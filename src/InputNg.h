@@ -197,7 +197,7 @@ public:
 			        labelsForRemoval=labelsForRemoval_;
 		}
 
-		const PsimagLite::String& filename() const { return file_; }
+		const String& filename() const { return file_; }
 
 	private:
 
@@ -363,7 +363,7 @@ public:
 		SizeType state_;
 		Vector<String>::Type numericVector_;
 		String lastLabel_;
-		PsimagLite::String file_;
+		String file_;
 		InputCheckType inputCheck_;
 		bool verbose_;
 		typename Map<String,String,MyCompareType>::Type mapStrStr_;
@@ -387,9 +387,9 @@ public:
 		template<typename SomeMemResolvType>
 		SizeType memResolv(SomeMemResolvType& mres,
 		                   SizeType,
-		                   PsimagLite::String msg = "") const
+		                   String msg = "") const
 		{
-			PsimagLite::String str = msg;
+			String str = msg;
 			str += "InputNgReadable";
 
 			const char* start = reinterpret_cast<const char *>(this);
@@ -545,7 +545,7 @@ public:
 
 		template<typename FloatingType>
 		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
-		readMatrix(PsimagLite::Matrix<FloatingType>& m,const String& label)
+		readMatrix(Matrix<FloatingType>& m,const String& label)
 		{
 			String label2 = label2label(label);
 
@@ -577,7 +577,7 @@ public:
 
 		template<typename FloatingType>
 		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
-		readMatrix(PsimagLite::Matrix<std::complex<FloatingType> >& m,
+		readMatrix(Matrix<std::complex<FloatingType> >& m,
 		           const String& label)
 		{
 			String label2 = label2label(label);
@@ -610,7 +610,7 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrVec_,it);
 		}
 
-		const PsimagLite::String& filename() const
+		const String& filename() const
 		{
 			return file_;
 		}
@@ -656,7 +656,7 @@ public:
 
 		template<typename ComplexOrRealType>
 		typename EnableIf<IsComplexNumber<ComplexOrRealType>::True,ComplexOrRealType>::Type
-		stringToComplexOrReal(const PsimagLite::String& s) const
+		stringToComplexOrReal(const String& s) const
 		{
 			typedef typename Real<ComplexOrRealType>::Type RealType;
 
@@ -664,7 +664,7 @@ public:
 				return stringToReal(s.c_str());
 			}
 
-			PsimagLite::String buffer("");
+			String buffer("");
 			SizeType start = 0;
 			for (SizeType i = 1; i < s.length(); ++i) {
 				start = i;
@@ -689,19 +689,19 @@ public:
 		template<typename ComplexOrRealType>
 		typename EnableIf<!IsComplexNumber<ComplexOrRealType>::True,
 		typename Real<ComplexOrRealType>::Type>::Type
-		stringToComplexOrReal(const PsimagLite::String& s) const
+		stringToComplexOrReal(const String& s) const
 		{
 			return static_cast<typename Real<ComplexOrRealType>::Type>(stringToReal(s));
 		}
 
-		double stringToReal(const PsimagLite::String& s) const
+		double stringToReal(const String& s) const
 		{
 			for (SizeType i = 0; i < s.length(); ++i) {
 				char c = s[i];
 				bool b1 = (c<48 || c>57);
 				bool b2 = (c != '.' && c != '-' && c != '+' && c != 'e');
 				if (b1 && b2) {
-					PsimagLite::String str = s +" is not a real number\n";
+					String str = s +" is not a real number\n";
 					str += "Suggestion: Add -DUSE_COMPLEX to your Makefile.\n";
 					throw RuntimeError(str);
 				}
@@ -723,7 +723,7 @@ public:
 
 		//serializr start class InputNgReadable
 		//serializr normal file_
-		PsimagLite::String file_;
+		String file_;
 		//serializr normal mapStrStr_
 		typename Map<String,String,MyCompareType>::Type mapStrStr_;
 		//serializr normal mapStrVec_

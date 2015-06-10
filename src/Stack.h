@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -76,7 +76,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  *  std::stack companions
  */
-  
+
 #ifndef PSIMAGLITE_STACK_H_
 #define PSIMAGLITE_STACK_H_
 #include <stack>
@@ -127,7 +127,7 @@ typename EnableIf<IsStackLike<StackType>::True,std::istream>::Type&
 operator>>(std::istream& is,StackType& x)
 {
 	typedef typename StackType::value_type ValueType;
-	typename PsimagLite::Vector<ValueType>::Type tmpVec;
+	typename Vector<ValueType>::Type tmpVec;
 	is>>tmpVec;
 	for (int i=tmpVec.size()-1;i>=0;i--) {
 		x.push(tmpVec[i]);
@@ -137,5 +137,5 @@ operator>>(std::istream& is,StackType& x)
 
 } // namespace PsimagLite
 
-/*@}*/	
+/*@}*/
 #endif // PSIMAGLITE_STACK_H_

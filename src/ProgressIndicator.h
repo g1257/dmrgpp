@@ -111,7 +111,7 @@ public:
 	{
 		if (bufferActive_) {
 			pid_t p = getpid();
-			PsimagLite::String outName("buffer");
+			String outName("buffer");
 			outName += ttos(p);
 			outName += ".txt";
 			std::ofstream fout(outName.c_str());
@@ -122,7 +122,7 @@ public:
 
 		bufferActive_ = !bufferActive_;
 
-		PsimagLite::String bufferActive = (bufferActive_) ? "active" : "inactive";
+		String bufferActive = (bufferActive_) ? "active" : "inactive";
 		std::cerr<<"ProgressIndicator: signal "<<signal<<" received.";
 		std::cerr<<" buffer is now "<<bufferActive<<"\n";
 

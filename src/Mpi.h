@@ -98,7 +98,7 @@ struct MpiData
 	static const MPI_Datatype Type;
 };
 
-void checkError(int errorCode,PsimagLite::String caller,CommType comm = COMM_WORLD);
+void checkError(int errorCode,String caller,CommType comm = COMM_WORLD);
 
 void init(int* argc, char **argv[]);
 
@@ -112,7 +112,7 @@ template<typename NumericType>
 typename EnableIf<Loki::TypeTraits<NumericType>::isArith,
 void>::Type recv(NumericType& v,int source, int tag, CommType mpiComm = COMM_WORLD)
 {
-	PsimagLite::String name = "MPI_Recv";
+	String name = "MPI_Recv";
 	MPI_Datatype datatype = MpiData<NumericType>::Type;
 	MPI_Status status;
 	int errorCode = MPI_Recv(&v,1,datatype,source,tag,mpiComm,&status);
@@ -132,7 +132,7 @@ Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
 void>::Type recv(SomeVectorType& v,int source, int tag, CommType mpiComm = COMM_WORLD)
 {
 	typedef typename SomeVectorType::value_type NumericType;
-	PsimagLite::String name = "MPI_Send";
+	String name = "MPI_Send";
 	MPI_Datatype datatype = MpiData<NumericType>::Type;
 	MPI_Status status;
 	SizeType total = v.size();
@@ -148,7 +148,7 @@ IsComplexNumber<typename SomeVectorType::value_type>::True,
 void>::Type recv(SomeVectorType& v,int source, int tag, CommType mpiComm = COMM_WORLD)
 {
 	typedef typename SomeVectorType::value_type NumericType;
-	PsimagLite::String name = "MPI_Send";
+	String name = "MPI_Send";
 	MPI_Datatype datatype = MpiData<typename NumericType::value_type>::Type;
 	MPI_Status status;
 	SizeType total = v.size();
@@ -162,7 +162,7 @@ template<typename NumericType>
 typename EnableIf<Loki::TypeTraits<NumericType>::isArith,
 void>::Type send(NumericType& v,int dest, int tag, CommType mpiComm = COMM_WORLD)
 {
-	PsimagLite::String name = "MPI_Send";
+	String name = "MPI_Send";
 	MPI_Datatype datatype = MpiData<NumericType>::Type;
 	int errorCode = MPI_Send(&v,1,datatype,dest,tag,mpiComm);
 	checkError(errorCode,name,mpiComm);
@@ -181,7 +181,7 @@ Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
 void>::Type send(SomeVectorType& v,int dest, int tag, CommType mpiComm = COMM_WORLD)
 {
 	typedef typename SomeVectorType::value_type NumericType;
-	PsimagLite::String name = "MPI_Send";
+	String name = "MPI_Send";
 	MPI_Datatype datatype = MpiData<NumericType>::Type;
 	int total = v.size();
 	send(total,dest,tag,mpiComm);
@@ -195,7 +195,7 @@ IsComplexNumber<typename SomeVectorType::value_type>::True,
 void>::Type send(SomeVectorType& v,int dest, int tag, CommType mpiComm = COMM_WORLD)
 {
 	typedef typename SomeVectorType::value_type NumericType;
-	PsimagLite::String name = "MPI_Send";
+	String name = "MPI_Send";
 	MPI_Datatype datatype = MpiData<typename NumericType::value_type>::Type;
 	int total = v.size();
 	send(total,dest,tag,mpiComm);
@@ -212,8 +212,8 @@ void>::Type pointByPointGather(SomeVectorType& v,
                                CommType mpiComm = COMM_WORLD)
 {
 	typedef typename SomeVectorType::value_type NumericType;
-	int mpiRank = PsimagLite::MPI::commRank(mpiComm);
-	int nprocs = PsimagLite::MPI::commSize(mpiComm);
+	int mpiRank = MPI::commRank(mpiComm);
+	int nprocs = MPI::commSize(mpiComm);
 	SizeType blockSize = static_cast<SizeType>(v.size()/nprocs);
 	if (v.size() % nprocs != 0) blockSize++;
 
@@ -221,7 +221,7 @@ void>::Type pointByPointGather(SomeVectorType& v,
 		for (SizeType p=0;p<blockSize;p++) {
 			SizeType taskNumber = mpiRank*blockSize + p;
 			if (taskNumber >= v.size()) break;
-			PsimagLite::MPI::send(v[taskNumber],0,taskNumber);
+			MPI::send(v[taskNumber],0,taskNumber);
 		}
 	} else {
 		for (int r=0;r<nprocs;r++) {
@@ -230,7 +230,7 @@ void>::Type pointByPointGather(SomeVectorType& v,
 				SizeType taskNumber = r*blockSize + p;
 				if (taskNumber >= v.size()) break;
 				NumericType value;
-				PsimagLite::MPI::recv(value,r,taskNumber);
+				MPI::recv(value,r,taskNumber);
 				v[taskNumber] = value;
 			}
 		}
@@ -246,8 +246,8 @@ void>::Type pointByPointGather(SomeVectorType& v,
                                int root = 0,
                                CommType mpiComm = COMM_WORLD)
 {
-	int mpiRank = PsimagLite::MPI::commRank(mpiComm);
-	int nprocs = PsimagLite::MPI::commSize(mpiComm);
+	int mpiRank = MPI::commRank(mpiComm);
+	int nprocs = MPI::commSize(mpiComm);
 	SizeType blockSize = static_cast<SizeType>(v.size()/nprocs);
 	if (v.size() % nprocs != 0) blockSize++;
 
@@ -276,8 +276,8 @@ void>::Type pointByPointGather(SomeVectorType& v,
                                int root = 0,
                                CommType mpiComm = COMM_WORLD)
 {
-	int mpiRank = PsimagLite::MPI::commRank(mpiComm);
-	int nprocs = PsimagLite::MPI::commSize(mpiComm);
+	int mpiRank = MPI::commRank(mpiComm);
+	int nprocs = MPI::commSize(mpiComm);
 	SizeType blockSize = static_cast<SizeType>(v.size()/nprocs);
 	if (v.size() % nprocs != 0) blockSize++;
 
@@ -306,7 +306,7 @@ Loki::TypeTraits<typename SomeVectorType::value_type::value_type>::isArith,
 void>::Type bcast(SomeVectorType& v,int root = 0, CommType mpiComm = COMM_WORLD)
 {
 	typedef typename SomeVectorType::value_type DataType;
-	PsimagLite::String name = "MPI_Bcast";
+	String name = "MPI_Bcast";
 	for (SizeType i=0;i<v.size();i++) {
 		DataType& vv = v[i];
 		int total = vv.size();
@@ -527,16 +527,16 @@ private:
 
 class MpiDisabled {
 
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef Vector<String>::Type VectorStringType;
 
 public:
 
-	void disable(PsimagLite::String label)
+	void disable(String label)
 	{
 		data_.push_back(label);
 	}
 
-	bool operator()(PsimagLite::String label) const
+	bool operator()(String label) const
 	{
 		return (find(data_.begin(),data_.end(),label) != data_.end());
 	}

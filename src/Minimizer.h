@@ -96,8 +96,8 @@ public:
 			status_ = gsl_multimin_fminimizer_iterate (gslS_);
 
 			if (status_) {
-				PsimagLite::String gslError(gsl_strerror(status_));
-				PsimagLite::String msg("Minimizer::simplex(...): GSL Error: ");
+				String gslError(gsl_strerror(status_));
+				String msg("Minimizer::simplex(...): GSL Error: ");
 				msg += gslError + "\n";
 				throw RuntimeError(msg);
 			}
@@ -149,8 +149,8 @@ public:
 			status_ = gsl_multimin_fdfminimizer_iterate(gslDs_);
 
 			if (status_) {
-				PsimagLite::String gslError(gsl_strerror(status_));
-				PsimagLite::String msg("Minimizer::conjugateGradient(...): GSL Error: ");
+				String gslError(gsl_strerror(status_));
+				String msg("Minimizer::conjugateGradient(...): GSL Error: ");
 				msg += gslError + "\n";
 				throw RuntimeError(msg);
 			}
@@ -180,7 +180,7 @@ public:
 
 	int status() const { return status_; }
 
-	PsimagLite::String statusString() const
+	String statusString() const
 	{
 		switch (status_) {
 		case GSL_SUCCESS:
@@ -253,19 +253,19 @@ public:
 
 	Minimizer(FunctionType&,SizeType, bool = false)
 	{
-		PsimagLite::String str("Minimizer needs the gsl\n");
-		throw PsimagLite::RuntimeError(str);
+		String str("Minimizer needs the gsl\n");
+		throw RuntimeError(str);
 	}
 
 	int simplex(VectorType&,RealType=1e-3,RealType=1e-3)
 	{
-		PsimagLite::String str("Minimizer needs the gsl\n");
-		throw PsimagLite::RuntimeError(str);
+		String str("Minimizer needs the gsl\n");
+		throw RuntimeError(str);
 	}
 
 	int status() const { return 1; }
 
-	PsimagLite::String statusString() const
+	String statusString() const
 	{
 		return "Minimizer needs the gsl";
 	}

@@ -34,7 +34,7 @@ public:
 	Random48(LongType seed,SizeType rank = 0,SizeType nprocs = 1)
 	{
 		srand48(seed);
-		PsimagLite::Vector<LongType>::Type vOfSeeds(nprocs);
+		Vector<LongType>::Type vOfSeeds(nprocs);
 		for (SizeType i=0;i<vOfSeeds.size();i++)
 			vOfSeeds[i] = static_cast<LongType>(10000.0*random());
 		seed_=vOfSeeds[rank];

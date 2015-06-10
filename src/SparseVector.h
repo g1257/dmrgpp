@@ -350,7 +350,7 @@ namespace PsimagLite {
 
 namespace PsimagLite {
 	template<typename FieldType>
-	inline FieldType norm(const PsimagLite::SparseVector<FieldType>& v)
+	inline FieldType norm(const SparseVector<FieldType>& v)
 	{
 		FieldType sum=0;
 		for (SizeType i=0;i<v.indices();i++) sum += std::conj(v.value(i))*v.value(i);
@@ -358,7 +358,7 @@ namespace PsimagLite {
 	}
 
 	template<typename FieldType>
-	inline FieldType norm(const PsimagLite::SparseVector<std::complex<FieldType> >& v)
+	inline FieldType norm(const SparseVector<std::complex<FieldType> >& v)
 	{
 		std::complex<FieldType> sum=0;
 		for (SizeType i=0;i<v.indices();i++) sum += std::conj(v.value(i))*v.value(i);

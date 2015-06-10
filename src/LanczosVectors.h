@@ -93,16 +93,16 @@ template<typename MatrixType,typename VectorType>
 class LanczosVectors {
 
 	typedef typename VectorType::value_type ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	typedef typename Real<ComplexOrRealType>::Type RealType;
 	typedef LanczosVectors<MatrixType,VectorType> ThisType;
 
 public:
 
 	typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
 	typedef typename VectorType::value_type VectorElementType;
-	typedef PsimagLite::Matrix<VectorElementType> DenseMatrixType;
-	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
-	typedef PsimagLite::ContinuedFraction<TridiagonalMatrixType> PostProcType;
+	typedef Matrix<VectorElementType> DenseMatrixType;
+	typedef Matrix<RealType> DenseMatrixRealType;
+	typedef ContinuedFraction<TridiagonalMatrixType> PostProcType;
 
 	enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 
@@ -201,7 +201,7 @@ public:
 	{
 		if (!lotaMemory_) return false;
 
-		PsimagLite::OstringStream msg;
+		OstringStream msg;
 		msg<<"Testing whether matrix is zero...";
 		progress_.printline(msg,std::cout);
 

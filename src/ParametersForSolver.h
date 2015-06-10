@@ -105,7 +105,7 @@ struct ParametersForSolver {
 	{}
 
 	template<typename IoInputType>
-	ParametersForSolver(IoInputType& io,PsimagLite::String prefix)
+	ParametersForSolver(IoInputType& io,String prefix)
 	    : steps(LanczosSteps),tolerance(1e-12),stepsForEnergyConvergence(MaxLanczosSteps),
 	      options(""),oneOverA(0),b(0),Eg(0),weight(0),isign(0),lotaMemory(false),
 	      threadId(0)

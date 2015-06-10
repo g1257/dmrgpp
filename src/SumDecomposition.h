@@ -11,7 +11,7 @@ namespace PsimagLite {
 
 class SumDecomposition {
 
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef Vector<SizeType>::Type VectorSizeType;
 
 public:
 
@@ -34,8 +34,8 @@ public:
 	const VectorSizeType& operator()(SizeType i) const
 	{
 		if (i < data_.size()) return data_[i];
-		PsimagLite::String msg("SumDecomposition::operator():");
-		throw PsimagLite::RuntimeError(msg + " requested index is too big\n");
+		String msg("SumDecomposition::operator():");
+		throw RuntimeError(msg + " requested index is too big\n");
 	}
 
 private:
@@ -62,7 +62,7 @@ private:
 	SelEnum sel_;
 	int selection_;
 	int size_;
-	PsimagLite::Vector<VectorSizeType>::Type data_;
+	Vector<VectorSizeType>::Type data_;
 
 };
 

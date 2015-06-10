@@ -151,7 +151,7 @@ public:
 			(*fout_)<<s<<"\n";
 		}
 
-		void printline(PsimagLite::OstringStream &s)
+		void printline(OstringStream &s)
 		{
 			if (rank_!=0) return;
 			(*fout_)<<s.str()<<"\n";

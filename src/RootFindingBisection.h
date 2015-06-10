@@ -29,7 +29,7 @@ public:
 	{
 		RealType f1 = function_(a_) * function_(b_);
 		if (f1 >= 0)
-			throw PsimagLite::RuntimeError("RootFindingBisection: condition not met\n");
+			throw RuntimeError("RootFindingBisection: condition not met\n");
 	}
 
 	RealType operator()() const
@@ -59,7 +59,7 @@ public:
 			}
 		}
 
-		PsimagLite::String msg("RootFindBisection, too many iterations ");
+		String msg("RootFindBisection, too many iterations ");
 		msg += "maximum = " + ttos(maxIter_) + " tolerance = ";
 		msg += ttos(tolerance_) + " a = " + ttos(a_) + " b = " + ttos(b_) + "\n";
 		throw std::runtime_error(msg);

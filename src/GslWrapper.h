@@ -141,7 +141,7 @@ public:
 private:
 	void thereSnoGsl() const
 	{
-		throw PsimagLite::RuntimeError("You need to compile with the GSL\n");
+		throw RuntimeError("You need to compile with the GSL\n");
 	}
 
 }; // class GslWrapper
@@ -185,8 +185,8 @@ public:
 
 #endif
 
-} // namespace PsimagLite 
+} // namespace PsimagLite
 
-/*@}*/	
+/*@}*/
 #endif // GSL_WRAPPER_H_
 

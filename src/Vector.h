@@ -258,7 +258,7 @@ namespace PsimagLite {
 		for (SizeType i=0;i<s.length();i++) {
 			if (s[i]==sep) {
 				if (buffer=="") continue;
-				PsimagLite::IstringStream buffer2(buffer);
+				IstringStream buffer2(buffer);
 				buffer2 >> tmp;
 				buffer="";
 				v.push_back(tmp);
@@ -267,7 +267,7 @@ namespace PsimagLite {
 			}
 		}
 		if (buffer=="") return;
-		PsimagLite::IstringStream buffer2(buffer);
+		IstringStream buffer2(buffer);
 		buffer2 >> tmp;
 		buffer="";
 		v.push_back(tmp);

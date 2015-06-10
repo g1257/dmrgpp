@@ -190,8 +190,8 @@ public:
 
 		lanczosVectors_.hookForZ(z,c,ab);
 
-		PsimagLite::String str = "LanczosSolver: computeGroundState: ";
-		if (PsimagLite::norm(z)<1e-6)
+		String str = "LanczosSolver: computeGroundState: ";
+		if (norm(z)<1e-6)
 			throw RuntimeError(str + " norm is zero\n");
 
 		if (mode_ & WITH_INFO) info(gsEnergy,initialVector,0,std::cout);
@@ -282,7 +282,7 @@ public:
 		SizeType& max_nstep = steps_;
 
 		if (initVector.size()!=mat_.rank()) {
-			PsimagLite::String msg("decomposition: vector size ");
+			String msg("decomposition: vector size ");
 			msg += ttos(initVector.size()) + " but matrix size ";
 			msg += ttos(mat_.rank()) + "\n";
 			throw RuntimeError(msg);
@@ -384,7 +384,7 @@ private:
 
 		OstringStream msg;
 		msg.precision(8);
-		PsimagLite::String what = "lowest";
+		String what = "lowest";
 		if (excited > 0) what = ttos(excited) + " excited";
 		msg<<"Found "<<what<<" eigenvalue= "<<energyTmp<<" after "<<iter;
 		msg<<" iterations, "<<" orig. norm="<<norma;

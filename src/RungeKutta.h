@@ -143,7 +143,7 @@ private:
 		return yi[j];
 	}
 
-	ComplexOrRealType findValueOf(const PsimagLite::Matrix<ComplexOrRealType>& yi,
+	ComplexOrRealType findValueOf(const Matrix<ComplexOrRealType>& yi,
 	                              SizeType j) const
 	{
 		return yi(j,j);
@@ -151,21 +151,21 @@ private:
 
 	SizeType findSizeOf(const VectorType& yi) const { return yi.size(); }
 
-	SizeType findSizeOf(const PsimagLite::Matrix<ComplexOrRealType>& yi) const
+	SizeType findSizeOf(const Matrix<ComplexOrRealType>& yi) const
 	{
 		return yi.n_row();
 	}
 
-	void checkNorm(const PsimagLite::Matrix<ComplexOrRealType>&,
-	               const PsimagLite::Matrix<ComplexOrRealType>&)const
+	void checkNorm(const Matrix<ComplexOrRealType>&,
+	               const Matrix<ComplexOrRealType>&)const
 	{}
 
 	void checkNorm(const VectorType& yi,const VectorType& y0) const
 	{
 		String s(__FILE__);
 		s+= " Norma not preserved\n";
-		RealType norma = PsimagLite::norm(yi);
-		RealType originalNorm = PsimagLite::norm(y0);
+		RealType norma = norm(yi);
+		RealType originalNorm = norm(y0);
 		if (fabs(norma-originalNorm)>1e-4)
 			std::cerr<<s;
 	}

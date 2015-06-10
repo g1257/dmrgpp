@@ -94,7 +94,7 @@ public:
 
 	class Writeable {
 
-		typedef PsimagLite::Vector<String>::Type VectorStringType;
+		typedef Vector<String>::Type VectorStringType;
 
 	public:
 

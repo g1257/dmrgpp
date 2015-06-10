@@ -88,9 +88,9 @@ public:
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
 	                   SizeType,
-	                   PsimagLite::String msg) const
+	                   String msg) const
 	{
-		PsimagLite::String str = msg;
+		String str = msg;
 		str += "Matrix";
 		const char* start = (const char *)&nrow_;
 		const char* end = (const char*)&ncol_;
@@ -353,7 +353,7 @@ std::istream& operator >> (std::istream& is, Matrix<T>& A)
 		}
 	}
 	if (!is) {
-		PsimagLite::String str("ERROR istream& operator >> ");
+		String str("ERROR istream& operator >> ");
 		str += "(std::istream&, Matrix<T>&): read past end stream";
 		throw RangeError(str);
 	}
@@ -472,7 +472,7 @@ void svd(char jobz,Matrix<double> &a,VectorLikeType& s,Matrix<double>& vt)
 #else
 	int m = a.n_row();
 	int n = a.n_col();
-	std::cerr<<"Trying PsimagLite::svd(...) "<<m<<"x"<<n<<"\n";
+	std::cerr<<"Trying svd(...) "<<m<<"x"<<n<<"\n";
 	int lda = m;
 	int min = (m<n) ? m : n;
 
@@ -507,7 +507,7 @@ void svd(char jobz,Matrix<double> &a,VectorLikeType& s,Matrix<double>& vt)
 	if (info!=0) {
 		String str(__FILE__);
 		str += " " + ttos(__LINE__);
-		str += " PsimagLite::svd(...) failed with info=" + ttos(info) + "\n";
+		str += " svd(...) failed with info=" + ttos(info) + "\n";
 		throw RuntimeError(str.c_str());
 	}
 	lwork = int(work[0]);
@@ -530,7 +530,7 @@ void svd(char jobz,Matrix<double> &a,VectorLikeType& s,Matrix<double>& vt)
 	if (info!=0) {
 		String str(__FILE__);
 		str += " " + ttos(__LINE__);
-		str += " PsimagLite::svd(...) failed with info=" + ttos(info) + "\n";
+		str += " svd(...) failed with info=" + ttos(info) + "\n";
 		throw RuntimeError(str.c_str());
 	}
 	a = u;
@@ -611,7 +611,7 @@ bool isZero(Matrix<std::complex<T> > const &a)
 }
 
 template<typename T>
-bool isZero(const PsimagLite::Matrix<T>& m)
+bool isZero(const Matrix<T>& m)
 {
 	for (SizeType i=0;i<m.n_row();i++)
 		for (SizeType j=0;j<m.n_col();j++)
@@ -620,7 +620,7 @@ bool isZero(const PsimagLite::Matrix<T>& m)
 }
 
 template<typename T>
-T norm2(const PsimagLite::Matrix<T>& m)
+T norm2(const Matrix<T>& m)
 {
 	T sum = 0;
 	for (SizeType i=0;i<m.n_row();i++)
@@ -630,7 +630,7 @@ T norm2(const PsimagLite::Matrix<T>& m)
 }
 
 template<typename T>
-T norm2(const PsimagLite::Matrix<std::complex<T> >& m)
+T norm2(const Matrix<std::complex<T> >& m)
 {
 	T sum = 0;
 	for (SizeType i=0;i<m.n_row();i++)
@@ -671,9 +671,9 @@ void transposeConjugate(Matrix<T>& m2,const Matrix<T>& m)
 }
 
 template<typename T>
-PsimagLite::Matrix<T> transposeConjugate(const Matrix<T>& A)
+Matrix<T> transposeConjugate(const Matrix<T>& A)
 {
-	PsimagLite::Matrix<T> ret(A.n_col(),A.n_row());
+	Matrix<T> ret(A.n_col(),A.n_row());
 	for (SizeType i=0;i<A.n_col();i++)
 		for (SizeType j=0;j<A.n_row();j++)
 			ret(i,j)=std::conj(A(j,i));
