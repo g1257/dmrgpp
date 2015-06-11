@@ -64,7 +64,7 @@ sub init
 	$TestSuiteGlobals::inputsDir = $TestSuiteGlobals::testDir."inputs/";
 	$TestSuiteGlobals::oraclesDir = $TestSuiteGlobals::testDir."oracles/";	
 	$TestSuiteGlobals::resultsDir = $TestSuiteGlobals::testDir."results/";
-	system("mkdir $TestSuiteGlobals::resultsDir") unless (-r "$TestSuiteGlobals::resultsDir");
+	system("mkdir \"$TestSuiteGlobals::resultsDir\"") unless (-d "$TestSuiteGlobals::resultsDir");
 }
 
 sub doMain
