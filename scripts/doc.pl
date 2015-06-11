@@ -93,8 +93,7 @@ sub procFile
 			chomp($label) if ($label=~/\n$/);
 			my $txt = $labels{"$label"};
 			if (defined($txt)) {
-				print STDERR "$0: ERROR: Label $label in file $f is duplicate\n";
-				last;
+				die "$0: ERROR: Label $label in file $f is duplicate\n";
 			}
 
 			next;
@@ -137,7 +136,10 @@ sub replaceLabels
 			my $label = $1;
 			next if ($label eq "#1");
 			my $txt = getTextFromLabel($label,$a);
-			last if (!defined($txt));
+			if (!defined($txt)) {
+				$txt = labelNotFound($label);
+			}
+
 			print FOUT $txt;
 			next;
 		}
@@ -146,7 +148,10 @@ sub replaceLabels
 			my $file=$1;
 			my $label = getLabelForFile($file);
 			my $txt = getTextFromLabel($label,$a);
-			last if (!defined($txt));
+			if (!defined($txt)) {
+				$txt = labelNotFound($label,$file);
+			}
+
 			print FOUT $txt;
 			next;
 		}
@@ -199,7 +204,11 @@ sub expandIfNeeded
 			my $label = $1;
 			chomp($label) if ($label=~/\n$/);
 			my $txt = getTextFromLabel($label,$a);
-			die "Line $_\n" if (!defined($txt));
+			if (!defined($txt)) {
+				print STDERR "$0: ERROR: line $_, $label not found\n";
+				$txt = notFoundLabel($label);
+			}
+
 			$buffer .= $txt;
 			next;
 		}
@@ -232,3 +241,11 @@ sub getLabelForFile
 	$file=~s/\//SLASH/g;
 	return "FILE$file";
 }
+
+sub labelNotFound
+{
+	my ($label,$file) = @_;
+	my $str = (defined($file)) ? " in $file " : "";
+	return "{\\bf\\textcolor{red}{ERROR: Label not found$str}}\n";
+}
+
