@@ -215,7 +215,7 @@ private:
 	void findQuantumNumbersLocal(VectorSizeType& q) const
 	{
 		bool mode = (other_.size() == electrons_.size());
-		assert(mode || other.size() == 2*electrons_.size());
+		assert(mode || other_.size() == 2*electrons_.size());
 
 		q.clear();
 		VectorSizeType qn((mode) ? 2 : 3);
@@ -247,7 +247,7 @@ private:
 			t[1] = static_cast<SizeType>(round(targetQ.totalElectrons*sites/totalSites));
 			if (!mode) {
 				assert(t.size() == 3);
-				assert(targetQ.other() > 1);
+				assert(targetQ.other.size() > 1);
 				t[2] = static_cast<SizeType>(round(targetQ.other[1]*sites/totalSites));
 			}
 		} else {
@@ -255,7 +255,7 @@ private:
 			t[1] = targetQ.totalElectrons;
 			if (!mode) {
 				assert(t.size() == 3);
-				assert(targetQ.other() > 1);
+				assert(targetQ.other.size() > 1);
 				t[2] = static_cast<SizeType>(round(targetQ.other[1]*sites/totalSites));
 			}
 		}

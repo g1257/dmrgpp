@@ -194,7 +194,7 @@ public:
 	template<typename SomeStructType>
 	static void valueModifier(SparseElementType& value,
 	                          SizeType term,
-	                          SizeType dofs,
+	                          SizeType,
 	                          bool isSu2,
 	                          const SomeStructType&)
 	{
