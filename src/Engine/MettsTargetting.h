@@ -792,6 +792,7 @@ private:
 	void setFromInfinite(VectorWithOffsetType& phi,
 	                     const LeftRightSuperType& lrs) const
 	{
+		SizeType mode = model_.targetQuantum().other.size();
 		phi.populateSectors(lrs.super());
 		for (SizeType ii=0;ii<phi.sectors();ii++) {
 			SizeType i0 = phi.sector(ii);
@@ -801,7 +802,7 @@ private:
 			if (fabs(tmpNorm-1.0)<1e-6) {
 				SizeType j = lrs.super().qn(lrs.super().partition(i0));
 				std::cerr<<"setFromInfinite: qns= ";
-				std::cerr<<SymmetryElectronsSzType::qnPrint(j);
+				std::cerr<<SymmetryElectronsSzType::qnPrint(j,mode+1);
 				std::cerr<<"\n";
 			}
 			phi.setDataInSector(v,i0);

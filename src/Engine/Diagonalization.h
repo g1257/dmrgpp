@@ -230,11 +230,12 @@ private:
 
 		SizeType counter=0;
 		SizeType weightsTotal = 0;
+		SizeType mode = model_.targetQuantum().other.size();
 		for (SizeType i=0;i<total;i++) {
 			SizeType bs = lrs.super().partition(i+1)-lrs.super().partition(i);
 			if (verbose_) {
 				SizeType j = lrs.super().qn(lrs.super().partition(i));
-				std::cerr<<SymmetryElectronsSzType::qnPrint(j);
+				std::cerr<<SymmetryElectronsSzType::qnPrint(j,mode+1);
 			}
 
 			weights[i]=bs;
@@ -265,7 +266,7 @@ private:
 			PsimagLite::OstringStream msg;
 			msg<<"About to diag. sector with quantum numbs. ";
 			SizeType j = lrs.super().qn(lrs.super().partition(i));
-			msg<<SymmetryElectronsSzType::qnPrint(j);
+			msg<<SymmetryElectronsSzType::qnPrint(j,mode+1);
 			msg<<" pseudo="<<lrs.super().pseudoEffectiveNumber(
 			         lrs.super().partition(i));
 			msg<<" quantumSector="<<quantumSector_;
@@ -328,7 +329,7 @@ private:
 
 			PsimagLite::OstringStream msg2;
 			msg2<<"Norm of vector is "<<PsimagLite::norm(vecSaved[i]);
-			msg2<<" and quantum numbers are "<<SymmetryElectronsSzType::qnPrint(j);
+			msg2<<" and quantum numbers are "<<SymmetryElectronsSzType::qnPrint(j,mode+1);
 			progress_.printline(msg2,std::cout);
 			counter++;
 		}

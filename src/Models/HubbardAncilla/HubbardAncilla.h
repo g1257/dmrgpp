@@ -139,14 +139,7 @@ public:
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
 	      geometry_(geometry)
-	{
-		if (modelParameters_.potentialV.size() != geometry.numberOfSites()) {
-			PsimagLite::String str(__FILE__);
-			str += " " + ttos(__LINE__) + "\n";
-			str += "potentialV length must be equal to the number of sites\n";
-			throw PsimagLite::RuntimeError(str.c_str());
-		}
-	}
+	{}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
 	                   SizeType,
@@ -410,32 +403,40 @@ private:
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		VectorSizeType flavors;
-		VectorSizeType electronsUp(basis.size());
-		VectorSizeType electronsDown(basis.size());
+		VectorSizeType electrons(basis.size());
 		VectorPairType jmvalues;
+		VectorSizeType other(3*basis.size());
+		SizeType offset = basis.size();
 		for (SizeType i=0;i<basis.size();i++) {
 			PairType jmpair = PairType(0,0);
 
 			jmvalues.push_back(jmpair);
 
-			SizeType na = HilbertSpaceFeAsType::calcNofElectrons(basis[i],0) +
-			        HilbertSpaceFeAsType::calcNofElectrons(basis[i],0+2);
-			SizeType nb = HilbertSpaceFeAsType::calcNofElectrons(basis[i],1) +
-			        HilbertSpaceFeAsType::calcNofElectrons(basis[i],1+2);
+			SizeType naUp = HilbertSpaceFeAsType::calcNofElectrons(basis[i],
+			                                                       ORBITALS*SPIN_UP);
+			SizeType naDown = HilbertSpaceFeAsType::calcNofElectrons(basis[i],
+			                                                         ORBITALS*SPIN_DOWN);
 
-			SizeType flavor = na  + 3*nb;
+			SizeType flavor = 0;
 
 			flavors.push_back(flavor);
 
 			// nup
-			electronsUp[i] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			                                                              SPIN_UP);
-			// ndown
-			electronsDown[i] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			                                                                SPIN_DOWN);
+			other[i] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
+			                                                        SPIN_UP);
+			// ntotal
+			electrons[i] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
+			                                                            SPIN_DOWN) +
+			        other[i];
+
+			// up ancilla
+			other[i+offset] = naUp;
+
+			// down ancilla
+			other[i+2*offset] = naDown;
 		}
 
-		q.set(jmvalues,flavors,electronsUp+electronsDown,electronsUp);
+		q.set(jmvalues,flavors,electrons,other);
 	}
 
 	// only for orbital == 0

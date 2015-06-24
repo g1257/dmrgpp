@@ -138,11 +138,12 @@ public:
 	}
 
 	static void qnToElectrons(VectorSizeType& electrons,
-	                          const VectorSizeType& qns)
+	                          const VectorSizeType& qns,
+	                          SizeType total)
 	{
 		electrons.resize(qns.size());
 		for (SizeType i=0;i<qns.size();i++) {
-			VectorSizeType v = decodeQuantumNumber(qns[i]);
+			VectorSizeType v = decodeQuantumNumber(qns[i],total);
 			electrons[i] = v[1];
 		}
 	}
@@ -157,10 +158,10 @@ public:
 		return pseudoQuantumNumber_(v);
 	}
 
-	static PsimagLite::String qnPrint(SizeType q)
+	static PsimagLite::String qnPrint(SizeType q, SizeType total)
 	{
 		PsimagLite::String str("");
-		VectorSizeType qns = decodeQuantumNumber(q);
+		VectorSizeType qns = decodeQuantumNumber(q,total);
 		for (SizeType k=0;k<qns.size();k++) str += ttos(qns[k]) + " ";
 		return str;
 	}
@@ -214,18 +215,19 @@ private:
 	//! considered symmetries for this model are: n_up and n_down
 	void findQuantumNumbersLocal(VectorSizeType& q) const
 	{
-		bool mode = (other_.size() == electrons_.size());
-		assert(mode || other_.size() == 2*electrons_.size());
-
+		SizeType mode = static_cast<SizeType>(other_.size()/electrons_.size());
+		assert(other_.size() % electrons_.size() == 0);
+		assert(mode > 0);
 		q.clear();
-		VectorSizeType qn((mode) ? 2 : 3);
+		VectorSizeType qn(mode + 1);
 		for (SizeType i=0;i<electrons_.size();i++) {
 			// n
 			qn[1] = electrons_[i];
 			// sz + const.
 			qn[0] = other_[i];
 
-			if (qn.size() == 3) qn[2] = other_[i + electrons_.size()];
+			for (SizeType x = 0; x < (mode-1); ++x)
+				qn[2+x] = other_[i + (x+1)*electrons_.size()];
 			q.push_back(encodeQuantumNumber(qn));
 		}
 	}
@@ -236,28 +238,22 @@ private:
 	                             SizeType totalSites,
 	                             SizeType direction)
 	{
-		bool mode = (targetQ.other.size() == 1);
-		assert(mode || targetQ.other.size() == 2);
-		assert(!targetQ.isSu2 || mode);
+		SizeType mode = targetQ.other.size();
+		assert(mode > 0);
+		assert(!targetQ.isSu2 || mode == 1);
 
-		t.resize((targetQ.isSu2 || !mode) ? 3 : 2,0);
+		t.resize((targetQ.isSu2) ? 3 : mode + 1,0);
 
 		if (direction == ProgramGlobals::INFINITE) {
 			t[0] = static_cast<SizeType>(round(targetQ.other[0]*sites/totalSites));
 			t[1] = static_cast<SizeType>(round(targetQ.totalElectrons*sites/totalSites));
-			if (!mode) {
-				assert(t.size() == 3);
-				assert(targetQ.other.size() > 1);
-				t[2] = static_cast<SizeType>(round(targetQ.other[1]*sites/totalSites));
-			}
+			for (SizeType x = 0; x < (mode-1); ++x)
+				t[2+x] = static_cast<SizeType>(round(targetQ.other[x+1]*sites/totalSites));
 		} else {
 			t[0] = targetQ.other[0];
 			t[1] = targetQ.totalElectrons;
-			if (!mode) {
-				assert(t.size() == 3);
-				assert(targetQ.other.size() > 1);
-				t[2] = static_cast<SizeType>(round(targetQ.other[1]*sites/totalSites));
-			}
+			for (SizeType x = 0; x < (mode-1); ++x)
+				t[2+x] = static_cast<SizeType>(round(targetQ.other[x+1]*sites/totalSites));
 		}
 
 		if (!targetQ.isSu2) return;
@@ -317,26 +313,35 @@ private:
 	{
 		SizeType maxElectrons = 2*ProgramGlobals::maxElectronsOneSpin;
 
-		assert(v[0] < maxElectrons);
-		assert(v[1] < maxElectrons);
-		assert(v[2] < maxElectrons);
+		for (SizeType x = 0; x < v.size(); ++x)
+			assert(v[x] < maxElectrons);
 
-		SizeType x= v[0] + v[1]*maxElectrons;
-		if (v.size()==3) x += v[2]*maxElectrons*maxElectrons;
-		return x;
+		SizeType index = 0;
+		SizeType number = 1;
+		for (SizeType x = 0; x < v.size(); ++x) {
+			index += v[x] * number;
+			number *= maxElectrons;
+		}
+
+		return index;
 	}
 
-	static VectorSizeType decodeQuantumNumber(SizeType q)
+	static VectorSizeType decodeQuantumNumber(SizeType q, SizeType total)
 	{
 		SizeType maxElectrons = 2*ProgramGlobals::maxElectronsOneSpin;
 
-		assert(q < maxElectrons*maxElectrons*maxElectrons);
+		SizeType number = 1;
+		for (SizeType x = 1; x < total; ++x) number *= maxElectrons;
+		assert(q < number*maxElectrons);
+		SizeType tmp = q;
+		VectorSizeType v(total);
+		for (SizeType x = 0; x < total; ++x) {
+			v[total-1-x] = static_cast<SizeType>(tmp/number);
+			tmp -= v[total-1-x]*number;
+			number /= maxElectrons;
 
-		VectorSizeType v(3);
-		v[2] = SizeType(q/(maxElectrons*maxElectrons));
-		SizeType tmp = q - v[2]*maxElectrons*maxElectrons;
-		v[1] = SizeType(tmp/maxElectrons);
-		v[0] = tmp % maxElectrons;
+		}
+
 		return v;
 	}
 

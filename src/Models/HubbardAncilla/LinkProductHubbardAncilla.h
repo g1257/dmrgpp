@@ -102,58 +102,56 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 
 	template<typename SomeStructType>
-	static SizeType dofs(SizeType term,const SomeStructType& additional)
+	static SizeType dofs(SizeType,const SomeStructType&)
 	{
-		return (term==TERM_LAMBDA) ? 2 : LinkProductFeAsType::dofs(term,additional);
+		return 2;
 	}
 
 	// has only dependence on orbital
 	template<typename SomeStructType>
-	static PairType connectorDofs(SizeType term,
-	                              SizeType dofs,
-	                              const SomeStructType& additional)
+	static PairType connectorDofs(SizeType,
+	                              SizeType,
+	                              const SomeStructType&)
 	{
-		if (term==TERM_HOPPING)
-			return LinkProductFeAsType::connectorDofs(term,dofs,additional);
-
-		return PairType(dofs,dofs);
+		return PairType(0,0);
 	}
 
 	template<typename SomeStructType>
 	static void setLinkData(SizeType term,
 	                        SizeType dofs,
-	                        bool isSu2,
+	                        bool,
 	                        SizeType& fermionOrBoson,
 	                        PairType& ops,
-	                        std::pair<char,char>& mods,
+	                        std::pair<char,char>&,
 	                        SizeType& angularMomentum,
 	                        RealType& angularFactor,
 	                        SizeType& category,
-	                        const SomeStructType& additional)
+	                        const SomeStructType&)
 	{
-		if (term==TERM_HOPPING)
-			return LinkProductFeAsType::setLinkData(
-			            term,dofs,isSu2,fermionOrBoson,ops,mods,
-			            angularMomentum,angularFactor,category,additional);
+		if (term==TERM_HOPPING) {
+			fermionOrBoson = ProgramGlobals::FERMION;
+			ops = PairType(dofs,dofs);
+			angularFactor = 1;
+			if (dofs == 1) angularFactor = -1;
+			angularMomentum = 1;
+			category = dofs;
+		}
+
 
 		fermionOrBoson = ProgramGlobals::BOSON;
-		SizeType offset1 = 4;
+		SizeType offset1 = 2;
 		ops.first += offset1;
 		ops.second += offset1;
 
 	}
 
 	template<typename SomeStructType>
-	static void valueModifier(SparseElementType& value,
-	                          SizeType term,
-	                          SizeType dofs,bool isSu2,const SomeStructType& additional)
-	{
-		if (term==TERM_HOPPING) return LinkProductFeAsType::valueModifier(value,
-		                                                                  term,
-		                                                                  dofs,
-		                                                                  isSu2,
-		                                                                  additional);
-	}
+	static void valueModifier(SparseElementType&,
+	                          SizeType,
+	                          SizeType,
+	                          bool,
+	                          const SomeStructType&)
+	{}
 
 	static SizeType terms() { return 2; }
 }; // class LinkProductHubbardAncilla

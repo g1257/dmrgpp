@@ -129,11 +129,15 @@ struct TargetQuantumElectrons {
 			throw PsimagLite::RuntimeError(msg);
 		}
 
-		try {
-			SizeType extra = 0;
-			io.readline(extra,"TargetExtra=");
-			other.push_back(extra);
-		} catch (std::exception&) {}
+		while (true) {
+			try {
+				SizeType extra = 0;
+				io.readline(extra,"TargetExtra=");
+				other.push_back(extra);
+			} catch (std::exception&) {
+				break;
+			}
+		}
 
 		int tmp = 0;
 		try {

@@ -160,7 +160,7 @@ public:
 		jMax_++;
 		calcReducedBasis();
 		normalizeFlavors();
-		SymmetryElectronsSzType::qnToElectrons(electrons,quantumNumbers);
+		SymmetryElectronsSzType::qnToElectrons(electrons,quantumNumbers,3);
 		electronsMax_ = *(std::max_element(electrons.begin(),electrons.end()));
 	}
 
