@@ -1,12 +1,10 @@
 TotalNumberOfSites=6
 
 NumberOfTerms=2
-DegreesOfFreedom=2
+DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
-Connectors 2 2
-0 0
-0 0 
+Connectors 1 0 
 
 DegreesOfFreedom=1
 GeometryKind=LongRange
@@ -31,6 +29,7 @@ Version=version
 OutputFile=data1950.txt
 InfiniteLoopKeptStates=60
 FiniteLoops 4  2 100 0 -2 100 0 -2 100 0 2 100 0 
+AdjustQuantumNumbers 4      2 4 1 1
 TargetElectronsTotal=8
 TargetSzPlusConst=4
 TargetExtra=2
