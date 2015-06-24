@@ -383,7 +383,7 @@ private:
 	                          const HilbertBasisType& natBasis) const
 	{
 		HilbertState bra,ket;
-		int n = natBasis.size();
+		SizeType n = natBasis.size();
 		MatrixType cm(n,n);
 
 		for (SizeType ii=0;ii<n;ii++) {
