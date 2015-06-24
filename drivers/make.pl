@@ -25,7 +25,7 @@ sub writeMakefile
 {
 	open(my $fh,">Makefile") or die "Cannot open Makefile for writing: $!\n";
 
-	my $libs = "$lapack    -lm  -lpthread -lpsimaglite";
+	my $libs = " -lm  -lpthread -lpsimaglite $lapack";
 	my $cxx = "g++ -O3 -DNDEBUG";
 	my $cppflags = " -I../  -I../src";
 	Make::make($fh,\@drivers,"PsimagLite","Linux",0,$libs,$cxx,$cppflags,"true"," "," ");
