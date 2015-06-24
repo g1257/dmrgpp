@@ -73,26 +73,31 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file HubbardAncilla.h
  *
+ *  An implementation of a FeBasedSc model for Fe-based superconductors to use with
+ *  the DmrgSolver
  *
  */
 #ifndef DMRG_HUBBARD_ANCILLA_H
 #define DMRG_HUBBARD_ANCILLA_H
-#include "ModelCommon.h"
-#include "LinkProductHubbardAncilla.h"
+#include "ModelBase.h"
 #include "ParametersHubbardAncilla.h"
+#include "../FeAsModel/HilbertSpaceFeAs.h"
+#include "CrsMatrix.h"
+#include "SpinSquaredHelper.h"
+#include "SpinSquared.h"
+#include "VerySparseMatrix.h"
+#include "LinkProductHubbardAncilla.h"
+#include "ProgramGlobals.h"
+#include "ModelCommon.h"
+#include "Geometry/GeometryDca.h"
 
 namespace Dmrg {
-
 template<typename ModelBaseType>
 class HubbardAncilla : public ModelBaseType {
 
 public:
 
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
-	typedef ModelFeBasedSc<ModelBaseType> ModelFeAsType;
-	typedef typename ModelFeAsType::MatrixType MatrixType;
-	typedef typename ModelFeAsType::HilbertState HilbertState;
-	typedef typename ModelFeAsType::HilbertBasisType HilbertBasisType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelBaseType::GeometryType GeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
@@ -105,31 +110,42 @@ public:
 	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
+	typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
+	typedef typename HilbertBasisType::value_type HilbertState;
+	typedef  HilbertSpaceFeAs<HilbertState> HilbertSpaceFeAsType;
+	typedef typename ModelHelperType::BlockType BlockType;
+	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
+	typedef typename ModelBaseType::VectorType VectorType;
 	typedef LinkProductHubbardAncilla<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef	 typename ModelBaseType::MyBasis MyBasis;
 	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
-	typedef typename MyBasis::BlockType BlockType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelBaseType::VectorType VectorType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
+	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
+	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
+	typedef ParametersHubbardAncilla<RealType> ParametersHubbardAncillaType;
+	typedef std::pair<SizeType,SizeType> PairType;
+	typedef typename PsimagLite::Vector<PairType>::Type VectorPairType;
 
-	static const SizeType SPIN_UP = ModelFeAsType::SPIN_UP;
-	static const SizeType SPIN_DOWN = ModelFeAsType::SPIN_DOWN;
+	static const int FERMION_SIGN = -1;
+	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
+	static const int SPIN_DOWN=HilbertSpaceFeAsType::SPIN_DOWN;
+	static SizeType const ORBITALS  = 2;
 
 	HubbardAncilla(const SolverParamsType& solverParams,
 	               InputValidatorType& io,
 	               GeometryType const &geometry)
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
-	      geometry_(geometry),
-	      modelFeAs_(solverParams,io,geometry),
-	      orbitals_(modelParameters_.orbitals)
+	      geometry_(geometry)
 	{
-		if (orbitals_ != 2)
-			throw PsimagLite::RuntimeError("HubbardAncilla: only for 2 orbitals\n");
+		if (modelParameters_.potentialV.size() != geometry.numberOfSites()) {
+			PsimagLite::String str(__FILE__);
+			str += " " + ttos(__LINE__) + "\n";
+			str += "potentialV length must be equal to the number of sites\n";
+			throw PsimagLite::RuntimeError(str.c_str());
+		}
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
@@ -139,9 +155,12 @@ public:
 		return 0;
 	}
 
-	SizeType hilbertSize(SizeType site) const { return modelFeAs_.hilbertSize(site); }
+	SizeType hilbertSize(SizeType) const
+	{
+		return (1<<(2*ORBITALS));
+	}
 
-	void print(std::ostream& os) const { modelFeAs_.print(os); }
+	void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
 	//! find creation operator matrices for (i,sigma) in the natural basis,
 	//! find quantum numbers and number of electrons
@@ -149,143 +168,347 @@ public:
 	void setNaturalBasis(VectorOperatorType& creationMatrix,
 	                     SparseMatrixType &hamiltonian,
 	                     SymmetryElectronsSzType &q,
-	                     BlockType const &block,
+	                     const BlockType& block,
 	                     const RealType& time)  const
 	{
-		blockIsSize1OrThrow(block);
+		HilbertBasisType natBasis;
+		VectorSizeType qvector;
+		setNaturalBasis(natBasis,qvector,block);
 
-		modelFeAs_.setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
+		setOperatorMatrices(creationMatrix,block);
 
-		// add \Gamma^+_i to creationMatrix
-		setGammaMatrix(creationMatrix,block);
+		//! Set symmetry related
+		setSymmetryRelated(q,natBasis,block.size());
 
-		// add ONSITE J S^+_i S^-_i + S^-_i S^+_i to Hamiltonian
-		addSplusSminus(hamiltonian,creationMatrix,block);
+		//! set hamiltonian
+		this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
 	}
 
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                         BlockType const &block) const
+	                         const BlockType& block) const
 	{
-		blockIsSize1OrThrow(block);
+		HilbertBasisType natBasis;
+		VectorSizeType qvector;
+		setNaturalBasis(natBasis,qvector,block);
 
-		modelFeAs_.setOperatorMatrices(creationMatrix,block);
+		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
+		creationMatrix.clear();
+		SizeType dofs = 2*ORBITALS;
+		for (SizeType i=0;i<block.size();i++) {
+			for (SizeType sigma=0;sigma<dofs;sigma+=2) {
+				MatrixType tmp;
+				findOperatorMatrices(tmp,i,sigma,natBasis);
+				SparseMatrixType tmpMatrix(tmp);
+				SizeType m=0;
+				int asign=1;
+				if (sigma>ORBITALS-1) {
+					m=1;
+					asign= -1;
+				}
 
-		// add \Gamma^+_i to creationMatrix
-		setGammaMatrix(creationMatrix,block);
+				typename OperatorType::Su2RelatedType su2related;
+				if (sigma <ORBITALS) {
+					su2related.source.push_back(i*dofs+sigma);
+					su2related.source.push_back(i*dofs+sigma + ORBITALS);
+					su2related.transpose.push_back(-1);
+					su2related.transpose.push_back(-1);
+					su2related.offset = ORBITALS;
+				}
+
+				OperatorType myOp(tmpMatrix,
+				                  -1,
+				                  typename OperatorType::PairType(1,m),
+				                  asign,
+				                  su2related);
+				creationMatrix.push_back(myOp);
+			}
+		}
+
+		assert(creationMatrix.size() == 2);
 	}
 
-	PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
-	                                                      SizeType site,
-	                                                      SizeType dof) const
+	MatrixType naturalOperator(const PsimagLite::String& what,
+	                           SizeType site,
+	                           SizeType) const
 	{
 		BlockType block;
 		block.resize(1);
 		block[0]=site;
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
+		VectorOperatorType creationMatrix;
 		setOperatorMatrices(creationMatrix,block);
+		assert(creationMatrix.size()>0);
+		SizeType nrow = creationMatrix[0].data.row();
+		PsimagLite::String what2 = what;
 
-		if (what=="g") {
-			PsimagLite::Matrix<SparseElementType> tmp;
-			SizeType x = 2*orbitals_;
-			crsMatrixToFullMatrix(tmp,creationMatrix[x].data);
+		if (what2 == "i" || what2=="identity") {
+			MatrixType tmp(nrow,nrow);
+			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
 			return tmp;
 		}
 
-		return modelFeAs_.naturalOperator(what,site,dof);
+		if (what2 == "0") {
+			MatrixType tmp(nrow,nrow);
+			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 0.0;
+			return tmp;
+		}
+
+		std::cerr<<"what="<<what<<"\n";
+		throw std::logic_error("naturalOperator: invalid argument\n");
 	}
 
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setNaturalBasis(typename PsimagLite::Vector<HilbertState>  ::Type&basis,
-	                     typename PsimagLite::Vector<SizeType>::Type& q,
-	                     const typename PsimagLite::Vector<SizeType>::Type& block) const
+	void setNaturalBasis(HilbertBasisType& basis,
+	                     VectorSizeType& q,
+	                     const VectorSizeType& block) const
 	{
-		modelFeAs_.setNaturalBasis(basis,q,block);
+		assert(block.size()==1);
+		HilbertState total = hilbertSize(0);
+
+		HilbertBasisType basisTmp;
+		for (HilbertState a=0;a<total;a++) basisTmp.push_back(a);
+
+		// reorder the natural basis (needed for MULTIPLE BANDS)
+		findQuantumNumbers(q,basisTmp,block.size());
+		this->orderBasis(basis,q,basisTmp);
 	}
 
-	void findElectrons(typename PsimagLite::Vector<SizeType>::Type& electrons,
-	                   const typename PsimagLite::Vector<HilbertState>::Type& basis,
-	                   SizeType site) const
+	void findElectrons(VectorSizeType& electrons,
+	                   const HilbertBasisType& basis,
+	                   SizeType) const
 	{
-		modelFeAs_.findElectrons(electrons,basis,site);
+		electrons.resize(basis.size());
+		for (SizeType i=0;i<basis.size();i++) {
+			// nup
+			SizeType nup = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
+			                                                            SPIN_UP);
+			// ndown
+			SizeType ndown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
+			                                                              SPIN_DOWN);
+			electrons[i] = nup + ndown;
+		}
 	}
 
-	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                        const VectorOperatorType& cm,
-	                                        const BlockType& block,
-	                                        RealType time,
-	                                        RealType factorForDiagonals=1.0)  const
+	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
+	                                const VectorOperatorType& cm,
+	                                const BlockType& block,
+	                                RealType,
+	                                RealType factorForDiagonals=1.0) const
 	{
-		modelFeAs_.addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
-		// add ONSITE J S^+_i S^-_i + S^-_i S^+_i to Hamiltonian
-		SparseMatrixType tmpMatrix;
-		addSplusSminus(tmpMatrix,cm,block);
-		hmatrix += factorForDiagonals*tmpMatrix;
+		SizeType n=block.size();
+
+		for (SizeType i=0;i<n;i++) {
+			addInteraction(hmatrix,cm,i,factorForDiagonals,block[i]);
+
+			addPotentialV(hmatrix,
+			              cm,
+			              i,
+			              block[i],
+			              factorForDiagonals,
+			              modelParameters_.potentialV);
+
+		}
 	}
 
 	virtual SizeType maxElectronsOneSpin() const
 	{
-		return 2 * modelParameters_.orbitals * geometry_.numberOfSites() + 1;
+		return 2*ORBITALS*geometry_.numberOfSites() + 1;
 	}
+
 
 	virtual const TargetQuantumElectronsType& targetQuantum() const
 	{
-		return modelFeAs_.targetQuantum();
+		return modelParameters_.targetQuantum;
 	}
 
 private:
 
-	void setGammaMatrix(VectorOperatorType& creationMatrix,
-	                    const BlockType& block)  const
+	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to
+	//! basis state ket
+	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
+	RealType sign(HilbertState const &ket, int i,SizeType sigma) const
 	{
-		blockIsSize1OrThrow(block);
-		assert(creationMatrix.size() == 2*modelParameters_.orbitals);
+		int value=0;
+		SizeType dofs = 2*ORBITALS;
+		for (SizeType alpha=0;alpha<dofs;alpha++)
+			value += HilbertSpaceFeAsType::calcNofElectrons(ket,0,i,alpha);
+		// add electron on site 0 if needed
+		if (i>0) value += HilbertSpaceFeAsType::electrons(ket);
 
-		MatrixType m1 = creationMatrix[0].data.toDense();
-		MatrixType m2 = creationMatrix[1].data.toDense();
-		MatrixType m3 = creationMatrix[2].data.toDense();
-		MatrixType m4 = creationMatrix[3].data.toDense();
-		MatrixType m = m1*transposeConjugate(m2) + m3*transposeConjugate(m4);
+		//order for sign is: a up, a down, b up, b down, etc
+		unsigned int x = HilbertSpaceFeAsType::get(ket,i);
+		int spin = sigma/ORBITALS;
+		SizeType orb = sigma % ORBITALS;
 
-		Su2RelatedType su2related;
-		SparseMatrixType tmpMatrix(m);
-		OperatorType myOp(tmpMatrix,
-		                  1,
-		                  typename OperatorType::PairType(0,0),
-		                  1,
-		                  su2related);
+		for (SizeType j=0;j<orb;j++) {
+			for (SizeType k=0;k<2;k++) {
+				SizeType ind = j + k * ORBITALS;
+				int mask = (1<<ind);
+				if (x & mask) value++;
+			}
+		}
 
-		creationMatrix.push_back(myOp);
+		if (spin==SPIN_DOWN) {
+			int mask = (1<<orb);
+			if (x & mask) value++;
+		}
+
+		return (value==0 || value%2==0) ? 1.0 : FERMION_SIGN;
 	}
 
-	void addSplusSminus(SparseMatrixType &hmatrix,
+	//! Find c^\dagger_i\gamma\sigma in the natural basis natBasis
+	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
+	void findOperatorMatrices(MatrixType& creationMatrix,
+	                          int i,
+	                          int sigma,
+	                          const HilbertBasisType& natBasis) const
+	{
+		HilbertState bra,ket;
+		int n = natBasis.size();
+		MatrixType cm(n,n);
+
+		for (SizeType ii=0;ii<n;ii++) {
+			bra=ket=natBasis[ii];
+
+			if (HilbertSpaceFeAsType::isNonZero(ket,i,sigma)) {
+
+			} else {
+				HilbertSpaceFeAsType::create(bra,i,sigma);
+				int jj = PsimagLite::isInVector(natBasis,bra);
+				if (jj<0)
+					throw PsimagLite::RuntimeError("findOperatorMatrices: error\n");
+				if (ii==SizeType(jj)) {
+					std::cerr<<"ii="<<i<<" ket="<<ket<<" bra="<<bra;
+					std::cerr<<" sigma="<<sigma<<"\n";
+					throw PsimagLite::RuntimeError("Creation op. cannot be diagonal\n");
+				}
+
+				cm(ii,jj) =sign(ket,i,sigma);
+			}
+		}
+
+		transposeConjugate(creationMatrix,cm);
+	}
+
+	void findQuantumNumbers(VectorSizeType& q,const HilbertBasisType&basis,int n) const
+	{
+		SymmetryElectronsSzType qq;
+		setSymmetryRelated(qq,basis,n);
+		qq.findQuantumNumbers(q, MyBasis::useSu2Symmetry());
+	}
+
+	void setSymmetryRelated(SymmetryElectronsSzType& q,
+	                        const HilbertBasisType& basis,
+	                        int n) const
+	{
+		if (n!=1)
+			PsimagLite::RuntimeError("setSymmetryRelated() implemented for n=1 only\n");
+
+		// find j,m and flavors (do it by hand since we assume n==1)
+		// note: we use 2j instead of j
+		// note: we use m+j instead of m
+		// This assures us that both j and m are SizeType
+		VectorSizeType flavors;
+		VectorSizeType electronsUp(basis.size());
+		VectorSizeType electronsDown(basis.size());
+		VectorPairType jmvalues;
+		for (SizeType i=0;i<basis.size();i++) {
+			PairType jmpair = PairType(0,0);
+
+			jmvalues.push_back(jmpair);
+
+			SizeType na = HilbertSpaceFeAsType::calcNofElectrons(basis[i],0) +
+			        HilbertSpaceFeAsType::calcNofElectrons(basis[i],0+2);
+			SizeType nb = HilbertSpaceFeAsType::calcNofElectrons(basis[i],1) +
+			        HilbertSpaceFeAsType::calcNofElectrons(basis[i],1+2);
+
+			SizeType flavor = na  + 3*nb;
+
+			flavors.push_back(flavor);
+
+			// nup
+			electronsUp[i] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
+			                                                              SPIN_UP);
+			// ndown
+			electronsDown[i] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
+			                                                                SPIN_DOWN);
+		}
+
+		q.set(jmvalues,flavors,electronsUp+electronsDown,electronsUp);
+	}
+
+	// only for orbital == 0
+	void addPotentialV(SparseMatrixType &hmatrix,
+	                   const VectorOperatorType& cm,
+	                   SizeType i,
+	                   SizeType actualIndexOfSite,
+	                   RealType factorForDiagonals,
+	                   const typename PsimagLite::Vector<RealType>::Type& V) const
+	{
+		SizeType orbital = 0;
+		int dof=2*ORBITALS;
+		SparseMatrixType nup = n(cm[orbital+SPIN_UP*ORBITALS+i*dof].data);
+		SparseMatrixType ndown = n(cm[orbital+SPIN_DOWN*ORBITALS+i*dof].data);
+
+		SizeType linSize = geometry_.numberOfSites();
+
+		SizeType iUp = actualIndexOfSite + (orbital + 0*ORBITALS)*linSize;
+		hmatrix += factorForDiagonals * V[iUp] * nup;
+		SizeType iDown = actualIndexOfSite + (orbital + 1*ORBITALS)*linSize;
+		hmatrix += factorForDiagonals * V[iDown] * ndown;
+	}
+
+	SparseMatrixType n(const SparseMatrixType& c) const
+	{
+		SparseMatrixType tmpMatrix;
+		SparseMatrixType cdagger;
+		transposeConjugate(cdagger,c);
+		multiply(tmpMatrix,c,cdagger);
+
+		return tmpMatrix;
+	}
+
+	//! Term is U[0]\sum_{\alpha}n_{i\alpha UP} n_{i\alpha DOWN}
+	void addInteraction(SparseMatrixType &hmatrix,
 	                    const VectorOperatorType& cm,
-	                    const BlockType& block) const
+	                    SizeType i,
+	                    RealType factorForDiagonals,
+	                    SizeType actualSite) const
 	{
-		blockIsSize1OrThrow(block);
-		MatrixType m1 = cm[0].data.toDense();
-		MatrixType m2 = cm[1].data.toDense();
-		MatrixType m3 = cm[2].data.toDense();
-		MatrixType m4 = cm[3].data.toDense();
-		MatrixType m = m1*transposeConjugate(m3)*m4*transposeConjugate(m2);
-		MatrixType m5 = modelParameters_.ancillaJ*(m + transposeConjugate(m));
-		fullMatrixToCrsMatrix(hmatrix,m5);
+		int dof = 4;
+		SparseMatrixType tmpMatrix,tmpMatrix2;
+
+		SizeType alpha = 0; // real sites, no ancilla
+		SparseMatrixType m1=cm[alpha+SPIN_UP*2+i*dof].data;
+		SparseMatrixType m2=cm[alpha+SPIN_DOWN*2+i*dof].data;
+
+		multiply(tmpMatrix,n(m1),n(m2));
+		assert(actualSite < modelParameters_.hubbardU.size());
+		multiplyScalar(tmpMatrix2,
+		               tmpMatrix,
+		               factorForDiagonals*modelParameters_.hubbardU[actualSite]);
+		hmatrix += tmpMatrix2;
+
 	}
 
-	void blockIsSize1OrThrow(const BlockType& block) const
+	void diagTest(const SparseMatrixType& fullm,const PsimagLite::String& str) const
 	{
-		if (block.size()==1) return;
-		throw PsimagLite::RuntimeError("FeAsBasedExtended:: blocks must be of size 1\n");
+		if (fullm.rank()!=256) return;
+		MatrixType fullm2;
+		crsMatrixToFullMatrix(fullm2,fullm);
+		typename PsimagLite::Vector<SparseElementType>::Type eigs(fullm2.n_row());
+		PsimagLite::diag(fullm2,eigs,'V');
+		std::cout<<str<<" diagTest size="<<fullm.rank()<<" eigs[0]="<<eigs[0]<<"\n";
+		std::cout<<fullm;
 	}
 
-	ParametersHubbardAncilla<RealType>  modelParameters_;
+	//serializr normal modelParameters_
+	ParametersHubbardAncillaType  modelParameters_;
+	//serializr ref geometry_ start
 	const GeometryType& geometry_;
-	ModelFeAsType modelFeAs_;
-	SizeType orbitals_;
 }; //class HubbardAncilla
-
 } // namespace Dmrg
 /*@}*/
-#endif // DMRG_HUBBARD_ANCILLA_H
+#endif
 

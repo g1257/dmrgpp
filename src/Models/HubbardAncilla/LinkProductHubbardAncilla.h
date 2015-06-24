@@ -95,7 +95,7 @@ class LinkProductHubbardAncilla {
 	typedef typename ModelHelperType::BasisType BasisType;
 	typedef typename ModelHelperType::OperatorType OperatorType;
 
-	enum {TERM_HOPPING, TERM_GAMMA};
+	enum {TERM_HOPPING, TERM_LAMBDA};
 
 public:
 
@@ -104,7 +104,7 @@ public:
 	template<typename SomeStructType>
 	static SizeType dofs(SizeType term,const SomeStructType& additional)
 	{
-		return (term==TERM_GAMMA) ? 1 : LinkProductFeAsType::dofs(term,additional);
+		return (term==TERM_LAMBDA) ? 2 : LinkProductFeAsType::dofs(term,additional);
 	}
 
 	// has only dependence on orbital
@@ -116,7 +116,7 @@ public:
 		if (term==TERM_HOPPING)
 			return LinkProductFeAsType::connectorDofs(term,dofs,additional);
 
-		return PairType(0,0);
+		return PairType(dofs,dofs);
 	}
 
 	template<typename SomeStructType>
