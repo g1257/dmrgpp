@@ -102,9 +102,9 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 
 	template<typename SomeStructType>
-	static SizeType dofs(SizeType,const SomeStructType&)
+	static SizeType dofs(SizeType term,const SomeStructType&)
 	{
-		return 2;
+		return (term == TERM_HOPPING) ? 2 : 4;
 	}
 
 	// has only dependence on orbital
@@ -137,11 +137,9 @@ public:
 			category = dofs;
 		}
 
-
 		fermionOrBoson = ProgramGlobals::BOSON;
 		SizeType offset1 = 2;
-		ops.first += offset1;
-		ops.second += offset1;
+		ops = PairType(dofs + offset1,dofs + offset1);
 
 	}
 

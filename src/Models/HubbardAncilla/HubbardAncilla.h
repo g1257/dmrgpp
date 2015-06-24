@@ -90,6 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "ModelCommon.h"
 #include "Geometry/GeometryDca.h"
+#include <cstdlib>
 
 namespace Dmrg {
 template<typename ModelBaseType>
@@ -330,19 +331,15 @@ private:
 		VectorSparseMatrixType vm;
 		findAllMatrices(vm,block);
 		typename OperatorType::Su2RelatedType su2related;
-		OperatorType myOp1(multiplyTc(vm[0],vm[1]),
+		for (SizeType x = 0; x < 2*ORBITALS; ++x) {
+			div_t spin = div(x,2);
+			OperatorType myOp(multiplyTc(vm[0+spin.quot*ORBITALS],vm[1+spin.rem*ORBITALS]),
 		                  1,
 		                  typename OperatorType::PairType(0,0),
 		                  1,
 		                  su2related);
-		cm.push_back(myOp1);
-
-		OperatorType myOp2(multiplyTc(vm[2],vm[3]),
-		                  1,
-		                  typename OperatorType::PairType(0,0),
-		                  1,
-		                  su2related);
-		cm.push_back(myOp2);
+			cm.push_back(myOp);
+		}
 	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to
