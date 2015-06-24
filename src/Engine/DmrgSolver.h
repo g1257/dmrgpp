@@ -573,12 +573,16 @@ private:
 
 	void updateQuantumSector(SizeType sites,SizeType direction,SizeType step)
 	{
-		if (direction==INFINITE && parameters_.adjustQuantumNumbers.size()>0) {
+		SizeType maxSites = model_.geometry().numberOfSites();
+		if (direction==INFINITE &&
+		        sites < maxSites &&
+		        parameters_.adjustQuantumNumbers.size()>0) {
 			quantumSector_ = SymmetryElectronsSzType::adjustQn(parameters_.adjustQuantumNumbers,
 			                                         direction,
 			                                         ioOut_,
 			                                         MyBasis::useSu2Symmetry(),
-			                                         step);
+			                                         step,
+			                                         model_.targetQuantum().other.size());
 			return;
 		}
 

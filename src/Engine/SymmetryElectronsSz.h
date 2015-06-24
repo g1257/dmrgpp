@@ -170,17 +170,19 @@ public:
 	                         SizeType direction,
 	                         PsimagLite::IoSimple::Out& ioOut,
 	                         bool useSu2Symmetry,
-	                         SizeType step)
+	                         SizeType step,
+	                         SizeType mode)
 	{
-		VectorSizeType targetQuantumNumbers(2,0);
-		if (2*step+1 >= adjustQuantumNumbers.size()) {
+		VectorSizeType targetQuantumNumbers(mode+1,0);
+		if (2*step+mode >= adjustQuantumNumbers.size()) {
 			PsimagLite::String msg("adjustQuantumNumbers must be a vector");
-			msg += " of size N-2, where N is the TotalNumberOfSites\n";
+			msg += " of correct size\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
 
-		targetQuantumNumbers[0] = adjustQuantumNumbers[2*step];
-		targetQuantumNumbers[1] = adjustQuantumNumbers[2*step+1];
+		for (SizeType x = 0; x < (mode+1); ++x)
+			targetQuantumNumbers[x] = adjustQuantumNumbers[2*step+x];
+
 		return getQuantumSector(targetQuantumNumbers,
 		                        direction,
 		                        &ioOut,

@@ -127,6 +127,7 @@ public:
 	typedef ParametersHubbardAncilla<RealType> ParametersHubbardAncillaType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename PsimagLite::Vector<PairType>::Type VectorPairType;
+	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
@@ -219,6 +220,8 @@ public:
 		}
 
 		assert(creationMatrix.size() == 2);
+
+		setLambdaMatrices(creationMatrix,block);
 	}
 
 	MatrixType naturalOperator(const PsimagLite::String& what,
@@ -249,6 +252,7 @@ public:
 		std::cerr<<"what="<<what<<"\n";
 		throw std::logic_error("naturalOperator: invalid argument\n");
 	}
+
 
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
@@ -284,13 +288,15 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                const VectorOperatorType& cm,
+	                                const VectorOperatorType&,
 	                                const BlockType& block,
 	                                RealType,
 	                                RealType factorForDiagonals=1.0) const
 	{
 		SizeType n=block.size();
-
+		assert(block.size() == 1);
+		VectorSparseMatrixType cm;
+		findAllMatrices(cm,block);
 		for (SizeType i=0;i<n;i++) {
 			addInteraction(hmatrix,cm,i,factorForDiagonals,block[i]);
 
@@ -316,6 +322,28 @@ public:
 	}
 
 private:
+
+	//! set creation matrices for sites in block
+	void setLambdaMatrices(VectorOperatorType& cm,
+	                       const BlockType& block) const
+	{
+		VectorSparseMatrixType vm;
+		findAllMatrices(vm,block);
+		typename OperatorType::Su2RelatedType su2related;
+		OperatorType myOp1(multiplyTc(vm[0],vm[1]),
+		                  1,
+		                  typename OperatorType::PairType(0,0),
+		                  1,
+		                  su2related);
+		cm.push_back(myOp1);
+
+		OperatorType myOp2(multiplyTc(vm[2],vm[3]),
+		                  1,
+		                  typename OperatorType::PairType(0,0),
+		                  1,
+		                  su2related);
+		cm.push_back(myOp2);
+	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to
 	//! basis state ket
@@ -384,6 +412,19 @@ private:
 		transposeConjugate(creationMatrix,cm);
 	}
 
+	void findAllMatrices(VectorSparseMatrixType& vm,
+	                     const VectorSizeType& block) const
+	{
+		HilbertBasisType natBasis;
+		VectorSizeType q;
+		setNaturalBasis(natBasis,q,block);
+		for (SizeType sigma = 0; sigma < 2*ORBITALS; ++sigma) {
+			MatrixType m;
+			findOperatorMatrices(m,0,sigma,natBasis);
+			vm.push_back(SparseMatrixType(m));
+		}
+	}
+
 	void findQuantumNumbers(VectorSizeType& q,const HilbertBasisType&basis,int n) const
 	{
 		SymmetryElectronsSzType qq;
@@ -441,7 +482,7 @@ private:
 
 	// only for orbital == 0
 	void addPotentialV(SparseMatrixType &hmatrix,
-	                   const VectorOperatorType& cm,
+	                   const VectorSparseMatrixType& cm,
 	                   SizeType i,
 	                   SizeType actualIndexOfSite,
 	                   RealType factorForDiagonals,
@@ -449,8 +490,8 @@ private:
 	{
 		SizeType orbital = 0;
 		int dof=2*ORBITALS;
-		SparseMatrixType nup = n(cm[orbital+SPIN_UP*ORBITALS+i*dof].data);
-		SparseMatrixType ndown = n(cm[orbital+SPIN_DOWN*ORBITALS+i*dof].data);
+		SparseMatrixType nup = n(cm[orbital+SPIN_UP*ORBITALS+i*dof]);
+		SparseMatrixType ndown = n(cm[orbital+SPIN_DOWN*ORBITALS+i*dof]);
 
 		SizeType linSize = geometry_.numberOfSites();
 
@@ -472,7 +513,7 @@ private:
 
 	//! Term is U[0]\sum_{\alpha}n_{i\alpha UP} n_{i\alpha DOWN}
 	void addInteraction(SparseMatrixType &hmatrix,
-	                    const VectorOperatorType& cm,
+	                    const VectorSparseMatrixType& cm,
 	                    SizeType i,
 	                    RealType factorForDiagonals,
 	                    SizeType actualSite) const
@@ -481,8 +522,8 @@ private:
 		SparseMatrixType tmpMatrix,tmpMatrix2;
 
 		SizeType alpha = 0; // real sites, no ancilla
-		SparseMatrixType m1=cm[alpha+SPIN_UP*2+i*dof].data;
-		SparseMatrixType m2=cm[alpha+SPIN_DOWN*2+i*dof].data;
+		SparseMatrixType m1=cm[alpha+SPIN_UP*2+i*dof];
+		SparseMatrixType m2=cm[alpha+SPIN_DOWN*2+i*dof];
 
 		multiply(tmpMatrix,n(m1),n(m2));
 		assert(actualSite < modelParameters_.hubbardU.size());
