@@ -330,16 +330,55 @@ private:
 	{
 		VectorSparseMatrixType vm;
 		findAllMatrices(vm,block);
+
 		typename OperatorType::Su2RelatedType su2related;
 		for (SizeType x = 0; x < 2*ORBITALS; ++x) {
 			div_t spin = div(x,2);
-			OperatorType myOp(multiplyTc(vm[0+spin.quot*ORBITALS],vm[1+spin.rem*ORBITALS]),
+			SparseMatrixType lambda = multiplyTc(vm[0+spin.quot*ORBITALS],
+			        vm[1+spin.rem*ORBITALS]);
+			MatrixType dlambda;
+			crsMatrixToFullMatrix(dlambda,lambda);
+			std::cout<<"dlambda\n";
+			std::cout<<dlambda;
+			correctLambda(dlambda,block);
+			std::cout<<"dlambda corrected\n";
+			std::cout<<dlambda;
+
+			OperatorType myOp(SparseMatrixType(dlambda),
 		                  1,
 		                  typename OperatorType::PairType(0,0),
 		                  1,
 		                  su2related);
 			cm.push_back(myOp);
 		}
+	}
+
+	void correctLambda(MatrixType& dlambda,
+	                   const VectorSizeType& block) const
+	{
+		HilbertBasisType natBasis;
+		VectorSizeType q;
+		setNaturalBasis(natBasis,q,block);
+		SizeType n = dlambda.n_row();
+
+		for (SizeType i = 0; i < n; ++i) {
+			for (SizeType j = 0; j < n; ++j) {
+				if (dlambda(i,j) == 0.0) continue;
+				if (isAllowedLambda(i,j,natBasis)) continue;
+				dlambda(i,j) = 0.0;
+			}
+		}
+	}
+
+	bool isAllowedLambda(SizeType row, SizeType, const HilbertBasisType& basis) const
+	{
+		return (densityOfState(basis[row]) == 2);
+	}
+
+	SizeType densityOfState(HilbertState state) const
+	{
+		return HilbertSpaceFeAsType::electronsWithGivenSpin(state, SPIN_UP) +
+		        HilbertSpaceFeAsType::electronsWithGivenSpin(state, SPIN_DOWN);
 	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to
@@ -420,6 +459,13 @@ private:
 			findOperatorMatrices(m,0,sigma,natBasis);
 			vm.push_back(SparseMatrixType(m));
 		}
+
+		std::cout<<"Local Basis\n";
+		for (SizeType i = 0; i < natBasis.size(); ++i) {
+			std::cout<<natBasis[i]<<" ";
+		}
+
+		std::cout<<"\n";
 	}
 
 	void findQuantumNumbers(VectorSizeType& q,const HilbertBasisType&basis,int n) const

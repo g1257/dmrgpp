@@ -45,12 +45,12 @@ exit(0) if ($useFlag == 2);
 
 
 for (my $c=0;$c<$total;$c++) {
-	next if (!allDefined($c,\@values,$nsites));
+	#next if (!allDefined($c,\@values,$nsites));
 
 	print "$times[$c] ";
 	for (my $site=0;$site<$nsites;$site++) {
 		my $val = $values[$site][$c];
-		$val = 0 if (!defined($val));
+		$val = "0.000" if (!defined($val));
 		print "$val ";
 	}
 	print "\n";

@@ -365,7 +365,7 @@ private:
 			PsimagLite::Matrix<typename SparseMatrixType::value_type> fullm2;
 			crsMatrixToFullMatrix(fullm2,fullm);
 			if (PsimagLite::isZero(fullm2)) std::cerr<<"Matrix is zero\n";
-			if (fullm.row()<=40)
+			//if (fullm.row()<=40)
 				printFullMatrix(fullm,"matrix",1);
 
 			if (!isHermitian(fullm,true))

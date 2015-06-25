@@ -259,7 +259,7 @@ public:
 
 		BlockType X = basisWithOps.block();
 		if (X.size()!=1) return;
-		assert(X[0]==0 || X[0]==this->leftRightSuper().super().block().size()-1);
+		if (X[0]!=0 && X[0]!=this->leftRightSuper().super().block().size()-1) return;
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		SparseMatrixType hmatrix;
 		SymmetryElectronsSzType q;
