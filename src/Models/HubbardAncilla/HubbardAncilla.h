@@ -332,53 +332,58 @@ private:
 		findAllMatrices(vm,block);
 
 		typename OperatorType::Su2RelatedType su2related;
-		for (SizeType x = 0; x < 2*ORBITALS; ++x) {
-			div_t spin = div(x,2);
-			SparseMatrixType lambda = multiplyTc(vm[0+spin.quot*ORBITALS],
-			        vm[1+spin.rem*ORBITALS]);
+		for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
+			SizeType spin2 = 1 - spin1;
+			SparseMatrixType lambda;
+			multiply(lambda,vm[0+spin1*ORBITALS],vm[1+spin2*ORBITALS]);
 			MatrixType dlambda;
 			crsMatrixToFullMatrix(dlambda,lambda);
 			std::cout<<"dlambda\n";
 			std::cout<<dlambda;
-			correctLambda(dlambda,block);
+			correctLambda(dlambda,spin1,vm);
 			std::cout<<"dlambda corrected\n";
 			std::cout<<dlambda;
 
 			OperatorType myOp(SparseMatrixType(dlambda),
-		                  1,
-		                  typename OperatorType::PairType(0,0),
-		                  1,
-		                  su2related);
+			                  1,
+			                  typename OperatorType::PairType(0,0),
+			                  1,
+			                  su2related);
 			cm.push_back(myOp);
 		}
 	}
 
 	void correctLambda(MatrixType& dlambda,
-	                   const VectorSizeType& block) const
+	                   SizeType spin1,
+	                   VectorSparseMatrixType& vm) const
 	{
-		HilbertBasisType natBasis;
-		VectorSizeType q;
-		setNaturalBasis(natBasis,q,block);
 		SizeType n = dlambda.n_row();
+		MatrixType corrector(n,n);
+		computeCorrector(corrector,spin1,vm);
 
+		MatrixType dlambda2 = dlambda;
+
+		dlambda = dlambda2 * corrector;
+	}
+
+	void computeCorrector(MatrixType& corrector,
+	                      SizeType spin1,
+	                      VectorSparseMatrixType& vm) const
+	{
+		SizeType spin2 = 1 - spin1;
+		SparseMatrixType cm1(vm[0+spin2*ORBITALS]);
+		SparseMatrixType cm2(vm[1+spin1*ORBITALS]);
+		SparseMatrixType n1 = n(cm1);
+		SparseMatrixType n2 = n(cm2);
+		MatrixType dn1;
+		MatrixType dn2;
+		crsMatrixToFullMatrix(dn1,n1);
+		crsMatrixToFullMatrix(dn2,n2);
+
+		SizeType n = corrector.n_row();
 		for (SizeType i = 0; i < n; ++i) {
-			for (SizeType j = 0; j < n; ++j) {
-				if (dlambda(i,j) == 0.0) continue;
-				if (isAllowedLambda(i,j,natBasis)) continue;
-				dlambda(i,j) = 0.0;
-			}
+			corrector(i,i) = abs(dn1(i,i) + dn2(i,i) -1.0);
 		}
-	}
-
-	bool isAllowedLambda(SizeType row, SizeType, const HilbertBasisType& basis) const
-	{
-		return (densityOfState(basis[row]) == 2);
-	}
-
-	SizeType densityOfState(HilbertState state) const
-	{
-		return HilbertSpaceFeAsType::electronsWithGivenSpin(state, SPIN_UP) +
-		        HilbertSpaceFeAsType::electronsWithGivenSpin(state, SPIN_DOWN);
 	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to
