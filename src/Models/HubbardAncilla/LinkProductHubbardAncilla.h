@@ -104,7 +104,7 @@ public:
 	template<typename SomeStructType>
 	static SizeType dofs(SizeType term,const SomeStructType&)
 	{
-		return (term == TERM_HOPPING) ? 2 : 2;
+		return 2;
 	}
 
 	// has only dependence on orbital

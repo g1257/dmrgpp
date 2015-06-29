@@ -337,11 +337,7 @@ private:
 			multiply(lambda,vm[0+spin1*ORBITALS],vm[1+spin2*ORBITALS]);
 			MatrixType dlambda;
 			crsMatrixToFullMatrix(dlambda,lambda);
-			std::cout<<"dlambda\n";
-			std::cout<<dlambda;
 			correctLambda(dlambda,spin1,vm);
-			std::cout<<"dlambda corrected\n";
-			std::cout<<dlambda;
 
 			OperatorType myOp(SparseMatrixType(dlambda),
 			                  1,
@@ -463,13 +459,6 @@ private:
 			findOperatorMatrices(m,0,sigma,natBasis);
 			vm.push_back(SparseMatrixType(m));
 		}
-
-		std::cout<<"Local Basis\n";
-		for (SizeType i = 0; i < natBasis.size(); ++i) {
-			std::cout<<natBasis[i]<<" ";
-		}
-
-		std::cout<<"\n";
 	}
 
 	void findQuantumNumbers(VectorSizeType& q,const HilbertBasisType&basis,int n) const
@@ -578,17 +567,6 @@ private:
 		               tmpMatrix,
 		               factorForDiagonals*modelParameters_.hubbardU[actualSite]);
 		hmatrix += tmpMatrix2;
-	}
-
-	void diagTest(const SparseMatrixType& fullm,const PsimagLite::String& str) const
-	{
-		if (fullm.rank()!=256) return;
-		MatrixType fullm2;
-		crsMatrixToFullMatrix(fullm2,fullm);
-		typename PsimagLite::Vector<SparseElementType>::Type eigs(fullm2.n_row());
-		PsimagLite::diag(fullm2,eigs,'V');
-		std::cout<<str<<" diagTest size="<<fullm.rank()<<" eigs[0]="<<eigs[0]<<"\n";
-		std::cout<<fullm;
 	}
 
 	//serializr normal modelParameters_

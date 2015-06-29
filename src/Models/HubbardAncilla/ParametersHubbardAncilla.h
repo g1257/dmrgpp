@@ -90,9 +90,7 @@ struct ParametersHubbardAncilla : ParametersModelFeAs<RealType> {
 
 	template<typename IoInputType>
 	ParametersHubbardAncilla(IoInputType& io) : BaseType(io)
-	{
-		io.readline(ancillaJ,"AncillaJ=");
-	}
+	{}
 
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType&,
@@ -101,18 +99,8 @@ struct ParametersHubbardAncilla : ParametersModelFeAs<RealType> {
 	{
 		return 0;
 	}
-
-	RealType ancillaJ;
 };
 
-//! Function that prints model parameters to stream os
-template<typename RealTypeType>
-std::ostream& operator<<(std::ostream &os,
-                         const ParametersHubbardAncilla<RealTypeType>& parameters)
-{
-	os<<"AncillaJ="<<parameters.ancillaJ<<"\n";
-	return os;
-}
 } // namespace Dmrg
 
 /*@}*/
