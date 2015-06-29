@@ -102,7 +102,7 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 
 	template<typename SomeStructType>
-	static SizeType dofs(SizeType term,const SomeStructType&)
+	static SizeType dofs(SizeType,const SomeStructType&)
 	{
 		return 2;
 	}
