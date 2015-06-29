@@ -357,7 +357,7 @@ private:
 		SizeType threadId = 0;
 		typename ModelType::ModelHelperType modelHelper(i,lrs,threadId);
 
-		if (options.find("debugmatrix")!=PsimagLite::String::npos) {
+		if (options.find("debugmatrix")!=PsimagLite::String::npos && !(saveOption & 4) ) {
 			SparseMatrixType fullm;
 
 			model_.fullHamiltonian(fullm,modelHelper);
@@ -532,6 +532,14 @@ private:
 		object.matrixVectorProduct(x,initialVector);
 		RealType gsEnergy = std::real(initialVector*x);
 		gsVector = initialVector;
+		PsimagLite::String options = parameters_.options;
+		bool debugmatrix = (options.find("debugmatrix") != PsimagLite::String::npos);
+		
+		if (debugmatrix) {
+			std::cout<<"VECTOR\n";
+			std::cout<<initialVector;
+		}
+
 		return gsEnergy;
 	}
 

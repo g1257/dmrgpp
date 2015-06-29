@@ -305,8 +305,7 @@ public:
 			              cm,
 			              i,
 			              block[i],
-			              factorForDiagonals,
-			              modelParameters_.potentialV);
+			              factorForDiagonals);
 
 		}
 	}
@@ -528,13 +527,11 @@ private:
 		q.set(jmvalues,flavors,electrons,other);
 	}
 
-	// only for orbital == 0
 	void addPotentialV(SparseMatrixType &hmatrix,
 	                   const VectorSparseMatrixType& cm,
 	                   SizeType i,
 	                   SizeType actualIndexOfSite,
-	                   RealType factorForDiagonals,
-	                   const typename PsimagLite::Vector<RealType>::Type& V) const
+	                   RealType factorForDiagonals) const
 	{
 		SizeType orbital = 0;
 		int dof=2*ORBITALS;
@@ -544,9 +541,11 @@ private:
 		SizeType linSize = geometry_.numberOfSites();
 
 		SizeType iUp = actualIndexOfSite + (orbital + 0*ORBITALS)*linSize;
-		hmatrix += factorForDiagonals * V[iUp] * nup;
+		assert(iUp < modelParameters_.potentialV.size());
+		hmatrix += factorForDiagonals*modelParameters_.potentialV[iUp] * nup;
 		SizeType iDown = actualIndexOfSite + (orbital + 1*ORBITALS)*linSize;
-		hmatrix += factorForDiagonals * V[iDown] * ndown;
+		assert(iDown < modelParameters_.potentialV.size());
+		hmatrix += factorForDiagonals*modelParameters_.potentialV[iDown] * ndown;
 	}
 
 	SparseMatrixType n(const SparseMatrixType& c) const
@@ -579,7 +578,6 @@ private:
 		               tmpMatrix,
 		               factorForDiagonals*modelParameters_.hubbardU[actualSite]);
 		hmatrix += tmpMatrix2;
-
 	}
 
 	void diagTest(const SparseMatrixType& fullm,const PsimagLite::String& str) const

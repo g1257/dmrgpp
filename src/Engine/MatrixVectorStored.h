@@ -111,6 +111,8 @@ public:
 	      pointer_(0),
 	      progress_("MatrixVectorStored")
 	{
+		PsimagLite::String options = model->params().options;
+		bool debugMatrix = (options.find("debugmatrix") != PsimagLite::String::npos);
 		if (!rs) {
 			matrixStored_[0].clear();
 			model->fullHamiltonian(matrixStored_[0],*modelHelper);
@@ -119,8 +121,11 @@ public:
 			msg<<"fullHamiltonian has rank="<<matrixStored_[0].row();
 			msg<<" nonzeros="<<matrixStored_[0].nonZero();
 			progress_.printline(msg,std::cout);
+			if (debugMatrix)
+				printFullMatrix(matrixStored_[0],"matrix",1);
 			return;
 		}
+
 		SparseMatrixType matrix2;
 		model->fullHamiltonian(matrix2,*modelHelper);
 		rs->transform(matrixStored_[0],matrixStored_[1],matrix2);

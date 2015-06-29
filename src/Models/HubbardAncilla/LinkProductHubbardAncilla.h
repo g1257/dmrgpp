@@ -135,12 +135,12 @@ public:
 			if (dofs == 1) angularFactor = -1;
 			angularMomentum = 1;
 			category = dofs;
+			return;
 		}
 
 		fermionOrBoson = ProgramGlobals::BOSON;
 		SizeType offset1 = 2;
 		ops = PairType(dofs + offset1,dofs + offset1);
-
 	}
 
 	template<typename SomeStructType>
