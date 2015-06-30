@@ -190,7 +190,7 @@ public:
 
 		SizeType site = block1[0];
 		evolve(Eg,direction,site,loopNumber);
-		SizeType numberOfSites = this->leftRightSuper().super().block().size();
+		SizeType numberOfSites = this->lrs().super().block().size();
 		if (site>1 && site<numberOfSites-2) return;
 		//corner case
 		SizeType x = (site==1) ? 0 : numberOfSites-1;
@@ -240,7 +240,7 @@ private:
 			return;
 		}
 
-		SizeType numberOfSites = this->leftRightSuper().super().block().size();
+		SizeType numberOfSites = this->lrs().super().block().size();
 		if (site>0 && site<numberOfSites-1) wftAllDynVectors(site);
 
 		if (!done_) calcDynVectors(site,phiNew);
@@ -257,12 +257,12 @@ private:
 		typename PsimagLite::Vector<SizeType>::Type nk(1,this->model().hilbertSize(site));
 
 		VectorWithOffsetType result;
-		result.populateSectors(this->leftRightSuper().super());
+		result.populateSectors(this->lrs().super());
 
 		// OK, now that we got the partition number right, let's wft:
 
 		// FIXME generalize for su(2)
-		wft_.setInitialVector(result,this->common().targetVectors()[i],this->leftRightSuper(),nk);
+		wft_.setInitialVector(result,this->common().targetVectors()[i],this->lrs(),nk);
 		result.collapseSectors();
 		this->common().targetVectors(i) = result;
 	}
@@ -273,7 +273,7 @@ private:
 			VectorType sv;
 			SizeType i0 = this->common().targetVectors()[0].sector(i);
 			this->common().targetVectors()[0].extract(sv,i0);
-			SizeType p = this->leftRightSuper().super().findPartitionNumber(this->common().targetVectors()[0].offset(i0));
+			SizeType p = this->lrs().super().findPartitionNumber(this->common().targetVectors()[0].offset(i0));
 			if (i==0) {
 				if (lastLanczosVector_==0)
 					this->common().targetVectors(1) = this->common().targetVectors()[0];
@@ -293,7 +293,7 @@ private:
 	        const VectorWithOffsetType& phiNew)
 	{
 		SizeType threadId = 0;
-		typename ModelType::ModelHelperType modelHelper(p,this->leftRightSuper(),threadId);
+		typename ModelType::ModelHelperType modelHelper(p,this->lrs(),threadId);
 		typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
 		LanczosMatrixType h(&this->model(),&modelHelper);
 		LanczosSolverType lanczosSolver(h,paramsForSolver_);

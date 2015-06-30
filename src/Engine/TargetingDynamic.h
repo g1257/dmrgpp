@@ -192,7 +192,7 @@ public:
 
 		SizeType site = block1[0];
 		evolve(Eg,direction,site,loopNumber);
-		SizeType numberOfSites = this->leftRightSuper().super().block().size();
+		SizeType numberOfSites = this->lrs().super().block().size();
 		if (site>1 && site<numberOfSites-2) return;
 		// //corner case
 		SizeType x = (site==1) ? 0 : numberOfSites-1;
@@ -262,7 +262,7 @@ private:
 			SizeType i0 = phi.sector(i);
 			phi.extract(sv,i0);
 			DenseMatrixType V;
-			SizeType p = this->leftRightSuper().super().findPartitionNumber(phi.offset(i0));
+			SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
 			getLanczosVectors(V,sv,p);
 			if (i==0) {
 				assert(V.n_col() > 0);
@@ -282,7 +282,7 @@ private:
 	{
 		this->common().targetVectors()[0] = phi;
 		// don't wft since we did it before
-		SizeType numberOfSites = this->leftRightSuper().super().block().size();
+		SizeType numberOfSites = this->lrs().super().block().size();
 		if (site==0 || site==numberOfSites -1)  return;
 
 		typedef ParallelWftMany<VectorWithOffsetType,
@@ -295,7 +295,7 @@ private:
 		ParallelWftType helperWft(this->common().targetVectors(),
 		                          this->model().hilbertSize(site),
 		                          wft_,
-		                          this->leftRightSuper());
+		                          this->lrs());
 		threadedWft.loopCreate(this->common().targetVectors().size()-1,
 		                       helperWft,
 		                       this->model().concurrency());
@@ -312,7 +312,7 @@ private:
 	{
 		SizeType threadId = 0;
 		typename ModelType::ModelHelperType modelHelper(p,
-		                                                this->leftRightSuper(),
+		                                                this->lrs(),
 		                                                threadId);
 		typename LanczosSolverType::LanczosMatrixType h(&this->model(),&modelHelper);
 		paramsForSolver_.lotaMemory = true;

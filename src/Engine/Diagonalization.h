@@ -152,12 +152,12 @@ public:
 		            "Diagonalization::operator(): expecting INFINITE direction\n");
 		SizeType loopIndex = 0;
 		  VectorSizeType sectors;
-		targetedSymmetrySectors(sectors,target.leftRightSuper());
+		targetedSymmetrySectors(sectors,target.lrs());
 		reflectionOperator_.update(sectors);
 		RealType gsEnergy = internalMain_(target,direction,loopIndex,false,blockLeft);
 		//  targetting:
 		target.evolve(gsEnergy,direction,blockLeft,blockRight,loopIndex);
-		wft_.triggerOff(target.leftRightSuper()); //,m);
+		wft_.triggerOff(target.lrs());
 		return gsEnergy;
 	}
 
@@ -172,7 +172,7 @@ public:
 		RealType gsEnergy = internalMain_(target,direction,loopIndex,false,block);
 		//  targetting:
 		target.evolve(gsEnergy,direction,block,block,loopIndex);
-		wft_.triggerOff(target.leftRightSuper()); //,m);
+		wft_.triggerOff(target.lrs());
 		return gsEnergy;
 	}
 
@@ -197,7 +197,7 @@ private:
 	                       const VectorSizeType& block)
 
 	{
-		const LeftRightSuperType& lrs= target.leftRightSuper();
+		const LeftRightSuperType& lrs= target.lrs();
 		wft_.triggerOn(lrs);
 
 		RealType gsEnergy = 0;
@@ -534,7 +534,7 @@ private:
 		gsVector = initialVector;
 		PsimagLite::String options = parameters_.options;
 		bool debugmatrix = (options.find("debugmatrix") != PsimagLite::String::npos);
-		
+
 		if (debugmatrix) {
 			std::cout<<"VECTOR\n";
 			std::cout<<initialVector;

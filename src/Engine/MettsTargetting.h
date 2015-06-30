@@ -308,7 +308,7 @@ public:
 		return targetVectors_[i];
 	}
 
-	const LeftRightSuperType& leftRightSuper() const
+	const LeftRightSuperType& lrs() const
 	{
 		return lrs_;
 	}

@@ -254,19 +254,6 @@ public:
 		this->common().psi().save(io,"PSI");
 	}
 
-	void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
-	{
-
-		BlockType X = basisWithOps.block();
-		if (X.size()!=1) return;
-		if (X[0]!=0 && X[0]!=this->leftRightSuper().super().block().size()-1) return;
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		SparseMatrixType hmatrix;
-		SymmetryElectronsSzType q;
-		this->model().setNaturalBasis(creationMatrix,hmatrix,q,X,this->common().currentTime());
-		basisWithOps.setVarious(X,hmatrix,q,creationMatrix);
-	}
-
 	bool end() const
 	{
 		return (tstStruct_.maxTime() != 0 &&
@@ -310,9 +297,9 @@ private:
 	                   SizeType whatTarget,
 	                   SizeType i0) const
 	{
-		SizeType p = this->leftRightSuper().super().findPartitionNumber(phi.offset(i0));
+		SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
 		SizeType threadId = 0;
-		typename ModelType::ModelHelperType modelHelper(p,this->leftRightSuper(),threadId);
+		typename ModelType::ModelHelperType modelHelper(p,this->lrs(),threadId);
 		typename LanczosSolverType::LanczosMatrixType lanczosHelper(&this->model(),
 		                                                            &modelHelper);
 

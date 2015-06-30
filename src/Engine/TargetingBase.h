@@ -120,7 +120,11 @@ public:
 	typedef TargetingCommon<TargetHelperType,
 	                        VectorWithOffsetType,
 	                        LanczosSolverType> TargetingCommonType;
-	typedef typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
+	typedef typename TargetingCommonType::ApplyOperatorExpressionType
+	ApplyOperatorExpressionType;
+	typedef typename BasisWithOperatorsType::SymmetryElectronsSzType
+	SymmetryElectronsSzType;
+	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 
 	enum {DISABLED=ApplyOperatorExpressionType::DISABLED,
 		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,
@@ -183,11 +187,6 @@ public:
 		return commonTargetting_.targetVectors()[i];
 	}
 
-	const LeftRightSuperType& leftRightSuper() const
-	{
-		return lrs_;
-	}
-
 	void initialGuess(VectorWithOffsetType& initialVector,
 	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
@@ -196,9 +195,25 @@ public:
 
 	const RealType& time() const {return commonTargetting_.currentTime(); }
 
-	void updateOnSiteForTimeDep(BasisWithOperatorsType&) const
+	virtual void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
 	{
-		// nothing to do here
+
+		BlockType X = basisWithOps.block();
+
+		if (X.size()!=1) return;
+
+		if (X[0] != 0 && X[0] != lrs_.super().block().size()-1)
+			return;
+
+		VectorOperatorType creationMatrix;
+		SparseMatrixType hmatrix;
+		SymmetryElectronsSzType q;
+		model_.setNaturalBasis(creationMatrix,
+		                       hmatrix,
+		                       q,
+		                       X,
+		                       commonTargetting_.currentTime());
+		basisWithOps.setVarious(X,hmatrix,q,creationMatrix);
 	}
 
 	bool end() const

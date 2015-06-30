@@ -297,7 +297,7 @@ public:
 
 		SizeType site = block1[0];
 		evolve(Eg,direction,site,loopNumber);
-		SizeType numberOfSites = this->leftRightSuper().super().block().size();
+		SizeType numberOfSites = this->lrs().super().block().size();
 		if (site>1 && site<numberOfSites-2) return;
 		if (site == 1 && direction == EXPAND_SYSTEM) return;
 		// //corner case
@@ -398,7 +398,7 @@ private:
 			// set Aq
 			this->common().targetVectors(1).setDataInSector(sv,i0);
 			// set xi
-			SizeType p = this->leftRightSuper().super().findPartitionNumber(phi.offset(i0));
+			SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
 			VectorType xi(sv.size(),0),xr(sv.size(),0);
 
 			if (tstStruct_.algorithm() == TargetParamsType::KRYLOV) {
@@ -422,7 +422,7 @@ private:
 	                       SizeType p)
 	{
 		SizeType threadId = 0;
-		typename ModelType::ModelHelperType modelHelper(p,this->leftRightSuper(),threadId);
+		typename ModelType::ModelHelperType modelHelper(p,this->lrs(),threadId);
 		typedef typename LanczosSolverType::LanczosMatrixType
 		        LanczosMatrixType;
 		LanczosMatrixType h(&this->model(),&modelHelper);
@@ -441,7 +441,7 @@ private:
 			throw PsimagLite::RuntimeError("Matsubara only with KRYLOV\n");
 
 		SizeType threadId = 0;
-		typename ModelType::ModelHelperType modelHelper(p,this->leftRightSuper(),threadId);
+		typename ModelType::ModelHelperType modelHelper(p,this->lrs(),threadId);
 		LanczosMatrixType h(&this->model(),&modelHelper);
 		RealType E0 = this->common().energy();
 		CorrectionVectorFunctionType cvft(h,tstStruct_,E0);
@@ -536,14 +536,14 @@ private:
 			ParallelizerType threadedTriDiag(PsimagLite::Concurrency::npthreads,
 			                                 PsimagLite::MPI::COMM_WORLD);
 
-			ParallelTriDiagType helperTriDiag(phi,T,V,steps,this->leftRightSuper(),this->model(),ioIn_);
+			ParallelTriDiagType helperTriDiag(phi,T,V,steps,this->lrs(),this->model(),ioIn_);
 
 			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
 		} else {
 			typedef PsimagLite::NoPthreads<ParallelTriDiagType> ParallelizerType;
 			ParallelizerType threadedTriDiag(1,0);
 
-			ParallelTriDiagType helperTriDiag(phi,T,V,steps,this->leftRightSuper(),this->model(),ioIn_);
+			ParallelTriDiagType helperTriDiag(phi,T,V,steps,this->lrs(),this->model(),ioIn_);
 
 			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
 		}
