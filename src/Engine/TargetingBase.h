@@ -197,6 +197,7 @@ public:
 
 	virtual void updateOnSiteForCorners(BasisWithOperatorsType& basisWithOps) const
 	{
+		if (BasisWithOperatorsType::useSu2Symmetry()) return;
 
 		BlockType X = basisWithOps.block();
 

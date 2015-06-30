@@ -114,7 +114,6 @@ sub createExecutable
 	(-r "../TestSuite/inputs/$specFile") or die "$0: createExecutable: $specFile does not exist\n";
 	print "Configuring $execType in Test $TestSuiteGlobals::testNum...\n";
 	$err = system($arg1) unless (-r "../src/Makefile");
-	die "Configuration error using $configFile with $specFile: $!" if($err);
 	print "Creating $execType executable for Test $TestSuiteGlobals::testNum...\n";
 	$err = system($arg2);
 	die "Make command for $execType: $arg2\n" if($err);
