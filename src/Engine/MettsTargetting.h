@@ -450,7 +450,7 @@ public:
 
 	RealType time() const { return 0; }
 
-	void updateOnSiteForTimeDep(BasisWithOperatorsType&) const
+	void updateOnSiteForCorners(BasisWithOperatorsType&) const
 	{
 		// nothing to do here
 	}

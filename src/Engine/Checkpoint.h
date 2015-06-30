@@ -193,7 +193,7 @@ private:
 		assert(thisStack.size() > 0);
 		BasisWithOperatorsType& basisWithOps =  thisStack.top();
 		// only updates the extreme sites:
-		target.updateOnSiteForTimeDep(basisWithOps);
+		target.updateOnSiteForCorners(basisWithOps);
 		return basisWithOps;
 	}
 

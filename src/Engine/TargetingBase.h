@@ -195,7 +195,7 @@ public:
 
 	const RealType& time() const {return commonTargetting_.currentTime(); }
 
-	virtual void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
+	virtual void updateOnSiteForCorners(BasisWithOperatorsType& basisWithOps) const
 	{
 
 		BlockType X = basisWithOps.block();
