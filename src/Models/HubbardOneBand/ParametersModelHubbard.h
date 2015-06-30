@@ -94,59 +94,52 @@ struct ParametersModelHubbard {
 		io.read(potentialV,"potentialV");
 
 		try {
-			io.read(potentialT,"PotentialT"); //level,beQuiet);
-		} catch (std::exception& e) {
-		}
+			io.read(potentialT,"PotentialT");
+		} catch (std::exception&) {}
+
+		bool hasT = (potentialT.size() > 0);
+
 		omega=0;
 		try {
 			io.readline(omega,"omega=");
+			if (!hasT) {
+				std::cerr<<"ParametersModelHubbard: ";
+				std::cerr<<"omega will be ignored as no PotentialT present\n";
+			}
+		} catch (std::exception&) {}
+
+		phase=0;
+		try {
+			io.readline(phase,"phase=");
+			if (!hasT) {
+				std::cerr<<"ParametersModelHubbard: ";
+				std::cerr<<"phase will be ignored as no PotentialT present\n";
+			}
 		} catch (std::exception&) {}
 	}
 
 	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
+	SizeType memResolv(SomeMemResolvType&,
 	                   SizeType,
-	                   PsimagLite::String msg = "") const
+	                   PsimagLite::String = "") const
 	{
-		PsimagLite::String str = msg;
-		str += "ParametersModelHubbard";
-
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&potentialV);
-		SizeType total = mres.memResolv(&hubbardU, end-start, str + " hubbardU");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&potentialT);
-		total += mres.memResolv(&potentialV, end-start, str + " potentialV");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&omega);
-		total += mres.memResolv(&potentialT, end-start, str + " potentialT");
-
-		total += mres.memResolv(&omega,
-		                        sizeof(*this) - total, str + " omega");
-
-		return total;
+		return 0;
 	}
 
-	//serializr start class ParametersModelHubbard
 	// Do not include here connection parameters
 	// those are handled by the Geometry
 
 	TargetQuantumElectrons<RealType> targetQuantum;
 
 	// Hubbard U values (one for each site)
-	//serializr normal hubbardU
 	typename PsimagLite::Vector<RealType>::Type hubbardU;
 	// Onsite potential values, one for each site
-	//serializr normal potentialV
 	typename PsimagLite::Vector<RealType>::Type potentialV;
 
 	// for time-dependent H:
-	//serializr normal potentialT
 	typename PsimagLite::Vector<RealType>::Type potentialT;
-	//serializr normal omega
 	RealType omega;
+	RealType phase;
 };
 
 //! Function that prints model parameters to stream os
@@ -165,6 +158,7 @@ std::ostream& operator<<(std::ostream &os,
 	os<<"potentialT\n";
 	os<<parameters.potentialT;
 	os<<"omega="<<parameters.omega<<"\n";
+	os<<"phase="<<parameters.phase<<"\n";
 	return os;
 }
 } // namespace Dmrg

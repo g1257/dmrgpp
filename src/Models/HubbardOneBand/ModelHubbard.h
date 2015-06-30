@@ -427,16 +427,17 @@ public:
 			hmatrix += tmpMatrix;
 
 			if (modelParameters_.potentialT.size()==0) continue;
-
+			RealType cosarg = cos(time*modelParameters_.omega +
+			                      modelParameters_.phase);
 			// VT_iup term
 			tmp = modelParameters_.potentialT[block[i]]*factorForDiagonals;
-			tmp *= cos(time*modelParameters_.omega);
+			tmp *= cosarg;
 			multiplyScalar(tmpMatrix,niup,static_cast<SparseElementType>(tmp));
 			hmatrix += tmpMatrix;
 
 			// VT_idown term
 			tmp = modelParameters_.potentialT[block[i]]*factorForDiagonals;
-			tmp *= cos(time*modelParameters_.omega);
+			tmp *= cosarg;
 			multiplyScalar(tmpMatrix,nidown,static_cast<SparseElementType>(tmp));
 			hmatrix += tmpMatrix;
 		}
