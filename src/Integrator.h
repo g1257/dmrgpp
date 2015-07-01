@@ -14,11 +14,17 @@ public:
 	typedef typename FunctionType::RealType RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
-	Integrator(FunctionType& function)
-	    : pts_(2),
-	      epsabs_(1e-9),
-	      epsrel_(1e-9),
-	      limit_(1000000),
+	enum IntegrationEnum {
+		INTEG_QAG, INTEG_QAGP
+	};
+
+	Integrator(FunctionType& function,
+	           RealType epsabs = 1e-9,
+	           RealType epsrel = 1e-9,
+	           SizeType limit = 1000000)
+	    : epsabs_(epsabs),
+	      epsrel_(epsrel),
+	      limit_(limit),
 	      result_(0),
 	      abserr_(0),
 	      workspace_(gslWrapper_.gsl_integration_workspace_alloc(limit_+2))
@@ -33,12 +39,21 @@ public:
 		gslWrapper_.gsl_integration_workspace_free (workspace_);
 	}
 
-	RealType operator()(const VectorRealType& pts)
+	RealType operator()(VectorRealType& pts,
+	                    IntegrationEnum integ = INTEG_QAG,
+	                    int key = 4)
 	{
-		pts_ = pts;
-		int status = gslWrapper_.gsl_integration_qagp(&f_,
-		                                 &(pts_[0]),
-		        pts_.size(),
+		switch (integ) {
+		default:
+			return qag(pts,key);
+		case INTEG_QAGP:
+			return qagp(pts);
+		}
+	}
+
+	RealType operator()()
+	{
+		int status = gslWrapper_.gsl_integration_qagi(&f_,
 		        epsabs_,
 		        epsrel_,
 		        limit_,
@@ -54,8 +69,44 @@ public:
 
 private:
 
+	RealType qagp(VectorRealType& pts)
+	{
+		int status = gslWrapper_.gsl_integration_qagp(&f_,
+		                                              &(pts[0]),
+		        pts.size(),
+		        epsabs_,
+		        epsrel_,
+		        limit_,
+		        workspace_,
+		        &result_,
+		        &abserr_);
+
+		if (status)
+			gslWrapper_.printError(status);
+
+		return result_;
+	}
+
+	RealType qag(const VectorRealType& pts, int key)
+	{
+		int status = gslWrapper_.gsl_integration_qag(&f_,
+		                                             pts[0],
+		        pts[1],
+		        epsabs_,
+		        epsrel_,
+		        limit_,
+		        key,
+		        workspace_,
+		        &result_,
+		        &abserr_);
+
+		if (status)
+			gslWrapper_.printError(status);
+
+		return result_;
+	}
+
 	GslWrapperType gslWrapper_;
-	VectorRealType pts_;
 	RealType epsabs_;
 	RealType epsrel_;
 	SizeType limit_;

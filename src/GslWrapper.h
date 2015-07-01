@@ -124,6 +124,21 @@ public:
 		thereSnoGsl();
 	}
 
+	int gsl_integration_qag(const gsl_function*,
+	                        double,
+	                        double,
+	                        double,
+	                        double,
+	                        size_t,
+	                        int,
+	                        gsl_integration_workspace*,
+	                        double*,
+	                        double*) const
+	{
+		thereSnoGsl();
+		return 0;
+	}
+
 	int gsl_integration_qagp (const gsl_function*,
 	                          double*,
 	                          SizeType,
@@ -133,6 +148,18 @@ public:
 	                          gsl_integration_workspace*,
 	                          double*,
 	                          double*) const
+	{
+		thereSnoGsl();
+		return 0;
+	}
+
+	int gsl_integration_qagi(gsl_function*,
+	                         double,
+	                         double,
+	                         size_t,
+	                         gsl_integration_workspace*,
+	                         double*,
+	                         double*) const
 	{
 		thereSnoGsl();
 		return 0;
@@ -179,6 +206,17 @@ public:
 		return ::gsl_integration_workspace_free(w);
 	}
 
+	int gsl_integration_qagi(gsl_function* f,
+	                         double epsabs,
+	                         double epsrel,
+	                         size_t limit,
+	                         gsl_integration_workspace* workspace,
+	                         double* result,
+	                         double* abserr) const
+	{
+		return ::gsl_integration_qagi(f,epsabs,epsrel,limit,workspace,result,abserr);
+	}
+
 	int gsl_integration_qagp (const gsl_function * f,
 	                          double * pts,
 	                          SizeType npts,
@@ -195,6 +233,29 @@ public:
 		                              epsabs,
 		                              epsrel,
 		                              limit,
+		                              workspace,
+		                              result,
+		                              abserr);
+	}
+
+	int gsl_integration_qag(const gsl_function * f,
+	                        double a,
+	                        double b,
+	                        double epsabs,
+	                        double epsrel,
+	                        size_t limit,
+	                        int key,
+	                        gsl_integration_workspace* workspace,
+	                        double* result,
+	                        double* abserr) const
+	{
+		 return ::gsl_integration_qag(f,
+		                              a,
+		                              b,
+		                              epsabs,
+		                              epsrel,
+		                              limit,
+		                              key,
 		                              workspace,
 		                              result,
 		                              abserr);
