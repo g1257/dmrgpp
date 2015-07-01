@@ -138,6 +138,11 @@ public:
 		return 0;
 	}
 
+	void printError() const
+	{
+		thereSnoGsl();
+	}
+
 private:
 	void thereSnoGsl() const
 	{
@@ -153,6 +158,11 @@ public:
 
 	typedef ::gsl_integration_workspace gsl_integration_workspace;
 	typedef ::gsl_function gsl_function;
+
+	void printError(int status) const
+	{
+		std::cerr<<"GslWrapper: error: "<<gsl_strerror(status)<<"\n";
+	}
 
 	gsl_error_handler_t * gsl_set_error_handler (gsl_error_handler_t * new_handler) const
 	{
@@ -179,7 +189,15 @@ public:
 	                          double * result,
 	                          double * abserr) const
 	{
-		return ::gsl_integration_qagp(f,pts,npts,epsabs,epsrel,limit,workspace,result,abserr);
+		return ::gsl_integration_qagp(f,
+		                              pts,
+		                              npts,
+		                              epsabs,
+		                              epsrel,
+		                              limit,
+		                              workspace,
+		                              result,
+		                              abserr);
 	}
 }; // class GslWrapper
 

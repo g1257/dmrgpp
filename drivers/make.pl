@@ -6,7 +6,7 @@ use warnings;
 use lib '../scripts';
 use Make;
 
-my @drivers = ("sparseSolverTest", "testCRSMatrix", "rungeKuttaTest", "combineContinuedFraction",
+my @drivers = ("integrator","sparseSolverTest", "testCRSMatrix", "rungeKuttaTest", "combineContinuedFraction",
 "continuedFractionCollection", "gitrev", "jsonExample", "range",
 "kernelPolynomial", "linearPrediction", "options", "randomTest", "svd", "testLapack", "threads",
 "testIsClass","testMemResolv1","sumDecomposition");
