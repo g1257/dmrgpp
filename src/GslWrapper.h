@@ -103,7 +103,7 @@ public:
 		void * params;
 	};
 
-	gsl_error_handler_t  gsl_set_error_handler (gsl_error_handler_t  new_handler) const
+	gsl_error_handler_t  gsl_set_error_handler (gsl_error_handler_t) const
 	{
 
 		thereSnoGsl();
@@ -112,33 +112,33 @@ public:
 		return *fx;
 	}
 
-	gsl_integration_workspace * gsl_integration_workspace_alloc (SizeType n) const
+	gsl_integration_workspace * gsl_integration_workspace_alloc (SizeType) const
 	{
 		thereSnoGsl();
 		int* x = new int;
 		return x;
 	}
 
-	void gsl_integration_workspace_free (gsl_integration_workspace * w) const
+	void gsl_integration_workspace_free (gsl_integration_workspace*) const
 	{
 		thereSnoGsl();
 	}
 
-	int gsl_integration_qagp (const gsl_function * f,
-	                          double * pts,
-	                          SizeType npts,
-	                          double epsabs,
-	                          double epsrel,
-	                          SizeType limit,
-	                          gsl_integration_workspace * workspace,
-	                          double * result,
-	                          double * abserr) const
+	int gsl_integration_qagp (const gsl_function*,
+	                          double*,
+	                          SizeType,
+	                          double,
+	                          double,
+	                          SizeType,
+	                          gsl_integration_workspace*,
+	                          double*,
+	                          double*) const
 	{
 		thereSnoGsl();
 		return 0;
 	}
 
-	void printError() const
+	void printError(int) const
 	{
 		thereSnoGsl();
 	}
