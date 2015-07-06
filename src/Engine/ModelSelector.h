@@ -58,6 +58,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/FeAsBasedScExtended/FeAsBasedScExtended.h"
 #include "../Models/Immm/Immm.h"
 #include "../Models/Tj1Orb/Tj1Orb.h"
+#include "../Models/TjAncillaC2/TjAncillaC2.h"
 #include "../Models/TjAncillaC/TjAncillaC.h"
 #include "../Models/TjAncillaG/TjAncillaG.h"
 #include "../Models/SuperHubbardExtended/SuperHubbardExtended.h"
@@ -83,6 +84,7 @@ class ModelSelector {
 	typedef FeAsBasedScExtended<ModelBaseType> FeBasedScExtType;
 	typedef Immm<ModelBaseType> ImmmType;
 	typedef Tj1Orb<ModelBaseType> Tj1OrbType;
+	typedef TjAncillaC2<ModelBaseType> TjAncillaC2Type;
 	typedef TjAncillaC<ModelBaseType> TjAncillaCType;
 	typedef TjAncillaG<ModelBaseType> TjAncillaGType;
 	typedef SuperHubbardExtended<ModelBaseType> SuperHubbardExtendedType;
@@ -122,6 +124,8 @@ public:
 			model_ = new ImmmType(solverParams,io,geometry);
 		} else if (name_ == "Tj1Orb") {
 			model_ = new Tj1OrbType(solverParams,io,geometry);
+		} else if (name_ == "TjAncillaC2") {
+			model_ = new TjAncillaC2Type(solverParams,io,geometry);
 		} else if (name_ == "TjAncillaC") {
 			model_ = new TjAncillaCType(solverParams,io,geometry);
 		} else if (name_ == "TjAncillaG") {
