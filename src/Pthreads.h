@@ -118,7 +118,8 @@ public:
 
 	void loopCreate(SizeType total,PthreadFunctionHolderType& pfh)
 	{
-		PthreadFunctionStruct<PthreadFunctionHolderType> pfs[nthreads_];
+		PthreadFunctionStruct<PthreadFunctionHolderType>* pfs;
+		pfs = new PthreadFunctionStruct<PthreadFunctionHolderType>[nthreads_];
 		pthread_mutex_init(&(mutex_), NULL);
 		pthread_t thread_id[nthreads_];
 
@@ -140,6 +141,7 @@ public:
 		for (SizeType j=0; j <nthreads_; j++) pthread_join( thread_id[j], NULL);
 
 		pthread_mutex_destroy(&mutex_);
+		delete [] pfs;
 	}
 
 	String name() const { return "pthreads"; }
