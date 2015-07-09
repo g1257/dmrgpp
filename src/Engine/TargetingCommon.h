@@ -382,9 +382,10 @@ public:
 		try {
 			assert(block.size()>0);
 			cocoon(direction,block[0],psi(),"PSI",psi(),"PSI");
-			if (tv.size() > 0)
+			if (tv.size() > 0) {
 				cocoon(direction,block[0],tv[0],"P0",tv[0],"P0");
-
+				cocoon(direction,block[0],psi(),"PSI",tv[0],"P0");
+			}
 		} catch (std::exception& e) {
 			noCocoon("unsupported by the model");
 		}
@@ -419,7 +420,8 @@ public:
 
 		SparseMatrixType tmpC3 = (nup.data * ndown.data);
 		OperatorType doubleOcc(tmpC3,fermionSign1,jm1,angularFactor1,su2Related1);
-		test(psi,psi,direction,"<PSI|doubleOcc|PSI>",site,doubleOcc,ApplyOperatorType::BORDER_NO);
+		test(psi,psi,direction,"<PSI|doubleOcc|PSI>",site,doubleOcc,
+		     ApplyOperatorType::BORDER_NO);
 		s = "<P0|doubleOcc|P0>";
 		test(tv0,tv0,direction,s,site,doubleOcc,ApplyOperatorType::BORDER_NO);
 	}
