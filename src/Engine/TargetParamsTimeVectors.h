@@ -101,6 +101,17 @@ public:
 	      algorithm_(BaseType::KRYLOV),
 	      tau_(0)
 	{
+		/*PSIDOC TargetParamsTimeVectors
+		\item[TSPTau] [RealType], $\tau$ for the Krylov,
+		see \cite{re:alvarez11} Section II.B and II.C.
+		\item[TSPTimeSteps] [Integer]  $n_v$ as defined in
+		\cite{re:alvarez11} Section II.B
+		\item[TSPAdvanceEach] [Integer] Number of sites to sweep before
+		advancing to the next time.
+		\item[TSPAlgorithm] [String] Either
+		\verb!Krylov! or \verb!RungeKutta! or \verb!SuzukiTrotter!\\
+		Note that SuzukiTrotter is currently very experimental and unsupported.
+		*/
 		io.readline(tau_,"TSPTau=");
 		io.readline(timeSteps_,"TSPTimeSteps=");
 		io.readline(advanceEach_,"TSPAdvanceEach=");

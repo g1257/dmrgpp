@@ -4,12 +4,9 @@ CXX = g++
 
 all: manual.pdf
 
-../perlmod/DoxyDocs.pm:  ../src/dmrg.o 
-	cd ../src; $(CXX) $(CPPFLAGS) -MM dmrg.cpp  > Makefile.dep
-	cd ../; doxygen
-
-manual.tex: manual.ptex ../perlmod/DoxyDocs.pm
-	perl -I../perlmod ../../PsimagLite/PsimagDoc/psimagdoc.pl < manual.ptex > manual.tex
+manual.tex: manual.ptex 
+	find ../src -iname "*.h" -or -iname "*.cpp" |\
+              perl ../../PsimagLite/scripts/doc.pl manual.ptex
 
 manual.pdf: manual.tex ../README.tex
 	pdflatex manual.tex

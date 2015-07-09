@@ -115,6 +115,27 @@ public:
 	      io_(io),
 	      model_(model)
 	{
+		/*PSIDOC TargetParamsCommon
+		\item[TSPSites] [VectorInteger] The first number is the number of numbers
+		to follow. The following numbers are the
+		sites $\pi'(0),\pi'(1),\cdots$ where the operators
+		to build state $|\phi\rangle$ should be applied; see Eq.~(4) of
+		\cite{re:alvarez11}. These sites must be
+		ordered by appearance in the DMRG sweeping.
+		\item[TSPLoops] [VectorInteger]
+		The first number is the number of numbers
+		to follow. The following numbers are
+		the delay (in units of finite loops) before evolving in time. Delaying the
+		time evolution helps converge the state $|\phi\rangle$.
+		\item[TSPProductOrSum] [String] Either \verb!product! or \verb!sum! indicating
+		whether the operators $B$ in Eq.~(4) of \cite{re:alvarez11} should be multiplied
+		or summed. Note that Eq.~(4) shows only multiplication.
+		\item[TSPSkipTimeZero] [Integer] Either 0 or 1 to indicate whether to skip the
+		application of the time evolution at $t=0$. It is ignored unless
+		$|\phi\rangle$ is the ground state.
+		\item[TSPEnergyForExp] [RealType] Energy to use as origin for the exponential
+		in the time evolution.
+		*/
 		io.read(sites_,"TSPSites");
 		io.read(startingLoops_,"TSPLoops");
 

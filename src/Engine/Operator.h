@@ -192,6 +192,33 @@ struct Operator {
 	template<typename IoInputType, typename CookedOperatorType>
 	Operator(IoInputType& io, CookedOperatorType& cookedOperator,bool checkNonZero)
 	{
+		/*PSIDOC Operator
+		 \item[TSPOperator] [String] Either \verb!cooked! or \verb!raw! to indicate
+		 how the operator will be specified.
+		 \item[COOKED\_OPERATOR] [String] A label naming the operator. This is model
+		 dependent and must be listed in the \verb!naturalOperator! function for
+		 the indicated in \verb!Model! in this input file. Ignored unless
+		 \verb!TSPOperator!
+		 was set to \verb!cooked!.
+		 \item[COOKED\_EXTRA] [VectorInteger] The first number is the number of numbers
+		 to follow. The other numbers are degrees of freedom for the cooked operator
+		 mentioned, and are passed as arguments (in order)
+		 to the \verb!naturalOperator! function for
+		 the indicated in \verb!Model! in this input file. Ignored unless
+		 \verb!TSPOperator!
+		 was set to \verb!cooked!.
+		 \item[RAW\_MATRIX] [MatrixComplexOrRealType] The number of rows and
+		 columns of this matrix, followed by the matrix in zig-zag format.
+		 Ignored unless
+		 \verb!TSPOperator!
+		 was set to \verb!raw!.
+		 \item[FERMIONSIGN] [RealType] Either 1 or -1, indicating if this operator
+		 commutes or anticommutes at \emph{different} sites.
+		 \item[JMVALUES] [Integer*2] If not using $SU(2)$ symmetry this is \verb!0 0!.
+		 Else it is the $2j$ and $j+m$ for this operator.
+		 \item[AngularFactor] [RealType] If not using $SU(2)$ symmetry this is \verb!1!.
+		 Else FIXME.
+		 */
 		PsimagLite::String s = "";
 		io.readline(s,"TSPOperator=");
 		PsimagLite::Matrix<SparseElementType> m;
