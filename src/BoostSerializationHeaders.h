@@ -41,7 +41,7 @@ public:
 };
 
 template<typename T>
-text_iarchive& operator>>(text_iarchive& ia, const T& t)
+text_iarchive& operator>>(text_iarchive& ia, const T&)
 {
 	boost::noboost("operator>> text_iarchive");
 	return ia;
@@ -59,7 +59,7 @@ public:
 };
 
 template<typename T>
-text_oarchive& operator<<(text_oarchive& oa, const T& t)
+text_oarchive& operator<<(text_oarchive& oa, const T&)
 {
 	boost::noboost("operator<< text_oarchive");
 	return oa;

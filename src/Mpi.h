@@ -498,10 +498,9 @@ template<typename InstanceType>
 class Mpi {
 public:
 
-	Mpi(SizeType npthreads=1,MPI::CommType comm = MPI::COMM_WORLD)
+	Mpi(SizeType = 1,MPI::CommType comm = MPI::COMM_WORLD)
 	    : comm_(comm)
-	{
-	}
+	{}
 
 	void loopCreate(SizeType total,
 	                InstanceType& pfh)

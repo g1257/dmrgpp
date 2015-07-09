@@ -134,9 +134,8 @@ public:
 	}
 
 	template<class Archive>
-    void serialize(Archive & ar, const unsigned int version)
+    void serialize(Archive & ar, const unsigned int)
     {
-//		ar & boost::serialization::base_object<GeometryExType>(*this);
         ar & linSize_;
 		ar & terms_;
 	}

@@ -183,7 +183,7 @@ public:
 	}
 
 	template<class Archive>
-	void serialize(Archive & ar, const unsigned int version)
+	void serialize(Archive & ar, const unsigned int)
 	{
 		ar.template register_type<LongChain<InputType> >();
 		ar.template register_type<Ladder<InputType> >();

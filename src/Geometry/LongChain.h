@@ -188,7 +188,7 @@ public:
 	}
 
 	template<class Archive>
-	void serialize(Archive & ar, const unsigned int version)
+	void serialize(Archive&, const unsigned int)
 	{
 		throw RuntimeError("LongChain::serialize(): unimplemented\n");
 	}
