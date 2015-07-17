@@ -137,6 +137,7 @@ public:
 		in the time evolution.
 		*/
 		io.read(sites_,"TSPSites");
+		checkSites();
 		io.read(startingLoops_,"TSPLoops");
 
 		if (sites_.size() != startingLoops_.size()) {
@@ -291,7 +292,7 @@ private:
 		}
 	}
 
-	void checkBorderOperators()
+	void checkBorderOperators() const
 	{
 		if (sites_.size() == 0) return;
 
@@ -306,6 +307,20 @@ private:
 		}
 	}
 
+	void checkSites() const
+	{
+		SizeType linSize = model_.geometry().numberOfSites();
+		for (SizeType i=0;i<sites_.size();i++) {
+			if (sites_[i] >= linSize) {
+				PsimagLite::String str(__FILE__);
+				str += " TSPSites: The " + ttos(i) + "-th site is ";
+				str += ttos(sites_[i]) + " is larger than the total ";
+				str += "number of sites "+ ttos(linSize) + "\n";
+				throw PsimagLite::RuntimeError(str);
+			}
+		}
+	}
+
 	bool hasOperatorAt(SizeType site) const
 	{
 		for (SizeType i = 0; i < sites_.size(); ++i) {
@@ -314,7 +329,7 @@ private:
 		return false;
 	}
 
-	void errorBorderOperators(SizeType site)
+	void errorBorderOperators(SizeType site) const
 	{
 		SizeType linSize = model_.geometry().numberOfSites();
 		SizeType site2 = (site == 0) ? 1 : linSize - 2;
