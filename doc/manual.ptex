@@ -197,10 +197,10 @@ you will get the observable
 \end{equation}
 where \verb!:operator! is any \emph{one-point} operator, and
 the meaning of $|\psi\rangle$ is explained later in this section.
-The file \verb!:operator.txt!
+The file \verb!operator.txt!
 contains the operator to be measured in the Hilbert space of one site.
 It is recommended that the \verb!operator! executable be used to generate the
-\verb!:operator.txt!.
+\verb!operator.txt!.
 
 \ptexPaste{OperatorDriver}
 
