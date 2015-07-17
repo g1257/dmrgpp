@@ -327,6 +327,38 @@ int main(int argc,char *argv[])
 	strUsage += " -f filename";
 	PsimagLite::String insitu("");
 	int precision = 6;
+	/* PSIDOC OperatorDriver
+	 The arguments to the \verb!operator! executable are as follows.
+	\begin{itemize}
+	 \item[-f] [Mandatory, String] Input to use. The Model= line is
+	very important in input.inp.
+
+	\item[-s] [Optional, Integer] Site for operator.
+	Meaningful only for Models where
+	the Hilbert space depends on the site (different kinds of atoms).
+	Defaults to 0.
+
+	\item[-l] [Mandatory, String] The label or name for this operator.
+	This is model dependent. For example to obtain $c_{\uparrow}$ for
+	the Hubbard model, say \begin{verbatim}
+	./operator -l c -f input.inp -F -1\end{verbatim}
+	See the function naturalOperator for each Model.
+
+	\item[-d] [Optional, Integer] Degree of freedom (spin, orbital or
+	combination of both) to use. This is model dependent. For example to
+	obtain $c_\downarrow$ for the Hubbard model, say
+	\begin{verbatim}./operator -l c -d 1 -f input.inp -F -1\end{verbatim}
+	See the function naturalOperator for each Model. Defaults to 0.
+
+	\item[-F] [Mandatory, 1 or -1] If this operator commutes on
+	\emph{different} sites say 1 here. If it anticommutes on
+	\emph{different} sites say -1.
+
+	\item[-t] [Optional, Void] Transpose the operator. For example to
+	obtain $c^\dagger_\uparrow$ for a Hubbard model, say
+	\begin{verbatim}./operator -l c -t -f input.inp -F -1\end{verbatim}
+	\end{itemize}
+	 */
 	while ((opt = getopt(argc, argv,"f:o:s:l:d:F:p:t")) != -1) {
 		switch (opt) {
 		case 'f':

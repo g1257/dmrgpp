@@ -9,6 +9,7 @@
 \usepackage{fancyvrb} %keep
 \usepackage{fancyhdr}
 \usepackage{booktabs} %keep
+\usepackage{mathtools} %keep
 \usepackage{hyperref}
 
 \fancyhead{}
@@ -182,7 +183,66 @@ what is being executed. The number \verb!T! between brackets is the wall
 time ellapsed since
 program start.
 
-\section{The Data file}
+\section{\emph{In-situ} measurements}
+
+\emph{In-situ} measurements are possible only for \emph{one-point} observables.
+If you need \emph{two-} or \emph{four-point} operators, please see
+section \ref{sec:observe}. If you run
+\begin{verbatim}
+./dmrg -f input.inp -o ':operator.txt'
+\end{verbatim}
+you will get the observable
+\begin{equation}
+\langle\psi|\text{:operator.txt}|\psi\rangle,\label{eq:insitu}
+\end{equation}
+where \verb!:operator! is any \emph{one-point} operator, and
+the meaning of $|\psi\rangle$ is explained later in this section.
+The file \verb!:operator.txt!
+contains the operator to be measured in the Hilbert space of one site.
+It is recommended that the \verb!operator! executable be used to generate the
+\verb!:operator.txt!.
+
+\ptexPaste{OperatorDriver}
+
+The meaning of $|\psi\rangle$ in Eq.~(\ref{eq:insitu}) depends on the targeting used.
+For GroundStateTargetting, $|\psi\rangle$ is the current target, usually the ground state,
+sometimes only in \emph{wft} form. But if restarting a run, the current target
+can be the state left off by the previous run.
+
+For MettsTargetting and TargetingAncilla,
+Eq.~(\ref{eq:insitu}) is computed multiple times
+at each DMRG step for different $|\psi\rangle$ vectors.
+These are all the temperature evolved states, and the collapsed state for
+MettsTargetting.
+
+For all other targetings, Eq.~(\ref{eq:insitu}) is computed multiple times
+at each DMRG step for different $|\psi\rangle$ vectors, including the the
+$|\psi\rangle$
+corresponding to GroundStateTargetting.
+The other vectors $|\psi\rangle$ are either (i) time vectors for TimeStepTargetting,
+(ii) dynamic vectors for AdaptiveDynamicTargetting and DynamicTargetting, and
+(iii) correction vectors for CorrectionVectorTargetting.
+
+To be able to compute Green functions, TimeStepTargetting computes \emph{in addition}
+\begin{equation}
+\langle\psi|\text{:operator.txt}|\phi_0\rangle,
+\end{equation}
+where $|\psi\rangle$ is the GroundStateTargetting vector, and
+$|\phi_0\rangle$ the first time vector. The same is true for
+CorrectionVectorTargetting, where $|\phi_0\rangle$ is the correction vector.
+
+To compute multiple operators in the same DMRG++ run, use
+\begin{verbatim}
+./dmrg -f input.inp -o ':operator0.txt,:operator1.txt:...'
+\end{verbatim}
+which will show
+\begin{align}
+&\langle\psi|\text{:operator0.txt}|\psi\rangle,\nonumber\\
+&\langle\psi|\text{:operator1.txt}|\psi\rangle,\nonumber\\
+&\cdots.\nonumber
+\end{align}
+
+\section{The Observer Driver}\label{sec:observe}
 
 \section{The Disk Stacks}
 
