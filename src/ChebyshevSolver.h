@@ -141,7 +141,7 @@ public:
 		progress_.printline(msg,std::cout);
 	}
 
-	void computeGroundState(RealType& gsEnergy,VectorType& z)
+	void computeGroundState(RealType&, VectorType&)
 	{
 		unimplemented("computeGroundState");
 	}

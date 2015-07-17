@@ -157,6 +157,15 @@ std::ostream &operator<<(std::ostream &s,const std::vector<X,A>& v)
 	return s;
 }
 
+template<typename X,typename Y,typename A>
+std::ostream &operator<<(std::ostream &s,
+                         const std::vector<std::pair<X,Y>,A>& v)
+{
+	s<<v.size()<<"\n";
+	for (SizeType i=0;i<v.size();i++) s<<v[i].first<<" "<<v[i].second<<"\n";
+	return s;
+}
+
 template<typename FieldType,typename A>
 inline std::istream& operator>>(std::istream& is,std::vector<FieldType,A>& v)
 {

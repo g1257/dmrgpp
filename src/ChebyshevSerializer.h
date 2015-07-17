@@ -143,7 +143,7 @@ public:
 	//! A has two cases:
 	//! (1) A = c_i + c_j and
 	//! (2) A = c_i - c_j
-	RealType iOfOmega(const RealType& z,RealType offset,int isign) const
+	RealType iOfOmega(const RealType&, RealType, int) const
 
 	{
 		throw RuntimeError("iOfOmega: unimplemented\n");
