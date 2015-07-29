@@ -265,7 +265,7 @@ public:
 		}
 	}
 
-	SizeType maxConnections(SizeType termId = 0) const
+	SizeType maxConnections(SizeType termId) const
 	{
 		return terms_[termId]->maxConnections();
 	}
