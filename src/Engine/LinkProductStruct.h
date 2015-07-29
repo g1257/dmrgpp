@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -84,17 +84,52 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	template<typename FieldType>
 	struct LinkProductStruct {
+		LinkProductStruct() : sealed(false)
+		{}
+
 		LinkProductStruct(SizeType maxSize)
-		: isaved(maxSize),jsaved(maxSize),typesaved(maxSize),
-		  tmpsaved(maxSize),dofssaved(maxSize),termsaved(maxSize) {}
-		typename PsimagLite::Vector<SizeType>::Type isaved,jsaved; //,dof1saved,dof2saved;
+		: sealed(false),isaved(maxSize),jsaved(maxSize),typesaved(maxSize),
+		  tmpsaved(maxSize),dofssaved(maxSize),termsaved(maxSize)
+		{}
+
+		void push(const LinkProductStruct& other, SizeType total)
+		{
+			for (SizeType i = 0; i < total; ++i) {
+				assert(i < other.typesaved.size());
+				isaved.push_back(other.isaved[i]);
+				jsaved.push_back(other.jsaved[i]);
+				typesaved.push_back(other.typesaved[i]);
+				tmpsaved.push_back(other.tmpsaved[i]);
+				dofssaved.push_back(other.dofssaved[i]);
+				termsaved.push_back(other.termsaved[i]);
+			}
+		}
+
+		void copy(const LinkProductStruct& other, SizeType total1, SizeType total)
+		{
+			assert(total1 + total <= typesaved.size());
+			for (SizeType i = 0; i < total1; ++i) {
+				assert(i < other.typesaved.size());
+				isaved[i+total] = other.isaved[i];
+				jsaved[i+total] = other.jsaved[i];
+				typesaved[i+total] = other.typesaved[i];
+				tmpsaved[i+total] = other.tmpsaved[i];
+				dofssaved[i+total] = other.dofssaved[i];
+				termsaved[i+total] = other.termsaved[i];
+			}
+		}
+
+		bool sealed;
+		typename PsimagLite::Vector<SizeType>::Type isaved;
+		typename PsimagLite::Vector<SizeType>::Type jsaved;
 		typename PsimagLite::Vector<int>::Type typesaved;
 		typename PsimagLite::Vector<FieldType>::Type tmpsaved;
-		typename PsimagLite::Vector<SizeType>::Type dofssaved,termsaved;
+		typename PsimagLite::Vector<SizeType>::Type dofssaved;
+		typename PsimagLite::Vector<SizeType>::Type termsaved;
 #ifdef NOMUTEX
 		mutable typename PsimagLite::Vector<PsimagLite::Vector<FieldType>::Type::Type > xtemp;
 #endif
-	}; // 
+	}; //
 } // namespace Dmrg
 /*@}*/
 #endif

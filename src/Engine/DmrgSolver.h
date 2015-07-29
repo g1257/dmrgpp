@@ -156,8 +156,7 @@ public:
 	                          EXPAND_SYSTEM),
 	      diagonalization_(parameters_,model,verbose_,
 	                       reflectionOperator_,ioIn,quantumSector_,wft_),
-	      truncate_(reflectionOperator_,wft_,parameters_,
-	                model_.geometry().maxConnections(),verbose_),
+	      truncate_(reflectionOperator_,wft_,parameters_,verbose_),
 	      energy_(0.0)
 	{
 		ioOut_.print(appInfo_);

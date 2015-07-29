@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -74,6 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "PackIndices.h" // in PsimagLite
 #include "Link.h"
+#include "LinkProductStruct.h"
 
 /** \ingroup DMRG */
 /*@{*/
@@ -102,6 +103,7 @@ namespace Dmrg {
 		typedef typename BasisType::RealType RealType;
 		typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 		typedef Link<SparseElementType> LinkType;
+		typedef LinkProductStruct<SparseElementType> LinkProductStructType;
 
 		enum { System=0,Environ=1 };
 
@@ -132,7 +134,7 @@ namespace Dmrg {
 		{
 			if (modifier=='N') {
 				if (type==System) {
-					PairType ii =lrs_.left().getOperatorIndices(i,sigma); 
+					PairType ii =lrs_.left().getOperatorIndices(i,sigma);
 					return lrs_.left().getOperatorByIndex(ii.first).data;
 				} else {
 					PairType ii =lrs_.right().getOperatorIndices(i,sigma);
@@ -393,6 +395,8 @@ namespace Dmrg {
 
 		SizeType threadId() const { return threadId_; }
 
+		const LinkProductStructType& lps() const { return lps_; }
+
 	private:
 		int m_;
 		const LeftRightSuperType&  lrs_;
@@ -401,6 +405,7 @@ namespace Dmrg {
 		typename PsimagLite::Vector<SparseMatrixType>::Type basis2tc_,basis3tc_;
 		typename PsimagLite::Vector<SizeType>::Type alpha_,beta_;
 		typename PsimagLite::Vector<bool>::Type fermionSigns_;
+		mutable LinkProductStructType lps_;
 
 		const SparseMatrixType& getTcOperator(int i,SizeType sigma,SizeType type) const
 		{

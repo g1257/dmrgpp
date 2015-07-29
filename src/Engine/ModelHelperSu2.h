@@ -39,7 +39,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -77,26 +77,27 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ClebschGordanCached.h"
 #include "Su2Reduced.h"
 #include "Link.h"
+#include "LinkProductStruct.h"
 
 /** \ingroup DMRG */
 /*@{*/
 
 /*! \file ModelHelperSu2.h
  *
- *  A class to contain state information about the Hamiltonian 
+ *  A class to contain state information about the Hamiltonian
  *  to help with the calculation of x+=Hy (for when there's su2 symmetry)
  *
  */
 
-namespace Dmrg { 	
-	
+namespace Dmrg {
+
 	template<typename LeftRightSuperType_>
 	class ModelHelperSu2  {
-		
+
 		typedef std::pair<SizeType,SizeType> PairType;
-		
+
 	public:
-		
+
 		enum { System=0,Environ=1 };
 
 		typedef LeftRightSuperType_ LeftRightSuperType;
@@ -108,10 +109,10 @@ namespace Dmrg {
 		typedef typename OperatorsType::BasisType BasisType;
 		typedef typename BasisType::BlockType BlockType;
 		typedef typename BasisType::RealType RealType;
-
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef Link<SparseElementType> LinkType;
-		
+		typedef LinkProductStruct<SparseElementType> LinkProductStructType;
+
 		ModelHelperSu2(int m,const LeftRightSuperType& lrs,SizeType threadId)
 		: m_(m),
 		  lrs_(lrs),
@@ -132,14 +133,14 @@ namespace Dmrg {
 			int state = lrs_.super().partition(m_);
 			return lrs_.super().qn(state);
 		}
-	
+
 		const SparseMatrixType& getReducedOperator(char modifier,SizeType i,SizeType sigma,SizeType type) const
 		{
 			if (type==System) {
-				PairType ii =lrs_.left().getOperatorIndices(i,sigma); 
+				PairType ii =lrs_.left().getOperatorIndices(i,sigma);
 				return lrs_.left().getReducedOperatorByIndex(modifier,ii).data;
 			}
-			PairType ii =lrs_.right().getOperatorIndices(i,sigma); 
+			PairType ii =lrs_.right().getOperatorIndices(i,sigma);
 			return lrs_.right().getReducedOperatorByIndex(modifier,ii).data;
 		}
 
@@ -156,7 +157,7 @@ namespace Dmrg {
 			if (link.type==ProgramGlobals::ENVIRON_SYSTEM)  {
 				LinkType link2 = link;
 				link2.value *= fermionSign;
-				link2.type = ProgramGlobals::SYSTEM_ENVIRON; 
+				link2.type = ProgramGlobals::SYSTEM_ENVIRON;
 				fastOpProdInter(B,A,matrixBlock,link2,true);
 				return;
 			}
@@ -173,18 +174,18 @@ namespace Dmrg {
 				int ix = su2reduced_.flavorMapping(i)-offset;
 				if (ix<0 || ix>=int(matrixBlock.row())) continue;
 				matrixBlock.setRow(ix,counter);
-				
+
 				SizeType i1=su2reduced_.reducedEffective(i).first;
 				SizeType i2=su2reduced_.reducedEffective(i).second;
 				PairType jm1 = lrs_.left().jmValue(lrs_.left().reducedIndex(i1));
-				
+
 				SizeType n1=lrs_.left().electrons(lrs_.left().reducedIndex(i1));
 				RealType fsign=1;
 				if (n1>0 && n1%2!=0) fsign= fermionSign;
-				
+
 				PairType jm2 = lrs_.right().jmValue(lrs_.right().reducedIndex(i2));
 				SizeType lf1 =jm1.first + jm2.first*lrs_.left().jMax();
-					
+
 				for (int k1=A.getRowPtr(i1);k1<A.getRowPtr(i1+1);k1++) {
 					SizeType i1prime = A.getCol(k1);
 					PairType jm1prime = lrs_.left().jmValue(lrs_.left().reducedIndex(i1prime));
@@ -222,11 +223,11 @@ namespace Dmrg {
 		{
 			//int const SystemEnviron=1,EnvironSystem=2;
 			RealType fermionSign =  (link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
-			
+
 			if (link.type == ProgramGlobals::ENVIRON_SYSTEM)  {
 				LinkType link2 = link;
 				link2.value *= fermionSign;
-				link2.type = ProgramGlobals::SYSTEM_ENVIRON; 
+				link2.type = ProgramGlobals::SYSTEM_ENVIRON;
 				fastOpProdInter(x,y,B,A,link2,true);
 				return;
 			}
@@ -280,7 +281,7 @@ namespace Dmrg {
 		//! Has been changed to accomodate for reflection symmetry
 		void hamiltonianLeftProduct(typename PsimagLite::Vector<SparseElementType>::Type& x,
 		                            const typename PsimagLite::Vector<SparseElementType>::Type& y) const
-		{ 
+		{
 			//! work only on partition m
 			int m = m_;
 			int offset = lrs_.super().partition(m);
@@ -316,7 +317,7 @@ namespace Dmrg {
 		//! This is a performance critical function
 		void hamiltonianRightProduct(typename PsimagLite::Vector<SparseElementType>::Type& x,
 		                             const typename PsimagLite::Vector<SparseElementType>::Type& y) const
-		{ 
+		{
 			//! work only on partition m
 			int m = m_;
 			int offset = lrs_.super().partition(m);
@@ -352,7 +353,7 @@ namespace Dmrg {
 			int offset = lrs_.super().partition(m);
 			int bs = lrs_.super().partition(m+1)-offset;
 			const SparseMatrixType& A = su2reduced_.hamiltonianLeft();
-			
+
 			matrixBlock.resize(bs,bs);
 			SizeType counter=0;
 			for (SizeType i=0;i<su2reduced_.reducedEffectiveSize();i++) {
@@ -370,7 +371,7 @@ namespace Dmrg {
 					SparseElementType lfactor=su2reduced_.reducedHamiltonianFactor(jm1.first,jm2.first);
 
 					if (lfactor==static_cast<SparseElementType>(0)) continue;
-						
+
 					int jx = su2reduced_.flavorMapping(i1prime,i2)-offset;
 					if (jx<0 || jx >= int(matrixBlock.row()) ) continue;
 
@@ -423,8 +424,8 @@ namespace Dmrg {
 		//! if option==false let  H_{alpha,beta; alpha',beta'} = basis2.hamiltonian_{beta,beta'} \delta_{alpha,alpha'}
 		//! returns the m-th block (in the ordering of basis1) of H
 		//! Note: USed only for debugging
-		void calcHamiltonianPart(SparseMatrixType &matrixBlock,bool option) const 
-		{ 
+		void calcHamiltonianPart(SparseMatrixType &matrixBlock,bool option) const
+		{
 			if (option) calcHamiltonianPartLeft(matrixBlock);
 			else calcHamiltonianPartRight(matrixBlock);
 		}
@@ -438,11 +439,14 @@ namespace Dmrg {
 
 		SizeType threadId() const { return threadId_; }
 
+		const LinkProductStructType& lps() const { return lps_; }
+
 	private:
 		int m_;
 		const LeftRightSuperType&  lrs_;
 		SizeType threadId_;
 		Su2Reduced<LeftRightSuperType> su2reduced_;
+		LinkProductStructType lps_;
 	};
 } // namespace Dmrg
 /*@}*/

@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -88,6 +88,8 @@ struct ProgramGlobals {
 	static SizeType maxElectronsOneSpin;
 
 	static const PsimagLite::String license;
+
+	static const SizeType MAX_LPS = 1000;
 
 	enum {INFINITE=0,EXPAND_ENVIRON=1,EXPAND_SYSTEM=2};
 

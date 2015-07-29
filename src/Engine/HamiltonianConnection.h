@@ -149,6 +149,7 @@ public:
 				flag = true;
 
 				if (lps!=0) {
+					assert(lps->typesaved.size() > total);
 					lps->isaved[total]=i;
 					lps->jsaved[total]=j;
 					lps->typesaved[total]=type;

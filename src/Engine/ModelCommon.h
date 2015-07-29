@@ -134,16 +134,6 @@ public:
 
 		Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 		MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
-
-		SizeType total = 1;
-		PsimagLite::String options = this->params().options;
-		bool cTridiag = (options.find("concurrenttridiag") != PsimagLite::String::npos);
-		if (cTridiag) total = PsimagLite::Concurrency::npthreads;
-
-		SizeType maxSize = this->geometry().maxConnections() * 4 * 16;
-		maxSize *= maxSize;
-		vlps_.resize(total,maxSize);
-
 	}
 
 	/** Let H be the hamiltonian of the  model for basis1 and partition m consisting of the external product
@@ -218,22 +208,33 @@ public:
 		*/
 	void hamiltonianConnectionProduct(typename PsimagLite::Vector<SparseElementType>::Type& x,
 	                                  const typename PsimagLite::Vector<SparseElementType>::Type& y,
-	                                  ModelHelperType const &modelHelper) const
+	                                  const ModelHelperType& modelHelper) const
 	{
-		SizeType threadId = modelHelper.threadId();
-
-		if (threadId >= vlps_.size())
-			throw PsimagLite::RuntimeError("hamiltonianConnectionProduct\n");
-
-		LinkProductStructType& lps = vlps_[threadId];
+		const LinkProductStructType& lpsConst = modelHelper.lps();
+		LinkProductStructType& lps = const_cast<LinkProductStructType&>(lpsConst);
+		LinkProductStructType lpsOne(ProgramGlobals::MAX_LPS);
 		HamiltonianConnectionType hc(this->geometry(),modelHelper,&lps,&x,&y);
 
 		SizeType n=modelHelper.leftRightSuper().super().block().size();
 		SizeType total = 0;
 		for (SizeType i=0;i<n;i++) {
 			for (SizeType j=0;j<n;j++) {
-				hc.compute(i,j,0,&lps,total);
+				SizeType totalOne = 0;
+				hc.compute(i,j,0,&lpsOne,totalOne);
+				if (!lps.sealed)
+					lps.push(lpsOne,totalOne);
+				else
+					lps.copy(lpsOne,totalOne,total);
+				total += totalOne;
 			}
+		}
+
+		assert(lps.typesaved.size() == total);
+		if (!lps.sealed) {
+			PsimagLite::OstringStream msg;
+			msg<<"LinkProductStructSize="<<total;
+			progress_.printline(msg,std::cout);
+			lps.sealed = true;
 		}
 
 		PsimagLite::String options = this->params().options;
@@ -251,7 +252,6 @@ public:
 		}
 
 		hc.sync();
-
 	}
 
 	/**
@@ -292,24 +292,10 @@ public:
 		}
 	}
 
-	SizeType getLinkProductStruct(LinkProductStructType** lps,
-	                              const ModelHelperType& modelHelper) const
+	SizeType getLinkProductStruct(LinkProductStructType**,
+	                              const ModelHelperType&) const
 	{
-		SizeType n=modelHelper.leftRightSuper().super().block().size();
-
-		SizeType maxSize = vlps_[0].isaved.size();
-		*lps = new LinkProductStructType(maxSize);
-
-		typename PsimagLite::Vector<SparseElementType>::Type x,y; // bogus
-
-		HamiltonianConnectionType hc(this->geometry(),modelHelper,*lps,&x,&y);
-		SizeType total = 0;
-		for (SizeType i=0;i<n;i++) {
-			for (SizeType j=0;j<n;j++) {
-				hc.compute(i,j,0,*lps,total);
-			}
-		}
-		return total;
+		return 0;
 	}
 
 	LinkType getConnection(const SparseMatrixType** A,
@@ -422,7 +408,6 @@ private:
 	}
 
 	PsimagLite::ProgressIndicator progress_;
-	mutable VectorLinkProductStructType vlps_;
 };     //class ModelCommon
 } // namespace Dmrg
 /*@}*/
