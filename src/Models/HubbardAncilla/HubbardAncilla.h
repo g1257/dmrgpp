@@ -310,12 +310,6 @@ public:
 		}
 	}
 
-	virtual SizeType maxElectronsOneSpin() const
-	{
-		return 2*ORBITALS*geometry_.numberOfSites() + 1;
-	}
-
-
 	virtual const TargetQuantumElectronsType& targetQuantum() const
 	{
 		return modelParameters_.targetQuantum;
