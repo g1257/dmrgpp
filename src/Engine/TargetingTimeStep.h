@@ -203,6 +203,7 @@ public:
 	            const BlockType&,
 	            SizeType loopNumber)
 	{
+		if (direction == ProgramGlobals::INFINITE) return;
 		VectorWithOffsetType phiNew;
 		this->common().getPhi(phiNew,Eg,direction,block1[0],loopNumber);
 

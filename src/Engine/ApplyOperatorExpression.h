@@ -477,6 +477,19 @@ private:
 				timeVectorsBase_->timeHasAdvanced();
 			}
 
+			if (targetVectors_.size() <= advance) {
+				PsimagLite::String s(__FILE__);
+				s += ": TargetVectors.size()" + ttos(targetVectors_.size());
+				s += " but advance=" + ttos(advance) + "\n";
+				throw PsimagLite::RuntimeError(s);
+			}
+
+			if (targetVectors_[advance].size() == 0) {
+				PsimagLite::String s(__FILE__);
+				s += ": TargetVectors[" + ttos(advance) + "].size()==0\n";
+				throw PsimagLite::RuntimeError(s);
+			}
+
 			if (site==0 || site==numberOfSites -1)  {
 				// don't wft since we did it before
 				assert(advance < targetVectors_.size());

@@ -280,6 +280,9 @@ public:
 	{
 		if (size_ == 0 && offset_ == 0 && m_ == 0) {
 			data_ = v.data_;
+			size_ = v.size_;
+			offset_ = v.offset_;
+			m_ = v.m_;
 			return *this;
 		}
 
