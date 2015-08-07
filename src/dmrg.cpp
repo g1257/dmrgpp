@@ -268,6 +268,15 @@ void mainLoop0(InputNgType::Readable& io,
 		return;
 	}
 
+#ifdef USE_COMPLEX
+	if (targetting != "TimeStepTargetting" &&
+	        targetting != "GroundStateTargetting") {
+		PsimagLite::String str("USE_COMPLEX not allowed for ");
+		str += targetting + "\n";
+		throw PsimagLite::RuntimeError(str);
+	}
+#endif
+
 	if (targetting=="TimeStepTargetting") {
 		mainLoop1<GeometryType,ModelHelperLocal,TargetingTimeStep,
 		         MySparseMatrixComplex>(geometry,dmrgSolverParams,io,opOptions);
