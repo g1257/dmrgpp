@@ -3,21 +3,20 @@
 use strict;
 use warnings;
 
-my ($observable,$useFlag)=@ARGV;
+my ($obs,$useFlag)=@ARGV;
 
 defined($useFlag) or die "USAGE: $0 observable useFlag\n";
 
-print STDERR "$0: command line: $observable $useFlag\n";
+print STDERR "$0: command line: $obs $useFlag\n";
 
 my $nsites=0;
 my $flag=0;
 my $biggestTimeSeen = 0;
-my $obs = "\Q$observable";
 
 while(<STDIN>) {
 	my $line = $_;
 	$flag = 1 if (/^ALL/);
-	next unless (/\<P0\|$obs\|P0\>/);
+	next unless (/\Q$obs/);
 	next if ($flag==0 and $useFlag==1);
 
 	my @temp=split;

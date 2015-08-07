@@ -3,16 +3,14 @@
 use strict;
 use warnings;
 
-my ($observable,$useFlag)=@ARGV;
+my ($divide,$tau)=@ARGV;
 
-defined($useFlag) or die "USAGE: $0 observable useFlag\n";
+defined($tau) or die "USAGE: $0 divide tau\n";
 
-print STDERR "$0: command line: $observable $useFlag\n";
+print STDERR "$0: command line: $divide $tau\n";
 
 my $nsites=0;
-my $flag=0;
 my $biggestTimeSeen = 0;
-my $obs = "\Q$observable";
 my @value;
 my ($times,$sites) = (0,0);
 
@@ -20,20 +18,23 @@ while(<STDIN>) {
 	chomp;
 	next if (/^#/);
 	my @temp = split;
-	if (scalar(@temp) != 5) { 
+	if (scalar(@temp) != 5) {
 		die "$0: Line $. does not have 5 columns\n";
 	}
 
 	my ($site,$val,$time,$label,$den) = @temp;
 
+	defined($den) or die "$0: Line $_\n";
 	if (!isAnInteger($site)) {
 		die "$0: Line $. site $site is not an integer\n";
-	}	
-	
-	my $timeIndex = int($time*10);
+	}
+
+	my $timeIndex = int($time/$tau);
 	my $denReal = realPartStrict($den);
 	$denReal = 1 if (realPart($denReal) == 0);
-	$value[$timeIndex][$site] = realPartStrict($val)/$denReal;
+	my @valri = (realPart($val),imagPart($val));
+	divide(\@valri,$denReal) if ($divide);
+	$value[$timeIndex][$site] = \@valri;
 	$times = $timeIndex if ($times < $timeIndex);
 	$sites = $site if ($sites < $site);
 }
@@ -44,12 +45,15 @@ print STDERR "$0: Total sites = $sites\n";
 print STDERR "$0: Total times = $times\n";
 
 for (my $i = 0; $i < $times; ++$i) {
-	my $time = $i*0.1;
+	my $time = $i*$tau;
 	my $c = 0;
 	my @temp;
 	for (my $j = 0; $j < $sites; ++$j) {
 		my $val = $value[$i][$j];
 		defined($val) or next;
+		my @valri = @$val;
+		(scalar(@valri) == 2) or die "$0: Internal error for @valri\n";
+		defined($valri[0] && $valri[1]) or next;
 		$c++;
 		$temp[$j] = $val;
 	}
@@ -59,19 +63,23 @@ for (my $i = 0; $i < $times; ++$i) {
 	print "$time ";
 	for (my $j = 0; $j < $sites; ++$j) {
 		my $val = $temp[$j];
-		defined($val) or $val = "0.00";
-		print "$val ";
+		my $valr = "0.00";
+		if (defined($val) && scalar(@$val) == 2) {
+			$valr = $val->[0];
+		}
+
+		print "$valr ";
 	}
 
 	print "\n";
 }
-	
+
 sub realPartStrict
 {
 	my ($t)=@_;
 	my $it = imagPart($t);
 	if (abs($it) > 1e-6) {
-		die "$0: $t is has non-zero imaginary part\n";
+		die "$0: $t has non-zero imaginary part $it\n";
 	}
 
 	return realPart($t);
