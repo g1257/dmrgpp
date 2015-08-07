@@ -176,15 +176,7 @@ public:
 		bool allInSystem = (parameters_.options.find("geometryallinsystem")!=
 		        PsimagLite::String::npos);
 
-		if (checkpoint_()) {
-			std::cerr<<"WARNING: Will not check finite loops for ";
-			std::cerr<<"consistency while checkpoint is in use\n";
-		} else {
-			if (parameters_.options.find("nofiniteloops")==PsimagLite::String::npos)
-				checkFiniteLoops(parameters_.finiteLoop,
-				                 geometry.numberOfSites(),
-				                 allInSystem);
-		}
+		checkFiniteLoops(allInSystem, geometry.numberOfSites());
 
 		PsimagLite::OstringStream msg;
 		msg<<"Turning the engine on";
@@ -608,6 +600,82 @@ private:
 		if (step < y.size()) return y[step];
 
 		return E;
+	}
+
+	void checkFiniteLoops(SizeType allInSystem, SizeType totalSize) const
+	{
+		if (parameters_.options.find("nofiniteloops")!=PsimagLite::String::npos)
+			return;
+
+		PsimagLite::Vector<FiniteLoop>::Type vfl;
+		if (checkpoint_()) {
+			PsimagLite::IoSimple::In io1(parameters_.checkpoint.filename);
+			ParametersType::readFiniteLoops(io1,vfl);
+		}
+
+		ParametersType::readFiniteLoops(ioIn_,vfl);
+
+		checkFiniteLoops(vfl,totalSize,allInSystem);
+	}
+
+	void checkFiniteLoops(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,
+	                      SizeType totalSites,
+	                      bool allInSystem) const
+	{
+		PsimagLite::String s = "checkFiniteLoops: I'm falling out of the lattice ";
+		PsimagLite::String loops = "";
+		int x = (allInSystem) ? totalSites-2 : totalSites/2-1; // must be signed
+		if (totalSites & 1) x++;
+		if (finiteLoop[0].stepLength<0) x++;
+		int prevDeltaSign = 1;
+		SizeType sopt = 0; // have we started saving yet?
+		for (SizeType i=0;i<finiteLoop.size();i++)  {
+			SizeType thisSaveOption = (finiteLoop[i].saveOption & 1);
+			if (sopt == 1 && !(thisSaveOption&1)) {
+				s = "Error for finite loop number " + ttos(i) + "\n";
+				s += "Once you say 1 on a finite loop, then all";
+				s += " finite loops that follow must have 1.";
+				throw PsimagLite::RuntimeError(s.c_str());
+			}
+			if (sopt == 0 && (thisSaveOption&1)) {
+				sopt = 1;
+				if (SizeType(x) != 1 && SizeType(x)!=totalSites-2) {
+					s = __FILE__ + PsimagLite::String(": FATAL: for finite loop number ")
+					        + ttos(i) + "\n";
+					s += "Saving finite loops must start at the left or";
+					s += " right end of the lattice\n";
+					throw PsimagLite::RuntimeError(s.c_str());
+				}
+			}
+			// naive location:
+			int delta = finiteLoop[i].stepLength;
+			x += delta;
+			loops = loops + ttos(delta) + " ";
+
+			// take care of bounces:
+			if (i>0 && delta*prevDeltaSign < 0) x += prevDeltaSign;
+			prevDeltaSign = 1;
+			if (delta<0) prevDeltaSign = -1;
+
+			// check that we don't fall out
+			bool flag = false;
+			if (x<=0) {
+				s = s + "on the left end\n";
+				flag = true;
+			}
+			if (SizeType(x)>=totalSites-1) {
+				s = s + "on the right end\n";
+				flag = true;
+			}
+			if (flag) {
+				// complain and die if we fell out:
+				s = s + "Loops so far: " + loops + "\n";
+				s =s + "x=" + ttos(x) + " last delta=" +
+				        ttos(delta);
+				s =s + " sites=" + ttos(totalSites);
+				throw PsimagLite::RuntimeError(s.c_str());
+			}
+		}
 	}
 
 	const ModelType& model_;

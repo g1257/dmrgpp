@@ -192,68 +192,6 @@ struct FiniteLoop {
 	}
 };
 
-//PTEX_LABEL{139}
-inline void checkFiniteLoops(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,
-                             SizeType totalSites,
-                             bool allInSystem)
-{
-	PsimagLite::String s = "checkFiniteLoops: I'm falling out of the lattice ";
-	PsimagLite::String loops = "";
-	int x = (allInSystem) ? totalSites-2 : totalSites/2-1; // must be signed
-	if (totalSites & 1) x++;
-	if (finiteLoop[0].stepLength<0) x++;
-	int prevDeltaSign = 1;
-	SizeType sopt = 0; // have we started saving yet?
-	for (SizeType i=0;i<finiteLoop.size();i++)  {
-		SizeType thisSaveOption = (finiteLoop[i].saveOption & 1);
-		if (sopt == 1 && !(thisSaveOption&1)) {
-			s = "Error for finite loop number " + ttos(i) + "\n";
-			s += "Once you say 1 on a finite loop, then all";
-			s += " finite loops that follow must have 1.";
-			throw PsimagLite::RuntimeError(s.c_str());
-		}
-		if (sopt == 0 && (thisSaveOption&1)) {
-			sopt = 1;
-			if (SizeType(x) != 1 && SizeType(x)!=totalSites-2) {
-				s = __FILE__ + PsimagLite::String(": FATAL: for finite loop number ")
-				        + ttos(i) + "\n";
-				s += "Saving finite loops must start at the left or";
-				s += " right end of the lattice\n";
-				throw PsimagLite::RuntimeError(s.c_str());
-			}
-		}
-		// naive location:
-		int delta = finiteLoop[i].stepLength;
-		x += delta;
-		loops = loops + ttos(delta) + " ";
-
-		// take care of bounces:
-		if (i>0 && delta*prevDeltaSign < 0) x += prevDeltaSign;
-		prevDeltaSign = 1;
-		if (delta<0) prevDeltaSign = -1;
-
-		// check that we don't fall out
-		bool flag = false;
-		if (x<=0) {
-			s = s + "on the left end\n";
-			flag = true;
-		}
-		if (SizeType(x)>=totalSites-1) {
-			s = s + "on the right end\n";
-			flag = true;
-		}
-		if (flag) {
-			// complain and die if we fell out:
-			s = s + "Loops so far: " + loops + "\n";
-			s =s + "x=" + ttos(x) + " last delta=" +
-			        ttos(delta);
-			s =s + " sites=" + ttos(totalSites);
-			throw PsimagLite::RuntimeError(s.c_str());
-		}
-	}
-
-}
-
 std::istream &operator>>(std::istream& is,FiniteLoop& fl)
 {
 	is>>fl.stepLength;
@@ -414,55 +352,7 @@ struct ParametersDmrgSolver {
 		io.readline(version,"Version=");
 		io.readline(filename,"OutputFile=");
 		io.readline(keptStatesInfinite,"InfiniteLoopKeptStates=");
-		typename PsimagLite::Vector<FieldType>::Type tmpVec;
-		io.read(tmpVec,"FiniteLoops");
-		for (SizeType i=0;i<tmpVec.size();i+=3) {
-			typename PsimagLite::Vector<int>::Type xTmp(3);
-			for (SizeType j=0;j<xTmp.size();j++) xTmp[j]=int(tmpVec[i+j]);
-			FiniteLoop fl(xTmp[0],xTmp[1],xTmp[2]);
-			finiteLoop.push_back(fl);
-		}
-
-		SizeType repeat = 0;
-
-		try {
-			io.readline(repeat,"RepeatFiniteLoopsTimes=");
-		}  catch (std::exception& e) {}
-
-		SizeType fromFl = 0;
-		try {
-			io.readline(fromFl,"RepeatFiniteLoopsFrom=");
-		}  catch (std::exception& e) {}
-
-		SizeType upToFl = finiteLoop.size()-1;
-		try {
-			io.readline(upToFl,"RepeatFiniteLoopsTo=");
-		}  catch (std::exception& e) {}
-
-		if (upToFl>=finiteLoop.size()) {
-			PsimagLite::String s (__FILE__);
-			s += "\nFATAL: RepeatFiniteLoopsTo=" + ttos(upToFl);
-			s += " is larger than current finite loops\n";
-			s += "\nMaximum is " + ttos(finiteLoop.size())+ "\n";
-			throw PsimagLite::RuntimeError(s.c_str());
-		}
-
-		if (fromFl>upToFl) {
-			PsimagLite::String s (__FILE__);
-			s += "\nFATAL: RepeatFiniteLoopsFrom=" + ttos(fromFl);
-			s += " is larger than RepeatFiniteLoopsTo\n";
-			s += "\nMaximum is " + ttos(upToFl)+ "\n";
-			throw PsimagLite::RuntimeError(s.c_str());
-		}
-
-		upToFl++;
-
-		for (SizeType i=0;i<repeat;i++) {
-			for (SizeType j=fromFl;j<upToFl;j++) {
-				FiniteLoop fl = finiteLoop[j];
-				finiteLoop.push_back(fl);
-			}
-		}
+		readFiniteLoops(io,finiteLoop);
 
 		if (options.find("hasQuantumNumbers")!=PsimagLite::String::npos) {
 			PsimagLite::String s = "*** FATAL: hasQuantumNumbers ";
@@ -542,18 +432,75 @@ struct ParametersDmrgSolver {
 		} catch (std::exception& e) {}
 	}
 
-	void checkRestart(PsimagLite::String filename1,
-	                  PsimagLite::String filename2,
-	                  PsimagLite::String options,
-	                  PsimagLite::String label) const
+	template<typename SomeInputType>
+	static void readFiniteLoops(SomeInputType& io,
+	                            PsimagLite::Vector<FiniteLoop>::Type& vfl)
+	{
+		typename PsimagLite::Vector<FieldType>::Type tmpVec;
+		io.read(tmpVec,"FiniteLoops");
+		for (SizeType i=0;i<tmpVec.size();i+=3) {
+			typename PsimagLite::Vector<int>::Type xTmp(3);
+			for (SizeType j=0;j<xTmp.size();j++) xTmp[j]=int(tmpVec[i+j]);
+			FiniteLoop fl(xTmp[0],xTmp[1],xTmp[2]);
+			vfl.push_back(fl);
+		}
+
+		SizeType repeat = 0;
+
+		try {
+			io.readline(repeat,"RepeatFiniteLoopsTimes=");
+		}  catch (std::exception& e) {}
+
+		SizeType fromFl = 0;
+		try {
+			io.readline(fromFl,"RepeatFiniteLoopsFrom=");
+		}  catch (std::exception& e) {}
+
+		SizeType upToFl = vfl.size()-1;
+		try {
+			io.readline(upToFl,"RepeatFiniteLoopsTo=");
+		}  catch (std::exception&) {}
+
+		if (upToFl >= vfl.size()) {
+			PsimagLite::String s (__FILE__);
+			s += "\nFATAL: RepeatFiniteLoopsTo=" + ttos(upToFl);
+			s += " is larger than current finite loops\n";
+			s += "\nMaximum is " + ttos(vfl.size())+ "\n";
+			throw PsimagLite::RuntimeError(s.c_str());
+		}
+
+		if (fromFl > upToFl) {
+			PsimagLite::String s (__FILE__);
+			s += "\nFATAL: RepeatFiniteLoopsFrom=" + ttos(fromFl);
+			s += " is larger than RepeatFiniteLoopsTo\n";
+			s += "\nMaximum is " + ttos(upToFl)+ "\n";
+			throw PsimagLite::RuntimeError(s.c_str());
+		}
+
+		upToFl++;
+
+		for (SizeType i=0;i<repeat;i++) {
+			for (SizeType j=fromFl;j<upToFl;j++) {
+				FiniteLoop fl = vfl[j];
+				vfl.push_back(fl);
+			}
+		}
+	}
+
+private:
+
+	static void checkRestart(PsimagLite::String filename1,
+	                         PsimagLite::String filename2,
+	                         PsimagLite::String options,
+	                         PsimagLite::String label)
 	{
 		checkFilesNotEqual(filename1,filename2,label);
 		checkTwoSiteDmrg(filename2,options);
 	}
 
-	void checkFilesNotEqual(PsimagLite::String filename1,
-	                        PsimagLite::String filename2,
-	                        PsimagLite::String label) const
+	static void checkFilesNotEqual(PsimagLite::String filename1,
+	                               PsimagLite::String filename2,
+	                               PsimagLite::String label)
 	{
 		if (filename1 != filename2) return;
 		PsimagLite::String s (__FILE__);
@@ -562,8 +509,8 @@ struct ParametersDmrgSolver {
 		throw PsimagLite::RuntimeError(s.c_str());
 	}
 
-	void checkTwoSiteDmrg(PsimagLite::String filename2,
-	                      PsimagLite::String options) const
+	static void checkTwoSiteDmrg(PsimagLite::String filename2,
+	                             PsimagLite::String options)
 	{
 		PsimagLite::IoSimple::In io(filename2);
 		PsimagLite::String optionsOld;
@@ -595,7 +542,7 @@ std::ostream &operator<<(std::ostream &os,
 	os<<"parameters.filename="<<p.filename<<"\n";
 	os<<"parameters.options="<<p.options<<"\n";
 	os<<"parameters.keptStatesInfinite="<<p.keptStatesInfinite<<"\n";
-	os<<"finiteLoop\n";
+	os<<"FiniteLoops ";
 	os<<p.finiteLoop;
 
 	if (p.tolerance>0)
