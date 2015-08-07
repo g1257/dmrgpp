@@ -20,8 +20,6 @@ while(<STDIN>) {
 	next if ($flag==0 and $useFlag==1);
 
 	my @temp=split;
-	my $denominator = realPartStrict($temp[4]);
-	next if ($denominator==0);
 	next if (!isAnInteger($temp[0]));
 
 	print $line;
@@ -41,17 +39,6 @@ $nsites++;
 
 print STDERR "$0: Largest site seen = $nsites\n";
 print STDERR "$0: Largest time seen = $biggestTimeSeen\n";
-
-sub realPartStrict
-{
-	my ($t)=@_;
-	my $it = imagPart($t);
-	if (abs($it) > 1e-6) {
-		die "$0: $t is has non-zero imaginary part\n";
-	}
-
-	return realPart($t);
-}
 
 sub realPart
 {

@@ -30,10 +30,13 @@ while(<STDIN>) {
 	}
 
 	my $timeIndex = int($time/$tau);
-	my $denReal = realPartStrict($den);
-	$denReal = 1 if (realPart($denReal) == 0);
 	my @valri = (realPart($val),imagPart($val));
-	divide(\@valri,$denReal) if ($divide);
+	if ($divide) {
+		my $denReal = realPartStrict($den);
+		$denReal = 1 if (realPart($denReal) == 0);
+		divide(\@valri,$denReal);
+	}
+
 	$value[$timeIndex][$site] = \@valri;
 	$times = $timeIndex if ($times < $timeIndex);
 	$sites = $site if ($sites < $site);
