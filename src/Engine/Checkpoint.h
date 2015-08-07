@@ -114,10 +114,7 @@ public:
 	    progress_("Checkpoint")
 	{
 		if (!enabled_) return;
-		if (parameters_.checkpoint.filename == parameters_.filename) {
-			throw PsimagLite::RuntimeError("Checkpoint::ctor(...): "
-			                               "this run will overwrite previous, throwing\n");
-		}
+
 		loadStacksDiskToMemory();
 	}
 

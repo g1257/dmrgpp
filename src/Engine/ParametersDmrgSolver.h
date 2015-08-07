@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "Provenance.h"
 #include "BoostSerializationHeaders.h"
+#include "IoSimple.h"
 
 namespace Dmrg {
 /* PSIDOC FiniteLoop
@@ -490,10 +491,13 @@ struct ParametersDmrgSolver {
 			io.readline(tolerance,"TruncationTolerance=");
 		} catch (std::exception& e) {}
 
-		if (options.find("checkpoint")!=PsimagLite::String::npos)
+		if (options.find("checkpoint")!=PsimagLite::String::npos) {
 			io.readline(checkpoint.filename,"CheckpointFilename=");
-		else if (options.find("restart")!=PsimagLite::String::npos)
+			checkRestart(filename,checkpoint.filename,options,"CheckpointFilename=");
+		} else if (options.find("restart")!=PsimagLite::String::npos) {
 			io.readline(checkpoint.filename,"RestartFilename=");
+			checkRestart(filename,checkpoint.filename,options,"CheckpointFilename=");
+		}
 
 		nthreads=1; // provide a default value
 		try {
@@ -536,6 +540,45 @@ struct ParametersDmrgSolver {
 		try {
 			io.readline(excited,"Excited=");
 		} catch (std::exception& e) {}
+	}
+
+	void checkRestart(PsimagLite::String filename1,
+	                  PsimagLite::String filename2,
+	                  PsimagLite::String options,
+	                  PsimagLite::String label) const
+	{
+		checkFilesNotEqual(filename1,filename2,label);
+		checkTwoSiteDmrg(filename2,options);
+	}
+
+	void checkFilesNotEqual(PsimagLite::String filename1,
+	                        PsimagLite::String filename2,
+	                        PsimagLite::String label) const
+	{
+		if (filename1 != filename2) return;
+		PsimagLite::String s (__FILE__);
+		s += "\nFATAL: " + filename1 + "is equal to " + filename2;
+		s += " in label " + label + " in input file\n";
+		throw PsimagLite::RuntimeError(s.c_str());
+	}
+
+	void checkTwoSiteDmrg(PsimagLite::String filename2,
+	                      PsimagLite::String options) const
+	{
+		PsimagLite::IoSimple::In io(filename2);
+		PsimagLite::String optionsOld;
+		io.readline(optionsOld,"parameters.options");
+		bool bOld = (optionsOld.find("twositedmrg")!=PsimagLite::String::npos);
+		bool b = (options.find("twositedmrg")!=PsimagLite::String::npos);
+		if (bOld == b) return;
+		PsimagLite::String s (__FILE__);
+		PsimagLite::String s1 = ": Previous run used twositedmrg ";
+		s1 += " but this one does not.";
+		PsimagLite::String s2 = ": Previous run didn't use twositedmrg ";
+		s2 += " but this one does.";
+		if (bOld) s += s1;
+		else s += s2;
+		throw PsimagLite::RuntimeError(s + "\n");
 	}
 };
 
