@@ -608,12 +608,26 @@ private:
 			return;
 
 		PsimagLite::Vector<FiniteLoop>::Type vfl;
+		SizeType offset = 0;
 		if (checkpoint_()) {
 			PsimagLite::IoSimple::In io1(parameters_.checkpoint.filename);
-			ParametersType::readFiniteLoops(io1,vfl);
+			typename ParametersType::VectorFieldType tmpVec;
+			PsimagLite::String s(__FILE__);
+			s += ": " + parameters_.checkpoint.filename + ": ";
+			s += "wrong line after FiniteLoops\n";
+			io1.read(tmpVec,"FiniteLoops");
+			if (tmpVec.size() == 0) throw PsimagLite::RuntimeError(s);
+			SizeType length = tmpVec.size()*3 + 1;
+			io1.rewind();
+			tmpVec.clear();
+			tmpVec.resize(length);
+			io1.readKnownSize(tmpVec,"FiniteLoops");
+			tmpVec.erase(tmpVec.begin());
+			ParametersType::readFiniteLoops_(io1,vfl,tmpVec,0);
+			offset = vfl.size();
 		}
 
-		ParametersType::readFiniteLoops(ioIn_,vfl);
+		ParametersType::readFiniteLoops(ioIn_,vfl,offset);
 
 		checkFiniteLoops(vfl,totalSize,allInSystem);
 	}

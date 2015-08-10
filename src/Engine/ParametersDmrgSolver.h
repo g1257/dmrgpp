@@ -285,6 +285,7 @@ struct ParametersDmrgSolver {
 
 	typedef ParametersDmrgSolver<FieldType, InputValidatorType> ThisType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename PsimagLite::Vector<FieldType>::Type VectorFieldType;
 
 	SizeType nthreads;
 	SizeType sitesPerBlock;
@@ -352,7 +353,7 @@ struct ParametersDmrgSolver {
 		io.readline(version,"Version=");
 		io.readline(filename,"OutputFile=");
 		io.readline(keptStatesInfinite,"InfiniteLoopKeptStates=");
-		readFiniteLoops(io,finiteLoop);
+		readFiniteLoops(io,finiteLoop,0);
 
 		if (options.find("hasQuantumNumbers")!=PsimagLite::String::npos) {
 			PsimagLite::String s = "*** FATAL: hasQuantumNumbers ";
@@ -434,10 +435,20 @@ struct ParametersDmrgSolver {
 
 	template<typename SomeInputType>
 	static void readFiniteLoops(SomeInputType& io,
-	                            PsimagLite::Vector<FiniteLoop>::Type& vfl)
+	                            PsimagLite::Vector<FiniteLoop>::Type& vfl,
+	                            SizeType offset)
 	{
-		typename PsimagLite::Vector<FieldType>::Type tmpVec;
+		VectorFieldType tmpVec;
 		io.read(tmpVec,"FiniteLoops");
+		readFiniteLoops_(io,vfl,tmpVec,offset);
+	}
+
+	template<typename SomeInputType>
+	static void readFiniteLoops_(SomeInputType& io,
+	                            PsimagLite::Vector<FiniteLoop>::Type& vfl,
+	                            const VectorFieldType& tmpVec,
+	                            SizeType offset)
+	{
 		for (SizeType i=0;i<tmpVec.size();i+=3) {
 			typename PsimagLite::Vector<int>::Type xTmp(3);
 			for (SizeType j=0;j<xTmp.size();j++) xTmp[j]=int(tmpVec[i+j]);
@@ -451,14 +462,16 @@ struct ParametersDmrgSolver {
 			io.readline(repeat,"RepeatFiniteLoopsTimes=");
 		}  catch (std::exception& e) {}
 
-		SizeType fromFl = 0;
+		SizeType fromFl = offset;
 		try {
 			io.readline(fromFl,"RepeatFiniteLoopsFrom=");
+			fromFl += offset;
 		}  catch (std::exception& e) {}
 
 		SizeType upToFl = vfl.size()-1;
 		try {
 			io.readline(upToFl,"RepeatFiniteLoopsTo=");
+			fromFl += offset;
 		}  catch (std::exception&) {}
 
 		if (upToFl >= vfl.size()) {
