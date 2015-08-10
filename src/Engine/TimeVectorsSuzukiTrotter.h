@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2012, UT-Battelle, LLC
+Copyright (c) 2009-2015, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -67,7 +67,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
 /** \ingroup DMRG */
 /*@{*/
@@ -76,7 +75,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  *
  */
-
 #ifndef TIME_VECTORS_SUZUKI_TROTTER
 #define TIME_VECTORS_SUZUKI_TROTTER
 #include <iostream>
@@ -100,10 +98,10 @@ class TimeVectorsSuzukiTrotter : public  TimeVectorsBase<
         VectorWithOffsetType> {
 
 	typedef TimeVectorsBase<TargetParamsType,
-	                        ModelType,
-	                        WaveFunctionTransfType,
-	                        LanczosSolverType,
-	                        VectorWithOffsetType> BaseType;
+	ModelType,
+	WaveFunctionTransfType,
+	LanczosSolverType,
+	VectorWithOffsetType> BaseType;
 	typedef typename BaseType::PairType PairType;
 	typedef typename TargetParamsType::RealType RealType;
 	typedef typename TargetParamsType::SparseMatrixType SparseMatrixType;
@@ -120,13 +118,15 @@ class TimeVectorsSuzukiTrotter : public  TimeVectorsBase<
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef VectorComplexOrRealType TargetVectorType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type
+	VectorVectorWithOffsetType;
 
 public:
 
 	TimeVectorsSuzukiTrotter(RealType currentTime,
 	                         const TargetParamsType& tstStruct,
 	                         const VectorRealType& times,
-	                         typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors,
+	                         VectorVectorWithOffsetType& targetVectors,
 	                         const ModelType& model,
 	                         const WaveFunctionTransfType& wft,
 	                         const LeftRightSuperType& lrs,
@@ -260,7 +260,8 @@ private:
 		// OK, now that we got the partition number right, let's wft:
 		PsimagLite::Vector<SizeType>::Type nk;
 		setNk(nk,block);
-		wft_.setInitialVector(phiNew,targetVectors_[i],lrs_,nk); // generalize for su(2)
+		// generalize for su(2)
+		wft_.setInitialVector(phiNew,targetVectors_[i],lrs_,nk);
 		phiNew.collapseSectors();
 		assert(std::norm(phiNew)>1e-6);
 		targetVectors_[i]=phiNew;
@@ -312,11 +313,14 @@ private:
 		transposeConjugate(transformET,transformE);
 
 		SizeType hilbertSize = model_.hilbertSize(block[0]);
-		if (systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM && lrs_.right().size()==hilbertSize) {
+		if (systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM &&
+		        lrs_.right().size()==hilbertSize) {
 			transformE.makeDiagonal(hilbertSize,1);
 			transformET.makeDiagonal(hilbertSize,1);
 		}
-		if (systemOrEnviron==ProgramGlobals::EXPAND_ENVIRON && lrs_.left().size()==hilbertSize) {
+
+		if (systemOrEnviron==ProgramGlobals::EXPAND_ENVIRON &&
+		        lrs_.left().size()==hilbertSize) {
 			transformS.makeDiagonal(hilbertSize,1);
 			transformST.makeDiagonal(hilbertSize,1);
 		}
@@ -325,9 +329,29 @@ private:
 			SizeType xp=0,yp=0;
 			packSuper.unpack(xp,yp,lrs_.super().permutation(i+offset));
 			if (systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM) {
-				timeVectorSystem(result,phi0,xp,yp,packSuper,block,m,i,offset,transformE,transformET);
+				timeVectorSystem(result,
+				                 phi0,
+				                 xp,
+				                 yp,
+				                 packSuper,
+				                 block,
+				                 m,
+				                 i,
+				                 offset,
+				                 transformE,
+				                 transformET);
 			} else {
-				timeVectorEnviron(result,phi0,xp,yp,packSuper,block,m,i,offset,transformS,transformST);
+				timeVectorEnviron(result,
+				                  phi0,
+				                  xp,
+				                  yp,
+				                  packSuper,
+				                  block,
+				                  m,
+				                  i,
+				                  offset,
+				                  transformS,
+				                  transformST);
 			}
 		}
 	}
@@ -372,16 +396,22 @@ private:
 
 			for (SizeType x2=0;x2<hilbertSize;x2++) {
 				for (SizeType y1=0;y1<hilbertSize;y1++) {
-					SizeType yfull2 = packRight.pack(y1,y2,oldLrs.right().permutationInverse());
+					SizeType yfull2 = packRight.pack(y1,
+					                                 y2,
+					                                 oldLrs.right().permutationInverse());
 					for (SizeType k2=transform1.getRowPtr(yfull2);
 					     k2<transform1.getRowPtr(yfull2+1);
 					     k2++) {
 						int y = transform1.getColOrExit(k2);
 						if (y<0) continue;
-						SizeType x = packLeft.pack(x1,x2,lrs_.left().permutationInverse());
-						SizeType j = packSuper.pack(x,y,lrs_.super().permutationInverse());
+						SizeType x = packLeft.pack(x1,
+						                           x2,
+						                           lrs_.left().permutationInverse());
+						SizeType j = packSuper.pack(x,
+						                            y,
+						                            lrs_.super().permutationInverse());
 						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],
-						                          iperm[x2p+y1p*hilbertSize]);
+						        iperm[x2p+y1p*hilbertSize]);
 						if (std::norm(tmp)<1e-12) continue;
 						assert(j>=offset && j<offset+phi0.size());
 						result[j-offset] += tmp*phi0[i]*transformT1.getValue(k)*
@@ -434,16 +464,22 @@ private:
 
 			for (SizeType x2=0;x2<hilbertSize;x2++) {
 				for (SizeType y1=0;y1<hilbertSize;y1++) {
-					SizeType xfull2 = packLeft.pack(x1,x2,oldLrs.left().permutationInverse());
+					SizeType xfull2 = packLeft.pack(x1,
+					                                x2,
+					                                oldLrs.left().permutationInverse());
 					for (SizeType k2=transform1.getRowPtr(xfull2);
 					     k2<transform1.getRowPtr(xfull2+1);
 					     k2++) {
 						int x = transform1.getColOrExit(k2);
 						if (x<0) continue;
-						SizeType y = packRight.pack(y1,y2,lrs_.right().permutationInverse());
-						SizeType j = packSuper.pack(x,y,lrs_.super().permutationInverse());
+						SizeType y = packRight.pack(y1,
+						                            y2,
+						                            lrs_.right().permutationInverse());
+						SizeType j = packSuper.pack(x,
+						                            y,
+						                            lrs_.super().permutationInverse());
 						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],
-						                          iperm[x2p+y1p*hilbertSize]);
+						        iperm[x2p+y1p*hilbertSize]);
 						if (std::norm(tmp)<1e-12) continue;
 						assert(j>=offset && j<offset+phi0.size());
 						result[j-offset] += tmp*phi0[i]*transformT1.getValue(k)*
@@ -475,7 +511,8 @@ private:
 	               const RealType& time) const
 	{
 		SparseMatrixType hmatrix;
-		RealType factorForDiagonals = (systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM) ? 1.0 : 0.0;
+		RealType factorForDiagonals =
+		        (systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM) ? 1.0 : 0.0;
 		if (systemOrEnviron==ProgramGlobals::EXPAND_ENVIRON && block[0]==0)
 			factorForDiagonals = 1.0;
 
@@ -527,7 +564,7 @@ private:
 	RealType currentTime_;
 	const TargetParamsType& tstStruct_;
 	const VectorRealType& times_;
-	typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors_;
+	VectorVectorWithOffsetType& targetVectors_;
 	const ModelType& model_;
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;
