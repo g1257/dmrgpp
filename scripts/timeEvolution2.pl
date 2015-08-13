@@ -3,11 +3,12 @@
 use strict;
 use warnings;
 
-my ($divide,$tau)=@ARGV;
+my ($divide,$tau,$onesite)=@ARGV;
 
-defined($tau) or die "USAGE: $0 divide tau\n";
+defined($tau) or die "USAGE: $0 divide tau [site]\n";
+defined($onesite) or $onesite = -1;
 
-print STDERR "$0: command line: $divide $tau\n";
+print STDERR "$0: command line: $divide $tau $onesite\n";
 
 my $nsites=0;
 my $biggestTimeSeen = 0;
@@ -29,7 +30,7 @@ while(<STDIN>) {
 		die "$0: Line $. site $site is not an integer\n";
 	}
 
-	my $_ = $time/$tau;
+	$_ = $time/$tau;
 	
 	my $timeIndex = sprintf("%0.f",$_);
 	my @valri = (realPart($val),imagPart($val));
@@ -53,27 +54,29 @@ for (my $i = 0; $i < $times; ++$i) {
 	my $time = $i*$tau;
 	my $c = 0;
 	my @temp;
+	
 	for (my $j = 0; $j < $sites; ++$j) {
 		my $val = $value[$i][$j];
 		defined($val) or next;
 		my @valri = @$val;
 		(scalar(@valri) == 2) or die "$0: Internal error for @valri\n";
-		defined($valri[0] && $valri[1]) or next;
+		(defined($valri[0]) && defined($valri[1])) or next;
 		$c++;
 		$temp[$j] = $val;
 	}
 
-	#next if ($c != $sites);
-
 	print "$time ";
 	for (my $j = 0; $j < $sites; ++$j) {
+		next if ($onesite >=0 && $onesite != $j);
 		my $val = $temp[$j];
 		my $valr = "0.00";
+		my $vali = "0.00";
 		if (defined($val) && scalar(@$val) == 2) {
 			$valr = $val->[0];
+			$vali = $val->[1];
 		}
 
-		print "$valr ";
+		print "$valr $vali";
 	}
 
 	print "\n";
