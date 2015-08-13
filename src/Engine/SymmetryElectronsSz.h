@@ -279,10 +279,10 @@ private:
 	                                 bool useSu2Symmetry)
 	{
 		PsimagLite::OstringStream msg;
-		msg<<"Integer target quantum numbers are: ";
+		msg<<"SymmetryElectronsSz: Integer target quantum numbers are: ";
 		for (SizeType ii=0;ii<targetQuantumNumbers.size();ii++)
 			msg<<targetQuantumNumbers[ii]<<" ";
-		std::cout<<msg<<"\n";
+		std::cout<<msg.str()<<"\n";
 		if (ioOut && direction == ProgramGlobals::INFINITE)
 			ioOut->printVector(targetQuantumNumbers,"TargetedQuantumNumbers");
 		return pseudoQuantumNumber(targetQuantumNumbers,useSu2Symmetry);
