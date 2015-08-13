@@ -20,7 +20,7 @@ FiniteLoops 16  3 200 0 -3 200 0 -3 200 0 3 200 0
 
 TargetElectronsUp=4
 TargetElectronsDown=4
-
+GsWeight=0.1
 
 DynamicDmrgType=2
 TSPSites 2 3 2  

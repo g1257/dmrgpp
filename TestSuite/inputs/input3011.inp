@@ -26,7 +26,7 @@ FiniteLoops  16
 7 100 0 -7 100 0 -7 100 0 7 100 0
 7 100 0 -7 100 0 -7 100 0 7 100 0
 7 100 0 -7 100 0 -7 100 0 7 100 0
-
+GsWeight=0.1
 TargetElectronsUp=8
 TargetElectronsDown=8
 Threads=4

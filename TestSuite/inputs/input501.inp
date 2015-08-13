@@ -80,7 +80,7 @@ FiniteLoops 192
 
 TargetElectronsUp=4
 TargetElectronsDown=0
-
+GsWeight=0.1
 TSPTau=0.1
 TSPTimeSteps=4
 TSPAdvanceEach=6

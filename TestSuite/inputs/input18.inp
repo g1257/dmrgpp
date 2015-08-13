@@ -78,7 +78,7 @@ TSPAlgorithm=Krylov
 TSPSites 2  3 2
 TSPLoops 2 0 0
 TSPProductOrSum=product
-
+GsWeight=0.1
 TSPOperator=raw 
 RAW_MATRIX 
 4 4

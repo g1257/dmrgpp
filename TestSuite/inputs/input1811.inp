@@ -32,7 +32,7 @@ RepeatFiniteLoopsTimes=100
 
 TargetElectronsTotal=3
 TargetSzPlusConst=6
-
+GsWeight=0.1
 RestartFilename=data1810.txt
 
 TSPTau=0.1

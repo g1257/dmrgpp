@@ -19,7 +19,7 @@ RepeatFiniteLoopsFrom=1
 RepeatFiniteLoopsTimes=40
 TargetElectronsUp=4
 TargetElectronsDown=4
-
+GsWeight=0.1
 TSPTau=0.1
 TSPTimeSteps=2
 TSPAdvanceEach=21

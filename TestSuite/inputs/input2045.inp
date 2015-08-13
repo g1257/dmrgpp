@@ -21,7 +21,7 @@ FiniteLoops 5   3 400 0
                -3 400 2 -3 400 2 3 400 2 3 400 2
 RepeatFiniteLoopsFrom=1
 RepeatFiniteLoopsTimes=2
-
+GsWeight=0.1
 TargetElectronsUp=2
 TargetElectronsDown=2
 TargetSpinTimesTwo=0

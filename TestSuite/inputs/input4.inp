@@ -16,7 +16,7 @@ InfiniteLoopKeptStates=64
 FiniteLoops 3  7 100 0 -7 100 0 -7 100 0 
 TargetElectronsUp=8
 TargetElectronsDown=8
-
+GsWeight=0.1
 TSPTau=0.1
 TSPTimeSteps=4
 TSPAdvanceEach=5

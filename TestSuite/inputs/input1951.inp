@@ -35,7 +35,7 @@ AdjustQuantumNumbers 4    2 4 1 1
 Orbitals=2
 AncillaJ=0
 FeAsMode=INT_ORBITAL0
-
+GsWeight=0.1
 MaxMatrixRankStored=512
 
 RestartFilename=data1950.txt

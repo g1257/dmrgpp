@@ -28,7 +28,7 @@ TargetElectronsDown=4
 TargetSpinTimesTwo=0
 Threads=2
 
-
+GsWeight=0.1
 TSPTau=0.1
 TSPTimeSteps=5
 TSPAdvanceEach=4

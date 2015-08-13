@@ -26,7 +26,7 @@ FiniteLoops 24  3 400 0 -3 400 0 -3 400 0 3 400 0
 TargetElectronsUp=2
 TargetElectronsDown=2
 TargetSpinTimesTwo=0
-
+GsWeight=0.1
 TSPTau=0.1
 TSPTimeSteps=5
 TSPAdvanceEach=4

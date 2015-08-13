@@ -17,7 +17,7 @@ FiniteLoops 3  -7 200 0  -7 200 1 7 200 1
 TargetElectronsUp=8
 TargetElectronsDown=8
 RestartFilename=data200.txt
-
+GsWeight=0.1
 TSPTau=0.1
 TSPTimeSteps=5
 TSPAdvanceEach=4
