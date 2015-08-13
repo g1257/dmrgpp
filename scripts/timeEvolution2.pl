@@ -29,7 +29,9 @@ while(<STDIN>) {
 		die "$0: Line $. site $site is not an integer\n";
 	}
 
-	my $timeIndex = int($time/$tau);
+	my $_ = $time/$tau;
+	
+	my $timeIndex = sprintf("%0.f",$_);
 	my @valri = (realPart($val),imagPart($val));
 	if ($divide) {
 		my $denReal = realPartStrict($den);
