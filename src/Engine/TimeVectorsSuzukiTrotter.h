@@ -246,16 +246,11 @@ private:
 
 	void wftOne(SizeType i,const PsimagLite::Vector<SizeType>::Type& block)
 	{
-		VectorWithOffsetType phiNew;
-		if (nonZeroQns_) {
-			phiNew.populateFromQns(*nonZeroQns_,lrs_.super());
-		} else {
-			phiNew.populateSectors(lrs_.super());
-		}
 		if (targetVectors_[i].size()==0) {
 			targetVectors_[i] = targetVectors_[0];
-			phiNew = targetVectors_[0];
 		}
+
+		VectorWithOffsetType phiNew = targetVectors_[0];
 
 		// OK, now that we got the partition number right, let's wft:
 		PsimagLite::Vector<SizeType>::Type nk;
