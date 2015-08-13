@@ -275,14 +275,6 @@ public:
 		}
 	}
 
-	RealType setGsWeight(RealType defaultValue) const
-	{
-		if (!targetHelper_.model().params().gsWeight.first)
-			return 	defaultValue;
-
-		return targetHelper_.model().params().gsWeight.second;
-	}
-
 	int findFermionSignOfTheOperators() const
 	{
 		const VectorOperatorType& myoperator = targetHelper_.tstStruct().aOperators();

@@ -157,7 +157,7 @@ public:
 	      tstStruct_(tstStruct),
 	      wft_(wft),
 	      progress_("TargetingDynamic"),
-	      gsWeight_(1.0),
+	      gsWeight_(tstStruct_.gsWeight()),
 	      paramsForSolver_(io,"DynamicDmrg"),
 	      weightForContinuedFraction_(0)
 	{
@@ -335,7 +335,6 @@ private:
 
 	void setWeights()
 	{
-		gsWeight_ = 0.0;
 		RealType sum  = 0;
 		weight_.resize(this->common().targetVectors().size());
 		for (SizeType r=0;r<weight_.size();r++) {

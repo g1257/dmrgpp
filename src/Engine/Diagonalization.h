@@ -148,10 +148,9 @@ public:
 	                    const BlockType& blockLeft,
 	                    const BlockType& blockRight)
 	{
-		if (direction!=WaveFunctionTransfType::INFINITE) throw PsimagLite::RuntimeError(
-		            "Diagonalization::operator(): expecting INFINITE direction\n");
+		assert(direction == WaveFunctionTransfType::INFINITE);
 		SizeType loopIndex = 0;
-		  VectorSizeType sectors;
+		VectorSizeType sectors;
 		targetedSymmetrySectors(sectors,target.lrs());
 		reflectionOperator_.update(sectors);
 		RealType gsEnergy = internalMain_(target,direction,loopIndex,false,blockLeft);
@@ -167,7 +166,7 @@ public:
 	                    SizeType loopIndex,
 	                    bool)
 	{
-		assert(direction!=WaveFunctionTransfType::INFINITE);
+		assert(direction != WaveFunctionTransfType::INFINITE);
 
 		RealType gsEnergy = internalMain_(target,direction,loopIndex,false,block);
 		//  targetting:

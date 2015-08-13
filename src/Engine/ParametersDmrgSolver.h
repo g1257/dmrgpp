@@ -294,7 +294,6 @@ struct ParametersDmrgSolver {
 	SizeType excited;
 	int useReflectionSymmetry;
 	FieldType tolerance;
-	std::pair<bool,FieldType> gsWeight;
 	PsimagLite::String filename;
 	PsimagLite::String version;
 	PsimagLite::String options;
@@ -314,7 +313,6 @@ struct ParametersDmrgSolver {
 		ar & keptStatesInfinite;
 		ar & useReflectionSymmetry;
 		ar & tolerance;
-		ar & gsWeight;
 		ar & filename;
 		ar & version;
 		ar & options;
@@ -345,8 +343,7 @@ struct ParametersDmrgSolver {
 	ParametersDmrgSolver(InputValidatorType& io)
 	    : sitesPerBlock(1),
 	      maxMatrixRankStored(0),
-	      excited(0),
-	      gsWeight(false,0.0)
+	      excited(0)
 	{
 		io.readline(model,"Model=");
 		io.readline(options,"SolverOptions=");
@@ -417,11 +414,6 @@ struct ParametersDmrgSolver {
 
 		try {
 			io.readline(sitesPerBlock,"SitesPerBlock=");
-		} catch (std::exception& e) {}
-
-		try {
-			io.readline(gsWeight.second,"GsWeight=");
-			gsWeight.first = true;
 		} catch (std::exception& e) {}
 
 		try {
@@ -566,9 +558,6 @@ std::ostream &operator<<(std::ostream &os,
 		os<<"parameters.restartFilename="<<p.checkpoint.filename<<"\n";
 	if (p.fileForDensityMatrixEigs!="")
 		os<<"parameters.fileForDensityMatrixEigs="<<p.fileForDensityMatrixEigs<<"\n";
-
-	if (p.gsWeight.first)
-		os<<"GsWeight="<<p.gsWeight.second<<"\n";
 
 	if (p.options.find("MatrixVectorStored")==PsimagLite::String::npos)
 		os<<"MaxMatrixRankStored="<<p.maxMatrixRankStored<<"\n";

@@ -111,6 +111,7 @@ public:
 	      noOperator_(false),
 	      skipTimeZero_(false),
 	      isEnergyForExp_(false),
+	      gsWeight_(0.0),
 	      energyForExp_(0.0),
 	      io_(io),
 	      model_(model)
@@ -139,6 +140,7 @@ public:
 		io.read(sites_,"TSPSites");
 		checkSites();
 		io.read(startingLoops_,"TSPLoops");
+		io.readline(gsWeight_,"GsWeight=");
 
 		if (sites_.size() != startingLoops_.size()) {
 			PsimagLite::String str(__FILE__);
@@ -259,6 +261,11 @@ public:
 		return energyForExp_;
 	}
 
+	virtual RealType gsWeight() const
+	{
+		return gsWeight_;
+	}
+
 	template<typename ModelType_>
 	friend std::ostream& operator<<(std::ostream& os,
 	                                const TargetParamsCommon<ModelType_>& t);
@@ -351,6 +358,7 @@ private:
 	bool noOperator_;
 	bool skipTimeZero_;
 	bool isEnergyForExp_;
+	RealType gsWeight_;
 	RealType energyForExp_;
 	//serializr normal aOperators_
 	VectorOperatorType aOperators_;

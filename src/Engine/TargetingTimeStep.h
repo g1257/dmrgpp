@@ -145,7 +145,8 @@ public:
 	      wft_(wft),
 	      progress_("TargetingTimeStep"),
 	      times_(tstStruct_.timeSteps()),
-	      weight_(tstStruct_.timeSteps())
+	      weight_(tstStruct_.timeSteps()),
+	      gsWeight_(tstStruct_.gsWeight())
 	{
 		if (!wft.isEnabled()) throw PsimagLite::RuntimeError
 		        (" TargetingTimeStep needs an enabled wft\n");
@@ -155,8 +156,6 @@ public:
 		RealType tau =tstStruct_.tau();
 		RealType sum = 0;
 		SizeType n = times_.size();
-		gsWeight_ = (tstStruct_.concatenation() == SUM) ? 0.1 : 0.0;
-		gsWeight_ = this->common().setGsWeight(gsWeight_);
 
 		RealType factor = (n+4.0)/(n+2.0);
 		factor *= (1.0 - gsWeight_);

@@ -354,7 +354,7 @@ private:
 			sum += weight_[r];
 		}
 
-		gsWeight_ = this->common().setGsWeight(0.0);
+		gsWeight_ = tstStruct_.gsWeight();
 		for (SizeType r=0;r<weight_.size();r++) weight_[r] *= (1-gsWeight_)/sum;
 	}
 

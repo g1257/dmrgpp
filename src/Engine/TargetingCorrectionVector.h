@@ -551,7 +551,7 @@ private:
 
 	void setWeights()
 	{
-		gsWeight_ = this->common().setGsWeight(0.5);
+		gsWeight_ = tstStruct_.gsWeight();
 
 		RealType sum  = 0;
 		weight_.resize(this->common().targetVectors().size());

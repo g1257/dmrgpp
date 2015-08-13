@@ -235,6 +235,11 @@ public:
 		return unimplemented("energyForExp");
 	}
 
+	virtual RealType gsWeight() const
+	{
+		return unimplemented("gsWeight");
+	}
+
 private:
 
 	RealType unimplemented(PsimagLite::String s) const
