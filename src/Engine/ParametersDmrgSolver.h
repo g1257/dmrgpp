@@ -350,7 +350,7 @@ struct ParametersDmrgSolver {
 		io.readline(version,"Version=");
 		io.readline(filename,"OutputFile=");
 		io.readline(keptStatesInfinite,"InfiniteLoopKeptStates=");
-		readFiniteLoops(io,finiteLoop,0);
+		readFiniteLoops(io,finiteLoop);
 
 		if (options.find("hasQuantumNumbers")!=PsimagLite::String::npos) {
 			PsimagLite::String s = "*** FATAL: hasQuantumNumbers ";
@@ -427,19 +427,17 @@ struct ParametersDmrgSolver {
 
 	template<typename SomeInputType>
 	static void readFiniteLoops(SomeInputType& io,
-	                            PsimagLite::Vector<FiniteLoop>::Type& vfl,
-	                            SizeType offset)
+	                            PsimagLite::Vector<FiniteLoop>::Type& vfl)
 	{
 		VectorFieldType tmpVec;
 		io.read(tmpVec,"FiniteLoops");
-		readFiniteLoops_(io,vfl,tmpVec,offset);
+		readFiniteLoops_(io,vfl,tmpVec);
 	}
 
 	template<typename SomeInputType>
 	static void readFiniteLoops_(SomeInputType& io,
 	                            PsimagLite::Vector<FiniteLoop>::Type& vfl,
-	                            const VectorFieldType& tmpVec,
-	                            SizeType offset)
+	                            const VectorFieldType& tmpVec)
 	{
 		for (SizeType i=0;i<tmpVec.size();i+=3) {
 			typename PsimagLite::Vector<int>::Type xTmp(3);
@@ -454,16 +452,14 @@ struct ParametersDmrgSolver {
 			io.readline(repeat,"RepeatFiniteLoopsTimes=");
 		}  catch (std::exception& e) {}
 
-		SizeType fromFl = offset;
+		SizeType fromFl = 0;
 		try {
 			io.readline(fromFl,"RepeatFiniteLoopsFrom=");
-			fromFl += offset;
 		}  catch (std::exception& e) {}
 
 		SizeType upToFl = vfl.size()-1;
 		try {
 			io.readline(upToFl,"RepeatFiniteLoopsTo=");
-			fromFl += offset;
 		}  catch (std::exception&) {}
 
 		if (upToFl >= vfl.size()) {

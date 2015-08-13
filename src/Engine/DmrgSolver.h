@@ -602,44 +602,34 @@ private:
 		return E;
 	}
 
-	void checkFiniteLoops(SizeType allInSystem, SizeType totalSize) const
+	void checkFiniteLoops(SizeType allInSystem, SizeType totalSites) const
 	{
 		if (parameters_.options.find("nofiniteloops")!=PsimagLite::String::npos)
 			return;
 
 		PsimagLite::Vector<FiniteLoop>::Type vfl;
-		SizeType offset = 0;
+		int lastSite = (allInSystem) ? totalSites-2 : totalSites/2-1; // must be signed
+
 		if (checkpoint_()) {
 			PsimagLite::IoSimple::In io1(parameters_.checkpoint.filename);
-			typename ParametersType::VectorFieldType tmpVec;
-			PsimagLite::String s(__FILE__);
-			s += ": " + parameters_.checkpoint.filename + ": ";
-			s += "wrong line after FiniteLoops\n";
-			io1.read(tmpVec,"FiniteLoops");
-			if (tmpVec.size() == 0) throw PsimagLite::RuntimeError(s);
-			SizeType length = tmpVec.size()*3 + 1;
-			io1.rewind();
-			tmpVec.clear();
-			tmpVec.resize(length);
-			io1.readKnownSize(tmpVec,"FiniteLoops");
-			tmpVec.erase(tmpVec.begin());
-			ParametersType::readFiniteLoops_(io1,vfl,tmpVec,0);
-			offset = vfl.size();
+			io1.readline(lastSite,"#TCENTRALSITE=");
 		}
 
-		ParametersType::readFiniteLoops(ioIn_,vfl,offset);
+		if (totalSites & 1) lastSite++;
 
-		checkFiniteLoops(vfl,totalSize,allInSystem);
+		ParametersType::readFiniteLoops(ioIn_,vfl);
+
+		checkFiniteLoops(vfl,totalSites,lastSite);
 	}
 
 	void checkFiniteLoops(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,
 	                      SizeType totalSites,
-	                      bool allInSystem) const
+	                      SizeType lastSite) const
 	{
 		PsimagLite::String s = "checkFiniteLoops: I'm falling out of the lattice ";
 		PsimagLite::String loops = "";
-		int x = (allInSystem) ? totalSites-2 : totalSites/2-1; // must be signed
-		if (totalSites & 1) x++;
+		int x = lastSite;
+
 		if (finiteLoop[0].stepLength<0) x++;
 		int prevDeltaSign = 1;
 		SizeType sopt = 0; // have we started saving yet?
