@@ -76,7 +76,7 @@ for (my $i = 0; $i < $times; ++$i) {
 			$vali = $val->[1];
 		}
 
-		print "$valr $vali";
+		print "$valr $vali ";
 	}
 
 	print "\n";
