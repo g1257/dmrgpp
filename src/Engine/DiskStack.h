@@ -1,9 +1,8 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2015, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
+
 #ifndef DISKSTACK_HEADER_H
 #define DISKSTACK_HEADER_H
 
@@ -81,124 +79,107 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 // A disk stack, similar to std::stack but stores in disk not in memory
 namespace Dmrg {
-	template<typename DataType>
-	class DiskStack {
-	
-		typedef typename PsimagLite::IoSimple::In IoInType;
-		typedef typename PsimagLite::IoSimple::Out IoOutType;
+template<typename DataType>
+class DiskStack {
 
-		public:
-			DiskStack(const PsimagLite::String &file1,
-			          const PsimagLite::String &file2,
-			          bool hasLoad)
-			    : fileIn_(file1),
-				fileOut_(file2),
-				total_(0),
-				progress_("DiskStack")
-			{
-				if (!hasLoad) {
-					ioOut_.open(fileOut_,std::ios_base::trunc);
-					ioOut_.close();
-					return;
-				}
-				try {
-					ioIn_.open(fileIn_);
-				} catch (std::exception& e) {
-					std::cerr<<"Problem opening reading file "<<fileIn_<<"\n";
-					throw PsimagLite::RuntimeError("DiskStack::load(...)\n");
-				}
-				int x = 0;
-				ioIn_.readline(x,"#STACKMETARANK=",IoInType::LAST_INSTANCE);
-				//ioIn_.readline(total_,"#STACKMETATOTAL="); <-- KEEP TOTAL=0, THIS IS A NEW FILE!!
-				//ioIn_.readline(debug_,"#STACKMETADEBUG=");
-				ioIn_.advance("#STACKMETASTACK");
-				ioIn_>>stack_;
-				ioIn_.close();
-				PsimagLite::OstringStream msg;
-				msg<<"Attempting to read from file " + fileIn_ + " succeeded";
-				progress_.printline(msg,std::cout);
-				
-			}
-			
-			~DiskStack()
-			{
-				//ioOut_.open(fileOut_,std::ios_base::trunc,rank_);
-				int x = 0;
-				ioOut_.open(fileOut_,std::ios_base::app);
-//				ioOut_.print("#STACKMETARANK=",rank_);
-				ioOut_.printline("#STACKMETARANK="+ttos(x));
+	typedef typename PsimagLite::IoSimple::In IoInType;
+	typedef typename PsimagLite::IoSimple::Out IoOutType;
 
-//				ioOut_.print("#STACKMETATOTAL=",total_);
-				ioOut_.printline("#STACKMETATOTAL="+ttos(total_));
-				//ioOut_.printline("#STACKMETADEBUG="+ttos(debug_));
-				ioOut_<<"#STACKMETASTACK\n";
-				ioOut_<<stack_;
-				ioOut_.close();
-			}
+public:
 
-			static bool persistent() { return true; }
-
-			void push(DataType const &d) 
-			{
-				//PsimagLite::String tmpLabel = fileOut_ + ttos(total_);
-				ioOut_.open(fileOut_,std::ios_base::app);
-				d.save(ioOut_,DataType::SAVE_ALL);
-				ioOut_.close();
-
-				stack_.push(total_);
-				total_++;
-
-				//PsimagLite::String s = "Pushing with label="+fileOut_+" and total="+ttos(total_);
-				//debugPrint(s);
-				//PsimagLite::OstringStream msg;
-				//msg<<s;
-				//progress_.printline(msg,std::cout);
-			}
-
-			void pop()
-			{
-				stack_.pop();
-//				PsimagLite::String s = "Popping with label="+fileIn_+" stack_.top="+ttos(stack_.top());
-//				PsimagLite::OstringStream msg;
-//				msg<<s;
-//				progress_.printline(msg,std::cout);
-			}
-
-			DataType top()
-			{
-				ioIn_.open(fileIn_);
-				DataType dt(ioIn_,"",stack_.top());
-//				PsimagLite::String s = "Topping with label="+fileIn_+" stack_.top="+ttos(stack_.top());
-//				PsimagLite::OstringStream msg;
-//				msg<<s;
-//				progress_.printline(msg,std::cout);
-				ioIn_.close();
-				return dt;
-			}
-
-			SizeType size() const { return stack_.size(); }
-
-			template<typename DataType_>
-			friend std::ostream& operator<<(std::ostream& os,const DiskStack<DataType_>& ds);
-
-		private:
-
-			PsimagLite::String fileIn_,fileOut_;
-			int total_;
-			PsimagLite::ProgressIndicator progress_;
-			IoInType ioIn_;
-			IoOutType ioOut_;
-			PsimagLite::Stack<int>::Type stack_;
-	}; // class DiskStack
-
-	template<typename DataType>
-	std::ostream& operator<<(std::ostream& os,const DiskStack<DataType>& ds)
+	DiskStack(const PsimagLite::String &file1,
+	          const PsimagLite::String &file2,
+	          bool hasLoad)
+	    : fileIn_(file1),
+	      fileOut_(file2),
+	      total_(0),
+	      progress_("DiskStack")
 	{
-		os<<"DISKSTACK: filein: "<<ds.fileIn_<<" fileout="<<ds.fileOut_<<"\n";
-		os<<"total="<<ds.total_<<"\n";
-		os<<ds.stack_;
-		return os;
+		if (!hasLoad) {
+			ioOut_.open(fileOut_,std::ios_base::trunc);
+			ioOut_.close();
+			return;
+		}
+
+		try {
+			ioIn_.open(fileIn_);
+		} catch (std::exception& e) {
+			std::cerr<<"Problem opening reading file "<<fileIn_<<"\n";
+			throw PsimagLite::RuntimeError("DiskStack::load(...)\n");
+		}
+
+		int x = 0;
+		ioIn_.readline(x,"#STACKMETARANK=",IoInType::LAST_INSTANCE);
+
+		ioIn_.advance("#STACKMETASTACK");
+		ioIn_>>stack_;
+		ioIn_.close();
+		PsimagLite::OstringStream msg;
+		msg<<"Attempt to read from file " + fileIn_ + " succeeded";
+		progress_.printline(msg,std::cout);
+
 	}
+
+	~DiskStack()
+	{
+		int x = 0;
+		ioOut_.open(fileOut_,std::ios_base::app);
+		ioOut_.printline("#STACKMETARANK="+ttos(x));
+		ioOut_.printline("#STACKMETATOTAL="+ttos(total_));
+		ioOut_<<"#STACKMETASTACK\n";
+		ioOut_<<stack_;
+		ioOut_.close();
+	}
+
+	static bool persistent() { return true; }
+
+	void push(DataType const &d)
+	{
+		ioOut_.open(fileOut_,std::ios_base::app);
+		d.save(ioOut_,DataType::SAVE_ALL);
+		ioOut_.close();
+
+		stack_.push(total_);
+		total_++;
+	}
+
+	void pop()
+	{
+		stack_.pop();
+	}
+
+	DataType top()
+	{
+		ioIn_.open(fileIn_);
+		DataType dt(ioIn_,"",stack_.top());
+		ioIn_.close();
+		return dt;
+	}
+
+	SizeType size() const { return stack_.size(); }
+
+	template<typename DataType_>
+	friend std::ostream& operator<<(std::ostream& os,const DiskStack<DataType_>& ds);
+
+private:
+
+	PsimagLite::String fileIn_,fileOut_;
+	int total_;
+	PsimagLite::ProgressIndicator progress_;
+	IoInType ioIn_;
+	IoOutType ioOut_;
+	PsimagLite::Stack<int>::Type stack_;
+}; // class DiskStack
+
+template<typename DataType>
+std::ostream& operator<<(std::ostream& os,const DiskStack<DataType>& ds)
+{
+	os<<"DISKSTACK: filein: "<<ds.fileIn_<<" fileout="<<ds.fileOut_<<"\n";
+	os<<"total="<<ds.total_<<"\n";
+	os<<ds.stack_;
+	return os;
+}
 } // namespace DMrg
 
 #endif
+
