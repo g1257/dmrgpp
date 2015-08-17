@@ -591,6 +591,7 @@ private:
 
 	void addCorrection(SizeType direction,const BlockType& block1)
 	{
+		if (tstStruct_.correctionA() == 0) return;
 		weight_.resize(1);
 		weight_[0]=tstStruct_.correctionA();
 		this->common().computeCorrection(direction,block1);
