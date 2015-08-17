@@ -303,6 +303,8 @@ public:
 		// //corner case
 		SizeType x = (site==1) ? 0 : numberOfSites-1;
 		evolve(Eg,direction,x,loopNumber);
+
+		printNormsAndWeights();
 	}
 
 	template<typename IoOutputType>
@@ -596,6 +598,23 @@ private:
 		weight_[0]=tstStruct_.correctionA();
 		this->common().computeCorrection(direction,block1);
 		gsWeight_ = 1.0-weight_[0];
+	}
+
+	void printNormsAndWeights() const
+	{
+		if (this->common().allStages(DISABLED)) return;
+
+		PsimagLite::OstringStream msg;
+		msg<<"gsWeight="<<gsWeight_<<" weights= ";
+		for (SizeType i = 0; i < weight_.size(); i++)
+			msg<<weight_[i]<<" ";
+		progress_.printline(msg,std::cout);
+
+		PsimagLite::OstringStream msg2;
+		msg2<<"gsNorm="<<std::norm(this->common().psi())<<" norms= ";
+		for (SizeType i = 0; i < weight_.size(); i++)
+			msg2<<this->common().normSquared(i)<<" ";
+		progress_.printline(msg2,std::cout);
 	}
 
 	const TargetParamsType& tstStruct_;
