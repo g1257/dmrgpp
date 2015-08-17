@@ -91,16 +91,16 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_>
 class TargetingTimeStep : public TargetingBase<LanczosSolverTemplate,
-                                               MatrixVectorType_,
-                                               WaveFunctionTransfType_> {
+        MatrixVectorType_,
+        WaveFunctionTransfType_> {
 
 	enum {BORDER_NEITHER, BORDER_LEFT, BORDER_RIGHT};
 
 public:
 
 	typedef TargetingBase<LanczosSolverTemplate,
-	                      MatrixVectorType_,
-	                      WaveFunctionTransfType_> BaseType;
+	MatrixVectorType_,
+	WaveFunctionTransfType_> BaseType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
@@ -116,8 +116,8 @@ public:
 	typedef typename VectorWithOffsetType::VectorType TargetVectorType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef LanczosSolverTemplate<ParametersForSolverType,
-	                              MatrixVectorType,
-	                              TargetVectorType> LanczosSolverType;
+	MatrixVectorType,
+	TargetVectorType> LanczosSolverType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
@@ -211,11 +211,11 @@ public:
 		                            this->common().noStageIs(OPERATOR));
 
 		this->common().calcTimeVectors(startEnd,
-		                                  Eg,
-		                                  phiNew,
-		                                  direction,
-		                                  allOperatorsApplied,
-		                                  block1);
+		                               Eg,
+		                               phiNew,
+		                               direction,
+		                               allOperatorsApplied,
+		                               block1);
 
 		cocoon(direction,block1); // in-situ
 		printEnergies(); // in-situ
@@ -333,8 +333,8 @@ private:
 		PsimagLite::String modelName = this->model().params().model;
 
 		if (modelName == "HubbardOneBand" ||
-		    modelName == "HubbardOneBandExtended" ||
-		    modelName == "Immm") {
+		        modelName == "HubbardOneBandExtended" ||
+		        modelName == "Immm") {
 			this->common().cocoonLegacy(direction,block);
 		}
 
