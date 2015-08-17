@@ -371,12 +371,19 @@ public:
 			return;
 		}
 
+		SizeType max = 1;
+		PsimagLite::String magic = "allPvectors";
+		if (model.params().options.find(magic) != PsimagLite::String::npos)
+			max = tv.size();
+
 		try {
 			assert(block.size()>0);
 			cocoon(direction,block[0],psi(),"PSI",psi(),"PSI");
 			if (tv.size() > 0) {
-				cocoon(direction,block[0],tv[0],"P0",tv[0],"P0");
-				cocoon(direction,block[0],psi(),"PSI",tv[0],"P0");
+				for (SizeType i = 0; i < max; ++i)
+					cocoon(direction,block[0],tv[i],"P"+ttos(i),tv[i],"P"+ttos(i));
+				for (SizeType i = 0; i < max; ++i)
+					cocoon(direction,block[0],psi(),"PSI",tv[i],"P"+ttos(i));
 			}
 		} catch (std::exception& e) {
 			noCocoon("unsupported by the model");

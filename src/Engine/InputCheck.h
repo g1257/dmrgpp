@@ -170,6 +170,7 @@ public:
 		registerOpts.push_back("TargetingAncilla");
 		registerOpts.push_back("geometryallinsystem");
 		registerOpts.push_back("vectorwithoffsets");
+		registerOpts.push_back("allPvectors");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);
