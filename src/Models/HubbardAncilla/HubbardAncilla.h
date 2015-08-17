@@ -371,7 +371,7 @@ private:
 
 		SizeType n = corrector.n_row();
 		for (SizeType i = 0; i < n; ++i) {
-			corrector(i,i) = abs(dn1(i,i) + dn2(i,i) -1.0);
+			corrector(i,i) = std::abs(dn1(i,i) + dn2(i,i) -1.0);
 		}
 	}
 
