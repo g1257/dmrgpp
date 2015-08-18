@@ -217,6 +217,12 @@ public:
 
 	virtual void timeHasAdvanced()
 	{
+		if (!allLinksSeen()) {
+			PsimagLite::String str("TimeVectorsSuzukiTrotter: ");
+			str += " trying to advance in time, but not all links seen yet\n";
+			throw PsimagLite::RuntimeError(str);
+		}
+
 		linksSeen_.clear();
 		PsimagLite::OstringStream msg;
 		msg<<"ALL LINKS CLEARED";
