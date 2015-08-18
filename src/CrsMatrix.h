@@ -1015,7 +1015,6 @@ bool isDiagonal(const CrsMatrix<T>& A,double eps=1e-6,bool checkForIdentity=fals
 			SizeType col = A.getCol(k);
 			const T& val = A.getValue(k);
 			if (checkForIdentity && col==i && std::norm(val-1.0)>eps) {
-				std::cerr<<"Diagonal is "<<val<<" at i="<<i<<"\n";
 				return false;
 			}
 			if (col!=i && std::norm(val)>eps) {
