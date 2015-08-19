@@ -90,9 +90,8 @@ class GeometryDirection {
 
 public:
 
-	enum {NUMBERS,MATRICES,RAW_GEOMETRY};
 	GeometryDirection()
-	    : dirId_(0),geometryBase_(0)
+	    : dirId_(0), dataType_(0), orbitals_(0), geometryBase_(0)
 	{}
 
 	template<typename IoInputter>
@@ -101,26 +100,33 @@ public:
 	                  SizeType edof,
 	                  const String& options,
 	                  const GeometryBaseType* geometryFactory)
-	    : dirId_(dirId),geometryBase_(geometryFactory)
+	    : dirId_(dirId),
+	      constantValues_(options.find("ConstantValues")!=String::npos),
+	      geometryBase_(geometryFactory)
 	{
-		SizeType n = (edof != RAW_GEOMETRY) ? getVectorSize(options) : 0;
+		SizeType n = (edof & 2) ? 0 : getVectorSize();
 		dataType_ = edof;
-		if (edof==NUMBERS) {
+		orbitals_ = 1;
+
+		if (edof & 2)
+			return geometryBase_->set(rawHoppings_, orbitals_);
+
+		if (edof & 1) {
+			if (n == 0) n = 1;
+			for (SizeType i=0;i<n;i++) {
+				MatrixType m;
+				io.readMatrix(m,"Connectors");
+				dataMatrices_.push_back(m);
+				if (orbitals_ < m.n_row()) orbitals_ = m.n_row();
+				if (orbitals_ < m.n_col()) orbitals_ = m.n_col();
+			}
+		} else {
 			io.read(dataNumbers_,"Connectors");
 			if (dataNumbers_.size()!=n) {
 				String s(__FILE__);
 				s += " " + ttos(dataNumbers_.size()) + " != " + ttos(n) + "\n";
 				throw RuntimeError(s.c_str());
 			}
-		} else if (edof==MATRICES) {
-			if (n == 0) n = 1;
-			for (SizeType i=0;i<n;i++) {
-				MatrixType m;
-				io.readMatrix(m,"Connectors");
-				dataMatrices_.push_back(m);
-			}
-		} else {
-			geometryBase_->set(rawHoppings_);
 		}
 	}
 
@@ -168,14 +174,15 @@ public:
 	                             SizeType j,
 	                             SizeType edof2) const
 	{
-		if (dataType_ == RAW_GEOMETRY) {
-			assert(edof1 == 0 && edof2 == 0);
-			return rawHoppings_(i,j);
+		if (dataType_ & 2) {
+			assert((dataType_&1) || (edof1 == 0 && edof2 == 0));
+			return rawHoppings_(i + edof1*orbitals_,j + edof2*orbitals_);
 		}
 
 		SizeType h = (constantValues()) ? 0 : geometryBase_->handle(i,j);
 
-		if (dataType_==NUMBERS) {
+		bool isMatrix = (dataType_&1);
+		if (!isMatrix) {
 			assert(dataNumbers_.size()>h);
 			return dataNumbers_[h];
 		}
@@ -194,41 +201,11 @@ public:
 		return tmp * static_cast<RealType>(signChange);
 	}
 
-	SizeType nRow() const
-	{
-		switch(dataType_) {
-		case MATRICES:
-			return dataMatrices_[0].n_row();
-		default:
-			return 1;
-		}
-	}
-
-	SizeType nCol() const
-	{
-		switch(dataType_) {
-		case MATRICES:
-			return dataMatrices_[0].n_col();
-		default:
-			return 1;
-		}
-	}
-
-	SizeType size() const
-	{
-		switch(dataType_) {
-		case NUMBERS:
-			return dataNumbers_.size();
-		case MATRICES:
-			return dataMatrices_.size();
-		}
-
-		throw RuntimeError("GeometryDirection: size() unimplemented for RAW_GEOMETRY\n");
-	}
+	SizeType orbitals() const { return orbitals_; }
 
 	bool constantValues() const
 	{
-		return (size()==1) ? true : false;
+		return constantValues_;
 	}
 
 	template<typename RealType_,typename GeometryBaseType_>
@@ -238,16 +215,17 @@ public:
 
 private:
 
-	SizeType getVectorSize(const String& s)
+	SizeType getVectorSize()
 	{
-		if (s.find("ConstantValues")!=String::npos)
-			return 1;
+		if (constantValues_) return 1;
 
 		return geometryBase_->getVectorSize(dirId_);
 	}
 
 	SizeType dirId_;
 	SizeType dataType_;
+	SizeType orbitals_;
+	bool constantValues_;
 	const GeometryBaseType* geometryBase_;
 	typename Vector<ComplexOrRealType>::Type dataNumbers_;
 	typename Vector<MatrixType>::Type dataMatrices_;
@@ -259,7 +237,8 @@ std::ostream& operator<<(std::ostream& os,
                          const GeometryDirection<ComplexOrRealType,GeometryBaseType>& gd)
 {
 	os<<"#GeometrydirId="<<gd.dirId_<<"\n";
-	if (gd.dataType_==GeometryDirection<ComplexOrRealType,GeometryBaseType>::NUMBERS) {
+	bool isMatrix = (gd.dataType_&1);
+	if (!isMatrix) {
 		os<<"#GeometryNumbersSize="<<gd.dataNumbers_.size()<<"\n";
 		os<<"#GeometryNumbers=";
 		for (SizeType i=0;i<gd.dataNumbers_.size();i++) {

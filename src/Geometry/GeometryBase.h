@@ -145,12 +145,12 @@ public:
 
 	virtual SizeType findReflection(SizeType site) const = 0;
 
-	virtual void set(MatrixType&) const
+	virtual void set(MatrixType&, SizeType&) const
 	{
 		throw RuntimeError("GeometryBase::set() unimplemented for derived class\n");
 	}
 
-	virtual void set(Matrix<std::complex<RealType> >&) const
+	virtual void set(Matrix<std::complex<RealType> >&, SizeType&) const
 	{
 		throw RuntimeError("GeometryBase::set() unimplemented for derived class\n");
 	}

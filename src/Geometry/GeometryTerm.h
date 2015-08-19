@@ -100,17 +100,13 @@ class GeometryTerm {
 	typedef GeometryBase<InputType> GeometryBaseType;
 	typedef GeometryDirection<ComplexOrRealType,GeometryBaseType> GeometryDirectionType;
 
-	enum {NUMBERS = GeometryDirectionType::NUMBERS,
-	      MATRICES = GeometryDirectionType::MATRICES,
-	      RAW_GEOMETRY = GeometryDirectionType::RAW_GEOMETRY};
-
 public:
 
 	typedef typename GeometryBaseType::AdditionalDataType AdditionalDataType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
 
 	GeometryTerm()
-	    : linSize_(0),maxEdof_(0),geometryBase_(0)
+	    : linSize_(0),orbitals_(0),geometryBase_(0)
 	{}
 
 	/** @class hide_geometry2
@@ -120,13 +116,13 @@ public:
 	 - GeometryOptions=string Either none or ConstantValues needs to explain more FIXME
 	*/
 	GeometryTerm(InputType& io,SizeType,SizeType linSize,bool debug=false) :
-	    linSize_(linSize),maxEdof_(0),geometryBase_(0),gOptions_("none")
+	    linSize_(linSize),geometryBase_(0),gOptions_("none")
 	{
 		int x;
 		io.readline(x,"DegreesOfFreedom=");
 		if (x<=0) throw RuntimeError("DegreesOfFreedom<=0 is an error\n");
 
-		SizeType edof = (x==1) ? NUMBERS : MATRICES;
+		SizeType edof = (x > 1);
 		String s;
 		io.readline(s,"GeometryKind=");
 
@@ -147,14 +143,8 @@ public:
 		} else if (s=="star") {
 			geometryBase_ = new Star<InputType>(linSize,io);
 		} else if (s=="LongRange") {
-			if (edof != NUMBERS) {
-				String msg("LongRange geometry ");
-				msg += "does not support multiple orbitals\n";
-				throw RuntimeError(msg);
-			}
-
 			geometryBase_ = new LongRange<InputType>(linSize,io);
-			edof = RAW_GEOMETRY;
+			edof |= 2;
 		} else {
 			throw RuntimeError("Unknown geometry " + s + "\n");
 		}
@@ -167,7 +157,7 @@ public:
 			                                            geometryBase_));
 		}
 
-		findMaxEdof();
+		orbitals_ = findOrbitals();
 		cacheValues();
 
 		if (debug) {
@@ -183,54 +173,15 @@ public:
 	}
 
 	template<class Archive>
-	void serialize(Archive & ar, const unsigned int)
-	{
-		ar.template register_type<LongChain<InputType> >();
-		ar.template register_type<Ladder<InputType> >();
-		ar.template register_type<LadderX<InputType> >();
-		ar.template register_type<LadderBath<InputType> >();
-		ar.template register_type<KTwoNiFFour<InputType> >();
-		ar.template register_type<Star<InputType> >();
-		ar.template register_type<LongRange<InputType> >();
-		ar & linSize_;
-		ar & maxEdof_;
-		ar & geometryBase_;
-		ar & directions_;
-		ar & cachedValues_;
-	}
+	void serialize(Archive &, const unsigned int)
+	{}
 
 	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
-	                   SizeType x,
-	                   String msg) const
+	SizeType memResolv(SomeMemResolvType&,
+	                   SizeType,
+	                   String) const
 	{
-		String str = msg;
-		str += "GeometryTerm";
-		const char* start = (const char *)&linSize_;
-		const char* end = (const char*)&maxEdof_;
-		SizeType total = mres.memResolv(&linSize_,end-start,str + " linSize");
-
-		start = end;
-		end = (const char*)&geometryBase_;
-		total += mres.memResolv(&maxEdof_,end-start,str + " maxEdof");
-
-		start = end;
-		end = (const char*)&directions_;
-		total += (end - start);
-		mres.push(SomeMemResolvType::MEMORY_HEAPPTR,
-		          sizeof(geometryBase_),
-		          &geometryBase_,
-		          str + " geometryBase");
-
-		start = end;
-		end = (const char*)&cachedValues_;
-		total += mres.memResolv(&directions_,end-start,str + " directions");
-
-		total += mres.memResolv(&cachedValues_,sizeof(*this)-total, str+" cachedValues");
-
-		geometryBase_->memResolv(mres,x,str);
-
-		return total;
+		return 0;
 	}
 
 	const ComplexOrRealType& operator()(SizeType i1,
@@ -238,8 +189,8 @@ public:
 	                                    SizeType i2,
 	                                    SizeType edof2) const
 	{
-		int k1 = geometryBase_->index(i1,edof1,maxEdof_);
-		int k2 = geometryBase_->index(i2,edof2,maxEdof_);
+		int k1 = geometryBase_->index(i1,edof1,orbitals_);
+		int k2 = geometryBase_->index(i2,edof2,orbitals_);
 		assert(k1>=0 && k2>=0);
 		return cachedValues_(k1,k2);
 	}
@@ -370,17 +321,17 @@ private:
 
 	void cacheValues()
 	{
-		SizeType matrixRank = geometryBase_->matrixRank(linSize_,maxEdof_);
+		SizeType matrixRank = geometryBase_->matrixRank(linSize_,orbitals_);
 		cachedValues_.resize(matrixRank,matrixRank);
 
 		for (SizeType i1=0;i1<linSize_;i1++) {
 			for (SizeType i2=0;i2<linSize_;i2++) {
 				if (!geometryBase_->connected(i1,i2)) continue;
-				for (SizeType edof1=0;edof1<maxEdof_;edof1++) {
-					int k1 = geometryBase_->index(i1,edof1,maxEdof_);
+				for (SizeType edof1=0;edof1<orbitals_;edof1++) {
+					int k1 = geometryBase_->index(i1,edof1,orbitals_);
 					if (k1<0) continue;
-					for (SizeType edof2=0;edof2<maxEdof_;edof2++) {
-						int k2 = geometryBase_->index(i2,edof2,maxEdof_);
+					for (SizeType edof2=0;edof2<orbitals_;edof2++) {
+						int k2 = geometryBase_->index(i2,edof2,orbitals_);
 						if (k2<0) continue;
 						cachedValues_(k1,k2)=calcValue(i1,edof1,i2,edof2);
 					}
@@ -389,14 +340,23 @@ private:
 		}
 	}
 
-	void findMaxEdof()
+	SizeType findOrbitals() const
 	{
-		maxEdof_ = 0;
-		for (SizeType dir=0;dir<directions_.size();dir++) {
-			maxEdof_ = directions_[dir].nRow();
-			if (maxEdof_< directions_[dir].nCol())
-				maxEdof_ = directions_[dir].nCol();
+		if (directions_.size() == 0) {
+			String str("GeometryTerm: ");
+			str += "No directions found for this term.\n";
+			throw RuntimeError(str);
 		}
+
+		SizeType orbitals = directions_[0].orbitals();
+		for (SizeType dir=1;dir<directions_.size();dir++) {
+			if (orbitals == directions_[dir].orbitals()) continue;
+			String str("GeometryTerm: All directions must have");
+			str += " connector matrices of the same rank\n";
+			throw RuntimeError(str);
+		}
+
+		return orbitals;
 	}
 
 	ComplexOrRealType calcValue(SizeType i1,
@@ -416,7 +376,7 @@ private:
 	GeometryTerm& operator=(const GeometryTerm&);
 
 	SizeType linSize_;
-	SizeType maxEdof_;
+	SizeType orbitals_;
 	GeometryBaseType* geometryBase_;
 	String gOptions_;
 	typename Vector<GeometryDirectionType>::Type directions_;
