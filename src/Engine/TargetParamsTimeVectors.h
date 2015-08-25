@@ -99,7 +99,8 @@ public:
 	      timeSteps_(0),
 	      advanceEach_(0),
 	      algorithm_(BaseType::KRYLOV),
-	      tau_(0)
+	      tau_(0),
+	      timeDirection_(1.0)
 	{
 		/*PSIDOC TargetParamsTimeVectors
 		\item[TSPTau] [RealType], $\tau$ for the Krylov,
@@ -123,7 +124,7 @@ public:
 				algorithm_ = BaseType::RUNGE_KUTTA;
 			if (s=="SuzukiTrotter" || s=="suzukiTrotter" || s=="suzukitrotter")
 				algorithm_ = BaseType::SUZUKI_TROTTER;
-		} catch (std::exception& e) {
+		} catch (std::exception&) {
 			PsimagLite::String s(__FILE__);
 			s += "\n FATAL: TSPAlgorithm not found in input file.\n";
 			s += "Please add either TSPAlgorithm=Krylov or TSPAlgorithm=RungeKutta";
@@ -131,6 +132,10 @@ public:
 			s += " line in the input file.\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
+
+		try {
+			io.readline(timeDirection_,"TSPTimeFactor=");
+		} catch (std::exception&) {}
 	}
 
 	virtual SizeType timeSteps() const
@@ -153,12 +158,18 @@ public:
 		return tau_;
 	}
 
+	virtual RealType timeDirection() const
+	{
+		return timeDirection_;
+	}
+
 private:
 
 	SizeType timeSteps_;
 	SizeType advanceEach_;
 	SizeType algorithm_;
 	RealType tau_;
+	RealType timeDirection_;
 
 }; // class TargetParamsTimeVectors
 
@@ -171,6 +182,7 @@ operator<<(std::ostream& os,const TargetParamsTimeVectors<ModelType>& t)
 	os<<"#TargetParams.timeSteps="<<t.timeSteps()<<"\n";
 	os<<"#TargetParams.advanceEach="<<t.advanceEach()<<"\n";
 	os<<"#TargetParams.algorithm="<<t.algorithm()<<"\n";
+	os<<"#TargetParams.timeDirection="<<t.timeDirection()<<"\n";
 	return os;
 }
 } // namespace Dmrg

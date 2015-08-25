@@ -528,7 +528,8 @@ private:
 		model_.hamiltonianOnLink(hmatrix,block,currentTime_,factorForDiagonals);
 		crsMatrixToFullMatrix(m,hmatrix);
 		assert(isHermitian(m));
-		m *= (time);
+		RealType timeDirection = tstStruct_.timeDirection();
+		m *= (timeDirection*time);
 		exp(m);
 	}
 

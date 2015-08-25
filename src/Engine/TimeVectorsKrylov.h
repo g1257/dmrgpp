@@ -258,13 +258,16 @@ private:
 	           SizeType n2,
 	           SizeType i0)
 	{
+		RealType timeDirection = tstStruct_.timeDirection();
+
 		for (SizeType k=0;k<n2;k++) {
 			ComplexOrRealType sum = 0.0;
 			for (SizeType kprime=0;kprime<n2;kprime++) {
 				ComplexOrRealType tmpV = calcVTimesPhi(kprime,V,phi,i0);
 				sum += std::conj(T(kprime,k))*tmpV;
 			}
-			RealType tmp = (eigs[k]-E0_)*times_[timeIndex];
+
+			RealType tmp = (eigs[k]-E0_)*times_[timeIndex]*timeDirection;
 			ComplexOrRealType c = 0.0;
 			PsimagLite::expComplexOrReal(c,-tmp);
 			r[k] = sum * c;

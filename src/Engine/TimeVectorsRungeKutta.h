@@ -174,12 +174,14 @@ private:
 	public:
 
 		FunctionForRungeKutta(const RealType& E0,
-					  const LeftRightSuperType& lrs,
-					  const ModelType& model,
-					  RealType,
-					  const VectorWithOffsetType& phi,
-					  SizeType i0)
+		                      const RealType &timeDirection,
+		                      const LeftRightSuperType& lrs,
+		                      const ModelType& model,
+		                      RealType,
+		                      const VectorWithOffsetType& phi,
+		                      SizeType i0)
 			: E0_(E0),
+		      timeDirection_(timeDirection),
 			  p_(lrs.super().findPartitionNumber(phi.offset(i0))),
 			  modelHelper_(p_,lrs,0),
 			  lanczosHelper_(&model,&modelHelper_)
@@ -193,12 +195,13 @@ private:
 			for (SizeType i=0;i<x.size();i++) x[i] -= E0_*y[i];
 			ComplexOrRealType tmp = 0;
 			ComplexOrRealType icomplex = minusOneOrMinusI(tmp);
-			return icomplex * x;
+			return timeDirection_*icomplex*x;
 		}
 
 	private:
 
 		RealType E0_;
+		RealType timeDirection_;
 		SizeType p_;
 		typename ModelType::ModelHelperType modelHelper_;
 		typename LanczosSolverType::LanczosMatrixType lanczosHelper_;
@@ -214,7 +217,7 @@ private:
 		TargetVectorType phi0(total);
 		phi.extract(phi0,i0);
 		//				std::cerr<<"norma of phi0="<<PsimagLite::norm(phi0)<<"\n";
-		FunctionForRungeKutta f(E0_,lrs_,model_,Eg,phi,i0);
+		FunctionForRungeKutta f(E0_,tstStruct_.timeDirection(),lrs_,model_,Eg,phi,i0);
 
 		RealType epsForRK = tstStruct_.tau()/(times_.size()-1.0);
 		PsimagLite::RungeKutta<RealType,FunctionForRungeKutta,TargetVectorType> rungeKutta(f,epsForRK);

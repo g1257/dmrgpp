@@ -240,6 +240,11 @@ public:
 		return unimplemented("gsWeight");
 	}
 
+	virtual RealType timeDirection() const
+	{
+		return unimplemented("timeDirection");
+	}
+
 private:
 
 	RealType unimplemented(PsimagLite::String s) const
