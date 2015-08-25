@@ -382,8 +382,9 @@ private:
 		}
 
 		stepCurrent_ = sc; // phew!!, that's all folks, now bugs, go away!!
-
+		int lastSign = 1;
 		for (SizeType i=0;i<parameters_.finiteLoop.size();i++)  {
+			lastSign = (parameters_.finiteLoop[i].stepLength < 0) ? -1 : 1;
 			PsimagLite::OstringStream msg;
 			msg<<"Finite loop number "<<i;
 			msg<<" with l="<<parameters_.finiteLoop[i].stepLength;
@@ -405,6 +406,9 @@ private:
 
 		checkpoint_.save(pS,pE,ioOut_);
 		psi.save(sitesIndices_[stepCurrent_],ioOut_);
+		PsimagLite::OstringStream msg2;
+		msg2<<"#LastLoopSign="<<lastSign<<"\n";
+		ioOut_<<msg2.str();
 	}
 
 	void finiteStep(
@@ -609,29 +613,36 @@ private:
 
 		PsimagLite::Vector<FiniteLoop>::Type vfl;
 		int lastSite = (allInSystem) ? totalSites-2 : totalSites/2-1; // must be signed
+		int prevDeltaSign = 1;
+		bool checkPoint = false;
 
 		if (checkpoint_()) {
 			PsimagLite::IoSimple::In io1(parameters_.checkpoint.filename);
-			io1.readline(lastSite,"#TCENTRALSITE=");
+			io1.readline(lastSite,"#TCENTRALSITE=",
+			             PsimagLite::IoSimple::In::LAST_INSTANCE);
+			io1.readline(prevDeltaSign,"#LastLoopSign=");
+			checkPoint = true;
 		}
 
 		if (totalSites & 1) lastSite++;
 
 		ParametersType::readFiniteLoops(ioIn_,vfl);
 
-		checkFiniteLoops(vfl,totalSites,lastSite);
+		checkFiniteLoops(vfl,totalSites,lastSite,prevDeltaSign,checkPoint);
 	}
 
 	void checkFiniteLoops(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,
 	                      SizeType totalSites,
-	                      SizeType lastSite) const
+	                      SizeType lastSite,
+	                      int prevDeltaSign,
+	                      bool checkPoint) const
 	{
 		PsimagLite::String s = "checkFiniteLoops: I'm falling out of the lattice ";
 		PsimagLite::String loops = "";
 		int x = lastSite;
 
 		if (finiteLoop[0].stepLength<0) x++;
-		int prevDeltaSign = 1;
+
 		SizeType sopt = 0; // have we started saving yet?
 		for (SizeType i=0;i<finiteLoop.size();i++)  {
 			SizeType thisSaveOption = (finiteLoop[i].saveOption & 1);
@@ -657,7 +668,8 @@ private:
 			loops = loops + ttos(delta) + " ";
 
 			// take care of bounces:
-			if (i>0 && delta*prevDeltaSign < 0) x += prevDeltaSign;
+			bool b1 = (checkPoint || (i>0));
+			if (b1 && delta*prevDeltaSign < 0) x += prevDeltaSign;
 			prevDeltaSign = 1;
 			if (delta<0) prevDeltaSign = -1;
 
