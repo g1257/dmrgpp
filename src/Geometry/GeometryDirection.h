@@ -108,8 +108,10 @@ public:
 		dataType_ = edof;
 		orbitals_ = 1;
 
-		if (edof & 2)
-			return geometryBase_->set(rawHoppings_, orbitals_);
+		if (edof & 2) {
+			geometryBase_->set(rawHoppings_, orbitals_);
+			return;
+		}
 
 		if (edof & 1) {
 			if (n == 0) n = 1;
