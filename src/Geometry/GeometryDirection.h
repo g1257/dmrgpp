@@ -178,7 +178,7 @@ public:
 	{
 		if (dataType_ & 2) {
 			assert((dataType_&1) || (edof1 == 0 && edof2 == 0));
-			return rawHoppings_(i + edof1*orbitals_,j + edof2*orbitals_);
+			return rawHoppings_(edof1 + i*orbitals_,edof2 + j*orbitals_);
 		}
 
 		SizeType h = (constantValues()) ? 0 : geometryBase_->handle(i,j);

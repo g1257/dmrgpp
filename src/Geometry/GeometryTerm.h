@@ -273,20 +273,22 @@ public:
 	void print(std::ostream& os) const
 	{
 		SizeType linSize = linSize_;
-		SizeType dofs = 1;
-		for (SizeType dof1=0;dof1<dofs;dof1++) {
-			for (SizeType dof2=0;dof2<dofs;dof2++) {
-				os<<"dof1="<<dof1<<" dof2="<<dof2<<"\n";
-				for (SizeType i=0;i<linSize;i++) {
-					for (SizeType j=0;j<linSize;j++) {
+		SizeType dofs = orbitals_;
+
+		os<<"#orbitals="<<dofs<<"\n";
+		os<<"#orbital changes first\n";
+		for (SizeType i=0;i<linSize;i++) {
+			for (SizeType dof1=0;dof1<dofs;dof1++) {
+				for (SizeType j=0;j<linSize;j++) {
+					for (SizeType dof2=0;dof2<dofs;dof2++) {
 						if (!connected(i,j)) {
 							os<<0<<" ";
 							continue;
 						}
 						os<<operator()(i,dof1,j,dof2)<<" ";
 					}
-					os<<"\n";
 				}
+
 				os<<"\n";
 			}
 		}

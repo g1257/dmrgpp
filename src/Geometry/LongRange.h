@@ -124,7 +124,7 @@ public:
 
 	bool connected(SizeType i1,SizeType i2) const
 	{
-		return (fabs(matrix_(i1,i2))>1e-6);
+		return true;
 	}
 
 	// assumes i1 and i2 are connected
