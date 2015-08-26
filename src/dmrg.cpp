@@ -244,6 +244,8 @@ void mainLoop0(InputNgType::Readable& io,
 	                             ProgramGlobals> GeometryType;
 
 	GeometryType geometry(io);
+	if (dmrgSolverParams.options.find("printgeometry") != PsimagLite::String::npos)
+		std::cout<<geometry;
 
 	int tmp = 0;
 	try {

@@ -171,6 +171,7 @@ public:
 		registerOpts.push_back("geometryallinsystem");
 		registerOpts.push_back("vectorwithoffsets");
 		registerOpts.push_back("allPvectors");
+		registerOpts.push_back("printgeometry");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);
