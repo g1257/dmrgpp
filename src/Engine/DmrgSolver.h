@@ -641,7 +641,7 @@ private:
 		PsimagLite::String loops = "";
 		int x = lastSite;
 
-		if (finiteLoop[0].stepLength<0) x++;
+		if (finiteLoop[0].stepLength<0 && !checkPoint) x++;
 
 		SizeType sopt = 0; // have we started saving yet?
 		for (SizeType i=0;i<finiteLoop.size();i++)  {
