@@ -778,19 +778,28 @@ private:
 			for (SizeType orb2=orb1+1;orb2<modelParameters_.orbitals;orb2++) {
 				SparseMatrixType tmpMatrix2,tmpMatrix;
 
-				multiply(tmpMatrix, spinOperator(cm,i,orb1,0),spinOperator(cm,i,orb2,1));
+				multiply(tmpMatrix,
+				         spinOperator(cm,i,orb1,0),
+				         spinOperator(cm,i,orb2,1));
 				val = modelParameters_.hubbardU[2]/val2;
-				multiplyScalar(tmpMatrix2,tmpMatrix,factorForDiagonals*val);// this is -2*J
+				// this is -2*J
+				multiplyScalar(tmpMatrix2,tmpMatrix,factorForDiagonals*val);
 				hmatrix += tmpMatrix2;
 
-				multiply(tmpMatrix, spinOperator(cm,i,orb1,1),spinOperator(cm,i,orb2,0));
+				multiply(tmpMatrix,
+				         spinOperator(cm,i,orb1,1),
+				         spinOperator(cm,i,orb2,0));
 				val = modelParameters_.hubbardU[2]/val2;
-				multiplyScalar(tmpMatrix2,tmpMatrix,factorForDiagonals*val);// this is -2*J
+				// this is -2*J
+				multiplyScalar(tmpMatrix2,tmpMatrix,factorForDiagonals*val);
 				hmatrix += tmpMatrix2;
 
-				multiply(tmpMatrix, spinOperator(cm,i,orb1,2),spinOperator(cm,i,orb2,2));
-				val = modelParameters_.hubbardU[2]/val3;
-				multiplyScalar(tmpMatrix2,tmpMatrix,factorForDiagonals*val);// this is -2*J
+				multiply(tmpMatrix,
+				         spinOperator(cm,i,orb1,2),
+				         spinOperator(cm,i,orb2,2));
+				val = modelParameters_.hubbardU[4]/val3;
+				// this is -2*J
+				multiplyScalar(tmpMatrix2,tmpMatrix,factorForDiagonals*val);
 				hmatrix += tmpMatrix2;
 			}
 		}

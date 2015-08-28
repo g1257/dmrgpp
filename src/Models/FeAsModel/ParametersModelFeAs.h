@@ -191,11 +191,22 @@ struct ParametersModelFeAs {
 		}
 
 		if (feAsMode == INT_PAPER33 || feAsMode == INT_IMPURITY) {
-			if (hubbardU.size() != 4) {
+			if (hubbardU.size() != 4 && hubbardU.size() != 5) {
 				PsimagLite::String str("FeAsMode: expecting");
-				str +=  " 4 U values\n";
+				str +=  " 4 or 5 U values\n";
 				throw PsimagLite::RuntimeError(str);
 			}
+
+			if (hubbardU.size() == 4) {
+				hubbardU.resize(5);
+				hubbardU[4] = hubbardU[2];
+			}
+
+			std::cout<<"U[0]="<<hubbardU[0]<<" U\n";
+			std::cout<<"U[1]="<<hubbardU[1]<<" U'-J/2\n";
+			std::cout<<"U[2]="<<hubbardU[2]<<" -2J for S+S- + S-S+ term\n";
+			std::cout<<"U[3]="<<hubbardU[3]<<" -J\n";
+			std::cout<<"U[4]="<<hubbardU[4]<<" -2J for SzSz term\n";
 		}
 
 		if (feAsMode == INT_KSPACE) {
