@@ -248,13 +248,15 @@ public:
 		SizeType lastMiddle=linSize_-sitesPerBlock;
 		while (i<lastMiddle) {
 			typename Vector<SizeType>::Type tmpV(sitesPerBlock);
+			typename Vector<SizeType>::Type tmpV2(sitesPerBlock);
 			for (SizeType j=0;j<sitesPerBlock;j++) {
 				SizeType jj = sitesPerBlock-1-j;
 				tmpV[j] = (linSize_-1-i-jj)+(middle-sitesPerBlock);
+				tmpV2[j] = jj + i;
 				assert(tmpV[j]<linSize_);
 			}
 
-			if (allInSystem) X.push_back(tmpV);
+			if (allInSystem) X.push_back(tmpV2);
 			else Y.push_back(tmpV);
 			i+=sitesPerBlock;
 		}
