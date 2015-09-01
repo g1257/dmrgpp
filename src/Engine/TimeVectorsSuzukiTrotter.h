@@ -383,7 +383,8 @@ private:
 		PsimagLite::Vector<SizeType>::Type iperm;
 		suzukiTrotterPerm(iperm,block);
 
-		const LeftRightSuperType& oldLrs = lrs_;
+		const LeftRightSuperType& oldLrs = wft_.lrs();
+		const LeftRightSuperType& newLrs = lrs_;
 		SizeType hilbertSize = model_.hilbertSize(block[0]);
 		SizeType ns = lrs_.left().size();
 		SizeType nx = ns/hilbertSize;
@@ -391,7 +392,7 @@ private:
 		PackIndicesType packRight(hilbertSize);
 
 		if (!twoSiteDmrg_) {
-			assert(transform.col()==lrs_.right().size());
+			assert(transform.col()==newLrs.right().size());
 			assert(transform.row()==oldLrs.right().permutationInverse().size());
 		}
 
@@ -399,7 +400,7 @@ private:
 		MatrixOrIdentityType transform1(!twoSiteDmrg_,transform);
 		for (SizeType k=transformT1.getRowPtr(yp);k<transformT1.getRowPtr(yp+1);k++) {
 			SizeType x1=0,x2p=0;
-			packLeft.unpack(x1,x2p,lrs_.left().permutation(xp));
+			packLeft.unpack(x1,x2p,newLrs.left().permutation(xp));
 
 			int yfull = transformT1.getColOrExit(k);
 			if (yfull<0) continue;
@@ -418,10 +419,10 @@ private:
 						if (y<0) continue;
 						SizeType x = packLeft.pack(x1,
 						                           x2,
-						                           lrs_.left().permutationInverse());
+						                           newLrs.left().permutationInverse());
 						SizeType j = packSuper.pack(x,
 						                            y,
-						                            lrs_.super().permutationInverse());
+						                            newLrs.super().permutationInverse());
 						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],
 						        iperm[x2p+y1p*hilbertSize]);
 						if (std::norm(tmp)<1e-12) continue;
@@ -449,7 +450,8 @@ private:
 		PsimagLite::Vector<SizeType>::Type iperm;
 		suzukiTrotterPerm(iperm,block);
 
-		const LeftRightSuperType& oldLrs = lrs_;
+		const LeftRightSuperType& oldLrs = wft_.lrs();
+		const LeftRightSuperType& newLrs = lrs_;
 		SizeType hilbertSize = model_.hilbertSize(block[0]);
 		SizeType ns = oldLrs.left().permutationInverse().size();
 		SizeType nx = ns/hilbertSize;
@@ -457,7 +459,7 @@ private:
 		PackIndicesType packRight(hilbertSize);
 
 		if (!twoSiteDmrg_) {
-			assert(transform.col()==lrs_.left().size());
+			assert(transform.col()==newLrs.left().size());
 			assert(transform.row()==oldLrs.left().permutationInverse().size());
 		}
 
@@ -472,7 +474,7 @@ private:
 			assert(x2p<hilbertSize);
 
 			SizeType y1p=0,y2=0;
-			packRight.unpack(y1p,y2,lrs_.right().permutation(yp));
+			packRight.unpack(y1p,y2,newLrs.right().permutation(yp));
 
 			for (SizeType x2=0;x2<hilbertSize;x2++) {
 				for (SizeType y1=0;y1<hilbertSize;y1++) {
@@ -486,10 +488,10 @@ private:
 						if (x<0) continue;
 						SizeType y = packRight.pack(y1,
 						                            y2,
-						                            lrs_.right().permutationInverse());
+						                            newLrs.right().permutationInverse());
 						SizeType j = packSuper.pack(x,
 						                            y,
-						                            lrs_.super().permutationInverse());
+						                            newLrs.super().permutationInverse());
 						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],
 						        iperm[x2p+y1p*hilbertSize]);
 						if (std::norm(tmp)<1e-12) continue;
