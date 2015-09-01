@@ -190,27 +190,38 @@ public:
 
 		if (b1 || b2) return;
 
-		bool areAllLinksSeen = allLinksSeen();
+		if (!oddLink && !allOddsApplied()) return;
+
+		if (oddLink && allOddsApplied() && !allEvensApplied()) return;
+
 		PsimagLite::OstringStream msg2;
 		msg2<<"LINKS SEEN ";
 		for (SizeType i=0;i<linksSeen_.size();i++)
 			msg2<<linksSeen_[i]<<" ";
 		progress_.printline(msg2,std::cout);
 
-		if (!areAllLinksSeen) {
-			for (SizeType i = 0; i < block.size(); ++i)
-				linksSeen_.push_back(lastIndexLeft+i);
-		} else {
+		SizeType count = countOccurrences(linksSeen_,lastIndexLeft);
+		b1 = (oddLink && count == 2);
+		b2 = (!oddLink && count == 1);
+
+		if (b1 || b2) {
 			PsimagLite::OstringStream msg3;
 			msg3<<"ALL LINKS SEEN";
 			progress_.printline(msg3,std::cout);
 			return;
+		} else {
+			linksSeen_.push_back(lastIndexLeft);
 		}
 
+		RealType factor = (oddLink) ? 0.5 : 1.0;
 		for (SizeType i=startEnd.first+1;i<startEnd.second;i++) {
 			VectorWithOffsetType src = targetVectors_[i];
 			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
-			calcTargetVector(targetVectors_[i],Eg,src,systemOrEnviron,times_[i]);
+			calcTargetVector(targetVectors_[i],
+			                 Eg,
+			                 src,
+			                 systemOrEnviron,
+			                 factor*times_[i]);
 			assert(targetVectors_[i].size()==targetVectors_[0].size());
 		}
 	}
@@ -560,6 +571,54 @@ private:
 		PsimagLite::Sort<VectorSizeType> sort;
 		VectorSizeType iperm(block.size());
 		sort.sort(block,iperm);
+	}
+
+	template<typename T>
+	SizeType countOccurrences(typename PsimagLite::Vector<T>::Type& v,
+	                          T element) const
+	{
+		SizeType counter = 0;
+		typename PsimagLite::Vector<T>::Type::iterator iter = v.begin();
+		while (true) {
+			iter = std::find(iter, v.end(),element);
+			if (iter == v.end()) break;
+			iter++;
+			counter++;
+		}
+
+		return counter;
+	}
+
+	bool allOddsApplied() const
+	{
+		SizeType nsites = model_.geometry().numberOfSites();
+		assert(nsites>0);
+		SizeType start = model_.params().sitesPerBlock - 1;
+		for (SizeType i=start;i<nsites-1;i++) {
+			bool isIodd = (i & 1);
+			if (!isIodd) continue;
+			bool found = (std::find(linksSeen_.begin(), linksSeen_.end(),i) !=
+			        linksSeen_.end());
+			if (!found) return false;
+		}
+
+		return true;
+	}
+
+	bool allEvensApplied() const
+	{
+		SizeType nsites = model_.geometry().numberOfSites();
+		assert(nsites>0);
+		SizeType start = model_.params().sitesPerBlock - 1;
+		for (SizeType i=start;i<nsites-1;i++) {
+			bool isIodd = (i & 1);
+			if (isIodd) continue;
+			bool found = (std::find(linksSeen_.begin(), linksSeen_.end(),i) !=
+			        linksSeen_.end());
+			if (!found) return false;
+		}
+
+		return true;
 	}
 
 	PsimagLite::ProgressIndicator progress_;
