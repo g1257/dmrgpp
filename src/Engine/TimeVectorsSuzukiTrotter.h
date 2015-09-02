@@ -190,50 +190,33 @@ public:
 
 		if (b1 || b2) return;
 
-		if (!oddLink && !allOddsApplied()) return;
-
-		if (oddLink && allOddsApplied() && !allEvensApplied()) return;
-
+		bool areAllLinksSeen = allLinksSeen();
 		PsimagLite::OstringStream msg2;
 		msg2<<"LINKS SEEN ";
 		for (SizeType i=0;i<linksSeen_.size();i++)
 			msg2<<linksSeen_[i]<<" ";
 		progress_.printline(msg2,std::cout);
 
-		SizeType count = countOccurrences(linksSeen_,lastIndexLeft);
-		b1 = (oddLink && count == 2);
-		b2 = (!oddLink && count == 1);
-
-		if (b1 || b2) {
+		if (!areAllLinksSeen) {
+			for (SizeType i = 0; i < block.size(); ++i)
+				linksSeen_.push_back(lastIndexLeft+i);
+		} else {
 			PsimagLite::OstringStream msg3;
 			msg3<<"ALL LINKS SEEN";
 			progress_.printline(msg3,std::cout);
 			return;
-		} else {
-			linksSeen_.push_back(lastIndexLeft);
 		}
 
-		RealType factor = (oddLink) ? 0.5 : 1.0;
 		for (SizeType i=startEnd.first+1;i<startEnd.second;i++) {
 			VectorWithOffsetType src = targetVectors_[i];
 			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
-			calcTargetVector(targetVectors_[i],
-			                 Eg,
-			                 src,
-			                 systemOrEnviron,
-			                 factor*times_[i]);
+			calcTargetVector(targetVectors_[i],Eg,src,systemOrEnviron,times_[i]);
 			assert(targetVectors_[i].size()==targetVectors_[0].size());
 		}
 	}
 
 	virtual void timeHasAdvanced()
 	{
-		if (!allLinksSeen()) {
-			PsimagLite::String str("TimeVectorsSuzukiTrotter: ");
-			str += " trying to advance in time, but not all links seen yet\n";
-			throw PsimagLite::RuntimeError(str);
-		}
-
 		linksSeen_.clear();
 		PsimagLite::OstringStream msg;
 		msg<<"ALL LINKS CLEARED";
@@ -263,10 +246,6 @@ private:
 
 	void wftOne(SizeType i,const PsimagLite::Vector<SizeType>::Type& block)
 	{
-		if (targetVectors_[i].size()==0) {
-			targetVectors_[i] = targetVectors_[0];
-		}
-
 		VectorWithOffsetType phiNew = targetVectors_[0];
 
 		// OK, now that we got the partition number right, let's wft:
@@ -383,8 +362,7 @@ private:
 		PsimagLite::Vector<SizeType>::Type iperm;
 		suzukiTrotterPerm(iperm,block);
 
-		const LeftRightSuperType& oldLrs = wft_.lrs();
-		const LeftRightSuperType& newLrs = lrs_;
+		const LeftRightSuperType& oldLrs = lrs_;
 		SizeType hilbertSize = model_.hilbertSize(block[0]);
 		SizeType ns = lrs_.left().size();
 		SizeType nx = ns/hilbertSize;
@@ -392,7 +370,7 @@ private:
 		PackIndicesType packRight(hilbertSize);
 
 		if (!twoSiteDmrg_) {
-			assert(transform.col()==newLrs.right().size());
+			assert(transform.col()==lrs_.right().size());
 			assert(transform.row()==oldLrs.right().permutationInverse().size());
 		}
 
@@ -400,7 +378,7 @@ private:
 		MatrixOrIdentityType transform1(!twoSiteDmrg_,transform);
 		for (SizeType k=transformT1.getRowPtr(yp);k<transformT1.getRowPtr(yp+1);k++) {
 			SizeType x1=0,x2p=0;
-			packLeft.unpack(x1,x2p,newLrs.left().permutation(xp));
+			packLeft.unpack(x1,x2p,lrs_.left().permutation(xp));
 
 			int yfull = transformT1.getColOrExit(k);
 			if (yfull<0) continue;
@@ -419,10 +397,10 @@ private:
 						if (y<0) continue;
 						SizeType x = packLeft.pack(x1,
 						                           x2,
-						                           newLrs.left().permutationInverse());
+						                           lrs_.left().permutationInverse());
 						SizeType j = packSuper.pack(x,
 						                            y,
-						                            newLrs.super().permutationInverse());
+						                            lrs_.super().permutationInverse());
 						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],
 						        iperm[x2p+y1p*hilbertSize]);
 						if (std::norm(tmp)<1e-12) continue;
@@ -450,8 +428,7 @@ private:
 		PsimagLite::Vector<SizeType>::Type iperm;
 		suzukiTrotterPerm(iperm,block);
 
-		const LeftRightSuperType& oldLrs = wft_.lrs();
-		const LeftRightSuperType& newLrs = lrs_;
+		const LeftRightSuperType& oldLrs = lrs_;
 		SizeType hilbertSize = model_.hilbertSize(block[0]);
 		SizeType ns = oldLrs.left().permutationInverse().size();
 		SizeType nx = ns/hilbertSize;
@@ -459,7 +436,7 @@ private:
 		PackIndicesType packRight(hilbertSize);
 
 		if (!twoSiteDmrg_) {
-			assert(transform.col()==newLrs.left().size());
+			assert(transform.col()==lrs_.left().size());
 			assert(transform.row()==oldLrs.left().permutationInverse().size());
 		}
 
@@ -474,7 +451,7 @@ private:
 			assert(x2p<hilbertSize);
 
 			SizeType y1p=0,y2=0;
-			packRight.unpack(y1p,y2,newLrs.right().permutation(yp));
+			packRight.unpack(y1p,y2,lrs_.right().permutation(yp));
 
 			for (SizeType x2=0;x2<hilbertSize;x2++) {
 				for (SizeType y1=0;y1<hilbertSize;y1++) {
@@ -488,10 +465,10 @@ private:
 						if (x<0) continue;
 						SizeType y = packRight.pack(y1,
 						                            y2,
-						                            newLrs.right().permutationInverse());
+						                            lrs_.right().permutationInverse());
 						SizeType j = packSuper.pack(x,
 						                            y,
-						                            newLrs.super().permutationInverse());
+						                            lrs_.super().permutationInverse());
 						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],
 						        iperm[x2p+y1p*hilbertSize]);
 						if (std::norm(tmp)<1e-12) continue;
@@ -541,8 +518,7 @@ private:
 		model_.hamiltonianOnLink(hmatrix,block,currentTime_,factorForDiagonals);
 		crsMatrixToFullMatrix(m,hmatrix);
 		assert(isHermitian(m));
-		RealType timeDirection = tstStruct_.timeDirection();
-		m *= (timeDirection*time);
+		m *= (-time);
 		exp(m);
 	}
 
@@ -573,54 +549,6 @@ private:
 		PsimagLite::Sort<VectorSizeType> sort;
 		VectorSizeType iperm(block.size());
 		sort.sort(block,iperm);
-	}
-
-	template<typename T>
-	SizeType countOccurrences(typename PsimagLite::Vector<T>::Type& v,
-	                          T element) const
-	{
-		SizeType counter = 0;
-		typename PsimagLite::Vector<T>::Type::iterator iter = v.begin();
-		while (true) {
-			iter = std::find(iter, v.end(),element);
-			if (iter == v.end()) break;
-			iter++;
-			counter++;
-		}
-
-		return counter;
-	}
-
-	bool allOddsApplied() const
-	{
-		SizeType nsites = model_.geometry().numberOfSites();
-		assert(nsites>0);
-		SizeType start = model_.params().sitesPerBlock - 1;
-		for (SizeType i=start;i<nsites-1;i++) {
-			bool isIodd = (i & 1);
-			if (!isIodd) continue;
-			bool found = (std::find(linksSeen_.begin(), linksSeen_.end(),i) !=
-			        linksSeen_.end());
-			if (!found) return false;
-		}
-
-		return true;
-	}
-
-	bool allEvensApplied() const
-	{
-		SizeType nsites = model_.geometry().numberOfSites();
-		assert(nsites>0);
-		SizeType start = model_.params().sitesPerBlock - 1;
-		for (SizeType i=start;i<nsites-1;i++) {
-			bool isIodd = (i & 1);
-			if (isIodd) continue;
-			bool found = (std::find(linksSeen_.begin(), linksSeen_.end(),i) !=
-			        linksSeen_.end());
-			if (!found) return false;
-		}
-
-		return true;
 	}
 
 	PsimagLite::ProgressIndicator progress_;
