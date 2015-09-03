@@ -131,7 +131,7 @@ public:
 	                         const WaveFunctionTransfType& wft,
 	                         const LeftRightSuperType& lrs,
 	                         const RealType& E0,
-	                         const PsimagLite::Vector<SizeType>::Type* nonZeroQns)
+	                         const VectorSizeType* nonZeroQns)
 	    : progress_("TimeVectorsSuzukiTrotter"),
 	      currentTime_(currentTime),
 	      tstStruct_(tstStruct),
@@ -143,7 +143,19 @@ public:
 	      E0_(E0),
 	      nonZeroQns_(nonZeroQns),
 	      twoSiteDmrg_(wft_.twoSiteDmrg())
-	{}
+	{
+		VectorSizeType block(1,0);
+		typename ModelType::HilbertBasisType  basis;
+		VectorSizeType q;
+		model_.setNaturalBasis(basis,q,block);
+		iperm1_.resize(basis.size());
+		for (SizeType i=0;i<basis.size();i++) {
+			SizeType ket = basis[i];
+			int jj = PsimagLite::isInVector(basis,ket);
+			assert(jj>=0);
+			iperm1_[ket] = jj;
+		}
+	}
 
 	virtual void calcTimeVectors(const PairType& startEnd,
 	                             RealType Eg,
@@ -231,25 +243,25 @@ private:
 		assert(nsites>0);
 		SizeType start = model_.params().sitesPerBlock - 1;
 		for (SizeType i=start;i<nsites-1;i++) {
-			PsimagLite::Vector<SizeType>::Type::const_iterator it =
+			VectorSizeType::const_iterator it =
 			        find(linksSeen_.begin(),linksSeen_.end(),i);
 			if (it == linksSeen_.end()) return false;
 		}
 		return true;
 	}
 
-	void wftAll(const PsimagLite::Vector<SizeType>::Type& block)
+	void wftAll(const VectorSizeType& block)
 	{
 		for (SizeType i=1;i<times_.size();i++)
 			wftOne(i,block);
 	}
 
-	void wftOne(SizeType i,const PsimagLite::Vector<SizeType>::Type& block)
+	void wftOne(SizeType i,const VectorSizeType& block)
 	{
 		VectorWithOffsetType phiNew = targetVectors_[0];
 
 		// OK, now that we got the partition number right, let's wft:
-		PsimagLite::Vector<SizeType>::Type nk;
+		VectorSizeType nk;
 		setNk(nk,block);
 		// generalize for su(2)
 		wft_.setInitialVector(phiNew,targetVectors_[i],lrs_,nk);
@@ -289,7 +301,7 @@ private:
 		SizeType ns = lrs_.left().size();
 		PackIndicesType packSuper(ns);
 
-		PsimagLite::Vector<SizeType>::Type block;
+		VectorSizeType block;
 		calcBlock(block);
 
 		MatrixComplexOrRealType m;
@@ -359,7 +371,7 @@ private:
 	                      const SparseMatrixType& transform,
 	                      const SparseMatrixType& transformT) const
 	{
-		PsimagLite::Vector<SizeType>::Type iperm;
+		VectorSizeType iperm;
 		suzukiTrotterPerm(iperm,block);
 
 		const LeftRightSuperType& oldLrs = lrs_;
@@ -379,14 +391,16 @@ private:
 		for (SizeType k=transformT1.getRowPtr(yp);k<transformT1.getRowPtr(yp+1);k++) {
 			SizeType x1=0,x2p=0;
 			packLeft.unpack(x1,x2p,lrs_.left().permutation(xp));
-
+			SizeType x2pmodif = iperm1_[x2p];
 			int yfull = transformT1.getColOrExit(k);
 			if (yfull<0) continue;
 			SizeType y1p=0,y2=0;
 			packRight.unpack(y1p,y2,oldLrs.right().permutation(yfull));
-
+			SizeType y1pmodif = iperm1_[y1p];
 			for (SizeType x2=0;x2<hilbertSize;x2++) {
+				SizeType x2modif = iperm1_[x2];
 				for (SizeType y1=0;y1<hilbertSize;y1++) {
+					SizeType y1modif = iperm1_[y1];
 					SizeType yfull2 = packRight.pack(y1,
 					                                 y2,
 					                                 oldLrs.right().permutationInverse());
@@ -401,8 +415,8 @@ private:
 						SizeType j = packSuper.pack(x,
 						                            y,
 						                            lrs_.super().permutationInverse());
-						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],
-						        iperm[x2p+y1p*hilbertSize]);
+						ComplexOrRealType tmp = m(iperm[x2modif+y1modif*hilbertSize],
+						        iperm[x2pmodif+y1pmodif*hilbertSize]);
 						if (std::norm(tmp)<1e-12) continue;
 						assert(j>=offset && j<offset+phi0.size());
 						result[j-offset] += tmp*phi0[i]*transformT1.getValue(k)*
@@ -425,7 +439,7 @@ private:
 	                       const SparseMatrixType& transform,
 	                       const SparseMatrixType& transformT) const
 	{
-		PsimagLite::Vector<SizeType>::Type iperm;
+		VectorSizeType iperm;
 		suzukiTrotterPerm(iperm,block);
 
 		const LeftRightSuperType& oldLrs = lrs_;
@@ -449,12 +463,14 @@ private:
 			SizeType x1=0,x2p=0;
 			packLeft.unpack(x1,x2p,oldLrs.left().permutation(xfull));
 			assert(x2p<hilbertSize);
-
+			SizeType x2pmodif = iperm1_[x2p];
 			SizeType y1p=0,y2=0;
 			packRight.unpack(y1p,y2,lrs_.right().permutation(yp));
-
+			SizeType y1pmodif = iperm1_[y1p];
 			for (SizeType x2=0;x2<hilbertSize;x2++) {
+				SizeType x2modif = iperm1_[x2];
 				for (SizeType y1=0;y1<hilbertSize;y1++) {
+					SizeType y1modif = iperm1_[y1];
 					SizeType xfull2 = packLeft.pack(x1,
 					                                x2,
 					                                oldLrs.left().permutationInverse());
@@ -469,8 +485,10 @@ private:
 						SizeType j = packSuper.pack(x,
 						                            y,
 						                            lrs_.super().permutationInverse());
-						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],
-						        iperm[x2p+y1p*hilbertSize]);
+
+
+						ComplexOrRealType tmp = m(iperm[x2modif+y1modif*hilbertSize],
+						        iperm[x2pmodif+y1pmodif*hilbertSize]);
 						if (std::norm(tmp)<1e-12) continue;
 						assert(j>=offset && j<offset+phi0.size());
 						result[j-offset] += tmp*phi0[i]*transformT1.getValue(k)*
@@ -481,11 +499,11 @@ private:
 		}
 	}
 
-	void suzukiTrotterPerm(PsimagLite::Vector<SizeType>::Type& iperm,
-	                       const PsimagLite::Vector<SizeType>::Type& block) const
+	void suzukiTrotterPerm(VectorSizeType& iperm,
+	                       const VectorSizeType& block) const
 	{
 		typename ModelType::HilbertBasisType  basis;
-		PsimagLite::Vector<SizeType>::Type q;
+		VectorSizeType q;
 		model_.setNaturalBasis(basis,q,block);
 		iperm.resize(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {
@@ -522,8 +540,7 @@ private:
 		exp(m);
 	}
 
-	void setNk(typename PsimagLite::Vector<SizeType>::Type& nk,
-	           const typename PsimagLite::Vector<SizeType>::Type& block) const
+	void setNk(VectorSizeType& nk, const  VectorSizeType& block) const
 	{
 		for (SizeType i=0;i<block.size();i++)
 			nk.push_back(model_.hilbertSize(block[i]));
@@ -560,9 +577,10 @@ private:
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;
 	RealType E0_;
-	const PsimagLite::Vector<SizeType>::Type* nonZeroQns_;
+	const VectorSizeType* nonZeroQns_;
 	bool twoSiteDmrg_;
-	PsimagLite::Vector<SizeType>::Type linksSeen_;
+	VectorSizeType linksSeen_;
+	VectorSizeType iperm1_;
 }; //class TimeVectorsSuzukiTrotter
 } // namespace Dmrg
 /*@}*/
