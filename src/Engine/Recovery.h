@@ -110,23 +110,31 @@ public:
 	      wft_(wft),
 	      pS_(pS),
 	      pE_(pE),
-	      rootName_("Recovery" + checkpoint_.parameters().filename)
+	      flag_m_(false)
 	{}
 
 	void save(const TargetingType& psi,
 	          VectorSizeType vsites,
 	          int lastSign) const
 	{
-		typename IoType::Out ioOut(rootName_);
+		if (checkpoint_.parameters().recoverySave == "0")
+			return;
+
+		PsimagLite::String prefix("Recovery");
+		prefix += (flag_m_) ? "1" : "0";
+		PsimagLite::String rootName(prefix + checkpoint_.parameters().filename);
+		typename IoType::Out ioOut(rootName);
+		ioOut<<checkpoint_.parameters();
 		checkpoint_.save(pS_,pE_,ioOut);
 		psi.save(vsites,ioOut);
 		PsimagLite::OstringStream msg;
 		msg<<"#LastLoopSign="<<lastSign<<"\n";
 		ioOut<<msg.str();
 
-		saveStacksForRecovery(rootName_);
+		saveStacksForRecovery(rootName);
 
-		wft_.save(rootName_);
+		wft_.save(rootName);
+		flag_m_ = !flag_m_;
 	}
 
 private:
@@ -161,7 +169,7 @@ private:
 	const WaveFunctionTransfType& wft_;
 	const BasisWithOperatorsType& pS_;
 	const BasisWithOperatorsType& pE_;
-	PsimagLite::String rootName_;
+	mutable bool flag_m_;
 };     //class Recovery
 
 } // namespace Dmrg

@@ -300,6 +300,7 @@ struct ParametersDmrgSolver {
 	PsimagLite::String model;
 	PsimagLite::String insitu;
 	PsimagLite::String fileForDensityMatrixEigs;
+	PsimagLite::String recoverySave;
 	DmrgCheckPoint checkpoint;
 	VectorSizeType adjustQuantumNumbers;
 	typename PsimagLite::Vector<FiniteLoop>::Type finiteLoop;
@@ -343,7 +344,8 @@ struct ParametersDmrgSolver {
 	ParametersDmrgSolver(InputValidatorType& io)
 	    : sitesPerBlock(1),
 	      maxMatrixRankStored(0),
-	      excited(0)
+	      excited(0),
+	      recoverySave("2")
 	{
 		io.readline(model,"Model=");
 		io.readline(options,"SolverOptions=");
@@ -372,12 +374,12 @@ struct ParametersDmrgSolver {
 
 		try {
 			io.read(adjustQuantumNumbers,"AdjustQuantumNumbers");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 
 		tolerance = -1.0;
 		try {
 			io.readline(tolerance,"TruncationTolerance=");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 
 		if (options.find("checkpoint")!=PsimagLite::String::npos) {
 			io.readline(checkpoint.filename,"CheckpointFilename=");
@@ -390,7 +392,7 @@ struct ParametersDmrgSolver {
 		nthreads=1; // provide a default value
 		try {
 			io.readline(nthreads,"Threads=");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 
 		if (nthreads==0) {
 			PsimagLite::String s (__FILE__);
@@ -401,28 +403,32 @@ struct ParametersDmrgSolver {
 		useReflectionSymmetry=0;
 		try {
 			io.readline(useReflectionSymmetry,"UseReflectionSymmetry=");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 		fileForDensityMatrixEigs="";
 		try {
 			io.readline(fileForDensityMatrixEigs,"FileForDensityMatrixEigs=");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 
 		insitu = "";
 		try {
 			io.readline(insitu,"insitu=");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 
 		try {
 			io.readline(sitesPerBlock,"SitesPerBlock=");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 
 		try {
 			io.readline(maxMatrixRankStored,"MaxMatrixRankStored=");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 
 		try {
 			io.readline(excited,"Excited=");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
+
+		try {
+			io.readline(recoverySave,"RecoverySave=");
+		} catch (std::exception&) {}
 	}
 
 	template<typename SomeInputType>
@@ -546,6 +552,7 @@ std::ostream &operator<<(std::ostream &os,
 	os<<"FiniteLoops ";
 	os<<p.finiteLoop;
 
+	os<<"RecoverySave="<<p.recoverySave<<"\n";
 	if (p.tolerance>0)
 		os<<"parameters.tolerance="<<p.tolerance<<"\n";
 	os<<"parameters.nthreads="<<p.nthreads<<"\n";
