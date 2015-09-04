@@ -170,7 +170,7 @@ public:
 	~WaveFunctionTransfFactory()
 	{
 		if (!isEnabled_) return;
-		save();
+		save(filenameOut_);
 		delete wftImpl_;
 	}
 
@@ -365,7 +365,41 @@ public:
 
 	bool twoSiteDmrg() const { return twoSiteDmrg_; }
 
+	void save(PsimagLite::String fileOut) const
+	{
+		if (!isEnabled_) return;
+
+		typename IoType::Out io(WFT_STRING + fileOut);
+		PsimagLite::String s="isEnabled="+ttos(isEnabled_);
+		io.printline(s);
+		s="stage="+ttos(stage_);
+		io.printline(s);
+		s="counter="+ttos(counter_);
+		io.printline(s);
+		io.printline("dmrgWaveStruct");
+
+		dmrgWaveStruct_.save(io);
+		io.printMatrix(wsStack_,"wsStack");
+		io.printMatrix(weStack_,"weStack");
+	}
+
 private:
+
+	void load()
+	{
+		if (!isEnabled_)
+			throw PsimagLite::RuntimeError("WFT::load(...) called but wft is disabled\n");
+
+		typename IoType::In io(WFT_STRING + filenameIn_);
+		io.readline(isEnabled_,"isEnabled=");
+		io.readline(stage_,"stage=");
+		io.readline(counter_,"counter=");
+		firstCall_=false;
+		io.advance("dmrgWaveStruct");
+		dmrgWaveStruct_.load(io);
+		io.readMatrix(wsStack_,"wsStack");
+		io.readMatrix(weStack_,"weStack");
+	}
 
 	void myRandomT(std::complex<RealType> &value) const
 	{
@@ -441,41 +475,6 @@ private:
 		std::cerr<<"counter="<<counter_<<"\n";
 	}
 
-	void save() const
-	{
-		if (!isEnabled_)
-			throw PsimagLite::RuntimeError("WFT::save(...) called but wft is disabled\n");
-
-		typename IoType::Out io(WFT_STRING + filenameOut_);
-		PsimagLite::String s="isEnabled="+ttos(isEnabled_);
-		io.printline(s);
-		s="stage="+ttos(stage_);
-		io.printline(s);
-		s="counter="+ttos(counter_);
-		io.printline(s);
-		io.printline("dmrgWaveStruct");
-
-		dmrgWaveStruct_.save(io);
-		io.printMatrix(wsStack_,"wsStack");
-		io.printMatrix(weStack_,"weStack");
-	}
-
-	void load()
-	{
-		if (!isEnabled_)
-			throw PsimagLite::RuntimeError("WFT::load(...) called but wft is disabled\n");
-
-		typename IoType::In io(WFT_STRING + filenameIn_);
-		io.readline(isEnabled_,"isEnabled=");
-		io.readline(stage_,"stage=");
-		io.readline(counter_,"counter=");
-		firstCall_=false;
-		io.advance("dmrgWaveStruct");
-		dmrgWaveStruct_.load(io);
-		io.readMatrix(wsStack_,"wsStack");
-		io.readMatrix(weStack_,"weStack");
-	}
-
 	SizeType computeCenter(const LeftRightSuperType& lrs,SizeType direction) const
 	{
 		if (direction==EXPAND_SYSTEM) {
@@ -518,7 +517,8 @@ private:
 	SizeType counter_;
 	bool firstCall_;
 	PsimagLite::ProgressIndicator progress_;
-	PsimagLite::String filenameIn_,filenameOut_;
+	PsimagLite::String filenameIn_;
+	PsimagLite::String filenameOut_;
 	const PsimagLite::String WFT_STRING;
 	DmrgWaveStructType dmrgWaveStruct_;
 	typename PsimagLite::Stack<SparseMatrixType>::Type wsStack_,weStack_;

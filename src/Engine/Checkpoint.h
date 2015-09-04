@@ -180,6 +180,23 @@ public:
 		return systemStack_.size();
 	}
 
+	const MemoryStackType& memoryStack(SizeType option) const
+	{
+		return (option == ProgramGlobals::SYSTEM) ? systemStack_ : envStack_;
+	}
+
+	template<typename StackType1,typename StackType2>
+	static void loadStack(StackType1& stackInMemory,StackType2& stackInDisk)
+	{
+		while (stackInDisk.size()>0) {
+			BasisWithOperatorsType b = stackInDisk.top();
+			stackInMemory.push(b);
+			stackInDisk.pop();
+		}
+	}
+
+	const ParametersType& parameters() const { return parameters_; }
+
 private:
 
 	//! shrink  (we don't really shrink, we just undo the growth)
@@ -211,17 +228,6 @@ private:
 		progress_.printline(msg,std::cout);
 		loadStack(systemDisk_,systemStack_);
 		loadStack(envDisk_,envStack_);
-	}
-
-	template<typename StackType1,typename StackType2>
-	void loadStack(StackType1& stackInMemory,StackType2& stackInDisk)
-	{
-		while (stackInDisk.size()>0) {
-			BasisWithOperatorsType b = stackInDisk.top();
-			stackInMemory.push(b);
-			stackInDisk.pop();
-		}
-
 	}
 
 	//! Move elsewhere

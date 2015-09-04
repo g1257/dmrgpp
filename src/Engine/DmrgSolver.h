@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Diagonalization.h"
 #include "ProgressIndicator.h"
 #include "DmrgSerializer.h"
-#include "Checkpoint.h"
+#include "Recovery.h"
 #include "WaveFunctionTransfFactory.h"
 #include "Truncation.h"
 #include "ObservablesInSitu.h"
@@ -122,7 +122,8 @@ public:
 	typedef Truncation<LeftRightSuperType,ParametersType,TargettingType> TruncationType;
 	typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> DmrgSerializerType;
 	typedef typename ModelType::GeometryType GeometryType;
-	typedef Checkpoint<ParametersType,TargettingType> CheckpointType;
+	typedef Recovery<ParametersType,TargettingType> RecoveryType;
+	typedef typename RecoveryType::CheckpointType CheckpointType;
 	typedef typename DmrgSerializerType::FermionSignType FermionSignType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename PsimagLite::Vector<BlockType>::Type VectorBlockType;
@@ -353,6 +354,8 @@ private:
 			throw PsimagLite::RuntimeError(msg + " (and nofiniteloops is not set)\n");
 		}
 
+		RecoveryType recovery(checkpoint_,wft_,pS,pE);
+
 		// set initial site to add to either system or environment:
 		// this is a bit tricky and has been a source of endless bugs
 		// basically we have pS on the left and pE on the right,
@@ -383,6 +386,7 @@ private:
 
 		stepCurrent_ = sc; // phew!!, that's all folks, now bugs, go away!!
 		int lastSign = 1;
+
 		for (SizeType i=0;i<parameters_.finiteLoop.size();i++)  {
 			lastSign = (parameters_.finiteLoop[i].stepLength < 0) ? -1 : 1;
 			PsimagLite::OstringStream msg;
@@ -400,8 +404,10 @@ private:
 					if (parameters_.finiteLoop[i].stepLength<0) stepCurrent_--;
 				}
 			}
+
 			finiteStep(S,E,pS,pE,i,psi);
 			if (psi.end()) break;
+			recovery.save(psi,sitesIndices_[stepCurrent_],lastSign);
 		}
 
 		checkpoint_.save(pS,pE,ioOut_);
@@ -411,13 +417,12 @@ private:
 		ioOut_<<msg2.str();
 	}
 
-	void finiteStep(
-	        BlockType const &,
-	        BlockType const &,
-	        MyBasisWithOperators &pS,
-	        MyBasisWithOperators &pE,
-	        SizeType loopIndex,
-	        TargettingType& target)
+	void finiteStep(BlockType const &,
+	                BlockType const &,
+	                MyBasisWithOperators &pS,
+	                MyBasisWithOperators &pE,
+	                SizeType loopIndex,
+	                TargettingType& target)
 	{
 		int stepLength = parameters_.finiteLoop[loopIndex].stepLength;
 		SizeType keptStates = parameters_.finiteLoop[loopIndex].keptStates;
