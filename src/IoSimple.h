@@ -427,6 +427,26 @@ public:
 			return std::pair<String,SizeType>(tempSaved,counter);
 		}
 
+		void readFullLine(String& temp)
+		{
+			getline(fin_,temp);
+		}
+
+		LongSizeType advanceToLine(LongSizeType line)
+		{
+			LongSizeType counter=0;
+			String temp;
+
+			while (!fin_.eof()) {
+				readFullLine(temp);
+				if (fin_.eof() || !fin_.good() || fin_.bad()) break;
+				counter++;
+				if (counter == line) break;
+			}
+
+			return counter;
+		}
+
 		SizeType count(const String& s)
 		{
 			SizeType i = 0;
@@ -495,6 +515,8 @@ public:
 			fin_.clear(); // forget we hit the end of file
 			fin_.seekg(0, std::ios::beg); // move to the start of the file
 		}
+
+		bool eof() const { return fin_.eof(); }
 
 		const char* filename() const
 		{

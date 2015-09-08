@@ -489,6 +489,12 @@ std::istream &operator>>(std::istream &is,CrsMatrix<T>& m)
 	return is;
 }
 
+template<typename T>
+class IsMatrixLike<CrsMatrix<T> > {
+public:
+        enum { True = true};
+};
+
 template<typename S>
 void bcast(CrsMatrix<S>& m)
 {
