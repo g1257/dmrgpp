@@ -345,7 +345,7 @@ struct ParametersDmrgSolver {
 	    : sitesPerBlock(1),
 	      maxMatrixRankStored(0),
 	      excited(0),
-	      recoverySave("2")
+	      recoverySave("0")
 	{
 		io.readline(model,"Model=");
 		io.readline(options,"SolverOptions=");
