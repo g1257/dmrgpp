@@ -82,8 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "Sort.h" // in PsimagLite
 #include "ParametersFermionSpinless.h"
-#include "../HubbardOneBand/HilbertSpaceHubbard.h"
-#include "LinkProductHubbardOneBand.h"
+#include "HilbertSpaceFermionSpinless.h"
+#include "LinkProductFermionSpinless.h"
 #include "CrsMatrix.h"
 #include "SpinSquaredHelper.h"
 #include "SpinSquared.h"
@@ -110,7 +110,7 @@ public:
 	typedef typename ModelBaseType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::SparseElementType SparseElementType;
 	typedef unsigned int long long WordType;
-	typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
+	typedef  HilbertSpaceFermionSpinless<WordType> HilbertSpaceType;
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
 	typedef typename ModelBaseType::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
@@ -121,16 +121,13 @@ private:
 	static const int DEGREES_OF_FREEDOM=1;
 	static const int NUMBER_OF_ORBITALS=1;
 
-	enum {SPIN_UP = HilbertSpaceHubbardType::SPIN_UP,
-		  SPIN_DOWN = HilbertSpaceHubbardType::SPIN_DOWN};
-
 	typedef typename ModelBaseType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
 
 public:
 
-	typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
+	typedef typename HilbertSpaceType::HilbertState HilbertState;
 	typedef LinkProductHubbardOneBand<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
@@ -271,7 +268,7 @@ public:
 	{
 		electrons.clear();
 		for (SizeType i=0;i<basis.size();i++) {
-			int nup = HilbertSpaceHubbardType::getNofDigits(basis[i],0);
+			int nup = HilbertSpaceType::getNofDigits(basis[i],0);
 			electrons.push_back(nup);
 		}
 	}
@@ -310,12 +307,11 @@ public:
 	{
 		SizeType n=block.size();
 		SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
-		SizeType linSize = geometry_.numberOfSites();
 
 		for (SizeType i=0;i<n;i++) {
 
 			// V_iup term
-			tmp = modelParameters_.potentialV[block[i]]*factorForDiagonals;
+			RealType tmp = modelParameters_.potentialV[block[i]]*factorForDiagonals;
 			multiplyScalar(tmpMatrix,niup,static_cast<SparseElementType>(tmp));
 			hmatrix += tmpMatrix;
 
@@ -339,13 +335,13 @@ private:
 
 	// Calculate fermionic sign when applying operator
 	// c^\dagger_{i\sigma} to basis state ket
-	RealType sign(typename HilbertSpaceHubbardType::HilbertState const &ket,
+	RealType sign(typename HilbertSpaceType::HilbertState const &ket,
 	              int i,
 	              int sigma) const
 	{
 		int value=0;
-		value += HilbertSpaceHubbardType::calcNofElectrons(ket,0,i,0);
-		int tmp1 = HilbertSpaceHubbardType::get(ket,0) &1;
+		value += HilbertSpaceType::calcNofElectrons(ket,0,i,0);
+		int tmp1 = HilbertSpaceType::get(ket,0) &1;
 		if (i>0 && tmp1>0) value++;
 
 		return (value%2==0) ? 1.0 : FERMION_SIGN;
@@ -356,16 +352,16 @@ private:
 	                                      int sigma,
 	                                      const HilbertBasisType& natBasis) const
 	{
-		typename HilbertSpaceHubbardType::HilbertState bra,ket;
+		typename HilbertSpaceType::HilbertState bra,ket;
 		int n = natBasis.size();
 		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
 
 		for (SizeType ii=0;ii<natBasis.size();ii++) {
 			bra=ket=natBasis[ii];
-			if (HilbertSpaceHubbardType::isNonZero(ket,i,sigma)) {
+			if (HilbertSpaceType::isNonZero(ket,i,sigma)) {
 
 			} else {
-				HilbertSpaceHubbardType::create(bra,i,sigma);
+				HilbertSpaceType::create(bra,i,sigma);
 				int jj = PsimagLite::isInVector(natBasis,bra);
 				assert(jj >= 0);
 				cm(ii,jj) =sign(ket,i,sigma);
@@ -406,7 +402,7 @@ private:
 
 			jmvalues.push_back(jmpair);
 			// nup
-			electronsUp[i] = HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_UP);
+			electronsUp[i] = HilbertSpaceType::getNofDigits(basis[i],0);
 
 			flavors.push_back(electronsUp[i]);
 			jmSaved = jmpair;

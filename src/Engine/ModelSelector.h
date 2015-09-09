@@ -63,6 +63,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/TjAncillaG/TjAncillaG.h"
 #include "../Models/SuperHubbardExtended/SuperHubbardExtended.h"
 #include "../Models/HubbardAncilla/HubbardAncilla.h"
+#include "../Models/FermionSpinless/FermionSpinless.h"
 
 namespace Dmrg {
 
@@ -89,6 +90,7 @@ class ModelSelector {
 	typedef TjAncillaG<ModelBaseType> TjAncillaGType;
 	typedef SuperHubbardExtended<ModelBaseType> SuperHubbardExtendedType;
 	typedef HubbardAncilla<ModelBaseType> HubbardAncillaType;
+	typedef FermionSpinless<ModelBaseType> FermionSpinlessType;
 	// end models
 
 public:
@@ -137,6 +139,8 @@ public:
 			model_ = new ModelHubbardType(solverParams,io,geometry);
 		} else if (name_ == "HubbardAncilla") {
 			model_ = new HubbardAncillaType(solverParams,io,geometry);
+		} else if (name_ == "FermionSpinless") {
+			model_ = new FermionSpinlessType(solverParams,io,geometry);
 		} else {
 			PsimagLite::String s(__FILE__);
 			s += " Unknown model " + name_ + "\n";
