@@ -90,13 +90,13 @@ class LinkProductFermionSpinless {
 
 public:
 
+	enum {TERM_HOPPING=0,TERM_NINJ=1};
+
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
-	static SizeType TERMS_;
-
 	template<typename SomeStructType>
-	static void setLinkData(SizeType,
+	static void setLinkData(SizeType term,
 	                        SizeType dofs,
 	                        bool,
 	                        SizeType& fermionOrBoson,
@@ -106,12 +106,15 @@ public:
 	                        RealType& angularFactor,
 	                        SizeType& category,const SomeStructType&)
 	{
-		fermionOrBoson = ProgramGlobals::FERMION;
-
-		ops = PairType(dofs,dofs);
+		assert(dofs == 0);
+		if (term==TERM_NINJ) fermionOrBoson = ProgramGlobals::BOSON;
+		else fermionOrBoson = ProgramGlobals::FERMION;
+		if (term==TERM_NINJ) ops = PairType(1,1);
+		else ops = PairType(dofs,dofs);
 		angularFactor = 1;
 		if (dofs==1) angularFactor = -1;
 		angularMomentum = 1;
+		if (term==TERM_NINJ) angularMomentum = 0;
 		category = dofs;
 	}
 
@@ -135,11 +138,8 @@ public:
 		return PairType(0,0); // no orbital and no dependence on spin
 	}
 
-	static SizeType terms() { return TERMS_; }
+	static SizeType terms() { return 2; }
 }; // class LinkProductFermionSpinless
-
-template<typename ModelHelperType>
-SizeType LinkProductFermionSpinless<ModelHelperType>::TERMS_ = 1;
 
 } // namespace Dmrg
 /*@}*/

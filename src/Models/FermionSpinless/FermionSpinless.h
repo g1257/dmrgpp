@@ -128,6 +128,7 @@ private:
 public:
 
 	typedef typename HilbertSpaceType::HilbertState HilbertState;
+	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
 	typedef LinkProductHubbardOneBand<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
@@ -178,6 +179,9 @@ public:
 
 		setOperatorMatrices(creationMatrix,block);
 
+		// add ni to creationMatrix
+		setNi(creationMatrix,block);
+
 		//! Set symmetry related
 		setSymmetryRelated(q,natBasis,block.size());
 
@@ -221,13 +225,16 @@ public:
 				creationMatrix.push_back(myOp);
 			}
 		}
+
+		// add ni to creationMatrix
+		setNi(creationMatrix,block);
 	}
 
 	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
 	 * unmangled (natural) basis of one-site */
 	PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
 	                                                      SizeType site,
-	                                                      SizeType dof) const
+	                                                      SizeType) const
 	{
 		BlockType block;
 		block.resize(1);
@@ -244,15 +251,16 @@ public:
 		}
 
 		if (what=="n") {
-			PsimagLite::Matrix<SparseElementType> tmp =
-			        multiplyTc(creationMatrix[0].data,creationMatrix[0].data);
+			PsimagLite::Matrix<SparseElementType> tmp;
+			assert(1<creationMatrix.size());
+			crsMatrixToFullMatrix(tmp,creationMatrix[1].data);
 			return tmp;
 		}
 
 		if (what=="c") {
 			PsimagLite::Matrix<SparseElementType> tmp;
-			assert(dof<creationMatrix.size());
-			crsMatrixToFullMatrix(tmp,creationMatrix[dof].data);
+			assert(0<creationMatrix.size());
+			crsMatrixToFullMatrix(tmp,creationMatrix[0].data);
 			return tmp;
 		}
 
@@ -306,7 +314,8 @@ public:
 	                                RealType factorForDiagonals=1.0)  const
 	{
 		SizeType n=block.size();
-		SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
+		SparseMatrixType tmpMatrix;
+		SparseMatrixType niup;
 
 		for (SizeType i=0;i<n;i++) {
 
@@ -409,6 +418,56 @@ private:
 		}
 
 		q.set(jmvalues,flavors,electronsUp,zero);
+	}
+
+	//! Find n_i in the natural basis natBasis
+	SparseMatrixType findOperatorMatrices(int i,
+	                                      const VectorHilbertStateType& natBasis) const
+	{
+
+		SizeType n = natBasis.size();
+		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
+
+		for (SizeType ii=0;ii<natBasis.size();ii++) {
+			HilbertState ket=natBasis[ii];
+			cm(ii,ii) = 0.0;
+			for (SizeType sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++)
+				if (HilbertSpaceType::isNonZero(ket,i,sigma))
+					cm(ii,ii) += 1.0;
+		}
+
+		SparseMatrixType creationMatrix(cm);
+		return creationMatrix;
+	}
+
+	void setNi(VectorOperatorType& creationMatrix,
+	           const BlockType& block) const
+	{
+		VectorOperatorType creationMatrix2 = creationMatrix;
+		creationMatrix.clear();
+		VectorHilbertStateType natBasis;
+		typename PsimagLite::Vector<SizeType>::Type q;
+		setNaturalBasis(natBasis,q,block);
+		SizeType operatorsPerSite = utils::exactDivision(creationMatrix2.size(),
+		                                                 block.size());
+		SizeType k = 0;
+
+		for (SizeType i = 0; i < block.size(); ++i) {
+			SparseMatrixType tmpMatrix = findOperatorMatrices(i,natBasis);
+			RealType angularFactor= 1;
+			typename OperatorType::Su2RelatedType su2related;
+			su2related.offset = 1; //check FIXME
+			OperatorType myOp(tmpMatrix,
+			                  1,
+			                  typename OperatorType::PairType(0,0),
+			                  angularFactor,
+			                  su2related);
+
+			for (SizeType j = 0; j < operatorsPerSite; ++j)
+				creationMatrix.push_back(creationMatrix2[k++]);
+
+			creationMatrix.push_back(myOp);
+		}
 	}
 
 	// note: we use 2j instead of j
