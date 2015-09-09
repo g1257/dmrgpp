@@ -96,16 +96,15 @@ public:
 	static SizeType TERMS_;
 
 	template<typename SomeStructType>
-	static void setLinkData(
-	        SizeType,
-	        SizeType dofs,
-	        bool,
-	        SizeType& fermionOrBoson,
-	        PairType& ops,
-	        std::pair<char,char>&,
-	        SizeType& angularMomentum,
-	        RealType& angularFactor,
-	        SizeType& category,const SomeStructType&)
+	static void setLinkData(SizeType,
+	                        SizeType dofs,
+	                        bool,
+	                        SizeType& fermionOrBoson,
+	                        PairType& ops,
+	                        std::pair<char,char>&,
+	                        SizeType& angularMomentum,
+	                        RealType& angularFactor,
+	                        SizeType& category,const SomeStructType&)
 	{
 		fermionOrBoson = ProgramGlobals::FERMION;
 
@@ -124,9 +123,9 @@ public:
 	                          const SomeStructType&)
 	{}
 
-	// up up and down down are the only connections possible for this model
+	// up up is the only connections possible for this model
 	template<typename SomeStructType>
-	static SizeType dofs(SizeType,const SomeStructType&) { return 2; }
+	static SizeType dofs(SizeType,const SomeStructType&) { return 1; }
 
 	template<typename SomeStructType>
 	static std::pair<SizeType,SizeType> connectorDofs(SizeType,

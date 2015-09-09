@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "Sort.h" // in PsimagLite
 #include "ParametersFermionSpinless.h"
-#include "HilbertSpaceHubbard.h"
+#include "../HubbardOneBand/HilbertSpaceHubbard.h"
 #include "LinkProductHubbardOneBand.h"
 #include "CrsMatrix.h"
 #include "SpinSquaredHelper.h"
@@ -118,7 +118,7 @@ public:
 private:
 
 	static const int FERMION_SIGN = -1;
-	static const int DEGREES_OF_FREEDOM=2;
+	static const int DEGREES_OF_FREEDOM=1;
 	static const int NUMBER_OF_ORBITALS=1;
 
 	enum {SPIN_UP = HilbertSpaceHubbardType::SPIN_UP,
@@ -139,9 +139,9 @@ public:
 	typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
 
 	FermionSpinless(const SolverParamsType& solverParams,
-	             InputValidatorType& io,
-	             GeometryType const &geometry,
-	             SizeType offset = DEGREES_OF_FREEDOM)
+	                InputValidatorType& io,
+	                GeometryType const &geometry,
+	                SizeType offset = DEGREES_OF_FREEDOM)
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
 	      geometry_(geometry),
@@ -149,55 +149,17 @@ public:
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 	{}
 
-	SizeType memResolv(PsimagLite::MemResolv& mres,
+	SizeType memResolv(PsimagLite::MemResolv&,
 	                   SizeType,
-	                   PsimagLite::String msg = "") const
+	                   PsimagLite::String = "") const
 	{
-		PsimagLite::String str = msg;
-		str += "FermionSpinless";
-
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&modelParameters_);
-		SizeType total = end - start;
-		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
-		          total,
-		          start,
-		          msg + " FermionSpinless vptr");
-
-		start = end;
-		end = start + sizeof(modelParameters_);
-		total += mres.memResolv(&modelParameters_, end-start, str + " modelParameters");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&offset_);
-		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
-		          PsimagLite::MemResolv::SIZEOF_HEAPREF,
-		          start,
-		          str + " ref to geometry");
-
-		mres.memResolv(&geometry_, 0, str + " geometry");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&spinSquaredHelper_);
-		total += mres.memResolv(&offset_, end-start, str + " offset");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&spinSquared_);
-		total += mres.memResolv(&spinSquaredHelper_,
-		                        end-start,
-		                        str + " spinSquaredHelper");
-
-		assert(sizeof(*this) > total);
-		total += mres.memResolv(&spinSquared_,
-		                        sizeof(*this) - total, str + " spinSquared");
-
-		return total;
+		return 0;
 	}
 
-	/** \cppFunction{!PTEX_THISFUNCTION} returns the size of the one-site Hilbert space. */
+	/** returns the size of the one-site Hilbert space. */
 	SizeType hilbertSize(SizeType) const
 	{
-		return (SizeType)pow(2,2*NUMBER_OF_ORBITALS);
+		return (SizeType)pow(2,NUMBER_OF_ORBITALS);
 	}
 
 	/** Function \cppFunction{!PTEX_THISFUNCTION} sets certain aspects of the
@@ -275,8 +237,6 @@ public:
 		block[0]=site;
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		setOperatorMatrices(creationMatrix,block);
-		SizeType iup = SPIN_UP;
-		SizeType idown = SPIN_DOWN;
 		assert(creationMatrix.size()>0);
 		SizeType nrow = creationMatrix[0].data.row();
 
@@ -286,30 +246,9 @@ public:
 			return tmp;
 		}
 
-		if (what=="+") {
-			PsimagLite::Matrix<SparseElementType> tmp =
-			        multiplyTc(creationMatrix[iup].data,creationMatrix[idown].data);
-			return tmp;
-		}
-
-		if (what=="-") {
-			PsimagLite::Matrix<SparseElementType> tmp =
-			        multiplyTc(creationMatrix[idown].data,creationMatrix[iup].data);
-			return tmp;
-		}
-
-		if (what=="z") {
-			PsimagLite::Matrix<SparseElementType> tmp =
-			        multiplyTc(creationMatrix[iup].data,creationMatrix[iup].data);
-			PsimagLite::Matrix<SparseElementType> tmp2 =
-			        multiplyTc(creationMatrix[idown].data,creationMatrix[idown].data);
-			return tmp-tmp2;
-		}
-
 		if (what=="n") {
 			PsimagLite::Matrix<SparseElementType> tmp =
-			        multiplyTc(creationMatrix[iup].data,creationMatrix[iup].data)
-			        + multiplyTc(creationMatrix[idown].data,creationMatrix[idown].data);
+			        multiplyTc(creationMatrix[0].data,creationMatrix[0].data);
 			return tmp;
 		}
 
@@ -320,32 +259,8 @@ public:
 			return tmp;
 		}
 
-		if (what=="nup") {
-			PsimagLite::Matrix<SparseElementType> cup =
-			        naturalOperator("c",site,SPIN_UP);
-			PsimagLite::Matrix<SparseElementType> nup =
-			        multiplyTransposeConjugate(cup,cup);
-			return nup;
-		}
-
-		if (what=="ndown") {
-			PsimagLite::Matrix<SparseElementType> cdown =
-			        naturalOperator("c",site,SPIN_DOWN);
-			PsimagLite::Matrix<SparseElementType> ndown =
-			        multiplyTransposeConjugate(cdown,cdown);
-			return ndown;
-		}
-
-		if (what=="d") {
-			PsimagLite::Matrix<SparseElementType> cup =
-			        naturalOperator("c",site,SPIN_UP);
-			PsimagLite::Matrix<SparseElementType> cdown =
-			        naturalOperator("c",site,SPIN_DOWN);
-			return (cup*cdown);
-		}
-
 		std::cerr<<"Argument: "<<what<<" "<<__FILE__<<"\n";
-		throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
+		throw std::logic_error("naturalOperator(): invalid argument\n");
 	}
 
 	/** \cppFunction{!PTEX_THISFUNCTION} Sets electrons to the total number of
@@ -354,12 +269,10 @@ public:
 	                   const typename PsimagLite::Vector<HilbertState>::Type& basis,
 	                   SizeType) const
 	{
-		int nup,ndown;
 		electrons.clear();
 		for (SizeType i=0;i<basis.size();i++) {
-			nup = HilbertSpaceHubbardType::getNofDigits(basis[i],0);
-			ndown = HilbertSpaceHubbardType::getNofDigits(basis[i],1);
-			electrons.push_back(nup+ndown);
+			int nup = HilbertSpaceHubbardType::getNofDigits(basis[i],0);
+			electrons.push_back(nup);
 		}
 	}
 
@@ -390,40 +303,20 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                     const VectorOperatorType& cm,
-	                     const BlockType& block,
-	                     RealType time,
-	                     RealType factorForDiagonals=1.0)  const
+	                                const VectorOperatorType& cm,
+	                                const BlockType& block,
+	                                RealType time,
+	                                RealType factorForDiagonals=1.0)  const
 	{
 		SizeType n=block.size();
 		SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
 		SizeType linSize = geometry_.numberOfSites();
 
 		for (SizeType i=0;i<n;i++) {
-			// onsite U hubbard
-			//n_i up
-			SizeType sigma =0; // up sector
-			transposeConjugate(tmpMatrix,cm[sigma+i*offset_].data);
-			multiply(niup,tmpMatrix,cm[sigma+i*offset_].data);
-			//n_i down
-			sigma =1; // down sector
-			transposeConjugate(tmpMatrix,cm[sigma+i*offset_].data);
-			multiply(nidown,tmpMatrix,cm[sigma+i*offset_].data);
-
-			multiply(tmpMatrix,niup,nidown);
-			RealType tmp = modelParameters_.hubbardU[block[i]]*factorForDiagonals;
-			multiplyScalar(tmpMatrix2,tmpMatrix,static_cast<SparseElementType>(tmp));
-
-			hmatrix += tmpMatrix2;
 
 			// V_iup term
-			tmp = modelParameters_.potentialV[block[i]+0*linSize]*factorForDiagonals;
+			tmp = modelParameters_.potentialV[block[i]]*factorForDiagonals;
 			multiplyScalar(tmpMatrix,niup,static_cast<SparseElementType>(tmp));
-			hmatrix += tmpMatrix;
-
-			// V_idown term
-			tmp = modelParameters_.potentialV[block[i]+1*linSize]*factorForDiagonals;
-			multiplyScalar(tmpMatrix,nidown,static_cast<SparseElementType>(tmp));
 			hmatrix += tmpMatrix;
 
 			if (modelParameters_.potentialT.size()==0) continue;
@@ -433,12 +326,6 @@ public:
 			tmp = modelParameters_.potentialT[block[i]]*factorForDiagonals;
 			tmp *= cosarg;
 			multiplyScalar(tmpMatrix,niup,static_cast<SparseElementType>(tmp));
-			hmatrix += tmpMatrix;
-
-			// VT_idown term
-			tmp = modelParameters_.potentialT[block[i]]*factorForDiagonals;
-			tmp *= cosarg;
-			multiplyScalar(tmpMatrix,nidown,static_cast<SparseElementType>(tmp));
 			hmatrix += tmpMatrix;
 		}
 	}
@@ -450,26 +337,18 @@ public:
 
 private:
 
-	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
+	// Calculate fermionic sign when applying operator
+	// c^\dagger_{i\sigma} to basis state ket
 	RealType sign(typename HilbertSpaceHubbardType::HilbertState const &ket,
 	              int i,
 	              int sigma) const
 	{
 		int value=0;
 		value += HilbertSpaceHubbardType::calcNofElectrons(ket,0,i,0);
-		value += HilbertSpaceHubbardType::calcNofElectrons(ket,0,i,1);
 		int tmp1 = HilbertSpaceHubbardType::get(ket,0) &1;
-		int tmp2 = HilbertSpaceHubbardType::get(ket,0) &2;
 		if (i>0 && tmp1>0) value++;
-		if (i>0 && tmp2>0) value++;
 
-		if (sigma==1) { // spin down
-			if ((HilbertSpaceHubbardType::get(ket,i) &1)) value++;
-
-		}
-		if (value%2==0) return 1.0;
-
-		return FERMION_SIGN;
+		return (value%2==0) ? 1.0 : FERMION_SIGN;
 	}
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
@@ -488,8 +367,7 @@ private:
 			} else {
 				HilbertSpaceHubbardType::create(bra,i,sigma);
 				int jj = PsimagLite::isInVector(natBasis,bra);
-				if (jj<0)
-					throw PsimagLite::RuntimeError("findOperatorMatrices\n");
+				assert(jj >= 0);
 				cm(ii,jj) =sign(ket,i,sigma);
 			}
 		}
@@ -507,7 +385,8 @@ private:
 		qq.findQuantumNumbers(q, MyBasis::useSu2Symmetry());
 	}
 
-	void setSymmetryRelated(SymmetryElectronsSzType& q,HilbertBasisType  const &basis,int) const
+	void setSymmetryRelated(SymmetryElectronsSzType& q,
+	                        HilbertBasisType  const &basis,int) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -521,21 +400,19 @@ private:
 		jmSaved.second++;
 
 		typename PsimagLite::Vector<SizeType>::Type electronsUp(basis.size());
-		typename PsimagLite::Vector<SizeType>::Type electronsDown(basis.size());
+		typename PsimagLite::Vector<SizeType>::Type zero(basis.size(),0);
 		for (SizeType i=0;i<basis.size();i++) {
 			PairType jmpair = calcJmValue<PairType>(basis[i]);
 
 			jmvalues.push_back(jmpair);
 			// nup
 			electronsUp[i] = HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_UP);
-			// ndown
-			electronsDown[i] = HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_DOWN);
 
-			flavors.push_back(electronsUp[i]+electronsDown[i]);
+			flavors.push_back(electronsUp[i]);
 			jmSaved = jmpair;
 		}
 
-		q.set(jmvalues,flavors,electronsUp+electronsDown,electronsUp);
+		q.set(jmvalues,flavors,electronsUp,zero);
 	}
 
 	// note: we use 2j instead of j
