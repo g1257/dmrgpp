@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009-2015, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -72,16 +72,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ModelHubbard.h
+/*! \file FermionSpinless.h
  *
- *  An implementation of the Hubbard Model to use with the DmrgSolver
+ *  TBW
  *
  */
-#ifndef MODEL_HUBBARD_DMRG
-#define MODEL_HUBBARD_DMRG
+#ifndef DMRG_FERMION_SPINLESS
+#define DMRG_FERMION_SPINLESS
 #include <cassert>
 #include "Sort.h" // in PsimagLite
-#include "ParametersModelHubbard.h"
+#include "ParametersFermionSpinless.h"
 #include "HilbertSpaceHubbard.h"
 #include "LinkProductHubbardOneBand.h"
 #include "CrsMatrix.h"
@@ -94,7 +94,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 //! Model Hubbard for DMRG solver, inherits from ModelBase and implements its interface:
 template<typename ModelBaseType>
-class ModelHubbard : public ModelBaseType {
+class FermionSpinless : public ModelBaseType {
 
 public:
 
@@ -138,7 +138,7 @@ public:
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
 
-	ModelHubbard(const SolverParamsType& solverParams,
+	FermionSpinless(const SolverParamsType& solverParams,
 	             InputValidatorType& io,
 	             GeometryType const &geometry,
 	             SizeType offset = DEGREES_OF_FREEDOM)
@@ -154,7 +154,7 @@ public:
 	                   PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
-		str += "ModelHubbard";
+		str += "FermionSpinless";
 
 		const char* start = reinterpret_cast<const char *>(this);
 		const char* end = reinterpret_cast<const char *>(&modelParameters_);
@@ -162,7 +162,7 @@ public:
 		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
 		          total,
 		          start,
-		          msg + " ModelHubbard vptr");
+		          msg + " FermionSpinless vptr");
 
 		start = end;
 		end = start + sizeof(modelParameters_);
@@ -558,10 +558,10 @@ private:
 		return jm;
 	}
 
-	//serializr start class ModelHubbard
+	//serializr start class FermionSpinless
 	//serializr vptr
 	//serializr normal modelParameters_
-	ParametersModelHubbard<RealType>  modelParameters_;
+	ParametersFermionSpinless<RealType>  modelParameters_;
 	//serializr ref geometry_
 	const GeometryType &geometry_;
 	//serializr normal offset_
@@ -570,7 +570,7 @@ private:
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 	//serializr normal spinSquared_
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
-};	//class ModelHubbard
+};	//class FermionSpinless
 
 } // namespace Dmrg
 /*@}*/

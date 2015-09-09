@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2014, UT-Battelle, LLC
+Copyright (c) 2009-2015, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -72,18 +72,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file LinkProductHubbardOneBand.h
+/*! \file LinkProductFermionSpinless.h
  *
  *  FIXME
  *
  */
-#ifndef LINK_PRODUCT_HubbardOneBand_H
-#define LINK_PRODUCT_HubbardOneBand_H
+#ifndef DMRG_LINK_PROD_FERMION_SPINLESS_H
+#define DMRG_LINK_PROD_FERMION_SPINLESS_H
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProductHubbardOneBand {
+class LinkProductFermionSpinless {
 
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -137,10 +137,10 @@ public:
 	}
 
 	static SizeType terms() { return TERMS_; }
-}; // class LinkProductHubbardOneBand
+}; // class LinkProductFermionSpinless
 
 template<typename ModelHelperType>
-SizeType LinkProductHubbardOneBand<ModelHelperType>::TERMS_ = 1;
+SizeType LinkProductFermionSpinless<ModelHelperType>::TERMS_ = 1;
 
 } // namespace Dmrg
 /*@}*/

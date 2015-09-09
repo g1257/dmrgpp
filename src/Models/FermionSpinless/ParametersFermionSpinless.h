@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2014, UT-Battelle, LLC
+Copyright (c) 2009-2015, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -72,25 +72,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ParametersModelHubbard.h
+/*! \file ParametersFermionSpinless.h
  *
- *  Contains the parameters for the Hubbard model and function to read them from a file
+ *  Contains the parameters for this model
  *
  */
-#ifndef PARAMETERSMODELHUBBARD_H
-#define PARAMETERSMODELHUBBARD_H
+#ifndef DMRG_PARAMS_FERMIONSPINLESS_H
+#define DMRG_PARAMS_FERMIONSPINLESS_H
 #include "TargetQuantumElectrons.h"
 
 namespace Dmrg {
 //! Hubbard Model Parameters
 template<typename RealType>
-struct ParametersModelHubbard {
+struct ParametersFermionSpinless {
 
 	template<typename IoInputType>
-	ParametersModelHubbard(IoInputType& io) : targetQuantum(io)
+	ParametersFermionSpinless(IoInputType& io) : targetQuantum(io)
 	{
-
-		io.read(hubbardU,"hubbardU");
 		io.read(potentialV,"potentialV");
 
 		try {
@@ -103,7 +101,7 @@ struct ParametersModelHubbard {
 		try {
 			io.readline(omega,"omega=");
 			if (!hasT) {
-				std::cerr<<"ParametersModelHubbard: ";
+				std::cerr<<"ParametersFermionSpinless: ";
 				std::cerr<<"omega will be ignored as no PotentialT present\n";
 			}
 		} catch (std::exception&) {}
@@ -112,7 +110,7 @@ struct ParametersModelHubbard {
 		try {
 			io.readline(phase,"phase=");
 			if (!hasT) {
-				std::cerr<<"ParametersModelHubbard: ";
+				std::cerr<<"ParametersFermionSpinless: ";
 				std::cerr<<"phase will be ignored as no PotentialT present\n";
 			}
 		} catch (std::exception&) {}
@@ -128,14 +126,9 @@ struct ParametersModelHubbard {
 
 	// Do not include here connection parameters
 	// those are handled by the Geometry
-
 	TargetQuantumElectrons<RealType> targetQuantum;
-
-	// Hubbard U values (one for each site)
-	typename PsimagLite::Vector<RealType>::Type hubbardU;
 	// Onsite potential values, one for each site
 	typename PsimagLite::Vector<RealType>::Type potentialV;
-
 	// for time-dependent H:
 	typename PsimagLite::Vector<RealType>::Type potentialT;
 	RealType omega;
@@ -145,11 +138,9 @@ struct ParametersModelHubbard {
 //! Function that prints model parameters to stream os
 template<typename RealTypeType>
 std::ostream& operator<<(std::ostream &os,
-                         const ParametersModelHubbard<RealTypeType>& parameters)
+                         const ParametersFermionSpinless<RealTypeType>& parameters)
 {
 	os<<parameters.targetQuantum;
-	os<<"hubbardU\n";
-	os<<parameters.hubbardU;
 	os<<"potentialV\n";
 	os<<parameters.potentialV;
 	if (parameters.potentialT.size()==0) return os;
