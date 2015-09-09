@@ -85,7 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-//! A class to operate on quaterny numbers (base 4)
 template<typename Word>
 class HilbertSpaceFermionSpinless {
 public:
@@ -97,14 +96,12 @@ public:
 		Word mask;
 		switch (value) {
 		case 0:
-			mask = (1<<j) | (1<<j+1);
+			mask = (1<<j);
 			a &= (~mask);
 			return;
 		case 1:
 			mask = (1<<j);
 			a |= mask;
-			mask = (1<<j+1);
-			a &= (~mask);
 			return;
 		default:
 			std::cerr<<"value="<<value<<"\n";
@@ -115,7 +112,7 @@ public:
 	// Get electronic state on site "j" in binary number "a"
 	static int get(Word const &a,int j)
 	{
-		Word mask = (1<<j) | (1<<(j+1));
+		Word mask = (1<<j);
 		mask &= a;
 		mask >>= j;
 		assert(mask <= 1);
