@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009-2015, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -71,7 +71,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file HilbertSpaceHubbard.h
+/*! \file HilbertSpaceFermionSpinless.h
  *
  *  This class represents the Hilbert space for the Hubbard Model
  *  States are represented with binary numbers. Two bits per site
@@ -80,150 +80,150 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *  01 1 up electron
  *  10 2 down electron
  *  11 3 doubly-occupied state
- * 
+ *
  *  Note: this is a static class
- * 
+ *
  */
-#ifndef HILBERTSPACEHUBBARD_HEADER_H
-#define HILBERTSPACEHUBBARD_HEADER_H
+#ifndef DMRG_HILBERTSPACE_FERMIONSPINLESS_H
+#define DMRG_HILBERTSPACE_FERMIONSPINLESS_H
 
 
 namespace Dmrg {
 
-	//! A class to operate on quaterny numbers (base 4)
-	template<typename Word>
-	class HilbertSpaceHubbard {
-	public:
-		typedef Word HilbertState;	
-		static int const  SPIN_UP=0;
-		static int const  SPIN_DOWN=1;
-		
-		//! For state "a" set electron on site "j" to value "value"
-		static void set(Word &a,int j,int value) 
-		{
-			Word mask; 
-			switch (value) {
-				case 0:
-					mask = (1<<(2*j)) | (1<<(2*j+1));
-					a &= (~mask);
-					return;
-				case 1:
-					mask = (1<<(2*j));
-					a |= mask;
-					mask = (1<<(2*j+1));
-					a &= (~mask);
-					return;
-				case 2:
-					mask = (1<<(2*j+1));
-					a |= mask;
-					mask = (1<<(2*j));
-					a &= (~mask);
-					return;
-				case 3:
-					mask = (1<<(2*j)) | (1<<(2*j+1));
-					a |= (mask);
-					return;
-				default:
-					std::cerr<<"value="<<value<<"\n";
-					throw PsimagLite::RuntimeError("HilbertSpaceHubbard: set: invalid value.\n");
-					
-						
-			}
+//! A class to operate on quaterny numbers (base 4)
+template<typename Word>
+class HilbertSpaceFermionSpinless {
+public:
+	typedef Word HilbertState;
+	static int const  SPIN_UP=0;
+	static int const  SPIN_DOWN=1;
+
+	//! For state "a" set electron on site "j" to value "value"
+	static void set(Word &a,int j,int value)
+	{
+		Word mask;
+		switch (value) {
+		case 0:
+			mask = (1<<(2*j)) | (1<<(2*j+1));
+			a &= (~mask);
+			return;
+		case 1:
+			mask = (1<<(2*j));
+			a |= mask;
+			mask = (1<<(2*j+1));
+			a &= (~mask);
+			return;
+		case 2:
+			mask = (1<<(2*j+1));
+			a |= mask;
+			mask = (1<<(2*j));
+			a &= (~mask);
+			return;
+		case 3:
+			mask = (1<<(2*j)) | (1<<(2*j+1));
+			a |= (mask);
+			return;
+		default:
+			std::cerr<<"value="<<value<<"\n";
+			throw PsimagLite::RuntimeError("HilbertSpaceFermionSpinless: set: invalid value.\n");
+
+
 		}
-		
-		// Get electronic state on site "j" in binary number "a"
-		static int get(Word const &a,int j)
-		{
-			Word mask = (1<<(2*j)) | (1<<(2*j+1));
-			mask &= a;
-			mask >>= (2*j);
-			if (mask>3) {
-				std::cerr<<"Error: mask="<<mask<<"\n";
-			 	throw PsimagLite::RuntimeError("HilbertSpaceHubbard: get: invalid  mask.\n");
-			}
-			return mask;
-			
+	}
+
+	// Get electronic state on site "j" in binary number "a"
+	static int get(Word const &a,int j)
+	{
+		Word mask = (1<<(2*j)) | (1<<(2*j+1));
+		mask &= a;
+		mask >>= (2*j);
+		if (mask>3) {
+			std::cerr<<"Error: mask="<<mask<<"\n";
+			throw PsimagLite::RuntimeError("HilbertSpaceFermionSpinless: get: invalid  mask.\n");
 		}
-		
-		// Destroy electron with internal dof  "sigma" on site "j" in binary number "a"
-		static void destroy(Word &a,int j,int sigma)
-		{
-			Word mask;
-			switch (sigma) {
-				case 0:
-					mask = (1<<(2*j));
-					a &= (~mask);
-					return;
-				case 1:
-					mask = (1<<(2*j+1));
-					a &= (~mask);
-					return;
-				default:
-					std::cerr<<"sigma="<<sigma<<"\n";
-					throw PsimagLite::RuntimeError("HilbertSpaceHubbard: destroy: invalid value.\n");		
-			}
+		return mask;
+
+	}
+
+	// Destroy electron with internal dof  "sigma" on site "j" in binary number "a"
+	static void destroy(Word &a,int j,int sigma)
+	{
+		Word mask;
+		switch (sigma) {
+		case 0:
+			mask = (1<<(2*j));
+			a &= (~mask);
+			return;
+		case 1:
+			mask = (1<<(2*j+1));
+			a &= (~mask);
+			return;
+		default:
+			std::cerr<<"sigma="<<sigma<<"\n";
+			throw PsimagLite::RuntimeError("HilbertSpaceFermionSpinless: destroy: invalid value.\n");
 		}
-		
-		// Create electron with internal dof  "sigma" on site "j" in binary number "a"
-		static void create(Word &a,int j,int sigma)
-		{
-			Word mask;
-			switch (sigma) {
-				case 0:
-					mask = (1<<(2*j));
-					a |= mask;
-					return;
-				case 1:
-					mask = (1<<(2*j+1));
-					a |= mask;
-					return;
-				default:
-					std::cerr<<"sigma="<<sigma<<"\n";
-					throw PsimagLite::RuntimeError("HilbertSpaceHubbard: create: invalid value.\n");		
-			}
+	}
+
+	// Create electron with internal dof  "sigma" on site "j" in binary number "a"
+	static void create(Word &a,int j,int sigma)
+	{
+		Word mask;
+		switch (sigma) {
+		case 0:
+			mask = (1<<(2*j));
+			a |= mask;
+			return;
+		case 1:
+			mask = (1<<(2*j+1));
+			a |= mask;
+			return;
+		default:
+			std::cerr<<"sigma="<<sigma<<"\n";
+			throw PsimagLite::RuntimeError("HilbertSpaceFermionSpinless: create: invalid value.\n");
 		}
-		
-		// Is there an electron with internal dof  "sigma" on site "i" in binary number "ket"?
-		static bool isNonZero(Word const &ket,int i,int sigma)
-		{
-			
-			int tmp=get(ket,i);
-			if ((tmp & 1) && sigma==0) return true;
-			if ((tmp & 2) && sigma==1) return true;
-			
-			return false;
-		}
-		
-		//! returns the number of electrons of internal dof "value" in binary number "data"
-		static int getNofDigits(Word const &data,int value)
-		{
-			int ret=0;
-			Word data2=data;
-			int i=0;
-			do {
-				 if ( (data & (1<<(2*i+value))) ) ret++;
-				 i++;
-			} while (data2>>=1);
-			
-			return ret;
-		}
-		
-		//! Number of electrons with dof sector between i and j excluding i and j in binary number "ket"
-		//!  intended for when i<j
-		static int calcNofElectrons(Word const &ket,int i,int j,int sector)
-		{
-			int ii=i+1;
-			if (ii>=j) return 0;
-			Word m=0;
-			SizeType end = 2 * j;
-			for (SizeType k=2*ii;k<end;k++) m |= (1<<k);
-			m = m & ket;
-			return getNofDigits(m,sector);
-		}
-		
-		
-	}; // class HilbertSpaceHubbard
+	}
+
+	// Is there an electron with internal dof  "sigma" on site "i" in binary number "ket"?
+	static bool isNonZero(Word const &ket,int i,int sigma)
+	{
+
+		int tmp=get(ket,i);
+		if ((tmp & 1) && sigma==0) return true;
+		if ((tmp & 2) && sigma==1) return true;
+
+		return false;
+	}
+
+	//! returns the number of electrons of internal dof "value" in binary number "data"
+	static int getNofDigits(Word const &data,int value)
+	{
+		int ret=0;
+		Word data2=data;
+		int i=0;
+		do {
+			if ( (data & (1<<(2*i+value))) ) ret++;
+			i++;
+		} while (data2>>=1);
+
+		return ret;
+	}
+
+	//! Number of electrons with dof sector between i and j excluding i and j in binary number "ket"
+	//!  intended for when i<j
+	static int calcNofElectrons(Word const &ket,int i,int j,int sector)
+	{
+		int ii=i+1;
+		if (ii>=j) return 0;
+		Word m=0;
+		SizeType end = 2 * j;
+		for (SizeType k=2*ii;k<end;k++) m |= (1<<k);
+		m = m & ket;
+		return getNofDigits(m,sector);
+	}
+
+
+}; // class HilbertSpaceFermionSpinless
 } // namespace Dmrg
 
-/*@}*/	
+/*@}*/
 #endif
