@@ -145,7 +145,14 @@ public:
 	      geometry_(geometry),
 	      offset_(offset),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
-	{}
+	{
+		SizeType expected = geometry_.numberOfSites();
+		SizeType found = modelParameters_.potentialV.size();
+		if (expected == found) return;
+		PsimagLite::String str("FermionSpinless: potentialV: expected ");
+		str += ttos(expected) + " values, but found " + ttos(found) + "\n";
+		throw PsimagLite::RuntimeError(str);
+	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
 	                   SizeType,
@@ -431,7 +438,7 @@ private:
 		for (SizeType ii=0;ii<natBasis.size();ii++) {
 			HilbertState ket=natBasis[ii];
 			cm(ii,ii) = 0.0;
-			for (SizeType sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++)
+			for (int sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++)
 				if (HilbertSpaceType::isNonZero(ket,i,sigma))
 					cm(ii,ii) += 1.0;
 		}
