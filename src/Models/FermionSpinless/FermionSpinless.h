@@ -129,7 +129,7 @@ public:
 
 	typedef typename HilbertSpaceType::HilbertState HilbertState;
 	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
-	typedef LinkProductHubbardOneBand<ModelHelperType> LinkProductType;
+	typedef LinkProductFermionSpinless<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
@@ -321,15 +321,13 @@ public:
 	                                RealType factorForDiagonals=1.0)  const
 	{
 		SizeType n=block.size();
-		SparseMatrixType tmpMatrix;
-		SparseMatrixType niup;
+		SparseMatrixType niup = cm[1].data;
 
 		for (SizeType i=0;i<n;i++) {
 
 			// V_iup term
 			RealType tmp = modelParameters_.potentialV[block[i]]*factorForDiagonals;
-			multiplyScalar(tmpMatrix,niup,static_cast<SparseElementType>(tmp));
-			hmatrix += tmpMatrix;
+			hmatrix += tmp*niup;
 
 			if (modelParameters_.potentialT.size()==0) continue;
 			RealType cosarg = cos(time*modelParameters_.omega +
@@ -337,8 +335,7 @@ public:
 			// VT_iup term
 			tmp = modelParameters_.potentialT[block[i]]*factorForDiagonals;
 			tmp *= cosarg;
-			multiplyScalar(tmpMatrix,niup,static_cast<SparseElementType>(tmp));
-			hmatrix += tmpMatrix;
+			hmatrix += tmp*niup;
 		}
 	}
 
