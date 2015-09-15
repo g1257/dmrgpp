@@ -150,7 +150,7 @@ class TargetingCorrectionVector : public TargetingBase<LanczosSolverTemplate,
 				RealType part1 =  (eigs_[k] - E0_)*sign + tstStruct_.omega().second;
 				RealType denom = part1*part1 + tstStruct_.eta()*tstStruct_.eta();
 				return (action_ == ACTION_IMAG) ? tstStruct_.eta()/denom :
-				                                  -part1 / denom;
+				                                  -part1/denom;
 			}
 
 			RealType actionWhenMatsubara(SizeType k) const
@@ -301,9 +301,6 @@ public:
 		SizeType numberOfSites = this->lrs().super().block().size();
 		if (site>1 && site<numberOfSites-2) return;
 		if (site == 1 && direction == EXPAND_SYSTEM) return;
-		// //corner case
-		SizeType x = (site==1) ? 0 : numberOfSites-1;
-		evolve(Eg,direction,x,loopNumber);
 
 		printNormsAndWeights();
 	}
@@ -576,25 +573,9 @@ private:
 		RealType sum  = 0;
 		weight_.resize(this->common().targetVectors().size());
 		for (SizeType r=1;r<weight_.size();r++) {
-			weight_[r] =0;
-			for (SizeType i=0;i<this->common().targetVectors()[1].sectors();i++) {
-				VectorType v,w;
-				SizeType i0 = this->common().targetVectors()[1].sector(i);
-				this->common().targetVectors()[1].extract(v,i0);
-				this->common().targetVectors()[r].extract(w,i0);
-				weight_[r] += dynWeightOf(v,w);
-			}
+			weight_[r] = 1;
 			sum += weight_[r];
 		}
-
-		if (fabs(sum) < 1e-6) {
-			for (SizeType r=1;r<weight_.size();r++) {
-				RealType tmp = std::norm(this->common().targetVectors()[r]);
-				weight_[r] = tmp*tmp;
-			}
-		}
-
-		if (fabs(sum) < 1e-6) return;
 
 		for (SizeType r=0;r<weight_.size();r++) weight_[r] *= (1.0 - gsWeight_)/sum;
 	}
