@@ -160,6 +160,9 @@ public:
 	      truncate_(reflectionOperator_,wft_,parameters_,verbose_),
 	      energy_(0.0)
 	{
+		PsimagLite::OstringStream msg;
+		msg<<"Turning the engine on";
+		progress_.printline(msg,std::cout);
 		ioOut_.print(appInfo_);
 		ioOut_.print("PARAMETERS",parameters_);
 		ioOut_.print("TARGETSTRUCT",targetStruct_);
@@ -169,6 +172,9 @@ public:
 	~DmrgSolver()
 	{
 		ioOut_.print(appInfo_);
+		PsimagLite::OstringStream msg2;
+		msg2<<"Turning off the engine.";
+		progress_.printline(msg2,std::cout);
 	}
 
 	void main(const GeometryType& geometry)
@@ -178,10 +184,6 @@ public:
 		        PsimagLite::String::npos);
 
 		checkFiniteLoops(allInSystem, geometry.numberOfSites());
-
-		PsimagLite::OstringStream msg;
-		msg<<"Turning the engine on";
-		progress_.printline(msg,std::cout);
 
 		ioOut_.print("MODEL",model_);
 		BlockType S,E;
@@ -220,10 +222,6 @@ public:
 		finiteDmrgLoops(S,E,pS,pE,psi);
 
 		inSitu_.init(psi,geometry.numberOfSites());
-
-		PsimagLite::OstringStream msg2;
-		msg2<<"Turning off the engine.";
-		progress_.printline(msg2,std::cout);
 	}
 
 	const DensityMatrixElementType& inSitu(SizeType i) const

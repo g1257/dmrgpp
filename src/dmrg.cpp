@@ -67,6 +67,16 @@ struct OperatorOptions {
 	bool enabled;
 };
 
+std::streambuf *GlobalCoutBuffer = 0;
+std::ofstream GlobalCoutStream;
+
+void restoreCoutBuffer()
+{
+	if (GlobalCoutBuffer == 0) return;
+	GlobalCoutStream.close();
+	std::cout.rdbuf(GlobalCoutBuffer);
+}
+
 void usageOperator()
 {
 	std::cerr<<"USAGE is operator -f filename -F ";
@@ -415,11 +425,37 @@ int main(int argc,char *argv[])
 		return 1;
 	}
 
+	if (!options.enabled && options.label != "") {
+		if (options.label == ".") {
+			PsimagLite::String rootname = filename;
+			size_t index =rootname.find(".", 0);
+			if (index != PsimagLite::String::npos) {
+				rootname.erase(index,filename.length());
+			}
+			options.label="runFor" + rootname + ".cout";
+		}
+
+		GlobalCoutStream.open(options.label.c_str());
+		if (!GlobalCoutStream || GlobalCoutStream.bad()
+		        || !GlobalCoutStream.good()) {
+			PsimagLite::String str(argv[0]);
+			str += ": Could not redirect std::cout to " + options.label + "\n";
+			throw PsimagLite::RuntimeError(str);
+		}
+
+		std::cerr<<argv[0]<<" ATTENTION: All standard output now sent to ";
+		std::cerr<<options.label<<"\n";
+		std::cerr.flush();
+		GlobalCoutBuffer = std::cout.rdbuf(); //save old buf
+		std::cout.rdbuf(GlobalCoutStream.rdbuf()); //redirect std::cout to file
+		atexit(restoreCoutBuffer);
+	}
+
 	// print license
 	if (ConcurrencyType::root()) {
-		std::cerr<<ProgramGlobals::license;
+		std::cout<<ProgramGlobals::license;
 		Provenance provenance;
-		std::cerr<<provenance;
+		std::cout<<provenance;
 	}
 
 	InputNgType::Writeable ioWriteable(filename,inputCheck);
