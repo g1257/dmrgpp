@@ -71,257 +71,205 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file TarPack.h
  *
+ * This class inspired from ideas at
+ * https://github.com/lindenb/cclindenb/
+ * blob/28f2164dbed87cbec51839d0cf1e2a2a8e563788/src/core/lindenb/io/tarball.h
  *
  */
 
 #ifndef DMRG_TAR_PACK_H
 #define DMRG_TAR_PACK_H
-
-#include "ReflectionOperatorEmpty.h"
-#include "ModelCommonBase.h"
 #include "Vector.h"
-#include "Sort.h"
-#include "MemResolv.h"
-#include "TargetQuantumElectrons.h"
+#include <iostream>
+#include <fstream>
+#include <cstring>
 
 namespace Dmrg {
 
-template<typename ModelHelperType_,
-         typename ParametersType,
-         typename InputValidatorType_,
-         typename GeometryType_>
 class TarPack  {
+
+	typedef long long unsigned int LongType;
+
+	enum RecordEnum {RECORD_OPEN, RECORD_CLOSED};
+
+	struct PosixTarHeader {
+		PosixTarHeader(PsimagLite::String filename,
+		               LongType fileSize)
+		{
+			std::memset(this,0,sizeof(PosixTarHeader));
+			if (filename == "" && fileSize == 0) return;
+
+			std::sprintf(magic,"ustar  ");
+			std::sprintf(mtime,"%011lo",time(0));
+			std::sprintf(mode,"%07o",0644);
+			std::snprintf(uname,32,"nobody");
+			std::sprintf(gname,"nobody");
+			std::snprintf(name,100,"%s",filename.c_str());
+			typeflag[0]=0;
+			std::sprintf(size,"%011llo",static_cast<LongType>(fileSize));
+		}
+
+		char name[100];
+		char mode[8];
+		char uid[8];
+		char gid[8];
+		char size[12];
+		char mtime[12];
+		char checksum[8];
+		char typeflag[1];
+		char linkname[100];
+		char magic[6];
+		char version[2];
+		char uname[32];
+		char gname[32];
+		char devmajor[8];
+		char devminor[8];
+		char prefix[155];
+		char pad[12];
+	}; // struct PosixTarHeader
+
+	class TarHeader {
+
+	public :
+
+		TarHeader(PsimagLite::String filename, LongType len)
+		    : header_(filename,len),len_(len),status_(RECORD_OPEN)
+		{
+			checksum();
+		}
+
+		~TarHeader()
+		{
+			if (len_ == 0) return;
+			statusCheck(RECORD_CLOSED,"dtor");
+		}
+
+		void writeTo(std::ofstream& fout) const
+		{
+			statusCheck(RECORD_OPEN,"writeTo");
+			fout.write((const char*)(&header_),
+			           sizeof(PosixTarHeader));
+		}
+
+		void endRecord(std::ofstream& fout)
+		{
+			statusCheck(RECORD_OPEN,"endRecord");
+			if (len_ == 0) {
+				status_ = RECORD_CLOSED;
+				return;
+			}
+
+			char c='\0';
+			LongType len = len_;
+			while ((len%sizeof(PosixTarHeader)) != 0)
+			{
+				fout.write(&c,sizeof(char));
+				++len;
+			}
+
+			status_ = RECORD_CLOSED;
+		}
+
+	private:
+
+		void checksum()
+		{
+			unsigned int sum = 0;
+			char *p = (char *)(&header_);
+			char *q = p + sizeof(PosixTarHeader);
+			while (p < header_.checksum) sum += *p++ & 0xff;
+			for (int i = 0; i < 8; ++i)  {
+				sum += ' ';
+				++p;
+			}
+
+			while (p < q) sum += *p++ & 0xff;
+
+			std::sprintf(header_.checksum,"%06o",sum);
+		}
+
+		void statusCheck(RecordEnum whatItShouldBe, PsimagLite::String func) const
+		{
+			if (status_ == whatItShouldBe) return;
+			std::cerr<<"TarHeader: WARNING: status is "<<statusToString(status_);
+			std::cerr<<" but it should have been "<<statusToString(whatItShouldBe);
+			std::cerr<<" from function = "<<func<<"\n";
+		}
+
+		PsimagLite::String statusToString(RecordEnum st) const
+		{
+			if (st == RECORD_CLOSED) return "RECORD_CLOSED";
+			return "RECORD_OPEN";
+		}
+
+		PosixTarHeader header_;
+		LongType len_;
+		RecordEnum status_;
+	}; // class TarHeader
 
 public:
 
-	typedef InputValidatorType_ InputValidatorType;
-	typedef typename PsimagLite::Vector<unsigned int long long>::Type HilbertBasisType;
-	typedef ModelHelperType_ ModelHelperType;
-	typedef GeometryType_ GeometryType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename ModelHelperType::BlockType BlockType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
-	typedef typename ModelHelperType::BasisType MyBasis;
-	typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef ReflectionOperatorEmpty<LeftRightSuperType> ReflectionSymmetryType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename ModelHelperType::SparseElementType ComplexOrRealType;
-	typedef ModelCommonBase<ModelHelperType,ParametersType,GeometryType>
-	ModelCommonBaseType;
-	typedef typename ModelCommonBaseType::LinkProductStructType LinkProductStructType;
-	typedef typename ModelCommonBaseType::VectorType VectorType;
-	typedef ParametersType SolverParamsType;
-	typedef typename ModelHelperType::LinkType LinkType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-
-	TarPack(InputValidatorType&,
-	          ModelCommonBaseType* modelCommon)
-	    : modelCommon_(modelCommon)
-	{}
-
-	virtual ~TarPack()
+	TarPack(PsimagLite::String filename)
+	    : fout_(filename.c_str(),std::ifstream::binary)
 	{
-		delete modelCommon_;
+		goodDescriptorOrThrow(fout_,filename);
 	}
 
-	virtual void setNaturalBasis(VectorOperatorType& creationMatrix,
-	                             SparseMatrixType &hamiltonian,
-	                             SymmetryElectronsSzType& q,
-	                             const BlockType& block,
-	                             const RealType& time) const = 0;
-
-	virtual PsimagLite::Matrix<ComplexOrRealType>
-	naturalOperator(const PsimagLite::String& what,
-	                SizeType site,
-	                SizeType dof) const = 0;
-
-	virtual void findElectrons(VectorSizeType& electrons,
-	                           const HilbertBasisType& basis,
-	                           SizeType site) const = 0;
-
-	virtual void print(std::ostream& os) const = 0;
-
-	virtual SizeType hilbertSize(SizeType site) const = 0;
-
-	virtual void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                                 const BlockType& block) const = 0;
-
-	virtual void setNaturalBasis(HilbertBasisType& basis,
-	                             typename PsimagLite::Vector<SizeType>::Type& q,
-	                             const BlockType& block) const = 0;
-
-	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                        const VectorOperatorType& cm,
-	                                        const BlockType& block,
-	                                        RealType time,
-	                                        RealType factorForDiagonals=1.0)  const = 0;
-
-	virtual void findElectronsOfOneSite(BlockType& electrons,SizeType site) const
+	~TarPack()
 	{
-		typename PsimagLite::Vector<SizeType>::Type block(1,site);
-		HilbertBasisType basis;
-		typename PsimagLite::Vector<SizeType>::Type quantumNumbs;
-		setNaturalBasis(basis,quantumNumbs,block);
-		findElectrons(electrons,basis,site);
+		//TarHeader tarHeader("",0);
+	    //tarHeader.writeTo(fout_);
+	    //tarHeader.writeTo(fout_);
+	    fout_.close();
 	}
 
-	virtual void hamiltonianOnLink(SparseMatrixType& hmatrix,
-	                               const BlockType& block,
-	                               RealType time,
-	                               RealType factorForDiagonals) const
+	void add(PsimagLite::String filename, PsimagLite::String nameInArchive = "")
 	{
-		typename PsimagLite::Vector<OperatorType>::Type cm;
-		setOperatorMatrices(cm,block);
-		calcHamiltonian(hmatrix,cm,block,time,factorForDiagonals,true);
+		if (nameInArchive == "") nameInArchive = filename;
+
+		std::ifstream fin(filename.c_str(),std::ifstream::binary);
+		goodDescriptorOrThrow(fin, filename);
+
+		LongType len = fileSize(filename);
+
+
+		TarHeader tarHeader(nameInArchive,len);
+
+		tarHeader.writeTo(fout_);
+
+		std::copy(std::istreambuf_iterator<char>(fin),
+		          std::istreambuf_iterator<char>(),
+		          std::ostreambuf_iterator<char>(fout_));
+
+		tarHeader.endRecord(fout_);
 	}
 
-	virtual void matrixVectorProduct(VectorType& x,
-	                                 const VectorType& y,
-	                                 ModelHelperType const &modelHelper) const
-	{
-		return modelCommon_->matrixVectorProduct(x,y,modelHelper);
-	}
-
-	virtual void addHamiltonianConnection(SparseMatrixType &matrix,
-	                                      const LeftRightSuperType& lrs) const
-	{
-		return modelCommon_->addHamiltonianConnection(matrix,lrs);
-	}
-
-	virtual void hamiltonianConnectionProduct(VectorType& x,
-	                                          const VectorType& y,
-	                                          ModelHelperType const &modelHelper) const
-	{
-		return modelCommon_->hamiltonianConnectionProduct(x,y,modelHelper);
-	}
-
-	virtual void fullHamiltonian(SparseMatrixType& matrix,
-	                             const ModelHelperType& modelHelper) const
-	{
-		return modelCommon_->fullHamiltonian(matrix,modelHelper);
-	}
-
-	virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
-	                                      const ModelHelperType& modelHelper) const
-	{
-		return modelCommon_->getLinkProductStruct(lps,modelHelper);
-	}
-
-	virtual LinkType getConnection(const SparseMatrixType** A,
-	                               const SparseMatrixType** B,
-	                               SizeType ix,
-	                               const LinkProductStructType& lps,
-	                               const ModelHelperType& modelHelper) const
-	{
-		return modelCommon_->getConnection(A,B,ix,lps,modelHelper);
-	}
-
-	//! Full hamiltonian from creation matrices cm
-	virtual void calcHamiltonian(SparseMatrixType &hmatrix,
-	                             const VectorOperatorType& cm,
-	                             const BlockType& block,
-	                             RealType time,
-	                             RealType factorForDiagonals=1.0,
-	                             bool sysEnvOnly=false)  const
-	{
-		hmatrix.makeDiagonal(cm[0].data.row());
-
-		modelCommon_->addConnectionsInNaturalBasis(hmatrix,cm,block,sysEnvOnly);
-
-		addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
-	}
-
-	virtual SizeType maxElectronsOneSpin() const
-	{
-		SizeType tmp = hilbertSize(0);
-		tmp = static_cast<SizeType>(log(tmp)/log(2.0));
-		SizeType maxElectrons = static_cast<SizeType>(tmp/2);
-		if (tmp & 1) maxElectrons++;
-
-		return maxElectrons * modelCommon_->geometry().numberOfSites() + 1;
-	}
-
-	const GeometryType& geometry() const { return modelCommon_->geometry(); }
-
-	const ParametersType& params() const { return modelCommon_->params(); }
-
-	void orderBasis(HilbertBasisType& basis,
-	                VectorSizeType& q,
-	                const HilbertBasisType& basisTmp) const
-	{
-		// reorder the natural basis
-		VectorSizeType iperm(q.size());
-		PsimagLite::Sort<VectorSizeType> sort;
-		sort.sort(q,iperm);
-
-		SizeType total = basisTmp.size();
-		VectorSizeType basis2(total);
-		for (SizeType a=0;a<total;a++)
-			basis2[a] = basisTmp[iperm[a]];
-
-		// Ensure deterministic order for the natural basis
-		SizeType offset = 0;
-		VectorSizeType symmetryBlock;
-
-		basis.resize(total);
-		for (SizeType a=0;a<total;a++) {
-			if (a>0 && q[a] != q[a-1]) {
-				iperm.resize(symmetryBlock.size());
-				sort.sort(symmetryBlock,iperm);
-
-				for (SizeType k = 0; k < symmetryBlock.size(); ++k)
-					basis[k + offset] = symmetryBlock[k];
-
-				offset += symmetryBlock.size();
-				symmetryBlock.clear();
-			}
-
-			symmetryBlock.push_back(basis2[a]);
-		}
-
-		if (symmetryBlock.size() == 0) return;
-
-		iperm.resize(symmetryBlock.size());
-		sort.sort(symmetryBlock,iperm);
-
-		for (SizeType k = 0; k < symmetryBlock.size(); ++k)
-			basis[k + offset] = symmetryBlock[k];
-
-		offset += symmetryBlock.size();
-		symmetryBlock.clear();
-	}
-
-	virtual const TargetQuantumElectronsType& targetQuantum() const = 0;
-
-	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
-	                           SizeType x,
-	                           PsimagLite::String msg = "") const = 0;
 
 private:
 
-	ModelCommonBaseType* modelCommon_;
+	LongType fileSize(PsimagLite::String filename) const
+	{
+	    std::ifstream fin(filename.c_str(),
+		                 std::ifstream::ate | std::ifstream::binary);
+	    return fin.tellg();
+	}
+
+	void goodDescriptorOrThrow(std::ifstream& f, PsimagLite::String filename) const
+	{
+		if (!f || !f.good() || !f.is_open() || f.bad())
+			throw PsimagLite::RuntimeError("Cannot read from " + filename + "\n");
+	}
+
+	void goodDescriptorOrThrow(std::ofstream& f, PsimagLite::String filename) const
+	{
+		if (!f || !f.is_open())
+			throw PsimagLite::RuntimeError("Cannot write to " + filename + "\n");
+	}
+
+	std::ofstream fout_;
 
 };     //class TarPack
 
-template<typename ModelHelperType,
-         typename ParametersType,
-         typename InputValidatorType,
-         typename GeometryType>
-std::ostream& operator<<(std::ostream& os,
-                         const TarPack<ModelHelperType,
-                         ParametersType,
-                         InputValidatorType,
-                         GeometryType>& model)
-{
-	model.print(os);
-	return os;
-}
 } // namespace Dmrg
 /*@}*/
 #endif
