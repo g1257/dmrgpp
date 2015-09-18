@@ -97,6 +97,7 @@ public:
 	typedef typename PsimagLite::IoSimple IoType;
 	typedef typename PsimagLite::Stack<BasisWithOperatorsType>::Type MemoryStackType;
 	typedef DiskStack<BasisWithOperatorsType>  DiskStackType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	const PsimagLite::String SYSTEM_STACK_STRING;
 	const PsimagLite::String ENVIRON_STACK_STRING;
@@ -196,6 +197,12 @@ public:
 	}
 
 	const ParametersType& parameters() const { return parameters_; }
+
+	void appendFileList(VectorStringType& files) const
+	{
+		files.push_back(SYSTEM_STACK_STRING+parameters_.filename);
+		files.push_back(ENVIRON_STACK_STRING+parameters_.filename);
+	}
 
 private:
 

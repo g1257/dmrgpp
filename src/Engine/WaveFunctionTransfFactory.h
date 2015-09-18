@@ -100,6 +100,7 @@ public:
 
 	enum {DO_NOT_RESET_COUNTER,RESET_COUNTER};
 
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
@@ -381,6 +382,11 @@ public:
 		dmrgWaveStruct_.save(io);
 		io.printMatrix(wsStack_,"wsStack");
 		io.printMatrix(weStack_,"weStack");
+	}
+
+	void appendFileList(VectorStringType& files) const
+	{
+		files.push_back(WFT_STRING + filenameOut_);
 	}
 
 private:

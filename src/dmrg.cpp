@@ -34,7 +34,9 @@ typedef float MatrixElementType;
 #include "InputCheck.h"
 #include "ModelSelector.h"
 #include "RegisterSignals.h"
+#include "ArchiveFiles.h"
 
+typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 typedef  PsimagLite::CrsMatrix<std::complex<MatrixElementType> > MySparseMatrixComplex;
 typedef  PsimagLite::CrsMatrix<MatrixElementType> MySparseMatrixReal;
 #ifdef USE_COMPLEX
@@ -47,6 +49,7 @@ using namespace Dmrg;
 
 typedef PsimagLite::InputNg<InputCheck> InputNgType;
 typedef ParametersDmrgSolver<MatrixElementType,InputNgType::Readable> ParametersDmrgSolverType;
+typedef ArchiveFiles<ParametersDmrgSolverType> ArchiveFilesType;
 
 struct OperatorOptions {
 
@@ -145,6 +148,8 @@ void mainLoop3(GeometryType& geometry,
 
 	//! Calculate observables:
 	dmrgSolver.main(geometry);
+
+	dmrgSolver.appendFileList();
 }
 
 template<typename GeometryType,
@@ -392,7 +397,7 @@ int main(int argc,char *argv[])
 	\begin{verbatim}./operator -l c -t -f input.inp -F -1\end{verbatim}
 	\end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:o:s:l:d:F:p:c:t")) != -1) {
+	while ((opt = getopt(argc, argv,"f:o:s:l:d:F:p:ct")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -489,6 +494,8 @@ int main(int argc,char *argv[])
 
 	ParametersDmrgSolverType dmrgSolverParams(io);
 
+	ArchiveFilesType af(dmrgSolverParams,filename,options.enabled,options.label);
+
 	if (insitu!="") dmrgSolverParams.insitu = insitu;
 
 #ifndef USE_PTHREADS
@@ -506,5 +513,6 @@ int main(int argc,char *argv[])
 	mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck,options);
 #endif
 
+	af.archiveIfNeeded();
 }
 

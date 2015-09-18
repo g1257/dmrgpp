@@ -231,6 +231,13 @@ public:
 
 	RealType energy() const { return energy_; }
 
+	void appendFileList() const
+	{
+		parameters_.files.push_back(parameters_.filename);
+		checkpoint_.appendFileList(parameters_.files);
+		wft_.appendFileList(parameters_.files);
+	}
+
 private:
 
 	/* PSIDOC DmrgSolverInfiniteDmrgLoop

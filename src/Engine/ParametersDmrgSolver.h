@@ -286,6 +286,7 @@ struct ParametersDmrgSolver {
 	typedef ParametersDmrgSolver<FieldType, InputValidatorType> ThisType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorFieldType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	SizeType nthreads;
 	SizeType sitesPerBlock;
@@ -304,26 +305,11 @@ struct ParametersDmrgSolver {
 	DmrgCheckPoint checkpoint;
 	VectorSizeType adjustQuantumNumbers;
 	typename PsimagLite::Vector<FiniteLoop>::Type finiteLoop;
+	mutable VectorStringType files;
 
 	template<class Archive>
-	void serialize(Archive & ar, const unsigned int version1)
-	{
-		ar & nthreads;
-		ar & sitesPerBlock;
-		ar & maxMatrixRankStored;
-		ar & keptStatesInfinite;
-		ar & useReflectionSymmetry;
-		ar & tolerance;
-		ar & filename;
-		ar & version;
-		ar & options;
-		ar & model;
-		ar & insitu;
-		ar & fileForDensityMatrixEigs;
-		ar & checkpoint;
-		ar & adjustQuantumNumbers;
-		ar & finiteLoop;
-	}
+	void serialize(Archive&, const unsigned int)
+	{}
 
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
