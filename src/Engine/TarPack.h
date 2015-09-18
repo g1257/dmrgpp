@@ -86,133 +86,166 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-class TarPack  {
+struct PosixTarHeader {
 
 	typedef long long unsigned int LongType;
 
-	enum RecordEnum {RECORD_OPEN, RECORD_CLOSED};
+	PosixTarHeader(PsimagLite::String filename,
+	               LongType fileSize)
+	{
+		std::memset(this,0,sizeof(PosixTarHeader));
+		if (filename == "" && fileSize == 0) return;
 
-	struct PosixTarHeader {
-		PosixTarHeader(PsimagLite::String filename,
-		               LongType fileSize)
-		{
-			std::memset(this,0,sizeof(PosixTarHeader));
-			if (filename == "" && fileSize == 0) return;
+		std::sprintf(magic,"ustar  ");
+		std::sprintf(mtime,"%011lo",time(0));
+		std::sprintf(mode,"%07o",0644);
+		std::snprintf(uname,32,"nobody");
+		std::sprintf(gname,"nobody");
+		std::snprintf(name,100,"%s",filename.c_str());
+		typeflag[0]=0;
+		std::sprintf(size,"%011llo",static_cast<LongType>(fileSize));
+	}
 
-			std::sprintf(magic,"ustar  ");
-			std::sprintf(mtime,"%011lo",time(0));
-			std::sprintf(mode,"%07o",0644);
-			std::snprintf(uname,32,"nobody");
-			std::sprintf(gname,"nobody");
-			std::snprintf(name,100,"%s",filename.c_str());
-			typeflag[0]=0;
-			std::sprintf(size,"%011llo",static_cast<LongType>(fileSize));
-		}
+	char name[100];
+	char mode[8];
+	char uid[8];
+	char gid[8];
+	char size[12];
+	char mtime[12];
+	char checksum[8];
+	char typeflag[1];
+	char linkname[100];
+	char magic[6];
+	char version[2];
+	char uname[32];
+	char gname[32];
+	char devmajor[8];
+	char devminor[8];
+	char prefix[155];
+	char pad[12];
+}; // struct PosixTarHeader
 
-		char name[100];
-		char mode[8];
-		char uid[8];
-		char gid[8];
-		char size[12];
-		char mtime[12];
-		char checksum[8];
-		char typeflag[1];
-		char linkname[100];
-		char magic[6];
-		char version[2];
-		char uname[32];
-		char gname[32];
-		char devmajor[8];
-		char devminor[8];
-		char prefix[155];
-		char pad[12];
-	}; // struct PosixTarHeader
+class TarHeader {
 
-	class TarHeader {
+public :
 
-	public :
+	typedef PosixTarHeader::LongType LongType;
 
-		TarHeader(PsimagLite::String filename, LongType len)
-		    : header_(filename,len),len_(len),status_(RECORD_OPEN)
-		{
-			checksum();
-		}
+	enum RecordEnum {RECORD_CLOSED, RECORD_OPEN};
 
-		~TarHeader()
-		{
-			if (len_ == 0) return;
-			statusCheck(RECORD_CLOSED,"dtor");
-		}
+	TarHeader(PsimagLite::String filename, LongType len)
+	    : header_(filename,len),len_(len),status_(RECORD_OPEN)
+	{
+		checksum();
+	}
 
-		void writeTo(std::ofstream& fout) const
-		{
-			statusCheck(RECORD_OPEN,"writeTo");
-			fout.write((const char*)(&header_),
-			           sizeof(PosixTarHeader));
-		}
+	~TarHeader()
+	{
+		if (len_ == 0) return;
+		statusCheck(RECORD_CLOSED,"dtor");
+	}
 
-		void endRecord(std::ofstream& fout)
-		{
-			statusCheck(RECORD_OPEN,"endRecord");
-			if (len_ == 0) {
-				status_ = RECORD_CLOSED;
-				return;
-			}
+	void writeTo(std::ofstream& fout) const
+	{
+		statusCheck(RECORD_OPEN,"writeTo");
+		fout.write((const char*)(&header_),
+		           sizeof(PosixTarHeader));
+	}
 
-			char c='\0';
-			LongType len = len_;
-			while ((len%sizeof(PosixTarHeader)) != 0)
-			{
-				fout.write(&c,sizeof(char));
-				++len;
-			}
-
+	void endRecord(std::ofstream& fout)
+	{
+		statusCheck(RECORD_OPEN,"endRecord");
+		if (len_ == 0) {
 			status_ = RECORD_CLOSED;
+			return;
 		}
 
-	private:
-
-		void checksum()
+		char c='\0';
+		LongType len = len_;
+		while ((len%sizeof(PosixTarHeader)) != 0)
 		{
-			unsigned int sum = 0;
-			char *p = (char *)(&header_);
-			char *q = p + sizeof(PosixTarHeader);
-			while (p < header_.checksum) sum += *p++ & 0xff;
-			for (int i = 0; i < 8; ++i)  {
-				sum += ' ';
-				++p;
-			}
-
-			while (p < q) sum += *p++ & 0xff;
-
-			std::sprintf(header_.checksum,"%06o",sum);
+			fout.write(&c,sizeof(char));
+			++len;
 		}
 
-		void statusCheck(RecordEnum whatItShouldBe, PsimagLite::String func) const
-		{
-			if (status_ == whatItShouldBe) return;
-			std::cerr<<"TarHeader: WARNING: status is "<<statusToString(status_);
-			std::cerr<<" but it should have been "<<statusToString(whatItShouldBe);
-			std::cerr<<" from function = "<<func<<"\n";
+		status_ = RECORD_CLOSED;
+	}
+
+private:
+
+	void checksum()
+	{
+		unsigned int sum = 0;
+		char *p = (char *)(&header_);
+		char *q = p + sizeof(PosixTarHeader);
+		while (p < header_.checksum) sum += *p++ & 0xff;
+		for (int i = 0; i < 8; ++i)  {
+			sum += ' ';
+			++p;
 		}
 
-		PsimagLite::String statusToString(RecordEnum st) const
-		{
-			if (st == RECORD_CLOSED) return "RECORD_CLOSED";
-			return "RECORD_OPEN";
-		}
+		while (p < q) sum += *p++ & 0xff;
 
-		PosixTarHeader header_;
-		LongType len_;
-		RecordEnum status_;
-	}; // class TarHeader
+		std::sprintf(header_.checksum,"%06o",sum);
+	}
+
+	void statusCheck(RecordEnum whatItShouldBe, PsimagLite::String func) const
+	{
+		if (status_ == whatItShouldBe) return;
+		std::cerr<<"TarHeader: WARNING: status is "<<statusToString(status_);
+		std::cerr<<" but it should have been "<<statusToString(whatItShouldBe);
+		std::cerr<<" from function = "<<func<<"\n";
+	}
+
+	PsimagLite::String statusToString(RecordEnum st) const
+	{
+		if (st == RECORD_CLOSED) return "RECORD_CLOSED";
+		return "RECORD_OPEN";
+	}
+
+	PosixTarHeader header_;
+	LongType len_;
+	RecordEnum status_;
+}; // class TarHeader
+
+class TarHelper {
+
+	typedef TarHeader::LongType LongType;
+
+public:
+
+	static LongType fileSize(PsimagLite::String filename)
+	{
+	    std::ifstream fin(filename.c_str(),
+		                 std::ifstream::ate | std::ifstream::binary);
+	    return fin.tellg();
+	}
+
+	static void goodDescriptorOrThrow(std::ifstream& f,
+	                                  PsimagLite::String filename)
+	{
+		if (!f || !f.good() || !f.is_open() || f.bad())
+			throw PsimagLite::RuntimeError("Cannot read from " + filename + "\n");
+	}
+
+	static void goodDescriptorOrThrow(std::ofstream& f,
+	                                  PsimagLite::String filename)
+	{
+		if (!f || !f.is_open())
+			throw PsimagLite::RuntimeError("Cannot write to " + filename + "\n");
+	}
+};
+
+class TarPack  {
+
+	typedef TarHeader::LongType LongType;
 
 public:
 
 	TarPack(PsimagLite::String filename)
 	    : fout_(filename.c_str(),std::ifstream::binary)
 	{
-		goodDescriptorOrThrow(fout_,filename);
+		TarHelper::goodDescriptorOrThrow(fout_,filename);
 	}
 
 	~TarPack()
@@ -228,9 +261,9 @@ public:
 		if (nameInArchive == "") nameInArchive = filename;
 
 		std::ifstream fin(filename.c_str(),std::ifstream::binary);
-		goodDescriptorOrThrow(fin, filename);
+		TarHelper::goodDescriptorOrThrow(fin, filename);
 
-		LongType len = fileSize(filename);
+		LongType len = TarHelper::fileSize(filename);
 
 
 		TarHeader tarHeader(nameInArchive,len);
@@ -246,25 +279,6 @@ public:
 
 
 private:
-
-	LongType fileSize(PsimagLite::String filename) const
-	{
-	    std::ifstream fin(filename.c_str(),
-		                 std::ifstream::ate | std::ifstream::binary);
-	    return fin.tellg();
-	}
-
-	void goodDescriptorOrThrow(std::ifstream& f, PsimagLite::String filename) const
-	{
-		if (!f || !f.good() || !f.is_open() || f.bad())
-			throw PsimagLite::RuntimeError("Cannot read from " + filename + "\n");
-	}
-
-	void goodDescriptorOrThrow(std::ofstream& f, PsimagLite::String filename) const
-	{
-		if (!f || !f.is_open())
-			throw PsimagLite::RuntimeError("Cannot write to " + filename + "\n");
-	}
 
 	std::ofstream fout_;
 
