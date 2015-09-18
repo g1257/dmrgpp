@@ -75,6 +75,43 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  * https://github.com/lindenb/cclindenb/
  * blob/28f2164dbed87cbec51839d0cf1e2a2a8e563788/src/core/lindenb/io/tarball.h
  *
+ * TarPack: creating a tar archive
+#include "TarPack.h"
+
+int main(int argc,char** argv)
+{
+	if (argc < 2) {
+		std::cerr<<"USAGE: "<<argv[0]<<" file.tar\n";
+		return 1;
+	}
+
+	Dmrg::UnTarPack untarPack(argv[1]);
+	Dmrg::UnTarPack::VectorStringType files;
+	untarPack.list(files);
+	for (SizeType i = 0; i < files.size(); ++i)
+		std::cout<<files[i]<<"\n";
+}
+ *
+ *
+ * TarPack: extracting a tar archive
+ *
+#include "TarPack.h"
+
+int main(int argc,char** argv)
+{
+	if (argc < 2) {
+		std::cerr<<"USAGE: "<<argv[0]<<" file.tar\n";
+		return 1;
+	}
+
+	Dmrg::UnTarPack untarPack(argv[1]);
+	Dmrg::UnTarPack::VectorStringType files;
+	untarPack.list(files);
+	for (SizeType i = 0; i < files.size(); ++i)
+		std::cout<<files[i]<<"\n";
+}
+ *
+ *
  */
 
 #ifndef DMRG_TAR_PACK_H
