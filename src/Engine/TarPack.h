@@ -145,7 +145,8 @@ struct PosixTarHeader {
 
 	PosixTarHeader (std::ifstream& fin)
 	{
-		fin.read((char*)(this),sizeof(*this));
+		std::memset(this,0,sizeof(PosixTarHeader));
+		fin.read((char*)(this),sizeof(PosixTarHeader));
 	}
 
 	char name[100];
@@ -183,7 +184,10 @@ public :
 
 	TarHeader(std::ifstream& fin)
 	    : header_(fin),len_(0),status_(RECORD_CLOSED)
-	{}
+	{
+		if (fin.eof())
+			throw PsimagLite::RuntimeError("TarHeader\n");
+	}
 
 	~TarHeader()
 	{
@@ -291,7 +295,7 @@ class TarPack  {
 public:
 
 	TarPack(PsimagLite::String filename)
-	    : fout_(filename.c_str(),std::ifstream::binary)
+	    : fout_(filename.c_str(),std::ofstream::binary)
 	{
 		TarHelper::goodDescriptorOrThrow(fout_,filename);
 	}
@@ -338,7 +342,7 @@ public:
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	UnTarPack(PsimagLite::String filename)
-	    : fin_(filename.c_str(),std::ifstream::binary)
+	    : fin_(filename.c_str(),std::ifstream::binary),filename_(filename)
 	{
 		TarHelper::goodDescriptorOrThrow(fin_,filename);
 	}
@@ -351,19 +355,62 @@ public:
 	void list(VectorStringType& files)
 	{
 		while (!fin_.eof()) {
-			TarHeader tarHeader(fin_);
+			TarHeader* tarHeader = 0;
+			try {
+				tarHeader = new TarHeader(fin_);
+			} catch (std::exception&) {
+				break;
+			}
+
 			std::stringstream ss;
-			ss<<std::oct<<tarHeader.header().size;
+			ss<<std::oct<<tarHeader->header().size;
 			LongType len = 0;
 			ss>>len;
-			if (fin_.eof()) break;
 			LongType currentPos = fin_.tellg();
 			fin_.seekg(currentPos + len);
 			readPadding(len);
-			PsimagLite::String name(tarHeader.header().name);
+			PsimagLite::String name(tarHeader->header().name);
 			files.push_back(name);
 			//std::cout<<name<<" "<<len<<"\n";
 		}
+
+		fin_.close();
+		fin_.open(filename_.c_str(),std::ifstream::binary);
+	}
+
+	void extract(PsimagLite::String file, bool rewind = true)
+	{
+		if (rewind) fin_.seekg(std::ios_base::beg);
+		bool found = false;
+		while (!fin_.eof()) {
+			TarHeader* tarHeader = 0;
+			try {
+				tarHeader = new TarHeader(fin_);
+			} catch (std::exception&) {
+				break;
+			}
+
+			std::stringstream ss;
+			ss<<std::oct<<tarHeader->header().size;
+			LongType len = 0;
+			ss>>len;
+			PsimagLite::String name(tarHeader->header().name);
+
+			if (name == file) {
+				extractFile(file, len);
+				found = true;
+			} else {
+				LongType currentPos = fin_.tellg();
+				fin_.seekg(currentPos + len);
+			}
+
+			readPadding(len);
+			std::cout<<"Read "<<name<<" "<<len<<"\n";
+			if (found) break;
+		}
+
+		if (found) return;
+		std::cerr<<"UnTarPack: "<<file<<" not found in archive\n";
 	}
 
 private:
@@ -380,7 +427,29 @@ private:
 		delete [] c;
 	}
 
+	void extractFile(PsimagLite::String file, LongType len)
+	{
+		std::ofstream fout(file.c_str(),std::ifstream::binary);
+		LongType len2 = len;
+		LongType bufferLen = 1024;
+		char *buffer = new char[bufferLen];
+		while (len2 >= bufferLen) {
+			fin_.read(buffer,bufferLen);
+			fout.write(buffer,bufferLen);
+			len2 -= bufferLen;
+		}
+
+		if (len2 > 0) {
+			fin_.read(buffer,len2);
+			fout.write(buffer,len2);
+		}
+
+		fout.close();
+		delete [] buffer;
+	}
+
 	std::ifstream fin_;
+	PsimagLite::String filename_;
 
 };     //class UnTarPack
 } // namespace Dmrg
