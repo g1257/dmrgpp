@@ -106,6 +106,11 @@ struct PosixTarHeader {
 		std::sprintf(size,"%011llo",static_cast<LongType>(fileSize));
 	}
 
+	PosixTarHeader (std::ifstream& fin)
+	{
+		fin.read((char*)(this),sizeof(*this));
+	}
+
 	char name[100];
 	char mode[8];
 	char uid[8];
@@ -139,6 +144,10 @@ public :
 		checksum();
 	}
 
+	TarHeader(std::ifstream& fin)
+	    : header_(fin),len_(0),status_(RECORD_CLOSED)
+	{}
+
 	~TarHeader()
 	{
 		if (len_ == 0) return;
@@ -170,6 +179,8 @@ public :
 
 		status_ = RECORD_CLOSED;
 	}
+
+	const PosixTarHeader& header() const { return header_; }
 
 private:
 
@@ -250,9 +261,6 @@ public:
 
 	~TarPack()
 	{
-		//TarHeader tarHeader("",0);
-	    //tarHeader.writeTo(fout_);
-	    //tarHeader.writeTo(fout_);
 	    fout_.close();
 	}
 
@@ -284,6 +292,60 @@ private:
 
 };     //class TarPack
 
+class UnTarPack  {
+
+	typedef TarHeader::LongType LongType;
+
+public:
+
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+
+	UnTarPack(PsimagLite::String filename)
+	    : fin_(filename.c_str(),std::ifstream::binary)
+	{
+		TarHelper::goodDescriptorOrThrow(fin_,filename);
+	}
+
+	~UnTarPack()
+	{
+	    fin_.close();
+	}
+
+	void list(VectorStringType& files)
+	{
+		while (!fin_.eof()) {
+			TarHeader tarHeader(fin_);
+			std::stringstream ss;
+			ss<<std::oct<<tarHeader.header().size;
+			LongType len = 0;
+			ss>>len;
+			if (fin_.eof()) break;
+			LongType currentPos = fin_.tellg();
+			fin_.seekg(currentPos + len);
+			readPadding(len);
+			PsimagLite::String name(tarHeader.header().name);
+			files.push_back(name);
+			//std::cout<<name<<" "<<len<<"\n";
+		}
+	}
+
+private:
+
+	void readPadding(LongType len)
+	{
+		if (len == 0) return;
+		SizeType padding = len % sizeof(PosixTarHeader);
+		padding = sizeof(PosixTarHeader) - padding;
+		if (padding == 0) return;
+		SizeType allocation = (padding > 512) ? padding : 512;
+		char *c = new char[allocation];
+		fin_.read(c,padding);
+		delete [] c;
+	}
+
+	std::ifstream fin_;
+
+};     //class UnTarPack
 } // namespace Dmrg
 /*@}*/
 #endif
