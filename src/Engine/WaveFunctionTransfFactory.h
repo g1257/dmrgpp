@@ -384,9 +384,9 @@ public:
 		io.printMatrix(weStack_,"weStack");
 	}
 
-	void appendFileList(VectorStringType& files) const
+	void appendFileList(VectorStringType& files, PsimagLite::String rootName) const
 	{
-		files.push_back(WFT_STRING + filenameOut_);
+		files.push_back(WFT_STRING + rootName);
 	}
 
 private:

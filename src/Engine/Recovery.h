@@ -93,6 +93,7 @@ public:
 
 	enum {SYSTEM = ProgramGlobals::SYSTEM, ENVIRON = ProgramGlobals::ENVIRON};
 
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef Checkpoint<ParametersType,TargetingType> CheckpointType;
 	typedef typename TargetingType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename TargetingType::WaveFunctionTransfType WaveFunctionTransfType;
@@ -113,6 +114,15 @@ public:
 	      flag_m_(false)
 	{}
 
+	~Recovery()
+	{
+		if (checkpoint_.parameters().options.find("recoveryNoDelete") !=
+		        PsimagLite::String::npos) return;
+
+		for (SizeType i = 0; i < files_.size(); ++i)
+			unlink(files_[i].c_str());
+	}
+
 	void save(const TargetingType& psi,
 	          VectorSizeType vsites,
 	          int lastSign) const
@@ -130,10 +140,12 @@ public:
 		PsimagLite::OstringStream msg;
 		msg<<"#LastLoopSign="<<lastSign<<"\n";
 		ioOut<<msg.str();
+		files_.push_back(rootName);
 
 		saveStacksForRecovery(rootName);
 
 		wft_.save(rootName);
+		wft_.appendFileList(files_,rootName);
 		flag_m_ = !flag_m_;
 	}
 
@@ -154,12 +166,14 @@ private:
 		{
 			MemoryStackType systemStackCopy = checkpoint_.memoryStack(SYSTEM);
 			DiskStackType systemDiskTemp(sysReadFile,sysWriteFile,false);
+			files_.push_back(sysWriteFile);
 			CheckpointType::loadStack(systemDiskTemp,systemStackCopy);
 		}
 
 		{
 			MemoryStackType envStackCopy = checkpoint_.memoryStack(ENVIRON);
 			DiskStackType envDiskTemp(envReadFile,envWriteFile,false);
+			files_.push_back(envWriteFile);
 			CheckpointType::loadStack(envDiskTemp,envStackCopy);
 		}
 	}
@@ -170,6 +184,7 @@ private:
 	const BasisWithOperatorsType& pS_;
 	const BasisWithOperatorsType& pE_;
 	mutable bool flag_m_;
+	mutable VectorStringType files_;
 };     //class Recovery
 
 } // namespace Dmrg

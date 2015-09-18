@@ -120,7 +120,7 @@ public:
 		if (parameters_.options.find("tarNoDelete") != PsimagLite::String::npos)
 			return;
 
-		for (SizeType i = 0; i < parameters_.files.size(); ++i)
+		for (SizeType i = 1; i < parameters_.files.size(); ++i)
 			unlink(parameters_.files[i].c_str());
 	}
 

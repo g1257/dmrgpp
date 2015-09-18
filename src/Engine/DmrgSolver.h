@@ -235,7 +235,7 @@ public:
 	{
 		parameters_.files.push_back(parameters_.filename);
 		checkpoint_.appendFileList(parameters_.files);
-		wft_.appendFileList(parameters_.files);
+		wft_.appendFileList(parameters_.files, parameters_.filename);
 	}
 
 private:
