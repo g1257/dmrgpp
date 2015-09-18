@@ -352,6 +352,7 @@ int main(int argc,char *argv[])
 	PsimagLite::String insitu("");
 	int precision = 6;
 	bool clearRun = false;
+	bool keepUpackedFiles = false;
 	/* PSIDOC DmrgDriver
 	 * \begin{itemize}
 	 * \item[-f] [Mandatory, String] Input to use.
@@ -395,7 +396,7 @@ int main(int argc,char *argv[])
 	\begin{verbatim}./operator -l c -t -f input.inp -F -1\end{verbatim}
 	\end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:o:s:l:d:F:p:ct")) != -1) {
+	while ((opt = getopt(argc, argv,"f:o:s:l:d:F:p:kct")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -431,6 +432,9 @@ int main(int argc,char *argv[])
 		case 'c':
 			clearRun = true;
 			break;
+		case 'k':
+			keepUpackedFiles = true;
+			break;
 		default:
 			inputCheck.usageMain(strUsage);
 			return 1;
@@ -446,13 +450,7 @@ int main(int argc,char *argv[])
 	if (!options.enabled && options.label != "" && !clearRun) {
 		bool queryOnly = (options.label == "?");
 		if (options.label == "." || options.label == "?") {
-			PsimagLite::String rootname = filename;
-			size_t index =rootname.find(".", 0);
-			if (index != PsimagLite::String::npos) {
-				rootname.erase(index,filename.length());
-			}
-
-			options.label="runFor" + rootname + ".cout";
+			options.label = ArchiveFilesType::coutName(filename);
 			if (queryOnly) {
 				std::cout<<options.label<<"\n";
 				return 0;
@@ -485,7 +483,7 @@ int main(int argc,char *argv[])
 	InputNgType::Writeable ioWriteable(filename,inputCheck);
 	InputNgType::Readable io(ioWriteable);
 
-	ParametersDmrgSolverType dmrgSolverParams(io);
+	ParametersDmrgSolverType dmrgSolverParams(io, clearRun);
 
 	ArchiveFilesType af(dmrgSolverParams,filename,options.enabled,options.label);
 
@@ -510,5 +508,9 @@ int main(int argc,char *argv[])
 #else
 	mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck,options);
 #endif
+
+	af.deletePackedFiles();
+	if (!keepUpackedFiles)
+		ArchiveFilesType::staticDelete();
 }
 

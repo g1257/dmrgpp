@@ -327,7 +327,7 @@ struct ParametersDmrgSolver {
 	}
 
 	//! Read Dmrg parameters from inp file
-	ParametersDmrgSolver(InputValidatorType& io)
+	ParametersDmrgSolver(InputValidatorType& io, bool earlyExit = false)
 	    : sitesPerBlock(1),
 	      maxMatrixRankStored(0),
 	      excited(0),
@@ -337,6 +337,8 @@ struct ParametersDmrgSolver {
 		io.readline(options,"SolverOptions=");
 		io.readline(version,"Version=");
 		io.readline(filename,"OutputFile=");
+		if (earlyExit) return;
+
 		io.readline(keptStatesInfinite,"InfiniteLoopKeptStates=");
 		readFiniteLoops(io,finiteLoop);
 

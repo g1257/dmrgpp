@@ -107,10 +107,8 @@ public:
 			files_.push_back(extra);
 	}
 
-	~ArchiveFiles()
+	void deletePackedFiles()
 	{
-		staticDelete();
-
 		if (parameters_.options.find("tarEnable") == PsimagLite::String::npos)
 			return;
 
@@ -146,6 +144,9 @@ public:
 			if (files_[i] == filename) continue;
 			unlink(files_[i].c_str());
 		}
+
+		PsimagLite::String coutname = coutName(filename);
+		unlink(coutname.c_str());
 	}
 
 	static void staticDelete()
@@ -153,6 +154,17 @@ public:
 		for (SizeType i = 0; i < filesToDelete_.size(); ++i)
 			unlink(filesToDelete_[i].c_str());
 		filesToDelete_.clear();
+	}
+
+	static PsimagLite::String coutName(PsimagLite::String filename)
+	{
+		PsimagLite::String rootname = filename;
+		size_t index =rootname.find(".", 0);
+		if (index != PsimagLite::String::npos) {
+			rootname.erase(index,filename.length());
+		}
+
+		return "runFor" + rootname + ".cout";
 	}
 
 private:
