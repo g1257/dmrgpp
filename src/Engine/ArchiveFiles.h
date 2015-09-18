@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "ProgressIndicator.h"
 #include "TarPack.h"
+#include "IoSimple.h"
 
 namespace Dmrg {
 
@@ -101,12 +102,24 @@ public:
 	{
 		files_.push_back(filename);
 		PsimagLite::String rootname = parameters.filename;
-		files_.push_back(rootname);
-		files_.push_back(ProgramGlobals::SYSTEM_STACK_STRING+rootname);
-		files_.push_back(ProgramGlobals::ENVIRON_STACK_STRING+rootname);
-		files_.push_back(ProgramGlobals::WFT_STRING+rootname);
+		appendToList(files_,rootname);
 		if (!addExtra && extra != "")
 			files_.push_back(extra);
+	}
+
+	static void unpackIfNeeded(PsimagLite::String rootname)
+	{
+		PsimagLite::IoSimple::In io;
+		try {
+			io.open(rootname);
+		} catch (std::exception&) {
+			VectorStringType files;
+			appendToList(files,rootname);
+			UnTarPack untarPack(tarName(rootname));
+
+			for (SizeType i = 0; i < files.size(); ++i)
+				untarPack.extract(files[i],false);
+		}
 	}
 
 	void archiveIfNeeded() const
@@ -114,12 +127,7 @@ public:
 		if (parameters_.options.find("tarEnable") == PsimagLite::String::npos)
 			return;
 
-		PsimagLite::String tarname = parameters_.filename;
-		size_t index = tarname.find(".");
-		if (index != PsimagLite::String::npos)
-			tarname.erase(index,parameters_.filename.length());
-
-		tarname += ".tar";
+		PsimagLite::String tarname = tarName(parameters_.filename);
 		Dmrg::TarPack tarPack(tarname);
 		for (SizeType i = 0; i < files_.size(); ++i)
 			tarPack.add(files_[i]);
@@ -140,6 +148,25 @@ public:
 	}
 
 private:
+
+	static PsimagLite::String tarName(PsimagLite::String rootname)
+	{
+		PsimagLite::String tarname = rootname;
+		size_t index = tarname.find(".");
+		if (index != PsimagLite::String::npos)
+			tarname.erase(index,rootname.length());
+
+		return tarname + ".tar";
+	}
+
+	static void appendToList(VectorStringType& files,
+	                         PsimagLite::String rootname)
+	{
+		files.push_back(rootname);
+		files.push_back(ProgramGlobals::SYSTEM_STACK_STRING+rootname);
+		files.push_back(ProgramGlobals::ENVIRON_STACK_STRING+rootname);
+		files.push_back(ProgramGlobals::WFT_STRING+rootname);
+	}
 
 	const ParametersType& parameters_;
 	VectorStringType files_;

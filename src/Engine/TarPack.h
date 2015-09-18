@@ -371,6 +371,7 @@ public:
 			readPadding(len);
 			PsimagLite::String name(tarHeader->header().name);
 			files.push_back(name);
+			delete tarHeader;
 			//std::cout<<name<<" "<<len<<"\n";
 		}
 

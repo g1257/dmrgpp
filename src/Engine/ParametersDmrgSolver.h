@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Provenance.h"
 #include "BoostSerializationHeaders.h"
 #include "IoSimple.h"
+#include "ArchiveFiles.h"
 
 namespace Dmrg {
 /* PSIDOC FiniteLoop
@@ -371,6 +372,7 @@ struct ParametersDmrgSolver {
 			checkRestart(filename,checkpoint.filename,options,"CheckpointFilename=");
 		} else if (options.find("restart")!=PsimagLite::String::npos) {
 			io.readline(checkpoint.filename,"RestartFilename=");
+			ArchiveFiles<ThisType>::unpackIfNeeded(checkpoint.filename);
 			checkRestart(filename,checkpoint.filename,options,"CheckpointFilename=");
 		}
 
@@ -510,6 +512,7 @@ private:
 		bool bOld = (optionsOld.find("twositedmrg")!=PsimagLite::String::npos);
 		bool b = (options.find("twositedmrg")!=PsimagLite::String::npos);
 		if (bOld == b) return;
+
 		PsimagLite::String s (__FILE__);
 		PsimagLite::String s1 = ": Previous run used twositedmrg ";
 		s1 += " but this one does not.";
