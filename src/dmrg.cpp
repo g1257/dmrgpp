@@ -348,6 +348,18 @@ int main(int argc,char *argv[])
 	strUsage += " -f filename";
 	PsimagLite::String insitu("");
 	int precision = 6;
+	bool clearRun = false;
+	/* PSIDOC DmrgDriver
+	 * \begin{itemize}
+	 * \item[-f] [Mandatory, String] Input to use.
+	 * \item[-o] [Optional, String] What to measure in-situ
+	 * \item[-l] [Optional, String] Redirect std::cout to a log file.
+	 * If the string is ``.'' then choose name for log file automatically
+	 * If the string is ``?'' then print name of log file that will
+	 * be chosen if ``.'' is used.
+	 *\item[-c] [Optional] Clear run for this input
+	 * \end{itemize}
+	 */
 	/* PSIDOC OperatorDriver
 	 The arguments to the \verb!operator! executable are as follows.
 	\begin{itemize}
@@ -380,7 +392,7 @@ int main(int argc,char *argv[])
 	\begin{verbatim}./operator -l c -t -f input.inp -F -1\end{verbatim}
 	\end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:o:s:l:d:F:p:t")) != -1) {
+	while ((opt = getopt(argc, argv,"f:o:s:l:d:F:p:c:t")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -413,6 +425,9 @@ int main(int argc,char *argv[])
 			std::cout.precision(precision);
 			std::cerr.precision(precision);
 			break;
+		case 'c':
+			clearRun = true;
+			break;
 		default:
 			inputCheck.usageMain(strUsage);
 			return 1;
@@ -425,14 +440,25 @@ int main(int argc,char *argv[])
 		return 1;
 	}
 
+	if (clearRun) {
+		std::cerr<<argv[0]<<": Clear run not implemented yet\n";
+		return 1;
+	}
+
 	if (!options.enabled && options.label != "") {
-		if (options.label == ".") {
+		bool queryOnly = (options.label == "?");
+		if (options.label == "." || options.label == "?") {
 			PsimagLite::String rootname = filename;
 			size_t index =rootname.find(".", 0);
 			if (index != PsimagLite::String::npos) {
 				rootname.erase(index,filename.length());
 			}
+
 			options.label="runFor" + rootname + ".cout";
+			if (queryOnly) {
+				std::cout<<options.label<<"\n";
+				return 0;
+			}
 		}
 
 		GlobalCoutStream.open(options.label.c_str());

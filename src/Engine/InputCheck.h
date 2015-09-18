@@ -172,6 +172,9 @@ public:
 		registerOpts.push_back("vectorwithoffsets");
 		registerOpts.push_back("allPvectors");
 		registerOpts.push_back("printgeometry");
+		registerOpts.push_back("tarEnable");
+		registerOpts.push_back("tarNoDelete");
+		registerOpts.push_back("recoveryNoDelete");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);
