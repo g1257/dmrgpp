@@ -30,6 +30,7 @@ typedef float RealType;
 #include "InputCheck.h"
 #include "ModelSelector.h"
 #include "ObserverInterpreter.h"
+#include "ArchiveFiles.h"
 
 using namespace Dmrg;
 
@@ -190,6 +191,7 @@ void mainLoop(GeometryType& geometry,
 
 	bool moreData = true;
 	const PsimagLite::String& datafile = params.filename;
+	ArchiveFiles<ParametersDmrgSolverType>::unpackIfNeeded(datafile);
 	IoInputType dataIo(datafile);
 	bool hasTimeEvolution = (targetting == "TimeStepTargetting" ||
 	                         targetting=="MettsTargetting" ||
@@ -283,7 +285,8 @@ int main(int argc,char *argv[])
 	PsimagLite::String options("");
 	int opt = 0;
 	int precision = 6;
-	while ((opt = getopt(argc, argv,"f:o:p:")) != -1) {
+	bool keepUpackedFiles = false;
+	while ((opt = getopt(argc, argv,"f:o:p:k")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -295,6 +298,9 @@ int main(int argc,char *argv[])
 			precision = atoi(optarg);
 			std::cout.precision(precision);
 			std::cerr.precision(precision);
+			break;
+		case 'k':
+			keepUpackedFiles = true;
 			break;
 		default:
 			usage(argv[0]);
@@ -337,5 +343,8 @@ int main(int argc,char *argv[])
 #else
 	mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck, options, list);
 #endif
+
+	if (!keepUpackedFiles)
+		ArchiveFiles<ParametersDmrgSolverType>::staticDelete();
 } // main
 

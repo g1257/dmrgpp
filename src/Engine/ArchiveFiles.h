@@ -109,9 +109,7 @@ public:
 
 	~ArchiveFiles()
 	{
-		for (SizeType i = 0; i < filesToDelete_.size(); ++i)
-			unlink(filesToDelete_[i].c_str());
-		filesToDelete_.clear();
+		staticDelete();
 
 		if (parameters_.options.find("tarEnable") == PsimagLite::String::npos)
 			return;
@@ -148,6 +146,13 @@ public:
 			if (files_[i] == filename) continue;
 			unlink(files_[i].c_str());
 		}
+	}
+
+	static void staticDelete()
+	{
+		for (SizeType i = 0; i < filesToDelete_.size(); ++i)
+			unlink(filesToDelete_[i].c_str());
+		filesToDelete_.clear();
 	}
 
 private:
