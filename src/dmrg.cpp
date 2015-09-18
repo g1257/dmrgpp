@@ -510,7 +510,5 @@ int main(int argc,char *argv[])
 #else
 	mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck,options);
 #endif
-
-	af.archiveIfNeeded();
 }
 

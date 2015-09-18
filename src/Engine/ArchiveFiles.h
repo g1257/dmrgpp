@@ -107,23 +107,12 @@ public:
 			files_.push_back(extra);
 	}
 
-	static void unpackIfNeeded(PsimagLite::String rootname)
+	~ArchiveFiles()
 	{
-		PsimagLite::IoSimple::In io;
-		try {
-			io.open(rootname);
-		} catch (std::exception&) {
-			VectorStringType files;
-			appendToList(files,rootname);
-			UnTarPack untarPack(tarName(rootname));
+		for (SizeType i = 0; i < filesToDelete_.size(); ++i)
+			unlink(filesToDelete_[i].c_str());
+		filesToDelete_.clear();
 
-			for (SizeType i = 0; i < files.size(); ++i)
-				untarPack.extract(files[i],false);
-		}
-	}
-
-	void archiveIfNeeded() const
-	{
 		if (parameters_.options.find("tarEnable") == PsimagLite::String::npos)
 			return;
 
@@ -137,6 +126,20 @@ public:
 
 		for (SizeType i = 1; i < files_.size(); ++i)
 			unlink(files_[i].c_str());
+	}
+
+	static void unpackIfNeeded(PsimagLite::String rootname)
+	{
+		PsimagLite::IoSimple::In io;
+		try {
+			io.open(rootname);
+		} catch (std::exception&) {
+			appendToList(filesToDelete_,rootname);
+			UnTarPack untarPack(tarName(rootname));
+
+			for (SizeType i = 0; i < filesToDelete_.size(); ++i)
+				untarPack.extract(filesToDelete_[i],false);
+		}
 	}
 
 	void clear(PsimagLite::String filename) const
@@ -168,9 +171,13 @@ private:
 		files.push_back(ProgramGlobals::WFT_STRING+rootname);
 	}
 
+	static VectorStringType filesToDelete_;
 	const ParametersType& parameters_;
 	VectorStringType files_;
 }; //class ArchiveFiles
+
+template<typename T>
+typename ArchiveFiles<T>::VectorStringType ArchiveFiles<T>::filesToDelete_;
 
 } // namespace Dmrg
 /*@}*/
