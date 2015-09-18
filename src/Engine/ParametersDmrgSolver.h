@@ -305,7 +305,6 @@ struct ParametersDmrgSolver {
 	DmrgCheckPoint checkpoint;
 	VectorSizeType adjustQuantumNumbers;
 	typename PsimagLite::Vector<FiniteLoop>::Type finiteLoop;
-	mutable VectorStringType files;
 
 	template<class Archive>
 	void serialize(Archive&, const unsigned int)

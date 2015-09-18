@@ -105,6 +105,7 @@ class DmrgSolver {
 
 public:
 
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename  OperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelType::MyBasis MyBasis;
 	typedef typename MyBasis::RealType RealType;
@@ -230,13 +231,6 @@ public:
 	}
 
 	RealType energy() const { return energy_; }
-
-	void appendFileList() const
-	{
-		parameters_.files.push_back(parameters_.filename);
-		checkpoint_.appendFileList(parameters_.files);
-		wft_.appendFileList(parameters_.files, parameters_.filename);
-	}
 
 private:
 

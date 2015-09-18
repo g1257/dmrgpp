@@ -148,8 +148,6 @@ void mainLoop3(GeometryType& geometry,
 
 	//! Calculate observables:
 	dmrgSolver.main(geometry);
-
-	dmrgSolver.appendFileList();
 }
 
 template<typename GeometryType,
@@ -445,12 +443,7 @@ int main(int argc,char *argv[])
 		return 1;
 	}
 
-	if (clearRun) {
-		std::cerr<<argv[0]<<": Clear run not implemented yet\n";
-		return 1;
-	}
-
-	if (!options.enabled && options.label != "") {
+	if (!options.enabled && options.label != "" && !clearRun) {
 		bool queryOnly = (options.label == "?");
 		if (options.label == "." || options.label == "?") {
 			PsimagLite::String rootname = filename;
@@ -495,6 +488,11 @@ int main(int argc,char *argv[])
 	ParametersDmrgSolverType dmrgSolverParams(io);
 
 	ArchiveFilesType af(dmrgSolverParams,filename,options.enabled,options.label);
+
+	if (clearRun) {
+		af.clear(filename);
+		return 1;
+	}
 
 	if (insitu!="") dmrgSolverParams.insitu = insitu;
 

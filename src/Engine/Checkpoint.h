@@ -103,8 +103,8 @@ public:
 	const PsimagLite::String ENVIRON_STACK_STRING;
 
 	Checkpoint(const ParametersType& parameters) :
-	    SYSTEM_STACK_STRING("SystemStack"),
-	    ENVIRON_STACK_STRING("EnvironStack"),
+	    SYSTEM_STACK_STRING(ProgramGlobals::SYSTEM_STACK_STRING),
+	    ENVIRON_STACK_STRING(ProgramGlobals::ENVIRON_STACK_STRING),
 	    parameters_(parameters),
 	    enabled_(parameters_.options.find("checkpoint")!=PsimagLite::String::npos ||
 	        parameters_.options.find("restart")!=PsimagLite::String::npos),
@@ -197,12 +197,6 @@ public:
 	}
 
 	const ParametersType& parameters() const { return parameters_; }
-
-	void appendFileList(VectorStringType& files) const
-	{
-		files.push_back(SYSTEM_STACK_STRING+parameters_.filename);
-		files.push_back(ENVIRON_STACK_STRING+parameters_.filename);
-	}
 
 private:
 

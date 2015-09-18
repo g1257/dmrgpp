@@ -130,7 +130,7 @@ public:
 	      progress_("WaveFunctionTransf"),
 	      filenameIn_(params.checkpoint.filename),
 	      filenameOut_(params.filename),
-	      WFT_STRING("Wft"),
+	      WFT_STRING(ProgramGlobals::WFT_STRING),
 	      wftImpl_(0),
 	      rng_(3433117),
 	      twoSiteDmrg_(params.options.find("twositedmrg")!=PsimagLite::String::npos),

@@ -89,6 +89,8 @@ namespace Dmrg {
 template<typename ParametersType>
 class ArchiveFiles  {
 
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+
 public:
 
 	ArchiveFiles(const ParametersType& parameters,
@@ -97,9 +99,14 @@ public:
 	             PsimagLite::String extra)
 	    : parameters_(parameters)
 	{
-		parameters.files.push_back(filename);
+		files_.push_back(filename);
+		PsimagLite::String rootname = parameters.filename;
+		files_.push_back(rootname);
+		files_.push_back(ProgramGlobals::SYSTEM_STACK_STRING+rootname);
+		files_.push_back(ProgramGlobals::ENVIRON_STACK_STRING+rootname);
+		files_.push_back(ProgramGlobals::WFT_STRING+rootname);
 		if (!addExtra && extra != "")
-			parameters.files.push_back(extra);
+			files_.push_back(extra);
 	}
 
 	void archiveIfNeeded() const
@@ -114,19 +121,28 @@ public:
 
 		tarname += ".tar";
 		Dmrg::TarPack tarPack(tarname);
-		for (SizeType i = 0; i < parameters_.files.size(); ++i)
-			tarPack.add(parameters_.files[i]);
+		for (SizeType i = 0; i < files_.size(); ++i)
+			tarPack.add(files_[i]);
 
 		if (parameters_.options.find("tarNoDelete") != PsimagLite::String::npos)
 			return;
 
-		for (SizeType i = 1; i < parameters_.files.size(); ++i)
-			unlink(parameters_.files[i].c_str());
+		for (SizeType i = 1; i < files_.size(); ++i)
+			unlink(files_[i].c_str());
+	}
+
+	void clear(PsimagLite::String filename) const
+	{
+		for (SizeType i = 0; i < files_.size(); ++i) {
+			if (files_[i] == filename) continue;
+			unlink(files_[i].c_str());
+		}
 	}
 
 private:
 
 	const ParametersType& parameters_;
+	VectorStringType files_;
 }; //class ArchiveFiles
 
 } // namespace Dmrg

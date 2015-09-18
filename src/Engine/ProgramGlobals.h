@@ -103,6 +103,10 @@ struct ProgramGlobals {
 	{
 		maxElectronsOneSpin = maxElectronsOneSpin_;
 	}
+
+	static PsimagLite::String WFT_STRING;
+	static PsimagLite::String SYSTEM_STACK_STRING;
+	static PsimagLite::String ENVIRON_STACK_STRING;
 }; // ProgramGlobals
 
 SizeType ProgramGlobals::maxElectronsOneSpin = 0;
@@ -123,6 +127,9 @@ const PsimagLite::String ProgramGlobals::license=
 "*********************************************************\n"
 "\n";
 
+PsimagLite::String ProgramGlobals::WFT_STRING = "Wft";
+PsimagLite::String ProgramGlobals::SYSTEM_STACK_STRING = "SystemStack";
+PsimagLite::String ProgramGlobals::ENVIRON_STACK_STRING = "EnvironStack";
 }; // namespace Dmrg
 /*@}*/
 #endif
