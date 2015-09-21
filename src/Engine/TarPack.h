@@ -133,14 +133,14 @@ struct PosixTarHeader {
 		std::memset(this,0,sizeof(PosixTarHeader));
 		if (filename == "" && fileSize == 0) return;
 
-		std::sprintf(magic,"ustar  ");
-		std::sprintf(mtime,"%011lo",time(0));
-		std::sprintf(mode,"%07o",0644);
+		sprintf(magic,"ustar");
+		sprintf(mtime,"%011lo",time(0));
+		sprintf(mode,"%07o",0644);
 		std::snprintf(uname,32,"nobody");
-		std::sprintf(gname,"nobody");
+		sprintf(gname,"nobody");
 		std::snprintf(name,100,"%s",filename.c_str());
 		typeflag[0]=0;
-		std::sprintf(size,"%011llo",static_cast<LongType>(fileSize));
+		sprintf(size,"%011llo",static_cast<LongType>(fileSize));
 	}
 
 	PosixTarHeader (std::ifstream& fin)
@@ -238,7 +238,7 @@ private:
 
 		while (p < q) sum += *p++ & 0xff;
 
-		std::sprintf(header_.checksum,"%06o",sum);
+		sprintf(header_.checksum,"%06o",sum);
 	}
 
 	void statusCheck(RecordEnum whatItShouldBe, PsimagLite::String func) const
