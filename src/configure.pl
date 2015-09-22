@@ -31,7 +31,7 @@ if (defined($arg) and -r "$arg" and $arg ne "Config.make") {
 	system($cmd);
 }
 
-my @drivers = ("dmrg","observe");
+my @drivers = ("dmrg","observe","toolboxdmrg");
 
 createMakefile();
 
