@@ -134,7 +134,7 @@ public:
 			UnTarPack untarPack(tarName(rootname));
 
 			for (SizeType i = 0; i < filesToDelete_.size(); ++i)
-				untarPack.extract(filesToDelete_[i],false);
+				untarPack.extract<NormalExtract>(filesToDelete_[i],false);
 		}
 	}
 
@@ -153,6 +153,17 @@ public:
 		for (SizeType i = 0; i < filesToDelete_.size(); ++i)
 			unlink(filesToDelete_[i].c_str());
 		filesToDelete_.clear();
+	}
+
+	static PsimagLite::String rootName(PsimagLite::String filename)
+	{
+		PsimagLite::String rootname = filename;
+		size_t index =rootname.find(".", 0);
+		if (index != PsimagLite::String::npos) {
+			rootname.erase(index,filename.length());
+		}
+
+		return rootname;
 	}
 
 	static PsimagLite::String coutName(PsimagLite::String filename)

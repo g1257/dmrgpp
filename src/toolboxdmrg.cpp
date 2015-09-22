@@ -1,5 +1,4 @@
 #include <iostream>
-#include "TarPack.h"
 #include "InputNg.h"
 #include "InputCheck.h"
 #include "ParametersDmrgSolver.h"
@@ -75,7 +74,7 @@ int main(int argc,char *argv[])
 	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
 
 	if (Dmrg::ToolBox::actionCanonical(action) == Dmrg::ToolBox::ACTION_ENERGIES) {
-		Dmrg::ToolBox::printEnergies(dmrgSolverParams.filename);
+		Dmrg::ToolBox::printEnergies(filename, dmrgSolverParams.filename);
 	} else {
 		std::cerr<<argv[0]<<": Unknown action "<<action<<"\n";
 		std::cerr<<"\tSupported actions are "<<Dmrg::ToolBox::actions()<<"\n";

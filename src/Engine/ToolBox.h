@@ -78,13 +78,51 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef DMRG_TOOLBOX_H
 #define DMRG_TOOLBOX_H
-
+#include "TarPack.h"
 #include "Vector.h"
 #include "ProgramGlobals.h"
+#include "ArchiveFiles.h"
 
 namespace Dmrg {
 
 class ToolBox  {
+
+	class GrepForEnergies {
+
+		typedef PosixTarHeader::LongType LongType;
+
+	public:
+
+		static void hook(std::ifstream& fin,
+		                 PsimagLite::String file,
+		                 LongType len)
+		{
+			LongType len2 = len;
+			LongType bufferLen = 1;
+			std::stringstream ss;
+			char *buffer = new char[bufferLen];
+			while (len2 >= bufferLen) {
+				fin.read(buffer,bufferLen);
+				ss<<buffer[0];
+				if (buffer[0] == '\n') {
+					procLine(ss.str());
+					ss.str("");
+				}
+
+				len2 -= bufferLen;
+			}
+
+			delete [] buffer;
+		}
+
+	private:
+
+		static void procLine(PsimagLite::String line)
+		{
+			if (line.find("lowest eigenvalue") != PsimagLite::String::npos)
+				std::cout<<line;
+		}
+	}; // GrepForEnergies
 
 public:
 
@@ -102,9 +140,14 @@ public:
 		return "energies";
 	}
 
-	static void printEnergies(PsimagLite::String filename)
+	static void printEnergies(PsimagLite::String inputfile,
+	                          PsimagLite::String datafile)
 	{
-
+		PsimagLite::String tarname = ArchiveFiles<int>::rootName(datafile) + ".tar";
+		PsimagLite::String coutName = ArchiveFiles<int>::coutName(inputfile);
+		UnTarPack untarpack(tarname);
+		bool rewind = false;
+		untarpack.extract<GrepForEnergies>(coutName,rewind);
 	}
 }; //class ToolBox
 

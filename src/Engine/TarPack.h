@@ -268,9 +268,9 @@ public:
 
 	static LongType fileSize(PsimagLite::String filename)
 	{
-	    std::ifstream fin(filename.c_str(),
-		                 std::ifstream::ate | std::ifstream::binary);
-	    return fin.tellg();
+		std::ifstream fin(filename.c_str(),
+		                  std::ifstream::ate | std::ifstream::binary);
+		return fin.tellg();
 	}
 
 	static void goodDescriptorOrThrow(std::ifstream& f,
@@ -288,6 +288,36 @@ public:
 	}
 };
 
+class NormalExtract {
+
+	typedef PosixTarHeader::LongType LongType;
+
+public:
+
+	static void hook(std::ifstream& fin,
+	                 PsimagLite::String file,
+	                 LongType len)
+	{
+		std::ofstream fout(file.c_str(),std::ifstream::binary);
+		LongType len2 = len;
+		LongType bufferLen = 1024;
+		char *buffer = new char[bufferLen];
+		while (len2 >= bufferLen) {
+			fin.read(buffer,bufferLen);
+			fout.write(buffer,bufferLen);
+			len2 -= bufferLen;
+		}
+
+		if (len2 > 0) {
+			fin.read(buffer,len2);
+			fout.write(buffer,len2);
+		}
+
+		fout.close();
+		delete [] buffer;
+	}
+}; // class NormalExtract
+
 class TarPack  {
 
 	typedef TarHeader::LongType LongType;
@@ -302,7 +332,7 @@ public:
 
 	~TarPack()
 	{
-	    fout_.close();
+		fout_.close();
 	}
 
 	void add(PsimagLite::String filename, PsimagLite::String nameInArchive = "")
@@ -349,7 +379,7 @@ public:
 
 	~UnTarPack()
 	{
-	    fin_.close();
+		fin_.close();
 	}
 
 	void list(VectorStringType& files)
@@ -372,13 +402,13 @@ public:
 			PsimagLite::String name(tarHeader->header().name);
 			files.push_back(name);
 			delete tarHeader;
-			//std::cout<<name<<" "<<len<<"\n";
 		}
 
 		fin_.close();
 		fin_.open(filename_.c_str(),std::ifstream::binary);
 	}
 
+	template<typename SomeCallbackType>
 	void extract(PsimagLite::String file, bool rewind = true)
 	{
 		if (rewind) fin_.seekg(std::ios_base::beg);
@@ -395,10 +425,15 @@ public:
 			ss<<std::oct<<tarHeader->header().size;
 			LongType len = 0;
 			ss>>len;
+			if (len == 0) {
+				delete tarHeader;
+				continue;
+			}
+
 			PsimagLite::String name(tarHeader->header().name);
 
 			if (name == file) {
-				extractFile(file, len);
+				SomeCallbackType::hook(fin_, file, len);
 				found = true;
 			} else {
 				LongType currentPos = fin_.tellg();
@@ -407,6 +442,7 @@ public:
 
 			readPadding(len);
 			std::cout<<"Read "<<name<<" "<<len<<"\n";
+			delete tarHeader;
 			if (found) break;
 		}
 
@@ -426,27 +462,6 @@ private:
 		char *c = new char[allocation];
 		fin_.read(c,padding);
 		delete [] c;
-	}
-
-	void extractFile(PsimagLite::String file, LongType len)
-	{
-		std::ofstream fout(file.c_str(),std::ifstream::binary);
-		LongType len2 = len;
-		LongType bufferLen = 1024;
-		char *buffer = new char[bufferLen];
-		while (len2 >= bufferLen) {
-			fin_.read(buffer,bufferLen);
-			fout.write(buffer,bufferLen);
-			len2 -= bufferLen;
-		}
-
-		if (len2 > 0) {
-			fin_.read(buffer,len2);
-			fout.write(buffer,len2);
-		}
-
-		fout.close();
-		delete [] buffer;
 	}
 
 	std::ifstream fin_;
