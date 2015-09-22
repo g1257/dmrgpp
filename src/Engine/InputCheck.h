@@ -86,10 +86,17 @@ namespace Dmrg {
 class InputCheck {
 
 	typedef PsimagLite::Options::Readable OptionsReadableType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 public:
 
-	InputCheck() : optsReadable_(0) {}
+	InputCheck() : optsReadable_(0)
+	{
+		allowedFileOptions_.push_back("");
+		allowedFileOptions_.push_back("CLEAR");
+		allowedFileOptions_.push_back("list");
+		allowedFileOptions_.push_back("keep");
+	}
 
 	~InputCheck()
 	{
@@ -237,7 +244,23 @@ public:
 		return targetting;
 	}
 
+	void checkFileOptions(PsimagLite::String fileOption)
+	{
+		if (passesFileOptions(fileOption)) return;
+		throw PsimagLite::RuntimeError("Option " + fileOption + " not understood\n");
+	}
+
 private:
+
+	bool passesFileOptions(PsimagLite::String fileOption)
+	{
+		for (SizeType i = 0; i < allowedFileOptions_.size(); ++i)
+			if (std::find(allowedFileOptions_.begin(),
+			              allowedFileOptions_.end(),
+			              fileOption) == allowedFileOptions_.end())
+				return false;
+		return true;
+	}
 
 	bool checkForVector(const PsimagLite::Vector<PsimagLite::String>::Type& vec) const
 	{
@@ -264,7 +287,7 @@ private:
 	}
 
 	OptionsReadableType* optsReadable_;
-
+	VectorStringType allowedFileOptions_;
 }; // class InputCheck
 } // namespace Dmrg
 

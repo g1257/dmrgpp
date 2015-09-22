@@ -138,15 +138,14 @@ public:
 		}
 	}
 
-	void clear(PsimagLite::String filename) const
+	void listOrClear(PsimagLite::String filename, PsimagLite::String what) const
 	{
-		for (SizeType i = 0; i < files_.size(); ++i) {
-			if (files_[i] == filename) continue;
-			unlink(files_[i].c_str());
-		}
-
-		PsimagLite::String coutname = coutName(filename);
-		unlink(coutname.c_str());
+		if (what == "CLEAR")
+			clearFiles(filename);
+		else if (what == "list")
+			listFiles(filename);
+		else
+			throw PsimagLite::RuntimeError("-F CLEAR | list | keep\n");
 	}
 
 	static void staticDelete()
@@ -168,6 +167,28 @@ public:
 	}
 
 private:
+
+	void clearFiles(PsimagLite::String filename) const
+	{
+		for (SizeType i = 0; i < files_.size(); ++i) {
+			if (files_[i] == filename) continue;
+			unlink(files_[i].c_str());
+		}
+
+		PsimagLite::String coutname = coutName(filename);
+		unlink(coutname.c_str());
+	}
+
+	void listFiles(PsimagLite::String filename) const
+	{
+		for (SizeType i = 0; i < files_.size(); ++i) {
+			if (files_[i] == filename) continue;
+			std::cout<<files_[i]<<"\n";
+		}
+
+		PsimagLite::String coutname = coutName(filename);
+		std::cout<<coutname<<"\n";
+	}
 
 	static PsimagLite::String tarName(PsimagLite::String rootname)
 	{

@@ -281,12 +281,12 @@ int main(int argc,char *argv[])
 {
 	using namespace Dmrg;
 
-	PsimagLite::String filename="";
-	PsimagLite::String options("");
+	PsimagLite::String filename;
+	PsimagLite::String options;
+	PsimagLite::String filesOption;
 	int opt = 0;
 	int precision = 6;
-	bool keepUpackedFiles = false;
-	while ((opt = getopt(argc, argv,"f:o:p:k")) != -1) {
+	while ((opt = getopt(argc, argv,"f:o:p:F:")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -299,8 +299,8 @@ int main(int argc,char *argv[])
 			std::cout.precision(precision);
 			std::cerr.precision(precision);
 			break;
-		case 'k':
-			keepUpackedFiles = true;
+		case 'F':
+			filesOption = optarg;
 			break;
 		default:
 			usage(argv[0]);
@@ -311,7 +311,7 @@ int main(int argc,char *argv[])
 	PsimagLite::String list = (optind < argc) ? argv[optind] : "";
 
 	//sanity checks here
-	if (filename=="") {
+	if (filename=="" || (filesOption != "keep" && filesOption != "")) {
 		usage(argv[0]);
 		return 1;
 	}
@@ -344,7 +344,7 @@ int main(int argc,char *argv[])
 	mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck, options, list);
 #endif
 
-	if (!keepUpackedFiles)
+	if (filesOption != "keep")
 		ArchiveFiles<ParametersDmrgSolverType>::staticDelete();
 } // main
 
