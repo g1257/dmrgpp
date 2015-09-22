@@ -3,6 +3,7 @@
 #include "InputNg.h"
 #include "InputCheck.h"
 #include "ParametersDmrgSolver.h"
+#include "ToolBox.h"
 
 #ifndef USE_FLOAT
 typedef double RealType;
@@ -76,8 +77,8 @@ int main(int argc,char *argv[])
 	if (Dmrg::ToolBox::actionCanonical(action) == Dmrg::ToolBox::ACTION_ENERGIES) {
 		Dmrg::ToolBox::printEnergies(dmrgSolverParams.filename);
 	} else {
-		std::cerr<<argv[0]<<" Unknown action "<<action<<"\n";
-		std::cerr<<argv[0]<<" Supported actions are "<<Dmrg::ToolBox::actions()<<"\n";
+		std::cerr<<argv[0]<<": Unknown action "<<action<<"\n";
+		std::cerr<<"\tSupported actions are "<<Dmrg::ToolBox::actions()<<"\n";
 		return 1;
 	}
 } // main

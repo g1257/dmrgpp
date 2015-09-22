@@ -71,121 +71,42 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file Recovery.h
+/*! \file ToolBox.h
  *
  *
  */
 
-#ifndef DMRG_RECOVER_H
-#define DMRG_RECOVER_H
+#ifndef DMRG_TOOLBOX_H
+#define DMRG_TOOLBOX_H
 
-#include "Checkpoint.h"
 #include "Vector.h"
 #include "ProgramGlobals.h"
-#include "ProgressIndicator.h"
 
 namespace Dmrg {
 
-template<typename ParametersType,typename TargetingType>
-class Recovery  {
+class ToolBox  {
 
 public:
 
-	enum {SYSTEM = ProgramGlobals::SYSTEM, ENVIRON = ProgramGlobals::ENVIRON};
+	enum ActionEnum {ACTION_UNKNOWN, ACTION_ENERGIES};
 
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-	typedef Checkpoint<ParametersType,TargetingType> CheckpointType;
-	typedef typename TargetingType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename TargetingType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename CheckpointType::IoType IoType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename CheckpointType::MemoryStackType MemoryStackType;
-	typedef typename CheckpointType::DiskStackType DiskStackType;
-
-	Recovery(const CheckpointType& checkpoint,
-	         const WaveFunctionTransfType& wft,
-	         const BasisWithOperatorsType& pS,
-	         const BasisWithOperatorsType& pE)
-	    : progress_("Recovery"),
-	      checkpoint_(checkpoint),
-	      wft_(wft),
-	      pS_(pS),
-	      pE_(pE),
-	      flag_m_(false)
-	{}
-
-	~Recovery()
+	static ActionEnum actionCanonical(PsimagLite::String action)
 	{
-		if (checkpoint_.parameters().options.find("recoveryNoDelete") !=
-		        PsimagLite::String::npos) return;
-
-		for (SizeType i = 0; i < files_.size(); ++i)
-			unlink(files_[i].c_str());
+		if (action == "energy" || action == "Energy" || action == "energies"
+		        || action == "Energies") return ACTION_ENERGIES;
+		return ACTION_UNKNOWN;
 	}
 
-	void save(const TargetingType& psi,
-	          VectorSizeType vsites,
-	          int lastSign) const
+	static PsimagLite::String actions()
 	{
-		if (checkpoint_.parameters().recoverySave == "0")
-			return;
-
-		PsimagLite::String prefix("Recovery");
-		prefix += (flag_m_) ? "1" : "0";
-		PsimagLite::String rootName(prefix + checkpoint_.parameters().filename);
-		typename IoType::Out ioOut(rootName);
-		ioOut<<checkpoint_.parameters();
-		checkpoint_.save(pS_,pE_,ioOut);
-		psi.save(vsites,ioOut);
-		PsimagLite::OstringStream msg;
-		msg<<"#LastLoopSign="<<lastSign<<"\n";
-		ioOut<<msg.str();
-		files_.push_back(rootName);
-
-		saveStacksForRecovery(rootName);
-
-		wft_.save(rootName);
-		wft_.appendFileList(files_,rootName);
-		flag_m_ = !flag_m_;
+		return "energies";
 	}
 
-private:
-
-	void saveStacksForRecovery(PsimagLite::String rootWriteFile) const
+	static void printEnergies(PsimagLite::String filename)
 	{
-		PsimagLite::OstringStream msg;
-		msg<<"Writing sys. and env. stacks to disk (for recovery)...";
-		progress_.printline(msg,std::cout);
-		PsimagLite::String sysWriteFile = checkpoint_.SYSTEM_STACK_STRING +
-		        rootWriteFile;
-		PsimagLite::String envWriteFile = checkpoint_.ENVIRON_STACK_STRING +
-		        rootWriteFile;
-		PsimagLite::String sysReadFile = "/dev/null";
-		PsimagLite::String envReadFile = "/dev/null";
 
-		{
-			MemoryStackType systemStackCopy = checkpoint_.memoryStack(SYSTEM);
-			DiskStackType systemDiskTemp(sysReadFile,sysWriteFile,false);
-			files_.push_back(sysWriteFile);
-			CheckpointType::loadStack(systemDiskTemp,systemStackCopy);
-		}
-
-		{
-			MemoryStackType envStackCopy = checkpoint_.memoryStack(ENVIRON);
-			DiskStackType envDiskTemp(envReadFile,envWriteFile,false);
-			files_.push_back(envWriteFile);
-			CheckpointType::loadStack(envDiskTemp,envStackCopy);
-		}
 	}
-
-	PsimagLite::ProgressIndicator progress_;
-	const CheckpointType& checkpoint_;
-	const WaveFunctionTransfType& wft_;
-	const BasisWithOperatorsType& pS_;
-	const BasisWithOperatorsType& pE_;
-	mutable bool flag_m_;
-	mutable VectorStringType files_;
-};     //class Recovery
+}; //class ToolBox
 
 } // namespace Dmrg
 /*@}*/
