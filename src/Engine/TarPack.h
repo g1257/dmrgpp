@@ -294,9 +294,12 @@ class NormalExtract {
 
 public:
 
+	typedef int ParametersType;
+
 	static void hook(std::ifstream& fin,
 	                 PsimagLite::String file,
-	                 LongType len)
+	                 LongType len,
+	                 const ParametersType&)
 	{
 		std::ofstream fout(file.c_str(),std::ifstream::binary);
 		LongType len2 = len;
@@ -409,7 +412,9 @@ public:
 	}
 
 	template<typename SomeCallbackType>
-	void extract(PsimagLite::String file, bool rewind = true)
+	void extract(PsimagLite::String file,
+	             bool rewind,
+	             const typename SomeCallbackType::ParametersType& params)
 	{
 		if (rewind) fin_.seekg(std::ios_base::beg);
 		bool found = false;
@@ -433,7 +438,7 @@ public:
 			PsimagLite::String name(tarHeader->header().name);
 
 			if (name == file) {
-				SomeCallbackType::hook(fin_, file, len);
+				SomeCallbackType::hook(fin_, file, len, params);
 				found = true;
 			} else {
 				LongType currentPos = fin_.tellg();
@@ -441,7 +446,7 @@ public:
 			}
 
 			readPadding(len);
-			std::cout<<"Read "<<name<<" "<<len<<"\n";
+			std::cerr<<"Read "<<name<<" "<<len<<"\n";
 			delete tarHeader;
 			if (found) break;
 		}

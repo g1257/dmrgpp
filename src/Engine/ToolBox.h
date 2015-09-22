@@ -93,9 +93,12 @@ class ToolBox  {
 
 	public:
 
+		typedef bool ParametersType;
+
 		static void hook(std::ifstream& fin,
-		                 PsimagLite::String file,
-		                 LongType len)
+		                 PsimagLite::String,
+		                 LongType len,
+		                 const ParametersType& cooked)
 		{
 			LongType len2 = len;
 			LongType bufferLen = 1;
@@ -105,7 +108,7 @@ class ToolBox  {
 				fin.read(buffer,bufferLen);
 				ss<<buffer[0];
 				if (buffer[0] == '\n') {
-					procLine(ss.str());
+					procLine(ss.str(),cooked);
 					ss.str("");
 				}
 
@@ -117,10 +120,27 @@ class ToolBox  {
 
 	private:
 
-		static void procLine(PsimagLite::String line)
+		static void procLine(PsimagLite::String line, const ParametersType& cooked)
 		{
-			if (line.find("lowest eigenvalue") != PsimagLite::String::npos)
+			if (line.find("lowest eigenvalue") == PsimagLite::String::npos) return;
+			if (cooked)
+				cookThisLine(line);
+			else
 				std::cout<<line;
+		}
+
+		static void cookThisLine(PsimagLite::String line)
+		{
+			size_t index = line.find(" after");
+			PsimagLite::String line2 = line;
+			if (index != PsimagLite::String::npos)
+				line2 = line.erase(index,line.length());
+			line = line2;
+			PsimagLite::String magic = "eigenvalue= ";
+			index = line.find(magic);
+			if (index != PsimagLite::String::npos)
+				line.erase(0,index + magic.length());
+			std::cout<<line<<"\n";
 		}
 	}; // GrepForEnergies
 
@@ -141,13 +161,14 @@ public:
 	}
 
 	static void printEnergies(PsimagLite::String inputfile,
-	                          PsimagLite::String datafile)
+	                          PsimagLite::String datafile,
+	                          bool cooked)
 	{
 		PsimagLite::String tarname = ArchiveFiles<int>::rootName(datafile) + ".tar";
 		PsimagLite::String coutName = ArchiveFiles<int>::coutName(inputfile);
 		UnTarPack untarpack(tarname);
 		bool rewind = false;
-		untarpack.extract<GrepForEnergies>(coutName,rewind);
+		untarpack.extract<GrepForEnergies>(coutName,rewind,cooked);
 	}
 }; //class ToolBox
 

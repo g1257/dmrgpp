@@ -134,7 +134,7 @@ public:
 			UnTarPack untarPack(tarName(rootname));
 
 			for (SizeType i = 0; i < filesToDelete_.size(); ++i)
-				untarPack.extract<NormalExtract>(filesToDelete_[i],false);
+				untarPack.extract<NormalExtract>(filesToDelete_[i],false,0);
 		}
 	}
 

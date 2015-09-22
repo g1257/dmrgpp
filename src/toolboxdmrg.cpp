@@ -15,7 +15,7 @@ ParametersDmrgSolverType;
 
 void usage(const char* name)
 {
-	std::cerr<<"USAGE is "<<name<<" -f filename -a action [-p precision]\n";
+	std::cerr<<"USAGE is "<<name<<" -f filename -a action [-s] [-p precision]\n";
 }
 
 int main(int argc,char *argv[])
@@ -26,7 +26,8 @@ int main(int argc,char *argv[])
 	PsimagLite::String action;
 	int opt = 0;
 	int precision = 6;
-	while ((opt = getopt(argc, argv,"f:p:a:")) != -1) {
+	bool shortoption = false;
+	while ((opt = getopt(argc, argv,"f:p:a:s")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -38,6 +39,9 @@ int main(int argc,char *argv[])
 			break;
 		case 'a':
 			action = optarg;
+			break;
+		case 's':
+			shortoption = true;
 			break;
 		default:
 			usage(argv[0]);
@@ -74,7 +78,7 @@ int main(int argc,char *argv[])
 	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
 
 	if (Dmrg::ToolBox::actionCanonical(action) == Dmrg::ToolBox::ACTION_ENERGIES) {
-		Dmrg::ToolBox::printEnergies(filename, dmrgSolverParams.filename);
+		Dmrg::ToolBox::printEnergies(filename, dmrgSolverParams.filename,shortoption);
 	} else {
 		std::cerr<<argv[0]<<": Unknown action "<<action<<"\n";
 		std::cerr<<"\tSupported actions are "<<Dmrg::ToolBox::actions()<<"\n";
