@@ -93,6 +93,9 @@ Hash of the latest commit is also posted at
 
 https://web.ornl.gov/~gz1/hashes.html
 
+Latest commit should always be signed.
+Keys at https://web.ornl.gov/~gz1/keys.html
+
 ## Building and Running DMRG++
 
 ### Required Software
