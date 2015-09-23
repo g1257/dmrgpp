@@ -40,6 +40,33 @@ for (my $i = 0; $i < $total; ++$i) {
 
 close(FOUTSPECTRUM);
 print STDERR "$0: Spectrum written to $outSpectrum\n";
+printSpectrumToColor($outSpectrum);
+
+sub printSpectrumToColor
+{
+	my ($inFile) = @_;
+	my $outSpectrum = "outSpectrum.color";
+	my @colorData;
+	my ($counter,$size) = spectrumToColor(\@colorData,$inFile);
+	open(FOUTSPECTRUM,"> $outSpectrum") or die "$0: Cannot write to $outSpectrum : $!\n";
+	print FOUTSPECTRUM "$counter $size\n";
+
+	my $rows = scalar(@colorData);
+	for (my $i = 0; $i < $rows; ++$i) {
+		my @thisRow = @{$colorData[$i]};
+		my $cols = scalar(@thisRow) - 1;
+		for (my $j = 0; $j < $cols; ++$j) {
+			my $value = $thisRow[$j+1];
+			$value = 0 if ($value < 0);
+			print FOUTSPECTRUM $value." ";
+		}
+
+		print FOUTSPECTRUM "\n";
+	}
+
+	close(FOUTSPECTRUM);
+	print STDERR "$0: Color spectrum written to $outSpectrum\n";
+}
 
 
 sub printSpectrum
@@ -69,9 +96,6 @@ sub procCommon
 
 	correctionVectorWrite($outFile,\@values,\@values2,$maxSite,$omega);
 
-	#my $cmd = "perl correctionVector.pl $omega < out$ind.txt > out$ind.space";
-	#execThis($cmd);
-
 	$inFile = "out$ind.space";
 	$outFile = "out$ind.sq";
 
@@ -81,8 +105,6 @@ sub procCommon
 	my $geometry = getGeometry($templateInput);
 	fourier(\@qValues,\@spaceValues,$geometry);
 	printFourier($outFile,\@qValues,$geometry);
-	#$cmd = "perl ft.pl $centralSite < out$ind.space > out$ind.sq";
-	#execThis($cmd);
 }
 
 sub correctionVectorRead
@@ -167,14 +189,10 @@ sub procThisOmega
 		my $site = -$q;
 		my $inFile = "out$ind.space";
 		extractQ($inFile,$site);
-		#$cmd = "perl extractQ.pl $site  out$ind.space";
 	} else {
 		my $inFile = "out$ind.sq";
 		extractQ($inFile,$q);
-		#$cmd = "perl extractQ.pl $q  out$ind.sq";
 	}
-
-	#execThis($cmd);
 }
 
 sub procAllQs
@@ -400,5 +418,81 @@ sub extractQ
 
 	close(FILE);
 }
+
+sub spectrumToColor
+{
+	my ($data,$file) = @_;
+	my $counter = 0;
+	my $size;
+
+	open(FIN,$file) or die "$0: Cannot open file $file : $!\n";
+	while (<FIN>) {
+		next if (/^#/);
+		chomp;
+		my @temp = split;
+		my $n = scalar(@temp);
+		next if ($n < 2);
+		if (!defined($size)) {
+			$size = $n;
+		} else {
+			($size == $n) or die "$0: Wrong line $_\n";
+		}
+
+		$data->[$counter++] = \@temp;
+	}
+
+	close(FIN);
+	$size--;
+
+	print STDERR "$0: Read $counter lines size=$size\n";
+
+	my ($min,$max) = minMaxData($data);
+	print STDERR "$0: Data min = $min, max = $max\n";
+
+	scaleData($data,$min,$max);
+	return ($counter,$size);
+}
+
+sub minMaxData
+{
+	my ($a) = @_;
+	my $rows = scalar(@$a);
+	my ($min,$max) = ($a->[0]->[1],$a->[0]->[1]);
+	for (my $i = 0; $i < $rows; ++$i) {
+		my @thisRow = @{$a->[$i]};
+		my $cols = scalar(@thisRow) - 1;
+		for (my $j = 0; $j < $cols; ++$j) {
+			my $thisValue = $thisRow[$j+1];
+			next if ($thisValue<0);
+			$min = $thisValue if ($min > $thisValue);
+			$max = $thisValue if ($max < $thisValue);
+		}
+	}
+
+	return ($min,$max);
+}
+
+sub scaleData
+{
+	my ($a,$min,$max) = @_;
+	my $afactor = 255/($max-$min);
+	my $bfactor = -$afactor*$min;
+	my $rows = scalar(@$a);
+	for (my $i = 0; $i < $rows; ++$i) {
+		my @thisRow = @{$a->[$i]};
+		my $cols = scalar(@thisRow) - 1;
+		for (my $j = 0; $j < $cols; ++$j) {
+			my $value = $a->[$i]->[$j];
+			if ($value < 0) {
+				$a->[$i]->[$j] = 0;
+				next;
+			}
+
+			$a->[$i]->[$j] = int($afactor*$value + $bfactor);
+		}
+	}
+}
+
+
 
 
