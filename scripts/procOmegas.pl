@@ -18,9 +18,12 @@ if ($omegaStep < 0) {
 	$omega0 = $omegaStep = 2.0*pi/$beta;
 }
 
+my $outSpectrum = "out.spectrum";
+open(FOUTSPECTRUM,"> $outSpectrum") or die "$0: Cannot write to $outSpectrum : $!\n";
 for (my $i = 0; $i < $total; ++$i) {
+
 	my $omega = $omega0 + $omegaStep * $i;
-	print "$omega ";
+	print FOUTSPECTRUM "$omega ";
 	print STDERR "$0: About to proc for omega = $omega\n";
 
 	if (defined($q)) {
@@ -28,16 +31,28 @@ for (my $i = 0; $i < $total; ++$i) {
 	} else {
 		my @array;
 		procAllQs(\@array,$i,$omega,$centralSite);
-		for (my $j = 0; $j < scalar(@array); ++$j) {
-			my $array2 = $array[$j];
-			my @array2 = @$array2;
-			print "$array2[1] $array2[2] ";
-		}
 
-		print "\n";
+		printSpectrum(\@array);
 	}
 
 	print STDERR "$0: Finished         omega = $omega\n";
+}
+
+close(FOUTSPECTRUM);
+print STDERR "$0: Spectrum written to $outSpectrum\n";
+
+
+sub printSpectrum
+{
+	my ($array) = @_;
+
+	for (my $j = 0; $j < scalar(@$array); ++$j) {
+		my $array2 = $array->[$j];
+		my @array2 = @$array2;
+		print FOUTSPECTRUM "$array2[1] $array2[2] ";
+	}
+
+	print FOUTSPECTRUM "\n";
 }
 
 sub procCommon
