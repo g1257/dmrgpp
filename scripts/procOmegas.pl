@@ -28,11 +28,13 @@ if ($omegaStep < 0) {
 	$omega0 = $omegaStep = 2.0*pi/$beta;
 }
 
+my @omegas;
 my $outSpectrum = "out.spectrum";
 open(FOUTSPECTRUM,"> $outSpectrum") or die "$0: Cannot write to $outSpectrum : $!\n";
 for (my $i = 0; $i < $total; ++$i) {
 
 	my $omega = $omega0 + $omegaStep * $i;
+	$omegas[$i] = $omega;
 	print FOUTSPECTRUM "$omega ";
 	print STDERR "$0: About to proc for omega = $omega\n";
 
@@ -53,6 +55,46 @@ for (my $i = 0; $i < $total; ++$i) {
 close(FOUTSPECTRUM);
 print STDERR "$0: Spectrum written to $outSpectrum\n";
 printSpectrumToColor($outSpectrum,"imag");
+printGnuplot($outSpectrum,\@omegas);
+
+sub printGnuplot
+{
+	my ($inFile,$omegas) = @_;
+
+	open(FIN,"$inFile") or die "$0: Cannot open $inFile : $!\n";
+
+	my @array;
+	my $counter = 0;
+	while (<FIN>) {
+		my @temp = split;
+		$array[$counter++] = \@temp;
+	}
+
+	close(FIN);
+
+	my $numberOfOmegas = scalar(@$omegas);
+	($counter == $numberOfOmegas) or
+		die "$0: Found $counter omegas in $inFile but was expecting $numberOfOmegas\n";
+
+	my $outFile = "outSpectrum.gnuplot";
+	open(FOUT,"> $outFile") or die "$0: Cannot write to $outFile : $!\n";
+
+	for (my $i = 0; $i < $numberOfOmegas; ++$i) {
+		my $omega = $omegas->[$i];
+		print FOUT "$omega ";
+		my $a = $array[$i];
+		my $numberOfQs = int(0.5*scalar(@$a));
+		for (my $m = 0; $m < $numberOfQs; ++$m) {
+			my $q = getQ($m,$numberOfQs);
+			my $realPart = $a->[2*$m];
+			my $imagPart = $a->[2*$m+1];
+			print FOUT "$q $omega $realPart $imagPart\n";
+		}
+	}
+
+	close(FOUT);
+	print "$0: Written $outFile\n";
+}
 
 sub printSpectrumToColor
 {
@@ -214,7 +256,12 @@ sub procAllQs
 {
 	my ($array,$ind,$omega,$centralSite) = @_;
 	procCommon($ind,$omega,$centralSite);
+	readAllQs($array,$ind);
+}
 
+sub readAllQs
+{
+	my ($array,$ind) = @_;
 	my $counter = 0;
 	open(FILE,"out$ind.sq") or die "$0: Cannot open file : $!\n";
 	while (<FILE>) {

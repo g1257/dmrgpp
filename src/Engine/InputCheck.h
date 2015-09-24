@@ -93,7 +93,7 @@ public:
 	InputCheck() : optsReadable_(0)
 	{
 		allowedFileOptions_.push_back("");
-		allowedFileOptions_.push_back("CLEAR");
+		allowedFileOptions_.push_back("DELETE");
 		allowedFileOptions_.push_back("list");
 		allowedFileOptions_.push_back("keep");
 	}
