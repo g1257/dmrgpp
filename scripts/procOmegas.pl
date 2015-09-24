@@ -10,7 +10,7 @@ my $usage = "-b begin -t total -s step -f dollarizedInput -c ";
 $usage .= "centralSite [-m mForQ] [-S site]\n";
 
 my ($omega0,$total,$omegaStep,$templateInput,$centralSite,$site,$m);
-my ($siteForSpectrum,$mForQ,$isPeriodic,$mMax);
+my ($siteForSpectrum,$mForQ,$isPeriodic,$mMax,$wantsRealPart);
 
 GetOptions('b=f' => \$omega0,
            't=i' => \$total,
@@ -20,7 +20,16 @@ GetOptions('b=f' => \$omega0,
 		   'S:i' => \$siteForSpectrum,
 		   'm:i' => \$mForQ,
 		   'p' => \$isPeriodic,
-		   'M:i' => \$mMax) or die "$usage\n";
+		   'M:i' => \$mMax,
+		   'r' => \$wantsRealPart) or die "$usage\n";
+
+(
+defined($omega0) and
+defined($total) and
+defined($omegaStep) and
+defined($templateInput) and
+defined($centralSite)
+) or die "$0: USAGE: $usage\n";
 
 if ($omegaStep < 0) {
 	my $beta = -$omegaStep;
@@ -56,7 +65,8 @@ for (my $i = 0; $i < $total; ++$i) {
 
 close(FOUTSPECTRUM);
 print STDERR "$0: Spectrum written to $outSpectrum\n";
-printSpectrumToColor($outSpectrum,"imag",$geometry);
+my $wantsRealOrImag = (defined($wantsRealPart)) ? "real" : "imag";
+printSpectrumToColor($outSpectrum,$wantsRealOrImag,$geometry);
 printGnuplot($outSpectrum,\@omegas,$geometry);
 
 sub printGnuplot
