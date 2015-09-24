@@ -62,7 +62,7 @@ sub addRectangle
 	my $xp = $x + $dx;
 	my $yp = $y + $dy;
 	my $id = $cnv->createRectangle($x,$y,$xp,$yp,
-	-fill=>$color,-width=>0,-outline =>$color);
+	-fill=>$color, -width=>0,-outline =>$color);
 }
 
 sub loadColors

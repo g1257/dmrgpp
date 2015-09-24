@@ -52,14 +52,14 @@ for (my $i = 0; $i < $total; ++$i) {
 
 close(FOUTSPECTRUM);
 print STDERR "$0: Spectrum written to $outSpectrum\n";
-printSpectrumToColor($outSpectrum);
+printSpectrumToColor($outSpectrum,"imag");
 
 sub printSpectrumToColor
 {
-	my ($inFile) = @_;
+	my ($inFile,$what) = @_;
 	my $outSpectrum = "outSpectrum.color";
 	my @colorData;
-	my ($counter,$size) = spectrumToColor(\@colorData,$inFile);
+	my ($counter,$size) = spectrumToColor(\@colorData,$inFile,$what);
 	open(FOUTSPECTRUM,"> $outSpectrum") or die "$0: Cannot write to $outSpectrum : $!\n";
 	print FOUTSPECTRUM "$counter $size\n";
 
@@ -68,8 +68,8 @@ sub printSpectrumToColor
 		my @thisRow = @{$colorData[$i]};
 		my $cols = scalar(@thisRow);
 		for (my $j = 1; $j < $cols; ++$j) {
-			my $value = $thisRow[$j];
-			$value = 0 if ($value < 0);
+			my $value = int($thisRow[$j]);
+			#$value = 0 if ($value < 0);
 			print FOUTSPECTRUM $value." ";
 		}
 
@@ -288,8 +288,7 @@ sub printFourierLadder
 sub fourier
 {
 	my ($f,$v,$geometry) = @_;
-	my $n = scalar(@$v);
-	defined($mMax) or $mMax = $n;
+
 	if ($geometry eq "chain") {
 		return fourierChain($f,$v);
 	}
@@ -305,7 +304,7 @@ sub fourierChain
 {
 	my ($f,$v) = @_;
 	my $n = scalar(@$v);
-	my $numberOfQs = $mMax;
+	my $numberOfQs = (defined($mMax)) ? $mMax : $n;
 	for (my $m = 0; $m < $numberOfQs; ++$m) {
 		my @sum = (0,0);
 		my $q = getQ($m,$numberOfQs);
@@ -327,7 +326,7 @@ sub fourierLadder
 {
 	my ($f,$v) = @_;
 	my $n = scalar(@$v);
-	my $numberOfQs = $mMax;
+	my $numberOfQs = (defined($mMax)) ? $mMax : int(0.5*$n);
 	for (my $m = 0; $m < $numberOfQs; ++$m) {
 		my $q = getQ($m,$numberOfQs);
 		my @f0 = fourierF0($v,$q);
@@ -362,7 +361,7 @@ sub fourierF1
 	for (my $i = 1; $i < $n; $i+=2) {
 		my $ptr = $v->[$i];
 		my @temp = @$ptr;
-		my $arg = $q*distanceLadder($i,$centralSite)*0.5;
+		my $arg = $q*distanceLadder($i,$centralSite);
 		my $carg = cos($arg);
 		$sum[0] += $temp[0]*$carg;
 		$sum[1] += $temp[1]*$carg;
@@ -436,7 +435,7 @@ sub extractValue
 
 sub spectrumToColor
 {
-	my ($data,$file) = @_;
+	my ($data,$file,$realOrImag) = @_;
 	my $counter = 0;
 	my $size;
 
@@ -453,13 +452,15 @@ sub spectrumToColor
 			($size == $n) or die "$0: Wrong line $_\n";
 		}
 
-		$data->[$counter++] = \@temp;
+		my @temp2 = getRealOrImagData(\@temp,$realOrImag);
+		$data->[$counter++] = \@temp2;
 	}
 
 	close(FIN);
 	$size--;
 
-	print STDERR "$0: Read $counter lines size=$size\n";
+	$size = int($size*0.5);
+	print STDERR "$0: Read $counter lines size=$size for $realOrImag from $file\n";
 
 	my ($min,$max) = minMaxData($data);
 	print STDERR "$0: Data min = $min, max = $max\n";
@@ -478,7 +479,7 @@ sub minMaxData
 		my $cols = scalar(@thisRow);
 		for (my $j = 1; $j < $cols; ++$j) {
 			my $thisValue = $thisRow[$j];
-			next if ($thisValue<0);
+			#next if ($thisValue<0);
 			$min = $thisValue if ($min > $thisValue);
 			$max = $thisValue if ($max < $thisValue);
 		}
@@ -498,13 +499,28 @@ sub scaleData
 		my $cols = scalar(@thisRow);
 		for (my $j = 1; $j < $cols; ++$j) {
 			my $value = $a->[$i]->[$j];
-			if ($value < 0) {
-				$a->[$i]->[$j] = 0;
-				next;
-			}
+			#if ($value < 0) {
+			#	$a->[$i]->[$j] = 0;
+			#	next;
+			#}
 
-			$a->[$i]->[$j] = int($afactor*$value + $bfactor);
+			$a->[$i]->[$j] = $afactor*$value + $bfactor;
 		}
 	}
 }
 
+sub getRealOrImagData
+{
+	my ($d,$realOrImag) = @_;
+	my @temp;
+	my $n = scalar(@$d);
+	my $j = 0;
+	$temp[$j++] = $d->[0];
+	for (my $i = 1; $i < $n; ++$i) {
+		next if ($realOrImag eq "imag" && ($i & 1));
+		next if ($realOrImag eq "real" && !($i & 1));
+		$temp[$j++] = $d->[$i];
+	}
+
+	return @temp;
+}
