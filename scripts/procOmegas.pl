@@ -4,13 +4,23 @@ use strict;
 use warnings;
 use Math::Trig;
 use OmegaUtils;
+use Getopt::Long qw(:config no_ignore_case);
 
-my ($omega0,$total,$omegaStep,$templateInput,$centralSite,$q) = @ARGV;
-my $usage = "omegaBegin omegaTotal omegaStep dollarizedInput centralSite [q]\n";
-$usage .= "\t q is the value of the momentum if positive or minus ";
-$usage .= "the site if negative\n";
-defined($centralSite) or die "USAGE: $0 $usage";
+my $usage = "-b begin -t total -s step -f dollarizedInput -c ";
+$usage .= "centralSite [-m mForQ] [-S site]\n";
 
+my ($omega0,$total,$omegaStep,$templateInput,$centralSite,$site,$m);
+my ($siteForSpectrum,$mForQ,$isPeriodic,$mMax);
+
+GetOptions('b=f' => \$omega0,
+           't=i' => \$total,
+		   's=f' => \$omegaStep,
+		   'f=s' => \$templateInput,
+		   'c=i' => \$centralSite,
+		   'S:i' => \$siteForSpectrum,
+		   'm:i' => \$mForQ,
+		   'p' => \$isPeriodic,
+		   'M:i' => \$mMax) or die "$usage\n";
 
 if ($omegaStep < 0) {
 	my $beta = -$omegaStep;
@@ -26,8 +36,10 @@ for (my $i = 0; $i < $total; ++$i) {
 	print FOUTSPECTRUM "$omega ";
 	print STDERR "$0: About to proc for omega = $omega\n";
 
-	if (defined($q)) {
-		procThisOmega($i,$omega,$centralSite,$q);
+	if (defined($mForQ)) {
+		procThisOmegaKspace($i,$omega,$centralSite,$mForQ);
+	} elsif (defined($siteForSpectrum)) {
+		procThisOmegaSpace($i,$omega,$centralSite,$siteForSpectrum);
 	} else {
 		my @array;
 		procAllQs(\@array,$i,$omega,$centralSite);
@@ -54,9 +66,9 @@ sub printSpectrumToColor
 	my $rows = scalar(@colorData);
 	for (my $i = 0; $i < $rows; ++$i) {
 		my @thisRow = @{$colorData[$i]};
-		my $cols = scalar(@thisRow) - 1;
-		for (my $j = 0; $j < $cols; ++$j) {
-			my $value = $thisRow[$j+1];
+		my $cols = scalar(@thisRow);
+		for (my $j = 1; $j < $cols; ++$j) {
+			my $value = $thisRow[$j];
 			$value = 0 if ($value < 0);
 			print FOUTSPECTRUM $value." ";
 		}
@@ -180,19 +192,22 @@ sub readSpace
 	print STDERR "$0: Read $counter sites\n";
 }
 
-sub procThisOmega
+sub procThisOmegaKspace
 {
-	my ($ind,$omega,$centralSite,$q) = @_;
+	my ($ind,$omega,$centralSite,$mForQ) = @_;
 	procCommon($ind,$omega,$centralSite);
 
-	if ($q < 0) {
-		my $site = -$q;
-		my $inFile = "out$ind.space";
-		extractQ($inFile,$site);
-	} else {
-		my $inFile = "out$ind.sq";
-		extractQ($inFile,$q);
-	}
+	my $inFile = "out$ind.sq";
+	extractValue($inFile,$mForQ);
+}
+
+sub procThisOmegaSpace
+{
+	my ($ind,$omega,$centralSite,$siteForSpectrum) = @_;
+	procCommon($ind,$omega,$centralSite);
+
+	my $inFile = "out$ind.space";
+	extractValue($inFile,$siteForSpectrum);
 }
 
 sub procAllQs
@@ -259,13 +274,12 @@ sub printFourierLadder
 
 	my $n = scalar(@$f);
 	for (my $m = 0; $m < $n; ++$m) {
-		my $q = getQ($m,$n);
 		my $ptr = $f->[$m];
 		my @temp = @$ptr;
 		my @f0 = @{$temp[0]};
 		my @f1 = @{$temp[1]};
 		my @sum = ($f0[0] - $f1[0],$f0[1] - $f1[1]);
-		print FOUT "$q @sum\n";
+		print FOUT "$m @sum\n";
 	}
 
 	close(FOUT);
@@ -274,6 +288,8 @@ sub printFourierLadder
 sub fourier
 {
 	my ($f,$v,$geometry) = @_;
+	my $n = scalar(@$v);
+	defined($mMax) or $mMax = $n;
 	if ($geometry eq "chain") {
 		return fourierChain($f,$v);
 	}
@@ -289,7 +305,7 @@ sub fourierChain
 {
 	my ($f,$v) = @_;
 	my $n = scalar(@$v);
-	my $numberOfQs = $n;
+	my $numberOfQs = $mMax;
 	for (my $m = 0; $m < $numberOfQs; ++$m) {
 		my @sum = (0,0);
 		my $q = getQ($m,$numberOfQs);
@@ -311,7 +327,7 @@ sub fourierLadder
 {
 	my ($f,$v) = @_;
 	my $n = scalar(@$v);
-	my $numberOfQs = int($n/2);
+	my $numberOfQs = $mMax;
 	for (my $m = 0; $m < $numberOfQs; ++$m) {
 		my $q = getQ($m,$numberOfQs);
 		my @f0 = fourierF0($v,$q);
@@ -369,8 +385,7 @@ sub distanceLadder
 sub getQ
 {
 	my ($m,$n) = @_;
-	return pi*$m/($n+1.0);
-	#return 2.0*pi*$m/$n;
+	return ($isPeriodic) ? 2.0*pi*$m/$n : pi*$m/($n+1.0);
 }
 
 sub getGeometry
@@ -392,7 +407,7 @@ sub getGeometry
 	return $ret;
 }
 
-sub extractQ
+sub extractValue
 {
 	my ($file,$q) = @_;
 	open(FILE,$file) or die "$0: Cannot open file $file : $!\n";
@@ -460,9 +475,9 @@ sub minMaxData
 	my ($min,$max) = ($a->[0]->[1],$a->[0]->[1]);
 	for (my $i = 0; $i < $rows; ++$i) {
 		my @thisRow = @{$a->[$i]};
-		my $cols = scalar(@thisRow) - 1;
-		for (my $j = 0; $j < $cols; ++$j) {
-			my $thisValue = $thisRow[$j+1];
+		my $cols = scalar(@thisRow);
+		for (my $j = 1; $j < $cols; ++$j) {
+			my $thisValue = $thisRow[$j];
 			next if ($thisValue<0);
 			$min = $thisValue if ($min > $thisValue);
 			$max = $thisValue if ($max < $thisValue);
@@ -480,8 +495,8 @@ sub scaleData
 	my $rows = scalar(@$a);
 	for (my $i = 0; $i < $rows; ++$i) {
 		my @thisRow = @{$a->[$i]};
-		my $cols = scalar(@thisRow) - 1;
-		for (my $j = 0; $j < $cols; ++$j) {
+		my $cols = scalar(@thisRow);
+		for (my $j = 1; $j < $cols; ++$j) {
 			my $value = $a->[$i]->[$j];
 			if ($value < 0) {
 				$a->[$i]->[$j] = 0;
@@ -492,7 +507,4 @@ sub scaleData
 		}
 	}
 }
-
-
-
 

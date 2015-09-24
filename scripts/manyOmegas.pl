@@ -77,7 +77,7 @@ sub createBatch
 
         open(FILE,"$templateBatch") or die "$0: Cannot open $templateBatch: $!\n";
 
-        while(<FILE>) {
+        while (<FILE>) {
                 while (/\$\$([a-zA-Z0-9\[\]]+)/) {
                         my $line = $_;
                         my $name = $1;
