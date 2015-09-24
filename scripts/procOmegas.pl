@@ -28,6 +28,8 @@ if ($omegaStep < 0) {
 	$omega0 = $omegaStep = 2.0*pi/$beta;
 }
 
+my $geometry = getGeometry($templateInput);
+
 my @omegas;
 my $outSpectrum = "out.spectrum";
 open(FOUTSPECTRUM,"> $outSpectrum") or die "$0: Cannot write to $outSpectrum : $!\n";
@@ -54,12 +56,12 @@ for (my $i = 0; $i < $total; ++$i) {
 
 close(FOUTSPECTRUM);
 print STDERR "$0: Spectrum written to $outSpectrum\n";
-printSpectrumToColor($outSpectrum,"imag");
-printGnuplot($outSpectrum,\@omegas);
+printSpectrumToColor($outSpectrum,"imag",$geometry);
+printGnuplot($outSpectrum,\@omegas,$geometry);
 
 sub printGnuplot
 {
-	my ($inFile,$omegas) = @_;
+	my ($inFile,$omegas,$geometry) = @_;
 
 	open(FIN,"$inFile") or die "$0: Cannot open $inFile : $!\n";
 
@@ -76,50 +78,79 @@ sub printGnuplot
 	($counter == $numberOfOmegas) or
 		die "$0: Found $counter omegas in $inFile but was expecting $numberOfOmegas\n";
 
-	my $outFile = "outSpectrum.gnuplot";
-	open(FOUT,"> $outFile") or die "$0: Cannot write to $outFile : $!\n";
-
-	for (my $i = 0; $i < $numberOfOmegas; ++$i) {
-		my $omega = $omegas->[$i];
-		print FOUT "$omega ";
-		my $a = $array[$i];
-		my $numberOfQs = int(0.5*scalar(@$a));
-		for (my $m = 0; $m < $numberOfQs; ++$m) {
-			my $q = getQ($m,$numberOfQs);
-			my $realPart = $a->[2*$m];
-			my $imagPart = $a->[2*$m+1];
-			print FOUT "$q $omega $realPart $imagPart\n";
-		}
+	my $factor = 0;
+	my @fileIndices=("");
+	if ($geometry eq "chain") {
+		$factor = 0.5;
+	} elsif ($geometry eq "ladder") {
+		$factor = 0.25;
+		@fileIndices=(0,1);
+	} else {
+		die "$0: Unknown geometry $geometry\n";
 	}
 
-	close(FOUT);
-	print "$0: Written $outFile\n";
+	foreach my $fileIndex (@fileIndices) {
+		my $outFile = "outSpectrum$fileIndex.gnuplot";
+		open(FOUT,"> $outFile") or die "$0: Cannot write to $outFile : $!\n";
+
+
+		for (my $i = 0; $i < $numberOfOmegas; ++$i) {
+			my $omega = $omegas->[$i];
+			my $a = $array[$i];
+			my $numberOfQs = int($factor*scalar(@$a));
+			for (my $m = 0; $m < $numberOfQs; ++$m) {
+				my $q = getQ($m,$numberOfQs);
+				my $realPart = $a->[2*$m+$fileIndex*$numberOfQs];
+				my $imagPart = $a->[2*$m+1];
+				print FOUT "$q $omega $realPart $imagPart\n";
+			}
+		}
+
+		close(FOUT);
+		print "$0: Written $outFile\n";
+	}
 }
 
 sub printSpectrumToColor
 {
-	my ($inFile,$what) = @_;
-	my $outSpectrum = "outSpectrum.color";
-	my @colorData;
-	my ($counter,$size) = spectrumToColor(\@colorData,$inFile,$what);
-	open(FOUTSPECTRUM,"> $outSpectrum") or die "$0: Cannot write to $outSpectrum : $!\n";
-	print FOUTSPECTRUM "$counter $size\n";
+	my ($inFile,$what,$geometry) = @_;
 
-	my $rows = scalar(@colorData);
-	for (my $i = 0; $i < $rows; ++$i) {
-		my @thisRow = @{$colorData[$i]};
-		my $cols = scalar(@thisRow);
-		for (my $j = 1; $j < $cols; ++$j) {
-			my $value = int($thisRow[$j]);
-			#$value = 0 if ($value < 0);
-			print FOUTSPECTRUM $value." ";
-		}
-
-		print FOUTSPECTRUM "\n";
+	my @fileIndices=("");
+	if ($geometry eq "chain") {
+	} elsif ($geometry eq "ladder") {
+		@fileIndices=(0,1);
+	} else {
+		die "$0: Unknown geometry $geometry\n";
 	}
 
-	close(FOUTSPECTRUM);
-	print STDERR "$0: Color spectrum written to $outSpectrum\n";
+	foreach my $fileIndex (@fileIndices) {
+		my $outSpectrum = "outSpectrum$fileIndex.color";
+		my @colorData;
+		my ($counter,$size) = spectrumToColor(\@colorData,
+		                                      $inFile,
+											  $what,
+											  $geometry,
+											  $fileIndex);
+
+		open(FOUTSPECTRUM,"> $outSpectrum")
+			or die "$0: Cannot write to $outSpectrum : $!\n";
+		print FOUTSPECTRUM "$counter $size\n";
+
+		my $rows = scalar(@colorData);
+		for (my $i = 0; $i < $rows; ++$i) {
+			my @thisRow = @{$colorData[$i]};
+			my $cols = scalar(@thisRow);
+			for (my $j = 0; $j < $cols; ++$j) {
+				my $value = int($thisRow[$j]);
+				print FOUTSPECTRUM $value." ";
+			}
+
+			print FOUTSPECTRUM "\n";
+		}
+
+		close(FOUTSPECTRUM);
+		print STDERR "$0: Color spectrum written to $outSpectrum\n";
+	}
 }
 
 
@@ -323,10 +354,7 @@ sub printFourierLadder
 	for (my $m = 0; $m < $n; ++$m) {
 		my $ptr = $f->[$m];
 		my @temp = @$ptr;
-		my @f0 = @{$temp[0]};
-		my @f1 = @{$temp[1]};
-		my @sum = ($f0[0] - $f1[0],$f0[1] - $f1[1]);
-		print FOUT "$m @sum\n";
+		print FOUT "$m @temp\n";
 	}
 
 	close(FOUT);
@@ -378,8 +406,13 @@ sub fourierLadder
 		my $q = getQ($m,$numberOfQs);
 		my @f0 = fourierF0($v,$q);
 		my @f1 = fourierF1($v,$q);
-		my @sum = (\@f0,\@f1);
-		$f->[$m] = \@sum;
+		for (my $x = 0; $x < 2; ++$x) {
+			my $sign = 1-2*$x;
+			my $realPart = $f0[0] + $sign*$f1[0];
+			my $imagPart = $f0[1] + $sign*$f1[1];
+			my @sum = ($realPart,$imagPart);
+			$f->[$m+$numberOfQs*$x] = \@sum;
+		}
 	}
 }
 
@@ -482,9 +515,10 @@ sub extractValue
 
 sub spectrumToColor
 {
-	my ($data,$file,$realOrImag) = @_;
+	my ($data,$file,$realOrImag,$geometry,$qyIndex) = @_;
 	my $counter = 0;
 	my $size;
+	my $finalSize;
 
 	open(FIN,$file) or die "$0: Cannot open file $file : $!\n";
 	while (<FIN>) {
@@ -499,21 +533,20 @@ sub spectrumToColor
 			($size == $n) or die "$0: Wrong line $_\n";
 		}
 
-		my @temp2 = getRealOrImagData(\@temp,$realOrImag);
+		my @temp2 = getRealOrImagData(\@temp,$realOrImag,$geometry,$qyIndex);
+		$finalSize = scalar(@temp2) if (!defined($finalSize));
 		$data->[$counter++] = \@temp2;
 	}
 
 	close(FIN);
-	$size--;
 
-	$size = int($size*0.5);
 	print STDERR "$0: Read $counter lines size=$size for $realOrImag from $file\n";
 
 	my ($min,$max) = minMaxData($data);
 	print STDERR "$0: Data min = $min, max = $max\n";
 
 	scaleData($data,$min,$max);
-	return ($counter,$size);
+	return ($counter,$finalSize);
 }
 
 sub minMaxData
@@ -524,7 +557,7 @@ sub minMaxData
 	for (my $i = 0; $i < $rows; ++$i) {
 		my @thisRow = @{$a->[$i]};
 		my $cols = scalar(@thisRow);
-		for (my $j = 1; $j < $cols; ++$j) {
+		for (my $j = 0; $j < $cols; ++$j) {
 			my $thisValue = $thisRow[$j];
 			#next if ($thisValue<0);
 			$min = $thisValue if ($min > $thisValue);
@@ -544,7 +577,7 @@ sub scaleData
 	for (my $i = 0; $i < $rows; ++$i) {
 		my @thisRow = @{$a->[$i]};
 		my $cols = scalar(@thisRow);
-		for (my $j = 1; $j < $cols; ++$j) {
+		for (my $j = 0; $j < $cols; ++$j) {
 			my $value = $a->[$i]->[$j];
 			#if ($value < 0) {
 			#	$a->[$i]->[$j] = 0;
@@ -558,12 +591,18 @@ sub scaleData
 
 sub getRealOrImagData
 {
-	my ($d,$realOrImag) = @_;
+	my ($d,$realOrImag,$geometry,$qyIndex) = @_;
 	my @temp;
 	my $n = scalar(@$d);
+	my $start = 1;
+	if ($geometry eq "ladder") {
+		$n = int($n*0.5);
+		$start += $qyIndex*$n;
+		$n *= (1+$qyIndex);
+	}
+
 	my $j = 0;
-	$temp[$j++] = $d->[0];
-	for (my $i = 1; $i < $n; ++$i) {
+	for (my $i = $start; $i < $n; ++$i) {
 		next if ($realOrImag eq "imag" && ($i & 1));
 		next if ($realOrImag eq "real" && !($i & 1));
 		$temp[$j++] = $d->[$i];
