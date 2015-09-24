@@ -85,7 +85,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
+template<typename DmrgParametersType>
 class ToolBox  {
+
+	typedef ArchiveFiles<DmrgParametersType> ArchiveFilesType;
 
 	class GrepForEnergies {
 
@@ -146,29 +149,47 @@ class ToolBox  {
 
 public:
 
-	enum ActionEnum {ACTION_UNKNOWN, ACTION_ENERGIES};
+	enum ActionEnum {ACTION_UNKNOWN, ACTION_ENERGIES, ACTION_FILES};
 
 	static ActionEnum actionCanonical(PsimagLite::String action)
 	{
 		if (action == "energy" || action == "Energy" || action == "energies"
 		        || action == "Energies") return ACTION_ENERGIES;
+		if (action == "files") return ACTION_FILES;
+
 		return ACTION_UNKNOWN;
 	}
 
 	static PsimagLite::String actions()
 	{
-		return "energies";
+		return "energies | files";
 	}
 
 	static void printEnergies(PsimagLite::String inputfile,
 	                          PsimagLite::String datafile,
 	                          bool cooked)
 	{
-		PsimagLite::String tarname = ArchiveFiles<int>::rootName(datafile) + ".tar";
-		PsimagLite::String coutName = ArchiveFiles<int>::coutName(inputfile);
+		PsimagLite::String tarname = ArchiveFilesType::rootName(datafile) + ".tar";
+		PsimagLite::String coutName = ArchiveFilesType::coutName(inputfile);
 		UnTarPack untarpack(tarname);
 		bool rewind = false;
 		untarpack.extract<GrepForEnergies>(coutName,rewind,cooked);
+	}
+
+	static void files(PsimagLite::String inputfile,
+	                  const DmrgParametersType& solverParams,
+	                  PsimagLite::String extraOptions)
+	{
+		PsimagLite::String coutName = ArchiveFilesType::coutName(inputfile);
+		ArchiveFilesType af(solverParams,inputfile,false,coutName);
+
+		if (extraOptions == "DELETE" || extraOptions == "list") {
+			af.listOrClear(inputfile,extraOptions);
+		} else {
+			PsimagLite::String str("ToolBox: action=files: ");
+			str += "extra option= " + extraOptions + " not understood\n";
+			throw PsimagLite::RuntimeError(str);
+		}
 	}
 }; //class ToolBox
 

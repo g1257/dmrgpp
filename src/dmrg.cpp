@@ -351,7 +351,7 @@ int main(int argc,char *argv[])
 	strUsage += " -f filename";
 	PsimagLite::String insitu("");
 	int precision = 6;
-	PsimagLite::String filesOption;
+	bool keepFiles = false;
 	/* PSIDOC DmrgDriver
 	 * \begin{itemize}
 	 * \item[-f] [Mandatory, String] Input to use.
@@ -395,7 +395,7 @@ int main(int argc,char *argv[])
 	\begin{verbatim}./operator -l c -t -f input.inp -F -1\end{verbatim}
 	\end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:o:s:l:d:F:p:t")) != -1) {
+	while ((opt = getopt(argc, argv,"f:o:s:l:d:F:p:tk")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -420,8 +420,10 @@ int main(int argc,char *argv[])
 		case 't':
 			options.transpose = true;
 			break;
+		case 'k':
+			keepFiles = true;
+			break;
 		case 'F':
-			filesOption = optarg;
 			options.fermionicSign = atoi(optarg);
 			break;
 		case 'p':
@@ -441,11 +443,9 @@ int main(int argc,char *argv[])
 		return 1;
 	}
 
-	if (!options.enabled) inputCheck.checkFileOptions(filesOption);
-
-	if (!options.enabled && options.label != "") {
+	if (!options.enabled && options.label != "-") {
 		bool queryOnly = (options.label == "?");
-		if (options.label == "." || options.label == "?") {
+		if (options.label == "" || options.label == "?") {
 			options.label = ArchiveFilesType::coutName(filename);
 			if (queryOnly) {
 				std::cout<<options.label<<"\n";
@@ -479,16 +479,9 @@ int main(int argc,char *argv[])
 	InputNgType::Writeable ioWriteable(filename,inputCheck);
 	InputNgType::Readable io(ioWriteable);
 
-	bool clearRun = (filesOption == "CLEAR");
-	if (options.enabled) clearRun = false;
-	ParametersDmrgSolverType dmrgSolverParams(io, clearRun);
+	ParametersDmrgSolverType dmrgSolverParams(io, false);
 
 	ArchiveFilesType af(dmrgSolverParams,filename,options.enabled,options.label);
-
-	if (!options.enabled && (filesOption == "CLEAR" || filesOption == "list")) {
-		af.listOrClear(filename,filesOption);
-		return 1;
-	}
 
 	if (insitu!="") dmrgSolverParams.insitu = insitu;
 
@@ -510,7 +503,7 @@ int main(int argc,char *argv[])
 	if (options.enabled) return 0;
 
 	af.deletePackedFiles();
-	if (filesOption != "keep")
+	if (!keepFiles)
 		ArchiveFilesType::staticDelete();
 }
 

@@ -12,6 +12,7 @@ typedef float RealType;
 typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
 typedef Dmrg::ParametersDmrgSolver<RealType,InputNgType::Readable>
 ParametersDmrgSolverType;
+typedef Dmrg::ToolBox<ParametersDmrgSolverType> ToolBoxType;
 
 void usage(const char* name)
 {
@@ -24,10 +25,11 @@ int main(int argc,char *argv[])
 
 	PsimagLite::String filename;
 	PsimagLite::String action;
+	PsimagLite::String extraOptions;
 	int opt = 0;
 	int precision = 6;
 	bool shortoption = false;
-	while ((opt = getopt(argc, argv,"f:p:a:s")) != -1) {
+	while ((opt = getopt(argc, argv,"f:p:a:E:s")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -40,6 +42,9 @@ int main(int argc,char *argv[])
 		case 'a':
 			action = optarg;
 			break;
+		case 'E':
+			extraOptions = optarg;
+			break;
 		case 's':
 			shortoption = true;
 			break;
@@ -48,8 +53,6 @@ int main(int argc,char *argv[])
 			return 1;
 		}
 	}
-
-	PsimagLite::String list = (optind < argc) ? argv[optind] : "";
 
 	//sanity checks here
 	if (filename=="" || action == "") {
@@ -68,6 +71,12 @@ int main(int argc,char *argv[])
 	}
 
 	InputCheck inputCheck;
+
+	if (action == "files") {
+		if (extraOptions == "") extraOptions = "list";
+		inputCheck.checkFileOptions(extraOptions);
+	}
+
 	InputNgType::Writeable ioWriteable(filename,inputCheck);
 	InputNgType::Readable io(ioWriteable);
 
@@ -77,11 +86,13 @@ int main(int argc,char *argv[])
 
 	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
 
-	if (Dmrg::ToolBox::actionCanonical(action) == Dmrg::ToolBox::ACTION_ENERGIES) {
-		Dmrg::ToolBox::printEnergies(filename, dmrgSolverParams.filename,shortoption);
+	if (ToolBoxType::actionCanonical(action) == ToolBoxType::ACTION_ENERGIES) {
+		ToolBoxType::printEnergies(filename, dmrgSolverParams.filename,shortoption);
+	} else if (ToolBoxType::actionCanonical(action) == ToolBoxType::ACTION_FILES) {
+		ToolBoxType::files(filename, dmrgSolverParams,extraOptions);
 	} else {
 		std::cerr<<argv[0]<<": Unknown action "<<action<<"\n";
-		std::cerr<<"\tSupported actions are "<<Dmrg::ToolBox::actions()<<"\n";
+		std::cerr<<"\tSupported actions are "<<ToolBoxType::actions()<<"\n";
 		return 1;
 	}
 } // main

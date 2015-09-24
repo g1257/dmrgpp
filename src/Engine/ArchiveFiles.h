@@ -140,12 +140,12 @@ public:
 
 	void listOrClear(PsimagLite::String filename, PsimagLite::String what) const
 	{
-		if (what == "CLEAR")
+		if (what == "DELETE")
 			clearFiles(filename);
 		else if (what == "list")
 			listFiles(filename);
 		else
-			throw PsimagLite::RuntimeError("-F CLEAR | list | keep\n");
+			throw PsimagLite::RuntimeError("-F DELETE | list\n");
 	}
 
 	static void staticDelete()
