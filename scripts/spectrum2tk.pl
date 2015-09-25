@@ -57,11 +57,8 @@ sub timer1
 	$mw->withdraw();
 	my $width = 7; # in cm
 	my $epsFile = $outputFile;
-	$epsFile =~ s/\..*$//;
-	$epsFile .= ".eps";
-	system("ps2eps -f $outputFile &> /dev/null");
 	my $texFile = tikzCreate($epsFile,$width,$GlobalOmegaMax);
-	system("pdflatex $texFile &> /dev/null");
+	system("pdflatex --interaction nonstopmode $texFile &> /dev/null");
 	my $pdfFile = $texFile;
 	$pdfFile =~ s/\..*$//;
 	$pdfFile .= ".pdf";
