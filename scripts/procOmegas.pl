@@ -6,38 +6,34 @@ use Math::Trig;
 use OmegaUtils;
 use Getopt::Long qw(:config no_ignore_case);
 
-my $usage = "-b begin -t total -s step -f dollarizedInput -c ";
-$usage .= "centralSite [-m mForQ] [-S site]\n";
+my $usage = "-f dollarizedInput [-M mForQ] [-S site] [-p] [-r]\n";
 
-my ($omega0,$total,$omegaStep,$templateInput,$centralSite,$site,$m);
+my ($templateInput,$site,$m,$geometry,$GlobalNumberOfSites);
 my ($siteForSpectrum,$mForQ,$isPeriodic,$mMax,$wantsRealPart);
 
-GetOptions('b=f' => \$omega0,
-           't=i' => \$total,
-		   's=f' => \$omegaStep,
-		   'f=s' => \$templateInput,
-		   'c=i' => \$centralSite,
+GetOptions('f=s' => \$templateInput,
 		   'S:i' => \$siteForSpectrum,
 		   'm:i' => \$mForQ,
 		   'p' => \$isPeriodic,
 		   'M:i' => \$mMax,
 		   'r' => \$wantsRealPart) or die "$usage\n";
 
-(
-defined($omega0) and
-defined($total) and
-defined($omegaStep) and
-defined($templateInput) and
-defined($centralSite)
-) or die "$0: USAGE: $usage\n";
+(defined($templateInput)) or die "$0: USAGE: $usage\n";
+my ($omega0,$total,$omegaStep,$centralSite);
+my $hptr = {"#OmegaBegin" => \$omega0,
+            "#OmegaTotal" => \$total,
+			"#OmegaStep" => \$omegaStep,
+			"TSPSites 1" => \$centralSite,
+			"GeometryKind" =>\$geometry,
+			"TotalNumberOfSites" => \$GlobalNumberOfSites};
+
+OmegaUtils::getLabels($hptr,$templateInput);
 
 if ($omegaStep < 0) {
 	my $beta = -$omegaStep;
 	print STDERR "$0: Matsubara freq. assumed with beta= $beta\n";
 	$omega0 = $omegaStep = 2.0*pi/$beta;
 }
-
-my $geometry = getGeometry($templateInput);
 
 my @omegas;
 my $outSpectrum = "out.spectrum";
@@ -180,7 +176,7 @@ sub printSpectrum
 sub procCommon
 {
 	my ($ind,$omega,$centralSite) = @_;
-	my $n = OmegaUtils::getLabel($templateInput,"TotalNumberOfSites=");
+	my $n = $GlobalNumberOfSites;
 
 	my $outFile = "out$ind.space";
 	my $inFile = "out$ind.txt";
@@ -197,7 +193,6 @@ sub procCommon
 	my @spaceValues;
 	readSpace(\@spaceValues,$inFile);
 	my @qValues;
-	my $geometry = getGeometry($templateInput);
 	fourier(\@qValues,\@spaceValues,$geometry);
 	printFourier($outFile,\@qValues,$geometry);
 }
@@ -475,25 +470,6 @@ sub getQ
 {
 	my ($m,$n) = @_;
 	return ($isPeriodic) ? 2.0*pi*$m/$n : pi*$m/($n+1.0);
-}
-
-sub getGeometry
-{
-	my ($file) = @_;
-	my $ret;
-	my $label = "GeometryKind";
-	open(FILE,$file) or die "$0: Cannot open $file : $!\n";
-	while (<FILE>) {
-		if (/$label=(.*$)/) {
-			$ret = $1;
-			last;
-		}
-	}
-
-	close(FILE);
-
-	defined($ret) or die "$0: Could not find $label in $file\n";
-	return $ret;
 }
 
 sub extractValue

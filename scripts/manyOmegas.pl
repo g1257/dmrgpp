@@ -5,11 +5,19 @@ use warnings;
 use Math::Trig;
 use OmegaUtils;
 
-my ($omega0,$total,$omegaStep,$obs,$templateInput,$templateBatch,$parallel) = @ARGV;
-my $usage = "omegaBegin omegaTotal omegaStep observable dollarizedInput ";
-$usage .= "dollarizedBatch howToSubmit\n";
+my ($templateInput,$templateBatch,$parallel) = @ARGV;
+my $usage = "dollarizedInput dollarizedBatch howToSubmit\n";
 $usage .="\t howToSubmit is one of nobatch  submit  test";
 defined($parallel) or die "USAGE: $0 $usage\n";
+
+my ($omega0,$total,$omegaStep,$obs,$GlobalNumberOfSites);
+my $hptr = {"#OmegaBegin" => \$omega0,
+            "#OmegaTotal" => \$total,
+			"#OmegaStep" => \$omegaStep,
+			"#Observable" => \$obs,
+			"TotalNumberOfSites" => \$GlobalNumberOfSites};
+
+OmegaUtils::getLabels($hptr,$templateInput);
 
 if ($omegaStep < 0) {
 	my $beta = -$omegaStep;
@@ -27,7 +35,7 @@ for (my $i = 0; $i < $total; ++$i) {
 sub runThisOmega
 {
 	my ($ind,$omega) = @_;
-	my $n = OmegaUtils::getLabel($templateInput,"TotalNumberOfSites=");
+	my $n = $GlobalNumberOfSites;
 	my $input = createInput($n,$ind,$omega);
 	if ($parallel eq "nobatch") {
 		(-x "./dmrg") or die "$0: No ./dmrg found in this directory\n";

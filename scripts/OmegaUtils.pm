@@ -5,24 +5,26 @@ use warnings;
 
 package OmegaUtils;
 
-sub getLabel
+sub getLabels
 {
-	my ($file,$label)=@_;
-	open(FILE,"$file") or die "$0: Cannot open $file: $!\n";
-	my $value;
+	my ($hptr,$file) = @_;
+
+	open(FILE,$file) or die "$0: Cannot open $file : $!\n";
 	while (<FILE>) {
-	        chomp;
-	        if (/$label(.*$)/) {
-	                $value=$1;
-	                last;
-	        }
+		chomp;
+		foreach my $key (keys %$hptr) {
+			if (/$key[= ]([^ ]+)/) {
+				${$hptr->{$key}} = $1;
+			}
+		}
 	}
 
 	close(FILE);
 
-	defined($value) or die "$0: Could not find $label in $file\n";
-
-	return $value;
+	foreach my $key (keys %$hptr) {
+		my $x = ${$hptr->{$key}};
+		defined($x) or die "$0: Could not find $key in $file\n";
+	}
 }
 
 
