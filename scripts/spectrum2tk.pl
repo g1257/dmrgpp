@@ -5,9 +5,18 @@ use warnings;
 use Tk;
 require Tk::Dialog;
 
-my ($dx,$dy) = (10,10);
-my ($file,$outputFile) = @ARGV;
+my ($file,$keep,$dx,$dy) = @ARGV;
 defined($file) or die "USAGE: $0 file\n";
+if (defined($keep)) {
+	if ($keep ne "i" && $keep ne "b") {
+		die "$0: expected i (interactive) or b (batch) instead of $keep\n";
+	}
+} else {
+	$keep = "b";
+}
+
+defined($dx) or $dx = 10;
+defined($dy) or $dy = 10;
 
 my @colors;
 my ($xtotal,$ytotal,$GlobalOmegaMax) = loadColors(\@colors,$file);
@@ -19,15 +28,27 @@ my @labels;
 
 my $totalwidth=$xtotal*$dx;
 my $totalheight=$ytotal*$dy;
-my $cnv = $mw->Canvas(-width=>$totalwidth, -height=>$totalheight);
-$cnv->CanvasBind(-command => \&canvasClicked);
+my $xScale = 4;
+my $scaleWidth = $xScale*$dx;
+my $cnvMain = $mw->Canvas(-width=>$totalwidth, -height=>$totalheight);
+my $cnvScale = $mw->Canvas(-width=>$scaleWidth, -height=>$totalheight);
+$cnvMain->CanvasBind(-command => \&canvasClicked);
 
 for (my $j = 0; $j < $ytotal; ++$j) {
 	my $y = $j*$dy;
 	for (my $i = 0; $i < $xtotal; ++$i) {
 		my $x = $i*$dx;
 		my $color = findColor($i,$j);
-		addRectangle($x,$y,$color);
+		addRectangle($x,$y,$color,$cnvMain);
+	}
+}
+
+for (my $j = 0; $j < $ytotal; ++$j) {
+	my $y = $j*$dy;
+	my $color = rgbColor(int(($ytotal-$j-1)*255/$ytotal));
+	for (my $i = 0; $i < $xScale; ++$i) {
+		my $x = $i*$dx;
+		addRectangle($x,$y,$color,$cnvScale);
 	}
 }
 
@@ -42,9 +63,15 @@ my $itemsFile = [
 my $mnbFile = $mnb->cascade(-label => '~File',
                             -menuitems => $itemsFile);
 
-$cnv->pack();
+$cnvMain->pack(-side=>"left");
+$cnvScale->pack(-side=>"right");
 
-if (defined($outputFile)) {
+my $GlobalOutFile;
+
+if ($keep eq "b") {
+	$GlobalOutFile = $file;
+	$GlobalOutFile =~ s/\..*$//;
+	$GlobalOutFile .= ".eps";
 	my $time1 = $mw->repeat(1000 => \&timer1);
 }
 
@@ -52,11 +79,16 @@ MainLoop;
 
 sub timer1
 {
-	saveToFile($outputFile);
+	saveToFile($GlobalOutFile,$cnvMain);
+	my $scaleFilename = $GlobalOutFile;
+	$scaleFilename =~ s/\..*$//;
+	$scaleFilename .= "Scale.eps";
+	saveToFile($scaleFilename,$cnvScale);
 
 	$mw->withdraw();
+
 	my $width = 7; # in cm
-	my $epsFile = $outputFile;
+	my $epsFile = $GlobalOutFile;
 	my $texFile = tikzCreate($epsFile,$width,$GlobalOmegaMax);
 	system("pdflatex --interaction nonstopmode $texFile &> /dev/null");
 	my $pdfFile = $texFile;
@@ -68,7 +100,7 @@ sub timer1
 
 sub addRectangle
 {
-	my ($x,$y,$color) = @_;
+	my ($x,$y,$color,$cnv) = @_;
 	my $xp = $x + $dx;
 	my $yp = $y + $dy;
 	my $id = $cnv->createRectangle($x,$y,$xp,$yp,
@@ -99,8 +131,14 @@ sub findColor
 	my $jnd2 = $ytotal - $jnd - 1;
 	my $a = $colors[$jnd2];
 	defined($a) or die "$0: findColor undefined for ind=$ind\n";
-	my $green = 255-$a->[$ind];
-	defined($green) or die "$0: findColor undefined for ind=$jnd\n";
+	defined($a->[$ind]) or die "$0: findColor undefined for ind=$jnd\n";
+	return rgbColor($a->[$ind]);
+}
+
+sub rgbColor
+{
+	my ($value) = @_;
+	my $green = 255-$value;
 	my $blue = 255;
 	my $red = $green;
 	my $color = sprintf("#%02X%02X%02X", $red, $green, $blue);
@@ -125,12 +163,12 @@ sub fileSave
         ["All files",        '*'],
        );
    my $currentFile= $mw->getSaveFile(-filetypes => \@types);
-   saveToFile($currentFile);
+   saveToFile($currentFile,$cnvMain);
 }
 
 sub saveToFile
 {
-	my ($currentFile) = @_;
+	my ($currentFile,$cnv) = @_;
    $cnv->postscript(-file => $currentFile);
 }
 
@@ -138,6 +176,9 @@ sub tikzCreate
 {
 	my ($graph,$w,$ymax) = @_;
 	my $h = tikzHeight($w,$graph);
+	my $graphScale = $graph;
+	$graphScale =~ s/\..*$//;
+	$graphScale .= "Scale.eps";
 	my $texFile = $graph;
 	$texFile =~ s/\..*$//;
 	$texFile .= ".tex";
@@ -147,6 +188,7 @@ sub tikzCreate
 \\usepackage{tikz}
 \\usepackage{pgfplots}
 \\pgfplotsset{width=${w}cm,compat=1.8}
+\\usepgfplotslibrary{groupplots}
 \\usetikzlibrary{positioning}
 \\usetikzlibrary{shadows}
 \\usetikzlibrary{shapes}
@@ -156,7 +198,9 @@ sub tikzCreate
 \\begin{document}
 
 \\begin{tikzpicture}
-	\\begin{axis}[
+\\begin{groupplot}[group style={rows=1,columns=2}]
+
+	\\nextgroupplot[
 		axis on top,% ----
 		width=${w}cm,
 		height=${h}cm,
@@ -171,7 +215,21 @@ sub tikzCreate
 		]
 
 	\\addplot[thick,blue] graphics[xmin=0,ymin=0,xmax=6.28,ymax=$ymax] {$graph};
-	\\end{axis}
+
+		\\nextgroupplot[
+		axis on top,% ----
+		width=0.5cm,
+		height=${h}cm,
+		scale only axis,
+		enlargelimits=false,
+		ymin=0,
+		ymax=5,
+		xmin=0,
+		xmax=1,
+		xtickmax=-1
+		]
+	\\addplot[thick,blue] graphics[ymin=0,ymax=$ymax,xmin=0,xmax=1] {$graphScale};
+\\end{groupplot}
 \\end{tikzpicture}
 \\end{document}
 
