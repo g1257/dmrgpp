@@ -19,6 +19,7 @@ GetOptions('f=s' => \$templateInput,
 		   'r' => \$wantsRealPart) or die "$usage\n";
 
 (defined($templateInput)) or die "$0: USAGE: $usage\n";
+
 my ($omega0,$total,$omegaStep,$centralSite);
 my $hptr = {"#OmegaBegin" => \$omega0,
             "#OmegaTotal" => \$total,
@@ -29,9 +30,14 @@ my $hptr = {"#OmegaBegin" => \$omega0,
 
 OmegaUtils::getLabels($hptr,$templateInput);
 
+my $logFile = "Log$templateInput";
+$logFile =~ s/\..*$//;
+$logFile .= ".log";
+open(LOGFILEOUT,">$logFile") or die "$0: Cannot write to $logFile : $!\n";
+
 if ($omegaStep < 0) {
 	my $beta = -$omegaStep;
-	print STDERR "$0: Matsubara freq. assumed with beta= $beta\n";
+	print LOGFILEOUT "$0: Matsubara freq. assumed with beta= $beta\n";
 	$omega0 = $omegaStep = 2.0*pi/$beta;
 }
 
@@ -43,7 +49,7 @@ for (my $i = 0; $i < $total; ++$i) {
 	my $omega = $omega0 + $omegaStep * $i;
 	$omegas[$i] = $omega;
 	print FOUTSPECTRUM "$omega ";
-	print STDERR "$0: About to proc for omega = $omega\n";
+	print LOGFILEOUT "$0: About to proc for omega = $omega\n";
 
 	if (defined($mForQ)) {
 		procThisOmegaKspace($i,$omega,$centralSite,$mForQ);
@@ -56,7 +62,7 @@ for (my $i = 0; $i < $total; ++$i) {
 		printSpectrum(\@array);
 	}
 
-	print STDERR "$0: Finished         omega = $omega\n";
+	print LOGFILEOUT "$0: Finished         omega = $omega\n";
 }
 
 close(FOUTSPECTRUM);
@@ -65,6 +71,9 @@ my $wantsRealOrImag = (defined($wantsRealPart)) ? "real" : "imag";
 my $omegaMax = $omega0 + $omegaStep * $total;
 printSpectrumToColor($outSpectrum,$wantsRealOrImag,$geometry,$omegaMax);
 printGnuplot($outSpectrum,\@omegas,$geometry);
+
+close(LOGFILEOUT);
+print STDERR "$0: Log written to $logFile\n";
 
 sub printGnuplot
 {
@@ -226,7 +235,7 @@ sub correctionVectorRead
 	close(FIN);
 	$maxSite++;
 
-	print STDERR "$0: correctionVectorRead maxsite= $maxSite\n";
+	print LOGFILEOUT "$0: correctionVectorRead maxsite= $maxSite\n";
 	return $maxSite;
 }
 
@@ -267,7 +276,7 @@ sub readSpace
 	}
 
 	close(FIN);
-	print STDERR "$0: Read $counter sites\n";
+	print LOGFILEOUT "$0: Read $counter sites\n";
 }
 
 sub procThisOmegaKspace
@@ -314,7 +323,7 @@ sub readAllQs
 sub execThis
 {
 	my ($cmd) = @_;
-	print STDERR "$0: About to execute $cmd\n";
+	print LOGFILEOUT "$0: About to execute $cmd\n";
 	system($cmd);
 }
 
@@ -526,10 +535,10 @@ sub spectrumToColor
 
 	close(FIN);
 
-	print STDERR "$0: Read $counter lines size=$size for $realOrImag from $file\n";
+	print LOGFILEOUT "$0: Read $counter lines size=$size for $realOrImag from $file\n";
 
 	my ($min,$max) = minMaxData($data);
-	print STDERR "$0: Data min = $min, max = $max\n";
+	print LOGFILEOUT "$0: Data min = $min, max = $max\n";
 
 	scaleData($data,$min,$max);
 	return ($counter,$finalSize);
