@@ -66,7 +66,8 @@ for (my $i = 0; $i < $total; ++$i) {
 close(FOUTSPECTRUM);
 print STDERR "$0: Spectrum written to $outSpectrum\n";
 my $wantsRealOrImag = (defined($wantsRealPart)) ? "real" : "imag";
-printSpectrumToColor($outSpectrum,$wantsRealOrImag,$geometry);
+my $omegaMax = $omega0 + $omegaStep * $total;
+printSpectrumToColor($outSpectrum,$wantsRealOrImag,$geometry,$omegaMax);
 printGnuplot($outSpectrum,\@omegas,$geometry);
 
 sub printGnuplot
@@ -123,8 +124,7 @@ sub printGnuplot
 
 sub printSpectrumToColor
 {
-	my ($inFile,$what,$geometry) = @_;
-
+	my ($inFile,$what,$geometry,$omegaMax) = @_;
 	my @fileIndices=("");
 	if ($geometry eq "chain") {
 	} elsif ($geometry eq "ladder") {
@@ -144,7 +144,7 @@ sub printSpectrumToColor
 
 		open(FOUTSPECTRUM,"> $outSpectrum")
 			or die "$0: Cannot write to $outSpectrum : $!\n";
-		print FOUTSPECTRUM "$counter $size\n";
+		print FOUTSPECTRUM "$counter $size $omegaMax\n";
 
 		my $rows = scalar(@colorData);
 		for (my $i = 0; $i < $rows; ++$i) {

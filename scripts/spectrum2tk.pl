@@ -10,7 +10,7 @@ my ($file,$outputFile) = @ARGV;
 defined($file) or die "USAGE: $0 file\n";
 
 my @colors;
-my ($xtotal,$ytotal) = loadColors(\@colors,$file);
+my ($xtotal,$ytotal,$GlobalOmegaMax) = loadColors(\@colors,$file);
 
 my $mw = MainWindow->new;
 $mw->title("Spectrum2Tk");
@@ -53,7 +53,20 @@ MainLoop;
 sub timer1
 {
 	saveToFile($outputFile);
-	exit(1);
+
+	$mw->withdraw();
+	my $width = 7; # in cm
+	my $epsFile = $outputFile;
+	$epsFile =~ s/\..*$//;
+	$epsFile .= ".eps";
+	system("ps2eps -f $outputFile &> /dev/null");
+	my $texFile = tikzCreate($epsFile,$width,$GlobalOmegaMax);
+	system("pdflatex $texFile &> /dev/null");
+	my $pdfFile = $texFile;
+	$pdfFile =~ s/\..*$//;
+	$pdfFile .= ".pdf";
+	system("evince $pdfFile");
+	exit 0;
 }
 
 sub addRectangle
@@ -69,10 +82,9 @@ sub loadColors
 {
 	my ($c,$file) = @_;
 	open(FILE,"$file") or die "$0: Cannot open file $file : $!\n";
-	my ($xtotal,$ytotal);
 	$_=<FILE>;
 	chomp;
-	($ytotal,$xtotal) = split;
+	my ($ytotal,$xtotal,$omegaMax) = split;
 	my $counter = 0;
 	while (<FILE>) {
 		my @temp = split;
@@ -81,7 +93,7 @@ sub loadColors
 
 	close(FILE);
 	print STDERR "$0: Read $counter lines, xtotal=$xtotal, ytotal=$ytotal\n";
-	return ($xtotal,$ytotal);
+	return ($xtotal,$ytotal,$omegaMax);
 }
 
 sub findColor
@@ -123,5 +135,74 @@ sub saveToFile
 {
 	my ($currentFile) = @_;
    $cnv->postscript(-file => $currentFile);
+}
+
+sub tikzCreate
+{
+	my ($graph,$w,$ymax) = @_;
+	my $h = tikzHeight($w,$graph);
+	my $texFile = $graph;
+	$texFile =~ s/\..*$//;
+	$texFile .= ".tex";
+	open(FOUT,">$texFile") or die "$0: Cannot write to $graph : $!\n";
+	print FOUT<<EOF;
+\\documentclass[border=0pt]{standalone}
+\\usepackage{tikz}
+\\usepackage{pgfplots}
+\\pgfplotsset{width=${w}cm,compat=1.8}
+\\usetikzlibrary{positioning}
+\\usetikzlibrary{shadows}
+\\usetikzlibrary{shapes}
+\\usetikzlibrary{arrows}
+\\usepackage{xcolor}
+
+\\begin{document}
+
+\\begin{tikzpicture}
+	\\begin{axis}[
+		axis on top,% ----
+		width=${w}cm,
+		height=${h}cm,
+		scale only axis,
+		enlargelimits=false,
+		xmin=0,
+		xmax=6.28,
+		ymin=0,
+		ymax=$ymax,
+		xlabel=\$k\$,
+		ylabel=\$E\$
+		]
+
+	\\addplot[thick,blue] graphics[xmin=0,ymin=0,xmax=6.28,ymax=$ymax] {$graph};
+	\\end{axis}
+\\end{tikzpicture}
+\\end{document}
+
+EOF
+	close(FOUT);
+	print STDERR "$0: File $texFile written\n";
+	return $texFile;
+}
+
+sub tikzHeight
+{
+	my ($w,$graph) = @_;
+	my $h;
+	open(FIN,$graph) or die "$0: Cannot open $graph : $!\n";
+	while (<FIN>) {
+		chomp;
+		if (/%%BoundingBox:/) {
+			my @temp = split;
+			next if (scalar(@temp) != 5);
+			my $xl = abs($temp[3] - $temp[1]);
+			my $yl = abs($temp[4] - $temp[2]);
+			$h = int($w*$yl/$xl);
+		}
+	}
+
+	close(FIN);
+
+	defined($h) or die "$0: No BoundingBox in $graph?\n";
+	return $h;
 }
 
