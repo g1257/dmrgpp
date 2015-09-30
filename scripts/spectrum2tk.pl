@@ -223,7 +223,7 @@ sub tikzCreate
 		scale only axis,
 		enlargelimits=false,
 		ymin=0,
-		ymax=5,
+		ymax=$ymax,
 		xmin=0,
 		xmax=1,
 		xtickmax=-1

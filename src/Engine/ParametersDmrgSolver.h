@@ -369,13 +369,18 @@ struct ParametersDmrgSolver {
 			io.readline(tolerance,"TruncationTolerance=");
 		} catch (std::exception&) {}
 
-		if (options.find("checkpoint")!=PsimagLite::String::npos) {
-			io.readline(checkpoint.filename,"CheckpointFilename=");
-			checkRestart(filename,checkpoint.filename,options,"CheckpointFilename=");
-		} else if (options.find("restart")!=PsimagLite::String::npos) {
+		if (options.find("restart")!=PsimagLite::String::npos) {
 			io.readline(checkpoint.filename,"RestartFilename=");
 			ArchiveFiles<ThisType>::unpackIfNeeded(checkpoint.filename);
-			checkRestart(filename,checkpoint.filename,options,"CheckpointFilename=");
+			checkRestart(filename,checkpoint.filename,options,"RestartFilename=");
+		} else {
+			PsimagLite::String str;
+			try {
+				io.readline(str,"RestartFilename=");
+				PsimagLite::String s = "WARNING: RestartFilename ignored in input ";
+				s += "because restart option not present in SolverOptions.\n";
+				std::cerr<<s;
+			} catch (std::exception&) {}
 		}
 
 		nthreads=1; // provide a default value
