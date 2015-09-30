@@ -137,17 +137,23 @@ All rights reserved
 
 \chapter{Input}\label{sec:inputfile}
 
+\section{Running DMRG++}
 There is a single input file that is passed as the argument to \verb!-f!, like so
 
 \begin{lstlisting}
     ./dmrg -f input.inp.
 \end{lstlisting}
 
+\ptexPaste{DmrgDriver}
+
 Examples of input files can be found under \verb!TestSuite/inputs/!
 There are three kinds of parameters in the input file:
 (i) model connections (``geometry'') parameters, (ii) model on-site parameters,
 and (iii) DMRG Solver parameters.
 Each type of input parameters is discussed below.
+
+\section{SolverOptions}
+\ptexPaste{dmrgSolverOptions}
 
 \section{Geometry Input}
 This needs to be in PsimagLite.
@@ -171,8 +177,8 @@ If you run
 \begin{verbatim}
 ./dmrg -f input.inp
 \end{verbatim}
-you will see messages printed to the terminal.
-These are process by the \verb!PsimagLite! class \verb!ProgressIndicator! and
+you will see messages printed to the log file.
+These are processed by the \verb!PsimagLite! class \verb!ProgressIndicator! and
 are designed to show the DMRG++ progress.
 All these messages are of the form:
 \begin{verbatim}
@@ -182,6 +188,12 @@ where \verb!Class! is the class that is currently executing and the message hint
 what is being executed. The number \verb!T! between brackets is the wall
 time ellapsed since
 program start.
+
+After the program finishes, all files are put in a tar file. You can obtain the energies
+with
+\begin{verbatim}
+./toolboxdmrg -f input.inp -a energies
+\end{verbatim}
 
 \section{\emph{In-situ} measurements}
 

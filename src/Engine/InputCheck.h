@@ -128,11 +128,11 @@ public:
 	}
 
 	/* PSIDOC dmrgSolverOptions
-		  \item[Options=string]
-		  A comma-separated list of strings. At least one of the following strings must
+	   \verb!SolverOptions=! in the input file must contain
+		  a comma-separated list of strings. At least one of the following strings must
 		  be provided:
-		  \begin{itemize}
-			 \item[none]  Use this when no options are given, since the list of
+		\begin{itemize}
+			\item[none]  Use this when no options are given, because the list of
 		   strings must be non-null.
 				Note that ``none'' does not disable other options.
 
@@ -142,7 +142,41 @@ public:
 
 			 \item[nofiniteloops]  Don't do finite loops, even if provided under
 			``FiniteLoops'' below.
-			\end{itemize}
+			\item[restart] Restart from a previously saved run. See FIXME
+			\item[debugmatrix] Print Hamiltonian matrix for targeted sector of
+			superblock
+			\item[exactdiag] Do exact diagonalization with LAPACK instead of Lanczos
+			\item[nodmrgtransform] Do not DMRG transform bases
+			\item[useDavidson] Use Davidson instead of Lanczos
+			\item[verbose] Enable verbose output
+			\item[nowft] Disable the Wave Function Transformation (WFT)
+			\item[targetnoguess] Do not guess non ground state targets
+			\item[complex] TBW
+			\item[inflate] TBW
+			\item[twositedmrg] Use 2-site DMRG. Default is 1-site DMRG
+			\item[noloadwft] TBW
+			\item[concurrenttridiag] TBW
+			\item[ChebyshevSolver] Use ChebyshevSolver instead of Lanczos
+			\item[MatrixVectorStored] Store superblock sector of Hamiltonian matrix
+			in memory instead of constructing it on the fly.
+			\item[MatrixVectorKron] TBW
+			\item[TimeStepTargetting] TDMRG algorithm
+			\item[DynamicTargetting] TBW
+			\item[AdaptiveDynamicTargetting] TBW
+			\item[CorrectionVectorTargetting] TBW
+			\item[CorrectionTargetting] TBW
+			\item[TargetingAncilla] TBW
+			\item[MettsTargetting] TBW
+			\item[geometryallinsystem] During infinite algorithm make environment
+			contain always exactly one site
+			\item[vectorwithoffsets] TBW
+			\item[allPvectors] TBW
+			\item[printgeometry] TBW
+			\item[tarDisable] Do not tar output files
+			\item[tarNoDelete] Do not delete output files after taring them.
+			\item[recoveryNoDelete] Do not delete recovery files even if run
+			finishes OK
+		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,const PsimagLite::String& val,SizeType)
 	{

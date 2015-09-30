@@ -353,15 +353,17 @@ int main(int argc,char *argv[])
 	int precision = 6;
 	bool keepFiles = false;
 	/* PSIDOC DmrgDriver
-	 * \begin{itemize}
-	 * \item[-f] [Mandatory, String] Input to use.
-	 * \item[-o] [Optional, String] What to measure in-situ
-	 * \item[-l] [Optional, String] Redirect std::cout to a log file.
-	 * If the string is ``.'' then choose name for log file automatically
-	 * If the string is ``?'' then print name of log file that will
-	 * be chosen if ``.'' is used.
-	 *\item[-c] [Optional] Clear run for this input
-	 * \end{itemize}
+	  \begin{itemize}
+	  \item[-f] {[}Mandatory, String{]} Input to use.
+	  \item[-p] [Optional, Integer] Digits of precision for printing.
+	  \item[-o] {[}Optional, String{]} What to measure in-situ
+	  \item[-l] {[}Optional, String{]} Without this option std::cout is redirected
+	  to a file.
+	  This option with the string ``?'' prints name of such log file.
+	  This option with the string ``-'' writes std::cout to terminal.
+	  In other cases, string is the name of the file to redirect std::cout to.
+	 \item[-k] [Optional] Keep untar files
+	  \end{itemize}
 	 */
 	/* PSIDOC OperatorDriver
 	 The arguments to the \verb!operator! executable are as follows.
