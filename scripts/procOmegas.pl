@@ -116,8 +116,8 @@ sub printGnuplot
 			my $numberOfQs = int($factor*scalar(@$a));
 			for (my $m = 0; $m < $numberOfQs; ++$m) {
 				my $q = getQ($m,$numberOfQs);
-				my $realPart = $a->[2*$m+1+$fileIndex*$numberOfQs];
-				my $imagPart = $a->[2*$m+2];
+				my $realPart = $a->[2*$m+1+2*$fileIndex*$numberOfQs];
+				my $imagPart = $a->[2*$m+2+2*$fileIndex*$numberOfQs];
 				print FOUT "$q $omega $realPart $imagPart\n";
 			}
 		}
@@ -467,12 +467,9 @@ sub fourierF1
 sub distanceLadder
 {
 	my ($ind, $jnd) = @_;
-	my $yind = ($ind & 1) ? 1 : 0;
-	my $yjnd = ($jnd & 1) ? 1 : 0;
-	my $xind = int($ind/2);
-	my $xjnd = int($jnd/2);
-
-	return ($xind - $xjnd);
+	my $first = ($ind-1)/2;
+	my $second = $jnd/2;
+	return $first - $second;
 }
 
 sub getQ
