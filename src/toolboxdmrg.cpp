@@ -75,6 +75,10 @@ int main(int argc,char *argv[])
 	if (action == "files") {
 		if (extraOptions == "") extraOptions = "list";
 		inputCheck.checkFileOptions(extraOptions);
+	} else if (action == "energies") {
+		extraOptions = "lowest eigenvalue";
+	} else if (action == "grep") {
+		if (extraOptions == "") extraOptions = "lowest eigenvalue";
 	}
 
 	InputNgType::Writeable ioWriteable(filename,inputCheck);
@@ -85,9 +89,9 @@ int main(int argc,char *argv[])
 	ParametersDmrgSolverType dmrgSolverParams(io,earlyExit);
 
 	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
-
-	if (ToolBoxType::actionCanonical(action) == ToolBoxType::ACTION_ENERGIES) {
-		ToolBoxType::printEnergies(filename, dmrgSolverParams.filename,shortoption);
+	ToolBoxType::ParametersForGrepType params(extraOptions, shortoption);
+	if (ToolBoxType::actionCanonical(action) == ToolBoxType::ACTION_GREP) {
+		ToolBoxType::printGrep(filename, dmrgSolverParams.filename,params);
 	} else if (ToolBoxType::actionCanonical(action) == ToolBoxType::ACTION_FILES) {
 		ToolBoxType::files(filename, dmrgSolverParams,extraOptions);
 	} else {

@@ -90,18 +90,27 @@ class ToolBox  {
 
 	typedef ArchiveFiles<DmrgParametersType> ArchiveFilesType;
 
-	class GrepForEnergies {
+	class GrepForLabel {
 
 		typedef PosixTarHeader::LongType LongType;
 
+		struct InternalName {
+			InternalName(PsimagLite::String label_, bool cooked_)
+			    : cooked(cooked_),label(label_)
+			{}
+
+			bool cooked;
+			PsimagLite::String label;
+		}; // struct InternalName
+
 	public:
 
-		typedef bool ParametersType;
+		typedef InternalName ParametersType;
 
 		static void hook(std::ifstream& fin,
 		                 PsimagLite::String,
 		                 LongType len,
-		                 const ParametersType& cooked)
+		                 const ParametersType& params)
 		{
 			LongType len2 = len;
 			LongType bufferLen = 1;
@@ -111,7 +120,7 @@ class ToolBox  {
 				fin.read(buffer,bufferLen);
 				ss<<buffer[0];
 				if (buffer[0] == '\n') {
-					procLine(ss.str(),cooked);
+					procLine(ss.str(),params);
 					ss.str("");
 				}
 
@@ -123,10 +132,10 @@ class ToolBox  {
 
 	private:
 
-		static void procLine(PsimagLite::String line, const ParametersType& cooked)
+		static void procLine(PsimagLite::String line, const ParametersType& params)
 		{
-			if (line.find("lowest eigenvalue") == PsimagLite::String::npos) return;
-			if (cooked)
+			if (line.find(params.label) == PsimagLite::String::npos) return;
+			if (params.cooked)
 				cookThisLine(line);
 			else
 				std::cout<<line;
@@ -145,16 +154,18 @@ class ToolBox  {
 				line.erase(0,index + magic.length());
 			std::cout<<line<<"\n";
 		}
-	}; // GrepForEnergies
+	}; // GrepForLabel
 
 public:
 
-	enum ActionEnum {ACTION_UNKNOWN, ACTION_ENERGIES, ACTION_FILES};
+	enum ActionEnum {ACTION_UNKNOWN, ACTION_GREP, ACTION_FILES};
+
+	typedef typename GrepForLabel::ParametersType ParametersForGrepType;
 
 	static ActionEnum actionCanonical(PsimagLite::String action)
 	{
 		if (action == "energy" || action == "Energy" || action == "energies"
-		        || action == "Energies") return ACTION_ENERGIES;
+		        || action == "Energies" || action == "grep") return ACTION_GREP;
 		if (action == "files") return ACTION_FILES;
 
 		return ACTION_UNKNOWN;
@@ -162,18 +173,18 @@ public:
 
 	static PsimagLite::String actions()
 	{
-		return "energies | files";
+		return "energies | grep | files";
 	}
 
-	static void printEnergies(PsimagLite::String inputfile,
-	                          PsimagLite::String datafile,
-	                          bool cooked)
+	static void printGrep(PsimagLite::String inputfile,
+	                      PsimagLite::String datafile,
+	                      ParametersForGrepType params)
 	{
 		PsimagLite::String tarname = ArchiveFilesType::rootName(datafile) + ".tar";
 		PsimagLite::String coutName = ArchiveFilesType::coutName(inputfile);
 		UnTarPack untarpack(tarname);
 		bool rewind = false;
-		untarpack.extract<GrepForEnergies>(coutName,rewind,cooked);
+		untarpack.extract<GrepForLabel>(coutName,rewind,params);
 	}
 
 	static void files(PsimagLite::String inputfile,
