@@ -25,11 +25,29 @@ if ($omegaStep < 0) {
 	$omega0 = $omegaStep = 2.0*pi/$beta;
 }
 
+my $jobs = "";
+my @outfiles;
 for (my $i = 0; $i < $total; ++$i) {
 	my $omega = sprintf("%.3f", $omega0 + $omegaStep * $i);
 	print STDERR "$0: About to run for omega = $omega\n";
-	runThisOmega($i,$omega);
+	my ($jobid,$outfile) = runThisOmega($i,$omega);
 	print STDERR "$0: Finished         omega = $omega\n";
+	$jobs .= ":" if ($i > 0);
+	$jobid =~ s/\..*$//;
+	$jobs .= $jobid;
+	push @outfiles, $outfile;
+}
+
+my $tarname = "runFor".$templateInput;
+$tarname =~ s/\.inp//;
+$tarname .= ".tar.gz";
+$tarname = "tar --group nobody --owner nobody -zcvf $tarname";
+if ($parallel eq "nobatch") {
+	system("$tarname @outfiles");
+} else {
+	my $batch = createFinalBatch($total,$tarname,\@outfiles);
+	my $afterok =  "-W depend=afterok:$jobs";
+	submitBatch($batch,$afterok) if ($parallel eq "submit");
 }
 
 sub runThisOmega
@@ -37,14 +55,20 @@ sub runThisOmega
 	my ($ind,$omega) = @_;
 	my $n = $GlobalNumberOfSites;
 	my $input = createInput($n,$ind,$omega);
+	my $jobid = "";
+	my $outfile = "runFor$input";
+	$outfile =~ s/\.inp//;
+	$outfile .= ".cout";
 	if ($parallel eq "nobatch") {
 		(-x "./dmrg") or die "$0: No ./dmrg found in this directory\n";
-		system("./dmrg -f $input -o ':$obs.txt' &> out$ind.txt");
-		system("echo '#omega=$omega' >> out$ind.txt");
+		system("./dmrg -f $input -o ':$obs.txt'");
+		system("echo '#omega=$omega' >> $outfile");
 	} else {
 		my $batch = createBatch($ind,$omega,$input);
-		submitBatch($batch) if ($parallel eq "submit");
+		$jobid = submitBatch($batch) if ($parallel eq "submit");
 	}
+
+	return ($jobid,$outfile);
 }
 
 sub createInput
@@ -74,6 +98,31 @@ sub createInput
 	close(FILE);
 	close(FOUT);
 
+	return $file;
+}
+
+sub createFinalBatch
+{
+	my ($ind,$tarname,$files) = @_;
+	createBatch($ind,0,"FINAL");
+	my $fout = "temp.pbs";
+	my $file = "Batch$ind.pbs";
+	open(FOUT,">$fout") or die "$0: Cannot write to $file: $!\n";
+	open(FILE,"$file") or die "$0: Cannot open $fout: $!\n";
+	my @outfiles = @$files;
+	while (<FILE>) {
+		if (/FINAL/) {
+			print FOUT "$tarname @outfiles\n";
+			next;
+		}
+
+		print FOUT;
+	}
+
+	close(FOUT);
+	close(FILE);
+	system("cp $fout $file");
+	unlink($fout);
 	return $file;
 }
 
@@ -108,9 +157,13 @@ sub createBatch
 
 sub submitBatch
 {
-        my ($batch) = @_;
-        sleep(2);
-        system("qsub $batch");
-        print STDERR "$0: Submitted $batch\n";
+	my ($batch,$extra) = @_;
+	defined($extra) or $extra = "";
+	sleep(1);
+	print STDERR "$0: Submitted $batch $extra $batch\n";
+
+	my $ret = `qsub $extra $batch`;
+	chomp($ret);
+	return $ret;
 }
 
