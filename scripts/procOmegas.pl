@@ -116,8 +116,8 @@ sub printGnuplot
 			my $numberOfQs = int($factor*scalar(@$a));
 			for (my $m = 0; $m < $numberOfQs; ++$m) {
 				my $q = getQ($m,$numberOfQs);
-				my $realPart = $a->[2*$m+$fileIndex*$numberOfQs];
-				my $imagPart = $a->[2*$m+1];
+				my $realPart = $a->[2*$m+1+$fileIndex*$numberOfQs];
+				my $imagPart = $a->[2*$m+2];
 				print FOUT "$q $omega $realPart $imagPart\n";
 			}
 		}
