@@ -12,21 +12,21 @@ my ($templateInput,$site,$m,$geometry,$GlobalNumberOfSites);
 my ($siteForSpectrum,$mForQ,$isPeriodic,$mMax,$wantsRealPart);
 
 GetOptions('f=s' => \$templateInput,
-		   'S:i' => \$siteForSpectrum,
-		   'm:i' => \$mForQ,
-		   'p' => \$isPeriodic,
-		   'M:i' => \$mMax,
-		   'r' => \$wantsRealPart) or die "$usage\n";
+           'S:i' => \$siteForSpectrum,
+           'm:i' => \$mForQ,
+           'p' => \$isPeriodic,
+           'M:i' => \$mMax,
+           'r' => \$wantsRealPart) or die "$usage\n";
 
 (defined($templateInput)) or die "$0: USAGE: $usage\n";
 
 my ($omega0,$total,$omegaStep,$centralSite);
 my $hptr = {"#OmegaBegin" => \$omega0,
             "#OmegaTotal" => \$total,
-			"#OmegaStep" => \$omegaStep,
-			"TSPSites 1" => \$centralSite,
-			"GeometryKind" =>\$geometry,
-			"TotalNumberOfSites" => \$GlobalNumberOfSites};
+            "#OmegaStep" => \$omegaStep,
+            "TSPSites 1" => \$centralSite,
+            "GeometryKind" =>\$geometry,
+            "TotalNumberOfSites" => \$GlobalNumberOfSites};
 
 OmegaUtils::getLabels($hptr,$templateInput);
 
@@ -95,7 +95,7 @@ sub printGnuplot
 		die "$0: Found $counter omegas in $inFile but was expecting $numberOfOmegas\n";
 
 	my $factor = 0;
-	my @fileIndices=("");
+	my @fileIndices=(0);
 	if ($geometry eq "chain") {
 		$factor = 0.5;
 	} elsif ($geometry eq "ladder") {
@@ -108,7 +108,6 @@ sub printGnuplot
 	foreach my $fileIndex (@fileIndices) {
 		my $outFile = "outSpectrum$fileIndex.gnuplot";
 		open(FOUT,"> $outFile") or die "$0: Cannot write to $outFile : $!\n";
-
 
 		for (my $i = 0; $i < $numberOfOmegas; ++$i) {
 			my $omega = $omegas->[$i];
@@ -130,7 +129,7 @@ sub printGnuplot
 sub printSpectrumToColor
 {
 	my ($inFile,$what,$geometry,$omegaMax) = @_;
-	my @fileIndices=("");
+	my @fileIndices=(0);
 	if ($geometry eq "chain") {
 	} elsif ($geometry eq "ladder") {
 		@fileIndices=(0,1);
@@ -143,9 +142,9 @@ sub printSpectrumToColor
 		my @colorData;
 		my ($counter,$size) = spectrumToColor(\@colorData,
 		                                      $inFile,
-											  $what,
-											  $geometry,
-											  $fileIndex);
+		                                      $what,
+		                                      $geometry,
+		                                      $fileIndex);
 
 		open(FOUTSPECTRUM,"> $outSpectrum")
 			or die "$0: Cannot write to $outSpectrum : $!\n";
@@ -167,7 +166,6 @@ sub printSpectrumToColor
 		print STDERR "$0: Color spectrum written to $outSpectrum\n";
 	}
 }
-
 
 sub printSpectrum
 {
@@ -602,3 +600,4 @@ sub getRealOrImagData
 
 	return @temp;
 }
+
