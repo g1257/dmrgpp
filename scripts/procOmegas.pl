@@ -207,11 +207,31 @@ sub procCommon
 
 sub correctionVectorRead
 {
-	my ($v1,$v2,$inFile) = @_;
-	my $maxSite = 0;
-	open(FIN,"$inFile") or die "$0: Cannot open $inFile : $!\n";
+	my ($v1,$v2,$inFile,$fh) = @_;
+	if (-r "$inFile") {
+		open(FIN,"$inFile") or die "$0: Cannot open $inFile : $!\n";
+	} else {
+		my $input = $inFile;
+		$input =~s/runFor//;
+		$input =~s/\.cout/\.inp/;
+		open(FIN,"./toolboxdmrg -f $input -a grep -E \"\" 2>/dev/null |")
+		or die "$0: Cannot open pipe : $!\n";
+	}
+
+	my $maxSite = correctionVectorReadOpen($v1,$v2,$inFile,\*FIN);
+	close(FIN);
+	$maxSite++;
+
+	print LOGFILEOUT "$0: correctionVectorRead maxsite= $maxSite\n";
+	return $maxSite;
+}
+
+sub correctionVectorReadOpen
+{
+	my ($v1,$v2,$inFile,$fh) = @_;
 	my $status;
-	while (<FIN>) {
+	my $maxSite = 0;
+	while (<$fh>) {
 		if (/P3/ and /PSI/) {
 		        $status="p3";
 		} elsif (/P2/ and /PSI/) {
@@ -231,10 +251,6 @@ sub correctionVectorRead
 		$status = "clear";
 	}
 
-	close(FIN);
-	$maxSite++;
-
-	print LOGFILEOUT "$0: correctionVectorRead maxsite= $maxSite\n";
 	return $maxSite;
 }
 
@@ -248,7 +264,7 @@ sub correctionVectorWrite
 	for (my $i = 0; $i < $maxSite; ++$i) {
 		my $vv1 = $v1->[$i];
 		my $vv2 = $v2->[$i];
-		defined($vv1) or die "$0: Undefined value for site = $i\n";
+		defined($vv1) or die "$0: Undefined value for site = $i and omega = $omega\n";
 		print FOUT "$i $vv1 $vv2\n";
 	}
 

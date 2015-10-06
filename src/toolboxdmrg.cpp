@@ -25,7 +25,7 @@ int main(int argc,char *argv[])
 
 	PsimagLite::String filename;
 	PsimagLite::String action;
-	PsimagLite::String extraOptions;
+	PsimagLite::String extraOptions = "lowest eigenvalue";
 	int opt = 0;
 	int precision = 6;
 	bool shortoption = false;
@@ -75,10 +75,6 @@ int main(int argc,char *argv[])
 	if (action == "files") {
 		if (extraOptions == "") extraOptions = "list";
 		inputCheck.checkFileOptions(extraOptions);
-	} else if (action == "energies") {
-		extraOptions = "lowest eigenvalue";
-	} else if (action == "grep") {
-		if (extraOptions == "") extraOptions = "lowest eigenvalue";
 	}
 
 	InputNgType::Writeable ioWriteable(filename,inputCheck);
