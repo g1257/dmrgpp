@@ -184,9 +184,10 @@ sub procCommon
 {
 	my ($ind,$omega,$centralSite) = @_;
 	my $n = $GlobalNumberOfSites;
-
-	my $outFile = "out$ind.space";
-	my $inFile = "out$ind.txt";
+	my $inputRoot = "input";
+	my $prefix = "runFor$inputRoot$ind";
+	my $outFile = "$prefix.space";
+	my $inFile = "$prefix.cout";
 	my @values;
 	my @values2;
 
@@ -194,8 +195,8 @@ sub procCommon
 
 	correctionVectorWrite($outFile,\@values,\@values2,$maxSite,$omega);
 
-	$inFile = "out$ind.space";
-	$outFile = "out$ind.sq";
+	$inFile = "$prefix.space";
+	$outFile = "$prefix.sq";
 
 	my @spaceValues;
 	readSpace(\@spaceValues,$inFile);
@@ -281,8 +282,9 @@ sub procThisOmegaKspace
 {
 	my ($ind,$omega,$centralSite,$mForQ) = @_;
 	procCommon($ind,$omega,$centralSite);
-
-	my $inFile = "out$ind.sq";
+	my $inputRoot = "input";
+	my $prefix = "runFor$inputRoot$ind";
+	my $inFile = "$prefix.sq";
 	extractValue($inFile,$mForQ);
 }
 
@@ -290,8 +292,9 @@ sub procThisOmegaSpace
 {
 	my ($ind,$omega,$centralSite,$siteForSpectrum) = @_;
 	procCommon($ind,$omega,$centralSite);
-
-	my $inFile = "out$ind.space";
+	my $inputRoot = "input";
+	my $prefix = "runFor$inputRoot$ind";
+	my $inFile = "$prefix.space";
 	extractValue($inFile,$siteForSpectrum);
 }
 
@@ -306,7 +309,9 @@ sub readAllQs
 {
 	my ($array,$ind) = @_;
 	my $counter = 0;
-	open(FILE,"out$ind.sq") or die "$0: Cannot open file : $!\n";
+	my $inputRoot = "input";
+	my $prefix = "runFor$inputRoot$ind";
+	open(FILE,"$prefix.sq") or die "$0: Cannot open file : $!\n";
 	while (<FILE>) {
 		chomp;
 		my @temp = split;
