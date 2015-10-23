@@ -11,11 +11,15 @@ $usage .="\t howToSubmit is one of nobatch  submit  test";
 defined($parallel) or die "USAGE: $0 $usage\n";
 
 my ($omega0,$total,$omegaStep,$obs,$GlobalNumberOfSites);
-my $hptr = {"#OmegaBegin" => \$omega0,
-            "#OmegaTotal" => \$total,
-			"#OmegaStep" => \$omegaStep,
-			"#Observable" => \$obs,
-			"TotalNumberOfSites" => \$GlobalNumberOfSites};
+my $offset = 0;
+
+my $hptr = {
+"#OmegaBegin" => \$omega0,
+"#OmegaTotal" => \$total,
+"#OmegaStep" => \$omegaStep,
+"#Observable" => \$obs,
+"#Offset" => \$offset,
+"TotalNumberOfSites" => \$GlobalNumberOfSites};
 
 OmegaUtils::getLabels($hptr,$templateInput);
 
@@ -27,7 +31,7 @@ if ($omegaStep < 0) {
 
 my $jobs = "";
 my @outfiles;
-for (my $i = 0; $i < $total; ++$i) {
+for (my $i = $offset; $i < $total; ++$i) {
 	my $omega = sprintf("%.3f", $omega0 + $omegaStep * $i);
 	print STDERR "$0: About to run for omega = $omega\n";
 	my ($jobid,$outfile) = runThisOmega($i,$omega);
