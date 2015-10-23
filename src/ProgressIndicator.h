@@ -99,7 +99,7 @@ class ProgressIndicator {
 public:
 
 	ProgressIndicator(String caller,SizeType threadId = 0)
-	    : threadId_(threadId)
+	    : threadId_(threadId),rank_(0)
 	{
 		if (threadId_ != 0) return;
 

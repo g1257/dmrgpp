@@ -121,7 +121,7 @@ public:
 		PthreadFunctionStruct<PthreadFunctionHolderType>* pfs;
 		pfs = new PthreadFunctionStruct<PthreadFunctionHolderType>[nthreads_];
 		pthread_mutex_init(&(mutex_), NULL);
-		pthread_t thread_id[nthreads_];
+		pthread_t* thread_id = new pthread_t[nthreads_];
 
 		for (SizeType j=0; j <nthreads_; j++) {
 			int ret=0;
@@ -141,6 +141,7 @@ public:
 		for (SizeType j=0; j <nthreads_; j++) pthread_join( thread_id[j], NULL);
 
 		pthread_mutex_destroy(&mutex_);
+		delete [] thread_id;
 		delete [] pfs;
 	}
 
