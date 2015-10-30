@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "WaveFunctionTransfBase.h"
 #include "MatrixOrIdentity.h"
 #include "ParallelWftOne.h"
+#include "Parallelizer.h"
 
 namespace Dmrg {
 

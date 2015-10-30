@@ -84,13 +84,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h" // in PsimagLite
 #include "ProgramGlobals.h"
 #include "Concurrency.h"
-#include "Parallelizer.h"
+#include "NoPthreads.h"
 
 namespace Dmrg {
 
 // A block matrix class
 // Blocks can be of any type and are templated with the type MatrixInBlockTemplate
 //
+// Note: In reality, Parallelization is disabled here because a LAPACK call
+//        is needed and LAPACK is not necessarily thread safe.
 template<typename MatrixInBlockTemplate>
 class BlockMatrix {
 
@@ -374,7 +376,7 @@ diagonalise(BlockMatrix<PsimagLite::Matrix<SomeFieldType> >& C,
             char option)
 {
 	typedef typename BlockMatrix<PsimagLite::Matrix<SomeFieldType> >::LoopForDiag LoopForDiagType;
-	typedef PsimagLite::Parallelizer<LoopForDiagType> ParallelizerType;
+	typedef PsimagLite::NoPthreads<LoopForDiagType> ParallelizerType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	SizeType savedNpthreads = ConcurrencyType::npthreads;
 	ConcurrencyType::npthreads = 1;
