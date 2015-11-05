@@ -103,7 +103,7 @@ public:
 		files_.push_back(filename);
 		PsimagLite::String rootname = parameters.filename;
 		appendToList(files_,rootname);
-		if (!addExtra && extra != "")
+		if (!addExtra && extra != "" && extra != "-")
 			files_.push_back(extra);
 	}
 
