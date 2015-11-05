@@ -164,7 +164,7 @@ public:
 			data_.resize(total);
 			for (SizeType i=0;i<total;i++) data_[i] = v[i+offset_];
 		} catch (std::exception& e) {
-			std::cerr<<e.what();
+			std::cout<<e.what();
 			m_=0;
 			offset_=0;
 			data_.resize(0);
