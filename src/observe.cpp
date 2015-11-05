@@ -333,7 +333,7 @@ int main(int argc,char *argv[])
 
 	//! Read the parameters for this run
 	//ParametersModelType mp(io);
-	ParametersDmrgSolverType dmrgSolverParams(io);
+	ParametersDmrgSolverType dmrgSolverParams(io,false,true);
 
 	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
 

@@ -327,7 +327,9 @@ struct ParametersDmrgSolver {
 	}
 
 	//! Read Dmrg parameters from inp file
-	ParametersDmrgSolver(InputValidatorType& io, bool earlyExit = false)
+	ParametersDmrgSolver(InputValidatorType& io,
+	                     bool earlyExit = false,
+	                     bool isObserveCode = false)
 	    : sitesPerBlock(1),
 	      maxMatrixRankStored(0),
 	      excited(0),
@@ -353,7 +355,6 @@ struct ParametersDmrgSolver {
 			io.read(tmpVector,"TargetQuantumNumbers");
 		} catch (std::exception&){}
 
-
 		if (tmpVector.size()>0) {
 			PsimagLite::String s = "*** FATAL: TargetQuantumNumbers ";
 			s += "is no longer allowed in input file\n";
@@ -368,20 +369,6 @@ struct ParametersDmrgSolver {
 		try {
 			io.readline(tolerance,"TruncationTolerance=");
 		} catch (std::exception&) {}
-
-		if (options.find("restart")!=PsimagLite::String::npos) {
-			io.readline(checkpoint.filename,"RestartFilename=");
-			ArchiveFiles<ThisType>::unpackIfNeeded(checkpoint.filename);
-			checkRestart(filename,checkpoint.filename,options,"RestartFilename=");
-		} else {
-			PsimagLite::String str;
-			try {
-				io.readline(str,"RestartFilename=");
-				PsimagLite::String s = "WARNING: RestartFilename ignored in input ";
-				s += "because restart option not present in SolverOptions.\n";
-				std::cerr<<s;
-			} catch (std::exception&) {}
-		}
 
 		nthreads=1; // provide a default value
 		try {
@@ -423,6 +410,21 @@ struct ParametersDmrgSolver {
 		try {
 			io.readline(recoverySave,"RecoverySave=");
 		} catch (std::exception&) {}
+
+		if (isObserveCode) return;
+		if (options.find("restart")!=PsimagLite::String::npos) {
+			io.readline(checkpoint.filename,"RestartFilename=");
+			ArchiveFiles<ThisType>::unpackIfNeeded(checkpoint.filename);
+			checkRestart(filename,checkpoint.filename,options,"RestartFilename=");
+		} else {
+			PsimagLite::String str;
+			try {
+				io.readline(str,"RestartFilename=");
+				PsimagLite::String s = "WARNING: RestartFilename ignored in input ";
+				s += "because restart option not present in SolverOptions.\n";
+				std::cerr<<s;
+			} catch (std::exception&) {}
+		}
 	}
 
 	template<typename SomeInputType>
