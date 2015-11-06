@@ -147,6 +147,10 @@ public:
 		mode = 0;
 #ifdef USE_PTHREADS
 		mode |= 1;
+#else
+		if (nthreads != 1) {
+			throw RuntimeError("nthreads>1 but no USE_PTHREADS support compiled\n");
+		}
 #endif
 #ifdef USE_MPI
 		MPI::init(argc,argv);
