@@ -150,7 +150,7 @@ public:
 	      progress_("DmrgSolver"),
 	      quantumSector_(0),
 	      stepCurrent_(0),
-	      checkpoint_(parameters_),
+	      checkpoint_(parameters_,ioIn,model.geometry().numberOfSites()),
 	      wft_(parameters_),
 	      reflectionOperator_(lrs_,
 	                          model_.hilbertSize(0),
@@ -181,14 +181,13 @@ public:
 	void main(const GeometryType& geometry)
 	{
 		ioOut_.print("GEOMETRY",geometry);
-		bool allInSystem = (parameters_.options.find("geometryallinsystem")!=
-		        PsimagLite::String::npos);
-
-		checkFiniteLoops(allInSystem, geometry.numberOfSites());
-
 		ioOut_.print("MODEL",model_);
+
 		BlockType S,E;
 		VectorBlockType X,Y;
+
+		bool allInSystem = (parameters_.options.find("geometryallinsystem")!=
+		        PsimagLite::String::npos);
 
 		geometry.split(parameters_.sitesPerBlock,S,X,Y,E,allInSystem);
 		for (SizeType i=0;i<X.size();i++)
@@ -608,94 +607,6 @@ private:
 		if (step < y.size()) return y[step];
 
 		return E;
-	}
-
-	void checkFiniteLoops(SizeType allInSystem, SizeType totalSites) const
-	{
-		if (parameters_.options.find("nofiniteloops")!=PsimagLite::String::npos)
-			return;
-
-		PsimagLite::Vector<FiniteLoop>::Type vfl;
-		int lastSite = (allInSystem) ? totalSites-2 : totalSites/2-1; // must be signed
-		int prevDeltaSign = 1;
-		bool checkPoint = false;
-
-		if (checkpoint_()) {
-			PsimagLite::IoSimple::In io1(parameters_.checkpoint.filename);
-			io1.readline(lastSite,"#TCENTRALSITE=",
-			             PsimagLite::IoSimple::In::LAST_INSTANCE);
-			io1.readline(prevDeltaSign,"#LastLoopSign=");
-			checkPoint = true;
-		}
-
-		if (totalSites & 1) lastSite++;
-
-		ParametersType::readFiniteLoops(ioIn_,vfl);
-
-		checkFiniteLoops(vfl,totalSites,lastSite,prevDeltaSign,checkPoint);
-	}
-
-	void checkFiniteLoops(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,
-	                      SizeType totalSites,
-	                      SizeType lastSite,
-	                      int prevDeltaSign,
-	                      bool checkPoint) const
-	{
-		PsimagLite::String s = "checkFiniteLoops: I'm falling out of the lattice ";
-		PsimagLite::String loops = "";
-		int x = lastSite;
-
-		if (finiteLoop[0].stepLength<0 && !checkPoint) x++;
-
-		SizeType sopt = 0; // have we started saving yet?
-		for (SizeType i=0;i<finiteLoop.size();i++)  {
-			SizeType thisSaveOption = (finiteLoop[i].saveOption & 1);
-			if (sopt == 1 && !(thisSaveOption&1)) {
-				s = "Error for finite loop number " + ttos(i) + "\n";
-				s += "Once you say 1 on a finite loop, then all";
-				s += " finite loops that follow must have 1.";
-				throw PsimagLite::RuntimeError(s.c_str());
-			}
-			if (sopt == 0 && (thisSaveOption&1)) {
-				sopt = 1;
-				if (SizeType(x) != 1 && SizeType(x)!=totalSites-2) {
-					s = __FILE__ + PsimagLite::String(": FATAL: for finite loop number ")
-					        + ttos(i) + "\n";
-					s += "Saving finite loops must start at the left or";
-					s += " right end of the lattice\n";
-					throw PsimagLite::RuntimeError(s.c_str());
-				}
-			}
-			// naive location:
-			int delta = finiteLoop[i].stepLength;
-			x += delta;
-			loops = loops + ttos(delta) + " ";
-
-			// take care of bounces:
-			bool b1 = (checkPoint || (i>0));
-			if (b1 && delta*prevDeltaSign < 0) x += prevDeltaSign;
-			prevDeltaSign = 1;
-			if (delta<0) prevDeltaSign = -1;
-
-			// check that we don't fall out
-			bool flag = false;
-			if (x<=0) {
-				s = s + "on the left end\n";
-				flag = true;
-			}
-			if (SizeType(x)>=totalSites-1) {
-				s = s + "on the right end\n";
-				flag = true;
-			}
-			if (flag) {
-				// complain and die if we fell out:
-				s = s + "Loops so far: " + loops + "\n";
-				s =s + "x=" + ttos(x) + " last delta=" +
-				        ttos(delta);
-				s =s + " sites=" + ttos(totalSites);
-				throw PsimagLite::RuntimeError(s.c_str());
-			}
-		}
 	}
 
 	const ModelType& model_;

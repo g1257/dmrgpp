@@ -95,6 +95,8 @@ public:
 	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
 	typedef typename PsimagLite::IoSimple IoType;
+	typedef typename TargettingType::ModelType ModelType;
+	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Stack<BasisWithOperatorsType>::Type MemoryStackType;
 	typedef DiskStack<BasisWithOperatorsType>  DiskStackType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
@@ -102,7 +104,9 @@ public:
 	const PsimagLite::String SYSTEM_STACK_STRING;
 	const PsimagLite::String ENVIRON_STACK_STRING;
 
-	Checkpoint(const ParametersType& parameters) :
+	Checkpoint(const ParametersType& parameters,
+	           InputValidatorType& ioIn,
+	           SizeType totalSites) :
 	    SYSTEM_STACK_STRING(ProgramGlobals::SYSTEM_STACK_STRING),
 	    ENVIRON_STACK_STRING(ProgramGlobals::ENVIRON_STACK_STRING),
 	    parameters_(parameters),
@@ -114,6 +118,8 @@ public:
 	             ENVIRON_STACK_STRING+parameters_.filename,enabled_),
 	    progress_("Checkpoint")
 	{
+		checkFiniteLoops(totalSites,ioIn);
+
 		if (!enabled_) return;
 
 		loadStacksDiskToMemory();
@@ -199,6 +205,97 @@ public:
 	const ParametersType& parameters() const { return parameters_; }
 
 private:
+
+	void checkFiniteLoops(SizeType totalSites, InputValidatorType& ioIn) const
+	{
+		if (parameters_.options.find("nofiniteloops")!=PsimagLite::String::npos)
+			return;
+
+		bool allInSystem = (parameters_.options.find("geometryallinsystem")!=
+		        PsimagLite::String::npos);
+
+		PsimagLite::Vector<FiniteLoop>::Type vfl;
+		int lastSite = (allInSystem) ? totalSites-2 : totalSites/2-1; // must be signed
+		int prevDeltaSign = 1;
+		bool checkPoint = false;
+
+		if (enabled_) {
+			PsimagLite::IoSimple::In io1(parameters_.checkpoint.filename);
+			io1.readline(lastSite,"#TCENTRALSITE=",
+			             PsimagLite::IoSimple::In::LAST_INSTANCE);
+			io1.readline(prevDeltaSign,"#LastLoopSign=");
+			checkPoint = true;
+		}
+
+		if (totalSites & 1) lastSite++;
+
+		ParametersType::readFiniteLoops(ioIn,vfl);
+
+		checkFiniteLoops(vfl,totalSites,lastSite,prevDeltaSign,checkPoint);
+	}
+
+	void checkFiniteLoops(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,
+	                      SizeType totalSites,
+	                      SizeType lastSite,
+	                      int prevDeltaSign,
+	                      bool checkPoint) const
+	{
+		PsimagLite::String s = "checkFiniteLoops: I'm falling out of the lattice ";
+		PsimagLite::String loops = "";
+		int x = lastSite;
+
+		if (finiteLoop[0].stepLength<0 && !checkPoint) x++;
+
+		SizeType sopt = 0; // have we started saving yet?
+		for (SizeType i=0;i<finiteLoop.size();i++)  {
+			SizeType thisSaveOption = (finiteLoop[i].saveOption & 1);
+			if (sopt == 1 && !(thisSaveOption&1)) {
+				s = "Error for finite loop number " + ttos(i) + "\n";
+				s += "Once you say 1 on a finite loop, then all";
+				s += " finite loops that follow must have 1.";
+				throw PsimagLite::RuntimeError(s.c_str());
+			}
+			if (sopt == 0 && (thisSaveOption&1)) {
+				sopt = 1;
+				if (SizeType(x) != 1 && SizeType(x)!=totalSites-2) {
+					s = __FILE__ + PsimagLite::String(": FATAL: for finite loop number ")
+					        + ttos(i) + "\n";
+					s += "Saving finite loops must start at the left or";
+					s += " right end of the lattice\n";
+					throw PsimagLite::RuntimeError(s.c_str());
+				}
+			}
+			// naive location:
+			int delta = finiteLoop[i].stepLength;
+			x += delta;
+			loops = loops + ttos(delta) + " ";
+
+			// take care of bounces:
+			bool b1 = (checkPoint || (i>0));
+			if (b1 && delta*prevDeltaSign < 0) x += prevDeltaSign;
+			prevDeltaSign = 1;
+			if (delta<0) prevDeltaSign = -1;
+
+			// check that we don't fall out
+			bool flag = false;
+			if (x<=0) {
+				s = s + "on the left end\n";
+				flag = true;
+			}
+			if (SizeType(x)>=totalSites-1) {
+				s = s + "on the right end\n";
+				flag = true;
+			}
+			if (flag) {
+				// complain and die if we fell out:
+				s = s + "Loops so far: " + loops + "\n";
+				s =s + "x=" + ttos(x) + " last delta=" +
+				        ttos(delta);
+				s =s + " sites=" + ttos(totalSites);
+				throw PsimagLite::RuntimeError(s.c_str());
+			}
+		}
+	}
 
 	//! shrink  (we don't really shrink, we just undo the growth)
 	BasisWithOperatorsType shrink(MemoryStackType& thisStack,
