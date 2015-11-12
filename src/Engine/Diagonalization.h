@@ -130,7 +130,8 @@ public:
 	                ReflectionSymmetryType& reflectionOperator,
 	                InputValidatorType& io,
 	                const SizeType& quantumSector,
-	                WaveFunctionTransfType& waveFunctionTransformation)
+	                WaveFunctionTransfType& waveFunctionTransformation,
+	                RealType oldEnergy)
 	    : parameters_(parameters),
 	      model_(model),
 	      verbose_(verbose),
@@ -139,7 +140,7 @@ public:
 	      progress_("Diag."),
 	      quantumSector_(quantumSector),
 	      wft_(waveFunctionTransformation),
-	      oldEnergy_(0)
+	      oldEnergy_(oldEnergy)
 	{}
 
 	//!PTEX_LABEL{Diagonalization}

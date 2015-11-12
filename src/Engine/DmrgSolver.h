@@ -156,8 +156,14 @@ public:
 	                          model_.hilbertSize(0),
 	                          parameters_.useReflectionSymmetry,
 	                          EXPAND_SYSTEM),
-	      diagonalization_(parameters_,model,verbose_,
-	                       reflectionOperator_,ioIn,quantumSector_,wft_),
+	      diagonalization_(parameters_,
+	                       model,
+	                       verbose_,
+	                       reflectionOperator_,
+	                       ioIn,
+	                       quantumSector_,
+	                       wft_,
+	                       checkpoint_.energy()),
 	      truncate_(reflectionOperator_,wft_,parameters_,verbose_),
 	      energy_(0.0)
 	{

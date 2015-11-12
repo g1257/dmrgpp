@@ -116,11 +116,17 @@ public:
 	                SYSTEM_STACK_STRING+parameters_.filename,enabled_),
 	    envDisk_(ENVIRON_STACK_STRING+parameters_.checkpoint.filename,
 	             ENVIRON_STACK_STRING+parameters_.filename,enabled_),
-	    progress_("Checkpoint")
+	    progress_("Checkpoint"),
+	    energyFromFile_(0.0)
 	{
 		checkFiniteLoops(totalSites,ioIn);
 
 		if (!enabled_) return;
+
+		{
+			IoType::In ioIn2(parameters_.checkpoint.filename);
+			ioIn2.readline(energyFromFile_,"#Energy=",IoType::In::LAST_INSTANCE);
+		}
 
 		loadStacksDiskToMemory();
 	}
@@ -203,6 +209,8 @@ public:
 	}
 
 	const ParametersType& parameters() const { return parameters_; }
+
+	const RealType& energy() const { return energyFromFile_; }
 
 private:
 
@@ -346,6 +354,7 @@ private:
 	MemoryStackType systemStack_,envStack_; // <--we're the owner
 	DiskStackType systemDisk_,envDisk_;
 	PsimagLite::ProgressIndicator progress_;
+	RealType energyFromFile_;
 }; // class Checkpoint
 } // namespace Dmrg
 
