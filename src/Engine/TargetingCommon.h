@@ -184,6 +184,16 @@ public:
 		return std::real(v*v);
 	}
 
+	void normalizeTimeVectors()
+	{
+		SizeType total =  applyOpExpression_.targetVectors().size();
+		for (SizeType i = 0; i < total; ++i) {
+			RealType factor = normSquared(i);
+			factor = 1.0/sqrt(factor);
+			applyOpExpression_.multiplyTimeVector(i,factor);
+		}
+	}
+
 	template<typename IoOutputType>
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
 	          IoOutputType& io,

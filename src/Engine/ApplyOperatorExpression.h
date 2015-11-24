@@ -307,6 +307,11 @@ public:
 			targetVectors_[i] = serializer.vector(i);
 	}
 
+	void multiplyTimeVector(SizeType i,RealType factor)
+	{
+		targetVectors_[i] = factor*targetVectors_[i];
+	}
+
 	void calcTimeVectors(const PairType& startEnd,
 	                     RealType Eg,
 	                     const VectorWithOffsetType& phi,

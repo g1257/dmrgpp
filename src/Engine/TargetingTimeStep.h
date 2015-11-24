@@ -218,8 +218,13 @@ public:
 		                               block1);
 
 		cocoon(direction,block1); // in-situ
-		printEnergies(); // in-situ
+        printEnergies(); // in-situ
+        bool normalizeTimeVectors = (this->model().params().options.
+                                     find("normalizeTimeVectors") != std::string::npos);
+        if (normalizeTimeVectors)
+            this->common().normalizeTimeVectors();
 		printNormsAndWeights();
+
 	}
 
 	void load(const PsimagLite::String& f)
