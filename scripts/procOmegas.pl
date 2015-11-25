@@ -214,11 +214,13 @@ sub correctionVectorRead
 		my $input = $inFile;
 		$input =~s/runFor//;
 		$input =~s/\.cout/\.inp/;
-		open(FIN,"./toolboxdmrg -f $input -a grep -E \"\" 2>/dev/null |")
+		open(FIN,"./toolboxdmrg -f $input -a grep -E \"<\" 2>/dev/null |")
 		or die "$0: Cannot open pipe : $!\n";
 	}
-
-	my $maxSite = correctionVectorReadOpen($v1,$v2,$inFile,\*FIN);
+	
+	my $maxSite = 0;
+	
+	$maxSite = correctionVectorReadOpen($v1,$v2,$inFile,\*FIN);
 	close(FIN);
 	$maxSite++;
 
@@ -264,7 +266,10 @@ sub correctionVectorWrite
 	for (my $i = 0; $i < $maxSite; ++$i) {
 		my $vv1 = $v1->[$i];
 		my $vv2 = $v2->[$i];
-		defined($vv1) or die "$0: Undefined value for site = $i and omega = $omega\n";
+		if (!defined($vv1)) { 
+			print STDERR "$0: Undefined value for site = $i and omega = $omega\n";
+			$vv1 = $vv2 = 0.0;
+		}
 		print FOUT "$i $vv1 $vv2\n";
 	}
 
