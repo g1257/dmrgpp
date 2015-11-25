@@ -76,7 +76,7 @@ for (my $i = 0; $i < $times; ++$i) {
 			$vali = $val->[1];
 		}
 
-		print "$valr $vali ";
+		printf("%.6f %.3f ",$valr, $vali);
 	}
 
 	print "\n";
@@ -119,5 +119,12 @@ sub isAnInteger
 	return 0 if (!defined($t));
 	return 1 if ($t=~/^[0-9]+$/);
 	return 0;
+}
+
+sub divide
+{
+	my ($realAndImag, $divisor) = @_;
+	$realAndImag->[0] /= $divisor;
+	$realAndImag->[1] /= $divisor;
 }
 
