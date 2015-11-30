@@ -220,8 +220,6 @@ public:
 			}
 		}
 
-		assert(creationMatrix.size() == 2);
-
 		setLambdaMatrices(creationMatrix,block);
 	}
 
@@ -261,8 +259,9 @@ public:
 	                     VectorSizeType& q,
 	                     const VectorSizeType& block) const
 	{
-		assert(block.size()==1);
+		SizeType n = block.size();
 		HilbertState total = hilbertSize(0);
+		total = pow(total,n);
 
 		HilbertBasisType basisTmp;
 		for (HilbertState a=0;a<total;a++) basisTmp.push_back(a);
@@ -295,7 +294,6 @@ public:
 	                                RealType factorForDiagonals=1.0) const
 	{
 		SizeType n=block.size();
-		assert(block.size() == 1);
 		VectorSparseMatrixType cm;
 		findAllMatrices(cm,block);
 		for (SizeType i=0;i<n;i++) {
@@ -323,22 +321,26 @@ private:
 	{
 		VectorSparseMatrixType vm;
 		findAllMatrices(vm,block);
+		SizeType dof = 2*ORBITALS;
 
-		typename OperatorType::Su2RelatedType su2related;
-		for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
-			SizeType spin2 = 1 - spin1;
-			SparseMatrixType lambda;
-			multiply(lambda,vm[0+spin1*ORBITALS],vm[1+spin2*ORBITALS]);
-			MatrixType dlambda;
-			crsMatrixToFullMatrix(dlambda,lambda);
-			correctLambda(dlambda,spin1,vm);
+		for (SizeType i = 0; i < block.size(); ++i) {
+			typename OperatorType::Su2RelatedType su2related;
+			for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
+				SizeType spin2 = 1 - spin1;
+				SparseMatrixType lambda;
+				assert(1+spin2*ORBITALS+i*dof < vm.size());
+				multiply(lambda,vm[0+spin1*ORBITALS+i*dof],vm[1+spin2*ORBITALS+i*dof]);
+				MatrixType dlambda;
+				crsMatrixToFullMatrix(dlambda,lambda);
+				correctLambda(dlambda,spin1,vm);
 
-			OperatorType myOp(SparseMatrixType(dlambda),
+				OperatorType myOp(SparseMatrixType(dlambda),
 			                  1,
 			                  typename OperatorType::PairType(0,0),
 			                  1,
 			                  su2related);
-			cm.push_back(myOp);
+				cm.push_back(myOp);
+			}
 		}
 	}
 
@@ -448,10 +450,12 @@ private:
 		HilbertBasisType natBasis;
 		VectorSizeType q;
 		setNaturalBasis(natBasis,q,block);
-		for (SizeType sigma = 0; sigma < 2*ORBITALS; ++sigma) {
-			MatrixType m;
-			findOperatorMatrices(m,0,sigma,natBasis);
-			vm.push_back(SparseMatrixType(m));
+		for (SizeType i = 0; i < block.size(); ++i) {
+			for (SizeType sigma = 0; sigma < 2*ORBITALS; ++sigma) {
+				MatrixType m;
+				findOperatorMatrices(m,0,sigma,natBasis);
+				vm.push_back(SparseMatrixType(m));
+			}
 		}
 	}
 
