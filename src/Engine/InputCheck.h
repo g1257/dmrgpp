@@ -266,7 +266,7 @@ public:
 		for (SizeType i = 0;i<totalTargets;++i) {
 			if (options.find(targets[i])!=PsimagLite::String::npos) {
 				if (targetting == "AdaptiveDynamicTargetting" &&
-				        std::string(targets[i]) == "DynamicTargetting") continue;
+				    std::string(targets[i]) == "DynamicTargetting") continue;
 				targetting = targets[i];
 				count++;
 			}

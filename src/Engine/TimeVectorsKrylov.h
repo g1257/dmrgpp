@@ -146,8 +146,8 @@ public:
 	      wft_(wft),
 	      lrs_(lrs),
 	      E0_(E0),
-          ioIn_(ioIn),
-          timeHasAdvanced_(true)
+	      ioIn_(ioIn),
+	      timeHasAdvanced_(true)
 	{}
 
 	virtual void calcTimeVectors(const PairType& startEnd,
@@ -163,19 +163,19 @@ public:
 			return;
 		}
 
-        bool returnEarly = true;
+		bool returnEarly = true;
 
-	for (SizeType i = 0; i < targetVectors_.size(); ++i) {
-		if (targetVectors_[i].size() == 0) {
-			returnEarly = false;
-			break;
+		for (SizeType i = 0; i < targetVectors_.size(); ++i) {
+			if (targetVectors_[i].size() == 0) {
+				returnEarly = false;
+				break;
+			}
 		}
-	}
 
-	assert(0 < targetVectors_.size());
-	targetVectors_[0] = phi;
-        if (timeHasAdvanced_) returnEarly = false;
-        if (returnEarly) return;
+		assert(0 < targetVectors_.size());
+		targetVectors_[0] = phi;
+		if (timeHasAdvanced_) returnEarly = false;
+		if (returnEarly) return;
 
 		VectorMatrixFieldType V(phi.sectors());
 		VectorMatrixFieldType T(phi.sectors());
@@ -192,14 +192,13 @@ public:
 		calcTargetVectors(startEnd,phi,T,V,Eg,eigs,steps,systemOrEnviron);
 
 		//checkNorms();
-        timeHasAdvanced_ = false;
+		timeHasAdvanced_ = false;
 	}
 
-
-    void timeHasAdvanced()
-    {
-        timeHasAdvanced_ = true;
-    }
+	void timeHasAdvanced()
+	{
+		timeHasAdvanced_ = true;
+	}
 
 private:
 
@@ -342,8 +341,9 @@ private:
 	const LeftRightSuperType& lrs_;
 	const RealType& E0_;
 	InputValidatorType& ioIn_;
-    bool timeHasAdvanced_;
+	bool timeHasAdvanced_;
 }; //class TimeVectorsKrylov
 } // namespace Dmrg
 /*@}*/
 #endif
+
