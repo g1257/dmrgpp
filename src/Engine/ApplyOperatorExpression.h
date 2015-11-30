@@ -506,27 +506,48 @@ private:
 			msg<<"I'm calling the WFT now";
 			progress_.printline(msg,std::cout);
 
-			if (targetHelper_.tstStruct().aOperators().size() == 1) {
-				guessPhiSectors(phiNew,i,systemOrEnviron,site);
-			} else {
-				if (targetHelper_.tstStruct().useQns())
-					phiNew.populateFromQns(nonZeroQns_,targetHelper_.lrs().super());
-				else
-					phiNew.populateSectors(targetHelper_.lrs().super());
-			}
+            wftOneVector(phiNew,i,site,systemOrEnviron,advance,true);
 
-			// OK, now that we got the partition number right, let's wft:
-			VectorSizeType nk(1,targetHelper_.model().hilbertSize(site));
-			targetHelper_.wft().setInitialVector(phiNew,
-			                                     targetVectors_[advance],
-			                                     targetHelper_.lrs(),
-			                                     nk);
-			phiNew.collapseSectors();
+            if (advance == indexNoAdvance_) {
+                for (SizeType index = 0; index < targetVectors_.size(); ++index) {
+                    if (index == advance) continue;
+                    VectorWithOffsetType phiNew2 = phiNew;
+                    wftOneVector(phiNew2,i,site,systemOrEnviron,index,false);
+                    targetVectors_[index] = phiNew2;
+                }
+            }
 
 		} else {
 			throw PsimagLite::RuntimeError("computePhi\n");
 		}
 	}
+
+    void wftOneVector(VectorWithOffsetType& phiNew,
+                      SizeType i,
+                      SizeType site,
+                      SizeType systemOrEnviron,
+                      SizeType index,
+	              bool guessNonZeroSector)
+    {
+	if (guessNonZeroSector) {
+        	if (targetHelper_.tstStruct().aOperators().size() == 1) {
+            		guessPhiSectors(phiNew,i,systemOrEnviron,site);
+        	} else {
+            		if (targetHelper_.tstStruct().useQns())
+                		phiNew.populateFromQns(nonZeroQns_,targetHelper_.lrs().super());
+            		else
+                		phiNew.populateSectors(targetHelper_.lrs().super());
+        	}
+	}
+
+        // OK, now that we got the partition number right, let's wft:
+        VectorSizeType nk(1,targetHelper_.model().hilbertSize(site));
+        targetHelper_.wft().setInitialVector(phiNew,
+                                             targetVectors_[index],
+                                             targetHelper_.lrs(),
+                                             nk);
+        phiNew.collapseSectors();
+    }
 
 	void guessPhiSectors(VectorWithOffsetType& phi,
 	                     SizeType i,

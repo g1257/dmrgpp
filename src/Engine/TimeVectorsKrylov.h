@@ -146,7 +146,8 @@ public:
 	      wft_(wft),
 	      lrs_(lrs),
 	      E0_(E0),
-	      ioIn_(ioIn)
+          ioIn_(ioIn),
+          timeHasAdvanced_(true)
 	{}
 
 	virtual void calcTimeVectors(const PairType& startEnd,
@@ -161,6 +162,20 @@ public:
 				targetVectors_[i]=phi;
 			return;
 		}
+
+        bool returnEarly = true;
+
+	for (SizeType i = 0; i < targetVectors_.size(); ++i) {
+		if (targetVectors_[i].size() == 0) {
+			returnEarly = false;
+			break;
+		}
+	}
+
+	assert(0 < targetVectors_.size());
+	targetVectors_[0] = phi;
+        if (timeHasAdvanced_) returnEarly = false;
+        if (returnEarly) return;
 
 		VectorMatrixFieldType V(phi.sectors());
 		VectorMatrixFieldType T(phi.sectors());
@@ -177,7 +192,14 @@ public:
 		calcTargetVectors(startEnd,phi,T,V,Eg,eigs,steps,systemOrEnviron);
 
 		//checkNorms();
+        timeHasAdvanced_ = false;
 	}
+
+
+    void timeHasAdvanced()
+    {
+        timeHasAdvanced_ = true;
+    }
 
 private:
 
@@ -191,8 +213,6 @@ private:
 	                       typename PsimagLite::Vector<SizeType>::Type steps,
 	                       SizeType)
 	{
-		assert(0 < targetVectors_.size());
-		targetVectors_[0] = phi;
 		for (SizeType i=startEnd.first+1;i<startEnd.second;i++) {
 			assert(i<targetVectors_.size());
 			targetVectors_[i] = phi;
@@ -322,6 +342,7 @@ private:
 	const LeftRightSuperType& lrs_;
 	const RealType& E0_;
 	InputValidatorType& ioIn_;
+    bool timeHasAdvanced_;
 }; //class TimeVectorsKrylov
 } // namespace Dmrg
 /*@}*/

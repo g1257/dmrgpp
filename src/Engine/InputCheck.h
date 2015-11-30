@@ -216,6 +216,7 @@ public:
 		registerOpts.push_back("tarDisable");
 		registerOpts.push_back("tarNoDelete");
 		registerOpts.push_back("recoveryNoDelete");
+		registerOpts.push_back("normalizeTimeVectors");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);
