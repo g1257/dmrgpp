@@ -175,7 +175,7 @@ public:
 		assert(0 < targetVectors_.size());
 		targetVectors_[0] = phi;
 		if (timeHasAdvanced_) returnEarly = false;
-		if (returnEarly) return;
+		if (returnEarly && ProgramGlobals::TST_FAST) return;
 
 		VectorMatrixFieldType V(phi.sectors());
 		VectorMatrixFieldType T(phi.sectors());

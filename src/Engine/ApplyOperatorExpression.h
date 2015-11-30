@@ -508,7 +508,7 @@ private:
 
 			wftOneVector(phiNew,i,site,systemOrEnviron,advance,true);
 
-			if (advance == indexNoAdvance_) {
+			if (advance == indexNoAdvance_ && ProgramGlobals::TST_FAST) {
 				for (SizeType index = 0; index < targetVectors_.size(); ++index) {
 					if (index == advance) continue;
 					VectorWithOffsetType phiNew2 = phiNew;
