@@ -165,15 +165,20 @@ public:
 		return ret;
 	}
 
-	//! Number of electrons with spin spin (sums over bands)
+	//! Number of electrons with spin spin (sums over bands and sites)
 	static int electronsWithGivenSpin(Word const &data,SizeType spin)
 	{
 		SizeType sum=0;
-		SizeType beginX=spin*orbitals_;
-		SizeType endX=beginX + orbitals_;
-
-		for (SizeType x=beginX;x<endX;x++)
-			sum += getNofDigits(data,x);
+		Word data2 = data;
+		SizeType digit = 0;
+		while (data2 > 0) {
+			SizeType sigma = digit % (2*orbitals_);
+			SizeType spin2 = static_cast<SizeType>(sigma/orbitals_);
+			Word thisbit = (data2 & 1);
+			data2 >>= 1;
+			digit++;
+			if (spin == spin2) sum += thisbit;
+		}
 
 		return sum;
 

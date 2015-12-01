@@ -453,7 +453,7 @@ private:
 		for (SizeType i = 0; i < block.size(); ++i) {
 			for (SizeType sigma = 0; sigma < 2*ORBITALS; ++sigma) {
 				MatrixType m;
-				findOperatorMatrices(m,0,sigma,natBasis);
+				findOperatorMatrices(m,i,sigma,natBasis);
 				vm.push_back(SparseMatrixType(m));
 			}
 		}
