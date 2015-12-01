@@ -373,7 +373,6 @@ private:
 	{
 		VectorSizeType iperm;
 		suzukiTrotterPerm(iperm,block);
-
 		const LeftRightSuperType& oldLrs = lrs_;
 		SizeType hilbertSize = model_.hilbertSize(block[0]);
 		SizeType ns = lrs_.left().size();
@@ -393,7 +392,7 @@ private:
 			packLeft.unpack(x1,x2p,lrs_.left().permutation(xp));
 			SizeType x2pmodif = iperm1_[x2p];
 			int yfull = transformT1.getColOrExit(k);
-			if (yfull<0) continue;
+			if (yfull<0) yfull = yp;
 			SizeType y1p=0,y2=0;
 			packRight.unpack(y1p,y2,oldLrs.right().permutation(yfull));
 			SizeType y1pmodif = iperm1_[y1p];
@@ -408,7 +407,7 @@ private:
 					     k2<transform1.getRowPtr(yfull2+1);
 					     k2++) {
 						int y = transform1.getColOrExit(k2);
-						if (y<0) continue;
+						if (y<0) y = yfull2;
 						SizeType x = packLeft.pack(x1,
 						                           x2,
 						                           lrs_.left().permutationInverse());
@@ -416,9 +415,10 @@ private:
 						                            y,
 						                            lrs_.super().permutationInverse());
 						ComplexOrRealType tmp = m(iperm[x2modif+y1modif*hilbertSize],
-						        iperm[x2pmodif+y1pmodif*hilbertSize]);
+						                          iperm[x2pmodif+y1pmodif*hilbertSize]);
 						if (std::norm(tmp)<1e-12) continue;
-						assert(j>=offset && j<offset+phi0.size());
+						if (j<offset || j >= offset+phi0.size())
+							throw PsimagLite::RuntimeError("j out of bounds\n");
 						result[j-offset] += tmp*phi0[i]*transformT1.getValue(k)*
 						        transform1.getValue(k2);
 					}
@@ -459,7 +459,7 @@ private:
 
 		for (SizeType k=transformT1.getRowPtr(xp);k<transformT1.getRowPtr(xp+1);k++) {
 			int xfull = transformT1.getColOrExit(k);
-			if (xfull<0) continue;
+			if (xfull<0) xfull = xp;
 			SizeType x1=0,x2p=0;
 			packLeft.unpack(x1,x2p,oldLrs.left().permutation(xfull));
 			assert(x2p<hilbertSize);
@@ -478,7 +478,7 @@ private:
 					     k2<transform1.getRowPtr(xfull2+1);
 					     k2++) {
 						int x = transform1.getColOrExit(k2);
-						if (x<0) continue;
+						if (x<0) x = xfull2;
 						SizeType y = packRight.pack(y1,
 						                            y2,
 						                            lrs_.right().permutationInverse());
@@ -490,7 +490,9 @@ private:
 						ComplexOrRealType tmp = m(iperm[x2modif+y1modif*hilbertSize],
 						        iperm[x2pmodif+y1pmodif*hilbertSize]);
 						if (std::norm(tmp)<1e-12) continue;
-						assert(j>=offset && j<offset+phi0.size());
+						if (j < offset || j >= offset+phi0.size())
+							throw PsimagLite::RuntimeError("j out of bounds (environ)\n");
+						
 						result[j-offset] += tmp*phi0[i]*transformT1.getValue(k)*
 						        transform1.getValue(k2);
 					}
@@ -535,7 +537,8 @@ private:
 		}
 		model_.hamiltonianOnLink(hmatrix,block,currentTime_,factorForDiagonals);
 		crsMatrixToFullMatrix(m,hmatrix);
-		assert(isHermitian(m));
+		if (!isHermitian(m))
+			throw PsimagLite::RuntimeError("ST matrix not hermitian\n");
 		m *= (-time);
 		exp(m);
 	}
