@@ -130,7 +130,6 @@ public:
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
 	static const int SPIN_DOWN=HilbertSpaceFeAsType::SPIN_DOWN;
-	static SizeType const REINTERPRET  = 1;
 
 	ModelFeBasedSc(const SolverParamsType& solverParams,
 	               InputValidatorType& io,
@@ -143,8 +142,16 @@ public:
 	      geometryDca_(geometry,modelParameters_.orbitals),
 	      spinSquared_(spinSquaredHelper_,
 	                   modelParameters_.orbitals,
-	                   2*modelParameters_.orbitals)
+	                   2*modelParameters_.orbitals),
+		reinterpret_(true)
 	{
+		PsimagLite::String tspAlgo = "";
+		try {
+			io.readline(tspAlgo,"TSPAlgorithm=");
+		} catch (std::exception&) {}
+
+		if (tspAlgo == "SuzukiTrotter") reinterpret_ = false;
+
 		if (modelParameters_.potentialV.size() !=
 		    2*modelParameters_.orbitals*geometry.numberOfSites()) {
 			PsimagLite::String str(__FILE__);
@@ -409,8 +416,7 @@ public:
 	                     VectorSizeType& q,
 	                     const VectorSizeType& block) const
 	{
-		assert(block.size()==1);
-		int sitesTimesDof=2*modelParameters_.orbitals;
+		int sitesTimesDof=2*modelParameters_.orbitals*block.size();
 		HilbertState total = (1<<sitesTimesDof);
 
 		HilbertBasisType basisTmp;
@@ -539,7 +545,7 @@ private:
 			}
 		}
 
-		if (REINTERPRET && modelParameters_.orbitals==2) reinterpret(cm,natBasis);
+		if (reinterpret_ && modelParameters_.orbitals==2) reinterpret(cm,natBasis);
 
 		SparseMatrixType temp;
 		fullMatrixToCrsMatrix(temp,cm);
@@ -557,9 +563,6 @@ private:
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
-		if (n!=1)
-			PsimagLite::RuntimeError("setSymmetryRelated() implemented for n=1 only\n");
-
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
 		// note: we use m+j instead of m
@@ -574,7 +577,8 @@ private:
 		VectorSizeType electronsUp(basis.size());
 		VectorSizeType electronsDown(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {
-			PairType jmpair = calcJmvalue<PairType>(basis[i]);
+			PairType jmpair(0,0);
+			if (n == 1) jmpair = calcJmvalue<PairType>(basis[i]);
 
 			jmvalues.push_back(jmpair);
 
@@ -1258,6 +1262,7 @@ private:
 	SpinSquaredHelper<RealType,HilbertState> spinSquaredHelper_;
 	//serializr normal spinSquared_
 	SpinSquared<SpinSquaredHelper<RealType,HilbertState> > spinSquared_;
+	bool reinterpret_;
 	//serializr normal statesPerSite_
 	SizeType statesPerSite_;
 }; //class ModelFeBasedSc

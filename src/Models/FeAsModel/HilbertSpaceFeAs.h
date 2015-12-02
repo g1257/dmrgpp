@@ -213,10 +213,18 @@ public:
 	static int calcNofElectrons(Word const &ket,SizeType sector)
 	{
 		SizeType dofs = 2*orbitals_;
-		Word m=0;
-		for (SizeType k=0;k<dofs;k++) m |= (1<<k);
-		m = m & ket;
-		return getNofDigits(m,sector);
+		Word ket2 = ket;
+		SizeType digit = 0;
+		int sum = 0;
+		while (ket2 > 0) {
+			SizeType sector2 = digit % dofs;
+			SizeType thisbit = (ket2 & 1);
+			if (sector == sector2) sum += thisbit;
+			digit++;
+			ket2 >>= 1;
+		}
+
+		return sum;
 	}
 
 }; // class HilbertSpaceFeAs
