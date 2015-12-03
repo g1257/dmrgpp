@@ -332,7 +332,7 @@ private:
 				multiply(lambda,vm[0+spin1*ORBITALS+i*dof],vm[1+spin2*ORBITALS+i*dof]);
 				MatrixType dlambda;
 				crsMatrixToFullMatrix(dlambda,lambda);
-				correctLambda(dlambda,spin1,vm);
+				correctLambda(dlambda,i,spin1,vm);
 
 				OperatorType myOp(SparseMatrixType(dlambda),
 			                  1,
@@ -345,12 +345,13 @@ private:
 	}
 
 	void correctLambda(MatrixType& dlambda,
+	                   SizeType siteIndex,
 	                   SizeType spin1,
 	                   VectorSparseMatrixType& vm) const
 	{
 		SizeType n = dlambda.n_row();
 		MatrixType corrector(n,n);
-		computeCorrector(corrector,spin1,vm);
+		computeCorrector(corrector,siteIndex,spin1,vm);
 
 		MatrixType dlambda2 = dlambda;
 
@@ -358,12 +359,14 @@ private:
 	}
 
 	void computeCorrector(MatrixType& corrector,
+	                      SizeType siteIndex,
 	                      SizeType spin1,
 	                      VectorSparseMatrixType& vm) const
 	{
+		SizeType dofs = 2*ORBITALS;
 		SizeType spin2 = 1 - spin1;
-		SparseMatrixType cm1(vm[0+spin2*ORBITALS]);
-		SparseMatrixType cm2(vm[1+spin1*ORBITALS]);
+		SparseMatrixType cm1(vm[0+spin2*ORBITALS+siteIndex*dofs]);
+		SparseMatrixType cm2(vm[1+spin1*ORBITALS+siteIndex*dofs]);
 		SparseMatrixType n1 = n(cm1);
 		SparseMatrixType n2 = n(cm2);
 		MatrixType dn1;
@@ -470,9 +473,6 @@ private:
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
-		if (n!=1)
-			PsimagLite::RuntimeError("setSymmetryRelated() implemented for n=1 only\n");
-
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
 		// note: we use m+j instead of m
