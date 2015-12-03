@@ -145,20 +145,7 @@ public:
 	      E0_(E0),
 	      nonZeroQns_(nonZeroQns),
 	      twoSiteDmrg_(wft_.twoSiteDmrg())
-	{
-		VectorSizeType block(1,0);
-		typename ModelType::HilbertBasisType  basis;
-		VectorSizeType q;
-		model_.setNaturalBasis(basis,q,block);
-		iperm1_.resize(basis.size());
-		for (SizeType i=0;i<basis.size();i++) {
-			iperm1_[i] = i;
-			/*SizeType ket = basis[i];
-			int jj = PsimagLite::isInVector(basis,ket);
-			assert(jj>=0);
-			iperm1_[ket] = jj;*/
-		}
-	}
+	{}
 
 	virtual void calcTimeVectors(const PairType& startEnd,
 	                             RealType Eg,
@@ -320,13 +307,13 @@ private:
 
 		SizeType hilbertSize = model_.hilbertSize(block[0]);
 		if (systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM &&
-		        lrs_.right().size()==hilbertSize) {
+		    lrs_.right().size()==hilbertSize) {
 			transformE.makeDiagonal(hilbertSize,1);
 			transformET.makeDiagonal(hilbertSize,1);
 		}
 
 		if (systemOrEnviron==ProgramGlobals::EXPAND_ENVIRON &&
-		        lrs_.left().size()==hilbertSize) {
+		    lrs_.left().size()==hilbertSize) {
 			transformS.makeDiagonal(hilbertSize,1);
 			transformST.makeDiagonal(hilbertSize,1);
 		}
@@ -393,16 +380,12 @@ private:
 		for (SizeType k=transformT1.getRowPtr(yp);k<transformT1.getRowPtr(yp+1);k++) {
 			SizeType x1=0,x2p=0;
 			packLeft.unpack(x1,x2p,lrs_.left().permutation(xp));
-			SizeType x2pmodif = iperm1_[x2p];
 			int yfull = transformT1.getColOrExit(k);
 			if (yfull<0) yfull = yp;
 			SizeType y1p=0,y2=0;
 			packRight.unpack(y1p,y2,oldLrs.right().permutation(yfull));
-			SizeType y1pmodif = iperm1_[y1p];
 			for (SizeType x2=0;x2<hilbertSize;x2++) {
-				SizeType x2modif = iperm1_[x2];
 				for (SizeType y1=0;y1<hilbertSize;y1++) {
-					SizeType y1modif = iperm1_[y1];
 					SizeType yfull2 = packRight.pack(y1,
 					                                 y2,
 					                                 oldLrs.right().permutationInverse());
@@ -417,8 +400,8 @@ private:
 						SizeType j = packSuper.pack(x,
 						                            y,
 						                            lrs_.super().permutationInverse());
-						ComplexOrRealType tmp = m(iperm[x2modif+y1modif*hilbertSize],
-						                          iperm[x2pmodif+y1pmodif*hilbertSize]);
+						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],
+						        iperm[x2p+y1p*hilbertSize]);
 						if (std::norm(tmp)<1e-12) continue;
 						if (j<offset || j >= offset+phi0.size())
 							throw PsimagLite::RuntimeError("j out of bounds\n");
@@ -466,14 +449,10 @@ private:
 			SizeType x1=0,x2p=0;
 			packLeft.unpack(x1,x2p,oldLrs.left().permutation(xfull));
 			assert(x2p<hilbertSize);
-			SizeType x2pmodif = iperm1_[x2p];
 			SizeType y1p=0,y2=0;
 			packRight.unpack(y1p,y2,lrs_.right().permutation(yp));
-			SizeType y1pmodif = iperm1_[y1p];
 			for (SizeType x2=0;x2<hilbertSize;x2++) {
-				SizeType x2modif = iperm1_[x2];
 				for (SizeType y1=0;y1<hilbertSize;y1++) {
-					SizeType y1modif = iperm1_[y1];
 					SizeType xfull2 = packLeft.pack(x1,
 					                                x2,
 					                                oldLrs.left().permutationInverse());
@@ -490,12 +469,12 @@ private:
 						                            lrs_.super().permutationInverse());
 
 
-						ComplexOrRealType tmp = m(iperm[x2modif+y1modif*hilbertSize],
-						        iperm[x2pmodif+y1pmodif*hilbertSize]);
+						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],
+						        iperm[x2p+y1p*hilbertSize]);
 						if (std::norm(tmp)<1e-12) continue;
 						if (j < offset || j >= offset+phi0.size())
 							throw PsimagLite::RuntimeError("j out of bounds (environ)\n");
-						
+
 						result[j-offset] += tmp*phi0[i]*transformT1.getValue(k)*
 						        transform1.getValue(k2);
 					}
@@ -516,7 +495,7 @@ private:
 		model_.setNaturalBasis(basis1,q1,block1);
 		iperm.resize(basis.size());
 		assert(basis1.size() > 0);
-		SizeType bitnumber = log2OfInteger(basis1.size()-1); 
+		SizeType bitnumber = log2OfInteger(basis1.size()-1);
 		for (SizeType i=0;i<basis1.size();i++) {
 			for (SizeType j=0;j<basis1.size();j++) {
 				HilbertStateType ket = basis1[i];
@@ -562,9 +541,7 @@ private:
 		}
 		model_.hamiltonianOnLink(hmatrix,block,currentTime_,factorForDiagonals);
 		crsMatrixToFullMatrix(m,hmatrix);
-		if (!isHermitian(m))
-			throw PsimagLite::RuntimeError("ST matrix not hermitian\n");
-		matrix_ = m;
+		assert(isHermitian(m));
 		m *= (-time);
 		exp(m);
 	}
@@ -609,8 +586,6 @@ private:
 	const VectorSizeType* nonZeroQns_;
 	bool twoSiteDmrg_;
 	VectorSizeType linksSeen_;
-	VectorSizeType iperm1_;
-	mutable MatrixComplexOrRealType matrix_;
 }; //class TimeVectorsSuzukiTrotter
 } // namespace Dmrg
 /*@}*/
