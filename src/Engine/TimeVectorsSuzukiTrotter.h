@@ -120,6 +120,8 @@ class TimeVectorsSuzukiTrotter : public  TimeVectorsBase<
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type
 	VectorVectorWithOffsetType;
+	typedef typename ModelType::HilbertBasisType HilbertBasisType;
+	typedef typename ModelType::HilbertBasisType::value_type HilbertStateType;
 
 public:
 
@@ -150,10 +152,11 @@ public:
 		model_.setNaturalBasis(basis,q,block);
 		iperm1_.resize(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {
-			SizeType ket = basis[i];
+			iperm1_[i] = i;
+			/*SizeType ket = basis[i];
 			int jj = PsimagLite::isInVector(basis,ket);
 			assert(jj>=0);
-			iperm1_[ket] = jj;
+			iperm1_[ket] = jj;*/
 		}
 	}
 
@@ -504,16 +507,38 @@ private:
 	void suzukiTrotterPerm(VectorSizeType& iperm,
 	                       const VectorSizeType& block) const
 	{
-		typename ModelType::HilbertBasisType  basis;
+		HilbertBasisType  basis;
 		VectorSizeType q;
 		model_.setNaturalBasis(basis,q,block);
+		HilbertBasisType  basis1;
+		VectorSizeType q1;
+		VectorSizeType block1(1,0);
+		model_.setNaturalBasis(basis1,q1,block1);
 		iperm.resize(basis.size());
-		for (SizeType i=0;i<basis.size();i++) {
-			SizeType ket = basis[i];
-			int jj = PsimagLite::isInVector(basis,ket);
-			assert(jj>=0);
-			iperm[ket] = jj;
+		assert(basis1.size() > 0);
+		SizeType bitnumber = log2OfInteger(basis1.size()-1); 
+		for (SizeType i=0;i<basis1.size();i++) {
+			for (SizeType j=0;j<basis1.size();j++) {
+				HilbertStateType ket = basis1[i];
+				HilbertStateType ket2 = basis1[j];
+				ket2 <<= bitnumber;
+				ket |= ket2;
+				assert(ket < basis.size());
+				assert(i+j*basis1.size() < iperm.size());
+				iperm[i+j*basis1.size()] = PsimagLite::isInVector(basis,ket);
+			}
 		}
+	}
+
+	SizeType log2OfInteger(SizeType x) const
+	{
+		SizeType counter = 0;
+		while (x) {
+			counter++;
+			x >>= 1;
+		}
+
+		return counter;
 	}
 
 	void getMatrix(MatrixComplexOrRealType& m,
@@ -539,6 +564,7 @@ private:
 		crsMatrixToFullMatrix(m,hmatrix);
 		if (!isHermitian(m))
 			throw PsimagLite::RuntimeError("ST matrix not hermitian\n");
+		matrix_ = m;
 		m *= (-time);
 		exp(m);
 	}
@@ -584,6 +610,7 @@ private:
 	bool twoSiteDmrg_;
 	VectorSizeType linksSeen_;
 	VectorSizeType iperm1_;
+	mutable MatrixComplexOrRealType matrix_;
 }; //class TimeVectorsSuzukiTrotter
 } // namespace Dmrg
 /*@}*/
