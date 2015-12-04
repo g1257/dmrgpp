@@ -449,6 +449,7 @@ private:
 				energyTmp = computeLevel(*lanczosOrDavidson,tmpVec,initialVector);
 			} catch (std::exception& e) {
 				PsimagLite::OstringStream msg0;
+				msg0<<e.what()<<"\n";
 				msg0<<"Lanczos or Davidson solver failed, ";
 				msg0<<"trying with exact diagonalization...";
 				progress_.printline(msg0,std::cout);

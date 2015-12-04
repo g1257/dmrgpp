@@ -218,9 +218,9 @@ public:
 				                  su2related);
 				creationMatrix.push_back(myOp);
 			}
-		}
 
-		setLambdaMatrices(creationMatrix,block);
+			setLambdaMatrices(creationMatrix,i,natBasis);
+		}
 	}
 
 	MatrixType naturalOperator(const PsimagLite::String& what,
@@ -294,14 +294,16 @@ public:
 	                                RealType factorForDiagonals=1.0) const
 	{
 		SizeType n=block.size();
-		VectorSparseMatrixType cm;
-		findAllMatrices(cm,block);
+		HilbertBasisType natBasis;
+		VectorSizeType qvector;
+		setNaturalBasis(natBasis,qvector,block);
 		for (SizeType i=0;i<n;i++) {
-			addInteraction(hmatrix,cm,i,factorForDiagonals,block[i]);
+			VectorSparseMatrixType cm;
+			findAllMatrices(cm,i,natBasis);
+			addInteraction(hmatrix,cm,factorForDiagonals,block[i]);
 
 			addPotentialV(hmatrix,
 			              cm,
-			              i,
 			              block[i],
 			              factorForDiagonals);
 
@@ -317,41 +319,38 @@ private:
 
 	//! set creation matrices for sites in block
 	void setLambdaMatrices(VectorOperatorType& cm,
-	                       const BlockType& block) const
+	                       SizeType i,
+	                       const HilbertBasisType& natBasis) const
 	{
 		VectorSparseMatrixType vm;
-		findAllMatrices(vm,block);
-		SizeType dof = 2*ORBITALS;
+		findAllMatrices(vm,i,natBasis);
 
-		for (SizeType i = 0; i < block.size(); ++i) {
-			typename OperatorType::Su2RelatedType su2related;
-			for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
-				SizeType spin2 = 1 - spin1;
-				SparseMatrixType lambda;
-				assert(1+spin2*ORBITALS+i*dof < vm.size());
-				multiply(lambda,vm[0+spin1*ORBITALS+i*dof],vm[1+spin2*ORBITALS+i*dof]);
-				MatrixType dlambda;
-				crsMatrixToFullMatrix(dlambda,lambda);
-				correctLambda(dlambda,i,spin1,vm);
+		typename OperatorType::Su2RelatedType su2related;
+		for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
+			SizeType spin2 = 1 - spin1;
+			SparseMatrixType lambda;
+			assert(1+spin2*ORBITALS < vm.size());
+			multiply(lambda,vm[0+spin1*ORBITALS],vm[1+spin2*ORBITALS]);
+			MatrixType dlambda;
+			crsMatrixToFullMatrix(dlambda,lambda);
+			correctLambda(dlambda,spin1,vm);
 
-				OperatorType myOp(SparseMatrixType(dlambda),
+			OperatorType myOp(SparseMatrixType(dlambda),
 			                  1,
 			                  typename OperatorType::PairType(0,0),
 			                  1,
 			                  su2related);
-				cm.push_back(myOp);
-			}
+			cm.push_back(myOp);
 		}
 	}
 
 	void correctLambda(MatrixType& dlambda,
-	                   SizeType siteIndex,
 	                   SizeType spin1,
 	                   VectorSparseMatrixType& vm) const
 	{
 		SizeType n = dlambda.n_row();
 		MatrixType corrector(n,n);
-		computeCorrector(corrector,siteIndex,spin1,vm);
+		computeCorrector(corrector,spin1,vm);
 
 		MatrixType dlambda2 = dlambda;
 
@@ -359,14 +358,12 @@ private:
 	}
 
 	void computeCorrector(MatrixType& corrector,
-	                      SizeType siteIndex,
 	                      SizeType spin1,
 	                      VectorSparseMatrixType& vm) const
 	{
-		SizeType dofs = 2*ORBITALS;
 		SizeType spin2 = 1 - spin1;
-		SparseMatrixType cm1(vm[0+spin2*ORBITALS+siteIndex*dofs]);
-		SparseMatrixType cm2(vm[1+spin1*ORBITALS+siteIndex*dofs]);
+		SparseMatrixType cm1(vm[0+spin2*ORBITALS]);
+		SparseMatrixType cm2(vm[1+spin1*ORBITALS]);
 		SparseMatrixType n1 = n(cm1);
 		SparseMatrixType n2 = n(cm2);
 		MatrixType dn1;
@@ -448,17 +445,13 @@ private:
 	}
 
 	void findAllMatrices(VectorSparseMatrixType& vm,
-	                     const VectorSizeType& block) const
+	                     SizeType i,
+	                     const HilbertBasisType& natBasis) const
 	{
-		HilbertBasisType natBasis;
-		VectorSizeType q;
-		setNaturalBasis(natBasis,q,block);
-		for (SizeType i = 0; i < block.size(); ++i) {
-			for (SizeType sigma = 0; sigma < 2*ORBITALS; ++sigma) {
-				MatrixType m;
-				findOperatorMatrices(m,i,sigma,natBasis);
-				vm.push_back(SparseMatrixType(m));
-			}
+		for (SizeType sigma = 0; sigma < 2*ORBITALS; ++sigma) {
+			MatrixType m;
+			findOperatorMatrices(m,i,sigma,natBasis);
+			vm.push_back(SparseMatrixType(m));
 		}
 	}
 
@@ -516,14 +509,12 @@ private:
 
 	void addPotentialV(SparseMatrixType &hmatrix,
 	                   const VectorSparseMatrixType& cm,
-	                   SizeType i,
 	                   SizeType actualIndexOfSite,
 	                   RealType factorForDiagonals) const
 	{
 		SizeType orbital = 0;
-		int dof=2*ORBITALS;
-		SparseMatrixType nup = n(cm[orbital+SPIN_UP*ORBITALS+i*dof]);
-		SparseMatrixType ndown = n(cm[orbital+SPIN_DOWN*ORBITALS+i*dof]);
+		SparseMatrixType nup = n(cm[orbital+SPIN_UP*ORBITALS]);
+		SparseMatrixType ndown = n(cm[orbital+SPIN_DOWN*ORBITALS]);
 
 		SizeType linSize = geometry_.numberOfSites();
 
@@ -548,16 +539,14 @@ private:
 	//! Term is U[0]\sum_{\alpha}n_{i\alpha UP} n_{i\alpha DOWN}
 	void addInteraction(SparseMatrixType &hmatrix,
 	                    const VectorSparseMatrixType& cm,
-	                    SizeType i,
 	                    RealType factorForDiagonals,
 	                    SizeType actualSite) const
 	{
-		int dof = 4;
 		SparseMatrixType tmpMatrix,tmpMatrix2;
 
 		SizeType alpha = 0; // real sites, no ancilla
-		SparseMatrixType m1=cm[alpha+SPIN_UP*2+i*dof];
-		SparseMatrixType m2=cm[alpha+SPIN_DOWN*2+i*dof];
+		SparseMatrixType m1=cm[alpha+SPIN_UP*2];
+		SparseMatrixType m2=cm[alpha+SPIN_DOWN*2];
 
 		multiply(tmpMatrix,n(m1),n(m2));
 		assert(actualSite < modelParameters_.hubbardU.size());
