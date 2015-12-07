@@ -412,6 +412,7 @@ private:
 		jmSaved.first++;
 		jmSaved.second++;
 
+		bool isCanonical = (modelParameters_.targetQuantum.isCanonical);
 		VectorSizeType szPlusConst(basis.size());
 		VectorSizeType electrons(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {
@@ -419,7 +420,7 @@ private:
 			jmpair.first = modelParameters_.twiceTheSpin;
 			jmpair.second = basis[i];
 			jmvalues.push_back(jmpair);
-			szPlusConst[i] = basis[i];
+			szPlusConst[i] = (isCanonical) ? basis[i] : 0;
 			electrons[i] = 1;
 			flavors.push_back(1);
 			jmSaved = jmpair;

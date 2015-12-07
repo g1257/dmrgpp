@@ -89,7 +89,7 @@ struct TargetQuantumElectrons {
 
 	template<typename IoInputType>
 	TargetQuantumElectrons(IoInputType& io, bool allowUpDown = true)
-	    : twiceJ(0)
+	    : twiceJ(0),isCanonical(true)
 	{
 		PsimagLite::String  msg("TargetQuantumElectrons: ");
 		bool hasTwiceJ = false;
@@ -107,20 +107,25 @@ struct TargetQuantumElectrons {
 				io.readline(electronsDown,"TargetElectronsDown=");
 				totalElectrons = electronsUp + electronsDown;
 				other.push_back(electronsUp);
-				ready++;
+				ready=2;
 			} catch (std::exception&) {}
 		}
 
 		try {
-			SizeType szPlusConst = 0;
 			io.readline(totalElectrons,"TargetElectronsTotal=");
-			io.readline(szPlusConst,"TargetSzPlusConst=");
-			other.push_back(szPlusConst);
 			ready++;
 		} catch (std::exception&) {}
 
+		bool hasSzPlusConst = false;
+		try {
+			SizeType szPlusConst = 0;
+			io.readline(szPlusConst,"TargetSzPlusConst=");
+			other.push_back(szPlusConst);
+			hasSzPlusConst = true;
+		} catch (std::exception&) {}
+
 		switch (ready) {
-		case 2:
+		case 3:
 			msg += "Provide either up/down or total/sz but not both.\n";
 			throw PsimagLite::RuntimeError(msg);
 
@@ -129,10 +134,21 @@ struct TargetQuantumElectrons {
 			throw PsimagLite::RuntimeError(msg);
 		}
 
+		if (other.size() > 0) hasSzPlusConst = true;
+
+		if (!hasSzPlusConst) {
+			std::cout<<"TargetQuantumElectrons: Grand Canonical\n";
+			assert(other.size() == 0);
+			other.resize(1,0);
+			isCanonical = false;
+		}
+
 		while (true) {
 			try {
 				SizeType extra = 0;
 				io.readline(extra,"TargetExtra=");
+				if (other.size() == 0)
+					std::cout<<"WARNING: TargetExtra= with grand canonical ???\n";
 				other.push_back(extra);
 			} catch (std::exception&) {
 				break;
@@ -150,6 +166,10 @@ struct TargetQuantumElectrons {
 			msg += "Please provide TargetSpinTimesTwo when running with SU(2).\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
+
+		if (isSu2 && !hasSzPlusConst)
+			throw PsimagLite::RuntimeError(
+				"WARNING: SU(2) with grand canonical ???\n");
 	}
 
 	template<typename SomeMemResolvType>
@@ -164,6 +184,7 @@ struct TargetQuantumElectrons {
 	SizeType totalElectrons;
 	VectorSizeType other;
 	SizeType twiceJ;
+	bool isCanonical;
 };
 
 //! Function that prints model parameters to stream os

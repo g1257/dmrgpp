@@ -497,7 +497,7 @@ private:
 		model_.setNaturalBasis(basis1,q1,block1);
 		iperm.resize(basis.size());
 		assert(basis1.size() > 0);
-		SizeType bitnumber = Utils::log2OfInteger(basis1.size()-1);
+		SizeType bitnumber = utils::log2OfInteger(basis1.size()-1);
 		for (SizeType i=0;i<basis1.size();i++) {
 			for (SizeType j=0;j<basis1.size();j++) {
 				HilbertStateType ket = basis1[i];

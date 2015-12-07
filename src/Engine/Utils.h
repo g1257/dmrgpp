@@ -272,7 +272,7 @@ SizeType exactDivision(SizeType a,SizeType b)
 	return c;
 }
 
-SizeType log2OfInteger(SizeType x) const
+SizeType log2OfInteger(SizeType x)
 {
 	SizeType counter = 0;
 	while (x) {

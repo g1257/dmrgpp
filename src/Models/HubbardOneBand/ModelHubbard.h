@@ -520,8 +520,10 @@ private:
 		jmSaved.first++;
 		jmSaved.second++;
 
+		bool isCanonical = (modelParameters_.targetQuantum.isCanonical);
+
+		typename PsimagLite::Vector<SizeType>::Type electrons(basis.size());
 		typename PsimagLite::Vector<SizeType>::Type electronsUp(basis.size());
-		typename PsimagLite::Vector<SizeType>::Type electronsDown(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {
 			PairType jmpair = calcJmValue<PairType>(basis[i]);
 
@@ -529,13 +531,14 @@ private:
 			// nup
 			electronsUp[i] = HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_UP);
 			// ndown
-			electronsDown[i] = HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_DOWN);
+			electrons[i] = electronsUp[i] + HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_DOWN);
 
-			flavors.push_back(electronsUp[i]+electronsDown[i]);
+			flavors.push_back(electrons[i]);
 			jmSaved = jmpair;
+			if (!isCanonical) electronsUp[i] = 0;
 		}
 
-		q.set(jmvalues,flavors,electronsUp+electronsDown,electronsUp);
+		q.set(jmvalues,flavors,electrons,electronsUp);
 	}
 
 	// note: we use 2j instead of j
