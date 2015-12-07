@@ -79,12 +79,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace std {
 
-	template<class T1,class T2>
-	ostream &operator<<(std::ostream &os,const pair<T1,T2>& p)
-	{
-		os<<p.first<<" "<<p.second;
-		return os;
-	}
+template<class T1,class T2>
+ostream &operator<<(std::ostream &os,const pair<T1,T2>& p)
+{
+	os<<p.first<<" "<<p.second;
+	return os;
+}
 } // namespace std
 
 // Utility functions that are still needed
@@ -92,17 +92,17 @@ namespace utils {
 
 struct UnixPathSeparator
 {
-    bool operator()(char ch) const
-    {
-        return ch == '/';
-    }
+	bool operator()(char ch) const
+	{
+		return ch == '/';
+	}
 };
 
 PsimagLite::String basename(PsimagLite::String pathname)
 {
 	return PsimagLite::String(std::find_if(pathname.rbegin(),
 	                                       pathname.rend(),
-	                                       UnixPathSeparator()).base(), pathname.end());
+	                                       UnixPathSeparator()).base(),pathname.end());
 }
 
 template<template<typename,typename> class SomeVectorTemplate,
@@ -167,7 +167,6 @@ void truncate(PsimagLite::Matrix<T> &A,const PsimagLite::Vector<SizeType>::Type&
 	}
 
 	PsimagLite::Vector<int>::Type remap(n);
-
 
 	//! find remapping
 	j=0;
@@ -254,8 +253,8 @@ template<typename SomeVectorType>
 static
 typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True,void>::Type
 fillFermionicSigns(SomeVectorType& fermionicSigns,
-                          const typename PsimagLite::Vector<SizeType>::Type& electrons,
-                          int f)
+                   const typename PsimagLite::Vector<SizeType>::Type& electrons,
+                   int f)
 {
 	typedef typename SomeVectorType::value_type ValueType;
 	fermionicSigns.resize(electrons.size());
@@ -286,5 +285,4 @@ SizeType log2OfInteger(SizeType x)
 } //namespace utils
 /*@}*/
 #endif
-
 

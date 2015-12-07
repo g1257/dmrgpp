@@ -122,7 +122,7 @@ private:
 	static const int NUMBER_OF_ORBITALS=1;
 
 	enum {SPIN_UP = HilbertSpaceHubbardType::SPIN_UP,
-		  SPIN_DOWN = HilbertSpaceHubbardType::SPIN_DOWN};
+	      SPIN_DOWN = HilbertSpaceHubbardType::SPIN_DOWN};
 
 	typedef typename ModelBaseType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;

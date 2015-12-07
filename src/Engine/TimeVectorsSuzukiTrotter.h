@@ -470,7 +470,6 @@ private:
 						                            y,
 						                            lrs_.super().permutationInverse());
 
-
 						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],
 						        iperm[x2p+y1p*hilbertSize]);
 						if (std::norm(tmp)<1e-12) continue;

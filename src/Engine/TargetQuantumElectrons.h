@@ -168,8 +168,8 @@ struct TargetQuantumElectrons {
 		}
 
 		if (isSu2 && !hasSzPlusConst)
-			throw PsimagLite::RuntimeError(
-				"WARNING: SU(2) with grand canonical ???\n");
+			throw PsimagLite::RuntimeError
+		        ("WARNING: SU(2) with grand canonical ???\n");
 	}
 
 	template<typename SomeMemResolvType>
