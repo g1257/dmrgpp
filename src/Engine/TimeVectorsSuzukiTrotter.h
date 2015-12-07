@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffsets.h"
 #include "MatrixOrIdentity.h"
 #include "Sort.h"
+#include "Utils.h"
 
 namespace Dmrg {
 
@@ -318,6 +319,8 @@ private:
 			transformST.makeDiagonal(hilbertSize,1);
 		}
 
+		VectorSizeType iperm;
+		suzukiTrotterPerm(iperm,block);
 		for (SizeType i=0;i<phi0.size();i++) {
 			SizeType xp=0,yp=0;
 			packSuper.unpack(xp,yp,lrs_.super().permutation(i+offset));
@@ -332,7 +335,8 @@ private:
 				                 i,
 				                 offset,
 				                 transformE,
-				                 transformET);
+				                 transformET,
+				                 iperm);
 			} else {
 				timeVectorEnviron(result,
 				                  phi0,
@@ -344,7 +348,8 @@ private:
 				                  i,
 				                  offset,
 				                  transformS,
-				                  transformST);
+				                  transformST,
+				                  iperm);
 			}
 		}
 	}
@@ -359,10 +364,9 @@ private:
 	                      SizeType i,
 	                      SizeType offset,
 	                      const SparseMatrixType& transform,
-	                      const SparseMatrixType& transformT) const
+	                      const SparseMatrixType& transformT,
+	                      const VectorSizeType& iperm) const
 	{
-		VectorSizeType iperm;
-		suzukiTrotterPerm(iperm,block);
 		const LeftRightSuperType& oldLrs = lrs_;
 		SizeType hilbertSize = model_.hilbertSize(block[0]);
 		SizeType ns = lrs_.left().size();
@@ -423,11 +427,9 @@ private:
 	                       SizeType i,
 	                       SizeType offset,
 	                       const SparseMatrixType& transform,
-	                       const SparseMatrixType& transformT) const
+	                       const SparseMatrixType& transformT,
+	                       const VectorSizeType& iperm) const
 	{
-		VectorSizeType iperm;
-		suzukiTrotterPerm(iperm,block);
-
 		const LeftRightSuperType& oldLrs = lrs_;
 		SizeType hilbertSize = model_.hilbertSize(block[0]);
 		SizeType ns = oldLrs.left().permutationInverse().size();
@@ -495,7 +497,7 @@ private:
 		model_.setNaturalBasis(basis1,q1,block1);
 		iperm.resize(basis.size());
 		assert(basis1.size() > 0);
-		SizeType bitnumber = log2OfInteger(basis1.size()-1);
+		SizeType bitnumber = Utils::log2OfInteger(basis1.size()-1);
 		for (SizeType i=0;i<basis1.size();i++) {
 			for (SizeType j=0;j<basis1.size();j++) {
 				HilbertStateType ket = basis1[i];
@@ -507,17 +509,6 @@ private:
 				iperm[i+j*basis1.size()] = PsimagLite::isInVector(basis,ket);
 			}
 		}
-	}
-
-	SizeType log2OfInteger(SizeType x) const
-	{
-		SizeType counter = 0;
-		while (x) {
-			counter++;
-			x >>= 1;
-		}
-
-		return counter;
 	}
 
 	void getMatrix(MatrixComplexOrRealType& m,
