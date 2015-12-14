@@ -206,6 +206,8 @@ public:
 		setOperatorMatrices(creationMatrix,block);
 
 		if (what=="n") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> tmp;
 			crsMatrixToFullMatrix(tmp,creationMatrix[2].data);
 			return tmp;

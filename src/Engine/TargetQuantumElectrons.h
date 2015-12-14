@@ -147,7 +147,7 @@ struct TargetQuantumElectrons {
 			try {
 				SizeType extra = 0;
 				io.readline(extra,"TargetExtra=");
-				if (other.size() == 0)
+				if (!hasSzPlusConst)
 					std::cout<<"WARNING: TargetExtra= with grand canonical ???\n";
 				other.push_back(extra);
 			} catch (std::exception&) {

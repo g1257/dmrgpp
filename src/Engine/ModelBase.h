@@ -159,10 +159,10 @@ public:
 	                             const BlockType& block) const = 0;
 
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                     const VectorOperatorType& cm,
-	                     const BlockType& block,
-	                     RealType time,
-	                     RealType factorForDiagonals=1.0)  const = 0;
+	                                        const VectorOperatorType& cm,
+	                                        const BlockType& block,
+	                                        RealType time,
+	                                        RealType factorForDiagonals=1.0)  const = 0;
 
 	virtual void findElectronsOfOneSite(BlockType& electrons,SizeType site) const
 	{
@@ -210,16 +210,16 @@ public:
 	}
 
 	virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
-	                              const ModelHelperType& modelHelper) const
+	                                      const ModelHelperType& modelHelper) const
 	{
 		return modelCommon_->getLinkProductStruct(lps,modelHelper);
 	}
 
 	virtual LinkType getConnection(const SparseMatrixType** A,
-	                       const SparseMatrixType** B,
-	                       SizeType ix,
-	                       const LinkProductStructType& lps,
-	                       const ModelHelperType& modelHelper) const
+	                               const SparseMatrixType** B,
+	                               SizeType ix,
+	                               const LinkProductStructType& lps,
+	                               const ModelHelperType& modelHelper) const
 	{
 		return modelCommon_->getConnection(A,B,ix,lps,modelHelper);
 	}
@@ -305,6 +305,20 @@ public:
 	                           SizeType x,
 	                           PsimagLite::String msg = "") const = 0;
 
+	static void checkNaturalOperatorDof(SizeType dof,
+	                                    PsimagLite::String label,
+	                                    const VectorSizeType& allowed)
+	{
+		if (std::find(allowed.begin(),allowed.end(),dof) != allowed.end()) return;
+		PsimagLite::String str("For this model and label=");
+		str += label + " dof=" + ttos(dof) + " is not allowed\n";
+		str += "Allowed dofs are ";
+		for (SizeType i = 0; i < allowed.size(); ++i)
+			str += ttos(i) + " ";
+		str += "\n";
+		throw PsimagLite::RuntimeError(str);
+	}
+
 private:
 
 	ModelCommonBaseType* modelCommon_;
@@ -317,9 +331,9 @@ template<typename ModelHelperType,
          typename GeometryType>
 std::ostream& operator<<(std::ostream& os,
                          const ModelBase<ModelHelperType,
-                                         ParametersType,
-                                         InputValidatorType,
-                                         GeometryType>& model)
+                         ParametersType,
+                         InputValidatorType,
+                         GeometryType>& model)
 {
 	model.print(os);
 	return os;

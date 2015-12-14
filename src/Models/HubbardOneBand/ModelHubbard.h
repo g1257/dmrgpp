@@ -281,24 +281,32 @@ public:
 		SizeType nrow = creationMatrix[0].data.row();
 
 		if (what == "i" || what=="identity") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
 			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
 			return tmp;
 		}
 
 		if (what=="+") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> tmp =
 			        multiplyTc(creationMatrix[iup].data,creationMatrix[idown].data);
 			return tmp;
 		}
 
 		if (what=="-") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> tmp =
 			        multiplyTc(creationMatrix[idown].data,creationMatrix[iup].data);
 			return tmp;
 		}
 
 		if (what=="z") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> tmp =
 			        multiplyTc(creationMatrix[iup].data,creationMatrix[iup].data);
 			PsimagLite::Matrix<SparseElementType> tmp2 =
@@ -307,6 +315,8 @@ public:
 		}
 
 		if (what=="n") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> tmp =
 			        multiplyTc(creationMatrix[iup].data,creationMatrix[iup].data)
 			        + multiplyTc(creationMatrix[idown].data,creationMatrix[idown].data);
@@ -314,6 +324,9 @@ public:
 		}
 
 		if (what=="c") {
+			VectorSizeType allowed(2,0);
+			allowed[1] = 1;
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> tmp;
 			assert(dof<creationMatrix.size());
 			crsMatrixToFullMatrix(tmp,creationMatrix[dof].data);
@@ -321,6 +334,8 @@ public:
 		}
 
 		if (what=="nup") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> cup =
 			        naturalOperator("c",site,SPIN_UP);
 			PsimagLite::Matrix<SparseElementType> nup =
@@ -329,6 +344,8 @@ public:
 		}
 
 		if (what=="ndown") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> cdown =
 			        naturalOperator("c",site,SPIN_DOWN);
 			PsimagLite::Matrix<SparseElementType> ndown =
@@ -337,6 +354,8 @@ public:
 		}
 
 		if (what=="d") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> cup =
 			        naturalOperator("c",site,SPIN_UP);
 			PsimagLite::Matrix<SparseElementType> cdown =

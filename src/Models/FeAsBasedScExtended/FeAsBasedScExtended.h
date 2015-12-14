@@ -230,6 +230,8 @@ public:
 		setOperatorMatrices(creationMatrix,block);
 
 		if (what=="z") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> tmp;
 			SizeType x = 2*orbitals_+1;
 			crsMatrixToFullMatrix(tmp,creationMatrix[x].data);
@@ -237,6 +239,8 @@ public:
 		}
 
 		if (what=="+") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> tmp;
 			SizeType x = 2*orbitals_;
 			crsMatrixToFullMatrix(tmp,creationMatrix[x].data);
@@ -244,6 +248,8 @@ public:
 		}
 
 		if (what=="-") { // delta = c^\dagger * c^dagger
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> tmp;
 			SizeType x = 2*orbitals_;
 			SparseMatrixType tmp2;

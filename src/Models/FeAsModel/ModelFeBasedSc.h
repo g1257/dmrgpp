@@ -143,7 +143,7 @@ public:
 	      spinSquared_(spinSquaredHelper_,
 	                   modelParameters_.orbitals,
 	                   2*modelParameters_.orbitals),
-		reinterpret_(true)
+	      reinterpret_(true)
 	{
 		PsimagLite::String tspAlgo = "";
 		try {
@@ -323,8 +323,8 @@ public:
 	}
 
 	MatrixType naturalOperator(const PsimagLite::String& what,
-	                                                      SizeType site,
-	                                                      SizeType dof) const
+	                           SizeType site,
+	                           SizeType dof) const
 	{
 		BlockType block;
 		block.resize(1);
@@ -338,48 +338,70 @@ public:
 		PsimagLite::String what2 = what;
 
 		if (what2 == "i" || what2=="identity") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			MatrixType tmp(nrow,nrow);
 			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
 			return tmp;
 		}
 
 		if (what2 == "0") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			MatrixType tmp(nrow,nrow);
 			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 0.0;
 			return tmp;
 		}
 
 		if (what2=="+") {
+			VectorSizeType allowed(modelParameters_.orbitals,0);
+			for (SizeType x = 0; x < modelParameters_.orbitals; ++x)
+				allowed[x] = x;
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			MatrixType tmp(nrow,nrow);
-			for (SizeType x=0;x<modelParameters_.orbitals;x++)
-				tmp += multiplyTc(creationMatrix[x].data,
-				                  creationMatrix[x+modelParameters_.orbitals].data);
+			tmp += multiplyTc(creationMatrix[dof].data,
+			                  creationMatrix[dof+modelParameters_.orbitals].data);
 			return tmp;
 		}
 		if (what2=="-") {
+			VectorSizeType allowed(modelParameters_.orbitals,0);
+			for (SizeType x = 0; x < modelParameters_.orbitals; ++x)
+				allowed[x] = x;
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			MatrixType tmp(nrow,nrow);
-			for (SizeType x=0;x<modelParameters_.orbitals;x++)
-				tmp += multiplyTc(creationMatrix[x+modelParameters_.orbitals].data,
-				                  creationMatrix[x].data);
+			tmp += multiplyTc(creationMatrix[dof+modelParameters_.orbitals].data,
+			        creationMatrix[dof].data);
 			return tmp;
 		}
 		if (what2=="z") {
+			VectorSizeType allowed(modelParameters_.orbitals,0);
+			for (SizeType x = 0; x < modelParameters_.orbitals; ++x)
+				allowed[x] = x;
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			MatrixType tmp(nrow,nrow);
 			MatrixType tmp2(nrow,nrow);
-			for (SizeType x=0;x<modelParameters_.orbitals;x++) {
-				tmp += multiplyTc(creationMatrix[x].data,creationMatrix[x].data);
-				tmp2 += multiplyTc(creationMatrix[x+modelParameters_.orbitals].data,
-				                   creationMatrix[x+modelParameters_.orbitals].data);
-			}
+
+			tmp += multiplyTc(creationMatrix[dof].data,creationMatrix[dof].data);
+			tmp2 += multiplyTc(creationMatrix[dof+modelParameters_.orbitals].data,
+			        creationMatrix[dof+modelParameters_.orbitals].data);
+
 			return tmp-tmp2;
 		}
 		if (what2=="n") {
+			VectorSizeType allowed(2*modelParameters_.orbitals,0);
+			for (SizeType x = 0; x < allowed.size(); ++x)
+				allowed[x] = x;
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			MatrixType tmp =
 			        multiplyTc(creationMatrix[dof].data,creationMatrix[dof].data);
 			return tmp;
 		}
 
 		if (what2=="c") {
+			VectorSizeType allowed(2*modelParameters_.orbitals,0);
+			for (SizeType x = 0; x < allowed.size(); ++x)
+				allowed[x] = x;
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			MatrixType tmp;
 			SparseMatrixType cdagger;
 			transposeConjugate(cdagger,
@@ -389,6 +411,10 @@ public:
 		}
 
 		if (what2=="c\'") {
+			VectorSizeType allowed(2*modelParameters_.orbitals,0);
+			for (SizeType x = 0; x < allowed.size(); ++x)
+				allowed[x] = x;
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			MatrixType tmp;
 			SparseMatrixType c = creationMatrix[orbital +
 			        spin*modelParameters_.orbitals].data;
@@ -397,6 +423,10 @@ public:
 		}
 
 		if (what2=="d") { // delta = c^\dagger * c^dagger
+			VectorSizeType allowed(modelParameters_.orbitals,0);
+			for (SizeType x = 0; x < allowed.size(); ++x)
+				allowed[x] = x;
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			SparseMatrixType atmp;
 			multiply(atmp,
 			         creationMatrix[orbital+orbital+modelParameters_.orbitals].data,
@@ -719,7 +749,7 @@ private:
 	RealType findHubbardU(SizeType index, SizeType orb1, SizeType orb2) const
 	{
 		if (modelParameters_.feAsMode == ParamsModelFeAsType::INT_PAPER33 ||
-		        modelParameters_.feAsMode == ParamsModelFeAsType::INT_IMPURITY) {
+		    modelParameters_.feAsMode == ParamsModelFeAsType::INT_IMPURITY) {
 			assert(index < modelParameters_.hubbardU.size());
 			return modelParameters_.hubbardU[index];
 		}
@@ -1019,7 +1049,7 @@ private:
 		transposeConjugate(temp,cm[orbital+spin2*modelParameters_.orbitals+i*dofs].data);
 		multiply(result, // =
 		         cm[orbital+spin1*modelParameters_.orbitals+i*dofs].data, // times
-		         temp);
+		        temp);
 
 		return result;
 	}
@@ -1104,10 +1134,10 @@ private:
 
 	//! only for feAsMode == 3
 	void addInteractionImpurity(SparseMatrixType &hmatrix,
-	                           const VectorOperatorType& cm,
-	                           SizeType i,
-	                           RealType factorForDiagonals,
-	                           SizeType actualSite) const
+	                            const VectorOperatorType& cm,
+	                            SizeType i,
+	                            RealType factorForDiagonals,
+	                            SizeType actualSite) const
 	{
 		if (actualSite > 0) return;
 
@@ -1118,9 +1148,9 @@ private:
 	}
 
 	void addInteractionImp2(SparseMatrixType &hmatrix,
-	                           const VectorOperatorType& cm,
-	                           SizeType site,
-	                           RealType factorForDiagonals) const
+	                        const VectorOperatorType& cm,
+	                        SizeType site,
+	                        RealType factorForDiagonals) const
 	{
 		const typename PsimagLite::Vector<RealType>::Type& U = modelParameters_.hubbardU;
 		SizeType orbitals = modelParameters_.orbitals;
@@ -1144,9 +1174,9 @@ private:
 	}
 
 	void addInteractionImp3(SparseMatrixType &hmatrix,
-	                           const VectorOperatorType& cm,
-	                           SizeType site,
-	                           RealType factorForDiagonals) const
+	                        const VectorOperatorType& cm,
+	                        SizeType site,
+	                        RealType factorForDiagonals) const
 	{
 		const typename PsimagLite::Vector<RealType>::Type& U = modelParameters_.hubbardU;
 		SizeType orbitals = modelParameters_.orbitals;
@@ -1171,9 +1201,9 @@ private:
 	}
 
 	void addInteractionImp4(SparseMatrixType &hmatrix,
-	                           const VectorOperatorType& cm,
-	                           SizeType site,
-	                           RealType factorForDiagonals) const
+	                        const VectorOperatorType& cm,
+	                        SizeType site,
+	                        RealType factorForDiagonals) const
 	{
 		const typename PsimagLite::Vector<RealType>::Type& U = modelParameters_.hubbardU;
 		SizeType orbitals = modelParameters_.orbitals;

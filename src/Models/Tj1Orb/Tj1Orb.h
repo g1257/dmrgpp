@@ -249,18 +249,24 @@ public:
 		SizeType nrow = creationMatrix[0].data.row();
 
 		if (what == "i" || what=="identity") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			MatrixType tmp(nrow,nrow);
 			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
 			return tmp;
 		}
 
 		if (what=="+") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			MatrixType tmp;
 			crsMatrixToFullMatrix(tmp,creationMatrix[2].data);
 			return tmp;
 		}
 
 		if (what=="-") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			SparseMatrixType tmp2;
 			transposeConjugate(tmp2,creationMatrix[2].data);
 			MatrixType tmp;
@@ -269,12 +275,17 @@ public:
 		}
 
 		if (what=="z") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			MatrixType tmp;
 			crsMatrixToFullMatrix(tmp,creationMatrix[3].data);
 			return tmp;
 		}
 
 		if (what=="c") {
+			VectorSizeType allowed(2,0);
+			allowed[1] = 1;
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			MatrixType tmp;
 			assert(dof<2);
 			crsMatrixToFullMatrix(tmp,creationMatrix[dof].data);
@@ -282,18 +293,24 @@ public:
 		}
 
 		if (what=="n") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			MatrixType tmp;
 			crsMatrixToFullMatrix(tmp,creationMatrix[4].data);
 			return tmp;
 		}
 
 		if (what=="nup") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			MatrixType cup = naturalOperator("c",site,SPIN_UP);
 			MatrixType nup = multiplyTransposeConjugate(cup,cup);
 			return nup;
 		}
 
 		if (what=="ndown") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			MatrixType cdown = naturalOperator("c",site,SPIN_DOWN);
 			MatrixType ndown = multiplyTransposeConjugate(cdown,cdown);
 			return ndown;
