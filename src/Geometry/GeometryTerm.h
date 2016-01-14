@@ -273,14 +273,14 @@ public:
 	void print(std::ostream& os) const
 	{
 		SizeType linSize = linSize_;
-		SizeType dofs = orbitals_;
 
-		os<<"#orbitals="<<dofs<<"\n";
 		os<<"#orbital changes first\n";
 		for (SizeType i=0;i<linSize;i++) {
-			for (SizeType dof1=0;dof1<dofs;dof1++) {
+			SizeType dofsi = orbitals(i);
+			for (SizeType dof1=0;dof1<dofsi;dof1++) {
 				for (SizeType j=0;j<linSize;j++) {
-					for (SizeType dof2=0;dof2<dofs;dof2++) {
+					SizeType dofsj = orbitals(j);
+					for (SizeType dof2=0;dof2<dofsj;dof2++) {
 						if (!connected(i,j)) {
 							os<<0<<" ";
 							continue;
@@ -320,6 +320,14 @@ public:
 	                                InputType_>& gt);
 
 private:
+
+	SizeType orbitals(SizeType site) const
+	{
+		if (geometryBase_->label() != "KTwoNiFFour") return orbitals_;
+		AdditionalDataType additionalData;
+		geometryBase_->fillAdditionalData(additionalData,site,0);
+		return (additionalData.type1 == additionalData.TYPE_C) ? 1 : orbitals_;
+	}
 
 	void cacheValues()
 	{

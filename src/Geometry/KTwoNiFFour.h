@@ -104,7 +104,7 @@ public:
 	    : linSize_(linSize)
 	{
 		io.readline(signChange_,"SignChange=");
-		std::cerr<<"SIGN CHANGE="<<signChange_<<"\n";
+		std::cout<<"KTwoNiFFour: SIGN CHANGE="<<signChange_<<"\n";
 	}
 
 	template<class Archive>
