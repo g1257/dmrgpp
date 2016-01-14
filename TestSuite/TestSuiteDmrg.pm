@@ -64,7 +64,7 @@ sub runDmrg
 
 	createExecutable($TestSuiteGlobals::specFile,$specKey,"dmrg") unless (-x "$executable");
 
-	my $arg = "$executable -f $inputFile &> $raw";
+	my $arg = "$executable -f $inputFile -l $raw";
 # 	grep {s/&//} $arg if($verbose);
 	
 	print "Running dmrg test...\n";
