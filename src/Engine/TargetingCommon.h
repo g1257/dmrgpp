@@ -586,7 +586,7 @@ private:
 		}
 
 		SizeType foundSize = nup.data.row();
-		SizeType expectedSize = targetHelper_.model().hilbertSize(0);
+		SizeType expectedSize = targetHelper_.model().hilbertSize(site);
 		if (foundSize != expectedSize) {
 			PsimagLite::String str("getOperatorForTest ");
 			str += " Expected size " + ttos(expectedSize);
