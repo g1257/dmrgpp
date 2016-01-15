@@ -109,6 +109,7 @@ class LanczosSolver : public LanczosOrDavidsonBase<SolverParametersType,MatrixTy
 
 public:
 
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef SolverParametersType ParametersSolverType;
 	typedef MatrixType LanczosMatrixType;
 	typedef typename LanczosVectorsType::TridiagonalMatrixType TridiagonalMatrixType;
@@ -393,88 +394,114 @@ private:
 		progress_.printline(msg,os);
 	}
 
+	void groundAllocations(SizeType n)
+	{
+		if (groundD_.size() != n) {
+			groundD_.clear();
+			groundD_.resize(n);
+		}
+
+		if (groundE_.size() != n) {
+			groundE_.clear();
+			groundE_.resize(n);
+		}
+
+	}
+
 	void ground(RealType &s,
 	            int n,
 	            const TridiagonalMatrixType& ab,
 	            typename Vector<RealType>::Type& gs)
 	{
-		int i, k, l, m;
-		RealType c, dd, f, g, h, p, r, *d, *e, *v = 0, *vki;
-		int long intCounter=0;
+		RealType* vki = 0;
 		int long maxCounter=stepsForEnergyConvergence_;
 
-		if (gs.size()>0) {
-			v  = new RealType[n*n];
-			for (k=0;k<n*n;k++) v[k]=0.0;
-			for (k = 0, vki = v; k < n; k++, vki += (n + 1))
-				(*vki) = 1.0;
+		groundAllocations(n);
+
+		if (gs.size() > 0) {
+			if (groundV_.size() != n*n) {
+				groundV_.clear();
+				groundV_.resize(n*n);
+			}
+
+			std::fill(groundV_.begin(),groundV_.end(),0.0);
+			vki = &(groundV_[0]);
+			for (int k = 0; k < n; k++, vki += (n + 1)) (*vki) = 1.0;
 		}
 
-		d = new RealType[n];
-		e = new RealType[n];
-
-		for (i = 0; i < n; i++) {
-			d[i] = ab.a(i);
-			e[i] = ab.b(i);
+		for (int i = 0; i < n; i++) {
+			groundD_[i] = ab.a(i);
+			groundE_[i] = ab.b(i);
 		}
 
-		for (l = 0; l < n; l++) {
+		long long int intCounter=0;
+		int m = 0;
+		int l = 0;
+		for (; l < n; l++) {
 			do {
 				intCounter++;
-				if (intCounter>maxCounter) {
+				if (intCounter > maxCounter) {
 					std::cerr<<"lanczos: ground: premature exit ";
 					std::cerr<<"(may indicate an internal error)\n";
 					break;
 				}
+
 				for (m = l; m < n - 1; m++) {
-					dd = fabs (d[m]) + fabs (d[m + 1]);
-					if ((fabs (e[m]) + dd) == dd) break;
+					RealType dd = fabs(groundD_[m]) + fabs(groundD_[m + 1]);
+					if ((fabs(groundE_[m]) + dd) == dd) break;
 				}
+
 				if (m != l) {
-					g = (d[l + 1] - d[l]) / (2.0 * e[l]);
-					r = sqrt (g * g + 1.0);
-					g = d[m] - d[l] + e[l] / (g + (g >= 0 ? fabs (r) : -fabs (r)));
-					for (i = m - 1, s = c = 1.0, p = 0.0; i >= l; i--) {
-						f = s * e[i];
-						h = c * e[i];
-						e[i + 1] = (r = sqrt (f * f + g * g));
+					RealType g = (groundD_[l + 1] - groundD_[l])/(2.0*groundE_[l]);
+					RealType r = sqrt(g*g + 1.0);
+					g = groundD_[m] - groundD_[l] + groundE_[l]/
+					        (g + (g >= 0 ? fabs(r) : -fabs(r)));
+					RealType p = 0.0;
+					RealType c = 1.0;
+					int i = m -1;
+					for (s = 1.0; i >= l; i--) {
+						RealType f = s * groundE_[i];
+						RealType h = c * groundE_[i];
+						groundE_[i + 1] = (r = sqrt(f * f + g * g));
 						if (r == 0.0) {
-							d[i + 1] -= p;
-							e[m] = 0.0;
+							groundD_[i + 1] -= p;
+							groundE_[m] = 0.0;
 							break;
 						}
+
 						s = f / r;
 						c = g / r;
-						g = d[i + 1] - p;
-						r = (d[i] - g) * s + 2.0 * c * h;
-						d[i + 1] = g + (p = s * r);
+						g = groundD_[i + 1] - p;
+						r = (groundD_[i] - g) * s + 2.0 * c * h;
+						groundD_[i + 1] = g + (p = s * r);
 						g = c * r - h;
-						if (gs.size()>0) {
-							for (k = 0, vki = v + i; k < n; k++, vki += n) {
+						if (gs.size() > 0) {
+							vki = &(groundV_[0]) + i;
+							for (int k = 0; k < n; k++, vki += n) {
 								f = vki[1];
 								vki[1] = s * vki[0] + c * f;
 								vki[0] = c * vki[0] - s * f;
 							}
 						}
 					}
+
 					if (r == 0.0 && i >= l) continue;
-					d[l] -= p;
-					e[l] = g;
-					e[m] = 0.0;
+					groundD_[l] -= p;
+					groundE_[l] = g;
+					groundE_[m] = 0.0;
 				}
 			} while (m != l);
 		}
 
-		for (i = 1, s = d[l = 0]; i < n; i++)
-			if (d[i] < s) s = d[l = i];
+		s = groundD_[l = 0];
+		for (int i = 1; i < n; i++)
+			if (groundD_[i] < s) s = groundD_[l = i];
 
-		if (gs.size()>0) {
-			for (k = 0, vki = v + l; k < n; k++, vki += n) gs[k] = (*vki);
-			delete [] v;
+		if (gs.size() > 0) {
+			vki = &(groundV_[0]) + l;
+			for (int k = 0; k < n; k++, vki += n) gs[k] = (*vki);
 		}
 
-		delete [] d;
-		delete [] e;
 		if (intCounter>maxCounter)
 			throw RuntimeError("LanczosSolver::ground(): internal error\n");
 
@@ -530,6 +557,9 @@ private:
 	SizeType stepsForEnergyConvergence_;
 	Random48<RealType> rng_;
 	LanczosVectorsType lanczosVectors_;
+	VectorRealType groundD_;
+	VectorRealType groundE_;
+	VectorRealType groundV_;
 }; // class LanczosSolver
 
 } // namespace PsimagLite
