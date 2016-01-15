@@ -182,6 +182,7 @@ public:
 
 		decomposition(y,ab);
 		typename Vector<RealType>::Type c(steps_);
+		groundAllocations(steps_ + 2,c.size() > 0);
 		try {
 			ground(gsEnergy,steps_, ab, c);
 		} catch (std::exception &e) {
@@ -311,6 +312,7 @@ public:
 		RealType enew = 0;
 		lanczosVectors_.saveInitialVector(y);
 		typename Vector<RealType>::Type nullVector(0);
+		groundAllocations(max_nstep + 2,false);
 		for (; j < max_nstep; j++) {
 			for (SizeType i = 0; i < mat_.rank(); i++)
 				lanczosVectors_(i,j) = y[i];
@@ -394,7 +396,7 @@ private:
 		progress_.printline(msg,os);
 	}
 
-	void groundAllocations(SizeType n)
+	void groundAllocations(SizeType n, bool extra)
 	{
 		if (groundD_.size() != n) {
 			groundD_.clear();
@@ -406,6 +408,12 @@ private:
 			groundE_.resize(n);
 		}
 
+		if (!extra) return;
+
+		if (groundV_.size() != n*n) {
+			groundV_.clear();
+			groundV_.resize(n*n);
+		}
 	}
 
 	void ground(RealType &s,
@@ -414,16 +422,9 @@ private:
 	            typename Vector<RealType>::Type& gs)
 	{
 		RealType* vki = 0;
-		int long maxCounter=stepsForEnergyConvergence_;
-
-		groundAllocations(n);
+		long long int maxCounter = stepsForEnergyConvergence_;
 
 		if (gs.size() > 0) {
-			if (groundV_.size() != n*n) {
-				groundV_.clear();
-				groundV_.resize(n*n);
-			}
-
 			std::fill(groundV_.begin(),groundV_.end(),0.0);
 			vki = &(groundV_[0]);
 			for (int k = 0; k < n; k++, vki += (n + 1)) (*vki) = 1.0;
@@ -502,9 +503,8 @@ private:
 			for (int k = 0; k < n; k++, vki += n) gs[k] = (*vki);
 		}
 
-		if (intCounter>maxCounter)
+		if (intCounter > maxCounter)
 			throw RuntimeError("LanczosSolver::ground(): internal error\n");
-
 	}
 
 	void getColumn(MatrixType const &mat,VectorType& x,SizeType col)
