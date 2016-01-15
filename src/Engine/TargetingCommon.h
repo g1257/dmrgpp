@@ -98,6 +98,32 @@ template<typename TargetHelperType,
          typename LanczosSolverType>
 class TargetingCommon  {
 
+	struct NaturalOpStruct {
+		NaturalOpStruct(PsimagLite::String label_)
+		: fermionSign(1),dof(0),label(label_)
+		{
+			SizeType i = 0;
+			for (; i < label_.length(); ++i) {
+				if (label_[i] == '?') break;
+			}
+
+			if (i == label_.length()) return;
+			SizeType j = i;
+			label = label_.substr(0,j);
+			for (; i < label_.length(); ++i) {
+				if (label_[i] == '-') break;
+			}
+
+			dof = atoi(label_.substr(j+1,i).c_str());
+			if (i == label_.length()) return;
+			fermionSign = -1;
+		}
+
+		int fermionSign;
+		SizeType dof;
+		PsimagLite::String label;
+	}; // struct NaturalOpStruct
+
 public:
 
 	typedef PsimagLite::IoSimple IoType;
@@ -137,12 +163,12 @@ public:
 	static const SizeType SUM = TargetParamsType::SUM;
 
 	enum {DISABLED=ApplyOperatorExpressionType::DISABLED,
-		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,
-		  WFT_NOADVANCE=ApplyOperatorExpressionType::WFT_NOADVANCE};
+	      OPERATOR=ApplyOperatorExpressionType::OPERATOR,
+	      WFT_NOADVANCE=ApplyOperatorExpressionType::WFT_NOADVANCE};
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-		  INFINITE=WaveFunctionTransfType::INFINITE};
+	      EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
+	      INFINITE=WaveFunctionTransfType::INFINITE};
 
 	TargetingCommon(const LeftRightSuperType& lrs,
 	                const ModelType& model,
@@ -539,7 +565,6 @@ private:
 	OperatorType getOperatorForTest(const PsimagLite::String& opLabel,
 	                                SizeType site) const
 	{
-		int fermionSign1 = 1;
 		const std::pair<SizeType,SizeType> jm1(0,0);
 		RealType angularFactor1 = 1.0;
 		typename OperatorType::Su2RelatedType su2Related1;
@@ -553,8 +578,11 @@ private:
 				throw e;
 			}
 
-			SparseMatrixType tmpC(targetHelper_.model().naturalOperator(opLabel,site,0));
-			nup = OperatorType(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
+			NaturalOpStruct nos(opLabel);
+			SparseMatrixType tmpC(targetHelper_.model().naturalOperator(nos.label,
+			                                                            site,
+			                                                            nos.dof));
+			nup = OperatorType(tmpC,nos.fermionSign,jm1,angularFactor1,su2Related1);
 		}
 
 		SizeType foundSize = nup.data.row();
