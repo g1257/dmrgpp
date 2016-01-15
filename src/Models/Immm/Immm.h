@@ -266,8 +266,7 @@ public:
 			OperatorType myOp(tmpMatrix,-1,typename OperatorType::PairType(0,0),1,su2related);
 			creationMatrix.push_back(myOp);
 
-			transposeConjugate(cTranspose,tmpMatrix);
-			nmatrix += multiplyTc(cTranspose,cTranspose);
+			nmatrix += multiplyTc(tmpMatrix,tmpMatrix);
 		}
 
 		// add n_i
