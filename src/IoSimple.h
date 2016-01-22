@@ -238,8 +238,8 @@ public:
 
 	public:
 
-		static const int LAST_INSTANCE=-1;
 		typedef int long long LongIntegerType;
+		static const LongIntegerType LAST_INSTANCE=-1;
 		typedef unsigned int long long LongSizeType;
 
 		In() { }
