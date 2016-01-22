@@ -211,44 +211,43 @@ std::ostream &operator<<(std::ostream& os,const FiniteLoop& fl)
 
 struct CheckPoint {
 
-	CheckPoint() : enabled(false),filename(""),into("GroundState"),labelForPsi("PSI")
+	CheckPoint() : filename(""),into("GroundState"),labelForPsi("PSI")
 	{}
 
 	template<class Archive>
 	void serialize(Archive & ar, const unsigned int version)
 	{
-		ar & enabled;
 		ar & filename;
 	}
 
 	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
-	                   SizeType x = sizeof(CheckPoint),
+	SizeType memResolv(SomeMemResolvType&,
+	                   SizeType = sizeof(CheckPoint),
 	                   PsimagLite::String msg = "") const
 	{
-		assert(x == sizeof(CheckPoint));
-
-		PsimagLite::String str = msg;
-		msg += "CheckPoint";
-		const char* start = (const char *)&enabled;
-		const char* end = (const char*)&filename;
-		SizeType total = mres.memResolv(&enabled,end-start,str + " enabled");
-
-		total += mres.memResolv(&filename,x-total,str + " filename");
-
-		return total;
+		return 0;
 	}
 
-	bool enabled;
 	PsimagLite::String filename;
 	PsimagLite::String into;
 	PsimagLite::String labelForPsi;
 };
 
-std::istream &operator>>(std::istream& is,CheckPoint& c)
+std::ostream& operator<<(std::ostream& os, const CheckPoint& c)
 {
-	is>>c.enabled;
+	if (c.filename == "") return os;
+
+	os<<"checkpoint.filename="<<c.filename<<"\n";
+	os<<"checkpoint.into="<<c.into<<"\n";
+	os<<"checkpoint.labelForPsi="<<c.labelForPsi<<"\n";
+	return os;
+}
+
+std::istream& operator>>(std::istream& is,CheckPoint& c)
+{
 	is>>c.filename;
+	is>>c.into;
+	is>>c.labelForPsi;
 	return is;
 }
 
@@ -573,8 +572,8 @@ std::ostream &operator<<(std::ostream &os,
 		os<<"parameters.tolerance="<<p.tolerance<<"\n";
 	os<<"parameters.nthreads="<<p.nthreads<<"\n";
 	os<<"parameters.useReflectionSymmetry="<<p.useReflectionSymmetry<<"\n";
-	if (p.checkpoint.filename!="")
-		os<<"parameters.restartFilename="<<p.checkpoint.filename<<"\n";
+	os<<p.checkpoint;
+
 	if (p.fileForDensityMatrixEigs!="")
 		os<<"parameters.fileForDensityMatrixEigs="<<p.fileForDensityMatrixEigs<<"\n";
 
