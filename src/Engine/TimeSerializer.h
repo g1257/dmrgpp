@@ -106,7 +106,8 @@ namespace Dmrg {
 			  marker_(marker)
 			{}
 			
-			TimeSerializer(typename PsimagLite::IoSimple::In& io,SizeType lastInstance = 0)
+			TimeSerializer(typename PsimagLite::IoSimple::In& io,
+			               PsimagLite::IoSimple::In::LongIntegerType lastInstance = 0)
 			{
 				RealType x=0;
 				PsimagLite::String s = "#TIME=";
