@@ -128,9 +128,10 @@ public:
 	      progress_("Truncation"),
 	      error_(0.0)
 	{
-		if (parameters_.tolerance<0) return;
+		if (parameters_.truncationControl.first < 0) return;
 		PsimagLite::OstringStream msg;
-		msg<<"has tolerance= "<<parameters_.tolerance;
+		msg<<"has tolerance= "<<parameters_.truncationControl.first;
+		msg<<" minimum m= "<<parameters_.truncationControl.second;
 		progress_.printline(msg,std::cout);
 	}
 
@@ -328,7 +329,7 @@ private:
 	SizeType computeKeptStates(SizeType& keptStates,
 	                           const typename PsimagLite::Vector<RealType>::Type& eigs) const
 	{
-		if (parameters_.tolerance<0) return keptStates;
+		if (parameters_.truncationControl.first < 0) return keptStates;
 		int start = eigs.size() - keptStates;
 		if (start<0) start = 0;
 		int maxToRemove = eigs.size()-parameters_.keptStatesInfinite;
@@ -342,16 +343,19 @@ private:
 			discWeight += fabs(eigs[i]);
 			// if the discarded weight
 			// gets larger than the tolerance, we break the loop.
-			if (discWeight>parameters_.tolerance) {
+			if (discWeight > parameters_.truncationControl.first) {
 				total = eigs.size() - i;
 				discWeight -= fabs(eigs[i]);
 				break;
 			}
 		}
 
-		// if total is too small or too big we keep it unchanged
-		if (total>=keptStates || total<parameters_.keptStatesInfinite)
+		// if total is too big we keep it unchanged
+		if (total>=keptStates)
 			return keptStates;
+
+		if (total < parameters_.truncationControl.second)
+			return parameters_.truncationControl.second;
 
 		return total;
 	}

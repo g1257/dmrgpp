@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BoostSerializationHeaders.h"
 #include "IoSimple.h"
 #include "ArchiveFiles.h"
+#include "Tokenizer.h"
 
 namespace Dmrg {
 /* PSIDOC FiniteLoop
@@ -289,6 +290,7 @@ struct ParametersDmrgSolver {
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorFieldType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef std::pair<FieldType, SizeType> PairRealSizeType;
 
 	SizeType nthreads;
 	SizeType sitesPerBlock;
@@ -296,7 +298,7 @@ struct ParametersDmrgSolver {
 	SizeType keptStatesInfinite;
 	SizeType excited;
 	int useReflectionSymmetry;
-	FieldType tolerance;
+	PairRealSizeType truncationControl;
 	PsimagLite::String filename;
 	PsimagLite::String version;
 	PsimagLite::String options;
@@ -366,9 +368,15 @@ struct ParametersDmrgSolver {
 			io.read(adjustQuantumNumbers,"AdjustQuantumNumbers");
 		} catch (std::exception&) {}
 
-		tolerance = -1.0;
+		truncationControl = PairRealSizeType(-1.0,keptStatesInfinite);
 		try {
-			io.readline(tolerance,"TruncationTolerance=");
+			PsimagLite::String s("");
+			VectorStringType tokens;
+			io.readline(s,"TruncationTolerance=");
+			PsimagLite::tokenizer(s,tokens,",");
+			truncationControl.first = atof(tokens[0].c_str());
+			if (tokens.size() > 1)
+				truncationControl.second = atoi(tokens[1].c_str());
 		} catch (std::exception&) {}
 
 		nthreads=1; // provide a default value
@@ -568,8 +576,11 @@ std::ostream &operator<<(std::ostream &os,
 	os<<p.finiteLoop;
 
 	os<<"RecoverySave="<<p.recoverySave<<"\n";
-	if (p.tolerance>0)
-		os<<"parameters.tolerance="<<p.tolerance<<"\n";
+	if (p.truncationControl.first > 0) {
+		os<<"parameters.tolerance="<<p.truncationControl.first<<",";
+		os<<p.truncationControl.second<<"\n";
+	}
+
 	os<<"parameters.nthreads="<<p.nthreads<<"\n";
 	os<<"parameters.useReflectionSymmetry="<<p.useReflectionSymmetry<<"\n";
 	os<<p.checkpoint;
