@@ -291,6 +291,7 @@ struct ParametersDmrgSolver {
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorFieldType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef std::pair<FieldType, SizeType> PairRealSizeType;
+	typedef typename PsimagLite::Vector<FiniteLoop>::Type VectorFiniteLoopType;
 
 	SizeType nthreads;
 	SizeType sitesPerBlock;
@@ -308,7 +309,7 @@ struct ParametersDmrgSolver {
 	PsimagLite::String recoverySave;
 	CheckPoint checkpoint;
 	VectorSizeType adjustQuantumNumbers;
-	typename PsimagLite::Vector<FiniteLoop>::Type finiteLoop;
+	VectorFiniteLoopType finiteLoop;
 
 	template<class Archive>
 	void serialize(Archive&, const unsigned int)
@@ -377,6 +378,7 @@ struct ParametersDmrgSolver {
 			truncationControl.first = atof(tokens[0].c_str());
 			if (tokens.size() > 1)
 				truncationControl.second = atoi(tokens[1].c_str());
+			warnIfFiniteMlessThanMin(finiteLoop, truncationControl.second);
 		} catch (std::exception&) {}
 
 		nthreads=1; // provide a default value
@@ -455,7 +457,7 @@ struct ParametersDmrgSolver {
 
 	template<typename SomeInputType>
 	static void readFiniteLoops(SomeInputType& io,
-	                            PsimagLite::Vector<FiniteLoop>::Type& vfl)
+	                            VectorFiniteLoopType& vfl)
 	{
 		VectorFieldType tmpVec;
 		io.read(tmpVec,"FiniteLoops");
@@ -464,7 +466,7 @@ struct ParametersDmrgSolver {
 
 	template<typename SomeInputType>
 	static void readFiniteLoops_(SomeInputType& io,
-	                             PsimagLite::Vector<FiniteLoop>::Type& vfl,
+	                             VectorFiniteLoopType& vfl,
 	                             const VectorFieldType& tmpVec)
 	{
 		for (SizeType i=0;i<tmpVec.size();i+=3) {
@@ -517,6 +519,16 @@ struct ParametersDmrgSolver {
 	}
 
 private:
+
+	static void warnIfFiniteMlessThanMin(const VectorFiniteLoopType& vfl, SizeType minM)
+	{
+		for (SizeType i = 0; i < vfl.size(); ++i) {
+			if (vfl[i].keptStates >= minM) continue;
+			std::cout<<"WARNING: Triplet number "<<i<<" has m= "<<vfl[i].keptStates;
+			std::cout<<" which is less than minimum m = "<<minM;
+			std::cout<<" as found in TruncationTolerance\n";
+		}
+	}
 
 	static void checkRestart(PsimagLite::String filename1,
 	                         PsimagLite::String filename2,
