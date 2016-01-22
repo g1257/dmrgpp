@@ -209,9 +209,9 @@ std::ostream &operator<<(std::ostream& os,const FiniteLoop& fl)
 	return os;
 }
 
-struct DmrgCheckPoint {
+struct CheckPoint {
 
-	DmrgCheckPoint() : enabled(false)
+	CheckPoint() : enabled(false),filename(""),into("GroundState"),labelForPsi("PSI")
 	{}
 
 	template<class Archive>
@@ -223,13 +223,13 @@ struct DmrgCheckPoint {
 
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
-	                   SizeType x = sizeof(DmrgCheckPoint),
+	                   SizeType x = sizeof(CheckPoint),
 	                   PsimagLite::String msg = "") const
 	{
-		assert(x == sizeof(DmrgCheckPoint));
+		assert(x == sizeof(CheckPoint));
 
 		PsimagLite::String str = msg;
-		msg += "DmrgCheckPoint";
+		msg += "CheckPoint";
 		const char* start = (const char *)&enabled;
 		const char* end = (const char*)&filename;
 		SizeType total = mres.memResolv(&enabled,end-start,str + " enabled");
@@ -241,9 +241,11 @@ struct DmrgCheckPoint {
 
 	bool enabled;
 	PsimagLite::String filename;
+	PsimagLite::String into;
+	PsimagLite::String labelForPsi;
 };
 
-std::istream &operator>>(std::istream& is,DmrgCheckPoint& c)
+std::istream &operator>>(std::istream& is,CheckPoint& c)
 {
 	is>>c.enabled;
 	is>>c.filename;
@@ -303,7 +305,7 @@ struct ParametersDmrgSolver {
 	PsimagLite::String insitu;
 	PsimagLite::String fileForDensityMatrixEigs;
 	PsimagLite::String recoverySave;
-	DmrgCheckPoint checkpoint;
+	CheckPoint checkpoint;
 	VectorSizeType adjustQuantumNumbers;
 	typename PsimagLite::Vector<FiniteLoop>::Type finiteLoop;
 
@@ -412,10 +414,12 @@ struct ParametersDmrgSolver {
 		} catch (std::exception&) {}
 
 		if (isObserveCode) return;
+		bool hasRestart = false;
 		if (options.find("restart")!=PsimagLite::String::npos) {
 			io.readline(checkpoint.filename,"RestartFilename=");
 			ArchiveFiles<ThisType>::unpackIfNeeded(checkpoint.filename);
 			checkRestart(filename,checkpoint.filename,options,"RestartFilename=");
+			hasRestart = true;
 		} else {
 			PsimagLite::String str;
 			try {
@@ -423,6 +427,21 @@ struct ParametersDmrgSolver {
 				PsimagLite::String s = "WARNING: RestartFilename ignored in input ";
 				s += "because restart option not present in SolverOptions.\n";
 				std::cerr<<s;
+			} catch (std::exception&) {}
+		}
+
+		if (hasRestart) {
+			try {
+				io.readline(checkpoint.into,"RestartInto=");
+			} catch (std::exception&) {}
+
+			if (checkpoint.into != "All" && checkpoint.into != "GroundState") {
+				PsimagLite::String str = "FATAL: RestartInto=All | GroundState\n";
+				throw PsimagLite::RuntimeError(str);
+			}
+
+			try {
+				io.readline(checkpoint.labelForPsi,"RestartLabelForPsi=");
 			} catch (std::exception&) {}
 		}
 	}
@@ -438,8 +457,8 @@ struct ParametersDmrgSolver {
 
 	template<typename SomeInputType>
 	static void readFiniteLoops_(SomeInputType& io,
-	                            PsimagLite::Vector<FiniteLoop>::Type& vfl,
-	                            const VectorFieldType& tmpVec)
+	                             PsimagLite::Vector<FiniteLoop>::Type& vfl,
+	                             const VectorFieldType& tmpVec)
 	{
 		for (SizeType i=0;i<tmpVec.size();i+=3) {
 			typename PsimagLite::Vector<int>::Type xTmp(3);

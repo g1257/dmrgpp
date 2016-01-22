@@ -100,7 +100,7 @@ class TargetingCommon  {
 
 	struct NaturalOpStruct {
 		NaturalOpStruct(PsimagLite::String label_)
-		: fermionSign(1),dof(0),label(label_)
+		    : fermionSign(1),dof(0),label(label_)
 		{
 			SizeType i = 0;
 			for (; i < label_.length(); ++i) {
@@ -163,12 +163,12 @@ public:
 	static const SizeType SUM = TargetParamsType::SUM;
 
 	enum {DISABLED=ApplyOperatorExpressionType::DISABLED,
-	      OPERATOR=ApplyOperatorExpressionType::OPERATOR,
-	      WFT_NOADVANCE=ApplyOperatorExpressionType::WFT_NOADVANCE};
+		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,
+		  WFT_NOADVANCE=ApplyOperatorExpressionType::WFT_NOADVANCE};
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-	      EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-	      INFINITE=WaveFunctionTransfType::INFINITE};
+		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
+		  INFINITE=WaveFunctionTransfType::INFINITE};
 
 	TargetingCommon(const LeftRightSuperType& lrs,
 	                const ModelType& model,
@@ -234,8 +234,10 @@ public:
 	void load(const PsimagLite::String& f)
 	{
 		IoInputType io(f);
+		PsimagLite::String loadInto = targetHelper_.model().params().checkpoint.into;
+		PsimagLite::String labelForPsi = targetHelper_.model().params().checkpoint.labelForPsi;
 
-		try {
+		if (loadInto == "All") {
 			setAllStagesTo(WFT_NOADVANCE);
 
 			SomeSerializerType ts(io,IoInputType::LAST_INSTANCE);
@@ -244,15 +246,14 @@ public:
 
 			applyOpExpression_.setTime(ts.time());
 
-			applyOpExpression_.psi().load(io,"PSI");
+			applyOpExpression_.psi().load(io,labelForPsi);
 
-		} catch (std::exception& e) {
-			std::cout<<"WARNING: Only ground-state targets found in file "<<f<<"\n";
+		} else {
 			setAllStagesTo(DISABLED);
 			io.rewind();
 			int site = 0;
 			io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
-			applyOpExpression_.psi().loadOneSector(io,"PSI");
+			applyOpExpression_.psi().loadOneSector(io,labelForPsi);
 		}
 	}
 
