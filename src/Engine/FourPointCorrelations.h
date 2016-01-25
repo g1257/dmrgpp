@@ -191,7 +191,7 @@ public:
 		}
 
 		SparseMatrixType O3g,O4g;
-		if (i4==skeleton_.numberOfSites()-1) {
+		if (i4==skeleton_.numberOfSites(threadId)-1) {
 			if (i3<i4-1) { // not tested
 				skeleton_.dmrgMultiply(O3g,Otmp,O3m,fermionicSign,ns,threadId);
 				skeleton_.growDirectly(Otmp,O3g,i3,fermionicSign,i4-2,true,threadId);

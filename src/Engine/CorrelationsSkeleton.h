@@ -143,9 +143,8 @@ public:
 	    : helper_(helper),verbose_(verbose)
 	{}
 
-	SizeType numberOfSites() const
+	SizeType numberOfSites(SizeType threadId) const
 	{
-		SizeType threadId = 0;
 		return helper_.leftRightSuper(threadId).sites();
 	}
 

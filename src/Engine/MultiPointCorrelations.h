@@ -156,7 +156,7 @@ private:
 	                           SizeType threadId)
 	{
 
-		if (i>=skeleton_.numberOfSites()-1)
+		if (i>=skeleton_.numberOfSites(threadId)-1)
 			throw PsimagLite::RuntimeError("calcCorrelation: i must be < sites-1\n");
 		int fermionicSign = 1;
 

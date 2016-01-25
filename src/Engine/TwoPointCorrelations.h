@@ -216,7 +216,7 @@ namespace Dmrg {
 			skeleton_.createWithModification(O1m,O1,'n');
 			skeleton_.createWithModification(O2m,O2,'n');
 
-			if (j==skeleton_.numberOfSites()-1) {
+			if (j==skeleton_.numberOfSites(threadId)-1) {
 				if (i==j-1) {
 					helper_.setPointer(threadId,j-2);
 					SizeType ni = helper_.leftRightSuper(threadId).left().size()/
