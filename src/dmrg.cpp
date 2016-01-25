@@ -1,9 +1,3 @@
-#ifndef USE_FLOAT
-typedef double MatrixElementType;
-#else
-typedef float MatrixElementType;
-#endif
-
 #include "CrsMatrix.h"
 #include "LanczosSolver.h"
 #include "ChebyshevSolver.h"
@@ -36,9 +30,14 @@ typedef float MatrixElementType;
 #include "RegisterSignals.h"
 #include "ArchiveFiles.h"
 
+#ifndef USE_FLOAT
+typedef double RealType;
+#else
+typedef float RealType;
+#endif
 typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-typedef  PsimagLite::CrsMatrix<std::complex<MatrixElementType> > MySparseMatrixComplex;
-typedef  PsimagLite::CrsMatrix<MatrixElementType> MySparseMatrixReal;
+typedef  PsimagLite::CrsMatrix<std::complex<RealType> > MySparseMatrixComplex;
+typedef  PsimagLite::CrsMatrix<RealType> MySparseMatrixReal;
 #ifdef USE_COMPLEX
 typedef MySparseMatrixComplex MySparseMatrixC;
 #else
@@ -48,7 +47,7 @@ typedef MySparseMatrixReal MySparseMatrixC;
 using namespace Dmrg;
 
 typedef PsimagLite::InputNg<InputCheck> InputNgType;
-typedef ParametersDmrgSolver<MatrixElementType,InputNgType::Readable> ParametersDmrgSolverType;
+typedef ParametersDmrgSolver<RealType,InputNgType::Readable> ParametersDmrgSolverType;
 typedef ArchiveFiles<ParametersDmrgSolverType> ArchiveFilesType;
 
 struct OperatorOptions {

@@ -1,9 +1,3 @@
-#ifndef USE_FLOAT
-typedef double RealType;
-#else
-typedef float RealType;
-#endif
-
 #include <unistd.h>
 #include "Observer.h"
 #include "ObservableLibrary.h"
@@ -31,6 +25,12 @@ typedef float RealType;
 #include "ModelSelector.h"
 #include "ObserverInterpreter.h"
 #include "ArchiveFiles.h"
+
+#ifndef USE_FLOAT
+typedef double RealType;
+#else
+typedef float RealType;
+#endif
 
 using namespace Dmrg;
 
