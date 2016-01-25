@@ -319,14 +319,14 @@ private:
 			ParallelizerType threadedTriDiag(PsimagLite::Concurrency::npthreads,
 			                                 PsimagLite::MPI::COMM_WORLD);
 
-			ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,model_,ioIn_);
+			ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,currentTime_,model_,ioIn_);
 
 			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
 		} else {
 			typedef PsimagLite::NoPthreads<ParallelTriDiagType> ParallelizerType;
 			ParallelizerType threadedTriDiag(1,0);
 
-			ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,model_,ioIn_);
+			ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,currentTime_,model_,ioIn_);
 
 			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
 		}

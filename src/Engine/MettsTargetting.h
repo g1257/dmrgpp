@@ -1110,7 +1110,7 @@ private:
 	{
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		SizeType threadId = 0;
-		typename ModelType::ModelHelperType modelHelper(p,lrs_,threadId);
+		typename ModelType::ModelHelperType modelHelper(p,lrs_,currentBeta_,threadId);
 		typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 
 		SizeType total = phi.effectiveSize(i0);

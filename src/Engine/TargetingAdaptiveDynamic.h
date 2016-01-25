@@ -285,15 +285,15 @@ private:
 			weightForContinuedFraction_ = std::real(this->common().targetVectors()[0]*this->common().targetVectors()[0]);
 	}
 
-	void setLanczosVectors(
-	        SizeType i0,
-	        const VectorType& sv,
-	        SizeType p,
-	        SizeType,
-	        const VectorWithOffsetType& phiNew)
+	void setLanczosVectors(SizeType i0,
+	                       const VectorType& sv,
+	                       SizeType p,
+	                       SizeType,
+	                       const VectorWithOffsetType& phiNew)
 	{
 		SizeType threadId = 0;
-		typename ModelType::ModelHelperType modelHelper(p,this->lrs(),threadId);
+		RealType fakeTime = 0;
+		typename ModelType::ModelHelperType modelHelper(p,this->lrs(),fakeTime,threadId);
 		typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
 		LanczosMatrixType h(&this->model(),&modelHelper);
 		LanczosSolverType lanczosSolver(h,paramsForSolver_);

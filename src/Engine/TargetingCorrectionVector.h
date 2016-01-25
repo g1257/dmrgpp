@@ -426,7 +426,8 @@ private:
 	                       SizeType p)
 	{
 		SizeType threadId = 0;
-		typename ModelType::ModelHelperType modelHelper(p,this->lrs(),threadId);
+		RealType fakeTime = 0;
+		typename ModelType::ModelHelperType modelHelper(p,this->lrs(),fakeTime,threadId);
 		typedef typename LanczosSolverType::LanczosMatrixType
 		        LanczosMatrixType;
 		LanczosMatrixType h(&this->model(),&modelHelper);
@@ -445,7 +446,8 @@ private:
 			throw PsimagLite::RuntimeError("Matsubara only with KRYLOV\n");
 
 		SizeType threadId = 0;
-		typename ModelType::ModelHelperType modelHelper(p,this->lrs(),threadId);
+		RealType fakeTime = 0;
+		typename ModelType::ModelHelperType modelHelper(p,this->lrs(),fakeTime,threadId);
 		LanczosMatrixType h(&this->model(),&modelHelper);
 		RealType E0 = this->common().energy();
 		CorrectionVectorFunctionType cvft(h,tstStruct_,E0);
@@ -535,6 +537,7 @@ private:
 		PsimagLite::String options = this->model().params().options;
 		bool cTridiag = (options.find("concurrenttridiag") !=
 		        PsimagLite::String::npos);
+		RealType fakeTime = 0;
 
 		if (cTridiag) {
 			typedef PsimagLite::Parallelizer<ParallelTriDiagType> ParallelizerType;
@@ -546,6 +549,7 @@ private:
 			                                  V,
 			                                  steps,
 			                                  this->lrs(),
+			                                  fakeTime,
 			                                  this->model(),
 			                                  ioIn_);
 
@@ -559,6 +563,7 @@ private:
 			                                  V,
 			                                  steps,
 			                                  this->lrs(),
+			                                  fakeTime,
 			                                  this->model(),
 			                                  ioIn_);
 

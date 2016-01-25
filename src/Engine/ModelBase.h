@@ -191,9 +191,10 @@ public:
 	}
 
 	virtual void addHamiltonianConnection(SparseMatrixType &matrix,
-	                                      const LeftRightSuperType& lrs) const
+	                                      const LeftRightSuperType& lrs,
+	                                      RealType currentTime) const
 	{
-		return modelCommon_->addHamiltonianConnection(matrix,lrs);
+		return modelCommon_->addHamiltonianConnection(matrix,lrs,currentTime);
 	}
 
 	virtual void hamiltonianConnectionProduct(VectorType& x,

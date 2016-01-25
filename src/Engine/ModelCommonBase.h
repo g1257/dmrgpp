@@ -121,7 +121,8 @@ public:
 	                                 ModelHelperType const &modelHelper) const = 0;
 
 	virtual void addHamiltonianConnection(SparseMatrixType &matrix,
-	                              const LeftRightSuperType& lrs) const = 0;
+	                                      const LeftRightSuperType& lrs,
+	                                      RealType currentTime) const = 0;
 
 
 	virtual void hamiltonianConnectionProduct(VectorType& x,

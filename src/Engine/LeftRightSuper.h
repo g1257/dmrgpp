@@ -302,7 +302,7 @@ private:
 			lrs = new  ThisType(Xbasis,pS,*leftOrRightL);
 		}
 		//!PTEX_LABEL{295}
-		model.addHamiltonianConnection(matrix,*lrs);
+		model.addHamiltonianConnection(matrix,*lrs,time);
 		delete lrs;
 		leftOrRight.setHamiltonian(matrix);
 	}

@@ -298,6 +298,7 @@ private:
 				                    vecSaved[i],
 				                    gsEnergy,
 				                    lrs,
+				                    target.time(),
 				                    initialVectorBySector,
 				                    saveOption);
 			}
@@ -350,12 +351,13 @@ private:
 	                         TargetVectorType &tmpVec,
 	                         RealType &energyTmp,
 	                         const LeftRightSuperType& lrs,
+	                         RealType targetTime,
 	                         const TargetVectorType& initialVector,
 	                         SizeType saveOption)
 	{
 		PsimagLite::String options = parameters_.options;
 		SizeType threadId = 0;
-		typename ModelType::ModelHelperType modelHelper(i,lrs,threadId);
+		typename ModelType::ModelHelperType modelHelper(i,lrs,targetTime,threadId);
 
 		if (options.find("debugmatrix")!=PsimagLite::String::npos && !(saveOption & 4) ) {
 			SparseMatrixType fullm;

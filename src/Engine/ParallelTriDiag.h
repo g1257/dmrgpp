@@ -90,6 +90,7 @@ class ParallelTriDiag {
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
@@ -105,9 +106,17 @@ public:
 	                VectorMatrixFieldType& V,
 	                typename PsimagLite::Vector<SizeType>::Type& steps,
 	                const LeftRightSuperType& lrs,
+	                RealType currentTime,
 	                const ModelType& model,
 	                InputValidatorType& io)
-	    : phi_(phi),T_(T),V_(V),steps_(steps),lrs_(lrs),model_(model),io_(io)
+	    : phi_(phi),
+	      T_(T),
+	      V_(V),
+	      steps_(steps),
+	      lrs_(lrs),
+	      currentTime_(currentTime),
+	      model_(model),
+	      io_(io)
 	{}
 
 	void thread_function_(SizeType threadNum,
@@ -138,7 +147,7 @@ private:
 	                 SizeType threadNum)
 	{
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
-		typename ModelType::ModelHelperType modelHelper(p,lrs_,threadNum);
+		typename ModelType::ModelHelperType modelHelper(p,lrs_,currentTime_,threadNum);
 		typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 
 		typename LanczosSolverType::ParametersSolverType params(io_,"Tridiag");
@@ -161,6 +170,7 @@ private:
 	VectorMatrixFieldType& V_;
 	typename PsimagLite::Vector<SizeType>::Type& steps_;
 	const LeftRightSuperType& lrs_;
+	RealType currentTime_;
 	const ModelType& model_;
 	InputValidatorType& io_;
 }; // class ParallelTriDiag

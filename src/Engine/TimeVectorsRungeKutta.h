@@ -176,14 +176,14 @@ private:
 		FunctionForRungeKutta(const RealType& E0,
 		                      const RealType &timeDirection,
 		                      const LeftRightSuperType& lrs,
+		                      RealType currentTime,
 		                      const ModelType& model,
-		                      RealType,
 		                      const VectorWithOffsetType& phi,
 		                      SizeType i0)
 			: E0_(E0),
 		      timeDirection_(timeDirection),
 			  p_(lrs.super().findPartitionNumber(phi.offset(i0))),
-			  modelHelper_(p_,lrs,0),
+			  modelHelper_(p_,lrs,currentTime,0),
 			  lanczosHelper_(&model,&modelHelper_)
 		{
 		}
@@ -217,7 +217,7 @@ private:
 		TargetVectorType phi0(total);
 		phi.extract(phi0,i0);
 		//				std::cerr<<"norma of phi0="<<PsimagLite::norm(phi0)<<"\n";
-		FunctionForRungeKutta f(E0_,tstStruct_.timeDirection(),lrs_,model_,Eg,phi,i0);
+		FunctionForRungeKutta f(E0_,tstStruct_.timeDirection(),lrs_,currentTime_,model_,phi,i0);
 
 		RealType epsForRK = tstStruct_.tau()/(times_.size()-1.0);
 		PsimagLite::RungeKutta<RealType,FunctionForRungeKutta,TargetVectorType> rungeKutta(f,epsForRK);

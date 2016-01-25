@@ -111,9 +111,13 @@ public:
 	typedef LinkProductStruct<SparseElementType> LinkProductStructType;
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorSparseElementType;
 
-	ModelHelperSu2(int m,const LeftRightSuperType& lrs,SizeType threadId)
+	ModelHelperSu2(int m,
+	               const LeftRightSuperType& lrs,
+	               RealType targetTime,
+	               SizeType threadId)
 	    : m_(m),
 	      lrs_(lrs),
+	      targetTime_(targetTime),
 	      threadId_(threadId),
 	      su2reduced_(m,lrs)
 	{}
@@ -470,6 +474,7 @@ private:
 
 	int m_;
 	const LeftRightSuperType&  lrs_;
+	RealType targetTime_;
 	SizeType threadId_;
 	Su2Reduced<LeftRightSuperType> su2reduced_;
 	LinkProductStructType lps_;

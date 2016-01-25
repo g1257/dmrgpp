@@ -310,9 +310,11 @@ private:
 	                       const VectorType& sv,
 	                       SizeType p)
 	{
+		RealType fakeTime = 0;
 		SizeType threadId = 0;
 		typename ModelType::ModelHelperType modelHelper(p,
 		                                                this->lrs(),
+		                                                fakeTime,
 		                                                threadId);
 		typename LanczosSolverType::LanczosMatrixType h(&this->model(),&modelHelper);
 		paramsForSolver_.lotaMemory = true;

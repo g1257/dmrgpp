@@ -304,7 +304,10 @@ private:
 	{
 		SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
 		SizeType threadId = 0;
-		typename ModelType::ModelHelperType modelHelper(p,this->lrs(),threadId);
+		typename ModelType::ModelHelperType modelHelper(p,
+		                                                this->lrs(),
+		                                                this->common().currentTime(),
+		                                                threadId);
 		typename LanczosSolverType::LanczosMatrixType lanczosHelper(&this->model(),
 		                                                            &modelHelper);
 

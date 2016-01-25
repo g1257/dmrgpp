@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2015, UT-Battelle, LLC
+Copyright (c) 2009-2016, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 3.0]
@@ -67,8 +67,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 */
-#ifndef MODELHELPER_LOC_HEADER_H
-#define MODELHELPER_LOC_HEADER_H
+#ifndef DMRG_MODELHELPER_H
+#define DMRG_MODELHELPER_H
 
 #include "PackIndices.h" // in PsimagLite
 #include "Link.h"
@@ -111,9 +111,11 @@ public:
 
 	ModelHelperLocal(SizeType m,
 	                 const LeftRightSuperType& lrs,
+	                 RealType targetTime,
 	                 SizeType threadId)
 	    : m_(m),
 	      lrs_(lrs),
+	      targetTime_(targetTime),
 	      threadId_(threadId),
 	      buffer_(lrs_.left().size()),
 	      basis2tc_(lrs_.left().numberOfOperators()),
@@ -496,6 +498,7 @@ private:
 
 	int m_;
 	const LeftRightSuperType&  lrs_;
+	RealType targetTime_;
 	SizeType threadId_;
 	typename PsimagLite::Vector<PsimagLite::Vector<int>::Type>::Type buffer_;
 	VectorSparseMatrixType basis2tc_,basis3tc_;

@@ -175,7 +175,9 @@ public:
 		explained before in Section~\ref{subsec:dmrgBasisWithOperators}.
 		This function has a default implementation.
 		*/
-	void addHamiltonianConnection(SparseMatrixType &matrix,const LeftRightSuperType& lrs) const
+	void addHamiltonianConnection(SparseMatrixType &matrix,
+	                              const LeftRightSuperType& lrs,
+	                              RealType currentTime) const
 	{
 		int bs,offset;
 		SparseMatrixType matrixBlock;
@@ -185,7 +187,7 @@ public:
 			bs = lrs.super().partition(m+1)-offset;
 			matrixBlock.makeDiagonal(bs);
 			SizeType threadId = 0;
-			ModelHelperType modelHelper(m,lrs,threadId);
+			ModelHelperType modelHelper(m,lrs,currentTime,threadId);
 
 			VerySparseMatrixType vsm(matrixBlock.row());
 			addHamiltonianConnection(vsm,modelHelper);
