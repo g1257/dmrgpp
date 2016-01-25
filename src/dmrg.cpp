@@ -471,7 +471,7 @@ int main(int argc,char *argv[])
 	}
 
 	// print license
-	if (ConcurrencyType::root()) {
+	if (ConcurrencyType::root() && !options.enabled) {
 		std::cout<<ProgramGlobals::license;
 		Provenance provenance;
 		std::cout<<provenance;
