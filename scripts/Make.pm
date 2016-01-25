@@ -93,7 +93,6 @@ sub make
 
 	my $gccVersion = gccVersion();
 	my $normalFlags = "-Werror -Wall";
-	$normalFlags .= " -Wstrict-overflow=5 " if ($gccVersion >= 4.2);
 	$normalFlags .= " -frecord-gcc-switches " if ($gccVersion >= 4.3);
 
 	my $libTarget = "";
