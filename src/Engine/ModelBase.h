@@ -235,7 +235,7 @@ public:
 	{
 		hmatrix.makeDiagonal(cm[0].data.row());
 
-		modelCommon_->addConnectionsInNaturalBasis(hmatrix,cm,block,sysEnvOnly);
+		modelCommon_->addConnectionsInNaturalBasis(hmatrix,cm,block,sysEnvOnly,time);
 
 		addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
 	}

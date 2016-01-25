@@ -105,6 +105,7 @@ class ModelCommon : public ModelBaseType::ModelCommonBaseType {
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef VerySparseMatrix<SparseElementType> VerySparseMatrixType;
 	typedef typename ModelHelperType::LinkType LinkType;
+	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
 
 public:
 
@@ -284,12 +285,13 @@ public:
 	void addConnectionsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                  const VectorOperatorType& cm,
 	                                  const Block& block,
-	                                  bool sysEnvOnly) const
+	                                  bool sysEnvOnly,
+	                                  RealType time) const
 	{
 		SizeType n = block.size();
 		for (SizeType i=0;i<n;i++) {
 			for (SizeType j=0;j<n;j++) {
-				addConnectionsInNaturalBasis(hmatrix,i,j,cm,block,sysEnvOnly);
+				addConnectionsInNaturalBasis(hmatrix,i,j,cm,block,sysEnvOnly,time);
 			}
 		}
 	}
@@ -310,7 +312,7 @@ public:
 		HamiltonianConnectionType hc(this->geometry(),modelHelper,&lps,&x,&y);
 		SizeType i =0, j = 0, type = 0,term = 0, dofs =0;
 		SparseElementType tmp = 0.0;
-		typename HamiltonianConnectionType::AdditionalDataType additionalData;
+		AdditionalDataType additionalData;
 		hc.prepare(ix,i,j,type,tmp,term,dofs,additionalData);
 		LinkType link2 = hc.getKron(A,B,i,j,type,tmp,term,dofs,additionalData);
 		return link2;
@@ -323,7 +325,8 @@ private:
 	                                  SizeType j,
 	                                  const VectorOperatorType& cm,
 	                                  const Block& block,
-	                                  bool sysEnvOnly) const
+	                                  bool sysEnvOnly,
+	                                  RealType time) const
 	{
 		SizeType middle = static_cast<SizeType>(block.size()/2);
 		if (middle == 0 && sysEnvOnly) return;
@@ -341,7 +344,7 @@ private:
 		SizeType type = 0;
 		SizeType offset = cm.size()/block.size();
 
-		typename GeometryType::AdditionalDataType additionalData;
+		AdditionalDataType additionalData;
 
 		for (SizeType term=0;term<this->geometry().terms();term++) {
 			this->geometry().fillAdditionalData(additionalData,term,ind,jnd);

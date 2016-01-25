@@ -124,6 +124,8 @@ public:
 
 	static bool isSu2() { return true; }
 
+	const RealType& time() const { return targetTime_; }
+
 	int size() const
 	{
 		int tmp = lrs_.super().partition(m_+1)-lrs_.super().partition(m_);

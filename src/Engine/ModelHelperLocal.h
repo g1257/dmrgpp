@@ -129,6 +129,8 @@ public:
 
 	SizeType m() const { return m_; }
 
+	const RealType& time() const { return targetTime_; }
+
 	static bool isSu2() { return false; }
 
 	const SparseMatrixType& getReducedOperator(char modifier,
