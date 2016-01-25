@@ -8,14 +8,11 @@ manual.tex: manual.ptex
 	find ../src -iname "*.h" -or -iname "*.cpp" |\
               perl ../../PsimagLite/scripts/doc.pl manual.ptex
 
-manual.pdf: manual.tex ../README.tex 
+manual.pdf: manual.tex 
 	pdflatex manual.tex
 	bibtex manual.aux
 	pdflatex manual.tex
 	pdflatex manual.tex
-
-../README.tex:
-	pod2latex -out ../README.tex  ../README.pod
 
 clean:
 	rm -f ../README.tex

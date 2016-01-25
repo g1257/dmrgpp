@@ -254,6 +254,22 @@ which will show
 &\cdots.\nonumber
 \end{align}
 
+In general, the following syntax can be used
+\begin{verbatim}
+./dmrg -f input.inp -o 'opspec,opspec,...'
+\end{verbatim}
+where \verb!opspec! is an operator specification. There are
+two kinds of operator specifications: raw operators and cooked operators.
+Raw operators are given in a file, and the specification is 
+\verb!':file.txt'! as has been described.
+The other operator specification, the cooked one, 
+is given by \verb!'label?dof-1'!, where 
+\verb!label! is a name for the operator, \verb!dof! is 
+an non-negative integer indicating the degree of freedom, and 
+-1 indicates that it is a fermionic operator. 
+-1 must be omitted for bosonic operators.
+\verb!?dof! may be omitted for bosonic operators and defaults to \verb!dof=0!.
+
 \section{The Observer Driver}\label{sec:observe}
 
 \section{The Disk Stacks}
