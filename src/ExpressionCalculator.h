@@ -10,12 +10,12 @@
 
 namespace PsimagLite {
 
-template<typename RealType>
+template<typename ComplexOrRealType>
 struct PrepassData {
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 
 	PsimagLite::String names;
-	VectorRealType values;
+	VectorType values;
 };
 
 template<typename PrepassDataType>

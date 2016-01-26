@@ -107,7 +107,6 @@ public:
 	typedef typename GeometryBaseType::AdditionalDataType AdditionalDataType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
 	typedef ExpressionCalculator<RealType> ExpressionCalculatorType;
-	typedef PrepassData<RealType> PrepassDataType;
 
 	GeometryTerm()
 	    : linSize_(0),orbitals_(0),geometryBase_(0)
@@ -203,21 +202,23 @@ public:
 		return cachedValues_(k1,k2);
 	}
 
-	ComplexOrRealType vModifier(ComplexOrRealType value, RealType time) const
+	template<typename T>
+	typename EnableIf<IsComplexNumber<T>::True || Loki::TypeTraits<T>::isStdFloat,
+	T>::Type vModifier(T value, RealType time) const
 	{
 		if (vModifier_ == "") return value;
 
 		typename ExpressionCalculatorType::VectorStringType ve;
 		tokenizer(vModifier_,ve,",");
 
-		PrepassDataType pd;
-		typename PrepassDataType::VectorRealType vr(2,0);
+		PrepassData<T> pd;
+		typename PrepassData<T>::VectorType vr(2,0);
 		vr[0] = time;
 		vr[1] = value;
 		pd.names = "tv";
 		pd.values = vr;
 
-		ExpressionPrepass<PrepassDataType>::prepass(ve,pd);
+		ExpressionPrepass<PrepassData<T> >::prepass(ve,pd);
 
 		ExpressionCalculatorType ec(ve);
 		return ec();

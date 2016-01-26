@@ -188,7 +188,9 @@ public:
 		return terms_[term]->operator()(i1,edof1,i2,edof2);
 	}
 
-	ComplexOrRealType vModifier(SizeType term, ComplexOrRealType value, RealType time) const
+	template<typename T>
+	typename EnableIf<IsComplexNumber<T>::True || Loki::TypeTraits<T>::isStdFloat,
+	T>::Type vModifier(SizeType term, T value, RealType time) const
 	{
 		return terms_[term]->vModifier(value,time);
 	}
