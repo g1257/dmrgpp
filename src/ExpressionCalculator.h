@@ -80,12 +80,6 @@ class ExpressionCalculator {
 			}
 		}
 
-		NodeTypeEnum type;
-		unsigned char op[4];
-		SizeType index;
-		SizeType ary;
-		ComplexOrRealType value;
-
 		void print(std::ostream& os) const
 		{
 			if (type == NODE_NUMBER) {
@@ -94,6 +88,12 @@ class ExpressionCalculator {
 				os<<index<<" "<<op<<" "<<ary<<"| ";
 			}
 		}
+
+		NodeTypeEnum type;
+		unsigned char op[4];
+		SizeType index;
+		SizeType ary;
+		ComplexOrRealType value;
 	};
 
 	typedef Node NodeType;
@@ -104,7 +104,7 @@ public:
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	ExpressionCalculator(const VectorStringType& ve)
-	: value_(0)
+	: ve_(ve), value_(0.0)
 	{
 		VectorNodeType vne(ve.size(),NodeType("",0));
 		fillNodes(vne,ve);
@@ -133,14 +133,20 @@ public:
 					}
 				}
 			} else {
-				if (vne[i].op[0] != '\0')
-					ops.push(vne[i]);
+				if (vne[i].op[0] == '\0') continue;
+				ops.push(vne[i]);
+				numbers = 0;
 			}
 		}
 
 		if (debug_) print(vne,"vne");
-		if (simplifications == 0)
-			throw PsimagLite::RuntimeError("Syntax Error\n");
+		if (simplifications > 0) return false;
+
+		String msg("ExpressionCalculator: Syntax error in expression ");
+		for (SizeType i = 0; i < ve_.size(); ++i)
+			msg += ve_[i] + " ";
+
+		throw PsimagLite::RuntimeError(msg + "\n");
 
 		return false;
 	}
@@ -218,6 +224,7 @@ private:
 		return 0;
 	}
 
+	VectorStringType ve_;
 	ComplexOrRealType value_;
 }; // class ExpressionCalculator
 
