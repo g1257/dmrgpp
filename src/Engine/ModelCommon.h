@@ -355,6 +355,8 @@ private:
 
 				if (tmp==static_cast<RealType>(0.0)) continue;
 
+				tmp = this->geometry().vModifier(term,tmp,time);
+
 				std::pair<SizeType,SizeType> ops;
 				std::pair<char,char> mods('N','C');
 				SizeType fermionOrBoson=ProgramGlobals::FERMION,angularMomentum=0,category=0;

@@ -146,6 +146,8 @@ public:
 				if (ind > jnd) tmp = std::conj(tmp);
 				if (dofsTotal == 2 && dofs == 1) tmp = std::conj(tmp);
 
+				tmp = geometry_.vModifier(term,tmp,modelHelper_.time());
+
 				flag = true;
 
 				if (lps!=0) {
@@ -249,6 +251,7 @@ public:
 		bool isSu2 = modelHelper_.isSu2();
 		SparseElementType value = valuec;
 		LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData);
+
 		LinkProductType::setLinkData(term,dofs,isSu2,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category,additionalData);
 		LinkType link2(i,j,type, value,dofs,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
 		SizeType sysOrEnv = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::System : ModelHelperType::Environ;
