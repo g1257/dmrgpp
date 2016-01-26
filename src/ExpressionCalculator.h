@@ -7,6 +7,8 @@
 #include "Tokenizer.h"
 #include "TypeToString.h"
 #include "Stack.h"
+#include "../loki/TypeTraits.h"
+#include <cmath>
 
 namespace PsimagLite {
 
@@ -188,13 +190,30 @@ private:
 		if (op[0] == 'c') return cos(values[0]);
 		if (op[0] == 's') return sin(values[0]);
 		if (op[0] == '?') return (std::real(values[0]) > 0) ? values[1] : values[2];
+		if (op[0] == 'e') return myExponential(values[0]);
+		if (op[0] == 'l') return log(values[0]);
 		return 0.0;
+	}
+
+	template<typename T>
+	static typename EnableIf<Loki::TypeTraits<T>::isStdFloat,
+	T>::Type myExponential(T v)
+	{
+		return ::exp(v);
+	}
+
+	template<typename T>
+	static typename EnableIf<IsComplexNumber<T>::True,
+	T>::Type myExponential(T v)
+	{
+		typename Real<T>::Type c = std::imag(v);
+		return ::exp(std::real(v))*T(cos(c),sin(c));
 	}
 
 	static SizeType findAry(PsimagLite::String op)
 	{
 		if (op == "+" || op == "-" || op == "*") return 2;
-		if (op == "c" || op == "s") return 1;
+		if (op == "c" || op == "s" || op == "e" || op == "l") return 1;
 		if (op == "?") return 3;
 		return 0;
 	}
