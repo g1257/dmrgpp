@@ -91,6 +91,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Star.h"
 #include "LongChain.h"
 #include "LongRange.h"
+#include "ExpressionCalculator.h"
+#include "Tokenizer.h"
 
 namespace PsimagLite {
 
@@ -104,6 +106,8 @@ public:
 
 	typedef typename GeometryBaseType::AdditionalDataType AdditionalDataType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
+	typedef ExpressionCalculator<RealType> ExpressionCalculatorType;
+	typedef PrepassData<RealType> PrepassDataType;
 
 	GeometryTerm()
 	    : linSize_(0),orbitals_(0),geometryBase_(0)
@@ -157,6 +161,10 @@ public:
 			                                            geometryBase_));
 		}
 
+		try {
+			io.readline(vModifier_,"GeometryValueModifier=");
+		} catch (std::exception&) {}
+
 		orbitals_ = findOrbitals();
 		cacheValues();
 
@@ -193,6 +201,26 @@ public:
 		int k2 = geometryBase_->index(i2,edof2,orbitals_);
 		assert(k1>=0 && k2>=0);
 		return cachedValues_(k1,k2);
+	}
+
+	ComplexOrRealType vModifier(ComplexOrRealType value, RealType time) const
+	{
+		if (vModifier_ == "") return value;
+
+		typename ExpressionCalculatorType::VectorStringType ve;
+		tokenizer(vModifier_,ve,",");
+
+		PrepassDataType pd;
+		typename PrepassDataType::VectorRealType vr(2,0);
+		vr[0] = time;
+		vr[1] = value;
+		pd.names = "tv";
+		pd.values = vr;
+
+		ExpressionPrepass<PrepassDataType>::prepass(ve,pd);
+
+		ExpressionCalculatorType ec(ve);
+		return ec();
 	}
 
 	//assumes 1<smax+1 < emin
@@ -389,6 +417,7 @@ private:
 	SizeType orbitals_;
 	GeometryBaseType* geometryBase_;
 	String gOptions_;
+	String vModifier_;
 	typename Vector<GeometryDirectionType>::Type directions_;
 	Matrix<ComplexOrRealType> cachedValues_;
 }; // class GeometryTerm

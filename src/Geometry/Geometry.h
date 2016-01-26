@@ -90,6 +90,7 @@ class Geometry : public GeometryEx<typename Real<ComplexOrRealType_>::Type,Input
 public:
 
 	typedef ComplexOrRealType_ ComplexOrRealType;
+	typedef typename Real<ComplexOrRealType>::Type RealType;
 	typedef GeometryTerm<ComplexOrRealType,InputType> GeometryTermType;
 	typedef typename Vector<SizeType>::Type BlockType;
 	typedef typename GeometryTermType::AdditionalDataType AdditionalDataType;
@@ -185,6 +186,11 @@ public:
 	(SizeType i1,SizeType edof1,SizeType i2, SizeType edof2,SizeType term) const
 	{
 		return terms_[term]->operator()(i1,edof1,i2,edof2);
+	}
+
+	ComplexOrRealType vModifier(SizeType term, ComplexOrRealType value, RealType time) const
+	{
+		return terms_[term]->vModifier(value,time);
 	}
 
 	bool connected(SizeType smax,SizeType emin,SizeType i1,SizeType i2) const
