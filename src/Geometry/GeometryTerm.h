@@ -106,7 +106,6 @@ public:
 
 	typedef typename GeometryBaseType::AdditionalDataType AdditionalDataType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
-	typedef ExpressionCalculator<RealType> ExpressionCalculatorType;
 
 	GeometryTerm()
 	    : linSize_(0),orbitals_(0),geometryBase_(0)
@@ -208,6 +207,7 @@ public:
 	{
 		if (vModifier_ == "") return value;
 
+		typedef ExpressionCalculator<T> ExpressionCalculatorType;
 		typename ExpressionCalculatorType::VectorStringType ve;
 		tokenizer(vModifier_,ve,",");
 

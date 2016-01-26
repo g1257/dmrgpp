@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 	PsimagLite::tokenizer(argv[1],ve,",");
 
 	PrepassDataType pd;
-	PrepassDataType::VectorRealType vr(1,0.25);
+	PrepassDataType::VectorType vr(1,0.25);
 	pd.names = "t";
 	pd.values = vr;
 

@@ -50,11 +50,11 @@ private:
 	}
 }; // class ExpressionPrepass
 
-template<typename RealType>
+template<typename ComplexOrRealType>
 class ExpressionCalculator {
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 
 	enum NodeTypeEnum {NODE_NUMBER, NODE_OPERATOR};
 
@@ -82,7 +82,7 @@ class ExpressionCalculator {
 		unsigned char op[4];
 		SizeType index;
 		SizeType ary;
-		RealType value;
+		ComplexOrRealType value;
 
 		void print(std::ostream& os) const
 		{
@@ -143,7 +143,7 @@ public:
 		return false;
 	}
 
-	const RealType& operator()() const
+	const ComplexOrRealType& operator()() const
 	{
 		return value_;
 	}
@@ -169,25 +169,25 @@ private:
 	              const VectorSizeType& indices) const
 	{
 		SizeType total = op.ary;
-		VectorRealType values(total);
+		VectorType values(total);
 		for (SizeType i = 0; i < total; ++i) {
 			values[i] = vn[indices[i]].value;
 			vn[indices[i]] = Node("",indices[i]);
 		}
 
-		RealType value = executeOperator(op.op,values);
+		ComplexOrRealType value = executeOperator(op.op,values);
 		vn[op.index] = Node(ttos(value),op.index);
 	}
 
-	static RealType executeOperator(const unsigned char op[],
-	                                const VectorRealType& values)
+	static ComplexOrRealType executeOperator(const unsigned char op[],
+	                                const VectorType& values)
 	{
 		if (op[0] == '+') return values[0] + values[1];
 		if (op[0] == '-') return values[0] - values[1];
 		if (op[0] == '*') return values[0] * values[1];
 		if (op[0] == 'c') return cos(values[0]);
 		if (op[0] == 's') return sin(values[0]);
-		if (op[0] == '?') return (values[0]) ? values[1] : values[2];
+		if (op[0] == '?') return (std::real(values[0]) > 0) ? values[1] : values[2];
 		return 0.0;
 	}
 
@@ -199,7 +199,7 @@ private:
 		return 0;
 	}
 
-	RealType value_;
+	ComplexOrRealType value_;
 }; // class ExpressionCalculator
 
 } // namespace PsimagLite
