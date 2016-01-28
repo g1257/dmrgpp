@@ -148,7 +148,7 @@ struct ParametersDmrgSolver {
 	PsimagLite::String insitu;
 	PsimagLite::String fileForDensityMatrixEigs;
 	PsimagLite::String recoverySave;
-	CheckPoint checkpoint;
+	RestartStruct checkpoint;
 	VectorSizeType adjustQuantumNumbers;
 	VectorFiniteLoopType finiteLoop;
 
