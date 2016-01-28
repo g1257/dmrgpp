@@ -1,9 +1,8 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2016, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 #ifndef UTILS_HEADER_H
 #define UTILS_HEADER_H
 
@@ -98,18 +95,14 @@ struct UnixPathSeparator
 	}
 };
 
-PsimagLite::String basename(PsimagLite::String pathname)
-{
-	return PsimagLite::String(std::find_if(pathname.rbegin(),
-	                                       pathname.rend(),
-	                                       UnixPathSeparator()).base(),pathname.end());
-}
+PsimagLite::String basename(PsimagLite::String pathname);
 
 template<template<typename,typename> class SomeVectorTemplate,
          typename SomeAllocator1Type,
          typename SomeAllocator2Type,
          typename T>
-typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorTemplate<T,SomeAllocator1Type> >::True,void>::Type
+typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<
+SomeVectorTemplate<T,SomeAllocator1Type> >::True,void>::Type
 reorder(SomeVectorTemplate<T,SomeAllocator1Type>& v,
         const SomeVectorTemplate<SizeType,SomeAllocator2Type>& permutation)
 {
@@ -119,7 +112,8 @@ reorder(SomeVectorTemplate<T,SomeAllocator1Type>& v,
 }
 
 template<typename SomeType>
-void reorder(PsimagLite::Matrix<SomeType>& v,const PsimagLite::Vector<SizeType>::Type& permutation)
+void reorder(PsimagLite::Matrix<SomeType>& v,
+             const PsimagLite::Vector<SizeType>::Type& permutation)
 {
 	PsimagLite::Matrix<SomeType> tmpVector(v.n_row(),v.n_col());
 	for (SizeType i=0;i<v.n_row();i++)
@@ -262,25 +256,9 @@ fillFermionicSigns(SomeVectorType& fermionicSigns,
 		fermionicSigns[i]= (electrons[i]%2==0) ? 1.0 : static_cast<ValueType>(f);
 }
 
-SizeType exactDivision(SizeType a,SizeType b)
-{
-	SizeType c = static_cast<SizeType>(a/b);
-	if (c * b != a)
-		throw PsimagLite::RuntimeError("exactDivision expected\n");
+SizeType exactDivision(SizeType a,SizeType b);
 
-	return c;
-}
-
-SizeType log2OfInteger(SizeType x)
-{
-	SizeType counter = 0;
-	while (x) {
-		counter++;
-		x >>= 1;
-	}
-
-	return counter;
-}
+SizeType log2OfInteger(SizeType x);
 
 } //namespace utils
 /*@}*/
