@@ -2,7 +2,6 @@
 #include "LanczosSolver.h"
 #include "ChebyshevSolver.h"
 #include "BlockMatrix.h"
-#include "DmrgSolver.h"
 #include "IoSimple.h"
 #include "Operators.h"
 #include "Concurrency.h"
@@ -24,17 +23,10 @@
 #include "BasisWithOperators.h"
 #include "LeftRightSuper.h"
 #include "Provenance.h"
-#include "InputNg.h"
-#include "InputCheck.h"
-#include "ModelSelector.h"
 #include "RegisterSignals.h"
 #include "ArchiveFiles.h"
+#include "DmrgDriver.h"
 
-#ifndef USE_FLOAT
-typedef double RealType;
-#else
-typedef float RealType;
-#endif
 typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 typedef  PsimagLite::CrsMatrix<std::complex<RealType> > MySparseMatrixComplex;
 typedef  PsimagLite::CrsMatrix<RealType> MySparseMatrixReal;
@@ -46,28 +38,7 @@ typedef MySparseMatrixReal MySparseMatrixC;
 
 using namespace Dmrg;
 
-typedef PsimagLite::InputNg<InputCheck> InputNgType;
-typedef ParametersDmrgSolver<RealType,InputNgType::Readable> ParametersDmrgSolverType;
 typedef ArchiveFiles<ParametersDmrgSolverType> ArchiveFilesType;
-
-struct OperatorOptions {
-
-	OperatorOptions()
-	    : site(0),
-	      dof(0),
-	      label(""),
-	      fermionicSign(0),
-	      transpose(false),
-	      enabled(false)
-	{}
-
-	SizeType site;
-	SizeType dof;
-	PsimagLite::String label;
-	int fermionicSign;
-	bool transpose;
-	bool enabled;
-};
 
 std::streambuf *GlobalCoutBuffer = 0;
 std::ofstream GlobalCoutStream;
@@ -117,36 +88,6 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 	                  su2Related);
 
 	opC3.save(std::cout);
-}
-
-template<typename GeometryType,
-         typename TargettingType>
-void mainLoop3(GeometryType& geometry,
-               const ParametersDmrgSolverType& dmrgSolverParams,
-               InputNgType::Readable& io,
-               const OperatorOptions& opOptions)
-{
-	typedef typename TargettingType::TargetParamsType TargetParamsType;
-	typedef typename TargettingType::MatrixVectorType::ModelType ModelBaseType;
-
-	//! Setup the Model
-	ModelSelector<ModelBaseType> modelSelector(dmrgSolverParams.model);
-	const ModelBaseType& model = modelSelector(dmrgSolverParams,io,geometry);
-
-	if (opOptions.enabled) {
-		operatorDriver(model,opOptions);
-		return;
-	}
-
-	//! Read TimeEvolution if applicable:
-	TargetParamsType tsp(io,model);
-
-	//! Setup the dmrg solver:
-	typedef DmrgSolver<TargettingType> SolverType;
-	SolverType dmrgSolver(model,tsp,io);
-
-	//! Calculate observables:
-	dmrgSolver.main(geometry);
 }
 
 template<typename GeometryType,
