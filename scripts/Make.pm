@@ -45,16 +45,29 @@ all: $allExecutables $additional3
 
 EOF
 
-foreach my $what (@$drivers) {
-print FH<<EOF;
+foreach my $ptr (@$drivers) {
+	my $refptr = ref($ptr);
+	my $oldmode = ($refptr eq "");
+	my $what = ($oldmode) ? $ptr : $ptr->{"name"};
+	my $aux = ($oldmode) ? 0 : $ptr->{"aux"};
+	$aux = 0 if (!defined($aux));
+	my $dotos = ($oldmode) ? "$what.o" : $ptr->{"dotos"};
+	$dotos = "$what.o" if (!defined($dotos));
+
+	print FH<<EOF;
 $what.o: $what.cpp  Makefile $additional Config.make
 	\$(CXX) \$(CPPFLAGS) -c $what.cpp
 
-$what: $what.o
+EOF
+
+	if (!$aux) {
+		print FH<<EOF;
+$what: $dotos
 	\$(CXX) -o  $what $what.o \$(LDFLAGS)
 	\$(STRIP_COMMAND) $what
 
 EOF
+	}
 }
 
 print FH<<EOF;
@@ -147,10 +160,17 @@ sub combineAllDrivers
 {
 	my ($drivers,$extension) = @_;
 	my $buffer = "";
-	foreach my $what (@$drivers) {
+	foreach my $ptr (@$drivers) {
+		my $refptr = ref($ptr);
+		my $oldmode = ($refptr eq "");
+		my $what = ($oldmode) ? $ptr : $ptr->{"name"};
+		my $aux = ($oldmode) ? 0 : $ptr->{"aux"};
+		defined($aux) or $aux = 0;
+		next if ($aux and $extension eq "");
 		my $tmp = $what.$extension." ";
 		$buffer .= $tmp;
 	}
+
 	return $buffer;
 }
 

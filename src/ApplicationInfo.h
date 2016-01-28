@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <sys/time.h>
 #include <time.h>
+#include "Vector.h"
 
 namespace PsimagLite {
 
