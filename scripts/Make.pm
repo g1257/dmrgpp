@@ -63,7 +63,7 @@ EOF
 	if (!$aux) {
 		print FH<<EOF;
 $what: $dotos
-	\$(CXX) -o  $what $what.o \$(LDFLAGS)
+	\$(CXX) -o  $what $dotos \$(LDFLAGS)
 	\$(STRIP_COMMAND) $what
 
 EOF

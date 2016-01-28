@@ -198,9 +198,6 @@ private:
 	SizeType rank_;
 }; // ProgressIndicator
 
-MemoryUsage ProgressIndicator::musage_;
-OstringStream ProgressIndicator::buffer_;
-bool ProgressIndicator::bufferActive_ = false;
 } // namespace PsimagLite
 
 /*@}*/

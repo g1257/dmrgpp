@@ -39,23 +39,28 @@ sub createMakefile
 	open($fh,">Makefile") or die "Cannot open Makefile for writing: $!\n";
 
 	local *FH = $fh;
-print FH<<EOF;
+	my @units = ("MersenneTwister","Matrix","Mpi","ApplicationInfo","Concurrency",
+	"ProgressIndicator","Tokenizer");
+	my $combinedUnits = combine("",\@units,".o ");
+	my $combinedUnits2 = combine("../src/",\@units,".cpp ");
+
+	print FH<<EOF;
 include Config.make
 all: libpsimaglite.a
-libpsimaglite.a: Makefile MersenneTwister.o Matrix.o Mpi.o
-\tar rcs libpsimaglite.a MersenneTwister.o Matrix.o Mpi.o
+libpsimaglite.a: Makefile $combinedUnits
+\tar rcs libpsimaglite.a $combinedUnits
+EOF
 
-MersenneTwister.o: ../src/MersenneTwister.cpp ../src/MersenneTwister.h Makefile
-\t\$(CXX) \$(CPPFLAGS) -c ../src/MersenneTwister.cpp
+	foreach my $unit (@units) {
+		print FH<<EOF;
+$unit.o: ../src/$unit.cpp ../src/$unit.h Makefile
+\t\$(CXX) \$(CPPFLAGS) -c ../src/$unit.cpp
+EOF
+	}
 
-Matrix.o: ../src/Matrix.cpp ../src/Matrix.h Makefile
-\t\$(CXX) \$(CPPFLAGS) -c ../src/Matrix.cpp
-
-Mpi.o: ../src/Mpi.cpp ../src/Mpi.h Makefile
-\t\$(CXX) \$(CPPFLAGS) -c ../src/Mpi.cpp
-
-Makefile.dep: ../src/MersenneTwister.cpp
-\t\$(CXX) \$(CPPFLAGS) -MM  ../src/MersenneTwister.cpp  > Makefile.dep
+print FH<<EOF;
+Makefile.dep: $combinedUnits2
+\t\$(CXX) \$(CPPFLAGS) -MM  $combinedUnits2  > Makefile.dep
 
 clean: Makefile.dep
 \trm -f core* *.o *.dep *.a
@@ -68,4 +73,15 @@ EOF
 	print STDERR "File Makefile has been written\n";
 }
 
+sub combine
+{
+	my ($pre,$a,$post) = @_;
+	my $n = scalar(@$a);
+	my $buffer = "";
+	for (my $i = 0; $i < $n; ++$i) {
+		$buffer .= $pre.$a->[$i].$post;
+	}
+
+	return $buffer;
+}
 

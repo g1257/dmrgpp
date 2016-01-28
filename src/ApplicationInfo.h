@@ -118,18 +118,7 @@ private:
 	PsimagLite::String name_;
 }; // class ApplicationInfo
 
-std::ostream& operator<<(std::ostream& os,const ApplicationInfo& ai)
-{
-	os<<ai.getTimeDate();
-	if (!ai.firstCall_) return os;
-	os<<ai.name_<<" sizeof(SizeType)="<<sizeof(SizeType)<<"\n";
-#ifdef USE_FLOAT
-	os<<ai.name_<<" using float\n";
-#else
-	os<<ai.name_<<" using double\n";
-#endif
-	return os;
-}
+std::ostream& operator<<(std::ostream& os,const ApplicationInfo& ai);
 
 } // namespace PsimagLite
 

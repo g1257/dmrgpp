@@ -80,28 +80,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <fstream>
 #include "AllocatorCpu.h"
+#include "Vector.h"
 
 namespace PsimagLite {
 void tokenizer(String str,
                Vector<String>::Type& tokens,
-               String delimiters = " ")
-{
-	// Skip delimiters at beginning.
-	String::size_type lastPos = str.find_first_not_of(delimiters, 0);
-	// Find first "non-delimiter".
-	String::size_type pos     = str.find_first_of(delimiters, lastPos);
-
-	while (String::npos != pos || String::npos != lastPos)
-	{
-		// Found a token, add it to the vector.
-		tokens.push_back(str.substr(lastPos, pos - lastPos));
-		// Skip delimiters.  Note the "not_of"
-		lastPos = str.find_first_not_of(delimiters, pos);
-		// Find next "non-delimiter"
-		pos = str.find_first_of(delimiters, lastPos);
-	}
-}
+               String delimiters = " ");
 } // namespace PsimagLite
 
 /*@}*/
 #endif // TOKENIZER_H
+
