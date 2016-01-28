@@ -1,6 +1,7 @@
 #ifndef PROVENANCE_H
 #define PROVENANCE_H
-#include "Version.h" // do not commit this file, created dynamically
+
+#include <iostream>
 
 class Provenance {
 
@@ -9,13 +10,7 @@ public:
 
 }; // Provenance
 
-std::ostream& operator<<(std::ostream& os,const Provenance&)
-{
-	os<<"DMRG++: revision: "<<dmrgppRevision<<"\n";
-	os<<"DMRG++: diff: "<<dmrgppDiff<<"\n";
-	os<<"PsimagLite: revision: "<<psimagLiteRevision<<"\n";
-	os<<"PsimagLite: diff: "<<psimagLiteDiff<<"\n";
-	return os;
-}
+std::ostream& operator<<(std::ostream& os,const Provenance&);
 
 #endif // PROVENANCE_H
+

@@ -31,9 +31,12 @@ if (defined($arg) and -r "$arg" and $arg ne "Config.make") {
 	system($cmd);
 }
 
-my %dmrgMain = (name => 'dmrg', dotos => 'dmrg.o DmrgDriver.o');
+my %dmrgMain = (name => 'dmrg', dotos => 'dmrg.o DmrgDriver.o Provenance.o');
 my %dmrgDriver = (name => 'DmrgDriver', aux => 1);
-my @drivers = (\%dmrgMain,\%dmrgDriver,"observe","toolboxdmrg");
+my %provenanceDriver = (name => 'Provenance', aux => 1);
+my %progGlobalsDriver = (name => 'ProgramGlobals', aux => 1);
+my @drivers = (\%dmrgMain,\%dmrgDriver,\%provenanceDriver,
+\%progGlobalsDriver,"observe","toolboxdmrg");
 
 createMakefile();
 
