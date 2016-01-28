@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "Concurrency.h"
 #include "NoPthreads.h"
+#include "CrsMatrix.h"
 
 namespace Dmrg {
 

@@ -1,27 +1,6 @@
-#include "CrsMatrix.h"
-#include "LanczosSolver.h"
-#include "ChebyshevSolver.h"
 #include "BlockMatrix.h"
 #include "IoSimple.h"
-#include "Operators.h"
 #include "Concurrency.h"
-#include "Geometry/Geometry.h"
-#include "ModelHelperLocal.h"
-#include "ModelHelperSu2.h"
-#include "MatrixVectorOnTheFly.h"
-#include "MatrixVectorStored.h"
-#include "MatrixVectorKron.h"
-#include "TargetingGroundState.h"
-#include "TargetingTimeStep.h"
-#include "TargetingDynamic.h"
-#include "TargetingAdaptiveDynamic.h"
-#include "TargetingCorrection.h"
-#include "TargetingCorrectionVector.h"
-#include "MettsTargetting.h"
-#include "VectorWithOffset.h"
-#include "VectorWithOffsets.h"
-#include "BasisWithOperators.h"
-#include "LeftRightSuper.h"
 #include "Provenance.h"
 #include "RegisterSignals.h"
 #include "ArchiveFiles.h"
@@ -48,46 +27,6 @@ void restoreCoutBuffer()
 	if (GlobalCoutBuffer == 0) return;
 	GlobalCoutStream.close();
 	std::cout.rdbuf(GlobalCoutBuffer);
-}
-
-void usageOperator()
-{
-	std::cerr<<"USAGE is operator -f filename -F ";
-	std::cerr<<"fermionicSign -l label [-d dof] [-s site] [-t]\n";
-}
-
-template<typename ModelBaseType>
-void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOptions)
-{
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename ModelHelperType::SparseElementType SparseElementType;
-	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
-	typedef std::pair<SizeType,SizeType> PairType;
-
-	if (obsOptions.label=="" || obsOptions.fermionicSign == 0) {
-		usageOperator();
-		return;
-	}
-
-	MatrixType opC = model.naturalOperator(obsOptions.label,obsOptions.site,obsOptions.dof);
-	std::cerr<<"#label="<<obsOptions.label<<" site="<<obsOptions.site;
-	std::cerr<<" dof="<<obsOptions.dof<<"\n";
-
-	Su2Related su2Related;
-
-	MatrixType opC2;
-	if (obsOptions.transpose)
-		transposeConjugate(opC2,opC);
-
-	OperatorType opC3((obsOptions.transpose) ? opC2 : opC,
-	                  obsOptions.fermionicSign,
-	                  PairType(0,0),
-	                  1,
-	                  su2Related);
-
-	opC3.save(std::cout);
 }
 
 template<typename GeometryType,

@@ -1,9 +1,8 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2016, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -68,14 +67,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
+
 #ifndef SU2_REDUCED_HEADER_H
 #define SU2_REDUCED_HEADER_H
 
 #include "Map.h"
 #include "Su2SymmetryGlobals.h"
+#include "Sort.h"
 
 /** \ingroup DMRG */
 /*@{*/
