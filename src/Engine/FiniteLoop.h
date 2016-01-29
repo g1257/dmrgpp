@@ -1,6 +1,9 @@
 #ifndef DMRG_FINITELOOP_H
 #define DMRG_FINITELOOP_H
 
+#include "Vector.h"
+#include <iostream>
+
 namespace Dmrg {
 /* PSIDOC FiniteLoop
 \subsection{Enabling finite loops}
@@ -105,6 +108,10 @@ struct FiniteLoop {
 		return total;
 	}
 };
+
+std::istream &operator>>(std::istream& is,FiniteLoop& fl);
+
+std::ostream &operator<<(std::ostream& os,const FiniteLoop& fl);
 
 } // namespace Dmrg
 

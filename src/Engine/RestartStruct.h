@@ -1,6 +1,9 @@
 #ifndef RestartStruct_H
 #define RestartStruct_H
 
+#include "Vector.h"
+#include <iostream>
+
 namespace Dmrg {
 
 struct RestartStruct {
@@ -20,6 +23,10 @@ struct RestartStruct {
 	PsimagLite::String into;
 	PsimagLite::String labelForPsi;
 };
+
+std::ostream& operator<<(std::ostream& os, const RestartStruct& c);
+
+std::istream& operator>>(std::istream& is,RestartStruct& c);
 
 } // namespace Dmrg
 

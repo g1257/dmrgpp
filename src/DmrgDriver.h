@@ -55,11 +55,7 @@ struct OperatorOptions {
 typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
 typedef Dmrg::ParametersDmrgSolver<RealType,InputNgType::Readable> ParametersDmrgSolverType;
 
-void usageOperator()
-{
-	std::cerr<<"USAGE is operator -f filename -F ";
-	std::cerr<<"fermionicSign -l label [-d dof] [-s site] [-t]\n";
-}
+void usageOperator();
 
 template<typename ModelBaseType>
 void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOptions)

@@ -70,36 +70,12 @@ sub printHeader
 {
 
 	print <<EOF;
-#include "DmrgDriver.h"
+#include "DmrgDriver1.h"
 
-template<typename GeometryType,
-		 typename TargettingType>
-void mainLoop3(GeometryType& geometry,
-			   const ParametersDmrgSolverType& dmrgSolverParams,
-			   InputNgType::Readable& io,
-			   const OperatorOptions& opOptions)
+void usageOperator()
 {
-	typedef typename TargettingType::TargetParamsType TargetParamsType;
-	typedef typename TargettingType::MatrixVectorType::ModelType ModelBaseType;
-
-	//! Setup the Model
-	Dmrg::ModelSelector<ModelBaseType> modelSelector(dmrgSolverParams.model);
-	const ModelBaseType& model = modelSelector(dmrgSolverParams,io,geometry);
-
-	if (opOptions.enabled) {
-		operatorDriver(model,opOptions);
-		return;
-	}
-
-	//! Read TimeEvolution if applicable:
-	TargetParamsType tsp(io,model);
-
-	//! Setup the dmrg solver:
-	typedef Dmrg::DmrgSolver<TargettingType> SolverType;
-	SolverType dmrgSolver(model,tsp,io);
-
-	//! Calculate observables:
-	dmrgSolver.main(geometry);
+\tstd::cerr<<"USAGE is operator -f filename -F ";
+\tstd::cerr<<"fermionicSign -l label [-d dof] [-s site] [-t]\\n";
 }
 
 EOF
