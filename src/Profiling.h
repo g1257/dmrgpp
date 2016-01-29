@@ -22,15 +22,9 @@ Please see full open source license included in file LICENSE.
 
 #include <iostream>
 #include "MemoryUsage.h"
+#include "PsimagLite.h"
 
 namespace PsimagLite {
-
-std::ostream& operator<<(std::ostream& os,const std::pair<SizeType,SizeType>& p)
-{
-
-	os<<p.first<<" "<<p.second<<" ";
-	return os;
-}
 
 class  Profiling {
 
