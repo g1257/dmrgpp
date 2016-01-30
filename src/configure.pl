@@ -37,9 +37,11 @@ my %restartDriver = (name => 'RestartStruct', aux => 1);
 my %finiteLoopDriver = (name => 'FiniteLoop', aux => 1);
 my %utilsDriver = (name => 'Utils', aux => 1);
 my %su2RelatedDriver = (name => 'Su2Related', aux => 1);
+my %toolboxDriver = (name => 'toolboxdmrg',
+                     dotos => 'toolboxdmrg.o ProgramGlobals.o Provenance.o');
 my @drivers = (\%provenanceDriver,\%su2RelatedDriver,
 \%progGlobalsDriver,\%restartDriver,\%finiteLoopDriver,\%utilsDriver,
-"observe","toolboxdmrg");
+"observe",\%toolboxDriver);
 
 my $dotos = "dmrg.o Provenance.o RestartStruct.o FiniteLoop.o Utils.o ";
 $dotos .= " ProgramGlobals.o Su2Related.o";

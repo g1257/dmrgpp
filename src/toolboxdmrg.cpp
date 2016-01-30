@@ -1,3 +1,4 @@
+#include "ProgramGlobals.h"
 #include <iostream>
 #include "InputNg.h"
 #include "InputCheck.h"
