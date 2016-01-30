@@ -21,6 +21,7 @@ use strict;
 
 use lib "../../PsimagLite/scripts";
 use Make;
+use DmrgDriver;
 
 my ($arg) = @ARGV;
 
@@ -49,7 +50,9 @@ my @drivers = (\%provenanceDriver,\%su2RelatedDriver,
 $dotos = "dmrg.o Provenance.o RestartStruct.o FiniteLoop.o Utils.o ";
 $dotos .= " ProgramGlobals.o Su2Related.o";
 
-for (my $i = 0; $i < 83; ++$i) {
+my $templates = DmrgDriver::createTemplates();
+
+for (my $i = 0; $i < $templates; ++$i) {
 	my $name = "DmrgDriver$i";
 	my %dmrgDriver = (name => $name, aux => 1);
 	push @drivers,\%dmrgDriver;
