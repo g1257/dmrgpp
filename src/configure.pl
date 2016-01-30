@@ -32,14 +32,15 @@ if (defined($arg) and -r "$arg" and $arg ne "Config.make") {
 }
 
 my %dmrgMain = (name => 'dmrg', dotos => 'dmrg.o DmrgDriver1.o Provenance.o\
- RestartStruct.o FiniteLoop.o Utils.o ProgramGlobals.o');
+ RestartStruct.o FiniteLoop.o Utils.o ProgramGlobals.o Su2Related.o');
 my %dmrgDriver = (name => 'DmrgDriver1', aux => 1);
 my %provenanceDriver = (name => 'Provenance', aux => 1);
 my %progGlobalsDriver = (name => 'ProgramGlobals', aux => 1);
 my %restartDriver = (name => 'RestartStruct', aux => 1);
 my %finiteLoopDriver = (name => 'FiniteLoop', aux => 1);
 my %utilsDriver = (name => 'Utils', aux => 1);
-my @drivers = (\%dmrgMain,\%dmrgDriver,\%provenanceDriver,
+my %su2RelatedDriver = (name => 'Su2Related', aux => 1);
+my @drivers = (\%dmrgMain,\%dmrgDriver,\%provenanceDriver,\%su2RelatedDriver,
 \%progGlobalsDriver,\%restartDriver,\%finiteLoopDriver,\%utilsDriver,
 "observe","toolboxdmrg");
 

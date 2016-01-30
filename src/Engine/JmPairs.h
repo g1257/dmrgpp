@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <algorithm>
 #include "Utils.h"
+#include "PsimagLite.h"
 
 namespace Dmrg {
 
@@ -221,12 +222,6 @@ namespace Dmrg {
 		return os;
 	}
 
-	std::istream& operator>>(std::istream& is,std::pair<SizeType,SizeType>& pair)
-	{
-		is>>pair.first;
-		is>>pair.second;
-		return is;
-	}
 } // namespace Dmrg
 
 /*@}*/

@@ -4,7 +4,7 @@ use warnings;
 
 my @targets = ("TargetingGroundState","TargetingTimeStep","TargetingCorrectionVector");
 my @lanczos = ("LanczosSolver","ChebyshevSolver");
-my @matrixVector = ("MatrixVectorStored","MatrixVectorOnTheFly","MatrixVectorKron");
+my @matrixVector = ("MatrixVectorOnTheFly","MatrixVectorStored","MatrixVectorKron");
 my @modelHelpers = ("Local","Su2");
 my @vecWithOffsets = ("","s");
 
@@ -34,7 +34,8 @@ sub printInstance
 {
 	my ($target,$lanczos,$matrixVector,$modelHelper,$vecWithOffset) = @_;
 	my $basis = $basisWithout;
-	my $geometry = "PsimagLite::Geometry<RealType,InputNgType,Dmrg::ProgramGlobals> ";
+	my $inputNg = "PsimagLite::InputNg<Dmrg::InputCheck>::Readable";
+	my $geometry = "PsimagLite::Geometry<RealType,$inputNg,Dmrg::ProgramGlobals> ";
 	my $basisSuperBlock = "$basis";
 	my $lrs = "Dmrg::LeftRightSuper<$basisWith,$basisSuperBlock >";
 	print<<EOF;
@@ -58,10 +59,10 @@ template void mainLoop3<
   >
  >
 >
-($geometry& geometry,
-const ParametersDmrgSolverType& dmrgSolverParams,
-InputNgType::Readable& io,
-const OperatorOptions& opOptions);
+($geometry&,
+const ParametersDmrgSolverType&,
+InputNgType::Readable&,
+const OperatorOptions&);
 
 EOF
 }

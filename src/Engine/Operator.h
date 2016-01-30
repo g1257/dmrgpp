@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2016, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -68,8 +68,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 *********************************************************
 
 */
-/** \ingroup DMRG */
-/*@{*/
 
 /*! \file Operator.h
  *
@@ -83,84 +81,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef OPERATOR_H
 #define OPERATOR_H
+#include "Su2Related.h"
 #include "CrsMatrix.h"
 #include "IoSimple.h"
 #include "InputNg.h"
 #include "InputCheck.h"
 
 namespace Dmrg {
-// This is a structure, don't add member functions here!
-struct Su2Related {
-	Su2Related()
-	    : offset(0) // setting to zero is necessary, because
-	{}		// we always print offset
-	// and when running Abelian
-	// it might be undefined
-
-	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
-	                   SizeType,
-	                   PsimagLite::String msg = "") const
-	{
-		PsimagLite::String str = msg;
-		str += "Su2Related";
-
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&source);
-		SizeType total = mres.memResolv(&offset, end-start, str + " offset");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&transpose);
-		total += mres.memResolv(&source, end-start, str + " source");
-
-		total += mres.memResolv(&transpose,
-		                        sizeof(*this) - total,
-		                        str + " transpose");
-
-		return total;
-	}
-
-	//serializr start class Su2Related
-	//serializr normal offset
-	SizeType offset;
-	//serializr normal source
-	PsimagLite::Vector<SizeType>::Type source;
-	//serializr normal transpose
-	PsimagLite::Vector<int>::Type transpose;
-};
-
-inline std::istream& operator>>(std::istream& is,Su2Related& x)
-{
-	is>>x.offset;
-	return is;
-}
-
-inline std::ostream& operator<<(std::ostream& os,const Su2Related& x)
-{
-	os<<x.offset<<"\n";
-	return os;
-}
-
-void send(Su2Related& su2Related,int root,int tag,PsimagLite::MPI::CommType mpiComm)
-{
-	PsimagLite::MPI::send(su2Related.offset,root,tag,mpiComm);
-	PsimagLite::MPI::send(su2Related.source,root,tag+1,mpiComm);
-	PsimagLite::MPI::send(su2Related.transpose,root,tag+2,mpiComm);
-}
-
-void recv(Su2Related& su2Related,int root,int tag,PsimagLite::MPI::CommType mpiComm)
-{
-	PsimagLite::MPI::recv(su2Related.offset,root,tag,mpiComm);
-	PsimagLite::MPI::recv(su2Related.source,root,tag+1,mpiComm);
-	PsimagLite::MPI::recv(su2Related.transpose,root,tag+2,mpiComm);
-}
-
-void bcast(Su2Related& su2Related)
-{
-	PsimagLite::MPI::bcast(su2Related.offset);
-	PsimagLite::MPI::bcast(su2Related.source);
-	PsimagLite::MPI::bcast(su2Related.transpose);
-}
 
 // This is a structure, don't add member functions here!
 template<typename SparseMatrixType_>
