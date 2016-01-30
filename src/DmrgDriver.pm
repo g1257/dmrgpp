@@ -2,6 +2,11 @@
 use strict;
 use warnings;
 
+package DmrgDriver;
+
+sub createTemplates
+{
+
 my $cppEach = 4;
 
 my @targets = ("TargetingGroundState","TargetingTimeStep","TargetingCorrectionVector",
@@ -18,6 +23,9 @@ my $counter = 0;
 my $fout;
 foreach my $target (@targets) {
 	foreach my $complexOrNot (@complexOrReal) {
+		
+		next if (isComplexOption($complexOrNot) and targetNotComplex($target));
+
 		foreach my $lanczos (@lanczos) {
 			foreach my $modelHelper (@modelHelpers) {
 				foreach my $vecWithOffset (@vecWithOffsets) {
@@ -48,6 +56,8 @@ close(FOUT);
 
 $cppFiles--;
 print STDERR "$0: $counter instances and $cppFiles files\n";
+return $cppFiles;
+}
 
 sub printInstance
 {
@@ -90,6 +100,19 @@ const OperatorOptions&);
 EOF
 }
 
+sub isComplexOption
+{
+	my ($option) = @_;
+	return ($option ne "RealType");
+}
+
+sub targetNotComplex
+{
+	my ($target) = @_;
+	return ($target ne "TargetingGroundState" and 
+	        $target ne "TargetingTimeStep");
+}
+
 sub printHeader
 {
 
@@ -99,4 +122,5 @@ sub printHeader
 EOF
 }
 
+1;
 
