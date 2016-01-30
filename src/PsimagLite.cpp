@@ -8,5 +8,12 @@ std::ostream& operator<<(std::ostream& os,const std::pair<SizeType,SizeType>& p)
 	return os;
 }
 
+std::istream& operator>>(std::istream& is,std::pair<SizeType,SizeType>& pair)
+{
+	is>>pair.first;
+	is>>pair.second;
+	return is;
+}
+
 } // namespace PsimagLite
 
