@@ -22,6 +22,12 @@ typedef ArchiveFiles<ParametersDmrgSolverType> ArchiveFilesType;
 std::streambuf *GlobalCoutBuffer = 0;
 std::ofstream GlobalCoutStream;
 
+void usageOperator()
+{
+	std::cerr<<"USAGE is operator -f filename -F ";
+	std::cerr<<"fermionicSign -l label [-d dof] [-s site] [-t]\n";
+}
+
 void restoreCoutBuffer()
 {
 	if (GlobalCoutBuffer == 0) return;

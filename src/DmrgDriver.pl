@@ -2,43 +2,66 @@
 use strict;
 use warnings;
 
-my @targets = ("TargetingGroundState","TargetingTimeStep","TargetingCorrectionVector");
+my $cppEach = 4;
+
+my @targets = ("TargetingGroundState","TargetingTimeStep","TargetingCorrectionVector",
+"TargetingDynamic","TargetingAdaptiveDynamic","TargetingCorrection",
+"MettsTargetting");
 my @lanczos = ("LanczosSolver","ChebyshevSolver");
 my @matrixVector = ("MatrixVectorOnTheFly","MatrixVectorStored","MatrixVectorKron");
 my @modelHelpers = ("Local","Su2");
 my @vecWithOffsets = ("","s");
+my @complexOrReal = ("RealType","std::complex<RealType> ");
 
-my $sparseMatrix = "PsimagLite::CrsMatrix<RealType> ";
-my $ops = "Dmrg::Operators<Dmrg::Basis<$sparseMatrix> > ";
-my $basisWith = "Dmrg::BasisWithOperators<$ops >";
-my $basisWithout = "Dmrg::Basis<$sparseMatrix >";
-
-printHeader();
+my $cppFiles = 0;
 my $counter = 0;
+my $fout;
 foreach my $target (@targets) {
-	foreach my $lanczos (@lanczos) {
-		foreach my $modelHelper (@modelHelpers) {
-			foreach my $vecWithOffset (@vecWithOffsets) {
-				foreach my $matrixVector (@matrixVector) {
-					printInstance($target,$lanczos,$matrixVector,$modelHelper,$vecWithOffset);
-					$counter++;
+	foreach my $complexOrNot (@complexOrReal) {
+		foreach my $lanczos (@lanczos) {
+			foreach my $modelHelper (@modelHelpers) {
+				foreach my $vecWithOffset (@vecWithOffsets) {
+					foreach my $matrixVector (@matrixVector) {
+						if ($counter == 0 or $counter % $cppEach == 0) {
+							if ($counter > 0) {
+								close(FOUT);
+								print STDERR "$0: File $fout written\n";
+							}
+
+							$fout = "DmrgDriver$cppFiles.cpp";
+							$cppFiles++;
+							open(FOUT,"> $fout") or die "$0: Cannot write to $fout : $!\n";
+							printHeader();
+						}
+
+						printInstance($target,$lanczos,$matrixVector,$modelHelper,
+						$vecWithOffset,$complexOrNot);
+						$counter++;
+					}
 				}
 			}
 		}
 	}
 }
 
-print STDERR "$0: $counter instances\n";
+close(FOUT);
+
+$cppFiles--;
+print STDERR "$0: $counter instances and $cppFiles files\n";
 
 sub printInstance
 {
-	my ($target,$lanczos,$matrixVector,$modelHelper,$vecWithOffset) = @_;
+	my ($target,$lanczos,$matrixVector,$modelHelper,$vecWithOffset,$complexOrNot) = @_;
+	my $sparseMatrix = "PsimagLite::CrsMatrix<$complexOrNot> ";
+	my $ops = "Dmrg::Operators<Dmrg::Basis<$sparseMatrix> > ";
+	my $basisWith = "Dmrg::BasisWithOperators<$ops >";
+	my $basisWithout = "Dmrg::Basis<$sparseMatrix >";
 	my $basis = $basisWithout;
 	my $inputNg = "PsimagLite::InputNg<Dmrg::InputCheck>::Readable";
 	my $geometry = "PsimagLite::Geometry<RealType,$inputNg,Dmrg::ProgramGlobals> ";
 	my $basisSuperBlock = "$basis";
 	my $lrs = "Dmrg::LeftRightSuper<$basisWith,$basisSuperBlock >";
-	print<<EOF;
+	print FOUT<<EOF;
 template void mainLoop3<
  $geometry,
  Dmrg::$target<
@@ -55,7 +78,7 @@ template void mainLoop3<
   >,
   Dmrg::WaveFunctionTransfFactory<
    $lrs,
-   Dmrg::VectorWithOffset$vecWithOffset<RealType>
+   Dmrg::VectorWithOffset$vecWithOffset<$complexOrNot>
   >
  >
 >
@@ -70,14 +93,8 @@ EOF
 sub printHeader
 {
 
-	print <<EOF;
+	print FOUT<<EOF;
 #include "DmrgDriver1.h"
-
-void usageOperator()
-{
-\tstd::cerr<<"USAGE is operator -f filename -F ";
-\tstd::cerr<<"fermionicSign -l label [-d dof] [-s site] [-t]\\n";
-}
 
 EOF
 }
