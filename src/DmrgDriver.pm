@@ -42,7 +42,7 @@ foreach my $target (@targets) {
 							printHeader();
 						}
 
-						printInstance($target,$lanczos,$matrixVector,$modelHelper,
+						printInstance($counter,$target,$lanczos,$matrixVector,$modelHelper,
 						$vecWithOffset,$complexOrNot);
 						$counter++;
 					}
@@ -61,17 +61,27 @@ return $cppFiles;
 
 sub printInstance
 {
-	my ($target,$lanczos,$matrixVector,$modelHelper,$vecWithOffset,$complexOrNot) = @_;
-	my $sparseMatrix = "PsimagLite::CrsMatrix<$complexOrNot> ";
+	my ($counter,$target,$lanczos,$matrixVector,
+	    $modelHelper,$vecWithOffset,$complexOrNot) = @_;
+	my $sparseMatrix = "SparseMatrixInstance${counter}Type";
+	my $realOrNotFromSparse = "${sparseMatrix}::value_type";
 	my $ops = "Dmrg::Operators<Dmrg::Basis<$sparseMatrix> > ";
 	my $basisWith = "Dmrg::BasisWithOperators<$ops >";
 	my $basisWithout = "Dmrg::Basis<$sparseMatrix >";
 	my $basis = $basisWithout;
 	my $inputNg = "PsimagLite::InputNg<Dmrg::InputCheck>::Readable";
-	my $geometry = "PsimagLite::Geometry<RealType,$inputNg,Dmrg::ProgramGlobals> ";
+	my $geometry = "GeometryInstance${counter}Type";
 	my $basisSuperBlock = "$basis";
 	my $lrs = "Dmrg::LeftRightSuper<$basisWith,$basisSuperBlock >";
 	print FOUT<<EOF;
+#ifdef USE_COMPLEX
+typedef PsimagLite::CrsMatrix<std::complex<RealType> > $sparseMatrix;
+typedef PsimagLite::Geometry<$realOrNotFromSparse,$inputNg,Dmrg::ProgramGlobals> $geometry;
+#else
+typedef PsimagLite::CrsMatrix<$complexOrNot> $sparseMatrix;
+typedef PsimagLite::Geometry<RealType,$inputNg,Dmrg::ProgramGlobals> $geometry;
+#endif
+
 template void mainLoop3<
  $geometry,
  Dmrg::$target<
@@ -88,7 +98,7 @@ template void mainLoop3<
   >,
   Dmrg::WaveFunctionTransfFactory<
    $lrs,
-   Dmrg::VectorWithOffset$vecWithOffset<$complexOrNot>
+   Dmrg::VectorWithOffset$vecWithOffset<$realOrNotFromSparse>
   >
  >
 >
