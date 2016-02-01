@@ -175,6 +175,7 @@ public:
 			\item[tarDisable] Do not tar output files
 			\item[tarNoDelete] Do not delete output files after taring them.
 			\item[recoveryNoDelete] Do not delete recovery files even if run
+			\item[neverNormalizeVectors] TBW
 			finishes OK
 		\end{itemize}
 		*/
@@ -217,6 +218,7 @@ public:
 		registerOpts.push_back("tarNoDelete");
 		registerOpts.push_back("recoveryNoDelete");
 		registerOpts.push_back("normalizeTimeVectors");
+		registerOpts.push_back("neverNormalizeVectors");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);

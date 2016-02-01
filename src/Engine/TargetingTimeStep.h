@@ -148,10 +148,10 @@ public:
 	      weight_(tstStruct_.timeSteps()),
 	      gsWeight_(tstStruct_.gsWeight())
 	{
-		if (!wft.isEnabled()) throw PsimagLite::RuntimeError
-		        (" TargetingTimeStep needs an enabled wft\n");
-		if (tstStruct_.sites() == 0) throw PsimagLite::RuntimeError
-		        (" TargetingTimeStep needs at least one TSPSite\n");
+		if (!wft.isEnabled())
+			throw PsimagLite::RuntimeError("TST needs an enabled wft\n");
+		if (tstStruct_.sites() == 0)
+			throw PsimagLite::RuntimeError("TST needs at least one TSPSite\n");
 
 		RealType tau =tstStruct_.tau();
 		RealType sum = 0;
@@ -218,13 +218,21 @@ public:
 		                               block1);
 
 		cocoon(direction,block1); // in-situ
-        printEnergies(); // in-situ
-        bool normalizeTimeVectors = (this->model().params().options.
-                                     find("normalizeTimeVectors") != std::string::npos);
-        if (normalizeTimeVectors)
-            this->common().normalizeTimeVectors();
-		printNormsAndWeights();
 
+		printEnergies(); // in-situ
+
+		PsimagLite::String options = this->model().params().options;
+		bool normalizeTimeVectors =
+		         (options.find("normalizeTimeVectors") != std::string::npos);
+		if (options.find("TargetingAncilla") != std::string::npos)
+			normalizeTimeVectors = true;
+		if (options.find("neverNormalizeVectors") != std::string::npos)
+			normalizeTimeVectors = false;
+
+		if (normalizeTimeVectors)
+			this->common().normalizeTimeVectors();
+
+		printNormsAndWeights();
 	}
 
 	void load(const PsimagLite::String& f)
@@ -311,7 +319,6 @@ private:
 		typename LanczosSolverType::LanczosMatrixType lanczosHelper(&this->model(),
 		                                                            &modelHelper);
 
-
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
 		phi.extract(phi2,i0);
@@ -372,3 +379,4 @@ std::ostream& operator<<(std::ostream& os,
 } // namespace Dmrg
 
 #endif
+
