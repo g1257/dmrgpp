@@ -40,8 +40,7 @@ template<typename GeometryType,
          typename WaveFunctionTransfType,
          template<template<typename,typename,typename> class,
                   typename,
-                  typename> class TargettingTemplate,
-         typename MySparseMatrix>
+                  typename> class TargettingTemplate>
 void mainLoop2(GeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io,
@@ -93,20 +92,17 @@ void mainLoop(GeometryType& geometry,
 		mainLoop2<GeometryType,
 		         MatrixVectorStored<ModelBaseType>,
 		         WaveFunctionTransfType,
-		         TargettingTemplate,
-		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
+		         TargettingTemplate>(geometry,dmrgSolverParams,io,opOptions);
 	} else if (dmrgSolverParams.options.find("MatrixVectorKron")!=PsimagLite::String::npos) {
 		mainLoop2<GeometryType,
 		MatrixVectorKron<ModelBaseType>,
 		                 WaveFunctionTransfType,
-		                 TargettingTemplate,
-		                 MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
+		                 TargettingTemplate>(geometry,dmrgSolverParams,io,opOptions);
 	} else {
 		mainLoop2<GeometryType,
 		         MatrixVectorOnTheFly<ModelBaseType>,
 		         WaveFunctionTransfType,
-		         TargettingTemplate,
-		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
+		         TargettingTemplate>(geometry,dmrgSolverParams,io,opOptions);
 	}
 }
 

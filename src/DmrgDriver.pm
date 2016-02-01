@@ -109,8 +109,7 @@ sub isComplexOption
 sub targetNotComplex
 {
 	my ($target) = @_;
-	return ($target ne "TargetingGroundState" and 
-	        $target ne "TargetingTimeStep");
+	return ($target ne "TargetingTimeStep");
 }
 
 sub printHeader
