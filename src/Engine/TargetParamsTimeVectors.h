@@ -133,6 +133,14 @@ public:
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 
+		if (algorithm_ == BaseType::SUZUKI_TROTTER) {
+			if (model.params().model == "Heisenberg") {
+				PsimagLite::String s(__FILE__);
+				s += "\n FATAL: Heisenberg does not yet support SuzukiTrotter.\n";
+				throw PsimagLite::RuntimeError(s.c_str());
+			}
+		}
+
 		try {
 			io.readline(timeDirection_,"TSPTimeFactor=");
 		} catch (std::exception&) {}
