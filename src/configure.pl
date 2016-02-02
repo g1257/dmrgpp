@@ -78,16 +78,9 @@ sub createMakefile
 	my $fh;
 	open($fh,">Makefile") or die "Cannot open Makefile for writing: $!\n";
 
-	Make::newMake($fh,\@drivers,"DMRG++","Engine/Version.h",
-	"Engine/Version.h gitrev","operator");
+	Make::newMake($fh,\@drivers,"DMRG++"," "," ","operator");
 	local *FH = $fh;
 print FH<<EOF;
-
-gitrev: gitrev.cpp
-	\$(CXX) \$(CPPFLAGS) gitrev.cpp -o gitrev
-
-Engine/Version.h: gitrev
-	./gitrev > Engine/Version.h
 
 operator: dmrg
 	cp dmrg operator
