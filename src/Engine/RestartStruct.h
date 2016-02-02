@@ -8,7 +8,8 @@ namespace Dmrg {
 
 struct RestartStruct {
 
-	RestartStruct() : filename(""),into("GroundState"),labelForPsi("PSI")
+	RestartStruct()
+	: filename(""),into("GroundState"),labelForPsi("PSI"),labelForEnergy("#Energy")
 	{}
 
 	template<typename SomeMemResolvType>
@@ -22,6 +23,7 @@ struct RestartStruct {
 	PsimagLite::String filename;
 	PsimagLite::String into;
 	PsimagLite::String labelForPsi;
+	PsimagLite::String labelForEnergy;
 };
 
 std::ostream& operator<<(std::ostream& os, const RestartStruct& c);

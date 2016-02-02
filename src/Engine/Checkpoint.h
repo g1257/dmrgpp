@@ -125,7 +125,9 @@ public:
 
 		{
 			IoType::In ioIn2(parameters_.checkpoint.filename);
-			ioIn2.readline(energyFromFile_,"#Energy=",IoType::In::LAST_INSTANCE);
+			PsimagLite::String label = parameters_.checkpoint.labelForEnergy;
+			label += "=";
+			ioIn2.readline(energyFromFile_,label,IoType::In::LAST_INSTANCE);
 		}
 
 		loadStacksDiskToMemory();

@@ -293,6 +293,10 @@ struct ParametersDmrgSolver {
 			try {
 				io.readline(checkpoint.labelForPsi,"RestartLabelForPsi=");
 			} catch (std::exception&) {}
+
+			try {
+				io.readline(checkpoint.labelForEnergy,"RestartLabelForEnergy=");
+			} catch (std::exception&) {}
 		}
 	}
 

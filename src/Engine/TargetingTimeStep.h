@@ -118,7 +118,7 @@ public:
 	typedef LanczosSolverTemplate<ParametersForSolverType,
 	MatrixVectorType,
 	TargetVectorType> LanczosSolverType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef TargetParamsTimeStep<ModelType> TargetParamsType;
@@ -146,6 +146,7 @@ public:
 	      progress_("TargetingTimeStep"),
 	      times_(tstStruct_.timeSteps()),
 	      weight_(tstStruct_.timeSteps()),
+	      tvEnergy_(times_.size(),0.0),
 	      gsWeight_(tstStruct_.gsWeight())
 	{
 		if (!wft.isEnabled())
@@ -265,6 +266,13 @@ public:
 		        marker);
 		ts.save(io);
 		this->common().psi().save(io,"PSI");
+
+		// TODO: FIXME: Integrate these energies into serializer
+		for (SizeType i = 0; i < tvEnergy_.size(); ++i) {
+			PsimagLite::OstringStream msg2;
+			msg2<<"TargetVectorEnergy"<<i<<"="<<tvEnergy_[i];
+			io.printline(msg2);
+		}
 	}
 
 	bool end() const
@@ -333,6 +341,7 @@ private:
 		msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<numerator;
 		msg<<" <phi(t)|phi(t)>="<<den<<" "<<division;
 		progress_.printline(msg,std::cout);
+		tvEnergy_[whatTarget] = std::real(division);
 	}
 
 	// in situ computation:
@@ -361,7 +370,9 @@ private:
 	const TargetParamsType& tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
-	typename PsimagLite::Vector<RealType>::Type times_,weight_;
+	VectorRealType times_;
+	VectorRealType weight_;
+	mutable VectorRealType tvEnergy_;
 	RealType gsWeight_;
 };     //class TargetingTimeStep
 
