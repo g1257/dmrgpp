@@ -1,12 +1,10 @@
 #include "Provenance.h"
-#include "Version.h" // do not commit this file, created dynamically
+#include "Version.h"
 
 std::ostream& operator<<(std::ostream& os,const Provenance&)
 {
-	os<<"DMRG++: revision: "<<dmrgppRevision<<"\n";
-	os<<"DMRG++: diff: "<<dmrgppDiff<<"\n";
-	os<<"PsimagLite: revision: "<<psimagLiteRevision<<"\n";
-	os<<"PsimagLite: diff: "<<psimagLiteDiff<<"\n";
+	os<<"DMRG++ version "<<DMRGPP_VERSION<<"\n";
+	os<<"PsimagLite version "<<PSIMAGLITE_VERSION<<"\n";
 	return os;
 }
 

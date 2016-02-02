@@ -85,7 +85,7 @@ const PsimagLite::String ProgramGlobals::license=
 "\n"
 "[DMRG++, Version 3.0]\n"
 "\n"
-"*********************************************************\n"
+"---------------------------------------------------------\n"
 "THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND\n"
 "CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED\n"
 "WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED\n"
@@ -93,7 +93,7 @@ const PsimagLite::String ProgramGlobals::license=
 "PARTICULAR PURPOSE ARE DISCLAIMED.\n"
 "\n"
 "Please see full open source license included in file LICENSE.\n"
-"*********************************************************\n"
+"---------------------------------------------------------\n"
 "\n";
 
 PsimagLite::String ProgramGlobals::WFT_STRING = "Wft";

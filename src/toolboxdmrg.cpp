@@ -30,7 +30,8 @@ int main(int argc,char *argv[])
 	int opt = 0;
 	int precision = 6;
 	bool shortoption = false;
-	while ((opt = getopt(argc, argv,"f:p:a:E:s")) != -1) {
+	bool versionOnly = false;
+	while ((opt = getopt(argc, argv,"f:p:a:E:sV")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -49,6 +50,9 @@ int main(int argc,char *argv[])
 		case 's':
 			shortoption = true;
 			break;
+		case 'V':
+			versionOnly = true;
+			break;
 		default:
 			usage(argv[0]);
 			return 1;
@@ -57,8 +61,10 @@ int main(int argc,char *argv[])
 
 	//sanity checks here
 	if (filename=="" || action == "") {
-		usage(argv[0]);
-		return 1;
+		if (!versionOnly) {
+			usage(argv[0]);
+			return 1;
+		}
 	}
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
@@ -70,6 +76,8 @@ int main(int argc,char *argv[])
 		Provenance provenance;
 		std::cout<<provenance;
 	}
+
+	if (versionOnly) return 0;
 
 	InputCheck inputCheck;
 

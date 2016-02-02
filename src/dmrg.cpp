@@ -229,10 +229,11 @@ int main(int argc,char *argv[])
 	OperatorOptions options;
 	PsimagLite::String strUsage(argv[0]);
 	if (utils::basename(strUsage) == "operator") options.enabled = true;
-	strUsage += " -f filename";
+	strUsage += " -f filename [-k] [-p precision] [-V]";
 	PsimagLite::String insitu("");
 	int precision = 6;
 	bool keepFiles = false;
+	bool versionOnly = false;
 	/* PSIDOC DmrgDriver
 	  \begin{itemize}
 	  \item[-f] {[}Mandatory, String{]} Input to use.
@@ -278,7 +279,7 @@ int main(int argc,char *argv[])
 	\begin{verbatim}./operator -l c -t -f input.inp -F -1\end{verbatim}
 	\end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:o:s:l:d:F:p:tk")) != -1) {
+	while ((opt = getopt(argc, argv,"f:o:s:l:d:F:p:tkV")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -314,6 +315,10 @@ int main(int argc,char *argv[])
 			std::cout.precision(precision);
 			std::cerr.precision(precision);
 			break;
+		case 'V':
+			versionOnly = true;
+			options.label = "-";
+			break;
 		default:
 			inputCheck.usageMain(strUsage);
 			return 1;
@@ -321,7 +326,7 @@ int main(int argc,char *argv[])
 	}
 
 	// sanity checks here
-	if (filename=="") {
+	if (filename=="" && !versionOnly) {
 		inputCheck.usageMain(strUsage);
 		return 1;
 	}
@@ -358,6 +363,8 @@ int main(int argc,char *argv[])
 		Provenance provenance;
 		std::cout<<provenance;
 	}
+
+	if (versionOnly) return 0;
 
 	InputNgType::Writeable ioWriteable(filename,inputCheck);
 	InputNgType::Readable io(ioWriteable);

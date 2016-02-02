@@ -286,7 +286,8 @@ int main(int argc,char *argv[])
 	PsimagLite::String filesOption;
 	int opt = 0;
 	int precision = 6;
-	while ((opt = getopt(argc, argv,"f:o:p:F:")) != -1) {
+	bool versionOnly = false;
+	while ((opt = getopt(argc, argv,"f:o:p:F:V")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -302,6 +303,9 @@ int main(int argc,char *argv[])
 		case 'F':
 			filesOption = optarg;
 			break;
+		case 'V':
+			versionOnly = true;
+			break;
 		default:
 			usage(argv[0]);
 			return 1;
@@ -312,8 +316,10 @@ int main(int argc,char *argv[])
 
 	//sanity checks here
 	if (filename=="" || (filesOption != "keep" && filesOption != "")) {
-		usage(argv[0]);
-		return 1;
+		if (!versionOnly) {
+			usage(argv[0]);
+			return 1;
+		}
 	}
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
@@ -325,6 +331,8 @@ int main(int argc,char *argv[])
 		Provenance provenance;
 		std::cout<<provenance;
 	}
+
+	if (versionOnly) return 0;
 
 	//Setup the Geometry
 	InputCheck inputCheck;
