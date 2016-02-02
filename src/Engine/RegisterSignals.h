@@ -124,11 +124,21 @@ void registerSignals()
 {
 #ifdef USE_SIGNALS
 	int signum = SIGUSR1;
+	sigset_t *maskset = new sigset_t;
+
+	int ret = sigemptyset(maskset);
+	if (ret != 0) {
+		PsimagLite::String str("RegisterSignals:");
+		throw PsimagLite::RuntimeError(str + " sigemptyset returned non zero\n");
+	}
+
 	struct sigaction act;
 	act.sa_handler = PsimagLite::ProgressIndicator::updateBuffer;
 	act.sa_flags = 0;
+	act.sa_mask = *maskset;
 
-	int ret = sigaction(signum,&act,0);
+	ret = sigaction(signum,&act,0);
+	delete maskset;
 	if (ret != 0) {
 		PsimagLite::String msg("FATAL: sigaction failed\n");
 		throw PsimagLite::RuntimeError(msg);
