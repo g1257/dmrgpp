@@ -99,14 +99,12 @@ class ObserverInterpreter {
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 
-	enum {ONE_POINT, TWO_POINT, FOUR_POINT};
-
 	class Bracket {
 
 	public:
 
 		Bracket(const ModelType& model,const PsimagLite::String& bracket)
-		    : model_(model), bracket_(2,""),type_(ONE_POINT)
+		    : model_(model), bracket_(2,"")
 		{
 			VectorStringType vecStr;
 			PsimagLite::tokenizer(bracket,vecStr,"|");
@@ -133,26 +131,14 @@ class ObserverInterpreter {
 
 			PsimagLite::tokenizer(vecStr[1],name_,";");
 
-			if (name_.size() != 1 && name_.size() != 2 && name_.size() != 4) {
+			if (name_.size() == 0 || name_.size() > 4) {
 				PsimagLite::String str("ObserverInterpreter: syntax error for ");
-				str += bracket + " expected one or two operators\n";
+				str += bracket + " Expecting between 1 and 4 operators\n";
 				throw PsimagLite::RuntimeError(str);
 			}
 
-
-			op_.push_back(findOperator(name_[0]));
-
-			if (name_.size() == 1) return;
-
-			op_.push_back(findOperator(name_[1]));
-
-			type_ = TWO_POINT;
-			if (name_.size() == 2) return;
-
-			assert(name_.size() == 4);
-			type_ = FOUR_POINT;
-			op_.push_back(findOperator(name_[2]));
-			op_.push_back(findOperator(name_[3]));
+			for (SizeType i = 0; i < name_.size(); ++i)
+				op_.push_back(findOperator(name_[i]));
 		}
 
 		const OperatorType& op(SizeType ind) const
@@ -179,7 +165,7 @@ class ObserverInterpreter {
 			return bracket_[1];
 		}
 
-		SizeType type() const { return type_; }
+		SizeType points() const { return name_.size(); }
 
 
 	private:
@@ -231,7 +217,7 @@ public:
 			Bracket bracket(observableLibrary_.model(), vecStr[i]);
 
 			SizeType threadId = 0;
-			if (bracket.type() == ONE_POINT) {
+			if (bracket.points() == 1) {
 				PreOperatorSiteIndependentType preOperator(bracket.op(0),
 				                                           bracket.opName(0),
 				                                           threadId);
@@ -241,7 +227,7 @@ public:
 				continue;
 			}
 
-			if (bracket.type() == TWO_POINT) {
+			if (bracket.points() == 2) {
 				MatrixType m0;
 				crsMatrixToFullMatrix(m0,bracket.op(0).data);
 
@@ -259,8 +245,8 @@ public:
 				continue;
 			}
 
-			if (bracket.type() == FOUR_POINT) {
-				observableLibrary_.fourPoint(bracket,
+			if (bracket.points() == 3 || bracket.points() == 4) {
+				observableLibrary_.manyPoint(bracket,
 			                                 rows,
 			                                 cols,
 			                                 threadId);

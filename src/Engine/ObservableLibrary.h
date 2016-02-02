@@ -241,11 +241,17 @@ public:
 	}
 
 	template<typename SomeBracketType>
-	void fourPoint(const SomeBracketType& bracket,
+	void manyPoint(const SomeBracketType& bracket,
 	               SizeType rows,
 	               SizeType cols,
 	               SizeType threadId)
 	{
+		if (bracket.points() == 3) {
+			throw PsimagLite::RuntimeError("observe 3-point not ready yet\n");
+		}
+
+		assert(bracket.points() == 4);
+
 		VectorMatrixType v = observe_.ladder(bracket,rows,cols,threadId);
 
 		for (SizeType i = 0; i < v.size(); ++i) {

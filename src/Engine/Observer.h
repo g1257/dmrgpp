@@ -211,15 +211,6 @@ public:
 		return v;
 	}
 
-	FieldType fourPoint(char mod1,SizeType i1,const MatrixType& O1,
-	                    char mod2,SizeType i2,const MatrixType& O2,
-	                    char mod3,SizeType i3,const MatrixType& O3,
-	                    char mod4,SizeType i4,const MatrixType& O4,
-	                    int fermionicSign)
-	{
-		return fourpoint_(mod1,i1,O1,mod2,i2,O2,mod3,i3,O3,mod4,i4,O4,fermionicSign);
-	}
-
 	template<typename SomeModelType>
 	void fourPointDeltas(MatrixType& fpd,
 	                     const typename PsimagLite::Vector<SizeType>::Type& gammas,
