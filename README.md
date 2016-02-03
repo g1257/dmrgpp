@@ -6,7 +6,7 @@ Parts might have its own License. See Parts of PsimagLite below.
 
 Please cite PsimagLite if you base any scientific 
 publication on this software. Citation should read:
-G. Alvarez, (2011), PsimagLite (version 1.0.0) 
+G. Alvarez, (2011), PsimagLite (version 1.0) 
 [computer software], Oak Ridge National Laboratory.
 
 -------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ PsimagLite is inspired in T.S.'s Psimag software (but PsimagLite is not a fork o
 
 The reason for PsimagLite is to share code among different applications.
 Applications that depend on PsimagLite are:
-SpinPhononFermion, DMRG++, Lanczos++, FreeFermions, and GpusDoneRight.
+SpinPhononFermion, DMRG++, Lanczos++, FreeFermions, GpusDoneRight, BetheAnsatz
 
 # Code integrity
 
@@ -58,7 +58,6 @@ Keys at https://web.ornl.gov/~gz1/keys.html
 
 [DenseLinearAlgebra]
 BLAS // wrapper
-Lapack <-- Temporary class, do not use, use LAPACK instead
 LAPACK // wrapper
 Matrix /// a matrix class
 
