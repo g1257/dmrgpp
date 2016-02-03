@@ -89,6 +89,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "WaveFunctionTransfFactory.h"
 #include "Truncation.h"
 #include "ObservablesInSitu.h"
+#include "TargetingGroundState.h"
+#include "TargetingTimeStep.h"
+#include "TargetingDynamic.h"
+#include "TargetingAdaptiveDynamic.h"
+#include "TargetingCorrection.h"
+#include "TargetingCorrectionVector.h"
 
 namespace Dmrg {
 
@@ -129,6 +135,30 @@ public:
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename PsimagLite::Vector<BlockType>::Type VectorBlockType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef TargetingGroundState<typename TargettingType::LanczosSolverType,
+	                             typename TargettingType::MatrixVectorType,
+	                             typename TargettingType::WaveFunctionTransfType>
+	TargetingGroundStateType;
+	typedef TargetingTimeStep<typename TargettingType::LanczosSolverType,
+	                             typename TargettingType::MatrixVectorType,
+	                             typename TargettingType::WaveFunctionTransfType>
+	TargetingTimeStepType;
+	typedef TargetingDynamic<typename TargettingType::LanczosSolverType,
+	                             typename TargettingType::MatrixVectorType,
+	                             typename TargettingType::WaveFunctionTransfType>
+	TargetingDynamicType;
+	typedef TargetingAdaptiveDynamic<typename TargettingType::LanczosSolverType,
+	                             typename TargettingType::MatrixVectorType,
+	                             typename TargettingType::WaveFunctionTransfType>
+	TargetingAdaptiveDynamicType;
+	typedef TargetingCorrectionVector<typename TargettingType::LanczosSolverType,
+	                             typename TargettingType::MatrixVectorType,
+	                             typename TargettingType::WaveFunctionTransfType>
+	TargetingCorrectionVectorType;
+	typedef TargetingCorrection<typename TargettingType::LanczosSolverType,
+	                             typename TargettingType::MatrixVectorType,
+	                             typename TargettingType::WaveFunctionTransfType>
+	TargetingCorrectionType;
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 	      EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
@@ -138,7 +168,8 @@ public:
 
 	DmrgSolver(ModelType const &model,
 	           TargetParamsType& targetStruct,
-	           InputValidatorType& ioIn)
+	           InputValidatorType& ioIn,
+	           PsimagLite::String targeting)
 	    : model_(model),
 	      parameters_(model_.params()),
 	      targetStruct_(targetStruct),
@@ -184,7 +215,7 @@ public:
 		progress_.printline(msg2,std::cout);
 	}
 
-	void main(const GeometryType& geometry)
+	void main(const GeometryType& geometry, PsimagLite::String targeting)
 	{
 		ioOut_.print("GEOMETRY",geometry);
 		ioOut_.print("MODEL",model_);
@@ -200,17 +231,30 @@ public:
 			sitesIndices_.push_back(X[i]);
 		for (SizeType i=0;i<Y.size();i++) sitesIndices_.push_back(Y[Y.size()-i-1]);
 
-		//wft_.init();
-		//if (parameters_.options.find("nowft")!=PsimagLite::String::npos) wft_.disable();
+		TargettingType* psi = 0;
+		if (targeting=="TimeStepTargetting") {
+			psi = new TargetingTimeStepType(lrs_,model_,targetStruct_,wft_,quantumSector_,ioIn_);
+		} else if (targeting=="DynamicTargetting") {
+			psi = new TargetingDynamicType(lrs_,model_,targetStruct_,wft_,quantumSector_,ioIn_);
+		} else if (targeting=="AdaptiveDynamicTargetting") {
+			psi = new TargetingAdaptiveDynamicType(lrs_,model_,targetStruct_,wft_,quantumSector_,ioIn_);
+		} else if (targeting=="CorrectionVectorTargetting") {
+			psi = new TargetingCorrectionVectorType(lrs_,model_,targetStruct_,wft_,quantumSector_,ioIn_);
+		} else if (targeting=="CorrectionTargetting") {
+			psi = new TargetingCorrectionType(lrs_,model_,targetStruct_,wft_,quantumSector_,ioIn_);
+		} else if (targeting == "GroundStateTargetting") {
+			psi = new TargetingGroundStateType(lrs_,model_,targetStruct_,wft_,quantumSector_,ioIn_);
+		} else {
+			throw PsimagLite::RuntimeError("Unknown targeting " + targeting + "\n");
+		}
 
-		TargettingType psi(lrs_,model_,targetStruct_,wft_,quantumSector_,ioIn_);
-		ioOut_.print("PSI",psi);
+		ioOut_.print("PSI",*psi);
 
 		MyBasisWithOperators pS("pS");
 		MyBasisWithOperators pE("pE");
 
 		if (checkpoint_()) {
-			checkpoint_.load(pS,pE,psi);
+			checkpoint_.load(pS,pE,*psi);
 		} else { // move this block elsewhere:
 			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 			SparseMatrixType hmatrix;
@@ -222,12 +266,15 @@ public:
 
 			model_.setNaturalBasis(creationMatrix,hmatrix,q,S,time);
 			pS.setVarious(S,hmatrix,q,creationMatrix);
-			infiniteDmrgLoop(S,X,Y,E,pS,pE,psi);
+			infiniteDmrgLoop(S,X,Y,E,pS,pE,*psi);
 		}
 
-		finiteDmrgLoops(S,E,pS,pE,psi);
+		finiteDmrgLoops(S,E,pS,pE,*psi);
 
 		inSitu_.init(psi,geometry.numberOfSites());
+
+		delete psi;
+		psi = 0;
 	}
 
 	const DensityMatrixElementType& inSitu(SizeType i) const

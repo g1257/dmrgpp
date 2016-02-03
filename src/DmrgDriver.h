@@ -11,12 +11,7 @@
 #include "MatrixVectorOnTheFly.h"
 #include "MatrixVectorStored.h"
 #include "MatrixVectorKron.h"
-#include "TargetingGroundState.h"
-#include "TargetingTimeStep.h"
-#include "TargetingDynamic.h"
-#include "TargetingAdaptiveDynamic.h"
-#include "TargetingCorrection.h"
-#include "TargetingCorrectionVector.h"
+#include "TargetingBase.h"
 #include "MettsTargetting.h"
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
@@ -95,10 +90,11 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 
 template<typename GeometryType,
          typename TargettingType>
-void mainLoop3(GeometryType& geometry,
-               const ParametersDmrgSolverType& dmrgSolverParams,
-               InputNgType::Readable& io,
-               const OperatorOptions& opOptions);
+void mainLoop3(GeometryType&,
+               const ParametersDmrgSolverType&,
+               InputNgType::Readable&,
+               const OperatorOptions&,
+               PsimagLite::String);
 
 #endif // DMRGDRIVER_H
 

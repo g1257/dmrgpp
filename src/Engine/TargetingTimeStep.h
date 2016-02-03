@@ -87,10 +87,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<template<typename,typename,typename> class LanczosSolverTemplate,
+template<typename LanczosSolverType_,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_>
-class TargetingTimeStep : public TargetingBase<LanczosSolverTemplate,
+class TargetingTimeStep : public TargetingBase<LanczosSolverType_,
         MatrixVectorType_,
         WaveFunctionTransfType_> {
 
@@ -98,9 +98,8 @@ class TargetingTimeStep : public TargetingBase<LanczosSolverTemplate,
 
 public:
 
-	typedef TargetingBase<LanczosSolverTemplate,
-	MatrixVectorType_,
-	WaveFunctionTransfType_> BaseType;
+	typedef LanczosSolverType_ LanczosSolverType;
+	typedef TargetingBase<LanczosSolverType,MatrixVectorType_,WaveFunctionTransfType_> BaseType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
@@ -114,10 +113,6 @@ public:
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
 	typedef typename VectorWithOffsetType::VectorType TargetVectorType;
-	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
-	typedef LanczosSolverTemplate<ParametersForSolverType,
-	MatrixVectorType,
-	TargetVectorType> LanczosSolverType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
@@ -376,11 +371,11 @@ private:
 	RealType gsWeight_;
 };     //class TargetingTimeStep
 
-template<template<typename,typename,typename> class LanczosSolverTemplate,
+template<typename LanczosSolverType,
          typename MatrixVectorType,
          typename WaveFunctionTransfType>
 std::ostream& operator<<(std::ostream& os,
-                         const TargetingTimeStep<LanczosSolverTemplate,
+                         const TargetingTimeStep<LanczosSolverType,
                          MatrixVectorType,
                          WaveFunctionTransfType>& tst)
 {

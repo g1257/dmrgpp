@@ -9,9 +9,7 @@ sub createTemplates
 
 my $cppEach = 4;
 
-my @targets = ("TargetingGroundState","TargetingTimeStep","TargetingCorrectionVector",
-"TargetingDynamic","TargetingAdaptiveDynamic","TargetingCorrection",
-"MettsTargetting");
+my @targets = ("TargetingBase","MettsTargetting");
 my @lanczos = ("LanczosSolver","ChebyshevSolver");
 my @matrixVector = ("MatrixVectorOnTheFly","MatrixVectorStored","MatrixVectorKron");
 my @modelHelpers = ("Local","Su2");
@@ -23,7 +21,7 @@ my $counter = 0;
 my $fout;
 foreach my $target (@targets) {
 	foreach my $complexOrNot (@complexOrReal) {
-		
+
 		next if (isComplexOption($complexOrNot) and targetNotComplex($target));
 
 		foreach my $lanczos (@lanczos) {
@@ -73,6 +71,9 @@ sub printInstance
 	my $geometry = "GeometryInstance${counter}Type";
 	my $basisSuperBlock = "$basis";
 	my $lrs = "Dmrg::LeftRightSuper<$basisWith,$basisSuperBlock >";
+	my $lanczosType = "LanczosSolver${counter}Type";
+	my $matrixVectorType = "MatrixVector${counter}Type";
+
 	print FOUT<<EOF;
 #ifdef USE_COMPLEX
 typedef PsimagLite::CrsMatrix<std::complex<RealType> > $sparseMatrix;
@@ -82,20 +83,25 @@ typedef PsimagLite::CrsMatrix<$complexOrNot> $sparseMatrix;
 typedef PsimagLite::Geometry<RealType,$inputNg,Dmrg::ProgramGlobals> $geometry;
 #endif
 
+typedef Dmrg::$matrixVector<
+ Dmrg::ModelBase<
+  Dmrg::ModelHelper$modelHelper<
+   $lrs
+  >,
+  ParametersDmrgSolverType,
+  InputNgType::Readable,
+  $geometry
+ >
+> $matrixVectorType;
+
+typedef PsimagLite::$lanczos<PsimagLite::ParametersForSolver<typename ${geometry}::RealType>,
+	$matrixVectorType, typename ${matrixVectorType}::VectorType> $lanczosType;
+
 template void mainLoop3<
  $geometry,
  Dmrg::$target<
-  PsimagLite::$lanczos,
-  Dmrg::$matrixVector<
-   Dmrg::ModelBase<
-    Dmrg::ModelHelper$modelHelper<
-     $lrs
-    >,
-    ParametersDmrgSolverType,
-    InputNgType::Readable,
-    $geometry
-   >
-  >,
+  $lanczosType,
+  $matrixVectorType,
   Dmrg::WaveFunctionTransfFactory<
    $lrs,
    Dmrg::VectorWithOffset$vecWithOffset<$realOrNotFromSparse>
@@ -105,7 +111,8 @@ template void mainLoop3<
 ($geometry&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
-const OperatorOptions&);
+const OperatorOptions&,
+PsimagLite::String);
 
 EOF
 }

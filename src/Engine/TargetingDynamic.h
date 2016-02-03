@@ -97,16 +97,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<template<typename,typename,typename> class LanczosSolverTemplate,
+template<typename LanczosSolverType_,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_>
-class TargetingDynamic : public TargetingBase<LanczosSolverTemplate,
+class TargetingDynamic : public TargetingBase<LanczosSolverType_,
                                               MatrixVectorType_,
                                               WaveFunctionTransfType_> {
 
 public:
 
-	typedef TargetingBase<LanczosSolverTemplate,
+	typedef LanczosSolverType_ LanczosSolverType;
+	typedef TargetingBase<LanczosSolverType,
 	                      MatrixVectorType_,
 	                      WaveFunctionTransfType_> BaseType;
 	typedef MatrixVectorType_ MatrixVectorType;
@@ -127,10 +128,6 @@ public:
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
-	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
-	typedef LanczosSolverTemplate<ParametersForSolverType,
-	                              MatrixVectorType,
-	                              VectorType> LanczosSolverType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
@@ -361,18 +358,18 @@ private:
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
-	ParametersForSolverType paramsForSolver_;
+	typename LanczosSolverType::ParametersForSolverType paramsForSolver_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	TridiagonalMatrixType ab_;
 	DenseMatrixRealType reortho_;
 	RealType weightForContinuedFraction_;
 }; // class TargetingDynamic
 
-template<template<typename,typename,typename> class LanczosSolverTemplate,
+template<typename LanczosSolverType,
          typename MatrixVectorType,
          typename WaveFunctionTransfType>
 std::ostream& operator<<(std::ostream& os,
-                         const TargetingDynamic<LanczosSolverTemplate,
+                         const TargetingDynamic<LanczosSolverType,
                          MatrixVectorType,
                          WaveFunctionTransfType>&)
 {

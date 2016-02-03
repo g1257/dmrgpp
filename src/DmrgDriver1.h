@@ -7,7 +7,8 @@ template<typename GeometryType, typename TargettingType>
 void mainLoop3(GeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io,
-               const OperatorOptions& opOptions)
+               const OperatorOptions& opOptions,
+               PsimagLite::String targeting)
 {
 	typedef typename TargettingType::TargetParamsType TargetParamsType;
 	typedef typename TargettingType::MatrixVectorType::ModelType ModelBaseType;
@@ -29,7 +30,7 @@ void mainLoop3(GeometryType& geometry,
 	SolverType dmrgSolver(model,tsp,io);
 
 	//! Calculate observables:
-	dmrgSolver.main(geometry);
+	dmrgSolver.main(geometry,targeting);
 }
 
 #endif // DMRG_DMRGDRIVER_1_H

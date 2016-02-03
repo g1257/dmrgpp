@@ -94,6 +94,7 @@ public:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
 
 	SizeType reflectionSector() const { return 0; }

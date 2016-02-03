@@ -87,13 +87,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<template<typename,typename,typename> class LanczosSolverTemplate,
+template<typename LanczosSolverType_,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_>
 class TargetingBase {
 
 public:
 
+	typedef LanczosSolverType_ LanczosSolverType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef PsimagLite::IoSimple::In IoInputType;
@@ -107,9 +108,9 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef LanczosSolverTemplate<ParametersForSolverType,
-	                              MatrixVectorType,
-	                              VectorType> LanczosSolverType;
+//	typedef LanczosSolverTemplate<ParametersForSolverType,
+//	                              MatrixVectorType,
+//	                              VectorType> LanczosSolverType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;

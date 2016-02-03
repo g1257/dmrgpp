@@ -90,22 +90,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<template<typename,typename,typename> class LanczosSolverTemplate,
+template<typename LanczosSolverType_,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_>
-class TargetingGroundState : public TargetingBase<LanczosSolverTemplate,
+class TargetingGroundState : public TargetingBase<LanczosSolverType_,
                                                   MatrixVectorType_,
                                                   WaveFunctionTransfType_> {
 
 public:
 
-	typedef TargetingBase<LanczosSolverTemplate,
+	typedef LanczosSolverType_ LanczosSolverType;
+	typedef TargetingBase<LanczosSolverType,
 	                      MatrixVectorType_,
 	                      WaveFunctionTransfType_> BaseType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
-	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
@@ -114,7 +114,6 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef LanczosSolverTemplate<ParametersForSolverType,MatrixVectorType,VectorType> LanczosSolverType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
@@ -185,11 +184,11 @@ private:
 
 };     //class TargetingGroundState
 
-template<template<typename,typename,typename> class LanczosSolverTemplate,
+template<typename LanczosSolverType,
          typename MatrixVectorType,
          typename WaveFunctionTransfType>
 std::ostream& operator<<(std::ostream& os,
-                         const TargetingGroundState<LanczosSolverTemplate,
+                         const TargetingGroundState<LanczosSolverType,
                          MatrixVectorType,
                          WaveFunctionTransfType>&)
 {

@@ -91,11 +91,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<template<typename,typename,typename> class LanczosSolverTemplate,
+template<typename LanczosSolverType_,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_>
 class MettsTargetting  {
 
+	typedef LanczosSolverType_ LanczosSolverType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef std::pair<SizeType,SizeType> PairSizeType;
 
@@ -124,9 +125,6 @@ public:
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::VectorType TargetVectorType;
-	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
-	typedef LanczosSolverTemplate<ParametersForSolverType,MatrixVectorType,TargetVectorType>
-	LanczosSolverType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef MettsParams<ModelType> TargetParamsType;
@@ -1199,11 +1197,11 @@ private:
 	VectorSizeType sitesCollapsed_;
 };     //class MettsTargetting
 
-template<template<typename,typename,typename> class LanczosSolverTemplate,
+template<typename LanczosSolverType,
          typename MatrixVectorType,
          typename WaveFunctionTransfType>
 std::ostream& operator<<(std::ostream& os,
-                         const MettsTargetting<LanczosSolverTemplate,
+                         const MettsTargetting<LanczosSolverType,
                          MatrixVectorType,
                          WaveFunctionTransfType>& tst)
 {

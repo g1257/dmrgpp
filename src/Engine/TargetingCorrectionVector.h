@@ -94,16 +94,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<template<typename,typename,typename> class LanczosSolverTemplate,
+template<typename LanczosSolverType_,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_>
-class TargetingCorrectionVector : public TargetingBase<LanczosSolverTemplate,
+class TargetingCorrectionVector : public TargetingBase<LanczosSolverType_,
         MatrixVectorType_,
         WaveFunctionTransfType_> {
 
-	typedef TargetingBase<LanczosSolverTemplate,
-	MatrixVectorType_,
-	WaveFunctionTransfType_> BaseType;
+	typedef LanczosSolverType_ LanczosSolverType;
+	typedef TargetingBase<LanczosSolverType,MatrixVectorType_,WaveFunctionTransfType_> BaseType;
 
 	class CalcR {
 
@@ -216,10 +215,6 @@ public:
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
-	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
-	typedef LanczosSolverTemplate<ParametersForSolverType,
-	MatrixVectorType,
-	VectorType> LanczosSolverType;
 	typedef VectorType TargetVectorType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
@@ -630,14 +625,14 @@ private:
 	TridiagonalMatrixType ab_;
 	DenseMatrixRealType reortho_;
 	RealType weightForContinuedFraction_;
-	ParametersForSolverType paramsForSolver_;
+	typename LanczosSolverType::ParametersForSolverType paramsForSolver_;
 }; // class TargetingCorrectionVector
 
-template<template<typename,typename,typename> class LanczosSolverTemplate,
+template<typename LanczosSolverType,
          typename MatrixVectorType,
          typename WaveFunctionTransfType>
 std::ostream& operator<<(std::ostream& os,
-                         const TargetingCorrectionVector<LanczosSolverTemplate,
+                         const TargetingCorrectionVector<LanczosSolverType,
                          MatrixVectorType,
                          WaveFunctionTransfType>&)
 {
