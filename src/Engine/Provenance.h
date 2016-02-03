@@ -1,5 +1,7 @@
 #ifndef PROVENANCE_H
 #define PROVENANCE_H
+#include "../../PsimagLite/src/Version.h"
+#include "../Version.h"
 
 #include <iostream>
 

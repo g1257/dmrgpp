@@ -1,5 +1,4 @@
 #include "Provenance.h"
-#include "Version.h"
 
 std::ostream& operator<<(std::ostream& os,const Provenance&)
 {
