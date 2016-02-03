@@ -96,7 +96,6 @@ template<typename LanczosSolverType_,
          typename WaveFunctionTransfType_>
 class MettsTargetting  {
 
-	typedef LanczosSolverType_ LanczosSolverType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef std::pair<SizeType,SizeType> PairSizeType;
 
@@ -111,6 +110,7 @@ class MettsTargetting  {
 
 public:
 
+	typedef LanczosSolverType_ LanczosSolverType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
@@ -410,13 +410,18 @@ public:
 		currentBeta_ = ts.time();
 	}
 
-	void print(std::ostream& os) const
+	void print(PsimagLite::IoSimple::Out& ioOut) const
 	{
-		os<<"MettsWeightsTimeVectors=";
+		PsimagLite::OstringStream msg;
+		msg<<"PSI\n";
+		
+		msg<<"MettsWeightsTimeVectors=";
 		for (SizeType i=0;i<weight_.size();i++)
-			os<<weight_[i]<<" ";
-		os<<"\n";
-		os<<"MettsWeightGroundState="<<gsWeight_<<"\n";
+			msg<<weight_[i]<<" ";
+		msg<<"\n";
+		msg<<"MettsWeightGroundState="<<gsWeight_<<"\n";
+
+		ioOut.print(msg.str());
 	}
 
 	void initialGuess(VectorWithOffsetType&,
