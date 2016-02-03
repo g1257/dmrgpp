@@ -97,20 +97,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename LanczosSolverType_,
-         typename MatrixVectorType_,
-         typename WaveFunctionTransfType_>
-class TargetingDynamic : public TargetingBase<LanczosSolverType_,
-                                              MatrixVectorType_,
-                                              WaveFunctionTransfType_> {
+template<typename LanczosSolverType_>
+class TargetingDynamic : public TargetingBase<LanczosSolverType_> {
 
 public:
 
 	typedef LanczosSolverType_ LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType,
-	                      MatrixVectorType_,
-	                      WaveFunctionTransfType_> BaseType;
-	typedef MatrixVectorType_ MatrixVectorType;
+	typedef TargetingBase<LanczosSolverType> BaseType;
+	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::OperatorsType OperatorsType;
@@ -123,7 +117,7 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef TargetParamsDynamic<ModelType> TargetParamsType;
 	typedef typename BasisType::BlockType BlockType;
-	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
+	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
@@ -374,13 +368,8 @@ private:
 	RealType weightForContinuedFraction_;
 }; // class TargetingDynamic
 
-template<typename LanczosSolverType,
-         typename MatrixVectorType,
-         typename WaveFunctionTransfType>
-std::ostream& operator<<(std::ostream& os,
-                         const TargetingDynamic<LanczosSolverType,
-                         MatrixVectorType,
-                         WaveFunctionTransfType>&)
+template<typename LanczosSolverType>
+std::ostream& operator<<(std::ostream& os, const TargetingDynamic<LanczosSolverType>&)
 {
 	os<<"DT=NothingToSeeHereYet\n";
 	return os;

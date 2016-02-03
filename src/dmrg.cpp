@@ -35,45 +35,30 @@ void restoreCoutBuffer()
 	std::cout.rdbuf(GlobalCoutBuffer);
 }
 
-template<typename GeometryType,
-         typename MatrixVectorType,
-         typename WaveFunctionTransfType,
-         template<typename,
-                  typename,
-                  typename> class TargettingTemplate>
-void mainLoop2(GeometryType& geometry,
+template<typename MatrixVectorType>
+void mainLoop2(MatrixVectorType::ModelType::GeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io,
                const OperatorOptions& opOptions,
                PsimagLite::String targeting)
 {
-	typedef PsimagLite::ParametersForSolver<typename GeometryType::RealType>
+	typedef MatrixVectorType::ModelType::GeometryType GeometryType;
+	typedef PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>
 	        ParametersForSolverType;
 	if (dmrgSolverParams.options.find("ChebyshevSolver")!=PsimagLite::String::npos) {
 		typedef PsimagLite::ChebyshevSolver<ParametersForSolverType,
 		        MatrixVectorType, typename MatrixVectorType::VectorType> SolverType;
-		typedef TargettingTemplate<SolverType,
-		                           MatrixVectorType,
-		                           WaveFunctionTransfType> TargettingType;
-		mainLoop3<GeometryType,TargettingType>
-		(geometry,dmrgSolverParams,io,opOptions,targeting);
+		mainLoop3<SolverType>(geometry,dmrgSolverParams,io,opOptions,targeting);
 	} else {
 		typedef PsimagLite::LanczosSolver<ParametersForSolverType,
 		        MatrixVectorType, typename MatrixVectorType::VectorType> SolverType;
-		typedef TargettingTemplate<SolverType,
-		                           MatrixVectorType,
-		                           WaveFunctionTransfType> TargettingType;
-		mainLoop3<GeometryType,TargettingType>
-		(geometry,dmrgSolverParams,io,opOptions,targeting);
+		mainLoop3<SolverType>(geometry,dmrgSolverParams,io,opOptions,targeting);
 	}
 }
 
 template<typename GeometryType,
         template<typename> class ModelHelperTemplate,
          template<typename> class VectorWithOffsetTemplate,
-         template<typename,
-                  typename,
-                  typename> class TargettingTemplate,
          typename MySparseMatrix>
 void mainLoop(GeometryType& geometry,
               const ParametersDmrgSolverType& dmrgSolverParams,
@@ -93,32 +78,30 @@ void mainLoop(GeometryType& geometry,
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
-	typedef WaveFunctionTransfFactory<LeftRightSuperType,
-	                                  VectorWithOffsetType> WaveFunctionTransfType;
 
 	if (dmrgSolverParams.options.find("MatrixVectorStored")!=PsimagLite::String::npos) {
-		mainLoop2<GeometryType,
-		         MatrixVectorStored<ModelBaseType>,
-		         WaveFunctionTransfType,
-		         TargettingTemplate>(geometry,dmrgSolverParams,io,opOptions,targeting);
+		mainLoop2<MatrixVectorStored<ModelBaseType> >(geometry,
+		                                              dmrgSolverParams,
+		                                              io,
+		                                              opOptions,
+		                                              targeting);
 	} else if (dmrgSolverParams.options.find("MatrixVectorKron")!=PsimagLite::String::npos) {
-		mainLoop2<GeometryType,
-		MatrixVectorKron<ModelBaseType>,
-		                 WaveFunctionTransfType,
-		                 TargettingTemplate>(geometry,dmrgSolverParams,io,opOptions,targeting);
+		mainLoop2<MatrixVectorKron<ModelBaseType> >(geometry,
+		                                            dmrgSolverParams,
+		                                            io,
+		                                            opOptions,
+		                                            targeting);
 	} else {
-		mainLoop2<GeometryType,
-		         MatrixVectorOnTheFly<ModelBaseType>,
-		         WaveFunctionTransfType,
-		         TargettingTemplate>(geometry,dmrgSolverParams,io,opOptions,targeting);
+		mainLoop2<MatrixVectorOnTheFly<ModelBaseType> >(geometry,
+		                                                dmrgSolverParams,
+		                                                io,
+		                                                opOptions,
+		                                                targeting);
 	}
 }
 
 template<typename GeometryType,
         template<typename> class ModelHelperTemplate,
-         template<typename,
-                  typename,
-                  typename> class TargettingTemplate,
          typename MySparseMatrix>
 void mainLoop1(GeometryType& geometry,
               const ParametersDmrgSolverType& dmrgSolverParams,
@@ -127,10 +110,10 @@ void mainLoop1(GeometryType& geometry,
                PsimagLite::String targeting)
 {
 	if (dmrgSolverParams.options.find("vectorwithoffsets")!=PsimagLite::String::npos) {
-		mainLoop<GeometryType,ModelHelperTemplate,VectorWithOffsets,TargettingTemplate,
+		mainLoop<GeometryType,ModelHelperTemplate,VectorWithOffsets,
 	         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions,targeting);
 	} else {
-		mainLoop<GeometryType,ModelHelperTemplate,VectorWithOffset,TargettingTemplate,
+		mainLoop<GeometryType,ModelHelperTemplate,VectorWithOffset,
 	         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions,targeting);
 	}
 }
@@ -165,10 +148,11 @@ void mainLoop0(InputNgType::Readable& io,
 	}
 
 	if (su2) {
-		mainLoop1<GeometryType,
-		        ModelHelperSu2,
-		        TargetingBase,
-		        MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions,targeting);
+		mainLoop1<GeometryType,ModelHelperSu2,MySparseMatrix>(geometry,
+		                                                      dmrgSolverParams,
+		                                                      io,
+		                                                      opOptions,
+		                                                      targeting);
 		return;
 	}
 
@@ -182,19 +166,19 @@ void mainLoop0(InputNgType::Readable& io,
 #endif
 
 	if (targeting=="TimeStepTargetting") {
-		mainLoop1<GeometryType,ModelHelperLocal,TargetingBase,
-		         MySparseMatrixComplex>(geometry,dmrgSolverParams,io,opOptions,targeting);
+		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrixComplex>(geometry,
+		                                                               dmrgSolverParams,
+		                                                               io,
+		                                                               opOptions,
+		                                                               targeting);
 		return;
 	}
 
-	if (targeting=="MettsTargetting") {
-		mainLoop1<GeometryType,ModelHelperLocal,MettsTargetting,
-		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions,targeting);
-		return;
-	}
-
-	mainLoop1<GeometryType,ModelHelperLocal,TargetingBase,
-		        MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions,targeting);
+	mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix>(geometry,
+	                                                        dmrgSolverParams,
+	                                                        io,
+	                                                        opOptions,
+	                                                        targeting);
 }
 
 int main(int argc,char *argv[])

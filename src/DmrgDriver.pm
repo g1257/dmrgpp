@@ -7,9 +7,8 @@ package DmrgDriver;
 sub createTemplates
 {
 
-my $cppEach = 4;
+my $cppEach = 2;
 
-my @targets = ("TargetingBase","MettsTargetting");
 my @lanczos = ("LanczosSolver","ChebyshevSolver");
 my @matrixVector = ("MatrixVectorOnTheFly","MatrixVectorStored","MatrixVectorKron");
 my @modelHelpers = ("Local","Su2");
@@ -19,31 +18,30 @@ my @complexOrReal = ("RealType","std::complex<RealType> ");
 my $cppFiles = 0;
 my $counter = 0;
 my $fout;
-foreach my $target (@targets) {
-	foreach my $complexOrNot (@complexOrReal) {
+my $target = "TargetingBase";
+foreach my $complexOrNot (@complexOrReal) {
 
-		next if (isComplexOption($complexOrNot) and targetNotComplex($target));
+	next if (isComplexOption($complexOrNot) and targetNotComplex($target));
 
-		foreach my $lanczos (@lanczos) {
-			foreach my $modelHelper (@modelHelpers) {
-				foreach my $vecWithOffset (@vecWithOffsets) {
-					foreach my $matrixVector (@matrixVector) {
-						if ($counter == 0 or $counter % $cppEach == 0) {
-							if ($counter > 0) {
-								close(FOUT);
-								print STDERR "$0: File $fout written\n";
-							}
-
-							$fout = "DmrgDriver$cppFiles.cpp";
-							$cppFiles++;
-							open(FOUT,"> $fout") or die "$0: Cannot write to $fout : $!\n";
-							printHeader();
+	foreach my $lanczos (@lanczos) {
+		foreach my $modelHelper (@modelHelpers) {
+			foreach my $vecWithOffset (@vecWithOffsets) {
+				foreach my $matrixVector (@matrixVector) {
+					if ($counter == 0 or $counter % $cppEach == 0) {
+						if ($counter > 0) {
+							close(FOUT);
+							print STDERR "$0: File $fout written\n";
 						}
 
-						printInstance($counter,$target,$lanczos,$matrixVector,$modelHelper,
-						$vecWithOffset,$complexOrNot);
-						$counter++;
+						$fout = "DmrgDriver$cppFiles.cpp";
+						$cppFiles++;
+						open(FOUT,"> $fout") or die "$0: Cannot write to $fout : $!\n";
+						printHeader();
 					}
+
+					printInstance($counter,$target,$lanczos,$matrixVector,$modelHelper,
+					$vecWithOffset,$complexOrNot);
+					$counter++;
 				}
 			}
 		}
@@ -97,17 +95,7 @@ typedef Dmrg::$matrixVector<
 typedef PsimagLite::$lanczos<PsimagLite::ParametersForSolver<typename ${geometry}::RealType>,
 	$matrixVectorType, typename ${matrixVectorType}::VectorType> $lanczosType;
 
-template void mainLoop3<
- $geometry,
- Dmrg::$target<
-  $lanczosType,
-  $matrixVectorType,
-  Dmrg::WaveFunctionTransfFactory<
-   $lrs,
-   Dmrg::VectorWithOffset$vecWithOffset<$realOrNotFromSparse>
-  >
- >
->
+template void mainLoop3<$lanczosType>
 ($geometry&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,

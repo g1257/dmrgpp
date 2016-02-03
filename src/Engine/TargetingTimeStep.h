@@ -87,21 +87,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename LanczosSolverType_,
-         typename MatrixVectorType_,
-         typename WaveFunctionTransfType_>
-class TargetingTimeStep : public TargetingBase<LanczosSolverType_,
-        MatrixVectorType_,
-        WaveFunctionTransfType_> {
+template<typename LanczosSolverType_>
+class TargetingTimeStep : public TargetingBase<LanczosSolverType_> {
 
 	enum {BORDER_NEITHER, BORDER_LEFT, BORDER_RIGHT};
 
 public:
 
 	typedef LanczosSolverType_ LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType,MatrixVectorType_,WaveFunctionTransfType_> BaseType;
+	typedef TargetingBase<LanczosSolverType> BaseType;
 	typedef std::pair<SizeType,SizeType> PairType;
-	typedef MatrixVectorType_ MatrixVectorType;
+	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::OperatorsType OperatorsType;
@@ -109,7 +105,7 @@ public:
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
+	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
 	typedef typename VectorWithOffsetType::VectorType TargetVectorType;
@@ -380,13 +376,8 @@ private:
 	RealType gsWeight_;
 };     //class TargetingTimeStep
 
-template<typename LanczosSolverType,
-         typename MatrixVectorType,
-         typename WaveFunctionTransfType>
-std::ostream& operator<<(std::ostream& os,
-                         const TargetingTimeStep<LanczosSolverType,
-                         MatrixVectorType,
-                         WaveFunctionTransfType>& tst)
+template<typename LanczosSolverType>
+std::ostream& operator<<(std::ostream& os, const TargetingTimeStep<LanczosSolverType>& tst)
 {
 	tst.print(os);
 	return os;

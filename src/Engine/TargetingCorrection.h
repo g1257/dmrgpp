@@ -88,20 +88,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename LanczosSolverType_,
-         typename MatrixVectorType_,
-         typename WaveFunctionTransfType_>
-class TargetingCorrection : public TargetingBase<LanczosSolverType_,
-                                                 MatrixVectorType_,
-                                                 WaveFunctionTransfType_> {
+template<typename LanczosSolverType_>
+class TargetingCorrection : public TargetingBase<LanczosSolverType_> {
 
 public:
 
 	typedef LanczosSolverType_ LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType,
-	                      MatrixVectorType_,
-	                      WaveFunctionTransfType_> BaseType;
-	typedef MatrixVectorType_ MatrixVectorType;
+	typedef TargetingBase<LanczosSolverType> BaseType;
+	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -113,7 +107,7 @@ public:
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisType::BlockType BlockType;
-	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
+	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef TargetParamsCorrection<ModelType> TargetParamsType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
@@ -198,13 +192,9 @@ private:
 	PsimagLite::ProgressIndicator progress_;
 };     //class TargetingCorrection
 
-template<typename LanczosSolverType,
-         typename MatrixVectorType,
-         typename WaveFunctionTransfType>
+template<typename LanczosSolverType>
 std::ostream& operator<<(std::ostream& os,
-                         const TargetingCorrection<LanczosSolverType,
-                         MatrixVectorType,
-                         WaveFunctionTransfType>& tst)
+                         const TargetingCorrection<LanczosSolverType>& tst)
 {
 	tst.print(os);
 	return os;

@@ -99,9 +99,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 //  A class to represent a generic solver for the Dmrg method
-template<typename TargettingType>
+template<typename SolverType>
 class DmrgSolver {
 
+	typedef TargetingBase<SolverType> TargettingType;
 	typedef typename TargettingType::ModelType ModelType;
 	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename ModelType::OperatorsType OperatorsType;
@@ -135,29 +136,17 @@ public:
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename PsimagLite::Vector<BlockType>::Type VectorBlockType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef TargetingGroundState<typename TargettingType::LanczosSolverType,
-	                             typename TargettingType::MatrixVectorType,
-	                             typename TargettingType::WaveFunctionTransfType>
+	typedef TargetingGroundState<typename TargettingType::LanczosSolverType>
 	TargetingGroundStateType;
-	typedef TargetingTimeStep<typename TargettingType::LanczosSolverType,
-	                             typename TargettingType::MatrixVectorType,
-	                             typename TargettingType::WaveFunctionTransfType>
+	typedef TargetingTimeStep<typename TargettingType::LanczosSolverType>
 	TargetingTimeStepType;
-	typedef TargetingDynamic<typename TargettingType::LanczosSolverType,
-	                             typename TargettingType::MatrixVectorType,
-	                             typename TargettingType::WaveFunctionTransfType>
+	typedef TargetingDynamic<typename TargettingType::LanczosSolverType>
 	TargetingDynamicType;
-	typedef TargetingAdaptiveDynamic<typename TargettingType::LanczosSolverType,
-	                             typename TargettingType::MatrixVectorType,
-	                             typename TargettingType::WaveFunctionTransfType>
+	typedef TargetingAdaptiveDynamic<typename TargettingType::LanczosSolverType>
 	TargetingAdaptiveDynamicType;
-	typedef TargetingCorrectionVector<typename TargettingType::LanczosSolverType,
-	                             typename TargettingType::MatrixVectorType,
-	                             typename TargettingType::WaveFunctionTransfType>
+	typedef TargetingCorrectionVector<typename TargettingType::LanczosSolverType>
 	TargetingCorrectionVectorType;
-	typedef TargetingCorrection<typename TargettingType::LanczosSolverType,
-	                             typename TargettingType::MatrixVectorType,
-	                             typename TargettingType::WaveFunctionTransfType>
+	typedef TargetingCorrection<typename TargettingType::LanczosSolverType>
 	TargetingCorrectionType;
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,

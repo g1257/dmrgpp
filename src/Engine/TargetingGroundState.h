@@ -90,20 +90,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename LanczosSolverType_,
-         typename MatrixVectorType_,
-         typename WaveFunctionTransfType_>
-class TargetingGroundState : public TargetingBase<LanczosSolverType_,
-                                                  MatrixVectorType_,
-                                                  WaveFunctionTransfType_> {
+template<typename LanczosSolverType_>
+class TargetingGroundState : public TargetingBase<LanczosSolverType_> {
 
 public:
 
 	typedef LanczosSolverType_ LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType,
-	                      MatrixVectorType_,
-	                      WaveFunctionTransfType_> BaseType;
-	typedef MatrixVectorType_ MatrixVectorType;
+	typedef TargetingBase<LanczosSolverType> BaseType;
+	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -115,7 +109,7 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef typename BasisType::BlockType BlockType;
-	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
+	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef VectorType TargetVectorType;
 	typedef TargetParamsGroundState<ModelType> TargetParamsType;
@@ -197,13 +191,9 @@ private:
 
 };     //class TargetingGroundState
 
-template<typename LanczosSolverType,
-         typename MatrixVectorType,
-         typename WaveFunctionTransfType>
+template<typename LanczosSolverType>
 std::ostream& operator<<(std::ostream& os,
-                         const TargetingGroundState<LanczosSolverType,
-                         MatrixVectorType,
-                         WaveFunctionTransfType>&)
+                         const TargetingGroundState<LanczosSolverType>&)
 {
 	os<<"GSTWeightGroundState=1\n";
 	return os;
