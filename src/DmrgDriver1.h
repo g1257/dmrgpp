@@ -10,7 +10,6 @@ void mainLoop3(GeometryType& geometry,
                const OperatorOptions& opOptions,
                PsimagLite::String targeting)
 {
-	typedef typename TargettingType::TargetParamsType TargetParamsType;
 	typedef typename TargettingType::MatrixVectorType::ModelType ModelBaseType;
 
 	//! Setup the Model
@@ -22,12 +21,9 @@ void mainLoop3(GeometryType& geometry,
 		return;
 	}
 
-	//! Read TimeEvolution if applicable:
-	TargetParamsType tsp(io,model);
-
 	//! Setup the dmrg solver:
 	typedef Dmrg::DmrgSolver<TargettingType> SolverType;
-	SolverType dmrgSolver(model,tsp,io);
+	SolverType dmrgSolver(model,io);
 
 	//! Calculate observables:
 	dmrgSolver.main(geometry,targeting);

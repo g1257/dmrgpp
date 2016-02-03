@@ -126,6 +126,7 @@ public:
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
+	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
 
 	enum {DISABLED=BaseType::DISABLED,
 		  OPERATOR=BaseType::OPERATOR,
@@ -137,13 +138,12 @@ public:
 
 	TargetingAdaptiveDynamic(const LeftRightSuperType& lrs,
 	                         const ModelType& model,
-	                         const TargetParamsType& tstStruct,
 	                         const WaveFunctionTransfType& wft,
 	                         const SizeType&,
 	                         InputValidatorType& io)
 
-	    : BaseType(lrs,model,tstStruct,wft,2,0),
-	      tstStruct_(tstStruct),
+	    : BaseType(lrs,model,wft,0),
+	      tstStruct_(io,model),
 	      wft_(wft),
 	      lastLanczosVector_(0),
 	      dynCounter_(0),
@@ -153,6 +153,7 @@ public:
 	      weightForContinuedFraction_(0),
 	      paramsForSolver_(io,"DynamicDmrg")
 	{
+		this->common().init(&tstStruct_,2);
 		if (!wft.isEnabled()) throw PsimagLite::RuntimeError(" DynamicTargetting "
 		                                                     "needs an enabled wft\n");
 	}
@@ -196,9 +197,17 @@ public:
 		evolve(Eg,direction,x,loopNumber);
 	}
 
-	template<typename IoOutputType>
+	void print(InputSimpleOutType& ioOut) const
+	{
+		ioOut.print("TARGETSTRUCT",tstStruct_);
+		PsimagLite::OstringStream msg;
+		msg<<"PSI\n";
+		msg<<(*this);
+		ioOut.print(msg.str());
+	}
+
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
-	          IoOutputType& io) const
+	          PsimagLite::IoSimple::Out& io) const
 	{
 		assert(block.size()==1);
 		SizeType type = tstStruct_.type();
@@ -375,7 +384,7 @@ private:
 		v /= x;
 	}
 
-	const TargetParamsType& tstStruct_;
+	TargetParamsType tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	SizeType lastLanczosVector_;
 	SizeType dynCounter_;
@@ -387,7 +396,7 @@ private:
 	RealType weightForContinuedFraction_;
 	TridiagonalMatrixType ab_;
 	DenseMatrixRealType reortho_;
-	mutable typename LanczosSolverType::ParametersForSolverType paramsForSolver_;
+	mutable typename LanczosSolverType::ParametersSolverType paramsForSolver_;
 }; // class DynamicTargetting
 
 template<typename LanczosSolverType,

@@ -172,15 +172,19 @@ public:
 
 	TargetingCommon(const LeftRightSuperType& lrs,
 	                const ModelType& model,
-	                const TargetParamsType& tstStruct,
 	                const WaveFunctionTransfType& wft,
-	                SizeType targets,
 	                SizeType indexNoAdvance)
 	    : progress_("TargetingCommon"),
-	      targetHelper_(lrs,model,tstStruct,wft),
-	      applyOpExpression_(targetHelper_,targets,indexNoAdvance),
+	      targetHelper_(lrs,model,wft),
+	      applyOpExpression_(targetHelper_,indexNoAdvance),
 	      inSitu_(model.geometry().numberOfSites())
 	{}
+
+	void init(TargetParamsType* tstStruct, SizeType targets)
+	{
+		targetHelper_.setTargetStruct(tstStruct);
+		targetVectorsResize(targets);
+	}
 
 	SizeType getPhi(VectorWithOffsetType& phiNew,
 	                RealType Eg,
@@ -195,6 +199,8 @@ public:
 	{
 		return applyOpExpression_.psi();
 	}
+
+	const TargetParamsType& tstStruct() const { return targetHelper_.tstStruct(); }
 
 	template<typename SomeBasisType>
 	void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,

@@ -120,6 +120,7 @@ public:
 	typedef VectorType TargetVectorType;
 	typedef TargetParamsGroundState<ModelType> TargetParamsType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
+	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
@@ -127,13 +128,15 @@ public:
 
 	TargetingGroundState(const LeftRightSuperType& lrs,
 	                     const ModelType& model,
-	                     const TargetParamsType& tstStruct,
 	                     const WaveFunctionTransfType& wft,
 	                     const SizeType&,
-	                     InputValidatorType&)
-	    : BaseType(lrs,model,tstStruct,wft,0,0),
+	                     InputValidatorType& io)
+	    : BaseType(lrs,model,wft,0),
+	      tstStruct_(io,model),
 	      progress_("TargetingGroundState")
-	{}
+	{
+		this->common().init(&tstStruct_,0);
+	}
 
 	RealType weight(SizeType) const
 	{
@@ -160,8 +163,17 @@ public:
 		this->common().cocoon(block1,direction);
 	}
 
-	template<typename IoOutputType>
-	void save(const typename PsimagLite::Vector<SizeType>::Type& block,IoOutputType& io) const
+	void print(InputSimpleOutType& ioOut) const
+	{
+		ioOut.print("TARGETSTRUCT",tstStruct_);
+		PsimagLite::OstringStream msg;
+		msg<<"PSI\n";
+		msg<<(*this);
+		ioOut.print(msg.str());
+	}
+
+	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
+	          PsimagLite::IoSimple::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";
@@ -180,6 +192,7 @@ public:
 
 private:
 
+	TargetParamsType tstStruct_;
 	PsimagLite::ProgressIndicator progress_;
 
 };     //class TargetingGroundState

@@ -123,6 +123,7 @@ public:
 	typedef typename BasisWithOperatorsType::SymmetryElectronsSzType
 	SymmetryElectronsSzType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
+	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
 
 	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 
@@ -131,12 +132,11 @@ public:
 
 	TargetingTimeStep(const LeftRightSuperType& lrs,
 	                  const ModelType& model,
-	                  const TargetParamsType& tstStruct,
 	                  const WaveFunctionTransfType& wft,
 	                  const SizeType&,
 	                  InputValidatorType& ioIn)
-	    : BaseType(lrs,model,tstStruct,wft,tstStruct.timeSteps(),0),
-	      tstStruct_(tstStruct),
+	    : BaseType(lrs,model,wft,0),
+	      tstStruct_(ioIn,model),
 	      wft_(wft),
 	      progress_("TargetingTimeStep"),
 	      times_(tstStruct_.timeSteps()),
@@ -144,6 +144,7 @@ public:
 	      tvEnergy_(times_.size(),0.0),
 	      gsWeight_(tstStruct_.gsWeight())
 	{
+		this->common().init(&tstStruct_,tstStruct_.timeSteps());
 		if (!wft.isEnabled())
 			throw PsimagLite::RuntimeError("TST needs an enabled wft\n");
 		if (tstStruct_.sites() == 0)
@@ -231,22 +232,36 @@ public:
 		printNormsAndWeights();
 	}
 
+	bool end() const
+	{
+		return (tstStruct_.maxTime() != 0 &&
+		        this->common().currentTime() >= tstStruct_.maxTime());
+	}
+
 	void load(const PsimagLite::String& f)
 	{
 		this->common().template load<TimeSerializerType>(f);
 	}
 
-	void print(std::ostream& os) const
+	void printTargetStruct(InputSimpleOutType& ioOut) const
 	{
-		os<<"TSTWeightsTimeVectors=";
-		for (SizeType i=0;i<weight_.size();i++)
-			os<<weight_[i]<<" ";
-		os<<"\n";
-		os<<"TSTWeightGroundState="<<gsWeight_<<"\n";
+		ioOut.print("TARGETSTRUCT",tstStruct_);
 	}
 
-	template<typename IoOutputType>
-	void save(const VectorSizeType& block,IoOutputType& io) const
+	void print(InputSimpleOutType& ioOut) const
+	{
+		ioOut.print("TARGETSTRUCT",tstStruct_);
+		PsimagLite::OstringStream msg;
+		msg<<"PSI\n";
+		msg<<"TSTWeightsTimeVectors=";
+		for (SizeType i=0;i<weight_.size();i++)
+			msg<<weight_[i]<<" ";
+		msg<<"\n";
+		msg<<"TSTWeightGroundState="<<gsWeight_<<"\n";
+		ioOut.print(msg.str());
+	}
+
+	void save(const VectorSizeType& block,PsimagLite::IoSimple::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";
@@ -268,12 +283,6 @@ public:
 			msg2<<"TargetVectorEnergy"<<i<<"="<<tvEnergy_[i];
 			io.printline(msg2);
 		}
-	}
-
-	bool end() const
-	{
-		return (tstStruct_.maxTime() != 0 &&
-		        this->common().currentTime() >= tstStruct_.maxTime());
 	}
 
 private:
@@ -362,7 +371,7 @@ private:
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
 
-	const TargetParamsType& tstStruct_;
+	TargetParamsType tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
 	VectorRealType times_;

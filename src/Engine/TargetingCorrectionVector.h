@@ -233,6 +233,7 @@ public:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
+	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
 
 	enum {DISABLED,OPERATOR,CONVERGING};
 
@@ -245,18 +246,18 @@ public:
 
 	TargetingCorrectionVector(const LeftRightSuperType& lrs,
 	                          const ModelType& model,
-	                          const TargetParamsType& tstStruct,
 	                          const WaveFunctionTransfType& wft,
 	                          const SizeType&,
 	                          InputValidatorType& ioIn)
-	    : BaseType(lrs,model,tstStruct,wft,4,1),
-	      tstStruct_(tstStruct),
+	    : BaseType(lrs,model,wft,1),
+	      tstStruct_(ioIn,model),
 	      ioIn_(ioIn),
 	      progress_("TargetingCorrectionVector"),
 	      gsWeight_(1.0),
 	      correctionEnabled_(false),
 	      paramsForSolver_(ioIn,"DynamicDmrg")
 	{
+		this->common().init(&tstStruct_,4);
 		if (!wft.isEnabled())
 			throw PsimagLite::RuntimeError("TargetingCorrectionVector needs wft\n");
 	}
@@ -300,9 +301,17 @@ public:
 		printNormsAndWeights();
 	}
 
-	template<typename IoOutputType>
+	void print(InputSimpleOutType& ioOut) const
+	{
+		ioOut.print("TARGETSTRUCT",tstStruct_);
+		PsimagLite::OstringStream msg;
+		msg<<"PSI\n";
+		msg<<(*this);
+		ioOut.print(msg.str());
+	}
+
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
-	          IoOutputType& io) const
+	          PsimagLite::IoSimple::Out& io) const
 	{
 		if (block.size()!=1) {
 			PsimagLite::String str("TargetingCorrectionVector ");
@@ -616,7 +625,7 @@ private:
 		progress_.printline(msg2,std::cout);
 	}
 
-	const TargetParamsType& tstStruct_;
+	TargetParamsType tstStruct_;
 	InputValidatorType& ioIn_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
@@ -625,7 +634,7 @@ private:
 	TridiagonalMatrixType ab_;
 	DenseMatrixRealType reortho_;
 	RealType weightForContinuedFraction_;
-	typename LanczosSolverType::ParametersForSolverType paramsForSolver_;
+	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
 }; // class TargetingCorrectionVector
 
 template<typename LanczosSolverType,

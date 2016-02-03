@@ -117,19 +117,21 @@ public:
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef TargetParamsCorrection<ModelType> TargetParamsType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
+	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
 
 	enum {DISABLED,ENABLED};
 
 	TargetingCorrection(const LeftRightSuperType& lrs,
 	                    const ModelType& model,
-	                    const TargetParamsType& correctionStruct,
 	                    const WaveFunctionTransfType& wft,
 	                    const SizeType&,
-	                    InputValidatorType&)
-	    : BaseType(lrs,model,correctionStruct,wft,1,0),
-	      correctionStruct_(correctionStruct),
+	                    InputValidatorType& io)
+	    : BaseType(lrs,model,wft,0),
+	      tstStruct_(io,model),
 	      progress_("TargetingCorrection")
-	{}
+	{
+		this->common().init(&tstStruct_,1);
+	}
 
 	RealType normSquared(SizeType i) const
 	{
@@ -140,7 +142,7 @@ public:
 	RealType weight(SizeType) const
 	{
 		assert(this->common().noStageIs(DISABLED));
-		return correctionStruct_.correctionA();
+		return tstStruct_.correctionA();
 	}
 
 	RealType gsWeight() const
@@ -161,9 +163,8 @@ public:
 		this->common().computeCorrection(direction,block1);
 	}
 
-	template<typename IoOutputType>
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
-	          IoOutputType& io) const
+	          PsimagLite::IoSimple::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";
@@ -182,15 +183,18 @@ public:
 		this->common().template load<int>(f,0);
 	}
 
-	void print(std::ostream& os) const
+	void print(InputSimpleOutType& ioOut) const
 	{
-		os<<"CorrectionWeightGroundState=1\n";
-		os<<"CorrectionWeightCorrection="<<correctionStruct_.correctionA()<<"\n";
+		ioOut.print("TARGETSTRUCT",tstStruct_);
+		PsimagLite::OstringStream msg;
+		msg<<"PSI\n";
+		msg<<"CorrectionWeightGroundState=1\n";
+		ioOut.print(msg.str());
 	}
 
 private:
 
-	const TargetParamsType& correctionStruct_;
+	TargetParamsType tstStruct_;
 	PsimagLite::ProgressIndicator progress_;
 };     //class TargetingCorrection
 

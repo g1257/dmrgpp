@@ -107,13 +107,11 @@ public:
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-//	typedef LanczosSolverTemplate<ParametersForSolverType,
-//	                              MatrixVectorType,
-//	                              VectorType> LanczosSolverType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
+	typedef typename VectorWithOffsetType::VectorType VectorType;
+	typedef VectorType TargetVectorType;
 	typedef TargetParamsBase<ModelType> TargetParamsType;
 	typedef TargetHelper<ModelType,
 	                     TargetParamsType,
@@ -126,6 +124,7 @@ public:
 	typedef typename BasisWithOperatorsType::SymmetryElectronsSzType
 	SymmetryElectronsSzType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
+	typedef PsimagLite::IoSimple::Out InputSimpleOutType;
 
 	enum {DISABLED=ApplyOperatorExpressionType::DISABLED,
 		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,
@@ -133,18 +132,14 @@ public:
 
 	TargetingBase(const LeftRightSuperType& lrs,
 	              const ModelType& model,
-	              const TargetParamsType& tstStruct,
 	              const WaveFunctionTransfType& wft,
-	              SizeType targets,
 	              SizeType indexNoAdvance)
 	    : lrs_(lrs),
 	      model_(model),
-	      tstStruct_(tstStruct),
-	      commonTargetting_(lrs,model,tstStruct,wft,targets,indexNoAdvance)
+	      commonTargetting_(lrs,model,wft,indexNoAdvance)
 	{}
 
-	virtual ~TargetingBase()
-	{}
+	virtual ~TargetingBase() {}
 
 	virtual RealType gsWeight() const = 0;
 
@@ -156,45 +151,7 @@ public:
 	                    const BlockType& block2,
 	                    SizeType loopNumber) = 0;
 
-	SizeType size() const
-	{
-		if (commonTargetting_.allStages(DISABLED)) return 0;
-		return commonTargetting_.targetVectors().size();
-	}
-
-	const ModelType& model() const { return model_; }
-
-	RealType normSquared(SizeType i) const
-	{
-		return commonTargetting_.normSquared(i);
-	}
-
-	template<typename SomeBasisType>
-	void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,
-	           const SomeBasisType& someBasis)
-	{
-		commonTargetting_.setGs(v,someBasis);
-	}
-
-	const VectorWithOffsetType& gs() const
-	{
-		return commonTargetting_.psi();
-	}
-
-	bool includeGroundStage() const {return true; }
-
-	const VectorWithOffsetType& operator()(SizeType i) const
-	{
-		return commonTargetting_.targetVectors()[i];
-	}
-
-	void initialGuess(VectorWithOffsetType& initialVector,
-	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
-	{
-		commonTargetting_.initialGuess(initialVector,block);
-	}
-
-	const RealType& time() const {return commonTargetting_.currentTime(); }
+	virtual bool includeGroundStage() const {return true; }
 
 	virtual void updateOnSiteForCorners(BasisWithOperatorsType& basisWithOps) const
 	{
@@ -218,10 +175,57 @@ public:
 		basisWithOps.setVarious(X,hmatrix,q,creationMatrix);
 	}
 
-	bool end() const
+	virtual bool end() const
 	{
 		return false;
 	}
+
+	virtual SizeType size() const
+	{
+		if (commonTargetting_.allStages(DISABLED)) return 0;
+		return commonTargetting_.targetVectors().size();
+	}
+
+	virtual RealType normSquared(SizeType i) const
+	{
+		return commonTargetting_.normSquared(i);
+	}
+
+	virtual void print(InputSimpleOutType&) const = 0;
+
+	virtual void load(const PsimagLite::String&) = 0;
+
+	virtual void save(const typename PsimagLite::Vector<SizeType>::Type&,
+	                  PsimagLite::IoSimple::Out&) const = 0;
+
+	// non-virtual below
+
+	const ModelType& model() const { return model_; }
+
+	template<typename SomeBasisType>
+	void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,
+	           const SomeBasisType& someBasis)
+	{
+		commonTargetting_.setGs(v,someBasis);
+	}
+
+	const VectorWithOffsetType& gs() const
+	{
+		return commonTargetting_.psi();
+	}
+
+	const VectorWithOffsetType& operator()(SizeType i) const
+	{
+		return commonTargetting_.targetVectors()[i];
+	}
+
+	void initialGuess(VectorWithOffsetType& initialVector,
+	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
+	{
+		commonTargetting_.initialGuess(initialVector,block);
+	}
+
+	const RealType& time() const {return commonTargetting_.currentTime(); }
 
 	const ComplexOrRealType& inSitu(SizeType i) const
 	{
@@ -246,7 +250,6 @@ private:
 
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;
-	const TargetParamsType& tstStruct_;
 	TargetingCommonType commonTargetting_;
 };     //class TargetingBase
 

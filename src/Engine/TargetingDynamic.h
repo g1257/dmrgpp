@@ -133,6 +133,7 @@ public:
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
+	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
 
 	enum {DISABLED,OPERATOR,CONVERGING};
 	enum {
@@ -146,18 +147,18 @@ public:
 
 	TargetingDynamic(const LeftRightSuperType& lrs,
 	                 const ModelType& model,
-	                 const TargetParamsType& tstStruct,
 	                 const WaveFunctionTransfType& wft,
 	                 const SizeType&,
 	                 InputValidatorType& io)
-	    : BaseType(lrs,model,tstStruct,wft,0,0),
-	      tstStruct_(tstStruct),
+	    : BaseType(lrs,model,wft,0),
+	      tstStruct_(io,model),
 	      wft_(wft),
 	      progress_("TargetingDynamic"),
 	      gsWeight_(tstStruct_.gsWeight()),
 	      paramsForSolver_(io,"DynamicDmrg"),
 	      weightForContinuedFraction_(0)
 	{
+		this->common().init(&tstStruct_,0);
 		if (!wft.isEnabled())
 			throw PsimagLite::RuntimeError(" TargetingDynamic needs an enabled wft\n");
 	}
@@ -196,9 +197,17 @@ public:
 		evolve(Eg,direction,x,loopNumber);
 	}
 
-	template<typename IoOutputType>
+	void print(InputSimpleOutType& ioOut) const
+	{
+		ioOut.print("TARGETSTRUCT",tstStruct_);
+		PsimagLite::OstringStream msg;
+		msg<<"PSI\n";
+		msg<<(*this);
+		ioOut.print(msg.str());
+	}
+
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
-	          IoOutputType& io) const
+	          PsimagLite::IoSimple::Out& io) const
 	{
 		assert(block.size()==1);
 
@@ -354,11 +363,11 @@ private:
 		return sum;
 	}
 
-	const TargetParamsType& tstStruct_;
+	TargetParamsType tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
-	typename LanczosSolverType::ParametersForSolverType paramsForSolver_;
+	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	TridiagonalMatrixType ab_;
 	DenseMatrixRealType reortho_;

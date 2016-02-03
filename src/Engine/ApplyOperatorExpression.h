@@ -114,7 +114,6 @@ public:
 	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 
 	ApplyOperatorExpression(const TargetHelperType& targetHelper,
-	                        SizeType targets,
 	                        SizeType indexNoAdvance)
 	    : progress_("ApplyOperatorExpression"),
 	      stage_(targetHelper.tstStruct().sites(),DISABLED),
@@ -122,7 +121,7 @@ public:
 	      currentTime_(0.0),
 	      indexNoAdvance_(indexNoAdvance),
 	      applyOpLocal_(targetHelper.lrs()),
-	      targetVectors_(targets),
+	      targetVectors_(0),
 	      timeVectorsBase_(0),
 	      targetHelper_(targetHelper)
 	{}
@@ -244,7 +243,8 @@ public:
 
 	void targetVectorsResize(SizeType x)
 	{
-		targetVectors_.resize(x);
+		if (x == 0) targetVectors_.clear();
+		else targetVectors_.resize(x);
 	}
 
 	void initTimeVectors(const VectorRealType& times,InputValidatorType& ioIn)

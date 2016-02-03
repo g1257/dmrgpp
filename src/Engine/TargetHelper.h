@@ -94,22 +94,30 @@ public:
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef typename ModelType::InputValidatorType InputValidatorType;
 
 	TargetHelper(const LeftRightSuperType& lrs,
 	             const ModelType& model,
-	             const TargetParamsType& tstStruct,
 	             const WaveFunctionTransfType& wft)
 	    : lrs_(lrs),
 	      model_(model),
-	      tstStruct_(tstStruct),
-	      wft_(wft)
+	      wft_(wft),
+	      tstStruct_(0)
 	{}
+
+	void setTargetStruct(TargetParamsType* tstStruct)
+	{
+		if (tstStruct_ != 0)
+			throw PsimagLite::RuntimeError("TargetHelper: Internal Error\n");
+
+		tstStruct_ = tstStruct;
+	}
 
 	const LeftRightSuperType& lrs() const  { return lrs_; }
 
 	const ModelType& model() const { return model_; }
 
-	const TargetParamsType& tstStruct() const { return tstStruct_; }
+	const TargetParamsType& tstStruct() const { return *tstStruct_; }
 
 	const WaveFunctionTransfType& wft() const  { return wft_; }
 
@@ -117,11 +125,11 @@ private:
 
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;
-	const TargetParamsType& tstStruct_;
 	const WaveFunctionTransfType& wft_;
+	TargetParamsType* tstStruct_;
 }; // TargetHelper
 
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // TARGET_HELPER_H

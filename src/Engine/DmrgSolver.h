@@ -167,12 +167,9 @@ public:
 	enum {SAVE_ALL=MyBasis::SAVE_ALL, SAVE_PARTIAL=MyBasis::SAVE_PARTIAL};
 
 	DmrgSolver(ModelType const &model,
-	           TargetParamsType& targetStruct,
-	           InputValidatorType& ioIn,
-	           PsimagLite::String targeting)
+	           InputValidatorType& ioIn)
 	    : model_(model),
 	      parameters_(model_.params()),
-	      targetStruct_(targetStruct),
 	      ioIn_(ioIn),
 	      appInfo_("DmrgSolver:"),
 	      verbose_(false),
@@ -203,7 +200,6 @@ public:
 		progress_.printline(msg,std::cout);
 		ioOut_.print(appInfo_);
 		ioOut_.print("PARAMETERS",parameters_);
-		ioOut_.print("TARGETSTRUCT",targetStruct_);
 		if (parameters_.options.find("verbose")!=PsimagLite::String::npos) verbose_=true;
 	}
 
@@ -232,23 +228,24 @@ public:
 		for (SizeType i=0;i<Y.size();i++) sitesIndices_.push_back(Y[Y.size()-i-1]);
 
 		TargettingType* psi = 0;
+
 		if (targeting=="TimeStepTargetting") {
-			psi = new TargetingTimeStepType(lrs_,model_,targetStruct_,wft_,quantumSector_,ioIn_);
+			psi = new TargetingTimeStepType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting=="DynamicTargetting") {
-			psi = new TargetingDynamicType(lrs_,model_,targetStruct_,wft_,quantumSector_,ioIn_);
+			psi = new TargetingDynamicType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting=="AdaptiveDynamicTargetting") {
-			psi = new TargetingAdaptiveDynamicType(lrs_,model_,targetStruct_,wft_,quantumSector_,ioIn_);
+			psi = new TargetingAdaptiveDynamicType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting=="CorrectionVectorTargetting") {
-			psi = new TargetingCorrectionVectorType(lrs_,model_,targetStruct_,wft_,quantumSector_,ioIn_);
+			psi = new TargetingCorrectionVectorType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting=="CorrectionTargetting") {
-			psi = new TargetingCorrectionType(lrs_,model_,targetStruct_,wft_,quantumSector_,ioIn_);
+			psi = new TargetingCorrectionType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting == "GroundStateTargetting") {
-			psi = new TargetingGroundStateType(lrs_,model_,targetStruct_,wft_,quantumSector_,ioIn_);
+			psi = new TargetingGroundStateType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else {
 			throw PsimagLite::RuntimeError("Unknown targeting " + targeting + "\n");
 		}
 
-		ioOut_.print("PSI",*psi);
+		psi->print(ioOut_);
 
 		MyBasisWithOperators pS("pS");
 		MyBasisWithOperators pE("pE");
@@ -271,7 +268,7 @@ public:
 
 		finiteDmrgLoops(S,E,pS,pE,*psi);
 
-		inSitu_.init(psi,geometry.numberOfSites());
+		inSitu_.init(*psi,geometry.numberOfSites());
 
 		delete psi;
 		psi = 0;
@@ -664,7 +661,6 @@ private:
 
 	const ModelType& model_;
 	const ParametersType& parameters_;
-	const TargetParamsType& targetStruct_;
 	InputValidatorType& ioIn_;
 	PsimagLite::ApplicationInfo appInfo_;
 	bool verbose_;
