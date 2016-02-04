@@ -116,20 +116,27 @@ public:
 	ApplyOperatorExpression(const TargetHelperType& targetHelper,
 	                        SizeType indexNoAdvance)
 	    : progress_("ApplyOperatorExpression"),
-	      stage_(targetHelper.tstStruct().sites(),DISABLED),
+	      targetHelper_(targetHelper),
 	      E0_(0.0),
 	      currentTime_(0.0),
 	      indexNoAdvance_(indexNoAdvance),
 	      applyOpLocal_(targetHelper.lrs()),
 	      targetVectors_(0),
-	      timeVectorsBase_(0),
-	      targetHelper_(targetHelper)
+	      timeVectorsBase_(0)
 	{}
 
 	~ApplyOperatorExpression()
 	{
 		if (timeVectorsBase_)
 			delete timeVectorsBase_;
+	}
+
+	void init()
+	{
+		if (stage_.size() != 0)
+			throw PsimagLite::RuntimeError("ApplyOperatorExpression: Internal Error\n");
+
+		stage_.resize(targetHelper_.tstStruct().sites(),DISABLED);
 	}
 
 	SizeType getPhi(VectorWithOffsetType& phiNew,
@@ -591,6 +598,7 @@ private:
 	}
 
 	PsimagLite::ProgressIndicator progress_;
+	const TargetHelperType& targetHelper_;
 	VectorSizeType stage_;
 	RealType E0_;
 	RealType currentTime_;
@@ -600,7 +608,6 @@ private:
 	VectorWithOffsetType psi_;
 	typename PsimagLite::Vector<VectorWithOffsetType>::Type targetVectors_;
 	TimeVectorsBaseType* timeVectorsBase_;
-	const TargetHelperType& targetHelper_;
 };
 
 } // namespace Dmrg

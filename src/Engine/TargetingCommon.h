@@ -183,6 +183,7 @@ public:
 	void init(TargetParamsType* tstStruct, SizeType targets)
 	{
 		targetHelper_.setTargetStruct(tstStruct);
+		applyOpExpression_.init();
 		targetVectorsResize(targets);
 	}
 
