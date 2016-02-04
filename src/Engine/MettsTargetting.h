@@ -180,7 +180,7 @@ public:
 	      systemPrev_(),
 	      environPrev_()
 	{
-		this->common().init(&mettsStruct_,mettsStruct_.timeSteps());
+		this->common().init(&mettsStruct_,mettsStruct_.timeSteps()+1);
 		if (!wft.isEnabled()) throw PsimagLite::RuntimeError(" MettsTargetting "
 		                                                     "needs an enabled wft\n");
 
@@ -313,7 +313,8 @@ public:
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"PSI\n";
-
+		msg<<"TSTStruct\n";
+		msg<<mettsStruct_;
 		msg<<"MettsWeightsTimeVectors=";
 		for (SizeType i=0;i<weight_.size();i++)
 			msg<<weight_[i]<<" ";
