@@ -70,12 +70,7 @@ void mainLoop2(typename MatrixVectorType::ModelType::GeometryType& geometry,
                const OperatorOptions& opOptions,
                PsimagLite::String targeting)
 {
-	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename MatrixVectorType::ComplexOrRealType ComplexOrRealType;
 
 	if (dmrgSolverParams.options.find("vectorwithoffsets")!=PsimagLite::String::npos) {
 		typedef VectorWithOffsets<ComplexOrRealType> VectorWithOffsetType;
@@ -173,10 +168,10 @@ void mainLoop0(InputNgType::Readable& io,
 	}
 
 #ifdef USE_COMPLEX
-	if (targetting != "TimeStepTargetting" &&
-	        targetting != "GroundStateTargetting") {
+	if (targeting != "TimeStepTargetting" &&
+	        targeting != "GroundStateTargetting") {
 		PsimagLite::String str("USE_COMPLEX not allowed for ");
-		str += targetting + "\n";
+		str += targeting + "\n";
 		throw PsimagLite::RuntimeError(str);
 	}
 #endif

@@ -68,7 +68,7 @@ sub printInstance
 	my $lrs = "Dmrg::LeftRightSuper<$basisWith,$basisSuperBlock >";
 	my $lanczosType = "LanczosSolver${counter}Type";
 	my $matrixVectorType = "MatrixVector${counter}Type";
-	my $vecWithOffsetType = "Dmrg::VectorWithOffset${vecWithOffset}<$complexOrNot> ";
+	my $vecWithOffsetType = "Dmrg::VectorWithOffset${vecWithOffset}<$realOrNotFromSparse> ";
 	print FOUT<<EOF;
 #ifdef USE_COMPLEX
 typedef PsimagLite::CrsMatrix<std::complex<RealType> > $sparseMatrix;
