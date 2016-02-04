@@ -9,11 +9,6 @@
 typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 typedef  PsimagLite::CrsMatrix<std::complex<RealType> > MySparseMatrixComplex;
 typedef  PsimagLite::CrsMatrix<RealType> MySparseMatrixReal;
-#ifdef USE_COMPLEX
-typedef MySparseMatrixComplex MySparseMatrixC;
-#else
-typedef MySparseMatrixReal MySparseMatrixC;
-#endif
 
 using namespace Dmrg;
 
@@ -167,14 +162,13 @@ void mainLoop0(InputNgType::Readable& io,
 		return;
 	}
 
-#ifdef USE_COMPLEX
-	if (targeting != "TimeStepTargetting" &&
-	        targeting != "GroundStateTargetting") {
-		PsimagLite::String str("USE_COMPLEX not allowed for ");
+	if (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos &&
+	    targeting != "TimeStepTargetting" &&
+	    targeting != "GroundStateTargetting") {
+		PsimagLite::String str("SolverOptions=useComplex not allowed for ");
 		str += targeting + "\n";
 		throw PsimagLite::RuntimeError(str);
 	}
-#endif
 
 	if (targeting=="TimeStepTargetting") {
 		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrixComplex>(geometry,
@@ -356,12 +350,12 @@ int main(int argc,char *argv[])
 
 	registerSignals();
 
-#ifdef USE_COMPLEX
-	std::cerr<<argv[0]<<" EXPERIMENTAL option complex is in use\n";
-	mainLoop0<MySparseMatrixC>(io,dmrgSolverParams,inputCheck,options);
-#else
-	mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck,options);
-#endif
+	if (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos) {
+		std::cerr<<argv[0]<<" EXPERIMENTAL option complex is in use\n";
+		mainLoop0<MySparseMatrixComplex>(io,dmrgSolverParams,inputCheck,options);
+	} else {
+		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck,options);
+	}
 
 	if (options.enabled) return 0;
 

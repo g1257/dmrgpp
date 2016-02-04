@@ -70,13 +70,9 @@ sub printInstance
 	my $matrixVectorType = "MatrixVector${counter}Type";
 	my $vecWithOffsetType = "Dmrg::VectorWithOffset${vecWithOffset}<$realOrNotFromSparse> ";
 	print FOUT<<EOF;
-#ifdef USE_COMPLEX
-typedef PsimagLite::CrsMatrix<std::complex<RealType> > $sparseMatrix;
-typedef PsimagLite::Geometry<$realOrNotFromSparse,$inputNg,Dmrg::ProgramGlobals> $geometry;
-#else
+
 typedef PsimagLite::CrsMatrix<$complexOrNot> $sparseMatrix;
-typedef PsimagLite::Geometry<RealType,$inputNg,Dmrg::ProgramGlobals> $geometry;
-#endif
+typedef PsimagLite::Geometry<$realOrNotFromSparse,$inputNg,Dmrg::ProgramGlobals> $geometry;
 
 typedef Dmrg::$matrixVector<
  Dmrg::ModelBase<

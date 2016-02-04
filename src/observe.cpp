@@ -38,11 +38,6 @@ typedef std::complex<RealType> ComplexType;
 
 typedef  PsimagLite::CrsMatrix<ComplexType> MySparseMatrixComplex;
 typedef  PsimagLite::CrsMatrix<RealType> MySparseMatrixReal;
-#ifdef USE_COMPLEX
-typedef MySparseMatrixComplex MySparseMatrixC;
-#else
-typedef MySparseMatrixReal MySparseMatrixC;
-#endif
 typedef PsimagLite::IoSimple::In IoInputType;
 typedef PsimagLite::InputNg<InputCheck> InputNgType;
 typedef ParametersDmrgSolver<RealType,InputNgType::Readable> ParametersDmrgSolverType;
@@ -345,12 +340,12 @@ int main(int argc,char *argv[])
 
 	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
 
-#ifdef USE_COMPLEX
-	std::cerr<<argv[0]<<" EXPERIMENTAL option complex is in use\n";
-	mainLoop0<MySparseMatrixC>(io,dmrgSolverParams,inputCheck, options, list);
-#else
-	mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck, options, list);
-#endif
+	if (options.find("useComplex") != PsimagLite::String::npos) {
+		std::cerr<<argv[0]<<" EXPERIMENTAL option complex is in use\n";
+		mainLoop0<MySparseMatrixComplex>(io,dmrgSolverParams,inputCheck, options, list);
+	} else {
+		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck, options, list);
+	}
 
 	if (filesOption != "keep")
 		ArchiveFiles<ParametersDmrgSolverType>::staticDelete();

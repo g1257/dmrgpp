@@ -38,9 +38,6 @@ CPPFLAGS += -O3
 # This makes the code use float instead of double
 #CPPFLAGS += -DUSE_FLOAT
 
-# This makes the code complex instead of real
-CPPFLAGS += -DUSE_COMPLEX
-
 # This enables signals
 #CPPFLAGS +=-DUSE_SIGNALS
 
