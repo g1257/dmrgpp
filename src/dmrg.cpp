@@ -35,36 +35,73 @@ void restoreCoutBuffer()
 	std::cout.rdbuf(GlobalCoutBuffer);
 }
 
-template<typename MatrixVectorType>
-void mainLoop2(MatrixVectorType::ModelType::GeometryType& geometry,
+template<typename MatrixVectorType, typename VectorWithOffsetType>
+void mainLoop3(typename MatrixVectorType::ModelType::GeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io,
                const OperatorOptions& opOptions,
                PsimagLite::String targeting)
 {
-	typedef MatrixVectorType::ModelType::GeometryType GeometryType;
 	typedef PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>
 	        ParametersForSolverType;
 	if (dmrgSolverParams.options.find("ChebyshevSolver")!=PsimagLite::String::npos) {
 		typedef PsimagLite::ChebyshevSolver<ParametersForSolverType,
 		        MatrixVectorType, typename MatrixVectorType::VectorType> SolverType;
-		mainLoop3<SolverType>(geometry,dmrgSolverParams,io,opOptions,targeting);
+		mainLoop4<SolverType,VectorWithOffsetType>(geometry,
+		                                           dmrgSolverParams,
+		                                           io,
+		                                           opOptions,
+		                                           targeting);
 	} else {
 		typedef PsimagLite::LanczosSolver<ParametersForSolverType,
 		        MatrixVectorType, typename MatrixVectorType::VectorType> SolverType;
-		mainLoop3<SolverType>(geometry,dmrgSolverParams,io,opOptions,targeting);
+		mainLoop4<SolverType,VectorWithOffsetType>(geometry,
+		                                           dmrgSolverParams,
+		                                           io,
+		                                           opOptions,
+		                                           targeting);
+	}
+}
+
+template<typename MatrixVectorType>
+void mainLoop2(typename MatrixVectorType::ModelType::GeometryType& geometry,
+               const ParametersDmrgSolverType& dmrgSolverParams,
+               InputNgType::Readable& io,
+               const OperatorOptions& opOptions,
+               PsimagLite::String targeting)
+{
+	typedef typename MatrixVectorType::ModelType ModelType;
+	typedef typename ModelType::ModelHelperType ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+
+	if (dmrgSolverParams.options.find("vectorwithoffsets")!=PsimagLite::String::npos) {
+		typedef VectorWithOffsets<ComplexOrRealType> VectorWithOffsetType;
+		mainLoop3<MatrixVectorType,VectorWithOffsetType>(geometry,
+		                                                 dmrgSolverParams,
+		                                                 io,
+		                                                 opOptions,
+		                                                 targeting);
+	} else {
+		typedef VectorWithOffset<ComplexOrRealType> VectorWithOffsetType;
+		mainLoop3<MatrixVectorType,VectorWithOffsetType>(geometry,
+		                                                 dmrgSolverParams,
+		                                                 io,
+		                                                 opOptions,
+		                                                 targeting);
 	}
 }
 
 template<typename GeometryType,
         template<typename> class ModelHelperTemplate,
-         template<typename> class VectorWithOffsetTemplate,
          typename MySparseMatrix>
-void mainLoop(GeometryType& geometry,
-              const ParametersDmrgSolverType& dmrgSolverParams,
-              InputNgType::Readable& io,
-              const OperatorOptions& opOptions,
-              PsimagLite::String targeting)
+void mainLoop1(GeometryType& geometry,
+               const ParametersDmrgSolverType& dmrgSolverParams,
+               InputNgType::Readable& io,
+               const OperatorOptions& opOptions,
+               PsimagLite::String targeting)
 {
 	typedef Basis<MySparseMatrix> BasisType;
 	typedef Operators<BasisType> OperatorsType;
@@ -75,9 +112,6 @@ void mainLoop(GeometryType& geometry,
 	                  ParametersDmrgSolverType,
 	                  InputNgType::Readable,
 	                  GeometryType> ModelBaseType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
 
 	if (dmrgSolverParams.options.find("MatrixVectorStored")!=PsimagLite::String::npos) {
 		mainLoop2<MatrixVectorStored<ModelBaseType> >(geometry,
@@ -97,24 +131,6 @@ void mainLoop(GeometryType& geometry,
 		                                                io,
 		                                                opOptions,
 		                                                targeting);
-	}
-}
-
-template<typename GeometryType,
-        template<typename> class ModelHelperTemplate,
-         typename MySparseMatrix>
-void mainLoop1(GeometryType& geometry,
-              const ParametersDmrgSolverType& dmrgSolverParams,
-              InputNgType::Readable& io,
-              const OperatorOptions& opOptions,
-               PsimagLite::String targeting)
-{
-	if (dmrgSolverParams.options.find("vectorwithoffsets")!=PsimagLite::String::npos) {
-		mainLoop<GeometryType,ModelHelperTemplate,VectorWithOffsets,
-	         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions,targeting);
-	} else {
-		mainLoop<GeometryType,ModelHelperTemplate,VectorWithOffset,
-	         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions,targeting);
 	}
 }
 

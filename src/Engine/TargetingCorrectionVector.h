@@ -94,11 +94,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename LanczosSolverType_>
-class TargetingCorrectionVector : public TargetingBase<LanczosSolverType_> {
+template<typename LanczosSolverType_, typename VectorWithOffsetType_>
+class TargetingCorrectionVector : public TargetingBase<LanczosSolverType_,VectorWithOffsetType_> {
 
 	typedef LanczosSolverType_ LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType> BaseType;
+	typedef TargetingBase<LanczosSolverType,VectorWithOffsetType_> BaseType;
 
 	class CalcR {
 
@@ -633,9 +633,9 @@ private:
 	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
 }; // class TargetingCorrectionVector
 
-template<typename LanczosSolverType>
+template<typename LanczosSolverType, typename VectorWithOffsetType>
 std::ostream& operator<<(std::ostream& os,
-                         const TargetingCorrectionVector<LanczosSolverType>&)
+                         const TargetingCorrectionVector<LanczosSolverType,VectorWithOffsetType>&)
 {
 	os<<"DT=NothingToSeeHereYet\n";
 	return os;

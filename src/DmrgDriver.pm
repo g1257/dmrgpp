@@ -20,9 +20,6 @@ my $counter = 0;
 my $fout;
 my $target = "TargetingBase";
 foreach my $complexOrNot (@complexOrReal) {
-
-	next if (isComplexOption($complexOrNot) and targetNotComplex($target));
-
 	foreach my $lanczos (@lanczos) {
 		foreach my $modelHelper (@modelHelpers) {
 			foreach my $vecWithOffset (@vecWithOffsets) {
@@ -71,7 +68,7 @@ sub printInstance
 	my $lrs = "Dmrg::LeftRightSuper<$basisWith,$basisSuperBlock >";
 	my $lanczosType = "LanczosSolver${counter}Type";
 	my $matrixVectorType = "MatrixVector${counter}Type";
-
+	my $vecWithOffsetType = "Dmrg::VectorWithOffset${vecWithOffset}<$complexOrNot> ";
 	print FOUT<<EOF;
 #ifdef USE_COMPLEX
 typedef PsimagLite::CrsMatrix<std::complex<RealType> > $sparseMatrix;
@@ -95,8 +92,8 @@ typedef Dmrg::$matrixVector<
 typedef PsimagLite::$lanczos<PsimagLite::ParametersForSolver<typename ${geometry}::RealType>,
 	$matrixVectorType, typename ${matrixVectorType}::VectorType> $lanczosType;
 
-template void mainLoop3<$lanczosType>
-($geometry&,
+template void mainLoop4<$lanczosType,$vecWithOffsetType>
+(typename ${lanczosType}::LanczosMatrixType::ModelType::GeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
 const OperatorOptions&,

@@ -88,13 +88,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename LanczosSolverType_>
-class TargetingCorrection : public TargetingBase<LanczosSolverType_> {
+template<typename LanczosSolverType_, typename VectorWithOffsetType_>
+class TargetingCorrection : public TargetingBase<LanczosSolverType_,VectorWithOffsetType_> {
 
 public:
 
 	typedef LanczosSolverType_ LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType> BaseType;
+	typedef TargetingBase<LanczosSolverType,VectorWithOffsetType_> BaseType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
@@ -192,9 +192,9 @@ private:
 	PsimagLite::ProgressIndicator progress_;
 };     //class TargetingCorrection
 
-template<typename LanczosSolverType>
+template<typename LanczosSolverType, typename VectorWithOffsetType>
 std::ostream& operator<<(std::ostream& os,
-                         const TargetingCorrection<LanczosSolverType>& tst)
+                         const TargetingCorrection<LanczosSolverType, VectorWithOffsetType>& tst)
 {
 	tst.print(os);
 	return os;

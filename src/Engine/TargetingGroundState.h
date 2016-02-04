@@ -90,13 +90,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename LanczosSolverType_>
-class TargetingGroundState : public TargetingBase<LanczosSolverType_> {
+template<typename LanczosSolverType_, typename VectorWithOffsetType_>
+class TargetingGroundState : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
 public:
 
 	typedef LanczosSolverType_ LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType> BaseType;
+	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
@@ -191,9 +191,9 @@ private:
 
 };     //class TargetingGroundState
 
-template<typename LanczosSolverType>
+template<typename LanczosSolverType, typename VectorWithOffsetType>
 std::ostream& operator<<(std::ostream& os,
-                         const TargetingGroundState<LanczosSolverType>&)
+                         const TargetingGroundState<LanczosSolverType,VectorWithOffsetType>&)
 {
 	os<<"GSTWeightGroundState=1\n";
 	return os;

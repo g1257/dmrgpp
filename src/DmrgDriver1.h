@@ -3,15 +3,14 @@
 
 #include "DmrgDriver.h"
 
-
-template<typename SolverType>
-void mainLoop3(SolverType::LanczosMatrixType::ModelType::GeometryType& geometry,
+template<typename SolverType, typename VectorWithOffsetType>
+void mainLoop4(typename SolverType::LanczosMatrixType::ModelType::GeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io,
                const OperatorOptions& opOptions,
                PsimagLite::String targeting)
 {
-	typedef typename MatrixVectorType::ModelType ModelBaseType;
+	typedef typename SolverType::LanczosMatrixType::ModelType ModelBaseType;
 
 	//! Setup the Model
 	Dmrg::ModelSelector<ModelBaseType> modelSelector(dmrgSolverParams.model);
@@ -23,7 +22,7 @@ void mainLoop3(SolverType::LanczosMatrixType::ModelType::GeometryType& geometry,
 	}
 
 	//! Setup the dmrg solver:
-	typedef Dmrg::DmrgSolver<SolverType> DmrgSolverType;
+	typedef Dmrg::DmrgSolver<SolverType, VectorWithOffsetType> DmrgSolverType;
 	DmrgSolverType dmrgSolver(model,io);
 
 	//! Calculate observables:

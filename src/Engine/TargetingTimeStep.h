@@ -87,15 +87,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename LanczosSolverType_>
-class TargetingTimeStep : public TargetingBase<LanczosSolverType_> {
+template<typename LanczosSolverType_, typename VectorWithOffsetType_>
+class TargetingTimeStep : public TargetingBase<LanczosSolverType_,VectorWithOffsetType_> {
 
 	enum {BORDER_NEITHER, BORDER_LEFT, BORDER_RIGHT};
 
 public:
 
 	typedef LanczosSolverType_ LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType> BaseType;
+	typedef TargetingBase<LanczosSolverType,VectorWithOffsetType_> BaseType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
@@ -376,8 +376,9 @@ private:
 	RealType gsWeight_;
 };     //class TargetingTimeStep
 
-template<typename LanczosSolverType>
-std::ostream& operator<<(std::ostream& os, const TargetingTimeStep<LanczosSolverType>& tst)
+template<typename LanczosSolverType, typename VectorWithOffsetType>
+std::ostream& operator<<(std::ostream& os,
+                         const TargetingTimeStep<LanczosSolverType, VectorWithOffsetType>& tst)
 {
 	tst.print(os);
 	return os;

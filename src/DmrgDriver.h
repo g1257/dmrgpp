@@ -88,8 +88,8 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 	opC3.save(std::cout);
 }
 
-template<typename SolverType>
-void mainLoop3(SolverType::LanczosMatrixType::ModelType::GeometryType&,
+template<typename SolverType, typename VectorWithOffsetType>
+void mainLoop4(typename SolverType::LanczosMatrixType::ModelType::GeometryType&,
                const ParametersDmrgSolverType&,
                InputNgType::Readable&,
                const OperatorOptions&,

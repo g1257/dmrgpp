@@ -84,15 +84,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetParamsBase.h"
 #include "TargetHelper.h"
 #include "TargetingCommon.h"
+#include "WaveFunctionTransfFactory.h"
 
 namespace Dmrg {
 
-template<typename LanczosSolverType_>
+template<typename LanczosSolverType_, typename VectorWithOffsetType_>
 class TargetingBase {
 
 public:
 
 	typedef LanczosSolverType_ LanczosSolverType;
+	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef typename LanczosSolverType::LanczosMatrixType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef PsimagLite::IoSimple::In IoInputType;
@@ -106,8 +108,8 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename BasisType::BlockType BlockType;
-	typedef typename ModelType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
+	typedef WaveFunctionTransfFactory<LeftRightSuperType,
+	                                  VectorWithOffsetType> WaveFunctionTransfType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
 	typedef TargetParamsBase<ModelType> TargetParamsType;

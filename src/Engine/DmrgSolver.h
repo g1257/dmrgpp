@@ -86,7 +86,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "DmrgSerializer.h"
 #include "Recovery.h"
-#include "WaveFunctionTransfFactory.h"
 #include "Truncation.h"
 #include "ObservablesInSitu.h"
 #include "TargetingGroundState.h"
@@ -99,12 +98,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 //  A class to represent a generic solver for the Dmrg method
-template<typename SolverType>
+template<typename SolverType, typename VectorWithOffsetType_>
 class DmrgSolver {
 
-	typedef TargetingBase<SolverType> TargettingType;
+	typedef TargetingBase<SolverType,VectorWithOffsetType_> TargettingType;
 	typedef typename TargettingType::ModelType ModelType;
-	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
+	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef ObservablesInSitu<typename TargettingType::TargetVectorType>
@@ -136,17 +135,18 @@ public:
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename PsimagLite::Vector<BlockType>::Type VectorBlockType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef TargetingGroundState<typename TargettingType::LanczosSolverType>
+	typedef typename TargettingType::LanczosSolverType LanczosSolverType;
+	typedef TargetingGroundState<LanczosSolverType,VectorWithOffsetType_>
 	TargetingGroundStateType;
-	typedef TargetingTimeStep<typename TargettingType::LanczosSolverType>
+	typedef TargetingTimeStep<LanczosSolverType,VectorWithOffsetType_>
 	TargetingTimeStepType;
-	typedef TargetingDynamic<typename TargettingType::LanczosSolverType>
+	typedef TargetingDynamic<LanczosSolverType,VectorWithOffsetType_>
 	TargetingDynamicType;
-	typedef TargetingAdaptiveDynamic<typename TargettingType::LanczosSolverType>
+	typedef TargetingAdaptiveDynamic<LanczosSolverType,VectorWithOffsetType_>
 	TargetingAdaptiveDynamicType;
-	typedef TargetingCorrectionVector<typename TargettingType::LanczosSolverType>
+	typedef TargetingCorrectionVector<LanczosSolverType,VectorWithOffsetType_>
 	TargetingCorrectionVectorType;
-	typedef TargetingCorrection<typename TargettingType::LanczosSolverType>
+	typedef TargetingCorrection<LanczosSolverType,VectorWithOffsetType_>
 	TargetingCorrectionType;
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
