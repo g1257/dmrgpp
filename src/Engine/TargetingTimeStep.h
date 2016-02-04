@@ -239,11 +239,6 @@ public:
 		this->common().template load<TimeSerializerType>(f);
 	}
 
-	void printTargetStruct(InputSimpleOutType& ioOut) const
-	{
-		ioOut.print("TARGETSTRUCT",tstStruct_);
-	}
-
 	void print(InputSimpleOutType& ioOut) const
 	{
 		ioOut.print("TARGETSTRUCT",tstStruct_);
