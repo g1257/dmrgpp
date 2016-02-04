@@ -16,7 +16,7 @@
 #include "TargetingAdaptiveDynamic.h"
 #include "TargetingCorrection.h"
 #include "TargetingCorrectionVector.h"
-#include "MettsTargetting.h"
+#include "TargetingMetts.h"
 #include "BasisWithOperators.h"
 #include "LeftRightSuper.h"
 #include "InputNg.h"

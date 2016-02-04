@@ -94,7 +94,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingAdaptiveDynamic.h"
 #include "TargetingCorrection.h"
 #include "TargetingCorrectionVector.h"
-#include "MettsTargetting.h"
+#include "TargetingMetts.h"
 
 namespace Dmrg {
 
