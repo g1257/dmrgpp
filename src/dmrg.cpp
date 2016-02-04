@@ -127,7 +127,7 @@ void mainLoop1(GeometryType& geometry,
 template<typename MySparseMatrix>
 void mainLoop0(InputNgType::Readable& io,
                const ParametersDmrgSolverType& dmrgSolverParams,
-               InputCheck& inputCheck,
+               PsimagLite::String targeting,
                const OperatorOptions& opOptions)
 {
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;
@@ -146,9 +146,7 @@ void mainLoop0(InputNgType::Readable& io,
 
 	bool su2 = (tmp > 0);
 
-	PsimagLite::String targeting=inputCheck.getTargeting(dmrgSolverParams.options);
-
-	if (targeting!="GroundStateTargetting" && su2) {
+	if (targeting != "GroundStateTargetting" && su2) {
 		PsimagLite::String str("SU(2) supports only GroundStateTargetting (sorry!)\n");
 		throw PsimagLite::RuntimeError(str);
 	}
@@ -171,7 +169,7 @@ void mainLoop0(InputNgType::Readable& io,
 	}
 
 	if (targeting=="TimeStepTargetting") {
-		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrixComplex>(geometry,
+		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix>(geometry,
 		                                                               dmrgSolverParams,
 		                                                               io,
 		                                                               opOptions,
@@ -350,11 +348,15 @@ int main(int argc,char *argv[])
 
 	registerSignals();
 
-	if (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos) {
+	PsimagLite::String targeting = inputCheck.getTargeting(dmrgSolverParams.options);
+
+	bool isComplex = (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos);
+	if (targeting=="TimeStepTargetting") isComplex = true;
+	if (isComplex) {
 		std::cerr<<argv[0]<<" EXPERIMENTAL option complex is in use\n";
-		mainLoop0<MySparseMatrixComplex>(io,dmrgSolverParams,inputCheck,options);
+		mainLoop0<MySparseMatrixComplex>(io,dmrgSolverParams,targeting,options);
 	} else {
-		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck,options);
+		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,targeting,options);
 	}
 
 	if (options.enabled) return 0;

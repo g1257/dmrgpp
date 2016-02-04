@@ -54,8 +54,7 @@ return $cppFiles;
 
 sub printInstance
 {
-	my ($counter,$target,$lanczos,$matrixVector,
-	    $modelHelper,$vecWithOffset,$complexOrNot) = @_;
+	my ($counter,$target,$lanczos,$matrixVector,$modelHelper,$vecWithOffset,$complexOrNot) = @_;
 	my $sparseMatrix = "SparseMatrixInstance${counter}Type";
 	my $realOrNotFromSparse = "${sparseMatrix}::value_type";
 	my $ops = "Dmrg::Operators<Dmrg::Basis<$sparseMatrix> > ";
