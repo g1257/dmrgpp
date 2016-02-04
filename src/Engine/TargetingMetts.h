@@ -68,8 +68,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 *********************************************************
 */
 
-#ifndef METTS_TARGETTING_H
-#define METTS_TARGETTING_H
+#ifndef DMRG_TARGETING_METTS_H
+#define DMRG_TARGETING_METTS_H
 #include <iostream>
 #include "ProgressIndicator.h"
 #include "BLAS.h"
@@ -93,7 +93,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<typename LanczosSolverType_, typename VectorWithOffsetType_>
-class MettsTargetting  : public TargetingBase<LanczosSolverType_,VectorWithOffsetType_> {
+class TargetingMetts  : public TargetingBase<LanczosSolverType_,VectorWithOffsetType_> {
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef std::pair<SizeType,SizeType> PairSizeType;
@@ -162,7 +162,7 @@ public:
 
 	const static SizeType SYSTEM = ProgramGlobals::SYSTEM;
 
-	MettsTargetting(const LeftRightSuperType& lrs,
+	TargetingMetts(const LeftRightSuperType& lrs,
 	                const ModelType& model,
 	                const WaveFunctionTransfType& wft,
 	                const SizeType& quantumSector,
@@ -173,7 +173,7 @@ public:
 	      mettsStruct_(ioIn,model),
 	      wft_(wft),
 	      quantumSector_(quantumSector),
-	      progress_("MettsTargetting"),
+	      progress_("TargetingMetts"),
 	      mettsStochastics_(model,mettsStruct_.rngSeed,mettsStruct_.pure),
 	      mettsCollapse_(mettsStochastics_,lrs,mettsStruct_),
 	      prevDirection_(INFINITE),
@@ -181,7 +181,7 @@ public:
 	      environPrev_()
 	{
 		this->common().init(&mettsStruct_,mettsStruct_.timeSteps()+1);
-		if (!wft.isEnabled()) throw PsimagLite::RuntimeError(" MettsTargetting "
+		if (!wft.isEnabled()) throw PsimagLite::RuntimeError(" TargetingMetts "
 		                                                     "needs an enabled wft\n");
 
 		RealType tau =mettsStruct_.tau()/(mettsStruct_.timeSteps()-1);
@@ -529,7 +529,7 @@ private:
 			if (lrs_.super().pseudoEffectiveNumber(lrs_.super().partition(i)) ==
 			    quantumSector_ ) return i;
 		}
-		throw PsimagLite::RuntimeError("MettsTargetting: getPartition()\n");
+		throw PsimagLite::RuntimeError("TargetingMetts: getPartition()\n");
 	}
 
 	// direction here is INFINITE
@@ -881,11 +881,11 @@ private:
 	MettsPrev environPrev_;
 	std::pair<TargetVectorType,TargetVectorType> pureVectors_;
 	VectorSizeType sitesCollapsed_;
-};     //class MettsTargetting
+};     //class TargetingMetts
 
 template<typename LanczosSolverType, typename VectorWithOffsetType>
 std::ostream& operator<<(std::ostream& os,
-                         const MettsTargetting<LanczosSolverType,
+                         const TargetingMetts<LanczosSolverType,
                          VectorWithOffsetType>& tst)
 {
 	tst.print(os);
@@ -893,5 +893,5 @@ std::ostream& operator<<(std::ostream& os,
 }
 } // namespace Dmrg
 
-#endif //METTS_TARGETTING_H
+#endif //DMRG_TARGETING_METTS_H
 

@@ -145,7 +145,7 @@ public:
 	typedef TargetingCorrectionVector<LanczosSolverType,VectorWithOffsetType>
 	TargetingCorrectionVectorType;
 	typedef TargetingCorrection<LanczosSolverType,VectorWithOffsetType> TargetingCorrectionType;
-	typedef MettsTargetting<LanczosSolverType,VectorWithOffsetType> TargetingMettsType;
+	typedef TargetingMetts<LanczosSolverType,VectorWithOffsetType> TargetingMettsType;
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 	      EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
