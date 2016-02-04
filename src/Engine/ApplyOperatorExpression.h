@@ -307,6 +307,8 @@ public:
 		currentTime_ = t;
 	}
 
+	void timeHasAdvanced() { timeVectorsBase_->timeHasAdvanced(); }
+
 	template<typename SomeSerializerType>
 	void loadTargetVectors(SomeSerializerType& serializer)
 	{

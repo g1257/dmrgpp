@@ -12,7 +12,6 @@
 #include "MatrixVectorStored.h"
 #include "MatrixVectorKron.h"
 #include "TargetingBase.h"
-#include "MettsTargetting.h"
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
 #include "BasisWithOperators.h"

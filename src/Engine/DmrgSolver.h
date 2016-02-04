@@ -94,6 +94,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingAdaptiveDynamic.h"
 #include "TargetingCorrection.h"
 #include "TargetingCorrectionVector.h"
+#include "MettsTargetting.h"
 
 namespace Dmrg {
 
@@ -136,18 +137,15 @@ public:
 	typedef typename PsimagLite::Vector<BlockType>::Type VectorBlockType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename TargettingType::LanczosSolverType LanczosSolverType;
-	typedef TargetingGroundState<LanczosSolverType,VectorWithOffsetType_>
-	TargetingGroundStateType;
-	typedef TargetingTimeStep<LanczosSolverType,VectorWithOffsetType_>
-	TargetingTimeStepType;
-	typedef TargetingDynamic<LanczosSolverType,VectorWithOffsetType_>
-	TargetingDynamicType;
-	typedef TargetingAdaptiveDynamic<LanczosSolverType,VectorWithOffsetType_>
+	typedef TargetingGroundState<LanczosSolverType,VectorWithOffsetType> TargetingGroundStateType;
+	typedef TargetingTimeStep<LanczosSolverType,VectorWithOffsetType> TargetingTimeStepType;
+	typedef TargetingDynamic<LanczosSolverType,VectorWithOffsetType> TargetingDynamicType;
+	typedef TargetingAdaptiveDynamic<LanczosSolverType,VectorWithOffsetType>
 	TargetingAdaptiveDynamicType;
-	typedef TargetingCorrectionVector<LanczosSolverType,VectorWithOffsetType_>
+	typedef TargetingCorrectionVector<LanczosSolverType,VectorWithOffsetType>
 	TargetingCorrectionVectorType;
-	typedef TargetingCorrection<LanczosSolverType,VectorWithOffsetType_>
-	TargetingCorrectionType;
+	typedef TargetingCorrection<LanczosSolverType,VectorWithOffsetType> TargetingCorrectionType;
+	typedef MettsTargetting<LanczosSolverType,VectorWithOffsetType> TargetingMettsType;
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 	      EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
@@ -230,6 +228,8 @@ public:
 			psi = new TargetingCorrectionType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting == "GroundStateTargetting") {
 			psi = new TargetingGroundStateType(lrs_,model_,wft_,quantumSector_,ioIn_);
+		} else if (targeting == "MettsTargetting") {
+			psi = new TargetingMettsType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else {
 			throw PsimagLite::RuntimeError("Unknown targeting " + targeting + "\n");
 		}

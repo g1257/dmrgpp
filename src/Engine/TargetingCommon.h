@@ -217,15 +217,23 @@ public:
 		return std::real(v*v);
 	}
 
-	void normalizeTimeVectors()
+	void normalizeTimeVectors(SizeType start = 0, SizeType end = 0)
 	{
 		SizeType total =  applyOpExpression_.targetVectors().size();
-		for (SizeType i = 0; i < total; ++i) {
+		if (end == 0) end = total;
+		for (SizeType i = start; i < end; ++i) {
 			RealType factor = normSquared(i);
 			factor = 1.0/sqrt(factor);
 			applyOpExpression_.multiplyTimeVector(i,factor);
 		}
 	}
+
+	void setTime(RealType t)
+	{
+		applyOpExpression_.setTime(t);
+	}
+
+	void timeHasAdvanced() { applyOpExpression_.timeHasAdvanced(); }
 
 	template<typename IoOutputType>
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
