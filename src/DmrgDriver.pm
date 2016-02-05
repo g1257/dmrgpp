@@ -47,7 +47,6 @@ foreach my $complexOrNot (@complexOrReal) {
 
 close(FOUT);
 
-$cppFiles--;
 print STDERR "$0: $counter instances and $cppFiles files\n";
 return $cppFiles;
 }
@@ -56,7 +55,6 @@ sub printInstance
 {
 	my ($counter,$target,$lanczos,$matrixVector,$modelHelper,$vecWithOffset,$complexOrNot) = @_;
 	my $sparseMatrix = "SparseMatrixInstance${counter}Type";
-	my $realOrNotFromSparse = "${sparseMatrix}::value_type";
 	my $ops = "Dmrg::Operators<Dmrg::Basis<$sparseMatrix> > ";
 	my $basisWith = "Dmrg::BasisWithOperators<$ops >";
 	my $basisWithout = "Dmrg::Basis<$sparseMatrix >";
@@ -67,11 +65,11 @@ sub printInstance
 	my $lrs = "Dmrg::LeftRightSuper<$basisWith,$basisSuperBlock >";
 	my $lanczosType = "LanczosSolver${counter}Type";
 	my $matrixVectorType = "MatrixVector${counter}Type";
-	my $vecWithOffsetType = "Dmrg::VectorWithOffset${vecWithOffset}<$realOrNotFromSparse> ";
+	my $vecWithOffsetType = "Dmrg::VectorWithOffset${vecWithOffset}<$complexOrNot> ";
 	print FOUT<<EOF;
 
 typedef PsimagLite::CrsMatrix<$complexOrNot> $sparseMatrix;
-typedef PsimagLite::Geometry<$realOrNotFromSparse,$inputNg,Dmrg::ProgramGlobals> $geometry;
+typedef PsimagLite::Geometry<$complexOrNot,$inputNg,Dmrg::ProgramGlobals> $geometry;
 
 typedef Dmrg::$matrixVector<
  Dmrg::ModelBase<
