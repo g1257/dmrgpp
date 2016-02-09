@@ -30,7 +30,7 @@ CPPFLAGS += -DNDEBUG
 CPPFLAGS += -O3
 
 # This enables partial debugging (make sure to comment out previous line)
-CPPFLAGS += -Wextra -g3
+CPPFLAGS +=   -g3
 
 # This enables additional debugging
 #CPPFLAGS += -D_GLIBCXX_DEBUG -D_GLIBCXX_PROFILE
