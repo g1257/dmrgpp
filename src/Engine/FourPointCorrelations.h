@@ -120,9 +120,13 @@ public:
 	        int fermionicSign,
 	        SizeType threadId) const
 	{
-		if (i1>i2 || i3>i4)
+		if (i1>i2 || i3>i4 || i2>i3)
 			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs ordered points\n");
 		if (i1==i2 || i3==i4)
+			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs distinct points\n");
+		if (i1==i3 || i2==i4)
+			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs distinct points\n");
+		if (i2==i3 || i1==i4)
 			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs distinct points\n");
 
 		SparseMatrixType O2gt;

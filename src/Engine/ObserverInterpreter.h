@@ -97,6 +97,7 @@ class ObserverInterpreter {
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
+	typedef typename PsimagLite::Vector<int>::Type VectorIntType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 
 	class Bracket {
@@ -137,8 +138,11 @@ class ObserverInterpreter {
 				throw PsimagLite::RuntimeError(str);
 			}
 
-			for (SizeType i = 0; i < name_.size(); ++i)
+			sites_.resize(name_.size(),-1);
+			for (SizeType i = 0; i < name_.size(); ++i) {
+				sites_[i] = extractSiteIfAny(name_[i]);
 				op_.push_back(findOperator(name_[i]));
+			}
 		}
 
 		const OperatorType& op(SizeType ind) const
@@ -167,6 +171,11 @@ class ObserverInterpreter {
 
 		SizeType points() const { return name_.size(); }
 
+		SizeType site(SizeType ind) const
+		{
+			if (sites_[ind] >= 0) return sites_[ind];
+			throw PsimagLite::RuntimeError("site is negative\n");
+		}
 
 	private:
 
@@ -193,11 +202,50 @@ class ObserverInterpreter {
 			return OperatorType(io,cookedOperator,OperatorType::MUST_BE_NONZERO);
 		}
 
+		int extractSiteIfAny(PsimagLite::String& name) const
+		{
+			int firstIndex = -1;
+			int lastIndex = -1;
+			for (SizeType i = 0; i < name.length(); ++i) {
+				if (name[i] == '[') {
+					firstIndex = i;
+					continue;
+				}
+
+				if (name[i] == ']') {
+					lastIndex = i;
+					continue;
+				}
+			}
+
+			if (firstIndex < 0 && lastIndex < 0) return -1;
+
+			bool b1 = (firstIndex < 0 && lastIndex >= 0);
+			bool b2 = (firstIndex >= 0 && lastIndex < 0);
+			if (b1 || b2) {
+				PsimagLite::String str("Bracket operator ");
+				str += name + " has unmatched [ or ]\n";
+				throw PsimagLite::RuntimeError(str);
+			}
+
+			if (static_cast<SizeType>(lastIndex) != name.length() - 1) {
+				PsimagLite::String str("Bracket operator ");
+				str += name + " has [] but does not end in ]\n";
+				throw PsimagLite::RuntimeError(str);
+			}
+
+			PsimagLite::String str = name.substr(0,firstIndex);
+			int site = atoi(name.substr(firstIndex+1,lastIndex-1).c_str());
+			name = str;
+			return site;
+		}
+
 		const ModelType& model_;
 		VectorStringType bracket_;
 		VectorStringType name_;
 		SizeType type_;
 		VectorOperatorType op_;
+		VectorIntType sites_;
 	}; // class Bracket
 
 public:
@@ -248,8 +296,7 @@ public:
 			if (bracket.points() == 3 || bracket.points() == 4) {
 				observableLibrary_.manyPoint(bracket,
 			                                 rows,
-			                                 cols,
-			                                 threadId);
+			                                 cols);
 			}
 		}
 	}

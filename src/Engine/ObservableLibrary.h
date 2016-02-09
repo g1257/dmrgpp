@@ -260,6 +260,19 @@ public:
 		}
 	}
 
+	template<typename SomeBracketType>
+	void manyPoint(const SomeBracketType& bracket,
+	               SizeType rows,
+	               SizeType cols)
+	{
+		if (bracket.points() == 3) {
+			throw PsimagLite::RuntimeError("observe 3-point not ready yet\n");
+		}
+
+		assert(bracket.points() == 4);
+		observe_.fourPoint(bracket,rows,cols);
+	}
+
 	void measureTime(const PsimagLite::String& label)
 	{
 		PsimagLite::String str("WARNING: ObservableLibrary: ");

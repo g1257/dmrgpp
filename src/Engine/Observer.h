@@ -122,9 +122,9 @@ class Observer {
 	static SizeType const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
 
 	enum {GS_VECTOR=ObserverHelperType::GS_VECTOR,
-	      TIME_VECTOR=ObserverHelperType::TIME_VECTOR};
+		  TIME_VECTOR=ObserverHelperType::TIME_VECTOR};
 	enum {LEFT_BRACKET=ObserverHelperType::LEFT_BRACKET,
-	      RIGHT_BRACKET=ObserverHelperType::RIGHT_BRACKET};
+		  RIGHT_BRACKET=ObserverHelperType::RIGHT_BRACKET};
 
 public:
 
@@ -179,6 +179,38 @@ public:
 	                        SizeType cols)
 	{
 		return twopoint_(O1,O2,fermionicSign,rows,cols);
+	}
+
+	template<typename SomeBracketType>
+	void fourPoint(const SomeBracketType& bracket,
+	               SizeType rows,
+	               SizeType cols)
+	{
+		SizeType site0 = bracket.site(0);
+		SizeType site3 = bracket.site(3);
+		std::cout<<"#site0="<<site0<<"\n#site3="<<site3<<"\n";
+		SizeType threadId = 0;
+		MatrixType m0;
+		MatrixType m1;
+		MatrixType m2;
+		MatrixType m3;
+		crsMatrixToFullMatrix(m0,bracket.op(0).data);
+		crsMatrixToFullMatrix(m1,bracket.op(1).data);
+		crsMatrixToFullMatrix(m2,bracket.op(2).data);
+		crsMatrixToFullMatrix(m3,bracket.op(3).data);
+		for (SizeType site1 = 0; site1 < rows; ++site1) {
+			for (SizeType site2 = 0; site2 < cols; ++site2) {
+				try {
+					typename MatrixType::value_type tmp = fourpoint_('N',site0,m0,
+					                                                 'N',site1,m1,
+					                                                 'N',site2,m2,
+					                                                 'N',site3,m3,
+					                                                 bracket.op(0).fermionSign,
+					                                                 threadId);
+					std::cout<<site1<<" "<<site2<<" "<<tmp<<"\n";
+				} catch(std::exception&) {}
+			}
+		}
 	}
 
 	template<typename SomeBracketType>
@@ -290,8 +322,8 @@ private:
 
 	SizeType bracketStringToNumber(const PsimagLite::String& str) const
 	{
-		if (str=="gs") return GS_VECTOR;
-		if (str=="time") return TIME_VECTOR;
+		if (str == "gs") return GS_VECTOR;
+		if (str == "time") return TIME_VECTOR;
 		PsimagLite::String msg("Observer::bracketStringToNumber:");
 		throw PsimagLite::RuntimeError(msg + " must be gs or time\n");
 	}
