@@ -97,6 +97,7 @@ public:
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
@@ -190,6 +191,12 @@ public:
 			aOperators_.push_back(myOp);
 		}
 
+		try {
+			VectorType tmpVector;
+			io.read(tmpVector,"TSPOperatorMultiplier");
+			multiplyOperators(tmpVector);
+		} catch (std::exception&) {}
+
 		noOperator_ = isNoOperator();
 		checkBorderOperators();
 		checkSizesOfOperators();
@@ -271,6 +278,19 @@ public:
 	                                const TargetParamsCommon<ModelType_>& t);
 
 private:
+
+	void multiplyOperators(const VectorType& tmpVector)
+	{
+		if (aOperators_.size() != tmpVector.size()) {
+			PsimagLite::String str(__FILE__);
+			str += "\nFATAL: ";
+			str += " TSPOperatorMultiplier of size " + ttos(tmpVector.size());
+			str += " but " + ttos(aOperators_.size()) + " expected.\n";
+		}
+
+		for (SizeType i=0;i<aOperators_.size();i++)
+			aOperators_[i].data *= tmpVector[i];
+	}
 
 	bool isNoOperator() const
 	{
