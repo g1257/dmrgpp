@@ -188,6 +188,21 @@ public:
 	{
 		SizeType site0 = bracket.site(0);
 		std::cout<<"#site0="<<site0<<"\n";
+		SizeType flag = 0;
+		try {
+			bracket.site(1);
+			flag |= 1;
+		} catch (std::exception&) {}
+
+		try {
+			bracket.site(2);
+			flag |= 2;
+		} catch (std::exception&) {}
+
+		if (flag == 1 || flag == 2) {
+			throw PsimagLite::RuntimeError("threePoint: Give all sites or first site only\n");
+		}
+
 		SizeType threadId = 0;
 		MatrixType m0;
 		MatrixType m1;
@@ -196,6 +211,18 @@ public:
 		crsMatrixToFullMatrix(m1,bracket.op(1).data);
 		crsMatrixToFullMatrix(m2,bracket.op(2).data);
 		int fermionSign = bracket.op(0).fermionSign;
+
+		if (flag == 3) {
+			typename MatrixType::value_type tmp = fourpoint_.threePoint('N',site0,m0,
+			                                                            'N',bracket.site(1),m1,
+			                                                            'N',bracket.site(2),m2,
+			                                                            fermionSign,
+			                                                            threadId);
+			std::cout<<bracket.site(1)<<" "<<bracket.site(2)<<" "<<tmp<<"\n";
+			return;
+		}
+
+		assert(flag == 0);
 		for (SizeType site1 = 0; site1 < rows; ++site1) {
 			for (SizeType site2 = 0; site2 < cols; ++site2) {
 				try {
@@ -221,6 +248,21 @@ public:
 		if (site0 >= site1)
 			throw PsimagLite::RuntimeError("FourPoint: needs ordered distinct points\n");
 
+		SizeType flag = 0;
+		try {
+			bracket.site(2);
+			flag |= 1;
+		} catch (std::exception&) {}
+
+		try {
+			bracket.site(3);
+			flag |= 2;
+		} catch (std::exception&) {}
+
+		if (flag == 1 || flag == 2) {
+			throw PsimagLite::RuntimeError("threePoint: Give all sites or first two sites only\n");
+		}
+
 		SizeType threadId = 0;
 		MatrixType m0;
 		MatrixType m1;
@@ -235,6 +277,18 @@ public:
 		typename FourPointCorrelationsType::SparseMatrixType O2gt;
 		fourpoint_.firstStage(O2gt,'N',site0,m0,'N',site1,m1,fermionSign,threadId);
 
+		if (flag == 3) {
+			typename MatrixType::value_type tmp = fourpoint_.
+			        secondStage(O2gt,site1,
+			                    'N',bracket.site(2),m2,
+			                    'N',bracket.site(3),m3,
+			                    fermionSign,
+			                    threadId);
+			std::cout<<bracket.site(2)<<" "<<bracket.site(3)<<" "<<tmp<<"\n";
+			return;
+		}
+
+		assert(flag == 0);
 		for (SizeType site2 = site1+1; site2 < rows; ++site2) {
 			for (SizeType site3 = site2+1; site3 < cols; ++site3) {
 				typename MatrixType::value_type tmp = fourpoint_.
