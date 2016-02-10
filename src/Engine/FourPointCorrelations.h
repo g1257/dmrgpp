@@ -97,10 +97,10 @@ class FourPointCorrelations {
 	static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
 	typedef typename VectorType::value_type FieldType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
-	typedef typename CorrelationsSkeletonType::SparseMatrixType SparseMatrixType;
 
 public:
 
+	typedef typename CorrelationsSkeletonType::SparseMatrixType SparseMatrixType;
 	typedef typename ObserverHelperType::MatrixType MatrixType;
 
 	FourPointCorrelations(ObserverHelperType& precomp,

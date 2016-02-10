@@ -216,8 +216,11 @@ public:
 	               SizeType cols)
 	{
 		SizeType site0 = bracket.site(0);
-		SizeType site3 = bracket.site(3);
-		std::cout<<"#site0="<<site0<<"\n#site3="<<site3<<"\n";
+		SizeType site1 = bracket.site(1);
+		std::cout<<"#site0="<<site0<<"\n#site1="<<site1<<"\n";
+		if (site0 >= site1)
+			throw PsimagLite::RuntimeError("FourPoint: needs ordered distinct points\n");
+
 		SizeType threadId = 0;
 		MatrixType m0;
 		MatrixType m1;
@@ -227,17 +230,16 @@ public:
 		crsMatrixToFullMatrix(m1,bracket.op(1).data);
 		crsMatrixToFullMatrix(m2,bracket.op(2).data);
 		crsMatrixToFullMatrix(m3,bracket.op(3).data);
-		for (SizeType site1 = 0; site1 < rows; ++site1) {
-			for (SizeType site2 = 0; site2 < cols; ++site2) {
-				try {
-					typename MatrixType::value_type tmp = fourpoint_('N',site0,m0,
-					                                                 'N',site1,m1,
-					                                                 'N',site2,m2,
-					                                                 'N',site3,m3,
-					                                                 bracket.op(0).fermionSign,
-					                                                 threadId);
-					std::cout<<site1<<" "<<site2<<" "<<tmp<<"\n";
-				} catch(std::exception&) {}
+
+		RealType fermionSign = bracket.op(0).fermionSign;
+		typename FourPointCorrelationsType::SparseMatrixType O2gt;
+		fourpoint_.firstStage(O2gt,'N',site0,m0,'N',site1,m1,fermionSign,threadId);
+
+		for (SizeType site2 = site1+1; site2 < rows; ++site2) {
+			for (SizeType site3 = site2+1; site3 < cols; ++site3) {
+				typename MatrixType::value_type tmp = fourpoint_.
+				        secondStage(O2gt,site1,'N',site2,m2,'N',site3,m3,fermionSign,threadId);
+					std::cout<<site2<<" "<<site3<<" "<<tmp<<"\n";
 			}
 		}
 	}
