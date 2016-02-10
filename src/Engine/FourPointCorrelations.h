@@ -136,6 +136,27 @@ public:
 		return secondStage(O2gt,i2,mod3,i3,O3,mod4,i4,O4,fermionicSign,threadId);
 	}
 
+	//! 3-point: these are expensive and uncached!!!
+	//! requires i1<i2<i3
+	FieldType threePoint(char mod1,SizeType i1,const MatrixType& O1,
+	                     char mod2,SizeType i2,const MatrixType& O2,
+	                     char mod3,SizeType i3,const MatrixType& O3,
+	                     int fermionicSign,
+	                     SizeType threadId) const
+	{
+		if (i1>i2 || i2>i3)
+			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs ordered points\n");
+		if (i1==i2 || i1==i3 || i2==i3)
+			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs distinct points\n");
+
+		SparseMatrixType O2gt;
+
+		firstStage(O2gt,mod1,i1,O1,mod2,i2,O2,fermionicSign,threadId);
+
+		return secondStage(O2gt,i2,mod3,i3,O3,fermionicSign,threadId);
+	}
+
+
 	//! requires i1<i2
 	void firstStage(SparseMatrixType& O2gt,
 	                char mod1,SizeType i1,const MatrixType& O1,
@@ -235,6 +256,43 @@ public:
 	}
 
 private:
+
+	//! requires i2<i3
+	FieldType secondStage(const SparseMatrixType& O2gt,
+	                      SizeType i2,
+	                      char mod3,SizeType i3,const MatrixType& O3,
+	                      int fermionicSign,
+	                      SizeType threadId) const
+	{
+		// Take care of modifiers
+		SparseMatrixType O3m;
+		skeleton_.createWithModification(O3m,O3,mod3);
+
+		int ns = i3-1;
+		if (ns<0) ns = 0;
+		SparseMatrixType Otmp;
+		growDirectly4p(Otmp,O2gt,i2+1,fermionicSign,ns,threadId);
+		if (verbose_) {
+			std::cerr<<"Otmp\n";
+			std::cerr<<Otmp;
+		}
+
+		if (i3 == skeleton_.numberOfSites(threadId)-1) {
+			helper_.setPointer(threadId,i3-2);
+		    return skeleton_.bracketRightCorner(Otmp,O3m,fermionicSign,threadId);
+		}
+
+		helper_.setPointer(threadId,ns);
+		SparseMatrixType O3g;
+		skeleton_.dmrgMultiply(O3g,Otmp,O3m,fermionicSign,ns,threadId);
+		if (verbose_) {
+			std::cerr<<"O3g\n";
+			std::cerr<<O3g;
+		}
+
+		helper_.setPointer(threadId,ns);
+		return skeleton_.bracket(O3g,fermionicSign,threadId);
+	}
 
 	//! i can be zero here!!
 	void growDirectly4p(SparseMatrixType& Odest,

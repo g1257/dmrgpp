@@ -182,6 +182,35 @@ public:
 	}
 
 	template<typename SomeBracketType>
+	void threePoint(const SomeBracketType& bracket,
+	                SizeType rows,
+	                SizeType cols)
+	{
+		SizeType site0 = bracket.site(0);
+		std::cout<<"#site0="<<site0<<"\n";
+		SizeType threadId = 0;
+		MatrixType m0;
+		MatrixType m1;
+		MatrixType m2;
+		crsMatrixToFullMatrix(m0,bracket.op(0).data);
+		crsMatrixToFullMatrix(m1,bracket.op(1).data);
+		crsMatrixToFullMatrix(m2,bracket.op(2).data);
+		int fermionSign = bracket.op(0).fermionSign;
+		for (SizeType site1 = 0; site1 < rows; ++site1) {
+			for (SizeType site2 = 0; site2 < cols; ++site2) {
+				try {
+					typename MatrixType::value_type tmp = fourpoint_.threePoint('N',site0,m0,
+					                                                            'N',site1,m1,
+					                                                            'N',site2,m2,
+					                                                            fermionSign,
+					                                                            threadId);
+					std::cout<<site1<<" "<<site2<<" "<<tmp<<"\n";
+				} catch(std::exception&) {}
+			}
+		}
+	}
+
+	template<typename SomeBracketType>
 	void fourPoint(const SomeBracketType& bracket,
 	               SizeType rows,
 	               SizeType cols)

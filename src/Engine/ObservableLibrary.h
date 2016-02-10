@@ -266,7 +266,8 @@ public:
 	               SizeType cols)
 	{
 		if (bracket.points() == 3) {
-			throw PsimagLite::RuntimeError("observe 3-point not ready yet\n");
+			observe_.threePoint(bracket,rows,cols);
+			return;
 		}
 
 		assert(bracket.points() == 4);
