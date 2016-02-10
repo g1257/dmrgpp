@@ -82,11 +82,11 @@ typedef Dmrg::$matrixVector<
  >
 > $matrixVectorType;
 
-typedef PsimagLite::$lanczos<PsimagLite::ParametersForSolver<typename ${geometry}::RealType>,
-	$matrixVectorType, typename ${matrixVectorType}::VectorType> $lanczosType;
+typedef PsimagLite::$lanczos<PsimagLite::ParametersForSolver<${geometry}::RealType>,
+	$matrixVectorType, ${matrixVectorType}::VectorType> $lanczosType;
 
 template void mainLoop4<$lanczosType,$vecWithOffsetType>
-(typename ${lanczosType}::LanczosMatrixType::ModelType::GeometryType&,
+(${lanczosType}::LanczosMatrixType::ModelType::GeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
 const OperatorOptions&,
