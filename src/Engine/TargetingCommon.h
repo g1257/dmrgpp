@@ -163,12 +163,12 @@ public:
 	static const SizeType SUM = TargetParamsType::SUM;
 
 	enum {DISABLED=ApplyOperatorExpressionType::DISABLED,
-		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,
-		  WFT_NOADVANCE=ApplyOperatorExpressionType::WFT_NOADVANCE};
+	      OPERATOR=ApplyOperatorExpressionType::OPERATOR,
+	      WFT_NOADVANCE=ApplyOperatorExpressionType::WFT_NOADVANCE};
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-		  INFINITE=WaveFunctionTransfType::INFINITE};
+	      EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
+	      INFINITE=WaveFunctionTransfType::INFINITE};
 
 	TargetingCommon(const LeftRightSuperType& lrs,
 	                const ModelType& model,
@@ -223,6 +223,12 @@ public:
 		if (end == 0) end = total;
 		for (SizeType i = start; i < end; ++i) {
 			RealType factor = normSquared(i);
+			if (fabs(factor)<1e-10) {
+				std::cerr<<"normalizeTimeVectors ";
+				std::cerr<<"vector "<<i<<" too small "<<factor<<"\n";
+				continue;
+			}
+
 			factor = 1.0/sqrt(factor);
 			applyOpExpression_.multiplyTimeVector(i,factor);
 		}
