@@ -216,7 +216,7 @@ public:
 
 		TargettingType* psi = 0;
 
-		if (targeting=="TimeStepTargetting") {
+		if (targeting=="TimeStepTargetting" || targeting == "TargetingAncilla") {
 			psi = new TargetingTimeStepType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting=="DynamicTargetting") {
 			psi = new TargetingDynamicType(lrs_,model_,wft_,quantumSector_,ioIn_);
