@@ -9,7 +9,7 @@ hubbardU	16 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0
 potentialV	32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 		0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 Model=HubbardOneBand
-SolverOptions=TimeStepTargetting
+SolverOptions=TimeStepTargetting,tarDisable
 Version=6ce41a4b7dfa08978e53fa756f7f139e2fb18251
 OutputFile=data5.txt
 InfiniteLoopKeptStates=64

@@ -24,7 +24,7 @@ potentialV	24 0.0 0.0 0.0 0.0 0.0 0.0
                    0.0 0.0 0.0 0.0 0.0 0.0 
                    0.0 0.0 0.0 0.0 0.0 0.0 
 
-SolverOptions=none
+SolverOptions=none,tarDisable
 Version=version
 OutputFile=data1950.txt
 InfiniteLoopKeptStates=60

@@ -11,7 +11,7 @@ hubbardU	16 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0
 potentialV	 32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 Model=HubbardOneBand
-SolverOptions=nowft
+SolverOptions=nowft,tarDisable
 Version=53725d9b8f22615ccccc782082f4cd6f51a4e374
 OutputFile=data1.txt
 InfiniteLoopKeptStates=60

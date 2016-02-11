@@ -25,7 +25,7 @@ Connectors 6 6
 Model=HeisenbergAncillaC
 HeisenbergTwiceS=1
 
-SolverOptions=none
+SolverOptions=none,tarDisable
 Version=version
 OutputFile=data1810.txt
 InfiniteLoopKeptStates=60

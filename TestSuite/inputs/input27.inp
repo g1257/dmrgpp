@@ -14,7 +14,7 @@ Connectors 1 1.0
 Model=Heisenberg
 HeisenbergTwiceS=2
 
-SolverOptions=none
+SolverOptions=none,tarDisable
 Version=version
 OutputFile=data27.txt
 InfiniteLoopKeptStates=60

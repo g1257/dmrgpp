@@ -30,7 +30,7 @@ hubbardU        6 5 5 5 5 5 5
 potentialV      12 0 0 0 0 0 0    0 0 0 0 0 0
 		   
 Model=KaneMeleHubbard
-SolverOptions=none
+SolverOptions=none,tarDisable
 Version=version
 OutputFile=data4000.txt
 InfiniteLoopKeptStates=200

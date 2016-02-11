@@ -39,7 +39,7 @@ Model=TjAncillaG
 potentialV 24     0.0 0.0 0.0 0.0 0.0 0.0       0.0 0.0 0.0 0.0 0.0 0.0
                   0.0 0.0 0.0 0.0 0.0 0.0       0.0 0.0 0.0 0.0 0.0 0.0
 
-SolverOptions=none
+SolverOptions=none,tarDisable
 Version=v3
 OutputFile=data1880.txt
 InfiniteLoopKeptStates=100

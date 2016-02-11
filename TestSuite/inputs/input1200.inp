@@ -32,7 +32,7 @@ Model=Tj1Orb
 potentialV 16     0.0 0.0 0.0 0.0         0.0 0.0 0.0 0.0
                   0.0 0.0 0.0 0.0         0.0 0.0 0.0 0.0
 
-SolverOptions=none
+SolverOptions=none,tarDisable
 Version=v2.6
 OutputFile=data1200.txt
 InfiniteLoopKeptStates=100

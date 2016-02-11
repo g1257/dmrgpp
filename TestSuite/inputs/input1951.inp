@@ -18,7 +18,7 @@ potentialV	24 0.0 0.0 0.0 0.0 0.0 0.0
                    0.0 0.0 0.0 0.0 0.0 0.0 
                    0.0 0.0 0.0 0.0 0.0 0.0 
 
-SolverOptions=restart,TargetingAncilla
+SolverOptions=restart,TargetingAncilla,tarDisable
 Version=version
 OutputFile=data1951.txt
 InfiniteLoopKeptStates=100
