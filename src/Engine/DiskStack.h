@@ -95,11 +95,8 @@ public:
 	      total_(0),
 	      progress_("DiskStack")
 	{
-		if (!hasLoad) {
-			ioOut_.open(fileOut_,std::ios_base::trunc);
-			ioOut_.close();
-			return;
-		}
+		unlink(fileOut_.c_str());
+		if (!hasLoad) return;
 
 		try {
 			ioIn_.open(fileIn_);
