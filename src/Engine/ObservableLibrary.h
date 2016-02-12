@@ -103,6 +103,7 @@ public:
 	typedef PreOperatorBase<ModelType> PreOperatorBaseType;
 	typedef PreOperatorSiteDependent<ModelType> PreOperatorSiteDependentType;
 	typedef PreOperatorSiteIndependent<ModelType> PreOperatorSiteIndependentType;
+	typedef typename ObserverType::BracketType BracketType;
 
 	template<typename IoInputter>
 	ObservableLibrary(
@@ -192,11 +193,9 @@ public:
 			}
 		} else if (label=="dd") {
 
-			const MatrixType& oDelta = model_.naturalOperator("d",site,0);
-			MatrixType oDeltaT;
-			transposeConjugate(oDeltaT,oDelta);
-			measureOne("TWO-POINT DELTA-DELTA^DAGGER",oDelta,"",oDeltaT,1,
-			           rows,cols,threadId);
+			BracketType bracket(model_,"<gs|d;d'|gs>");
+			manyPoint(bracket,rows,cols);
+
 		} else if (label=="dd4") {
 			if (model_.geometry().label(0)!="ladderx") {
 				PsimagLite::String str(__FILE__);
@@ -240,23 +239,24 @@ public:
 		}
 	}
 
-	template<typename SomeBracketType>
-	void manyPoint(const SomeBracketType& bracket,
-	               SizeType rows,
-	               SizeType cols,
-	               SizeType threadId)
+	void measureOne(const PsimagLite::String& label1,
+	                const PsimagLite::Matrix<FieldType>& op1,
+	                const PsimagLite::String& label2,
+	                const PsimagLite::Matrix<FieldType>& op2,
+	                int fermionSign,
+	                SizeType rows,
+	                SizeType cols,
+	                SizeType threadId)
 	{
-		if (bracket.points() == 3) {
-			throw PsimagLite::RuntimeError("observe 3-point not ready yet\n");
-		}
+		if (hasTimeEvolution_) printSites(threadId);
 
-		assert(bracket.points() == 4);
-
-		VectorMatrixType v = observe_.ladder(bracket,rows,cols,threadId);
-
-		for (SizeType i = 0; i < v.size(); ++i) {
-			std::cout<<v[0];
-			std::cout<<"- - - - - - - - - - - - - \n";
+		const MatrixType& v =
+		        observe_.correlations(op1,op2,fermionSign,rows,cols);;
+		if (PsimagLite::Concurrency::root()) {
+			if (hasTimeEvolution_)
+				std::cout<<"#Time="<<observe_.time(threadId)<<"\n";
+			std::cout<<label1<<label2<<":\n";
+			std::cout<<v;
 		}
 	}
 
@@ -265,6 +265,12 @@ public:
 	               SizeType rows,
 	               SizeType cols)
 	{
+		if (hasTimeEvolution_) {
+			SizeType threadId = 0;
+			printSites(threadId);
+			std::cout<<"#Time="<<observe_.time(threadId)<<"\n";
+		}
+
 		if (bracket.points() == 3) {
 			observe_.threePoint(bracket,rows,cols);
 			return;
@@ -342,27 +348,6 @@ public:
 
 	bool endOfData() const { return observe_.endOfData(); }
 
-	void measureOne(const PsimagLite::String& label1,
-	                const PsimagLite::Matrix<FieldType>& op1,
-	                const PsimagLite::String& label2,
-	                const PsimagLite::Matrix<FieldType>& op2,
-	                int fermionSign,
-	                SizeType rows,
-	                SizeType cols,
-	                SizeType threadId)
-	{
-		if (hasTimeEvolution_) printSites(threadId);
-
-		const MatrixType& v =
-		        observe_.correlations(op1,op2,fermionSign,rows,cols);;
-		if (PsimagLite::Concurrency::root()) {
-			if (hasTimeEvolution_)
-				std::cout<<"#Time="<<observe_.time(threadId)<<"\n";
-			std::cout<<label1<<label2<<":\n";
-			std::cout<<v;
-		}
-	}
-
 	const ModelType& model() const { return model_; }
 
 	void measureOnePoint(const PsimagLite::String& bra,
@@ -411,6 +396,53 @@ public:
 			                                    ApplyOperatorType::BORDER_YES);
 			std::cout<<x<<" "<<tmp1;
 			std::cout<<" "<<observe_.time(threadId)<<"\n";
+		}
+	}
+
+	void interpret(const PsimagLite::String& list, SizeType rows, SizeType cols)
+	{
+		typename BracketType::VectorStringType vecStr;
+		PsimagLite::tokenizer(list,vecStr,",");
+
+		for (SizeType i = 0; i < vecStr.size(); ++i) {
+			std::cout<<vecStr[i]<<"\n";
+
+			BracketType bracket(model_, vecStr[i]);
+
+			SizeType threadId = 0;
+			if (bracket.points() == 1) {
+				PreOperatorSiteIndependentType preOperator(bracket.op(0),
+				                                           bracket.opName(0),
+				                                           threadId);
+				measureOnePoint(bracket.bra(),
+				                preOperator,
+				                bracket.ket());
+				continue;
+			}
+
+			if (bracket.points() == 2) {
+				MatrixType m0;
+				crsMatrixToFullMatrix(m0,bracket.op(0).data);
+
+				MatrixType m1;
+				crsMatrixToFullMatrix(m1,bracket.op(1).data);
+
+				measureOne(bracket.opName(0),
+				           m0,
+				           bracket.opName(1),
+				           m1,
+				           bracket.op(0).fermionSign,
+				           rows,
+				           cols,
+				           threadId);
+				continue;
+			}
+
+			if (bracket.points() == 3 || bracket.points() == 4) {
+				manyPoint(bracket,
+				          rows,
+				          cols);
+			}
 		}
 	}
 

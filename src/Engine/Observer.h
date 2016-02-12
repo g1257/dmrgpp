@@ -91,6 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "Parallelizer.h"
 #include "Utils.h"
+#include "Bracket.h"
 
 namespace Dmrg {
 
@@ -130,6 +131,7 @@ public:
 
 	typedef ModelType_ ModelType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
+	typedef Bracket<ModelType> BracketType;
 
 	Observer(IoInputType& io,
 	         SizeType nf,
@@ -181,8 +183,7 @@ public:
 		return twopoint_(O1,O2,fermionicSign,rows,cols);
 	}
 
-	template<typename SomeBracketType>
-	void threePoint(const SomeBracketType& bracket,
+	void threePoint(const BracketType& bracket,
 	                SizeType rows,
 	                SizeType cols)
 	{
@@ -237,8 +238,7 @@ public:
 		}
 	}
 
-	template<typename SomeBracketType>
-	void fourPoint(const SomeBracketType& bracket,
+	void fourPoint(const BracketType& bracket,
 	               SizeType rows,
 	               SizeType cols)
 	{
@@ -298,8 +298,7 @@ public:
 		}
 	}
 
-	template<typename SomeBracketType>
-	VectorMatrixType ladder(const SomeBracketType& bracket,
+	VectorMatrixType ladder(const BracketType& bracket,
 	                        SizeType rows,
 	                        SizeType,
 	                        SizeType threadId)
@@ -328,10 +327,9 @@ public:
 		return v;
 	}
 
-	template<typename SomeModelType>
 	void fourPointDeltas(MatrixType& fpd,
 	                     const typename PsimagLite::Vector<SizeType>::Type& gammas,
-	                     const SomeModelType& model)
+	                     const ModelType& model)
 	{
 		if (gammas.size()!=4) {
 			std::cerr<<"Observer: fourPointDeltas(...):  wrong number of gammas ";

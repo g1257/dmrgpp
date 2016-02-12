@@ -23,7 +23,6 @@
 #include "Provenance.h"
 #include "InputCheck.h"
 #include "ModelSelector.h"
-#include "ObserverInterpreter.h"
 #include "ArchiveFiles.h"
 
 #ifndef USE_FLOAT
@@ -95,9 +94,7 @@ bool observeOneFullSweep(IoInputType& io,
 	const PsimagLite::String& modelName = model.params().model;
 	SizeType rows = n; // could be n/2 if there's enough symmetry
 
-	ObserverInterpreter<ObservableLibraryType> observerInterpreter(observerLib);
-
-	observerInterpreter(list,rows,n);
+	observerLib.interpret(list,rows,n);
 
 	// Immm supports only onepoint:
 	if (modelName=="Immm" && obsOptions!="onepoint") {
