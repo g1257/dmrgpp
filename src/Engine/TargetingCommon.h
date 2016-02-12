@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TARGETING_COMMON_H
 #define TARGETING_COMMON_H
 
+#include "OperatorInterpreter.h"
 #include "ProgressIndicator.h"
 #include "BLAS.h"
 #include "DynamicSerializer.h"
@@ -97,32 +98,6 @@ template<typename TargetHelperType,
          typename VectorWithOffsetType,
          typename LanczosSolverType>
 class TargetingCommon  {
-
-	struct NaturalOpStruct {
-		NaturalOpStruct(PsimagLite::String label_)
-		    : fermionSign(1),dof(0),label(label_)
-		{
-			SizeType i = 0;
-			for (; i < label_.length(); ++i) {
-				if (label_[i] == '?') break;
-			}
-
-			if (i == label_.length()) return;
-			SizeType j = i;
-			label = label_.substr(0,j);
-			for (; i < label_.length(); ++i) {
-				if (label_[i] == '-') break;
-			}
-
-			dof = atoi(label_.substr(j+1,i).c_str());
-			if (i == label_.length()) return;
-			fermionSign = -1;
-		}
-
-		int fermionSign;
-		SizeType dof;
-		PsimagLite::String label;
-	}; // struct NaturalOpStruct
 
 public:
 
@@ -563,10 +538,11 @@ private:
 	             BorderEnumType border) const
 	{
 		VectorStringType vecStr = getOperatorLabels();
+		OperatorInterpreter<ModelType> opInterpreter(targetHelper_.model());
 
 		for (SizeType i=0;i<vecStr.size();i++) {
 			const PsimagLite::String& opLabel = vecStr[i];
-			OperatorType nup = getOperatorForTest(opLabel,site);
+			OperatorType nup = opInterpreter(opLabel,site);
 
 			PsimagLite::String tmpStr = "<"+ label1 + "|" + opLabel + "|" + label2 + ">";
 			test(v1,v2,direction,tmpStr,site,nup,border);
@@ -578,42 +554,6 @@ private:
 		VectorStringType vecStr;
 		PsimagLite::tokenizer(targetHelper_.model().params().insitu,vecStr,",");
 		return vecStr;
-	}
-
-	OperatorType getOperatorForTest(const PsimagLite::String& opLabel,
-	                                SizeType site) const
-	{
-		const std::pair<SizeType,SizeType> jm1(0,0);
-		RealType angularFactor1 = 1.0;
-		typename OperatorType::Su2RelatedType su2Related1;
-
-		OperatorType nup;
-		try {
-			nup = findOperator(opLabel);
-		} catch (std::exception& e) {
-			if (opLabel[0] == ':') {
-				std::cerr<<e.what();
-				throw e;
-			}
-
-			NaturalOpStruct nos(opLabel);
-			SparseMatrixType tmpC(targetHelper_.model().naturalOperator(nos.label,
-			                                                            site,
-			                                                            nos.dof));
-			nup = OperatorType(tmpC,nos.fermionSign,jm1,angularFactor1,su2Related1);
-		}
-
-		SizeType foundSize = nup.data.row();
-		SizeType expectedSize = targetHelper_.model().hilbertSize(site);
-		if (foundSize != expectedSize) {
-			PsimagLite::String str("getOperatorForTest ");
-			str += " Expected size " + ttos(expectedSize);
-			str += " but found size " + ttos(foundSize);
-			str += " for operator " + opLabel + "\n";
-			throw PsimagLite::RuntimeError(str);
-		}
-
-		return nup;
 	}
 
 	void test(const VectorWithOffsetType& src1,
@@ -646,23 +586,6 @@ private:
 		inSitu_[site] = sum;
 		std::cout<<site<<" "<<sum<<" "<<currentTime();
 		std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
-	}
-
-	OperatorType findOperator(const PsimagLite::String& name) const
-	{
-		if (name.length()<2 || name[0]!=':') {
-			PsimagLite::String str("ObserverInterpreter: syntax error for ");
-			str += name + "\n";
-			throw PsimagLite::RuntimeError(str);
-		}
-
-		PsimagLite::String label = name.substr(1,name.length()-1);
-
-		PsimagLite::IoSimple::In io(label);
-
-		CookedOperator<ModelType> cookedOperator(targetHelper_.model());
-
-		return OperatorType(io,cookedOperator,OperatorType::MUST_BE_NONZERO);
 	}
 
 	PsimagLite::ProgressIndicator progress_;

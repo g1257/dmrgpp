@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include <stdexcept>
 #include <iostream>
-#include "CookedOperator.h"
 #include "TargetParamsBase.h"
 
 namespace Dmrg {
@@ -184,10 +183,8 @@ public:
 			isEnergyForExp_ = true;
 		} catch (std::exception&) {}
 
-		CookedOperator<ModelType> cookedOperator(model_);
-
 		for (SizeType i=0;i<sites_.size();i++) {
-			OperatorType myOp(io,cookedOperator,OperatorType::MUST_BE_NONZERO);
+			OperatorType myOp(io,model_,OperatorType::MUST_BE_NONZERO);
 			aOperators_.push_back(myOp);
 		}
 

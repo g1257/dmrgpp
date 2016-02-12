@@ -100,7 +100,7 @@ public:
 	    : model_(model)
 	{}
 
-	void operator()(PsimagLite::Matrix<ComplexOrRealType>& m,
+	peratorType operator()(PsimagLite::Matrix<ComplexOrRealType>& m,
 	                const PsimagLite::String& s,
 	                const VectorSizeType& v)
 	{

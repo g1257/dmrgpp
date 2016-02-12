@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include "Vector.h"
 #include "Tokenizer.h"
+#include "OperatorInterpreter.h"
 
 namespace Dmrg {
 
@@ -96,9 +97,12 @@ class ObserverInterpreter {
 	typedef typename ObservableLibraryType::OperatorType OperatorType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename PsimagLite::Vector<int>::Type VectorIntType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef typename OperatorType::PairType PairType;
+	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
 
 	class Bracket {
 
@@ -139,9 +143,9 @@ class ObserverInterpreter {
 			}
 
 			sites_.resize(name_.size(),-1);
+			OperatorInterpreter<ModelType> opInterpreter(model_);
 			for (SizeType i = 0; i < name_.size(); ++i) {
-				sites_[i] = extractSiteIfAny(name_[i]);
-				op_.push_back(findOperator(name_[i]));
+				op_.push_back(opInterpreter(name_[i],sites_[i]));
 			}
 		}
 
@@ -183,61 +187,6 @@ class ObserverInterpreter {
 		{
 			if (ind >= bracket_.size()) return false;
 			return (bracket_[ind] == "gs" || bracket_[ind] == "time");
-		}
-
-		OperatorType findOperator(const PsimagLite::String& name) const
-		{
-			if (name.length()<2 || name[0]!=':') {
-				PsimagLite::String str("ObserverInterpreter: syntax error for ");
-				str += name + "\n";
-				throw PsimagLite::RuntimeError(str);
-			}
-
-			PsimagLite::String label = name.substr(1,name.length()-1);
-
-			PsimagLite::IoSimple::In io(label);
-
-			CookedOperator<ModelType> cookedOperator(model_);
-
-			return OperatorType(io,cookedOperator,OperatorType::MUST_BE_NONZERO);
-		}
-
-		int extractSiteIfAny(PsimagLite::String& name) const
-		{
-			int firstIndex = -1;
-			int lastIndex = -1;
-			for (SizeType i = 0; i < name.length(); ++i) {
-				if (name[i] == '[') {
-					firstIndex = i;
-					continue;
-				}
-
-				if (name[i] == ']') {
-					lastIndex = i;
-					continue;
-				}
-			}
-
-			if (firstIndex < 0 && lastIndex < 0) return -1;
-
-			bool b1 = (firstIndex < 0 && lastIndex >= 0);
-			bool b2 = (firstIndex >= 0 && lastIndex < 0);
-			if (b1 || b2) {
-				PsimagLite::String str("Bracket operator ");
-				str += name + " has unmatched [ or ]\n";
-				throw PsimagLite::RuntimeError(str);
-			}
-
-			if (static_cast<SizeType>(lastIndex) != name.length() - 1) {
-				PsimagLite::String str("Bracket operator ");
-				str += name + " has [] but does not end in ]\n";
-				throw PsimagLite::RuntimeError(str);
-			}
-
-			PsimagLite::String str = name.substr(0,firstIndex);
-			int site = atoi(name.substr(firstIndex+1,lastIndex-1).c_str());
-			name = str;
-			return site;
 		}
 
 		const ModelType& model_;

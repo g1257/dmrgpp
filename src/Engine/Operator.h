@@ -116,8 +116,8 @@ struct Operator {
 	      su2Related(su2Related1)
 	{}
 
-	template<typename IoInputType, typename CookedOperatorType>
-	Operator(IoInputType& io, CookedOperatorType& cookedOperator,bool checkNonZero)
+	template<typename IoInputType, typename SomeModelType>
+	Operator(IoInputType& io, SomeModelType& model,bool checkNonZero)
 	{
 		/*PSIDOC Operator
 		 \item[TSPOperator] [String] Either \verb!cooked! or \verb!raw! to indicate
@@ -154,7 +154,9 @@ struct Operator {
 			io.readline(s,"COOKED_OPERATOR=");
 			VectorSizeType v;
 			io.read(v,"COOKED_EXTRA");
-			cookedOperator(m,s,v);
+			if (v.size() != 2)
+				throw PsimagLite::RuntimeError("COOKED_EXTRA must be followed 2 v0 v1\n");
+			m = model.naturalOperator(s,v[0],v[1]);
 		} else if (s == "raw") {
 			io.readMatrix(m,"RAW_MATRIX");
 			if (checkNonZero) checkNotZeroMatrix(m);
