@@ -179,8 +179,17 @@ public:
 		if (allStages(DISABLED)) E0_ = Eg;
 
 		if (noStageIs(DISABLED)) {
-			if (targetHelper_.tstStruct().isEnergyForExp())
+			PsimagLite::OstringStream msg;
+			msg<<"EnergyForExp was ";
+			if (targetHelper_.tstStruct().isEnergyForExp()) {
 				E0_ = targetHelper_.tstStruct().energyForExp();
+				msg<<"provided explicitly, ";
+			} else {
+				msg<<"not provided explicitly, ";
+			}
+
+			msg<<" value= "<<E0_;
+			progress_.printline(msg,std::cout);
 		}
 
 		return count;
