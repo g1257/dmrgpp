@@ -223,11 +223,7 @@ public:
 		if (end == 0) end = total;
 		for (SizeType i = start; i < end; ++i) {
 			RealType factor = normSquared(i);
-			if (fabs(factor)<1e-10) {
-				std::cerr<<"normalizeTimeVectors ";
-				std::cerr<<"vector "<<i<<" too small "<<factor<<"\n";
-				continue;
-			}
+			if (fabs(factor)<1e-10) continue;
 
 			factor = 1.0/sqrt(factor);
 			applyOpExpression_.multiplyTimeVector(i,factor);
