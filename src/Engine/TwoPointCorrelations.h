@@ -126,13 +126,14 @@ namespace Dmrg {
 		  verbose_(verbose)
 		{}
 
-		PsimagLite::Matrix<FieldType> operator()(
+		void operator()(PsimagLite::Matrix<FieldType>& w,
 				const SparseMatrixType& O1,
 				const SparseMatrixType& O2,
-				int fermionicSign,
-				SizeType rows,
-				SizeType cols)
+				int fermionicSign)
 		{
+			SizeType rows = w.n_row();
+			SizeType cols = w.n_col();
+
 			typename PsimagLite::Vector<PairType>::Type pairs;
 			for (SizeType i=0;i<rows;i++) {
 				for (SizeType j=i;j<cols;j++) {
@@ -145,12 +146,9 @@ namespace Dmrg {
 			ParallelizerType threaded2Points(PsimagLite::Concurrency::npthreads,
 			                                 PsimagLite::MPI::COMM_WORLD);
 
-			PsimagLite::Matrix<FieldType> w(rows,cols);
 			Parallel2PointCorrelationsType helper2Points(w,*this,pairs,O1,O2,fermionicSign);
 
 			threaded2Points.loopCreate(pairs.size(),helper2Points);
-
-			return w;
 		}
 
 		// Return the vector: O1 * O2 |psi>

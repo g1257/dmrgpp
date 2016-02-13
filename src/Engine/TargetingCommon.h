@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TARGETING_COMMON_H
 #define TARGETING_COMMON_H
 
-#include "Bracket.h"
+#include "Braket.h"
 #include "ProgressIndicator.h"
 #include "BLAS.h"
 #include "DynamicSerializer.h"
@@ -134,7 +134,7 @@ public:
 	typedef typename ApplyOperatorExpressionType::VectorRealType VectorRealType;
 	typedef typename ApplyOperatorExpressionType::PairType PairType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef Bracket<ModelType> BracketType;
+	typedef Braket<ModelType> BraketType;
 
 	static const SizeType SUM = TargetParamsType::SUM;
 
@@ -543,9 +543,9 @@ private:
 		for (SizeType i=0;i<vecStr.size();i++) {
 			PsimagLite::String opLabel = vecStr[i];
 
-			BracketType bracket(targetHelper_.model(),"<gs|"+opLabel+"[" + ttos(site) + "]|gs>");
+			BraketType Braket(targetHelper_.model(),"<gs|"+opLabel+"[" + ttos(site) + "]|gs>");
 
-			OperatorType nup = bracket.op(0);
+			OperatorType nup = Braket.op(0);
 
 			PsimagLite::String tmpStr = "<"+ label1 + "|" + opLabel + "|" + label2 + ">";
 			test(v1,v2,direction,tmpStr,site,nup,border);

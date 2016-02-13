@@ -132,8 +132,8 @@ public:
 	enum {DIAGONAL,NON_DIAGONAL};
 	enum {GS_VECTOR=ObserverHelperType::GS_VECTOR,
 		  TIME_VECTOR=ObserverHelperType::TIME_VECTOR};
-	enum {LEFT_BRACKET=ObserverHelperType::LEFT_BRACKET,
-		  RIGHT_BRACKET=ObserverHelperType::RIGHT_BRACKET};
+	enum {LEFT_BRAKET=ObserverHelperType::LEFT_BRAKET,
+		  RIGHT_BRAKET=ObserverHelperType::RIGHT_BRAKET};
 	static const SizeType EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
 	static const SizeType EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
 
@@ -231,9 +231,9 @@ public:
 	{
 		try {
 			const VectorWithOffsetType& src1 =
-			        helper_.getVectorFromBracketId(LEFT_BRACKET,threadId);
+			        helper_.getVectorFromBracketId(LEFT_BRAKET,threadId);
 			const VectorWithOffsetType& src2 =
-			        helper_.getVectorFromBracketId(RIGHT_BRACKET,threadId);
+			        helper_.getVectorFromBracketId(RIGHT_BRAKET,threadId);
 
 			return bracket_(A,src1,src2,fermionicSign,threadId);
 		} catch (std::exception& e) {
@@ -251,9 +251,9 @@ public:
 	{
 		try {
 			const VectorWithOffsetType& src1 =
-			        helper_.getVectorFromBracketId(LEFT_BRACKET,threadId);
+			        helper_.getVectorFromBracketId(LEFT_BRAKET,threadId);
 			const VectorWithOffsetType& src2 =
-			        helper_.getVectorFromBracketId(RIGHT_BRACKET,threadId);
+			        helper_.getVectorFromBracketId(RIGHT_BRAKET,threadId);
 			return bracketRightCorner_(A,B,fermionSign,src1,src2,threadId);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
@@ -271,9 +271,9 @@ public:
 	{
 		try {
 			const VectorWithOffsetType& src1 =
-			        helper_.getVectorFromBracketId(LEFT_BRACKET,threadId);
+			        helper_.getVectorFromBracketId(LEFT_BRAKET,threadId);
 			const VectorWithOffsetType& src2 =
-			        helper_.getVectorFromBracketId(RIGHT_BRACKET,threadId);
+			        helper_.getVectorFromBracketId(RIGHT_BRAKET,threadId);
 			return bracketRightCorner_(A,B,C,fermionSign,src1,src2,threadId);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();

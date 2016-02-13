@@ -89,7 +89,7 @@ bool observeOneFullSweep(IoInputType& io,
 			observerLib.measureTime("sz");
 	}
 
-	if (hasTimeEvolution) observerLib.setBrackets("time","time");
+	if (hasTimeEvolution) observerLib.setBrakets("time","time");
 
 	const PsimagLite::String& modelName = model.params().model;
 	SizeType rows = n; // could be n/2 if there's enough symmetry

@@ -103,8 +103,8 @@ namespace Dmrg {
 		typedef typename VectorType::value_type FieldType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
 
-		enum {LEFT_BRACKET=ObserverHelperType::LEFT_BRACKET,
-			RIGHT_BRACKET=ObserverHelperType::RIGHT_BRACKET};
+		enum {LEFT_BRAKET=ObserverHelperType::LEFT_BRAKET,
+			RIGHT_BRAKET=ObserverHelperType::RIGHT_BRAKET};
 	public:
 		OnePointCorrelations(ObserverHelperType& helper,
 				bool verbose=false)
@@ -121,8 +121,8 @@ namespace Dmrg {
 			SizeType pnter=site;
 			helper_.setPointer(threadId,pnter);
 			try {
-				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET,threadId);
-				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET,threadId);
+				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRAKET,threadId);
+				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRAKET,threadId);
 
 				return onePointInternal<ApplyOperatorType>(site,A,src1,src2,corner,threadId);
 			} catch (std::exception& e) {
@@ -141,8 +141,8 @@ namespace Dmrg {
 			SizeType threadId = 0;
 			helper_.setPointer(threadId,pnter);
 			try {
-				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET,threadId);
-				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET,threadId);
+				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRAKET,threadId);
+				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRAKET,threadId);
 
 				return onePointInternalHookForZero<ApplyOperatorType>(site,A,src1,src2,corner,threadId);
 			} catch (std::exception& e) {

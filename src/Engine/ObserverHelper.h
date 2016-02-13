@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -109,9 +109,9 @@ namespace Dmrg {
 		typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 		typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> DmrgSerializerType;
 		typedef typename DmrgSerializerType::FermionSignType FermionSignType;
-		
+
 		enum {GS_VECTOR,TIME_VECTOR};
-		enum {LEFT_BRACKET=0,RIGHT_BRACKET=1};
+		enum {LEFT_BRAKET=0,RIGHT_BRAKET=1};
 
 		ObserverHelper(
 				IoInputType& io,
@@ -131,15 +131,15 @@ namespace Dmrg {
 					"No more data to construct this object\n");
 
 		}
-		
-		~ObserverHelper() 
+
+		~ObserverHelper()
 		{
 			for (SizeType i=0;i<dSerializerV_.size();i++) {
 				DmrgSerializerType* p = dSerializerV_[i];
 				delete p;
 			}
 		}
-		
+
 		bool endOfData() const { return noMoreData_; }
 
 		void setPointer(SizeType threadId,SizeType pos)
@@ -154,10 +154,10 @@ namespace Dmrg {
 			return currentPos_[threadId];
 		}
 
-		void setBrackets(SizeType left,SizeType right)
+		void setBrakets(SizeType left,SizeType right)
 		{
-			bracket_[LEFT_BRACKET]=left;
-			bracket_[RIGHT_BRACKET]=right;
+			bracket_[LEFT_BRAKET]=left;
+			bracket_[RIGHT_BRAKET]=right;
 		}
 
 		SizeType bracket(SizeType leftOrRight) const
@@ -227,7 +227,7 @@ namespace Dmrg {
 						dSerializerV_[currentPos_[threadId]]->site()
 					  : timeSerializerV_[currentPos_[threadId]].site();
 		}
-		
+
 		SizeType size() const
 		{
 			return dSerializerV_.size(); //-1;
@@ -278,7 +278,7 @@ namespace Dmrg {
 				if (verbose_)
 					std::cerr<<"ObserverHelper "<<dSerializerV_.size()<<"\n";
 				try {
-					DmrgSerializerType* dSerializer = new 
+					DmrgSerializerType* dSerializer = new
 						DmrgSerializerType(io_);
 					if (counter>=offset) dSerializerV_.push_back(dSerializer);
 					if (hasTimeEvolution) {
@@ -295,7 +295,7 @@ namespace Dmrg {
 				}
 			}
 			if (dSerializerV_.size()==0 && noMoreData_) return false;
-			
+
 			return true;
 		}
 
@@ -309,7 +309,7 @@ namespace Dmrg {
 				if (n!=timeSerializerV_[x].size())
 					throw PsimagLite::RuntimeError("Error 2\n");
 			}
-			
+
 		}
 
 		void getTransform(MatrixType& transform,int ns)
@@ -325,7 +325,7 @@ namespace Dmrg {
 			tmpV.toSparse(wavefunction);
 			io_.rewind();
 		}
-		
+
 		void getDirection(int& x,int ns)
 		{
 			io_.readline(x,"#DIRECTION=",ns);

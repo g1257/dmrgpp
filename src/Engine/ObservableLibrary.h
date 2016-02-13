@@ -103,7 +103,7 @@ public:
 	typedef PreOperatorBase<ModelType> PreOperatorBaseType;
 	typedef PreOperatorSiteDependent<ModelType> PreOperatorSiteDependentType;
 	typedef PreOperatorSiteIndependent<ModelType> PreOperatorSiteIndependentType;
-	typedef typename ObserverType::BracketType BracketType;
+	typedef typename ObserverType::BraketType BraketType;
 
 	template<typename IoInputter>
 	ObservableLibrary(
@@ -132,44 +132,38 @@ public:
 
 	void measure(const PsimagLite::String& label,SizeType rows,SizeType cols)
 	{
-		SizeType threadId = 0;
-
 		PsimagLite::String str("WARNING: ObservableLibrary: ");
 		str += "deprecated use of measure\n";
 		std::cerr<<str;
 
-		SizeType site = 0; // FIXME: No support for site varying operators
+		// FIXME: No support for site varying operators
 		if (label=="cc") {
-			MatrixType opC = model_.naturalOperator("c",site,0); // c_{0,0} spin up
-			MatrixType opCtranspose = transposeConjugate(opC);
-			measureOne("OperatorC",opC,"",opCtranspose,-1,rows,cols,threadId);
-			MatrixType opC2 = model_.naturalOperator("c",site,1); // c_{0,0} spin down
-			MatrixType opCtranspose2 = transposeConjugate(opC2);
-			measureOne("OperatorC",opC2,"",opCtranspose2,-1,rows,cols,threadId);
+			BraketType braket(model_,"<gs|c?0-;c'?0-|gs>");
+			manyPoint(0,braket,rows,cols); // c_{0,0} spin down
+			BraketType braket2(model_,"<gs|c?1-;c'?1-|gs>");
+			manyPoint(0,braket2,rows,cols); // c_{0,0} spin down
 		} else if (label=="nn") {
-			MatrixType opN = model_.naturalOperator("n",site,0);
-			measureOne("OperatorN",opN,"",opN,1,rows,cols,threadId);
+			BraketType braket(model_,"<gs|n?0;n?0|gs>");
+			manyPoint(0,braket,rows,cols);
 		} else if (label=="szsz") {
-			MatrixType Sz = model_.naturalOperator("z",site,0);
-			szsz_ = observe_.correlations(Sz,Sz,1,rows,cols);
+			BraketType braket(model_,"<gs|z?0;z?0|gs>");
+			manyPoint(&szsz_,braket,rows,cols);
 			if (PsimagLite::Concurrency::root()) {
 				std::cout<<"OperatorSz:\n";
 				std::cout<<szsz_;
 			}
 		} else if (label=="s+s-") {
 			// Si^+ Sj^-
-			const MatrixType& sPlus = model_.naturalOperator("+",site,0);
-			MatrixType sPlusT = transposeConjugate(sPlus);
-			sPlusSminus_ = observe_.correlations(sPlus,sPlusT,1,rows,cols);
+			BraketType braket(model_,"<gs|+?0;-?0|gs>");
+			manyPoint(&sPlusSminus_,braket,rows,cols);
 			if (PsimagLite::Concurrency::root()) {
 				std::cout<<"OperatorSplus:\n";
 				std::cout<<sPlusSminus_;
 			}
 		} else if (label=="s-s+") {
 			// Si^- Sj^+
-			const MatrixType& sMinus = model_.naturalOperator("-",site,0);
-			MatrixType sMinusT = transposeConjugate(sMinus);
-			sMinusSplus_= observe_.correlations(sMinus,sMinusT,1,rows,cols);
+			BraketType braket(model_,"<gs|-?0;+?0|gs>");
+			manyPoint(&sPlusSminus_,braket,rows,cols);
 			if (PsimagLite::Concurrency::root()) {
 				std::cout<<"OperatorSminus:\n";
 				std::cout<<sMinusSplus_;
@@ -193,8 +187,8 @@ public:
 			}
 		} else if (label=="dd") {
 
-			BracketType bracket(model_,"<gs|d;d'|gs>");
-			manyPoint(bracket,rows,cols);
+			BraketType braket(model_,"<gs|d;d'|gs>");
+			manyPoint(0,braket,rows,cols);
 
 		} else if (label=="dd4") {
 			if (model_.geometry().label(0)!="ladderx") {
@@ -239,29 +233,8 @@ public:
 		}
 	}
 
-	void measureOne(const PsimagLite::String& label1,
-	                const PsimagLite::Matrix<FieldType>& op1,
-	                const PsimagLite::String& label2,
-	                const PsimagLite::Matrix<FieldType>& op2,
-	                int fermionSign,
-	                SizeType rows,
-	                SizeType cols,
-	                SizeType threadId)
-	{
-		if (hasTimeEvolution_) printSites(threadId);
-
-		const MatrixType& v =
-		        observe_.correlations(op1,op2,fermionSign,rows,cols);;
-		if (PsimagLite::Concurrency::root()) {
-			if (hasTimeEvolution_)
-				std::cout<<"#Time="<<observe_.time(threadId)<<"\n";
-			std::cout<<label1<<label2<<":\n";
-			std::cout<<v;
-		}
-	}
-
-	template<typename SomeBracketType>
-	void manyPoint(const SomeBracketType& bracket,
+	void manyPoint(MatrixType* storage,
+	               const BraketType& braket,
 	               SizeType rows,
 	               SizeType cols)
 	{
@@ -271,13 +244,33 @@ public:
 			std::cout<<"#Time="<<observe_.time(threadId)<<"\n";
 		}
 
-		if (bracket.points() == 3) {
-			observe_.threePoint(bracket,rows,cols);
+		std::cout<<braket.toString()<<"\n";
+
+		if (braket.points() == 2) {
+			bool needsPrinting = false;
+			if (storage == 0) {
+				needsPrinting = true;
+				storage = new MatrixType(rows,cols);
+			}
+
+			observe_.twoPoint(*storage,braket);
+
+			if (needsPrinting) {
+				std::cout<<(*storage);
+				delete storage;
+				storage = 0;
+			}
+
 			return;
 		}
 
-		assert(bracket.points() == 4);
-		observe_.fourPoint(bracket,rows,cols);
+		if (braket.points() == 3) {
+			observe_.threePoint(braket,rows,cols);
+			return;
+		}
+
+		assert(braket.points() == 4);
+		observe_.fourPoint(braket,rows,cols);
 	}
 
 	void measureTime(const PsimagLite::String& label)
@@ -294,7 +287,7 @@ public:
 			A.makeDiagonal(model_.hilbertSize(observe_.site(threadId)),1.0);
 			std::pair<SizeType,SizeType> zeroZero(0,0);
 			OperatorType opIdentity(A,1,zeroZero,1,su2Related1);
-			observe_.setBrackets("time","time");
+			observe_.setBrakets("time","time");
 			FieldType superDensity = observe_.template
 			        onePoint<ApplyOperatorType>(0,
 			                                    opIdentity,
@@ -341,9 +334,9 @@ public:
 		}
 	}
 
-	void setBrackets(const PsimagLite::String& left,const PsimagLite::String& right)
+	void setBrakets(const PsimagLite::String& left,const PsimagLite::String& right)
 	{
-		observe_.setBrackets(left,right);
+		observe_.setBrakets(left,right);
 	}
 
 	bool endOfData() const { return observe_.endOfData(); }
@@ -369,7 +362,7 @@ public:
 				std::cout<<"|"<<ket<<"> time\n";
 			}
 
-			observe_.setBrackets(bra,ket);
+			observe_.setBrakets(bra,ket);
 			observe_.setPointer(threadId,i0);
 
 			onePointHookForZero(i0,opA,"gs",threadId);
@@ -389,7 +382,7 @@ public:
 			OperatorType opAcorner = preOperator(x);
 
 			// do the corner case
-			observe_.setBrackets(bra,ket);
+			observe_.setBrakets(bra,ket);
 			tmp1 = observe_.template
 			        onePoint<ApplyOperatorType>(i0,
 			                                    opAcorner,
@@ -401,48 +394,26 @@ public:
 
 	void interpret(const PsimagLite::String& list, SizeType rows, SizeType cols)
 	{
-		typename BracketType::VectorStringType vecStr;
+		typename BraketType::VectorStringType vecStr;
 		PsimagLite::tokenizer(list,vecStr,",");
 
 		for (SizeType i = 0; i < vecStr.size(); ++i) {
 			std::cout<<vecStr[i]<<"\n";
 
-			BracketType bracket(model_, vecStr[i]);
+			BraketType braket(model_, vecStr[i]);
 
 			SizeType threadId = 0;
-			if (bracket.points() == 1) {
-				PreOperatorSiteIndependentType preOperator(bracket.op(0),
-				                                           bracket.opName(0),
+			if (braket.points() == 1) {
+				PreOperatorSiteIndependentType preOperator(braket.op(0),
+				                                           braket.opName(0),
 				                                           threadId);
-				measureOnePoint(bracket.bra(),
+				measureOnePoint(braket.bra(),
 				                preOperator,
-				                bracket.ket());
+				                braket.ket());
 				continue;
 			}
 
-			if (bracket.points() == 2) {
-				MatrixType m0;
-				crsMatrixToFullMatrix(m0,bracket.op(0).data);
-
-				MatrixType m1;
-				crsMatrixToFullMatrix(m1,bracket.op(1).data);
-
-				measureOne(bracket.opName(0),
-				           m0,
-				           bracket.opName(1),
-				           m1,
-				           bracket.op(0).fermionSign,
-				           rows,
-				           cols,
-				           threadId);
-				continue;
-			}
-
-			if (bracket.points() == 3 || bracket.points() == 4) {
-				manyPoint(bracket,
-				          rows,
-				          cols);
-			}
+			manyPoint(0,braket,rows,cols);
 		}
 	}
 
@@ -467,7 +438,7 @@ private:
 				std::cout<<"\n";
 			}
 			// for g.s. use this one:
-			observe_.setBrackets("gs","gs");
+			observe_.setBrakets("gs","gs");
 			observe_.setPointer(threadId,i0);
 
 			onePointHookForZero(i0,opA,"gs",threadId);
@@ -477,7 +448,7 @@ private:
 			std::cout<<observe_.site(threadId)<<" "<<tmp1;
 
 			if (hasTimeEvolution_) { // for time vector use this one:
-				observe_.setBrackets("time","time");
+				observe_.setBrakets("time","time");
 
 				onePointHookForZero(i0,opA,"time",threadId);
 
@@ -498,7 +469,7 @@ private:
 
 				// do the corner case
 				// for g.s. use this one:
-				observe_.setBrackets("gs","gs");
+				observe_.setBrakets("gs","gs");
 				FieldType tmp1 = observe_.template
 				        onePoint<ApplyOperatorType>(i0,
 				                                    opAcorner,
@@ -506,7 +477,7 @@ private:
 				std::cout<<x<<" "<<tmp1;
 
 				if (hasTimeEvolution_) {// for time vector use this one:
-					observe_.setBrackets("time","time");
+					observe_.setBrakets("time","time");
 					FieldType tmp2 = observe_.template
 					        onePoint<ApplyOperatorType>(i0,
 					                                    opAcorner,
