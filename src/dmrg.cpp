@@ -194,8 +194,7 @@ int main(int argc,char *argv[])
 	OperatorOptions options;
 	PsimagLite::String strUsage(argv[0]);
 	if (utils::basename(strUsage) == "operator") options.enabled = true;
-	strUsage += " -f filename [-k] [-p precision] [-V]";
-	PsimagLite::String insitu("");
+	strUsage += " -f filename [-k] [-p precision] [-V] [whatToMeasure]";
 	int precision = 6;
 	bool keepFiles = false;
 	bool versionOnly = false;
@@ -203,7 +202,7 @@ int main(int argc,char *argv[])
 	  \begin{itemize}
 	  \item[-f] {[}Mandatory, String{]} Input to use.
 	  \item[-p] [Optional, Integer] Digits of precision for printing.
-	  \item[-o] {[}Optional, String{]} What to measure in-situ
+	  \item[whatToMeasure] {[}Optional, String{]} What to measure in-situ
 	  \item[-l] {[}Optional, String{]} Without this option std::cout is redirected
 	  to a file.
 	  This option with the string ``?'' prints name of such log file.
@@ -244,19 +243,15 @@ int main(int argc,char *argv[])
 	\begin{verbatim}./operator -l c -t -f input.inp -F -1\end{verbatim}
 	\end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:o:s:l:d:F:p:tkV")) != -1) {
+	while ((opt = getopt(argc, argv,"f:s:l:d:F:o:p:tkV")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
 			break;
 		case 'o':
-			if (insitu=="") {
-				insitu = optarg;
-			} else {
-				insitu += ",";
-				insitu += optarg;
-			}
-			break;
+			std::cerr<<argv[0]<<": Omit the \"-o\". It's not needed anymore.\n";
+			std::cerr<<"\t Write the insitu measurements at the end of the command line\n";
+			return 1;
 		case 's':
 			options.site = atoi(optarg);
 			break;
@@ -295,6 +290,8 @@ int main(int argc,char *argv[])
 		inputCheck.usageMain(strUsage);
 		return 1;
 	}
+
+	PsimagLite::String insitu = (optind < argc) ? argv[optind] : "";
 
 	if (!options.enabled && options.label != "-") {
 		bool queryOnly = (options.label == "?");

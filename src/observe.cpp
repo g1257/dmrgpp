@@ -63,12 +63,18 @@ template<typename GeometryType,
          typename SparseMatrixType>
 bool observeOneFullSweep(IoInputType& io,
                          const ModelType& model,
-                         const PsimagLite::String& obsOptions,
-                         const PsimagLite::String& list,
+                         const PsimagLite::String& list2,
                          bool hasTimeEvolution)
 {
 	const GeometryType& geometry = model.geometry();
 	bool verbose = false;
+	PsimagLite::String obsOptions("");
+	PsimagLite::String list = list2;
+
+	if (list2.length() > 0 && list2[0] != '<') {
+        obsOptions = list2;
+		list = "";
+	}
 
 	typedef Observer<VectorWithOffsetType,ModelType,IoInputType> ObserverType;
 	typedef ObservableLibrary<ObserverType> ObservableLibraryType;
@@ -163,7 +169,6 @@ void mainLoop(GeometryType& geometry,
               const PsimagLite::String& targetting,
               InputNgType::Readable& io,
               const ParametersDmrgSolverType& params,
-              const PsimagLite::String& obsOptions,
               const PsimagLite::String& list)
 {
 	typedef Basis<MySparseMatrix> BasisType;
@@ -192,7 +197,7 @@ void mainLoop(GeometryType& geometry,
 		try {
 			moreData = !observeOneFullSweep<GeometryType,VectorWithOffsetType,ModelBaseType,
 			        MySparseMatrix>
-			        (dataIo,model,obsOptions,list,hasTimeEvolution);
+			        (dataIo,model,list,hasTimeEvolution);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
 			std::cerr<<"There's no more data\n";
@@ -208,15 +213,14 @@ void mainLoop1(GeometryType& geometry,
                const PsimagLite::String& targetting,
                InputNgType::Readable& io,
                const ParametersDmrgSolverType& params,
-               const PsimagLite::String& obsOptions,
                const PsimagLite::String& list)
 {
 	if (params.options.find("vectorwithoffsets")!=PsimagLite::String::npos) {
 		mainLoop<GeometryType,ModelHelperTemplate,VectorWithOffsets,MySparseMatrix>
-		        (geometry,targetting,io,params, obsOptions, list);
+		        (geometry,targetting,io,params, list);
 	} else {
 		mainLoop<GeometryType,ModelHelperTemplate,VectorWithOffset,MySparseMatrix>
-		        (geometry,targetting,io,params, obsOptions, list);
+		        (geometry,targetting,io,params, list);
 	}
 }
 
@@ -224,7 +228,6 @@ template<typename MySparseMatrix>
 void mainLoop0(InputNgType::Readable& io,
                ParametersDmrgSolverType& dmrgSolverParams,
                InputCheck& inputCheck,
-               const PsimagLite::String& options,
                const PsimagLite::String& list)
 {
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;
@@ -247,26 +250,27 @@ void mainLoop0(InputNgType::Readable& io,
 
 	if (su2) {
 		mainLoop1<GeometryType,ModelHelperSu2,MySparseMatrix>
-		        (geometry,targetting,io,dmrgSolverParams, options, list);
+		        (geometry,targetting,io,dmrgSolverParams, list);
 
 		return;
 	}
 
 	if (targetting=="GroundStateTargetting") {
 		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix>
-		        (geometry,targetting,io,dmrgSolverParams, options, list);
+		        (geometry,targetting,io,dmrgSolverParams, list);
 	} else if (targetting=="TimeStepTargetting") {
 		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrixComplex>
-		        (geometry,targetting,io,dmrgSolverParams, options, list);
+		        (geometry,targetting,io,dmrgSolverParams, list);
 	} else {
 		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix>
-		        (geometry,targetting,io,dmrgSolverParams, options, list);
+		        (geometry,targetting,io,dmrgSolverParams, list);
 	}
 }
 
 void usage(const char* name)
 {
-	std::cerr<<"USAGE is "<<name<<" -f filename [-o options]\n";
+	std::cerr<<"USAGE is "<<name<<" -f filename [-p precision] [-F fileoption]";
+	std::cerr<<" [-V] whatToMeasure\n";
 }
 
 int main(int argc,char *argv[])
@@ -274,7 +278,6 @@ int main(int argc,char *argv[])
 	using namespace Dmrg;
 
 	PsimagLite::String filename;
-	PsimagLite::String options;
 	PsimagLite::String filesOption;
 	int opt = 0;
 	int precision = 6;
@@ -285,8 +288,9 @@ int main(int argc,char *argv[])
 			filename = optarg;
 			break;
 		case 'o':
-			options = optarg;
-			break;
+			std::cerr<<argv[0]<<": Omit the \"-o\". It's not needed anymore.\n";
+			std::cerr<<"\t Write the insitu measurements at the end of the command line\n";
+			return 1;
 		case 'p':
 			precision = atoi(optarg);
 			std::cout.precision(precision);
@@ -337,11 +341,11 @@ int main(int argc,char *argv[])
 
 	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
 
-	if (options.find("useComplex") != PsimagLite::String::npos) {
+	if (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos) {
 		std::cerr<<argv[0]<<" EXPERIMENTAL option complex is in use\n";
-		mainLoop0<MySparseMatrixComplex>(io,dmrgSolverParams,inputCheck, options, list);
+		mainLoop0<MySparseMatrixComplex>(io,dmrgSolverParams,inputCheck, list);
 	} else {
-		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck, options, list);
+		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck, list);
 	}
 
 	if (filesOption != "keep")
