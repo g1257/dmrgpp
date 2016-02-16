@@ -225,7 +225,7 @@ public:
 
 	MatrixType naturalOperator(const PsimagLite::String& what,
 	                           SizeType site,
-	                           SizeType) const
+	                           SizeType dof) const
 	{
 		BlockType block;
 		block.resize(1);
@@ -245,6 +245,19 @@ public:
 		if (what2 == "0") {
 			MatrixType tmp(nrow,nrow);
 			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 0.0;
+			return tmp;
+		}
+
+		if (what == "c") {
+			if (dof >= creationMatrix.size()) {
+				PsimagLite::String str("naturalOperator: dof too big ");
+				str += "maximum is " + ttos(creationMatrix.size());
+				str += " given is " + ttos(dof) + "\n";
+				throw PsimagLite::RuntimeError(str);
+			}
+
+			MatrixType tmp;
+			crsMatrixToFullMatrix(tmp,creationMatrix[dof].data);
 			return tmp;
 		}
 
