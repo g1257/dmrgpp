@@ -39,7 +39,7 @@ my %finiteLoopDriver = (name => 'FiniteLoop', aux => 1);
 my %utilsDriver = (name => 'Utils', aux => 1);
 my %su2RelatedDriver = (name => 'Su2Related', aux => 1);
 my %toolboxDriver = (name => 'toolboxdmrg',
-                     dotos => 'toolboxdmrg.o ProgramGlobals.o Provenance.o');
+                     dotos => 'toolboxdmrg.o ProgramGlobals.o Provenance.o Utils.o');
 my $dotos = "observe.o ProgramGlobals.o Provenance.o Utils.o Su2Related.o";
 my %observeDriver = (name => 'observe', dotos => $dotos);
 

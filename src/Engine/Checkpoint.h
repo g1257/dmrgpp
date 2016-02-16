@@ -112,10 +112,10 @@ public:
 	    parameters_(parameters),
 	    enabled_(parameters_.options.find("checkpoint")!=PsimagLite::String::npos ||
 	        parameters_.options.find("restart")!=PsimagLite::String::npos),
-	    systemDisk_(SYSTEM_STACK_STRING+parameters_.checkpoint.filename,
-	                SYSTEM_STACK_STRING+parameters_.filename,enabled_),
-	    envDisk_(ENVIRON_STACK_STRING+parameters_.checkpoint.filename,
-	             ENVIRON_STACK_STRING+parameters_.filename,enabled_),
+	    systemDisk_(utils::pathPrepend(SYSTEM_STACK_STRING,parameters_.checkpoint.filename),
+	                utils::pathPrepend(SYSTEM_STACK_STRING,parameters_.filename),enabled_),
+	    envDisk_(utils::pathPrepend(ENVIRON_STACK_STRING,parameters_.checkpoint.filename),
+	             utils::pathPrepend(ENVIRON_STACK_STRING,parameters_.filename),enabled_),
 	    progress_("Checkpoint"),
 	    energyFromFile_(0.0)
 	{

@@ -83,7 +83,7 @@ const PsimagLite::String ProgramGlobals::license=
 "Copyright (c) 2009-2016, UT-Battelle, LLC\n"
 "All rights reserved\n"
 "\n"
-"[DMRG++, Version 3.0]\n"
+"[DMRG++, Version 3]\n"
 "\n"
 "---------------------------------------------------------\n"
 "THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND\n"

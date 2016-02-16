@@ -81,6 +81,27 @@ PsimagLite::String basename(PsimagLite::String pathname)
 	                                       UnixPathSeparator()).base(),pathname.end());
 }
 
+PsimagLite::String pathPrepend(PsimagLite::String pre,PsimagLite::String pathname)
+{
+	bool addDotDot = false;
+	PsimagLite::String path1("");
+	if (pathname.length() > 2 && pathname[0] == '.' && pathname[1] == '.') {
+		addDotDot = true;
+		path1 = pathname.substr(2,pathname.length());
+	}
+
+	if (pathname.length() > 1 && pathname[0] == '/') path1 = pathname;
+
+	if (path1 == "") return pre + pathname;
+
+	size_t index = path1.find_last_of("/");
+
+	index++;
+	PsimagLite::String ret = path1.substr(0,index) + pre +
+	        path1.substr(index,path1.length());
+	return (addDotDot) ? ".." + ret : ret;
+}
+
 SizeType exactDivision(SizeType a,SizeType b)
 {
 	SizeType c = static_cast<SizeType>(a/b);

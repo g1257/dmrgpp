@@ -156,10 +156,10 @@ private:
 		PsimagLite::OstringStream msg;
 		msg<<"Writing sys. and env. stacks to disk (for recovery)...";
 		progress_.printline(msg,std::cout);
-		PsimagLite::String sysWriteFile = checkpoint_.SYSTEM_STACK_STRING +
-		        rootWriteFile;
-		PsimagLite::String envWriteFile = checkpoint_.ENVIRON_STACK_STRING +
-		        rootWriteFile;
+		PsimagLite::String sysWriteFile = utils::pathPrepend(checkpoint_.SYSTEM_STACK_STRING,
+		                                                     rootWriteFile);
+		PsimagLite::String envWriteFile = utils::pathPrepend(checkpoint_.ENVIRON_STACK_STRING,
+		                                                     rootWriteFile);
 		PsimagLite::String sysReadFile = "/dev/null";
 		PsimagLite::String envReadFile = "/dev/null";
 

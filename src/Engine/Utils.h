@@ -97,6 +97,8 @@ struct UnixPathSeparator
 
 PsimagLite::String basename(PsimagLite::String pathname);
 
+PsimagLite::String pathPrepend(PsimagLite::String,PsimagLite::String);
+
 template<template<typename,typename> class SomeVectorTemplate,
          typename SomeAllocator1Type,
          typename SomeAllocator2Type,

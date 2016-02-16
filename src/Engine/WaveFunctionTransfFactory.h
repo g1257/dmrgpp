@@ -370,7 +370,7 @@ public:
 	{
 		if (!isEnabled_) return;
 
-		typename IoType::Out io(WFT_STRING + fileOut);
+		typename IoType::Out io(utils::pathPrepend(WFT_STRING, fileOut));
 		PsimagLite::String s="isEnabled="+ttos(isEnabled_);
 		io.printline(s);
 		s="stage="+ttos(stage_);
@@ -386,7 +386,7 @@ public:
 
 	void appendFileList(VectorStringType& files, PsimagLite::String rootName) const
 	{
-		files.push_back(WFT_STRING + rootName);
+		files.push_back(utils::pathPrepend(WFT_STRING,rootName));
 	}
 
 private:
@@ -396,7 +396,7 @@ private:
 		if (!isEnabled_)
 			throw PsimagLite::RuntimeError("WFT::load(...) called but wft is disabled\n");
 
-		typename IoType::In io(WFT_STRING + filenameIn_);
+		typename IoType::In io(utils::pathPrepend(WFT_STRING,filenameIn_));
 		io.readline(isEnabled_,"isEnabled=");
 		io.readline(stage_,"stage=");
 		io.readline(counter_,"counter=");

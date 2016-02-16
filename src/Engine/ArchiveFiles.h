@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_ARCHIVE_FILES_H
 #define DMRG_ARCHIVE_FILES_H
 
+#include "Utils.h"
 #include "Vector.h"
 #include "ProgramGlobals.h"
 #include "ProgressIndicator.h"
@@ -215,9 +216,9 @@ private:
 	                         PsimagLite::String rootname)
 	{
 		files.push_back(rootname);
-		files.push_back(ProgramGlobals::SYSTEM_STACK_STRING+rootname);
-		files.push_back(ProgramGlobals::ENVIRON_STACK_STRING+rootname);
-		files.push_back(ProgramGlobals::WFT_STRING+rootname);
+		files.push_back(utils::pathPrepend(ProgramGlobals::SYSTEM_STACK_STRING,rootname));
+		files.push_back(utils::pathPrepend(ProgramGlobals::ENVIRON_STACK_STRING,rootname));
+		files.push_back(utils::pathPrepend(ProgramGlobals::WFT_STRING,rootname));
 	}
 
 	static VectorStringType filesToDelete_;
