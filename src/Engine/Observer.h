@@ -170,8 +170,8 @@ public:
 
 	void setBrakets(const PsimagLite::String& left,const PsimagLite::String& right)
 	{
-		helper_.setBrakets(BraketStringToNumber(left),
-		                   BraketStringToNumber(right));
+		helper_.setBrakets(braketStringToNumber(left),
+		                   braketStringToNumber(right));
 	}
 
 	void twoPoint(MatrixType& storage,
@@ -215,21 +215,26 @@ public:
 	{
 		assert(braket.points() == 3);
 
-		SizeType site0 = braket.site(0);
-		std::cout<<"#site0="<<site0<<"\n";
 		SizeType flag = 0;
 		try {
-			braket.site(1);
+			braket.site(0);
 			flag |= 1;
 		} catch (std::exception&) {}
 
 		try {
-			braket.site(2);
+			braket.site(1);
 			flag |= 2;
 		} catch (std::exception&) {}
 
-		if (flag == 1 || flag == 2) {
-			throw PsimagLite::RuntimeError("threePoint: Give all sites or first site only\n");
+		try {
+			braket.site(2);
+			flag |= 4;
+		} catch (std::exception&) {}
+
+		if (flag != 0 && flag != 7 && flag != 1) {
+			PsimagLite::String str("threePoint: ");
+			str += "Give no site, first site, or all sites\n";
+			throw PsimagLite::RuntimeError(str);
 		}
 
 		SizeType threadId = 0;
@@ -241,27 +246,48 @@ public:
 		crsMatrixToFullMatrix(m2,braket.op(2).data);
 		int fermionSign = braket.op(0).fermionSign;
 
-		if (flag == 3) {
-			typename MatrixType::value_type tmp = fourpoint_.threePoint('N',site0,m0,
+		if (flag == 7) {
+			std::cout<<"#Fixed all sites\n";
+			typename MatrixType::value_type tmp = fourpoint_.threePoint('N',braket.site(0),m0,
 			                                                            'N',braket.site(1),m1,
 			                                                            'N',braket.site(2),m2,
 			                                                            fermionSign,
 			                                                            threadId);
-			std::cout<<braket.site(1)<<" "<<braket.site(2)<<" "<<tmp<<"\n";
+			std::cout<<braket.site(0)<<" ";
+			std::cout<<braket.site(1)<<" "<<braket.site(2)<<"  "<<tmp<<"\n";
 			return;
 		}
 
-		assert(flag == 0);
-		for (SizeType site1 = 0; site1 < rows; ++site1) {
-			for (SizeType site2 = 0; site2 < cols; ++site2) {
-				try {
+		if (flag == 1) {
+			SizeType site0 = braket.site(0);
+			std::cout<<"#Fixed site0= "<<site0<<"\n";
+			for (SizeType site1 = site0+1; site1 < rows; ++site1) {
+				for (SizeType site2 = site1+1; site2 < cols; ++site2) {
 					typename MatrixType::value_type tmp = fourpoint_.threePoint('N',site0,m0,
 					                                                            'N',site1,m1,
 					                                                            'N',site2,m2,
 					                                                            fermionSign,
 					                                                            threadId);
-					std::cout<<site1<<" "<<site2<<" "<<tmp<<"\n";
-				} catch(std::exception&) {}
+					std::cout<<site1<<" "<<site2<<"  "<<tmp<<"\n";
+
+				}
+			}
+
+			return;
+		}
+
+		assert(flag == 0);
+		for (SizeType site0 = 0; site0 < rows; ++site0) {
+			for (SizeType site1 = site0+1; site1 < rows; ++site1) {
+				for (SizeType site2 = site1+1; site2 < cols; ++site2) {
+
+					typename MatrixType::value_type tmp = fourpoint_.threePoint('N',site0,m0,
+					                                                            'N',site1,m1,
+					                                                            'N',site2,m2,
+					                                                            fermionSign,
+					                                                            threadId);
+					std::cout<<site0<<" "<<site1<<" "<<site2<<"  "<<tmp<<"\n";
+				}
 			}
 		}
 	}
@@ -272,25 +298,31 @@ public:
 	{
 		assert(braket.points() == 4);
 
-		SizeType site0 = braket.site(0);
-		SizeType site1 = braket.site(1);
-		std::cout<<"#site0="<<site0<<"\n#site1="<<site1<<"\n";
-		if (site0 >= site1)
-			throw PsimagLite::RuntimeError("FourPoint: needs ordered distinct points\n");
-
 		SizeType flag = 0;
 		try {
-			braket.site(2);
+			braket.site(0);
 			flag |= 1;
 		} catch (std::exception&) {}
 
 		try {
-			braket.site(3);
+			braket.site(1);
 			flag |= 2;
 		} catch (std::exception&) {}
 
-		if (flag == 1 || flag == 2) {
-			throw PsimagLite::RuntimeError("threePoint: Give all sites or first two sites only\n");
+		try {
+			braket.site(2);
+			flag |= 4;
+		} catch (std::exception&) {}
+
+		try {
+			braket.site(3);
+			flag |= 8;
+		} catch (std::exception&) {}
+
+		if (flag != 0 && flag != 3 && flag != 15) {
+			PsimagLite::String str("fourPoint: ");
+			str += "Give no site, first two sites, or all sites\n";
+			throw PsimagLite::RuntimeError(str);
 		}
 
 		SizeType threadId = 0;
@@ -304,26 +336,59 @@ public:
 		crsMatrixToFullMatrix(m3,braket.op(3).data);
 
 		RealType fermionSign = braket.op(0).fermionSign;
-		typename FourPointCorrelationsType::SparseMatrixType O2gt;
-		fourpoint_.firstStage(O2gt,'N',site0,m0,'N',site1,m1,fermionSign,threadId);
 
-		if (flag == 3) {
+		if (flag == 15) {
+			std::cout<<"#Fixed all sites\n";
+			SizeType site0 = braket.site(0);
+			SizeType site1 = braket.site(1);
+			typename FourPointCorrelationsType::SparseMatrixType O2gt;
+			fourpoint_.firstStage(O2gt,'N',site0,m0,'N',site1,m1,fermionSign,threadId);
 			typename MatrixType::value_type tmp = fourpoint_.
 			        secondStage(O2gt,site1,
 			                    'N',braket.site(2),m2,
 			                    'N',braket.site(3),m3,
 			                    fermionSign,
 			                    threadId);
-			std::cout<<braket.site(2)<<" "<<braket.site(3)<<" "<<tmp<<"\n";
+			std::cout<<site0<<" "<<site1<<" ";
+			std::cout<<braket.site(2)<<" "<<braket.site(3)<<"  "<<tmp<<"\n";
+			return;
+		}
+
+		if (flag == 3) {
+			SizeType site0 = braket.site(0);
+			SizeType site1 = braket.site(1);
+			std::cout<<"#Fixed site0= "<<site0<<"\n";
+			std::cout<<"#Fixed site1= "<<site1<<"\n";
+			typename FourPointCorrelationsType::SparseMatrixType O2gt;
+			fourpoint_.firstStage(O2gt,'N',site0,m0,'N',site1,m1,fermionSign,threadId);
+
+			for (SizeType site2 = site1+1; site2 < rows; ++site2) {
+				for (SizeType site3 = site2+1; site3 < cols; ++site3) {
+					typename MatrixType::value_type tmp = fourpoint_.
+					        secondStage(O2gt,site1,'N',site2,m2,'N',site3,m3,fermionSign,
+					                    threadId);
+					std::cout<<site2<<" "<<site3<<" "<<tmp<<"\n";
+				}
+			}
+
 			return;
 		}
 
 		assert(flag == 0);
-		for (SizeType site2 = site1+1; site2 < rows; ++site2) {
-			for (SizeType site3 = site2+1; site3 < cols; ++site3) {
-				typename MatrixType::value_type tmp = fourpoint_.
-				        secondStage(O2gt,site1,'N',site2,m2,'N',site3,m3,fermionSign,threadId);
-				std::cout<<site2<<" "<<site3<<" "<<tmp<<"\n";
+		for (SizeType site0 = 0; site0 < rows; ++site0) {
+			for (SizeType site1 = site0+1; site1 < cols; ++site1) {
+				for (SizeType site2 = site1+1; site2 < rows; ++site2) {
+					for (SizeType site3 = site2+1; site3 < cols; ++site3) {
+						typename FourPointCorrelationsType::SparseMatrixType O2gt;
+						fourpoint_.firstStage(O2gt,'N',site0,m0,'N',site1,m1,fermionSign,
+						                      threadId);
+						typename MatrixType::value_type tmp = fourpoint_.
+						        secondStage(O2gt,site1,'N',site2,m2,'N',site3,m3,fermionSign,
+						                    threadId);
+						std::cout<<site0<<" "<<site1<<" ";
+						std::cout<<site2<<" "<<site3<<" "<<tmp<<"\n";
+					}
+				}
 			}
 		}
 	}
@@ -433,11 +498,11 @@ public:
 
 private:
 
-	SizeType BraketStringToNumber(const PsimagLite::String& str) const
+	SizeType braketStringToNumber(const PsimagLite::String& str) const
 	{
 		if (str == "gs") return GS_VECTOR;
 		if (str == "time") return TIME_VECTOR;
-		PsimagLite::String msg("Observer::BraketStringToNumber:");
+		PsimagLite::String msg("Observer::braketStringToNumber:");
 		throw PsimagLite::RuntimeError(msg + " must be gs or time\n");
 	}
 
