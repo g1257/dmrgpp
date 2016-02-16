@@ -2,6 +2,7 @@
 #define DMRG_braket_H
 #include "Vector.h"
 #include "Tokenizer.h"
+#include "Matrix.h"
 
 template<typename ModelType>
 class Braket {
@@ -13,11 +14,12 @@ class Braket {
 	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
 	struct NaturalOpStruct {
 		NaturalOpStruct(PsimagLite::String label_)
-		    : fermionSign(1),dof(0),label(label_)
+		    : fermionSign(1),dof(0),label(label_),transpose(false)
 		{
 			SizeType i = 0;
 			for (; i < label_.length(); ++i) {
@@ -31,6 +33,13 @@ class Braket {
 				if (label_[i] == '-') break;
 			}
 
+			SizeType lastIndex = label.length();
+			if (lastIndex > 0) lastIndex--;
+			if (label[lastIndex] == '\'') {
+				label = label.substr(0,lastIndex);
+				transpose = true;
+			}
+
 			dof = atoi(label_.substr(j+1,i).c_str());
 			if (i == label_.length()) return;
 			fermionSign = -1;
@@ -39,6 +48,7 @@ class Braket {
 		int fermionSign;
 		SizeType dof;
 		PsimagLite::String label;
+		bool transpose;
 	}; // struct NaturalOpStruct
 
 public:
@@ -148,9 +158,14 @@ private:
 			}
 
 			NaturalOpStruct nos(opLabel);
-			SparseMatrixType tmpC(model_.naturalOperator(nos.label,
-			                                             site,
-			                                             nos.dof));
+			MatrixType m = model_.naturalOperator(nos.label,
+			                                      site,
+			                                      nos.dof);
+			MatrixType m2 = m;
+			if (nos.transpose)
+				transposeConjugate(m2,m);
+
+			SparseMatrixType tmpC(m2);
 			nup = OperatorType(tmpC,nos.fermionSign,jm1,angularFactor1,su2Related1);
 		}
 
