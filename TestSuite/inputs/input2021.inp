@@ -7,7 +7,7 @@ Connectors 1 1.0
 Model=HubbardOneBand
 hubbardU	8  0  0  0  0  0  0  0  0
 potentialV	 16  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 
-SolverOptions=TimeStepTargetting,tarDisable
+SolverOptions=TimeStepTargetting
 Version=version
 OutputFile=data2021.txt
 InfiniteLoopKeptStates=256

@@ -32,7 +32,7 @@ potentialV	32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 Model=FeAsBasedScExtended
 FeAsMode=INT_PAPER33
 Orbitals=2
-SolverOptions=none,tarDisable
+SolverOptions=none
 Version=61289987cdd32b8485213ac0415baf4e9cd16432
 OutputFile=data340.txt
 InfiniteLoopKeptStates=60

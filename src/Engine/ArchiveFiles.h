@@ -110,7 +110,7 @@ public:
 
 	void deletePackedFiles()
 	{
-		if (parameters_.options.find("tarDisable") != PsimagLite::String::npos)
+		if (parameters_.options.find("tarEnable") == PsimagLite::String::npos)
 			return;
 
 		PsimagLite::String tarname = tarName(parameters_.filename);

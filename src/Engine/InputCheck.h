@@ -172,7 +172,7 @@ public:
 			\item[vectorwithoffsets] TBW
 			\item[allPvectors] TBW
 			\item[printgeometry] TBW
-			\item[tarDisable] Do not tar output files
+			\item[tarEnable] Tar output files
 			\item[tarNoDelete] Do not delete output files after taring them.
 			\item[recoveryNoDelete] Do not delete recovery files even if run
 			\item[neverNormalizeVectors] TBW
@@ -214,7 +214,7 @@ public:
 		registerOpts.push_back("vectorwithoffsets");
 		registerOpts.push_back("allPvectors");
 		registerOpts.push_back("printgeometry");
-		registerOpts.push_back("tarDisable");
+		registerOpts.push_back("tarEnable");
 		registerOpts.push_back("tarNoDelete");
 		registerOpts.push_back("recoveryNoDelete");
 		registerOpts.push_back("normalizeTimeVectors");

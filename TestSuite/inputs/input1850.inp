@@ -29,7 +29,7 @@ Connectors  1 -1
 Model=TjAncillaC
 potentialV	 12 0 0 0 0 0 0 
                     0 0 0 0 0 0
-SolverOptions=none,tarDisable
+SolverOptions=none
 Version=version
 OutputFile=data1850.txt
 InfiniteLoopKeptStates=60

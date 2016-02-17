@@ -10,7 +10,7 @@ potentialV  16  -0.5 -0.5 -0.5 -0.5     -0.5 -0.5 -0.5 -0.5
                 -0.5 -0.5 -0.5 -0.5     -0.5 -0.5 -0.5 -0.5
 
 Model=HubbardOneBand
-SolverOptions=MettsTargetting,twositedmrg,tarDisable
+SolverOptions=MettsTargetting,twositedmrg
 Version=version
 OutputFile=data1550.txt
 InfiniteLoopKeptStates=200

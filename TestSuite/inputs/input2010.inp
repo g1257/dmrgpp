@@ -9,7 +9,7 @@ hubbardU	16 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 potentialV	 32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 		0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 Model=HubbardOneBand
-SolverOptions=TimeStepTargetting,twositedmrg,tarDisable
+SolverOptions=TimeStepTargetting,twositedmrg
 Version=version
 OutputFile=data2010.txt
 InfiniteLoopKeptStates=150 

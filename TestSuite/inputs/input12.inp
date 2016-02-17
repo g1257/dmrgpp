@@ -17,7 +17,7 @@ hubbardU	12 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 potentialV 24 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
               0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
 Model=HubbardOneBandExtended
-SolverOptions=none,tarDisable
+SolverOptions=none
 Version=6b9dc12805519cb864e80fa0957129a010711116
 OutputFile=data12.txt
 InfiniteLoopKeptStates=150

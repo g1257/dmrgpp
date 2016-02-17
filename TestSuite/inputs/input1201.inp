@@ -31,7 +31,7 @@ Connectors
 Model=Tj1Orb
 potentialV 16     0.0 0.0 0.0 0.0         0.0 0.0 0.0 0.0
                   0.0 0.0 0.0 0.0         0.0 0.0 0.0 0.0
-SolverOptions=none,tarDisable
+SolverOptions=none
 Version=v2.6
 OutputFile=data1201.txt
 InfiniteLoopKeptStates=100

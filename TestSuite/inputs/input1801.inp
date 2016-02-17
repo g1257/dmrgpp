@@ -18,7 +18,7 @@ LadderLeg=2
 Model=Heisenberg
 HeisenbergTwiceS=1
 
-SolverOptions=none,restart,TargetingAncilla,tarDisable
+SolverOptions=none,restart,TargetingAncilla
 Version=version
 OutputFile=data1801.txt
 InfiniteLoopKeptStates=64

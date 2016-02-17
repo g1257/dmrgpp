@@ -12,7 +12,7 @@ PotentialT  8    0.0 -1.77 -0.91 2.144       0.45 2.05 -1.67  0.0
 omega=0.4
 
 Model=HubbardOneBand
-SolverOptions=TimeStepTargetting,tarDisable
+SolverOptions=TimeStepTargetting
 Version=6ce41a4b7dfa08978e53fa756f7f139e2fb18251
 OutputFile=data501.txt
 InfiniteLoopKeptStates=200 
