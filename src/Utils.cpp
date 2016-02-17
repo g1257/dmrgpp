@@ -102,7 +102,7 @@ PsimagLite::String pathPrepend(PsimagLite::String pre,PsimagLite::String pathnam
 	return (addDotDot) ? ".." + ret : ret;
 }
 
-SizeType exactDivision(SizeType a,SizeType b)
+SizeType exactDivision(SizeType a, SizeType b)
 {
 	SizeType c = static_cast<SizeType>(a/b);
 	if (c * b != a)
@@ -120,6 +120,15 @@ SizeType log2OfInteger(SizeType x)
 	}
 
 	return counter;
+}
+
+SizeType powUint(SizeType x, SizeType n)
+{
+	if (n == 0) return 1;
+	if (n == 1) return x;
+	SizeType ret = x;
+	for (SizeType i = 1; i < n; ++i) ret *= x;
+	return ret;
 }
 
 } //namespace utils

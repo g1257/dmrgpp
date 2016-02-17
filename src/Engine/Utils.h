@@ -258,9 +258,11 @@ fillFermionicSigns(SomeVectorType& fermionicSigns,
 		fermionicSigns[i]= (electrons[i]%2==0) ? 1.0 : static_cast<ValueType>(f);
 }
 
-SizeType exactDivision(SizeType a,SizeType b);
+SizeType exactDivision(SizeType,SizeType);
 
-SizeType log2OfInteger(SizeType x);
+SizeType log2OfInteger(SizeType);
+
+SizeType powUint(SizeType, SizeType);
 
 } //namespace utils
 /*@}*/

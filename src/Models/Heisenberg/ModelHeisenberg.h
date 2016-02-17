@@ -91,6 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquared.h"
 #include "ProgramGlobals.h"
 #include "ModelCommon.h"
+#include "Utils.h"
 
 namespace Dmrg {
 
@@ -308,8 +309,8 @@ public:
 	                     VectorSizeType& q,
 	                     const VectorSizeType& block) const
 	{
-		assert(block.size()==1);
-		SizeType total = modelParameters_.twiceTheSpin + 1;
+		SizeType total = utils::powUint(modelParameters_.twiceTheSpin + 1,block.size());
+
 		for (SizeType i=0;i<total;i++) basis.push_back(i);
 		SymmetryElectronsSzType qq;
 		setSymmetryRelated(qq,basis,block.size());
@@ -340,7 +341,7 @@ public:
 
 		for (SizeType i=0;i<n;i++) {
 			// magnetic field
-			RealType tmp = modelParameters_.magneticField[block[i]]*factorForDiagonals;
+			RealType tmp = modelParameters_.magneticField[block[i*2]]*factorForDiagonals;
 			multiplyScalar(tmpMatrix,cm[1+i*2].data,tmp);
 
 			hmatrix += tmpMatrix;
@@ -354,20 +355,34 @@ public:
 
 private:
 
-	//! Find S^+_i in the natural basis natBasis
-	SparseMatrixType findSplusMatrices(int,const HilbertBasisType& natBasis) const
+	//! Find S^+_site in the natural basis natBasis
+	SparseMatrixType findSplusMatrices(SizeType site,
+	                                   const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
 		RealType j = 0.5*modelParameters_.twiceTheSpin;
+		SizeType bitsForOneSite = utils::log2OfInteger(modelParameters_.twiceTheSpin);
+		SizeType mask = modelParameters_.twiceTheSpin;
+		mask <<= (site*bitsForOneSite);
 
 		for (SizeType ii=0;ii<total;ii++) {
 			SizeType ket = natBasis[ii];
-			SizeType bra = ket + 1;
-			if (bra>=total) continue;
-			RealType m = ket - j;
+
+			SizeType ketsite = ket & mask;
+			ketsite >>= (site*bitsForOneSite);
+
+			SizeType brasite = ketsite + 1;
+			if (brasite >= modelParameters_.twiceTheSpin+1) continue;
+
+			SizeType bra = (ket ^ mask);
+			brasite <<= (site*bitsForOneSite);
+			bra |= brasite;
+
+			RealType m = ketsite - j;
 			RealType x = j*(j+1)-m*(m+1);
 			assert(x>=0);
+
 			cm(ket,bra) = sqrt(x);
 		}
 
@@ -376,15 +391,23 @@ private:
 	}
 
 	//! Find S^z_i in the natural basis natBasis
-	SparseMatrixType findSzMatrices(int,const HilbertBasisType& natBasis) const
+	SparseMatrixType findSzMatrices(SizeType site,
+	                                const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
 		RealType j = 0.5*modelParameters_.twiceTheSpin;
+		SizeType bitsForOneSite = utils::log2OfInteger(modelParameters_.twiceTheSpin);
+		SizeType mask = modelParameters_.twiceTheSpin;
+		mask <<= (site*bitsForOneSite);
 
 		for (SizeType ii=0;ii<total;ii++) {
 			SizeType ket = natBasis[ii];
-			RealType m = ket - j;
+
+			SizeType ketsite = ket & mask;
+			ketsite >>= (site*bitsForOneSite);
+
+			RealType m = ketsite - j;
 			cm(ket,ket) = m;
 		}
 
@@ -396,9 +419,6 @@ private:
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
-		if (n!=1)
-			PsimagLite::RuntimeError("ModelHeisenberg::setSymmetryRelated n=1 only\n");
-
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
 		// note: we use m+j instead of m
@@ -420,13 +440,31 @@ private:
 			jmpair.first = modelParameters_.twiceTheSpin;
 			jmpair.second = basis[i];
 			jmvalues.push_back(jmpair);
-			szPlusConst[i] = (isCanonical) ? basis[i] : 0;
+			szPlusConst[i] = (isCanonical) ? getSzPlusConst(basis[i],n) : 0;
 			electrons[i] = 1;
 			flavors.push_back(1);
 			jmSaved = jmpair;
 		}
 
 		q.set(jmvalues,flavors,electrons,szPlusConst);
+	}
+
+	SizeType getSzPlusConst(SizeType ket, SizeType n) const
+	{
+		//if (n == 1) return ket;
+
+		SizeType bitsForOneSite = utils::log2OfInteger(modelParameters_.twiceTheSpin);
+
+		SizeType sum = 0;
+		for (SizeType site = 0; site < n; ++site) {
+			SizeType mask = modelParameters_.twiceTheSpin;
+			mask <<= (site*bitsForOneSite);
+			SizeType ketsite = ket & mask;
+			ketsite >>= (site*bitsForOneSite);
+			sum += ketsite;
+		}
+
+		return sum;
 	}
 
 	//serializr start class ModelHeisenberg
