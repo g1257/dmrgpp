@@ -81,6 +81,7 @@ namespace PsimagLite {
 std::ostream& operator<<(std::ostream& os,const ApplicationInfo& ai)
 {
 	os<<ai.getTimeDate();
+	os<<"Hostname: "<<ai.hostname()<<"\n";
 	if (!ai.firstCall_) return os;
 	os<<ai.name_<<" sizeof(SizeType)="<<sizeof(SizeType)<<"\n";
 #ifdef USE_FLOAT

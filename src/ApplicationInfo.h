@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <sys/time.h>
 #include <time.h>
 #include "Vector.h"
+#include <unistd.h>
 
 namespace PsimagLite {
 
@@ -108,6 +109,23 @@ public:
 		gettimeofday(&tv,0);
 		tt=tv.tv_sec; /* seconds since 1970 */
 		return asctime(localtime(&tt));
+	}
+
+	String hostname() const
+	{
+		int len = 1024;
+		char* name = new char[len];
+		int ret = gethostname(name,len);
+		String retString;
+		if (ret != 0) {
+			retString = "UNKNOWN";
+		} else {
+			retString = name;
+		}
+
+		delete[] name;
+
+		return retString;
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,const ApplicationInfo& ai);
