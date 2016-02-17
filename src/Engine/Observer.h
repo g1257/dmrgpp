@@ -197,15 +197,34 @@ public:
 		crsMatrixToFullMatrix(m1,braket.op(1).data);
 		int fermionSign = braket.op(0).fermionSign;
 
+		SizeType threadId = 0;
+		SizeType site1 = 0;
+		SizeType sites= storage.n_col();
+		PsimagLite::String str("twopoint: Give no site, first site, or all sites\n");
+
 		switch (flag) {
 		case 0: // no sites given
 			return twopoint_(storage,m0,m1,fermionSign);
 		case 1: //first site given
-			throw PsimagLite::RuntimeError("twopoint: 1st site given, loop over 2nd (TBD)\n");
+			for (site1 = 0; site1 < sites; ++site1)
+				storage(braket.site(0),site1) = twopoint_.calcCorrelation(braket.site(0),
+				                                                          site1,
+				                                                          braket.op(0).data,
+				                                                          braket.op(1).data,
+				                                                          fermionSign,
+				                                                          threadId);
+			return;
+
 		case 3:
-			throw PsimagLite::RuntimeError("twopoint: all sites given (TBD)\n");
+			storage(braket.site(0),braket.site(1)) = twopoint_.calcCorrelation(braket.site(0),
+			                                                                   braket.site(1),
+			                                                                   braket.op(0).data,
+			                                                                   braket.op(1).data,
+			                                                                   fermionSign,
+			                                                                   threadId);
+			return;
 		default:
-			throw PsimagLite::RuntimeError("twopoint: Give all sites or first site only\n");
+			throw PsimagLite::RuntimeError(str);
 		}
 	}
 
