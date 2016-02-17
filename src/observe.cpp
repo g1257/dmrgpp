@@ -57,15 +57,14 @@ SizeType dofsFromModelName(const ModelType& model)
 	return 0;
 }
 
-template<typename GeometryType,
-         typename VectorWithOffsetType,
-         typename ModelType,
-         typename SparseMatrixType>
+template<typename VectorWithOffsetType,
+         typename ModelType>
 bool observeOneFullSweep(IoInputType& io,
                          const ModelType& model,
                          const PsimagLite::String& list2,
                          bool hasTimeEvolution)
 {
+	typedef typename ModelType::GeometryType GeometryType;
 	const GeometryType& geometry = model.geometry();
 	bool verbose = false;
 	PsimagLite::String obsOptions("");
@@ -162,26 +161,18 @@ bool observeOneFullSweep(IoInputType& io,
 }
 
 template<typename GeometryType,
-         template<typename> class ModelHelperTemplate,
-         template<typename> class VectorWithOffsetTemplate,
-         typename MySparseMatrix>
+         typename ModelHelperType,
+         typename VectorWithOffsetType>
 void mainLoop(GeometryType& geometry,
               const PsimagLite::String& targetting,
               InputNgType::Readable& io,
               const ParametersDmrgSolverType& params,
               const PsimagLite::String& list)
 {
-	typedef Basis<MySparseMatrix> BasisType;
-	typedef Operators<BasisType> OperatorsType;
-	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
-	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
-	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
 	typedef ModelBase<ModelHelperType,
 	        ParametersDmrgSolverType,
 	        InputNgType::Readable,
 	        GeometryType> ModelBaseType;
-	typedef typename MySparseMatrix::value_type ComplexOrRealType;
-	typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
 
 	ModelSelector<ModelBaseType> modelSelector(params.model);
 	const ModelBaseType& model = modelSelector(params,io,geometry);
@@ -195,8 +186,7 @@ void mainLoop(GeometryType& geometry,
 	                         targetting=="TargetingAncilla");
 	while (moreData) {
 		try {
-			moreData = !observeOneFullSweep<GeometryType,VectorWithOffsetType,ModelBaseType,
-			        MySparseMatrix>
+			moreData = !observeOneFullSweep<VectorWithOffsetType,ModelBaseType>
 			        (dataIo,model,list,hasTimeEvolution);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
@@ -215,11 +205,20 @@ void mainLoop1(GeometryType& geometry,
                const ParametersDmrgSolverType& params,
                const PsimagLite::String& list)
 {
+	typedef Basis<MySparseMatrix> BasisType;
+	typedef Operators<BasisType> OperatorsType;
+	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
+	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
+	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
+	typedef typename MySparseMatrix::value_type ComplexOrRealType;
+
 	if (params.options.find("vectorwithoffsets")!=PsimagLite::String::npos) {
-		mainLoop<GeometryType,ModelHelperTemplate,VectorWithOffsets,MySparseMatrix>
+		typedef VectorWithOffsets<ComplexOrRealType> VectorWithOffsetType;
+		mainLoop<GeometryType,ModelHelperType,VectorWithOffsetType>
 		        (geometry,targetting,io,params, list);
 	} else {
-		mainLoop<GeometryType,ModelHelperTemplate,VectorWithOffset,MySparseMatrix>
+		typedef VectorWithOffset<ComplexOrRealType> VectorWithOffsetType;
+		mainLoop<GeometryType,ModelHelperType,VectorWithOffsetType>
 		        (geometry,targetting,io,params, list);
 	}
 }
