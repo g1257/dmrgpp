@@ -176,6 +176,7 @@ public:
 		targetVectors_[0] = phi;
 		if (timeHasAdvanced_) returnEarly = false;
 		if (returnEarly && ProgramGlobals::TST_FAST) return;
+		if (times_.size() == 1 && fabs(times_[0])<1e-10) return;
 
 		VectorMatrixFieldType V(phi.sectors());
 		VectorMatrixFieldType T(phi.sectors());
