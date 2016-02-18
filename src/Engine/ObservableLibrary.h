@@ -244,8 +244,6 @@ public:
 			std::cout<<"#Time="<<observe_.time(threadId)<<"\n";
 		}
 
-		std::cout<<braket.toString()<<"\n";
-
 		if (braket.points() == 2) {
 			bool needsPrinting = false;
 			if (storage == 0) {
