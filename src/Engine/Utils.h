@@ -260,7 +260,7 @@ fillFermionicSigns(SomeVectorType& fermionicSigns,
 
 SizeType exactDivision(SizeType,SizeType);
 
-SizeType log2OfInteger(SizeType);
+SizeType bitSizeOfInteger(SizeType);
 
 SizeType powUint(SizeType, SizeType);
 

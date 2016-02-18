@@ -111,7 +111,7 @@ SizeType exactDivision(SizeType a, SizeType b)
 	return c;
 }
 
-SizeType log2OfInteger(SizeType x)
+SizeType bitSizeOfInteger(SizeType x)
 {
 	SizeType counter = 0;
 	while (x) {

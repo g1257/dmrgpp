@@ -362,7 +362,7 @@ private:
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
 		RealType j = 0.5*modelParameters_.twiceTheSpin;
-		SizeType bitsForOneSite = utils::log2OfInteger(modelParameters_.twiceTheSpin);
+		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
 		SizeType mask = modelParameters_.twiceTheSpin;
 		mask <<= (site*bitsForOneSite);
 
@@ -397,7 +397,7 @@ private:
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
 		RealType j = 0.5*modelParameters_.twiceTheSpin;
-		SizeType bitsForOneSite = utils::log2OfInteger(modelParameters_.twiceTheSpin);
+		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
 		SizeType mask = modelParameters_.twiceTheSpin;
 		mask <<= (site*bitsForOneSite);
 
@@ -453,7 +453,7 @@ private:
 	{
 		//if (n == 1) return ket;
 
-		SizeType bitsForOneSite = utils::log2OfInteger(modelParameters_.twiceTheSpin);
+		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
 
 		SizeType sum = 0;
 		for (SizeType site = 0; site < n; ++site) {
