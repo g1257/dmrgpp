@@ -451,7 +451,7 @@ private:
 
 	SizeType getSzPlusConst(SizeType ket, SizeType n) const
 	{
-		//if (n == 1) return ket;
+		if (n == 1) return ket;
 
 		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
 

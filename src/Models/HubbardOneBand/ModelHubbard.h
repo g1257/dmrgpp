@@ -316,12 +316,7 @@ public:
 		}
 
 		if (what=="n") {
-			VectorSizeType allowed(1,0);
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			PsimagLite::Matrix<SparseElementType> tmp =
-			        multiplyTc(creationMatrix[iup].data,creationMatrix[iup].data)
-			        + multiplyTc(creationMatrix[idown].data,creationMatrix[idown].data);
-			return tmp;
+			return naturalOperator("nup",site,0) + naturalOperator("ndown",site,0);
 		}
 
 		if (what=="c") {

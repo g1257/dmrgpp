@@ -61,6 +61,11 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
 
+	if (obsOptions.label == "B") {
+		model.printBasis(obsOptions.site);
+		return;
+	}
+
 	if (obsOptions.label=="" || obsOptions.fermionicSign == 0) {
 		usageOperator();
 		return;

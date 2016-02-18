@@ -250,6 +250,17 @@ public:
 		return maxElectrons * modelCommon_->geometry().numberOfSites() + 1;
 	}
 
+	void printBasis(SizeType site) const
+	{
+		BlockType block(1,site);
+		HilbertBasisType natBasis;
+                typename PsimagLite::Vector<SizeType>::Type quantumNumbs;
+                this->setNaturalBasis(natBasis,quantumNumbs,block);
+		std::cout<<"block="<<block;
+		std::cout<<"natBasis="<<natBasis;
+		std::cout<<"quantumNumbs="<<quantumNumbs;
+	}
+
 	const GeometryType& geometry() const { return modelCommon_->geometry(); }
 
 	const ParametersType& params() const { return modelCommon_->params(); }
