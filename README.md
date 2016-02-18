@@ -3,7 +3,7 @@
 ## Licensing
 
 
- The full software license for DMRG++ version 2.0.0
+ The full software license for DMRG++ version 3 
  can be found in file LICENSE in the root directory of the code.
  DMRG++ is a free and open source implementation of the
  DMRG algorithm. You are welcomed to use it and publish data
