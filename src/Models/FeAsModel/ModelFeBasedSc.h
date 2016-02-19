@@ -152,11 +152,14 @@ public:
 
 		if (tspAlgo == "SuzukiTrotter") reinterpret_ = false;
 
-		if (modelParameters_.potentialV.size() !=
-		    2*modelParameters_.orbitals*geometry.numberOfSites()) {
+		SizeType v1 = 2*modelParameters_.orbitals*geometry.numberOfSites();
+		SizeType v2 = v1*modelParameters_.orbitals;
+		if (modelParameters_.potentialV.size() != v1 &&
+		    modelParameters_.potentialV.size() != v2) {
 			PsimagLite::String str(__FILE__);
 			str += " " + ttos(__LINE__) + "\n";
-			str += "potentialV length must be 2*orbitals times the number of sites\n";
+			str += "potentialV length must be 2*orbitals times the number of sites or";
+			str += " 2*orbitals*orbitals times the number of sites\n";
 			throw PsimagLite::RuntimeError(str.c_str());
 		}
 
@@ -958,8 +961,30 @@ private:
 	                   RealType factorForDiagonals,
 	                   const typename PsimagLite::Vector<RealType>::Type& V) const
 	{
-		for (SizeType orb=0;orb<modelParameters_.orbitals;orb++)
-			addPotentialV(hmatrix,cm,i,actualIndexOfSite,orb,factorForDiagonals,V);
+		SizeType v1 = 2*modelParameters_.orbitals*geometry_.numberOfSites();
+		SizeType v2 = v1*modelParameters_.orbitals;
+		if (V.size() != v1 && V.size() != v2) {
+			PsimagLite::String str(__FILE__);
+			str += " " + ttos(__LINE__) + "\n";
+			str += "potentialV[T] length must be 2*orbitals times the number of sites or";
+			str += " 2*orbitals*orbitals times the number of sites\n";
+			throw PsimagLite::RuntimeError(str.c_str());
+		}
+
+		if (V.size() == v1) {
+			for (SizeType orb=0;orb<modelParameters_.orbitals;orb++)
+				addPotentialV(hmatrix,cm,i,actualIndexOfSite,orb,factorForDiagonals,V);
+		}
+
+		if (V.size() == v2) {
+			for (SizeType orb=0;orb<modelParameters_.orbitals;orb++) {
+				for (SizeType orb2=0;orb2<modelParameters_.orbitals;orb2++) {
+				addPotentialV(hmatrix,cm,i,actualIndexOfSite,orb,orb2,factorForDiagonals,V);
+				}
+			}
+
+			return;
+		}
 	}
 
 	void addPotentialV(SparseMatrixType &hmatrix,
@@ -980,6 +1005,43 @@ private:
 		hmatrix += factorForDiagonals * V[iUp] * nup;
 		SizeType iDown = actualIndexOfSite + (orbital + 1*modelParameters_.orbitals)*linSize;
 		hmatrix += factorForDiagonals * V[iDown] * ndown;
+	}
+
+	void addPotentialV(SparseMatrixType &hmatrix,
+	                   const VectorOperatorType& cm,
+	                   SizeType i,
+	                   SizeType actualIndexOfSite,
+	                   SizeType orb,
+	                   SizeType orb2,
+	                   RealType factorForDiagonals,
+	                   const typename PsimagLite::Vector<RealType>::Type& V) const
+	{
+		int dof=2*modelParameters_.orbitals;
+		SizeType orbitalsSquared = modelParameters_.orbitals*modelParameters_.orbitals;
+
+		SparseMatrixType nup = nEx(cm[orb+SPIN_UP*modelParameters_.orbitals+i*dof].data,
+		        cm[orb2+SPIN_UP*modelParameters_.orbitals+i*dof].data);
+		SparseMatrixType ndown = nEx(cm[orb+SPIN_DOWN*modelParameters_.orbitals+i*dof].data,
+		        cm[orb2+SPIN_DOWN*modelParameters_.orbitals+i*dof].data);
+
+		SizeType linSize = geometry_.numberOfSites();
+
+		SizeType iUp = actualIndexOfSite + (orb + orb2*modelParameters_.orbitals +
+		                                    0*orbitalsSquared)*linSize;
+		hmatrix += factorForDiagonals * V[iUp] * nup;
+		SizeType iDown = actualIndexOfSite + (orb + orb2*modelParameters_.orbitals +
+		                                      1*orbitalsSquared)*linSize;
+		hmatrix += factorForDiagonals * V[iDown] * ndown;
+	}
+
+	SparseMatrixType nEx(const SparseMatrixType& c1, const SparseMatrixType& c2) const
+	{
+		SparseMatrixType tmpMatrix;
+		SparseMatrixType cdagger;
+		transposeConjugate(cdagger,c2);
+		multiply(tmpMatrix,c1,cdagger);
+
+		return tmpMatrix;
 	}
 
 	SparseMatrixType n(const SparseMatrixType& c) const
