@@ -195,27 +195,22 @@ private:
 
 	void convertXcYcArrays()
 	{
-		LinkProductStructType* lps = 0;
-		SizeType total = model_.getLinkProductStruct(&lps,modelHelper_);
+		SizeType total = model_.getLinkProductStruct(modelHelper_);
 
 		for (SizeType ix=0;ix<total;ix++) {
 			SparseMatrixType const* A = 0;
 			SparseMatrixType const* B = 0;
 
-			LinkType link2 = model_.getConnection(&A,&B,ix,*lps,modelHelper_);
-//			assert(link2.fermionOrBoson==ProgramGlobals::BOSON);
+			LinkType link2 = model_.getConnection(&A,&B,ix,modelHelper_);
 			if (link2.type==ProgramGlobals::ENVIRON_SYSTEM)  {
 				LinkType link3 = link2;
-				//link3.value *= fermionSign;
 				link3.type = ProgramGlobals::SYSTEM_ENVIRON;
 				addOneConnection(*B,*A,link3);
 				continue;
 			}
+
 			addOneConnection(*A,*B,link2);
 		}
-//		std::cerr<<"Toooooootttttttttaaaaaaaaaaaaaallllllll="<<total<<"\n";
-
-		if (lps) delete lps;
 	}
 
 	void addOneConnection(const SparseMatrixType& A,const SparseMatrixType& B,const LinkType& link2)

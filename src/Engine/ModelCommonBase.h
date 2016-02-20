@@ -138,13 +138,11 @@ public:
 	                                          bool sysEnvOnly,
 	                                          RealType time) const = 0;
 
-	virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
-	                              const ModelHelperType& modelHelper) const = 0;
+	virtual SizeType getLinkProductStruct(const ModelHelperType& modelHelper) const = 0;
 
 	virtual LinkType getConnection(const SparseMatrixType** A,
 	                       const SparseMatrixType** B,
 	                       SizeType ix,
-	                       const LinkProductStructType& lps,
 	                       const ModelHelperType& modelHelper) const = 0;
 
 	const SolverParamsType& params() const {return params_; }

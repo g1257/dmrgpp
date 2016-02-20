@@ -257,6 +257,60 @@ public:
 		hc.sync();
 	}
 
+	SizeType getLinkProductStruct(const ModelHelperType& modelHelper) const
+	{
+		typename PsimagLite::Vector<SparseElementType>::Type x,y; // bogus
+
+		const LinkProductStructType& lpsConst = modelHelper.lps();
+		LinkProductStructType& lps = const_cast<LinkProductStructType&>(lpsConst);
+		LinkProductStructType lpsOne(ProgramGlobals::MAX_LPS);
+		HamiltonianConnectionType hc(this->geometry(),modelHelper,&lps,&x,&y);
+
+		SizeType n=modelHelper.leftRightSuper().super().block().size();
+		SizeType total = 0;
+		for (SizeType i=0;i<n;i++) {
+			for (SizeType j=0;j<n;j++) {
+				SizeType totalOne = 0;
+				hc.compute(i,j,0,&lpsOne,totalOne);
+				if (!lps.sealed)
+					lps.push(lpsOne,totalOne);
+				else
+					lps.copy(lpsOne,totalOne,total);
+				total += totalOne;
+			}
+		}
+
+		if (lps.typesaved.size() != total) {
+			PsimagLite::String str("getLinkProductStruct: InternalError\n");
+			throw PsimagLite::RuntimeError(str);
+		}
+
+		if (!lps.sealed) {
+			PsimagLite::OstringStream msg;
+			msg<<"LinkProductStructSize="<<total;
+			progress_.printline(msg,std::cout);
+			lps.sealed = true;
+		}
+
+		return total;
+	}
+
+	LinkType getConnection(const SparseMatrixType** A,
+	                       const SparseMatrixType** B,
+	                       SizeType ix,
+	                       const ModelHelperType& modelHelper) const
+	{
+		const LinkProductStructType& lps = modelHelper.lps();
+		typename PsimagLite::Vector<SparseElementType>::Type x,y; // bogus
+		HamiltonianConnectionType hc(this->geometry(),modelHelper,&lps,&x,&y);
+		SizeType i =0, j = 0, type = 0,term = 0, dofs =0;
+		SparseElementType tmp = 0.0;
+		AdditionalDataType additionalData;
+		hc.prepare(ix,i,j,type,tmp,term,dofs,additionalData);
+		LinkType link2 = hc.getKron(A,B,i,j,type,tmp,term,dofs,additionalData);
+		return link2;
+	}
+
 	/**
 		Returns H, the hamiltonian for basis1 and partition
 		$m$ consisting of the external product of basis2$\otimes$basis3
@@ -294,28 +348,6 @@ public:
 				addConnectionsInNaturalBasis(hmatrix,i,j,cm,block,sysEnvOnly,time);
 			}
 		}
-	}
-
-	SizeType getLinkProductStruct(LinkProductStructType**,
-	                              const ModelHelperType&) const
-	{
-		return 0;
-	}
-
-	LinkType getConnection(const SparseMatrixType** A,
-	                       const SparseMatrixType** B,
-	                       SizeType ix,
-	                       const LinkProductStructType& lps,
-	                       const ModelHelperType& modelHelper) const
-	{
-		typename PsimagLite::Vector<SparseElementType>::Type x,y; // bogus
-		HamiltonianConnectionType hc(this->geometry(),modelHelper,&lps,&x,&y);
-		SizeType i =0, j = 0, type = 0,term = 0, dofs =0;
-		SparseElementType tmp = 0.0;
-		AdditionalDataType additionalData;
-		hc.prepare(ix,i,j,type,tmp,term,dofs,additionalData);
-		LinkType link2 = hc.getKron(A,B,i,j,type,tmp,term,dofs,additionalData);
-		return link2;
 	}
 
 private:
