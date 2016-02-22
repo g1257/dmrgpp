@@ -131,7 +131,7 @@ public:
 	      progress_("WaveFunctionTransfLocal")
 	{
 		PsimagLite::OstringStream msg;
-		msg<<"Constructing...";
+		msg<<"Constructing Local";
 		progress_.printline(msg,std::cout);
 	}
 
