@@ -25,7 +25,7 @@ potentialV   32   0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
                   
 Model=FeAsBasedSc
 FeAsMode=INT_PAPER33
-SolverOptions=nowft
+SolverOptions=none
 Version=61289987cdd32b8485213ac0415baf4e9cd16432
 OutputFile=data41.txt
 InfiniteLoopKeptStates=60

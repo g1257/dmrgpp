@@ -14,7 +14,7 @@ Connectors 1 0.5
 Model=Heisenberg
 HeisenbergTwiceS=1
 
-SolverOptions=nowft
+SolverOptions=none
 Version=e953d056acae438cabd88c58df0d92133368d52e
 OutputFile=data22.txt
 InfiniteLoopKeptStates=100
