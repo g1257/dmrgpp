@@ -302,7 +302,7 @@ public:
 
 	FieldType& slowAccess(SizeType i)
 	{
-		assert(i <= offset_);
+		assert(i >= offset_);
 		assert(i-offset_ < data_.size());
 		return data_[i-offset_];
 	}

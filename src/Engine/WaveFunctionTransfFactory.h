@@ -419,6 +419,7 @@ private:
 
 	void beforeWft(const LeftRightSuperType&)
 	{
+		bool hasSu2 = BasisType::useSu2Symmetry();
 		if (stage_==EXPAND_ENVIRON) {
 			if (wsStack_.size()>=1) {
 				dmrgWaveStruct_.ws=wsStack_.top();
@@ -440,13 +441,13 @@ private:
 				throw PsimagLite::RuntimeError("Environ Stack is empty\n");
 			}
 		}
-		if (counter_==0 && stage_==EXPAND_SYSTEM) {
+		if (counter_==0 && stage_==EXPAND_SYSTEM && !hasSu2) {
 			if (weStack_.size()>=1) {
 				dmrgWaveStruct_.we=weStack_.top();
 			}
 		}
 
-		if (counter_==0 && stage_==EXPAND_ENVIRON) {
+		if (counter_==0 && stage_==EXPAND_ENVIRON && !hasSu2) {
 			if (wsStack_.size()>=1) {
 				dmrgWaveStruct_.ws=wsStack_.top();
 			}

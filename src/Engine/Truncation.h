@@ -260,6 +260,7 @@ private:
 		waveFunctionTransformation_.push(ftransform_,EXPAND_SYSTEM,lrsForWft);
 
 		msg<<"new size of basis="<<rSprime.size();
+		msg<<" transform is "<<ftransform_.row()<<" x "<<ftransform_.col();
 		progress_.printline(msg,std::cout);
 	}
 
@@ -278,6 +279,7 @@ private:
 		const LeftRightSuperType& lrsForWft = (twoSiteDmrg) ? lrs_ : lrs;
 		waveFunctionTransformation_.push(ftransform_,EXPAND_ENVIRON,lrsForWft);
 		msg<<"new size of basis="<<rEprime.size();
+		msg<<" transform is "<<ftransform_.row()<<" x "<<ftransform_.col();
 		progress_.printline(msg,std::cout);
 	}
 

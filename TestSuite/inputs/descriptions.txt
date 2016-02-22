@@ -139,4 +139,6 @@ correction vector algorithm (type=3).
 4000) KMH model simple test
 4001) KMH model simple test 8 sites
 #4002 to 4099 are hereby reserved for the KMH model.
+#4100-4200) <--- reserved for kron
+
 #TAGEND DO NOT REMOVE THIS TAG
