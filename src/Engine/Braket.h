@@ -77,7 +77,7 @@ public:
 		braket_[1] = vecStr[2].substr(0,vecStr[2].length()-1);
 		if (!isBraket(1)) {
 			PsimagLite::String str("ObserverInterpreter: syntax error: ");
-			str += braket_[1] + " must be <gs or <time \n";
+			str += braket_[1] + " must be gs> or time> \n";
 			throw PsimagLite::RuntimeError(str);
 		}
 
