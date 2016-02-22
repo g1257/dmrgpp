@@ -275,7 +275,7 @@ private:
 	                                          const SparseMatrixType& weT,
 	                                          const VectorSizeType& nk) const
 	{
-		SizeType volumeOfNk = volumeOf(nk);
+		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType ni=dmrgWaveStruct_.ws.col();
 		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
 		MatrixOrIdentityType wsRef2(twoSiteDmrg_ && nip>volumeOfNk,ws);
@@ -286,8 +286,8 @@ private:
 		SizeType ipkp=ip+kp*nip;
 		for (int k2I=factorsS.getRowPtr(ipkp);k2I<factorsS.getRowPtr(ipkp+1);k2I++) {
 			SizeType alpha = factorsS.getCol(k2I);
-			for (int k=wsRef2.getRowPtr(alpha);k<wsRef2.getRowPtr(alpha+1);k++) {
-				SizeType i = wsRef2.getCol(k);
+			for (SizeType k=wsRef2.getRowPtr(alpha);k<wsRef2.getRowPtr(alpha+1);k++) {
+				SizeType i = wsRef2.getColOrExit(k);
 				for (int k2=weT.getRowPtr(jp);k2<weT.getRowPtr(jp+1);k2++) {
 					SizeType j = weT.getCol(k2);
 					SizeType r = i+j*ni;
@@ -295,6 +295,123 @@ private:
 						SizeType x = factorsSE.getCol(kI);
 						sum += wsRef2.getValue(k)*weT.getValue(k2)*psiSrc.slowAccess(x)*
 						        factorsSE.getValue(kI)*factorsS.getValue(k2I);
+					}
+				}
+			}
+		}
+
+		return sum;
+	}
+
+	template<typename SomeVectorType>
+	void transformVector2FromInfinite(SomeVectorType& psiDest,
+	                                  const SomeVectorType& psiSrc,
+	                                  const LeftRightSuperType& lrs,
+	                                  const VectorSizeType& nk) const
+	{
+		PsimagLite::OstringStream msg;
+		msg<<" Destination sectors "<<psiDest.sectors();
+		msg<<" Source sectors "<<psiSrc.sectors();
+		progress_.printline(msg,std::cout);
+		assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
+
+		VectorType psiV;
+		for (SizeType srcI = 0; srcI < psiSrc.sectors(); ++srcI) {
+			SizeType srcII = psiSrc.sector(srcI);
+			psiSrc.extract(psiV,srcII);
+			SizeType offset = psiSrc.offset(srcII);
+			for (SizeType ii=0;ii<psiDest.sectors();ii++) {
+				SizeType i0 = psiDest.sector(ii);
+				SizeType start = psiDest.offset(i0);
+				SizeType final = psiDest.effectiveSize(i0)+start;
+				VectorType dest(final-start,0.0);
+				if (srcI > 0) psiDest.extract(dest,i0);
+				transformVector2FromInfinite(dest,start,psiV,offset,lrs,nk);
+				psiDest.setDataInSector(dest,i0);
+			}
+		}
+	}
+
+	void transformVector2FromInfinite(VectorType& dest,
+	                                  SizeType destOffset,
+	                                  const VectorType& psiV,
+	                                  SizeType offset,
+	                                  const LeftRightSuperType& lrs,
+	                                  const VectorSizeType& nk) const
+	{
+		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
+		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
+		SizeType nalpha = lrs.left().permutationInverse().size();
+
+		assert(nip==dmrgWaveStruct_.ws.col());
+
+		const FactorsType& factorsS = dmrgWaveStruct_.lrs.left().getFactors();
+		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
+		SparseMatrixType factorsInverseSE, factorsInverseS;
+		transposeConjugate(factorsInverseSE,factorsSE);
+		transposeConjugate(factorsInverseS,factorsS);
+
+		const SparseMatrixType& we = dmrgWaveStruct_.we;
+		const SparseMatrixType& ws = dmrgWaveStruct_.ws;
+		SparseMatrixType wsT;
+		transposeConjugate(wsT,ws);
+
+		PackIndicesType pack1(nalpha);
+		PackIndicesType pack2(nip);
+		for (SizeType x=0;x<dest.size();x++) {
+			SizeType xx = x + offset;
+			SizeType isn,jen;
+			for (int kI=factorsInverseSE.getRowPtr(xx);
+			     kI<factorsInverseSE.getRowPtr(xx+1);
+			     kI++) {
+				pack1.unpack(isn,jen,(SizeType)factorsInverseSE.getCol(kI));
+				SizeType is,jpl;
+				for (int k2I=factorsInverseS.getRowPtr(isn);
+				     k2I<factorsInverseS.getRowPtr(isn+1);
+				     k2I++) {
+					pack2.unpack(is,jpl,(SizeType)factorsInverseS.getCol(k2I));
+
+					dest[x] += factorsInverseSE.getValue(kI)*
+					        factorsInverseS.getValue(k2I)*
+					        createAux2bFromInfinite(psiV,offset,is,jpl,jen,wsT,we,nk);
+				}
+			}
+		}
+	}
+
+	SparseElementType createAux2bFromInfinite(const VectorType& psiSrc,
+	                                          SizeType offset,
+	                                          SizeType ip,
+	                                          SizeType kp,
+	                                          SizeType jp,
+	                                          const SparseMatrixType& wsT,
+	                                          const SparseMatrixType& we,
+	                                          const VectorSizeType& nk) const
+	{
+		SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
+		SparseElementType sum=0;
+		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
+		SizeType ni = dmrgWaveStruct_.lrs.right().size()/volumeOfNk;
+		const FactorsType& factorsE = dmrgWaveStruct_.lrs.right().getFactors();
+		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
+
+		MatrixOrIdentityType weRef(twoSiteDmrg_ && ni>volumeOfNk,we);
+
+		SizeType kpjp = kp+jp*volumeOfNk;
+		assert(kpjp<dmrgWaveStruct_.lrs.right().permutationInverse().size());
+		SizeType kpjpx = dmrgWaveStruct_.lrs.right().permutationInverse(kpjp);
+
+		for (int k2I=factorsE.getRowPtr(kpjpx);k2I<factorsE.getRowPtr(kpjpx+1);k2I++) {
+			SizeType beta = factorsE.getCol(k2I);
+			for (int k=wsT.getRowPtr(ip);k<wsT.getRowPtr(ip+1);k++) {
+				SizeType alpha = wsT.getCol(k);
+				for (int k2=weRef.getRowPtr(beta);k2<weRef.getRowPtr(beta+1);k2++) {
+					SizeType j = weRef.getCol(k2);
+					SizeType r = alpha + j*nalpha;
+					for (int kI=factorsSE.getRowPtr(r);kI<factorsSE.getRowPtr(r+1);kI++) {
+						SizeType x = factorsSE.getCol(kI);
+						sum += wsT.getValue(k)*weRef.getValue(k2)*psiSrc.slowAccess(x)*
+						        factorsSE.getValue(kI)*factorsE.getValue(k2I);
 					}
 				}
 			}
