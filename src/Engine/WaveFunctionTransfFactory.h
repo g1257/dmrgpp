@@ -419,7 +419,6 @@ private:
 
 	void beforeWft(const LeftRightSuperType&)
 	{
-		bool hasSu2 = BasisType::useSu2Symmetry();
 		if (stage_==EXPAND_ENVIRON) {
 			if (wsStack_.size()>=1) {
 				dmrgWaveStruct_.ws=wsStack_.top();
@@ -441,13 +440,13 @@ private:
 				throw PsimagLite::RuntimeError("Environ Stack is empty\n");
 			}
 		}
-		if (counter_==0 && stage_==EXPAND_SYSTEM && !hasSu2) {
+		if (counter_==0 && stage_==EXPAND_SYSTEM) {
 			if (weStack_.size()>=1) {
 				dmrgWaveStruct_.we=weStack_.top();
 			}
 		}
 
-		if (counter_==0 && stage_==EXPAND_ENVIRON && !hasSu2) {
+		if (counter_==0 && stage_==EXPAND_ENVIRON) {
 			if (wsStack_.size()>=1) {
 				dmrgWaveStruct_.ws=wsStack_.top();
 			}
@@ -461,8 +460,14 @@ private:
 	{
 		wftImpl_->transformVector(psiDest,psiSrc,lrs,nk);
 
+		RealType norm1 = std::norm(psiSrc);
+		RealType norm2 = std::norm(psiDest);
 		PsimagLite::OstringStream msg;
-		msg<<"Transformation completed";
+		msg<<"Transformation completed ";
+		if (fabs(norm1-norm2)>1e-5) {
+			msg<<"WARNING: orig. norm= "<<norm1<<" resulting norm= "<<norm2;
+		}
+
 		progress_.printline(msg,std::cout);
 	}
 
