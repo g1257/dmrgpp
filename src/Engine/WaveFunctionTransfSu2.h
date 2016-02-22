@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "WaveFunctionTransfBase.h"
 #include "Random48.h"
 #include "ParallelWftSu2.h"
+#include "MatrixOrIdentity.h"
 
 namespace Dmrg {
 
@@ -111,6 +112,7 @@ public:
 	typedef ParallelWftSu2<VectorWithOffsetType,
 	        DmrgWaveStructType,
 	        LeftRightSuperType> ParallelWftType;
+	typedef MatrixOrIdentity<SparseMatrixType> MatrixOrIdentityType;
 
 	static const SizeType INFINITE = ProgramGlobals::INFINITE;
 	static const SizeType EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
@@ -200,6 +202,105 @@ private:
 		                          dir);
 
 		threadedWft.loopCreate(total, helperWft);
+	}
+
+	template<typename SomeVectorType>
+	void transformVector1FromInfinite(SomeVectorType& psiDest,
+	                                  const SomeVectorType& psiSrc,
+	                                  const LeftRightSuperType& lrs,
+	                                  const VectorSizeType& nk) const
+	{
+		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
+			SizeType i0 = psiDest.sector(ii);
+			transformVector1FromInfinite(psiDest,psiSrc,lrs,i0,nk);
+		}
+	}
+
+	template<typename SomeVectorType>
+	void transformVector1FromInfinite(SomeVectorType& psiDest,
+	                                  const SomeVectorType& psiSrc,
+	                                  const LeftRightSuperType& lrs,
+	                                  SizeType i0,
+	                                  const VectorSizeType& nk) const
+	{
+		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
+		SizeType nip = lrs.super().permutationInverse().size()/
+		        lrs.right().permutationInverse().size();
+
+		assert(lrs.left().permutationInverse().size()==volumeOfNk ||
+		       lrs.left().permutationInverse().size()==dmrgWaveStruct_.ws.row());
+		assert(lrs.right().permutationInverse().size()/volumeOfNk==dmrgWaveStruct_.we.col());
+
+		SizeType start = psiDest.offset(i0);
+		SizeType total = psiDest.effectiveSize(i0);
+		const FactorsType& factorsSE = lrs.super().getFactors();
+		const FactorsType& factorsE = lrs.right().getFactors();
+
+		SparseMatrixType factorsInverseSE, factorsInverseE;
+		transposeConjugate(factorsInverseSE,factorsSE);
+		transposeConjugate(factorsInverseE,factorsE);
+
+		SparseMatrixType ws(dmrgWaveStruct_.ws);
+		SparseMatrixType we(dmrgWaveStruct_.we);
+		SparseMatrixType weT;
+		transposeConjugate(weT,we);
+
+		PackIndicesType pack1(nip);
+		PackIndicesType pack2(volumeOfNk);
+		for (SizeType x=0;x<total;x++) {
+			SizeType ip,beta,kp,jp;
+			SizeType xx = x + start;
+			for (int kI = factorsInverseSE.getRowPtr(xx);
+			     kI < factorsInverseSE.getRowPtr(xx+1);
+			     kI++) {
+				pack1.unpack(ip,beta,(SizeType)factorsInverseSE.getCol(kI));
+				for (int k2I = factorsInverseE.getRowPtr(beta);
+				     k2I < factorsInverseE.getRowPtr(beta+1);
+				     k2I++) {
+					pack2.unpack(kp,jp,(SizeType)factorsInverseE.getCol(k2I));
+					psiDest.fastAccess(i0,x)=factorsInverseSE.getValue(kI)*
+					        factorsInverseE.getValue(k2I)*
+					        createAux1bFromInfinite(psiSrc,ip,kp,jp,ws,weT,nk);
+				}
+			}
+		}
+	}
+
+	template<typename SomeVectorType>
+	SparseElementType createAux1bFromInfinite(const SomeVectorType& psiSrc,
+	                                          SizeType ip,
+	                                          SizeType kp,
+	                                          SizeType jp,
+	                                          const SparseMatrixType& ws,
+	                                          const SparseMatrixType& weT,
+	                                          const VectorSizeType& nk) const
+	{
+		SizeType volumeOfNk = volumeOf(nk);
+		SizeType ni=dmrgWaveStruct_.ws.col();
+		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
+		MatrixOrIdentityType wsRef2(twoSiteDmrg_ && nip>volumeOfNk,ws);
+		const FactorsType& factorsS = dmrgWaveStruct_.lrs.left().getFactors();
+		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
+		SparseElementType sum=0;
+
+		SizeType ipkp=ip+kp*nip;
+		for (int k2I=factorsS.getRowPtr(ipkp);k2I<factorsS.getRowPtr(ipkp+1);k2I++) {
+			SizeType alpha = factorsS.getCol(k2I);
+			for (int k=wsRef2.getRowPtr(alpha);k<wsRef2.getRowPtr(alpha+1);k++) {
+				SizeType i = wsRef2.getCol(k);
+				for (int k2=weT.getRowPtr(jp);k2<weT.getRowPtr(jp+1);k2++) {
+					SizeType j = weT.getCol(k2);
+					SizeType r = i+j*ni;
+					for (int kI=factorsSE.getRowPtr(r);kI<factorsSE.getRowPtr(r+1);kI++) {
+						SizeType x = factorsSE.getCol(kI);
+						sum += wsRef2.getValue(k)*weT.getValue(k2)*psiSrc.slowAccess(x)*
+						        factorsSE.getValue(kI)*factorsS.getValue(k2I);
+					}
+				}
+			}
+		}
+
+		return sum;
 	}
 
 	const SizeType& stage_;
