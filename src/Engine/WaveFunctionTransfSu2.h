@@ -612,15 +612,15 @@ private:
 		const FactorsType& factorsE = dmrgWaveStruct_.lrs.right().getFactors();
 		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
 		MatrixOrIdentityType weRef(twoSiteDmrg_ && ni>volumeOfNk,we);
-		SizeType kpjp = kp+jp*volumeOfNk;
 
-		for (int k2I=factorsE.getRowPtr(kpjp);k2I<factorsE.getRowPtr(kpjp+1);k2I++) {
-			SizeType beta = factorsE.getCol(k2I);
-			SizeType alpha = ip;
-			for (SizeType k2=weRef.getRowPtr(beta);k2<weRef.getRowPtr(beta+1);k2++) {
-				int j = weRef.getColOrExit(k2);
-				if (j < 0) continue;
-				SizeType r = alpha + j*nalpha;
+		for (SizeType k2=weRef.getRowPtr(jp);k2<weRef.getRowPtr(jp+1);k2++) {
+			int j = weRef.getColOrExit(k2);
+			if (j < 0) continue;
+			SizeType kpjp = kp+j*volumeOfNk;
+			for (int k2I=factorsE.getRowPtr(kpjp);k2I<factorsE.getRowPtr(kpjp+1);k2I++) {
+				SizeType beta = factorsE.getCol(k2I);
+				SizeType alpha = ip;
+				SizeType r = alpha + beta*nalpha;
 				for (int kI=factorsSE.getRowPtr(r);kI<factorsSE.getRowPtr(r+1);kI++) {
 					SizeType x = factorsSE.getCol(kI);
 					sum += weRef.getValue(k2)*psiSrc.slowAccess(x)*
