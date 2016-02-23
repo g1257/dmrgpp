@@ -423,19 +423,19 @@ private:
 		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
 		MatrixOrIdentityType weRef(twoSiteDmrg_ && ni>volumeOfNk,we);
 		SizeType end = start + psiSrc.size();
-		SizeType kpjp = kp+jp*volumeOfNk;
 
-		for (int k2I=factorsE.getRowPtr(kpjp);k2I<factorsE.getRowPtr(kpjp+1);k2I++) {
-			SizeType beta = factorsE.getCol(k2I);
-			for (int k=wsT.getRowPtr(ip);k<wsT.getRowPtr(ip+1);k++) {
-				SizeType alpha = wsT.getCol(k);
-				for (SizeType k2=weRef.getRowPtr(beta);k2<weRef.getRowPtr(beta+1);k2++) {
-					int j = weRef.getColOrExit(k2);
-					if (j < 0) continue;
-					SizeType r = alpha + j*nalpha;
+		for (SizeType k2=weRef.getRowPtr(jp);k2<weRef.getRowPtr(jp+1);k2++) {
+			int j = weRef.getColOrExit(k2);
+			if (j < 0) continue;
+			SizeType kpjp = kp+j*volumeOfNk;
+			for (int k2I=factorsE.getRowPtr(kpjp);k2I<factorsE.getRowPtr(kpjp+1);k2I++) {
+				SizeType beta = factorsE.getCol(k2I);
+				for (int k=wsT.getRowPtr(ip);k<wsT.getRowPtr(ip+1);k++) {
+					SizeType alpha = wsT.getCol(k);
+					SizeType r = alpha + beta*nalpha;
 					for (int kI=factorsSE.getRowPtr(r);kI<factorsSE.getRowPtr(r+1);kI++) {
 						SizeType x = factorsSE.getCol(kI);
-						if (x < start || x >= end) continue;
+						assert(x >= start && x < end);
 						x -= start;
 						sum += wsT.getValue(k)*weRef.getValue(k2)*psiSrc[x]*
 						        factorsSE.getValue(kI)*factorsE.getValue(k2I);
