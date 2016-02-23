@@ -360,9 +360,9 @@ private:
 	}
 
 	void transformVector2FromInfinite(VectorType& dest,
-	                                  SizeType start,
+	                                  SizeType startDest,
 	                                  const VectorType& psiV,
-	                                  SizeType offset,
+	                                  SizeType startSrc,
 	                                  const LeftRightSuperType& lrs,
 	                                  const VectorSizeType& nk) const
 	{
@@ -386,7 +386,7 @@ private:
 		PackIndicesType pack1(nalpha);
 		PackIndicesType pack2(nip);
 		for (SizeType x=0;x<dest.size();x++) {
-			SizeType xx = x + offset;
+			SizeType xx = x + startDest;
 			dest[x] = 0.0;
 			SizeType isn,jen;
 			for (int kI=factorsInverseSE.getRowPtr(xx);
@@ -398,10 +398,9 @@ private:
 				     k2I<factorsInverseS.getRowPtr(isn+1);
 				     k2I++) {
 					pack2.unpack(is,jpl,(SizeType)factorsInverseS.getCol(k2I));
-
 					dest[x] += factorsInverseSE.getValue(kI)*
 					        factorsInverseS.getValue(k2I)*
-					        createAux2bFromInfinite(psiV,start,is,jpl,jen,wsT,we,nk);
+					        createAux2bFromInfinite(psiV,startSrc,is,jpl,jen,wsT,we,nk);
 				}
 			}
 		}
@@ -436,7 +435,7 @@ private:
 					SizeType r = alpha + j*nalpha;
 					for (int kI=factorsSE.getRowPtr(r);kI<factorsSE.getRowPtr(r+1);kI++) {
 						SizeType x = factorsSE.getCol(kI);
-						assert(x >= start && x < end);
+						if (x < start || x >= end) continue;
 						x -= start;
 						sum += wsT.getValue(k)*weRef.getValue(k2)*psiSrc[x]*
 						        factorsSE.getValue(kI)*factorsE.getValue(k2I);
@@ -592,7 +591,7 @@ private:
 
 					psiDest.fastAccess(i0,x-start) += factorsInverseSE.getValue(kI)*
 					        factorsInverseS.getValue(k2I)*
-					        transformVector2bounceAux(psiSrc,start,is,jpl,jen,we,nk);
+					        transformVector2bounceAux(psiSrc,is,jpl,jen,we,nk);
 				}
 			}
 		}
@@ -600,7 +599,6 @@ private:
 
 	template<typename SomeVectorType>
 	SparseElementType transformVector2bounceAux(const SomeVectorType& psiSrc,
-	                                            SizeType start,
 	                                            SizeType ip,
 	                                            SizeType kp,
 	                                            SizeType jp,
@@ -614,7 +612,6 @@ private:
 		const FactorsType& factorsE = dmrgWaveStruct_.lrs.right().getFactors();
 		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
 		MatrixOrIdentityType weRef(twoSiteDmrg_ && ni>volumeOfNk,we);
-		SizeType end = start + psiSrc.size();
 		SizeType kpjp = kp+jp*volumeOfNk;
 
 		for (int k2I=factorsE.getRowPtr(kpjp);k2I<factorsE.getRowPtr(kpjp+1);k2I++) {
@@ -626,7 +623,6 @@ private:
 				SizeType r = alpha + j*nalpha;
 				for (int kI=factorsSE.getRowPtr(r);kI<factorsSE.getRowPtr(r+1);kI++) {
 					SizeType x = factorsSE.getCol(kI);
-					assert(x >= start && x < end);
 					sum += weRef.getValue(k2)*psiSrc.slowAccess(x)*
 					        factorsSE.getValue(kI)*factorsE.getValue(k2I);
 				}
