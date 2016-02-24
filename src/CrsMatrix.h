@@ -159,7 +159,7 @@ public:
 		ncol_ = a.ncol_;
 	}
 
-	CrsMatrix(const Matrix<T>& a)
+	explicit CrsMatrix(const Matrix<T>& a)
 	{
 		int counter=0;
 		double eps = 0;
