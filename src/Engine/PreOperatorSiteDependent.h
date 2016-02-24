@@ -111,7 +111,7 @@ public:
 		SparseMatrixType opCdown = model_.naturalOperator("c",site,dof2_).data;
 		SparseMatrixType opCupTranspose;
 		transposeConjugate(opCupTranspose,opCup);
-		SparseMatrixType A = opCupTranspose * opCdown;
+		SparseMatrixType A = opCupTranspose * opCdown; //<--- FIXME CHECK
 		Su2RelatedType su2Related1;
 		OperatorType opA(A,1,std::pair<SizeType,SizeType>(0,0),1,su2Related1);
 

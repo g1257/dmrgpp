@@ -460,9 +460,8 @@ public:
 			multiply(atmp,
 			         creationMatrix[orbital+orbital+modelParameters_.orbitals].data,
 			        creationMatrix[orbital].data);
-			SparseMatrixType tmp(atmp);
 			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp,
+			return OperatorType(atmp,
 			                    1.0,
 			                    typename OperatorType::PairType(0,0),
 			                    1.0,

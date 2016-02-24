@@ -257,14 +257,8 @@ public:
 		}
 
 		if (what=="-") {
-			SparseMatrixType tmp2;
-			transposeConjugate(tmp2,creationMatrix[2].data);
-			const OperatorType& tmpOp = creationMatrix[2];
-			return OperatorType(tmp2,
-			                    tmpOp.fermionSign,
-			                    tmpOp.jm,
-			                    tmpOp.angularFactor,
-			                    tmpOp.su2Related);
+			creationMatrix[2].conjugate();
+			return creationMatrix[2];
 		}
 
 		if (what=="z") {
