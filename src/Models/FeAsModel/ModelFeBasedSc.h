@@ -325,9 +325,9 @@ public:
 		}
 	}
 
-	MatrixType naturalOperator(const PsimagLite::String& what,
-	                           SizeType site,
-	                           SizeType dof) const
+	OperatorType naturalOperator(const PsimagLite::String& what,
+	                             SizeType site,
+	                             SizeType dof) const
 	{
 		BlockType block;
 		block.resize(1);
@@ -343,17 +343,27 @@ public:
 		if (what2 == "i" || what2=="identity") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			MatrixType tmp(nrow,nrow);
-			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
-			return tmp;
+			SparseMatrixType tmp(nrow,nrow);
+			tmp.makeDiagonal(nrow,1.0);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what2 == "0") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			MatrixType tmp(nrow,nrow);
-			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 0.0;
-			return tmp;
+			SparseMatrixType tmp(nrow,nrow);
+			tmp.makeDiagonal(nrow,0.0);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what2=="+") {
@@ -364,7 +374,13 @@ public:
 			MatrixType tmp(nrow,nrow);
 			tmp += multiplyTc(creationMatrix[dof].data,
 			                  creationMatrix[dof+modelParameters_.orbitals].data);
-			return tmp;
+			SparseMatrixType tmp2(tmp);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp2,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 		if (what2=="-") {
 			VectorSizeType allowed(modelParameters_.orbitals,0);
@@ -374,7 +390,13 @@ public:
 			MatrixType tmp(nrow,nrow);
 			tmp += multiplyTc(creationMatrix[dof+modelParameters_.orbitals].data,
 			        creationMatrix[dof].data);
-			return tmp;
+			SparseMatrixType tmp2(tmp);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp2,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 		if (what2=="z") {
 			VectorSizeType allowed(modelParameters_.orbitals,0);
@@ -388,7 +410,14 @@ public:
 			tmp2 += multiplyTc(creationMatrix[dof+modelParameters_.orbitals].data,
 			        creationMatrix[dof+modelParameters_.orbitals].data);
 
-			return tmp-tmp2;
+			tmp = tmp-tmp2;
+			SparseMatrixType tmp3(tmp);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp3,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 		if (what2=="n") {
 			VectorSizeType allowed(2*modelParameters_.orbitals,0);
@@ -397,20 +426,21 @@ public:
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			MatrixType tmp =
 			        multiplyTc(creationMatrix[dof].data,creationMatrix[dof].data);
-			return tmp;
+			SparseMatrixType tmp2(tmp);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp2,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what2=="c") {
 			VectorSizeType allowed(2*modelParameters_.orbitals,0);
-			for (SizeType x = 0; x < allowed.size(); ++x)
-				allowed[x] = x;
+			for (SizeType x = 0; x < allowed.size(); ++x) allowed[x] = x;
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			MatrixType tmp;
-			SparseMatrixType cdagger;
-			transposeConjugate(cdagger,
-			                   creationMatrix[orbital + spin*modelParameters_.orbitals].data);
-			crsMatrixToFullMatrix(tmp,cdagger);
-			return tmp;
+			creationMatrix[orbital + spin*modelParameters_.orbitals].conjugate();
+			return creationMatrix[orbital + spin*modelParameters_.orbitals];
 		}
 
 		if (what2=="c\'") {
@@ -418,11 +448,7 @@ public:
 			for (SizeType x = 0; x < allowed.size(); ++x)
 				allowed[x] = x;
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			MatrixType tmp;
-			SparseMatrixType c = creationMatrix[orbital +
-			        spin*modelParameters_.orbitals].data;
-			crsMatrixToFullMatrix(tmp,c);
-			return tmp;
+			return creationMatrix[orbital + spin*modelParameters_.orbitals];
 		}
 
 		if (what2=="d") { // delta = c^\dagger * c^dagger
@@ -434,13 +460,18 @@ public:
 			multiply(atmp,
 			         creationMatrix[orbital+orbital+modelParameters_.orbitals].data,
 			        creationMatrix[orbital].data);
-			MatrixType tmp;
-			crsMatrixToFullMatrix(tmp,atmp);
-			return tmp;
+			SparseMatrixType tmp(atmp);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
-		std::cerr<<"what="<<what<<"\n";
-		throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
+		PsimagLite::String str("ModelFeBasedSc: naturalOperator: no label ");
+		str += what + "\n";
+		throw PsimagLite::RuntimeError(str);
 	}
 
 	//! find all states in the natural basis for a block of n sites

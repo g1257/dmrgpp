@@ -138,10 +138,9 @@ public:
 	                             const BlockType& block,
 	                             const RealType& time) const = 0;
 
-	virtual PsimagLite::Matrix<ComplexOrRealType>
-	naturalOperator(const PsimagLite::String& what,
-	                SizeType site,
-	                SizeType dof) const = 0;
+	virtual OperatorType naturalOperator(const PsimagLite::String& what,
+	                                     SizeType site,
+	                                     SizeType dof) const = 0;
 
 	virtual void findElectrons(VectorSizeType& electrons,
 	                           const HilbertBasisType& basis,
@@ -252,8 +251,8 @@ public:
 	{
 		BlockType block(1,site);
 		HilbertBasisType natBasis;
-                typename PsimagLite::Vector<SizeType>::Type quantumNumbs;
-                this->setNaturalBasis(natBasis,quantumNumbs,block);
+		typename PsimagLite::Vector<SizeType>::Type quantumNumbs;
+		this->setNaturalBasis(natBasis,quantumNumbs,block);
 		std::cout<<"block="<<block;
 		std::cout<<"natBasis="<<natBasis;
 		std::cout<<"quantumNumbs="<<quantumNumbs;

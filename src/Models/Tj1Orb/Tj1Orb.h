@@ -236,9 +236,9 @@ public:
 
 	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
 	 *unmangled (natural) basis of one-site */
-	MatrixType naturalOperator(const PsimagLite::String& what,
-	                                                      SizeType site,
-	                                                      SizeType dof) const
+	OperatorType naturalOperator(const PsimagLite::String& what,
+	                             SizeType site,
+	                             SizeType dof) const
 	{
 		BlockType block;
 		block.resize(1);
@@ -251,53 +251,47 @@ public:
 		if (what == "i" || what=="identity") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			MatrixType tmp(nrow,nrow);
-			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
-			return tmp;
+			SparseMatrixType tmp(nrow,nrow);
+			tmp.makeDiagonal(nrow,1.0);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what=="+") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			MatrixType tmp;
-			crsMatrixToFullMatrix(tmp,creationMatrix[2].data);
-			return tmp;
+			return creationMatrix[2];
 		}
 
 		if (what=="-") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			SparseMatrixType tmp2;
-			transposeConjugate(tmp2,creationMatrix[2].data);
-			MatrixType tmp;
-			crsMatrixToFullMatrix(tmp,tmp2);
-			return tmp;
+			creationMatrix[2].conjugate();
+			return creationMatrix[2];
 		}
 
 		if (what=="z") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			MatrixType tmp;
-			crsMatrixToFullMatrix(tmp,creationMatrix[3].data);
-			return tmp;
+			return creationMatrix[3];
 		}
 
 		if (what=="c") {
 			VectorSizeType allowed(2,0);
 			allowed[1] = 1;
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			MatrixType tmp;
-			assert(dof<2);
-			crsMatrixToFullMatrix(tmp,creationMatrix[dof].data);
-			return tmp;
+			assert(dof<2 && creationMatrix.size() > dof);
+			return creationMatrix[dof];
 		}
 
 		if (what=="n") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			MatrixType tmp;
-			crsMatrixToFullMatrix(tmp,creationMatrix[4].data);
-			return tmp;
+			return creationMatrix[4].data;
 		}
 
 		if (what=="nup") {
@@ -305,7 +299,12 @@ public:
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			MatrixType cup = naturalOperator("c",site,SPIN_UP);
 			MatrixType nup = multiplyTransposeConjugate(cup,cup);
-			return nup;
+			OperatorType::Su2Related su2Related;
+			return OperatorType(nup,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what=="ndown") {
@@ -313,11 +312,17 @@ public:
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			MatrixType cdown = naturalOperator("c",site,SPIN_DOWN);
 			MatrixType ndown = multiplyTransposeConjugate(cdown,cdown);
-			return ndown;
+			OperatorType::Su2Related su2Related;
+			return OperatorType(ndown,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
-		std::cerr<<"Argument: "<<what<<" "<<__FILE__<<"\n";
-		throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
+		PsimagLite::String str("Tj1Orb: naturalOperator: no label ");
+		str += what + "\n";
+		throw PsimagLite::RuntimeError(str);
 	}
 
 	//! find total number of electrons for each state in the basis

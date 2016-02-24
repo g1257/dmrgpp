@@ -219,9 +219,9 @@ public:
 		setSz(creationMatrix,block);
 	}
 
-	PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
-	                                                      SizeType site,
-	                                                      SizeType dof) const
+	OperatorType naturalOperator(const PsimagLite::String& what,
+	                             SizeType site,
+	                             SizeType dof) const
 	{
 		BlockType block;
 		block.resize(1);
@@ -232,31 +232,25 @@ public:
 		if (what=="z") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			PsimagLite::Matrix<SparseElementType> tmp;
 			SizeType x = 2*orbitals_+1;
-			crsMatrixToFullMatrix(tmp,creationMatrix[x].data);
-			return tmp;
+			return creationMatrix[x];
 		}
 
 		if (what=="+") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			PsimagLite::Matrix<SparseElementType> tmp;
 			SizeType x = 2*orbitals_;
-			crsMatrixToFullMatrix(tmp,creationMatrix[x].data);
-			return tmp;
+			return creationMatrix[x];
 		}
 
 		if (what=="-") { // delta = c^\dagger * c^dagger
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			PsimagLite::Matrix<SparseElementType> tmp;
 			SizeType x = 2*orbitals_;
-			SparseMatrixType tmp2;
-			transposeConjugate(tmp2,creationMatrix[x].data);
-			crsMatrixToFullMatrix(tmp,tmp2);
-			return tmp;
+			creationMatrix[x].conjugate();
+			return creationMatrix[x];
 		}
+
 		return modelFeAs_.naturalOperator(what,site,dof);
 	}
 

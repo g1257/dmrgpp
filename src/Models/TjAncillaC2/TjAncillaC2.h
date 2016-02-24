@@ -230,9 +230,9 @@ public:
 
 	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
 	 *unmangled (natural) basis of one-site */
-	MatrixType naturalOperator(const PsimagLite::String& what,
-	                           SizeType site,
-	                           SizeType dof) const
+	OperatorType naturalOperator(const PsimagLite::String& what,
+	                             SizeType site,
+	                             SizeType dof) const
 	{
 		BlockType block;
 		block.resize(1);
@@ -243,65 +243,70 @@ public:
 		SizeType nrow = creationMatrix[0].data.row();
 
 		if (what == "i" || what=="identity") {
-			MatrixType tmp(nrow,nrow);
-			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
-			return tmp;
+			SparseMatrixType tmp(nrow,nrow);
+			tmp.makeDiagonal(nrow,1.0);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what=="+") {
-			MatrixType tmp;
-			crsMatrixToFullMatrix(tmp,creationMatrix[2].data);
-			return tmp;
+			return creationMatrix[2];
 		}
 
 		if (what=="-") {
-			SparseMatrixType tmp2;
-			transposeConjugate(tmp2,creationMatrix[2].data);
-			MatrixType tmp;
-			crsMatrixToFullMatrix(tmp,tmp2);
-			return tmp;
+			creationMatrix[2].conjugate();
+			return creationMatrix[2];
 		}
 
 		if (what=="z") {
-			MatrixType tmp;
-			crsMatrixToFullMatrix(tmp,creationMatrix[3].data);
-			return tmp;
+			return creationMatrix[3];
 		}
 
 		if (what=="c") {
-			MatrixType tmp;
 			assert(dof<2);
-			crsMatrixToFullMatrix(tmp,creationMatrix[dof].data);
-			return tmp;
+			return creationMatrix[dof];
 		}
 
 		if (what=="n") {
-			MatrixType tmp;
-			crsMatrixToFullMatrix(tmp,creationMatrix[4].data);
-			return tmp;
+			return creationMatrix[4];
 		}
 
 		if (what=="d") {
-			MatrixType tmp;
 			assert(creationMatrix.size() > 5 + dof);
-			crsMatrixToFullMatrix(tmp,creationMatrix[5+dof].data);
-			return tmp;
+			return creationMatrix[5+dof];
 		}
 
 		if (what=="nup") {
 			MatrixType cup = naturalOperator("c",site,SPIN_UP);
 			MatrixType nup = multiplyTransposeConjugate(cup,cup);
-			return nup;
+			SparseMatrixType tmp3(nup);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp3,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what=="ndown") {
 			MatrixType cdown = naturalOperator("c",site,SPIN_DOWN);
 			MatrixType ndown = multiplyTransposeConjugate(cdown,cdown);
-			return ndown;
+			SparseMatrixType tmp3(ndown);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp3,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
-		std::cerr<<"Argument: "<<what<<" "<<__FILE__<<"\n";
-		throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
+		PsimagLite::String str("TjAncillaC2: naturalOperator: no label ");
+		str += what + "\n";
+		throw PsimagLite::RuntimeError(str);
 	}
 
 	//! find total number of electrons for each state in the basis

@@ -195,9 +195,9 @@ public:
 		setNi(creationMatrix,block);
 	}
 
-	PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
-	                                                      SizeType site,
-	                                                      SizeType dof) const
+	OperatorType naturalOperator(const PsimagLite::String& what,
+	                             SizeType site,
+	                             SizeType dof) const
 	{
 		BlockType block;
 		block.resize(1);
@@ -209,8 +209,7 @@ public:
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> tmp;
-			crsMatrixToFullMatrix(tmp,creationMatrix[2].data);
-			return tmp;
+			return creationMatrix[2];
 		} else {
 			return modelHubbard_.naturalOperator(what,site,dof);
 		}

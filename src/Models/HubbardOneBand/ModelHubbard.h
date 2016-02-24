@@ -267,9 +267,9 @@ public:
 
 	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
 	 * unmangled (natural) basis of one-site */
-	PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
-	                                                      SizeType site,
-	                                                      SizeType dof) const
+	OperatorType naturalOperator(const PsimagLite::String& what,
+	                             SizeType site,
+	                             SizeType dof) const
 	{
 		BlockType block;
 		block.resize(1);
@@ -282,11 +282,14 @@ public:
 		SizeType nrow = creationMatrix[0].data.row();
 
 		if (what == "i" || what=="identity") {
-			VectorSizeType allowed(1,0);
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
-			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
-			return tmp;
+			SparseMatrixType tmp(nrow,nrow);
+			tmp.makeDiagonal(nrow,1.0);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what=="+") {
@@ -294,7 +297,13 @@ public:
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> tmp =
 			        multiplyTc(creationMatrix[iup].data,creationMatrix[idown].data);
-			return tmp;
+			SparseMatrixType tmp2(tmp);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp2,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what=="-") {
@@ -302,7 +311,13 @@ public:
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> tmp =
 			        multiplyTc(creationMatrix[idown].data,creationMatrix[iup].data);
-			return tmp;
+			SparseMatrixType tmp2(tmp);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp2,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what=="z") {
@@ -312,7 +327,14 @@ public:
 			        multiplyTc(creationMatrix[iup].data,creationMatrix[iup].data);
 			PsimagLite::Matrix<SparseElementType> tmp2 =
 			        multiplyTc(creationMatrix[idown].data,creationMatrix[idown].data);
-			return tmp-tmp2;
+			tmp = tmp-tmp2;
+			SparseMatrixType tmp3(tmp);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp3,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what=="n") {
@@ -323,10 +345,8 @@ public:
 			VectorSizeType allowed(2,0);
 			allowed[1] = 1;
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			PsimagLite::Matrix<SparseElementType> tmp;
 			assert(dof<creationMatrix.size());
-			crsMatrixToFullMatrix(tmp,creationMatrix[dof].data);
-			return tmp;
+			return creationMatrix[dof];
 		}
 
 		if (what=="nup") {
@@ -336,7 +356,13 @@ public:
 			        naturalOperator("c",site,SPIN_UP);
 			PsimagLite::Matrix<SparseElementType> nup =
 			        multiplyTransposeConjugate(cup,cup);
-			return nup;
+			SparseMatrixType tmp3(nup);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp3,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what=="ndown") {
@@ -346,7 +372,13 @@ public:
 			        naturalOperator("c",site,SPIN_DOWN);
 			PsimagLite::Matrix<SparseElementType> ndown =
 			        multiplyTransposeConjugate(cdown,cdown);
-			return ndown;
+			SparseMatrixType tmp3(ndown);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp3,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what=="d") {
@@ -356,11 +388,19 @@ public:
 			        naturalOperator("c",site,SPIN_UP);
 			PsimagLite::Matrix<SparseElementType> cdown =
 			        naturalOperator("c",site,SPIN_DOWN);
-			return (cup*cdown);
+			cup = (cup*cdown);
+			SparseMatrixType tmp3(cup);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp3,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
-		std::cerr<<"Argument: "<<what<<" "<<__FILE__<<"\n";
-		throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
+		PsimagLite::String str("ModelHubbard: naturalOperator: no label ");
+		str += what + "\n";
+		throw PsimagLite::RuntimeError(str);
 	}
 
 	/** \cppFunction{!PTEX_THISFUNCTION} Sets electrons to the total number of

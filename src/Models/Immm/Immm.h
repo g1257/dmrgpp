@@ -275,9 +275,9 @@ public:
 		creationMatrix.push_back(nOp);
 	}
 
-	MatrixType naturalOperator(const PsimagLite::String& what,
-	                           SizeType site,
-	                           SizeType dof) const
+	OperatorType naturalOperator(const PsimagLite::String& what,
+	                             SizeType site,
+	                             SizeType dof) const
 	{
 		BlockType block;
 		block.resize(1);
@@ -300,17 +300,13 @@ public:
 		}
 
 		if (what=="n") {
-			MatrixType tmp;
-			crsMatrixToFullMatrix(tmp,creationMatrix[creationMatrix.size()-1].data);
-			return tmp;
+			assert(creationMatrix.size() > 0);
+			return creationMatrix[creationMatrix.size()-1];
 		}
 
 		if (what=="c") {
-			SparseMatrixType tmp2;
-			transposeConjugate(tmp2,creationMatrix[orbital + spin*orbitals].data);
-			MatrixType tmp;
-			crsMatrixToFullMatrix(tmp,tmp2);
-			return tmp;
+			creationMatrix[orbital + spin*orbitals].conjugate();
+			return creationMatrix[orbital + spin*orbitals];
 		}
 
 		if (what=="nup") {
@@ -325,16 +321,21 @@ public:
 			SparseMatrixType tmp2;
 			transposeConjugate(tmp2,creationMatrix[orbital + spin*orbitals].data);
 			SparseMatrixType tmp3 = creationMatrix[orbital + spin*orbitals].data * tmp2;
-			MatrixType tmp;
-			crsMatrixToFullMatrix(tmp,tmp3);
-			return tmp;
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp3,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what=="d") { // delta = c^\dagger * c^dagger
 			throw PsimagLite::RuntimeError("delta unimplemented for this model\n");
 		}
-		std::cerr<<"what="<<what<<"\n";
-		throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
+
+		PsimagLite::String str("Immm: naturalOperator: no label ");
+		str += what + "\n";
+		throw PsimagLite::RuntimeError(str);
 	}
 
 	//! find all states in the natural basis for a block of n sites

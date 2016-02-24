@@ -223,9 +223,9 @@ public:
 		}
 	}
 
-	MatrixType naturalOperator(const PsimagLite::String& what,
-	                           SizeType site,
-	                           SizeType dof) const
+	OperatorType naturalOperator(const PsimagLite::String& what,
+	                             SizeType site,
+	                             SizeType dof) const
 	{
 		BlockType block;
 		block.resize(1);
@@ -237,15 +237,25 @@ public:
 		PsimagLite::String what2 = what;
 
 		if (what2 == "i" || what2=="identity") {
-			MatrixType tmp(nrow,nrow);
-			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
-			return tmp;
+			SparseMatrixType tmp(nrow,nrow);
+			tmp.makeDiagonal(nrow,1.0);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what2 == "0") {
-			MatrixType tmp(nrow,nrow);
-			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 0.0;
-			return tmp;
+			SparseMatrixType tmp(nrow,nrow);
+			tmp.makeDiagonal(nrow,0.0);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what == "c") {
@@ -256,13 +266,12 @@ public:
 				throw PsimagLite::RuntimeError(str);
 			}
 
-			MatrixType tmp;
-			crsMatrixToFullMatrix(tmp,creationMatrix[dof].data);
-			return tmp;
+			return creationMatrix[dof];
 		}
 
-		std::cerr<<"what="<<what<<"\n";
-		throw std::logic_error("naturalOperator: invalid argument\n");
+		PsimagLite::String str("HubbardAncilla: naturalOperator: no label ");
+		str += what + "\n";
+		throw PsimagLite::RuntimeError(str);
 	}
 
 

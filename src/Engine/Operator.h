@@ -212,6 +212,12 @@ struct Operator {
 		return total;
 	}
 
+	void conjugate()
+	{
+		SparseMatrixType data2 = data;
+		transposeConjugate(data,data2);
+	}
+
 	void save(std::ostream& os) const
 	{
 		os<<"TSPOperator=raw\n";

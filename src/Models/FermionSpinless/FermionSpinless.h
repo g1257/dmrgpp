@@ -239,9 +239,9 @@ public:
 
 	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
 	 * unmangled (natural) basis of one-site */
-	PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
-	                                                      SizeType site,
-	                                                      SizeType) const
+	OperatorType naturalOperator(const PsimagLite::String& what,
+	                             SizeType site,
+	                             SizeType) const
 	{
 		BlockType block;
 		block.resize(1);
@@ -252,27 +252,29 @@ public:
 		SizeType nrow = creationMatrix[0].data.row();
 
 		if (what == "i" || what=="identity") {
-			PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
-			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
-			return tmp;
+			SparseMatrixType tmp(nrow,nrow);
+			tmp.makeDiagonal(nrow,1.0);
+			OperatorType::Su2Related su2Related;
+			return OperatorType(tmp,
+			                    1.0,
+			                    OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what=="n") {
-			PsimagLite::Matrix<SparseElementType> tmp;
 			assert(1<creationMatrix.size());
-			crsMatrixToFullMatrix(tmp,creationMatrix[1].data);
-			return tmp;
+			return creationMatrix[1];
 		}
 
 		if (what=="c") {
-			PsimagLite::Matrix<SparseElementType> tmp;
 			assert(0<creationMatrix.size());
-			crsMatrixToFullMatrix(tmp,creationMatrix[0].data);
-			return tmp;
+			return creationMatrix[0].data;
 		}
 
-		std::cerr<<"Argument: "<<what<<" "<<__FILE__<<"\n";
-		throw std::logic_error("naturalOperator(): invalid argument\n");
+		PsimagLite::String str("FermionSpinless: naturalOperator: no label ");
+		str += what + "\n";
+		throw PsimagLite::RuntimeError(str);
 	}
 
 	/** \cppFunction{!PTEX_THISFUNCTION} Sets electrons to the total number of

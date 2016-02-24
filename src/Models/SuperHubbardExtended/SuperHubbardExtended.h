@@ -167,9 +167,9 @@ public:
 		setSpinMatrices(creationMatrix,block);
 	}
 
-	PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
-	                                                      SizeType site,
-	                                                      SizeType dof) const
+	OperatorType naturalOperator(const PsimagLite::String& what,
+	                             SizeType site,
+	                             SizeType dof) const
 	{
 		SizeType matrixIndex = findMatrixIndex(what);
 
@@ -181,9 +181,8 @@ public:
 		block[0]=site;
 		VectorOperatorType creationMatrix;
 		setSpinMatrices(creationMatrix,block);
-		PsimagLite::Matrix<SparseElementType> tmp;
-		crsMatrixToFullMatrix(tmp,creationMatrix[matrixIndex-3].data);
-		return tmp;
+		assert(creationMatrix.size() > 2);
+		return creationMatrix[matrixIndex-3];
 	}
 
 	//! find total number of electrons for each state in the basis
