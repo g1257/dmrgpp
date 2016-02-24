@@ -137,10 +137,6 @@ private:
 
 	OperatorType internal_(PsimagLite::String& opLabel, int& site2) const
 	{
-		PairType jm1(0,0);
-		RealType angularFactor1 = 1.0;
-		Su2RelatedType su2Related1;
-
 		if (site2 < 0) site2 = extractSiteIfAny(opLabel);
 
 		SizeType site = (site2 < 0) ? 0 : site2;

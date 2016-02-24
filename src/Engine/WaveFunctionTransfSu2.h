@@ -422,7 +422,6 @@ private:
 		const FactorsType& factorsE = dmrgWaveStruct_.lrs.right().getFactors();
 		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
 		MatrixOrIdentityType weRef(twoSiteDmrg_ && ni>volumeOfNk,we);
-		SizeType end = start + psiSrc.size();
 
 		for (SizeType k2=weRef.getRowPtr(jp);k2<weRef.getRowPtr(jp+1);k2++) {
 			int j = weRef.getColOrExit(k2);
