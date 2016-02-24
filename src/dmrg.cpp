@@ -19,8 +19,8 @@ std::ofstream GlobalCoutStream;
 
 void usageOperator()
 {
-	std::cerr<<"USAGE is operator -f filename -F ";
-	std::cerr<<"fermionicSign -l label [-d dof] [-s site] [-t]\n";
+	std::cerr<<"USAGE is operator -f filename ";
+	std::cerr<<"-l label [-d dof] [-s site] [-t]\n";
 }
 
 void restoreCoutBuffer()
@@ -225,22 +225,18 @@ int main(int argc,char *argv[])
 	\item[-l] [Mandatory, String] The label or name for this operator.
 	This is model dependent. For example to obtain $c_{\uparrow}$ for
 	the Hubbard model, say \begin{verbatim}
-	./operator -l c -f input.inp -F -1\end{verbatim}
+	./operator -l c -f input.inp\end{verbatim}
 	See the function naturalOperator for each Model.
 
 	\item[-d] [Optional, Integer] Degree of freedom (spin, orbital or
 	combination of both) to use. This is model dependent. For example to
 	obtain $c_\downarrow$ for the Hubbard model, say
-	\begin{verbatim}./operator -l c -d 1 -f input.inp -F -1\end{verbatim}
+	\begin{verbatim}./operator -l c -d 1 -f input.inp\end{verbatim}
 	See the function naturalOperator for each Model. Defaults to 0.
-
-	\item[-F] [Mandatory, 1 or -1] If this operator commutes on
-	\emph{different} sites say 1 here. If it anticommutes on
-	\emph{different} sites say -1.
 
 	\item[-t] [Optional, Void] Transpose the operator. For example to
 	obtain $c^\dagger_\uparrow$ for a Hubbard model, say
-	\begin{verbatim}./operator -l c -t -f input.inp -F -1\end{verbatim}
+	\begin{verbatim}./operator -l c -t -f input.inp\end{verbatim}
 	\end{itemize}
 	 */
 	while ((opt = getopt(argc, argv,"f:s:l:d:F:o:p:tkV")) != -1) {
@@ -268,8 +264,9 @@ int main(int argc,char *argv[])
 			keepFiles = true;
 			break;
 		case 'F':
-			options.fermionicSign = atoi(optarg);
-			break;
+			std::cerr<<argv[0]<<": Omit the \"-F\". It's not needed anymore.\n";
+			std::cerr<<"\t It is implied by the label: n=bosonic, c=fermionic, etc\n";
+			return 2;
 		case 'p':
 			precision = atoi(optarg);
 			std::cout.precision(precision);

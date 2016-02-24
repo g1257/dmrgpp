@@ -33,7 +33,6 @@ struct OperatorOptions {
 	    : site(0),
 	      dof(0),
 	      label(""),
-	      fermionicSign(0),
 	      transpose(false),
 	      enabled(false)
 	{}
@@ -41,7 +40,6 @@ struct OperatorOptions {
 	SizeType site;
 	SizeType dof;
 	PsimagLite::String label;
-	int fermionicSign;
 	bool transpose;
 	bool enabled;
 };
@@ -63,7 +61,7 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 		return;
 	}
 
-	if (obsOptions.label=="" || obsOptions.fermionicSign == 0) {
+	if (obsOptions.label=="") {
 		usageOperator();
 		return;
 	}

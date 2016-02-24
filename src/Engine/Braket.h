@@ -19,7 +19,7 @@ class Braket {
 
 	struct NaturalOpStruct {
 		NaturalOpStruct(PsimagLite::String label_)
-		    : fermionSign(1),dof(0),label(label_),transpose(false)
+		    : dof(0),label(label_),transpose(false)
 		{
 			SizeType i = 0;
 			for (; i < label_.length(); ++i) {
@@ -41,11 +41,8 @@ class Braket {
 			}
 
 			dof = atoi(label_.substr(j+1,i).c_str());
-			if (i == label_.length()) return;
-			fermionSign = -1;
 		}
 
-		int fermionSign;
 		SizeType dof;
 		PsimagLite::String label;
 		bool transpose;
@@ -158,14 +155,9 @@ private:
 			}
 
 			NaturalOpStruct nos(opLabel);
-			SparseMatrixType m = model_.naturalOperator(nos.label,
-			                                            site,
-			                                            nos.dof).data;
-			SparseMatrixType m2 = m;
+			nup = model_.naturalOperator(nos.label,site,nos.dof);
 			if (nos.transpose)
-				transposeConjugate(m2,m);
-
-			nup = OperatorType(m2,nos.fermionSign,jm1,angularFactor1,su2Related1);
+				nup.conjugate();
 		}
 
 		SizeType foundSize = nup.data.row();
