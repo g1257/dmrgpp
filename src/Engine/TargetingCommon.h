@@ -427,28 +427,23 @@ public:
 		const ModelType& model = targetHelper_.model();
 
 		SizeType site = block[0];
-		SparseMatrixType tmpC(model.naturalOperator("nup",site,0));
-		int fermionSign1 = 1;
-		const std::pair<SizeType,SizeType> jm1(0,0);
-		RealType angularFactor1 = 1.0;
-		typename OperatorType::Su2RelatedType su2Related1;
-		OperatorType nup(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
-
-		nup.data = tmpC;
-		nup.fermionSign = 1;
+		OperatorType nup = model.naturalOperator("nup",site,0);
 
 		test(psi,psi,direction,"<PSI|nup|PSI>",site,nup,ApplyOperatorType::BORDER_NO);
 		PsimagLite::String s = "<P0|nup|P0>";
 		test(tv0,tv0,direction,s,site,nup,ApplyOperatorType::BORDER_NO);
 
-		SparseMatrixType tmpC2(model.naturalOperator("ndown",site,0));
-		OperatorType ndown(tmpC2,fermionSign1,jm1,angularFactor1,su2Related1);
+		OperatorType ndown = model.naturalOperator("ndown",site,0);
 		test(psi,psi,direction,"<PSI|ndown|PSI>",site,ndown,ApplyOperatorType::BORDER_NO);
 		s = "<P0|ndown|P0>";
 		test(tv0,tv0,direction,s,site,ndown,ApplyOperatorType::BORDER_NO);
 
 		SparseMatrixType tmpC3 = (nup.data * ndown.data);
-		OperatorType doubleOcc(tmpC3,fermionSign1,jm1,angularFactor1,su2Related1);
+		OperatorType doubleOcc(tmpC3,
+		                       nup.fermionSign,
+		                       nup.jm,
+		                       nup.angularFactor,
+		                       nup.su2Related);
 		test(psi,psi,direction,"<PSI|doubleOcc|PSI>",site,doubleOcc,
 		     ApplyOperatorType::BORDER_NO);
 		s = "<P0|doubleOcc|P0>";
