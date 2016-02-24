@@ -104,6 +104,7 @@ class Observer {
 	typedef PsimagLite::Matrix<FieldType> MatrixType;
 	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
 	typedef typename ModelType_::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelType_::ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef ObserverHelper<IoInputType,
 	MatrixType,
@@ -191,10 +192,8 @@ public:
 			flag |= 2;
 		} catch (std::exception&) {}
 
-		MatrixType m0;
-		MatrixType m1;
-		crsMatrixToFullMatrix(m0,braket.op(0).data);
-		crsMatrixToFullMatrix(m1,braket.op(1).data);
+		SparseMatrixType m0 = braket.op(0).data;
+		SparseMatrixType m1 = braket.op(1).data;
 		int fermionSign = braket.op(0).fermionSign;
 
 		SizeType threadId = 0;
@@ -257,12 +256,10 @@ public:
 		}
 
 		SizeType threadId = 0;
-		MatrixType m0;
-		MatrixType m1;
-		MatrixType m2;
-		crsMatrixToFullMatrix(m0,braket.op(0).data);
-		crsMatrixToFullMatrix(m1,braket.op(1).data);
-		crsMatrixToFullMatrix(m2,braket.op(2).data);
+		SparseMatrixType m0 = braket.op(0).data;
+		SparseMatrixType m1 = braket.op(1).data;
+		SparseMatrixType m2 = braket.op(2).data;
+
 		int fermionSign = braket.op(0).fermionSign;
 
 		if (flag == 7) {
@@ -345,14 +342,10 @@ public:
 		}
 
 		SizeType threadId = 0;
-		MatrixType m0;
-		MatrixType m1;
-		MatrixType m2;
-		MatrixType m3;
-		crsMatrixToFullMatrix(m0,braket.op(0).data);
-		crsMatrixToFullMatrix(m1,braket.op(1).data);
-		crsMatrixToFullMatrix(m2,braket.op(2).data);
-		crsMatrixToFullMatrix(m3,braket.op(3).data);
+		SparseMatrixType m0 = braket.op(0).data;
+		SparseMatrixType m1 = braket.op(1).data;
+		SparseMatrixType m2 = braket.op(2).data;
+		SparseMatrixType m3 = braket.op(3).data;
 
 		RealType fermionSign = braket.op(0).fermionSign;
 
@@ -506,7 +499,7 @@ public:
 	typename PsimagLite::EnableIf
 	<PsimagLite::IsVectorLike<VectorLikeType>::True,void>::Type
 	multiCorrelations(VectorLikeType& result,
-	                  const MatrixType& O,
+	                  const SparseMatrixType& O,
 	                  SizeType rows,
 	                  SizeType cols)
 	{

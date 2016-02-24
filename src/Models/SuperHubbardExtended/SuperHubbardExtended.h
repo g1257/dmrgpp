@@ -249,14 +249,14 @@ private:
 	{
 		assert(block.size()==1);
 
-		SparseMatrixType sPlus = extendedHubbard_.naturalOperator("+",0,0);
+		SparseMatrixType sPlus = extendedHubbard_.naturalOperator("+",0,0).data;
 		RealType angularFactor= 1;
 		typename OperatorType::Su2RelatedType su2related;
 		su2related.offset = 1; //check FIXME
 		OperatorType sPlusOp(sPlus,1,typename OperatorType::PairType(0,0),angularFactor,su2related);
 		creationMatrix.push_back(sPlusOp);
 
-		SparseMatrixType sz = extendedHubbard_.naturalOperator("z",0,0);
+		SparseMatrixType sz = extendedHubbard_.naturalOperator("z",0,0).data;
 		sz *= 0.5;
 		OperatorType szOp(sz,1,typename OperatorType::PairType(0,0),angularFactor,su2related);
 		creationMatrix.push_back(szOp);

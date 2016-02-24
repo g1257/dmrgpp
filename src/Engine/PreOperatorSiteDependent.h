@@ -107,12 +107,11 @@ public:
 
 	virtual OperatorType operator()(SizeType site) const
 	{
-		MatrixType opCup = model_.naturalOperator("c",site,dof_);
-		MatrixType opCdown = model_.naturalOperator("c",site,dof2_);
-		MatrixType opCupTranspose;
+		SparseMatrixType opCup = model_.naturalOperator("c",site,dof_).data;
+		SparseMatrixType opCdown = model_.naturalOperator("c",site,dof2_).data;
+		SparseMatrixType opCupTranspose;
 		transposeConjugate(opCupTranspose,opCup);
-		MatrixType Afull = opCupTranspose * opCdown;
-		SparseMatrixType A(Afull);
+		SparseMatrixType A = opCupTranspose * opCdown;
 		Su2RelatedType su2Related1;
 		OperatorType opA(A,1,std::pair<SizeType,SizeType>(0,0),1,su2Related1);
 

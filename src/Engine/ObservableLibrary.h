@@ -125,8 +125,8 @@ public:
 		if (hasTimeEvolution && hubbardLike) {
 			SizeType site = 0;
 			// FIXME: No support for site varying operators
-			fullMatrixToCrsMatrix(matrixNup_,model_.naturalOperator("nup",site,0));
-			fullMatrixToCrsMatrix(matrixNdown_,model_.naturalOperator("ndown",site,0));
+			matrixNup_ = model_.naturalOperator("nup",site,0);
+			matrixNdown_ = model_.naturalOperator("ndown",site,0);
 		}
 	}
 
@@ -221,9 +221,9 @@ public:
 			MatrixType myMatrix(4,4);
 			myMatrix(0,0) = myMatrix(3,3) = 1.0;
 			myMatrix(1,1) = myMatrix(2,2) = -1.0;
-
+			SparseMatrixType myMatrixSparse(myMatrix);
 			typename PsimagLite::Vector<FieldType>::Type result;
-			observe_.multiCorrelations(result,myMatrix,rows,cols);
+			observe_.multiCorrelations(result,myMatrixSparse,rows,cols);
 			for (SizeType i=0;i<result.size();i++) {
 				std::cout<<i<<" "<<result[i]<<"\n";
 			}
@@ -295,19 +295,19 @@ public:
 			std::cout<<"SuperDensity(Weight of the timeVector)="<<
 			           superDensity<<"\n";
 		} else if (label=="nupNdown") {
-			multiply(A,matrixNup_,matrixNdown_);
+			multiply(A,matrixNup_.data,matrixNdown_.data);
 			OperatorType opA(A,1,std::pair<SizeType,SizeType>(0,0),1,su2Related1);
 			PreOperatorSiteIndependentType preOperator(opA,"nupNdown",threadId);
 			measureOnePoint(preOperator);
 		} else if (label=="nup+ndown") {
-			A = matrixNup_;
-			A += matrixNdown_;
+			A = matrixNup_.data;
+			A += matrixNdown_.data;
 			OperatorType opA(A,1,std::pair<SizeType,SizeType>(0,0),1,su2Related1);
 			PreOperatorSiteIndependentType preOperator(opA,"nup+ndown",threadId);
 			measureOnePoint(preOperator);
 		} else if (label=="sz") {
-			A = matrixNup_;
-			A += (-1)*matrixNdown_;
+			A = matrixNup_.data;
+			A += (-1)*matrixNdown_.data;
 			OperatorType opA(A,1,std::pair<SizeType,SizeType>(0,0),1,su2Related1);
 			PreOperatorSiteIndependentType preOperator(opA,"sz",threadId);
 			measureOnePoint(preOperator);
@@ -545,7 +545,7 @@ private:
 	bool hasTimeEvolution_;
 	const ModelType& model_; // not the owner
 	ObserverType observe_;
-	SparseMatrixType matrixNup_,matrixNdown_;
+	OperatorType matrixNup_,matrixNdown_;
 	MatrixType szsz_,sPlusSminus_,sMinusSplus_;
 
 }; // class ObservableLibrary

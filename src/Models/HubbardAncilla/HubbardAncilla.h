@@ -239,10 +239,10 @@ public:
 		if (what2 == "i" || what2=="identity") {
 			SparseMatrixType tmp(nrow,nrow);
 			tmp.makeDiagonal(nrow,1.0);
-			OperatorType::Su2Related su2Related;
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}
@@ -250,10 +250,10 @@ public:
 		if (what2 == "0") {
 			SparseMatrixType tmp(nrow,nrow);
 			tmp.makeDiagonal(nrow,0.0);
-			OperatorType::Su2Related su2Related;
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}

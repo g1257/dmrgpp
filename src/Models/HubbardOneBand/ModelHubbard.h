@@ -284,10 +284,10 @@ public:
 		if (what == "i" || what=="identity") {
 			SparseMatrixType tmp(nrow,nrow);
 			tmp.makeDiagonal(nrow,1.0);
-			OperatorType::Su2Related su2Related;
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}
@@ -298,10 +298,10 @@ public:
 			PsimagLite::Matrix<SparseElementType> tmp =
 			        multiplyTc(creationMatrix[iup].data,creationMatrix[idown].data);
 			SparseMatrixType tmp2(tmp);
-			OperatorType::Su2Related su2Related;
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp2,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}
@@ -312,10 +312,10 @@ public:
 			PsimagLite::Matrix<SparseElementType> tmp =
 			        multiplyTc(creationMatrix[idown].data,creationMatrix[iup].data);
 			SparseMatrixType tmp2(tmp);
-			OperatorType::Su2Related su2Related;
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp2,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}
@@ -329,16 +329,26 @@ public:
 			        multiplyTc(creationMatrix[idown].data,creationMatrix[idown].data);
 			tmp = tmp-tmp2;
 			SparseMatrixType tmp3(tmp);
-			OperatorType::Su2Related su2Related;
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp3,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}
 
 		if (what=="n") {
-			return naturalOperator("nup",site,0) + naturalOperator("ndown",site,0);
+			PsimagLite::Matrix<SparseElementType> dense1;
+			crsMatrixToFullMatrix(dense1,naturalOperator("nup",site,0).data);
+			PsimagLite::Matrix<SparseElementType> dense2;
+			crsMatrixToFullMatrix(dense2,naturalOperator("ndown",site,0).data);
+			SparseMatrixType tmp(dense1 + dense2);
+			typename OperatorType::Su2RelatedType su2Related;
+			return OperatorType(tmp,
+			                    1.0,
+			                    typename OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what=="c") {
@@ -352,15 +362,13 @@ public:
 		if (what=="nup") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			PsimagLite::Matrix<SparseElementType> cup =
-			        naturalOperator("c",site,SPIN_UP);
-			PsimagLite::Matrix<SparseElementType> nup =
-			        multiplyTransposeConjugate(cup,cup);
-			SparseMatrixType tmp3(nup);
-			OperatorType::Su2Related su2Related;
+			OperatorType cup = naturalOperator("c",site,SPIN_UP);
+			cup.conjugate();
+			SparseMatrixType tmp3(multiplyTc(cup.data,cup.data));
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp3,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}
@@ -368,15 +376,13 @@ public:
 		if (what=="ndown") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			PsimagLite::Matrix<SparseElementType> cdown =
-			        naturalOperator("c",site,SPIN_DOWN);
-			PsimagLite::Matrix<SparseElementType> ndown =
-			        multiplyTransposeConjugate(cdown,cdown);
-			SparseMatrixType tmp3(ndown);
-			OperatorType::Su2Related su2Related;
+			OperatorType cdown = naturalOperator("c",site,SPIN_DOWN);
+			cdown.conjugate();
+			SparseMatrixType tmp3(multiplyTc(cdown.data,cdown.data));
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp3,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}
@@ -384,16 +390,16 @@ public:
 		if (what=="d") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			PsimagLite::Matrix<SparseElementType> cup =
-			        naturalOperator("c",site,SPIN_UP);
-			PsimagLite::Matrix<SparseElementType> cdown =
-			        naturalOperator("c",site,SPIN_DOWN);
+			PsimagLite::Matrix<SparseElementType> cup;
+			crsMatrixToFullMatrix(cup,naturalOperator("c",site,SPIN_UP).data);
+			PsimagLite::Matrix<SparseElementType> cdown;
+			crsMatrixToFullMatrix(cdown,naturalOperator("c",site,SPIN_DOWN).data);
 			cup = (cup*cdown);
 			SparseMatrixType tmp3(cup);
-			OperatorType::Su2Related su2Related;
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp3,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}

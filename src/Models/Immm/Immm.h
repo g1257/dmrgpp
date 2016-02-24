@@ -254,8 +254,7 @@ public:
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 		creationMatrix.clear();
 
-		SparseMatrixType nmatrix(natBasis.size(),natBasis.size());
-		SparseMatrixType cTranspose;
+		MatrixType nmatrix(natBasis.size(),natBasis.size());
 
 		SizeType total = NUMBER_OF_SPINS * orbitalsAtSite(0);
 		for (SizeType sigma=0;sigma<total;sigma++) {
@@ -271,7 +270,11 @@ public:
 
 		// add n_i
 		typename OperatorType::Su2RelatedType su2related2;
-		OperatorType nOp(nmatrix,1,typename OperatorType::PairType(0,0),1,su2related2);
+		OperatorType nOp(SparseMatrixType(nmatrix),
+		                 1,
+		                 typename OperatorType::PairType(0,0),
+		                 1
+		                 ,su2related2);
 		creationMatrix.push_back(nOp);
 	}
 
@@ -296,7 +299,17 @@ public:
 		}
 
 		if (what=="z") {
-			return nUpOrDown(block,SPIN_UP)-nUpOrDown(block,SPIN_DOWN);
+			MatrixType tmp1;
+			crsMatrixToFullMatrix(tmp1,nUpOrDown(block,SPIN_UP).data);
+			MatrixType tmp2;
+			crsMatrixToFullMatrix(tmp2,nUpOrDown(block,SPIN_DOWN).data);
+			SparseMatrixType tmp(tmp1-tmp2);
+			typename OperatorType::Su2RelatedType su2Related;
+			return OperatorType(tmp,
+			                    1.0,
+			                    typename OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
 		}
 
 		if (what=="n") {
@@ -321,10 +334,10 @@ public:
 			SparseMatrixType tmp2;
 			transposeConjugate(tmp2,creationMatrix[orbital + spin*orbitals].data);
 			SparseMatrixType tmp3 = creationMatrix[orbital + spin*orbitals].data * tmp2;
-			OperatorType::Su2Related su2Related;
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp3,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}
@@ -571,9 +584,9 @@ private:
 		std::cout<<fullm;
 	}
 
-	MatrixType cDaggerCi(const typename PsimagLite::Vector<SizeType>::Type& block,
-	                     SizeType spin1,
-	                     SizeType spin2) const
+	OperatorType cDaggerCi(const typename PsimagLite::Vector<SizeType>::Type& block,
+	                       SizeType spin1,
+	                       SizeType spin2) const
 	{
 		assert(block.size()==1);
 		SizeType site = block[0];
@@ -589,11 +602,17 @@ private:
 		for (SizeType orb=0;orb<norb;orb++)
 			tmp += multiplyTc(creationMatrix[orb+spin1*norb].data,
 			        creationMatrix[orb+spin2*norb].data);
-		return tmp;
+
+		typename OperatorType::Su2RelatedType su2Related;
+		return OperatorType(SparseMatrixType(tmp),
+		                    1.0,
+		                    typename OperatorType::PairType(0,0),
+		                    1.0,
+		                    su2Related);
 	}
 
-	MatrixType nUpOrDown(const typename PsimagLite::Vector<SizeType>::Type& block,
-	                     SizeType spin) const
+	OperatorType nUpOrDown(const typename PsimagLite::Vector<SizeType>::Type& block,
+	                       SizeType spin) const
 	{
 		return cDaggerCi(block,spin,spin);
 	}

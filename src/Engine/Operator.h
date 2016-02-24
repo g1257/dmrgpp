@@ -148,7 +148,7 @@ struct Operator {
 		 */
 		PsimagLite::String s = "";
 		io.readline(s,"TSPOperator=");
-		PsimagLite::Matrix<SparseElementType> m;
+		;
 
 		if (s == "cooked") {
 			io.readline(s,"COOKED_OPERATOR=");
@@ -156,10 +156,12 @@ struct Operator {
 			io.read(v,"COOKED_EXTRA");
 			if (v.size() != 2)
 				throw PsimagLite::RuntimeError("COOKED_EXTRA must be followed 2 v0 v1\n");
-			m = model.naturalOperator(s,v[0],v[1]);
+			data = model.naturalOperator(s,v[0],v[1]).data;
 		} else if (s == "raw") {
+			PsimagLite::Matrix<SparseElementType> m;
 			io.readMatrix(m,"RAW_MATRIX");
 			if (checkNonZero) checkNotZeroMatrix(m);
+			fullMatrixToCrsMatrix(data,m);
 		} else {
 			PsimagLite::String str(__FILE__);
 			str += " : " + ttos(__LINE__) + "\n";
@@ -167,8 +169,6 @@ struct Operator {
 			str += "allowed, not TSPOperator=" + s + "\n";
 			throw PsimagLite::RuntimeError(str.c_str());
 		}
-
-		fullMatrixToCrsMatrix(data,m);
 
 		io.readline(fermionSign,"FERMIONSIGN=");
 

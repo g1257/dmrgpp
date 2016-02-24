@@ -87,6 +87,7 @@ class Parallel4PointDs {
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename FourPointCorrelationsType::MatrixType MatrixType;
 	typedef typename MatrixType::value_type FieldType;
+	typedef typename FourPointCorrelationsType::SparseMatrixType SparseMatrixType;
 
 public:
 
@@ -137,13 +138,13 @@ private:
 		nx /= 2;
 		SizeType site = 0;
 		// C_{gamma0,up}
-		const MatrixType& opC0 = model.naturalOperator("c",site,gammas[0] + 0*nx);
+		const SparseMatrixType& opC0 = model.naturalOperator("c",site,gammas[0] + 0*nx).data;
 		// C_{gamma1,down}
-		const MatrixType& opC1 = model.naturalOperator("c",site,gammas[1] + 1*nx);
+		const SparseMatrixType& opC1 = model.naturalOperator("c",site,gammas[1] + 1*nx).data;
 		// C_{gamma2,down}
-		const MatrixType& opC2 = model.naturalOperator("c",site,gammas[2] + 1*nx);
+		const SparseMatrixType& opC2 = model.naturalOperator("c",site,gammas[2] + 1*nx).data;
 		// C_{gamma3,up}
-		const MatrixType& opC3 = model.naturalOperator("c",site,gammas[3] + 0*nx);
+		const SparseMatrixType& opC3 = model.naturalOperator("c",site,gammas[3] + 0*nx).data;
 
 		return fourpoint_('C',i,opC0,
 		                  'C',i+1,opC1,

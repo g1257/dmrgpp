@@ -345,10 +345,10 @@ public:
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			SparseMatrixType tmp(nrow,nrow);
 			tmp.makeDiagonal(nrow,1.0);
-			OperatorType::Su2Related su2Related;
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}
@@ -358,10 +358,10 @@ public:
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			SparseMatrixType tmp(nrow,nrow);
 			tmp.makeDiagonal(nrow,0.0);
-			OperatorType::Su2Related su2Related;
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}
@@ -375,10 +375,10 @@ public:
 			tmp += multiplyTc(creationMatrix[dof].data,
 			                  creationMatrix[dof+modelParameters_.orbitals].data);
 			SparseMatrixType tmp2(tmp);
-			OperatorType::Su2Related su2Related;
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp2,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}
@@ -391,10 +391,10 @@ public:
 			tmp += multiplyTc(creationMatrix[dof+modelParameters_.orbitals].data,
 			        creationMatrix[dof].data);
 			SparseMatrixType tmp2(tmp);
-			OperatorType::Su2Related su2Related;
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp2,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}
@@ -412,10 +412,10 @@ public:
 
 			tmp = tmp-tmp2;
 			SparseMatrixType tmp3(tmp);
-			OperatorType::Su2Related su2Related;
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp3,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}
@@ -427,10 +427,10 @@ public:
 			MatrixType tmp =
 			        multiplyTc(creationMatrix[dof].data,creationMatrix[dof].data);
 			SparseMatrixType tmp2(tmp);
-			OperatorType::Su2Related su2Related;
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp2,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}
@@ -461,10 +461,10 @@ public:
 			         creationMatrix[orbital+orbital+modelParameters_.orbitals].data,
 			        creationMatrix[orbital].data);
 			SparseMatrixType tmp(atmp);
-			OperatorType::Su2Related su2Related;
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}
@@ -1194,14 +1194,14 @@ private:
 			const SparseMatrixType& cm1 = cm[orb1+SPIN_UP*orbs+i*dofs].data;
 			for (SizeType orb2=0;orb2<orbs;orb2++) {
 				const SparseMatrixType& cm2 = cm[orb2+SPIN_UP*orbs+i*dofs].data;
-				SparseMatrixType tmpMatrix = multiplyTc(cm1,cm2);
+				SparseMatrixType tmpMatrix(multiplyTc(cm1,cm2));
 				for (SizeType orb3=0;orb3<orbs;orb3++) {
 					const SparseMatrixType& cm3 = cm[orb3+SPIN_DOWN*orbs+i*dofs].data;
 
 					SizeType orb4 = getMomentum(orb1, orb2, orb3);
 					const SparseMatrixType& cm4 = cm[orb4+SPIN_DOWN*orbs+i*dofs].data;
 
-					SparseMatrixType tmpMatrix2 = multiplyTc(cm3,cm4);
+					SparseMatrixType tmpMatrix2(multiplyTc(cm3,cm4));
 
 					SparseMatrixType tmpMatrix3;
 					multiply(tmpMatrix3, tmpMatrix2, tmpMatrix);
@@ -1315,9 +1315,9 @@ private:
 					const SparseMatrixType& cm3 = cm[orb3+1*orbitals+site*dofs].data;
 					const SparseMatrixType& cm4 = cm[orb4+1*orbitals+site*dofs].data;
 
-					SparseMatrixType tmpMatrix = multiplyTc(cm1,cm2);
+					SparseMatrixType tmpMatrix(multiplyTc(cm1,cm2));
 
-					SparseMatrixType tmpMatrix2 = multiplyTc(cm3,cm4);
+					SparseMatrixType tmpMatrix2(multiplyTc(cm3,cm4));
 
 					SparseMatrixType tmpMatrix3;
 					multiply(tmpMatrix3, tmpMatrix,tmpMatrix2);

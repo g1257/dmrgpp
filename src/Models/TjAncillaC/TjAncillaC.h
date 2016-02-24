@@ -229,9 +229,9 @@ public:
 
 	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
 	 *unmangled (natural) basis of one-site */
-	MatrixType naturalOperator(const PsimagLite::String& what,
-	                           SizeType site,
-	                           SizeType dof) const
+	OperatorType naturalOperator(const PsimagLite::String& what,
+	                             SizeType site,
+	                             SizeType dof) const
 	{
 		BlockType block;
 		block.resize(1);
@@ -244,10 +244,10 @@ public:
 		if (what == "i" || what=="identity") {
 			SparseMatrixType tmp(nrow,nrow);
 			tmp.makeDiagonal(nrow,1.0);
-			OperatorType::Su2Related su2Related;
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}
@@ -285,25 +285,27 @@ public:
 		}
 
 		if (what=="nup") {
-			MatrixType cup = naturalOperator("c",site,SPIN_UP);
-			MatrixType nup = multiplyTransposeConjugate(cup,cup);
-			SparseMatrixType tmp3(nup);
-			OperatorType::Su2Related su2Related;
+			OperatorType tmp = naturalOperator("c",site,SPIN_UP);
+			tmp.conjugate();
+			SparseMatrixType c = tmp.data;
+			SparseMatrixType tmp3(multiplyTc(c,c));
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp3,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}
 
 		if (what=="ndown") {
-			MatrixType cdown = naturalOperator("c",site,SPIN_DOWN);
-			MatrixType ndown = multiplyTransposeConjugate(cdown,cdown);
-			SparseMatrixType tmp3(ndown);
-			OperatorType::Su2Related su2Related;
+			OperatorType tmp = naturalOperator("c",site,SPIN_DOWN);
+			tmp.conjugate();
+			SparseMatrixType c = tmp.data;
+			SparseMatrixType tmp3(multiplyTc(c,c));
+			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp3,
 			                    1.0,
-			                    OperatorType::PairType(0,0),
+			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related);
 		}
@@ -565,8 +567,8 @@ private:
 		for (SizeType i=0;i<n;i++) {
 			SizeType orb = 0;
 			// potentialV
-			SparseMatrixType nup(naturalOperator("nup",i,orb));
-			SparseMatrixType ndown(naturalOperator("ndown",i,orb));
+			SparseMatrixType nup(naturalOperator("nup",i,orb).data);
+			SparseMatrixType ndown(naturalOperator("ndown",i,orb).data);
 			SparseMatrixType m = nup;
 			SizeType index = block[i]+orb*linSize;
 			assert(index<modelParameters_.potentialV.size());

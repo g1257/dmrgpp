@@ -113,10 +113,10 @@ public:
 	//! Four-point: these are expensive and uncached!!!
 	//! requires i1<i2<i3<i4
 	FieldType operator()(
-	        char mod1,SizeType i1,const MatrixType& O1,
-	        char mod2,SizeType i2,const MatrixType& O2,
-	        char mod3,SizeType i3,const MatrixType& O3,
-	        char mod4,SizeType i4,const MatrixType& O4,
+	        char mod1,SizeType i1,const SparseMatrixType& O1,
+	        char mod2,SizeType i2,const SparseMatrixType& O2,
+	        char mod3,SizeType i3,const SparseMatrixType& O3,
+	        char mod4,SizeType i4,const SparseMatrixType& O4,
 	        int fermionicSign,
 	        SizeType threadId) const
 	{
@@ -138,9 +138,9 @@ public:
 
 	//! 3-point: these are expensive and uncached!!!
 	//! requires i1<i2<i3
-	FieldType threePoint(char mod1,SizeType i1,const MatrixType& O1,
-	                     char mod2,SizeType i2,const MatrixType& O2,
-	                     char mod3,SizeType i3,const MatrixType& O3,
+	FieldType threePoint(char mod1,SizeType i1,const SparseMatrixType& O1,
+	                     char mod2,SizeType i2,const SparseMatrixType& O2,
+	                     char mod3,SizeType i3,const SparseMatrixType& O3,
 	                     int fermionicSign,
 	                     SizeType threadId) const
 	{
@@ -159,8 +159,8 @@ public:
 
 	//! requires i1<i2
 	void firstStage(SparseMatrixType& O2gt,
-	                char mod1,SizeType i1,const MatrixType& O1,
-	                char mod2,SizeType i2,const MatrixType& O2,
+	                char mod1,SizeType i1,const SparseMatrixType& O1,
+	                char mod2,SizeType i2,const SparseMatrixType& O2,
 	                int fermionicSign,
 	                SizeType threadId) const
 	{
@@ -195,8 +195,8 @@ public:
 	//! requires i2<i3<i4
 	FieldType secondStage(const SparseMatrixType& O2gt,
 	                      SizeType i2,
-	                      char mod3,SizeType i3,const MatrixType& O3,
-	                      char mod4,SizeType i4,const MatrixType& O4,
+	                      char mod3,SizeType i3,const SparseMatrixType& O3,
+	                      char mod4,SizeType i4,const SparseMatrixType& O4,
 	                      int fermionicSign,
 	                      SizeType threadId) const
 	{
@@ -260,7 +260,7 @@ private:
 	//! requires i2<i3
 	FieldType secondStage(const SparseMatrixType& O2gt,
 	                      SizeType i2,
-	                      char mod3,SizeType i3,const MatrixType& O3,
+	                      char mod3,SizeType i3,const SparseMatrixType& O3,
 	                      int fermionicSign,
 	                      SizeType threadId) const
 	{

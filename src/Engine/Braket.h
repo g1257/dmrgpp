@@ -158,15 +158,14 @@ private:
 			}
 
 			NaturalOpStruct nos(opLabel);
-			MatrixType m = model_.naturalOperator(nos.label,
-			                                      site,
-			                                      nos.dof);
-			MatrixType m2 = m;
+			SparseMatrixType m = model_.naturalOperator(nos.label,
+			                                            site,
+			                                            nos.dof).data;
+			SparseMatrixType m2 = m;
 			if (nos.transpose)
 				transposeConjugate(m2,m);
 
-			SparseMatrixType tmpC(m2);
-			nup = OperatorType(tmpC,nos.fermionSign,jm1,angularFactor1,su2Related1);
+			nup = OperatorType(m2,nos.fermionSign,jm1,angularFactor1,su2Related1);
 		}
 
 		SizeType foundSize = nup.data.row();
