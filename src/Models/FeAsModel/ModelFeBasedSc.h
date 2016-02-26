@@ -411,7 +411,7 @@ public:
 			        creationMatrix[dof+modelParameters_.orbitals].data);
 
 			tmp = tmp-tmp2;
-			SparseMatrixType tmp3(tmp);
+			SparseMatrixType tmp3(0.5*tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp3,
 			                    1.0,

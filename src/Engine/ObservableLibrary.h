@@ -291,7 +291,7 @@ private:
 					PsimagLite::String str = "<gs|z?" + ttos(i) + ";z?" + ttos(j) + "|gs>";
 					BraketType braket(model_,str);
 					manyPoint(&szsz_[counter],braket,rows,cols);
-					MatrixType tSzThis = 0.25*szsz_[counter];
+					MatrixType tSzThis = szsz_[counter];
 					RealType factor = (i != j) ? 2.0 : 1.0;
 					if (counter == 0)
 						tSzTotal =  factor*tSzThis;
@@ -321,7 +321,7 @@ private:
 					PsimagLite::String str = "<gs|+?" + ttos(i) + ";-?" + ttos(j) + "|gs>";
 					BraketType braket(model_,str);
 					manyPoint(&sPlusSminus_[counter],braket,rows,cols);
-					MatrixType tSpThis = 0.25*sPlusSminus_[counter];
+					MatrixType tSpThis = sPlusSminus_[counter];
 					RealType factor = (i != j) ? 2.0 : 1.0;
 					if (counter == 0)
 						tSpTotal =  factor*tSpThis;
@@ -351,7 +351,7 @@ private:
 					PsimagLite::String str = "<gs|-?" + ttos(i) + ";+?" + ttos(j) + "|gs>";
 					BraketType braket(model_,str);
 					manyPoint(&sMinusSplus_[counter],braket,rows,cols);
-					MatrixType tSmThis = 0.25*sMinusSplus_[counter];
+					MatrixType tSmThis = sMinusSplus_[counter];
 					RealType factor = (i != j) ? 2.0 : 1.0;
 					if (counter == 0)
 						tSmTotal =  factor*tSmThis;
@@ -386,7 +386,7 @@ private:
 					MatrixType spinTotal(szsz_[counter].n_row(),szsz_[counter].n_col());
 
 					RealType factorSpSm = 0.5;
-					RealType factorSz = 0.25;
+					RealType factorSz = 1.0;
 					for (SizeType i=0;i<spinTotal.n_row();i++)
 						for (SizeType j=0;j<spinTotal.n_col();j++)
 							spinTotal(i,j) = factorSpSm*(
