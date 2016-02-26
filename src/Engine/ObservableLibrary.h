@@ -129,6 +129,142 @@ public:
 		}
 	}
 
+	bool endOfData() const { return observe_.endOfData(); }
+
+	const ModelType& model() const { return model_; }
+
+	void interpret(const PsimagLite::String& list, SizeType rows, SizeType cols)
+	{
+		typename BraketType::VectorStringType vecStr;
+		PsimagLite::tokenizer(list,vecStr,",");
+
+		for (SizeType i = 0; i < vecStr.size(); ++i) {
+			BraketType braket(model_, vecStr[i]);
+
+			SizeType threadId = 0;
+			if (braket.points() == 1) {
+				PreOperatorSiteIndependentType preOperator(braket.op(0),
+				                                           braket.opName(0),
+				                                           threadId);
+				measureOnePoint(braket.bra(),
+				                preOperator,
+				                braket.ket());
+				continue;
+			}
+
+			manyPoint(0,braket,rows,cols);
+		}
+	}
+
+	void measureTriage(const PsimagLite::String& label,
+	                   SizeType rows,
+	                   SizeType cols,
+	                   SizeType orbitals,
+	                   bool hasTimeEvolution)
+	{
+		bool ot = (label == "ot" || label== "time");
+
+		if (hasTimeEvolution && ot) {
+			measureTime("superDensity");
+			measureTime("nupNdown");
+			measureTime("nup+ndown");
+			measureTime("sz");
+			return;
+		}
+
+		if (hasTimeEvolution) setBrakets("time","time");
+
+		const PsimagLite::String& modelName = model_.params().model;
+
+		// Immm supports only onepoint:
+		if (modelName=="Immm" && label!="onepoint") {
+			PsimagLite::String str(__FILE__);
+			str += " "  + ttos(__LINE__) + "\n";
+			str += "Model Immm only supports onepoint\n";
+			throw PsimagLite::RuntimeError(str.c_str());
+		}
+
+		if (!hasTimeEvolution && label == "onepoint") {
+			SizeType numberOfDofs = dofsFromModelName();
+			return measureTheOnePoints(numberOfDofs);
+		}
+
+		measure(label,rows,cols,orbitals);
+	}
+
+private:
+
+	void setBrakets(const PsimagLite::String& left,const PsimagLite::String& right)
+	{
+		observe_.setBrakets(left,right);
+	}
+
+	void measureTheOnePoints(SizeType numberOfDofs)
+	{
+		PsimagLite::String str("WARNING: ObservableLibrary: ");
+		str += "measureTheOnePoints is deprecated\n";
+		std::cerr<<str;
+
+		SizeType threadId = 0;
+		for (SizeType dof=0;dof<numberOfDofs;dof++) {
+			for (SizeType dof2=dof;dof2<numberOfDofs;dof2++) {
+				PsimagLite::String str("c^\\dagger(dof=");
+				str += ttos(dof) + ") c(dof=" + ttos(dof2) + ")";
+				PreOperatorSiteDependentType preOperator(dof,dof2,model_,str,threadId);
+				measureOnePoint(preOperator);
+			}
+		}
+	}
+
+	void measureOnePoint(const PsimagLite::String& bra,
+	                     const PreOperatorBaseType& preOperator,
+	                     const PsimagLite::String& ket)
+	{
+		SizeType threadId = preOperator.threadId();
+		printMarker(threadId);
+
+		for (SizeType i0 = 0;i0<observe_.size();i0++) {
+			if (!preOperator.isValid(i0+1)) continue;
+
+			OperatorType opA = preOperator(i0+1);
+
+			preOperator.printMatrix(opA.data,preOperator.siteDependent(),i0);
+
+			if (i0==0) {
+				std::cout<<"site <"<<bra<<"|"<<preOperator.label();
+				std::cout<<"|"<<ket<<"> time\n";
+			}
+
+			observe_.setBrakets(bra,ket);
+			observe_.setPointer(threadId,i0);
+
+			onePointHookForZero(i0,opA,"gs",threadId);
+
+			FieldType tmp1 = observe_.template
+			        onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
+			std::cout<<observe_.site(threadId)<<" "<<tmp1;
+			std::cout<<" "<<observe_.time(threadId)<<"\n";
+
+			if (!observe_.isAtCorner(numberOfSites_,threadId)) continue;
+
+			// also calculate next or prev. site:
+			SizeType x = (observe_.site(threadId)==1) ? 0 : numberOfSites_-1;
+
+			// operator might be site dependent
+			if (!preOperator.isValid(x)) continue;
+			OperatorType opAcorner = preOperator(x);
+
+			// do the corner case
+			observe_.setBrakets(bra,ket);
+			tmp1 = observe_.template
+			        onePoint<ApplyOperatorType>(i0,
+			                                    opAcorner,
+			                                    ApplyOperatorType::BORDER_YES);
+			std::cout<<x<<" "<<tmp1;
+			std::cout<<" "<<observe_.time(threadId)<<"\n";
+		}
+	}
+
 	void measure(const PsimagLite::String& label,SizeType rows,SizeType cols,SizeType orbitals)
 	{
 		PsimagLite::String modelName = model_.params().model;
@@ -172,7 +308,7 @@ public:
 
 			if (PsimagLite::Concurrency::root() && orbitals > 1) {
 				std::cout<<"OperatorSz tot:\n";
-                std::cout<<tSzTotal;
+				std::cout<<tSzTotal;
 			}
 
 		} else if (label=="s+s-") {
@@ -202,7 +338,7 @@ public:
 
 			if (PsimagLite::Concurrency::root() && orbitals > 1) {
 				std::cout<<"OperatorS+S- tot:\n";
-                std::cout<<tSpTotal;
+				std::cout<<tSpTotal;
 			}
 
 		} else if (label=="s-s+") {
@@ -232,7 +368,7 @@ public:
 
 			if (PsimagLite::Concurrency::root() && orbitals > 1) {
 				std::cout<<"OperatorS+S- tot:\n";
-                std::cout<<tSmTotal;
+				std::cout<<tSmTotal;
 			}
 
 		} else if (label=="ss") {
@@ -254,7 +390,7 @@ public:
 					for (SizeType i=0;i<spinTotal.n_row();i++)
 						for (SizeType j=0;j<spinTotal.n_col();j++)
 							spinTotal(i,j) = factorSpSm*(
-							        sPlusSminus_[counter](i,j) + sMinusSplus_[counter](i,j)) +
+							            sPlusSminus_[counter](i,j) + sMinusSplus_[counter](i,j)) +
 							        szsz_[counter](i,j)*factorSz;
 
 					RealType factor = (x != y) ? 2.0 : 1.0;
@@ -274,7 +410,7 @@ public:
 
 			if (PsimagLite::Concurrency::root() && orbitals > 1) {
 				std::cout<<"SpinTotalTotal:\n";
-                std::cout<<spinTotalTotal;
+				std::cout<<spinTotalTotal;
 			}
 
 		} else if (label=="dd") {
@@ -409,106 +545,6 @@ public:
 		}
 	}
 
-	void measureTheOnePoints(SizeType numberOfDofs)
-	{
-		PsimagLite::String str("WARNING: ObservableLibrary: ");
-		str += "measureTheOnePoints is deprecated\n";
-		std::cerr<<str;
-
-		SizeType threadId = 0;
-		for (SizeType dof=0;dof<numberOfDofs;dof++) {
-			for (SizeType dof2=dof;dof2<numberOfDofs;dof2++) {
-				PsimagLite::String str("c^\\dagger(dof=");
-				str += ttos(dof) + ") c(dof=" + ttos(dof2) + ")";
-				PreOperatorSiteDependentType preOperator(dof,dof2,model_,str,threadId);
-				measureOnePoint(preOperator);
-			}
-		}
-	}
-
-	void setBrakets(const PsimagLite::String& left,const PsimagLite::String& right)
-	{
-		observe_.setBrakets(left,right);
-	}
-
-	bool endOfData() const { return observe_.endOfData(); }
-
-	const ModelType& model() const { return model_; }
-
-	void measureOnePoint(const PsimagLite::String& bra,
-	                     const PreOperatorBaseType& preOperator,
-	                     const PsimagLite::String& ket)
-	{
-		SizeType threadId = preOperator.threadId();
-		printMarker(threadId);
-
-		for (SizeType i0 = 0;i0<observe_.size();i0++) {
-			if (!preOperator.isValid(i0+1)) continue;
-
-			OperatorType opA = preOperator(i0+1);
-
-			preOperator.printMatrix(opA.data,preOperator.siteDependent(),i0);
-
-			if (i0==0) {
-				std::cout<<"site <"<<bra<<"|"<<preOperator.label();
-				std::cout<<"|"<<ket<<"> time\n";
-			}
-
-			observe_.setBrakets(bra,ket);
-			observe_.setPointer(threadId,i0);
-
-			onePointHookForZero(i0,opA,"gs",threadId);
-
-			FieldType tmp1 = observe_.template
-			        onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
-			std::cout<<observe_.site(threadId)<<" "<<tmp1;
-			std::cout<<" "<<observe_.time(threadId)<<"\n";
-
-			if (!observe_.isAtCorner(numberOfSites_,threadId)) continue;
-
-			// also calculate next or prev. site:
-			SizeType x = (observe_.site(threadId)==1) ? 0 : numberOfSites_-1;
-
-			// operator might be site dependent
-			if (!preOperator.isValid(x)) continue;
-			OperatorType opAcorner = preOperator(x);
-
-			// do the corner case
-			observe_.setBrakets(bra,ket);
-			tmp1 = observe_.template
-			        onePoint<ApplyOperatorType>(i0,
-			                                    opAcorner,
-			                                    ApplyOperatorType::BORDER_YES);
-			std::cout<<x<<" "<<tmp1;
-			std::cout<<" "<<observe_.time(threadId)<<"\n";
-		}
-	}
-
-	void interpret(const PsimagLite::String& list, SizeType rows, SizeType cols)
-	{
-		typename BraketType::VectorStringType vecStr;
-		PsimagLite::tokenizer(list,vecStr,",");
-
-		for (SizeType i = 0; i < vecStr.size(); ++i) {
-			BraketType braket(model_, vecStr[i]);
-
-			SizeType threadId = 0;
-			if (braket.points() == 1) {
-				PreOperatorSiteIndependentType preOperator(braket.op(0),
-				                                           braket.opName(0),
-				                                           threadId);
-				measureOnePoint(braket.bra(),
-				                preOperator,
-				                braket.ket());
-				continue;
-			}
-
-			manyPoint(0,braket,rows,cols);
-		}
-	}
-
-private:
-
 	void resizeStorage(VectorMatrixType& v,SizeType rows,SizeType cols,SizeType orbitals)
 	{
 		if (v.size() != 0) return;
@@ -601,6 +637,21 @@ private:
 		std::cout<<0<<" "<<tmp1;
 		if (hasTimeEvolution_ && gsOrTime=="time") std::cout<<"\n";
 		if (!hasTimeEvolution_) std::cout<<"\n";
+	}
+
+	SizeType dofsFromModelName() const
+	{
+		const PsimagLite::String& modelName = model_.params().model;
+		SizeType site = 0; // FIXME : account for Hilbert spaces changing with site
+		SizeType dofs = SizeType(log(model_.hilbertSize(site))/log(2.0));
+		std::cerr<<"DOFS= "<<dofs<<" <------------------------------------\n";
+		if (modelName.find("FeAsBasedSc")!=PsimagLite::String::npos) return dofs;
+		if (modelName.find("FeAsBasedScExtended")!=PsimagLite::String::npos) return dofs;
+		if (modelName.find("HubbardOneBand")!=PsimagLite::String::npos) return dofs;
+
+		// max number here, site dependence taken into account elsewhere
+		if (modelName.find("Immm")!=PsimagLite::String::npos) return 4;
+		return 0;
 	}
 
 	void printSites(SizeType threadId)

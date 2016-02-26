@@ -41,22 +41,6 @@ typedef PsimagLite::IoSimple::In IoInputType;
 typedef PsimagLite::InputNg<InputCheck> InputNgType;
 typedef ParametersDmrgSolver<RealType,InputNgType::Readable> ParametersDmrgSolverType;
 
-template<typename ModelType>
-SizeType dofsFromModelName(const ModelType& model)
-{
-	const PsimagLite::String& modelName = model.params().model;
-	SizeType site = 0; // FIXME : account for Hilbert spaces changing with site
-	SizeType dofs = SizeType(log(model.hilbertSize(site))/log(2.0));
-	std::cerr<<"DOFS= "<<dofs<<" <------------------------------------\n";
-	if (modelName.find("FeAsBasedSc")!=PsimagLite::String::npos) return dofs;
-	if (modelName.find("FeAsBasedScExtended")!=PsimagLite::String::npos) return dofs;
-	if (modelName.find("HubbardOneBand")!=PsimagLite::String::npos) return dofs;
-
-	// max number here, site dependence taken into account elsewhere
-	if (modelName.find("Immm")!=PsimagLite::String::npos) return 4;
-	return 0;
-}
-
 template<typename VectorWithOffsetType,
          typename ModelType>
 bool observeOneFullSweep(IoInputType& io,
@@ -65,107 +49,36 @@ bool observeOneFullSweep(IoInputType& io,
                          bool hasTimeEvolution)
 {
 	typedef typename ModelType::GeometryType GeometryType;
+	typedef Observer<VectorWithOffsetType,ModelType,IoInputType> ObserverType;
+	typedef ObservableLibrary<ObserverType> ObservableLibraryType;
+
 	const GeometryType& geometry = model.geometry();
 	bool verbose = false;
+	SizeType n  = geometry.numberOfSites();
+	SizeType rows = n; // could be n/2 if there's enough symmetry
+	ObservableLibraryType observerLib(io,n,hasTimeEvolution,model,verbose);
+
 	PsimagLite::String obsOptions("");
 	PsimagLite::String list = list2;
 
 	if (list2.length() > 0 && list2[0] != '<') {
         obsOptions = list2;
 		list = "";
+	} else {
+		observerLib.interpret(list,rows,n);
+		return observerLib.endOfData();
 	}
 
-	typedef Observer<VectorWithOffsetType,ModelType,IoInputType> ObserverType;
-	typedef ObservableLibrary<ObserverType> ObservableLibraryType;
-
-	SizeType n  = geometry.numberOfSites();
-
-	ObservableLibraryType observerLib(io,n,hasTimeEvolution,model,verbose);
-
-	bool ot = false;
-	if (obsOptions.find("ot")!=PsimagLite::String::npos ||
-	        obsOptions.find("time")!=PsimagLite::String::npos) ot = true;
-
-	if (hasTimeEvolution && ot) {
-		observerLib.measureTime("superDensity");
-		observerLib.measureTime("nupNdown");
-		observerLib.measureTime("nup+ndown");
-		if (obsOptions.find("sz")!=PsimagLite::String::npos)
-			observerLib.measureTime("sz");
-	}
-
-	if (hasTimeEvolution) observerLib.setBrakets("time","time");
-
-	const PsimagLite::String& modelName = model.params().model;
-	SizeType rows = n; // could be n/2 if there's enough symmetry
-
-	observerLib.interpret(list,rows,n);
-
-	// Immm supports only onepoint:
-	if (modelName=="Immm" && obsOptions!="onepoint") {
-		PsimagLite::String str(__FILE__);
-		str += " "  + ttos(__LINE__) + "\n";
-		str += "Model Immm only supports onepoint\n";
-		throw PsimagLite::RuntimeError(str.c_str());
-	}
-
-	SizeType numberOfDofs = dofsFromModelName(model);
-
-	if (!hasTimeEvolution && obsOptions.find("onepoint")!=PsimagLite::String::npos) {
-		observerLib.measureTheOnePoints(numberOfDofs);
-	}
-
+	// only label mode below
+	PsimagLite::Vector<PsimagLite::String>::Type vecOptions;
+	PsimagLite::tokenizer(obsOptions,vecOptions,",");
 	SizeType orbitals = 1.0;
 	try {
 		io.readline(orbitals,"Orbitals=");
 	} catch (std::exception&) {}
 
-	if (modelName.find("Heisenberg")==PsimagLite::String::npos) {
-		if (obsOptions.find("cc")!=PsimagLite::String::npos) {
-			observerLib.measure("cc",rows,n,orbitals);
-		}
-
-		if (obsOptions.find("nn")!=PsimagLite::String::npos) {
-			observerLib.measure("nn",rows,n,orbitals);
-		}
-	}
-
-	if (obsOptions.find("szsz")!=PsimagLite::String::npos) {
-		observerLib.measure("szsz",rows,n,orbitals);
-	}
-
-	if (modelName.find("FeAsBasedSc")!=PsimagLite::String::npos ||
-	        modelName.find("FeAsBasedScExtended")!=PsimagLite::String::npos ||
-	        modelName.find("HubbardOneBand")!=PsimagLite::String::npos) {
-		bool dd4 = (obsOptions.find("dd4")!=PsimagLite::String::npos);
-
-		if (obsOptions.find("dd")!=PsimagLite::String::npos && !dd4) { // &&
-			//geometry.label(0).find("ladder")!=PsimagLite::String::npos) {
-			observerLib.measure("dd",rows,n,orbitals);
-		}
-
-		// FOUR-POINT DELTA-DELTA^DAGGER:
-		if (dd4 && geometry.label(0).find("ladder")!=PsimagLite::String::npos) {
-			observerLib.measure("dd4",rows,n,orbitals);
-		} // if dd4
-	}
-
-	if (modelName.find("HubbardOneBand")!=PsimagLite::String::npos &&
-	        obsOptions.find("multi")!=PsimagLite::String::npos) {
-		observerLib.measure("multi",rows,n,orbitals);
-	}
-
-	if (obsOptions.find("s+s-")!=PsimagLite::String::npos) {
-		observerLib.measure("s+s-",rows,n,orbitals);
-	}
-
-	if (obsOptions.find("s-s+")!=PsimagLite::String::npos) {
-		observerLib.measure("s-s+",rows,n,orbitals);
-	}
-
-	if (obsOptions.find("ss")!=PsimagLite::String::npos) {
-		observerLib.measure("ss",rows,n,orbitals);
-	}
+	for (SizeType i = 0; i < vecOptions.size(); ++i)
+		observerLib.measureTriage(vecOptions[i],rows,n,orbitals,hasTimeEvolution);
 
 	return observerLib.endOfData();
 }
