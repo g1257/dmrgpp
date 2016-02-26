@@ -145,8 +145,10 @@ public:
 	                  GeometryType const &geometry)
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
-	      geometry_(geometry)
+	      geometry_(geometry),
+	      hot_(geometry_.orbitals(0,0) > 1)
 	{
+		LinkProductType::setHot(hot_);
 		SizeType n = geometry_.numberOfSites();
 		SizeType m = modelParameters_.magneticField.size();
 		if (m > 0 && m != n) {
@@ -222,7 +224,7 @@ public:
 		operatorMatrices.clear();
 		for (SizeType i=0;i<block.size();i++) {
 			// Set the operators S^+_i for orbital a in the natural basis
-			tmpMatrix=findSplusMatrices(i,natBasis);
+			tmpMatrix=findSplusMatrices(i,0,natBasis);
 
 			typename OperatorType::Su2RelatedType su2related;
 			su2related.source.push_back(i*2);
@@ -236,11 +238,35 @@ public:
 			OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
 			operatorMatrices.push_back(myOp);
 
-			// Set the operators S^z_i in the natural basis
-			tmpMatrix = findSzMatrices(i,natBasis);
+			if (hot_) {
+				// Set the operators S^+_i for orbital b in the natural basis
+				tmpMatrix=findSplusMatrices(i,1,natBasis);
+
+				typename OperatorType::Su2RelatedType su2related;
+				su2related.source.push_back(i*2);
+				su2related.source.push_back(i*2+NUMBER_OF_ORBITALS);
+				su2related.source.push_back(i*2);
+				su2related.transpose.push_back(-1);
+				su2related.transpose.push_back(-1);
+				su2related.transpose.push_back(1);
+				su2related.offset = NUMBER_OF_ORBITALS;
+
+				OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
+				operatorMatrices.push_back(myOp);
+			}
+
+			// Set the operators S^z_i orbital a in the natural basis
+			tmpMatrix = findSzMatrices(i,0,natBasis);
 			typename OperatorType::Su2RelatedType su2related2;
 			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
 			operatorMatrices.push_back(myOp2);
+			if (hot_) {
+				// Set the operators S^z_i orbital b in the natural basis
+				tmpMatrix = findSzMatrices(i,1,natBasis);
+				typename OperatorType::Su2RelatedType su2related2;
+				OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
+				operatorMatrices.push_back(myOp2);
+			}
 
 			// Set the operators \Delta_i in the natural basis
 			tmpMatrix = findDeltaMatrices(i,natBasis);
@@ -252,7 +278,7 @@ public:
 
 	OperatorType naturalOperator(const PsimagLite::String& what,
 	                             SizeType site,
-	                             SizeType) const
+	                             SizeType dof) const
 	{
 		BlockType block;
 		block.resize(1);
@@ -274,20 +300,28 @@ public:
 		}
 
 		if (what=="+") { // S^+
-			return creationMatrix[0];
+			if (!hot_) dof = 0;
+			return creationMatrix[dof];
 		}
 
 		if (what=="-") { // S^-
-			creationMatrix[0].conjugate();
-			return creationMatrix[0];
+			if (!hot_) dof = 0;
+			assert(dof < creationMatrix.size());
+			creationMatrix[dof].conjugate();
+			return creationMatrix[dof];
 		}
 
 		if (what=="z") { // S^z
-			return creationMatrix[1];
+			if (!hot_) dof = 0;
+			SizeType offset = (hot_) ? 2 : 1;
+			assert(offset + dof < creationMatrix.size());
+			return creationMatrix[offset+dof];
 		}
 
 		if (what=="d") { // \Delta
-			return creationMatrix[2];
+			SizeType offset = (hot_) ? 4 : 2;
+			assert(offset < creationMatrix.size());
+			return creationMatrix[offset];
 		}
 
 		PsimagLite::String str("HeisenbergAncillaC: naturalOperator: no label ");
@@ -347,8 +381,10 @@ public:
 
 private:
 
-	//! Find S^+_i in the natural basis natBasis
-	SparseMatrixType findSplusMatrices(int,const HilbertBasisType& natBasis) const
+	//! Find S^+_i a in the natural basis natBasis
+	SparseMatrixType findSplusMatrices(int,
+	                                   SizeType orbital,
+	                                   const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
@@ -357,11 +393,14 @@ private:
 		for (SizeType ii=0;ii<total;ii++) {
 			PairSizeType ket = getOneOrbital(natBasis[ii]);
 
-			SizeType bra1 = ket.first + 1;
+			SizeType ket1 = (orbital == 0) ? ket.first : ket.second;
+			SizeType ket2 = (orbital == 0) ? ket.second : ket.first;
+			SizeType bra1 = ket1 + 1;
 			if (bra1 >= total1) continue;
-			PairSizeType bra(bra1,ket.second);
+			PairSizeType bra = (orbital == 0) ? PairSizeType(bra1,ket2) : PairSizeType(ket2,bra1);
 			SizeType jj = getFullIndex(bra);
-			RealType m = ket.first - j;
+			RealType m = ket1 - j;
+
 			RealType x = j*(j+1)-m*(m+1);
 			assert(x>=0);
 			cm(ii,jj) = sqrt(x);
@@ -372,7 +411,9 @@ private:
 	}
 
 	//! Find S^z_i in the natural basis natBasis
-	SparseMatrixType findSzMatrices(int,const HilbertBasisType& natBasis) const
+	SparseMatrixType findSzMatrices(int,
+	                                SizeType orbital,
+	                                const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
@@ -380,8 +421,8 @@ private:
 
 		for (SizeType ii=0;ii<total;ii++) {
 			PairSizeType ket = getOneOrbital(natBasis[ii]);
-
-			RealType m = ket.first - j;
+			SizeType ket1 = (orbital == 0) ? ket.first : ket.second;
+			RealType m = ket1 - j;
 			cm(ii,ii) = m;
 		}
 
@@ -477,6 +518,7 @@ private:
 	ParametersHeisenbergAncillaC<RealType>  modelParameters_;
 	//serializr ref geometry_ start
 	GeometryType const &geometry_;
+	bool hot_;
 }; // class HeisenbergAncillaC
 
 } // namespace Dmrg

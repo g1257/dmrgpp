@@ -25,6 +25,9 @@
 #include "ModelSelector.h"
 #include "ArchiveFiles.h"
 
+template<typename ModelHelperType>
+bool Dmrg::LinkProductHeisenbergAncillaC<ModelHelperType>::hot_ = false;
+
 #ifndef USE_FLOAT
 typedef double RealType;
 #else

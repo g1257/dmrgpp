@@ -15,6 +15,7 @@ my @modelHelpers = ("Local","Su2");
 my @vecWithOffsets = ("","s");
 my @complexOrReal = ("RealType","std::complex<RealType> ");
 
+my @values;
 my $cppFiles = 0;
 my $counter = 0;
 my $fout;
@@ -37,7 +38,7 @@ foreach my $complexOrNot (@complexOrReal) {
 					}
 
 					printInstance($counter,$target,$lanczos,$matrixVector,$modelHelper,
-					$vecWithOffset,$complexOrNot);
+					$vecWithOffset,$complexOrNot,\@values);
 					$counter++;
 				}
 			}
@@ -53,7 +54,8 @@ return $cppFiles;
 
 sub printInstance
 {
-	my ($counter,$target,$lanczos,$matrixVector,$modelHelper,$vecWithOffset,$complexOrNot) = @_;
+	my ($counter,$target,$lanczos,$matrixVector,$modelHelper,$vecWithOffset,$complexOrNot,
+	$values) = @_;
 	my $sparseMatrix = "SparseMatrixInstance${counter}Type";
 	my $ops = "Dmrg::Operators<Dmrg::Basis<$sparseMatrix> > ";
 	my $basisWith = "Dmrg::BasisWithOperators<$ops >";
@@ -93,6 +95,35 @@ const OperatorOptions&,
 PsimagLite::String);
 
 EOF
+
+my $value = "$modelHelper$complexOrNot";
+
+my $seen  = 0;
+foreach my $item (@$values) {
+	if ($item eq $value) {
+		$seen = 1;
+		last;
+	}
+}
+
+return if ($seen);
+
+push @$values, $value;
+foreach my $item (@$values) {
+	system("echo \'$item\' >> out.txt");
+}
+
+system("echo \"-------------------\" >> out.txt");
+
+print FOUT<<EOF;
+template<>
+bool Dmrg::LinkProductHeisenbergAncillaC<
+Dmrg::ModelHelper$modelHelper<
+   $lrs
+  >
+>::hot_ = false;
+EOF
+
 }
 
 sub isComplexOption

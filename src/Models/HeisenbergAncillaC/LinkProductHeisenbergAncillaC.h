@@ -94,7 +94,7 @@ public:
 
 	template<typename SomeStructType>
 	static void setLinkData(SizeType term,
-	                        SizeType,
+	                        SizeType dofs,
 	                        bool isSu2,
 	                        SizeType& fermionOrBoson,
 	                        std::pair<SizeType,SizeType>& ops,
@@ -105,7 +105,7 @@ public:
 	                        const SomeStructType&)
 	{
 		fermionOrBoson = ProgramGlobals::BOSON;
-		ops = operatorDofs(term,isSu2);
+		ops = (hot_) ? operatorDofsHot(term,dofs,isSu2) : operatorDofs(term,isSu2);
 		angularMomentum = 2;
 		switch (term) {
 		case 0:
@@ -136,18 +136,25 @@ public:
 	}
 
 	template<typename SomeStructType>
-	static SizeType dofs(SizeType,const SomeStructType&) { return 1; }
+	static SizeType dofs(SizeType term,const SomeStructType&)
+	{
+		if (!hot_ || term == TERM_ANCILLA) return 1;
+		return 2;
+	}
 
 	template<typename SomeStructType>
-	static PairType connectorDofs(SizeType,SizeType,const SomeStructType&)
+	static PairType connectorDofs(SizeType term,SizeType dofs,const SomeStructType&)
 	{
-		return PairType(0,0); // no orbital
+		if (!hot_ || term == TERM_ANCILLA) return PairType(0,0);
+		return PairType(dofs,dofs);
 	}
 
 	//! Splus Sminus and
 	//! Sz Sz
 	//! delta^\dagger delta
 	static SizeType terms() { return 3; }
+
+	static bool setHot(bool hot) { return hot_ = hot; }
 
 private:
 
@@ -158,6 +165,16 @@ private:
 		SizeType x = (isSu2) ? 0 : 1;
 		return PairType(x,x);
 	}
+
+	static PairType operatorDofsHot(SizeType term,SizeType dofs,bool)
+	{
+		if (term == TERM_ANCILLA) return PairType(4,4);
+		assert(term == TERM_SPLUSSMINUS || term == TERM_SZSZ);
+		SizeType offset = (term == TERM_SPLUSSMINUS) ? 0 : 2;
+		return PairType(dofs+offset,dofs+offset);
+	}
+
+	static bool hot_;
 }; // class LinkProductHeisenbergAncillaC
 } // namespace Dmrg
 /*@}*/
