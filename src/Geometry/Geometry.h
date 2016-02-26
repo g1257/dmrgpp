@@ -214,6 +214,12 @@ public:
 
 	SizeType numberOfSites() const { return linSize_; }
 
+	SizeType orbitals(SizeType term, SizeType site) const
+	{
+		assert(term < terms_.size());
+		return terms_[term]->orbitals(site);
+	}
+
 	void split(SizeType sitesPerBlock,
 	           BlockType& S,
 	           typename Vector<BlockType>::Type& X,

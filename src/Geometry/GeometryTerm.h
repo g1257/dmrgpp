@@ -348,8 +348,6 @@ public:
 	                                const GeometryTerm<ComplexOrRealType_,
 	                                InputType_>& gt);
 
-private:
-
 	SizeType orbitals(SizeType site) const
 	{
 		if (geometryBase_->label() != "KTwoNiFFour") return orbitals_;
@@ -357,6 +355,8 @@ private:
 		geometryBase_->fillAdditionalData(additionalData,site,0);
 		return (additionalData.type1 == additionalData.TYPE_C) ? 1 : orbitals_;
 	}
+
+private:
 
 	void cacheValues()
 	{
