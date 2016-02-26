@@ -45,7 +45,7 @@ template<typename VectorWithOffsetType,
          typename ModelType>
 bool observeOneFullSweep(IoInputType& io,
                          const ModelType& model,
-                         const PsimagLite::String& list2,
+                         const PsimagLite::String& list,
                          bool hasTimeEvolution)
 {
 	typedef typename ModelType::GeometryType GeometryType;
@@ -58,27 +58,21 @@ bool observeOneFullSweep(IoInputType& io,
 	SizeType rows = n; // could be n/2 if there's enough symmetry
 	ObservableLibraryType observerLib(io,n,hasTimeEvolution,model,verbose);
 
-	PsimagLite::String obsOptions("");
-	PsimagLite::String list = list2;
-
-	if (list2.length() > 0 && list2[0] != '<') {
-        obsOptions = list2;
-		list = "";
-	} else {
-		observerLib.interpret(list,rows,n);
-		return observerLib.endOfData();
-	}
-
-	// only label mode below
 	PsimagLite::Vector<PsimagLite::String>::Type vecOptions;
-	PsimagLite::tokenizer(obsOptions,vecOptions,",");
+	PsimagLite::tokenizer(list,vecOptions,",");
 	SizeType orbitals = 1.0;
 	try {
 		io.readline(orbitals,"Orbitals=");
 	} catch (std::exception&) {}
 
-	for (SizeType i = 0; i < vecOptions.size(); ++i)
-		observerLib.measureTriage(vecOptions[i],rows,n,orbitals,hasTimeEvolution);
+	for (SizeType i = 0; i < vecOptions.size(); ++i) {
+		PsimagLite::String item = vecOptions[i];
+
+		if (item.length() > 0 && item[0] != '<')
+	        observerLib.measureTriage(item,rows,n,orbitals,hasTimeEvolution);
+		else
+			observerLib.interpret(item,rows,n);
+	}
 
 	return observerLib.endOfData();
 }
