@@ -115,17 +115,23 @@ bool observeOneFullSweep(IoInputType& io,
 		observerLib.measureTheOnePoints(numberOfDofs);
 	}
 
+	SizeType orbitals = 1.0;
+	try {
+		io.readline(orbitals,"Orbitals=");
+	} catch (std::exception&) {}
+
 	if (modelName.find("Heisenberg")==PsimagLite::String::npos) {
 		if (obsOptions.find("cc")!=PsimagLite::String::npos) {
-			observerLib.measure("cc",rows,n);
+			observerLib.measure("cc",rows,n,orbitals);
 		}
 
 		if (obsOptions.find("nn")!=PsimagLite::String::npos) {
-			observerLib.measure("nn",rows,n);
+			observerLib.measure("nn",rows,n,orbitals);
 		}
 	}
+
 	if (obsOptions.find("szsz")!=PsimagLite::String::npos) {
-		observerLib.measure("szsz",rows,n);
+		observerLib.measure("szsz",rows,n,orbitals);
 	}
 
 	if (modelName.find("FeAsBasedSc")!=PsimagLite::String::npos ||
@@ -135,26 +141,30 @@ bool observeOneFullSweep(IoInputType& io,
 
 		if (obsOptions.find("dd")!=PsimagLite::String::npos && !dd4) { // &&
 			//geometry.label(0).find("ladder")!=PsimagLite::String::npos) {
-			observerLib.measure("dd",rows,n);
+			observerLib.measure("dd",rows,n,orbitals);
 		}
 
 		// FOUR-POINT DELTA-DELTA^DAGGER:
 		if (dd4 && geometry.label(0).find("ladder")!=PsimagLite::String::npos) {
-			observerLib.measure("dd4",rows,n);
+			observerLib.measure("dd4",rows,n,orbitals);
 		} // if dd4
 	}
 
 	if (modelName.find("HubbardOneBand")!=PsimagLite::String::npos &&
 	        obsOptions.find("multi")!=PsimagLite::String::npos) {
-		observerLib.measure("multi",rows,n);
+		observerLib.measure("multi",rows,n,orbitals);
 	}
 
 	if (obsOptions.find("s+s-")!=PsimagLite::String::npos) {
-		observerLib.measure("s+s-",rows,n);
+		observerLib.measure("s+s-",rows,n,orbitals);
+	}
+
+	if (obsOptions.find("s-s+")!=PsimagLite::String::npos) {
+		observerLib.measure("s-s+",rows,n,orbitals);
 	}
 
 	if (obsOptions.find("ss")!=PsimagLite::String::npos) {
-		observerLib.measure("ss",rows,n);
+		observerLib.measure("ss",rows,n,orbitals);
 	}
 
 	return observerLib.endOfData();

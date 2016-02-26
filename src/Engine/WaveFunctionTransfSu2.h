@@ -434,7 +434,7 @@ private:
 					SizeType r = alpha + beta*nalpha;
 					for (int kI=factorsSE.getRowPtr(r);kI<factorsSE.getRowPtr(r+1);kI++) {
 						SizeType x = factorsSE.getCol(kI);
-						assert(x >= start && x < end);
+						assert(x >= start && x < start + psiSrc.size());
 						x -= start;
 						sum += wsT.getValue(k)*weRef.getValue(k2)*psiSrc[x]*
 						        factorsSE.getValue(kI)*factorsE.getValue(k2I);

@@ -115,8 +115,7 @@ public:
 	    : numberOfSites_(numberOfSites),
 	      hasTimeEvolution_(hasTimeEvolution),
 	      model_(model),
-	      observe_(io,numberOfSites-2,hasTimeEvolution,model,verbose),
-	      szsz_(0,0)
+	      observe_(io,numberOfSites-2,hasTimeEvolution,model,verbose)
 	{
 		PsimagLite::String modelName = model.params().model;
 		bool hubbardLike = (modelName == "HubbardOneBand" ||
@@ -130,11 +129,9 @@ public:
 		}
 	}
 
-	void measure(const PsimagLite::String& label,SizeType rows,SizeType cols)
+	void measure(const PsimagLite::String& label,SizeType rows,SizeType cols,SizeType orbitals)
 	{
-		PsimagLite::String str("WARNING: ObservableLibrary: ");
-		str += "deprecated use of measure\n";
-		std::cerr<<str;
+		PsimagLite::String modelName = model_.params().model;
 
 		// FIXME: No support for site varying operators
 		if (label=="cc") {
@@ -143,48 +140,143 @@ public:
 			BraketType braket2(model_,"<gs|c?1-;c'?1-|gs>");
 			manyPoint(0,braket2,rows,cols); // c_{0,0} spin down
 		} else if (label=="nn") {
-			BraketType braket(model_,"<gs|n?0;n?0|gs>");
-			manyPoint(0,braket,rows,cols);
-		} else if (label=="szsz") {
-			BraketType braket(model_,"<gs|z?0;z?0|gs>");
-			manyPoint(&szsz_,braket,rows,cols);
-			if (PsimagLite::Concurrency::root()) {
-				std::cout<<"OperatorSz:\n";
-				std::cout<<szsz_;
+			for (SizeType i =0; i < orbitals; ++i) {
+				PsimagLite::String str = "<gs|n?" + ttos(i) + ";n?" + ttos(i) + "|gs>";
+				BraketType braket(model_,str);
+				manyPoint(0,braket,rows,cols);
 			}
+
+		} else if (label=="szsz") {
+			resizeStorage(szsz_,rows,cols,orbitals);
+			MatrixType tSzTotal;
+			SizeType counter = 0;
+			for (SizeType i = 0; i < orbitals; ++i) {
+				for (SizeType j = i; j < orbitals; ++j) {
+					PsimagLite::String str = "<gs|z?" + ttos(i) + ";z?" + ttos(j) + "|gs>";
+					BraketType braket(model_,str);
+					manyPoint(&szsz_[counter],braket,rows,cols);
+					MatrixType tSzThis = 0.25*szsz_[counter];
+					RealType factor = (i != j) ? 2.0 : 1.0;
+					if (counter == 0)
+						tSzTotal =  factor*tSzThis;
+					else
+						tSzTotal +=  factor*tSzThis;
+					if (PsimagLite::Concurrency::root()) {
+						std::cout<<"OperatorSz orb"<<i<<"-"<<j<<":\n";
+						std::cout<<tSzThis;
+					}
+
+					counter++;
+				}
+			}
+
+			if (PsimagLite::Concurrency::root() && orbitals > 1) {
+				std::cout<<"OperatorSz tot:\n";
+                std::cout<<tSzTotal;
+			}
+
 		} else if (label=="s+s-") {
 			// Si^+ Sj^-
-			BraketType braket(model_,"<gs|+?0;-?0|gs>");
-			manyPoint(&sPlusSminus_,braket,rows,cols);
-			if (PsimagLite::Concurrency::root()) {
-				std::cout<<"OperatorSplus:\n";
-				std::cout<<sPlusSminus_;
+			resizeStorage(sPlusSminus_,rows,cols,orbitals);
+			MatrixType tSpTotal;
+			SizeType counter = 0;
+			for (SizeType i = 0; i < orbitals; ++i) {
+				for (SizeType j = i; j < orbitals; ++j) {
+					PsimagLite::String str = "<gs|+?" + ttos(i) + ";-?" + ttos(j) + "|gs>";
+					BraketType braket(model_,str);
+					manyPoint(&sPlusSminus_[counter],braket,rows,cols);
+					MatrixType tSpThis = 0.25*sPlusSminus_[counter];
+					RealType factor = (i != j) ? 2.0 : 1.0;
+					if (counter == 0)
+						tSpTotal =  factor*tSpThis;
+					else
+						tSpTotal +=  factor*tSpThis;
+					if (PsimagLite::Concurrency::root()) {
+						std::cout<<"OperatorS+S- orb"<<i<<"-"<<j<<":\n";
+						std::cout<<tSpThis;
+					}
+
+					counter++;
+				}
 			}
+
+			if (PsimagLite::Concurrency::root() && orbitals > 1) {
+				std::cout<<"OperatorS+S- tot:\n";
+                std::cout<<tSpTotal;
+			}
+
 		} else if (label=="s-s+") {
 			// Si^- Sj^+
-			BraketType braket(model_,"<gs|-?0;+?0|gs>");
-			manyPoint(&sPlusSminus_,braket,rows,cols);
-			if (PsimagLite::Concurrency::root()) {
-				std::cout<<"OperatorSminus:\n";
-				std::cout<<sMinusSplus_;
+			resizeStorage(sMinusSplus_,rows,cols,orbitals);
+			MatrixType tSmTotal;
+			SizeType counter = 0;
+			for (SizeType i = 0; i < orbitals; ++i) {
+				for (SizeType j = i; j < orbitals; ++j) {
+					PsimagLite::String str = "<gs|-?" + ttos(i) + ";+?" + ttos(j) + "|gs>";
+					BraketType braket(model_,str);
+					manyPoint(&sMinusSplus_[counter],braket,rows,cols);
+					MatrixType tSmThis = 0.25*sMinusSplus_[counter];
+					RealType factor = (i != j) ? 2.0 : 1.0;
+					if (counter == 0)
+						tSmTotal =  factor*tSmThis;
+					else
+						tSmTotal +=  factor*tSmThis;
+					if (PsimagLite::Concurrency::root()) {
+						std::cout<<"OperatorS-S+ orb"<<i<<"-"<<j<<":\n";
+						std::cout<<tSmThis;
+					}
+
+					counter++;
+				}
 			}
+
+			if (PsimagLite::Concurrency::root() && orbitals > 1) {
+				std::cout<<"OperatorS+S- tot:\n";
+                std::cout<<tSmTotal;
+			}
+
 		} else if (label=="ss") {
-			if (szsz_.n_row()==0) measure("szsz",rows,cols);
-			if (sPlusSminus_.n_row()==0)  measure("s+s-",rows,cols);
-			if (sMinusSplus_.n_row()==0)  measure("s-s+",rows,cols);
+			MatrixType spinTotalTotal;
+			SizeType counter = 0;
+			for (SizeType x = 0; x < orbitals; ++x) {
+				for (SizeType y = x; y < orbitals; ++y) {
+					if (szsz_.size() == 0)
+						measure("szsz",rows,cols,orbitals);
+					if (sPlusSminus_.size() == 0)
+						measure("s+s-",rows,cols,orbitals);
+					if (sMinusSplus_.size() == 0)
+						measure("s-s+",rows,cols,orbitals);
 
-			MatrixType spinTotal(szsz_.n_row(),szsz_.n_col());
+					MatrixType spinTotal(szsz_[counter].n_row(),szsz_[counter].n_col());
 
-			for (SizeType i=0;i<spinTotal.n_row();i++)
-				for (SizeType j=0;j<spinTotal.n_col();j++)
-					spinTotal(i,j) = static_cast<RealType>(0.5)*(sPlusSminus_(i,j) +
-					                                             sMinusSplus_(i,j)) +
-					        szsz_(i,j);
+					RealType factorSpSm = 0.5;
+					RealType factorSz = 0.25;
+					for (SizeType i=0;i<spinTotal.n_row();i++)
+						for (SizeType j=0;j<spinTotal.n_col();j++)
+							spinTotal(i,j) = factorSpSm*(
+							        sPlusSminus_[counter](i,j) + sMinusSplus_[counter](i,j)) +
+							        szsz_[counter](i,j)*factorSz;
 
-			if (PsimagLite::Concurrency::root()) {
-				std::cout<<"SpinTotal:\n";
-				std::cout<<spinTotal;
+					RealType factor = (x != y) ? 2.0 : 1.0;
+					if (counter == 0)
+						spinTotalTotal =  factor*spinTotal;
+					else
+						spinTotalTotal +=  factor*spinTotal;
+
+					if (PsimagLite::Concurrency::root()) {
+						std::cout<<"SpinTotal orb"<<x<<"-"<<y<<":\n";
+						std::cout<<spinTotal;
+					}
+
+					counter++;
+				}
 			}
+
+			if (PsimagLite::Concurrency::root() && orbitals > 1) {
+				std::cout<<"SpinTotalTotal:\n";
+                std::cout<<spinTotalTotal;
+			}
+
 		} else if (label=="dd") {
 
 			BraketType braket(model_,"<gs|d;d'|gs>");
@@ -417,6 +509,14 @@ public:
 
 private:
 
+	void resizeStorage(VectorMatrixType& v,SizeType rows,SizeType cols,SizeType orbitals)
+	{
+		if (v.size() != 0) return;
+		v.resize(static_cast<SizeType>(orbitals*(orbitals+1)/2));
+		for (SizeType i = 0; i < v.size(); ++i)
+			v[i].resize(rows,cols);
+	}
+
 	void measureOnePoint(const PreOperatorBaseType& preOperator)
 	{
 		SizeType threadId = preOperator.threadId();
@@ -546,7 +646,7 @@ private:
 	const ModelType& model_; // not the owner
 	ObserverType observe_;
 	OperatorType matrixNup_,matrixNdown_;
-	MatrixType szsz_,sPlusSminus_,sMinusSplus_;
+	VectorMatrixType szsz_,sPlusSminus_,sMinusSplus_;
 
 }; // class ObservableLibrary
 
