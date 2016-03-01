@@ -134,6 +134,7 @@ public:
 			ioIn2.readline(energyFromFile_,label,IoType::In::LAST_INSTANCE);
 			label = "#OPERATORSPERSITE";
 			VectorSizeType v;
+			ioIn2.rewind();
 			ioIn2.read(v,label);
 			if (v.size() == 0) return;
 
