@@ -165,7 +165,7 @@ public:
 	      progress_("DmrgSolver"),
 	      quantumSector_(0),
 	      stepCurrent_(0),
-	      checkpoint_(parameters_,ioIn,model.geometry().numberOfSites()),
+	      checkpoint_(parameters_,ioIn,model),
 	      wft_(parameters_),
 	      reflectionOperator_(lrs_,
 	                          model_.hilbertSize(0),

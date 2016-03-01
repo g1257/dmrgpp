@@ -133,9 +133,7 @@ public:
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
 	      geometry_(geometry)
-	{
-		std::cout<<"TjAncillaC: This model is EXPERIMENTAL\n";
-	}
+	{}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
 	                   SizeType,

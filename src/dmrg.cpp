@@ -347,7 +347,6 @@ int main(int argc,char *argv[])
 	bool isComplex = (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos);
 	if (targeting=="TimeStepTargetting") isComplex = true;
 	if (isComplex) {
-		std::cerr<<argv[0]<<" EXPERIMENTAL option complex is in use\n";
 		mainLoop0<MySparseMatrixComplex>(io,dmrgSolverParams,targeting,options);
 	} else {
 		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,targeting,options);

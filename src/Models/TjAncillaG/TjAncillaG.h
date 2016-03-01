@@ -140,7 +140,6 @@ public:
 	      offset_(DEGREES_OF_FREEDOM+3), // c^\dagger_up, c^\dagger_down, S+, Sz, n
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 	{
-		std::cout<<"TjAncillaG: This model is EXPERIMENTAL\n";
 		if (MyBasis::useSu2Symmetry()) {
 			throw PsimagLite::RuntimeError("TjAncillaG: SU(2) not supported\n");
 		}

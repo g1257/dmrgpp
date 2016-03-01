@@ -168,6 +168,13 @@ public:
 			msg += " HIGHLY EXPERIMENTAL!\n";
 			std::cout<<msg;
 		}
+
+		if (hot_) {
+			PsimagLite::String msg("HeisenbergAncillaC: Hot ancilla mode is on");
+			msg += " (EXPERIMENTAL feature)\n";
+			std::cout<<msg;
+			std::cerr<<msg;
+		}
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,

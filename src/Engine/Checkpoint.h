@@ -97,16 +97,20 @@ public:
 	typedef typename PsimagLite::IoSimple IoType;
 	typedef typename TargettingType::ModelType ModelType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
+	typedef typename ModelType::SymmetryElectronsSzType SymmetryElectronsSzType;
+	typedef typename OperatorsType::OperatorType OperatorType;
+	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename PsimagLite::Stack<BasisWithOperatorsType>::Type MemoryStackType;
 	typedef DiskStack<BasisWithOperatorsType>  DiskStackType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	const PsimagLite::String SYSTEM_STACK_STRING;
 	const PsimagLite::String ENVIRON_STACK_STRING;
 
 	Checkpoint(const ParametersType& parameters,
 	           InputValidatorType& ioIn,
-	           SizeType totalSites) :
+	           const ModelType& model) :
 	    SYSTEM_STACK_STRING(ProgramGlobals::SYSTEM_STACK_STRING),
 	    ENVIRON_STACK_STRING(ProgramGlobals::ENVIRON_STACK_STRING),
 	    parameters_(parameters),
@@ -119,7 +123,7 @@ public:
 	    progress_("Checkpoint"),
 	    energyFromFile_(0.0)
 	{
-		checkFiniteLoops(totalSites,ioIn);
+		checkFiniteLoops(model.geometry().numberOfSites(),ioIn);
 
 		if (!enabled_) return;
 
@@ -128,6 +132,25 @@ public:
 			PsimagLite::String label = parameters_.checkpoint.labelForEnergy;
 			label += "=";
 			ioIn2.readline(energyFromFile_,label,IoType::In::LAST_INSTANCE);
+			label = "#OPERATORSPERSITE";
+			VectorSizeType v;
+			ioIn2.read(v,label);
+			if (v.size() == 0) return;
+
+			SizeType operatorsPerSite = v[0];
+
+			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
+			SparseMatrixType hmatrix;
+			SymmetryElectronsSzType q;
+			RealType time = 0;
+			VectorSizeType test(1,0);
+			model.setNaturalBasis(creationMatrix,hmatrix,q,test,time);
+
+			if (creationMatrix.size() != operatorsPerSite) {
+				PsimagLite::String msg("CheckPoint: FATAL: Perhaps trying to");
+				msg += " restart one model from a different one or different variant\n";
+				throw PsimagLite::RuntimeError(msg);
+			}
 		}
 
 		loadStacksDiskToMemory();
@@ -163,6 +186,7 @@ public:
 		}
 		loop--;
 		BasisWithOperatorsType pS1(ioTmp,"#CHKPOINTSYSTEM",loop);
+
 		pS=pS1;
 		BasisWithOperatorsType pE1(ioTmp,"#CHKPOINTENVIRON");
 		pE=pE1;

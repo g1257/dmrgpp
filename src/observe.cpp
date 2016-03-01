@@ -261,7 +261,6 @@ int main(int argc,char *argv[])
 	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
 
 	if (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos) {
-		std::cerr<<argv[0]<<" EXPERIMENTAL option complex is in use\n";
 		mainLoop0<MySparseMatrixComplex>(io,dmrgSolverParams,inputCheck, list);
 	} else {
 		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck, list);

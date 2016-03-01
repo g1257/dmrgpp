@@ -326,6 +326,12 @@ public:
 
 	SizeType numberOfOperators() const { return operators_.numberOfOperators(); }
 
+	SizeType operatorsPerSite(SizeType i) const
+	{
+		assert(i < operatorsPerSite_.size());
+		return operatorsPerSite_[i];
+	}
+
 	int fermionicSign(SizeType i,int fsign) const
 	{
 		const BasisType &parent = *this;
