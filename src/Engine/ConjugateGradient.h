@@ -109,21 +109,19 @@ public:
 			r[0][i] = b[i] - v[i];
 			p[0][i] = r[0][i];
 		}
+
 		SizeType k = 0;
-		typename PsimagLite::Vector<FieldType>::Type alpha,beta;
 		while (k<max_) {
 			VectorType tmp = multiply(A,p[k]);
 			FieldType val = scalarProduct(r[k],r[k])/
 			        scalarProduct(p[k],tmp);
-			alpha.push_back(val);
-			v = x[k] + alpha[k] * p[k];
+			v = x[k] + val * p[k];
 			x.push_back(v);
-			v = r[k] - alpha[k] * tmp;
+			v = r[k] - val * tmp;
 			r.push_back(v);
 			if (PsimagLite::norm(r[k+1])<eps_) break;
 			val = scalarProduct(r[k+1],r[k+1])/scalarProduct(r[k],r[k]);
-			beta.push_back(val);
-			v = r[k+1] - beta[k]*p[k];
+			v = r[k+1] - val*p[k];
 			p.push_back(v);
 			k++;
 		}
