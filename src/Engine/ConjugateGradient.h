@@ -99,42 +99,43 @@ public:
 	//! A and b, the result x, and also the initial solution x0
 	void operator()(typename PsimagLite::Vector<VectorType>::Type& x,
 	                const MatrixType& A,
-	                const typename PsimagLite::Vector<FieldType>::Type& b) const
+	                const VectorType& b) const
 	{
 		VectorType v = multiply(A,x[0]);
-		typename PsimagLite::Vector<VectorType>::Type r,p;
-		r.push_back(b);
+		typename PsimagLite::Vector<VectorType>::Type p;
+		VectorType rprev(b.size());
+		VectorType rnext;
 		p.push_back(b);
-		for (SizeType i=0;i<r[0].size();i++) {
-			r[0][i] = b[i] - v[i];
-			p[0][i] = r[0][i];
+		for (SizeType i=0;i<rprev.size();i++) {
+			rprev[i] = b[i] - v[i];
+			p[0][i] = rprev[i];
 		}
 
 		SizeType k = 0;
 		while (k<max_) {
 			VectorType tmp = multiply(A,p[k]);
-			FieldType val = scalarProduct(r[k],r[k])/
+			FieldType val = scalarProduct(rprev,rprev)/
 			        scalarProduct(p[k],tmp);
 			v = x[k] + val * p[k];
 			x.push_back(v);
-			v = r[k] - val * tmp;
-			r.push_back(v);
-			if (PsimagLite::norm(r[k+1])<eps_) break;
-			val = scalarProduct(r[k+1],r[k+1])/scalarProduct(r[k],r[k]);
-			v = r[k+1] - val*p[k];
+			v = rprev - val * tmp;
+			rnext = v;
+			if (PsimagLite::norm(rnext)<eps_) break;
+			val = scalarProduct(rnext,rnext)/scalarProduct(rprev,rprev);
+			v = rnext - val*p[k];
 			p.push_back(v);
+			rprev = rnext;
 			k++;
 		}
 
 		PsimagLite::OstringStream msg;
 		msg<<"Finished after "<<k<<" steps out of "<<max_;
 		msg<<" requested eps= "<<eps_;
-		RealType finalEps = (r.size() > 0) ? PsimagLite::norm(r[r.size()-1]) : 0.0;
-		if (r.size() > 0)
-			msg<<" actual eps= "<<finalEps;
+		RealType finalEps = PsimagLite::norm(rnext);
+		msg<<" actual eps= "<<finalEps;
 		progress_.printline(msg,std::cout);
 
-		if (r.size() == 0 || finalEps <= eps_) return;
+		if (finalEps <= eps_) return;
 
 		PsimagLite::OstringStream msg2;
 		msg2<<"WARNING: actual eps "<<finalEps<<" greater than requested eps= "<<eps_;
