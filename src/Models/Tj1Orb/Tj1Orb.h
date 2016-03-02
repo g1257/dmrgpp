@@ -523,7 +523,7 @@ private:
 		jmSaved.second++;
 
 		VectorSizeType electronsUp(basis.size());
-		VectorSizeType electronsDown(basis.size());
+		VectorSizeType electrons(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {
 			PairType jmpair = calcJmvalue<PairType>(basis[i]);
 
@@ -531,13 +531,13 @@ private:
 			// nup
 			electronsUp[i] = HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_UP);
 			// ndown
-			electronsDown[i] = HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_DOWN);
-
-			flavors.push_back(electronsUp[i]+electronsDown[i]);
+			SizeType electronsDown = HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_DOWN);
+			electrons[i] = electronsDown + electronsUp[i];
+			flavors.push_back(electrons[i]);
 			jmSaved = jmpair;
 		}
 
-		q.set(jmvalues,flavors,electronsUp+electronsDown,electronsUp);
+		q.set(jmvalues,flavors,electrons,electronsUp);
 	}
 
 	// note: we use 2j instead of j

@@ -638,7 +638,7 @@ private:
 		jmSaved.second++;
 
 		VectorSizeType electronsUp(basis.size());
-		VectorSizeType electronsDown(basis.size());
+		VectorSizeType electrons(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {
 			PairType jmpair(0,0);
 			if (n == 1) jmpair = calcJmvalue<PairType>(basis[i]);
@@ -659,11 +659,12 @@ private:
 			electronsUp[i] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
 			                                                              SPIN_UP);
 			// ndown
-			electronsDown[i] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			                                                                SPIN_DOWN);
+			SizeType electronsDown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
+			                                                                      SPIN_DOWN);
+			electrons[i] = electronsDown + electronsUp[i];
 		}
 
-		q.set(jmvalues,flavors,electronsUp+electronsDown,electronsUp);
+		q.set(jmvalues,flavors,electrons,electronsUp);
 	}
 
 	// note: we use 2j instead of j

@@ -491,7 +491,7 @@ private:
 		jmSaved.second++;
 
 		typename PsimagLite::Vector<SizeType>::Type electronsUp(basis.size());
-		typename PsimagLite::Vector<SizeType>::Type electronsDown(basis.size());
+		typename PsimagLite::Vector<SizeType>::Type electrons(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {
 			PairType jmpair = calcJmvalue<PairType>(basis[i]);
 
@@ -505,10 +505,11 @@ private:
 			// nup
 			electronsUp[i] = hilbertSpace_.electronsWithGivenSpin(basis[i],site,SPIN_UP);
 			// ndown
-			electronsDown[i] = hilbertSpace_.electronsWithGivenSpin(basis[i],site,SPIN_DOWN);
+			SizeType electronsDown = hilbertSpace_.electronsWithGivenSpin(basis[i],site,SPIN_DOWN);
+			electrons[i] = electronsDown + electronsUp[i];
 		}
 
-		q.set(jmvalues,flavors,electronsUp+electronsDown,electronsUp);
+		q.set(jmvalues,flavors,electrons,electronsUp);
 	}
 
 	//! Not implemented, su(2) symmetry won't work
