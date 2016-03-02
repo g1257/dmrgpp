@@ -97,12 +97,12 @@ public:
 	    : progress_("ConjugateGradient"), max_(max), eps_(eps) {}
 
 	//! A and b, the result x, and also the initial solution x0
-	void operator()(typename PsimagLite::Vector<VectorType>::Type& x,
+	void operator()(VectorType& x,
 	                const MatrixType& A,
 	                const VectorType& b) const
 	{
-		VectorType v = multiply(A,x[0]);
-		VectorType p;
+		VectorType v = multiply(A,x);
+		VectorType p(b.size());
 		VectorType rprev(b.size());
 		VectorType rnext;
 		for (SizeType i=0;i<rprev.size();i++) {
@@ -115,8 +115,8 @@ public:
 			VectorType tmp = multiply(A,p);
 			FieldType val = scalarProduct(rprev,rprev)/
 			        scalarProduct(p,tmp);
-			v = x[k] + val * p;
-			x.push_back(v);
+			v = x + val * p;
+			x = v;
 			v = rprev - val * tmp;
 			rnext = v;
 			if (PsimagLite::norm(rnext)<eps_) break;

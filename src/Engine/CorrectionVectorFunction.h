@@ -133,12 +133,9 @@ public:
 	void getXi(VectorType& result,const VectorType& sv) const
 	{
 		VectorType x0(result.size(),0.0);
-		typename PsimagLite::Vector<VectorType>::Type x;
 
-		x.push_back(x0); // initial ansatz
-		cg_(x,im_,sv);
-		SizeType k = x.size();
-		result = x[k-1];
+		result = x0; // initial ansatz
+		cg_(result,im_,sv);
 	}
 
 private:
