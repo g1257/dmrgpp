@@ -102,28 +102,27 @@ public:
 	                const VectorType& b) const
 	{
 		VectorType v = multiply(A,x[0]);
-		typename PsimagLite::Vector<VectorType>::Type p;
+		VectorType p;
 		VectorType rprev(b.size());
 		VectorType rnext;
-		p.push_back(b);
 		for (SizeType i=0;i<rprev.size();i++) {
 			rprev[i] = b[i] - v[i];
-			p[0][i] = rprev[i];
+			p[i] = rprev[i];
 		}
 
 		SizeType k = 0;
 		while (k<max_) {
-			VectorType tmp = multiply(A,p[k]);
+			VectorType tmp = multiply(A,p);
 			FieldType val = scalarProduct(rprev,rprev)/
-			        scalarProduct(p[k],tmp);
-			v = x[k] + val * p[k];
+			        scalarProduct(p,tmp);
+			v = x[k] + val * p;
 			x.push_back(v);
 			v = rprev - val * tmp;
 			rnext = v;
 			if (PsimagLite::norm(rnext)<eps_) break;
 			val = scalarProduct(rnext,rnext)/scalarProduct(rprev,rprev);
-			v = rnext - val*p[k];
-			p.push_back(v);
+			v = rnext - val*p;
+			p = v;
 			rprev = rnext;
 			k++;
 		}
