@@ -113,15 +113,15 @@ public:
 		SizeType k = 0;
 		while (k<max_) {
 			VectorType tmp = multiply(A,p);
-			FieldType val = scalarProduct(rprev,rprev)/
-			        scalarProduct(p,tmp);
-			v = x + val * p;
+			FieldType scalarrprev = scalarProduct(rprev,rprev);
+			FieldType val = scalarrprev/scalarProduct(p,tmp);
+			v <= x + val * p;
 			x = v;
-			v = rprev - val * tmp;
+			v <= rprev - val * tmp;
 			rnext = v;
 			if (PsimagLite::norm(rnext)<eps_) break;
-			val = scalarProduct(rnext,rnext)/scalarProduct(rprev,rprev);
-			v = rnext - val*p;
+			val = scalarProduct(rnext,rnext)/scalarrprev;
+			v <= rnext - val*p;
 			p = v;
 			rprev = rnext;
 			k++;

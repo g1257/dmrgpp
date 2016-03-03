@@ -188,7 +188,8 @@ private:
 		{
 		}
 
-		TargetVectorType operator()(const RealType&,const TargetVectorType& y) const
+		std::ClosureOperator<ComplexOrRealType,TargetVectorType,std::ClosureOperations::OP_MULT>
+		operator()(const RealType&,const TargetVectorType& y) const
 		{
 			TargetVectorType x(y.size());
 			lanczosHelper_.matrixVectorProduct(x,y);

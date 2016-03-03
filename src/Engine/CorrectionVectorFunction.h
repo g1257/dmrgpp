@@ -111,7 +111,7 @@ class	CorrectionVectorFunction {
 			m_.matrixVectorProduct(xTmp,y); // xTmp = Hy
 			VectorType x2(x.size(),0);
 			m_.matrixVectorProduct(x2,xTmp); // x2 = H^2 y
-			x = x2 -2 *omegaMinusE0 * xTmp + (omegaMinusE0*omegaMinusE0 + eta*eta)*y;
+			x <= x2 - 2.0*omegaMinusE0*xTmp + (omegaMinusE0*omegaMinusE0 + eta*eta)*y;
 			x /= (-eta);
 		}
 
