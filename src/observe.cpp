@@ -49,7 +49,8 @@ template<typename VectorWithOffsetType,
 bool observeOneFullSweep(IoInputType& io,
                          const ModelType& model,
                          const PsimagLite::String& list,
-                         bool hasTimeEvolution)
+                         bool hasTimeEvolution,
+                         SizeType orbitals)
 {
 	typedef typename ModelType::GeometryType GeometryType;
 	typedef Observer<VectorWithOffsetType,ModelType,IoInputType> ObserverType;
@@ -63,10 +64,6 @@ bool observeOneFullSweep(IoInputType& io,
 
 	PsimagLite::Vector<PsimagLite::String>::Type vecOptions;
 	PsimagLite::tokenizer(list,vecOptions,",");
-	SizeType orbitals = 1.0;
-	try {
-		io.readline(orbitals,"Orbitals=");
-	} catch (std::exception&) {}
 
 	for (SizeType i = 0; i < vecOptions.size(); ++i) {
 		PsimagLite::String item = vecOptions[i];
@@ -94,6 +91,11 @@ void mainLoop(GeometryType& geometry,
 	        InputNgType::Readable,
 	        GeometryType> ModelBaseType;
 
+	SizeType orbitals = 1.0;
+	try {
+		io.readline(orbitals,"Orbitals=");
+	} catch (std::exception&) {}
+
 	ModelSelector<ModelBaseType> modelSelector(params.model);
 	const ModelBaseType& model = modelSelector(params,io,geometry);
 
@@ -107,7 +109,7 @@ void mainLoop(GeometryType& geometry,
 	while (moreData) {
 		try {
 			moreData = !observeOneFullSweep<VectorWithOffsetType,ModelBaseType>
-			        (dataIo,model,list,hasTimeEvolution);
+			        (dataIo,model,list,hasTimeEvolution,orbitals);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
 			std::cerr<<"There's no more data\n";
