@@ -120,18 +120,23 @@ public:
 
 		RealType ti = t0;
 		ArrayType yi = y0;
+		ArrayType tmp;
 
 		for (SizeType i = 0; i < N; i++) {
-			k1 = h_ * f_(ti, yi);
-			k2 = h_ * f_(ti + h_*0.5, yi + k1*0.5);
-			k3 = h_ * f_(ti + h_*0.5, yi + k2*0.5);
-			k4 = h_ * f_(ti + h_, yi + k3);
+			k1 <= h_ * f_(ti, yi);
+			tmp <= yi + k1*0.5;
+			k2 <= h_ * f_(ti + h_*0.5, tmp);
+			tmp <= yi + k2*0.5;
+			k3 <= h_ * f_(ti + h_*0.5, tmp);
+			tmp <= yi + k3;
+			k4 <= h_ * f_(ti + h_, tmp);
 
 			VectorType myresult(findSizeOf(yi));
 			for (SizeType j=0;j<myresult.size();j++) myresult[j] = findValueOf(yi,j);
 			result.push_back(myresult);
 			ti += h_;
-			yi += (w1*k1 + w2*k2 + w3*k3 + w4*k4) * wtotInverse;
+			tmp <= (w1*k1 + w2*k2 + w3*k3 + w4*k4);
+			yi +=  tmp*wtotInverse;
 			checkNorm(yi,y0);
 		}
 	}

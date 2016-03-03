@@ -32,7 +32,22 @@ Please see full open source license included in file LICENSE.
 #include "Complex.h"
 #include "AllocatorCpu.h"
 
-// temporary hack until Vector is used:
+namespace PsimagLite {
+
+template<typename T>
+class IsVectorLike {
+public:
+	enum {True = false};
+};
+
+template<typename T>
+class IsVectorLike<std::vector<T,typename Allocator<T>::Type> > {
+public:
+	enum {True = true};
+};
+
+} // namespace PsimagLite
+
 namespace std {
 
 template<typename T1,typename T2>
@@ -74,37 +89,204 @@ vector<T2,A> operator*(const vector<vector<T1,A>,AA>& v1,
 	return v3;
 }
 
+// closure
+
+struct ClosureOperations {
+
+	enum {OP_PLUS,OP_MINUS,OP_MULT};
+};
+
+template<typename T1, typename T2,int type>
+class ClosureOperator {
+
+public:
+
+	ClosureOperator(const T1& v1,const T2& v2)
+	    : v1_(v1),v2_(v2)
+	{}
+
+	const T1& v1_;
+	const T2& v2_;
+};
+
+template<typename T>
+struct IsClosureLike {
+
+	enum {True = false};
+};
+
+template<typename T1, typename T2,int type>
+struct IsClosureLike<ClosureOperator<T1,T2,type> > {
+
+	enum {True = true};
+};
+
+// vector * scalar
 template<typename T1,typename T2,typename A>
-vector<T2,A> operator*(const T1& v1,const vector<T2,A>& v2)
+ClosureOperator<T1,vector<T2,A>,ClosureOperations::OP_MULT> operator*(const T1& v1,
+                                                                      const vector<T2,A>& v2)
 {
-	vector<T2,A> v3(v2.size());
-	for (SizeType i=0;i<v3.size();i++) v3[i] = v1 * v2[i];
-	return v3;
+	return ClosureOperator<T1,vector<T2,A>,ClosureOperations::OP_MULT >(v1,v2);
+}
+
+// vector * scalar
+template<typename T1,typename T2,typename A>
+ClosureOperator<T1,
+ClosureOperator<T2,std::vector<T2,A>,ClosureOperations::OP_MULT>,
+ClosureOperations::OP_MULT> operator*(const T1& v1,
+                                      const ClosureOperator<T2,
+                                      std::vector<T2,A>,
+                                      ClosureOperations::OP_MULT>& v2)
+{
+	return ClosureOperator<T1,
+	        ClosureOperator<T2,std::vector<T2,A>,ClosureOperations::OP_MULT>,
+	        ClosureOperations::OP_MULT>(v1,v2);
 }
 
 template<typename T1,typename T2,typename A>
-vector<T2,A> operator*(const vector<T2,A>& v2,const T1& v1)
+void operator<=(vector<T2,A>& v,
+                const ClosureOperator<T1,vector<T2,A>,ClosureOperations::OP_MULT>& c)
+{
+	v = c.v2_;
+	for (SizeType i=0;i<v.size();i++) v[i] *= c.v1_;
+}
+
+template<typename T1,typename T2,typename A>
+void operator<=(vector<T2,A>& v,
+                const ClosureOperator<T1,
+                ClosureOperator<T2,std::vector<T2,A>,ClosureOperations::OP_MULT>,
+                ClosureOperations::OP_MULT>& c)
+{
+	v = c.v2_.v2_;
+	T2 tmp = c.v1_*c.v2_.v1_;
+	for (SizeType i=0;i<v.size();i++) v[i] *= tmp;
+}
+
+template<typename T1,typename T2,typename A>
+ClosureOperator<T1,vector<T2,A>, ClosureOperations::OP_MULT> operator*(const vector<T2,A>& v2,
+                                                                       const T1& v1)
 {
 	return v1*v2;
 }
 
-template<typename T,typename A>
-vector<T,A> conj(vector<T,A>& v)
+// vector + vector
+template<typename T1,typename T2,typename A1, typename A2>
+ClosureOperator<vector<T1,A1>,vector<T2,A2>,ClosureOperations::OP_PLUS>
+operator+(const vector<T1,A1>& v1,const vector<T2,A2>& v2)
 {
-	vector<T,A> w(v.size());
-	for (SizeType i=0;i<v.size();i++) w[i]=conj(v[i]);
-	return w;
+	return ClosureOperator<vector<T1,A1>,vector<T2,A2>,ClosureOperations::OP_PLUS>(v1,v2);
 }
 
-template<typename T,typename A>
-T scalarProduct(const vector<T,A>& v1, const vector<T,A>& v2)
+template<typename T1,typename T2>
+typename PsimagLite::EnableIf<IsClosureLike<T1>::True || IsClosureLike<T2>::True,
+ClosureOperator<T1,T2,ClosureOperations::OP_PLUS> >::Type
+operator+(const T1& v1,const T2& v2)
 {
-	T result = 0.0;
-	for (SizeType i=0; i < v2.size(); i++)
-		result += conj(v1[i]) * v2[i];
-	return result;
+	return ClosureOperator<T1,T2,ClosureOperations::OP_PLUS>(v1,v2);
 }
 
+template<typename T1,typename T2,typename A>
+void operator<=(vector<T1,A>& v,
+                const ClosureOperator<vector<T1,A>,vector<T2,A>,ClosureOperations::OP_PLUS>& c)
+{
+	v.resize(c.v1_.size());
+	for (SizeType i=0;i<v.size();i++) v[i] = c.v1_[i] + c.v2_[i];
+}
+
+template<typename T1,typename T2,typename A>
+void operator<=(vector<T2,A>& v,
+                const ClosureOperator<vector<T2,A>,
+                ClosureOperator<T1,vector<T2,A>, ClosureOperations::OP_MULT>,
+                ClosureOperations::OP_PLUS>& c)
+{
+	v.resize(c.v1_.size());
+	for (SizeType i=0;i<v.size();i++) v[i] = c.v1_[i] + c.v2_.v1_*c.v2_.v2_[i];
+}
+
+template<typename T1,typename T2,typename A1, typename A2>
+void operator<=(vector<T1,A1>& v,
+                const ClosureOperator<
+                ClosureOperator<T1,vector<T2,A2>, ClosureOperations::OP_MULT>,
+                vector<T1,A1>,
+                ClosureOperations::OP_PLUS>& c)
+{
+	v.resize(c.v2_.size());
+	for (SizeType i=0;i<v.size();i++) v[i] = c.v1_.v1_*c.v1_.v2_[i] + c.v2_[i];
+}
+
+template<typename T1,typename T2,typename A>
+void operator<=(vector<T2,A>& v,
+                const ClosureOperator<
+                ClosureOperator<
+                ClosureOperator<ClosureOperator<T1,vector<T2,A>, ClosureOperations::OP_MULT>,
+                ClosureOperator<T1,vector<T2,A>, ClosureOperations::OP_MULT>,
+                ClosureOperations::OP_PLUS>,
+                ClosureOperator<T1,vector<T2,A>, ClosureOperations::OP_MULT>,
+                ClosureOperations::OP_PLUS>,
+                ClosureOperator<T1,vector<T2,A>, ClosureOperations::OP_MULT>,
+                ClosureOperations::OP_PLUS>& c)
+{
+	v.resize(c.v2_.v2_.size());
+	T1 m1 = c.v2_.v1_;
+	T1 m2 = c.v1_.v2_.v1_;
+	T1 m3 = c.v1_.v1_.v2_.v1_;
+	T1 m4 = c.v1_.v1_.v1_.v1_;
+	const vector<T2,A>& k1 = c.v2_.v2_;
+	const vector<T2,A>& k2 = c.v1_.v2_.v2_;
+	const vector<T2,A>& k3 = c.v1_.v1_.v2_.v2_;
+	const vector<T2,A>& k4 = c.v1_.v1_.v1_.v2_;
+	for (SizeType i=0;i<v.size();i++)
+		v[i] = m1*k1[i] + m2*k2[i] + m3*k3[i] + m4*k4[i];
+}
+
+// vector - vector
+
+template<typename T1,typename T2,typename A1, typename A2>
+ClosureOperator<vector<T1,A1>,vector<T2,A2>,ClosureOperations::OP_MINUS>
+operator-(const vector<T1,A1>& v1,const vector<T2,A2>& v2)
+{
+	return ClosureOperator<vector<T1,A1>,vector<T2,A2>,ClosureOperations::OP_MINUS>(v1,v2);
+}
+
+template<typename T1,typename T2>
+typename PsimagLite::EnableIf<IsClosureLike<T1>::True || IsClosureLike<T2>::True,
+ClosureOperator<T1,T2,ClosureOperations::OP_MINUS> >::Type
+operator-(const T1& v1,const T2& v2)
+{
+	return ClosureOperator<T1,T2,ClosureOperations::OP_MINUS>(v1,v2);
+}
+
+template<typename T1,typename T2,typename A1, typename A2>
+void operator<=(vector<T1,A1>& v,
+                const ClosureOperator<vector<T1,A1>,
+                ClosureOperator<T1,vector<T2,A2>, ClosureOperations::OP_MULT>,
+                ClosureOperations::OP_MINUS>& c)
+{
+	v.resize(c.v1_.size());
+	for (SizeType i=0;i<v.size();i++) v[i] = c.v1_[i] - c.v2_.v1_*c.v2_.v2_[i];
+}
+
+template<typename T1, typename T2, typename A>
+void operator<=(vector<T2,A>& v,
+                const ClosureOperator<
+                ClosureOperator<std::vector<T2,A>,
+                ClosureOperator<T1,vector<T2,A>, ClosureOperations::OP_MULT>,
+                ClosureOperations::OP_MINUS>,
+                ClosureOperator<T1,vector<T2,A>, ClosureOperations::OP_MULT>,
+                ClosureOperations::OP_PLUS>& c)
+{
+	T1 m2 = c.v1_.v2_.v1_;
+	T1 m3 = c.v2_.v1_;
+	const vector<T2,A>& k1 = c.v1_.v1_;
+	const vector<T2,A>& k2 = c.v1_.v2_.v2_;
+	const vector<T2,A>& k3 = c.v2_.v2_;
+
+	v.resize(k1.size());
+	for (SizeType i=0;i<v.size();i++)
+		v[i] = k1[i] - m2*k2[i] + m3*k3[i];
+}
+
+// operator+=
 template<typename FieldType,typename A>
 vector<FieldType,A> operator+=(vector<FieldType,A>& v,
                                const vector<FieldType,A>& w)
@@ -113,6 +295,15 @@ vector<FieldType,A> operator+=(vector<FieldType,A>& v,
 	return v;
 }
 
+template<typename T1,typename T2,typename A>
+vector<T2,A> operator+=(vector<T2,A>& v,
+                       const ClosureOperator<T1,vector<T2,A>,ClosureOperations::OP_MULT>& w)
+{
+	for (SizeType i=0;i<v.size();i++) v[i] += w.v1_*w.v2_[i];
+	return v;
+}
+
+// operator-=
 template<typename FieldType,typename A>
 vector<FieldType,A> operator-=(vector<FieldType,A>& v,const vector<FieldType,A>& w)
 {
@@ -120,6 +311,15 @@ vector<FieldType,A> operator-=(vector<FieldType,A>& v,const vector<FieldType,A>&
 	return v;
 }
 
+template<typename T1,typename T2,typename A>
+vector<T2,A> operator-=(vector<T2,A>& v,
+                       const ClosureOperator<T1,vector<T2,A>,ClosureOperations::OP_MULT>& w)
+{
+	for (SizeType i=0;i<v.size();i++) v[i] -= w.v1_*w.v2_[i];
+	return v;
+}
+
+// operator*=
 template<typename T1,typename T2,typename A>
 vector<T1,A> operator*=(vector<T1,A>& v,
                         const T2& t2)
@@ -136,20 +336,23 @@ vector<T1,A> operator/=(vector<T1,A>& v,
 	return v;
 }
 
-template<typename T1,typename T2,typename A1,typename A2>
-vector<T1,A1> operator+(const vector<T1,A1>& v1,const vector<T2,A2>& v2)
+// end of closure
+
+template<typename T,typename A>
+vector<T,A> conj(vector<T,A>& v)
 {
-	vector<T1,A1> v3(v1.size());
-	for (SizeType i=0;i<v1.size();i++) v3[i] = v1[i] + v2[i];
-	return v3;
+	vector<T,A> w(v.size());
+	for (SizeType i=0;i<v.size();i++) w[i]=conj(v[i]);
+	return w;
 }
 
-template<typename T1,typename T2,typename A>
-vector<T1,A> operator-(const vector<T1,A>& v1,const vector<T2,A>& v2)
+template<typename T,typename A>
+T scalarProduct(const vector<T,A>& v1, const vector<T,A>& v2)
 {
-	vector<T1,A> v3(v1.size());
-	for (SizeType i=0;i<v1.size();i++) v3[i] = v1[i] - v2[i];
-	return v3;
+	T result = 0.0;
+	for (SizeType i=0; i < v2.size(); i++)
+		result += conj(v1[i]) * v2[i];
+	return result;
 }
 
 template<class X,typename A>
@@ -197,18 +400,6 @@ class  Vector<bool>  {
 public:
 	typedef std::vector<bool,Allocator<bool>::Type> Type;
 }; // class Vector
-
-template<typename T>
-class IsVectorLike {
-public:
-	enum {True = false};
-};
-
-template<typename T>
-class IsVectorLike<std::vector<T,typename Allocator<T>::Type> > {
-public:
-	enum {True = true};
-};
 
 // change this when using PsimagLite::Vector:
 template<class T,typename A>
