@@ -93,7 +93,7 @@ vector<T2,A> operator*(const vector<vector<T1,A>,AA>& v1,
 
 struct ClosureOperations {
 
-	enum {OP_PLUS,OP_MINUS,OP_MULT};
+	enum {OP_PLUS,OP_MINUS,OP_MULT,OP_DIVIDE,OP_CONJ};
 };
 
 template<typename T1, typename T2,int type>
@@ -103,6 +103,10 @@ public:
 
 	ClosureOperator(const T1& v1,const T2& v2)
 	    : v1_(v1),v2_(v2)
+	{}
+
+	ClosureOperator(const T1& v1)
+	    : v1_(v1),v2_(v1)
 	{}
 
 	const T1& v1_;
@@ -339,14 +343,6 @@ vector<T1,A> operator/=(vector<T1,A>& v,
 // end of closure
 
 template<typename T,typename A>
-vector<T,A> conj(vector<T,A>& v)
-{
-	vector<T,A> w(v.size());
-	for (SizeType i=0;i<v.size();i++) w[i]=conj(v[i]);
-	return w;
-}
-
-template<typename T,typename A>
 T scalarProduct(const vector<T,A>& v1, const vector<T,A>& v2)
 {
 	T result = 0.0;
@@ -450,30 +446,6 @@ sum(SomeVectorType& v)
 		tmp += v[i];
 	}
 	return tmp;
-}
-
-template<typename T,typename A>
-void split(std::vector<T,A>& v,const char* s1,char sep)
-{
-	String buffer = "";
-	String s(s1);
-	T tmp;
-	for (SizeType i=0;i<s.length();i++) {
-		if (s[i]==sep) {
-			if (buffer=="") continue;
-			IstringStream buffer2(buffer);
-			buffer2 >> tmp;
-			buffer="";
-			v.push_back(tmp);
-		} else {
-			buffer += s[i];
-		}
-	}
-	if (buffer=="") return;
-	IstringStream buffer2(buffer);
-	buffer2 >> tmp;
-	buffer="";
-	v.push_back(tmp);
 }
 
 template<typename T>
