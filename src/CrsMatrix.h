@@ -197,7 +197,8 @@ public:
 
 	CrsMatrix(const std::ClosureOperator<T,CrsMatrix,std::ClosureOperations::OP_MULT>& c)
 	{
-		multiplyScalar(*this,c.v2_,c.v1_);
+		*this = c.v2_;
+		this->values_ *= c.v1_;
 	}
 
 	// end all ctors
@@ -274,11 +275,12 @@ public:
 
 	void operator*=(T x)
 	{
-		for (SizeType i=0;i<values_.size();i++) values_[i] *= x;
+		values_ *= x;
 	}
 
 	template<typename VerySparseMatrixType>
-	void operator=(const VerySparseMatrixType& m)
+	typename EnableIf<!std::IsClosureLike<VerySparseMatrixType>::True,void>::Type
+	operator=(const VerySparseMatrixType& m)
 	{
 		if (!m.sorted())
 			throw RuntimeError("CrsMatrix: VerySparseMatrix must be sorted\n");
@@ -398,10 +400,25 @@ public:
 	}
 
 	// closures operators start
+
 	template<typename T1>
-	CrsMatrix operator+=(const std::ClosureOperator<T1,
-	                     CrsMatrix,
-	                     std::ClosureOperations::OP_MULT>& c)
+	typename EnableIf<Loki::TypeTraits<T1>::isArith || IsComplexNumber<T1>::True,
+	CrsMatrix>::Type
+	operator=(const std::ClosureOperator<T1,
+	          CrsMatrix,
+	          std::ClosureOperations::OP_MULT>& c)
+	{
+		*this = c.v2_;
+		this->values_ *= c.v1_;
+		return *this;
+	}
+
+	template<typename T1>
+	typename EnableIf<Loki::TypeTraits<T1>::isArith || IsComplexNumber<T1>::True,
+	CrsMatrix>::Type
+	operator+=(const std::ClosureOperator<T1,
+	           CrsMatrix,
+	           std::ClosureOperations::OP_MULT>& c)
 	{
 		CrsMatrix s;
 		add(s,c.v2_,c.v1_);
@@ -409,7 +426,10 @@ public:
 		return *this;
 	}
 
-	CrsMatrix operator+=(const std::ClosureOperator<std::ClosureOperator<T,
+	template<typename T1>
+	typename EnableIf<Loki::TypeTraits<T1>::isArith || IsComplexNumber<T1>::True,
+	CrsMatrix>::Type
+	operator+=(const std::ClosureOperator<std::ClosureOperator<T1,
 	                     CrsMatrix,
 	                     std::ClosureOperations::OP_MULT>,
 	                     CrsMatrix,
@@ -448,9 +468,6 @@ public:
 
 	template<typename S>
 	friend std::ostream &operator<<(std::ostream &os,const CrsMatrix<S> &m);
-
-	template<typename S,typename S2>
-	friend void multiplyScalar(CrsMatrix<S> &ret,CrsMatrix<S> const &s,S2 const &v);
 
 	template<class S>
 	friend void difference(const CrsMatrix<S>& A,const CrsMatrix<S>& B);
@@ -550,7 +567,7 @@ std::istream &operator>>(std::istream &is,CrsMatrix<T>& m)
 template<typename T>
 class IsMatrixLike<CrsMatrix<T> > {
 public:
-        enum { True = true};
+	enum { True = true};
 };
 
 template<typename S>
@@ -565,7 +582,7 @@ void bcast(CrsMatrix<S>& m)
 
 //! Transforms a Compressed-Row-Storage (CRS) into a full Matrix (Fast version)
 template<typename T>
- void crsMatrixToFullMatrix(Matrix<T>& m,const CrsMatrix<T>& crsMatrix)
+void crsMatrixToFullMatrix(Matrix<T>& m,const CrsMatrix<T>& crsMatrix)
 {
 	m.reset(crsMatrix.row(),crsMatrix.col());
 	for (SizeType i = 0; i < crsMatrix.row() ; i++) {
@@ -716,16 +733,6 @@ void externalProduct(CrsMatrix<T>  &C,
 	C.setRow(n,counter);
 }
 
-//! Sets ret = s * v where ret and s are CRS matrices and v is a scalar number
-template<typename S,typename T>
-void multiplyScalar(CrsMatrix<S> &ret,CrsMatrix<S> const &s,T const &v)
-{
-	ret = s;
-	for (SizeType ii=0;ii<s.values_.size();ii++) {
-		ret.values_[ii] *= v;
-	}
-}
-
 template<typename T>
 void printFullMatrix(const CrsMatrix<T>& s,
                      const String& name,
@@ -850,9 +857,9 @@ void transposeConjugate(CrsMatrix<S>  &B,CrsMatrix<S2> const &A)
 //! Sets B=transpose(conjugate(A))
 template<typename S,typename S2>
 void transposeConjugate(CrsMatrix<S>& B,
-                               const CrsMatrix<S2>& A,
-                               typename Vector<typename Vector<int>::Type >::Type& col,
-                               typename Vector<typename Vector<S2>::Type >::Type& value)
+                        const CrsMatrix<S2>& A,
+                        typename Vector<typename Vector<int>::Type >::Type& col,
+                        typename Vector<typename Vector<S2>::Type >::Type& value)
 {
 	SizeType n=A.row();
 	assert(col.size()==n);
