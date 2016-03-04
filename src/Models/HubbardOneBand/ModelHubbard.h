@@ -342,7 +342,8 @@ public:
 			crsMatrixToFullMatrix(dense1,naturalOperator("nup",site,0).data);
 			PsimagLite::Matrix<SparseElementType> dense2;
 			crsMatrixToFullMatrix(dense2,naturalOperator("ndown",site,0).data);
-			SparseMatrixType tmp(dense1 + dense2);
+			dense1 += dense2;
+			SparseMatrixType tmp(dense1);
 			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp,
 			                    1.0,

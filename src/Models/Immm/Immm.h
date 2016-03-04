@@ -303,7 +303,8 @@ public:
 			crsMatrixToFullMatrix(tmp1,nUpOrDown(block,SPIN_UP).data);
 			MatrixType tmp2;
 			crsMatrixToFullMatrix(tmp2,nUpOrDown(block,SPIN_DOWN).data);
-			SparseMatrixType tmp(tmp1-tmp2);
+			tmp1 -= tmp2;
+			SparseMatrixType tmp(tmp1);
 			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp,
 			                    1.0,

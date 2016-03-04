@@ -272,7 +272,7 @@ std::ostream& operator<<(std::ostream &os,
                          const ParametersModelFeAs<RealType>& parameters)
 {
 	os<<parameters.targetQuantum;
-	os<<"Orbitals="<<orbitals<<"\n";
+	os<<"Orbitals="<<parameters.orbitals<<"\n";
 	os<<"hubbardU\n";
 	os<<parameters.hubbardU;
 	os<<"potentialV\n";
