@@ -339,8 +339,33 @@ void symbolicPrint(std::ostream& os,const Matrix<T>& A)
 	os<<"\n";
 }
 
-template <class T>
-std::istream& operator >> (std::istream& is, Matrix<T>& A)
+template<typename T>
+void printNonZero(const Matrix<T>& m,std::ostream& os)
+{
+	os<<"#size="<<m.n_row()<<"x"<<m.n_col()<<"\n";
+	for (SizeType i=0;i<m.n_row();i++) {
+		SizeType nonzero = 0;
+		for (SizeType j=0;j<m.n_col();j++) {
+			const T& val = m(i,j);
+			if (val!=static_cast<T>(0)) {
+				os<<val<<" ";
+				nonzero++;
+			}
+		}
+		if (nonzero>0) os<<"\n";
+	}
+	os<<"#diagonal non-zero\n";
+	for (SizeType i=0;i<m.n_row();i++) {
+		const T& val = m(i,i);
+		if (val!=static_cast<T>(0)) {
+			os<<val<<" ";
+		}
+	}
+	os<<"\n";
+}
+
+template<typename T>
+std::istream& operator>>(std::istream& is, Matrix<T>& A)
 {
 	SizeType nrow=0,ncol=0;
 	is >> nrow;
@@ -359,6 +384,65 @@ std::istream& operator >> (std::istream& is, Matrix<T>& A)
 	}
 	return is;
 }
+
+template<typename T>
+bool isHermitian(Matrix<T> const &A,bool verbose=false)
+{
+	SizeType n=A.n_row();
+	double eps=1e-6;
+	if (n!=A.n_col())
+		throw RuntimeError("isHermitian called on a non-square matrix.\n");
+	for (SizeType i=0;i<n;i++) for (SizeType j=0;j<n;j++) {
+		if (std::norm(A(i,j)-std::conj(A(j,i)))>eps) {
+			if (verbose) {
+				std::cerr<<"A("<<i<<","<<j<<")="<<A(i,j);
+				std::cerr<<" A("<<j<<","<<i<<")="<<A(j,i)<<"\n";
+			}
+			return false;
+		}
+	}
+	return true;
+}
+
+template<typename T>
+bool isTheIdentity(Matrix<T> const &a)
+{
+
+	for (SizeType i=0;i<a.n_row();i++) {
+		for (SizeType j=0;j<a.n_col();j++) {
+			if (i!=j && std::norm(a(i,j))>1e-6)  {
+				std::cerr<<"a("<<i<<","<<j<<")="<<a(i,j)<<"\n";
+				return false;
+			}
+		}
+	}
+
+	for (SizeType i=0;i<a.n_row();i++)
+		if (std::norm(a(i,i)-static_cast<T>(1.0))>1e-6) return false;
+
+	return true;
+}
+
+template<typename T>
+bool isZero(Matrix<std::complex<T> > const &a)
+{
+
+	for (SizeType i=0;i<a.n_row();i++)
+		for (SizeType j=0;j<a.n_col();j++)
+			if (norm(a(i,j))>0) return false;
+	return true;
+}
+
+template<typename T>
+bool isZero(const Matrix<T>& m)
+{
+	for (SizeType i=0;i<m.n_row();i++)
+		for (SizeType j=0;j<m.n_col();j++)
+			if (fabs(m(i,j))>0) return false;
+	return true;
+}
+
+// closures start
 
 template<typename T>
 Matrix<T> operator+(const Matrix<T>& a,const Matrix<T>& b)
@@ -442,184 +526,6 @@ Matrix<T2> operator*(const Matrix<T2>& a,const T1& val)
 }
 
 template<typename T>
-void exp(Matrix<T>& m)
-{
-	SizeType n = m.n_row();
-	typename Vector<typename Real<T>::Type>::Type eigs(n);
-	diag(m,eigs,'V');
-	Matrix<T> expm(n,n);
-	for (SizeType i=0;i<n;i++) {
-		for (SizeType j=0;j<n;j++) {
-			T sum = 0;
-			for (SizeType k=0;k<n;k++) {
-				typename Real<T>::Type alpha = eigs[k];
-				T tmp = 0.0;
-				expComplexOrReal(tmp,alpha);
-				sum+= std::conj(m(i,k))*m(j,k)*tmp;
-			}
-			expm(i,j) = sum;
-		}
-	}
-	m = expm;
-
-}
-
-template<typename VectorLikeType>
-void svd(char jobz,Matrix<double> &a,VectorLikeType& s,Matrix<double>& vt)
-{
-#ifdef NO_LAPACK
-	throw RuntimeError("svd: dgesdd_: NO LAPACK!\n");
-#else
-	int m = a.n_row();
-	int n = a.n_col();
-	std::cerr<<"Trying svd(...) "<<m<<"x"<<n<<"\n";
-	int lda = m;
-	int min = (m<n) ? m : n;
-
-	s.resize(min);
-	int ldu = m;
-	int ucol = m;
-	Matrix<double> u(ldu,ucol);
-	int ldvt = n;
-	//Matrix<double> vt(ldvt,n);
-	vt.resize(ldvt,n);
-
-	Vector<double>::Type work(100,0);
-	int info = 0;
-	Vector<int>::Type iwork(8*min,0);
-
-	// query optimal work
-	int lwork = -1;
-	psimag::LAPACK::dgesdd_(&jobz,
-	                        &m,
-	                        &n,
-	                        &(a(0,0)),
-	                        &lda,
-	                        &(s[0]),
-	                        &(u(0,0)),
-	                        &ldu,
-	                        &(vt(0,0)),
-	                        &ldvt,
-	                        &(work[0]),
-	                        &lwork,
-	                        &(iwork[0]),
-	                        &info);
-	if (info!=0) {
-		String str(__FILE__);
-		str += " " + ttos(__LINE__);
-		str += " svd(...) failed with info=" + ttos(info) + "\n";
-		throw RuntimeError(str.c_str());
-	}
-	lwork = int(work[0]);
-	work.resize(lwork+10);
-	// real work:
-	psimag::LAPACK::dgesdd_(&jobz,
-	                        &m,
-	                        &n,
-	                        &(a(0,0)),
-	                        &lda,
-	                        &(s[0]),
-	                        &(u(0,0)),
-	                        &ldu,
-	                        &(vt(0,0)),
-	                        &ldvt,
-	                        &(work[0]),
-	                        &lwork,
-	                        &(iwork[0]),
-	                        &info);
-	if (info!=0) {
-		String str(__FILE__);
-		str += " " + ttos(__LINE__);
-		str += " svd(...) failed with info=" + ttos(info) + "\n";
-		throw RuntimeError(str.c_str());
-	}
-	a = u;
-#endif
-}
-
-template<typename T>
-bool isHermitian(Matrix<T> const &A,bool verbose=false)
-{
-	SizeType n=A.n_row();
-	double eps=1e-6;
-	if (n!=A.n_col())
-		throw RuntimeError("isHermitian called on a non-square matrix.\n");
-	for (SizeType i=0;i<n;i++) for (SizeType j=0;j<n;j++) {
-		if (std::norm(A(i,j)-std::conj(A(j,i)))>eps) {
-			if (verbose) {
-				std::cerr<<"A("<<i<<","<<j<<")="<<A(i,j);
-				std::cerr<<" A("<<j<<","<<i<<")="<<A(j,i)<<"\n";
-			}
-			return false;
-		}
-	}
-	return true;
-}
-
-template<typename T>
-void printNonZero(const Matrix<T>& m,std::ostream& os)
-{
-	os<<"#size="<<m.n_row()<<"x"<<m.n_col()<<"\n";
-	for (SizeType i=0;i<m.n_row();i++) {
-		SizeType nonzero = 0;
-		for (SizeType j=0;j<m.n_col();j++) {
-			const T& val = m(i,j);
-			if (val!=static_cast<T>(0)) {
-				os<<val<<" ";
-				nonzero++;
-			}
-		}
-		if (nonzero>0) os<<"\n";
-	}
-	os<<"#diagonal non-zero\n";
-	for (SizeType i=0;i<m.n_row();i++) {
-		const T& val = m(i,i);
-		if (val!=static_cast<T>(0)) {
-			os<<val<<" ";
-		}
-	}
-	os<<"\n";
-}
-
-template<typename T>
-bool isTheIdentity(Matrix<T> const &a)
-{
-
-	for (SizeType i=0;i<a.n_row();i++) {
-		for (SizeType j=0;j<a.n_col();j++) {
-			if (i!=j && std::norm(a(i,j))>1e-6)  {
-				std::cerr<<"a("<<i<<","<<j<<")="<<a(i,j)<<"\n";
-				return false;
-			}
-		}
-	}
-
-	for (SizeType i=0;i<a.n_row();i++)
-		if (std::norm(a(i,i)-static_cast<T>(1.0))>1e-6) return false;
-
-	return true;
-}
-
-template<typename T>
-bool isZero(Matrix<std::complex<T> > const &a)
-{
-
-	for (SizeType i=0;i<a.n_row();i++)
-		for (SizeType j=0;j<a.n_col();j++)
-			if (norm(a(i,j))>0) return false;
-	return true;
-}
-
-template<typename T>
-bool isZero(const Matrix<T>& m)
-{
-	for (SizeType i=0;i<m.n_row();i++)
-		for (SizeType j=0;j<m.n_col();j++)
-			if (fabs(m(i,j))>0) return false;
-	return true;
-}
-
-template<typename T>
 T norm2(const Matrix<T>& m)
 {
 	T sum = 0;
@@ -693,6 +599,104 @@ void outerProduct(Matrix<T>& A,const Matrix<T>& B,const Matrix<T>& C)
 			for (SizeType i2 = 0; i2 < C.n_row(); ++i2)
 				for (SizeType j2 = 0; j2 < C.n_col(); ++j2)
 					A(i1+i2*ni,j1+j2*nj) = B(i1,j1) * C(i2,j2);
+}
+
+template<typename T>
+void exp(Matrix<T>& m)
+{
+	SizeType n = m.n_row();
+	typename Vector<typename Real<T>::Type>::Type eigs(n);
+	diag(m,eigs,'V');
+	Matrix<T> expm(n,n);
+	for (SizeType i=0;i<n;i++) {
+		for (SizeType j=0;j<n;j++) {
+			T sum = 0;
+			for (SizeType k=0;k<n;k++) {
+				typename Real<T>::Type alpha = eigs[k];
+				T tmp = 0.0;
+				expComplexOrReal(tmp,alpha);
+				sum+= std::conj(m(i,k))*m(j,k)*tmp;
+			}
+			expm(i,j) = sum;
+		}
+	}
+	m = expm;
+
+}
+
+// closures end
+
+template<typename VectorLikeType>
+void svd(char jobz,Matrix<double> &a,VectorLikeType& s,Matrix<double>& vt)
+{
+#ifdef NO_LAPACK
+	throw RuntimeError("svd: dgesdd_: NO LAPACK!\n");
+#else
+	int m = a.n_row();
+	int n = a.n_col();
+	std::cerr<<"Trying svd(...) "<<m<<"x"<<n<<"\n";
+	int lda = m;
+	int min = (m<n) ? m : n;
+
+	s.resize(min);
+	int ldu = m;
+	int ucol = m;
+	Matrix<double> u(ldu,ucol);
+	int ldvt = n;
+	//Matrix<double> vt(ldvt,n);
+	vt.resize(ldvt,n);
+
+	Vector<double>::Type work(100,0);
+	int info = 0;
+	Vector<int>::Type iwork(8*min,0);
+
+	// query optimal work
+	int lwork = -1;
+	psimag::LAPACK::dgesdd_(&jobz,
+	                        &m,
+	                        &n,
+	                        &(a(0,0)),
+	                        &lda,
+	                        &(s[0]),
+	        &(u(0,0)),
+	        &ldu,
+	        &(vt(0,0)),
+	        &ldvt,
+	        &(work[0]),
+	        &lwork,
+	        &(iwork[0]),
+	        &info);
+	if (info!=0) {
+		String str(__FILE__);
+		str += " " + ttos(__LINE__);
+		str += " svd(...) failed with info=" + ttos(info) + "\n";
+		throw RuntimeError(str.c_str());
+	}
+	lwork = int(work[0]);
+	work.resize(lwork+10);
+	// real work:
+	psimag::LAPACK::dgesdd_(&jobz,
+	                        &m,
+	                        &n,
+	                        &(a(0,0)),
+	                        &lda,
+	                        &(s[0]),
+	        &(u(0,0)),
+	        &ldu,
+	        &(vt(0,0)),
+	        &ldvt,
+	        &(work[0]),
+	        &lwork,
+	        &(iwork[0]),
+	        &info);
+	if (info!=0) {
+		String str(__FILE__);
+		str += " " + ttos(__LINE__);
+		str += " svd(...) failed with info=" + ttos(info) + "\n";
+		throw RuntimeError(str.c_str());
+	}
+	a = u;
+#endif
 }
 
 #ifdef USE_MPI
