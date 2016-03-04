@@ -80,7 +80,7 @@ public:
 	// ctor closures
 	Matrix(const std::ClosureOperator<Matrix,Matrix,std::ClosureOperations::OP_MULT>& c)
 	{
-		operator=(*this,c.v1_*c.v2_);
+		matrixMatrix(c.v1_,c.v2_,1.0);
 	}
 
 	template<typename T1>
@@ -288,23 +288,7 @@ public:
 	                  Matrix,
 	                  std::ClosureOperations::OP_MULT>& c)
 	{
-		const Matrix<T>& a = c.v1_.v2_;
-		const Matrix<T>& b = c.v2_;
-		nrow_ = a.n_row();
-		ncol_ = b.n_col();
-		data_.resize(nrow_*ncol_);
-		assert(a.n_col()==b.n_row());
-		for (SizeType i=0;i<a.n_row();i++) {
-			for (SizeType j=0;j<b.n_col();j++) {
-				T sum = 0.0;
-				for (SizeType k=0;k<a.n_col();k++) {
-					sum += a(i,k) * b(k,j);
-				}
-
-				this->operator()(i,j) = sum*c.v1_.v1_;
-			}
-		}
-
+		matrixMatrix(c.v1_.v2_,c.v2_,c.v1_.v1_);
 		return *this;
 	}
 
@@ -386,6 +370,18 @@ public:
 	{
 		const Matrix<T>& a = c.v1_;
 		const Matrix<T>& b = c.v2_;
+		matrixMatrix(a,b,1.0);
+
+		return *this;
+	}
+
+	// end closure members
+
+private:
+
+	template<typename T1>
+	void matrixMatrix(const Matrix<T>& a, const Matrix<T>& b, const T1& t1)
+	{
 		nrow_ = a.n_row();
 		ncol_ = b.n_col();
 		data_.resize(nrow_*ncol_);
@@ -396,16 +392,11 @@ public:
 				for (SizeType k=0;k<a.n_col();k++) {
 					sum += a(i,k) * b(k,j);
 				}
-				this->operator()(i,j) = sum;
+
+				this->operator()(i,j) = sum*t1;
 			}
 		}
-
-		return *this;
 	}
-
-	// end closure members
-
-private:
 
 	SizeType nrow_,ncol_;
 	typename Vector<T>::Type data_;

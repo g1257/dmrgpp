@@ -93,7 +93,8 @@ namespace PsimagLite {
 //! A Sparse Matrix in Compressed Row Storage (CRS) format.
 /**
 	The CRS format puts the subsequent nonzero elements of the matrix rows
-	in contiguous memory locations. We create 3 vectors: one for complex numbers containing the values of the
+	in contiguous memory locations. We create 3 vectors: one for complex numbers
+	containing the values of the
 	matrix entries
 	and the other two for integers ($colind$ and $rowptr$).
 	The vector $values$ stores the values of the non-zero elements of the matrix,
@@ -103,7 +104,8 @@ namespace PsimagLite {
 	The $rowptr$ vector stores the locations in the $values$ vector that start
 	a row, that is $values[k] = a[i][j]$ if $rowptr[i] \le i < rowptr[i + 1]$.
 	By convention, we define $rowptr[N_{dim}]$ to be equal to the number of non-zero elements,
-	$n_z$, in the matrix. The storage savings of this approach are significant since instead of
+	$n_z$, in the matrix. The storage savings of this approach are significant
+	because instead of
 	storing $N_{dim}^2$ elements, we need only $2n_z + N_{dim} + 1$ storage locations.\\
 	To illustrate how the CRS format works, consider the non-symmetric matrix defined by
 	\begin{equation}
@@ -125,7 +127,9 @@ namespace PsimagLite {
 	*/
 template<class T>
 class CrsMatrix {
+
 public:
+
 	typedef T MatrixElementType;
 	typedef T value_type;
 
@@ -178,6 +182,25 @@ public:
 		}
 		setRow(a.n_row(),counter);
 	}
+
+	// start closure ctors
+
+	CrsMatrix(const std::ClosureOperator<CrsMatrix,
+	          CrsMatrix,
+	          std::ClosureOperations::OP_MULT>& c)
+	{
+		CrsMatrix& x = *this;
+		const CrsMatrix& y = c.v1_;
+		const CrsMatrix& z = c.v2_;
+		multiply(x,y,z);
+	}
+
+	CrsMatrix(const std::ClosureOperator<T,CrsMatrix,std::ClosureOperations::OP_MULT>& c)
+	{
+		multiplyScalar(*this,c.v2_,c.v1_);
+	}
+
+	// end all ctors
 
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
@@ -279,13 +302,11 @@ public:
 		checkValidity();
 	}
 
-	void operator+=(CrsMatrix<T> const &m)
+	void operator+=(const CrsMatrix& m)
 	{
-		assert(m.row()==m.col());
-		CrsMatrix<T> c;
-		if (nrow_>=m.row()) operatorPlus(c,*this,m);
-		else operatorPlus(c,m,*this);
-		*this =c;
+		CrsMatrix c;
+		add(c,m,1.0);
+		*this = c;
 	}
 
 	T element(int i,int j) const
@@ -376,6 +397,34 @@ public:
 #endif
 	}
 
+	// closures operators start
+	template<typename T1>
+	CrsMatrix operator+=(const std::ClosureOperator<T1,
+	                     CrsMatrix,
+	                     std::ClosureOperations::OP_MULT>& c)
+	{
+		CrsMatrix s;
+		add(s,c.v2_,c.v1_);
+		*this = s;
+		return *this;
+	}
+
+	CrsMatrix operator+=(const std::ClosureOperator<std::ClosureOperator<T,
+	                     CrsMatrix,
+	                     std::ClosureOperations::OP_MULT>,
+	                     CrsMatrix,
+	                     std::ClosureOperations::OP_MULT>& c)
+	{
+		CrsMatrix s;
+		multiply(s,c.v1_.v2_,c.v2_);
+		CrsMatrix s2;
+		add(s2,s,c.v1_.v1_);
+		*this = s2;
+		return *this;
+	}
+
+	// closures operators end
+
 	void send(int root,int tag,MPI::CommType mpiComm)
 	{
 		MPI::send(nrow_,root,tag,mpiComm);
@@ -422,6 +471,15 @@ public:
 	friend void bcast(CrsMatrix<S>& m);
 
 private:
+
+	template<typename T1>
+	void add(CrsMatrix<T>& c, const CrsMatrix<T>& m, const T1& t1) const
+	{
+		assert(m.row()==m.col());
+		const T1 one = 1.0;
+		if (nrow_>=m.row()) operatorPlus(c,*this,one,m,t1);
+		else operatorPlus(c,m,t1,*this,one);
+	}
 
 	//serializr start class CrsMatrix
 	//serializr normal rowptr_
@@ -506,8 +564,8 @@ void bcast(CrsMatrix<S>& m)
 }
 
 //! Transforms a Compressed-Row-Storage (CRS) into a full Matrix (Fast version)
-template<typename T,class FullMatrixTemplate>
-inline void crsMatrixToFullMatrix(FullMatrixTemplate& m,const CrsMatrix<T>& crsMatrix)
+template<typename T>
+ void crsMatrixToFullMatrix(Matrix<T>& m,const CrsMatrix<T>& crsMatrix)
 {
 	m.reset(crsMatrix.row(),crsMatrix.col());
 	for (SizeType i = 0; i < crsMatrix.row() ; i++) {
@@ -520,8 +578,8 @@ inline void crsMatrixToFullMatrix(FullMatrixTemplate& m,const CrsMatrix<T>& crsM
 
 //! Transforms a full matrix into a Compressed-Row-Storage (CRS) Matrix
 // Use the constructor if possible
-template<typename T,class FullMatrixTemplate>
-void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const FullMatrixTemplate& a)
+template<typename T>
+void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
 {
 	crsMatrix.resize(a.n_row(),a.n_col());
 
@@ -758,7 +816,7 @@ void multiply(typename Vector<S>::Type& v2,
 
 //! Sets B=transpose(conjugate(A))
 template<typename S,typename S2>
-inline void transposeConjugate(CrsMatrix<S>  &B,CrsMatrix<S2> const &A)
+void transposeConjugate(CrsMatrix<S>  &B,CrsMatrix<S2> const &A)
 {
 	SizeType n=A.row();
 	Vector<Vector<int>::Type >::Type col(n);
@@ -791,7 +849,7 @@ inline void transposeConjugate(CrsMatrix<S>  &B,CrsMatrix<S2> const &A)
 
 //! Sets B=transpose(conjugate(A))
 template<typename S,typename S2>
-inline void transposeConjugate(CrsMatrix<S>& B,
+void transposeConjugate(CrsMatrix<S>& B,
                                const CrsMatrix<S2>& A,
                                typename Vector<typename Vector<int>::Type >::Type& col,
                                typename Vector<typename Vector<S2>::Type >::Type& value)
@@ -884,11 +942,13 @@ void permuteInverse(CrsMatrix<S>& A,
 	A.setRow(n,counter);
 }
 
-//! Sets A=B+C, restriction: B.size has to be larger or equal than C.size
-template<class T>
+//! Sets A=B*b1+C*c1, restriction: B.size has to be larger or equal than C.size
+template<typename T, typename T1>
 void operatorPlus(CrsMatrix<T>& A,
                   const CrsMatrix<T>& B,
-                  const CrsMatrix<T>& C)
+                  T1& b1,
+                  const CrsMatrix<T>& C,
+                  T1& c1)
 {
 	SizeType n = B.row();
 	assert(B.row()==B.col());
@@ -915,13 +975,13 @@ void operatorPlus(CrsMatrix<T>& A,
 			for (k=B.getRowPtr(i);k<B.getRowPtr(i+1);k++) {
 				if (B.getCol(k)<0 || SizeType(B.getCol(k))>=n)
 					throw RuntimeError("operatorPlus (1)\n");
-				valueTmp[B.getCol(k)]=B.getValue(k);
+				valueTmp[B.getCol(k)]=B.getValue(k)*b1;
 				index.push_back(B.getCol(k));
 			}
 
 			// inspect C
 			for (k=C.getRowPtr(i);k<C.getRowPtr(i+1);k++) {
-				tmp = C.getValue(k);
+				tmp = C.getValue(k)*c1;
 				if (C.getCol(k)>=int(valueTmp.size()) || C.getCol(k)<0)
 					throw RuntimeError("operatorPlus (2)\n");
 
@@ -945,13 +1005,14 @@ void operatorPlus(CrsMatrix<T>& A,
 			}
 		} else {
 			for (k=B.getRowPtr(i);k<B.getRowPtr(i+1);k++) {
-				tmp = B.getValue(k);
+				tmp = B.getValue(k)*b1;
 				A.pushCol(B.getCol(k));
 				A.pushValue(tmp);
 				counter++;
 			}
 		}
 	}
+
 	A.setRow(n,counter);
 }
 
@@ -1057,22 +1118,6 @@ Matrix<T> multiplyTc(const CrsMatrix<T>& a,const CrsMatrix<T>& b)
 	Matrix<T> cc;
 	crsMatrixToFullMatrix(cc,c);
 	return cc;
-}
-
-template<typename T1,typename T2>
-CrsMatrix<T2> operator*(const T1& t1,const CrsMatrix<T2>& a)
-{
-	CrsMatrix<T2> b;
-	multiplyScalar(b,a,t1);
-	return b;
-}
-
-template<typename T1,typename T2>
-CrsMatrix<T1> operator*(const CrsMatrix<T1>& a,const CrsMatrix<T2>& b)
-{
-	CrsMatrix<T2> c;
-	multiply(c,a,b);
-	return c;
 }
 
 } // namespace PsimagLite

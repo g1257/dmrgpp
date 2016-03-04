@@ -1,3 +1,4 @@
+#include "CrsMatrix.h"
 #include "Matrix.h"
 #include "Vector.h"
 
@@ -58,6 +59,11 @@ void testMatrix()
 	m3 = 0.5*(m3-m2);
 	std::cout<<m3;
 	std::cout<<"--------------\n";
+	m3 += m2;
+	std::cout<<m3;
+	m3 -= m2;
+	std::cout<<m3;
+	std::cout<<"--------------\n";
 
 	// minus tests omitted here
 
@@ -74,9 +80,18 @@ void testMatrix()
 	std::cout<<v2;
 }
 
+void testCrsMatrix()
+{
+	SizeType n = 4;
+	PsimagLite::CrsMatrix<double> s(n,n);
+	s.makeDiagonal(n,1.1);
+	std::cout<<s;
+}
+
 int main(int, char**)
 {
-	testVector();
-	testMatrix();
+//	testVector();
+//	testMatrix();
+	testCrsMatrix();
 }
 
