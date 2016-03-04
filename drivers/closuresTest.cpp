@@ -54,12 +54,24 @@ void testMatrix()
 	m3 = 1.3*m2 + m1;
 	std::cout<<m3;
 
-	// minus
+	// minus tests omitted here
+
+	// matrix * matrix
+	m3 = m1 * m2;
+	std::cout<<m3;
+
+	// matrix * vector
+	std::vector<double> v1(n,3.0);
+	std::vector<double> v2;
+	v2 <= m3 * v1;
+	std::cout<<v2;
+	v2 <= v1 * m3;
+	std::cout<<v2;
 }
 
 int main(int, char**)
 {
-	//testVector();
+	testVector();
 	testMatrix();
 }
 

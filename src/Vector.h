@@ -93,7 +93,7 @@ vector<T2,A> operator*(const vector<vector<T1,A>,AA>& v1,
 
 struct ClosureOperations {
 
-	enum {OP_PLUS,OP_MINUS,OP_MULT,OP_DIVIDE,OP_CONJ};
+	enum {OP_PLUS,OP_MINUS,OP_MULT,OP_DIVIDE,OP_MULTSAME,OP_CONJ};
 };
 
 template<typename T1, typename T2,int type>

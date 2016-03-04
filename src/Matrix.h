@@ -265,6 +265,26 @@ public:
 		this->data_ <= c.v2_.data_ + c.v1_.v1_*c.v1_.v2_.data_;
 	}
 
+	void operator=
+	(const std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_MULTSAME>& c)
+	{
+		const Matrix<T>& a = c.v1_;
+		const Matrix<T>& b = c.v2_;
+		nrow_ = a.n_row();
+		ncol_ = b.n_col();
+		data_.resize(nrow_*ncol_);
+		assert(a.n_col()==b.n_row());
+		for (SizeType i=0;i<a.n_row();i++) {
+			for (SizeType j=0;j<b.n_col();j++) {
+				T sum = 0.0;
+				for (SizeType k=0;k<a.n_col();k++) {
+					sum += a(i,k) * b(k,j);
+				}
+				this->operator()(i,j) = sum;
+			}
+		}
+	}
+
 	// end closure members
 
 private:
@@ -501,8 +521,8 @@ std::ClosureOperator<T1,Matrix<T2>,std::ClosureOperations::OP_MULT> operator*(co
 }
 
 template<typename T1,typename T2>
-std::ClosureOperator<T1,Matrix<T2>,std::ClosureOperations::OP_MULT> operator*(const Matrix<T2>& a,
-                                                                              const T1& val)
+std::ClosureOperator<T1,Matrix<T2>,std::ClosureOperations::OP_MULT>
+operator*(const Matrix<T2>& a, const T1& val)
 {
 	return val*a;
 }
@@ -522,74 +542,62 @@ operator-(const Matrix<T>& a,const Matrix<T>& b)
 }
 
 template<typename T>
-Matrix<T> operator*(const Matrix<T>& a,const Matrix<T>& b)
+std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_MULTSAME>
+operator*(const Matrix<T>& a,const Matrix<T>& b)
 {
-	assert(a.n_col()==b.n_row());
-	Matrix<T> c(a.n_row(),b.n_col());
-	for (SizeType i=0;i<a.n_row();i++) {
-		for (SizeType j=0;j<b.n_col();j++) {
-			T sum = 0.0;
-			for (SizeType k=0;k<a.n_col();k++) {
-				sum += a(i,k) * b(k,j);
-			}
-			c(i,j) = sum;
-		}
-	}
-	return c;
+	return std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_MULTSAME>(a,b);
 }
 
 template<typename T>
-typename Vector<T>::Type operator*(const Matrix<T>& a,
-                                   const typename Vector<T>::Type& b)
+std::ClosureOperator<Matrix<T>,std::vector<T>,std::ClosureOperations::OP_MULT>
+operator*(const Matrix<T>& a, const std::vector<T>& v)
 {
+	return std::ClosureOperator<Matrix<T>,std::vector<T>,std::ClosureOperations::OP_MULT>(a,v);
+}
+
+template<typename T,typename A>
+void operator<=(std::vector<T,A>& v, const std::ClosureOperator<Matrix<T>,
+                std::vector<T,A>,
+                std::ClosureOperations::OP_MULT>& c)
+{
+	const std::vector<T,A>& b = c.v2_;
+	const Matrix<T>& a = c.v1_;
 	assert(a.n_col()==b.size());
-	typename Vector<T>::Type v(a.n_row());
+	v.resize(a.n_row());
 	for (SizeType i=0;i<a.n_row();i++) {
 		T sum = 0;
 		for (SizeType j=0;j<b.size();j++) sum += a(i,j)*b[j];
 		v[i] = sum;
 	}
-	return v;
 }
 
-template<typename VectorLikeType>
-VectorLikeType operator*(const VectorLikeType& b,
-                         const Matrix<typename VectorLikeType::value_type>& a)
+template<typename T>
+std::ClosureOperator<std::vector<T>,Matrix<T>,std::ClosureOperations::OP_MULT>
+operator*(const std::vector<T>& v, const Matrix<T>& a)
 {
+	return std::ClosureOperator<std::vector<T>,Matrix<T>,std::ClosureOperations::OP_MULT>(v,a);
+}
+
+template<typename T,typename A>
+void operator<=(std::vector<T,A>& v, const std::ClosureOperator<std::vector<T,A>,
+                Matrix<T>,
+                std::ClosureOperations::OP_MULT>& c)
+{
+	const std::vector<T,A>& b = c.v1_;
+	const Matrix<T>& a = c.v2_;
 	assert(a.n_row()==b.size());
-	VectorLikeType v(a.n_col());
+	v.resize(a.n_col());
 	for (SizeType i=0;i<a.n_col();i++) {
-		typename VectorLikeType::value_type sum = 0;
+		T sum = 0;
 		for (SizeType j=0;j<b.size();j++) sum += b[j] * a(j,i);
 		v[i] = sum;
 	}
-	return v;
 }
 
 template<typename T>
-T norm2(const Matrix<T>& m)
-{
-	T sum = 0;
-	for (SizeType i=0;i<m.n_row();i++)
-		for (SizeType j=0;j<m.n_col();j++)
-			sum += m(i,j) * m(i,j);
-	return sum;
-}
-
-template<typename T>
-T norm2(const Matrix<std::complex<T> >& m)
-{
-	T sum = 0;
-	for (SizeType i=0;i<m.n_row();i++)
-		for (SizeType j=0;j<m.n_col();j++)
-			sum += std::real(std::conj(m(i,j)) * m(i,j));
-	return sum;
-}
-
-template<typename T>
-Matrix<T> multiplyTransposeConjugate(
-        const Matrix<T>& O1,
-        const Matrix<T>& O2,char modifier='C')
+Matrix<T> multiplyTransposeConjugate(const Matrix<T>& O1,
+                                     const Matrix<T>& O2,
+                                     char modifier='C')
 {
 	SizeType n=O1.n_row();
 	Matrix<T> ret(n,n);
@@ -628,21 +636,6 @@ Matrix<T> transposeConjugate(const Matrix<T>& A)
 }
 
 template<typename T>
-void outerProduct(Matrix<T>& A,const Matrix<T>& B,const Matrix<T>& C)
-{
-	SizeType ni = B.n_row();
-	SizeType nj = B.n_col();
-
-	A.resize(B.n_row()*C.n_row(),B.n_col()*C.n_col());
-
-	for (SizeType i1 = 0; i1 < B.n_row(); ++i1)
-		for (SizeType j1 = 0; j1 < B.n_col(); ++j1)
-			for (SizeType i2 = 0; i2 < C.n_row(); ++i2)
-				for (SizeType j2 = 0; j2 < C.n_col(); ++j2)
-					A(i1+i2*ni,j1+j2*nj) = B(i1,j1) * C(i2,j2);
-}
-
-template<typename T>
 void exp(Matrix<T>& m)
 {
 	SizeType n = m.n_row();
@@ -663,6 +656,41 @@ void exp(Matrix<T>& m)
 	}
 	m = expm;
 
+}
+
+template<typename T>
+T norm2(const Matrix<T>& m)
+{
+	T sum = 0;
+	for (SizeType i=0;i<m.n_row();i++)
+		for (SizeType j=0;j<m.n_col();j++)
+			sum += m(i,j) * m(i,j);
+	return sum;
+}
+
+template<typename T>
+T norm2(const Matrix<std::complex<T> >& m)
+{
+	T sum = 0;
+	for (SizeType i=0;i<m.n_row();i++)
+		for (SizeType j=0;j<m.n_col();j++)
+			sum += std::real(std::conj(m(i,j)) * m(i,j));
+	return sum;
+}
+
+template<typename T>
+void outerProduct(Matrix<T>& A,const Matrix<T>& B,const Matrix<T>& C)
+{
+	SizeType ni = B.n_row();
+	SizeType nj = B.n_col();
+
+	A.resize(B.n_row()*C.n_row(),B.n_col()*C.n_col());
+
+	for (SizeType i1 = 0; i1 < B.n_row(); ++i1)
+		for (SizeType j1 = 0; j1 < B.n_col(); ++j1)
+			for (SizeType i2 = 0; i2 < C.n_row(); ++i2)
+				for (SizeType j2 = 0; j2 < C.n_col(); ++j2)
+					A(i1+i2*ni,j1+j2*nj) = B(i1,j1) * C(i2,j2);
 }
 
 // closures end
