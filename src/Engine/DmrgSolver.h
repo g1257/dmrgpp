@@ -187,6 +187,7 @@ public:
 		progress_.printline(msg,std::cout);
 		ioOut_.print(appInfo_);
 		ioOut_.print("PARAMETERS",parameters_);
+		ioOut_.print(model);
 		if (parameters_.options.find("verbose")!=PsimagLite::String::npos) verbose_=true;
 	}
 
