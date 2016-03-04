@@ -31,6 +31,7 @@ Please see full open source license included in file LICENSE.
 #include <stdexcept>
 #include "Complex.h"
 #include "AllocatorCpu.h"
+#include "../loki/TypeTraits.h"
 
 namespace PsimagLite {
 
@@ -93,7 +94,7 @@ vector<T2,A> operator*(const vector<vector<T1,A>,AA>& v1,
 
 struct ClosureOperations {
 
-	enum {OP_PLUS,OP_MINUS,OP_MULT,OP_DIVIDE,OP_MULTSAME,OP_CONJ};
+	enum {OP_PLUS,OP_MINUS,OP_MULT,OP_DIVIDE,OP_CONJ};
 };
 
 template<typename T1, typename T2,int type>
@@ -134,21 +135,17 @@ ClosureOperator<T1,vector<T2,A>,ClosureOperations::OP_MULT> operator*(const T1& 
 }
 
 // vector * scalar
-template<typename T1,typename T2,typename A>
-ClosureOperator<T1,
-ClosureOperator<T2,std::vector<T2,A>,ClosureOperations::OP_MULT>,
-ClosureOperations::OP_MULT> operator*(const T1& v1,
-                                      const ClosureOperator<T2,
-                                      std::vector<T2,A>,
-                                      ClosureOperations::OP_MULT>& v2)
+template<typename T1,typename T2>
+typename PsimagLite::EnableIf<IsClosureLike<T1>::True || IsClosureLike<T2>::True,
+ClosureOperator<T1,T2,ClosureOperations::OP_MULT> >::Type
+operator*(const T1& v1,const T2& v2)
 {
-	return ClosureOperator<T1,
-	        ClosureOperator<T2,std::vector<T2,A>,ClosureOperations::OP_MULT>,
-	        ClosureOperations::OP_MULT>(v1,v2);
+	return ClosureOperator<T1,T2,ClosureOperations::OP_MULT>(v1,v2);
 }
 
 template<typename T1,typename T2,typename A>
-void operator<=(vector<T2,A>& v,
+typename PsimagLite::EnableIf<Loki::TypeTraits<T1>::isArith,void>::Type
+operator<=(vector<T2,A>& v,
                 const ClosureOperator<T1,vector<T2,A>,ClosureOperations::OP_MULT>& c)
 {
 	v = c.v2_;
@@ -220,6 +217,16 @@ void operator<=(vector<T1,A1>& v,
 
 template<typename T1,typename T2,typename A>
 void operator<=(vector<T2,A>& v,
+                const ClosureOperator<T1,
+                ClosureOperator<vector<T2,A>,vector<T2,A>, ClosureOperations::OP_PLUS>,
+                ClosureOperations::OP_MULT>& c)
+{
+	v.resize(c.v2_.v2_.size());
+	for (SizeType i=0;i<v.size();i++) v[i] = c.v1_*(c.v2_.v1_[i] + c.v2_.v2_[i]);
+}
+
+template<typename T1,typename T2,typename A>
+void operator<=(vector<T2,A>& v,
                 const ClosureOperator<
                 ClosureOperator<
                 ClosureOperator<ClosureOperator<T1,vector<T2,A>, ClosureOperations::OP_MULT>,
@@ -260,6 +267,14 @@ operator-(const T1& v1,const T2& v2)
 	return ClosureOperator<T1,T2,ClosureOperations::OP_MINUS>(v1,v2);
 }
 
+template<typename T,typename A>
+void operator<=(vector<T,A>& v,
+                const ClosureOperator<vector<T,A>,vector<T,A>,ClosureOperations::OP_MINUS>& c)
+{
+	v.resize(c.v1_.size());
+	for (SizeType i=0;i<v.size();i++) v[i] = c.v1_[i] - c.v2_[i];
+}
+
 template<typename T1,typename T2,typename A1, typename A2>
 void operator<=(vector<T1,A1>& v,
                 const ClosureOperator<vector<T1,A1>,
@@ -268,6 +283,16 @@ void operator<=(vector<T1,A1>& v,
 {
 	v.resize(c.v1_.size());
 	for (SizeType i=0;i<v.size();i++) v[i] = c.v1_[i] - c.v2_.v1_*c.v2_.v2_[i];
+}
+
+template<typename T1,typename T2,typename A>
+void operator<=(vector<T2,A>& v,
+                const ClosureOperator<T1,
+                ClosureOperator<vector<T2,A>,vector<T2,A>, ClosureOperations::OP_MINUS>,
+                ClosureOperations::OP_MULT>& c)
+{
+	v.resize(c.v2_.v2_.size());
+	for (SizeType i=0;i<v.size();i++) v[i] = c.v1_*(c.v2_.v1_[i] - c.v2_.v2_[i]);
 }
 
 template<typename T1, typename T2, typename A>

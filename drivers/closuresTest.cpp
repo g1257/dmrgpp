@@ -52,7 +52,12 @@ void testMatrix()
 	m3 = m1 + 1.3*m2;
 	std::cout<<m3;
 	m3 = 1.3*m2 + m1;
+	std::cout<<"--------------\n";
 	std::cout<<m3;
+	std::cout<<m2;
+	m3 = 0.5*(m3-m2);
+	std::cout<<m3;
+	std::cout<<"--------------\n";
 
 	// minus tests omitted here
 
