@@ -405,8 +405,8 @@ private:
 
 				if (ind > jnd) tmp = std::conj(tmp);
 
-				hmatrix += tmp * (transposeOrNot(B,link2.mods.second) *
-				                  transposeOrNot(A,link2.mods.first));
+				hmatrix += tmp*transposeOrNot(B,link2.mods.second)
+				        *transposeOrNot(A,link2.mods.first);
 			}
 		}
 	}
