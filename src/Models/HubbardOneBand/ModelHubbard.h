@@ -458,7 +458,7 @@ public:
 	                     RealType factorForDiagonals=1.0)  const
 	{
 		SizeType n=block.size();
-		SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
+		SparseMatrixType tmpMatrix,niup,nidown;
 		SizeType linSize = geometry_.numberOfSites();
 
 		for (SizeType i=0;i<n;i++) {
@@ -474,19 +474,15 @@ public:
 
 			multiply(tmpMatrix,niup,nidown);
 			RealType tmp = modelParameters_.hubbardU[block[i]]*factorForDiagonals;
-			multiplyScalar(tmpMatrix2,tmpMatrix,static_cast<SparseElementType>(tmp));
-
-			hmatrix += tmpMatrix2;
+			hmatrix += tmp*tmpMatrix;
 
 			// V_iup term
 			tmp = modelParameters_.potentialV[block[i]+0*linSize]*factorForDiagonals;
-			multiplyScalar(tmpMatrix,niup,static_cast<SparseElementType>(tmp));
-			hmatrix += tmpMatrix;
+			hmatrix += tmp*niup;
 
 			// V_idown term
 			tmp = modelParameters_.potentialV[block[i]+1*linSize]*factorForDiagonals;
-			multiplyScalar(tmpMatrix,nidown,static_cast<SparseElementType>(tmp));
-			hmatrix += tmpMatrix;
+			hmatrix += tmp*nidown;
 
 			if (modelParameters_.potentialT.size()==0) continue;
 			RealType cosarg = cos(time*modelParameters_.omega +
@@ -494,14 +490,12 @@ public:
 			// VT_iup term
 			tmp = modelParameters_.potentialT[block[i]]*factorForDiagonals;
 			tmp *= cosarg;
-			multiplyScalar(tmpMatrix,niup,static_cast<SparseElementType>(tmp));
-			hmatrix += tmpMatrix;
+			hmatrix += tmp*niup;
 
 			// VT_idown term
 			tmp = modelParameters_.potentialT[block[i]]*factorForDiagonals;
 			tmp *= cosarg;
-			multiplyScalar(tmpMatrix,nidown,static_cast<SparseElementType>(tmp));
-			hmatrix += tmpMatrix;
+			hmatrix += tmp*nidown;
 		}
 	}
 

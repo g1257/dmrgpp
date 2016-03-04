@@ -799,17 +799,14 @@ private:
 	                      RealType factorForDiagonals) const
 	{
 		int dof=2*modelParameters_.orbitals;
-		SparseMatrixType tmpMatrix,tmpMatrix2;
+		SparseMatrixType tmpMatrix;
 
 		for (SizeType alpha=0;alpha<SizeType(modelParameters_.orbitals);alpha++) {
 			SparseMatrixType m1=cm[alpha+SPIN_UP*modelParameters_.orbitals+i*dof].data;
 			SparseMatrixType m2=cm[alpha+SPIN_DOWN*modelParameters_.orbitals+i*dof].data;
 
 			multiply(tmpMatrix,n(m1),n(m2));
-			multiplyScalar(tmpMatrix2,
-			               tmpMatrix,
-			               factorForDiagonals*findHubbardU(0,alpha,alpha));
-			hmatrix += tmpMatrix2;
+			hmatrix += factorForDiagonals*findHubbardU(0,alpha,alpha)*tmpMatrix;
 		}
 	}
 
@@ -822,12 +819,9 @@ private:
 
 		for (SizeType orb1=0;orb1<modelParameters_.orbitals;orb1++) {
 			for (SizeType orb2=orb1+1;orb2<modelParameters_.orbitals;orb2++) {
-				SparseMatrixType tmpMatrix,tmpMatrix2;
+				SparseMatrixType tmpMatrix;
 				multiply(tmpMatrix, nSummedOverSpin(cm,i,orb1),nSummedOverSpin(cm,i,orb2));
-				multiplyScalar(tmpMatrix2,
-				               tmpMatrix,
-				               factorForDiagonals*findHubbardU(1,orb1,orb2));
-				hmatrix += tmpMatrix2;
+				hmatrix += factorForDiagonals*findHubbardU(1,orb1,orb2)*tmpMatrix;
 			}
 		}
 	}
@@ -844,31 +838,28 @@ private:
 
 		for (SizeType orb1=0;orb1<modelParameters_.orbitals;orb1++) {
 			for (SizeType orb2=orb1+1;orb2<modelParameters_.orbitals;orb2++) {
-				SparseMatrixType tmpMatrix2,tmpMatrix;
+				SparseMatrixType tmpMatrix;
 
 				multiply(tmpMatrix,
 				         spinOperator(cm,i,orb1,0),
 				         spinOperator(cm,i,orb2,1));
 				val = modelParameters_.hubbardU[2]/val2;
 				// this is -2*J
-				multiplyScalar(tmpMatrix2,tmpMatrix,factorForDiagonals*val);
-				hmatrix += tmpMatrix2;
+				hmatrix += factorForDiagonals*val*tmpMatrix;
 
 				multiply(tmpMatrix,
 				         spinOperator(cm,i,orb1,1),
 				         spinOperator(cm,i,orb2,0));
 				val = modelParameters_.hubbardU[2]/val2;
 				// this is -2*J
-				multiplyScalar(tmpMatrix2,tmpMatrix,factorForDiagonals*val);
-				hmatrix += tmpMatrix2;
+				hmatrix += factorForDiagonals*val*tmpMatrix;
 
 				multiply(tmpMatrix,
 				         spinOperator(cm,i,orb1,2),
 				         spinOperator(cm,i,orb2,2));
 				val = modelParameters_.hubbardU[4]/val3;
 				// this is -2*J
-				multiplyScalar(tmpMatrix2,tmpMatrix,factorForDiagonals*val);
-				hmatrix += tmpMatrix2;
+				hmatrix += factorForDiagonals*val*tmpMatrix;
 			}
 		}
 	}
@@ -880,7 +871,7 @@ private:
 	                      SizeType i,
 	                      RealType factorForDiagonals) const
 	{
-		SparseMatrixType tmpMatrix,tmpMatrix2;
+		SparseMatrixType tmpMatrix;
 
 		for (SizeType orb1=0;orb1<modelParameters_.orbitals;orb1++) {
 			for (SizeType orb2=0;orb2<modelParameters_.orbitals;orb2++) {
@@ -888,10 +879,8 @@ private:
 				multiply(tmpMatrix,
 				         nBar(cm,i,orb1,orb2,SPIN_UP),
 				         nBar(cm,i,orb1,orb2,SPIN_DOWN));
-				multiplyScalar(tmpMatrix2,
-				               tmpMatrix,
-				               factorForDiagonals*modelParameters_.hubbardU[3]); // -J
-				hmatrix += tmpMatrix2;
+				// -J
+				hmatrix += factorForDiagonals*modelParameters_.hubbardU[3]*tmpMatrix;
 			}
 		}
 	}
@@ -930,9 +919,7 @@ private:
 				multiply(tmpMatrix2,cmTranspose1,cmTranspose2);
 
 				multiply(tmpMatrix,tmpMatrix1,tmpMatrix2);
-				multiplyScalar(tmpMatrix1,
-				               tmpMatrix,
-				               factorForDiagonals*value);
+				tmpMatrix1 = factorForDiagonals*value*tmpMatrix;
 				hmatrix += tmpMatrix1;
 
 				transposeConjugate(tmpMatrix2,tmpMatrix1);
@@ -1125,9 +1112,7 @@ private:
 		}
 		SparseMatrixType tmpMatrix=spinOperatorAux(cm,i,orbital,SPIN_UP,SPIN_UP);
 		SparseMatrixType tmpMatrix2=spinOperatorAux(cm,i,orbital,SPIN_DOWN,SPIN_DOWN);
-		SparseMatrixType tmpMatrix3;
-		multiplyScalar(tmpMatrix3,tmpMatrix2,-1.0);
-		tmpMatrix += tmpMatrix3;
+		tmpMatrix += (-1.0)*tmpMatrix2;
 		return tmpMatrix;
 	}
 
@@ -1165,13 +1150,12 @@ private:
 						const SparseMatrixType& cm2 = cm[orb1+spin2*orbitals+site*dofs].data;
 						SizeType offset = orb1 + orb2*orbitals;
 						if (interaction == 1) offset += orbitals * orbitals;
-						SparseMatrixType tmpMatrix,tmpMatrix2;
+						SparseMatrixType tmpMatrix;
 
 						multiply(tmpMatrix, n(cm1),n(cm2));
 						assert(offset < U.size());
-						multiplyScalar(tmpMatrix2,tmpMatrix,factorForDiagonals*U[offset]);
 
-						hmatrix += tmpMatrix2;
+						hmatrix += factorForDiagonals*U[offset]*tmpMatrix;
 					}
 				}
 			}
@@ -1255,12 +1239,10 @@ private:
 					const SparseMatrixType& cm1 = cm[orb1+spin*orbitals+site*dofs].data;
 					const SparseMatrixType& cm2 = cm[orb2+spin*orbitals+site*dofs].data;
 
-					SparseMatrixType tmpMatrix,tmpMatrix2;
+					SparseMatrixType tmpMatrix;
 
 					multiply(tmpMatrix, n(cm1),n(cm2));
-					multiplyScalar(tmpMatrix2,tmpMatrix,factorForDiagonals*U[1]);
-
-					hmatrix += tmpMatrix2;
+					hmatrix += factorForDiagonals*U[1]*tmpMatrix;
 				}
 			}
 		}
@@ -1283,12 +1265,10 @@ private:
 				const SparseMatrixType& cm1 = cm[orb1+0*orbitals+site*dofs].data;
 				const SparseMatrixType& cm2 = cm[orb2+1*orbitals+site*dofs].data;
 
-				SparseMatrixType tmpMatrix,tmpMatrix2;
+				SparseMatrixType tmpMatrix;
 
 				multiply(tmpMatrix, n(cm1),n(cm2));
-				multiplyScalar(tmpMatrix2,tmpMatrix,factorForDiagonals*U[2]);
-
-				hmatrix += tmpMatrix2;
+				hmatrix += factorForDiagonals*U[2]*tmpMatrix;
 			}
 		}
 	}
@@ -1316,14 +1296,8 @@ private:
 					const SparseMatrixType& cm4 = cm[orb4+1*orbitals+site*dofs].data;
 
 					SparseMatrixType tmpMatrix(multiplyTc(cm1,cm2));
-
 					SparseMatrixType tmpMatrix2(multiplyTc(cm3,cm4));
-
-					SparseMatrixType tmpMatrix3;
-					multiply(tmpMatrix3, tmpMatrix,tmpMatrix2);
-					multiplyScalar(tmpMatrix,tmpMatrix3,factorForDiagonals*U[3]);
-
-					hmatrix += tmpMatrix;
+					hmatrix += factorForDiagonals*U[3]*tmpMatrix*tmpMatrix2;
 				}
 			}
 		}
@@ -1337,7 +1311,7 @@ private:
 	                           SizeType actualSite) const
 	{
 		int dof=2*modelParameters_.orbitals;
-		SparseMatrixType tmpMatrix,tmpMatrix2;
+		SparseMatrixType tmpMatrix;
 
 		SizeType alpha = 0; // real sites, no ancilla
 		SparseMatrixType m1=cm[alpha+SPIN_UP*modelParameters_.orbitals+i*dof].data;
@@ -1345,11 +1319,7 @@ private:
 
 		multiply(tmpMatrix,n(m1),n(m2));
 		assert(actualSite < modelParameters_.hubbardU.size());
-		multiplyScalar(tmpMatrix2,
-		               tmpMatrix,
-		               factorForDiagonals*modelParameters_.hubbardU[actualSite]);
-		hmatrix += tmpMatrix2;
-
+		hmatrix += factorForDiagonals*modelParameters_.hubbardU[actualSite]*tmpMatrix;
 	}
 
 	bool isAllowedThisDof(SizeType alpha) const

@@ -375,9 +375,7 @@ public:
 		for (SizeType i=0;i<n;i++) {
 			// magnetic field
 			RealType tmp = modelParameters_.magneticField[block[i]]*factorForDiagonals;
-			multiplyScalar(tmpMatrix,cm[1+i*2].data,tmp);
-
-			hmatrix += tmpMatrix;
+			hmatrix += tmp * cm[1+i*2].data;
 		}
 	}
 

@@ -564,7 +564,7 @@ private:
 	                    RealType factorForDiagonals,
 	                    SizeType actualSite) const
 	{
-		SparseMatrixType tmpMatrix,tmpMatrix2;
+		SparseMatrixType tmpMatrix;
 
 		SizeType alpha = 0; // real sites, no ancilla
 		SparseMatrixType m1=cm[alpha+SPIN_UP*2];
@@ -572,10 +572,7 @@ private:
 
 		multiply(tmpMatrix,n(m1),n(m2));
 		assert(actualSite < modelParameters_.hubbardU.size());
-		multiplyScalar(tmpMatrix2,
-		               tmpMatrix,
-		               factorForDiagonals*modelParameters_.hubbardU[actualSite]);
-		hmatrix += tmpMatrix2;
+		hmatrix += factorForDiagonals*modelParameters_.hubbardU[actualSite]*tmpMatrix;
 	}
 
 	//serializr normal modelParameters_

@@ -340,9 +340,9 @@ private:
 			multiply(tmpMatrix,
 			         creationMatrix[orbital+spin1*orbitals_].data,
 			        tmpMatrix2);
-			multiplyScalar(tmpMatrix2,tmpMatrix,value);
-			if (orbital == 0) sum = tmpMatrix2;
-			else sum += tmpMatrix2;
+
+			if (orbital == 0) sum = value*tmpMatrix;
+			else sum += value*tmpMatrix;
 		}
 	}
 
