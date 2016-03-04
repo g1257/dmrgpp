@@ -218,6 +218,55 @@ public:
 		MPI::bcast(data_,root,mpiComm);
 	}
 
+	// start closure memebers
+
+	template<typename T1>
+	void operator=(const std::ClosureOperator<T1,Matrix<T>,std::ClosureOperations::OP_MULT>& c)
+	{
+		nrow_ = c.v2_.nrow_;
+		ncol_ = c.v2_.ncol_;
+		this->data_ <= c.v1_*c.v2_.data_;
+	}
+
+	void operator=
+	(const std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_PLUS>& c)
+	{
+		nrow_ = c.v1_.nrow_;
+		ncol_ = c.v1_.ncol_;
+		assert(nrow_ == c.v2_.nrow_);
+		assert(ncol_ == c.v2_.ncol_);
+		this->data_ <= c.v1_.data_ + c.v2_.data_;
+	}
+
+	template<typename T1>
+	void operator=
+	(const std::ClosureOperator<Matrix<T>,
+	 std::ClosureOperator<T1,Matrix<T>,std::ClosureOperations::OP_MULT>,
+	 std::ClosureOperations::OP_PLUS>& c)
+	{
+		nrow_ = c.v1_.nrow_;
+		ncol_ = c.v1_.ncol_;
+		assert(nrow_ == c.v2_.v2_.nrow_);
+		assert(ncol_ == c.v2_.v2_.ncol_);
+		this->data_ <= c.v1_.data_ + c.v2_.v1_*c.v2_.v2_.data_;
+	}
+
+	template<typename T1>
+	void operator=
+	(const std::ClosureOperator<
+	 std::ClosureOperator<T1,Matrix<T>,std::ClosureOperations::OP_MULT>,
+	 Matrix<T>,
+	 std::ClosureOperations::OP_PLUS>& c)
+	{
+		nrow_ = c.v2_.nrow_;
+		ncol_ = c.v2_.ncol_;
+		assert(nrow_ == c.v1_.v2_.nrow_);
+		assert(ncol_ == c.v1_.v2_.ncol_);
+		this->data_ <= c.v2_.data_ + c.v1_.v1_*c.v1_.v2_.data_;
+	}
+
+	// end closure members
+
 private:
 
 	SizeType nrow_,ncol_;
@@ -444,24 +493,32 @@ bool isZero(const Matrix<T>& m)
 
 // closures start
 
-template<typename T>
-Matrix<T> operator+(const Matrix<T>& a,const Matrix<T>& b)
+template<typename T1,typename T2>
+std::ClosureOperator<T1,Matrix<T2>,std::ClosureOperations::OP_MULT> operator*(const T1& val,
+                                                                              const Matrix<T2>& a)
 {
-	Matrix<T> c(a.n_row(),a.n_col());
-	for (SizeType i=0;i<a.n_row();i++)
-		for (SizeType j=0;j<a.n_col();j++)
-			c(i,j) = a(i,j) + b(i,j);
-	return c;
+	return std::ClosureOperator<T1,Matrix<T2>,std::ClosureOperations::OP_MULT>(val,a);
+}
+
+template<typename T1,typename T2>
+std::ClosureOperator<T1,Matrix<T2>,std::ClosureOperations::OP_MULT> operator*(const Matrix<T2>& a,
+                                                                              const T1& val)
+{
+	return val*a;
 }
 
 template<typename T>
-Matrix<T> operator-(const Matrix<T>& a,const Matrix<T>& b)
+std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_PLUS>
+operator+(const Matrix<T>& a,const Matrix<T>& b)
 {
-	Matrix<T> c(a.n_row(),a.n_col());
-	for (SizeType i=0;i<a.n_row();i++)
-		for (SizeType j=0;j<a.n_col();j++)
-			c(i,j) = a(i,j) - b(i,j);
-	return c;
+	return std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_PLUS>(a,b);
+}
+
+template<typename T>
+std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_MINUS>
+operator-(const Matrix<T>& a,const Matrix<T>& b)
+{
+	return std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_MINUS>(a,b);
 }
 
 template<typename T>
@@ -507,22 +564,6 @@ VectorLikeType operator*(const VectorLikeType& b,
 		v[i] = sum;
 	}
 	return v;
-}
-
-template<typename T1,typename T2>
-Matrix<T2> operator*(const T1& val,const Matrix<T2>& a)
-{
-	Matrix<T2> b(a.n_row(),a.n_col());
-	for (SizeType i=0;i<a.n_row();i++)
-		for (SizeType j=0;j<b.n_col();j++)
-			b(i,j) = val*a(i,j);
-	return b;
-}
-
-template<typename T1,typename T2>
-Matrix<T2> operator*(const Matrix<T2>& a,const T1& val)
-{
-	return val*a;
 }
 
 template<typename T>

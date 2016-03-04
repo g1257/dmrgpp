@@ -12,7 +12,7 @@ void testVector()
 	v3 <= v2*1.2;
 	std::cout<<v3;
 
-//	// plus
+	// plus
 	v3 <= v1 + v2;
 	std::cout<<v3;
 	v3 <= v1 + 1.3*v2;
@@ -44,6 +44,17 @@ void testMatrix()
 	// multiplication by scalar
 	m2 = m1*1.2;
 	std::cout<<m2;
+
+	// plus
+	PsimagLite::Matrix<double> m3;
+	m3 = m1 + m2;
+	std::cout<<m3;
+	m3 = m1 + 1.3*m2;
+	std::cout<<m3;
+	m3 = 1.3*m2 + m1;
+	std::cout<<m3;
+
+	// minus
 }
 
 int main(int, char**)
