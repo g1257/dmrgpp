@@ -219,6 +219,10 @@ public:
 		registerOpts.push_back("recoveryNoDelete");
 		registerOpts.push_back("normalizeTimeVectors");
 		registerOpts.push_back("neverNormalizeVectors");
+		registerOpts.push_back("noSaveStacks");
+		registerOpts.push_back("noSaveData");
+		registerOpts.push_back("noSaveWft");
+		registerOpts.push_back("minimizeDisk");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);

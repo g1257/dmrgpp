@@ -180,7 +180,8 @@ public:
 	                       wft_,
 	                       checkpoint_.energy()),
 	      truncate_(reflectionOperator_,wft_,parameters_,verbose_),
-	      energy_(0.0)
+	      energy_(0.0),
+	      saveData_(parameters_.options.find("noSaveData") == PsimagLite::String::npos)
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Turning the engine on";
@@ -235,7 +236,7 @@ public:
 			throw PsimagLite::RuntimeError("Unknown targeting " + targeting + "\n");
 		}
 
-		psi->print(ioOut_);
+		if (saveData_) psi->print(ioOut_);
 
 		MyBasisWithOperators pS("pS");
 		MyBasisWithOperators pE("pE");
@@ -448,6 +449,7 @@ private:
 			recovery.save(psi,sitesIndices_[stepCurrent_],lastSign);
 		}
 
+		if (!saveData_) return;
 		checkpoint_.save(pS,pE,ioOut_);
 		psi.save(sitesIndices_[stepCurrent_],ioOut_);
 		PsimagLite::OstringStream msg2;
@@ -532,6 +534,8 @@ private:
 		} else {
 			pS = lrs_.left();
 		}
+
+		if (!saveData_) return;
 		if (saveOption & 1) {
 			PsimagLite::String s="#WAVEFUNCTION_ENERGY="+ttos(energy_);
 			ioOut_.printline(s);
@@ -556,7 +560,7 @@ private:
 		truncate_(pS,pE,target,keptStates,direction);
 		PsimagLite::OstringStream msg2;
 		msg2<<"#Error="<<truncate_.error();
-		ioOut_.printline(msg2);
+		if (saveData_) ioOut_.printline(msg2);
 
 		if (direction==EXPAND_SYSTEM) {
 			checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS,ProgramGlobals::SYSTEM);
@@ -574,6 +578,7 @@ private:
 	               int saveOption)
 	{
 		if (!(saveOption & 1)) return;
+		if (!saveData_) return;
 
 		DmrgSerializerType ds(fsS,fsE,lrs_,target.gs(),transform,direction);
 
@@ -634,6 +639,7 @@ private:
 
 	void printEnergy(RealType energy)
 	{
+		if (!saveData_) return;
 		PsimagLite::OstringStream msg;
 		msg.precision(8);
 		msg<<"#Energy="<<energy;
@@ -667,6 +673,7 @@ private:
 	TruncationType truncate_;
 	ObservablesInSituType inSitu_;
 	RealType energy_;
+	bool saveData_;
 }; //class DmrgSolver
 } // namespace Dmrg
 

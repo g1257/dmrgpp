@@ -134,7 +134,8 @@ public:
 	      wftImpl_(0),
 	      rng_(3433117),
 	      twoSiteDmrg_(params.options.find("twositedmrg")!=PsimagLite::String::npos),
-	      noLoad_(false)
+	      noLoad_(false),
+	      save_(params.options.find("noSaveWft") == PsimagLite::String::npos)
 	{
 		if (!isEnabled_) return;
 
@@ -371,6 +372,7 @@ public:
 		if (!isEnabled_) return;
 
 		typename IoType::Out io(utils::pathPrepend(WFT_STRING, fileOut));
+		if (!save_) return;
 		PsimagLite::String s="isEnabled="+ttos(isEnabled_);
 		io.printline(s);
 		s="stage="+ttos(stage_);
@@ -538,6 +540,7 @@ private:
 	PsimagLite::Random48<RealType> rng_;
 	bool twoSiteDmrg_;
 	bool noLoad_;
+	bool save_;
 	typename PsimagLite::Vector<SizeType>::Type sitesSeen_;
 }; // class WaveFunctionTransformation
 } // namespace Dmrg

@@ -159,7 +159,8 @@ public:
 
 	~Checkpoint()
 	{
-		loadStacksMemoryToDisk();
+		if (parameters_.options.find("noSaveStacks") == PsimagLite::String::npos)
+			loadStacksMemoryToDisk();
 	}
 
 	// Not related to stacks

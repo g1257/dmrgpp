@@ -333,6 +333,8 @@ int main(int argc,char *argv[])
 	ArchiveFilesType af(dmrgSolverParams,filename,options.enabled,options.label);
 
 	if (insitu!="") dmrgSolverParams.insitu = insitu;
+	if (dmrgSolverParams.options.find("minimizeDisk") != PsimagLite::String::npos)
+		dmrgSolverParams.options += ",noSaveWft,noSaveStacks,noSaveData";
 
 #ifndef USE_PTHREADS
 	inputCheck.checkForThreads(dmrgSolverParams.nthreads);
