@@ -196,7 +196,8 @@ private:
 			for (SizeType i=0;i<x.size();i++) x[i] -= E0_*y[i];
 			ComplexOrRealType tmp = 0;
 			ComplexOrRealType icomplex = minusOneOrMinusI(tmp);
-			return timeDirection_*icomplex*x;
+			tmp = timeDirection_*icomplex;
+			return tmp*x;
 		}
 
 	private:
