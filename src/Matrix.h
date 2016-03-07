@@ -80,7 +80,7 @@ public:
 	// ctor closures
 	Matrix(const std::ClosureOperator<Matrix,Matrix,std::ClosureOperations::OP_MULT>& c)
 	{
-		matrixMatrix(c.v1_,c.v2_,1.0);
+		matrixMatrix(c.r1,c.r2,1.0);
 	}
 
 	template<typename T1>
@@ -90,7 +90,7 @@ public:
 	       std::ClosureOperations::OP_MULT>& c,
 	       typename EnableIf<Loki::TypeTraits<T1>::isArith,int>::Type = 0)
 	{
-		*this = c.v1_.v1_*c.v1_.v2_*c.v2_;
+		*this = c.r1.r1*c.r1.r2*c.r2;
 	}
 
 	template<typename T1>
@@ -99,7 +99,7 @@ public:
 	       std::ClosureOperations::OP_MULT>& c,
 	       typename EnableIf<Loki::TypeTraits<T1>::isArith,int>::Type = 0)
 	{
-		*this = c.v1_*(c.v2_.v1_+c.v2_.v2_);
+		*this = c.r1*(c.r2.r1+c.r2.r2);
 	}
 	// end all ctors
 
@@ -249,36 +249,36 @@ public:
 	template<typename T1>
 	Matrix& operator+=(const std::ClosureOperator<T1,Matrix,std::ClosureOperations::OP_MULT>& c)
 	{
-		nrow_ = c.v2_.nrow_;
-		ncol_ = c.v2_.ncol_;
-		this->data_ += c.v1_*c.v2_.data_;
+		nrow_ = c.r2.nrow_;
+		ncol_ = c.r2.ncol_;
+		this->data_ += c.r1*c.r2.data_;
 		return *this;
 	}
 
 	template<typename T1>
 	Matrix& operator+=(const std::ClosureOperator<Matrix,T1,std::ClosureOperations::OP_MULT>& c)
 	{
-		nrow_ = c.v1_.nrow_;
-		ncol_ = c.v1_.ncol_;
-		this->data_ += c.v2_*c.v1_.data_;
+		nrow_ = c.r1.nrow_;
+		ncol_ = c.r1.ncol_;
+		this->data_ += c.r2*c.r1.data_;
 		return *this;
 	}
 
 	template<typename T1>
 	Matrix& operator=(const std::ClosureOperator<T1,Matrix,std::ClosureOperations::OP_MULT>& c)
 	{
-		nrow_ = c.v2_.nrow_;
-		ncol_ = c.v2_.ncol_;
-		this->data_ <= c.v1_*c.v2_.data_;
+		nrow_ = c.r2.nrow_;
+		ncol_ = c.r2.ncol_;
+		this->data_ <= c.r1*c.r2.data_;
 		return *this;
 	}
 
 	template<typename T1>
 	Matrix& operator=(const std::ClosureOperator<Matrix,T1,std::ClosureOperations::OP_MULT>& c)
 	{
-		nrow_ = c.v1_.nrow_;
-		ncol_ = c.v1_.ncol_;
-		this->data_ <= c.v2_*c.v1_.data_;
+		nrow_ = c.r1.nrow_;
+		ncol_ = c.r1.ncol_;
+		this->data_ <= c.r2*c.r1.data_;
 		return *this;
 	}
 
@@ -288,7 +288,7 @@ public:
 	                  Matrix,
 	                  std::ClosureOperations::OP_MULT>& c)
 	{
-		matrixMatrix(c.v1_.v2_,c.v2_,c.v1_.v1_);
+		matrixMatrix(c.r1.r2,c.r2,c.r1.r1);
 		return *this;
 	}
 
@@ -297,9 +297,9 @@ public:
 	                  std::ClosureOperator<Matrix,Matrix,std::ClosureOperations::OP_PLUS>,
 	                  std::ClosureOperations::OP_MULT>& c)
 	{
-		this->nrow_ = c.v2_.v1_.nrow_;
-		this->ncol_ = c.v2_.v1_.ncol_;
-		this->data_ <= c.v1_*(c.v2_.v1_.data_ + c.v2_.v2_.data_);
+		this->nrow_ = c.r2.r1.nrow_;
+		this->ncol_ = c.r2.r1.ncol_;
+		this->data_ <= c.r1*(c.r2.r1.data_ + c.r2.r2.data_);
 		return *this;
 	}
 
@@ -308,31 +308,31 @@ public:
 	                  std::ClosureOperator<Matrix,Matrix,std::ClosureOperations::OP_MINUS>,
 	                  std::ClosureOperations::OP_MULT>& c)
 	{
-		this->nrow_ = c.v2_.v1_.nrow_;
-		this->ncol_ = c.v2_.v1_.ncol_;
-		this->data_ <= c.v1_*(c.v2_.v1_.data_ - c.v2_.v2_.data_);
+		this->nrow_ = c.r2.r1.nrow_;
+		this->ncol_ = c.r2.r1.ncol_;
+		this->data_ <= c.r1*(c.r2.r1.data_ - c.r2.r2.data_);
 		return *this;
 	}
 
 	Matrix& operator=
 	(const std::ClosureOperator<Matrix,Matrix,std::ClosureOperations::OP_PLUS>& c)
 	{
-		nrow_ = c.v1_.nrow_;
-		ncol_ = c.v1_.ncol_;
-		assert(nrow_ == c.v2_.nrow_);
-		assert(ncol_ == c.v2_.ncol_);
-		this->data_ <= c.v1_.data_ + c.v2_.data_;
+		nrow_ = c.r1.nrow_;
+		ncol_ = c.r1.ncol_;
+		assert(nrow_ == c.r2.nrow_);
+		assert(ncol_ == c.r2.ncol_);
+		this->data_ <= c.r1.data_ + c.r2.data_;
 		return *this;
 	}
 
 	Matrix& operator=
 	(const std::ClosureOperator<Matrix,Matrix,std::ClosureOperations::OP_MINUS>& c)
 	{
-		nrow_ = c.v1_.nrow_;
-		ncol_ = c.v1_.ncol_;
-		assert(nrow_ == c.v2_.nrow_);
-		assert(ncol_ == c.v2_.ncol_);
-		this->data_ <= c.v1_.data_ - c.v2_.data_;
+		nrow_ = c.r1.nrow_;
+		ncol_ = c.r1.ncol_;
+		assert(nrow_ == c.r2.nrow_);
+		assert(ncol_ == c.r2.ncol_);
+		this->data_ <= c.r1.data_ - c.r2.data_;
 		return *this;
 	}
 
@@ -342,11 +342,11 @@ public:
 	 std::ClosureOperator<T1,Matrix,std::ClosureOperations::OP_MULT>,
 	 std::ClosureOperations::OP_PLUS>& c)
 	{
-		nrow_ = c.v1_.nrow_;
-		ncol_ = c.v1_.ncol_;
-		assert(nrow_ == c.v2_.v2_.nrow_);
-		assert(ncol_ == c.v2_.v2_.ncol_);
-		this->data_ <= c.v1_.data_ + c.v2_.v1_*c.v2_.v2_.data_;
+		nrow_ = c.r1.nrow_;
+		ncol_ = c.r1.ncol_;
+		assert(nrow_ == c.r2.r2.nrow_);
+		assert(ncol_ == c.r2.r2.ncol_);
+		this->data_ <= c.r1.data_ + c.r2.r1*c.r2.r2.data_;
 		return *this;
 	}
 
@@ -357,19 +357,19 @@ public:
 	 Matrix,
 	 std::ClosureOperations::OP_PLUS>& c)
 	{
-		nrow_ = c.v2_.nrow_;
-		ncol_ = c.v2_.ncol_;
-		assert(nrow_ == c.v1_.v2_.nrow_);
-		assert(ncol_ == c.v1_.v2_.ncol_);
-		this->data_ <= c.v2_.data_ + c.v1_.v1_*c.v1_.v2_.data_;
+		nrow_ = c.r2.nrow_;
+		ncol_ = c.r2.ncol_;
+		assert(nrow_ == c.r1.r2.nrow_);
+		assert(ncol_ == c.r1.r2.ncol_);
+		this->data_ <= c.r2.data_ + c.r1.r1*c.r1.r2.data_;
 		return *this;
 	}
 
 	Matrix& operator=
 	(const std::ClosureOperator<Matrix<T>,Matrix,std::ClosureOperations::OP_MULT>& c)
 	{
-		const Matrix<T>& a = c.v1_;
-		const Matrix<T>& b = c.v2_;
+		const Matrix<T>& a = c.r1;
+		const Matrix<T>& b = c.r2;
 		matrixMatrix(a,b,1.0);
 
 		return *this;
@@ -650,8 +650,8 @@ void operator<=(std::vector<T,A>& v, const std::ClosureOperator<Matrix<T>,
                 std::vector<T,A>,
                 std::ClosureOperations::OP_MULT>& c)
 {
-	const std::vector<T,A>& b = c.v2_;
-	const Matrix<T>& a = c.v1_;
+	const std::vector<T,A>& b = c.r2;
+	const Matrix<T>& a = c.r1;
 	assert(a.n_col()==b.size());
 	v.resize(a.n_row());
 	for (SizeType i=0;i<a.n_row();i++) {
@@ -666,8 +666,8 @@ void operator<=(std::vector<T,A>& v, const std::ClosureOperator<std::vector<T,A>
                 Matrix<T>,
                 std::ClosureOperations::OP_MULT>& c)
 {
-	const std::vector<T,A>& b = c.v1_;
-	const Matrix<T>& a = c.v2_;
+	const std::vector<T,A>& b = c.r1;
+	const Matrix<T>& a = c.r2;
 	assert(a.n_row()==b.size());
 	v.resize(a.n_col());
 	for (SizeType i=0;i<a.n_col();i++) {

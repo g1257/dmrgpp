@@ -103,15 +103,11 @@ class ClosureOperator {
 public:
 
 	ClosureOperator(const T1& v1,const T2& v2)
-	    : v1_(v1),v2_(v2)
+	    : r1(v1),r2(v2)
 	{}
 
-	ClosureOperator(const T1& v1)
-	    : v1_(v1),v2_(v1)
-	{}
-
-	const T1& v1_;
-	const T2& v2_;
+	const T1& r1;
+	const T2& r2;
 };
 
 template<typename T>
@@ -148,8 +144,8 @@ typename PsimagLite::EnableIf<Loki::TypeTraits<T1>::isArith,void>::Type
 operator<=(vector<T2,A>& v,
                 const ClosureOperator<T1,vector<T2,A>,ClosureOperations::OP_MULT>& c)
 {
-	v = c.v2_;
-	for (SizeType i=0;i<v.size();i++) v[i] *= c.v1_;
+	v = c.r2;
+	for (SizeType i=0;i<v.size();i++) v[i] *= c.r1;
 }
 
 template<typename T1,typename T2,typename A>
@@ -158,8 +154,8 @@ void operator<=(vector<T2,A>& v,
                 ClosureOperator<T2,std::vector<T2,A>,ClosureOperations::OP_MULT>,
                 ClosureOperations::OP_MULT>& c)
 {
-	v = c.v2_.v2_;
-	T2 tmp = c.v1_*c.v2_.v1_;
+	v = c.r2.r2;
+	T2 tmp = c.r1*c.r2.r1;
 	for (SizeType i=0;i<v.size();i++) v[i] *= tmp;
 }
 
@@ -190,8 +186,8 @@ template<typename T1,typename T2,typename A>
 void operator<=(vector<T1,A>& v,
                 const ClosureOperator<vector<T1,A>,vector<T2,A>,ClosureOperations::OP_PLUS>& c)
 {
-	v.resize(c.v1_.size());
-	for (SizeType i=0;i<v.size();i++) v[i] = c.v1_[i] + c.v2_[i];
+	v.resize(c.r1.size());
+	for (SizeType i=0;i<v.size();i++) v[i] = c.r1[i] + c.r2[i];
 }
 
 template<typename T1,typename T2,typename A>
@@ -200,8 +196,8 @@ void operator<=(vector<T2,A>& v,
                 ClosureOperator<T1,vector<T2,A>, ClosureOperations::OP_MULT>,
                 ClosureOperations::OP_PLUS>& c)
 {
-	v.resize(c.v1_.size());
-	for (SizeType i=0;i<v.size();i++) v[i] = c.v1_[i] + c.v2_.v1_*c.v2_.v2_[i];
+	v.resize(c.r1.size());
+	for (SizeType i=0;i<v.size();i++) v[i] = c.r1[i] + c.r2.r1*c.r2.r2[i];
 }
 
 template<typename T1,typename T2,typename A1, typename A2>
@@ -211,8 +207,8 @@ void operator<=(vector<T1,A1>& v,
                 vector<T1,A1>,
                 ClosureOperations::OP_PLUS>& c)
 {
-	v.resize(c.v2_.size());
-	for (SizeType i=0;i<v.size();i++) v[i] = c.v1_.v1_*c.v1_.v2_[i] + c.v2_[i];
+	v.resize(c.r2.size());
+	for (SizeType i=0;i<v.size();i++) v[i] = c.r1.r1*c.r1.r2[i] + c.r2[i];
 }
 
 template<typename T1,typename T2,typename A>
@@ -221,8 +217,8 @@ void operator<=(vector<T2,A>& v,
                 ClosureOperator<vector<T2,A>,vector<T2,A>, ClosureOperations::OP_PLUS>,
                 ClosureOperations::OP_MULT>& c)
 {
-	v.resize(c.v2_.v2_.size());
-	for (SizeType i=0;i<v.size();i++) v[i] = c.v1_*(c.v2_.v1_[i] + c.v2_.v2_[i]);
+	v.resize(c.r2.r2.size());
+	for (SizeType i=0;i<v.size();i++) v[i] = c.r1*(c.r2.r1[i] + c.r2.r2[i]);
 }
 
 template<typename T1,typename T2,typename A>
@@ -237,15 +233,15 @@ void operator<=(vector<T2,A>& v,
                 ClosureOperator<T1,vector<T2,A>, ClosureOperations::OP_MULT>,
                 ClosureOperations::OP_PLUS>& c)
 {
-	v.resize(c.v2_.v2_.size());
-	T1 m1 = c.v2_.v1_;
-	T1 m2 = c.v1_.v2_.v1_;
-	T1 m3 = c.v1_.v1_.v2_.v1_;
-	T1 m4 = c.v1_.v1_.v1_.v1_;
-	const vector<T2,A>& k1 = c.v2_.v2_;
-	const vector<T2,A>& k2 = c.v1_.v2_.v2_;
-	const vector<T2,A>& k3 = c.v1_.v1_.v2_.v2_;
-	const vector<T2,A>& k4 = c.v1_.v1_.v1_.v2_;
+	v.resize(c.r2.r2.size());
+	T1 m1 = c.r2.r1;
+	T1 m2 = c.r1.r2.r1;
+	T1 m3 = c.r1.r1.r2.r1;
+	T1 m4 = c.r1.r1.r1.r1;
+	const vector<T2,A>& k1 = c.r2.r2;
+	const vector<T2,A>& k2 = c.r1.r2.r2;
+	const vector<T2,A>& k3 = c.r1.r1.r2.r2;
+	const vector<T2,A>& k4 = c.r1.r1.r1.r2;
 	for (SizeType i=0;i<v.size();i++)
 		v[i] = m1*k1[i] + m2*k2[i] + m3*k3[i] + m4*k4[i];
 }
@@ -271,8 +267,8 @@ template<typename T,typename A>
 void operator<=(vector<T,A>& v,
                 const ClosureOperator<vector<T,A>,vector<T,A>,ClosureOperations::OP_MINUS>& c)
 {
-	v.resize(c.v1_.size());
-	for (SizeType i=0;i<v.size();i++) v[i] = c.v1_[i] - c.v2_[i];
+	v.resize(c.r1.size());
+	for (SizeType i=0;i<v.size();i++) v[i] = c.r1[i] - c.r2[i];
 }
 
 template<typename T1,typename T2,typename A1, typename A2>
@@ -281,8 +277,8 @@ void operator<=(vector<T1,A1>& v,
                 ClosureOperator<T1,vector<T2,A2>, ClosureOperations::OP_MULT>,
                 ClosureOperations::OP_MINUS>& c)
 {
-	v.resize(c.v1_.size());
-	for (SizeType i=0;i<v.size();i++) v[i] = c.v1_[i] - c.v2_.v1_*c.v2_.v2_[i];
+	v.resize(c.r1.size());
+	for (SizeType i=0;i<v.size();i++) v[i] = c.r1[i] - c.r2.r1*c.r2.r2[i];
 }
 
 template<typename T1,typename T2,typename A>
@@ -291,8 +287,8 @@ void operator<=(vector<T2,A>& v,
                 ClosureOperator<vector<T2,A>,vector<T2,A>, ClosureOperations::OP_MINUS>,
                 ClosureOperations::OP_MULT>& c)
 {
-	v.resize(c.v2_.v2_.size());
-	for (SizeType i=0;i<v.size();i++) v[i] = c.v1_*(c.v2_.v1_[i] - c.v2_.v2_[i]);
+	v.resize(c.r2.r2.size());
+	for (SizeType i=0;i<v.size();i++) v[i] = c.r1*(c.r2.r1[i] - c.r2.r2[i]);
 }
 
 template<typename T1, typename T2, typename A>
@@ -304,11 +300,11 @@ void operator<=(vector<T2,A>& v,
                 ClosureOperator<T1,vector<T2,A>, ClosureOperations::OP_MULT>,
                 ClosureOperations::OP_PLUS>& c)
 {
-	T1 m2 = c.v1_.v2_.v1_;
-	T1 m3 = c.v2_.v1_;
-	const vector<T2,A>& k1 = c.v1_.v1_;
-	const vector<T2,A>& k2 = c.v1_.v2_.v2_;
-	const vector<T2,A>& k3 = c.v2_.v2_;
+	T1 m2 = c.r1.r2.r1;
+	T1 m3 = c.r2.r1;
+	const vector<T2,A>& k1 = c.r1.r1;
+	const vector<T2,A>& k2 = c.r1.r2.r2;
+	const vector<T2,A>& k3 = c.r2.r2;
 
 	v.resize(k1.size());
 	for (SizeType i=0;i<v.size();i++)
@@ -328,7 +324,7 @@ template<typename T1,typename T2,typename A>
 vector<T2,A> operator+=(vector<T2,A>& v,
                        const ClosureOperator<T1,vector<T2,A>,ClosureOperations::OP_MULT>& w)
 {
-	for (SizeType i=0;i<v.size();i++) v[i] += w.v1_*w.v2_[i];
+	for (SizeType i=0;i<v.size();i++) v[i] += w.r1*w.r2[i];
 	return v;
 }
 
@@ -344,7 +340,7 @@ template<typename T1,typename T2,typename A>
 vector<T2,A> operator-=(vector<T2,A>& v,
                        const ClosureOperator<T1,vector<T2,A>,ClosureOperations::OP_MULT>& w)
 {
-	for (SizeType i=0;i<v.size();i++) v[i] -= w.v1_*w.v2_[i];
+	for (SizeType i=0;i<v.size();i++) v[i] -= w.r1*w.r2[i];
 	return v;
 }
 

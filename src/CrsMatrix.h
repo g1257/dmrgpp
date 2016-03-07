@@ -190,15 +190,15 @@ public:
 	          std::ClosureOperations::OP_MULT>& c)
 	{
 		CrsMatrix& x = *this;
-		const CrsMatrix& y = c.v1_;
-		const CrsMatrix& z = c.v2_;
+		const CrsMatrix& y = c.r1;
+		const CrsMatrix& z = c.r2;
 		multiply(x,y,z);
 	}
 
 	CrsMatrix(const std::ClosureOperator<T,CrsMatrix,std::ClosureOperations::OP_MULT>& c)
 	{
-		*this = c.v2_;
-		this->values_ *= c.v1_;
+		*this = c.r2;
+		this->values_ *= c.r1;
 	}
 
 	// end all ctors
@@ -408,8 +408,8 @@ public:
 	          CrsMatrix,
 	          std::ClosureOperations::OP_MULT>& c)
 	{
-		*this = c.v2_;
-		this->values_ *= c.v1_;
+		*this = c.r2;
+		this->values_ *= c.r1;
 		return *this;
 	}
 
@@ -421,7 +421,7 @@ public:
 	           std::ClosureOperations::OP_MULT>& c)
 	{
 		CrsMatrix s;
-		add(s,c.v2_,c.v1_);
+		add(s,c.r2,c.r1);
 		*this = s;
 		return *this;
 	}
@@ -436,9 +436,9 @@ public:
 	                     std::ClosureOperations::OP_MULT>& c)
 	{
 		CrsMatrix s;
-		multiply(s,c.v1_.v2_,c.v2_);
+		multiply(s,c.r1.r2,c.r2);
 		CrsMatrix s2;
-		add(s2,s,c.v1_.v1_);
+		add(s2,s,c.r1.r1);
 		*this = s2;
 		return *this;
 	}
