@@ -185,7 +185,27 @@ public:
 				printMap(mapStrVec_,"StrVec");
 				std::cout<<"END\n";
 			}
+		}
 
+		Writeable(const String& data, const InputCheckType& inputCheck, int)
+		    : data_(data),
+		      line_(0),
+		      state_(IN_LABEL),
+		      numericVector_(0),
+		      lastLabel_(""),
+		      file_("-"),
+		      inputCheck_(inputCheck),
+		      verbose_(false)
+		{
+			check();
+
+			if (verbose_) {
+				std::cout<<"START\n";
+				printMap(mapStrStr_,"StrStr");
+				std::cout<<"END\nSTART\n";
+				printMap(mapStrVec_,"StrVec");
+				std::cout<<"END\n";
+			}
 		}
 
 		void set(MapStrStrType& mapStrStr,

@@ -40,7 +40,7 @@ sub createMakefile
 
 	local *FH = $fh;
 	my @units = ("MersenneTwister","Matrix","Mpi","ApplicationInfo","Concurrency",
-	"ProgressIndicator","Tokenizer","MemResolv","PsimagLite");
+	"ProgressIndicator","Tokenizer","MemResolv","PsimagLite","PsiBase64");
 	my $combinedUnits = combine("",\@units,".o ");
 	my $combinedUnits2 = combine("../src/",\@units,".cpp ");
 
