@@ -95,6 +95,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingCorrection.h"
 #include "TargetingCorrectionVector.h"
 #include "TargetingMetts.h"
+#include "PsiBase64.h"
 
 namespace Dmrg {
 
@@ -187,6 +188,9 @@ public:
 		msg<<"Turning the engine on";
 		progress_.printline(msg,std::cout);
 		ioOut_.print(appInfo_);
+
+		PsimagLite::PsiBase64 base64;
+		ioOut_.print(base64.encode(ioIn.data()));
 		ioOut_.print("PARAMETERS",parameters_);
 		ioOut_.print(model);
 		if (parameters_.options.find("verbose")!=PsimagLite::String::npos) verbose_=true;
