@@ -69,7 +69,7 @@ bool observeOneFullSweep(IoInputType& io,
 		PsimagLite::String item = vecOptions[i];
 
 		if (item.length() > 0 && item[0] != '<')
-	        observerLib.measureTriage(item,rows,n,orbitals,hasTimeEvolution);
+			observerLib.measureTriage(item,rows,n,orbitals,hasTimeEvolution);
 		else
 			observerLib.interpret(item,rows,n);
 	}
@@ -253,7 +253,10 @@ int main(int argc,char *argv[])
 
 	//Setup the Geometry
 	InputCheck inputCheck;
-	InputNgType::Writeable ioWriteable(filename,inputCheck);
+	InputNgType::Writeable ioWriteable(filename,
+	                                   inputCheck,
+	                                   "#InputStartsHere",
+	                                   "#InputEndsHere");
 	InputNgType::Readable io(ioWriteable);
 
 	//! Read the parameters for this run

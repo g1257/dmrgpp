@@ -149,8 +149,8 @@ public:
 	typedef TargetingMetts<LanczosSolverType,VectorWithOffsetType> TargetingMettsType;
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-	      EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-	      INFINITE=WaveFunctionTransfType::INFINITE};
+		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
+		  INFINITE=WaveFunctionTransfType::INFINITE};
 
 	enum {SAVE_ALL=MyBasis::SAVE_ALL, SAVE_PARTIAL=MyBasis::SAVE_PARTIAL};
 
@@ -190,8 +190,10 @@ public:
 		ioOut_.print(appInfo_);
 
 		PsimagLite::PsiBase64 base64;
+		ioOut_.print("#InputStartsHere\n");
 		ioOut_.print(base64.encode(ioIn.data()));
-		ioOut_.print("PARAMETERS",parameters_);
+		ioOut_.print("#InputEndsHere\n");
+		ioOut_.print("PARAMETERS\n",parameters_);
 		ioOut_.print(model);
 		if (parameters_.options.find("verbose")!=PsimagLite::String::npos) verbose_=true;
 	}
@@ -279,7 +281,7 @@ public:
 private:
 
 	/* PSIDOC DmrgSolverInfiniteDmrgLoop
-	    I shall give a procedural description of the DMRG method in the following.
+		I shall give a procedural description of the DMRG method in the following.
 		We start with an initial block $S$ (the initial system) and $E$ (the initial environment).
 		Consider two sets of blocks $X$ and $Y$.
 		We will be adding blocks from $X$ to $S$, one at a time, and from $Y$ to $E$, one at a time.
@@ -622,23 +624,23 @@ private:
 	{
 		SizeType maxSites = model_.geometry().numberOfSites();
 		if (direction==INFINITE &&
-		        sites < maxSites &&
-		        parameters_.adjustQuantumNumbers.size()>0) {
+		    sites < maxSites &&
+		    parameters_.adjustQuantumNumbers.size()>0) {
 			quantumSector_ = SymmetryElectronsSzType::adjustQn(parameters_.adjustQuantumNumbers,
-			                                         direction,
-			                                         ioOut_,
-			                                         MyBasis::useSu2Symmetry(),
-			                                         step,
-			                                         model_.targetQuantum().other.size());
+			                                                   direction,
+			                                                   ioOut_,
+			                                                   MyBasis::useSu2Symmetry(),
+			                                                   step,
+			                                                   model_.targetQuantum().other.size());
 			return;
 		}
 
 		quantumSector_ = SymmetryElectronsSzType::getQuantumSector(model_.targetQuantum(),
-		                                                 sites,
-		                                                 model_.geometry().numberOfSites(),
-		                                                 direction,
-		                                                 &ioOut_,
-		                                                 MyBasis::useSu2Symmetry());
+		                                                           sites,
+		                                                           model_.geometry().numberOfSites(),
+		                                                           direction,
+		                                                           &ioOut_,
+		                                                           MyBasis::useSu2Symmetry());
 	}
 
 	void printEnergy(RealType energy)
