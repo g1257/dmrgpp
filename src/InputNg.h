@@ -91,6 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Map.h"
 #include "Matrix.h"
 #include "loki/TypeTraits.h"
+#include "PsiBase64.h"
 
 namespace PsimagLite {
 
@@ -162,6 +163,22 @@ public:
 		      inputCheck_(inputCheck),
 		      verbose_(false)
 		{
+			internal(file);
+		}
+
+		Writeable(const String& file,
+		          const InputCheckType& inputCheck,
+		          PsimagLite::String start,
+		          PsimagLite::String end)
+		    : data_(""),
+		      line_(0),
+		      state_(IN_LABEL),
+		      numericVector_(0),
+		      lastLabel_(""),
+		      file_(file),
+		      inputCheck_(inputCheck),
+		      verbose_(false)
+		{
 			std::ifstream fin(file.c_str());
 			if (!fin || !fin.good() || fin.bad()) {
 				String s(__FILE__);
@@ -169,34 +186,39 @@ public:
 				throw RuntimeError(s.c_str());
 			}
 
-			char c=0;
+			PsimagLite::String buffer = "";
+			int mode = 0;
 			while (!fin.eof()) {
-				fin.get(c);
-				data_ += c;
+				PsimagLite::String str;
+				fin>>str;
+				if (str == start) {
+					mode = 1;
+					continue;
+				}
+
+				if (str = end) {
+					mode = 2;
+					break;
+				}
+
+				if (mode == 1) buffer += str;
 			}
 
-			fin.close();
-			check();
-
-			if (verbose_) {
-				std::cout<<"START\n";
-				printMap(mapStrStr_,"StrStr");
-				std::cout<<"END\nSTART\n";
-				printMap(mapStrVec_,"StrVec");
-				std::cout<<"END\n";
+			if (mode == 0) {
+				internal(file);
+				return;
 			}
-		}
 
-		Writeable(const String& data, const InputCheckType& inputCheck, int)
-		    : data_(data),
-		      line_(0),
-		      state_(IN_LABEL),
-		      numericVector_(0),
-		      lastLabel_(""),
-		      file_("-"),
-		      inputCheck_(inputCheck),
-		      verbose_(false)
-		{
+			if (mode == 1) {
+				String s(__FILE__);
+				s += " File " + file + " contains " + start + " but no " + end +"\n";
+				throw RuntimeError(s.c_str());
+			}
+
+			assert(mode == 2);
+
+			PsiBase64 base;
+			data_ = base.decode(buffer);
 			check();
 
 			if (verbose_) {
@@ -222,6 +244,33 @@ public:
 		const String& data() const { return data_; }
 
 	private:
+
+		void internal(PsimagLite::String file)
+		{
+			std::ifstream fin(file.c_str());
+			if (!fin || !fin.good() || fin.bad()) {
+				String s(__FILE__);
+				s += " Cannot open file " + file + "\n";
+				throw RuntimeError(s.c_str());
+			}
+
+			char c=0;
+			while (!fin.eof()) {
+				fin.get(c);
+				data_ += c;
+			}
+
+			fin.close();
+			check();
+
+			if (verbose_) {
+				std::cout<<"START\n";
+				printMap(mapStrStr_,"StrStr");
+				std::cout<<"END\nSTART\n";
+				printMap(mapStrVec_,"StrVec");
+				std::cout<<"END\n";
+			}
+		}
 
 		void check()
 		{
