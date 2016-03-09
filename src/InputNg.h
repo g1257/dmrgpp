@@ -219,6 +219,8 @@ public:
 
 		const String& filename() const { return file_; }
 
+		const String& data() const { return data_; }
+
 	private:
 
 		void check()
@@ -399,7 +401,8 @@ public:
 
 	public:
 
-		Readable(const Writeable& inputWriteable) : file_(inputWriteable.filename())
+		Readable(const Writeable& inputWriteable)
+		    : file_(inputWriteable.filename()),data_(inputWriteable.data())
 		{
 			inputWriteable.set(mapStrStr_,mapStrVec_,labelsForRemoval_);
 		}
@@ -430,6 +433,8 @@ public:
 
 			return total;
 		}
+
+		const PsimagLite::String& data() const { return data_; }
 
 		void readline(String& val,
 		              const String& label,
@@ -744,6 +749,7 @@ public:
 		//serializr start class InputNgReadable
 		//serializr normal file_
 		String file_;
+		String data_;
 		//serializr normal mapStrStr_
 		typename Map<String,String,MyCompareType>::Type mapStrStr_;
 		//serializr normal mapStrVec_
