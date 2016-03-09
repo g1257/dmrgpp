@@ -20,7 +20,7 @@ Please see full open source license included in file LICENSE.
 #define PSICOMPLEX_H_
 
 #include <complex>
-#include "loki/TypeTraits.h"
+#include "../loki/TypeTraits.h"
 
 namespace std {
 

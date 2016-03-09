@@ -140,7 +140,7 @@ operator*(const T1& v1,const T2& v2)
 }
 
 template<typename T1,typename T2,typename A>
-typename PsimagLite::EnableIf<Loki::TypeTraits<T1>::isArith,void>::Type
+typename PsimagLite::EnableIf<PsimagLite::IsNumber<T1>::True,void>::Type
 operator<=(vector<T2,A>& v,
                 const ClosureOperator<T1,vector<T2,A>,ClosureOperations::OP_MULT>& c)
 {
