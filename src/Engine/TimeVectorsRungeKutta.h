@@ -86,13 +86,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<typename RealType>
-RealType minusOneOrMinusI(const RealType&)
+RealType minusOneOrMinusI(RealType)
 {
 	return -1;
 }
 
 template<typename RealType>
-std::complex<RealType> minusOneOrMinusI(const std::complex<RealType>&)
+std::complex<RealType> minusOneOrMinusI(std::complex<RealType>)
 {
 	return std::complex<RealType>(0.0,-1.0);
 }
@@ -188,16 +188,16 @@ private:
 		{
 		}
 
-		std::ClosureOperator<ComplexOrRealType,TargetVectorType,std::ClosureOperations::OP_MULT>
-		operator()(const RealType&,const TargetVectorType& y) const
+		TargetVectorType operator()(const RealType&,const TargetVectorType& y) const
 		{
 			TargetVectorType x(y.size());
 			lanczosHelper_.matrixVectorProduct(x,y);
 			for (SizeType i=0;i<x.size();i++) x[i] -= E0_*y[i];
-			ComplexOrRealType tmp = 0;
-			ComplexOrRealType icomplex = minusOneOrMinusI(tmp);
-			tmp = timeDirection_*icomplex;
-			return tmp*x;
+			ComplexOrRealType icomplex = minusOneOrMinusI(static_cast<ComplexOrRealType>(0));
+			ComplexOrRealType tmp2 = timeDirection_*icomplex;
+			TargetVectorType x2;
+			x2 <= tmp2*x;
+			return x2;
 		}
 
 	private:
@@ -218,11 +218,11 @@ private:
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi0(total);
 		phi.extract(phi0,i0);
-		//				std::cerr<<"norma of phi0="<<PsimagLite::norm(phi0)<<"\n";
 		FunctionForRungeKutta f(E0_,tstStruct_.timeDirection(),lrs_,currentTime_,model_,phi,i0);
 
 		RealType epsForRK = tstStruct_.tau()/(times_.size()-1.0);
-		PsimagLite::RungeKutta<RealType,FunctionForRungeKutta,TargetVectorType> rungeKutta(f,epsForRK);
+		PsimagLite::RungeKutta<RealType,FunctionForRungeKutta,TargetVectorType>
+		        rungeKutta(f,epsForRK);
 
 		typename PsimagLite::Vector<TargetVectorType>::Type result;
 		rungeKutta.solve(result,0.0,times_.size(),phi0);
