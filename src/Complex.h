@@ -20,6 +20,8 @@ Please see full open source license included in file LICENSE.
 #define PSICOMPLEX_H_
 
 #include <complex>
+#include "loki/TypeTraits.h"
+
 namespace std {
 
 inline double real(double t) { return t; }
@@ -63,6 +65,11 @@ template<typename T>
 class IsComplexNumber<std::complex<T> > {
 public:
 	enum { True = true};
+};
+
+template<typename T>
+struct IsNumber {
+	enum {True = (IsComplexNumber<T>::True || Loki::TypeTraits<T>::isArith)};
 };
 } // namespace PsimagLite
 

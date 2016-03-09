@@ -149,7 +149,8 @@ operator<=(vector<T2,A>& v,
 }
 
 template<typename T1,typename T2,typename A>
-void operator<=(vector<T2,A>& v,
+typename PsimagLite::EnableIf<PsimagLite::IsNumber<T1>::True && PsimagLite::IsNumber<T2>::True,
+void>::Type operator<=(vector<T2,A>& v,
                 const ClosureOperator<T1,
                 ClosureOperator<T2,std::vector<T2,A>,ClosureOperations::OP_MULT>,
                 ClosureOperations::OP_MULT>& c)
