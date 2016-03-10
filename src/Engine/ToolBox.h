@@ -82,6 +82,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "ProgramGlobals.h"
 #include "ArchiveFiles.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 namespace Dmrg {
 
@@ -116,7 +119,7 @@ class ToolBox  {
 			LongType bufferLen = 1;
 			std::stringstream ss;
 			char *buffer = new char[bufferLen];
-			while (len2 >= bufferLen) {
+			while (len2 >= bufferLen && !fin.eof()) {
 				fin.read(buffer,bufferLen);
 				ss<<buffer[0];
 				if (buffer[0] == '\n') {
@@ -124,7 +127,7 @@ class ToolBox  {
 					ss.str("");
 				}
 
-				len2 -= bufferLen;
+				if (len > 1) len2 -= bufferLen;
 			}
 
 			delete [] buffer;
@@ -158,7 +161,7 @@ class ToolBox  {
 
 public:
 
-	enum ActionEnum {ACTION_UNKNOWN, ACTION_GREP, ACTION_FILES};
+	enum ActionEnum {ACTION_UNKNOWN, ACTION_GREP, ACTION_FILES, ACTION_INPUT};
 
 	typedef typename GrepForLabel::ParametersType ParametersForGrepType;
 
@@ -167,21 +170,27 @@ public:
 		if (action == "energy" || action == "Energy" || action == "energies"
 		        || action == "Energies" || action == "grep") return ACTION_GREP;
 		if (action == "files") return ACTION_FILES;
+		if (action == "input") return ACTION_INPUT;
 
 		return ACTION_UNKNOWN;
 	}
 
 	static PsimagLite::String actions()
 	{
-		return "energies | grep | files";
+		return "energies | grep | files | input";
 	}
 
 	static void printGrep(PsimagLite::String inputfile,
 	                      PsimagLite::String datafile,
 	                      ParametersForGrepType params)
 	{
+
 		PsimagLite::String tarname = ArchiveFilesType::rootName(datafile) + ".tar";
 		PsimagLite::String coutName = ArchiveFilesType::coutName(inputfile);
+		struct stat *buf = 0;
+		int ret = stat(tarname.c_str(), buf);
+		if (ret != 0) return printGrepNoTar(coutName,datafile,params);
+
 		UnTarPack untarpack(tarname);
 		bool rewind = false;
 		untarpack.extract<GrepForLabel>(coutName,rewind,params);
@@ -201,6 +210,21 @@ public:
 			str += "extra option= " + extraOptions + " not understood\n";
 			throw PsimagLite::RuntimeError(str);
 		}
+	}
+
+	static void printInput(PsimagLite::String inputfile)
+	{
+		std::cerr<<inputfile<<"\n";
+	}
+
+private:
+
+	static void printGrepNoTar(PsimagLite::String inputfile,
+	                      PsimagLite::String,
+	                      ParametersForGrepType params)
+	{
+		std::ifstream fin(inputfile.c_str());
+		GrepForLabel::hook(fin,"",1,params);
 	}
 }; //class ToolBox
 

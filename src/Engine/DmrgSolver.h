@@ -189,9 +189,9 @@ public:
 		progress_.printline(msg,std::cout);
 		ioOut_.print(appInfo_);
 
-		PsimagLite::PsiBase64 base64;
+		PsimagLite::PsiBase64::Encode base64encode(ioIn.data());
 		ioOut_.print("#InputStartsHere\n");
-		ioOut_.print(base64.encode(ioIn.data()));
+		ioOut_.print(base64encode());
 		ioOut_.print("#InputEndsHere\n");
 		ioOut_.print("PARAMETERS\n",parameters_);
 		ioOut_.print(model);

@@ -86,7 +86,10 @@ int main(int argc,char *argv[])
 		inputCheck.checkFileOptions(extraOptions);
 	}
 
-	InputNgType::Writeable ioWriteable(filename,inputCheck);
+	InputNgType::Writeable ioWriteable(filename,
+	                                   inputCheck,
+	                                   "#InputStartsHere",
+	                                   "#InputEndsHere");
 	InputNgType::Readable io(ioWriteable);
 
 	//! Read the parameters for this run
@@ -99,6 +102,8 @@ int main(int argc,char *argv[])
 		ToolBoxType::printGrep(filename, dmrgSolverParams.filename,params);
 	} else if (ToolBoxType::actionCanonical(action) == ToolBoxType::ACTION_FILES) {
 		ToolBoxType::files(filename, dmrgSolverParams,extraOptions);
+	} else if (ToolBoxType::actionCanonical(action) == ToolBoxType::ACTION_INPUT) {
+		std::cout<<io.data()<<"\n";
 	} else {
 		std::cerr<<argv[0]<<": Unknown action "<<action<<"\n";
 		std::cerr<<"\tSupported actions are "<<ToolBoxType::actions()<<"\n";
