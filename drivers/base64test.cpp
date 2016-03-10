@@ -42,9 +42,9 @@ int main()
 	const PsimagLite::String s = "ADP GmbH\nAnalyse Design & Programmierung"
 	                             "\nGesellschaft mit beschränkter Haftung" ;
 
-	PsimagLite::PsiBase64 base64;
-	PsimagLite::String encoded = base64.encode(s);
+	PsimagLite::PsiBase64::Encode base64encode(s);
+	PsimagLite::String encoded = base64encode();
 	std::cout<<"encoded: "<<encoded<<"\n";
-	std::cout<<"decoded: "<<base64.decode(encoded)<<"\n";
+	std::cout<<"decoded: "<<PsimagLite::PsiBase64::Decode(encoded)()<<"\n";
 }
 

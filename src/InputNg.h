@@ -196,7 +196,7 @@ public:
 					continue;
 				}
 
-				if (str = end) {
+				if (str == end) {
 					mode = 2;
 					break;
 				}
@@ -217,8 +217,8 @@ public:
 
 			assert(mode == 2);
 
-			PsiBase64 base;
-			data_ = base.decode(buffer);
+			PsiBase64::Decode base64decode(buffer);
+			data_ = base64decode();
 			check();
 
 			if (verbose_) {
