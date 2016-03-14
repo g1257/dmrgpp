@@ -51,15 +51,33 @@ public:
 		}
 	}
 
+	RealType toInfinity(RealType a,
+	                    IntegrationEnum integ = INTEG_QAG,
+	                    int key = 4)
+	{
+		int status = gslWrapper_.gsl_integration_qagiu(&f_,
+		                                               a,
+		                                               epsabs_,
+		                                               epsrel_,
+		                                               limit_,
+		                                               workspace_,
+		                                               &result_,
+		                                               &abserr_);
+		if (status)
+			gslWrapper_.printError(status);
+
+		return result_;
+	}
+
 	RealType operator()()
 	{
 		int status = gslWrapper_.gsl_integration_qagi(&f_,
-		        epsabs_,
-		        epsrel_,
-		        limit_,
-		        workspace_,
-		        &result_,
-		        &abserr_);
+		                                              epsabs_,
+		                                              epsrel_,
+		                                              limit_,
+		                                              workspace_,
+		                                              &result_,
+		                                              &abserr_);
 
 		if (status)
 			gslWrapper_.printError(status);

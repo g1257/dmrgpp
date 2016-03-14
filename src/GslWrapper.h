@@ -82,6 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifdef USE_GSL
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_errno.h>
+#include <gsl/gsl_sf_result.h>
+#include <gsl/gsl_sf_gamma.h>
 #endif
 
 #include <stdexcept>
@@ -95,6 +97,7 @@ public:
 	typedef int DummyType;
 	typedef DummyType gsl_integration_workspace;
 	typedef double (* GslWrapperFunctionType) (double, void * );
+	typedef double gsl_sf_result;
 
 	typedef void (* gsl_error_handler_t) (const char *,const char *,int,int);
 
@@ -139,6 +142,19 @@ public:
 		return 0;
 	}
 
+	int gsl_integration_qagiu(gsl_function*,
+	                          double,
+	                          double,
+	                          double,
+	                          size_t ,
+	                          gsl_integration_workspace*,
+	                          double*,
+	                          double*) const
+	{
+		thereSnoGsl();
+		return 0;
+	}
+
 	int gsl_integration_qagp (const gsl_function*,
 	                          double*,
 	                          SizeType,
@@ -168,6 +184,15 @@ public:
 	void printError(int) const
 	{
 		thereSnoGsl();
+	}
+
+	int gsl_sf_lngamma_complex_e(double zr,
+	                             double zi,
+	                             gsl_sf_result* lnr,
+	                             gsl_sf_result* arg) const
+	{
+		thereSnoGsl();
+		return 0;
 	}
 
 private:
@@ -217,6 +242,18 @@ public:
 		return ::gsl_integration_qagi(f,epsabs,epsrel,limit,workspace,result,abserr);
 	}
 
+	int gsl_integration_qagiu(gsl_function* f,
+	                          double a,
+	                          double epsabs,
+	                          double epsrel,
+	                          size_t limit,
+	                          gsl_integration_workspace* workspace,
+	                          double* result,
+	                          double* abserr) const
+	{
+		return ::gsl_integration_qagiu(f,a,epsabs,epsrel,limit,workspace,result,abserr);
+	}
+
 	int gsl_integration_qagp (const gsl_function * f,
 	                          double * pts,
 	                          SizeType npts,
@@ -249,17 +286,26 @@ public:
 	                        double* result,
 	                        double* abserr) const
 	{
-		 return ::gsl_integration_qag(f,
-		                              a,
-		                              b,
-		                              epsabs,
-		                              epsrel,
-		                              limit,
-		                              key,
-		                              workspace,
-		                              result,
-		                              abserr);
+		return ::gsl_integration_qag(f,
+		                             a,
+		                             b,
+		                             epsabs,
+		                             epsrel,
+		                             limit,
+		                             key,
+		                             workspace,
+		                             result,
+		                             abserr);
 	}
+
+	int gsl_sf_lngamma_complex_e(double zr,
+	                             double zi,
+	                             gsl_sf_result* lnr,
+	                             gsl_sf_result* arg) const
+	{
+		return ::gsl_sf_lngamma_complex_e(zr, zi, lnr, arg);
+	}
+
 }; // class GslWrapper
 
 #endif
