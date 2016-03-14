@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_sf_result.h>
 #include <gsl/gsl_sf_gamma.h>
+#include <gsl/gsl_sf_expint.h>
 #endif
 
 #include <stdexcept>
@@ -97,7 +98,10 @@ public:
 	typedef int DummyType;
 	typedef DummyType gsl_integration_workspace;
 	typedef double (* GslWrapperFunctionType) (double, void * );
-	typedef double gsl_sf_result;
+	typedef struct {
+		double val;
+		double err;
+	} gsl_sf_result;
 
 	typedef void (* gsl_error_handler_t) (const char *,const char *,int,int);
 
@@ -186,16 +190,23 @@ public:
 		thereSnoGsl();
 	}
 
-	int gsl_sf_lngamma_complex_e(double zr,
-	                             double zi,
-	                             gsl_sf_result* lnr,
-	                             gsl_sf_result* arg) const
+	int gsl_sf_lngamma_complex_e(double,
+	                             double,
+	                             gsl_sf_result*,
+	                             gsl_sf_result*) const
+	{
+		thereSnoGsl();
+		return 0;
+	}
+
+	int gsl_sf_Ci_e(double, gsl_sf_result*)
 	{
 		thereSnoGsl();
 		return 0;
 	}
 
 private:
+
 	void thereSnoGsl() const
 	{
 		throw RuntimeError("You need to compile with the GSL\n");
@@ -210,6 +221,7 @@ public:
 
 	typedef ::gsl_integration_workspace gsl_integration_workspace;
 	typedef ::gsl_function gsl_function;
+	typedef ::gsl_sf_result gsl_sf_result;
 
 	void printError(int status) const
 	{
@@ -304,6 +316,11 @@ public:
 	                             gsl_sf_result* arg) const
 	{
 		return ::gsl_sf_lngamma_complex_e(zr, zi, lnr, arg);
+	}
+
+	int gsl_sf_Ci_e(double x, gsl_sf_result* result) const
+	{
+		return ::gsl_sf_Ci_e(x,result);
 	}
 
 }; // class GslWrapper
