@@ -1,4 +1,4 @@
-#include "GammaFunction.h"
+#include "SpecialFunctions.h"
 
 namespace PsimagLite {
 std::complex<double> LnGammaFunction(const std::complex<double>& z)
