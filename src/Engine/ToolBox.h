@@ -212,11 +212,6 @@ public:
 		}
 	}
 
-	static void printInput(PsimagLite::String inputfile)
-	{
-		std::cerr<<inputfile<<"\n";
-	}
-
 private:
 
 	static void printGrepNoTar(PsimagLite::String inputfile,
