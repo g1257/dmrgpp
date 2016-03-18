@@ -2,10 +2,18 @@
 
 use strict;
 use warnings;
+use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 
-my ($min,$max,$submit) = @ARGV;
-defined($submit) or $submit = "n";
+my ($min,$max,$submit,$valgrind);
+GetOptions(
+'m=f' => \$min,
+'M=f' => \$max,
+'S' => \$submit, 
+'valgrind=s' => \$valgrind);
+defined($submit) or $submit = 0;
+defined($valgrind) or $valgrind = "";
+
 my $templateBatch = "batchDollarized.pbs";
 my @tests;
 Ci::getTests(\@tests);
@@ -17,15 +25,18 @@ for (my $i = 0; $i < $total; ++$i) {
 	my $n = $tests[$i];
 	next if (defined($min) and $n < $min);
 	next if (defined($max) and $n > $max);
-	procTest($n,$submit);
+	procTest($n,$valgrind,$submit);
 }
 
 sub procTest
 {
-	my ($n,$submit) = @_;
-	my $cmd = "./dmrg -f ../inputs/input$n.inp";
+	my ($n,$tool,$submit) = @_;
+	my $valgrind = ($tool eq "") ? "" : "valgrind --tool=$tool ";
+	$valgrind .= " --callgrind-out-file=callgrind$n.out " if ($tool eq "callgrind");
+	my $term = ($tool eq "memcheck") ? "&> memcheck$n.txt" : "";
+	my $cmd = "$valgrind./dmrg -f ../inputs/input$n.inp $term";
 	my $batch = createBatch($n,$cmd);
-	submitBatch($batch) if ($submit eq "Y");
+	submitBatch($batch) if ($submit);
 }
 
 sub createBatch
