@@ -5,14 +5,16 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 
-my ($min,$max,$submit,$valgrind);
+my ($min,$max,$submit,$valgrind,$workdir);
 GetOptions(
 'm=f' => \$min,
 'M=f' => \$max,
 'S' => \$submit, 
-'valgrind=s' => \$valgrind);
+'valgrind=s' => \$valgrind,
+'w=s' => \$workdir);
 defined($submit) or $submit = 0;
 defined($valgrind) or $valgrind = "";
+defined($workdir) or $workdir = "tests";
 
 my $templateBatch = "batchDollarized.pbs";
 my @tests;
@@ -82,11 +84,11 @@ sub submitBatch
 
 sub prepareDir
 {
-	my $b = (-r "tests");
-	system("mkdir tests") if (!$b);
-	my $cmd = "diff ../src/dmrg tests/dmrg &> /dev/null";
+	my $b = (-r "$workdir");
+	system("mkdir $workdir") if (!$b);
+	my $cmd = "diff ../src/dmrg $workdir/dmrg &> /dev/null";
 	my $ret = system($cmd);
-	system("cp -a ../src/dmrg tests/") if ($ret != 0);
-	chdir("tests/");
+	system("cp -a ../src/dmrg $workdir/") if ($ret != 0);
+	chdir("$workdir/");
 }
 

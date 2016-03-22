@@ -23,7 +23,7 @@ Connectors 3
 DegreesOfFreedom=1
 GeometryKind=longchain
 LongChainDistance=4
-GeometryOptions=none
+GeometryOptions=useComplex
 Connectors 2 (0,-0.50) (0,0.50)
 
 hubbardU        6 5 5 5 5 5 5 
