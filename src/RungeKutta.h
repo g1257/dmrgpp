@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "Complex.h"
 #include "Vector.h"
+#include "Matrix.h"
 
 namespace PsimagLite {
 
@@ -106,7 +107,7 @@ public:
 	             RealType t,
 	             const ArrayType& y0) const
 	{
-		SizeType N = static_cast<SizeType> (std::real((t - t0)/h_));
+		SizeType N = static_cast<SizeType>(std::real((t - t0)/h_));
 		solve(result,t0,N,y0);
 	}
 

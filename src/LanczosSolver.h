@@ -124,6 +124,7 @@ public:
 	    : progress_("LanczosSolver",params.threadId),
 	      mat_(mat),
 	      steps_(params.steps),
+	      minSteps_(params.minSteps),
 	      eps_(params.tolerance),
 	      mode_(WITH_INFO),
 	      stepsForEnergyConvergence_(params.stepsForEnergyConvergence),
@@ -326,7 +327,7 @@ public:
 				ground(enew,j+1, ab,nullVector);
 				if (fabs (enew - eold) < eps_) exitFlag=true;
 				if (exitFlag && mat_.rank()<=4) break;
-				if (exitFlag && j>=4) break;
+				if (exitFlag && j >= minSteps_) break;
 			}
 
 			eold = enew;
@@ -552,6 +553,7 @@ private:
 	ProgressIndicator progress_;
 	MatrixType const& mat_;
 	SizeType steps_;
+	SizeType minSteps_;
 	RealType eps_;
 	SizeType mode_;
 	SizeType stepsForEnergyConvergence_;

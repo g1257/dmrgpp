@@ -99,53 +99,58 @@ struct ParametersForSolver {
 	static const SizeType LanczosSteps = 200; // max number of external Lanczos steps
 
 	ParametersForSolver()
-	    : steps(LanczosSteps),tolerance(1e-12),stepsForEnergyConvergence(MaxLanczosSteps),
+	    : steps(LanczosSteps),minSteps(4),tolerance(1e-12),stepsForEnergyConvergence(MaxLanczosSteps),
 	      options(""),oneOverA(0),b(0),Eg(0),weight(0),isign(0),lotaMemory(false),
 	      threadId(0)
 	{}
 
 	template<typename IoInputType>
 	ParametersForSolver(IoInputType& io,String prefix)
-	    : steps(LanczosSteps),tolerance(1e-12),stepsForEnergyConvergence(MaxLanczosSteps),
+	    : steps(LanczosSteps),minSteps(4),tolerance(1e-12),stepsForEnergyConvergence(MaxLanczosSteps),
 	      options(""),oneOverA(0),b(0),Eg(0),weight(0),isign(0),lotaMemory(false),
 	      threadId(0)
 	{
 		try {
 			io.readline(steps,prefix + "Steps=");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
+
+		try {
+			io.readline(minSteps,prefix + "MinSteps=");
+		} catch (std::exception&) {}
 
 		try {
 			io.readline(tolerance,prefix + "Eps=");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 
 		try {
 			io.readline(stepsForEnergyConvergence,prefix + "StepsForEnergyConvergence=");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 
 		try {
 			io.readline(options,prefix + "Options=");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 
 		try {
 			io.readline(oneOverA,prefix + "OneOverA=");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 
 		try {
 			io.readline(b,prefix + "B=");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 
 		try {
 			io.readline(Eg,prefix + "Energy=");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 
 		try {
 			int x = 0;
 			io.readline(x,prefix + "SaveLanczosVectors=");
 			lotaMemory = (x > 0);
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 	}
 
 	SizeType steps;
+	SizeType minSteps;
 	RealType tolerance;
 	SizeType stepsForEnergyConvergence;
 	String options;
