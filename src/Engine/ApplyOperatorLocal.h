@@ -137,9 +137,7 @@ public:
 	{
 		assert(systemOrEnviron == ProgramGlobals::EXPAND_SYSTEM);
 
-		TargetVectorType dest2(lrs_.super().size());
-
-		for (SizeType i=0;i<dest2.size();i++) dest2[i] = 0;
+		TargetVectorType dest2(lrs_.super().size(),0.0);
 
 		for (SizeType ii=0;ii<src.sectors();ii++) {
 			SizeType i = src.sector(ii);
@@ -190,9 +188,7 @@ private:
 	                        const FermionSign& fermionSign,
 	                        SizeType whichPartOfTheLattice = MIDDLE) const
 	{
-		TargetVectorType dest2(lrs_.super().size());
-
-		for (SizeType i=0;i<dest2.size();i++) dest2[i] = 0;
+		TargetVectorType dest2(lrs_.super().size(),0.0);
 
 		for (SizeType ii=0;ii<src.sectors();ii++) {
 			SizeType i = src.sector(ii);
@@ -251,9 +247,7 @@ private:
 	                         const OperatorType& A,
 	                         SizeType whichPartOfTheLattice = MIDDLE) const
 	{
-		TargetVectorType dest2(lrs_.super().size());
-
-		for (SizeType i=0;i<dest2.size();i++) dest2[i] = 0;
+		TargetVectorType dest2(lrs_.super().size(),0.0);
 
 		for (SizeType ii=0;ii<src.sectors();ii++) {
 			SizeType i = src.sector(ii);
