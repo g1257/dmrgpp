@@ -115,7 +115,6 @@ public:
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
-	typedef typename ModelHubbardType::HilbertSpaceHubbardType HilbertSpaceHubbardType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef typename OperatorType::PairType PairType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
@@ -408,7 +407,7 @@ public:
 			bra=ket=natBasis[ii];
 			HilbertStateType mask = (1<<(sigma+i*2*orbitals);
 			if (ket & mask) continue;
-			HilbertSpaceHubbardType::create(bra,i,sigma);
+			bra = (ket ^ mask);
 			int jj = PsimagLite::isInVector(natBasis,bra);
 			if (jj<0) continue;
 			cm(ii,jj) = sign(ket,i,sigma);
@@ -430,13 +429,12 @@ public:
 
 		for (SizeType ii=0;ii<natBasis.size();ii++) {
 			ket=natBasis[ii];
-			keti = HilbertSpaceHubbardType::get(ket,i);
 			for (SizeType l = orbitals; l < 2*orbitals; ++l) {
 				bra = ket;
 				HilbertStateType masklp = (1<<l);
 				HilbertStateType masklm = (1<<(l-orbitals));
-				if ((keti & masklp) > 0 && (keti & masklm) == 0) {
-					bra = keti ^ (masklp | masklm);
+				if ((ket & masklp) > 0 && (keti & masklm) == 0) {
+					bra = ket ^ (masklp | masklm);
 				}
 
 				int jj = PsimagLite::isInVector(natBasis,bra);
@@ -458,20 +456,18 @@ public:
 		int n = natBasis.size();
 		MatrixType cm(n,n);
 
-		for (SizeType ii=0;ii<natBasis.size();ii++) {
+		for (SizeType ii=0;ii<natBasis.size();ii++) {s
 			ket=natBasis[ii];
-			keti = HilbertSpaceHubbardType::get(ket,i);
 			SizeType counter = 0;
 			for (SizeType l = 0; l < orbitals; ++l) {
 				HilbertStateType masklp = (1<<l);
-				if (keti & masklp) counter++;
+				if (ket & masklp) counter++;
 			}
 
 			for (SizeType l = orbitals; l < 2*orbitals; ++l) {
 				HilbertStateType masklp = (1<<l);
-				if (keti & masklp) counter--;
+				if (ket & masklp) counter--;
 			}
-
 
 			cm(ii,ii) = 0.5*counter;
 		}
