@@ -91,6 +91,7 @@ struct ParametersModelTj1Orb {
 	    : targetQuantum(io)
 	{
 		io.read(potentialV,"potentialV");
+		io.readline(orbitals,"Orbitals=");
 	}
 
 	template<typename SomeMemResolvType>
@@ -108,6 +109,7 @@ struct ParametersModelTj1Orb {
 	//serializr start class ParametersModelTj1Orb
 	//serializr normal potentialV
 	typename PsimagLite::Vector<RealType>::Type potentialV;
+	SizeType orbitals;
 };
 
 //! Function that prints model parameters to stream os
@@ -118,6 +120,7 @@ std::ostream& operator<<(std::ostream &os,
 	os<<parameters.targetQuantum;
 	os<<"potentialV\n";
 	os<<parameters.potentialV;
+	os<<"orbitals="<<parameters.orbitals<<"\n";
 	return os;
 }
 } // namespace Dmrg

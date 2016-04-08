@@ -185,13 +185,10 @@ namespace Dmrg {
 		
 		// Is there an electron with internal dof  "sigma" on site "i" in binary number "ket"?
 		static bool isNonZero(Word const &ket,int i,int sigma)
-		{
-			
+		{			
 			int tmp=get(ket,i);
-			if ((tmp & 1) && sigma==0) return true;
-			if ((tmp & 2) && sigma==1) return true;
-			
-			return false;
+			HilbertState mask = (1<<sigma);
+			return (tmp & mask);
 		}
 		
 		//! returns the number of electrons of internal dof "value" in binary number "data"
