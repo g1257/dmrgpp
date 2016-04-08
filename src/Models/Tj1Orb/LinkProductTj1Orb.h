@@ -89,39 +89,39 @@ class LinkProductTj1Orb {
 
 	enum {TERM_CICJ, TERM_SPSM, TERM_SZSZ, TERM_NINJ};
 
+	static SizeType orbitals_;
+
 public:
+
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
+	static void setOrbitals(SizeType orbitals)
+	{
+		orbitals_=orbitals;
+	}
+
 	template<typename SomeStructType>
 	static void setLinkData(SizeType term,
-							SizeType dofs,
-							bool isSu2,
-							SizeType& fermionOrBoson,
-							PairType& ops,
-							std::pair<char,char>& mods,
-							SizeType& angularMomentum,
-							RealType& angularFactor,
-							SizeType& category,
-							const SomeStructType&)
+	                        SizeType dofs,
+	                        bool isSu2,
+	                        SizeType& fermionOrBoson,
+	                        PairType& ops,
+	                        std::pair<char,char>& mods,
+	                        SizeType& angularMomentum,
+	                        RealType& angularFactor,
+	                        SizeType& category,
+	                        const SomeStructType&)
 	{
 		char tmp = mods.first;
 		if (term==TERM_CICJ) {
 			fermionOrBoson = ProgramGlobals::FERMION;
-			switch (dofs) {
-			case 0: // up up
-				angularFactor = 1;
-				category = 0;
-				angularMomentum = 1;
-				ops = PairType(dofs,dofs);
-				break;
-			case 1: // down down
-				angularFactor = -1;
-				category = 1;
-				angularMomentum = 1;
-				ops = PairType(dofs,dofs);
-				break;
-			}
+			SizeType spin = getSpin(dofs);
+			ops = operatorDofs(dofs);
+			angularFactor = 1;
+			if (spin==1) angularFactor = -1;
+			angularMomentum = 1;
+			category = spin;
 			return;
 		}
 
@@ -132,7 +132,7 @@ public:
 				angularFactor = -1;
 				category = 2;
 				angularMomentum = 2;
-				ops = PairType(2,2);
+				ops = PairType(2*orbitals_,2*orbitals_);
 				break;
 			case 1: // S- S+
 				angularFactor = -1;
@@ -140,7 +140,7 @@ public:
 				mods.first = mods.second;
 				mods.second = tmp;
 				angularMomentum = 2;
-				ops = PairType(2,2);
+				ops = PairType(2*orbitals_,2*orbitals_);
 				break;
 			}
 
@@ -159,7 +159,7 @@ public:
 
 		if (term==TERM_NINJ) {
 			fermionOrBoson = ProgramGlobals::BOSON;
-			ops = PairType(4,4);
+			ops = PairType(2*orbitals_ + 2,2*orbitals_ + 2);
 			angularFactor = 1;
 			angularMomentum = 0;
 			category = 0;
@@ -197,7 +197,7 @@ public:
 	template<typename SomeStructType>
 	static SizeType dofs(SizeType term,const SomeStructType&)
 	{
-		if (term==TERM_CICJ) return 2; // c^\dagger c
+		if (term==TERM_CICJ) return 2*orbitals_*orbitals_; // c^\dagger c
 		if (term==TERM_SPSM) return 2; // S+ S- and S- S+
 		if (term==TERM_SZSZ) return 1; // Sz Sz
 		if (term==TERM_NINJ) return 1; // ninj
@@ -206,11 +206,19 @@ public:
 	}
 
 	template<typename SomeStructType>
-	static std::pair<SizeType,SizeType> connectorDofs(SizeType,
-	                                                  SizeType,
+	static std::pair<SizeType,SizeType> connectorDofs(SizeType term,
+	                                                  SizeType dofs,
 	                                                  const SomeStructType&)
 	{
-		return PairType(0,0); // no orbital and no dependence on spin
+		if (term != TERM_CICJ) return PairType(0,0);
+
+		SizeType orbitalsSquared = orbitals_*orbitals_;
+		SizeType spin = dofs/orbitalsSquared;
+		SizeType xtmp = (spin==0) ? 0 : orbitalsSquared;
+		xtmp = dofs - xtmp;
+		SizeType orb1 = xtmp/orbitals_;
+		SizeType orb2 = xtmp % orbitals_;
+		return PairType(orb1,orb2); //  orbital dependence, no spin dependence
 	}
 
 	static SizeType terms() { return 4; }
@@ -220,11 +228,33 @@ private:
 	// only for TERM_SISJ
 	static PairType operatorSz(bool isSu2)
 	{
-		SizeType x = (isSu2) ? 2 : 3;
+		SizeType x = (isSu2) ? 2*orbitals_ : 2*orbitals_+1;
 		return PairType(x,x);
 	}
 
+	// spin is diagonal
+	static std::pair<SizeType,SizeType> operatorDofs(SizeType dofs)
+	{
+		SizeType orbitalsSquared = orbitals_*orbitals_;
+		SizeType spin = dofs/orbitalsSquared;
+		SizeType xtmp = (spin==0) ? 0 : orbitalsSquared;
+		xtmp = dofs - xtmp;
+		SizeType orb1 = xtmp/orbitals_;
+		SizeType orb2 = xtmp % orbitals_;
+		SizeType op1 = orb1 + spin*orbitals_;
+		SizeType op2 = orb2 + spin*orbitals_;
+		return std::pair<SizeType,SizeType>(op1,op2);
+	}
+
+	static SizeType getSpin(SizeType dofs)
+	{
+		SizeType orbitalsSquared = orbitals_*orbitals_;
+		return dofs/orbitalsSquared;
+	}
 }; // class LinkProductTj1Orb
+
+template<typename ModelHelperType>
+SizeType LinkProductTj1Orb<ModelHelperType>::orbitals_ = 1;
 } // namespace Dmrg
 /*@}*/
 #endif

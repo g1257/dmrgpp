@@ -131,9 +131,11 @@ public:
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
 	      geometry_(geometry),
-	      offset_(DEGREES_OF_FREEDOM+3), // c^\dagger_up, c^\dagger_down, S+, Sz, n
-	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
+	      offset_(2*modelParameters_.orbitals+3), // c^\dagger_up, c^\dagger_down, S+, Sz, n
+	      spinSquared_(spinSquaredHelper_,modelParameters_.orbitals,2*modelParameters_.orbitals)
 	{
+		LinkProductType::setOrbitals(modelParameters_.orbitals);
+
 		if (modelParameters_.potentialV.size() != 2*geometry_.numberOfSites()*modelParameters_.orbitals)
 			throw PsimagLite::RuntimeError("potentialV must be of size 2*sites*orbitals\n");
 	}
@@ -181,7 +183,7 @@ public:
 		VectorSizeType quantumNumbs;
 		setNaturalBasis(natBasis,quantumNumbs,block);
 
-		SizeType dof = 2*orbitals;
+		SizeType dof = 2*modelParameters_.orbitals;
 		// Set the operators c^\daggger_{i\sigma} in the natural basis
 		creationMatrix.clear();
 		for (SizeType i=0;i<block.size();i++) {
@@ -196,7 +198,7 @@ public:
 					su2related.source.push_back(i*offset_+1);
 					su2related.transpose.push_back(-1);
 					su2related.transpose.push_back(-1);
-					su2related.offset = NUMBER_OF_ORBITALS;
+					su2related.offset = modelParameters_.orbitals;
 				}
 
 				OperatorType myOp(tmpMatrix,-1,PairType(1,1-sigma),asign,su2related);
@@ -208,13 +210,13 @@ public:
 			tmpMatrix = findSplusMatrices(i,natBasis);
 
 			typename OperatorType::Su2RelatedType su2related;
-			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
-			su2related.source.push_back(i*DEGREES_OF_FREEDOM+NUMBER_OF_ORBITALS);
-			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
+			su2related.source.push_back(i*modelParameters_.orbitals*2);
+			su2related.source.push_back(i*modelParameters_.orbitals*2+modelParameters_.orbitals);
+			su2related.source.push_back(i*modelParameters_.orbitals*2);
 			su2related.transpose.push_back(-1);
 			su2related.transpose.push_back(-1);
 			su2related.transpose.push_back(1);
-			su2related.offset = NUMBER_OF_ORBITALS;
+			su2related.offset = modelParameters_.orbitals;
 
 			OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
 			creationMatrix.push_back(myOp);
@@ -340,6 +342,7 @@ public:
 		SizeType numberOfDofs = 2*modelParameters_.orbitals;
 		electrons.clear();
 		for (SizeType i=0;i<basis.size();i++) {
+			SizeType sum = 0;
 			for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 				HilbertStateType mask = (1<<dof);
 				if (mask & basis[i]) sum++;
@@ -405,7 +408,7 @@ public:
 
 		for (SizeType ii=0;ii<natBasis.size();ii++) {
 			bra=ket=natBasis[ii];
-			HilbertStateType mask = (1<<(sigma+i*2*orbitals);
+			HilbertStateType mask = (1<<(sigma+i*2*orbitals));
 			if (ket & mask) continue;
 			bra = (ket ^ mask);
 			int jj = PsimagLite::isInVector(natBasis,bra);
@@ -426,6 +429,7 @@ public:
 		HilbertStateType bra,ket;
 		int n = natBasis.size();
 		MatrixType cm(n,n);
+		SizeType orbitals = modelParameters_.orbitals;
 
 		for (SizeType ii=0;ii<natBasis.size();ii++) {
 			ket=natBasis[ii];
@@ -433,7 +437,7 @@ public:
 				bra = ket;
 				HilbertStateType masklp = (1<<l);
 				HilbertStateType masklm = (1<<(l-orbitals));
-				if ((ket & masklp) > 0 && (keti & masklm) == 0) {
+				if ((ket & masklp) > 0 && (ket & masklm) == 0) {
 					bra = ket ^ (masklp | masklm);
 				}
 
@@ -452,12 +456,12 @@ public:
 	                                const VectorHilbertStateType& natBasis) const
 	{
 		assert(i == 0);
-		HilbertStateType ket;
 		int n = natBasis.size();
 		MatrixType cm(n,n);
+		SizeType orbitals = modelParameters_.orbitals;
 
-		for (SizeType ii=0;ii<natBasis.size();ii++) {s
-			ket=natBasis[ii];
+		for (SizeType ii=0;ii<natBasis.size();ii++) {
+			HilbertStateType ket=natBasis[ii];
 			SizeType counter = 0;
 			for (SizeType l = 0; l < orbitals; ++l) {
 				HilbertStateType masklp = (1<<l);
@@ -505,7 +509,7 @@ public:
 	                                RealType factorForDiagonals=1.0) const
 	{
 		SizeType n=block.size();
-
+		SizeType orbitals = modelParameters_.orbitals;
 		SizeType linSize = geometry_.numberOfSites();
 		for (SizeType i=0;i<n;i++) {
 			for (SizeType orb = 0; orb < orbitals; ++orb) {
@@ -522,6 +526,32 @@ public:
 	}
 
 private:
+
+	void weedOutBasis(VectorHilbertStateType& basis) const
+	{
+		SizeType orbitals = modelParameters_.orbitals;
+		HilbertBasisType basisTmp;
+		VectorHilbertStateType electrons(orbitals,0);
+
+		for (SizeType i = 0; basis.size(); ++i) {
+			HilbertStateType ket = basis[i];
+			SizeType orb = 0;
+			while (ket > 0) {
+				if (ket & 1) electrons[orb]++;
+				orb++;
+				if (orb >= orbitals) orb = 0;
+				ket >>= 1;
+			}
+
+			bool addIt = true;
+			for (SizeType orb = 0; electrons.size(); ++orb)
+				if (electrons[orb] > 1) addIt = false;
+
+			if (addIt) basisTmp.push_back(ket);
+		}
+
+		basis = basisTmp;
+	}
 
 	void findQuantumNumbers(VectorSizeType& q,
 	                        const HilbertBasisType& basis,int n) const
@@ -547,7 +577,7 @@ private:
 		PairType jmSaved = calcJmvalue<PairType>(basis[0]);
 		jmSaved.first++;
 		jmSaved.second++;
-		SizeType numberOfDofs = 2*modelParameters_.orbitals;
+		SizeType orbitals = modelParameters_.orbitals;
 		VectorSizeType electronsUp(basis.size());
 		VectorSizeType electrons(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {

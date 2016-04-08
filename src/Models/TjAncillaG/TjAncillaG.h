@@ -193,7 +193,7 @@ public:
 		creationMatrix.clear();
 		for (SizeType i=0;i<block.size();i++) {
 			for (int sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++) {
-				tmpMatrix = tj1orb_.findOperatorMatrices(i,sigma,natBasis);
+				tmpMatrix = tj1orb_.findCreationMatrices(i,sigma,natBasis);
 				int asign= 1;
 				if (sigma>0) asign= 1;
 				typename OperatorType::Su2RelatedType su2related;
