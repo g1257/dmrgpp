@@ -277,9 +277,10 @@ public:
 				fm(i,j)=ftransform.getValue(k);
 			}
 		}
+
 		thisBasis_ = thisBasis;
 		fullMatrixToCrsMatrix(ftransform_,fm);
-
+		transposeConjugate(ftransformT_,ftransform_);
 	}
 
 	void changeBasis(SizeType k)
@@ -400,10 +401,8 @@ public:
 
 	void changeBasis(SparseMatrixType &v)
 	{
-		SparseMatrixType transformConj;
-		transposeConjugate(transformConj,ftransform_);
 		SparseMatrixType tmp = v*ftransform_;
-		multiply(v,transformConj,tmp);
+		multiply(v,ftransformT_,tmp);
 	}
 
 private:
@@ -424,6 +423,7 @@ private:
 	PsimagLite::Vector<PsimagLite::Vector<SizeType>::Type>::Type fastBasisRight_;
 	PsimagLite::Matrix<SizeType> flavorIndexCached_;
 	SparseMatrixType ftransform_;
+	SparseMatrixType ftransformT_;
 
 	SparseElementType lfactor(int ki,
 	                          bool order,
