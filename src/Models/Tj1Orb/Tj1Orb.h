@@ -444,11 +444,11 @@ public:
 				HilbertStateType masklm = (1<<(l-orbitals));
 				if ((ket & masklp) > 0 && (ket & masklm) == 0) {
 					bra = ket ^ (masklp | masklm);
-				}
 
-				int jj = PsimagLite::isInVector(natBasis,bra);
-				assert(jj>=0);
-				cm(ii,jj) = 1.0;
+					int jj = PsimagLite::isInVector(natBasis,bra);
+					assert(jj>=0);
+					cm(ii,jj) = 1.0;
+				}
 			}
 		}
 
