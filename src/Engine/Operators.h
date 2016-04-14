@@ -163,8 +163,10 @@ public:
 					operators_[k].data.clear();
 					continue;
 				}
-				if (!useSu2Symmetry_) changeBasis(operators_[k].data,ftransform);
-				reducedOpImpl_.changeBasis(k);
+				if (!useSu2Symmetry_)
+					reducedOpImpl_.changeBasis(operators_[k].data);
+				else
+					reducedOpImpl_.changeBasis(k);
 			}
 		}
 
@@ -288,16 +290,7 @@ public:
 
 		helper.gather();
 
-		changeBasis(hamiltonian_,ftransform);
-		reducedOpImpl_.changeBasisHamiltonian();
-	}
-
-	static void changeBasis(SparseMatrixType &v,const SparseMatrixType& ftransform)
-	{
-		SparseMatrixType transformConj;
-		transposeConjugate(transformConj,ftransform);
-		SparseMatrixType tmp = v*ftransform;
-		multiply(v,transformConj,tmp);
+		reducedOpImpl_.changeBasisHamiltonian(hamiltonian_);
 	}
 
 	void reorder(const   VectorSizeType& permutation)

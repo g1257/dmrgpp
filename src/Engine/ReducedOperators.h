@@ -288,10 +288,12 @@ public:
 		changeBasis(reducedOperators_[k].data);
 	}
 
-	void changeBasisHamiltonian()
+	void changeBasisHamiltonian(SparseMatrixType& hamiltonian)
 	{
-		if (!useSu2Symmetry_) return;
-		changeBasis(reducedHamiltonian_);
+		if (useSu2Symmetry_)
+			changeBasis(reducedHamiltonian_);
+		else
+			changeBasis(hamiltonian);
 	}
 
 	void externalProduct(SizeType ind,
@@ -396,7 +398,16 @@ public:
 		io.printVector(tmp,"#OPERATORS");
 	}
 
+	void changeBasis(SparseMatrixType &v)
+	{
+		SparseMatrixType transformConj;
+		transposeConjugate(transformConj,ftransform_);
+		SparseMatrixType tmp = v*ftransform_;
+		multiply(v,transformConj,tmp);
+	}
+
 private:
+
 	const BasisType* thisBasis_;
 	bool useSu2Symmetry_;
 	ClebschGordanType* cgObject_;
@@ -556,14 +567,6 @@ private:
 				        cgObject_->operator()(jmPrime,jm,opSrc.jm)/divisor;
 			}
 		}
-	}
-
-	void changeBasis(SparseMatrixType &v)
-	{
-		SparseMatrixType transformConj;
-		transposeConjugate(transformConj,ftransform_);
-		SparseMatrixType tmp = v*ftransform_;
-		multiply(v,transformConj,tmp);
 	}
 
 	void buildLfactor(VectorType& lfactor,
