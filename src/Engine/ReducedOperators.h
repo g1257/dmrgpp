@@ -420,8 +420,8 @@ public:
 					SizeType k = v.getCol(k2);
 					SparseElementType v2 = v.getValue(k2);
 					for (int k3 = ftransform_.getRowPtr(k); k3 < ftransform_.getRowPtr(k+1); ++k3) {
-						SizeType j = v.getCol(k3);
-						SparseElementType v3 = v.getValue(k3);
+						SizeType j = ftransform_.getCol(k3);
+						SparseElementType v3 = ftransform_.getValue(k3);
 						values[j] += v1*v2*v3;
 					}
 				}
