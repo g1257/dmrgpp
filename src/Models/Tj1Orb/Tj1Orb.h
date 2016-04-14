@@ -135,6 +135,11 @@ public:
 	      spinSquared_(spinSquaredHelper_,modelParameters_.orbitals,2*modelParameters_.orbitals)
 	{
 		LinkProductType::setOrbitals(modelParameters_.orbitals);
+		if (modelParameters_.orbitals > 1) {
+			PsimagLite::String str("Tj1Orb with more than 1 orbital is EXPERIMENTAL\n");
+			std::cerr<<str<<"\n";
+			std::cout<<str<<"\n";
+		}
 
 		if (modelParameters_.potentialV.size() != 2*geometry_.numberOfSites()*modelParameters_.orbitals)
 			throw PsimagLite::RuntimeError("potentialV must be of size 2*sites*orbitals\n");
@@ -484,7 +489,6 @@ public:
 	SparseMatrixType findNiMatrices(int,
 	                                const VectorHilbertStateType& natBasis) const
 	{
-		assert(i == 0);
 		SizeType n = natBasis.size();
 		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
 		SizeType dofs = 2*modelParameters_.orbitals;

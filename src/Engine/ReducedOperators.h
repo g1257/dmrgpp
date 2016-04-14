@@ -172,8 +172,8 @@ public:
 					myOp[transposeCounter].fermionSign=
 					        ops[ops[i].su2Related.source[m]].fermionSign;
 					myOp[transposeCounter].jm=typename OperatorType::PairType(
-					         angularMomentum,
-					         angularMomentum-ops[ops[i].su2Related.source[m]].jm.second);
+					            angularMomentum,
+					            angularMomentum-ops[ops[i].su2Related.source[m]].jm.second);
 					myOp[transposeCounter].angularFactor =
 					        -ops[ops[i].su2Related.source[m]].angularFactor;
 					opSrc[m]=&myOp[transposeCounter];
@@ -254,7 +254,12 @@ public:
 
 	void prepareTransform(const SparseMatrixType& ftransform,const BasisType* thisBasis)
 	{
-		if (!useSu2Symmetry_) return;
+
+		if (!useSu2Symmetry_) {
+			ftransform_ = ftransform;
+			transposeConjugate(ftransformT_,ftransform_);
+			return;
+		}
 
 		SizeType nr=thisBasis->reducedSize();
 		SizeType nold = thisBasis_->reducedSize();
