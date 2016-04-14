@@ -378,7 +378,7 @@ public:
 		PsimagLite::Sort<VectorSizeType > sort;
 		sort.sort(q,iperm);
 		basis.clear();
-		for (a=0;a<total;a++) basis.push_back(basisTmp[iperm[a]]);
+		for (a=0;a<basisTmp.size();a++) basis.push_back(basisTmp[iperm[a]]);
 	}
 
 	virtual const TargetQuantumElectronsType& targetQuantum() const
@@ -537,7 +537,7 @@ private:
 		HilbertBasisType basisTmp;
 		VectorHilbertStateType electrons(orbitals,0);
 
-		for (SizeType i = 0; basis.size(); ++i) {
+		for (SizeType i = 0; i < basis.size(); ++i) {
 			HilbertStateType ket = basis[i];
 			SizeType orb = 0;
 			while (ket > 0) {
@@ -548,10 +548,12 @@ private:
 			}
 
 			bool addIt = true;
-			for (SizeType orb = 0; electrons.size(); ++orb)
+			for (SizeType orb = 0; orb < electrons.size(); ++orb) {
 				if (electrons[orb] > 1) addIt = false;
+				electrons[orb] = 0;
+			}
 
-			if (addIt) basisTmp.push_back(ket);
+			if (addIt) basisTmp.push_back(basis[i]);
 		}
 
 		basis = basisTmp;
