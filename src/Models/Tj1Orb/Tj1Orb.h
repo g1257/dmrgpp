@@ -187,7 +187,7 @@ public:
 		// Set the operators c^\daggger_{i\sigma} in the natural basis
 		creationMatrix.clear();
 		for (SizeType i=0;i<block.size();i++) {
-			for (int sigma=0;sigma<dof;sigma++) {
+			for (SizeType sigma=0;sigma<dof;sigma++) {
 				// orbital changes first
 				tmpMatrix = findCreationMatrices(i,sigma,natBasis);
 				int asign= 1;
