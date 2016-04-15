@@ -286,6 +286,15 @@ public:
 		return terms_[termId]->maxConnections();
 	}
 
+	SizeType maxConnections() const
+	{
+		SizeType result = 0;
+		for (SizeType termId = 0; termId < terms_.size(); ++termId)
+			if (terms_[termId]->maxConnections() > result)
+				result = terms_[termId]->maxConnections();
+		return result;
+	}
+
 	void fillAdditionalData(AdditionalDataType& additionalData,
 	                        SizeType term,
 	                        SizeType ind,
