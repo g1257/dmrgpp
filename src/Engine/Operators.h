@@ -111,7 +111,6 @@ template<typename BasisType_>
 class Operators {
 
 	typedef std::pair<SizeType,SizeType> PairType;
-	static const bool EXCLUDE = true;
 
 public:
 
@@ -190,7 +189,9 @@ public:
 
 		bool isExcluded(SizeType k) const
 		{
-			if (!EXCLUDE) return false; // <-- this is the safest answer
+#ifndef OPERATORS_DONT_CHANGE_ALL
+			return false; // <-- this is the safest answer
+#endif
 			if (k < startEnd_.first || k >= startEnd_.second) return true;
 			return false;
 		}

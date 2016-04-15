@@ -180,7 +180,7 @@ public:
 	                       quantumSector_,
 	                       wft_,
 	                       checkpoint_.energy()),
-	      truncate_(reflectionOperator_,wft_,parameters_,verbose_),
+	      truncate_(reflectionOperator_,wft_,parameters_,model.geometry().maxConnections(),verbose_),
 	      energy_(0.0),
 	      saveData_(parameters_.options.find("noSaveData") == PsimagLite::String::npos)
 	{

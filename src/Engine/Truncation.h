@@ -120,11 +120,13 @@ public:
 	Truncation(ReflectionSymmetryType& reflectionOperator,
 	           WaveFunctionTransfType& waveFunctionTransformation,
 	           const ParametersType& parameters,
+	           SizeType maxConnections,
 	           bool verbose)
 	    : reflectionOperator_(reflectionOperator),
 	      lrs_(reflectionOperator_.leftRightSuper()),
 	      waveFunctionTransformation_(waveFunctionTransformation),
 	      parameters_(parameters),
+	      maxConnections_(maxConnections),
 	      verbose_(verbose),
 	      progress_("Truncation"),
 	      error_(0.0)
@@ -405,6 +407,7 @@ private:
 	const LeftRightSuperType& lrs_;
 	WaveFunctionTransfType& waveFunctionTransformation_;
 	const ParametersType& parameters_;
+	SizeType maxConnections_;
 	bool verbose_;
 	ProgressIndicatorType progress_;
 	RealType error_;
