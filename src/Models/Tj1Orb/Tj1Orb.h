@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/HubbardOneBand/ModelHubbard.h"
 #include "../Models/Tj1Orb/LinkProductTj1Orb.h"
 #include "../Models/Tj1Orb/ParametersModelTj1Orb.h"
+#include "../Models/FeAsModel/HilbertSpaceFeAs.h"
 #include "ModelCommon.h"
 
 namespace Dmrg {
@@ -107,6 +108,9 @@ public:
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef LinkProductTj1Orb<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
+	typedef typename ModelBaseType::HilbertBasisType HilbertBasisFeAsType;
+	typedef typename HilbertBasisFeAsType::value_type HilbertStateFeAs;
+	typedef  HilbertSpaceFeAs<HilbertStateFeAs> HilbertSpaceFeAsType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
@@ -393,11 +397,37 @@ public:
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma}
 	//! to basis state ket
-	RealType sign(HilbertStateType const &, int,int) const
+	RealType sign(HilbertStateType const &ket, int i, int sigma) const
 	{
 		SizeType orbitals = modelParameters_.orbitals;
 		if (orbitals == 1) return 1;
-		return 1; //FIXME THIS IS GOING TO BE A NIGHTMARE
+
+		int value=0;
+		SizeType dofs=2*modelParameters_.orbitals;
+		for (SizeType alpha=0;alpha<dofs;alpha++)
+			value += HilbertSpaceFeAsType::calcNofElectrons(ket,0,i,alpha);
+
+		if (i>0) value += HilbertSpaceFeAsType::electrons(ket);
+
+		unsigned int x = HilbertSpaceFeAsType::get(ket,i);
+		int spin = sigma/modelParameters_.orbitals;
+		SizeType orb = sigma % modelParameters_.orbitals;
+
+		for (SizeType j=0;j<orb;j++) {
+			for (SizeType k=0;k<2;k++) {
+				SizeType ind = j + k * modelParameters_.orbitals;
+				int mask = (1<<ind);
+				if (x & mask) value++;
+			}
+		}
+		if (spin==SPIN_DOWN) {
+			int mask = (1<<orb);
+			if (x & mask) value++;
+		}
+		if (value==0 || value%2==0) return 1.0;
+
+		return FERMION_SIGN;
+
 	}
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
@@ -467,7 +497,7 @@ public:
 
 		for (SizeType ii=0;ii<natBasis.size();ii++) {
 			HilbertStateType ket=natBasis[ii];
-			SizeType counter = 0;
+			int counter = 0;
 			for (SizeType l = 0; l < orbitals; ++l) {
 				HilbertStateType masklp = (1<<l);
 				if (ket & masklp) counter++;
@@ -587,8 +617,12 @@ private:
 		VectorSizeType electronsUp(basis.size());
 		VectorSizeType electrons(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {
-			PairType jmpair = calcJmvalue<PairType>(basis[i]);
+			PairType jmpair(0,0);
 
+			if(orbitals==1) {
+				jmpair = calcJmvalue<PairType>(basis[i]);
+			}
+			
 			jmvalues.push_back(jmpair);
 			// nup
 			electronsUp[i] = 0;
