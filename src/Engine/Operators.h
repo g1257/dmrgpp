@@ -111,7 +111,7 @@ template<typename BasisType_>
 class Operators {
 
 	typedef std::pair<SizeType,SizeType> PairType;
-	static const bool EXCLUDE = false;
+	static const bool EXCLUDE = true;
 
 public:
 
@@ -124,6 +124,7 @@ public:
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef std::pair<SizeType,SizeType> PairSizeSizeType;
 
 	class MyLoop {
 
@@ -133,13 +134,15 @@ public:
 		       ReducedOperatorsType& reducedOpImpl,
 		       typename PsimagLite::Vector<OperatorType>::Type& operators,
 		       const SparseMatrixType& ftransform1,
-		       const BasisType* thisBasis1)
+		       const BasisType* thisBasis1,
+		       const PairSizeSizeType& startEnd)
 		    : useSu2Symmetry_(useSu2Symmetry),
 		      reducedOpImpl_(reducedOpImpl),
 		      operators_(operators),
 		      ftransform(ftransform1),
 		      thisBasis(thisBasis1),
-		      hasMpi_(ConcurrencyType::hasMpi())
+		      hasMpi_(ConcurrencyType::hasMpi()),
+		      startEnd_(startEnd)
 		{
 			reducedOpImpl_.prepareTransform(ftransform,thisBasis);
 		}
@@ -159,7 +162,7 @@ public:
 				if (taskNumber>=total) break;
 
 				SizeType k = taskNumber;
-				if (isExcluded(k,thisBasis)) {
+				if (isExcluded(k)) {
 					operators_[k].data.clear();
 					continue;
 				}
@@ -185,12 +188,10 @@ public:
 
 	private:
 
-		bool isExcluded(SizeType,
-		                const BasisType*)
-		// 		               const std::pair<SizeType,SizeType>& startEnd)
+		bool isExcluded(SizeType k) const
 		{
 			if (!EXCLUDE) return false; // <-- this is the safest answer
-			// 			if (k<startEnd.first || k>=startEnd.second) return true;
+			if (k < startEnd_.first || k >= startEnd_.second) return true;
 			return false;
 		}
 
@@ -213,6 +214,7 @@ public:
 		const SparseMatrixType& ftransform;
 		const BasisType* thisBasis;
 		bool hasMpi_;
+		const PairSizeSizeType& startEnd_;
 	};
 
 	Operators(const BasisType* thisBasis)
@@ -278,13 +280,14 @@ public:
 	}
 
 	void changeBasis(const SparseMatrixType& ftransform,
-	                 const BasisType* thisBasis)
+	                 const BasisType* thisBasis,
+	                 const PairSizeSizeType& startEnd)
 	{
 		typedef PsimagLite::Parallelizer<MyLoop> ParallelizerType;
 		ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,
 		                              PsimagLite::MPI::COMM_WORLD);
 
-		MyLoop helper(useSu2Symmetry_,reducedOpImpl_,operators_,ftransform,thisBasis);
+		MyLoop helper(useSu2Symmetry_,reducedOpImpl_,operators_,ftransform,thisBasis,startEnd);
 
 		threadObject.loopCreate(numberOfOperators(),helper); // FIXME: needs weights
 

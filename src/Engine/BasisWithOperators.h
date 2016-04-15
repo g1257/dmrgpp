@@ -113,7 +113,7 @@ namespace Dmrg {
 	 an outer product of two given Hilbert spaces, to transform a basis, to truncate a basis, etc.
 	 */
 template<typename OperatorsType_>
-class	BasisWithOperators : public  OperatorsType_::BasisType {
+class BasisWithOperators : public OperatorsType_::BasisType {
 
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorIntegerType;
@@ -122,6 +122,7 @@ public:
 
 	typedef typename OperatorsType_::BasisType::RealType RealType;
 	typedef OperatorsType_ OperatorsType;
+	typedef typename OperatorsType::PairSizeSizeType PairSizeSizeType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorsType::BasisType BasisType;
 	typedef typename BasisType::BlockType BlockType;
@@ -251,19 +252,21 @@ public:
 	RealType truncateBasis(SparseMatrixType& ftransform,
 	                       const BlockMatrixType& transform,
 	                       const typename PsimagLite::Vector<RealType>::Type& eigs,
-	                       const typename PsimagLite::Vector<SizeType>::Type& removedIndices)
+	                       const typename PsimagLite::Vector<SizeType>::Type& removedIndices,
+	                       const PairSizeSizeType& startEnd)
 	{
 		BasisType &parent = *this;
 		RealType error = parent.truncateBasis(ftransform,transform,eigs,removedIndices);
 
-		changeBasisDirect(ftransform);
+		changeBasisDirect(ftransform,startEnd);
 
 		return error;
 	}
 
-	void changeBasisDirect(const SparseMatrixType& ftransform)
+	void changeBasisDirect(const SparseMatrixType& ftransform,
+	                       const PairSizeSizeType& startEnd)
 	{
-		operators_.changeBasis(ftransform,this);
+		operators_.changeBasis(ftransform,this,startEnd);
 	}
 
 	void setHamiltonian(SparseMatrixType const &h)

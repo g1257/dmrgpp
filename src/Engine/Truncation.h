@@ -91,6 +91,7 @@ template<typename LeftRightSuperType,
 class Truncation  {
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
+	typedef typename BasisWithOperatorsType::PairSizeSizeType PairSizeSizeType;
 	typedef typename LeftRightSuperType::ProgressIndicatorType ProgressIndicatorType;
 	typedef typename TargettingType::RealType RealType;
 	typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
@@ -247,12 +248,21 @@ private:
 	void truncateBasisSystem(BasisWithOperatorsType& rSprime,
 	                         const BasisWithOperatorsType& eBasis)
 	{
+		SizeType site = 0; // FIXME for model Immm
+		size_t mostRecent = lrs_.left().operatorsPerSite(site)*maxConnections_;
+		size_t numOfOp = lrs_.left().numberOfOperators();
+		PairSizeSizeType startEnd(0,numOfOp);
+		if (startEnd.second > mostRecent)
+			startEnd.first = startEnd.second - mostRecent;
 
 		PsimagLite::OstringStream msg;
 		TruncationCache& cache = leftCache_;
 
-		rSprime.truncateBasis(ftransform_,cache.transform,
-		                      cache.eigs,cache.removedIndices);
+		rSprime.truncateBasis(ftransform_,
+		                      cache.transform,
+		                      cache.eigs,
+		                      cache.removedIndices,
+		                      startEnd);
 		LeftRightSuperType lrs(rSprime,(BasisWithOperatorsType&) eBasis,
 		                       (BasisType&)lrs_.super());
 		bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=PsimagLite::String::npos);
@@ -267,12 +277,21 @@ private:
 	void truncateBasisEnviron(BasisWithOperatorsType& rEprime,
 	                          const BasisWithOperatorsType& sBasis)
 	{
+		SizeType site = 0; // FIXME for model Immm
+		SizeType mostRecent = lrs_.left().operatorsPerSite(site)*maxConnections_;
+		size_t numOfOp = lrs_.right().numberOfOperators();
+		PairSizeSizeType startEnd(0,numOfOp);
+		if (startEnd.second > mostRecent)
+			startEnd.second = mostRecent;
 
 		PsimagLite::OstringStream msg;
 		TruncationCache& cache = rightCache_;
 
-		rEprime.truncateBasis(ftransform_,cache.transform,
-		                      cache.eigs,cache.removedIndices);
+		rEprime.truncateBasis(ftransform_,
+		                      cache.transform,
+		                      cache.eigs,
+		                      cache.removedIndices,
+		                      startEnd);
 		LeftRightSuperType lrs((BasisWithOperatorsType&) sBasis,
 		                       rEprime,(BasisType&)lrs_.super());
 		bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=PsimagLite::String::npos);
