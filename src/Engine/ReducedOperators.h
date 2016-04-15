@@ -406,38 +406,9 @@ public:
 
 	void changeBasis(SparseMatrixType &v)
 	{
-		SizeType counter = 0;
-		SizeType m = ftransformT_.row();
-		VectorType values(m,0.0);
-		SparseMatrixType result(m,m);
-
-		for (SizeType i = 0; i < m; ++i) {
-			result.setRow(i,counter);
-			for (int k1 = ftransformT_.getRowPtr(i); k1 < ftransformT_.getRowPtr(i+1); ++k1) {
-				SizeType l = ftransformT_.getCol(k1);
-				SparseElementType v1 = ftransformT_.getValue(k1);
-				for (int k2 = v.getRowPtr(l); k2 < v.getRowPtr(l+1); ++k2) {
-					SizeType k = v.getCol(k2);
-					SparseElementType v2 = v.getValue(k2);
-					for (int k3 = ftransform_.getRowPtr(k); k3 < ftransform_.getRowPtr(k+1); ++k3) {
-						SizeType j = ftransform_.getCol(k3);
-						SparseElementType v3 = ftransform_.getValue(k3);
-						values[j] += v1*v2*v3;
-					}
-				}
-			}
-
-			for (SizeType j = 0; j < values.size(); ++j) {
-				if (values[j] == 0.0) continue;
-				result.pushCol(j);
-				result.pushValue(values[j]);
-				values[j] = 0.0;
-				counter++;
-			}
-		}
-
-		result.setRow(m,counter);
-		v = result;
+		SparseMatrixType tmp;
+		multiply(tmp,v,ftransform_);
+		multiply(v,ftransformT_,tmp);
 	}
 
 private:
