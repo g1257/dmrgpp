@@ -1,5 +1,6 @@
 TotalNumberOfSites=8 
-NumberOfTerms=2
+NumberOfTerms=3
+
 DegreesOfFreedom=2
 GeometryKind=ladderx
 GeometryOptions=ConstantValues
@@ -16,6 +17,7 @@ Connectors 2 2
 Connectors 2 2
 +0.20828 -0.079
 -0.079 +0.20828
+
 DegreesOfFreedom=1
 GeometryKind=ladderx
 GeometryOptions=ConstantValues
@@ -24,6 +26,16 @@ Connectors 1 0.1
 Connectors 1 0.1
 Connectors 1 0.02
 Connectors 1 0.02 
+
+DegreesOfFreedom=1
+GeometryKind=ladderx
+GeometryOptions=ConstantValues
+LadderLeg=2
+Connectors 1 0.1
+Connectors 1 0.1
+Connectors 1 0.02
+Connectors 1 0.02
+
 hubbardU	4 0.0 0.0 0.0 0.0 
 potentialV	32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
                    0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0

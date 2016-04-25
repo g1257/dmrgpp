@@ -95,7 +95,7 @@ class LinkProductFeAsExtended {
 	typedef typename ModelHelperType::BasisType BasisType;
 	typedef typename ModelHelperType::OperatorType OperatorType;
 
-	enum {TERM_HOPPING, TERM_J};
+	enum {TERM_HOPPING, TERM_JPLUS, TERM_JZ};
 
 	static const SizeType DEGREES_OF_FREEDOM = 4;
 
@@ -106,7 +106,7 @@ public:
 	template<typename SomeStructType>
 	static SizeType dofs(SizeType term,const SomeStructType& additional)
 	{
-		return (term==TERM_J) ?
+		return (term == TERM_JPLUS || term == TERM_JZ) ?
 		            LinkProductHeisenbergType::dofs(term,additional) :
 		            LinkProductFeAsType::dofs(term,additional);
 	}
@@ -139,8 +139,9 @@ public:
 			            term,dofs,isSu2,fermionOrBoson,ops,mods,
 			            angularMomentum,angularFactor,category,additional);
 
+		assert(term > 0);
 		LinkProductHeisenbergType::setLinkData(
-		            term,dofs,isSu2,fermionOrBoson,ops,mods,
+		            term-1,dofs,isSu2,fermionOrBoson,ops,mods,
 		            angularMomentum,angularFactor,category,additional);
 		SizeType offset1 = DEGREES_OF_FREEDOM;
 		ops.first += offset1;
@@ -158,10 +159,11 @@ public:
 		                                                                  isSu2,
 		                                                                  additional);
 
-		LinkProductHeisenbergType::valueModifier(value,term,dofs,isSu2,additional);
+		assert(term > 0);
+		LinkProductHeisenbergType::valueModifier(value,term-1,dofs,isSu2,additional);
 	}
 
-	static SizeType terms() { return 2; }
+	static SizeType terms() { return 3; }
 }; // class LinkProductFeAsExtended
 } // namespace Dmrg
 /*@}*/
