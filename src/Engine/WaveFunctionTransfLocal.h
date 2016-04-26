@@ -261,14 +261,15 @@ private:
 		SizeType ni=dmrgWaveStruct_.lrs.left().size();
 		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
 		MatrixOrIdentityType wsRef2(twoSiteDmrg_ && nip>volumeOfNk,ws);
-
+		SizeType start = weT.getRowPtr(jp);
+		SizeType end = weT.getRowPtr(jp+1);
 		SparseElementType sum=0;
 		for (SizeType k3=wsRef2.getRowPtr(ip);k3<wsRef2.getRowPtr(ip+1);k3++) {
 			int ip2 = wsRef2.getColOrExit(k3);
 			if (ip2<0) continue;
 			SizeType alpha = dmrgWaveStruct_.lrs.left().permutationInverse(ip2+kp*nip);
 
-			for (int k = weT.getRowPtr(jp);k<weT.getRowPtr(jp+1);k++) {
+			for (SizeType k = start; k < end; k++) {
 				SizeType jp2 = weT.getCol(k);
 				SizeType x = dmrgWaveStruct_.lrs.super().permutationInverse(alpha+jp2*ni);
 				sum += weT.getValue(k)*psiSrc.slowAccess(x)*wsRef2.getValue(k3);
@@ -369,14 +370,15 @@ private:
 		SizeType ni = dmrgWaveStruct_.lrs.right().size()/volumeOfNk;
 
 		MatrixOrIdentityType weRef(twoSiteDmrg_ && ni>volumeOfNk,we);
-
+		SizeType start = wsT.getRowPtr(is);
+		SizeType end = wsT.getRowPtr(is+1);
 		for (SizeType k2=weRef.getRowPtr(jen);k2<weRef.getRowPtr(jen+1);k2++) {
 			int jpr = weRef.getColOrExit(k2);
 			//if (jpr<0) continue;
 			assert(jpr >= 0);
 			SizeType jp = dmrgWaveStruct_.lrs.right().permutationInverse(jpl + jpr*volumeOfNk);
 			SparseElementType sum2 = 0;
-			for (int k=wsT.getRowPtr(is);k<wsT.getRowPtr(is+1);k++) {
+			for (SizeType k = start;k < end;k++) {
 				SizeType ip = wsT.getCol(k);
 				SizeType y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + jp*nalpha);
 				assert(y >= offset && y-offset <= psiV.size());
