@@ -57,7 +57,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/FeAsModel/ModelFeBasedSc.h"
 #include "../Models/FeAsBasedScExtended/FeAsBasedScExtended.h"
 #include "../Models/Immm/Immm.h"
-#include "../Models/Tj1Orb/Tj1Orb.h"
+#include "../Models/TjMultiOrb/TjMultiOrb.h"
 #include "../Models/TjAncillaC2/TjAncillaC2.h"
 #include "../Models/TjAncillaC/TjAncillaC.h"
 #include "../Models/TjAncillaG/TjAncillaG.h"
@@ -84,7 +84,7 @@ class ModelSelector {
 	typedef ModelFeBasedSc<ModelBaseType> FeBasedScType;
 	typedef FeAsBasedScExtended<ModelBaseType> FeBasedScExtType;
 	typedef Immm<ModelBaseType> ImmmType;
-	typedef Tj1Orb<ModelBaseType> Tj1OrbType;
+	typedef TjMultiOrb<ModelBaseType> TjMultiOrbType;
 	typedef TjAncillaC2<ModelBaseType> TjAncillaC2Type;
 	typedef TjAncillaC<ModelBaseType> TjAncillaCType;
 	typedef TjAncillaG<ModelBaseType> TjAncillaGType;
@@ -124,8 +124,8 @@ public:
 			model_ = new FeBasedScExtType(solverParams,io,geometry);
 		} else if (name_ == "Immm") {
 			model_ = new ImmmType(solverParams,io,geometry);
-		} else if (name_ == "Tj1Orb") {
-			model_ = new Tj1OrbType(solverParams,io,geometry);
+		} else if (name_ == "TjMultiOrb") {
+			model_ = new TjMultiOrbType(solverParams,io,geometry);
 		} else if (name_ == "TjAncillaC2") {
 			model_ = new TjAncillaC2Type(solverParams,io,geometry);
 		} else if (name_ == "TjAncillaC") {

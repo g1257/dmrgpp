@@ -80,9 +80,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_TJ_ANCILLAG_H
 #define DMRG_TJ_ANCILLAG_H
 #include "../Models/HubbardOneBand/ModelHubbard.h"
-#include "../Models/Tj1Orb/Tj1Orb.h"
+#include "../Models/TjMultiOrb/TjMultiOrb.h"
 #include "../Models/TjAncillaG/LinkProductTjAncillaG.h"
-#include "../Models/Tj1Orb/ParametersModelTj1Orb.h"
+#include "../Models/TjMultiOrb/ParametersModelTjMultiOrb.h"
 #include "ModelCommon.h"
 
 namespace Dmrg {
@@ -94,7 +94,7 @@ public:
 
 	typedef typename ModelBaseType::VectorRealType VectorRealType;
 	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
-	typedef Tj1Orb<ModelBaseType> Tj1OrbType;
+	typedef TjMultiOrb<ModelBaseType> TjMultiOrbType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelBaseType::GeometryType GeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
@@ -136,7 +136,7 @@ public:
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
 	      geometry_(geometry),
-	      tj1orb_(solverParams,io,geometry),
+	      TjMultiOrb_(solverParams,io,geometry),
 	      offset_(DEGREES_OF_FREEDOM+3), // c^\dagger_up, c^\dagger_down, S+, Sz, n
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 	{
@@ -154,7 +154,7 @@ public:
 
 	SizeType hilbertSize(SizeType site) const
 	{
-		return tj1orb_.hilbertSize(site);
+		return TjMultiOrb_.hilbertSize(site);
 	}
 
 	//! find creation operator matrices for (i,sigma) in the natural basis,
@@ -193,7 +193,7 @@ public:
 		creationMatrix.clear();
 		for (SizeType i=0;i<block.size();i++) {
 			for (int sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++) {
-				tmpMatrix = tj1orb_.findCreationMatrices(i,sigma,natBasis);
+				tmpMatrix = TjMultiOrb_.findCreationMatrices(i,sigma,natBasis);
 				int asign= 1;
 				if (sigma>0) asign= 1;
 				typename OperatorType::Su2RelatedType su2related;
@@ -210,7 +210,7 @@ public:
 			}
 
 			// Set the operators S^+_i in the natural basis
-			tmpMatrix=tj1orb_.findSplusMatrices(i,natBasis);
+			tmpMatrix=TjMultiOrb_.findSplusMatrices(i,natBasis);
 
 			typename OperatorType::Su2RelatedType su2related;
 			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
@@ -225,13 +225,13 @@ public:
 			creationMatrix.push_back(myOp);
 
 			// Set the operators S^z_i in the natural basis
-			tmpMatrix = tj1orb_.findSzMatrices(i,natBasis);
+			tmpMatrix = TjMultiOrb_.findSzMatrices(i,natBasis);
 			typename OperatorType::Su2RelatedType su2related2;
 			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
 			creationMatrix.push_back(myOp2);
 
 			// Set ni matrices:
-			SparseMatrixType tmpMatrix = tj1orb_.findNiMatrices(0,natBasis);
+			SparseMatrixType tmpMatrix = TjMultiOrb_.findNiMatrices(0,natBasis);
 			RealType angularFactor= 1;
 			typename OperatorType::Su2RelatedType su2related3;
 			su2related3.offset = 1; //check FIXME
@@ -370,7 +370,7 @@ public:
 	                   const VectorHilbertStateType& basis,
 	                   SizeType other) const
 	{
-		tj1orb_.findElectrons(electrons,basis,other);
+		TjMultiOrb_.findElectrons(electrons,basis,other);
 	}
 
 	virtual const TargetQuantumElectronsType& targetQuantum() const
@@ -458,10 +458,10 @@ private:
 	//serializr start class TjAncillaG
 	//serializr vptr
 	//serializr normal modelParameters_
-	ParametersModelTj1Orb<RealType>  modelParameters_;
+	ParametersModelTjMultiOrb<RealType>  modelParameters_;
 	//serializr ref geometry_ end
 	const GeometryType &geometry_;
-	Tj1OrbType tj1orb_;
+	TjMultiOrbType TjMultiOrb_;
 	//serializr normal offset_
 	SizeType offset_;
 	//serializr normal spinSquaredHelper_

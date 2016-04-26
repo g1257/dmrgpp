@@ -72,23 +72,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file Tj1Orb.h
+/*! \file TjMultiOrb.h
  *
  *  Hubbard + Heisenberg
  *
  */
-#ifndef TJ_1ORB_H
-#define TJ_1ORB_H
+#ifndef DMRG_TJ_MULTIORB_H
+#define DMRG_TJ_MULTIORB_H
 #include "../Models/HubbardOneBand/ModelHubbard.h"
-#include "../Models/Tj1Orb/LinkProductTj1Orb.h"
-#include "../Models/Tj1Orb/ParametersModelTj1Orb.h"
+#include "../Models/TjMultiOrb/LinkProductTjMultiOrb.h"
+#include "../Models/TjMultiOrb/ParametersModelTjMultiOrb.h"
 #include "../Models/FeAsModel/HilbertSpaceFeAs.h"
 #include "ModelCommon.h"
 
 namespace Dmrg {
 //! t-J model for DMRG solver, uses ModelHubbard and ModelHeisenberg by containment
 template<typename ModelBaseType>
-class Tj1Orb : public ModelBaseType {
+class TjMultiOrb : public ModelBaseType {
 
 public:
 
@@ -106,7 +106,7 @@ public:
 	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef LinkProductTj1Orb<ModelHelperType> LinkProductType;
+	typedef LinkProductTjMultiOrb<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisFeAsType;
 	typedef typename HilbertBasisFeAsType::value_type HilbertStateFeAs;
@@ -129,7 +129,7 @@ public:
 
 	enum {SPIN_UP, SPIN_DOWN};
 
-	Tj1Orb(const SolverParamsType& solverParams,
+	TjMultiOrb(const SolverParamsType& solverParams,
 	       InputValidatorType& io,
 	       GeometryType const &geometry)
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
@@ -140,7 +140,7 @@ public:
 	{
 		LinkProductType::setOrbitals(modelParameters_.orbitals);
 		if (modelParameters_.orbitals > 1) {
-			PsimagLite::String str("Tj1Orb with more than 1 orbital is EXPERIMENTAL\n");
+			PsimagLite::String str("TjMultiOrb with more than 1 orbital is EXPERIMENTAL\n");
 			std::cerr<<str<<"\n";
 			std::cout<<str<<"\n";
 		}
@@ -338,7 +338,7 @@ public:
 			                    su2Related);
 		}
 
-		PsimagLite::String str("Tj1Orb: naturalOperator: no label ");
+		PsimagLite::String str("TjMultiOrb: naturalOperator: no label ");
 		str += what + "\n";
 		throw PsimagLite::RuntimeError(str);
 	}
@@ -672,10 +672,10 @@ private:
 		return jm;
 	}
 
-	//serializr start class Tj1Orb
+	//serializr start class TjMultiOrb
 	//serializr vptr
 	//serializr normal modelParameters_
-	ParametersModelTj1Orb<RealType>  modelParameters_;
+	ParametersModelTjMultiOrb<RealType>  modelParameters_;
 	//serializr ref geometry_ end
 	const GeometryType &geometry_;
 	//serializr normal offset_
@@ -685,9 +685,9 @@ private:
 	//serializr normal spinSquared_
 	SpinSquared<SpinSquaredHelper<RealType,HilbertStateType> > spinSquared_;
 
-};	//class Tj1Orb
+};	//class TjMultiOrb
 
 } // namespace Dmrg
 /*@}*/
-#endif // TJ_1ORB_H
+#endif // DMRG_TJ_MULTIORB_H
 

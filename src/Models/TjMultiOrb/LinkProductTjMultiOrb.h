@@ -71,19 +71,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file LinkProductTj1Orb.h
+/*! \file LinkProductTjMultiOrb.h
  *
  *  FIXME
  *
  */
-#ifndef LINK_PROD_TJ_1ORB_H
-#define LINK_PROD_TJ_1ORB_H
+#ifndef LINK_PROD_TJ_MULTIORB_H
+#define LINK_PROD_TJ_MULTIORB_H
 
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProductTj1Orb {
+class LinkProductTjMultiOrb {
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
 
@@ -251,10 +251,10 @@ private:
 		SizeType orbitalsSquared = orbitals_*orbitals_;
 		return dofs/orbitalsSquared;
 	}
-}; // class LinkProductTj1Orb
+}; // class LinkProductTjMultiOrb
 
 template<typename ModelHelperType>
-SizeType LinkProductTj1Orb<ModelHelperType>::orbitals_ = 1;
+SizeType LinkProductTjMultiOrb<ModelHelperType>::orbitals_ = 1;
 } // namespace Dmrg
 /*@}*/
 #endif
