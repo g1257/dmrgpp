@@ -130,8 +130,8 @@ public:
 	enum {SPIN_UP, SPIN_DOWN};
 
 	TjMultiOrb(const SolverParamsType& solverParams,
-	       InputValidatorType& io,
-	       GeometryType const &geometry)
+	           InputValidatorType& io,
+	           GeometryType const &geometry)
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
 	      geometry_(geometry),
@@ -190,15 +190,20 @@ public:
 		VectorHilbertStateType natBasis;
 		SparseMatrixType tmpMatrix;
 		VectorSizeType quantumNumbs;
-		setNaturalBasis(natBasis,quantumNumbs,block);
+		setNaturalBasis(natBasis,quantumNumbs,block,false);
 
 		SizeType dof = 2*modelParameters_.orbitals;
 		// Set the operators c^\daggger_{i\sigma} in the natural basis
 		creationMatrix.clear();
+
+		SizeType n = natBasis.size();
+		MatrixType rotation(n,n);
+		MatrixType rotationR(n,n);
+		computeRotation(rotation,rotationR,natBasis);
 		for (SizeType i=0;i<block.size();i++) {
 			for (SizeType sigma=0;sigma<dof;sigma++) {
 				// orbital changes first
-				tmpMatrix = findCreationMatrices(i,sigma,natBasis);
+				tmpMatrix = findCreationMatrices(i,sigma,natBasis,&rotation,&rotationR);
 				int asign= 1;
 				if (sigma>0) asign= 1;
 				typename OperatorType::Su2RelatedType su2related;
@@ -216,7 +221,7 @@ public:
 			}
 
 			// Set the operators S^+_i in the natural basis summed over orbitals
-			tmpMatrix = findSplusMatrices(i,natBasis);
+			tmpMatrix = findSplusMatrices(i,natBasis,&rotation,&rotationR);
 
 			typename OperatorType::Su2RelatedType su2related;
 			su2related.source.push_back(i*modelParameters_.orbitals*2);
@@ -231,13 +236,13 @@ public:
 			creationMatrix.push_back(myOp);
 
 			// Set the operators S^z_i in the natural basis summed over orbitals
-			tmpMatrix = findSzMatrices(i,natBasis);
+			tmpMatrix = findSzMatrices(i,natBasis,&rotation,&rotationR);
 			typename OperatorType::Su2RelatedType su2related2;
 			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
 			creationMatrix.push_back(myOp2);
 
 			// Set ni matrices  summed over orbitals
-			SparseMatrixType tmpMatrix = findNiMatrices(0,natBasis);
+			SparseMatrixType tmpMatrix = findNiMatrices(0,natBasis,&rotation,&rotationR);
 			RealType angularFactor= 1;
 			typename OperatorType::Su2RelatedType su2related3;
 			su2related3.offset = 1; //check FIXME
@@ -367,22 +372,7 @@ public:
 	                     VectorSizeType& q,
 	                     const VectorSizeType& block) const
 	{
-		assert(block.size()==1);
-		HilbertStateType a=0;
-		HilbertStateType total = (1 << 2*modelParameters_.orbitals);
-
-		HilbertBasisType basisTmp;
-		for (a=0;a<total;a++) basisTmp.push_back(a);
-		weedOutBasis(basisTmp);
-
-		// reorder the natural basis (needed for MULTIPLE BANDS)
-		findQuantumNumbers(q,basisTmp,1);
-		VectorSizeType iperm(q.size());
-
-		PsimagLite::Sort<VectorSizeType > sort;
-		sort.sort(q,iperm);
-		basis.clear();
-		for (a=0;a<basisTmp.size();a++) basis.push_back(basisTmp[iperm[a]]);
+		setNaturalBasis(basis,q,block,true);
 	}
 
 	virtual const TargetQuantumElectronsType& targetQuantum() const
@@ -433,12 +423,14 @@ public:
 	//! Find c^\dagger_isigma in the natural basis natBasis
 	SparseMatrixType findCreationMatrices(int i,
 	                                      int sigma,
-	                                      const VectorHilbertStateType& natBasis) const
+	                                      const VectorHilbertStateType& natBasis,
+	                                      const MatrixType* rot = 0,
+	                                      const MatrixType* rotT = 0) const
 	{
 		assert(i == 0);
 		HilbertStateType bra,ket;
 		int n = natBasis.size();
-		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
+		MatrixType cm(n,n);
 		SizeType orbitals = modelParameters_.orbitals;
 
 		for (SizeType ii=0;ii<natBasis.size();ii++) {
@@ -452,13 +444,21 @@ public:
 
 		}
 
+		if (rot && rotT) {
+			cm  = (*rot)*cm;
+			cm = cm*(*rotT);
+			truncateMatrix(cm,natBasis);
+		}
+
 		SparseMatrixType creationMatrix(cm);
 		return creationMatrix;
 	}
 
 	//! Find S^+_i in the natural basis natBasis
 	SparseMatrixType findSplusMatrices(int i,
-	                                   const VectorHilbertStateType& natBasis) const
+	                                   const VectorHilbertStateType& natBasis,
+	                                   const MatrixType* rot = 0,
+	                                   const MatrixType* rotT = 0) const
 	{
 		assert(i == 0);
 		HilbertStateType bra,ket;
@@ -482,13 +482,21 @@ public:
 			}
 		}
 
+		if (rot && rotT) {
+			cm  = (*rot)*cm;
+			cm = cm*(*rotT);
+			truncateMatrix(cm,natBasis);
+		}
+
 		SparseMatrixType operatorMatrix(cm);
 		return operatorMatrix;
 	}
 
 	//! Find S^z_i in the natural basis natBasis
 	SparseMatrixType findSzMatrices(int i,
-	                                const VectorHilbertStateType& natBasis) const
+	                                const VectorHilbertStateType& natBasis,
+	                                const MatrixType* rot = 0,
+	                                const MatrixType* rotT = 0) const
 	{
 		assert(i == 0);
 		int n = natBasis.size();
@@ -511,13 +519,21 @@ public:
 			cm(ii,ii) = 0.5*counter;
 		}
 
+		if (rot && rotT) {
+			cm  = (*rot)*cm;
+			cm = cm*(*rotT);
+			truncateMatrix(cm,natBasis);
+		}
+
 		SparseMatrixType operatorMatrix(cm);
 		return operatorMatrix;
 	}
 
 	//! Find n_i in the natural basis natBasis
 	SparseMatrixType findNiMatrices(int,
-	                                const VectorHilbertStateType& natBasis) const
+	                                const VectorHilbertStateType& natBasis,
+	                                const MatrixType* rot = 0,
+	                                const MatrixType* rotT = 0) const
 	{
 		SizeType n = natBasis.size();
 		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
@@ -532,8 +548,73 @@ public:
 			}
 		}
 
+		if (rot && rotT) {
+			cm  = (*rot)*cm;
+			cm = cm*(*rotT);
+			truncateMatrix(cm,natBasis);
+		}
+
 		SparseMatrixType creationMatrix(cm);
 		return creationMatrix;
+	}
+
+	void truncateMatrix(MatrixType& cm,const VectorHilbertStateType& natBasis) const
+	{
+		if (modelParameters_.orbitals != 2) return;
+		SizeType target = findIndexToRemove(natBasis);
+		SizeType n = cm.n_row();
+		assert(n == cm.n_col());
+		assert(n > 0);
+		n--;
+		MatrixType cm2(n,n);
+		SizeType ii = 0;
+		SizeType jj = 0;
+		for (SizeType i = 0; i < cm.n_row(); ++i) {
+			if (i == target) continue;
+			for (SizeType j = 0; j < cm.n_col(); ++j) {
+				if (j == target) continue;
+				cm2(ii,jj) = cm(i,j);
+				jj++;
+			}
+
+			ii++;
+		}
+
+		cm = cm2;
+	}
+
+	void computeRotation(MatrixType& u,
+	                     MatrixType& uT,
+	                     const VectorHilbertStateType& natBasis) const
+	{
+		if (modelParameters_.orbitals != 2) return;
+
+		int n = natBasis.size();
+		for (SizeType ii=0;ii<n;ii++) {
+			for (SizeType jj=0;jj<n;jj++) {
+				HilbertStateType ket = natBasis[ii];
+				HilbertStateType bra = natBasis[jj];
+
+				if (ket == bra) u(ii,jj)=1;
+				if (ket == 6 && bra == 9) u(ii,jj)=-1/sqrt(2.0);
+				if (ket == 9 && bra == 6) u(ii,jj)=1/sqrt(2.0);
+				if (ket == 6 && bra == 6) u(ii,jj)=1/sqrt(2.0);
+				if (ket == 9 && bra == 9) u(ii,jj)=1/sqrt(2.0);
+			}
+
+		}
+
+		transposeConjugate(uT,u);
+	}
+
+	SizeType findIndexToRemove(const VectorHilbertStateType& natBasis) const
+	{
+		SizeType target = 6;
+		for (SizeType i = 0; i < natBasis.size(); ++i) {
+			if (natBasis[i] == target) return i;
+		}
+
+		throw PsimagLite::RuntimeError("findIndexToRemove: index not found\n");
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
@@ -561,14 +642,40 @@ public:
 
 private:
 
-	void weedOutBasis(VectorHilbertStateType& basis) const
+	void setNaturalBasis(HilbertBasisType& basis,
+	                     VectorSizeType& q,
+	                     const VectorSizeType& block,
+	                     bool truncated) const
+	{
+		assert(block.size()==1);
+		HilbertStateType a=0;
+		HilbertStateType total = (1 << 2*modelParameters_.orbitals);
+
+		HilbertBasisType basisTmp;
+		for (a=0;a<total;a++) basisTmp.push_back(a);
+		weedOutBasis(basisTmp,truncated);
+
+		// reorder the natural basis (needed for MULTIPLE BANDS)
+		findQuantumNumbers(q,basisTmp,1);
+		VectorSizeType iperm(q.size());
+
+		PsimagLite::Sort<VectorSizeType > sort;
+		sort.sort(q,iperm);
+		basis.clear();
+		for (a=0;a<basisTmp.size();a++) basis.push_back(basisTmp[iperm[a]]);
+	}
+
+
+	void weedOutBasis(VectorHilbertStateType& basis, bool truncated) const
 	{
 		SizeType orbitals = modelParameters_.orbitals;
 		HilbertBasisType basisTmp;
 		VectorHilbertStateType electrons(orbitals,0);
+		if (orbitals != 2) truncated = false;
 
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			HilbertStateType ket = basis[i];
+			if (truncated && ket == 6) continue;
 			SizeType orb = 0;
 			while (ket > 0) {
 				if (ket & 1) electrons[orb]++;
