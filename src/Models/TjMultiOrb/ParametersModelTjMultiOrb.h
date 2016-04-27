@@ -88,10 +88,14 @@ struct ParametersModelTjMultiOrb {
 
 	template<typename IoInputType>
 	ParametersModelTjMultiOrb(IoInputType& io)
-	    : targetQuantum(io)
+	    : targetQuantum(io),reinterpretAndTruncate(0)
 	{
 		io.read(potentialV,"potentialV");
 		io.readline(orbitals,"Orbitals=");
+
+		try {
+			io.readline(reinterpretAndTruncate,"JHundInfinity=");
+		} catch (std::exception&) {}
 	}
 
 	template<typename SomeMemResolvType>
@@ -110,6 +114,7 @@ struct ParametersModelTjMultiOrb {
 	//serializr normal potentialV
 	typename PsimagLite::Vector<RealType>::Type potentialV;
 	SizeType orbitals;
+	SizeType reinterpretAndTruncate;
 };
 
 //! Function that prints model parameters to stream os

@@ -127,6 +127,8 @@ public:
 
 	static const int FERMION_SIGN = -1;
 
+	enum {REINTERPRET_6 = 6, REINTERPRET_9 = 9};
+
 	enum {SPIN_UP, SPIN_DOWN};
 
 	TjMultiOrb(const SolverParamsType& solverParams,
@@ -444,11 +446,7 @@ public:
 
 		}
 
-		if (rot && rotT) {
-			cm  = (*rot)*cm;
-			cm = cm*(*rotT);
-			truncateMatrix(cm,natBasis);
-		}
+		truncateMatrix(cm,rot,rotT,natBasis);
 
 		SparseMatrixType creationMatrix(cm);
 		return creationMatrix;
@@ -482,11 +480,7 @@ public:
 			}
 		}
 
-		if (rot && rotT) {
-			cm  = (*rot)*cm;
-			cm = cm*(*rotT);
-			truncateMatrix(cm,natBasis);
-		}
+		truncateMatrix(cm,rot,rotT,natBasis);
 
 		SparseMatrixType operatorMatrix(cm);
 		return operatorMatrix;
@@ -519,11 +513,7 @@ public:
 			cm(ii,ii) = 0.5*counter;
 		}
 
-		if (rot && rotT) {
-			cm  = (*rot)*cm;
-			cm = cm*(*rotT);
-			truncateMatrix(cm,natBasis);
-		}
+		truncateMatrix(cm,rot,rotT,natBasis);
 
 		SparseMatrixType operatorMatrix(cm);
 		return operatorMatrix;
@@ -548,19 +538,25 @@ public:
 			}
 		}
 
-		if (rot && rotT) {
-			cm  = (*rot)*cm;
-			cm = cm*(*rotT);
-			truncateMatrix(cm,natBasis);
-		}
+		truncateMatrix(cm,rot,rotT,natBasis);
 
 		SparseMatrixType creationMatrix(cm);
 		return creationMatrix;
 	}
 
-	void truncateMatrix(MatrixType& cm,const VectorHilbertStateType& natBasis) const
+	void truncateMatrix(MatrixType& cm,
+	                    const MatrixType* rot,
+	                    const MatrixType* rotT,
+	                    const VectorHilbertStateType& natBasis) const
 	{
-		if (modelParameters_.orbitals != 2) return;
+		if (modelParameters_.orbitals != 2 || !modelParameters_.reinterpretAndTruncate)
+			return;
+
+		if (!rot || !rotT) return;
+
+		cm  = (*rot)*cm;
+		cm = cm*(*rotT);
+
 		SizeType target = findIndexToRemove(natBasis);
 		SizeType n = cm.n_row();
 		assert(n == cm.n_col());
@@ -587,7 +583,8 @@ public:
 	                     MatrixType& uT,
 	                     const VectorHilbertStateType& natBasis) const
 	{
-		if (modelParameters_.orbitals != 2) return;
+		if (modelParameters_.orbitals != 2 || !modelParameters_.reinterpretAndTruncate)
+			return;
 
 		int n = natBasis.size();
 		for (SizeType ii=0;ii<n;ii++) {
@@ -596,10 +593,10 @@ public:
 				HilbertStateType bra = natBasis[jj];
 
 				if (ket == bra) u(ii,jj)=1;
-				if (ket == 6 && bra == 9) u(ii,jj)=-1/sqrt(2.0);
-				if (ket == 9 && bra == 6) u(ii,jj)=1/sqrt(2.0);
-				if (ket == 6 && bra == 6) u(ii,jj)=1/sqrt(2.0);
-				if (ket == 9 && bra == 9) u(ii,jj)=1/sqrt(2.0);
+				if (ket == REINTERPRET_6 && bra == REINTERPRET_9) u(ii,jj)=-1/sqrt(2.0);
+				if (ket == REINTERPRET_9 && bra == REINTERPRET_6) u(ii,jj)=1/sqrt(2.0);
+				if (ket == REINTERPRET_6 && bra == REINTERPRET_6) u(ii,jj)=1/sqrt(2.0);
+				if (ket == REINTERPRET_9 && bra == REINTERPRET_9) u(ii,jj)=1/sqrt(2.0);
 			}
 
 		}
@@ -609,7 +606,7 @@ public:
 
 	SizeType findIndexToRemove(const VectorHilbertStateType& natBasis) const
 	{
-		SizeType target = 6;
+		SizeType target = REINTERPRET_6;
 		for (SizeType i = 0; i < natBasis.size(); ++i) {
 			if (natBasis[i] == target) return i;
 		}
@@ -675,7 +672,7 @@ private:
 
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			HilbertStateType ket = basis[i];
-			if (truncated && ket == 6) continue;
+			if (truncated && ket == REINTERPRET_6) continue;
 			SizeType orb = 0;
 			while (ket > 0) {
 				if (ket & 1) electrons[orb]++;
