@@ -293,6 +293,9 @@ public:
 		SizeType numberOfSites = this->lrs().super().block().size();
 		if (site>1 && site<numberOfSites-2) return;
 		if (site == 1 && direction == EXPAND_SYSTEM) return;
+                //corner case
+		SizeType x = (site==1) ? 0 : numberOfSites-1;
+		evolve(Eg,direction,x,loopNumber);
 
 		printNormsAndWeights();
 	}
