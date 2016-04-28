@@ -381,8 +381,7 @@ private:
 			for (SizeType k = start;k < end;k++) {
 				SizeType ip = wsT.getCol(k);
 				SizeType y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + jp*nalpha);
-				assert(y >= offset && y-offset <= psiV.size());
-				//				if (y < offset || y - offset >= psiV.size()) continue;
+				if (y < offset || y - offset >= psiV.size()) continue;
 				sum2 += wsT.getValue(k)*psiV[y-offset]*weRef.getValue(k2);
 			}
 
