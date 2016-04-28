@@ -96,6 +96,10 @@ struct ParametersModelTjMultiOrb {
 		try {
 			io.readline(reinterpretAndTruncate,"JHundInfinity=");
 		} catch (std::exception&) {}
+
+		if (orbitals != 2 && reinterpretAndTruncate) {
+			throw PsimagLite::RuntimeError("JHundInfinity=1 only possible for orbitals==2\n");
+		}
 	}
 
 	template<typename SomeMemResolvType>

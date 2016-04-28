@@ -160,7 +160,7 @@ public:
 
 	SizeType hilbertSize(SizeType) const
 	{
-		return pow(3,modelParameters_.orbitals);
+		return (modelParameters_.reinterpretAndTruncate) ? 8 : pow(3,modelParameters_.orbitals);
 	}
 
 	//! find creation operator matrices for (i,sigma) in the natural basis,
@@ -564,9 +564,9 @@ public:
 		n--;
 		MatrixType cm2(n,n);
 		SizeType ii = 0;
-		SizeType jj = 0;
 		for (SizeType i = 0; i < cm.n_row(); ++i) {
 			if (i == target) continue;
+			SizeType jj = 0;
 			for (SizeType j = 0; j < cm.n_col(); ++j) {
 				if (j == target) continue;
 				cm2(ii,jj) = cm(i,j);
@@ -586,7 +586,7 @@ public:
 		if (modelParameters_.orbitals != 2 || !modelParameters_.reinterpretAndTruncate)
 			return;
 
-		int n = natBasis.size();
+		SizeType n = natBasis.size();
 		for (SizeType ii=0;ii<n;ii++) {
 			for (SizeType jj=0;jj<n;jj++) {
 				HilbertStateType ket = natBasis[ii];
@@ -672,7 +672,8 @@ private:
 
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			HilbertStateType ket = basis[i];
-			if (truncated && ket == REINTERPRET_6) continue;
+			if (truncated && modelParameters_.reinterpretAndTruncate && ket == REINTERPRET_6)
+				continue;
 			SizeType orb = 0;
 			while (ket > 0) {
 				if (ket & 1) electrons[orb]++;

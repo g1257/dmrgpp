@@ -23,7 +23,7 @@ GeometryOptions=ConstantValues
 Connectors  1 1
 
 
-Model=Tj1Orb
+Model=TjMultiOrb
 potentialV	 64 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
                 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 SolverOptions=none
