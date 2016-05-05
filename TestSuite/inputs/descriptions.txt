@@ -64,14 +64,14 @@ hence non-trivial.
 1201) Tj 1 orb with hopping = 1 and J = 0.3 and W = -0.4 dens = 0.25
 1500) Figure 1 of METTS paper
 #1550) Same as 1500 with Suzuki-Trotter
-1800 Ancilla: Entangler Hamiltonian Heisenberg 6 sites
-1801 Ancilla: Real      Hamiltonian Heisenberg 6 sites
-1810 Ancilla: Entangler Hamiltonian Heisenberg 6 sites Canonical
+1800) Ancilla: Entangler Hamiltonian Heisenberg 6 sites
+1801) Ancilla: Real      Hamiltonian Heisenberg 6 sites
+1810) Ancilla: Entangler Hamiltonian Heisenberg 6 sites Canonical
 #
-1850 Ancilla canonical: Entangler Hamiltonian t-J 6 sites
-1851 Ancilla canonical: Real      Hamiltonian t-J 6 sites
-1880 Ancilla grand canonical Hamiltonian t-J 6x2 sites: Entangler
-1881 Ancilla grand canonical Hamiltonian t-J 6x2 sites: restart real
+1850) Ancilla canonical: Entangler Hamiltonian t-J 6 sites
+1851) Ancilla canonical: Real      Hamiltonian t-J 6 sites
+1880) Ancilla grand canonical Hamiltonian t-J 6x2 sites: Entangler
+1881) Ancilla grand canonical Hamiltonian t-J 6x2 sites: restart real
 #1852 to 1899 for tj Ancilla Tests
 #1900 to 1950 for Hubbard Ancilla Tests
 #1951 to 1999 for Ancilla tests

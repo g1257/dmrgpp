@@ -35,6 +35,6 @@ TargetElectronsUp=16
 TargetElectronsDown=16
 TargetSpinTimesTwo=0
 
-   
+Orbitals=1
 Threads=2
 

@@ -2,9 +2,15 @@
 
 use strict;
 use warnings;
+use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 
-my ($min,$max) = @ARGV;
+my ($min,$max,$memory);
+GetOptions(
+'m=f' => \$min,
+'M=f' => \$max,
+'memory=i' => \$memory);
+defined($memory) or $memory=50000000;
 
 my @tests;
 Ci::getTests(\@tests);
@@ -14,6 +20,7 @@ for (my $i = 0; $i < $total; ++$i) {
 	my $n = $tests[$i];
 	next if (defined($min) and $n < $min);
 	next if (defined($max) and $n > $max);
+	print STDERR "$0: Procing test $n\n";
 	procTest($n);
 }
 sub procTest
@@ -30,6 +37,14 @@ sub procData
 	my $file2 = "oldTests/data$n.txt";
 	(-r "$file1") or return;
 	(-r "$file2") or return;
+	my $size1 = fileSize($file1);
+	my $size2 = fileSize($file2);
+	$size1 = $size2 if ($size2 > $size1);
+	if ($memory > 0 and $size2 > $memory) {
+		print STDERR "$0: File $file1 or $file2 is too big (ignoring test)\n";
+		return;
+	}
+
 	my $cmd = "diff $file1 $file2";
 	my @version = ("???","???");
 	open(PIPE,"$cmd |") or return;
@@ -109,5 +124,14 @@ sub procMemcheck
 
 	return if ($mode eq "OK");
 	print "$0: ATTENTION: TEST $n has output mode $mode\n";
+}
+
+sub fileSize
+{
+	my ($filename) = @_;
+	my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+                  $atime,$mtime,$ctime,$blksize,$blocks)
+                      = stat($filename);
+	return $size;
 }
 
