@@ -294,7 +294,7 @@ public:
 
 		helper.gather();
 
-		reducedOpImpl_.changeBasisHamiltonian(hamiltonian_);
+		reducedOpImpl_.changeBasisHamiltonian(hamiltonian_,ftransform);
 	}
 
 	void reorder(const   VectorSizeType& permutation)
@@ -378,7 +378,7 @@ public:
 	{
 		SparseMatrixType tmpMatrix;
 		assert(h2.row()==h2.col());
-		  VectorRealType ones(h2.row(),1.0);
+		VectorRealType ones(h2.row(),1.0);
 		PsimagLite::externalProduct(hamiltonian_,h2,h3.row(),ones,true);
 
 		PsimagLite::externalProduct(tmpMatrix,h3,h2.row(),ones,false);

@@ -294,12 +294,13 @@ public:
 		changeBasis(reducedOperators_[k].data);
 	}
 
-	void changeBasisHamiltonian(SparseMatrixType& hamiltonian)
+	void changeBasisHamiltonian(SparseMatrixType& hamiltonian,
+	                            const SparseMatrixType& transform)
 	{
+		
+		changeBasis(hamiltonian,transform);
 		if (useSu2Symmetry_)
 			changeBasis(reducedHamiltonian_);
-		else
-			changeBasis(hamiltonian);
 	}
 
 	void externalProduct(SizeType ind,
@@ -412,6 +413,16 @@ public:
 	}
 
 private:
+
+	void changeBasis(SparseMatrixType &v,
+	                 const SparseMatrixType& ftransform)
+	{
+		SparseMatrixType ftransformT;
+		transposeConjugate(ftransformT,ftransform);
+		SparseMatrixType tmp;
+		multiply(tmp,v,ftransform);
+		multiply(v,ftransformT,tmp);
+	}
 
 	const BasisType* thisBasis_;
 	bool useSu2Symmetry_;
