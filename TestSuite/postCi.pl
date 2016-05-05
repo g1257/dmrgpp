@@ -49,7 +49,7 @@ sub procData
 sub procMemcheck
 {
 	my ($n) = @_;
-	my $file1 = "tests/memcheck$n.txt";
+	my $file1 = "tests/output$n.txt";
 	my $mode = "OK";
 	my $extra = "UNDEFINED";
 	my %lost;
@@ -62,6 +62,18 @@ sub procMemcheck
 			last;
 		}
 
+		if (/terminate called after throwing/) {
+			$mode = "throw";
+			while (<FILE>) {
+				if (/what\(\)/) {
+					$extra = $_;
+					chomp($extra);
+					last;
+				}
+			}
+
+			last;
+		}
 		next unless (/^==/);
 		if (/invalid/i) {
 			$mode = "invalid";
@@ -84,7 +96,7 @@ sub procMemcheck
 
 	close(FILE);
 
-	if ($mode eq "FATAL") {
+	if ($mode eq "FATAL" || $mode eq "throw") {
 		print "$0: ATTENTION TEST $n couldn't run because of $extra\n";
 		return;
 	}
@@ -96,6 +108,6 @@ sub procMemcheck
 	}
 
 	return if ($mode eq "OK");
-	print "$0: ATTENTION: TEST $n has memcheck mode $mode\n";
+	print "$0: ATTENTION: TEST $n has output mode $mode\n";
 }
 

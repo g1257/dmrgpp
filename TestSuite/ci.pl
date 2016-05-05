@@ -35,8 +35,7 @@ sub procTest
 	my ($n,$tool,$submit) = @_;
 	my $valgrind = ($tool eq "") ? "" : "valgrind --tool=$tool ";
 	$valgrind .= " --callgrind-out-file=callgrind$n.out " if ($tool eq "callgrind");
-	my $term = ($tool eq "memcheck") ? "&> memcheck$n.txt" : "";
-	my $cmd = "$valgrind./dmrg -f ../inputs/input$n.inp $term";
+	my $cmd = "$valgrind./dmrg -f ../inputs/input$n.inp &> output$n.txt";
 	my $batch = createBatch($n,$cmd);
 	submitBatch($batch) if ($submit);
 }
