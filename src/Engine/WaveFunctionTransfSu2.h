@@ -347,7 +347,12 @@ private:
 			SizeType srcII = psiSrc.sector(srcI);
 			psiSrc.extract(psiV,srcII);
 			SizeType offset = psiSrc.offset(srcII);
+			SizeType qSrc = lrs.super().qn(lrs.super().partition(srcI));
 			for (SizeType ii=0;ii<psiDest.sectors();ii++) {
+				SizeType tmp = dmrgWaveStruct_.lrs.super().partition(ii);
+				SizeType qDest = dmrgWaveStruct_.lrs.super().qn(tmp);
+				if (qSrc != qDest) continue;
+
 				SizeType i0 = psiDest.sector(ii);
 				SizeType start = psiDest.offset(i0);
 				SizeType final = psiDest.effectiveSize(i0)+start;
@@ -434,7 +439,9 @@ private:
 					SizeType r = alpha + beta*nalpha;
 					for (int kI=factorsSE.getRowPtr(r);kI<factorsSE.getRowPtr(r+1);kI++) {
 						SizeType x = factorsSE.getCol(kI);
-						assert(x >= start && x < start + psiSrc.size());
+						if (x < start || x >= start + psiSrc.size())
+							continue;
+
 						x -= start;
 						sum += wsT.getValue(k)*weRef.getValue(k2)*psiSrc[x]*
 						        factorsSE.getValue(kI)*factorsE.getValue(k2I);

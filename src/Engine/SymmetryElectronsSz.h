@@ -334,7 +334,6 @@ private:
 
 		SizeType number = 1;
 		for (SizeType x = 1; x < total; ++x) number *= maxElectrons;
-		assert(q < number*maxElectrons);
 		SizeType tmp = q;
 		VectorSizeType v(total);
 		for (SizeType x = 0; x < total; ++x) {
