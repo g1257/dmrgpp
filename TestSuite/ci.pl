@@ -5,16 +5,18 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 
-my ($min,$max,$submit,$valgrind,$workdir);
+my ($min,$max,$submit,$valgrind,$workdir,$restart);
 GetOptions(
 'm=f' => \$min,
 'M=f' => \$max,
 'S' => \$submit, 
 'valgrind=s' => \$valgrind,
-'w=s' => \$workdir);
+'w=s' => \$workdir,
+'r' => \$restart);
 defined($submit) or $submit = 0;
 defined($valgrind) or $valgrind = "";
 defined($workdir) or $workdir = "tests";
+defined($restart) or $restart = 0;
 
 my $templateBatch = "batchDollarized.pbs";
 my @tests;
@@ -27,7 +29,34 @@ for (my $i = 0; $i < $total; ++$i) {
 	my $n = $tests[$i];
 	next if (defined($min) and $n < $min);
 	next if (defined($max) and $n > $max);
+	
+	my $ir = isRestart("../inputs/input$n.inp",$n);
+	if ($restart) {
+		next if (!$ir);
+	} else {
+		next if ($ir);
+	}
+
 	procTest($n,$valgrind,$submit);
+}
+
+sub isRestart
+{
+	my ($file,$n) = @_;
+	open(FILE, "$file") or return 0;
+	my $so;
+	while (<FILE>) {
+		chomp;
+		if (/SolverOptions=(.*$)/) {
+			$so = $1;
+			last;
+		}
+	}
+
+	close(FILE);
+	defined($so) or return 0;
+	if ($so =~/restart/) { return 1; }
+	return 0;
 }
 
 sub procTest
