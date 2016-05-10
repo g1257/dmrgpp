@@ -46,4 +46,5 @@ InfiniteLoopKeptStates=100
 FiniteLoops 3  5 100 0 -10 100 0 5 100 0
 TargetSzPlusConst=12
 TargetElectronsTotal=0
+Orbitals=1
 

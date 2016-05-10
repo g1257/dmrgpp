@@ -151,7 +151,7 @@ public:
 			\item[verbose] Enable verbose output
 			\item[nowft] Disable the Wave Function Transformation (WFT)
 			\item[targetnoguess] Do not guess non ground state targets
-			\item[complex] TBW
+			\item[useComplex] TBW
 			\item[inflate] TBW
 			\item[twositedmrg] Use 2-site DMRG. Default is 1-site DMRG
 			\item[noloadwft] TBW
@@ -194,7 +194,7 @@ public:
 		registerOpts.push_back("nofiniteloops");
 		registerOpts.push_back("nowft");
 		registerOpts.push_back("targetnoguess");
-		registerOpts.push_back("complex");
+		registerOpts.push_back("useComplex");
 		registerOpts.push_back("inflate");
 		registerOpts.push_back("none");
 		registerOpts.push_back("twositedmrg");

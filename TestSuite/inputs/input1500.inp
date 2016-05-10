@@ -32,7 +32,7 @@ BetaDividedByTwo=1.0
 TSPRngSeed=0
 TSPRotateBasis=1
 MettsCollapse=random
-
+GsWeight=0.0
 TSPOperator=raw
 RAW_MATRIX
 4 4
