@@ -382,9 +382,7 @@ private:
 	template<typename T1>
 	void matrixMatrix(const Matrix<T>& a, const Matrix<T>& b, const T1& t1)
 	{
-		nrow_ = a.n_row();
-		ncol_ = b.n_col();
-		data_.resize(nrow_*ncol_);
+		Matrix<T> m(a.n_row(), b.n_col());
 		assert(a.n_col()==b.n_row());
 		for (SizeType i=0;i<a.n_row();i++) {
 			for (SizeType j=0;j<b.n_col();j++) {
@@ -393,9 +391,11 @@ private:
 					sum += a(i,k) * b(k,j);
 				}
 
-				this->operator()(i,j) = sum*t1;
+				m(i,j) = sum*t1;
 			}
 		}
+
+		*this = m; // copy is needed in case a or b are *this matrix
 	}
 
 	SizeType nrow_,ncol_;
