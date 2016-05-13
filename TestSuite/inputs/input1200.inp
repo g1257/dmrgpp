@@ -29,6 +29,7 @@ Connectors
         0.0
 
 Model=TjMultiOrb
+Orbitals=1
 potentialV 16     0.0 0.0 0.0 0.0         0.0 0.0 0.0 0.0
                   0.0 0.0 0.0 0.0         0.0 0.0 0.0 0.0
 

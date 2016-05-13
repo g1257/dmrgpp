@@ -102,7 +102,7 @@ hence non-trivial. (Krylov)
 #2050) Reserved
 #2055) Reserved
 #2058) Reserved
-2060) Test on 6-site chain with U=10, standard Hubbard model.
+#2060) Test on 6-site chain with U=10, standard Hubbard model.
       Tests the density and double occupation of a time vector,
       defined as exp(iHt) h d |gs>, where h a holon and d a doblon (Suzuki-Trotter)
 2061) Test on 6-site chain with U=10, standard Hubbard model.

@@ -5,12 +5,14 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 
-my ($min,$max,$memory);
+my ($min,$max,$memory,$failed);
 GetOptions(
 'm=f' => \$min,
 'M=f' => \$max,
-'memory=i' => \$memory);
-defined($memory) or $memory=50000000;
+'memory=i' => \$memory,
+'f' => \$failed);
+defined($memory) or $memory = 50000000;
+defined($failed) or $failed = 0;
 
 my @tests;
 Ci::getTests(\@tests);
@@ -20,7 +22,6 @@ for (my $i = 0; $i < $total; ++$i) {
 	my $n = $tests[$i];
 	next if (defined($min) and $n < $min);
 	next if (defined($max) and $n > $max);
-	print STDERR "$0: Procing test $n\n";
 	procTest($n);
 }
 sub procTest
@@ -122,7 +123,8 @@ sub procMemcheck
 		print "$0: ATTENTION TEST $n $key lost ".$lost{"$key"}." bytes\n";
 	}
 
-	return if ($mode eq "OK");
+	return if ($mode eq "OK" and $failed);
+
 	print "$0: ATTENTION: TEST $n has output mode $mode\n";
 }
 
