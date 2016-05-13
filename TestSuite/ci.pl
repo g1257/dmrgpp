@@ -5,18 +5,28 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 
-my ($min,$max,$submit,$valgrind,$workdir,$restart);
+my ($min,$max,$submit,$valgrind,$workdir,$restart,$n);
 GetOptions(
 'm=f' => \$min,
 'M=f' => \$max,
 'S' => \$submit, 
 'valgrind=s' => \$valgrind,
 'w=s' => \$workdir,
-'r' => \$restart);
+'r' => \$restart,
+'n=f' => \$n);
 defined($submit) or $submit = 0;
 defined($valgrind) or $valgrind = "";
 defined($workdir) or $workdir = "tests";
 defined($restart) or $restart = 0;
+
+if (defined($n)) {
+	if (defined($min) or defined($max)) {
+		die "$0: -n cannot be used with either -m or -M\n";
+	}
+
+	$min = $n;
+	$max = $n;
+}
 
 my $templateBatch = "batchDollarized.pbs";
 my @tests;

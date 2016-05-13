@@ -9,7 +9,7 @@ hubbardU	6  10 10 10 10 10 10
 potentialV	12 0 0 0 0 0 0
      		   0 0 0 0 0 0
 Model=HubbardOneBand
-SolverOptions=TimeStepTargetting
+SolverOptions=TimeStepTargetting,vectorwithoffsets
 Version=version
 OutputFile=data2061.txt
 InfiniteLoopKeptStates=200

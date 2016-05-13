@@ -15,7 +15,7 @@ potentialV   32
 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 
 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 
 
-SolverOptions=CorrectionVectorTargetting
+SolverOptions=CorrectionVectorTargetting,vectorwithoffsets
 CorrectionA=0
 Version=1219aeb832f7990323cca0baa17ad7b87b731ea6
 OutputFile=data3007.txt
