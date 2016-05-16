@@ -192,9 +192,9 @@ public:
 	static SizeType getQuantumSector(const TargetQuantumElectronsType& targetQuantum,
 	                                 SizeType sites,
 	                                 SizeType total,
-                                     SizeType direction,
+	                                 SizeType direction,
 	                                 PsimagLite::IoSimple::Out* ioOut,
-			                         bool useSu2Symmetry)
+	                                 bool useSu2Symmetry)
 	{
 		VectorSizeType v;
 		setTargetNumbers(v,targetQuantum,sites,total,direction);
@@ -264,11 +264,23 @@ private:
 		SizeType tmp = (direction == ProgramGlobals::INFINITE) ?
 		            static_cast<SizeType>(round(jReal)) : targetQ.twiceJ;
 
-		if (targetQ.totalElectrons%2==0) {
-			if (tmp%2 != 0) tmp++;
+		PsimagLite::String str("SymmetryElectronsSz: FATAL: Impossible parameters ");
+		bool flag = false;
+		if (targetQ.totalElectrons & 1) {
+			if (!(tmp&1)) {
+				flag = true;
+				str += "electrons= " + ttos(targetQ.totalElectrons) + " is odd ";
+				str += "and 2j= " +  ttos(tmp) + " is even.";
+			}
 		} else {
-			if (tmp%2 == 0) tmp++;
+			if (tmp & 1) {
+				flag = true;
+				str += "electrons= " + ttos(targetQ.totalElectrons) + " is even ";
+				str += "and 2j= " +  ttos(tmp) + " is odd.";
+			}
 		}
+
+		if (flag) throw PsimagLite::RuntimeError(str);
 
 		t[2] = tmp;
 	}
