@@ -271,16 +271,18 @@ private:
 				flag = true;
 				str += "electrons= " + ttos(targetQ.totalElectrons) + " is odd ";
 				str += "and 2j= " +  ttos(tmp) + " is even.";
+				tmp++;
 			}
 		} else {
 			if (tmp & 1) {
 				flag = true;
 				str += "electrons= " + ttos(targetQ.totalElectrons) + " is even ";
 				str += "and 2j= " +  ttos(tmp) + " is odd.";
+				tmp++;
 			}
 		}
 
-		if (flag) throw PsimagLite::RuntimeError(str);
+		if (flag && sites == totalSites) throw PsimagLite::RuntimeError(str);
 
 		t[2] = tmp;
 	}
