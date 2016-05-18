@@ -1,0 +1,66 @@
+TotalNumberOfSites=6
+NumberOfTerms=5
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors  1 -1 
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors  1 0.1
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors  1 0.1
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors  1 -0.025
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors  1 0
+
+Model=TjAncillaC2
+potentialV	 12 0 0 0 0 0 0 
+                    0 0 0 0 0 0 
+
+SolverOptions=restart,TargetingAncilla,twositedmrg
+Version=version
+OutputFile=data1861.txt
+FiniteLoops 4
+
+5 200 0 -5 200 0 -5 200 0  5 200 0
+
+RepeatFiniteLoopsFrom=0
+RepeatFiniteLoopsTimes=202
+
+TargetElectronsUp=4
+TargetElectronsDown=4
+TargetExtra=2
+TargetExtra=2
+
+RestartFilename=data1860.txt
+
+TSPTau=0.1
+TSPTimeSteps=5
+TSPAdvanceEach=4
+TSPAlgorithm=Krylov
+TSPSites 1 3
+TSPLoops 1 6
+TSPProductOrSum=sum
+TSPEnergyForExp=-3
+TSPUseQns=1
+GsWeight=0.0
+
+TSPOperator=cooked
+COOKED_OPERATOR=i
+COOKED_EXTRA 2 0 0
+FERMIONSIGN=1
+JMVALUES 0 0
+AngularFactor=1
