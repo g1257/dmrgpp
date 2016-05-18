@@ -49,10 +49,11 @@ for (my $i = 0; $i < $total; ++$i) {
 		next if ($ir);
 	}
 
-	my $what = getPostProcess("../inputs/input$n.inp",$n);
-	print STDERR "$0: Run $n has postprocess $what\n";
-	if ($what ne "" and $postprocess) {
-		postTest($n,$what,$submit);
+	my @what = getPostProcess("../inputs/input$n.inp",$n);
+	my $whatN = scalar(@what);
+	print STDERR "$0: Run $n has $whatN postprocess lines\n" if ($whatN > 0);
+	if ($whatN > 0 and $postprocess) {
+		postTest($n,\@what,$submit);
 		next;
 	}
 
@@ -62,6 +63,20 @@ for (my $i = 0; $i < $total; ++$i) {
 sub postTest
 {
 	my ($n,$what,$submit) = @_;
+	my $whatN = scalar(@$what);
+	my $cmd = "";
+	for (my $i = 0; $i < $whatN; ++$i) {
+		$cmd .= postTestOne($n,$i,$what->[$i],$submit);
+		$cmd .= "\n";
+	}
+
+	my $batch = createBatch($n,$cmd);
+    submitBatch($batch) if ($submit);
+}
+
+sub postTestOne
+{
+	my ($n,$ind,$what,$submit) = @_;
 	# what == #ci observe arguments=something
 	my @temp = split/\s/,$what;
 	scalar(@temp) > 2 or die "$0: Not enough info in $what\n";
@@ -76,25 +91,24 @@ sub postTest
 
 	my $cmd = "./observe -f ../inputs/input$n.inp $args";
 	print STDERR "$0: postTest $cmd\n";
-	my $batch = createBatch($n,$cmd);
-	submitBatch($batch) if ($submit);
+	return $cmd;
 }
 
 sub getPostProcess
 {
 	my ($file,$n) = @_;
 	open(FILE, "$file") or return "";
-	my $what;
+	my @what;
+	my $counter = 0;
 	while (<FILE>) {
 		if (/^\#ci /) {
 			chomp;
-			$what=$_;
+			$what[$counter++]=$_;
 		}
 	}
 
 	close(FILE);
-	return "" if (!defined($what));
-	return $what;
+	return @what;
 }
 
 sub isRestart

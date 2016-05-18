@@ -48,5 +48,5 @@ potentialV 32
 0.423 0.423 0.423 0.423 0.423 0.423 0.423 0.423  
 -0.314 -0.314 -0.314 -0.314 -0.314 -0.314 -0.314 -0.314  
 
-#ci observe arguments=ss
-
+#ci observe arguments=ss,'<gs|:../inputs/sz4300.txt[1];:../inputs/sz4300.txt[3];:../inputs/sz4300.txt[6];:../inputs/sz4300.txt[7]|gs>'
+#ci observe arguments='<gs|:../inputs/sz4300.txt[1];:../inputs/sz4300.txt[3];:../inputs/sz4300.txt[6]|gs>'
