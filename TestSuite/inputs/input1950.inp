@@ -10,12 +10,12 @@ DegreesOfFreedom=1
 GeometryKind=LongRange
 GeometryOptions=none
 Connectors 6 6
-0 1 1 1 1 1
-1 0 1 1 1 1
-1 1 0 1 1 1
-1 1 1 0 1 1
-1 1 1 1 0 1
-1 1 1 1 1 0
+0 -1 -1 -1 -1 -1
+-1 0 -1 -1 -1 -1
+-1 -1 0 -1 -1 -1
+-1 -1 -1 0 -1 -1
+-1 -1 -1 -1 0 -1
+-1 -1 -1 -1 -1 0
 
 Model=HubbardAncilla
 hubbardU	6 0.0 0.0 0.0 0.0 0.0 0.0
@@ -24,7 +24,7 @@ potentialV	24 0.0 0.0 0.0 0.0 0.0 0.0
                    0.0 0.0 0.0 0.0 0.0 0.0 
                    0.0 0.0 0.0 0.0 0.0 0.0 
 
-SolverOptions=none
+SolverOptions=twositedmrg
 Version=version
 OutputFile=data1950.txt
 InfiniteLoopKeptStates=60
@@ -36,5 +36,4 @@ TargetExtra=2
 TargetExtra=2
 Orbitals=2
 FeAsMode=INT_ORBITAL0
-AncillaJ=0
 

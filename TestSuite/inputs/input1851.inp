@@ -4,22 +4,22 @@ NumberOfTerms=5
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
-Connectors  1 1 
+Connectors  1 -1
 
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
-Connectors  1 1
+Connectors  1 0.1
 
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
-Connectors  1 1
+Connectors  1 0.1
 
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
-Connectors  1 1 
+Connectors  1 -0.025
 
 DegreesOfFreedom=1
 GeometryKind=chain
@@ -29,27 +29,35 @@ Connectors  1 0
 Model=TjAncillaC
 potentialV	 12 0 0 0 0 0 0 
                     0 0 0 0 0 0 
-SolverOptions=restart,TargetingAncilla
+
+SolverOptions=restart,TargetingAncilla,twositedmrg
 Version=version
 OutputFile=data1851.txt
-InfiniteLoopKeptStates=60
+
+InfiniteLoopKeptStates=64
 FiniteLoops 4
-2 100 0 -2 100 0 -2 100 0 2 100 0
 
-TargetElectronsUp=3
-TargetElectronsDown=3
-TargetExtra=3
+5 800 0 -5 800 0 -5 800 0  5 800 0
 
-MaxMatrixRankStored=512
+RepeatFiniteLoopsFrom=0
+RepeatFiniteLoopsTimes=202
+
+TargetElectronsUp=4
+TargetElectronsDown=4
+TargetExtra=4
+
 RestartFilename=data1850.txt
-GsWeight=0.1
+
 TSPTau=0.1
 TSPTimeSteps=5
 TSPAdvanceEach=4
 TSPAlgorithm=Krylov
 TSPSites 1 3
-TSPLoops 1 0
-TSPProductOrSum=product
+TSPLoops 1 6
+TSPProductOrSum=sum
+TSPEnergyForExp=-3
+TSPUseQns=1
+GsWeight=0.0
 
 TSPOperator=cooked
 COOKED_OPERATOR=i
@@ -57,4 +65,3 @@ COOKED_EXTRA 2 0 0
 FERMIONSIGN=1
 JMVALUES 0 0
 AngularFactor=1
-

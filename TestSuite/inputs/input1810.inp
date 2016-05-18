@@ -13,7 +13,7 @@ Connectors 1 0.0
 
 DegreesOfFreedom=1
 GeometryKind=LongRange
-GeometryOptions=none
+GeometryOptions=twositedmrg
 Connectors 6 6
 0  -1 -1 -1 -1 -1
 -1  0 -1 -1 -1 -1

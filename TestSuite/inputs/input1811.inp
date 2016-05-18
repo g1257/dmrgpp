@@ -19,7 +19,7 @@ Connectors 1 0.0
 Model=HeisenbergAncillaC
 HeisenbergTwiceS=1
 
-SolverOptions=restart,TargetingAncilla
+SolverOptions=twositedmrg,restart,TargetingAncilla
 Version=version
 OutputFile=data1811.txt
 InfiniteLoopKeptStates=60

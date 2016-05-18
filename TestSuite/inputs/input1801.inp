@@ -4,21 +4,21 @@ NumberOfTerms=2
 DegreesOfFreedom=1
 GeometryKind=ladder
 GeometryOptions=none
-Connectors 10 1.0 0.0 1.0 0.0 2.0 0.0 1.0 0.0 1.0 0.0 
+Connectors 10 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0
 Connectors 6  0 0 0 0 0 0
 LadderLeg=2
 
 DegreesOfFreedom=1
 GeometryKind=ladder
-GeometryOptions=none
-Connectors 10 1.0 0.0 1.0 0.0 2.0 0.0 1.0 0.0 1.0 0.0 
+GeometryOptions=twositedmrg
+Connectors 10  -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0
 Connectors 6  0 0 0 0 0 0
 LadderLeg=2
 
 Model=Heisenberg
 HeisenbergTwiceS=1
 
-SolverOptions=none,restart,TargetingAncilla
+SolverOptions=twositedmrg,restart,TargetingAncilla
 Version=version
 OutputFile=data1801.txt
 InfiniteLoopKeptStates=64
