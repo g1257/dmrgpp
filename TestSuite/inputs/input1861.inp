@@ -33,12 +33,12 @@ potentialV	 12 0 0 0 0 0 0
 SolverOptions=restart,TargetingAncilla,twositedmrg
 Version=version
 OutputFile=data1861.txt
+InfiniteLoopKeptStates=60
 FiniteLoops 4
-
-5 200 0 -5 200 0 -5 200 0  5 200 0
+2 200 0 -2 200 0 -2 200 0  2 200 0
 
 RepeatFiniteLoopsFrom=0
-RepeatFiniteLoopsTimes=202
+RepeatFiniteLoopsTimes=2
 
 TargetElectronsUp=4
 TargetElectronsDown=4
