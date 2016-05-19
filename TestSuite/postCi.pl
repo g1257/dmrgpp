@@ -5,12 +5,34 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 
-my ($min,$max,$memory,$failed);
+my ($min,$max,$memory,$failed,$help);
 GetOptions(
 'm=f' => \$min,
 'M=f' => \$max,
 'memory=i' => \$memory,
-'f' => \$failed);
+'f' => \$failed,
+'h' => \$help);
+
+if (defined($help)) {
+	print "USAGE: $0 [options]\n";
+	print "\tIf no option is given examines all runs\n";
+	print "\t-m min\n";
+	print "\t\tMinimum test to examine is min (inclusive)\n";
+	print "\t-M max\n";
+	print "\t\tMaximum test to examine is max (inclusive)\n";
+	print "\t-n n (NOT IMPLEMENTED YET)\n";
+	print "\t\tIgnore all tests except test number n\n";
+	print "\t-w workdir (NOT IMPLEMENTED YET)\n";
+	print "\t\tUse workdir as working directory not the default of tests/\n";
+	print "\t--memory mem\n";
+	print "\t\tIgnore files larger than mem\n";
+	print "\t-f\n";
+	print "\t\tPrint info only about failed tests\n";
+	print "\t-h\n";
+	print "\t\tPrint this help and exit\n";
+	exit(0);
+}
+
 defined($memory) or $memory = 50000000;
 defined($failed) or $failed = 0;
 

@@ -5,22 +5,52 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 
-my ($min,$max,$submit,$valgrind,$workdir,$restart,$n,$postprocess);
+my ($min,$max,$submit,$valgrind,$workdir,
+    $restart,$n,$postprocess,$help);
 GetOptions(
 'm=f' => \$min,
 'M=f' => \$max,
 'S' => \$submit, 
 'valgrind=s' => \$valgrind,
 'w=s' => \$workdir,
-'r' => \$restart,
+'R' => \$restart,
 'P' => \$postprocess,
-'n=f' => \$n);
+'n=f' => \$n,
+'h' => \$help);
+
+if (defined($help)) {
+	print "USAGE: $0 [options]\n";
+	print "\tIf no option is given creates inputs and batches for all ";
+	print "no-restart tests\n";
+	print "\t-S\n";
+	print "\t\tAfter creating inputs and batches, submit them to the queue ";
+	print "using batchDollarized.pbs as template\n";
+	print "\t-m min\n";
+	print "\t\tMinimum test to run is min (inclusive)\n";
+	print "\t-M max\n";
+	print "\t\tMaximum test to run is max (inclusive)\n";
+	print "\t-n n\n";
+	print "\t\tIgnore all tests except test number n\n";
+	print "\t-w workdir\n";
+	print "\t\tUse workdir as working directory not the default of tests/\n";
+	print "\t-R\n";
+	print "\t\tRun restart tests only\n";
+	print "\t-P\n";
+	print "\t\tRun postprocess only\n";
+	print "\t--valgrind tool\n";
+	print "\t\tRun with valgrind using tool tool\n";
+	print "\t-h\n";
+	print "\t\tPrint this help and exit\n";
+	exit(0);
+}
+
 defined($submit) or $submit = 0;
 defined($valgrind) or $valgrind = "";
 defined($workdir) or $workdir = "tests";
 defined($restart) or $restart = 0;
 defined($postprocess) or $postprocess = 0;
 
+my $exact = 0;
 if (defined($n)) {
 	if (defined($min) or defined($max)) {
 		die "$0: -n cannot be used with either -m or -M\n";
@@ -28,6 +58,7 @@ if (defined($n)) {
 
 	$min = $n;
 	$max = $n;
+	$exact = 1;
 }
 
 my $templateBatch = "batchDollarized.pbs";
@@ -44,9 +75,9 @@ for (my $i = 0; $i < $total; ++$i) {
 	
 	my $ir = isRestart("../inputs/input$n.inp",$n);
 	if ($restart) {
-		next if (!$ir);
+		next if (!$ir and !$exact);
 	} else {
-		next if ($ir);
+		next if ($ir and !$exact);
 	}
 
 	my @what = getPostProcess("../inputs/input$n.inp",$n);

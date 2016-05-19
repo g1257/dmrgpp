@@ -74,7 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file CorrectionVectorFunction.h
  *
- *  This is an implementation of PRB 60, 225, Eq. (24)
+ *  This is an implementation of PRB 60, 335, Eq. (24)
  *
  */
 #ifndef CORRECTION_V_FUNCTION_H
