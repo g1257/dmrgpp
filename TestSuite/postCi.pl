@@ -6,12 +6,16 @@ use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 
 my ($min,$max,$memory,$failed,$help);
+my ($workdir,$golddir,$n);
 GetOptions(
-'m=f' => \$min,
-'M=f' => \$max,
+'m=i' => \$min,
+'M=i' => \$max,
+'n=i' => \$n,
 'memory=i' => \$memory,
 'f' => \$failed,
-'h' => \$help);
+'h' => \$help,
+'g=s' => \$golddir,
+'w=s' => \$workdir);
 
 if (defined($help)) {
 	print "USAGE: $0 [options]\n";
@@ -20,10 +24,13 @@ if (defined($help)) {
 	print "\t\tMinimum test to examine is min (inclusive)\n";
 	print "\t-M max\n";
 	print "\t\tMaximum test to examine is max (inclusive)\n";
-	print "\t-n n (NOT IMPLEMENTED YET)\n";
+	print "\t-n n\n";
 	print "\t\tIgnore all tests except test number n\n";
-	print "\t-w workdir (NOT IMPLEMENTED YET)\n";
+	print "\t-w workdir\n";
 	print "\t\tUse workdir as working directory not the default of tests/\n";
+	print "\t-g golddir\n";
+	print "\t\tUse golddir for oracles directory instead of the ";
+	print "default of oldTests/\n";
 	print "\t--memory mem\n";
 	print "\t\tIgnore files larger than mem\n";
 	print "\t-f\n";
@@ -35,6 +42,16 @@ if (defined($help)) {
 
 defined($memory) or $memory = 50000000;
 defined($failed) or $failed = 0;
+defined($workdir) or $workdir = "tests";
+defined($golddir) or $golddir = "oldTests";
+if (defined($n)) {
+	if (defined($min) or defined($max)) {
+		die "$0: -n cannot be used with either -m or -M\n";
+	}
+
+	$min = $n;
+	$max = $n;
+}
 
 my @tests;
 Ci::getTests(\@tests);
@@ -44,20 +61,21 @@ for (my $i = 0; $i < $total; ++$i) {
 	my $n = $tests[$i];
 	next if (defined($min) and $n < $min);
 	next if (defined($max) and $n > $max);
-	procTest($n);
+	procTest($n,$workdir,$golddir);
 }
+
 sub procTest
 {
-	my ($n) = @_;
-	procData($n);
+	my ($n,$workdir,$golddir) = @_;
+	procData($n,$workdir,$golddir);
 	procMemcheck($n);
 }
 
 sub procData
 {
-	my ($n) = @_;
-	my $file1 = "tests/data$n.txt";
-	my $file2 = "oldTests/data$n.txt";
+	my ($n,$workdir,$golddir) = @_;
+	my $file1 = "$workdir/data$n.txt";
+	my $file2 = "$golddir/data$n.txt";
 	(-r "$file1") or return;
 	(-r "$file2") or return;
 	my $size1 = fileSize($file1);
