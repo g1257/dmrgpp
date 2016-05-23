@@ -229,21 +229,21 @@ public:
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		setOperatorMatrices(creationMatrix,block);
 
-		if (what=="z") {
+		if (what=="naturalSz") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			SizeType x = 2*orbitals_+1;
 			return creationMatrix[x];
 		}
 
-		if (what=="+") {
+		if (what=="naturalS+") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			SizeType x = 2*orbitals_;
 			return creationMatrix[x];
 		}
 
-		if (what=="-") { // delta = c^\dagger * c^dagger
+		if (what=="naturalS-") { // delta = c^\dagger * c^dagger
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			SizeType x = 2*orbitals_;
