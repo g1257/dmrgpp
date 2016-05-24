@@ -271,12 +271,8 @@ while(<FILE>) {
 
 	print FOUT $lforEcho;
 }
-close(FILE);
 
-if ($consecutiveEmptyLine!=1) {
-	print "ERROR: No empty line at end of file\n" unless ($noerrors);
-	print FOUT "\n";
-}
+close(FILE);
 close(FOUT);
 
 printWarnings() unless ($nowarn);
