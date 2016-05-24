@@ -216,6 +216,7 @@ public:
 		registerOpts.push_back("printgeometry");
 		registerOpts.push_back("tarEnable");
 		registerOpts.push_back("tarNoDelete");
+		registerOpts.push_back("tarCoutNoDelete");
 		registerOpts.push_back("recoveryNoDelete");
 		registerOpts.push_back("normalizeTimeVectors");
 		registerOpts.push_back("neverNormalizeVectors");

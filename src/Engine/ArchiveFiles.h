@@ -121,7 +121,12 @@ public:
 		if (parameters_.options.find("tarNoDelete") != PsimagLite::String::npos)
 			return;
 
-		for (SizeType i = 1; i < files_.size(); ++i)
+		SizeType finalfile = files_.size();
+		if (parameters_.options.find("tarCoutNoDelete") !=
+		    PsimagLite::String::npos and finalfile > 0)
+		finalfile--;
+
+		for (SizeType i = 1; i < finalfile; ++i)
 			unlink(files_[i].c_str());
 	}
 
@@ -187,6 +192,10 @@ private:
 			unlink(files_[i].c_str());
 		}
 
+		if (parameters_.options.find("tarCoutNoDelete") !=
+		    PsimagLite::String::npos ||
+		    parameters_.options.find("tarNoDelete") !=
+		    PsimagLite::String::npos) return;
 		PsimagLite::String coutname = coutName(filename);
 		unlink(coutname.c_str());
 	}
