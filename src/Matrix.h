@@ -151,6 +151,13 @@ public:
 		return data_[i+j*nrow_];
 	}
 
+	bool operator==(const Matrix<T>& other) const
+	{
+		return (nrow_ == other.nrow_ &&
+		        ncol_ == other.ncol_ &&
+		        data_ == other.data_);
+	}
+
 	void resize(SizeType nrow,SizeType ncol)
 	{
 		if (nrow == nrow_ && ncol == ncol_) return;

@@ -67,16 +67,6 @@ X operator*(const vector<X,A>& v,const vector<X,A>& w)
 	return result;
 }
 
-template<typename A>
-bool operator==(const vector<SizeType,A>& v, const vector<SizeType,A>& w)
-{
-	if (v.size() != w.size()) return false;
-	for (SizeType i = 0; i < v.size(); ++i)
-		if (v[i] != w[i]) return false;
-
-	return true;
-}
-
 template<typename T1,typename T2,typename A,typename AA>
 vector<T2,A> operator*(const vector<vector<T1,A>,AA>& v1,
                        const vector<T2,A>& v2)

@@ -278,6 +278,16 @@ public:
 		values_ *= x;
 	}
 
+
+	bool operator==(const CrsMatrix<T>& op) const
+	{
+		return (nrow_ == op.nrow_ &&
+		        ncol_ == op.ncol_ &&
+		        rowptr_ == op.rowptr_ &&
+		        colind_ == op.colind_ &&
+		        values_ == op.values_);
+	}
+
 	template<typename VerySparseMatrixType>
 	typename EnableIf<!std::IsClosureLike<VerySparseMatrixType>::True,void>::Type
 	operator=(const VerySparseMatrixType& m)
@@ -430,10 +440,10 @@ public:
 	typename EnableIf<Loki::TypeTraits<T1>::isArith || IsComplexNumber<T1>::True,
 	CrsMatrix>::Type
 	operator+=(const std::ClosureOperator<std::ClosureOperator<T1,
-	                     CrsMatrix,
-	                     std::ClosureOperations::OP_MULT>,
-	                     CrsMatrix,
-	                     std::ClosureOperations::OP_MULT>& c)
+	           CrsMatrix,
+	           std::ClosureOperations::OP_MULT>,
+	           CrsMatrix,
+	           std::ClosureOperations::OP_MULT>& c)
 	{
 		CrsMatrix s;
 		multiply(s,c.r1.r2,c.r2);
