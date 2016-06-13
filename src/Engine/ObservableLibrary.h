@@ -367,7 +367,7 @@ private:
 			}
 
 			if (PsimagLite::Concurrency::root() && orbitals > 1) {
-				std::cout<<"OperatorS+S- tot:\n";
+				std::cout<<"OperatorS-S+ tot:\n";
 				std::cout<<tSmTotal;
 			}
 
