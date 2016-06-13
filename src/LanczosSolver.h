@@ -387,7 +387,7 @@ private:
 		}
 
 		OstringStream msg;
-		msg.precision(8);
+		msg.precision(os.precision());
 		String what = "lowest";
 		if (excited > 0) what = ttos(excited) + " excited";
 		msg<<"Found "<<what<<" eigenvalue= "<<energyTmp<<" after "<<iter;
