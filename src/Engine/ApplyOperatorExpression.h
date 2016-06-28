@@ -427,7 +427,14 @@ private:
 
 		if (stage_[i] == OPERATOR) checkOrder(i);
 
-		if (advanceEach > 0 && timesWithoutAdvancement >= advanceEach) {
+		PsimagLite::String options = targetHelper_.model().params().options;
+		bool advanceOnlyAtBorder = (options.find("advanceOnlyAtBorder") !=
+		        PsimagLite::String::npos);
+		SizeType sites = targetHelper_.model().geometry().numberOfSites();
+		bool weAreAtBorder = (site < 2 || site >= sites-2);
+		bool dontAdvance = (advanceOnlyAtBorder & !weAreAtBorder);
+
+		if (advanceEach > 0 && timesWithoutAdvancement >= advanceEach && !dontAdvance) {
 			stage_[i] = WFT_ADVANCE;
 			if (i==lastI) {
 				currentTime_ += targetHelper_.tstStruct().tau();

@@ -176,6 +176,7 @@ public:
 			\item[tarNoDelete] Do not delete output files after taring them.
 			\item[recoveryNoDelete] Do not delete recovery files even if run
 			\item[neverNormalizeVectors] TBW
+			\item [advanceOnlyAtBorder] Advance time only at borders
 			finishes OK
 		\end{itemize}
 		*/
@@ -224,6 +225,7 @@ public:
 		registerOpts.push_back("noSaveData");
 		registerOpts.push_back("noSaveWft");
 		registerOpts.push_back("minimizeDisk");
+		registerOpts.push_back("advanceOnlyAtBorder");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);
