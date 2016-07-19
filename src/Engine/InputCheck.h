@@ -208,9 +208,14 @@ public:
 			return true;
 		}
 
+		return false;
+	}
+
+	bool checkSimpleLabel(const PsimagLite::String& label,
+	                      SizeType line) const
+	{
 		for (SizeType i = 0; i < knownLabels_.size(); ++i)
 			if (knownLabels_[i] == label) return true;
-
 		PsimagLite::String msg("WARNING: Unknown label " + label +"\n");
 		std::cout<<msg;
 		std::cerr<<msg;
