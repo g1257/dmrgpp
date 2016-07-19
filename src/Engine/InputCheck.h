@@ -96,6 +96,89 @@ public:
 		allowedFileOptions_.push_back("DELETE");
 		allowedFileOptions_.push_back("list");
 		allowedFileOptions_.push_back("keep");
+
+		knownLabels_.push_back("TotalNumberOfSites");
+		knownLabels_.push_back("NumberOfTerms");
+		knownLabels_.push_back("DegreesOfFreedom");
+		knownLabels_.push_back("GeometryKind");
+		knownLabels_.push_back("GeometryOptions");
+		knownLabels_.push_back("Connectors");
+		knownLabels_.push_back("hubbardU");
+		knownLabels_.push_back("potentialV");
+		knownLabels_.push_back("Model");
+		knownLabels_.push_back("SolverOptions");
+		knownLabels_.push_back("Version");
+		knownLabels_.push_back("OutputFile");
+		knownLabels_.push_back("InfiniteLoopKeptStates");
+		knownLabels_.push_back("FiniteLoops");
+		knownLabels_.push_back("TargetElectronsUp");
+		knownLabels_.push_back("TargetElectronsDown");
+		knownLabels_.push_back("TargetSpinTimesTwo");
+		knownLabels_.push_back("UseSu2Symmetry");
+		knownLabels_.push_back("GsWeight");
+		knownLabels_.push_back("TSPTau");
+		knownLabels_.push_back("TSPTimeSteps");
+		knownLabels_.push_back("TSPAdvanceEach");
+		knownLabels_.push_back("TSPAlgorithm");
+		knownLabels_.push_back("TSPSites");
+		knownLabels_.push_back("TSPLoops");
+		knownLabels_.push_back("TSPProductOrSum");
+		knownLabels_.push_back("TSPUseQns");
+		knownLabels_.push_back("IsPeriodicX");
+		knownLabels_.push_back("Orbitals");
+		knownLabels_.push_back("TSPOperator");
+		knownLabels_.push_back("RAW_MATRIX");
+		knownLabels_.push_back("FERMIONSIGN");
+		knownLabels_.push_back("JMVALUES");
+		knownLabels_.push_back("AngularFactor");
+		knownLabels_.push_back("Threads");
+		knownLabels_.push_back("LadderLeg");
+		knownLabels_.push_back("linSize");
+		knownLabels_.push_back("jvalues");
+		knownLabels_.push_back("options");
+		knownLabels_.push_back("version");
+		knownLabels_.push_back("outputfile");
+		knownLabels_.push_back("QNS");
+		knownLabels_.push_back("BathSitesPerSite");
+		knownLabels_.push_back("hoppings");
+		knownLabels_.push_back("density");
+		knownLabels_.push_back("skip");
+		knownLabels_.push_back("ConnectorsX");
+		knownLabels_.push_back("ConnectorsY");
+		knownLabels_.push_back("ConnectorsBath");
+		knownLabels_.push_back("RepeatFiniteLoopsTimes");
+		knownLabels_.push_back("BetaDividedByTwo");
+		knownLabels_.push_back("TSPRngSeed");
+		knownLabels_.push_back("TSPRotateBasis");
+		knownLabels_.push_back("TSPOperatorMultiplier");
+		knownLabels_.push_back("MettsCollapse");
+		knownLabels_.push_back("HeisenbergTwiceS");
+		knownLabels_.push_back("TargetElectronsTotal");
+		knownLabels_.push_back("TargetSzPlusConst");
+		knownLabels_.push_back("RepeatFiniteLoopsFrom");
+		knownLabels_.push_back("RestartFilename");
+		knownLabels_.push_back("COOKED_OPERATOR");
+		knownLabels_.push_back("COOKED_EXTRA");
+		knownLabels_.push_back("TargetExtra");
+		knownLabels_.push_back("TSPEnergyForExp");
+		knownLabels_.push_back("AdjustQuantumNumbers");
+		knownLabels_.push_back("FeAsMode");
+		knownLabels_.push_back("MaxMatrixRankStored");
+		knownLabels_.push_back("CorrectionA");
+		knownLabels_.push_back("DynamicDmrgType");
+		knownLabels_.push_back("CorrectionVectorFreqType");
+		knownLabels_.push_back("DynamicDmrgSteps");
+		knownLabels_.push_back("DynamicDmrgEps");
+		knownLabels_.push_back("DynamicDmrgAdvanceEach");
+		knownLabels_.push_back("CorrectionVectorOmega");
+		knownLabels_.push_back("CorrectionVectorEta");
+		knownLabels_.push_back("CorrectionVectorAlgorithm");
+		knownLabels_.push_back("LongChainDistance");
+		knownLabels_.push_back("IsPeriodicY");
+		knownLabels_.push_back("TruncationTolerance");
+		knownLabels_.push_back("LanczosSteps");
+		knownLabels_.push_back("PotentialT");
+		knownLabels_.push_back("omega");
 	}
 
 	~InputCheck()
@@ -124,6 +207,13 @@ public:
 			if (vec.size()!=3*n+1)  return error1("FiniteLoops",line);
 			return true;
 		}
+
+		for (SizeType i = 0; i < knownLabels_.size(); ++i)
+			if (knownLabels_[i] == label) return true;
+
+		PsimagLite::String msg("WARNING: Unknown label " + label +"\n");
+		std::cout<<msg;
+		std::cerr<<msg;
 		return false;
 	}
 
@@ -275,7 +365,7 @@ public:
 		for (SizeType i = 0;i<totalTargets;++i) {
 			if (options.find(targets[i])!=PsimagLite::String::npos) {
 				if (targetting == "AdaptiveDynamicTargetting" &&
-				    std::string(targets[i]) == "DynamicTargetting") continue;
+				        std::string(targets[i]) == "DynamicTargetting") continue;
 				targetting = targets[i];
 				count++;
 			}
@@ -332,6 +422,7 @@ private:
 
 	OptionsReadableType* optsReadable_;
 	VectorStringType allowedFileOptions_;
+	VectorStringType knownLabels_;
 }; // class InputCheck
 } // namespace Dmrg
 
