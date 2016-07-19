@@ -328,6 +328,7 @@ public:
 			case IN_LABEL:
 				if (verbose_) std::cout<<"Read label="<<buffer<<"\n";
 				lastLabel_=buffer;
+				inputCheck_.checkSimpleLabel(lastLabel_,line_);
 				if (whatchar==EQUALSIGN) state_=IN_VALUE_TEXT;
 				else state_=IN_VALUE_NUMERIC;
 				break;
