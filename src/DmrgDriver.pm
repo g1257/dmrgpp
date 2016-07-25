@@ -116,14 +116,15 @@ foreach my $item (@$values) {
 system("echo \"-------------------\" >> out.txt");
 
 print FOUT<<EOF;
+namespace Dmrg {
 template<>
-bool Dmrg::LinkProductHeisenbergAncillaC<
+bool LinkProductHeisenbergAncillaC<
 Dmrg::ModelHelper$modelHelper<
    $lrs
   >
 >::hot_ = false;
+}
 EOF
-
 }
 
 sub isComplexOption
