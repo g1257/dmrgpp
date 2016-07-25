@@ -82,7 +82,7 @@ int main(int argc,char *argv[])
 	// sanity checks
 	if (n==0) usage(argv[0]);
 	if (maxCol==0) maxCol = 1 + SizeType(0.1*n);
-	if (std::norm(maxValue)<1e-6) maxValue = 1.0;
+	if (PsimagLite::norm(maxValue)<1e-6) maxValue = 1.0;
 	if (seed==0) seed = 3443331;
 
 	// create a random matrix:

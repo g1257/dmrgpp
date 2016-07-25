@@ -202,7 +202,7 @@ public:
 		for (SizeType i=0;i<nrow_;i++) {
 			for (SizeType j=0;j<ncol_;j++) {
 				T val = data_[i+j*nrow_];
-				if (std::norm(val)<eps) val=0.0;
+				if (PsimagLite::norm(val)<eps) val=0.0;
 				os<<val<<" ";
 			}
 			os<<"\n";
@@ -482,19 +482,19 @@ void symbolicPrint(std::ostream& os,const Matrix<T>& A)
 		for (j=0;j<A.n_col();j++) {
 
 			const T& val = A(i,j);
-			if (std::norm(val)<1e-6) {
+			if (PsimagLite::norm(val)<1e-6) {
 				os<<" 0 ";
 				continue;
 			}
 
 			SizeType k=0;
 			for (;k<values.size();k++)
-				if (std::norm(values[k]-val)<1e-6) break;
+				if (PsimagLite::norm(values[k]-val)<1e-6) break;
 			bool b1 = (k==values.size());
 
 			SizeType k2 = 0;
 			for (;k2<values.size();k2++)
-				if (std::norm(values[k2]+val)<1e-6) break;
+				if (PsimagLite::norm(values[k2]+val)<1e-6) break;
 
 			bool b2 = (k2==values.size());
 
@@ -578,7 +578,7 @@ bool isHermitian(Matrix<T> const &A,bool verbose=false)
 	if (n!=A.n_col())
 		throw RuntimeError("isHermitian called on a non-square matrix.\n");
 	for (SizeType i=0;i<n;i++) for (SizeType j=0;j<n;j++) {
-		if (std::norm(A(i,j)-PsimagLite::conj(A(j,i)))>eps) {
+		if (PsimagLite::norm(A(i,j)-PsimagLite::conj(A(j,i)))>eps) {
 			if (verbose) {
 				std::cerr<<"A("<<i<<","<<j<<")="<<A(i,j);
 				std::cerr<<" A("<<j<<","<<i<<")="<<A(j,i)<<"\n";
@@ -595,7 +595,7 @@ bool isTheIdentity(Matrix<T> const &a)
 
 	for (SizeType i=0;i<a.n_row();i++) {
 		for (SizeType j=0;j<a.n_col();j++) {
-			if (i!=j && std::norm(a(i,j))>1e-6)  {
+			if (i!=j && PsimagLite::norm(a(i,j))>1e-6)  {
 				std::cerr<<"a("<<i<<","<<j<<")="<<a(i,j)<<"\n";
 				return false;
 			}
@@ -603,7 +603,7 @@ bool isTheIdentity(Matrix<T> const &a)
 	}
 
 	for (SizeType i=0;i<a.n_row();i++)
-		if (std::norm(a(i,i)-static_cast<T>(1.0))>1e-6) return false;
+		if (PsimagLite::norm(a(i,i)-static_cast<T>(1.0))>1e-6) return false;
 
 	return true;
 }
@@ -614,7 +614,7 @@ bool isZero(Matrix<std::complex<T> > const &a)
 
 	for (SizeType i=0;i<a.n_row();i++)
 		for (SizeType j=0;j<a.n_col();j++)
-			if (norm(a(i,j))>0) return false;
+			if (PsimagLite::norm(a(i,j))>0) return false;
 	return true;
 }
 
@@ -764,7 +764,7 @@ T norm2(const Matrix<std::complex<T> >& m)
 	T sum = 0;
 	for (SizeType i=0;i<m.n_row();i++)
 		for (SizeType j=0;j<m.n_col();j++)
-			sum += std::real(PsimagLite::conj(m(i,j)) * m(i,j));
+			sum += PsimagLite::real(PsimagLite::conj(m(i,j)) * m(i,j));
 	return sum;
 }
 

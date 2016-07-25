@@ -195,7 +195,7 @@ private:
 		if (op[0] == '*') return values[0] * values[1];
 		if (op[0] == 'c') return cos(values[0]);
 		if (op[0] == 's') return sin(values[0]);
-		if (op[0] == '?') return (std::real(values[0]) > 0) ? values[1] : values[2];
+		if (op[0] == '?') return (PsimagLite::real(values[0]) > 0) ? values[1] : values[2];
 		if (op[0] == 'e') return myExponential(values[0]);
 		if (op[0] == 'l') return log(values[0]);
 		return 0.0;
@@ -212,8 +212,8 @@ private:
 	static typename EnableIf<IsComplexNumber<T>::True,
 	T>::Type myExponential(T v)
 	{
-		typename Real<T>::Type c = std::imag(v);
-		return ::exp(std::real(v))*T(cos(c),sin(c));
+		typename Real<T>::Type c = PsimagLite::imag(v);
+		return ::exp(PsimagLite::real(v))*T(cos(c),sin(c));
 	}
 
 	static SizeType findAry(PsimagLite::String op)

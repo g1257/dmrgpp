@@ -26,7 +26,17 @@ namespace PsimagLite {
 
 inline double real(double t) { return t; }
 
+inline double real(const std::complex<double>& t)
+{
+	return std::real(t);
+}
+
 inline double imag(double) { return 0.0; }
+
+inline double imag(const std::complex<double>& t)
+{
+	return std::imag(t);
+}
 
 inline double conj(double t) { return t; }
 
@@ -37,6 +47,13 @@ inline double norm(double t)
 {
 	return fabs(t);
 }
+
+template<typename T>
+inline double norm(const std::complex<T>& t)
+{
+	return std::norm(t);
+}
+
 }
 
 namespace std {

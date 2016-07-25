@@ -173,7 +173,7 @@ public:
 		for (SizeType i = 0; i < a.n_row(); i++) {
 			setRow(i,counter);
 			for (SizeType j=0;j<a.n_col();j++) {
-				if (std::norm(a(i,j))<=eps) continue;
+				if (PsimagLite::norm(a(i,j))<=eps) continue;
 				pushValue(a(i,j));
 				pushCol(j);
 				counter++;
@@ -1039,7 +1039,7 @@ bool isHermitian(const CrsMatrix<T>& A,bool=false)
 	if (A.row()!=A.col()) return false;
 	for (SizeType i=0;i<A.row();i++) {
 		for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
-			if (std::norm(A.getValue(k)-PsimagLite::conj(A.element(A.getCol(k),i)))<1e-6)
+			if (PsimagLite::norm(A.getValue(k)-PsimagLite::conj(A.element(A.getCol(k),i)))<1e-6)
 				continue;
 			assert(false);
 			return false;
@@ -1080,7 +1080,7 @@ bool isZero(const CrsMatrix<T>& A,double eps = 1e-6)
 {
 	for (SizeType i=0;i<A.row();i++) {
 		for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
-			double x = std::real(std::norm(A.getValue(k)));
+			double x = PsimagLite::real(PsimagLite::norm(A.getValue(k)));
 			if (x>eps) {
 				return false;
 			}
@@ -1098,10 +1098,10 @@ bool isDiagonal(const CrsMatrix<T>& A,double eps=1e-6,bool checkForIdentity=fals
 		for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
 			SizeType col = A.getCol(k);
 			const T& val = A.getValue(k);
-			if (checkForIdentity && col==i && std::norm(val-1.0)>eps) {
+			if (checkForIdentity && col==i && PsimagLite::norm(val-1.0)>eps) {
 				return false;
 			}
-			if (col!=i && std::norm(val)>eps) {
+			if (col!=i && PsimagLite::norm(val)>eps) {
 				return false;
 			}
 		}
@@ -1122,7 +1122,7 @@ typename Real<T>::Type norm2(const CrsMatrix<T>& m)
 	for (SizeType i=0;i<m.values_.size();i++)
 		val += PsimagLite::conj(m.values_[i])*m.values_[i];
 
-	return std::real(val);
+	return PsimagLite::real(val);
 }
 
 template<typename T>

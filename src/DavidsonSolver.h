@@ -125,7 +125,7 @@ public:
 
 		for (SizeType i=0;i<n;i++) {
 			y[i]=rng_()-0.5;
-			atmp += std::real(y[i]*PsimagLite::conj(y[i]));
+			atmp += PsimagLite::real(y[i]*PsimagLite::conj(y[i]));
 		}
 		if (mode_ & ParentType::DEBUG) {
 			computeGroundStateTest(gsEnergy,z,y);
@@ -190,12 +190,12 @@ private:
 		if (m==0) return;
 		// select a value for k less than 1
 		RealType k = 0.25;
-		RealType tauin= std::real(t*t);
+		RealType tauin= PsimagLite::real(t*t);
 		for (SizeType i=0;i<m;i++) {
 			ComplexOrRealType tmp = scalarProduct(v[i],t);
 			t=t-tmp*t;
 		}
-		if (std::real(t*t)/tauin>k) return;
+		if (PsimagLite::real(t*t)/tauin>k) return;
 		for (SizeType i=0;i<m;i++) {
 			ComplexOrRealType tmp = scalarProduct(v[i],t);
 			t=t-tmp*v[i];

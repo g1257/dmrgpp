@@ -170,7 +170,7 @@ public:
 		for (SizeType omegaIndex = 0; omegaIndex < params.numberOfMatsubaras; ++omegaIndex) {
 			ComplexType z(params.delta, matsubara(omegaIndex,params));
 			ComplexType res = iOfOmega(z,Eg_,isign_);
-			std::pair<RealType,ComplexType> p(std::imag(z),res);
+			std::pair<RealType,ComplexType> p(PsimagLite::imag(z),res);
 			result[counter++] = p;
 			if (counter>=result.size()) break;
 		}

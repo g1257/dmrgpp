@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
 		RealType time = wbegin + wstep*i;
 		std::cout<<time<<" ";
 		for (SizeType j=0;j<result[i].size();j++)
-			std::cout<<std::real(result[i][j])<<" ";
+			std::cout<<PsimagLite::real(result[i][j])<<" ";
 		std::cout<<"\n";
 	}
 }

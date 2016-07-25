@@ -208,7 +208,7 @@ public:
 
 		atmp = 0.0;
 		for (SizeType i = 0; i < mat_.rank(); i++)
-			atmp += std::real(y[i]*PsimagLite::conj(y[i]));
+			atmp += PsimagLite::real(y[i]*PsimagLite::conj(y[i]));
 
 		for (SizeType i = 0; i < mat_.rank(); i++) {
 			VectorElementType tmp = val*z[i] - x[i];
@@ -218,7 +218,7 @@ public:
 
 		btmp = 0.0;
 		for (SizeType i = 0; i < mat_.rank(); i++)
-			btmp += std::real(y[i]*PsimagLite::conj(x[i]));
+			btmp += PsimagLite::real(y[i]*PsimagLite::conj(x[i]));
 	}
 
 	SizeType steps() const {return params_.steps; }

@@ -147,7 +147,7 @@ public:
 
 		for (SizeType i=0;i<n;i++) {
 			y[i]=rng_()-0.5;
-			atmp += std::real(y[i]*PsimagLite::conj(y[i]));
+			atmp += PsimagLite::real(y[i]*PsimagLite::conj(y[i]));
 		}
 		if (mode_ & DEBUG) {
 			computeExcitedStateTest(gsEnergy,z,y,0);
@@ -174,7 +174,7 @@ public:
 		RealType atmp=0.0;
 		for (SizeType i=0;i<n;i++) {
 			y[i]=initialVector[i];
-			atmp += std::real(y[i]*PsimagLite::conj(y[i]));
+			atmp += PsimagLite::real(y[i]*PsimagLite::conj(y[i]));
 		}
 		atmp = 1.0 / sqrt (atmp);
 		for (SizeType i = 0; i < mat_.rank(); i++) y[i] *= atmp;
@@ -210,7 +210,7 @@ public:
 
 		for (SizeType i=0;i<n;i++) {
 			y[i]=rng_()-0.5;
-			atmp += std::real(y[i]*PsimagLite::conj(y[i]));
+			atmp += PsimagLite::real(y[i]*PsimagLite::conj(y[i]));
 		}
 		if (mode_ & DEBUG) {
 			computeExcitedStateTest(gsEnergy,z,y,0);
@@ -239,7 +239,7 @@ public:
 		RealType atmp=0.0;
 		for (SizeType i=0;i<n;i++) {
 			y[i]=initialVector[i];
-			atmp += std::real(y[i]*PsimagLite::conj(y[i]));
+			atmp += PsimagLite::real(y[i]*PsimagLite::conj(y[i]));
 		}
 		atmp = 1.0 / sqrt (atmp);
 		for (SizeType i = 0; i < mat_.rank(); i++) y[i] *= atmp;
@@ -296,7 +296,7 @@ public:
 		RealType atmp = 0;
 		for (SizeType i = 0; i < mat_.rank(); i++) {
 			x[i] = 0;
-			atmp += std::real(y[i]*PsimagLite::conj(y[i]));
+			atmp += PsimagLite::real(y[i]*PsimagLite::conj(y[i]));
 		}
 
 		for (SizeType i = 0; i < y.size(); i++) y[i] /= sqrt(atmp);

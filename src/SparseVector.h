@@ -281,7 +281,7 @@ namespace PsimagLite {
 				for (SizeType i=1;i<indices_.size();i++) {
 
 					if (indices_[i]!=prevIndex) {
-						if (std::norm(sum)>1e-16) {
+						if (PsimagLite::norm(sum)>1e-16) {
 							values_.push_back(sum);
 							indices.push_back(prevIndex);
 						}
@@ -291,7 +291,7 @@ namespace PsimagLite {
 						sum += values[i];
 					}
 				}
-				if (std::norm(sum)>1e-16) {
+				if (PsimagLite::norm(sum)>1e-16) {
 					values_.push_back(sum);
 					indices.push_back(prevIndex);
 				}

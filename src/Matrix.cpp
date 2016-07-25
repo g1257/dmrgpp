@@ -168,7 +168,7 @@ void geev(char jobvl,
 
 	checkBlasStatus(info,"zgeev_");
 
-	lwork = static_cast<int>(std::real(work[0]));
+	lwork = static_cast<int>(PsimagLite::real(work[0]));
 	work.resize(lwork,0.0);
 
 	zgeev_(&jobvl,
@@ -202,7 +202,7 @@ void inverse(Matrix<std::complex<double> > &m)
 	int lwork = -1;
 	Vector<std::complex<double> >::Type work(2);
 	psimag::LAPACK::zgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
-	lwork = static_cast<int>(std::real(work[0]));
+	lwork = static_cast<int>(PsimagLite::real(work[0]));
 	work.resize(lwork+2);
 	psimag::LAPACK::zgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
 	String s = "zgetri_ failed\n";

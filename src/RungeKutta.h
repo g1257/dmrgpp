@@ -107,7 +107,7 @@ public:
 	             RealType t,
 	             const ArrayType& y0) const
 	{
-		SizeType N = static_cast<SizeType>(std::real((t - t0)/h_));
+		SizeType N = static_cast<SizeType>(PsimagLite::real((t - t0)/h_));
 		solve(result,t0,N,y0);
 	}
 

@@ -212,7 +212,7 @@ public:
 		mat_.matrixVectorProduct (x, y); // x+= Hy
 
 		for (SizeType i = 0; i < x.size(); i++)
-			if (std::real(x[i]*PsimagLite::conj(x[i]))!=0) return false;
+			if (PsimagLite::real(x[i]*PsimagLite::conj(x[i]))!=0) return false;
 
 		for (SizeType j=0; j < data_->n_col(); j++) {
 			for (SizeType i = 0; i < mat_.rank(); i++) {
@@ -233,11 +233,11 @@ public:
 
 		atmp = 0.0;
 		for (SizeType i = 0; i < mat_.rank(); i++)
-			atmp += std::real(y[i]*PsimagLite::conj(x[i]));
+			atmp += PsimagLite::real(y[i]*PsimagLite::conj(x[i]));
 		btmp = 0.0;
 		for (SizeType i = 0; i < mat_.rank(); i++) {
 			x[i] -= atmp * y[i];
-			btmp += std::real(x[i]*PsimagLite::conj(x[i]));
+			btmp += PsimagLite::real(x[i]*PsimagLite::conj(x[i]));
 		}
 
 		btmp = sqrt (btmp);
@@ -345,12 +345,12 @@ private:
 
 		for (SizeType p = 0; p <= n; ++p)
 			for (SizeType q = 0; q <= n; ++q)
-				nn += std::real(v[p] * v[q] * w(p,q));
+				nn += PsimagLite::real(v[p] * v[q] * w(p,q));
 		assert(nn>0);
 		nn = 1.0/sqrt(nn);
 
 		for (SizeType p = 0; p <= n; ++p)
-			s(p,n) = std::real(v[p]) * nn;
+			s(p,n) = PsimagLite::real(v[p]) * nn;
 
 	}
 
