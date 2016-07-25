@@ -212,7 +212,7 @@ public:
 		mat_.matrixVectorProduct (x, y); // x+= Hy
 
 		for (SizeType i = 0; i < x.size(); i++)
-			if (std::real(x[i]*std::conj(x[i]))!=0) return false;
+			if (std::real(x[i]*PsimagLite::conj(x[i]))!=0) return false;
 
 		for (SizeType j=0; j < data_->n_col(); j++) {
 			for (SizeType i = 0; i < mat_.rank(); i++) {
@@ -233,11 +233,11 @@ public:
 
 		atmp = 0.0;
 		for (SizeType i = 0; i < mat_.rank(); i++)
-			atmp += std::real(y[i]*std::conj(x[i]));
+			atmp += std::real(y[i]*PsimagLite::conj(x[i]));
 		btmp = 0.0;
 		for (SizeType i = 0; i < mat_.rank(); i++) {
 			x[i] -= atmp * y[i];
-			btmp += std::real(x[i]*std::conj(x[i]));
+			btmp += std::real(x[i]*PsimagLite::conj(x[i]));
 		}
 
 		btmp = sqrt (btmp);
@@ -303,7 +303,7 @@ private:
 		SizeType n = data_->n_row();
 
 		for (SizeType i = 0; i < n; ++i) {
-			sum += std::conj(data_->operator ()(i,ind)) * data_->operator ()(i,jnd);
+			sum += PsimagLite::conj(data_->operator ()(i,ind)) * data_->operator ()(i,jnd);
 		}
 
 		return sum;

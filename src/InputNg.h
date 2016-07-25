@@ -106,7 +106,7 @@ class InputNg {
 
 	public:
 
-		bool operator()(const String& x1,const String& x2)
+		bool operator()(const String& x1,const String& x2) const
 		{
 			PairType p1 = mysplit(x1);
 			PairType p2 = mysplit(x2);

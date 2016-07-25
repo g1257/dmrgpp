@@ -42,13 +42,6 @@ public:
 	  zeroes_(0),
 	  lenOfZeroes_(0)
 	{
-		RefFunctionType f = &std::conj;
-		refTextPtr_ = (long int)(*f);
-		memResolv(ptr);
-		finish();
-		const unsigned char* ptr2 = reinterpret_cast<const unsigned char*>(ptr);
-		garbage_.push_back(const_cast<unsigned char*>(ptr2));
-		garbageSize_.push_back(0);
 	}
 
 	MemResolv(String filename, String label)
@@ -652,8 +645,8 @@ private:
 	void adjustPointers(unsigned char* ptr,
 	                    long int offset) const
 	{
-		VectorPairType offsetsForHoles(0);
-		RefFunctionType f = &std::conj;
+		/*VectorPairType offsetsForHoles(0);
+		RefFunctionType f = &PsimagLite::conj;
 		long int offsetText = (long int)(*f);
 		std::cout<<offsetText<<"\n";
 		offsetText -= refTextPtr_;
@@ -674,7 +667,7 @@ private:
 				adjustPointer(ptr,len,offsetText,0);
 			ptr += len;
 
-		}
+		}*/
 	}
 
 	void adjustPointer(unsigned char* ptr,

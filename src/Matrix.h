@@ -578,7 +578,7 @@ bool isHermitian(Matrix<T> const &A,bool verbose=false)
 	if (n!=A.n_col())
 		throw RuntimeError("isHermitian called on a non-square matrix.\n");
 	for (SizeType i=0;i<n;i++) for (SizeType j=0;j<n;j++) {
-		if (std::norm(A(i,j)-std::conj(A(j,i)))>eps) {
+		if (std::norm(A(i,j)-PsimagLite::conj(A(j,i)))>eps) {
 			if (verbose) {
 				std::cerr<<"A("<<i<<","<<j<<")="<<A(i,j);
 				std::cerr<<" A("<<j<<","<<i<<")="<<A(j,i)<<"\n";
@@ -695,7 +695,7 @@ Matrix<T> multiplyTransposeConjugate(const Matrix<T>& O1,
 		for (SizeType s=0;s<n;s++)
 			for (SizeType t=0;t<n;t++)
 				for (SizeType w=0;w<n;w++)
-					ret(s,t) += std::conj(O1(w,s))*O2(w,t);
+					ret(s,t) += PsimagLite::conj(O1(w,s))*O2(w,t);
 	} else {
 		for (SizeType s=0;s<n;s++)
 			for (SizeType t=0;t<n;t++)
@@ -711,7 +711,7 @@ void transposeConjugate(Matrix<T>& m2,const Matrix<T>& m)
 	m2.resize(m.n_col(),m.n_row());
 	for (SizeType i=0;i<m2.n_row();i++)
 		for (SizeType j=0;j<m2.n_col();j++)
-			m2(i,j)=std::conj(m(j,i));
+			m2(i,j)=PsimagLite::conj(m(j,i));
 
 }
 
@@ -721,7 +721,7 @@ Matrix<T> transposeConjugate(const Matrix<T>& A)
 	Matrix<T> ret(A.n_col(),A.n_row());
 	for (SizeType i=0;i<A.n_col();i++)
 		for (SizeType j=0;j<A.n_row();j++)
-			ret(i,j)=std::conj(A(j,i));
+			ret(i,j)=PsimagLite::conj(A(j,i));
 	return ret;
 }
 
@@ -739,7 +739,7 @@ void exp(Matrix<T>& m)
 				typename Real<T>::Type alpha = eigs[k];
 				T tmp = 0.0;
 				expComplexOrReal(tmp,alpha);
-				sum+= std::conj(m(i,k))*m(j,k)*tmp;
+				sum+= PsimagLite::conj(m(i,k))*m(j,k)*tmp;
 			}
 			expm(i,j) = sum;
 		}
@@ -764,7 +764,7 @@ T norm2(const Matrix<std::complex<T> >& m)
 	T sum = 0;
 	for (SizeType i=0;i<m.n_row();i++)
 		for (SizeType j=0;j<m.n_col();j++)
-			sum += std::real(std::conj(m(i,j)) * m(i,j));
+			sum += std::real(PsimagLite::conj(m(i,j)) * m(i,j));
 	return sum;
 }
 

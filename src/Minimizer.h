@@ -218,7 +218,7 @@ private:
 		RealType sum = 0;
 		for (int i = 0; i < df->size; ++i) {
 			RealType tmp = gsl_vector_get(df,i);
-			sum += std::conj(tmp) * tmp;
+			sum += PsimagLite::conj(tmp) * tmp;
 		}
 
 		gsl_vector_free (df);

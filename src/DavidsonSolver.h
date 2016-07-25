@@ -125,7 +125,7 @@ public:
 
 		for (SizeType i=0;i<n;i++) {
 			y[i]=rng_()-0.5;
-			atmp += std::real(y[i]*std::conj(y[i]));
+			atmp += std::real(y[i]*PsimagLite::conj(y[i]));
 		}
 		if (mode_ & ParentType::DEBUG) {
 			computeGroundStateTest(gsEnergy,z,y);

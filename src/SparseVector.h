@@ -245,7 +245,7 @@ namespace PsimagLite {
 					for (;j<v.indices_.size();j++) {
 						if (v.indices_[j]<index) continue;
 						if (v.indices_[j]>index) break;
-						if (v.indices_[j]==index) sum += values_[i] * std::conj(v.values_[j]);
+						if (v.indices_[j]==index) sum += values_[i] * PsimagLite::conj(v.values_[j]);
 					}
 					if (j>0) j--;
 				}
@@ -353,7 +353,7 @@ namespace PsimagLite {
 	inline FieldType norm(const SparseVector<FieldType>& v)
 	{
 		FieldType sum=0;
-		for (SizeType i=0;i<v.indices();i++) sum += std::conj(v.value(i))*v.value(i);
+		for (SizeType i=0;i<v.indices();i++) sum += PsimagLite::conj(v.value(i))*v.value(i);
 		return sqrt(sum);
 	}
 
@@ -361,7 +361,7 @@ namespace PsimagLite {
 	inline FieldType norm(const SparseVector<std::complex<FieldType> >& v)
 	{
 		std::complex<FieldType> sum=0;
-		for (SizeType i=0;i<v.indices();i++) sum += std::conj(v.value(i))*v.value(i);
+		for (SizeType i=0;i<v.indices();i++) sum += PsimagLite::conj(v.value(i))*v.value(i);
 		return real(sqrt(sum));
 	}
 

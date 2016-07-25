@@ -22,7 +22,7 @@ Please see full open source license included in file LICENSE.
 #include <complex>
 #include "../loki/TypeTraits.h"
 
-namespace std {
+namespace PsimagLite {
 
 inline double real(double t) { return t; }
 
@@ -30,11 +30,16 @@ inline double imag(double) { return 0.0; }
 
 inline double conj(double t) { return t; }
 
+template<typename T>
+inline std::complex<T> conj(const std::complex<T>& t) { return std::conj(t); }
+
 inline double norm(double t)
 {
 	return fabs(t);
 }
+}
 
+namespace std {
 inline std::complex<double> operator*(int x,const std::complex<double>& y)
 {
 	return std::complex<double>(real(y)*x,imag(y)*x);

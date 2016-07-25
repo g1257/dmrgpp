@@ -857,7 +857,7 @@ void transposeConjugate(CrsMatrix<S>  &B,CrsMatrix<S2> const &A)
 		for (SizeType j=0;j<col[i].size();j++) {
 			if (value[i][j]==static_cast<S>(0.0)) continue;
 			B.pushCol(col[i][j]);
-			B.pushValue(std::conj(value[i][j]));
+			B.pushValue(PsimagLite::conj(value[i][j]));
 			counter++;
 		}
 	}
@@ -899,7 +899,7 @@ void transposeConjugate(CrsMatrix<S>& B,
 		B.setRow(i,counter);
 		for (SizeType j=0;j<col[i].size();j++) {
 			B.setCol(counter,col[i][j]);
-			B.setValues(counter,std::conj(value[i][j]));
+			B.setValues(counter,PsimagLite::conj(value[i][j]));
 			counter++;
 		}
 	}
@@ -1039,7 +1039,7 @@ bool isHermitian(const CrsMatrix<T>& A,bool=false)
 	if (A.row()!=A.col()) return false;
 	for (SizeType i=0;i<A.row();i++) {
 		for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
-			if (std::norm(A.getValue(k)-std::conj(A.element(A.getCol(k),i)))<1e-6)
+			if (std::norm(A.getValue(k)-PsimagLite::conj(A.element(A.getCol(k),i)))<1e-6)
 				continue;
 			assert(false);
 			return false;
@@ -1120,7 +1120,7 @@ typename Real<T>::Type norm2(const CrsMatrix<T>& m)
 {
 	T val = 0;
 	for (SizeType i=0;i<m.values_.size();i++)
-		val += std::conj(m.values_[i])*m.values_[i];
+		val += PsimagLite::conj(m.values_[i])*m.values_[i];
 
 	return std::real(val);
 }

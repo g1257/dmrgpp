@@ -63,7 +63,7 @@ template<typename X,typename A>
 X operator*(const vector<X,A>& v,const vector<X,A>& w)
 {
 	X result=0;
-	for (SizeType i=0;i<v.size();i++) result += v[i]*conj(w[i]);
+	for (SizeType i=0;i<v.size();i++) result += v[i]*PsimagLite::conj(w[i]);
 	return result;
 }
 
