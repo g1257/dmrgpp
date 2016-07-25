@@ -219,10 +219,10 @@ private:
 
 		VectorWithOffsetType dest;
 		collapseVector(dest,dest2,direction,volumeOfIndexFixed,volumeOfNk,border);
-		RealType x = std::norm(dest);
+		RealType x = norm(dest);
 
 		if (x<1e-6 && dest.sectors()==0) {
-			std::cout<<"norm of dest2= "<<std::norm(dest2)<<"\n";
+			std::cout<<"norm of dest2= "<<norm(dest2)<<"\n";
 			dest2 = dest;
 			return;
 		}
@@ -248,7 +248,7 @@ private:
 		dest.collapseSectors();
 
 		dest2 =  dest;
-		std::cerr<<" Norm of the collapsed="<<std::norm(dest2)<<"\n";
+		std::cerr<<" Norm of the collapsed="<<norm(dest2)<<"\n";
 	}
 
 	void collapseVector(VectorWithOffsetType& w, // <<---- CPS
@@ -432,7 +432,7 @@ private:
 	                 SizeType volumeOfNk,
 	                 bool border) const
 	{
-		RealType tmp = std::norm(src);
+		RealType tmp = norm(src);
 		if (fabs(tmp-1.0)>1e-3)
 			std::cerr<<"probability "<<tmp<<"\n";
 
@@ -440,7 +440,7 @@ private:
 		for (SizeType alpha=0;alpha<volumeOfNk;alpha++) {
 			VectorWithOffsetType dest;
 			collapseVector(dest,src,direction,alpha,volumeOfNk,border);
-			RealType x = std::norm(dest);
+			RealType x = norm(dest);
 			sum += x*x;
 			p[alpha] = x*x;
 		}

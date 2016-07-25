@@ -284,7 +284,7 @@ private:
 		}
 		setWeights();
 		if (lastLanczosVector_==1 && fabs(weightForContinuedFraction_)<1e-6)
-			weightForContinuedFraction_ = std::real(this->common().targetVectors()[0]*this->common().targetVectors()[0]);
+			weightForContinuedFraction_ = PsimagLite::real(this->common().targetVectors()[0]*this->common().targetVectors()[0]);
 	}
 
 	void setLanczosVectors(SizeType i0,
@@ -320,7 +320,7 @@ private:
 		if (norm1<1e-6) {
 			lanczosSolver.push(ab_,a,b);
 			h.matrixVectorProduct(x,y);
-			a = std::real(x*y);
+			a = PsimagLite::real(x*y);
 			lanczosSolver.push(ab_,a,b);
 			done_=true;
 			return;
@@ -365,7 +365,7 @@ private:
 		RealType sum = 0;
 		for (SizeType i=0;i<v.size();i++) {
 			if (i>=w.size()) continue;
-			RealType tmp = std::real(v[i]*w[i]);
+			RealType tmp = PsimagLite::real(v[i]*w[i]);
 			sum += tmp*tmp;
 		}
 		return sum;

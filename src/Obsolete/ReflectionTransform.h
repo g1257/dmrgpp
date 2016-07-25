@@ -224,7 +224,7 @@ private:
 			for (int k=C.getRowPtr(i);k<C.getRowPtr(i+1);k++) {
 				SizeType col = C.getCol(k);
 				if (col==i) {
-					return std::real(C.getValue(k));
+					return PsimagLite::real(C.getValue(k));
 				}
 			}
 		}
@@ -311,7 +311,7 @@ private:
 				ComplexOrRealType val =  Q1.getValue(k);
 				Q.pushValue(val);
 				Q.pushCol(col);
-				sum[i] += std::conj(val)*val;
+				sum[i] += PsimagLite::conj(val)*val;
 				counter++;
 			}
 			// add Qm
@@ -321,7 +321,7 @@ private:
 				ComplexOrRealType val =  Qm.getValue(k);
 				Q.pushValue(val);
 				Q.pushCol(Qm.getCol(k)+plusSector_);
-				sum[i] += std::conj(val)*val;
+				sum[i] += PsimagLite::conj(val)*val;
 				counter++;
 			}
 		}
@@ -436,7 +436,7 @@ private:
 				assert(SizeType(col)<ipPosOrNeg.size());
 				T1final.pushCol(col);
 				T1final.pushValue(val);
-				sum[i] += std::conj(val)*val;
+				sum[i] += PsimagLite::conj(val)*val;
 				counter++;
 			}
 		}

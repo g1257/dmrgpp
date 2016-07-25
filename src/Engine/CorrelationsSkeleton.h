@@ -321,7 +321,7 @@ private:
 					SizeType u2 = O2.getCol(k2);
 					SizeType r2 = helper_.leftRightSuper(threadId).left().
 					        permutationInverse(e2 + u2*ni);
-					value[r2] += std::conj(O1.getValue(k))*O2.getValue(k2)*f;
+					value[r2] += PsimagLite::conj(O1.getValue(k))*O2.getValue(k2)*f;
 					col[r2] = 1;
 				}
 			}
@@ -380,7 +380,7 @@ private:
 					        permutationInverse(e2 + u2*nj);
 					assert(r2<eprime);
 					col[r2] = 1;
-					value[r2] += O2.getValue(k)*std::conj(O1.getValue(k2))*f;
+					value[r2] += O2.getValue(k)*PsimagLite::conj(O1.getValue(k2))*f;
 				}
 			}
 			for (SizeType i=0;i<col.size();i++) {
@@ -563,7 +563,7 @@ private:
 					        permutationInverse(r2+eta*A.col());
 					if (t2<offset || t2>=total) continue;
 					sum += Acrs.getValue(k)*vec1.slowAccess(t)*
-					        std::conj(vec2.slowAccess(t2));
+					        PsimagLite::conj(vec2.slowAccess(t2));
 				}
 			}
 		}
@@ -601,7 +601,7 @@ private:
 					        permutationInverse(r+eta2*leftSize);
 					if (t2<offset || t2>=total) continue;
 					sum += Acrs.getValue(k)*vec1.slowAccess(t)*
-					        std::conj(vec2.slowAccess(t2))*sign;
+					        PsimagLite::conj(vec2.slowAccess(t2))*sign;
 				}
 			}
 		}
@@ -671,9 +671,9 @@ private:
 						SizeType t2 = helper_.leftRightSuper(threadId).super().
 						        permutationInverse(rprime+eta2*leftSize);
 						if (t2<offset || t2>=total) continue;
-						sum += std::conj(Acrs.getValue(k))*Bcrs.getValue(k2)*
+						sum += PsimagLite::conj(Acrs.getValue(k))*Bcrs.getValue(k2)*
 						        vec1.slowAccess(t)*
-						        std::conj(vec2.slowAccess(t2))*sign;
+						        PsimagLite::conj(vec2.slowAccess(t2))*sign;
 					}
 				}
 			}
@@ -731,9 +731,9 @@ private:
 						SizeType t2 = helper_.leftRightSuper(threadId).super().
 						        permutationInverse(eta2+rprime*leftSize);
 						if (t2<offset || t2>=total) continue;
-						sum += std::conj(Acrs.getValue(k))*Bcrs.getValue(k2)*
+						sum += PsimagLite::conj(Acrs.getValue(k))*Bcrs.getValue(k2)*
 						        vec1.slowAccess(t)*
-						        std::conj(vec2.slowAccess(t2))*sign;
+						        PsimagLite::conj(vec2.slowAccess(t2))*sign;
 					}
 				}
 			}
@@ -803,10 +803,10 @@ private:
 							SizeType t2 = helper_.leftRightSuper(threadId).super().
 							        permutationInverse(rprime+eta2*leftSize);
 							if (t2<offset || t2>=total) continue;
-							sum += std::conj(A1crs.getValue(k1)*A2crs.getValue(k2))*
+							sum += PsimagLite::conj(A1crs.getValue(k1)*A2crs.getValue(k2))*
 							        Bcrs.getValue(k3)*
 							        vec1.slowAccess(t)*
-							        std::conj(vec2.slowAccess(t2))*sign;
+							        PsimagLite::conj(vec2.slowAccess(t2))*sign;
 						}
 					}
 				}
@@ -819,8 +819,8 @@ private:
 	FieldType resultDivided(FieldType sum, const VectorWithOffsetType& vec) const
 	{
 		FieldType tmp = vec*vec;
-		RealType norma2 = std::real(tmp);
-		assert(fabs(norma2)>1e-10 && fabs(std::imag(tmp))<1e-6);
+		RealType norma2 = PsimagLite::real(tmp);
+		assert(fabs(norma2)>1e-10 && fabs(PsimagLite::imag(tmp))<1e-6);
 		return sum/norma2;
 	}
 

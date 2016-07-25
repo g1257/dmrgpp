@@ -328,10 +328,10 @@ public:
 	}
 
 	template<typename FieldType2>
-	friend FieldType2 std::norm(const Dmrg::VectorWithOffset<FieldType2>& v);
+	friend FieldType2 norm(const Dmrg::VectorWithOffset<FieldType2>& v);
 
 	template<typename FieldType2>
-	friend FieldType2 std::norm(const Dmrg::VectorWithOffset<std::complex<FieldType2> >& v);
+	friend FieldType2 norm(const Dmrg::VectorWithOffset<std::complex<FieldType2> >& v);
 
 	template<typename FieldType2>
 	friend FieldType2 operator*(const Dmrg::VectorWithOffset<FieldType2>& v1,
@@ -419,9 +419,6 @@ VectorWithOffset<FieldType2> operator*(const FieldType& value,
 	return w;
 }
 
-} // namespace Dmrg
-
-namespace std {
 template<typename FieldType>
 FieldType norm(const Dmrg::VectorWithOffset<FieldType>& v)
 {

@@ -243,7 +243,7 @@ private:
 			R1.setRow(i,counter);
 
 			ComplexOrRealType val = 1.0 + sector*dr[ipPosOrNeg[i]];
-			RealType val2 = sqrt(2.0*std::norm(val));
+			RealType val2 = sqrt(2.0*PsimagLite::norm(val));
 			if (isAlmostZero(val2,1e-10)) continue;
 
 			R1.pushValue(val2);
@@ -260,7 +260,7 @@ private:
 			  SizeType lessOrGreater)
 	{
 		for (SizeType i=0;i<perm.size();i++) {
-			if (lessOrGreaterCondition(std::real(dd[perm[i]]),lessOrGreater))
+			if (lessOrGreaterCondition(PsimagLite::real(dd[perm[i]]),lessOrGreater))
 				x.push_back(perm[i]);
 		}
 	}
@@ -322,7 +322,7 @@ private:
 		transposeConjugate(R1t,R1);
 		linearSolverTriangular(r,R1t,T1w);
 		ComplexOrRealType rkk2 =w*w - r*r; // note: operator* will conjugate if needed
-		if (std::norm(rkk2)>tol) {
+		if (PsimagLite::norm(rkk2)>tol) {
 			// accept this column
 			if (idebug_) {
 				std::cerr<<__FILE__<<" "<<__LINE__<<" sector="<<sector;

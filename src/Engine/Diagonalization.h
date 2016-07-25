@@ -78,8 +78,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DIAGONALIZATION_HEADER_H
 #define DIAGONALIZATION_HEADER_H
 #include "ProgressIndicator.h"
-#include "VectorWithOffset.h" // includes the std::norm functions
-#include "VectorWithOffsets.h" // includes the std::norm functions
+#include "VectorWithOffset.h" // includes the PsimagLite::norm functions
+#include "VectorWithOffsets.h" // includes the PsimagLite::norm functions
 #include "ProgramGlobals.h"
 #include "LanczosSolver.h"
 #include "DavidsonSolver.h"
@@ -533,7 +533,7 @@ private:
 
 		TargetVectorType x(initialVector.size(),0.0);
 		object.matrixVectorProduct(x,initialVector);
-		RealType gsEnergy = std::real(initialVector*x);
+		RealType gsEnergy = PsimagLite::real(initialVector*x);
 		gsVector = initialVector;
 		PsimagLite::String options = parameters_.options;
 		bool debugmatrix = (options.find("debugmatrix") != PsimagLite::String::npos);

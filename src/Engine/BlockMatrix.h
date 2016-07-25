@@ -173,8 +173,8 @@ public:
 		{
 			FieldType sign1=0;
 			for (SizeType j=0;j<n;j++) {
-				if (std::norm(v[j])>1e-6) {
-					if (std::real(v[j])>0) sign1=1;
+				if (PsimagLite::norm(v[j])>1e-6) {
+					if (PsimagLite::real(v[j])>0) sign1=1;
 					else sign1= -1;
 					break;
 				}
@@ -427,7 +427,7 @@ void blockMatrixToSparseMatrix(PsimagLite::CrsMatrix<S>& fm,
 		fm.setRow(i,counter);
 		for (SizeType j=0;j<n;j++) {
 			S val = B(i,j);
-			if (std::norm(val)<1e-10) continue;
+			if (PsimagLite::norm(val)<1e-10) continue;
 			fm.pushValue(val);
 			fm.pushCol(j);
 			counter++;

@@ -190,7 +190,7 @@ public:
 	{
 		const VectorWithOffsetType& v = applyOpExpression_.targetVectors()[i];
 		// call to mult will conjugate one of the vector
-		return std::real(v*v);
+		return PsimagLite::real(v*v);
 	}
 
 	void normalizeTimeVectors(SizeType start = 0, SizeType end = 0)
@@ -460,8 +460,8 @@ public:
 	{
 
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
-		RealType norm1 = std::norm(v1);
-		RealType norm2 = std::norm(v2);
+		RealType norm1 = norm(v1);
+		RealType norm2 = norm(v2);
 		if (norm1 < 1e-6 || norm2 < 1e-6) {
 			std::cout<<"cocoon: At least 1 NORM IS ZERO ";
 			std::cout<<label1<<" has norm "<<norm1;
@@ -576,7 +576,7 @@ private:
 				if (i!=j) continue;
 				for (SizeType k=0;k<dest.effectiveSize(i);k++)
 					sum+= dest.fastAccess(i,k)*
-					        std::conj(src2.fastAccess(j,k));
+					        PsimagLite::conj(src2.fastAccess(j,k));
 			}
 		}
 

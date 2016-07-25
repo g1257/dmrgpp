@@ -309,7 +309,7 @@ private:
 		progress_.printline(msg,std::cout);
 
 		PsimagLite::OstringStream msg2;
-		msg2<<"gsNorm="<<std::norm(this->common().psi())<<" norms= ";
+		msg2<<"gsNorm="<<norm(this->common().psi())<<" norms= ";
 		for (SizeType i = 0; i < weight_.size(); i++)
 			msg2<<this->common().normSquared(i)<<" ";
 		progress_.printline(msg2,std::cout);
@@ -352,11 +352,11 @@ private:
 		msg<<" for target="<<whatTarget;
 		ComplexOrRealType numerator = phi2*x;
 		ComplexOrRealType den = phi2*phi2;
-		ComplexOrRealType division = (std::norm(den)<1e-10) ? 0 : numerator/den;
+		ComplexOrRealType division = (PsimagLite::norm(den)<1e-10) ? 0 : numerator/den;
 		msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<numerator;
 		msg<<" <phi(t)|phi(t)>="<<den<<" "<<division;
 		progress_.printline(msg,std::cout);
-		tvEnergy_[whatTarget] = std::real(division);
+		tvEnergy_[whatTarget] = PsimagLite::real(division);
 	}
 
 	// in situ computation:

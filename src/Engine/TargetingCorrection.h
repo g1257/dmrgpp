@@ -129,7 +129,7 @@ public:
 
 	RealType normSquared(SizeType i) const
 	{
-		return std::real(this->common().targetVectors()[i]*
+		return PsimagLite::real(this->common().targetVectors()[i]*
 		                          this->common().targetVectors()[i]);
 	}
 

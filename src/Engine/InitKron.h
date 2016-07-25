@@ -216,7 +216,7 @@ private:
 	void addOneConnection(const SparseMatrixType& A,const SparseMatrixType& B,const LinkType& link2)
 	{
 		values_.push_back(link2.value);
-//			assert(std::norm(tmp-0.5)<1e-6);
+//			assert(PsimagLite::norm(tmp-0.5)<1e-6);
 		ArrayOfMatStructType* x1 = new ArrayOfMatStructType(A,gengroupLeft_);
 		xc_.push_back(x1);
 

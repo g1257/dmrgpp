@@ -82,8 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "PackIndices.h"
 #include "ProgressIndicator.h"
-#include "VectorWithOffsets.h" // so that std::norm() becomes visible here
-#include "VectorWithOffset.h" // so that std::norm() becomes visible here
+#include "VectorWithOffsets.h" // so that PsimagLite::norm() becomes visible here
+#include "VectorWithOffset.h" // so that PsimagLite::norm() becomes visible here
 #include "WaveFunctionTransfBase.h"
 #include "MatrixOrIdentity.h"
 #include "ParallelWftOne.h"

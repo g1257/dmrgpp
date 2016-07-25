@@ -421,7 +421,7 @@ private:
 			getLanczosVectors(V,sv,p);
 		}
 		setWeights();
-		weightForContinuedFraction_ = std::real(phi*phi);
+		weightForContinuedFraction_ = PsimagLite::real(phi*phi);
 	}
 
 	void getLanczosVectors(DenseMatrixType& V,
@@ -512,7 +512,7 @@ private:
 			ComplexOrRealType sum = 0.0;
 			for (SizeType kprime=0;kprime<n2;kprime++) {
 				ComplexOrRealType tmpV = calcVTimesPhi(kprime,V,phi,i0);
-				sum += std::conj(T(kprime,k))*tmpV;
+				sum += PsimagLite::conj(T(kprime,k))*tmpV;
 			}
 
 			r[k] = sum * whatRorI(k);
@@ -528,7 +528,7 @@ private:
 		SizeType total = phi.effectiveSize(i0);
 
 		for (SizeType j=0;j<total;j++)
-			ret += std::conj(V(j,kprime))*phi.fastAccess(i0,j);
+			ret += PsimagLite::conj(V(j,kprime))*phi.fastAccess(i0,j);
 		return ret;
 	}
 
@@ -592,7 +592,7 @@ private:
 	{
 		RealType sum = 0;
 		for (SizeType i=0;i<v.size();i++) {
-			RealType tmp = std::real(v[i]*w[i]);
+			RealType tmp = PsimagLite::real(v[i]*w[i]);
 			sum += tmp*tmp;
 		}
 		return sum;
@@ -618,7 +618,7 @@ private:
 		progress_.printline(msg,std::cout);
 
 		PsimagLite::OstringStream msg2;
-		msg2<<"gsNorm="<<std::norm(this->common().psi())<<" norms= ";
+		msg2<<"gsNorm="<<norm(this->common().psi())<<" norms= ";
 		for (SizeType i = 0; i < weight_.size(); i++)
 			msg2<<this->common().normSquared(i)<<" ";
 		progress_.printline(msg2,std::cout);

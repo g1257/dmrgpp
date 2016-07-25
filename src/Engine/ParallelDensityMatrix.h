@@ -177,7 +177,7 @@ private:
 			SizeType start2 = v.offset(sector2);
 
 			sum += v.fastAccess(sector1,ii-start1)*
-			        std::conj(v.fastAccess(sector2,jj-start2));
+			        PsimagLite::conj(v.fastAccess(sector2,jj-start2));
 		}
 		return sum;
 	}
@@ -205,7 +205,7 @@ private:
 			SizeType start2 = v.offset(sector2);
 
 			sum += v.fastAccess(sector1,ii-start1)*
-			        std::conj(v.fastAccess(sector2,jj-start2));
+			        PsimagLite::conj(v.fastAccess(sector2,jj-start2));
 		}
 
 		return sum;

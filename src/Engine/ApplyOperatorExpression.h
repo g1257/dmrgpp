@@ -488,7 +488,7 @@ private:
 			FermionSign fs(targetHelper_.lrs().left(),electrons);
 			applyOpLocal_(phiNew,phiOld,targetHelper_.tstStruct().aOperators()[i],
 			              fs,systemOrEnviron,corner);
-			RealType norma = std::norm(phiNew);
+			RealType norma = norm(phiNew);
 
 			if (norma<1e-6) {
 				PsimagLite::OstringStream msg2;

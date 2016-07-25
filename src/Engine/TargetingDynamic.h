@@ -275,7 +275,7 @@ private:
 
 		setWeights();
 		if (fabs(weightForContinuedFraction_)<1e-6)
-			weightForContinuedFraction_ = std::real(phi*phi);
+			weightForContinuedFraction_ = PsimagLite::real(phi*phi);
 	}
 
 	void wftLanczosVectors(SizeType site,const VectorWithOffsetType& phi)
@@ -351,7 +351,7 @@ private:
 	{
 		RealType sum = 0;
 		for (SizeType i=0;i<v.size();i++) {
-			RealType tmp = std::real(v[i]*w[i]);
+			RealType tmp = PsimagLite::real(v[i]*w[i]);
 			sum += tmp*tmp;
 		}
 		return sum;

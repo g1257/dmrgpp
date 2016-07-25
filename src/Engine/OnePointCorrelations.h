@@ -179,7 +179,7 @@ namespace Dmrg {
 					if (i!=j) continue;
 					SizeType offset = v1.offset(i);
 					for (SizeType k=0;k<v1.effectiveSize(i);k++)
-						sum+= v1.slowAccess(k+offset)*std::conj(v2.slowAccess(k+offset));
+						sum+= v1.slowAccess(k+offset)*PsimagLite::conj(v2.slowAccess(k+offset));
 				}
 			}
 			return sum;
@@ -209,7 +209,7 @@ namespace Dmrg {
 					if (i!=j) continue;
 					SizeType offset = v1.offset(i);
 					for (SizeType k=0;k<v1.effectiveSize(i);k++)
-						sum+= v1.slowAccess(k+offset)*std::conj(v2.slowAccess(k+offset));
+						sum+= v1.slowAccess(k+offset)*PsimagLite::conj(v2.slowAccess(k+offset));
 				}
 			}
 			return sum;

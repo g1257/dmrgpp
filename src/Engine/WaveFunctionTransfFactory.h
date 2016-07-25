@@ -234,7 +234,7 @@ public:
 		if (isEnabled_ && allow) {
 #ifndef NDEBUG
 			RealType eps = 1e-12;
-			RealType x =std::norm(src);
+			RealType x = norm(src);
 			bool b = (x<eps);
 			if (b) std::cerr<<"norm="<<x<<"\n";
 			assert(!b);
@@ -293,7 +293,7 @@ public:
 		for (SizeType i=0;i<total;i++) {
 			myRandomT(tmp);
 			y.fastAccess(i0,i)=tmp;
-			atmp += std::real(tmp*std::conj(tmp));
+			atmp += PsimagLite::real(tmp*PsimagLite::conj(tmp));
 		}
 
 		assert(fabs(atmp)>1e-10);
@@ -462,8 +462,8 @@ private:
 	{
 		wftImpl_->transformVector(psiDest,psiSrc,lrs,nk);
 
-		RealType norm1 = std::norm(psiSrc);
-		RealType norm2 = std::norm(psiDest);
+		RealType norm1 = Dmrg::norm(psiSrc);
+		RealType norm2 = Dmrg::norm(psiDest);
 		PsimagLite::OstringStream msg;
 		msg<<"Transformation completed ";
 		if (fabs(norm1-norm2)>1e-5) {

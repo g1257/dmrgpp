@@ -82,8 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "PackIndices.h"
 #include "ProgressIndicator.h"
-#include "VectorWithOffsets.h" // so that std::norm() becomes visible here
-#include "VectorWithOffset.h" // so that std::norm() becomes visible here
+#include "VectorWithOffsets.h" // so that PsimagLite::norm() becomes visible here
+#include "VectorWithOffset.h" // so that PsimagLite::norm() becomes visible here
 #include "WaveFunctionTransfBase.h"
 #include "Random48.h"
 #include "ParallelWftSu2.h"
@@ -160,8 +160,8 @@ public:
 			else transformVector2(psiDest,psiSrc,lrs,nk);
 		}
 
-		RealType norm1 = std::norm(psiSrc);
-		RealType norm2 = std::norm(psiDest);
+		RealType norm1 = norm(psiSrc);
+		RealType norm2 = norm(psiDest);
 
 		if (fabs(norm1-norm2)>1e-5) {
 			PsimagLite::OstringStream msg;

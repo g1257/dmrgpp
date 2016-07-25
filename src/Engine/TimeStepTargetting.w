@@ -899,9 +899,9 @@ A validity check
 					for (SizeType j=0;j<V.n_row();j++) 
 						r[k] += conj(V(j,k))*phi2[j];
 					// is r(k) == \delta(k,0)
-					if (k==0 && std::norm(r[k]-1.0)>1e-5) 
+					if (k==0 && PsimagLite::norm(r[k]-1.0)>1e-5) 
 						std::cerr<<"WARNING: r[0]="<<r[0]<<" != 1\n";
-					if (k>0 && std::norm(r[k])>1e-5) 
+					if (k>0 && PsimagLite::norm(r[k])>1e-5) 
 						std::cerr<<"WARNING: r["<<k<<"]="<<r[k]<<" !=0\n";
 				}
 			}
@@ -997,7 +997,7 @@ This is mainly for testing purposes, since measurements are better done, post-pr
 					}
 				}
 				std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_;
-				std::cerr<<" "<<label<<std::norm(src1)<<" "<<std::norm(src2)<<" "<<std::norm(dest)<<"\n";
+				std::cerr<<" "<<label<<PsimagLite::norm(src1)<<" "<<PsimagLite::norm(src2)<<" "<<PsimagLite::norm(dest)<<"\n";
 			}
 @}
 

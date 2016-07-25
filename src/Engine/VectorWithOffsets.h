@@ -421,10 +421,10 @@ public:
 	}
 
 	template<typename FieldType2>
-	friend FieldType2 std::norm(const Dmrg::VectorWithOffsets<FieldType2>& v);
+	friend FieldType2 norm(const Dmrg::VectorWithOffsets<FieldType2>& v);
 
 	template<typename FieldType2>
-	friend FieldType2 std::norm(const Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v);
+	friend FieldType2 norm(const Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v);
 
 	template<typename FieldType2>
 	friend void normalize(Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v);
@@ -488,7 +488,7 @@ private:
 	{
 		RealType eps = 1e-5;
 		for (SizeType i=0;i<v.size();i++)
-			if (fabs(std::real(v[i]))>eps || fabs(std::imag(v[i]))>eps)
+			if (fabs(PsimagLite::real(v[i]))>eps || fabs(PsimagLite::imag(v[i]))>eps)
 				return false;
 		return true;
 	}
@@ -513,9 +513,6 @@ private:
 	typename PsimagLite::Vector<SizeType>::Type nonzeroSectors_;
 }; // class VectorWithOffset
 
-} // namespace Dmrg
-
-namespace std {
 template<typename FieldType>
 inline FieldType norm(const Dmrg::VectorWithOffsets<FieldType>& v)
 {
@@ -540,13 +537,10 @@ inline FieldType norm(const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v
 	return sqrt(sum);
 }
 
-}
-
-namespace Dmrg {
 template<typename FieldType>
 inline void normalize(Dmrg::VectorWithOffsets<std::complex<FieldType> >& v)
 {
-	FieldType norma = std::norm(v);
+	FieldType norma = PsimagLite::norm(v);
 	FieldType eps = 1e-5;
 
 	if (fabs(norma-1.0)<eps) return;
@@ -572,7 +566,7 @@ inline FieldType operator*(const Dmrg::VectorWithOffsets<FieldType>& v1,
 			SizeType j = v2.sector(jj);
 			if (i!=j) continue;
 			for (SizeType k=0;k<v1.effectiveSize(i);k++)
-				sum+= v1.fastAccess(i,k)*std::conj(v2.fastAccess(j,k));
+				sum+= v1.fastAccess(i,k)*PsimagLite::conj(v2.fastAccess(j,k));
 		}
 	}
 	return sum;

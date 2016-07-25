@@ -146,7 +146,7 @@ private:
 	FieldType scalarProduct(const VectorType& v1,const VectorType& v2) const
 	{
 		FieldType sum = 0;
-		for (SizeType i=0;i<v1.size();i++) sum += std::conj(v1[i])*v2[i];
+		for (SizeType i=0;i<v1.size();i++) sum += PsimagLite::conj(v1[i])*v2[i];
 		return sum;
 	}
 

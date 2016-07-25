@@ -284,7 +284,7 @@ private:
 			ComplexOrRealType sum = 0.0;
 			for (SizeType kprime=0;kprime<n2;kprime++) {
 				ComplexOrRealType tmpV = calcVTimesPhi(kprime,V,phi,i0);
-				sum += std::conj(T(kprime,k))*tmpV;
+				sum += PsimagLite::conj(T(kprime,k))*tmpV;
 			}
 
 			RealType tmp = (eigs[k]-E0_)*times_[timeIndex]*timeDirection;
@@ -303,7 +303,7 @@ private:
 		SizeType total = phi.effectiveSize(i0);
 
 		for (SizeType j=0;j<total;j++)
-			ret += std::conj(V(j,kprime))*phi.fastAccess(i0,j);
+			ret += PsimagLite::conj(V(j,kprime))*phi.fastAccess(i0,j);
 		return ret;
 	}
 

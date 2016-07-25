@@ -381,9 +381,9 @@ private:
 		const VectorWithOffsetType& phi = this->common().targetVectors()[startEnd.first];
 		PsimagLite::OstringStream msg;
 		msg<<" vector number "<<startEnd.first<<" has norm ";
-		msg<<std::norm(phi);
+		msg<<norm(phi);
 		progress_.printline(msg,std::cout);
-		if (std::norm(phi)<1e-6)
+		if (norm(phi)<1e-6)
 			setFromInfinite(this->common().targetVectors(startEnd.first),lrs_);
 		bool allOperatorsApplied = (this->common().noStageIs(DISABLED));
 		this->common().calcTimeVectors(startEnd,
@@ -416,7 +416,7 @@ private:
 			this->common().setTime(0);
 			PsimagLite::OstringStream msg;
 			SizeType n1 = mettsStruct_.timeSteps();
-			RealType x = std::norm(this->common().targetVectors()[n1]);
+			RealType x = norm(this->common().targetVectors()[n1]);
 			msg<<"Changing direction, setting collapsed with norm="<<x;
 			progress_.printline(msg,std::cout);
 			for (SizeType i=0;i<n1;i++)
@@ -475,7 +475,7 @@ private:
 	                  const VectorSizeType& block)
 	{
 		if (this->common().targetVectors()[index].size()==0) return;
-		assert(std::norm(this->common().targetVectors()[index])>1e-6);
+		assert(PsimagLite::norm(this->common().targetVectors()[index])>1e-6);
 		VectorSizeType nk;
 		mettsCollapse_.setNk(nk,block);
 
@@ -495,13 +495,13 @@ private:
 
 			VectorWithOffsetType phiNew; // same sectors as g.s.
 			//phiNew.populateSectors(lrs_.super());
-			assert(std::norm(this->common().targetVectors()[advance])>1e-6);
+			assert(PsimagLite::norm(this->common().targetVectors()[advance])>1e-6);
 
 			phiNew.populateSectors(lrs_.super());
 			// OK, now that we got the partition number right, let's wft:
 			wft_.setInitialVector(phiNew,this->common().targetVectors()[advance],lrs_,nk);
 			phiNew.collapseSectors();
-			assert(std::norm(phiNew)>1e-6);
+			assert(PsimagLite::norm(phiNew)>1e-6);
 			this->common().targetVectors(index) = phiNew;
 		} else {
 			assert(false);
@@ -575,7 +575,7 @@ private:
 		           betaFixedVolume,lrs_.right(),transformEnviron,block2);
 		pureVectors_.second = newVector2;
 		setFromInfinite(this->common().targetVectors(0),lrs_);
-		assert(std::norm(this->common().targetVectors()[0])>1e-6);
+		assert(PsimagLite::norm(this->common().targetVectors()[0])>1e-6);
 
 		systemPrev_.fixed = alphaFixedVolume;
 		systemPrev_.permutationInverse = lrs_.left().permutationInverse();
@@ -729,7 +729,7 @@ private:
 			phi.setDataInSector(v,i0);
 		}
 		phi.collapseSectors();
-		assert(std::norm(phi)>1e-6);
+		assert(PsimagLite::norm(phi)>1e-6);
 	}
 
 	// in situ computation:
@@ -816,7 +816,7 @@ private:
 		progress_.printline(msg,std::cout);
 
 		PsimagLite::OstringStream msg2;
-		msg2<<"gsNorm="<<std::norm(this->common().psi())<<" norms= ";
+		msg2<<"gsNorm="<<norm(this->common().psi())<<" norms= ";
 		for (SizeType i = 0; i < weight_.size(); i++)
 			msg2<<this->common().normSquared(i)<<" ";
 		progress_.printline(msg2,std::cout);
@@ -859,7 +859,7 @@ private:
 		msg<<" for target="<<whatTarget;
 		ComplexOrRealType numerator = phi2*x;
 		ComplexOrRealType den = phi2*phi2;
-		ComplexOrRealType division = (std::norm(den)<1e-10) ? 0 : numerator/den;
+		ComplexOrRealType division = (PsimagLite::norm(den)<1e-10) ? 0 : numerator/den;
 		msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<numerator;
 		msg<<" <phi(t)|phi(t)>="<<den<<" "<<division;
 		progress_.printline(msg,std::cout);

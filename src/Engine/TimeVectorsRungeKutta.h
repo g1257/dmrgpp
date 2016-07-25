@@ -153,7 +153,7 @@ public:
 		PsimagLite::OstringStream msg;
 		msg<<"using RungeKutta";
 
-		RealType norma = std::norm(phi);
+		RealType norma = norm(phi);
 		if (norma<1e-10) return;
 		msg<<" Norm of phi= "<<norma;
 		progress_.printline(msg,std::cout);

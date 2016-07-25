@@ -365,7 +365,7 @@ private:
 		for (SizeType i=0;i<n;i++) {
 			for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
 				ComplexOrRealType val = A.getValue(k);
-				sum[i] += std::conj(val)*val;
+				sum[i] += PsimagLite::conj(val)*val;
 			}
 		}
 
@@ -496,7 +496,7 @@ private:
 			for (SizeType s=0;s<itemp;s++) {
 				sSector.pushCol(index[s]);
 				sSector.pushValue(temp[s]);
-				val += std::conj(temp[s])*temp[s];
+				val += PsimagLite::conj(temp[s])*temp[s];
 				ptr[index[s]] = -1;
 				counter++;
 			}
@@ -528,7 +528,7 @@ private:
 			ComplexOrRealType sum = 0.0;
 			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
 				ComplexOrRealType val = sSector.getValue(k);
-				sum += std::conj(val)*val;
+				sum += PsimagLite::conj(val)*val;
 			}
 			if (isAlmostZero(sum,1e-4)) {
 				flag=true;
@@ -574,7 +574,7 @@ private:
 //				reflectedFinal.pushCol(col);
 //				reflectedFinal.pushValue(val);
 //				counterl++;
-//				sum[i] += std::conj(val) * val;
+//				sum[i] += PsimagLite::conj(val) * val;
 //			}
 
 //		}

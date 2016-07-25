@@ -308,7 +308,7 @@ namespace Dmrg {
 						int jj = pSE.permutationInverse(eta2);
 
 						DensityMatrixElementType tmp3= v.slowAccess(ii)*
-						        std::conj(v.slowAccess(jj)) *
+						        PsimagLite::conj(v.slowAccess(jj)) *
 							factors.getValue(k1) * factors.getValue(k2);
 						sum += tmp3;
 					}
@@ -336,7 +336,7 @@ namespace Dmrg {
 
 			for (SizeType i=0;i<bp1.n_row();i++) {
 				for (SizeType j=0;j<bp1.n_col();j++) {
-					RealType x = std::norm(bp1(i,j)-bp2(i,j));
+					RealType x = PsimagLite::norm(bp1(i,j)-bp2(i,j));
 					if (x>1e-5) {
 						std::cerr<<bp1(i,j)<<"!="<<bp2(i,j)<<" i="<<i<<" j= "<<j<<"\n";
 						std::cerr<<"difference="<<x<<" p1="<<p1<<" p2="<<p2<<"\n";

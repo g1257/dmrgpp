@@ -158,7 +158,7 @@ public:
 		PsimagLite::OstringStream msg;
 		msg<<"EXPERIMENTAL: using SuzukiTrotter";
 
-		RealType norma = std::norm(phi);
+		RealType norma = norm(phi);
 		if (norma<1e-10) return;
 		msg<<" Norm of phi= "<<norma;
 		progress_.printline(msg,std::cout);
@@ -257,7 +257,7 @@ private:
 		// generalize for su(2)
 		wft_.setInitialVector(phiNew,targetVectors_[i],lrs_,nk);
 		phiNew.collapseSectors();
-		assert(std::norm(phiNew)>1e-6);
+		assert(norm(phiNew)>1e-6);
 		targetVectors_[i]=phiNew;
 	}
 
@@ -406,7 +406,7 @@ private:
 						                            lrs_.super().permutationInverse());
 						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],
 						        iperm[x2p+y1p*hilbertSize]);
-						if (std::norm(tmp)<1e-12) continue;
+						if (PsimagLite::norm(tmp)<1e-12) continue;
 						if (j<offset || j >= offset+phi0.size())
 							throw PsimagLite::RuntimeError("j out of bounds\n");
 						result[j-offset] += tmp*phi0[i]*transformT1.getValue(k)*
@@ -472,7 +472,7 @@ private:
 
 						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],
 						        iperm[x2p+y1p*hilbertSize]);
-						if (std::norm(tmp)<1e-12) continue;
+						if (PsimagLite::norm(tmp)<1e-12) continue;
 						if (j < offset || j >= offset+phi0.size())
 							throw PsimagLite::RuntimeError("j out of bounds (environ)\n");
 

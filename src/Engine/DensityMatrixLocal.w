@@ -350,7 +350,7 @@ This is exactly Eq.~(\ref{eq:densitymatrix}).
 			for (SizeType beta=0;beta<total;beta++) {
 				SizeType jj = pSE.permutationInverse(beta + x2);
 				SizeType ii = pSE.permutationInverse(beta + x1);
-				sum += v[ii] * std::conj(v[jj]);
+				sum += v[ii] * PsimagLite::conj(v[jj]);
 			}
 			return sum;
 		}
@@ -378,7 +378,7 @@ This is exactly Eq.~(\ref{eq:densitymatrix}).
 			for (SizeType beta=0;beta<total;beta++) {
 				SizeType jj = pSE.permutationInverse(alpha2+beta*ns);
 				SizeType ii = pSE.permutationInverse(alpha1+beta*ns);
-				sum += v[ii] * std::conj(v[jj]);
+				sum += v[ii] * PsimagLite::conj(v[jj]);
 			}
 			return sum;
 		}
