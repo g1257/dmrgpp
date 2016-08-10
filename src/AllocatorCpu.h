@@ -25,6 +25,8 @@ Please see full open source license included in file LICENSE.
 #ifndef ALLOCATOR_CPU_H
 #define ALLOCATOR_CPU_H
 
+#include <string>
+#include <iostream>
 #include <vector>
 #include <stdexcept>
 #include <cstdlib>
