@@ -65,7 +65,7 @@ sub runThisOmega
 	$outfile .= ".cout";
 	if ($parallel eq "nobatch") {
 		(-x "./dmrg") or die "$0: No ./dmrg found in this directory\n";
-		system("./dmrg -f $input -o ':$obs.txt'");
+		system("./dmrg -f $input ':$obs.txt'");
 		system("echo '#omega=$omega' >> $outfile");
 	} else {
 		my $batch = createBatch($ind,$omega,$input);

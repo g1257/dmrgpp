@@ -475,7 +475,7 @@ private:
 	                  const VectorSizeType& block)
 	{
 		if (this->common().targetVectors()[index].size()==0) return;
-		assert(PsimagLite::norm(this->common().targetVectors()[index])>1e-6);
+		assert(norm(this->common().targetVectors()[index])>1e-6);
 		VectorSizeType nk;
 		mettsCollapse_.setNk(nk,block);
 
@@ -495,13 +495,13 @@ private:
 
 			VectorWithOffsetType phiNew; // same sectors as g.s.
 			//phiNew.populateSectors(lrs_.super());
-			assert(PsimagLite::norm(this->common().targetVectors()[advance])>1e-6);
+			assert(norm(this->common().targetVectors()[advance])>1e-6);
 
 			phiNew.populateSectors(lrs_.super());
 			// OK, now that we got the partition number right, let's wft:
 			wft_.setInitialVector(phiNew,this->common().targetVectors()[advance],lrs_,nk);
 			phiNew.collapseSectors();
-			assert(PsimagLite::norm(phiNew)>1e-6);
+			assert(norm(phiNew)>1e-6);
 			this->common().targetVectors(index) = phiNew;
 		} else {
 			assert(false);
@@ -575,7 +575,7 @@ private:
 		           betaFixedVolume,lrs_.right(),transformEnviron,block2);
 		pureVectors_.second = newVector2;
 		setFromInfinite(this->common().targetVectors(0),lrs_);
-		assert(PsimagLite::norm(this->common().targetVectors()[0])>1e-6);
+		assert(norm(this->common().targetVectors()[0])>1e-6);
 
 		systemPrev_.fixed = alphaFixedVolume;
 		systemPrev_.permutationInverse = lrs_.left().permutationInverse();
@@ -729,7 +729,7 @@ private:
 			phi.setDataInSector(v,i0);
 		}
 		phi.collapseSectors();
-		assert(PsimagLite::norm(phi)>1e-6);
+		assert(norm(phi)>1e-6);
 	}
 
 	// in situ computation:
