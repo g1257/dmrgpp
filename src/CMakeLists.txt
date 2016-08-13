@@ -16,6 +16,17 @@ add_library( Common OBJECT ProgramGlobals.cpp
   )
 add_library( Su2Related OBJECT Su2Related.cpp )
 
+set(driver_templates DmrgDriver0.cpp DmrgDriver1.cpp DmrgDriver2.cpp DmrgDriver3.cpp DmrgDriver4.cpp DmrgDriver5.cpp DmrgDriver6.cpp DmrgDriver7.cpp DmrgDriver8.cpp DmrgDriver9.cpp DmrgDriver10.cpp DmrgDriver11.cpp DmrgDriver12.cpp DmrgDriver13.cpp DmrgDriver14.cpp DmrgDriver15.cpp DmrgDriver16.cpp DmrgDriver17.cpp DmrgDriver18.cpp DmrgDriver19.cpp DmrgDriver20.cpp DmrgDriver21.cpp DmrgDriver22.cpp DmrgDriver23.cpp)
+
+
+
+add_custom_command( OUTPUT $<JOIN:${driver_templates}, ${CMAKE_CURRENT_SOURCE_DIR}>
+  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/run_driver.pl
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  COMMENT "Generating driver files"
+#  VERBATIM
+  )
+
 add_executable (dmrg $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related>
   RestartStruct.cpp FiniteLoop.cpp DmrgDriver0.cpp DmrgDriver1.cpp DmrgDriver2.cpp DmrgDriver3.cpp DmrgDriver4.cpp DmrgDriver5.cpp DmrgDriver6.cpp DmrgDriver7.cpp DmrgDriver8.cpp DmrgDriver9.cpp DmrgDriver10.cpp DmrgDriver11.cpp DmrgDriver12.cpp DmrgDriver13.cpp DmrgDriver14.cpp DmrgDriver15.cpp DmrgDriver16.cpp DmrgDriver17.cpp DmrgDriver18.cpp DmrgDriver19.cpp DmrgDriver20.cpp DmrgDriver21.cpp DmrgDriver22.cpp DmrgDriver23.cpp dmrg.cpp)
 
