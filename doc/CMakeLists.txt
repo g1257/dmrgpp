@@ -1,8 +1,3 @@
-include_directories(${dmrgpp_SOURCE_DIR}
-  -I../src/Engine -I../src/Models/Heisenberg -I../src/Models/Heisenberg -I../src/Models/HubbardOneBand -I../src/Models/FeAsModel \
-	   -IModels/Immm -I../src/Models/FeAsBasedScExtended -IModels/ExtendedHubbard1Orb -I../../PsimagLite/src -I../../PsimagLite/src/Geometry
-  
-
 add_custom_command( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/manual.tex
   COMMAND bash -c "cp ${CMAKE_CURRENT_SOURCE_DIR}/*.pdf ${CMAKE_CURRENT_BINARY_DIR}/"
   COMMAND bash -c "cp ${CMAKE_CURRENT_SOURCE_DIR}/*.png ${CMAKE_CURRENT_BINARY_DIR}/"
