@@ -10,7 +10,7 @@ PSIDOCCOPY label
 
 =cut
 
-my ($file) = @ARGV;
+my ($file, $doc_root, $out_dir) = @ARGV;
 my $find = "find ../src -iname \"*.h\" -or -iname \"*.cpp\"";
 defined($file) or die "USAGE: $find | $0 file\n";
 my %labels;
@@ -39,8 +39,11 @@ sub loadFiles
 	open(FILE,$f) or die "$0: Cannot open $f : $!\n";
 
 	while (<FILE>) {
-		if (/\\ptexReadFile\{([^\}]+)\}/) {
-			my $file = $1;
+	    if (/\\ptexReadFile\{([^\}]+)\}/) {
+		        my $file = $1;
+			if ($doc_root != "") {
+			    $file = $doc_root . "/" . $file;
+			}
 			my $ret = open(FILE2,$file);
 			if (!$ret) {
 				close(FILE);
@@ -125,6 +128,10 @@ sub replaceLabels
 	my ($file,$a) = @_;
 	my %labels = %$a;
 	my $fout = $file;
+	if ($out_dir != "") {
+	    $fout =~ s/.*\///; #chop the beginning of the path
+	    $fout =  $out_dir . "/" . $fout;
+	}
 	$fout=~s/\.ptex$/\.tex/;
 	die "$0: $file must have extension .ptex\n" if ($file eq $fout);
 
