@@ -19,6 +19,5 @@ Version=version
 OutputFile=data80.txt
 InfiniteLoopKeptStates=100
 FiniteLoops 4  2 200 0 -2 200 0 -2 200 0 2 200 0 
-TargetElectronsTotal=6
 TargetSzPlusConst=6
 

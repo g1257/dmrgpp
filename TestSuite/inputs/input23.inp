@@ -19,6 +19,5 @@ Version=55460ffd4e0d2587072e9595d7d4ed211c66e83e
 OutputFile=data23.txt
 InfiniteLoopKeptStates=60
 FiniteLoops 3  7 100 0 -5 100 0 -2 100 0 
-TargetElectronsTotal=16
 TargetSzPlusConst=8
  

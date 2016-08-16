@@ -19,6 +19,5 @@ Version=version
 OutputFile=data27.txt
 InfiniteLoopKeptStates=60
 FiniteLoops 4  15 100 0 -15 100 0 -15 100 0 15 100 0 
-TargetElectronsTotal=32
 TargetSzPlusConst=32
 

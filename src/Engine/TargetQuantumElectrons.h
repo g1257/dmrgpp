@@ -89,7 +89,7 @@ struct TargetQuantumElectrons {
 
 	template<typename IoInputType>
 	TargetQuantumElectrons(IoInputType& io, bool allowUpDown = true)
-	    : twiceJ(0),isCanonical(true)
+	    : totalElectrons(0),twiceJ(0),isCanonical(true)
 	{
 		PsimagLite::String  msg("TargetQuantumElectrons: ");
 		bool hasTwiceJ = false;
@@ -124,13 +124,8 @@ struct TargetQuantumElectrons {
 			hasSzPlusConst = true;
 		} catch (std::exception&) {}
 
-		switch (ready) {
-		case 3:
+		if (ready == 3) {
 			msg += "Provide either up/down or total/sz but not both.\n";
-			throw PsimagLite::RuntimeError(msg);
-
-		case 0:
-			msg += "Provide at least one of up/down or total/sz.\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
 

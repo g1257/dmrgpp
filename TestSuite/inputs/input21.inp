@@ -19,7 +19,6 @@ Version=247b335fe1542909b90be8647456bfd8fd56191c
 OutputFile=data21.txt
 InfiniteLoopKeptStates=100
 FiniteLoops 4  7 200 0 -7 200 0 -7 200 0 7 200 0 
-TargetElectronsTotal=16
 TargetSzPlusConst=8
 TargetSpinTimesTwo=0
 UseSu2Symmetry=1

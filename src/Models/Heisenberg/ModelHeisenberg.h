@@ -441,7 +441,7 @@ private:
 			jmpair.second = basis[i];
 			jmvalues.push_back(jmpair);
 			szPlusConst[i] = (isCanonical) ? getSzPlusConst(basis[i],n) : 0;
-			electrons[i] = 1;
+			electrons[i] = 0;
 			flavors.push_back(1);
 			jmSaved = jmpair;
 		}
