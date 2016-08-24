@@ -179,6 +179,7 @@ public:
 		knownLabels_.push_back("LanczosSteps");
 		knownLabels_.push_back("PotentialT");
 		knownLabels_.push_back("omega");
+		knownLabels_.push_back("MagneticField");
 	}
 
 	~InputCheck()
