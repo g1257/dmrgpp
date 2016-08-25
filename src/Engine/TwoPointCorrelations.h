@@ -165,7 +165,7 @@ namespace Dmrg {
 		{
 			FieldType c = 0;
 			if (i==j) {
-				c=calcDiagonalCorrelation(i,O1,O2,fermionicSign,threadId);
+//				c=calcDiagonalCorrelation(i,O1,O2,fermionicSign,threadId);
 			} else if (i>j) {
 				c= -calcCorrelation_(j,i,O2,O1,fermionicSign,threadId);
 			} else {

@@ -62,7 +62,6 @@ bool observeOneFullSweep(IoInputType& io,
 	SizeType rows = n; // could be n/2 if there's enough symmetry
 	SizeType cols = n;
 	SizeType nf = n - 2;
-	SizeType offset = 0;
 	SizeType trail = 0;
 
 	PsimagLite::Vector<PsimagLite::String>::Type vecOptions;
@@ -80,13 +79,6 @@ bool observeOneFullSweep(IoInputType& io,
 			cols = nf;
 			std::cerr<<"observe: Found "<<label<<" = "<<nf;
 			std::cerr<<" (rows and cols also set to it)\n";
-		}
-
-		label = "%offset=";
-		labelIndex = item.find(label);
-		if (labelIndex == 0) {
-			offset = atoi(item.substr(label.length()).c_str());
-			std::cerr<<"observe: Found "<<label<<" = "<<offset<<"\n";
 		}
 
 		label = "%trail=";
@@ -113,13 +105,12 @@ bool observeOneFullSweep(IoInputType& io,
 	}
 
 	if (!hasTrail)
-		trail = n - 2 - offset - nf;
+		trail = n - 2 - nf;
 
 	ObservableLibraryType observerLib(io,
 	                                  n,
 	                                  hasTimeEvolution,
 	                                  model,
-	                                  offset,
 	                                  nf,
 	                                  trail,
 	                                  verbose);

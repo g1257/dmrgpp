@@ -115,7 +115,6 @@ public:
 	enum SaveEnum {SAVE_YES, SAVE_NO};
 
 	ObserverHelper(IoInputType& io,
-	               SizeType offset,
 	               SizeType nf,
 	               SizeType trail,
 	               SizeType numberOfPthreads,
@@ -130,9 +129,6 @@ public:
 	      noMoreData_(false)
 	{
 		PsimagLite::String msg = "No more data to construct this object\n";
-		if (offset > 0)
-			if (!init(hasTimeEvolution,offset,SAVE_NO))
-				throw PsimagLite::RuntimeError(msg);
 
 		if (nf > 0)
 			if (!init(hasTimeEvolution,nf,SAVE_YES))

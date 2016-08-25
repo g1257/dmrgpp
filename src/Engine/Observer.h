@@ -135,13 +135,12 @@ public:
 	typedef Braket<ModelType> BraketType;
 
 	Observer(IoInputType& io,
-	         SizeType offset,
 	         SizeType nf,
 	         SizeType trail,
 	         bool hasTimeEvolution,
 	         const ModelType& model,
 	         bool verbose=false)
-	    : helper_(io,offset,nf,trail,model.params().nthreads,hasTimeEvolution,verbose),
+	    : helper_(io,nf,trail,model.params().nthreads,hasTimeEvolution,verbose),
 	      verbose_(verbose),
 	      onepoint_(helper_),
 	      skeleton_(helper_,model,verbose),
