@@ -232,6 +232,7 @@ public:
 	      reducedOpImpl_(io,level,thisBasis),
 	      progress_("Operators")
 	{
+		return;
 		if (!useSu2Symmetry_) io.read(operators_,"#OPERATORS");
 
 		io.readMatrix(hamiltonian_,"#HAMILTONIAN");

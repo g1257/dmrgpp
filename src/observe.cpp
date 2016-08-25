@@ -60,18 +60,79 @@ bool observeOneFullSweep(IoInputType& io,
 	bool verbose = false;
 	SizeType n  = geometry.numberOfSites();
 	SizeType rows = n; // could be n/2 if there's enough symmetry
-	ObservableLibraryType observerLib(io,n,hasTimeEvolution,model,verbose);
+	SizeType cols = n;
+	SizeType nf = n - 2;
+	SizeType offset = 0;
+	SizeType trail = 0;
 
 	PsimagLite::Vector<PsimagLite::String>::Type vecOptions;
 	PsimagLite::tokenizer(list,vecOptions,",");
+	bool hasTrail = false;
 
 	for (SizeType i = 0; i < vecOptions.size(); ++i) {
 		PsimagLite::String item = vecOptions[i];
 
+		PsimagLite::String label = "%nf=";
+		std::size_t labelIndex = item.find(label);
+		if (labelIndex == 0) {
+			nf = atoi(item.substr(label.length()).c_str());
+			rows = nf;
+			cols = nf;
+			std::cerr<<"observe: Found "<<label<<" = "<<nf;
+			std::cerr<<" (rows and cols also set to it)\n";
+		}
+
+		label = "%offset=";
+		labelIndex = item.find(label);
+		if (labelIndex == 0) {
+			offset = atoi(item.substr(label.length()).c_str());
+			std::cerr<<"observe: Found "<<label<<" = "<<offset<<"\n";
+		}
+
+		label = "%trail=";
+		labelIndex = item.find(label);
+		if (labelIndex == 0) {
+			trail = atoi(item.substr(label.length()).c_str());
+			std::cerr<<"observe: Found "<<label<<" = "<<trail<<"\n";
+			hasTrail = true;
+		}
+
+		label = "%rows=";
+		labelIndex = item.find(label);
+		if (labelIndex == 0) {
+			std::cerr<<"observe: Found %rows= with index "<<labelIndex<<"\n";
+			rows = atoi(item.substr(label.length()).c_str());
+		}
+
+		label = "%cols=";
+		labelIndex = item.find(label);
+		if (labelIndex == 0) {
+			std::cerr<<"observe: Found %cols= with index "<<labelIndex<<"\n";
+			cols = atoi(item.substr(label.length()).c_str());
+		}
+	}
+
+	if (!hasTrail)
+		trail = n - 2 - offset - nf;
+
+	ObservableLibraryType observerLib(io,
+	                                  n,
+	                                  hasTimeEvolution,
+	                                  model,
+	                                  offset,
+	                                  nf,
+	                                  trail,
+	                                  verbose);
+
+	for (SizeType i = 0; i < vecOptions.size(); ++i) {
+		PsimagLite::String item = vecOptions[i];
+
+		if (item.find("%") == 0) continue;
+
 		if (item.length() > 0 && item[0] != '<')
-			observerLib.measureTriage(item,rows,n,orbitals,hasTimeEvolution);
+			observerLib.measureTriage(item,rows,cols,orbitals,hasTimeEvolution);
 		else
-			observerLib.interpret(item,rows,n);
+			observerLib.interpret(item,rows,cols);
 	}
 
 	return observerLib.endOfData();
