@@ -115,14 +115,14 @@ public:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef PsimagLite::LanczosOrDavidsonBase<ParametersForSolverType,
-	        MatrixVectorType,
-	        TargetVectorType> LanczosOrDavidsonBaseType;
+	MatrixVectorType,
+	TargetVectorType> LanczosOrDavidsonBaseType;
 	typedef PsimagLite::DavidsonSolver<ParametersForSolverType,
-	        MatrixVectorType,
-	        TargetVectorType> DavidsonSolverType;
+	MatrixVectorType,
+	TargetVectorType> DavidsonSolverType;
 	typedef PsimagLite::LanczosSolver<ParametersForSolverType,
-	        MatrixVectorType,
-	        TargetVectorType> LanczosSolverType;
+	MatrixVectorType,
+	TargetVectorType> LanczosSolverType;
 
 	Diagonalization(const ParametersType& parameters,
 	                const ModelType& model,
@@ -197,6 +197,8 @@ private:
 	                       const VectorSizeType& block)
 
 	{
+		PsimagLite::String options = parameters_.options;
+		bool findSymmetrySector = (options.find("findSymmetrySector") != PsimagLite::String::npos);
 		const LeftRightSuperType& lrs= target.lrs();
 		wft_.triggerOn(lrs);
 
@@ -226,7 +228,7 @@ private:
 
 		energySaved.resize(total);
 		vecSaved.resize(total);
-		  VectorSizeType weights(total);
+		VectorSizeType weights(total);
 
 		SizeType counter=0;
 		SizeType weightsTotal = 0;
@@ -241,8 +243,8 @@ private:
 			weights[i]=bs;
 
 			// Do only one sector unless doing su(2) with j>0, then do all m's
-			if (lrs.super().pseudoEffectiveNumber(lrs.super().partition(i))!=quantumSector_ )
-				weights[i]=0;
+			SizeType qn = lrs.super().pseudoEffectiveNumber(lrs.super().partition(i));
+			if (qn != quantumSector_ && !findSymmetrySector) weights[i]=0;
 
 			weightsTotal += weights[i];
 			counter+=bs;
@@ -312,14 +314,15 @@ private:
 		gsEnergy=1e6;
 		for (SizeType i=0;i<total;i++) {
 			if (weights[i]==0) continue;
-			if (energySaved[i]<gsEnergy) gsEnergy=energySaved[i];
+			if (energySaved[i] < gsEnergy) gsEnergy=energySaved[i];
 		}
 
 		if (verbose_ && PsimagLite::Concurrency::root())
 			std::cerr<<"About to calc gs vector\n";
 
 		counter=0;
-		for (SizeType i=0;i<lrs.super().partition()-1;i++) {
+		for (SizeType i=0;i<total;i++) {
+			if (energySaved[i] > gsEnergy) weights[i] = 0;
 			if (weights[i]==0) continue;
 
 			SizeType j = lrs.super().qn(lrs.super().partition(i));
@@ -368,7 +371,7 @@ private:
 			crsMatrixToFullMatrix(fullm2,fullm);
 			if (PsimagLite::isZero(fullm2)) std::cerr<<"Matrix is zero\n";
 			//if (fullm.row()<=40)
-				printFullMatrix(fullm,"matrix",1);
+			printFullMatrix(fullm,"matrix",1);
 
 			if (!isHermitian(fullm,true))
 				throw PsimagLite::RuntimeError("Not hermitian matrix block\n");
