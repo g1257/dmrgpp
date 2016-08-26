@@ -112,13 +112,12 @@ public:
 
 	//! Four-point: these are expensive and uncached!!!
 	//! requires i1<i2<i3<i4
-	FieldType operator()(
-	        char mod1,SizeType i1,const SparseMatrixType& O1,
-	        char mod2,SizeType i2,const SparseMatrixType& O2,
-	        char mod3,SizeType i3,const SparseMatrixType& O3,
-	        char mod4,SizeType i4,const SparseMatrixType& O4,
-	        int fermionicSign,
-	        SizeType threadId) const
+	FieldType operator()(char mod1,SizeType i1,const SparseMatrixType& O1,
+	                     char mod2,SizeType i2,const SparseMatrixType& O2,
+	                     char mod3,SizeType i3,const SparseMatrixType& O3,
+	                     char mod4,SizeType i4,const SparseMatrixType& O4,
+	                     int fermionicSign,
+	                     SizeType threadId) const
 	{
 		if (i1>i2 || i3>i4 || i2>i3)
 			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs ordered points\n");
@@ -279,7 +278,7 @@ private:
 
 		if (i3 == skeleton_.numberOfSites(threadId)-1) {
 			helper_.setPointer(threadId,i3-2);
-		    return skeleton_.bracketRightCorner(Otmp,O3m,fermionicSign,threadId);
+			return skeleton_.bracketRightCorner(Otmp,O3m,fermionicSign,threadId);
 		}
 
 		helper_.setPointer(threadId,ns);

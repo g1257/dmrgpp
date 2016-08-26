@@ -309,6 +309,8 @@ public:
 		}
 	}
 
+	const FourPointCorrelationsType& fourpoint() const {return fourpoint_; }
+
 	void fourPoint(const BraketType& braket,
 	               SizeType rows,
 	               SizeType cols)
