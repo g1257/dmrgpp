@@ -317,6 +317,10 @@ private:
 			if (energySaved[i] < gsEnergy) gsEnergy=energySaved[i];
 		}
 
+		PsimagLite::OstringStream msg3;
+		msg3<<"Ground state energy= "<<gsEnergy<<"\n";
+		progress_.printline(msg3,std::cout);
+
 		if (verbose_ && PsimagLite::Concurrency::root())
 			std::cerr<<"About to calc gs vector\n";
 
@@ -325,6 +329,7 @@ private:
 			if (energySaved[i] > gsEnergy) weights[i] = 0;
 			if (weights[i]==0) continue;
 
+			PsimagLite::OstringStream msg3;
 			SizeType j = lrs.super().qn(lrs.super().partition(i));
 			PsimagLite::OstringStream msg;
 			msg<<"Found targetted symmetry sector in partition "<<i;
