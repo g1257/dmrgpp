@@ -437,12 +437,7 @@ private:
 				std::cout<<"\n";
 				MatrixType fpd(numberOfSites_/2,numberOfSites_/2);
 				observe_.fourPointDeltas(fpd,gammas,model_);
-				for (SizeType i=0;i<fpd.n_row();i++) {
-					for (SizeType j=0;j<fpd.n_col();j++) {
-						std::cout<<fpd(i,j)<<" ";
-					}
-					std::cout<<"\n";
-				}
+				std::cout<<fpd;
 			}
 		} else if (label == "multi") {
 			if (model_.params().model!="HubbardOneBand")
@@ -453,8 +448,16 @@ private:
 			SparseMatrixType myMatrixSparse(myMatrix);
 			typename PsimagLite::Vector<FieldType>::Type result;
 			observe_.multiCorrelations(result,myMatrixSparse,rows,cols);
-			for (SizeType i=0;i<result.size();i++) {
+			for (SizeType i=0;i<result.size();i++)
 				std::cout<<i<<" "<<result[i]<<"\n";
+		} else if (label == "ddOrbitals") {
+			typename PsimagLite::Vector<MatrixType*>::Type results;
+			typename PsimagLite::Vector<PsimagLite::String>::Type names;
+			ddOrbitals(results,names);
+			for (SizeType i=0;i<results.size();i++) {
+				std::cout<<"ddOrbital number "<<i<<" "<<names[i]<<"\n";
+				std::cout<<*results[i];
+				delete results[i];
 			}
 		} else {
 			PsimagLite::String s = "Unknown label: " + label + "\n";
@@ -638,6 +641,30 @@ private:
 		std::cout<<0<<" "<<tmp1;
 		if (hasTimeEvolution_ && gsOrTime=="time") std::cout<<"\n";
 		if (!hasTimeEvolution_) std::cout<<"\n";
+	}
+
+	void ddOrbitals(typename PsimagLite::Vector<MatrixType*>::Type& result,
+	                typename PsimagLite::Vector<PsimagLite::String>::Type& names) const
+	{
+		SizeType rows = numberOfSites_ - 1;
+		SizeType cols = rows;
+
+		MatrixType* m1 = new MatrixType(rows,cols);
+		names.push_back("S^l_{nn}");
+		ddOrbitalsF(*m1,0,0,-1);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		names.push_back("S^u_{nn}");
+		ddOrbitalsF(*m1,0,1,-1);
+		result.push_back(m1);
+
+		// add rest here
+	}
+
+	void ddOrbitalsF(MatrixType& m, SizeType orb1, SizeType orb2, int sign) const
+	{
+
 	}
 
 	SizeType dofsFromModelName() const
