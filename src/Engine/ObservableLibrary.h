@@ -654,10 +654,10 @@ private:
 		ddOrbitalsF(*m1,0,0,-1);
 		result.push_back(m1);
 
-		m1 = new MatrixType(rows,cols);
-		names.push_back("S^u_{nn}");
-		ddOrbitalsF(*m1,0,1,-1);
-		result.push_back(m1);
+//		m1 = new MatrixType(rows,cols);
+//		names.push_back("S^u_{nn}");
+//		ddOrbitalsF(*m1,0,1,-1);
+//		result.push_back(m1);
 
 		// add rest here
 	}
@@ -667,7 +667,7 @@ private:
 		SizeType rows = m.n_row();
 		SizeType cols = m.n_row();
 		for (SizeType i = 0; i < rows; ++i) {
-			for (SizeType j = 0; j < cols; ++j) {
+			for (SizeType j = i + 2; j < cols; ++j) {
 				m(i,j) = ddOrbitalsF2(i,j,orb1,orb2,sign);
 			}
 		}
@@ -683,6 +683,7 @@ private:
 		SizeType i2 = i + 1;
 		SizeType j1 = j;
 		SizeType j2 = j + 1;
+
 		int fermionicSign = -1;
 		SizeType threadId = 0;
 		FieldType sum = 0.0;
