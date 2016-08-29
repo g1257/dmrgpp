@@ -110,16 +110,21 @@ public:
 
 	Checkpoint(const ParametersType& parameters,
 	           InputValidatorType& ioIn,
-	           const ModelType& model) :
+	           const ModelType& model,
+	           bool isObserveCode) :
 	    SYSTEM_STACK_STRING(ProgramGlobals::SYSTEM_STACK_STRING),
 	    ENVIRON_STACK_STRING(ProgramGlobals::ENVIRON_STACK_STRING),
 	    parameters_(parameters),
 	    enabled_(parameters_.options.find("checkpoint")!=PsimagLite::String::npos ||
 	        parameters_.options.find("restart")!=PsimagLite::String::npos),
 	    systemDisk_(utils::pathPrepend(SYSTEM_STACK_STRING,parameters_.checkpoint.filename),
-	                utils::pathPrepend(SYSTEM_STACK_STRING,parameters_.filename),enabled_),
+	                utils::pathPrepend(SYSTEM_STACK_STRING,parameters_.filename),
+	                enabled_,
+	                isObserveCode),
 	    envDisk_(utils::pathPrepend(ENVIRON_STACK_STRING,parameters_.checkpoint.filename),
-	             utils::pathPrepend(ENVIRON_STACK_STRING,parameters_.filename),enabled_),
+	             utils::pathPrepend(ENVIRON_STACK_STRING,parameters_.filename),
+	             enabled_,
+	             isObserveCode),
 	    progress_("Checkpoint"),
 	    energyFromFile_(0.0)
 	{
@@ -176,7 +181,10 @@ public:
 	}
 
 	// Not related to stacks
-	void load(BasisWithOperatorsType &pS,BasisWithOperatorsType &pE,TargettingType& psi)
+	void load(BasisWithOperatorsType &pS,
+	          BasisWithOperatorsType &pE,
+	          TargettingType& psi,
+	          bool isObserveCode)
 	{
 
 		typename IoType::In ioTmp(parameters_.checkpoint.filename);
@@ -187,10 +195,10 @@ public:
 			throw PsimagLite::RuntimeError("Checkpoint::load(...)\n");
 		}
 		loop--;
-		BasisWithOperatorsType pS1(ioTmp,"#CHKPOINTSYSTEM",loop);
+		BasisWithOperatorsType pS1(ioTmp,"#CHKPOINTSYSTEM",loop,isObserveCode);
 
 		pS=pS1;
-		BasisWithOperatorsType pE1(ioTmp,"#CHKPOINTENVIRON");
+		BasisWithOperatorsType pE1(ioTmp,"#CHKPOINTENVIRON",0,isObserveCode);
 		pE=pE1;
 		psi.load(parameters_.checkpoint.filename);
 	}

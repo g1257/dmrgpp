@@ -89,9 +89,11 @@ public:
 
 	DiskStack(const PsimagLite::String &file1,
 	          const PsimagLite::String &file2,
-	          bool hasLoad)
+	          bool hasLoad,
+	          bool isObserveCode)
 	    : fileIn_(file1),
 	      fileOut_(file2),
+	      isObserveCode_(isObserveCode),
 	      total_(0),
 	      progress_("DiskStack")
 	{
@@ -148,7 +150,7 @@ public:
 	DataType top()
 	{
 		ioIn_.open(fileIn_);
-		DataType dt(ioIn_,"",stack_.top());
+		DataType dt(ioIn_,"",stack_.top(),isObserveCode_);
 		ioIn_.close();
 		return dt;
 	}
@@ -161,6 +163,7 @@ public:
 private:
 
 	PsimagLite::String fileIn_,fileOut_;
+	bool isObserveCode_;
 	int total_;
 	PsimagLite::ProgressIndicator progress_;
 	IoInType ioIn_;

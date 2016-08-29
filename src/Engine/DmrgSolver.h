@@ -166,7 +166,7 @@ public:
 	      progress_("DmrgSolver"),
 	      quantumSector_(0),
 	      stepCurrent_(0),
-	      checkpoint_(parameters_,ioIn,model),
+	      checkpoint_(parameters_,ioIn,model,false),
 	      wft_(parameters_),
 	      reflectionOperator_(lrs_,
 	                          model_.hilbertSize(0),
@@ -180,7 +180,11 @@ public:
 	                       quantumSector_,
 	                       wft_,
 	                       checkpoint_.energy()),
-	      truncate_(reflectionOperator_,wft_,parameters_,model.geometry().maxConnections(),verbose_),
+	      truncate_(reflectionOperator_,
+	                wft_,
+	                parameters_,
+	                model.geometry().maxConnections(),
+	                verbose_),
 	      energy_(0.0),
 	      saveData_(parameters_.options.find("noSaveData") == PsimagLite::String::npos)
 	{
@@ -248,7 +252,7 @@ public:
 		MyBasisWithOperators pE("pE");
 
 		if (checkpoint_()) {
-			checkpoint_.load(pS,pE,*psi);
+			checkpoint_.load(pS,pE,*psi,false);
 		} else { // move this block elsewhere:
 			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 			SparseMatrixType hmatrix;
@@ -452,7 +456,7 @@ private:
 
 			finiteStep(S,E,pS,pE,i,psi);
 			if (psi.end()) break;
-			recovery.save(psi,sitesIndices_[stepCurrent_],lastSign);
+			recovery.save(psi,sitesIndices_[stepCurrent_],lastSign,false);
 		}
 
 		if (!saveData_) return;

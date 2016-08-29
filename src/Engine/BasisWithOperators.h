@@ -140,8 +140,9 @@ public:
 	template<typename IoInputter>
 	BasisWithOperators(IoInputter& io,
 	                   const PsimagLite::String& ss,
-	                   SizeType counter=0)
-	    : BasisType(io,ss,counter),operators_(io,0,this)
+	                   SizeType counter,
+	                   bool isObserveCode)
+	    : BasisType(io,ss,counter),operators_(io,0,this,isObserveCode)
 	{
 		io.read(operatorsPerSite_,"#OPERATORSPERSITE");
 	}

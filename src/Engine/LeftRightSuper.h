@@ -114,8 +114,8 @@ public:
 	{
 		// watch out: same order as save here:
 		super_ = new SuperBlockType(io,"");
-		left_ = new BasisWithOperatorsType(io,"");
-		right_ = new BasisWithOperatorsType(io,"");
+		left_ = new BasisWithOperatorsType(io,"",0,true);
+		right_ = new BasisWithOperatorsType(io,"",0,true);
 	}
 
 	LeftRightSuper(

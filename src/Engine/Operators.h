@@ -227,12 +227,13 @@ public:
 	template<typename IoInputter>
 	Operators(IoInputter& io,
 	          SizeType level,
-	          const BasisType* thisBasis)
+	          const BasisType* thisBasis,
+	          bool isObserveCode)
 	    : useSu2Symmetry_(BasisType::useSu2Symmetry()),
 	      reducedOpImpl_(io,level,thisBasis),
 	      progress_("Operators")
 	{
-		return;
+		if (isObserveCode) return;
 		if (!useSu2Symmetry_) io.read(operators_,"#OPERATORS");
 
 		io.readMatrix(hamiltonian_,"#HAMILTONIAN");

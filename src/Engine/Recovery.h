@@ -125,7 +125,8 @@ public:
 
 	void save(const TargetingType& psi,
 	          VectorSizeType vsites,
-	          int lastSign) const
+	          int lastSign,
+	          bool isObserveCode) const
 	{
 		if (checkpoint_.parameters().recoverySave == "0")
 			return;
@@ -142,7 +143,7 @@ public:
 		ioOut<<msg.str();
 		files_.push_back(rootName);
 
-		saveStacksForRecovery(rootName);
+		saveStacksForRecovery(rootName,isObserveCode);
 
 		wft_.save(rootName);
 		wft_.appendFileList(files_,rootName);
@@ -151,7 +152,8 @@ public:
 
 private:
 
-	void saveStacksForRecovery(PsimagLite::String rootWriteFile) const
+	void saveStacksForRecovery(PsimagLite::String rootWriteFile,
+	                           bool isObserveCode) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Writing sys. and env. stacks to disk (for recovery)...";
@@ -165,14 +167,14 @@ private:
 
 		{
 			MemoryStackType systemStackCopy = checkpoint_.memoryStack(SYSTEM);
-			DiskStackType systemDiskTemp(sysReadFile,sysWriteFile,false);
+			DiskStackType systemDiskTemp(sysReadFile,sysWriteFile,false,isObserveCode);
 			files_.push_back(sysWriteFile);
 			CheckpointType::loadStack(systemDiskTemp,systemStackCopy);
 		}
 
 		{
 			MemoryStackType envStackCopy = checkpoint_.memoryStack(ENVIRON);
-			DiskStackType envDiskTemp(envReadFile,envWriteFile,false);
+			DiskStackType envDiskTemp(envReadFile,envWriteFile,false,isObserveCode);
 			files_.push_back(envWriteFile);
 			CheckpointType::loadStack(envDiskTemp,envStackCopy);
 		}
