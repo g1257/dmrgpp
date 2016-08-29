@@ -378,21 +378,27 @@ public:
 		if (x<0)
 			throw PsimagLite::RuntimeError(msg + ":loadOneSector(...): size<0\n");
 		size_ = x;
-		int offset = 0;
-		io.readline(offset,"#offset=");
-		if (offset<0)
-			throw PsimagLite::RuntimeError(msg + ":loadOneSector(...): offset<0\n");
 
-		data_.resize(1);
-		offsets_.resize(2);
-		index2Sector_.resize(size_);
-		io.read(data_[0],"#data");
-		nonzeroSectors_.resize(1);
-		nonzeroSectors_[0]=0;
+		io.read(offsets_,"#offsets");
 
-		offsets_[0] = offset;
+		data_.clear();
+		data_.resize(offsets_.size());
 
-		offsets_[1]=offset+data_[0].size();
+		io.readline(x,"#nonzero=");
+		if (x < 0)
+			throw PsimagLite::RuntimeError(msg + ":loadOneSector(...): nonzerosectors<0\n");
+		nonzeroSectors_.resize(x);
+
+		for (SizeType jj=0;jj<nonzeroSectors_.size();jj++) {
+			io.readline(x,"#sector=");
+			if (x<0)
+				throw PsimagLite::RuntimeError(msg + ":loadOneSector(...): sector<0\n");
+			if (SizeType(x)>=data_.size())
+				throw PsimagLite::RuntimeError(msg + ":loadOneSector(...): sector too big\n");
+			nonzeroSectors_[jj] = x;
+			io.read(data_[x],"#sector=");
+		}
+
 		setIndex2Sector();
 	}
 
