@@ -326,7 +326,8 @@ private:
 
 		counter=0;
 		for (SizeType i=0;i<total;i++) {
-			if (energySaved[i] > gsEnergy) weights[i] = 0;
+			if (findSymmetrySector && energySaved[i] > gsEnergy)
+				weights[i] = 0;
 			if (weights[i]==0) continue;
 
 			PsimagLite::OstringStream msg3;
