@@ -450,20 +450,352 @@ private:
 			observe_.multiCorrelations(result,myMatrixSparse,rows,cols);
 			for (SizeType i=0;i<result.size();i++)
 				std::cout<<i<<" "<<result[i]<<"\n";
+
 		} else if (label == "ddOrbitals") {
 			typename PsimagLite::Vector<MatrixType*>::Type results;
 			typename PsimagLite::Vector<PsimagLite::String>::Type names;
-			ddOrbitals(results,names);
-			for (SizeType i=0;i<results.size();i++) {
-				std::cout<<"ddOrbital number "<<i<<" "<<names[i]<<"\n";
-				std::cout<<*results[i];
-				delete results[i];
-			}
+			ddOrbitalsTwopoint(results,names);
+			ddOrbitalsFourpoint(results,names);
+			//            for (SizeType i=0;i<results.size();i++) {
+			//                std::cout<<"ddOrbital number "<<i<<" "<<names[i]<<"\n";
+			//                std::cout<<*results[i];
+			//                delete results[i];
+			//            }
 		} else {
 			PsimagLite::String s = "Unknown label: " + label + "\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 	}
+
+	void ddOrbitalsTwopoint(typename PsimagLite::Vector<MatrixType*>::Type& result,
+	                        typename PsimagLite::Vector<PsimagLite::String>::Type& names)
+	{
+		SizeType rows = numberOfSites_;
+		SizeType cols = rows;
+
+		// Two-point Pair
+		MatrixType* m1 = new MatrixType(rows,cols);
+		names.push_back("S^{l}_{on}");
+		std::cout << "PairPair Correlations S^{l}_{on}" << std::endl;
+		ddOrbitalsTwo(*m1,0);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		names.push_back("S^{u}_{on}");
+		std::cout << "PairPair Correlations S^{u}_{on}" << std::endl;
+		ddOrbitalsTwo(*m1,1);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		names.push_back("S^{lu}_{on}");
+		std::cout << "PairPair Correlations S^{lu}_{on}" << std::endl;
+		ddOrbitalsTwo(*m1,2);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		names.push_back("T^{lu}_{on}");
+		std::cout << "PairPair Correlations T^{lu}_{on}" << std::endl;
+		ddOrbitalsTwo(*m1,3);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		names.push_back("T^{lu}_{on}");
+		std::cout << "PairPair Correlations T^{up-up}_{on}" << std::endl;
+		ddOrbitalsTwo(*m1,4);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		names.push_back("T^{lu}_{on}");
+		std::cout << "PairPair Correlations T^{dn-dn}_{on}" << std::endl;
+		ddOrbitalsTwo(*m1,5);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		names.push_back("T^{lu}_{on}");
+		std::cout << "PairPair Correlations T^{up*up+dn*dn}_{on}" << std::endl;
+		ddOrbitalsTwo(*m1,6);
+		result.push_back(m1);
+	}
+
+
+	void ddOrbitalsFourpoint(typename PsimagLite::Vector<MatrixType*>::Type& result,
+	                         typename PsimagLite::Vector<PsimagLite::String>::Type& names) const
+	{
+		SizeType rows = numberOfSites_ - 1;
+		SizeType cols = rows;
+
+		// Singlet four-points
+		MatrixType* m1 = new MatrixType(rows,cols);
+		std::cout << "PairPair Correlations S^{l}_{nn}" << std::endl;
+		names.push_back("S^{l}_{nn}");
+		ddOrbitalsFour(*m1,0,0,0,0,-1);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		std::cout << "PairPair Correlations S^{u}_{nn}" << std::endl;
+		names.push_back("S^{u}_{nn}");
+		ddOrbitalsFour(*m1,1,1,1,1,-1);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		std::cout << "PairPair Correlations S^{lu}_{nn}" << std::endl;
+		names.push_back("S^{lu}_{nn}");
+		ddOrbitalsFour(*m1,0,1,0,1,-1);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		std::cout << "PairPair Correlations S^{l-u}_{nn}" << std::endl;
+		names.push_back("S^{l-u}_{nn}");
+		ddOrbitalsFour(*m1,0,0,1,1,-1);
+		result.push_back(m1);
+
+		// Triplet four-points
+		m1 = new MatrixType(rows,cols);
+		std::cout << "PairPair Correlations T^{l}_{nn}" << std::endl;
+		names.push_back("T^{l}_{nn}");
+		ddOrbitalsFour(*m1,0,0,0,0,1);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		std::cout << "PairPair Correlations T{^{u}_{nn}" << std::endl;
+		names.push_back("T{^{u}_{nn}");
+		ddOrbitalsFour(*m1,1,1,1,1,1);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		std::cout << "PairPair Correlations T^{lu}_{nn}" << std::endl;
+		names.push_back("T^{lu}_{nn}");
+		ddOrbitalsFour(*m1,0,1,0,1,1);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		std::cout << "PairPair Correlations T^{l-u}_{nn}" << std::endl;
+		names.push_back("T^{l-u}_{nn}");
+		ddOrbitalsFour(*m1,0,0,1,1,1);
+		result.push_back(m1);
+
+		// add rest here
+	}
+
+	void ddOrbitalsTwo(MatrixType& m, SizeType flag)
+	{
+		int fermionicSign = 1;
+		SizeType threadId = 0;
+		SizeType rows = numberOfSites_;
+		SizeType cols = rows;
+		SizeType site = 1;
+		SizeType orbitals = logBase2(model_.hilbertSize(site));
+		assert(!(orbitals & 1));
+		orbitals /= 2;
+
+		if (flag==0) {
+			SizeType orb1 = 0;  // lower orbital
+			SizeType spin0 = 0; // up
+			SizeType spin1 = 1; // down
+			SparseMatrixType O1 = model_.naturalOperator("c",site,orb1+spin1*orbitals).data; // c_dn,0
+			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin0*orbitals).data; // c_up,0
+
+			SparseMatrixType A,B;
+			multiply(B,O1,O2); // c_dn,0 . c_up,0.
+			transposeConjugate(A,B);
+			for (SizeType i = 0; i < rows; ++i) {
+				for (SizeType j = i; j < cols; ++j) {
+					m(i,j) = observe_.correlations(i,j,A,B,fermionicSign,threadId);
+				}
+			}
+			std::cout << m;
+		} else if (flag==1) {
+			SizeType orb1 = 1;  // lower orbital
+			SizeType spin0 = 0; // up
+			SizeType spin1 = 1; // down
+			SparseMatrixType O1 = model_.naturalOperator("c",site,orb1+spin1*orbitals).data; // c_dn,0
+			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin0*orbitals).data; // c_up,0
+			SparseMatrixType A,B;
+			multiply(B,O1,O2); // c_dn,0 . c_up,0.
+			transposeConjugate(A,B);
+			for (SizeType i = 0; i < rows; ++i) {
+				for (SizeType j = i; j < cols; ++j) {
+					m(i,j) = observe_.correlations(i,j,A,B,fermionicSign,threadId);
+				}
+			}
+			std::cout << m;
+		} else if (flag==2) {
+			SizeType spin0 = 0; // up
+			SizeType spin1 = 1; // down
+			SparseMatrixType O1 = model_.naturalOperator("c",site,1+spin1*orbitals).data; // c_dn,1
+			SparseMatrixType O2 = model_.naturalOperator("c",site,0+spin0*orbitals).data; // c_up,0
+			SparseMatrixType O3 = model_.naturalOperator("c",site,1+spin0*orbitals).data; // c_up,1
+			SparseMatrixType O4 = model_.naturalOperator("c",site,0+spin1*orbitals).data; // c_dn,0
+
+			SparseMatrixType A,B,tmp1,tmp2;
+			multiply(tmp1,O1,O2); // c_dn,1 . c_up,0
+			multiply(tmp2,O3,O4); // c_up,1 . c_dn,0
+
+			FieldType mult1, mult2;
+			mult1 = 1.0; mult2 = -1.0;
+			operatorPlus(B,tmp1,mult1,tmp2,mult2); // B = 1.0*tmp1 + (-1.0)*tmp2 = Singlet
+			transposeConjugate(A,B); // A = transpose(B)
+
+			for (SizeType i = 0; i < rows; ++i) {
+				for (SizeType j = i; j < cols; ++j) {
+					m(i,j) = observe_.correlations(i,j,A,B,fermionicSign,threadId);
+				}
+			}
+			std::cout << m;
+		} else if (flag==3) {
+			SizeType spin0 = 0; // up
+			SizeType spin1 = 1; // down
+			SparseMatrixType O1 = model_.naturalOperator("c",site,1+spin1*orbitals).data; // c_dn,1
+			SparseMatrixType O2 = model_.naturalOperator("c",site,0+spin0*orbitals).data; // c_up,0
+			SparseMatrixType O3 = model_.naturalOperator("c",site,1+spin0*orbitals).data; // c_up,1
+			SparseMatrixType O4 = model_.naturalOperator("c",site,0+spin1*orbitals).data; // c_dn,0
+
+			SparseMatrixType A,B,tmp1,tmp2;
+			multiply(tmp1,O1,O2); // c_dn,1 . c_up,0
+			multiply(tmp2,O3,O4); // c_up,1 . c_dn,0
+
+			FieldType mult1, mult2;
+			mult1 = 1.0; mult2 = 1.0;
+			operatorPlus(B,tmp1,mult1,tmp2,mult2); // B = 1.0*tmp1 + (1.0)*tmp2 = Triplet
+			transposeConjugate(A,B); // A = transpose(B)
+
+			for (SizeType i = 0; i < rows; ++i) {
+				for (SizeType j = i; j < cols; ++j) {
+					m(i,j) = observe_.correlations(i,j,A,B,fermionicSign,threadId);
+				}
+			}
+			std::cout << m;
+		} else if (flag==4) {
+			SizeType orb0 = 0;  // lower orbital
+			SizeType orb1 = 1;  // upper orbital
+			SizeType spin0 = 0; // up
+			SparseMatrixType O1 = model_.naturalOperator("c",site,orb0+spin0*orbitals).data; // c_up,0
+			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin0*orbitals).data; // c_up,1
+			SparseMatrixType A,B;
+			multiply(B,O1,O2);      // c_up,0 . c_up,1
+			transposeConjugate(A,B);
+			for (SizeType i = 0; i < rows; ++i) {
+				for (SizeType j = i; j < cols; ++j) {
+					m(i,j) = observe_.correlations(i,j,A,B,fermionicSign,threadId);
+				}
+			}
+			std::cout << m;
+		} else if (flag==5) {
+			SizeType orb0 = 0;  // lower orbital
+			SizeType orb1 = 1;  // upper orbital
+			SizeType spin1 = 1; // dn
+			SparseMatrixType O1 = model_.naturalOperator("c",site,orb0+spin1*orbitals).data; // c_dn,0
+			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin1*orbitals).data; // c_dn,1
+			SparseMatrixType A,B;
+			multiply(B,O1,O2);      // c_dn,0 . c_dn,1
+			transposeConjugate(A,B);
+			for (SizeType i = 0; i < rows; ++i) {
+				for (SizeType j = i; j < cols; ++j) {
+					m(i,j) = observe_.correlations(i,j,A,B,fermionicSign,threadId);
+				}
+			}
+			std::cout << m;
+		} else if (flag==6) {
+			SizeType spin0 = 0; // up
+			SizeType spin1 = 1; // down
+			SparseMatrixType O1 = model_.naturalOperator("c",site,1+spin1*orbitals).data; // c_up,0
+			SparseMatrixType O2 = model_.naturalOperator("c",site,0+spin0*orbitals).data; // c_up,1
+			SparseMatrixType O3 = model_.naturalOperator("c",site,1+spin0*orbitals).data; // c_dn,0
+			SparseMatrixType O4 = model_.naturalOperator("c",site,0+spin1*orbitals).data; // c_dn,1
+
+			SparseMatrixType A,B,tmp1,tmp2;
+			multiply(tmp1,O1,O2); // c_dn,1 . c_up,0
+			multiply(tmp2,O3,O4); // c_up,1 . c_dn,0
+
+			FieldType mult1, mult2;
+			mult1 = 1.0; mult2 = 1.0;
+			operatorPlus(B,tmp1,mult1,tmp2,mult2); // B = 1.0*tmp1 + (1.0)*tmp2 = Triplet = up*up + dn*dn
+			transposeConjugate(A,B); // A = transpose(B)
+
+			for (SizeType i = 0; i < rows; ++i) {
+				for (SizeType j = i; j < cols; ++j) {
+					m(i,j) = observe_.correlations(i,j,A,B,fermionicSign,threadId);
+				}
+			}
+			std::cout << m;
+		} else {
+			PsimagLite::String s = "Unknown flag: " + flag;
+			throw PsimagLite::RuntimeError(s.c_str());
+		}
+	}
+
+	void ddOrbitalsFour(MatrixType& m,
+	                    SizeType orb1,
+	                    SizeType orb2,
+	                    SizeType orb3,
+	                    SizeType orb4,
+	                    int sign) const
+	{
+		SizeType rows = m.n_row();
+		SizeType cols = m.n_row();
+		for (SizeType i = 0; i < rows; ++i) {
+			for (SizeType j = i + 2; j < cols; ++j) {
+				m(i,j) = ddOrbitalsFour2(i,j,orb1,orb2,orb3,orb4,sign);
+			}
+		}
+		std::cout << m;
+	}
+
+	FieldType ddOrbitalsFour2(SizeType i,
+	                          SizeType j,
+	                          SizeType orb1,
+	                          SizeType orb2,
+	                          SizeType orb3,
+	                          SizeType orb4,
+	                          int sign) const
+	{
+		SizeType i1 = i;
+		SizeType i2 = i + 1;
+		SizeType j1 = j;
+		SizeType j2 = j + 1;
+
+		int fermionicSign = -1;
+		SizeType threadId = 0;
+		FieldType sum = 0.0;
+		SizeType site = 0;
+		SizeType orbitals = logBase2(model_.hilbertSize(site));
+		assert(!(orbitals & 1));
+		orbitals /= 2;
+
+
+		for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
+			// c(i1,orb1,spin0)
+			SparseMatrixType O1 = model_.naturalOperator("c",site,orb1+spin0*orbitals).data;
+			// c(i2,orb2,1-spin0)
+			SparseMatrixType O2 = model_.naturalOperator("c",site,orb2+(1-spin0)*orbitals).data;
+			for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
+				// c(i2,orb2,spin1)
+				SparseMatrixType O3 = model_.naturalOperator("c",site,orb3+spin1*orbitals).data;
+				// c(i3,orb1,1-spin1)
+				SparseMatrixType O4 = model_.naturalOperator("c",site,orb4+(1-spin1)*orbitals).data;
+				SizeType val = spin0 + spin1 + 1;
+				int signTerm = (val & 1) ? sign : 1;
+				sum +=  signTerm*observe_.fourpoint()('N',
+				                                      i1,
+				                                      O1,
+				                                      'N',
+				                                      i2,
+				                                      O2,
+				                                      'C',
+				                                      j1,
+				                                      O3,
+				                                      'C',
+				                                      j2,
+				                                      O4,
+				                                      fermionicSign,
+				                                      threadId);
+			}
+		}
+
+		return sum;
+	}
+
+
 
 	void manyPoint(MatrixType* storage,
 	               const BraketType& braket,
@@ -641,87 +973,6 @@ private:
 		std::cout<<0<<" "<<tmp1;
 		if (hasTimeEvolution_ && gsOrTime=="time") std::cout<<"\n";
 		if (!hasTimeEvolution_) std::cout<<"\n";
-	}
-
-	void ddOrbitals(typename PsimagLite::Vector<MatrixType*>::Type& result,
-	                typename PsimagLite::Vector<PsimagLite::String>::Type& names) const
-	{
-		SizeType rows = numberOfSites_ - 1;
-		SizeType cols = rows;
-
-		MatrixType* m1 = new MatrixType(rows,cols);
-		names.push_back("S^l_{nn}");
-		ddOrbitalsF(*m1,0,0,-1);
-		result.push_back(m1);
-
-//		m1 = new MatrixType(rows,cols);
-//		names.push_back("S^u_{nn}");
-//		ddOrbitalsF(*m1,0,1,-1);
-//		result.push_back(m1);
-
-		// add rest here
-	}
-
-	void ddOrbitalsF(MatrixType& m, SizeType orb1, SizeType orb2, int sign) const
-	{
-		SizeType rows = m.n_row();
-		SizeType cols = m.n_row();
-		for (SizeType i = 0; i < rows; ++i) {
-			for (SizeType j = i + 2; j < cols; ++j) {
-				m(i,j) = ddOrbitalsF2(i,j,orb1,orb2,sign);
-			}
-		}
-	}
-
-	FieldType ddOrbitalsF2(SizeType i,
-	                       SizeType j,
-	                       SizeType orb1,
-	                       SizeType orb2,
-	                       int sign) const
-	{
-		SizeType i1 = i;
-		SizeType i2 = i + 1;
-		SizeType j1 = j;
-		SizeType j2 = j + 1;
-
-		int fermionicSign = -1;
-		SizeType threadId = 0;
-		FieldType sum = 0.0;
-		SizeType site = 0;
-		SizeType orbitals = logBase2(model_.hilbertSize(site));
-		assert(!(orbitals & 1));
-		orbitals /= 2;
-
-		for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
-			// c(i1,orb1,spin0)
-			SparseMatrixType O1 = model_.naturalOperator("c",site,orb1+spin0*orbitals).data;
-			// c(i2,orb2,1-spin0)
-			SparseMatrixType O2 = model_.naturalOperator("c",site,orb2+(1-spin0)*orbitals).data;
-			for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
-				// c(i2,orb2,spin1)
-				SparseMatrixType O3 = model_.naturalOperator("c",site,orb2+spin1*orbitals).data;
-				// c(i3,orb1,1-spin1)
-				SparseMatrixType O4 = model_.naturalOperator("c",site,orb1+(1-spin1)*orbitals).data;
-				SizeType val = spin0 + spin1 + 1;
-				int signTerm = (val & 1) ? sign : 1;
-				sum +=  signTerm*observe_.fourpoint()('N',
-				                                      i1,
-				                                      O1,
-				                                      'N',
-				                                      i2,
-				                                      O2,
-				                                      'C',
-				                                      j1,
-				                                      O3,
-				                                      'C',
-				                                      j2,
-				                                      O4,
-				                                      fermionicSign,
-				                                      threadId);
-			}
-		}
-
-		return sum;
 	}
 
 	SizeType logBase2(SizeType x) const
