@@ -228,15 +228,12 @@ public:
 		}
 	}
 
-	FieldType correlations(
-	        SizeType i,
-	        SizeType j,
-	        const SparseMatrixType& O1,
-	        const SparseMatrixType& O2,
-	        int fermionicSign,
-	        SizeType threadId)
+	void twoPoint(MatrixType& m,
+	                   const SparseMatrixType& O1,
+	                   const SparseMatrixType& O2,
+	                   int fermionicSign)
 	{
-		return twopoint_.calcCorrelation(i,j, O1, O2, fermionicSign,threadId);
+		twopoint_(m, O1, O2, fermionicSign);
 	}
 
 	void threePoint(const BraketType& braket,

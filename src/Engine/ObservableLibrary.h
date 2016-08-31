@@ -580,9 +580,6 @@ private:
 	void ddOrbitalsTwo(MatrixType& m, SizeType flag)
 	{
 		int fermionicSign = 1;
-		SizeType threadId = 0;
-		SizeType rows = numberOfSites_;
-		SizeType cols = rows;
 		SizeType site = 1;
 		SizeType orbitals = logBase2(model_.hilbertSize(site));
 		assert(!(orbitals & 1));
@@ -592,32 +589,29 @@ private:
 			SizeType orb1 = 0;  // lower orbital
 			SizeType spin0 = 0; // up
 			SizeType spin1 = 1; // down
-			SparseMatrixType O1 = model_.naturalOperator("c",site,orb1+spin1*orbitals).data; // c_dn,0
-			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin0*orbitals).data; // c_up,0
+			 // c_dn,0
+			SparseMatrixType O1 = model_.naturalOperator("c",site,orb1+spin1*orbitals).data;
+			// c_up,0
+			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin0*orbitals).data;
 
 			SparseMatrixType A,B;
 			multiply(B,O1,O2); // c_dn,0 . c_up,0.
 			transposeConjugate(A,B);
-			for (SizeType i = 0; i < rows; ++i) {
-				for (SizeType j = i; j < cols; ++j) {
-					m(i,j) = observe_.correlations(i,j,A,B,fermionicSign,threadId);
-				}
-			}
+			observe_.twoPoint(m,A,B,fermionicSign);
+
 			std::cout << m;
 		} else if (flag==1) {
 			SizeType orb1 = 1;  // lower orbital
 			SizeType spin0 = 0; // up
 			SizeType spin1 = 1; // down
-			SparseMatrixType O1 = model_.naturalOperator("c",site,orb1+spin1*orbitals).data; // c_dn,0
-			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin0*orbitals).data; // c_up,0
+			// c_dn,0
+			SparseMatrixType O1 = model_.naturalOperator("c",site,orb1+spin1*orbitals).data;
+			 // c_up,0
+			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin0*orbitals).data;
 			SparseMatrixType A,B;
 			multiply(B,O1,O2); // c_dn,0 . c_up,0.
 			transposeConjugate(A,B);
-			for (SizeType i = 0; i < rows; ++i) {
-				for (SizeType j = i; j < cols; ++j) {
-					m(i,j) = observe_.correlations(i,j,A,B,fermionicSign,threadId);
-				}
-			}
+			observe_.twoPoint(m,A,B,fermionicSign);
 			std::cout << m;
 		} else if (flag==2) {
 			SizeType spin0 = 0; // up
@@ -635,12 +629,7 @@ private:
 			mult1 = 1.0; mult2 = -1.0;
 			operatorPlus(B,tmp1,mult1,tmp2,mult2); // B = 1.0*tmp1 + (-1.0)*tmp2 = Singlet
 			transposeConjugate(A,B); // A = transpose(B)
-
-			for (SizeType i = 0; i < rows; ++i) {
-				for (SizeType j = i; j < cols; ++j) {
-					m(i,j) = observe_.correlations(i,j,A,B,fermionicSign,threadId);
-				}
-			}
+			observe_.twoPoint(m,A,B,fermionicSign);
 			std::cout << m;
 		} else if (flag==3) {
 			SizeType spin0 = 0; // up
@@ -658,42 +647,33 @@ private:
 			mult1 = 1.0; mult2 = 1.0;
 			operatorPlus(B,tmp1,mult1,tmp2,mult2); // B = 1.0*tmp1 + (1.0)*tmp2 = Triplet
 			transposeConjugate(A,B); // A = transpose(B)
-
-			for (SizeType i = 0; i < rows; ++i) {
-				for (SizeType j = i; j < cols; ++j) {
-					m(i,j) = observe_.correlations(i,j,A,B,fermionicSign,threadId);
-				}
-			}
+			observe_.twoPoint(m,A,B,fermionicSign);
 			std::cout << m;
 		} else if (flag==4) {
 			SizeType orb0 = 0;  // lower orbital
 			SizeType orb1 = 1;  // upper orbital
 			SizeType spin0 = 0; // up
-			SparseMatrixType O1 = model_.naturalOperator("c",site,orb0+spin0*orbitals).data; // c_up,0
-			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin0*orbitals).data; // c_up,1
+			// c_up,0
+			SparseMatrixType O1 = model_.naturalOperator("c",site,orb0+spin0*orbitals).data;
+			// c_up,1
+			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin0*orbitals).data;
 			SparseMatrixType A,B;
 			multiply(B,O1,O2);      // c_up,0 . c_up,1
 			transposeConjugate(A,B);
-			for (SizeType i = 0; i < rows; ++i) {
-				for (SizeType j = i; j < cols; ++j) {
-					m(i,j) = observe_.correlations(i,j,A,B,fermionicSign,threadId);
-				}
-			}
+			observe_.twoPoint(m,A,B,fermionicSign);
 			std::cout << m;
 		} else if (flag==5) {
 			SizeType orb0 = 0;  // lower orbital
 			SizeType orb1 = 1;  // upper orbital
 			SizeType spin1 = 1; // dn
-			SparseMatrixType O1 = model_.naturalOperator("c",site,orb0+spin1*orbitals).data; // c_dn,0
-			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin1*orbitals).data; // c_dn,1
+			// c_dn,0
+			SparseMatrixType O1 = model_.naturalOperator("c",site,orb0+spin1*orbitals).data;
+			// c_dn,1
+			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin1*orbitals).data;
 			SparseMatrixType A,B;
 			multiply(B,O1,O2);      // c_dn,0 . c_dn,1
 			transposeConjugate(A,B);
-			for (SizeType i = 0; i < rows; ++i) {
-				for (SizeType j = i; j < cols; ++j) {
-					m(i,j) = observe_.correlations(i,j,A,B,fermionicSign,threadId);
-				}
-			}
+			observe_.twoPoint(m,A,B,fermionicSign);
 			std::cout << m;
 		} else if (flag==6) {
 			SizeType spin0 = 0; // up
@@ -709,14 +689,10 @@ private:
 
 			FieldType mult1, mult2;
 			mult1 = 1.0; mult2 = 1.0;
-			operatorPlus(B,tmp1,mult1,tmp2,mult2); // B = 1.0*tmp1 + (1.0)*tmp2 = Triplet = up*up + dn*dn
+			// B = 1.0*tmp1 + (1.0)*tmp2 = Triplet = up*up + dn*dn
+			operatorPlus(B,tmp1,mult1,tmp2,mult2);
 			transposeConjugate(A,B); // A = transpose(B)
-
-			for (SizeType i = 0; i < rows; ++i) {
-				for (SizeType j = i; j < cols; ++j) {
-					m(i,j) = observe_.correlations(i,j,A,B,fermionicSign,threadId);
-				}
-			}
+			observe_.twoPoint(m,A,B,fermionicSign);
 			std::cout << m;
 		} else {
 			PsimagLite::String s = "Unknown flag: " + flag;
