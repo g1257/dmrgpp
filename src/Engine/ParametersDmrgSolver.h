@@ -151,6 +151,7 @@ struct ParametersDmrgSolver {
 	RestartStruct checkpoint;
 	VectorSizeType adjustQuantumNumbers;
 	VectorFiniteLoopType finiteLoop;
+	FieldType degeneracyMax;
 
 	template<class Archive>
 	void serialize(Archive&, const unsigned int)
@@ -178,7 +179,8 @@ struct ParametersDmrgSolver {
 	    : sitesPerBlock(1),
 	      maxMatrixRankStored(0),
 	      excited(0),
-	      recoverySave("0")
+	      recoverySave("0"),
+	      degeneracyMax(1e-12)
 	{
 		io.readline(model,"Model=");
 		io.readline(options,"SolverOptions=");
@@ -257,6 +259,10 @@ struct ParametersDmrgSolver {
 
 		try {
 			io.readline(excited,"Excited=");
+		} catch (std::exception&) {}
+
+		try {
+			io.readline(degeneracyMax,"DegeneracyMax=");
 		} catch (std::exception&) {}
 
 		try {
@@ -438,6 +444,7 @@ std::ostream &operator<<(std::ostream &os,
 		os<<p.truncationControl.second<<"\n";
 	}
 
+	os<<"parameters.degeneracyMax="<<p.degeneracyMax<<"\n";
 	os<<"parameters.nthreads="<<p.nthreads<<"\n";
 	os<<"parameters.useReflectionSymmetry="<<p.useReflectionSymmetry<<"\n";
 	os<<p.checkpoint;

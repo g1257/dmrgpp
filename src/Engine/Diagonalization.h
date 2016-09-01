@@ -318,15 +318,16 @@ private:
 		}
 
 		PsimagLite::OstringStream msg3;
-		msg3<<"Ground state energy= "<<gsEnergy<<"\n";
+		msg3<<"Ground state energy= "<<gsEnergy;
 		progress_.printline(msg3,std::cout);
 
 		if (verbose_ && PsimagLite::Concurrency::root())
 			std::cerr<<"About to calc gs vector\n";
 
 		counter=0;
+		RealType degeneracyMax = parameters_.degeneracyMax;
 		for (SizeType i=0;i<total;i++) {
-			if (findSymmetrySector && energySaved[i] > gsEnergy)
+			if (findSymmetrySector && fabs(energySaved[i] - gsEnergy) > degeneracyMax)
 				weights[i] = 0;
 			if (weights[i]==0) continue;
 
@@ -343,6 +344,10 @@ private:
 			progress_.printline(msg2,std::cout);
 			counter++;
 		}
+
+		PsimagLite::OstringStream msg4;
+		msg4<<"Number of Sectors found "<<counter;
+		progress_.printline(msg4,std::cout);
 
 		target.setGs(vecSaved,lrs.super());
 
