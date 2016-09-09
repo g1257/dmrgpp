@@ -435,7 +435,7 @@ private:
 		SizeType totalElectrons = modelParameters_.targetQuantum.totalElectrons;
 		if (totalElectrons != 0) {
 			PsimagLite::String msg("Please delete the line ");
-			msg += "TargetElectronsTotal= in the input file\n");
+			msg += "TargetElectronsTotal= in the input file\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
 
