@@ -16,10 +16,10 @@ $steps /=  ($deltaT * $x);
 $steps = int($steps) + 1;
 my $loops = int($steps/4);
 
-my $buffer="$x $m 0  -$x $m 0  -$x $m 0  $x $m 1\n";
+my $buffer="$x $m 0  -$x $m 0  -$x $m 0  $x $m 0\n";
 my $count = 4;
 for (my $i=0;$i<$loops;$i++) {
-	$buffer=$buffer."$x $m 1  -$x $m 1  -$x $m 1  $x $m 1\n";
+	$buffer=$buffer."$x $m 0  -$x $m 0  -$x $m 0  $x $m 0\n";
 	$count += 4;
 }
 print "FiniteLoops $count $buffer\n";
