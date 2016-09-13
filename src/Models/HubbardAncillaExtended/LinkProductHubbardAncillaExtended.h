@@ -95,16 +95,19 @@ class LinkProductHubbardAncillaExtended {
 	typedef typename ModelHelperType::BasisType BasisType;
 	typedef typename ModelHelperType::OperatorType OperatorType;
 
-    enum {TERM_HOPPING, TERM_LAMBDA, TERM_SPLUS, TERM_SZ, TERM_PAIR, TERM_NINJ};
+	enum {TERM_HOPPING, TERM_LAMBDA, TERM_SPLUS, TERM_SZ, TERM_PAIR, TERM_NINJ};
 
 public:
 
 	typedef typename ModelHelperType::RealType RealType;
 
 	template<typename SomeStructType>
-	static SizeType dofs(SizeType,const SomeStructType&)
+	static SizeType dofs(SizeType term,const SomeStructType&)
 	{
-		return 2;
+		if (term == TERM_HOPPING || term == TERM_LAMBDA)
+			return 2;
+
+		return 1;
 	}
 
 	// has only dependence on orbital
@@ -122,13 +125,13 @@ public:
 	                        bool,
 	                        SizeType& fermionOrBoson,
 	                        PairType& ops,
-                            std::pair<char,char>& mods,
+	                        std::pair<char,char>& mods,
 	                        SizeType& angularMomentum,
 	                        RealType& angularFactor,
 	                        SizeType& category,
 	                        const SomeStructType&)
 	{
-        char tmp = mods.first;
+		char tmp = mods.first;
 		if (term==TERM_HOPPING) {
 			fermionOrBoson = ProgramGlobals::FERMION;
 			ops = PairType(dofs,dofs);
@@ -139,80 +142,76 @@ public:
 			return;
 		}
 
-        if (term==TERM_LAMBDA) {
-            fermionOrBoson = ProgramGlobals::BOSON;
-            SizeType offset1 = 2;
-            ops = PairType(dofs + offset1,dofs + offset1);
-        }
+		if (term==TERM_LAMBDA) {
+			fermionOrBoson = ProgramGlobals::BOSON;
+			SizeType offset1 = 2;
+			ops = PairType(dofs + offset1,dofs + offset1);
+			return;
+		}
 
-        if (term==TERM_SPLUS) {
-            fermionOrBoson = ProgramGlobals::BOSON;
-            SizeType offset1 = 4;
-            switch (dofs) {
-            case 0: // S+ S-
-                angularFactor = -1;
-                category = 2;
-                angularMomentum = 2;
-                ops = PairType(offset1,offset1);
-                break;
-            case 1: // S- S+
-                angularFactor = -1;
-                category = 0;
-                mods.first = mods.second;
-                mods.second = tmp;
-                angularMomentum = 2;
-                ops = PairType(offset1,offset1);
-                break;
-            }
-        }
+		if (term==TERM_SPLUS) {
+			fermionOrBoson = ProgramGlobals::BOSON;
+			SizeType offset1 = 4;
+			assert(dofs == 0);
+			// S+ S- which includes also S- S+
+			angularFactor = -1;
+			category = 2;
+			angularMomentum = 2;
+			ops = PairType(offset1,offset1);
+			return;
+		}
 
-        if (term==TERM_SZ) {
-            fermionOrBoson = ProgramGlobals::BOSON;
-            SizeType offset1 = 5;
-            angularFactor = 0.5;
-            category = 1;
-            angularMomentum = 2;
-            ops = PairType(offset1,offset1);
-        }
+		if (term==TERM_SZ) {
+			fermionOrBoson = ProgramGlobals::BOSON;
+			SizeType offset1 = 5;
+			angularFactor = 0.5;
+			category = 1;
+			angularMomentum = 2;
+			ops = PairType(offset1,offset1);
+		}
 
-        if (term==TERM_PAIR) {
-            fermionOrBoson = ProgramGlobals::BOSON;
-            SizeType offset1 = 6;
-            switch (dofs) {
-            case 0: // P+ P-
-                angularFactor = 1;
-                category = 2;
-                angularMomentum = 2;
-                ops = PairType(offset1,offset1);
-                break;
-            case 1: // P- P+
-                angularFactor = -1;
-                category = 0;
-                mods.first = mods.second;
-                mods.second = tmp;
-                angularMomentum = 2;
-                ops = PairType(offset1,offset1);
-                break;
-            }
-        }
+		if (term==TERM_PAIR) {
+			fermionOrBoson = ProgramGlobals::BOSON;
+			SizeType offset1 = 6;
+			assert(dofs = 0);
+			angularFactor = 1;
+			category = 2;
+			angularMomentum = 2;
+			ops = PairType(offset1,offset1);
+			return;
+		}
 
-        if (term==TERM_NINJ) {
-            fermionOrBoson = ProgramGlobals::BOSON;
-            SizeType offset1 = 7;
-            angularFactor = 1;
-            angularMomentum = 0;
-            category = 0;
-            ops = PairType(offset1,offset1);
-        }
+		if (term==TERM_NINJ) {
+			fermionOrBoson = ProgramGlobals::BOSON;
+			SizeType offset1 = 7;
+			angularFactor = 1;
+			angularMomentum = 0;
+			category = 0;
+			ops = PairType(offset1,offset1);
+			return;
+		}
 	}
 
 	template<typename SomeStructType>
-	static void valueModifier(SparseElementType&,
+	static void valueModifier(SparseElementType& value,
+	                          SizeType term,
 	                          SizeType,
-	                          SizeType,
-	                          bool,
+	                          bool isSu2,
 	                          const SomeStructType&)
-	{}
+	{
+		if (term==TERM_HOPPING || term == TERM_LAMBDA || term == TERM_PAIR)
+			return;
+
+		if (term==TERM_NINJ) {
+			value *= 0.5;
+			return;
+		}
+
+		assert(term==TERM_SPLUS || term == TERM_SZ);
+
+		if (isSu2) value = -value;
+		value *= 0.5;
+	}
 
 	static SizeType terms() { return 6; }
 }; // class LinkProductHubbardAncillaExtended

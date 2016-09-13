@@ -105,11 +105,11 @@ public:
 		ops = operatorDofs(term,isSu2);
 		angularMomentum = 2;
 		switch (term) {
-		case 0:
+		case 0: // S+S-
 			angularFactor = -1;
 			category = 2;
 			break;
-		case 1:
+		case 1: // SzSz
 			angularFactor = 0.5;
 			category = 1;
 			break;

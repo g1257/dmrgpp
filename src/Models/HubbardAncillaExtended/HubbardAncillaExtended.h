@@ -225,6 +225,8 @@ public:
             setPair(creationMatrix,i,natBasis);
             setN(creationMatrix,i,natBasis);
 		}
+
+		assert(creationMatrix.size() == 8);
 	}
 
 	OperatorType naturalOperator(const PsimagLite::String& what,
