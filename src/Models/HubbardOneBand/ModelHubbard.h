@@ -148,7 +148,23 @@ public:
 	      geometry_(geometry),
 	      offset_(offset),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
-	{}
+	{
+		SizeType usize = modelParameters_.hubbardU.size();
+		SizeType vsize = modelParameters_.potentialV.size();
+		SizeType totalSites = geometry_.numberOfSites();
+
+		if (usize != totalSites) {
+			PsimagLite::String msg("ModelHubbard: hubbardU expecting ");
+			msg += ttos(totalSites) + " entries, got " + ttos(usize) + "\n";
+			throw PsimagLite::RuntimeError(msg);
+		}
+
+		if (vsize != 2*totalSites) {
+			PsimagLite::String msg("ModelHubbard: potentialV expecting ");
+			msg += ttos(2*totalSites) + " entries, got " + ttos(vsize) + "\n";
+			throw PsimagLite::RuntimeError(msg);
+		}
+	}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,
 	                   SizeType,
