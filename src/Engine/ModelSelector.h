@@ -54,6 +54,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/Heisenberg/ModelHeisenberg.h"
 #include "../Models/HeisenbergAncillaC/HeisenbergAncillaC.h"
 #include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
+#include "../Models/SuperExtendedHubbard1Orb/SuperExtendedHubbard1Orb.h"
 #include "../Models/FeAsModel/ModelFeBasedSc.h"
 #include "../Models/FeAsBasedScExtended/FeAsBasedScExtended.h"
 #include "../Models/Immm/Immm.h"
@@ -82,6 +83,7 @@ class ModelSelector {
 	typedef HeisenbergAncillaC<ModelBaseType> HeisenbergAncillaCType;
 	typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
 	typedef ExtendedHubbard1Orb<ModelBaseType> ModelHubbardExtType;
+        typedef ExtendedSuperHubbard1Orb<ModelBaseType> ModelHubbardExtSuperType;
 	typedef ModelFeBasedSc<ModelBaseType> FeBasedScType;
 	typedef FeAsBasedScExtended<ModelBaseType> FeBasedScExtType;
 	typedef Immm<ModelBaseType> ImmmType;
@@ -91,8 +93,7 @@ class ModelSelector {
 	typedef TjAncillaG<ModelBaseType> TjAncillaGType;
 	typedef SuperHubbardExtended<ModelBaseType> SuperHubbardExtendedType;
 	typedef HubbardAncilla<ModelBaseType> HubbardAncillaType;
-
-    typedef HubbardAncillaExtended<ModelBaseType> HubbardAncillaExtendedType;
+	typedef HubbardAncillaExtended<ModelBaseType> HubbardAncillaExtendedType;
 	typedef FermionSpinless<ModelBaseType> FermionSpinlessType;
 	// end models
 
@@ -121,6 +122,8 @@ public:
 			model_ = new HeisenbergAncillaCType(solverParams,io,geometry);
 		} else if (name_ == "HubbardOneBandExtended") {
 			model_ = new ModelHubbardExtType(solverParams,io,geometry);
+                } else if (name_ == "HubbardOneBandExtendedSuper") {
+                        model_ = new ModelHubbardExtSuperType(solverParams,io,geometry);
 		} else if (name_ == "FeAsBasedSc") {
 			model_ = new FeBasedScType(solverParams,io,geometry);
 		} else if (name_ == "FeAsBasedScExtended") {

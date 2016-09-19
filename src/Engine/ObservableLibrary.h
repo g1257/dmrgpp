@@ -120,7 +120,8 @@ public:
 	{
 		PsimagLite::String modelName = model.params().model;
 		bool hubbardLike = (modelName == "HubbardOneBand" ||
-		                    modelName == "HubbardOneBandExtended");
+		                    modelName == "HubbardOneBandExtended" ||
+		                    modelName == "HubbardOneBandExtendedSuper");
 
 		if (hasTimeEvolution && hubbardLike) {
 			SizeType site = 0;

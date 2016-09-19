@@ -373,6 +373,7 @@ private:
 
 		if (modelName == "HubbardOneBand" ||
 		        modelName == "HubbardOneBandExtended" ||
+		        modelName == "HubbardOneBandExtendedSuper" ||		        
 		        modelName == "Immm") {
 			this->common().cocoonLegacy(direction,block);
 		}
