@@ -131,7 +131,6 @@ public:
 	                        SizeType& category,
 	                        const SomeStructType&)
 	{
-		char tmp = mods.first;
 		if (term==TERM_HOPPING) {
 			fermionOrBoson = ProgramGlobals::FERMION;
 			ops = PairType(dofs,dofs);
