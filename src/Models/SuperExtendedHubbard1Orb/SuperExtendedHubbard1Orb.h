@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef EXTENDED_SUPER_HUBBARD_1ORB_H
 #define EXTENDED_SUPER_HUBBARD_1ORB_H
-#include "../Models/HubbardOneBand/ModelHubbard.h"
+#include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
 #include "LinkProdExtendedSuperHubbard1Orb.h"
 #include "ModelCommon.h"
 
@@ -90,378 +90,273 @@ class ExtendedSuperHubbard1Orb : public ModelBaseType {
 
 public:
 
-    typedef typename ModelBaseType::VectorSizeType VectorSizeType;
-    typedef ModelHubbard<ModelBaseType> ModelHubbardType;
-    typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-    typedef typename ModelBaseType::GeometryType GeometryType;
-    typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
-    typedef typename ModelBaseType::LinkProductStructType LinkProductStructType;
-    typedef typename ModelBaseType::LinkType LinkType;
-    typedef typename ModelHelperType::OperatorsType OperatorsType;
-    typedef typename OperatorsType::OperatorType OperatorType;
-    typedef typename ModelHelperType::RealType RealType;
-    typedef typename ModelBaseType::TargetQuantumElectronsType TargetQuantumElectronsType;
-    typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-    typedef typename SparseMatrixType::value_type SparseElementType;
-    typedef LinkProdExtendedSuperHubbard1Orb<ModelHelperType> LinkProductType;
-    typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
-    typedef	typename ModelBaseType::MyBasis MyBasis;
-    typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-    typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
-    typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
-    typedef typename ModelHelperType::BlockType BlockType;
-    typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-    typedef typename ModelBaseType::VectorType VectorType;
-    typedef PsimagLite::Matrix<SparseElementType> MatrixType;
-    typedef typename ModelHubbardType::HilbertSpaceHubbardType HilbertSpaceHubbardType;
-    typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
-    typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-    typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
-    typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
-    typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
+	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
+	typedef ExtendedHubbard1Orb<ModelBaseType> ExtendedHubbard1OrbType;
+	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
+	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
+	typedef typename ModelBaseType::LinkProductStructType LinkProductStructType;
+	typedef typename ModelBaseType::LinkType LinkType;
+	typedef typename ModelHelperType::OperatorsType OperatorsType;
+	typedef typename OperatorsType::OperatorType OperatorType;
+	typedef typename ModelHelperType::RealType RealType;
+	typedef typename ModelBaseType::TargetQuantumElectronsType TargetQuantumElectronsType;
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef LinkProdExtendedSuperHubbard1Orb<ModelHelperType> LinkProductType;
+	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
+	typedef	typename ModelBaseType::MyBasis MyBasis;
+	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
+	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
+	typedef typename ExtendedHubbard1OrbType::HilbertBasisType HilbertBasisType;
+	typedef typename ModelHelperType::BlockType BlockType;
+	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
+	typedef typename ModelBaseType::VectorType VectorType;
+	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
+	typedef typename ExtendedHubbard1OrbType::HilbertSpaceHubbardType HilbertSpaceHubbardType;
+	typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
+	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
+	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
+	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
+	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
 
-    ExtendedSuperHubbard1Orb(const SolverParamsType& solverParams,
-                             InputValidatorType& io,
-                             GeometryType const &geometry)
-        : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
-          modelParameters_(io),
-          geometry_(geometry),
-          modelHubbard_(solverParams,io,geometry)
-    {}
+	ExtendedSuperHubbard1Orb(const SolverParamsType& solverParams,
+	                         InputValidatorType& io,
+	                         GeometryType const &geometry)
+	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
+	      modelParameters_(io),
+	      geometry_(geometry),
+	      extendedHubbard_(solverParams,io,geometry)
+	{}
 
-    SizeType memResolv(PsimagLite::MemResolv&,
-                       SizeType,
-                       PsimagLite::String = "") const
-    {
-        return 0;
-    }
+	SizeType memResolv(PsimagLite::MemResolv&,
+	                   SizeType,
+	                   PsimagLite::String = "") const
+	{
+		return 0;
+	}
 
-    SizeType hilbertSize(SizeType) const
-    {
-        return (1<<2);
-    }
+	SizeType hilbertSize(SizeType) const
+	{
+		return (1<<2);
+	}
 
-    //! find creation operator matrices for (i,sigma) in the natural basis,
-    //! find quantum numbers and number of electrons
-    //! for each state in the basis
-    void setNaturalBasis(VectorOperatorType& creationMatrix,
-                         SparseMatrixType &hamiltonian,
-                         SymmetryElectronsSzType &q,
-                         const BlockType& block,
-                         const RealType& time)  const
-    {
-        HilbertBasisType natBasis;
-        VectorSizeType qvector;
-        setNaturalBasis(natBasis,qvector,block);
+	//! find creation operator matrices for (i,sigma) in the natural basis,
+	//! find quantum numbers and number of electrons
+	//! for each state in the basis
+	void setNaturalBasis(VectorOperatorType& creationMatrix,
+	                     SparseMatrixType &hamiltonian,
+	                     SymmetryElectronsSzType &q,
+	                     const BlockType& block,
+	                     const RealType& time)  const
+	{
+		extendedHubbard_.setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
 
-        setOperatorMatrices(creationMatrix,block);
+		addAditionalOperatorMatrices(creationMatrix,block);
 
-        //! set hamiltonian
-        this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
-    }
+		//! set hamiltonian
+		this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
+	}
 
-    void setOperatorMatrices(VectorOperatorType& creationMatrix,
-                             const BlockType& block) const
-    {
-        HilbertBasisType natBasis;
-        VectorSizeType qvector;
-        setNaturalBasis(natBasis,qvector,block);
+	void setOperatorMatrices(VectorOperatorType& creationMatrix,
+	                         const BlockType& block) const
+	{
+		extendedHubbard_.setOperatorMatrices(creationMatrix,block);
+		addAditionalOperatorMatrices(creationMatrix,block);
+		assert(creationMatrix.size() == 6);
+	}
 
-        SizeType dofs = 2;
-        //! Set the operators c^\daggger_{i\sigma} in the natural basis
-        creationMatrix.clear();
-        for (SizeType i=0;i<block.size();i++) {
-            for (SizeType sigma=0;sigma<dofs;sigma++) {
-                MatrixType tmp;
-                findOperatorMatrices(tmp,i,sigma,natBasis);
-                SparseMatrixType tmpMatrix(tmp);
-                int asign= 1;
-                if (sigma>0) asign= 1;
-                typename OperatorType::Su2RelatedType su2related;
-                if (sigma==0) {
-                    su2related.source.push_back(i*dofs);
-                    su2related.source.push_back(i*dofs+1);
-                    su2related.transpose.push_back(-1);
-                    su2related.transpose.push_back(-1);
-                    su2related.offset = 1;
-                }
-                OperatorType myOp(tmpMatrix,
-                                  -1,
-                                  typename OperatorType::PairType(1,1-sigma),
-                                  asign,
-                                  su2related);
+	OperatorType naturalOperator(const PsimagLite::String& what,
+	                             SizeType site,
+	                             SizeType dof) const
+	{
+		BlockType block;
+		block.resize(1);
+		block[0]=site;
+		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
+		setOperatorMatrices(creationMatrix,block);
 
-                creationMatrix.push_back(myOp);
-            }
+		if (what=="n") {
+			VectorSizeType allowed(1,0);
+			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
+			return creationMatrix[2];
+		}
 
-            setNi(creationMatrix,i,natBasis);
-            setSplusi(creationMatrix,i,natBasis);
-            setSzi(creationMatrix,i,natBasis);
-            setPairi(creationMatrix,i,natBasis);
-        }
-        assert(creationMatrix.size() == 6);
+		return extendedHubbard_.naturalOperator(what,site,dof);
+	}
 
-    }
+	//! find total number of electrons for each state in the basis
+	void findElectrons(typename PsimagLite::Vector<SizeType> ::Type&electrons,
+	                   const VectorHilbertStateType& basis,
+	                   SizeType site) const
+	{
+		extendedHubbard_.findElectrons(electrons,basis,site);
+	}
 
-    OperatorType naturalOperator(const PsimagLite::String& what,
-                                 SizeType site,
-                                 SizeType dof) const
-    {
-        BlockType block;
-        block.resize(1);
-        block[0]=site;
-        typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-        setOperatorMatrices(creationMatrix,block);
+	//! find all states in the natural basis for a block of n sites
+	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
+	void setNaturalBasis(HilbertBasisType  &basis,
+	                     typename PsimagLite::Vector<SizeType>::Type& q,
+	                     const typename PsimagLite::Vector<SizeType>::Type& block) const
+	{
+		extendedHubbard_.setNaturalBasis(basis,q,block);
+	}
 
-        if (what=="n") {
-            VectorSizeType allowed(1,0);
-            ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-            PsimagLite::Matrix<SparseElementType> tmp;
-            return creationMatrix[2];
-        } else {
-            return modelHubbard_.naturalOperator(what,site,dof);
-        }
-    }
+	void print(std::ostream& os) const
+	{
+		extendedHubbard_.print(os);
+	}
 
-    //! find total number of electrons for each state in the basis
-    void findElectrons(typename PsimagLite::Vector<SizeType> ::Type&electrons,
-                       const VectorHilbertStateType& basis,
-                       SizeType site) const
-    {
-        modelHubbard_.findElectrons(electrons,basis,site);
-    }
+	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
+	                                        const VectorOperatorType& cm,
+	                                        const BlockType& block,
+	                                        RealType time,
+	                                        RealType factorForDiagonals=1.0)  const
+	{
+		// remove the other matrices before sending to Hubbard
+		VectorOperatorType cmCorrected;
+		SizeType k = 0;
+		for (SizeType i = 0; i < block.size(); ++i) {
+			for (SizeType j = 0; j < 2; ++j) {
+				cmCorrected.push_back(cm[k++]);
+			}
 
-    //! find all states in the natural basis for a block of n sites
-    //! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-    void setNaturalBasis(HilbertBasisType  &basis,
-                         typename PsimagLite::Vector<SizeType>::Type& q,
-                         const typename PsimagLite::Vector<SizeType>::Type& block) const
-    {
-        modelHubbard_.setNaturalBasis(basis,q,block);
-    }
+			cmCorrected.push_back(cm[k++]);
+			k += 3;
+		}
 
-    void print(std::ostream& os) const
-    {
-        modelHubbard_.print(os);
-    }
+		extendedHubbard_.addDiagonalsInNaturalBasis(hmatrix,
+		                                            cmCorrected,
+		                                            block,
+		                                            time,
+		                                            factorForDiagonals);
+	}
 
-    virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-                                            const VectorOperatorType& cm,
-                                            const BlockType& block,
-                                            RealType time,
-                                            RealType factorForDiagonals=1.0)  const
-    {
-        // remove the other matrices before sending to Hubbard
-        VectorOperatorType cmCorrected;
-        SizeType k = 0;
-        for (SizeType i = 0; i < block.size(); ++i) {
-            for (SizeType j = 0; j < 2; ++j) {
-                cmCorrected.push_back(cm[k++]);
-            }
-            k++;
-        }
-
-        modelHubbard_.addDiagonalsInNaturalBasis(hmatrix,
-                                                 cmCorrected,
-                                                 block,
-                                                 time,
-                                                 factorForDiagonals);
-    }
-
-    virtual const TargetQuantumElectronsType& targetQuantum() const
-    {
-        return modelHubbard_.targetQuantum();
-    }
+	virtual const TargetQuantumElectronsType& targetQuantum() const
+	{
+		return extendedHubbard_.targetQuantum();
+	}
 
 private:
 
-    //! Find c^\dagger_isigma in the natural basis natBasis
-    void findOperatorMatrices(MatrixType& creationMatrix,
-                              int i,
-                              int sigma,
-                              const HilbertBasisType& natBasis) const
-    {
-        typename HilbertSpaceHubbardType::HilbertState bra,ket;
-        int n = natBasis.size();
-        PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
+	void addAditionalOperatorMatrices(VectorOperatorType& creationMatrix,
+	                                  const BlockType& block) const
+	{
+		HilbertBasisType natBasis;
+		VectorSizeType qvector;
+		extendedHubbard_.setNaturalBasis(natBasis,qvector,block);
 
-        for (SizeType ii=0;ii<natBasis.size();ii++) {
-            bra=ket=natBasis[ii];
-            if (HilbertSpaceHubbardType::isNonZero(ket,i,sigma)) {
+		for (SizeType i=0;i<block.size();i++) {
+			setSplusi(creationMatrix,i);
+			setSzi(creationMatrix,i);
+			setPairi(creationMatrix,i);
+		}
 
-            } else {
-                HilbertSpaceHubbardType::create(bra,i,sigma);
-                int jj = PsimagLite::isInVector(natBasis,bra);
-                if (jj<0)
-                    throw PsimagLite::RuntimeError("findOperatorMatrices\n");
-                cm(ii,jj) =sign(ket,i,sigma);
-            }
-        }
-        transposeConjugate(creationMatrix,cm);
-    }
+		assert(creationMatrix.size() == 6);
+	}
 
-    void findAllMatrices(VectorSparseMatrixType& vm,
-                         SizeType i,
-                         const HilbertBasisType& natBasis) const
-    {
-        for (SizeType sigma = 0; sigma < 2; ++sigma) {
-            MatrixType m;
-            findOperatorMatrices(m,i,sigma,natBasis);
-            vm.push_back(SparseMatrixType(m));
-        }
-    }
+	void setSplusi(VectorOperatorType& cm,
+	               SizeType) const
+	{
+		typename OperatorType::Su2RelatedType su2related;
+		SparseMatrixType m;
+		transposeConjugate(m,cm[1].data);
+		SparseMatrixType splus;
+		multiply(splus,cm[0].data,m);
 
-    void setSplusi(VectorOperatorType& cm,
-                   SizeType i,
-                   const HilbertBasisType& natBasis) const
-    {
+		OperatorType myOp(splus,
+		                  1,
+		                  typename OperatorType::PairType(0,0),
+		                  -1,
+		                  su2related);
+		cm.push_back(myOp);
+	}
 
-        VectorSparseMatrixType vm;
-        findAllMatrices(vm,i,natBasis);
+	void setSzi(VectorOperatorType& cm,
+	            SizeType) const
+	{
+		typename OperatorType::Su2RelatedType su2related;
 
-        typename OperatorType::Su2RelatedType su2related;
-        SparseMatrixType m;
-        transposeConjugate(m,vm[1]);
-        SparseMatrixType splus;
-        multiply(splus,vm[0],m);
+		SparseMatrixType n1 = n(cm[0].data);
+		SparseMatrixType n2 = n(cm[1].data);
+		MatrixType dn1;
+		MatrixType dn2;
+		crsMatrixToFullMatrix(dn1,n1);
+		crsMatrixToFullMatrix(dn2,n2);
 
-        OperatorType myOp(splus,
-                          1,
-                          typename OperatorType::PairType(0,0),
-                          -1,
-                          su2related);
-        cm.push_back(myOp);
-    }
-
-    void setSzi(VectorOperatorType& cm,
-                SizeType i,
-                const HilbertBasisType& natBasis) const
-    {
-
-        VectorSparseMatrixType vm;
-        findAllMatrices(vm,i,natBasis);
-
-        typename OperatorType::Su2RelatedType su2related;
-
-        SparseMatrixType cm1(vm[0]);
-        SparseMatrixType cm2(vm[1]);
-        SparseMatrixType n1 = n(cm1);
-        SparseMatrixType n2 = n(cm2);
-        MatrixType dn1;
-        MatrixType dn2;
-        crsMatrixToFullMatrix(dn1,n1);
-        crsMatrixToFullMatrix(dn2,n2);
-
-        SizeType n = dn1.n_row();
-        MatrixType szmatrix(n,n);
+		SizeType n = dn1.n_row();
+		MatrixType szmatrix(n,n);
 
 
-        for (SizeType i = 0; i < n; ++i) {
-            szmatrix(i,i) = 0.5*(dn1(i,i) - dn2(i,i));
-        }
+		for (SizeType i = 0; i < n; ++i) {
+			szmatrix(i,i) = 0.5*(dn1(i,i) - dn2(i,i));
+		}
 
-        OperatorType sz(SparseMatrixType(szmatrix),
-                        1,
-                        typename OperatorType::PairType(0,0),
-                        1,
-                        su2related);
+		OperatorType sz(SparseMatrixType(szmatrix),
+		                1,
+		                typename OperatorType::PairType(0,0),
+		                1,
+		                su2related);
 
-        cm.push_back(sz);
-    }
+		cm.push_back(sz);
+	}
 
-    void setPairi(VectorOperatorType& cm,
-                  SizeType i,
-                  const HilbertBasisType& natBasis) const
-    {
-        VectorSparseMatrixType vm;
-        findAllMatrices(vm,i,natBasis);
-        typename OperatorType::Su2RelatedType su2related;
-        SparseMatrixType pair;
-        multiply(pair,vm[0],vm[1]);
+	void setPairi(VectorOperatorType& cm,
+	              SizeType) const
+	{
+		typename OperatorType::Su2RelatedType su2related;
+		SparseMatrixType pair;
+		multiply(pair,cm[0].data,cm[1].data);
 
-        OperatorType myOp(pair,
-                          1,
-                          typename OperatorType::PairType(0,0),
-                          1,
-                          su2related);
-        cm.push_back(myOp);
-    }
+		OperatorType myOp(pair,
+		                  1,
+		                  typename OperatorType::PairType(0,0),
+		                  1,
+		                  su2related);
+		cm.push_back(myOp);
+	}
 
-    void setNi(VectorOperatorType& cm,
-               SizeType i,
-               const HilbertBasisType& natBasis) const
-    {
+	SparseMatrixType n(const SparseMatrixType& c) const
+	{
+		SparseMatrixType tmpMatrix;
+		SparseMatrixType cdagger;
+		transposeConjugate(cdagger,c);
+		multiply(tmpMatrix,c,cdagger);
 
-        VectorSparseMatrixType vm;
-        findAllMatrices(vm,i,natBasis);
+		return tmpMatrix;
+	}
 
-        typename OperatorType::Su2RelatedType su2related;
-        SparseMatrixType cm1(vm[0]);
-        SparseMatrixType cm2(vm[1]);
-        SparseMatrixType n1 = n(cm1);
-        SparseMatrixType n2 = n(cm2);
-        MatrixType dn1;
-        MatrixType dn2;
-        crsMatrixToFullMatrix(dn1,n1);
-        crsMatrixToFullMatrix(dn2,n2);
-        SizeType n = dn1.n_row();
-        MatrixType nmatrix(n,n);
+	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
+	RealType sign(typename HilbertSpaceHubbardType::HilbertState const &ket,
+	              int i,
+	              int sigma) const
+	{
+		int value=0;
+		value += HilbertSpaceHubbardType::calcNofElectrons(ket,0,i,0);
+		value += HilbertSpaceHubbardType::calcNofElectrons(ket,0,i,1);
+		int tmp1 = HilbertSpaceHubbardType::get(ket,0) &1;
+		int tmp2 = HilbertSpaceHubbardType::get(ket,0) &2;
+		if (i>0 && tmp1>0) value++;
+		if (i>0 && tmp2>0) value++;
 
+		if (sigma==1) { // spin down
+			if ((HilbertSpaceHubbardType::get(ket,i) &1)) value++;
 
-        for (SizeType i = 0; i < n; ++i) {
-            nmatrix(i,i) = 1.0*(dn1(i,i) + dn2(i,i));
-        }
+		}
+		if (value%2==0) return 1.0;
 
-        OperatorType nop(SparseMatrixType(nmatrix),
-                         1,
-                         typename OperatorType::PairType(0,0),
-                         1,
-                         su2related);
-
-        cm.push_back(nop);
-    }
-
-    SparseMatrixType n(const SparseMatrixType& c) const
-    {
-        SparseMatrixType tmpMatrix;
-        SparseMatrixType cdagger;
-        transposeConjugate(cdagger,c);
-        multiply(tmpMatrix,c,cdagger);
-
-        return tmpMatrix;
-    }
-
-    //! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
-    RealType sign(typename HilbertSpaceHubbardType::HilbertState const &ket,
-                  int i,
-                  int sigma) const
-    {
-        int value=0;
-        value += HilbertSpaceHubbardType::calcNofElectrons(ket,0,i,0);
-        value += HilbertSpaceHubbardType::calcNofElectrons(ket,0,i,1);
-        int tmp1 = HilbertSpaceHubbardType::get(ket,0) &1;
-        int tmp2 = HilbertSpaceHubbardType::get(ket,0) &2;
-        if (i>0 && tmp1>0) value++;
-        if (i>0 && tmp2>0) value++;
-
-        if (sigma==1) { // spin down
-            if ((HilbertSpaceHubbardType::get(ket,i) &1)) value++;
-
-        }
-        if (value%2==0) return 1.0;
-
-        return -1;
-    }
+		return -1;
+	}
 
 
-    //serializr start class ExtendedSuperHubbard1Orb
-    //serializr vptr
-    //serializr normal modelParameters_
-    ParametersModelHubbard<RealType>  modelParameters_;
-    //serializr ref geometry_ start
-    const GeometryType &geometry_;
-    //serializr normal modelHubbard_
-    ModelHubbardType modelHubbard_;
+	//serializr start class ExtendedSuperHubbard1Orb
+	//serializr vptr
+	//serializr normal modelParameters_
+	ParametersModelHubbard<RealType>  modelParameters_;
+	//serializr ref geometry_ start
+	const GeometryType &geometry_;
+	//serializr normal modelExtHubbard_
+	ExtendedHubbard1OrbType extendedHubbard_;
 };	//class ExtendedSuperHubbard1Orb
 
 } // namespace Dmrg

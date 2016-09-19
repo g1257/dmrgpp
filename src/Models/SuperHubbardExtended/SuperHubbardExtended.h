@@ -270,4 +270,3 @@ private:
 } // namespace Dmrg
 /*@}*/
 #endif // SUPER_HUBBARD_EXTENDED_H
-

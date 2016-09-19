@@ -85,111 +85,119 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	template<typename ModelHelperType>
-    class LinkProdExtendedSuperHubbard1Orb {
-			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-			typedef std::pair<SizeType,SizeType> PairType;
-			enum {TERM_HOPPING=0,TERM_NINJ=1,TERM_SPLUSISMINUSJ=2,TERM_SZISZJ=3,TERM_PAIRIPAIRJ=4};
+template<typename ModelHelperType>
+class LinkProdExtendedSuperHubbard1Orb {
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef std::pair<SizeType,SizeType> PairType;
+	enum {TERM_HOPPING=0,TERM_NINJ=1,TERM_SPLUSISMINUSJ=2,TERM_SZISZJ=3,TERM_PAIRIPAIRJ=4};
 
-		public:
-			typedef typename ModelHelperType::RealType RealType;
-			typedef typename SparseMatrixType::value_type SparseElementType;
+public:
+	typedef typename ModelHelperType::RealType RealType;
+	typedef typename SparseMatrixType::value_type SparseElementType;
 
-			template<typename SomeStructType>
-			static void setLinkData(
-					SizeType term,
-					SizeType dofs,
-     					bool,
-					SizeType& fermionOrBoson,
-					PairType& ops,
-     					std::pair<char,char>&,
-					SizeType& angularMomentum,
-     					RealType& angularFactor,
-					SizeType& category,const SomeStructType&)
-			{
-				if (term==TERM_HOPPING) {
-					fermionOrBoson = ProgramGlobals::FERMION;
-					ops = PairType(dofs,dofs);
-					angularFactor = 1;
-					if (dofs == 1) angularFactor = -1;
-					angularMomentum = 1;
-					category = dofs;
-					return;
-				}
+	template<typename SomeStructType>
+	static void setLinkData(
+	        SizeType term,
+	        SizeType dofs,
+	        bool,
+	        SizeType& fermionOrBoson,
+	        PairType& ops,
+	        std::pair<char,char>&,
+	        SizeType& angularMomentum,
+	        RealType& angularFactor,
+	        SizeType& category,const SomeStructType&)
+	{
+		if (term==TERM_HOPPING) {
+			fermionOrBoson = ProgramGlobals::FERMION;
+			ops = PairType(dofs,dofs);
+			angularFactor = 1;
+			if (dofs == 1) angularFactor = -1;
+			angularMomentum = 1;
+			category = dofs;
+			return;
+		}
 
-				if (term==TERM_NINJ) {
-					fermionOrBoson = ProgramGlobals::BOSON;
-					SizeType offset1 = 2;
-					assert(dofs == 0);
-					angularFactor = 1;
-					category = 0;
-					angularMomentum = 0;
-					ops = PairType(offset1,offset1);
-					return;
-				}
+		if (term==TERM_NINJ) {
+			fermionOrBoson = ProgramGlobals::BOSON;
+			SizeType offset1 = 2;
+			assert(dofs == 0);
+			angularFactor = 1;
+			category = 0;
+			angularMomentum = 0;
+			ops = PairType(offset1,offset1);
+			return;
+		}
 
-				if (term==TERM_SPLUSISMINUSJ) {
-					fermionOrBoson = ProgramGlobals::BOSON;
-					SizeType offset1 = 3;
-					angularFactor = -1;
-					category = 2;
-					angularMomentum = 2;
-					ops = PairType(offset1,offset1);
-				}
+		if (term==TERM_SPLUSISMINUSJ) {
+			fermionOrBoson = ProgramGlobals::BOSON;
+			SizeType offset1 = 3;
+			angularFactor = -1;
+			category = 2;
+			angularMomentum = 2;
+			ops = PairType(offset1,offset1);
+		}
 
-				if (term==TERM_SZISZJ) {
-					fermionOrBoson = ProgramGlobals::BOSON;
-					SizeType offset1 = 4;
-					assert(dofs = 0);
-					angularFactor = 0.5;
-					category = 1;
-					angularMomentum = 2;
-					ops = PairType(offset1,offset1);
-					return;
-				}
+		if (term==TERM_SZISZJ) {
+			fermionOrBoson = ProgramGlobals::BOSON;
+			SizeType offset1 = 4;
+			assert(dofs = 0);
+			angularFactor = 0.5;
+			category = 1;
+			angularMomentum = 2;
+			ops = PairType(offset1,offset1);
+			return;
+		}
 
-				if (term==TERM_PAIRIPAIRJ) {
-					fermionOrBoson = ProgramGlobals::BOSON;
-					SizeType offset1 = 5;
-					angularFactor = 1;
-					angularMomentum = 2;
-					category = 2;
-					ops = PairType(offset1,offset1);
-					return;
-				}
-			}
+		if (term==TERM_PAIRIPAIRJ) {
+			fermionOrBoson = ProgramGlobals::BOSON;
+			SizeType offset1 = 5;
+			angularFactor = 1;
+			angularMomentum = 2;
+			category = 2;
+			ops = PairType(offset1,offset1);
+			return;
+		}
+	}
 
-			template<typename SomeStructType>
-			static void valueModifier(SparseElementType& value,SizeType term,SizeType,bool isSu2,const SomeStructType&)
-			{
+	template<typename SomeStructType>
+	static void valueModifier(SparseElementType& value,
+	                          SizeType term,
+	                          SizeType,
+	                          bool isSu2,
+	                          const SomeStructType&)
+	{
 
-				if (term==TERM_HOPPING || term == TERM_PAIRIPAIRJ)
-					return;
+		if (term==TERM_HOPPING || term == TERM_PAIRIPAIRJ)
+			return;
 
-				if (term==TERM_NINJ) {
-					value *= 0.5;
-					return;
-				}
+		if (term==TERM_NINJ) {
+			value *= 0.5;
+			return;
+		}
 
-				assert(term==TERM_SPLUSISMINUSJ || term == TERM_SZISZJ);
+		assert(term==TERM_SPLUSISMINUSJ || term == TERM_SZISZJ);
 
-				if (isSu2) value = -value;
-				value *= 0.5;
+		if (isSu2) value = -value;
+		value *= 0.5;
 
-			}
+	}
 
-			template<typename SomeStructType>
-			static SizeType dofs(SizeType term,const SomeStructType&) { return (term==TERM_NINJ || term==TERM_SPLUSISMINUSJ || term==TERM_SZISZJ || TERM_PAIRIPAIRJ) ? 1 : 2; }
+	template<typename SomeStructType>
+	static SizeType dofs(SizeType term,const SomeStructType&)
+	{
+		return (term==TERM_NINJ || term==TERM_SPLUSISMINUSJ ||
+		        term==TERM_SZISZJ || TERM_PAIRIPAIRJ) ? 1 : 2;
+	}
 
-			template<typename SomeStructType>
-			static PairType connectorDofs(SizeType,SizeType,const SomeStructType&)
-			{
-				return PairType(0,0); // no orbital and no dependence on spin
-			}
+	template<typename SomeStructType>
+	static PairType connectorDofs(SizeType,SizeType,const SomeStructType&)
+	{
+		return PairType(0,0); // no orbital and no dependence on spin
+	}
 
-			static SizeType terms() { return 5; }
+	static SizeType terms() { return 5; }
 
-    }; // class LinkProdExtendedSuperHubbard1Orb
+}; // class LinkProdExtendedSuperHubbard1Orb
 } // namespace Dmrg
 /*@}*/
 #endif // LINKPROD_EXTENDED_SUPER_HUBBARD_1ORB_H
