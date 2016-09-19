@@ -1,9 +1,9 @@
 // BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2016, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -96,16 +96,15 @@ public:
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
 	template<typename SomeStructType>
-	static void setLinkData(
-	        SizeType term,
-	        SizeType dofs,
-	        bool,
-	        SizeType& fermionOrBoson,
-	        PairType& ops,
-	        std::pair<char,char>&,
-	        SizeType& angularMomentum,
-	        RealType& angularFactor,
-	        SizeType& category,const SomeStructType&)
+	static void setLinkData(SizeType term,
+	                        SizeType dofs,
+	                        bool,
+	                        SizeType& fermionOrBoson,
+	                        PairType& ops,
+	                        std::pair<char,char>&,
+	                        SizeType& angularMomentum,
+	                        RealType& angularFactor,
+	                        SizeType& category,const SomeStructType&)
 	{
 		if (term==TERM_HOPPING) {
 			fermionOrBoson = ProgramGlobals::FERMION;
@@ -135,6 +134,7 @@ public:
 			category = 2;
 			angularMomentum = 2;
 			ops = PairType(offset1,offset1);
+			return;
 		}
 
 		if (term==TERM_SZISZJ) {
@@ -179,14 +179,12 @@ public:
 
 		if (isSu2) value = -value;
 		value *= 0.5;
-
 	}
 
 	template<typename SomeStructType>
 	static SizeType dofs(SizeType term,const SomeStructType&)
 	{
-		return (term==TERM_NINJ || term==TERM_SPLUSISMINUSJ ||
-		        term==TERM_SZISZJ || TERM_PAIRIPAIRJ) ? 1 : 2;
+		return (term == TERM_HOPPING) ? 2 : 1;
 	}
 
 	template<typename SomeStructType>
