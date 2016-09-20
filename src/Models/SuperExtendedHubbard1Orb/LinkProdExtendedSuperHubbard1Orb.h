@@ -140,7 +140,7 @@ public:
 		if (term==TERM_SZISZJ) {
 			fermionOrBoson = ProgramGlobals::BOSON;
 			SizeType offset1 = 4;
-			assert(dofs = 0);
+			assert(dofs == 0);
 			angularFactor = 0.5;
 			category = 1;
 			angularMomentum = 2;

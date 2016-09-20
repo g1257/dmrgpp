@@ -518,7 +518,6 @@ private:
 		result.push_back(m1);
 	}
 
-
 	void ddOrbitalsFourpoint(typename PsimagLite::Vector<MatrixType*>::Type& result,
 	                         typename PsimagLite::Vector<PsimagLite::String>::Type& names,
 	                         SizeType rows,
@@ -738,7 +737,6 @@ private:
 		assert(!(orbitals & 1));
 		orbitals /= 2;
 
-
 		for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 			// c(i1,orb1,spin0)
 			SparseMatrixType O1 = model_.naturalOperator("c",site,orb1+spin0*orbitals).data;
@@ -770,8 +768,6 @@ private:
 
 		return sum;
 	}
-
-
 
 	void manyPoint(MatrixType* storage,
 	               const BraketType& braket,
