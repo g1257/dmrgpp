@@ -232,6 +232,11 @@ struct ParametersModelFeAs {
 		try {
 			io.readline(minElectronsPerSite,"MinElectronsPerSite=");
 		} catch (std::exception& e) {}
+
+		try {
+			io.readMatrix(spinOrbit,"SpinOrbit");
+		} catch (std::exception&) {}
+
 	}
 
 	template<typename SomeMemResolvType>
@@ -264,6 +269,7 @@ struct ParametersModelFeAs {
 	RealType coulombV;
 	//serializr normal magneticField
 	PsimagLite::Matrix<RealType> magneticField;
+	PsimagLite::Matrix<RealType> spinOrbit;
 };
 
 //! Function that prints model parameters to stream os
@@ -281,7 +287,10 @@ std::ostream& operator<<(std::ostream &os,
 		os<<"magneticField\n";
 		os<<parameters.magneticField;
 	}
-
+	if (parameters.spinOrbit.n_row()>0) {
+		os<<"SpinOrbit\n";
+		os<<parameters.spinOrbit;
+	}
 	os<<"FeAsMode=";
 	os<<ParametersModelFeAs<RealType>::modeString(parameters.feAsMode)<<"\n";
 	if (parameters.feAsMode == ParametersModelFeAs<RealType>::INT_V)

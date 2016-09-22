@@ -155,7 +155,7 @@ public:
 		SizeType v1 = 2*modelParameters_.orbitals*geometry.numberOfSites();
 		SizeType v2 = v1*modelParameters_.orbitals;
 		if (modelParameters_.potentialV.size() != v1 &&
-		    modelParameters_.potentialV.size() != v2) {
+		        modelParameters_.potentialV.size() != v2) {
 			PsimagLite::String str(__FILE__);
 			str += " " + ttos(__LINE__) + "\n";
 			str += "potentialV length must be 2*orbitals times the number of sites or";
@@ -520,6 +520,7 @@ public:
 		for (SizeType i=0;i<n;i++) {
 			addInteraction(hmatrix,cm,i,factorForDiagonals,block[i]);
 			addMagneticField(hmatrix,cm,i,block[i],factorForDiagonals);
+			addSpinOrbit(hmatrix,cm,i,block[i],factorForDiagonals);
 
 			if (modelParameters_.potentialT.size()==0 || time==0) {
 				addPotentialV(hmatrix,
@@ -783,7 +784,7 @@ private:
 	RealType findHubbardU(SizeType index, SizeType orb1, SizeType orb2) const
 	{
 		if (modelParameters_.feAsMode == ParamsModelFeAsType::INT_PAPER33 ||
-		    modelParameters_.feAsMode == ParamsModelFeAsType::INT_IMPURITY) {
+		        modelParameters_.feAsMode == ParamsModelFeAsType::INT_IMPURITY) {
 			assert(index < modelParameters_.hubbardU.size());
 			return modelParameters_.hubbardU[index];
 		}
@@ -928,6 +929,35 @@ private:
 		}
 	}
 
+	void addSpinOrbit(SparseMatrixType &hmatrix,
+	                  const VectorOperatorType& cm,
+	                  SizeType i,
+	                  SizeType ,
+	                  RealType factorForDiagonals) const
+	{
+		if (modelParameters_.spinOrbit.n_row()<4) return;
+		SizeType orbitals = modelParameters_.orbitals;
+		int dof=2*orbitals;
+
+		for (SizeType spin1=0;spin1<2;spin1++) {
+			for (SizeType spin2=0;spin2<2;spin2++) {
+				for (SizeType orb1=0;orb1<orbitals;orb1++) {
+					for (SizeType orb2=0;orb2<orbitals;orb2++) {
+						SparseMatrixType c1 = cm[orb1+spin1*orbitals+i*dof].data;
+						SparseMatrixType c1Transpose;
+						transposeConjugate(c1Transpose,c1);
+						SparseMatrixType c2 = cm[orb2+spin2*orbitals+i*dof].data;
+						SparseMatrixType A = c1Transpose * c2;
+
+						hmatrix += factorForDiagonals *
+						        modelParameters_.spinOrbit(spin1+spin2*2,orb1+orb2*orbitals)*A;
+
+					}
+				}
+			}
+		}
+	}
+
 	void addMagneticField(SparseMatrixType &hmatrix,
 	                      const VectorOperatorType& cm,
 	                      SizeType i,
@@ -997,7 +1027,7 @@ private:
 		if (V.size() == v2) {
 			for (SizeType orb=0;orb<modelParameters_.orbitals;orb++) {
 				for (SizeType orb2=0;orb2<modelParameters_.orbitals;orb2++) {
-				addPotentialV(hmatrix,cm,i,actualIndexOfSite,orb,orb2,factorForDiagonals,V);
+					addPotentialV(hmatrix,cm,i,actualIndexOfSite,orb,orb2,factorForDiagonals,V);
 				}
 			}
 
