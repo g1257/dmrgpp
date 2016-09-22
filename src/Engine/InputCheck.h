@@ -180,6 +180,7 @@ public:
 		knownLabels_.push_back("PotentialT");
 		knownLabels_.push_back("omega");
 		knownLabels_.push_back("MagneticField");
+                knownLabels_.push_back("SpinOrbit");
 		knownLabels_.push_back("DegeneracyMax=");
 	}
 
@@ -195,14 +196,14 @@ public:
 		if (label=="JMVALUES") {
 			if (vec.size()!=2) return error1("JMVALUES",line);
 			return true;
-		} else if (label=="RAW_MATRIX") {
+		} else if (label=="RAW_MATRIX" || label == "SpinOrbit") {
 			if (!checkForMatrix(vec)) return error1(label,line);
 			return true;
 		} else if (label=="Connectors") {
 			if (!checkForMatrix(vec) && !checkForVector(vec))
 				return error1(label,line);
 			return true;
-		} else if (label=="MagneticField") {
+		} else if (label == "MagneticField") {
 			return true;
 		} else if (label=="FiniteLoops") {
 			SizeType n = atoi(vec[0].c_str());
