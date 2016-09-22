@@ -198,11 +198,11 @@ public:
 	                          bool isSu2,
 	                          const SomeStructType&)
 	{
-		if (term==TERM_HOPPING || term == TERM_LAMBDA || term == TERM_PAIR)
+		if (term == TERM_HOPPING || term == TERM_LAMBDA || term == TERM_NINJ)
 			return;
 
-		if (term==TERM_NINJ) {
-			value *= 0.5;
+		if (term == TERM_PAIR) {
+			value *= -1.0;
 			return;
 		}
 
