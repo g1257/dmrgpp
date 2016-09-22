@@ -236,7 +236,6 @@ struct ParametersModelFeAs {
 		try {
 			io.readMatrix(spinOrbit,"SpinOrbit");
 		} catch (std::exception&) {}
-
 	}
 
 	template<typename SomeMemResolvType>

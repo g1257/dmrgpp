@@ -663,6 +663,8 @@ private:
 			SizeType electronsDown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
 			                                                                      SPIN_DOWN);
 			electrons[i] = electronsDown + electronsUp[i];
+			if (modelParameters_.spinOrbit.n_row() > 0)
+				electronsUp[i] = 0;
 		}
 
 		q.set(jmvalues,flavors,electrons,electronsUp);
