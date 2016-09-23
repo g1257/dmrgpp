@@ -110,7 +110,7 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
 	typedef typename HilbertBasisType::value_type HilbertState;
 	typedef  HilbertSpaceFeAs<HilbertState> HilbertSpaceFeAsType;
@@ -124,8 +124,8 @@ public:
 	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
-	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
-	typedef ParametersModelFeAs<RealType> ParamsModelFeAsType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef ParametersModelFeAs<ComplexOrRealType> ParamsModelFeAsType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
@@ -1366,7 +1366,7 @@ private:
 		if (fullm.rank()!=256) return;
 		MatrixType fullm2;
 		crsMatrixToFullMatrix(fullm2,fullm);
-		typename PsimagLite::Vector<SparseElementType>::Type eigs(fullm2.n_row());
+		typename PsimagLite::Vector<RealType>::Type eigs(fullm2.n_row());
 		PsimagLite::diag(fullm2,eigs,'V');
 		std::cout<<str<<" diagTest size="<<fullm.rank()<<" eigs[0]="<<eigs[0]<<"\n";
 		std::cout<<fullm;

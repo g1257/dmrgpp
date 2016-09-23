@@ -86,10 +86,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 //! FeAs Model Parameters
-template<typename RealType>
+template<typename ComplexOrRealType>
 struct ParametersModelFeAs {
 	// no connections here please!!
 	// connections are handled by the geometry
+
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
 	enum IntEnum {INT_PAPER33,
 		          INT_V,
@@ -268,7 +270,7 @@ struct ParametersModelFeAs {
 	RealType coulombV;
 	//serializr normal magneticField
 	PsimagLite::Matrix<RealType> magneticField;
-	PsimagLite::Matrix<RealType> spinOrbit;
+	PsimagLite::Matrix<ComplexOrRealType> spinOrbit;
 };
 
 //! Function that prints model parameters to stream os
