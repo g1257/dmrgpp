@@ -176,9 +176,11 @@ public:
 	                             SizeType j,
 	                             SizeType edof2) const
 	{
+		SizeType ii = edof1 + i*orbitals_;
+		SizeType jj = edof2 + j*orbitals_;
 		if (dataType_ & 2) {
 			assert((dataType_&1) || (edof1 == 0 && edof2 == 0));
-			return rawHoppings_(edof1 + i*orbitals_,edof2 + j*orbitals_);
+			return rawHoppings_(ii,jj);
 		}
 
 		SizeType h = (constantValues()) ? 0 : geometryBase_->handle(i,j);
@@ -188,6 +190,8 @@ public:
 			assert(dataNumbers_.size()>h);
 			return dataNumbers_[h];
 		}
+
+		if (ii < jj) return PsimagLite::conj(operator()(j,edof2,i,edof1));
 
 		assert(dataMatrices_.size()>h);
 
