@@ -694,7 +694,7 @@ private:
 			observe_.twoPoint(m,A,B,fermionicSign);
 			std::cout << m;
 		} else {
-			PsimagLite::String s = "Unknown flag: " + flag;
+			PsimagLite::String s = "Unknown flag: " + ttos(flag);
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 	}
