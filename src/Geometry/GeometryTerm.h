@@ -99,7 +99,7 @@ namespace PsimagLite {
 template<typename ComplexOrRealType,typename InputType>
 class GeometryTerm {
 
-	typedef GeometryBase<InputType> GeometryBaseType;
+	typedef GeometryBase<ComplexOrRealType, InputType> GeometryBaseType;
 	typedef GeometryDirection<ComplexOrRealType,GeometryBaseType> GeometryDirectionType;
 
 public:
@@ -131,21 +131,21 @@ public:
 		io.readline(gOptions_,"GeometryOptions=");
 
 		if (s == "chain" || s=="longchain") {
-			geometryBase_ = new LongChain<InputType>(linSize,io);
+			geometryBase_ = new LongChain<ComplexOrRealType, InputType>(linSize,io);
 		} else if (s == "chainEx") {
 			throw RuntimeError("GeometryTerm::ctor(): ChainEx: no longer supported.\n");
 		} else if (s=="ladder") {
-			geometryBase_ = new Ladder<InputType>(linSize,io);
+			geometryBase_ = new Ladder<ComplexOrRealType, InputType>(linSize,io);
 		} else if (s=="ladderx") {
-			geometryBase_ = new LadderX<InputType>(linSize,io);
+			geometryBase_ = new LadderX<ComplexOrRealType, InputType>(linSize,io);
 		} else if (s=="ladderbath") {
-			geometryBase_ = new LadderBath<InputType>(linSize,io);
+			geometryBase_ = new LadderBath<ComplexOrRealType, InputType>(linSize,io);
 		} else if (s=="ktwoniffour") {
-			geometryBase_ = new KTwoNiFFour<InputType>(linSize,io);
+			geometryBase_ = new KTwoNiFFour<ComplexOrRealType, InputType>(linSize,io);
 		} else if (s=="star") {
-			geometryBase_ = new Star<InputType>(linSize,io);
+			geometryBase_ = new Star<ComplexOrRealType, InputType>(linSize,io);
 		} else if (s=="LongRange") {
-			geometryBase_ = new LongRange<InputType>(linSize,io);
+			geometryBase_ = new LongRange<ComplexOrRealType, InputType>(linSize,io);
 			edof |= 2;
 		} else {
 			throw RuntimeError("Unknown geometry " + s + "\n");

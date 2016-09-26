@@ -83,11 +83,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template<typename InputType>
-class LadderBath : public GeometryBase<InputType> {
+template<typename ComplexOrRealType, typename InputType>
+class LadderBath : public GeometryBase<ComplexOrRealType, InputType> {
 
 	typedef std::pair<int,int> PairType;
-	typedef Ladder<InputType> LadderType;
+	typedef Ladder<ComplexOrRealType, InputType> LadderType;
 
 public:
 
@@ -114,7 +114,7 @@ public:
 	template<class Archive>
 	void serialize(Archive & ar, const unsigned int)
 	{
-		ar & boost::serialization::base_object<GeometryBase<InputType> >(*this);
+		ar & boost::serialization::base_object<GeometryBase<ComplexOrRealType, InputType> >(*this);
 		ar & linSize_;
 		ar & bathSitesPerSite_;
 		ar & clusterSize_;

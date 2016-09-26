@@ -83,11 +83,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template<typename InputType>
-class KTwoNiFFour : public GeometryBase<InputType> {
+template<typename ComplexOrRealType, typename InputType>
+class KTwoNiFFour : public GeometryBase<ComplexOrRealType, InputType> {
 
 	typedef std::pair<int,int> PairType;
-	typedef GeometryBase<InputType> GeometryBaseType;
+	typedef GeometryBase<ComplexOrRealType, InputType> GeometryBaseType;
 	typedef typename GeometryBaseType::AdditionalDataType AdditionalDataType;
 
 	enum {TYPE_O = GeometryBaseType::TYPE_O, TYPE_C = GeometryBaseType::TYPE_C};
@@ -110,7 +110,7 @@ public:
 	template<class Archive>
 	void serialize(Archive & ar, const unsigned int)
 	{
-		ar & boost::serialization::base_object<GeometryBase<InputType> >(*this);
+		ar & boost::serialization::base_object<GeometryBase<ComplexOrRealType, InputType> >(*this);
 		ar & linSize_;
 		ar & signChange_;
 	}

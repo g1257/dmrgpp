@@ -81,8 +81,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template<typename InputType>
-class Star : public GeometryBase<InputType> {
+template<typename ComplexOrRealType, typename InputType>
+class Star : public GeometryBase<ComplexOrRealType, InputType> {
 
 public:
 
@@ -97,7 +97,7 @@ public:
 	template<class Archive>
 	void serialize(Archive & ar, const unsigned int)
 	{
-		ar & boost::serialization::base_object<GeometryBase<InputType> >(*this);
+		ar & boost::serialization::base_object<GeometryBase<ComplexOrRealType, InputType> >(*this);
 		ar & linSize_;
 	}
 

@@ -81,8 +81,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template<typename InputType>
-class LongChain : public GeometryBase<InputType> {
+template<typename ComplexOrRealType, typename InputType>
+class LongChain : public GeometryBase<ComplexOrRealType, InputType> {
 
 public:
 

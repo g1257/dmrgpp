@@ -81,10 +81,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template<typename InputType>
-class LongRange : public GeometryBase<InputType> {
+template<typename ComplexOrRealType, typename InputType>
+class LongRange : public GeometryBase<ComplexOrRealType, InputType> {
 
-	typedef Matrix<typename GeometryBase<InputType>::RealType> MatrixType;
+	typedef Matrix<ComplexOrRealType> MatrixType;
 
 public:
 
