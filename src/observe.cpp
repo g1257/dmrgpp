@@ -24,6 +24,7 @@
 #include "InputCheck.h"
 #include "ModelSelector.h"
 #include "ArchiveFiles.h"
+#include "CvectorSize.h"
 
 template<typename ModelHelperType>
 bool Dmrg::LinkProductHeisenbergAncillaC<ModelHelperType>::hot_ = false;
@@ -179,7 +180,7 @@ void mainLoop1(GeometryType& geometry,
                const ParametersDmrgSolverType& params,
                const PsimagLite::String& list)
 {
-	typedef Basis<MySparseMatrix> BasisType;
+	typedef Basis<MySparseMatrix, CvectorSizeType> BasisType;
 	typedef Operators<BasisType> OperatorsType;
 	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;

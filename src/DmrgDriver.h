@@ -20,6 +20,7 @@
 #include "ChebyshevSolver.h"
 #include "Operators.h"
 #include "CrsMatrix.h"
+#include "CvectorSize.h"
 
 #ifndef USE_FLOAT
 typedef double RealType;

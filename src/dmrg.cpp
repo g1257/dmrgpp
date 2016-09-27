@@ -85,23 +85,24 @@ void mainLoop2(typename MatrixVectorType::ModelType::GeometryType& geometry,
 }
 
 template<typename GeometryType,
-        template<typename> class ModelHelperTemplate,
-         typename MySparseMatrix>
+         template<typename> class ModelHelperTemplate,
+         typename MySparseMatrix,
+         typename CvectorSizeType>
 void mainLoop1(GeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io,
                const OperatorOptions& opOptions,
                PsimagLite::String targeting)
 {
-	typedef Basis<MySparseMatrix> BasisType;
+	typedef Basis<MySparseMatrix, CvectorSizeType> BasisType;
 	typedef Operators<BasisType> OperatorsType;
 	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
 	typedef ModelBase<ModelHelperType,
-	                  ParametersDmrgSolverType,
-	                  InputNgType::Readable,
-	                  GeometryType> ModelBaseType;
+	        ParametersDmrgSolverType,
+	        InputNgType::Readable,
+	        GeometryType> ModelBaseType;
 
 	if (dmrgSolverParams.options.find("MatrixVectorStored")!=PsimagLite::String::npos) {
 		mainLoop2<MatrixVectorStored<ModelBaseType> >(geometry,
@@ -124,7 +125,7 @@ void mainLoop1(GeometryType& geometry,
 	}
 }
 
-template<typename MySparseMatrix>
+template<typename MySparseMatrix, typename CvectorSizeType>
 void mainLoop0(InputNgType::Readable& io,
                const ParametersDmrgSolverType& dmrgSolverParams,
                PsimagLite::String targeting,
@@ -132,8 +133,8 @@ void mainLoop0(InputNgType::Readable& io,
 {
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;
 	typedef PsimagLite::Geometry<ComplexOrRealType,
-	                             InputNgType::Readable,
-	                             ProgramGlobals> GeometryType;
+	        InputNgType::Readable,
+	        ProgramGlobals> GeometryType;
 
 	GeometryType geometry(io);
 	if (dmrgSolverParams.options.find("printgeometry") != PsimagLite::String::npos)
@@ -152,36 +153,36 @@ void mainLoop0(InputNgType::Readable& io,
 	}
 
 	if (su2) {
-		mainLoop1<GeometryType,ModelHelperSu2,MySparseMatrix>(geometry,
-		                                                      dmrgSolverParams,
-		                                                      io,
-		                                                      opOptions,
-		                                                      targeting);
+		mainLoop1<GeometryType,ModelHelperSu2,MySparseMatrix,CvectorSizeType>(geometry,
+		                                                                      dmrgSolverParams,
+		                                                                      io,
+		                                                                      opOptions,
+		                                                                      targeting);
 		return;
 	}
 
 	if (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos &&
-	    targeting != "TimeStepTargetting" &&
-	    targeting != "GroundStateTargetting") {
+	        targeting != "TimeStepTargetting" &&
+	        targeting != "GroundStateTargetting") {
 		PsimagLite::String str("SolverOptions=useComplex not allowed for ");
 		str += targeting + "\n";
 		throw PsimagLite::RuntimeError(str);
 	}
 
 	if (targeting=="TimeStepTargetting") {
-		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix>(geometry,
-		                                                               dmrgSolverParams,
-		                                                               io,
-		                                                               opOptions,
-		                                                               targeting);
+		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix,CvectorSizeType>(geometry,
+		                                                                        dmrgSolverParams,
+		                                                                        io,
+		                                                                        opOptions,
+		                                                                        targeting);
 		return;
 	}
 
-	mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix>(geometry,
-	                                                        dmrgSolverParams,
-	                                                        io,
-	                                                        opOptions,
-	                                                        targeting);
+	mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix,CvectorSizeType>(geometry,
+	                                                                        dmrgSolverParams,
+	                                                                        io,
+	                                                                        opOptions,
+	                                                                        targeting);
 }
 
 int main(int argc,char *argv[])
@@ -349,9 +350,9 @@ int main(int argc,char *argv[])
 	bool isComplex = (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos);
 	if (targeting=="TimeStepTargetting") isComplex = true;
 	if (isComplex) {
-		mainLoop0<MySparseMatrixComplex>(io,dmrgSolverParams,targeting,options);
+		mainLoop0<MySparseMatrixComplex, CvectorSizeType>(io,dmrgSolverParams,targeting,options);
 	} else {
-		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,targeting,options);
+		mainLoop0<MySparseMatrixReal, CvectorSizeType>(io,dmrgSolverParams,targeting,options);
 	}
 
 	if (options.enabled) return 0;
