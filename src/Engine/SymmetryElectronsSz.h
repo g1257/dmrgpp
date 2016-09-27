@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "IoSimple.h"
 #include "TargetQuantumElectrons.h"
+#include "CvectorSize.h"
 
 namespace Dmrg {
 
@@ -106,12 +107,12 @@ public:
 		other_ = other;
 	}
 
-	SizeType electronsMax() const
-	{
-		return *(std::max_element(electrons_.begin(),electrons_.end()));
-	}
+//	SizeType electronsMax() const
+//	{
+//		return *(std::max_element(electrons_.begin(),electrons_.end()));
+//	}
 
-	const VectorSizeType& electrons() const {return electrons_; }
+	const CvectorSizeType& electrons() const {return electrons_; }
 
 	const VectorSizeType& flavors() const { return flavors_; }
 
@@ -120,7 +121,7 @@ public:
 		return jmValues_;
 	}
 
-	void findQuantumNumbers(VectorSizeType& qn, bool useSu2Symmetry) const
+	void findQuantumNumbers(CvectorSizeType& qn, bool useSu2Symmetry) const
 	{
 		if (useSu2Symmetry)
 			findQuantumNumbersSu2(qn);
@@ -203,7 +204,7 @@ public:
 
 private:
 
-	void findQuantumNumbersSu2(VectorSizeType& q) const
+	void findQuantumNumbersSu2(CvectorSizeType& q) const
 	{
 		q.resize(electrons_.size());
 		for (SizeType i=0;i<q.size();i++) {
@@ -215,13 +216,14 @@ private:
 
 	//! find quantum numbers for each state of this basis,
 	//! considered symmetries for this model are: n_up and n_down
-	void findQuantumNumbersLocal(VectorSizeType& q) const
+	void findQuantumNumbersLocal(CvectorSizeType& q) const
 	{
 		SizeType mode = static_cast<SizeType>(other_.size()/electrons_.size());
 		assert(other_.size() % electrons_.size() == 0);
 		assert(mode > 0);
 		q.clear();
 		VectorSizeType qn(mode + 1);
+		q.resize(electrons_.size());
 		for (SizeType i=0;i<electrons_.size();i++) {
 			// n
 			qn[1] = electrons_[i];
@@ -230,7 +232,7 @@ private:
 
 			for (SizeType x = 0; x < (mode-1); ++x)
 				qn[2+x] = other_[i + (x+1)*electrons_.size()];
-			q.push_back(encodeQuantumNumber(qn));
+			q[i] = encodeQuantumNumber(qn);
 		}
 	}
 
@@ -360,7 +362,7 @@ private:
 		return v;
 	}
 
-	VectorSizeType electrons_;
+	CvectorSizeType electrons_;
 	VectorSizeType other_;
 	VectorPairSizeType jmValues_;
 	VectorSizeType flavors_;
