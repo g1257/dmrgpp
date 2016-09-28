@@ -107,10 +107,10 @@ public:
 		other_ = other;
 	}
 
-//	SizeType electronsMax() const
-//	{
-//		return *(std::max_element(electrons_.begin(),electrons_.end()));
-//	}
+	SizeType electronsMax() const
+	{
+		return *(std::max_element(electrons_.begin(),electrons_.end()));
+	}
 
 	const CvectorSizeType& electrons() const {return electrons_; }
 
@@ -221,9 +221,11 @@ private:
 		SizeType mode = static_cast<SizeType>(other_.size()/electrons_.size());
 		assert(other_.size() % electrons_.size() == 0);
 		assert(mode > 0);
+
 		q.clear();
-		VectorSizeType qn(mode + 1);
 		q.resize(electrons_.size());
+
+		VectorSizeType qn(mode + 1);
 		for (SizeType i=0;i<electrons_.size();i++) {
 			// n
 			qn[1] = electrons_[i];
