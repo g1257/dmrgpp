@@ -92,7 +92,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "Parallelizer.h"
 #include "ProgramGlobals.h"
-#include "ParallelWftMany.h"
 
 namespace Dmrg {
 
@@ -247,100 +246,22 @@ private:
 	            SizeType site,
 	            SizeType loopNumber)
 	{
+		// wft everything
+		this->common().wftAll(i,site,direction);
 
+		// see if operator at site has been applied and result put into targetVectors[site]
+		// if no apply operator at site and add into targetVectors[site]
+		this->common().applyOneOperator(i,site,this->common().targetVectors(site),direction);
+
+		// measure brackets
 		VectorWithOffsetType phiNew;
 		SizeType count = this->common().getPhi(phiNew,Eg,direction,site,loopNumber);
 
 		if (count==0) return;
 
-//		AddThisPhitoTargetVectors(gsWeight_,weight_,phiNew,direction);
-
 		typename PsimagLite::Vector<SizeType>::Type block(1,site);
 		this->common().cocoon(block,direction);
 	}
-
-//	void AddThisPhitoTargetVectors(RealType&,
-//	                        typename PsimagLite::Vector<RealType>::Type&,
-//	                        const VectorWithOffsetType& phi,
-//	                        SizeType)
-//	{
-//		for (SizeType i=0;i<phi.sectors();i++) {
-//			VectorType sv;
-//			SizeType i0 = phi.sector(i);
-//			phi.extract(sv,i0);
-//			//DenseMatrixType V;
-//			SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
-//			//getLanczosVectors(V,sv,p);
-//			if (i==0) {
-//				//assert(V.n_col() > 0);
-//				this->common().targetVectorsResize(V.n_col());
-//				for (SizeType j=0;j<this->common().targetVectors().size();j++)
-//					this->common().targetVectors(j) = phi;
-//			}
-//			setVectors(V,i0);
-//		}
-
-//		setWeights();
-//		if (fabs(weightForContinuedFraction_)<1e-6)
-//			weightForContinuedFraction_ = PsimagLite::real(phi*phi);
-//	}
-
-	void wftLanczosVectors(SizeType site,const VectorWithOffsetType& phi)
-	{
-		this->common().targetVectors()[0] = phi;
-		// don't wft since we did it before
-		SizeType numberOfSites = this->lrs().super().block().size();
-		if (site==0 || site==numberOfSites -1)  return;
-
-		typedef ParallelWftMany<VectorWithOffsetType,
-		                    WaveFunctionTransfType,
-		                    LeftRightSuperType> ParallelWftType;
-		typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
-		ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
-		                             PsimagLite::MPI::COMM_WORLD);
-
-		ParallelWftType helperWft(this->common().targetVectors(),
-		                          this->model().hilbertSize(site),
-		                          wft_,
-		                          this->lrs());
-		threadedWft.loopCreate(this->common().targetVectors().size()-1,
-		                       helperWft,
-		                       this->model().concurrency());
-
-		for (SizeType i=1;i<this->common().targetVectors().size();i++) {
-			assert(this->common().targetVectors()[i].size()==
-			       this->common().targetVectors()[0].size());
-		}
-	}
-
-//	void getLanczosVectors(DenseMatrixType& V,
-//	                       const VectorType& sv,
-//	                       SizeType p)
-//	{
-//		RealType fakeTime = 0;
-//		SizeType threadId = 0;
-//		typename ModelType::ModelHelperType modelHelper(p,
-//		                                                this->lrs(),
-//		                                                fakeTime,
-//		                                                threadId);
-//		typename LanczosSolverType::LanczosMatrixType h(&this->model(),&modelHelper);
-//		paramsForSolver_.lotaMemory = true;
-//		LanczosSolverType lanczosSolver(h,paramsForSolver_,&V);
-
-//		lanczosSolver.decomposition(sv,ab_);
-
-//		reortho_ = lanczosSolver.reorthogonalizationMatrix();
-//	}
-
-//	void setVectors(const DenseMatrixType& V,
-//	                SizeType i0)
-//	{
-//		for (SizeType i=0;i<this->common().targetVectors().size();i++) {
-//			VectorType tmp(V.n_row());
-//			for (SizeType j=0;j<tmp.size();j++) tmp[j] = V(j,i);
-//			this->common().targetVectors(i).setDataInSector(tmp,i0);
-//		}
-//	}
 
 	void setWeights()
 	{
@@ -352,16 +273,6 @@ private:
 		}
 
 		for (SizeType r=0;r<weight_.size();r++) weight_[r] *=(1.0-gsWeight_)/sum;
-	}
-
-	RealType dynWeightOf(VectorType& v,const VectorType& w) const
-	{
-		RealType sum = 0;
-		for (SizeType i=0;i<v.size();i++) {
-			RealType tmp = PsimagLite::real(v[i]*w[i]);
-			sum += tmp*tmp;
-		}
-		return sum;
 	}
 
 	TargetParamsType tstStruct_;

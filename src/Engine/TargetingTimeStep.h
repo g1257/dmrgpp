@@ -78,7 +78,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetParamsTimeStep.h"
 #include "ProgramGlobals.h"
 #include "ParametersForSolver.h"
-#include "ParallelWftMany.h"
 #include "TimeVectorsKrylov.h"
 #include "TimeVectorsRungeKutta.h"
 #include "TimeVectorsSuzukiTrotter.h"

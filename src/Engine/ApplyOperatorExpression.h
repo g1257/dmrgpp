@@ -345,6 +345,40 @@ public:
 		                                  block);
 	}
 
+	void applyOneOperator(SizeType i,
+	                      SizeType site,
+	                      VectorWithOffsetType& phiNew,
+	                      SizeType systemOrEnviron)
+	{
+		VectorWithOffsetType phiOld = psi_;
+		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
+		bool hasBeenApplied = (targetVectors_[site].size() > 0);
+		if (hasBeenApplied) return;
+
+
+		BorderEnumType corner = (targetHelper_.tstStruct().sites(i)==0 ||
+			                     targetHelper_.tstStruct().sites(i)==numberOfSites -1) ?
+			            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
+
+		PsimagLite::OstringStream msg;
+		msg<<"I'm applying a local operator now";
+		progress_.printline(msg,std::cout);
+		typename PsimagLite::Vector<SizeType>::Type electrons;
+		findElectronsOfOneSite(electrons,site);
+		FermionSign fs(targetHelper_.lrs().left(),electrons);
+		applyOpLocal_(phiNew,phiOld,targetHelper_.tstStruct().aOperators()[i],
+			          fs,systemOrEnviron,corner);
+
+		RealType norma = norm(phiNew);
+		if (norma<1e-6) {
+			PsimagLite::OstringStream msg2;
+			msg2<<"Norm of phi is zero\n";
+			progress_.printline(msg2,std::cout);
+		}
+
+		if (targetHelper_.tstStruct().useQns()) setQuantumNumbers(phiNew);
+	}
+
 private:
 
 	void checkOrder(SizeType i) const
@@ -411,7 +445,7 @@ private:
 		}
 
 		if (targetHelper_.tstStruct().startingLoops().size()>0 &&
-		    targetHelper_.tstStruct().startingLoops()[i]>loopNumber) return 0;
+		        targetHelper_.tstStruct().startingLoops()[i]>loopNumber) return 0;
 
 		if (site != targetHelper_.tstStruct().sites(i) && stage_[i]==DISABLED)
 			return 0;
@@ -572,6 +606,17 @@ private:
 		                                     targetHelper_.lrs(),
 		                                     nk);
 		phiNew.collapseSectors();
+	}
+
+	void wftAll(SizeType i,
+	            SizeType site,
+	            SizeType systemOrEnviron)
+	{
+		for (SizeType index = 0; index < targetVectors_.size(); ++index) {
+			VectorWithOffsetType phiNew;
+			wftOneVector(phiNew,i,site,systemOrEnviron,index,true);
+			targetVectors_[index] = phiNew;
+		}
 	}
 
 	void guessPhiSectors(VectorWithOffsetType& phi,

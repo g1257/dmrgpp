@@ -93,7 +93,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "Parallelizer.h"
 #include "ProgramGlobals.h"
-#include "ParallelWftMany.h"
 
 namespace Dmrg {
 
@@ -276,34 +275,6 @@ private:
 		setWeights();
 		if (fabs(weightForContinuedFraction_)<1e-6)
 			weightForContinuedFraction_ = PsimagLite::real(phi*phi);
-	}
-
-	void wftLanczosVectors(SizeType site,const VectorWithOffsetType& phi)
-	{
-		this->common().targetVectors()[0] = phi;
-		// don't wft since we did it before
-		SizeType numberOfSites = this->lrs().super().block().size();
-		if (site==0 || site==numberOfSites -1)  return;
-
-		typedef ParallelWftMany<VectorWithOffsetType,
-		                    WaveFunctionTransfType,
-		                    LeftRightSuperType> ParallelWftType;
-		typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
-		ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
-		                             PsimagLite::MPI::COMM_WORLD);
-
-		ParallelWftType helperWft(this->common().targetVectors(),
-		                          this->model().hilbertSize(site),
-		                          wft_,
-		                          this->lrs());
-		threadedWft.loopCreate(this->common().targetVectors().size()-1,
-		                       helperWft,
-		                       this->model().concurrency());
-
-		for (SizeType i=1;i<this->common().targetVectors().size();i++) {
-			assert(this->common().targetVectors()[i].size()==
-			       this->common().targetVectors()[0].size());
-		}
 	}
 
 	void getLanczosVectors(DenseMatrixType& V,

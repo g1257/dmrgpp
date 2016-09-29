@@ -389,6 +389,21 @@ public:
 		                                          block);
 	}
 
+	void wftAll(SizeType i,
+	            SizeType site,
+	            SizeType systemOrEnviron)
+	{
+		applyOpExpression_.wftAll(i,site,systemOrEnviron);
+	}
+
+	void applyOneOperator(SizeType i,
+	                      SizeType site,
+	                      VectorWithOffsetType& phiNew,
+	                      SizeType systemOrEnviron)
+	{
+		applyOpExpression_.applyOneOperator(i,site,phiNew,systemOrEnviron);
+	}
+
 	void cocoon(const BlockType& block,SizeType direction) const
 	{
 		const ModelType& model = targetHelper_.model();
