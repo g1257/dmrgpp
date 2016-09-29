@@ -354,7 +354,7 @@ public:
 		wftAll(i,site,systemOrEnviron);
 
 		if (targetHelper_.tstStruct().startingLoops().size()>0 &&
-		        targetHelper_.tstStruct().startingLoops()[i]>loopNumber);
+		        targetHelper_.tstStruct().startingLoops()[i]>loopNumber) return;
 
 		VectorWithOffsetType phiOld = psi_;
 		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
@@ -362,8 +362,7 @@ public:
 		if (hasBeenApplied) return;
 
 
-		BorderEnumType corner = (targetHelper_.tstStruct().sites(i)==0 ||
-			                     targetHelper_.tstStruct().sites(i)==numberOfSites -1) ?
+		BorderEnumType corner = (site == 0 || site == numberOfSites -1) ?
 			            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
 
 		PsimagLite::OstringStream msg;

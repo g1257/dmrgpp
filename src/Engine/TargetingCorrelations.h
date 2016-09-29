@@ -193,8 +193,8 @@ public:
 		SizeType numberOfSites = this->lrs().super().block().size();
 		if (site>1 && site<numberOfSites-2) return;
 		// //corner case
-		SizeType x = (site==1) ? 0 : numberOfSites-1;
-		evolve(Eg,direction,x,loopNumber);
+		//SizeType x = (site==1) ? 0 : numberOfSites-1;
+		//evolve(Eg,direction,x,loopNumber);
 	}
 
 	void print(InputSimpleOutType& ioOut) const
@@ -246,6 +246,7 @@ private:
 	            SizeType site,
 	            SizeType loopNumber)
 	{
+		if (direction == INFINITE) return;
 		SizeType i = 0;
 
 		// see if operator at site has been applied and result put into targetVectors[site]
@@ -253,7 +254,8 @@ private:
 		// also wft everything
 		this->common().applyOneOperator(loopNumber,
 		                                i,
-		                                site,this->common().targetVectors(site),
+		                                site,
+		                                this->common().targetVectors(site),
 		                                direction);
 
 		typename PsimagLite::Vector<SizeType>::Type block(1,site);
