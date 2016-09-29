@@ -389,13 +389,6 @@ public:
 		                                          block);
 	}
 
-	void wftAll(SizeType i,
-	            SizeType site,
-	            SizeType systemOrEnviron)
-	{
-		applyOpExpression_.wftAll(i,site,systemOrEnviron);
-	}
-
 	void applyOneOperator(SizeType i,
 	                      SizeType site,
 	                      VectorWithOffsetType& phiNew,

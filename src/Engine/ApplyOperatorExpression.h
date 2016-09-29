@@ -350,6 +350,8 @@ public:
 	                      VectorWithOffsetType& phiNew,
 	                      SizeType systemOrEnviron)
 	{
+		wftAll(i,site,systemOrEnviron);
+
 		VectorWithOffsetType phiOld = psi_;
 		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
 		bool hasBeenApplied = (targetVectors_[site].size() > 0);

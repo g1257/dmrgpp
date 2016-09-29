@@ -246,18 +246,12 @@ private:
 	            SizeType site,
 	            SizeType loopNumber)
 	{
-		// wft everything
-		this->common().wftAll(i,site,direction);
+		SizeType i = 0;
 
 		// see if operator at site has been applied and result put into targetVectors[site]
 		// if no apply operator at site and add into targetVectors[site]
+		// also wft everything
 		this->common().applyOneOperator(i,site,this->common().targetVectors(site),direction);
-
-		// measure brackets
-		VectorWithOffsetType phiNew;
-		SizeType count = this->common().getPhi(phiNew,Eg,direction,site,loopNumber);
-
-		if (count==0) return;
 
 		typename PsimagLite::Vector<SizeType>::Type block(1,site);
 		this->common().cocoon(block,direction);

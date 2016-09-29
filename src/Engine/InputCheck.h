@@ -367,9 +367,10 @@ public:
 		                       "CorrectionVectorTargetting",
 		                       "CorrectionTargetting",
 		                       "MettsTargetting",
-		                       "TargetingAncilla"};
+		                       "TargetingAncilla",
+		                       "TargetingCorrelations"};
 
-		SizeType totalTargets = 8;
+		SizeType totalTargets = 9;
 
 		SizeType count = 0;
 		for (SizeType i = 0;i<totalTargets;++i) {
