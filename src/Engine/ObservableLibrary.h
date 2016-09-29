@@ -421,6 +421,13 @@ private:
 			BraketType braket(model_,"<gs|d;d'|gs>");
 			manyPoint(0,braket,rows,cols);
 
+		} else if (label == "pp") {
+			if (model_.params().model!="TjMultiOrb")
+				throw PsimagLite::RuntimeError("pp: not for this model\n");
+			typename PsimagLite::Vector<MatrixType*>::Type results;
+			typename PsimagLite::Vector<PsimagLite::String>::Type names;
+			ppFourpoint(results,names,rows,cols);
+
 		} else if (label=="dd4") {
 			if (model_.geometry().label(0)!="ladderx") {
 				PsimagLite::String str(__FILE__);
@@ -736,6 +743,97 @@ private:
 		SizeType orbitals = logBase2(model_.hilbertSize(site));
 		assert(!(orbitals & 1));
 		orbitals /= 2;
+
+		for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
+			// c(i1,orb1,spin0)
+			SparseMatrixType O1 = model_.naturalOperator("c",site,orb1+spin0*orbitals).data;
+			// c(i2,orb2,1-spin0)
+			SparseMatrixType O2 = model_.naturalOperator("c",site,orb2+(1-spin0)*orbitals).data;
+			for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
+				// c(i2,orb2,spin1)
+				SparseMatrixType O3 = model_.naturalOperator("c",site,orb3+spin1*orbitals).data;
+				// c(i3,orb1,1-spin1)
+				SparseMatrixType O4 = model_.naturalOperator("c",site,orb4+(1-spin1)*orbitals).data;
+				SizeType val = spin0 + spin1 + 1;
+				int signTerm = (val & 1) ? sign : 1;
+				sum +=  signTerm*observe_.fourpoint()('N',
+				                                      i1,
+				                                      O1,
+				                                      'N',
+				                                      i2,
+				                                      O2,
+				                                      'C',
+				                                      j1,
+				                                      O3,
+				                                      'C',
+				                                      j2,
+				                                      O4,
+				                                      fermionicSign,
+				                                      threadId);
+			}
+		}
+
+		return sum;
+	}
+
+	void ppFourpoint(typename PsimagLite::Vector<MatrixType*>::Type& result,
+	                 typename PsimagLite::Vector<PsimagLite::String>::Type& names,
+	                 SizeType rows,
+	                 SizeType cols) const
+	{
+		// Singlet four-points
+		MatrixType* m1 = new MatrixType(rows,cols);
+		std::cout << "PairPair Correlations SrSr_{nn}" << std::endl;
+		names.push_back("S^{l}_{nn}");
+		ppFour(*m1,0,0,0,0,0,-1);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		std::cout << "PairPair Correlations SrSl_{nn}" << std::endl;
+		names.push_back("S^{u}_{nn}");
+		ppFour(*m1,0,0,0,0,1,-1);
+		result.push_back(m1);
+
+		// add rest here
+	}
+
+	void ppFour(MatrixType& m,
+	            SizeType orb1,
+	            SizeType orb2,
+	            SizeType orb3,
+	            SizeType orb4,
+	            SizeType isRRorRL,
+	            int sign) const
+	{
+		SizeType rows = m.n_row();
+		SizeType cols = m.n_row();
+		for (SizeType i = 0; i < rows; ++i) {
+			for (SizeType j = i + 2; j < cols; ++j) {
+				m(i,j) = ppFour2(i,j,orb1,orb2,orb3,orb4,isRRorRL,sign);
+			}
+		}
+		std::cout << m;
+	}
+
+	FieldType ppFour2(SizeType i,
+	                  SizeType j,
+	                  SizeType orb1,
+	                  SizeType orb2,
+	                  SizeType orb3,
+	                  SizeType orb4,
+	                  SizeType isRRorRL,
+	                  int sign) const
+	{
+		SizeType i1 = i;
+		SizeType i2 = i + 1;
+		SizeType j1 = j;
+		SizeType j2 = j + 1 + isRRorRL;
+
+		int fermionicSign = -1;
+		SizeType threadId = 0;
+		FieldType sum = 0.0;
+		SizeType site = 0;
+		SizeType orbitals = 1;
 
 		for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 			// c(i1,orb1,spin0)
