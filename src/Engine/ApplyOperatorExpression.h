@@ -345,12 +345,16 @@ public:
 		                                  block);
 	}
 
-	void applyOneOperator(SizeType i,
+	void applyOneOperator(SizeType loopNumber,
+	                      SizeType i,
 	                      SizeType site,
 	                      VectorWithOffsetType& phiNew,
 	                      SizeType systemOrEnviron)
 	{
 		wftAll(i,site,systemOrEnviron);
+
+		if (targetHelper_.tstStruct().startingLoops().size()>0 &&
+		        targetHelper_.tstStruct().startingLoops()[i]>loopNumber);
 
 		VectorWithOffsetType phiOld = psi_;
 		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
@@ -615,6 +619,7 @@ private:
 	            SizeType systemOrEnviron)
 	{
 		for (SizeType index = 0; index < targetVectors_.size(); ++index) {
+			if (targetVectors_[index].size() == 0) continue;
 			VectorWithOffsetType phiNew;
 			wftOneVector(phiNew,i,site,systemOrEnviron,index,true);
 			targetVectors_[index] = phiNew;

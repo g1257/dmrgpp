@@ -389,12 +389,13 @@ public:
 		                                          block);
 	}
 
-	void applyOneOperator(SizeType i,
+	void applyOneOperator(SizeType loopNumber,
+	                      SizeType i,
 	                      SizeType site,
 	                      VectorWithOffsetType& phiNew,
 	                      SizeType systemOrEnviron)
 	{
-		applyOpExpression_.applyOneOperator(i,site,phiNew,systemOrEnviron);
+		applyOpExpression_.applyOneOperator(loopNumber,i,site,phiNew,systemOrEnviron);
 	}
 
 	void cocoon(const BlockType& block,SizeType direction) const
