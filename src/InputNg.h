@@ -677,7 +677,7 @@ public:
 			}
 			SizeType k = 2;
 			for (SizeType i=0;i<m.n_row();i++) {
-				for (SizeType j=0;j<m.n_row();j++) {
+				for (SizeType j=0;j<m.n_col();j++) {
 					IstringStream is(it->second[k++]);
 					is >> m(i,j);
 				}
