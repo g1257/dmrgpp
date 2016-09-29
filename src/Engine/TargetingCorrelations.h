@@ -72,20 +72,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file TargetingCorrelationsInSitu.h
+/*! \file TargetingCorrelations.h
  *
  * Implements the multi-targetting for measuring
  * 2-point correlations in situ
  *
  */
 
-#ifndef TARGETING_CORRELATIONSINSITU_H
-#define TARGETING_CORRELATIONSINSITU_H
+#ifndef TARGETING_CORRELATIONS_H
+#define TARGETING_CORRELATIONS_H
 
 #include "ProgressIndicator.h"
 #include "BLAS.h"
 #include "ParametersForSolver.h"
-#include "TargetParamsCorrelationsInSitu.h"
+#include "TargetParamsCorrelations.h"
 #include "VectorWithOffsets.h"
 #include "TargetingBase.h"
 #include <cassert>
@@ -96,7 +96,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingCorrelationsInSitu : public TargetingBase<LanczosSolverType_,VectorWithOffsetType_> {
+class TargetingCorrelations : public TargetingBase<LanczosSolverType_,VectorWithOffsetType_> {
 
 public:
 
@@ -113,7 +113,7 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef TargetParamsCorrelationsInSitu<ModelType> TargetParamsType;
+	typedef TargetParamsCorrelations<ModelType> TargetParamsType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
@@ -137,7 +137,7 @@ public:
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
 
-	TargetingCorrelationsInSitu(const LeftRightSuperType& lrs,
+	TargetingCorrelations(const LeftRightSuperType& lrs,
 	                 const ModelType& model,
 	                 const WaveFunctionTransfType& wft,
 	                 const SizeType&,
@@ -145,15 +145,15 @@ public:
 	    : BaseType(lrs,model,wft,0),
 	      tstStruct_(io,model),
 	      wft_(wft),
-	      progress_("TargetingCorrelationsInSitu"),
+	      progress_("TargetingCorrelations"),
 	      gsWeight_(tstStruct_.gsWeight()),
-	      paramsForSolver_(io,"CorrelationsInSituDmrg"),
+	      paramsForSolver_(io,"CorrelationsDmrg"),
 	      weightForContinuedFraction_(0)
 	{
 		SizeType n = model.geometry().numberOfSites();
 		this->common().init(&tstStruct_,n);
 		if (!wft.isEnabled())
-			throw PsimagLite::RuntimeError(" TargetingCorrelationsInSitu needs an enabled wft\n");
+			throw PsimagLite::RuntimeError(" TargetingCorrelations needs an enabled wft\n");
 
 		if (tstStruct_.sites() == 0)
 			throw PsimagLite::RuntimeError("TST needs at least one TSPSite\n");
@@ -284,11 +284,11 @@ private:
 	TridiagonalMatrixType ab_;
 	DenseMatrixRealType reortho_;
 	RealType weightForContinuedFraction_;
-}; // class TargetingCorrelationsInSitu
+}; // class TargetingCorrelations
 
 template<typename LanczosSolverType, typename VectorWithOffsetType>
 std::ostream& operator<<(std::ostream& os,
-                         const TargetingCorrelationsInSitu<LanczosSolverType,VectorWithOffsetType>&)
+                         const TargetingCorrelations<LanczosSolverType,VectorWithOffsetType>&)
 {
 	os<<"DT=NothingToSeeHereYet\n";
 	return os;
@@ -296,5 +296,5 @@ std::ostream& operator<<(std::ostream& os,
 
 } // namespace
 /*@}*/
-#endif // TARGETING_CORRELATIONSINSITU_H
+#endif // TARGETING_CORRELATIONS_H
 

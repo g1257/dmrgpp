@@ -71,22 +71,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file TargetParamsCorrelationsInSitu.h
+/*! \file TargetParamsCorrelations.h
  *
  *  This is a structure to represent the parameters of the
  *  multi targeting DMRG for measuring correlations in situ.
  *  Don't add functions to this class because
  *  this class's data is all public
  */
-#ifndef TARGET_PARAMS_CORRELATIONSINSITU_H
-#define TARGET_PARAMS_CORRELATIONSINSITU_H
+#ifndef TARGET_PARAMS_CORRELATIONS_H
+#define TARGET_PARAMS_CORRELATIONS_H
 
 #include "TargetParamsCommon.h"
 
 namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
 template<typename ModelType>
-class TargetParamsCorrelationsInSitu : public TargetParamsCommon<ModelType> {
+class TargetParamsCorrelations : public TargetParamsCommon<ModelType> {
 public:
 	typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
 	typedef typename ModelType::RealType RealType;
@@ -101,10 +101,10 @@ public:
 	static SizeType const SUM = TargetParamsCommonType::SUM;
 
 	template<typename IoInputter>
-	TargetParamsCorrelationsInSitu(IoInputter& io,const ModelType& model)
+	TargetParamsCorrelations(IoInputter& io,const ModelType& model)
 	    : TargetParamsCommonType(io,model)
 	{
-		io.readline(type_,"CorrelationsInSituDmrgType=");
+		io.readline(type_,"CorrelationsType=");
 	}
 
 	virtual SizeType memResolv(PsimagLite::MemResolv&,
@@ -123,20 +123,20 @@ private:
 
 	SizeType type_;
 
-}; // class TargetParamsCorrelationsInSitu
+}; // class TargetParamsCorrelations
 
 template<typename ModelType>
 inline std::ostream&
-operator<<(std::ostream& os,const TargetParamsCorrelationsInSitu<ModelType>& t)
+operator<<(std::ostream& os,const TargetParamsCorrelations<ModelType>& t)
 {
-	os<<"#TargetParams.type=CorrelationsInSituDmrg\n";
+	os<<"#TargetParams.type=Correlations\n";
 	const typename TargetParamsDynamic<ModelType>::TargetParamsCommonType&
 	        tp = t;
 	os<<tp;
-	os<<"CorrelationsInSituDmrgType="<<t.type()<<"\n";
+	os<<"CorrelationsType="<<t.type()<<"\n";
 	return os;
 }
 } // namespace Dmrg
 
 /*@}*/
-#endif //TARGET_PARAMS_CORRELATIONSINSITU_H
+#endif //TARGET_PARAMS_CORRELATIONS_H
