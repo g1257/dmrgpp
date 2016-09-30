@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PreOperatorSiteDependent.h"
 #include "PreOperatorSiteIndependent.h"
 #include "Concurrency.h"
+#include <vector>
 
 namespace Dmrg {
 
@@ -223,6 +224,7 @@ private:
 	{
 		SizeType threadId = preOperator.threadId();
 		printMarker(threadId);
+		std::vector<FieldType> density;
 
 		for (SizeType i0 = 0;i0<observe_.size();i0++) {
 			if (!preOperator.isValid(i0+1)) continue;
@@ -239,12 +241,13 @@ private:
 			observe_.setBrakets(bra,ket);
 			observe_.setPointer(threadId,i0);
 
-			onePointHookForZero(i0,opA,"gs",threadId);
+			onePointHookForZero(i0,opA,"gs",threadId,density);
 
 			FieldType tmp1 = observe_.template
 			        onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
 			std::cout<<observe_.site(threadId)<<" "<<tmp1;
 			std::cout<<" "<<observe_.time(threadId)<<"\n";
+			density.push_back(tmp1);
 
 			if (!observe_.isAtCorner(numberOfSites_,threadId)) continue;
 
@@ -263,7 +266,9 @@ private:
 			                                    ApplyOperatorType::BORDER_YES);
 			std::cout<<x<<" "<<tmp1;
 			std::cout<<" "<<observe_.time(threadId)<<"\n";
+			density.push_back(tmp1);
 		}
+
 	}
 
 	MatrixType SliceOrbital(const MatrixType& m,
@@ -1091,13 +1096,16 @@ private:
 
 	void measureOnePoint(const PreOperatorBaseType& preOperator)
 	{
+		const PsimagLite::String& modelName = model_.params().model;
 		SizeType threadId = preOperator.threadId();
 		printMarker(threadId);
+		std::vector<FieldType> density;
 
 		for (SizeType i0 = 0;i0<observe_.size();i0++) {
 			if (!preOperator.isValid(i0+1)) continue;
 
 			OperatorType opA = preOperator(i0+1);
+			FieldType tmp1;
 
 			preOperator.printMatrix(opA.data,preOperator.siteDependent(),i0);
 
@@ -1105,22 +1113,22 @@ private:
 				std::cout<<"site "<<preOperator.label()<<"(gs) ";
 				if (hasTimeEvolution_)
 					std::cout<<preOperator.label()<<"(timevector) time";
-				std::cout<<"\n";
+				//std::cout<<"\n";
 			}
 			// for g.s. use this one:
 			observe_.setBrakets("gs","gs");
 			observe_.setPointer(threadId,i0);
 
-			onePointHookForZero(i0,opA,"gs",threadId);
+			onePointHookForZero(i0,opA,"gs",threadId, density);
 
-			FieldType tmp1 = observe_.template
+			tmp1 = observe_.template
 			        onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
-			std::cout<<observe_.site(threadId)<<" "<<tmp1;
+			density.push_back(tmp1);
 
 			if (hasTimeEvolution_) { // for time vector use this one:
 				observe_.setBrakets("time","time");
 
-				onePointHookForZero(i0,opA,"time",threadId);
+				onePointHookForZero(i0,opA,"time",threadId,density);
 
 				FieldType tmp2 = observe_.template
 				        onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
@@ -1128,7 +1136,6 @@ private:
 				std::cout<<" "<<tmp2<<" "<<observe_.time(threadId);
 			}
 
-			std::cout<<"\n";
 			// also calculate next or prev. site:
 			if (observe_.isAtCorner(numberOfSites_,threadId)) {
 				SizeType x = (observe_.site(threadId)==1) ? 0 : numberOfSites_-1;
@@ -1144,7 +1151,7 @@ private:
 				        onePoint<ApplyOperatorType>(i0,
 				                                    opAcorner,
 				                                    ApplyOperatorType::BORDER_YES);
-				std::cout<<x<<" "<<tmp1;
+				density.push_back(tmp1);
 
 				if (hasTimeEvolution_) {// for time vector use this one:
 					observe_.setBrakets("time","time");
@@ -1155,22 +1162,36 @@ private:
 					std::cout<<" "<<tmp2<<" "<<observe_.time(threadId);
 				}
 
-				std::cout<<"\n";
+				//std::cout<<"\n";
 			}
 		}
+
+		if(modelName=="HubbardOneBandExtendedSuper") {
+			SizeType nsite=observe_.size()/2+1;
+			SizeType orbitals = 2;
+			for (SizeType i0 = 0;i0<nsite;i0++)
+				std::cout << i0 << " " << density[i0*orbitals+0]
+				          << " " << density[i0*orbitals+1] << std::endl;
+		} else {
+			for (SizeType i0 = 0;i0<observe_.size();i0++)
+				std::cout << i0 << " " << density[i0] << std::endl;
+		}
+
+
 	}
 
 	void onePointHookForZero(SizeType i0,
 	                         const OperatorType& opA,
 	                         const PsimagLite::String& gsOrTime,
-	                         SizeType threadId)
+	                         SizeType threadId,
+	                         std::vector<FieldType> &density)
 	{
 		if (hasTimeEvolution_) return;
 		if (observe_.site(threadId)!=1 || observe_.isAtCorner(numberOfSites_,threadId))
 			return;
 		assert(observe_.site(threadId)==1);
 		FieldType tmp1 = observe_.template onePointHookForZero<ApplyOperatorType>(i0,opA);
-		std::cout<<0<<" "<<tmp1;
+		density.push_back(tmp1);
 		if (hasTimeEvolution_ && gsOrTime=="time") std::cout<<"\n";
 		if (!hasTimeEvolution_) std::cout<<"\n";
 	}
