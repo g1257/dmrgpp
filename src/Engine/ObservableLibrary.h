@@ -277,11 +277,25 @@ private:
 			BraketType braket2(model_,"<gs|c?1-;c'?1-|gs>");
 			manyPoint(0,braket2,rows,cols); // c_{0,0} spin down
 		} else if (label=="nn") {
+			MatrixType out(rows,cols);
+			int fermionicSign = 1;
+			SizeType site = 1;
 			for (SizeType i = 0; i < orbitals*2; ++i) {
 				for (SizeType j = i; j < orbitals*2; ++j) {
+					SparseMatrixType O2,O4,n1,n2;
+					SparseMatrixType O1 = model_.naturalOperator("c",site,i).data; // c_i
+					transposeConjugate(O2,O1); // O2 = transpose(O1)
+					SparseMatrixType O3 = model_.naturalOperator("c",site,j).data; // c_j
+					transposeConjugate(O4,O3); // O4 = transpose(O3)
+
+					multiply(n1,O2,O1); // c_i^{\dagger}.c_i
+					multiply(n2,O4,O3); // c_j^{\dagger}.c_j
+
 					PsimagLite::String str = "<gs|n?" + ttos(i) + ";n?" + ttos(j) + "|gs>";
-					BraketType braket(model_,str);
-					manyPoint(0,braket,rows,cols);
+					std::cout << str << std::endl;
+					observe_.twoPoint(out,n1,n2,fermionicSign);
+					std::cout << out;
+
 				}
 			}
 
