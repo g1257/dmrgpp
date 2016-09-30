@@ -274,6 +274,39 @@ private:
 		for (SizeType r=0;r<weight_.size();r++) weight_[r] *=(1.0-gsWeight_)/sum;
 	}
 
+	void cocoon(const BlockType& block,SizeType direction) const
+	{
+		const VectorType& tv = this->common().targetVectors();
+
+		if (BasisType::useSu2Symmetry()) {
+			this->common().noCocoon("not when SU(2) symmetry is in use");
+			return;
+		}
+
+		assert(block.size() > 0);
+		SizeType site = block[0];
+		SizeType max = tv.size();
+		DenseMatrixType results(max,max);
+
+		if (max > 0) max--; // FIXME: include borders
+		for (SizeType i = 1; i < max; ++i) {  // FIXME: include borders
+			for (SizeType j = i; j < max; ++j) {
+				this->common().cocoon(direction,site,tv[i],"P"+ttos(i),tv[j],"P"+ttos(j));
+				results(i,j) = this->common().inSitu(site);
+			}
+		}
+
+		std::cout<<"TargetingCorrelations\n";
+		std::cout<<"-------------&*&*&* In-situ measurements start\n";
+		for (SizeType i = 0; i < results.n_row(); ++i) {
+			for (SizeType j = 0; j < results.n_col(); ++j)
+				std::cout<<results(i,j)<<" ";
+			std::cout<<"\n";
+		}
+
+		std::cout<<"-------------&*&*&* In-situ measurements end\n";
+	}
+
 	TargetParamsType tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;

@@ -139,12 +139,12 @@ public:
 	static const SizeType SUM = TargetParamsType::SUM;
 
 	enum {DISABLED=ApplyOperatorExpressionType::DISABLED,
-	      OPERATOR=ApplyOperatorExpressionType::OPERATOR,
-	      WFT_NOADVANCE=ApplyOperatorExpressionType::WFT_NOADVANCE};
+		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,
+		  WFT_NOADVANCE=ApplyOperatorExpressionType::WFT_NOADVANCE};
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-	      EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-	      INFINITE=WaveFunctionTransfType::INFINITE};
+		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
+		  INFINITE=WaveFunctionTransfType::INFINITE};
 
 	TargetingCommon(const LeftRightSuperType& lrs,
 	                const ModelType& model,
@@ -465,7 +465,8 @@ public:
 	            const VectorWithOffsetType& v1,
 	            PsimagLite::String label1,
 	            const VectorWithOffsetType& v2,
-	            PsimagLite::String label2) const
+	            PsimagLite::String label2,
+	            bool needsPrinting = true) const
 	{
 
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
@@ -478,12 +479,14 @@ public:
 			return;
 		}
 
-		cocoon_(direction,site,v1,label1,v2,label2,ApplyOperatorType::BORDER_NO);
+		BorderEnumType border = ApplyOperatorType::BORDER_NO;
+		cocoon_(direction,site,v1,label1,v2,label2,border,needsPrinting);
 
 		int site2 = findBorderSiteFrom(site,direction);
 
 		if (site2 >= 0) {
-			cocoon_(direction,site2,v1,label1,v2,label2,ApplyOperatorType::BORDER_YES);
+			border = ApplyOperatorType::BORDER_YES;
+			cocoon_(direction,site2,v1,label1,v2,label2,border,needsPrinting);
 		}
 
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
@@ -540,7 +543,8 @@ private:
 	             PsimagLite::String label1,
 	             const VectorWithOffsetType& v2,
 	             PsimagLite::String label2,
-	             BorderEnumType border) const
+	             BorderEnumType border,
+	             bool wantsPrinting) const
 	{
 		VectorStringType vecStr = getOperatorLabels();
 
@@ -552,7 +556,8 @@ private:
 			OperatorType nup = Braket.op(0);
 
 			PsimagLite::String tmpStr = "<"+ label1 + "|" + opLabel + "|" + label2 + ">";
-			test(v1,v2,direction,tmpStr,site,nup,border);
+			if (wantsPrinting) test(v1,v2,direction,tmpStr,site,nup,border);
+			else test_(v1,v2,direction,site,nup,border);
 		}
 	}
 
@@ -570,6 +575,18 @@ private:
 	          SizeType site,
 	          const OperatorType& A,
 	          BorderEnumType border) const
+	{
+		ComplexOrRealType sum = test_(src1,src2,systemOrEnviron,site,A,border);
+		std::cout<<site<<" "<<sum<<" "<<currentTime();
+		std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
+	}
+
+	ComplexOrRealType test_(const VectorWithOffsetType& src1,
+	                        const VectorWithOffsetType& src2,
+	                        SizeType systemOrEnviron,
+	                        SizeType site,
+	                        const OperatorType& A,
+	                        BorderEnumType border) const
 	{
 		typename PsimagLite::Vector<SizeType>::Type electrons;
 		targetHelper_.model().findElectronsOfOneSite(electrons,site);
@@ -591,8 +608,7 @@ private:
 
 		assert(site < inSitu_.size());
 		inSitu_[site] = sum;
-		std::cout<<site<<" "<<sum<<" "<<currentTime();
-		std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
+		return sum;
 	}
 
 	PsimagLite::ProgressIndicator progress_;
