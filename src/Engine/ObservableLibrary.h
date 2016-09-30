@@ -266,6 +266,23 @@ private:
 		}
 	}
 
+	void SliceOrbital(const MatrixType& m,
+	                  const SizeType o1,
+	                  const SizeType o2)
+	{
+		SizeType orbitals = 2;
+		SizeType nsite = numberOfSites_/orbitals;
+		MatrixType out(nsite,nsite);
+		for (SizeType i = 0; i < nsite; ++i) {
+			for (SizeType j = i; j < nsite; ++j) {
+				SizeType k = i*orbitals + o1;
+				SizeType l = j*orbitals + o2;
+				out(i,j) = m(k,l);
+			}
+		}
+		std::cout << out;
+	}
+
 	void measure(const PsimagLite::String& label,SizeType rows,SizeType cols,SizeType orbitals)
 	{
 		PsimagLite::String modelName = model_.params().model;
@@ -292,10 +309,23 @@ private:
 					multiply(n2,O4,O3); // c_j^{\dagger}.c_j
 
 					PsimagLite::String str = "<gs|n?" + ttos(i) + ";n?" + ttos(j) + "|gs>";
-					std::cout << str << std::endl;
 					observe_.twoPoint(out,n1,n2,fermionicSign);
-					std::cout << out;
+					if(modelName=="HubbardOneBandExtendedSuper") {
+						PsimagLite::String str1;
+						str1 = str + " orbitals 0-0:";
+						std::cout << str1 << std::endl;
+						SliceOrbital(out,0,0);
 
+						str1 = str + " orbitals 0-1:";
+						std::cout << str1 << std::endl;
+						SliceOrbital(out,0,1);
+
+						str1 = str + " orbitals 1-1:";
+						std::cout << str1 << std::endl;
+						SliceOrbital(out,1,1);
+					} else {
+						std::cout << out;
+					}
 				}
 			}
 
