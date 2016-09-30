@@ -126,7 +126,9 @@ public:
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
-
+	typedef typename BaseType::TargetingCommonType::VectorVectorWithOffsetType
+	                 VectorVectorWithOffsetType;
+ 
 	enum {DISABLED,OPERATOR,CONVERGING};
 	enum {
 		EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
@@ -259,7 +261,7 @@ private:
 		                                direction);
 
 		typename PsimagLite::Vector<SizeType>::Type block(1,site);
-		this->common().cocoon(block,direction);
+		cocoon(block,direction);
 	}
 
 	void setWeights()
@@ -276,12 +278,7 @@ private:
 
 	void cocoon(const BlockType& block,SizeType direction) const
 	{
-		const VectorType& tv = this->common().targetVectors();
-
-		if (BasisType::useSu2Symmetry()) {
-			this->common().noCocoon("not when SU(2) symmetry is in use");
-			return;
-		}
+		const VectorVectorWithOffsetType& tv = this->common().targetVectors();
 
 		assert(block.size() > 0);
 		SizeType site = block[0];
