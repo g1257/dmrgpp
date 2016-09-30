@@ -129,7 +129,8 @@ public:
 	typedef typename BaseType::TargetingCommonType::VectorVectorWithOffsetType
 	                 VectorVectorWithOffsetType;
  
-	enum {DISABLED,OPERATOR,CONVERGING};
+	enum StageEnum {DISABLED,CONVERGING};
+
 	enum {
 		EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 		EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
@@ -150,7 +151,8 @@ public:
 	      progress_("TargetingCorrelations"),
 	      gsWeight_(tstStruct_.gsWeight()),
 	      paramsForSolver_(io,"CorrelationsDmrg"),
-	      weightForContinuedFraction_(0)
+	      weightForContinuedFraction_(0),
+	      stage_(DISABLED)
 	{
 		SizeType n = model.geometry().numberOfSites();
 		this->common().init(&tstStruct_,n);
@@ -167,14 +169,19 @@ public:
 
 	RealType weight(SizeType i) const
 	{
-		assert(!this->common().allStages(DISABLED));
-		return weight_[i];
+		return (this->common().targetVectors(i).size() == 0) ?
+		      0 : weight_[i];
 	}
 
 	RealType gsWeight() const
 	{
-		if (this->common().allStages(DISABLED)) return 1.0;
 		return gsWeight_;
+	}
+
+	SizeType size() const
+	{
+		return (stage_ == CONVERGING) ?
+		    this->common().targetVectors().size() : 0;
 	}
 
 	void evolve(RealType Eg,
@@ -262,6 +269,15 @@ private:
 
 		typename PsimagLite::Vector<SizeType>::Type block(1,site);
 		cocoon(block,direction);
+
+		if (stage_ == CONVERGING) return;
+
+		for (SizeType i = 0; i < this->common().targetVectors().size(); ++i) {
+			if (this->common().targetVectors(i).size() != 0) {
+				stage_ = CONVERGING;
+				break;
+			}
+		}
 	}
 
 	void setWeights()
@@ -313,6 +329,7 @@ private:
 	TridiagonalMatrixType ab_;
 	DenseMatrixRealType reortho_;
 	RealType weightForContinuedFraction_;
+	StageEnum stage_;
 }; // class TargetingCorrelations
 
 template<typename LanczosSolverType, typename VectorWithOffsetType>

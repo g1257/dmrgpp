@@ -257,6 +257,11 @@ public:
 		return targetVectors_[i];
 	}
 
+	const VectorWithOffsetType& targetVectors(SizeType i) const
+	{
+		return targetVectors_[i];
+	}
+
 	void targetVectorsResize(SizeType x)
 	{
 		if (x == 0) targetVectors_.clear();
@@ -620,6 +625,8 @@ private:
 		for (SizeType index = 0; index < targetVectors_.size(); ++index) {
 			if (targetVectors_[index].size() == 0) continue;
 			VectorWithOffsetType phiNew;
+			if (targetHelper_.tstStruct().useQns())
+                                        phiNew.populateFromQns(nonZeroQns_,targetHelper_.lrs().super());
 			wftOneVector(phiNew,i,site,systemOrEnviron,index,true);
 			targetVectors_[index] = phiNew;
 		}

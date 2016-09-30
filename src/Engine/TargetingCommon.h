@@ -364,6 +364,11 @@ public:
 		return applyOpExpression_.targetVectors(i);
 	}
 
+	const VectorWithOffsetType& targetVectors(SizeType i) const
+	{
+		return applyOpExpression_.targetVectors(i);
+	}
+
 	void targetVectorsResize(SizeType x)
 	{
 		applyOpExpression_.targetVectorsResize(x);
