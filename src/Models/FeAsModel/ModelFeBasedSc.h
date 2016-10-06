@@ -127,7 +127,7 @@ public:
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef ParametersModelFeAs<ComplexOrRealType> ParamsModelFeAsType;
-	typedef FeAsJzSymmetry<HilbertBasisType, MatrixType> FeAsJzSymmetryType;
+	typedef FeAsJzSymmetry<HilbertBasisType, ComplexOrRealType> FeAsJzSymmetryType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
@@ -674,9 +674,9 @@ private:
 				electronsUp[i] = 0;
 				continue;
 			}
-
-			feAsJzSymmetry_.setElectronsAndJzFor(electrons,electronsUp,i);
 		}
+
+		feAsJzSymmetry_.setElectronsAndJz(electrons,electronsUp);
 
 		q.set(jmvalues,flavors,electrons,electronsUp);
 	}
