@@ -557,8 +557,10 @@ private:
 			manyPoint(0,braket,rows,cols);
 
 		} else if (label == "pp") {
-			if (model_.params().model!="TjMultiOrb")
+			if (model_.params().model!="TjMultiOrb" &&
+			        model_.params().model!="HubbardOneBandExtendedSuper") {
 				throw PsimagLite::RuntimeError("pp: not for this model\n");
+			}
 			typename PsimagLite::Vector<MatrixType*>::Type results;
 			typename PsimagLite::Vector<PsimagLite::String>::Type names;
 			ppFourpoint(results,names,rows,cols);
@@ -596,15 +598,13 @@ private:
 				std::cout<<i<<" "<<result[i]<<"\n";
 
 		} else if (label == "ddOrbitals") {
+			if (model_.params().model!="HubbardOneBandExtendedSuper") {
+				throw PsimagLite::RuntimeError("pp: not for this model\n");
+			}
 			typename PsimagLite::Vector<MatrixType*>::Type results;
 			typename PsimagLite::Vector<PsimagLite::String>::Type names;
 			ddOrbitalsTwopoint(results,names,rows,cols);
 			ddOrbitalsFourpoint(results,names,rows,cols);
-			//            for (SizeType i=0;i<results.size();i++) {
-			//                std::cout<<"ddOrbital number "<<i<<" "<<names[i]<<"\n";
-			//                std::cout<<*results[i];
-			//                delete results[i];
-			//            }
 		} else {
 			PsimagLite::String s = "Unknown label: " + label + "\n";
 			throw PsimagLite::RuntimeError(s.c_str());
@@ -850,6 +850,7 @@ private:
 	{
 		SizeType rows = m.n_row();
 		SizeType cols = m.n_row();
+
 		for (SizeType i = 0; i < rows; ++i) {
 			for (SizeType j = i + 2; j < cols; ++j) {
 				m(i,j) = ddOrbitalsFour2(i,j,orb1,orb2,orb3,orb4,sign);
@@ -916,17 +917,75 @@ private:
 	                 SizeType rows,
 	                 SizeType cols) const
 	{
+		/*	Alberto Nocera
+		 *
+//		// Singlet four-points
+//		MatrixType* m1 = new MatrixType(rows,cols);
+//		std::cout << "PairPair Correlations SrSr_{nn}" << std::endl;
+//		names.push_back("S^{l}_{nn}");
+//		ppFour(*m1,0,0,0,0,0,-1);
+//		result.push_back(m1);
+
+//		m1 = new MatrixType(rows,cols);
+//		std::cout << "PairPair Correlations SrSl_{nn}" << std::endl;
+//		names.push_back("S^{u}_{nn}");
+//		ppFour(*m1,0,0,0,0,1,-1);
+//		result.push_back(m1);
+		*
+		*/
+		if (model_.params().model=="HubbardOneBandExtendedSuper") {
+			rows = rows/2;   // Actually: divided by # of orbitals
+			cols = cols/2;
+		}
+
 		// Singlet four-points
 		MatrixType* m1 = new MatrixType(rows,cols);
-		std::cout << "PairPair Correlations SrSr_{nn}" << std::endl;
+		std::cout << "PairPair Correlations S^{l}_{nn}" << std::endl;
 		names.push_back("S^{l}_{nn}");
-		ppFour(*m1,0,0,0,0,0,-1);
+		ppFour(*m1,0,0,0,0,-1);
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
-		std::cout << "PairPair Correlations SrSl_{nn}" << std::endl;
+		std::cout << "PairPair Correlations S^{u}_{nn}" << std::endl;
 		names.push_back("S^{u}_{nn}");
-		ppFour(*m1,0,0,0,0,1,-1);
+		ppFour(*m1,1,1,1,1,-1);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		std::cout << "PairPair Correlations S^{lu}_{nn}" << std::endl;
+		names.push_back("S^{lu}_{nn}");
+		ppFour(*m1,0,1,0,1,-1);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		std::cout << "PairPair Correlations S^{l-u}_{nn}" << std::endl;
+		names.push_back("S^{l-u}_{nn}");
+		ppFour(*m1,0,0,1,1,-1);
+		result.push_back(m1);
+
+		// Triplet four-points
+		m1 = new MatrixType(rows,cols);
+		std::cout << "PairPair Correlations T^{l}_{nn}" << std::endl;
+		names.push_back("T^{l}_{nn}");
+		ppFour(*m1,0,0,0,0,1);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		std::cout << "PairPair Correlations T{^{u}_{nn}" << std::endl;
+		names.push_back("T{^{u}_{nn}");
+		ppFour(*m1,1,1,1,1,1);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		std::cout << "PairPair Correlations T^{lu}_{nn}" << std::endl;
+		names.push_back("T^{lu}_{nn}");
+		ppFour(*m1,0,1,0,1,1);
+		result.push_back(m1);
+
+		m1 = new MatrixType(rows,cols);
+		std::cout << "PairPair Correlations T^{l-u}_{nn}" << std::endl;
+		names.push_back("T^{l-u}_{nn}");
+		ppFour(*m1,0,0,1,1,1);
 		result.push_back(m1);
 
 		// add rest here
@@ -937,14 +996,14 @@ private:
 	            SizeType orb2,
 	            SizeType orb3,
 	            SizeType orb4,
-	            SizeType isRRorRL,
 	            int sign) const
 	{
 		SizeType rows = m.n_row();
 		SizeType cols = m.n_row();
+
 		for (SizeType i = 0; i < rows; ++i) {
-			for (SizeType j = i + 2; j < cols; ++j) {
-				m(i,j) = ppFour2(i,j,orb1,orb2,orb3,orb4,isRRorRL,sign);
+			for (SizeType j = i + 2; j < cols-1; ++j) {
+				m(i,j) = ppFour2(i,j,orb1,orb2,orb3,orb4,sign);
 			}
 		}
 		std::cout << m;
@@ -956,43 +1015,47 @@ private:
 	                  SizeType orb2,
 	                  SizeType orb3,
 	                  SizeType orb4,
-	                  SizeType isRRorRL,
 	                  int sign) const
 	{
 		SizeType i1 = i;
 		SizeType i2 = i + 1;
 		SizeType j1 = j;
-		SizeType j2 = j + 1 + isRRorRL;
+		SizeType j2 = j + 1 ;
+
+		SizeType thini1 = i1*2 + orb1;
+		SizeType thini2 = i2*2 + orb2;
+		SizeType thinj1 = j1*2 + orb3;
+		SizeType thinj2 = j2*2 + orb4;
 
 		int fermionicSign = -1;
 		SizeType threadId = 0;
 		FieldType sum = 0.0;
 		SizeType site = 0;
-		SizeType orbitals = 1;
+//		SizeType orbitals = 1;
 
 		for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 			// c(i1,orb1,spin0)
-			SparseMatrixType O1 = model_.naturalOperator("c",site,orb1+spin0*orbitals).data;
+			SparseMatrixType O1 = model_.naturalOperator("c",site,spin0).data;
 			// c(i2,orb2,1-spin0)
-			SparseMatrixType O2 = model_.naturalOperator("c",site,orb2+(1-spin0)*orbitals).data;
+			SparseMatrixType O2 = model_.naturalOperator("c",site,1-spin0).data;
 			for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
 				// c(i2,orb2,spin1)
-				SparseMatrixType O3 = model_.naturalOperator("c",site,orb3+spin1*orbitals).data;
+				SparseMatrixType O3 = model_.naturalOperator("c",site,spin1).data;
 				// c(i3,orb1,1-spin1)
-				SparseMatrixType O4 = model_.naturalOperator("c",site,orb4+(1-spin1)*orbitals).data;
+				SparseMatrixType O4 = model_.naturalOperator("c",site,1-spin1).data;
 				SizeType val = spin0 + spin1 + 1;
 				int signTerm = (val & 1) ? sign : 1;
 				sum +=  signTerm*observe_.fourpoint()('N',
-				                                      i1,
+				                                      thini1,
 				                                      O1,
 				                                      'N',
-				                                      i2,
+				                                      thini2,
 				                                      O2,
 				                                      'C',
-				                                      j1,
+				                                      thinj1,
 				                                      O3,
 				                                      'C',
-				                                      j2,
+				                                      thinj2,
 				                                      O4,
 				                                      fermionicSign,
 				                                      threadId);
