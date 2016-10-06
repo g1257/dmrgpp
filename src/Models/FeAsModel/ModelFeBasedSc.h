@@ -127,7 +127,7 @@ public:
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef ParametersModelFeAs<ComplexOrRealType> ParamsModelFeAsType;
-	typedef FeAsJzSymmetry<HilbertBasisType, ComplexOrRealType> FeAsJzSymmetryType;
+	typedef FeAsJzSymmetry<HilbertBasisType, VectorOperatorType> FeAsJzSymmetryType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
@@ -146,7 +146,7 @@ public:
 	                   modelParameters_.orbitals,
 	                   2*modelParameters_.orbitals),
 	      reinterpret_(!modelParameters_.jzSymmetry),
-	      feAsJzSymmetry_()
+	      feAsJzSymmetry_(modelParameters_.jzSymmetry)
 	{
 		PsimagLite::String tspAlgo = "";
 		try {
@@ -290,41 +290,7 @@ public:
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
 	                         const BlockType& block) const
 	{
-		HilbertBasisType natBasis;
-		SparseMatrixType tmpMatrix;
-		VectorSizeType qvector;
-		setNaturalBasis(natBasis,qvector,block);
-
-		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
-		creationMatrix.clear();
-		SizeType dofs = 2*modelParameters_.orbitals;
-		for (SizeType i=0;i<block.size();i++) {
-			for (SizeType sigma=0;sigma<dofs;sigma++) {
-				findOperatorMatrices(tmpMatrix,i,sigma,natBasis);
-
-				SizeType m=0;
-				int asign=1;
-				if (sigma>modelParameters_.orbitals-1) {
-					m=1;
-					asign= -1;
-				}
-				typename OperatorType::Su2RelatedType su2related;
-				if (sigma <modelParameters_.orbitals) {
-					su2related.source.push_back(i*dofs+sigma);
-					su2related.source.push_back(i*dofs+sigma + modelParameters_.orbitals);
-					su2related.transpose.push_back(-1);
-					su2related.transpose.push_back(-1);
-					su2related.offset = modelParameters_.orbitals;
-				}
-
-				OperatorType myOp(tmpMatrix,
-				                  -1,
-				                  typename OperatorType::PairType(1,m),
-				                  asign,
-				                  su2related);
-				creationMatrix.push_back(myOp);
-			}
-		}
+		setOperatorMatrices(creationMatrix,block,true);
 	}
 
 	OperatorType naturalOperator(const PsimagLite::String& what,
@@ -490,6 +456,12 @@ public:
 			basisTmp.push_back(a);
 		}
 
+		if (feAsJzSymmetry_.isEnabled() && !feAsJzSymmetry_.isSet()) {
+			VectorOperatorType creationMatrix;
+			setOperatorMatrices(creationMatrix,block,false);
+			feAsJzSymmetry_.init(basis,creationMatrix);
+		}
+
 		// reorder the natural basis (needed for MULTIPLE BANDS)
 		findQuantumNumbers(q,basisTmp,block.size());
 		this->orderBasis(basis,q,basisTmp);
@@ -551,6 +523,47 @@ public:
 	}
 
 private:
+
+	void setOperatorMatrices(VectorOperatorType& creationMatrix,
+	                         const BlockType& block,
+	                         bool reinterpretJz) const
+	{
+		HilbertBasisType natBasis;
+		SparseMatrixType tmpMatrix;
+		VectorSizeType qvector;
+		setNaturalBasis(natBasis,qvector,block);
+
+		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
+		creationMatrix.clear();
+		SizeType dofs = 2*modelParameters_.orbitals;
+		for (SizeType i=0;i<block.size();i++) {
+			for (SizeType sigma=0;sigma<dofs;sigma++) {
+				findOperatorMatrices(tmpMatrix,i,sigma,natBasis);
+
+				SizeType m=0;
+				int asign=1;
+				if (sigma>modelParameters_.orbitals-1) {
+					m=1;
+					asign= -1;
+				}
+				typename OperatorType::Su2RelatedType su2related;
+				if (sigma <modelParameters_.orbitals) {
+					su2related.source.push_back(i*dofs+sigma);
+					su2related.source.push_back(i*dofs+sigma + modelParameters_.orbitals);
+					su2related.transpose.push_back(-1);
+					su2related.transpose.push_back(-1);
+					su2related.offset = modelParameters_.orbitals;
+				}
+
+				OperatorType myOp(tmpMatrix,
+				                  -1,
+				                  typename OperatorType::PairType(1,m),
+				                  asign,
+				                  su2related);
+				creationMatrix.push_back(myOp);
+			}
+		}
+	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to
 	//! basis state ket
@@ -1403,7 +1416,7 @@ private:
 	bool reinterpret_;
 	//serializr normal statesPerSite_
 	SizeType statesPerSite_;
-	FeAsJzSymmetryType feAsJzSymmetry_;
+	mutable FeAsJzSymmetryType feAsJzSymmetry_;
 }; //class ModelFeBasedSc
 } // namespace Dmrg
 /*@}*/
