@@ -152,7 +152,8 @@ struct ParametersModelFeAs {
 	      potentialT(0),
 	      feAsMode(INT_PAPER33),
 	      coulombV(0),
-	      magneticField(0,0)
+	      magneticField(0,0),
+	      jzSymmetry(false)
 	{
 		io.readline(orbitals,"Orbitals=");
 		io.read(hubbardU,"hubbardU");
@@ -238,6 +239,10 @@ struct ParametersModelFeAs {
 		try {
 			io.readMatrix(spinOrbit,"SpinOrbit");
 		} catch (std::exception&) {}
+
+		try {
+			io.readline(jzSymmetry,"JzSymmetry=");
+		} catch (std::exception&) {}
 	}
 
 	template<typename SomeMemResolvType>
@@ -271,6 +276,7 @@ struct ParametersModelFeAs {
 	//serializr normal magneticField
 	PsimagLite::Matrix<RealType> magneticField;
 	PsimagLite::Matrix<ComplexOrRealType> spinOrbit;
+	SizeType jzSymmetry;
 };
 
 //! Function that prints model parameters to stream os

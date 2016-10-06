@@ -143,7 +143,7 @@ public:
 	      spinSquared_(spinSquaredHelper_,
 	                   modelParameters_.orbitals,
 	                   2*modelParameters_.orbitals),
-	      reinterpret_(true)
+	      reinterpret_(!modelParameters_.jzSymmetry)
 	{
 		PsimagLite::String tspAlgo = "";
 		try {
@@ -281,9 +281,6 @@ public:
 
 		//! set hamiltonian
 		this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
-
-		SparseMatrixType tmpMatrix2;
-		tmpMatrix2.makeDiagonal(natBasis.size(),0.0);
 	}
 
 	//! set creation matrices for sites in block
@@ -301,6 +298,7 @@ public:
 		for (SizeType i=0;i<block.size();i++) {
 			for (SizeType sigma=0;sigma<dofs;sigma++) {
 				findOperatorMatrices(tmpMatrix,i,sigma,natBasis);
+
 				SizeType m=0;
 				int asign=1;
 				if (sigma>modelParameters_.orbitals-1) {
@@ -315,6 +313,7 @@ public:
 					su2related.transpose.push_back(-1);
 					su2related.offset = modelParameters_.orbitals;
 				}
+
 				OperatorType myOp(tmpMatrix,
 				                  -1,
 				                  typename OperatorType::PairType(1,m),
@@ -495,8 +494,11 @@ public:
 
 	void findElectrons(VectorSizeType& electrons,
 	                   const HilbertBasisType& basis,
-	                   SizeType) const
+	                   SizeType site) const
 	{
+		if (modelParameters_.jzSymmetry)
+			return findElectronsJzSymm(electrons,basis,site);
+
 		electrons.resize(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {
 			// nup
@@ -609,7 +611,8 @@ private:
 			}
 		}
 
-		if (reinterpret_ && modelParameters_.orbitals==2) reinterpret(cm,natBasis);
+		reinterpret(cm,natBasis);
+		jzReinterpret(cm);
 
 		SparseMatrixType temp;
 		fullMatrixToCrsMatrix(temp,cm);
@@ -663,8 +666,13 @@ private:
 			SizeType electronsDown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
 			                                                                      SPIN_DOWN);
 			electrons[i] = electronsDown + electronsUp[i];
-			if (modelParameters_.spinOrbit.n_row() > 0)
+			if (modelParameters_.spinOrbit.n_row() == 0) continue;
+			if (!modelParameters_.jzSymmetry) {
 				electronsUp[i] = 0;
+				continue;
+			}
+
+			setElectronsAndJzFor(electrons,electronsUp,i);
 		}
 
 		q.set(jmvalues,flavors,electrons,electronsUp);
@@ -715,6 +723,8 @@ private:
 	void reinterpret(MatrixType& cm,
 	                 const HilbertBasisType& basis) const
 	{
+		if (reinterpret_ && modelParameters_.orbitals==2);
+
 		int n  = cm.n_row();
 		if (n!=16)
 			throw PsimagLite::RuntimeError("blocks.size must be 1, and basis.size 16\n");
