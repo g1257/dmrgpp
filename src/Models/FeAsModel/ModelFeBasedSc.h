@@ -91,6 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "ModelCommon.h"
 #include "Geometry/GeometryDca.h"
+#include "FeAsJzSymmetry.h"
 
 namespace Dmrg {
 template<typename ModelBaseType>
@@ -126,6 +127,7 @@ public:
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef ParametersModelFeAs<ComplexOrRealType> ParamsModelFeAsType;
+	typedef FeAsJzSymmetry<HilbertBasisType, MatrixType> FeAsJzSymmetryType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
@@ -143,7 +145,8 @@ public:
 	      spinSquared_(spinSquaredHelper_,
 	                   modelParameters_.orbitals,
 	                   2*modelParameters_.orbitals),
-	      reinterpret_(!modelParameters_.jzSymmetry)
+	      reinterpret_(!modelParameters_.jzSymmetry),
+	      feAsJzSymmetry_()
 	{
 		PsimagLite::String tspAlgo = "";
 		try {
@@ -497,7 +500,7 @@ public:
 	                   SizeType site) const
 	{
 		if (modelParameters_.jzSymmetry)
-			return findElectronsJzSymm(electrons,basis,site);
+			return feAsJzSymmetry_.findElectrons(electrons,basis,site);
 
 		electrons.resize(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {
@@ -612,7 +615,7 @@ private:
 		}
 
 		reinterpret(cm,natBasis);
-		jzReinterpret(cm);
+		feAsJzSymmetry_.jzReinterpret(cm);
 
 		SparseMatrixType temp;
 		fullMatrixToCrsMatrix(temp,cm);
@@ -672,7 +675,7 @@ private:
 				continue;
 			}
 
-			setElectronsAndJzFor(electrons,electronsUp,i);
+			feAsJzSymmetry_.setElectronsAndJzFor(electrons,electronsUp,i);
 		}
 
 		q.set(jmvalues,flavors,electrons,electronsUp);
@@ -1400,6 +1403,7 @@ private:
 	bool reinterpret_;
 	//serializr normal statesPerSite_
 	SizeType statesPerSite_;
+	FeAsJzSymmetryType feAsJzSymmetry_;
 }; //class ModelFeBasedSc
 } // namespace Dmrg
 /*@}*/
