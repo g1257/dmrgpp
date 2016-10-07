@@ -127,7 +127,7 @@ public:
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef ParametersModelFeAs<ComplexOrRealType> ParamsModelFeAsType;
-	typedef FeAsJzSymmetry<HilbertBasisType, VectorOperatorType> FeAsJzSymmetryType;
+    typedef FeAsJzSymmetry<HilbertBasisType, SparseMatrixType> FeAsJzSymmetryType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
@@ -526,7 +526,7 @@ private:
 
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
 	                         const BlockType& block,
-	                         bool reinterpretJz) const
+                             bool reinterpretJz) const
 	{
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
@@ -538,7 +538,7 @@ private:
 		SizeType dofs = 2*modelParameters_.orbitals;
 		for (SizeType i=0;i<block.size();i++) {
 			for (SizeType sigma=0;sigma<dofs;sigma++) {
-				findOperatorMatrices(tmpMatrix,i,sigma,natBasis);
+                findOperatorMatrices(tmpMatrix,i,sigma,natBasis,reinterpretJz);
 
 				SizeType m=0;
 				int asign=1;
@@ -603,7 +603,8 @@ private:
 	void findOperatorMatrices(SparseMatrixType& creationMatrix,
 	                          int i,
 	                          int sigma,
-	                          const HilbertBasisType& natBasis) const
+                              const HilbertBasisType& natBasis,
+                              bool reinterpretJz) const
 	{
 		HilbertState bra,ket;
 		int n = natBasis.size();
@@ -628,7 +629,9 @@ private:
 		}
 
 		reinterpret(cm,natBasis);
-		feAsJzSymmetry_.jzReinterpret(cm);
+        if(reinterpretJz) {
+        feAsJzSymmetry_.jzReinterpret(cm);
+        }
 
 		SparseMatrixType temp;
 		fullMatrixToCrsMatrix(temp,cm);
@@ -739,7 +742,7 @@ private:
 	void reinterpret(MatrixType& cm,
 	                 const HilbertBasisType& basis) const
 	{
-		if (reinterpret_ && modelParameters_.orbitals==2);
+        if (!reinterpret_ || modelParameters_.orbitals!=2) return;
 
 		int n  = cm.n_row();
 		if (n!=16)
