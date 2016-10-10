@@ -3,6 +3,8 @@
 #include "Vector.h"
 #include "CrsMatrix.h"
 #include "Operator.h"
+#include "ModelBase.h"
+#include "HilbertSpaceFeAs.h"
 
 
 namespace Dmrg {
@@ -18,7 +20,7 @@ public:
     typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
     typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
     typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-    typedef HilbertBasisType::value_type WordType;
+
 
     FeAsJzSymmetry(bool) {}
     void init(HilbertBasisType&,
@@ -52,6 +54,11 @@ public:
     typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
     typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
     typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+    typedef  typename HilbertBasisType::value_type WordType;
+    typedef  HilbertSpaceFeAs<WordType> HilbertSpaceFeAsType;
+
+    static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
+    static const int SPIN_DOWN=HilbertSpaceFeAsType::SPIN_DOWN;
 
     FeAsJzSymmetry(bool isEnabled) :
         isEnabled_(isEnabled), isSet_(false)
@@ -70,20 +77,20 @@ public:
         VectorRealType blockOffsets;
 
         MatrixType P(natBasis.size(),natBasis.size());
-        Get_P_Blocks(natBasis,blockOffsets,P);
+        Get_P_and_Blocks_and_electrons(natBasis,blockOffsets,P);
 
         Rotate(P,Jz_opr);
         // diagonalize each block --> U, jzEigs
         VectorRealType jzEigs;
 
-        DiagonalizeBlocks_GetU(Jz_opr, blockOffsets, jzEigs);
+        //DiagonalizeBlocks_GetU(Jz_opr, blockOffsets, jzEigs);
 
         // convertJzEigs(jzModifiedEigs_,jzEigs);
 
         // do U' = U*P^\dagger --> u_ and utranspose_
-        Get_UP(UP,P);
+        //Get_UP(UP,P);
         //rotate all operators
-        Rotate(UP,creationMatrix);
+        //Rotate(UP,creationMatrix);
 
         isSet_ = true;
     }
@@ -164,15 +171,15 @@ private:
     }
 
 
-    void Get_P_Blocks(const HilbertBasisType& natBasis, VectorRealType& blockOffsets, MatrixType& P)
+    void Get_P_and_Blocks_and_electrons(const HilbertBasisType& natBasis, VectorRealType& blockOffsets, MatrixType& P)
     {
         //HilbertBasisType newBasis;
         electrons_.resize(natBasis.size());
 
         //Works only for 3 orbital model
-        int j=0;
-        for(int ne=0;i<7;i++){
-            for(int i=0;i<natBasis.size();i++){
+        SizeType j=0;
+        for(SizeType ne=0;ne<7;ne++){
+            for(SizeType i=0;i<natBasis.size();i++){
                 if(no_of_electrons(natBasis[i])==ne){
                     //newBasis.pushback(natBasis[i]);
                     P(j,i)=1;
@@ -180,7 +187,7 @@ private:
                     j=j+1;
                 }
             }
-            blockOffsets.pushback(j);
+            blockOffsets.push_back(j);
 
         }
 
@@ -197,10 +204,10 @@ private:
                                 const VectorRealType& blockOffsets,
                                 VectorRealType& jzEigs)
     {
-        SizeType nrow = Jz_opr.row();
+//        SizeType nrow = Jz_opr.row();
 
-    u_.resize(nrow,nrow);
-    utranspose_.resize(nrow,nrow);
+//    u_.resize(nrow,nrow);
+//    utranspose_.resize(nrow,nrow);
 
 
 
@@ -221,6 +228,16 @@ private:
     return tmp_e;
     }
 
+
+    void Rotate(const MatrixType& R, MatrixType& O)
+    {
+        SizeType nrow = R.n_row();
+        MatrixType tmp(nrow,nrow);
+        tmp = O*R;
+        MatrixType R_dagg(nrow,nrow);
+        R_dagg=transposeConjugate(R);
+        O = R_dagg*tmp;
+    }
 
 
     void convertJzEigs(VectorSizeType& electronselectronsUp,

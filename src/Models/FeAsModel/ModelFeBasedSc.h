@@ -127,7 +127,7 @@ public:
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef ParametersModelFeAs<ComplexOrRealType> ParamsModelFeAsType;
-    typedef FeAsJzSymmetry<HilbertBasisType, SparseMatrixType> FeAsJzSymmetryType;
+    typedef FeAsJzSymmetry<HilbertBasisType, PsimagLite::CrsMatrix<std::complex<double> > > FeAsJzSymmetryType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
@@ -407,7 +407,7 @@ public:
 			VectorSizeType allowed(2*modelParameters_.orbitals,0);
 			for (SizeType x = 0; x < allowed.size(); ++x) allowed[x] = x;
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			creationMatrix[orbital + spin*modelParameters_.orbitals].conjugate();
+            creationMatrix[orbital + spin*modelParameters_.orbitals].conjugate();
 			return creationMatrix[orbital + spin*modelParameters_.orbitals];
 		}
 

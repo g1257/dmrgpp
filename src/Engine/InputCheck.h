@@ -180,8 +180,9 @@ public:
 		knownLabels_.push_back("PotentialT");
 		knownLabels_.push_back("omega");
 		knownLabels_.push_back("MagneticField");
-                knownLabels_.push_back("SpinOrbit");
+        knownLabels_.push_back("SpinOrbit");
 		knownLabels_.push_back("DegeneracyMax=");
+        knownLabels_.push_back("JzSymmetry=");
 	}
 
 	~InputCheck()
