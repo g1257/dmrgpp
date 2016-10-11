@@ -6,15 +6,14 @@
 #include "ModelBase.h"
 #include "HilbertSpaceFeAs.h"
 
-
 namespace Dmrg {
 
-template<typename HilbertBasisType, typename SparseMatrixType>
+template<typename HilbertBasisType, typename VectorOperatorType, bool>
 class FeAsJzSymmetry {
 public:
 
-	typedef Operator<SparseMatrixType> OperatorType;
-	typedef std::vector<OperatorType> VectorOperatorType;
+	typedef typename VectorOperatorType::value_type OperatorType;
+	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
@@ -41,13 +40,12 @@ public:
 
 };
 
-template<typename HilbertBasisType>
-class FeAsJzSymmetry<HilbertBasisType,PsimagLite::CrsMatrix<std::complex<double> > > {
+template<typename HilbertBasisType, typename VectorOperatorType>
+class FeAsJzSymmetry<HilbertBasisType,VectorOperatorType, true> {
 
 public:
 
-	typedef Operator<PsimagLite::CrsMatrix<std::complex<double> > > OperatorType;
-	typedef std::vector<OperatorType> VectorOperatorType;
+	typedef typename VectorOperatorType::value_type OperatorType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;

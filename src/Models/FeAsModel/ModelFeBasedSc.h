@@ -127,7 +127,9 @@ public:
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef ParametersModelFeAs<ComplexOrRealType> ParamsModelFeAsType;
-	typedef FeAsJzSymmetry<HilbertBasisType, PsimagLite::CrsMatrix<std::complex<double> > > FeAsJzSymmetryType;
+	typedef FeAsJzSymmetry<HilbertBasisType,
+	VectorOperatorType,
+	PsimagLite::IsComplexNumber<ComplexOrRealType>::True> FeAsJzSymmetryType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
