@@ -299,10 +299,10 @@ std::ostream& operator<<(std::ostream &os,
 		os<<parameters.spinOrbit;
 	}
 
-    if (parameters.jzSymmetry>0) {
-        os<<"using jzSymmetry, works only for 3 orbitals \n";
-        os<<parameters.jzSymmetry;
-    }
+	if (parameters.jzSymmetry>0) {
+		os<<"using jzSymmetry, works only for 3 orbitals \n";
+		os<<parameters.jzSymmetry;
+	}
 	os<<"FeAsMode=";
 	os<<ParametersModelFeAs<RealType>::modeString(parameters.feAsMode)<<"\n";
 	if (parameters.feAsMode == ParametersModelFeAs<RealType>::INT_V)

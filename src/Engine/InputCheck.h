@@ -180,9 +180,9 @@ public:
 		knownLabels_.push_back("PotentialT");
 		knownLabels_.push_back("omega");
 		knownLabels_.push_back("MagneticField");
-        knownLabels_.push_back("SpinOrbit");
+		knownLabels_.push_back("SpinOrbit");
 		knownLabels_.push_back("DegeneracyMax=");
-        knownLabels_.push_back("JzSymmetry=");
+		knownLabels_.push_back("JzSymmetry=");
 	}
 
 	~InputCheck()
@@ -276,7 +276,7 @@ public:
 			\item[recoveryNoDelete] Do not delete recovery files even if run finishes OK
 			\item[neverNormalizeVectors] TBW
 			\item [advanceOnlyAtBorder] Advance time only at borders
-		    \item [findSymmetrySector] Find symmetry sector with lowest energy, and
+			\item [findSymmetrySector] Find symmetry sector with lowest energy, and
 			ignore value set in TargetElectronsUp or TargetSzPlusConst
 		\end{itemize}
 		*/
