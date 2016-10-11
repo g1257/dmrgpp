@@ -62,16 +62,15 @@ public:
 	    isEnabled_(isEnabled), isSet_(false)
 	{}
 
-	void init(HilbertBasisType& natBasis,
+	void init(const HilbertBasisType& natBasis,
 	          VectorOperatorType& creationMatrix)
 	{
 		assert(!isSet_);
 		// write operator Jz in first basis
 		MatrixType Jz_opr = Jz_opr_original_basis(creationMatrix);
 
-
-
-		// reorder Jz so that it is block diagonal in n and find P,and determine the electrons_ and save it --> permutation
+		// reorder Jz so that it is block diagonal in n and find P,
+		// and determine the electrons_ and save it --> permutation
 		VectorRealType blockOffsets;
 
 		MatrixType P(natBasis.size(),natBasis.size());
@@ -152,12 +151,13 @@ private:
 		tmp -= multiplyTc(creationMatrix[2].data,creationMatrix[2].data) ;
 
 
-		//i(czx_dn_dagg*cyz_dn) + hc (first with i, sec with -i, std::complex<double>(0.0,1.0)*)
+		//i(czx_dn_dagg*cyz_dn) + hc (first with i, sec with -i,
+		// std::complex<double>(0.0,1.0)*)
 		ComplexOrRealType sqrtMinus1(0,1);
 
-		tmp += sqrtMinus1*(multiplyTc(creationMatrix[4].data,creationMatrix[5].data) );
+		tmp += sqrtMinus1*(multiplyTc(creationMatrix[4].data,creationMatrix[5].data));
 
-		tmp += -sqrtMinus1*(multiplyTc(creationMatrix[5].data,creationMatrix[4].data) ) ;
+		tmp += -sqrtMinus1*(multiplyTc(creationMatrix[5].data,creationMatrix[4].data));
 
 		//i(czx_up_dagg*cyz_up) + hc
 		tmp += (multiplyTc(creationMatrix[1].data,creationMatrix[2].data));
@@ -169,7 +169,9 @@ private:
 	}
 
 
-	void Get_P_and_Blocks_and_electrons(const HilbertBasisType& natBasis, VectorRealType& blockOffsets, MatrixType& P)
+	void Get_P_and_Blocks_and_electrons(const HilbertBasisType& natBasis,
+	                                    VectorRealType& blockOffsets,
+	                                    MatrixType& P)
 	{
 		//HilbertBasisType newBasis;
 		electrons_.resize(natBasis.size());
@@ -185,18 +187,10 @@ private:
 					j=j+1;
 				}
 			}
+
 			blockOffsets.push_back(j);
-
 		}
-
-
-
-
-
-
 	}
-
-
 
 	void DiagonalizeBlocks_GetU(const MatrixType& Jz_opr,
 	                            const VectorRealType& blockOffsets,
@@ -206,11 +200,7 @@ private:
 
 		//    u_.resize(nrow,nrow);
 		//    utranspose_.resize(nrow,nrow);
-
-
-
 	}
-
 
 	SizeType no_of_electrons(WordType basis_i)
 	{
@@ -226,7 +216,6 @@ private:
 		return tmp_e;
 	}
 
-
 	void Rotate(const MatrixType& R, MatrixType& O)
 	{
 		SizeType nrow = R.n_row();
@@ -237,12 +226,9 @@ private:
 		O = R_dagg*tmp;
 	}
 
-
 	void convertJzEigs(VectorSizeType& electronselectronsUp,
 	                   const VectorRealType& jzEigs) const
-	{
-
-	}
+	{}
 
 	bool isEnabled_;
 	bool isSet_;
