@@ -82,13 +82,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PreOperatorSiteDependent.h"
 #include "PreOperatorSiteIndependent.h"
 #include "Concurrency.h"
-#include <vector>
+#include "Vector.h"
 
 namespace Dmrg {
 
 template<typename ObserverType>
 class ObservableLibrary {
+
 public:
+
 	typedef typename ObserverType::ModelType ModelType;
 	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelType::OperatorType OperatorType;
@@ -99,6 +101,7 @@ public:
 	typedef typename ModelType::RealType RealType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename VectorWithOffsetType::value_type FieldType;
+	typedef typename PsimagLite::Vector<FieldType>::Type VectorFieldType;
 	typedef PsimagLite::Matrix<FieldType> MatrixType;
 	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
 	typedef PreOperatorBase<ModelType> PreOperatorBaseType;
@@ -196,7 +199,8 @@ public:
 
 private:
 
-	void setBrakets(const PsimagLite::String& left,const PsimagLite::String& right)
+	void setBrakets(const PsimagLite::String& left,
+	                const PsimagLite::String& right)
 	{
 		observe_.setBrakets(left,right);
 	}
@@ -224,7 +228,7 @@ private:
 	{
 		SizeType threadId = preOperator.threadId();
 		printMarker(threadId);
-		std::vector<FieldType> density;
+		VectorFieldType density;
 
 		for (SizeType i0 = 0;i0<observe_.size();i0++) {
 			if (!preOperator.isValid(i0+1)) continue;
@@ -268,7 +272,6 @@ private:
 			std::cout<<" "<<observe_.time(threadId)<<"\n";
 			density.push_back(tmp1);
 		}
-
 	}
 
 	MatrixType SliceOrbital(const MatrixType& m,
@@ -285,11 +288,15 @@ private:
 				out(i,j) = m(k,l);
 			}
 		}
+
 		std::cout << out;
 		return out;
 	}
 
-	void measure(const PsimagLite::String& label,SizeType rows,SizeType cols,SizeType orbitals)
+	void measure(const PsimagLite::String& label,
+	             SizeType rows,
+	             SizeType cols,
+	             SizeType orbitals)
 	{
 		PsimagLite::String modelName = model_.params().model;
 
@@ -316,7 +323,7 @@ private:
 
 					PsimagLite::String str = "<gs|n?" + ttos(i) + ";n?" + ttos(j) + "|gs>";
 					observe_.twoPoint(out,n1,n2,fermionicSign);
-					if(modelName=="HubbardOneBandExtendedSuper") {
+					if (modelName=="HubbardOneBandExtendedSuper") {
 						MatrixType tmp;
 						PsimagLite::String str1;
 						str1 = str + " orbitals 0-0:";
@@ -353,7 +360,7 @@ private:
 					else
 						tSzTotal +=  factor*tSzThis;
 
-					if(modelName=="HubbardOneBandExtendedSuper") {
+					if (modelName=="HubbardOneBandExtendedSuper") {
 						MatrixType tmp;
 						str = "OperatorSz orb";
 						PsimagLite::String str1;
@@ -401,7 +408,7 @@ private:
 					else
 						tSpTotal +=  factor*tSpThis;
 
-					if(modelName=="HubbardOneBandExtendedSuper") {
+					if (modelName=="HubbardOneBandExtendedSuper") {
 						MatrixType tmp;
 						str = "OperatorS+S- orb";
 						PsimagLite::String str1;
@@ -449,7 +456,7 @@ private:
 					else
 						tSmTotal +=  factor*tSmThis;
 
-					if(modelName=="HubbardOneBandExtendedSuper") {
+					if (modelName=="HubbardOneBandExtendedSuper") {
 						MatrixType tmp;
 						str = "OperatorS-S+ orb";
 						PsimagLite::String str1;
@@ -508,7 +515,7 @@ private:
 					else
 						spinTotalTotal +=  factor*spinTotal;
 
-					if(modelName=="HubbardOneBandExtendedSuper") {
+					if (modelName=="HubbardOneBandExtendedSuper") {
 						MatrixType AA, BB, AB;
 						PsimagLite::String str = "SpinTotal";
 						PsimagLite::String str1;
@@ -561,6 +568,7 @@ private:
 			        model_.params().model!="HubbardOneBandExtendedSuper") {
 				throw PsimagLite::RuntimeError("pp: not for this model\n");
 			}
+
 			typename PsimagLite::Vector<MatrixType*>::Type results;
 			typename PsimagLite::Vector<PsimagLite::String>::Type names;
 			ppTwopoint(results,names,rows,cols);
@@ -611,7 +619,6 @@ private:
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 	}
-
 
 	void ppTwopoint(typename PsimagLite::Vector<MatrixType*>::Type& result,
 	                typename PsimagLite::Vector<PsimagLite::String>::Type& names,
@@ -691,6 +698,7 @@ private:
 					m(i,j) = -1.0*ppFour2(i,i,j,j,orb1,orb2,orb4,orb3,sign);
 				}
 			}
+
 			std::cout << m;
 
 		} else if (flag==2) {
@@ -707,7 +715,9 @@ private:
 					m(i,j) = -1.0*ppFour2(i,i,j,j,orb1,orb2,orb4,orb3,sign);
 				}
 			}
+
 			std::cout << m;
+
 		} else if (flag==3) {
 			SizeType spin0 = 0; // up
 			SizeType spin1 = 1; // down
@@ -1283,7 +1293,10 @@ private:
 		}
 	}
 
-	void resizeStorage(VectorMatrixType& v,SizeType rows,SizeType cols,SizeType orbitals)
+	void resizeStorage(VectorMatrixType& v,
+	                   SizeType rows,
+	                   SizeType cols,
+	                   SizeType orbitals)
 	{
 		if (v.size() != 0) return;
 		v.resize(static_cast<SizeType>(orbitals*(orbitals+1)/2));
@@ -1296,7 +1309,7 @@ private:
 		const PsimagLite::String& modelName = model_.params().model;
 		SizeType threadId = preOperator.threadId();
 		printMarker(threadId);
-		std::vector<FieldType> density;
+		VectorFieldType density;
 
 		for (SizeType i0 = 0;i0<observe_.size();i0++) {
 			if (!preOperator.isValid(i0+1)) continue;
@@ -1363,7 +1376,7 @@ private:
 			}
 		}
 
-		if(modelName=="HubbardOneBandExtendedSuper") {
+		if (modelName=="HubbardOneBandExtendedSuper") {
 			SizeType nsite=observe_.size()/2+1;
 			SizeType orbitals = 2;
 			for (SizeType i0 = 0;i0<nsite;i0++)
@@ -1373,15 +1386,13 @@ private:
 			for (SizeType i0 = 0;i0<observe_.size();i0++)
 				std::cout << i0 << " " << density[i0] << std::endl;
 		}
-
-
 	}
 
 	void onePointHookForZero(SizeType i0,
 	                         const OperatorType& opA,
 	                         const PsimagLite::String& gsOrTime,
 	                         SizeType threadId,
-	                         std::vector<FieldType> &density)
+	                         VectorFieldType& density)
 	{
 		if (hasTimeEvolution_) return;
 		if (observe_.site(threadId)!=1 || observe_.isAtCorner(numberOfSites_,threadId))
