@@ -216,6 +216,7 @@ public:
 
 		HilbertBasisType basisTmp = basis_;
 		setSymmetryRelatedInternal(qq_,basis_,1,false);
+		ProgramGlobals::init(modelParameters_.orbitals*geometry_.numberOfSites() + 1);
 		qq_.findQuantumNumbers(q_, MyBasis::useSu2Symmetry());
 		this->orderBasis(basis_,q_,basisTmp);
 

@@ -244,7 +244,7 @@ public:
 		SizeType maxElectrons = static_cast<SizeType>(tmp/2);
 		if (tmp & 1) maxElectrons++;
 
-		return maxElectrons * modelCommon_->geometry().numberOfSites() + 1;
+		return maxElectrons*modelCommon_->geometry().numberOfSites() + 1;
 	}
 
 	void printBasis(SizeType site) const

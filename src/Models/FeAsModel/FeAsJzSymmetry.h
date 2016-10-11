@@ -120,12 +120,6 @@ public:
 		cm = tmp*u_;
 	}
 
-
-
-
-
-
-
 	bool isEnabled() const { return isEnabled_; }
 
 	bool isSet() const { return isSet_; }
