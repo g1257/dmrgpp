@@ -102,6 +102,10 @@ struct ProgramGlobals {
 
 	static void init(SizeType maxElectronsOneSpin_)
 	{
+		if (maxElectronsOneSpin == maxElectronsOneSpin_) return;
+		if (maxElectronsOneSpin != 0)
+			throw PsimagLite::RuntimeError("ProgramGlobals::init(...)\n");
+
 		maxElectronsOneSpin = maxElectronsOneSpin_;
 	}
 
@@ -110,7 +114,7 @@ struct ProgramGlobals {
 	static PsimagLite::String ENVIRON_STACK_STRING;
 }; // ProgramGlobals
 
-}; // namespace Dmrg
+} // namespace Dmrg
 /*@}*/
 #endif
 
