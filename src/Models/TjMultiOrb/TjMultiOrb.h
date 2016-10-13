@@ -152,6 +152,11 @@ public:
 			throw PsimagLite::RuntimeError("potentialV must be of size 2*sites*orbitals\n");
 
 		// fill caches
+		BlockType block(1,0);
+		setNaturalBasis(basis_,q_,block,true);
+		setOperatorMatrices(creationMatrix_,block);
+		//! Set symmetry related
+		setSymmetryRelated(qq_,basis_,block.size());
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
@@ -306,9 +311,10 @@ public:
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 	void setNaturalBasis(HilbertBasisType  &basis,
 	                     VectorSizeType& q,
-	                     const VectorSizeType& block) const
+	                     const VectorSizeType&) const
 	{
-		setNaturalBasis(basis,q,block,true);
+		basis = basis_;
+		q = q_;
 	}
 
 
@@ -333,30 +339,27 @@ public:
 	}
 
 	//! Find n_i in the natural basis natBasis
-	SparseMatrixType findNiMatrices(int i,
-	                                const VectorHilbertStateType& natBasis,
-	                                const MatrixType* rot = 0,
-	                                const MatrixType* rotT = 0) const
+	SparseMatrixType findNiMatrices(int,
+	                                const VectorHilbertStateType&) const
 	{
-		return findNiMatrices(i,natBasis,true,rot,rotT);
+		assert(2*modelParameters_.orbitals + 2 < creationMatrix_.size());
+		return creationMatrix_[2*modelParameters_.orbitals + 2].data;
 	}
 
 	//! Find S^+_i in the natural basis natBasis
-	SparseMatrixType findSplusMatrices(int i,
-	                                   const VectorHilbertStateType& natBasis,
-	                                   const MatrixType* rot = 0,
-	                                   const MatrixType* rotT = 0) const
+	SparseMatrixType findSplusMatrices(int,
+	                                   const VectorHilbertStateType&) const
 	{
-		return findSplusMatrices(i,natBasis,true,rot,rotT);
+		assert(2*modelParameters_.orbitals < creationMatrix_.size());
+		return creationMatrix_[2*modelParameters_.orbitals].data;
 	}
 
 	//! Find S^z_i in the natural basis natBasis
-	SparseMatrixType findSzMatrices(int i,
-	                                const VectorHilbertStateType& natBasis,
-	                                const MatrixType* rot = 0,
-	                                const MatrixType* rotT = 0) const
+	SparseMatrixType findSzMatrices(int,
+	                                const VectorHilbertStateType&) const
 	{
-		return findSzMatrices(i,natBasis,true,rot,rotT);
+		assert(2*modelParameters_.orbitals + 1< creationMatrix_.size());
+		return creationMatrix_[2*modelParameters_.orbitals+1].data;
 	}
 
 private:
@@ -395,7 +398,6 @@ private:
 	//! Find n_i in the natural basis natBasis
 	SparseMatrixType findNiMatrices(int,
 	                                const VectorHilbertStateType& natBasis,
-	                                bool afterSet,
 	                                const MatrixType* rot,
 	                                const MatrixType* rotT) const
 	{
@@ -421,7 +423,6 @@ private:
 	//! Find S^+_i in the natural basis natBasis
 	SparseMatrixType findSplusMatrices(int i,
 	                                   const VectorHilbertStateType& natBasis,
-	                                   bool afterSet,
 	                                   const MatrixType* rot,
 	                                   const MatrixType* rotT) const
 	{
@@ -456,7 +457,6 @@ private:
 	//! Find S^z_i in the natural basis natBasis
 	SparseMatrixType findSzMatrices(int i,
 	                                const VectorHilbertStateType& natBasis,
-	                                bool afterSet,
 	                                const MatrixType* rot,
 	                                const MatrixType* rotT) const
 	{
