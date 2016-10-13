@@ -152,6 +152,7 @@ public:
 			throw PsimagLite::RuntimeError("potentialV must be of size 2*sites*orbitals\n");
 
 		// fill caches
+		ProgramGlobals::init(modelParameters_.orbitals*geometry_.numberOfSites() + 1);
 		BlockType block(1,0);
 		setNaturalBasis(basis_,q_,block,true);
 		setOperatorMatrices(creationMatrix_,block);
