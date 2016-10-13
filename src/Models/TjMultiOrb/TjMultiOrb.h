@@ -329,13 +329,12 @@ public:
 	}
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
-	SparseMatrixType findCreationMatrices(int i,
-	                                      int sigma,
-	                                      const VectorHilbertStateType& natBasis,
-	                                      const MatrixType* rot = 0,
-	                                      const MatrixType* rotT = 0) const
+	SparseMatrixType findCreationMatrices(int,
+	                                      SizeType sigma,
+	                                      const VectorHilbertStateType&) const
 	{
-		return findCreationMatrices(i,sigma,natBasis,true,rot,rotT);
+		assert(sigma < creationMatrix_.size());
+		return creationMatrix_[sigma].data;
 	}
 
 	//! Find n_i in the natural basis natBasis
@@ -368,7 +367,6 @@ private:
 	SparseMatrixType findCreationMatrices(int i,
 	                                      int sigma,
 	                                      const VectorHilbertStateType& natBasis,
-	                                      bool afterSet,
 	                                      const MatrixType* rot,
 	                                      const MatrixType* rotT) const
 	{
@@ -523,7 +521,7 @@ private:
 	}
 
 	//! set creation matrices for sites in block
-	void setOperatorMatrices(VectorOperatorType&creationMatrix,
+	void setOperatorMatrices(VectorOperatorType& creationMatrix,
 	                         const BlockType& block) const
 	{
 		VectorHilbertStateType natBasis;
