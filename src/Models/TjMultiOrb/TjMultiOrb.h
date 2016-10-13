@@ -129,6 +129,8 @@ public:
 
 	enum {REINTERPRET_6 = 6, REINTERPRET_9 = 9};
 
+	enum {STATE_EMPTY = 0, STATE_UP_A = 1, STATE_DOWN_A = 4};
+
 	enum {SPIN_UP, SPIN_DOWN};
 
 	TjMultiOrb(const SolverParamsType& solverParams,
@@ -169,17 +171,8 @@ public:
 
 	SizeType hilbertSize(SizeType) const
 	{
-		switch (modelParameters_.reinterpretAndTruncate) {
-		case 1:
-			return 8;
-		case 2:
-			return 7;
-		case 3:
-			return 5;
-		default:
-			return pow(3,modelParameters_.orbitals);
-
-		}
+		assert(0 < creationMatrix_.size());
+		return creationMatrix_[0].data.row();
 	}
 
 	//! find creation operator matrices for (i,sigma) in the natural basis,
@@ -491,26 +484,34 @@ private:
 	                    const MatrixType* rotT,
 	                    const VectorHilbertStateType& natBasis) const
 	{
-		if (modelParameters_.orbitals != 2 || !modelParameters_.reinterpretAndTruncate)
-			return;
+		if (modelParameters_.orbitals != 2 ||
+		        modelParameters_.reinterpretAndTruncate == 0) return;
 
 		if (!rot || !rotT) return;
 
 		cm  = (*rot)*cm;
 		cm = cm*(*rotT);
 
-		SizeType target = findIndexToRemove(natBasis);
+		VectorSizeType target;
+		findIndicesToRemove(target, natBasis);
+		assert(target.size() > 0);
+
 		SizeType n = cm.n_row();
 		assert(n == cm.n_col());
-		assert(n > 0);
-		n--;
+		assert(n > target.size());
+		n -= target.size();
+
 		MatrixType cm2(n,n);
 		SizeType ii = 0;
 		for (SizeType i = 0; i < cm.n_row(); ++i) {
-			if (i == target) continue;
+			VectorSizeType::const_iterator it = std::find(target.begin(),
+			                                              target.end(),
+			                                              i);
+			if (it != target.end()) continue;
 			SizeType jj = 0;
 			for (SizeType j = 0; j < cm.n_col(); ++j) {
-				if (j == target) continue;
+				VectorSizeType::const_iterator it = std::find(target.begin(), target.end(), j);
+				if (it != target.end()) continue;
 				cm2(ii,jj) = cm(i,j);
 				jj++;
 			}
@@ -629,8 +630,8 @@ private:
 	                     MatrixType& uT,
 	                     const VectorHilbertStateType& natBasis) const
 	{
-		if (modelParameters_.orbitals != 2 || !modelParameters_.reinterpretAndTruncate)
-			return;
+		if (modelParameters_.orbitals != 2 ||
+		        modelParameters_.reinterpretAndTruncate == 0) return;
 
 		SizeType n = natBasis.size();
 		for (SizeType ii=0;ii<n;ii++) {
@@ -650,14 +651,24 @@ private:
 		transposeConjugate(uT,u);
 	}
 
-	SizeType findIndexToRemove(const VectorHilbertStateType& natBasis) const
+	void findIndicesToRemove(VectorSizeType& indices,
+	                         const VectorHilbertStateType& natBasis) const
 	{
-		SizeType target = REINTERPRET_6;
-		for (SizeType i = 0; i < natBasis.size(); ++i) {
-			if (natBasis[i] == target) return i;
+		VectorHilbertStateType target(1,REINTERPRET_6);
+		if (modelParameters_.reinterpretAndTruncate > 1)
+			target.push_back(STATE_EMPTY);
+		if (modelParameters_.reinterpretAndTruncate > 2) {
+			target.push_back(STATE_UP_A);
+			target.push_back(STATE_DOWN_A);
 		}
 
-		throw PsimagLite::RuntimeError("findIndexToRemove: index not found\n");
+		for (SizeType i = 0; i < natBasis.size(); ++i) {
+			typename VectorHilbertStateType::const_iterator it = std::find(target.begin(),
+			                                                               target.end(),
+			                                                               natBasis[i]);
+			if (it == target.end()) continue;
+			indices.push_back(i);
+		}
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
@@ -716,7 +727,7 @@ private:
 
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			HilbertStateType ket = basis[i];
-			if (truncated && modelParameters_.reinterpretAndTruncate && ket == REINTERPRET_6)
+			if (truncated && modelParameters_.reinterpretAndTruncate == 1 && ket == REINTERPRET_6)
 				continue;
 			SizeType orb = 0;
 			while (ket > 0) {
