@@ -147,8 +147,11 @@ public:
 			std::cout<<str<<"\n";
 		}
 
-		if (modelParameters_.potentialV.size() != 2*geometry_.numberOfSites()*modelParameters_.orbitals)
+		if (modelParameters_.potentialV.size() !=
+		        2*geometry_.numberOfSites()*modelParameters_.orbitals)
 			throw PsimagLite::RuntimeError("potentialV must be of size 2*sites*orbitals\n");
+
+		// fill caches
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
@@ -178,18 +181,12 @@ public:
 	//! for each state in the basis
 	virtual void setNaturalBasis(VectorOperatorType& creationMatrix,
 	                             SparseMatrixType &hamiltonian,
-	                             SymmetryElectronsSzType& q,
+	                             SymmetryElectronsSzType& qq,
 	                             const BlockType& block,
 	                             const RealType& time) const
 	{
-		HilbertBasisType natBasis;
-		VectorSizeType quantumNumbs;
-		setNaturalBasis(natBasis,quantumNumbs,block);
-
-		setOperatorMatrices(creationMatrix,block);
-
-		//! Set symmetry related
-		setSymmetryRelated(q,natBasis,block.size());
+		creationMatrix = creationMatrix_;
+		qq = qq_;
 
 		//! set hamiltonian
 		this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
@@ -201,13 +198,8 @@ public:
 	                             SizeType site,
 	                             SizeType dof) const
 	{
-		BlockType block;
-		block.resize(1);
-		block[0]=site;
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		setOperatorMatrices(creationMatrix,block);
-		assert(creationMatrix.size()>0);
-		SizeType nrow = creationMatrix[0].data.row();
+		assert(creationMatrix_.size()>0);
+		SizeType nrow = creationMatrix_[0].data.row();
 		SizeType orbitals = modelParameters_.orbitals;
 
 		if (what == "i" || what=="identity") {
@@ -226,34 +218,35 @@ public:
 		if (what=="+") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			return creationMatrix[2*orbitals];
+			return creationMatrix_[2*orbitals];
 		}
 
 		if (what=="-") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			creationMatrix[2*orbitals].conjugate();
-			return creationMatrix[2*orbitals];
+			OperatorType cm = creationMatrix_[2*orbitals];
+			cm.conjugate();
+			return cm;
 		}
 
 		if (what=="z") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			return creationMatrix[2*orbitals+1];
+			return creationMatrix_[2*orbitals+1];
 		}
 
 		if (what=="c") {
 			VectorSizeType allowed(2*orbitals,0);
 			for (SizeType i = 0; i < allowed.size(); ++i) allowed[i] = i;
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			assert(dof < 2*orbitals && creationMatrix.size() > dof);
-			return creationMatrix[dof];
+			assert(dof < 2*orbitals && creationMatrix_.size() > dof);
+			return creationMatrix_[dof];
 		}
 
 		if (what=="n") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			return creationMatrix[2*orbitals+2];
+			return creationMatrix_[2*orbitals+2];
 		}
 
 		if (what=="nup") {
@@ -318,12 +311,63 @@ public:
 		setNaturalBasis(basis,q,block,true);
 	}
 
+
+	virtual const TargetQuantumElectronsType& targetQuantum() const
+	{
+		return modelParameters_.targetQuantum;
+	}
+
+	void print(std::ostream& os) const
+	{
+		os<<modelParameters_;
+	}
+
 	//! Find c^\dagger_isigma in the natural basis natBasis
 	SparseMatrixType findCreationMatrices(int i,
 	                                      int sigma,
 	                                      const VectorHilbertStateType& natBasis,
 	                                      const MatrixType* rot = 0,
 	                                      const MatrixType* rotT = 0) const
+	{
+		return findCreationMatrices(i,sigma,natBasis,true,rot,rotT);
+	}
+
+	//! Find n_i in the natural basis natBasis
+	SparseMatrixType findNiMatrices(int i,
+	                                const VectorHilbertStateType& natBasis,
+	                                const MatrixType* rot = 0,
+	                                const MatrixType* rotT = 0) const
+	{
+		return findNiMatrices(i,natBasis,true,rot,rotT);
+	}
+
+	//! Find S^+_i in the natural basis natBasis
+	SparseMatrixType findSplusMatrices(int i,
+	                                   const VectorHilbertStateType& natBasis,
+	                                   const MatrixType* rot = 0,
+	                                   const MatrixType* rotT = 0) const
+	{
+		return findSplusMatrices(i,natBasis,true,rot,rotT);
+	}
+
+	//! Find S^z_i in the natural basis natBasis
+	SparseMatrixType findSzMatrices(int i,
+	                                const VectorHilbertStateType& natBasis,
+	                                const MatrixType* rot = 0,
+	                                const MatrixType* rotT = 0) const
+	{
+		return findSzMatrices(i,natBasis,true,rot,rotT);
+	}
+
+private:
+
+	//! Find c^\dagger_isigma in the natural basis natBasis
+	SparseMatrixType findCreationMatrices(int i,
+	                                      int sigma,
+	                                      const VectorHilbertStateType& natBasis,
+	                                      bool afterSet,
+	                                      const MatrixType* rot,
+	                                      const MatrixType* rotT) const
 	{
 		assert(i == 0);
 		HilbertStateType bra,ket;
@@ -351,8 +395,9 @@ public:
 	//! Find n_i in the natural basis natBasis
 	SparseMatrixType findNiMatrices(int,
 	                                const VectorHilbertStateType& natBasis,
-	                                const MatrixType* rot = 0,
-	                                const MatrixType* rotT = 0) const
+	                                bool afterSet,
+	                                const MatrixType* rot,
+	                                const MatrixType* rotT) const
 	{
 		SizeType n = natBasis.size();
 		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
@@ -371,6 +416,75 @@ public:
 
 		SparseMatrixType creationMatrix(cm);
 		return creationMatrix;
+	}
+
+	//! Find S^+_i in the natural basis natBasis
+	SparseMatrixType findSplusMatrices(int i,
+	                                   const VectorHilbertStateType& natBasis,
+	                                   bool afterSet,
+	                                   const MatrixType* rot,
+	                                   const MatrixType* rotT) const
+	{
+		assert(i == 0);
+		HilbertStateType bra,ket;
+		int n = natBasis.size();
+		MatrixType cm(n,n);
+		SizeType orbitals = modelParameters_.orbitals;
+
+		for (SizeType ii=0;ii<natBasis.size();ii++) {
+			ket=natBasis[ii];
+			for (SizeType l = orbitals; l < 2*orbitals; ++l) {
+				bra = ket;
+				HilbertStateType masklp = (1<<l);
+				HilbertStateType masklm = (1<<(l-orbitals));
+				if ((ket & masklp) > 0 && (ket & masklm) == 0) {
+					bra = ket ^ (masklp | masklm);
+
+					int jj = PsimagLite::isInVector(natBasis,bra);
+					assert(jj>=0);
+					cm(ii,jj) = 1.0;
+				}
+			}
+		}
+
+		truncateMatrix(cm,rot,rotT,natBasis);
+
+		SparseMatrixType operatorMatrix(cm);
+		return operatorMatrix;
+	}
+
+	//! Find S^z_i in the natural basis natBasis
+	SparseMatrixType findSzMatrices(int i,
+	                                const VectorHilbertStateType& natBasis,
+	                                bool afterSet,
+	                                const MatrixType* rot,
+	                                const MatrixType* rotT) const
+	{
+		assert(i == 0);
+		int n = natBasis.size();
+		MatrixType cm(n,n);
+		SizeType orbitals = modelParameters_.orbitals;
+
+		for (SizeType ii=0;ii<natBasis.size();ii++) {
+			HilbertStateType ket=natBasis[ii];
+			int counter = 0;
+			for (SizeType l = 0; l < orbitals; ++l) {
+				HilbertStateType masklp = (1<<l);
+				if (ket & masklp) counter++;
+			}
+
+			for (SizeType l = orbitals; l < 2*orbitals; ++l) {
+				HilbertStateType masklp = (1<<l);
+				if (ket & masklp) counter--;
+			}
+
+			cm(ii,ii) = 0.5*counter;
+		}
+
+		truncateMatrix(cm,rot,rotT,natBasis);
+
+		SparseMatrixType operatorMatrix(cm);
+		return operatorMatrix;
 	}
 
 	void truncateMatrix(MatrixType& cm,
@@ -407,85 +521,6 @@ public:
 
 		cm = cm2;
 	}
-
-	//! Find S^+_i in the natural basis natBasis
-	SparseMatrixType findSplusMatrices(int i,
-	                                   const VectorHilbertStateType& natBasis,
-	                                   const MatrixType* rot = 0,
-	                                   const MatrixType* rotT = 0) const
-	{
-		assert(i == 0);
-		HilbertStateType bra,ket;
-		int n = natBasis.size();
-		MatrixType cm(n,n);
-		SizeType orbitals = modelParameters_.orbitals;
-
-		for (SizeType ii=0;ii<natBasis.size();ii++) {
-			ket=natBasis[ii];
-			for (SizeType l = orbitals; l < 2*orbitals; ++l) {
-				bra = ket;
-				HilbertStateType masklp = (1<<l);
-				HilbertStateType masklm = (1<<(l-orbitals));
-				if ((ket & masklp) > 0 && (ket & masklm) == 0) {
-					bra = ket ^ (masklp | masklm);
-
-					int jj = PsimagLite::isInVector(natBasis,bra);
-					assert(jj>=0);
-					cm(ii,jj) = 1.0;
-				}
-			}
-		}
-
-		truncateMatrix(cm,rot,rotT,natBasis);
-
-		SparseMatrixType operatorMatrix(cm);
-		return operatorMatrix;
-	}
-
-	//! Find S^z_i in the natural basis natBasis
-	SparseMatrixType findSzMatrices(int i,
-	                                const VectorHilbertStateType& natBasis,
-	                                const MatrixType* rot = 0,
-	                                const MatrixType* rotT = 0) const
-	{
-		assert(i == 0);
-		int n = natBasis.size();
-		MatrixType cm(n,n);
-		SizeType orbitals = modelParameters_.orbitals;
-
-		for (SizeType ii=0;ii<natBasis.size();ii++) {
-			HilbertStateType ket=natBasis[ii];
-			int counter = 0;
-			for (SizeType l = 0; l < orbitals; ++l) {
-				HilbertStateType masklp = (1<<l);
-				if (ket & masklp) counter++;
-			}
-
-			for (SizeType l = orbitals; l < 2*orbitals; ++l) {
-				HilbertStateType masklp = (1<<l);
-				if (ket & masklp) counter--;
-			}
-
-			cm(ii,ii) = 0.5*counter;
-		}
-
-		truncateMatrix(cm,rot,rotT,natBasis);
-
-		SparseMatrixType operatorMatrix(cm);
-		return operatorMatrix;
-	}
-
-	virtual const TargetQuantumElectronsType& targetQuantum() const
-	{
-		return modelParameters_.targetQuantum;
-	}
-
-	void print(std::ostream& os) const
-	{
-		os<<modelParameters_;
-	}
-
-private:
 
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType&creationMatrix,
