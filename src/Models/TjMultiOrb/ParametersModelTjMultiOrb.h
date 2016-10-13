@@ -97,9 +97,11 @@ struct ParametersModelTjMultiOrb {
 			io.readline(reinterpretAndTruncate,"JHundInfinity=");
 		} catch (std::exception&) {}
 
-		if (orbitals != 2 && reinterpretAndTruncate) {
-			throw PsimagLite::RuntimeError("JHundInfinity=1 only possible for orbitals==2\n");
-		}
+		if (orbitals != 2 && reinterpretAndTruncate > 0)
+			throw PsimagLite::RuntimeError("JHundInfinity>0 only possible for orbitals==2\n");
+
+		if (reinterpretAndTruncate > 3)
+			throw PsimagLite::RuntimeError("JHundInfinity must be less or equal to 3\n");
 	}
 
 	template<typename SomeMemResolvType>
@@ -130,6 +132,7 @@ std::ostream& operator<<(std::ostream &os,
 	os<<"potentialV\n";
 	os<<parameters.potentialV;
 	os<<"orbitals="<<parameters.orbitals<<"\n";
+	os<<"JHundInfinity="<<parameters.reinterpretAndTruncate<<"\n";
 	return os;
 }
 } // namespace Dmrg

@@ -160,7 +160,17 @@ public:
 
 	SizeType hilbertSize(SizeType) const
 	{
-		return (modelParameters_.reinterpretAndTruncate) ? 8 : pow(3,modelParameters_.orbitals);
+		switch (modelParameters_.reinterpretAndTruncate) {
+		case 1:
+			return 8;
+		case 2:
+			return 7;
+		case 3:
+			return 5;
+		default:
+			return pow(3,modelParameters_.orbitals);
+
+		}
 	}
 
 	//! find creation operator matrices for (i,sigma) in the natural basis,
