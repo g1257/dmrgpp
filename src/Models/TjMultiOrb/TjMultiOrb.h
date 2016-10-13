@@ -727,8 +727,14 @@ private:
 
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			HilbertStateType ket = basis[i];
-			if (truncated && modelParameters_.reinterpretAndTruncate == 1 && ket == REINTERPRET_6)
+			if (truncated && modelParameters_.reinterpretAndTruncate > 0 && ket == REINTERPRET_6)
 				continue;
+			if (truncated && modelParameters_.reinterpretAndTruncate > 1 && ket == STATE_EMPTY)
+				continue;
+			bool b = (ket == STATE_UP_A || ket == STATE_DOWN_A);
+			if (truncated && modelParameters_.reinterpretAndTruncate > 2 && b)
+				continue;
+
 			SizeType orb = 0;
 			while (ket > 0) {
 				if (ket & 1) electrons[orb]++;
