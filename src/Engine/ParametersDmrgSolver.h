@@ -281,6 +281,18 @@ struct ParametersDmrgSolver {
 			io.readline(dumperEnd,"KroneckerDumperEnd=");
 		} catch (std::exception&) {}
 
+		if (options.find("KroneckerDumper") != PsimagLite::String::npos) {
+			if (options.find("MatrixVectorStored") == PsimagLite::String::npos) {
+				PsimagLite::String msg("FATAL: KroneckerDumper needs MatrixVectorStored\n");
+				throw PsimagLite::RuntimeError(msg);
+			}
+		} else {
+			if (dumperBegin > 0 || dumperEnd > 0) {
+				PsimagLite::String msg("FATAL: KroneckerDumperBegin|End needs ");
+				throw PsimagLite::RuntimeError(msg + "KroneckerDumper in SolverOptions\n");
+			}
+		}
+
 		if (isObserveCode) return;
 		bool hasRestart = false;
 		if (options.find("restart")!=PsimagLite::String::npos) {

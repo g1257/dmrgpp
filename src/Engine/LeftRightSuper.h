@@ -80,12 +80,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define LEFT_RIGHT_SUPER_H
 
 #include "ProgressIndicator.h"
+#include "KroneckerDumper.h"
 
 namespace Dmrg {
 
 template<typename BasisWithOperatorsType_,typename SuperBlockType>
 class LeftRightSuper {
+
 public:
+
 	typedef typename SuperBlockType::RealType RealType;
 	typedef BasisWithOperatorsType_ BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
@@ -100,6 +103,8 @@ public:
 	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
 	typedef  LeftRightSuper<
 	BasisWithOperatorsType_,SuperBlockType> ThisType;
+	typedef KroneckerDumper<SparseMatrixType> KroneckerDumperType;
+	typedef typename KroneckerDumperType::ParamsForKroneckerDumper ParamsForKroneckerDumperType;
 
 	enum {GROW_TO_THE_RIGHT = BasisWithOperatorsType::GROW_RIGHT,
 	      GROW_TO_THE_LEFT= BasisWithOperatorsType::GROW_LEFT};

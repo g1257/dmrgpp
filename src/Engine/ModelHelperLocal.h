@@ -73,7 +73,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PackIndices.h" // in PsimagLite
 #include "Link.h"
 #include "LinkProductStruct.h"
-#include "KroneckerDumper.h"
 
 /** \ingroup DMRG */
 /*@{*/
@@ -107,8 +106,9 @@ public:
 	typedef LinkProductStruct<SparseElementType> LinkProductStructType;
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorSparseElementType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
-	typedef KroneckerDumper<SparseMatrixType> KroneckerDumperType;
-	typedef typename KroneckerDumperType::ParamsForKroneckerDumper ParamsForKroneckerDumperType;
+	typedef typename LeftRightSuperType::KroneckerDumperType KroneckerDumperType;
+	typedef typename LeftRightSuperType::ParamsForKroneckerDumperType
+	ParamsForKroneckerDumperType;
 
 	enum { System=0,Environ=1 };
 

@@ -110,11 +110,14 @@ public:
 	typedef Link<SparseElementType> LinkType;
 	typedef LinkProductStruct<SparseElementType> LinkProductStructType;
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorSparseElementType;
+	typedef typename LeftRightSuperType::ParamsForKroneckerDumperType
+	ParamsForKroneckerDumperType;
 
 	ModelHelperSu2(int m,
 	               const LeftRightSuperType& lrs,
 	               RealType targetTime,
-	               SizeType threadId)
+	               SizeType threadId,
+	               const ParamsForKroneckerDumperType* = 0)
 	    : m_(m),
 	      lrs_(lrs),
 	      targetTime_(targetTime),

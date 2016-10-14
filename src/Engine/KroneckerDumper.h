@@ -3,7 +3,7 @@
 #include "Vector.h"
 #include "TypeToString.h"
 #include <fstream>
-#include "Version.h"
+#include "../Version.h"
 
 namespace Dmrg {
 
