@@ -73,6 +73,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PackIndices.h" // in PsimagLite
 #include "Link.h"
 #include "LinkProductStruct.h"
+#include "KroneckerDumper.h"
 
 /** \ingroup DMRG */
 /*@{*/
@@ -119,7 +120,8 @@ public:
 	      threadId_(threadId),
 	      buffer_(lrs_.left().size()),
 	      basis2tc_(lrs_.left().numberOfOperators()),
-	      basis3tc_(lrs_.right().numberOfOperators())
+	      basis3tc_(lrs_.right().numberOfOperators()),
+	      kroneckerDumper_()
 	{
 		createBuffer();
 		createTcOperators(basis2tc_,lrs_.left());
@@ -215,7 +217,15 @@ public:
 				}
 			}
 		}
+
 		matrixBlock.setRow(i,counter);
+
+		kroneckerDumper_.push(A,
+		                      B,
+		                      fermionSigns_,
+		                      lrs_.super().permutationVector(),
+		                      lrs_.super().partition(m_),
+		                      lrs_.super().partition(m_+1));
 	}
 
 	// Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or
@@ -506,6 +516,7 @@ private:
 	VectorSparseMatrixType basis2tc_,basis3tc_;
 	typename PsimagLite::Vector<SizeType>::Type alpha_,beta_;
 	typename PsimagLite::Vector<bool>::Type fermionSigns_;
+	KroneckerDumper<SparseMatrixType> kroneckerDumper_;
 	mutable LinkProductStructType lps_;
 }; // class ModelHelperLocal
 } // namespace Dmrg
