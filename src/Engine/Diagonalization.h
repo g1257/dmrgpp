@@ -373,11 +373,16 @@ private:
 	{
 		PsimagLite::String options = parameters_.options;
 		SizeType threadId = 0;
+
 		bool dumperEnabled = (options.find("KroneckerDumper") != PsimagLite::String::npos);
 		ParamsForKroneckerDumperType paramsKrDumper(dumperEnabled,
 		                                            parameters_.dumperBegin,
 		                                            parameters_.dumperEnd);
-		ModelHelperType modelHelper(i,lrs,targetTime,threadId, &paramsKrDumper);
+		ParamsForKroneckerDumperType* paramsKrDumperPtr = 0;
+		if (lrs.super().block().size() == model_.geometry().numberOfSites())
+			paramsKrDumperPtr = &paramsKrDumper;
+
+		ModelHelperType modelHelper(i,lrs,targetTime,threadId, paramsKrDumperPtr);
 
 		if (options.find("debugmatrix")!=PsimagLite::String::npos && !(saveOption & 4) ) {
 			SparseMatrixType fullm;

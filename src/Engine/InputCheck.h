@@ -183,6 +183,9 @@ public:
 		knownLabels_.push_back("SpinOrbit");
 		knownLabels_.push_back("DegeneracyMax=");
 		knownLabels_.push_back("JzSymmetry=");
+		knownLabels_.push_back("DegeneracyMax=");
+		knownLabels_.push_back("KroneckerDumperBegin=");
+		knownLabels_.push_back("KroneckerDumperEnd=");
 	}
 
 	~InputCheck()
@@ -278,6 +281,7 @@ public:
 			\item [advanceOnlyAtBorder] Advance time only at borders
 			\item [findSymmetrySector] Find symmetry sector with lowest energy, and
 			ignore value set in TargetElectronsUp or TargetSzPlusConst
+			\item [KroneckerDumper] TBW
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,const PsimagLite::String& val,SizeType)
@@ -327,6 +331,7 @@ public:
 		registerOpts.push_back("minimizeDisk");
 		registerOpts.push_back("advanceOnlyAtBorder");
 		registerOpts.push_back("findSymmetrySector");
+		registerOpts.push_back("KroneckerDumper");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);
