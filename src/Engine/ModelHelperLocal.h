@@ -107,13 +107,16 @@ public:
 	typedef LinkProductStruct<SparseElementType> LinkProductStructType;
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorSparseElementType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
+	typedef KroneckerDumper<SparseMatrixType> KroneckerDumperType;
+	typedef typename KroneckerDumperType::ParamsForKroneckerDumper ParamsForKroneckerDumperType;
 
 	enum { System=0,Environ=1 };
 
 	ModelHelperLocal(SizeType m,
 	                 const LeftRightSuperType& lrs,
 	                 RealType targetTime,
-	                 SizeType threadId)
+	                 SizeType threadId,
+	                 const ParamsForKroneckerDumperType* pKroneckerDumper = 0)
 	    : m_(m),
 	      lrs_(lrs),
 	      targetTime_(targetTime),
@@ -121,7 +124,7 @@ public:
 	      buffer_(lrs_.left().size()),
 	      basis2tc_(lrs_.left().numberOfOperators()),
 	      basis3tc_(lrs_.right().numberOfOperators()),
-	      kroneckerDumper_()
+	      kroneckerDumper_(pKroneckerDumper)
 	{
 		createBuffer();
 		createTcOperators(basis2tc_,lrs_.left());
@@ -408,7 +411,10 @@ public:
 				counter++;
 			}
 		}
+
 		matrixBlock.setRow(lrs_.super().partition(m+1)-offset,counter);
+
+		kroneckerDumper_.push(option,hamiltonian);
 	}
 
 	const LeftRightSuperType& leftRightSuper() const
@@ -516,7 +522,7 @@ private:
 	VectorSparseMatrixType basis2tc_,basis3tc_;
 	typename PsimagLite::Vector<SizeType>::Type alpha_,beta_;
 	typename PsimagLite::Vector<bool>::Type fermionSigns_;
-	KroneckerDumper<SparseMatrixType> kroneckerDumper_;
+	KroneckerDumperType kroneckerDumper_;
 	mutable LinkProductStructType lps_;
 }; // class ModelHelperLocal
 } // namespace Dmrg
