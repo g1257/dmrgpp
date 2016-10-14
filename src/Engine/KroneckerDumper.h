@@ -39,6 +39,8 @@ public:
 		PsimagLite::String filename = "kroneckerDumper" + ttos(counter_) + ".txt";
 		fout_.open(filename.c_str());
 		fout_<<"#KroneckerDumper for DMRG++ version "<<DMRGPP_VERSION<<"\n";
+		fout_<<"#Instance="<<counter_<<"\n";
+		counter_++;
 	}
 
 	~KroneckerDumper()
@@ -47,19 +49,35 @@ public:
 		fout_.close();
 	}
 
-	void push(const SparseMatrixType&,
-	          const SparseMatrixType&,
-	          const VectorBoolType&,
-	          const VectorSizeType&,
+	void push(const SparseMatrixType& A,
+	          const SparseMatrixType& B,
+	          const VectorBoolType& fs,
+	          const VectorSizeType& perm,
 	          SizeType start,
-	          SizeType end) const
+	          SizeType end)
 	{
 		if (!enabled_) return;
+
+		fout_<<"#A\n";
+		fout_<<A;
+		fout_<<"#B\n";
+		fout_<<B;
+		fout_<<"#fs\n";
+		fout_<<fs;
+		fout_<<"#Permutation\n";
+		fout_<<perm;
+		fout_<<"#StartPartition="<<start<<"\n";
+		fout_<<"#EndPartition="<<end<<"\n";
 	}
 
-	void push(bool option,const SparseMatrixType& hamiltonian) const
+	void push(bool option,const SparseMatrixType& hamiltonian)
 	{
 		if (!enabled_) return;
+		if (option)
+			fout_<<"#LeftHamiltonian\n";
+		else
+			fout_<<"#RightHamiltonian\n";
+		fout_<<hamiltonian;
 	}
 
 private:

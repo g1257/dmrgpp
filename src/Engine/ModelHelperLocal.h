@@ -522,7 +522,7 @@ private:
 	VectorSparseMatrixType basis2tc_,basis3tc_;
 	typename PsimagLite::Vector<SizeType>::Type alpha_,beta_;
 	typename PsimagLite::Vector<bool>::Type fermionSigns_;
-	KroneckerDumperType kroneckerDumper_;
+	mutable KroneckerDumperType kroneckerDumper_;
 	mutable LinkProductStructType lps_;
 }; // class ModelHelperLocal
 } // namespace Dmrg
