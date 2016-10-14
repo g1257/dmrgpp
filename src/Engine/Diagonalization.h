@@ -108,6 +108,8 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef typename ModelHelperType::ParamsForKroneckerDumperType
+	ParamsForKroneckerDumperType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename TargettingType::MatrixVectorType MatrixVectorType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
@@ -371,7 +373,11 @@ private:
 	{
 		PsimagLite::String options = parameters_.options;
 		SizeType threadId = 0;
-		typename ModelType::ModelHelperType modelHelper(i,lrs,targetTime,threadId);
+		bool dumperEnabled = (options.find("KroneckerDumper") != PsimagLite::String::npos);
+		ParamsForKroneckerDumperType paramsKrDumper(dumperEnabled,
+		                                            parameters_.dumperBegin,
+		                                            parameters_.dumperEnd);
+		ModelHelperType modelHelper(i,lrs,targetTime,threadId, &paramsKrDumper);
 
 		if (options.find("debugmatrix")!=PsimagLite::String::npos && !(saveOption & 4) ) {
 			SparseMatrixType fullm;
@@ -415,7 +421,7 @@ private:
 	void diagonaliseOneBlock(int i,
 	                         TargetVectorType &tmpVec,
 	                         RealType &energyTmp,
-	                         typename ModelType::ModelHelperType& modelHelper,
+	                         ModelHelperType& modelHelper,
 	                         const TargetVectorType& initialVector,
 	                         SizeType saveOption)
 	{

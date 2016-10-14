@@ -139,6 +139,8 @@ struct ParametersDmrgSolver {
 	SizeType maxMatrixRankStored;
 	SizeType keptStatesInfinite;
 	SizeType excited;
+	SizeType dumperBegin;
+	SizeType dumperEnd;
 	int useReflectionSymmetry;
 	PairRealSizeType truncationControl;
 	PsimagLite::String filename;
@@ -179,6 +181,8 @@ struct ParametersDmrgSolver {
 	    : sitesPerBlock(1),
 	      maxMatrixRankStored(0),
 	      excited(0),
+	      dumperBegin(0),
+		  dumperEnd(0),
 	      recoverySave("0"),
 	      degeneracyMax(1e-12)
 	{
@@ -267,6 +271,14 @@ struct ParametersDmrgSolver {
 
 		try {
 			io.readline(recoverySave,"RecoverySave=");
+		} catch (std::exception&) {}
+
+		try {
+			io.readline(dumperBegin,"KroneckerDumperBegin=");
+		} catch (std::exception&) {}
+
+		try {
+			io.readline(dumperEnd,"KroneckerDumperEnd=");
 		} catch (std::exception&) {}
 
 		if (isObserveCode) return;
@@ -434,6 +446,11 @@ std::ostream &operator<<(std::ostream &os,
 	os<<"parameters.model="<<p.model<<"\n";
 	os<<"parameters.filename="<<p.filename<<"\n";
 	os<<"parameters.options="<<p.options<<"\n";
+	if (p.options.find("KroneckerDumper") != PsimagLite::String::npos) {
+		os<<"parameters.dumperBegin="<<p.dumperBegin<<"\n";
+		os<<"parameters.dumperEnd="<<p.dumperEnd<<"\n";
+	}
+
 	os<<"parameters.keptStatesInfinite="<<p.keptStatesInfinite<<"\n";
 	os<<"FiniteLoops ";
 	os<<p.finiteLoop;

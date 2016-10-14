@@ -29,7 +29,8 @@ public:
 	    : enabled_(p && p->enabled)
 	{
 		if (!enabled_) return;
-		if (counter_ < p->begin || counter_ >= p->end) {
+		bool b = (p->end > 0 && counter_ >= p->end);
+		if (counter_ < p->begin || b) {
 			counter_++;
 			enabled_ = false;
 			return;
