@@ -108,6 +108,8 @@ public:
 	typedef PreOperatorSiteDependent<ModelType> PreOperatorSiteDependentType;
 	typedef PreOperatorSiteIndependent<ModelType> PreOperatorSiteIndependentType;
 	typedef typename ObserverType::BraketType BraketType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef std::pair<SizeType,SizeType> PairSizeType;
 
 	template<typename IoInputter>
 	ObservableLibrary(IoInputter& io,
@@ -1145,13 +1147,44 @@ private:
 	            int sign) const
 	{
 		SizeType rows = m.n_row();
-		SizeType cols = m.n_row();
+		SizeType cols = m.n_col();
+		assert(rows == cols);
+		typename PsimagLite::Vector<PairSizeType>::Type pairs;
+		VectorSizeType gammas(1,1+sign);
+		SizeType orbitals = 2;
 
 		for (SizeType i = 0; i < rows; ++i) {
-			for (SizeType j = i + 2; j < cols-1; ++j) {
-				m(i,j) = ppFour2(i,i+1,j,j+1,orb1,orb2,orb3,orb4,sign);
+			SizeType thini1 = i*orbitals + orb1;
+			SizeType thini2 = (i+1)*orbitals + orb2;
+			for (SizeType j = i + orbitals; j < cols-1; ++j) {
+				SizeType thinj1 = j*orbitals + orb3;
+				SizeType thinj2 = (j+1)*orbitals + orb4;
+				for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
+					for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
+						pairs.push_back(PairSizeType(thini1+thini2*rows*orbitals+rows*orbitals*
+						                             rows*orbitals*spin0,
+						                             thinj1+thinj2*rows*orbitals+
+						                             rows*orbitals*rows*orbitals*spin1));
+					}
+				}
 			}
 		}
+
+		typedef typename ObserverType::Parallel4PointDsType Parallel4PointDsType;
+		typedef PsimagLite::Parallelizer<Parallel4PointDsType> ParallelizerType;
+		ParallelizerType threaded4PointDs(PsimagLite::Concurrency::npthreads,
+		                                  PsimagLite::MPI::COMM_WORLD);
+
+		Parallel4PointDsType helper4PointDs(m,
+		                                    observe_.fourpoint(),
+		                                    model_,
+		                                    gammas,
+		                                    pairs,
+		                                    Parallel4PointDsType::MODE_THIN);
+
+		threaded4PointDs.loopCreate(pairs.size(),helper4PointDs);
+
+		//				m(i,j) = ppFour2(i,i+1,j,j+1,orb1,orb2,orb3,orb4,sign);
 		std::cout << m;
 	}
 

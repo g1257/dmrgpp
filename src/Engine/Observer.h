@@ -133,6 +133,7 @@ public:
 	typedef ModelType_ ModelType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef Braket<ModelType> BraketType;
+	typedef Parallel4PointDs<ModelType,FourPointCorrelationsType> Parallel4PointDsType;
 
 	Observer(IoInputType& io,
 	         SizeType nf,
@@ -479,13 +480,17 @@ public:
 			}
 		}
 
-		typedef Parallel4PointDs<ModelType,FourPointCorrelationsType>
-		        Parallel4PointDsType;
+
 		typedef PsimagLite::Parallelizer<Parallel4PointDsType> ParallelizerType;
 		ParallelizerType threaded4PointDs(PsimagLite::Concurrency::npthreads,
 		                                  PsimagLite::MPI::COMM_WORLD);
 
-		Parallel4PointDsType helper4PointDs(fpd,fourpoint_,model,gammas,pairs);
+		Parallel4PointDsType helper4PointDs(fpd,
+		                                    fourpoint_,
+		                                    model,
+		                                    gammas,
+		                                    pairs,
+		                                    Parallel4PointDsType::MODE_NORMAL);
 
 		threaded4PointDs.loopCreate(pairs.size(),helper4PointDs);
 	}

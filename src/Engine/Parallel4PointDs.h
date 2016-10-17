@@ -91,14 +91,17 @@ class Parallel4PointDs {
 
 public:
 
+	enum FourPointModeEnum {MODE_NORMAL, MODE_THIN};
+
 	typedef typename ModelType::RealType RealType;
 
 	Parallel4PointDs(MatrixType& fpd,
 	                 const FourPointCorrelationsType& fourpoint,
 	                 const ModelType& model,
 	                 const typename PsimagLite::Vector<SizeType>::Type& gammas,
-	                 const typename PsimagLite::Vector<PairType>::Type& pairs)
-	    : fpd_(fpd),fourpoint_(fourpoint),model_(model),gammas_(gammas),pairs_(pairs)
+	                 const typename PsimagLite::Vector<PairType>::Type& pairs,
+	                 FourPointModeEnum mode)
+	    : fpd_(fpd),fourpoint_(fourpoint),model_(model),gammas_(gammas),pairs_(pairs),mode_(mode)
 	{}
 
 	void thread_function_(SizeType threadNum,
@@ -116,7 +119,8 @@ public:
 			SizeType i = pairs_[px].first;
 			SizeType j = pairs_[px].second;
 
-			fpd_(i,j) = fourPointDelta(2*i,2*j,gammas_,model_,threadNum);
+			fpd_(i,j) = (mode_ == MODE_NORMAL) ? fourPointDelta(2*i,2*j,gammas_,model_,threadNum)
+			                                   : fourPointThin(i,j,gammas_,model_,threadNum);
 		}
 	}
 
@@ -126,7 +130,8 @@ private:
 	FieldType fourPointDelta(SizeType i,
 	                         SizeType j,
 	                         const typename PsimagLite::Vector<SizeType>::Type& gammas,
-	                         const SomeModelType& model,SizeType threadId) const
+	                         const SomeModelType& model,
+	                         SizeType threadId) const
 	{
 		SizeType hs = model.hilbertSize(0);
 		SizeType nx = 0;
@@ -152,11 +157,53 @@ private:
 		                  'N',j+1,opC3,-1,threadId);
 	}
 
+	template<typename SomeModelType>
+	FieldType fourPointThin(SizeType i,
+	                        SizeType j,
+	                        const typename PsimagLite::Vector<SizeType>::Type& gammas,
+	                        const SomeModelType& model,
+	                        SizeType threadId) const
+	{
+		SizeType number1 = fpd_.n_row()/2;
+		SizeType spin0 = i/number1;
+		SizeType tmp = i % number1;
+		SizeType number2 = sqrt(number1);
+		SizeType thini2 = tmp/number2;
+		SizeType thini1 = tmp % number2;
+
+		SizeType spin1 = j/number1;
+		tmp = j % number1;
+		SizeType thinj2 = tmp/number2;
+		SizeType thinj1 = tmp % number2;
+		int sign = gammas[0] - 1;
+
+		SizeType site = 0;
+
+		// c(i1,orb1,spin0)
+		SparseMatrixType O1 = model_.naturalOperator("c",site,spin0).data;
+		// c(i2,orb2,1-spin0)
+		SparseMatrixType O2 = model_.naturalOperator("c",site,1-spin0).data;
+
+		// c(i2,orb2,spin1)
+		SparseMatrixType O3 = model_.naturalOperator("c",site,spin1).data;
+		// c(i3,orb1,1-spin1)
+		SparseMatrixType O4 = model_.naturalOperator("c",site,1-spin1).data;
+		SizeType val = spin0 + spin1 + 1;
+		int signTerm = (val & 1) ? sign : 1;
+
+		return signTerm*fourpoint_('N',thini1,O1,
+		                  'N',thini2,O2,
+		                  'C',thinj1,O3,
+		                  'C',thinj2,O4,-1,threadId);
+
+	}
+
 	MatrixType& fpd_;
 	const FourPointCorrelationsType& fourpoint_;
 	const ModelType& model_;
 	const typename PsimagLite::Vector<SizeType>::Type& gammas_;
 	const typename PsimagLite::Vector<PairType>::Type& pairs_;
+	FourPointModeEnum mode_;
 }; // class Parallel4PointDs
 } // namespace Dmrg
 
