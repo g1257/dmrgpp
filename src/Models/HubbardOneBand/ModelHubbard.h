@@ -620,6 +620,7 @@ private:
 	template<typename PairType>
 	PairType calcJmValue(const HilbertState& ket) const
 	{
+		if (!MyBasis::useSu2Symmetry()) return PairType(0,0);
 		SizeType site0=0;
 		SizeType site1=0;
 
