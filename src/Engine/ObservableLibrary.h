@@ -1152,6 +1152,9 @@ private:
 		typename PsimagLite::Vector<PairSizeType>::Type pairs;
 		VectorSizeType gammas(1,1+sign);
 		SizeType orbitals = 2;
+		SizeType bigSize = rows*orbitals*rows*orbitals*2;
+		m.reset(bigSize,bigSize);
+		m.setTo(0.0);
 
 		for (SizeType i = 0; i < rows; ++i) {
 			SizeType thini1 = i*orbitals + orb1;
@@ -1184,7 +1187,23 @@ private:
 
 		threaded4PointDs.loopCreate(pairs.size(),helper4PointDs);
 
-		//				m(i,j) = ppFour2(i,i+1,j,j+1,orb1,orb2,orb3,orb4,sign);
+		MatrixType m2(rows,cols);
+		for (SizeType i = 0; i < rows; ++i) {
+			SizeType thini1 = i*orbitals + orb1;
+			SizeType thini2 = (i+1)*orbitals + orb2;
+			for (SizeType j = i + orbitals; j < cols-1; ++j) {
+				SizeType thinj1 = j*orbitals + orb3;
+				SizeType thinj2 = (j+1)*orbitals + orb4;
+				for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
+					for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
+						m2(i,j) += m(thini1+thini2*rows*orbitals+spin0*rows*orbitals*rows*orbitals,
+						             thinj1+thinj2*rows*orbitals+spin1*rows*orbitals*rows*orbitals);
+					}
+				}
+			}
+		}
+
+		m = m2;
 		std::cout << m;
 	}
 
