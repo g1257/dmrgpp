@@ -1020,7 +1020,8 @@ private:
 		SparseMatrixType ndown = n(cdown);
 
 		SparseMatrixType tmp = nup;
-		tmp += (-1.0)*ndown;
+		const RealType f1 = (-1.0);
+		tmp += f1*ndown;
 		hmatrix += factorForDiagonals *
 		        modelParameters_.magneticField(2,actualIndexOfSite) * tmp;
 
@@ -1166,7 +1167,8 @@ private:
 		}
 		SparseMatrixType tmpMatrix=spinOperatorAux(cm,i,orbital,SPIN_UP,SPIN_UP);
 		SparseMatrixType tmpMatrix2=spinOperatorAux(cm,i,orbital,SPIN_DOWN,SPIN_DOWN);
-		tmpMatrix += (-1.0)*tmpMatrix2;
+		const RealType f1 = (-1.0);
+		tmpMatrix += f1*tmpMatrix2;
 		return tmpMatrix;
 	}
 

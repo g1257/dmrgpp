@@ -400,9 +400,9 @@ private:
 		crsMatrixToFullMatrix(dn2,n2);
 
 		SizeType n = corrector.n_row();
-		for (SizeType i = 0; i < n; ++i) {
-			corrector(i,i) = std::abs(dn1(i,i) + dn2(i,i) -1.0);
-		}
+		SparseElementType f1 = (-1.0);
+		for (SizeType i = 0; i < n; ++i)
+			corrector(i,i) = std::abs(dn1(i,i) + dn2(i,i) + f1);
 	}
 
     void setSplus(VectorOperatorType& cm,

@@ -111,7 +111,15 @@ class	CorrectionVectorFunction {
 			m_.matrixVectorProduct(xTmp,y); // xTmp = Hy
 			VectorType x2(x.size(),0);
 			m_.matrixVectorProduct(x2,xTmp); // x2 = H^2 y
-			x <= x2 - 2.0*omegaMinusE0*xTmp + (omegaMinusE0*omegaMinusE0 + eta*eta)*y;
+			const RealType f1 = (-2.0);
+			// this needs fixing
+			// preferred:
+			// x <= x2 + f1*omegaMinusE0*xTmp + (omegaMinusE0*omegaMinusE0 + eta*eta)*y;
+			// equivalent
+			for (SizeType i = 0; i < x.size(); ++i)
+				x[i] = x2[i] + f1*omegaMinusE0*xTmp[i] +
+				        (omegaMinusE0*omegaMinusE0 + eta*eta)*y[i];
+
 			x /= (-eta);
 		}
 

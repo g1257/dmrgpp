@@ -538,7 +538,8 @@ private:
 		findCreationDense(cau,i,1 + SPIN_UP*NUMBER_OF_ORBITALS,natBasis);
 
 		PsimagLite::Matrix<SparseElementType> part1 = cru*cad;
-		PsimagLite::Matrix<SparseElementType> part2 = (-1.0)*crd*cau;
+		const RealType f1 = (-1.0);
+		PsimagLite::Matrix<SparseElementType> part2 = f1*crd*cau;
 
 		RealType oneOverSqrt2 = 1.0/sqrt(2.0);
 		PsimagLite::Matrix<SparseElementType> final = oneOverSqrt2*(part1 + part2);

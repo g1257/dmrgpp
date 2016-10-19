@@ -1335,7 +1335,8 @@ private:
 			measureOnePoint(preOperator);
 		} else if (label=="sz") {
 			A = matrixNup_.data;
-			A += (-1.0)*matrixNdown_.data;
+			const FieldType f1 = (-1.0);
+			A += f1*matrixNdown_.data;
 			OperatorType opA(A,1,std::pair<SizeType,SizeType>(0,0),1,su2Related1);
 			PreOperatorSiteIndependentType preOperator(opA,"sz",threadId);
 			measureOnePoint(preOperator);
