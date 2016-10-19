@@ -4,6 +4,7 @@
 #include "TypeToString.h"
 #include <fstream>
 #include "../Version.h"
+#include "Concurrency.h"
 
 namespace Dmrg {
 
@@ -33,6 +34,11 @@ public:
 	    : enabled_(p && p->enabled)
 	{
 		if (!enabled_) return;
+		if (PsimagLite::Concurrency::npthreads > 1) {
+			PsimagLite::String msg("KroneckerDumper cannot be run with Threads>1 ");
+			throw PsimagLite::RuntimeError(msg + "because it's not thread-safe\n");
+		}
+
 		bool b = (p->end > 0 && counter_ >= p->end);
 		if (counter_ < p->begin || b) {
 			counter_++;
