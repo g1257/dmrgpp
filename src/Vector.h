@@ -422,12 +422,13 @@ X norm(const std::vector<X,A>& v)
 	return sqrt(v*v);
 }
 
-template<class X,typename A>
-X norm(const std::vector<std::complex<X>,A>& v)
+template<typename X,typename A>
+typename EnableIf<Loki::TypeTraits<X>::isFloat,X>::Type
+norm(const std::vector<std::complex<X>,A>& v)
 {
 	std::complex<X> x = v*v;
-	if (fabs(imag(x))>1e-5) throw RuntimeError("Norm isn't real\n");
-	return sqrt(real(x));
+	if (fabs(std::imag(x))>1e-5) throw RuntimeError("Norm isn't real\n");
+	return sqrt(std::real(x));
 }
 
 template<typename X,typename RandomType>

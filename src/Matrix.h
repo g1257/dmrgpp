@@ -80,7 +80,8 @@ public:
 	// ctor closures
 	Matrix(const std::ClosureOperator<Matrix,Matrix,std::ClosureOperations::OP_MULT>& c)
 	{
-		matrixMatrix(c.r1,c.r2,1.0);
+		const T f1 = 1.0;
+		matrixMatrix(c.r1,c.r2,f1);
 	}
 
 	template<typename T1>
@@ -377,7 +378,8 @@ public:
 	{
 		const Matrix<T>& a = c.r1;
 		const Matrix<T>& b = c.r2;
-		matrixMatrix(a,b,1.0);
+		const T f1 = 1.0;
+		matrixMatrix(a,b,f1);
 
 		return *this;
 	}

@@ -18,7 +18,7 @@ public:
 	GammaCiCj(MatrixType& T,
 		VectorType& V,
 		VectorType& W,
-		const double& omega)
+		const RealType& omega)
 		: T_(T),
 		  V_(V),
 		  W_(W),
@@ -57,10 +57,14 @@ private:
     const VectorType& W_;
     MatrixType mV_;
     MatrixType mW_;
-    double omega_;
+    RealType omega_;
 }; // class GammaCiCj
 
+#ifndef USE_FLOAT
 typedef double RealType;
+#else
+typedef float RealType
+#endif
 typedef std::complex<RealType> ComplexOrRealType;
 //typedef RealType ComplexOrRealType;
 typedef PsimagLite::Vector<ComplexOrRealType>::Type VectorType;

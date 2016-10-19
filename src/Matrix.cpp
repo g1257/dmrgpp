@@ -61,7 +61,7 @@ void diag(Matrix<std::complex<double> > &m,Vector<double> ::Type&eigs,char optio
 
 	// query:
 	zheev_(&jobz,&uplo,&n,&(m(0,0)),&lda,&(eigs[0]),&(work[0]),&lwork,&(rwork[0]),&info);
-	lwork = int(real(work[0]))+1;
+	lwork = int(std::real(work[0]))+1;
 	work.resize(lwork+1);
 	// real work:
 	zheev_(&jobz,&uplo,&n,&(m(0,0)),&lda,&(eigs[0]),&(work[0]),&lwork,&(rwork[0]),&info);
@@ -122,7 +122,7 @@ void diag(Matrix<std::complex<float> > &m,Vector<float> ::Type& eigs,char option
 
 	// query:
 	cheev_(&jobz,&uplo,&n,&(m(0,0)),&lda,&(eigs[0]),&(work[0]),&lwork,&(rwork[0]),&info);
-	lwork = int(real(work[0]))+1;
+	lwork = int(std::real(work[0]))+1;
 	work.resize(lwork+1);
 	// real work:
 	cheev_(&jobz,&uplo,&n,&(m(0,0)),&lda,&(eigs[0]),&(work[0]),&lwork,&(rwork[0]),&info);

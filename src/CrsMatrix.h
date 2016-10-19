@@ -317,7 +317,8 @@ public:
 	void operator+=(const CrsMatrix& m)
 	{
 		CrsMatrix c;
-		add(c,m,1.0);
+		const T f1 = 1.0;
+		add(c,m,f1);
 		*this = c;
 	}
 
@@ -1094,11 +1095,12 @@ bool isDiagonal(const CrsMatrix<T>& A,double eps=1e-6,bool checkForIdentity=fals
 {
 	if (A.row()!=A.col()) return false;
 	SizeType n = A.row();
+	const T f1 = (-1.0);
 	for (SizeType i=0;i<n;i++) {
 		for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
 			SizeType col = A.getCol(k);
 			const T& val = A.getValue(k);
-			if (checkForIdentity && col==i && PsimagLite::norm(val-1.0)>eps) {
+			if (checkForIdentity && col==i && PsimagLite::norm(val + f1)>eps) {
 				return false;
 			}
 			if (col!=i && PsimagLite::norm(val)>eps) {

@@ -122,13 +122,13 @@ public:
 		RealType ti = t0;
 		ArrayType yi = y0;
 		ArrayType tmp;
-
+		RealType f1 = 0.5;
 		for (SizeType i = 0; i < N; i++) {
 			k1 <= h_ * f_(ti, yi);
-			tmp <= yi + k1*0.5;
-			k2 <= h_ * f_(ti + h_*0.5, tmp);
-			tmp <= yi + k2*0.5;
-			k3 <= h_ * f_(ti + h_*0.5, tmp);
+			tmp <= yi + k1*f1;
+			k2 <= h_ * f_(ti + h_*f1, tmp);
+			tmp <= yi + k2*f1;
+			k3 <= h_ * f_(ti + h_*f1, tmp);
 			tmp <= yi + k3;
 			k4 <= h_ * f_(ti + h_, tmp);
 
