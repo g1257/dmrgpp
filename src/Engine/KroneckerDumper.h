@@ -12,6 +12,7 @@ template<typename LeftRightSuperType>
 class KroneckerDumper {
 
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -19,8 +20,10 @@ class KroneckerDumper {
 public:
 
 	struct ParamsForKroneckerDumper {
-		ParamsForKroneckerDumper(bool enable = false, SizeType b = 0, SizeType e = 0)
-		    : enabled(enable),begin(b),end(e)
+		ParamsForKroneckerDumper(bool enable = false,
+		                         SizeType b = 0,
+		                         SizeType e = 0)
+		    : enabled(enable), begin(b), end(e)
 		{}
 
 		bool enabled;
@@ -50,13 +53,12 @@ public:
 		fout_.open(filename.c_str());
 		fout_<<"#KroneckerDumper for DMRG++ version "<<DMRGPP_VERSION<<"\n";
 		fout_<<"#Instance="<<counter_<<"\n";
-		fout_<<"#LeftBasis\n";
-		fout_<<lrs.left();
-		fout_<<"#RightBasis\n";
-		fout_<<lrs.right();
-		fout_<<"#SuperBasis\n";
-		fout_<<lrs.super();
-		fout_<<"M_Sector="<<m<<"\n";
+
+		printOneBasis("Left",lrs.left());
+		printOneBasis("Right",lrs.right());
+
+		fout_<<"#TargetQuantumNumber="<<lrs.super().qn(lrs.super().partition(m))<<"\n";
+
 		counter_++;
 	}
 
@@ -72,9 +74,9 @@ public:
 
 		fout_<<"#START_AB_PAIR\n";
 		fout_<<"#A\n";
-		fout_<<A;
+		printMatrix(A);
 		fout_<<"#B\n";
-		fout_<<B;
+		printMatrix(B);
 		fout_<<"#END_AB_PAIR\n";
 	}
 
@@ -85,13 +87,37 @@ public:
 			fout_<<"#LeftHamiltonian\n";
 		else
 			fout_<<"#RightHamiltonian\n";
-		fout_<<hamiltonian;
+		printMatrix(hamiltonian);
 	}
 
 private:
 
+	void printMatrix(const SparseMatrixType& matrix)
+	{
+		if (PRINTS_DENSE)
+			fout_<<matrix.toDense();
+		else
+			fout_<<matrix;
+	}
+
+	void printOneBasis(PsimagLite::String name, const BasisType& basis)
+	{
+		fout_<<"#" + name + "Basis\n";
+		fout_<<"#Sites\n";
+		fout_<<basis.block();
+		fout_<<"#permutationVector\n";
+		fout_<<basis.permutationVector();
+		fout_<<"#QuantumNumbers\n";
+		for (SizeType i = 0; i < basis.size(); ++i)
+			fout_<<basis.pseudoEffectiveNumber(i)<<"\n";
+		fout_<<"#Electrons\n";
+		fout_<<basis.electronsVector();
+	}
+
+	static const bool PRINTS_DENSE = true;
 	static SizeType counter_;
 	bool enabled_;
+	bool printsDense_;
 	std::ofstream fout_;
 }; // class KroneckerDumpter
 
