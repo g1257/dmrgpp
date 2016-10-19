@@ -103,7 +103,7 @@ public:
 	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
 	typedef  LeftRightSuper<
 	BasisWithOperatorsType_,SuperBlockType> ThisType;
-	typedef KroneckerDumper<SparseMatrixType> KroneckerDumperType;
+	typedef KroneckerDumper<ThisType> KroneckerDumperType;
 	typedef typename KroneckerDumperType::ParamsForKroneckerDumper ParamsForKroneckerDumperType;
 
 	enum {GROW_TO_THE_RIGHT = BasisWithOperatorsType::GROW_RIGHT,

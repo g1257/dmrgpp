@@ -181,11 +181,11 @@ public:
 		knownLabels_.push_back("omega");
 		knownLabels_.push_back("MagneticField");
 		knownLabels_.push_back("SpinOrbit");
-		knownLabels_.push_back("DegeneracyMax=");
-		knownLabels_.push_back("JzSymmetry=");
-		knownLabels_.push_back("DegeneracyMax=");
-		knownLabels_.push_back("KroneckerDumperBegin=");
-		knownLabels_.push_back("KroneckerDumperEnd=");
+		knownLabels_.push_back("DegeneracyMax");
+		knownLabels_.push_back("JzSymmetry");
+		knownLabels_.push_back("DegeneracyMax");
+		knownLabels_.push_back("KroneckerDumperBegin");
+		knownLabels_.push_back("KroneckerDumperEnd");
 	}
 
 	~InputCheck()

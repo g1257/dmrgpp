@@ -7,9 +7,11 @@
 
 namespace Dmrg {
 
-template<typename SparseMatrixType>
+template<typename LeftRightSuperType>
 class KroneckerDumper {
 
+	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
@@ -25,7 +27,9 @@ public:
 		SizeType end;
 	}; // struct ParamsForKroneckerDumper
 
-	KroneckerDumper(const ParamsForKroneckerDumper* p)
+	KroneckerDumper(const ParamsForKroneckerDumper* p,
+	                const LeftRightSuperType& lrs,
+	                SizeType m)
 	    : enabled_(p && p->enabled)
 	{
 		if (!enabled_) return;
@@ -40,6 +44,13 @@ public:
 		fout_.open(filename.c_str());
 		fout_<<"#KroneckerDumper for DMRG++ version "<<DMRGPP_VERSION<<"\n";
 		fout_<<"#Instance="<<counter_<<"\n";
+		fout_<<"#LeftBasis\n";
+		fout_<<lrs.left();
+		fout_<<"#RightBasis\n";
+		fout_<<lrs.right();
+		fout_<<"#SuperBasis\n";
+		fout_<<lrs.super();
+		fout_<<"M_Sector="<<m<<"\n";
 		counter_++;
 	}
 
@@ -49,25 +60,16 @@ public:
 		fout_.close();
 	}
 
-	void push(const SparseMatrixType& A,
-	          const SparseMatrixType& B,
-	          const VectorBoolType& fs,
-	          const VectorSizeType& perm,
-	          SizeType start,
-	          SizeType end)
+	void push(const SparseMatrixType& A, const SparseMatrixType& B)
 	{
 		if (!enabled_) return;
 
+		fout_<<"#START_AB_PAIR\n";
 		fout_<<"#A\n";
 		fout_<<A;
 		fout_<<"#B\n";
 		fout_<<B;
-		fout_<<"#fs\n";
-		fout_<<fs;
-		fout_<<"#Permutation\n";
-		fout_<<perm;
-		fout_<<"#StartPartition="<<start<<"\n";
-		fout_<<"#EndPartition="<<end<<"\n";
+		fout_<<"#END_AB_PAIR\n";
 	}
 
 	void push(bool option,const SparseMatrixType& hamiltonian)

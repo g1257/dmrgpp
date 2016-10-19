@@ -124,7 +124,7 @@ public:
 	      buffer_(lrs_.left().size()),
 	      basis2tc_(lrs_.left().numberOfOperators()),
 	      basis3tc_(lrs_.right().numberOfOperators()),
-	      kroneckerDumper_(pKroneckerDumper)
+	      kroneckerDumper_(pKroneckerDumper,lrs_,m_)
 	{
 		createBuffer();
 		createTcOperators(basis2tc_,lrs_.left());
@@ -223,12 +223,7 @@ public:
 
 		matrixBlock.setRow(i,counter);
 
-		kroneckerDumper_.push(A,
-		                      B,
-		                      fermionSigns_,
-		                      lrs_.super().permutationVector(),
-		                      lrs_.super().partition(m_),
-		                      lrs_.super().partition(m_+1));
+		kroneckerDumper_.push(A,B);
 	}
 
 	// Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or
