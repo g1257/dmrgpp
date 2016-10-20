@@ -135,7 +135,6 @@ public:
 	RealType weight(SizeType) const
 	{
 		throw PsimagLite::RuntimeError("GST: What are you doing here?\n");
-		return 0;
 	}
 
 	RealType gsWeight() const

@@ -198,7 +198,6 @@ private:
 				break;
 			case LEFT_CORNER:
 				throw PsimagLite::RuntimeError("applyLocalOpSystem: internal error\n");
-				break;
 			case RIGHT_CORNER:
 				applyLocalOpRightCorner(dest2,src,A,i);
 				break;
@@ -260,7 +259,6 @@ private:
 				break;
 			case RIGHT_CORNER:
 				throw PsimagLite::RuntimeError("applyLocalOpEnviron: internal error\n");
-				break;
 			}
 		}
 		dest.fromFull(dest2,lrs_.super());

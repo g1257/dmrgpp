@@ -1160,11 +1160,10 @@ private:
 		switch (component) {
 		case 0: // S^+
 			return spinOperatorAux(cm,i,orbital,SPIN_UP,SPIN_DOWN);
-			break;
 		case 1: // S^-
 			return spinOperatorAux(cm,i,orbital,SPIN_DOWN,SPIN_UP);
-			break;
 		}
+
 		SparseMatrixType tmpMatrix=spinOperatorAux(cm,i,orbital,SPIN_UP,SPIN_UP);
 		SparseMatrixType tmpMatrix2=spinOperatorAux(cm,i,orbital,SPIN_DOWN,SPIN_DOWN);
 		const RealType f1 = (-1.0);

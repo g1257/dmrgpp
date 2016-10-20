@@ -411,16 +411,12 @@ private:
 		switch (stage_[i]) {
 		case DISABLED:
 			return "Disabled";
-			break;
 		case OPERATOR:
 			return "Applying operator for the first time";
-			break;
 		case WFT_NOADVANCE:
 			return "WFT_NOADVANCE";
-			break;
 		case WFT_ADVANCE:
 			return "WFT_ADVANCE";
-			break;
 		}
 
 		return "undefined";
