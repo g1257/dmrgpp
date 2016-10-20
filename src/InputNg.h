@@ -370,8 +370,8 @@ public:
 				String s(__FILE__);
 				s += " use equal sign instead of space in line "+ttos(line_) + "\n";
 				throw RuntimeError(s.c_str());
-				return;
 			}
+
 			String s(__FILE__);
 			if (numericVector_.size()==0) {
 				std::cerr<<"Line="<<line_<<"\n";

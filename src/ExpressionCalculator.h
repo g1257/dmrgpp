@@ -147,8 +147,6 @@ public:
 			msg += ve_[i] + " ";
 
 		throw PsimagLite::RuntimeError(msg + "\n");
-
-		return false;
 	}
 
 	const ComplexOrRealType& operator()() const
