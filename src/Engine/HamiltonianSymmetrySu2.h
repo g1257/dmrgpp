@@ -235,8 +235,9 @@ public:
 	SizeType size() const {return jmValues_.size(); }
 
 	template<typename IoInputter>
-	void load(IoInputter& io)
+	void load(IoInputter& io, bool minimizeRead)
 	{
+		if (minimizeRead) return;
 		jmValues_.load(io);
 		io.read(flavors_,"#su2flavors");
 		io.readline(flavorsMax_,"#su2FlavorsMax=");

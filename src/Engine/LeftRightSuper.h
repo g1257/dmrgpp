@@ -113,12 +113,13 @@ public:
 	      SAVE_PARTIAL = SuperBlockType::SAVE_PARTIAL};
 
 	template<typename IoInputter>
-	LeftRightSuper(IoInputter& io)
+	LeftRightSuper(IoInputter& io, bool isObserveCode)
 	    : progress_("LeftRightSuper"),
 	      left_(0),right_(0),super_(0),refCounter_(0)
 	{
 		// watch out: same order as save here:
-		super_ = new SuperBlockType(io,"");
+		bool minimizeRead = isObserveCode;
+		super_ = new SuperBlockType(io,"",0,false,minimizeRead);
 		left_ = new BasisWithOperatorsType(io,"",0,true);
 		right_ = new BasisWithOperatorsType(io,"",0,true);
 	}
@@ -225,7 +226,10 @@ public:
 
 	BasisWithOperatorsType& rightNonConst() { return *right_; }
 
-	const SuperBlockType& super() const { return *super_; }
+	const SuperBlockType& super() const
+	{
+		return *super_;
+	}
 
 	void left(const BasisWithOperatorsType& left)
 	{

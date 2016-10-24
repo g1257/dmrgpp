@@ -124,11 +124,12 @@ public:
 	Basis(IoInputter& io,
 	      const PsimagLite::String& ss,
 	      SizeType counter=0,
-	      bool = false)
+	      bool = false,
+	      bool minimizeRead = false)
 	    : dmrgTransformed_(false), name_(ss), progress_(ss)
 	{
 		io.advance("#NAME="+ss,counter);
-		loadInternal(io);
+		loadInternal(io, minimizeRead);
 	}
 
 	//! Loads this basis from memory or disk
@@ -296,7 +297,7 @@ public:
 	const BlockType& block() const { return block_; }
 
 	//! returns the size of this basis
-	SizeType size() const { return quantumNumbers_.size(); }
+	SizeType size() const { return permutationVector_.size(); }
 
 	//! finds the partition that contains basis state i
 	SizeType findPartitionNumber(SizeType i) const
@@ -546,7 +547,7 @@ public:
 private:
 
 	template<typename IoInputter>
-	void loadInternal(IoInputter& io)
+	void loadInternal(IoInputter& io, bool minimizeRead = false)
 	{
 		int x=0;
 		useSu2Symmetry_=false;
@@ -554,18 +555,21 @@ private:
 		if (x>0) useSu2Symmetry_=true;
 		io.read(block_,"#BLOCK");
 		io.read(quantumNumbers_,"#QN");
+		if (minimizeRead) quantumNumbers_.clear();
 		io.read(electrons_,"#ELECTRONS");
 		io.read(electronsOld_,"#0OLDELECTRONS");
+		if (minimizeRead) electronsOld_.clear();
 		io.read(partition_,"#PARTITION");
 		io.read(permInverse_,"#PERMUTATIONINVERSE");
 		permutationVector_.resize(permInverse_.size());
 		for (SizeType i=0;i<permInverse_.size();i++)
 			permutationVector_[permInverse_[i]]=i;
+
 		dmrgTransformed_=false;
 		if (useSu2Symmetry_)
-			symmSu2_.load(io);
+			symmSu2_.load(io,minimizeRead);
 		else
-			symmLocal_.load(io);
+			symmLocal_.load(io,minimizeRead);
 	}
 
 	template<typename IoOutputter>

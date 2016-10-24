@@ -280,7 +280,7 @@ private:
 				std::cerr<<"ObserverHelper "<<dSerializerV_.size()<<"\n";
 			try {
 				DmrgSerializerType* dSerializer = new
-				        DmrgSerializerType(io_);
+				        DmrgSerializerType(io_,false,true);
 				if (saveOrNot == SAVE_YES)
 					dSerializerV_.push_back(dSerializer);
 				else

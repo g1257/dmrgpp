@@ -117,10 +117,12 @@ public:
 	}
 
 
-	DmrgSerializer(typename PsimagLite::IoSimple::In& io,bool bogus = false)
+	DmrgSerializer(typename PsimagLite::IoSimple::In& io,
+	               bool bogus,
+	               bool isObserveCode)
 		: fS_(io,bogus),
 		  fE_(io,bogus),
-		  lrs_(io)
+		  lrs_(io, isObserveCode)
 	{
 		if (bogus) return;
 		PsimagLite::String s = "#WAVEFUNCTION_sites=";

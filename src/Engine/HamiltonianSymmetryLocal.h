@@ -135,10 +135,11 @@ public:
 	}
 
 	template<typename IoInputter>
-	void load(IoInputter& io)
+	void load(IoInputter& io, bool minimizeRead)
 	{
 		SizeType tmp=0;
 		io.readline(tmp,"#FACTORSSIZE=");
+		if (minimizeRead) return;
 		factors_.makeDiagonal(tmp,1);
 	}
 
