@@ -321,7 +321,7 @@ public:
 	{
 		if (useSu2Symmetry_)
 			return SymmetryElectronsSzType::pseudoEffectiveNumber(electrons_[i],
-			                                            symmSu2_.jmValue(i).first);
+			                                                      symmSu2_.jmValue(i).first);
 		else
 			return quantumNumbers_[i];
 	}
@@ -554,12 +554,14 @@ private:
 		io.readline(x,"#useSu2Symmetry=");
 		if (x>0) useSu2Symmetry_=true;
 		io.read(block_,"#BLOCK");
-		io.read(quantumNumbers_,"#QN");
-		if (minimizeRead) quantumNumbers_.clear();
-		io.read(electrons_,"#ELECTRONS");
-		io.read(electronsOld_,"#0OLDELECTRONS");
-		if (minimizeRead) electronsOld_.clear();
-		io.read(partition_,"#PARTITION");
+
+		if (!minimizeRead) {
+			io.read(quantumNumbers_,"#QN");
+			io.read(electrons_,"#ELECTRONS");
+			io.read(electronsOld_,"#0OLDELECTRONS");
+			io.read(partition_,"#PARTITION");
+		}
+
 		io.read(permInverse_,"#PERMUTATIONINVERSE");
 		permutationVector_.resize(permInverse_.size());
 		for (SizeType i=0;i<permInverse_.size();i++)

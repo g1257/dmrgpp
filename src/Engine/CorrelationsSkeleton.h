@@ -622,6 +622,19 @@ private:
 		return brLftCrnrEnviron_(A,B,fermionSign,vec1,vec2,threadId);
 	}
 
+	SizeType superElectrons(SizeType t, SizeType threadId) const
+	{
+#if 0
+		return helper_.leftRightSuper(threadId).super().electrons(t);
+#else
+		SizeType tmp = helper_.leftRightSuper(threadId).super().permutation(t);
+		div_t mydiv = div(tmp,helper_.leftRightSuper(threadId).left().size());
+		return helper_.leftRightSuper(threadId).right().electrons(mydiv.quot) +
+		        helper_.leftRightSuper(threadId).left().electrons(mydiv.rem);
+#endif
+
+	}
+
 	FieldType brRghtCrnrSystem_(const SparseMatrixType& Acrs,
 	                           const SparseMatrixType& Bcrs,
 	                           int fermionSign,
@@ -658,7 +671,7 @@ private:
 				SizeType r0,r1;
 				pack2.unpack(r0,r1,helper_.leftRightSuper(threadId).left().
 				             permutation(r));
-				SizeType electrons = helper_.leftRightSuper(threadId).super().electrons(t);
+				SizeType electrons = superElectrons(t,threadId);
 				electrons -= helper_.leftRightSuper(threadId).right().electrons(eta);
 				RealType sign = (electrons & 1) ? fermionSign : 1.0;
 
