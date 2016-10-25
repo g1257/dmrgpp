@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2011, 2013, UT-Battelle, LLC
+Copyright (c) 2009-2016, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 3.0]
+[DMRG++, Version 4.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -110,6 +110,7 @@ public:
 	TargetParamsCorrectionVector(IoInputter& io,const ModelType& model)
 	    : BaseType(io,model),
 	      cgSteps_(1000),
+	      useQns_(false),
 	      cgEps_(1e-6)
 	{
 		io.readline(correctionA_,"CorrectionA=");
@@ -148,6 +149,12 @@ public:
 		try {
 			io.readline(cgEps_,"ConjugateGradientEps=");
 		} catch (std::exception& e) {}
+
+		try {
+			int x = 0;
+			io.readline(x,"TSPUseQns=");
+			useQns_ = (x > 0);
+		} catch (std::exception&) {}
 	}
 
 	virtual RealType correctionA() const
@@ -195,15 +202,21 @@ public:
 		return algorithm_;
 	}
 
+	virtual bool useQns() const
+	{
+		return useQns_;
+	}
+
 private:
 
 	SizeType type_;
-	RealType correctionA_;
+	SizeType algorithm_;
 	SizeType cgSteps_;
+	bool useQns_;
+	RealType correctionA_;
 	PairFreqType omega_;
 	RealType eta_;
 	RealType cgEps_;
-	SizeType algorithm_;
 }; // class TargetParamsCorrectionVector
 
 template<typename ModelType>
@@ -218,7 +231,7 @@ inline std::ostream& operator<<(std::ostream& os,
 	os<<"CorrectionVectorEta="<<t.eta()<<"\n";
 	os<<"ConjugateGradientSteps"<<t.cgSteps()<<"\n";
 	os<<"ConjugateGradientEps"<<t.cgEps()<<"\n";
-
+	os<<"TSPUseQns="<<t.useQns()<<"\n";
 	return os;
 }
 } // namespace Dmrg
