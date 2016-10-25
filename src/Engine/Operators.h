@@ -448,6 +448,11 @@ private:
 
 	void reorder(SparseMatrixType &v,const   VectorSizeType& permutation)
 	{
+		if (v.row() == 0 || v.col() == 0) {
+			assert(v.row() == 0 && v.col() == 0);
+			return;
+		}
+
 		SparseMatrixType matrixTmp;
 
 		permute(matrixTmp,v,permutation);
