@@ -141,6 +141,7 @@ struct ParametersDmrgSolver {
 	SizeType excited;
 	SizeType dumperBegin;
 	SizeType dumperEnd;
+	SizeType precision;
 	int useReflectionSymmetry;
 	PairRealSizeType truncationControl;
 	PsimagLite::String filename;
@@ -183,6 +184,7 @@ struct ParametersDmrgSolver {
 	      excited(0),
 	      dumperBegin(0),
 		  dumperEnd(0),
+	      precision(6),
 	      recoverySave("0"),
 	      degeneracyMax(1e-12)
 	{
@@ -292,6 +294,10 @@ struct ParametersDmrgSolver {
 				throw PsimagLite::RuntimeError(msg + "KroneckerDumper in SolverOptions\n");
 			}
 		}
+
+		try {
+			io.readline(precision,"Precision=");
+		} catch (std::exception&) {}
 
 		if (isObserveCode) return;
 		bool hasRestart = false;
@@ -463,6 +469,7 @@ std::ostream &operator<<(std::ostream &os,
 		os<<"parameters.dumperEnd="<<p.dumperEnd<<"\n";
 	}
 
+	os<<"parameters.precision="<<p.precision<<"\n";
 	os<<"parameters.keptStatesInfinite="<<p.keptStatesInfinite<<"\n";
 	os<<"FiniteLoops ";
 	os<<p.finiteLoop;

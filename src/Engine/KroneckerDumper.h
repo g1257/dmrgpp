@@ -23,13 +23,15 @@ public:
 	struct ParamsForKroneckerDumper {
 		ParamsForKroneckerDumper(bool enable = false,
 		                         SizeType b = 0,
-		                         SizeType e = 0)
-		    : enabled(enable), begin(b), end(e)
+		                         SizeType e = 0,
+		                         SizeType p = 6)
+		    : enabled(enable), begin(b), end(e), precision(p)
 		{}
 
 		bool enabled;
 		SizeType begin;
 		SizeType end;
+		SizeType precision;
 	}; // struct ParamsForKroneckerDumper
 
 	KroneckerDumper(const ParamsForKroneckerDumper* p,
@@ -52,6 +54,7 @@ public:
 
 		PsimagLite::String filename = "kroneckerDumper" + ttos(counter_) + ".txt";
 		fout_.open(filename.c_str());
+		fout_.precision(p->precision);
 		fout_<<"#KroneckerDumper for DMRG++ version "<<DMRGPP_VERSION<<"\n";
 		fout_<<"#Instance="<<counter_<<"\n";
 

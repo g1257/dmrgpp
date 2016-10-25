@@ -377,7 +377,8 @@ private:
 		bool dumperEnabled = (options.find("KroneckerDumper") != PsimagLite::String::npos);
 		ParamsForKroneckerDumperType paramsKrDumper(dumperEnabled,
 		                                            parameters_.dumperBegin,
-		                                            parameters_.dumperEnd);
+		                                            parameters_.dumperEnd,
+		                                            parameters_.precision);
 		ParamsForKroneckerDumperType* paramsKrDumperPtr = 0;
 		if (lrs.super().block().size() == model_.geometry().numberOfSites())
 			paramsKrDumperPtr = &paramsKrDumper;
