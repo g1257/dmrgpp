@@ -96,9 +96,13 @@ private:
 
 	void printMatrix(const SparseMatrixType& matrix)
 	{
+		fout_<<matrix.row()<<" "<<matrix.col()<<"\n";
 		for (SizeType i = 0; i < matrix.row(); ++i) {
-			for (int k = matrix.getRowPtr(i); k < matrix.getRowPtr(i+1); ++k)
-				fout_<<i<<" "<<matrix.getCol(k)<<" "<<matrix.getValue(k)<<"\n";
+			for (int k = matrix.getRowPtr(i); k < matrix.getRowPtr(i+1); ++k) {
+				ComplexOrRealType value = matrix.getValue(k);
+				if (PsimagLite::norm(value) == 0) continue;
+				fout_<<i<<" "<<matrix.getCol(k)<<" "<<value<<"\n";
+			}
 		}
 	}
 
