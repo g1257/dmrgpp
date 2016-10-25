@@ -299,8 +299,9 @@ public:
 	//! returns the size of this basis
 	SizeType size() const
 	{
-		return (quantumNumbers_.size() == 0) ?
-		            permutationVector_.size() : quantumNumbers_.size();
+		assert(partition_.size() > 0);
+		assert(quantumNumbers_.size() == partition_[partition_.size()-1]);
+		return partition_[partition_.size()-1];
 	}
 
 	//! finds the partition that contains basis state i
