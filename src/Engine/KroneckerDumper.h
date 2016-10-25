@@ -14,6 +14,7 @@ class KroneckerDumper {
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
@@ -68,11 +69,12 @@ public:
 		fout_.close();
 	}
 
-	void push(const SparseMatrixType& A, const SparseMatrixType& B)
+	void push(const SparseMatrixType& A, const SparseMatrixType& B, ComplexOrRealType val)
 	{
 		if (!enabled_) return;
 
 		fout_<<"#START_AB_PAIR\n";
+		fout_<<"link.value="<<val<<"\n";
 		fout_<<"#A\n";
 		printMatrix(A);
 		fout_<<"#B\n";
@@ -94,10 +96,10 @@ private:
 
 	void printMatrix(const SparseMatrixType& matrix)
 	{
-		if (PRINTS_DENSE)
-			fout_<<matrix.toDense();
-		else
-			fout_<<matrix;
+		for (SizeType i = 0; i < matrix.row(); ++i) {
+			for (int k = matrix.getRowPtr(i); k < matrix.getRowPtr(i+1); ++k)
+				fout_<<i<<" "<<matrix.getCol(k)<<" "<<matrix.getValue(k)<<"\n";
+		}
 	}
 
 	void printOneBasis(PsimagLite::String name, const BasisType& basis)
@@ -114,10 +116,8 @@ private:
 		fout_<<basis.electronsVector();
 	}
 
-	static const bool PRINTS_DENSE = true;
 	static SizeType counter_;
 	bool enabled_;
-	bool printsDense_;
 	std::ofstream fout_;
 }; // class KroneckerDumpter
 
