@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LinkProductStruct.h"
 #include "CrsMatrix.h"
 #include "Concurrency.h"
+#include <cassert>
 
 namespace Dmrg {
 
@@ -261,6 +262,9 @@ public:
 		*A = &modelHelper_.getReducedOperator(link2.mods.first,site1Corrected,link2.ops.first,sysOrEnv);
 		*B = &modelHelper_.getReducedOperator(link2.mods.second,site2Corrected,link2.ops.second,envOrSys);
 
+		assert(isNonZeroMatrix(**A));
+		assert(isNonZeroMatrix(**B));
+
 		return link2;
 	}
 
@@ -305,6 +309,12 @@ private:
 		SparseMatrixType const* B = 0;
 		LinkType link2 = getKron(&A,&B,i,j,type,valuec,term,dofs,additionalData);
 		modelHelper_.fastOpProdInter(x,y,*A,*B,link2);
+	}
+
+	bool isNonZeroMatrix(const SparseMatrixType& m) const
+	{
+		if (m.row() > 0 && m.col() > 0) return true;
+		return false;
 	}
 
 	const GeometryType& geometry_;
