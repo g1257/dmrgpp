@@ -565,9 +565,8 @@ private:
 			io.read(quantumNumbers_,"#QN");
 			io.read(electrons_,"#ELECTRONS");
 			io.read(electronsOld_,"#0OLDELECTRONS");
-			io.read(partition_,"#PARTITION");
 		}
-
+		io.read(partition_,"#PARTITION");
 		io.read(permInverse_,"#PERMUTATIONINVERSE");
 		permutationVector_.resize(permInverse_.size());
 		for (SizeType i=0;i<permInverse_.size();i++)
