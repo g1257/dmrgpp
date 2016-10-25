@@ -297,7 +297,11 @@ public:
 	const BlockType& block() const { return block_; }
 
 	//! returns the size of this basis
-	SizeType size() const { return permutationVector_.size(); }
+	SizeType size() const
+	{
+		return (quantumNumbers_.size() == 0) ?
+		            permutationVector_.size() : quantumNumbers_.size();
+	}
 
 	//! finds the partition that contains basis state i
 	SizeType findPartitionNumber(SizeType i) const
@@ -386,16 +390,18 @@ public:
 	//! (see section about Symmetries in paper)
 	void findPartition()
 	{
-		assert(quantumNumbers_.size() > 0);
+		SizeType n = quantumNumbers_.size();
+		assert(n > 0);
 		SizeType qtmp = quantumNumbers_[0]+1;
 		partition_.clear();
-		for (SizeType i=0;i<size();i++) {
+		for (SizeType i=0;i<n;++i) {
 			if (quantumNumbers_[i]!=qtmp) {
 				partition_.push_back(i);
 				qtmp = quantumNumbers_[i];
 			}
 		}
-		partition_.push_back(size());
+
+		partition_.push_back(n);
 	}
 
 	//! Returns the factors that mix this basis
@@ -615,7 +621,7 @@ private:
 	void findPermutationAndPartition(bool changePermutation=true)
 	{
 		if (changePermutation) {
-			permutationVector_.resize(size());
+			permutationVector_.resize(quantumNumbers_.size());
 			if (useSu2Symmetry_) 	{
 				//symmSu2_.orderFlavors(permutationVector_,partition_);
 				for (SizeType i=0;i<permutationVector_.size();i++)
