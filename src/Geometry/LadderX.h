@@ -101,7 +101,7 @@ public:
 	    : ladder_(linSize,io),linSize_(linSize),leg_(ladder_.leg())
 	{}
 
-	virtual SizeType maxConnections() const { return 4; }
+	virtual SizeType maxConnections() const { return leg_ + 1; }
 
 	virtual SizeType dirs() const { return 4; }
 

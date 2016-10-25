@@ -88,14 +88,17 @@ class LongRange : public GeometryBase<ComplexOrRealType, InputType> {
 
 public:
 
-	LongRange() : linSize_(0), orbitals_(0) {}
+	LongRange() : linSize_(0), orbitals_(0), maxConnections_(0) {}
 
 	LongRange(SizeType linSize,InputType& io)
-	    : linSize_(linSize)
+	    : linSize_(linSize), maxConnections_(0)
 	{
 		io.readMatrix(matrix_,"Connectors");
 		assert(matrix_.n_row()%linSize == 0);
 		orbitals_ = static_cast<SizeType>(matrix_.n_row()/linSize);
+		try {
+			io.readline(maxConnections_,"GeometryMaxConnections=");
+		} catch (std::exception&) {}
 	}
 
 	virtual void set(MatrixType& m, SizeType& orbitals) const
@@ -106,7 +109,7 @@ public:
 
 	virtual SizeType maxConnections() const
 	{
-		return linSize_*linSize_*0.25;
+		return (maxConnections_ == 0) ? linSize_*linSize_*0.25 : maxConnections_;
 	}
 
 	virtual SizeType dirs() const { return 1; }
@@ -189,6 +192,7 @@ private:
 
 	SizeType linSize_;
 	SizeType orbitals_;
+	SizeType maxConnections_;
 	MatrixType matrix_;
 }; // class LongRange
 } // namespace PsimagLite

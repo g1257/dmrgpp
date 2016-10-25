@@ -4,6 +4,7 @@
 #include <iostream>
 #include <algorithm>
 #include "Vector.h"
+#include <cassert>
 
 namespace PsimagLite {
 template<typename ContainerType>
@@ -39,6 +40,7 @@ public:
 		if (n==0) return;
 		// FIXME: DON'T USE smallSize, just say n=iperm.size()
 		if (smallSize!=0) n = smallSize;
+		assert(n == iperm.size());
 		const ContainerType& xread = x;
 		PairType onep(xread[0],0);
 		typename Vector<PairType>::Type p(n,onep);
