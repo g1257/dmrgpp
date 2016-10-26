@@ -528,7 +528,11 @@ template<typename T>
 std::ostream &operator<<(std::ostream &os,const CrsMatrix<T> &m)
 {
 	SizeType n=m.row();
-	if (n==0) return os;
+	if (n==0) {
+		os<<"0 0\n";
+		return os;
+	}
+
 	os<<n<<" "<<m.col()<<"\n";
 	for (SizeType i=0;i<n+1;i++) os<<m.rowptr_[i]<<" ";
 	os<<"\n";
