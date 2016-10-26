@@ -140,11 +140,11 @@ public:
 
 	// Save to disk everything needed to compute any observable (OBSOLETE!!)
 	template<typename IoOutputter>
-	void save(IoOutputter& io,SizeType option) const
+	void save(IoOutputter& io,SizeType option, SizeType numberOfSites) const
 	{
 		fS_.save(io);
 		fE_.save(io);
-		lrs_.save(io,option);
+		lrs_.save(io,option,numberOfSites);
 
 		// save wavefunction
 		PsimagLite::String label = "#WAVEFUNCTION_sites=";

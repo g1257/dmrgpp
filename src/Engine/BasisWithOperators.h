@@ -345,7 +345,7 @@ public:
 	template<typename IoOutputter>
 	void save(IoOutputter& io,const PsimagLite::String& s,SizeType option) const
 	{
-		BasisType::save(io,s); // parent saves
+		BasisType::save(io,s,false); // parent saves
 		if (option == BasisType::SAVE_ALL)
 			operators_.save(io,s);
 		else
@@ -356,7 +356,7 @@ public:
 	template<typename IoOutputter>
 	void save(IoOutputter& io,SizeType option) const
 	{
-		BasisType::save(io); // parent saves
+		BasisType::save(io,false); // parent saves
 		if (option == BasisType::SAVE_ALL)
 			operators_.save(io,this->name());
 		else

@@ -597,7 +597,7 @@ private:
 		DmrgSerializerType ds(fsS,fsE,lrs_,target.gs(),transform,direction);
 
 		SizeType saveOption2 = (saveOption & 4) ? SAVE_ALL : SAVE_PARTIAL;
-		ds.save(ioOut_,saveOption2);
+		ds.save(ioOut_,saveOption2,model_.geometry().numberOfSites());
 
 		target.save(sitesIndices_[stepCurrent_],ioOut_);
 	}

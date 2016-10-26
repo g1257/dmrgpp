@@ -111,7 +111,7 @@ struct DmrgWaveStruct {
 	{
 		io.printMatrix(ws,"Ws");
 		io.printMatrix(we,"We");
-		lrs.save(io,LeftRightSuperType::SAVE_ALL);
+		lrs.save(io,LeftRightSuperType::SAVE_ALL,false);
 	}
 
 }; // struct DmrgWaveStruct

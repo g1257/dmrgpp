@@ -211,9 +211,10 @@ public:
 	}
 
 	template<typename IoOutputType>
-	void save(IoOutputType& io,SizeType option) const
+	void save(IoOutputType& io,SizeType option,SizeType numberOfSites) const
 	{
-		super_->save(io);
+		bool minimizeWrite = (super_->block().size() == numberOfSites);
+		super_->save(io, minimizeWrite);
 		left_->save(io,option);
 		right_->save(io,option);
 	}

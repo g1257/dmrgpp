@@ -511,18 +511,20 @@ public:
 
 	//! saves this basis to disk
 	template<typename IoOutputter>
-	void save(IoOutputter& io,const PsimagLite::String& ss) const
+	void save(IoOutputter& io,
+	          const PsimagLite::String& ss,
+	          bool minimizeWrite) const
 	{
 		io.printline("#NAME="+ss);
-		saveInternal(io);
+		saveInternal(io, minimizeWrite);
 	}
 
 	//! saves this basis to disk
 	template<typename IoOutputter>
-	void save(IoOutputter& io) const
+	void save(IoOutputter& io, bool minimizeWrite) const
 	{
 		io.printline("#NAME="+name_);
-		saveInternal(io);
+		saveInternal(io, minimizeWrite);
 
 	}
 
@@ -581,14 +583,18 @@ private:
 	}
 
 	template<typename IoOutputter>
-	void saveInternal(IoOutputter& io) const
+	void saveInternal(IoOutputter& io, bool minimizeWrite) const
 	{
 		PsimagLite::String s="#useSu2Symmetry="+ttos(useSu2Symmetry_);
 		io.printline(s);
 		io.printVector(block_,"#BLOCK");
-		io.printVector(quantumNumbers_,"#QN");
-		io.printVector(electrons_,"#ELECTRONS");
-		io.printVector(electronsOld_,"#0OLDELECTRONS");
+
+		if (!minimizeWrite) {
+			io.printVector(quantumNumbers_,"#QN");
+			io.printVector(electrons_,"#ELECTRONS");
+			io.printVector(electronsOld_,"#0OLDELECTRONS");
+		}
+
 		io.printVector(partition_,"#PARTITION");
 		io.printVector(permInverse_,"#PERMUTATIONINVERSE");
 
