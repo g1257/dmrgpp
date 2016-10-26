@@ -692,17 +692,12 @@ private:
 			SizeType orb3 = 1;
 			SizeType orb4 = 0;
 			int sign = -1;
-
+			PsimagLite::String onsiteOrNot = "two";
 			// notice - orb3 and orb4 order had to be fliped to preserve
-			// i1 > i2 > i3 > i4 ordering, this adds multiplication by (-1.0);
-			for (SizeType i = 0; i < m.n_row(); ++i) {  //loop over fat sites
-				for (SizeType j = i+1; j < m.n_col(); ++j) {
-					m(i,j) = -1.0*ppFour2(i,i,j,j,orb1,orb2,orb4,orb3,sign);
-				}
-			}
+			// i1 > i2 > i3 > i4 thin site ordering, this should add multiplication by (-1.0);
+			ppFour(m,orb1,orb2,orb4,orb3,onsiteOrNot,sign);
 
 			std::cout << m;
-
 		} else if (flag==2) {
 			SizeType orb1 = 0;
 			SizeType orb2 = 1;
@@ -1088,54 +1083,55 @@ private:
 			cols = cols/2;
 		}
 
+		PsimagLite::String onsiteOrNot = "four";
 		// Singlet four-points
 		MatrixType* m1 = new MatrixType(rows,cols);
 		std::cout << "PairPair Correlations S^{l}_{nn}" << std::endl;
 		names.push_back("S^{l}_{nn}");
-		ppFour(*m1,0,0,0,0,-1);
+		ppFour(*m1,0,0,0,0,onsiteOrNot,-1);
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
 		std::cout << "PairPair Correlations S^{u}_{nn}" << std::endl;
 		names.push_back("S^{u}_{nn}");
-		ppFour(*m1,1,1,1,1,-1);
+		ppFour(*m1,1,1,1,1,onsiteOrNot,-1);
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
 		std::cout << "PairPair Correlations S^{lu}_{nn}" << std::endl;
 		names.push_back("S^{lu}_{nn}");
-		ppFour(*m1,0,1,1,0,-1);
+		ppFour(*m1,0,1,1,0,onsiteOrNot,-1);
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
 		std::cout << "PairPair Correlations S^{l-u}_{nn}" << std::endl;
 		names.push_back("S^{l-u}_{nn}");
-		ppFour(*m1,0,0,1,1,-1);
+		ppFour(*m1,0,0,1,1,onsiteOrNot,-1);
 		result.push_back(m1);
 
 		// Triplet four-points
 		m1 = new MatrixType(rows,cols);
 		std::cout << "PairPair Correlations T^{l}_{nn}" << std::endl;
 		names.push_back("T^{l}_{nn}");
-		ppFour(*m1,0,0,0,0,1);
+		ppFour(*m1,0,0,0,0,onsiteOrNot,1);
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
 		std::cout << "PairPair Correlations T{^{u}_{nn}" << std::endl;
 		names.push_back("T{^{u}_{nn}");
-		ppFour(*m1,1,1,1,1,1);
+		ppFour(*m1,1,1,1,1,onsiteOrNot,1);
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
 		std::cout << "PairPair Correlations T^{lu}_{nn}" << std::endl;
 		names.push_back("T^{lu}_{nn}");
-		ppFour(*m1,0,1,1,0,1);
+		ppFour(*m1,0,1,1,0,onsiteOrNot,1);
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
 		std::cout << "PairPair Correlations T^{l-u}_{nn}" << std::endl;
 		names.push_back("T^{l-u}_{nn}");
-		ppFour(*m1,0,0,1,1,1);
+		ppFour(*m1,0,0,1,1,onsiteOrNot,1);
 		result.push_back(m1);
 	}
 
@@ -1144,8 +1140,12 @@ private:
 	            SizeType orb2,
 	            SizeType orb3,
 	            SizeType orb4,
+	            const PsimagLite::String& string,
 	            int sign) const
 	{
+		if (string!="four" && string!="two") {
+			throw PsimagLite::RuntimeError("ppFour: only string = 'two' or 'four' is allowed \n");
+		}
 		SizeType rows = m.n_row();
 		SizeType cols = m.n_col();
 		assert(rows == cols);
@@ -1158,10 +1158,10 @@ private:
 
 		for (SizeType i = 0; i < rows; ++i) {
 			SizeType thini1 = i*orbitals + orb1;
-			SizeType thini2 = (i+1)*orbitals + orb2;
+			SizeType thini2 = (string=="four") ? (i+1)*orbitals + orb2 : i*orbitals+orb2;
 			for (SizeType j = i + orbitals; j < cols-1; ++j) {
 				SizeType thinj1 = j*orbitals + orb3;
-				SizeType thinj2 = (j+1)*orbitals + orb4;
+				SizeType thinj2 = (string=="four") ? (j+1)*orbitals + orb4 : j*orbitals + orb4;
 				for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 					for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
 						pairs.push_back(PairSizeType(thini1+thini2*rows*orbitals+rows*orbitals*
@@ -1196,8 +1196,8 @@ private:
 				SizeType thinj2 = (j+1)*orbitals + orb4;
 				for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 					for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
-						m2(i,j) += m(thini1+thini2*rows*orbitals+spin0*rows*orbitals*rows*orbitals,
-						             thinj1+thinj2*rows*orbitals+spin1*rows*orbitals*rows*orbitals);
+						m2(i,j) += sign*m(thini1+thini2*rows*orbitals+spin0*rows*orbitals*rows*orbitals,
+										  thinj1+thinj2*rows*orbitals+spin1*rows*orbitals*rows*orbitals);
 					}
 				}
 			}
