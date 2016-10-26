@@ -300,7 +300,6 @@ public:
 	SizeType size() const
 	{
 		assert(partition_.size() > 0);
-		assert(quantumNumbers_.size() == partition_[partition_.size()-1]);
 		return partition_[partition_.size()-1];
 	}
 
