@@ -641,19 +641,16 @@ private:
 
 		m1 = new MatrixType(rows,cols);
 		names.push_back("S^{lu}_{on}");
-		std::cout << "PairPair Correlations S^{lu}_{on}" << std::endl;
 		ppTwo(*m1,1);
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
 		names.push_back("T^{lu}_{on}");
-		std::cout << "PairPair Correlations T^{lu}_{on}" << std::endl;
 		ppTwo(*m1,2);
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
 		names.push_back("T_{on}");
-		std::cout << "PairPair Correlations T_{on}" << std::endl;
 		ppTwo(*m1,3);
 		result.push_back(m1);
 	}
@@ -695,62 +692,57 @@ private:
 			PsimagLite::String onsiteOrNot = "two";
 			// notice - orb3 and orb4 order had to be fliped to preserve
 			// i1 > i2 > i3 > i4 thin site ordering, this should add multiplication by (-1.0);
+			std::cout << "PairPair Correlations S^{lu}_{on}" << std::endl;
 			ppFour(m,orb1,orb2,orb4,orb3,onsiteOrNot,sign);
 
-			std::cout << m;
 		} else if (flag==2) {
 			SizeType orb1 = 0;
 			SizeType orb2 = 1;
 			SizeType orb3 = 1;
 			SizeType orb4 = 0;
 			int sign = 1;
-
+			PsimagLite::String onsiteOrNot = "two";
 			// notice - orb3 and orb4 order had to be fliped to preserve
 			// i1 > i2 > i3 > i4 ordering, this adds multiplication by (-1.0);
-			for (SizeType i = 0; i < m.n_row(); ++i) {  //loop over fat sites
-				for (SizeType j = i+1; j < m.n_col(); ++j) {
-					m(i,j) = -1.0*ppFour2(i,i,j,j,orb1,orb2,orb4,orb3,sign);
-				}
-			}
-
-			std::cout << m;
-
+			std::cout << "PairPair Correlations T^{lu}_{on}" << std::endl;
+			ppFour(m,orb1,orb2,orb4,orb3,onsiteOrNot,sign);
 		} else if (flag==3) {
 			SizeType spin0 = 0; // up
 			SizeType spin1 = 1; // down
-			SizeType orb1 = 0;
-			SizeType orb2 = 1;
-			SizeType orb3 = 0;
-			SizeType orb4 = 1;
-			int fermionicSign = -1;
-			SizeType threadId = 0;
+//			SizeType orb1 = 0;
+//			SizeType orb2 = 1;
+//			SizeType orb3 = 0;
+//			SizeType orb4 = 1;
+//			int fermionicSign = -1;
+//			SizeType threadId = 0;
 			SizeType site = 0;
 
+			std::cout << "PairPair Correlations T_{on}" << std::endl;
 			SparseMatrixType O1 = model_.naturalOperator("c",site,spin0).data; // c_up
 			SparseMatrixType O2 = model_.naturalOperator("c",site,spin1).data; // c_down
 
-			for (SizeType i = 0; i < m.n_row(); ++i) {  //loop over fat sites
-				for (SizeType j = i+1; j < m.n_col(); ++j) {
-					SizeType thini1 = i*2 + orb1;
-					SizeType thini2 = i*2 + orb2;
-					SizeType thinj1 = j*2 + orb3;
-					SizeType thinj2 = j*2 + orb4;
-					m(i,j) = observe_.fourpoint()('N',thini1,O1,
-					                              'N',thini2,O1,
-					                              'C',thinj1,O1,
-					                              'C',thinj2,O1,
-					                              fermionicSign,
-					                              threadId); // up
+//			for (SizeType i = 0; i < m.n_row(); ++i) {  //loop over fat sites
+//				for (SizeType j = i+1; j < m.n_col(); ++j) {
+//					SizeType thini1 = i*2 + orb1;
+//					SizeType thini2 = i*2 + orb2;
+//					SizeType thinj1 = j*2 + orb3;
+//					SizeType thinj2 = j*2 + orb4;
+//					m(i,j) = observe_.fourpoint()('N',thini1,O1,
+//					                              'N',thini2,O1,
+//					                              'C',thinj1,O1,
+//					                              'C',thinj2,O1,
+//					                              fermionicSign,
+//					                              threadId); // up
 
-					m(i,j) += observe_.fourpoint()('N',thini1,O2,
-					                               'N',thini2,O2,
-					                               'C',thinj1,O2,
-					                               'C',thinj2,O2,
-					                               fermionicSign,
-					                               threadId); // down
+//					m(i,j) += observe_.fourpoint()('N',thini1,O2,
+//					                               'N',thini2,O2,
+//					                               'C',thinj1,O2,
+//					                               'C',thinj2,O2,
+//					                               fermionicSign,
+//					                               threadId); // down
 
-				}
-			}
+//				}
+//			}
 			std::cout << m;
 		} else {
 			PsimagLite::String s = "Unknown flag: " + ttos(flag);
@@ -1156,12 +1148,16 @@ private:
 		m.reset(bigSize,bigSize);
 		m.setTo(0.0);
 
+		SizeType offset = (string=="four") ? orbitals : 1;
+		SizeType jmax = (string=="four") ? cols-1 : cols;
 		for (SizeType i = 0; i < rows; ++i) {
 			SizeType thini1 = i*orbitals + orb1;
 			SizeType thini2 = (string=="four") ? (i+1)*orbitals + orb2 : i*orbitals+orb2;
-			for (SizeType j = i + orbitals; j < cols-1; ++j) {
+			//SizeType thini2 = (i+1)*orbitals + orb2;
+			for (SizeType j = i + offset; j < jmax; ++j) {
 				SizeType thinj1 = j*orbitals + orb3;
 				SizeType thinj2 = (string=="four") ? (j+1)*orbitals + orb4 : j*orbitals + orb4;
+				//SizeType thinj2 = (j+1)*orbitals + orb4;
 				for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 					for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
 						pairs.push_back(PairSizeType(thini1+thini2*rows*orbitals+rows*orbitals*
@@ -1190,14 +1186,16 @@ private:
 		MatrixType m2(rows,cols);
 		for (SizeType i = 0; i < rows; ++i) {
 			SizeType thini1 = i*orbitals + orb1;
-			SizeType thini2 = (i+1)*orbitals + orb2;
-			for (SizeType j = i + orbitals; j < cols-1; ++j) {
+			SizeType thini2 = (string=="four") ? (i+1)*orbitals + orb2 : i*orbitals+orb2;
+			for (SizeType j = i + offset; j < jmax; ++j) {
 				SizeType thinj1 = j*orbitals + orb3;
-				SizeType thinj2 = (j+1)*orbitals + orb4;
+				SizeType thinj2 = (string=="four") ? (j+1)*orbitals + orb4 : j*orbitals + orb4;
 				for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 					for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
-						m2(i,j) += sign*m(thini1+thini2*rows*orbitals+spin0*rows*orbitals*rows*orbitals,
-										  thinj1+thinj2*rows*orbitals+spin1*rows*orbitals*rows*orbitals);
+						SizeType val = spin0 + spin1 + 1;
+						int signTerm = (val & 1) ? sign : 1;
+						m2(i,j) += signTerm*m(thini1+thini2*rows*orbitals+spin0*rows*orbitals*rows*orbitals,
+											  thinj1+thinj2*rows*orbitals+spin1*rows*orbitals*rows*orbitals);
 					}
 				}
 			}
