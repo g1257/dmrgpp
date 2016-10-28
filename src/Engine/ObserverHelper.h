@@ -174,62 +174,62 @@ public:
 
 	void transform(SparseMatrixType& ret,const SparseMatrixType& O2,size_t threadId) const
 	{
-		checkPos(threadId);
+		//checkPos(threadId);
 		return dSerializerV_[currentPos_[threadId]]->transform(ret,O2);
 	}
 
 	SizeType columns(SizeType threadId) const
 	{
-		checkPos(threadId);
+		//checkPos(threadId);
 		return dSerializerV_[currentPos_[threadId]]->columns();
 	}
 
 	SizeType rows(SizeType threadId) const
 	{
-		checkPos(threadId);
+		//checkPos(threadId);
 		return dSerializerV_[currentPos_[threadId]]->rows();
 	}
 
 	const FermionSignType& fermionicSignLeft(SizeType threadId) const
 	{
-		checkPos(threadId);
+		//checkPos(threadId);
 		return dSerializerV_[currentPos_[threadId]]->fermionicSignLeft();
 	}
 
 	const FermionSignType& fermionicSignRight(SizeType threadId) const
 	{
-		checkPos(threadId);
+		//checkPos(threadId);
 		return dSerializerV_[currentPos_[threadId]]->fermionicSignRight();
 	}
 
 	const LeftRightSuperType& leftRightSuper(SizeType threadId) const
 	{
-		checkPos(threadId);
+		//checkPos(threadId);
 		return dSerializerV_[currentPos_[threadId]]->leftRightSuper();
 	}
 
 	SizeType direction(SizeType threadId) const
 	{
-		checkPos(threadId);
+		//checkPos(threadId);
 		return dSerializerV_[currentPos_[threadId]]->direction();
 	}
 
 	const VectorWithOffsetType& wavefunction(SizeType threadId) const
 	{
-		checkPos(threadId);
+		//checkPos(threadId);
 		return dSerializerV_[currentPos_[threadId]]->wavefunction();
 	}
 
 	RealType time(SizeType threadId) const
 	{
 		if (timeSerializerV_.size() == 0) return 0.0;
-		checkPos(threadId);
+		//checkPos(threadId);
 		return timeSerializerV_[currentPos_[threadId]].time();
 	}
 
 	SizeType site(SizeType threadId) const
 	{
-		checkPos(threadId);
+		//checkPos(threadId);
 		return  (timeSerializerV_.size()==0) ?
 		            dSerializerV_[currentPos_[threadId]]->site()
 		        : timeSerializerV_[currentPos_[threadId]].site();
@@ -242,7 +242,7 @@ public:
 
 	SizeType marker(SizeType threadId) const
 	{
-		checkPos(threadId);
+		//checkPos(threadId);
 		return timeSerializerV_[currentPos_[threadId]].marker();
 	}
 
@@ -256,7 +256,7 @@ public:
 
 	const VectorWithOffsetType& timeVector(SizeType threadId) const
 	{
-		checkPos(threadId);
+		//checkPos(threadId);
 		return timeSerializerV_[currentPos_[threadId]].vector();
 	}
 
