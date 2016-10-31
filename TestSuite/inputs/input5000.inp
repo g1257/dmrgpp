@@ -1,0 +1,27 @@
+TotalNumberOfSites=32
+NumberOfTerms=1
+DegreesOfFreedom=1
+GeometryKind=ladder
+GeometryOptions=ConstantValues
+LadderLeg=2
+Connectors 1 1.0
+Connectors 1 1.0
+hubbardU	32 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0
+                   2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0
+potentialV      64 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+                   0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+                   0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+                   0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+Model=HubbardOneBand
+SolverOptions=none
+Version=53725d9b8f22615ccccc782082f4cd6f51a4e374
+OutputFile=data5000.txt
+InfiniteLoopKeptStates=100
+FiniteLoops 7
+15 400 0 
+-30 400 0    30 400 0
+-30 600 0    30 600 0
+-30 800 0    30 800 0
+TargetElectronsUp=14
+TargetElectronsDown=14
+
