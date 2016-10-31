@@ -189,7 +189,7 @@ public:
 
 		bool isExcluded(SizeType k) const
 		{
-#ifndef OPERATORS_DONT_CHANGE_ALL
+#ifdef OPERATORS_CHANGE_ALL
 			return false; // <-- this is the safest answer
 #endif
 			if (k < startEnd_.first || k >= startEnd_.second) return true;

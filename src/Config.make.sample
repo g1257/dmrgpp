@@ -52,8 +52,8 @@ CPPFLAGS += -O3
 # This enables the custom allocator (use only for debugging)
 #CPPFLAGS += -DUSE_CUSTOM_ALLOCATOR
 
-#Don't change basis for un-needed operators (EXPERIMENTAL, NOT CHECKED)
-#CPPFLAGS += -DOPERATORS_DONT_CHANGE_ALL
+#Change basis even for un-needed operators
+#CPPFLAGS += -DOPERATORS_CHANGE_ALL
 
 # Specify the strip command to use (or use true to disable) 
 STRIP_COMMAND = strip 
