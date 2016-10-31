@@ -299,6 +299,8 @@ public:
 	//! returns the size of this basis
 	SizeType size() const
 	{
+		assert(quantumNumbers_.size() == 0 ||
+		       quantumNumbers_.size() == partition_[partition_.size()-1]);
 		assert(partition_.size() > 0);
 		return partition_[partition_.size()-1];
 	}

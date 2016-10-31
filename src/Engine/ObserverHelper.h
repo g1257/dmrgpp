@@ -174,62 +174,62 @@ public:
 
 	void transform(SparseMatrixType& ret,const SparseMatrixType& O2,size_t threadId) const
 	{
-		//checkPos(threadId);
+		assert(checkPos(threadId));
 		return dSerializerV_[currentPos_[threadId]]->transform(ret,O2);
 	}
 
 	SizeType columns(SizeType threadId) const
 	{
-		//checkPos(threadId);
+		assert(checkPos(threadId));
 		return dSerializerV_[currentPos_[threadId]]->columns();
 	}
 
 	SizeType rows(SizeType threadId) const
 	{
-		//checkPos(threadId);
+		assert(checkPos(threadId));
 		return dSerializerV_[currentPos_[threadId]]->rows();
 	}
 
 	const FermionSignType& fermionicSignLeft(SizeType threadId) const
 	{
-		//checkPos(threadId);
+		assert(checkPos(threadId));
 		return dSerializerV_[currentPos_[threadId]]->fermionicSignLeft();
 	}
 
 	const FermionSignType& fermionicSignRight(SizeType threadId) const
 	{
-		//checkPos(threadId);
+		assert(checkPos(threadId));
 		return dSerializerV_[currentPos_[threadId]]->fermionicSignRight();
 	}
 
 	const LeftRightSuperType& leftRightSuper(SizeType threadId) const
 	{
-		//checkPos(threadId);
+		assert(checkPos(threadId));
 		return dSerializerV_[currentPos_[threadId]]->leftRightSuper();
 	}
 
 	SizeType direction(SizeType threadId) const
 	{
-		//checkPos(threadId);
+		assert(checkPos(threadId));
 		return dSerializerV_[currentPos_[threadId]]->direction();
 	}
 
 	const VectorWithOffsetType& wavefunction(SizeType threadId) const
 	{
-		//checkPos(threadId);
+		assert(checkPos(threadId));
 		return dSerializerV_[currentPos_[threadId]]->wavefunction();
 	}
 
 	RealType time(SizeType threadId) const
 	{
 		if (timeSerializerV_.size() == 0) return 0.0;
-		//checkPos(threadId);
+		assert(checkPos(threadId));
 		return timeSerializerV_[currentPos_[threadId]].time();
 	}
 
 	SizeType site(SizeType threadId) const
 	{
-		//checkPos(threadId);
+		assert(checkPos(threadId));
 		return  (timeSerializerV_.size()==0) ?
 		            dSerializerV_[currentPos_[threadId]]->site()
 		        : timeSerializerV_[currentPos_[threadId]].site();
@@ -242,7 +242,7 @@ public:
 
 	SizeType marker(SizeType threadId) const
 	{
-		//checkPos(threadId);
+		assert(checkPos(threadId));
 		return timeSerializerV_[currentPos_[threadId]].marker();
 	}
 
@@ -256,7 +256,7 @@ public:
 
 	const VectorWithOffsetType& timeVector(SizeType threadId) const
 	{
-		//checkPos(threadId);
+		assert(checkPos(threadId));
 		return timeSerializerV_[currentPos_[threadId]].vector();
 	}
 
@@ -339,52 +339,55 @@ private:
 		io_.rewind();
 	}
 
-	void checkPos(SizeType threadId) const
+	bool checkPos(SizeType threadId) const
 	{
 		if (threadId>=currentPos_.size())
-			checkFailedThread(threadId);
+			return checkFailedThread(threadId);
 
 		SizeType pos = currentPos_[threadId];
 
-		if (pos>=dSerializerV_.size()) checkFailed1(threadId,pos);
+		if (pos>=dSerializerV_.size())
+			return checkFailed1(threadId,pos);
 
 		bool hasTimeE = (timeSerializerV_.size()>0);
 
-		if (!hasTimeE) return;
-		if (pos>=timeSerializerV_.size()) checkFailed2(threadId,pos);
+		if (!hasTimeE) return true;
+		if (pos>=timeSerializerV_.size())
+			return checkFailed2(threadId,pos);
+		return true;
 	}
 
-	void checkFailedThread(SizeType threadId) const
+	bool checkFailedThread(SizeType threadId) const
 	{
-		assert(false);
 		PsimagLite::String str(__FILE__);
 		str += " " + ttos(__LINE__) + "\n";
 		str += " thread=" + ttos(threadId);
 		str += " >= currentPos.size=" + ttos(currentPos_.size());
 		str += "\n";
-		throw PsimagLite::RuntimeError(str.c_str());
+		std::cerr<<str;
+		return false;
 	}
 
-	void checkFailed1(SizeType threadId,SizeType pos) const
+	bool checkFailed1(SizeType threadId,SizeType pos) const
 	{
-		assert(false);
 		PsimagLite::String str(__FILE__);
 		str += " " + ttos(__LINE__) + "\n";
 		str += " thread=" + ttos(threadId) + " currentPos=" + ttos(pos);
 		str += " >= serializer.size=" + ttos(dSerializerV_.size());
 		str += "\n";
-		throw PsimagLite::RuntimeError(str.c_str());
+		std::cerr<<str;
+		return false;
 	}
 
-	void checkFailed2(SizeType threadId,SizeType pos) const
+	bool checkFailed2(SizeType threadId,SizeType pos) const
 	{
-		assert(false);
 		PsimagLite::String str(__FILE__);
 		str += " " + ttos(__LINE__) + "\n";
 		str += " thread=" + ttos(threadId) + " currentPos=" + ttos(pos);
 		str += " >= time serializer.size=" + ttos(timeSerializerV_.size());
 		str += "\n";
-		throw PsimagLite::RuntimeError(str.c_str());
+		std::cerr<<str;
+		return false;
 	}
 
 	IoInputType& io_;
