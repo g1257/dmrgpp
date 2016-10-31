@@ -1153,11 +1153,9 @@ private:
 		for (SizeType i = 0; i < rows; ++i) {
 			SizeType thini1 = i*orbitals + orb1;
 			SizeType thini2 = (string=="four") ? (i+1)*orbitals + orb2 : i*orbitals+orb2;
-			//SizeType thini2 = (i+1)*orbitals + orb2;
 			for (SizeType j = i + offset; j < jmax; ++j) {
 				SizeType thinj1 = j*orbitals + orb3;
 				SizeType thinj2 = (string=="four") ? (j+1)*orbitals + orb4 : j*orbitals + orb4;
-				//SizeType thinj2 = (j+1)*orbitals + orb4;
 				for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 					for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
 						pairs.push_back(PairSizeType(thini1+thini2*rows*orbitals+rows*orbitals*
@@ -1192,10 +1190,8 @@ private:
 				SizeType thinj2 = (string=="four") ? (j+1)*orbitals + orb4 : j*orbitals + orb4;
 				for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 					for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
-						SizeType val = spin0 + spin1 + 1;
-						int signTerm = (val & 1) ? sign : 1;
-						m2(i,j) += signTerm*m(thini1+thini2*rows*orbitals+spin0*rows*orbitals*rows*orbitals,
-											  thinj1+thinj2*rows*orbitals+spin1*rows*orbitals*rows*orbitals);
+						m2(i,j) += m(thini1+thini2*rows*orbitals+spin0*rows*orbitals*rows*orbitals,
+						             thinj1+thinj2*rows*orbitals+spin1*rows*orbitals*rows*orbitals);
 					}
 				}
 			}

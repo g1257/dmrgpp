@@ -332,6 +332,8 @@ public:
 		registerOpts.push_back("advanceOnlyAtBorder");
 		registerOpts.push_back("findSymmetrySector");
 		registerOpts.push_back("KroneckerDumper");
+		registerOpts.push_back("LanczosEps");
+		registerOpts.push_back("TruncationTolerance");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);
