@@ -167,6 +167,24 @@ public:
 		return str;
 	}
 
+	static VectorSizeType decodeQuantumNumber(SizeType q, SizeType total)
+	{
+		SizeType maxElectrons = 2*ProgramGlobals::maxElectronsOneSpin;
+
+		SizeType number = 1;
+		for (SizeType x = 1; x < total; ++x) number *= maxElectrons;
+		SizeType tmp = q;
+		VectorSizeType v(total);
+		for (SizeType x = 0; x < total; ++x) {
+			v[total-1-x] = static_cast<SizeType>(tmp/number);
+			tmp -= v[total-1-x]*number;
+			number /= maxElectrons;
+
+		}
+
+		return v;
+	}
+
 	static SizeType adjustQn(const VectorSizeType& adjustQuantumNumbers,
 	                         SizeType direction,
 	                         PsimagLite::IoSimple::Out& ioOut,
@@ -344,24 +362,6 @@ private:
 		}
 
 		return index;
-	}
-
-	static VectorSizeType decodeQuantumNumber(SizeType q, SizeType total)
-	{
-		SizeType maxElectrons = 2*ProgramGlobals::maxElectronsOneSpin;
-
-		SizeType number = 1;
-		for (SizeType x = 1; x < total; ++x) number *= maxElectrons;
-		SizeType tmp = q;
-		VectorSizeType v(total);
-		for (SizeType x = 0; x < total; ++x) {
-			v[total-1-x] = static_cast<SizeType>(tmp/number);
-			tmp -= v[total-1-x]*number;
-			number /= maxElectrons;
-
-		}
-
-		return v;
 	}
 
 	CvectorSizeType electrons_;

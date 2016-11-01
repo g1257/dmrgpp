@@ -6,6 +6,7 @@
 #include "../Version.h"
 #include "Concurrency.h"
 #include "ProgramGlobals.h"
+#include "SymmetryElectronsSz.h"
 
 namespace Dmrg {
 
@@ -16,8 +17,11 @@ class KroneckerDumper {
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef SymmetryElectronsSz<RealType> SymmetryElectronsSzType;
+	typedef std::pair<SizeType,SizeType> PairSizeType;
 
 public:
 
@@ -65,7 +69,10 @@ public:
 
 		fout_<<"#SuperBasisPermutation\n";
 		fout_<<lrs.super().permutationVector();
-		fout_<<"#TargetQuantumNumber="<<lrs.super().qn(lrs.super().partition(m))<<"\n";
+		SizeType qtarget = lrs.super().qn(lrs.super().partition(m));
+		PairSizeType etarget = getNupNdown(qtarget);
+		fout_<<"#TargetElectronsUp="<<etarget.first<<"\n";
+		fout_<<"#Target_ElectronsDown="<<etarget.second<<"\n";
 
 		counter_++;
 	}
@@ -120,11 +127,26 @@ private:
 		fout_<<basis.block();
 		fout_<<"#permutationVector\n";
 		fout_<<basis.permutationVector();
-		fout_<<"#QuantumNumbers\n";
-		for (SizeType i = 0; i < basis.size(); ++i)
-			fout_<<basis.pseudoEffectiveNumber(i)<<"\n";
+		fout_<<"#ElectronsUp_ElectronsDown\n";
+		fout_<<basis.size()<<"\n";
+		for (SizeType i = 0; i < basis.size(); ++i) {
+			SizeType q = basis.pseudoEffectiveNumber(i);
+			PairSizeType nupDown = getNupNdown(q);
+			fout_<<nupDown.first<<" "<<nupDown.second<<"\n";
+		}
+
 		fout_<<"#Electrons\n";
 		fout_<<basis.electronsVector();
+	}
+
+	PairSizeType getNupNdown(SizeType q) const
+	{
+		VectorSizeType qns = SymmetryElectronsSzType::decodeQuantumNumber(q,2);
+		SizeType electrons = qns[1];
+		SizeType electronsUp = qns[0];
+		assert(qns[1] >= qns[0]);
+		SizeType electronsDown = electrons - qns[0];
+		return PairSizeType(electronsUp,electronsDown);
 	}
 
 	static SizeType counter_;
