@@ -5,6 +5,7 @@
 #include <fstream>
 #include "../Version.h"
 #include "Concurrency.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -57,10 +58,13 @@ public:
 		fout_.precision(p->precision);
 		fout_<<"#KroneckerDumper for DMRG++ version "<<DMRGPP_VERSION<<"\n";
 		fout_<<"#Instance="<<counter_<<"\n";
+		fout_<<"#EncodingOfQuantumNumbers="<<(2*ProgramGlobals::maxElectronsOneSpin)<<"\n";
 
 		printOneBasis("Left",lrs.left());
 		printOneBasis("Right",lrs.right());
 
+		fout_<<"#SuperBasisPermutation\n";
+		fout_<<lrs.super().permutationVector();
 		fout_<<"#TargetQuantumNumber="<<lrs.super().qn(lrs.super().partition(m))<<"\n";
 
 		counter_++;
