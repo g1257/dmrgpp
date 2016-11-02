@@ -72,7 +72,7 @@ public:
 		SizeType qtarget = lrs.super().qn(lrs.super().partition(m));
 		PairSizeType etarget = getNupNdown(qtarget);
 		fout_<<"#TargetElectronsUp="<<etarget.first<<"\n";
-		fout_<<"#Target_ElectronsDown="<<etarget.second<<"\n";
+		fout_<<"#TargetElectronsDown="<<etarget.second<<"\n";
 
 		counter_++;
 	}
