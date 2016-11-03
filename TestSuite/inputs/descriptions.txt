@@ -147,6 +147,9 @@ correction vector algorithm (type=3).
 4300) BaFe2S3 FeS two-leg ladder two-orbital Hubbard
 5000) Hubbard model 1 orbital on a 32x2 ladder with m up to 800.
 It has 14 electrons up and 14 electrons down (or 2+2 "holes", 16+16 being
-the "half filled" case).
+the "half filled" case). U=2
+5010) Hubbard model 1 orbital on a 12x12 square with m up to 10000.
+It has 68 electrons up and 68 electrons down (or 4+4 "holes", 72+72 being
+the "half filled" case). U=2
 #5001 to 5499 reserved for performance work
 #TAGEND DO NOT REMOVE THIS TAG
