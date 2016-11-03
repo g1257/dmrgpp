@@ -78,12 +78,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef LINK_PROD_TJ_MULTIORB_H
 #define LINK_PROD_TJ_MULTIORB_H
-
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
 class LinkProductTjMultiOrb {
+
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
 
@@ -105,7 +106,7 @@ public:
 	static void setLinkData(SizeType term,
 	                        SizeType dofs,
 	                        bool isSu2,
-	                        SizeType& fermionOrBoson,
+	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
 	                        PairType& ops,
 	                        std::pair<char,char>& mods,
 	                        SizeType& angularMomentum,

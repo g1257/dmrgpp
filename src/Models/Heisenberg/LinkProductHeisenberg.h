@@ -78,6 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef LINK_PRODUCT_HEIS_ONE_HALF_H
 #define LINK_PRODUCT_HEIS_ONE_HALF_H
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 template<typename ModelHelperType>
@@ -90,16 +91,16 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 
 	template<typename SomeStructType>
-	static void setLinkData( SizeType term,
-	                         SizeType,
-	                         bool isSu2,
-	                         SizeType& fermionOrBoson,
-	                         std::pair<SizeType,SizeType>& ops,
-	                         std::pair<char,char>&,
-	                         SizeType& angularMomentum,
-	                         RealType& angularFactor,
-	                         SizeType& category,
-	                         const SomeStructType&)
+	static void setLinkData(SizeType term,
+	                        SizeType,
+	                        bool isSu2,
+	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
+	                        std::pair<SizeType,SizeType>& ops,
+	                        std::pair<char,char>&,
+	                        SizeType& angularMomentum,
+	                        RealType& angularFactor,
+	                        SizeType& category,
+	                        const SomeStructType&)
 	{
 		fermionOrBoson = ProgramGlobals::BOSON;
 		ops = operatorDofs(term,isSu2);

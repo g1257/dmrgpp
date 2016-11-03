@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -82,37 +82,42 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 
 namespace Dmrg {
-	
-	template<typename FieldType>
-	struct Link {
 
-		typedef std::pair<SizeType,SizeType> PairType;
-		typedef typename PsimagLite::Real<FieldType>::Type RealType;
+template<typename FieldType>
+struct Link {
 
-		Link(SizeType i,SizeType j,SizeType type1,const FieldType& value1,SizeType dofs1,
-		    	SizeType fOb,const PairType& ops1,const std::pair<char,char>& mods1,
-       			SizeType aM,RealType aF,
-	  		SizeType cat) 
-			: site1(i),site2(j),
-			type(type1),value(value1),dofs(dofs1),
-			fermionOrBoson(fOb),ops(ops1),mods(mods1),
-       			angularMomentum(aM),angularFactor(aF),
-	  		category(cat) 
-		{
-		}
-		
-		SizeType site1,site2;
-		SizeType type;
-		FieldType value;
-		SizeType dofs;
-		SizeType fermionOrBoson;
-		std::pair<SizeType,SizeType> ops; // operator indices
-		std::pair<char,char> mods; // operator modifiers
-		SizeType angularMomentum;
-		RealType angularFactor;
-		SizeType category;
-		
-	}; // struct Link
+	typedef std::pair<SizeType,SizeType> PairType;
+	typedef typename PsimagLite::Real<FieldType>::Type RealType;
+
+	Link(SizeType i,
+	     SizeType j,
+	     SizeType type1,
+	     const FieldType& value1,
+	     SizeType dofs1,
+	     ProgramGlobals::FermionOrBosonEnum fOb,
+	     const PairType& ops1,
+	     const std::pair<char,char>& mods1,
+	     SizeType aM,RealType aF,
+	     SizeType cat)
+	    : site1(i),site2(j),
+	      type(type1),value(value1),dofs(dofs1),
+	      fermionOrBoson(fOb),ops(ops1),mods(mods1),
+	      angularMomentum(aM),angularFactor(aF),
+	      category(cat)
+	{}
+
+	SizeType site1,site2;
+	SizeType type;
+	FieldType value;
+	SizeType dofs;
+	ProgramGlobals::FermionOrBosonEnum fermionOrBoson;
+	std::pair<SizeType,SizeType> ops; // operator indices
+	std::pair<char,char> mods; // operator modifiers
+	SizeType angularMomentum;
+	RealType angularFactor;
+	SizeType category;
+
+}; // struct Link
 } // namespace Dmrg 
 
 /*@}*/

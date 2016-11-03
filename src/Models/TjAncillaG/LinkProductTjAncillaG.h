@@ -78,18 +78,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_LINKPROD_TJ_ANCILLAG_H
 #define DMRG_LINKPROD_TJ_ANCILLAG_H
-
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
 class LinkProductTjAncillaG {
+
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
 
 	enum {TERM_CICJ, TERM_SPSM, TERM_SZSZ, TERM_NINJ, TERM_ANCILLA};
 
 public:
+
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
@@ -97,7 +99,7 @@ public:
 	static void setLinkData(SizeType term,
 							SizeType dofs,
 							bool isSu2,
-							SizeType& fermionOrBoson,
+							ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
 							PairType& ops,
 							std::pair<char,char>& mods,
 							SizeType& angularMomentum,

@@ -391,13 +391,34 @@ private:
 
 				std::pair<SizeType,SizeType> ops;
 				std::pair<char,char> mods('N','C');
-				SizeType fermionOrBoson=ProgramGlobals::FERMION,angularMomentum=0,category=0;
+				ProgramGlobals::FermionOrBosonEnum fermionOrBoson=ProgramGlobals::FERMION;
+				SizeType angularMomentum=0;
+				SizeType category=0;
 				RealType angularFactor=0;
 				bool isSu2 = ModelHelperType::isSu2();
 				SparseElementType value = tmp;
 				LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData);
-				LinkProductType::setLinkData(term,dofs,isSu2,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category,additionalData);
-				typename ModelHelperType::LinkType link2(i,j,type, value,dofs,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
+				LinkProductType::setLinkData(term,
+				                             dofs,
+				                             isSu2,
+				                             fermionOrBoson,
+				                             ops,
+				                             mods,
+				                             angularMomentum,
+				                             angularFactor,
+				                             category,
+				                             additionalData);
+				typename ModelHelperType::LinkType link2(i,
+				                                         j,
+				                                         type,
+				                                         value,
+				                                         dofs,
+				                                         fermionOrBoson,
+				                                         ops,
+				                                         mods,
+				                                         angularMomentum,
+				                                         angularFactor,
+				                                         category);
 
 				const SparseMatrixType& A = cm[link2.ops.first+i*offset].data;
 

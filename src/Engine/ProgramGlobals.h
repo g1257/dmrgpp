@@ -98,7 +98,7 @@ struct ProgramGlobals {
 
 	enum {SYSTEM,ENVIRON};
 
-	enum {FERMION,BOSON};
+	enum FermionOrBosonEnum {FERMION,BOSON};
 
 	static void init(SizeType maxElectronsOneSpin_)
 	{

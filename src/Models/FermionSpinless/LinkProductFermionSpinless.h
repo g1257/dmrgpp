@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_LINK_PROD_FERMION_SPINLESS_H
 #define DMRG_LINK_PROD_FERMION_SPINLESS_H
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -99,7 +100,7 @@ public:
 	static void setLinkData(SizeType term,
 	                        SizeType dofs,
 	                        bool,
-	                        SizeType& fermionOrBoson,
+	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
 	                        PairType& ops,
 	                        std::pair<char,char>&,
 	                        SizeType& angularMomentum,

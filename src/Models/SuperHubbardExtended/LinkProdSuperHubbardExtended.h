@@ -101,7 +101,7 @@ public:
 	static void setLinkData(SizeType term,
 	                        SizeType dofs,
 	                        bool isSu2,
-	                        SizeType& fermionOrBoson,
+	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
 	                        PairType& ops,
 	                        std::pair<char,char>& mods,
 	                        SizeType& angularMomentum,

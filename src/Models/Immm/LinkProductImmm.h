@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINK_PRODUCT_IMMM_H
 #define LINK_PRODUCT_IMMM_H
 #include <cassert>
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -147,7 +148,7 @@ public:
 	static void setLinkData(SizeType term,
 	                        SizeType dofs,
 	                        bool,
-	                        SizeType& fermionOrBoson,
+	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
 	                        PairType& ops,
 	                        std::pair<char,char>&,
 	                        SizeType& angularMomentum,

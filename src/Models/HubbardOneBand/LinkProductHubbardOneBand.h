@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef LINK_PRODUCT_HubbardOneBand_H
 #define LINK_PRODUCT_HubbardOneBand_H
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -96,16 +97,15 @@ public:
 	static SizeType TERMS_;
 
 	template<typename SomeStructType>
-	static void setLinkData(
-	        SizeType,
-	        SizeType dofs,
-	        bool,
-	        SizeType& fermionOrBoson,
-	        PairType& ops,
-	        std::pair<char,char>&,
-	        SizeType& angularMomentum,
-	        RealType& angularFactor,
-	        SizeType& category,const SomeStructType&)
+	static void setLinkData(SizeType,
+	                        SizeType dofs,
+	                        bool,
+	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
+	                        PairType& ops,
+	                        std::pair<char,char>&,
+	                        SizeType& angularMomentum,
+	                        RealType& angularFactor,
+	                        SizeType& category,const SomeStructType&)
 	{
 		fermionOrBoson = ProgramGlobals::FERMION;
 

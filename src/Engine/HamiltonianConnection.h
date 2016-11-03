@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 #include "Concurrency.h"
 #include <cassert>
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -129,7 +130,7 @@ public:
 		SizeType type = geometry_.connectionKind(smax_,ind,jnd);
 
 		if (type==ProgramGlobals::SYSTEM_SYSTEM ||
-		    type==ProgramGlobals::ENVIRON_ENVIRON) return flag;
+		        type==ProgramGlobals::ENVIRON_ENVIRON) return flag;
 
 		SparseMatrixType mBlock;
 
@@ -139,8 +140,15 @@ public:
 			geometry_.fillAdditionalData(additionalData,term,ind,jnd);
 			SizeType dofsTotal = LinkProductType::dofs(term,additionalData);
 			for (SizeType dofs=0;dofs<dofsTotal;dofs++) {
-				std::pair<SizeType,SizeType> edofs = LinkProductType::connectorDofs(term,dofs,additionalData);
-				SparseElementType tmp = geometry_(smax_,emin_,ind,edofs.first,jnd,edofs.second,term);
+				std::pair<SizeType,SizeType> edofs = LinkProductType::connectorDofs(term,
+				                                                                    dofs,
+				                                                                    additionalData);
+				SparseElementType tmp = geometry_(smax_,
+				                                  emin_,
+				                                  ind,
+				                                  edofs.first,
+				                                  jnd,edofs.second,
+				                                  term);
 
 				if (tmp==static_cast<RealType>(0.0)) continue;
 
@@ -246,21 +254,51 @@ public:
 		int offset = modelHelper_.leftRightSuper().left().block().size();
 		PairType ops;
 		std::pair<char,char> mods('N','C');
-		SizeType fermionOrBoson=ProgramGlobals::FERMION,angularMomentum=0,category=0;
+		ProgramGlobals::FermionOrBosonEnum fermionOrBoson=ProgramGlobals::FERMION;
+		SizeType angularMomentum=0;
+		SizeType category=0;
 		RealType angularFactor=0;
 		bool isSu2 = modelHelper_.isSu2();
 		SparseElementType value = valuec;
 		LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData);
 
-		LinkProductType::setLinkData(term,dofs,isSu2,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category,additionalData);
-		LinkType link2(i,j,type, value,dofs,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
-		SizeType sysOrEnv = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::System : ModelHelperType::Environ;
-		SizeType envOrSys = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::Environ : ModelHelperType::System;
-		SizeType site1Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? link2.site1 : link2.site1-offset;
-		SizeType site2Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? link2.site2-offset : link2.site2;
+		LinkProductType::setLinkData(term,
+		                             dofs,
+		                             isSu2,
+		                             fermionOrBoson,
+		                             ops,
+		                             mods,
+		                             angularMomentum,
+		                             angularFactor,
+		                             category,
+		                             additionalData);
+		LinkType link2(i,
+		               j,
+		               type,
+		               value,
+		               dofs,
+		               fermionOrBoson,
+		               ops,mods,
+		               angularMomentum,
+		               angularFactor,
+		               category);
+		SizeType sysOrEnv = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ?
+		            ModelHelperType::System : ModelHelperType::Environ;
+		SizeType envOrSys = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ?
+		            ModelHelperType::Environ : ModelHelperType::System;
+		SizeType site1Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ?
+		            link2.site1 : link2.site1-offset;
+		SizeType site2Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ?
+		            link2.site2-offset : link2.site2;
 
-		*A = &modelHelper_.getReducedOperator(link2.mods.first,site1Corrected,link2.ops.first,sysOrEnv);
-		*B = &modelHelper_.getReducedOperator(link2.mods.second,site2Corrected,link2.ops.second,envOrSys);
+		*A = &modelHelper_.getReducedOperator(link2.mods.first,
+		                                      site1Corrected,
+		                                      link2.ops.first,
+		                                      sysOrEnv);
+		*B = &modelHelper_.getReducedOperator(link2.mods.second,
+		                                      site2Corrected,
+		                                      link2.ops.second,
+		                                      envOrSys);
 
 		assert(isNonZeroMatrix(**A));
 		assert(isNonZeroMatrix(**B));

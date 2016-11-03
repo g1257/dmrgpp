@@ -78,6 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_LINK_PROD_HEISENBERG_ANCILLAC_H
 #define DMRG_LINK_PROD_HEISENBERG_ANCILLAC_H
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 template<typename ModelHelperType>
@@ -96,7 +97,7 @@ public:
 	static void setLinkData(SizeType term,
 	                        SizeType dofs,
 	                        bool isSu2,
-	                        SizeType& fermionOrBoson,
+	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
 	                        std::pair<SizeType,SizeType>& ops,
 	                        std::pair<char,char>&,
 	                        SizeType& angularMomentum,

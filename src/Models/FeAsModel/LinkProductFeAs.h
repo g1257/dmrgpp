@@ -78,11 +78,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef LINK_PRODUCT_H
 #define LINK_PRODUCT_H
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
 class LinkProductFeAs {
+
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -127,7 +129,7 @@ public:
 	static void setLinkData(SizeType,
 	                        SizeType dofs,
 	                        bool,
-	                        SizeType& fermionOrBoson,
+	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
 	                        PairType& ops,
 	                        std::pair<char,char>&,
 	                        SizeType& angularMomentum,

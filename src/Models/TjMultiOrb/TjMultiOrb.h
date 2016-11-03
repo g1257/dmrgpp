@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/TjMultiOrb/ParametersModelTjMultiOrb.h"
 #include "../Models/FeAsModel/HilbertSpaceFeAs.h"
 #include "ModelCommon.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 //! t-J model for DMRG solver, uses ModelHubbard and ModelHeisenberg by containment

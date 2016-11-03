@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define LINK_PRODUCT_EX_H
 #include "../Models/Heisenberg/LinkProductHeisenberg.h"
 #include "../Models/FeAsModel/LinkProductFeAs.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -127,7 +128,7 @@ public:
 	static void setLinkData(SizeType term,
 	                        SizeType dofs,
 	                        bool isSu2,
-	                        SizeType& fermionOrBoson,
+	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
 	                        PairType& ops,
 	                        std::pair<char,char>& mods,
 	                        SizeType& angularMomentum,
