@@ -74,6 +74,7 @@ public:
 		fout_<<"#TargetElectronsUp="<<etarget.first<<"\n";
 		fout_<<"#TargetElectronsDown="<<etarget.second<<"\n";
 
+		cacheSigns(lrs.left().electronsVector());
 		counter_++;
 	}
 
@@ -83,7 +84,10 @@ public:
 		fout_.close();
 	}
 
-	void push(const SparseMatrixType& A, const SparseMatrixType& B, ComplexOrRealType val)
+	void push(const SparseMatrixType& A,
+	          const SparseMatrixType& B,
+	          ComplexOrRealType val,
+	          ProgramGlobals::FermionOrBosonEnum bosonOrFermion)
 	{
 		if (!enabled_) return;
 
@@ -91,6 +95,10 @@ public:
 		fout_<<"link.value="<<val<<"\n";
 		fout_<<"#A\n";
 		printMatrix(A);
+		fout_<<"#Ahat\n";
+		SparseMatrixType Ahat;
+		calculateAhat(Ahat,A,val,bosonOrFermion);
+		printMatrix(Ahat);
 		fout_<<"#B\n";
 		printMatrix(B);
 		fout_<<"#END_AB_PAIR\n";
@@ -149,9 +157,36 @@ private:
 		return PairSizeType(electronsUp,electronsDown);
 	}
 
+	void cacheSigns(const VectorSizeType& electrons)
+	{
+		signs_.resize(electrons.size(), false);
+		for (SizeType i = 0; i < electrons.size(); ++i)
+			signs_[i] = (electrons[i] & 1) ? true : false;
+	}
+
+	// Ahat(ia,ja) = (-1)^e_L(ia) A(ia,ja)*value
+	void calculateAhat(SparseMatrixType& Ahat,
+	                   const SparseMatrixType& A,
+	                   ComplexOrRealType val,
+	                   ProgramGlobals::FermionOrBosonEnum bosonOrFermion) const
+	{
+		Ahat = A;
+		SizeType rows = Ahat.row();
+		SizeType counter = 0;
+		for (SizeType i = 0; i < rows; ++i) {
+			RealType sign = (bosonOrFermion == ProgramGlobals::FERMION &&
+			                 signs_[i]) ? -1.0 : 1.0;
+			for (int k = Ahat.getRowPtr(i); k < Ahat.getRowPtr(i+1); ++k) {
+				ComplexOrRealType tmp = Ahat.getValue(k)*sign*val;
+				Ahat.setValues(counter++, tmp);
+			}
+		}
+	}
+
 	static SizeType counter_;
 	bool enabled_;
 	std::ofstream fout_;
+	VectorBoolType signs_;
 }; // class KroneckerDumpter
 
 template<typename SparseMatrixType>

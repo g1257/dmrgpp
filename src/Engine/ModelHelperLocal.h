@@ -223,7 +223,7 @@ public:
 
 		matrixBlock.setRow(i,counter);
 
-		kroneckerDumper_.push(A,B,link.value);
+		kroneckerDumper_.push(A,B,link.value,link.fermionOrBoson);
 	}
 
 	// Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or
