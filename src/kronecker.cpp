@@ -4,6 +4,7 @@
 #include "Concurrency.h"
 #include "ProgramGlobals.h"
 #include "Provenance.h"
+#include "MiniAppKronecker.h"
 
 void usage(const char* name)
 {
@@ -48,4 +49,6 @@ int main(int argc, char** argv)
 	}
 
 	if (versionOnly) return 0;
+	Dmrg::MiniAppKronecker miniAppKron(filename);
+	miniAppKron.check();
 }
