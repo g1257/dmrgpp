@@ -38,24 +38,33 @@ public:
 		std::cerr<<"Read H_R square, rank="<<hamRight.rank()<<"\n";
 		assert(isHermitian(hamRight));
 
+		SizeType nLeft = hamLeft.rank();
+		SizeType nRight = hamRight.rank();
+		SizeType nSuper = nLeft*nRight;
+		hamSuper_.resize(nSuper,nSuper);
+		hamSuper_.setTo(0.0);
 		buildHLeftAndRight(hamLeft,hamRight);
+		assert(isHermitian(hamSuper_,true));
 
-		SparseMatrixType Ahat(static_cast<SizeType>(0));
-		SparseMatrixType B(static_cast<SizeType>(0));
+
+		SizeType counter = 0;
 		while (!io.eof()) {
+			SparseMatrixType Ahat(static_cast<SizeType>(0));
+			SparseMatrixType B(static_cast<SizeType>(0));
 			try {
-				io.readMatrix(Ahat,"#Ahat");
+				io.readMatrix(Ahat,"#Ahat"+ttos(counter));
 			} catch (std::exception&) {
 				break;
 			}
 
 			io.move(-20);
-			io.readMatrix(B,"#B");
+			io.readMatrix(B,"#B"+ttos(counter));
 			io.move(-20);
 			buildHconnection(Ahat,B);
+			counter++;
 		}
 
-		assert(isHermitian(hamSuper_));
+		assert(isHermitian(hamSuper_,true));
 	}
 
 	void printH(std::ostream& os) const
@@ -100,9 +109,6 @@ private:
 	{
 		SizeType nLeft = hamLeft.rank();
 		SizeType nRight = hamRight.rank();
-		SizeType nSuper = nLeft*nRight;
-		hamSuper_.resize(nSuper,nSuper);
-		hamSuper_.setTo(0.0);
 
 		// hamLeft
 		for (SizeType i = 0; i < nLeft; ++i) {
@@ -134,6 +140,7 @@ private:
 	SizeType pack(SizeType l, SizeType r, SizeType nLeft) const
 	{
 		assert(l + r*nLeft < pse_.size());
+//		return l + r*nLeft;
 		return pse_[l + r*nLeft];
 	}
 
