@@ -516,6 +516,13 @@ public:
 			fin_.seekg(0, std::ios::beg); // move to the start of the file
 		}
 
+		void move(int x)
+		{
+			SizeType c = fin_.tellg();
+			if (x < 0 && c < static_cast<SizeType>(-x)) return;
+			fin_.seekg(c+x, std::ios::beg);
+		}
+
 		bool eof() const { return fin_.eof(); }
 
 		const char* filename() const
