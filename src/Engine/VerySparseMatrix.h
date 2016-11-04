@@ -84,311 +84,326 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h" // in PsimagLite
 
 namespace Dmrg {
-	// Yet another sparse matrix class
-	template<class T>
-	class VerySparseMatrix {
-		typedef std::pair<SizeType,SizeType> PairType;
-	public:
+// Yet another sparse matrix class
+template<class ComplexOrRealType>
+class VerySparseMatrix {
 
-		typedef T value_type;
+	typedef std::pair<SizeType,SizeType> PairType;
+	typedef PsimagLite::Vector<PairType>::Type VectorPairType;
+	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorComplexOrRealType;
 
-		VerySparseMatrix(SizeType rank) : rank_(rank),sorted_(true)
-		{}
+public:
 
-		template<typename CrsMatrixType>
-		VerySparseMatrix(const CrsMatrixType& crs)
-		    : rank_(crs.row()),
-		      values_(crs.nonZero()),
-		      coordinates_(crs.nonZero()),
-		      sorted_(true)
-		{
-			assert(crs.row()==crs.col());
-			SizeType counter = 0;
-			for (SizeType i=0;i<rank_;++i) {
-				for (int k=crs.getRowPtr(i);k<crs.getRowPtr(i+1);++k) {
-					// (i,crs.getCol(k)) --> coordinate
-					coordinates_[counter] = PairType(i,crs.getCol(k));
-					values_[counter++] = crs.getValue(k);
-				}
+	typedef ComplexOrRealType value_type;
+
+	VerySparseMatrix(SizeType rank) : rank_(rank),sorted_(true)
+	{}
+
+	template<typename CrsMatrixType>
+	VerySparseMatrix(const CrsMatrixType& crs)
+	    : rank_(crs.row()),
+	      values_(crs.nonZero()),
+	      coordinates_(crs.nonZero()),
+	      sorted_(true)
+	{
+		assert(crs.row()==crs.col());
+		SizeType counter = 0;
+		for (SizeType i=0;i<rank_;++i) {
+			for (int k=crs.getRowPtr(i);k<crs.getRowPtr(i+1);++k) {
+				// (i,crs.getCol(k)) --> coordinate
+				coordinates_[counter] = PairType(i,crs.getCol(k));
+				values_[counter++] = crs.getValue(k);
 			}
 		}
+	}
 
-		T& operator()(SizeType row,SizeType col)
-		{
-			std::pair<SizeType,SizeType> coordinate(row,col);
-			int x=PsimagLite::isInVector(coordinates_,coordinate);
-			if (x<0) {
-				coordinates_.push_back(coordinate);
-				values_.push_back(0);
-				x=values_.size()-1;
-				sorted_=false;
-			}
-			return values_[x];
-		}
-
-		bool operator!=(const VerySparseMatrix<T>& other) const
-		{
-			return !(*this == other);
-		}
-
-		void clear()
-		{
-			rank_=0;
-			values_.clear();
-			coordinates_.clear();
+	ComplexOrRealType& operator()(SizeType row,SizeType col)
+	{
+		std::pair<SizeType,SizeType> coordinate(row,col);
+		int x=PsimagLite::isInVector(coordinates_,coordinate);
+		if (x<0) {
+			coordinates_.push_back(coordinate);
+			values_.push_back(0);
+			x=values_.size()-1;
 			sorted_=false;
 		}
+		return values_[x];
+	}
 
-		template<typename CrsMatrixType>
-		void operator=(const CrsMatrixType& crs)
-		{
-			clear();
-			rank_=crs.rank();
-			sorted_=true;
-			for (SizeType i=0;i<rank_;i++)
-				for (int k=crs.getRowPtr(i);k<crs.getRowPtr(i+1);k++)
-					// (i,crs.getCol(k)) --> coordinate
-					this->operator()(i,crs.getCol(k))=crs.getValue(k);
-					// crs.getValue(k) --> value
+	bool operator!=(const VerySparseMatrix<ComplexOrRealType>& other) const
+	{
+		return !(*this == other);
+	}
+
+	void clear()
+	{
+		rank_=0;
+		values_.clear();
+		coordinates_.clear();
+		sorted_=false;
+	}
+
+	template<typename CrsMatrixType>
+	void operator=(const CrsMatrixType& crs)
+	{
+		clear();
+		rank_=crs.rank();
+		sorted_=true;
+		for (SizeType i=0;i<rank_;i++)
+			for (int k=crs.getRowPtr(i);k<crs.getRowPtr(i+1);k++)
+				// (i,crs.getCol(k)) --> coordinate
+				this->operator()(i,crs.getCol(k))=crs.getValue(k);
+		// crs.getValue(k) --> value
+	}
+
+	//! same as T& operator() but doesn't check for dupes
+	//! faster than T& operator() but use with care.
+	void set(SizeType row,SizeType col,const ComplexOrRealType& value)
+	{
+		std::pair<SizeType,SizeType> coordinate(row,col);
+		coordinates_.push_back(coordinate);
+		values_.push_back(value);
+	}
+
+	ComplexOrRealType operator()(SizeType row,SizeType col) const
+	{
+		std::pair<SizeType,SizeType> coordinate(row,col);
+		int x=PsimagLite::isInVector(coordinates_,coordinate);
+		if (x<0) {
+			//T value=0;
+			return 0;
+		}
+		return values_[x];
+	}
+
+	const ComplexOrRealType& operator()(SizeType i) const
+	{
+		return values_[i];
+	}
+
+	ComplexOrRealType& operator()(SizeType i)
+	{
+		return values_[i];
+	}
+
+	void operator+=(VerySparseMatrix<ComplexOrRealType>& other)
+	{
+		if (sorted_ && other.sorted())
+			plusEqualOrd(other);
+		else
+			throw PsimagLite::RuntimeError("VerySparseMatrix::operator+=(): unsorted\n");
+	}
+
+	void sort()
+	{
+		VectorSizeType perm;
+		sort(perm);
+	}
+
+	void sort(VectorSizeType& perm)
+	{
+		VectorSizeType rows(coordinates_.size());
+		VectorSizeType cols(coordinates_.size());
+		VectorComplexOrRealType values = values_;
+		for (SizeType i=0;i<coordinates_.size();i++) {
+			rows[i]=coordinates_[i].first;
+			cols[i]=coordinates_[i].second;
+
 		}
 
-		//! same as T& operator() but doesn't check for dupes
-		//! faster than T& operator() but use with care.
-		void set(SizeType row,SizeType col,const T& value)
-		{
-			std::pair<SizeType,SizeType> coordinate(row,col);
-			coordinates_.push_back(coordinate);
-			values_.push_back(value);
-		}
+		perm.resize(rows.size());
+		PsimagLite::Sort<VectorSizeType> sort;
+		sort.sort(rows,perm);
 
-		T operator()(SizeType row,SizeType col) const
-		{
-			std::pair<SizeType,SizeType> coordinate(row,col);
-			int x=PsimagLite::isInVector(coordinates_,coordinate);
-			if (x<0) {
-				//T value=0;
-				return 0;
+		for (SizeType i=0;i<coordinates_.size();i++) {
+			coordinates_[i].first = rows[i];
+			coordinates_[i].second = cols[perm[i]];
+			values_[i] = values[perm[i]];
+		}
+		sorted_=true;
+	}
+
+	SizeType rank() const { return rank_; }
+
+	SizeType getRow(SizeType i) const
+	{
+		assert(i < coordinates_.size());
+		return coordinates_[i].first;
+	}
+
+	void getRow(VectorSizeType& cols,
+	            SizeType row,
+	            SizeType startIndex=0) const
+	{
+		cols.clear();
+		for (SizeType i=startIndex;i<coordinates_.size();i++) {
+			if (coordinates_[i].first == row) cols.push_back(i);
+			if (sorted_ && coordinates_[i].first > row) break;
+		}
+	}
+
+	SizeType getColumn(SizeType i) const
+	{
+		assert(i < coordinates_.size());
+		return coordinates_[i].second;
+	}
+
+	void getColumn(VectorSizeType& rows,
+	               SizeType col) const
+	{
+		rows.clear();
+		for (SizeType i=0;i<coordinates_.size();i++)
+			if (coordinates_[i].second == col) rows.push_back(i);
+	}
+
+	SizeType nonZero() const { return values_.size(); }
+
+	ComplexOrRealType getValue(SizeType i) const
+	{
+		assert(i < values_.size());
+		return values_[i];
+	}
+
+	template<typename T1>
+	friend std::ostream& operator<<(std::ostream& os,
+	                                const VerySparseMatrix<T1>& m);
+
+	template<typename IoType>
+	void saveToDisk(IoType& outHandle)
+	{
+		PsimagLite::String s = "rank="+ttos(rank_);
+		outHandle.printline(s);
+		outHandle.printVector(coordinates_,"coordinates");
+		outHandle.printVector(values_,"values");
+		s="#######\n";
+		outHandle.printline(s);
+	}
+
+	template<typename IoType>
+	void loadFromDisk(IoType& inHandle,bool check=false)
+	{
+		clear();
+		PsimagLite::String s = "rank=";
+		inHandle.readline(rank_,s);
+		inHandle.read(coordinates_,"coordinates");
+		if (check) checkCoordinates();
+		inHandle.read(values_,"values");
+		sorted_=true;
+	}
+
+	//! for debuggin only:
+	void checkCoordinates() const
+	{
+		SizeType flag=0;
+		for (SizeType i=0;i<coordinates_.size();i++) {
+			if (coordinates_[i].first<0 || 	coordinates_[i].first>=rank_) {
+				std::cerr<<"coordinates["<<i<<"].first="<< coordinates_[i].first<<"\n";
+				flag=1;
+				break;
 			}
-			return values_[x];
-		}
-
-		const T& operator()(SizeType i) const
-		{
-			return values_[i];
-		}
-
-		T& operator()(SizeType i)
-		{
-			return values_[i];
-		}
-
-		void operator+=(VerySparseMatrix<T>& other)
-		{
-			if (sorted_ && other.sorted()) plusEqualOrd(other);
-			else throw PsimagLite::RuntimeError("VerySparseMatrix::operator+=(): unsorted\n"); //plusEqualUnord(other);
-		}
-
-		void sort()
-		{
-			typename PsimagLite::Vector<SizeType>::Type perm;
-			sort(perm);
-		}
-
-		void sort(typename PsimagLite::Vector<SizeType>::Type& perm)
-		{
-			typename PsimagLite::Vector<SizeType>::Type rows(coordinates_.size()),cols(coordinates_.size());
-			typename PsimagLite::Vector<T>::Type values = values_;
-			for (SizeType i=0;i<coordinates_.size();i++) {
-				rows[i]=coordinates_[i].first;
-				cols[i]=coordinates_[i].second;
-
-			}
-
-			perm.resize(rows.size());
-			PsimagLite::Sort<typename PsimagLite::Vector<SizeType>::Type> sort;
-			sort.sort(rows,perm);
-
-			for (SizeType i=0;i<coordinates_.size();i++) {
-				coordinates_[i].first = rows[i];
-				coordinates_[i].second = cols[perm[i]];
-				values_[i] = values[perm[i]];
-			}
-			sorted_=true;
-		}
-
-		SizeType rank() const { return rank_; }
-
-		SizeType getRow(SizeType i) const
-		{
-			assert(i < coordinates_.size());
-			return coordinates_[i].first;
-		}
-
-		void getRow(typename PsimagLite::Vector<SizeType>::Type& cols,SizeType row,SizeType startIndex=0) const
-		{
-			cols.clear();
-			for (SizeType i=startIndex;i<coordinates_.size();i++) {
-				if (coordinates_[i].first == row) cols.push_back(i);
-				if (sorted_ && coordinates_[i].first > row) break;
+			if (coordinates_[i].second<0 || 	coordinates_[i].second>=rank_) {
+				std::cerr<<"coordinates["<<i<<"].second="<< coordinates_[i].second<<"\n";
+				flag=2;
+				break;
 			}
 		}
+		if (flag==0) return;
+		std::cerr<<"rank="<<rank_<<"\n";
+		throw PsimagLite::RuntimeError("VerySparseMatrix::checkCoordinates()\n");
+	}
 
-		SizeType getColumn(SizeType i) const
-		{
-			assert(i < coordinates_.size());
-			return coordinates_[i].second;
-		}
-
-		void getColumn(typename PsimagLite::Vector<SizeType>::Type& rows,SizeType col) const
-		{
-			rows.clear();
-			for (SizeType i=0;i<coordinates_.size();i++)
-				if (coordinates_[i].second == col) rows.push_back(i);
-		}
-
-		SizeType nonZero() const { return values_.size(); }
-
-		T getValue(SizeType i) const
-		{
-			assert(i < values_.size());
-			return values_[i];
-		}
-
-		template<typename T1>
-		friend std::ostream& operator<<(std::ostream& os,const VerySparseMatrix<T1>& m);
-
-		template<typename IoType>
-		void saveToDisk(IoType& outHandle)
-		{
-			PsimagLite::String s = "rank="+ttos(rank_);
-			outHandle.printline(s);
-			outHandle.printVector(coordinates_,"coordinates");
-			outHandle.printVector(values_,"values");
-			s="#######\n";
-			outHandle.printline(s);
-		}
-
-		template<typename IoType>
-		void loadFromDisk(IoType& inHandle,bool check=false)
-		{
-			clear();
-			PsimagLite::String s = "rank=";
-			inHandle.readline(rank_,s);
-			inHandle.read(coordinates_,"coordinates");
-			if (check) checkCoordinates();
-			inHandle.read(values_,"values");
-			sorted_=true;
-		}
-
-		//! for debuggin only:
-		void checkCoordinates() const
-		{
-			SizeType flag=0;
-			for (SizeType i=0;i<coordinates_.size();i++) {
-				if (coordinates_[i].first<0 || 	coordinates_[i].first>=rank_) {
-					std::cerr<<"coordinates["<<i<<"].first="<< coordinates_[i].first<<"\n";
- 					flag=1;
-					break;
-				}
-				if (coordinates_[i].second<0 || 	coordinates_[i].second>=rank_) {
-					std::cerr<<"coordinates["<<i<<"].second="<< coordinates_[i].second<<"\n";
-					flag=2;
-					break;
-				}
-			}
-			if (flag==0) return;
-			std::cerr<<"rank="<<rank_<<"\n";
-			throw PsimagLite::RuntimeError("VerySparseMatrix::checkCoordinates()\n");
-		}
-
-		bool sorted() const { return sorted_; }
+	bool sorted() const { return sorted_; }
 
 
-	private:
+private:
 
-		void plusEqualOrd(VerySparseMatrix<T>& other)
-		{
-			SizeType j = 0;
-			SizeType i = 0;
-			// pre-alloc memory:
-			typename PsimagLite::Vector<PairType>::Type newcoord(coordinates_.size()+other.coordinates_.size());
-			typename PsimagLite::Vector<T>::Type newvals(coordinates_.size()+other.coordinates_.size());
-			SizeType counter = 0;
-			while(i<coordinates_.size() && j<other.coordinates_.size()) {
-				PairType row = coordinates_[i];
-				PairType row2 = other.coordinates_[j];
-				//std::cerr<<row<<" "<<row2<<"\n";
-				if (row2 < row) {
-					//newcoord.push_back(j);
-					newcoord[counter]=row2;
-					newvals[counter]=other.values_[j];
-					counter++;
-					j++;
-				} else if (row2 == row) {
-					newcoord[counter]=row2;
-					newvals[counter]=values_[i] + other.values_[j];
-					j++;
-					i++;
-					counter++;
-				} else {
-					newcoord[counter]=row;
-					newvals[counter]=values_[i];
-					i++;
-					counter++;
-				}
-			}
-			for (SizeType j1=j;j1<other.coordinates_.size();j1++) {
-				newcoord[counter]=other.coordinates_[j1];
-				newvals[counter]=other.values_[j1];
+	void plusEqualOrd(VerySparseMatrix<ComplexOrRealType>& other)
+	{
+		SizeType j = 0;
+		SizeType i = 0;
+		// pre-alloc memory:
+		VectorPairType newcoord(coordinates_.size()+other.coordinates_.size());
+		VectorComplexOrRealType newvals(coordinates_.size()+other.coordinates_.size());
+		SizeType counter = 0;
+		while(i<coordinates_.size() && j<other.coordinates_.size()) {
+			PairType row = coordinates_[i];
+			PairType row2 = other.coordinates_[j];
+			//std::cerr<<row<<" "<<row2<<"\n";
+			if (row2 < row) {
+				//newcoord.push_back(j);
+				newcoord[counter]=row2;
+				newvals[counter]=other.values_[j];
+				counter++;
+				j++;
+			} else if (row2 == row) {
+				newcoord[counter]=row2;
+				newvals[counter]=values_[i] + other.values_[j];
+				j++;
+				i++;
+				counter++;
+			} else {
+				newcoord[counter]=row;
+				newvals[counter]=values_[i];
+				i++;
 				counter++;
 			}
-			for (SizeType j1=i;j1<coordinates_.size();j1++) {
-				newcoord[counter]=coordinates_[j1];
-				newvals[counter]=values_[j1];
-				counter++;
-			}
-			coordinates_.resize(counter);
-			values_.resize(counter);
-			for (SizeType j1=0;j1<counter;j1++) {
-				coordinates_[j1] = newcoord[j1];
-				values_[j1] = newvals[j1];
-			}
-			// this is sorted
 		}
+		for (SizeType j1=j;j1<other.coordinates_.size();j1++) {
+			newcoord[counter]=other.coordinates_[j1];
+			newvals[counter]=other.values_[j1];
+			counter++;
+		}
+		for (SizeType j1=i;j1<coordinates_.size();j1++) {
+			newcoord[counter]=coordinates_[j1];
+			newvals[counter]=values_[j1];
+			counter++;
+		}
+		coordinates_.resize(counter);
+		values_.resize(counter);
+		for (SizeType j1=0;j1<counter;j1++) {
+			coordinates_[j1] = newcoord[j1];
+			values_[j1] = newvals[j1];
+		}
+		// this is sorted
+	}
 
-		bool notEqual(const char *s) const
-		{
-			std::cerr<<"notEqual="<<s<<"\n";
+	bool notEqual(const char *s) const
+	{
+		std::cerr<<"notEqual="<<s<<"\n";
+		return false;
+	}
+
+	SizeType rank_;
+	VectorComplexOrRealType values_;
+	VectorPairType coordinates_;
+	bool sorted_;
+}; // VerySparseMatrix
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os,const VerySparseMatrix<T>& m)
+{
+	for (SizeType i=0;i<m.values_.size();i++) {
+		os<<"verysparse("<<m.coordinates_[i].first<<",";
+		os<<m.coordinates_[i].second<<")="<<m.values_[i]<<"\n";
+	}
+
+	return os;
+}
+
+template<typename T>
+bool isHermitian(const VerySparseMatrix<T>& m)
+{
+	T eps =1e-6;
+	for (SizeType i=0;i<m.nonZero();i++) {
+		SizeType row = m.getRow(i);
+		SizeType col = m.getColumn(i);
+		if (fabs(m.getValue(i)-m(col,row))>eps) {
 			return false;
 		}
-
-		SizeType rank_;
-		typename PsimagLite::Vector<T>::Type values_;
-		typename PsimagLite::Vector<PairType>::Type coordinates_;
-		bool sorted_;
-	}; // VerySparseMatrix
-
-	template<typename T>
-	std::ostream& operator<<(std::ostream& os,const VerySparseMatrix<T>& m)
-	{
-		for (SizeType i=0;i<m.values_.size();i++)
-			os<<"verysparse("<<m.coordinates_[i].first<<","<<m.coordinates_[i].second<<")="<<m.values_[i]<<"\n";
-		return os;
 	}
-
-	template<typename T>
-	bool isHermitian(const VerySparseMatrix<T>& m)
-	{
-		T eps =1e-6;
-		for (SizeType i=0;i<m.nonZero();i++) {
-			SizeType row = m.getRow(i);
-			SizeType col = m.getColumn(i);
-			if (fabs(m.getValue(i)-m(col,row))>eps) {
-				return false;
-			}
-		}
-		return true;
-	}
+	return true;
+}
 } // namespace Dmrg
 /*@}*/
 #endif
