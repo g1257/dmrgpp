@@ -29,30 +29,33 @@ public:
 			pse_[pse[i]] = i;
 
 		io.readMatrix(hamLeft,"#LeftHamiltonian");
+		io.move(-20);
 		std::cerr<<"Read H_L square, rank="<<hamLeft.rank()<<"\n";
 		assert(isHermitian(hamLeft));
-		io.rewind();
-		io.advance("#LeftHamiltonian");
 
 		io.readMatrix(hamRight,"#RightHamiltonian");
+		io.move(-2);
 		std::cerr<<"Read H_R square, rank="<<hamRight.rank()<<"\n";
 		assert(isHermitian(hamRight));
-		io.rewind();
-		io.advance("#RightHamiltonian");
 
 		buildHLeftAndRight(hamLeft,hamRight);
 
-//		SparseMatrixType Ahat(static_cast<SizeType>(0));
-//		SparseMatrixType B(static_cast<SizeType>(0));
-//		while (!io.eof()) {
-//			io.readMatrix(Ahat,"#Ahat");
-//			io.rewind();
-//			io.advance("#Ahat");
-//			io.readMatrix(B,"#B");
-//			io.rewind();
-//			io.advance("#B");
-//			buildHconnection(Ahat,B);
-//		}
+		SparseMatrixType Ahat(static_cast<SizeType>(0));
+		SparseMatrixType B(static_cast<SizeType>(0));
+		while (!io.eof()) {
+			try {
+				io.readMatrix(Ahat,"#Ahat");
+			} catch (std::exception&) {
+				break;
+			}
+
+			io.move(-20);
+			io.readMatrix(B,"#B");
+			io.move(-20);
+			buildHconnection(Ahat,B);
+		}
+
+		assert(isHermitian(hamSuper_));
 	}
 
 	void printH(std::ostream& os) const
@@ -77,7 +80,19 @@ private:
 	void buildHconnection(const SparseMatrixType Ahat,
 	                      const SparseMatrixType B)
 	{
-
+		SizeType nLeft = Ahat.rank();
+		SizeType nRight = B.rank();
+		for (SizeType i = 0; i < nLeft; ++i) {
+			for (SizeType j = 0; j < nRight; ++j) {
+				SizeType is = pack(i,j,nLeft);
+				for (SizeType ip = 0; ip < nLeft; ++ip) { // iprime
+					for (SizeType jp = 0; jp < nRight; ++jp) { // jprime
+						SizeType js = pack(ip,jp,nLeft);
+						hamSuper_(is,js) += Ahat(i,ip)*B(j,jp);
+					}
+				}
+			}
+		}
 	}
 
 	void buildHLeftAndRight(const SparseMatrixType hamLeft,
