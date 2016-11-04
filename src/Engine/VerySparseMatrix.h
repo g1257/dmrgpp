@@ -268,7 +268,7 @@ public:
 	friend std::ostream& operator<<(std::ostream& os,
 	                                const VerySparseMatrix<ComplexOrRealType>& m)
 	{
-		os<<m.rank_;
+		os<<m.rank_<<" "<<m.rank_;
 		if (m.rank_ == 0) return os;
 		for (SizeType i=0;i<m.values_.size();i++) {
 			os<<m.coordinates_[i].first<<" ";
@@ -284,13 +284,14 @@ public:
 		is>>m.rank_;
 		if (m.rank_ == 0) return is;
 		PsimagLite::String temp;
+		is>>temp;
+		assert(static_cast<SizeType>(atoi(temp.c_str())) == m.rank_);
 		PairType coordinate;
 
 		while (true) {
 			is>>temp;
 			if (temp[0] == '#') break;
 
-			is>>temp;
 			coordinate.first = atoi(temp.c_str());
 			is>>temp;
 			coordinate.second = atoi(temp.c_str());
