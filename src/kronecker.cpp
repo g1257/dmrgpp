@@ -49,6 +49,6 @@ int main(int argc, char** argv)
 	}
 
 	if (versionOnly) return 0;
-	Dmrg::MiniAppKronecker miniAppKron(filename);
+	Dmrg::MiniAppKronecker<double> miniAppKron(filename);
 	miniAppKron.check();
 }
