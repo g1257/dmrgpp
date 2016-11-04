@@ -17,21 +17,33 @@ class MiniAppKronecker {
 public:
 
 	MiniAppKronecker(PsimagLite::String filename)
-	    : hamLeft_(static_cast<SizeType>(0)),
-	      hamRight_(static_cast<SizeType>(0))
 	{
+		SparseMatrixType hamLeft(static_cast<SizeType>(0));
+		SparseMatrixType hamRight(static_cast<SizeType>(0));
 		PsimagLite::IoSimple::In io(filename);
-		io.advance("#LeftBasis");
-		io.read(electrons_,"#Electrons");
-		std::cerr<<"Read electrons_.size="<<electrons_.size()<<"\n";
 		io.read(pse_,"#SuperBasisPermutation");
 		std::cerr<<"Read pse_.size="<<pse_.size()<<"\n";
-		io.readMatrix(hamLeft_,"#LeftHamiltonian");
-		std::cerr<<"Read H_L square, rank="<<hamLeft_.rank()<<"\n";
+		io.readMatrix(hamLeft,"#LeftHamiltonian");
+		std::cerr<<"Read H_L square, rank="<<hamLeft.rank()<<"\n";
 		io.rewind();
-		io.readMatrix(hamRight_,"#RightHamiltonian");
-		std::cerr<<"Read H_R square, rank="<<hamRight_.rank()<<"\n";
-		buildH();
+		io.advance("#LeftHamiltonian");
+		io.readMatrix(hamRight,"#RightHamiltonian");
+		std::cerr<<"Read H_R square, rank="<<hamRight.rank()<<"\n";
+		io.rewind();
+		io.advance("#RightHamiltonian");
+		buildHLeftAndRight(hamLeft,hamRight);
+
+		SparseMatrixType Ahat(static_cast<SizeType>(0));
+		SparseMatrixType B(static_cast<SizeType>(0));
+		while (!io.eof()) {
+			io.readMatrix(Ahat,"#Ahat");
+			io.rewind();
+			io.advance("#Ahat");
+			io.readMatrix(B,"#B");
+			io.rewind();
+			io.advance("#B");
+			buildHconnection(Ahat,B);
+		}
 	}
 
 	void printH(std::ostream& os) const
@@ -53,10 +65,17 @@ public:
 
 private:
 
-	void buildH()
+	void buildHconnection(const SparseMatrixType Ahat,
+	                      const SparseMatrixType B)
 	{
-		SizeType nLeft = hamLeft_.rank();
-		SizeType nRight = hamRight_.rank();
+
+	}
+
+	void buildHLeftAndRight(const SparseMatrixType hamLeft,
+	                        const SparseMatrixType hamRight)
+	{
+		SizeType nLeft = hamLeft.rank();
+		SizeType nRight = hamRight.rank();
 		SizeType nSuper = nLeft*nRight;
 		hamSuper_.resize(nSuper,nSuper);
 		hamSuper_.setTo(0.0);
@@ -67,16 +86,13 @@ private:
 				SizeType is = i + j*nLeft;
 				for (SizeType ip = 0; ip < nLeft; ++ip) { // iprime
 					SizeType js = ip + j*nLeft;
-					hamSuper_(is,js) = hamLeft_(i,ip);
+					hamSuper_(is,js) = hamLeft(i,ip);
 				}
 			}
 		}
 	}
 
-	VectorSizeType electrons_;
 	VectorSizeType pse_;
-	SparseMatrixType hamLeft_;
-	SparseMatrixType hamRight_;
 	MatrixType hamSuper_;
 }; // class MiniAppKronecker
 }
