@@ -42,7 +42,7 @@ public:
 	KroneckerDumper(const ParamsForKroneckerDumper* p,
 	                const LeftRightSuperType& lrs,
 	                SizeType m)
-	    : enabled_(p && p->enabled)
+	    : enabled_(p && p->enabled),pairCount_(0)
 	{
 		if (!enabled_) return;
 		if (PsimagLite::Concurrency::npthreads > 1) {
@@ -93,15 +93,16 @@ public:
 
 		fout_<<"#START_AB_PAIR\n";
 		fout_<<"link.value="<<val<<"\n";
-		fout_<<"#A\n";
+		fout_<<"#A"<<pairCount_<<"\n";
 		printMatrix(A);
-		fout_<<"#Ahat\n";
+		fout_<<"#Ahat"<<pairCount_<<"\n";
 		SparseMatrixType Ahat;
 		calculateAhat(Ahat,A,val,bosonOrFermion);
 		printMatrix(Ahat);
-		fout_<<"#B\n";
+		fout_<<"#B"<<pairCount_<<"\n";
 		printMatrix(B);
 		fout_<<"#END_AB_PAIR\n";
+		pairCount_++;
 	}
 
 	void push(bool option,const SparseMatrixType& hamiltonian)
@@ -185,6 +186,7 @@ private:
 
 	static SizeType counter_;
 	bool enabled_;
+	SizeType pairCount_;
 	std::ofstream fout_;
 	VectorBoolType signs_;
 }; // class KroneckerDumpter
