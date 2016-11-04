@@ -90,16 +90,16 @@ private:
 	                      const SparseMatrixType B)
 	{
 		SizeType nLeft = Ahat.rank();
-		SizeType nRight = B.rank();
-		for (SizeType i = 0; i < nLeft; ++i) {
-			for (SizeType j = 0; j < nRight; ++j) {
+
+		for (SizeType k = 0; k < Ahat.nonZero(); ++k) {
+			SizeType i = Ahat.getRow(k);
+			SizeType ip = Ahat.getColumn(k);
+			for (SizeType k2 = 0; k2 < B.nonZero(); ++k2) {
+				SizeType j = B.getRow(k2);
+				SizeType jp = B.getColumn(k2);
 				SizeType is = pack(i,j,nLeft);
-				for (SizeType ip = 0; ip < nLeft; ++ip) { // iprime
-					for (SizeType jp = 0; jp < nRight; ++jp) { // jprime
-						SizeType js = pack(ip,jp,nLeft);
-						hamSuper_(is,js) += Ahat(i,ip)*B(j,jp);
-					}
-				}
+				SizeType js = pack(ip,jp,nLeft);
+				hamSuper_(is,js) += Ahat(i,ip)*B(j,jp);
 			}
 		}
 	}
@@ -111,26 +111,26 @@ private:
 		SizeType nRight = hamRight.rank();
 
 		// hamLeft
-		for (SizeType i = 0; i < nLeft; ++i) {
-			for (SizeType j = 0; j < nRight; ++j) { // j = jprime
+		for (SizeType k = 0; k < hamLeft.nonZero(); ++k) {
+			SizeType i = hamLeft.getRow(k);
+			SizeType ip = hamLeft.getColumn(k);
+			for (SizeType j = 0; j < nRight; ++j) {
 				SizeType is = pack(i,j,nLeft);
-				for (SizeType ip = 0; ip < nLeft; ++ip) { // iprime
-					SizeType js = pack(ip,j,nLeft);
-					hamSuper_(is,js) += hamLeft(i,ip);
-				}
+				SizeType js = pack(ip,j,nLeft);
+				hamSuper_(is,js) += hamLeft(i,ip);
 			}
 		}
 
 		std::cerr<<"Done hamLeft\n";
 
 		// hamRight
-		for (SizeType i = 0; i < nRight; ++i) {
-			for (SizeType j = 0; j < nLeft; ++j) { // j = jprime
-				SizeType is =  pack(j,i,nLeft);
-				for (SizeType ip = 0; ip < nRight; ++ip) { // iprime
-					SizeType js = pack(j,ip,nLeft);
-					hamSuper_(is,js) += hamRight(i,ip);
-				}
+		for (SizeType k = 0; k < hamRight.nonZero(); ++k) {
+			SizeType i = hamRight.getRow(k);
+			SizeType ip = hamRight.getColumn(k);
+			for (SizeType j = 0; j < nLeft; ++j) {
+				SizeType is = pack(j,i,nLeft);
+				SizeType js = pack(j,ip,nLeft);
+				hamSuper_(is,js) += hamRight(i,ip);
 			}
 		}
 
@@ -140,7 +140,6 @@ private:
 	SizeType pack(SizeType l, SizeType r, SizeType nLeft) const
 	{
 		assert(l + r*nLeft < pse_.size());
-//		return l + r*nLeft;
 		return pse_[l + r*nLeft];
 	}
 
