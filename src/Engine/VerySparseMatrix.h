@@ -265,9 +265,43 @@ public:
 		return values_[i];
 	}
 
-	template<typename T1>
 	friend std::ostream& operator<<(std::ostream& os,
-	                                const VerySparseMatrix<T1>& m);
+	                                const VerySparseMatrix<ComplexOrRealType>& m)
+	{
+		os<<m.rank_;
+		if (m.rank_ == 0) return os;
+		for (SizeType i=0;i<m.values_.size();i++) {
+			os<<m.coordinates_[i].first<<" ";
+			os<<m.coordinates_[i].second<<" "<<m.values_[i]<<"\n";
+		}
+
+		return os;
+	}
+
+	friend std::istream& operator>>(std::istream& is,
+	                                VerySparseMatrix<ComplexOrRealType>& m)
+	{
+		is>>m.rank_;
+		if (m.rank_ == 0) return is;
+		PsimagLite::String temp;
+		PairType coordinate;
+
+		while (true) {
+			is>>temp;
+			if (temp[0] == '#') break;
+
+			is>>temp;
+			coordinate.first = atoi(temp.c_str());
+			is>>temp;
+			coordinate.second = atoi(temp.c_str());
+			m.coordinates_.push_back(coordinate);
+
+			is>>temp;
+			m.values_.push_back(atof(temp.c_str()));
+		}
+
+		return is;
+	}
 
 	template<typename IoType>
 	void saveToDisk(IoType& outHandle)
@@ -379,17 +413,6 @@ private:
 	VectorPairType coordinates_;
 	bool sorted_;
 }; // VerySparseMatrix
-
-template<typename T>
-std::ostream& operator<<(std::ostream& os,const VerySparseMatrix<T>& m)
-{
-	for (SizeType i=0;i<m.values_.size();i++) {
-		os<<"verysparse("<<m.coordinates_[i].first<<",";
-		os<<m.coordinates_[i].second<<")="<<m.values_[i]<<"\n";
-	}
-
-	return os;
-}
 
 template<typename T>
 bool isHermitian(const VerySparseMatrix<T>& m)

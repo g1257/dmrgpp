@@ -50,5 +50,6 @@ int main(int argc, char** argv)
 
 	if (versionOnly) return 0;
 	Dmrg::MiniAppKronecker<double> miniAppKron(filename);
-	miniAppKron.check();
+	std::ofstream fout("h.pnm");
+	miniAppKron.printH(fout);
 }
