@@ -84,6 +84,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include "AllocatorCpu.h"
 #include <sched.h>
+#include <unistd.h>
+#ifdef PTHREAD_ASSIGN_AFFINITIES
+#include <errno.h>
+#include <string.h>
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#endif
 
 template<typename PthreadFunctionHolderType>
 struct PthreadFunctionStruct {
@@ -122,8 +130,11 @@ class Pthreads  {
 public:
 
 	Pthreads(SizeType npthreads,int = 0)
-	    : nthreads_(npthreads)
-	{}
+	    : nthreads_(npthreads),cores_(1)
+	{
+		int cores = sysconf(_SC_NPROCESSORS_ONLN);
+		cores_ = (cores > 0) ? cores : 1;
+	}
 
 	void loopCreate(SizeType total,PthreadFunctionHolderType& pfh)
 	{
@@ -131,23 +142,38 @@ public:
 		pfs = new PthreadFunctionStruct<PthreadFunctionHolderType>[nthreads_];
 		pthread_mutex_init(&(mutex_), NULL);
 		pthread_t* thread_id = new pthread_t[nthreads_];
+		pthread_attr_t** attr = new pthread_attr_t*[nthreads_];
 
 		for (SizeType j=0; j <nthreads_; j++) {
-			int ret=0;
 			pfs[j].threadNum = j;
 			pfs[j].pfh = &pfh;
 			pfs[j].total = total;
 			pfs[j].blockSize = total/nthreads_;
 			if (total%nthreads_!=0) pfs[j].blockSize++;
 			pfs[j].mutex = &mutex_;
-			if ((ret=pthread_create(&thread_id[j],
-			                        NULL,
-			                        thread_function_wrapper<PthreadFunctionHolderType>,
-			                        &pfs[j])))
-				std::cerr<<"Thread creation failed: "<<ret<<"\n";
+
+			attr[j] = new pthread_attr_t;
+			int ret = pthread_attr_init(attr[j]);
+			checkForError(ret);
+
+			setAffinity(attr[j],j,cores_);
+
+			ret = pthread_create(&thread_id[j],
+			                     attr[j],
+			                     thread_function_wrapper<PthreadFunctionHolderType>,
+			                     &pfs[j]);
+			checkForError(ret);
 		}
 
-		for (SizeType j=0; j <nthreads_; j++) pthread_join( thread_id[j], NULL);
+		for (SizeType j=0; j <nthreads_; ++j) pthread_join(thread_id[j], 0);
+		for (SizeType j=0; j <nthreads_; ++j) {
+			int ret = pthread_attr_destroy(attr[j]);
+			checkForError(ret);
+			delete attr[j];
+			attr[j] = 0;
+		}
+
+		delete [] attr;
 
 #ifndef NDEBUG
 		for (SizeType j=0; j <nthreads_; j++) {
@@ -169,9 +195,35 @@ public:
 
 private:
 
-	SizeType nthreads_;
-	pthread_mutex_t mutex_;
+	void setAffinity(pthread_attr_t* attr,
+	                 SizeType threadNum,
+	                 SizeType cores) const
+	{
+#ifdef PTHREAD_ASSIGN_AFFINITIES
+		cpu_set_t* cpuset = new cpu_set_t;
+		int cpu = threadNum % cores;
+		CPU_ZERO(cpuset);
+		CPU_SET(cpu,cpuset);
+		std::size_t cpusetsize = sizeof(cpu_set_t);
+		int ret = pthread_attr_setaffinity_np(attr,cpusetsize,cpuset);
+		checkForError(ret);
+		// clean up
+		delete cpuset;
+		cpuset = 0;
+#endif
+	}
 
+	void checkForError(int ret) const
+	{
+		if (ret == 0) return;
+#ifdef _GNU_SOURCE
+		std::cerr<<"Pthreads ERROR: "<<strerror(ret)<<"\n";
+#endif
+	}
+
+	SizeType nthreads_;
+	SizeType cores_;
+	pthread_mutex_t mutex_;
 }; // Pthreads class
 
 } // namespace Dmrg
