@@ -83,14 +83,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <pthread.h>
 #include <iostream>
 #include "AllocatorCpu.h"
+#include <sched.h>
 
 template<typename PthreadFunctionHolderType>
 struct PthreadFunctionStruct {
+	PthreadFunctionStruct()
+	    : pfh(0),threadNum(0),blockSize(0),total(0),mutex(0),cpu(0)
+	{}
+
 	PthreadFunctionHolderType* pfh;
 	int threadNum;
 	SizeType blockSize;
 	SizeType total;
 	pthread_mutex_t* mutex;
+	SizeType cpu;
 };
 
 template<typename PthreadFunctionHolderType>
@@ -100,6 +106,9 @@ void *thread_function_wrapper(void *dummyPtr)
 	        (PthreadFunctionStruct<PthreadFunctionHolderType> *) dummyPtr;
 
 	PthreadFunctionHolderType *pfh = pfs->pfh;
+
+	int s = sched_getcpu();
+	if (s >= 0) pfs->cpu = s;
 
 	pfh->thread_function_(pfs->threadNum,pfs->blockSize,pfs->total,pfs->mutex);
 
@@ -139,6 +148,13 @@ public:
 		}
 
 		for (SizeType j=0; j <nthreads_; j++) pthread_join( thread_id[j], NULL);
+
+#ifndef NDEBUG
+		for (SizeType j=0; j <nthreads_; j++) {
+			std::cout<<"Pthreads: Pthread number "<<j<<" runs on core number ";
+			std::cout<<pfs[j].cpu<<"\n";
+		}
+#endif
 
 		pthread_mutex_destroy(&mutex_);
 		delete [] thread_id;
