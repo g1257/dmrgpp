@@ -86,11 +86,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <sched.h>
 #include <unistd.h>
 #ifdef PTHREAD_ASSIGN_AFFINITIES
-#include <errno.h>
-#include <string.h>
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
+#endif
+#ifdef _GNU_SOURCE
+#include <errno.h>
+#include <string.h>
 #endif
 
 template<typename PthreadFunctionHolderType>
