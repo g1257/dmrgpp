@@ -312,25 +312,12 @@ private:
 	             VectorMatrixFieldType& V,
 	             typename PsimagLite::Vector<SizeType>::Type& steps)
 	{
-		PsimagLite::String options = model_.params().options;
-		bool cTridiag = (options.find("concurrenttridiag") != PsimagLite::String::npos);
+		typedef PsimagLite::NoPthreads<ParallelTriDiagType> ParallelizerType;
+		ParallelizerType threadedTriDiag(1,0);
 
-		if (cTridiag) {
-			typedef PsimagLite::Parallelizer<ParallelTriDiagType> ParallelizerType;
-			ParallelizerType threadedTriDiag(PsimagLite::Concurrency::npthreads,
-			                                 PsimagLite::MPI::COMM_WORLD);
+		ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,currentTime_,model_,ioIn_);
 
-			ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,currentTime_,model_,ioIn_);
-
-			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
-		} else {
-			typedef PsimagLite::NoPthreads<ParallelTriDiagType> ParallelizerType;
-			ParallelizerType threadedTriDiag(1,0);
-
-			ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,currentTime_,model_,ioIn_);
-
-			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
-		}
+		threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
 	}
 
 	const RealType& currentTime_;

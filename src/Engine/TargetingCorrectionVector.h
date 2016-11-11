@@ -234,8 +234,8 @@ public:
 	enum {DISABLED,OPERATOR,CONVERGING};
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-	      EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-	      INFINITE=WaveFunctionTransfType::INFINITE};
+		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
+		  INFINITE=WaveFunctionTransfType::INFINITE};
 
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
@@ -293,7 +293,7 @@ public:
 		SizeType numberOfSites = this->lrs().super().block().size();
 		if (site>1 && site<numberOfSites-2) return;
 		if (site == 1 && direction == EXPAND_SYSTEM) return;
-                //corner case
+		//corner case
 		SizeType x = (site==1) ? 0 : numberOfSites-1;
 		evolve(Eg,direction,x,loopNumber);
 
@@ -537,41 +537,21 @@ private:
 	             VectorMatrixFieldType& V,
 	             typename PsimagLite::Vector<SizeType>::Type& steps)
 	{
-		PsimagLite::String options = this->model().params().options;
-		bool cTridiag = (options.find("concurrenttridiag") !=
-		        PsimagLite::String::npos);
 		RealType fakeTime = 0;
 
-		if (cTridiag) {
-			typedef PsimagLite::Parallelizer<ParallelTriDiagType> ParallelizerType;
-			ParallelizerType threadedTriDiag(PsimagLite::Concurrency::npthreads,
-			                                 PsimagLite::MPI::COMM_WORLD);
+		typedef PsimagLite::NoPthreads<ParallelTriDiagType> ParallelizerType;
+		ParallelizerType threadedTriDiag(1,0);
 
-			ParallelTriDiagType helperTriDiag(phi,
-			                                  T,
-			                                  V,
-			                                  steps,
-			                                  this->lrs(),
-			                                  fakeTime,
-			                                  this->model(),
-			                                  ioIn_);
+		ParallelTriDiagType helperTriDiag(phi,
+		                                  T,
+		                                  V,
+		                                  steps,
+		                                  this->lrs(),
+		                                  fakeTime,
+		                                  this->model(),
+		                                  ioIn_);
 
-			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
-		} else {
-			typedef PsimagLite::NoPthreads<ParallelTriDiagType> ParallelizerType;
-			ParallelizerType threadedTriDiag(1,0);
-
-			ParallelTriDiagType helperTriDiag(phi,
-			                                  T,
-			                                  V,
-			                                  steps,
-			                                  this->lrs(),
-			                                  fakeTime,
-			                                  this->model(),
-			                                  ioIn_);
-
-			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
-		}
+		threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
 	}
 
 	void setWeights()

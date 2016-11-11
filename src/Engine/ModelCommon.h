@@ -240,19 +240,10 @@ public:
 			lps.sealed = true;
 		}
 
-		PsimagLite::String options = this->params().options;
-		bool cTridiag = (options.find("concurrenttridiag") != PsimagLite::String::npos);
-
-		if (cTridiag) {
-			typedef PsimagLite::NoPthreads<HamiltonianConnectionType> ParallelizerType;
-			ParallelizerType parallelConnections(1,0);
-			parallelConnections.loopCreate(total,hc);
-		} else {
-			typedef PsimagLite::Parallelizer<HamiltonianConnectionType> ParallelizerType;
-			ParallelizerType parallelConnections(PsimagLite::Concurrency::npthreads,
-			                                     PsimagLite::MPI::COMM_WORLD);
-			parallelConnections.loopCreate(total,hc);
-		}
+		typedef PsimagLite::Parallelizer<HamiltonianConnectionType> ParallelizerType;
+		ParallelizerType parallelConnections(PsimagLite::Concurrency::npthreads,
+		                                     PsimagLite::MPI::COMM_WORLD);
+		parallelConnections.loopCreate(total,hc);
 
 		hc.sync();
 	}

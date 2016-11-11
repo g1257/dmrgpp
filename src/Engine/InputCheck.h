@@ -257,7 +257,6 @@ public:
 			\item[inflate] TBW
 			\item[twositedmrg] Use 2-site DMRG. Default is 1-site DMRG
 			\item[noloadwft] TBW
-			\item[concurrenttridiag] TBW
 			\item[ChebyshevSolver] Use ChebyshevSolver instead of Lanczos
 			\item[MatrixVectorStored] Store superblock sector of Hamiltonian matrix
 			in memory instead of constructing it on the fly.
@@ -304,7 +303,6 @@ public:
 		registerOpts.push_back("none");
 		registerOpts.push_back("twositedmrg");
 		registerOpts.push_back("noloadwft");
-		registerOpts.push_back("concurrenttridiag");
 		registerOpts.push_back("ChebyshevSolver");
 		registerOpts.push_back("MatrixVectorStored");
 		registerOpts.push_back("MatrixVectorKron");

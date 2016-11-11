@@ -229,8 +229,8 @@ public:
 	typedef typename TargetingBaseType::InputSimpleOutType InputSimpleOutType;
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-	      EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-	      INFINITE=WaveFunctionTransfType::INFINITE};
+		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
+		  INFINITE=WaveFunctionTransfType::INFINITE};
 
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
@@ -446,41 +446,20 @@ private:
 	             VectorMatrixFieldType& V,
 	             typename PsimagLite::Vector<SizeType>::Type& steps)
 	{
-		PsimagLite::String options = model_.params().options;
-		bool cTridiag = (options.find("concurrenttridiag") !=
-		        PsimagLite::String::npos);
 		RealType fakeTime = 0;
+		typedef PsimagLite::NoPthreads<ParallelTriDiagType> ParallelizerType;
+		ParallelizerType threadedTriDiag(1,0);
 
-		if (cTridiag) {
-			typedef PsimagLite::Parallelizer<ParallelTriDiagType> ParallelizerType;
-			ParallelizerType threadedTriDiag(PsimagLite::Concurrency::npthreads,
-			                                 PsimagLite::MPI::COMM_WORLD);
+		ParallelTriDiagType helperTriDiag(phi,
+		                                  T,
+		                                  V,
+		                                  steps,
+		                                  lrs_,
+		                                  fakeTime,
+		                                  model_,
+		                                  ioIn_);
 
-			ParallelTriDiagType helperTriDiag(phi,
-			                                  T,
-			                                  V,
-			                                  steps,
-			                                  lrs_,
-			                                  fakeTime,
-			                                  model_,
-			                                  ioIn_);
-
-			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
-		} else {
-			typedef PsimagLite::NoPthreads<ParallelTriDiagType> ParallelizerType;
-			ParallelizerType threadedTriDiag(1,0);
-
-			ParallelTriDiagType helperTriDiag(phi,
-			                                  T,
-			                                  V,
-			                                  steps,
-			                                  lrs_,
-			                                  fakeTime,
-			                                  model_,
-			                                  ioIn_);
-
-			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
-		}
+		threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
 	}
 
 	RealType dynWeightOf(VectorType& v,const VectorType& w) const
@@ -496,7 +475,7 @@ private:
 	InputValidatorType& ioIn_;
 	const TargetParamsType& tstStruct_;
 	const ModelType& model_;
-    const LeftRightSuperType& lrs_;
+	const LeftRightSuperType& lrs_;
 	RealType energy_;
 	PsimagLite::ProgressIndicator progress_;
 	TridiagonalMatrixType ab_;
