@@ -137,11 +137,11 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
 
-	enum StageEnum {DISABLED,OPERATOR,STATIC,DYNAMIC};
+	enum StageEnum {STAGE_DISABLED,STAGE_OPERATOR,STAGE_STATIC1,STAGE_STATIC2};
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-	      EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-	      INFINITE=WaveFunctionTransfType::INFINITE};
+		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
+		  INFINITE=WaveFunctionTransfType::INFINITE};
 
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
@@ -268,36 +268,52 @@ private:
 	{
 		if (direction == INFINITE) return;
 		SizeType i = 0;
+		bool guessNonZeroSector = true;
+		SizeType numberOfSites = this->lrs().super().block().size();
 
 		// see if operator at site has been applied and result put into targetVectors[site]
 		// if no apply operator at site and add into targetVectors[site]
 		// also wft everything
-		this->common().applyOneOperator(loopNumber,
-		                                i,
-		                                site,
-		                                this->common().targetVectors(3*site),
-		                                direction);
+		if (stage_ != STAGE_STATIC2) {
+			this->common().applyOneOperator(loopNumber,
+			                                i,
+			                                site,
+			                                this->common().targetVectors(3*site),
+			                                direction);
 
-		typename PsimagLite::Vector<SizeType>::Type block(1,site);
+		} else {
+			for (SizeType s = 0; s < numberOfSites; ++s) {
+				if (s == site) continue;
+				if (this->common().targetVectors(3*s).size() == 0) continue;
+				VectorWithOffsetType phiNew;
+				if (this->common().tstStruct().useQns())
+	                                        phiNew.populateFromQns(this->common().nonZeroQns(),
+											                       this->lrs().super());
+				this->common().wftOneVector(phiNew,i,site,direction,3*s,guessNonZeroSector);
+				this->common().targetVectors(3*s) = phiNew;
+			}
+
+			doCorrectionVector(direction,site,loopNumber);
+		}
+
+		// typename PsimagLite::Vector<SizeType>::Type block(1,site);
 		// skeleton_.cocoon(block,direction);
 
-		if (stage_ == DYNAMIC)
-			return doCorrectionVector(direction,site,loopNumber);
+		if (stage_ == STAGE_STATIC2) return;
 
 		SizeType counter = 0;
 		for (SizeType i = 0; i < this->common().targetVectors().size(); ++i) {
 			if (i%3 != 0) continue;
 			if (this->common().targetVectors(i).size() != 0) {
-				if (stage_ != DYNAMIC) stage_ = STATIC;
+				if (stage_ != STAGE_STATIC2) stage_ = STAGE_STATIC1;
 				counter++;
 				break;
 			}
 		}
 
 		// -2 here because borders not done (needs FIXING FIXME TODO)
-		SizeType numberOfSites = this->lrs().super().block().size();
-		if (counter == numberOfSites-2 && stage_ == STATIC)
-			stage_ = DYNAMIC;
+		if (counter == numberOfSites-2 && stage_ == STAGE_STATIC1)
+			stage_ = STAGE_STATIC2;
 	}
 
 	void doCorrectionVector(SizeType direction,

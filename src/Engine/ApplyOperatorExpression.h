@@ -389,6 +389,33 @@ public:
 		if (targetHelper_.tstStruct().useQns()) setQuantumNumbers(phiNew);
 	}
 
+	void wftOneVector(VectorWithOffsetType& phiNew,
+	                  SizeType i,
+	                  SizeType site,
+	                  SizeType systemOrEnviron,
+	                  SizeType index,
+	                  bool guessNonZeroSector)
+	{
+		if (guessNonZeroSector) {
+			if (targetHelper_.tstStruct().aOperators().size() == 1) {
+				guessPhiSectors(phiNew,i,systemOrEnviron,site);
+			} else {
+				if (targetHelper_.tstStruct().useQns())
+					phiNew.populateFromQns(nonZeroQns_,targetHelper_.lrs().super());
+				else
+					phiNew.populateSectors(targetHelper_.lrs().super());
+			}
+		}
+
+		// OK, now that we got the partition number right, let's wft:
+		VectorSizeType nk(1,targetHelper_.model().hilbertSize(site));
+		targetHelper_.wft().setInitialVector(phiNew,
+		                                     targetVectors_[index],
+		                                     targetHelper_.lrs(),
+		                                     nk);
+		phiNew.collapseSectors();
+	}
+
 private:
 
 	void checkOrder(SizeType i) const
@@ -587,33 +614,6 @@ private:
 		}
 	}
 
-	void wftOneVector(VectorWithOffsetType& phiNew,
-	                  SizeType i,
-	                  SizeType site,
-	                  SizeType systemOrEnviron,
-	                  SizeType index,
-	                  bool guessNonZeroSector)
-	{
-		if (guessNonZeroSector) {
-			if (targetHelper_.tstStruct().aOperators().size() == 1) {
-				guessPhiSectors(phiNew,i,systemOrEnviron,site);
-			} else {
-				if (targetHelper_.tstStruct().useQns())
-					phiNew.populateFromQns(nonZeroQns_,targetHelper_.lrs().super());
-				else
-					phiNew.populateSectors(targetHelper_.lrs().super());
-			}
-		}
-
-		// OK, now that we got the partition number right, let's wft:
-		VectorSizeType nk(1,targetHelper_.model().hilbertSize(site));
-		targetHelper_.wft().setInitialVector(phiNew,
-		                                     targetVectors_[index],
-		                                     targetHelper_.lrs(),
-		                                     nk);
-		phiNew.collapseSectors();
-	}
-
 	void wftAll(SizeType i,
 	            SizeType site,
 	            SizeType systemOrEnviron)
@@ -622,7 +622,8 @@ private:
 			if (targetVectors_[index].size() == 0) continue;
 			VectorWithOffsetType phiNew;
 			if (targetHelper_.tstStruct().useQns())
-                                        phiNew.populateFromQns(nonZeroQns_,targetHelper_.lrs().super());
+                                        phiNew.populateFromQns(nonZeroQns_,
+										                       targetHelper_.lrs().super());
 			wftOneVector(phiNew,i,site,systemOrEnviron,index,true);
 			targetVectors_[index] = phiNew;
 		}

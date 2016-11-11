@@ -403,6 +403,16 @@ public:
 		applyOpExpression_.applyOneOperator(loopNumber,i,site,phiNew,systemOrEnviron);
 	}
 
+	void wftOneVector(VectorWithOffsetType& phiNew,
+	                  SizeType i,
+	                  SizeType site,
+	                  SizeType systemOrEnviron,
+	                  SizeType index,
+	                  bool guessNonZeroSector)
+	{
+		applyOpExpression_.wftOneVector(phiNew,i,site,systemOrEnviron,index,guessNonZeroSector);
+	}
+
 	void cocoon(const BlockType& block,SizeType direction) const
 	{
 		const ModelType& model = targetHelper_.model();
