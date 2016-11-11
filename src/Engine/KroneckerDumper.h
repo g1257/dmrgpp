@@ -13,6 +13,7 @@ namespace Dmrg {
 template<typename LeftRightSuperType>
 class KroneckerDumper {
 
+	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
@@ -42,13 +43,10 @@ public:
 	KroneckerDumper(const ParamsForKroneckerDumper* p,
 	                const LeftRightSuperType& lrs,
 	                SizeType m)
-	    : enabled_(p && p->enabled),pairCount_(0)
+	    : enabled_(p && p->enabled),
+	      pairCount_(0)
 	{
 		if (!enabled_) return;
-		if (PsimagLite::Concurrency::npthreads > 1) {
-			PsimagLite::String msg("KroneckerDumper cannot be run with Threads>1 ");
-			throw PsimagLite::RuntimeError(msg + "because it's not thread-safe\n");
-		}
 
 		bool b = (p->end > 0 && counter_ >= p->end);
 		if (counter_ < p->begin || b) {
@@ -56,6 +54,8 @@ public:
 			enabled_ = false;
 			return;
 		}
+
+		ConcurrencyType::mutexInit(&mutex_);
 
 		PsimagLite::String filename = "kroneckerDumper" + ttos(counter_) + ".txt";
 		fout_.open(filename.c_str());
@@ -80,8 +80,12 @@ public:
 
 	~KroneckerDumper()
 	{
+		if (!enabled_) return;
+
 		fout_<<"#EOF\n";
 		fout_.close();
+
+		ConcurrencyType::mutexDestroy(&mutex_);
 	}
 
 	void push(const SparseMatrixType& A,
@@ -91,6 +95,7 @@ public:
 	{
 		if (!enabled_) return;
 
+		ConcurrencyType::mutexLock(&mutex_);
 		fout_<<"#START_AB_PAIR\n";
 		fout_<<"link.value="<<val<<"\n";
 		fout_<<"#A"<<pairCount_<<"\n";
@@ -103,6 +108,7 @@ public:
 		printMatrix(B);
 		fout_<<"#END_AB_PAIR\n";
 		pairCount_++;
+		ConcurrencyType::mutexUnlock(&mutex_);
 	}
 
 	void push(bool option,const SparseMatrixType& hamiltonian)
@@ -189,6 +195,7 @@ private:
 	SizeType pairCount_;
 	std::ofstream fout_;
 	VectorBoolType signs_;
+	ConcurrencyType::MutexType mutex_;
 }; // class KroneckerDumpter
 
 template<typename SparseMatrixType>

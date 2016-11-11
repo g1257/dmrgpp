@@ -73,6 +73,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PackIndices.h" // in PsimagLite
 #include "Link.h"
 #include "LinkProductStruct.h"
+#include "Concurrency.h"
 
 /** \ingroup DMRG */
 /*@{*/
