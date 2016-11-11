@@ -179,7 +179,7 @@ public:
 	void thread_function_(SizeType threadNum,
 	                      SizeType blockSize,
 	                      SizeType total,
-	                      pthread_mutex_t*)
+	                      ConcurrencyType::MutexType*)
 	{
 
 		xtemp_[threadNum].resize(x_.size(),0);

@@ -118,7 +118,7 @@ public:
 	void thread_function_(SizeType threadNum,
 	                      SizeType blockSize,
 	                      SizeType total,
-	                      pthread_mutex_t*)
+	                      ConcurrencyType::MutexType*)
 	{
 		SizeType start = pBasis_.partition(m_);
 		SizeType length = pBasis_.partition(m_+1) - start;

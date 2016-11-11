@@ -108,7 +108,7 @@ public:
 	void thread_function_(SizeType threadNum,
 	                      SizeType blockSize,
 	                      SizeType total,
-	                      pthread_mutex_t*)
+	                      ConcurrencyType::MutexType*)
 	{
 		SizeType nk = nk_;
 		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);

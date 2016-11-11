@@ -89,6 +89,7 @@ class Parallel2PointCorrelations {
 	typedef typename TwoPointCorrelationsType::MatrixType MatrixType;
 	typedef typename TwoPointCorrelationsType::SparseMatrixType SparseMatrixType;
 	typedef typename MatrixType::value_type FieldType;
+	typedef PsimagLite::Concurrency ConcurrencyType;
 
 public:
 
@@ -109,7 +110,10 @@ public:
 		  fermionicSign_(fermionicSign)
 	{}
 
-	void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t* myMutex)
+	void thread_function_(SizeType threadNum,
+	                      SizeType blockSize,
+	                      SizeType total,
+	                      ConcurrencyType::MutexType* myMutex)
 	{
 		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
 		SizeType npthreads = PsimagLite::Concurrency::npthreads;

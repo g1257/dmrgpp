@@ -78,6 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Matrix.h"
 #include "Mpi.h"
+#include "Concurrency.h"
 
 namespace Dmrg {
 
@@ -88,6 +89,7 @@ class Parallel4PointDs {
 	typedef typename FourPointCorrelationsType::MatrixType MatrixType;
 	typedef typename MatrixType::value_type FieldType;
 	typedef typename FourPointCorrelationsType::SparseMatrixType SparseMatrixType;
+	typedef PsimagLite::Concurrency ConcurrencyType;
 
 public:
 
@@ -107,7 +109,7 @@ public:
 	void thread_function_(SizeType threadNum,
 	                      SizeType blockSize,
 	                      SizeType total,
-	                      pthread_mutex_t*)
+	                      ConcurrencyType::MutexType*)
 	{
 		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
 		SizeType npthreads = PsimagLite::Concurrency::npthreads;
