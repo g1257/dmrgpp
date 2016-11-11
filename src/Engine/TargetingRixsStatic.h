@@ -90,6 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParallelTriDiag.h"
 #include "TimeSerializer.h"
 #include "FreqEnum.h"
+#include "CorrectionVectorSkeleton.h"
 
 namespace Dmrg {
 
@@ -136,6 +137,10 @@ public:
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
+	typedef CorrectionVectorSkeleton<LanczosSolverType,
+	VectorWithOffsetType,
+    BaseType,
+    TargetParamsType> CorrectionVectorSkeletonType;
 
 	enum StageEnum {STAGE_DISABLED,STAGE_OPERATOR,STAGE_STATIC1,STAGE_STATIC2};
 
@@ -156,8 +161,8 @@ public:
 	      ioIn_(ioIn),
 	      progress_("TargetingRixsStatic"),
 	      gsWeight_(1.0),
-	      correctionEnabled_(false),
-	      paramsForSolver_(ioIn,"DynamicDmrg")
+	      paramsForSolver_(ioIn,"DynamicDmrg"),
+	      skeleton_(tstStruct_,ioIn_)
 	{
 		SizeType numberOfSites = model.geometry().numberOfSites();
 		this->common().init(&tstStruct_,3*numberOfSites);
@@ -172,13 +177,11 @@ public:
 
 	RealType gsWeight() const
 	{
-		if (!correctionEnabled_) return 1.0;
 		return gsWeight_;
 	}
 
 	SizeType size() const
 	{
-		if (!correctionEnabled_) return 0;
 		return BaseType::size();
 	}
 
@@ -216,38 +219,10 @@ public:
 		ioOut.print(msg.str());
 	}
 
-	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
+	void save(const VectorSizeType& block,
 	          PsimagLite::IoSimple::Out& io) const
 	{
-		if (block.size()!=1) {
-			PsimagLite::String str("TargetingRixsStatic ");
-			str += "only supports blocks of size 1\n";
-			throw PsimagLite::RuntimeError(str);
-		}
-
-		SizeType type = tstStruct_.type();
-		int fermionSign = this->common().findFermionSignOfTheOperators();
-		int s = (type&1) ? -1 : 1;
-		int s2 = (type>1) ? -1 : 1;
-		int s3 = (type&1) ? -fermionSign : 1;
-
-		typename PostProcType::ParametersType params(ioIn_,"DynamicDmrg");
-		params.Eg = this->common().energy();
-		params.weight = s2*weightForContinuedFraction_*s3;
-		params.isign = s;
-		if (ab_.size() == 0) {
-			PsimagLite::OstringStream msg;
-			msg<<"WARNING:  Trying to save a tridiagonal matrix with size zero.\n";
-			msg<<"\tHINT: Maybe the dyn vectors were never calculated.\n";
-			msg<<"\tHINT: Maybe TSPLoops is too large";
-			if (params.weight != 0)
-				msg<<"\n\tExpect a throw anytime now...";
-			progress_.printline(msg,std::cerr);
-		}
-
-		PostProcType cf(ab_,reortho_,params);
-
-		this->common().save(block,io,cf,this->common().targetVectors());
+		//this->common().save(block,io,cf,this->common().targetVectors());
 		this->common().psi().save(io,"PSI");
 	}
 
@@ -283,17 +258,15 @@ private:
 
 		} else {
 			for (SizeType s = 0; s < numberOfSites; ++s) {
-				if (s == site) continue;
 				if (this->common().targetVectors(3*s).size() == 0) continue;
 				VectorWithOffsetType phiNew;
-				if (this->common().tstStruct().useQns())
-	                                        phiNew.populateFromQns(this->common().nonZeroQns(),
-											                       this->lrs().super());
+				if (tstStruct_.useQns()) phiNew.populateFromQns(this->common().nonZeroQns(),
+				                                                this->lrs().super());
 				this->common().wftOneVector(phiNew,i,site,direction,3*s,guessNonZeroSector);
 				this->common().targetVectors(3*s) = phiNew;
 			}
 
-			doCorrectionVector(direction,site,loopNumber);
+			doCorrectionVector();
 		}
 
 		// typename PsimagLite::Vector<SizeType>::Type block(1,site);
@@ -316,11 +289,29 @@ private:
 			stage_ = STAGE_STATIC2;
 	}
 
-	void doCorrectionVector(SizeType direction,
-	                        SizeType site,
-	                        SizeType loopNumber)
+	void doCorrectionVector()
 	{
-		// FIXING FIXME TODO
+//		assert(stage_ == STAGE_STATIC2);
+//		SizeType numberOfSites = this->lrs().super().block().size();
+//		for (SizeType s = 0; s < numberOfSites; ++s)
+//			calcDynVectors(this->common().targetVectors(3*s),3*s);
+	}
+
+	void printNormsAndWeights() const
+	{
+		if (this->common().allStages(STAGE_DISABLED)) return;
+
+		PsimagLite::OstringStream msg;
+		msg<<"gsWeight="<<gsWeight_<<" weights= ";
+		for (SizeType i = 0; i < weight_.size(); i++)
+			msg<<weight_[i]<<" ";
+		progress_.printline(msg,std::cout);
+
+		PsimagLite::OstringStream msg2;
+		msg2<<"gsNorm="<<norm(this->common().psi())<<" norms= ";
+		for (SizeType i = 0; i < weight_.size(); i++)
+			msg2<<this->common().normSquared(i)<<" ";
+		progress_.printline(msg2,std::cout);
 	}
 
 	StageEnum stage_;
@@ -328,12 +319,9 @@ private:
 	InputValidatorType& ioIn_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
-	bool correctionEnabled_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
-	TridiagonalMatrixType ab_;
-	DenseMatrixRealType reortho_;
-	RealType weightForContinuedFraction_;
 	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
+	CorrectionVectorSkeletonType skeleton_;
 }; // class TargetingRixsStatic
 
 template<typename LanczosSolverType, typename VectorWithOffsetType>
