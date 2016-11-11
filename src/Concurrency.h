@@ -97,9 +97,46 @@ public:
 
 #ifndef USE_PTHREADS
 	typedef int MutexType;
+
+	static void mutexLock(MutexType*)
+	{}
+
+	static void mutexUnlock(MutexType*)
+	{}
+
+	static void mutexInit(MutexType*)
+	{}
+
+	static void mutexDestroy(MutexType*)
+	{}
+
 #else
+
+	#include <pthread.h>
 	typedef pthread_mutex_t MutexType;
+
+	static void mutexInit(MutexType* mutex)
+	{
+		pthread_mutex_init(mutex, 0);
+	}
+
+	static void mutexDestroy(MutexType* mutex)
+	{
+		pthread_mutex_destroy(mutex);
+	}
+
+	static void mutexLock(MutexType* mutex)
+	{
+		pthread_mutex_lock(mutex);
+	}
+
+	static void mutexUnlock(MutexType* mutex)
+	{
+		pthread_mutex_unlock(mutex);
+	}
+
 #endif
+
 #ifndef USE_MPI
 	typedef int CommType;
 #else
