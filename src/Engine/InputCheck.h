@@ -376,9 +376,10 @@ public:
 		                       "CorrectionTargetting",
 		                       "MettsTargetting",
 		                       "TargetingAncilla",
-		                       "TargetingCorrelations"};
+		                       "TargetingCorrelations",
+		                       "TargetingRixsStatic"};
 
-		SizeType totalTargets = 9;
+		SizeType totalTargets = 10;
 
 		SizeType count = 0;
 		for (SizeType i = 0;i<totalTargets;++i) {
