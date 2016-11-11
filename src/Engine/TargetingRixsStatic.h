@@ -162,7 +162,7 @@ public:
 	      progress_("TargetingRixsStatic"),
 	      gsWeight_(1.0),
 	      paramsForSolver_(ioIn,"DynamicDmrg"),
-	      skeleton_(tstStruct_,ioIn_)
+	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().energy())
 	{
 		SizeType numberOfSites = model.geometry().numberOfSites();
 		this->common().init(&tstStruct_,3*numberOfSites);
@@ -222,8 +222,7 @@ public:
 	void save(const VectorSizeType& block,
 	          PsimagLite::IoSimple::Out& io) const
 	{
-		//this->common().save(block,io,cf,this->common().targetVectors());
-		this->common().psi().save(io,"PSI");
+		skeleton_.save(this->common(),block,io);
 	}
 
 	void load(const PsimagLite::String& f)
@@ -291,10 +290,27 @@ private:
 
 	void doCorrectionVector()
 	{
-//		assert(stage_ == STAGE_STATIC2);
-//		SizeType numberOfSites = this->lrs().super().block().size();
-//		for (SizeType s = 0; s < numberOfSites; ++s)
-//			calcDynVectors(this->common().targetVectors(3*s),3*s);
+		assert(stage_ == STAGE_STATIC2);
+		SizeType numberOfSites = this->lrs().super().block().size();
+		for (SizeType s = 0; s < numberOfSites; ++s)
+			skeleton_.calcDynVectors(this->common().targetVectors(3*s),
+			                         this->common().targetVectors(3*s+1),
+			                         this->common().targetVectors(3*s+2));
+		setWeights();
+	}
+
+	void setWeights()
+	{
+		gsWeight_ = tstStruct_.gsWeight();
+
+		RealType sum  = 0;
+		weight_.resize(this->common().targetVectors().size());
+		for (SizeType r=1;r<weight_.size();r++) {
+			weight_[r] = 1;
+			sum += weight_[r];
+		}
+
+		for (SizeType r=0;r<weight_.size();r++) weight_[r] *= (1.0 - gsWeight_)/sum;
 	}
 
 	void printNormsAndWeights() const

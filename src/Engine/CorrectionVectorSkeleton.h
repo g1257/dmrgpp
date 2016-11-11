@@ -235,17 +235,25 @@ public:
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
 
-	CorrectionVectorSkeleton(const TargetParamsType& tstStruct,
-	                         InputValidatorType& ioIn)
-	    : tstStruct_(tstStruct), ioIn_(ioIn), progress_("CorrectionVectorSkeleton")
+	CorrectionVectorSkeleton(InputValidatorType& ioIn,
+	                         const TargetParamsType& tstStruct,
+	                         const ModelType& model,
+	                         const LeftRightSuperType& lrs,
+	                         RealType energy)
+	    : ioIn_(ioIn),
+	      tstStruct_(tstStruct),
+	      model_(model),
+	      lrs_(lrs),
+	      energy_(energy),
+	      progress_("CorrectionVectorSkeleton")
 	{}
 
-	void calcDynVectors(const VectorWithOffsetType& phi,
-	                    SizeType offset)
+	void calcDynVectors(const VectorWithOffsetType& tv0,
+	                    VectorWithOffsetType& tv1,
+	                    VectorWithOffsetType& tv2)
 	{
-		SizeType end = offset + 3;
-		for (SizeType i = offset;i < end; ++i)
-			this->common().targetVectors(i) = phi;
+		const VectorWithOffsetType& phi = tv0;
+		tv1 = tv2 = phi;
 
 		VectorMatrixFieldType V(phi.sectors());
 		VectorMatrixFieldType T(phi.sectors());
@@ -262,12 +270,12 @@ public:
 		for (SizeType i=0;i<phi.sectors();i++) {
 			VectorType sv;
 			SizeType i0 = phi.sector(i);
-			phi.extract(sv,i0);
+			tv0.extract(sv,i0);
 			// g.s. is included separately
 			// set Aq
-			this->common().targetVectors(offset).setDataInSector(sv,i0);
+			// tv0.setDataInSector(sv,i0);
 			// set xi
-			SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
+			SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 			VectorType xi(sv.size(),0),xr(sv.size(),0);
 
 			if (tstStruct_.algorithm() == TargetParamsType::KRYLOV) {
@@ -276,15 +284,51 @@ public:
 				computeXiAndXrIndirect(xi,xr,sv,p);
 			}
 
-			this->common().targetVectors(offset + 1).setDataInSector(xi,i0);
+			tv1.setDataInSector(xi,i0);
 			//set xr
-			this->common().targetVectors(offset + 2).setDataInSector(xr,i0);
+			tv2.setDataInSector(xr,i0);
 			DenseMatrixType V;
 			getLanczosVectors(V,sv,p);
 		}
 
-		setWeights();
 		weightForContinuedFraction_ = PsimagLite::real(phi*phi);
+	}
+
+	template<typename SomeTargetingCommonType>
+	void save(const SomeTargetingCommonType& targetingCommon,
+	          const VectorSizeType& block,
+	          PsimagLite::IoSimple::Out& io) const
+	{
+		if (block.size()!=1) {
+			PsimagLite::String str("TargetingCorrectionVector ");
+			str += "only supports blocks of size 1\n";
+			throw PsimagLite::RuntimeError(str);
+		}
+
+		SizeType type = tstStruct_.type();
+		int fermionSign = targetingCommon.findFermionSignOfTheOperators();
+		int s = (type&1) ? -1 : 1;
+		int s2 = (type>1) ? -1 : 1;
+		int s3 = (type&1) ? -fermionSign : 1;
+
+		typename PostProcType::ParametersType params(ioIn_,"DynamicDmrg");
+		params.Eg = targetingCommon.energy();
+		params.weight = s2*weightForContinuedFraction_*s3;
+		params.isign = s;
+		if (ab_.size() == 0) {
+			PsimagLite::OstringStream msg;
+			msg<<"WARNING:  Trying to save a tridiagonal matrix with size zero.\n";
+			msg<<"\tHINT: Maybe the dyn vectors were never calculated.\n";
+			msg<<"\tHINT: Maybe TSPLoops is too large";
+			if (params.weight != 0)
+				msg<<"\n\tExpect a throw anytime now...";
+			progress_.printline(msg,std::cerr);
+		}
+
+		PostProcType cf(ab_,reortho_,params);
+
+		targetingCommon.save(block,io,cf,targetingCommon.targetVectors());
+		targetingCommon.psi().save(io,"PSI");
 	}
 
 private:
@@ -295,10 +339,10 @@ private:
 	{
 		SizeType threadId = 0;
 		RealType fakeTime = 0;
-		typename ModelType::ModelHelperType modelHelper(p,this->lrs(),fakeTime,threadId);
+		typename ModelType::ModelHelperType modelHelper(p,lrs_,fakeTime,threadId);
 		typedef typename LanczosSolverType::LanczosMatrixType
 		        LanczosMatrixType;
-		LanczosMatrixType h(&this->model(),&modelHelper);
+		LanczosMatrixType h(&model_,&modelHelper);
 		LanczosSolverType lanczosSolver(h,paramsForSolver_,&V);
 
 		lanczosSolver.decomposition(sv,ab_);
@@ -315,9 +359,9 @@ private:
 
 		SizeType threadId = 0;
 		RealType fakeTime = 0;
-		typename ModelType::ModelHelperType modelHelper(p,this->lrs(),fakeTime,threadId);
-		LanczosMatrixType h(&this->model(),&modelHelper);
-		RealType E0 = this->common().energy();
+		typename ModelType::ModelHelperType modelHelper(p,lrs_,fakeTime,threadId);
+		LanczosMatrixType h(&model_,&modelHelper);
+		RealType E0 = energy_;
 		CorrectionVectorFunctionType cvft(h,tstStruct_,E0);
 
 		cvft.getXi(xi,sv);
@@ -347,7 +391,7 @@ private:
 
 		TargetVectorType tmp(n2);
 		VectorType r(n2);
-		CalcRType what(tstStruct_,this->common().energy(),eigs);
+		CalcRType what(tstStruct_,energy_,eigs);
 
 		calcR(r,what.imag(),T,V,phi,eigs,n2,i0);
 
@@ -402,7 +446,7 @@ private:
 	             VectorMatrixFieldType& V,
 	             typename PsimagLite::Vector<SizeType>::Type& steps)
 	{
-		PsimagLite::String options = this->model().params().options;
+		PsimagLite::String options = model_.params().options;
 		bool cTridiag = (options.find("concurrenttridiag") !=
 		        PsimagLite::String::npos);
 		RealType fakeTime = 0;
@@ -416,9 +460,9 @@ private:
 			                                  T,
 			                                  V,
 			                                  steps,
-			                                  this->lrs(),
+			                                  lrs_,
 			                                  fakeTime,
-			                                  this->model(),
+			                                  model_,
 			                                  ioIn_);
 
 			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
@@ -430,27 +474,13 @@ private:
 			                                  T,
 			                                  V,
 			                                  steps,
-			                                  this->lrs(),
+			                                  lrs_,
 			                                  fakeTime,
-			                                  this->model(),
+			                                  model_,
 			                                  ioIn_);
 
 			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
 		}
-	}
-
-	void setWeights()
-	{
-		gsWeight_ = tstStruct_.gsWeight();
-
-		RealType sum  = 0;
-		weight_.resize(this->common().targetVectors().size());
-		for (SizeType r=1;r<weight_.size();r++) {
-			weight_[r] = 1;
-			sum += weight_[r];
-		}
-
-		for (SizeType r=0;r<weight_.size();r++) weight_[r] *= (1.0 - gsWeight_)/sum;
 	}
 
 	RealType dynWeightOf(VectorType& v,const VectorType& w) const
@@ -463,11 +493,12 @@ private:
 		return sum;
 	}
 
-	const TargetParamsType& tstStruct_;
 	InputValidatorType& ioIn_;
+	const TargetParamsType& tstStruct_;
+	const ModelType& model_;
+    const LeftRightSuperType& lrs_;
+	RealType energy_;
 	PsimagLite::ProgressIndicator progress_;
-	RealType gsWeight_;
-	typename PsimagLite::Vector<RealType>::Type weight_;
 	TridiagonalMatrixType ab_;
 	DenseMatrixRealType reortho_;
 	RealType weightForContinuedFraction_;
