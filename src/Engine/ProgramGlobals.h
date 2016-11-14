@@ -90,8 +90,6 @@ struct ProgramGlobals {
 
 	static const SizeType MAX_LPS = 1000;
 
-	static const bool TST_FAST = false;
-
 	enum {INFINITE=0,EXPAND_ENVIRON=1,EXPAND_SYSTEM=2};
 
 	enum {SYSTEM_SYSTEM,SYSTEM_ENVIRON,ENVIRON_SYSTEM,ENVIRON_ENVIRON};

@@ -163,19 +163,9 @@ public:
 			return;
 		}
 
-		bool returnEarly = true;
-
-		for (SizeType i = 0; i < targetVectors_.size(); ++i) {
-			if (targetVectors_[i].size() == 0) {
-				returnEarly = false;
-				break;
-			}
-		}
-
 		assert(0 < targetVectors_.size());
 		targetVectors_[0] = phi;
-		if (timeHasAdvanced_) returnEarly = false;
-		if (returnEarly && ProgramGlobals::TST_FAST) return;
+
 		if (times_.size() == 1 && fabs(times_[0])<1e-10) return;
 
 		VectorMatrixFieldType V(phi.sectors());
