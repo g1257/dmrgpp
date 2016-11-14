@@ -152,6 +152,7 @@ public:
 	typedef TargetingMetts<LanczosSolverType,VectorWithOffsetType> TargetingMettsType;
 	typedef TargetingCorrelations<LanczosSolverType,VectorWithOffsetType> TargetingCorrelationsType;
 	typedef TargetingRixsStatic<LanczosSolverType,VectorWithOffsetType> TargetingRixsStaticType;
+	typedef TargetingRixsDynamic<LanczosSolverType,VectorWithOffsetType> TargetingRixsDynamicType;
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
@@ -251,6 +252,8 @@ public:
 			psi = new TargetingCorrelationsType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting == "TargetingRixsStatic") {
 			psi = new TargetingRixsStaticType(lrs_,model_,wft_,quantumSector_,ioIn_);
+		} else if (targeting == "TargetingRixsDynamic") {
+			psi = new TargetingRixsDynamicType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else {
 			throw PsimagLite::RuntimeError("Unknown targeting " + targeting + "\n");
 		}
