@@ -75,6 +75,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  * Implements the targeting required by
  * RIXS Static
+ * tv[3*site] = A^\dagger_{site}|gs>
+ * tv[3*site+1] = Imaginary of (w*-Htilde+i\eta)^{-1}A^\dagger_{site}|gs>
+ * tv[3*site+2] = Real of (w*-Htilde+i\eta)^{-1}A^\dagger_{site}|gs>
  *
  */
 

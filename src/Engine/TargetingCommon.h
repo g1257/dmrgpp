@@ -172,6 +172,16 @@ public:
 		return applyOpExpression_.getPhi(phiNew,Eg,direction,site,loopNumber);
 	}
 
+	SizeType getPhi(VectorWithOffsetType& phiNew,
+	                const VectorWithOffsetType& phiSrc,
+	                RealType Eg,
+	                SizeType direction,
+	                SizeType site,
+	                SizeType loopNumber)
+	{
+		return applyOpExpression_.getPhi(phiNew,phiSrc,Eg,direction,site,loopNumber);
+	}
+
 	const VectorWithOffsetType& psi() const
 	{
 		return applyOpExpression_.psi();

@@ -97,6 +97,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingMetts.h"
 #include "TargetingCorrelations.h"
 #include "TargetingRixsStatic.h"
+#include "TargetingRixsDynamic.h"
 #include "PsiBase64.h"
 
 namespace Dmrg {

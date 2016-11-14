@@ -294,6 +294,14 @@ public:
 		weightForContinuedFraction_ = PsimagLite::real(phi*phi);
 	}
 
+	void calcDynVectors(const VectorWithOffsetType& tv0,
+	                    const VectorWithOffsetType& tv1,
+	                    VectorWithOffsetType& tv2,
+	                    VectorWithOffsetType& tv3)
+	{
+		throw PsimagLite::RuntimeError("calcDynVectors unimplemented\n");
+	}
+
 	template<typename SomeTargetingCommonType>
 	void save(const SomeTargetingCommonType& targetingCommon,
 	          const VectorSizeType& block,
