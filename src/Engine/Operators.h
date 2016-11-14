@@ -161,7 +161,7 @@ public:
 				if (taskNumber>=total) break;
 
 				SizeType k = taskNumber;
-				if (isExcluded(k)) {
+				if (isExcluded(k) && k < operators_.size()) {
 					operators_[k].data.clear();
 					continue;
 				}
