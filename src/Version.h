@@ -1,4 +1,4 @@
 #ifndef DMRGPP_VERSION
-#define DMRGPP_VERSION "4.12"
+#define DMRGPP_VERSION "4.14"
 #endif
 
