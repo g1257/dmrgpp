@@ -145,7 +145,7 @@ public:
     BaseType,
     TargetParamsType> CorrectionVectorSkeletonType;
 
-	enum StageEnum {STAGE_DISABLED,STAGE_OPERATOR,STAGE_STATIC1,STAGE_STATIC2};
+	enum StageEnum {STAGE_DISABLED, STAGE_OPERATOR, STAGE_STATIC1, STAGE_STATIC2};
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
@@ -160,6 +160,7 @@ public:
 	                    const SizeType&,
 	                    InputValidatorType& ioIn)
 	    : BaseType(lrs,model,wft,1),
+	      stage_(STAGE_DISABLED),
 	      tstStruct_(ioIn,model),
 	      ioIn_(ioIn),
 	      progress_("TargetingRixsStatic"),
@@ -225,7 +226,18 @@ public:
 	void save(const VectorSizeType& block,
 	          PsimagLite::IoSimple::Out& io) const
 	{
-		skeleton_.save(this->common(),block,io);
+		assert(block.size() > 0);
+		SizeType site = block[0];
+		PsimagLite::String s = "#DCENTRALSITE=" + ttos(site);
+		io.printline(s);
+		s = "#DNUMBEROFVECTORS="+ttos(this->common().targetVectors().size());
+		io.printline(s);
+
+		for (SizeType i=0;i<this->common().targetVectors().size();i++) {
+			PsimagLite::String label = "targetVector"+ttos(i);
+			this->common().targetVectors(i).save(io,label);
+		}
+
 	}
 
 	void load(const PsimagLite::String& f)

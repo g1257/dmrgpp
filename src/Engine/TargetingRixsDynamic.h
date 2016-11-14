@@ -243,7 +243,7 @@ public:
 			this->common().targetVectors(2*site + 1) = ts.vector(3*site + 2);
 		}
 
-		this->common().psi().load(io,"PSI");
+		this->common().template load<TimeSerializerType>(f,0);
 	}
 
 private:
