@@ -356,8 +356,6 @@ public:
 	                      VectorWithOffsetType& phiNew,
 	                      SizeType systemOrEnviron)
 	{
-		wftAll(i,site,systemOrEnviron);
-
 		if (targetHelper_.tstStruct().startingLoops().size()>0 &&
 		        targetHelper_.tstStruct().startingLoops()[i]>loopNumber) return;
 
@@ -414,6 +412,21 @@ public:
 		                                     targetHelper_.lrs(),
 		                                     nk);
 		phiNew.collapseSectors();
+	}
+
+	void wftAll(SizeType i,
+	            SizeType site,
+	            SizeType systemOrEnviron)
+	{
+		for (SizeType index = 0; index < targetVectors_.size(); ++index) {
+			if (targetVectors_[index].size() == 0) continue;
+			VectorWithOffsetType phiNew;
+			if (targetHelper_.tstStruct().useQns())
+                                        phiNew.populateFromQns(nonZeroQns_,
+										                       targetHelper_.lrs().super());
+			wftOneVector(phiNew,i,site,systemOrEnviron,index,true);
+			targetVectors_[index] = phiNew;
+		}
 	}
 
 private:
@@ -611,21 +624,6 @@ private:
 
 		} else {
 			throw PsimagLite::RuntimeError("computePhi\n");
-		}
-	}
-
-	void wftAll(SizeType i,
-	            SizeType site,
-	            SizeType systemOrEnviron)
-	{
-		for (SizeType index = 0; index < targetVectors_.size(); ++index) {
-			if (targetVectors_[index].size() == 0) continue;
-			VectorWithOffsetType phiNew;
-			if (targetHelper_.tstStruct().useQns())
-                                        phiNew.populateFromQns(nonZeroQns_,
-										                       targetHelper_.lrs().super());
-			wftOneVector(phiNew,i,site,systemOrEnviron,index,true);
-			targetVectors_[index] = phiNew;
 		}
 	}
 

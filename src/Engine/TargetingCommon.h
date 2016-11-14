@@ -423,6 +423,13 @@ public:
 		applyOpExpression_.wftOneVector(phiNew,i,site,systemOrEnviron,index,guessNonZeroSector);
 	}
 
+	void wftAll(SizeType i,
+	            SizeType site,
+	            SizeType systemOrEnviron)
+	{
+		applyOpExpression_.wftAll(i,site,systemOrEnviron);
+	}
+
 	void cocoon(const BlockType& block,SizeType direction) const
 	{
 		const ModelType& model = targetHelper_.model();

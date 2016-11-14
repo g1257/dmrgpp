@@ -252,6 +252,7 @@ private:
 		// if no apply operator at site and add into targetVectors[site]
 		// also wft everything
 		if (stage_ != STAGE_STATIC2) {
+			this->common().wftAll(i,site,direction);
 			this->common().applyOneOperator(loopNumber,
 			                                i,
 			                                site,

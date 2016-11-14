@@ -261,6 +261,7 @@ private:
 		// see if operator at site has been applied and result put into targetVectors[site]
 		// if no apply operator at site and add into targetVectors[site]
 		// also wft everything
+		this->common().wftAll(i,site,direction);
 		this->common().applyOneOperator(loopNumber,
 		                                i,
 		                                site,
