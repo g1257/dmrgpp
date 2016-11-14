@@ -234,8 +234,16 @@ public:
 
 	void load(const PsimagLite::String& f)
 	{
-		this->common().template load<TimeSerializerType>(f);
-		// FIXME: Load vectors and reassign
+		typename BaseType::IoInputType io(f);
+
+		TimeSerializerType ts(io,BaseType::IoInputType::LAST_INSTANCE);
+		SizeType numberOfSites = this->lrs().super().block().size();
+		for (SizeType site = 0; site < numberOfSites; ++site) {
+			this->common().targetVectors(2*site) = ts.vector(3*site + 1);
+			this->common().targetVectors(2*site + 1) = ts.vector(3*site + 2);
+		}
+
+		this->common().psi().load(io,"PSI");
 	}
 
 private:
