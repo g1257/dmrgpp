@@ -1,0 +1,20 @@
+TotalNumberOfSites=6
+NumberOfTerms=1
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+	1
+	1.0
+
+hubbardU	6   1.0 1.0 1.0 1.0 1.0 1.0
+potentialV	 12 0.0 0.0 0.0 0.0 0.0 0.0
+                    0.0 0.0 0.0 0.0 0.0 0.0
+Model=HubbardOneBand
+SolverOptions=none
+Version=version
+OutputFile=data5500.txt
+InfiniteLoopKeptStates=100
+FiniteLoops 4  2 100 0 -2 100 0 -2 100 0 2 100 0
+TargetElectronsUp=3
+TargetElectronsDown=3
