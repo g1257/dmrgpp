@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "AllocatorCpu.h"
 #include <sched.h>
 #include <unistd.h>
-#ifndef PTHREAD_NO_ASSIGN_AFFINITIES
+#ifdef PTHREAD_ASSIGN_AFFINITIES
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
@@ -201,7 +201,7 @@ private:
 	                 SizeType threadNum,
 	                 SizeType cores) const
 	{
-#ifndef PTHREAD_NO_ASSIGN_AFFINITIES
+#ifdef PTHREAD_ASSIGN_AFFINITIES
 		cpu_set_t* cpuset = new cpu_set_t;
 		int cpu = threadNum % cores;
 		CPU_ZERO(cpuset);
