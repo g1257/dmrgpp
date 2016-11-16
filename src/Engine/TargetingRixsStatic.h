@@ -123,12 +123,11 @@ public:
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
-	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
-	typedef DynamicSerializer<VectorWithOffsetType,PostProcType> DynamicSerializerType;
+	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
 	typedef CorrectionVectorFunction<LanczosMatrixType,TargetParamsType>
 	CorrectionVectorFunctionType;
@@ -228,7 +227,7 @@ public:
 	{
 		assert(block.size() > 0);
 		SizeType site = block[0];
-		PsimagLite::String s = "#DCENTRALSITE=" + ttos(site);
+		PsimagLite::String s = "#TCENTRALSITE=" + ttos(site);
 		io.printline(s);
 		s = "#DNUMBEROFVECTORS="+ttos(this->common().targetVectors().size());
 		io.printline(s);
