@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -83,113 +83,113 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TypeToString.h"
 
 namespace Dmrg {
-	
-	template<typename VectorType>
-	class TimeSerializer {
 
-		typedef typename VectorType::value_type VectorElementType;
-		typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
+template<typename VectorType>
+class TimeSerializer {
 
-		public:
-			
-			// Unfortunately we need a default ctor
-			// to build an array of these
-			TimeSerializer() { }
-			
-			TimeSerializer(RealType currentTime,
-				       SizeType site,
-				       const typename PsimagLite::Vector<VectorType>::Type& targetVectors,
-				       SizeType marker)
-			: currentTime_(currentTime),
-			  site_(site),
-			  targetVectors_(targetVectors),
-			  marker_(marker)
-			{}
-			
-			TimeSerializer(typename PsimagLite::IoSimple::In& io,
-			               PsimagLite::IoSimple::In::LongIntegerType lastInstance = 0)
-			{
-				RealType x=0;
-				PsimagLite::String s = "#TIME=";
-				if (lastInstance) io.readline(x,s,lastInstance);
-				else io.readline(x,s);
-				if (x<0) throw PsimagLite::RuntimeError("TimeSerializer:: time cannot be negative\n");
-				currentTime_ = x;
-				
-				s = "#TCENTRALSITE=";
-				int xi=0;
-				io.readline(xi,s);
-				if (xi<0) throw PsimagLite::RuntimeError("TimeSerializer:: site cannot be negative\n");
-				site_ = xi;
-				
-				s = "#TNUMBEROFVECTORS=";
-				io.readline(xi,s);
-				if (xi<=0) throw PsimagLite::RuntimeError("TimeSerializer:: n. of vectors must be positive\n");
-				targetVectors_.resize(xi);
-				for (SizeType i=0;i<targetVectors_.size();i++) {
-					s = "targetVector"+ttos(i);
-					targetVectors_[i].load(io,s);
-				}
-				s = "#MARKER=";
-				io.readline(xi,s);
-				if (xi<0) throw PsimagLite::RuntimeError("TimeSerializer:: marker must be positive\n");
-				marker_=xi;
-			}
-			
-			SizeType size(SizeType i=0) const
-			{
-				return  targetVectors_[i].size();
-			}
-			
-			RealType time() const { return currentTime_; }
-			
-			SizeType site() const
-			{
-				return  site_;
-			}
-			
-			const VectorType& vector(SizeType i=0) const 
-			{
-				return targetVectors_[i];
-			}
-			
-			SizeType marker() const
-			{
-				return marker_;
-			}
-			
-			template<typename IoOutputter>
-			void save(IoOutputter& io) const
-			{
-				PsimagLite::String s = "#TIME=" + ttos(currentTime_);
-				io.printline(s);
-				s = "#TCENTRALSITE=" + ttos(site_);
-				io.printline(s);
-				s = "#TNUMBEROFVECTORS="+ttos(targetVectors_.size());
-				io.printline(s);
+	typedef typename VectorType::value_type VectorElementType;
+	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
 
-//				io.print("#TIME=",currentTime_);
+public:
 
-//				io.print("#TCENTRALSITE=",site_);
+	// Unfortunately we need a default ctor
+	// to build an array of these
+	TimeSerializer() { }
 
-//				io.print("#TNUMBEROFVECTORS=",targetVectors_.size());
+	TimeSerializer(RealType currentTime,
+	               SizeType site,
+	               const typename PsimagLite::Vector<VectorType>::Type& targetVectors,
+	               SizeType marker)
+	    : currentTime_(currentTime),
+	      site_(site),
+	      targetVectors_(targetVectors),
+	      marker_(marker)
+	{}
 
-				for (SizeType i=0;i<targetVectors_.size();i++) {
-					PsimagLite::String label = "targetVector"+ttos(i)+"_"+ttos(currentTime_);
-					targetVectors_[i].save(io,label);
-				}
+	TimeSerializer(typename PsimagLite::IoSimple::In& io,
+	               PsimagLite::IoSimple::In::LongIntegerType lastInstance = 0)
+	{
+		RealType x=0;
+		PsimagLite::String s = "#TIME=";
+		if (lastInstance) io.readline(x,s,lastInstance);
+		else io.readline(x,s);
+		if (x<0) throw PsimagLite::RuntimeError("TimeSerializer:: time cannot be negative\n");
+		currentTime_ = x;
 
-//				io.print("#MARKER=",marker_);
-				s="#MARKER="+ttos(marker_);
-				io.printline(s);
-			}
+		s = "#TCENTRALSITE=";
+		int xi=0;
+		io.readline(xi,s);
+		if (xi<0) throw PsimagLite::RuntimeError("TimeSerializer:: site cannot be negative\n");
+		site_ = xi;
 
-		private:
-			RealType currentTime_;
-			SizeType site_;
-			typename PsimagLite::Vector<VectorType>::Type targetVectors_;
-			SizeType marker_;
-	}; // class TimeSerializer
+		s = "#TNUMBEROFVECTORS=";
+		io.readline(xi,s);
+		if (xi<=0) throw PsimagLite::RuntimeError("TimeSerializer:: n. of vectors must be positive\n");
+		targetVectors_.resize(xi);
+		for (SizeType i=0;i<targetVectors_.size();i++) {
+			s = "targetVector"+ttos(i);
+			targetVectors_[i].load(io,s);
+		}
+		s = "#MARKER=";
+		io.readline(xi,s);
+		if (xi<0) throw PsimagLite::RuntimeError("TimeSerializer:: marker must be positive\n");
+		marker_=xi;
+	}
+
+	SizeType size(SizeType i=0) const
+	{
+		return  targetVectors_[i].size();
+	}
+
+	RealType time() const { return currentTime_; }
+
+	SizeType site() const
+	{
+		return  site_;
+	}
+
+	const VectorType& vector(SizeType i=0) const
+	{
+		return targetVectors_[i];
+	}
+
+	SizeType marker() const
+	{
+		return marker_;
+	}
+
+	template<typename IoOutputter>
+	void save(IoOutputter& io) const
+	{
+		PsimagLite::String s = "#TIME=" + ttos(currentTime_);
+		io.printline(s);
+		s = "#TCENTRALSITE=" + ttos(site_);
+		io.printline(s);
+		s = "#TNUMBEROFVECTORS="+ttos(targetVectors_.size());
+		io.printline(s);
+
+		//				io.print("#TIME=",currentTime_);
+
+		//				io.print("#TCENTRALSITE=",site_);
+
+		//				io.print("#TNUMBEROFVECTORS=",targetVectors_.size());
+
+		for (SizeType i=0;i<targetVectors_.size();i++) {
+			PsimagLite::String label = "targetVector"+ttos(i)+"_"+ttos(currentTime_);
+			targetVectors_[i].save(io,label);
+		}
+
+		//				io.print("#MARKER=",marker_);
+		s="#MARKER="+ttos(marker_);
+		io.printline(s);
+	}
+
+private:
+	RealType currentTime_;
+	SizeType site_;
+	typename PsimagLite::Vector<VectorType>::Type targetVectors_;
+	SizeType marker_;
+}; // class TimeSerializer
 } // namespace Dmrg 
 
 /*@}*/

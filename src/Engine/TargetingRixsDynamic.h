@@ -95,9 +95,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingBase.h"
 #include "ParametersForSolver.h"
 #include "ParallelTriDiag.h"
-#include "DynamicSerializer.h"
 #include "FreqEnum.h"
 #include "CorrectionVectorSkeleton.h"
+#include "TimeSerializer.h"
 
 namespace Dmrg {
 
@@ -127,11 +127,11 @@ public:
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
+	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
-	typedef DynamicSerializer<VectorWithOffsetType,PostProcType> DynamicSerializerType;
 	typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
 	typedef CorrectionVectorFunction<LanczosMatrixType,TargetParamsType>
 	CorrectionVectorFunctionType;
@@ -235,14 +235,14 @@ public:
 	{
 		typename BaseType::IoInputType io(f);
 
-		DynamicSerializerType ts(io,BaseType::IoInputType::LAST_INSTANCE);
+		TimeSerializerType ts(io,BaseType::IoInputType::LAST_INSTANCE);
 		SizeType numberOfSites = this->lrs().super().block().size();
 		for (SizeType site = 0; site < numberOfSites; ++site) {
 			this->common().targetVectors(2*site) = ts.vector(3*site + 1);
 			this->common().targetVectors(2*site + 1) = ts.vector(3*site + 2);
 		}
 
-		this->common().template load<DynamicSerializerType>(f,0);
+		this->common().template load<TimeSerializerType>(f,0);
 	}
 
 private:

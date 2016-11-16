@@ -285,7 +285,7 @@ private:
 
 		PsimagLite::String options = this->model().params().options;
 		bool normalizeTimeVectors =
-		         (options.find("normalizeTimeVectors") != std::string::npos);
+		        (options.find("normalizeTimeVectors") != std::string::npos);
 		if (options.find("TargetingAncilla") != std::string::npos)
 			normalizeTimeVectors = true;
 		if (options.find("neverNormalizeVectors") != std::string::npos)
@@ -372,7 +372,7 @@ private:
 
 		if (modelName == "HubbardOneBand" ||
 		        modelName == "HubbardOneBandExtended" ||
-		        modelName == "HubbardOneBandExtendedSuper" ||		        
+		        modelName == "HubbardOneBandExtendedSuper" ||
 		        modelName == "Immm") {
 			this->common().cocoonLegacy(direction,block);
 		}

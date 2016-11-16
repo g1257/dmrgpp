@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Braket.h"
 #include "ProgressIndicator.h"
 #include "BLAS.h"
-#include "DynamicSerializer.h"
+#include "TimeSerializer.h"
 #include "TargetParamsDynamic.h"
 #include "VectorWithOffsets.h"
 #include "ContinuedFraction.h"
@@ -110,7 +110,7 @@ public:
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
-	typedef DynamicSerializer<VectorWithOffsetType,PostProcType> DynamicSerializerType;
+	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -224,13 +224,19 @@ public:
 	void timeHasAdvanced() { applyOpExpression_.timeHasAdvanced(); }
 
 	template<typename IoOutputType>
-	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
+	void save(const VectorSizeType& block,
 	          IoOutputType& io,
 	          const PostProcType& cf,
 	          const VectorVectorWithOffsetType& targetVectors) const
 	{
-		DynamicSerializerType dynS(cf,block[0],targetVectors);
-		dynS.save(io);
+		cf.save(io);
+		SizeType marker = (noStageIs(DISABLED)) ? 1 : 0;
+
+		TimeSerializerType ts(currentTime(),
+		                      block[0],
+		                      applyOpExpression_.targetVectors(),
+		                      marker);
+		ts.save(io);
 	}
 
 	template<typename SomeSerializerType>
