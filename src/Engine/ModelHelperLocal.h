@@ -223,17 +223,15 @@ public:
 		}
 
 		matrixBlock.setRow(i,counter);
-
-		kroneckerDumper_.push(A,B,link.value,link.fermionOrBoson);
 	}
 
 	// Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or
 	// viceversa (inter)
 	// Has been changed to accomodate for reflection symmetry
-	void fastOpProdInter(VectorSparseElementType&x,
-	                     const VectorSparseElementType&y,
-	                     SparseMatrixType const &A,
-	                     SparseMatrixType const &B,
+	void fastOpProdInter(VectorSparseElementType& x,
+	                     const VectorSparseElementType& y,
+	                     const SparseMatrixType& A,
+	                     const SparseMatrixType& B,
 	                     const LinkType& link) const
 	{
 		RealType fermionSign =  (link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
@@ -287,6 +285,8 @@ public:
 
 			x[i] += sum;
 		}
+
+		kroneckerDumper_.push(A,B,link.value,link.fermionOrBoson,y);
 	}
 
 	// Let H_{alpha,beta; alpha',beta'} =
@@ -321,6 +321,8 @@ public:
 			x[i] += sum;
 			sum = 0.0;
 		}
+
+		kroneckerDumper_.push(true,hamiltonian,y);
 	}
 
 	// Let  H_{alpha,beta; alpha',beta'} =
@@ -353,6 +355,8 @@ public:
 			x[i] += sum;
 			sum = 0.0;
 		}
+
+		kroneckerDumper_.push(false,hamiltonian,y);
 	}
 
 	// if option==true let H_{alpha,beta; alpha',beta'} =
@@ -409,8 +413,6 @@ public:
 		}
 
 		matrixBlock.setRow(lrs_.super().partition(m+1)-offset,counter);
-
-		kroneckerDumper_.push(option,hamiltonian);
 	}
 
 	const LeftRightSuperType& leftRightSuper() const

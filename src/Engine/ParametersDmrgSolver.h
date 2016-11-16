@@ -284,9 +284,9 @@ struct ParametersDmrgSolver {
 		} catch (std::exception&) {}
 
 		if (options.find("KroneckerDumper") != PsimagLite::String::npos) {
-			if (options.find("MatrixVectorStored") == PsimagLite::String::npos) {
-				PsimagLite::String msg("FATAL: KroneckerDumper needs MatrixVectorStored\n");
-				throw PsimagLite::RuntimeError(msg);
+			if (options.find("MatrixVectorStored") != PsimagLite::String::npos) {
+				PsimagLite::String msg("FATAL: KroneckerDumper cannot run with ");
+				throw PsimagLite::RuntimeError(msg + "MatrixVectorStored\n");
 			}
 		} else {
 			if (dumperBegin > 0 || dumperEnd > 0) {

@@ -18,6 +18,7 @@ class KroneckerDumper {
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -43,8 +44,7 @@ public:
 	KroneckerDumper(const ParamsForKroneckerDumper* p,
 	                const LeftRightSuperType& lrs,
 	                SizeType m)
-	    : enabled_(p && p->enabled),
-	      pairCount_(0)
+	    : enabled_(p && p->enabled),pairCount_(0),disable_(false)
 	{
 		if (!enabled_) return;
 
@@ -91,9 +91,17 @@ public:
 	void push(const SparseMatrixType& A,
 	          const SparseMatrixType& B,
 	          ComplexOrRealType val,
-	          ProgramGlobals::FermionOrBosonEnum bosonOrFermion)
+	          ProgramGlobals::FermionOrBosonEnum bosonOrFermion,
+	          const VectorType& y)
 	{
 		if (!enabled_) return;
+		if (disable_) return;
+
+		assert(y_.size() > 0);
+		if (notFirstVector(y)) {
+			disable_ = true;
+			return;
+		}
 
 		ConcurrencyType::mutexLock(&mutex_);
 		fout_<<"#START_AB_PAIR\n";
@@ -111,9 +119,19 @@ public:
 		ConcurrencyType::mutexUnlock(&mutex_);
 	}
 
-	void push(bool option,const SparseMatrixType& hamiltonian)
+	void push(bool option,
+	          const SparseMatrixType& hamiltonian,
+	          const VectorType& y)
 	{
 		if (!enabled_) return;
+		if (disable_) return;
+
+		if (y_.size() == 0) y_ = y;
+		if (notFirstVector(y)) {
+			disable_ = true;
+			return;
+		}
+
 		if (option)
 			fout_<<"#LeftHamiltonian\n";
 		else
@@ -190,9 +208,18 @@ private:
 		}
 	}
 
+	bool notFirstVector(const VectorType& y) const
+	{
+		VectorType ydiff;
+		ydiff <= y - y_;
+		return (PsimagLite::norm(ydiff) > 1e-8);
+	}
+
 	static SizeType counter_;
 	bool enabled_;
 	SizeType pairCount_;
+	bool disable_;
+	VectorType y_;
 	std::ofstream fout_;
 	VectorBoolType signs_;
 	ConcurrencyType::MutexType mutex_;
