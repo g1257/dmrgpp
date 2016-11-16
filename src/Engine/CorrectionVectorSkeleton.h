@@ -299,7 +299,12 @@ public:
 	                    VectorWithOffsetType& tv2,
 	                    VectorWithOffsetType& tv3)
 	{
-		throw PsimagLite::RuntimeError("calcDynVectors unimplemented\n");
+		calcDynVectors(tv0,tv2,tv3);
+		VectorWithOffsetType tv4;
+		VectorWithOffsetType tv5;
+		calcDynVectors(tv1,tv4,tv5);
+		tv2 += (-1.0)*tv5;
+		tv3 += tv4;
 	}
 
 	template<typename SomeTargetingCommonType>

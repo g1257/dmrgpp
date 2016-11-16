@@ -95,7 +95,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingBase.h"
 #include "ParametersForSolver.h"
 #include "ParallelTriDiag.h"
-#include "TimeSerializer.h"
+#include "DynamicSerializer.h"
 #include "FreqEnum.h"
 #include "CorrectionVectorSkeleton.h"
 
@@ -127,7 +127,6 @@ public:
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
-	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
@@ -236,14 +235,14 @@ public:
 	{
 		typename BaseType::IoInputType io(f);
 
-		TimeSerializerType ts(io,BaseType::IoInputType::LAST_INSTANCE);
+		DynamicSerializerType ts(io,BaseType::IoInputType::LAST_INSTANCE);
 		SizeType numberOfSites = this->lrs().super().block().size();
 		for (SizeType site = 0; site < numberOfSites; ++site) {
 			this->common().targetVectors(2*site) = ts.vector(3*site + 1);
 			this->common().targetVectors(2*site + 1) = ts.vector(3*site + 2);
 		}
 
-		this->common().template load<TimeSerializerType>(f,0);
+		this->common().template load<DynamicSerializerType>(f,0);
 	}
 
 private:
