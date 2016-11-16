@@ -274,16 +274,17 @@ private:
 		                                direction);
 
 		calcDynVectors(site,direction);
-		// FIXME: print correct observable
-		//		for (SizeType i = 1; i < this->common().targetVectors().size(); ++i) {
-		//			PsimagLite::String label = "P" + ttos(i);
-		//			this->common().cocoon(direction,
-		//			                      site,
-		//			                      this->common().psi(),
-		//			                      "PSI",
-		//			                      this->common().targetVectors(i),
-		//			                      label);
-		//		}
+
+		SizeType numberOfSites = this->lrs().super().block().size();
+		ComplexOrRealType rr = this->common().rixsCocoon(direction,site,2*site,2*numberOfSites);
+		ComplexOrRealType ri = this->common().rixsCocoon(direction,site,2*site,2*numberOfSites+1);
+		ComplexOrRealType ir = this->common().rixsCocoon(direction,site,2*site+1,2*numberOfSites);
+		ComplexOrRealType ii = this->common().rixsCocoon(direction,site,2*site+1,2*numberOfSites+1);
+
+		std::cout<<site<<" "<<(ri+ir)<<" 0"; // 0 here is the currentTime
+		std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
+		std::cout<<site<<" "<<(rr-ii)<<" 0"; // 0 here is the currentTime
+		std::cout<<" <gs|A|P3> 1\n";   // 1 here is the "superdensity"
 	}
 
 	void calcDynVectors(SizeType site,

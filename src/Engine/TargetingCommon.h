@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2014, UT-Battelle, LLC
+Copyright (c) 2009-2016, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 3.0]
+[DMRG++, Version 4.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -524,6 +524,40 @@ public:
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
 
+	ComplexOrRealType rixsCocoon(SizeType direction,
+	                             SizeType site,
+	                             SizeType index1,
+	                             SizeType index2) const
+	{
+		ComplexOrRealType value = 0.0;
+		VectorStringType vecStr = getOperatorLabels();
+		if (vecStr.size() == 0) return value;
+		if (vecStr.size() > 1) {
+			throw PsimagLite::RuntimeError("rixsCocoon: supports only 1 insitu operator\n");
+		}
+
+		SizeType numberOfSites = targetHelper_.model().geometry().numberOfSites();
+		BorderEnumType border = (site == 0 || site == numberOfSites - 1) ?
+		            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
+
+		const VectorWithOffsetType& v1 =  applyOpExpression_.targetVectors(index1);
+		const VectorWithOffsetType& v2 =  applyOpExpression_.targetVectors(index2);
+
+		assert(vecStr.size() == 1);
+		for (SizeType i=0;i<vecStr.size();i++) {
+			PsimagLite::String opLabel = vecStr[i];
+
+			BraketType Braket(targetHelper_.model(),"<gs|"+opLabel+"[" + ttos(site) + "]|gs>");
+
+			OperatorType A = Braket.op(0);
+
+			value = test_(v1,v2,direction,site,A,border);
+		}
+
+		return value;
+	}
+
+
 	const ComplexOrRealType& inSitu(SizeType site) const
 	{
 		assert(site < inSitu_.size());
@@ -570,7 +604,8 @@ private:
 		return -1;
 	}
 
-	void cocoon_(SizeType direction,SizeType site,
+	void cocoon_(SizeType direction,
+	             SizeType site,
 	             const VectorWithOffsetType& v1,
 	             PsimagLite::String label1,
 	             const VectorWithOffsetType& v2,
