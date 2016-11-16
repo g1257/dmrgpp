@@ -226,17 +226,14 @@ public:
 	          PsimagLite::IoSimple::Out& io) const
 	{
 		assert(block.size() > 0);
-		SizeType site = block[0];
-		PsimagLite::String s = "#TCENTRALSITE=" + ttos(site);
-		io.printline(s);
-		s = "#DNUMBEROFVECTORS="+ttos(this->common().targetVectors().size());
-		io.printline(s);
 
-		for (SizeType i=0;i<this->common().targetVectors().size();i++) {
-			PsimagLite::String label = "targetVector"+ttos(i);
-			this->common().targetVectors(i).save(io,label);
-		}
-
+		SizeType marker = (this->common().noStageIs(STAGE_DISABLED)) ? 1 : 0;
+		TimeSerializerType ts(this->common().currentTime(),
+		                      block[0],
+		                      this->common().targetVectors(),
+		                      marker);
+		ts.save(io);
+		this->common().psi().save(io,"PSI");
 	}
 
 	void load(const PsimagLite::String& f)

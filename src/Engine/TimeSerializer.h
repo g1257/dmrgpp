@@ -113,18 +113,21 @@ public:
 		PsimagLite::String s = "#TIME=";
 		if (lastInstance) io.readline(x,s,lastInstance);
 		else io.readline(x,s);
-		if (x<0) throw PsimagLite::RuntimeError("TimeSerializer:: time cannot be negative\n");
+		if (x<0)
+			throw PsimagLite::RuntimeError("TimeSerializer:: time cannot be negative\n");
 		currentTime_ = x;
 
 		s = "#TCENTRALSITE=";
 		int xi=0;
 		io.readline(xi,s);
-		if (xi<0) throw PsimagLite::RuntimeError("TimeSerializer:: site cannot be negative\n");
+		if (xi<0)
+			throw PsimagLite::RuntimeError("TimeSerializer:: site cannot be negative\n");
 		site_ = xi;
 
 		s = "#TNUMBEROFVECTORS=";
 		io.readline(xi,s);
-		if (xi<=0) throw PsimagLite::RuntimeError("TimeSerializer:: n. of vectors must be positive\n");
+		if (xi<=0)
+			throw PsimagLite::RuntimeError("TimeSerializer:: n. of vectors must be positive\n");
 		targetVectors_.resize(xi);
 		for (SizeType i=0;i<targetVectors_.size();i++) {
 			s = "targetVector"+ttos(i);
@@ -168,18 +171,11 @@ public:
 		s = "#TNUMBEROFVECTORS="+ttos(targetVectors_.size());
 		io.printline(s);
 
-		//				io.print("#TIME=",currentTime_);
-
-		//				io.print("#TCENTRALSITE=",site_);
-
-		//				io.print("#TNUMBEROFVECTORS=",targetVectors_.size());
-
 		for (SizeType i=0;i<targetVectors_.size();i++) {
 			PsimagLite::String label = "targetVector"+ttos(i)+"_"+ttos(currentTime_);
 			targetVectors_[i].save(io,label);
 		}
 
-		//				io.print("#MARKER=",marker_);
 		s="#MARKER="+ttos(marker_);
 		io.printline(s);
 	}

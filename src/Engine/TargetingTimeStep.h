@@ -239,8 +239,7 @@ public:
 		msg<<"Saving state...";
 		progress_.printline(msg,std::cout);
 
-		SizeType marker = 0;
-		if (this->common().noStageIs(DISABLED)) marker = 1;
+		SizeType marker = (this->common().noStageIs(DISABLED)) ? 1 : 0;
 
 		TimeSerializerType ts(this->common().currentTime(),
 		                      block[0],
