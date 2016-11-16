@@ -374,11 +374,13 @@ private:
 		PsimagLite::String options = parameters_.options;
 		SizeType threadId = 0;
 
+		SizeType nOfQns = model_.targetQuantum().other.size() + 1;
 		bool dumperEnabled = (options.find("KroneckerDumper") != PsimagLite::String::npos);
 		ParamsForKroneckerDumperType paramsKrDumper(dumperEnabled,
 		                                            parameters_.dumperBegin,
 		                                            parameters_.dumperEnd,
-		                                            parameters_.precision);
+		                                            parameters_.precision,
+		                                            nOfQns);
 		ParamsForKroneckerDumperType* paramsKrDumperPtr = 0;
 		if (lrs.super().block().size() == model_.geometry().numberOfSites())
 			paramsKrDumperPtr = &paramsKrDumper;

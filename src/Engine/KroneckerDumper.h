@@ -31,14 +31,16 @@ public:
 		ParamsForKroneckerDumper(bool enable = false,
 		                         SizeType b = 0,
 		                         SizeType e = 0,
-		                         SizeType p = 6)
-		    : enabled(enable), begin(b), end(e), precision(p)
+		                         SizeType p = 6,
+		                         SizeType nOfQns_ = 0)
+		    : enabled(enable), begin(b), end(e), precision(p),nOfQns(nOfQns_)
 		{}
 
 		bool enabled;
 		SizeType begin;
 		SizeType end;
 		SizeType precision;
+		SizeType nOfQns;
 	}; // struct ParamsForKroneckerDumper
 
 	KroneckerDumper(const ParamsForKroneckerDumper* p,
@@ -55,6 +57,11 @@ public:
 			return;
 		}
 
+		if (p->nOfQns == 0) {
+			PsimagLite::String msg("KroneckerDumper::ctor(): internal error ");
+			throw PsimagLite::RuntimeError(msg + "nOfQns\n");
+		}
+
 		ConcurrencyType::mutexInit(&mutex_);
 
 		PsimagLite::String filename = "kroneckerDumper" + ttos(counter_) + ".txt";
@@ -64,13 +71,14 @@ public:
 		fout_<<"#Instance="<<counter_<<"\n";
 		fout_<<"#EncodingOfQuantumNumbers="<<(2*ProgramGlobals::maxElectronsOneSpin)<<"\n";
 
-		printOneBasis("Left",lrs.left());
-		printOneBasis("Right",lrs.right());
+		printOneBasis("Left",lrs.left(),p->nOfQns);
+		printOneBasis("Right",lrs.right(),p->nOfQns);
 
 		fout_<<"#SuperBasisPermutation\n";
 		fout_<<lrs.super().permutationVector();
 		SizeType qtarget = lrs.super().qn(lrs.super().partition(m));
-		PairSizeType etarget = getNupNdown(qtarget);
+
+		PairSizeType etarget = getNupNdown(qtarget,p->nOfQns);
 		fout_<<"#TargetElectronsUp="<<etarget.first<<"\n";
 		fout_<<"#TargetElectronsDown="<<etarget.second<<"\n";
 
@@ -153,7 +161,9 @@ private:
 		}
 	}
 
-	void printOneBasis(PsimagLite::String name, const BasisType& basis)
+	void printOneBasis(PsimagLite::String name,
+	                   const BasisType& basis,
+	                   SizeType nOfQns)
 	{
 		fout_<<"#" + name + "Basis\n";
 		fout_<<"#Sites\n";
@@ -164,7 +174,7 @@ private:
 		fout_<<basis.size()<<"\n";
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			SizeType q = basis.pseudoEffectiveNumber(i);
-			PairSizeType nupDown = getNupNdown(q);
+			PairSizeType nupDown = getNupNdown(q, nOfQns);
 			fout_<<nupDown.first<<" "<<nupDown.second<<"\n";
 		}
 
@@ -172,12 +182,11 @@ private:
 		fout_<<basis.electronsVector();
 	}
 
-	PairSizeType getNupNdown(SizeType q) const
+	PairSizeType getNupNdown(SizeType q, SizeType nOfQns) const
 	{
-		VectorSizeType qns = SymmetryElectronsSzType::decodeQuantumNumber(q,2);
+		VectorSizeType qns = SymmetryElectronsSzType::decodeQuantumNumber(q,nOfQns);
 		SizeType electrons = qns[1];
 		SizeType electronsUp = qns[0];
-		assert(qns[1] >= qns[0]);
 		SizeType electronsDown = electrons - qns[0];
 		return PairSizeType(electronsUp,electronsDown);
 	}
