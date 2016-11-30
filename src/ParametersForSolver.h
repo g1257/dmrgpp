@@ -128,7 +128,10 @@ struct ParametersForSolver {
 
 		try {
 			io.readline(options,prefix + "Options=");
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+			options = "none";
+			io.rewind();
+		}
 
 		try {
 			io.readline(oneOverA,prefix + "OneOverA=");

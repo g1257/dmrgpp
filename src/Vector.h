@@ -238,7 +238,6 @@ void operator<=(vector<T2,A>& v,
 }
 
 // vector - vector
-
 template<typename T1,typename T2,typename A1, typename A2>
 ClosureOperator<vector<T1,A1>,vector<T2,A2>,ClosureOperations::OP_MINUS>
 operator-(const vector<T1,A1>& v1,const vector<T2,A2>& v2)
