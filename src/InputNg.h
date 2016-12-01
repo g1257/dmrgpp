@@ -484,6 +484,8 @@ public:
 			return total;
 		}
 
+		void rewind() {}
+
 		const PsimagLite::String& data() const { return data_; }
 
 		void readline(String& val,
