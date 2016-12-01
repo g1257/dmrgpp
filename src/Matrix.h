@@ -637,21 +637,21 @@ typename EnableIf<(IsMatrixLike<T1>::True || IsMatrixLike<T2>::True)
 std::ClosureOperator<T1,T2,std::ClosureOperations::OP_MULT> >::Type operator*(const T1& a,
                                                                               const T2& b)
 {
-	return std::ClosureOperator<T1,T2,std::ClosureOperations::OP_MULT>(a,b);
+    return std::ClosureOperator<T1,T2,std::ClosureOperations::OP_MULT>(a,b);
 }
 
 template<typename T>
 std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_PLUS>
 operator+(const Matrix<T>& a,const Matrix<T>& b)
 {
-	return std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_PLUS>(a,b);
+    return std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_PLUS>(a,b);
 }
 
 template<typename T>
 std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_MINUS>
 operator-(const Matrix<T>& a,const Matrix<T>& b)
 {
-	return std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_MINUS>(a,b);
+    return std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_MINUS>(a,b);
 }
 
 template<typename T,typename A>
@@ -793,6 +793,13 @@ void svd(char jobz,Matrix<double> &a,VectorLikeType& s,Matrix<double>& vt)
 #ifdef NO_LAPACK
 	throw RuntimeError("svd: dgesdd_: NO LAPACK!\n");
 #else
+	if (jobz != 'A' && jobz != 'S') {
+		String msg("svd: jobz must be either A or S");
+		String jobzString = " ";
+		jobzString[0] = jobz;
+		throw RuntimeError(msg + ", not " + jobzString + "\n");
+	}
+
 	int m = a.n_row();
 	int n = a.n_col();
 	std::cerr<<"Trying svd(...) "<<m<<"x"<<n<<"\n";
@@ -801,10 +808,9 @@ void svd(char jobz,Matrix<double> &a,VectorLikeType& s,Matrix<double>& vt)
 
 	s.resize(min);
 	int ldu = m;
-	int ucol = m;
+	int ucol = (jobz == 'A') ? m : min;
 	Matrix<double> u(ldu,ucol);
-	int ldvt = n;
-	//Matrix<double> vt(ldvt,n);
+	int ldvt = (jobz == 'A') ? n : min;
 	vt.resize(ldvt,n);
 
 	Vector<double>::Type work(100,0);
