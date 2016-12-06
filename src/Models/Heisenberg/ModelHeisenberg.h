@@ -355,6 +355,17 @@ public:
 
 private:
 
+	SizeType logBase2(SizeType x) const
+	{
+		SizeType counter = 0;
+		while (x > 0) {
+			x >>= 1;
+			counter++;
+		}
+
+		return (counter == 0) ? counter : counter - 1;
+	}
+
 	//! Find S^+_site in the natural basis natBasis
 	SparseMatrixType findSplusMatrices(SizeType site,
 	                                   const HilbertBasisType& natBasis) const
@@ -363,7 +374,11 @@ private:
 		MatrixType cm(total,total);
 		RealType j = 0.5*modelParameters_.twiceTheSpin;
 		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
-		SizeType mask = modelParameters_.twiceTheSpin;
+		SizeType bits = 1 + logBase2(modelParameters_.twiceTheSpin);
+		SizeType mask = 1;
+		mask <<= bits; // mask = 2^bits
+		assert(mask > 0);
+		mask--;
 		mask <<= (site*bitsForOneSite);
 
 		for (SizeType ii=0;ii<total;ii++) {
@@ -372,12 +387,15 @@ private:
 			SizeType ketsite = ket & mask;
 			ketsite >>= (site*bitsForOneSite);
 
+			assert(ketsite == ket);
 			SizeType brasite = ketsite + 1;
 			if (brasite >= modelParameters_.twiceTheSpin+1) continue;
 
-			SizeType bra = (ket ^ mask);
+			SizeType bra = ket & (~mask);
+			assert(bra == 0);
 			brasite <<= (site*bitsForOneSite);
 			bra |= brasite;
+			assert(bra == brasite);
 
 			RealType m = ketsite - j;
 			RealType x = j*(j+1)-m*(m+1);
@@ -398,7 +416,11 @@ private:
 		MatrixType cm(total,total);
 		RealType j = 0.5*modelParameters_.twiceTheSpin;
 		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
-		SizeType mask = modelParameters_.twiceTheSpin;
+		SizeType bits = logBase2(modelParameters_.twiceTheSpin) + 1;
+		SizeType mask = 1;
+		mask <<= bits; // mask = 2^bits
+		assert(mask > 0);
+		mask--;
 		mask <<= (site*bitsForOneSite);
 
 		for (SizeType ii=0;ii<total;ii++) {
@@ -406,7 +428,7 @@ private:
 
 			SizeType ketsite = ket & mask;
 			ketsite >>= (site*bitsForOneSite);
-
+			assert(ketsite == ket);
 			RealType m = ketsite - j;
 			cm(ket,ket) = m;
 		}
