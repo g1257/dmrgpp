@@ -297,6 +297,13 @@ public:
 					break;
 				case EQUALSIGN:
 					if (buffer=="" || state_==IN_COMMENT) break;
+
+					// support = sign in value text
+					if (state_ == IN_VALUE_TEXT) {
+						buffer += data_.at(i);
+						break;
+					}
+
 					saveBuffer(buffer,EQUALSIGN);
 					buffer="";
 					break;
@@ -313,6 +320,7 @@ public:
 							state_=IN_VALUE_NUMERIC;
 						}
 					}
+
 					buffer += data_.at(i);
 					break;
 				}
