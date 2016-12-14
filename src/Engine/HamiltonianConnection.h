@@ -192,12 +192,12 @@ public:
 			if (ix>=total) break;
 
 			if (ix == 0) {
-				modelHelper_.hamiltonianLeftProduct(x_,y_);
+				modelHelper_.hamiltonianLeftProduct(xtemp_[threadNum],y_);
 				continue;
 			}
 
 			if (ix == 1) {
-				modelHelper_.hamiltonianRightProduct(x_,y_);
+				modelHelper_.hamiltonianRightProduct(xtemp_[threadNum],y_);
 				continue;
 			}
 
