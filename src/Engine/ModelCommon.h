@@ -137,26 +137,16 @@ public:
 		MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
 	}
 
-	/** Let H be the hamiltonian of the  model for basis1 and partition m consisting of the external product
+	/** Let H be the hamiltonian of the  model for basis1 and partition m
+	 * consisting of the external product
 		 * of basis2 \otimes basis3
 		 * This function does x += H*y
-		 * The \cppFunction{matrixVectorProduct} function implements the operation $x+=Hy$. This function
+		 * The \cppFunction{matrixVectorProduct} function implements the operation $x+=Hy$.
+		 * This function
 		 * has a default implementation.
 		 */
-	void matrixVectorProduct(typename PsimagLite::Vector<RealType>::Type& x,
-	                         const typename PsimagLite::Vector<RealType>::Type& y,
-	                         ModelHelperType const &modelHelper) const
-	{
-		//! contribution to Hamiltonian from current system
-		modelHelper.hamiltonianLeftProduct(x,y);
-		//! contribution to Hamiltonian from current envirnoment
-		modelHelper.hamiltonianRightProduct(x,y);
-		//! contribution to Hamiltonian from connection system-environment
-		hamiltonianConnectionProduct(x,y,modelHelper);
-	}
-
-	void matrixVectorProduct(typename PsimagLite::Vector<std::complex<RealType> >::Type& x,
-	                         const typename PsimagLite::Vector<std::complex<RealType> >::Type& y,
+	void matrixVectorProduct(typename PsimagLite::Vector<SparseElementType>::Type& x,
+	                         const typename PsimagLite::Vector<SparseElementType>::Type& y,
 	                         ModelHelperType const &modelHelper) const
 	{
 		//! contribution to Hamiltonian from connection system-environment
@@ -204,6 +194,8 @@ public:
 	{
 		return this->geometry().maxConnections();
 	}
+
+private:
 
 	/**
 		Let $H_m$ be the Hamiltonian connection between basis2 and basis3 in
@@ -341,8 +333,6 @@ public:
 		}
 	}
 
-private:
-
 	void addConnectionsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                  SizeType i,
 	                                  SizeType j,
@@ -373,8 +363,14 @@ private:
 			this->geometry().fillAdditionalData(additionalData,term,ind,jnd);
 			SizeType dofsTotal = LinkProductType::dofs(term,additionalData);
 			for (SizeType dofs=0;dofs<dofsTotal;dofs++) {
-				std::pair<SizeType,SizeType> edofs = LinkProductType::connectorDofs(term,dofs,additionalData);
-				SparseElementType tmp = this->geometry()(ind,edofs.first,jnd,edofs.second,term);
+				std::pair<SizeType,SizeType> edofs = LinkProductType::connectorDofs(term,
+				                                                                    dofs,
+				                                                                    additionalData);
+				SparseElementType tmp = this->geometry()(ind,
+				                                         edofs.first,
+				                                         jnd,
+				                                         edofs.second,
+				                                         term);
 
 				if (tmp==static_cast<RealType>(0.0)) continue;
 
@@ -423,7 +419,8 @@ private:
 		}
 	}
 
-	//! Add Hamiltonian connection between basis2 and basis3 in the orderof basis1 for symmetry block m
+	// Add Hamiltonian connection between basis2 and basis3
+	// in the orderof basis1 for symmetry block m
 	void addHamiltonianConnection(VerySparseMatrix<SparseElementType>& matrix,
 	                              const ModelHelperType& modelHelper) const
 	{
