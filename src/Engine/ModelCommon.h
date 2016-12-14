@@ -151,10 +151,12 @@ public:
 	{
 		//! contribution to Hamiltonian from connection system-environment
 		hamiltonianConnectionProduct(x,y,modelHelper);
-		//! contribution to Hamiltonian from current system
-		modelHelper.hamiltonianLeftProduct(x,y);
-		//! contribution to Hamiltonian from current envirnoment
-		modelHelper.hamiltonianRightProduct(x,y);
+
+		// parts below were move to include them in the parallelization
+		//! contribution to Hamiltonian from current system moved to HamiltonianConnection
+		// modelHelper.hamiltonianLeftProduct(x,y);
+		//! contribution to Hamiltonian from current environ moved to HamiltonianConnection
+		// modelHelper.hamiltonianRightProduct(x,y);
 	}
 
 	/**
@@ -230,12 +232,38 @@ private:
 			msg<<"LinkProductStructSize="<<total;
 			progress_.printline(msg,std::cout);
 			lps.sealed = true;
+
+			PsimagLite::OstringStream msg2;
+			// add left and right contributions
+			msg2<<"PthreadsTheoreticalLimitForThisPart="<<(total+2);
+
+			// The theoretical maximum number of pthreads that are useful
+			// is equal to C + 2, where
+			// C = number of connection = 2*G*M
+			// where G = geometry factor
+			// and   M = model factor
+			// G = 1 for a chain
+			// G = leg for a ladder with leg legs. (For instance, G=2 for a 2-leg ladder).
+			// M = 2 for the Hubbard model
+			//
+			// In general, M = \sum_{term=0}^{terms} dof(term)
+			// where terms and dof(term) is model dependent.
+			// To find M for a model, go to the Model directory and see LinkProduct*.h file.
+			// the return of function terms() for terms.
+			// For dof(term) see function dof(SizeType term,...).
+			// For example, for the HubbardModelOneBand, one must look at
+			// src/Model/HubbardOneBand/LinkProductHubbardOneBand.h
+			// In that file, terms() returns 1, so that terms=1
+			// Therefore there is only one term: term = 0.
+			// And dof(0,...) = 2, as you can see in  LinkProductHubbardOneBand.h.
+			// Then M = 2.
+			progress_.printline(msg2,std::cout);
 		}
 
 		typedef PsimagLite::Parallelizer<HamiltonianConnectionType> ParallelizerType;
 		ParallelizerType parallelConnections(PsimagLite::Concurrency::npthreads,
 		                                     PsimagLite::MPI::COMM_WORLD);
-		parallelConnections.loopCreate(total,hc);
+		parallelConnections.loopCreate(total+2,hc);
 
 		hc.sync();
 	}

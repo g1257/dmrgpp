@@ -181,25 +181,32 @@ public:
 	                      SizeType total,
 	                      ConcurrencyType::MutexType*)
 	{
-
 		xtemp_[threadNum].resize(x_.size(),0);
 		SizeType i =0, j = 0, type = 0,term = 0, dofs =0;
 		SparseElementType tmp = 0.0;
 
-		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
 		SizeType npthreads = PsimagLite::Concurrency::npthreads;
 
-		ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"HamiltonianConnection",total);
-
 		for (SizeType p=0;p<blockSize;p++) {
-			SizeType ix = (threadNum+npthreads*mpiRank)*blockSize + p;
+			SizeType ix = p*npthreads + threadNum;
 			if (ix>=total) break;
 
+			if (ix == 0) {
+				modelHelper_.hamiltonianLeftProduct(x_,y_);
+				continue;
+			}
+
+			if (ix == 1) {
+				modelHelper_.hamiltonianRightProduct(x_,y_);
+				continue;
+			}
+
+			assert(ix > 1);
+			ix -= 2;
 			AdditionalDataType additionalData;
 			prepare(ix,i,j,type,tmp,term,dofs,additionalData);
 
 			linkProduct(xtemp_[threadNum],y_,i,j,type,tmp,term,dofs,additionalData);
-
 		}
 	}
 
