@@ -252,7 +252,6 @@ public:
 			\item[useDavidson] Use Davidson instead of Lanczos
 			\item[verbose] Enable verbose output
 			\item[nowft] Disable the Wave Function Transformation (WFT)
-			\item[targetnoguess] Do not guess non ground state targets
 			\item[useComplex] TBW
 			\item[inflate] TBW
 			\item[twositedmrg] Use 2-site DMRG. Default is 1-site DMRG
@@ -297,7 +296,6 @@ public:
 		registerOpts.push_back("verbose");
 		registerOpts.push_back("nofiniteloops");
 		registerOpts.push_back("nowft");
-		registerOpts.push_back("targetnoguess");
 		registerOpts.push_back("useComplex");
 		registerOpts.push_back("inflate");
 		registerOpts.push_back("none");

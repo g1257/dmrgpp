@@ -213,6 +213,8 @@ private:
 		if (direction != WaveFunctionTransfType::INFINITE)
 			onlyWft = ((saveOption & 2)>0);
 
+		bool noguess = ((saveOption & 8) > 0); // bit 3 set means guess is random vector
+
 		if (parameters_.options.find("MettsTargetting")!=PsimagLite::String::npos)
 			return gsEnergy;
 
@@ -263,7 +265,7 @@ private:
 		        VectorWithOffsetType;
 		VectorWithOffsetType initialVector(weights,lrs.super());
 
-		target.initialGuess(initialVector,block);
+		target.initialGuess(initialVector, block, noguess);
 
 		for (SizeType i=0;i<total;i++) {
 			if (weights[i]==0) continue;

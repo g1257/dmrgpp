@@ -220,9 +220,10 @@ public:
 	}
 
 	void initialGuess(VectorWithOffsetType& initialVector,
-	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
+	                  const typename PsimagLite::Vector<SizeType>::Type& block,
+	                  bool noguess) const
 	{
-		commonTargetting_.initialGuess(initialVector,block);
+		commonTargetting_.initialGuess(initialVector, block, noguess);
 	}
 
 	const RealType& time() const {return commonTargetting_.currentTime(); }

@@ -290,11 +290,12 @@ public:
 	}
 
 	void initialGuess(VectorWithOffsetType& v,
-	                  const VectorSizeType& block) const
+	                  const VectorSizeType& block,
+	                  bool noguess) const
 	{
 		PsimagLite::Vector<SizeType>::Type nk;
 		setNk(nk,block);
-		setInitialVector(v,applyOpExpression_.psi(),nk);
+		setInitialVector(v,applyOpExpression_.psi(), nk, noguess);
 	}
 
 	void computeCorrection(SizeType direction,
@@ -588,11 +589,10 @@ private:
 
 	void setInitialVector(VectorWithOffsetType& v1,
 	                      const VectorWithOffsetType& v2,
-	                      const VectorSizeType& nk) const
+	                      const VectorSizeType& nk,
+	                      bool noguess) const
 	{
 		const WaveFunctionTransfType& wft = targetHelper_.wft();
-		bool noguess = (targetHelper_.model().params().options.find("targetnoguess") !=
-		        PsimagLite::String::npos);
 
 		if (noguess)
 			wft.createRandomVector(v1);
