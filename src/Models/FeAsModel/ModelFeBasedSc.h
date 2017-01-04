@@ -577,7 +577,7 @@ private:
 		// add electron on site 0 if needed
 		if (i>0) value += HilbertSpaceFeAsType::electrons(ket);
 
-		//order for sign is: a up, a down, b up, b down, etc
+		//order for sign is: a up, b up, a down, b down, etc
 		unsigned int x = HilbertSpaceFeAsType::get(ket,i);
 		int spin = sigma/modelParameters_.orbitals;
 		SizeType orb = sigma % modelParameters_.orbitals;
@@ -962,24 +962,33 @@ private:
 		if (modelParameters_.spinOrbit.n_row()<4) return;
 		SizeType orbitals = modelParameters_.orbitals;
 		int dof=2*orbitals;
+		SizeType nrow = cm[0].data.row();
+		MatrixType tmp(nrow,nrow);
+		SparseMatrixType tmpMatrix;
 
 		for (SizeType spin1=0;spin1<2;spin1++) {
 			for (SizeType spin2=0;spin2<2;spin2++) {
 				for (SizeType orb1=0;orb1<orbitals;orb1++) {
 					for (SizeType orb2=0;orb2<orbitals;orb2++) {
-						SparseMatrixType c1 = cm[orb1+spin1*orbitals+i*dof].data;
-						SparseMatrixType c1Transpose;
-						transposeConjugate(c1Transpose,c1);
-						SparseMatrixType c2 = cm[orb2+spin2*orbitals+i*dof].data;
-						SparseMatrixType A = c1Transpose * c2;
 
-						hmatrix += factorForDiagonals *
-						        modelParameters_.spinOrbit(spin1+spin2*2,orb1+orb2*orbitals)*A;
+
+						SparseMatrixType c1 = cm[orb1+spin1*orbitals+i*dof].data;
+
+						SparseMatrixType c2 = cm[orb2+spin2*orbitals+i*dof].data;
+
+						tmp += 0.5*modelParameters_.spinOrbit((spin1*2)+spin2,(orb1*orbitals)+orb2)*factorForDiagonals*
+						        (multiplyTc(c1,c2));
+
+
+
 
 					}
 				}
 			}
 		}
+
+		fullMatrixToCrsMatrix(tmpMatrix,tmp);
+		hmatrix += tmpMatrix;
 	}
 
 	void addMagneticField(SparseMatrixType &hmatrix,
@@ -1022,6 +1031,7 @@ private:
 		SparseMatrixType tmp = nup;
 		const RealType f1 = (-1.0);
 		tmp += f1*ndown;
+
 		hmatrix += factorForDiagonals *
 		        modelParameters_.magneticField(2,actualIndexOfSite) * tmp;
 

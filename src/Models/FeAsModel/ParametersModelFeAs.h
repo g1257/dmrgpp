@@ -243,6 +243,7 @@ struct ParametersModelFeAs {
 		try {
 			io.readline(jzSymmetry,"JzSymmetry=");
 		} catch (std::exception&) {}
+		std::cout<<"JzSymmetry="<<jzSymmetry<<std::endl;
 	}
 
 	template<typename SomeMemResolvType>
