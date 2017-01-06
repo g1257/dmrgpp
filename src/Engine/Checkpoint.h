@@ -128,7 +128,16 @@ public:
 	    progress_("Checkpoint"),
 	    energyFromFile_(0.0)
 	{
-		checkFiniteLoops(model.geometry().numberOfSites(),ioIn);
+		SizeType site = 0; // FIXME for Immm model, find max of hilbert(site) over site
+		SizeType hilbertOneSite = model.hilbertSize(site);
+		if (parameters_.keptStatesInfinite < hilbertOneSite) {
+			PsimagLite::String str("FATAL:  keptStatesInfinite= ");
+			str += ttos(parameters_.keptStatesInfinite) + " < ";
+			str += ttos(hilbertOneSite) + "\n";
+			throw PsimagLite::RuntimeError(str);
+		}
+
+		checkFiniteLoops(model.geometry().numberOfSites(), hilbertOneSite, ioIn);
 
 		if (!enabled_) return;
 
@@ -250,7 +259,9 @@ public:
 
 private:
 
-	void checkFiniteLoops(SizeType totalSites, InputValidatorType& ioIn) const
+	void checkFiniteLoops(SizeType totalSites,
+	                      SizeType hilbertOneSite,
+	                      InputValidatorType& ioIn) const
 	{
 		if (parameters_.options.find("nofiniteloops")!=PsimagLite::String::npos)
 			return;
@@ -276,6 +287,7 @@ private:
 		ParametersType::readFiniteLoops(ioIn,vfl);
 
 		checkFiniteLoops(vfl,totalSites,lastSite,prevDeltaSign,checkPoint);
+		checkMvalues(vfl, hilbertOneSite);
 	}
 
 	void checkFiniteLoops(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,
@@ -338,6 +350,19 @@ private:
 				s =s + " sites=" + ttos(totalSites);
 				throw PsimagLite::RuntimeError(s.c_str());
 			}
+		}
+	}
+
+	void checkMvalues(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,
+	                  SizeType hilbertOneSite) const
+	{
+		for (SizeType i = 0;i < finiteLoop.size(); ++i)  {
+			if (finiteLoop[i].keptStates >= hilbertOneSite)
+				continue;
+			PsimagLite::String str("FATAL: Finite loop number ");
+			str += ttos(i) +" has keptStates= " + ttos(finiteLoop[i].keptStates);
+			str += " < " + ttos(hilbertOneSite) + "\n";
+			throw PsimagLite::RuntimeError(str);
 		}
 	}
 
