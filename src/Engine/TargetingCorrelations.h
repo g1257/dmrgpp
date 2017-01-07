@@ -310,6 +310,7 @@ private:
 			}
 		}
 
+		if (results.n_row() == 0 || results.n_col() == 0) return;
 		std::cout<<"TargetingCorrelations\n";
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 		for (SizeType i = 0; i < results.n_row(); ++i) {
