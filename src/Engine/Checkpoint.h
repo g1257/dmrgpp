@@ -311,16 +311,7 @@ private:
 				s += " finite loops that follow must have 1.";
 				throw PsimagLite::RuntimeError(s.c_str());
 			}
-			if (sopt == 0 && (thisSaveOption&1)) {
-				sopt = 1;
-				if (SizeType(x) != 1 && SizeType(x)!=totalSites-2) {
-					s = __FILE__ + PsimagLite::String(": FATAL: for finite loop number ")
-					        + ttos(i) + "\n";
-					s += "Saving finite loops must start at the left or";
-					s += " right end of the lattice\n";
-					throw PsimagLite::RuntimeError(s.c_str());
-				}
-			}
+
 			// naive location:
 			int delta = finiteLoop[i].stepLength;
 			x += delta;

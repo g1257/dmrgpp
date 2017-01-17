@@ -106,7 +106,7 @@ public:
 		for (SizeType i=0;i<weights.size();i++) {
 			if (weights[i]>0) {
 				if (found) {
-					PsimagLite::String msg("VectorWithOffset::");
+					PsimagLite::String msg("FATAL: VectorWithOffset::");
 					msg += " more than one non-zero sector found. ";
 					msg += " Maybe you should be using VectorWithOffsets instead?\n";
 					throw PsimagLite::RuntimeError(msg);
@@ -137,7 +137,7 @@ public:
 		for (SizeType i=0;i<v.size();i++) {
 			if (v[i].size()>0) {
 				if (found) {
-					PsimagLite::String msg("VectorWithOffset::");
+					PsimagLite::String msg("FATAL: VectorWithOffset::");
 					msg += " more than one non-zero sector found. ";
 					msg += " Maybe you should be using VectorWithOffsets instead?\n";
 					throw PsimagLite::RuntimeError(msg);
@@ -250,7 +250,7 @@ public:
 	{
 		if (qns.size() == 0) return;
 		if (qns.size() != 1) {
-			PsimagLite::String msg("VectorWithOffset::populateFromQns: ");
+			PsimagLite::String msg("FATAL: VectorWithOffset::populateFromQns: ");
 			throw PsimagLite::RuntimeError(msg + "more than one sector found\n");
 		}
 
@@ -364,7 +364,7 @@ private:
 		for (SizeType i=0;i<someBasis.partition()-1;i++) {
 			if (nonZeroPartition(v,someBasis,i)) {
 				if (found) {
-					PsimagLite::String msg("VectorWithOffset::");
+					PsimagLite::String msg("FATAL: VectorWithOffset::");
 					msg += " More than one partition found\n";
 					throw PsimagLite::RuntimeError(msg);
 				}
