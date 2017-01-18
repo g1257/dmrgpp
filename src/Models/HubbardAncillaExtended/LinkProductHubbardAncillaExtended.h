@@ -118,10 +118,11 @@ public:
 	                              SizeType dofs,
 	                              const SomeStructType&)
 	{
-		if (!hot_ || term == TERM_LAMBDA) return PairType(0,0);
+		if (!hot_ || term == TERM_LAMBDA)
+			return PairType(0,0);
+
 		if (term == TERM_HOPPING) {
-			SizeType temp = dofs/2;
-			SizeType orb = (temp==0) ? 0 : 1;
+			SizeType orb = dofs/2;
 			return PairType(orb,orb);
 		}
 
@@ -134,7 +135,7 @@ public:
 	                        bool,
 	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
 	                        PairType& ops,
-	                        std::pair<char,char>& mods,
+	                        std::pair<char,char>&,
 	                        SizeType& angularMomentum,
 	                        RealType& angularFactor,
 	                        SizeType& category,
@@ -142,8 +143,8 @@ public:
 	{
 		if (term==TERM_HOPPING) {
 			fermionOrBoson = ProgramGlobals::FERMION;
-			SizeType spin = getSpin(dofs);
-			ops = operatorDofs(dofs);
+			SizeType spin = dofs % 2;
+			ops = std::pair<SizeType,SizeType>(dofs,dofs);
 			angularFactor = 1;
 			if (spin==1) angularFactor = -1;
 			angularMomentum = 1;
@@ -225,18 +226,6 @@ public:
 	static bool setHot(bool hot) { return hot_ = hot; }
 
 private:
-
-	static std::pair<SizeType,SizeType> operatorDofs(SizeType dofs)
-	{
-		SizeType temp = dofs/2;
-		SizeType orb = (temp==0) ? 0 : 1;
-		return std::pair<SizeType,SizeType>(orb,orb);
-	}
-
-	static SizeType getSpin(SizeType dofs)
-	{
-		return dofs % 2;
-	}
 
 	static bool hot_;
 }; // class LinkProductHubbardAncillaExtended

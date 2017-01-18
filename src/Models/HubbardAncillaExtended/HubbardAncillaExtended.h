@@ -203,7 +203,10 @@ public:
 		creationMatrix.clear();
 		SizeType dofs = 2*ORBITALS;
 		for (SizeType i=0;i<block.size();i++) {
-			for (SizeType sigma=0;sigma<dofs;sigma+=2) {
+			for (SizeType sigma2=0;sigma2<dofs;++sigma2) {
+				SizeType sigma = (hot_) ? 2*sigma2 : sigma2;
+				if (sigma >= dofs) sigma -= (dofs - 1);
+				if (!hot_ && (sigma & 1)) continue;
 				MatrixType tmp;
 				findOperatorMatrices(tmp,i,sigma,natBasis);
 				SparseMatrixType tmpMatrix(tmp);
@@ -231,36 +234,6 @@ public:
 				creationMatrix.push_back(myOp);
 			}
 
-			if (hot_) {
-				for (SizeType sigma=1;sigma<dofs;sigma+=2) {
-					MatrixType tmp;
-					findOperatorMatrices(tmp,i,sigma,natBasis);
-					SparseMatrixType tmpMatrix(tmp);
-					SizeType m=0;
-					int asign=1;
-					if (sigma>ORBITALS-1) {
-						m=1;
-						asign= -1;
-					}
-
-					typename OperatorType::Su2RelatedType su2related;
-					if (sigma <ORBITALS) {
-						su2related.source.push_back(i*dofs+sigma);
-						su2related.source.push_back(i*dofs+sigma + ORBITALS);
-						su2related.transpose.push_back(-1);
-						su2related.transpose.push_back(-1);
-						su2related.offset = ORBITALS;
-					}
-
-					OperatorType myOp(tmpMatrix,
-					                  -1,
-					                  typename OperatorType::PairType(1,m),
-					                  asign,
-					                  su2related);
-					creationMatrix.push_back(myOp);
-				}
-			}
-
 			setLambdaMatrices(creationMatrix,i,natBasis);
 			setSplus(creationMatrix,i,0,natBasis);
 			if (hot_) setSplus(creationMatrix,i,1,natBasis);
@@ -272,7 +245,10 @@ public:
 			if (hot_) setN(creationMatrix,i,1,natBasis);
 		}
 
-		assert(creationMatrix.size() == 14);
+		if (hot_)
+			assert(creationMatrix.size() == 14);
+		else
+			assert(creationMatrix.size() == 8);
 	}
 
 	OperatorType naturalOperator(const PsimagLite::String& what,
@@ -763,17 +739,19 @@ private:
 	{
 		SparseMatrixType tmpMatrix;
 		SizeType nsites = geometry_.numberOfSites();
-		if (modelParameters_.hubbardU.size() != 2*nsites) {
-			throw PsimagLite::RuntimeError("Number of U's is 2 * number of sites, you have ancillas\n");
+		SizeType factor = (hot_) ? 2 : 1;
+		if (modelParameters_.hubbardU.size() != factor*nsites) {
+			throw PsimagLite::RuntimeError("Number of Us is incorrect\n");
 		}
 
-		for (SizeType alpha=0;alpha<2;alpha++) {// real sites and ancillas
+		for (SizeType alpha=0;alpha<factor;++alpha) {// real sites and ancillas
 			SparseMatrixType m1=cm[alpha+SPIN_UP*2];
 			SparseMatrixType m2=cm[alpha+SPIN_DOWN*2];
 
 			multiply(tmpMatrix,n(m1),n(m2));
 			assert(actualSite + nsites*alpha < modelParameters_.hubbardU.size());
-			hmatrix += factorForDiagonals*modelParameters_.hubbardU[actualSite+nsites*alpha]*tmpMatrix;
+			hmatrix += factorForDiagonals*
+			        modelParameters_.hubbardU[actualSite+nsites*alpha]*tmpMatrix;
 		}
 	}
 

@@ -147,7 +147,8 @@ public:
 				                                  emin_,
 				                                  ind,
 				                                  edofs.first,
-				                                  jnd,edofs.second,
+				                                  jnd,
+								  edofs.second,
 				                                  term);
 
 				if (tmp==static_cast<RealType>(0.0)) continue;
