@@ -23,28 +23,34 @@ Please see full open source license included in file LICENSE.
 class MyHelper {
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 public:
 
 	MyHelper(SizeType nthreads)
-	    : nthreads_(nthreads)
+	    : nthreads_(nthreads),x_(nthreads,0)
 	{}
 
-	void doTask(SizeType threadNum,
-	            SizeType blockSize,
-	            SizeType total)
+	int result() const
 	{
-		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
-		for (SizeType p=0;p<blockSize;p++) {
-			SizeType taskNumber = (threadNum+nthreads_*mpiRank)*blockSize + p;
-			if (taskNumber>=total) break;
-		}
+		return x_[0];
+	}
+
+	void doTask(SizeType taskNumber, SizeType threadNum)
+	{
+		x_[threadNum] += taskNumber;
+	}
+
+	void sync()
+	{
+		for (SizeType i = 1; i < x_.size(); ++i)
+			x_[0] += x_[i];
 	}
 
 private:
 
 	SizeType nthreads_;
-
+	VectorSizeType x_;
 }; // class MyHelper
 
 
@@ -73,5 +79,7 @@ int main(int argc,char *argv[])
 	std::cout<<"Using "<<threadObject.name();
 	std::cout<<" with "<<threadObject.threads()<<" threads.\n";
 	threadObject.loopCreate(ntasks,helper);
+	helper.sync();
+	std::cout<<"Sum of all tasks= "<<helper.result()<<"\n";
 }
 
