@@ -87,36 +87,45 @@ namespace Dmrg {
 template<typename ModelHelperType>
 class LinkProductHubbardAncillaExtended {
 
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef std::pair<SizeType,SizeType> PairType;
-	typedef LinkProductFeAs<ModelHelperType> LinkProductFeAsType;
-	typedef LinkProductHeisenberg<ModelHelperType> LinkProductHeisenbergType;
-	typedef typename ModelHelperType::BasisType BasisType;
-	typedef typename ModelHelperType::OperatorType OperatorType;
+public:
 
 	enum {TERM_HOPPING, TERM_LAMBDA, TERM_SPLUS, TERM_SZ, TERM_PAIR, TERM_NINJ};
 
-public:
-
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename ModelHelperType::RealType RealType;
+
 
 	template<typename SomeStructType>
 	static SizeType dofs(SizeType term,const SomeStructType&)
 	{
-		if (term == TERM_HOPPING || term == TERM_LAMBDA)
-			return 2;
+		if (!hot_) {
+			if (term == TERM_HOPPING || term == TERM_LAMBDA)
+				return 2;
 
-		return 1;
+			return 1;
+		}
+
+		if (term == TERM_HOPPING) return 4;
+
+		return 2;
 	}
 
 	// has only dependence on orbital
 	template<typename SomeStructType>
-	static PairType connectorDofs(SizeType,
-	                              SizeType,
+	static PairType connectorDofs(SizeType term,
+	                              SizeType dofs,
 	                              const SomeStructType&)
 	{
-		return PairType(0,0);
+		if (!hot_ || term == TERM_LAMBDA) return PairType(0,0);
+		if (term == TERM_HOPPING) {
+			SizeType temp = dofs/2;
+			SizeType orb = (temp==0) ? 0 : 1;
+			return PairType(orb,orb);
+		}
+
+		return PairType(dofs,dofs);
 	}
 
 	template<typename SomeStructType>
@@ -133,60 +142,59 @@ public:
 	{
 		if (term==TERM_HOPPING) {
 			fermionOrBoson = ProgramGlobals::FERMION;
-			ops = PairType(dofs,dofs);
+			SizeType spin = getSpin(dofs);
+			ops = operatorDofs(dofs);
 			angularFactor = 1;
-			if (dofs == 1) angularFactor = -1;
+			if (spin==1) angularFactor = -1;
 			angularMomentum = 1;
-			category = dofs;
+			category = spin;
 			return;
 		}
 
 		if (term==TERM_LAMBDA) {
 			fermionOrBoson = ProgramGlobals::BOSON;
-			SizeType offset1 = 2;
+			SizeType offset1 = (!hot_) ? 2 : 4;
 			ops = PairType(dofs + offset1,dofs + offset1);
 			return;
 		}
 
 		if (term==TERM_SPLUS) {
 			fermionOrBoson = ProgramGlobals::BOSON;
-			SizeType offset1 = 4;
-			assert(dofs == 0);
+			SizeType offset1 = (!hot_) ? 4 : 6;
 			// S+ S- which includes also S- S+
 			angularFactor = -1;
 			category = 2;
 			angularMomentum = 2;
-			ops = PairType(offset1,offset1);
+			ops = PairType(dofs + offset1,dofs + offset1);
 			return;
 		}
 
 		if (term==TERM_SZ) {
 			fermionOrBoson = ProgramGlobals::BOSON;
-			SizeType offset1 = 5;
+			SizeType offset1 = (!hot_) ? 5 : 8;
 			angularFactor = 0.5;
 			category = 1;
 			angularMomentum = 2;
-			ops = PairType(offset1,offset1);
+			ops = PairType(dofs + offset1,dofs + offset1);
 		}
 
 		if (term==TERM_PAIR) {
 			fermionOrBoson = ProgramGlobals::BOSON;
-			SizeType offset1 = 6;
-			assert(dofs = 0);
+			SizeType offset1 = (!hot_) ? 6 : 10;
 			angularFactor = 1;
 			category = 2;
 			angularMomentum = 2;
-			ops = PairType(offset1,offset1);
+			ops = PairType(dofs + offset1,dofs + offset1);
 			return;
 		}
 
 		if (term==TERM_NINJ) {
 			fermionOrBoson = ProgramGlobals::BOSON;
-			SizeType offset1 = 7;
+			SizeType offset1 = (!hot_) ? 7 : 12;
 			angularFactor = 1;
 			angularMomentum = 0;
 			category = 0;
-			ops = PairType(offset1,offset1);
+			ops = PairType(dofs + offset1,dofs + offset1);
 			return;
 		}
 	}
@@ -213,6 +221,24 @@ public:
 	}
 
 	static SizeType terms() { return 6; }
+
+	static bool setHot(bool hot) { return hot_ = hot; }
+
+private:
+
+	static std::pair<SizeType,SizeType> operatorDofs(SizeType dofs)
+	{
+		SizeType temp = dofs/2;
+		SizeType orb = (temp==0) ? 0 : 1;
+		return std::pair<SizeType,SizeType>(orb,orb);
+	}
+
+	static SizeType getSpin(SizeType dofs)
+	{
+		return dofs % 2;
+	}
+
+	static bool hot_;
 }; // class LinkProductHubbardAncillaExtended
 } // namespace Dmrg
 /*@}*/

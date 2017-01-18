@@ -123,6 +123,13 @@ Dmrg::ModelHelper$modelHelper<
    $lrs
   >
 >::hot_ = false;
+
+template<>
+bool LinkProductHubbardAncillaExtended<
+Dmrg::ModelHelper$modelHelper<
+   $lrs
+  >
+>::hot_ = false;
 }
 EOF
 }

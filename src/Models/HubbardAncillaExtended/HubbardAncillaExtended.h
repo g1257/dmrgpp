@@ -98,7 +98,6 @@ class HubbardAncillaExtended : public ModelBaseType {
 
 public:
 
-	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelBaseType::GeometryType GeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
@@ -109,22 +108,26 @@ public:
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelHelperType::RealType RealType;
 	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
 	typedef typename HilbertBasisType::value_type HilbertState;
 	typedef  HilbertSpaceFeAs<HilbertState> HilbertSpaceFeAsType;
+
+
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelBaseType::VectorType VectorType;
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef LinkProductHubbardAncillaExtended<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
+	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
+	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
+	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
+
+	typedef typename ModelBaseType::VectorType VectorType;
 	typedef	 typename ModelBaseType::MyBasis MyBasis;
 	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
-	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
-	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef ParametersHubbardAncilla<RealType> ParametersHubbardAncillaType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename PsimagLite::Vector<PairType>::Type VectorPairType;
@@ -135,13 +138,22 @@ public:
 	static const int SPIN_DOWN=HilbertSpaceFeAsType::SPIN_DOWN;
 	static SizeType const ORBITALS  = 2;
 
-    HubbardAncillaExtended(const SolverParamsType& solverParams,
-	               InputValidatorType& io,
-	               GeometryType const &geometry)
+	HubbardAncillaExtended(const SolverParamsType& solverParams,
+	                       InputValidatorType& io,
+	                       GeometryType const &geometry)
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
-	      geometry_(geometry)
-	{}
+	      geometry_(geometry),
+	      hot_(geometry_.orbitals(0,0) > 1)
+	{
+		LinkProductType::setHot(hot_);
+		if (hot_) {
+			PsimagLite::String msg("HubbardAncillaExtended: Hot ancilla mode is on");
+			msg += " (EXPERIMENTAL feature)\n";
+			std::cout<<msg;
+			std::cerr<<msg;
+		}
+	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
 	                   SizeType,
@@ -219,14 +231,48 @@ public:
 				creationMatrix.push_back(myOp);
 			}
 
+			if (hot_) {
+				for (SizeType sigma=1;sigma<dofs;sigma+=2) {
+					MatrixType tmp;
+					findOperatorMatrices(tmp,i,sigma,natBasis);
+					SparseMatrixType tmpMatrix(tmp);
+					SizeType m=0;
+					int asign=1;
+					if (sigma>ORBITALS-1) {
+						m=1;
+						asign= -1;
+					}
+
+					typename OperatorType::Su2RelatedType su2related;
+					if (sigma <ORBITALS) {
+						su2related.source.push_back(i*dofs+sigma);
+						su2related.source.push_back(i*dofs+sigma + ORBITALS);
+						su2related.transpose.push_back(-1);
+						su2related.transpose.push_back(-1);
+						su2related.offset = ORBITALS;
+					}
+
+					OperatorType myOp(tmpMatrix,
+					                  -1,
+					                  typename OperatorType::PairType(1,m),
+					                  asign,
+					                  su2related);
+					creationMatrix.push_back(myOp);
+				}
+			}
+
 			setLambdaMatrices(creationMatrix,i,natBasis);
-            setSplus(creationMatrix,i,natBasis);
-            setSz(creationMatrix,i,natBasis);
-            setPair(creationMatrix,i,natBasis);
-            setN(creationMatrix,i,natBasis);
+			setSplus(creationMatrix,i,0,natBasis);
+			if (hot_) setSplus(creationMatrix,i,1,natBasis);
+			setSz(creationMatrix,i,0,natBasis);
+			if (hot_) setSz(creationMatrix,i,1,natBasis);
+			setPair(creationMatrix,i,0,natBasis);
+			if (hot_) setPair(creationMatrix,i,1,natBasis);
+			setN(creationMatrix,i,0,natBasis);
+			if (hot_) setN(creationMatrix,i,1,natBasis);
 		}
 
-		assert(creationMatrix.size() == 8);
+		assert(creationMatrix.size() == 14);
 	}
 
 	OperatorType naturalOperator(const PsimagLite::String& what,
@@ -271,11 +317,42 @@ public:
 				str += " given is " + ttos(dof) + "\n";
 				throw PsimagLite::RuntimeError(str);
 			}
-
 			return creationMatrix[dof];
 		}
 
-		PsimagLite::String str("HubbardAncilla: naturalOperator: no label ");
+		if (what=="d") { // \Delta
+			SizeType offset = (!hot_) ? 2 : 4;
+			assert(offset < creationMatrix.size());
+			return creationMatrix[offset+dof];
+		}
+
+		if (what=="+") { // S^+
+			SizeType offset = (!hot_) ? 4 : 6;
+			return creationMatrix[offset+dof];
+		}
+
+		if (what=="-") { // S^-
+			SizeType offset = (!hot_) ? 4 : 6;
+			creationMatrix[offset+dof].conjugate();
+			return creationMatrix[offset+dof];
+		}
+
+		if (what=="z") { // S^z
+			SizeType offset = (!hot_) ? 5 : 8;
+			return creationMatrix[offset+dof];
+		}
+
+		if (what=="p") { // Pair
+			SizeType offset = (!hot_) ? 6 : 10;
+			return creationMatrix[offset+dof];
+		}
+
+		if (what=="n") { // N
+			SizeType offset = (!hot_) ? 7 : 12;
+			return creationMatrix[offset+dof];
+		}
+
+		PsimagLite::String str("HubbardAncillaExtended: naturalOperator: no label ");
 		str += what + "\n";
 		throw PsimagLite::RuntimeError(str);
 	}
@@ -405,119 +482,119 @@ private:
 			corrector(i,i) = std::abs(dn1(i,i) + dn2(i,i) + f1);
 	}
 
-    void setSplus(VectorOperatorType& cm,
-                  SizeType i,
-                  const HilbertBasisType& natBasis) const
-    {
+	void setSplus(VectorOperatorType& cm,
+	              SizeType i,
+	              SizeType orbital,
+	              const HilbertBasisType& natBasis) const
+	{
 
-        VectorSparseMatrixType vm;
-        findAllMatrices(vm,i,natBasis);
+		VectorSparseMatrixType vm;
+		findAllMatrices(vm,i,natBasis);
 
-        typename OperatorType::Su2RelatedType su2related;
-        SizeType spin1 = 0;
-        SparseMatrixType m;
-        transposeConjugate(m,vm[2+spin1*ORBITALS]);
-        SparseMatrixType splus;
-        multiply(splus,vm[0+spin1*ORBITALS],m);
+		typename OperatorType::Su2RelatedType su2related;
+		SparseMatrixType m;
+		transposeConjugate(m,vm[2+orbital]);
+		SparseMatrixType splus;
+		multiply(splus,vm[0+orbital],m);
 
-        OperatorType myOp(splus,
-                          1,
-                          typename OperatorType::PairType(0,0),
-                          -1,
-                          su2related);
-        cm.push_back(myOp);
-    }
+		OperatorType myOp(splus,
+		                  1,
+		                  typename OperatorType::PairType(0,0),
+		                  -1,
+		                  su2related);
+		cm.push_back(myOp);
+	}
 
-    void setSz(VectorOperatorType& cm,
-               SizeType i,
-               const HilbertBasisType& natBasis) const
-    {
+	void setSz(VectorOperatorType& cm,
+	           SizeType i,
+	           SizeType orbital,
+	           const HilbertBasisType& natBasis) const
+	{
 
-        VectorSparseMatrixType vm;
-        findAllMatrices(vm,i,natBasis);
+		VectorSparseMatrixType vm;
+		findAllMatrices(vm,i,natBasis);
 
-        typename OperatorType::Su2RelatedType su2related;
+		typename OperatorType::Su2RelatedType su2related;
 
-        SizeType spin1 = 0;
-        SparseMatrixType cm1(vm[0+spin1*ORBITALS]);
-        SparseMatrixType cm2(vm[2+spin1*ORBITALS]);
-        SparseMatrixType n1 = n(cm1);
-        SparseMatrixType n2 = n(cm2);
-        MatrixType dn1;
-        MatrixType dn2;
-        crsMatrixToFullMatrix(dn1,n1);
-        crsMatrixToFullMatrix(dn2,n2);
+		SparseMatrixType cm1(vm[0+orbital]);
+		SparseMatrixType cm2(vm[2+orbital]);
+		SparseMatrixType n1 = n(cm1);
+		SparseMatrixType n2 = n(cm2);
+		MatrixType dn1;
+		MatrixType dn2;
+		crsMatrixToFullMatrix(dn1,n1);
+		crsMatrixToFullMatrix(dn2,n2);
 
-        SizeType n = dn1.n_row();
-        MatrixType szmatrix(n,n);
-
-
-        for (SizeType i = 0; i < n; ++i) {
-            szmatrix(i,i) = 0.5*(dn1(i,i) - dn2(i,i));
-        }
-
-        OperatorType sz(SparseMatrixType(szmatrix),
-                        1,
-                        typename OperatorType::PairType(0,0),
-                        1,
-                        su2related);
-
-        cm.push_back(sz);
-    }
-
-    void setPair(VectorOperatorType& cm,
-                 SizeType i,
-                 const HilbertBasisType& natBasis) const
-    {
-        VectorSparseMatrixType vm;
-        findAllMatrices(vm,i,natBasis);
-        typename OperatorType::Su2RelatedType su2related;
-        SizeType spin1 = 0;
-        SparseMatrixType pair;
-        multiply(pair,vm[0+spin1*ORBITALS],vm[2+spin1*ORBITALS]);
-
-        OperatorType myOp(pair,
-                          1,
-                          typename OperatorType::PairType(0,0),
-                          1,
-                          su2related);
-        cm.push_back(myOp);
-    }
-
-    void setN(VectorOperatorType& cm,
-              SizeType i,
-              const HilbertBasisType& natBasis) const
-    {
-
-        VectorSparseMatrixType vm;
-        findAllMatrices(vm,i,natBasis);
-
-        typename OperatorType::Su2RelatedType su2related;
-        SizeType spin1 = 0;
-        SparseMatrixType cm1(vm[0+spin1*ORBITALS]);
-        SparseMatrixType cm2(vm[2+spin1*ORBITALS]);
-        SparseMatrixType n1 = n(cm1);
-        SparseMatrixType n2 = n(cm2);
-        MatrixType dn1;
-        MatrixType dn2;
-        crsMatrixToFullMatrix(dn1,n1);
-        crsMatrixToFullMatrix(dn2,n2);
-        SizeType n = dn1.n_row();
-        MatrixType nmatrix(n,n);
+		SizeType n = dn1.n_row();
+		MatrixType szmatrix(n,n);
 
 
-        for (SizeType i = 0; i < n; ++i) {
-            nmatrix(i,i) = 1.0*(dn1(i,i) + dn2(i,i));
-        }
+		for (SizeType i = 0; i < n; ++i) {
+			szmatrix(i,i) = 0.5*(dn1(i,i) - dn2(i,i));
+		}
 
-        OperatorType nop(SparseMatrixType(nmatrix),
-                         1,
-                         typename OperatorType::PairType(0,0),
-                         1,
-                         su2related);
+		OperatorType sz(SparseMatrixType(szmatrix),
+		                1,
+		                typename OperatorType::PairType(0,0),
+		                1,
+		                su2related);
 
-        cm.push_back(nop);
-    }
+		cm.push_back(sz);
+	}
+
+	void setPair(VectorOperatorType& cm,
+	             SizeType i,
+	             SizeType orbital,
+	             const HilbertBasisType& natBasis) const
+	{
+		VectorSparseMatrixType vm;
+		findAllMatrices(vm,i,natBasis);
+		typename OperatorType::Su2RelatedType su2related;
+		SparseMatrixType pair;
+		multiply(pair,vm[0+orbital],vm[2+orbital]);
+
+		OperatorType myOp(pair,
+		                  1,
+		                  typename OperatorType::PairType(0,0),
+		                  1,
+		                  su2related);
+		cm.push_back(myOp);
+	}
+
+	void setN(VectorOperatorType& cm,
+	          SizeType i,
+	          SizeType orbital,
+	          const HilbertBasisType& natBasis) const
+	{
+
+		VectorSparseMatrixType vm;
+		findAllMatrices(vm,i,natBasis);
+
+		typename OperatorType::Su2RelatedType su2related;
+		SparseMatrixType cm1(vm[0+orbital]);
+		SparseMatrixType cm2(vm[2+orbital]);
+		SparseMatrixType n1 = n(cm1);
+		SparseMatrixType n2 = n(cm2);
+		MatrixType dn1;
+		MatrixType dn2;
+		crsMatrixToFullMatrix(dn1,n1);
+		crsMatrixToFullMatrix(dn2,n2);
+		SizeType n = dn1.n_row();
+		MatrixType nmatrix(n,n);
+
+
+		for (SizeType i = 0; i < n; ++i) {
+			nmatrix(i,i) = 1.0*(dn1(i,i) + dn2(i,i));
+		}
+
+		OperatorType nop(SparseMatrixType(nmatrix),
+		                 1,
+		                 typename OperatorType::PairType(0,0),
+		                 1,
+		                 su2related);
+
+		cm.push_back(nop);
+	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to
 	//! basis state ket
@@ -685,20 +762,26 @@ private:
 	                    SizeType actualSite) const
 	{
 		SparseMatrixType tmpMatrix;
+		SizeType nsites = geometry_.numberOfSites();
+		if (modelParameters_.hubbardU.size() != 2*nsites) {
+			throw PsimagLite::RuntimeError("Number of U's is 2 * number of sites, you have ancillas\n");
+		}
 
-		SizeType alpha = 0; // real sites, no ancilla
-		SparseMatrixType m1=cm[alpha+SPIN_UP*2];
-		SparseMatrixType m2=cm[alpha+SPIN_DOWN*2];
+		for (SizeType alpha=0;alpha<2;alpha++) {// real sites and ancillas
+			SparseMatrixType m1=cm[alpha+SPIN_UP*2];
+			SparseMatrixType m2=cm[alpha+SPIN_DOWN*2];
 
-		multiply(tmpMatrix,n(m1),n(m2));
-		assert(actualSite < modelParameters_.hubbardU.size());
-		hmatrix += factorForDiagonals*modelParameters_.hubbardU[actualSite]*tmpMatrix;
+			multiply(tmpMatrix,n(m1),n(m2));
+			assert(actualSite + nsites*alpha < modelParameters_.hubbardU.size());
+			hmatrix += factorForDiagonals*modelParameters_.hubbardU[actualSite+nsites*alpha]*tmpMatrix;
+		}
 	}
 
 	//serializr normal modelParameters_
 	ParametersHubbardAncillaType  modelParameters_;
 	//serializr ref geometry_ start
 	const GeometryType& geometry_;
+	bool hot_;
 }; //class HubbardAncilla
 } // namespace Dmrg
 /*@}*/

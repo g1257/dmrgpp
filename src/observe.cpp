@@ -29,6 +29,9 @@
 template<typename ModelHelperType>
 bool Dmrg::LinkProductHeisenbergAncillaC<ModelHelperType>::hot_ = false;
 
+template<typename ModelHelperType>
+bool Dmrg::LinkProductHubbardAncillaExtended<ModelHelperType>::hot_ = false;
+
 #ifndef USE_FLOAT
 typedef double RealType;
 #else

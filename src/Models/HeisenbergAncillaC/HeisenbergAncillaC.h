@@ -141,8 +141,8 @@ public:
 	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 
 	HeisenbergAncillaC(const SolverParamsType& solverParams,
-	                  InputValidatorType& io,
-	                  GeometryType const &geometry)
+	                   InputValidatorType& io,
+	                   GeometryType const &geometry)
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
 	      geometry_(geometry),
