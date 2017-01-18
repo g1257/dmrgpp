@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009-2017, UT-Battelle, LLC
 All rights reserved
 
-[PsimagLite, Version 1.0.0]
+[PsimagLite, Version 1.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -39,7 +39,7 @@ must include the following acknowledgment:
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
 
-*********************************************************
+-----------------------------------------------------------
 DISCLAIMER
 
 THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
@@ -65,7 +65,7 @@ ANY OF THEIR EMPLOYEES, REPRESENTS THAT THE USE OF ANY
 INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
 DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
-*********************************************************
+-----------------------------------------------------------
 
 */
 /** \ingroup PsimagLite */
@@ -80,10 +80,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "Concurrency.h"
 
+#ifdef USE_PTHREADS_NG
+#define ActualPthreadsName PthreadsNg
+#define ActualPthreadsN() "PthreadsNg.h"
+#else
+#define ActualPthreadsName Pthreads
+#define ActualPthreadsN() "Pthreads.h"
+#endif
+
 #ifdef USE_PTHREADS
 
 #ifndef USE_MPI
-#include "Pthreads.h"
+#include ActualPthreadsN()
 #else
 #include "PthreadsAndMpi.h"
 #endif
@@ -101,14 +109,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace PsimagLite {
 template<typename InstanceType>
 class Parallelizer
+
 #ifdef USE_PTHREADS
 
 #ifdef USE_MPI
 	: public PthreadsAndMpi<InstanceType> {
 	typedef PthreadsAndMpi<InstanceType> BaseType;
 #else
-        : public Pthreads<InstanceType> {
-	typedef Pthreads<InstanceType> BaseType;
+        : public ActualPthreadsName<InstanceType> {
+	typedef ActualPthreadsName<InstanceType> BaseType;
 #endif
 
 #else

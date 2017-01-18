@@ -1,7 +1,8 @@
-/* Copyright (c) 2009-2013, UT-Battelle, LLC
+/*
+Copyright (c) 2009-2017, UT-Battelle, LLC
 All rights reserved
 
-[PsimagLite, Version 1.0.0]
+[PsimagLite, Version 1.]
 
 *********************************************************
 THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
@@ -29,17 +30,14 @@ public:
 	    : nthreads_(nthreads)
 	{}
 
-	void thread_function_(SizeType threadNum,
-	                      SizeType blockSize,
-	                      SizeType total,
-	                      ConcurrencyType::MutexType*)
+	void doTask(SizeType threadNum,
+	            SizeType blockSize,
+	            SizeType total)
 	{
 		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
 		for (SizeType p=0;p<blockSize;p++) {
 			SizeType taskNumber = (threadNum+nthreads_*mpiRank)*blockSize + p;
 			if (taskNumber>=total) break;
-//			std::cout<<"This is thread number "<<threadNum;
-//			std::cout<<" and taskNumber="<<taskNumber<<"\n";
 		}
 	}
 
@@ -75,6 +73,5 @@ int main(int argc,char *argv[])
 	std::cout<<"Using "<<threadObject.name();
 	std::cout<<" with "<<threadObject.threads()<<" threads.\n";
 	threadObject.loopCreate(ntasks,helper);
-
 }
 
