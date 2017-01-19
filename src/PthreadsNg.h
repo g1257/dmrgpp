@@ -111,7 +111,7 @@ template<typename PthreadFunctionHolderType>
 void *thread_function_wrapper(void *dummyPtr)
 {
 	PthreadFunctionStruct<PthreadFunctionHolderType> *pfs =
-	        (PthreadFunctionStruct<PthreadFunctionHolderType> *) dummyPtr;
+	        static_cast<PthreadFunctionStruct<PthreadFunctionHolderType> *>(dummyPtr);
 
 	PthreadFunctionHolderType *pfh = pfs->pfh;
 
@@ -144,7 +144,7 @@ public:
 		cores_ = (cores > 0) ? cores : 1;
 	}
 
-	void loopCreate(SizeType total,PthreadFunctionHolderType& pfh)
+	void loopCreate(PthreadFunctionHolderType& pfh)
 	{
 		PthreadFunctionStruct<PthreadFunctionHolderType>* pfs;
 		pfs = new PthreadFunctionStruct<PthreadFunctionHolderType>[nthreads_];
@@ -154,7 +154,7 @@ public:
 		for (SizeType j=0; j <nthreads_; j++) {
 			pfs[j].threadNum = j;
 			pfs[j].pfh = &pfh;
-			pfs[j].total = total;
+			pfs[j].total = pfh.tasks();
 			pfs[j].nthreads = nthreads_;
 
 			attr[j] = new pthread_attr_t;

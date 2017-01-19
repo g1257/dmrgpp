@@ -27,9 +27,11 @@ class MyHelper {
 
 public:
 
-	MyHelper(SizeType nthreads)
-	    : nthreads_(nthreads),x_(nthreads,0)
+	MyHelper(SizeType ntasks, SizeType nthreads)
+	    : ntasks_(ntasks), nthreads_(nthreads),x_(nthreads,0)
 	{}
+
+	SizeType tasks() const { return ntasks_; }
 
 	int result() const
 	{
@@ -49,6 +51,7 @@ public:
 
 private:
 
+	SizeType ntasks_;
 	SizeType nthreads_;
 	VectorSizeType x_;
 }; // class MyHelper
@@ -74,11 +77,11 @@ int main(int argc,char *argv[])
 	ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,
 	                              PsimagLite::MPI::COMM_WORLD);
 
-	HelperType helper(nthreads);
+	HelperType helper(ntasks, nthreads);
 
 	std::cout<<"Using "<<threadObject.name();
 	std::cout<<" with "<<threadObject.threads()<<" threads.\n";
-	threadObject.loopCreate(ntasks,helper);
+	threadObject.loopCreate(helper);
 	helper.sync();
 	std::cout<<"Sum of all tasks= "<<helper.result()<<"\n";
 }
