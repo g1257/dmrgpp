@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <pthread.h>
 #include <iostream>
+#include <algorithm>
 #include "Vector.h"
 #include <sched.h>
 #include <unistd.h>
@@ -103,27 +104,51 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	LoadBalancerDefault(const VectorSizeType& weights, SizeType nthreads)
-	    : weights_(weights),
-	      nthreads_(nthreads),
-	      blockSize_(weights.size()/nthreads),
-	      mpiRank_(PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD))
+	    : taskNumber_(nthreads)
 	{
-		if (weights.size()%nthreads != 0) blockSize_++;
+		VectorSizeType workLoad(nthreads, 0);
+
+		SizeType ntasks = weights.size();
+		for (SizeType i = 0; i < ntasks; ++i) {
+			SizeType thread = findThreadWithLightestWork(workLoad);
+			// assign work to thread
+			assert(thread < taskNumber_.size());
+			taskNumber_[thread].push_back(i);
+			// update work loads
+			assert(thread < workLoad.size());
+			workLoad[thread] += weights[i];
+		}
+
+		for (SizeType i = 0; i < nthreads; ++i) {
+			SizeType n = taskNumber_[i].size();
+			std::cout<<n<<" Indices allocated to thread "<<i<<": ";
+			for (SizeType j = 0; j < n; ++j)
+				std::cout<<taskNumber_[i][j]<<" ";
+			std::cout<<"\n";
+		}
 	}
 
-	SizeType blockSize(SizeType) const { return blockSize_; }
+	SizeType blockSize(SizeType threadNum) const
+	{
+		assert(threadNum < taskNumber_.size());
+		return taskNumber_[threadNum].size();
+	}
 
 	int taskNumber(SizeType threadNum, SizeType p) const
 	{
-		return (threadNum + nthreads_*mpiRank_)*blockSize_ + p;
+		assert(threadNum < taskNumber_.size());
+		assert(p < taskNumber_[threadNum].size());
+		return taskNumber_[threadNum][p];
 	}
 
 private:
 
-	VectorSizeType weights_;
-	SizeType nthreads_;
-	SizeType blockSize_;
-	SizeType mpiRank_;
+	SizeType findThreadWithLightestWork(const VectorSizeType& workLoad) const
+	{
+		return std::min_element(workLoad.begin(), workLoad.end()) - workLoad.begin();
+	}
+
+	PsimagLite::Vector<VectorSizeType>::Type taskNumber_;
 };
 
 template<typename PthreadFunctionHolderType, typename LoadBalancerType=LoadBalancerDefault>
@@ -176,18 +201,15 @@ public:
 		cores_ = (cores > 0) ? cores : 1;
 	}
 
-	// no weights, no balancer
+	// no weights, no balancer ==> create weights, set all weigths to 1, delegate
 	void loopCreate(PthreadFunctionHolderType& pfh)
 	{
 		SizeType ntasks = pfh.tasks();
 		VectorSizeType weights(ntasks,1);
-		LoadBalancerType* loadBalancer = new LoadBalancerType(weights, nthreads_);
-		loopCreate(pfh,*loadBalancer);
-		delete loadBalancer;
-		loadBalancer = 0;
+		loopCreate(pfh,weights);
 	}
 
-	// weights, no balancer
+	// weights, no balancer ==> create balancer with weights ==> delegate
 	void loopCreate(PthreadFunctionHolderType& pfh, const VectorSizeType& weights)
 	{
 		LoadBalancerType* loadBalancer = new LoadBalancerType(weights, nthreads_);
@@ -289,4 +311,3 @@ private:
 
 /*@}*/
 #endif
-
