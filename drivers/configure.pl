@@ -55,8 +55,11 @@ EOF
 		my $doth = "../src/".ucfirst($unit).".h";
 		my $tmp = (-r "$doth") ? "$doth" : "";
 		print FH<<EOF;
-$unit: ./$unit.cpp $tmp Makefile Makefile.dep
-\t\$(CXX) \$(CPPFLAGS) -I../src -I.. -o $unit ./$unit.cpp \$(LDFLAGS)
+$unit.o: ./$unit.cpp $tmp Makefile Makefile.dep
+\t\$(CXX) \$(CPPFLAGS) -c -I../src -I..  ./$unit.cpp
+
+$unit: $unit.o $tmp Makefile Makefile.dep
+\t\$(CXX) -o $unit $unit.o \$(LDFLAGS)
 EOF
 	}
 

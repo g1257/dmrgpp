@@ -49,6 +49,8 @@ public:
 		return x_[0];
 	}
 
+	const VectorSizeType& weights() { return weight_; }
+
 	void doTask(SizeType taskNumber, SizeType threadNum)
 	{
 		for (SizeType i = 0; i < weight_[taskNumber]; ++i)
@@ -93,7 +95,7 @@ int main(int argc,char *argv[])
 
 	std::cout<<"Using "<<threadObject.name();
 	std::cout<<" with "<<threadObject.threads()<<" threads.\n";
-	threadObject.loopCreate(helper);
+	threadObject.loopCreate(helper, helper.weights());
 	helper.sync();
 	std::cout<<"Sum of all tasks= "<<helper.result()<<"\n";
 }

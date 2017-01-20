@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <pthread.h>
 #include <iostream>
-#include "AllocatorCpu.h"
+#include "Vector.h"
 #include <sched.h>
 #include <unistd.h>
 #ifdef PTHREAD_ASSIGN_AFFINITIES
@@ -94,17 +94,21 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <string.h>
 #endif
 
+namespace PsimagLite {
+
 class LoadBalancerDefault {
 
 public:
 
-	LoadBalancerDefault(SizeType ntasks, SizeType nthreads)
-	    : ntasks_(ntasks),
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+
+	LoadBalancerDefault(const VectorSizeType& weights, SizeType nthreads)
+	    : weights_(weights),
 	      nthreads_(nthreads),
-	      blockSize_(ntasks/nthreads),
+	      blockSize_(weights.size()/nthreads),
 	      mpiRank_(PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD))
 	{
-		if (ntasks%nthreads != 0) blockSize_++;
+		if (weights.size()%nthreads != 0) blockSize_++;
 	}
 
 	SizeType blockSize(SizeType) const { return blockSize_; }
@@ -116,7 +120,7 @@ public:
 
 private:
 
-	SizeType ntasks_;
+	VectorSizeType weights_;
 	SizeType nthreads_;
 	SizeType blockSize_;
 	SizeType mpiRank_;
@@ -129,7 +133,7 @@ struct PthreadFunctionStruct {
 	{}
 
 	PthreadFunctionHolderType* pfh;
-	LoadBalancerType *loadBalancer;
+	const LoadBalancerType *loadBalancer;
 	int threadNum;
 	SizeType nthreads;
 	SizeType total;
@@ -158,11 +162,12 @@ void *thread_function_wrapper(void *dummyPtr)
 	return 0;
 }
 
-namespace PsimagLite {
 template<typename PthreadFunctionHolderType, typename LoadBalancerType=LoadBalancerDefault>
 class PthreadsNg  {
 
 public:
+
+	typedef LoadBalancerDefault::VectorSizeType VectorSizeType;
 
 	PthreadsNg(SizeType nPthreadsNg,int = 0)
 	    : nthreads_(nPthreadsNg),cores_(1)
@@ -171,23 +176,39 @@ public:
 		cores_ = (cores > 0) ? cores : 1;
 	}
 
-	void loopCreate(PthreadFunctionHolderType& pfh, LoadBalancerType* loadBalancer = 0)
+	// no weights, no balancer
+	void loopCreate(PthreadFunctionHolderType& pfh)
+	{
+		SizeType ntasks = pfh.tasks();
+		VectorSizeType weights(ntasks,1);
+		LoadBalancerType* loadBalancer = new LoadBalancerType(weights, nthreads_);
+		loopCreate(pfh,*loadBalancer);
+		delete loadBalancer;
+		loadBalancer = 0;
+	}
+
+	// weights, no balancer
+	void loopCreate(PthreadFunctionHolderType& pfh, const VectorSizeType& weights)
+	{
+		LoadBalancerType* loadBalancer = new LoadBalancerType(weights, nthreads_);
+		loopCreate(pfh,*loadBalancer);
+		delete loadBalancer;
+		loadBalancer = 0;
+	}
+
+	// balancer (includes weights)
+	void loopCreate(PthreadFunctionHolderType& pfh,
+	                const LoadBalancerType& loadBalancer)
 	{
 		PthreadFunctionStruct<PthreadFunctionHolderType>* pfs;
 		pfs = new PthreadFunctionStruct<PthreadFunctionHolderType>[nthreads_];
 		pthread_t* thread_id = new pthread_t[nthreads_];
 		pthread_attr_t** attr = new pthread_attr_t*[nthreads_];
-		bool ownsLoadBalancer = false;
 		SizeType ntasks = pfh.tasks();
-
-		if (loadBalancer == 0) {
-			loadBalancer = new LoadBalancerType(ntasks, nthreads_);
-			ownsLoadBalancer = true;
-		}
 
 		for (SizeType j=0; j <nthreads_; j++) {
 			pfs[j].pfh = &pfh;
-			pfs[j].loadBalancer = loadBalancer;
+			pfs[j].loadBalancer = &loadBalancer;
 			pfs[j].threadNum = j;
 			pfs[j].total = ntasks;
 			pfs[j].nthreads = nthreads_;
@@ -221,9 +242,6 @@ public:
 			std::cout<<pfs[j].cpu<<"\n";
 		}
 #endif
-
-		if (ownsLoadBalancer)
-			delete loadBalancer;
 
 		delete [] thread_id;
 		delete [] pfs;
