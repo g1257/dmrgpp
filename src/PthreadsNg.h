@@ -94,13 +94,42 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <string.h>
 #endif
 
-template<typename PthreadFunctionHolderType>
+class LoadBalancerDefault {
+
+public:
+
+	LoadBalancerDefault(SizeType ntasks, SizeType nthreads)
+	    : ntasks_(ntasks),
+	      nthreads_(nthreads),
+	      blockSize_(ntasks/nthreads),
+	      mpiRank_(PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD))
+	{
+		if (ntasks%nthreads != 0) blockSize_++;
+	}
+
+	SizeType blockSize(SizeType) const { return blockSize_; }
+
+	int taskNumber(SizeType threadNum, SizeType p) const
+	{
+		return (threadNum + nthreads_*mpiRank_)*blockSize_ + p;
+	}
+
+private:
+
+	SizeType ntasks_;
+	SizeType nthreads_;
+	SizeType blockSize_;
+	SizeType mpiRank_;
+};
+
+template<typename PthreadFunctionHolderType, typename LoadBalancerType=LoadBalancerDefault>
 struct PthreadFunctionStruct {
 	PthreadFunctionStruct()
-	    : pfh(0),threadNum(0),nthreads(0),total(0),cpu(0)
+	    : pfh(0),loadBalancer(0),threadNum(0),nthreads(0),total(0),cpu(0)
 	{}
 
 	PthreadFunctionHolderType* pfh;
+	LoadBalancerType *loadBalancer;
 	int threadNum;
 	SizeType nthreads;
 	SizeType total;
@@ -118,13 +147,11 @@ void *thread_function_wrapper(void *dummyPtr)
 	int s = sched_getcpu();
 	if (s >= 0) pfs->cpu = s;
 
-	SizeType blockSize = pfs->total/pfs->nthreads;
-	if (pfs->total%pfs->nthreads!=0) blockSize++;
+	SizeType blockSize = pfs->loadBalancer->blockSize(pfs->threadNum);
 
-	SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
 	for (SizeType p=0; p < blockSize; ++p) {
-		SizeType taskNumber = (pfs->threadNum + pfs->nthreads*mpiRank)*blockSize + p;
-		if (taskNumber >= pfs->total) break;
+		SizeType taskNumber = pfs->loadBalancer->taskNumber(pfs->threadNum, p);
+		if (taskNumber > pfs->total) break;
 		pfh->doTask(taskNumber, pfs->threadNum);
 	}
 
@@ -132,7 +159,7 @@ void *thread_function_wrapper(void *dummyPtr)
 }
 
 namespace PsimagLite {
-template<typename PthreadFunctionHolderType>
+template<typename PthreadFunctionHolderType, typename LoadBalancerType=LoadBalancerDefault>
 class PthreadsNg  {
 
 public:
@@ -144,17 +171,25 @@ public:
 		cores_ = (cores > 0) ? cores : 1;
 	}
 
-	void loopCreate(PthreadFunctionHolderType& pfh)
+	void loopCreate(PthreadFunctionHolderType& pfh, LoadBalancerType* loadBalancer = 0)
 	{
 		PthreadFunctionStruct<PthreadFunctionHolderType>* pfs;
 		pfs = new PthreadFunctionStruct<PthreadFunctionHolderType>[nthreads_];
 		pthread_t* thread_id = new pthread_t[nthreads_];
 		pthread_attr_t** attr = new pthread_attr_t*[nthreads_];
+		bool ownsLoadBalancer = false;
+		SizeType ntasks = pfh.tasks();
+
+		if (loadBalancer == 0) {
+			loadBalancer = new LoadBalancerType(ntasks, nthreads_);
+			ownsLoadBalancer = true;
+		}
 
 		for (SizeType j=0; j <nthreads_; j++) {
-			pfs[j].threadNum = j;
 			pfs[j].pfh = &pfh;
-			pfs[j].total = pfh.tasks();
+			pfs[j].loadBalancer = loadBalancer;
+			pfs[j].threadNum = j;
+			pfs[j].total = ntasks;
 			pfs[j].nthreads = nthreads_;
 
 			attr[j] = new pthread_attr_t;
@@ -186,6 +221,9 @@ public:
 			std::cout<<pfs[j].cpu<<"\n";
 		}
 #endif
+
+		if (ownsLoadBalancer)
+			delete loadBalancer;
 
 		delete [] thread_id;
 		delete [] pfs;

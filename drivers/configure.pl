@@ -41,7 +41,7 @@ sub createMakefile
 	local *FH = $fh;
 	my @units = qw(integrator sparseSolverTest testCRSMatrix combineContinuedFraction
 	continuedFractionCollection gitrev jsonExample range kernelPolynomial
-	linearPrediction options randomTest svd testLapack threads testIsClass
+	linearPrediction options randomTest svd testLapack threads loadImbalance testIsClass
 	testMemResolv1 sumDecomposition calculator closuresTest base64test);
 	my $combinedUnits = combine("",\@units,".o ");
 	my $combinedUnits2 = combine("./",\@units,".cpp ");
@@ -55,17 +55,17 @@ EOF
 		my $doth = "../src/".ucfirst($unit).".h";
 		my $tmp = (-r "$doth") ? "$doth" : "";
 		print FH<<EOF;
-$unit: ./$unit.cpp $tmp Makefile
+$unit: ./$unit.cpp $tmp Makefile Makefile.dep
 \t\$(CXX) \$(CPPFLAGS) -I../src -I.. -o $unit ./$unit.cpp \$(LDFLAGS)
 EOF
 	}
 
 print FH<<EOF;
 Makefile.dep: $combinedUnits2
-\t\$(CXX) \$(CPPFLAGS) -MM  $combinedUnits2  > Makefile.dep
+\t\$(CXX) \$(CPPFLAGS) -I../src -I.. -MM  $combinedUnits2  > Makefile.dep
 
 clean: Makefile.dep
-\trm -f core* *.o *.dep *.a
+\trm -f core* *.o *.dep *.a @units
 
 include Makefile.dep
 
