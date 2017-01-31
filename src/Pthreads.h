@@ -182,10 +182,12 @@ public:
 		delete [] attr;
 
 #ifndef NDEBUG
+#ifdef __linux__
 		for (SizeType j=0; j <nthreads_; j++) {
 			std::cout<<"Pthreads: Pthread number "<<j<<" runs on core number ";
 			std::cout<<pfs[j].cpu<<"\n";
 		}
+#endif
 #endif
 
 		pthread_mutex_destroy(&mutex_);
