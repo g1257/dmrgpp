@@ -28,7 +28,7 @@ class MyHelper {
 public:
 
 	MyHelper(SizeType ntasks, SizeType nthreads)
-	    : ntasks_(ntasks), nthreads_(nthreads),x_(nthreads,0)
+	    : ntasks_(ntasks), x_(nthreads,0)
 	{}
 
 	SizeType tasks() const { return ntasks_; }
@@ -52,7 +52,6 @@ public:
 private:
 
 	SizeType ntasks_;
-	SizeType nthreads_;
 	VectorSizeType x_;
 }; // class MyHelper
 

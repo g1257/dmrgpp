@@ -173,7 +173,7 @@ void *thread_function_wrapper(void *dummyPtr)
 
 	PthreadFunctionHolderType *pfh = pfs->pfh;
 
-	int s = 1;
+	int s = 0;
 #ifdef __linux__
 	s = sched_getcpu();
 #endif
