@@ -1,0 +1,40 @@
+MEMO: Policy Regarding Regressions
+DATE: January 31st, 2017
+TYPE OF MEMO: Normative
+
+1.1 Definition.
+A software regression is a fault in the software that was not
+present in a previous revision. The types of faults included
+in this MEMO are listed below, under section 2.
+
+1.2 Policy.
+Regressions are not allowed in any of our codes.
+
+1.3 Reporting procedure.
+If you find a regression please submit the git revision hashes
+for the old revision for the relevant code, and all codes that
+depend on it. Submit also the conditions (input decks, cores used, etc)
+under which the regression can be reproduced.
+
+2. Regressions Types
+
+2.1 Bugs that cause the code to give wrong results, where correct
+results where obtained before, under the same or similar conditions.
+
+2.2 Bugs that cause the code to segfault, where it did not
+segfault before, under the same or similar conditions.
+
+2.3 Bugs that cause a race condition, where a race condition was not
+present before, under the same or similar conditions.
+
+2.4 Changes that caused established useful functionality to be removed, without 
+similar ways of accessing said functionality in the current revision, under
+the same or similar conditions.
+
+2.5 Changes that cause the code to use an impractical amount of RAM or disk, where
+an impractical amount of RAM or disk was not used before, under the same or similar conditions.
+
+2.6 Changes that cause the code to use unnecessary amount of RAM or disk, where
+an unnecessary amount of RAM or disk was not used before, under the same or similar conditions.
+
+
