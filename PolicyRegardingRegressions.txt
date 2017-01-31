@@ -27,8 +27,8 @@ segfault before, under the same or similar conditions.
 2.3 Bugs that cause a race condition, where a race condition was not
 present before, under the same or similar conditions.
 
-2.4 Changes that caused established useful functionality to be removed, without 
-similar ways of accessing said functionality in the current revision, under
+2.4 Changes that caused established useful functionality to be removed, without
+alternative ways of accessing said functionality in the current revision, under
 the same or similar conditions.
 
 2.5 Changes that cause the code to use an impractical amount of RAM or disk, where
@@ -37,4 +37,5 @@ an impractical amount of RAM or disk was not used before, under the same or simi
 2.6 Changes that cause the code to use unnecessary amount of RAM or disk, where
 an unnecessary amount of RAM or disk was not used before, under the same or similar conditions.
 
-
+2.7 Changes that negatively affect the performance of the code in a practical way, compared
+to a previous revision, under the same or similar conditions.
