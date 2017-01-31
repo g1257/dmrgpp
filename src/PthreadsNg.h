@@ -176,8 +176,8 @@ void *thread_function_wrapper(void *dummyPtr)
 	int s = 1;
 #ifdef __linux__
 	s = sched_getcpu();
-	if (s >= 0) pfs->cpu = s;
 #endif
+	if (s >= 0) pfs->cpu = s;
 
 	SizeType blockSize = pfs->loadBalancer->blockSize(pfs->threadNum);
 

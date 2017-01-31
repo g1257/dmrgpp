@@ -121,8 +121,8 @@ void *thread_function_wrapper(void *dummyPtr)
 
 #ifdef __linux___
 	s = sched_getcpu();
-	if (s >= 0) pfs->cpu = s;
 #endif
+	if (s >= 0) pfs->cpu = s;
 
 	pfh->thread_function_(pfs->threadNum,pfs->blockSize,pfs->total,pfs->mutex);
 
