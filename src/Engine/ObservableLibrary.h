@@ -247,7 +247,14 @@ private:
 			observe_.setBrakets(bra,ket);
 			observe_.setPointer(threadId,i0);
 
+			SizeType tmp = density.size();
 			onePointHookForZero(i0,opA,"gs",threadId,density);
+			SizeType lastOne = density.size();
+			if (tmp != density.size() && lastOne > 0) {
+				lastOne--;
+				std::cout<<"0 "<<density[lastOne];
+				std::cout<<" "<<observe_.time(threadId)<<"\n";
+			}
 
 			FieldType tmp1 = observe_.template
 			        onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
