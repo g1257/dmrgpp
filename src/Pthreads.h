@@ -117,8 +117,12 @@ void *thread_function_wrapper(void *dummyPtr)
 
 	PthreadFunctionHolderType *pfh = pfs->pfh;
 
-	int s = sched_getcpu();
+	int s = 1;
+
+#ifdef __linux___
+	s = sched_getcpu();
 	if (s >= 0) pfs->cpu = s;
+#endif
 
 	pfh->thread_function_(pfs->threadNum,pfs->blockSize,pfs->total,pfs->mutex);
 
