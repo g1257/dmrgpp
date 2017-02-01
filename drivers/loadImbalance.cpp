@@ -19,6 +19,9 @@ Please see full open source license included in file LICENSE.
 #include <iostream>
 #include <cstdlib>
 #include "Parallelizer.h"
+#ifdef USE_PTHREADS
+#define USE_PTHREADS_NG
+#endif
 
 class MyHelper {
 

@@ -4,7 +4,7 @@ TYPE OF MEMO: Normative
 
 1.1 Definition.
 A software regression is a fault in the software that was not
-present in a previous revision. The types of faults included
+present in a previous revision. The types of faults covered 
 in this MEMO are listed below, under section 2.
 
 1.2 Policy.

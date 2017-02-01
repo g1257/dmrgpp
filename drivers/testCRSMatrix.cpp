@@ -16,7 +16,7 @@ std::ostream& operator<<(std::ostream& os,const typename Vector<T>::Type& v)
 
 void fillRandomVector(Vector<RealType>::Type& x,RealType maxValue)
 {
-	unsigned int long long seed = 7334211;
+	unsigned int long seed = 7334211;
 	srand48(seed);
 	for (SizeType i=0;i<x.size();i++)
 		x[i] = drand48()*maxValue;
@@ -39,7 +39,7 @@ int main(int argc,char *argv[])
 
 	if (argc==3) {
 		SizeType rank = std::atoi(argv[1]);
-		unsigned int long long seed = 343981;
+		unsigned int long seed = 343981;
 		RealType ratio = std::atof(argv[2]);
 		SizeType nonZeros = SizeType(ratio * rank *rank);
 		RealType maxValue = 10.0;

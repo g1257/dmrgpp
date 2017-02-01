@@ -423,7 +423,7 @@ private:
 	            typename Vector<RealType>::Type& gs)
 	{
 		RealType* vki = 0;
-		long long int maxCounter = stepsForEnergyConvergence_;
+		long int maxCounter = stepsForEnergyConvergence_;
 
 		if (gs.size() > 0) {
 			std::fill(groundV_.begin(),groundV_.end(),0.0);
@@ -436,7 +436,7 @@ private:
 			groundE_[i] = ab.b(i);
 		}
 
-		long long int intCounter=0;
+		long int intCounter=0;
 		int m = 0;
 		int l = 0;
 		for (; l < n; l++) {

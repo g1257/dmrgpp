@@ -238,9 +238,9 @@ public:
 
 	public:
 
-		typedef int long long LongIntegerType;
+		typedef int long LongIntegerType;
 		static const LongIntegerType LAST_INSTANCE=-1;
-		typedef unsigned int long long LongSizeType;
+		typedef unsigned int long LongSizeType;
 
 		In() { }
 

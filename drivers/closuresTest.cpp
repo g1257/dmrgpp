@@ -123,7 +123,7 @@ bool checkCrs(const PsimagLite::CrsMatrix<T>& m,
 void testCrsMatrix()
 {
 	SizeType n = 10;
-	unsigned int long long seed = 343981;
+	unsigned int long seed = 343981;
 	double ratio = 0.5;
 	SizeType nonZeros = SizeType(ratio*n*n);
 	double maxValue = 10.0;

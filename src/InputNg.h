@@ -523,7 +523,7 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrStr_,it);
 		}
 
-		void readline(long long int& val,const String& label)
+		void readline(long int& val,const String& label)
 		{
 			String label2 = label2label(label);
 			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
