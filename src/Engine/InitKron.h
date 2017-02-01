@@ -114,14 +114,9 @@ public:
 		SparseMatrixType arTranspose;
 		transposeConjugate(arTranspose,modelHelper_.leftRightSuper().right().hamiltonian());
 
-//		std::cerr<<"gengroupLeft_.size="<<gengroupLeft_.size()<<"\n";
-//		std::cerr<<"gengroupRight_.size="<<gengroupRight_.size()<<"\n";
-
 		aRt_ = new ArrayOfMatStructType(arTranspose,gengroupRight_);
 
 		convertXcYcArrays();
-//		printFullMatrix(modelHelper_.leftRightSuper().left().hamiltonian(),"LEFT HAM");
-//		printFullMatrix(modelHelper_.leftRightSuper().right().hamiltonian(),"RIGHT HAM");
 	}
 
 	~InitKron()
@@ -233,7 +228,6 @@ private:
 
 	const ModelType& model_;
 	const ModelHelperType& modelHelper_;
-//	QvalStructType qvalStruct_;
 	GenGroupType gengroupLeft_,gengroupRight_;
 	GenIjPatchType  ijpatches_;
 	ArrayOfMatStructType aL_;

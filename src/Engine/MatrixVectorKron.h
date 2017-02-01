@@ -98,7 +98,7 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef InitKron<ModelType,ModelHelperType> InitKronType;
-	typedef KronMatrix<InitKronType> KronMatrixType;
+	typedef KronMatrix<ModelType,ModelHelperType> KronMatrixType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;

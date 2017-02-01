@@ -81,29 +81,37 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef KRON_CONNECTIONS_H
 #define KRON_CONNECTIONS_H
 
+#include "InitKron.h"
+#include "MatrixDenseOrSparse.h"
 #include "Matrix.h"
 #include "Concurrency.h"
 
 namespace Dmrg {
 
-template<typename InitKronType>
+
+template<typename ModelType,typename ModelHelperType_>
 class KronConnections {
 
+	typedef InitKron<ModelType,ModelHelperType_> InitKronType;
 	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
 	typedef typename InitKronType::GenGroupType GenGroupType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef MatrixDenseOrSparse<ComplexOrRealType> MatrixDenseOrSparseType;
 
 public:
 
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef typename InitKronType::RealType RealType;
 
-	KronConnections(const InitKronType& initKron,MatrixType& W,const MatrixType& V)
-	: initKron_(initKron),W_(W),V_(V),hasMpi_(PsimagLite::Concurrency::hasMpi())
+	KronConnections(const InitKronType& initKron,VectorType& x,const VectorType& y)
+	    : initKron_(initKron),x_(x),y_(y),hasMpi_(PsimagLite::Concurrency::hasMpi())
 	{
+		init();
 	}
 
 	//! ATTENTION: ONLY VALID ON X86 AND X86_64 WHERE += IS ATOMIC
@@ -112,11 +120,7 @@ public:
 	                      SizeType total,
 	                      ConcurrencyType::MutexType*)
 	{
-		SizeType nC = initKron_.connections();
-		const GenGroupType& istartLeft = initKron_.istartLeft();
-		const GenGroupType& istartRight = initKron_.istartRight();
-		MatrixType intermediate(W_.n_row(),W_.n_col());
-
+		bool useSymmetry = initKron_.useSymmetry();
 		SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
 		SizeType npthreads = PsimagLite::Concurrency::npthreads;
 
@@ -124,77 +128,113 @@ public:
 
 		for (SizeType p=0;p<blockSize;p++) {
 			SizeType outPatch = (threadNum+npthreads*mpiRank)*blockSize + p;
-			if (outPatch>=total) break;
+			if (outPatch >= total) break;
+			SizeType i1 = initKron_.vstart(outPatch);
+			SizeType i2 = i1 + initKron_.vsize(outPatch);
 
-			for (SizeType inPatch=0;inPatch<total;++inPatch) {
-				for (SizeType ic=0;ic<nC;++ic) {
-					const ComplexOrRealType& val = initKron_.value(ic);
-					const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
-					const ArrayOfMatStructType& yiStruct = initKron_.yc(ic);
+			// needs to be private for each iteration
+			VectorType yi(initKron_.vsize(outPatch)); // FIXME: Allocation here, move elsewhere
 
-					SizeType i = initKron_.patch(GenIjPatchType::LEFT,inPatch);
-					SizeType j = initKron_.patch(GenIjPatchType::RIGHT,inPatch);
-
-					SizeType ip = initKron_.patch(GenIjPatchType::LEFT,outPatch);
-					SizeType jp = initKron_.patch(GenIjPatchType::RIGHT,outPatch);
-
-					SizeType i1 = istartLeft(i);
-//					SizeType i2 = istartLeft(i+1);
-
-					SizeType j1 = istartRight(j);
-					SizeType j2 = istartRight(j+1);
-
-					SizeType ip1 = istartLeft(ip);
-//					SizeType ip2 = istartLeft(ip+1);
-
-					SizeType jp1 = istartRight(jp);
-//					SizeType jp2 = istartLeft(jp+1);
-
-					const SparseMatrixType& tmp1 =  xiStruct(ip,i);
-					const SparseMatrixType& tmp2 =  yiStruct(j,jp);
-
-					SizeType colsize = j2 -j1;
-					for (SizeType mr2=0;mr2<colsize;++mr2)
-						for (SizeType mr=0;mr<tmp1.row();++mr)
-							intermediate(mr,mr2)=0.0;
-
-					for (SizeType mr=0;mr<tmp1.row();++mr) {
-						for (int k3=tmp1.getRowPtr(mr);k3<tmp1.getRowPtr(mr+1);++k3) {
-							SizeType col3 = tmp1.getCol(k3)+i1;
-							ComplexOrRealType valtmp = val * tmp1.getValue(k3);
-							for (SizeType mr2=j1;mr2<j2;++mr2) {
-								intermediate(mr,mr2-j1) += valtmp * V_(col3,mr2);
-							}
-						}
-					}
-
-					for (SizeType mr2=0;mr2<colsize;++mr2) {
-						SizeType start = tmp2.getRowPtr(mr2);
-						SizeType end = tmp2.getRowPtr(mr2+1);
-						for (SizeType k4=start;k4<end;++k4) {
-							ComplexOrRealType value1 = tmp2.getValue(k4);
-							SizeType col4 = tmp2.getCol(k4)+jp1;
-							for (SizeType mr=0;mr<tmp1.row();++mr) {
-								W_(mr+ip1,col4) += intermediate(mr,mr2) * value1;
-							}
-						}
-					}
-				}
+			/**
+			* Symmetry : Access only upper triangular matrix
+			**/
+			SizeType jpatchStart = 0;
+			SizeType jpatchEnd = outPatch;
+			VectorType xi;
+			if (!useSymmetry) {
+				jpatchEnd = total;
+			} else {
+				assert(i2 >= i1);
+				SizeType sizeXI = i2 - i1;
+				xi.resize(sizeXI, 0); // FIXME: Allocation here, move elsewhere
+				for (SizeType i = i1; i < i2; i++)
+					xi[i] = x_[i];
 			}
-		}
+
+			for (SizeType inPatch = jpatchStart; inPatch < jpatchEnd; ++inPatch) {
+				SizeType j1 = initKron_.vstart(inPatch);
+				SizeType j2 = j1 + initKron_.vsize(inPatch); // do we need the -1 ?
+
+				assert(j2 >= j1);
+				SizeType sizeXJ = j2 - j1;
+				VectorType xj(sizeXJ); // FIXME: Allocation here, move elsewhere
+				for (SizeType j = j1; j < j2; j++)
+					xj[j] = x_[j];
+
+				// is it iPatch or jPatch ? the size ?
+				VectorType yij(initKron_.vsize(outPatch));
+
+				// validate the size -- should be no of A's / B's
+				SizeType sizeListK = initKron_.cij(outPatch, inPatch)->A().size();
+
+				for (SizeType k = 0; k < sizeListK; ++k) {
+					const MatrixDenseOrSparseType& Ak = initKron_.cij(outPatch, inPatch)->A(k);
+					const MatrixDenseOrSparseType& Bk = initKron_.cij(outPatch, inPatch)->B(k);
+
+					// Change this to something smart
+					bool hasWork = (Ak.nnz() && Bk.nnz());
+					if (!hasWork)
+						continue;
+
+					bool diagonal = (outPatch == inPatch);
+
+					if (useSymmetry && diagonal) {
+						kronMult('n', 'n', Ak, Bk,  xj, yi);
+						for (SizeType i = 0; i < initKron_.vsize(outPatch); i++)
+							yij[i] += yi[i];
+
+						kronMult('t', 't', Ak, Bk, xi, yi);
+						for (SizeType j = j1; j < j2; j++)
+							y_[j] += yi[j];
+					} else {
+						kronMult('n','n', Ak, Bk, xj, yi);
+						for (SizeType i = 0; i < initKron_.vsize(outPatch); i++)
+							yij[i] += yi[i];
+					}
+				} // end loop over k
+			} // end inside patch
+		} // end outside patch
 	}
 
 	void sync()
 	{
 		if (!hasMpi_ || ConcurrencyType::isMpiDisabled("KronConnections"))
 			return;
-		PsimagLite::MPI::allReduce(W_);
+		PsimagLite::MPI::allReduce(x_);
+	}
+
+private:
+
+	void init()
+	{
+		SizeType npatches = initKron_.connections();
+		vsize_.resize(npatches, 0);
+		vstart_.resize(npatches, 0);
+
+		const GenGroupType& istartLeft = initKron_.istartLeft();
+		const GenGroupType& istartRight = initKron_.istartRight();
+
+		/**
+		  *  Calculating the size of the patches
+		  *  and row and column indeces for X and Y
+		  *  matrices.
+		**/
+		SizeType ip = 0;
+		for (SizeType ipatch = 0; ipatch < npatches; ipatch++){
+			SizeType nrowL = istartLeft(ipatch).size(); //  No of rows for the Lindex
+			SizeType nrowR  = istartRight(ipatch).size(); // No of rows for the Rindex
+			vsize_[ipatch] = nrowL*nrowR;
+			vstart_[ipatch] = ip;
+			ip += vsize_[ipatch]; // ip: Points to start of each patch
+		}
 	}
 
 	const InitKronType& initKron_;
-	MatrixType& W_;
-	const MatrixType& V_;
+	VectorType& x_;
+	const VectorType& y_;
 	bool hasMpi_;
+	VectorSizeType vstart_;
+	VectorSizeType vsize_;
 }; //class KronConnections
 
 } // namespace PsimagLite

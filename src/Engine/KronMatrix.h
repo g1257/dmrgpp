@@ -88,12 +88,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename InitKronType>
+template<typename ModelType,typename ModelHelperType_>
 class KronMatrix {
 
+	typedef InitKron<ModelType, ModelHelperType_> InitKronType;
 	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef KronConnections<ModelType, ModelHelperType_> KronConnectionsType;
+	typedef typename KronConnectionsType::MatrixType MatrixType;
+	typedef typename KronConnectionsType::VectorType VectorType;
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
 	typedef typename InitKronType::GenGroupType GenGroupType;
@@ -106,109 +109,107 @@ public:
 		std::cout<<"KronMatrix: preparation done for size="<<initKron.size()<<"\n";
 	}
 
-	void matrixVectorProduct(typename PsimagLite::Vector<ComplexOrRealType>::Type& vout,
-				 const typename PsimagLite::Vector<ComplexOrRealType>::Type& vin) const
+	void matrixVectorProduct(VectorType& vout, const VectorType& vin) const
 	{
-		const typename PsimagLite::Vector<SizeType>::Type& permInverse = initKron_.lrs().super().permutationInverse();
-		const typename PsimagLite::Vector<SizeType>::Type& perm = initKron_.lrs().super().permutationVector();
-		const SparseMatrixType& left = initKron_.lrs().left().hamiltonian();
-		const SparseMatrixType& right = initKron_.lrs().right().hamiltonian();
-		SizeType nl = left.row();
-		SizeType nr = right.row();
-		SizeType nq = initKron_.size();
-		SizeType offset = initKron_.offset();
+//		const typename PsimagLite::Vector<SizeType>::Type& permInverse = initKron_.lrs().super().permutationInverse();
+//		const typename PsimagLite::Vector<SizeType>::Type& perm = initKron_.lrs().super().permutationVector();
+//		const SparseMatrixType& left = initKron_.lrs().left().hamiltonian();
+//		const SparseMatrixType& right = initKron_.lrs().right().hamiltonian();
+//		SizeType nl = left.row();
+//		SizeType nr = right.row();
+//		SizeType nq = initKron_.size();
+//		SizeType offset = initKron_.offset();
 
-		MatrixType V(nl,nr);
-		for (SizeType i=0;i<nl;i++) {
-			for (SizeType j=0;j<nr;j++) {
-				SizeType r = permInverse[i+j*nl];
-				if (r<offset || r>=offset+nq) continue;
-				V(i,j) = vin[r-offset];
-			}
-		}
+//		MatrixType V(nl,nr);
+//		for (SizeType i=0;i<nl;i++) {
+//			for (SizeType j=0;j<nr;j++) {
+//				SizeType r = permInverse[i+j*nl];
+//				if (r<offset || r>=offset+nq) continue;
+//				V(i,j) = vin[r-offset];
+//			}
+//		}
 
-		MatrixType W(nl,nr);
+//		MatrixType W(nl,nr);
 
-		computeConnections(W,V);
-		computeRight(W,V);
-		computeLeft(W,V);
+		computeConnections(vout,vin);
+		//computeRight(W,V);
+		//computeLeft(W,V);
 
-		for (SizeType r=0;r<vout.size();r++) {
-			div_t divresult = div(perm[r+offset],nl);
-			SizeType i = divresult.rem;
-			SizeType j = divresult.quot;
-			vout[r] += W(i,j);
-		}
+//		for (SizeType r=0;r<vout.size();r++) {
+//			div_t divresult = div(perm[r+offset],nl);
+//			SizeType i = divresult.rem;
+//			SizeType j = divresult.quot;
+//			vout[r] += W(i,j);
+//		}
 	}
 
 private:
 
-	void computeRight(MatrixType& W,const MatrixType& V) const
-	{
-		SizeType npatches = initKron_.patch();
-		const GenGroupType& istartLeft = initKron_.istartLeft();
-		const GenGroupType& istartRight = initKron_.istartRight();
-		const ArrayOfMatStructType& artStruct = initKron_.aRt();
+//	void computeRight(MatrixType& W,const MatrixType& V) const
+//	{
+//		SizeType npatches = initKron_.patch();
+//		const GenGroupType& istartLeft = initKron_.istartLeft();
+//		const GenGroupType& istartRight = initKron_.istartRight();
+//		const ArrayOfMatStructType& artStruct = initKron_.aRt();
 
-		for (SizeType ipatch = 0;ipatch<npatches;ipatch++) {
-			SizeType i = initKron_.patch(GenIjPatchType::LEFT,ipatch);
-			SizeType j = initKron_.patch(GenIjPatchType::RIGHT,ipatch);
+//		for (SizeType ipatch = 0;ipatch<npatches;ipatch++) {
+//			SizeType i = initKron_.patch(GenIjPatchType::LEFT,ipatch);
+//			SizeType j = initKron_.patch(GenIjPatchType::RIGHT,ipatch);
 
-			SizeType i1 = istartLeft(i);
-			SizeType i2 = istartLeft(i+1);
-
-			SizeType j1 = istartRight(j);
-			//SizeType j2 = istartRight(j+1);
-
-			const SparseMatrixType& tmp = artStruct(j,j);
-			for (SizeType ii=i1;ii<i2;ii++) {
-				for (SizeType mr=0;mr<tmp.row();mr++) {
-					for (int kk=tmp.getRowPtr(mr);kk<tmp.getRowPtr(mr+1);kk++) {
-						SizeType col = tmp.getCol(kk) + j1;
-//						if (col>=i2) continue;
-						W(ii,col) += V(ii, mr+j1) * tmp.getValue(kk);
-					}
-				}
-			}
-		}
-	}
-
-	void computeLeft(MatrixType& W,const MatrixType& V) const
-	{
-		SizeType npatches = initKron_.patch();
-		const GenGroupType& istartLeft = initKron_.istartLeft();
-		const GenGroupType& istartRight = initKron_.istartRight();
-		const ArrayOfMatStructType& alStruct = initKron_.aL();
-
-		for (SizeType ipatch = 0;ipatch<npatches;ipatch++) {
-			SizeType i = initKron_.patch(GenIjPatchType::LEFT,ipatch);
-			SizeType j = initKron_.patch(GenIjPatchType::RIGHT,ipatch);
-
-			SizeType i1 = istartLeft(i);
+//			SizeType i1 = istartLeft(i);
 //			SizeType i2 = istartLeft(i+1);
 
-			SizeType j1 = istartRight(j);
-			SizeType j2 = istartRight(j+1);
+//			SizeType j1 = istartRight(j);
+//			//SizeType j2 = istartRight(j+1);
 
-			const SparseMatrixType& tmp = alStruct(i,i);
+//			const SparseMatrixType& tmp = artStruct(j,j);
+//			for (SizeType ii=i1;ii<i2;ii++) {
+//				for (SizeType mr=0;mr<tmp.row();mr++) {
+//					for (int kk=tmp.getRowPtr(mr);kk<tmp.getRowPtr(mr+1);kk++) {
+//						SizeType col = tmp.getCol(kk) + j1;
+////						if (col>=i2) continue;
+//						W(ii,col) += V(ii, mr+j1) * tmp.getValue(kk);
+//					}
+//				}
+//			}
+//		}
+//	}
 
-			for (SizeType jj=j1;jj<j2;jj++) {
-				for (SizeType mr=0;mr<tmp.row();mr++) {
-					for (int kk=tmp.getRowPtr(mr);kk<tmp.getRowPtr(mr+1);kk++) {
-						SizeType col = tmp.getCol(kk) + i1;
-//						if (col>=i2) continue;
-						W(mr+i1,jj) += tmp.getValue(kk) *  V(col, jj);
-					}
-				}
-			}
-		}
-	}
+//	void computeLeft(MatrixType& W,const MatrixType& V) const
+//	{
+//		SizeType npatches = initKron_.patch();
+//		const GenGroupType& istartLeft = initKron_.istartLeft();
+//		const GenGroupType& istartRight = initKron_.istartRight();
+//		const ArrayOfMatStructType& alStruct = initKron_.aL();
+
+//		for (SizeType ipatch = 0;ipatch<npatches;ipatch++) {
+//			SizeType i = initKron_.patch(GenIjPatchType::LEFT,ipatch);
+//			SizeType j = initKron_.patch(GenIjPatchType::RIGHT,ipatch);
+
+//			SizeType i1 = istartLeft(i);
+////			SizeType i2 = istartLeft(i+1);
+
+//			SizeType j1 = istartRight(j);
+//			SizeType j2 = istartRight(j+1);
+
+//			const SparseMatrixType& tmp = alStruct(i,i);
+
+//			for (SizeType jj=j1;jj<j2;jj++) {
+//				for (SizeType mr=0;mr<tmp.row();mr++) {
+//					for (int kk=tmp.getRowPtr(mr);kk<tmp.getRowPtr(mr+1);kk++) {
+//						SizeType col = tmp.getCol(kk) + i1;
+////						if (col>=i2) continue;
+//						W(mr+i1,jj) += tmp.getValue(kk) *  V(col, jj);
+//					}
+//				}
+//			}
+//		}
+//	}
 
 	// ATTENTION: MPI is not supported, only pthreads
-	void computeConnections(MatrixType& W,const MatrixType& V) const
+	void computeConnections(VectorType& x,const VectorType& y) const
 	{
-		typedef KronConnections<InitKronType> KronConnectionsType;
-		KronConnectionsType kc(initKron_,W,V);
+		KronConnectionsType kc(initKron_,x,y);
 
 		typedef PsimagLite::Parallelizer<KronConnectionsType> ParallelizerType;
 		ParallelizerType parallelConnections(PsimagLite::Concurrency::npthreads,
