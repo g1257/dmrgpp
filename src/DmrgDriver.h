@@ -10,7 +10,7 @@
 #include "ModelHelperSu2.h"
 #include "MatrixVectorOnTheFly.h"
 #include "MatrixVectorStored.h"
-#include "MatrixVectorKron.h"
+#include "MatrixVectorKron/MatrixVectorKron.h"
 #include "TargetingBase.h"
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
