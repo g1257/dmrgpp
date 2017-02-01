@@ -80,12 +80,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "Concurrency.h"
 
-#ifdef USE_PTHREADS_NG
+#ifdef USE_PTHREADS_OR_NOT_NG
 #define ActualPthreadsName PthreadsNg
 #define ActualPthreadsN() "PthreadsNg.h"
+#define ActualNoPthreadsName NoPthreadsNg
+#define ActualNoPthreadsN() "NoPthreadsNg.h"
 #else
 #define ActualPthreadsName Pthreads
 #define ActualPthreadsN() "Pthreads.h"
+#define ActualNoPthreadsName NoPthreads
+#define ActualNoPthreadsN() "NoPthreads.h"
 #endif
 
 #ifdef USE_PTHREADS
@@ -101,7 +105,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifdef USE_MPI
 #include "Mpi.h"
 #else 
-#include "NoPthreads.h"
+#include ActualNoPthreadsN()
 #endif // USE_MPI
 
 #endif // USE_PTHREADS
@@ -125,8 +129,8 @@ class Parallelizer
         : public Mpi<InstanceType> {
 	typedef Mpi<InstanceType> BaseType;
 #else
-        : public NoPthreads<InstanceType>  {
-	typedef NoPthreads<InstanceType> BaseType;
+        : public ActualNoPthreadsName<InstanceType>  {
+	typedef ActualNoPthreadsName<InstanceType> BaseType;
 #endif
 #endif
 

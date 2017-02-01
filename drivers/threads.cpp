@@ -18,6 +18,7 @@ Please see full open source license included in file LICENSE.
 #include "Concurrency.h"
 #include <iostream>
 #include <cstdlib>
+#define USE_PTHREADS_OR_NOT_NG
 #include "Parallelizer.h"
 
 class MyHelper {
