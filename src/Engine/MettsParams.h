@@ -119,7 +119,7 @@ public:
 		this->noOperator(false);
 	}
 
-	int long long rngSeed;
+	int long rngSeed;
 	RealType beta;
 	PsimagLite::String collapse;
 	VectorSizeType pure;

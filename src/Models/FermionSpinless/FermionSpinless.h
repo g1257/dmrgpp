@@ -109,7 +109,7 @@ public:
 	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
 	typedef typename ModelBaseType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::SparseElementType SparseElementType;
-	typedef unsigned int long long WordType;
+	typedef unsigned int long WordType;
 	typedef  HilbertSpaceFermionSpinless<WordType> HilbertSpaceType;
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
 	typedef typename ModelBaseType::SymmetryElectronsSzType SymmetryElectronsSzType;

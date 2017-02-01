@@ -104,7 +104,7 @@ public:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	MettsStochastics(const ModelType& model,
-	                 int long long seed,
+	                 int long seed,
 	                 const VectorSizeType& pure)
 	    : model_(model),
 	      rng_(seed),

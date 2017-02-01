@@ -120,7 +120,7 @@ private:
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef unsigned int long long WordType;
+	typedef unsigned int long WordType;
 	typedef LinkProductHeisenbergAncillaC<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
@@ -132,7 +132,7 @@ private:
 
 public:
 
-	typedef typename PsimagLite::Vector<unsigned int long long>::Type HilbertBasisType;
+	typedef typename PsimagLite::Vector<unsigned int long>::Type HilbertBasisType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::PairType PairType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;

@@ -125,7 +125,7 @@ namespace Dmrg {
 
 struct PosixTarHeader {
 
-	typedef long long unsigned int LongType;
+	typedef long unsigned int LongType;
 
 	PosixTarHeader(PsimagLite::String filename,
 	               LongType fileSize)
@@ -140,7 +140,7 @@ struct PosixTarHeader {
 		sprintf(gname,"nobody");
 		std::snprintf(name,100,"%s",filename.c_str());
 		typeflag[0]=0;
-		sprintf(size,"%011llo",static_cast<LongType>(fileSize));
+		sprintf(size,"%011o",static_cast<int>(fileSize));
 	}
 
 	PosixTarHeader (std::ifstream& fin)

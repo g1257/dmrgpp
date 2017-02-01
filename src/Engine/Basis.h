@@ -198,9 +198,9 @@ public:
 			quantumNumbers_.clear();
 			electrons_.clear();
 
-			unsigned long long int check = ns*ne;
+			unsigned long int check = ns*ne;
 			unsigned int shift = 8*sizeof(SizeType)-1;
-			unsigned long long int max = 1;
+			unsigned long int max = 1;
 			max <<= shift;
 			if (check >= max) {
 				PsimagLite::String msg("Basis::setToProduct: Basis too large. ");

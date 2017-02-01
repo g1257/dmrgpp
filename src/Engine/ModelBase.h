@@ -98,7 +98,7 @@ class ModelBase  {
 public:
 
 	typedef InputValidatorType_ InputValidatorType;
-	typedef typename PsimagLite::Vector<unsigned int long long>::Type HilbertBasisType;
+	typedef typename PsimagLite::Vector<unsigned int long>::Type HilbertBasisType;
 	typedef ModelHelperType_ ModelHelperType;
 	typedef GeometryType_ GeometryType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;

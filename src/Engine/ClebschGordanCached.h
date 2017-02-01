@@ -192,7 +192,7 @@ private:
 template<typename FieldType>
 SizeType ClebschGordanCached<FieldType>::copies_=0;
 
-}; // namespace Dmrg
+} // namespace Dmrg
 /*@}*/
 #endif
 

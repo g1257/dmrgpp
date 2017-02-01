@@ -112,6 +112,6 @@ namespace Dmrg {
 	template<typename FieldType>
 	ClebschGordanCached<FieldType> Su2SymmetryGlobals<FieldType>::clebschGordanObject(2);
 	
-}; // namespace Dmrg
+} // namespace Dmrg
 /*@}*/
 #endif //SU2_GLOBALS_H

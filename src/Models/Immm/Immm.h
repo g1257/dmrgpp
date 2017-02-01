@@ -89,7 +89,7 @@ namespace Dmrg {
 template<typename ModelBaseType>
 class Immm : public ModelBaseType {
 
-	typedef unsigned int long long WordType;
+	typedef unsigned int long WordType;
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 
 public:
