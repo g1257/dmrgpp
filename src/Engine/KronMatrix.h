@@ -131,6 +131,7 @@ public:
 
 //		MatrixType W(nl,nr);
 
+		// FIXME: Pass vin and vout here as is ???
 		computeConnections(vout,vin);
 		//computeRight(W,V);
 		//computeLeft(W,V);

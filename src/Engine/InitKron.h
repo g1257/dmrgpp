@@ -89,6 +89,8 @@ namespace Dmrg {
 template<typename ModelType,typename ModelHelperType_>
 class InitKron {
 
+	static const bool KRON_USE_SYMMETRY = true;
+
 public:
 
 	typedef ModelHelperType_ ModelHelperType;
@@ -127,6 +129,8 @@ public:
 		for (SizeType ic=0;ic<yc_.size();ic++) delete yc_[ic];
 
 	}
+
+	bool useSymmetry() const { return KRON_USE_SYMMETRY; }
 
 	const ArrayOfMatStructType& xc(SizeType ic) const
 	{

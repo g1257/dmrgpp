@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define KRON_CONNECTIONS_H
 
 #include "InitKron.h"
-#include "MatrixDenseOrSparse.h"
 #include "Matrix.h"
 #include "Concurrency.h"
 
@@ -100,7 +99,9 @@ class KronConnections {
 	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
 	typedef typename InitKronType::GenGroupType GenGroupType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
-	typedef MatrixDenseOrSparse<ComplexOrRealType> MatrixDenseOrSparseType;
+
+	// FIXME: Create a matrix dense or sparse class
+	typedef SparseMatrixType MatrixDenseOrSparseType;
 
 public:
 
@@ -108,13 +109,12 @@ public:
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef typename InitKronType::RealType RealType;
 
-	KronConnections(const InitKronType& initKron,VectorType& x,const VectorType& y)
-	    : initKron_(initKron),x_(x),y_(y),hasMpi_(PsimagLite::Concurrency::hasMpi())
+	KronConnections(const InitKronType& initKron,VectorType& y,const VectorType& x)
+	    : initKron_(initKron),y_(y),x_(x),hasMpi_(PsimagLite::Concurrency::hasMpi())
 	{
 		init();
 	}
 
-	//! ATTENTION: ONLY VALID ON X86 AND X86_64 WHERE += IS ATOMIC
 	void thread_function_(SizeType threadNum,
 	                      SizeType blockSize,
 	                      SizeType total,
@@ -129,11 +129,11 @@ public:
 		for (SizeType p=0;p<blockSize;p++) {
 			SizeType outPatch = (threadNum+npthreads*mpiRank)*blockSize + p;
 			if (outPatch >= total) break;
-			SizeType i1 = initKron_.vstart(outPatch);
-			SizeType i2 = i1 + initKron_.vsize(outPatch);
+			SizeType i1 = vstart_[outPatch];
+			SizeType i2 = i1 + vsize_[outPatch];
 
 			// needs to be private for each iteration
-			VectorType yi(initKron_.vsize(outPatch)); // FIXME: Allocation here, move elsewhere
+			VectorType yi(vsize_[outPatch]); // FIXME: Allocation here, move elsewhere
 
 			/**
 			* Symmetry : Access only upper triangular matrix
@@ -152,8 +152,8 @@ public:
 			}
 
 			for (SizeType inPatch = jpatchStart; inPatch < jpatchEnd; ++inPatch) {
-				SizeType j1 = initKron_.vstart(inPatch);
-				SizeType j2 = j1 + initKron_.vsize(inPatch); // do we need the -1 ?
+				SizeType j1 =vstart_[inPatch];
+				SizeType j2 = j1 + vsize_[inPatch]; // do we need the -1 ?
 
 				assert(j2 >= j1);
 				SizeType sizeXJ = j2 - j1;
@@ -162,17 +162,17 @@ public:
 					xj[j] = x_[j];
 
 				// is it iPatch or jPatch ? the size ?
-				VectorType yij(initKron_.vsize(outPatch));
+				VectorType yij(vsize_[outPatch]);
 
 				// validate the size -- should be no of A's / B's
-				SizeType sizeListK = initKron_.cij(outPatch, inPatch)->A().size();
+				SizeType sizeListK = initKron_.connections(); // IS THIS CORRECT, FIXME
 
 				for (SizeType k = 0; k < sizeListK; ++k) {
-					const MatrixDenseOrSparseType& Ak = initKron_.cij(outPatch, inPatch)->A(k);
-					const MatrixDenseOrSparseType& Bk = initKron_.cij(outPatch, inPatch)->B(k);
+					const MatrixDenseOrSparseType& Ak = initKron_.xc(k)(outPatch, inPatch);
+					const MatrixDenseOrSparseType& Bk = initKron_.yc(k)(outPatch, inPatch);
 
 					// Change this to something smart
-					bool hasWork = (Ak.nnz() && Bk.nnz());
+					bool hasWork = true; // FIXME: (Ak.nnz() && Bk.nnz());
 					if (!hasWork)
 						continue;
 
@@ -180,7 +180,7 @@ public:
 
 					if (useSymmetry && diagonal) {
 						kronMult('n', 'n', Ak, Bk,  xj, yi);
-						for (SizeType i = 0; i < initKron_.vsize(outPatch); i++)
+						for (SizeType i = 0; i < vsize_[outPatch]; i++)
 							yij[i] += yi[i];
 
 						kronMult('t', 't', Ak, Bk, xi, yi);
@@ -188,7 +188,7 @@ public:
 							y_[j] += yi[j];
 					} else {
 						kronMult('n','n', Ak, Bk, xj, yi);
-						for (SizeType i = 0; i < initKron_.vsize(outPatch); i++)
+						for (SizeType i = 0; i < vsize_[outPatch]; i++)
 							yij[i] += yi[i];
 					}
 				} // end loop over k
@@ -207,6 +207,7 @@ private:
 
 	void init()
 	{
+#if 0
 		SizeType npatches = initKron_.connections();
 		vsize_.resize(npatches, 0);
 		vstart_.resize(npatches, 0);
@@ -221,17 +222,28 @@ private:
 		**/
 		SizeType ip = 0;
 		for (SizeType ipatch = 0; ipatch < npatches; ipatch++){
-			SizeType nrowL = istartLeft(ipatch).size(); //  No of rows for the Lindex
+			SizeType nrowL = istartLeft()(ipatch).size(); //  No of rows for the Lindex
 			SizeType nrowR  = istartRight(ipatch).size(); // No of rows for the Rindex
 			vsize_[ipatch] = nrowL*nrowR;
 			vstart_[ipatch] = ip;
 			ip += vsize_[ipatch]; // ip: Points to start of each patch
 		}
+#endif
+	}
+
+	static void kronMult(char modifier1,
+	                     char modifier2,
+	                     const MatrixDenseOrSparseType& A,
+	                     const MatrixDenseOrSparseType& B,
+	                     VectorType& xj,
+	                     const VectorType& yi)
+	{
+		// TO BE IMPLEMENTED, FIXME
 	}
 
 	const InitKronType& initKron_;
-	VectorType& x_;
-	const VectorType& y_;
+	VectorType& y_;
+	const VectorType& x_;
 	bool hasMpi_;
 	VectorSizeType vstart_;
 	VectorSizeType vsize_;
