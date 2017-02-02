@@ -277,5 +277,26 @@ EOF
 	return @nothingFound;
 }
 
+sub createConfigMake
+{
+	return if (-r "Config.make");
+	my $cmd = "cp ../TestSuite/inputs/ConfigBase.make Config.make";
+	system($cmd);
+	print STDERR "$0: Executed $cmd\n";
+	open(FILE, "../TestSuite/inputs/Config.make") or return;
+	if (!open(FOUT, ">> Config.make")) {
+		close(FILE);
+		return;
+	}
+
+	while (<FILE>) {
+		next if (/ConfigBase\.make/);
+		print FOUT;
+	}
+
+	close(FOUT);
+	close(FILE);
+}
+
 1;
 

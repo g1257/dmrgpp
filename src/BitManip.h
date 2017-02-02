@@ -4,7 +4,7 @@
 namespace PsimagLite {
 namespace BitManip {
 //Counting bits set, Brian Kernighan's way
-typedef unsigned int long long WordType;
+typedef unsigned int long WordType;
 inline SizeType countKernighan(WordType v)
 {
 	SizeType c = 0; // c accumulates the total bits set in v
