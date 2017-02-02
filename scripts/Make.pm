@@ -246,7 +246,7 @@ sub backupMakefile
 	my ($dir) = @_;
 	$dir = "." unless defined($dir);
 	system("cp $dir/Makefile $dir/Makefile.bak") if (-r "$dir/Makefile");
-	print "Backup of $dir/Makefile in $dir/Makefile.bak\n";
+	print STDERR "$0: Backup of $dir/Makefile in $dir/Makefile.bak\n";
 }
 
 sub findGsl
@@ -279,12 +279,11 @@ EOF
 
 sub createConfigMake
 {
-	return if (-r "Config.make");
-	my $cmd = "cp ../TestSuite/inputs/ConfigBase.make Config.make";
+	my $cmd = "cp ../TestSuite/inputs/ConfigBase.make Config.make.new";
 	system($cmd);
 	print STDERR "$0: Executed $cmd\n";
 	open(FILE, "../TestSuite/inputs/Config.make") or return;
-	if (!open(FOUT, ">> Config.make")) {
+	if (!open(FOUT, ">> Config.make.new")) {
 		close(FILE);
 		return;
 	}
@@ -296,6 +295,16 @@ sub createConfigMake
 
 	close(FOUT);
 	close(FILE);
+	if (-r "Config.make") {
+		print STDERR "$0: Config.make exists and will NOT be overwritten\n";
+		print STDERR "$0: Please consider comparing your Config.make\n";
+	        print STDERR "\t to the one I've written to Config.make.new\n";
+		return;
+	}
+
+	$cmd = "mv Config.make.new Config.make";
+	system($cmd);
+	print STDERR "$0: Written Config.make\n";
 }
 
 1;
