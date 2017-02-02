@@ -109,21 +109,21 @@ public:
 	  modelHelper_(modelHelper),
 	  gengroupLeft_(modelHelper_.leftRightSuper().left()),
 	  gengroupRight_(modelHelper_.leftRightSuper().right()),
-	  ijpatches_(modelHelper_.leftRightSuper(),modelHelper_.quantumNumber()),
-	  aL_(modelHelper_.leftRightSuper().left().hamiltonian(),gengroupLeft_),
-	  aRt_(0)
+	  ijpatches_(modelHelper_.leftRightSuper(),modelHelper_.quantumNumber())
+	  //aL_(modelHelper_.leftRightSuper().left().hamiltonian(),gengroupLeft_),
+	  //aRt_(0)
 	{
 		SparseMatrixType arTranspose;
 		transposeConjugate(arTranspose,modelHelper_.leftRightSuper().right().hamiltonian());
 
-		aRt_ = new ArrayOfMatStructType(arTranspose,gengroupRight_);
+		//aRt_ = new ArrayOfMatStructType(arTranspose,gengroupRight_);
 
 		convertXcYcArrays();
 	}
 
 	~InitKron()
 	{
-		if (aRt_) delete aRt_;
+		// delete aRt_;
 
 		for (SizeType ic=0;ic<xc_.size();ic++) delete xc_[ic];
 		for (SizeType ic=0;ic<yc_.size();ic++) delete yc_[ic];
@@ -164,15 +164,15 @@ public:
 
 	SizeType connections() const { return xc_.size(); }
 
-	const ArrayOfMatStructType& aRt () const
-	{
-		return *aRt_;
-	}
+//	const ArrayOfMatStructType& aRt () const
+//	{
+//		return *aRt_;
+//	}
 
-	const ArrayOfMatStructType& aL() const
-	{
-		return aL_;
-	}
+//	const ArrayOfMatStructType& aL() const
+//	{
+//		return aL_;
+//	}
 
 	const GenGroupType& istartLeft() const
 	{
@@ -225,7 +225,6 @@ private:
 		yc_.push_back(y1);
 	}
 
-
 	InitKron(const InitKron& other);
 
 	InitKron& operator=(const InitKron& other);
@@ -234,8 +233,8 @@ private:
 	const ModelHelperType& modelHelper_;
 	GenGroupType gengroupLeft_,gengroupRight_;
 	GenIjPatchType  ijpatches_;
-	ArrayOfMatStructType aL_;
-	ArrayOfMatStructType* aRt_; // <-- we own it also, it's newed and deleted here
+//	ArrayOfMatStructType aL_;
+//	ArrayOfMatStructType* aRt_; // <-- we own it also, it's newed and deleted here
 	typename PsimagLite::Vector<ArrayOfMatStructType*>::Type xc_;
 	typename PsimagLite::Vector<ArrayOfMatStructType*>::Type yc_;
 	typename PsimagLite::Vector<ComplexOrRealType>::Type values_;
