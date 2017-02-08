@@ -174,6 +174,7 @@ void csr_kron_mult_method(
 
     }
     
+    delete by_;
    }
  else if (imethod == 2) {
     /*
@@ -206,9 +207,6 @@ void csr_kron_mult_method(
        };
     }
     
-
-
-   
     {
      /*
       * ---------------------
@@ -235,9 +233,6 @@ void csr_kron_mult_method(
                      &(YAt(0,0))  );
      }
 
-
-
-
     {
     /*
      * ------------
@@ -263,7 +258,7 @@ void csr_kron_mult_method(
                      
       }
 
-
+   delete yat_;
 
    }
  else if (imethod == 3) {
