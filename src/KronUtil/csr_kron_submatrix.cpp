@@ -68,7 +68,7 @@ void csr_kron_submatrix(
   * setup mapping for column index
   * ------------------------------
   */
-  int cmap[ncol_C];
+  int* cmap = new int[ncol_C];
   int jc = 0;
   for(jc=0; jc < ncol_C; jc++) {
       cmap[jc] = -1;
@@ -128,6 +128,7 @@ void csr_kron_submatrix(
 
   delete ialist;
   delete iblist;
+  delete cmap;
 }           
 
       

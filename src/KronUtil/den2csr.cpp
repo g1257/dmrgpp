@@ -20,7 +20,7 @@ void den2csr( const int nrow_A,
   const double dzero = 0;
 
 
-  int nnz_row[nrow_A];
+  int* nnz_row = new int[nrow_A];
   
   int ia = 0;
   int ja = 0;
@@ -93,5 +93,6 @@ void den2csr( const int nrow_A,
     };
     };
 
+ delete nnz_row;
 }
 #undef A

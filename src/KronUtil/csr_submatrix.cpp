@@ -34,8 +34,8 @@ void csr_submatrix( const int nrow_A,
   * setup boolean array for fast mapping of column index
   * ----------------------------------------------------
   */
-  int cmap[ncol_A];
-  int nnz[nrow_B];
+  int* cmap = new int[ncol_A];
+  int* nnz = new int[nrow_B];
 
   int ja = 0;
   int ib = 0;
@@ -144,4 +144,6 @@ void csr_submatrix( const int nrow_A,
         };
       };
 
+  delete cmap;
+  delete nnz;
 }
