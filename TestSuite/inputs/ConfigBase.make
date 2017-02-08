@@ -37,6 +37,10 @@ CPPFLAGS += -Wall -Werror
 #Change basis even for un-needed operators
 #CPPFLAGS += -DOPERATORS_CHANGE_ALL
 
+# Enable KronUtil
+#CPPFLAGS += -DUSE_KRON_UTIL
+#LDFLAGS += KronUtil/libkronutil.a
+
 # Specify the strip command to use (or use true to disable) 
 STRIP_COMMAND = true
 

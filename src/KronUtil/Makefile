@@ -1,6 +1,6 @@
 include ../Config.make 
 
-SRC= \
+SRC=    kronUtilComplex.cpp \
 	coord2csr.cpp  \
 	csc_nnz.cpp \
 	csc_kron_mult.cpp  \
@@ -31,6 +31,7 @@ SRC= \
 	estimate_kron_cost.cpp
 
 OBJ= \
+        KronUtilComplex.o \
 	coord2csr.o  \
 	csc_nnz.o \
 	csc_kron_mult.o  \

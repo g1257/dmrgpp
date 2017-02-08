@@ -2,7 +2,7 @@
 #define KRON_UTIL_WRAPPER_H
 
 #ifdef USE_KRON_UTIL
-#include "KronUtil.h"
+#include "../../KronUtil/KronUtil.h"
 #else
 #include "ProgramGlobals.h"
 
