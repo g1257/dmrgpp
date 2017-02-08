@@ -207,7 +207,6 @@ private:
 
 	void init()
 	{
-#if 0
 		SizeType npatches = initKron_.connections();
 		vsize_.resize(npatches, 0);
 		vstart_.resize(npatches, 0);
@@ -222,13 +221,14 @@ private:
 		**/
 		SizeType ip = 0;
 		for (SizeType ipatch = 0; ipatch < npatches; ipatch++){
-			SizeType nrowL = istartLeft()(ipatch).size(); //  No of rows for the Lindex
-			SizeType nrowR  = istartRight(ipatch).size(); // No of rows for the Rindex
+			//  No of rows for the Lindex
+			SizeType nrowL = istartLeft(ipatch+1) - istartLeft(ipatch);
+			// No of rows for the Rindex
+			SizeType nrowR  = istartRight(ipatch+1) - istartRight(ipatch);
 			vsize_[ipatch] = nrowL*nrowR;
 			vstart_[ipatch] = ip;
 			ip += vsize_[ipatch]; // ip: Points to start of each patch
 		}
-#endif
 	}
 
 	static void kronMult(char modifier1,
