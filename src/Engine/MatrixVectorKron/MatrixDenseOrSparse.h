@@ -49,99 +49,17 @@ public:
 
 	const VectorType& values() const { return values_; }
 
-	const VectorIntType& colind() const { return colind_; }
-
-	const VectorIntType& rowptr() const { return rowptr_; }
-
-	static void kronMult(VectorType& xout,
-	                     const VectorType& yin,
-	                     char transA,
-	                     char transB,
-	                     const MatrixDenseOrSparse& A,
-	                     const MatrixDenseOrSparse& B)
+	const VectorIntType& colind() const
 	{
-		SizeType nrowA = A.rows();
-		SizeType ncolA = A.cols();
-		SizeType nrowB = B.rows();
-		SizeType ncolB = B.cols();
+		assert(!isDense());
+		return colind_;
+	}
 
-		const ComplexOrRealType *aval = &(A.values()[0]);
-		const ComplexOrRealType *bval = &(B.values()[0]);
-
-		const bool isDenseA = A.isDense();
-		const bool isDenseB = B.isDense();
-
-
-		if (isDenseA) {
-			if (isDenseB) {
-				den_kron_mult(transA,
-				              transB,
-				              nrowA,
-				              ncolA,
-				              aval,
-				              nrowB,
-				              ncolB,
-				              bval,
-				              &(yin[0]),
-				              &(xout[0]));
-			} else  {
-				// B is sparse
-				const int *browptr = &(B.rowptr()[0]);
-				const int *bcol = &(B.colind()[0]);
-
-				den_csr_kron_mult(transA,
-				                  transB,
-				                  nrowA,
-				                  ncolA,
-				                  aval,
-				                  nrowB,
-				                  ncolB,
-				                  browptr,
-				                  bcol,
-				                  bval,
-				                  &(yin[0]),
-					              &(xout[0]));
-			}
-		} else {
-			// A is sparse
-			const int *arowptr = &(A.rowptr()[0]);
-			const int *acol = &(A.colind()[0]);
-
-			if (isDenseB) {
-				csr_den_kron_mult(transA,
-				                  transB,
-				                  nrowA,
-				                  ncolA,
-				                  arowptr,
-				                  acol,
-				                  aval,
-				                  nrowB,
-				                  ncolB,
-				                  bval,
-				                  &(yin[0]),
-					              &(xout[0]));
-			} else {
-				// B is sparse
-				const int *browptr = &(B.rowptr()[0]);
-				const int *bcol = &(B.colind()[0]);
-
-				csr_kron_mult(transA,
-				              transB,
-				              nrowA,
-				              ncolA,
-				              arowptr,
-				              acol,
-				              aval,
-				              nrowB,
-				              ncolB,
-				              browptr,
-				              bcol,
-				              bval,
-				              &(yin[0]),
-				              &(xout[0]));
-			};
-		};
-	} // kron_mult
+	const VectorIntType& rowptr() const
+	{
+		assert(!isDense());
+		return rowptr_;
+	}
 
 private:
 
@@ -152,5 +70,96 @@ private:
 	VectorIntType colind_;
 	VectorType values_;
 }; // class MatrixDenseOrSparse
+
+template<typename SparseMatrixType>
+void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>::Type& xout,
+              const typename PsimagLite::Vector<typename SparseMatrixType::value_type>::Type& yin,
+              char transA,
+              char transB,
+              const MatrixDenseOrSparse<SparseMatrixType>& A,
+              const MatrixDenseOrSparse<SparseMatrixType>& B)
+{
+	SizeType nrowA = A.rows();
+	SizeType ncolA = A.cols();
+	SizeType nrowB = B.rows();
+	SizeType ncolB = B.cols();
+
+	const typename SparseMatrixType::value_type *aval = &(A.values()[0]);
+	const typename SparseMatrixType::value_type *bval = &(B.values()[0]);
+
+	const bool isDenseA = A.isDense();
+	const bool isDenseB = B.isDense();
+
+	if (isDenseA) {
+		if (isDenseB) {
+			den_kron_mult(transA,
+			              transB,
+			              nrowA,
+			              ncolA,
+			              aval,
+			              nrowB,
+			              ncolB,
+			              bval,
+			              &(yin[0]),
+			        &(xout[0]));
+		} else  {
+			// B is sparse
+			const int *browptr = &(B.rowptr()[0]);
+			const int *bcol = &(B.colind()[0]);
+
+			den_csr_kron_mult(transA,
+			                  transB,
+			                  nrowA,
+			                  ncolA,
+			                  aval,
+			                  nrowB,
+			                  ncolB,
+			                  browptr,
+			                  bcol,
+			                  bval,
+			                  &(yin[0]),
+			        &(xout[0]));
+		}
+	} else {
+		// A is sparse
+		const int *arowptr = &(A.rowptr()[0]);
+		const int *acol = &(A.colind()[0]);
+
+		if (isDenseB) {
+			csr_den_kron_mult(transA,
+			                  transB,
+			                  nrowA,
+			                  ncolA,
+			                  arowptr,
+			                  acol,
+			                  aval,
+			                  nrowB,
+			                  ncolB,
+			                  bval,
+			                  &(yin[0]),
+			        &(xout[0]));
+		} else {
+			// B is sparse
+			const int *browptr = &(B.rowptr()[0]);
+			const int *bcol = &(B.colind()[0]);
+
+			csr_kron_mult(transA,
+			              transB,
+			              nrowA,
+			              ncolA,
+			              arowptr,
+			              acol,
+			              aval,
+			              nrowB,
+			              ncolB,
+			              browptr,
+			              bcol,
+			              bval,
+			              &(yin[0]),
+			        &(xout[0]));
+		};
+	};
+} // kron_mult
+
 } // namespace Dmrg
 #endif // MATRIXDENSEORSPARSE_H

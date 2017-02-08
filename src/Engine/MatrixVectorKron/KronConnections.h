@@ -177,15 +177,15 @@ public:
 					bool diagonal = (outPatch == inPatch);
 
 					if (useSymmetry && diagonal) {
-						MatrixDenseOrSparseType::kronMult(xj, yi, 'n', 'n', Ak, Bk);
+						kronMult(xj, yi, 'n', 'n', Ak, Bk);
 						for (SizeType i = 0; i < vsize_[outPatch]; i++)
 							yij[i] += yi[i];
 
-						MatrixDenseOrSparseType::kronMult(xi, yi, 't', 't', Ak, Bk);
+						kronMult(xi, yi, 't', 't', Ak, Bk);
 						for (SizeType j = j1; j < j2; j++)
 							y_[j] += yi[j];
 					} else {
-						MatrixDenseOrSparseType::kronMult(xj, yi, 'n','n', Ak, Bk);
+						kronMult(xj, yi, 'n','n', Ak, Bk);
 						for (SizeType i = 0; i < vsize_[outPatch]; i++)
 							yij[i] += yi[i];
 					}
