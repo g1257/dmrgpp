@@ -62,7 +62,7 @@ OBJ= \
 
 libkronutil.a: $(OBJ)
 	ar rc libkronutil.a $(OBJ)
-	ranlibkronutil libkronutil.a
+	ranlib libkronutil.a
 
 test1: libkronutil.a test1.o
 	$(CC) $(CFLAGS) -o test1 test1.o libkronutil.a $(LIBS)
