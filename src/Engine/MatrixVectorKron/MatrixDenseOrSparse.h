@@ -1,6 +1,7 @@
 #ifndef MATRIXDENSEORSPARSE_H
 #define MATRIXDENSEORSPARSE_H
 #include "Vector.h"
+#include "KronUtilWrapper.h"
 
 namespace Dmrg {
 
@@ -64,8 +65,8 @@ public:
 		SizeType nrowB = B.rows();
 		SizeType ncolB = B.cols();
 
-		const double *aval = &(A.values()[0]);
-		const double *bval = &(B.values()[0]);
+		const ComplexOrRealType *aval = &(A.values()[0]);
+		const ComplexOrRealType *bval = &(B.values()[0]);
 
 		const bool isDenseA = A.isDense();
 		const bool isDenseB = B.isDense();
@@ -81,8 +82,8 @@ public:
 				              nrowB,
 				              ncolB,
 				              bval,
-				              yin,
-				              xout );
+				              &(yin[0]),
+				              &(xout[0]));
 			} else  {
 				// B is sparse
 				const int *browptr = &(B.rowptr()[0]);
@@ -98,8 +99,8 @@ public:
 				                  browptr,
 				                  bcol,
 				                  bval,
-				                  yin,
-				                  xout);
+				                  &(yin[0]),
+					              &(xout[0]));
 			}
 		} else {
 			// A is sparse
@@ -117,8 +118,8 @@ public:
 				                  nrowB,
 				                  ncolB,
 				                  bval,
-				                  yin,
-				                  xout);
+				                  &(yin[0]),
+					              &(xout[0]));
 			} else {
 				// B is sparse
 				const int *browptr = &(B.rowptr()[0]);
@@ -136,8 +137,8 @@ public:
 				              browptr,
 				              bcol,
 				              bval,
-				              yin,
-				              xout);
+				              &(yin[0]),
+				              &(xout[0]));
 			};
 		};
 	} // kron_mult
