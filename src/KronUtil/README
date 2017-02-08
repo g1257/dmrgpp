@@ -1,0 +1,70 @@
+/*
+ * This directory is part of DMRG++
+ *
+ * Contributed by [by Ed D'Azevedo, Oak Ridge National Laboratory]
+ *
+ * The full software license for DMRG++
+ * can be found in file LICENSE in the root directory of the code.
+ */
+-----------------------------------------------------------------------
+DISCLAIMER
+
+THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT OWNER, CONTRIBUTORS, UNITED STATES GOVERNMENT,
+OR THE UNITED STATES DEPARTMENT OF ENERGY BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+NEITHER THE UNITED STATES GOVERNMENT, NOR THE UNITED
+STATES DEPARTMENT OF ENERGY, NOR THE COPYRIGHT OWNER, NOR
+ANY OF THEIR EMPLOYEES, REPRESENTS THAT THE USE OF ANY
+INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
+DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
+-----------------------------------------------------------------------
+
+Performance critical routines for kronecker product
+
+Note csr_*.c  routines assume sparse matrices in Compressed Sparse Row (CSR) format.
+
+Note den_*.c  routines assume dense matrix in Fortran ordering
+
+den2csr:		convert dense matrix to compressed sparse storage
+den_gen_matrix:		generate a random matrix based, accept entries based on a threshold
+den_copymat:		copy 2 dense matrices
+den_zero:		zero out a dense matrix
+den_kron_form:		explicit form the large dense kronecker product
+den_submatrix:		extract a submatrix, B = A( rindex(:), cindex(:) )
+den_matmul_pre:		perform  X + op(A) * Y, op(A) can be A or transpose(A)
+den_nnz:		number of nonzeros in matrix
+den_transpose:		form the matrix transpose
+
+den_kron_mult:		peform  X += kron( op(A), op(B)) * Y
+
+den_kron_submatrix:	extra a submatrix out of  kronecker product
+den_matmul_post:	perform  X += Y * op(A), op(A) can be A or transpose(A)
+
+-----------------
+
+Similar routines for compressed sparse row (CSR) format.
+For example
+
+csr_matmul_kron:	perform X += kron( op(A), op(B)) * Y, by A, B are in CSR format
+
+csr_matmul_pre:		perform X += op(A) * Y,  op(A) is A or transpose(A), A in CSR format
+csr_matmul_post:	perform X += Y * op(A),  op(A) is A or transpose(A), A in CSR format
+csr_submatrix:		extract a submatrix B = A( rindex(:), cindex(:) )
+csr_kron_submatrix:	extract a submatrix of kron(A,B) without first forming kron(A,B)
+csr_nnz:		number of nonzeros
+csr_transpose:		form matrix transpose in CSR format
+
