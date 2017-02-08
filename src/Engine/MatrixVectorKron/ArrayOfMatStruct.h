@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef ARRAY_OF_MAT_STRUCT_H
 #define ARRAY_OF_MAT_STRUCT_H
 #include "CrsMatrix.h"
+#include "MatrixDenseOrSparse.h"
 
 namespace Dmrg {
 
@@ -89,7 +90,7 @@ class ArrayOfMatStruct {
 
 public:
 
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef MatrixDenseOrSparse<SparseMatrixType> MatrixDenseOrSparseType;
 
 	ArrayOfMatStruct() {}
 
@@ -106,8 +107,7 @@ public:
 				SizeType i1 = istart(i);
 				SizeType i2 = istart(i+1);
 
-				data_(i,j) = new SparseMatrixType(i2-i1,j2-j1);
-				SparseMatrixType& tmp = *data_(i,j);
+				SparseMatrixType tmp(i2-i1,j2-j1);
 				SizeType counter = 0;
 
 				for (SizeType ii=i1;ii<i2;++ii) {
@@ -129,11 +129,12 @@ public:
 
 				tmp.setRow(i2-i1,counter);
 				tmp.checkValidity();
+				data_(i,j) = new MatrixDenseOrSparseType(tmp);
 			}
 		}
 	}
 
-	const SparseMatrixType& operator()(SizeType i,SizeType j) const
+	const MatrixDenseOrSparseType& operator()(SizeType i,SizeType j) const
 	{
 		assert(i<data_.n_row() && j<data_.n_col());
 		return *data_(i,j);
@@ -148,7 +149,7 @@ public:
 
 private:
 
-	PsimagLite::Matrix<SparseMatrixType*> data_;
+	PsimagLite::Matrix<MatrixDenseOrSparseType*> data_;
 
 }; //class ArrayOfMatStruct
 } // namespace Dmrg

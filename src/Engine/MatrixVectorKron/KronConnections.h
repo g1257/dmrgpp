@@ -94,19 +94,17 @@ class KronConnections {
 	typedef InitKron<ModelType,ModelHelperType_> InitKronType;
 	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
 	typedef typename InitKronType::GenGroupType GenGroupType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
-
-	// FIXME: Create a matrix dense or sparse class
-	typedef SparseMatrixType MatrixDenseOrSparseType;
+	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 public:
 
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
+	typedef typename MatrixDenseOrSparseType::VectorType VectorType;
 	typedef typename InitKronType::RealType RealType;
 
 	KronConnections(const InitKronType& initKron,VectorType& y,const VectorType& x)
@@ -179,15 +177,15 @@ public:
 					bool diagonal = (outPatch == inPatch);
 
 					if (useSymmetry && diagonal) {
-						kronMult('n', 'n', Ak, Bk,  xj, yi);
+						MatrixDenseOrSparseType::kronMult(xj, yi, 'n', 'n', Ak, Bk);
 						for (SizeType i = 0; i < vsize_[outPatch]; i++)
 							yij[i] += yi[i];
 
-						kronMult('t', 't', Ak, Bk, xi, yi);
+						MatrixDenseOrSparseType::kronMult(xi, yi, 't', 't', Ak, Bk);
 						for (SizeType j = j1; j < j2; j++)
 							y_[j] += yi[j];
 					} else {
-						kronMult('n','n', Ak, Bk, xj, yi);
+						MatrixDenseOrSparseType::kronMult(xj, yi, 'n','n', Ak, Bk);
 						for (SizeType i = 0; i < vsize_[outPatch]; i++)
 							yij[i] += yi[i];
 					}
@@ -229,16 +227,6 @@ private:
 			vstart_[ipatch] = ip;
 			ip += vsize_[ipatch]; // ip: Points to start of each patch
 		}
-	}
-
-	static void kronMult(char modifier1,
-	                     char modifier2,
-	                     const MatrixDenseOrSparseType& A,
-	                     const MatrixDenseOrSparseType& B,
-	                     VectorType& xj,
-	                     const VectorType& yi)
-	{
-		// TO BE IMPLEMENTED, FIXME
 	}
 
 	const InitKronType& initKron_;
