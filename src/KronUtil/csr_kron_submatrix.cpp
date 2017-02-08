@@ -46,8 +46,8 @@ void csr_kron_submatrix(
   * split cindex(:) into [jb,ja]
   * -----------------------------
   */
-  int ialist[nrindex];
-  int iblist[nrindex];
+  int* ialist = new int[nrindex];
+  int* iblist = new int[nrindex];
 
   int k = 0;
   for(k=0; k < nrindex; k++) {
@@ -125,6 +125,9 @@ void csr_kron_submatrix(
          };
      };
   hrowptr[nrow_H] = ifree;
+
+  delete ialist;
+  delete iblist;
 }           
 
       

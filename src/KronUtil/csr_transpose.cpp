@@ -18,7 +18,7 @@ void csr_transpose( const int nrow_A,
  
  const int nrow_At = ncol_A;
 
- int nnz_row_At[nrow_At];
+ int* nnz_row_At = new int[nrow_At];
  
  {
  int iat = 0;
@@ -94,6 +94,8 @@ void csr_transpose( const int nrow_A,
     };
   };
  }
+
+ delete nnz_row_At;
 
 }
 

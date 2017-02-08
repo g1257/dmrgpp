@@ -23,7 +23,7 @@ void coord2csr(
  * --------------------------------------
  */
 
- int nnz_row[nrow_A];
+ int* nnz_row = new int[nrow_A];
 
 
  {
@@ -110,4 +110,5 @@ void coord2csr(
     };
   }
 
+  delete nnz_row;
 }

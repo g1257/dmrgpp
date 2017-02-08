@@ -50,8 +50,7 @@ void den_matmul_post(
     *   ----------------------------------------------------------
     */
 
-    int isok = (nrow_X == nrow_Y) && (ncol_Y == ncol_A) && (ncol_X == nrow_A);
-    assert( isok );
+    assert((nrow_X == nrow_Y) && (ncol_Y == ncol_A) && (ncol_X == nrow_A));
 
     if (use_blas) {
         /*
@@ -108,8 +107,7 @@ else  {
     * X(ix,jx) += sum( Y(iy,ia) * A(ia,ja), over ia )
     * ---------------------------------------------
     */
-    int isok = (nrow_X == nrow_Y) && (ncol_Y == nrow_A) && (ncol_X == ncol_A);
-    assert( isok );
+    assert((nrow_X == nrow_Y) && (ncol_Y == nrow_A) && (ncol_X == ncol_A));
 
     if (use_blas) {
         /*

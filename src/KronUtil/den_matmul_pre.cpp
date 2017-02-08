@@ -50,8 +50,7 @@ void den_matmul_pre( const char trans_A,
     *   ----------------------------------------------------------
     */
 
-    int isok = (nrow_X == ncol_A) &&  (nrow_A == nrow_Y) && (ncol_X == ncol_Y);
-    assert( isok );
+    assert((nrow_X == ncol_A) &&  (nrow_A == nrow_Y) && (ncol_X == ncol_Y));
 
     if (use_blas) {
         /*
@@ -109,8 +108,7 @@ else  {
     * X(ia,jy) += sum( A(ia,ja)*Y(ja,jy), over ja )
     * ---------------------------------------------
     */
-    int isok = (nrow_X == nrow_A) && (ncol_A == nrow_Y) && (ncol_X == ncol_Y);
-    assert( isok );
+    assert((nrow_X == nrow_A) && (ncol_A == nrow_Y) && (ncol_X == ncol_Y));
 
     if (use_blas) {
        /*

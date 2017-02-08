@@ -1,6 +1,6 @@
 #include "util.h"
 
-void csr_kron_mult_method( 
+void csr_den_kron_mult_method( 
                     const int imethod,
                     const char transA,
                     const char transB,
@@ -13,13 +13,12 @@ void csr_kron_mult_method(
 
                     const int nrow_B,
                     const int ncol_B, 
-                    const int browptr[], 
-                    const int bcol[], 
-                    const double bval[],
+                    const double b_[],
 
                     const double yin[], 
                           double xout[] )
 
+#define B(ib,jb) b_[(ib) + (jb)*nrow_B]
 #define X(ib,ia) xout[ (ib) + (ia)*nrow_X ]
 #define Y(jb,ja) yin[ (jb) + (ja)*nrow_Y ]
 {
@@ -41,14 +40,15 @@ void csr_kron_mult_method(
                 (imethod == 3));
 
      int nnz_A = csr_nnz( nrow_A, arowptr );
-     int nnz_B = csr_nnz( nrow_B, browptr );
+     int nnz_B = den_nnz( nrow_B, ncol_B, &(B(0,0)) );
      int has_work = (nnz_A >= 1) && (nnz_B >= 1);
      if (!has_work) {
          return;
          };
 /*
  *   -------------------------------------------------------------
- *   A and B in compressed sparse ROW format
+ *   A in compressed sparse ROW format
+ *   B in dense format
  *
  *   X += kron( op(A), op(B)) * Y 
  *   X +=  op(B) * Y * transpose(op(A))
@@ -101,7 +101,7 @@ void csr_kron_mult_method(
 
     int nrow_BY = nrow_X;
     int ncol_BY = ncol_Y;
-    double by_[  nrow_BY * ncol_BY ];
+    double* by_ = new double[  nrow_BY * ncol_BY ];
 #define BY(iby,jby)  by_[ (iby) + (jby)*nrow_BY ]
 
 
@@ -131,12 +131,10 @@ void csr_kron_mult_method(
      * ------------------------------
      */
     const char trans = (isTransB) ? 'T' : 'N';
-    csr_matmul_pre(  trans,
+    den_matmul_pre(  trans,
                      nrow_B,
                      ncol_B,
-                     browptr, 
-                     bcol,
-                     bval,
+                     &(B(0,0)),
 
                      nrow_Y,
                      ncol_Y,
@@ -174,6 +172,7 @@ void csr_kron_mult_method(
 
     }
     
+    delete by_;
    }
  else if (imethod == 2) {
     /*
@@ -185,7 +184,7 @@ void csr_kron_mult_method(
 
     int nrow_YAt = nrow_Y;
     int ncol_YAt = ncol_X;
-    double yat_[  nrow_YAt * ncol_YAt ];
+    double* yat_ = new double[  nrow_YAt * ncol_YAt ];
 #define YAt(iy,jy) yat_[ (iy) + (jy)*nrow_YAt ]
 
 
@@ -246,12 +245,10 @@ void csr_kron_mult_method(
      */
 
     const char trans = (isTransB) ? 'T' : 'N';
-    csr_matmul_pre( trans,
+    den_matmul_pre( trans,
                     nrow_B,
                     ncol_B, 
-                    browptr,
-                    bcol,
-                    bval,
+                    &(B(0,0)),
 
                     nrow_YAt,
                     ncol_YAt,
@@ -263,7 +260,7 @@ void csr_kron_mult_method(
                      
       }
 
-
+    delete yat_;
 
    }
  else if (imethod == 3) {
@@ -276,23 +273,20 @@ void csr_kron_mult_method(
     */
    
    int ia = 0;
-   int ka = 0;
-   int ib = 0;
-   int kb = 0;
    for(ia=0; ia < nrow_A; ia++) {
       int istarta = arowptr[ia];
       int ienda = arowptr[ia+1]-1;
+      int ka = 0;
       for(ka=istarta; ka <= ienda; ka++) {
          int ja = acol[ka];
          double aij = aval[ka];
 
-         for(ib=0; ib < nrow_B; ib++) {
-             int istartb = browptr[ib];
-             int iendb = browptr[ib+1]-1;
+         int ib = 0;
+         int jb = 0;
 
-             for(kb=istartb; kb <= iendb; kb++) {
-                 int jb = bcol[kb];
-                 double bij = bval[kb];
+         for(ib=0; ib < nrow_B; ib++) {
+         for(jb=0; jb < ncol_B; jb++) {
+                 double bij = B(ib,jb);
                  double cij = aij * bij;
 
                  int ix = (isTransB) ? jb : ib;
@@ -313,7 +307,7 @@ void csr_kron_mult_method(
 
 
 
-void csr_kron_mult( 
+void csr_den_kron_mult( 
                     const char transA,
                     const char transB,
                     const int nrow_A,
@@ -324,9 +318,7 @@ void csr_kron_mult(
 
                     const int nrow_B,
                     const int ncol_B, 
-                    const int browptr[], 
-                    const int bcol[], 
-                    const double bval[],
+                    const double b_[],
 
                     const double yin[], 
                           double xout[] )
@@ -334,7 +326,8 @@ void csr_kron_mult(
 {
 /*
  *   -------------------------------------------------------------
- *   A and B in compressed sparse ROW format
+ *   A in compressed sparse ROW format
+ *   B in dense matrix format
  *
  *   X += kron( A, B) * Y 
  *   that can be computed as either
@@ -363,7 +356,7 @@ void csr_kron_mult(
  */
 
  int nnz_A = csr_nnz( nrow_A, arowptr );
- int nnz_B = csr_nnz( nrow_B, browptr );
+ int nnz_B = den_nnz( nrow_B, ncol_B, &(B(0,0)) );
  int has_work = (nnz_A >= 1) && (nnz_B >= 1);
  if (!has_work) {
      return;
@@ -384,7 +377,7 @@ void csr_kron_mult(
                      &kron_nnz, &kron_flops, &imethod );
 
 
- csr_kron_mult_method( 
+ csr_den_kron_mult_method( 
                     imethod,
                     transA, 
                     transB,
@@ -397,14 +390,13 @@ void csr_kron_mult(
 
                     nrow_B,
                     ncol_B, 
-                    browptr, 
-                    bcol, 
-                    bval,
+                    &(B(0,0)),
 
                     yin, 
                     xout );
 }
 
+#undef B
 #undef BY
 #undef YAt
 #undef X

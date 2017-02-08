@@ -1,34 +1,34 @@
 include ../Config.make 
 
 SRC= \
-	coord2csr.c  \
-	csc_nnz.c \
-	csc_kron_mult.c  \
-	csc_matmul_post.c  \
-	csc_matmul_pre.c  \
-	csr2den.c \
-	csr_den_kron_mult.c \
-	csr_nnz.c \
-	csr_transpose.c \
-	csr_kron_mult.c  \
-	csr_kron_submatrix.c  \
-	csr_matmul_post.c  \
-	csr_matmul_pre.c  \
-	csr_submatrix.c  \
-	den2csr.c \
-	den_csr_kron_mult.c \
-	den_copymat.c \
-	den_zeros.c \
-	den_transpose.c \
-	den_submatrix.c \
-        den_gen_matrix.c \
-	den_kron_submatrix.c \
-	den_kron_form.c  \
-	den_kron_mult.c  \
-	den_matmul_post.c  \
-	den_matmul_pre.c  \
-	den_nnz.c  \
-	estimate_kron_cost.c
+	coord2csr.cpp  \
+	csc_nnz.cpp \
+	csc_kron_mult.cpp  \
+	csc_matmul_post.cpp  \
+	csc_matmul_pre.cpp  \
+	csr2den.cpp \
+	csr_den_kron_mult.cpp \
+	csr_nnz.cpp \
+	csr_transpose.cpp \
+	csr_kron_mult.cpp  \
+	csr_kron_submatrix.cpp  \
+	csr_matmul_post.cpp  \
+	csr_matmul_pre.cpp  \
+	csr_submatrix.cpp  \
+	den2csr.cpp \
+	den_csr_kron_mult.cpp \
+	den_copymat.cpp \
+	den_zeros.cpp \
+	den_transpose.cpp \
+	den_submatrix.cpp \
+        den_gen_matrix.cpp \
+	den_kron_submatrix.cpp \
+	den_kron_form.cpp  \
+	den_kron_mult.cpp  \
+	den_matmul_post.cpp  \
+	den_matmul_pre.cpp  \
+	den_nnz.cpp  \
+	estimate_kron_cost.cpp
 
 OBJ= \
 	coord2csr.o  \
