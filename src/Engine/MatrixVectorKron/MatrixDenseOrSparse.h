@@ -61,6 +61,11 @@ public:
 		return rowptr_;
 	}
 
+	bool isZero() const
+	{
+		return (isDense_) ? false : (values_.size() == 0);
+	}
+
 private:
 
 	bool isDense_;
