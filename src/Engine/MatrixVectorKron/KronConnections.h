@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2012, UT-Battelle, LLC
+Copyright (c) 2012-2017, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -67,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -86,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 
 namespace Dmrg {
-
 
 template<typename ModelType,typename ModelHelperType_>
 class KronConnections {
@@ -152,7 +149,7 @@ public:
 
 			for (SizeType inPatch = jpatchStart; inPatch < jpatchEnd; ++inPatch) {
 				SizeType j1 = vstart_[inPatch];
-				SizeType j2 = j1 + vsize_[inPatch]; // do we need the -1 ?
+				SizeType j2 = j1 + vsize_[inPatch];
 
 				if (j1 == j2) continue;
 
@@ -161,22 +158,20 @@ public:
 				for (SizeType j = j1; j < j2; j++)
 					xj[j - j1] = x_[j];
 
-				// is it iPatch or jPatch ? the size ?
 				std::fill(yij.begin(), yij.begin() + vsize_[outPatch], 0.0);
 
-				// validate the size -- should be no of A's / B's
 				SizeType sizeListK = initKron_.connections();
 
 				for (SizeType k = 0; k < sizeListK; ++k) {
 					const MatrixDenseOrSparseType& Ak = initKron_.xc(k)(outPatch, inPatch);
 					const MatrixDenseOrSparseType& Bk = initKron_.yc(k)(outPatch, inPatch);
 
-					// Change this to something smart
 					if (Ak.isZero() || Bk.isZero() == 0)
 						continue;
 
 					bool diagonal = (outPatch == inPatch);
 
+					// FIXME: Check that kronMult overwrites yi insead of accumulating
 					if (useSymmetry && !diagonal) {
 						kronMult(yi, xj, 'n', 'n', Ak, Bk);
 						for (SizeType i = 0; i < vsize_[outPatch]; ++i)
@@ -184,7 +179,7 @@ public:
 
 						kronMult(yi, xi, 't', 't', Ak, Bk);
 						for (SizeType j = j1; j < j2; j++)
-							y_[j] += yi[j];
+							y_[j] += yi[j-j1];
 					} else {
 						kronMult(yi, xj, 'n','n', Ak, Bk);
 						for (SizeType i = 0; i < vsize_[outPatch]; ++i)
