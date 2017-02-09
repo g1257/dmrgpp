@@ -100,6 +100,10 @@ struct ParametersModelHeisenberg {
 		try {
 			io.read(magneticField,"MagneticField");
 		} catch (std::exception&) {}
+
+		try {
+			io.read(anisotropy,"AnisotropyD");
+		} catch (std::exception&) {}
 	}
 
 	template<typename SomeMemResolvType>
@@ -115,6 +119,7 @@ struct ParametersModelHeisenberg {
 	//serializr normal twiceTheSpin
 	SizeType twiceTheSpin;
 	VectorRealType magneticField;
+	VectorRealType anisotropy;
 };
 
 //! Function that prints model parameters to stream os
@@ -123,6 +128,7 @@ std::ostream& operator<<(std::ostream &os,
                          const ParametersModelHeisenberg<RealTypeType>& parameters)
 {
 	os<<"MagneticField="<<parameters.magneticField<<"\n";
+	os<<"AnisotropyD="<<parameters.anisotropy<<"\n";
 	os<<"HeisenbergTwiceS="<<parameters.twiceTheSpin<<"\n";
 	os<<parameters.targetQuantum;
 	return os;

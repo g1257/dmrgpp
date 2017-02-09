@@ -148,9 +148,17 @@ public:
 	{
 		SizeType n = geometry_.numberOfSites();
 		SizeType m = modelParameters_.magneticField.size();
+		SizeType md = modelParameters_.anisotropy.size();
+
 		if (m > 0 && m != n) {
 			PsimagLite::String msg("ModelHeisenberg: If provided, ");
 			msg += " MagneticField must be a vector of " + ttos(n) + " entries.\n";
+			throw PsimagLite::RuntimeError(msg);
+		}
+
+		if (md > 0 && md != n) {
+			PsimagLite::String msg("ModelHeisenberg: If provided, ");
+			msg += " Anisotropy must be a vector of " + ttos(n) + " entries.\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
 
@@ -336,16 +344,24 @@ public:
 	                                RealType factorForDiagonals=1.0)  const
 	{
 		SizeType linSize = geometry_.numberOfSites();
-		if (modelParameters_.magneticField.size() != linSize) return;
-
 		SizeType n=block.size();
-		SparseMatrixType tmpMatrix;
+		SparseMatrixType Szsquare;
 
 		for (SizeType i=0;i<n;i++) {
 			// magnetic field
+			if (modelParameters_.magneticField.size() != linSize) continue;
 			RealType tmp = modelParameters_.magneticField[block[i*2]]*factorForDiagonals;
 			hmatrix += tmp*cm[1+i*2].data;
 		}
+
+		for (SizeType i=0;i<n;i++) {
+			// anisotropy
+			if (modelParameters_.anisotropy.size() != linSize) continue;
+			RealType tmp = modelParameters_.anisotropy[block[i*2]]*factorForDiagonals;
+			multiply(Szsquare,cm[1+i*2].data,cm[1+i*2].data);
+			hmatrix += tmp*Szsquare;
+		}
+
 	}
 
 	virtual const TargetQuantumElectronsType& targetQuantum() const

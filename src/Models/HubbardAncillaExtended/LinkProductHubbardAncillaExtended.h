@@ -207,8 +207,13 @@ public:
 	                          bool isSu2,
 	                          const SomeStructType&)
 	{
-		if (term == TERM_HOPPING || term == TERM_LAMBDA || term == TERM_NINJ)
+		if (term == TERM_HOPPING || term == TERM_LAMBDA)
 			return;
+
+		if (term==TERM_NINJ) {
+			value *= 0.5;
+			return;
+		}
 
 		if (term == TERM_PAIR) {
 			value *= -1.0;
