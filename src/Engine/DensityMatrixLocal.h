@@ -215,8 +215,6 @@ private:
 	                   SizeType direction,
 	                   RealType weight)
 	{
-		SizeType start = pBasis.partition(m);
-		SizeType length = pBasis.partition(m+1) - start;
 		ParallelDensityMatrixType helperDm(v,
 		                                   pBasis,
 		                                   pBasisSummed,
@@ -227,7 +225,7 @@ private:
 		                                   matrixBlock);
 		ParallelizerType threadedDm(ConcurrencyType::npthreads,
 		                            PsimagLite::MPI::COMM_WORLD);
-		threadedDm.loopCreate(length,helperDm);
+		threadedDm.loopCreate(helperDm);
 
 	}
 

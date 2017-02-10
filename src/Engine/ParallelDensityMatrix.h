@@ -115,27 +115,24 @@ public:
 	      hasMpi_(PsimagLite::Concurrency::hasMpi())
 	{}
 
-	void thread_function_(SizeType threadNum,
-	                      SizeType blockSize,
-	                      SizeType total,
-	                      ConcurrencyType::MutexType*)
+	SizeType tasks() const
+	{
+		return pBasis_.partition(m_+1) - pBasis_.partition(m_);
+	}
+
+	void doTask(SizeType taskNumber, SizeType threadNum)
 	{
 		SizeType start = pBasis_.partition(m_);
 		SizeType length = pBasis_.partition(m_+1) - start;
 
-		for (SizeType p=0;p<blockSize;p++) {
-			SizeType ix = threadNum*blockSize + p;
-			if (ix >= total) break;
-			SizeType ieff = ix +start;
-			for (SizeType j=0;j<length;++j) {
-				matrixBlock_(ix,j) += densityMatrixExpand(direction_,
-				                                         ieff,
-				                                         j+start,
-				                                         target_)*weight_;
-			}
+		SizeType ieff = taskNumber + start;
+		for (SizeType j = 0; j < length; ++j) {
+			matrixBlock_(taskNumber,j) += densityMatrixExpand(direction_,
+			                                          ieff,
+			                                          j+start,
+			                                          target_)*weight_;
 		}
 	}
-
 
 private:
 
@@ -146,12 +143,12 @@ private:
 	{
 		if (direction == ProgramGlobals::EXPAND_SYSTEM)
 			return densityMatrixExpandSystem(alpha1,
-			                          alpha2,
-			                          v);
+			                                 alpha2,
+			                                 v);
 		else
 			return densityMatrixExpandEnviron(alpha1,
-			                           alpha2,
-			                           v);
+			                                  alpha2,
+			                                  v);
 
 	}
 

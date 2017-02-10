@@ -212,8 +212,6 @@ private:
 	                             const VectorSizeType& nk,
 	                             typename ParallelWftType::DirectionEnum dir) const
 	{
-		SizeType total = psiDest.effectiveSize(i0);
-
 		typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
 		ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
 		                             PsimagLite::MPI::COMM_WORLD);
@@ -226,7 +224,7 @@ private:
 		                          dmrgWaveStruct_,
 		                          dir);
 
-		threadedWft.loopCreate(total, helperWft);
+		threadedWft.loopCreate(helperWft);
 	}
 
 	template<typename SomeVectorType>

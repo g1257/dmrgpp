@@ -102,98 +102,100 @@ public:
 
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename MatrixDenseOrSparseType::VectorType VectorType;
+	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
 	typedef typename InitKronType::RealType RealType;
 
-	KronConnections(const InitKronType& initKron,VectorType& y,const VectorType& x)
-	    : initKron_(initKron),y_(y),x_(x),maxVsize_(0)
+	KronConnections(const InitKronType& initKron,
+	                VectorType& y,
+	                const VectorType& x,
+	                SizeType npthreads)
+	    : initKron_(initKron),
+	      y_(y),
+	      x_(x),
+	      maxVsize_(0)
 	{
-		init();
+		init(); // <--- sets maxVsize_
+		init2(npthreads);
 	}
 
-	void thread_function_(SizeType threadNum,
-	                      SizeType blockSize,
-	                      SizeType total,
-	                      ConcurrencyType::MutexType*)
+	SizeType tasks() const { return initKron_.patch(); }
+
+	void doTask(SizeType taskNumber, SizeType threadNum)
 	{
 		bool useSymmetry = initKron_.useSymmetry();
-		VectorType yi(maxVsize_,0.0);
-		VectorType xi(maxVsize_, 0.0);
-		VectorType xj(maxVsize_, 0.0);
-		VectorType yij(maxVsize_,0.0);
+		VectorType& yi = yi_[threadNum];
+		VectorType& xi = xi_[threadNum];
+		VectorType& xj = xj_[threadNum];
+		VectorType& yij = yij_[threadNum];
 
-		for (SizeType p = 0; p < blockSize; ++p) {
-			SizeType outPatch = threadNum*blockSize + p;
-			if (outPatch >= total) break;
+		SizeType i1 = vstart_[taskNumber];
+		SizeType i2 = i1 + vsize_[taskNumber];
 
-			SizeType i1 = vstart_[outPatch];
-			SizeType i2 = i1 + vsize_[outPatch];
+		if (i1 == i2) return;
 
-			if (i1 == i2) continue;
+		assert(i1 < i2);
 
-			assert(i1 < i2);
+		std::fill(yi.begin(), yi.begin() + vsize_[taskNumber], 0.0);
 
-			std::fill(yi.begin(), yi.begin() + vsize_[outPatch], 0.0);
-
-			/**
+		/**
 			* Symmetry : Access only upper triangular matrix
 			**/
-			SizeType jpatchStart = 0;
-			SizeType jpatchEnd = outPatch;
+		SizeType jpatchStart = 0;
+		SizeType jpatchEnd = taskNumber;
 
-			if (!useSymmetry) {
-				jpatchEnd = total;
-			} else {				
-				for (SizeType i = i1; i < i2; i++)
-					xi[i - i1] = x_[i];
-			}
+		if (!useSymmetry) {
+			jpatchEnd = tasks();
+		} else {
+			for (SizeType i = i1; i < i2; i++)
+				xi[i - i1] = x_[i];
+		}
 
-			for (SizeType inPatch = jpatchStart; inPatch < jpatchEnd; ++inPatch) {
-				SizeType j1 = vstart_[inPatch];
-				SizeType j2 = j1 + vsize_[inPatch];
+		for (SizeType inPatch = jpatchStart; inPatch < jpatchEnd; ++inPatch) {
+			SizeType j1 = vstart_[inPatch];
+			SizeType j2 = j1 + vsize_[inPatch];
 
-				if (j1 == j2) continue;
+			if (j1 == j2) continue;
 
-				assert(j1 < j2);
+			assert(j1 < j2);
 
-				for (SizeType j = j1; j < j2; j++)
-					xj[j - j1] = x_[j];
+			for (SizeType j = j1; j < j2; j++)
+				xj[j - j1] = x_[j];
 
-				std::fill(yij.begin(), yij.begin() + vsize_[outPatch], 0.0);
+			std::fill(yij.begin(), yij.begin() + vsize_[taskNumber], 0.0);
 
-				SizeType sizeListK = initKron_.connections();
+			SizeType sizeListK = initKron_.connections();
 
-				for (SizeType k = 0; k < sizeListK; ++k) {
-					const MatrixDenseOrSparseType& Ak = initKron_.xc(k)(outPatch, inPatch);
-					const MatrixDenseOrSparseType& Bk = initKron_.yc(k)(outPatch, inPatch);
+			for (SizeType k = 0; k < sizeListK; ++k) {
+				const MatrixDenseOrSparseType& Ak = initKron_.xc(k)(taskNumber, inPatch);
+				const MatrixDenseOrSparseType& Bk = initKron_.yc(k)(taskNumber, inPatch);
 
-					if (Ak.isZero() || Bk.isZero() == 0)
-						continue;
+				if (Ak.isZero() || Bk.isZero() == 0)
+					continue;
 
-					bool diagonal = (outPatch == inPatch);
+				bool diagonal = (taskNumber == inPatch);
 
-					// FIXME: Check that kronMult overwrites yi insead of accumulating
-					if (useSymmetry && !diagonal) {
-						kronMult(yi, xj, 'n', 'n', Ak, Bk);
-						for (SizeType i = 0; i < vsize_[outPatch]; ++i)
-							yij[i] += yi[i];
+				// FIXME: Check that kronMult overwrites yi insead of accumulating
+				if (useSymmetry && !diagonal) {
+					kronMult(yi, xj, 'n', 'n', Ak, Bk);
+					for (SizeType i = 0; i < vsize_[taskNumber]; ++i)
+						yij[i] += yi[i];
 
-						kronMult(yi, xi, 't', 't', Ak, Bk);
-						for (SizeType j = j1; j < j2; j++)
-							y_[j] += yi[j-j1];
-					} else {
-						kronMult(yi, xj, 'n','n', Ak, Bk);
-						for (SizeType i = 0; i < vsize_[outPatch]; ++i)
-							yij[i] += yi[i];
-					}
-				} // end loop over k
+					kronMult(yi, xi, 't', 't', Ak, Bk);
+					for (SizeType j = j1; j < j2; j++)
+						y_[j] += yi[j-j1];
+				} else {
+					kronMult(yi, xj, 'n','n', Ak, Bk);
+					for (SizeType i = 0; i < vsize_[taskNumber]; ++i)
+						yij[i] += yi[i];
+				}
+			} // end loop over k
 
-				for (SizeType i = 0; i< vsize_[outPatch]; ++i)
-					yi[i] += yij[i];
-			} // end inside patch
+			for (SizeType i = 0; i< vsize_[taskNumber]; ++i)
+				yi[i] += yij[i];
+		} // end inside patch
 
-			for (SizeType i = i1; i < i2; ++i)
-				y_[i] = yi[i - i1];
-		} // end outside patch
+		for (SizeType i = i1; i < i2; ++i)
+			y_[i] = yi[i - i1];
 	}
 
 	void sync()
@@ -230,12 +232,30 @@ private:
 		}
 	}
 
+	void init2(SizeType nthreads)
+	{
+		xi_.resize(nthreads);
+		yi_.resize(nthreads);
+		yi_.resize(nthreads);
+		yij_.resize(nthreads);
+		for (SizeType i = 0; i < maxVsize_; ++i) {
+			xi_[i].resize(maxVsize_,0.0);
+			yi_[i].resize(maxVsize_,0.0);
+			xj_[i].resize(maxVsize_,0.0);
+			yij_[i].resize(maxVsize_,0.0);
+		}
+	}
+
 	const InitKronType& initKron_;
 	VectorType& y_;
 	const VectorType& x_;
 	SizeType maxVsize_;
 	VectorSizeType vstart_;
 	VectorSizeType vsize_;
+	VectorVectorType yi_;
+	VectorVectorType xi_;
+	VectorVectorType xj_;
+	VectorVectorType yij_;
 }; //class KronConnections
 
 } // namespace PsimagLite

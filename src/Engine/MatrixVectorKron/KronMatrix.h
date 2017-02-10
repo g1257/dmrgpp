@@ -210,14 +210,13 @@ private:
 	// ATTENTION: MPI is not supported, only pthreads
 	void computeConnections(VectorType& x,const VectorType& y) const
 	{
-		KronConnectionsType kc(initKron_,x,y);
+		KronConnectionsType kc(initKron_,x,y,PsimagLite::Concurrency::npthreads);
 
 		typedef PsimagLite::Parallelizer<KronConnectionsType> ParallelizerType;
 		ParallelizerType parallelConnections(PsimagLite::Concurrency::npthreads,
 		                                     PsimagLite::MPI::COMM_WORLD);
 
-		SizeType npatches = initKron_.patch();
-		parallelConnections.loopCreate(npatches,kc);
+		parallelConnections.loopCreate(kc);
 		kc.sync();
 	}
 

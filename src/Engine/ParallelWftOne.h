@@ -158,33 +158,28 @@ public:
 		return ret;
 	}
 
-	void thread_function_(SizeType threadNum,
-	                      SizeType blockSize,
-	                      SizeType total,
-	                      ConcurrencyType::MutexType*)
+	SizeType tasks() const { return psiDest_.effectiveSize(i0_); }
+
+	void doTask(SizeType taskNumber, SizeType)
 	{
 		SizeType start = psiDest_.offset(i0_);
-		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
-		SizeType npthreads = PsimagLite::Concurrency::npthreads;
 
-
-		ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"ParallelWftOne",total);
-
-		for (SizeType p=0;p<blockSize;p++) {
-			SizeType x = (threadNum+npthreads*mpiRank)*blockSize + p + 1;
-			if (x >= total) break;
-
-			if (dir_ == DIR_2) {
-				SizeType ip,alpha,kp,jp;
-				pack1_->unpack(alpha,jp,(SizeType)lrs_.super().permutation(x+start));
-				pack2_->unpack(ip,kp,(SizeType)lrs_.left().permutation(alpha));
-				psiDest_.fastAccess(i0_,x) = createAux2b(psiSrc_,ip,kp,jp,wsT_,we_,nk_);
-			} else {
-				SizeType ip,beta,kp,jp;
-				pack1_->unpack(ip,beta,(SizeType)lrs_.super().permutation(x+start));
-				pack2_->unpack(kp,jp,(SizeType)lrs_.right().permutation(beta));
-				psiDest_.fastAccess(i0_,x)=createAux1b(psiSrc_,ip,kp,jp,ws_,weT_,nk_);
-			}
+		if (dir_ == DIR_2) {
+			SizeType ip = 0;
+			SizeType alpha = 0;
+			SizeType kp = 0;
+			SizeType jp = 0;
+			pack1_->unpack(alpha,jp,(SizeType)lrs_.super().permutation(taskNumber+start));
+			pack2_->unpack(ip,kp,(SizeType)lrs_.left().permutation(alpha));
+			psiDest_.fastAccess(i0_,taskNumber) = createAux2b(psiSrc_,ip,kp,jp,wsT_,we_,nk_);
+		} else {
+			SizeType ip = 0;
+			SizeType beta = 0;
+			SizeType kp = 0;
+			SizeType jp = 0;
+			pack1_->unpack(ip,beta,(SizeType)lrs_.super().permutation(taskNumber+start));
+			pack2_->unpack(kp,jp,(SizeType)lrs_.right().permutation(beta));
+			psiDest_.fastAccess(i0_,taskNumber)=createAux1b(psiSrc_,ip,kp,jp,ws_,weT_,nk_);
 		}
 	}
 

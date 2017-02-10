@@ -146,30 +146,24 @@ public:
 			reducedOpImpl_.prepareTransform(ftransform,thisBasis);
 		}
 
-		void thread_function_(SizeType threadNum,
-		                      SizeType blockSize,
-		                      SizeType total,
-		                      typename ConcurrencyType::MutexType*)
+		void doTask(SizeType taskNumber , SizeType threadNum)
 		{
-			SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
-			SizeType npthreads = ConcurrencyType::npthreads;
-
-			ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"Operators",total);
-
-			for (SizeType p=0;p<blockSize;p++) {
-				SizeType taskNumber = (threadNum+npthreads*mpiRank)*blockSize + p;
-				if (taskNumber>=total) break;
-
-				SizeType k = taskNumber;
-				if (isExcluded(k) && k < operators_.size()) {
-					operators_[k].data.clear();
-					continue;
-				}
-				if (!useSu2Symmetry_)
-					reducedOpImpl_.changeBasis(operators_[k].data);
-				else
-					reducedOpImpl_.changeBasis(k);
+			SizeType k = taskNumber;
+			if (isExcluded(k) && k < operators_.size()) {
+				operators_[k].data.clear();
+				return;
 			}
+
+			if (!useSu2Symmetry_)
+				reducedOpImpl_.changeBasis(operators_[k].data);
+			else
+				reducedOpImpl_.changeBasis(k);
+		}
+
+		SizeType tasks() const
+		{
+			if (useSu2Symmetry_) return reducedOpImpl_.size();
+			return operators_.size();
 		}
 
 		void gather()
@@ -292,7 +286,7 @@ public:
 
 		MyLoop helper(useSu2Symmetry_,reducedOpImpl_,operators_,ftransform,thisBasis,startEnd);
 
-		threadObject.loopCreate(numberOfOperators(),helper); // FIXME: needs weights
+		threadObject.loopCreate(helper); // FIXME: needs weights
 
 		helper.gather();
 

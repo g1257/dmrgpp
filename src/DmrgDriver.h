@@ -1,5 +1,6 @@
 #ifndef DMRGDRIVER_H
 #define DMRGDRIVER_H
+#define USE_PTHREADS_OR_NOT_NG
 #include "DmrgSolver.h"
 #include "InputNg.h"
 #include "InputCheck.h"

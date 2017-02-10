@@ -143,6 +143,14 @@ public:
 			                             lrs.right().permutationInverse().size());
 			pack2_ = new PackIndicesType(volumeOf(nk));
 		}
+
+		const FactorsType& factorsSE = lrs_.super().getFactors();
+		const FactorsType& factorsS = lrs_.left().getFactors();
+		const FactorsType& factorsE = lrs_.right().getFactors();
+
+		transposeConjugate(factorsInvSE_,factorsSE);
+		transposeConjugate(factorsInvS_,factorsS);
+		transposeConjugate(factorsInvE_,factorsE);
 	}
 
 	~ParallelWftSu2()
@@ -159,61 +167,49 @@ public:
 		return ret;
 	}
 
-	void thread_function_(SizeType threadNum,
-	                      SizeType blockSize,
-	                      SizeType total,
-	                      ConcurrencyType::MutexType*)
+	SizeType tasks() const { return psiDest_.effectiveSize(i0_); }
+
+	void doTask(SizeType taskNumber, SizeType)
 	{
 		SizeType start = psiDest_.offset(i0_);
-		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
-		SizeType npthreads = PsimagLite::Concurrency::npthreads;
-		const FactorsType& factorsSE = lrs_.super().getFactors();
-		const FactorsType& factorsS = lrs_.left().getFactors();
-		const FactorsType& factorsE = lrs_.right().getFactors();
-		FactorsType factorsInverseSE,factorsInverseS,factorsInverseE;
+		psiDest_.fastAccess(i0_,taskNumber) = 0.0;
+		SizeType xx = taskNumber + start;
 
-		transposeConjugate(factorsInverseSE,factorsSE);
-		transposeConjugate(factorsInverseS,factorsS);
-		transposeConjugate(factorsInverseE,factorsE);
-
-		ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"ParallelWftSu2",total);
-
-		for (SizeType p=0;p<blockSize;p++) {
-			SizeType x = (threadNum+npthreads*mpiRank)*blockSize + p + 1;
-			if (x >= total) break;
-			psiDest_.fastAccess(i0_,x) = 0.0;
-			SizeType xx = x + start;
-			//psiDest_.slowAccess(x) = 0;
-			for (int kI = factorsInverseSE.getRowPtr(xx);
-			     kI < factorsInverseSE.getRowPtr(xx+1);
-			     kI++) {
-				if (dir_ == DIR_2) {
-					SizeType ip,alpha,kp,jp;
-					for (int kI=factorsInverseSE.getRowPtr(xx);
-					     kI<factorsInverseSE.getRowPtr(xx+1);
-					     kI++) {
-						pack1_->unpack(alpha,jp,(SizeType)factorsInverseSE.getCol(kI));
-						for (int k2I=factorsInverseS.getRowPtr(alpha);
-						     k2I<factorsInverseS.getRowPtr(alpha+1);
-						     k2I++) {
-							pack2_->unpack(ip,kp,(SizeType)factorsInverseS.getCol(k2I));
-							psiDest_.fastAccess(i0_,x) += factorsInverseSE.getValue(kI)*
-							        factorsInverseS.getValue(k2I)*
-							        createAux2b(psiSrc_,ip,kp,jp,wsT_,we_,nk_);
-						}
-					}
-
-				} else {
-					SizeType ip,beta,kp,jp;
-					pack1_->unpack(ip,beta,(SizeType)factorsInverseSE.getCol(kI));
-					for (int k2I = factorsInverseE.getRowPtr(beta);
-					     k2I < factorsInverseE.getRowPtr(beta+1);
+		for (int kI = factorsInvSE_.getRowPtr(xx);
+		     kI < factorsInvSE_.getRowPtr(xx+1);
+		     kI++) {
+			if (dir_ == DIR_2) {
+				SizeType ip = 0;
+				SizeType alpha = 0;
+				SizeType kp = 0;
+				SizeType jp = 0;
+				for (int kI=factorsInvSE_.getRowPtr(xx);
+				     kI<factorsInvSE_.getRowPtr(xx+1);
+				     kI++) {
+					pack1_->unpack(alpha,jp,static_cast<SizeType>(factorsInvSE_.getCol(kI)));
+					for (int k2I=factorsInvS_.getRowPtr(alpha);
+					     k2I<factorsInvS_.getRowPtr(alpha+1);
 					     k2I++) {
-						pack2_->unpack(kp,jp,(SizeType)factorsInverseE.getCol(k2I));
-						psiDest_.fastAccess(i0_,x) += factorsInverseSE.getValue(kI)*
-						        factorsInverseE.getValue(k2I)*
-						        createAux1b(psiSrc_,ip,kp,jp,ws_,weT_,nk_);
+						pack2_->unpack(ip,kp,static_cast<SizeType>(factorsInvS_.getCol(k2I)));
+						psiDest_.fastAccess(i0_,taskNumber) += factorsInvSE_.getValue(kI)*
+						        factorsInvS_.getValue(k2I)*
+						        createAux2b(psiSrc_,ip,kp,jp,wsT_,we_,nk_);
 					}
+				}
+
+			} else {
+				SizeType ip = 0;
+				SizeType beta = 0;
+				SizeType kp = 0;
+				SizeType jp = 0;
+				pack1_->unpack(ip,beta,static_cast<SizeType>(factorsInvSE_.getCol(kI)));
+				for (int k2I = factorsInvE_.getRowPtr(beta);
+				     k2I < factorsInvE_.getRowPtr(beta+1);
+				     k2I++) {
+					pack2_->unpack(kp,jp,static_cast<SizeType>(factorsInvE_.getCol(k2I)));
+					psiDest_.fastAccess(i0_,taskNumber) += factorsInvSE_.getValue(kI)*
+					        factorsInvE_.getValue(k2I)*
+					        createAux1b(psiSrc_,ip,kp,jp,ws_,weT_,nk_);
 				}
 			}
 		}
@@ -317,6 +313,9 @@ private:
 	PackIndicesType* pack2_;
 	SparseMatrixType wsT_;
 	SparseMatrixType weT_;
+	FactorsType factorsInvSE_;
+	FactorsType factorsInvS_;
+	FactorsType factorsInvE_;
 }; // class ParallelWftSu2
 } // namespace Dmrg
 
