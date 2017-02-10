@@ -113,7 +113,8 @@ public:
 	      envBlock_(modelHelper.leftRightSuper().right().block()),
 	      smax_(*std::max_element(systemBlock_.begin(),systemBlock_.end())),
 	      emin_(*std::min_element(envBlock_.begin(),envBlock_.end())),
-	      xtemp_(ConcurrencyType::storageSize(ConcurrencyType::npthreads))
+	      xtemp_(ConcurrencyType::storageSize(ConcurrencyType::npthreads)),
+	      total_(0)
 	{}
 
 	bool compute(SizeType i,
@@ -148,7 +149,7 @@ public:
 				                                  ind,
 				                                  edofs.first,
 				                                  jnd,
-								  edofs.second,
+				                                  edofs.second,
 				                                  term);
 
 				if (tmp==static_cast<RealType>(0.0)) continue;
@@ -177,39 +178,39 @@ public:
 		return flag;
 	}
 
-	void thread_function_(SizeType threadNum,
-	                      SizeType blockSize,
-	                      SizeType total,
-	                      ConcurrencyType::MutexType*)
+	void doTask(SizeType taskNumber ,SizeType threadNum)
 	{
-		xtemp_[threadNum].resize(x_.size(),0);
-		SizeType i =0, j = 0, type = 0,term = 0, dofs =0;
+		if (xtemp_[threadNum].size() != x_.size())
+			xtemp_[threadNum].resize(x_.size(),0.0);
+
 		SparseElementType tmp = 0.0;
 
-		SizeType npthreads = PsimagLite::Concurrency::npthreads;
-
-		for (SizeType p=0;p<blockSize;p++) {
-			SizeType ix = p*npthreads + threadNum;
-			if (ix>=total) break;
-
-			if (ix == 0) {
-				modelHelper_.hamiltonianLeftProduct(xtemp_[threadNum],y_);
-				continue;
-			}
-
-			if (ix == 1) {
-				modelHelper_.hamiltonianRightProduct(xtemp_[threadNum],y_);
-				continue;
-			}
-
-			assert(ix > 1);
-			ix -= 2;
-			AdditionalDataType additionalData;
-			prepare(ix,i,j,type,tmp,term,dofs,additionalData);
-
-			linkProduct(xtemp_[threadNum],y_,i,j,type,tmp,term,dofs,additionalData);
+		if (taskNumber == 0) {
+			modelHelper_.hamiltonianLeftProduct(xtemp_[threadNum],y_);
+			return;
 		}
+
+		if (taskNumber == 1) {
+			modelHelper_.hamiltonianRightProduct(xtemp_[threadNum],y_);
+			return;
+		}
+
+		assert(taskNumber > 1);
+		taskNumber -= 2;
+		AdditionalDataType additionalData;
+		SizeType i = 0;
+		SizeType j = 0;
+		SizeType type = 0;
+		SizeType term = 0;
+		SizeType dofs =0;
+		prepare(taskNumber,i,j,type,tmp,term,dofs,additionalData);
+
+		linkProduct(xtemp_[threadNum],y_,i,j,type,tmp,term,dofs,additionalData);
 	}
+
+	void tasks(SizeType total) { total_ = total; }
+
+	SizeType tasks() const { return total_; }
 
 	void sync()
 	{
@@ -372,6 +373,7 @@ private:
 	const typename GeometryType::BlockType& envBlock_;
 	SizeType smax_,emin_;
 	VectorVectorType xtemp_;
+	SizeType total_;
 }; // class HamiltonianConnection
 } // namespace Dmrg
 

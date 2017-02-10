@@ -97,37 +97,27 @@ public:
 	typedef typename PsimagLite::Real<FieldType>::Type RealType;
 
 	Parallel2PointCorrelations(MatrixType& w,
-							   TwoPointCorrelationsType& twopoint,
-							   const typename PsimagLite::Vector<PairType>::Type& pairs,
-							   const SparseMatrixType& O1,
-							   const SparseMatrixType& O2,
-							   int fermionicSign)
-		: w_(w),
-		  twopoint_(twopoint),
-		  pairs_(pairs),
-		  O1_(O1),
-		  O2_(O2),
-		  fermionicSign_(fermionicSign)
+	                           TwoPointCorrelationsType& twopoint,
+	                           const typename PsimagLite::Vector<PairType>::Type& pairs,
+	                           const SparseMatrixType& O1,
+	                           const SparseMatrixType& O2,
+	                           int fermionicSign)
+	    : w_(w),
+	      twopoint_(twopoint),
+	      pairs_(pairs),
+	      O1_(O1),
+	      O2_(O2),
+	      fermionicSign_(fermionicSign)
 	{}
 
-	void thread_function_(SizeType threadNum,
-	                      SizeType blockSize,
-	                      SizeType total,
-	                      ConcurrencyType::MutexType* myMutex)
+	void doTask(SizeType taskNumber ,SizeType threadNum)
 	{
-		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
-		SizeType npthreads = PsimagLite::Concurrency::npthreads;
-
-		for (SizeType p=0;p<blockSize;p++) {
-			SizeType px = (threadNum+npthreads*mpiRank)*blockSize + p;
-			if (px>=total) continue;
-
-			SizeType i = pairs_[px].first;
-			SizeType j = pairs_[px].second;
-			SizeType threadId = (myMutex==0) ? 0 : threadNum;
-			w_(i,j) = twopoint_.calcCorrelation(i,j,O1_,O2_,fermionicSign_,threadId);
-		}
+		SizeType i = pairs_[taskNumber].first;
+		SizeType j = pairs_[taskNumber].second;
+		w_(i,j) = twopoint_.calcCorrelation(i,j,O1_,O2_,fermionicSign_,threadNum);
 	}
+
+	SizeType tasks() const { return pairs_.size(); }
 
 private:
 

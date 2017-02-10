@@ -1186,7 +1186,7 @@ private:
 		                                    pairs,
 		                                    Parallel4PointDsType::MODE_THIN);
 
-		threaded4PointDs.loopCreate(pairs.size(),helper4PointDs);
+		threaded4PointDs.loopCreate(helper4PointDs);
 
 		MatrixType m2(rows,cols);
 		for (SizeType i = 0; i < rows; ++i) {

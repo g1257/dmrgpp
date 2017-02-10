@@ -226,6 +226,7 @@ private:
 			}
 		}
 
+		hc.tasks(total + 2);
 		assert(lps.typesaved.size() == total);
 		if (!lps.sealed) {
 			PsimagLite::OstringStream msg;
@@ -263,7 +264,7 @@ private:
 		typedef PsimagLite::Parallelizer<HamiltonianConnectionType> ParallelizerType;
 		ParallelizerType parallelConnections(PsimagLite::Concurrency::npthreads,
 		                                     PsimagLite::MPI::COMM_WORLD);
-		parallelConnections.loopCreate(total+2,hc);
+		parallelConnections.loopCreate(hc);
 
 		hc.sync();
 	}

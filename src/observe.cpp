@@ -1,4 +1,5 @@
 #include <unistd.h>
+#define USE_PTHREADS_OR_NOT_NG
 #include "Observer.h"
 #include "ObservableLibrary.h"
 #include "IoSimple.h"

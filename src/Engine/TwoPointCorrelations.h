@@ -148,7 +148,7 @@ public:
 
 		Parallel2PointCorrelationsType helper2Points(w,*this,pairs,O1,O2,fermionicSign);
 
-		threaded2Points.loopCreate(pairs.size(),helper2Points);
+		threaded2Points.loopCreate(helper2Points);
 	}
 
 	// Return the vector: O1 * O2 |psi>

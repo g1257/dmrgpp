@@ -106,25 +106,16 @@ public:
 	    : fpd_(fpd),fourpoint_(fourpoint),model_(model),gammas_(gammas),pairs_(pairs),mode_(mode)
 	{}
 
-	void thread_function_(SizeType threadNum,
-	                      SizeType blockSize,
-	                      SizeType total,
-	                      ConcurrencyType::MutexType*)
+	void doTask(SizeType taskNumber, SizeType threadNum)
 	{
-		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
-		SizeType npthreads = PsimagLite::Concurrency::npthreads;
+		SizeType i = pairs_[taskNumber].first;
+		SizeType j = pairs_[taskNumber].second;
 
-		for (SizeType p=0;p<blockSize;p++) {
-			SizeType px = (threadNum+npthreads*mpiRank)*blockSize + p;
-			if (px>=total) continue;
-
-			SizeType i = pairs_[px].first;
-			SizeType j = pairs_[px].second;
-
-			fpd_(i,j) = (mode_ == MODE_NORMAL) ? fourPointDelta(2*i,2*j,gammas_,model_,threadNum)
-			                                   : fourPointThin(i,j,gammas_,model_,threadNum);
-		}
+		fpd_(i,j) = (mode_ == MODE_NORMAL) ? fourPointDelta(2*i,2*j,gammas_,model_,threadNum)
+		                                   : fourPointThin(i,j,gammas_,model_,threadNum);
 	}
+
+	SizeType tasks() const { return pairs_.size(); }
 
 private:
 
@@ -194,9 +185,9 @@ private:
 		int signTerm = (val & 1) ? sign : 1;
 
 		return signTerm*fourpoint_('N',thini1,O1,
-		                  'N',thini2,O2,
-		                  'C',thinj1,O3,
-		                  'C',thinj2,O4,-1,threadId);
+		                           'N',thini2,O2,
+		                           'C',thinj1,O3,
+		                           'C',thinj2,O4,-1,threadId);
 
 	}
 

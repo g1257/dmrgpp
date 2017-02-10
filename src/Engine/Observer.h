@@ -492,7 +492,7 @@ public:
 		                                    pairs,
 		                                    Parallel4PointDsType::MODE_NORMAL);
 
-		threaded4PointDs.loopCreate(pairs.size(),helper4PointDs);
+		threaded4PointDs.loopCreate(helper4PointDs);
 	}
 
 	template<typename ApplyOperatorType>
