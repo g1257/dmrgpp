@@ -23,14 +23,9 @@ use lib "../../PsimagLite/scripts";
 use Make;
 use DmrgDriver;
 
-my ($arg) = @ARGV;
+my ($flavor) = @ARGV;
 
-if (defined($arg) and -r "$arg" and $arg ne "Config.make") {
-	my $cmd = "cp Config.make Config.make.bak";
-	system($cmd);
-	$cmd = "cp $arg Config.make";
-	system($cmd);
-}
+$flavor = procFlavor($flavor);
 
 my %provenanceDriver = (name => 'Provenance', aux => 1);
 my %progGlobalsDriver = (name => 'ProgramGlobals', aux => 1);
@@ -64,13 +59,14 @@ my %dmrgMain = (name => 'dmrg', dotos => $dotos);
 
 push @drivers,\%dmrgMain;
 
-createMakefile();
+createMakefile($flavor);
 
 sub createMakefile
 {
+	my ($flavor) = @_;
 	unlink("Engine/Version.h");
 	Make::backupMakefile();
-	Make::createConfigMake();
+	Make::createConfigMake($flavor);
 
 	my $fh;
 	open($fh,">Makefile") or die "Cannot open Makefile for writing: $!\n";
@@ -92,5 +88,35 @@ EOF
 
 	close($fh);
 	print STDERR "$0: File Makefile has been written\n";
+}
+
+sub procFlavor
+{
+	my ($flavor) = @_;
+	defined($flavor) or $flavor = "production";
+
+	my $hasPath = ($flavor =~ /^\.\./ or $flavor =~ /^\//);
+	return $flavor if ($hasPath);
+
+	if ($flavor eq "help") {
+		print "USAGE: $0 [production | debug | callgrind";
+		print " | helgrind | drd]\n";
+		exit(0);
+	}
+
+	my $dir = "../TestSuite/inputs";
+	if ($flavor eq "production") {
+		$flavor = "Config.make";
+	} elsif ($flavor eq "debug") {
+		$flavor = "ConfigDebug.make";
+	} elsif ($flavor eq "callgrind") {
+		$flavor = "ConfigCallgrind.make";
+	} elsif ($flavor eq "helgrind" or $flavor eq "drd") {
+		$flavor = "ConfigHelgrind.make";
+	} else {
+		return $flavor;
+	}
+
+	return "$dir/$flavor";
 }
 
