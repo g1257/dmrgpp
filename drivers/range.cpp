@@ -21,7 +21,7 @@
  * your batch system script
  *
  */
-
+#define USE_PTHREADS_OR_NOT_NG
 #include "Concurrency.h"
 #include "Parallelizer.h"
 #include <iostream>
@@ -39,25 +39,15 @@ public:
 	      v_(total,0)
 	{}
 
-	void thread_function_(SizeType threadNum,
-	                      SizeType blockSize,
-	                      SizeType total,
-	                      ConcurrencyType::MutexType*)
+	SizeType tasks() const { return v_.size(); }
+
+	void doTask(SizeType taskNumber, SizeType threadNum)
 	{
-		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
-		for (SizeType p=0;p<blockSize;p++) {
-			SizeType taskNumber = (threadNum+nthreads_*mpiRank)*blockSize + p;
-			if (taskNumber>=total) break;
+		sleep(1);
 
-			sleep(1);
-
-//			std::cout<<"This is thread number "<<threadNum;
-//			std::cout<<" and taskNumber="<<taskNumber<<"\n";
-
-			SizeType ind = ConcurrencyType::storageIndex(threadNum);
-			sum_[ind] += taskNumber;
-			v_[taskNumber] = taskNumber * taskNumber;
-		}
+		SizeType ind = ConcurrencyType::storageIndex(threadNum);
+		sum_[ind] += taskNumber;
+		v_[taskNumber] = taskNumber * taskNumber;
 	}
 
 	void sync()
@@ -115,7 +105,7 @@ int main(int argc,char *argv[])
 
 	HelperType helper(nthreads,total);
 
-	threadObject.loopCreate(total,helper);
+	threadObject.loopCreate(helper);
 
 	helper.sync();
 
