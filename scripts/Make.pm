@@ -279,10 +279,12 @@ EOF
 
 sub createConfigMake
 {
+	my ($flavor) = @_;
+	defined($flavor) or $flavor = "../TestSuite/inputs/Config.make";
 	my $cmd = "cp ../TestSuite/inputs/ConfigBase.make Config.make.new";
 	system($cmd);
 	print STDERR "$0: Executed $cmd\n";
-	open(FILE, "../TestSuite/inputs/Config.make") or return;
+	open(FILE, $flavor) or return;
 	if (!open(FOUT, ">> Config.make.new")) {
 		close(FILE);
 		return;
