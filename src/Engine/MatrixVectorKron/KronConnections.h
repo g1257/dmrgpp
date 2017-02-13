@@ -207,7 +207,7 @@ private:
 
 	void init()
 	{
-		SizeType npatches = initKron_.connections();
+		SizeType npatches = initKron_.patch();
 		vsize_.resize(npatches, 0);
 		vstart_.resize(npatches, 0);
 

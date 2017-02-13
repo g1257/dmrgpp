@@ -129,7 +129,6 @@ public:
 
 				tmp.setRow(i2-i1,counter);
 				tmp.checkValidity();
-				if (tmp.values() == 0) continue;
 				data_(i,j) = new MatrixDenseOrSparseType(tmp);
 			}
 		}

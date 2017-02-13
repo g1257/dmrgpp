@@ -80,14 +80,13 @@ public:
 			return SparseMatrixType(m2);
 		}
 
-		SparseMatrixType m(rows_, cols_);
+		SparseMatrixType m;
+		m.resize(rows_, cols_, colind_.size());
 		SizeType counter = 0;
 		for (SizeType i = 0; i < rows_; ++i) {
 			m.setRow(i, counter);
-			for (int k = rowptr_[i]; k < rowptr_[i+1]; ++k) {
-				m.setCol(k,colind_[k]);
-				++counter;
-			}
+			for (int k = rowptr_[i]; k < rowptr_[i+1]; ++k)
+				m.setCol(counter++,colind_[k]);
 		}
 
 		m.setRow(rows_, counter);
