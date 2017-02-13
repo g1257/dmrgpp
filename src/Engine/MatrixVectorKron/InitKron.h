@@ -134,11 +134,15 @@ public:
 
 	const ArrayOfMatStructType& xc(SizeType ic) const
 	{
+		assert(ic < xc_.size());
+		assert(xc_[ic]);
 		return *xc_[ic];
 	}
 
 	const ArrayOfMatStructType& yc(SizeType ic) const
 	{
+		assert(ic < yc_.size());
+		assert(yc_[ic]);
 		return *yc_[ic];
 	}
 

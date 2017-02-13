@@ -101,7 +101,7 @@ class KronMatrix {
 	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
 	typedef typename InitKronType::GenGroupType GenGroupType;
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
-
+	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 public:
 
 	KronMatrix(const InitKronType& initKron)
@@ -112,8 +112,8 @@ public:
 
 	void matrixVectorProduct(VectorType& vout, const VectorType& vin) const
 	{
-		const typename PsimagLite::Vector<SizeType>::Type& permInverse = initKron_.lrs().super().permutationInverse();
-		const typename PsimagLite::Vector<SizeType>::Type& perm = initKron_.lrs().super().permutationVector();
+		const VectorSizeType& permInverse = initKron_.lrs().super().permutationInverse();
+		const VectorSizeType& perm = initKron_.lrs().super().permutationVector();
 		const SparseMatrixType& left = initKron_.lrs().left().hamiltonian();
 		const SparseMatrixType& right = initKron_.lrs().right().hamiltonian();
 		SizeType nl = left.row();

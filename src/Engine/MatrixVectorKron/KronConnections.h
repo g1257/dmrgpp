@@ -128,6 +128,8 @@ public:
 		VectorType& xj = xj_[threadNum];
 		VectorType& yij = yij_[threadNum];
 
+		assert(vstart_.size() > taskNumber);
+		assert(vsize_.size() > taskNumber);
 		SizeType i1 = vstart_[taskNumber];
 		SizeType i2 = i1 + vsize_[taskNumber];
 
@@ -236,9 +238,9 @@ private:
 	{
 		xi_.resize(nthreads);
 		yi_.resize(nthreads);
-		yi_.resize(nthreads);
+		xj_.resize(nthreads);
 		yij_.resize(nthreads);
-		for (SizeType i = 0; i < maxVsize_; ++i) {
+		for (SizeType i = 0; i < nthreads; ++i) {
 			xi_[i].resize(maxVsize_,0.0);
 			yi_[i].resize(maxVsize_,0.0);
 			xj_[i].resize(maxVsize_,0.0);

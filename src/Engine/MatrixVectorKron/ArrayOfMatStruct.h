@@ -129,6 +129,7 @@ public:
 
 				tmp.setRow(i2-i1,counter);
 				tmp.checkValidity();
+				if (tmp.values() == 0) continue;
 				data_(i,j) = new MatrixDenseOrSparseType(tmp);
 			}
 		}
@@ -137,6 +138,7 @@ public:
 	const MatrixDenseOrSparseType& operator()(SizeType i,SizeType j) const
 	{
 		assert(i<data_.n_row() && j<data_.n_col());
+		assert(data_(i,j));
 		return *data_(i,j);
 	}
 

@@ -25,15 +25,18 @@ public:
 			for (SizeType k = 0; k < rows_ + 1; ++k)
 				rowptr_[k] = sparse.getRowPtr(k);
 
-			colind_.resize(cols_);
-			for (SizeType k = 0; k < cols_; ++k)
-				colind_[k] = sparse.getCol(k);
-
 			SizeType nz = sparse.nonZero();
-			for (SizeType k = 0; k < nz; ++k)
+			if (nz == 0) return;
+			colind_.resize(nz, 0);
+			values_.resize(nz, 0.0);
+			for (SizeType k = 0; k < nz; ++k) {
+				colind_[k] = sparse.getCol(k);
 				values_[k] = sparse.getValue(k);
+			}
+
 		} else {
 			// A(i,j) at  val[ (i) + (j)*nrow ]
+			values_.resize(rows_*cols_, 0.0);
 			for (SizeType i = 0; i < rows_; ++i) {
 				for (int k = sparse.getRowPtr(i); k < sparse.getRowPtr(i+1); ++k)
 					values_[i + sparse.getCol(k)*rows_] = sparse.getValue(k);
