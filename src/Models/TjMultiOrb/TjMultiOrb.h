@@ -256,6 +256,7 @@ public:
 			OperatorType cup = naturalOperator("c",site,dof+SPIN_UP*orbitals);
 			cup.conjugate();
 			SparseMatrixType nup(multiplyTc(cup.data,cup.data));
+			if (orbitals>1) nup = findNMatrices(dof+SPIN_UP*orbitals);
 			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(nup,
 			                    1.0,
@@ -271,6 +272,7 @@ public:
 			OperatorType cdown = naturalOperator("c",site,dof+SPIN_DOWN*orbitals);
 			cdown.conjugate();
 			SparseMatrixType ndown(multiplyTc(cdown.data,cdown.data));
+			if (orbitals>1) ndown = findNMatrices(dof+SPIN_DOWN*orbitals);
 			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(ndown,
 			                    1.0,
@@ -356,6 +358,11 @@ public:
 		return creationMatrix_[2*modelParameters_.orbitals+1].data;
 	}
 
+	virtual SizeType maxElectronsOneSpin() const
+	{
+		return modelParameters_.orbitals*geometry_.numberOfSites() + 1;
+	}
+
 private:
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
@@ -413,6 +420,33 @@ private:
 		return creationMatrix;
 	}
 
+	SparseMatrixType findNMatrices(SizeType sigma) const
+	{
+		assert(sigma<2*modelParameters_.orbitals);
+		VectorHilbertStateType natBasis;
+		VectorSizeType quantumNumbs;
+		BlockType block(1,0);
+		setNaturalBasis(natBasis,quantumNumbs,block,false);
+		SizeType n = natBasis.size();
+		MatrixType cm(n,n);
+
+		for (SizeType ii=0;ii<natBasis.size();ii++) {
+			HilbertStateType ket=natBasis[ii];
+			cm(ii,ii) = 0.0;
+			HilbertStateType mask = (1<<sigma);
+			if (ket & mask) cm(ii,ii) += 1.0;
+		}
+
+		MatrixType rotation(n,n);
+		MatrixType rotationR(n,n);
+		computeRotation(rotation,rotationR,natBasis);
+		truncateMatrix(cm,&rotation,&rotationR,natBasis);
+
+		SparseMatrixType creationMatrix(cm);
+		return creationMatrix;
+	}
+
+
 	//! Find S^+_i in the natural basis natBasis
 	SparseMatrixType findSplusMatrices(int i,
 	                                   const VectorHilbertStateType& natBasis,
@@ -440,7 +474,7 @@ private:
 				}
 			}
 		}
-
+		if (orbitals > 1) correctLambda(cm,natBasis);
 		truncateMatrix(cm,rot,rotT,natBasis);
 
 		SparseMatrixType operatorMatrix(cm);
@@ -474,10 +508,36 @@ private:
 			cm(ii,ii) = 0.5*counter;
 		}
 
+		if (orbitals > 1) correctLambda(cm,natBasis);
 		truncateMatrix(cm,rot,rotT,natBasis);
 
 		SparseMatrixType operatorMatrix(cm);
 		return operatorMatrix;
+	}
+
+	void correctLambda(MatrixType& cm2,
+	                   const VectorHilbertStateType& natBasis) const
+	{
+		SizeType n = natBasis.size();
+		PsimagLite::Matrix<typename SparseMatrixType::value_type> dens(n,n);
+		SizeType dofs = 2*modelParameters_.orbitals;
+
+		for (SizeType ii=0;ii<natBasis.size();ii++) {
+			HilbertStateType ket=natBasis[ii];
+			dens(ii,ii) = 0.0;
+			for (SizeType sigma=0;sigma<dofs;sigma++) {
+				HilbertStateType mask = (1<<sigma);
+				if (ket & mask) dens(ii,ii) += 1.0;
+			}
+		}
+
+		MatrixType corrector(n,n);
+		SparseElementType f1 = (-1.0);
+		SparseElementType f2 = 0.5;
+		for (SizeType i = 0; i < n; ++i)
+			corrector(i,i) = f2 * dens(i,i) * std::abs(dens(i,i) + f1);
+
+		cm2 = cm2 * corrector;
 	}
 
 	void truncateMatrix(MatrixType& cm,
@@ -582,13 +642,13 @@ private:
 			creationMatrix.push_back(myOp2);
 
 			// Set ni matrices  summed over orbitals
-			SparseMatrixType tmpMatrix = findNiMatrices(0,natBasis,&rotation,&rotationR);
+			tmpMatrix = findNiMatrices(0,natBasis,&rotation,&rotationR);
 			RealType angularFactor= 1;
 			typename OperatorType::Su2RelatedType su2related3;
 			su2related3.offset = 1; //check FIXME
 			OperatorType myOp3(tmpMatrix,1,PairType(0,0),angularFactor,su2related3);
-
 			creationMatrix.push_back(myOp3);
+
 		}
 	}
 
