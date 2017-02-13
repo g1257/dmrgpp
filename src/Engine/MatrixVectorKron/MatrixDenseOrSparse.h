@@ -15,7 +15,7 @@ public:
 	typedef PsimagLite::Vector<int>::Type VectorIntType;
 
 	// 50% cutoff == 0.5 here for sparse/dense
-	MatrixDenseOrSparse(const SparseMatrixType& sparse)
+	explicit MatrixDenseOrSparse(const SparseMatrixType& sparse)
 	    : isDense_(sparse.nonZero() > static_cast<int>(0.5*sparse.row()*sparse.col())),
 	      rows_(sparse.row()),
 	      cols_(sparse.col())
@@ -64,6 +64,32 @@ public:
 	bool isZero() const
 	{
 		return (isDense_) ? false : (values_.size() == 0);
+	}
+
+	SparseMatrixType toSparse() const
+	{
+		if (isDense_) {
+			PsimagLite::Matrix<ComplexOrRealType> m2(rows_, cols_);
+			for (SizeType i = 0; i < rows_; ++i)
+				for (SizeType j = 0; j < cols_; ++j)
+					m2(i,j) = values_[i + j*rows_];
+
+			return SparseMatrixType(m2);
+		}
+
+		SparseMatrixType m(rows_, cols_);
+		SizeType counter = 0;
+		for (SizeType i = 0; i < rows_; ++i) {
+			m.setRow(i, counter);
+			for (int k = rowptr_[i]; k < rowptr_[i+1]; ++k) {
+				m.setCol(k,colind_[k]);
+				++counter;
+			}
+		}
+
+		m.setRow(rows_, counter);
+		m.checkValidity();
+		return m;
 	}
 
 private:
