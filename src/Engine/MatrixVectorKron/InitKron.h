@@ -89,7 +89,7 @@ namespace Dmrg {
 template<typename ModelType,typename ModelHelperType_>
 class InitKron {
 
-	static const bool KRON_USE_SYMMETRY = true;
+	static const bool KRON_USE_SYMMETRY = false;
 
 public:
 

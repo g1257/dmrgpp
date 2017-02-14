@@ -150,8 +150,11 @@ public:
 
 private:
 
-	PsimagLite::Matrix<MatrixDenseOrSparseType*> data_;
+	ArrayOfMatStruct(const ArrayOfMatStruct&);
 
+	ArrayOfMatStruct& operator=(const ArrayOfMatStruct&);
+
+	PsimagLite::Matrix<MatrixDenseOrSparseType*> data_;
 }; //class ArrayOfMatStruct
 } // namespace Dmrg
 

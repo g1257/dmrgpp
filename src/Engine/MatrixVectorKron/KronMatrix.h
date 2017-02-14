@@ -221,6 +221,10 @@ private:
 		kc.sync();
 	}
 
+	KronMatrix(const KronMatrix&);
+
+	const KronMatrix& operator=(const KronMatrix&);
+
 	const InitKronType& initKron_;
 
 }; //class KronMatrix
