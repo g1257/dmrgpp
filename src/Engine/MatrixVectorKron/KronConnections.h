@@ -172,7 +172,7 @@ public:
 				const MatrixDenseOrSparseType& Ak = initKron_.xc(k)(taskNumber, inPatch);
 				const MatrixDenseOrSparseType& Bk = initKron_.yc(k)(taskNumber, inPatch);
 
-				if (Ak.isZero() || Bk.isZero() == 0)
+				if (Ak.isZero() || Bk.isZero())
 					continue;
 
 				bool diagonal = (taskNumber == inPatch);
