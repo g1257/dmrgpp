@@ -223,9 +223,9 @@ private:
 		ArrayOfMatStructType* x1 = new ArrayOfMatStructType(A,gengroupLeft_);
 		xc_.push_back(x1);
 
-		SparseMatrixType tmpMatrix;
-		transposeConjugate(tmpMatrix,B);
-		ArrayOfMatStructType* y1 = new ArrayOfMatStructType(tmpMatrix,gengroupRight_);
+		//SparseMatrixType tmpMatrix;
+		//transposeConjugate(tmpMatrix,B);
+		ArrayOfMatStructType* y1 = new ArrayOfMatStructType(B,gengroupRight_);
 		yc_.push_back(y1);
 	}
 
