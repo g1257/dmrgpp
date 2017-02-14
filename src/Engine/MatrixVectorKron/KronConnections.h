@@ -127,6 +127,7 @@ public:
 		VectorType& xi = xi_[threadNum];
 		VectorType& xj = xj_[threadNum];
 		VectorType& yij = yij_[threadNum];
+		VectorType& yi2 = yi2_[threadNum];
 
 		assert(vstart_.size() > taskNumber);
 		assert(vsize_.size() > taskNumber);
@@ -176,19 +177,19 @@ public:
 
 				bool diagonal = (taskNumber == inPatch);
 
-				// FIXME: Check that kronMult overwrites yi insead of accumulating
+				// FIXME: Check that kronMult overwrites yi2 insead of accumulating
 				if (useSymmetry && !diagonal) {
-					kronMult(yi, xj, 'n', 'n', Ak, Bk);
+					kronMult(yi2, xj, 'n', 'n', Ak, Bk);
 					for (SizeType i = 0; i < vsize_[taskNumber]; ++i)
-						yij[i] += yi[i];
+						yij[i] += yi2[i];
 
-					kronMult(yi, xi, 't', 't', Ak, Bk);
+					kronMult(yi2, xi, 't', 't', Ak, Bk);
 					for (SizeType j = j1; j < j2; j++)
-						y_[j] += yi[j-j1];
+						y_[j] += yi2[j-j1];
 				} else {
-					kronMult(yi, xj, 'n','n', Ak, Bk);
+					kronMult(yi2, xj, 'n','n', Ak, Bk);
 					for (SizeType i = 0; i < vsize_[taskNumber]; ++i)
-						yij[i] += yi[i];
+						yij[i] += yi2[i];
 				}
 			} // end loop over k
 
@@ -240,11 +241,13 @@ private:
 		yi_.resize(nthreads);
 		xj_.resize(nthreads);
 		yij_.resize(nthreads);
+		yi2_.resize(nthreads);
 		for (SizeType i = 0; i < nthreads; ++i) {
 			xi_[i].resize(maxVsize_,0.0);
 			yi_[i].resize(maxVsize_,0.0);
 			xj_[i].resize(maxVsize_,0.0);
 			yij_[i].resize(maxVsize_,0.0);
+			yi2_[i].resize(maxVsize_,0.0);
 		}
 	}
 
@@ -258,6 +261,7 @@ private:
 	VectorVectorType xi_;
 	VectorVectorType xj_;
 	VectorVectorType yij_;
+	VectorVectorType yi2_;
 }; //class KronConnections
 
 } // namespace PsimagLite
