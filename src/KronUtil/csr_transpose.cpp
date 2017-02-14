@@ -95,7 +95,7 @@ void csr_transpose( const int nrow_A,
   };
  }
 
- delete nnz_row_At;
+ delete[] nnz_row_At;
 
 }
 

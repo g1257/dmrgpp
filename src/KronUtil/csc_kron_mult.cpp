@@ -153,7 +153,7 @@ void csc_kron_mult_method(
 
     }
     
-    delete by_;
+    delete[] by_;
 
    }
  else if (imethod == 2) {
@@ -242,10 +242,10 @@ void csc_kron_mult_method(
                      nrow_X,
                      ncol_X, 
                      &(X(0,0)) );
-                     
+
       }
 
-    delete yat_;
+    delete[] yat_;
 
    }
  else if (imethod == 3) {

@@ -93,6 +93,6 @@ void den2csr( const int nrow_A,
     };
     };
 
- delete nnz_row;
+ delete[] nnz_row;
 }
 #undef A

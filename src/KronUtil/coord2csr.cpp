@@ -110,5 +110,5 @@ void coord2csr(
     };
   }
 
-  delete nnz_row;
+  delete[] nnz_row;
 }

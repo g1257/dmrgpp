@@ -69,7 +69,7 @@ void csr_matmul_pre( char trans_A,
                    nrow_Y,ncol_Y, &(Y(0,0)),
                    nrow_X,ncol_X, &(X(0,0)) );
 
-   delete a_;
+   delete[] a_;
    return;
    };
 

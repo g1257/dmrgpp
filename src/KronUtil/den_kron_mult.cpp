@@ -158,7 +158,7 @@ void den_kron_mult_method(
 
     }
     
-     delete by_;
+     delete[] by_;
    }
  else if (imethod == 2) {
     /*
@@ -245,7 +245,7 @@ void den_kron_mult_method(
                      
       }
 
-   delete yat_;
+   delete[] yat_;
 
    }
  else if (imethod == 3) {

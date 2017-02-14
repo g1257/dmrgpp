@@ -144,6 +144,6 @@ void csr_submatrix( const int nrow_A,
         };
       };
 
-  delete cmap;
-  delete nnz;
+  delete[] cmap;
+  delete[] nnz;
 }

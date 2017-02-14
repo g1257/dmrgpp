@@ -126,10 +126,7 @@ void csr_kron_submatrix(
      };
   hrowptr[nrow_H] = ifree;
 
-  delete ialist;
-  delete iblist;
-  delete cmap;
-}           
-
-      
-  
+  delete[] ialist;
+  delete[] iblist;
+  delete[] cmap;
+}

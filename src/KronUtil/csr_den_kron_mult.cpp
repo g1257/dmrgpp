@@ -171,8 +171,8 @@ void csr_den_kron_mult_method(
                      &(X(0,0))   );
 
     }
-    
-    delete by_;
+
+    delete[] by_;
    }
  else if (imethod == 2) {
     /*
@@ -257,10 +257,10 @@ void csr_den_kron_mult_method(
                      nrow_X,
                      ncol_X, 
                      &(X(0,0)) );
-                     
+
       }
 
-    delete yat_;
+    delete[] yat_;
 
    }
  else if (imethod == 3) {
