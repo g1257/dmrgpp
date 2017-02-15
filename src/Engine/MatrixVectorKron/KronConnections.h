@@ -120,7 +120,7 @@ public:
 
 	SizeType tasks() const { return initKron_.patch(); }
 
-	void doTask(SizeType taskNumber, SizeType threadNum)
+	void doTask(SizeType outPatch, SizeType threadNum)
 	{
 		bool useSymmetry = initKron_.useSymmetry();
 		VectorType& yi = yi_[threadNum];
@@ -129,22 +129,20 @@ public:
 		VectorType& yij = yij_[threadNum];
 		VectorType& yi2 = yi2_[threadNum];
 
-		assert(vstart_.size() > taskNumber);
-		assert(vsize_.size() > taskNumber);
-		SizeType i1 = vstart_[taskNumber];
-		SizeType i2 = i1 + vsize_[taskNumber];
 
+		SizeType i1 = vstart_[outPatch];
+		SizeType i2 = i1 + vsize_[outPatch];
 		if (i1 == i2) return;
 
 		assert(i1 < i2);
 
-		std::fill(yi.begin(), yi.begin() + vsize_[taskNumber], 0.0);
+		std::fill(yi.begin(), yi.end(), 0.0);
 
 		/**
 			* Symmetry : Access only upper triangular matrix
 			**/
 		SizeType jpatchStart = 0;
-		SizeType jpatchEnd = taskNumber;
+		SizeType jpatchEnd = outPatch;
 
 		if (!useSymmetry) {
 			jpatchEnd = tasks();
@@ -156,7 +154,6 @@ public:
 		for (SizeType inPatch = jpatchStart; inPatch < jpatchEnd; ++inPatch) {
 			SizeType j1 = vstart_[inPatch];
 			SizeType j2 = j1 + vsize_[inPatch];
-
 			if (j1 == j2) continue;
 
 			assert(j1 < j2);
@@ -164,23 +161,23 @@ public:
 			for (SizeType j = j1; j < j2; j++)
 				xj[j - j1] = x_[j];
 
-			std::fill(yij.begin(), yij.begin() + vsize_[taskNumber], 0.0);
+			std::fill(yij.begin(), yij.end(), 0.0);
 
 			SizeType sizeListK = initKron_.connections();
 
 			for (SizeType k = 0; k < sizeListK; ++k) {
-				const MatrixDenseOrSparseType& Ak = initKron_.xc(k)(taskNumber, inPatch);
-				const MatrixDenseOrSparseType& Bk = initKron_.yc(k)(taskNumber, inPatch);
+				const MatrixDenseOrSparseType& Ak = initKron_.xc(k)(outPatch, inPatch);
+				const MatrixDenseOrSparseType& Bk = initKron_.yc(k)(outPatch, inPatch);
 
 				if (Ak.isZero() || Bk.isZero())
 					continue;
 
-				bool diagonal = (taskNumber == inPatch);
+				bool diagonal = (outPatch == inPatch);
 
 				// FIXME: Check that kronMult overwrites yi2 insead of accumulating
 				if (useSymmetry && !diagonal) {
 					kronMult(yi2, xj, 'n', 'n', Ak, Bk);
-					for (SizeType i = 0; i < vsize_[taskNumber]; ++i)
+					for (SizeType i = 0; i < vsize_[outPatch]; ++i)
 						yij[i] += yi2[i];
 
 					kronMult(yi2, xi, 't', 't', Ak, Bk);
@@ -188,12 +185,12 @@ public:
 						y_[j] += yi2[j-j1];
 				} else {
 					kronMult(yi2, xj, 'n','n', Ak, Bk);
-					for (SizeType i = 0; i < vsize_[taskNumber]; ++i)
+					for (SizeType i = 0; i < vsize_[outPatch]; ++i)
 						yij[i] += yi2[i];
 				}
 			} // end loop over k
 
-			for (SizeType i = 0; i< vsize_[taskNumber]; ++i)
+			for (SizeType i = 0; i< vsize_[outPatch]; ++i)
 				yi[i] += yij[i];
 		} // end inside patch
 
@@ -223,9 +220,11 @@ private:
 		SizeType ip = 0;
 		for (SizeType ipatch = 0; ipatch < npatches; ipatch++){
 			//  No of rows for the Lindex
-			SizeType nrowL = istartLeft(ipatch+1) - istartLeft(ipatch);
+			SizeType il = initKron_.patch(GenIjPatchType::LEFT,ipatch);
+			SizeType nrowL = istartLeft(il+1) - istartLeft(il);
 			// No of rows for the Rindex
-			SizeType nrowR  = istartRight(ipatch+1) - istartRight(ipatch);
+			SizeType ir = initKron_.patch(GenIjPatchType::RIGHT,ipatch);
+			SizeType nrowR  = istartRight(ir+1) - istartRight(ir);
 			vsize_[ipatch] = nrowL*nrowR;
 			vstart_[ipatch] = ip;
 			ip += vsize_[ipatch]; // ip: Points to start of each patch
