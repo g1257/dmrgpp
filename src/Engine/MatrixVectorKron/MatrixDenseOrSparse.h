@@ -106,7 +106,7 @@ private:
 
 template<typename SparseMatrixType>
 void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>::Type& xout,
-              const typename PsimagLite::Vector<typename SparseMatrixType::value_type>::Type& yin,
+              const typename SparseMatrixType::value_type* yin,
               char transA,
               char transB,
               const MatrixDenseOrSparse<SparseMatrixType>& A,
@@ -133,7 +133,7 @@ void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>
 			              nrowB,
 			              ncolB,
 			              bval,
-			              &(yin[0]),
+			              yin,
 			        &(xout[0]));
 		} else  {
 			// B is sparse
@@ -150,7 +150,7 @@ void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>
 			                  browptr,
 			                  bcol,
 			                  bval,
-			                  &(yin[0]),
+			                  yin,
 			        &(xout[0]));
 		}
 	} else {
@@ -169,7 +169,7 @@ void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>
 			                  nrowB,
 			                  ncolB,
 			                  bval,
-			                  &(yin[0]),
+			                  yin,
 			        &(xout[0]));
 		} else {
 			// B is sparse
@@ -188,7 +188,7 @@ void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>
 			              browptr,
 			              bcol,
 			              bval,
-			              &(yin[0]),
+			              yin,
 			        &(xout[0]));
 		};
 	};

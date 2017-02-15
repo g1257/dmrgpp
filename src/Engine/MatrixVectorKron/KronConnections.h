@@ -124,11 +124,10 @@ public:
 	{
 		bool useSymmetry = initKron_.useSymmetry();
 		VectorType& yi = yi_[threadNum];
-		VectorType& xi = xi_[threadNum];
-		VectorType& xj = xj_[threadNum];
 		VectorType& yij = yij_[threadNum];
 		VectorType& yi2 = yi2_[threadNum];
-
+		const ComplexOrRealType* xi = 0;
+		const ComplexOrRealType* xj = 0;
 
 		SizeType i1 = vstart_[outPatch];
 		SizeType i2 = i1 + vsize_[outPatch];
@@ -144,12 +143,10 @@ public:
 		SizeType jpatchStart = 0;
 		SizeType jpatchEnd = outPatch;
 
-		if (!useSymmetry) {
+		if (!useSymmetry)
 			jpatchEnd = tasks();
-		} else {
-			for (SizeType i = i1; i < i2; i++)
-				xi[i - i1] = x_[i];
-		}
+		else
+			xi = &(x_[i1]);
 
 		for (SizeType inPatch = jpatchStart; inPatch < jpatchEnd; ++inPatch) {
 			SizeType j1 = vstart_[inPatch];
@@ -158,8 +155,7 @@ public:
 
 			assert(j1 < j2);
 
-			for (SizeType j = j1; j < j2; j++)
-				xj[j - j1] = x_[j];
+			xj = &(x_[j1]);
 
 			std::fill(yij.begin(), yij.end(), 0.0);
 
@@ -236,15 +232,11 @@ private:
 
 	void init2(SizeType nthreads)
 	{
-		xi_.resize(nthreads);
 		yi_.resize(nthreads);
-		xj_.resize(nthreads);
 		yij_.resize(nthreads);
 		yi2_.resize(nthreads);
 		for (SizeType i = 0; i < nthreads; ++i) {
-			xi_[i].resize(maxVsize_,0.0);
 			yi_[i].resize(maxVsize_,0.0);
-			xj_[i].resize(maxVsize_,0.0);
 			yij_[i].resize(maxVsize_,0.0);
 			yi2_[i].resize(maxVsize_,0.0);
 		}
@@ -257,8 +249,6 @@ private:
 	VectorSizeType vstart_;
 	VectorSizeType vsize_;
 	VectorVectorType yi_;
-	VectorVectorType xi_;
-	VectorVectorType xj_;
 	VectorVectorType yij_;
 	VectorVectorType yi2_;
 }; //class KronConnections
