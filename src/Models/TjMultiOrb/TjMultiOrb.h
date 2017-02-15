@@ -140,7 +140,7 @@ public:
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
 	      geometry_(geometry),
-	      offset_(2*modelParameters_.orbitals+3), // c^\dagger_up, c^\dagger_down, S+, Sz, n
+	      offset_(5*modelParameters_.orbitals), // c^\dagger_up, c^\dagger_down, S+, Sz, n
 	      spinSquared_(spinSquaredHelper_,modelParameters_.orbitals,2*modelParameters_.orbitals)
 	{
 		LinkProductType::setOrbitals(modelParameters_.orbitals);
@@ -216,23 +216,29 @@ public:
 		}
 
 		if (what=="+") {
-			VectorSizeType allowed(1,0);
+			VectorSizeType allowed(orbitals,0);
+			for (SizeType i = 0; i < allowed.size(); ++i) allowed[i] = i;
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			return creationMatrix_[2*orbitals];
+			assert(dof < orbitals);
+			return creationMatrix_[2*orbitals+dof];
 		}
 
 		if (what=="-") {
-			VectorSizeType allowed(1,0);
+			VectorSizeType allowed(orbitals,0);
+			for (SizeType i = 0; i < allowed.size(); ++i) allowed[i] = i;
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			OperatorType cm = creationMatrix_[2*orbitals];
+			assert(dof < orbitals);
+			OperatorType cm = creationMatrix_[2*orbitals+dof];
 			cm.conjugate();
 			return cm;
 		}
 
 		if (what=="z") {
-			VectorSizeType allowed(1,0);
+			VectorSizeType allowed(orbitals,0);
+			for (SizeType i = 0; i < allowed.size(); ++i) allowed[i] = i;
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			return creationMatrix_[2*orbitals+1];
+			assert(dof < orbitals);
+			return creationMatrix_[3*orbitals+dof];
 		}
 
 		if (what=="c") {
@@ -244,9 +250,11 @@ public:
 		}
 
 		if (what=="n") {
-			VectorSizeType allowed(1,0);
+			VectorSizeType allowed(orbitals,0);
+			for (SizeType i = 0; i < allowed.size(); ++i) allowed[i] = i;
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			return creationMatrix_[2*orbitals+2];
+			assert(dof < orbitals);
+			return creationMatrix_[4*orbitals+dof];
 		}
 
 		if (what=="nup") {
@@ -336,26 +344,29 @@ public:
 
 	//! Find n_i in the natural basis natBasis
 	SparseMatrixType findNiMatrices(int,
+	                                SizeType orb,
 	                                const VectorHilbertStateType&) const
 	{
-		assert(2*modelParameters_.orbitals + 2 < creationMatrix_.size());
-		return creationMatrix_[2*modelParameters_.orbitals + 2].data;
+		assert(4*modelParameters_.orbitals + orb < creationMatrix_.size());
+		return creationMatrix_[4*modelParameters_.orbitals + orb].data;
 	}
 
 	//! Find S^+_i in the natural basis natBasis
 	SparseMatrixType findSplusMatrices(int,
+	                                   SizeType orb,
 	                                   const VectorHilbertStateType&) const
 	{
-		assert(2*modelParameters_.orbitals < creationMatrix_.size());
-		return creationMatrix_[2*modelParameters_.orbitals].data;
+		assert(2*modelParameters_.orbitals + orb < creationMatrix_.size());
+		return creationMatrix_[2*modelParameters_.orbitals+orb].data;
 	}
 
 	//! Find S^z_i in the natural basis natBasis
 	SparseMatrixType findSzMatrices(int,
+	                                SizeType orb,
 	                                const VectorHilbertStateType&) const
 	{
-		assert(2*modelParameters_.orbitals + 1< creationMatrix_.size());
-		return creationMatrix_[2*modelParameters_.orbitals+1].data;
+		assert(3*modelParameters_.orbitals + orb< creationMatrix_.size());
+		return creationMatrix_[3*modelParameters_.orbitals + orb].data;
 	}
 
 	virtual SizeType maxElectronsOneSpin() const
@@ -396,11 +407,14 @@ private:
 	}
 
 	//! Find n_i in the natural basis natBasis
-	SparseMatrixType findNiMatrices(int,
+	SparseMatrixType findNiMatrices(int i,
+	                                SizeType orb,
 	                                const VectorHilbertStateType& natBasis,
 	                                const MatrixType* rot,
 	                                const MatrixType* rotT) const
 	{
+		assert(i == 0);
+		SizeType orbitals = modelParameters_.orbitals;
 		SizeType n = natBasis.size();
 		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
 		SizeType dofs = 2*modelParameters_.orbitals;
@@ -408,12 +422,14 @@ private:
 		for (SizeType ii=0;ii<natBasis.size();ii++) {
 			HilbertStateType ket=natBasis[ii];
 			cm(ii,ii) = 0.0;
-			for (SizeType sigma=0;sigma<dofs;sigma++) {
-				HilbertStateType mask = (1<<sigma);
+			SizeType orbitals = modelParameters_.orbitals;
+			for (SizeType sigma=0;sigma<dofs;sigma+=orbitals) {
+				HilbertStateType mask = (1<<(orb+sigma));
 				if (ket & mask) cm(ii,ii) += 1.0;
 			}
 		}
 
+		if (orbitals > 1) correctLambda(cm,natBasis);
 		truncateMatrix(cm,rot,rotT,natBasis);
 
 		SparseMatrixType creationMatrix(cm);
@@ -449,6 +465,7 @@ private:
 
 	//! Find S^+_i in the natural basis natBasis
 	SparseMatrixType findSplusMatrices(int i,
+	                                   SizeType orb,
 	                                   const VectorHilbertStateType& natBasis,
 	                                   const MatrixType* rot,
 	                                   const MatrixType* rotT) const
@@ -461,17 +478,16 @@ private:
 
 		for (SizeType ii=0;ii<natBasis.size();ii++) {
 			ket=natBasis[ii];
-			for (SizeType l = orbitals; l < 2*orbitals; ++l) {
-				bra = ket;
-				HilbertStateType masklp = (1<<l);
-				HilbertStateType masklm = (1<<(l-orbitals));
-				if ((ket & masklp) > 0 && (ket & masklm) == 0) {
-					bra = ket ^ (masklp | masklm);
+			SizeType l = orb+orbitals;
+			bra = ket;
+			HilbertStateType masklp = (1<<l);
+			HilbertStateType masklm = (1<<(l-orbitals));
+			if ((ket & masklp) > 0 && (ket & masklm) == 0) {
+				bra = ket ^ (masklp | masklm);
 
-					int jj = PsimagLite::isInVector(natBasis,bra);
-					assert(jj>=0);
-					cm(ii,jj) = 1.0;
-				}
+				int jj = PsimagLite::isInVector(natBasis,bra);
+				assert(jj>=0);
+				cm(ii,jj) = 1.0;
 			}
 		}
 		if (orbitals > 1) correctLambda(cm,natBasis);
@@ -483,6 +499,7 @@ private:
 
 	//! Find S^z_i in the natural basis natBasis
 	SparseMatrixType findSzMatrices(int i,
+	                                SizeType orb,
 	                                const VectorHilbertStateType& natBasis,
 	                                const MatrixType* rot,
 	                                const MatrixType* rotT) const
@@ -495,16 +512,12 @@ private:
 		for (SizeType ii=0;ii<natBasis.size();ii++) {
 			HilbertStateType ket=natBasis[ii];
 			int counter = 0;
-			for (SizeType l = 0; l < orbitals; ++l) {
-				HilbertStateType masklp = (1<<l);
-				if (ket & masklp) counter++;
-			}
-
-			for (SizeType l = orbitals; l < 2*orbitals; ++l) {
-				HilbertStateType masklp = (1<<l);
-				if (ket & masklp) counter--;
-			}
-
+			SizeType l1 = orb;
+			HilbertStateType masklp = (1<<l1);
+			if (ket & masklp) counter++;
+			SizeType l2 = orb+orbitals;
+			HilbertStateType masklp1 = (1<<l2);
+			if (ket & masklp1) counter--;
 			cm(ii,ii) = 0.5*counter;
 		}
 
@@ -620,34 +633,45 @@ private:
 				creationMatrix.push_back(myOp);
 			}
 
-			// Set the operators S^+_i in the natural basis summed over orbitals
-			tmpMatrix = findSplusMatrices(i,natBasis,&rotation,&rotationR);
+			// Set the operators S^+_i in the natural basis
+			for (SizeType i=0;i<block.size();i++) {
+				for (SizeType orb=0;orb<modelParameters_.orbitals;orb++) {
+					tmpMatrix = findSplusMatrices(i,orb,natBasis,&rotation,&rotationR);
 
-			typename OperatorType::Su2RelatedType su2related;
-			su2related.source.push_back(i*modelParameters_.orbitals*2);
-			su2related.source.push_back(i*modelParameters_.orbitals*2+modelParameters_.orbitals);
-			su2related.source.push_back(i*modelParameters_.orbitals*2);
-			su2related.transpose.push_back(-1);
-			su2related.transpose.push_back(-1);
-			su2related.transpose.push_back(1);
-			su2related.offset = modelParameters_.orbitals;
+					typename OperatorType::Su2RelatedType su2related;
+					su2related.source.push_back(i*modelParameters_.orbitals*2);
+					su2related.source.push_back(i*modelParameters_.orbitals*2+modelParameters_.orbitals);
+					su2related.source.push_back(i*modelParameters_.orbitals*2);
+					su2related.transpose.push_back(-1);
+					su2related.transpose.push_back(-1);
+					su2related.transpose.push_back(1);
+					su2related.offset = modelParameters_.orbitals;
 
-			OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
-			creationMatrix.push_back(myOp);
+					OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
+					creationMatrix.push_back(myOp);
+				}
+			}
+			// Set the operators S^z_i in the natural basis
+			for (SizeType i=0;i<block.size();i++) {
+				for (SizeType orb=0;orb<modelParameters_.orbitals;orb++) {
 
-			// Set the operators S^z_i in the natural basis summed over orbitals
-			tmpMatrix = findSzMatrices(i,natBasis,&rotation,&rotationR);
-			typename OperatorType::Su2RelatedType su2related2;
-			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
-			creationMatrix.push_back(myOp2);
-
-			// Set ni matrices  summed over orbitals
-			tmpMatrix = findNiMatrices(0,natBasis,&rotation,&rotationR);
-			RealType angularFactor= 1;
-			typename OperatorType::Su2RelatedType su2related3;
-			su2related3.offset = 1; //check FIXME
-			OperatorType myOp3(tmpMatrix,1,PairType(0,0),angularFactor,su2related3);
-			creationMatrix.push_back(myOp3);
+					tmpMatrix = findSzMatrices(i,orb,natBasis,&rotation,&rotationR);
+					typename OperatorType::Su2RelatedType su2related2;
+					OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
+					creationMatrix.push_back(myOp2);
+				}
+			}
+			// Set ni matrices
+			for (SizeType i=0;i<block.size();i++) {
+				for (SizeType orb=0;orb<modelParameters_.orbitals;orb++) {
+					tmpMatrix = findNiMatrices(0,orb,natBasis,&rotation,&rotationR);
+					RealType angularFactor= 1;
+					typename OperatorType::Su2RelatedType su2related3;
+					su2related3.offset = 1; //check FIXME
+					OperatorType myOp3(tmpMatrix,1,PairType(0,0),angularFactor,su2related3);
+					creationMatrix.push_back(myOp3);
+				}
+			}
 
 		}
 	}

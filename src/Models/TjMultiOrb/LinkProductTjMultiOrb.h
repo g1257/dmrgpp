@@ -105,7 +105,7 @@ public:
 	template<typename SomeStructType>
 	static void setLinkData(SizeType term,
 	                        SizeType dofs,
-	                        bool isSu2,
+	                        bool,
 	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
 	                        PairType& ops,
 	                        std::pair<char,char>& mods,
@@ -118,7 +118,7 @@ public:
 		if (term==TERM_CICJ) {
 			fermionOrBoson = ProgramGlobals::FERMION;
 			SizeType spin = getSpin(dofs);
-			ops = operatorDofs(dofs);
+			ops = operatorDofs(dofs,term);
 			angularFactor = 1;
 			if (spin==1) angularFactor = -1;
 			angularMomentum = 1;
@@ -128,12 +128,13 @@ public:
 
 		if (term==TERM_SPSM) {
 			fermionOrBoson = ProgramGlobals::BOSON;
-			switch (dofs) {
+			SizeType spin = getSpin(dofs);
+			switch (spin) {
 			case 0: // S+ S-
 				angularFactor = -1;
 				category = 2;
 				angularMomentum = 2;
-				ops = PairType(2*orbitals_,2*orbitals_);
+				ops = operatorDofs(dofs,term);
 				break;
 			case 1: // S- S+
 				angularFactor = -1;
@@ -141,7 +142,7 @@ public:
 				mods.first = mods.second;
 				mods.second = tmp;
 				angularMomentum = 2;
-				ops = PairType(2*orbitals_,2*orbitals_);
+				ops = operatorDofs(dofs,term);
 				break;
 			}
 
@@ -150,17 +151,16 @@ public:
 
 		if (term==TERM_SZSZ) {
 			fermionOrBoson = ProgramGlobals::BOSON;
-			assert(dofs == 0);
 			angularFactor = 0.5;
 			category = 1;
 			angularMomentum = 2;
-			ops = operatorSz(isSu2);
+			ops = operatorDofs(dofs,term);
 			return;
 		}
 
 		if (term==TERM_NINJ) {
 			fermionOrBoson = ProgramGlobals::BOSON;
-			ops = PairType(2*orbitals_ + 2,2*orbitals_ + 2);
+			ops = operatorDofs(dofs,term);
 			angularFactor = 1;
 			angularMomentum = 0;
 			category = 0;
@@ -199,9 +199,9 @@ public:
 	static SizeType dofs(SizeType term,const SomeStructType&)
 	{
 		if (term==TERM_CICJ) return 2*orbitals_*orbitals_; // c^\dagger c
-		if (term==TERM_SPSM) return 2; // S+ S- and S- S+
-		if (term==TERM_SZSZ) return 1; // Sz Sz
-		if (term==TERM_NINJ) return 1; // ninj
+		if (term==TERM_SPSM) return 2*orbitals_*orbitals_; // S+ S- and S- S+
+		if (term==TERM_SZSZ) return 1*orbitals_*orbitals_; // Sz Sz
+		if (term==TERM_NINJ) return 1*orbitals_*orbitals_; // ninj
 		assert(false);
 		return 0; // bogus
 	}
@@ -211,8 +211,6 @@ public:
 	                                                  SizeType dofs,
 	                                                  const SomeStructType&)
 	{
-		if (term != TERM_CICJ) return PairType(0,0);
-
 		SizeType orbitalsSquared = orbitals_*orbitals_;
 		SizeType spin = dofs/orbitalsSquared;
 		SizeType xtmp = (spin==0) ? 0 : orbitalsSquared;
@@ -226,15 +224,8 @@ public:
 
 private:
 
-	// only for TERM_SISJ
-	static PairType operatorSz(bool isSu2)
-	{
-		SizeType x = (isSu2) ? 2*orbitals_ : 2*orbitals_+1;
-		return PairType(x,x);
-	}
-
 	// spin is diagonal
-	static std::pair<SizeType,SizeType> operatorDofs(SizeType dofs)
+	static std::pair<SizeType,SizeType> operatorDofs(SizeType dofs, SizeType term)
 	{
 		SizeType orbitalsSquared = orbitals_*orbitals_;
 		SizeType spin = dofs/orbitalsSquared;
@@ -242,9 +233,17 @@ private:
 		xtmp = dofs - xtmp;
 		SizeType orb1 = xtmp/orbitals_;
 		SizeType orb2 = xtmp % orbitals_;
+		if (term == TERM_SPSM) spin = 0;
 		SizeType op1 = orb1 + spin*orbitals_;
 		SizeType op2 = orb2 + spin*orbitals_;
-		return std::pair<SizeType,SizeType>(op1,op2);
+
+		SizeType offset = 0;
+// Need to look at the crationMatrices order to get the offset correct!
+		if (term == TERM_SPSM) offset = 2*orbitals_;
+		if (term == TERM_SZSZ) offset = 3*orbitals_;
+		if (term == TERM_NINJ) offset = 4*orbitals_;
+
+		return std::pair<SizeType,SizeType>(op1+offset,op2+offset);
 	}
 
 	static SizeType getSpin(SizeType dofs)

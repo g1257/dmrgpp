@@ -131,8 +131,8 @@ public:
 	enum {SPIN_UP, SPIN_DOWN};
 
 	TjAncillaG(const SolverParamsType& solverParams,
-	       InputValidatorType& io,
-	       GeometryType const &geometry)
+	           InputValidatorType& io,
+	           GeometryType const &geometry)
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
 	      geometry_(geometry),
@@ -210,7 +210,7 @@ public:
 			}
 
 			// Set the operators S^+_i in the natural basis
-			tmpMatrix=TjMultiOrb_.findSplusMatrices(i,natBasis);
+			tmpMatrix=findSplusMatrices(i,natBasis);
 
 			typename OperatorType::Su2RelatedType su2related;
 			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
@@ -223,15 +223,13 @@ public:
 
 			OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
 			creationMatrix.push_back(myOp);
-
 			// Set the operators S^z_i in the natural basis
-			tmpMatrix = TjMultiOrb_.findSzMatrices(i,natBasis);
+			tmpMatrix = findSzMatrices(i,natBasis);
 			typename OperatorType::Su2RelatedType su2related2;
 			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
 			creationMatrix.push_back(myOp2);
-
 			// Set ni matrices:
-			SparseMatrixType tmpMatrix = TjMultiOrb_.findNiMatrices(0,natBasis);
+			SparseMatrixType tmpMatrix = findNiMatrices(0,natBasis);
 			RealType angularFactor= 1;
 			typename OperatorType::Su2RelatedType su2related3;
 			su2related3.offset = 1; //check FIXME
@@ -384,6 +382,85 @@ public:
 	}
 
 private:
+
+	SparseMatrixType findSplusMatrices(int i,
+	                                   const VectorHilbertStateType& natBasis) const
+	{
+		assert(i == 0);
+		HilbertStateType bra,ket;
+		int n = natBasis.size();
+		MatrixType cm(n,n);
+		SizeType orbitals = modelParameters_.orbitals;
+
+		for (SizeType ii=0;ii<natBasis.size();ii++) {
+			ket=natBasis[ii];
+			for (SizeType l = orbitals; l < 2*orbitals; ++l) {
+				bra = ket;
+				HilbertStateType masklp = (1<<l);
+				HilbertStateType masklm = (1<<(l-orbitals));
+				if ((ket & masklp) > 0 && (ket & masklm) == 0) {
+					bra = ket ^ (masklp | masklm);
+
+					int jj = PsimagLite::isInVector(natBasis,bra);
+					assert(jj>=0);
+					cm(ii,jj) = 1.0;
+				}
+			}
+		}
+
+		SparseMatrixType operatorMatrix(cm);
+		return operatorMatrix;
+	}
+
+	SparseMatrixType findSzMatrices(int i,
+	                                const VectorHilbertStateType& natBasis) const
+	{
+		assert(i == 0);
+		int n = natBasis.size();
+		MatrixType cm(n,n);
+		SizeType orbitals = modelParameters_.orbitals;
+
+		for (SizeType ii=0;ii<natBasis.size();ii++) {
+			HilbertStateType ket=natBasis[ii];
+			int counter = 0;
+			for (SizeType l = 0; l < orbitals; ++l) {
+				HilbertStateType masklp = (1<<l);
+				if (ket & masklp) counter++;
+			}
+
+			for (SizeType l = orbitals; l < 2*orbitals; ++l) {
+				HilbertStateType masklp = (1<<l);
+				if (ket & masklp) counter--;
+			}
+
+			cm(ii,ii) = 0.5*counter;
+		}
+
+		SparseMatrixType operatorMatrix(cm);
+		return operatorMatrix;
+	}
+
+	SparseMatrixType findNiMatrices(int,
+	                                const VectorHilbertStateType& natBasis) const
+	{
+		SizeType n = natBasis.size();
+		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
+		SizeType dofs = 2*modelParameters_.orbitals;
+
+		for (SizeType ii=0;ii<natBasis.size();ii++) {
+			HilbertStateType ket=natBasis[ii];
+			cm(ii,ii) = 0.0;
+			for (SizeType sigma=0;sigma<dofs;sigma++) {
+				HilbertStateType mask = (1<<sigma);
+				if (ket & mask) cm(ii,ii) += 1.0;
+			}
+		}
+
+		SparseMatrixType creationMatrix(cm);
+		return creationMatrix;
+	}
+
+
 
 	void findQuantumNumbers(VectorSizeType& q,
 	                        const HilbertBasisType& basis,int n) const
