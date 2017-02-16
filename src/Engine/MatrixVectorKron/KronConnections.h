@@ -132,7 +132,6 @@ public:
 		VectorType& yij = yij_[threadNum];
 		VectorType& yi2 = yi2_[threadNum];
 		const ComplexOrRealType* xi = 0;
-		const ComplexOrRealType* xj = 0;
 
 		SizeType i1 = vstart_[outPatch];
 		SizeType i2 = i1 + vsize_[outPatch];
@@ -160,7 +159,7 @@ public:
 
 			assert(j1 < j2);
 
-			xj = &(x_[j1]);
+			const ComplexOrRealType* xj = &(x_[j1]);
 
 			std::fill(yij.begin(), yij.end(), 0.0);
 

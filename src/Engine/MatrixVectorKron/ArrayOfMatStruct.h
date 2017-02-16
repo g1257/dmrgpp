@@ -97,19 +97,21 @@ public:
 	typedef typename GenIjPatchType::VectorSizeType VectorSizeType;
 	typedef typename GenIjPatchType::GenGroupType GenGroupType;
 
-	ArrayOfMatStruct() {}
-
 	ArrayOfMatStruct(const SparseMatrixType& sparse,
-	                 GenGroupType& istart)
+	                 GenGroupType& istart,
+	                 GenIjPatchType& patch,
+	                 typename GenIjPatchType::LeftOrRightEnumType leftOrRight)
 	    : data_(istart.size()-1,istart.size()-1)
 	{
 		SizeType ngroup = istart.size()-1;
 
-		for (SizeType j=0;j<ngroup;j++) {
+		for (SizeType jj = 0;jj < ngroup; ++jj) {
+			SizeType j = patch(leftOrRight)[jj];
 			SizeType j1 = istart(j);
 			SizeType j2 = istart(j+1);
 
-			for (SizeType i=0;i<ngroup;++i) {
+			for (SizeType ii = 0;ii < ngroup; ++ii) {
+				SizeType i = patch(leftOrRight)[ii];
 				SizeType i1 = istart(i);
 				SizeType i2 = istart(i+1);
 

@@ -105,25 +105,31 @@ public:
 	typedef typename ModelType::LinkProductStructType LinkProductStructType;
 
 	InitKron(const ModelType& model,const ModelHelperType& modelHelper)
-	: model_(model),
-	  modelHelper_(modelHelper),
-	  gengroupLeft_(modelHelper_.leftRightSuper().left()),
-	  gengroupRight_(modelHelper_.leftRightSuper().right()),
-	  ijpatches_(modelHelper_.leftRightSuper(),modelHelper_.quantumNumber()),
-	  aL_(modelHelper_.leftRightSuper().left().hamiltonian(),gengroupLeft_),
-	  aRt_(0)
+	    : model_(model),
+	      modelHelper_(modelHelper),
+	      gengroupLeft_(modelHelper_.leftRightSuper().left()),
+	      gengroupRight_(modelHelper_.leftRightSuper().right()),
+	      ijpatches_(modelHelper_.leftRightSuper(),modelHelper_.quantumNumber()),
+	      aL_(modelHelper_.leftRightSuper().left().hamiltonian(),
+	          gengroupLeft_,
+	          ijpatches_,
+	          GenIjPatchType::LEFT),
+	      aRt_(0)
 	{
 		SparseMatrixType arTranspose;
 		transposeConjugate(arTranspose,modelHelper_.leftRightSuper().right().hamiltonian());
 
-		aRt_ = new ArrayOfMatStructType(arTranspose,gengroupRight_);
+		aRt_ = new ArrayOfMatStructType(arTranspose,
+		                                gengroupRight_,
+		                                ijpatches_,
+		                                GenIjPatchType::RIGHT);
 
 		convertXcYcArrays();
 	}
 
 	~InitKron()
 	{
-		 delete aRt_;
+		delete aRt_;
 
 		for (SizeType ic=0;ic<xc_.size();ic++) delete xc_[ic];
 		for (SizeType ic=0;ic<yc_.size();ic++) delete yc_[ic];
@@ -217,13 +223,19 @@ private:
 	void addOneConnection(const SparseMatrixType& A,const SparseMatrixType& B,const LinkType& link2)
 	{
 		values_.push_back(link2.value);
-//			assert(PsimagLite::norm(tmp-0.5)<1e-6);
-		ArrayOfMatStructType* x1 = new ArrayOfMatStructType(A,gengroupLeft_);
+		//			assert(PsimagLite::norm(tmp-0.5)<1e-6);
+		ArrayOfMatStructType* x1 = new ArrayOfMatStructType(A,
+		                                                    gengroupLeft_,
+		                                                    ijpatches_,
+		                                                    GenIjPatchType::LEFT);
 		xc_.push_back(x1);
 
 		//SparseMatrixType tmpMatrix;
 		//transposeConjugate(tmpMatrix,B);
-		ArrayOfMatStructType* y1 = new ArrayOfMatStructType(B,gengroupRight_);
+		ArrayOfMatStructType* y1 = new ArrayOfMatStructType(B,
+		                                                    gengroupRight_,
+		                                                    ijpatches_,
+		                                                    GenIjPatchType::RIGHT);
 		yc_.push_back(y1);
 	}
 
