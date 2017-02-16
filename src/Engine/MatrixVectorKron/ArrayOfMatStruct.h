@@ -103,41 +103,35 @@ public:
 	                 typename GenIjPatchType::LeftOrRightEnumType leftOrRight)
 	    : data_(istart.size()-1,istart.size()-1)
 	{
-		SizeType ngroup = istart.size()-1;
+		SizeType npatch = patch(leftOrRight).size();
+		for (SizeType jpatch=0; jpatch < npatch; ++jpatch) {
+			SizeType jgroup = patch(leftOrRight)[jpatch];
+			SizeType j1 = istart(jgroup);
+			SizeType j2 = istart(jgroup+1);
+			for (SizeType ipatch=0; ipatch < npatch; ++ipatch) {
+				SizeType igroup = patch(leftOrRight)[ipatch];
+				SizeType i1 = istart(igroup);
+				SizeType i2 = istart(igroup+1);
 
-		for (SizeType jj = 0;jj < ngroup; ++jj) {
-			SizeType j = patch(leftOrRight)[jj];
-			SizeType j1 = istart(j);
-			SizeType j2 = istart(j+1);
-
-			for (SizeType ii = 0;ii < ngroup; ++ii) {
-				SizeType i = patch(leftOrRight)[ii];
-				SizeType i1 = istart(i);
-				SizeType i2 = istart(i+1);
-
-				SparseMatrixType tmp(i2-i1,j2-j1);
+				SparseMatrixType tmp(i2-i1,  j2-j1);
 				SizeType counter = 0;
-
-				for (SizeType ii=i1;ii<i2;++ii) {
-					SizeType row = ii - i1;
-					tmp.setRow(row,counter);
-
+				for (SizeType ii = i1; ii < i2; ++ii) {
+					tmp.setRow(ii - i1, counter);
 					SizeType start = sparse.getRowPtr(ii);
 					SizeType end = sparse.getRowPtr(ii+1);
-
-					for (SizeType k = start;k<end;++k) {
+					for (SizeType k = start; k < end; ++k) {
 						int col = sparse.getCol(k)-j1;
-						if (col<0) continue;
-						if (SizeType(col)>=j2-j1) continue; // ARE COLUMNS SORTED?
+						if (col < 0) continue;
+						if (SizeType(col)>=j2-j1) continue;
 						tmp.pushValue(sparse.getValue(k));
 						tmp.pushCol(col);
-						counter++;
+						++counter;
 					}
 				}
 
 				tmp.setRow(i2-i1,counter);
 				tmp.checkValidity();
-				data_(i,j) = new MatrixDenseOrSparseType(tmp);
+				data_(ipatch,jpatch) = new MatrixDenseOrSparseType(tmp);
 			}
 		}
 	}
