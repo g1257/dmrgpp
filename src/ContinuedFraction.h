@@ -221,11 +221,7 @@ private:
 
 	RealType matsubara(int ind,const PlotParamsType& params) const
 	{
-		int halfNs = static_cast<int>(params.omega1);
-		RealType factor = 2.0*M_PI/params.beta;
-		int ind2 = ind - halfNs;
-		if (ind2 >= 0) return factor*(ind2 + 1);
-		return factor*ind2;
+		return (2.0*ind + 1.0)*M_PI/params.beta;
 	}
 
 	ProgressIndicator progress_;
