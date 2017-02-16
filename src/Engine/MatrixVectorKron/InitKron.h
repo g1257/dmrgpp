@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef INIT_KRON_HEADER_H
 #define INIT_KRON_HEADER_H
 
-#include "GenIjPatch.h"
 #include "ArrayOfMatStruct.h"
 
 namespace Dmrg {
@@ -98,9 +97,10 @@ public:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
+	typedef ArrayOfMatStruct<LeftRightSuperType> ArrayOfMatStructType;
+	typedef typename ArrayOfMatStructType::VectorSizeType VectorSizeType;
+	typedef typename ArrayOfMatStructType::GenIjPatchType GenIjPatchType;
 	typedef typename GenIjPatchType::GenGroupType GenGroupType;
-	typedef ArrayOfMatStruct<SparseMatrixType,GenGroupType> ArrayOfMatStructType;
 	typedef typename ModelHelperType::LinkType LinkType;
 	typedef typename ModelType::LinkProductStructType LinkProductStructType;
 
@@ -146,12 +146,10 @@ public:
 		return *yc_[ic];
 	}
 
-	SizeType patch(typename GenIjPatchType::LeftOrRightEnumType i,SizeType j) const
+	const VectorSizeType& patch(typename GenIjPatchType::LeftOrRightEnumType i) const
 	{
-		return ijpatches_(i,j);
+		return ijpatches_(i);
 	}
-
-	SizeType patch() const {return ijpatches_.size(); }
 
 	const LeftRightSuperType& lrs() const
 	{

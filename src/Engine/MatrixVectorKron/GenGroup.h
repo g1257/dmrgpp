@@ -91,6 +91,8 @@ class GenGroup {
 
 public:
 
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+
 	GenGroup(const BasisType& qvals)
 	{
 		if (qvals.size()<2) {
@@ -117,7 +119,7 @@ public:
 
 private:
 
-	typename PsimagLite::Vector<SizeType>::Type istart_;
+	VectorSizeType istart_;
 }; //GenGroup
 } // namespace PsimagLite
 

@@ -80,21 +80,27 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef ARRAY_OF_MAT_STRUCT_H
 #define ARRAY_OF_MAT_STRUCT_H
+#include "GenIjPatch.h"
 #include "CrsMatrix.h"
 #include "MatrixDenseOrSparse.h"
 
 namespace Dmrg {
 
-template<typename SparseMatrixType,typename GenGroupType>
+template<typename LeftRightSuperType>
 class ArrayOfMatStruct {
 
 public:
 
+	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
 	typedef MatrixDenseOrSparse<SparseMatrixType> MatrixDenseOrSparseType;
+	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
+	typedef typename GenIjPatchType::VectorSizeType VectorSizeType;
+	typedef typename GenIjPatchType::GenGroupType GenGroupType;
 
 	ArrayOfMatStruct() {}
 
-	ArrayOfMatStruct(const SparseMatrixType& sparse,GenGroupType& istart)
+	ArrayOfMatStruct(const SparseMatrixType& sparse,
+	                 GenGroupType& istart)
 	    : data_(istart.size()-1,istart.size()-1)
 	{
 		SizeType ngroup = istart.size()-1;

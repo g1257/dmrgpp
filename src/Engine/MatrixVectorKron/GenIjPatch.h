@@ -96,6 +96,7 @@ class GenIjPatch {
 public:
 
 	typedef GenGroup<BasisType> GenGroupType;
+	typedef typename GenGroupType::VectorSizeType VectorSizeType;
 
 	enum LeftOrRightEnumType {LEFT=0,RIGHT=1};
 
@@ -119,21 +120,14 @@ public:
 		}
 	}
 
-	SizeType operator()(LeftOrRightEnumType leftOrRight,SizeType i) const
+	const VectorSizeType& operator()(LeftOrRightEnumType leftOrRight) const
 	{
-		assert(i<patchesLeft_.size() && i<patchesRight_.size());
-		return (leftOrRight==LEFT) ? patchesLeft_[i] : patchesRight_[i];
-	}
-
-	SizeType size() const
-	{
-		assert(patchesLeft_.size()==patchesRight_.size());
-		return patchesLeft_.size();
+		return (leftOrRight==LEFT) ? patchesLeft_ : patchesRight_;
 	}
 
 private:
 
-	typename PsimagLite::Vector<SizeType>::Type patchesLeft_,patchesRight_;
+	VectorSizeType patchesLeft_,patchesRight_;
 
 }; //class GenIjPatch
 } // namespace PsimagLite

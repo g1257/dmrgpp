@@ -149,14 +149,15 @@ private:
 
 	void computeRight(MatrixType& W,const MatrixType& V) const
 	{
-		SizeType npatches = initKron_.patch();
+		SizeType npatches =  initKron_.patch(GenIjPatchType::RIGHT).size();
+
 		const GenGroupType& istartLeft = initKron_.istartLeft();
 		const GenGroupType& istartRight = initKron_.istartRight();
 		const ArrayOfMatStructType& artStruct = initKron_.aRt();
 
 		for (SizeType ipatch = 0;ipatch<npatches;ipatch++) {
-			SizeType i = initKron_.patch(GenIjPatchType::LEFT,ipatch);
-			SizeType j = initKron_.patch(GenIjPatchType::RIGHT,ipatch);
+			SizeType i = initKron_.patch(GenIjPatchType::LEFT)[ipatch];
+			SizeType j = initKron_.patch(GenIjPatchType::RIGHT)[ipatch];
 
 			SizeType i1 = istartLeft(i);
 			SizeType i2 = istartLeft(i+1);
@@ -179,14 +180,15 @@ private:
 
 	void computeLeft(MatrixType& W,const MatrixType& V) const
 	{
-		SizeType npatches = initKron_.patch();
+		SizeType npatches = initKron_.patch(GenIjPatchType::LEFT).size();
+
 		const GenGroupType& istartLeft = initKron_.istartLeft();
 		const GenGroupType& istartRight = initKron_.istartRight();
 		const ArrayOfMatStructType& alStruct = initKron_.aL();
 
 		for (SizeType ipatch = 0;ipatch<npatches;ipatch++) {
-			SizeType i = initKron_.patch(GenIjPatchType::LEFT,ipatch);
-			SizeType j = initKron_.patch(GenIjPatchType::RIGHT,ipatch);
+			SizeType i = initKron_.patch(GenIjPatchType::LEFT)[ipatch];
+			SizeType j = initKron_.patch(GenIjPatchType::RIGHT)[ipatch];
 
 			SizeType i1 = istartLeft(i);
 //			SizeType i2 = istartLeft(i+1);

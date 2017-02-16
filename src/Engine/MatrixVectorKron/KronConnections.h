@@ -118,7 +118,12 @@ public:
 		init2(npthreads);
 	}
 
-	SizeType tasks() const { return initKron_.patch(); }
+	SizeType tasks() const
+	{
+		assert(initKron_.patch(GenIjPatchType::LEFT).size() ==
+		       initKron_.patch(GenIjPatchType::RIGHT).size());
+		return initKron_.patch(GenIjPatchType::LEFT).size();
+	}
 
 	void doTask(SizeType outPatch, SizeType threadNum)
 	{
@@ -201,7 +206,9 @@ private:
 
 	void init()
 	{
-		SizeType npatches = initKron_.patch();
+		SizeType npatches = initKron_.patch(GenIjPatchType::LEFT).size();
+		assert(npatches == initKron_.patch(GenIjPatchType::RIGHT).size());
+
 		vsize_.resize(npatches, 0);
 		vstart_.resize(npatches, 0);
 
@@ -216,10 +223,10 @@ private:
 		SizeType ip = 0;
 		for (SizeType ipatch = 0; ipatch < npatches; ipatch++){
 			//  No of rows for the Lindex
-			SizeType il = initKron_.patch(GenIjPatchType::LEFT,ipatch);
+			SizeType il = initKron_.patch(GenIjPatchType::LEFT)[ipatch];
 			SizeType nrowL = istartLeft(il+1) - istartLeft(il);
 			// No of rows for the Rindex
-			SizeType ir = initKron_.patch(GenIjPatchType::RIGHT,ipatch);
+			SizeType ir = initKron_.patch(GenIjPatchType::RIGHT)[ipatch];
 			SizeType nrowR  = istartRight(ir+1) - istartRight(ir);
 			vsize_[ipatch] = nrowL*nrowR;
 			vstart_[ipatch] = ip;
