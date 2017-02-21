@@ -131,7 +131,7 @@ public:
 
 				tmp.setRow(i2-i1,counter);
 				tmp.checkValidity();
-				data_(ipatch,jpatch) = new MatrixDenseOrSparseType(tmp);
+				data_(jgroup,igroup) = new MatrixDenseOrSparseType(tmp);
 			}
 		}
 	}

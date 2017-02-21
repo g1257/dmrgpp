@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2012-2017, UT-Battelle, LLC
+Copyright (c) 2012, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 3.]
+[DMRG++, Version 2.0.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -67,7 +67,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
+
 */
+// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -79,18 +81,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef KRON_CONNECTIONS_H
 #define KRON_CONNECTIONS_H
 
-#include "InitKron.h"
 #include "Matrix.h"
 #include "Concurrency.h"
+#include "InitKron.h"
 
 namespace Dmrg {
 
-template<typename ModelType,typename ModelHelperType_>
+template<typename ModelType, typename ModelHelperType_>
 class KronConnections {
-
 	typedef InitKron<ModelType,ModelHelperType_> InitKronType;
+
 	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
 	typedef typename InitKronType::GenGroupType GenGroupType;
@@ -105,19 +108,13 @@ public:
 	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
 	typedef typename InitKronType::RealType RealType;
 
+
 	KronConnections(const InitKronType& initKron,
-	                VectorType& y,
-	                const VectorType& x,
-	                SizeType npthreads)
-	    : initKron_(initKron),
-	      y_(y),
-	      x_(x),
-	      maxVsize_(0)
-	{
-		init(); // <--- sets maxVsize_
-		init2(npthreads);
-		std::fill(y_.begin(), y_.end(), 0.0);
-	}
+	                VectorType& x,
+	                const VectorType& y,
+	                SizeType nthreads)
+	    : initKron_(initKron),x_(x),y_(y)
+	{}
 
 	SizeType tasks() const
 	{
@@ -126,138 +123,37 @@ public:
 		return initKron_.patch(GenIjPatchType::LEFT).size();
 	}
 
-	void doTask(SizeType outPatch, SizeType threadNum)
+	void doTask(SizeType outPatch, SizeType)
 	{
-		bool useSymmetry = initKron_.useSymmetry();
-		VectorType& yi = yi_[threadNum];
-		VectorType& yij = yij_[threadNum];
-		VectorType& yi2 = yi2_[threadNum];
-		const ComplexOrRealType* xi = 0;
+		SizeType nC = initKron_.connections();
+		SizeType total = tasks();
+		for (SizeType inPatch=0;inPatch<total;++inPatch) {
+			for (SizeType ic=0;ic<nC;++ic) {
+				const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
+				const ArrayOfMatStructType& yiStruct = initKron_.yc(ic);
 
-		SizeType i1 = vstart_[outPatch];
-		SizeType i2 = i1 + vsize_[outPatch];
-		if (i1 == i2) return;
+				SizeType i = initKron_.patch(GenIjPatchType::LEFT)[inPatch];
+				SizeType j = initKron_.patch(GenIjPatchType::RIGHT)[inPatch];
 
-		assert(i1 < i2);
+				SizeType ip = initKron_.patch(GenIjPatchType::LEFT)[outPatch];
+				SizeType jp = initKron_.patch(GenIjPatchType::RIGHT)[outPatch];
 
-		std::fill(yi.begin(), yi.end(), 0.0);
 
-		/**
-			* Symmetry : Access only upper triangular matrix
-			**/
-		SizeType jpatchStart = 0;
-		SizeType jpatchEnd = outPatch;
+				const MatrixDenseOrSparseType& tmp1 =  xiStruct(ip,i);
+				const MatrixDenseOrSparseType& tmp2 =  yiStruct(j,jp);
 
-		if (!useSymmetry)
-			jpatchEnd = tasks();
-		else
-			xi = &(x_[i1]);
+				kronMult(x_, &(y_[0]), 'n', 'n', tmp1, tmp2);
+			}
+		}
 
-		for (SizeType inPatch = jpatchStart; inPatch < jpatchEnd; ++inPatch) {
-			SizeType j1 = vstart_[inPatch];
-			SizeType j2 = j1 + vsize_[inPatch];
-			if (j1 == j2) continue;
-
-			assert(j1 < j2);
-
-			const ComplexOrRealType* xj = &(x_[j1]);
-
-			std::fill(yij.begin(), yij.end(), 0.0);
-
-			SizeType sizeListK = initKron_.connections();
-
-			for (SizeType k = 0; k < sizeListK; ++k) {
-				const MatrixDenseOrSparseType& Ak = initKron_.xc(k)(outPatch, inPatch);
-				const MatrixDenseOrSparseType& Bk = initKron_.yc(k)(outPatch, inPatch);
-
-				if (Ak.isZero() || Bk.isZero())
-					continue;
-
-				bool diagonal = (outPatch == inPatch);
-
-				// FIXME: Check that kronMult overwrites yi2 insead of accumulating
-				if (useSymmetry && !diagonal) {
-					kronMult(yi2, xj, 'n', 'n', Ak, Bk);
-					for (SizeType i = 0; i < vsize_[outPatch]; ++i)
-						yij[i] += yi2[i];
-
-					kronMult(yi2, xi, 't', 't', Ak, Bk);
-					for (SizeType j = j1; j < j2; j++)
-						y_[j] += yi2[j-j1];
-				} else {
-					kronMult(yi2, xj, 'n','n', Ak, Bk);
-					for (SizeType i = 0; i < vsize_[outPatch]; ++i)
-						yij[i] += yi2[i];
-				}
-			} // end loop over k
-
-			for (SizeType i = 0; i< vsize_[outPatch]; ++i)
-				yi[i] += yij[i];
-		} // end inside patch
-
-		for (SizeType i = i1; i < i2; ++i)
-			y_[i] = yi[i - i1];
 	}
 
 	void sync()
 	{}
 
-private:
-
-	void init()
-	{
-		SizeType npatches = initKron_.patch(GenIjPatchType::LEFT).size();
-		assert(npatches == initKron_.patch(GenIjPatchType::RIGHT).size());
-
-		vsize_.resize(npatches, 0);
-		vstart_.resize(npatches, 0);
-
-		const GenGroupType& istartLeft = initKron_.istartLeft();
-		const GenGroupType& istartRight = initKron_.istartRight();
-
-		/**
-		  *  Calculating the size of the patches
-		  *  and row and column indeces for X and Y
-		  *  matrices.
-		**/
-		SizeType ip = 0;
-		for (SizeType ipatch = 0; ipatch < npatches; ipatch++){
-			//  No of rows for the Lindex
-			SizeType il = initKron_.patch(GenIjPatchType::LEFT)[ipatch];
-			SizeType nrowL = istartLeft(il+1) - istartLeft(il);
-			// No of rows for the Rindex
-			SizeType ir = initKron_.patch(GenIjPatchType::RIGHT)[ipatch];
-			SizeType nrowR  = istartRight(ir+1) - istartRight(ir);
-			vsize_[ipatch] = nrowL*nrowR;
-			vstart_[ipatch] = ip;
-			ip += vsize_[ipatch]; // ip: Points to start of each patch
-
-			if (maxVsize_ < vsize_[ipatch])
-				maxVsize_ = vsize_[ipatch];
-		}
-	}
-
-	void init2(SizeType nthreads)
-	{
-		yi_.resize(nthreads);
-		yij_.resize(nthreads);
-		yi2_.resize(nthreads);
-		for (SizeType i = 0; i < nthreads; ++i) {
-			yi_[i].resize(maxVsize_,0.0);
-			yij_[i].resize(maxVsize_,0.0);
-			yi2_[i].resize(maxVsize_,0.0);
-		}
-	}
-
 	const InitKronType& initKron_;
-	VectorType& y_;
-	const VectorType& x_;
-	SizeType maxVsize_;
-	VectorSizeType vstart_;
-	VectorSizeType vsize_;
-	VectorVectorType yi_;
-	VectorVectorType yij_;
-	VectorVectorType yi2_;
+	VectorType& x_;
+	const VectorType& y_;
 }; //class KronConnections
 
 } // namespace PsimagLite
