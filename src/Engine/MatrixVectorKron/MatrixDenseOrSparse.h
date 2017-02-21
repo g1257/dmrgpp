@@ -16,7 +16,7 @@ public:
 
 	// 50% cutoff == 0.5 here for sparse/dense
 	explicit MatrixDenseOrSparse(const SparseMatrixType& sparse)
-	    : isDense_(sparse.nonZero() > static_cast<int>(0.5*sparse.row()*sparse.col())),
+	    : isDense_(false), //sparse.nonZero() > static_cast<int>(0.5*sparse.row()*sparse.col())),
 	      rows_(sparse.row()),
 	      cols_(sparse.col())
 	{

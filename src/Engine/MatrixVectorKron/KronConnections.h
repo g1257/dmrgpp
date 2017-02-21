@@ -116,6 +116,7 @@ public:
 	{
 		init(); // <--- sets maxVsize_
 		init2(npthreads);
+		std::fill(y_.begin(), y_.end(), 0.0);
 	}
 
 	SizeType tasks() const
@@ -168,7 +169,6 @@ public:
 			for (SizeType k = 0; k < sizeListK; ++k) {
 				const MatrixDenseOrSparseType& Ak = initKron_.xc(k)(outPatch, inPatch);
 				const MatrixDenseOrSparseType& Bk = initKron_.yc(k)(outPatch, inPatch);
-				const ComplexOrRealType& val = initKron_.value(k);
 
 				if (Ak.isZero() || Bk.isZero())
 					continue;
@@ -183,11 +183,11 @@ public:
 
 					kronMult(yi2, xi, 't', 't', Ak, Bk);
 					for (SizeType j = j1; j < j2; j++)
-						y_[j] += yi2[j-j1]*val;
+						y_[j] += yi2[j-j1];
 				} else {
 					kronMult(yi2, xj, 'n','n', Ak, Bk);
 					for (SizeType i = 0; i < vsize_[outPatch]; ++i)
-						yij[i] += yi2[i]*val;
+						yij[i] += yi2[i];
 				}
 			} // end loop over k
 

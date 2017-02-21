@@ -112,37 +112,37 @@ public:
 
 	void matrixVectorProduct(VectorType& vout, const VectorType& vin) const
 	{
-		const VectorSizeType& permInverse = initKron_.lrs().super().permutationInverse();
-		const VectorSizeType& perm = initKron_.lrs().super().permutationVector();
-		const SparseMatrixType& left = initKron_.lrs().left().hamiltonian();
-		const SparseMatrixType& right = initKron_.lrs().right().hamiltonian();
-		SizeType nl = left.row();
-		SizeType nr = right.row();
-		SizeType nq = initKron_.size();
-		SizeType offset = initKron_.offset();
+//		const VectorSizeType& permInverse = initKron_.lrs().super().permutationInverse();
+//		const VectorSizeType& perm = initKron_.lrs().super().permutationVector();
+//		const SparseMatrixType& left = initKron_.lrs().left().hamiltonian();
+//		const SparseMatrixType& right = initKron_.lrs().right().hamiltonian();
+//		SizeType nl = left.row();
+//		SizeType nr = right.row();
+//		SizeType nq = initKron_.size();
+//		SizeType offset = initKron_.offset();
 
-		MatrixType V(nl,nr);
-		for (SizeType i=0;i<nl;i++) {
-			for (SizeType j=0;j<nr;j++) {
-				SizeType r = permInverse[i+j*nl];
-				if (r<offset || r>=offset+nq) continue;
-				V(i,j) = vin[r-offset];
-			}
-		}
+//		MatrixType V(nl,nr);
+//		for (SizeType i=0;i<nl;i++) {
+//			for (SizeType j=0;j<nr;j++) {
+//				SizeType r = permInverse[i+j*nl];
+//				if (r<offset || r>=offset+nq) continue;
+//				V(i,j) = vin[r-offset];
+//			}
+//		}
 
-		MatrixType W(nl,nr);
+//		MatrixType W(nl,nr);
 
 		// FIXME: Pass vin and vout here as is ???
 		computeConnections(vout,vin);
-		computeRight(W,V);
-		computeLeft(W,V);
+//		computeRight(W,V);
+//		computeLeft(W,V);
 
-		for (SizeType r=0;r<vout.size();r++) {
-			div_t divresult = div(perm[r+offset],nl);
-			SizeType i = divresult.rem;
-			SizeType j = divresult.quot;
-			vout[r] += W(i,j);
-		}
+//		for (SizeType r=0;r<vout.size();r++) {
+//			div_t divresult = div(perm[r+offset],nl);
+//			SizeType i = divresult.rem;
+//			SizeType j = divresult.quot;
+//			vout[r] += W(i,j);
+//		}
 	}
 
 private:

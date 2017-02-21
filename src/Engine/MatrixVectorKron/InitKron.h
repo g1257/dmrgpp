@@ -103,6 +103,7 @@ public:
 	typedef typename GenIjPatchType::GenGroupType GenGroupType;
 	typedef typename ModelHelperType::LinkType LinkType;
 	typedef typename ModelType::LinkProductStructType LinkProductStructType;
+	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 
 	InitKron(const ModelType& model,const ModelHelperType& modelHelper)
 	    : model_(model),
@@ -116,6 +117,7 @@ public:
 	          GenIjPatchType::LEFT),
 	      aRt_(0)
 	{
+		cacheSigns(modelHelper_.leftRightSuper().left().electronsVector());
 		SparseMatrixType arTranspose;
 		transposeConjugate(arTranspose,modelHelper_.leftRightSuper().right().hamiltonian());
 
@@ -222,9 +224,11 @@ private:
 
 	void addOneConnection(const SparseMatrixType& A,const SparseMatrixType& B,const LinkType& link2)
 	{
+		SparseMatrixType Ahat;
+		calculateAhat(Ahat, A, link2.value, link2.fermionOrBoson);
 		values_.push_back(link2.value);
 		//			assert(PsimagLite::norm(tmp-0.5)<1e-6);
-		ArrayOfMatStructType* x1 = new ArrayOfMatStructType(A,
+		ArrayOfMatStructType* x1 = new ArrayOfMatStructType(Ahat,
 		                                                    gengroupLeft_,
 		                                                    ijpatches_,
 		                                                    GenIjPatchType::LEFT);
@@ -239,6 +243,32 @@ private:
 		yc_.push_back(y1);
 	}
 
+	// Ahat(ia,ja) = (-1)^e_L(ia) A(ia,ja)*value
+	void calculateAhat(SparseMatrixType& Ahat,
+	                   const SparseMatrixType& A,
+	                   ComplexOrRealType val,
+	                   ProgramGlobals::FermionOrBosonEnum bosonOrFermion) const
+	{
+		Ahat = A;
+		SizeType rows = Ahat.row();
+		SizeType counter = 0;
+		for (SizeType i = 0; i < rows; ++i) {
+			RealType sign = (bosonOrFermion == ProgramGlobals::FERMION &&
+			                 signs_[i]) ? -1.0 : 1.0;
+			for (int k = Ahat.getRowPtr(i); k < Ahat.getRowPtr(i+1); ++k) {
+				ComplexOrRealType tmp = Ahat.getValue(k)*sign*val;
+				Ahat.setValues(counter++, tmp);
+			}
+		}
+	}
+
+	void cacheSigns(const VectorSizeType& electrons)
+	{
+		signs_.resize(electrons.size(), false);
+		for (SizeType i = 0; i < electrons.size(); ++i)
+			signs_[i] = (electrons[i] & 1) ? true : false;
+	}
+
 	InitKron(const InitKron& other);
 
 	InitKron& operator=(const InitKron& other);
@@ -249,6 +279,7 @@ private:
 	GenIjPatchType  ijpatches_;
 	ArrayOfMatStructType aL_;
 	ArrayOfMatStructType* aRt_; // <-- we own it also, it's newed and deleted here
+	VectorBoolType signs_;
 	typename PsimagLite::Vector<ArrayOfMatStructType*>::Type xc_;
 	typename PsimagLite::Vector<ArrayOfMatStructType*>::Type yc_;
 	typename PsimagLite::Vector<ComplexOrRealType>::Type values_;
