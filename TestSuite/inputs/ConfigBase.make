@@ -6,7 +6,7 @@ LDFLAGS = -L../../PsimagLite/lib -lpsimaglite
 CXX = g++
 
 # We're using ansi C++
-CPPFLAGS += -pedantic -ansi
+CPPFLAGS += -pedantic -std=c++98
 
 # Enable MPI (you must set the proper
 # compiler wrapper under CXX above)
@@ -29,7 +29,7 @@ CPPFLAGS += -Wall -Werror
 
 # This enables gsl support
 #CPPFLAGS +=-DUSE_GSL
-#LDFLAGS += -lgsl -lgslcblas 
+#LDFLAGS += -lgsl -lgslcblas
 
 # This enables the custom allocator (use only for debugging)
 #CPPFLAGS += -DUSE_CUSTOM_ALLOCATOR
@@ -41,6 +41,6 @@ CPPFLAGS += -Wall -Werror
 #CPPFLAGS += -DUSE_KRON_UTIL
 #LDFLAGS += KronUtil/libkronutil.a
 
-# Specify the strip command to use (or use true to disable) 
+# Specify the strip command to use (or use true to disable)
 STRIP_COMMAND = true
 
