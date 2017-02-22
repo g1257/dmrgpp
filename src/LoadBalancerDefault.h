@@ -26,6 +26,7 @@ public:
 			workLoad[thread] += weights[i];
 		}
 
+#ifndef NDEBUG
 		for (SizeType i = 0; i < nthreads; ++i) {
 			SizeType n = taskNumber_[i].size();
 			std::cout<<n<<" Indices allocated to thread "<<i<<": ";
@@ -33,6 +34,7 @@ public:
 				std::cout<<taskNumber_[i][j]<<" ";
 			std::cout<<"\n";
 		}
+#endif
 	}
 
 	SizeType blockSize(SizeType threadNum) const
