@@ -105,13 +105,11 @@ sub make
 	my $allCpps = combineAllDrivers($drivers,".cpp");
 
 	my $gccVersion = gccVersion();
-	my $normalFlags = "-Werror -Wall";
-	$normalFlags .= " -frecord-gcc-switches " if ($gccVersion >= 4.3);
 
 	my $libTarget = "";
 	if ($libs=~/\-lpsimaglite/) {
 		$libTarget  = " ../../PsimagLite/lib/libpsimaglite.a";
-		psimagLiteLibMake($platform,$mpi,$libs,$normalFlags,$cppflags,$cxx);
+		psimagLiteLibMake();
 	}
 
 print FH<<EOF;
@@ -122,7 +120,7 @@ print FH<<EOF;
 # MPI: $mpi
 
 LDFLAGS = -L../../PsimagLite/lib   $libs
-CPPFLAGS = $normalFlags $cppflags
+CPPFLAGS = $cppflags
 CXX = $cxx
 all: $allExecutables $additional3
 
