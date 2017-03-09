@@ -16,4 +16,3 @@ std::istream& operator>>(std::istream& is,std::pair<SizeType,SizeType>& pair)
 }
 
 } // namespace PsimagLite
-

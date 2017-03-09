@@ -39,7 +39,7 @@ sub createMakefile
 	open($fh,">Makefile") or die "Cannot open Makefile for writing: $!\n";
 
 	local *FH = $fh;
-	my @units = ("MersenneTwister","Matrix","Mpi","ApplicationInfo","Concurrency",
+	my @units = ("MersenneTwister","Matrix","Mpi","Concurrency",
 	"ProgressIndicator","Tokenizer","MemResolv","PsimagLite","PsiBase64",
 	"SpecialFunctions");
 	my $combinedUnits = combine("",\@units,".o ");

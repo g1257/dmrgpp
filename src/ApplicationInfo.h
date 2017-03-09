@@ -82,7 +82,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <sys/time.h>
 #include <time.h>
 #include "Vector.h"
+#include "MersenneTwister.h"
+#include <sys/types.h>
 #include <unistd.h>
+#include "BitManip.h"
+#include <cstdlib>
 
 namespace PsimagLite {
 
@@ -90,24 +94,34 @@ class ApplicationInfo {
 
 public:
 
+	typedef String RunIdType;
+
 	ApplicationInfo(const PsimagLite::String& name)
-	    : firstCall_(true),name_(name)
-	{
-		std::cout<<(*this);
-	}
+	    : name_(name)
+	{}
 
-	~ApplicationInfo()
+	void finish(std::ostream& os) const
 	{
-		std::cout<<getTimeDate();
+		os<<name_<<" sizeof(SizeType)="<<sizeof(SizeType)<<"\n";
+#ifdef USE_FLOAT
+		os<<name_<<" using float\n";
+#else
+		os<<name_<<" using double\n";
+#endif
 	}
-
-	String getTimeDate() const
+	
+	time_t unixTime(bool arg  = false) const
 	{
 		struct timeval tv;
 		time_t tt;
 
 		gettimeofday(&tv,0);
-		tt=tv.tv_sec; /* seconds since 1970 */
+		return (arg) ? tv.tv_usec : tv.tv_sec;
+	}
+	
+	String getTimeDate() const
+	{
+		time_t tt = unixTime();
 		return asctime(localtime(&tt));
 	}
 
@@ -128,11 +142,32 @@ public:
 		return retString;
 	}
 
-	friend std::ostream& operator<<(std::ostream& os,const ApplicationInfo& ai);
+	RunIdType runId() const
+	{
+		unsigned int p = getpid();
+		time_t tt = unixTime(true);
+		MersenneTwister mt(tt + p);
+		unsigned int x = tt ^ mt.random();
+		OstringStream msg;
+		msg<<x;
+		x = p ^ mt.random();
+		msg<<x;
+		unsigned int y = atoi(msg.str().c_str());
+		x = BitManip::count(y);
+		msg<<x;
+		return msg.str();
+	}
+
+	friend std::ostream& operator<<(std::ostream& os,
+	                                const ApplicationInfo& ai)
+	{
+		os<<ai.getTimeDate();
+		os<<"Hostname: "<<ai.hostname()<<"\n";
+		return os;
+	}
 
 private:
 
-	mutable bool firstCall_;
 	PsimagLite::String name_;
 }; // class ApplicationInfo
 
