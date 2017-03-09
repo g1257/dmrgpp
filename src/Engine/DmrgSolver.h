@@ -114,6 +114,24 @@ class DmrgSolver {
 	typedef ObservablesInSitu<typename TargettingType::TargetVectorType>
 	ObservablesInSituType;
 
+	class Finalize {
+
+	public:
+
+		Finalize(PsimagLite::ApplicationInfo& a)
+		    : appInfo_(a)
+		{}
+
+		void action(std::ostream& os)
+		{
+			appInfo_.finalize(os);
+		}
+
+	private:
+
+		PsimagLite::ApplicationInfo& appInfo_;
+	};
+
 public:
 
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
@@ -194,6 +212,7 @@ public:
 	      energy_(0.0),
 	      saveData_(parameters_.options.find("noSaveData") == PsimagLite::String::npos)
 	{
+		std::cout<<appInfo_;
 		PsimagLite::OstringStream msg;
 		msg<<"Turning the engine on";
 		progress_.printline(msg,std::cout);
@@ -210,10 +229,13 @@ public:
 
 	~DmrgSolver()
 	{
-		ioOut_.print(appInfo_);
+		Finalize finalize(appInfo_);
+		ioOut_.action(finalize);
+
 		PsimagLite::OstringStream msg2;
 		msg2<<"Turning off the engine.";
 		progress_.printline(msg2,std::cout);
+		appInfo_.finalize(std::cout);
 	}
 
 	void main(const GeometryType& geometry, PsimagLite::String targeting)
@@ -640,8 +662,8 @@ private:
 	{
 		SizeType maxSites = model_.geometry().numberOfSites();
 		if (direction==INFINITE &&
-		    sites < maxSites &&
-		    parameters_.adjustQuantumNumbers.size()>0) {
+		        sites < maxSites &&
+		        parameters_.adjustQuantumNumbers.size()>0) {
 			quantumSector_ = SymmetryElectronsSzType::adjustQn(parameters_.adjustQuantumNumbers,
 			                                                   direction,
 			                                                   ioOut_,
