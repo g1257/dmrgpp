@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009-2017, UT-Battelle, LLC
 All rights reserved
 
-[PsimagLite, Version 1.0.0]
+[PsimagLite, Version 1.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -97,10 +97,10 @@ public:
 	typedef String RunIdType;
 
 	ApplicationInfo(const PsimagLite::String& name)
-	    : name_(name)
+	    : name_(name),runId_(runId())
 	{}
 
-	void finish(std::ostream& os) const
+	void finalize(std::ostream& os) const
 	{
 		os<<name_<<" sizeof(SizeType)="<<sizeof(SizeType)<<"\n";
 #ifdef USE_FLOAT
@@ -108,13 +108,12 @@ public:
 #else
 		os<<name_<<" using double\n";
 #endif
+		os<<getTimeDate();
 	}
 	
 	time_t unixTime(bool arg  = false) const
 	{
 		struct timeval tv;
-		time_t tt;
-
 		gettimeofday(&tv,0);
 		return (arg) ? tv.tv_usec : tv.tv_sec;
 	}
@@ -142,6 +141,17 @@ public:
 		return retString;
 	}
 
+	friend std::ostream& operator<<(std::ostream& os,
+	                                const ApplicationInfo& ai)
+	{
+		os<<ai.getTimeDate();
+		os<<"Hostname: "<<ai.hostname()<<"\n";
+		os<<"RunID="<<ai.runId_<<"\n";
+		return os;
+	}
+
+private:
+
 	RunIdType runId() const
 	{
 		unsigned int p = getpid();
@@ -158,17 +168,8 @@ public:
 		return msg.str();
 	}
 
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const ApplicationInfo& ai)
-	{
-		os<<ai.getTimeDate();
-		os<<"Hostname: "<<ai.hostname()<<"\n";
-		return os;
-	}
-
-private:
-
 	PsimagLite::String name_;
+	const RunIdType runId_;
 }; // class ApplicationInfo
 
 std::ostream& operator<<(std::ostream& os,const ApplicationInfo& ai);

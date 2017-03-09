@@ -224,6 +224,13 @@ public:
 			fout_->precision(x);
 		}
 
+		template<typename ActionType>
+		void action(ActionType& a)
+		{
+			assert(fout_);
+			a.action(*fout_);
+		}
+
 		template<typename X>
 		friend Out& operator<<(Out& io,const X& t);
 

@@ -42,7 +42,7 @@ sub createMakefile
 	my @units = qw(integrator sparseSolverTest testCRSMatrix combineContinuedFraction
 	continuedFractionCollection gitrev jsonExample range kernelPolynomial
 	linearPrediction options randomTest svd testLapack threads loadImbalance testIsClass
-	testMemResolv1 sumDecomposition calculator closuresTest base64test);
+	testMemResolv1 sumDecomposition calculator closuresTest base64test runId);
 	my $combinedUnits = combine("",\@units,".o ");
 	my $combinedUnits2 = combine("./",\@units,".cpp ");
 
