@@ -1,5 +1,6 @@
 #ifndef BIT_MANIP_H
 #define BIT_MANIP_H
+#include "AllocatorCpu.h"
 
 namespace PsimagLite {
 namespace BitManip {

@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <unistd.h>
 #include "BitManip.h"
 #include <cstdlib>
+#include <cassert>
 
 namespace PsimagLite {
 
@@ -97,7 +98,7 @@ public:
 	typedef String RunIdType;
 
 	ApplicationInfo(const PsimagLite::String& name)
-	    : name_(name),runId_(runId())
+	    : name_(name),runId_(runIdInternal())
 	{}
 
 	void finalize(std::ostream& os) const
@@ -141,6 +142,11 @@ public:
 		return retString;
 	}
 
+	const RunIdType runId() const
+	{
+		return runId_;
+	}
+
 	friend std::ostream& operator<<(std::ostream& os,
 	                                const ApplicationInfo& ai)
 	{
@@ -152,7 +158,7 @@ public:
 
 private:
 
-	RunIdType runId() const
+	RunIdType runIdInternal() const
 	{
 		unsigned int p = getpid();
 		time_t tt = unixTime(true);
@@ -162,10 +168,30 @@ private:
 		msg<<x;
 		x = p ^ mt.random();
 		msg<<x;
-		unsigned int y = atoi(msg.str().c_str());
-		x = BitManip::count(y);
-		msg<<x;
-		return msg.str();
+		unsigned long int y = atol(msg.str().c_str());
+		y ^= mt.random();
+		x = BitManip::countKernighan(y);
+		OstringStream msg2;
+		msg2<<y;
+		if (x < 10) msg2<<"0";
+		msg2<<x;
+		return msg2.str();
+	}
+
+	long unsigned int convertToLuint(PsimagLite::String str) const
+	{
+		long unsigned int sum = 0;
+		long unsigned int prod = 1;
+		int l = str.length();
+		assert(l < 20);
+
+		for (int i = 0; i < l; ++i) {
+			unsigned int c = str[l - i - 1] - 48;
+			sum += prod*c;
+			prod *= 10;
+		}
+
+		return sum;
 	}
 
 	PsimagLite::String name_;
