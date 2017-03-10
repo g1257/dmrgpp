@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h" // in PsimagLite
 #include "ProgramGlobals.h"
 #include "Concurrency.h"
-#include "NoPthreads.h"
+#include "NoPthreadsNg.h"
 #include "CrsMatrix.h"
 
 namespace Dmrg {
@@ -110,15 +110,14 @@ public:
 
 	public:
 
-		LoopForDiag(BlockMatrixType  &C1,
+		LoopForDiag(BlockMatrixType& C1,
 		            typename PsimagLite::Vector<RealType>::Type& eigs1,
 		            char option1)
 		    : C(C1),
 		      eigs(eigs1),
 		      option(option1),
 		      eigsForGather(C.blocks()),
-		      weights(C.blocks()),
-		      hasMpi_(PsimagLite::Concurrency::hasMpi())
+		      weights(C.blocks())
 		{
 
 			for (SizeType m=0;m<C.blocks();m++) {
@@ -129,38 +128,21 @@ public:
 			eigs.resize(C.rank());
 		}
 
-		void thread_function_(SizeType threadNum,
-		                      SizeType blockSize,
-		                      SizeType total,
-		                      typename PsimagLite::Concurrency::MutexType*)
+		SizeType tasks() const { return C.blocks(); }
+
+		void doTask(SizeType taskNumber, SizeType)
 		{
-			SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
-			SizeType npthreads = ConcurrencyType::npthreads;
+			SizeType m = taskNumber;
+			typename PsimagLite::Vector<RealType>::Type eigsTmp;
+			PsimagLite::diag(C.data_[m],eigsTmp,option);
+			enforcePhase(C.data_[m]);
+			for (int j=C.offsets(m);j< C.offsets(m+1);j++)
+				eigsForGather[m][j-C.offsets(m)] = eigsTmp[j-C.offsets(m)];
 
-			ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"BlockMatrix",total);
-
-			for (SizeType p=0;p<blockSize;p++) {
-				SizeType taskNumber = (threadNum+npthreads*mpiRank)*blockSize + p;
-				if (taskNumber>=total) break;
-
-				SizeType m = taskNumber;
-				typename PsimagLite::Vector<RealType>::Type eigsTmp;
-				PsimagLite::diag(C.data_[m],eigsTmp,option);
-				enforcePhase(C.data_[m]);
-				for (int j=C.offsets(m);j< C.offsets(m+1);j++)
-					eigsForGather[m][j-C.offsets(m)] = eigsTmp[j-C.offsets(m)];
-			}
 		}
 
 		void gather()
 		{
-			if (hasMpi_ & !ConcurrencyType::isMpiDisabled("BlockMatrix")) {
-				PsimagLite::MPI::pointByPointGather(eigsForGather);
-				PsimagLite::MPI::bcast(eigsForGather);
-				PsimagLite::MPI::pointByPointGather(C.data_);
-				PsimagLite::MPI::bcast(C.data_);
-			}
-
 			for (SizeType m=0;m<C.blocks();m++) {
 				for (int j=C.offsets(m);j< C.offsets(m+1);j++)
 					eigs[j]=eigsForGather[m][j-C.offsets(m)];
@@ -195,12 +177,11 @@ public:
 				enforcePhase(&(vpointer[i*a.n_row()]),a.n_row());
 		}
 
-		BlockMatrixType  &C;
+		BlockMatrixType& C;
 		typename PsimagLite::Vector<RealType>::Type& eigs;
 		char option;
 		typename PsimagLite::Vector<typename PsimagLite::Vector<RealType>::Type>::Type eigsForGather;
 		typename PsimagLite::Vector<SizeType>::Type weights;
-		bool hasMpi_;
 	};
 
 	BlockMatrix(int rank,int blocks) : rank_(rank),offsets_(blocks+1),data_(blocks)
@@ -377,7 +358,7 @@ diagonalise(BlockMatrix<PsimagLite::Matrix<SomeFieldType> >& C,
             char option)
 {
 	typedef typename BlockMatrix<PsimagLite::Matrix<SomeFieldType> >::LoopForDiag LoopForDiagType;
-	typedef PsimagLite::NoPthreads<LoopForDiagType> ParallelizerType;
+	typedef PsimagLite::NoPthreadsNg<LoopForDiagType> ParallelizerType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	SizeType savedNpthreads = ConcurrencyType::npthreads;
 	ConcurrencyType::npthreads = 1;
@@ -386,7 +367,7 @@ diagonalise(BlockMatrix<PsimagLite::Matrix<SomeFieldType> >& C,
 
 	LoopForDiagType helper(C,eigs,option);
 
-	threadObject.loopCreate(C.blocks(),helper); // FIXME: needs weights
+	threadObject.loopCreate(helper); // FIXME: needs weights
 
 	helper.gather();
 

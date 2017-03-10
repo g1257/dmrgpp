@@ -91,6 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParallelTriDiag.h"
 #include "TimeSerializer.h"
 #include "FreqEnum.h"
+#include "NoPthreadsNg.h"
 
 namespace Dmrg {
 
@@ -538,7 +539,7 @@ private:
 	{
 		RealType fakeTime = 0;
 
-		typedef PsimagLite::NoPthreads<ParallelTriDiagType> ParallelizerType;
+		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
 		ParallelizerType threadedTriDiag(1,0);
 
 		ParallelTriDiagType helperTriDiag(phi,
@@ -550,7 +551,7 @@ private:
 		                                  this->model(),
 		                                  ioIn_);
 
-		threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
+		threadedTriDiag.loopCreate(helperTriDiag);
 	}
 
 	void setWeights()

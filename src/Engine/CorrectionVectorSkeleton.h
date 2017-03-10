@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParallelTriDiag.h"
 #include "TimeSerializer.h"
 #include "FreqEnum.h"
+#include "NoPthreadsNg.h"
 
 namespace Dmrg {
 
@@ -459,7 +460,7 @@ private:
 	             typename PsimagLite::Vector<SizeType>::Type& steps)
 	{
 		RealType fakeTime = 0;
-		typedef PsimagLite::NoPthreads<ParallelTriDiagType> ParallelizerType;
+		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
 		ParallelizerType threadedTriDiag(1,0);
 
 		ParallelTriDiagType helperTriDiag(phi,
@@ -471,7 +472,7 @@ private:
 		                                  model_,
 		                                  ioIn_);
 
-		threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
+		threadedTriDiag.loopCreate(helperTriDiag);
 	}
 
 	RealType dynWeightOf(VectorType& v,const VectorType& w) const

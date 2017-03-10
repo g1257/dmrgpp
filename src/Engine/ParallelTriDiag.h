@@ -119,23 +119,12 @@ public:
 	      io_(io)
 	{}
 
-	void thread_function_(SizeType threadNum,
-	                      SizeType blockSize,
-	                      SizeType total,
-	                      ConcurrencyType::MutexType*)
+	SizeType tasks() const { return phi_.sectors(); }
+
+	void doTask(SizeType ii, SizeType threadNum)
 	{
-		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
-		SizeType npthreads = PsimagLite::Concurrency::npthreads;
-
-		ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"ParallelTriDiag",total);
-
-		for (SizeType p=0;p<blockSize;p++) {
-			SizeType ii = (threadNum+npthreads*mpiRank)*blockSize + p;
-			if (ii >= total) continue;
-
-			SizeType i = phi_.sector(ii);
-			steps_[ii] = triDiag(phi_,T_[ii],V_[ii],i,threadNum);
-		}
+		SizeType i = phi_.sector(ii);
+		steps_[ii] = triDiag(phi_,T_[ii],V_[ii],i,threadNum);
 	}
 
 private:

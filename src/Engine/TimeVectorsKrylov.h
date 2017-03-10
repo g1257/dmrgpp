@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include "TimeVectorsBase.h"
 #include "ParallelTriDiag.h"
-#include "NoPthreads.h"
+#include "NoPthreadsNg.h"
 #include "Parallelizer.h"
 
 namespace Dmrg {
@@ -302,12 +302,12 @@ private:
 	             VectorMatrixFieldType& V,
 	             typename PsimagLite::Vector<SizeType>::Type& steps)
 	{
-		typedef PsimagLite::NoPthreads<ParallelTriDiagType> ParallelizerType;
+		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
 		ParallelizerType threadedTriDiag(1,0);
 
 		ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,currentTime_,model_,ioIn_);
 
-		threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
+		threadedTriDiag.loopCreate(helperTriDiag);
 	}
 
 	const RealType& currentTime_;
