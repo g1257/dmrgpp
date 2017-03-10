@@ -130,6 +130,13 @@ Dmrg::ModelHelper$modelHelper<
    $lrs
   >
 >::hot_ = false;
+
+template<>
+bool LinkProductTjAncillaC2<
+Dmrg::ModelHelper$modelHelper<
+   $lrs
+  >
+>::hot_ = false;
 }
 EOF
 }
