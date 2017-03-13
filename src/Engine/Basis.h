@@ -364,7 +364,7 @@ public:
 		partitionOld_ = partition_;
 		dmrgTransformed_=true;
 
-		blockMatrixToSparseMatrix(ftransform,transform);
+		transform.toSparse(ftransform);
 
 		if (removedIndices.size()==0) return 0;
 

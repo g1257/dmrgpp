@@ -270,6 +270,27 @@ public:
 
 	}
 
+	void toSparse(PsimagLite::CrsMatrix<FieldType>& fm) const
+	{
+		fm.resize(rank_, rank_);
+		SizeType counter=0;
+		SizeType k = 0;
+		for (SizeType i = 0; i < rank_; ++i) {
+			fm.setRow(i,counter);
+			if (k+1 < offsets_.size() && offsets_[k+1] <= i)
+				++k;
+			SizeType end = (k + 1 < offsets_.size()) ? offsets_[k + 1] : rank_;
+			for (SizeType j = offsets_[k]; j < end; ++j) {
+				fm.pushValue(data_[k](i-offsets_[k],j-offsets_[k]));
+				fm.pushCol(j);
+				counter++;
+			}
+		}
+
+		fm.setRow(rank_, counter);
+		fm.checkValidity();
+	}
+
 	MatrixInBlockTemplate operator()(int i) const { return data_[i]; }
 
 	template<class MatrixInBlockTemplate2>
@@ -383,26 +404,6 @@ void blockMatrixToFullMatrix(PsimagLite::Matrix<S>& fm,
 	for (j=0;j<n;j++) for (i=0;i<n;i++) fm(i,j)=B(i,j);
 }
 
-template<class S>
-void blockMatrixToSparseMatrix(PsimagLite::CrsMatrix<S>& fm,
-                               const BlockMatrix<PsimagLite::Matrix<S> >& B)
-{
-	SizeType n = B.rank();
-	fm.resize(n,n);
-	SizeType counter=0;
-	for (SizeType i=0;i<n;i++) {
-		fm.setRow(i,counter);
-		for (SizeType j=0;j<n;j++) {
-			S val = B(i,j);
-			if (PsimagLite::norm(val)<1e-10) continue;
-			fm.pushValue(val);
-			fm.pushCol(j);
-			counter++;
-		}
-	}
-	fm.setRow(n,counter);
-	fm.checkValidity();
-}
 } // namespace Dmrg
 /*@}*/
 
