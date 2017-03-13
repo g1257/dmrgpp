@@ -471,7 +471,7 @@ private:
 		jmSaved.second++;
 
 		SizeType totalElectrons = modelParameters_.targetQuantum.totalElectrons;
-		if (totalElectrons != 0) {
+		if (!modelParameters_.targetQuantum.isSu2 && totalElectrons > 0) {
 			PsimagLite::String msg("Please delete the line ");
 			msg += "TargetElectronsTotal= in the input file\n";
 			throw PsimagLite::RuntimeError(msg);
@@ -486,7 +486,7 @@ private:
 			jmpair.second = basis[i];
 			jmvalues.push_back(jmpair);
 			szPlusConst[i] = (isCanonical) ? getSzPlusConst(basis[i],n) : 0;
-			electrons[i] = 0;
+			electrons[i] = (modelParameters_.targetQuantum.isSu2) ? 1 : 0;
 			flavors.push_back(1);
 			jmSaved = jmpair;
 		}

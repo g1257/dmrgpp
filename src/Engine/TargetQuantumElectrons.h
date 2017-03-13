@@ -91,6 +91,9 @@ struct TargetQuantumElectrons {
 	TargetQuantumElectrons(IoInputType& io, bool allowUpDown = true)
 	    : totalElectrons(0),twiceJ(0),isCanonical(true)
 	{
+		int totalNumberOfSites = 0;
+		io.readline(totalNumberOfSites, "TotalNumberOfSites=");
+
 		PsimagLite::String  msg("TargetQuantumElectrons: ");
 		bool hasTwiceJ = false;
 		try {
@@ -165,6 +168,9 @@ struct TargetQuantumElectrons {
 		if (isSu2 && !hasSzPlusConst)
 			throw PsimagLite::RuntimeError
 		        ("WARNING: SU(2) with grand canonical ???\n");
+
+		if (isSu2 && totalElectrons == 0)
+			totalElectrons = totalNumberOfSites;
 	}
 
 	template<typename SomeMemResolvType>
