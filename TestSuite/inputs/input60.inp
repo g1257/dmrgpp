@@ -37,4 +37,5 @@ TargetSpinTimesTwo=0
 
 Orbitals=1
 Threads=2
+MaxMatrixRankStored=1024
 

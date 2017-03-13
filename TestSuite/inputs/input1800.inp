@@ -23,6 +23,5 @@ Version=version
 OutputFile=data1800.txt
 InfiniteLoopKeptStates=60
 FiniteLoops 4  5 100 0 -5 100 0 -5 100 0 5 100 0 
-TargetElectronsTotal=12
 TargetSzPlusConst=6
 
