@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009-2017, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 4.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -68,7 +68,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 *********************************************************
 
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -102,16 +101,17 @@ public:
 	typedef MatrixInBlockTemplate BuildingBlockType;
 	typedef typename BuildingBlockType::value_type FieldType;
 	typedef BlockMatrix<MatrixInBlockTemplate> BlockMatrixType;
+	typedef typename PsimagLite::Real<FieldType>::Type RealType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	class LoopForDiag {
 
 		typedef PsimagLite::Concurrency ConcurrencyType;
-		typedef typename PsimagLite::Real<FieldType>::Type RealType;
 
 	public:
 
 		LoopForDiag(BlockMatrixType& C1,
-		            typename PsimagLite::Vector<RealType>::Type& eigs1,
+		            VectorRealType& eigs1,
 		            char option1)
 		    : C(C1),
 		      eigs(eigs1),
@@ -133,7 +133,7 @@ public:
 		void doTask(SizeType taskNumber, SizeType)
 		{
 			SizeType m = taskNumber;
-			typename PsimagLite::Vector<RealType>::Type eigsTmp;
+			VectorRealType eigsTmp;
 			PsimagLite::diag(C.data_[m],eigsTmp,option);
 			enforcePhase(C.data_[m]);
 			for (int j=C.offsets(m);j< C.offsets(m+1);j++)
@@ -178,9 +178,9 @@ public:
 		}
 
 		BlockMatrixType& C;
-		typename PsimagLite::Vector<RealType>::Type& eigs;
+		VectorRealType& eigs;
 		char option;
-		typename PsimagLite::Vector<typename PsimagLite::Vector<RealType>::Type>::Type eigsForGather;
+		typename PsimagLite::Vector<VectorRealType>::Type eigsForGather;
 		typename PsimagLite::Vector<SizeType>::Type weights;
 	};
 
@@ -275,15 +275,56 @@ public:
 	template<class MatrixInBlockTemplate2>
 	friend void operatorPlus(BlockMatrix<MatrixInBlockTemplate2>& C,
 	                         const BlockMatrix<MatrixInBlockTemplate2>& A,
-	                         const BlockMatrix<MatrixInBlockTemplate2>& B);
+	                         const BlockMatrix<MatrixInBlockTemplate2>& B)
+	{
+		SizeType i;
+		int counter=0;
+		C.rank_ = A.rank_;
+		C.offsets_=A.offsets_;
+		C.data_.resize(A.data_.size());
+		for (i=0;i<A.data_.size();i++) {
+			C.data_[i] = A.data_[i];
+
+			while (B.offsets_[counter] <A.offsets_[i+1]) {
+				accumulate(C.data_[i],B.data_[counter++]);
+				if (counter>=B.offsets_.size()) break;
+			}
+
+			if (counter>=B.offsets_.size() && i<A.offsets_.size()-1)
+				throw PsimagLite::RuntimeError("operatorPlus: restriction not met.\n");
+		}
+	}
 
 	template<class MatrixInBlockTemplate2>
 	friend void operatorPlus(BlockMatrix<MatrixInBlockTemplate2>& A,
-	                         const BlockMatrix<MatrixInBlockTemplate2>& B);
+	                         const BlockMatrix<MatrixInBlockTemplate2>& B)
+	{
+		SizeType i;
+		int counter=0;
+
+		for (i=0;i<A.data_.size();i++) {
+			while (B.offsets_[counter] < A.offsets_[i+1]) {
+				accumulate(A.data_[i],B.data_[counter++]);
+				if (counter>=B.offsets_.size()) break;
+			}
+
+			if (counter>=B.offsets_.size() && i<A.offsets_.size()-1)
+				throw PsimagLite::RuntimeError("operatorPlus: restriction not met.\n");
+		}
+	}
 
 	template<class MatrixInBlockTemplate2>
 	friend std::ostream &operator<<(std::ostream &s,
-	                                const BlockMatrix<MatrixInBlockTemplate2>& A);
+	                                const BlockMatrix<MatrixInBlockTemplate2>& A)
+	{
+		for (SizeType m=0;m<A.blocks();m++) {
+			int nrank = A.offsets(m+1)-A.offsets(m);
+			s<<"block number "<<m<<" has rank "<<nrank<<"\n";
+			s<<A.data_[m];
+		}
+
+		return s;
+	}
 
 private:
 
@@ -294,61 +335,6 @@ private:
 }; // class BlockMatrix
 
 // Companion Functions
-template<class MatrixInBlockTemplate>
-std::ostream &operator<<(std::ostream &s,const BlockMatrix<MatrixInBlockTemplate>& A)
-{
-	for (SizeType m=0;m<A.blocks();m++) {
-		int nrank = A.offsets(m+1)-A.offsets(m);
-		s<<"block number "<<m<<" has rank "<<nrank<<"\n";
-		s<<A.data_[m];
-	}
-	return s;
-}
-
-//C=A+ B where A.offsets is contained in B.offsets
-template<class MatrixInBlockTemplate>
-void operatorPlus(BlockMatrix<MatrixInBlockTemplate>& C,
-                  const BlockMatrix<MatrixInBlockTemplate>& A,
-                  const BlockMatrix<MatrixInBlockTemplate>& B)
-{
-	SizeType i;
-	int counter=0;
-	C.rank_ = A.rank_;
-	C.offsets_=A.offsets_;
-	C.data_.resize(A.data_.size());
-	for (i=0;i<A.data_.size();i++) {
-		C.data_[i] = A.data_[i];
-
-		while (B.offsets_[counter] <A.offsets_[i+1]) {
-			accumulate(C.data_[i],B.data_[counter++]);
-			if (counter>=B.offsets_.size()) break;
-		}
-
-		if (counter>=B.offsets_.size() && i<A.offsets_.size()-1)
-			throw PsimagLite::RuntimeError("operatorPlus: restriction not met.\n");
-	}
-}
-
-//A+= B where A.offsets is contained in B.offsets
-template<class MatrixInBlockTemplate>
-void operatorPlus(BlockMatrix<MatrixInBlockTemplate>& A,
-                  const BlockMatrix<MatrixInBlockTemplate>& B)
-{
-	SizeType i;
-	int counter=0;
-
-	for (i=0;i<A.data_.size();i++) {
-		while (B.offsets_[counter] < A.offsets_[i+1]) {
-			accumulate(A.data_[i],B.data_[counter++]);
-			if (counter>=B.offsets_.size()) break;
-		}
-
-		if (counter>=B.offsets_.size() && i<A.offsets_.size()-1)
-			throw PsimagLite::RuntimeError("operatorPlus: restriction not met.\n");
-	}
-
-}
-
 // Parallel version of the diagonalization of a block diagonal matrix
 template<typename SomeVectorType,typename SomeFieldType>
 typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True,
