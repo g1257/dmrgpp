@@ -259,23 +259,12 @@ public:
 
 	SizeType blocks() const { return data_.size(); }
 
-	FieldType operator()(int i,int j) const
-	{
-		int k;
-		for (k=data_.size()-1;k>=0;k--) if (i>=offsets_[k]) break;
-
-		if (j<offsets_[k] || j>=offsets_[k+1])
-			return static_cast<FieldType>(0.0);
-		return data_[k](i-offsets_[k],j-offsets_[k]);
-
-	}
-
 	void toSparse(PsimagLite::CrsMatrix<FieldType>& fm) const
 	{
 		fm.resize(rank_, rank_);
 		SizeType counter=0;
 		SizeType k = 0;
-		for (SizeType i = 0; i < rank_; ++i) {
+		for (int i = 0; i < rank_; ++i) {
 			fm.setRow(i,counter);
 			if (k+1 < offsets_.size() && offsets_[k+1] <= i)
 				++k;
@@ -392,16 +381,6 @@ bool isUnitary(const BlockMatrix<MatrixInBlockTemplate>& B)
 		if (!isUnitary(matrixTmp)) flag=false;
 	}
 	return flag;
-}
-
-template<class S>
-void blockMatrixToFullMatrix(PsimagLite::Matrix<S>& fm,
-                             const BlockMatrix<PsimagLite::Matrix<S> >& B)
-{
-	int n = B.rank();
-	int i,j;
-	fm.reset(n,n);
-	for (j=0;j<n;j++) for (i=0;i<n;i++) fm(i,j)=B(i,j);
 }
 
 } // namespace Dmrg
