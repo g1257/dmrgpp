@@ -31,7 +31,6 @@ FiniteLoops 4
 RepeatFiniteLoopsFrom=2
 RepeatFiniteLoopsTimes=100
 
-TargetElectronsTotal=12
 TargetSzPlusConst=6
 RestartFilename=data1800.txt
 GsWeight=0.1

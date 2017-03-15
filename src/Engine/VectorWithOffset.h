@@ -118,6 +118,8 @@ public:
 				found = true;
 			}
 		}
+
+		setIndex2Sector();
 	}
 
 	void resize(SizeType x)
@@ -126,6 +128,8 @@ public:
 		data_.clear();
 		offset_=0;
 		m_=0;
+
+		setIndex2Sector();
 	}
 
 	template<typename SomeBasisType>
@@ -151,6 +155,7 @@ public:
 		}
 
 		if (!found) throw PsimagLite::RuntimeError("Set failed\n");
+		setIndex2Sector();
 	}
 
 	template<typename SomeBasisType>
@@ -169,6 +174,8 @@ public:
 			offset_=0;
 			data_.resize(0);
 		}
+
+		setIndex2Sector();
 	}
 
 	SizeType sectors() const { return (size_ == 0) ? 0 : 1; }
@@ -228,6 +235,8 @@ public:
 			throw PsimagLite::RuntimeError("VectorWithOffset::load(...): m<0\n");
 		m_ = x;
 		io.read(data_,"#data");
+
+		setIndex2Sector();
 	}
 
 	template<typename IoInputter>
@@ -266,6 +275,8 @@ public:
 		PsimagLite::OstringStream msg;
 		msg<<"populateFromQns succeeded";
 		progress_.printline(msg,std::cout);
+
+		setIndex2Sector();
 	}
 
 	void collapseSectors() {}
@@ -283,6 +294,8 @@ public:
 			size_ = v.size_;
 			offset_ = v.offset_;
 			m_ = v.m_;
+			setIndex2Sector();
+
 			return *this;
 		}
 
@@ -321,10 +334,8 @@ public:
 
 	int index2Sector(SizeType i) const
 	{
-		if (i < offset_ || i >= (offset_+data_.size()))
-			return -1;
-
-		return 0;
+		assert(i < index2Sector_.size());
+		return (index2Sector_[i]) ? 0 : -1;
 	}
 
 	template<typename FieldType2>
@@ -357,7 +368,7 @@ private:
 	}
 
 	template<typename SomeBasisType>
-	SizeType findPartition(const VectorType& v,const SomeBasisType& someBasis)
+	SizeType findPartition(const VectorType& v,const SomeBasisType& someBasis) const
 	{
 		bool found = false;
 		SizeType p = 0;
@@ -384,7 +395,7 @@ private:
 
 	template<typename SomeBasisType>
 	bool nonZeroPartition(const VectorType& v,
-	                      const SomeBasisType& someBasis,SizeType i)
+	                      const SomeBasisType& someBasis,SizeType i) const
 	{
 		typename VectorType::value_type zero = 0;
 		for (SizeType j=someBasis.partition(i);j<someBasis.partition(i+1);j++) {
@@ -393,11 +404,20 @@ private:
 		return false;
 	}
 
+	void setIndex2Sector()
+	{
+		index2Sector_.clear();
+		index2Sector_.resize(size_, false);
+		for (SizeType i = offset_; i < offset_ + data_.size(); ++i)
+			index2Sector_[i] = true;
+	}
+
 	PsimagLite::ProgressIndicator progress_;
 	SizeType size_;
 	VectorType data_;
 	SizeType offset_;
 	SizeType m_; // partition
+	PsimagLite::Vector<bool>::Type index2Sector_;
 }; // class VectorWithOffset
 
 template<typename FieldType>
