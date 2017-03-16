@@ -14,9 +14,12 @@ void csr_den_kron_mult_method(const int imethod,
                     const int ncol_B,
                     const PsimagLite::Matrix<double>& b_,
 
-                    const PsimagLite::Matrix<double>& yin,
-                          PsimagLite::Matrix<double>& xout)
+                    const PsimagLite::Matrix<double>& yin_,
+                          PsimagLite::Matrix<double>& xout_)
 {
+	PsimagLite::MatrixNonOwned<const double> yin(yin_);
+	PsimagLite::MatrixNonOwned<double> xout(xout_);
+
      const int isTransA = (transA == 'T') || (transA == 't');
      const int isTransB = (transB == 'T') || (transB == 't');
     
@@ -97,6 +100,8 @@ void csr_den_kron_mult_method(const int imethod,
     int nrow_BY = nrow_X;
     int ncol_BY = ncol_Y;
     PsimagLite::Matrix<double> by_(nrow_BY, ncol_BY);
+	PsimagLite::MatrixNonOwned<const double> byConstRef(by_);
+	PsimagLite::MatrixNonOwned<double> byRef(by_);
 
     /*
      * ---------------
@@ -136,7 +141,7 @@ void csr_den_kron_mult_method(const int imethod,
 
                      nrow_BY,
                      ncol_BY,
-                     by_);
+                     byRef);
 
    }
 
@@ -158,7 +163,7 @@ void csr_den_kron_mult_method(const int imethod,
 
                      nrow_BY,
                      ncol_BY,
-                     by_,
+                     byConstRef,
 
                      nrow_X,
                      ncol_X,
@@ -177,6 +182,8 @@ void csr_den_kron_mult_method(const int imethod,
     int nrow_YAt = nrow_Y;
     int ncol_YAt = ncol_X;
     PsimagLite::Matrix<double> yat_(nrow_YAt, ncol_YAt );
+	PsimagLite::MatrixNonOwned<double> yatRef(yat_);
+	PsimagLite::MatrixNonOwned<const double> yatConstRef(yat_);
 
     /*
      * ----------------
@@ -222,7 +229,7 @@ void csr_den_kron_mult_method(const int imethod,
     
                      nrow_YAt, 
                      ncol_YAt,
-                     yat_);
+                     yatRef);
      }
 
 
@@ -243,7 +250,7 @@ void csr_den_kron_mult_method(const int imethod,
 
                     nrow_YAt,
                     ncol_YAt,
-                    yat_,
+                    yatConstRef,
 
                      nrow_X,
                      ncol_X, 

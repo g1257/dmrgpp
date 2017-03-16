@@ -14,8 +14,8 @@ void den_kron_mult_method(
                     const int ncol_B, 
                     const PsimagLite::Matrix<double>& b_,
 
-                    const PsimagLite::Matrix<double>& yin,
-                          PsimagLite::Matrix<double>& xout)
+                    const PsimagLite::Matrix<double>& yin_,
+                          PsimagLite::Matrix<double>& xout_)
 {
      const int isTransA = (transA == 'T') || (transA == 't');
      const int isTransB = (transB == 'T') || (transB == 't');
@@ -29,6 +29,9 @@ void den_kron_mult_method(
      const int ncol_X = nrow_1;
      const int nrow_Y = ncol_2;
      const int ncol_Y = ncol_1;
+
+	 PsimagLite::MatrixNonOwned<const double> yin(yin_);
+	 PsimagLite::MatrixNonOwned<double> xout(xout_);
 
      assert((imethod == 1) ||
                 (imethod == 2) ||
@@ -79,6 +82,8 @@ void den_kron_mult_method(
      const int nrow_BY = nrow_X;
      const int ncol_BY = ncol_Y;
      PsimagLite::Matrix<double> by_(nrow_BY, ncol_BY );
+	 PsimagLite::MatrixNonOwned<double> byRef(by_);
+	PsimagLite::MatrixNonOwned<const double> byConstRef(by_);
 
     /*
      * ---------------
@@ -117,7 +122,7 @@ void den_kron_mult_method(
 
                      nrow_BY,
                      ncol_BY,
-                     by_);
+                     byRef);
 
    }
 
@@ -137,7 +142,7 @@ void den_kron_mult_method(
 
                      nrow_BY,
                      ncol_BY,
-                     by_,
+                     byConstRef,
 
                      nrow_X,
                      ncol_X,
@@ -155,7 +160,8 @@ void den_kron_mult_method(
      const int nrow_YAt = nrow_Y;
      const int ncol_YAt = ncol_X;
      PsimagLite::Matrix<double> yat_(nrow_YAt, ncol_YAt);
-
+	PsimagLite::MatrixNonOwned<double> yatRef(yat_);
+	PsimagLite::MatrixNonOwned<const double> yatConstRef(yat_);
 
     /*
      * ----------------
@@ -200,7 +206,7 @@ void den_kron_mult_method(
     
                      nrow_YAt, 
                      ncol_YAt,
-                     yat_);
+                     yatRef);
      }
 
 
@@ -221,7 +227,7 @@ void den_kron_mult_method(
 
                     nrow_YAt,
                     ncol_YAt,
-                    yat_,
+                    yatConstRef,
 
                      nrow_X,
                      ncol_X, 

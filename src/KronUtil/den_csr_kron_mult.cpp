@@ -100,6 +100,7 @@ void den_csr_kron_mult_method(const int imethod,
     int ncol_BY = ncol_Y;
     PsimagLite::Matrix<double> by_(nrow_BY, ncol_BY);
 	PsimagLite::MatrixNonOwned<double> byRef(by_);
+	PsimagLite::MatrixNonOwned<const double> byConstRef(by_);
 
     /*
      * ---------------
@@ -161,11 +162,11 @@ void den_csr_kron_mult_method(const int imethod,
 
                      nrow_BY,
                      ncol_BY,
-                     by_,
+                     byConstRef,
 
                      nrow_X,
                      ncol_X,
-                     xout_);
+                     xout);
 
     }
    }
@@ -180,7 +181,8 @@ void den_csr_kron_mult_method(const int imethod,
     int nrow_YAt = nrow_Y;
     int ncol_YAt = ncol_X;
     PsimagLite::Matrix<double> yat_(nrow_YAt, ncol_YAt);
-	PsimagLite::MatrixNonOwned<const double> yatRef(yat_);
+	PsimagLite::MatrixNonOwned<const double> yatConstRef(yat_);
+	PsimagLite::MatrixNonOwned<double> yatRef(yat_);
 
     /*
      * ----------------
@@ -219,11 +221,11 @@ void den_csr_kron_mult_method(const int imethod,
 
                      nrow_Y, 
                      ncol_Y,
-                     yin_,
+                     yin,
     
                      nrow_YAt, 
                      ncol_YAt,
-                     yat_);
+                     yatRef);
      }
 
 
@@ -246,7 +248,7 @@ void den_csr_kron_mult_method(const int imethod,
 
                     nrow_YAt,
                     ncol_YAt,
-                    yatRef,
+                    yatConstRef,
 
                      nrow_X,
                      ncol_X, 

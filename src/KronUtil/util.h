@@ -108,7 +108,7 @@ void csr_kron_mult_method(const int imethod,
                     const PsimagLite::Vector<double>::Type& bval,
 
                     const PsimagLite::MatrixNonOwned<const double>& yin,
-                          PsimagLite::MatrixNonOwned<double>& xout );
+                          PsimagLite::MatrixNonOwned<double>& xout);
 
 
 
@@ -317,35 +317,34 @@ void den_gen_matrix( const int nrow_A,
                            PsimagLite::Matrix<double>& a_);
 
 extern
-void den_matmul_pre( const char trans_A, 
+void den_matmul_pre(const char trans_A,
                      const int nrow_A,
-                     const int ncol_A, 
+                     const int ncol_A,
                      const PsimagLite::Matrix<double>& a_,
 
-                     const int nrow_Y, 
-                     const int ncol_Y, 
-                     const PsimagLite::Matrix<double>& yin,
+                     const int nrow_Y,
+                     const int ncol_Y,
+                     const PsimagLite::MatrixNonOwned<const double>& yin,
 
-                     const int nrow_X, 
-                     const int ncol_X, 
-                     PsimagLite::Matrix<double>& xout);
+                     const int nrow_X,
+                     const int ncol_X,
+                     PsimagLite::MatrixNonOwned<double>& xout);
 
 
 
 extern
-void den_matmul_post( 
-                     const char trans_A, 
+void den_matmul_post(const char trans_A,
                      const int nrow_A,
-                     const int ncol_A, 
+                     const int ncol_A,
                      const PsimagLite::Matrix<double>& a_,
 
-                     const int nrow_Y, 
-                     const int ncol_Y, 
-                     const PsimagLite::Matrix<double>& yin,
+                     const int nrow_Y,
+                     const int ncol_Y,
+                     const PsimagLite::MatrixNonOwned<const double>& yin,
 
-                     const int nrow_X, 
-                     const int ncol_X, 
-                     PsimagLite::Matrix<double>& xout);
+                     const int nrow_X,
+                     const int ncol_X,
+                     PsimagLite::MatrixNonOwned<double>& xout);
 
 
 
@@ -379,8 +378,8 @@ void den_kron_mult_method(const int imethod,
                     const int ncol_B,
                     const PsimagLite::Matrix<double>& b_,
 
-                    const PsimagLite::Matrix<double>& yin,
-                          PsimagLite::Matrix<double>& xout );
+                    const PsimagLite::Matrix<double>& yin_,
+                          PsimagLite::Matrix<double>& xout_ );
 
 extern
 int den_nnz( const int,

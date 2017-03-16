@@ -7,11 +7,11 @@ void den_matmul_pre( const char trans_A,
 
                      const int nrow_Y, 
                      const int ncol_Y, 
-                     const PsimagLite::Matrix<double>& yin,
+                     const PsimagLite::MatrixNonOwned<const double>& yin,
 
                      const int nrow_X, 
                      const int ncol_X, 
-                     PsimagLite::Matrix<double>& xout)
+                     PsimagLite::MatrixNonOwned<double>& xout)
 
 {
 /*
