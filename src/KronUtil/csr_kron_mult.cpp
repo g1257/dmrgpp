@@ -17,11 +17,11 @@ void csr_kron_mult_method(
                     const int bcol[], 
                     const double bval[],
 
-                    const double yin[], 
-                          double xout[] )
+                    const PsimagLite::Matrix<double>& yin,
+                          PsimagLite::Matrix<double>& xout)
 
-#define X(ib,ia) xout[ (ib) + (ia)*nrow_X ]
-#define Y(jb,ja) yin[ (jb) + (ja)*nrow_Y ]
+//#define X(ib,ia) xout[ (ib) + (ia)*nrow_X ]
+//#define Y(jb,ja) yin[ (jb) + (ja)*nrow_Y ]
 {
      const int isTransA = (transA == 'T') || (transA == 't');
      const int isTransB = (transB == 'T') || (transB == 't');
@@ -101,8 +101,8 @@ void csr_kron_mult_method(
 
     int nrow_BY = nrow_X;
     int ncol_BY = ncol_Y;
-    double* by_ = new double[  nrow_BY * ncol_BY ];
-#define BY(iby,jby)  by_[ (iby) + (jby)*nrow_BY ]
+    PsimagLite::Matrix<double> by_(nrow_BY,ncol_BY );
+//#define BY(iby,jby)  by_[ (iby) + (jby)*nrow_BY ]
 
 
     /*
@@ -115,9 +115,10 @@ void csr_kron_mult_method(
      int iby = 0;
      int jby = 0;
 
+	 // not needed FIXME
      for(jby=0; jby < ncol_BY; jby++) {
      for(iby=0; iby < nrow_BY; iby++) {
-        BY(iby,jby) = 0;
+        by_(iby,jby) = 0;
         };
         };
      }
@@ -140,11 +141,11 @@ void csr_kron_mult_method(
 
                      nrow_Y,
                      ncol_Y,
-                     &(Y(0,0)),
+                     yin,
 
                      nrow_BY,
                      ncol_BY,
-                     &(BY(0,0))   );
+                     by_);
 
    }
 
@@ -166,15 +167,13 @@ void csr_kron_mult_method(
 
                      nrow_BY,
                      ncol_BY,
-                     &(BY(0,0)),
+                     by_,
 
                      nrow_X,
                      ncol_X,
-                     &(X(0,0))   );
+                     xout);
 
     }
-    
-    delete[] by_;
    }
  else if (imethod == 2) {
     /*
@@ -186,8 +185,8 @@ void csr_kron_mult_method(
 
     int nrow_YAt = nrow_Y;
     int ncol_YAt = ncol_X;
-    double* yat_ = new double[  nrow_YAt * ncol_YAt ];
-#define YAt(iy,jy) yat_[ (iy) + (jy)*nrow_YAt ]
+    PsimagLite::Matrix<double> yat_(nrow_YAt, ncol_YAt);
+//#define YAt(iy,jy) yat_[ (iy) + (jy)*nrow_YAt ]
 
 
     /*
@@ -200,9 +199,10 @@ void csr_kron_mult_method(
     int iy = 0;
     int jy = 0;
   
+	// not needed FIXME
     for(jy=0; jy < ncol_YAt; jy++) {
     for(iy=0; iy < nrow_YAt; iy++) {
-       YAt(iy,jy) = 0;
+       yat_(iy,jy) = 0;
        };
        };
     }
@@ -226,11 +226,11 @@ void csr_kron_mult_method(
 
                      nrow_Y, 
                      ncol_Y,
-                     &(Y(0,0)),
+                     yin,
     
                      nrow_YAt, 
                      ncol_YAt,
-                     &(YAt(0,0))  );
+                     yat_);
      }
 
     {
@@ -250,16 +250,13 @@ void csr_kron_mult_method(
 
                     nrow_YAt,
                     ncol_YAt,
-                    &(YAt(0,0)),
+                    yat_,
 
                      nrow_X,
                      ncol_X, 
-                     &(X(0,0)) );
+                     xout);
                      
       }
-
-   delete[] yat_;
-
    }
  else if (imethod == 3) {
    /*
@@ -295,7 +292,7 @@ void csr_kron_mult_method(
                  int iy = (isTransB) ? ib : jb;
                  int jy = (isTransA) ? ia : ja;
 
-                 X(ix,jx) +=  (cij * Y(iy,jy));
+                 xout(ix,jx) +=  cij * yin(iy,jy);
                  };
              };
          };
@@ -323,8 +320,8 @@ void csr_kron_mult(
                     const int bcol[], 
                     const double bval[],
 
-                    const double yin[], 
-                          double xout[] )
+                    const PsimagLite::Matrix<double>& yin,
+                          PsimagLite::Matrix<double>& xout)
 
 {
 /*

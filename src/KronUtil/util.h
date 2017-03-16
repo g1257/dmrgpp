@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-
+#include "Matrix.h"
 #include "blas.h"
 
 #ifndef MIN
@@ -53,26 +53,25 @@ void csr2den(  const int nrow_A,
                const int acol[],
                const double aval[],
 
-               double a_[] );
+               PsimagLite::Matrix<double>& a_);
 
 extern
-void csr_den_kron_mult_method( 
-                    const int imethod,
+void csr_den_kron_mult_method(const int imethod,
                     const char transA,
                     const char transB,
 
                     const int nrow_A,
-                    const int ncol_A, 
-                    const int arowptr[], 
-                    const int acol[], 
+                    const int ncol_A,
+                    const int arowptr[],
+                    const int acol[],
                     const double aval[],
 
                     const int nrow_B,
-                    const int ncol_B, 
-                    const double b_[],
+                    const int ncol_B,
+                    const PsimagLite::Matrix<double>& b_,
 
-                    const double yin[], 
-                          double xout[] );
+                    const PsimagLite::Matrix<double>& yin,
+                          PsimagLite::Matrix<double>& xout );
 
 extern
 int csr_nnz( const int nrow_A,  
@@ -91,25 +90,24 @@ void csr_transpose(
                          double atval[] );
 
 extern
-void csr_kron_mult_method( 
-                    const int imethod,
+void csr_kron_mult_method(const int imethod,
                     const char transA,
                     const char transB,
-                   
+
                     const int nrow_A,
-                    const int ncol_A, 
-                    const int arowptr[], 
-                    const int acol[], 
+                    const int ncol_A,
+                    const int arowptr[],
+                    const int acol[],
                     const double aval[],
 
                     const int nrow_B,
-                    const int ncol_B, 
-                    const int browptr[], 
-                    const int bcol[], 
+                    const int ncol_B,
+                    const int browptr[],
+                    const int bcol[],
                     const double bval[],
 
-                    const double yin[], 
-                          double xout[] );
+                    const PsimagLite::Matrix<double>& yin,
+                          PsimagLite::Matrix<double>& xout );
 
 
 
@@ -123,11 +121,11 @@ void csr_matmul_post(const char trans_A,
 
                      const int nrow_Y,
                      const int ncol_Y,
-                     const double yin[],
+                     const PsimagLite::Matrix<double>& yin,
 
                      const int nrow_X,
                      const int ncol_X,
-                     double xout[] );
+                     PsimagLite::Matrix<double>& xout);
 
 extern
 void csr_matmul_pre( const char trans_A,
@@ -139,11 +137,11 @@ void csr_matmul_pre( const char trans_A,
 
                      const int nrow_Y,
                      const int ncol_Y,
-                     const double yin[],
+                     const PsimagLite::Matrix<double>& yin,
 
                      const int nrow_X,
                      const int ncol_X,
-                     double xout[] );
+                     PsimagLite::Matrix<double>& xout);
 
 extern
 void csr_submatrix( const int nrow_A,
@@ -293,8 +291,8 @@ void den_csr_kron_mult_method(
                     const int bcol[], 
                     const double bval[],
 
-                    const double yin[], 
-                          double xout[] );
+                    const PsimagLite::Matrix<double>& yin,
+                          PsimagLite::Matrix<double>& xout);
 
 extern
 void den_copymat( const int nrow, 
@@ -323,15 +321,15 @@ extern
 void den_matmul_pre( const char trans_A, 
                      const int nrow_A,
                      const int ncol_A, 
-                     const double a_[],
+                     const PsimagLite::Matrix<double>& a_,
 
                      const int nrow_Y, 
                      const int ncol_Y, 
-                     const double yin[],
+                     const PsimagLite::Matrix<double>& yin,
 
                      const int nrow_X, 
                      const int ncol_X, 
-                     double xout[] );
+                     PsimagLite::Matrix<double>& xout);
 
 
 
@@ -340,15 +338,15 @@ void den_matmul_post(
                      const char trans_A, 
                      const int nrow_A,
                      const int ncol_A, 
-                     const double a_[],
+                     const PsimagLite::Matrix<double>& a_,
 
                      const int nrow_Y, 
                      const int ncol_Y, 
-                     const double yin[],
+                     const PsimagLite::Matrix<double>& yin,
 
                      const int nrow_X, 
                      const int ncol_X, 
-                     double xout[] );
+                     PsimagLite::Matrix<double>& xout);
 
 
 
@@ -370,26 +368,25 @@ void den_kron_submatrix(
         double c_[] );
 
 extern
-void den_kron_mult_method( 
-                    const int imethod,
+void den_kron_mult_method(const int imethod,
                     const char transA,
                     const char transB,
 
                     const int nrow_A,
-                    const int ncol_A, 
-                    const double a_[],
+                    const int ncol_A,
+                    const PsimagLite::Matrix<double>& a_,
 
                     const int nrow_B,
-                    const int ncol_B, 
-                    const double b_[],
+                    const int ncol_B,
+                    const PsimagLite::Matrix<double>& b_,
 
-                    const double yin[], 
-                          double xout[] );
+                    const PsimagLite::Matrix<double>& yin,
+                          PsimagLite::Matrix<double>& xout );
 
 extern
-int den_nnz( const int nrow_A,
-             const int ncol_A,
-             const double  a_[] );
+int den_nnz( const int,
+             const int,
+             const PsimagLite::Matrix<double>&);
 
 
 extern

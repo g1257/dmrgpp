@@ -9,15 +9,11 @@ void csr_matmul_post( char trans_A,
 
                      const int nrow_Y, 
                      const int ncol_Y, 
-                     const double yin[],
+                     const PsimagLite::Matrix<double>& yin,
 
                      const int nrow_X, 
                      const int ncol_X, 
-                     double xout[] )
-
-#define Y(iy,jy) yin[ (iy) + (jy)*nrow_Y ]
-#define X(ix,jx) xout[ (ix) + (jx)*nrow_X ]
-
+                     PsimagLite::Matrix<double>& xout)
 {
     const int idebug = 0;
 /*
@@ -52,23 +48,21 @@ void csr_matmul_post( char trans_A,
     * more efficient matrix operations
     * ----------------------------------
     */
-   double* a_ = new double[nrow_A * ncol_A];
-#define A(ia,ja)  a_[ (ia) + (ja)*nrow_A ]
+   PsimagLite::Matrix<double> a_(nrow_A, ncol_A);
+
    if (idebug >= 1) {
      printf("csr_matmul_post:nrow_A %d,ncol_A %d,nnz_A %d\n",
              nrow_A, ncol_A, nnz_A );
      };
 
    csr2den( nrow_A, ncol_A,         arowptr, acol, aval,
-            &(A(0,0))  );
+            a_);
    
    den_matmul_post( trans_A,
-                   nrow_A, ncol_A,  &(A(0,0)),
+                   nrow_A, ncol_A,  a_,
 
-                   nrow_Y,ncol_Y, &(Y(0,0)),
-                   nrow_X,ncol_X, &(X(0,0)) );
-
-   delete[] a_;
+                   nrow_Y,ncol_Y, yin,
+                   nrow_X,ncol_X, xout);
    return;
    };
 
@@ -102,7 +96,7 @@ void csr_matmul_post( char trans_A,
             int ix = iy;
             int jx = ia;
 
-            X(ix,jx) += (Y(iy,ja) * atji);
+            xout(ix,jx) += (yin(iy,ja) * atji);
             };
          };
      };
@@ -130,7 +124,7 @@ else  {
               int ix = iy;
               int jx = ja;
 
-              X(ix,jx) += ( Y(iy,ia) * aij );
+              xout(ix,jx) += ( yin(iy,ia) * aij );
               };
           };
        };

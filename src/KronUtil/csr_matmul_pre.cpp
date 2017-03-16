@@ -9,14 +9,14 @@ void csr_matmul_pre( char trans_A,
 
                      const int nrow_Y, 
                      const int ncol_Y, 
-                     const double yin[],
+                     const PsimagLite::Matrix<double>& yin,
 
                      const int nrow_X, 
                      const int ncol_X, 
-                     double xout[] )
+                     PsimagLite::Matrix<double>& xout)
 
-#define Y(iy,jy) yin[ (iy) + (jy)*nrow_Y ]
-#define X(ix,jx) xout[ (ix) + (jx)*nrow_X ]
+//#define Y(iy,jy) yin[ (iy) + (jy)*nrow_Y ]
+//#define X(ix,jx) xout[ (ix) + (jx)*nrow_X ]
 
 {
    const int idebug = 0;
@@ -52,8 +52,7 @@ void csr_matmul_pre( char trans_A,
     * more efficient matrix operations
     * ----------------------------------
     */
-   double* a_ = new double[nrow_A * ncol_A];
-#define A(ia,ja)  a_[ (ia) + (ja)*nrow_A ]
+   PsimagLite::Matrix<double> a_(nrow_A, ncol_A);
 
    if (idebug >= 1) {
      printf("csr_matmul_pre:nrow_A %d,ncol_A %d,nnz_A %d\n",
@@ -61,15 +60,13 @@ void csr_matmul_pre( char trans_A,
      };
 
    csr2den( nrow_A, ncol_A,      arowptr, acol, aval,
-            &(A(0,0))  );
+            a_);
    
    den_matmul_pre( trans_A,
-                   nrow_A, ncol_A,  &(A(0,0)),
+                   nrow_A, ncol_A,  a_,
 
-                   nrow_Y,ncol_Y, &(Y(0,0)),
-                   nrow_X,ncol_X, &(X(0,0)) );
-
-   delete[] a_;
+                   nrow_Y,ncol_Y, yin,
+                   nrow_X,ncol_X, xout);
    return;
    };
 
@@ -102,7 +99,7 @@ void csr_matmul_pre( char trans_A,
           for(jy=0; jy < ncol_Y; jy++) {
             int ix = ja;
             int jx = jy;
-            X(ix,jx) += (atji * Y(ia,jy));
+            xout(ix,jx) += (atji * yin(ia,jy));
            };
         };
     };
@@ -130,7 +127,7 @@ else  {
             int ix = ia;
             int jx = jy;
 
-            X(ix,jx) += (aij * Y(ja,jy));
+            xout(ix,jx) += (aij * yin(ja,jy));
             };
          };
       };

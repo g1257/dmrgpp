@@ -1,5 +1,9 @@
 include ../Config.make 
 
+all: libkronutil.a test1 test2
+
+CPPFLAGS += -I../../../PsimagLite/src
+
 SRC=    kronUtilComplex.cpp \
 	coord2csr.cpp  \
 	csc_nnz.cpp \

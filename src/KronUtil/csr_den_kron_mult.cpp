@@ -13,14 +13,14 @@ void csr_den_kron_mult_method(
 
                     const int nrow_B,
                     const int ncol_B, 
-                    const double b_[],
+                    const PsimagLite::Matrix<double>& b_,
 
-                    const double yin[], 
-                          double xout[] )
+                    const PsimagLite::Matrix<double>& yin,
+                          PsimagLite::Matrix<double>& xout)
 
-#define B(ib,jb) b_[(ib) + (jb)*nrow_B]
-#define X(ib,ia) xout[ (ib) + (ia)*nrow_X ]
-#define Y(jb,ja) yin[ (jb) + (ja)*nrow_Y ]
+//#define B(ib,jb) b_[(ib) + (jb)*nrow_B]
+//#define X(ib,ia) xout[ (ib) + (ia)*nrow_X ]
+//#define Y(jb,ja) yin[ (jb) + (ja)*nrow_Y ]
 {
      const int isTransA = (transA == 'T') || (transA == 't');
      const int isTransB = (transB == 'T') || (transB == 't');
@@ -40,7 +40,7 @@ void csr_den_kron_mult_method(
                 (imethod == 3));
 
      int nnz_A = csr_nnz( nrow_A, arowptr );
-     int nnz_B = den_nnz( nrow_B, ncol_B, &(B(0,0)) );
+     int nnz_B = den_nnz( nrow_B, ncol_B, b_);
      int has_work = (nnz_A >= 1) && (nnz_B >= 1);
      if (!has_work) {
          return;
@@ -101,8 +101,8 @@ void csr_den_kron_mult_method(
 
     int nrow_BY = nrow_X;
     int ncol_BY = ncol_Y;
-    double* by_ = new double[  nrow_BY * ncol_BY ];
-#define BY(iby,jby)  by_[ (iby) + (jby)*nrow_BY ]
+    PsimagLite::Matrix<double> by_(nrow_BY, ncol_BY);
+// #define BY(iby,jby)  by_[ (iby) + (jby)*nrow_BY ]
 
 
     /*
@@ -115,9 +115,10 @@ void csr_den_kron_mult_method(
      int iby = 0;
      int jby = 0;
 
+     // not needed FIXME
      for(jby=0; jby < ncol_BY; jby++) {
      for(iby=0; iby < nrow_BY; iby++) {
-        BY(iby,jby) = 0;
+        by_(iby,jby) = 0;
         };
         };
      }
@@ -134,15 +135,15 @@ void csr_den_kron_mult_method(
     den_matmul_pre(  trans,
                      nrow_B,
                      ncol_B,
-                     &(B(0,0)),
+                     b_,
 
                      nrow_Y,
                      ncol_Y,
-                     &(Y(0,0)),
+                     yin,
 
                      nrow_BY,
                      ncol_BY,
-                     &(BY(0,0))   );
+                     by_);
 
    }
 
@@ -164,15 +165,13 @@ void csr_den_kron_mult_method(
 
                      nrow_BY,
                      ncol_BY,
-                     &(BY(0,0)),
+                     by_,
 
                      nrow_X,
                      ncol_X,
-                     &(X(0,0))   );
+                     xout);
 
     }
-
-    delete[] by_;
    }
  else if (imethod == 2) {
     /*
@@ -184,8 +183,8 @@ void csr_den_kron_mult_method(
 
     int nrow_YAt = nrow_Y;
     int ncol_YAt = ncol_X;
-    double* yat_ = new double[  nrow_YAt * ncol_YAt ];
-#define YAt(iy,jy) yat_[ (iy) + (jy)*nrow_YAt ]
+    PsimagLite::Matrix<double> yat_(nrow_YAt, ncol_YAt );
+//#define YAt(iy,jy) yat_[ (iy) + (jy)*nrow_YAt ]
 
 
     /*
@@ -198,9 +197,10 @@ void csr_den_kron_mult_method(
     int iy = 0;
     int jy = 0;
   
+    // not needed, FIXME
     for(jy=0; jy < ncol_YAt; jy++) {
     for(iy=0; iy < nrow_YAt; iy++) {
-       YAt(iy,jy) = 0;
+       yat_(iy,jy) = 0;
        };
        };
     }
@@ -227,11 +227,11 @@ void csr_den_kron_mult_method(
 
                      nrow_Y, 
                      ncol_Y,
-                     &(Y(0,0)),
+                     yin,
     
                      nrow_YAt, 
                      ncol_YAt,
-                     &(YAt(0,0))  );
+                     yat_);
      }
 
 
@@ -248,20 +248,17 @@ void csr_den_kron_mult_method(
     den_matmul_pre( trans,
                     nrow_B,
                     ncol_B, 
-                    &(B(0,0)),
+                    b_,
 
                     nrow_YAt,
                     ncol_YAt,
-                    &(YAt(0,0)),
+                    yat_,
 
                      nrow_X,
                      ncol_X, 
-                     &(X(0,0)) );
+                     xout);
 
       }
-
-    delete[] yat_;
-
    }
  else if (imethod == 3) {
    /*
@@ -286,7 +283,7 @@ void csr_den_kron_mult_method(
 
          for(ib=0; ib < nrow_B; ib++) {
          for(jb=0; jb < ncol_B; jb++) {
-                 double bij = B(ib,jb);
+                 double bij = b_(ib,jb);
                  double cij = aij * bij;
 
                  int ix = (isTransB) ? jb : ib;
@@ -294,7 +291,7 @@ void csr_den_kron_mult_method(
                  int iy = (isTransB) ? ib : jb;
                  int jy = (isTransA) ? ia : ja;
 
-                 X(ix,jx) +=  (cij * Y(iy,jy));
+                 xout(ix,jx) +=  (cij * yin(iy,jy));
                  };
              };
          };
@@ -318,10 +315,10 @@ void csr_den_kron_mult(
 
                     const int nrow_B,
                     const int ncol_B, 
-                    const double b_[],
+                    const PsimagLite::Matrix<double>& b_,
 
-                    const double yin[], 
-                          double xout[] )
+                    const PsimagLite::Matrix<double>& yin,
+                          PsimagLite::Matrix<double>& xout)
 
 {
 /*
@@ -356,7 +353,7 @@ void csr_den_kron_mult(
  */
 
  int nnz_A = csr_nnz( nrow_A, arowptr );
- int nnz_B = den_nnz( nrow_B, ncol_B, &(B(0,0)) );
+ int nnz_B = den_nnz( nrow_B, ncol_B, b_);
  int has_work = (nnz_A >= 1) && (nnz_B >= 1);
  if (!has_work) {
      return;
@@ -390,7 +387,7 @@ void csr_den_kron_mult(
 
                     nrow_B,
                     ncol_B, 
-                    &(B(0,0)),
+                    b_,
 
                     yin, 
                     xout );
