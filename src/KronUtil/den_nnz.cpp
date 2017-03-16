@@ -1,9 +1,8 @@
 #include "util.h"
 int den_nnz( const int nrow_A, 
              const int ncol_A, 
-             const double a_[])
+             const PsimagLite::Matrix<double>& a_)
 {
-#define A(ia,ja) a_[ (ia) + (ja)*nrow_A ]
 /*
  * -------------------------
  * return number of nonzeros
@@ -23,7 +22,7 @@ int den_nnz( const int nrow_A,
   for(ja=0; ja < ncol_A; ja++) {
     int ia = 0;
     for(ia=0; ia < nrow_A; ia++) {
-       int is_zero = (A(ia,ja) == dzero);
+       int is_zero = (a_(ia,ja) == dzero);
        nnz_A = (is_zero)? nnz_A : (nnz_A+1);
        };
      };

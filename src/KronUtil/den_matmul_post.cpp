@@ -4,21 +4,16 @@ void den_matmul_post(
                      const char trans_A, 
                      const int nrow_A,
                      const int ncol_A, 
-                     const double a_[],
+                     const PsimagLite::Matrix<double>& a_,
 
                      const int nrow_Y, 
                      const int ncol_Y, 
-                     const double yin[],
+                     const PsimagLite::Matrix<double>& yin,
 
                      const int nrow_X, 
                      const int ncol_X, 
-                     double xout[] )
+                     PsimagLite::Matrix<double>& xout)
 {
-
-#define Y(iy,jy) yin[ (iy) + (jy)*nrow_Y ]
-#define X(ix,jx) xout[ (ix) + (jx)*nrow_X ]
-#define A(ia,ja) a_[ (ia) + (ja)*nrow_A ]
-
 /*
  * -------------------------------------------------------
  * A in dense matrix format
@@ -72,9 +67,9 @@ void den_matmul_post(
 
          dgemm_( &trans1, &trans2,
                  &mm, &nn, &kk,
-                 &alpha,  &(Y(0,0)), &ld1, 
-                          &(A(0,0)), &ld2,
-                 &beta,   &(X(0,0)), &ld3 );
+                 &alpha,  &(yin(0,0)), &ld1,
+                          &(a_(0,0)), &ld2,
+                 &beta,   &(xout(0,0)), &ld3 );
          }
      else {
 
@@ -88,11 +83,11 @@ void den_matmul_post(
             for(ja=0; ja < ncol_A; ja++) {
                int jy = ja;
                int ia = jx;
-               double aij = A(ia,ja);
+               double aij = a_(ia,ja);
                double atji = aij;
-               dsum += (Y(iy,jy) * atji);
+               dsum += (yin(iy,jy) * atji);
                };
-            X(ix,jx) += dsum;
+            xout(ix,jx) += dsum;
            };
           };
            
@@ -128,9 +123,9 @@ else  {
 
          dgemm_( &trans1, &trans2,
                  &mm, &nn, &kk,
-                 &alpha,  &(Y(0,0)), &ld1,
-                          &(A(0,0)), &ld2,
-                 &beta,   &(X(0,0)), &ld3 );
+                 &alpha,  &(yin(0,0)), &ld1,
+                          &(a_(0,0)), &ld2,
+                 &beta,   &(xout(0,0)), &ld3 );
 
           }
       else {
@@ -144,11 +139,11 @@ else  {
                  int ja = jx;
                  int iy = ix;
                  int jy = ia;
-                 double aij = A(ia,ja);
+                 double aij = a_(ia,ja);
                
-                 dsum += (aij * Y(iy,jy));
+                 dsum += (aij * yin(iy,jy));
                  };
-              X(ix,jx) += dsum;
+              xout(ix,jx) += dsum;
               };
             };
          };

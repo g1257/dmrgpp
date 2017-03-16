@@ -1,15 +1,13 @@
 #include "util.h"
 void den2csr( const int nrow_A, 
               const int ncol_A, 
-              const double a_[], 
+              const PsimagLite::Matrix<double>& a_,
 
               const int max_nnz, 
-                    int arowptr[], 
-                    int acol[], 
-                    double aval[] )
+                    PsimagLite::Vector<int>::Type& arowptr,
+                    PsimagLite::Vector<int>::Type& acol,
+                    PsimagLite::Vector<double>::Type& aval)
 {
-#define A(ia,ja) a_[(ia) + (ja)*nrow_A]
-
 /*
  * -----------------------------
  * convert from dense matrix format to
@@ -38,7 +36,7 @@ void den2csr( const int nrow_A,
 
   for(ja=0; ja < ncol_A; ja++) {
   for(ia=0; ia < nrow_A; ia++) {
-      double aij = A(ia,ja);
+      double aij = a_(ia,ja);
       int is_zero = (aij == dzero);
       if (!is_zero) {
            nnz_row[ia] += 1;
@@ -82,7 +80,7 @@ void den2csr( const int nrow_A,
 
  for(ja=0; ja < ncol_A; ja++) {
  for(ia=0; ia < nrow_A; ia++) {
-    double aij = A(ia,ja);
+    double aij = a_(ia,ja);
     int is_zero = (aij == dzero);
     if (!is_zero) {
        int ipos = arowptr[ia] + nnz_row[ia];

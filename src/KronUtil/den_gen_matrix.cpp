@@ -2,9 +2,8 @@
 void den_gen_matrix( const int nrow_A, 
                      const int ncol_A, 
                      const double threshold, 
-                           double a_[] )
+                           PsimagLite::Matrix<double>& a_)
 {
-#define A(ia,ja) a_[ (ia) + (ja)*nrow_A ]
 /* 
  * -------------------------------
  * generate a random matix in (0,1)
@@ -26,7 +25,7 @@ void den_gen_matrix( const int nrow_A,
 
     int is_accept = (drand <= threshold);
 
-    A(ia,ja) = (is_accept) ? aij : dzero;
+    a_(ia,ja) = (is_accept) ? aij : dzero;
 
     };
     };

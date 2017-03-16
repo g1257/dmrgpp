@@ -3,21 +3,17 @@
 void csc_matmul_pre( char trans_A, 
                      const int nrow_A,
                      const int ncol_A, 
-                     const int acolptr[], 
-                     const int arow[], 
-                     const double aval[],
+                     const PsimagLite::Vector<int>::Type& acolptr,
+                     const PsimagLite::Vector<int>::Type& arow,
+                     const PsimagLite::Vector<double>::Type& aval,
 
                      const int nrow_Y, 
                      const int ncol_Y, 
-                     const double yin[],
+                     const PsimagLite::Matrix<double>& yin,
 
                      const int nrow_X, 
                      const int ncol_X, 
-                     double xout[] )
-
-#define Y(iy,jy)  yin[ (iy) + (jy)*nrow_Y ]
-#define X(ix,jx) xout[ (ix) + (jx)*nrow_X ]
-
+                     PsimagLite::Matrix<double>& xout )
 {
 /*
  * -------------------------------------------------------
@@ -67,7 +63,7 @@ void csc_matmul_pre( char trans_A,
           for(jy=0; jy < ncol_Y; jy++) {
             int ix = ja;
             int jx = jy;
-            X(ix,jx) += (atji * Y(ia,jy));
+            xout(ix,jx) += (atji * yin(ia,jy));
            };
         };
     };
@@ -97,7 +93,7 @@ else  {
             int ix = ia;
             int jx = jy;
 
-            X(ix,jx) += (aij * Y(ja,jy));
+            xout(ix,jx) += (aij * yin(ja,jy));
             };
          };
       };

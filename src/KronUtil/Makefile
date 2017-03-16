@@ -3,6 +3,7 @@ include ../Config.make
 all: libkronutil.a test1 test2
 
 CPPFLAGS += -I../../../PsimagLite/src
+LDFLAGS += -L. -L../../../PsimagLite/lib
 
 SRC=    kronUtilComplex.cpp \
 	coord2csr.cpp  \
@@ -69,11 +70,11 @@ libkronutil.a: $(OBJ)
 	ar rc libkronutil.a $(OBJ)
 	ranlib libkronutil.a
 
-test1: libkronutil.a test1.o
-	$(CC) $(CFLAGS) -o test1 test1.o libkronutil.a $(LIBS)
+test1: libkronutil.a test1.o $(OBJ)
+	$(CXX) $(CFLAGS) -o test1 test1.o $(OBJ) libkronutil.a $(LDFLAGS)
 
 test2: libkronutil.a test2.o
-	$(CC) $(CFLAGS) -o test2 test2.o libkronutil.a $(LIBS)
+	$(CXX) $(CFLAGS) -o test2 test2.o $(OBJ) libkronutil.a $(LDFLAGS)
 
 clean:
 	touch csr_kron_mult.o libkronutil.a test1 test2

@@ -2,6 +2,7 @@
 #define KRON_UTIL_HEADER_H
 #include <complex>
 #include "Vector.h"
+#include "Matrix.h"
 
 extern
 void csr_kron_mult(const char transA,

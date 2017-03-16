@@ -3,9 +3,9 @@
 void csr_matmul_post( char trans_A, 
                      const int nrow_A,
                      const int ncol_A, 
-                     const int arowptr[], 
-                     const int acol[], 
-                     const double aval[],
+                     const PsimagLite::Vector<int>::Type& arowptr,
+                     const PsimagLite::Vector<int>::Type& acol,
+                     const PsimagLite::Vector<double>::Type& aval,
 
                      const int nrow_Y, 
                      const int ncol_Y, 

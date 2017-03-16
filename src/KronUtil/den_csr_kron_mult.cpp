@@ -1,19 +1,18 @@
 #include "util.h"
 
-void den_csr_kron_mult_method( 
-                    const int imethod,
+void den_csr_kron_mult_method(const int imethod,
                     const char transA,
                     const char transB,
 
                     const int nrow_A,
-                    const int ncol_A, 
+                    const int ncol_A,
                     const PsimagLite::Matrix<double>& a_,
 
                     const int nrow_B,
-                    const int ncol_B, 
-                    const int browptr[], 
-                    const int bcol[], 
-                    const double bval[],
+                    const int ncol_B,
+                    const PsimagLite::Vector<int>::Type& browptr,
+                    const PsimagLite::Vector<int>::Type& bcol,
+                    const PsimagLite::Vector<double>::Type& bval,
 
                     const PsimagLite::Matrix<double>& yin,
                           PsimagLite::Matrix<double>& xout)
@@ -310,9 +309,9 @@ void den_csr_kron_mult(
 
                     const int nrow_B,
                     const int ncol_B, 
-                    const int browptr[], 
-                    const int bcol[], 
-                    const double bval[],
+                    const PsimagLite::Vector<int>::Type& browptr,
+                    const PsimagLite::Vector<int>::Type& bcol,
+                    const PsimagLite::Vector<double>::Type& bval,
 
                     const PsimagLite::Matrix<double>& yin,
                           PsimagLite::Matrix<double>& xout)

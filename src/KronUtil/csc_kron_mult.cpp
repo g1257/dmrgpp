@@ -1,24 +1,20 @@
 #include "util.h"
 
-void csc_kron_mult_method( 
-                    const int imethod,
+void csc_kron_mult_method(const int imethod,
                     const int nrow_A,
-                    const int ncol_A, 
-                    const int acolptr[], 
-                    const int arow[], 
-                    const double aval[],
+                    const int ncol_A,
+                    const PsimagLite::Vector<int>::Type& acolptr,
+                    const PsimagLite::Vector<int>::Type& arow,
+                    const PsimagLite::Vector<double>::Type& aval,
 
                     const int nrow_B,
-                    const int ncol_B, 
-                    const int bcolptr[], 
-                    const int brow[], 
-                    const double bval[],
+                    const int ncol_B,
+                    const PsimagLite::Vector<int>::Type& bcolptr,
+                    const PsimagLite::Vector<int>::Type& brow,
+                    const PsimagLite::Vector<double>::Type& bval,
 
-                    const double yin[], 
-                          double xout[] )
-
-#define X(ib,ia) xout[ (ib) + (ia)*nrow_X ]
-#define Y(jb,ja)  yin[ (jb) + (ja)*nrow_Y ]
+                    const PsimagLite::Matrix<double>& yin,
+                          PsimagLite::Matrix<double>& xout)
 {
      const int nrow_X = nrow_B;
      const int ncol_X = nrow_A;
@@ -88,16 +84,16 @@ void csc_kron_mult_method(
      */
     const int nrow_BY = nrow_B;
     const int ncol_BY = ncol_A;
-    double* by_ = new double[nrow_BY * ncol_BY ];
-#define BY(ib,ja)  by_[ (ib) + (ja)*nrow_B ]
+    PsimagLite::Matrix<double> by_(nrow_BY, ncol_BY);
 
     {
      int iby = 0;
      int jby = 0;
 
+	 // not needed, FIXME
      for( jby=0; jby < ncol_BY; jby++) {
      for( iby=0; iby < nrow_BY; iby++) {
-        BY(iby,jby) = 0;
+        by_(iby,jby) = 0;
         };
         };
     }
@@ -119,11 +115,11 @@ void csc_kron_mult_method(
 
                      nrow_Y,
                      ncol_Y,
-                     &(Y(0,0)),
+                     yin,
 
                      nrow_BY,
                      ncol_BY,
-                     &(BY(0,0))   );
+                     by_);
 
    }
 
@@ -145,16 +141,13 @@ void csc_kron_mult_method(
 
                      nrow_BY,
                      ncol_BY,
-                     &(BY(0,0)),
+                     by_,
 
                      nrow_X,
                      ncol_X,
-                     &(X(0,0))   );
+                     xout);
 
     }
-    
-    delete[] by_;
-
    }
  else if (imethod == 2) {
     /*
@@ -172,8 +165,7 @@ void csc_kron_mult_method(
      * ----------------
      */
 
-    double* yat_ = new double[ncol_B * nrow_A ];
-#define YAt(jb,ia) yat_[ (jb) + (ia)*ncol_B ]
+    PsimagLite::Matrix<double> yat_(ncol_B, nrow_A);
 
     int nrow_YAt = ncol_B;
     int ncol_YAt = nrow_A;
@@ -183,9 +175,10 @@ void csc_kron_mult_method(
     int jb = 0;
     int ia = 0;
   
+	//not needed, FIXME
     for(ia=0; ia < ncol_A; ia++) {
       for(jb=0; jb < ncol_B; jb++) {
-         YAt(jb,ia) = 0;
+         yat_(jb,ia) = 0;
          };
       };
      }
@@ -210,11 +203,11 @@ void csc_kron_mult_method(
 
                      nrow_Y, 
                      ncol_Y,
-                     &(Y(0,0)),
+                     yin,
     
                      nrow_YAt, 
                      ncol_YAt,
-                     &(YAt(0,0))  );
+                     yat_);
      }
 
 
@@ -237,16 +230,13 @@ void csc_kron_mult_method(
 
                     nrow_YAt,
                     ncol_YAt,
-                    &(YAt(0,0)),
+                    yat_,
 
                      nrow_X,
                      ncol_X, 
-                     &(X(0,0)) );
+                     xout);
 
       }
-
-    delete[] yat_;
-
    }
  else if (imethod == 3) {
    /*
@@ -275,7 +265,7 @@ void csc_kron_mult_method(
                  double bij = brow[kb];
                  double cij = aij * bij;
 
-                 X(ib,ia) +=  (cij * Y(jb,ja));
+                 xout(ib,ia) +=  (cij * yin(jb,ja));
                  };
              };
          };
@@ -288,18 +278,18 @@ void csc_kron_mult_method(
 
 void csc_kron_mult( const int nrow_A,
                     const int ncol_A, 
-                    const int acolptr[], 
-                    const int arow[], 
-                    const double aval[],
+                    const PsimagLite::Vector<int>::Type& acolptr,
+                    const PsimagLite::Vector<int>::Type& arow,
+                    const PsimagLite::Vector<double>::Type& aval,
 
                     const int nrow_B,
                     const int ncol_B, 
-                    const int bcolptr[], 
-                    const int brow[], 
-                    const double bval[],
+                    const PsimagLite::Vector<int>::Type& bcolptr,
+                    const PsimagLite::Vector<int>::Type& brow,
+                    const PsimagLite::Vector<double>::Type& bval,
 
-                    const double yin[], 
-                          double xout[] )
+                    const PsimagLite::Matrix<double>& yin,
+                          PsimagLite::Matrix<double>& xout )
 
 {
 /*
