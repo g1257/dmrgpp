@@ -11,15 +11,15 @@ void csr_kron_mult(const char transA,
                    const char transB,
                    const int nrow_A,
                    const int ncol_A,
-                   const int arowptr[],
-                   const int acol[],
-                   const ComplexOrRealType aval[],
+                   const PsimagLite::Vector<int>::Type& arowptr,
+                   const PsimagLite::Vector<int>::Type& acol,
+                   const typename PsimagLite::Vector<ComplexOrRealType>::Type& aval,
 
                    const int nrow_B,
                    const int ncol_B,
-                   const int browptr[],
-                   const int bcol[],
-                   const ComplexOrRealType bval[],
+                   const PsimagLite::Vector<int>::Type& browptr,
+                   const PsimagLite::Vector<int>::Type& bcol,
+                   const typename PsimagLite::Vector<ComplexOrRealType>::Type& bval,
 
                    const ComplexOrRealType yin[],
                    ComplexOrRealType xout[])
@@ -35,13 +35,13 @@ void csr_den_kron_mult(const char transA,
 
                        const int nrow_A,
                        const int ncol_A,
-                       const int arowptr[],
-                       const int acol[],
-                       const ComplexOrRealType aval[],
+                       const PsimagLite::Vector<int>::Type& arowptr,
+                       const PsimagLite::Vector<int>::Type& acol,
+                       const typename PsimagLite::Vector<ComplexOrRealType>::Type& aval,
 
                        const int nrow_B,
                        const int ncol_B,
-                       const ComplexOrRealType b_[],
+                       const typename PsimagLite::Vector<ComplexOrRealType>::Type& b_,
 
                        const ComplexOrRealType yin[],
                        ComplexOrRealType xout[] )
@@ -56,13 +56,13 @@ void den_csr_kron_mult(const char transA,
                        const char transB,
                        const int nrow_A,
                        const int ncol_A,
-                       const ComplexOrRealType a_[],
+                       const typename PsimagLite::Vector<ComplexOrRealType>::Type& a_,
 
                        const int nrow_B,
                        const int ncol_B,
-                       const int browptr[],
-                       const int bcol[],
-                       const ComplexOrRealType bval[],
+                       const PsimagLite::Vector<int>::Type& browptr,
+                       const PsimagLite::Vector<int>::Type& bcol,
+                       const typename PsimagLite::Vector<ComplexOrRealType>::Type& bval,
 
                        const ComplexOrRealType yin[],
                        ComplexOrRealType xout[])
@@ -78,11 +78,11 @@ void den_kron_mult(const char transA,
 
                    const int nrow_A,
                    const int ncol_A,
-                   const ComplexOrRealType a_[],
+                   const typename PsimagLite::Vector<ComplexOrRealType>::Type& a_,
 
                    const int nrow_B,
                    const int ncol_B,
-                   const ComplexOrRealType b_[],
+                   const typename PsimagLite::Vector<ComplexOrRealType>::Type& b_,
 
                    const ComplexOrRealType yin[],
                    ComplexOrRealType xout[])
