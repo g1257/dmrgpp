@@ -112,6 +112,7 @@ public:
 
 	const SizeType& operator()(SizeType i) const
 	{
+		assert(i < istart_.size());
 		return istart_[i];
 	}
 

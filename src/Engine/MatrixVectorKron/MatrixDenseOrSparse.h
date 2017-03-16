@@ -105,7 +105,7 @@ private:
 }; // class MatrixDenseOrSparse
 
 template<typename SparseMatrixType>
-void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>::Type& xout,
+void kronMult(typename SparseMatrixType::value_type* xout,
               const typename SparseMatrixType::value_type* yin,
               char transA,
               char transB,
@@ -134,7 +134,7 @@ void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>
 			              ncolB,
 			              bval,
 			              yin,
-			        &(xout[0]));
+			              xout);
 		} else  {
 			// B is sparse
 			const int *browptr = &(B.rowptr()[0]);
@@ -151,7 +151,7 @@ void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>
 			                  bcol,
 			                  bval,
 			                  yin,
-			        &(xout[0]));
+			                  xout);
 		}
 	} else {
 		// A is sparse
@@ -170,7 +170,7 @@ void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>
 			                  ncolB,
 			                  bval,
 			                  yin,
-			        &(xout[0]));
+			                  xout);
 		} else {
 			// B is sparse
 			const int *browptr = &(B.rowptr()[0]);
@@ -189,7 +189,7 @@ void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>
 			              bcol,
 			              bval,
 			              yin,
-			        &(xout[0]));
+			              xout);
 		};
 	};
 } // kron_mult

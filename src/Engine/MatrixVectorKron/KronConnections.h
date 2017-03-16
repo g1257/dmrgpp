@@ -112,9 +112,14 @@ public:
 	KronConnections(const InitKronType& initKron,
 	                VectorType& x,
 	                const VectorType& y,
-	                SizeType nthreads)
-	    : initKron_(initKron),x_(x),y_(y)
-	{}
+	                SizeType)
+	    : initKron_(initKron),
+	      x_(x),
+	      y_(y),
+	      offsetForPatches_(initKron_.patch(GenIjPatchType::LEFT).size())
+	{
+		computeOffsets();
+	}
 
 	SizeType tasks() const
 	{
@@ -127,22 +132,19 @@ public:
 	{
 		SizeType nC = initKron_.connections();
 		SizeType total = tasks();
+		SizeType offsetX = offsetForPatches_[outPatch];
+		assert(offsetX < x_.size());
 		for (SizeType inPatch=0;inPatch<total;++inPatch) {
+			SizeType offsetY = offsetForPatches_[inPatch];
+			assert(offsetY < y_.size());
 			for (SizeType ic=0;ic<nC;++ic) {
 				const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
 				const ArrayOfMatStructType& yiStruct = initKron_.yc(ic);
 
-				SizeType i = initKron_.patch(GenIjPatchType::LEFT)[inPatch];
-				SizeType j = initKron_.patch(GenIjPatchType::RIGHT)[inPatch];
+				const MatrixDenseOrSparseType& tmp1 =  xiStruct(outPatch,inPatch);
+				const MatrixDenseOrSparseType& tmp2 =  yiStruct(outPatch,inPatch);
 
-				SizeType ip = initKron_.patch(GenIjPatchType::LEFT)[outPatch];
-				SizeType jp = initKron_.patch(GenIjPatchType::RIGHT)[outPatch];
-
-
-				const MatrixDenseOrSparseType& tmp1 =  xiStruct(ip,i);
-				const MatrixDenseOrSparseType& tmp2 =  yiStruct(j,jp);
-
-				kronMult(x_, &(y_[0]), 'n', 'n', tmp1, tmp2);
+				kronMult(&(x_[offsetX]), &(y_[offsetY]), 'n', 'n', tmp1, tmp2);
 			}
 		}
 
@@ -151,9 +153,29 @@ public:
 	void sync()
 	{}
 
+private:
+
+	void computeOffsets()
+	{
+		SizeType total = initKron_.patch(GenIjPatchType::LEFT).size();
+		SizeType sum = 0;
+		for (SizeType patch=0; patch < total; ++patch) {
+			offsetForPatches_[patch] = sum;
+			assert(initKron_.istartLeft()(patch+1) >= initKron_.istartLeft()(patch));
+			SizeType sizeLeft =
+			        initKron_.istartLeft()(patch+1) - initKron_.istartLeft()(patch);
+
+			assert(initKron_.istartRight()(patch+1) >= initKron_.istartRight()(patch));
+			SizeType sizeRight =
+			        initKron_.istartRight()(patch+1) - initKron_.istartRight()(patch);
+			sum += sizeLeft*sizeRight;
+		}
+	}
+
 	const InitKronType& initKron_;
 	VectorType& x_;
 	const VectorType& y_;
+	VectorSizeType offsetForPatches_;
 }; //class KronConnections
 
 } // namespace PsimagLite

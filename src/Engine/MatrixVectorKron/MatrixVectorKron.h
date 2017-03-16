@@ -91,6 +91,8 @@ class MatrixVectorKron : public MatrixVectorBase<ModelType_> {
 
 	typedef MatrixVectorBase<ModelType_> BaseType;
 
+	static const bool CHECK_KRON = true;
+
 public:
 
 	typedef ModelType_ ModelType;
@@ -102,6 +104,7 @@ public:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
 	typedef typename SparseMatrixType::value_type value_type;
 
@@ -115,6 +118,8 @@ public:
 
 		model->fullHamiltonian(matrixStored_,*modelHelper);
 		assert(isHermitian(matrixStored_,true));
+
+		checkKron();
 	}
 
 	SizeType rank() const { return initKron_.size(); }
@@ -134,6 +139,36 @@ public:
 	}
 
 private:
+
+
+	void checkKron() const
+	{
+		if (!CHECK_KRON)
+			return;
+
+#ifndef NDEBUG
+		return;
+#endif
+
+		SizeType n = rank();
+		std::cout<<n<<"\n";
+		FullMatrixType m(n, n);
+		for (SizeType i = 0; i < n; ++i) {
+			VectorType e(n, 0.0);
+			e[i] = 1.0;
+			VectorType ey(n, 0.0);
+			kronMatrix_.matrixVectorProduct(ey,e);
+			for (SizeType j = 0; j < n; ++j)
+				m(i, j) = ey[j];
+
+		}
+
+		std::cout<<"Matrix as thought of by Kron\n";
+		std::cout<<m;
+		assert(isHermitian(m));
+		std::cout<<"Correct matrix\n";
+		std::cout<<matrixStored_;
+	}
 
 	const ModelType* model_;
 	InitKronType initKron_;

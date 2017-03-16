@@ -101,7 +101,7 @@ public:
 	                 GenGroupType& istart,
 	                 GenIjPatchType& patch,
 	                 typename GenIjPatchType::LeftOrRightEnumType leftOrRight)
-	    : data_(istart.size()-1,istart.size()-1)
+	    : data_(patch(leftOrRight).size(), patch(leftOrRight).size())
 	{
 		SizeType npatch = patch(leftOrRight).size();
 		for (SizeType jpatch=0; jpatch < npatch; ++jpatch) {
@@ -131,7 +131,7 @@ public:
 
 				tmp.setRow(i2-i1,counter);
 				tmp.checkValidity();
-				data_(jgroup,igroup) = new MatrixDenseOrSparseType(tmp);
+				data_(ipatch,jpatch) = new MatrixDenseOrSparseType(tmp);
 			}
 		}
 	}
