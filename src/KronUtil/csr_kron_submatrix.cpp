@@ -2,25 +2,25 @@
 void csr_kron_submatrix( 
          const int nrow_A,
          const int ncol_A,
-         const int arowptr[],
-         const int acol[],
-         const double aval[],
+         const PsimagLite::Vector<int>::Type& arowptr,
+         const PsimagLite::Vector<int>::Type& acol,
+         const PsimagLite::Vector<double>::Type& aval,
 
          const int nrow_B,
          const int ncol_B,
-         const int browptr[],
-         const int bcol[],
-         const double bval[],
+         const PsimagLite::Vector<int>::Type& browptr,
+         const PsimagLite::Vector<int>::Type& bcol,
+         const PsimagLite::Vector<double>::Type& bval,
          
          const int nrindex, 
          const int ncindex, 
          const int max_nnz,
-         const int rindex[],
-         const int cindex[],
+         const PsimagLite::Vector<int>::Type& rindex,
+         const PsimagLite::Vector<int>::Type& cindex,
 
-         int hrowptr[],
-         int hcol[],
-         double hval[] )
+         PsimagLite::Vector<int>::Type& hrowptr,
+         PsimagLite::Vector<int>::Type& hcol,
+         PsimagLite::Vector<double>::Type& hval )
 {
 /*
  * -------------------------------------------------

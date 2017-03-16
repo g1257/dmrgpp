@@ -3,18 +3,18 @@
 void den_kron_submatrix(
         const int nrow_A,
         const int ncol_A,
-        const double a_[],
+        const PsimagLite::Matrix<double>& a_,
 
         const int nrow_B,
         const int ncol_B,
-        const double b_[],
+        const PsimagLite::Matrix<double>& b_,
 
         const int nrindex, 
         const int ncindex,
-        const int rindex[], 
-        const int cindex[],
+        const PsimagLite::Vector<int>::Type& rindex,
+        const PsimagLite::Vector<int>::Type& cindex,
 
-        double e_[] )
+        PsimagLite::Matrix<double>& e_ )
 {
 /*
  * -------------------------------------------------
@@ -27,9 +27,6 @@ void den_kron_submatrix(
  */
  const int nrow_E = nrindex;
  const int ncol_E = ncindex;
-#define E(ie,je) e_[ (ie) + (je)*nrow_E ]
-#define A(ia,ja) a_[ (ia) + (ja)*nrow_A ]
-#define B(ib,jb) b_[ (ib) + (jb)*nrow_B ]
 
  int ie = 0;
  int je = 0;
@@ -95,9 +92,9 @@ void den_kron_submatrix(
                   (0 <= jb) && (jb < ncol_B) &&
                   ((jb + ja*ncol_B) == jc));
 
-    double cij = A(ia,ja)*B(ib,jb);
+    double cij = a_(ia,ja)*b_(ib,jb);
     
-    E(ie,je) = cij;
+    e_(ie,je) = cij;
     };
     };
 }

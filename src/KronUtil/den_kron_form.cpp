@@ -1,13 +1,13 @@
 #include "util.h"
 void den_kron_form( const int nrow_A, 
                     const int ncol_A, 
-                    const double a_[], 
+                    const PsimagLite::Matrix<double>& a_,
 
                     const int nrow_B, 
                     const int ncol_B, 
-                    const double b_[],   
+                    const PsimagLite::Matrix<double>& b_,
 
-                          double c_[] )
+                          PsimagLite::Matrix<double>& c_ )
 {
 /*
  * ---------------------------------------
@@ -17,12 +17,6 @@ void den_kron_form( const int nrow_A,
  * C([ib,ia], [jb,ja]) = A(ia,ja)*B(ib,jb)
  * ---------------------------------------
  */
-#define A(ia,ja) a_[(ia) + (ja)*nrow_A]
-#define B(ib,jb) b_[(ib) + (jb)*nrow_B]
-#define C(ib,jb) c_[(ic) + (jc)*nrow_C]
-
-  const int nrow_C = nrow_A * nrow_B;
-
   int ia = 0;
   int ja = 0;
   int ib = 0;
@@ -36,7 +30,7 @@ void den_kron_form( const int nrow_A,
            int ic = ib + ia*nrow_B;
            int jc = jb + ja*ncol_B;
 
-           C(ic,jc) = A(ia,ja) * B(ib,jb);
+           c_(ic,jc) = a_(ia,ja) * b_(ib,jb);
     };
     };
     };

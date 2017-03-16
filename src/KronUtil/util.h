@@ -146,45 +146,45 @@ void csr_matmul_pre( const char trans_A,
 extern
 void csr_submatrix( const int nrow_A,
                     const int ncol_A,
-                    const int arowptr[],
-                    const int acol[],
-                    const double aval[],
+                    const PsimagLite::Vector<int>::Type& arowptr,
+                    const PsimagLite::Vector<int>::Type& acol,
+                    const PsimagLite::Vector<double>::Type& aval,
 
                     const int nrow_B,
                     const int ncol_B,
                     const int max_nnz,
 
-                    const int rindex[],
-                    const int cindex[],
+                    const PsimagLite::Vector<int>::Type& rindex,
+                    const PsimagLite::Vector<int>::Type& cindex,
 
-                    int browptr[],
-                    int bcol[],
-                    double bval[] );
+                    PsimagLite::Vector<int>::Type& browptr,
+                    PsimagLite::Vector<int>::Type& bcol,
+                    PsimagLite::Vector<double>::Type& bval);
 
 
 extern
 void csr_kron_submatrix( 
          const int nrow_A,
          const int ncol_A,
-         const int arowptr[],
-         const int acol[],
-         const double aval[],
+         const PsimagLite::Vector<int>::Type& arowptr,
+         const PsimagLite::Vector<int>::Type& acol,
+         const PsimagLite::Vector<double>::Type& aval,
 
          const int nrow_B,
          const int ncol_B,
-         const int browptr[],
-         const int bcol[],
-         const double bval[],
+         const PsimagLite::Vector<int>::Type& browptr,
+         const PsimagLite::Vector<int>::Type& bcol,
+         const PsimagLite::Vector<double>::Type& bval,
          
          const int nrindex, 
          const int ncindex, 
          const int max_nnz,
-         const int rindex[],
-         const int cindex[],
+         const PsimagLite::Vector<int>::Type& rindex,
+         const PsimagLite::Vector<int>::Type& cindex,
 
-         int hrowptr[],
-         int hcol[],
-         double hval[] );
+         PsimagLite::Vector<int>::Type& hrowptr,
+         PsimagLite::Vector<int>::Type& hcol,
+         PsimagLite::Vector<double>::Type& hval );
 
 
 extern
@@ -352,18 +352,18 @@ extern
 void den_kron_submatrix(
         const int nrow_A,
         const int ncol_A,
-        const double a_[],
+        const PsimagLite::Matrix<double>& a_,
 
         const int nrow_B,
         const int ncol_B,
-        const double b_[],
+        const PsimagLite::Matrix<double>& b_,
 
         const int nrindex, 
         const int ncindex,
-        const int rindex[], 
-        const int cindex[],
+        const PsimagLite::Vector<int>::Type& rindex,
+        const PsimagLite::Vector<int>::Type& cindex,
 
-        double c_[] );
+        PsimagLite::Matrix<double>& c_ );
 
 extern
 void den_kron_mult_method(const int imethod,
@@ -390,26 +390,26 @@ int den_nnz( const int,
 extern
 void den_kron_form( const int nrow_A,
                     const int ncol_A, 
-                    const double a_[],
+                    const PsimagLite::Matrix<double>& a_,
 
                     const int nrow_B,
                     const int ncol_B, 
-                    const double b_[],
+                    const PsimagLite::Matrix<double>& b_,
 
-                          double c_[] );
+                          PsimagLite::Matrix<double>& c_);
 
 
 extern
 void den_submatrix( const int nrow_A, 
                     const int ncol_A, 
-                    const double a_[],
+                    const PsimagLite::Matrix<double>& a_,
 
                     const int nrindex, 
                     const int ncindex,
-                    const int rindex[],  
-                    const int cindex[],
+                    const PsimagLite::Vector<int>::Type& rindex,
+                    const PsimagLite::Vector<int>::Type& cindex,
 
-                    double c_[] );
+                    PsimagLite::Matrix<double>& c_);
 
 extern
 void den2csr( const int nrow_A, 

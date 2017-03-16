@@ -2,20 +2,20 @@
 
 void csr_submatrix( const int nrow_A, 
                     const int ncol_A, 
-                    const int arowptr[], 
-                    const int acol[], 
-                    const double aval[], 
+                    const PsimagLite::Vector<int>::Type& arowptr,
+                    const PsimagLite::Vector<int>::Type& acol,
+                    const PsimagLite::Vector<double>::Type& aval,
 
                     const int nrow_B, 
                     const int ncol_B, 
                     const int max_nnz,
 
-                    const int rindex[], 
-                    const int cindex[],
+                    const PsimagLite::Vector<int>::Type& rindex,
+                    const PsimagLite::Vector<int>::Type& cindex,
 
-                    int browptr[], 
-                    int bcol[], 
-                    double bval[] )
+                    PsimagLite::Vector<int>::Type& browptr,
+                    PsimagLite::Vector<int>::Type& bcol,
+                    PsimagLite::Vector<double>::Type& bval )
 {
 /*
  * ---------------------------------------------------------------------------

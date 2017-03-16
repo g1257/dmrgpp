@@ -1,14 +1,14 @@
 #include "util.h"
 void den_submatrix( const int nrow_A, 
                     const int ncol_A, 
-                    const double a_[],
+                    const PsimagLite::Matrix<double>& a_,
 
                     const int nrindex, 
                     const int ncindex,
-                    const int rindex[],  
-                    const int cindex[],
+                    const PsimagLite::Vector<int>::Type& rindex,
+                    const PsimagLite::Vector<int>::Type& cindex,
 
-                    double c_[] )
+                    PsimagLite::Matrix<double>& c_ )
 {
 /*
  * -------------------------------------
@@ -17,8 +17,6 @@ void den_submatrix( const int nrow_A,
  */
  const int nrow_C = nrindex;
  const int ncol_C = ncindex;
-#define C(ic,jc) c_[ (ic) + (jc)*nrow_C ]
-#define A(ia,ja) a_[ (ia) + (ja)*nrow_A ]
 
  int ic = 0;
  int jc = 0;
@@ -47,11 +45,9 @@ void den_submatrix( const int nrow_A,
     int ia = rindex[ic];
     int ja = cindex[jc];
 
-    C(ic,jc) = A(ia,ja);
+    c_(ic,jc) = a_(ia,ja);
     };
     };
 
 }
- 
-#undef A
-#undef C
+
