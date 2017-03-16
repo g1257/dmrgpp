@@ -312,7 +312,7 @@ public:
 		SizeType j = 0;
 		RealType enew = 0;
 		lanczosVectors_.saveInitialVector(y);
-		typename Vector<RealType>::Type nullVector(0);
+		typename Vector<RealType>::Type nullVector;
 		groundAllocations(max_nstep + 2,false);
 		for (; j < max_nstep; j++) {
 			for (SizeType i = 0; i < mat_.rank(); i++)

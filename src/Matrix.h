@@ -44,6 +44,9 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 	x = std::complex<RealType>(cos(y),sin(y));
 }
 
+template<typename T2>
+class MatrixNonOwned;
+
 template<typename T>
 class  Matrix  {
 public:
@@ -385,6 +388,9 @@ public:
 	}
 
 	// end closure members
+
+	template<typename T2>
+	friend class MatrixNonOwned;
 
 private:
 
