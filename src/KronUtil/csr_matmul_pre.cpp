@@ -14,10 +14,6 @@ void csr_matmul_pre( char trans_A,
                      const int nrow_X, 
                      const int ncol_X, 
                      PsimagLite::Matrix<double>& xout)
-
-//#define Y(iy,jy) yin[ (iy) + (jy)*nrow_Y ]
-//#define X(ix,jx) xout[ (ix) + (jx)*nrow_X ]
-
 {
    const int idebug = 0;
 /*

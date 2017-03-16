@@ -116,10 +116,6 @@ void kronMult(typename SparseMatrixType::value_type* xout,
 	SizeType ncolA = A.cols();
 	SizeType nrowB = B.rows();
 	SizeType ncolB = B.cols();
-
-	const typename SparseMatrixType::value_type *aval = &(A.values()[0]);
-	const typename SparseMatrixType::value_type *bval = &(B.values()[0]);
-
 	const bool isDenseA = A.isDense();
 	const bool isDenseB = B.isDense();
 
@@ -129,65 +125,56 @@ void kronMult(typename SparseMatrixType::value_type* xout,
 			              transB,
 			              nrowA,
 			              ncolA,
-			              aval,
+			              A.values(),
 			              nrowB,
 			              ncolB,
-			              bval,
+			              B.values(),
 			              yin,
 			              xout);
 		} else  {
 			// B is sparse
-			const int *browptr = &(B.rowptr()[0]);
-			const int *bcol = &(B.colind()[0]);
-
 			den_csr_kron_mult(transA,
 			                  transB,
 			                  nrowA,
 			                  ncolA,
-			                  aval,
+			                  A.values(),
 			                  nrowB,
 			                  ncolB,
-			                  browptr,
-			                  bcol,
-			                  bval,
+			                  B.rowptr(),
+			                  B.colind(),
+			                  B.values(),
 			                  yin,
 			                  xout);
 		}
 	} else {
 		// A is sparse
-		const int *arowptr = &(A.rowptr()[0]);
-		const int *acol = &(A.colind()[0]);
-
 		if (isDenseB) {
 			csr_den_kron_mult(transA,
 			                  transB,
 			                  nrowA,
 			                  ncolA,
-			                  arowptr,
-			                  acol,
-			                  aval,
+			                  A.rowptr(),
+			                  A.colind(),
+			                  A.values(),
 			                  nrowB,
 			                  ncolB,
-			                  bval,
+			                  B.values(),
 			                  yin,
 			                  xout);
 		} else {
 			// B is sparse
-			const int *browptr = &(B.rowptr()[0]);
-			const int *bcol = &(B.colind()[0]);
-
 			csr_kron_mult(transA,
 			              transB,
 			              nrowA,
 			              ncolA,
-			              arowptr,
-			              acol,
-			              aval,
+			              A.rowptr(),
+		                  A.colind(),
+		                  A.values(),
 			              nrowB,
 			              ncolB,
-			              browptr,
-			              bcol,
-			              bval,
+			              B.rowptr(),
+		                  B.colind(),
+		                  B.values(),
 			              yin,
 			              xout);
 		};

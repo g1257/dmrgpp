@@ -18,9 +18,6 @@ void csr_kron_mult_method(const int imethod,
 
                     const PsimagLite::Matrix<double>& yin,
                           PsimagLite::Matrix<double>& xout)
-
-//#define X(ib,ia) xout[ (ib) + (ia)*nrow_X ]
-//#define Y(jb,ja) yin[ (jb) + (ja)*nrow_Y ]
 {
      const int isTransA = (transA == 'T') || (transA == 't');
      const int isTransB = (transB == 'T') || (transB == 't');
@@ -101,8 +98,6 @@ void csr_kron_mult_method(const int imethod,
     int nrow_BY = nrow_X;
     int ncol_BY = ncol_Y;
     PsimagLite::Matrix<double> by_(nrow_BY,ncol_BY );
-//#define BY(iby,jby)  by_[ (iby) + (jby)*nrow_BY ]
-
 
     /*
      * ---------------
@@ -185,8 +180,6 @@ void csr_kron_mult_method(const int imethod,
     int nrow_YAt = nrow_Y;
     int ncol_YAt = ncol_X;
     PsimagLite::Matrix<double> yat_(nrow_YAt, ncol_YAt);
-//#define YAt(iy,jy) yat_[ (iy) + (jy)*nrow_YAt ]
-
 
     /*
      * ----------------
@@ -301,26 +294,22 @@ void csr_kron_mult_method(const int imethod,
    
 }
 
-
-
-
-void csr_kron_mult( 
-                    const char transA,
+void csr_kron_mult(const char transA,
                     const char transB,
                     const int nrow_A,
-                    const int ncol_A, 
+                    const int ncol_A,
                     const PsimagLite::Vector<int>::Type& arowptr,
                     const PsimagLite::Vector<int>::Type& acol,
                     const PsimagLite::Vector<double>::Type& aval,
 
                     const int nrow_B,
-                    const int ncol_B, 
+                    const int ncol_B,
                     const PsimagLite::Vector<int>::Type& browptr,
                     const PsimagLite::Vector<int>::Type& bcol,
                     const PsimagLite::Vector<double>::Type& bval,
 
-                    const PsimagLite::Matrix<double>& yin,
-                          PsimagLite::Matrix<double>& xout)
+                    const double* yin,
+                          double* xout)
 
 {
 /*

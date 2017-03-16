@@ -16,10 +16,6 @@ void den_csr_kron_mult_method(const int imethod,
 
                     const PsimagLite::Matrix<double>& yin,
                           PsimagLite::Matrix<double>& xout)
-
-//#define A(ia,ja) a_[ (ia) + (ja)*nrow_A ]
-//#define X(ib,ia) xout[ (ib) + (ia)*nrow_X ]
-//#define Y(jb,ja) yin[ (jb) + (ja)*nrow_Y ]
 {
      const int isTransA = (transA == 'T') || (transA == 't');
      const int isTransB = (transB == 'T') || (transB == 't');
