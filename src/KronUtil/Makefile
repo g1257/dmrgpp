@@ -71,10 +71,10 @@ libkronutil.a: $(OBJ)
 	ranlib libkronutil.a
 
 test1: libkronutil.a test1.o $(OBJ)
-	$(CXX) $(CFLAGS) -o test1 test1.o $(OBJ) libkronutil.a $(LDFLAGS)
+	$(CXX) $(CFLAGS) -o test1 test1.o libkronutil.a $(LDFLAGS)
 
 test2: libkronutil.a test2.o
-	$(CXX) $(CFLAGS) -o test2 test2.o $(OBJ) libkronutil.a $(LDFLAGS)
+	$(CXX) $(CFLAGS) -o test2 test2.o libkronutil.a $(LDFLAGS)
 
 clean:
 	touch csr_kron_mult.o libkronutil.a test1 test2

@@ -257,7 +257,7 @@ int main()
                      bval,
 
                      &(y_(0,0)),
-                     &sx1_(0,0));
+                     &(sx1_(0,0)));
      
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {
