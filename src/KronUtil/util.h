@@ -6,6 +6,7 @@
 #include <assert.h>
 #include "Matrix.h"
 #include "blas.h"
+#include "MatrixNonOwned.h"
 
 #ifndef MIN
 #define MIN(x,y)  (  ((x) < (y))? (x) : (y) )
@@ -106,8 +107,8 @@ void csr_kron_mult_method(const int imethod,
                     const PsimagLite::Vector<int>::Type& bcol,
                     const PsimagLite::Vector<double>::Type& bval,
 
-                    const PsimagLite::Matrix<double>& yin,
-                          PsimagLite::Matrix<double>& xout );
+                    const PsimagLite::MatrixNonOwned<const double>& yin,
+                          PsimagLite::MatrixNonOwned<double>& xout );
 
 
 
@@ -121,11 +122,11 @@ void csr_matmul_post(const char trans_A,
 
                      const int nrow_Y,
                      const int ncol_Y,
-                     const PsimagLite::Matrix<double>& yin,
+                     const PsimagLite::MatrixNonOwned<const double>& yin,
 
                      const int nrow_X,
                      const int ncol_X,
-                     PsimagLite::Matrix<double>& xout);
+                     PsimagLite::MatrixNonOwned<double>& xout);
 
 extern
 void csr_matmul_pre( const char trans_A,
@@ -137,11 +138,11 @@ void csr_matmul_pre( const char trans_A,
 
                      const int nrow_Y,
                      const int ncol_Y,
-                     const PsimagLite::Matrix<double>& yin,
+                     const PsimagLite::MatrixNonOwned<const double>& yin,
 
                      const int nrow_X,
                      const int ncol_X,
-                     PsimagLite::Matrix<double>& xout);
+                     PsimagLite::MatrixNonOwned<double>& xout);
 
 extern
 void csr_submatrix( const int nrow_A,
@@ -290,7 +291,7 @@ void den_csr_kron_mult_method(const int imethod,
                     const PsimagLite::Vector<double>::Type& bval,
 
                     const PsimagLite::Matrix<double>& yin,
-                          PsimagLite::Matrix<double>& xout);
+                          PsimagLite::Matrix<double>& xout_);
 
 extern
 void den_copymat( const int nrow, 

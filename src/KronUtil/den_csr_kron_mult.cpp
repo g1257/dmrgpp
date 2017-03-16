@@ -14,9 +14,11 @@ void den_csr_kron_mult_method(const int imethod,
                     const PsimagLite::Vector<int>::Type& bcol,
                     const PsimagLite::Vector<double>::Type& bval,
 
-                    const PsimagLite::Matrix<double>& yin,
-                          PsimagLite::Matrix<double>& xout)
+                    const PsimagLite::Matrix<double>& yin_,
+                          PsimagLite::Matrix<double>& xout_)
 {
+	PsimagLite::MatrixNonOwned<const double> yin(yin_);
+	PsimagLite::MatrixNonOwned<double> xout(xout_);
      const int isTransA = (transA == 'T') || (transA == 't');
      const int isTransB = (transB == 'T') || (transB == 't');
     
@@ -97,7 +99,7 @@ void den_csr_kron_mult_method(const int imethod,
     int nrow_BY = nrow_X;
     int ncol_BY = ncol_Y;
     PsimagLite::Matrix<double> by_(nrow_BY, ncol_BY);
-
+	PsimagLite::MatrixNonOwned<double> byRef(by_);
 
     /*
      * ---------------
@@ -139,7 +141,7 @@ void den_csr_kron_mult_method(const int imethod,
 
                      nrow_BY,
                      ncol_BY,
-                     by_);
+                     byRef);
 
    }
 
@@ -163,7 +165,7 @@ void den_csr_kron_mult_method(const int imethod,
 
                      nrow_X,
                      ncol_X,
-                     xout);
+                     xout_);
 
     }
    }
@@ -178,7 +180,7 @@ void den_csr_kron_mult_method(const int imethod,
     int nrow_YAt = nrow_Y;
     int ncol_YAt = ncol_X;
     PsimagLite::Matrix<double> yat_(nrow_YAt, ncol_YAt);
-
+	PsimagLite::MatrixNonOwned<const double> yatRef(yat_);
 
     /*
      * ----------------
@@ -217,7 +219,7 @@ void den_csr_kron_mult_method(const int imethod,
 
                      nrow_Y, 
                      ncol_Y,
-                     yin,
+                     yin_,
     
                      nrow_YAt, 
                      ncol_YAt,
@@ -244,7 +246,7 @@ void den_csr_kron_mult_method(const int imethod,
 
                     nrow_YAt,
                     ncol_YAt,
-                    yat_,
+                    yatRef,
 
                      nrow_X,
                      ncol_X, 

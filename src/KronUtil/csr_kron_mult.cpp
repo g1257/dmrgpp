@@ -16,8 +16,8 @@ void csr_kron_mult_method(const int imethod,
                     const PsimagLite::Vector<int>::Type& bcol,
                     const PsimagLite::Vector<double>::Type& bval,
 
-                    const PsimagLite::Matrix<double>& yin,
-                          PsimagLite::Matrix<double>& xout)
+                    const PsimagLite::MatrixNonOwned<const double>& yin,
+                          PsimagLite::MatrixNonOwned<double>& xout)
 {
      const int isTransA = (transA == 'T') || (transA == 't');
      const int isTransB = (transB == 'T') || (transB == 't');
@@ -98,7 +98,8 @@ void csr_kron_mult_method(const int imethod,
     int nrow_BY = nrow_X;
     int ncol_BY = ncol_Y;
     PsimagLite::Matrix<double> by_(nrow_BY,ncol_BY );
-
+	PsimagLite::MatrixNonOwned<double> byRef(by_);
+	PsimagLite::MatrixNonOwned<const double> byConstRef(by_);
     /*
      * ---------------
      * setup BY
@@ -139,7 +140,7 @@ void csr_kron_mult_method(const int imethod,
 
                      nrow_BY,
                      ncol_BY,
-                     by_);
+                     byRef);
 
    }
 
@@ -161,7 +162,7 @@ void csr_kron_mult_method(const int imethod,
 
                      nrow_BY,
                      ncol_BY,
-                     by_,
+                     byConstRef,
 
                      nrow_X,
                      ncol_X,
@@ -180,6 +181,8 @@ void csr_kron_mult_method(const int imethod,
     int nrow_YAt = nrow_Y;
     int ncol_YAt = ncol_X;
     PsimagLite::Matrix<double> yat_(nrow_YAt, ncol_YAt);
+	PsimagLite::MatrixNonOwned<double> yatRef(yat_);
+	PsimagLite::MatrixNonOwned<const double> yatConstRef(yat_);
 
     /*
      * ----------------
@@ -222,7 +225,7 @@ void csr_kron_mult_method(const int imethod,
     
                      nrow_YAt, 
                      ncol_YAt,
-                     yat_);
+                     yatRef);
      }
 
     {
@@ -242,7 +245,7 @@ void csr_kron_mult_method(const int imethod,
 
                     nrow_YAt,
                     ncol_YAt,
-                    yat_,
+                    yatConstRef,
 
                      nrow_X,
                      ncol_X, 
@@ -292,6 +295,56 @@ void csr_kron_mult_method(const int imethod,
                  
  };
    
+}
+
+void csr_kron_mult_method(const int imethod,
+                    const char transA,
+                    const char transB,
+
+                    const int nrow_A,
+                    const int ncol_A,
+                    const PsimagLite::Vector<int>::Type& arowptr,
+                    const PsimagLite::Vector<int>::Type& acol,
+                    const PsimagLite::Vector<double>::Type& aval,
+
+                    const int nrow_B,
+                    const int ncol_B,
+                    const PsimagLite::Vector<int>::Type& browptr,
+                    const PsimagLite::Vector<int>::Type& bcol,
+                    const PsimagLite::Vector<double>::Type& bval,
+
+                    const double* yin_,
+                          double* xout_)
+{
+     const int isTransA = (transA == 'T') || (transA == 't');
+     const int isTransB = (transB == 'T') || (transB == 't');
+
+     const int nrow_1 = (isTransA) ? ncol_A : nrow_A;
+     const int ncol_1 = (isTransA) ? nrow_A : ncol_A;
+     const int nrow_2 = (isTransB) ? ncol_B : nrow_B;
+     const int ncol_2 = (isTransB) ? nrow_B : ncol_B;
+
+     const int nrow_X = nrow_2;
+     const int ncol_X = nrow_1;
+     const int nrow_Y = ncol_2;
+     const int ncol_Y = ncol_1;
+	 PsimagLite::MatrixNonOwned<const double> yin(nrow_Y, ncol_Y, yin_);
+	 PsimagLite::MatrixNonOwned<double> xout(nrow_X, ncol_X, xout_);
+	 csr_kron_mult_method(imethod,
+	                      transA,
+	                      transB,
+	                      nrow_A,
+	                      ncol_A,
+	                      arowptr,
+	                      acol,
+	                      aval,
+	                      nrow_B,
+	                      ncol_B,
+	                      browptr,
+	                      bcol,
+	                      bval,
+	                      yin,
+	                      xout);
 }
 
 void csr_kron_mult(const char transA,
@@ -358,7 +411,6 @@ void csr_kron_mult(const char transA,
     
      const int nrow_1 = (isTransA) ? ncol_A : nrow_A;
      const int ncol_2 = (isTransB) ? nrow_B : ncol_B;
-
 
  estimate_kron_cost( nrow_1,ncol_2,nnz_A, nrow_1,ncol_2,nnz_B,
                      &kron_nnz, &kron_flops, &imethod );
