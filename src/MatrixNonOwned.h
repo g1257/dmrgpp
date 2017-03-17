@@ -5,32 +5,61 @@
 namespace PsimagLite {
 
 template<typename T>
+struct VectorConstOrNot {
+	typedef typename Vector<T>::Type Type;
+};
+
+template<typename T>
+struct VectorConstOrNot<const T> {
+	typedef const typename Vector<T>::Type Type;
+};
+
+template<typename T>
 class MatrixNonOwned {
 
 public:
 
-	MatrixNonOwned(SizeType nrow, SizeType ncol, T* data)
-	    : nrow_(nrow), ncol_(ncol), data_(data)
+	MatrixNonOwned(SizeType nrow,
+	               SizeType ncol,
+	               typename VectorConstOrNot<T>::Type& data,
+	               SizeType offset)
+	    : nrow_(nrow), ncol_(ncol), data_(&data), offset_(offset)
 	{}
 
 	explicit MatrixNonOwned(const PsimagLite::Matrix<typename RemoveConst<T>::Type>& m)
-	    : nrow_(m.n_row()), ncol_(m.n_col()), data_(&(m.data_[0]))
+	    : nrow_(m.n_row()), ncol_(m.n_col()), data_(&(m.data_)), offset_(0)
 	{}
 
 	explicit MatrixNonOwned(PsimagLite::Matrix<typename RemoveConst<T>::Type>& m)
-	    : nrow_(m.n_row()), ncol_(m.n_col()), data_(&(m.data_[0]))
+	    : nrow_(m.n_row()), ncol_(m.n_col()), data_(&(m.data_)), offset_(0)
 	{}
 
 	const T& operator()(SizeType i, SizeType j) const
 	{
-//		assert(i + j*nrow_ < data_.size());
-		return data_[i + j*nrow_];
+		assert(i < nrow_);
+		assert(j < ncol_);
+		assert(offset_ + i + j*nrow_ < data_->size());
+		return (*data_)[offset_ + i + j*nrow_];
 	}
 
 	T& operator()(SizeType i, SizeType j)
 	{
-//		assert(i + j*nrow_ < data_.size());
-		return data_[i + j*nrow_];
+		assert(i < nrow_);
+		assert(j < ncol_);
+		assert(offset_ + i + j*nrow_ < data_->size());
+		return (*data_)[offset_ + i + j*nrow_];
+	}
+
+	const typename VectorConstOrNot<T>::Type& getVector() const
+	{
+		assert(data_);
+		return *data_;
+	}
+
+	typename VectorConstOrNot<T>::Type& getVector()
+	{
+		assert(data_);
+		return *data_;
 	}
 
 private:
@@ -41,7 +70,8 @@ private:
 
 	SizeType nrow_;
 	SizeType ncol_;
-	T* data_;
+	typename VectorConstOrNot<T>::Type* data_;
+	SizeType offset_;
 };
 }
 

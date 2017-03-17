@@ -601,7 +601,7 @@ void crsMatrixToFullMatrix(Matrix<T>& m,const CrsMatrix<T>& crsMatrix)
 {
 	m.reset(crsMatrix.row(),crsMatrix.col());
 	for (SizeType i = 0; i < crsMatrix.row() ; i++) {
-		for (SizeType k=0;k<crsMatrix.row();k++) m(i,k)=0;
+		for (SizeType k=0;k<crsMatrix.col();k++) m(i,k)=0;
 		for (int k=crsMatrix.getRowPtr(i);k<crsMatrix.getRowPtr(i+1);k++)
 			m(i,crsMatrix.getCol(k))=crsMatrix.getValue(k);
 	}
