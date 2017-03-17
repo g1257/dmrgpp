@@ -363,8 +363,8 @@ int main()
 
                      nrow_B, ncol_B, b_,
 
-                     y_,
-                     sx1_ );
+                     &(y_(0,0)),
+                     &(sx1_(0,0)));
 
 
      imethod =2;
@@ -376,8 +376,8 @@ int main()
 
                      nrow_B, ncol_B, b_,
 
-                     y_,
-                     sx2_ );
+                     &(y_(0,0)),
+                     &(sx2_(0,0)));
 
 
 
@@ -390,8 +390,8 @@ int main()
 
                      nrow_B, ncol_B, b_,
 
-                     y_,
-                     sx3_ );
+	             &(y_(0,0)),
+                 &(sx3_(0,0)));
 
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {

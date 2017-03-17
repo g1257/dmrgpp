@@ -71,8 +71,8 @@ void csr_den_kron_mult_method(const int imethod,
                     const int ncol_B,
                     const PsimagLite::Matrix<double>& b_,
 
-                    const PsimagLite::Matrix<double>& yin,
-                          PsimagLite::Matrix<double>& xout );
+                    const double* yin,
+                          double* xout );
 
 extern
 int csr_nnz( const int nrow_A,  

@@ -50,8 +50,8 @@ void den_csr_kron_mult(const char transA,
 
                        const int nrow_B,
                        const int ncol_B,
-                       const PsimagLite::Vector<int>::Type browptr,
-                       const PsimagLite::Vector<int>::Type bcol,
+                       const PsimagLite::Vector<int>::Type& browptr,
+                       const PsimagLite::Vector<int>::Type& bcol,
                        const PsimagLite::Vector<double>::Type& bval,
 
                        const double* yin_,
@@ -66,8 +66,8 @@ void den_csr_kron_mult(const char transA,
 
                        const int nrow_B,
                        const int ncol_B,
-                       const PsimagLite::Vector<int>::Type browptr,
-                       const PsimagLite::Vector<int>::Type bcol,
+                       const PsimagLite::Vector<int>::Type& browptr,
+                       const PsimagLite::Vector<int>::Type& bcol,
                        const PsimagLite::Vector<std::complex<double> >::Type& bval,
 
                        const std::complex<double>* yin_,
@@ -113,8 +113,8 @@ void csr_den_kron_mult( const char transA,
 
                         const int nrow_A,
                         const int ncol_A,
-                        const PsimagLite::Vector<int>::Type arowptr,
-                        const PsimagLite::Vector<int>::Type acol,
+                        const PsimagLite::Vector<int>::Type& arowptr,
+                        const PsimagLite::Vector<int>::Type& acol,
                         const PsimagLite::Vector<double>::Type& aval,
 
                         const int nrow_B,
@@ -130,8 +130,8 @@ void csr_den_kron_mult( const char transA,
 
                         const int nrow_A,
                         const int ncol_A,
-                        const PsimagLite::Vector<int>::Type arowptr,
-                        const PsimagLite::Vector<int>::Type acol,
+                        const PsimagLite::Vector<int>::Type& arowptr,
+                        const PsimagLite::Vector<int>::Type& acol,
                         const PsimagLite::Vector<std::complex<double> >::Type& aval,
 
                         const int nrow_B,
