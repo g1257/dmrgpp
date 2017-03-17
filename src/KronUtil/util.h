@@ -55,8 +55,10 @@ void csr_den_kron_mult_method(const int imethod,
                     const PsimagLite::CrsMatrix<double>& a_,
                     const PsimagLite::Matrix<double>& b_,
 
-                    const double* yin,
-                          double* xout );
+                    const PsimagLite::Vector<double>::Type& yin_,
+                          SizeType offsetY ,
+                              PsimagLite::Vector<double>::Type& xout_,
+                              SizeType offsetX);
 
 extern
 int csr_nnz(const PsimagLite::CrsMatrix<double>&);
@@ -229,8 +231,10 @@ void den_csr_kron_mult_method(const int imethod,
                     const PsimagLite::Matrix<double>& a_,
                     const PsimagLite::CrsMatrix<double>& b,
 
-                    const double* yin,
-                          double* xout_);
+                    const PsimagLite::Vector<double>::Type& yin,
+                              SizeType offsetY,
+                          PsimagLite::Vector<double>::Type& xout_,
+                              SizeType offsetX);
 
 extern
 void den_copymat( const int nrow, 
@@ -317,8 +321,10 @@ void den_kron_mult_method(const int imethod,
                     const int ncol_B,
                     const PsimagLite::Matrix<double>& b_,
 
-                    const double* yin_,
-                          double* xout_ );
+                    const PsimagLite::Vector<double>::Type& yin,
+                          SizeType offsetY ,
+                          PsimagLite::Vector<double>::Type& xout,
+                          SizeType offsetX);
 
 extern
 int den_nnz(const PsimagLite::Matrix<double>&);

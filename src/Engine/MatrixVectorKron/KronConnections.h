@@ -144,7 +144,7 @@ public:
 				const MatrixDenseOrSparseType& tmp1 =  xiStruct(outPatch,inPatch);
 				const MatrixDenseOrSparseType& tmp2 =  yiStruct(outPatch,inPatch);
 
-				kronMult(&(x_[offsetX]), &(y_[offsetY]), 'n', 'n', tmp1, tmp2);
+				kronMult(x_, offsetX, y_, offsetY, 'n', 'n', tmp1, tmp2);
 			}
 		}
 

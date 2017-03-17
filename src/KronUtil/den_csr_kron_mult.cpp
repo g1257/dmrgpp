@@ -8,8 +8,10 @@ void den_csr_kron_mult_method(const int imethod,
 
                     const PsimagLite::CrsMatrix<double>& b,
 
-                    const double* yin_,
-                          double* xout_)
+                              const PsimagLite::Vector<double>::Type& yin_,
+		                      SizeType offsetY,
+		                      PsimagLite::Vector<double>::Type& xout_,
+		                      SizeType offsetX)
 {
      const int isTransA = (transA == 'T') || (transA == 't');
      const int isTransB = (transB == 'T') || (transB == 't');
@@ -29,8 +31,8 @@ void den_csr_kron_mult_method(const int imethod,
      const int nrow_Y = ncol_2;
      const int ncol_Y = ncol_1;
 
-	 PsimagLite::MatrixNonOwned<const double> yin(nrow_Y, ncol_Y, yin_);
-	 PsimagLite::MatrixNonOwned<double> xout(nrow_X, ncol_X, xout_);
+	 PsimagLite::MatrixNonOwned<const double> yin(nrow_Y, ncol_Y, yin_, offsetY);
+	 PsimagLite::MatrixNonOwned<double> xout(nrow_X, ncol_X, xout_, offsetX);
 
      assert((imethod == 1) ||
                 (imethod == 2) ||
@@ -299,8 +301,10 @@ void den_csr_kron_mult(
 
                     const PsimagLite::CrsMatrix<double>& b,
 
-                    const double* yin,
-                          double* xout)
+        const PsimagLite::Vector<double>::Type& yin,
+        SizeType offsetY,
+        PsimagLite::Vector<double>::Type& xout,
+        SizeType offsetX)
 
 {
 /*
@@ -371,7 +375,9 @@ void den_csr_kron_mult(
                     b,
 
                     yin, 
-                    xout );
+             offsetY,
+                    xout,
+             offsetX);
 }
 
 #undef A

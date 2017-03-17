@@ -47,8 +47,11 @@ int main()
 	PsimagLite::MatrixNonOwned<const double> yRef(y_);
 
      PsimagLite::Matrix<double> x1_(nrow_X, ncol_X);
+	 PsimagLite::MatrixNonOwned<double> x1Ref(x1_);
      PsimagLite::Matrix<double> x2_(nrow_X, ncol_X);
+	 PsimagLite::MatrixNonOwned<double> x2Ref(x2_);
      PsimagLite::Matrix<double> x3_(nrow_X, ncol_X);
+	PsimagLite::MatrixNonOwned<double> x3Ref(x3_);
 
      PsimagLite::Matrix<double> sx1_(nrow_X, ncol_X);
 	  PsimagLite::MatrixNonOwned<double> sx1Ref(sx1_);
@@ -77,23 +80,29 @@ int main()
                            transA, transB,
                            nrow_A, ncol_A, a_,
                            nrow_B, ncol_B, b_,
-                           &(y_(0,0)),
-                           &(x1_(0,0)));
+                           yRef.getVector(),
+	                       0,
+                           x1Ref.getVector(),
+	                       0);
 
      imethod = 2;
      den_kron_mult_method( imethod,
                            transA, transB,
                            nrow_A, ncol_A, a_,
                            nrow_B, ncol_B, b_,
-                           &(y_(0,0)),
-                           &(x2_(0,0)));
+	                       yRef.getVector(),
+	                       0,
+                           x2Ref.getVector(),
+	                       0);
      imethod = 3;
      den_kron_mult_method( imethod,
                            transA, transB,
                            nrow_A, ncol_A, a_,
                            nrow_B, ncol_B, b_,
-                           &(y_(0,0)),
-                           &(x3_(0,0)));
+	                       yRef.getVector(),
+	                       0,
+                           x3Ref.getVector(),
+	                       0);
 
      int ix = 0;
      int jx = 0;
@@ -198,16 +207,20 @@ int main()
                            transA, transB,
                            nrow_A, ncol_A, a_,
                            nrow_B, ncol_B, b_,
-                           &(y_(0,0)),
-                           &(x1_(0,0)));
+                           yRef.getVector(),
+	                       0,
+                           x1Ref.getVector(),
+	                       0);
      csr_kron_mult( 
                      transA, transB,
                      a,
 
                      b,
 
-                     &(y_(0,0)),
-                     &(sx1_(0,0)));
+	             yRef.getVector(),
+                 0,
+                 sx1Ref.getVector(),
+                 0);
      
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {
@@ -242,8 +255,10 @@ int main()
 
                     b,
 
-                     &(y_(0,0)),
-                     &(sx1_(0,0)));
+	             yRef.getVector(),
+                 0,
+                 sx1Ref.getVector(),
+                 0);
 
 
      imethod =2;
@@ -255,8 +270,10 @@ int main()
 
                      b,
 
-                     &(y_(0,0)),
-                     &(sx2_(0,0)));
+	             yRef.getVector(),
+                 0,
+                 sx2Ref.getVector(),
+                 0);
 
 
 
@@ -269,8 +286,10 @@ int main()
 
                      b,
 
-                     &(y_(0,0)),
-                     &(sx3_(0,0)));
+	             yRef.getVector(),
+                 0,
+                 sx3Ref.getVector(),
+                 0);
 
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {
@@ -313,9 +332,10 @@ int main()
 
                      b_,
 
-                     &(y_(0,0)),
-                     &(sx1_(0,0)));
-
+	             yRef.getVector(),
+                 0,
+                 sx1Ref.getVector(),
+                 0);
 
      imethod =2;
      csr_den_kron_mult_method( 
@@ -326,8 +346,10 @@ int main()
 
                      b_,
 
-                     &(y_(0,0)),
-                     &(sx2_(0,0)));
+	             yRef.getVector(),
+                 0,
+                 sx2Ref.getVector(),
+                 0);
 
 
 
@@ -340,8 +362,10 @@ int main()
 
                      b_,
 
-	             &(y_(0,0)),
-                 &(sx3_(0,0)));
+	             yRef.getVector(),
+                 0,
+                 sx3Ref.getVector(),
+                 0);
 
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {

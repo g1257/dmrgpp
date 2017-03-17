@@ -12,9 +12,11 @@ void csr_kron_mult(const char transA,
                    const char transB,
                    const PsimagLite::CrsMatrix<ComplexOrRealType>&,
                    const PsimagLite::CrsMatrix<ComplexOrRealType>&,
+                   const PsimagLite::Vector<ComplexOrRealType>::Type& yin,
+                   SizeType offsetY,
+                   PsimagLite::Vector<ComplexOrRealType>::Type& xout,
+                   SizeType offsetX)
 
-                   const ComplexOrRealType* yin,
-                   ComplexOrRealType* xout)
 {
 	PsimagLite::String msg("csr_kron_mult: please #define USE_KRON_UTIL");
 	msg += " and link against libkronutil\n";
@@ -26,8 +28,10 @@ void csr_den_kron_mult(const char transA,
                        const char transB,
                        const PsimagLite::CrsMatrix<ComplexOrRealType>&,
                        const PsimagLite::Matrix<ComplexOrRealType>& b_,
-                       const ComplexOrRealType* yin,
-                       ComplexOrRealType* xout)
+                       const PsimagLite::Vector<ComplexOrRealType>::Type& yin,
+	                   SizeType offsetY,
+	                   PsimagLite::Vector<ComplexOrRealType>::Type& xout,
+	                   SizeType offsetX)
 {
 	PsimagLite::String msg("csr_den_kron_mult: please #define USE_KRON_UTIL");
 	msg += " and link against libkronutil\n";
@@ -39,8 +43,10 @@ void den_csr_kron_mult(const char transA,
                        const char transB,
                        const PsimagLite::Matrix<ComplexOrRealType>& a_,
                        const PsimagLite::CrsMatrix<ComplexOrRealType>&,
-                       const ComplexOrRealType* yin,
-                       ComplexOrRealType* xout)
+                       const PsimagLite::Vector<ComplexOrRealType>::Type& yin,
+	                   SizeType offsetY,
+	                   PsimagLite::Vector<ComplexOrRealType>::Type& xout,
+	                   SizeType offsetX)
 {
 	PsimagLite::String msg("den_csr_kron_mult: please #define USE_KRON_UTIL");
 	msg += " and link against libkronutil\n";
@@ -52,8 +58,10 @@ void den_kron_mult(const char transA,
                    const char transB,
                    const PsimagLite::Matrix<ComplexOrRealType>& a_,
                    const PsimagLite::Matrix<ComplexOrRealType>& b_,
-                   const ComplexOrRealType* yin,
-                   ComplexOrRealType* xout)
+                   const PsimagLite::Vector<ComplexOrRealType>::Type& yin,
+                   SizeType offsetY,
+                   PsimagLite::Vector<ComplexOrRealType>::Type& xout,
+                   SizeType offsetX)
 {
 	PsimagLite::String msg("den_kron_mult: please #define USE_KRON_UTIL");
 	msg += " and link against libkronutil\n";

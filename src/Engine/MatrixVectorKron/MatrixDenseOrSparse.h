@@ -18,12 +18,9 @@ public:
 	// 50% cutoff == 0.5 here for sparse/dense
 	explicit MatrixDenseOrSparse(const SparseMatrixType& sparse)
 	    : isDense_(true), //sparse.nonZero() > static_cast<int>(0.5*sparse.row()*sparse.col())),
-	      sparseMatrix_(0),
-	      denseMatrix_(sparse.row(), sparse.col())
+	      sparseMatrix_(&sparse)
 	{
-		if (!isDense_) {
-			sparseMatrix_ = &sparse;
-		} else {
+		if (isDense_) {
 			// A(i,j) at  val[ (i) + (j)*nrow ]
 			crsMatrixToFullMatrix(denseMatrix_, sparse);
 		}
@@ -31,9 +28,9 @@ public:
 
 	bool isDense() const { return isDense_; }
 
-	SizeType rows() const { return denseMatrix_.n_row(); }
+	SizeType rows() const { return sparseMatrix_.row(); }
 
-	SizeType cols() const { return denseMatrix_.n_col(); }
+	SizeType cols() const { return sparseMatrix_.col(); }
 
 	const PsimagLite::Matrix<ComplexOrRealType>& dense() const
 	{
@@ -53,11 +50,7 @@ public:
 
 	SparseMatrixType toSparse() const
 	{
-		if (isDense_) {
-			return SparseMatrixType(denseMatrix_);
-		}
-
-		return sparse();
+		return (isDense_) ? SparseMatrixType(denseMatrix_) : sparse();
 	}
 
 private:
@@ -68,8 +61,10 @@ private:
 }; // class MatrixDenseOrSparse
 
 template<typename SparseMatrixType>
-void kronMult(typename SparseMatrixType::value_type* xout,
-              const typename SparseMatrixType::value_type* yin,
+void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>::Type& xout,
+              SizeType offsetX,
+              const typename PsimagLite::Vector<typename SparseMatrixType::value_type>::Type& yin,
+              SizeType offsetY,
               char transA,
               char transB,
               const MatrixDenseOrSparse<SparseMatrixType>& A,
@@ -85,7 +80,9 @@ void kronMult(typename SparseMatrixType::value_type* xout,
 			              A.dense(),
 			              B.dense(),
 			              yin,
-			              xout);
+			              offsetY,
+			              xout,
+			              offsetX);
 		} else  {
 			// B is sparse
 			den_csr_kron_mult(transA,
@@ -93,7 +90,9 @@ void kronMult(typename SparseMatrixType::value_type* xout,
 			                  A.dense(),
 			                  B.sparse(),
 			                  yin,
-			                  xout);
+				              offsetY,
+				              xout,
+				              offsetX);
 		}
 	} else {
 		// A is sparse
@@ -103,7 +102,9 @@ void kronMult(typename SparseMatrixType::value_type* xout,
 			                  A.sparse(),
 			                  B.dense(),
 			                  yin,
-			                  xout);
+				              offsetY,
+				              xout,
+				              offsetX);
 		} else {
 			// B is sparse
 			csr_kron_mult(transA,
@@ -111,7 +112,9 @@ void kronMult(typename SparseMatrixType::value_type* xout,
 			              A.sparse(),
 			              B.sparse(),
 			              yin,
-			              xout);
+			              offsetY,
+			              xout,
+			              offsetX);
 		};
 	};
 } // kron_mult
