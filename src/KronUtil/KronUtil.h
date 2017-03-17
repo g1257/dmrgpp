@@ -3,21 +3,15 @@
 #include <complex>
 #include "Vector.h"
 #include "Matrix.h"
+#include "CrsMatrix.h"
 
 extern
 void csr_kron_mult(const char transA,
                    const char transB,
-                   const int nrow_A,
-                   const int ncol_A,
-                   const PsimagLite::Vector<int>::Type& arowptr,
-                   const PsimagLite::Vector<int>::Type& acol,
-                   const PsimagLite::Vector<double>::Type& aval,
 
-                   const int nrow_B,
-                   const int ncol_B,
-                   const PsimagLite::Vector<int>::Type& browptr,
-                   const PsimagLite::Vector<int>::Type& bcol,
-                   const PsimagLite::Vector<double>::Type& bval,
+                   const PsimagLite::CrsMatrix<double>& a,
+
+                    const PsimagLite::CrsMatrix<double>& b,
 
                    const double* yin,
                    double* xout);

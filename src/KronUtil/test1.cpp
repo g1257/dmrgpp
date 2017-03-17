@@ -3,10 +3,6 @@
 
 int main()
 {
-
-    typedef PsimagLite::Vector<double>::Type VectorType;
-    typedef PsimagLite::Vector<int>::Type VectorIntType;
-
   int nerrors = 0;
   double threshold = 0;
   int nrow_A = 0;
@@ -127,42 +123,18 @@ int main()
      * test sparse matrix
      * ------------------
      */
-     const int max_nnz_A = nrow_A * ncol_A;
-     VectorType aval(max_nnz_A);
-     VectorIntType acol(max_nnz_A);
-     VectorIntType arowptr(nrow_A+1);
+     PsimagLite::CrsMatrix<double> a(a_);
 
-     const int max_nnz_B = nrow_B * ncol_B;
-     VectorType bval(max_nnz_B);
-     VectorIntType bcol(max_nnz_B);
-     VectorIntType browptr(nrow_B+1);
-
-     den2csr( nrow_A, ncol_A, a_,
-              max_nnz_A,
-              arowptr, acol, aval );
-
-     den2csr( nrow_B, ncol_B, b_,
-              max_nnz_B,
-              browptr, bcol, bval );
-
-
-
+     PsimagLite::CrsMatrix<double> b(b_);
 
      imethod =1;
      csr_kron_mult_method( 
                      imethod,
-                     transA, transB,
-                     nrow_A,
-                     ncol_A, 
-                     arowptr, 
-                     acol, 
-                     aval,
+                     transA,
+	             transB,
+                     a,
 
-                     nrow_B,
-                     ncol_B, 
-                     browptr, 
-                     bcol, 
-                     bval,
+                     b,
 
                      yRef,
                      sx1Ref);
@@ -171,18 +143,11 @@ int main()
      imethod =2;
      csr_kron_mult_method( 
                      imethod,
-                     transA, transB,
-                     nrow_A,
-                     ncol_A, 
-                     arowptr, 
-                     acol, 
-                     aval,
+                     transA,
+	             transB,
+                     a,
 
-                     nrow_B,
-                     ncol_B, 
-                     browptr, 
-                     bcol, 
-                     bval,
+                     b,
 
                      yRef,
                      sx2Ref);
@@ -192,18 +157,11 @@ int main()
      imethod =3;
      csr_kron_mult_method( 
                      imethod,
-                     transA, transB,
-                     nrow_A,
-                     ncol_A, 
-                     arowptr, 
-                     acol, 
-                     aval,
+                     transA,
+	             transB,
+                     a,
 
-                     nrow_B,
-                     ncol_B, 
-                     browptr, 
-                     bcol, 
-                     bval,
+                     b,
 
                      yRef,
                      sx3Ref);
@@ -244,17 +202,9 @@ int main()
                            &(x1_(0,0)));
      csr_kron_mult( 
                      transA, transB,
-                     nrow_A,
-                     ncol_A, 
-                     arowptr, 
-                     acol, 
-                     aval,
+                     a,
 
-                     nrow_B,
-                     ncol_B, 
-                     browptr, 
-                     bcol, 
-                     bval,
+                     b,
 
                      &(y_(0,0)),
                      &(sx1_(0,0)));
@@ -288,9 +238,9 @@ int main()
                      imethod,
                      transA, transB,
 
-                     nrow_A, ncol_A, a_,
+                      a_,
 
-                     nrow_B, ncol_B, browptr, bcol, bval,
+                    b,
 
                      &(y_(0,0)),
                      &(sx1_(0,0)));
@@ -301,9 +251,9 @@ int main()
                      imethod,
                      transA, transB,
 
-                     nrow_A, ncol_A, a_,
+                      a_,
 
-                     nrow_B, ncol_B, browptr, bcol, bval,
+                     b,
 
                      &(y_(0,0)),
                      &(sx2_(0,0)));
@@ -315,9 +265,9 @@ int main()
                      imethod,
                      transA, transB,
 
-                     nrow_A, ncol_A, a_,
+                     a_,
 
-                     nrow_B, ncol_B, browptr, bcol, bval,
+                     b,
 
                      &(y_(0,0)),
                      &(sx3_(0,0)));
@@ -358,10 +308,10 @@ int main()
                      imethod,
                      transA, transB,
 
-                     nrow_A, ncol_A, arowptr,acol,aval,
+                     a,
            
 
-                     nrow_B, ncol_B, b_,
+                     b_,
 
                      &(y_(0,0)),
                      &(sx1_(0,0)));
@@ -372,9 +322,9 @@ int main()
                      imethod,
                      transA, transB,
 
-                     nrow_A, ncol_A, arowptr,acol,aval,
+                     a,
 
-                     nrow_B, ncol_B, b_,
+                     b_,
 
                      &(y_(0,0)),
                      &(sx2_(0,0)));
@@ -386,9 +336,9 @@ int main()
                      imethod,
                      transA, transB,
 
-                     nrow_A, ncol_A, arowptr,acol,aval,
+                     a,
 
-                     nrow_B, ncol_B, b_,
+                     b_,
 
 	             &(y_(0,0)),
                  &(sx3_(0,0)));

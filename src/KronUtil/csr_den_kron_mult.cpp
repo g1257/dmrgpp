@@ -4,15 +4,9 @@ void csr_den_kron_mult_method(const int imethod,
                     const char transA,
                     const char transB,
 
-                    const int nrow_A,
-                    const int ncol_A,
-                    const PsimagLite::Vector<int>::Type& arowptr,
-                    const PsimagLite::Vector<int>::Type& acol,
-                    const PsimagLite::Vector<double>::Type& aval,
+                    const PsimagLite::CrsMatrix<double>& a_,
 
-                    const int nrow_B,
-                    const int ncol_B,
-                    const PsimagLite::Matrix<double>& b_,
+                   const PsimagLite::Matrix<double>& b_,
 
                     const double* yin_,
                           double* xout_)
@@ -20,6 +14,11 @@ void csr_den_kron_mult_method(const int imethod,
      const int isTransA = (transA == 'T') || (transA == 't');
      const int isTransB = (transB == 'T') || (transB == 't');
     
+	 const int nrow_A = a_.row();
+	 const int ncol_A = a_.col();
+	 const int nrow_B = b_.n_row();
+	 const int ncol_B = b_.n_col();
+
      const int nrow_1 = (isTransA) ? ncol_A : nrow_A;
      const int ncol_1 = (isTransA) ? nrow_A : ncol_A;
      const int nrow_2 = (isTransB) ? ncol_B : nrow_B;
@@ -37,7 +36,7 @@ void csr_den_kron_mult_method(const int imethod,
                 (imethod == 2) ||
                 (imethod == 3));
 
-     int nnz_A = csr_nnz( nrow_A, arowptr );
+     int nnz_A = csr_nnz(a_);
      int nnz_B = den_nnz( nrow_B, ncol_B, b_);
      int has_work = (nnz_A >= 1) && (nnz_B >= 1);
      if (!has_work) {
@@ -155,11 +154,7 @@ void csr_den_kron_mult_method(const int imethod,
 
      csr_matmul_post( 
                      trans,
-                     nrow_A,
-                     ncol_A,
-                     arowptr,
-                     acol,
-                     aval,
+                    a_,
 
                      nrow_BY,
                      ncol_BY,
@@ -217,11 +212,7 @@ void csr_den_kron_mult_method(const int imethod,
 
 
     csr_matmul_post( transa,
-                     nrow_A,
-                     ncol_A,
-                     arowptr,
-                     acol,
-                     aval,
+                     a_,
 
                      nrow_Y, 
                      ncol_Y,
@@ -269,12 +260,12 @@ void csr_den_kron_mult_method(const int imethod,
    
    int ia = 0;
    for(ia=0; ia < nrow_A; ia++) {
-      int istarta = arowptr[ia];
-      int ienda = arowptr[ia+1]-1;
+      int istarta = a_.getRowPtr(ia);
+      int ienda = a_.getRowPtr(ia+1);
       int ka = 0;
-      for(ka=istarta; ka <= ienda; ka++) {
-         int ja = acol[ka];
-         double aij = aval[ka];
+      for(ka=istarta; ka < ienda; ka++) {
+         int ja = a_.getCol(ka);
+         double aij = a_.getValue(ka);
 
          int ib = 0;
          int jb = 0;
@@ -304,11 +295,7 @@ void csr_den_kron_mult_method(const int imethod,
 
 void csr_den_kron_mult(const char transA,
                     const char transB,
-                    const int nrow_A,
-                    const int ncol_A,
-                    const PsimagLite::Vector<int>::Type& arowptr,
-                    const PsimagLite::Vector<int>::Type& acol,
-                    const PsimagLite::Vector<double>::Type& aval,
+                    const PsimagLite::CrsMatrix<double>& a_,
                     const PsimagLite::Matrix<double>& b_,
 
                     const double* yin,
@@ -346,9 +333,11 @@ void csr_den_kron_mult(const char transA,
  *   -------------------------------------------------------------
  */
 
+	const int nrow_A = a_.row();
+	const int ncol_A = a_.col();
 	const int nrow_B = b_.n_row();
 	const int ncol_B = b_.n_col();
- int nnz_A = csr_nnz( nrow_A, arowptr );
+ int nnz_A = csr_nnz(a_);
  int nnz_B = den_nnz( nrow_B, ncol_B, b_);
  int has_work = (nnz_A >= 1) && (nnz_B >= 1);
  if (!has_work) {
@@ -375,14 +364,8 @@ void csr_den_kron_mult(const char transA,
                     transA, 
                     transB,
 
-                    nrow_A,
-                    ncol_A, 
-                    arowptr, 
-                    acol, 
-                    aval,
+                  a_,
 
-                    nrow_B,
-                    ncol_B, 
                     b_,
 
                     yin, 

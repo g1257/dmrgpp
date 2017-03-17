@@ -1,11 +1,8 @@
 #include "util.h"
 
 void csr_matmul_post( char trans_A, 
-                     const int nrow_A,
-                     const int ncol_A, 
-                     const PsimagLite::Vector<int>::Type& arowptr,
-                     const PsimagLite::Vector<int>::Type& acol,
-                     const PsimagLite::Vector<double>::Type& aval,
+
+                     const PsimagLite::CrsMatrix<double>& a,
 
                      const int nrow_Y, 
                      const int ncol_Y, 
@@ -37,7 +34,9 @@ void csr_matmul_post( char trans_A,
 
  const double threshold = 0.5;
 
- int nnz_A = csr_nnz( nrow_A, arowptr );
+ int nnz_A = csr_nnz(a);
+ const int nrow_A = a.row();
+ const int ncol_A = a.col();
  int use_dense_storage = (nnz_A >= threshold * nrow_A * ncol_A);
 
  if (use_dense_storage) {
@@ -55,8 +54,7 @@ void csr_matmul_post( char trans_A,
              nrow_A, ncol_A, nnz_A );
      };
 
-   csr2den( nrow_A, ncol_A,         arowptr, acol, aval,
-            a_);
+   crsMatrixToFullMatrix(a_, a);
    
    den_matmul_post( trans_A,
                    nrow_A, ncol_A,  a_,
@@ -83,12 +81,12 @@ void csr_matmul_post( char trans_A,
 
    int ia = 0;
    for(ia=0; ia < nrow_A; ia++) {
-       int istart = arowptr[ia];
-       int iend = arowptr[ia+1]-1;
+       int istart = a.getRowPtr(ia);
+       int iend = a.getRowPtr(ia+1);
        int k = 0;
-       for(k=istart; k <= iend; k++) {
-          int ja = acol[k];
-          double aij = aval[k];
+       for(k=istart; k < iend; k++) {
+          int ja = a.getCol(k);
+          double aij = a.getValue(k);
           double atji = aij;
           
           int iy = 0;
@@ -113,12 +111,12 @@ else  {
           
    int ia = 0;
    for(ia=0; ia < nrow_A; ia++) {
-       int istart = arowptr[ia];
-       int iend = arowptr[ia+1]-1;
+       int istart = a.getRowPtr(ia);
+       int iend = a.getRowPtr(ia+1);
        int k = 0;
-       for(k=istart; k <= iend; k++) {
-          int ja = acol[k];
-          double aij = aval[k];
+       for(k=istart; k < iend; k++) {
+          int ja = a.getCol(k);
+          double aij = a.getValue(k);
           int iy = 0;
           for(iy = 0; iy < nrow_Y; iy++) {
               int ix = iy;

@@ -65,7 +65,7 @@ void den_matmul_post(
          int ld2 = nrow_A;
          int ld3 = nrow_X;
 
-         dgemm_( &trans1, &trans2,
+         psimag::BLAS::dgemm_( &trans1, &trans2,
                  &mm, &nn, &kk,
                  &alpha,  &(yin(0,0)), &ld1,
                           &(a_(0,0)), &ld2,
@@ -121,7 +121,7 @@ else  {
          int ld2 = nrow_A;
          int ld3 = nrow_X;
 
-         dgemm_( &trans1, &trans2,
+         psimag::BLAS::dgemm_( &trans1, &trans2,
                  &mm, &nn, &kk,
                  &alpha,  &(yin(0,0)), &ld1,
                           &(a_(0,0)), &ld2,

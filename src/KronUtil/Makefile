@@ -2,7 +2,7 @@ include ../Config.make
 
 all: libkronutil.a test1 test2
 
-CPPFLAGS += -I../../../PsimagLite/src
+CPPFLAGS += -I../../../PsimagLite/src -I../../../PsimagLite
 LDFLAGS += -L. -L../../../PsimagLite/lib
 
 SRC=    kronUtilComplex.cpp \
@@ -11,7 +11,6 @@ SRC=    kronUtilComplex.cpp \
 	csc_kron_mult.cpp  \
 	csc_matmul_post.cpp  \
 	csc_matmul_pre.cpp  \
-	csr2den.cpp \
 	csr_den_kron_mult.cpp \
 	csr_nnz.cpp \
 	csr_transpose.cpp \
@@ -20,7 +19,6 @@ SRC=    kronUtilComplex.cpp \
 	csr_matmul_post.cpp  \
 	csr_matmul_pre.cpp  \
 	csr_submatrix.cpp  \
-	den2csr.cpp \
 	den_csr_kron_mult.cpp \
 	den_copymat.cpp \
 	den_zeros.cpp \
@@ -42,7 +40,6 @@ OBJ= \
 	csc_kron_mult.o  \
 	csc_matmul_post.o  \
 	csc_matmul_pre.o  \
-	csr2den.o \
 	csr_den_kron_mult.o \
 	csr_nnz.o \
 	csr_transpose.o \
@@ -51,7 +48,6 @@ OBJ= \
 	csr_matmul_post.o  \
 	csr_matmul_pre.o  \
 	csr_submatrix.o  \
-	den2csr.o \
 	den_csr_kron_mult.o \
 	den_copymat.o \
 	den_zeros.o \

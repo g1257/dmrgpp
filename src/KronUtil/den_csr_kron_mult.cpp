@@ -4,15 +4,9 @@ void den_csr_kron_mult_method(const int imethod,
                     const char transA,
                     const char transB,
 
-                    const int nrow_A,
-                    const int ncol_A,
                     const PsimagLite::Matrix<double>& a_,
 
-                    const int nrow_B,
-                    const int ncol_B,
-                    const PsimagLite::Vector<int>::Type& browptr,
-                    const PsimagLite::Vector<int>::Type& bcol,
-                    const PsimagLite::Vector<double>::Type& bval,
+                    const PsimagLite::CrsMatrix<double>& b,
 
                     const double* yin_,
                           double* xout_)
@@ -20,6 +14,11 @@ void den_csr_kron_mult_method(const int imethod,
      const int isTransA = (transA == 'T') || (transA == 't');
      const int isTransB = (transB == 'T') || (transB == 't');
     
+	 const int nrow_A = a_.n_row();
+	 const int ncol_A = a_.n_col();
+	 const int nrow_B = b.row();
+	 const int ncol_B = b.col();
+
      const int nrow_1 = (isTransA) ? ncol_A : nrow_A;
      const int ncol_1 = (isTransA) ? nrow_A : ncol_A;
      const int nrow_2 = (isTransB) ? ncol_B : nrow_B;
@@ -38,7 +37,7 @@ void den_csr_kron_mult_method(const int imethod,
                 (imethod == 3));
 
      int nnz_A = den_nnz( nrow_A, ncol_A, a_);
-     int nnz_B = csr_nnz( nrow_B, browptr );
+     int nnz_B = csr_nnz(b);
      int has_work = (nnz_A >= 1) && (nnz_B >= 1);
      if (!has_work) {
          return;
@@ -131,11 +130,7 @@ void den_csr_kron_mult_method(const int imethod,
      */
     const char trans = (isTransB) ? 'T' : 'N';
     csr_matmul_pre(  trans,
-                     nrow_B,
-                     ncol_B,
-                     browptr, 
-                     bcol,
-                     bval,
+                     b,
 
                      nrow_Y,
                      ncol_Y,
@@ -241,11 +236,7 @@ void den_csr_kron_mult_method(const int imethod,
 
     const char trans = (isTransB) ? 'T' : 'N';
     csr_matmul_pre( trans,
-                    nrow_B,
-                    ncol_B, 
-                    browptr,
-                    bcol,
-                    bval,
+                    b,
 
                     nrow_YAt,
                     ncol_YAt,
@@ -274,13 +265,13 @@ void den_csr_kron_mult_method(const int imethod,
 
          int ib = 0;
          for(ib=0; ib < nrow_B; ib++) {
-             int istartb = browptr[ib];
-             int iendb = browptr[ib+1]-1;
+             int istartb = b.getRowPtr(ib);
+             int iendb = b.getRowPtr(ib + 1);
 
              int kb = 0;
-             for(kb=istartb; kb <= iendb; kb++) {
-                 int jb = bcol[kb];
-                 double bij = bval[kb];
+             for(kb=istartb; kb < iendb; kb++) {
+                 int jb = b.getCol(kb);
+                 double bij = b.getValue(kb);
                  double cij = aij * bij;
 
                  int ix = (isTransB) ? jb : ib;
@@ -306,11 +297,7 @@ void den_csr_kron_mult(
                     const char transB,
                     const PsimagLite::Matrix<double>& a_,
 
-                    const int nrow_B,
-                    const int ncol_B,
-                    const PsimagLite::Vector<int>::Type& browptr,
-                    const PsimagLite::Vector<int>::Type& bcol,
-                    const PsimagLite::Vector<double>::Type& bval,
+                    const PsimagLite::CrsMatrix<double>& b,
 
                     const double* yin,
                           double* xout)
@@ -349,8 +336,11 @@ void den_csr_kron_mult(
 
 	const int nrow_A = a_.n_row();
 	const int ncol_A = a_.n_col();
+	const int nrow_B = b.row();
+    const int ncol_B = b.col();
+
  int nnz_A = den_nnz( nrow_A, ncol_A, a_);
- int nnz_B = csr_nnz( nrow_B, browptr );
+ int nnz_B = csr_nnz(b);
  int has_work = (nnz_A >= 1) && (nnz_B >= 1);
  if (!has_work) {
      return;
@@ -376,15 +366,9 @@ void den_csr_kron_mult(
                     transA, 
                     transB,
 
-                    nrow_A,
-                    ncol_A, 
                     a_,
 
-                    nrow_B,
-                    ncol_B, 
-                    browptr, 
-                    bcol, 
-                    bval,
+                    b,
 
                     yin, 
                     xout );

@@ -1,7 +1,6 @@
 #include "util.h"
-int csr_nnz( const int nrow_A,  
-             const PsimagLite::Vector<int>::Type& arowptr)
+int csr_nnz(const PsimagLite::CrsMatrix<double>& a)
 {
- return( arowptr[nrow_A] );
+	return a.getRowPtr(a.row());
 }
  

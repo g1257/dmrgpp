@@ -66,7 +66,7 @@ void den_matmul_pre( const char trans_A,
          int ld2 = nrow_Y;
          int ld3 = nrow_X;
 
-         dgemm_( &trans1, &trans2,
+         psimag::BLAS::dgemm_( &trans1, &trans2,
                  &mm, &nn, &kk,
                  &alpha, &(a_(0,0)), &ld1,
                          &(yin(0,0)), &ld2,
@@ -124,7 +124,7 @@ else  {
         int ld2 = nrow_Y;
         int ld3 = nrow_X;
 
-        dgemm_( &trans1, &trans2,
+        psimag::BLAS::dgemm_( &trans1, &trans2,
                 &mm, &nn, &kk,
                 &alpha,  &(a_(0,0)), &ld1,
                          &(yin(0,0)), &ld2,
