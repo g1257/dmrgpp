@@ -5,6 +5,7 @@
 #include "../../KronUtil/KronUtil.h"
 #else
 #include "ProgramGlobals.h"
+#include "Matrix.h"
 
 template<typename ComplexOrRealType>
 void csr_kron_mult(const char transA,
@@ -41,7 +42,7 @@ void csr_den_kron_mult(const char transA,
 
                        const int nrow_B,
                        const int ncol_B,
-                       const typename PsimagLite::Vector<ComplexOrRealType>::Type& b_,
+                       const PsimagLite::Matrix<ComplexOrRealType>& b_,
 
                        const ComplexOrRealType yin[],
                        ComplexOrRealType xout[] )
@@ -56,7 +57,7 @@ void den_csr_kron_mult(const char transA,
                        const char transB,
                        const int nrow_A,
                        const int ncol_A,
-                       const typename PsimagLite::Vector<ComplexOrRealType>::Type& a_,
+                       const PsimagLite::Matrix<ComplexOrRealType>& a_,
 
                        const int nrow_B,
                        const int ncol_B,
@@ -78,11 +79,11 @@ void den_kron_mult(const char transA,
 
                    const int nrow_A,
                    const int ncol_A,
-                   const typename PsimagLite::Vector<ComplexOrRealType>::Type& a_,
+                   const PsimagLite::Matrix<ComplexOrRealType>& a_,
 
                    const int nrow_B,
                    const int ncol_B,
-                   const typename PsimagLite::Vector<ComplexOrRealType>::Type& b_,
+                   const PsimagLite::Matrix<ComplexOrRealType>& b_,
 
                    const ComplexOrRealType yin[],
                    ComplexOrRealType xout[])

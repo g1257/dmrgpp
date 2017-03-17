@@ -81,23 +81,23 @@ int main()
                            transA, transB,
                            nrow_A, ncol_A, a_,
                            nrow_B, ncol_B, b_,
-                           y_,
-                           x1_);
+                           &(y_(0,0)),
+                           &(x1_(0,0)));
 
      imethod = 2;
      den_kron_mult_method( imethod,
                            transA, transB,
                            nrow_A, ncol_A, a_,
                            nrow_B, ncol_B, b_,
-                           y_,
-                           x2_  );
+                           &(y_(0,0)),
+                           &(x2_(0,0)));
      imethod = 3;
      den_kron_mult_method( imethod,
                            transA, transB,
                            nrow_A, ncol_A, a_,
                            nrow_B, ncol_B, b_,
-                           y_,
-                           x3_ );
+                           &(y_(0,0)),
+                           &(x3_(0,0)));
 
      int ix = 0;
      int jx = 0;
@@ -240,8 +240,8 @@ int main()
                            transA, transB,
                            nrow_A, ncol_A, a_,
                            nrow_B, ncol_B, b_,
-                           y_,
-                           x1_  );
+                           &(y_(0,0)),
+                           &(x1_(0,0)));
      csr_kron_mult( 
                      transA, transB,
                      nrow_A,

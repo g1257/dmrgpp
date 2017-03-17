@@ -17,12 +17,12 @@ public:
 	// 50% cutoff == 0.5 here for sparse/dense
 	explicit MatrixDenseOrSparse(const SparseMatrixType& sparse)
 	    : isDense_(false), //sparse.nonZero() > static_cast<int>(0.5*sparse.row()*sparse.col())),
-	      rows_(sparse.row()),
-	      cols_(sparse.col())
+	      denseMatrix_(sparse.row(), sparse.col())
 	{
+		SizeType rows = sparse.row();
 		if (!isDense_) {
-			rowptr_.resize(rows_ + 1, 0);
-			for (SizeType k = 0; k < rows_ + 1; ++k)
+			rowptr_.resize(rows + 1, 0);
+			for (SizeType k = 0; k < rows + 1; ++k)
 				rowptr_[k] = sparse.getRowPtr(k);
 
 			SizeType nz = sparse.nonZero();
@@ -36,21 +36,29 @@ public:
 
 		} else {
 			// A(i,j) at  val[ (i) + (j)*nrow ]
-			values_.resize(rows_*cols_, 0.0);
-			for (SizeType i = 0; i < rows_; ++i) {
+			for (SizeType i = 0; i < rows; ++i) {
 				for (int k = sparse.getRowPtr(i); k < sparse.getRowPtr(i+1); ++k)
-					values_[i + sparse.getCol(k)*rows_] = sparse.getValue(k);
+					denseMatrix_(i, sparse.getCol(k)) = sparse.getValue(k);
 			}
 		}
 	}
 
 	bool isDense() const { return isDense_; }
 
-	SizeType rows() const { return rows_; }
+	SizeType rows() const { return denseMatrix_.n_row(); }
 
-	SizeType cols() const { return cols_; }
+	SizeType cols() const { return denseMatrix_.n_col(); }
 
-	const VectorType& values() const { return values_; }
+	const PsimagLite::Matrix<ComplexOrRealType>& toDense() const
+	{
+		return denseMatrix_;
+	}
+
+	const VectorType& values() const
+	{
+		assert(!isDense_);
+		return values_;
+	}
 
 	const VectorIntType& colind() const
 	{
@@ -72,24 +80,20 @@ public:
 	SparseMatrixType toSparse() const
 	{
 		if (isDense_) {
-			PsimagLite::Matrix<ComplexOrRealType> m2(rows_, cols_);
-			for (SizeType i = 0; i < rows_; ++i)
-				for (SizeType j = 0; j < cols_; ++j)
-					m2(i,j) = values_[i + j*rows_];
-
-			return SparseMatrixType(m2);
+			return SparseMatrixType(denseMatrix_);
 		}
 
 		SparseMatrixType m;
-		m.resize(rows_, cols_, colind_.size());
+		SizeType rows = this->rows();
+		m.resize(rows, cols(), colind_.size());
 		SizeType counter = 0;
-		for (SizeType i = 0; i < rows_; ++i) {
+		for (SizeType i = 0; i < rows; ++i) {
 			m.setRow(i, counter);
 			for (int k = rowptr_[i]; k < rowptr_[i+1]; ++k)
 				m.setCol(counter++,colind_[k]);
 		}
 
-		m.setRow(rows_, counter);
+		m.setRow(rows, counter);
 		m.checkValidity();
 		return m;
 	}
@@ -97,11 +101,10 @@ public:
 private:
 
 	bool isDense_;
-	SizeType rows_;
-	SizeType cols_;
 	VectorIntType rowptr_;
 	VectorIntType colind_;
 	VectorType values_;
+	PsimagLite::Matrix<ComplexOrRealType> denseMatrix_;
 }; // class MatrixDenseOrSparse
 
 template<typename SparseMatrixType>
@@ -125,10 +128,10 @@ void kronMult(typename SparseMatrixType::value_type* xout,
 			              transB,
 			              nrowA,
 			              ncolA,
-			              A.values(),
+			              A.toDense(),
 			              nrowB,
 			              ncolB,
-			              B.values(),
+			              B.toDense(),
 			              yin,
 			              xout);
 		} else  {
@@ -137,7 +140,7 @@ void kronMult(typename SparseMatrixType::value_type* xout,
 			                  transB,
 			                  nrowA,
 			                  ncolA,
-			                  A.values(),
+			                  A.toDense(),
 			                  nrowB,
 			                  ncolB,
 			                  B.rowptr(),
@@ -158,7 +161,7 @@ void kronMult(typename SparseMatrixType::value_type* xout,
 			                  A.values(),
 			                  nrowB,
 			                  ncolB,
-			                  B.values(),
+			                  B.toDense(),
 			                  yin,
 			                  xout);
 		} else {

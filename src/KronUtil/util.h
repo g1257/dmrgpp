@@ -378,8 +378,8 @@ void den_kron_mult_method(const int imethod,
                     const int ncol_B,
                     const PsimagLite::Matrix<double>& b_,
 
-                    const PsimagLite::Matrix<double>& yin_,
-                          PsimagLite::Matrix<double>& xout_ );
+                    const double* yin_,
+                          double* xout_ );
 
 extern
 int den_nnz( const int,
