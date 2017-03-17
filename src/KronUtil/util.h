@@ -290,8 +290,8 @@ void den_csr_kron_mult_method(const int imethod,
                     const PsimagLite::Vector<int>::Type& bcol,
                     const PsimagLite::Vector<double>::Type& bval,
 
-                    const PsimagLite::Matrix<double>& yin,
-                          PsimagLite::Matrix<double>& xout_);
+                    const double* yin,
+                          double* xout_);
 
 extern
 void den_copymat( const int nrow, 
