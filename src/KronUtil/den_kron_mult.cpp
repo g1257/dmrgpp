@@ -296,16 +296,9 @@ void den_kron_mult_method(
 
 
 
-void den_kron_mult( 
-                    const char transA,
+void den_kron_mult(const char transA,
                     const char transB,
-
-                    const int nrow_A,
-                    const int ncol_A, 
                     const PsimagLite::Matrix<double>& a_,
-
-                    const int nrow_B,
-                    const int ncol_B, 
                     const PsimagLite::Matrix<double>& b_,
 
                     const double* yin,
@@ -342,7 +335,10 @@ void den_kron_mult(
  *   this is feasible only if A and B are very sparse, need nnz(A)*nnz(B) flops
  *   -------------------------------------------------------------
  */
-
+	const int nrow_A = a_.n_row();
+	const int ncol_A = a_.n_col();
+	const int nrow_B = b_.n_row();
+	const int ncol_B = b_.n_col();
  int nnz_A = nrow_A * ncol_A;
  int nnz_B = nrow_B * ncol_B;
 

@@ -301,15 +301,13 @@ void den_csr_kron_mult_method(const int imethod,
 
 
 
-void den_csr_kron_mult( 
+void den_csr_kron_mult(
                     const char transA,
                     const char transB,
-                    const int nrow_A,
-                    const int ncol_A, 
                     const PsimagLite::Matrix<double>& a_,
 
                     const int nrow_B,
-                    const int ncol_B, 
+                    const int ncol_B,
                     const PsimagLite::Vector<int>::Type& browptr,
                     const PsimagLite::Vector<int>::Type& bcol,
                     const PsimagLite::Vector<double>::Type& bval,
@@ -349,6 +347,8 @@ void den_csr_kron_mult(
  *   -------------------------------------------------------------
  */
 
+	const int nrow_A = a_.n_row();
+	const int ncol_A = a_.n_col();
  int nnz_A = den_nnz( nrow_A, ncol_A, a_);
  int nnz_B = csr_nnz( nrow_B, browptr );
  int has_work = (nnz_A >= 1) && (nnz_B >= 1);

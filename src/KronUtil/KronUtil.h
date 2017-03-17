@@ -44,8 +44,6 @@ void csr_kron_mult(const char transA,
 extern
 void den_csr_kron_mult(const char transA,
                        const char transB,
-                       const int nrow_A,
-                       const int ncol_A,
                        const PsimagLite::Matrix<double>& a_,
 
                        const int nrow_B,
@@ -60,8 +58,6 @@ void den_csr_kron_mult(const char transA,
 extern
 void den_csr_kron_mult(const char transA,
                        const char transB,
-                       const int nrow_A,
-                       const int ncol_A,
                        const PsimagLite::Matrix<std::complex<double> >& a_,
 
                        const int nrow_B,
@@ -78,13 +74,7 @@ void den_csr_kron_mult(const char transA,
 extern
 void den_kron_mult(const char transA,
                    const char transB,
-
-                   const int nrow_A,
-                   const int ncol_A,
                    const PsimagLite::Matrix<double>& a_,
-
-                   const int nrow_B,
-                   const int ncol_B,
                    const PsimagLite::Matrix<double>& b_,
 
                    const double* yin,
@@ -94,12 +84,7 @@ extern
 void den_kron_mult(const char transA,
                    const char transB,
 
-                   const int nrow_A,
-                   const int ncol_A,
                    const PsimagLite::Matrix<std::complex<double> >& a_,
-
-                   const int nrow_B,
-                   const int ncol_B,
                    const PsimagLite::Matrix<std::complex<double> >& b_,
 
                    const std::complex<double>* yin,
@@ -117,8 +102,6 @@ void csr_den_kron_mult( const char transA,
                         const PsimagLite::Vector<int>::Type& acol,
                         const PsimagLite::Vector<double>::Type& aval,
 
-                        const int nrow_B,
-                        const int ncol_B,
                         const PsimagLite::Matrix<double>& b_,
 
                         const double* yin_,
@@ -134,8 +117,6 @@ void csr_den_kron_mult( const char transA,
                         const PsimagLite::Vector<int>::Type& acol,
                         const PsimagLite::Vector<std::complex<double> >::Type& aval,
 
-                        const int nrow_B,
-                        const int ncol_B,
                         const PsimagLite::Matrix<std::complex<double> >& b_,
 
                         const std::complex<double>* yin_,

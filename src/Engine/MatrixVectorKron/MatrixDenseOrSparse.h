@@ -16,7 +16,7 @@ public:
 
 	// 50% cutoff == 0.5 here for sparse/dense
 	explicit MatrixDenseOrSparse(const SparseMatrixType& sparse)
-	    : isDense_(false), //sparse.nonZero() > static_cast<int>(0.5*sparse.row()*sparse.col())),
+	    : isDense_(true), //sparse.nonZero() > static_cast<int>(0.5*sparse.row()*sparse.col())),
 	      denseMatrix_(sparse.row(), sparse.col())
 	{
 		SizeType rows = sparse.row();
@@ -126,11 +126,7 @@ void kronMult(typename SparseMatrixType::value_type* xout,
 		if (isDenseB) {
 			den_kron_mult(transA,
 			              transB,
-			              nrowA,
-			              ncolA,
 			              A.toDense(),
-			              nrowB,
-			              ncolB,
 			              B.toDense(),
 			              yin,
 			              xout);
@@ -138,8 +134,6 @@ void kronMult(typename SparseMatrixType::value_type* xout,
 			// B is sparse
 			den_csr_kron_mult(transA,
 			                  transB,
-			                  nrowA,
-			                  ncolA,
 			                  A.toDense(),
 			                  nrowB,
 			                  ncolB,
@@ -159,8 +153,6 @@ void kronMult(typename SparseMatrixType::value_type* xout,
 			                  A.rowptr(),
 			                  A.colind(),
 			                  A.values(),
-			                  nrowB,
-			                  ncolB,
 			                  B.toDense(),
 			                  yin,
 			                  xout);
