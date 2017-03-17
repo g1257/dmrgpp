@@ -10,20 +10,11 @@
 template<typename ComplexOrRealType>
 void csr_kron_mult(const char transA,
                    const char transB,
-                   const int nrow_A,
-                   const int ncol_A,
-                   const PsimagLite::Vector<int>::Type& arowptr,
-                   const PsimagLite::Vector<int>::Type& acol,
-                   const typename PsimagLite::Vector<ComplexOrRealType>::Type& aval,
+                   const PsimagLite::CrsMatrix<ComplexOrRealType>&,
+                   const PsimagLite::CrsMatrix<ComplexOrRealType>&,
 
-                   const int nrow_B,
-                   const int ncol_B,
-                   const PsimagLite::Vector<int>::Type& browptr,
-                   const PsimagLite::Vector<int>::Type& bcol,
-                   const typename PsimagLite::Vector<ComplexOrRealType>::Type& bval,
-
-                   const ComplexOrRealType yin[],
-                   ComplexOrRealType xout[])
+                   const ComplexOrRealType* yin,
+                   ComplexOrRealType* xout)
 {
 	PsimagLite::String msg("csr_kron_mult: please #define USE_KRON_UTIL");
 	msg += " and link against libkronutil\n";
@@ -33,19 +24,10 @@ void csr_kron_mult(const char transA,
 template<typename ComplexOrRealType>
 void csr_den_kron_mult(const char transA,
                        const char transB,
-
-                       const int nrow_A,
-                       const int ncol_A,
-                       const PsimagLite::Vector<int>::Type& arowptr,
-                       const PsimagLite::Vector<int>::Type& acol,
-                       const typename PsimagLite::Vector<ComplexOrRealType>::Type& aval,
-
-                       const int nrow_B,
-                       const int ncol_B,
+                       const PsimagLite::CrsMatrix<ComplexOrRealType>&,
                        const PsimagLite::Matrix<ComplexOrRealType>& b_,
-
-                       const ComplexOrRealType yin[],
-                       ComplexOrRealType xout[] )
+                       const ComplexOrRealType* yin,
+                       ComplexOrRealType* xout)
 {
 	PsimagLite::String msg("csr_den_kron_mult: please #define USE_KRON_UTIL");
 	msg += " and link against libkronutil\n";
@@ -55,18 +37,10 @@ void csr_den_kron_mult(const char transA,
 template<typename ComplexOrRealType>
 void den_csr_kron_mult(const char transA,
                        const char transB,
-                       const int nrow_A,
-                       const int ncol_A,
                        const PsimagLite::Matrix<ComplexOrRealType>& a_,
-
-                       const int nrow_B,
-                       const int ncol_B,
-                       const PsimagLite::Vector<int>::Type& browptr,
-                       const PsimagLite::Vector<int>::Type& bcol,
-                       const typename PsimagLite::Vector<ComplexOrRealType>::Type& bval,
-
-                       const ComplexOrRealType yin[],
-                       ComplexOrRealType xout[])
+                       const PsimagLite::CrsMatrix<ComplexOrRealType>&,
+                       const ComplexOrRealType* yin,
+                       ComplexOrRealType* xout)
 {
 	PsimagLite::String msg("den_csr_kron_mult: please #define USE_KRON_UTIL");
 	msg += " and link against libkronutil\n";
@@ -76,17 +50,10 @@ void den_csr_kron_mult(const char transA,
 template<typename ComplexOrRealType>
 void den_kron_mult(const char transA,
                    const char transB,
-
-                   const int nrow_A,
-                   const int ncol_A,
                    const PsimagLite::Matrix<ComplexOrRealType>& a_,
-
-                   const int nrow_B,
-                   const int ncol_B,
                    const PsimagLite::Matrix<ComplexOrRealType>& b_,
-
-                   const ComplexOrRealType yin[],
-                   ComplexOrRealType xout[])
+                   const ComplexOrRealType* yin,
+                   ComplexOrRealType* xout)
 {
 	PsimagLite::String msg("den_kron_mult: please #define USE_KRON_UTIL");
 	msg += " and link against libkronutil\n";
