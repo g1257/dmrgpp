@@ -29,30 +29,9 @@ int main()
      * dense matrices A, B
      * -----------------------------------
      */
-     const int max_nnz_A =  1 + den_nnz(nrow_A,ncol_A, a_);
-     PsimagLite::Vector<int>::Type arowptr(nrow_A+1);
-     PsimagLite::Vector<int>::Type acol(max_nnz_A);
-     PsimagLite::Vector<double>::Type aval(max_nnz_A);
+     PsimagLite::CrsMatrix<double> a(a_);
 
-     den2csr( nrow_A, ncol_A, a_,
-              max_nnz_A, 
-              arowptr, acol, aval );
-
-
-
-     const int max_nnz_B = 1 + den_nnz(nrow_B,ncol_B, b_);
-     PsimagLite::Vector<int>::Type browptr(nrow_B+1);
-     PsimagLite::Vector<int>::Type bcol(max_nnz_B);
-     PsimagLite::Vector<double>::Type bval(max_nnz_B);
-
-     den2csr( nrow_B, ncol_B, b_,
-              max_nnz_B, 
-              browptr, bcol, bval );
-
-
-
-
-
+	 PsimagLite::CrsMatrix<double> b(b_);
 
     /*
      * -----------------------------
@@ -62,6 +41,7 @@ int main()
 
     const int nrow_C = nrow_A * nrow_B;
     const int ncol_C = ncol_A * ncol_B;
+	if (ncol_C < 2) continue;
     PsimagLite::Matrix<double> c_(nrow_C, ncol_C);
 
     den_kron_form( nrow_A, ncol_A, a_,
@@ -73,15 +53,7 @@ int main()
      * generate compressed sparse version of C
      * ---------------------------------------
      */
-    const int max_nnz_C = 1 + den_nnz( nrow_C, ncol_C, c_);
-    PsimagLite::Vector<int>::Type scrowptr(nrow_C+1);
-    PsimagLite::Vector<int>::Type sccol(max_nnz_C);
-    PsimagLite::Vector<double>::Type scval(max_nnz_C);
-
-    den2csr( nrow_C, ncol_C, c_,
-             max_nnz_C,
-             scrowptr, sccol,scval );
-
+    PsimagLite::CrsMatrix<double> c(c_);
 
 
     PsimagLite::Vector<int>::Type rindex(nrow_C);
@@ -131,19 +103,17 @@ int main()
      * -------------------------------------
      */
 
-     const int max_nnz_D = 1 + den_nnz( nrow_D,ncol_D, d_);
-     PsimagLite::Vector<int>::Type sdrowptr(nrow_D + 1);
-     PsimagLite::Vector<int>::Type sdcol(max_nnz_D);
-     PsimagLite::Vector<double>::Type sdval(max_nnz_D);
+     const int max_nnz_D = 1 + den_nnz(d_);
 
-     csr_submatrix( nrow_C, ncol_C, 
-                    scrowptr,sccol,scval,
+	 PsimagLite::CrsMatrix<double> sd(d_.n_row(),d_.n_col());
+
+     csr_submatrix( c,
                  
                     nrindex, ncindex, 
                     max_nnz_D,
                     rindex, cindex,
                     
-                    sdrowptr,sdcol,sdval );
+                    sd );
 
 
      /*
@@ -152,9 +122,7 @@ int main()
       * -----------------------
       */
       PsimagLite::Matrix<double> dd_(nrow_D, ncol_D);
-      csr2den( nrow_D, ncol_D,
-               sdrowptr, sdcol, sdval,
-               dd_);
+	  crsMatrixToFullMatrix(dd_, sd);
 
     /*
      * --------------------------------------
@@ -231,18 +199,16 @@ int main()
      * sparse version of A, B
      * ------------------------------
      */
-    const int max_nnz_E = 1 + den_nnz(nrow_E,ncol_E, e_);
-    PsimagLite::Vector<int>::Type erowptr(nrow_E+1);
-    PsimagLite::Vector<int>::Type ecol(max_nnz_E);
-    PsimagLite::Vector<double>::Type eval(max_nnz_E);
 
+    PsimagLite::CrsMatrix<double> e(nrow_E, ncol_E);
+	const int max_nnz_E = 1 + den_nnz(e_);
     csr_kron_submatrix(
-                nrow_A,ncol_A,arowptr,acol,aval,
-                nrow_B,ncol_B,browptr,bcol,bval,
+                a,
+                b,
                 nrindex,ncindex,
                 max_nnz_E,
                 rindex, cindex,
-                erowptr,ecol,eval );
+                e);
 
     /*
      * ---------------------------------
@@ -251,8 +217,7 @@ int main()
      */
     PsimagLite::Matrix<double> se_(nrow_E, ncol_E);
 
-    csr2den( nrow_E,ncol_E, erowptr, ecol,eval,
-	     se_);
+	crsMatrixToFullMatrix(se_, e);
 
 
     /*

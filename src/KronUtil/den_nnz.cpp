@@ -1,8 +1,8 @@
 #include "util.h"
-int den_nnz( const int nrow_A, 
-             const int ncol_A, 
-             const PsimagLite::Matrix<double>& a_)
+int den_nnz(const PsimagLite::Matrix<double>& a_)
 {
+	const int nrow_A = a_.n_row();
+	const int ncol_A = a_.n_col();
 /*
  * -------------------------
  * return number of nonzeros

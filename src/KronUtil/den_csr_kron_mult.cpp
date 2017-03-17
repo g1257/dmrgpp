@@ -36,7 +36,7 @@ void den_csr_kron_mult_method(const int imethod,
                 (imethod == 2) ||
                 (imethod == 3));
 
-     int nnz_A = den_nnz( nrow_A, ncol_A, a_);
+     int nnz_A = den_nnz(a_);
      int nnz_B = csr_nnz(b);
      int has_work = (nnz_A >= 1) && (nnz_B >= 1);
      if (!has_work) {
@@ -339,7 +339,7 @@ void den_csr_kron_mult(
 	const int nrow_B = b.row();
     const int ncol_B = b.col();
 
- int nnz_A = den_nnz( nrow_A, ncol_A, a_);
+ int nnz_A = den_nnz(a_);
  int nnz_B = csr_nnz(b);
  int has_work = (nnz_A >= 1) && (nnz_B >= 1);
  if (!has_work) {

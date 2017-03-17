@@ -1,21 +1,16 @@
 #include "util.h"
 
-void csr_submatrix( const int nrow_A, 
-                    const int ncol_A, 
-                    const PsimagLite::Vector<int>::Type& arowptr,
-                    const PsimagLite::Vector<int>::Type& acol,
-                    const PsimagLite::Vector<double>::Type& aval,
+void csr_submatrix(
+                    const PsimagLite::CrsMatrix<double>& a,
 
-                    const int nrow_B, 
-                    const int ncol_B, 
+const int nrow_B,
+        const int ncol_B,
                     const int max_nnz,
 
                     const PsimagLite::Vector<int>::Type& rindex,
                     const PsimagLite::Vector<int>::Type& cindex,
 
-                    PsimagLite::Vector<int>::Type& browptr,
-                    PsimagLite::Vector<int>::Type& bcol,
-                    PsimagLite::Vector<double>::Type& bval )
+                    PsimagLite::CrsMatrix<double>& b)
 {
 /*
  * ---------------------------------------------------------------------------
@@ -34,6 +29,9 @@ void csr_submatrix( const int nrow_A,
   * setup boolean array for fast mapping of column index
   * ----------------------------------------------------
   */
+	const int nrow_A = a.row();
+	const int ncol_A = a.col();
+
   int* cmap = new int[ncol_A];
   int* nnz = new int[nrow_B];
 
@@ -65,14 +63,14 @@ void csr_submatrix( const int nrow_A,
 
   for(ib=0; ib < nrow_B; ib++) {
      int ia = rindex[ib];
-     int istart = arowptr[ia];
-     int iend = arowptr[ia+1]-1;
+     int istart = a.getRowPtr(ia);
+     int iend = a.getRowPtr(ia + 1);
 
      assert((0 <= ia) && (ia < nrow_A));
 
      int k = 0;
-     for( k=istart; k <= iend; k++) {
-         int ja = acol[k];
+     for( k=istart; k < iend; k++) {
+         int ja = a.getCol(k);
          assert((0 <= ja) && (ja < ncol_A));
          
          int jb = cmap[ ja ];
@@ -101,11 +99,10 @@ void csr_submatrix( const int nrow_A,
   * ---------------------------------
   */
   
-  browptr[0] = 0;
-  for(ib=0; ib < nrow_B; ib++) {
-     browptr[ib+1] = browptr[ib] + nnz[ib];
-     };
-
+  b.resize(nrow_B, ncol_B, max_nnz);
+  b.setRow(0,0);
+  for(ib=0; ib < nrow_B; ib++)
+	  b.setRow(ib+1,b.getRowPtr(ib) + nnz[ib]);
 
   /*
    * ------------------------
@@ -125,25 +122,26 @@ void csr_submatrix( const int nrow_A,
    */
   for(ib=0; ib < nrow_B; ib++) {
       int ia = rindex[ib];
-      int istart = arowptr[ia];
-      int iend = arowptr[ia+1]-1;
+      int istart = a.getRowPtr(ia);
+      int iend = a.getRowPtr(ia + 1);
       int k = 0;
-      for(k=istart; k <= iend; k++) {
-         int ja = acol[k];
-         double aij = aval[k];
+      for(k=istart; k < iend; k++) {
+         int ja = a.getCol(k);
+         double aij = a.getValue(k);
 
          jb = cmap[ja];
          int isvalid =  (0 <= jb) && (jb < ncol_B);
          if (isvalid) {
-           int ipos = browptr[ib]  + nnz[ib];
+           int ipos = b.getRowPtr(ib) + nnz[ib];
 
-           bval[ipos] = aij;
-           bcol[ipos] = jb;
+           b.setValues(ipos,aij);
+           b.setCol(ipos,jb);
            nnz[ib] += 1;
            };
         };
       };
 
+  b.checkValidity();
   delete[] cmap;
   delete[] nnz;
 }

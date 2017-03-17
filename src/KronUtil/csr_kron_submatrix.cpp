@@ -1,16 +1,8 @@
 #include "util.h"
 void csr_kron_submatrix( 
-         const int nrow_A,
-         const int ncol_A,
-         const PsimagLite::Vector<int>::Type& arowptr,
-         const PsimagLite::Vector<int>::Type& acol,
-         const PsimagLite::Vector<double>::Type& aval,
+         const PsimagLite::CrsMatrix<double>& a,
 
-         const int nrow_B,
-         const int ncol_B,
-         const PsimagLite::Vector<int>::Type& browptr,
-         const PsimagLite::Vector<int>::Type& bcol,
-         const PsimagLite::Vector<double>::Type& bval,
+      const PsimagLite::CrsMatrix<double>& b,
          
          const int nrindex, 
          const int ncindex, 
@@ -18,9 +10,7 @@ void csr_kron_submatrix(
          const PsimagLite::Vector<int>::Type& rindex,
          const PsimagLite::Vector<int>::Type& cindex,
 
-         PsimagLite::Vector<int>::Type& hrowptr,
-         PsimagLite::Vector<int>::Type& hcol,
-         PsimagLite::Vector<double>::Type& hval )
+         PsimagLite::CrsMatrix<double>& h)
 {
 /*
  * -------------------------------------------------
@@ -31,7 +21,12 @@ void csr_kron_submatrix(
  * assume A, B are in sparse compressed ROW format
  * -------------------------------------------------
  */
-         
+
+	const int nrow_A = a.row();
+	const int ncol_A = a.col();
+	const int nrow_B = b.row();
+	const int ncol_B = b.col();
+
     const int ncol_C = ncol_A * ncol_B;
 #ifndef NDEBUG
     const int nrow_C = nrow_A * nrow_B;
@@ -85,26 +80,27 @@ void csr_kron_submatrix(
 
   int ih = 0;
   int ifree = 0;
+  h.resize(nrow_H, ncol_H, max_nnz);
   for(ih=0; ih < nrow_H; ih++) {
-     hrowptr[ih] = ifree;
+     h.setRow(ih,ifree);
 
      int ia = ialist[ih];
      int ib = iblist[ih];
 
-     int istarta = arowptr[ia];
-     int ienda = arowptr[ia+1]-1;
+     int istarta = a.getRowPtr(ia);
+     int ienda = a.getRowPtr(ia + 1);
 
-     int istartb = browptr[ib];
-     int iendb = browptr[ib+1]-1;
+     int istartb = b.getRowPtr(ib);
+     int iendb = b.getRowPtr(ib + 1);
 
      int ka = 0;
      int kb = 0;
-     for(ka=istarta; ka <= ienda; ka++) {
-     for(kb=istartb; kb <= iendb; kb++) {
-         int ja = acol[ka];
-         int jb = bcol[kb];
-         double aij = aval[ka];
-         double bij = bval[kb];
+     for(ka=istarta; ka < ienda; ka++) {
+     for(kb=istartb; kb < iendb; kb++) {
+         int ja = a.getCol(ka);
+         int jb = b.getCol(kb);
+         double aij = a.getValue(ka);
+         double bij = b.getValue(kb);
 
          int jc = jb + ja*ncol_B;
      
@@ -117,14 +113,15 @@ void csr_kron_submatrix(
 
             assert((ifree < max_nnz));
 
-            hcol[ifree] = jh;
-            hval[ifree] = cij;
+            h.setCol(ifree, jh);
+            h.setValues(ifree,cij);
             ifree++;
             };
          };
          };
      };
-  hrowptr[nrow_H] = ifree;
+  h.setRow(nrow_H, ifree);
+h.checkValidity();
 
   delete[] ialist;
   delete[] iblist;

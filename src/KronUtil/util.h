@@ -113,47 +113,26 @@ void csr_matmul_pre( const char trans_A,
                      PsimagLite::MatrixNonOwned<double>& xout);
 
 extern
-void csr_submatrix( const int nrow_A,
-                    const int ncol_A,
-                    const PsimagLite::Vector<int>::Type& arowptr,
-                    const PsimagLite::Vector<int>::Type& acol,
-                    const PsimagLite::Vector<double>::Type& aval,
-
-                    const int nrow_B,
-                    const int ncol_B,
+void csr_submatrix(const PsimagLite::CrsMatrix<double>& a,
+                   const int nrow_B,
+				           const int ncol_B,
                     const int max_nnz,
 
                     const PsimagLite::Vector<int>::Type& rindex,
                     const PsimagLite::Vector<int>::Type& cindex,
-
-                    PsimagLite::Vector<int>::Type& browptr,
-                    PsimagLite::Vector<int>::Type& bcol,
-                    PsimagLite::Vector<double>::Type& bval);
+                    PsimagLite::CrsMatrix<double>& b);
 
 
 extern
-void csr_kron_submatrix( 
-         const int nrow_A,
-         const int ncol_A,
-         const PsimagLite::Vector<int>::Type& arowptr,
-         const PsimagLite::Vector<int>::Type& acol,
-         const PsimagLite::Vector<double>::Type& aval,
+void csr_kron_submatrix(const PsimagLite::CrsMatrix<double>& a,
+         const PsimagLite::CrsMatrix<double>& b,
 
-         const int nrow_B,
-         const int ncol_B,
-         const PsimagLite::Vector<int>::Type& browptr,
-         const PsimagLite::Vector<int>::Type& bcol,
-         const PsimagLite::Vector<double>::Type& bval,
-         
-         const int nrindex, 
-         const int ncindex, 
+         const int nrindex,
+         const int ncindex,
          const int max_nnz,
          const PsimagLite::Vector<int>::Type& rindex,
          const PsimagLite::Vector<int>::Type& cindex,
-
-         PsimagLite::Vector<int>::Type& hrowptr,
-         PsimagLite::Vector<int>::Type& hcol,
-         PsimagLite::Vector<double>::Type& hval );
+         PsimagLite::CrsMatrix<double>& h);
 
 
 extern
@@ -342,9 +321,7 @@ void den_kron_mult_method(const int imethod,
                           double* xout_ );
 
 extern
-int den_nnz( const int,
-             const int,
-             const PsimagLite::Matrix<double>&);
+int den_nnz(const PsimagLite::Matrix<double>&);
 
 
 extern
