@@ -29,7 +29,7 @@ const int nrow_B,
   * setup boolean array for fast mapping of column index
   * ----------------------------------------------------
   */
-	const int nrow_A = a.row();
+
 	const int ncol_A = a.col();
 
   int* cmap = new int[ncol_A];
@@ -66,7 +66,7 @@ const int nrow_B,
      int istart = a.getRowPtr(ia);
      int iend = a.getRowPtr(ia + 1);
 
-     assert((0 <= ia) && (ia < nrow_A));
+     assert((0 <= ia) && (ia < a.row()));
 
      int k = 0;
      for( k=istart; k < iend; k++) {

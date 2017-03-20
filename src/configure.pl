@@ -55,7 +55,7 @@ for (my $i = 0; $i < $templates; ++$i) {
 	$dotos .= " $name.o ";
 }
 
-my %dmrgMain = (name => 'dmrg', dotos => $dotos);
+my %dmrgMain = (name => 'dmrg', dotos => "$dotos", libs => "kronutil");
 
 push @drivers,\%dmrgMain;
 
@@ -77,6 +77,9 @@ print FH<<EOF;
 
 operator: dmrg
 	cp dmrg operator
+
+libkronutil.a:
+	\$(MAKE) -C KronUtil
 
 ../doc/manual.pdf: ../doc/manual.tex
 	cd ../doc; pdflatex manual.tex; pdflatex manual.tex; pdflatex manual.tex

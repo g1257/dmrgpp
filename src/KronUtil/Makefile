@@ -62,15 +62,15 @@ OBJ= \
 	den_nnz.o  \
 	estimate_kron_cost.o
 
-libkronutil.a: $(OBJ)
+libkronutil.a: $(OBJ) ../Config.make
 	ar rc libkronutil.a $(OBJ)
 	ranlib libkronutil.a
 
-test1: libkronutil.a test1.o $(OBJ)
-	$(CXX) $(CFLAGS) -o test1 test1.o libkronutil.a $(LDFLAGS)
+test1: libkronutil.a test1.o $(OBJ) ../Config.make
+	$(CXX) $(CFLAGS) -o test1 test1.o $(LDFLAGS)
 
-test2: libkronutil.a test2.o
-	$(CXX) $(CFLAGS) -o test2 test2.o libkronutil.a $(LDFLAGS)
+test2: libkronutil.a test2.o ../Config.make
+	$(CXX) $(CFLAGS) -o test2 test2.o $(LDFLAGS)
 
 clean:
 	touch csr_kron_mult.o libkronutil.a test1 test2

@@ -37,9 +37,11 @@ CPPFLAGS += -Wall -Werror -Wendif-labels
 #Change basis even for un-needed operators
 #CPPFLAGS += -DOPERATORS_CHANGE_ALL
 
-# Enable KronUtil
-#CPPFLAGS += -DUSE_KRON_UTIL
-#LDFLAGS += KronUtil/libkronutil.a
+# Disable KronUtil
+#CPPFLAGS += -DDO_NOT_USE_KRON_UTIL
+
+#Add directory to linker where libkronutil.a resides
+LDFLAGS += -LKronUtil
 
 # Specify the strip command to use (or use true to disable)
 STRIP_COMMAND = true

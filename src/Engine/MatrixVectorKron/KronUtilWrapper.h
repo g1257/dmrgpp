@@ -1,7 +1,7 @@
 #ifndef KRON_UTIL_WRAPPER_H
 #define KRON_UTIL_WRAPPER_H
 
-#ifdef USE_KRON_UTIL
+#ifndef DO_NOT_USE_KRON_UTIL
 #include "../../KronUtil/KronUtil.h"
 #else
 #include "ProgramGlobals.h"
@@ -18,7 +18,7 @@ void csr_kron_mult(const char transA,
                    SizeType offsetX)
 
 {
-	PsimagLite::String msg("csr_kron_mult: please #define USE_KRON_UTIL");
+	PsimagLite::String msg("csr_kron_mult: please #undefine DO_NOT_USE_KRON_UTIL");
 	msg += " and link against libkronutil\n";
 	throw PsimagLite::RuntimeError(msg);
 }
@@ -33,7 +33,7 @@ void csr_den_kron_mult(const char transA,
 	                   typename PsimagLite::Vector<ComplexOrRealType>::Type& xout,
 	                   SizeType offsetX)
 {
-	PsimagLite::String msg("csr_den_kron_mult: please #define USE_KRON_UTIL");
+	PsimagLite::String msg("csr_den_kron_mult: please #undefine DO_NOT_USE_KRON_UTIL");
 	msg += " and link against libkronutil\n";
 	throw PsimagLite::RuntimeError(msg);
 }
@@ -48,7 +48,7 @@ void den_csr_kron_mult(const char transA,
 	                   typename PsimagLite::Vector<ComplexOrRealType>::Type& xout,
 	                   SizeType offsetX)
 {
-	PsimagLite::String msg("den_csr_kron_mult: please #define USE_KRON_UTIL");
+	PsimagLite::String msg("den_csr_kron_mult: please #undefine DO_NOT_USE_KRON_UTIL");
 	msg += " and link against libkronutil\n";
 	throw PsimagLite::RuntimeError(msg);
 }
@@ -63,7 +63,7 @@ void den_kron_mult(const char transA,
                    typename PsimagLite::Vector<ComplexOrRealType>::Type& xout,
                    SizeType offsetX)
 {
-	PsimagLite::String msg("den_kron_mult: please #define USE_KRON_UTIL");
+	PsimagLite::String msg("den_kron_mult: please #undefine DO_NOT_USE_KRON_UTIL");
 	msg += " and link against libkronutil\n";
 	throw PsimagLite::RuntimeError(msg);
 }
