@@ -61,9 +61,18 @@ $what.o: $what.cpp  Makefile $additional Config.make
 EOF
 
 	if (!$aux) {
+		# FIXME: Support many libs separated by commas here
+		my $libs = $ptr->{"libs"};
+		my $libs1 = "";
+		my $libs2 = "";
+		if (defined($libs) and $libs ne "") {
+			$libs1 = "lib$libs.a";
+			$libs2 = "-l$libs";
+		}
+
 		print FH<<EOF;
-$what: $dotos
-	\$(CXX) -o  $what $dotos \$(LDFLAGS) \$(CPPFLAGS)
+$what: $dotos $libs1
+	\$(CXX) -o  $what $dotos \$(LDFLAGS) $libs2 \$(CPPFLAGS)
 	\$(STRIP_COMMAND) $what
 
 EOF
@@ -288,23 +297,64 @@ sub createConfigMake
 		return;
 	}
 
+	my $blasLapack = "-lblas -llapack";
 	while (<FILE>) {
 		next if (/ConfigBase\.make/);
+		if (/\Q$blasLapack/) {
+			my $line = $_;
+			my $tmp = findBlasLapack();
+			$line =~ s/\Q$blasLapack/$tmp/ if ($tmp ne "");
+			$_ = $line;
+		}
+
 		print FOUT;
 	}
 
 	close(FOUT);
 	close(FILE);
+
+	my $overwrite = 1;
 	if (-r "Config.make") {
-		print STDERR "$0: Config.make exists and will NOT be overwritten\n";
-		print STDERR "$0: Please consider comparing your Config.make\n";
-	        print STDERR "\t to the one I've written to Config.make.new\n";
-		return;
+		$overwrite = 0;
+		print "$0: Config.make exists. Do you want to overwrite it?\n";
+		print "$0: Your answer: (n/Y): ";
+		$_ = <STDIN>;
+		chomp;
+		$overwrite = ($_ eq "Y");
+		if (!$overwrite) {
+			print STDERR "$0: Please consider comparing your Config.make\n";
+			print STDERR "\t to the one I've written to Config.make.new\n";
+			return;
+		}
 	}
 
 	$cmd = "mv Config.make.new Config.make";
 	system($cmd);
 	print STDERR "$0: Written Config.make\n";
+}
+
+sub findBlasLapack
+{
+	my $test1 = "/usr/lib64/libblas.so.3";
+	my $test2 = "/usr/lib64/liblapack.so.3";
+	return "$test1 $test2" if (-r "$test1" and -r "$test2");
+	$test1 = "/usr/lib/libblas.so.3";
+        $test2 = "/usr/lib/liblapack.so.3";
+	return "$test1 $test2" if (-r "$test1" and -r "$test2");
+	return "-framework Accelerate " if (isMacOs());
+	return "";
+}
+
+sub isMacOs
+{
+	open(PIPE, "uname |") or return 0;
+	my $flag = 0;
+	while (<PIPE>) {
+		$flag = 1 if (/darwin/i);
+	}
+
+	close(PIPE);
+	return $flag;
 }
 
 1;

@@ -5,6 +5,8 @@ CXX = g++
 # We're using ansi C++
 CXX += -pedantic -ansi
 
+CXX += -Wall -Werror
+
 # Enable MPI (you must set the proper 
 # compiler wrapper under CXX above)
 # CPPFLAGS += -DUSE_MPI
