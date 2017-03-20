@@ -110,29 +110,15 @@ public:
 	      modelHelper_(modelHelper),
 	      gengroupLeft_(modelHelper_.leftRightSuper().left()),
 	      gengroupRight_(modelHelper_.leftRightSuper().right()),
-	      ijpatches_(modelHelper_.leftRightSuper(),modelHelper_.quantumNumber()),
-	      aL_(modelHelper_.leftRightSuper().left().hamiltonian(),
-	          gengroupLeft_,
-	          ijpatches_,
-	          GenIjPatchType::LEFT),
-	      aRt_(0)
+	      ijpatches_(modelHelper_.leftRightSuper(),modelHelper_.quantumNumber())
 	{
 		cacheSigns(modelHelper_.leftRightSuper().left().electronsVector());
-		SparseMatrixType arTranspose;
-		transposeConjugate(arTranspose,modelHelper_.leftRightSuper().right().hamiltonian());
-
-		aRt_ = new ArrayOfMatStructType(arTranspose,
-		                                gengroupRight_,
-		                                ijpatches_,
-		                                GenIjPatchType::RIGHT);
-
 		convertXcYcArrays();
+		addHlAndHr();
 	}
 
 	~InitKron()
 	{
-		delete aRt_;
-
 		for (SizeType ic=0;ic<xc_.size();ic++) delete xc_[ic];
 		for (SizeType ic=0;ic<yc_.size();ic++) delete yc_[ic];
 
@@ -174,16 +160,6 @@ public:
 
 	SizeType connections() const { return xc_.size(); }
 
-	const ArrayOfMatStructType& aRt () const
-	{
-		return *aRt_;
-	}
-
-	const ArrayOfMatStructType& aL() const
-	{
-		return aL_;
-	}
-
 	const GenGroupType& istartLeft() const
 	{
 		return gengroupLeft_;
@@ -201,6 +177,20 @@ public:
 	}
 
 private:
+
+	void addHlAndHr()
+	{
+		const RealType value = 1.0;
+		const SparseMatrixType& aL = modelHelper_.leftRightSuper().left().hamiltonian();
+		const SparseMatrixType& aR = modelHelper_.leftRightSuper().right().hamiltonian();
+		identityL_.makeDiagonal(aL.row(), value);
+		identityR_.makeDiagonal(aR.row(), value);
+		std::pair<SizeType, SizeType> ops(0,0);
+		std::pair<char, char> mods('n', 'n');
+		LinkType link(0,0,0,value,0, ProgramGlobals::BOSON, ops, mods,1,value,0);
+		addOneConnection(aL,identityR_,link);
+		addOneConnection(identityL_,aR,link);
+	}
 
 	void convertXcYcArrays()
 	{
@@ -277,8 +267,8 @@ private:
 	const ModelHelperType& modelHelper_;
 	GenGroupType gengroupLeft_,gengroupRight_;
 	GenIjPatchType  ijpatches_;
-	ArrayOfMatStructType aL_;
-	ArrayOfMatStructType* aRt_; // <-- we own it also, it's newed and deleted here
+	SparseMatrixType identityL_;
+	SparseMatrixType identityR_;
 	VectorBoolType signs_;
 	typename PsimagLite::Vector<ArrayOfMatStructType*>::Type xc_;
 	typename PsimagLite::Vector<ArrayOfMatStructType*>::Type yc_;
