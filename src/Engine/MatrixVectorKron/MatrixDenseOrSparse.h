@@ -28,9 +28,17 @@ public:
 
 	bool isDense() const { return isDense_; }
 
-	SizeType rows() const { return sparseMatrix_.row(); }
+	SizeType rows() const
+	{
+		assert(sparseMatrix_);
+		return sparseMatrix_->row();
+	}
 
-	SizeType cols() const { return sparseMatrix_.col(); }
+	SizeType cols() const
+	{
+		assert(sparseMatrix_);
+		return sparseMatrix_->col();
+	}
 
 	const PsimagLite::Matrix<ComplexOrRealType>& dense() const
 	{
@@ -39,13 +47,13 @@ public:
 
 	const SparseMatrixType& sparse() const
 	{
-		assert(!sparseMatrix_);
+		assert(sparseMatrix_);
 		return *sparseMatrix_;
 	}
 
 	bool isZero() const
 	{
-		return (isDense_) ? false : (sparseMatrix_.nonZero() == 0);
+		return (isDense_) ? false : (sparseMatrix_->nonZero() == 0);
 	}
 
 	SparseMatrixType toSparse() const
