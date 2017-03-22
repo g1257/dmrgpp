@@ -66,7 +66,7 @@ const int nrow_B,
      int istart = a.getRowPtr(ia);
      int iend = a.getRowPtr(ia + 1);
 
-     assert((0 <= ia) && (ia < a.row()));
+     assert((0 <= ia) && (static_cast<SizeType>(ia) < a.row()));
 
      int k = 0;
      for( k=istart; k < iend; k++) {
