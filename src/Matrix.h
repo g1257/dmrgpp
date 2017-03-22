@@ -57,16 +57,8 @@ public:
 	{}
 
 	Matrix(SizeType nrow,SizeType ncol)
-	    : nrow_(nrow),ncol_(ncol),data_(nrow*ncol)
+	    : nrow_(nrow),ncol_(ncol),data_(nrow*ncol, 0)
 	{}
-
-	// copy constructor
-	Matrix(const Matrix<T>& m)
-	{
-		nrow_=m.nrow_;
-		ncol_=m.ncol_;
-		data_=m.data_;
-	}
 
 	template<typename RealType>
 	Matrix(const Matrix<RealType>& m,
@@ -174,7 +166,7 @@ public:
 	void reset(SizeType nrow,SizeType ncol)
 	{
 		nrow_=nrow; ncol_=ncol;
-		data_.resize(nrow*ncol);
+		data_.resize(nrow*ncol, 0);
 	}
 
 	Matrix<T>& operator+=(const Matrix<T>& other)
@@ -255,7 +247,7 @@ public:
 		MPI::bcast(data_,root,mpiComm);
 	}
 
-	// start closure memebers
+	// start closure members
 
 	template<typename T1>
 	Matrix& operator+=(const std::ClosureOperator<T1,Matrix,std::ClosureOperations::OP_MULT>& c)
