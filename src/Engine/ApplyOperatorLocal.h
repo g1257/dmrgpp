@@ -74,7 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file ApplyOperatorLocal.h
  *
- *  documentation FIXME
+ *  dest2 = transpose(A) * src
  */
 #ifndef APPLY_OPERATOR_LOCAL_H
 #define APPLY_OPERATOR_LOCAL_H
@@ -147,6 +147,7 @@ public:
 		dest.fromFull(dest2,lrs_.super());
 	}
 
+	// dest2 = transpose(A) * src
 	void hookForZeroSystem(TargetVectorType& dest2,
 	                       const VectorWithOffsetType& src,
 	                       const OperatorType& A,
@@ -206,6 +207,7 @@ private:
 		dest.fromFull(dest2,lrs_.super());
 	}
 
+	// dest2 = transpose(A) * src
 	void applyLocalOpSystem(TargetVectorType& dest2,
 	                        const VectorWithOffsetType& src,
 	                        const OperatorType& A,
@@ -238,7 +240,6 @@ private:
 				dest2[j] += src.slowAccess(i)*A.data.getValue(k)*sign;
 			}
 		}
-
 	}
 
 	void applyLocalOpEnviron(VectorWithOffsetType& dest,
@@ -264,6 +265,7 @@ private:
 		dest.fromFull(dest2,lrs_.super());
 	}
 
+	// dest2 = transpose(A) * src
 	void applyLocalOpEnviron(TargetVectorType& dest2,
 	                         const VectorWithOffsetType& src,
 	                         const OperatorType& A,
@@ -292,6 +294,7 @@ private:
 		}
 	}
 
+	// dest2 = transpose(A) * src
 	void applyLocalOpLeftCorner(TargetVectorType& dest2,
 	                            const VectorWithOffsetType& src,
 	                            const OperatorType& A,
@@ -315,6 +318,7 @@ private:
 		}
 	}
 
+	// dest2 = transpose(A) * src
 	void applyLocalOpRightCorner(TargetVectorType& dest2,
 	                             const VectorWithOffsetType& src,
 	                             const OperatorType& A,
