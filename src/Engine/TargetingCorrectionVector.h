@@ -368,6 +368,7 @@ private:
 		if (count==0) return;
 
 		calcDynVectors(phiNew,direction);
+
 		for (SizeType i = 1; i < this->common().targetVectors().size(); ++i) {
 			PsimagLite::String label = "P" + ttos(i);
 			this->common().cocoon(direction,

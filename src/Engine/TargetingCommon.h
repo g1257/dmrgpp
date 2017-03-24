@@ -499,6 +499,7 @@ public:
 	}
 
 	// in situ computation:
+	// prints <v1|A|v2>
 	void cocoon(SizeType direction,
 	            SizeType site,
 	            const VectorWithOffsetType& v1,
@@ -610,6 +611,7 @@ private:
 		return -1;
 	}
 
+	// prints <v1|A|v2>
 	void cocoon_(SizeType direction,
 	             SizeType site,
 	             const VectorWithOffsetType& v1,
@@ -641,6 +643,7 @@ private:
 		return vecStr;
 	}
 
+	// prints <src2|A|src1>
 	void test(const VectorWithOffsetType& src1,
 	          const VectorWithOffsetType& src2,
 	          SizeType systemOrEnviron,
@@ -654,6 +657,7 @@ private:
 		std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
 	}
 
+	// returns <src2|A|src1>
 	ComplexOrRealType test_(const VectorWithOffsetType& src1,
 	                        const VectorWithOffsetType& src2,
 	                        SizeType systemOrEnviron,
