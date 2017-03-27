@@ -186,7 +186,8 @@ public:
 		knownLabels_.push_back("DegeneracyMax");
 		knownLabels_.push_back("KroneckerDumperBegin");
 		knownLabels_.push_back("KroneckerDumperEnd");
-		knownLabels_.push_back("doNotCheckTwoSiteDmrg");
+		knownLabels_.push_back("LanczosEps");
+		knownLabels_.push_back("TruncationTolerance");
 	}
 
 	~InputCheck()
@@ -329,8 +330,7 @@ public:
 		registerOpts.push_back("advanceOnlyAtBorder");
 		registerOpts.push_back("findSymmetrySector");
 		registerOpts.push_back("KroneckerDumper");
-		registerOpts.push_back("LanczosEps");
-		registerOpts.push_back("TruncationTolerance");
+		registerOpts.push_back("doNotCheckTwoSiteDmrg");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);
