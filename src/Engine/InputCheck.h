@@ -186,6 +186,7 @@ public:
 		knownLabels_.push_back("DegeneracyMax");
 		knownLabels_.push_back("KroneckerDumperBegin");
 		knownLabels_.push_back("KroneckerDumperEnd");
+		knownLabels_.push_back("doNotCheckTwoSiteDmrg");
 	}
 
 	~InputCheck()

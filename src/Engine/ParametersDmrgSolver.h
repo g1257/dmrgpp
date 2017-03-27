@@ -439,6 +439,8 @@ private:
 		io.readline(optionsOld,"parameters.options");
 		bool bOld = (optionsOld.find("twositedmrg")!=PsimagLite::String::npos);
 		bool b = (options.find("twositedmrg")!=PsimagLite::String::npos);
+		bool doNotCheck = (options.find("doNotCheckTwoSiteDmrg") != PsimagLite::String::npos);
+
 		if (bOld == b) return;
 
 		PsimagLite::String s (__FILE__);
@@ -448,6 +450,11 @@ private:
 		s2 += " but this one does.";
 		if (bOld) s += s1;
 		else s += s2;
+		if (doNotCheck) {
+			std::cerr<<"WARNING: "<<s<<"\n";
+			return;
+		}
+
 		throw PsimagLite::RuntimeError(s + "\n");
 	}
 };
