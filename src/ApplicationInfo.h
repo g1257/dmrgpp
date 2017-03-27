@@ -109,6 +109,7 @@ public:
 #else
 		os<<name_<<" using double\n";
 #endif
+		os<<"UnixTimeEnd="<<unixTime(false)<<"\n";
 		os<<getTimeDate();
 	}
 	
@@ -153,6 +154,7 @@ public:
 		os<<ai.getTimeDate();
 		os<<"Hostname: "<<ai.hostname()<<"\n";
 		os<<"RunID="<<ai.runId_<<"\n";
+		os<<"UnixTimeStart="<<ai.unixTime(false)<<"\n";
 		return os;
 	}
 
