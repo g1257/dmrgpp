@@ -137,6 +137,7 @@ public:
 	Pthreads(SizeType npthreads,int = 0)
 	    : nthreads_(npthreads),cores_(1)
 	{
+		std::cerr<<"Pthreads is deprecated, please use PthreadsNg\n";
 		int cores = sysconf(_SC_NPROCESSORS_ONLN);
 		cores_ = (cores > 0) ? cores : 1;
 	}

@@ -26,7 +26,7 @@ public:
 			workLoad[thread] += weights[i];
 		}
 
-#ifndef NDEBUG
+#ifdef DEBUG_PTHREADS_NG
 		for (SizeType i = 0; i < nthreads; ++i) {
 			SizeType n = taskNumber_[i].size();
 			std::cout<<n<<" Indices allocated to thread "<<i<<": ";

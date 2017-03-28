@@ -91,6 +91,7 @@ public:
 
 	NoPthreads(SizeType npthreads=1,int = 0)
 	{
+		std::cerr<<"NoPthreads is deprecated, please use NoPthreadsNg\n";
 		assert(npthreads==1);
 	}
 
