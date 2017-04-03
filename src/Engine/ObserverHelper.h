@@ -166,11 +166,6 @@ public:
 		bracket_[RIGHT_BRAKET]=right;
 	}
 
-//	SizeType bracket(SizeType leftOrRight) const
-//	{
-//		return bracket_[leftOrRight];
-//	}
-
 	void transform(SparseMatrixType& ret,const SparseMatrixType& O2,size_t threadId) const
 	{
 		assert(checkPos(threadId));
@@ -266,12 +261,23 @@ public:
 		return timeSerializerV_[currentPos_[threadId]].vector(braketId);
 	}
 
-	template<typename IoInputType1,typename MatrixType1,
-	         typename VectorType1,typename VectorWithOffsetType1,
-	         typename LeftSuperType1>
-	friend std::ostream& operator<<(std::ostream& os,
-	                                ObserverHelper<IoInputType1,MatrixType1,VectorType1,
-	                                VectorWithOffsetType1,LeftSuperType1>& precomp);
+
+	friend std::ostream& operator<<(std::ostream& os, ObserverHelper& p)
+	{
+		for (SizeType i=0;i<p.SpermutationInverse_.size();i++) {
+			os<<"i="<<i<<"\n";
+			os<<"\tS.size="<<p.SpermutationInverse_[i].size();
+			os<<" "<<p.Spermutation_[i].size()<<"\n";
+			os<<"\tSE.size="<<p.SEpermutationInverse_[i].size();
+			os<<" "<<p.SEpermutation_[i].size()<<"\n";
+			os<<"\tElectrons.size="<<p.electrons_[i].size()<<"\n";
+			os<<"\tTransform="<<p.transform_[i].n_row()<<"x";
+			os<<p.transform_[i].n_col()<<"\n";
+			os<<"\tWF.size="<<p.wavefunction_[i].size()<<"\n";
+		}
+
+		return os;
+	}
 
 private:
 
@@ -404,35 +410,6 @@ private:
 	typename PsimagLite::Vector<SizeType>::Type bracket_;
 	bool noMoreData_;
 };  //ObserverHelper
-
-template<
-        typename IoInputType1,
-        typename MatrixType1,
-        typename VectorType1,
-        typename VectorWithOffsetType1,
-        typename LeftRightSuperType1>
-std::ostream& operator<<(
-        std::ostream& os,
-        const ObserverHelper<
-        IoInputType1,
-        MatrixType1,
-        VectorType1,
-        VectorWithOffsetType1,
-        LeftRightSuperType1>& p)
-{
-	for (SizeType i=0;i<p.SpermutationInverse_.size();i++) {
-		os<<"i="<<i<<"\n";
-		os<<"\tS.size="<<p.SpermutationInverse_[i].size();
-		os<<" "<<p.Spermutation_[i].size()<<"\n";
-		os<<"\tSE.size="<<p.SEpermutationInverse_[i].size();
-		os<<" "<<p.SEpermutation_[i].size()<<"\n";
-		os<<"\tElectrons.size="<<p.electrons_[i].size()<<"\n";
-		os<<"\tTransform="<<p.transform_[i].n_row()<<"x";
-		os<<p.transform_[i].n_col()<<"\n";
-		os<<"\tWF.size="<<p.wavefunction_[i].size()<<"\n";
-	}
-	return os;
-}
 } // namespace Dmrg
 
 /*@}*/
