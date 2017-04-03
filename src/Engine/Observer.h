@@ -123,8 +123,6 @@ class Observer {
 	static SizeType const DIAGONAL = CorrelationsSkeletonType::DIAGONAL;
 	static SizeType const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
 
-	enum {GS_VECTOR=ObserverHelperType::GS_VECTOR,
-		  TIME_VECTOR=ObserverHelperType::TIME_VECTOR};
 	enum {LEFT_BRAKET=ObserverHelperType::LEFT_BRAKET,
 		  RIGHT_BRAKET=ObserverHelperType::RIGHT_BRAKET};
 
@@ -528,10 +526,13 @@ private:
 
 	SizeType braketStringToNumber(const PsimagLite::String& str) const
 	{
-		if (str == "gs") return GS_VECTOR;
-		if (str == "time") return TIME_VECTOR;
+		if (str == "gs") return 0;
+		if (str == "time") return 1; // == "P0", "time" is legacy notation
+		int x = BraketType::getPtype(str);
+		if (x >= 0) return x;
+
 		PsimagLite::String msg("Observer::braketStringToNumber:");
-		throw PsimagLite::RuntimeError(msg + " must be gs or time\n");
+		throw PsimagLite::RuntimeError(msg + " must be gs or time or P\\d+\n");
 	}
 
 	FieldType ladder_(const MatrixType& O1,

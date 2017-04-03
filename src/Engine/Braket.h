@@ -54,7 +54,7 @@ public:
 
 	Braket(const ModelType& model,const PsimagLite::String& braket)
 	    : model_(model), braket_(2,""),savedString_(braket)
-	{
+	{		
 		VectorStringType vecStr;
 		PsimagLite::tokenizer(braket,vecStr,"|");
 
@@ -67,14 +67,14 @@ public:
 		braket_[0] = vecStr[0].substr(1,vecStr[0].length()-1);
 		if (!isBraket(0)) {
 			PsimagLite::String str("ObserverInterpreter: syntax error: ");
-			str += braket_[0] + " must be <gs or <time \n";
+			str += braket_[0] + " must be <gs or <time or <P\\d+\n";
 			throw PsimagLite::RuntimeError(str);
 		}
 
 		braket_[1] = vecStr[2].substr(0,vecStr[2].length()-1);
 		if (!isBraket(1)) {
 			PsimagLite::String str("ObserverInterpreter: syntax error: ");
-			str += braket_[1] + " must be gs> or time> \n";
+			str += braket_[1] + " must be gs> or time>  or <P\\d+\n";
 			throw PsimagLite::RuntimeError(str);
 		}
 
@@ -127,12 +127,31 @@ public:
 
 	PsimagLite::String toString() const { return savedString_; }
 
+	static int getPtype(PsimagLite::String str)
+	{
+		// str == P\d+
+		if (str.length() < 2) return -1;
+		if (str[0] != 'P') return -1;
+		PsimagLite::String number("");
+		for (SizeType i = 1; i < str.length(); ++i) {
+			number += str[i];
+			unsigned char x = str[i];
+			if (x < 48 || x > 57) return -1;
+		}
+
+		return atoi(number.c_str()) + 1;
+	}
+
 private:
 
 	bool isBraket(SizeType ind) const
 	{
 		if (ind >= braket_.size()) return false;
-		return (braket_[ind] == "gs" || braket_[ind] == "time");
+		int pType = getPtype(braket_[ind]);
+
+		return (braket_[ind] == "gs" ||
+		        braket_[ind] == "time" ||
+		        pType >= 0);
 	}
 
 	OperatorType internal_(PsimagLite::String& opLabel, int& site2) const

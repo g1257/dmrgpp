@@ -129,9 +129,9 @@ public:
 	typedef PsimagLite::CrsMatrix<FieldType> SparseMatrixType;
 
 	enum {GROW_RIGHT,GROW_LEFT};
+
 	enum {DIAGONAL,NON_DIAGONAL};
-	enum {GS_VECTOR=ObserverHelperType::GS_VECTOR,
-		  TIME_VECTOR=ObserverHelperType::TIME_VECTOR};
+
 	enum {LEFT_BRAKET=ObserverHelperType::LEFT_BRAKET,
 		  RIGHT_BRAKET=ObserverHelperType::RIGHT_BRAKET};
 	static const SizeType EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;

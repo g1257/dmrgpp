@@ -151,9 +151,11 @@ public:
 		return  site_;
 	}
 
-	const VectorType& vector(SizeType i=0) const
+	const VectorType& vector(SizeType i) const
 	{
-		return targetVectors_[i];
+		if (i < targetVectors_.size())
+			return targetVectors_[i];
+		throw PsimagLite::RuntimeError("Not so many time vectors\n");
 	}
 
 	SizeType marker() const

@@ -110,7 +110,6 @@ public:
 	typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> DmrgSerializerType;
 	typedef typename DmrgSerializerType::FermionSignType FermionSignType;
 
-	enum {GS_VECTOR,TIME_VECTOR};
 	enum {LEFT_BRAKET=0,RIGHT_BRAKET=1};
 	enum SaveEnum {SAVE_YES, SAVE_NO};
 
@@ -125,7 +124,7 @@ public:
 	      timeSerializerV_(),//(nf),
 	      currentPos_(numberOfPthreads),
 	      verbose_(verbose),
-	      bracket_(2,GS_VECTOR),
+	      bracket_(2,0),
 	      noMoreData_(false)
 	{
 		PsimagLite::String msg = "No more data to construct this object\n";
@@ -167,10 +166,10 @@ public:
 		bracket_[RIGHT_BRAKET]=right;
 	}
 
-	SizeType bracket(SizeType leftOrRight) const
-	{
-		return bracket_[leftOrRight];
-	}
+//	SizeType bracket(SizeType leftOrRight) const
+//	{
+//		return bracket_[leftOrRight];
+//	}
 
 	void transform(SparseMatrixType& ret,const SparseMatrixType& O2,size_t threadId) const
 	{
@@ -246,18 +245,25 @@ public:
 		return timeSerializerV_[currentPos_[threadId]].marker();
 	}
 
-	const VectorWithOffsetType& getVectorFromBracketId(SizeType leftOrRight,SizeType threadId) const
+	const VectorWithOffsetType& getVectorFromBracketId(SizeType leftOrRight,
+	                                                   SizeType threadId) const
 	{
-		if (bracket(leftOrRight)==GS_VECTOR) {
+		SizeType braketId = bracket_[leftOrRight];
+		// braketId == 0 means GS
+		if (braketId == 0) {
 			return wavefunction(threadId);
 		}
-		return timeVector(threadId);
+
+		// braketId > 0 then it means the "time vector" number braketId - 1
+		assert(braketId > 0);
+		return timeVector(braketId - 1, threadId);
 	}
 
-	const VectorWithOffsetType& timeVector(SizeType threadId) const
+	const VectorWithOffsetType& timeVector(SizeType braketId,
+	                                       SizeType threadId) const
 	{
 		assert(checkPos(threadId));
-		return timeSerializerV_[currentPos_[threadId]].vector();
+		return timeSerializerV_[currentPos_[threadId]].vector(braketId);
 	}
 
 	template<typename IoInputType1,typename MatrixType1,

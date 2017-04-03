@@ -162,7 +162,7 @@ namespace Dmrg {
 								   typename ApplyOperatorType::BorderEnum corner,
 								   SizeType threadId)
 		{
-
+			if (src1.sectors() == 0 || src2.sectors() == 0) return 0.0;
 			ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(threadId));
 			VectorWithOffsetType dest;
 //			assert(helper_.fermionicSignLeft().size()==helper_.leftRightSuper().left().size());

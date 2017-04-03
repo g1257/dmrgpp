@@ -163,9 +163,8 @@ void mainLoop(GeometryType& geometry,
 	const PsimagLite::String& datafile = params.filename;
 	ArchiveFiles<ParametersDmrgSolverType>::unpackIfNeeded(datafile);
 	IoInputType dataIo(datafile);
-	bool hasTimeEvolution = (targetting == "TimeStepTargetting" ||
-	                         targetting=="MettsTargetting" ||
-	                         targetting=="TargetingAncilla");
+	bool hasTimeEvolution = (targetting != "GroundStateTargeting");
+
 	while (moreData) {
 		try {
 			moreData = !observeOneFullSweep<VectorWithOffsetType,ModelBaseType>

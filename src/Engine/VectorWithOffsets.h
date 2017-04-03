@@ -231,7 +231,11 @@ public:
 
 	SizeType sectors() const { return nonzeroSectors_.size(); }
 
-	SizeType sector(SizeType i) const { return nonzeroSectors_[i]; }
+	SizeType sector(SizeType i) const
+	{
+		assert(i < nonzeroSectors_.size());
+		return nonzeroSectors_[i];
+	}
 
 	template<typename SomeBasisType>
 	void fromFull(const VectorType& v,const SomeBasisType& someBasis)
