@@ -24,15 +24,21 @@ public:
 	               typename VectorConstOrNot<T>::Type& data,
 	               SizeType offset)
 	    : nrow_(nrow), ncol_(ncol), data_(&data), offset_(offset)
-	{}
+	{
+		check();
+	}
 
 	explicit MatrixNonOwned(const PsimagLite::Matrix<typename RemoveConst<T>::Type>& m)
 	    : nrow_(m.n_row()), ncol_(m.n_col()), data_(&(m.data_)), offset_(0)
-	{}
+	{
+		check();
+	}
 
 	explicit MatrixNonOwned(PsimagLite::Matrix<typename RemoveConst<T>::Type>& m)
 	    : nrow_(m.n_row()), ncol_(m.n_col()), data_(&(m.data_)), offset_(0)
-	{}
+	{
+		check();
+	}
 
 	const T& operator()(SizeType i, SizeType j) const
 	{
@@ -63,6 +69,12 @@ public:
 	}
 
 private:
+
+	void check() const
+	{
+		assert(data_);
+		assert(offset_ + nrow_ - 1 + (ncol_ - 1)*nrow_ < data_->size());
+	}
 
 	MatrixNonOwned(const MatrixNonOwned&);
 
