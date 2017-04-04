@@ -102,6 +102,7 @@ class KronMatrix {
 	typedef typename InitKronType::GenGroupType GenGroupType;
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+
 public:
 
 	KronMatrix(const InitKronType& initKron)
@@ -110,108 +111,7 @@ public:
 		std::cout<<"KronMatrix: preparation done for size="<<initKron.size()<<"\n";
 	}
 
-	void matrixVectorProduct(VectorType& vout, const VectorType& vin) const
-	{
-//		const VectorSizeType& permInverse = initKron_.lrs().super().permutationInverse();
-//		const VectorSizeType& perm = initKron_.lrs().super().permutationVector();
-//		const SparseMatrixType& left = initKron_.lrs().left().hamiltonian();
-//		const SparseMatrixType& right = initKron_.lrs().right().hamiltonian();
-//		SizeType nl = left.row();
-//		SizeType nr = right.row();
-//		SizeType nq = initKron_.size();
-//		SizeType offset = initKron_.offset();
-
-//		MatrixType V(nl,nr);
-//		for (SizeType i=0;i<nl;i++) {
-//			for (SizeType j=0;j<nr;j++) {
-//				SizeType r = permInverse[i+j*nl];
-//				if (r<offset || r>=offset+nq) continue;
-//				V(i,j) = vin[r-offset];
-//			}
-//		}
-
-//		MatrixType W(nl,nr);
-
-		// FIXME: Pass vin and vout here as is ???
-		computeConnections(vout,vin);
-//		computeRight(W,V);
-//		computeLeft(W,V);
-
-//		for (SizeType r=0;r<vout.size();r++) {
-//			div_t divresult = div(perm[r+offset],nl);
-//			SizeType i = divresult.rem;
-//			SizeType j = divresult.quot;
-//			vout[r] += W(i,j);
-//		}
-	}
-
-private:
-
-	void computeRight(MatrixType& W,const MatrixType& V) const
-	{
-		SizeType npatches =  initKron_.patch(GenIjPatchType::RIGHT).size();
-
-		const GenGroupType& istartLeft = initKron_.istartLeft();
-		const GenGroupType& istartRight = initKron_.istartRight();
-		const ArrayOfMatStructType& artStruct = initKron_.aRt();
-
-		for (SizeType ipatch = 0;ipatch<npatches;ipatch++) {
-			SizeType i = initKron_.patch(GenIjPatchType::LEFT)[ipatch];
-			SizeType j = initKron_.patch(GenIjPatchType::RIGHT)[ipatch];
-
-			SizeType i1 = istartLeft(i);
-			SizeType i2 = istartLeft(i+1);
-
-			SizeType j1 = istartRight(j);
-			//SizeType j2 = istartRight(j+1);
-
-			SparseMatrixType tmp = artStruct(j,j).toSparse();
-			for (SizeType ii=i1;ii<i2;ii++) {
-				for (SizeType mr=0;mr<tmp.row();mr++) {
-					for (int kk=tmp.getRowPtr(mr);kk<tmp.getRowPtr(mr+1);kk++) {
-						SizeType col = tmp.getCol(kk) + j1;
-//						if (col>=i2) continue;
-						W(ii,col) += V(ii, mr+j1) * tmp.getValue(kk);
-					}
-				}
-			}
-		}
-	}
-
-	void computeLeft(MatrixType& W,const MatrixType& V) const
-	{
-		SizeType npatches = initKron_.patch(GenIjPatchType::LEFT).size();
-
-		const GenGroupType& istartLeft = initKron_.istartLeft();
-		const GenGroupType& istartRight = initKron_.istartRight();
-		const ArrayOfMatStructType& alStruct = initKron_.aL();
-
-		for (SizeType ipatch = 0;ipatch<npatches;ipatch++) {
-			SizeType i = initKron_.patch(GenIjPatchType::LEFT)[ipatch];
-			SizeType j = initKron_.patch(GenIjPatchType::RIGHT)[ipatch];
-
-			SizeType i1 = istartLeft(i);
-//			SizeType i2 = istartLeft(i+1);
-
-			SizeType j1 = istartRight(j);
-			SizeType j2 = istartRight(j+1);
-
-			SparseMatrixType tmp = alStruct(i,i).toSparse();
-
-			for (SizeType jj=j1;jj<j2;jj++) {
-				for (SizeType mr=0;mr<tmp.row();mr++) {
-					for (int kk=tmp.getRowPtr(mr);kk<tmp.getRowPtr(mr+1);kk++) {
-						SizeType col = tmp.getCol(kk) + i1;
-//						if (col>=i2) continue;
-						W(mr+i1,jj) += tmp.getValue(kk) *  V(col, jj);
-					}
-				}
-			}
-		}
-	}
-
-	// ATTENTION: MPI is not supported, only pthreads
-	void computeConnections(VectorType& x,const VectorType& y) const
+	void matrixVectorProduct(VectorType& x, const VectorType& y) const
 	{
 		KronConnectionsType kc(initKron_,x,y,PsimagLite::Concurrency::npthreads);
 
@@ -222,6 +122,8 @@ private:
 		parallelConnections.loopCreate(kc);
 		kc.sync();
 	}
+
+private:
 
 	KronMatrix(const KronMatrix&);
 
