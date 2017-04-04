@@ -6,12 +6,10 @@ void den_kron_mult_method(
 		    const char transA, 
 		    const char transB,
 
-                    const int nrow_A,
-                    const int ncol_A, 
+
                     const PsimagLite::Matrix<double>& a_,
 
-                    const int nrow_B,
-                    const int ncol_B, 
+
                     const PsimagLite::Matrix<double>& b_,
 
         const PsimagLite::Vector<double>::Type& yin_,
@@ -19,6 +17,10 @@ void den_kron_mult_method(
         PsimagLite::Vector<double>::Type& xout_,
         SizeType offsetX)
 {
+	const int nrow_A = a_.n_row();
+    const int ncol_A = a_.n_col();
+	const int nrow_B = b_.n_row();
+    const int ncol_B = b_.n_col();
      const int isTransA = (transA == 'T') || (transA == 't');
      const int isTransB = (transB == 'T') || (transB == 't');
     
@@ -371,9 +373,9 @@ void den_kron_mult(const char transA,
                     transA,
                     transB,
 
-                    nrow_A, ncol_A, a_,
+                    a_,
 
-                    nrow_B, ncol_B, b_,
+                    b_,
 
                     yin, 
               offsetY,

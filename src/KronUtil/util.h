@@ -313,12 +313,8 @@ void den_kron_mult_method(const int imethod,
                     const char transA,
                     const char transB,
 
-                    const int nrow_A,
-                    const int ncol_A,
                     const PsimagLite::Matrix<double>& a_,
 
-                    const int nrow_B,
-                    const int ncol_B,
                     const PsimagLite::Matrix<double>& b_,
 
                     const PsimagLite::Vector<double>::Type& yin,

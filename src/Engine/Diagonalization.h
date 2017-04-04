@@ -335,7 +335,6 @@ private:
 				weights[i] = 0;
 			if (weights[i]==0) continue;
 
-			PsimagLite::OstringStream msg3;
 			SizeType j = lrs.super().qn(lrs.super().partition(i));
 			PsimagLite::OstringStream msg;
 			msg<<"Found targetted symmetry sector in partition "<<i;

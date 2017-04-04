@@ -18,8 +18,10 @@ public:
 	// 50% cutoff == 0.5 here for sparse/dense
 	explicit MatrixDenseOrSparse(const SparseMatrixType& sparse)
 	    : isDense_(true), //sparse.nonZero() > static_cast<int>(0.5*sparse.row()*sparse.col())),
-	      sparseMatrix_(&sparse)
+	      sparseMatrix_(sparse)
 	{
+		sparseMatrix_.checkValidity();
+
 		if (isDense_) {
 			// A(i,j) at  val[ (i) + (j)*nrow ]
 			crsMatrixToFullMatrix(denseMatrix_, sparse);
@@ -30,14 +32,12 @@ public:
 
 	SizeType rows() const
 	{
-		assert(sparseMatrix_);
-		return sparseMatrix_->row();
+		return sparseMatrix_.row();
 	}
 
 	SizeType cols() const
 	{
-		assert(sparseMatrix_);
-		return sparseMatrix_->col();
+		return sparseMatrix_.col();
 	}
 
 	const PsimagLite::Matrix<ComplexOrRealType>& dense() const
@@ -47,13 +47,13 @@ public:
 
 	const SparseMatrixType& sparse() const
 	{
-		assert(sparseMatrix_);
-		return *sparseMatrix_;
+		sparseMatrix_.checkValidity();
+		return sparseMatrix_;
 	}
 
 	bool isZero() const
 	{
-		return (isDense_) ? false : (sparseMatrix_->nonZero() == 0);
+		return (isDense_) ? false : (sparseMatrix_.nonZero() == 0);
 	}
 
 	SparseMatrixType toSparse() const
@@ -64,7 +64,7 @@ public:
 private:
 
 	bool isDense_;
-	const PsimagLite::CrsMatrix<ComplexOrRealType>* sparseMatrix_;
+	const PsimagLite::CrsMatrix<ComplexOrRealType> sparseMatrix_;
 	PsimagLite::Matrix<ComplexOrRealType> denseMatrix_;
 }; // class MatrixDenseOrSparse
 

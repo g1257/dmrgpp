@@ -78,8 +78,8 @@ int main()
      imethod =1;
      den_kron_mult_method( imethod,
                            transA, transB,
-                           nrow_A, ncol_A, a_,
-                           nrow_B, ncol_B, b_,
+                           a_,
+                           b_,
                            yRef.getVector(),
 	                       0,
                            x1Ref.getVector(),
@@ -88,8 +88,8 @@ int main()
      imethod = 2;
      den_kron_mult_method( imethod,
                            transA, transB,
-                           nrow_A, ncol_A, a_,
-                           nrow_B, ncol_B, b_,
+                           a_,
+                           b_,
 	                       yRef.getVector(),
 	                       0,
                            x2Ref.getVector(),
@@ -97,8 +97,8 @@ int main()
      imethod = 3;
      den_kron_mult_method( imethod,
                            transA, transB,
-                           nrow_A, ncol_A, a_,
-                           nrow_B, ncol_B, b_,
+                           a_,
+                           b_,
 	                       yRef.getVector(),
 	                       0,
                            x3Ref.getVector(),
@@ -203,10 +203,10 @@ int main()
      den_zeros(nrow_X,ncol_X, x1_ );
      den_zeros(nrow_X,ncol_X, sx1_ );
  
-     den_kron_mult_method( imethod,
-                           transA, transB,
-                           nrow_A, ncol_A, a_,
-                           nrow_B, ncol_B, b_,
+     den_kron_mult_method(imethod,
+                          transA, transB,
+                           a_,
+                           b_,
                            yRef.getVector(),
 	                       0,
                            x1Ref.getVector(),
