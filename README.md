@@ -84,17 +84,17 @@ And also:
  re:webDmrgPlusPlus,
  Author = {G. Alvarez},
  Title = {DMRG++ Website},
- Publisher = {\\url{http://www.ornl.gov/~gz1/dmrgPlusPlus}} }
+ Publisher = {\\url{https://g1257.github.com/dmrgPlusPlus}} }
 </pre>
 
 ## Code Integrity
 
 Hash of the latest commit is also posted at
 
-https://web.ornl.gov/~gz1/hashes.html
+https://g1257.github.com/hashes.html
 
 Latest commit should always be signed.
-Keys at https://web.ornl.gov/~gz1/keys.html
+Keys at https://g1257.github.com/keys.html
 
 ## Building and Running DMRG++
 

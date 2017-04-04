@@ -18,8 +18,7 @@ git clone https://github.com/g1257/LanczosPlusPlus
 
 For code integrity, it's a good idea to verify hashes at
 
-https://web.ornl.gov/~gz1/hashes.html
-
+https://g1257.github.com/hashes.html
 It's better to compile all codes at this point
 
 cd PsimagLite/drivers
