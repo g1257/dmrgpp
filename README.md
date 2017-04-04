@@ -1,12 +1,12 @@
 
 # Introduction
 
-PsimagLite is free software (see file LICENSE) 
+PsimagLite is free software (see file LICENSE)
 Parts might have its own License. See Parts of PsimagLite below.
 
-Please cite PsimagLite if you base any scientific 
+Please cite PsimagLite if you base any scientific
 publication on this software. Citation should read:
-G. Alvarez, (2011), PsimagLite (version 1.0) 
+G. Alvarez, (2011), PsimagLite (version 1.0)
 [computer software], Oak Ridge National Laboratory.
 
 -------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 # Description
 
-PsimagLite is a collection of C++ classes that are common to 
+PsimagLite is a collection of C++ classes that are common to
  codes for the simulation of strongly correlated electrons.
 PsimagLite is inspired in T.S.'s Psimag software (but PsimagLite is not a fork of Psimag).
 
@@ -49,10 +49,10 @@ SpinPhononFermion, DMRG++, Lanczos++, FreeFermions, GpusDoneRight, BetheAnsatz
 # Code integrity
 
 Hash of the latest commit is also posted at
-https://web.ornl.gov/~gz1/hashes.html
+https://g1257.github.com/hashes.html
 
 Latest commit should always be signed.
-Keys at https://web.ornl.gov/~gz1/keys.html
+Keys at https://g1257.github.com/keys.html
 
 # Parts of PsimagLite
 
@@ -66,11 +66,11 @@ CrsMatrix
 TridiagonalMatrix
 LanczosSolver
 LanczosVectors
-ChebyshevSolver 
+ChebyshevSolver
 SparseRow       <-- slower, consumes less memory
-SparseRowCached <-- faster, consumes more memory 
+SparseRowCached <-- faster, consumes more memory
 
-[JSON] 
+[JSON]
 JSON directory.
 Json support (taken from M.S.'s new implementation which doesn't depend on anything at all)
 
@@ -132,14 +132,14 @@ See README under PsimagDoc
 // The Loki Library
 // Copyright (c) 2001 by Andrei Alexandrescu
 // This code accompanies the book:
-// Alexandrescu, Andrei. "Modern C++ Design: Generic Programming and Design 
+// Alexandrescu, Andrei. "Modern C++ Design: Generic Programming and Design
 //     Patterns Applied". Copyright (c) 2001. Addison-Wesley.
-// Permission to use, copy, modify, distribute and sell this software for any 
-//     purpose is hereby granted without fee, provided that the above copyright 
-//     notice appear in all copies and that both that copyright notice and this 
+// Permission to use, copy, modify, distribute and sell this software for any
+//     purpose is hereby granted without fee, provided that the above copyright
+//     notice appear in all copies and that both that copyright notice and this
 //     permission notice appear in supporting documentation.
-// The author or Addison-Welsey Longman make no representations about the 
-//     suitability of this software for any purpose. It is provided "as is" 
+// The author or Addison-Welsey Longman make no representations about the
+//     suitability of this software for any purpose. It is provided "as is"
 //     without express or implied warranty.
 ////////////////////////////////////////////////////////////////////////////////
 
