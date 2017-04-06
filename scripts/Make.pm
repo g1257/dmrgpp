@@ -62,7 +62,7 @@ EOF
 
 	if (!$aux) {
 		# FIXME: Support many libs separated by commas here
-		my $libs = $ptr->{"libs"};
+		my $libs = ($oldmode) ? "" : $ptr->{"libs"};
 		my $libs1 = "";
 		my $libs2 = "";
 		if (defined($libs) and $libs ne "") {

@@ -93,21 +93,29 @@ public:
 	Ladder() {}
 
 	Ladder(SizeType linSize,InputType& io)
-	    : linSize_(linSize)
+	    : linSize_(linSize),isPeriodicX_(false)
 	{
 
 		io.readline(leg_,"LadderLeg=");
 		if (leg_!=2) {
 			std::cerr<<"WARNING: LadderLeg!=2 is experimental!\n";
 		}
+
 		try {
 			int x = 0;
-			io.readline(x,"PeriodicY=");
+			io.readline(x,"IsPeriodicX=");
+			isPeriodicX_ = (x > 0) ? true : false;
+			std::cerr<<"INFO: IsPeriodicX="<<isPeriodicX_<<"\n";
+		} catch (std::exception&) {}
+
+		try {
+			int x = 0;
+			io.readline(x,"IsPeriodicY=");
 			isPeriodicY_ = (x > 0) ? true : false;
-			if (leg_==2) throw RuntimeError("LadderLeg==2 cannot have PeriodicY set\n");
-			std::cerr<<"INFO: PeriodicY="<<isPeriodicY_<<"\n";
+			if (leg_==2) throw RuntimeError("LadderLeg==2 cannot have IsPeriodicY set\n");
+			std::cerr<<"INFO: IsPeriodicY="<<isPeriodicY_<<"\n";
 		} catch (std::exception& e) {
-			if (leg_>2) throw RuntimeError("LadderLeg>2 must have PeriodicY= line\n");
+			if (leg_>2) throw RuntimeError("LadderLeg>2 must have IsPeriodicY= line\n");
 		}
 
 		if (leg_ & 1)
@@ -160,7 +168,7 @@ public:
 	SizeType getVectorSize(SizeType dirId) const
 	{
 		if (dirId==DIRECTION_X)
-			return linSize_-leg_;
+			return (isPeriodicX_) ? linSize_ : linSize_ - leg_;
 		else if (dirId==DIRECTION_Y)
 			return (isPeriodicY_) ? linSize_ : linSize_ - linSize_/leg_;
 
@@ -174,8 +182,10 @@ public:
 		SizeType c2 = i2/leg_;
 		SizeType r1 = i1%leg_;
 		SizeType r2 = i2%leg_;
-		if (c1==c2) return this->neighbors(r1,r2,isPeriodicY_,leg_-1);
-		if (r1==r2) return this->neighbors(c1,c2);
+		if (c1==c2)
+			return this->neighbors(r1,r2,isPeriodicY_,leg_-1);
+		if (r1==r2)
+			return this->neighbors(c1, c2, isPeriodicX_, linSize_/leg_ - 1);
 		return false;
 	}
 
@@ -293,6 +303,7 @@ private:
 
 	SizeType linSize_;
 	SizeType leg_;
+	bool isPeriodicX_;
 	bool isPeriodicY_;
 }; // class Ladder
 } // namespace PsimagLite
