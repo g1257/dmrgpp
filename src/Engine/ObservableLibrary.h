@@ -1274,6 +1274,7 @@ private:
 		}
 
 		std::cout<<braket.toString()<<"\n";
+		observe_.setBrakets(braket.bra(), braket.ket());
 
 		if (braket.points() == 2) {
 			bool needsPrinting = false;
