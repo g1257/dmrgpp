@@ -4,7 +4,7 @@ DegreesOfFreedom=1
 GeometryKind=ladder
 GeometryOptions=ConstantValues
 LadderLeg=12
-PeriodicY=1
+IsPeriodicY=1
 Connectors 1 1.0
 Connectors 1 1.0
 hubbardU	144 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0
