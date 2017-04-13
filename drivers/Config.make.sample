@@ -6,7 +6,7 @@ LDFLAGS = -L../../PsimagLite/lib -lpsimaglite
 CXX = g++
 
 # We're using ansi C++
-CXX += -pedantic -ansi
+CXX += -pedantic -std=c++98
 
 # Enable MPI (you must set the proper
 # compiler wrapper under CXX above)

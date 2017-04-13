@@ -3,7 +3,7 @@
 CXX = g++
 
 # We're using ansi C++
-CXX += -pedantic -ansi
+CXX += -pedantic -std=c++98
 
 CXX += -Wall -Werror
 

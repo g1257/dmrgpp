@@ -1,0 +1,11 @@
+include Config.make
+
+CPPFLAGS=-I../src -I..
+
+integrator: integrator.o
+	$(CXX) -o $@ $^
+
+.PHONY: clean
+clean:
+	rm -f integrator *.o
+
