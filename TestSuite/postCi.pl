@@ -62,6 +62,7 @@ for (my $i = 0; $i < $total; ++$i) {
 	next if (defined($min) and $n < $min);
 	next if (defined($max) and $n > $max);
 	procTest($n,$workdir,$golddir);
+	print "-----------------------------------------------\n";
 }
 
 sub procTest
@@ -87,19 +88,39 @@ sub procData
 	}
 
 	my $cmd = "diff $file1 $file2";
-	my @version = ("???","???");
+	my @version;
+	my ($newEnergy, $oldEnergy);
+	my $maxEdiff = 0;
 	open(PIPE,"$cmd |") or return;
 	while (<PIPE>) {
+		chomp;
 		if (/([\<\>]) DMRG\+\+ version (.*$)/) {
 			my $tmp = ($1 eq "<") ? 0 : 1;
 			$version[$tmp] = $2;
+			next if (!defined($version[0]) or !defined($version[1]));
+			print "|$n|: New Version $version[0], Old Version $version[1]\n";
 			next;
 		}
+
+		if (/\< \#Energy=(.+$)/) {
+			$newEnergy = $1;
+			next;
+		}
+
+		if (/\> \#Energy=(.+$)/ and defined($newEnergy)) {
+			$oldEnergy = $1;
+			my $tmp = $newEnergy-$oldEnergy;
+			print "|$n|: EnergyNew-EnergyOld=$tmp\n";
+			$tmp = abs($tmp);
+			$maxEdiff = $tmp if ($maxEdiff < $tmp);
+			undef($newEnergy);
+			next;
+		}
+
 	}
 
 	close(PIPE);
-
-	print "New Version $version[0], Old Version $version[1]\n";
+	print "|$n|: MaxEnergyDiff = $maxEdiff\n" if ($maxEdiff > 0);
 }
 
 sub procMemcheck
@@ -165,7 +186,7 @@ sub procMemcheck
 
 	return if ($mode eq "OK" and $failed);
 
-	print "$0: ATTENTION: TEST $n has output mode $mode\n";
+	print "|$n|: output mode $mode\n";
 }
 
 sub fileSize

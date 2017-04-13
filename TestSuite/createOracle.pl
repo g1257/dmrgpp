@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 # Accepted runs between 1 minute and 1/2 hour
-my ($tmin, $tmax) = (60, 1800);
+my ($tmin, $tmax) = (1, 1800);
 # Accepted files up to 10MB
 my $sizemax = 1024*1024*10; # 10 MB
 

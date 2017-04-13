@@ -241,6 +241,7 @@ private:
 	{
 		Ahat = A;
 		SizeType rows = Ahat.row();
+		assert(signs_.size() == rows);
 		SizeType counter = 0;
 		for (SizeType i = 0; i < rows; ++i) {
 			RealType sign = (bosonOrFermion == ProgramGlobals::FERMION &&
