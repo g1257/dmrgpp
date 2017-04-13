@@ -10,21 +10,23 @@ my ($min,$max,$submit,$valgrind,$workdir,
 GetOptions(
 'm=f' => \$min,
 'M=f' => \$max,
-'S' => \$submit, 
+'S=s' => \$submit,
 'valgrind=s' => \$valgrind,
 'w=s' => \$workdir,
 'R' => \$restart,
 'P' => \$postprocess,
 'n=f' => \$n,
-'h' => \$help);
+'h' => \$help) or die "$0: Error in command line args, run with -h to display help\n";
 
 if (defined($help)) {
 	print "USAGE: $0 [options]\n";
 	print "\tIf no option is given creates inputs and batches for all ";
 	print "no-restart tests\n";
-	print "\t-S\n";
+	print "\t-S command\n";
 	print "\t\tAfter creating inputs and batches, submit them to the queue ";
-	print "using batchDollarized.pbs as template\n";
+	print "using batchDollarized.pbs as template, and ";
+	print "with command command, usually command is qsub but you can also use ";
+	print "bash to run in the command line without a batching system.\n";
 	print "\t-m min\n";
 	print "\t\tMinimum test to run is min (inclusive)\n";
 	print "\t-M max\n";
@@ -44,7 +46,10 @@ if (defined($help)) {
 	exit(0);
 }
 
-defined($submit) or $submit = 0;
+if (!defined($submit)) {
+	$submit = "";
+}
+
 defined($valgrind) or $valgrind = "";
 defined($workdir) or $workdir = "tests";
 defined($restart) or $restart = 0;
@@ -72,7 +77,7 @@ for (my $i = 0; $i < $total; ++$i) {
 	my $n = $tests[$i];
 	next if (defined($min) and $n < $min);
 	next if (defined($max) and $n > $max);
-	
+
 	my $ir = isRestart("../inputs/input$n.inp",$n);
 	if ($restart) {
 		next if (!$ir and !$exact);
@@ -102,7 +107,7 @@ sub postTest
 	}
 
 	my $batch = createBatch($n,$cmd);
-    submitBatch($batch) if ($submit);
+    submitBatch($submit, $batch) if ($submit ne "");
 }
 
 sub postTestOne
@@ -168,7 +173,7 @@ sub procTest
 	$valgrind .= " --callgrind-out-file=callgrind$n.out " if ($tool eq "callgrind");
 	my $cmd = "$valgrind./dmrg -f ../inputs/input$n.inp &> output$n.txt";
 	my $batch = createBatch($n,$cmd);
-	submitBatch($batch) if ($submit);
+	submitBatch($submit, $batch) if ($submit ne "");
 }
 
 sub createBatch
@@ -202,12 +207,12 @@ sub createBatch
 
 sub submitBatch
 {
-	my ($batch,$extra) = @_;
+	my ($qsub, $batch, $extra) = @_;
 	defined($extra) or $extra = "";
 	sleep(1);
 	print STDERR "$0: Submitted $batch $extra $batch\n";
 
-	my $ret = `qsub $extra $batch`;
+	my $ret = `$qsub $extra $batch`;
 	chomp($ret);
 	return $ret;
 }
