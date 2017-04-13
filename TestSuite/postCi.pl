@@ -77,8 +77,16 @@ sub procData
 	my ($n,$workdir,$golddir) = @_;
 	my $file1 = "$workdir/data$n.txt";
 	my $file2 = "$golddir/data$n.txt";
-	(-r "$file1") or return;
-	(-r "$file2") or return;
+	if (!(-r "$file1")) {
+		print "|$n|: No $file1 produced\n";
+		return;
+	}
+
+	if (!(-r "$file2")) {
+		print "|$n|: No oracle $file2 found\n";
+		return;
+	}
+
 	my $size1 = fileSize($file1);
 	my $size2 = fileSize($file2);
 	$size1 = $size2 if ($size2 > $size1);
