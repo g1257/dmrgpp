@@ -141,10 +141,10 @@ public:
 				const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
 				const ArrayOfMatStructType& yiStruct = initKron_.yc(ic);
 
-				const MatrixDenseOrSparseType& tmp1 =  xiStruct(outPatch,inPatch);
-				const MatrixDenseOrSparseType& tmp2 =  yiStruct(outPatch,inPatch);
-
-				kronMult(x_, offsetX, y_, offsetY, 'n', 'n', tmp1, tmp2);
+				const MatrixDenseOrSparseType& Amat =  xiStruct(outPatch,inPatch);
+				const MatrixDenseOrSparseType& Bmat =  yiStruct(outPatch,inPatch);
+				checks(Amat, Bmat, outPatch, inPatch);
+				kronMult(x_, offsetX, y_, offsetY, 'n', 'n', Amat, Bmat);
 			}
 		}
 
@@ -170,6 +170,34 @@ private:
 			        initKron_.istartRight()(patch+1) - initKron_.istartRight()(patch);
 			sum += sizeLeft*sizeRight;
 		}
+	}
+
+	// In production mode this function should be empty
+	void checks(const MatrixDenseOrSparseType& Amat,
+	            const MatrixDenseOrSparseType& Bmat,
+	            SizeType ipatch,
+	            SizeType jpatch) const
+	{
+#ifndef NDEBUG
+		SizeType lSizeI = lSizeFunction(ipatch);
+		SizeType lSizeJ = lSizeFunction(jpatch);
+		SizeType rSizeI = rSizeFunction(ipatch);
+		SizeType rSizeJ = rSizeFunction(jpatch);
+		assert(Amat.rows() == lSizeI);
+		assert(Amat.cols() == lSizeJ);
+		assert(Bmat.rows() == rSizeI);
+		assert(Bmat.cols() == rSizeJ);
+#endif
+	}
+
+	SizeType lSizeFunction(SizeType patch) const
+	{
+		return initKron_.istartLeft()(patch+1) - initKron_.istartLeft()(patch);
+	}
+
+	SizeType rSizeFunction(SizeType patch) const
+	{
+		return initKron_.istartRight()(patch+1) - initKron_.istartRight()(patch);
 	}
 
 	const InitKronType& initKron_;
