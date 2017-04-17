@@ -155,20 +155,30 @@ public:
 
 private:
 
+
 	void computeOffsets()
 	{
-		SizeType total = initKron_.patch(GenIjPatchType::LEFT).size();
-		SizeType sum = 0;
-		for (SizeType patch=0; patch < total; ++patch) {
-			offsetForPatches_[patch] = sum;
-			assert(initKron_.istartLeft()(patch+1) >= initKron_.istartLeft()(patch));
-			SizeType sizeLeft =
-			        initKron_.istartLeft()(patch+1) - initKron_.istartLeft()(patch);
+		assert(initKron_.patch(GenIjPatchType::LEFT).size() ==
+		       initKron_.patch(GenIjPatchType::RIGHT).size());
 
-			assert(initKron_.istartRight()(patch+1) >= initKron_.istartRight()(patch));
-			SizeType sizeRight =
-			        initKron_.istartRight()(patch+1) - initKron_.istartRight()(patch);
-			sum += sizeLeft*sizeRight;
+		SizeType npatch = initKron_.patch(GenIjPatchType::LEFT).size();
+		SizeType sum = 0;
+
+		for( SizeType ipatch=0; ipatch < npatch; ipatch++) {
+			offsetForPatches_[ipatch] = sum;
+
+			SizeType igroup = initKron_.patch(GenIjPatchType::LEFT)[ipatch];
+			SizeType jgroup = initKron_.patch(GenIjPatchType::RIGHT)[ipatch];
+
+			assert(initKron_.istartLeft()(igroup+1) >= initKron_.istartLeft()(igroup));
+			SizeType sizeLeft =  initKron_.istartLeft()(igroup+1) -
+			        initKron_.istartLeft()(igroup);
+
+			assert(initKron_.istartRight()(jgroup+1) >= initKron_.istartRight()(jgroup));
+			SizeType sizeRight = initKron_.istartRight()(jgroup+1) -
+			        initKron_.istartRight()(jgroup);
+
+			sum +=  sizeLeft*sizeRight;
 		}
 	}
 
@@ -190,14 +200,16 @@ private:
 #endif
 	}
 
-	SizeType lSizeFunction(SizeType patch) const
+	SizeType lSizeFunction(SizeType ipatch) const
 	{
-		return initKron_.istartLeft()(patch+1) - initKron_.istartLeft()(patch);
+		SizeType igroup = initKron_.patch(GenIjPatchType::LEFT)[ipatch];
+		return initKron_.istartLeft()(igroup+1) - initKron_.istartLeft()(igroup);
 	}
 
-	SizeType rSizeFunction(SizeType patch) const
+	SizeType rSizeFunction(SizeType ipatch) const
 	{
-		return initKron_.istartRight()(patch+1) - initKron_.istartRight()(patch);
+		SizeType jgroup = initKron_.patch(GenIjPatchType::RIGHT)[ipatch];
+		return initKron_.istartRight()(jgroup+1) - initKron_.istartRight()(jgroup);
 	}
 
 	const InitKronType& initKron_;
