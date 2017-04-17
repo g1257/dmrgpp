@@ -352,6 +352,10 @@ public:
 
 	SizeType col() const { return ncol_; }
 
+	SizeType rows() const { return nrow_; }
+
+	SizeType cols() const { return ncol_; }
+
 	SizeType rank() const
 	{
 		if (nrow_!=ncol_)

@@ -133,6 +133,10 @@ public:
 
 	SizeType n_col() const { return ncol_; } // legacy name
 
+	SizeType rows() const { return nrow_; }
+
+	SizeType cols() const { return ncol_; }
+
 	const T& operator()(SizeType i,SizeType j) const
 	{
 		assert(i<nrow_ && j<ncol_);
