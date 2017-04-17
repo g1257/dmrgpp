@@ -1,5 +1,5 @@
 include Config.make
-LDFLAGS += @LAPACK_LIBS@ @BLAS_LIBS@ @LIBS@ @FLIBS@
+LDFLAGS += @LAPACK_LIBS@ @BLAS_LIBS@
 
 all: svd testLapack 
 

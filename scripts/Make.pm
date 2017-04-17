@@ -181,19 +181,6 @@ sub combineAllDrivers
 	return $buffer;
 }
 
-sub findLapack
-{
-	my $stringToTest = "-llapack -lblas";
-	my $ret = tryWith($stringToTest);
-	return $stringToTest if ($ret == 0);
-
-	$stringToTest = "/usr/lib64/liblapack.so.3 /usr/lib64/libblas.so.3";
-	$ret = tryWith($stringToTest);
-	return $stringToTest if ($ret == 0);
-
-	return "/usr/lib/liblapack.so.3 /usr/lib/libblas.so.3";
-}
-
 sub tryWith
 {
 	my ($stringToTest) = @_;
@@ -300,13 +287,6 @@ sub createConfigMake
 	my $blasLapack = "-lblas -llapack";
 	while (<FILE>) {
 		next if (/ConfigBase\.make/);
-		if (/\Q$blasLapack/) {
-			my $line = $_;
-			my $tmp = findBlasLapack();
-			$line =~ s/\Q$blasLapack/$tmp/ if ($tmp ne "");
-			$_ = $line;
-		}
-
 		print FOUT;
 	}
 
@@ -331,18 +311,6 @@ sub createConfigMake
 	$cmd = "mv Config.make.new Config.make";
 	system($cmd);
 	print STDERR "$0: Written Config.make\n";
-}
-
-sub findBlasLapack
-{
-	my $test1 = "/usr/lib64/libblas.so.3";
-	my $test2 = "/usr/lib64/liblapack.so.3";
-	return "$test1 $test2" if (-r "$test1" and -r "$test2");
-	$test1 = "/usr/lib/libblas.so.3";
-        $test2 = "/usr/lib/liblapack.so.3";
-	return "$test1 $test2" if (-r "$test1" and -r "$test2");
-	return "-framework Accelerate " if (isMacOs());
-	return "";
 }
 
 sub isMacOs

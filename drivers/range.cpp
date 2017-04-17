@@ -4,7 +4,7 @@
  *
  * g++ -g3 -DNDEBUG  -Werror -Wall -I../src -I../src/JSON \
  * -I../src/JSON/JsonParser -lm  -lpthread   range.cpp   -o range \
- * /usr/lib64/libblas.so.3 /usr/lib64/liblapack.so.3
+ * -lblas -llapack 
  *
  * And run it with:
  *
@@ -14,7 +14,7 @@
  *
  * mpicxx -DUSE_MPI -g3 -DNDEBUG  -Werror -Wall -I../src -I../src/JSON \
  * -I../src/JSON/JsonParser -lm  -lpthread   range.cpp   -o range \
- * /usr/lib64/libblas.so.3 /usr/lib64/liblapack.so.3
+ * -lblas -llapack 
  *
  * And run it with:
  *
