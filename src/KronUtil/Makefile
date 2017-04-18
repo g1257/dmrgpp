@@ -3,7 +3,7 @@ include ../Config.make
 all: libkronutil.a test1 test2
 
 CPPFLAGS += -I../../../PsimagLite/src -I../../../PsimagLite
-LDFLAGS += -L. -L../../../PsimagLite/lib -lkronutil
+LDFLAGS += -L. -L../../../PsimagLite/lib -lkronutil -lblas -llapack
 
 SRC=    kronUtilComplex.cpp \
 	coord2csr.cpp  \
