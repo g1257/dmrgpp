@@ -216,7 +216,9 @@ public:
 	    : useSu2Symmetry_(BasisType::useSu2Symmetry()),
 	      reducedOpImpl_(thisBasis),
 	      progress_("Operators")
-	{}
+	{
+		announceChangeAll();
+	}
 
 	template<typename IoInputter>
 	Operators(IoInputter& io,
@@ -228,6 +230,9 @@ public:
 	      progress_("Operators")
 	{
 		if (isObserveCode) return;
+
+		announceChangeAll();
+
 		if (!useSu2Symmetry_) io.read(operators_,"#OPERATORS");
 
 		io.readMatrix(hamiltonian_,"#HAMILTONIAN");
@@ -451,6 +456,19 @@ private:
 
 		permute(matrixTmp,v,permutation);
 		permuteInverse(v,matrixTmp,permutation);
+	}
+
+	void announceChangeAll() const
+	{
+#ifdef OPERATORS_CHANGE_ALL
+		static bool flag = false;
+		if (flag) return;
+		PsimagLite::String msg("OPERATORS_CHANGE_ALL in use: ");
+		msg += "GeometryMaxConnections value might not be used\n";
+		std::cerr<<msg;
+		std::cout<<msg;
+		flag = true;
+#endif
 	}
 
 	bool useSu2Symmetry_;
