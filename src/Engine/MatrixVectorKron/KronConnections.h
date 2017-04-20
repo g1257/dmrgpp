@@ -155,7 +155,6 @@ public:
 
 private:
 
-
 	void computeOffsets()
 	{
 		assert(initKron_.patch(GenIjPatchType::LEFT).size() ==

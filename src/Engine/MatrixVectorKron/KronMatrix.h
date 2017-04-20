@@ -147,10 +147,6 @@ private:
 		const SparseMatrixType& left = initKron_.lrs().left().hamiltonian();
 		SizeType nl = left.row();
 
-		const SparseMatrixType& right = initKron_.lrs().right().hamiltonian();
-		SizeType nr = right.row();
-
-		SizeType nq = initKron_.size();
 		SizeType offset = initKron_.offset();
 		SizeType npatches = initKron_.patch(GenIjPatchType::LEFT).size();
 
@@ -175,21 +171,21 @@ private:
 
 					SizeType ij = i + j * nl;
 
-					assert( (0 <= i) && (i < nl) );
-					assert( (0 <= j) && (j < nr) );
+					assert(i < nl);
+					assert(j < initKron_.lrs().right().hamiltonian().row());
 
-					assert( (0 <= ij) && (ij < permInverse.size() ));
+					assert(ij < permInverse.size());
 
 					SizeType r = permInverse[ ij ];
-					assert( !(  (r < offset) || (r >= (offset + nq)) ) );
+					assert( !(  (r < offset) || (r >= (offset + initKron_.size())) ) );
 
 
 					SizeType ip = vstart_[ipatch] + (iright + ileft * sizeRight);
 					// SizeType ip = vstart[ipatch] + (ileft + iright * sizeLeft);
 
-					assert( (0 <= ip) && (ip < yin.size()) );
+					assert(ip < yin.size());
 
-					assert( (0 <= (r-offset)) && ((r-offset) < vin.size()) );
+					assert( (r >= offset) && ((r-offset) < vin.size()) );
 					yin[ip] = vin[r-offset];
 					xout[ip] = vout[r-offset];
 				}
@@ -203,13 +199,6 @@ private:
 	void copyOut(VectorType& vout, const VectorType& xout) const
 	{
 		const VectorSizeType& permInverse = initKron_.lrs().super().permutationInverse();
-		const SparseMatrixType& left = initKron_.lrs().left().hamiltonian();
-		SizeType nl = left.row();
-
-		const SparseMatrixType& right = initKron_.lrs().right().hamiltonian();
-		SizeType nr = right.row();
-
-		SizeType nq = initKron_.size();
 		SizeType offset = initKron_.offset();
 		SizeType npatches = initKron_.patch(GenIjPatchType::LEFT).size();
 
@@ -231,20 +220,20 @@ private:
 
 					SizeType i = ileft + left_offset;
 					SizeType j = iright + right_offset;
-					SizeType ij = i + j*nl;
 
-					assert( (0 <= i) && (i < nl) );
-					assert( (0 <= j) && (j < nr) );
+					assert(i < initKron_.lrs().left ().hamiltonian().row());
+					assert(j < initKron_.lrs().right().hamiltonian().row());
 
-					assert( (0 <= ij) && (ij < permInverse.size()) );
+					assert(i + j*initKron_.lrs().left().hamiltonian().row() <
+					       permInverse.size());
 
-					SizeType r = permInverse[ i + j * nl ];
-					assert( !(  (r < offset) || (r >= (offset + nq)) ) );
+					SizeType r = permInverse[i + j*initKron_.lrs().left().hamiltonian().row()];
+					assert( !(  (r < offset) || (r >= (offset + initKron_.size())) ) );
 
 					SizeType ip = vstart_[ipatch] + (iright + ileft * sizeRight);
-					assert( (0 <= ip) && (ip < xout.size()) );
+					assert(ip < xout.size());
 
-					assert( (0 <= (r-offset)) && ((r-offset) < vout.size()) );
+					assert(r >= offset && ((r-offset) < vout.size()) );
 					vout[r-offset] = xout[ip];
 				}
 			}
