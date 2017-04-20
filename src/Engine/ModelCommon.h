@@ -192,11 +192,6 @@ public:
 		}
 	}
 
-	SizeType maxConnections() const
-	{
-		return this->geometry().maxConnections();
-	}
-
 private:
 
 	/**
