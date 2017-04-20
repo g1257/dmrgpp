@@ -4,10 +4,10 @@
 
 void estimate_kron_cost( const int nrow_A,
                          const int ncol_A,
-                         const int nnz_A, 
+                         const int nnz_A_in, 
                          const int nrow_B,
                          const int ncol_B,
-                         const int nnz_B,
+                         const int nnz_B_in,
                          double *p_kron_nnz, 
                          double *p_kron_flops, 
                          int *p_imethod )
@@ -18,6 +18,8 @@ void estimate_kron_cost( const int nrow_A,
   assert( p_kron_flops != 0 );
   assert( p_imethod != 0 );
   
+  double nnz_A = (double) nnz_A_in;
+  double nnz_B = (double) nnz_B_in;
   
   /*
   % ------------------------
@@ -30,8 +32,8 @@ void estimate_kron_cost( const int nrow_A,
   % X(ib,ia) = BY(ib,ja)*At(ja,ia)
   % ------------------------
   */
-  double flops_BY = 2*nnz_B*ncol_A;
-  double flops_BYAt = 2*nnz_A*nrow_B;
+  double flops_BY = 2.0*nnz_B*ncol_A;
+  double flops_BYAt = 2.0*nnz_A*nrow_B;
   double flops_method1 = flops_BY + flops_BYAt;
   double nnz_method1 = nrow_B * ncol_A;
 
@@ -47,8 +49,8 @@ void estimate_kron_cost( const int nrow_A,
   % X(ib,ia) = B(ib,jb)*YAt(jb,ia)
   % ------------------------
   */
-  double flops_YAt = 2*nnz_A*ncol_B;
-  flops_BYAt = 2*nnz_B*nrow_A;
+  double flops_YAt = 2.0*nnz_A*ncol_B;
+  flops_BYAt = 2.0*nnz_B*nrow_A;
   double flops_method2 = flops_YAt + flops_BYAt;
   double nnz_method2 = ncol_B * nrow_A;
 
@@ -62,7 +64,7 @@ void estimate_kron_cost( const int nrow_A,
   % need A and B to be very sparse
   % ------------------
   */
-  double flops_method3 =  2*nnz_A*nnz_B;
+  double flops_method3 =  2.0*nnz_A*nnz_B;
   double nnz_method3 = nnz_A*nnz_B;
 
   double kron_flops = MIN( flops_method1, 
