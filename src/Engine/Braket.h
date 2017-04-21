@@ -80,12 +80,6 @@ public:
 
 		PsimagLite::tokenizer(vecStr[1],name_,";");
 
-		if (name_.size() == 0 || name_.size() > 4) {
-			PsimagLite::String str("ObserverInterpreter: syntax error for ");
-			str += braket + " Expecting between 1 and 4 operators\n";
-			throw PsimagLite::RuntimeError(str);
-		}
-
 		sites_.resize(name_.size(),-1);
 
 		for (SizeType i = 0; i < name_.size(); ++i) {

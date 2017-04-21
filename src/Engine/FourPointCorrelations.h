@@ -102,6 +102,9 @@ public:
 
 	typedef typename CorrelationsSkeletonType::SparseMatrixType SparseMatrixType;
 	typedef typename ObserverHelperType::MatrixType MatrixType;
+	typedef PsimagLite::Vector<char>::Type VectorCharType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
 
 	FourPointCorrelations(ObserverHelperType& precomp,
 	                      CorrelationsSkeletonType& skeleton,
@@ -155,6 +158,55 @@ public:
 		return secondStage(O2gt,i2,mod3,i3,O3,fermionicSign,threadId);
 	}
 
+	//! 4-points or more: these are expensive and uncached!!!
+	//! requires i0<i1<i2<i3<...<i_{n-1}
+	FieldType anyPoint(const VectorCharType& mods,
+	                   const VectorSizeType& indices,
+	                   const VectorSparseMatrixType& Omatrices,
+	                   int fermionicSign,
+	                   SizeType threadId) const
+	{
+		checkIndicesForStrictOrdering(indices);
+		checkSizes(mods,indices,Omatrices);
+
+		SparseMatrixType O2gt;
+		firstStage(O2gt,
+		           mods[0],
+		        indices[0],
+		        Omatrices[0],
+		        mods[1],
+		        indices[1],
+		        Omatrices[1],
+		        fermionicSign,
+		        threadId);
+
+		SizeType n = indices.size();
+		assert(n > 3);
+		SizeType end = n - 2;
+		// do the middle
+		for (SizeType i = 2; i < end; ++i) {
+			SizeType i2 = indices[i - 1];
+			SparseMatrixType OsoFar;
+			middleStage(OsoFar,O2gt,i2,mods[i],indices[i],Omatrices[i],fermionicSign,threadId);
+			O2gt = OsoFar;
+		}
+
+		// handle the last 2 sites
+		SizeType i2 = indices[n - 3];
+		SizeType i3 = indices[n - 2];
+		SizeType i4 = indices[n - 1];
+
+		return secondStage(O2gt,
+		                   i2,
+		                   mods[n-2],
+		        i3,
+		        Omatrices[n-2],
+		        mods[n-1],
+		        i4,
+		        Omatrices[n-1],
+		        fermionicSign,
+		        threadId);
+	}
 
 	//! requires i1<i2
 	void firstStage(SparseMatrixType& O2gt,
@@ -194,8 +246,12 @@ public:
 	//! requires i2<i3<i4
 	FieldType secondStage(const SparseMatrixType& O2gt,
 	                      SizeType i2,
-	                      char mod3,SizeType i3,const SparseMatrixType& O3,
-	                      char mod4,SizeType i4,const SparseMatrixType& O4,
+	                      char mod3,
+	                      SizeType i3,
+	                      const SparseMatrixType& O3,
+	                      char mod4,
+	                      SizeType i4,
+	                      const SparseMatrixType& O4,
 	                      int fermionicSign,
 	                      SizeType threadId) const
 	{
@@ -254,12 +310,60 @@ public:
 		return skeleton_.bracket(O4g,fermionicSign,threadId);
 	}
 
+	//! requires i2<i3<i4
+	void middleStage(SparseMatrixType& dest,
+	                 const SparseMatrixType& OsoFar,
+	                 SizeType i2,
+	                 char mod3,
+	                 SizeType i3,
+	                 const SparseMatrixType& O3,
+	                 int fermionicSign,
+	                 SizeType threadId) const
+	{
+		// Take care of modifiers
+		if (i2 > i3)
+			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs ordered points\n");
+		if (i2 == i3)
+			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs distinct points\n");
+
+		SparseMatrixType O3m;
+		skeleton_.createWithModification(O3m,O3,mod3);
+
+		int ns = i3-1;
+		if (ns < 0) ns = 0;
+		helper_.setPointer(threadId,ns);
+		SparseMatrixType Otmp;
+		growDirectly4p(Otmp,OsoFar,i2+1,fermionicSign,ns,threadId);
+		if (verbose_) {
+			std::cerr<<"Otmp\n";
+			std::cerr<<Otmp;
+		}
+
+		SparseMatrixType O3g;
+		skeleton_.dmrgMultiply(O3g,Otmp,O3m,fermionicSign,ns,threadId);
+		if (verbose_) {
+			std::cerr<<"O3g\n";
+			std::cerr<<O3g;
+		}
+
+		helper_.setPointer(threadId,ns);
+
+		helper_.transform(dest,O3g,threadId);
+		if (verbose_) {
+			std::cerr<<"dest\n";
+			std::cerr<<dest;
+		}
+	}
+
+
 private:
 
 	//! requires i2<i3
 	FieldType secondStage(const SparseMatrixType& O2gt,
 	                      SizeType i2,
-	                      char mod3,SizeType i3,const SparseMatrixType& O3,
+	                      char mod3,
+	                      SizeType i3,
+	                      const SparseMatrixType& O3,
 	                      int fermionicSign,
 	                      SizeType threadId) const
 	{
@@ -316,6 +420,36 @@ private:
 			Odest = Onew;
 
 		}
+	}
+
+	void checkIndicesForStrictOrdering(const VectorSizeType& indices) const
+	{
+		if (indices.size() < 2) return;
+
+		bool flag = true;
+		SizeType prev = indices[0];
+		for (SizeType i = 1; i < indices.size(); ++i) {
+			if (indices[i] <= prev) {
+				flag = false;
+				break;
+			}
+		}
+
+		if (flag) return;
+		throw PsimagLite::RuntimeError("AnyPoint: Point must be strictly ordered\n");
+	}
+
+	void checkSizes(const VectorCharType& mods,
+	                const VectorSizeType& indices,
+	                const VectorSparseMatrixType& Omatrices) const
+	{
+		SizeType n = mods.size();
+		if (n != indices.size() || n != Omatrices.size()) {
+			throw PsimagLite::RuntimeError("AnyPoint: Internal Error\n");
+		}
+
+		if (n < 4)
+			throw PsimagLite::RuntimeError("AnyPoint: 4 or more points expected\n");
 	}
 
 	ObserverHelperType& helper_; // <-- NB: not the owner

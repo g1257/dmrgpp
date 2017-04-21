@@ -1294,13 +1294,14 @@ private:
 			return;
 		}
 
-		if (braket.points() == 3) {
-			observe_.threePoint(braket,rows,cols);
-			return;
-		}
+		if (braket.points() == 3)
+			return observe_.threePoint(braket,rows,cols);
 
-		assert(braket.points() == 4);
-		observe_.fourPoint(braket,rows,cols);
+
+		if (braket.points() == 4)
+			return observe_.fourPoint(braket,rows,cols);
+
+		observe_.anyPoint(braket);
 	}
 
 	void measureTime(const PsimagLite::String& label)

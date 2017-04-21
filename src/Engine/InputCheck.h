@@ -176,7 +176,6 @@ public:
 		knownLabels_.push_back("LongChainDistance");
 		knownLabels_.push_back("IsPeriodicY");
 		knownLabels_.push_back("TruncationTolerance");
-		knownLabels_.push_back("LanczosSteps");
 		knownLabels_.push_back("PotentialT");
 		knownLabels_.push_back("omega");
 		knownLabels_.push_back("MagneticField");
@@ -187,7 +186,11 @@ public:
 		knownLabels_.push_back("KroneckerDumperBegin");
 		knownLabels_.push_back("KroneckerDumperEnd");
 		knownLabels_.push_back("LanczosEps");
+		knownLabels_.push_back("LanczosSteps");
+		knownLabels_.push_back("TridiagEps");
+		knownLabels_.push_back("TridiagSteps");
 		knownLabels_.push_back("TruncationTolerance");
+		knownLabels_.push_back("GeometryMaxConnections");
 	}
 
 	~InputCheck()

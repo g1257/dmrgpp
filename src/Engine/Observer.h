@@ -415,6 +415,63 @@ public:
 		}
 	}
 
+	void anyPoint(const BraketType& braket)
+	{
+		assert(braket.points() >= 4);
+
+		SizeType flag = 0;
+		try {
+			braket.site(0);
+			flag |= 1;
+		} catch (std::exception&) {}
+
+		try {
+			braket.site(1);
+			flag |= 2;
+		} catch (std::exception&) {}
+
+		try {
+			braket.site(2);
+			flag |= 4;
+		} catch (std::exception&) {}
+
+		try {
+			braket.site(3);
+			flag |= 8;
+		} catch (std::exception&) {}
+
+		if (flag != 15) {
+			PsimagLite::String str("fourPoint: ");
+			str += "Give all sites\n";
+			throw PsimagLite::RuntimeError(str);
+		}
+
+		SizeType n = braket.points();
+		typename FourPointCorrelationsType::VectorCharType mods(n, 'N');
+		typename FourPointCorrelationsType::VectorSizeType indices(n, 0);
+		typename FourPointCorrelationsType::VectorSparseMatrixType Omatrices(n);
+		RealType fermionicSign = braket.op(0).fermionSign;
+		SizeType threadId = 0;
+
+		for (SizeType i = 0; i < n; ++i) {
+			mods[i] = 'N';
+			indices[i] = braket.site(i);
+			Omatrices[i] = braket.op(i).data;
+		}
+
+		FieldType tmp = fourpoint_.anyPoint(mods,
+		                                    indices,
+		                                    Omatrices,
+		                                    fermionicSign,
+		                                    threadId);
+
+		std::cout<<"#Fixed all sites\n";
+		for (SizeType i = 0; i < n; ++i)
+			std::cout<<indices[i]<<" ";
+
+		std::cout<<tmp<<"\n";
+	}
+
 	VectorMatrixType ladder(const BraketType& braket,
 	                        SizeType rows,
 	                        SizeType,
