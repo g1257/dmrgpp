@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define INIT_KRON_HEADER_H
 
 #include "ArrayOfMatStruct.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -204,6 +205,8 @@ private:
 			if (link2.type==ProgramGlobals::ENVIRON_SYSTEM)  {
 				LinkType link3 = link2;
 				link3.type = ProgramGlobals::SYSTEM_ENVIRON;
+				if (link3.fermionOrBoson == ProgramGlobals::FERMION)
+					link3.value *= -1.0;
 				addOneConnection(*B,*A,link3);
 				continue;
 			}
@@ -212,20 +215,20 @@ private:
 		}
 	}
 
-	void addOneConnection(const SparseMatrixType& A,const SparseMatrixType& B,const LinkType& link2)
+	void addOneConnection(const SparseMatrixType& A,
+	                      const SparseMatrixType& B,
+	                      const LinkType& link2)
 	{
 		SparseMatrixType Ahat;
 		calculateAhat(Ahat, A, link2.value, link2.fermionOrBoson);
 		values_.push_back(link2.value);
-		//			assert(PsimagLite::norm(tmp-0.5)<1e-6);
 		ArrayOfMatStructType* x1 = new ArrayOfMatStructType(Ahat,
 		                                                    gengroupLeft_,
 		                                                    ijpatches_,
 		                                                    GenIjPatchType::LEFT);
+
 		xc_.push_back(x1);
 
-		//SparseMatrixType tmpMatrix;
-		//transposeConjugate(tmpMatrix,B);
 		ArrayOfMatStructType* y1 = new ArrayOfMatStructType(B,
 		                                                    gengroupRight_,
 		                                                    ijpatches_,
