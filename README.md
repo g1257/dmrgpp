@@ -70,10 +70,6 @@ ChebyshevSolver
 SparseRow       <-- slower, consumes less memory
 SparseRowCached <-- faster, consumes more memory
 
-[JSON]
-JSON directory.
-Json support (taken from M.S.'s new implementation which doesn't depend on anything at all)
-
 [Io] Input output support
 IoSimple
 ChebyshevSerializer

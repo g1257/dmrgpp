@@ -30,7 +30,6 @@ public:
 
 	MyHelper(SizeType ntasks, SizeType nthreads)
 	    : weight_(ntasks),
-	      nthreads_(nthreads),
 	      x_(nthreads,0)
 	{
 		srand48(1234);
@@ -67,7 +66,6 @@ public:
 private:
 
 	VectorSizeType weight_;
-	SizeType nthreads_;
 	VectorSizeType x_;
 }; // class MyHelper
 

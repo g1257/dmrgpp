@@ -2,9 +2,9 @@
  *
  * Serial version:
  *
- * g++ -g3 -DNDEBUG  -Werror -Wall -I../src -I../src/JSON \
- * -I../src/JSON/JsonParser -lm  -lpthread   range.cpp   -o range \
- * -lblas -llapack 
+ * g++ -g3 -DNDEBUG  -Werror -Wall -I../src  \
+ *  -lm  -lpthread   range.cpp   -o range \
+ * -lblas -llapack
  *
  * And run it with:
  *
@@ -12,9 +12,9 @@
  *
  * Parallel version:
  *
- * mpicxx -DUSE_MPI -g3 -DNDEBUG  -Werror -Wall -I../src -I../src/JSON \
- * -I../src/JSON/JsonParser -lm  -lpthread   range.cpp   -o range \
- * -lblas -llapack 
+ * mpicxx -DUSE_MPI -g3 -DNDEBUG  -Werror -Wall -I../src \
+ *  -lm  -lpthread   range.cpp   -o range \
+ * -lblas -llapack
  *
  * And run it with:
  *
@@ -33,9 +33,8 @@ class MyLoop {
 
 public:
 
-	MyLoop(SizeType nthreads,SizeType total)
-	    : nthreads_(nthreads),
-	      sum_(ConcurrencyType::storageSize(nthreads)),
+	MyLoop(SizeType nthreads, SizeType total)
+	    : sum_(ConcurrencyType::storageSize(nthreads)),
 	      v_(total,0)
 	{}
 
@@ -79,7 +78,6 @@ public:
 
 private:
 
-	SizeType nthreads_;
 	PsimagLite::Vector<SizeType>::Type sum_;
 	PsimagLite::Vector<SizeType>::Type v_;
 };

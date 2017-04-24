@@ -40,7 +40,7 @@ sub createMakefile
 
 	local *FH = $fh;
 	my @units = qw(integrator sparseSolverTest testCRSMatrix combineContinuedFraction
-	continuedFractionCollection gitrev jsonExample range kernelPolynomial
+	continuedFractionCollection gitrev range kernelPolynomial
 	linearPrediction options randomTest svd testLapack threads loadImbalance testIsClass
 	testMemResolv1 sumDecomposition calculator closuresTest base64test checkRunId
 	testLanczos);

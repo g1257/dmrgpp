@@ -14,12 +14,12 @@ testLapack.o: ./testLapack.cpp  Makefile Makefile.dep
 testLapack: testLapack.o  Makefile Makefile.dep
 	$(CXX) -o testLapack testLapack.o $(LDFLAGS)
 
-Makefile.dep: ./integrator.cpp ./sparseSolverTest.cpp ./testCRSMatrix.cpp ./combineContinuedFraction.cpp ./continuedFractionCollection.cpp ./gitrev.cpp ./jsonExample.cpp ./range.cpp ./kernelPolynomial.cpp ./linearPrediction.cpp ./options.cpp ./randomTest.cpp ./svd.cpp ./testLapack.cpp ./threads.cpp ./loadImbalance.cpp ./testIsClass.cpp ./testMemResolv1.cpp ./sumDecomposition.cpp ./calculator.cpp ./closuresTest.cpp ./base64test.cpp ./checkRunId.cpp ./testLanczos.cpp 
-	$(CXX) $(CPPFLAGS) -I../src -I.. -MM  ./integrator.cpp ./sparseSolverTest.cpp ./testCRSMatrix.cpp ./combineContinuedFraction.cpp ./continuedFractionCollection.cpp ./gitrev.cpp ./jsonExample.cpp ./range.cpp ./kernelPolynomial.cpp ./linearPrediction.cpp ./options.cpp ./randomTest.cpp ./svd.cpp ./testLapack.cpp ./threads.cpp ./loadImbalance.cpp ./testIsClass.cpp ./testMemResolv1.cpp ./sumDecomposition.cpp ./calculator.cpp ./closuresTest.cpp ./base64test.cpp ./checkRunId.cpp ./testLanczos.cpp   > Makefile.dep
+Makefile.dep: ./integrator.cpp ./sparseSolverTest.cpp ./testCRSMatrix.cpp ./combineContinuedFraction.cpp ./continuedFractionCollection.cpp ./gitrev.cpp ./range.cpp ./kernelPolynomial.cpp ./linearPrediction.cpp ./options.cpp ./randomTest.cpp ./svd.cpp ./testLapack.cpp ./threads.cpp ./loadImbalance.cpp ./testIsClass.cpp ./testMemResolv1.cpp ./sumDecomposition.cpp ./calculator.cpp ./closuresTest.cpp ./base64test.cpp ./checkRunId.cpp ./testLanczos.cpp
+	$(CXX) $(CPPFLAGS) -I../src -I.. -MM  ./integrator.cpp ./sparseSolverTest.cpp ./testCRSMatrix.cpp ./combineContinuedFraction.cpp ./continuedFractionCollection.cpp ./gitrev.cpp ./range.cpp ./kernelPolynomial.cpp ./linearPrediction.cpp ./options.cpp ./randomTest.cpp ./svd.cpp ./testLapack.cpp ./threads.cpp ./loadImbalance.cpp ./testIsClass.cpp ./testMemResolv1.cpp ./sumDecomposition.cpp ./calculator.cpp ./closuresTest.cpp ./base64test.cpp ./checkRunId.cpp ./testLanczos.cpp   > Makefile.dep
 
 .PHONY: clean
 clean: Makefile.dep
-	rm -f core* *.o *.dep *.a integrator sparseSolverTest testCRSMatrix combineContinuedFraction continuedFractionCollection gitrev jsonExample range kernelPolynomial linearPrediction options randomTest svd testLapack threads loadImbalance testIsClass testMemResolv1 sumDecomposition calculator closuresTest base64test checkRunId testLanczos
+	rm -f core* *.o *.dep *.a integrator sparseSolverTest testCRSMatrix combineContinuedFraction continuedFractionCollection gitrev range kernelPolynomial linearPrediction options randomTest svd testLapack threads loadImbalance testIsClass testMemResolv1 sumDecomposition calculator closuresTest base64test checkRunId testLanczos
 
 include Makefile.dep
 
