@@ -1,0 +1,22 @@
+2017-04-24 2017-04-24
+
+* observe: 
+	- bug fix when <bra|operators|ket>
+	- 5 or more points supported with
+	  fixed sites
+
+* postCi: detects energy changes, no files
+
+* ci: -S option allows to run on command line
+      or batch
+
+* Makefile: -lblas -llapack
+
+* announce when ifdef OPERATORS_CHANGE_ALL
+
+* Kron and KronUtil:
+	- additional checks
+	- bug fix in offsets
+	- bug fix for in and out vectors
+	- bug fix in estimate_kron_cost
+
