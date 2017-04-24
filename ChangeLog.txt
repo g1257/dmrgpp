@@ -1,0 +1,8 @@
+2017-04-24 Version 1.52
+
+* Geometry: Ladder: Reads IsPeriodicX/Y
+
+* Makefile: -lblas -llapack
+
+* Matrices: rows() cols() interface
+
