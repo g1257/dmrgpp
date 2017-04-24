@@ -1,4 +1,6 @@
-2017-04-24 2017-04-24
+https://github.com/g1257/dmrgpp/commits/master
+
+2017-04-24 Version 4.38
 
 * observe: 
 	- bug fix when <bra|operators|ket>
