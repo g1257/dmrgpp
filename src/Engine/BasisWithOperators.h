@@ -276,12 +276,12 @@ public:
 	}
 
 	//! Returns the Hamiltonian as stored in this basis
-	SparseMatrixType hamiltonian() const
+	const SparseMatrixType& hamiltonian() const
 	{
 		return operators_.hamiltonian();
 	}
 
-	SparseMatrixType reducedHamiltonian() const
+	const SparseMatrixType& reducedHamiltonian() const
 	{
 		return operators_.reducedHamiltonian();
 	}

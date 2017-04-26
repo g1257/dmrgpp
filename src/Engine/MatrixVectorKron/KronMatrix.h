@@ -200,6 +200,7 @@ private:
 	{
 		const VectorSizeType& permInverse = initKron_.lrs().super().permutationInverse();
 		SizeType offset = initKron_.offset();
+		SizeType nl = initKron_.lrs().left().hamiltonian().row();
 		SizeType npatches = initKron_.patch(GenIjPatchType::LEFT).size();
 
 		for( SizeType ipatch=0; ipatch < npatches; ++ipatch) {
@@ -221,13 +222,12 @@ private:
 					SizeType i = ileft + left_offset;
 					SizeType j = iright + right_offset;
 
-					assert(i < initKron_.lrs().left ().hamiltonian().row());
+					assert(i < nl);
 					assert(j < initKron_.lrs().right().hamiltonian().row());
 
-					assert(i + j*initKron_.lrs().left().hamiltonian().row() <
-					       permInverse.size());
+					assert(i + j*nl < permInverse.size());
 
-					SizeType r = permInverse[i + j*initKron_.lrs().left().hamiltonian().row()];
+					SizeType r = permInverse[i + j*nl];
 					assert( !(  (r < offset) || (r >= (offset + initKron_.size())) ) );
 
 					SizeType ip = vstart_[ipatch] + (iright + ileft * sizeRight);
