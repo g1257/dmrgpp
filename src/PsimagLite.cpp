@@ -15,4 +15,9 @@ std::istream& operator>>(std::istream& is,std::pair<SizeType,SizeType>& pair)
 	return is;
 }
 
+int PsiApp::libSizeOfSizeType()
+{
+	return sizeof(SizeType);
+}
+
 } // namespace PsimagLite
