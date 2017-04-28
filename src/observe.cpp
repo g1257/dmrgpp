@@ -253,10 +253,10 @@ void usage(const char* name)
 	std::cerr<<" [-V] whatToMeasure\n";
 }
 
-int main(int argc,char *argv[])
+int main(int argc,char **argv)
 {
 	using namespace Dmrg;
-
+	PsimagLite::PsiApp application("observe",&argc,&argv,1);
 	PsimagLite::String filename;
 	PsimagLite::String filesOption;
 	int opt = 0;
@@ -299,7 +299,6 @@ int main(int argc,char *argv[])
 	}
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
-	ConcurrencyType concurrency(&argc,&argv,1);
 
 	// print license
 	if (ConcurrencyType::root()) {

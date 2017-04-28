@@ -4,6 +4,7 @@
 #include "InputCheck.h"
 #include "ParametersDmrgSolver.h"
 #include "ToolBox.h"
+#include "PsimagLite.h"
 
 #ifndef USE_FLOAT
 typedef double RealType;
@@ -20,10 +21,10 @@ void usage(const char* name)
 	std::cerr<<"USAGE is "<<name<<" -f filename -a action [-s] [-p precision]\n";
 }
 
-int main(int argc,char *argv[])
+int main(int argc,char **argv)
 {
 	using namespace Dmrg;
-
+	PsimagLite::PsiApp application("toolboxdmrg",&argc,&argv,1);
 	PsimagLite::String filename;
 	PsimagLite::String action;
 	PsimagLite::String extraOptions = "lowest eigenvalue";
@@ -68,7 +69,6 @@ int main(int argc,char *argv[])
 	}
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
-	ConcurrencyType concurrency(&argc,&argv,1);
 
 	// print license
 	if (ConcurrencyType::root()) {

@@ -189,8 +189,8 @@ void mainLoop0(InputNgType::Readable& io,
 
 int main(int argc,char *argv[])
 {
+	PsimagLite::PsiApp application("DMRG++",&argc,&argv,1);
 	typedef PsimagLite::Concurrency ConcurrencyType;
-	ConcurrencyType concurrency(&argc,&argv,1);
 	InputCheck inputCheck;
 	PsimagLite::String filename="";
 	int opt = 0;
