@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <utility>
-#include "Vector.h"
+#include "Concurrency.h"
 
 namespace PsimagLite {
 
@@ -14,7 +14,8 @@ std::istream& operator>>(std::istream&,std::pair<SizeType,SizeType>&);
 class PsiApp {
 public:
 
-	PsiApp(String appName)
+	PsiApp(String appName, int* argc, char*** argv, int nthreads)
+	    : concurrency_(argc,argv,nthreads)
 	{
 		chekSizeType();
 	}
@@ -23,13 +24,15 @@ private:
 
 	void chekSizeType()
 	{
-		if (sizeof(SizeType) == libSizeOfSizeType()) return;
+		if (sizeof(SizeType) == libSizeOfSizeType_) return;
 		std::string msg("PsimagLite compiled with -DUSE_LONG but");
 		msg += "application without. Or viceversa.\n";
 		throw std::runtime_error(msg);
 	}
 
-	int libSizeOfSizeType();
+	static const int libSizeOfSizeType_;
+
+	Concurrency concurrency_;
 };
 
 } // namespace PsimagLite
