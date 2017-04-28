@@ -24,11 +24,17 @@ use Make;
 
 my @drivers = ();
 
-createMakefile();
+my ($flavor) = @ARGV;
+
+$flavor = procFlavor($flavor);
+createMakefile($flavor);
 
 sub createMakefile
 {
+	my ($flavor) = @_;
 	Make::backupMakefile();
+	Make::createConfigMake($flavor);
+
 	if (!(-r "Config.make")) {
 		my $cmd = "cp Config.make.sample Config.make";
 		system($cmd);
@@ -84,5 +90,39 @@ sub combine
 	}
 
 	return $buffer;
+}
+
+sub procFlavor
+{
+	my ($flavor) = @_;
+	if (!defined($flavor)) {
+		$flavor = "production";
+		print STDERR "$0: No flavor given, assuming production\n";
+		print STDERR "\t say $0 help for a list of options\n";
+	}
+
+	my $hasPath = ($flavor =~ /^\.\./ or $flavor =~ /^\//);
+	return $flavor if ($hasPath);
+
+	if ($flavor eq "help") {
+		print "USAGE: $0 [production | debug | callgrind";
+		print " | helgrind | drd]\n";
+		exit(0);
+	}
+
+	my $dir = "../TestSuite/inputs";
+	if ($flavor eq "production") {
+		$flavor = "Config.make";
+	} elsif ($flavor eq "debug") {
+		$flavor = "ConfigDebug.make";
+	} elsif ($flavor eq "callgrind") {
+		$flavor = "ConfigCallgrind.make";
+	} elsif ($flavor eq "helgrind" or $flavor eq "drd") {
+		$flavor = "ConfigHelgrind.make";
+	} else {
+		return $flavor;
+	}
+
+	return "$dir/$flavor";
 }
 

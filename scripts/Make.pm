@@ -278,6 +278,11 @@ sub createConfigMake
 	my $cmd = "cp ../TestSuite/inputs/ConfigBase.make Config.make.new";
 	system($cmd);
 	print STDERR "$0: Executed $cmd\n";
+	if (!(-r "$flavor")) {
+		print STDERR "$0: WARNING: I didn't find $flavor, ignoring...\n";
+		return;
+	}
+
 	open(FILE, $flavor) or return;
 	if (!open(FOUT, ">> Config.make.new")) {
 		close(FILE);

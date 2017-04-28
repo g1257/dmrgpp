@@ -3,32 +3,14 @@
 CXX = g++
 
 # We're using ansi C++
-CXX += -pedantic -std=c++98
-
-CXX += -Wall -Werror
+CPPFLAGS += -pedantic -std=c++98
 
 # Enable MPI (you must set the proper
 # compiler wrapper under CXX above)
 # CPPFLAGS += -DUSE_MPI
 
-# Here you have the option to say NO_LAPACK
-# CPPFLAGS += -DNO_LAPACK
-
-# Here add -lpthread if threading is needed and also
-# set -DUSE_PTHREADS below
-LDFLAGS += -lpthread
-
-# Enable pthreads
-CPPFLAGS += -DUSE_PTHREADS
-
-# This disables debugging
-CPPFLAGS += -DNDEBUG
-
-# Optimization level here
-CPPFLAGS += -O3
-
-# This enables partial debugging
-#CPPFLAGS += -Wextra -g3
+# Enable warnings and treat warnings as errors
+CPPFLAGS += -Wall -Werror -Wendif-labels
 
 # This enables additional debugging
 #CPPFLAGS += -D_GLIBCXX_DEBUG -D_GLIBCXX_PROFILE
@@ -48,4 +30,7 @@ CPPFLAGS += -O3
 
 # This enables the custom allocator (use only for debugging)
 #CPPFLAGS += -DUSE_CUSTOM_ALLOCATOR
+
+# Specify the strip command to use (or use true to disable)
+STRIP_COMMAND = true
 
