@@ -36,12 +36,15 @@ my %su2RelatedDriver = (name => 'Su2Related', aux => 1);
 my %toolboxDriver = (name => 'toolboxdmrg',
                      dotos => 'toolboxdmrg.o ProgramGlobals.o Provenance.o Utils.o');
 my $dotos = "observe.o ProgramGlobals.o Provenance.o Utils.o Su2Related.o";
+$dotos .= " ObserveDriver0.o";
 my %observeDriver = (name => 'observe', dotos => $dotos);
 my %kronDriver = (name => 'kronecker', dotos => 'kronecker.o ProgramGlobals.o Provenance.o');
 
+my %observeDriver0 = (name => 'ObserveDriver0', aux => 1);
+
 my @drivers = (\%provenanceDriver,\%su2RelatedDriver,
 \%progGlobalsDriver,\%restartDriver,\%finiteLoopDriver,\%utilsDriver,
-\%observeDriver,\%toolboxDriver,\%kronDriver);
+\%observeDriver,\%toolboxDriver,\%kronDriver,\%observeDriver0);
 
 $dotos = "dmrg.o Provenance.o RestartStruct.o FiniteLoop.o Utils.o ";
 $dotos .= " ProgramGlobals.o Su2Related.o";
