@@ -271,7 +271,7 @@ void den_csr_kron_mult_method(const int imethod,
              int iendb = b.getRowPtr(ib + 1);
 
              int kb = 0;
-             for(kb=istartb; kb < iendb; kb++) {
+             for(kb=istartb; kb < iendb; ++kb) {
                  int jb = b.getCol(kb);
                  double bij = b.getValue(kb);
                  double cij = aij * bij;

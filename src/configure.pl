@@ -64,7 +64,6 @@ createMakefile($flavor);
 sub createMakefile
 {
 	my ($flavor) = @_;
-	unlink("Engine/Version.h");
 	Make::backupMakefile();
 	Make::createConfigMake($flavor);
 
@@ -96,7 +95,11 @@ EOF
 sub procFlavor
 {
 	my ($flavor) = @_;
-	defined($flavor) or $flavor = "production";
+	if (!defined($flavor)) {
+		$flavor = "production";
+		print STDERR "$0: No flavor given, assuming production\n";
+		print STDERR "\t say $0 help for a list of options\n";
+	}
 
 	my $hasPath = ($flavor =~ /^\.\./ or $flavor =~ /^\//);
 	return $flavor if ($hasPath);
