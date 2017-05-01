@@ -9,6 +9,13 @@ int den_nnz(const PsimagLite::Matrix<double>& a_)
  * matrix A in dense storage format
  * -------------------------
  */
+  const bool use_estimate = true;
+  if (use_estimate) {
+     return( nrow_A * ncol_A );
+     };
+
+  
+
   const double dzero = 0;
   int nnz_A = 0;
 

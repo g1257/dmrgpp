@@ -20,6 +20,18 @@ void estimate_kron_cost( const int nrow_A,
   
   double nnz_A = (double) nnz_A_in;
   double nnz_B = (double) nnz_B_in;
+  bool is_dense_A = (nnz_A_in == nrow_A * ncol_A);
+  bool is_dense_B = (nnz_B_in == nrow_B * ncol_B);
+
+
+  /*
+   * ------------------------------------
+   * assume dense matrix operations are
+   * faster than sparse matrix operations
+   * ------------------------------------
+   */
+  const double dense_flop_discount = 0.2;
+  double discount = 1;
   
   /*
   % ------------------------
@@ -32,8 +44,12 @@ void estimate_kron_cost( const int nrow_A,
   % X(ib,ia) = BY(ib,ja)*At(ja,ia)
   % ------------------------
   */
-  double flops_BY = 2.0*nnz_B*ncol_A;
-  double flops_BYAt = 2.0*nnz_A*nrow_B;
+  discount = (is_dense_B) ? dense_flop_discount : 1;
+  double flops_BY =  discount * 2.0*nnz_B*ncol_A;
+
+  discount = (is_dense_A) ? dense_flop_discount : 1;
+  double flops_BYAt = discount * 2.0*nnz_A*nrow_B;
+
   double flops_method1 = flops_BY + flops_BYAt;
   double nnz_method1 = nrow_B * ncol_A;
 
@@ -49,8 +65,12 @@ void estimate_kron_cost( const int nrow_A,
   % X(ib,ia) = B(ib,jb)*YAt(jb,ia)
   % ------------------------
   */
-  double flops_YAt = 2.0*nnz_A*ncol_B;
-  flops_BYAt = 2.0*nnz_B*nrow_A;
+  discount = (is_dense_A) ? dense_flop_discount : 1;
+  double flops_YAt = discount * 2.0*nnz_A*ncol_B;
+
+  discount = (is_dense_B) ? dense_flop_discount : 1;
+  flops_BYAt = discount * 2.0*nnz_B*nrow_A;
+
   double flops_method2 = flops_YAt + flops_BYAt;
   double nnz_method2 = ncol_B * nrow_A;
 

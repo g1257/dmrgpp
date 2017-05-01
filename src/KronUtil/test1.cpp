@@ -3,8 +3,10 @@
 
 int main()
 {
+  const int idebug = 0;
   int nerrors = 0;
-  double threshold = 0;
+  double thresholdA = 0;
+  double thresholdB = 0;
   int nrow_A = 0;
   int ncol_A = 0;
   int nrow_B = 0;
@@ -12,7 +14,8 @@ int main()
   int itransA = 0;
   int itransB = 0;
 
-  for(threshold=0.01; threshold <= 1.1; threshold += 0.1) {
+  for(thresholdB=0; thresholdB <= 1.1; thresholdB += 0.1) {
+  for(thresholdA=0; thresholdA <= 1.1; thresholdA += 0.1) {
   for(ncol_A=1; ncol_A <= 10; ncol_A += 3 ) {
   for(nrow_A=1; nrow_A <= 10; nrow_A += 3 ) {
   for(ncol_B=1; ncol_B <= 10; ncol_B += 3 ) {
@@ -60,8 +63,67 @@ int main()
      PsimagLite::Matrix<double> sx3_(nrow_X, ncol_X);
 	 PsimagLite::MatrixNonOwned<double> sx3Ref(sx3_);
 
-     den_gen_matrix( nrow_A, ncol_A,  threshold, a_);
-     den_gen_matrix( nrow_B, ncol_B,  threshold, b_);
+     if (thresholdA == 0) {
+      if (nrow_A == ncol_A) {
+          /*
+           * ------------------------------------
+           * special case to test identity matrix
+           * ------------------------------------
+           */
+          if (idebug >= 1) {
+            printf("nrow_A=%d, identity \n",nrow_A);
+            };
+          den_eye( nrow_A, ncol_A, a_ );
+          assert( den_is_eye(a_) );
+   
+          PsimagLite::CrsMatrix<double> a(a_);
+          assert( csr_is_eye(a) );
+          }
+       else {
+        if (idebug >= 1) {
+           printf("nrow_A=%d,ncol_A=%d, zeros\n",nrow_A,ncol_A);
+           };
+
+           den_zeros(nrow_A,ncol_A,a_);
+           assert( den_is_zeros(a_) );
+           
+           PsimagLite::CrsMatrix<double> a(a_);
+           assert( csr_is_zeros(a) );
+          };
+      }
+     else {
+       den_gen_matrix( nrow_A, ncol_A,  thresholdA, a_);
+
+       PsimagLite::CrsMatrix<double> a(a_);
+       assert( den_is_eye(a_) == csr_is_eye(a) );
+       assert( den_is_zeros(a_) == csr_is_zeros(a) );
+
+       };
+
+
+     if ((thresholdB == 0) && (nrow_B == ncol_B)) {
+       /*
+        * ------------------------------------
+        * special case to test identity matrix
+        * ------------------------------------
+        */
+       if (idebug >= 1) {
+          printf("nrow_B=%d, identity \n",nrow_B);
+          };
+       den_eye( nrow_B, ncol_B, b_ );
+       assert( den_is_eye(b_));
+
+       PsimagLite::CrsMatrix<double> b(b_);
+       assert( csr_is_eye(b) );
+       }
+     else {
+       den_gen_matrix( nrow_B, ncol_B,  thresholdB, b_);
+
+       PsimagLite::CrsMatrix<double> b(b_);
+       assert( den_is_eye(b_) == csr_is_eye(b) );
+       assert( den_is_zeros(b_) == csr_is_zeros(b) );
+       };
+
      den_gen_matrix( nrow_Y, ncol_Y,  1.0, y_);
 
      den_zeros( nrow_X, ncol_X, x1_);
@@ -133,8 +195,12 @@ int main()
      * ------------------
      */
      PsimagLite::CrsMatrix<double> a(a_);
+     assert( den_is_eye(a_) == csr_is_eye(a) );
+     assert( den_is_zeros(a_) == csr_is_zeros(a) );
 
      PsimagLite::CrsMatrix<double> b(b_);
+     assert( den_is_eye(b_) == csr_is_eye(b) );
+     assert( den_is_zeros(b_) == csr_is_zeros(b) );
 
      imethod =1;
      csr_kron_mult_method( 
@@ -242,6 +308,42 @@ int main()
      * test mixed matrix types dense and CSR
      * -----------------------
      */
+
+     den_zeros( nrow_X, ncol_X, sx1_ );
+     den_csr_kron_mult( 
+                     
+                     transA, transB,
+
+                      a_,
+
+                    b,
+
+	             yRef.getVector(),
+                 0,
+                 sx1Ref.getVector(),
+                 0);
+
+
+
+     for(jx=0; jx < ncol_X; jx++) {
+     for(ix=0; ix < nrow_X; ix++) {
+        double diff1 = ABS( x1_(ix,jx) - sx1_(ix,jx));
+        double diff2 = 0;
+        double diff3 = 0;
+        double diffmax = MAX( diff1, MAX( diff2, diff3) );
+        const double tol = 1.0/(1000.0*1000.0*1000.0);
+        int isok = (diffmax <= tol );
+        if (!isok) {
+           nerrors += 1;
+           printf("den_csr: itransA %d itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
+                   itransA, itransB,    nrow_A,ncol_A,   nrow_B, ncol_B );
+           printf("ix %d, jx %d, diff1 %f, diff2 %f, diff3 %f \n",
+                   ix,jx,  diff1, diff2, diff3 );
+           };
+        };
+        };
+
+
      den_zeros( nrow_X, ncol_X, sx1_ );
      den_zeros( nrow_X, ncol_X, sx2_ );
      den_zeros( nrow_X, ncol_X, sx3_ );
@@ -319,6 +421,42 @@ int main()
      * -----------------------
      */
      den_zeros( nrow_X, ncol_X, sx1_ );
+
+     csr_den_kron_mult( 
+                     transA, transB,
+
+                     a,
+           
+
+                     b_,
+
+	             yRef.getVector(),
+                 0,
+                 sx1Ref.getVector(),
+                 0);
+
+
+     for(jx=0; jx < ncol_X; jx++) {
+     for(ix=0; ix < nrow_X; ix++) {
+        double diff1 = ABS( x1_(ix,jx) - sx1_(ix,jx));
+        double diff2 = 0;
+        double diff3 = 0;
+        double diffmax = MAX( diff1, MAX( diff2, diff3) );
+        const double tol = 1.0/(1000.0*1000.0*1000.0);
+        int isok = (diffmax <= tol );
+        if (!isok) {
+           nerrors += 1;
+           printf("den_csr: itransA %d itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
+                   itransA, itransB,    nrow_A,ncol_A,   nrow_B, ncol_B );
+           printf("ix %d, jx %d, diff1 %f, diff2 %f, diff3 %f \n",
+                   ix,jx,  diff1, diff2, diff3 );
+           };
+        };
+        };
+
+
+
+     den_zeros( nrow_X, ncol_X, sx1_ );
      den_zeros( nrow_X, ncol_X, sx2_ );
      den_zeros( nrow_X, ncol_X, sx3_ );
 
@@ -393,6 +531,7 @@ int main()
    };
    };
    };  
+   };
    };
 
  if (nerrors == 0) {

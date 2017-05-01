@@ -64,6 +64,12 @@ extern
 int csr_nnz(const PsimagLite::CrsMatrix<double>&);
 
 extern
+bool csr_is_eye(const PsimagLite::CrsMatrix<double>&);
+
+extern
+bool csr_is_zeros(const PsimagLite::CrsMatrix<double>&);
+
+extern
 void csr_transpose( 
                    const int nrow_A, 
                    const int ncol_A, 
@@ -117,13 +123,19 @@ void csr_matmul_pre( const char trans_A,
 extern
 void csr_submatrix(const PsimagLite::CrsMatrix<double>& a,
                    const int nrow_B,
-				           const int ncol_B,
-                    const int max_nnz,
+		   const int ncol_B,
+                   const int max_nnz,
 
                     const PsimagLite::Vector<int>::Type& rindex,
                     const PsimagLite::Vector<int>::Type& cindex,
                     PsimagLite::CrsMatrix<double>& b);
 
+
+extern
+void csr_eye(
+                   const int nrow_B,
+		   const int ncol_B,
+                   PsimagLite::CrsMatrix<double>& b);
 
 extern
 void csr_kron_submatrix(const PsimagLite::CrsMatrix<double>& a,
@@ -325,6 +337,12 @@ void den_kron_mult_method(const int imethod,
 extern
 int den_nnz(const PsimagLite::Matrix<double>&);
 
+extern
+bool den_is_eye(const PsimagLite::Matrix<double>&);
+
+extern
+bool den_is_zeros(const PsimagLite::Matrix<double>&);
+
 
 extern
 void den_kron_form( const int nrow_A,
@@ -350,6 +368,11 @@ void den_submatrix( const int nrow_A,
 
                     PsimagLite::Matrix<double>& c_);
 
+extern
+void den_eye(       const int nrow_A, 
+                    const int ncol_A, 
+
+                    PsimagLite::Matrix<double>& c_);
 
 #ifdef __cplusplus
 }

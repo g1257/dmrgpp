@@ -33,10 +33,9 @@ void csr_kron_mult_method(const int imethod,
                 (imethod == 2) ||
                 (imethod == 3));
 
-     int nnz_A = csr_nnz(a);
-     int nnz_B = csr_nnz(b);
-     int has_work = (nnz_A >= 1) && (nnz_B >= 1);
-     if (!has_work) {
+
+     bool no_work = (csr_is_zeros(a) || csr_is_zeros(b));
+     if (no_work) {
          return;
          };
 /*
@@ -362,8 +361,9 @@ void csr_kron_mult(const char transA,
 
  int nnz_A = csr_nnz(a);
  int nnz_B = csr_nnz(b);
- int has_work = (nnz_A >= 1) && (nnz_B >= 1);
- if (!has_work) {
+
+ bool no_work = (csr_is_zeros(a) || csr_is_zeros(b));
+ if (no_work) {
      return;
      };
 
@@ -378,10 +378,14 @@ void csr_kron_mult(const char transA,
 	 const int ncol_A = a.col();
 	 const int nrow_B = b.row();
 	 const int ncol_B = b.col();
+
      const int nrow_1 = (isTransA) ? ncol_A : nrow_A;
+     const int ncol_1 = (isTransA) ? nrow_A : ncol_A;
+
+     const int nrow_2 = (isTransB) ? ncol_B : nrow_B;
      const int ncol_2 = (isTransB) ? nrow_B : ncol_B;
 
- estimate_kron_cost( nrow_1,ncol_2,nnz_A, nrow_1,ncol_2,nnz_B,
+ estimate_kron_cost( nrow_1,ncol_1,nnz_A, nrow_2,ncol_2,nnz_B,
                      &kron_nnz, &kron_flops, &imethod );
 
 

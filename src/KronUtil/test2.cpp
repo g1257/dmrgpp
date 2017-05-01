@@ -5,13 +5,15 @@ int main()
 {
 
   int nerrors = 0;
-  double threshold = 0;
+  double thresholdA = 0;
+  double thresholdB = 0;
   int nrow_A = 0;
   int ncol_A = 0;
   int nrow_B = 0;
   int ncol_B = 0;
 
-  for(threshold=0.01; threshold <= 1.1; threshold += 0.1) {
+  for(thresholdB=0; thresholdB <= 1.1; thresholdB += 0.1) {
+  for(thresholdA=0; thresholdA <= 1.1; thresholdA += 0.1) {
   for(ncol_A=1; ncol_A <= 10; ncol_A += 3 ) {
   for(nrow_A=1; nrow_A <= 10; nrow_A += 3 ) {
   for(ncol_B=1; ncol_B <= 10; ncol_B += 3 ) {
@@ -20,9 +22,43 @@ int main()
      PsimagLite::Matrix<double> a_(nrow_A, ncol_A);
      PsimagLite::Matrix<double> b_(nrow_B, ncol_B);
 
-     den_gen_matrix( nrow_A, ncol_A,  threshold, a_ );
-     den_gen_matrix( nrow_B, ncol_B,  threshold, b_ );
 
+     if ((thresholdA == 0) && (nrow_A == ncol_A)) {
+       /*
+        * ------------------------------------
+        * special case to test identity matrix
+        * ------------------------------------
+        */
+       den_eye( nrow_A, ncol_A, a_ );
+       assert( den_is_eye(a_) );
+
+       PsimagLite::CrsMatrix<double> a(a_);
+       assert( csr_is_eye(a) );
+       }
+     else {
+       den_gen_matrix( nrow_A, ncol_A,  thresholdA, a_);
+
+       PsimagLite::CrsMatrix<double> a(a_);
+       assert( den_is_eye(a_) == csr_is_eye(a) );
+       assert( den_is_zeros(a_) == csr_is_zeros(a) );
+
+       };
+
+
+     if ((thresholdB == 0) && (nrow_B == ncol_B)) {
+       den_eye( nrow_B, ncol_B, b_ );
+       assert( den_is_eye(b_));
+
+       PsimagLite::CrsMatrix<double> b(b_);
+       assert( csr_is_eye(b) );
+       }
+     else {
+       den_gen_matrix( nrow_B, ncol_B,  thresholdB, b_);
+
+       PsimagLite::CrsMatrix<double> b(b_);
+       assert( den_is_eye(b_) == csr_is_eye(b) );
+       assert( den_is_zeros(b_) == csr_is_zeros(b) );
+       };
     /*
      * -----------------------------------
      * generate compressed row format from
@@ -30,8 +66,10 @@ int main()
      * -----------------------------------
      */
      PsimagLite::CrsMatrix<double> a(a_);
+     assert( den_is_eye(a_) == csr_is_eye(a) );
 
-	 PsimagLite::CrsMatrix<double> b(b_);
+     PsimagLite::CrsMatrix<double> b(b_);
+     assert( den_is_eye(b_) == csr_is_eye(b) );
 
     /*
      * -----------------------------
@@ -245,6 +283,7 @@ int main()
 
     };
 
+   };
    };
    };
    };

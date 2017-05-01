@@ -13,12 +13,15 @@ SRC=    kronUtilComplex.cpp \
 	csc_matmul_pre.cpp  \
 	csr_den_kron_mult.cpp \
 	csr_nnz.cpp \
+	csr_is_eye.cpp \
+	csr_is_zeros.cpp \
 	csr_transpose.cpp \
 	csr_kron_mult.cpp  \
 	csr_kron_submatrix.cpp  \
 	csr_matmul_post.cpp  \
 	csr_matmul_pre.cpp  \
 	csr_submatrix.cpp  \
+	csr_eye.cpp  \
 	den_csr_kron_mult.cpp \
 	den_copymat.cpp \
 	den_zeros.cpp \
@@ -31,6 +34,9 @@ SRC=    kronUtilComplex.cpp \
 	den_matmul_post.cpp  \
 	den_matmul_pre.cpp  \
 	den_nnz.cpp  \
+	den_eye.cpp  \
+	den_is_eye.cpp  \
+	den_is_zeros.cpp  \
 	estimate_kron_cost.cpp
 
 OBJ= \
@@ -42,12 +48,15 @@ OBJ= \
 	csc_matmul_pre.o  \
 	csr_den_kron_mult.o \
 	csr_nnz.o \
+	csr_is_eye.o \
+	csr_is_zeros.o \
 	csr_transpose.o \
 	csr_kron_mult.o  \
 	csr_kron_submatrix.o  \
 	csr_matmul_post.o  \
 	csr_matmul_pre.o  \
 	csr_submatrix.o  \
+	csr_eye.o  \
 	den_csr_kron_mult.o \
 	den_copymat.o \
 	den_zeros.o \
@@ -60,6 +69,9 @@ OBJ= \
 	den_matmul_post.o  \
 	den_matmul_pre.o  \
 	den_nnz.o  \
+	den_eye.o \
+	den_is_eye.o  \
+	den_is_zeros.o  \
 	estimate_kron_cost.o
 
 libkronutil.a: $(OBJ) ../Config.make

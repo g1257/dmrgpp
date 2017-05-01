@@ -38,10 +38,8 @@ void den_csr_kron_mult_method(const int imethod,
                 (imethod == 2) ||
                 (imethod == 3));
 
-     int nnz_A = den_nnz(a_);
-     int nnz_B = csr_nnz(b);
-     int has_work = (nnz_A >= 1) && (nnz_B >= 1);
-     if (!has_work) {
+     bool no_work = (den_is_zeros(a_) || csr_is_zeros(b));
+     if (no_work) {
          return;
          };
 /*
@@ -258,7 +256,14 @@ void den_csr_kron_mult_method(const int imethod,
     * X([ib,ia]) += C([ib,ia],[jb,ja]) * Y([jb,ja])
     * ---------------------------------------------
     */
-   
+   const bool use_inner_sparse = false;
+
+ if (use_inner_sparse) {   
+   /*
+    * -----------------------------
+    * sparse matrix B in inner loop
+    * -----------------------------
+    */
    int ia = 0;
    int ja = 0;
    for(ia=0; ia < nrow_A; ia++) {
@@ -271,7 +276,7 @@ void den_csr_kron_mult_method(const int imethod,
              int iendb = b.getRowPtr(ib + 1);
 
              int kb = 0;
-             for(kb=istartb; kb < iendb; ++kb) {
+             for(kb=istartb; kb < iendb; kb++) {
                  int jb = b.getCol(kb);
                  double bij = b.getValue(kb);
                  double cij = aij * bij;
@@ -287,6 +292,45 @@ void den_csr_kron_mult_method(const int imethod,
          };
       };
                  
+   }
+  else {
+   /*
+    * -----------------------------
+    * sparse matrix B in outer loop
+    * -----------------------------
+    */
+
+    int ib = 0;
+    for(ib=0; ib < nrow_B; ib++) {
+      int istartb = b.getRowPtr(ib);
+      int iendb = b.getRowPtr(ib + 1);
+   
+      int kb = 0;
+      for(kb=istartb; kb < iendb; kb++) {
+          int jb = b.getCol(kb);
+          double bij = b.getValue(kb);
+   
+          int ia = 0;
+          int ja = 0;
+   
+          for(ia=0; ia < nrow_A; ia++) {
+          for(ja=0; ja < ncol_A; ja++) {
+   
+                    double aij = a_(ia,ja);
+                    double cij = aij * bij;
+   
+                    int ix = (isTransB) ? jb : ib;
+                    int jx = (isTransA) ? ja : ia;
+                    int iy = (isTransB) ? ib : jb;
+                    int jy = (isTransA) ? ia : ja;
+   
+                    xout(ix,jx) +=  (cij * yin(iy,jy));
+                    };
+                };
+            };
+         };
+
+   };
  };
    
 }
@@ -301,12 +345,13 @@ void den_csr_kron_mult(
 
                     const PsimagLite::CrsMatrix<double>& b,
 
-        const PsimagLite::Vector<double>::Type& yin,
+        const PsimagLite::Vector<double>::Type& yin_,
         SizeType offsetY,
-        PsimagLite::Vector<double>::Type& xout,
+        PsimagLite::Vector<double>::Type& xout_,
         SizeType offsetX)
 
 {
+   const int idebug = 0;
 /*
  *   -------------------------------------------------------------
  *   A in dense matrix format
@@ -345,23 +390,71 @@ void den_csr_kron_mult(
 
  int nnz_A = den_nnz(a_);
  int nnz_B = csr_nnz(b);
- int has_work = (nnz_A >= 1) && (nnz_B >= 1);
- if (!has_work) {
+ int no_work = (den_is_zeros(a_) || csr_is_zeros(b));
+ if (no_work) {
+   if (idebug >= 1) {
+     printf("den_csr:no_work,nrow_A=%d,nrow_B=%d,nrow_B=%d,ncol_B=%d\n",
+                       nrow_A,ncol_A,   nrow_B,ncol_B );
+     };
+      
      return;
      };
+
+  const int isTransA = (transA == 'T') || (transA == 't');
+  const int isTransB = (transB == 'T') || (transB == 't');
+
+ /*
+  * --------------------------
+  * check for special case
+  * that B is identity matrix
+  * --------------------------
+  */
+ if (csr_is_eye(b)) {
+   if (idebug >= 1) {
+     printf("den_csr: B is eye: nrow_A=%d,ncol_A=%d,nrow_B=%d,ncol_B=%d\n",
+                  nrow_A,ncol_A, nrow_B, ncol_B );
+                 
+     };
+
+   /*
+    ----------------------
+    X +=  ( op(B) ) Y * transpose( op(A) )
+    ----------------------
+    */
+   const int nrow_Y = (isTransB) ? nrow_B : ncol_B;
+   const int ncol_Y = (isTransA) ? nrow_A : ncol_A;
+ 
+   const int nrow_X = (isTransB) ? ncol_B : nrow_B;
+   const int ncol_X = (isTransA) ? ncol_A : nrow_A;
+
+   PsimagLite::MatrixNonOwned<const double> yin(nrow_Y, ncol_Y, yin_, offsetY);
+   PsimagLite::MatrixNonOwned<double> xout(nrow_X, ncol_X, xout_, offsetX);
+
+
+ 
+   const char  trans1 =  (isTransA) ? 'N' : 'T';
+   den_matmul_post(  trans1, 
+                     nrow_A, ncol_A, a_,
+                     nrow_Y, ncol_Y, yin,
+                     nrow_X, ncol_X, xout );
+
+
+   return;
+   };
 
  double kron_nnz = 0;
  double kron_flops = 0;
  int imethod = 1;
 
-     const int isTransA = (transA == 'T') || (transA == 't');
-     const int isTransB = (transB == 'T') || (transB == 't');
     
      const int nrow_1 = (isTransA) ? ncol_A : nrow_A;
+     const int ncol_1 = (isTransA) ? nrow_A : ncol_A;
+
+     const int nrow_2 = (isTransB) ? ncol_B : nrow_B;
      const int ncol_2 = (isTransB) ? nrow_B : ncol_B;
 
 
- estimate_kron_cost( nrow_1,ncol_2,nnz_A, nrow_1,ncol_2,nnz_B,
+ estimate_kron_cost( nrow_1,ncol_1,nnz_A, nrow_2,ncol_2,nnz_B,
                      &kron_nnz, &kron_flops, &imethod );
 
 
@@ -374,9 +467,9 @@ void den_csr_kron_mult(
 
                     b,
 
-                    yin, 
+                    yin_, 
              offsetY,
-                    xout,
+                    xout_,
              offsetX);
 }
 

@@ -38,10 +38,8 @@ void csr_den_kron_mult_method(const int imethod,
                 (imethod == 2) ||
                 (imethod == 3));
 
-     int nnz_A = csr_nnz(a_);
-     int nnz_B = den_nnz(b_);
-     int has_work = (nnz_A >= 1) && (nnz_B >= 1);
-     if (!has_work) {
+     bool no_work = (csr_is_zeros(a_) || den_is_zeros(b_));
+     if (no_work) {
          return;
          };
 /*
@@ -259,34 +257,69 @@ void csr_den_kron_mult_method(const int imethod,
     * X([ib,ia]) += C([ib,ia],[jb,ja]) * Y([jb,ja])
     * ---------------------------------------------
     */
+   const bool use_inner_sparse = false;
+
+   if (use_inner_sparse) {
+
+        int ib = 0;
+        int jb = 0;
    
-   int ia = 0;
-   for(ia=0; ia < nrow_A; ia++) {
-      int istarta = a_.getRowPtr(ia);
-      int ienda = a_.getRowPtr(ia+1);
-      int ka = 0;
-      for(ka=istarta; ka < ienda; ka++) {
-         int ja = a_.getCol(ka);
-         double aij = a_.getValue(ka);
-
-         int ib = 0;
-         int jb = 0;
-
-         for(ib=0; ib < nrow_B; ib++) {
-         for(jb=0; jb < ncol_B; jb++) {
-                 double bij = b_(ib,jb);
-                 double cij = aij * bij;
-
-                 int ix = (isTransB) ? jb : ib;
-                 int jx = (isTransA) ? ja : ia;
-                 int iy = (isTransB) ? ib : jb;
-                 int jy = (isTransA) ? ia : ja;
-
-                 xout(ix,jx) +=  (cij * yin(iy,jy));
-                 };
-             };
+        for(ib=0; ib < nrow_B; ib++) {
+        for(jb=0; jb < ncol_B; jb++) {
+         double bij = b_(ib,jb);
+   
+         int ia = 0;
+         for(ia=0; ia < nrow_A; ia++) {
+            int istarta = a_.getRowPtr(ia);
+            int ienda = a_.getRowPtr(ia+1);
+   
+                  int ka = 0;
+                  for(ka=istarta; ka < ienda; ka++) {
+                       int ja = a_.getCol(ka);
+                       double aij = a_.getValue(ka);
+                       double cij = aij * bij;
+      
+                       int ix = (isTransB) ? jb : ib;
+                       int jx = (isTransA) ? ja : ia;
+                       int iy = (isTransB) ? ib : jb;
+                       int jy = (isTransA) ? ia : ja;
+      
+                       xout(ix,jx) +=  (cij * yin(iy,jy));
+                       };
+                   };
+               };
+            };
+     }
+   else {
+   
+      int ia = 0;
+      for(ia=0; ia < nrow_A; ia++) {
+         int istarta = a_.getRowPtr(ia);
+         int ienda = a_.getRowPtr(ia+1);
+         int ka = 0;
+         for(ka=istarta; ka < ienda; ka++) {
+            int ja = a_.getCol(ka);
+            double aij = a_.getValue(ka);
+   
+            int ib = 0;
+            int jb = 0;
+   
+            for(ib=0; ib < nrow_B; ib++) {
+            for(jb=0; jb < ncol_B; jb++) {
+                    double bij = b_(ib,jb);
+                    double cij = aij * bij;
+   
+                    int ix = (isTransB) ? jb : ib;
+                    int jx = (isTransA) ? ja : ia;
+                    int iy = (isTransB) ? ib : jb;
+                    int jy = (isTransA) ? ia : ja;
+   
+                    xout(ix,jx) +=  (cij * yin(iy,jy));
+                    };
+                };
+            };
          };
-      };
+   };
                  
  };
    
@@ -299,12 +332,13 @@ void csr_den_kron_mult(const char transA,
                     const char transB,
                     const PsimagLite::CrsMatrix<double>& a_,
                     const PsimagLite::Matrix<double>& b_,
-                       const PsimagLite::Vector<double>::Type& yin,
+                       const PsimagLite::Vector<double>::Type& yin_,
 	                   SizeType offsetY,
-	                   PsimagLite::Vector<double>::Type& xout,
+	                   PsimagLite::Vector<double>::Type& xout_,
 	                   SizeType offsetX)
 
 {
+  const int idebug = 0;
 /*
  *   -------------------------------------------------------------
  *   A in compressed sparse ROW format
@@ -342,8 +376,14 @@ void csr_den_kron_mult(const char transA,
 	const int ncol_B = b_.n_col();
  int nnz_A = csr_nnz(a_);
  int nnz_B = den_nnz(b_);
- int has_work = (nnz_A >= 1) && (nnz_B >= 1);
- if (!has_work) {
+
+ bool no_work = (csr_is_zeros(a_) || den_is_zeros(b_));
+ if (no_work) {
+   if (idebug >= 1) {
+     printf("csr_den: no_work, nrow_A=%d,ncol_A=%d,nrow_B=%d,ncol_B=%d\n",
+                      nrow_A,ncol_A,   nrow_B,ncol_B );
+     };
+
      return;
      };
 
@@ -353,12 +393,57 @@ void csr_den_kron_mult(const char transA,
 
      const int isTransA = (transA == 'T') || (transA == 't');
      const int isTransB = (transB == 'T') || (transB == 't');
+
+
+
+ /*
+  * -------------------------------------
+  * check for special case where A is eye
+  * -------------------------------------
+  */
+
+ if (csr_is_eye(a_)) {
+   if (idebug >= 1) {
+     printf("csr_den: A is eye: nrow_A=%d,ncol_A=%d,nrow_B=%d,ncol_B=%d\n",
+                  nrow_A,ncol_A, nrow_B, ncol_B );
+                 
+     };
+
+   /*
+    ----------------------
+    X +=  ( op(B) ) Y * transpose( op(A) )
+    ----------------------
+    */
+   const int nrow_Y = (isTransB) ? nrow_B : ncol_B;
+   const int ncol_Y = (isTransA) ? nrow_A : ncol_A;
+ 
+   const int nrow_X = (isTransB) ? ncol_B : nrow_B;
+   const int ncol_X = (isTransA) ? ncol_A : nrow_A;
+
+   PsimagLite::MatrixNonOwned<const double> yin(nrow_Y, ncol_Y, yin_, offsetY);
+   PsimagLite::MatrixNonOwned<double> xout(nrow_X, ncol_X, xout_, offsetX);
+
+
+ 
+   const char  trans1 =  (isTransB) ? 'T' : 'N';
+   den_matmul_pre(  trans1, 
+                     nrow_B, ncol_B, b_,
+                     nrow_Y, ncol_Y, yin,
+                     nrow_X, ncol_X, xout );
+
+
+   return;
+   };
+
     
      const int nrow_1 = (isTransA) ? ncol_A : nrow_A;
+     const int ncol_1 = (isTransA) ? nrow_A : ncol_A;
+
+     const int nrow_2 = (isTransB) ? ncol_B : nrow_B;
      const int ncol_2 = (isTransB) ? nrow_B : ncol_B;
 
 
- estimate_kron_cost( nrow_1,ncol_2,nnz_A, nrow_1,ncol_2,nnz_B,
+ estimate_kron_cost( nrow_1,ncol_1,nnz_A, nrow_2,ncol_2,nnz_B,
                      &kron_nnz, &kron_flops, &imethod );
 
 
@@ -371,9 +456,9 @@ void csr_den_kron_mult(const char transA,
 
                     b_,
 
-                    yin, 
+                    yin_, 
              offsetY,
-                    xout,
+                    xout_,
              offsetX);
 }
 
