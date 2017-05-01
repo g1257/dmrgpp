@@ -25,40 +25,41 @@ typedef Operators<Basis2Type> Operators2Type;
 typedef BasisWithOperators<Operators2Type> BasisWithOperators2Type;
 typedef LeftRightSuper<BasisWithOperators2Type,Basis2Type> LeftRightSuper2Type;
 
-typedef ModelHelperLocal<LeftRightSuper1Type> ModelHelper1Type;
-typedef ModelHelperLocal<LeftRightSuper2Type> ModelHelper2Type;
+typedef ModelHelperSu2<LeftRightSuper1Type> ModelHelper3Type;
+typedef ModelHelperSu2<LeftRightSuper2Type> ModelHelper4Type;
 
-typedef ModelBase<ModelHelper1Type,
+
+typedef ModelBase<ModelHelper3Type,
 ParametersDmrgSolverType,
 InputNgType::Readable,
-Geometry1Type> ModelBase1Type;
+Geometry1Type> ModelBase3Type;
 
-typedef ModelBase<ModelHelper2Type,
+typedef ModelBase<ModelHelper4Type,
 ParametersDmrgSolverType,
 InputNgType::Readable,
-Geometry2Type> ModelBase2Type;
+Geometry2Type> ModelBase4Type;
 
 
-template bool observeOneFullSweep<VectorWithOffset1Type,ModelBase1Type>(IoInputType& io,
-const ModelBase1Type& model,
+template bool observeOneFullSweep<VectorWithOffset1Type,ModelBase3Type>(IoInputType& io,
+const ModelBase3Type& model,
 const PsimagLite::String& list,
 bool hasTimeEvolution,
 SizeType orbitals);
 
-template bool observeOneFullSweep<VectorWithOffset2Type,ModelBase2Type>(IoInputType& io,
-const ModelBase2Type& model,
+template bool observeOneFullSweep<VectorWithOffset2Type,ModelBase4Type>(IoInputType& io,
+const ModelBase4Type& model,
 const PsimagLite::String& list,
 bool hasTimeEvolution,
 SizeType orbitals);
 
-template bool observeOneFullSweep<VectorWithOffset3Type,ModelBase1Type>(IoInputType& io,
-const ModelBase1Type& model,
+template bool observeOneFullSweep<VectorWithOffset3Type,ModelBase3Type>(IoInputType& io,
+const ModelBase3Type& model,
 const PsimagLite::String& list,
 bool hasTimeEvolution,
 SizeType orbitals);
 
-template bool observeOneFullSweep<VectorWithOffset4Type,ModelBase2Type>(IoInputType& io,
-const ModelBase2Type& model,
+template bool observeOneFullSweep<VectorWithOffset4Type,ModelBase4Type>(IoInputType& io,
+const ModelBase4Type& model,
 const PsimagLite::String& list,
 bool hasTimeEvolution,
 SizeType orbitals);
