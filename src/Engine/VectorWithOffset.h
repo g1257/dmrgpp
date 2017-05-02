@@ -321,10 +321,7 @@ public:
 
 	int index2Sector(SizeType i) const
 	{
-		if (i < offset_ || i >= (offset_+data_.size()))
-			return -1;
-
-		return 0;
+		return ((i < offset_) || (i >= (offset_+data_.size()))) ? (-1) : (0);
 	}
 
 	template<typename FieldType2>
