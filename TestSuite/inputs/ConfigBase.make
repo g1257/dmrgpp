@@ -1,5 +1,5 @@
 # PsimagLite support is needed by DMRG++
-LDFLAGS = -L../../PsimagLite/lib -lpsimaglite
+LDFLAGS = -L../../PsimagLite/lib -L../../../PsimagLite/lib -lpsimaglite
 
 # Compiler to use. If using MPI then say mpicxx here (or mpic++)
 # and also say -DUSE_MPI below

@@ -27,6 +27,8 @@ my ($flavor) = @ARGV;
 
 $flavor = procFlavor($flavor);
 
+system("cd KronUtil; perl configure.pl");
+
 my %provenanceDriver = (name => 'Provenance', aux => 1);
 my %progGlobalsDriver = (name => 'ProgramGlobals', aux => 1);
 my %restartDriver = (name => 'RestartStruct', aux => 1);
