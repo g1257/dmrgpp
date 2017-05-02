@@ -109,7 +109,6 @@ public:
 	      weightsOfPatches_(initKron_.patch(GenIjPatchType::LEFT).size(), 1)
 	{
 		setUpVstart();
-		setWeightsOfPatches();
 		assert(vstart_.size() > 0);
 		SizeType nsize = vstart_[vstart_.size() - 1];
 		assert(nsize > 0);
@@ -268,18 +267,12 @@ private:
 			assert(1 <= sizeLeft);
 			assert(1 <= sizeRight);
 
+			weightsOfPatches_[ipatch] = sizeLeft * sizeRight * (sizeLeft + sizeRight);
+
 			ip += sizeLeft * sizeRight;
 		}
 
 		vstart_[npatches] = ip;
-	}
-
-	void setWeightsOfPatches()
-	{
-		SizeType npatches = initKron_.patch(GenIjPatchType::LEFT).size();
-		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
-			weightsOfPatches_[ipatch] = 1;
-		}
 	}
 
 	KronMatrix(const KronMatrix&);
