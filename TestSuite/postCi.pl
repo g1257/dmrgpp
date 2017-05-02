@@ -5,7 +5,7 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 
-my ($min,$max,$memory,$failed,$help);
+my ($min,$max,$memory,$failed,$noSu2,$help);
 my ($workdir,$golddir,$n);
 GetOptions(
 'm=i' => \$min,
@@ -13,6 +13,7 @@ GetOptions(
 'n=i' => \$n,
 'memory=i' => \$memory,
 'f' => \$failed,
+'nosu2' => \$noSu2,
 'h' => \$help,
 'g=s' => \$golddir,
 'w=s' => \$workdir);
@@ -35,6 +36,8 @@ if (defined($help)) {
 	print "\t\tIgnore files larger than mem\n";
 	print "\t-f\n";
 	print "\t\tPrint info only about failed tests\n";
+	print "\t-nosu2\n";
+	print "\t\tDo not postprocess SU(2) tests\n";
 	print "\t-h\n";
 	print "\t\tPrint this help and exit\n";
 	exit(0);
@@ -42,6 +45,7 @@ if (defined($help)) {
 
 defined($memory) or $memory = 50000000;
 defined($failed) or $failed = 0;
+defined($noSu2) or $noSu2 = 0;
 defined($workdir) or $workdir = "tests";
 defined($golddir) or $golddir = "oldTests";
 if (defined($n)) {
@@ -61,6 +65,10 @@ for (my $i = 0; $i < $total; ++$i) {
 	my $n = $tests[$i];
 	next if (defined($min) and $n < $min);
 	next if (defined($max) and $n > $max);
+
+	my $isSu2 = Ci::isSu2("inputs/input$n.inp",$n);
+	next if ($isSu2 and $noSu2);
+
 	procTest($n,$workdir,$golddir);
 	print "-----------------------------------------------\n";
 }
@@ -134,7 +142,7 @@ sub procData
 sub procMemcheck
 {
 	my ($n) = @_;
-	my $file1 = "tests/output$n.txt";
+	my $file1 = "$workdir/output$n.txt";
 	my $mode = "OK";
 	my $extra = "UNDEFINED";
 	my %lost;

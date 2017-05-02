@@ -27,5 +27,22 @@ sub getTests
 	close(FILE);
 }
 
+sub isSu2
+{
+	my ($file,$n) = @_; 
+	open(FILE, "$file") or return 0;
+	my $su2 = 0;
+	while (<FILE>) {
+		chomp;
+		if (/UseSu2Symmetry=1/) {
+			$su2 = 1;
+			last;
+		}
+	}
+
+	close(FILE);
+	return $su2;
+}
+
 1;
 

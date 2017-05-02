@@ -6,7 +6,7 @@ use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 
 my ($min,$max,$submit,$valgrind,$workdir,
-    $restart,$n,$postprocess,$help);
+    $restart,$n,$postprocess,$noSu2,$help);
 GetOptions(
 'm=f' => \$min,
 'M=f' => \$max,
@@ -16,6 +16,7 @@ GetOptions(
 'R' => \$restart,
 'P' => \$postprocess,
 'n=f' => \$n,
+'nosu2' => \$noSu2,
 'h' => \$help) or die "$0: Error in command line args, run with -h to display help\n";
 
 if (defined($help)) {
@@ -41,14 +42,15 @@ if (defined($help)) {
 	print "\t\tRun postprocess only\n";
 	print "\t--valgrind tool\n";
 	print "\t\tRun with valgrind using tool tool\n";
+	print "\t-nosu2\n";
+	print "\t\tDo not run SU(2) tests\n";
 	print "\t-h\n";
 	print "\t\tPrint this help and exit\n";
 	exit(0);
 }
 
-if (!defined($submit)) {
-	$submit = "";
-}
+defined($submit) or $submit = "";
+defined($noSu2) or $noSu2 = 0;
 
 defined($valgrind) or $valgrind = "";
 defined($workdir) or $workdir = "tests";
@@ -84,6 +86,9 @@ for (my $i = 0; $i < $total; ++$i) {
 	} else {
 		next if ($ir and !$exact);
 	}
+
+	my $isSu2 = Ci::isSu2("../inputs/input$n.inp",$n);
+	next if ($isSu2 and $noSu2);
 
 	my @what = getPostProcess("../inputs/input$n.inp",$n);
 	my $whatN = scalar(@what);
