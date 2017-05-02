@@ -27,20 +27,24 @@ sub newMake
 	local *FH = shift;
 	my ($drivers,
 	    $code,
-		$additional,
-		$additional2,
-		$additional3) = @_;
-	$additional3 = "" unless defined($additional3);
+            $additional,
+            $additional2,
+            $additional3,
+            $path) = @_;
+	
+        $additional3 = "" unless defined($additional3);
+        $path = "" unless defined($path);
+
 	my $allExecutables = combineAllDrivers($drivers,"");
 	my $allCpps = combineAllDrivers($drivers,".cpp");
 
 print FH<<EOF;
 # DO NOT EDIT!!! Changes will be lost. Modify Config.make instead
 # This Makefile was written by $0
-# $code by G.A.
+# $code
 
-include Config.make
-CPPFLAGS += -I../../PsimagLite -I../../PsimagLite/src -IEngine
+include ${path}Config.make
+CPPFLAGS += -I$path../../PsimagLite -I$path../../PsimagLite/src -I${path}Engine
 all: $allExecutables $additional3
 
 EOF
@@ -55,7 +59,7 @@ foreach my $ptr (@$drivers) {
 	$dotos = "$what.o" if (!defined($dotos));
 
 	print FH<<EOF;
-$what.o: $what.cpp  Makefile $additional Config.make
+$what.o: $what.cpp  Makefile $additional ${path}Config.make
 	\$(CXX) \$(CPPFLAGS) -c $what.cpp
 
 EOF
@@ -81,8 +85,8 @@ EOF
 
 print FH<<EOF;
 
-../../PsimagLite/lib/libpsimaglite.a:
-	\$(MAKE) -f Makefile -C ../../PsimagLite/lib/
+$path../../PsimagLite/lib/libpsimaglite.a:
+	\$(MAKE) -f Makefile -C $path../../PsimagLite/lib/
 
 Makefile.dep: $allCpps $additional
 	\$(CXX) \$(CPPFLAGS) -MM $allCpps  > Makefile.dep
@@ -100,15 +104,15 @@ sub make
 	local *FH = shift;
 	my ($drivers,
 	    $code,
-		$platform,
-		$mpi,
-		$libs,
-		$cxx,
-		$cppflags,
-		$strip,
-		$additional,
-		$additional2,
-		$additional3) = @_;
+            $platform,
+            $mpi,
+            $libs,
+            $cxx,
+            $cppflags,
+            $strip,
+            $additional,
+            $additional2,
+            $additional3) = @_;
 	$additional3 = "" unless defined($additional3);
 	my $allExecutables = combineAllDrivers($drivers,"");
 	my $allCpps = combineAllDrivers($drivers,".cpp");
