@@ -105,9 +105,11 @@ public:
 
 	KronMatrix(const InitKronType& initKron)
 	    : initKron_(initKron),
-	      vstart_(initKron_.patch(GenIjPatchType::LEFT).size() + 1)
+	      vstart_(initKron_.patch(GenIjPatchType::LEFT).size() + 1),
+	      weightsOfPatches_(initKron_.patch(GenIjPatchType::LEFT).size(), 1)
 	{
 		setUpVstart();
+		setWeightsOfPatches();
 		assert(vstart_.size() > 0);
 		SizeType nsize = vstart_[vstart_.size() - 1];
 		assert(nsize > 0);
@@ -127,7 +129,7 @@ public:
 		ParallelizerType parallelConnections(PsimagLite::Concurrency::npthreads,
 		                                     PsimagLite::MPI::COMM_WORLD);
 
-		parallelConnections.loopCreate(kc);
+		parallelConnections.loopCreate(kc, weightsOfPatches_);
 		kc.sync();
 
 		copyOut(vout, xout_);
@@ -272,6 +274,14 @@ private:
 		vstart_[npatches] = ip;
 	}
 
+	void setWeightsOfPatches()
+	{
+		SizeType npatches = initKron_.patch(GenIjPatchType::LEFT).size();
+		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
+			weightsOfPatches_[ipatch] = 1;
+		}
+	}
+
 	KronMatrix(const KronMatrix&);
 
 	const KronMatrix& operator=(const KronMatrix&);
@@ -279,6 +289,7 @@ private:
 	const InitKronType& initKron_;
 
 	VectorSizeType vstart_;
+	VectorSizeType weightsOfPatches_;
 	mutable VectorType yin_;
 	mutable VectorType xout_;
 }; //class KronMatrix
