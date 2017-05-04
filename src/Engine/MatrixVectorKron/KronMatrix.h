@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "KronConnections.h"
 #include "Concurrency.h"
 #include "Parallelizer.h"
+#include "PsimagLite.h"
 
 namespace Dmrg {
 
@@ -249,6 +250,7 @@ private:
 		SizeType npatches = initKron_.patch(GenIjPatchType::LEFT).size();
 
 		SizeType ip = 0;
+		PsimagLite::Vector<long unsigned int>::Type weights(npatches, 0);
 
 		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
 			vstart_[ipatch] = ip;
@@ -267,12 +269,27 @@ private:
 			assert(1 <= sizeLeft);
 			assert(1 <= sizeRight);
 
-			weightsOfPatches_[ipatch] = sizeLeft * sizeRight * (sizeLeft + sizeRight);
+			weights[ipatch] = sizeLeft * sizeRight * (sizeLeft + sizeRight);
 
 			ip += sizeLeft * sizeRight;
 		}
 
 		vstart_[npatches] = ip;
+
+		setAndFixWeights(weights);
+	}
+
+	void setAndFixWeights(const PsimagLite::Vector<long unsigned int>::Type& weights)
+	{
+		long unsigned int max = *(std::max_element(weights.begin(), weights.end()));
+		max >>= 31;
+		SizeType bits = 1 + PsimagLite::log2Integer(max);
+		SizeType npatches = weights.size();
+		assert(npatches == weightsOfPatches_.size());
+		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
+			long unsigned int tmp = (weights[ipatch] >> bits);
+			weightsOfPatches_[ipatch] = (max == 0) ? weights[ipatch] : tmp;
+		}
 	}
 
 	KronMatrix(const KronMatrix&);
