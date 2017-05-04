@@ -21,7 +21,8 @@ void diag(Matrix<double> &m,Vector<double> ::Type& eigs,char option)
 	int n=m.n_row();
 	int lda=m.n_col();
 	Vector<double>::Type work(3);
-	int info,lwork= -1;
+	int info;
+	int lwork= -1;
 
 	if (lda<=0) throw RuntimeError("lda<=0\n");
 
@@ -33,8 +34,10 @@ void diag(Matrix<double> &m,Vector<double> ::Type& eigs,char option)
 		std::cerr<<"info="<<info<<"\n";
 		throw RuntimeError("diag: dsyev_: failed with info!=0.\n");
 	}
-	lwork = int(work[0])+1;
-	work.resize(lwork+1);
+
+	const int NB = 256;
+	lwork = std::max(1 + static_cast<int>(work[0]), (NB + 2)*n);
+	work.resize(lwork);
 	// real work:
 	dsyev_(&jobz,&uplo,&n,&(m(0,0)),&lda, &(eigs[0]),&(work[0]),&lwork, &info);
 	if (info!=0) {
@@ -55,14 +58,21 @@ void diag(Matrix<std::complex<double> > &m,Vector<double> ::Type&eigs,char optio
 	int lda=m.n_col();
 	Vector<std::complex<double> >::Type work(3);
 	Vector<double>::Type rwork(3*n);
-	int info,lwork= -1;
+	int info;
+	int lwork= -1;
 
 	eigs.resize(n);
 
 	// query:
 	zheev_(&jobz,&uplo,&n,&(m(0,0)),&lda,&(eigs[0]),&(work[0]),&lwork,&(rwork[0]),&info);
-	lwork = int(std::real(work[0]))+1;
-	work.resize(lwork+1);
+	if (info!=0) {
+		std::cerr<<"info="<<info<<"\n";
+		throw RuntimeError("diag: zheev_: failed with info!=0.\n");
+	}
+
+	const int NB = 256;
+	lwork = std::max(1 + static_cast<int>(std::real(work[0])), (NB + 2)*n);
+	work.resize(lwork);
 	// real work:
 	zheev_(&jobz,&uplo,&n,&(m(0,0)),&lda,&(eigs[0]),&(work[0]),&lwork,&(rwork[0]),&info);
 	if (info!=0) {
@@ -82,7 +92,8 @@ void diag(Matrix<float> &m,Vector<float> ::Type& eigs,char option)
 	int n=m.n_row();
 	int lda=m.n_col();
 	Vector<float>::Type work(3);
-	int info,lwork= -1;
+	int info;
+	int lwork= -1;
 
 	if (lda<=0) throw RuntimeError("lda<=0\n");
 
@@ -94,8 +105,11 @@ void diag(Matrix<float> &m,Vector<float> ::Type& eigs,char option)
 		std::cerr<<"info="<<info<<"\n";
 		throw RuntimeError("diag: dsyev_: failed with info!=0.\n");
 	}
-	lwork = int(work[0])+1;
-	work.resize(lwork+1);
+
+	const int NB = 256;
+	lwork = std::max(1 + static_cast<int>(work[0]), (NB + 2)*n);
+	work.resize(lwork);
+
 	// real work:
 	ssyev_(&jobz,&uplo,&n,&(m(0,0)),&lda, &(eigs[0]),&(work[0]),&lwork, &info);
 	if (info!=0) {
@@ -122,8 +136,15 @@ void diag(Matrix<std::complex<float> > &m,Vector<float> ::Type& eigs,char option
 
 	// query:
 	cheev_(&jobz,&uplo,&n,&(m(0,0)),&lda,&(eigs[0]),&(work[0]),&lwork,&(rwork[0]),&info);
-	lwork = int(std::real(work[0]))+1;
-	work.resize(lwork+1);
+	if (info!=0) {
+		std::cerr<<"info="<<info<<"\n";
+		throw RuntimeError("diag: cheev_: failed with info!=0.\n");
+	}
+
+	const int NB = 256;
+	lwork = std::max(1 + static_cast<int>(std::real(work[0])), (NB + 2)*n);
+	work.resize(lwork);
+
 	// real work:
 	cheev_(&jobz,&uplo,&n,&(m(0,0)),&lda,&(eigs[0]),&(work[0]),&lwork,&(rwork[0]),&info);
 	if (info!=0) {
@@ -166,10 +187,9 @@ void geev(char jobvl,
 	        &(rwork[0]),
 	        &info);
 
-	checkBlasStatus(info,"zgeev_");
-
-	lwork = static_cast<int>(PsimagLite::real(work[0]));
-	work.resize(lwork,0.0);
+	const int NB = 256;
+	lwork = std::max(1 + static_cast<int>(std::real(work[0])), (NB + 2)*n);
+	work.resize(lwork);
 
 	zgeev_(&jobvl,
 	      &jobvr,
