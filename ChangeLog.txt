@@ -1,5 +1,26 @@
 https://github.com/g1257/dmrgpp/commits/master
 
+2017-05-04 Version 4.40
+
+* Kron: 
+
+	- bug fix for fermion sign
+	- changes to KronUtil
+	- KronUtil Makefile created by configure.pl
+	- does not support SU(2)
+	- weights for load balancing
+
+* MatrixDenseOrSparse: 50% cutoff
+
+* PsiApp used by dmrg and observe drivers
+
+* observe: compilation in parallel
+
+* option printmatrix
+
+* ci: -nosu2 option added
+
+
 2017-04-24 Version 4.38
 
 * observe: 
