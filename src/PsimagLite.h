@@ -11,6 +11,8 @@ std::ostream& operator<<(std::ostream&,const std::pair<SizeType,SizeType>&);
 
 std::istream& operator>>(std::istream&,std::pair<SizeType,SizeType>&);
 
+SizeType log2Integer(SizeType x);
+
 class PsiApp {
 public:
 
@@ -34,7 +36,6 @@ private:
 
 	Concurrency concurrency_;
 };
-
 } // namespace PsimagLite
 
 #endif // PSI_PSIMAGLITE_H

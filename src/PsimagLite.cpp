@@ -15,6 +15,18 @@ std::istream& operator>>(std::istream& is,std::pair<SizeType,SizeType>& pair)
 	return is;
 }
 
+SizeType log2Integer(SizeType x)
+{
+	SizeType count = 0;
+	while (x > 0) {
+		x >>= 1;
+		++count;
+	}
+
+	return count;
+}
+
+
 const int PsiApp::libSizeOfSizeType_ = sizeof(SizeType);
 
 } // namespace PsimagLite
