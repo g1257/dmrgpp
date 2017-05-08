@@ -1,6 +1,7 @@
 #ifndef LOADBALANCERDEFAULT_H
 #define LOADBALANCERDEFAULT_H
 #include "Vector.h"
+#include "Sort.h"
 
 namespace PsimagLite {
 
@@ -14,16 +15,21 @@ public:
 	    : taskNumber_(nthreads)
 	{
 		VectorSizeType workLoad(nthreads, 0);
-
 		SizeType ntasks = weights.size();
-		for (SizeType i = 0; i < ntasks; ++i) {
+		VectorSizeType weights2 = weights;
+		VectorSizeType iperm(ntasks, 0);
+		Sort<VectorSizeType> sort;
+		sort.sort(weights2,iperm);
+
+		for (SizeType iii = 0; iii < ntasks; ++iii) {
+			SizeType ii = ntasks - 1 - iii; // because sort is ascending
 			SizeType thread = findThreadWithLightestWork(workLoad);
 			// assign work to thread
 			assert(thread < taskNumber_.size());
-			taskNumber_[thread].push_back(i);
+			taskNumber_[thread].push_back(iperm[ii]);
 			// update work loads
-			assert(thread < workLoad.size());
-			workLoad[thread] += weights[i];
+			assert(thread < workLoad.size()); 
+			workLoad[thread] += weights[iperm[ii]];
 		}
 
 #ifdef DEBUG_PTHREADS_NG
