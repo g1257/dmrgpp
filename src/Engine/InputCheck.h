@@ -285,6 +285,7 @@ public:
 			\item [findSymmetrySector] Find symmetry sector with lowest energy, and
 			ignore value set in TargetElectronsUp or TargetSzPlusConst
 			\item [KroneckerDumper] TBW
+			\item [extendedPrint] TBW
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,const PsimagLite::String& val,SizeType)
@@ -334,6 +335,7 @@ public:
 		registerOpts.push_back("findSymmetrySector");
 		registerOpts.push_back("KroneckerDumper");
 		registerOpts.push_back("doNotCheckTwoSiteDmrg");
+		registerOpts.push_back("extendedPrint");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);

@@ -115,11 +115,11 @@ namespace Dmrg {
 template<typename OperatorsType_>
 class BasisWithOperators : public OperatorsType_::BasisType {
 
-	typedef std::pair<SizeType,SizeType> PairType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorIntegerType;
 
 public:
 
+	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename OperatorsType_::BasisType::RealType RealType;
 	typedef OperatorsType_ OperatorsType;
 	typedef typename OperatorsType::PairSizeSizeType PairSizeSizeType;

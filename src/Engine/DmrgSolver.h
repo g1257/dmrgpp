@@ -99,6 +99,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingRixsStatic.h"
 #include "TargetingRixsDynamic.h"
 #include "PsiBase64.h"
+#include "PrinterInDetail.h"
 
 namespace Dmrg {
 
@@ -171,7 +172,7 @@ public:
 	typedef TargetingCorrelations<LanczosSolverType,VectorWithOffsetType> TargetingCorrelationsType;
 	typedef TargetingRixsStatic<LanczosSolverType,VectorWithOffsetType> TargetingRixsStaticType;
 	typedef TargetingRixsDynamic<LanczosSolverType,VectorWithOffsetType> TargetingRixsDynamicType;
-
+	typedef PrinterInDetail<LeftRightSuperType> PrinterInDetailType;
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 		  INFINITE=WaveFunctionTransfType::INFINITE};
@@ -370,6 +371,9 @@ private:
 	{
 		bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=
 		        PsimagLite::String::npos);
+		bool extendedPrint = parameters_.options.find("extendedPrint");
+		SizeType mode = model_.targetQuantum().other.size();
+		PrinterInDetailType printerInDetail(lrs_, mode, extendedPrint);
 
 		lrs_.left(pS);
 		lrs_.right(pE);
@@ -381,6 +385,7 @@ private:
 			msg<<"Infinite-loop: step="<<step<<" ( of "<<X.size()<<"), ";
 			msg<<" size of blk. added="<<X[step].size();
 			progress_.printline(msg,std::cout);
+			printerInDetail.print(std::cout, "infinite");
 
 			lrs_.growLeftBlock(model_,pS,X[step],time); // grow system
 			bool needsRightPush = false;
@@ -390,7 +395,6 @@ private:
 			}
 
 			progress_.print("Growth done.\n",std::cout);
-			lrs_.printSizes("Infinite",std::cout);
 
 			updateQuantumSector(lrs_.sites(),INFINITE,step);
 
@@ -508,6 +512,9 @@ private:
 	                SizeType loopIndex,
 	                TargettingType& target)
 	{
+		bool extendedPrint = parameters_.options.find("extendedPrint");
+		SizeType mode = model_.targetQuantum().other.size();
+		PrinterInDetailType printerInDetail(lrs_, mode, extendedPrint);
 		int stepLength = parameters_.finiteLoop[loopIndex].stepLength;
 		SizeType keptStates = parameters_.finiteLoop[loopIndex].keptStates;
 		int saveOption = parameters_.finiteLoop[loopIndex].saveOption;
@@ -528,6 +535,7 @@ private:
 				throw PsimagLite::RuntimeError("stepCurrent_ too large!\n");
 
 			RealType time = target.time();
+			printerInDetail.print(std::cout, "finite");
 			if (direction==EXPAND_SYSTEM) {
 				lrs_.growLeftBlock(model_,pS,sitesIndices_[stepCurrent_],time);
 				lrs_.right(checkpoint_.shrink(ProgramGlobals::ENVIRON,target));
@@ -536,7 +544,6 @@ private:
 				lrs_.left(checkpoint_.shrink(ProgramGlobals::SYSTEM,target));
 			}
 
-			lrs_.printSizes("finite",std::cout);
 			if (verbose_) {
 				PsimagLite::OstringStream msg;
 				msg<<" stackS="<<checkpoint_.stackSize(ProgramGlobals::SYSTEM);
