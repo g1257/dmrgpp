@@ -106,7 +106,8 @@ public:
 	              const BasisWithOperatorsType& pBasisSummed,
 	              const BasisType& pSE,
 	              const ParamsType& p)
-	    : densityMatrixLocal_(target,pBasis,pBasisSummed,pSE,p),
+	    : densityMatrixImpl_(0),
+	      densityMatrixLocal_(target,pBasis,pBasisSummed,pSE,p),
 	      densityMatrixSvd_(target, pBasis, pBasisSummed, pSE, p),
 	      densityMatrixSu2_(target,pBasis,pBasisSummed,pSE,p)
 	{
@@ -144,11 +145,8 @@ public:
 
 	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 	{
-		if (!BasisType::useSu2Symmetry()) {
-			densityMatrixLocal_.diag(eigs,jobz);
-		} else {
-			densityMatrixSu2_.diag(eigs,jobz);
-		}
+		assert(densityMatrixImpl_);
+		densityMatrixImpl_->diag(eigs, jobz);
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
@@ -160,13 +158,10 @@ public:
 
 private:
 
-	DensityMatrixLocalType densityMatrixLocal_;
-
-	DensityMatrixSvdType densityMatrixSvd_;
-
-	DensityMatrixSu2Type densityMatrixSu2_;
-
 	DensityMatrixBaseType* densityMatrixImpl_;
+	DensityMatrixLocalType densityMatrixLocal_;
+	DensityMatrixSvdType densityMatrixSvd_;
+	DensityMatrixSu2Type densityMatrixSu2_;
 }; // class DensityMatrix
 } // namespace Dmrg
 

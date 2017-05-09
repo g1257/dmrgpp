@@ -231,7 +231,6 @@ private:
 	ProgressIndicatorType progress_;
 	BlockMatrixType data_;
 	bool debug_,verbose_;
-
 }; // class DensityMatrixLocal
 
 } // namespace Dmrg

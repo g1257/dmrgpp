@@ -90,6 +90,7 @@ class DensityMatrixBase {
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
+	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 	typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
 	typedef typename BasisType::FactorsType FactorsType;
 	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
@@ -126,6 +127,8 @@ public:
 	                  const BasisWithOperatorsType& pBasisSummed,
 	                  BasisType const &pSE,
 	                  const Params& p)=0;
+
+	virtual void diag(typename PsimagLite::Vector<RealType>::Type&, char) = 0;
 }; // class DensityMatrixBase
 } // namespace Dmrg
 
