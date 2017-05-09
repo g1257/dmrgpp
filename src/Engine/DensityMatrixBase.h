@@ -1,9 +1,8 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009-2015, UT-Battelle, LLC
+Copyright (c) 2009-2017, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 3.0]
+[DMRG++, Version 4.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -85,24 +82,34 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BlockMatrix.h"
 
 namespace Dmrg {
-template<typename DmrgBasisType,
-         typename DmrgBasisWithOperatorsType,
-         typename TargettingType
-         >
+template<typename TargettingType>
 class DensityMatrixBase {
-	typedef typename DmrgBasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+
+	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BasisType BasisType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
 	typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
-	typedef typename DmrgBasisType::FactorsType FactorsType;
+	typedef typename BasisType::FactorsType FactorsType;
 	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
 public:
+
+	struct Params {
+
+		Params(SizeType d, bool v, bool de)
+		    : direction(d), verbose(v), debug(de)
+		{}
+
+		SizeType direction;
+		bool verbose;
+		bool debug;
+	};
+
 	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
 
 	virtual ~DensityMatrixBase()
-	{
-		// avoids compiler warning
-	}
+	{}
 
 	virtual BlockMatrixType& operator()()=0;
 
@@ -112,12 +119,11 @@ public:
 
 	virtual void check2(int direction)=0;
 
-	virtual void init(
-	        const TargettingType& target,
-	        DmrgBasisWithOperatorsType const &pBasis,
-	        const DmrgBasisWithOperatorsType& pBasisSummed,
-	        DmrgBasisType const &pSE,
-	        int direction)=0;
+	virtual void init(const TargettingType& target,
+	                  BasisWithOperatorsType const &pBasis,
+	                  const BasisWithOperatorsType& pBasisSummed,
+	                  BasisType const &pSE,
+	                  const Params& p)=0;
 }; // class DensityMatrixBase
 } // namespace Dmrg
 

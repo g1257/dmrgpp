@@ -89,13 +89,14 @@ template<typename LeftRightSuperType,
          typename ParametersType,
          typename TargettingType>
 class Truncation  {
+
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::PairSizeSizeType PairSizeSizeType;
 	typedef typename LeftRightSuperType::ProgressIndicatorType ProgressIndicatorType;
 	typedef typename TargettingType::RealType RealType;
 	typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef DensityMatrix<BasisType,BasisWithOperatorsType,TargettingType> DensityMatrixType;
+	typedef DensityMatrix<TargettingType> DensityMatrixType;
 	typedef typename TargettingType::ModelType ModelType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 
@@ -104,6 +105,7 @@ class Truncation  {
 
 public:
 
+	typedef typename DensityMatrixType::ParamsType ParamsDensityMatrixType;
 	typedef typename LeftRightSuperType::SparseMatrixType TransformType;
 	typedef typename DensityMatrixType::BlockMatrixType BlockMatrixType;
 
@@ -204,7 +206,9 @@ private:
 		const BasisWithOperatorsType& pBasisSummed = (direction==EXPAND_SYSTEM) ?
 		            lrs_.right() : lrs_.left();
 
-		DensityMatrixType dmS(target,pBasis,pBasisSummed,lrs_.super(),direction);
+		bool debug = false;
+		ParamsDensityMatrixType p(direction, verbose_, debug);
+		DensityMatrixType dmS(target,pBasis,pBasisSummed,lrs_.super(),p);
 		dmS.check(direction);
 
 		if (verbose_ && PsimagLite::Concurrency::root()) {

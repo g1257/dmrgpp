@@ -78,53 +78,43 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename DmrgBasisType,
-         typename DmrgBasisWithOperatorsType,
-         typename TargettingType
-         >
+template<typename TargettingType>
 class DensityMatrix {
 
 	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
-	typedef typename DmrgBasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BasisType BasisType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
 	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
-	typedef typename DmrgBasisType::FactorsType FactorsType;
-	typedef DensityMatrixLocal<DmrgBasisType,
-	DmrgBasisWithOperatorsType,
-	TargettingType> DensityMatrixLocalType;
-	typedef DensityMatrixSu2<DmrgBasisType,
-	DmrgBasisWithOperatorsType,
-	TargettingType> DensityMatrixSu2Type;
-	typedef DensityMatrixBase<DmrgBasisType,
-	DmrgBasisWithOperatorsType,
-	TargettingType> DensityMatrixBaseType;
+	typedef typename BasisType::FactorsType FactorsType;
+	typedef DensityMatrixLocal<TargettingType> DensityMatrixLocalType;
+	typedef DensityMatrixSu2<TargettingType> DensityMatrixSu2Type;
+	typedef DensityMatrixBase<TargettingType> DensityMatrixBaseType;
 
 public:
 
+	typedef typename DensityMatrixBaseType::Params ParamsType;
 	typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
 	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
 
 	DensityMatrix(const TargettingType& target,
-	              const DmrgBasisWithOperatorsType& pBasis,
-	              const DmrgBasisWithOperatorsType& pBasisSummed,
-	              const DmrgBasisType& pSE,
-	              SizeType direction,
-	              bool debug=false,
-	              bool verbose=false)
-	    : densityMatrixLocal_(target,pBasis,pBasisSummed,pSE,
-	                          direction,debug,verbose),
-	      densityMatrixSu2_(target,pBasis,pBasisSummed,pSE,
-	                        direction,debug,verbose)
+	              const BasisWithOperatorsType& pBasis,
+	              const BasisWithOperatorsType& pBasisSummed,
+	              const BasisType& pSE,
+	              const ParamsType& p)
+	    : densityMatrixLocal_(target,pBasis,pBasisSummed,pSE,p),
+	      densityMatrixSu2_(target,pBasis,pBasisSummed,pSE,p)
 	{
 
-		if (DmrgBasisType::useSu2Symmetry()) {
+		if (BasisType::useSu2Symmetry()) {
 			densityMatrixImpl_ = &densityMatrixSu2_;
 		} else {
 			densityMatrixImpl_ = &densityMatrixLocal_;
 		}
 
-		densityMatrixImpl_->init(target,pBasis,pBasisSummed,pSE,direction);
+		densityMatrixImpl_->init(target,pBasis,pBasisSummed,pSE,p);
 	}
 
 	BlockMatrixType& operator()()
@@ -146,7 +136,7 @@ public:
 
 	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 	{
-		if (!DmrgBasisType::useSu2Symmetry()) {
+		if (!BasisType::useSu2Symmetry()) {
 			densityMatrixLocal_.diag(eigs,jobz);
 		} else {
 			densityMatrixSu2_.diag(eigs,jobz);

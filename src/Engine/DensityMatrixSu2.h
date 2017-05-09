@@ -85,16 +85,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DensityMatrixBase.h"
 
 namespace Dmrg {
-	template<typename DmrgBasisType,
-		typename DmrgBasisWithOperatorsType,
-		typename TargettingType
-		>
-	class DensityMatrixSu2 : public DensityMatrixBase<DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType> {
-		typedef typename DmrgBasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	template<typename TargettingType>
+	class DensityMatrixSu2 : public DensityMatrixBase<TargettingType> {
+
+		typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
+		typedef typename BasisWithOperatorsType::BasisType  BasisType;
+		typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
 		typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
-		typedef typename DmrgBasisType::FactorsType FactorsType;
+		typedef typename BasisType::FactorsType FactorsType;
 		typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
+		typedef typename DensityMatrixBase<TargettingType>::Params ParamsType;
 
 		enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
@@ -103,11 +104,11 @@ namespace Dmrg {
 
 		DensityMatrixSu2(
 			const TargettingType&,
-			const DmrgBasisWithOperatorsType& pBasis,
-			const DmrgBasisWithOperatorsType&,
-			const DmrgBasisType&,
-			SizeType,bool debug=false,bool verbose=false) : data_(pBasis.size() ,pBasis.partition()-1),mMaximal_(pBasis.partition()-1),pBasis_(pBasis),
-				debug_(debug),verbose_(verbose)
+			const BasisWithOperatorsType& pBasis,
+			const BasisWithOperatorsType&,
+			const BasisType&,
+			const ParamsType& p) : data_(pBasis.size() ,pBasis.partition()-1),mMaximal_(pBasis.partition()-1),pBasis_(pBasis),
+				debug_(p.debug),verbose_(p.verbose)
 		{
 		}
 
@@ -167,19 +168,18 @@ namespace Dmrg {
 
 		}
 
-		void init(
-				const TargettingType& target,
-				DmrgBasisWithOperatorsType const &pBasis,
-				const DmrgBasisWithOperatorsType& pBasisSummed,
-				DmrgBasisType const &pSE,
-				int direction)
+		void init(const TargettingType& target,
+				BasisWithOperatorsType const &pBasis,
+				const BasisWithOperatorsType& pBasisSummed,
+				BasisType const &pSE,
+				const ParamsType& p)
 		{
 			BuildingBlockType matrixBlock;
 
 			for (SizeType m=0;m<pBasis.partition()-1;m++) {
 				// Definition: Given partition p with (j m) findMaximalPartition(p) returns the partition p' (with j,j)
 
-				if (DmrgBasisType::useSu2Symmetry()) {
+				if (BasisType::useSu2Symmetry()) {
 					mMaximal_[m] = findMaximalPartition(m,pBasis);
 					//if (enforceSymmetry && SizeType(m)!=mMaximal_[m]) continue;
 					// we'll fill non-maximal partitions later
@@ -193,7 +193,7 @@ namespace Dmrg {
 					for (SizeType j=pBasis.partition(m);j<pBasis.partition(m+1);j++) {
 
 						matrixBlock(i-pBasis.partition(m),j-pBasis.partition(m))=
-							densityMatrixAux(i,j,target,pBasisSummed,pSE,direction);
+							densityMatrixAux(i,j,target,pBasisSummed,pSE,p.direction);
 
 					}
 				}
@@ -201,7 +201,7 @@ namespace Dmrg {
 			}
 
 			if (verbose_) {
-				std::cerr<<"DENSITYMATRIXPRINT option="<<direction<<"\n";
+				std::cerr<<"DENSITYMATRIXPRINT option="<<p.direction<<"\n";
 				std::cerr<<(*this);
 				std::cerr<<"***********\n";
 				std::cerr<<"Calling ae from init()...\n";
@@ -209,20 +209,27 @@ namespace Dmrg {
 			if (debug_) areAllMsEqual(pBasis);
 		}
 
-		template<typename DmrgBasisType_,
-			typename DmrgBasisWithOperatorsType_,
-   			typename TargettingType_
-			>
 		friend std::ostream& operator<<(std::ostream& os,
-				const DensityMatrixSu2<
-    					DmrgBasisType_,DmrgBasisWithOperatorsType_,TargettingType_>& dm);
+				const DensityMatrixSu2& dm)
+		{
+			for (SizeType m=0;m<dm.data_.blocks();m++) {
+				// Definition: Given partition p with (j m) findMaximalPartition(p) returns the partition p' (with j,j)
+				std::pair<SizeType,SizeType> jm1 = dm.pBasis_.jmValue(dm.pBasis_.partition(m));
+				SizeType ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
+				os<<"partitionNumber="<<m<<" j="<<jm1.first<<" m= "<<jm1.second<<" ne="<<ne<<"\n";
+				os<<dm.data_(m)<<"\n";
+			}
+			return os;
+		}
+
 	private:
+
 		BlockMatrixType data_;
 		typename PsimagLite::Vector<SizeType>::Type mMaximal_;
-		const DmrgBasisWithOperatorsType& pBasis_;
+		const BasisWithOperatorsType& pBasis_;
 		bool debug_,verbose_;
 
-		SizeType findMaximalPartition(SizeType p,DmrgBasisWithOperatorsType const &pBasis)
+		SizeType findMaximalPartition(SizeType p, const BasisWithOperatorsType& pBasis)
 		{
 			std::pair<SizeType,SizeType> jm2 = pBasis.jmValue(pBasis.partition(p));
 			SizeType ne2 = pBasis.electrons(pBasis.partition(p));
@@ -232,11 +239,12 @@ namespace Dmrg {
 				SizeType ne1 = pBasis.electrons(pBasis.partition(m));
 				if (jm1.first==jm2.first && jm1.first==jm1.second && ne1==ne2) return m;
 			}
+
 			throw PsimagLite::RuntimeError("	findMaximalPartition : none found\n");
 		}
 
 		//! only used for debugging
-		bool areAllMsEqual(DmrgBasisWithOperatorsType const &)
+		bool areAllMsEqual(const BasisWithOperatorsType&)
 		{
 //			PsimagLite::AlmostEqual<RealType> almostEqual(1e-5);
 
@@ -259,7 +267,7 @@ namespace Dmrg {
 			return true;
 		}
 		DensityMatrixElementType densityMatrixAux(SizeType alpha1,SizeType alpha2,const TargettingType& target,
-			DmrgBasisWithOperatorsType const &pBasisSummed,DmrgBasisType const &pSE,SizeType direction)
+			BasisWithOperatorsType const &pBasisSummed, BasisType const &pSE,SizeType direction)
 		{
 			DensityMatrixElementType sum=0;
 			// The g.s. has to be treated separately because it's usually a vector of RealType, whereas
@@ -276,7 +284,7 @@ namespace Dmrg {
 
 		template<typename TargetVectorType>
 		DensityMatrixElementType densityMatrixHasFactors(SizeType alpha1,SizeType alpha2,const TargetVectorType& v,
-			DmrgBasisWithOperatorsType const &pBasisSummed,DmrgBasisType const &pSE,SizeType direction)
+			BasisWithOperatorsType const &pBasisSummed,BasisType const &pSE,SizeType direction)
 		{
 			int ne = pBasisSummed.size();
 			int ns = pSE.size()/ne;
@@ -365,24 +373,6 @@ namespace Dmrg {
 		}
 
 	}; // class DensityMatrixSu2
-
-	template<typename DmrgBasisType,
-		typename DmrgBasisWithOperatorsType,
-  		typename TargettingType
-		>
-	std::ostream& operator<<(std::ostream& os,
-				const DensityMatrixSu2<DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType>& dm)
-	{
-		//std::cerr<<"PRINTING DENSITY-MATRIX WITH OPTION="<<option<<"\n";
-		for (SizeType m=0;m<dm.data_.blocks();m++) {
-			// Definition: Given partition p with (j m) findMaximalPartition(p) returns the partition p' (with j,j)
-			std::pair<SizeType,SizeType> jm1 = dm.pBasis_.jmValue(dm.pBasis_.partition(m));
-			SizeType ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
-			os<<"partitionNumber="<<m<<" j="<<jm1.first<<" m= "<<jm1.second<<" ne="<<ne<<"\n";
-			os<<dm.data_(m)<<"\n";
-		}
-		return os;
-	}
 } // namespace Dmrg
 
 /*@}*/
