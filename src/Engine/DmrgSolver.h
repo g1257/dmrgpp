@@ -371,7 +371,8 @@ private:
 	{
 		bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=
 		        PsimagLite::String::npos);
-		bool extendedPrint = parameters_.options.find("extendedPrint");
+		bool extendedPrint = (parameters_.options.find("extendedPrint") !=
+		        PsimagLite::String::npos);
 		SizeType mode = model_.targetQuantum().other.size();
 		PrinterInDetailType printerInDetail(lrs_, mode, extendedPrint);
 
@@ -512,7 +513,8 @@ private:
 	                SizeType loopIndex,
 	                TargettingType& target)
 	{
-		bool extendedPrint = parameters_.options.find("extendedPrint");
+		bool extendedPrint = (parameters_.options.find("extendedPrint") !=
+		        PsimagLite::String::npos);
 		SizeType mode = model_.targetQuantum().other.size();
 		PrinterInDetailType printerInDetail(lrs_, mode, extendedPrint);
 		int stepLength = parameters_.finiteLoop[loopIndex].stepLength;
