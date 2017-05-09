@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009-2017, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 4.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -85,297 +85,328 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DensityMatrixBase.h"
 
 namespace Dmrg {
-	template<typename TargettingType>
-	class DensityMatrixSu2 : public DensityMatrixBase<TargettingType> {
+template<typename TargettingType>
+class DensityMatrixSu2 : public DensityMatrixBase<TargettingType> {
 
-		typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
-		typedef typename BasisWithOperatorsType::BasisType  BasisType;
-		typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
-		typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
-		typedef typename BasisType::FactorsType FactorsType;
-		typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
-		typedef typename DensityMatrixBase<TargettingType>::Params ParamsType;
+	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BasisType  BasisType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
+	typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
+	typedef typename BasisType::FactorsType FactorsType;
+	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
+	typedef typename DensityMatrixBase<TargettingType>::Params ParamsType;
 
-		enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
+	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
-	public:
-		typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
+public:
 
-		DensityMatrixSu2(
-			const TargettingType&,
-			const BasisWithOperatorsType& pBasis,
-			const BasisWithOperatorsType&,
-			const BasisType&,
-			const ParamsType& p) : data_(pBasis.size() ,pBasis.partition()-1),mMaximal_(pBasis.partition()-1),pBasis_(pBasis),
-				debug_(p.debug),verbose_(p.verbose)
-		{
+	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
+
+	DensityMatrixSu2(
+	        const TargettingType&,
+	        const BasisWithOperatorsType& pBasis,
+	        const BasisWithOperatorsType&,
+	        const BasisType&,
+	        const ParamsType& p)
+	    : data_(pBasis.size(), pBasis.partition()-1),
+	      mMaximal_(pBasis.partition()-1),
+	      pBasis_(pBasis),
+	      debug_(p.debug),
+	      verbose_(p.verbose)
+	{}
+
+	BlockMatrixType& operator()()
+	{
+		return data_;
+	}
+
+	SizeType rank() { return data_.rank(); }
+
+	void check(int direction)
+	{
+		if (!debug_) return;
+
+		if (verbose_)
+			std::cerr<<"CHECKING DENSITY-MATRIX WITH OPTION="<<direction<<"\n";
+		for (SizeType m = 0; m < data_.blocks(); ++m) {
+			// Definition: Given partition p with (j m)
+			// findMaximalPartition(p) returns the partition p' (with j,j)
+			SizeType p = mMaximal_[m];
+			if (m==p) continue;
+			//is data_(m)==data_(p) ?
+			check(m,data_(m),p,data_(p));
+
 		}
+	}
 
-		BlockMatrixType& operator()()
-		{
-			return data_;
+	void check2(int direction)
+	{
+		if (!debug_) return;
+		if (verbose_)
+			std::cerr<<"CHECKING DMRG-TRANFORM WITH OPTION="<<direction<<"\n";
+		for (SizeType m = 0; m < data_.blocks(); ++m) {
+			// Definition: Given partition p with (j m)
+			// findMaximalPartition(p) returns the partition p' (with j,j)
+			SizeType p = mMaximal_[m];
+			if (m==p) continue;
+			//is data_(m)==data_(p) ?
+			check2(m,data_(m),p,data_(p));
+
 		}
+	}
 
-		SizeType rank() { return data_.rank(); }
+	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
+	{
+		diagonalise(data_,eigs,jobz);
 
-		void check(int direction)
-		{
-			if (!debug_) return;
+		//make sure non-maximals are equal to maximals
+		// this is needed because otherwise there's no assure that m-independence
+		// is achieved due to the non unique phase of eigenvectors of the density matrix
+		for (SizeType m=0;m<data_.blocks();m++) {
 
-			if (verbose_) std::cerr<<"CHECKING DENSITY-MATRIX WITH OPTION="<<direction<<"\n";
-			for (SizeType m=0;m<data_.blocks();m++) {
-				// Definition: Given partition p with (j m) findMaximalPartition(p) returns the partition p' (with j,j)
-				SizeType p = mMaximal_[m];
-				if (m==p) continue;
-				//is data_(m)==data_(p) ?
-				check(m,data_(m),p,data_(p));
+			SizeType p = mMaximal_[m];
+			if (SizeType(m)==p) continue; // we already did these ones
 
+			data_.setBlock(m,data_.offsets(m),data_(p));
+		}
+		if (verbose_) std::cerr<<"After diagonalise\n";
+
+		if (debug_) areAllMsEqual(pBasis_);
+
+	}
+
+	void init(const TargettingType& target,
+	          BasisWithOperatorsType const &pBasis,
+	          const BasisWithOperatorsType& pBasisSummed,
+	          BasisType const &pSE,
+	          const ParamsType& p)
+	{
+		BuildingBlockType matrixBlock;
+
+		for (SizeType m = 0; m < pBasis.partition() - 1; ++m) {
+			// Definition: Given partition p with (j m)
+			// findMaximalPartition(p) returns the partition p' (with j,j)
+
+			if (BasisType::useSu2Symmetry()) {
+				mMaximal_[m] = findMaximalPartition(m,pBasis);
+				//if (enforceSymmetry && SizeType(m)!=mMaximal_[m]) continue;
+				// we'll fill non-maximal partitions later
 			}
-		}
 
-		void check2(int direction)
-		{
-			if (!debug_) return;
-			if (verbose_) std::cerr<<"CHECKING DMRG-TRANFORM WITH OPTION="<<direction<<"\n";
-			for (SizeType m=0;m<data_.blocks();m++) {
-				// Definition: Given partition p with (j m) findMaximalPartition(p) returns the partition p' (with j,j)
-				SizeType p = mMaximal_[m];
-				if (m==p) continue;
-				//is data_(m)==data_(p) ?
-				check2(m,data_(m),p,data_(p));
+			SizeType bs = pBasis.partition(m+1)-pBasis.partition(m);
 
-			}
-		}
+			matrixBlock.reset(bs,bs);
 
-		void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
-		{
-			diagonalise(data_,eigs,jobz);
+			for (SizeType i=pBasis.partition(m);i<pBasis.partition(m+1);i++) {
+				for (SizeType j=pBasis.partition(m);j<pBasis.partition(m+1);j++) {
 
-			//make sure non-maximals are equal to maximals
-			// this is needed because otherwise there's no assure that m-independence
-			// is achieved due to the non unique phase of eigenvectors of the density matrix
-			for (SizeType m=0;m<data_.blocks();m++) {
+					matrixBlock(i-pBasis.partition(m),j-pBasis.partition(m))=
+					        densityMatrixAux(i,j,target,pBasisSummed,pSE,p.direction);
 
-				SizeType p = mMaximal_[m];
-				if (SizeType(m)==p) continue; // we already did these ones
-
-				data_.setBlock(m,data_.offsets(m),data_(p));
-			}
-			if (verbose_) std::cerr<<"After diagonalise\n";
-
-			if (debug_) areAllMsEqual(pBasis_);
-
-		}
-
-		void init(const TargettingType& target,
-				BasisWithOperatorsType const &pBasis,
-				const BasisWithOperatorsType& pBasisSummed,
-				BasisType const &pSE,
-				const ParamsType& p)
-		{
-			BuildingBlockType matrixBlock;
-
-			for (SizeType m=0;m<pBasis.partition()-1;m++) {
-				// Definition: Given partition p with (j m) findMaximalPartition(p) returns the partition p' (with j,j)
-
-				if (BasisType::useSu2Symmetry()) {
-					mMaximal_[m] = findMaximalPartition(m,pBasis);
-					//if (enforceSymmetry && SizeType(m)!=mMaximal_[m]) continue;
-					// we'll fill non-maximal partitions later
 				}
-
-				SizeType bs = pBasis.partition(m+1)-pBasis.partition(m);
-
-				matrixBlock.reset(bs,bs);
-
-				for (SizeType i=pBasis.partition(m);i<pBasis.partition(m+1);i++) {
-					for (SizeType j=pBasis.partition(m);j<pBasis.partition(m+1);j++) {
-
-						matrixBlock(i-pBasis.partition(m),j-pBasis.partition(m))=
-							densityMatrixAux(i,j,target,pBasisSummed,pSE,p.direction);
-
-					}
-				}
-				data_.setBlock(m,pBasis.partition(m),matrixBlock);
 			}
 
-			if (verbose_) {
-				std::cerr<<"DENSITYMATRIXPRINT option="<<p.direction<<"\n";
-				std::cerr<<(*this);
-				std::cerr<<"***********\n";
-				std::cerr<<"Calling ae from init()...\n";
-			}
-			if (debug_) areAllMsEqual(pBasis);
+			data_.setBlock(m,pBasis.partition(m),matrixBlock);
 		}
 
-		friend std::ostream& operator<<(std::ostream& os,
-				const DensityMatrixSu2& dm)
-		{
-			for (SizeType m=0;m<dm.data_.blocks();m++) {
-				// Definition: Given partition p with (j m) findMaximalPartition(p) returns the partition p' (with j,j)
-				std::pair<SizeType,SizeType> jm1 = dm.pBasis_.jmValue(dm.pBasis_.partition(m));
-				SizeType ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
-				os<<"partitionNumber="<<m<<" j="<<jm1.first<<" m= "<<jm1.second<<" ne="<<ne<<"\n";
-				os<<dm.data_(m)<<"\n";
-			}
-			return os;
+		if (verbose_) {
+			std::cerr<<"DENSITYMATRIXPRINT option="<<p.direction<<"\n";
+			std::cerr<<(*this);
+			std::cerr<<"***********\n";
+			std::cerr<<"Calling ae from init()...\n";
 		}
 
-	private:
+		if (debug_) areAllMsEqual(pBasis);
+	}
 
-		BlockMatrixType data_;
-		typename PsimagLite::Vector<SizeType>::Type mMaximal_;
-		const BasisWithOperatorsType& pBasis_;
-		bool debug_,verbose_;
-
-		SizeType findMaximalPartition(SizeType p, const BasisWithOperatorsType& pBasis)
-		{
-			std::pair<SizeType,SizeType> jm2 = pBasis.jmValue(pBasis.partition(p));
-			SizeType ne2 = pBasis.electrons(pBasis.partition(p));
-			if (jm2.first==jm2.second) return p;
-			for (SizeType m=0;m<pBasis.partition()-1;m++) {
-				std::pair<SizeType,SizeType> jm1 = pBasis.jmValue(pBasis.partition(m));
-				SizeType ne1 = pBasis.electrons(pBasis.partition(m));
-				if (jm1.first==jm2.first && jm1.first==jm1.second && ne1==ne2) return m;
-			}
-
-			throw PsimagLite::RuntimeError("	findMaximalPartition : none found\n");
+	friend std::ostream& operator<<(std::ostream& os,
+	                                const DensityMatrixSu2& dm)
+	{
+		for (SizeType m=0;m<dm.data_.blocks();m++) {
+			// Definition: Given partition p with (j m)
+			// findMaximalPartition(p) returns the partition p' (with j,j)
+			std::pair<SizeType,SizeType> jm1 = dm.pBasis_.jmValue(dm.pBasis_.partition(m));
+			SizeType ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
+			os<<"partitionNumber="<<m<<" j="<<jm1.first;
+			os<<" m= "<<jm1.second<<" ne="<<ne<<"\n";
+			os<<dm.data_(m)<<"\n";
 		}
 
-		//! only used for debugging
-		bool areAllMsEqual(const BasisWithOperatorsType&)
-		{
-//			PsimagLite::AlmostEqual<RealType> almostEqual(1e-5);
+		return os;
+	}
 
-//			for (SizeType m=0;m<pBasis.partition()-1;m++) {
-//				std::pair<SizeType,SizeType> jmPair1 =  pBasis.jmValue(pBasis.partition(m));
-//				SizeType ne1 = pBasis.electrons(pBasis.partition(m));
-//				for (SizeType p=0;p<pBasis.partition()-1;p++) {
-//					std::pair<SizeType,SizeType> jmPair2 =  pBasis.jmValue(pBasis.partition(p));
-//					SizeType ne2 = pBasis.electrons(pBasis.partition(p));
+private:
 
-//					if (jmPair1.first == jmPair2.first && ne1==ne2) {
-
-//						if (!almostEqual(data_(m),data_(p))) {
-//							std::cerr<<"Checking m="<<m<<" against p="<<p<<"\n";
-//							throw PsimagLite::RuntimeError("error\n");
-//						}
-//					}
-//				}
-//			}
-			return true;
-		}
-		DensityMatrixElementType densityMatrixAux(SizeType alpha1,SizeType alpha2,const TargettingType& target,
-			BasisWithOperatorsType const &pBasisSummed, BasisType const &pSE,SizeType direction)
-		{
-			DensityMatrixElementType sum=0;
-			// The g.s. has to be treated separately because it's usually a vector of RealType, whereas
-			// the other targets might be complex, and C++ generic programming capabilities are weak... we need D!!!
-			if (target.includeGroundStage()) sum +=  densityMatrixHasFactors(alpha1,alpha2,target.gs(),
-			    		pBasisSummed,pSE,direction)*target.gsWeight();
-
-			for (SizeType i=0;i<target.size();i++)
-				sum += densityMatrixHasFactors(alpha1,alpha2,target(i),
-					pBasisSummed,pSE,direction)*target.weight(i)/target.normSquared(i);
-
-			return sum;
+	SizeType findMaximalPartition(SizeType p, const BasisWithOperatorsType& pBasis)
+	{
+		std::pair<SizeType,SizeType> jm2 = pBasis.jmValue(pBasis.partition(p));
+		SizeType ne2 = pBasis.electrons(pBasis.partition(p));
+		if (jm2.first==jm2.second) return p;
+		for (SizeType m=0;m<pBasis.partition()-1;m++) {
+			std::pair<SizeType,SizeType> jm1 = pBasis.jmValue(pBasis.partition(m));
+			SizeType ne1 = pBasis.electrons(pBasis.partition(m));
+			if (jm1.first==jm2.first && jm1.first==jm1.second && ne1==ne2) return m;
 		}
 
-		template<typename TargetVectorType>
-		DensityMatrixElementType densityMatrixHasFactors(SizeType alpha1,SizeType alpha2,const TargetVectorType& v,
-			BasisWithOperatorsType const &pBasisSummed,BasisType const &pSE,SizeType direction)
-		{
-			int ne = pBasisSummed.size();
-			int ns = pSE.size()/ne;
-			SizeType total=pBasisSummed.size();
+		throw PsimagLite::RuntimeError("	findMaximalPartition : none found\n");
+	}
+
+	//! only used for debugging
+	bool areAllMsEqual(const BasisWithOperatorsType&)
+	{
+		return true;
+	}
+
+	DensityMatrixElementType densityMatrixAux(SizeType alpha1,
+	                                          SizeType alpha2,
+	                                          const TargettingType& target,
+	                                          const BasisWithOperatorsType& pBasisSummed,
+	                                          const BasisType& pSE,
+	                                          SizeType direction)
+	{
+		DensityMatrixElementType sum=0;
+		// The g.s. has to be treated separately because it's
+		// usually a vector of RealType, whereas
+		// the other targets might be complex,
+		// and C++ generic programming capabilities are weak... we need D!!!
+		if (target.includeGroundStage())
+			sum +=  densityMatrixHasFactors(alpha1,
+			                                alpha2,
+			                                target.gs(),
+			                                pBasisSummed,
+			                                pSE,
+			                                direction)*target.gsWeight();
+
+		for (SizeType i = 0; i < target.size(); ++i)
+			sum += densityMatrixHasFactors(alpha1,
+			                               alpha2,
+			                               target(i),
+			                               pBasisSummed,
+			                               pSE,
+			                               direction)*target.weight(i)/target.normSquared(i);
+
+		return sum;
+	}
+
+	template<typename TargetVectorType>
+	DensityMatrixElementType densityMatrixHasFactors(SizeType alpha1,
+	                                                 SizeType alpha2,
+	                                                 const TargetVectorType& v,
+	                                                 const BasisWithOperatorsType& pBasisSummed,
+	                                                 const BasisType& pSE,
+	                                                 SizeType direction)
+	{
+		int ne = pBasisSummed.size();
+		int ns = pSE.size()/ne;
+		SizeType total=pBasisSummed.size();
+		if (direction!=EXPAND_SYSTEM) {
+			ns=pBasisSummed.size();
+			ne=pSE.size()/ns;
+		}
+
+		DensityMatrixElementType sum=0;
+
+		// Make sure we don't copy just get the reference here!!
+		const FactorsType& factors = pSE.getFactors();
+
+		for (SizeType beta=0;beta<total;beta++) {
+			// sum over environ:
+			int i1 = alpha1+beta*ns;
+			int i2 = alpha2+beta*ns;
+			// sum over system:
 			if (direction!=EXPAND_SYSTEM) {
-				ns=pBasisSummed.size();
-				ne=pSE.size()/ns;
+				i1 = beta + alpha1*ns;
+				i2 = beta + alpha2*ns;
 			}
+			for (int k1=factors.getRowPtr(i1);k1<factors.getRowPtr(i1+1);k1++) {
+				int eta1 = factors.getCol(k1);
+				int ii = pSE.permutationInverse(eta1);
+				for (int k2=factors.getRowPtr(i2);k2<factors.getRowPtr(i2+1);k2++) {
+					int eta2 =  factors.getCol(k2);
+					int jj = pSE.permutationInverse(eta2);
 
-			DensityMatrixElementType sum=0;
-
-			// Make sure we don't copy just get the reference here!!
-			const FactorsType& factors = pSE.getFactors();
-
-			for (SizeType beta=0;beta<total;beta++) {
-				// sum over environ:
-				int i1 = alpha1+beta*ns;
-				int i2 = alpha2+beta*ns;
-				// sum over system:
-				if (direction!=EXPAND_SYSTEM) {
-					i1 = beta + alpha1*ns;
-					i2 = beta + alpha2*ns;
-				}
-				for (int k1=factors.getRowPtr(i1);k1<factors.getRowPtr(i1+1);k1++) {
-					int eta1 = factors.getCol(k1);
-					int ii = pSE.permutationInverse(eta1);
-					for (int k2=factors.getRowPtr(i2);k2<factors.getRowPtr(i2+1);k2++) {
-						int eta2 =  factors.getCol(k2);
-						int jj = pSE.permutationInverse(eta2);
-
-						DensityMatrixElementType tmp3= v.slowAccess(ii)*
-						        PsimagLite::conj(v.slowAccess(jj)) *
-							factors.getValue(k1) * factors.getValue(k2);
-						sum += tmp3;
-					}
-				}
-			}
-			return sum;
-		}
-
-		//! only used for debugging
-		void check(SizeType p1,const BuildingBlockType& bp1,SizeType p2,const BuildingBlockType& bp2)
-		{
-			if (bp1.n_row()!=bp2.n_row()) {
-				std::cerr<<"row size different "<<bp1.n_row()<<"!="<<bp2.n_row()<<"\n";
-				std::cerr<<"p1="<<p1<<" p2="<<p2<<"\n";
-				std::cerr<<data_<<"\n";
-				throw PsimagLite::RuntimeError("Density Matrix Check: failed\n");
-			}
-			if (bp1.n_col()!=bp2.n_col()) {
-				std::cerr<<"col size different "<<bp1.n_col()<<"!="<<bp2.n_col()<<"\n";
-				std::cerr<<"p1="<<p1<<" p2="<<p2<<"\n";
-				std::cerr<<data_<<"\n";
-				throw PsimagLite::RuntimeError("Density Matrix Check: failed\n");
-			}
-			if (!debug_) return;
-
-			for (SizeType i=0;i<bp1.n_row();i++) {
-				for (SizeType j=0;j<bp1.n_col();j++) {
-					RealType x = PsimagLite::norm(bp1(i,j)-bp2(i,j));
-					if (x>1e-5) {
-						std::cerr<<bp1(i,j)<<"!="<<bp2(i,j)<<" i="<<i<<" j= "<<j<<"\n";
-						std::cerr<<"difference="<<x<<" p1="<<p1<<" p2="<<p2<<"\n";
-						std::cerr<<data_(p1)<<"\n";
-						std::cerr<<"******************\n";
-						std::cerr<<data_(p2)<<"\n";
-						throw PsimagLite::RuntimeError("Density Matrix Check: failed (differ)\n");
-					}
+					DensityMatrixElementType tmp3= v.slowAccess(ii)*
+					        PsimagLite::conj(v.slowAccess(jj)) *
+					        factors.getValue(k1) * factors.getValue(k2);
+					sum += tmp3;
 				}
 			}
 		}
+		return sum;
+	}
 
-		//! only used for debugging
-		void check2(SizeType p1,const BuildingBlockType& bp1,SizeType p2,const BuildingBlockType& bp2)
-		{
-			DensityMatrixElementType alpha=1.0,beta=0.0;
-			int n =bp1.n_col();
-			PsimagLite::Matrix<DensityMatrixElementType> result(n,n);
-			psimag::BLAS::GEMM('C','N',n,n,n,alpha,&(bp1(0,0)),n,&(bp2(0,0)),n,beta,&(result(0,0)),n);
-			if (!PsimagLite::isTheIdentity(result)) {
-				//utils::matrixPrint(result,std::cerr);
-				std::cerr<<"p1="<<p1<<" p2="<<p2<<"\n";
-				throw PsimagLite::RuntimeError("Density Matrix Check2: failed\n");
-			}
-
+	//! only used for debugging
+	void check(SizeType p1,
+	           const BuildingBlockType& bp1,
+	           SizeType p2,
+	           const BuildingBlockType& bp2)
+	{
+		if (bp1.n_row()!=bp2.n_row()) {
+			std::cerr<<"row size different "<<bp1.n_row()<<"!="<<bp2.n_row()<<"\n";
+			std::cerr<<"p1="<<p1<<" p2="<<p2<<"\n";
+			std::cerr<<data_<<"\n";
+			throw PsimagLite::RuntimeError("Density Matrix Check: failed\n");
 		}
+		if (bp1.n_col()!=bp2.n_col()) {
+			std::cerr<<"col size different "<<bp1.n_col()<<"!="<<bp2.n_col()<<"\n";
+			std::cerr<<"p1="<<p1<<" p2="<<p2<<"\n";
+			std::cerr<<data_<<"\n";
+			throw PsimagLite::RuntimeError("Density Matrix Check: failed\n");
+		}
+		if (!debug_) return;
 
-	}; // class DensityMatrixSu2
+		for (SizeType i=0;i<bp1.n_row();i++) {
+			for (SizeType j=0;j<bp1.n_col();j++) {
+				RealType x = PsimagLite::norm(bp1(i,j)-bp2(i,j));
+				if (x>1e-5) {
+					std::cerr<<bp1(i,j)<<"!="<<bp2(i,j)<<" i="<<i<<" j= "<<j<<"\n";
+					std::cerr<<"difference="<<x<<" p1="<<p1<<" p2="<<p2<<"\n";
+					std::cerr<<data_(p1)<<"\n";
+					std::cerr<<"******************\n";
+					std::cerr<<data_(p2)<<"\n";
+					throw PsimagLite::RuntimeError("Density Matrix Check: failed (differ)\n");
+				}
+			}
+		}
+	}
+
+	//! only used for debugging
+	void check2(SizeType p1,
+	            const BuildingBlockType& bp1,
+	            SizeType p2,
+	            const BuildingBlockType& bp2)
+	{
+		DensityMatrixElementType alpha=1.0,beta=0.0;
+		int n =bp1.n_col();
+		PsimagLite::Matrix<DensityMatrixElementType> result(n,n);
+		psimag::BLAS::GEMM('C',
+		                   'N',
+		                   n,
+		                   n,
+		                   n,
+		                   alpha,
+		                   &(bp1(0,0)),
+		                   n,
+		                   &(bp2(0,0)),
+		                   n,
+		                   beta,
+		                   &(result(0,0)),
+		                   n);
+		if (!PsimagLite::isTheIdentity(result)) {
+			//utils::matrixPrint(result,std::cerr);
+			std::cerr<<"p1="<<p1<<" p2="<<p2<<"\n";
+			throw PsimagLite::RuntimeError("Density Matrix Check2: failed\n");
+		}
+	}
+
+	BlockMatrixType data_;
+	typename PsimagLite::Vector<SizeType>::Type mMaximal_;
+	const BasisWithOperatorsType& pBasis_;
+	bool debug_;
+	bool verbose_;
+}; // class DensityMatrixSu2
 } // namespace Dmrg
 
 /*@}*/
 #endif
-
-

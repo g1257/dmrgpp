@@ -81,14 +81,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Parallelizer.h"
 
 namespace Dmrg {
-template<typename BasisType,
-         typename BasisWithOperatorsType,
-         typename TargettingType
-         >
 
-class DensityMatrixLocal : public DensityMatrixBase<BasisType,
-        BasisWithOperatorsType,
-        TargettingType> {
+template<typename TargettingType>
+class DensityMatrixLocal : public DensityMatrixBase<TargettingType> {
+
+	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename TargettingType::VectorWithOffsetType TargetVectorType;
 	typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
@@ -96,6 +94,7 @@ class DensityMatrixLocal : public DensityMatrixBase<BasisType,
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
 	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
+	typedef typename DensityMatrixBase<TargettingType>::Params ParamsType;
 
 	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
@@ -112,16 +111,13 @@ public:
 	                   const BasisWithOperatorsType& pBasis,
 	                   const BasisWithOperatorsType&,
 	                   const BasisType&,
-	                   SizeType,
-	                   bool debug=false,
-	                   bool verbose=false)
+	                   const ParamsType& p)
 	    :
 	      progress_("DensityMatrixLocal"),
 	      data_(pBasis.size(),
 	            pBasis.partition()-1),
-	      debug_(debug),verbose_(verbose)
-	{
-	}
+	      debug_(p.debug),verbose_(p.verbose)
+	{}
 
 	virtual BlockMatrixType& operator()()
 	{
@@ -147,7 +143,7 @@ public:
 	                  BasisWithOperatorsType const &pBasis,
 	                  const BasisWithOperatorsType& pBasisSummed,
 	                  BasisType const &pSE,
-	                  int direction)
+	                  const ParamsType& p)
 	{
 		{
 			PsimagLite::OstringStream msg;
@@ -173,7 +169,7 @@ public:
 			                                               target.gs(),
 			                                               pBasisSummed,
 			                                               pSE,
-			                                               direction,
+			                                               p.direction,
 			                                               w);
 
 			// target all other states if any:
@@ -182,7 +178,7 @@ public:
 				if (fabs(wnorm) < 1e-6) continue;
 				RealType w = target.weight(ix)/wnorm;
 				initPartition(matrixBlock,pBasis,m,target(ix),
-				              pBasisSummed,pSE,direction,w);
+				              pBasisSummed,pSE,p.direction,w);
 			}
 
 			// set this matrix block into data_
@@ -195,14 +191,17 @@ public:
 		}
 	}
 
-	template<typename BasisType_,
-	         typename BasisWithOperatorsType_,
-	         typename TargettingType_
-	         >
-	friend std::ostream& operator<<(std::ostream&,
-	                                const DensityMatrixLocal<BasisType_,
-	                                BasisWithOperatorsType_,
-	                                TargettingType_>&);
+	friend std::ostream& operator<<(std::ostream& os,
+	                                const DensityMatrixLocal& dm)
+	{
+		for (SizeType m = 0; m < dm.data_.blocks(); ++m) {
+			SizeType ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
+			os<<" ne="<<ne<<"\n";
+			os<<dm.data_(m)<<"\n";
+		}
+
+		return os;
+	}
 
 private:
 
@@ -235,22 +234,6 @@ private:
 
 }; // class DensityMatrixLocal
 
-template<typename BasisType,
-         typename BasisWithOperatorsType,
-         typename TargettingType
-         >
-std::ostream& operator<<(std::ostream& os,
-                         const DensityMatrixLocal<BasisType,
-                         BasisWithOperatorsType,
-                         TargettingType>& dm)
-{
-	for (SizeType m=0;m<dm.data_.blocks();m++) {
-		SizeType ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
-		os<<" ne="<<ne<<"\n";
-		os<<dm.data_(m)<<"\n";
-	}
-	return os;
-}
 } // namespace Dmrg
 
 #endif
