@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DENSITY_MATRIX_BASE_H
 
 #include "BlockMatrix.h"
+#include "PsimagLite.h"
 
 namespace Dmrg {
 template<typename TargettingType>
@@ -97,10 +98,11 @@ public:
 
 	struct Params {
 
-		Params(SizeType d, bool v, bool de)
-		    : direction(d), verbose(v), debug(de)
+		Params(bool u, SizeType d, bool v, bool de)
+		    : useSvd(u), direction(d), verbose(v), debug(de)
 		{}
 
+		bool useSvd;
 		SizeType direction;
 		bool verbose;
 		bool debug;

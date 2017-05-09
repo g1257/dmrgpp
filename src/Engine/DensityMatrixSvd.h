@@ -1,9 +1,8 @@
-
 /*
-Copyright (c) 2009-2015, UT-Battelle, LLC
+Copyright (c) 2009-2017, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 3.0]
+[DMRG++, Version 4.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -69,13 +68,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 *********************************************************
 */
 
-#ifndef DENSITY_MATRIX_LOCAL_H
-#define DENSITY_MATRIX_LOCAL_H
+#ifndef DENSITY_MATRIX_SVD_H
+#define DENSITY_MATRIX_SVD_H
 #include "ProgressIndicator.h"
 #include "TypeToString.h"
 #include "BlockMatrix.h"
 #include "DensityMatrixBase.h"
-#include "ParallelDensityMatrix.h"
 #include "NoPthreads.h"
 #include "Concurrency.h"
 #include "Parallelizer.h"
@@ -83,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<typename TargettingType>
-class DensityMatrixLocal : public DensityMatrixBase<TargettingType> {
+class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 
 	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
@@ -107,13 +105,13 @@ public:
 	TargetVectorType> ParallelDensityMatrixType;
 	typedef PsimagLite::Parallelizer<ParallelDensityMatrixType> ParallelizerType;
 
-	DensityMatrixLocal(const TargettingType&,
+	DensityMatrixSvd(const TargettingType&,
 	                   const BasisWithOperatorsType& pBasis,
 	                   const BasisWithOperatorsType&,
 	                   const BasisType&,
 	                   const ParamsType& p)
 	    :
-	      progress_("DensityMatrixLocal"),
+	      progress_("DensityMatrixSvd"),
 	      data_(pBasis.size(),
 	            pBasis.partition()-1),
 	      debug_(p.debug),verbose_(p.verbose)
@@ -192,7 +190,7 @@ public:
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
-	                                const DensityMatrixLocal& dm)
+	                                const DensityMatrixSvd& dm)
 	{
 		for (SizeType m = 0; m < dm.data_.blocks(); ++m) {
 			SizeType ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
@@ -214,25 +212,14 @@ private:
 	                   SizeType direction,
 	                   RealType weight)
 	{
-		ParallelDensityMatrixType helperDm(v,
-		                                   pBasis,
-		                                   pBasisSummed,
-		                                   pSE,
-		                                   direction,
-		                                   m,
-		                                   weight,
-		                                   matrixBlock);
-		ParallelizerType threadedDm(ConcurrencyType::npthreads,
-		                            PsimagLite::MPI::COMM_WORLD);
-		threadedDm.loopCreate(helperDm);
-
+		err(PsimagLite::String(__FILE__) + " unimplemented\n");
 	}
 
 	ProgressIndicatorType progress_;
 	BlockMatrixType data_;
 	bool debug_,verbose_;
 
-}; // class DensityMatrixLocal
+}; // class DensityMatrixSvd
 
 } // namespace Dmrg
 

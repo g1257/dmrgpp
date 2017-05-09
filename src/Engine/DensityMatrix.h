@@ -74,6 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BlockMatrix.h"
 
 #include "DensityMatrixLocal.h"
+#include "DensityMatrixSvd.h"
 #include "DensityMatrixSu2.h"
 
 namespace Dmrg {
@@ -90,6 +91,7 @@ class DensityMatrix {
 	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef DensityMatrixLocal<TargettingType> DensityMatrixLocalType;
+	typedef DensityMatrixSvd<TargettingType> DensityMatrixSvdType;
 	typedef DensityMatrixSu2<TargettingType> DensityMatrixSu2Type;
 	typedef DensityMatrixBase<TargettingType> DensityMatrixBaseType;
 
@@ -105,11 +107,17 @@ public:
 	              const BasisType& pSE,
 	              const ParamsType& p)
 	    : densityMatrixLocal_(target,pBasis,pBasisSummed,pSE,p),
+	      densityMatrixSvd_(target, pBasis, pBasisSummed, pSE, p),
 	      densityMatrixSu2_(target,pBasis,pBasisSummed,pSE,p)
 	{
-
 		if (BasisType::useSu2Symmetry()) {
+			if (p.useSvd) {
+				err("useSvd not supported while SU(2) is in use\n");
+			}
+
 			densityMatrixImpl_ = &densityMatrixSu2_;
+		} else if (p.useSvd) {
+			densityMatrixImpl_ = &densityMatrixSvd_;
 		} else {
 			densityMatrixImpl_ = &densityMatrixLocal_;
 		}
@@ -153,6 +161,8 @@ public:
 private:
 
 	DensityMatrixLocalType densityMatrixLocal_;
+
+	DensityMatrixSvdType densityMatrixSvd_;
 
 	DensityMatrixSu2Type densityMatrixSu2_;
 

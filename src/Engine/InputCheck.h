@@ -286,6 +286,7 @@ public:
 			ignore value set in TargetElectronsUp or TargetSzPlusConst
 			\item [KroneckerDumper] TBW
 			\item [extendedPrint] TBW
+			\item [useSvd] TBW
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,const PsimagLite::String& val,SizeType)
@@ -336,6 +337,7 @@ public:
 		registerOpts.push_back("KroneckerDumper");
 		registerOpts.push_back("doNotCheckTwoSiteDmrg");
 		registerOpts.push_back("extendedPrint");
+		registerOpts.push_back("useSvd");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);

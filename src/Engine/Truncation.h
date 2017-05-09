@@ -207,7 +207,8 @@ private:
 		            lrs_.right() : lrs_.left();
 
 		bool debug = false;
-		ParamsDensityMatrixType p(direction, verbose_, debug);
+		bool useSvd = (parameters_.options.find("useSvd") != PsimagLite::String::npos);
+		ParamsDensityMatrixType p(useSvd, direction, verbose_, debug);
 		DensityMatrixType dmS(target,pBasis,pBasisSummed,lrs_.super(),p);
 		dmS.check(direction);
 
