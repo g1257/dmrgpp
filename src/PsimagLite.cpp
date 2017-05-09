@@ -15,6 +15,11 @@ std::istream& operator>>(std::istream& is,std::pair<SizeType,SizeType>& pair)
 	return is;
 }
 
+void err(String s)
+{
+	throw RuntimeError(s);
+}
+
 SizeType log2Integer(SizeType x)
 {
 	SizeType count = 0;
@@ -30,3 +35,9 @@ SizeType log2Integer(SizeType x)
 const int PsiApp::libSizeOfSizeType_ = sizeof(SizeType);
 
 } // namespace PsimagLite
+
+void err(PsimagLite::String s)
+{
+        PsimagLite::err(s);
+}
+
