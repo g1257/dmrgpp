@@ -155,6 +155,7 @@ public:
 
 	virtual int index(SizeType i1,SizeType edof1,SizeType edofTotal) const
 	{
+		assert(edof1 < edofTotal);
 		return edof1+i1*edofTotal;
 	}
 
