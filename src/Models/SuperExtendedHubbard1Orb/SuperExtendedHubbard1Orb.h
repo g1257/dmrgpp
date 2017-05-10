@@ -127,7 +127,12 @@ public:
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      extendedHubbard_(solverParams,io,geometry)
-	{}
+	{
+		SizeType site = 0;
+		bool useSpinOrbit = (geometry_.orbitals(LinkProductType::TERM_HOPPING, site) == 2);
+
+		LinkProductType::setSpinOrbit(useSpinOrbit);
+	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
 	                   SizeType,

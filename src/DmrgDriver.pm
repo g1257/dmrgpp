@@ -137,6 +137,13 @@ Dmrg::ModelHelper$modelHelper<
    $lrs
   >
 >::hot_ = false;
+
+template<>
+bool LinkProdExtendedSuperHubbard1Orb<
+Dmrg::ModelHelper$modelHelper<
+   $lrs
+  >
+>::hasSpinOrbit_ = false;
 }
 EOF
 }

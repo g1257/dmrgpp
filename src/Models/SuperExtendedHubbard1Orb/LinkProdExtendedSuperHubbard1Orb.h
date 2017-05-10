@@ -86,12 +86,20 @@ class LinkProdExtendedSuperHubbard1Orb {
 
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
-	enum {TERM_HOPPING=0,TERM_NINJ=1,TERM_SPLUSISMINUSJ=2,TERM_SZISZJ=3,TERM_PAIRIPAIRJ=4};
+
+	static bool hasSpinOrbit_;
 
 public:
 
+	enum {TERM_HOPPING=0,TERM_NINJ=1,TERM_SPLUSISMINUSJ=2,TERM_SZISZJ=3,TERM_PAIRIPAIRJ=4};
+
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
+
+	static void setSpinOrbit(bool b)
+	{
+		hasSpinOrbit_ = b;
+	}
 
 	template<typename SomeStructType>
 	static void setLinkData(SizeType term,
@@ -102,15 +110,21 @@ public:
 	                        std::pair<char,char>&,
 	                        SizeType& angularMomentum,
 	                        RealType& angularFactor,
-	                        SizeType& category,const SomeStructType&)
+	                        SizeType& category,
+	                        const SomeStructType&)
 	{
 		if (term==TERM_HOPPING) {
 			fermionOrBoson = ProgramGlobals::FERMION;
-			ops = PairType(dofs,dofs);
+			SizeType spin1 = (dofs & 1);
+			SizeType spin2 = (dofs & 2);
+			spin2 >>= 1;
+			if (!hasSpinOrbit_)
+				spin1 = spin2 = dofs;
+			ops = PairType(spin1,spin2);
 			angularFactor = 1;
-			if (dofs == 1) angularFactor = -1;
+			if (spin1 == 1) angularFactor = -1;
 			angularMomentum = 1;
-			category = dofs;
+			category = spin1;
 			return;
 		}
 
@@ -182,13 +196,25 @@ public:
 	template<typename SomeStructType>
 	static SizeType dofs(SizeType term,const SomeStructType&)
 	{
-		return (term == TERM_HOPPING) ? 2 : 1;
+		if (term != TERM_HOPPING) return 1;
+		assert(term == TERM_HOPPING);
+		return (hasSpinOrbit_) ? 4 : 2;
 	}
 
 	template<typename SomeStructType>
-	static PairType connectorDofs(SizeType,SizeType,const SomeStructType&)
+	static PairType connectorDofs(SizeType term,
+	                              SizeType dofs,
+	                              const SomeStructType&)
 	{
-		return PairType(0,0); // no orbital and no dependence on spin
+		// no orbital and no dependence on spin
+		if (term != TERM_HOPPING || !hasSpinOrbit_) return PairType(0,0);
+
+		SizeType spin1 = (dofs & 1);
+		SizeType spin2 = (dofs & 2);
+		spin2 >>= 1;
+
+		// spin dependence of the hopping parameter (spin orbit)
+		return PairType(spin1,spin2);
 	}
 
 	static SizeType terms() { return 5; }
