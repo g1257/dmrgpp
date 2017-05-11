@@ -175,7 +175,8 @@ sub printHeader
 	print FOUT<<EOF;
 // Created automatically by $0
 // DO NOT EDIT because file will be overwritten each
-// time you run $0
+// time you run $0 with the second argument set to 1
+// This file should be commited
 #include "DmrgDriver1.h"
 
 EOF
