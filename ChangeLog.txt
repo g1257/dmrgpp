@@ -1,5 +1,17 @@
 https://github.com/g1257/dmrgpp/commits/master
 
+2017-05-11 Version 4.42
+
+* extendedPrint SolverOptions added
+
+* SolverOptions useSvd added, but not working yet
+
+* SuperExtendedHubbard1Orb: includes spin orbit
+
+* configure.pl does not generate sources
+  by default anymore. All DmrgDriver*.cpp files
+  are now commited
+
 2017-05-04 Version 4.40
 
 * Kron: 
