@@ -1,3 +1,9 @@
+2017-05-11 version 1.56
+
+* PthreadsNg: LoadBalancerDefault assigns largest weight first
+
+* err function added
+
 2017-05-04 Version 1.54
 
 * JSON Library removed
