@@ -6,6 +6,7 @@ package DmrgDriver;
 
 sub createTemplates
 {
+	my ($generateSources) = @_;
 
 my $cppEach = 2;
 
@@ -26,19 +27,24 @@ foreach my $complexOrNot (@complexOrReal) {
 			foreach my $vecWithOffset (@vecWithOffsets) {
 				foreach my $matrixVector (@matrixVector) {
 					if ($counter == 0 or $counter % $cppEach == 0) {
-						if ($counter > 0) {
+						if ($counter > 0 and $generateSources) {
 							close(FOUT);
 							print STDERR "$0: File $fout written\n";
 						}
 
 						$fout = "DmrgDriver$cppFiles.cpp";
 						$cppFiles++;
-						open(FOUT,"> $fout") or die "$0: Cannot write to $fout : $!\n";
-						printHeader();
+						if ($generateSources) {
+							open(FOUT,"> $fout") or die "$0: Cannot write to $fout : $!\n";
+							printHeader();
+						}
 					}
 
-					printInstance($counter,$target,$lanczos,$matrixVector,$modelHelper,
+					if ($generateSources) {
+						printInstance($counter,$target,$lanczos,$matrixVector,$modelHelper,
 					$vecWithOffset,$complexOrNot,\@values);
+					}
+
 					$counter++;
 				}
 			}
@@ -46,9 +52,12 @@ foreach my $complexOrNot (@complexOrReal) {
 	}
 }
 
-close(FOUT);
+if ($generateSources) {
+	close(FOUT);
 
-print STDERR "$0: $counter instances and $cppFiles files\n";
+	print STDERR "$0: $counter instances and $cppFiles files\n";
+}
+
 return $cppFiles;
 }
 

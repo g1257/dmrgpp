@@ -62,7 +62,6 @@ my $dotos = "";
 my $total= scalar(@names);
 for (my $i = 0; $i < $total; ++$i) {
 	my $name = $names[$i];
-	print STDERR "$name\n";
 	my %dmrgDriver = (name => $name, aux => 1);
 	push @drivers,\%dmrgDriver;
 	$dotos .= " $name.o ";

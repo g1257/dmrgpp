@@ -23,9 +23,10 @@ use lib "../../PsimagLite/scripts";
 use Make;
 use DmrgDriver;
 
-my ($flavor) = @ARGV;
+my ($flavor, $generateSources) = @ARGV;
 
 $flavor = procFlavor($flavor);
+$generateSources = 0 if (!defined($generateSources));
 
 system("cd KronUtil; perl configure.pl");
 
@@ -54,7 +55,7 @@ my @drivers = (\%provenanceDriver,\%su2RelatedDriver,
 $dotos = "dmrg.o Provenance.o RestartStruct.o FiniteLoop.o Utils.o ";
 $dotos .= " ProgramGlobals.o Su2Related.o";
 
-my $templates = DmrgDriver::createTemplates();
+my $templates = DmrgDriver::createTemplates($generateSources);
 
 for (my $i = 0; $i < $templates; ++$i) {
 	my $name = "DmrgDriver$i";
