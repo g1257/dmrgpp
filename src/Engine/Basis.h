@@ -354,24 +354,14 @@ public:
 		sort.sort(removedIndices,perm);
 	}
 
-	template<typename BlockMatrixType>
-	RealType truncateBasis(SparseMatrixType& ftransform,
-	                       const BlockMatrixType& transform,
-	                       const typename PsimagLite::Vector<RealType>::Type& eigs,
+	RealType truncateBasis(const typename PsimagLite::Vector<RealType>::Type& eigs,
 	                       const VectorSizeType& removedIndices)
 	{
 		quantumNumbersOld_ = quantumNumbers_;
 		partitionOld_ = partition_;
 		dmrgTransformed_=true;
 
-		transform.toSparse(ftransform);
-
 		if (removedIndices.size()==0) return 0;
-
-		PsimagLite::OstringStream msg0;
-		msg0<<"Truncating transform...";
-		utils::truncate(ftransform,removedIndices,false);
-		progress_.printline(msg0,std::cout);
 
 		PsimagLite::OstringStream msg2;
 		msg2<<"Truncating indices...";

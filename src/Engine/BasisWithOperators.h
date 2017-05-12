@@ -249,25 +249,17 @@ public:
 
 	//! transform this basis by transform
 	//! note: basis change must conserve total number of electrons and all quantum numbers
-	template<typename BlockMatrixType>
-	RealType truncateBasis(SparseMatrixType& ftransform,
-	                       const BlockMatrixType& transform,
+	RealType truncateBasis(const SparseMatrixType& ftransform,
 	                       const typename PsimagLite::Vector<RealType>::Type& eigs,
 	                       const typename PsimagLite::Vector<SizeType>::Type& removedIndices,
 	                       const PairSizeSizeType& startEnd)
 	{
 		BasisType &parent = *this;
-		RealType error = parent.truncateBasis(ftransform,transform,eigs,removedIndices);
+		RealType error = parent.truncateBasis(eigs,removedIndices);
 
-		changeBasisDirect(ftransform,startEnd);
+		operators_.changeBasis(ftransform,this,startEnd);
 
 		return error;
-	}
-
-	void changeBasisDirect(const SparseMatrixType& ftransform,
-	                       const PairSizeSizeType& startEnd)
-	{
-		operators_.changeBasis(ftransform,this,startEnd);
 	}
 
 	void setHamiltonian(SparseMatrixType const &h)
