@@ -789,84 +789,16 @@ void outerProduct(Matrix<T>& A,const Matrix<T>& B,const Matrix<T>& C)
 
 // closures end
 
-template<typename VectorLikeType>
-void svd(char jobz,Matrix<double> &a,VectorLikeType& s,Matrix<double>& vt)
-{
-#ifdef NO_LAPACK
-	throw RuntimeError("svd: dgesdd_: NO LAPACK!\n");
-#else
-	if (jobz != 'A' && jobz != 'S') {
-		String msg("svd: jobz must be either A or S");
-		String jobzString = " ";
-		jobzString[0] = jobz;
-		throw RuntimeError(msg + ", not " + jobzString + "\n");
-	}
-
-	int m = a.n_row();
-	int n = a.n_col();
-	std::cerr<<"Trying svd(...) "<<m<<"x"<<n<<"\n";
-	int lda = m;
-	int min = (m<n) ? m : n;
-
-	s.resize(min);
-	int ldu = m;
-	int ucol = (jobz == 'A') ? m : min;
-	Matrix<double> u(ldu,ucol);
-	int ldvt = (jobz == 'A') ? n : min;
-	vt.resize(ldvt,n);
-
-	Vector<double>::Type work(100,0);
-	int info = 0;
-	Vector<int>::Type iwork(8*min,0);
-
-	// query optimal work
-	int lwork = -1;
-	psimag::LAPACK::dgesdd_(&jobz,
-	                        &m,
-	                        &n,
-	                        &(a(0,0)),
-	                        &lda,
-	                        &(s[0]),
-	        &(u(0,0)),
-	        &ldu,
-	        &(vt(0,0)),
-	        &ldvt,
-	        &(work[0]),
-	        &lwork,
-	        &(iwork[0]),
-	        &info);
-	if (info!=0) {
-		String str(__FILE__);
-		str += " " + ttos(__LINE__);
-		str += " svd(...) failed with info=" + ttos(info) + "\n";
-		throw RuntimeError(str.c_str());
-	}
-	lwork = int(work[0]);
-	work.resize(lwork+10);
-	// real work:
-	psimag::LAPACK::dgesdd_(&jobz,
-	                        &m,
-	                        &n,
-	                        &(a(0,0)),
-	                        &lda,
-	                        &(s[0]),
-	        &(u(0,0)),
-	        &ldu,
-	        &(vt(0,0)),
-	        &ldvt,
-	        &(work[0]),
-	        &lwork,
-	        &(iwork[0]),
-	        &info);
-	if (info!=0) {
-		String str(__FILE__);
-		str += " " + ttos(__LINE__);
-		str += " svd(...) failed with info=" + ttos(info) + "\n";
-		throw RuntimeError(str.c_str());
-	}
-	a = u;
-#endif
-}
+void svd(char jobz,Matrix<double>& a,Vector<double>::Type& s,Matrix<double>& vt);
+void svd(char jobz,
+         Matrix<std::complex<double> >& a,
+         Vector<double>::Type& s,
+         Matrix<std::complex<double> >& vt);
+void svd(char jobz,Matrix<float>& a,Vector<float>::Type& s,Matrix<float>& vt);
+void svd(char jobz,
+         Matrix<std::complex<float> >& a,
+         Vector<float>::Type& s,
+         Matrix<std::complex<float> >& vt);
 
 #ifdef USE_MPI
 namespace MPI {
