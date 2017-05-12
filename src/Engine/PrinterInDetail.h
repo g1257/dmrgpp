@@ -18,18 +18,12 @@ public:
 
 	void print(std::ostream& os, PsimagLite::String msg) const
 	{
-		lrs_.printSizes(msg, os);
-		printMore(os);
-	}
-
-private:
-
-	void printMore(std::ostream& os) const
-	{
 		if (!extended_) return;
 		printOneSide(os, "left", lrs_.left());
 		printOneSide(os, "right", lrs_.right());
 	}
+
+private:
 
 	void printOneSide(std::ostream& os,
 	                  PsimagLite::String msg,

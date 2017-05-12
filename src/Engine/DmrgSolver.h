@@ -396,6 +396,7 @@ private:
 			}
 
 			progress_.print("Growth done.\n",std::cout);
+			lrs_.printSizes("Infinite",std::cout);
 
 			updateQuantumSector(lrs_.sites(),INFINITE,step);
 
@@ -546,6 +547,7 @@ private:
 				lrs_.left(checkpoint_.shrink(ProgramGlobals::SYSTEM,target));
 			}
 
+			lrs_.printSizes("finite",std::cout);
 			if (verbose_) {
 				PsimagLite::OstringStream msg;
 				msg<<" stackS="<<checkpoint_.stackSize(ProgramGlobals::SYSTEM);

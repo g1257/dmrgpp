@@ -14,7 +14,7 @@ https://github.com/g1257/dmrgpp/commits/master
 
 2017-05-04 Version 4.40
 
-* Kron: 
+* Kron:
 
 	- bug fix for fermion sign
 	- changes to KronUtil
@@ -35,7 +35,7 @@ https://github.com/g1257/dmrgpp/commits/master
 
 2017-04-24 Version 4.38
 
-* observe: 
+* observe:
 	- bug fix when <bra|operators|ket>
 	- 5 or more points supported with
 	  fixed sites
