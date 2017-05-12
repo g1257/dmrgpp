@@ -72,11 +72,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DENSITY_MATRIX_SVD_H
 #include "ProgressIndicator.h"
 #include "TypeToString.h"
-#include "BlockMatrix.h"
 #include "DensityMatrixBase.h"
 #include "NoPthreads.h"
 #include "Concurrency.h"
-#include "Parallelizer.h"
 
 namespace Dmrg {
 
@@ -100,13 +98,6 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 
 public:
 
-	typedef typename BaseType::BlockMatrixType BlockMatrixType;
-	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
-	typedef ParallelDensityMatrix<BlockMatrixType,
-	BasisWithOperatorsType,
-	VectorWithOffsetType> ParallelDensityMatrixType;
-	typedef PsimagLite::Parallelizer<ParallelDensityMatrixType> ParallelizerType;
-
 	DensityMatrixSvd(const TargettingType&,
 	                   const BasisWithOperatorsType& pBasis,
 	                   const BasisWithOperatorsType&,
@@ -127,7 +118,12 @@ public:
 
 	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 	{
-		err("Svd not implemented\n");
+		SizeType freeSize = allTargets_.cols();
+		SizeType xTimesSummedSize = allTargets_.rows();
+		SizeType minSize = std::min(freeSize, xTimesSummedSize);
+		MatrixType vt(minSize, freeSize);
+		eigs.resize(minSize);
+		svd('S', allTargets_, eigs, vt);
 		fullMatrixToCrsMatrix(data_, allTargets_);
 	}
 
