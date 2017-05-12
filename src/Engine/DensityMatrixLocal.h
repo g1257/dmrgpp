@@ -122,9 +122,9 @@ public:
 	      verbose_(p.verbose)
 	{}
 
-	virtual BlockMatrixType& operator()()
+	virtual SparseMatrixType& operator()()
 	{
-		return data_;
+		return dataSparse_;
 	}
 
 	virtual SizeType rank() { return data_.rank(); }
@@ -132,6 +132,7 @@ public:
 	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 	{
 		diagonalise(data_,eigs,jobz);
+		data_.toSparse(dataSparse_);
 	}
 
 	virtual void init(const TargettingType& target,
@@ -225,6 +226,7 @@ private:
 
 	ProgressIndicatorType progress_;
 	BlockMatrixType data_;
+	SparseMatrixType dataSparse_;
 	SizeType direction_;
 	bool debug_;
 	bool verbose_;

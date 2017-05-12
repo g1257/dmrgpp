@@ -96,7 +96,8 @@ class DensityMatrixBase {
 
 public:
 
-	typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
+	typedef PsimagLite::Matrix<DensityMatrixElementType> MatrixType;
+	typedef BlockMatrix<MatrixType> BlockMatrixType;
 
 	struct Params {
 
@@ -115,7 +116,7 @@ public:
 	virtual ~DensityMatrixBase()
 	{}
 
-	virtual BlockMatrixType& operator()()=0;
+	virtual SparseMatrixType& operator()()=0;
 
 	virtual SizeType rank()=0;
 

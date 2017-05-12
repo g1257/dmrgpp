@@ -98,8 +98,6 @@ class DensityMatrix {
 public:
 
 	typedef typename DensityMatrixBaseType::Params ParamsType;
-	typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
-	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
 
 	DensityMatrix(const TargettingType& target,
 	              const BasisWithOperatorsType& pBasis,
@@ -126,7 +124,7 @@ public:
 		densityMatrixImpl_->init(target,pBasis,pBasisSummed,pSE,p);
 	}
 
-	BlockMatrixType& operator()()
+	SparseMatrixType& operator()()
 	{
 		return densityMatrixImpl_->operator()();
 	}

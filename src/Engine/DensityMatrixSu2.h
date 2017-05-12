@@ -120,9 +120,9 @@ public:
 		check(p.direction);
 	}
 
-	BlockMatrixType& operator()()
+	SparseMatrixType& operator()()
 	{
-		return data_;
+		return dataSparse_;
 	}
 
 	SizeType rank() { return data_.rank(); }
@@ -145,6 +145,7 @@ public:
 
 		if (debug_) areAllMsEqual(pBasis_);
 
+		data_.toSparse(dataSparse_);
 		check2(direction_);
 	}
 
@@ -406,6 +407,7 @@ private:
 	}
 
 	BlockMatrixType data_;
+	SparseMatrixType dataSparse_;
 	typename PsimagLite::Vector<SizeType>::Type mMaximal_;
 	const BasisWithOperatorsType& pBasis_;
 	SizeType direction_;

@@ -114,21 +114,21 @@ public:
 	                   const ParamsType& p)
 	    :
 	      progress_("DensityMatrixSvd"),
-	      data_(pBasis.size(),
-	            pBasis.partition()-1),
-	      debug_(p.debug),verbose_(p.verbose)
+	      debug_(p.debug),
+	      verbose_(p.verbose)
 	{}
 
-	virtual BlockMatrixType& operator()()
+	virtual SparseMatrixType& operator()()
 	{
 		return data_;
 	}
 
-	virtual SizeType rank() { return data_.rank(); }
+	virtual SizeType rank() { return allTargets_.rows(); }
 
 	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 	{
-		diagonalise(data_,eigs,jobz);
+		err("Svd not implemented\n");
+		fullMatrixToCrsMatrix(data_, allTargets_);
 	}
 
 	virtual void init(const TargettingType& target,
@@ -197,7 +197,7 @@ private:
 
 	ProgressIndicatorType progress_;
 	MatrixType allTargets_;
-	BlockMatrixType data_;
+	SparseMatrixType data_;
 	bool debug_;
 	bool verbose_;
 }; // class DensityMatrixSvd
