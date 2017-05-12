@@ -91,11 +91,12 @@ class DensityMatrixBase {
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
 	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
-	typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
 	typedef typename BasisType::FactorsType FactorsType;
 	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
 public:
+
+	typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
 
 	struct Params {
 
@@ -117,10 +118,6 @@ public:
 	virtual BlockMatrixType& operator()()=0;
 
 	virtual SizeType rank()=0;
-
-	virtual void check(int direction)=0;
-
-	virtual void check2(int direction)=0;
 
 	virtual void init(const TargettingType& target,
 	                  BasisWithOperatorsType const &pBasis,

@@ -83,26 +83,28 @@ namespace Dmrg {
 template<typename TargettingType>
 class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 
+	typedef DensityMatrixBase<TargettingType> BaseType;
 	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename TargettingType::VectorWithOffsetType TargetVectorType;
-	typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
+	typedef typename BaseType::BuildingBlockType MatrixType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
-	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
-	typedef typename DensityMatrixBase<TargettingType>::Params ParamsType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	typedef typename BaseType::Params ParamsType;
 
 	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
 public:
 
-	typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
+	typedef typename BaseType::BlockMatrixType BlockMatrixType;
 	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
 	typedef ParallelDensityMatrix<BlockMatrixType,
 	BasisWithOperatorsType,
-	TargetVectorType> ParallelDensityMatrixType;
+	VectorWithOffsetType> ParallelDensityMatrixType;
 	typedef PsimagLite::Parallelizer<ParallelDensityMatrixType> ParallelizerType;
 
 	DensityMatrixSvd(const TargettingType&,
@@ -124,14 +126,6 @@ public:
 
 	virtual SizeType rank() { return data_.rank(); }
 
-	virtual void check(int)
-	{
-	}
-
-	virtual void check2(int)
-	{
-	}
-
 	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 	{
 		diagonalise(data_,eigs,jobz);
@@ -149,39 +143,14 @@ public:
 			progress_.printline(msg,std::cout);
 		}
 
-		//loop over all partitions:
-		for (SizeType m=0;m<pBasis.partition()-1;m++) {
-			// size of this partition
-			SizeType bs = pBasis.partition(m+1)-pBasis.partition(m);
+		SizeType oneOrZero = (target.includeGroundStage()) ? 1 : 0;
+		SizeType targets = oneOrZero + target.size(); // Number of targets;
+		SizeType freeSize = pBasis.size();
+		SizeType summedSize = pBasisSummed.size();
+		allTargets_.resize(targets*summedSize, freeSize);
+		for (SizeType x = 0; x < targets; ++x)
+			addThisTarget(x, freeSize, summedSize, target, p.direction, pSE, targets);
 
-			// density matrix block for this partition:
-			BuildingBlockType matrixBlock(bs,bs);
-
-			// weight of the ground state:
-			RealType w = target.gsWeight();
-
-			// if we are to target the ground state do it now:
-			if (target.includeGroundStage()) initPartition(matrixBlock,
-			                                               pBasis,
-			                                               m,
-			                                               target.gs(),
-			                                               pBasisSummed,
-			                                               pSE,
-			                                               p.direction,
-			                                               w);
-
-			// target all other states if any:
-			for (SizeType ix = 0; ix < target.size(); ++ix) {
-				RealType wnorm = target.normSquared(ix);
-				if (fabs(wnorm) < 1e-6) continue;
-				RealType w = target.weight(ix)/wnorm;
-				initPartition(matrixBlock,pBasis,m,target(ix),
-				              pBasisSummed,pSE,p.direction,w);
-			}
-
-			// set this matrix block into data_
-			data_.setBlock(m,pBasis.partition(m),matrixBlock);
-		}
 		{
 			PsimagLite::OstringStream msg;
 			msg<<"Done with init partition";
@@ -203,22 +172,34 @@ public:
 
 private:
 
-	void initPartition(BuildingBlockType& matrixBlock,
-	                   BasisWithOperatorsType const &pBasis,
-	                   SizeType m,
-	                   const TargetVectorType& v,
-	                   BasisWithOperatorsType const &pBasisSummed,
-	                   BasisType const &pSE,
+	void addThisTarget(SizeType x,
+	                   SizeType freeSize,
+	                   SizeType summedSize,
+	                   const TargettingType& target,
 	                   SizeType direction,
-	                   RealType weight)
+	                   const BasisType& pSE,
+	                   SizeType targets)
 	{
-		err(PsimagLite::String(__FILE__) + " unimplemented\n");
+		SizeType x2 = (target.includeGroundStage() && x > 0 ) ? x - 1 : x;
+
+		const VectorWithOffsetType& v = (target.includeGroundStage() && x == 0) ?
+		            target.gs() : target(x2);
+
+		for (SizeType alpha = 0; alpha < freeSize; ++alpha) {
+			for (SizeType beta = 0; beta < summedSize; ++beta) {
+				SizeType ind = (direction == ProgramGlobals::EXPAND_SYSTEM) ?
+				            alpha + beta*summedSize : beta + alpha*freeSize;
+				ind = pSE.permutationInverse(ind);
+				allTargets_(x + beta*targets, alpha) = v.slowAccess(ind);
+			}
+		}
 	}
 
 	ProgressIndicatorType progress_;
+	MatrixType allTargets_;
 	BlockMatrixType data_;
-	bool debug_,verbose_;
-
+	bool debug_;
+	bool verbose_;
 }; // class DensityMatrixSvd
 
 } // namespace Dmrg

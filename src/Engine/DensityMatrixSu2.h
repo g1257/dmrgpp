@@ -88,11 +88,12 @@ namespace Dmrg {
 template<typename TargettingType>
 class DensityMatrixSu2 : public DensityMatrixBase<TargettingType> {
 
+	typedef DensityMatrixBase<TargettingType> BaseType;
 	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType  BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
-	typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
+	typedef typename BaseType::BlockMatrixType BlockMatrixType;
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 	typedef typename DensityMatrixBase<TargettingType>::Params ParamsType;
@@ -112,9 +113,12 @@ public:
 	    : data_(pBasis.size(), pBasis.partition()-1),
 	      mMaximal_(pBasis.partition()-1),
 	      pBasis_(pBasis),
+	      direction_(p.direction),
 	      debug_(p.debug),
 	      verbose_(p.verbose)
-	{}
+	{
+		check(p.direction);
+	}
 
 	BlockMatrixType& operator()()
 	{
@@ -122,39 +126,6 @@ public:
 	}
 
 	SizeType rank() { return data_.rank(); }
-
-	void check(int direction)
-	{
-		if (!debug_) return;
-
-		if (verbose_)
-			std::cerr<<"CHECKING DENSITY-MATRIX WITH OPTION="<<direction<<"\n";
-		for (SizeType m = 0; m < data_.blocks(); ++m) {
-			// Definition: Given partition p with (j m)
-			// findMaximalPartition(p) returns the partition p' (with j,j)
-			SizeType p = mMaximal_[m];
-			if (m==p) continue;
-			//is data_(m)==data_(p) ?
-			check(m,data_(m),p,data_(p));
-
-		}
-	}
-
-	void check2(int direction)
-	{
-		if (!debug_) return;
-		if (verbose_)
-			std::cerr<<"CHECKING DMRG-TRANFORM WITH OPTION="<<direction<<"\n";
-		for (SizeType m = 0; m < data_.blocks(); ++m) {
-			// Definition: Given partition p with (j m)
-			// findMaximalPartition(p) returns the partition p' (with j,j)
-			SizeType p = mMaximal_[m];
-			if (m==p) continue;
-			//is data_(m)==data_(p) ?
-			check2(m,data_(m),p,data_(p));
-
-		}
-	}
 
 	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 	{
@@ -174,6 +145,7 @@ public:
 
 		if (debug_) areAllMsEqual(pBasis_);
 
+		check2(direction_);
 	}
 
 	void init(const TargettingType& target,
@@ -237,6 +209,39 @@ public:
 	}
 
 private:
+
+	void check(int direction)
+	{
+		if (!debug_) return;
+
+		if (verbose_)
+			std::cerr<<"CHECKING DENSITY-MATRIX WITH OPTION="<<direction<<"\n";
+		for (SizeType m = 0; m < data_.blocks(); ++m) {
+			// Definition: Given partition p with (j m)
+			// findMaximalPartition(p) returns the partition p' (with j,j)
+			SizeType p = mMaximal_[m];
+			if (m==p) continue;
+			//is data_(m)==data_(p) ?
+			check(m,data_(m),p,data_(p));
+
+		}
+	}
+
+	void check2(int direction)
+	{
+		if (!debug_) return;
+		if (verbose_)
+			std::cerr<<"CHECKING DMRG-TRANFORM WITH OPTION="<<direction<<"\n";
+		for (SizeType m = 0; m < data_.blocks(); ++m) {
+			// Definition: Given partition p with (j m)
+			// findMaximalPartition(p) returns the partition p' (with j,j)
+			SizeType p = mMaximal_[m];
+			if (m==p) continue;
+			//is data_(m)==data_(p) ?
+			check2(m,data_(m),p,data_(p));
+
+		}
+	}
 
 	SizeType findMaximalPartition(SizeType p, const BasisWithOperatorsType& pBasis)
 	{
@@ -403,6 +408,7 @@ private:
 	BlockMatrixType data_;
 	typename PsimagLite::Vector<SizeType>::Type mMaximal_;
 	const BasisWithOperatorsType& pBasis_;
+	SizeType direction_;
 	bool debug_;
 	bool verbose_;
 }; // class DensityMatrixSu2

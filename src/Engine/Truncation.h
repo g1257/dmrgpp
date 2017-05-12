@@ -209,8 +209,8 @@ private:
 		bool debug = false;
 		bool useSvd = (parameters_.options.find("useSvd") != PsimagLite::String::npos);
 		ParamsDensityMatrixType p(useSvd, direction, verbose_, debug);
+		TruncationCache& cache = (direction==EXPAND_SYSTEM) ? leftCache_ : rightCache_;
 		DensityMatrixType dmS(target,pBasis,pBasisSummed,lrs_.super(),p);
-		dmS.check(direction);
 
 		if (verbose_ && PsimagLite::Concurrency::root()) {
 			std::cerr<<"Trying to diagonalize density-matrix with size=";
@@ -231,10 +231,8 @@ private:
 			\end{equation}
 		*/
 
-		TruncationCache& cache = (direction==EXPAND_SYSTEM) ? leftCache_ : rightCache_;
-
 		dmS.diag(cache.eigs,'V');
-		dmS.check2(direction);
+
 		updateKeptStates(keptStates,cache.eigs);
 
 		//! transform basis: dmS^\dagger * operator matrix * dms

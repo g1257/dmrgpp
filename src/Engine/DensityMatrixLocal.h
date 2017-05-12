@@ -85,6 +85,7 @@ namespace Dmrg {
 template<typename TargettingType>
 class DensityMatrixLocal : public DensityMatrixBase<TargettingType> {
 
+	typedef DensityMatrixBase<TargettingType> BaseType;
 	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
@@ -100,7 +101,7 @@ class DensityMatrixLocal : public DensityMatrixBase<TargettingType> {
 
 public:
 
-	typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
+	typedef typename BaseType::BlockMatrixType BlockMatrixType;
 	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
 	typedef ParallelDensityMatrix<BlockMatrixType,
 	BasisWithOperatorsType,
@@ -116,7 +117,9 @@ public:
 	      progress_("DensityMatrixLocal"),
 	      data_(pBasis.size(),
 	            pBasis.partition()-1),
-	      debug_(p.debug),verbose_(p.verbose)
+	      direction_(p.direction),
+	      debug_(p.debug),
+	      verbose_(p.verbose)
 	{}
 
 	virtual BlockMatrixType& operator()()
@@ -125,14 +128,6 @@ public:
 	}
 
 	virtual SizeType rank() { return data_.rank(); }
-
-	virtual void check(int)
-	{
-	}
-
-	virtual void check2(int)
-	{
-	}
 
 	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 	{
@@ -230,7 +225,9 @@ private:
 
 	ProgressIndicatorType progress_;
 	BlockMatrixType data_;
-	bool debug_,verbose_;
+	SizeType direction_;
+	bool debug_;
+	bool verbose_;
 }; // class DensityMatrixLocal
 
 } // namespace Dmrg
