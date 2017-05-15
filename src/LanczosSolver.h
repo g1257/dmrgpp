@@ -129,7 +129,7 @@ public:
 	      mode_(WITH_INFO),
 	      stepsForEnergyConvergence_(params.stepsForEnergyConvergence),
 	      rng_(343311),
-	      lanczosVectors_(mat_,params.lotaMemory,storageForLanczosVectors)
+	      lanczosVectors_(mat_,params.lotaMemory,params.steps,storageForLanczosVectors)
 	{
 		setMode(params.options);
 		OstringStream msg;

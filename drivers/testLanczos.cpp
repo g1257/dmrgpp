@@ -19,6 +19,7 @@ int main()
 	PsimagLite::CrsMatrix<ComplexType> msparse(m);
 
 	SolverParametersType params;
+	params.lotaMemory = true;
 
 	PsimagLite::LanczosSolver<SolverParametersType,
 	        PsimagLite::CrsMatrix<ComplexType>,VectorType> lanczosSolver(msparse, params);

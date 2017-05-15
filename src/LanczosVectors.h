@@ -108,21 +108,32 @@ public:
 
 	LanczosVectors(const MatrixType& mat,
 	               bool lotaMemory,
+	               SizeType steps,
 	               DenseMatrixType* storage)
 	    : progress_("LanczosVectors"),
 	      mat_(mat),
 	      lotaMemory_(lotaMemory),
 	      dummy_(0),
 	      needsDelete_(false),
-	      ysaved_(0)
+	      ysaved_(0),
+	      data_(storage)
 	{
-		if (storage) {
-			data_ = storage;
+		if (storage || !lotaMemory)
 			return;
-		}
 
-		data_ = new DenseMatrixType();
-		needsDelete_ = true;
+		// if lotaMemory is set, we still degrade gracefully if we can't allocate
+		SizeType maxNstep =  std::min(steps , mat_.rows());
+		try {
+			data_ = new DenseMatrixType(mat_.rows(),maxNstep);
+			needsDelete_ = true;
+		} catch (std::exception&) {
+			// FIXME: option to store in secondary
+			OstringStream msg;
+			msg<<"Memory allocation failed, setting lotaMemory_=false\n";
+			progress_.printline(msg,std::cout);
+			lotaMemory_ = false;
+			data_ = 0;
+		}
 	}
 
 	~LanczosVectors()
@@ -132,7 +143,6 @@ public:
 
 	void resize(SizeType matrixRank,SizeType steps)
 	{
-		steps_= steps;
 		if (!lotaMemory_) return;
 		data_->reset(matrixRank,steps);
 	}
@@ -365,7 +375,6 @@ private:
 	bool lotaMemory_;
 	VectorElementType dummy_;
 	bool needsDelete_;
-	SizeType steps_;
 	VectorType ysaved_;
 	DenseMatrixType* data_;
 	DenseMatrixRealType reortho_;
