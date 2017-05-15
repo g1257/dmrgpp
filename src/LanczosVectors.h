@@ -251,10 +251,11 @@ public:
 			return;
 		}
 
+		RealType inverseBtmp = 1.0/btmp;
 		for (SizeType i = 0; i < mat_.rank(); i++) {
 			//lanczosVectors(i,j) = y[i];
 			VectorElementType tmp = y[i];
-			y[i] = x[i] / btmp;
+			y[i] = x[i] * inverseBtmp;
 			x[i] = -btmp * tmp;
 		}
 	}
