@@ -250,7 +250,7 @@ sub backupMakefile
 sub findGsl
 {
 	my $gslDefine = " -DUSE_GSL ";
-	my $gslLibs = " -lgsl -lgslcblas ";
+	my $gslLibs = " -lgslcblas -lgsl ";
 	my $slashTmp = "/tmp";
 	my @nothingFound = (" ", " ");
 	return @nothingFound unless (-w $slashTmp);
@@ -293,7 +293,7 @@ sub createConfigMake
 		return;
 	}
 
-	my $blasLapack = "-lblas -llapack";
+	my $blasLapack = " -llapack -lblas ";
 	while (<FILE>) {
 		next if (/ConfigBase\.make/);
 		print FOUT;
