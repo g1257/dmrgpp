@@ -126,6 +126,9 @@ public:
 		try {
 			data_ = new DenseMatrixType(mat_.rows(),maxNstep);
 			needsDelete_ = true;
+			OstringStream msg;
+			msg<<"lotaMemory_=true";
+			progress_.printline(msg,std::cout);
 		} catch (std::exception&) {
 			// FIXME: option to store in secondary
 			OstringStream msg;

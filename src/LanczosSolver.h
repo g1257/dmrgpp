@@ -136,6 +136,11 @@ public:
 		msg<<"Constructing... mat.rank="<<mat_.rows();
 		msg<<" maximum steps="<<steps_<<" maximum eps="<<eps_<<" requested";
 		progress_.printline(msg,std::cout);
+		if (storageForLanczosVectors) {
+			OstringStream msg2;
+			msg2<<"storageForLanczosVectors: managed elsewhere\n";
+			progress_.printline(msg2,std::cout);
+		}
 	}
 
 	// FIXME : Deprecate this function
