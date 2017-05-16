@@ -1,5 +1,37 @@
 #include "util.h"
 
+void csr_to_den( const PsimagLite::CrsMatrix<double>& a,
+                       PsimagLite::Matrix<double>& a_ )
+{
+     int ia = 0;
+     int ja = 0;
+     
+
+     int nrow_A = a.row();
+     int ncol_A = a.col();
+
+     for(ja=0; ja < ncol_A; ja++) {
+     for(ia=0; ia < nrow_A; ia++) {
+         a_(ia,ja) = 0;
+         };
+         };
+
+     for(ia=0; ia < nrow_A; ia++) {
+        int istarta = a.getRowPtr(ia);
+        int ienda   = a.getRowPtr(ia+1);
+        int ka = 0;
+        for(ka=istarta; ka < ienda; ka++) {
+             double aij = a.getValue(ka);
+             int    ja  = a.getCol(ka);
+             a_(ia,ja) = aij;
+             };
+        };
+}
+
+
+
+
+
 void csr_kron_mult_method(const int imethod,
                     const char transA,
                     const char transB,
@@ -362,6 +394,7 @@ void csr_kron_mult(const char transA,
  int nnz_A = csr_nnz(a);
  int nnz_B = csr_nnz(b);
 
+
  bool no_work = (csr_is_zeros(a) || csr_is_zeros(b));
  if (no_work) {
      return;
@@ -378,6 +411,69 @@ void csr_kron_mult(const char transA,
 	 const int ncol_A = a.col();
 	 const int nrow_B = b.row();
 	 const int ncol_B = b.col();
+
+    double threshold = 0.1;
+    bool use_dense_A = (nnz_A >= threshold * nrow_A * ncol_A);
+    bool use_dense_B = (nnz_B >= threshold * nrow_B * ncol_B);
+
+
+   // -----------------------------
+   // check for alternate algorithm
+   // -----------------------------
+   if (use_dense_A || use_dense_B) { 
+    
+
+    if (use_dense_A) {
+      PsimagLite::Matrix<double> a_(nrow_A, ncol_A);
+      csr_to_den(a, a_);
+
+     if (use_dense_B) {
+       PsimagLite::Matrix<double> b_(nrow_B, ncol_B);
+       csr_to_den(b, b_);
+
+       den_kron_mult(  transA, transB,
+                         a_, b_,
+                         yin, offsetY,
+                         xout, offsetX );
+
+       }
+     else {
+      // -----------
+      // B is sparse 
+      // -----------
+      
+      den_csr_kron_mult( transA, transB,
+                         a_, b,
+                         yin, offsetY,
+                         xout, offsetX );
+      }
+     }
+    else {
+      // -----------
+      // A is sparse
+      // -----------
+      assert( use_dense_B );
+      PsimagLite::Matrix<double> b_(nrow_B, ncol_B);
+      csr_to_den(b, b_);
+
+      csr_den_kron_mult( transA, transB,
+                         a, b_,
+                         yin, offsetY,
+                         xout, offsetX );
+
+      };
+
+
+   return;
+   };
+
+  // -----------------------------------
+  // both A and B are considered sparse
+  // -----------------------------------
+
+
+
+
 
      const int nrow_1 = (isTransA) ? ncol_A : nrow_A;
      const int ncol_1 = (isTransA) ? nrow_A : ncol_A;

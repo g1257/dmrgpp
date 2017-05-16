@@ -32,7 +32,7 @@ void csr_matmul_post( char trans_A,
  */ 
 
 
- const double threshold = 0.5;
+ const double threshold = 0.1;
 
  int nnz_A = csr_nnz(a);
  const int nrow_A = a.row();

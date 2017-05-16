@@ -4,9 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include "Matrix.h"
+#include "KronUtil.h"
 #include "MatrixNonOwned.h"
-#include "CrsMatrix.h"
 
 #ifndef MIN
 #define MIN(x,y)  (  ((x) < (y))? (x) : (y) )

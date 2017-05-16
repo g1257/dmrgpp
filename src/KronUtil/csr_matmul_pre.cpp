@@ -32,7 +32,7 @@ void csr_matmul_pre( char trans_A,
  */ 
 
 
- const double threshold = 0.5;
+ const double threshold = 0.1;
 
  const int nrow_A = a.row();
  const int ncol_A = a.col();
