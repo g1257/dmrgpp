@@ -89,7 +89,7 @@ public:
 
 	typedef LoadBalancerDefault::VectorSizeType VectorSizeType;
 
-	NoPthreadsNg(SizeType nNoPthreadsNg,int = 0)
+	NoPthreadsNg(SizeType nNoPthreadsNg,int,bool)
 	{
 		if (nNoPthreadsNg != 1)
 			throw PsimagLite::RuntimeError("NoPthreadsNg: ctor with threads != 1\n");
@@ -127,6 +127,8 @@ public:
 	SizeType threads() const { return 1; }
 
 	SizeType mpiProcs() const { return 1; }
+
+	void setAffinities(bool) {}
 }; // NoPthreadsNg class
 
 } // namespace Dmrg

@@ -86,10 +86,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LoadBalancerDefault.h"
 #include <sched.h>
 #include <unistd.h>
-#ifdef PTHREAD_ASSIGN_AFFINITIES
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
-#endif
 #endif
 #ifdef _GNU_SOURCE
 #include <errno.h>
@@ -144,11 +142,16 @@ public:
 
 	typedef LoadBalancerDefault::VectorSizeType VectorSizeType;
 
-	PthreadsNg(SizeType nPthreadsNg,int = 0)
-	    : nthreads_(nPthreadsNg),cores_(1)
+	PthreadsNg(SizeType nPthreadsNg,int,bool setAffinityDefault)
+	    : nthreads_(nPthreadsNg),cores_(1),setAffinities_(setAffinityDefault)
 	{
 		int cores = sysconf(_SC_NPROCESSORS_ONLN);
 		cores_ = (cores > 0) ? cores : 1;
+	}
+
+	void setAffinities(bool flag)
+	{
+		setAffinities_ = flag;
 	}
 
 	// no weights, no balancer ==> create weights, set all weigths to 1, delegate
@@ -189,7 +192,8 @@ public:
 			int ret = pthread_attr_init(attr[j]);
 			checkForError(ret);
 
-			setAffinity(attr[j],j,cores_);
+			if (setAffinities_)
+				setAffinity(attr[j],j,cores_);
 
 			ret = pthread_create(&thread_id[j],
 			                     attr[j],
@@ -233,7 +237,6 @@ private:
 	                 SizeType threadNum,
 	                 SizeType cores) const
 	{
-#ifdef PTHREAD_ASSIGN_AFFINITIES
 		cpu_set_t* cpuset = new cpu_set_t;
 		int cpu = threadNum % cores;
 		CPU_ZERO(cpuset);
@@ -244,7 +247,6 @@ private:
 		// clean up
 		delete cpuset;
 		cpuset = 0;
-#endif
 	}
 
 	void checkForError(int ret) const
@@ -257,6 +259,7 @@ private:
 
 	SizeType nthreads_;
 	SizeType cores_;
+	bool setAffinities_;
 }; // PthreadsNg class
 
 } // namespace Dmrg

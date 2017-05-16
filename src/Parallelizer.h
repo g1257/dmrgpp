@@ -137,7 +137,7 @@ class Parallelizer
 public:
 
 	Parallelizer(SizeType npthreads,Concurrency::CommType comm)
-	    : BaseType(npthreads,comm)
+	    : BaseType(npthreads, comm, Concurrency::setAffinitiesDefault)
 	{}
 
 };

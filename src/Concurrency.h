@@ -94,6 +94,7 @@ public:
 
 	static SizeType mode;
 	static SizeType npthreads;
+	static bool setAffinitiesDefault;
 
 #ifndef USE_PTHREADS
 	typedef int MutexType;
@@ -250,6 +251,26 @@ public:
 	{
 		if (!hasMpi()) return false;
 		return mpiDisabled_(label);
+	}
+
+	static void setOptions(SizeType nthreads, bool affinities)
+	{
+		npthreads = nthreads;
+		setAffinitiesDefault = affinities;
+		if (nthreads==1) return;
+#ifndef USE_PTHREADS
+		PsimagLite::String message1(__FILE__);
+		message1 += " FATAL: You are requesting nthreads>0 but you ";
+		message1 += "did not compile with USE_PTHREADS enabled\n";
+		message1 += " Either set Threads=1 in the input file (you won't ";
+		message1 += "have threads though) or\n";
+		message1 += " add -DUSE_PTHREADS to the CPP_FLAGS in your Makefile ";
+		message1 += "and recompile\n";
+		throw PsimagLite::RuntimeError(message1.c_str());
+#else
+		std::cout<<"Concurrency::npthreads="<<npthreads<<"\n";
+		std::cout<<"Concurrency::setAffinitiesDefault="<<setAffinitiesDefault<<"\n";
+#endif
 	}
 
 private:
