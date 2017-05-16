@@ -250,7 +250,7 @@ sub backupMakefile
 sub findGsl
 {
 	my $gslDefine = " -DUSE_GSL ";
-	my $gslLibs = " -lgslcblas -lgsl ";
+	my $gslLibs = " -lgsl -lgslcblas ";
 	my $slashTmp = "/tmp";
 	my @nothingFound = (" ", " ");
 	return @nothingFound unless (-w $slashTmp);
