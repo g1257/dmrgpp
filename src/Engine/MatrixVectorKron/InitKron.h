@@ -106,7 +106,8 @@ public:
 	typedef typename ModelType::LinkProductStructType LinkProductStructType;
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 
-	InitKron(const ModelType& model,const ModelHelperType& modelHelper)
+	InitKron(const ModelType& model,
+	         const ModelHelperType& modelHelper)
 	    : model_(model),
 	      modelHelper_(modelHelper),
 	      gengroupLeft_(modelHelper_.leftRightSuper().left()),
@@ -126,6 +127,12 @@ public:
 	}
 
 	bool useSymmetry() const { return KRON_USE_SYMMETRY; }
+
+	bool loadBalance() const
+	{
+		return (model_.params().options.find("KronNoLoadBalance")
+		        == PsimagLite::String::npos);
+	}
 
 	const ArrayOfMatStructType& xc(SizeType ic) const
 	{

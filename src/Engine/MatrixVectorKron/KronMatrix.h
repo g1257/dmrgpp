@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "Parallelizer.h"
 #include "PsimagLite.h"
+#include "ProgressIndicator.h"
 
 namespace Dmrg {
 
@@ -106,6 +107,7 @@ public:
 
 	KronMatrix(const InitKronType& initKron)
 	    : initKron_(initKron),
+	      progress_("KronMatrix"),
 	      vstart_(initKron_.patch(GenIjPatchType::LEFT).size() + 1),
 	      weightsOfPatches_(initKron_.patch(GenIjPatchType::LEFT).size(), 1)
 	{
@@ -116,7 +118,11 @@ public:
 		yin_.resize(nsize, 0.0);
 		xout_.resize(nsize, 0.0);
 
-		std::cout<<"KronMatrix: preparation done for size="<<initKron.size()<<"\n";
+		PsimagLite::String str((initKron.loadBalance()) ? "true" : "false");
+		PsimagLite::OstringStream msg;
+		msg<<"KronMatrix: preparation done for size="<<initKron.size();
+		msg<<" loadBalance "<<str;
+		progress_.printline(msg, std::cout);
 	}
 
 	void matrixVectorProduct(VectorType& vout, const VectorType& vin) const
@@ -129,7 +135,11 @@ public:
 		ParallelizerType parallelConnections(PsimagLite::Concurrency::npthreads,
 		                                     PsimagLite::MPI::COMM_WORLD);
 
-		parallelConnections.loopCreate(kc, weightsOfPatches_);
+		if (initKron_.loadBalance())
+			parallelConnections.loopCreate(kc, weightsOfPatches_);
+		else
+			parallelConnections.loopCreate(kc);
+
 		kc.sync();
 
 		copyOut(vout, xout_);
@@ -297,7 +307,7 @@ private:
 	const KronMatrix& operator=(const KronMatrix&);
 
 	const InitKronType& initKron_;
-
+	PsimagLite::ProgressIndicator progress_;
 	VectorSizeType vstart_;
 	VectorSizeType weightsOfPatches_;
 	mutable VectorType yin_;

@@ -191,6 +191,7 @@ public:
 		knownLabels_.push_back("TridiagSteps");
 		knownLabels_.push_back("TruncationTolerance");
 		knownLabels_.push_back("GeometryMaxConnections");
+		knownLabels_.push_back("LanczosSaveLanczosVectors");
 	}
 
 	~InputCheck()
@@ -287,6 +288,7 @@ public:
 			\item [KroneckerDumper] TBW
 			\item [extendedPrint] TBW
 			\item [useSvd] TBW
+			\item [KronNoLoadBalance] Disable load balancing for MatrixVectorKron
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,const PsimagLite::String& val,SizeType)
@@ -338,6 +340,7 @@ public:
 		registerOpts.push_back("doNotCheckTwoSiteDmrg");
 		registerOpts.push_back("extendedPrint");
 		registerOpts.push_back("useSvd");
+		registerOpts.push_back("KronNoLoadBalance");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);
