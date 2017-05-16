@@ -4,7 +4,7 @@ include ConfigBase.make
 # Here add your lapack and blas libraries or say NO_LAPACK
 # CPPFLAGS += -DNO_LAPACK
 # If on MacOs please say LDFLAGS += -framework Accelerate
-LDFLAGS += -lblas -llapack
+LDFLAGS += -llapack -lblas
 
 # Here add -lpthread if threading is needed and also 
 # set -DUSE_PTHREADS below

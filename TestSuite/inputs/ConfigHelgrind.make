@@ -14,4 +14,4 @@ CPPFLAGS +=   -g3
 # Here add your lapack and blas libraries or say NO_LAPACK
 # CPPFLAGS += -DNO_LAPACK
 # If on MacOs please say LDFLAGS += -framework Accelerate
-LDFLAGS += -lblas -llapack 
+LDFLAGS += -llapack -lblas

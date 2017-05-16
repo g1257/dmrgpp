@@ -289,6 +289,7 @@ public:
 			\item [extendedPrint] TBW
 			\item [useSvd] TBW
 			\item [KronNoLoadBalance] Disable load balancing for MatrixVectorKron
+			\item [setAffinities] TBW
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,const PsimagLite::String& val,SizeType)
