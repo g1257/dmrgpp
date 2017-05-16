@@ -112,14 +112,14 @@ public:
 	{
 		setMode(params.options);
 		OstringStream msg;
-		msg<<"Constructing... mat.rank="<<mat_.rank();
+		msg<<"Constructing... mat.rank="<<mat_.rows();
 		msg<<" steps="<<steps_<<" eps="<<eps_;
 		progress_.printline(msg,std::cout);
 	}
 
 	virtual void computeGroundState(RealType& gsEnergy,VectorType& z)
 	{
-		SizeType n =mat_.rank();
+		SizeType n =mat_.rows();
 		RealType atmp=0.0;
 		VectorType y(n);
 

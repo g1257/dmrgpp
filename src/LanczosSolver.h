@@ -94,7 +94,7 @@ namespace PsimagLite {
 
 //! MatrixType must have the following interface:
 //! 	RealType type to indicate the matrix type
-//! 	rank() member function to indicate the rank of the matrix
+//! 	rows() member function to indicate the rank of the matrix
 //! 	matrixVectorProduct(typename Vector< RealType>::Type& x,const
 //!     typename Vector< RealType>::Type& const y)
 //!    	   member function that implements the operation x += Hy
@@ -133,7 +133,7 @@ public:
 	{
 		setMode(params.options);
 		OstringStream msg;
-		msg<<"Constructing... mat.rank="<<mat_.rank();
+		msg<<"Constructing... mat.rank="<<mat_.rows();
 		msg<<" maximum steps="<<steps_<<" maximum eps="<<eps_<<" requested";
 		progress_.printline(msg,std::cout);
 	}
@@ -141,7 +141,7 @@ public:
 	// FIXME : Deprecate this function
 	virtual void computeGroundState(RealType& gsEnergy,VectorType& z)
 	{
-		SizeType n =mat_.rank();
+		SizeType n =mat_.rows();
 		RealType atmp=0.0;
 		VectorType y(n);
 
@@ -168,7 +168,7 @@ public:
 			return;
 		}
 
-		SizeType n=mat_.rank();
+		SizeType n=mat_.rows();
 		VectorType y(n);
 
 		RealType atmp=0.0;
@@ -177,7 +177,7 @@ public:
 			atmp += PsimagLite::real(y[i]*PsimagLite::conj(y[i]));
 		}
 		atmp = 1.0 / sqrt (atmp);
-		for (SizeType i = 0; i < mat_.rank(); i++) y[i] *= atmp;
+		for (SizeType i = 0; i < mat_.rows(); i++) y[i] *= atmp;
 
 		TridiagonalMatrixType ab;
 
@@ -204,7 +204,7 @@ public:
 	{
 		if (excited == 0) return computeGroundState(gsEnergy,z);
 
-		SizeType n =mat_.rank();
+		SizeType n =mat_.rows();
 		RealType atmp=0.0;
 		VectorType y(n);
 
@@ -233,7 +233,7 @@ public:
 			return;
 		}
 
-		SizeType n=mat_.rank();
+		SizeType n=mat_.rows();
 		VectorType y(n);
 
 		RealType atmp=0.0;
@@ -242,7 +242,7 @@ public:
 			atmp += PsimagLite::real(y[i]*PsimagLite::conj(y[i]));
 		}
 		atmp = 1.0 / sqrt (atmp);
-		for (SizeType i = 0; i < mat_.rank(); i++) y[i] *= atmp;
+		for (SizeType i = 0; i < mat_.rows(); i++) y[i] *= atmp;
 
 		TridiagonalMatrixType ab;
 
@@ -284,25 +284,25 @@ public:
 	{
 		SizeType& max_nstep = steps_;
 
-		if (initVector.size()!=mat_.rank()) {
+		if (initVector.size()!=mat_.rows()) {
 			String msg("decomposition: vector size ");
 			msg += ttos(initVector.size()) + " but matrix size ";
-			msg += ttos(mat_.rank()) + "\n";
+			msg += ttos(mat_.rows()) + "\n";
 			throw RuntimeError(msg);
 		}
 
-		VectorType x(mat_.rank());
+		VectorType x(mat_.rows());
 		VectorType y = initVector;
 		RealType atmp = 0;
-		for (SizeType i = 0; i < mat_.rank(); i++) {
+		for (SizeType i = 0; i < mat_.rows(); i++) {
 			x[i] = 0;
 			atmp += PsimagLite::real(y[i]*PsimagLite::conj(y[i]));
 		}
 
 		for (SizeType i = 0; i < y.size(); i++) y[i] /= sqrt(atmp);
 
-		if (max_nstep > mat_.rank()) max_nstep = mat_.rank();
-		lanczosVectors_.resize(mat_.rank(),max_nstep);
+		if (max_nstep > mat_.rows()) max_nstep = mat_.rows();
+		lanczosVectors_.resize(mat_.rows(),max_nstep);
 		ab.resize(max_nstep,0);
 
 		if (mode_ & ALLOWS_ZERO && lanczosVectors_.isHyZero(y,ab)) return;
@@ -315,7 +315,7 @@ public:
 		typename Vector<RealType>::Type nullVector;
 		groundAllocations(max_nstep + 2,false);
 		for (; j < max_nstep; j++) {
-			for (SizeType i = 0; i < mat_.rank(); i++)
+			for (SizeType i = 0; i < mat_.rows(); i++)
 				lanczosVectors_(i,j) = y[i];
 
 			RealType btmp = 0;
@@ -326,7 +326,7 @@ public:
 			if (eps_>0) {
 				ground(enew,j+1, ab,nullVector);
 				if (fabs (enew - eold) < eps_) exitFlag=true;
-				if (exitFlag && mat_.rank()<=4) break;
+				if (exitFlag && mat_.rows()<=4) break;
 				if (exitFlag && j >= minSteps_) break;
 			}
 
@@ -335,18 +335,18 @@ public:
 
 		if (j < max_nstep) {
 			max_nstep = j + 1;
-			lanczosVectors_.reset(mat_.rank(),max_nstep);
+			lanczosVectors_.reset(mat_.rows(),max_nstep);
 			ab.resize(max_nstep);
 		}
 
 		OstringStream msg;
-		msg<<"Decomposition done for mat.rank="<<mat_.rank();
+		msg<<"Decomposition done for mat.rank="<<mat_.rows();
 		msg<<" after "<<j<<" steps";
 		if (eps_>0) msg<<", actual eps="<<fabs(enew - eold);
 
 		progress_.printline(msg,std::cout);
 
-		if (j == max_nstep && j != mat_.rank()) {
+		if (j == max_nstep && j != mat_.rows()) {
 			OstringStream msg2;
 			msg2<<"WARNING: Maximum number of steps used. ";
 			msg2<<"Increasing this maximum is recommended.";
@@ -526,7 +526,7 @@ private:
 	                             const VectorType&,
 	                             SizeType excited)
 	{
-		SizeType n =mat_.rank();
+		SizeType n =mat_.rows();
 		Matrix<VectorElementType> a(n,n);
 		for (SizeType i=0;i<n;i++) {
 			VectorType x(n);

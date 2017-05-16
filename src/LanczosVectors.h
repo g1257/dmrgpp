@@ -215,7 +215,7 @@ public:
 		msg<<"Testing whether matrix is zero...";
 		progress_.printline(msg,std::cout);
 
-		VectorType x(mat_.rank());
+		VectorType x(mat_.rows());
 
 		for (SizeType i = 0; i < x.size(); i++) x[i] = 0.0;
 
@@ -225,7 +225,7 @@ public:
 			if (PsimagLite::real(x[i]*PsimagLite::conj(x[i]))!=0) return false;
 
 		for (SizeType j=0; j < data_->n_col(); j++) {
-			for (SizeType i = 0; i < mat_.rank(); i++) {
+			for (SizeType i = 0; i < mat_.rows(); i++) {
 				data_->operator()(i,j) = (i==j) ? 0.0 : 1.1;
 			}
 			ab.a(j) = 0.0;
@@ -242,10 +242,10 @@ public:
 		mat_.matrixVectorProduct (x, y); // x+= Hy
 
 		atmp = 0.0;
-		for (SizeType i = 0; i < mat_.rank(); i++)
+		for (SizeType i = 0; i < mat_.rows(); i++)
 			atmp += PsimagLite::real(y[i]*PsimagLite::conj(x[i]));
 		btmp = 0.0;
-		for (SizeType i = 0; i < mat_.rank(); i++) {
+		for (SizeType i = 0; i < mat_.rows(); i++) {
 			x[i] -= atmp * y[i];
 			btmp += PsimagLite::real(x[i]*PsimagLite::conj(x[i]));
 		}
@@ -253,7 +253,7 @@ public:
 		btmp = sqrt (btmp);
 
 		if (fabs(btmp)<1e-10) {
-			for (SizeType i = 0; i < mat_.rank(); i++) {
+			for (SizeType i = 0; i < mat_.rows(); i++) {
 				VectorElementType tmp = y[i];
 				y[i] = x[i];
 				x[i] = -btmp * tmp;
@@ -262,7 +262,7 @@ public:
 		}
 
 		RealType inverseBtmp = 1.0/btmp;
-		for (SizeType i = 0; i < mat_.rank(); i++) {
+		for (SizeType i = 0; i < mat_.rows(); i++) {
 			//lanczosVectors(i,j) = y[i];
 			VectorElementType tmp = y[i];
 			y[i] = x[i] * inverseBtmp;

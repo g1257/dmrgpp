@@ -93,7 +93,7 @@ namespace PsimagLite {
 
 /** MatrixType must have the following interface:
 	 * RealType type to indicate the matrix type
-	 * rank() member function to indicate the rank of the matrix
+	 * rows() member function to indicate the rank of the matrix
 	 * matrixVectorProduct(typename Vector< RealType>::Type& x,const
 	 *        typename Vector< RealType>::Type& const y)
 	 *    member function that implements the operation x += Hy
@@ -131,13 +131,13 @@ public:
 	      params_(params),
 	      mode_(WITH_INFO),
 	      rng_(343311),
-	      lanczosVectors_(mat,params.lotaMemory,storageForLanczosVectors)
+	      lanczosVectors_(mat,params.lotaMemory,params.steps,storageForLanczosVectors)
 	{
 		params.steps=400;
 		setMode(params.options);
 		computeAandB();
 		PsimagLite::OstringStream msg;
-		msg<<"Constructing... mat.rank="<<mat_.rank()<<" steps="<<params.steps;
+		msg<<"Constructing... mat.rank="<<mat_.rows()<<" steps="<<params.steps;
 		progress_.printline(msg,std::cout);
 	}
 
@@ -180,7 +180,7 @@ public:
 		lanczosVectors_.reset(y.size(),params_.steps);
 		ab.resize(2*params_.steps,0);
 		for (SizeType j=0; j < lanczosVectors_.n_col(); j++) {
-			for (SizeType i = 0; i < mat_.rank(); i++)
+			for (SizeType i = 0; i < mat_.rows(); i++)
 				lanczosVectors_(i,j) = y[i];
 			RealType atmp = 0;
 			RealType btmp = 0;
@@ -207,17 +207,17 @@ public:
 		RealType val = (isFirst) ? 1.0 : 2.0;
 
 		atmp = 0.0;
-		for (SizeType i = 0; i < mat_.rank(); i++)
+		for (SizeType i = 0; i < mat_.rows(); i++)
 			atmp += PsimagLite::real(y[i]*PsimagLite::conj(y[i]));
 
-		for (SizeType i = 0; i < mat_.rank(); i++) {
+		for (SizeType i = 0; i < mat_.rows(); i++) {
 			VectorElementType tmp = val*z[i] - x[i];
 			x[i] = y[i];
 			y[i] = tmp;
 		}
 
 		btmp = 0.0;
-		for (SizeType i = 0; i < mat_.rank(); i++)
+		for (SizeType i = 0; i < mat_.rows(); i++)
 			btmp += PsimagLite::real(y[i]*PsimagLite::conj(x[i]));
 	}
 
@@ -274,10 +274,10 @@ private:
 	class InternalMatrix {
 	public:
 		InternalMatrix(const MatrixType& mat)
-		    : matx_(mat),y_(matx_.rank())
+		    : matx_(mat),y_(matx_.rows())
 		{}
 
-		SizeType rank() const { return matx_.rank(); }
+		SizeType rows() const { return matx_.rows(); }
 
 		void matrixVectorProduct (VectorType &x,const VectorType &y) const
 		{
@@ -307,10 +307,10 @@ private:
 		LanczosSolver<SolverParametersType,InternalMatrix,VectorType>
 		        lanczosSolver2(mat2,params);
 
-		VectorType z2(mat_.rank(),0);
+		VectorType z2(mat_.rows(),0);
 		lanczosSolver2.computeGroundState(eMax,z2);
 
-		VectorType z(mat_.rank(),0);
+		VectorType z(mat_.rows(),0);
 		LanczosSolver<SolverParametersType,MatrixType,VectorType>
 		        lanczosSolver(mat_,params);
 		RealType eMin = 0;
