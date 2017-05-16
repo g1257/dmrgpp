@@ -101,7 +101,7 @@ class	CorrectionVectorFunction {
 				throw PsimagLite::RuntimeError("Matsubara only with KRYLOV\n");
 		}
 
-		SizeType rank() const { return m_.rank(); }
+		SizeType rows() const { return m_.rows(); }
 
 		void matrixVectorProduct(VectorType& x,const VectorType& y) const
 		{

@@ -122,7 +122,7 @@ public:
 		checkKron();
 	}
 
-	SizeType rank() const { return initKron_.size(); }
+	SizeType rows() const { return initKron_.size(); }
 
 	template<typename SomeVectorType>
 	void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y) const
@@ -150,7 +150,7 @@ private:
 		return;
 #endif
 
-		SizeType n = rank();
+		SizeType n = rows();
 		std::cout<<n<<"\n";
 		FullMatrixType m(n, n);
 		for (SizeType i = 0; i < n; ++i) {

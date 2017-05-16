@@ -464,7 +464,7 @@ private:
 			lanczosOrDavidson = new LanczosSolverType(lanczosHelper,params);
 		}
 
-		if (lanczosHelper.rank()==0) {
+		if (lanczosHelper.rows()==0) {
 			energyTmp=10000;
 			PsimagLite::OstringStream msg;
 			msg<<"Early exit due to matrix rank being zero.";
@@ -475,7 +475,7 @@ private:
 		}
 
 		if (!reflectionOperator_.isEnabled()) {
-			tmpVec.resize(lanczosHelper.rank());
+			tmpVec.resize(lanczosHelper.rows());
 			try {
 				energyTmp = computeLevel(*lanczosOrDavidson,tmpVec,initialVector);
 			} catch (std::exception& e) {
@@ -485,7 +485,7 @@ private:
 				msg0<<"trying with exact diagonalization...";
 				progress_.printline(msg0,std::cout);
 
-				VectorRealType eigs(lanczosHelper.rank());
+				VectorRealType eigs(lanczosHelper.rows());
 				PsimagLite::Matrix<ComplexOrRealType> fm;
 				lanczosHelper.fullDiag(eigs,fm);
 				for (SizeType j = 0; j < eigs.size(); ++j)

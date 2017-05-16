@@ -152,7 +152,7 @@ private:
 
 	VectorType multiply(const MatrixType& A,const VectorType& v) const
 	{
-		VectorType y(A.rank(),0);
+		VectorType y(A.rows(),0);
 		A.matrixVectorProduct(y,v);
 		return y;
 	}
