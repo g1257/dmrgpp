@@ -303,7 +303,7 @@ private:
 	             typename PsimagLite::Vector<SizeType>::Type& steps)
 	{
 		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
-		ParallelizerType threadedTriDiag(1,0);
+		ParallelizerType threadedTriDiag(1,0,false);
 
 		ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,currentTime_,model_,ioIn_);
 

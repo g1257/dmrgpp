@@ -342,11 +342,9 @@ int main(int argc,char *argv[])
 	if (dmrgSolverParams.options.find("minimizeDisk") != PsimagLite::String::npos)
 		dmrgSolverParams.options += ",noSaveWft,noSaveStacks,noSaveData";
 
-#ifndef USE_PTHREADS
-	inputCheck.checkForThreads(dmrgSolverParams.nthreads);
-#endif
-
-	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
+	bool setAffinities = (dmrgSolverParams.options.find("setAffinities")
+                                  != PsimagLite::String::npos);
+	ConcurrencyType::setOptions(dmrgSolverParams.nthreads, setAffinities);
 
 	registerSignals();
 

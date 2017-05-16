@@ -198,7 +198,9 @@ int main(int argc,char **argv)
 	//ParametersModelType mp(io);
 	ParametersDmrgSolverType dmrgSolverParams(io,false,true);
 
-	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
+	bool setAffinities = (dmrgSolverParams.options.find("setAffinities")
+                                  != PsimagLite::String::npos);
+	ConcurrencyType::setOptions(dmrgSolverParams.nthreads, setAffinities);
 
 	if (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos) {
 		mainLoop0<MySparseMatrixComplex>(io,dmrgSolverParams,inputCheck, list);

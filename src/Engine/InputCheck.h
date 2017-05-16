@@ -341,6 +341,7 @@ public:
 		registerOpts.push_back("extendedPrint");
 		registerOpts.push_back("useSvd");
 		registerOpts.push_back("KronNoLoadBalance");
+		registerOpts.push_back("setAffinities");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);
@@ -350,20 +351,6 @@ public:
 	bool isSet(const PsimagLite::String& thisOption) const
 	{
 		return optsReadable_->isSet(thisOption);
-	}
-
-	void checkForThreads(SizeType nthreads) const
-	{
-		if (nthreads==1) return;
-
-		PsimagLite::String message1(__FILE__);
-		message1 += " FATAL: You are requesting nthreads>0 but you ";
-		message1 += "did not compile with USE_PTHREADS enabled\n";
-		message1 += " Either set Threads=1 in the input file (you won't ";
-		message1 += "have threads though) or\n";
-		message1 += " add -DUSE_PTHREADS to the CPP_FLAGS in your Makefile ";
-		message1 += "and recompile\n";
-		throw PsimagLite::RuntimeError(message1.c_str());
 	}
 
 	void usageMain(const PsimagLite::String& name) const

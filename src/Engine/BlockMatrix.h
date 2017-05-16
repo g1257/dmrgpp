@@ -359,7 +359,8 @@ diagonalise(BlockMatrix<PsimagLite::Matrix<SomeFieldType> >& C,
 	SizeType savedNpthreads = ConcurrencyType::npthreads;
 	ConcurrencyType::npthreads = 1;
 	ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,
-	                              PsimagLite::MPI::COMM_WORLD);
+	                              PsimagLite::MPI::COMM_WORLD,
+	                              false);
 
 	LoopForDiagType helper(C,eigs,option);
 
