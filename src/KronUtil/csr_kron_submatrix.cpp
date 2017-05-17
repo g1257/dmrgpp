@@ -1,8 +1,10 @@
 #include "util.h"
-void csr_kron_submatrix( 
-         const PsimagLite::CrsMatrix<double>& a,
 
-      const PsimagLite::CrsMatrix<double>& b,
+template<typename ComplexOrRealType>
+void csr_kron_submatrix( 
+         const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
+
+      const PsimagLite::CrsMatrix<ComplexOrRealType>& b,
          
          const int nrindex, 
          const int ncindex, 
@@ -10,7 +12,7 @@ void csr_kron_submatrix(
          const PsimagLite::Vector<int>::Type& rindex,
          const PsimagLite::Vector<int>::Type& cindex,
 
-         PsimagLite::CrsMatrix<double>& h)
+         PsimagLite::CrsMatrix<ComplexOrRealType>& h)
 {
 /*
  * -------------------------------------------------
@@ -99,8 +101,8 @@ void csr_kron_submatrix(
      for(kb=istartb; kb < iendb; kb++) {
          int ja = a.getCol(ka);
          int jb = b.getCol(kb);
-         double aij = a.getValue(ka);
-         double bij = b.getValue(kb);
+         ComplexOrRealType aij = a.getValue(ka);
+         ComplexOrRealType bij = b.getValue(kb);
 
          int jc = jb + ja*ncol_B;
      
@@ -109,7 +111,7 @@ void csr_kron_submatrix(
          int jh = cmap[jc];
          int isvalid = (0 <= jh) && (jh < ncol_H);
          if (isvalid) {
-            double cij = aij * bij;
+            ComplexOrRealType cij = aij * bij;
 
             assert((ifree < max_nnz));
 

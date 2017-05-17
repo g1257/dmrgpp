@@ -1,11 +1,13 @@
 #include "util.h"
-bool csr_is_zeros(const PsimagLite::CrsMatrix<double>& a)
+
+template<typename ComplexOrRealType>
+bool csr_is_zeros(const PsimagLite::CrsMatrix<ComplexOrRealType>& a)
 {
    // ----------------------------------------------------
    // check whether a sparse matrix is the zero matrix
    // ----------------------------------------------------
         
-   const double zero = 0;
+   const ComplexOrRealType zero = 0;
    const int nrow_A = a.row();
    const int ncol_A = a.col();
 
@@ -20,7 +22,7 @@ bool csr_is_zeros(const PsimagLite::CrsMatrix<double>& a)
          bool isok = ((0 <= ja) && (ja < ncol_A)); 
          assert( isok );
 
-         double aij = a.getValue(k);
+         ComplexOrRealType aij = a.getValue(k);
          if (isok && (aij != zero)) { return( false ); };
        };
     };

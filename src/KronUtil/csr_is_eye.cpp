@@ -1,5 +1,7 @@
 #include "util.h"
-bool csr_is_eye(const PsimagLite::CrsMatrix<double>& a)
+
+template<typename ComplexOrRealType>
+bool csr_is_eye(const PsimagLite::CrsMatrix<ComplexOrRealType>& a)
 {
    // ----------------------------------------------------
    // check whether a sparse matrix is the identity matrix
@@ -23,8 +25,8 @@ bool csr_is_eye(const PsimagLite::CrsMatrix<double>& a)
      bool has_diagonal  = false;;
      for(int k=istart; k < iend; k++) {
         int ja = a.getCol(k);
-        double aij = a.getValue(k);
-        double eij = (ia == ja) ? 1 : 0;
+        ComplexOrRealType aij = a.getValue(k);
+        ComplexOrRealType eij = (ia == ja) ? 1 : 0;
         if (ia == ja) { has_diagonal = true; };
 
         is_eye = (aij == eij);

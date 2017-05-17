@@ -1,5 +1,7 @@
 #include "util.h"
-bool den_is_eye(const PsimagLite::Matrix<double>& a_)
+
+template<typename ComplexOrRealType>
+bool den_is_eye(const PsimagLite::Matrix<ComplexOrRealType>& a_)
 {
 	const int nrow_A = a_.n_row();
 	const int ncol_A = a_.n_col();
@@ -18,8 +20,8 @@ bool den_is_eye(const PsimagLite::Matrix<double>& a_)
   for(ja=0; ja < ncol_A; ja++) {
     int ia = 0;
     for(ia=0; ia < nrow_A; ia++) {
-       double aij = a_(ia,ja);
-       double eij = (ia == ja) ? 1 : 0;
+       ComplexOrRealType aij = a_(ia,ja);
+       ComplexOrRealType eij = (ia == ja) ? 1 : 0;
 
        bool is_eye = (aij == eij);
        if (!is_eye) { return( false ); };

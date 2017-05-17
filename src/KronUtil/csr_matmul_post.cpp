@@ -1,19 +1,18 @@
 #include "util.h"
 
-void csr_matmul_post( char trans_A, 
-
-                     const PsimagLite::CrsMatrix<double>& a,
-
-                     const int nrow_Y, 
-                     const int ncol_Y, 
-                     const PsimagLite::MatrixNonOwned<const double>& yin,
-
-                     const int nrow_X, 
-                     const int ncol_X, 
-                     PsimagLite::MatrixNonOwned<double>& xout)
+template<typename ComplexOrRealType>
+void csr_matmul_post(char trans_A,
+                     const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
+                     const int nrow_Y,
+                     const int ncol_Y,
+                     const PsimagLite::MatrixNonOwned<const ComplexOrRealType>& yin,
+                     const int nrow_X,
+                     const int ncol_X,
+                     PsimagLite::MatrixNonOwned<ComplexOrRealType>& xout)
 {
-    const int idebug = 0;
-/*
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	const int idebug = 0;
+	/*
  * -------------------------------------------------------
  * A in compressed sparse ROW format
  *
@@ -29,105 +28,104 @@ void csr_matmul_post( char trans_A,
  *  X(nrow_X,ncol_X) +=  Y(nrow_Y,ncol_Y) * A(nrow_A,ncol_A)
  *  requires  (nrow_X == nrow_Y) && ( ncol_Y == nrow_A) && (ncol_X == ncol_A)
  * -------------------------------------------------------
- */ 
+ */
+
+	const RealType threshold = 0.1;
+
+	int nnz_A = csr_nnz(a);
+	const int nrow_A = a.row();
+	const int ncol_A = a.col();
+	int use_dense_storage = (nnz_A >= threshold * nrow_A * ncol_A);
+
+	if (use_dense_storage) {
+		/*
+	* ----------------------------------
+	* sparse matrix A is sufficiently dense that
+	* we convert to dense storage to perform
+	* more efficient matrix operations
+	* ----------------------------------
+	*/
+		PsimagLite::Matrix<ComplexOrRealType> a_(nrow_A, ncol_A);
+
+		if (idebug >= 1) {
+			printf("csr_matmul_post:nrow_A %d,ncol_A %d,nnz_A %d\n",
+			       nrow_A, ncol_A, nnz_A );
+		};
+
+		crsMatrixToFullMatrix(a_, a);
+
+		den_matmul_post( trans_A,
+		                 nrow_A, ncol_A,  a_,
+
+		                 nrow_Y,ncol_Y, yin,
+		                 nrow_X,ncol_X, xout);
+		return;
+	};
+
+	int isTranspose = (trans_A == 'T') || (trans_A == 't');
 
 
- const double threshold = 0.1;
 
- int nnz_A = csr_nnz(a);
- const int nrow_A = a.row();
- const int ncol_A = a.col();
- int use_dense_storage = (nnz_A >= threshold * nrow_A * ncol_A);
+	if (isTranspose) {
+		/*
+	*   ----------------------------------------------------------
+	*   X(nrow_X,ncol_X) +=  Y(nrow_Y,ncol_Y) * transpose(A(nrow_A,ncol_A))
+	*   X(ix,jx) +=  Y(iy,jy) * transpose( A(ia,ja) )
+	*   X(ix,jx) += sum( Y(iy, ja) * At(ja,ia), over ja )
+	*   ----------------------------------------------------------
+	*/
 
- if (use_dense_storage) {
-   /*
-    * ----------------------------------
-    * sparse matrix A is sufficiently dense that
-    * we convert to dense storage to perform 
-    * more efficient matrix operations
-    * ----------------------------------
-    */
-   PsimagLite::Matrix<double> a_(nrow_A, ncol_A);
+		assert((nrow_X == nrow_Y) && (ncol_Y == ncol_A) && (ncol_X == nrow_A));
 
-   if (idebug >= 1) {
-     printf("csr_matmul_post:nrow_A %d,ncol_A %d,nnz_A %d\n",
-             nrow_A, ncol_A, nnz_A );
-     };
+		int ia = 0;
+		for(ia=0; ia < nrow_A; ia++) {
+			int istart = a.getRowPtr(ia);
+			int iend = a.getRowPtr(ia+1);
+			int k = 0;
+			for(k=istart; k < iend; k++) {
+				int ja = a.getCol(k);
+				ComplexOrRealType aij = a.getValue(k);
+				ComplexOrRealType atji = aij;
 
-   crsMatrixToFullMatrix(a_, a);
-   
-   den_matmul_post( trans_A,
-                   nrow_A, ncol_A,  a_,
+				int iy = 0;
+				for(iy=0; iy < nrow_Y; iy++) {
+					int ix = iy;
+					int jx = ia;
 
-                   nrow_Y,ncol_Y, yin,
-                   nrow_X,ncol_X, xout);
-   return;
-   };
+					xout(ix,jx) += (yin(iy,ja) * atji);
+				};
+			};
+		};
 
- int isTranspose = (trans_A == 'T') || (trans_A == 't');
+	}
+	else  {
+		/*
+	* ---------------------------------------------
+	* X(nrow_X,ncol_X) += Y(nrow_Y,ncol_Y) * A(nrow_A,ncol_A)
+	* X(ix,jx) += sum( Y(iy,ia) * A(ia,ja), over ia )
+	* ---------------------------------------------
+	*/
+		assert((nrow_X == nrow_Y) && (ncol_Y == nrow_A) && (ncol_X == ncol_A));
 
+		int ia = 0;
+		for(ia=0; ia < nrow_A; ia++) {
+			int istart = a.getRowPtr(ia);
+			int iend = a.getRowPtr(ia+1);
+			int k = 0;
+			for(k=istart; k < iend; k++) {
+				int ja = a.getCol(k);
+				ComplexOrRealType aij = a.getValue(k);
+				int iy = 0;
+				for(iy = 0; iy < nrow_Y; iy++) {
+					int ix = iy;
+					int jx = ja;
 
-
- if (isTranspose) {
-   /*
-    *   ----------------------------------------------------------
-    *   X(nrow_X,ncol_X) +=  Y(nrow_Y,ncol_Y) * transpose(A(nrow_A,ncol_A))
-    *   X(ix,jx) +=  Y(iy,jy) * transpose( A(ia,ja) )
-    *   X(ix,jx) += sum( Y(iy, ja) * At(ja,ia), over ja )
-    *   ----------------------------------------------------------
-    */
-
-    assert((nrow_X == nrow_Y) && (ncol_Y == ncol_A) && (ncol_X == nrow_A));
-
-   int ia = 0;
-   for(ia=0; ia < nrow_A; ia++) {
-       int istart = a.getRowPtr(ia);
-       int iend = a.getRowPtr(ia+1);
-       int k = 0;
-       for(k=istart; k < iend; k++) {
-          int ja = a.getCol(k);
-          double aij = a.getValue(k);
-          double atji = aij;
-          
-          int iy = 0;
-          for(iy=0; iy < nrow_Y; iy++) {
-            int ix = iy;
-            int jx = ia;
-
-            xout(ix,jx) += (yin(iy,ja) * atji);
-            };
-         };
-     };
-
- }
-else  {
-   /*
-    * ---------------------------------------------
-    * X(nrow_X,ncol_X) += Y(nrow_Y,ncol_Y) * A(nrow_A,ncol_A)
-    * X(ix,jx) += sum( Y(iy,ia) * A(ia,ja), over ia )
-    * ---------------------------------------------
-    */
-    assert((nrow_X == nrow_Y) && (ncol_Y == nrow_A) && (ncol_X == ncol_A));
-          
-   int ia = 0;
-   for(ia=0; ia < nrow_A; ia++) {
-       int istart = a.getRowPtr(ia);
-       int iend = a.getRowPtr(ia+1);
-       int k = 0;
-       for(k=istart; k < iend; k++) {
-          int ja = a.getCol(k);
-          double aij = a.getValue(k);
-          int iy = 0;
-          for(iy = 0; iy < nrow_Y; iy++) {
-              int ix = iy;
-              int jx = ja;
-
-              xout(ix,jx) += ( yin(iy,ia) * aij );
-              };
-          };
-       };
-   }
+					xout(ix,jx) += ( yin(iy,ia) * aij );
+				};
+			};
+		};
+	}
 }
-          
+
 #undef X
 #undef Y

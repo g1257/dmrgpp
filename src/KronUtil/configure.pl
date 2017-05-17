@@ -22,40 +22,7 @@ use strict;
 use lib "../../../PsimagLite/scripts";
 use Make;
 
-my @names = qw/KronUtilComplex
-	coord2csr
-	csc_nnz
-	csc_kron_mult
-	csc_matmul_post
-	csc_matmul_pre
-	csr_den_kron_mult
-	csr_nnz
-	csr_is_eye
-	csr_is_zeros
-	csr_transpose
-	csr_kron_mult
-	csr_kron_submatrix
-	csr_matmul_post
-	csr_matmul_pre
-	csr_submatrix
-	csr_eye
-	den_csr_kron_mult
-	den_copymat
-	den_zeros
-	den_transpose
-	den_submatrix
-        den_gen_matrix
-	den_kron_submatrix
-	den_kron_form
-	den_kron_mult
-	den_matmul_post
-	den_matmul_pre
-	den_nnz
-	den_eye
-	den_is_eye
-	den_is_zeros
-	estimate_kron_cost/;
-
+my @names = ("KronUtil", "util", "utilComplex");
 
 my @drivers;
 my $dotos = "";

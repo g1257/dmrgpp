@@ -1,19 +1,18 @@
 #include "util.h"
 
-void csc_matmul_post( char trans_A, 
+template<typename ComplexOrRealType>
+void csc_matmul_post(char trans_A,
                      const int nrow_A,
                      const int ncol_A, 
                      const PsimagLite::Vector<int>::Type& acolptr,
                      const PsimagLite::Vector<int>::Type& arow,
-                     const PsimagLite::Vector<double>::Type& aval,
-
+                     const typename PsimagLite::Vector<ComplexOrRealType>::Type& aval,
                      const int nrow_Y, 
                      const int ncol_Y, 
-                     const PsimagLite::Matrix<double>& yin,
-
+                     const PsimagLite::Matrix<ComplexOrRealType>& yin,
                      const int nrow_X, 
                      const int ncol_X, 
-                     PsimagLite::Matrix<double>& xout)
+                     PsimagLite::Matrix<ComplexOrRealType>& xout)
 {
 /*
  * -------------------------------------------------------
@@ -54,12 +53,12 @@ void csc_matmul_post( char trans_A,
        int iend = acolptr[ja+1]-1;
        int k = 0;
        for(k=istart; k <= iend; k++) {
-          double aij = aval[k];
+          ComplexOrRealType aij = aval[k];
 
           int ia = arow[k];
           assert((0 <= ia) && (ia < nrow_A));
 
-          double atji = aij;
+          ComplexOrRealType atji = aij;
           
           int iy = 0;
           for(iy=0; iy < nrow_Y; iy++) {
@@ -87,7 +86,7 @@ else  {
        int iend = acolptr[ja+1]-1;
        int k = 0;
        for(k=istart; k <= iend; k++) {
-          double aij = aval[k];
+          ComplexOrRealType aij = aval[k];
 
           int ia = arow[k];
           assert((0 <= ia) && (ia < nrow_A));

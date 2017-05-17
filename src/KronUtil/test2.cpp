@@ -3,7 +3,7 @@
 
 int main()
 {
-
+  typedef std::complex<double> ComplexOrRealType;
   int nerrors = 0;
   double thresholdA = 0;
   double thresholdB = 0;
@@ -19,8 +19,8 @@ int main()
   for(ncol_B=1; ncol_B <= 10; ncol_B += 3 ) {
   for(nrow_B=1; nrow_B <= 10; nrow_B += 3 ) {
 
-     PsimagLite::Matrix<double> a_(nrow_A, ncol_A);
-     PsimagLite::Matrix<double> b_(nrow_B, ncol_B);
+     PsimagLite::Matrix<ComplexOrRealType> a_(nrow_A, ncol_A);
+     PsimagLite::Matrix<ComplexOrRealType> b_(nrow_B, ncol_B);
 
 
      if ((thresholdA == 0) && (nrow_A == ncol_A)) {
@@ -32,13 +32,13 @@ int main()
        den_eye( nrow_A, ncol_A, a_ );
        assert( den_is_eye(a_) );
 
-       PsimagLite::CrsMatrix<double> a(a_);
+       PsimagLite::CrsMatrix<ComplexOrRealType> a(a_);
        assert( csr_is_eye(a) );
        }
      else {
        den_gen_matrix( nrow_A, ncol_A,  thresholdA, a_);
 
-       PsimagLite::CrsMatrix<double> a(a_);
+       PsimagLite::CrsMatrix<ComplexOrRealType> a(a_);
        assert( den_is_eye(a_) == csr_is_eye(a) );
        assert( den_is_zeros(a_) == csr_is_zeros(a) );
 
@@ -49,13 +49,13 @@ int main()
        den_eye( nrow_B, ncol_B, b_ );
        assert( den_is_eye(b_));
 
-       PsimagLite::CrsMatrix<double> b(b_);
+       PsimagLite::CrsMatrix<ComplexOrRealType> b(b_);
        assert( csr_is_eye(b) );
        }
      else {
        den_gen_matrix( nrow_B, ncol_B,  thresholdB, b_);
 
-       PsimagLite::CrsMatrix<double> b(b_);
+       PsimagLite::CrsMatrix<ComplexOrRealType> b(b_);
        assert( den_is_eye(b_) == csr_is_eye(b) );
        assert( den_is_zeros(b_) == csr_is_zeros(b) );
        };
@@ -65,10 +65,10 @@ int main()
      * dense matrices A, B
      * -----------------------------------
      */
-     PsimagLite::CrsMatrix<double> a(a_);
+     PsimagLite::CrsMatrix<ComplexOrRealType> a(a_);
      assert( den_is_eye(a_) == csr_is_eye(a) );
 
-     PsimagLite::CrsMatrix<double> b(b_);
+     PsimagLite::CrsMatrix<ComplexOrRealType> b(b_);
      assert( den_is_eye(b_) == csr_is_eye(b) );
 
     /*
@@ -80,7 +80,7 @@ int main()
     const int nrow_C = nrow_A * nrow_B;
     const int ncol_C = ncol_A * ncol_B;
 	if (ncol_C < 2) continue;
-    PsimagLite::Matrix<double> c_(nrow_C, ncol_C);
+    PsimagLite::Matrix<ComplexOrRealType> c_(nrow_C, ncol_C);
 
     den_kron_form( nrow_A, ncol_A, a_,
                    nrow_B, ncol_B, b_,
@@ -91,7 +91,7 @@ int main()
      * generate compressed sparse version of C
      * ---------------------------------------
      */
-    PsimagLite::CrsMatrix<double> c(c_);
+    PsimagLite::CrsMatrix<ComplexOrRealType> c(c_);
 
 
     PsimagLite::Vector<int>::Type rindex(nrow_C);
@@ -129,7 +129,7 @@ int main()
 
     int nrow_D = nrindex;
     int ncol_D = ncindex;
-    PsimagLite::Matrix<double> d_(nrow_D, ncol_D);
+    PsimagLite::Matrix<ComplexOrRealType> d_(nrow_D, ncol_D);
 
     den_submatrix( nrow_C, ncol_C, c_,
                    nrindex, ncindex,
@@ -143,7 +143,7 @@ int main()
 
      const int max_nnz_D = 1 + den_nnz(d_);
 
-	 PsimagLite::CrsMatrix<double> sd(d_.n_row(),d_.n_col());
+	 PsimagLite::CrsMatrix<ComplexOrRealType> sd(d_.n_row(),d_.n_col());
 
      csr_submatrix( c,
                  
@@ -159,7 +159,7 @@ int main()
       * convert to dense matrix
       * -----------------------
       */
-      PsimagLite::Matrix<double> dd_(nrow_D, ncol_D);
+      PsimagLite::Matrix<ComplexOrRealType> dd_(nrow_D, ncol_D);
 	  crsMatrixToFullMatrix(dd_, sd);
 
     /*
@@ -173,8 +173,8 @@ int main()
 
      for(jd=0; jd < ncol_D; jd++) {
      for(id=0; id < nrow_D; id++) {
-         double diff = ABS( dd_(id,jd) - d_(id,jd) );
-         const double tol = 1.0/(1000.0 * 1000.0);
+         ComplexOrRealType diff = ABS( dd_(id,jd) - d_(id,jd) );
+         const ComplexOrRealType tol = 1.0/(1000.0 * 1000.0);
          int isok = (diff <= tol );
          if (!isok) {
            nerrors += 1;
@@ -196,7 +196,7 @@ int main()
      */
     int nrow_E = nrindex;
     int ncol_E = ncindex;
-    PsimagLite::Matrix<double> e_(nrow_E, ncol_E );
+    PsimagLite::Matrix<ComplexOrRealType> e_(nrow_E, ncol_E );
 
     den_kron_submatrix( nrow_A,ncol_A, a_,
                         nrow_B,ncol_B, b_,
@@ -213,8 +213,8 @@ int main()
     int je = 0;
     for(je=0; je < ncol_E; je++) {
     for(ie=0; ie < nrow_E; ie++) {
-       double eij = e_(ie,je);
-       double dij = d_(ie,je);
+       ComplexOrRealType eij = e_(ie,je);
+       ComplexOrRealType dij = d_(ie,je);
 
        int isok = (eij == dij);
        if (!isok) {
@@ -238,7 +238,7 @@ int main()
      * ------------------------------
      */
 
-    PsimagLite::CrsMatrix<double> e(nrow_E, ncol_E);
+    PsimagLite::CrsMatrix<ComplexOrRealType> e(nrow_E, ncol_E);
 	const int max_nnz_E = 1 + den_nnz(e_);
     csr_kron_submatrix(
                 a,
@@ -253,7 +253,7 @@ int main()
      * convert from sparse back to dense
      * ---------------------------------
      */
-    PsimagLite::Matrix<double> se_(nrow_E, ncol_E);
+    PsimagLite::Matrix<ComplexOrRealType> se_(nrow_E, ncol_E);
 
 	crsMatrixToFullMatrix(se_, e);
 
@@ -269,8 +269,8 @@ int main()
 
     for(je=0; je < ncol_E; je++) {
     for(ie=0; ie < nrow_E; ie++) {
-      double diff = ABS( e_(ie,je) - se_(ie,je) );
-      const double tol = 1.0/(1000.0 * 1000.0);
+      ComplexOrRealType diff = ABS( e_(ie,je) - se_(ie,je) );
+      const ComplexOrRealType tol = 1.0/(1000.0 * 1000.0);
       int isok = (diff <= tol);
       if (!isok) {
         nerrors += 1;
