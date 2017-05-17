@@ -171,10 +171,10 @@ int main()
 
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {
-        double diff12 = ABS( x1_(ix,jx) - x2_(ix,jx) );
-        double diff23 = ABS( x2_(ix,jx) - x3_(ix,jx) );
-        double diff31 = ABS( x3_(ix,jx) - x1_(ix,jx) );
-        double diffmax = MAX( diff12, MAX( diff23, diff31) );
+        double diff12 = std::abs( x1_(ix,jx) - x2_(ix,jx) );
+        double diff23 = std::abs( x2_(ix,jx) - x3_(ix,jx) );
+        double diff31 = std::abs( x3_(ix,jx) - x1_(ix,jx) );
+        double diffmax = std::max( diff12, std::max( diff23, diff31) );
         const double tol = 1.0/(1000.0*1000.0*1000.0);
 
         int isok = (diffmax <= tol);
@@ -243,10 +243,10 @@ int main()
 
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {
-        double diff1 = ABS( x1_(ix,jx) - sx1_(ix,jx));
-        double diff2 = ABS( x2_(ix,jx) - sx2_(ix,jx));
-        double diff3 = ABS( x3_(ix,jx) - sx3_(ix,jx));
-        double diffmax = MAX( diff1, MAX( diff2, diff3) );
+        double diff1 = std::abs( x1_(ix,jx) - sx1_(ix,jx));
+        double diff2 = std::abs( x2_(ix,jx) - sx2_(ix,jx));
+        double diff3 = std::abs( x3_(ix,jx) - sx3_(ix,jx));
+        double diffmax = std::max( diff1, std::max( diff2, diff3) );
         const double tol = 1.0/(1000.0*1000.0*1000.0);
         int isok = (diffmax <= tol );
         if (!isok) {
@@ -290,7 +290,7 @@ int main()
      
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {
-       double diff = ABS( x1_(ix,jx) - sx1_(ix,jx) );
+       double diff = std::abs( x1_(ix,jx) - sx1_(ix,jx) );
        const double tol = 1.0/(1000.0 * 1000.0 * 1000.0);
 
        int isok  = (diff <= tol);
@@ -327,10 +327,10 @@ int main()
 
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {
-        double diff1 = ABS( x1_(ix,jx) - sx1_(ix,jx));
+        double diff1 = std::abs( x1_(ix,jx) - sx1_(ix,jx));
         double diff2 = 0;
         double diff3 = 0;
-        double diffmax = MAX( diff1, MAX( diff2, diff3) );
+        double diffmax = std::max( diff1, std::max( diff2, diff3) );
         const double tol = 1.0/(1000.0*1000.0*1000.0);
         int isok = (diffmax <= tol );
         if (!isok) {
@@ -395,10 +395,10 @@ int main()
 
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {
-        double diff1 = ABS( x1_(ix,jx) - sx1_(ix,jx));
-        double diff2 = ABS( x2_(ix,jx) - sx2_(ix,jx));
-        double diff3 = ABS( x3_(ix,jx) - sx3_(ix,jx));
-        double diffmax = MAX( diff1, MAX( diff2, diff3) );
+        double diff1 = std::abs( x1_(ix,jx) - sx1_(ix,jx));
+        double diff2 = std::abs( x2_(ix,jx) - sx2_(ix,jx));
+        double diff3 = std::abs( x3_(ix,jx) - sx3_(ix,jx));
+        double diffmax = std::max( diff1, std::max( diff2, diff3) );
         const double tol = 1.0/(1000.0*1000.0*1000.0);
         int isok = (diffmax <= tol );
         if (!isok) {
@@ -438,10 +438,10 @@ int main()
 
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {
-        double diff1 = ABS( x1_(ix,jx) - sx1_(ix,jx));
+        double diff1 = std::abs( x1_(ix,jx) - sx1_(ix,jx));
         double diff2 = 0;
         double diff3 = 0;
-        double diffmax = MAX( diff1, MAX( diff2, diff3) );
+        double diffmax = std::max( diff1, std::max( diff2, diff3) );
         const double tol = 1.0/(1000.0*1000.0*1000.0);
         int isok = (diffmax <= tol );
         if (!isok) {
@@ -507,10 +507,10 @@ int main()
 
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {
-        double diff1 = ABS( x1_(ix,jx) - sx1_(ix,jx));
-        double diff2 = ABS( x2_(ix,jx) - sx2_(ix,jx));
-        double diff3 = ABS( x3_(ix,jx) - sx3_(ix,jx));
-        double diffmax = MAX( diff1, MAX( diff2, diff3) );
+        double diff1 = std::abs( x1_(ix,jx) - sx1_(ix,jx));
+        double diff2 = std::abs( x2_(ix,jx) - sx2_(ix,jx));
+        double diff3 = std::abs( x3_(ix,jx) - sx3_(ix,jx));
+        double diffmax = std::max( diff1, std::max( diff2, diff3) );
         const double tol = 1.0/(1000.0*1000.0*1000.0);
         int isok = (diffmax <= tol );
         if (!isok) {

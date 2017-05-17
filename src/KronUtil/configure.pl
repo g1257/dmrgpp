@@ -22,7 +22,7 @@ use strict;
 use lib "../../../PsimagLite/scripts";
 use Make;
 
-my @names = ("KronUtil", "util", "utilComplex");
+my @names = ("KronUtil", "util", "utilComplex", "csc_nnz");
 
 my @drivers;
 my $dotos = "";
