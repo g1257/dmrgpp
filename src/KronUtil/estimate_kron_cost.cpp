@@ -88,11 +88,11 @@ void estimate_kron_cost(const int nrow_A,
 	RealType flops_method3 =  2.0*nnz_A*nnz_B;
 	RealType nnz_method3 = nnz_A*nnz_B;
 
-	RealType kron_flops = MIN( flops_method1,
-	                                    MIN( flops_method2, flops_method3));
+	RealType kron_flops = std::min( flops_method1,
+	                                    std::min( flops_method2, flops_method3));
 
-	RealType kron_nnz = MIN( nnz_method1,
-	                                  MIN( nnz_method2, nnz_method3));
+	RealType kron_nnz = std::min( nnz_method1,
+	                                  std::min( nnz_method2, nnz_method3));
 
 	const bool minimize_flops = true;
 	if (minimize_flops) {

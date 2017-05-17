@@ -221,11 +221,11 @@ void den_transpose<double>(const int nrow_A,
                     const double a_[],
                     double at_[] );
 
-//template
-//void den_gen_matrix<double>(const int nrow_A,
-//                     const int ncol_A,
-//                     const double threshold,
-//                     PsimagLite::Matrix<double>& a_);
+template
+void den_gen_matrix<double>(const int nrow_A,
+                     const int ncol_A,
+                     const double& threshold,
+                     PsimagLite::Matrix<double>& a_);
 
 template
 void den_matmul_pre<double>(const char trans_A,

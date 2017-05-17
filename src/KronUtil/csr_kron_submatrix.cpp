@@ -49,7 +49,7 @@ void csr_kron_submatrix(
   int k = 0;
   for(k=0; k < nrindex; k++) {
      int ic = rindex[k];
-     int ib = MOD( ic, nrow_B );
+     int ib = (ic % nrow_B);
      int ia = (ic - ib)/nrow_B;
 
      assert((0 <= ia) && (ia < nrow_A));

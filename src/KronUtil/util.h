@@ -7,22 +7,6 @@
 #include "KronUtil.h"
 #include "MatrixNonOwned.h"
 
-#ifndef MIN
-#define MIN(x,y)  (  ((x) < (y))? (x) : (y) )
-#endif
-
-#ifndef MAX
-#define MAX(x,y)  (  ((x) > (y))? (x) : (y) )
-#endif
-
-#ifndef ABS
-#define ABS(x) (( (x) > 0 )? (x) : (-(x)) )
-#endif
-
-#ifndef MOD
-#define MOD(x,y)  ((x) % (y))
-#endif
-
 template<typename ComplexOrRealType>
 void estimate_kron_cost( const int nrow_A,
                          const int ncol_A,
@@ -229,7 +213,7 @@ void den_transpose( const int nrow_A,
 template<typename ComplexOrRealType>
 void den_gen_matrix( const int nrow_A, 
                      const int ncol_A,
-                     const ComplexOrRealType threshold,
+                     const typename PsimagLite::Real<ComplexOrRealType>::Type& threshold,
                      PsimagLite::Matrix<ComplexOrRealType>& a_);
 
 template<typename ComplexOrRealType>

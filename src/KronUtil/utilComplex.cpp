@@ -225,7 +225,7 @@ void den_transpose<std::complex<double> >(const int nrow_A,
 template
 void den_gen_matrix<std::complex<double> >(const int nrow_A,
                      const int ncol_A,
-                     const double threshold,
+                     const double& threshold,
                      PsimagLite::Matrix<std::complex<double> >& a_);
 
 template

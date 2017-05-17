@@ -3,6 +3,7 @@
 
 int main()
 {
+  typedef double RealType;
   typedef std::complex<double> ComplexOrRealType;
   int nerrors = 0;
   double thresholdA = 0;
@@ -96,7 +97,7 @@ int main()
 
     PsimagLite::Vector<int>::Type rindex(nrow_C);
     PsimagLite::Vector<int>::Type cindex(ncol_C);
-    
+
     int nrindex = 0;
     int ncindex = 0;
 
@@ -146,11 +147,11 @@ int main()
 	 PsimagLite::CrsMatrix<ComplexOrRealType> sd(d_.n_row(),d_.n_col());
 
      csr_submatrix( c,
-                 
-                    nrindex, ncindex, 
+
+                    nrindex, ncindex,
                     max_nnz_D,
                     rindex, cindex,
-                    
+
                     sd );
 
 
@@ -167,26 +168,28 @@ int main()
      * check both matrices should be the same
      * --------------------------------------
      */
-     { 
+     {
      int id = 0;
      int jd = 0;
 
      for(jd=0; jd < ncol_D; jd++) {
      for(id=0; id < nrow_D; id++) {
-         ComplexOrRealType diff = ABS( dd_(id,jd) - d_(id,jd) );
-         const ComplexOrRealType tol = 1.0/(1000.0 * 1000.0);
-         int isok = (diff <= tol );
+         RealType diff = std::abs(dd_(id,jd) - d_(id,jd) );
+         const RealType tol = 1.0/(1000.0 * 1000.0);
+         bool isok = (diff <= tol );
          if (!isok) {
            nerrors += 1;
-           printf("nrow_D %d ncol_D %d DD(%d,%d) %f D(%d,%d) %f diff %f\n",
-                   nrow_D,ncol_D,   id,jd,dd_(id,jd),  id,jd,d_(id,jd), diff );
-
+           std::cout<<"nrow_D "<<nrow_D;
+		   std::cout<<" ncol_D "<<ncol_D;
+		   std::cout<<" DD("<<id<<","<<jd<<")"<<dd_(id, jd);
+		   std::cout<<" D("<<id<<","<<jd<<")"<<d_(id, jd);
+		   std::cout<<" diff "<<diff<<"\n";
            };
         };
         };
      }
-     
-    
+
+
     /*
      * --------------------------------
      * form E = C(rindex(:),cindex(:))
@@ -220,20 +223,19 @@ int main()
        if (!isok) {
          nerrors += 1;
 
-         printf("nrow_A %d ncol_A %d nrow_B %d ncol_B %d nrindex %d ncindex %d\n",
-                 nrow_A,  ncol_A, nrow_B, ncol_B, nrindex, ncindex );
+         std::cout<<"nrow_A "<<nrow_A<<" ncol_A "<<ncol_A;
+		 std::cout<<" nrow_B "<<nrow_B<<" ncol_B "<<ncol_B;
+		 std::cout<<"  nrindex "<<nrindex<<" ncindex "<<ncindex<<"\n";
 
-         printf("ie %d je %d eij %f dij %f \n",
-                 ie,je,  eij, dij );
-         };
-       };
-       };
-
+		 std::cout<<"ie "<<ie<< " je "<<je<<" eij "<<eij<<" dij "<<dij<<"\n";
+         }
+       }
+       }
 
 
     /*
      * ------------------------------
-     * form sparse version of E from 
+     * form sparse version of E from
      * sparse version of A, B
      * ------------------------------
      */
@@ -269,19 +271,19 @@ int main()
 
     for(je=0; je < ncol_E; je++) {
     for(ie=0; ie < nrow_E; ie++) {
-      ComplexOrRealType diff = ABS( e_(ie,je) - se_(ie,je) );
-      const ComplexOrRealType tol = 1.0/(1000.0 * 1000.0);
-      int isok = (diff <= tol);
+      RealType diff = std::abs( e_(ie,je) - se_(ie,je) );
+      const RealType tol = 1.0/(1000.0 * 1000.0);
+      bool isok = (diff <= tol);
       if (!isok) {
         nerrors += 1;
-        printf("nrow_E %d ncol_E %d E(%d,%d) %f SE(%d,%d) %f\n",
-                nrow_E, ncol_E,  ie,je, e_(ie,je), ie,je, se_(ie,je) );
+        std::cout<<"nrow_E "<<nrow_E<<" ncol_E "<<ncol_E;
+		std::cout<<" E("<<ie<<","<<je<<" "<<e_(ie, je);
+		std::cout<<" SE("<<ie<<","<<je<<")"<<se_(ie, je)<<"\n";
+        }
+     }
+     }
 
-        };
-     };
-     };
-
-    };
+    }
 
    };
    };

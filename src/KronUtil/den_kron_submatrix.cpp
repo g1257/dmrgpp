@@ -71,11 +71,11 @@ void den_kron_submatrix(const int nrow_A,
 	 * jc =  jb + ja * ncol_B
 	 * --------------------------
 	 */
-			int ib = MOD(ic,nrow_B);
+			int ib = (ic % nrow_B);
 			int ia = (ic - ib)/nrow_B;
 
 
-			int jb = MOD(jc,ncol_B);
+			int jb = (jc % ncol_B);
 			int ja = (jc - jb)/ncol_B;
 
 
