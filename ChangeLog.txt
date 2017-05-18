@@ -1,5 +1,17 @@
 https://github.com/g1257/dmrgpp/commits/master
 
+2017-05-18 Version 4.44
+
+* bug fix in printing
+
+* changes in preparation for useSvd option
+
+* Kron: KronNoLoadBalance SolverOptions added
+
+* PTHREAD_ASSIGN_AFFINITIES removed, now a runtime option
+
+* KronUtil: supports useComplex
+
 2017-05-11 Version 4.42
 
 * extendedPrint SolverOptions added
