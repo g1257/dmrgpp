@@ -174,15 +174,6 @@ void mainLoop0(InputNgType::Readable& io,
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	if (targeting=="TimeStepTargetting") {
-		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix,CvectorSizeType>(geometry,
-		                                                                        dmrgSolverParams,
-		                                                                        io,
-		                                                                        opOptions,
-		                                                                        targeting);
-		return;
-	}
-
 	mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix,CvectorSizeType>(geometry,
 	                                                                        dmrgSolverParams,
 	                                                                        io,

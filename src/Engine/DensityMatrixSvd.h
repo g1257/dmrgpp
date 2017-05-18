@@ -119,11 +119,9 @@ public:
 	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 	{
 		SizeType freeSize = allTargets_.cols();
-		SizeType xTimesSummedSize = allTargets_.rows();
-		SizeType minSize = std::min(freeSize, xTimesSummedSize);
-		MatrixType vt(minSize, freeSize);
-		eigs.resize(minSize);
-		svd('S', allTargets_, eigs, vt);
+		MatrixType vt(freeSize, freeSize);
+		eigs.resize(freeSize);
+		svd('A', allTargets_, eigs, vt);
 		fullMatrixToCrsMatrix(data_, allTargets_);
 	}
 
@@ -144,6 +142,7 @@ public:
 		SizeType freeSize = pBasis.size();
 		SizeType summedSize = pBasisSummed.size();
 		allTargets_.resize(targets*summedSize, freeSize);
+		allTargets_.setTo(0.0);
 		for (SizeType x = 0; x < targets; ++x)
 			addThisTarget(x, freeSize, summedSize, target, p.direction, pSE, targets);
 
@@ -180,15 +179,37 @@ private:
 
 		const VectorWithOffsetType& v = (target.includeGroundStage() && x == 0) ?
 		            target.gs() : target(x2);
+		addThisTarget2(x, freeSize, summedSize, v, direction, pSE, targets);
+	}
 
+	void addThisTarget2(SizeType x,
+	                    SizeType freeSize,
+	                    SizeType summedSize,
+	                    const VectorWithOffset<ComplexOrRealType>& v,
+	                    SizeType direction,
+	                    const BasisType& pSE,
+	                    SizeType targets)
+	{
 		for (SizeType alpha = 0; alpha < freeSize; ++alpha) {
 			for (SizeType beta = 0; beta < summedSize; ++beta) {
 				SizeType ind = (direction == ProgramGlobals::EXPAND_SYSTEM) ?
 				            alpha + beta*summedSize : beta + alpha*freeSize;
 				ind = pSE.permutationInverse(ind);
-				allTargets_(x + beta*targets, alpha) = v.slowAccess(ind);
+				if (v.index2Sector(ind) < 0) continue;
+				allTargets_(x + beta*targets, alpha) += v.slowAccess(ind);
 			}
 		}
+	}
+
+	void addThisTarget2(SizeType x,
+	                    SizeType freeSize,
+	                    SizeType summedSize,
+	                    const VectorWithOffsets<ComplexOrRealType>& v,
+	                    SizeType direction,
+	                    const BasisType& pSE,
+	                    SizeType targets)
+	{
+		err("useSvd doesn't yet work with VectorWithOffsets (sorry)\n");
 	}
 
 	ProgressIndicatorType progress_;

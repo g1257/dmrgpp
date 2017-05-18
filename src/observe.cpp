@@ -194,8 +194,6 @@ int main(int argc,char **argv)
 	                                   "#InputEndsHere");
 	InputNgType::Readable io(ioWriteable);
 
-	//! Read the parameters for this run
-	//ParametersModelType mp(io);
 	ParametersDmrgSolverType dmrgSolverParams(io,false,true);
 
 	bool setAffinities = (dmrgSolverParams.options.find("setAffinities")
