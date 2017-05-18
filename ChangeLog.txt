@@ -1,3 +1,11 @@
+2017-05-18 version 1.58
+
+* PTHREAD_ASSIGN_AFFINITIES removed, now a runtime option
+
+* LanczosSolver: checks for success of memory alloc.
+
+* svd implementation now in Matrix.cpp
+
 2017-05-11 version 1.56
 
 * PthreadsNg: LoadBalancerDefault assigns largest weight first
