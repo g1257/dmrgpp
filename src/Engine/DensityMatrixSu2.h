@@ -83,12 +83,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "AlmostEqual.h" // in PsimagLite
 #include "BlockMatrix.h"
 #include "DensityMatrixBase.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 template<typename TargettingType>
 class DensityMatrixSu2 : public DensityMatrixBase<TargettingType> {
 
 	typedef DensityMatrixBase<TargettingType> BaseType;
+	typedef typename TargettingType::LeftRightSuperType LeftRightSuperType;
 	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType  BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
@@ -104,20 +106,60 @@ public:
 
 	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
 
-	DensityMatrixSu2(
-	        const TargettingType&,
-	        const BasisWithOperatorsType& pBasis,
-	        const BasisWithOperatorsType&,
-	        const BasisType&,
-	        const ParamsType& p)
-	    : data_(pBasis.size(), pBasis.partition()-1),
-	      mMaximal_(pBasis.partition()-1),
-	      pBasis_(pBasis),
+	DensityMatrixSu2(const TargettingType& target,
+	                 const LeftRightSuperType& lrs,
+	                 const ParamsType& p)
+	    : data_((p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.left().size() :
+	                                                             lrs.right().size(),
+	            (p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.left().partition() -1 :
+	                                                             lrs.right().partition() -1),
+	      mMaximal_(data_.blocks()),
+	      pBasis_((p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.left() : lrs.right()),
 	      direction_(p.direction),
 	      debug_(p.debug),
 	      verbose_(p.verbose)
 	{
 		check(p.direction);
+		BuildingBlockType matrixBlock;
+
+		const BasisWithOperatorsType& pBasisSummed =
+		        (p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.right() :
+		                                                         lrs.left();
+
+		for (SizeType m = 0; m < pBasis_.partition() - 1; ++m) {
+			// Definition: Given partition p with (j m)
+			// findMaximalPartition(p) returns the partition p' (with j,j)
+
+			if (BasisType::useSu2Symmetry()) {
+				mMaximal_[m] = findMaximalPartition(m,pBasis_);
+				//if (enforceSymmetry && SizeType(m)!=mMaximal_[m]) continue;
+				// we'll fill non-maximal partitions later
+			}
+
+			SizeType bs = pBasis_.partition(m+1)-pBasis_.partition(m);
+
+			matrixBlock.reset(bs,bs);
+
+			for (SizeType i=pBasis_.partition(m);i<pBasis_.partition(m+1);i++) {
+				for (SizeType j=pBasis_.partition(m);j<pBasis_.partition(m+1);j++) {
+
+					matrixBlock(i-pBasis_.partition(m),j-pBasis_.partition(m))=
+					        densityMatrixAux(i,j,target,pBasisSummed,lrs.super(),p.direction);
+
+				}
+			}
+
+			data_.setBlock(m,pBasis_.partition(m),matrixBlock);
+		}
+
+		if (verbose_) {
+			std::cerr<<"DENSITYMATRIXPRINT option="<<p.direction<<"\n";
+			std::cerr<<(*this);
+			std::cerr<<"***********\n";
+			std::cerr<<"Calling ae from init()...\n";
+		}
+
+		if (debug_) areAllMsEqual(pBasis_);
 	}
 
 	SparseMatrixType& operator()()
@@ -147,50 +189,6 @@ public:
 
 		data_.toSparse(dataSparse_);
 		check2(direction_);
-	}
-
-	void init(const TargettingType& target,
-	          BasisWithOperatorsType const &pBasis,
-	          const BasisWithOperatorsType& pBasisSummed,
-	          BasisType const &pSE,
-	          const ParamsType& p)
-	{
-		BuildingBlockType matrixBlock;
-
-		for (SizeType m = 0; m < pBasis.partition() - 1; ++m) {
-			// Definition: Given partition p with (j m)
-			// findMaximalPartition(p) returns the partition p' (with j,j)
-
-			if (BasisType::useSu2Symmetry()) {
-				mMaximal_[m] = findMaximalPartition(m,pBasis);
-				//if (enforceSymmetry && SizeType(m)!=mMaximal_[m]) continue;
-				// we'll fill non-maximal partitions later
-			}
-
-			SizeType bs = pBasis.partition(m+1)-pBasis.partition(m);
-
-			matrixBlock.reset(bs,bs);
-
-			for (SizeType i=pBasis.partition(m);i<pBasis.partition(m+1);i++) {
-				for (SizeType j=pBasis.partition(m);j<pBasis.partition(m+1);j++) {
-
-					matrixBlock(i-pBasis.partition(m),j-pBasis.partition(m))=
-					        densityMatrixAux(i,j,target,pBasisSummed,pSE,p.direction);
-
-				}
-			}
-
-			data_.setBlock(m,pBasis.partition(m),matrixBlock);
-		}
-
-		if (verbose_) {
-			std::cerr<<"DENSITYMATRIXPRINT option="<<p.direction<<"\n";
-			std::cerr<<(*this);
-			std::cerr<<"***********\n";
-			std::cerr<<"Calling ae from init()...\n";
-		}
-
-		if (debug_) areAllMsEqual(pBasis);
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,

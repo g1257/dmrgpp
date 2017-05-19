@@ -120,12 +120,6 @@ public:
 
 	virtual SizeType rank()=0;
 
-	virtual void init(const TargettingType& target,
-	                  BasisWithOperatorsType const &pBasis,
-	                  const BasisWithOperatorsType& pBasisSummed,
-	                  BasisType const &pSE,
-	                  const Params& p)=0;
-
 	virtual void diag(typename PsimagLite::Vector<RealType>::Type&, char) = 0;
 }; // class DensityMatrixBase
 } // namespace Dmrg

@@ -79,7 +79,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_TRUNCATION_H
 #define DMRG_TRUNCATION_H
 
-#include "DensityMatrix.h"
+#include "DensityMatrixLocal.h"
+#include "DensityMatrixSvd.h"
+#include "DensityMatrixSu2.h"
 #include "Sort.h"
 #include "Concurrency.h"
 
@@ -97,7 +99,10 @@ class Truncation  {
 	typedef typename TargettingType::SparseMatrixType SparseMatrixType;
 	typedef typename TargettingType::RealType RealType;
 	typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef DensityMatrix<TargettingType> DensityMatrixType;
+	typedef DensityMatrixLocal<TargettingType> DensityMatrixLocalType;
+	typedef DensityMatrixSvd<TargettingType> DensityMatrixSvdType;
+	typedef DensityMatrixSu2<TargettingType> DensityMatrixSu2Type;
+	typedef DensityMatrixBase<TargettingType> DensityMatrixBaseType;
 	typedef typename TargettingType::ModelType ModelType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 
@@ -106,7 +111,7 @@ class Truncation  {
 
 public:
 
-	typedef typename DensityMatrixType::ParamsType ParamsDensityMatrixType;
+	typedef typename DensityMatrixBaseType::Params ParamsDensityMatrixType;
 	typedef typename LeftRightSuperType::SparseMatrixType TransformType;
 
 	struct TruncationCache {
@@ -203,40 +208,40 @@ private:
 
 		const BasisWithOperatorsType& pBasis = (direction==EXPAND_SYSTEM) ?
 		            lrs_.left() : lrs_.right();
-		const BasisWithOperatorsType& pBasisSummed = (direction==EXPAND_SYSTEM) ?
-		            lrs_.right() : lrs_.left();
 
 		bool debug = false;
 		bool useSvd = (parameters_.options.find("useSvd") != PsimagLite::String::npos);
 		ParamsDensityMatrixType p(useSvd, direction, verbose_, debug);
 		TruncationCache& cache = (direction==EXPAND_SYSTEM) ? leftCache_ : rightCache_;
-		DensityMatrixType dmS(target,pBasis,pBasisSummed,lrs_.super(),p);
+		DensityMatrixBaseType* dmS = 0;
+
+		if (BasisType::useSu2Symmetry()) {
+			if (p.useSvd) {
+				err("useSvd not supported while SU(2) is in use\n");
+			}
+
+			dmS = new DensityMatrixSu2Type(target,lrs_,p);
+		} else if (p.useSvd) {
+			dmS = new DensityMatrixSvdType(target,lrs_,p);
+		} else {
+			dmS = new DensityMatrixLocalType(target,lrs_,p);
+		}
 
 		if (verbose_ && PsimagLite::Concurrency::root()) {
 			std::cerr<<"Trying to diagonalize density-matrix with size=";
-			std::cerr<<dmS.rank()<<"\n";
+			std::cerr<<dmS->rank()<<"\n";
 		}
 
 		/* PSIDOC DiagOfDensityMatrix
-			We then diagonalize $\hat{\rho}_S$, and obtain its eigenvalues and
-		    eigenvectors,
-			$w^S_{\alpha,\alpha'}$ in $\mathcal{V}(S')$ ordered in decreasing
-		    eigenvalue order.
-			We change basis for the operator $H^{S'}$ (and other operators as necessary),
-		    as follows:
-			\begin{equation}
-			(H^{S' {\rm new\,\,basis}})_{\alpha,\alpha'}=(w^S)^{-1}_{\alpha,\gamma}
-		    (H^{ S'})_{\gamma,\gamma'}w^S_{\gamma',\alpha'}.
-			\label{eq:transformation}
-			\end{equation}
+
 		*/
 
-		dmS.diag(cache.eigs,'V');
+		dmS->diag(cache.eigs,'V');
 
 		updateKeptStates(keptStates,cache.eigs);
 
 		//! transform basis: dmS^\dagger * operator matrix * dms
-		cache.transform = dmS();
+		cache.transform = dmS->operator()();
 		if (parameters_.options.find("nodmrgtransform") != PsimagLite::String::npos) {
 			cache.transform.makeDiagonal(cache.transform.rows(), 1.0);
 		}
@@ -248,6 +253,8 @@ private:
 		msg2<<"done with entanglement";
 		progress_.printline(msg2,std::cout);
 
+		delete dmS;
+		dmS = 0;
 	}
 
 	void truncateBasisSystem(BasisWithOperatorsType& rSprime,

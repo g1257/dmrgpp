@@ -75,6 +75,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DensityMatrixBase.h"
 #include "NoPthreads.h"
 #include "Concurrency.h"
+#include "MatrixVectorKron/GenIjPatch.h"
 
 namespace Dmrg {
 
@@ -83,6 +84,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 
 	typedef DensityMatrixBase<TargettingType> BaseType;
 	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename TargettingType::LeftRightSuperType LeftRightSuperType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -93,21 +95,49 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename BaseType::Params ParamsType;
+	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
+	typedef typename GenIjPatchType::VectorSizeType VectorSizeType;
+	typedef typename GenIjPatchType::GenGroupType GenGroupType;
 
 	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
 public:
 
-	DensityMatrixSvd(const TargettingType&,
-	                   const BasisWithOperatorsType& pBasis,
-	                   const BasisWithOperatorsType&,
-	                   const BasisType&,
-	                   const ParamsType& p)
+	DensityMatrixSvd(const TargettingType& target,
+	                 const LeftRightSuperType& lrs,
+	                 const ParamsType& p)
 	    :
 	      progress_("DensityMatrixSvd"),
 	      debug_(p.debug),
 	      verbose_(p.verbose)
-	{}
+	{
+		{
+			PsimagLite::OstringStream msg;
+			msg<<"Init partition for all targets";
+			progress_.printline(msg,std::cout);
+		}
+
+		const BasisWithOperatorsType& left = lrs.left();
+		const BasisWithOperatorsType& right = lrs.right();
+		SizeType oneOrZero = (target.includeGroundStage()) ? 1 : 0;
+		SizeType targets = oneOrZero + target.size(); // Number of targets;
+		SizeType freeSize = (p.direction == ProgramGlobals::EXPAND_SYSTEM) ?
+		            left.size() : right.size();
+		SizeType summedSize = (p.direction == ProgramGlobals::EXPAND_SYSTEM) ?
+		            right.size() : left.size();
+		allTargets_.resize(targets*summedSize, freeSize);
+		allTargets_.setTo(0.0);
+		GenGroupType gengroupLeft(left);
+		GenGroupType gengroupRight(right);
+		for (SizeType x = 0; x < targets; ++x)
+			addThisTarget(x, target, gengroupLeft, gengroupRight, lrs, targets);
+
+		{
+			PsimagLite::OstringStream msg;
+			msg<<"Done with init partition";
+			progress_.printline(msg,std::cout);
+		}
+	}
 
 	virtual SparseMatrixType& operator()()
 	{
@@ -125,34 +155,6 @@ public:
 		fullMatrixToCrsMatrix(data_, allTargets_);
 	}
 
-	virtual void init(const TargettingType& target,
-	                  BasisWithOperatorsType const &pBasis,
-	                  const BasisWithOperatorsType& pBasisSummed,
-	                  BasisType const &pSE,
-	                  const ParamsType& p)
-	{
-		{
-			PsimagLite::OstringStream msg;
-			msg<<"Init partition for all targets";
-			progress_.printline(msg,std::cout);
-		}
-
-		SizeType oneOrZero = (target.includeGroundStage()) ? 1 : 0;
-		SizeType targets = oneOrZero + target.size(); // Number of targets;
-		SizeType freeSize = pBasis.size();
-		SizeType summedSize = pBasisSummed.size();
-		allTargets_.resize(targets*summedSize, freeSize);
-		allTargets_.setTo(0.0);
-		for (SizeType x = 0; x < targets; ++x)
-			addThisTarget(x, freeSize, summedSize, target, p.direction, pSE, targets);
-
-		{
-			PsimagLite::OstringStream msg;
-			msg<<"Done with init partition";
-			progress_.printline(msg,std::cout);
-		}
-	}
-
 	friend std::ostream& operator<<(std::ostream& os,
 	                                const DensityMatrixSvd& dm)
 	{
@@ -168,45 +170,83 @@ public:
 private:
 
 	void addThisTarget(SizeType x,
-	                   SizeType freeSize,
-	                   SizeType summedSize,
 	                   const TargettingType& target,
-	                   SizeType direction,
-	                   const BasisType& pSE,
+	                   const GenGroupType& genGroupLeft,
+	                   const GenGroupType& genGroupRight,
+	                   const LeftRightSuperType& lrs,
 	                   SizeType targets)
+
 	{
 		SizeType x2 = (target.includeGroundStage() && x > 0 ) ? x - 1 : x;
 
 		const VectorWithOffsetType& v = (target.includeGroundStage() && x == 0) ?
 		            target.gs() : target(x2);
-		addThisTarget2(x, freeSize, summedSize, v, direction, pSE, targets);
+
+		addThisTarget2(x, v, genGroupLeft, genGroupRight, lrs, targets);
 	}
 
 	void addThisTarget2(SizeType x,
-	                    SizeType freeSize,
-	                    SizeType summedSize,
 	                    const VectorWithOffset<ComplexOrRealType>& v,
-	                    SizeType direction,
-	                    const BasisType& pSE,
+	                    const GenGroupType& genGroupLeft,
+	                    const GenGroupType& genGroupRight,
+	                    const LeftRightSuperType& lrs,
 	                    SizeType targets)
 	{
-		for (SizeType alpha = 0; alpha < freeSize; ++alpha) {
-			for (SizeType beta = 0; beta < summedSize; ++beta) {
-				SizeType ind = (direction == ProgramGlobals::EXPAND_SYSTEM) ?
-				            alpha + beta*summedSize : beta + alpha*freeSize;
-				ind = pSE.permutationInverse(ind);
-				if (v.index2Sector(ind) < 0) continue;
-				allTargets_(x + beta*targets, alpha) += v.slowAccess(ind);
+		const BasisType& super = lrs.super();
+		const BasisWithOperatorsType& left = lrs.left();
+		const BasisWithOperatorsType& right = lrs.right();
+
+		SizeType m = v.sector(0);
+		int state = super.partition(m);
+		SizeType qn = super.qn(state);
+		GenIjPatchType ijPatch(lrs, qn);
+
+		const VectorSizeType& permInverse = super.permutationInverse();
+		SizeType nl = left.size();
+
+		SizeType offset = v.offset(0);
+		SizeType npatches = ijPatch(GenIjPatchType::LEFT).size();
+
+		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
+
+			SizeType igroup = ijPatch(GenIjPatchType::LEFT)[ipatch];
+			SizeType jgroup = ijPatch(GenIjPatchType::RIGHT)[ipatch];
+
+			SizeType sizeLeft = genGroupLeft(igroup+1) - genGroupLeft(igroup);
+			SizeType sizeRight = genGroupRight(jgroup+1) - genGroupRight(jgroup);
+
+			SizeType left_offset = genGroupLeft(igroup);
+			SizeType right_offset = genGroupRight(jgroup);
+
+			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
+				for (SizeType iright=0; iright < sizeRight; ++iright) {
+
+					SizeType i = ileft + left_offset;
+					SizeType j = iright + right_offset;
+
+					SizeType ij = i + j * nl;
+
+					assert(i < nl);
+					assert(j < right.hamiltonian().row());
+
+					assert(ij < permInverse.size());
+
+					SizeType r = permInverse[ij];
+					if (r < offset || r >= offset + v.effectiveSize(0))
+						continue;
+
+					allTargets_(i,j) =  v.slowAccess(r);
+
+				}
 			}
 		}
 	}
 
 	void addThisTarget2(SizeType x,
-	                    SizeType freeSize,
-	                    SizeType summedSize,
 	                    const VectorWithOffsets<ComplexOrRealType>& v,
-	                    SizeType direction,
-	                    const BasisType& pSE,
+	                    const BasisWithOperatorsType& left,
+	                    const BasisWithOperatorsType& right,
+	                    const BasisType& super,
 	                    SizeType targets)
 	{
 		err("useSvd doesn't yet work with VectorWithOffsets (sorry)\n");

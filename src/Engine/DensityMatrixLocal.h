@@ -86,6 +86,7 @@ template<typename TargettingType>
 class DensityMatrixLocal : public DensityMatrixBase<TargettingType> {
 
 	typedef DensityMatrixBase<TargettingType> BaseType;
+	typedef typename TargettingType::LeftRightSuperType LeftRightSuperType;
 	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
@@ -108,44 +109,32 @@ public:
 	TargetVectorType> ParallelDensityMatrixType;
 	typedef PsimagLite::Parallelizer<ParallelDensityMatrixType> ParallelizerType;
 
-	DensityMatrixLocal(const TargettingType&,
-	                   const BasisWithOperatorsType& pBasis,
-	                   const BasisWithOperatorsType&,
-	                   const BasisType&,
+	DensityMatrixLocal(const TargettingType& target,
+	                   const LeftRightSuperType& lrs,
 	                   const ParamsType& p)
 	    :
 	      progress_("DensityMatrixLocal"),
-	      data_(pBasis.size(),
-	            pBasis.partition()-1),
+	      data_((p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.left().size() :
+	                                                             lrs.right().size(),
+	            (p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.left().partition() -1 :
+	                                                             lrs.right().partition() -1),
 	      direction_(p.direction),
 	      debug_(p.debug),
 	      verbose_(p.verbose)
-	{}
-
-	virtual SparseMatrixType& operator()()
-	{
-		return dataSparse_;
-	}
-
-	virtual SizeType rank() { return data_.rank(); }
-
-	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
-	{
-		diagonalise(data_,eigs,jobz);
-		data_.toSparse(dataSparse_);
-	}
-
-	virtual void init(const TargettingType& target,
-	                  BasisWithOperatorsType const &pBasis,
-	                  const BasisWithOperatorsType& pBasisSummed,
-	                  BasisType const &pSE,
-	                  const ParamsType& p)
 	{
 		{
 			PsimagLite::OstringStream msg;
 			msg<<"Init partition for all targets";
 			progress_.printline(msg,std::cout);
 		}
+
+		const BasisWithOperatorsType& pBasis =
+		        (p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.left() :
+		                                                         lrs.right();
+
+		const BasisWithOperatorsType& pBasisSummed =
+		        (p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.right() :
+		                                                         lrs.left();
 
 		//loop over all partitions:
 		for (SizeType m=0;m<pBasis.partition()-1;m++) {
@@ -164,7 +153,7 @@ public:
 			                                               m,
 			                                               target.gs(),
 			                                               pBasisSummed,
-			                                               pSE,
+			                                               lrs.super(),
 			                                               p.direction,
 			                                               w);
 
@@ -174,7 +163,7 @@ public:
 				if (fabs(wnorm) < 1e-6) continue;
 				RealType w = target.weight(ix)/wnorm;
 				initPartition(matrixBlock,pBasis,m,target(ix),
-				              pBasisSummed,pSE,p.direction,w);
+				              pBasisSummed,lrs.super(),p.direction,w);
 			}
 
 			// set this matrix block into data_
@@ -185,6 +174,20 @@ public:
 			msg<<"Done with init partition";
 			progress_.printline(msg,std::cout);
 		}
+
+	}
+
+	virtual SparseMatrixType& operator()()
+	{
+		return dataSparse_;
+	}
+
+	virtual SizeType rank() { return data_.rank(); }
+
+	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
+	{
+		diagonalise(data_,eigs,jobz);
+		data_.toSparse(dataSparse_);
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
