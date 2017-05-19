@@ -150,7 +150,7 @@ public:
 	typedef typename ModelType::SolverParamsType ParametersType;
 	typedef Diagonalization<ParametersType,TargettingType> DiagonalizationType;
 	typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef Truncation<LeftRightSuperType,ParametersType,TargettingType> TruncationType;
+	typedef Truncation<ParametersType,TargettingType> TruncationType;
 	typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> DmrgSerializerType;
 	typedef typename ModelType::GeometryType GeometryType;
 	typedef Recovery<ParametersType,TargettingType> RecoveryType;

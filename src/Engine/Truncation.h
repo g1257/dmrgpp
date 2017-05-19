@@ -87,11 +87,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename LeftRightSuperType,
-         typename ParametersType,
+template<typename ParametersType,
          typename TargettingType>
 class Truncation  {
 
+	typedef typename TargettingType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::PairSizeSizeType PairSizeSizeType;

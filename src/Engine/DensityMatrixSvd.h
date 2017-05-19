@@ -244,9 +244,9 @@ private:
 
 	void addThisTarget2(SizeType x,
 	                    const VectorWithOffsets<ComplexOrRealType>& v,
-	                    const BasisWithOperatorsType& left,
-	                    const BasisWithOperatorsType& right,
-	                    const BasisType& super,
+	                    const GenGroupType& genGroupLeft,
+	                    const GenGroupType& genGroupRight,
+	                    const LeftRightSuperType& lrs,
 	                    SizeType targets)
 	{
 		err("useSvd doesn't yet work with VectorWithOffsets (sorry)\n");
