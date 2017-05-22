@@ -227,11 +227,6 @@ private:
 			dmS = new DensityMatrixLocalType(target,lrs_,p);
 		}
 
-		if (verbose_ && PsimagLite::Concurrency::root()) {
-			std::cerr<<"Trying to diagonalize density-matrix with size=";
-			std::cerr<<dmS->rank()<<"\n";
-		}
-
 		/* PSIDOC DiagOfDensityMatrix
 
 		*/

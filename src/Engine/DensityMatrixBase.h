@@ -118,8 +118,6 @@ public:
 
 	virtual SparseMatrixType& operator()()=0;
 
-	virtual SizeType rank()=0;
-
 	virtual void diag(typename PsimagLite::Vector<RealType>::Type&, char) = 0;
 }; // class DensityMatrixBase
 } // namespace Dmrg

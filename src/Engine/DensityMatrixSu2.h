@@ -167,8 +167,6 @@ public:
 		return dataSparse_;
 	}
 
-	SizeType rank() { return data_.rank(); }
-
 	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 	{
 		diagonalise(data_,eigs,jobz);

@@ -90,6 +90,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename BaseType::BuildingBlockType MatrixType;
+	typedef typename PsimagLite::Vector<MatrixType*>::Type MatrixVectorType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
@@ -98,6 +99,8 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
 	typedef typename GenIjPatchType::VectorSizeType VectorSizeType;
 	typedef typename GenIjPatchType::GenGroupType GenGroupType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename PsimagLite::Vector<GenIjPatchType*>::Type VectorGenIjPatchType;
 
 	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
@@ -109,7 +112,11 @@ public:
 	    :
 	      progress_("DensityMatrixSvd"),
 	      debug_(p.debug),
-	      verbose_(p.verbose)
+	      verbose_(p.verbose),
+	      lrs_(lrs),
+	      gengroupLeft_(lrs.left()),
+	      gengroupRight_(lrs.right()),
+	      vectorOfijPatches_(0)
 	{
 		{
 			PsimagLite::OstringStream msg;
@@ -117,20 +124,11 @@ public:
 			progress_.printline(msg,std::cout);
 		}
 
-		const BasisWithOperatorsType& left = lrs.left();
-		const BasisWithOperatorsType& right = lrs.right();
 		SizeType oneOrZero = (target.includeGroundStage()) ? 1 : 0;
 		SizeType targets = oneOrZero + target.size(); // Number of targets;
-		SizeType freeSize = (p.direction == ProgramGlobals::EXPAND_SYSTEM) ?
-		            left.size() : right.size();
-		SizeType summedSize = (p.direction == ProgramGlobals::EXPAND_SYSTEM) ?
-		            right.size() : left.size();
-		allTargets_.resize(targets*summedSize, freeSize);
-		allTargets_.setTo(0.0);
-		GenGroupType gengroupLeft(left);
-		GenGroupType gengroupRight(right);
+
 		for (SizeType x = 0; x < targets; ++x)
-			addThisTarget(x, target, gengroupLeft, gengroupRight, lrs, targets);
+			addThisTarget(x, target, targets);
 
 		{
 			PsimagLite::OstringStream msg;
@@ -139,20 +137,34 @@ public:
 		}
 	}
 
+	~DensityMatrixSvd()
+	{
+		for (SizeType i = 0; i < allTargets_.size(); ++i) {
+			delete allTargets_[i];
+			allTargets_[i] = 0;
+		}
+	}
+
 	virtual SparseMatrixType& operator()()
 	{
 		return data_;
 	}
 
-	virtual SizeType rank() { return allTargets_.rows(); }
-
-	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
+	void diag(VectorRealType& eigs,char jobz)
 	{
-		SizeType freeSize = allTargets_.cols();
-		MatrixType vt(freeSize, freeSize);
-		eigs.resize(freeSize);
-		svd('A', allTargets_, eigs, vt);
-		fullMatrixToCrsMatrix(data_, allTargets_);
+		SizeType npatches = allTargets_.size();
+		MatrixType mAll(lrs_.left().size(), lrs_.right().size());
+		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
+			MatrixType& m = *(allTargets_[ipatch]);
+			SizeType freeSize = m.rows();
+			MatrixType vt(freeSize, freeSize);
+			VectorRealType eigsOnePatch(freeSize);
+
+			svd('A', m, eigsOnePatch, vt);
+			transformThisPatch(mAll, eigs, m, vt, eigsOnePatch);
+		}
+
+		fullMatrixToCrsMatrix(data_, mAll);
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
@@ -171,9 +183,6 @@ private:
 
 	void addThisTarget(SizeType x,
 	                   const TargettingType& target,
-	                   const GenGroupType& genGroupLeft,
-	                   const GenGroupType& genGroupRight,
-	                   const LeftRightSuperType& lrs,
 	                   SizeType targets)
 
 	{
@@ -182,24 +191,23 @@ private:
 		const VectorWithOffsetType& v = (target.includeGroundStage() && x == 0) ?
 		            target.gs() : target(x2);
 
-		addThisTarget2(x, v, genGroupLeft, genGroupRight, lrs, targets);
+		addThisTarget2(x, v, targets);
 	}
 
 	void addThisTarget2(SizeType x,
 	                    const VectorWithOffset<ComplexOrRealType>& v,
-	                    const GenGroupType& genGroupLeft,
-	                    const GenGroupType& genGroupRight,
-	                    const LeftRightSuperType& lrs,
 	                    SizeType targets)
 	{
-		const BasisType& super = lrs.super();
-		const BasisWithOperatorsType& left = lrs.left();
-		const BasisWithOperatorsType& right = lrs.right();
+		const BasisType& super = lrs_.super();
+		const BasisWithOperatorsType& left = lrs_.left();
+		const BasisWithOperatorsType& right = lrs_.right();
 
 		SizeType m = v.sector(0);
 		int state = super.partition(m);
 		SizeType qn = super.qn(state);
-		GenIjPatchType ijPatch(lrs, qn);
+
+		vectorOfijPatches_.push_back(new GenIjPatchType(lrs_, qn));
+		GenIjPatchType& ijPatch = *(vectorOfijPatches_[vectorOfijPatches_.size() - 1]);
 
 		const VectorSizeType& permInverse = super.permutationInverse();
 		SizeType nl = left.size();
@@ -212,11 +220,13 @@ private:
 			SizeType igroup = ijPatch(GenIjPatchType::LEFT)[ipatch];
 			SizeType jgroup = ijPatch(GenIjPatchType::RIGHT)[ipatch];
 
-			SizeType sizeLeft = genGroupLeft(igroup+1) - genGroupLeft(igroup);
-			SizeType sizeRight = genGroupRight(jgroup+1) - genGroupRight(jgroup);
+			SizeType sizeLeft = gengroupLeft_(igroup+1) - gengroupLeft_(igroup);
+			SizeType sizeRight = gengroupRight_(jgroup+1) - gengroupRight_(jgroup);
 
-			SizeType left_offset = genGroupLeft(igroup);
-			SizeType right_offset = genGroupRight(jgroup);
+			SizeType left_offset = gengroupLeft_(igroup);
+			SizeType right_offset = gengroupRight_(jgroup);
+
+			MatrixType& matrix = getMatrix(ipatch, sizeLeft, sizeRight);
 
 			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
 				for (SizeType iright=0; iright < sizeRight; ++iright) {
@@ -235,8 +245,7 @@ private:
 					if (r < offset || r >= offset + v.effectiveSize(0))
 						continue;
 
-					allTargets_(i,j) =  v.slowAccess(r);
-
+					matrix(ileft,iright) +=  v.slowAccess(r);
 				}
 			}
 		}
@@ -244,19 +253,82 @@ private:
 
 	void addThisTarget2(SizeType x,
 	                    const VectorWithOffsets<ComplexOrRealType>& v,
-	                    const GenGroupType& genGroupLeft,
-	                    const GenGroupType& genGroupRight,
-	                    const LeftRightSuperType& lrs,
 	                    SizeType targets)
 	{
 		err("useSvd doesn't yet work with VectorWithOffsets (sorry)\n");
 	}
 
+	MatrixType& getMatrix(SizeType ipatch, SizeType sizeLeft, SizeType sizeRight)
+	{
+		if (ipatch < allTargets_.size())
+			return *(allTargets_[ipatch]);
+
+		MatrixType* m = new MatrixType(sizeLeft, sizeRight);
+		allTargets_.push_back(m);
+		return *m;
+	}
+
+	// This is wrong: use only left, left' or right, right'
+	void transformThisPatch(MatrixType& mAll,
+	                        VectorRealType& eigs,
+	                        const MatrixType& m,
+	                        const MatrixType& vt,
+	                        const VectorRealType& eigsOnePatch)
+	{
+		err("transformThisPatch (useSvd isn't ready yet)\n");
+		assert(vectorOfijPatches_.size() == 1);
+		const GenIjPatchType& ijPatch = *(vectorOfijPatches_[0]);
+		const VectorSizeType& permInverse = lrs_.super().permutationInverse();
+		SizeType nl = lrs_.left().size();
+
+		SizeType npatches = ijPatch(GenIjPatchType::LEFT).size();
+
+		for (SizeType ipatch  =0; ipatch < npatches; ++ipatch) {
+
+			SizeType igroup = ijPatch(GenIjPatchType::LEFT)[ipatch];
+			SizeType jgroup = ijPatch(GenIjPatchType::RIGHT)[ipatch];
+
+			SizeType sizeLeft =  gengroupLeft_(igroup+1) - gengroupLeft_(igroup);
+			SizeType sizeRight = gengroupRight_(jgroup+1) - gengroupRight_(jgroup);
+
+			SizeType left_offset = gengroupLeft_(igroup);
+			SizeType right_offset = gengroupRight_(jgroup);
+
+			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
+				for (SizeType iright=0; iright < sizeRight; ++iright) {
+
+					SizeType i = ileft + left_offset;
+					SizeType j = iright + right_offset;
+
+					assert(i < lrs_.left().size());
+					assert(j < lrs_.right().hamiltonian().row());
+
+					mAll(i, j) += m(ileft, iright);
+
+					assert(i + j*nl < permInverse.size());
+
+					/*SizeType r = permInverse[i + j*nl];
+					assert( !(  (r < offset) || (r >= (offset + initKron_.size())) ) );
+
+					SizeType ip = vstart_[ipatch] + (iright + ileft * sizeRight);
+					assert(ip < xout.size());
+
+
+					eigs[r-offset] = eigsOnePatch[ip];*/
+				}
+			}
+		}
+	}
+
 	ProgressIndicatorType progress_;
-	MatrixType allTargets_;
+	MatrixVectorType allTargets_;
 	SparseMatrixType data_;
 	bool debug_;
 	bool verbose_;
+	const LeftRightSuperType& lrs_;
+	GenGroupType gengroupLeft_;
+	GenGroupType gengroupRight_;
+	VectorGenIjPatchType vectorOfijPatches_;
 }; // class DensityMatrixSvd
 
 } // namespace Dmrg
