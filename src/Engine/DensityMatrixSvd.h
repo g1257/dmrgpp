@@ -178,6 +178,89 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 		MatrixVectorType& allTargets_;
 	};
 
+	class ParallelSvd {
+
+	public:
+
+		ParallelSvd(const MatrixVectorType& allTargets,
+		            MatrixType& mAll,
+		            VectorRealType& eigs,
+		            const LeftRightSuperType& lrs,
+		            SizeType direction,
+		            const VectorGenIjPatchType& vectorOfijPatches)
+		    : allTargets_(allTargets),
+		      mAll_(mAll),
+		      eigs_(eigs),
+		      lrs_(lrs),
+		      direction_(direction)
+		{
+			ijPatch_ = vectorOfijPatches[vectorOfijPatches.size() - 1];
+			SizeType oneSide = expandSys() ? lrs.left().size() : lrs.right().size();
+			eigs.resize(oneSide, 0.0);
+			mAll.resize(oneSide, oneSide);
+		}
+
+		void doTask(SizeType ipatch, SizeType)
+		{
+			MatrixType& m = *(allTargets_[ipatch]);
+			SizeType freeSize = m.rows();
+			MatrixType vt;
+			VectorRealType eigsOnePatch(freeSize);
+
+			svd('A', m, eigsOnePatch, vt);
+			MatrixType* vMatrix = 0;
+			if (!expandSys()) {
+				vMatrix = new MatrixType();
+				transposeConjugate(*vMatrix, vt);
+			}
+
+			saveThisPatch(mAll_, eigs_, m, vMatrix, eigsOnePatch, ipatch);
+			delete vMatrix;
+		}
+
+		SizeType tasks() const
+		{
+			return allTargets_.size();
+		}
+
+	private:
+
+		void saveThisPatch(MatrixType& mAll,
+		                   VectorRealType& eigs,
+		                   const MatrixType& m,
+		                   const MatrixType* vMatrix,
+		                   const VectorRealType& eigsOnePatch,
+		                   SizeType ipatch)
+		{
+			const MatrixType& mLeftOrRight = expandSys() ? m : *vMatrix;
+			const BasisType& basis = expandSys() ? lrs_.left() : lrs_.right();
+			typename GenIjPatchType::LeftOrRightEnumType lOrR = (expandSys()) ?
+			            GenIjPatchType::LEFT : GenIjPatchType::RIGHT;
+			SizeType igroup = ijPatch_->operator ()(lOrR)[ipatch];
+			SizeType offset = basis.partition(igroup);
+			SizeType x = mLeftOrRight.rows();
+			assert(x == mLeftOrRight.cols());
+
+			for (SizeType i = 0; i < x; ++i) {
+				eigs[i+offset] = eigsOnePatch[i];
+				for (SizeType j = 0; j < x; ++j)
+					mAll(i + offset, j + offset) += mLeftOrRight(i, j);
+			}
+		}
+
+		bool expandSys() const
+		{
+			return (direction_ == ProgramGlobals::EXPAND_SYSTEM);
+		}
+
+		const MatrixVectorType& allTargets_;
+		MatrixType& mAll_;
+		VectorRealType& eigs_;
+		const LeftRightSuperType& lrs_;
+		SizeType direction_;
+		GenIjPatchType* ijPatch_;
+	};
+
 public:
 
 	DensityMatrixSvd(const TargettingType& target,
@@ -223,26 +306,17 @@ public:
 
 	void diag(VectorRealType& eigs,char jobz)
 	{
-		SizeType npatches = allTargets_.size();
-		SizeType oneSide = expandSys() ? lrs_.left().size() : lrs_.right().size();
-		eigs.resize(oneSide, 0.0);
-		MatrixType mAll(oneSide, oneSide);
-		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
-			MatrixType& m = *(allTargets_[ipatch]);
-			SizeType freeSize = m.rows();
-			MatrixType vt;
-			VectorRealType eigsOnePatch(freeSize);
-
-			svd('A', m, eigsOnePatch, vt);
-			MatrixType* vMatrix = 0;
-			if (!expandSys()) {
-				vMatrix = new MatrixType();
-				transposeConjugate(*vMatrix, vt);
-			}
-
-			saveThisPatch(mAll, eigs, m, vMatrix, eigsOnePatch, ipatch);
-			delete vMatrix;
-		}
+		MatrixType mAll;
+		typedef PsimagLite::Parallelizer<ParallelSvd> ParallelizerType;
+		ParallelizerType threaded(PsimagLite::Concurrency::npthreads,
+		                          PsimagLite::MPI::COMM_WORLD);
+		ParallelSvd parallelSvd(allTargets_,
+		                        mAll,
+		                        eigs,
+		                        lrs_,
+		                        params_.direction,
+		                        vectorOfijPatches_);
+		threaded.loopCreate(parallelSvd);
 
 		fullMatrixToCrsMatrix(data_, mAll);
 	}
@@ -297,35 +371,6 @@ private:
 	                    SizeType targets)
 	{
 		err("useSvd doesn't yet work with VectorWithOffsets (sorry)\n");
-	}
-
-	void saveThisPatch(MatrixType& mAll,
-	                   VectorRealType& eigs,
-	                   const MatrixType& m,
-	                   const MatrixType* vMatrix,
-	                   const VectorRealType& eigsOnePatch,
-	                   SizeType ipatch)
-	{
-		GenIjPatchType& ijPatch = *(vectorOfijPatches_[0]);
-		const MatrixType& mLeftOrRight = expandSys() ? m : *vMatrix;
-		const BasisType& basis = expandSys() ? lrs_.left() : lrs_.right();
-		typename GenIjPatchType::LeftOrRightEnumType lOrR = (expandSys()) ?
-		            GenIjPatchType::LEFT : GenIjPatchType::RIGHT;
-		SizeType igroup = ijPatch(lOrR)[ipatch];
-		SizeType offset = basis.partition(igroup);
-		SizeType x = mLeftOrRight.rows();
-		assert(x == mLeftOrRight.cols());
-
-		for (SizeType i = 0; i < x; ++i) {
-			eigs[i+offset] = eigsOnePatch[i];
-			for (SizeType j = 0; j < x; ++j)
-				mAll(i + offset, j + offset) += mLeftOrRight(i, j);
-		}
-	}
-
-	bool expandSys() const
-	{
-		return (params_.direction == ProgramGlobals::EXPAND_SYSTEM);
 	}
 
 	ProgressIndicatorType progress_;
