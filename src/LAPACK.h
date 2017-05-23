@@ -38,8 +38,37 @@ namespace LAPACK {
 
   extern "C" int  dgetri_(int* N, double* A, int* LDA, int* IPIV,  double* WORK, int* LWORK, int* INFO);
 
-  extern "C" int  dgesdd_(char* jobz,int* m,int* n, double* a,int* lda,double* s,double* u, int* ldu, double* vt, int* ldvt,double* work,int* lwork,int* iwork,int* info);
-// ============================================================================
+  extern "C" int  dgesdd_(char* jobz,
+                          int* m,
+                          int* n,
+                          double* a,
+                          int* lda,
+                          double* s,
+                          double* u,
+                          int* ldu,
+                          double* vt,
+                          int* ldvt,
+                          double* work,
+                          int* lwork,
+                          int* iwork,
+                          int* info);
+
+  extern "C" int  zgesdd_(char* jobz,
+                          int* m,
+                          int* n,
+                          std::complex<double>* a,
+                          int* lda,
+                          double* s,
+                          std::complex<double>* u,
+                          int* ldu,
+                          std::complex<double>* vt,
+                          int* ldvt,
+                          std::complex<double>* work,
+                          int* lwork,
+                          double* rwork,
+                          int* iwork,
+                          int* info);
+  // ============================================================================
   inline void GESV(int ma,int mb,float* a,int lda,int* pivot,
 		   float* b,int ldb,int& info) {
     sgesv_(&ma,&mb,a,&lda,pivot,b,&ldb,&info);

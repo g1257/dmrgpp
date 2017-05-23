@@ -150,7 +150,7 @@ struct ParametersForSolver {
 			io.readline(x,prefix + "SaveLanczosVectors=");
 			PsimagLite::String msg("prefix + SaveLanczosVectors=");
 			msg +="	should not be present in input file anymore\n";
-			err(msg);
+			throw RuntimeError(msg);
 		} catch (std::exception&) {}
 
 		try {

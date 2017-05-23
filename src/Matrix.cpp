@@ -339,15 +339,88 @@ void svd(char,
 #endif
 }
 
-void svd(char,
-         Matrix<std::complex<double> >&,
-         Vector<double>::Type&,
-         Matrix<std::complex<double> >&)
+void svd(char jobz,
+         Matrix<std::complex<double> >& a,
+         Vector<double>::Type& s,
+         Matrix<std::complex<double> >& vt)
 {
 #ifdef NO_LAPACK
 	throw RuntimeError("svd: dgesdd_: NO LAPACK!\n");
 #else
-	throw RuntimeError("svd: with std::complex<double> not ready yet\n");
+	if (jobz != 'A' && jobz != 'S') {
+		String msg("svd: jobz must be either A or S");
+		String jobzString = " ";
+		jobzString[0] = jobz;
+		throw RuntimeError(msg + ", not " + jobzString + "\n");
+	}
+
+	int m = a.n_row();
+	int n = a.n_col();
+	int lda = m;
+	int min = (m<n) ? m : n;
+
+	s.resize(min);
+	int ldu = m;
+	int ucol = (jobz == 'A') ? m : min;
+	Matrix<std::complex<double> > u(ldu,ucol);
+	int ldvt = (jobz == 'A') ? n : min;
+	vt.resize(ldvt,n);
+	int lrwork = 2.0*min*std::max(5*min+7,2*std::max(m,n)+2*min+1);
+	Vector<double>::Type rwork(lrwork, 0.0);
+
+	Vector<std::complex<double> >::Type work(100,0);
+	int info = 0;
+	Vector<int>::Type iwork(8*min,0);
+
+	// query optimal work
+	int lwork = -1;
+	psimag::LAPACK::zgesdd_(&jobz,
+	                        &m,
+	                        &n,
+	                        &(a(0,0)),
+	                        &lda,
+	                        &(s[0]),
+	        &(u(0,0)),
+	        &ldu,
+	        &(vt(0,0)),
+	        &ldvt,
+	        &(work[0]),
+	        &lwork,
+	        &(rwork[0]),
+	        &(iwork[0]),
+	        &info);
+	if (info!=0) {
+		String str(__FILE__);
+		str += " " + ttos(__LINE__);
+		str += " svd(...) failed with info=" + ttos(info) + "\n";
+		throw RuntimeError(str.c_str());
+	}
+
+	lwork = int(std::real(work[0]));
+	work.resize(lwork+10);
+	// real work:
+	psimag::LAPACK::zgesdd_(&jobz,
+	                        &m,
+	                        &n,
+	                        &(a(0,0)),
+	                        &lda,
+	                        &(s[0]),
+	        &(u(0,0)),
+	        &ldu,
+	        &(vt(0,0)),
+	        &ldvt,
+	        &(work[0]),
+	        &lwork,
+	        &(rwork[0]),
+	        &(iwork[0]),
+	        &info);
+	if (info!=0) {
+		String str(__FILE__);
+		str += " " + ttos(__LINE__);
+		str += " svd(...) failed with info=" + ttos(info) + "\n";
+		throw RuntimeError(str.c_str());
+	}
+	a = u;
 #endif
 }
 
