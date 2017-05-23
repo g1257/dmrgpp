@@ -155,11 +155,18 @@ public:
 		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
 			MatrixType& m = *(allTargets_[ipatch]);
 			SizeType freeSize = m.rows();
-			MatrixType vt(freeSize, freeSize);
+			MatrixType vt;
 			VectorRealType eigsOnePatch(freeSize);
 
 			svd('A', m, eigsOnePatch, vt);
-			saveThisPatch(mAll, eigs, m, vt, eigsOnePatch, ipatch);
+			MatrixType* vMatrix = 0;
+			if (!expandSys()) {
+				vMatrix = new MatrixType();
+				transposeConjugate(*vMatrix, vt);
+			}
+
+			saveThisPatch(mAll, eigs, m, vMatrix, eigsOnePatch, ipatch);
+			delete vMatrix;
 		}
 
 		fullMatrixToCrsMatrix(data_, mAll);
@@ -268,12 +275,12 @@ private:
 	void saveThisPatch(MatrixType& mAll,
 	                   VectorRealType& eigs,
 	                   const MatrixType& m,
-	                   const MatrixType& vt,
+	                   const MatrixType* vMatrix,
 	                   const VectorRealType& eigsOnePatch,
 	                   SizeType ipatch)
 	{
 		GenIjPatchType& ijPatch = *(vectorOfijPatches_[0]);
-		const MatrixType& mLeftOrRight = expandSys() ? m : vt;
+		const MatrixType& mLeftOrRight = expandSys() ? m : *vMatrix;
 		const BasisType& basis = expandSys() ? lrs_.left() : lrs_.right();
 		typename GenIjPatchType::LeftOrRightEnumType lOrR = (expandSys()) ?
 		            GenIjPatchType::LEFT : GenIjPatchType::RIGHT;
@@ -298,8 +305,6 @@ private:
 	const ParamsType& params_;
 	MatrixVectorType allTargets_;
 	SparseMatrixType data_;
-	bool debug_;
-	bool verbose_;
 	const LeftRightSuperType& lrs_;
 	VectorGenIjPatchType vectorOfijPatches_;
 }; // class DensityMatrixSvd
