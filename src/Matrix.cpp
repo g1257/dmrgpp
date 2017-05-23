@@ -264,7 +264,6 @@ void svd(char jobz,Matrix<double>& a,Vector<double>::Type& s,Matrix<double>& vt)
 
 	int m = a.n_row();
 	int n = a.n_col();
-	std::cerr<<"Trying svd(...) "<<m<<"x"<<n<<"\n";
 	int lda = m;
 	int min = (m<n) ? m : n;
 
