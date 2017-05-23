@@ -101,7 +101,6 @@ public:
 	typedef ArrayOfMatStruct<LeftRightSuperType> ArrayOfMatStructType;
 	typedef typename ArrayOfMatStructType::VectorSizeType VectorSizeType;
 	typedef typename ArrayOfMatStructType::GenIjPatchType GenIjPatchType;
-	typedef typename GenIjPatchType::GenGroupType GenGroupType;
 	typedef typename ModelHelperType::LinkType LinkType;
 	typedef typename ModelType::LinkProductStructType LinkProductStructType;
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
@@ -110,8 +109,6 @@ public:
 	         const ModelHelperType& modelHelper)
 	    : model_(model),
 	      modelHelper_(modelHelper),
-	      gengroupLeft_(modelHelper_.leftRightSuper().left()),
-	      gengroupRight_(modelHelper_.leftRightSuper().right()),
 	      ijpatches_(modelHelper_.leftRightSuper(),modelHelper_.quantumNumber())
 	{
 		cacheSigns(modelHelper_.leftRightSuper().left().electronsVector());
@@ -168,16 +165,6 @@ public:
 
 	SizeType connections() const { return xc_.size(); }
 
-	const GenGroupType& istartLeft() const
-	{
-		return gengroupLeft_;
-	}
-
-	const GenGroupType& istartRight() const
-	{
-		return gengroupRight_;
-	}
-
 	const ComplexOrRealType& value(SizeType i) const
 	{
 		assert(values_.size()>i);
@@ -230,14 +217,12 @@ private:
 		calculateAhat(Ahat, A, link2.value, link2.fermionOrBoson);
 		values_.push_back(link2.value);
 		ArrayOfMatStructType* x1 = new ArrayOfMatStructType(Ahat,
-		                                                    gengroupLeft_,
 		                                                    ijpatches_,
 		                                                    GenIjPatchType::LEFT);
 
 		xc_.push_back(x1);
 
 		ArrayOfMatStructType* y1 = new ArrayOfMatStructType(B,
-		                                                    gengroupRight_,
 		                                                    ijpatches_,
 		                                                    GenIjPatchType::RIGHT);
 		yc_.push_back(y1);
@@ -276,7 +261,6 @@ private:
 
 	const ModelType& model_;
 	const ModelHelperType& modelHelper_;
-	GenGroupType gengroupLeft_,gengroupRight_;
 	GenIjPatchType  ijpatches_;
 	SparseMatrixType identityL_;
 	SparseMatrixType identityR_;

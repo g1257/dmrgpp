@@ -95,23 +95,24 @@ public:
 	typedef MatrixDenseOrSparse<SparseMatrixType> MatrixDenseOrSparseType;
 	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
 	typedef typename GenIjPatchType::VectorSizeType VectorSizeType;
-	typedef typename GenIjPatchType::GenGroupType GenGroupType;
+	typedef typename GenIjPatchType::BasisType BasisType;
 
 	ArrayOfMatStruct(const SparseMatrixType& sparse,
-	                 GenGroupType& istart,
 	                 GenIjPatchType& patch,
 	                 typename GenIjPatchType::LeftOrRightEnumType leftOrRight)
 	    : data_(patch(leftOrRight).size(), patch(leftOrRight).size())
 	{
+		const BasisType& basis = (leftOrRight == GenIjPatchType::LEFT) ?
+		            patch.lrs().left() : patch.lrs().right();
 		SizeType npatch = patch(leftOrRight).size();
 		for (SizeType jpatch=0; jpatch < npatch; ++jpatch) {
 			SizeType jgroup = patch(leftOrRight)[jpatch];
-			SizeType j1 = istart(jgroup);
-			SizeType j2 = istart(jgroup+1);
+			SizeType j1 = basis.partition(jgroup);
+			SizeType j2 = basis.partition(jgroup+1);
 			for (SizeType ipatch=0; ipatch < npatch; ++ipatch) {
 				SizeType igroup = patch(leftOrRight)[ipatch];
-				SizeType i1 = istart(igroup);
-				SizeType i2 = istart(igroup+1);
+				SizeType i1 = basis.partition(igroup);
+				SizeType i2 = basis.partition(igroup+1);
 
 				SparseMatrixType tmp(i2-i1,  j2-j1);
 				SizeType counter = 0;

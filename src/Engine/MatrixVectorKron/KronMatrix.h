@@ -99,9 +99,9 @@ class KronMatrix {
 	typedef typename KronConnectionsType::VectorType VectorType;
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
-	typedef typename InitKronType::GenGroupType GenGroupType;
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename GenIjPatchType::BasisType BasisType;
 
 public:
 
@@ -156,24 +156,27 @@ private:
 	            const VectorType& vin) const
 	{
 		const VectorSizeType& permInverse = initKron_.lrs().super().permutationInverse();
-		const SparseMatrixType& left = initKron_.lrs().left().hamiltonian();
-		SizeType nl = left.row();
+		const SparseMatrixType& leftH = initKron_.lrs().left().hamiltonian();
+		SizeType nl = leftH.row();
 
 		SizeType offset = initKron_.offset();
 		SizeType npatches = initKron_.patch(GenIjPatchType::LEFT).size();
+		const BasisType& left = initKron_.lrs().left();
+		const BasisType& right = initKron_.lrs().right();
 
 		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
 
 			SizeType igroup = initKron_.patch(GenIjPatchType::LEFT)[ipatch];
 			SizeType jgroup = initKron_.patch(GenIjPatchType::RIGHT)[ipatch];
 
-			SizeType sizeLeft =  initKron_.istartLeft()(igroup+1) -
-			        initKron_.istartLeft()(igroup);
-			SizeType sizeRight = initKron_.istartRight()(jgroup+1) -
-			        initKron_.istartRight()(jgroup);
+			assert(left.partition(igroup+1) >= left.partition(igroup));
+			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
 
-			SizeType left_offset = initKron_.istartLeft()(igroup);
-			SizeType right_offset = initKron_.istartRight()(jgroup);
+			assert(right.partition(jgroup+1) >= right.partition(jgroup));
+			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
+
+			SizeType left_offset = left.partition(igroup);
+			SizeType right_offset = right.partition(jgroup);
 
 			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
 				for (SizeType iright=0; iright < sizeRight; ++iright) {
@@ -214,19 +217,22 @@ private:
 		SizeType offset = initKron_.offset();
 		SizeType nl = initKron_.lrs().left().hamiltonian().row();
 		SizeType npatches = initKron_.patch(GenIjPatchType::LEFT).size();
+		const BasisType& left = initKron_.lrs().left();
+		const BasisType& right = initKron_.lrs().right();
 
 		for( SizeType ipatch=0; ipatch < npatches; ++ipatch) {
 
 			SizeType igroup = initKron_.patch(GenIjPatchType::LEFT)[ipatch];
 			SizeType jgroup = initKron_.patch(GenIjPatchType::RIGHT)[ipatch];
 
-			SizeType sizeLeft =  initKron_.istartLeft()(igroup+1) -
-			        initKron_.istartLeft()(igroup);
-			SizeType sizeRight = initKron_.istartRight()(jgroup+1) -
-			        initKron_.istartRight()(jgroup);
+			assert(left.partition(igroup+1) >= left.partition(igroup));
+			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
 
-			SizeType left_offset = initKron_.istartLeft()(igroup);
-			SizeType right_offset = initKron_.istartRight()(jgroup);
+			assert(right.partition(jgroup+1) >= right.partition(jgroup));
+			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
+
+			SizeType left_offset = left.partition(igroup);
+			SizeType right_offset = right.partition(jgroup);
 
 			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
 				for (SizeType iright=0; iright < sizeRight; ++iright) {
@@ -261,6 +267,8 @@ private:
 
 		SizeType ip = 0;
 		PsimagLite::Vector<long unsigned int>::Type weights(npatches, 0);
+		const BasisType& left = initKron_.lrs().left();
+		const BasisType& right = initKron_.lrs().right();
 
 		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
 			vstart_[ipatch] = ip;
@@ -268,13 +276,11 @@ private:
 			SizeType igroup = initKron_.patch(GenIjPatchType::LEFT)[ipatch];
 			SizeType jgroup = initKron_.patch(GenIjPatchType::RIGHT)[ipatch];
 
-			assert(initKron_.istartLeft()(igroup+1) >= initKron_.istartLeft()(igroup));
-			SizeType sizeLeft =  initKron_.istartLeft()(igroup+1) -
-			        initKron_.istartLeft()(igroup);
+			assert(left.partition(igroup+1) >= left.partition(igroup));
+			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
 
-			assert(initKron_.istartRight()(jgroup+1) >= initKron_.istartRight()(jgroup));
-			SizeType sizeRight = initKron_.istartRight()(jgroup+1) -
-			        initKron_.istartRight()(jgroup);
+			assert(right.partition(jgroup+1) >= right.partition(jgroup));
+			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
 
 			assert(1 <= sizeLeft);
 			assert(1 <= sizeRight);

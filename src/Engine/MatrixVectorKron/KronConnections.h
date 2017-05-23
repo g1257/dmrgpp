@@ -96,7 +96,6 @@ class KronConnections {
 
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
-	typedef typename InitKronType::GenGroupType GenGroupType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -107,7 +106,7 @@ public:
 	typedef typename MatrixDenseOrSparseType::VectorType VectorType;
 	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
 	typedef typename InitKronType::RealType RealType;
-
+	typedef typename GenIjPatchType::BasisType BasisType;
 
 	KronConnections(const InitKronType& initKron,
 	                VectorType& x,
@@ -162,6 +161,8 @@ private:
 
 		SizeType npatch = initKron_.patch(GenIjPatchType::LEFT).size();
 		SizeType sum = 0;
+		const BasisType& left = initKron_.lrs().left();
+		const BasisType& right = initKron_.lrs().right();
 
 		for( SizeType ipatch=0; ipatch < npatch; ipatch++) {
 			offsetForPatches_[ipatch] = sum;
@@ -169,13 +170,11 @@ private:
 			SizeType igroup = initKron_.patch(GenIjPatchType::LEFT)[ipatch];
 			SizeType jgroup = initKron_.patch(GenIjPatchType::RIGHT)[ipatch];
 
-			assert(initKron_.istartLeft()(igroup+1) >= initKron_.istartLeft()(igroup));
-			SizeType sizeLeft =  initKron_.istartLeft()(igroup+1) -
-			        initKron_.istartLeft()(igroup);
+			assert(left.partition(igroup+1) >= left.partition(igroup));
+			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
 
-			assert(initKron_.istartRight()(jgroup+1) >= initKron_.istartRight()(jgroup));
-			SizeType sizeRight = initKron_.istartRight()(jgroup+1) -
-			        initKron_.istartRight()(jgroup);
+			assert(right.partition(jgroup+1) >= right.partition(jgroup));
+			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
 
 			sum +=  sizeLeft*sizeRight;
 		}
@@ -202,13 +201,15 @@ private:
 	SizeType lSizeFunction(SizeType ipatch) const
 	{
 		SizeType igroup = initKron_.patch(GenIjPatchType::LEFT)[ipatch];
-		return initKron_.istartLeft()(igroup+1) - initKron_.istartLeft()(igroup);
+		return initKron_.lrs().left().partition(igroup+1) -
+		        initKron_.lrs().left().partition(igroup);
 	}
 
 	SizeType rSizeFunction(SizeType ipatch) const
 	{
 		SizeType jgroup = initKron_.patch(GenIjPatchType::RIGHT)[ipatch];
-		return initKron_.istartRight()(jgroup+1) - initKron_.istartRight()(jgroup);
+		return initKron_.lrs().right().partition(jgroup+1) -
+		        initKron_.lrs().right().partition(jgroup);
 	}
 
 	const InitKronType& initKron_;

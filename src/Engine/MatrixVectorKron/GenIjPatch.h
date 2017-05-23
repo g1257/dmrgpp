@@ -81,35 +81,29 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef GEN_IJ_PATCH_HEADER_H
 #define GEN_IJ_PATCH_HEADER_H
 
-#include <vector>
+#include "Vector.h"
 #include <cassert>
-#include "GenGroup.h"
-//#include "QvalStruct.h"
 
 namespace Dmrg {
 
 template<typename LeftRightSuperType>
 class GenIjPatch {
 
-	typedef typename LeftRightSuperType::BasisType BasisType;
-
 public:
 
-	typedef GenGroup<BasisType> GenGroupType;
-	typedef typename GenGroupType::VectorSizeType VectorSizeType;
+	typedef typename LeftRightSuperType::BasisType BasisType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	enum LeftOrRightEnumType {LEFT=0,RIGHT=1};
 
 	GenIjPatch(const LeftRightSuperType& lrs, int target)
+	    : lrs_(lrs)
 	{
-		GenGroupType groupLeft(lrs.left());
-		GenGroupType groupRight(lrs.right());
-
-		for (SizeType i=0;i<groupLeft.size()-1;i++) {
-			SizeType istart = groupLeft(i);
+		for (SizeType i=0;i<lrs.left().partition()-1;i++) {
+			SizeType istart = lrs.left().partition(i);
 			assert(istart<lrs.left().size());
-			for (SizeType j=0;j<groupRight.size()-1;j++) {
-				SizeType jstart = groupRight(j);
+			for (SizeType j=0;j<lrs.right().partition()-1;++j) {
+				SizeType jstart = lrs.right().partition(j);
 				assert(jstart<lrs.right().size());
 
 				if (lrs.left().qn(istart) + lrs.right().qn(jstart)!=target)
@@ -126,8 +120,11 @@ public:
 		return (leftOrRight==LEFT) ? patchesLeft_ : patchesRight_;
 	}
 
+	const LeftRightSuperType& lrs() const { return lrs_; }
+
 private:
 
+	const LeftRightSuperType& lrs_;
 	VectorSizeType patchesLeft_;
 	VectorSizeType patchesRight_;
 

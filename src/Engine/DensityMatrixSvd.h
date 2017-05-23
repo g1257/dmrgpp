@@ -98,7 +98,6 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 	typedef typename BaseType::Params ParamsType;
 	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
 	typedef typename GenIjPatchType::VectorSizeType VectorSizeType;
-	typedef typename GenIjPatchType::GenGroupType GenGroupType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename PsimagLite::Vector<GenIjPatchType*>::Type VectorGenIjPatchType;
 
@@ -113,8 +112,6 @@ public:
 	      progress_("DensityMatrixSvd"),
 	      params_(p),
 	      lrs_(lrs),
-	      gengroupLeft_(lrs.left()),
-	      gengroupRight_(lrs.right()),
 	      vectorOfijPatches_(0)
 	{
 		{
@@ -202,7 +199,6 @@ private:
 		const BasisType& super = lrs_.super();
 		const BasisWithOperatorsType& left = lrs_.left();
 		const BasisWithOperatorsType& right = lrs_.right();
-
 		SizeType m = v.sector(0);
 		int state = super.partition(m);
 		SizeType qn = super.qn(state);
@@ -221,11 +217,11 @@ private:
 			SizeType igroup = ijPatch(GenIjPatchType::LEFT)[ipatch];
 			SizeType jgroup = ijPatch(GenIjPatchType::RIGHT)[ipatch];
 
-			SizeType sizeLeft = gengroupLeft_(igroup+1) - gengroupLeft_(igroup);
-			SizeType sizeRight = gengroupRight_(jgroup+1) - gengroupRight_(jgroup);
+			SizeType sizeLeft = left.partition(igroup+1) - left.partition(igroup);
+			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
 
-			SizeType left_offset = gengroupLeft_(igroup);
-			SizeType right_offset = gengroupRight_(jgroup);
+			SizeType left_offset = left.partition(igroup);
+			SizeType right_offset = right.partition(jgroup);
 
 			MatrixType& matrix = getMatrix(ipatch, sizeLeft, sizeRight);
 
@@ -278,11 +274,11 @@ private:
 	{
 		GenIjPatchType& ijPatch = *(vectorOfijPatches_[0]);
 		const MatrixType& mLeftOrRight = expandSys() ? m : vt;
-		const GenGroupType& gengroup = expandSys() ? gengroupLeft_ : gengroupRight_;
+		const BasisType& basis = expandSys() ? lrs_.left() : lrs_.right();
 		typename GenIjPatchType::LeftOrRightEnumType lOrR = (expandSys()) ?
 		            GenIjPatchType::LEFT : GenIjPatchType::RIGHT;
 		SizeType igroup = ijPatch(lOrR)[ipatch];
-		SizeType offset = gengroup(igroup);
+		SizeType offset = basis.partition(igroup);
 		SizeType x = mLeftOrRight.rows();
 		assert(x == mLeftOrRight.cols());
 
@@ -305,8 +301,6 @@ private:
 	bool debug_;
 	bool verbose_;
 	const LeftRightSuperType& lrs_;
-	GenGroupType gengroupLeft_;
-	GenGroupType gengroupRight_;
 	VectorGenIjPatchType vectorOfijPatches_;
 }; // class DensityMatrixSvd
 
