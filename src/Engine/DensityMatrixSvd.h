@@ -111,8 +111,7 @@ public:
 	                 const ParamsType& p)
 	    :
 	      progress_("DensityMatrixSvd"),
-	      debug_(p.debug),
-	      verbose_(p.verbose),
+	      params_(p),
 	      lrs_(lrs),
 	      gengroupLeft_(lrs.left()),
 	      gengroupRight_(lrs.right()),
@@ -153,7 +152,9 @@ public:
 	void diag(VectorRealType& eigs,char jobz)
 	{
 		SizeType npatches = allTargets_.size();
-		MatrixType mAll(lrs_.left().size(), lrs_.right().size());
+		SizeType oneSide = expandSys() ? lrs_.left().size() : lrs_.right().size();
+		eigs.resize(oneSide, 0.0);
+		MatrixType mAll(oneSide, oneSide);
 		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
 			MatrixType& m = *(allTargets_[ipatch]);
 			SizeType freeSize = m.rows();
@@ -161,7 +162,7 @@ public:
 			VectorRealType eigsOnePatch(freeSize);
 
 			svd('A', m, eigsOnePatch, vt);
-			transformThisPatch(mAll, eigs, m, vt, eigsOnePatch);
+			saveThisPatch(mAll, eigs, m, vt, eigsOnePatch, ipatch);
 		}
 
 		fullMatrixToCrsMatrix(data_, mAll);
@@ -268,59 +269,37 @@ private:
 		return *m;
 	}
 
-	// This is wrong: use only left, left' or right, right'
-	void transformThisPatch(MatrixType& mAll,
-	                        VectorRealType& eigs,
-	                        const MatrixType& m,
-	                        const MatrixType& vt,
-	                        const VectorRealType& eigsOnePatch)
+	void saveThisPatch(MatrixType& mAll,
+	                   VectorRealType& eigs,
+	                   const MatrixType& m,
+	                   const MatrixType& vt,
+	                   const VectorRealType& eigsOnePatch,
+	                   SizeType ipatch)
 	{
-		err("transformThisPatch (useSvd isn't ready yet)\n");
-		assert(vectorOfijPatches_.size() == 1);
-		const GenIjPatchType& ijPatch = *(vectorOfijPatches_[0]);
-		const VectorSizeType& permInverse = lrs_.super().permutationInverse();
-		SizeType nl = lrs_.left().size();
+		GenIjPatchType& ijPatch = *(vectorOfijPatches_[0]);
+		const MatrixType& mLeftOrRight = expandSys() ? m : vt;
+		const GenGroupType& gengroup = expandSys() ? gengroupLeft_ : gengroupRight_;
+		typename GenIjPatchType::LeftOrRightEnumType lOrR = (expandSys()) ?
+		            GenIjPatchType::LEFT : GenIjPatchType::RIGHT;
+		SizeType igroup = ijPatch(lOrR)[ipatch];
+		SizeType offset = gengroup(igroup);
+		SizeType x = mLeftOrRight.rows();
+		assert(x == mLeftOrRight.cols());
 
-		SizeType npatches = ijPatch(GenIjPatchType::LEFT).size();
-
-		for (SizeType ipatch  =0; ipatch < npatches; ++ipatch) {
-
-			SizeType igroup = ijPatch(GenIjPatchType::LEFT)[ipatch];
-			SizeType jgroup = ijPatch(GenIjPatchType::RIGHT)[ipatch];
-
-			SizeType sizeLeft =  gengroupLeft_(igroup+1) - gengroupLeft_(igroup);
-			SizeType sizeRight = gengroupRight_(jgroup+1) - gengroupRight_(jgroup);
-
-			SizeType left_offset = gengroupLeft_(igroup);
-			SizeType right_offset = gengroupRight_(jgroup);
-
-			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
-				for (SizeType iright=0; iright < sizeRight; ++iright) {
-
-					SizeType i = ileft + left_offset;
-					SizeType j = iright + right_offset;
-
-					assert(i < lrs_.left().size());
-					assert(j < lrs_.right().hamiltonian().row());
-
-					mAll(i, j) += m(ileft, iright);
-
-					assert(i + j*nl < permInverse.size());
-
-					/*SizeType r = permInverse[i + j*nl];
-					assert( !(  (r < offset) || (r >= (offset + initKron_.size())) ) );
-
-					SizeType ip = vstart_[ipatch] + (iright + ileft * sizeRight);
-					assert(ip < xout.size());
-
-
-					eigs[r-offset] = eigsOnePatch[ip];*/
-				}
-			}
+		for (SizeType i = 0; i < x; ++i) {
+			eigs[i+offset] = eigsOnePatch[i];
+			for (SizeType j = 0; j < x; ++j)
+				mAll(i + offset, j + offset) += mLeftOrRight(i, j);
 		}
 	}
 
+	bool expandSys() const
+	{
+		return (params_.direction == ProgramGlobals::EXPAND_SYSTEM);
+	}
+
 	ProgressIndicatorType progress_;
+	const ParamsType& params_;
 	MatrixVectorType allTargets_;
 	SparseMatrixType data_;
 	bool debug_;

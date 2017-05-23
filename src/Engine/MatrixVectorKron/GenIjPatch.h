@@ -100,7 +100,7 @@ public:
 
 	enum LeftOrRightEnumType {LEFT=0,RIGHT=1};
 
-	GenIjPatch(const LeftRightSuperType& lrs,int target)
+	GenIjPatch(const LeftRightSuperType& lrs, int target)
 	{
 		GenGroupType groupLeft(lrs.left());
 		GenGroupType groupRight(lrs.right());
@@ -112,7 +112,8 @@ public:
 				SizeType jstart = groupRight(j);
 				assert(jstart<lrs.right().size());
 
-				if (lrs.left().qn(istart) + lrs.right().qn(jstart)!=target) continue;
+				if (lrs.left().qn(istart) + lrs.right().qn(jstart)!=target)
+					continue;
 
 				patchesLeft_.push_back(i);
 				patchesRight_.push_back(j);
@@ -127,7 +128,8 @@ public:
 
 private:
 
-	VectorSizeType patchesLeft_,patchesRight_;
+	VectorSizeType patchesLeft_;
+	VectorSizeType patchesRight_;
 
 }; //class GenIjPatch
 } // namespace PsimagLite
