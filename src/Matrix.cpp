@@ -300,7 +300,8 @@ void svd(char jobz,Matrix<double>& a,Vector<double>::Type& s,Matrix<double>& vt)
 		str += " svd(...) failed with info=" + ttos(info) + "\n";
 		throw RuntimeError(str.c_str());
 	}
-	lwork = int(work[0]);
+
+	lwork = int(work[0]) + (m+n)*256;
 	work.resize(lwork+10);
 	// real work:
 	psimag::LAPACK::dgesdd_(&jobz,
@@ -396,7 +397,7 @@ void svd(char jobz,
 		throw RuntimeError(str.c_str());
 	}
 
-	lwork = int(std::real(work[0]));
+	lwork = int(std::real(work[0])) + (m+n)*256;
 	work.resize(lwork+10);
 	// real work:
 	psimag::LAPACK::zgesdd_(&jobz,
