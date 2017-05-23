@@ -191,7 +191,7 @@ public:
 		knownLabels_.push_back("TridiagSteps");
 		knownLabels_.push_back("TruncationTolerance");
 		knownLabels_.push_back("GeometryMaxConnections");
-		knownLabels_.push_back("LanczosSaveLanczosVectors");
+		knownLabels_.push_back("LanczosNoSaveLanczosVectors");
 	}
 
 	~InputCheck()
