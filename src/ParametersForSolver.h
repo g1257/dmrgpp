@@ -107,7 +107,7 @@ struct ParametersForSolver {
 	template<typename IoInputType>
 	ParametersForSolver(IoInputType& io,String prefix)
 	    : steps(LanczosSteps),minSteps(4),tolerance(1e-12),stepsForEnergyConvergence(MaxLanczosSteps),
-	      options(""),oneOverA(0),b(0),Eg(0),weight(0),isign(0),lotaMemory(false),
+	      options(""),oneOverA(0),b(0),Eg(0),weight(0),isign(0),lotaMemory(true),
 	      threadId(0)
 	{
 		try {
@@ -148,7 +148,15 @@ struct ParametersForSolver {
 		try {
 			int x = 0;
 			io.readline(x,prefix + "SaveLanczosVectors=");
-			lotaMemory = (x > 0);
+			PsimagLite::String msg("prefix + SaveLanczosVectors=");
+			msg +="	should not be present in input file anymore\n";
+			err(msg);
+		} catch (std::exception&) {}
+
+		try {
+			int x = 0;
+			io.readline(x,prefix + "NoSaveLanczosVectors=");
+			lotaMemory = (x > 0) ? 0 : 1;
 		} catch (std::exception&) {}
 	}
 
