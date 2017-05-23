@@ -103,6 +103,81 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 
 	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
+	class ParallelPsiSplit {
+
+	public:
+
+		ParallelPsiSplit(const LeftRightSuperType& lrs,
+		                 const VectorGenIjPatchType& vectorOfijPatches,
+		                 const VectorWithOffset<ComplexOrRealType>& v,
+		                 MatrixVectorType& allTargets)
+		    : left_(lrs.left()),
+		      right_(lrs.right()),
+		      permInverse_(lrs.super().permutationInverse()),
+		      v_(v),
+		      allTargets_(allTargets)
+		{
+			ijPatch_ = vectorOfijPatches[vectorOfijPatches.size() - 1];
+			for (SizeType i = 0; i < tasks(); ++i) {
+				allTargets.push_back(new MatrixType());
+			}
+		}
+
+		void doTask(SizeType ipatch, SizeType)
+		{
+			SizeType nl = left_.size();
+
+			SizeType offset = v_.offset(0);
+			SizeType igroup = ijPatch_->operator ()(GenIjPatchType::LEFT)[ipatch];
+			SizeType jgroup = ijPatch_->operator ()(GenIjPatchType::RIGHT)[ipatch];
+
+			SizeType sizeLeft = left_.partition(igroup+1) - left_.partition(igroup);
+			SizeType sizeRight = right_.partition(jgroup+1) - right_.partition(jgroup);
+
+			SizeType left_offset = left_.partition(igroup);
+			SizeType right_offset = right_.partition(jgroup);
+
+			MatrixType& matrix = *(allTargets_[ipatch]);
+			matrix.resize(sizeLeft, sizeRight);
+
+			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
+				for (SizeType iright=0; iright < sizeRight; ++iright) {
+
+					SizeType i = ileft + left_offset;
+					SizeType j = iright + right_offset;
+
+					SizeType ij = i + j * nl;
+
+					assert(i < nl);
+					assert(j < right_.size());
+
+					assert(ij < permInverse_.size());
+
+					SizeType r = permInverse_[ij];
+					if (r < offset || r >= offset + v_.effectiveSize(0))
+						continue;
+
+					matrix(ileft,iright) +=  v_.slowAccess(r);
+				}
+			}
+
+		}
+
+		SizeType tasks() const
+		{
+			return ijPatch_->operator ()(GenIjPatchType::LEFT).size();
+		}
+
+	private:
+
+		const BasisWithOperatorsType& left_;
+		const BasisWithOperatorsType& right_;
+		const VectorSizeType& permInverse_;
+		GenIjPatchType* ijPatch_;
+		const VectorWithOffset<ComplexOrRealType>& v_;
+		MatrixVectorType& allTargets_;
+	};
+
 public:
 
 	DensityMatrixSvd(const TargettingType& target,
@@ -204,55 +279,17 @@ private:
 	                    SizeType targets)
 	{
 		const BasisType& super = lrs_.super();
-		const BasisWithOperatorsType& left = lrs_.left();
-		const BasisWithOperatorsType& right = lrs_.right();
+
 		SizeType m = v.sector(0);
 		int state = super.partition(m);
 		SizeType qn = super.qn(state);
 
 		vectorOfijPatches_.push_back(new GenIjPatchType(lrs_, qn));
-		GenIjPatchType& ijPatch = *(vectorOfijPatches_[vectorOfijPatches_.size() - 1]);
-
-		const VectorSizeType& permInverse = super.permutationInverse();
-		SizeType nl = left.size();
-
-		SizeType offset = v.offset(0);
-		SizeType npatches = ijPatch(GenIjPatchType::LEFT).size();
-
-		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
-
-			SizeType igroup = ijPatch(GenIjPatchType::LEFT)[ipatch];
-			SizeType jgroup = ijPatch(GenIjPatchType::RIGHT)[ipatch];
-
-			SizeType sizeLeft = left.partition(igroup+1) - left.partition(igroup);
-			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
-
-			SizeType left_offset = left.partition(igroup);
-			SizeType right_offset = right.partition(jgroup);
-
-			MatrixType& matrix = getMatrix(ipatch, sizeLeft, sizeRight);
-
-			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
-				for (SizeType iright=0; iright < sizeRight; ++iright) {
-
-					SizeType i = ileft + left_offset;
-					SizeType j = iright + right_offset;
-
-					SizeType ij = i + j * nl;
-
-					assert(i < nl);
-					assert(j < right.hamiltonian().row());
-
-					assert(ij < permInverse.size());
-
-					SizeType r = permInverse[ij];
-					if (r < offset || r >= offset + v.effectiveSize(0))
-						continue;
-
-					matrix(ileft,iright) +=  v.slowAccess(r);
-				}
-			}
-		}
+		typedef PsimagLite::Parallelizer<ParallelPsiSplit> ParallelizerType;
+		ParallelizerType threaded(PsimagLite::Concurrency::npthreads,
+		                          PsimagLite::MPI::COMM_WORLD);
+		ParallelPsiSplit parallelPsiSplit(lrs_, vectorOfijPatches_, v, allTargets_);
+		threaded.loopCreate(parallelPsiSplit);
 	}
 
 	void addThisTarget2(SizeType x,
@@ -260,16 +297,6 @@ private:
 	                    SizeType targets)
 	{
 		err("useSvd doesn't yet work with VectorWithOffsets (sorry)\n");
-	}
-
-	MatrixType& getMatrix(SizeType ipatch, SizeType sizeLeft, SizeType sizeRight)
-	{
-		if (ipatch < allTargets_.size())
-			return *(allTargets_[ipatch]);
-
-		MatrixType* m = new MatrixType(sizeLeft, sizeRight);
-		allTargets_.push_back(m);
-		return *m;
 	}
 
 	void saveThisPatch(MatrixType& mAll,
