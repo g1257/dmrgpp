@@ -1,5 +1,18 @@
 https://github.com/g1257/dmrgpp/commits/master
 
+2017-05-25 Version 4.46
+
+* useSvd (but not yet for vectorWithOffsets or
+  more than 1 target)
+
+* useSvd pthreads
+
+* Lanczos: saves LanczosVectors by the default
+    
+    Internally lotaMemory=true is the default
+    prefix + NoSaveLanczosVectors=1
+    should be used to have Lanczos not save vectors
+
 2017-05-18 Version 4.44
 
 * bug fix in printing
