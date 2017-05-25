@@ -4,6 +4,7 @@
 #include <iostream>
 #include <utility>
 #include "Concurrency.h"
+#include "AnsiColors.h"
 
 namespace PsimagLite {
 
