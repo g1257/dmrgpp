@@ -305,7 +305,7 @@ int main(int argc,char *argv[])
 			throw PsimagLite::RuntimeError(str);
 		}
 
-		std::cerr<<argv[0]<<" ATTENTION: All standard output now sent to ";
+		std::cerr<<argv[0]<<" [master] All standard output now sent to ";
 		std::cerr<<options.label<<"\n";
 		std::cerr.flush();
 		GlobalCoutBuffer = std::cout.rdbuf(); //save old buf

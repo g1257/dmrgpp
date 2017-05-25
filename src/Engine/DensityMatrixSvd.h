@@ -285,6 +285,8 @@ public:
 
 		SizeType oneOrZero = (target.includeGroundStage()) ? 1 : 0;
 		SizeType targets = oneOrZero + target.size(); // Number of targets;
+		if (targets > 1)
+			err("useSvd doesn't yet work with targets > 1 (sorry)\n");
 
 		for (SizeType x = 0; x < targets; ++x)
 			addThisTarget(x, target, targets);
