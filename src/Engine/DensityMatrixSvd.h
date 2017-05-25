@@ -118,9 +118,8 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 		      allTargets_(allTargets)
 		{
 			ijPatch_ = vectorOfijPatches[vectorOfijPatches.size() - 1];
-			for (SizeType i = 0; i < tasks(); ++i) {
+			for (SizeType i = 0; i < tasks(); ++i)
 				allTargets.push_back(new MatrixType());
-			}
 		}
 
 		void doTask(SizeType ipatch, SizeType)
@@ -196,18 +195,18 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 		{
 			ijPatch_ = vectorOfijPatches[vectorOfijPatches.size() - 1];
 			SizeType oneSide = expandSys() ? lrs.left().size() : lrs.right().size();
-			eigs.resize(oneSide, 0.0);
+			eigs_.resize(oneSide);
+			std::fill(eigs_.begin(), eigs_.end(), 0.0);
 			mAll.resize(oneSide, oneSide);
 		}
 
 		void doTask(SizeType ipatch, SizeType)
 		{
 			MatrixType& m = *(allTargets_[ipatch]);
-			SizeType freeSize = m.rows();
 			MatrixType vt;
-			VectorRealType eigsOnePatch(freeSize);
+			VectorRealType eigsOnePatch;
 
-			svd('A', m, eigsOnePatch, vt);
+			svd('S', m, eigsOnePatch, vt);
 			MatrixType* vMatrix = 0;
 			if (!expandSys()) {
 				vMatrix = new MatrixType();
@@ -238,14 +237,20 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 			            GenIjPatchType::LEFT : GenIjPatchType::RIGHT;
 			SizeType igroup = ijPatch_->operator ()(lOrR)[ipatch];
 			SizeType offset = basis.partition(igroup);
-			SizeType x = mLeftOrRight.rows();
-			assert(x == mLeftOrRight.cols());
+			SizeType partSize = basis.partition(igroup + 1) - offset;
+			SizeType rows = mLeftOrRight.rows();
+			SizeType cols = mLeftOrRight.cols();
 
-			for (SizeType i = 0; i < x; ++i) {
-				eigs[i+offset] = eigsOnePatch[i];
-				for (SizeType j = 0; j < x; ++j)
+			for (SizeType i = 0; i < rows; ++i)
+				for (SizeType j = 0; j < cols; ++j)
 					mAll(i + offset, j + offset) += mLeftOrRight(i, j);
-			}
+
+			SizeType x = eigsOnePatch.size();
+			if (x > partSize) x = partSize;
+			assert(x + offset <= eigs.size());
+			for (SizeType i = 0; i < x; ++i)
+				eigs[i + offset] = eigsOnePatch[i]*eigsOnePatch[i];
+
 		}
 
 		bool expandSys() const
