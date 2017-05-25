@@ -1,3 +1,13 @@
+2017-05-25 Version 1.60
+
+* Lanczos: saves LanczosVectors by the default
+    
+    Internally lotaMemory=true is the default
+    prefix + NoSaveLanczosVectors=1
+    should be used to have Lanczos not save vectors
+
+* svd: complex version and optimal lwork
+
 2017-05-18 version 1.58
 
 * PTHREAD_ASSIGN_AFFINITIES removed, now a runtime option
