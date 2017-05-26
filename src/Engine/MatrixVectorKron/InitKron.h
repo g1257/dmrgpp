@@ -216,15 +216,18 @@ private:
 		SparseMatrixType Ahat;
 		calculateAhat(Ahat, A, link2.value, link2.fermionOrBoson);
 		values_.push_back(link2.value);
+		RealType threshold = model_.params().denseSparseThreshold;
 		ArrayOfMatStructType* x1 = new ArrayOfMatStructType(Ahat,
 		                                                    ijpatches_,
-		                                                    GenIjPatchType::LEFT);
+		                                                    GenIjPatchType::LEFT,
+		                                                    threshold);
 
 		xc_.push_back(x1);
 
 		ArrayOfMatStructType* y1 = new ArrayOfMatStructType(B,
 		                                                    ijpatches_,
-		                                                    GenIjPatchType::RIGHT);
+		                                                    GenIjPatchType::RIGHT,
+		                                                    threshold);
 		yc_.push_back(y1);
 	}
 

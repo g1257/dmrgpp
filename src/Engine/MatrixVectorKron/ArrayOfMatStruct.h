@@ -93,13 +93,15 @@ public:
 
 	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
 	typedef MatrixDenseOrSparse<SparseMatrixType> MatrixDenseOrSparseType;
+	typedef typename MatrixDenseOrSparseType::RealType RealType;
 	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
 	typedef typename GenIjPatchType::VectorSizeType VectorSizeType;
 	typedef typename GenIjPatchType::BasisType BasisType;
 
 	ArrayOfMatStruct(const SparseMatrixType& sparse,
 	                 GenIjPatchType& patch,
-	                 typename GenIjPatchType::LeftOrRightEnumType leftOrRight)
+	                 typename GenIjPatchType::LeftOrRightEnumType leftOrRight,
+	                 const RealType& threshold)
 	    : data_(patch(leftOrRight).size(), patch(leftOrRight).size())
 	{
 		const BasisType& basis = (leftOrRight == GenIjPatchType::LEFT) ?
@@ -132,7 +134,7 @@ public:
 
 				tmp.setRow(i2-i1,counter);
 				tmp.checkValidity();
-				data_(ipatch,jpatch) = new MatrixDenseOrSparseType(tmp);
+				data_(ipatch,jpatch) = new MatrixDenseOrSparseType(tmp, threshold);
 			}
 		}
 	}

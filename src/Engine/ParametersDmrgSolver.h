@@ -155,6 +155,7 @@ struct ParametersDmrgSolver {
 	VectorSizeType adjustQuantumNumbers;
 	VectorFiniteLoopType finiteLoop;
 	FieldType degeneracyMax;
+	FieldType denseSparseThreshold;
 
 	template<class Archive>
 	void serialize(Archive&, const unsigned int)
@@ -186,7 +187,8 @@ struct ParametersDmrgSolver {
 		  dumperEnd(0),
 	      precision(6),
 	      recoverySave("0"),
-	      degeneracyMax(1e-12)
+	      degeneracyMax(1e-12),
+	      denseSparseThreshold(0.5)
 	{
 		io.readline(model,"Model=");
 		io.readline(options,"SolverOptions=");
@@ -297,6 +299,10 @@ struct ParametersDmrgSolver {
 
 		try {
 			io.readline(precision,"Precision=");
+		} catch (std::exception&) {}
+
+		try {
+			io.readline(denseSparseThreshold, "DenseSparseThreshold=");
 		} catch (std::exception&) {}
 
 		if (isObserveCode) return;
@@ -488,6 +494,7 @@ std::ostream &operator<<(std::ostream &os,
 	}
 
 	os<<"parameters.degeneracyMax="<<p.degeneracyMax<<"\n";
+	os<<"parameters.denseSparseThreshold="<<p.denseSparseThreshold<<"\n";
 	os<<"parameters.nthreads="<<p.nthreads<<"\n";
 	os<<"parameters.useReflectionSymmetry="<<p.useReflectionSymmetry<<"\n";
 	os<<p.checkpoint;

@@ -283,8 +283,8 @@ public:
 
 		if (saveData_) psi->print(ioOut_);
 
-		MyBasisWithOperators pS("pS");
-		MyBasisWithOperators pE("pE");
+		MyBasisWithOperators pS("BasisWithOperators.System");
+		MyBasisWithOperators pE("BasisWithOperators.Environ");
 
 		if (checkpoint_()) {
 			checkpoint_.load(pS,pE,*psi,false);

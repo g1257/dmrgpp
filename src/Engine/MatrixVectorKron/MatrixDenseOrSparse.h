@@ -12,20 +12,19 @@ class MatrixDenseOrSparse {
 public:
 
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef PsimagLite::Vector<int>::Type VectorIntType;
 
-	// 50% cutoff == 0.5 here for sparse/dense
-	explicit MatrixDenseOrSparse(const SparseMatrixType& sparse)
-	    : isDense_(sparse.nonZero() > static_cast<int>(0.5*sparse.row()*sparse.col())),
+	explicit MatrixDenseOrSparse(const SparseMatrixType& sparse,
+	                             const RealType& threshold)
+	    : isDense_(sparse.nonZero() > static_cast<int>(threshold*sparse.row()*sparse.col())),
 	      sparseMatrix_(sparse)
 	{
 		sparseMatrix_.checkValidity();
 
-		if (isDense_) {
-			// A(i,j) at  val[ (i) + (j)*nrow ]
+		if (isDense_) // A(i,j) at  val[ (i) + (j)*nrow ]
 			crsMatrixToFullMatrix(denseMatrix_, sparse);
-		}
 	}
 
 	bool isDense() const { return isDense_; }

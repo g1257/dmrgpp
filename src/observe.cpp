@@ -179,9 +179,10 @@ int main(int argc,char **argv)
 
 	// print license
 	if (ConcurrencyType::root()) {
-		std::cerr<<ProgramGlobals::license;
 		Provenance provenance;
 		std::cout<<provenance;
+		std::cerr<<argv[0]<<PsimagLite::AnsiColor::red;
+		std::cerr<<" [features] "<<PsimagLite::AnsiColor::reset<<"\n";
 	}
 
 	if (versionOnly) return 0;
