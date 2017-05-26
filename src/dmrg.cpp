@@ -189,7 +189,7 @@ int main(int argc,char *argv[])
 	PsimagLite::String filename="";
 	int opt = 0;
 	OperatorOptions options;
-	PsimagLite::String strUsage(argv[0]);
+	PsimagLite::String strUsage(application.name());
 	if (utils::basename(strUsage) == "operator") options.enabled = true;
 	strUsage += " -f filename [-k] [-p precision] [-V] [whatToMeasure]";
 	int precision = 6;
@@ -236,15 +236,11 @@ int main(int argc,char *argv[])
 	\begin{verbatim}./operator -l c -t -f input.inp\end{verbatim}
 	\end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:s:l:d:F:o:p:tkV")) != -1) {
+	while ((opt = getopt(argc, argv,"f:s:l:d:p:tkV")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
 			break;
-		case 'o':
-			std::cerr<<argv[0]<<": Omit the \"-o\". It's not needed anymore.\n";
-			std::cerr<<"\t Write the insitu measurements at the end of the command line\n";
-			return 1;
 		case 's':
 			options.site = atoi(optarg);
 			break;
@@ -260,10 +256,6 @@ int main(int argc,char *argv[])
 		case 'k':
 			keepFiles = true;
 			break;
-		case 'F':
-			std::cerr<<argv[0]<<": Omit the \"-F\". It's not needed anymore.\n";
-			std::cerr<<"\t It is implied by the label: n=bosonic, c=fermionic, etc\n";
-			return 2;
 		case 'p':
 			precision = atoi(optarg);
 			std::cout.precision(precision);
@@ -300,12 +292,12 @@ int main(int argc,char *argv[])
 		GlobalCoutStream.open(options.label.c_str());
 		if (!GlobalCoutStream || GlobalCoutStream.bad()
 		        || !GlobalCoutStream.good()) {
-			PsimagLite::String str(argv[0]);
+			PsimagLite::String str(application.name());
 			str += ": Could not redirect std::cout to " + options.label + "\n";
 			throw PsimagLite::RuntimeError(str);
 		}
 
-		std::cerr<<argv[0]<<PsimagLite::AnsiColor::red;
+		std::cerr<<application.name()<<PsimagLite::AnsiColor::red;
 		std::cerr<<" [features] "<<PsimagLite::AnsiColor::reset;
 		std::cerr<<"Standard output sent to ";
 		std::cerr<<options.label<<"\n";

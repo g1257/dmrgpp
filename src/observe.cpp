@@ -124,7 +124,7 @@ void mainLoop0(InputNgType::Readable& io,
 	}
 }
 
-void usage(const char* name)
+void usage(const PsimagLite::String& name)
 {
 	std::cerr<<"USAGE is "<<name<<" -f filename [-p precision] [-F fileoption]";
 	std::cerr<<" [-V] whatToMeasure\n";
@@ -139,15 +139,11 @@ int main(int argc,char **argv)
 	int opt = 0;
 	int precision = 6;
 	bool versionOnly = false;
-	while ((opt = getopt(argc, argv,"f:o:p:F:V")) != -1) {
+	while ((opt = getopt(argc, argv,"f:p:F:V")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
 			break;
-		case 'o':
-			std::cerr<<argv[0]<<": Omit the \"-o\". It's not needed anymore.\n";
-			std::cerr<<"\t Write the insitu measurements at the end of the command line\n";
-			return 1;
 		case 'p':
 			precision = atoi(optarg);
 			std::cout.precision(precision);
@@ -160,7 +156,7 @@ int main(int argc,char **argv)
 			versionOnly = true;
 			break;
 		default:
-			usage(argv[0]);
+			usage(application.name());
 			return 1;
 		}
 	}
@@ -170,7 +166,7 @@ int main(int argc,char **argv)
 	//sanity checks here
 	if (filename=="" || (filesOption != "keep" && filesOption != "")) {
 		if (!versionOnly) {
-			usage(argv[0]);
+			usage(application.name());
 			return 1;
 		}
 	}
@@ -181,7 +177,7 @@ int main(int argc,char **argv)
 	if (ConcurrencyType::root()) {
 		Provenance provenance;
 		std::cout<<provenance;
-		std::cerr<<argv[0]<<PsimagLite::AnsiColor::red;
+		std::cerr<<application.name()<<PsimagLite::AnsiColor::red;
 		std::cerr<<" [features] "<<PsimagLite::AnsiColor::reset<<"\n";
 	}
 

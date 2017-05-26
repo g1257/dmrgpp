@@ -16,7 +16,7 @@ typedef Dmrg::ParametersDmrgSolver<RealType,InputNgType::Readable>
 ParametersDmrgSolverType;
 typedef Dmrg::ToolBox<ParametersDmrgSolverType> ToolBoxType;
 
-void usage(const char* name)
+void usage(const PsimagLite::String& name)
 {
 	std::cerr<<"USAGE is "<<name<<" -f filename -a action [-s] [-p precision]\n";
 }
@@ -55,7 +55,7 @@ int main(int argc,char **argv)
 			versionOnly = true;
 			break;
 		default:
-			usage(argv[0]);
+			usage(application.name());
 			return 1;
 		}
 	}
@@ -63,7 +63,7 @@ int main(int argc,char **argv)
 	//sanity checks here
 	if (filename=="" || action == "") {
 		if (!versionOnly) {
-			usage(argv[0]);
+			usage(application.name());
 			return 1;
 		}
 	}
@@ -105,7 +105,8 @@ int main(int argc,char **argv)
 	} else if (ToolBoxType::actionCanonical(action) == ToolBoxType::ACTION_INPUT) {
 		std::cout<<io.data()<<"\n";
 	} else {
-		std::cerr<<argv[0]<<": Unknown action "<<action<<"\n";
+		std::cerr<<application.name();
+		std::cerr<<": Unknown action "<<action<<"\n";
 		std::cerr<<"\tSupported actions are "<<ToolBoxType::actions()<<"\n";
 		return 1;
 	}
