@@ -31,6 +31,13 @@ SizeType log2Integer(SizeType x)
 	return count;
 }
 
+String basename(const String& path)
+{
+	return String(std::find_if(path.rbegin(),
+	                           path.rend(),
+	                           MatchPathSeparator()).base(),
+	              path.end());
+}
 
 const int PsiApp::libSizeOfSizeType_ = sizeof(SizeType);
 
@@ -38,6 +45,6 @@ const int PsiApp::libSizeOfSizeType_ = sizeof(SizeType);
 
 void err(PsimagLite::String s)
 {
-        PsimagLite::err(s);
+	PsimagLite::err(s);
 }
 

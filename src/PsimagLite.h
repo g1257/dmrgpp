@@ -16,14 +16,25 @@ SizeType log2Integer(SizeType x);
 
 void err(String);
 
+struct MatchPathSeparator {
+    bool operator()(char ch) const
+    {
+        return (ch == '/');
+    }
+};
+
+String basename(const String&);
+
 class PsiApp {
 public:
 
 	PsiApp(String appName, int* argc, char*** argv, int nthreads)
-	    : concurrency_(argc,argv,nthreads)
+	    : concurrency_(argc,argv,nthreads), appName_(basename(appName))
 	{
 		chekSizeType();
 	}
+
+	const String& name() const { return appName_; }
 
 private:
 
@@ -38,6 +49,7 @@ private:
 	static const int libSizeOfSizeType_;
 
 	Concurrency concurrency_;
+	String appName_;
 };
 } // namespace PsimagLite
 
