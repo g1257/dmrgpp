@@ -146,7 +146,7 @@ private:
 		if (!CHECK_KRON)
 			return;
 
-#ifndef NDEBUG
+#ifdef NDEBUG
 		return;
 #endif
 
