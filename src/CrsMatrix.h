@@ -478,6 +478,17 @@ public:
 		MPI::recv(values_,root,tag+4,mpiComm);
 	}
 
+	friend bool isZero(const CrsMatrix& A, double eps = 1e-6)
+	{
+		SizeType n = A.values_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			if (std::abs(A.values_[i]) > eps)
+				return false;
+		}
+
+		return true;
+	}
+
 	template<typename S>
 	friend typename Real<S>::Type norm2(const CrsMatrix<S>& m);
 
@@ -1082,20 +1093,6 @@ void sumBlock(CrsMatrix<T> &A,CrsMatrix<T> const &B,SizeType offset)
 	Bfull.checkValidity();
 	A += Bfull;
 	A.checkValidity();
-}
-
-template<class T>
-bool isZero(const CrsMatrix<T>& A,double eps = 1e-6)
-{
-	for (SizeType i=0;i<A.row();i++) {
-		for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
-			double x = PsimagLite::real(PsimagLite::norm(A.getValue(k)));
-			if (x>eps) {
-				return false;
-			}
-		}
-	}
-	return true;
 }
 
 template<class T>
