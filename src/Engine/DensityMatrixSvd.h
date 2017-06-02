@@ -114,14 +114,22 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 		                 SizeType sector,
 		                 MatrixVectorType& allTargets,
 		                 const VectorSizeType& qnToPatch,
-		                 const VectorSizeType& patchBoundary)
+		                 const VectorSizeType& patchBoundary,
+		                 SizeType direction,
+		                 SizeType targetNumber,
+		                 SizeType targets,
+		                 const RealType& weight)
 		    : lrs_(lrs),
 		      ijPatch_(ijPatch),
 		      v_(v),
 		      sector_(sector),
 		      allTargets_(allTargets),
 		      qnToPatch_(qnToPatch),
-		      patchBoundary_(patchBoundary)
+		      patchBoundary_(patchBoundary),
+		      direction_(direction),
+		      targetNumber_(targetNumber),
+		      targets_(targets),
+		      weight_(weight)
 		{}
 
 		void doTask(SizeType ipatch, SizeType)
@@ -135,21 +143,24 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 
 			SizeType sizeLeft = lrs_.left().partition(igroup+1) - lrs_.left().partition(igroup);
 			SizeType sizeRight = lrs_.right().partition(jgroup+1) - lrs_.right().partition(jgroup);
-
-			SizeType left_offset = lrs_.left().partition(igroup);
-			SizeType right_offset = lrs_.right().partition(jgroup);
+			SizeType leftOffset = lrs_.left().partition(igroup);
+			SizeType rightOffset = lrs_.right().partition(jgroup);
 
 			int state = lrs_.super().partition(m);
 			SizeType qn = lrs_.super().qn(state);
 			SizeType multiIndex = ipatchToMultiIndex(qn, ipatch);
 			MatrixType& matrix = *(allTargets_[multiIndex]);
-			matrix.resize(sizeLeft, sizeRight);
+			matrix.resize(expandSys() ? sizeLeft : sizeLeft*targets_,
+			              expandSys() ? sizeRight*targets_ : sizeRight);
 
 			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
+				SizeType ileftModif = (expandSys()) ?
+				            ileft : ileft + targetNumber_*sizeLeft;
 				for (SizeType iright=0; iright < sizeRight; ++iright) {
-
-					SizeType i = ileft + left_offset;
-					SizeType j = iright + right_offset;
+					SizeType irightModif = (expandSys()) ?
+					            iright + targetNumber_*sizeRight : iright;
+					SizeType i = ileft + leftOffset;
+					SizeType j = iright + rightOffset;
 
 					SizeType ij = i + j * nl;
 
@@ -162,10 +173,9 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 					if (r < offset || r >= offset + v_.effectiveSize(m))
 						continue;
 
-					matrix(ileft,iright) +=  v_.slowAccess(r);
+					matrix(ileftModif,irightModif) +=  v_.slowAccess(r)*weight_;
 				}
 			}
-
 		}
 
 		SizeType tasks() const
@@ -185,6 +195,11 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 			return patchBoundary_[ind] + ipatch;
 		}
 
+		bool expandSys() const
+		{
+			return (direction_ == ProgramGlobals::EXPAND_SYSTEM);
+		}
+
 		const LeftRightSuperType& lrs_;
 		const GenIjPatchType& ijPatch_;
 		const VectorWithOffsetType& v_;
@@ -192,6 +207,10 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 		MatrixVectorType& allTargets_;
 		const VectorSizeType& qnToPatch_;
 		const VectorSizeType& patchBoundary_;
+		SizeType direction_;
+		SizeType targetNumber_;
+		SizeType targets_;
+		RealType weight_;
 	};
 
 	class ParallelSvd {
@@ -311,8 +330,6 @@ public:
 	{
 		SizeType oneOrZero = (target.includeGroundStage()) ? 1 : 0;
 		SizeType targets = oneOrZero + target.size(); // Number of targets;
-		if (targets > 1)
-			err("useSvd doesn't yet work with targets > 1 (sorry)\n");
 
 		SizeType sum = 0;
 		for (SizeType x = 0; x  < targets; ++x) {
@@ -347,12 +364,14 @@ public:
 			progress_.printline(msg,std::cout);
 		}
 
+		RealType weights = 0.0;
 		for (SizeType x = 0; x < targets; ++x)
-			addThisTarget(x, target, targets);
+			weights += addThisTarget(x, target, targets);
 
 		{
 			PsimagLite::OstringStream msg;
-			msg<<"Done with init partition";
+			msg<<"Done with init partition, targets= "<<targets;
+			msg<<" sum of weights= "<<weights;
 			progress_.printline(msg,std::cout);
 		}
 	}
@@ -407,9 +426,9 @@ public:
 
 private:
 
-	void addThisTarget(SizeType x,
-	                   const TargettingType& target,
-	                   SizeType targets)
+	RealType addThisTarget(SizeType x,
+	                       const TargettingType& target,
+	                       SizeType targets)
 
 	{
 		SizeType x2 = (target.includeGroundStage() && x > 0 ) ? x - 1 : x;
@@ -417,15 +436,19 @@ private:
 		const VectorWithOffsetType& v = (target.includeGroundStage() && x == 0) ?
 		            target.gs() : target(x2);
 
-		addThisTarget2(x, v, targets);
+		RealType weight = (target.includeGroundStage() && x == 0 ) ?
+		            target.gsWeight() : target.weight(x2);
+
+		addThisTarget2(x, v, targets, sqrt(weight));
+		return weight;
 	}
 
 	void addThisTarget2(SizeType x,
 	                    const VectorWithOffsetType& v,
-	                    SizeType targets)
+	                    SizeType targets,
+	                    const RealType& weight)
 	{
 		const BasisType& super = lrs_.super();
-		assert(targets == 1 && x == 0);
 		for (SizeType sector = 0; sector < v.sectors(); ++sector) {
 			SizeType m = v.sector(sector);
 			int state = super.partition(m);
@@ -445,7 +468,11 @@ private:
 			                                  sector,
 			                                  allTargets_,
 			                                  qnToPatch_,
-			                                  patchBoundary_);
+			                                  patchBoundary_,
+			                                  params_.direction,
+			                                  x,
+			                                  targets,
+			                                  weight);
 			threaded.loopCreate(parallelPsiSplit);
 		}
 	}
