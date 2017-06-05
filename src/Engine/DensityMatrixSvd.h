@@ -98,6 +98,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 	typedef typename BaseType::Params ParamsType;
 	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
 	typedef typename GenIjPatchType::VectorSizeType VectorSizeType;
+	typedef PsimagLite::Matrix<RealType> MatrixRealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename PsimagLite::Vector<GenIjPatchType*>::Type VectorGenIjPatchType;
 	typedef std::pair<SizeType, SizeType> PairSizeType;
@@ -118,7 +119,8 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 		                 SizeType direction,
 		                 SizeType targetNumber,
 		                 SizeType targets,
-		                 const RealType& weight)
+		                 const RealType& weight,
+		                 SizeType targetsOffset)
 		    : lrs_(lrs),
 		      ijPatch_(ijPatch),
 		      v_(v),
@@ -129,7 +131,8 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 		      direction_(direction),
 		      targetNumber_(targetNumber),
 		      targets_(targets),
-		      weight_(weight)
+		      weight_(weight),
+		      targetsOffset_(targetsOffset)
 		{}
 
 		void doTask(SizeType ipatch, SizeType)
@@ -149,16 +152,13 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 			int state = lrs_.super().partition(m);
 			SizeType qn = lrs_.super().qn(state);
 			SizeType multiIndex = ipatchToMultiIndex(qn, ipatch);
-			MatrixType& matrix = *(allTargets_[multiIndex]);
-			matrix.resize(expandSys() ? sizeLeft : sizeLeft*targets_,
-			              expandSys() ? sizeRight*targets_ : sizeRight);
+			MatrixType& matrix = *(allTargets_[multiIndex + targetsOffset_*targetNumber_]);
+			matrix.resize(sizeLeft, sizeRight);
 
 			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
-				SizeType ileftModif = (expandSys()) ?
-				            ileft : ileft + targetNumber_*sizeLeft;
+
 				for (SizeType iright=0; iright < sizeRight; ++iright) {
-					SizeType irightModif = (expandSys()) ?
-					            iright + targetNumber_*sizeRight : iright;
+
 					SizeType i = ileft + leftOffset;
 					SizeType j = iright + rightOffset;
 
@@ -173,7 +173,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 					if (r < offset || r >= offset + v_.effectiveSize(m))
 						continue;
 
-					matrix(ileftModif,irightModif) +=  v_.slowAccess(r)*weight_;
+					matrix(ileft,iright) +=  v_.slowAccess(r)*weight_;
 				}
 			}
 		}
@@ -211,31 +211,63 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 		SizeType targetNumber_;
 		SizeType targets_;
 		RealType weight_;
+		SizeType targetsOffset_;
 	};
 
 	class ParallelSvd {
 
+		struct Opaque {
+			Opaque(SizeType o, SizeType x1, SizeType r, SizeType c)
+			    : offset(o), x(x1), rows(r), cols(c)
+			{}
+
+			SizeType offset;
+			SizeType x;
+			SizeType rows;
+			SizeType cols;
+		};
+
+		typedef typename PsimagLite::Vector<MatrixType*>::Type VectorMatrixType;
+		typedef typename PsimagLite::Vector<Opaque*>::Type VectorOpaqueType;
+
 	public:
 
 		ParallelSvd(const MatrixVectorType& allTargets,
-		            MatrixType& mAll,
-		            VectorRealType& eigs,
 		            const LeftRightSuperType& lrs,
 		            SizeType direction,
 		            const VectorGenIjPatchType& vectorOfijPatches,
-		            const VectorSizeType& patchBoundary)
+		            const VectorSizeType& patchBoundary,
+		            SizeType targets,
+		            SizeType targetsOffset)
 		    : allTargets_(allTargets),
-		      mAll_(mAll),
-		      eigs_(eigs),
 		      lrs_(lrs),
 		      direction_(direction),
 		      ijPatch_(vectorOfijPatches),
-		      patchBoundary_(patchBoundary)
+		      patchBoundary_(patchBoundary),
+		      targetsOffset_(targetsOffset),
+		      mAll_(targets, 0),
+		      eigs_(targets, expandSys() ? lrs.left().size() : lrs.right().size()),
+		      opaque_(patchBoundary_[patchBoundary_.size()-1], 0)
 		{
-			SizeType oneSide = expandSys() ? lrs.left().size() : lrs.right().size();
-			eigs_.resize(oneSide);
-			std::fill(eigs_.begin(), eigs_.end(), 0.0);
-			mAll.resize(oneSide, oneSide);
+			eigs_.setTo(0.0);
+			SizeType oneSide = eigs_.cols();
+			for (SizeType x = 0; x < mAll_.size(); ++x) {
+				mAll_[x] = new MatrixType(oneSide, oneSide);
+				mAll_[x]->setTo(0.0);
+			}
+		}
+
+		~ParallelSvd()
+		{
+			for (SizeType x = 0; x < mAll_.size(); ++x) {
+				delete mAll_[x];
+				mAll_[x] = 0;
+			}
+
+			for (SizeType x = 0; x < opaque_.size(); ++x) {
+				delete opaque_[x];
+				opaque_[x] = 0;
+			}
 		}
 
 		void doTask(SizeType multiIndex, SizeType)
@@ -251,7 +283,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 				transposeConjugate(*vMatrix, vt);
 			}
 
-			saveThisPatch(mAll_, eigs_, m, vMatrix, eigsOnePatch, multiIndex);
+			saveThisPatch(m, vMatrix, eigsOnePatch, multiIndex);
 			delete vMatrix;
 		}
 
@@ -260,11 +292,26 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 			return allTargets_.size();
 		}
 
+		void sync(SparseMatrixType& data, VectorRealType& eigs) const
+		{
+			eigs.resize(eigs_.cols(), 0.0);
+			MatrixType m(mAll_[0]->rows(), mAll_[0]->cols());
+			m.setTo(0.0);
+			for (SizeType i = 0; i < ijPatch_.size(); ++i) {
+				const GenIjPatchType& ijPatch = *(ijPatch_[i]);
+				for (SizeType j = 0; j < ijPatch(GenIjPatchType::LEFT).size(); ++j) {
+					SizeType reducedIndex = patchBoundary_[i] + j;
+					SizeType t = findLowestEigIndex(reducedIndex);
+					copyOne(m, eigs, reducedIndex, t);
+				}
+			}
+
+			fullMatrixToCrsMatrix(data, m);
+		}
+
 	private:
 
-		void saveThisPatch(MatrixType& mAll,
-		                   VectorRealType& eigs,
-		                   const MatrixType& m,
+		void saveThisPatch(const MatrixType& m,
 		                   const MatrixType* vMatrix,
 		                   const VectorRealType& eigsOnePatch,
 		                   SizeType multiIndex)
@@ -273,8 +320,11 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 			const BasisType& basis = expandSys() ? lrs_.left() : lrs_.right();
 			typename GenIjPatchType::LeftOrRightEnumType lOrR = (expandSys()) ?
 			            GenIjPatchType::LEFT : GenIjPatchType::RIGHT;
-			PairSizeType p = multiIndexToPatch(multiIndex);
-			SizeType igroup = ijPatch_[p.first]->operator ()(lOrR)[p.second];
+			SizeType t = static_cast<SizeType>(multiIndex/targetsOffset_);
+			assert(t < mAll_.size());
+			SizeType reducedIndex = multiIndex % targetsOffset_;
+			PairSizeType p = multiIndexToPatch(reducedIndex);
+			SizeType igroup = ijPatch_[p.first]->operator()(lOrR)[p.second];
 			SizeType offset = basis.partition(igroup);
 			SizeType partSize = basis.partition(igroup + 1) - offset;
 			SizeType rows = mLeftOrRight.rows();
@@ -282,14 +332,64 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 
 			for (SizeType i = 0; i < rows; ++i)
 				for (SizeType j = 0; j < cols; ++j)
-					mAll(i + offset, j + offset) += mLeftOrRight(i, j);
+					mAll_[t]->operator()(i + offset, j + offset) += mLeftOrRight(i, j);
 
 			SizeType x = eigsOnePatch.size();
 			if (x > partSize) x = partSize;
+			for (SizeType i = 0; i < x; ++i)
+				eigs_(t, i + offset) = eigsOnePatch[i]*eigsOnePatch[i];
+
+			assert(reducedIndex < opaque_.size());
+			if (opaque_[reducedIndex] != 0) return;
+			opaque_[reducedIndex] = new Opaque(offset,  x, rows, cols);
+		}
+
+		void copyOne(MatrixType& mAll,
+		             VectorRealType& eigs,
+		             SizeType reducedIndex,
+		             SizeType t) const
+		{
+			assert(t < mAll_.size());
+			SizeType offset = opaque_[reducedIndex]->offset;
+			SizeType rows = opaque_[reducedIndex]->rows;
+			SizeType cols = opaque_[reducedIndex]->cols;
+
+			for (SizeType i = 0; i < rows; ++i)
+				for (SizeType j = 0; j < cols; ++j)
+					mAll(i + offset, j + offset) = mAll_[t]->operator()(i + offset, j + offset);
+
+			SizeType x = opaque_[reducedIndex]->x;
 			assert(x + offset <= eigs.size());
 			for (SizeType i = 0; i < x; ++i)
-				eigs[i + offset] = eigsOnePatch[i]*eigsOnePatch[i];
+				eigs[i + offset] = eigs_(t, i + offset);
+		}
 
+		SizeType findLowestEigIndex(SizeType reducedIndex) const
+		{
+			// FIXME: Precompute sum of eigs for each target
+			SizeType tmin = 0;
+			SizeType min = sumOfEigs(tmin, reducedIndex);
+			for (SizeType t = 1; t < mAll_.size(); ++t) {
+				RealType sum = sumOfEigs(t, reducedIndex);
+				if (sum < min) {
+					min = sum;
+					tmin = t;
+				}
+			}
+
+			return tmin;
+		}
+
+		RealType sumOfEigs(SizeType t, SizeType reducedIndex) const
+		{
+			SizeType x = opaque_[reducedIndex]->x;
+			SizeType offset = opaque_[reducedIndex]->offset;
+
+			RealType sum = 0.0;
+			for (SizeType i = 0; i < x; ++i)
+				sum += eigs_(t, i + offset);
+
+			return sum;
 		}
 
 		bool expandSys() const
@@ -310,12 +410,14 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 		}
 
 		const MatrixVectorType& allTargets_;
-		MatrixType& mAll_;
-		VectorRealType& eigs_;
 		const LeftRightSuperType& lrs_;
 		SizeType direction_;
 		const VectorGenIjPatchType& ijPatch_;
 		const VectorSizeType& patchBoundary_;
+		SizeType targetsOffset_;
+		VectorMatrixType mAll_;
+		MatrixRealType eigs_;
+		VectorOpaqueType opaque_;
 	};
 
 public:
@@ -326,13 +428,11 @@ public:
 	    :
 	      progress_("DensityMatrixSvd"),
 	      params_(p),
-	      lrs_(lrs)
+	      lrs_(lrs),
+	      targets_(target.size() + (target.includeGroundStage()) ? 1 : 0),
+	      targetOffset_(0)
 	{
-		SizeType oneOrZero = (target.includeGroundStage()) ? 1 : 0;
-		SizeType targets = oneOrZero + target.size(); // Number of targets;
-
-		SizeType sum = 0;
-		for (SizeType x = 0; x  < targets; ++x) {
+		for (SizeType x = 0; x  < targets_; ++x) {
 			SizeType x2 = (target.includeGroundStage() && x > 0 ) ? x - 1 : x;
 
 			const VectorWithOffsetType& v = (target.includeGroundStage() && x == 0) ?
@@ -347,30 +447,31 @@ public:
 					continue;
 				GenIjPatchType* ptr = new GenIjPatchType(lrs, qn);
 				vectorOfijPatches_.push_back(ptr);
-				patchBoundary_.push_back(sum);
+				patchBoundary_.push_back(targetOffset_);
 				qnToPatch_.push_back(qn);
-				sum += ptr->operator ()(GenIjPatchType::LEFT).size();
+				targetOffset_ += ptr->operator ()(GenIjPatchType::LEFT).size();
 			}
 		}
 
-		patchBoundary_.push_back(sum);
-		allTargets_.resize(sum);
-		for (SizeType i = 0; i < sum; ++i)
+		patchBoundary_.push_back(targetOffset_);
+		allTargets_.resize(targetOffset_*targets_);
+		for (SizeType i = 0; i < allTargets_.size(); ++i)
 			allTargets_[i] = new MatrixType();
 
 		{
 			PsimagLite::OstringStream msg;
-			msg<<"Found "<<sum<<" multindices and "<<qnToPatch_.size()<<" qns";
+			msg<<"Found "<<allTargets_.size()<<" multindices, targetOffset= ";
+			msg<<targetOffset_<<", qns= "<<qnToPatch_.size();
 			progress_.printline(msg,std::cout);
 		}
 
 		RealType weights = 0.0;
-		for (SizeType x = 0; x < targets; ++x)
-			weights += addThisTarget(x, target, targets);
+		for (SizeType x = 0; x < targets_; ++x)
+			weights += addThisTarget(x, target);
 
 		{
 			PsimagLite::OstringStream msg;
-			msg<<"Done with init partition, targets= "<<targets;
+			msg<<"Done with init partition, targets= "<<targets_;
 			msg<<" sum of weights= "<<weights;
 			progress_.printline(msg,std::cout);
 		}
@@ -396,20 +497,19 @@ public:
 
 	void diag(VectorRealType& eigs,char jobz)
 	{
-		MatrixType mAll;
 		typedef PsimagLite::Parallelizer<ParallelSvd> ParallelizerType;
 		ParallelizerType threaded(PsimagLite::Concurrency::npthreads,
 		                          PsimagLite::MPI::COMM_WORLD);
 		ParallelSvd parallelSvd(allTargets_,
-		                        mAll,
-		                        eigs,
 		                        lrs_,
 		                        params_.direction,
 		                        vectorOfijPatches_,
-		                        patchBoundary_);
+		                        patchBoundary_,
+		                        targets_,
+		                        targetOffset_);
 		threaded.loopCreate(parallelSvd);
 
-		fullMatrixToCrsMatrix(data_, mAll);
+		parallelSvd.sync(data_, eigs);
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
@@ -427,8 +527,7 @@ public:
 private:
 
 	RealType addThisTarget(SizeType x,
-	                       const TargettingType& target,
-	                       SizeType targets)
+	                       const TargettingType& target)
 
 	{
 		SizeType x2 = (target.includeGroundStage() && x > 0 ) ? x - 1 : x;
@@ -439,13 +538,12 @@ private:
 		RealType weight = (target.includeGroundStage() && x == 0 ) ?
 		            target.gsWeight() : target.weight(x2);
 
-		addThisTarget2(x, v, targets, sqrt(weight));
+		addThisTarget2(x, v, sqrt(weight));
 		return weight;
 	}
 
 	void addThisTarget2(SizeType x,
 	                    const VectorWithOffsetType& v,
-	                    SizeType targets,
 	                    const RealType& weight)
 	{
 		const BasisType& super = lrs_.super();
@@ -471,8 +569,9 @@ private:
 			                                  patchBoundary_,
 			                                  params_.direction,
 			                                  x,
-			                                  targets,
-			                                  weight);
+			                                  targets_,
+			                                  weight,
+			                                  targetOffset_);
 			threaded.loopCreate(parallelPsiSplit);
 		}
 	}
@@ -482,6 +581,8 @@ private:
 	MatrixVectorType allTargets_;
 	SparseMatrixType data_;
 	const LeftRightSuperType& lrs_;
+	SizeType targets_;
+	SizeType targetOffset_;
 	VectorGenIjPatchType vectorOfijPatches_;
 	VectorSizeType qnToPatch_;
 	VectorSizeType patchBoundary_;
