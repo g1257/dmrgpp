@@ -1,5 +1,11 @@
 https://github.com/g1257/dmrgpp/commits/master
 
+2017-06-08 Version 4.48
+
+* DenseSparseThreshold label
+
+* useSvd supports vectorwithoffsets
+
 2017-05-25 Version 4.46
 
 * useSvd (but not yet for vectorWithOffsets or
