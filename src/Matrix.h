@@ -639,21 +639,21 @@ typename EnableIf<(IsMatrixLike<T1>::True || IsMatrixLike<T2>::True)
 std::ClosureOperator<T1,T2,std::ClosureOperations::OP_MULT> >::Type operator*(const T1& a,
                                                                               const T2& b)
 {
-    return std::ClosureOperator<T1,T2,std::ClosureOperations::OP_MULT>(a,b);
+	return std::ClosureOperator<T1,T2,std::ClosureOperations::OP_MULT>(a,b);
 }
 
 template<typename T>
 std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_PLUS>
 operator+(const Matrix<T>& a,const Matrix<T>& b)
 {
-    return std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_PLUS>(a,b);
+	return std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_PLUS>(a,b);
 }
 
 template<typename T>
 std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_MINUS>
 operator-(const Matrix<T>& a,const Matrix<T>& b)
 {
-    return std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_MINUS>(a,b);
+	return std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_MINUS>(a,b);
 }
 
 template<typename T,typename A>
@@ -717,6 +717,15 @@ void transposeConjugate(Matrix<T>& m2,const Matrix<T>& m)
 		for (SizeType j=0;j<m2.n_col();j++)
 			m2(i,j)=PsimagLite::conj(m(j,i));
 
+}
+
+template<class T>
+void transpose(Matrix<T>& m2,const Matrix<T>& m)
+{
+	m2.resize(m.n_col(),m.n_row());
+	for (SizeType i=0;i<m2.n_row();++i)
+		for (SizeType j=0;j<m2.n_col();++j)
+			m2(i,j) = m(j,i);
 }
 
 template<typename T>
@@ -838,4 +847,3 @@ void>::Type allReduce(SomeMatrixType& v,
 
 } // namespace PsimagLite
 #endif
-
