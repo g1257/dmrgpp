@@ -219,6 +219,7 @@ sub submitBatch
 
 	my $ret = `$qsub $extra $batch`;
 	chomp($ret);
+	sleep(30);
 	return $ret;
 }
 

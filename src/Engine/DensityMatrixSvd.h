@@ -229,7 +229,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 			MatrixType* vMatrix = 0;
 			if (!expandSys()) {
 				vMatrix = new MatrixType();
-				transposeConjugate(*vMatrix, vt);
+				transpose(*vMatrix, vt);
 			}
 
 			saveThisPatch(mAll_, eigs_, m, vMatrix, eigsOnePatch, multiIndex);
