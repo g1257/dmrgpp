@@ -6,7 +6,7 @@ void den_gen_matrix(const int nrow_A,
                     const typename PsimagLite::Real<ComplexOrRealType>::Type& threshold,
                     PsimagLite::Matrix<ComplexOrRealType>& a_)
 {
-	/*
+/*
  * -------------------------------
  * generate a random matix in (0,1)
  * accept only if   aij < threshold
@@ -30,7 +30,7 @@ void den_gen_matrix(const int nrow_A,
 
 			a_(ia,ja) = (is_accept) ? aij : dzero;
 
-		};
-	};
+		}
+	}
 }
-#undef A
+

@@ -386,8 +386,6 @@ void csr_kron_mult(const char transA,
  *   this is feasible only if A and B are very sparse, need nnz(A)*nnz(B) flops
  *   -------------------------------------------------------------
  */
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-
 	int nnz_A = csr_nnz(a);
 	int nnz_B = csr_nnz(b);
 
@@ -409,68 +407,9 @@ void csr_kron_mult(const char transA,
 	const int nrow_B = b.row();
 	const int ncol_B = b.col();
 
-	RealType threshold = 0.1;
-	bool use_dense_A = (nnz_A >= threshold * nrow_A * ncol_A);
-	bool use_dense_B = (nnz_B >= threshold * nrow_B * ncol_B);
-
-
-	// -----------------------------
-	// check for alternate algorithm
-	// -----------------------------
-	if (use_dense_A || use_dense_B) {
-
-
-		if (use_dense_A) {
-			PsimagLite::Matrix<ComplexOrRealType> a_(nrow_A, ncol_A);
-			csr_to_den(a, a_);
-
-			if (use_dense_B) {
-				PsimagLite::Matrix<ComplexOrRealType> b_(nrow_B, ncol_B);
-				csr_to_den(b, b_);
-
-				den_kron_mult(  transA, transB,
-				                a_, b_,
-				                yin, offsetY,
-				                xout, offsetX );
-
-			}
-			else {
-				// -----------
-				// B is sparse
-				// -----------
-
-				den_csr_kron_mult( transA, transB,
-				                   a_, b,
-				                   yin, offsetY,
-				                   xout, offsetX );
-			}
-		}
-		else {
-			// -----------
-			// A is sparse
-			// -----------
-			assert( use_dense_B );
-			PsimagLite::Matrix<ComplexOrRealType> b_(nrow_B, ncol_B);
-			csr_to_den(b, b_);
-
-			csr_den_kron_mult( transA, transB,
-			                   a, b_,
-			                   yin, offsetY,
-			                   xout, offsetX );
-
-		};
-
-
-		return;
-	};
-
 	// -----------------------------------
 	// both A and B are considered sparse
 	// -----------------------------------
-
-
-
-
 
 	const int nrow_1 = (isTransA) ? ncol_A : nrow_A;
 	const int ncol_1 = (isTransA) ? nrow_A : ncol_A;
@@ -478,26 +417,18 @@ void csr_kron_mult(const char transA,
 	const int nrow_2 = (isTransB) ? ncol_B : nrow_B;
 	const int ncol_2 = (isTransB) ? nrow_B : ncol_B;
 
-	estimate_kron_cost( nrow_1,ncol_1,nnz_A, nrow_2,ncol_2,nnz_B,
+	estimate_kron_cost(nrow_1,ncol_1,nnz_A, nrow_2,ncol_2,nnz_B,
 	                    &kron_nnz, &kron_flops, &imethod );
 
 
-	csr_kron_mult_method(
-	            imethod,
-	            transA,
-	            transB,
-
-	            a,
-
-	            b,
-
-	            yin,
-	            offsetY,
-	            xout ,
-	            offsetX);
+	csr_kron_mult_method(imethod,
+	                     transA,
+	                     transB,
+	                     a,
+	                     b,
+	                     yin,
+	                     offsetY,
+	                     xout ,
+	                     offsetX);
 }
 
-#undef BY
-#undef YAt
-#undef X
-#undef Y

@@ -192,6 +192,7 @@ public:
 		knownLabels_.push_back("TruncationTolerance");
 		knownLabels_.push_back("GeometryMaxConnections");
 		knownLabels_.push_back("LanczosNoSaveLanczosVectors");
+		knownLabels_.push_back("DenseSparseThreshold");
 	}
 
 	~InputCheck()

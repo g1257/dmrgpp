@@ -10,9 +10,7 @@ void csr_matmul_pre( char trans_A,
                      const int ncol_X,
                      PsimagLite::MatrixNonOwned<ComplexOrRealType>& xout)
 {
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	const int idebug = 0;
-	/*
+/*
  * -------------------------------------------------------
  * A in compressed sparse ROW format
  *
@@ -30,53 +28,17 @@ void csr_matmul_pre( char trans_A,
  * -------------------------------------------------------
  */
 
-
-	const RealType threshold = 0.1;
-
 	const int nrow_A = a.row();
-	const int ncol_A = a.col();
-
-	int nnz_A = csr_nnz(a);
-	int use_dense_storage = (nnz_A >= threshold * nrow_A * ncol_A);
-
-	if (use_dense_storage) {
-		/*
-	* ----------------------------------
-	* sparse matrix A is sufficiently dense that
-	* we convert to dense storage to perform
-	* more efficient matrix operations
-	* ----------------------------------
-	*/
-		PsimagLite::Matrix<ComplexOrRealType> a_(nrow_A, ncol_A);
-
-		if (idebug >= 1) {
-			printf("csr_matmul_pre:nrow_A %d,ncol_A %d,nnz_A %d\n",
-			       nrow_A, ncol_A, nnz_A );
-		};
-
-		crsMatrixToFullMatrix(a_, a);
-
-		den_matmul_pre( trans_A,
-		                nrow_A, ncol_A,  a_,
-
-		                nrow_Y,ncol_Y, yin,
-		                nrow_X,ncol_X, xout);
-		return;
-	};
-
-
 	int isTranspose = (trans_A == 'T') || (trans_A == 't');
 
-
-
 	if (isTranspose) {
-		/*
-	*   ----------------------------------------------------------
-	*   X(nrow_X,ncol_X) +=  tranpose(A(nrow_A,ncol_A))*Y(nrow_Y,ncol_Y)
-	*   X(ix,jx) +=  transpose( A(ia,ja) ) * Y(iy,jy)
-	*   X(ja,jy) +=  sum( At(ja, ia) * Y(ia,jy), over ia)
-	*   ----------------------------------------------------------
-	*/
+	/*
+	 *   ----------------------------------------------------------
+	 *   X(nrow_X,ncol_X) +=  tranpose(A(nrow_A,ncol_A))*Y(nrow_Y,ncol_Y)
+	 *   X(ix,jx) +=  transpose( A(ia,ja) ) * Y(iy,jy)
+	 *   X(ja,jy) +=  sum( At(ja, ia) * Y(ia,jy), over ia)
+	 *   ----------------------------------------------------------
+	 */
 
 		assert((nrow_X == ncol_A) &&  (nrow_A == nrow_Y) && (ncol_X == ncol_Y));
 
@@ -94,17 +56,16 @@ void csr_matmul_pre( char trans_A,
 					int ix = ja;
 					int jx = jy;
 					xout(ix,jx) += (atji * yin(ia,jy));
-				};
-			};
-		};
-	}
-	else  {
-		/*
-	* ---------------------------------------------
-	* X(nrow_X,ncol_X) += A(nrow_A,ncol_A) * Y(nrow_Y,ncol_Y)
-	* X(ia,jy) += sum( A(ia,ja)*Y(ja,jy), over ja )
-	* ---------------------------------------------
-	*/
+				}
+			}
+		}
+	} else  {
+	/*
+	 * ---------------------------------------------
+	 * X(nrow_X,ncol_X) += A(nrow_A,ncol_A) * Y(nrow_Y,ncol_Y)
+	 * X(ia,jy) += sum( A(ia,ja)*Y(ja,jy), over ja )
+	 * ---------------------------------------------
+	 */
 		assert((nrow_X == nrow_A) && (ncol_A == nrow_Y) && (ncol_X == ncol_Y));
 
 		int ia = 0;
@@ -122,15 +83,12 @@ void csr_matmul_pre( char trans_A,
 					int jx = jy;
 
 					xout(ix,jx) += (aij * yin(ja,jy));
-				};
-			};
-		};
-	};
+				}
+			}
+		}
+	}
 }
 
-#undef X
-#undef Y
-#undef A
 
 
 

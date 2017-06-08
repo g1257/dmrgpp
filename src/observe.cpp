@@ -177,8 +177,8 @@ int main(int argc,char **argv)
 	if (ConcurrencyType::root()) {
 		Provenance provenance;
 		std::cout<<provenance;
-		std::cerr<<application.name();
-		std::cerr<<" [master]\n";
+		std::cerr<<application.name()<<"\x1b[38;5;124m";
+		std::cerr<<" [features]"<<PsimagLite::AnsiColor::reset<<"\n";
 	}
 
 	if (versionOnly) return 0;
