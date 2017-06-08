@@ -1,3 +1,9 @@
+2017-06-08 Version 1.62
+
+* faster isZero function for CrsMatrix
+
+* transpose of Matrix added (without conjugate)
+ 
 2017-05-25 Version 1.60
 
 * Lanczos: saves LanczosVectors by the default
