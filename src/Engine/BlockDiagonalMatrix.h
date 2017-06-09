@@ -71,13 +71,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file BlockMatrix.h
+/*! \file BlockDiagonalMatrix.h
  *
  *  A class to represent a block diagonal matrix
  *
  */
-#ifndef BLOCKMATRIX_HEADER_H
-#define BLOCKMATRIX_HEADER_H
+#ifndef BLOCK_DIAGONAL_MATRIX_H
+#define BLOCK_DIAGONAL_MATRIX_H
 #include <vector>
 #include <iostream>
 #include "Matrix.h" // in PsimagLite
@@ -94,13 +94,13 @@ namespace Dmrg {
 // Note: In reality, Parallelization is disabled here because a LAPACK call
 //        is needed and LAPACK is not necessarily thread safe.
 template<typename MatrixInBlockTemplate>
-class BlockMatrix {
+class BlockDiagonalMatrix {
 
 public:
 
 	typedef MatrixInBlockTemplate BuildingBlockType;
 	typedef typename BuildingBlockType::value_type FieldType;
-	typedef BlockMatrix<MatrixInBlockTemplate> BlockMatrixType;
+	typedef BlockDiagonalMatrix<MatrixInBlockTemplate> BlockDiagonalMatrixType;
 	typedef typename PsimagLite::Real<FieldType>::Type RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
@@ -110,7 +110,7 @@ public:
 
 	public:
 
-		LoopForDiag(BlockMatrixType& C1,
+		LoopForDiag(BlockDiagonalMatrixType& C1,
 		            VectorRealType& eigs1,
 		            char option1)
 		    : C(C1),
@@ -177,21 +177,21 @@ public:
 				enforcePhase(&(vpointer[i*a.n_row()]),a.n_row());
 		}
 
-		BlockMatrixType& C;
+		BlockDiagonalMatrixType& C;
 		VectorRealType& eigs;
 		char option;
 		typename PsimagLite::Vector<VectorRealType>::Type eigsForGather;
 		typename PsimagLite::Vector<SizeType>::Type weights;
 	};
 
-	BlockMatrix(int rank,int blocks) : rank_(rank),offsets_(blocks+1),data_(blocks)
+	BlockDiagonalMatrix(int rank,int blocks) : rank_(rank),offsets_(blocks+1),data_(blocks)
 	{
 		offsets_[blocks]=rank;
 	}
 
-	void operator+=(const BlockMatrixType& m)
+	void operator+=(const BlockDiagonalMatrixType& m)
 	{
-		BlockMatrixType c;
+		BlockDiagonalMatrixType c;
 		if (offsets_.size()<m.blocks()) operatorPlus(c,*this,m);
 		else operatorPlus(c,m,*this);
 		*this = c;
@@ -287,9 +287,9 @@ public:
 	MatrixInBlockTemplate operator()(int i) const { return data_[i]; }
 
 	template<class MatrixInBlockTemplate2>
-	friend void operatorPlus(BlockMatrix<MatrixInBlockTemplate2>& C,
-	                         const BlockMatrix<MatrixInBlockTemplate2>& A,
-	                         const BlockMatrix<MatrixInBlockTemplate2>& B)
+	friend void operatorPlus(BlockDiagonalMatrix<MatrixInBlockTemplate2>& C,
+	                         const BlockDiagonalMatrix<MatrixInBlockTemplate2>& A,
+	                         const BlockDiagonalMatrix<MatrixInBlockTemplate2>& B)
 	{
 		SizeType i;
 		int counter=0;
@@ -310,8 +310,8 @@ public:
 	}
 
 	template<class MatrixInBlockTemplate2>
-	friend void operatorPlus(BlockMatrix<MatrixInBlockTemplate2>& A,
-	                         const BlockMatrix<MatrixInBlockTemplate2>& B)
+	friend void operatorPlus(BlockDiagonalMatrix<MatrixInBlockTemplate2>& A,
+	                         const BlockDiagonalMatrix<MatrixInBlockTemplate2>& B)
 	{
 		SizeType i;
 		int counter=0;
@@ -329,7 +329,7 @@ public:
 
 	template<class MatrixInBlockTemplate2>
 	friend std::ostream &operator<<(std::ostream &s,
-	                                const BlockMatrix<MatrixInBlockTemplate2>& A)
+	                                const BlockDiagonalMatrix<MatrixInBlockTemplate2>& A)
 	{
 		for (SizeType m=0;m<A.blocks();m++) {
 			int nrank = A.offsets(m+1)-A.offsets(m);
@@ -346,18 +346,18 @@ private:
 	typename PsimagLite::Vector<int>::Type offsets_; //starting of diagonal offsets for each block
 	typename PsimagLite::Vector<MatrixInBlockTemplate>::Type data_; // data on each block
 
-}; // class BlockMatrix
+}; // class BlockDiagonalMatrix
 
 // Companion Functions
 // Parallel version of the diagonalization of a block diagonal matrix
 template<typename SomeVectorType,typename SomeFieldType>
 typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True,
 void>::Type
-diagonalise(BlockMatrix<PsimagLite::Matrix<SomeFieldType> >& C,
+diagonalise(BlockDiagonalMatrix<PsimagLite::Matrix<SomeFieldType> >& C,
             SomeVectorType& eigs,
             char option)
 {
-	typedef typename BlockMatrix<PsimagLite::Matrix<SomeFieldType> >::LoopForDiag LoopForDiagType;
+	typedef typename BlockDiagonalMatrix<PsimagLite::Matrix<SomeFieldType> >::LoopForDiag LoopForDiagType;
 	typedef PsimagLite::NoPthreadsNg<LoopForDiagType> ParallelizerType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	SizeType savedNpthreads = ConcurrencyType::npthreads;
@@ -376,7 +376,7 @@ diagonalise(BlockMatrix<PsimagLite::Matrix<SomeFieldType> >& C,
 }
 
 template<class MatrixInBlockTemplate>
-bool isUnitary(const BlockMatrix<MatrixInBlockTemplate>& B)
+bool isUnitary(const BlockDiagonalMatrix<MatrixInBlockTemplate>& B)
 {
 	bool flag=true;
 	MatrixInBlockTemplate matrixTmp;

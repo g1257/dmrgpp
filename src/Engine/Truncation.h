@@ -103,7 +103,7 @@ class Truncation  {
 	typedef DensityMatrixSvd<TargettingType> DensityMatrixSvdType;
 	typedef DensityMatrixSu2<TargettingType> DensityMatrixSu2Type;
 	typedef DensityMatrixBase<TargettingType> DensityMatrixBaseType;
-	typedef typename DensityMatrixBaseType::BlockMatrixType BlockMatrixType;
+	typedef typename DensityMatrixBaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename TargettingType::ModelType ModelType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 
@@ -120,7 +120,7 @@ public:
 		    : transform(0,0)
 		{}
 
-		BlockMatrixType transform;
+		BlockDiagonalMatrixType transform;
 		typename PsimagLite::Vector<RealType>::Type eigs;
 		typename PsimagLite::Vector<SizeType>::Type removedIndices;
 	}; // TruncationCache

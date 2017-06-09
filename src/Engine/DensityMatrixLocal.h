@@ -102,9 +102,9 @@ class DensityMatrixLocal : public DensityMatrixBase<TargettingType> {
 
 public:
 
-	typedef typename BaseType::BlockMatrixType BlockMatrixType;
-	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
-	typedef ParallelDensityMatrix<BlockMatrixType,
+	typedef typename BaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
+	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
+	typedef ParallelDensityMatrix<BlockDiagonalMatrixType,
 	BasisWithOperatorsType,
 	TargetVectorType> ParallelDensityMatrixType;
 	typedef PsimagLite::Parallelizer<ParallelDensityMatrixType> ParallelizerType;
@@ -177,7 +177,7 @@ public:
 
 	}
 
-	virtual const BlockMatrixType& operator()()
+	virtual const BlockDiagonalMatrixType& operator()()
 	{
 		return data_;
 	}
@@ -225,7 +225,7 @@ private:
 	}
 
 	ProgressIndicatorType progress_;
-	BlockMatrixType data_;
+	BlockDiagonalMatrixType data_;
 	SizeType direction_;
 	bool debug_;
 	bool verbose_;

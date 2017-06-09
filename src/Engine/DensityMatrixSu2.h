@@ -95,7 +95,7 @@ class DensityMatrixSu2 : public DensityMatrixBase<TargettingType> {
 	typedef typename BasisWithOperatorsType::BasisType  BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
-	typedef typename BaseType::BlockMatrixType BlockMatrixType;
+	typedef typename BaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 	typedef typename DensityMatrixBase<TargettingType>::Params ParamsType;
@@ -104,7 +104,7 @@ class DensityMatrixSu2 : public DensityMatrixBase<TargettingType> {
 
 public:
 
-	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
+	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
 
 	DensityMatrixSu2(const TargettingType& target,
 	                 const LeftRightSuperType& lrs,
@@ -162,7 +162,7 @@ public:
 		if (debug_) areAllMsEqual(pBasis_);
 	}
 
-	virtual const BlockMatrixType& operator()()
+	virtual const BlockDiagonalMatrixType& operator()()
 	{
 		return data_;
 	}
@@ -401,7 +401,7 @@ private:
 		}
 	}
 
-	BlockMatrixType data_;
+	BlockDiagonalMatrixType data_;
 	typename PsimagLite::Vector<SizeType>::Type mMaximal_;
 	const BasisWithOperatorsType& pBasis_;
 	SizeType direction_;

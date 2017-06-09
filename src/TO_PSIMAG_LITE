@@ -56,7 +56,7 @@ Engine/SparseVector.h
 Engine/CrsMatrix.h
 Engine/VectorWithOffset.h
 Engine/VectorWithOffsets.h
-Engine/BlockMatrix.h
+Engine/BlockDiagonalMatrix.h
 
 [LINALG.Dense]
 reorder()

@@ -130,7 +130,7 @@ public:
 	typedef MettsParams<ModelType> TargetParamsType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef PsimagLite::Matrix<RealType> MatrixType;
-	typedef BlockMatrix<MatrixType> BlockMatrixType;
+	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
 	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;

@@ -101,7 +101,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename PsimagLite::Vector<GenIjPatchType*>::Type VectorGenIjPatchType;
 	typedef std::pair<SizeType, SizeType> PairSizeType;
-	typedef typename BaseType::BlockMatrixType BlockMatrixType;
+	typedef typename BaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 
 	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
@@ -218,7 +218,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 			eigs_.resize(oneSide);
 			std::fill(eigs_.begin(), eigs_.end(), 0.0);
 			SizeType parts = basis.partition() - 1;
-			mAll_ = new BlockMatrixType(oneSide, parts);
+			mAll_ = new BlockDiagonalMatrixType(oneSide, parts);
 			for (SizeType i = 0; i < parts; ++i) {
 				SizeType offset = basis.partition(i);
 				SizeType smallSize = basis.partition(i + 1) - offset;
@@ -255,7 +255,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 			return allTargets_.size();
 		}
 
-		const BlockMatrixType& blockMatrix() const
+		const BlockDiagonalMatrixType& blockMatrix() const
 		{
 			return *mAll_;
 		}
@@ -309,7 +309,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 		SizeType direction_;
 		const VectorGenIjPatchType& ijPatch_;
 		const VectorSizeType& patchBoundary_;
-		BlockMatrixType* mAll_;
+		BlockDiagonalMatrixType* mAll_;
 	};
 
 public:
@@ -387,7 +387,7 @@ public:
 		data_ = 0;
 	}
 
-	virtual const BlockMatrixType& operator()()
+	virtual const BlockDiagonalMatrixType& operator()()
 	{
 		return *data_;
 	}
@@ -468,7 +468,7 @@ private:
 	ProgressIndicatorType progress_;
 	const LeftRightSuperType& lrs_;
 	const ParamsType& params_;
-	const BlockMatrixType* data_;
+	const BlockDiagonalMatrixType* data_;
 	MatrixVectorType allTargets_;
 	VectorGenIjPatchType vectorOfijPatches_;
 	VectorSizeType qnToPatch_;

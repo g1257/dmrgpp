@@ -97,7 +97,7 @@ class DensityMatrixBase {
 public:
 
 	typedef PsimagLite::Matrix<DensityMatrixElementType> MatrixType;
-	typedef BlockMatrix<MatrixType> BlockMatrixType;
+	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
 
 	struct Params {
 
@@ -111,12 +111,12 @@ public:
 		bool debug;
 	};
 
-	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
+	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
 
 	virtual ~DensityMatrixBase()
 	{}
 
-	virtual const BlockMatrixType& operator()()=0;
+	virtual const BlockDiagonalMatrixType& operator()()=0;
 
 	virtual void diag(typename PsimagLite::Vector<RealType>::Type&, char) = 0;
 }; // class DensityMatrixBase
