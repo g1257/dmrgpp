@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Matrix.h" // in PsimagLite
 #include "AlmostEqual.h" // in PsimagLite
-#include "BlockMatrix.h"
+#include "BlockDiagonalMatrix.h"
 #include "DensityMatrixBase.h"
 #include "ProgramGlobals.h"
 

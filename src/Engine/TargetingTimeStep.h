@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsRungeKutta.h"
 #include "TimeVectorsSuzukiTrotter.h"
 #include "TargetingBase.h"
-#include "BlockMatrix.h"
+#include "BlockDiagonalMatrix.h"
 
 namespace Dmrg {
 

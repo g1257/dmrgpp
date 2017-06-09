@@ -73,7 +73,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DENSITY_MATRIX_LOCAL_H
 #include "ProgressIndicator.h"
 #include "TypeToString.h"
-#include "BlockMatrix.h"
+#include "BlockDiagonalMatrix.h"
 #include "DensityMatrixBase.h"
 #include "ParallelDensityMatrix.h"
 #include "NoPthreads.h"

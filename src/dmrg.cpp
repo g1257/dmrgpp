@@ -1,4 +1,4 @@
-#include "BlockMatrix.h"
+#include "BlockDiagonalMatrix.h"
 #include "IoSimple.h"
 #include "Concurrency.h"
 #include "Provenance.h"

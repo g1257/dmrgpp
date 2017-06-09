@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DENSITY_MATRIX_BASE_H
 #define DENSITY_MATRIX_BASE_H
 
-#include "BlockMatrix.h"
+#include "BlockDiagonalMatrix.h"
 #include "PsimagLite.h"
 
 namespace Dmrg {
