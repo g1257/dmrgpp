@@ -175,8 +175,9 @@ public:
 
 	Matrix<T>& operator+=(const Matrix<T>& other)
 	{
-		// domain checking ???
-		for (SizeType i=0;i<ncol_*nrow_;i++)
+		assert(data_.size() == ncol_*nrow_);
+		SizeType total = std::min(data_.size(), other.data_.size());
+		for (SizeType i = 0; i < total; ++i)
 			data_[i] += other.data_[i];
 		return *this;
 	}
