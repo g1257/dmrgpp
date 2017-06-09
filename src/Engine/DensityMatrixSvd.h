@@ -223,14 +223,14 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 				SizeType offset = basis.partition(i);
 				SizeType smallSize = basis.partition(i + 1) - offset;
 				MatrixType m(smallSize, smallSize);
+				m.setTo(0.0);
 				mAll_->setBlock(i, offset, m);
 			}
 		}
 
 		~ParallelSvd()
 		{
-			delete mAll_;
-			mAll_ = 0;
+			// Don't delete data_ here, it's used (and deleted) by calling class
 		}
 
 		void doTask(SizeType multiIndex, SizeType)
@@ -405,7 +405,7 @@ public:
 		                        patchBoundary_);
 		threaded.loopCreate(parallelSvd);
 
-		data_ = new BlockMatrixType(parallelSvd.blockMatrix());
+		data_ = &(parallelSvd.blockMatrix());
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
@@ -468,7 +468,7 @@ private:
 	ProgressIndicatorType progress_;
 	const LeftRightSuperType& lrs_;
 	const ParamsType& params_;
-	BlockMatrixType* data_;
+	const BlockMatrixType* data_;
 	MatrixVectorType allTargets_;
 	VectorGenIjPatchType vectorOfijPatches_;
 	VectorSizeType qnToPatch_;

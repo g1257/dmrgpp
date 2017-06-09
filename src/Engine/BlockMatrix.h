@@ -251,7 +251,11 @@ public:
 		offsets_[i]=offset;
 	}
 
-	void sumBlock(int i,MatrixInBlockTemplate const &m) { data_[i] += m; }
+	void sumBlock(SizeType i,MatrixInBlockTemplate const &m)
+	{
+		assert(i < data_.size());
+		data_[i] += m;
+	}
 
 	int rank() const { return rank_; }
 

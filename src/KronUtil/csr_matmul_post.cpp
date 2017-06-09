@@ -27,7 +27,7 @@ void csr_matmul_post(char trans_A,
  *  requires  (nrow_X == nrow_Y) && ( ncol_Y == nrow_A) && (ncol_X == ncol_A)
  * -------------------------------------------------------
  */
-	const int nrow_A = a.row();
+	const int nrow_A = a.rows();
 	int isTranspose = (trans_A == 'T') || (trans_A == 't');
 
 	if (isTranspose) {
@@ -39,7 +39,8 @@ void csr_matmul_post(char trans_A,
 	 *   ----------------------------------------------------------
 	 */
 
-		assert((nrow_X == nrow_Y) && (ncol_Y == ncol_A) && (ncol_X == nrow_A));
+		assert(nrow_X == nrow_Y);
+		assert(static_cast<SizeType>(ncol_Y) == a.cols() && (ncol_X == nrow_A));
 
 		int ia = 0;
 		for(ia=0; ia < nrow_A; ia++) {
@@ -67,7 +68,8 @@ void csr_matmul_post(char trans_A,
 	 * X(ix,jx) += sum( Y(iy,ia) * A(ia,ja), over ia )
 	 * ---------------------------------------------
 	 */
-		assert((nrow_X == nrow_Y) && (ncol_Y == nrow_A) && (ncol_X == ncol_A));
+		assert(nrow_X == nrow_Y);
+		assert(ncol_Y == nrow_A && static_cast<SizeType>(ncol_X) == a.cols());
 
 		int ia = 0;
 		for(ia=0; ia < nrow_A; ia++) {
