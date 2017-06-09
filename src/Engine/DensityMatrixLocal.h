@@ -177,15 +177,14 @@ public:
 
 	}
 
-	virtual SparseMatrixType& operator()()
+	virtual const BlockMatrixType& operator()()
 	{
-		return dataSparse_;
+		return data_;
 	}
 
 	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 	{
 		diagonalise(data_,eigs,jobz);
-		data_.toSparse(dataSparse_);
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
@@ -227,7 +226,6 @@ private:
 
 	ProgressIndicatorType progress_;
 	BlockMatrixType data_;
-	SparseMatrixType dataSparse_;
 	SizeType direction_;
 	bool debug_;
 	bool verbose_;

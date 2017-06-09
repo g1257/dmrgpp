@@ -162,9 +162,9 @@ public:
 		if (debug_) areAllMsEqual(pBasis_);
 	}
 
-	SparseMatrixType& operator()()
+	virtual const BlockMatrixType& operator()()
 	{
-		return dataSparse_;
+		return data_;
 	}
 
 	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
@@ -185,7 +185,6 @@ public:
 
 		if (debug_) areAllMsEqual(pBasis_);
 
-		data_.toSparse(dataSparse_);
 		check2(direction_);
 	}
 
@@ -403,7 +402,6 @@ private:
 	}
 
 	BlockMatrixType data_;
-	SparseMatrixType dataSparse_;
 	typename PsimagLite::Vector<SizeType>::Type mMaximal_;
 	const BasisWithOperatorsType& pBasis_;
 	SizeType direction_;

@@ -103,6 +103,7 @@ class Truncation  {
 	typedef DensityMatrixSvd<TargettingType> DensityMatrixSvdType;
 	typedef DensityMatrixSu2<TargettingType> DensityMatrixSu2Type;
 	typedef DensityMatrixBase<TargettingType> DensityMatrixBaseType;
+	typedef typename DensityMatrixBaseType::BlockMatrixType BlockMatrixType;
 	typedef typename TargettingType::ModelType ModelType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 
@@ -119,7 +120,7 @@ public:
 		    : transform(0,0)
 		{}
 
-		SparseMatrixType transform;
+		BlockMatrixType transform;
 		typename PsimagLite::Vector<RealType>::Type eigs;
 		typename PsimagLite::Vector<SizeType>::Type removedIndices;
 	}; // TruncationCache
@@ -235,12 +236,7 @@ private:
 
 		updateKeptStates(keptStates,cache.eigs);
 
-		//! transform basis: dmS^\dagger * operator matrix * dms
 		cache.transform = dmS->operator()();
-		if (parameters_.options.find("nodmrgtransform") != PsimagLite::String::npos) {
-			cache.transform.makeDiagonal(cache.transform.rows(), 1.0);
-		}
-
 		rSprime = pBasis;
 		rSprime.changeBasis(cache.removedIndices,cache.eigs,keptStates,parameters_);
 
@@ -265,7 +261,7 @@ private:
 		PsimagLite::OstringStream msg;
 		TruncationCache& cache = leftCache_;
 
-		ftransform_ = cache.transform;
+		cache.transform.toSparse(ftransform_);
 		PsimagLite::OstringStream msg0;
 		msg0<<"Truncating transform...";
 		utils::truncate(ftransform_,cache.removedIndices,false);
@@ -298,7 +294,7 @@ private:
 		PsimagLite::OstringStream msg;
 		TruncationCache& cache = rightCache_;
 
-		ftransform_ = cache.transform;
+		cache.transform.toSparse(ftransform_);
 		PsimagLite::OstringStream msg0;
 		msg0<<"Truncating transform...";
 		utils::truncate(ftransform_,cache.removedIndices,false);

@@ -116,7 +116,7 @@ public:
 	virtual ~DensityMatrixBase()
 	{}
 
-	virtual SparseMatrixType& operator()()=0;
+	virtual const BlockMatrixType& operator()()=0;
 
 	virtual void diag(typename PsimagLite::Vector<RealType>::Type&, char) = 0;
 }; // class DensityMatrixBase
