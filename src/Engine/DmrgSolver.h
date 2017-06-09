@@ -622,6 +622,7 @@ private:
 		} else {
 			checkpoint_.push((twoSiteDmrg) ? lrs_.right() : pE,ProgramGlobals::ENVIRON);
 		}
+
 		serialize(fsS,fsE,target,truncate_.transform(),direction,saveOption);
 	}
 

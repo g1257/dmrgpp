@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Su2SymmetryGlobals.h"
 #include "Operator.h"
+#include "ChangeOfBasis.h"
 
 namespace Dmrg {
 template<typename BasisType>
@@ -101,6 +102,7 @@ class ReducedOperators {
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
 	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef ChangeOfBasis<SparseMatrixType, DenseMatrixType> ChangeOfBasisType;
 
 public:
 
@@ -256,8 +258,7 @@ public:
 	{
 
 		if (!useSu2Symmetry_) {
-			ftransform_ = ftransform;
-			transposeConjugate(ftransformT_,ftransform_);
+			changeOfBasis_.update(ftransform);
 			return;
 		}
 
@@ -284,8 +285,7 @@ public:
 		}
 
 		thisBasis_ = thisBasis;
-		fullMatrixToCrsMatrix(ftransform_,fm);
-		transposeConjugate(ftransformT_,ftransform_);
+		changeOfBasis_.update(fm);
 	}
 
 	void changeBasis(SizeType k)
@@ -298,7 +298,7 @@ public:
 	                            const SparseMatrixType& transform)
 	{
 		
-		changeBasis(hamiltonian,transform);
+		ChangeOfBasisType::changeBasis(hamiltonian,transform);
 		if (useSu2Symmetry_)
 			changeBasis(reducedHamiltonian_);
 	}
@@ -407,40 +407,10 @@ public:
 
 	void changeBasis(SparseMatrixType &v)
 	{
-		SparseMatrixType tmp;
-		multiply(tmp,v,ftransform_);
-		multiply(v,ftransformT_,tmp);
+		changeOfBasis_(v);
 	}
 
 private:
-
-	void changeBasis(SparseMatrixType &v,
-	                 const SparseMatrixType& ftransform)
-	{
-		SparseMatrixType ftransformT;
-		transposeConjugate(ftransformT,ftransform);
-		SparseMatrixType tmp;
-		multiply(tmp,v,ftransform);
-		multiply(v,ftransformT,tmp);
-	}
-
-	const BasisType* thisBasis_;
-	bool useSu2Symmetry_;
-	ClebschGordanType* cgObject_;
-	PsimagLite::Vector<SizeType>::Type momentumOfOperators_;
-	PsimagLite::Vector<SizeType>::Type basisrinverse_;
-	typename PsimagLite::Vector<OperatorType>::Type reducedOperators_;
-	SparseMatrixType reducedHamiltonian_;
-	SizeType j1Max_,j2Max_;
-	VectorVectorType lfactorLeft_;
-	VectorVectorType lfactorRight_;
-	VectorType lfactorHamLeft_,lfactorHamRight_;
-	PsimagLite::Matrix<int> reducedMapping_;
-	PsimagLite::Vector<PsimagLite::Vector<SizeType>::Type>::Type fastBasisLeft_;
-	PsimagLite::Vector<PsimagLite::Vector<SizeType>::Type>::Type fastBasisRight_;
-	PsimagLite::Matrix<SizeType> flavorIndexCached_;
-	SparseMatrixType ftransform_;
-	SparseMatrixType ftransformT_;
 
 	SparseElementType lfactor(int ki,
 	                          bool order,
@@ -897,6 +867,24 @@ private:
 			}
 		}
 	}
+
+	const BasisType* thisBasis_;
+	bool useSu2Symmetry_;
+	ClebschGordanType* cgObject_;
+	PsimagLite::Vector<SizeType>::Type momentumOfOperators_;
+	PsimagLite::Vector<SizeType>::Type basisrinverse_;
+	typename PsimagLite::Vector<OperatorType>::Type reducedOperators_;
+	SparseMatrixType reducedHamiltonian_;
+	SizeType j1Max_;
+	SizeType j2Max_;
+	VectorVectorType lfactorLeft_;
+	VectorVectorType lfactorRight_;
+	VectorType lfactorHamLeft_,lfactorHamRight_;
+	PsimagLite::Matrix<int> reducedMapping_;
+	PsimagLite::Vector<PsimagLite::Vector<SizeType>::Type>::Type fastBasisLeft_;
+	PsimagLite::Vector<PsimagLite::Vector<SizeType>::Type>::Type fastBasisRight_;
+	PsimagLite::Matrix<SizeType> flavorIndexCached_;
+	ChangeOfBasisType changeOfBasis_;
 }; // ReducedOperators
 }// namespace Dmrg
 
