@@ -146,7 +146,9 @@ truncateVector(SomeVectorType& v,
 }
 
 template<class T>
-void truncate(PsimagLite::Matrix<T> &A,const PsimagLite::Vector<SizeType>::Type& removed,bool rowOption)
+void truncate(PsimagLite::Matrix<T> &A,
+              const PsimagLite::Vector<SizeType>::Type& removed,
+              bool rowOption)
 {
 	SizeType j;
 	int x=removed.size();
@@ -158,7 +160,8 @@ void truncate(PsimagLite::Matrix<T> &A,const PsimagLite::Vector<SizeType>::Type&
 	if (rowOption)  n = nrow;
 
 	if (int(n)<=x) {
-		std::cerr<<"psimag::truncate: n="<<n<<" must be larger than x="<<x<<" rowoption="<<rowOption<<"\n";
+		std::cerr<<"psimag::truncate: n="<<n;
+		std::cerr<<" must be larger than x="<<x<<" rowoption="<<rowOption<<"\n";
 		throw PsimagLite::RuntimeError("psimag::truncated\n");
 	}
 
@@ -172,7 +175,8 @@ void truncate(PsimagLite::Matrix<T> &A,const PsimagLite::Vector<SizeType>::Type&
 		remap[i]=j;
 		j++;
 	}
-	if (j!=n-x) throw PsimagLite::RuntimeError("truncate: PsimagLite::Matrix is throwing...\n");
+	if (j!=n-x)
+		throw PsimagLite::RuntimeError("truncate: PsimagLite::Matrix is throwing...\n");
 
 	//! truncate
 	if (rowOption) {
@@ -197,12 +201,12 @@ void truncate(PsimagLite::Matrix<T> &A,const PsimagLite::Vector<SizeType>::Type&
 }
 
 template<class T>
-void truncate(PsimagLite::CrsMatrix<T> &A,const PsimagLite::Vector<SizeType>::Type& removed,bool rowOption)
+void truncate(PsimagLite::CrsMatrix<T> &A,
+              const PsimagLite::Vector<SizeType>::Type& removed,
+              bool rowOption)
 {
-	if (rowOption) { // unimplemented
-		assert(false);
+	if (rowOption)
 		throw PsimagLite::RuntimeError("truncate: rowoption must not be set\n");
-	}
 
 	SizeType x=removed.size();
 	if (x==0) return;
