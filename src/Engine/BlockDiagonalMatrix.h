@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "NoPthreadsNg.h"
 #include "CrsMatrix.h"
+#include "PsimagLite.h"
 
 namespace Dmrg {
 
@@ -189,58 +190,22 @@ public:
 		offsets_[blocks]=rank;
 	}
 
+	void setTo(FieldType value)
+	{
+		SizeType n = data_.size();
+		if (n == 0)
+			err("BlockDiagonalMatrix::setTo(...): cannot be called without structure\n");
+
+		for (SizeType i = 0; i < n; ++i)
+			data_[i].setTo(value);
+	}
+
 	void operator+=(const BlockDiagonalMatrixType& m)
 	{
 		BlockDiagonalMatrixType c;
 		if (offsets_.size()<m.blocks()) operatorPlus(c,*this,m);
 		else operatorPlus(c,m,*this);
 		*this = c;
-	}
-
-	//! Sets all blocks of size 1 and value value
-	void makeDiagonal(int n,const FieldType& value)
-	{
-		rank_ = n;
-		MatrixInBlockTemplate m;
-
-		setValue(m,1,value);
-
-		offsets_.clear();
-		data_.clear();
-		for (int i=0;i<n;i++) {
-			offsets_.push_back(i);
-			data_.push_back(m);
-		}
-
-		offsets_.push_back(n);
-	}
-
-	void setDiagonal()
-	{
-		SizeType offsetsMinus1 = offsets_.size();
-		if (offsetsMinus1 == 0) return;
-		offsetsMinus1--;
-		for (SizeType i = 0; i < offsetsMinus1; ++i) {
-			offsets_.push_back(i);
-			SizeType n = data_[i].n_row();
-			MatrixInBlockTemplate tmp(n,n);
-			for (SizeType j = 0; j < n; ++j) tmp(j,j) = 1.0;
-			data_[i] = tmp;
-		}
-	}
-
-	//! Set block to the zero matrix,
-	void setToZero(int n)
-	{
-		FieldType value=static_cast<FieldType>(0.0);
-		makeDiagonal(n,value);
-	}
-
-	//! set block to the identity matrix
-	void setToIdentity(int n)
-	{
-		FieldType value=static_cast<FieldType>(1.0);
-		makeDiagonal(n,value);
 	}
 
 	void setBlock(SizeType i,int offset,MatrixInBlockTemplate const &m)
@@ -284,7 +249,11 @@ public:
 		fm.checkValidity();
 	}
 
-	MatrixInBlockTemplate operator()(int i) const { return data_[i]; }
+	MatrixInBlockTemplate operator()(SizeType i) const
+	{
+		assert(i < data_.size());
+		return data_[i];
+	}
 
 	template<class MatrixInBlockTemplate2>
 	friend void operatorPlus(BlockDiagonalMatrix<MatrixInBlockTemplate2>& C,

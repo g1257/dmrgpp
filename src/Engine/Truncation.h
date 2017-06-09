@@ -194,14 +194,14 @@ private:
 			Let us define the density matrices for system:
 			\begin{equation}
 			(\hat{\rho}_S)_{\alpha,\alpha'} = \sum_{\beta\in\mathcal{V}(E')}
-		    \psi_{\alpha',\beta}^*\psi_{\alpha,\beta}
+			\psi_{\alpha',\beta}^*\psi_{\alpha,\beta}
 			\label{eq:rhoSystem}
 			\end{equation}
 			in $\mathcal{V}(S')$,
 			and environment:
 			\begin{equation}
 			(\hat{\rho}_E )_{\beta,\beta'}= \sum_{\alpha\in \mathcal{V}(S')}
-		    \psi_{\alpha,\beta'}^*\psi_{\alpha,\beta}
+			\psi_{\alpha,\beta'}^*\psi_{\alpha,\beta}
 			\label{eq:rhoEnviron}
 			\end{equation}
 			in $\mathcal{V}(E')$.
@@ -237,6 +237,13 @@ private:
 		updateKeptStates(keptStates,cache.eigs);
 
 		cache.transform = dmS->operator()();
+		if (parameters_.options.find("nodmrgtransform") != PsimagLite::String::npos) {
+			PsimagLite::OstringStream msg;
+			msg<<"SolverOptions=nodmrgtransform, setting transform to identity";
+			progress_.printline(msg,std::cout);
+			cache.transform.setTo(1.0);
+		}
+
 		rSprime = pBasis;
 		rSprime.changeBasis(cache.removedIndices,cache.eigs,keptStates,parameters_);
 
