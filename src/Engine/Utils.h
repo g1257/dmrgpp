@@ -146,68 +146,9 @@ truncateVector(SomeVectorType& v,
 }
 
 template<class T>
-void truncate(PsimagLite::Matrix<T> &A,
-              const PsimagLite::Vector<SizeType>::Type& removed,
-              bool rowOption)
-{
-	SizeType j;
-	int x=removed.size();
-	if (x<=0) return;
-	SizeType nrow = A.n_row();
-	SizeType ncol = A.n_col();
-
-	SizeType n = ncol;
-	if (rowOption)  n = nrow;
-
-	if (int(n)<=x) {
-		std::cerr<<"psimag::truncate: n="<<n;
-		std::cerr<<" must be larger than x="<<x<<" rowoption="<<rowOption<<"\n";
-		throw PsimagLite::RuntimeError("psimag::truncated\n");
-	}
-
-	PsimagLite::Vector<int>::Type remap(n);
-
-	//! find remapping
-	j=0;
-	for (SizeType i=0;i<n;i++) {
-		remap[i] = -1;
-		if (PsimagLite::isInVector(removed,i)>=0) continue;
-		remap[i]=j;
-		j++;
-	}
-	if (j!=n-x)
-		throw PsimagLite::RuntimeError("truncate: PsimagLite::Matrix is throwing...\n");
-
-	//! truncate
-	if (rowOption) {
-		PsimagLite::Matrix<T> B(nrow-x,ncol);
-		for (SizeType i=0;i<ncol;i++) {
-			for (j=0;j<nrow;j++) {
-				if (remap[j]<0) continue;
-				B(remap[j],i)=A(j,i);
-			}
-		}
-		A=B;
-	} else {
-		PsimagLite::Matrix<T> B(nrow,ncol-x);
-		for (SizeType i=0;i<nrow;i++) {
-			for (j=0;j<ncol;j++) {
-				if (remap[j]<0) continue;
-				B(i,remap[j])=A(i,j);
-			}
-		}
-		A=B;
-	}
-}
-
-template<class T>
 void truncate(PsimagLite::CrsMatrix<T> &A,
-              const PsimagLite::Vector<SizeType>::Type& removed,
-              bool rowOption)
+              const PsimagLite::Vector<SizeType>::Type& removed)
 {
-	if (rowOption)
-		throw PsimagLite::RuntimeError("truncate: rowoption must not be set\n");
-
 	SizeType x=removed.size();
 	if (x==0) return;
 
