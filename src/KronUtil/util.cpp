@@ -1,10 +1,8 @@
 #include "estimate_kron_cost.cpp"
 #include "csr_den_kron_mult.cpp"
 #include "csr_kron_mult.cpp"
-#include "csr_nnz.cpp"
 #include "csr_eye.cpp"
 #include "csr_is_eye.cpp"
-#include "csr_is_zeros.cpp"
 #include "csr_transpose.cpp"
 #include "csr_matmul_post.cpp"
 #include "csr_matmul_pre.cpp"
@@ -55,13 +53,7 @@ void csr_den_kron_mult_method<double>(const int imethod,
                               SizeType offsetX);
 
 template
-int csr_nnz<double>(const PsimagLite::CrsMatrix<double>&);
-
-template
 bool csr_is_eye<double>(const PsimagLite::CrsMatrix<double>&);
-
-template
-bool csr_is_zeros<double>(const PsimagLite::CrsMatrix<double>&);
 
 template
 void csr_transpose<double>(const int nrow_A,

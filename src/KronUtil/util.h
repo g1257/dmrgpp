@@ -32,13 +32,7 @@ void csr_den_kron_mult_method(const int imethod,
                               SizeType offsetX);
 
 template<typename ComplexOrRealType>
-int csr_nnz(const PsimagLite::CrsMatrix<ComplexOrRealType>&);
-
-template<typename ComplexOrRealType>
 bool csr_is_eye(const PsimagLite::CrsMatrix<ComplexOrRealType>&);
-
-template<typename ComplexOrRealType>
-bool csr_is_zeros(const PsimagLite::CrsMatrix<ComplexOrRealType>&);
 
 template<typename ComplexOrRealType>
 void csr_transpose(const int nrow_A,
@@ -299,5 +293,21 @@ template<typename ComplexOrRealType>
 void den_eye(const int nrow_A,
              const int ncol_A,
              PsimagLite::Matrix<ComplexOrRealType>& c_);
+
+template<typename ComplexOrRealType>
+bool csr_is_zeros(const PsimagLite::CrsMatrix<ComplexOrRealType>& a)
+{
+	// ----------------------------------------------------
+	// check whether a sparse matrix is the zero matrix
+	// ----------------------------------------------------
+	return isZero(a, 1e-12);
+}
+
+template<typename ComplexOrRealType>
+int csr_nnz(const PsimagLite::CrsMatrix<ComplexOrRealType>& a)
+{
+	return a.nonZero();
+}
+
 #endif
 
