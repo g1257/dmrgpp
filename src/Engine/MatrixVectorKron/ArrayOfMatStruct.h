@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define ARRAY_OF_MAT_STRUCT_H
 #include "GenIjPatch.h"
 #include "CrsMatrix.h"
-#include "MatrixDenseOrSparse.h"
+#include "../KronUtil/MatrixDenseOrSparse.h"
 
 namespace Dmrg {
 
