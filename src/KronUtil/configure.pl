@@ -22,6 +22,9 @@ use strict;
 use lib "../../../PsimagLite/scripts";
 use Make;
 
+my ($gccdash) = @ARGV;
+defined($gccdash) or $gccdash = "";
+
 my @names = ("KronUtil", "util", "utilComplex", "csc_nnz");
 
 my @drivers;
@@ -34,23 +37,28 @@ for (my $i = 0; $i < $total; ++$i) {
 	$dotos .= " $name.o ";
 }
 
-createMakefile();
+createMakefile($gccdash);
 
 sub createMakefile
 {
+	my ($gccdash) = @_;
 	Make::backupMakefile();
 
 	my $fh;
 	open($fh,">Makefile") or die "Cannot open Makefile for writing: $!\n";
 
-	Make::newMake($fh,\@drivers,"KronUtil"," "," ","libkronutil.a test1 test2","../");
+	my %args;
+	$args{"code"} = "KronUtil";
+	$args{"additional3"} = "libkronutil.a test1 test2";
+	$args{"path"} = "../";
+	Make::newMake($fh,\@drivers,\%args);
 
 	local *FH = $fh;
 print FH<<EOF;
 
 libkronutil.a: $dotos ../Config.make Makefile
-	ar rc libkronutil.a $dotos
-	ranlib libkronutil.a
+	${gccdash}ar rc libkronutil.a $dotos
+	${gccdash}ranlib libkronutil.a
 
 test1: libkronutil.a test1.o $dotos ../Config.make
 	\$(CXX) \$(CFLAGS) -o test1 test1.o \$(LDFLAGS) libkronutil.a

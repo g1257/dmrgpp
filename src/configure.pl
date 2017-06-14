@@ -24,11 +24,20 @@ use Make;
 use DmrgDriver;
 
 my ($flavor, $generateSources) = @ARGV;
-
 $flavor = procFlavor($flavor);
-$generateSources = 0 if (!defined($generateSources));
+my $gccdash = "";
+my $lto = "";
+if (defined($generateSources)) {
+	if ($generateSources eq "lto") {
+		$gccdash = "gcc-";
+		$lto = "-flto";
+		$generateSources = 0;
+	}
+} else {
+	$generateSources = 0;
+}
 
-system("cd KronUtil; perl configure.pl");
+system("cd KronUtil; perl configure.pl $gccdash");
 
 my %provenanceDriver = (name => 'Provenance', aux => 1);
 my %progGlobalsDriver = (name => 'ProgramGlobals', aux => 1);
@@ -68,18 +77,24 @@ my %dmrgMain = (name => 'dmrg', dotos => "$dotos", libs => "kronutil");
 
 push @drivers,\%dmrgMain;
 
-createMakefile($flavor);
+createMakefile($flavor, $lto);
 
 sub createMakefile
 {
-	my ($flavor) = @_;
+	my ($flavor, $lto) = @_;
 	Make::backupMakefile();
-	Make::createConfigMake($flavor);
+	my %args;
+	$args{"CPPFLAGS"} = $lto;
+	$args{"LDFLAGS"} = $lto;
+	Make::createConfigMake($flavor, \%args);
 
 	my $fh;
 	open($fh,">Makefile") or die "Cannot open Makefile for writing: $!\n";
 
-	Make::newMake($fh,\@drivers,"DMRG++"," "," ","operator");
+	my %additionals;
+	$additionals{"code"} = "DMRG++";
+	$additionals{"additional3"} = "operator";
+	Make::newMake($fh,\@drivers,\%additionals);
 	local *FH = $fh;
 print FH<<EOF;
 
