@@ -25,15 +25,17 @@ package Make;
 sub newMake
 {
 	local *FH = shift;
-	my ($drivers,
-	    $code,
-            $additional,
-            $additional2,
-            $additional3,
-            $path) = @_;
-	
-        $additional3 = "" unless defined($additional3);
-        $path = "" unless defined($path);
+	my ($drivers, $additionals) = @_;
+	my %a = %$additionals;
+	my $additional = $a{"additional"};
+	my $additional2 = $a{"additional2"};
+	my $additional3 = $a{"additional3"};
+	my $path = $a{"path"};
+	my $code = $a{"code"};
+	$additional = " " unless defined($additional);
+	$additional2 = " " unless defined($additional2);
+	$additional3 = "" unless defined($additional3);
+	$path = " " unless defined($path);
 
 	my $allExecutables = combineAllDrivers($drivers,"");
 	my $allCpps = combineAllDrivers($drivers,".cpp");
@@ -277,7 +279,7 @@ EOF
 
 sub createConfigMake
 {
-	my ($flavor) = @_;
+	my ($flavor, $additionals) = @_;
 	defined($flavor) or $flavor = "../TestSuite/inputs/Config.make";
 	my $cmd = "cp ../TestSuite/inputs/ConfigBase.make Config.make.new";
 	system($cmd);
@@ -299,8 +301,16 @@ sub createConfigMake
 		print FOUT;
 	}
 
-	close(FOUT);
 	close(FILE);
+
+	if (defined($additionals)) {
+		my $cppflags = $additionals->{"CPPFLAGS"};
+		my $ldflags = $additionals->{"LDFLAGS"};
+		print FOUT "CPPFLAGS += $cppflags\n" if ($cppflags ne "");
+		print FOUT "LDFLAGS += $ldflags\n" if ($ldflags ne "");
+	}
+
+	close(FOUT);
 
 	my $overwrite = 1;
 	if (-r "Config.make") {
