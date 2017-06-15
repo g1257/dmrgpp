@@ -297,8 +297,8 @@ int main(int argc,char *argv[])
 			throw PsimagLite::RuntimeError(str);
 		}
 
-		std::cerr<<application.name()<<"\x1b[38;5;240m";
-		std::cerr<<" [master] "<<PsimagLite::AnsiColor::reset;
+		std::cerr<<application.name()<<"\x1b[38;5;124m";
+		std::cerr<<" [features] "<<PsimagLite::AnsiColor::reset;
 		std::cerr<<"Standard output sent to ";
 		std::cerr<<options.label<<"\n";
 		std::cerr.flush();

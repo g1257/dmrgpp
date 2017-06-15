@@ -16,15 +16,15 @@ public:
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef PsimagLite::Vector<int>::Type VectorIntType;
 
-	explicit MatrixDenseOrSparse(const SparseMatrixType& sparse,
+	explicit MatrixDenseOrSparse(const VectorType& v,
+	                             SizeType rows,
+	                             SizeType cols,
 	                             const RealType& threshold)
-	    : isDense_(sparse.nonZero() > static_cast<int>(threshold*sparse.row()*sparse.col())),
-	      sparseMatrix_(sparse)
-	{
-		sparseMatrix_.checkValidity();
-
-		if (isDense_) // A(i,j) at  val[ (i) + (j)*nrow ]
-			crsMatrixToFullMatrix(denseMatrix_, sparse);
+	    : denseMatrix_(v, rows, cols)
+	{		
+		fullMatrixToCrsMatrix(sparseMatrix_, denseMatrix_);
+		isDense_ = (sparseMatrix_.nonZero() > static_cast<int>(threshold*rows*cols));
+		if (!isDense_) denseMatrix_.clear();
 	}
 
 	bool isDense() const { return isDense_; }
@@ -63,7 +63,7 @@ public:
 private:
 
 	bool isDense_;
-	const PsimagLite::CrsMatrix<ComplexOrRealType> sparseMatrix_;
+	PsimagLite::CrsMatrix<ComplexOrRealType> sparseMatrix_;
 	PsimagLite::Matrix<ComplexOrRealType> denseMatrix_;
 }; // class MatrixDenseOrSparse
 

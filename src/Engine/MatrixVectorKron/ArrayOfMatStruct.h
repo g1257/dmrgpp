@@ -93,6 +93,7 @@ public:
 
 	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
 	typedef MatrixDenseOrSparse<SparseMatrixType> MatrixDenseOrSparseType;
+	typedef typename MatrixDenseOrSparseType::VectorType VectorType;
 	typedef typename MatrixDenseOrSparseType::RealType RealType;
 	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
 	typedef typename GenIjPatchType::VectorSizeType VectorSizeType;
@@ -106,35 +107,37 @@ public:
 	{
 		const BasisType& basis = (leftOrRight == GenIjPatchType::LEFT) ?
 		            patch.lrs().left() : patch.lrs().right();
+		SizeType max = maxRowsOrCols(patch, leftOrRight);
+		VectorType tmp(max*max, 0.0);
 		SizeType npatch = patch(leftOrRight).size();
 		for (SizeType jpatch=0; jpatch < npatch; ++jpatch) {
 			SizeType jgroup = patch(leftOrRight)[jpatch];
 			SizeType j1 = basis.partition(jgroup);
 			SizeType j2 = basis.partition(jgroup+1);
+			SizeType cols = j2 - j1;
 			for (SizeType ipatch=0; ipatch < npatch; ++ipatch) {
 				SizeType igroup = patch(leftOrRight)[ipatch];
 				SizeType i1 = basis.partition(igroup);
 				SizeType i2 = basis.partition(igroup+1);
 
-				SparseMatrixType tmp(i2-i1,  j2-j1);
-				SizeType counter = 0;
+				SizeType rows = i2 - i1;
+				std::fill(tmp.begin(), tmp.begin() + rows*cols, 0.0);
 				for (SizeType ii = i1; ii < i2; ++ii) {
-					tmp.setRow(ii - i1, counter);
 					SizeType start = sparse.getRowPtr(ii);
 					SizeType end = sparse.getRowPtr(ii+1);
 					for (SizeType k = start; k < end; ++k) {
-						int col = sparse.getCol(k)-j1;
+						int col = sparse.getCol(k) - j1;
 						if (col < 0) continue;
-						if (SizeType(col)>=j2-j1) continue;
-						tmp.pushValue(sparse.getValue(k));
-						tmp.pushCol(col);
-						++counter;
+						if (static_cast<SizeType>(col) >= cols)
+							continue;
+						tmp[ii + col*rows] = sparse.getValue(k);
 					}
 				}
 
-				tmp.setRow(i2-i1,counter);
-				tmp.checkValidity();
-				data_(ipatch,jpatch) = new MatrixDenseOrSparseType(tmp, threshold);
+				data_(ipatch,jpatch) = new MatrixDenseOrSparseType(tmp,
+				                                                   rows,
+				                                                   cols,
+				                                                   threshold);
 			}
 		}
 	}
@@ -154,6 +157,23 @@ public:
 	}
 
 private:
+
+	SizeType maxRowsOrCols(GenIjPatchType& patch,
+	                       typename GenIjPatchType::LeftOrRightEnumType leftOrRight) const
+	{
+		const BasisType& basis = (leftOrRight == GenIjPatchType::LEFT) ?
+		            patch.lrs().left() : patch.lrs().right();
+		SizeType npatch = patch(leftOrRight).size();
+		SizeType max = 0;
+		for (SizeType jpatch=0; jpatch < npatch; ++jpatch) {
+			SizeType jgroup = patch(leftOrRight)[jpatch];
+			SizeType j1 = basis.partition(jgroup);
+			SizeType j2 = basis.partition(jgroup+1);
+			if (j2 -j1 > max) max = j2 - j1;
+		}
+
+		return max;
+	}
 
 	ArrayOfMatStruct(const ArrayOfMatStruct&);
 
