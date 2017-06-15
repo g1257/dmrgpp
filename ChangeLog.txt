@@ -1,3 +1,10 @@
+2017-06-15 Version 1.64
+
+* Domain checks for operator+= in Matrix
+
+* Make.pm, newMake function takes pointer to hash
+  as third argument
+
 2017-06-08 Version 1.62
 
 * faster isZero function for CrsMatrix
