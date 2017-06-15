@@ -60,6 +60,17 @@ public:
 	    : nrow_(nrow),ncol_(ncol),data_(nrow*ncol, 0)
 	{}
 
+	Matrix(const typename Vector<T>::Type& data,
+	       SizeType nrow,
+	       SizeType ncol)
+	    : nrow_(nrow),ncol_(ncol),data_(data)
+	{
+		if (data.size() < nrow*ncol)
+			throw RuntimeError("Matrix::ctor failed\n");
+
+		data_.resize(nrow*ncol);
+	}
+
 	template<typename RealType>
 	Matrix(const Matrix<RealType>& m,
 	       typename EnableIf<!IsComplexNumber<RealType>::True,int>::Type = 0)
@@ -125,6 +136,12 @@ public:
 		total += mres.memResolv(&data_,sizeof(*this)-total, str+" data_");
 
 		return total;
+	}
+
+	void clear()
+	{
+		nrow_ = ncol_ = 0;
+		data_.clear();
 	}
 
 	// default assigment operator is fine
