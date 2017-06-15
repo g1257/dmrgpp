@@ -328,7 +328,7 @@ public:
 		return static_cast<T>(0.0);
 	}
 
-	int nonZero() const { return colind_.size(); }
+	SizeType nonZeros() const { return colind_.size(); }
 
 	/** performs x = x + A * y
 		 ** where x and y are vectors and A is a sparse matrix in
@@ -348,20 +348,25 @@ public:
 		}
 	}
 
-	SizeType row() const { return nrow_; }
+#ifndef NO_DEPRECATED_ALLOWED
+	int nonZero() const { return colind_.size(); } // DEPRECATED, use nonZeros()
 
-	SizeType col() const { return ncol_; }
+	SizeType row() const { return nrow_; } // DEPRECATED, use rows()
 
-	SizeType rows() const { return nrow_; }
+	SizeType col() const { return ncol_; } // DEPRECATED, use cols()
 
-	SizeType cols() const { return ncol_; }
-
-	SizeType rank() const
+	SizeType rank() const // DEPRECATED, use rows() or cols() as appropriate
 	{
 		if (nrow_!=ncol_)
 			throw RuntimeError("CrsMatrix: rank(): only for square matrices\n");
 		return nrow_;
 	}
+
+#endif
+
+	SizeType rows() const { return nrow_; }
+
+	SizeType cols() const { return ncol_; }
 
 	void pushCol(SizeType i) { colind_.push_back(i); }
 

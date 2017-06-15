@@ -146,9 +146,22 @@ public:
 
 	// default assigment operator is fine
 
+	SizeType nonZeros() const
+	{
+		SizeType n = nrow_*ncol_;
+		assert(data_.size() >= n);
+		SizeType count = 0;
+		for (SizeType i = 0; i < n; ++i)
+			if (data_[i] != 0.0) ++count;
+
+		return count;
+	}
+
+#ifndef NO_DEPRECATED_ALLOWED
 	SizeType n_row() const { return nrow_; } // legacy name
 
 	SizeType n_col() const { return ncol_; } // legacy name
+#endif
 
 	SizeType rows() const { return nrow_; }
 
