@@ -130,7 +130,8 @@ public:
 						if (col < 0) continue;
 						if (static_cast<SizeType>(col) >= cols)
 							continue;
-						tmp[ii + col*rows] = sparse.getValue(k);
+						assert(ii - i1 + col*rows < tmp.size());
+						tmp[ii - i1 + col*rows] = sparse.getValue(k);
 					}
 				}
 
