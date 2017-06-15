@@ -1,5 +1,18 @@
 https://github.com/g1257/dmrgpp/commits/master
 
+2017-06-15 Version 4.50
+
+* Standalone input label DenseSparseThreshold
+
+* DensityMatrix: Returns BlockDiagonalMatrix
+
+* KronUtil: more function in same compilation unit
+  to improve inlining
+
+* MatrixDenseOrSparse.h now in KronUtil
+
+* linker time optimizations for gcc
+
 2017-06-08 Version 4.48
 
 * DenseSparseThreshold label
