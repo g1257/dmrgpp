@@ -181,7 +181,7 @@ void mainLoop0(InputNgType::Readable& io,
 	                                                                        targeting);
 }
 
-int main(int argc,char *argv[])
+int main(int argc, char *argv[])
 {
 	PsimagLite::PsiApp application("DMRG++",&argc,&argv,1);
 	typedef PsimagLite::Concurrency ConcurrencyType;
@@ -190,7 +190,7 @@ int main(int argc,char *argv[])
 	int opt = 0;
 	OperatorOptions options;
 	PsimagLite::String strUsage(application.name());
-	if (utils::basename(strUsage) == "operator") options.enabled = true;
+	if (utils::basename(argv[0]) == "operator") options.enabled = true;
 	strUsage += " -f filename [-k] [-p precision] [-V] [whatToMeasure]";
 	int precision = 6;
 	bool keepFiles = false;
