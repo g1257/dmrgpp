@@ -483,7 +483,7 @@ public:
 		MPI::recv(values_,root,tag+4,mpiComm);
 	}
 
-	friend bool isZero(const CrsMatrix& A, double eps = 1e-6)
+	friend bool isZero(const CrsMatrix& A, double eps = 0.0)
 	{
 		SizeType n = A.values_.size();
 		for (SizeType i = 0; i < n; ++i) {
