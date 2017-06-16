@@ -294,7 +294,7 @@ void svd(char jobz,Matrix<double>& a,Vector<double>::Type& s,Matrix<double>& vt)
 	        &lwork,
 	        &(iwork[0]),
 	        &info);
-	if (info != 0) {
+	if (info!=0) {
 		String str(__FILE__);
 		str += " " + ttos(__LINE__);
 		str += " svd(...) failed with info=" + ttos(info) + "\n";
@@ -322,14 +322,9 @@ void svd(char jobz,Matrix<double>& a,Vector<double>::Type& s,Matrix<double>& vt)
 		String str(__FILE__);
 		str += " " + ttos(__LINE__);
 		str += " svd(...) failed with info=" + ttos(info) + "\n";
-		if (info < 0)
-			throw RuntimeError(str.c_str());
-
-		std::cerr<<str;
+		throw RuntimeError(str.c_str());
 	}
-
 	a = u;
-
 #endif
 }
 
@@ -424,12 +419,8 @@ void svd(char jobz,
 		String str(__FILE__);
 		str += " " + ttos(__LINE__);
 		str += " svd(...) failed with info=" + ttos(info) + "\n";
-		if (info < 0)
-			throw RuntimeError(str.c_str());
-
-		std::cerr<<str;
+		throw RuntimeError(str.c_str());
 	}
-
 	a = u;
 #endif
 }
