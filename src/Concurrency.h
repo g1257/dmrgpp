@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "Mpi.h"
 #include "FloatingPoint.h"
+#include "LAPACK.h"
 
 namespace PsimagLite {
 
@@ -185,10 +186,11 @@ public:
 		mode = 0;
 #ifdef USE_PTHREADS
 		mode |= 1;
+		if (!psimag::LAPACK::isThreadSafe())
+			std::cerr<<"WARNING: You LAPACK might not be thread safe\n";
 #else
-		if (nthreads != 1) {
+		if (nthreads != 1)
 			throw RuntimeError("nthreads>1 but no USE_PTHREADS support compiled\n");
-		}
 #endif
 #ifdef USE_MPI
 		MPI::init(argc,argv);

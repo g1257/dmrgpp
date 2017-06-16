@@ -42,5 +42,4 @@ extern "C" void zgeev_(char*,
                        int*,
                        double*,
                        int*);
-
 #endif
