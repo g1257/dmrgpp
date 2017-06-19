@@ -95,6 +95,7 @@ public:
 	typedef MatrixDenseOrSparse<SparseMatrixType> MatrixDenseOrSparseType;
 	typedef typename MatrixDenseOrSparseType::VectorType VectorType;
 	typedef typename MatrixDenseOrSparseType::RealType RealType;
+	typedef typename MatrixDenseOrSparseType::MatrixType MatrixType;
 	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
 	typedef typename GenIjPatchType::VectorSizeType VectorSizeType;
 	typedef typename GenIjPatchType::BasisType BasisType;
@@ -107,8 +108,6 @@ public:
 	{
 		const BasisType& basis = (leftOrRight == GenIjPatchType::LEFT) ?
 		            patch.lrs().left() : patch.lrs().right();
-		SizeType max = maxRowsOrCols(patch, leftOrRight);
-		VectorType tmp(max*max, 0.0);
 		SizeType npatch = patch(leftOrRight).size();
 		for (SizeType jpatch=0; jpatch < npatch; ++jpatch) {
 			SizeType jgroup = patch(leftOrRight)[jpatch];
@@ -121,7 +120,11 @@ public:
 				SizeType i2 = basis.partition(igroup+1);
 
 				SizeType rows = i2 - i1;
-				std::fill(tmp.begin(), tmp.begin() + rows*cols, 0.0);
+
+				data_(ipatch,jpatch) = new MatrixDenseOrSparseType(rows,
+				                                                   cols);
+
+				MatrixType& m = data_(ipatch, jpatch)->matrix();
 				for (SizeType ii = i1; ii < i2; ++ii) {
 					SizeType start = sparse.getRowPtr(ii);
 					SizeType end = sparse.getRowPtr(ii+1);
@@ -130,15 +133,11 @@ public:
 						if (col < 0) continue;
 						if (static_cast<SizeType>(col) >= cols)
 							continue;
-						assert(ii - i1 + col*rows < tmp.size());
-						tmp[ii - i1 + col*rows] = sparse.getValue(k);
+						m(ii - i1, col) = sparse.getValue(k);
 					}
 				}
 
-				data_(ipatch,jpatch) = new MatrixDenseOrSparseType(tmp,
-				                                                   rows,
-				                                                   cols,
-				                                                   threshold);
+				data_(ipatch,jpatch)->finalize(threshold);
 			}
 		}
 	}
@@ -158,23 +157,6 @@ public:
 	}
 
 private:
-
-	SizeType maxRowsOrCols(GenIjPatchType& patch,
-	                       typename GenIjPatchType::LeftOrRightEnumType leftOrRight) const
-	{
-		const BasisType& basis = (leftOrRight == GenIjPatchType::LEFT) ?
-		            patch.lrs().left() : patch.lrs().right();
-		SizeType npatch = patch(leftOrRight).size();
-		SizeType max = 0;
-		for (SizeType jpatch=0; jpatch < npatch; ++jpatch) {
-			SizeType jgroup = patch(leftOrRight)[jpatch];
-			SizeType j1 = basis.partition(jgroup);
-			SizeType j2 = basis.partition(jgroup+1);
-			if (j2 -j1 > max) max = j2 - j1;
-		}
-
-		return max;
-	}
 
 	ArrayOfMatStruct(const ArrayOfMatStruct&);
 
