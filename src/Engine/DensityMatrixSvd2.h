@@ -124,7 +124,18 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 
 		GroupsStruct(const LeftRightSuperType& lrs, SizeType direction)
 		    : lrs_(lrs), direction_(direction)
-		{}
+		{
+			propsThisIgroup_.resize(this->basis().partition());
+		}
+
+		~GroupsStruct()
+		{
+			SizeType n = m_.size();
+			for (SizeType i = 0; i < n; ++i) {
+				delete m_[i];
+				m_[i] = 0;
+			}
+		}
 
 		void push(SizeType igroup,
 		          SizeType jgroup,
@@ -149,10 +160,12 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 			}
 		}
 
-		void finalize()
+		void finalize(SizeType targets, SizeType maxSectors)
 		{
 			SizeType n = seenGroups_.size();
-			assert(n == propsThisIgroup_.size());
+			assert(n >= propsThisIgroup_.size());
+			additionalOffsets_.resize(targets, maxSectors);
+			additionalOffsets_.setTo(0);
 			for (SizeType i = 0; i < n; ++i) {
 				SizeType igroup = seenGroups_[i];
 				SizeType offset = this->basis().partition(igroup);
@@ -163,6 +176,8 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 					SizeType jgroup = propsThisIgroup_[i][j].jgroup;
 					SizeType joffset = this->basisPrime().partition(jgroup);
 					SizeType jsize = this->basisPrime().partition(jgroup + 1) - joffset;
+					additionalOffsets_(propsThisIgroup_[i][j].target,
+					                   propsThisIgroup_[i][j].sector) = cols;
 					cols += jsize;
 				}
 
@@ -190,40 +205,33 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 			return (expandSys()) ? lrs_.right() : lrs_.left();
 		}
 
-		SizeType groupIndex(SizeType igroup) const
+		SizeType groupFromIndex(SizeType index) const
 		{
-			typename VectorSizeType::const_iterator it = std::find(seenGroups_.begin(),
-			                                                       seenGroups_.end(),
-			                                                       igroup);
-			assert(it != seenGroups_.end());
-			return it - seenGroups_.begin();
+			assert(index < seenGroups_.size());
+			return seenGroups_[index];
 		}
 
-		SizeType groupPrimeIndex(SizeType group, SizeType target, SizeType sector) const
+		SizeType groupPrimeIndex(SizeType igroup, SizeType target, SizeType sector) const
 		{
-			throw PsimagLite::RuntimeError("GroupsStruct: groupPrimeIndex()\n");
+			SizeType index = groupIndex(igroup);
+			SizeType m = propsThisIgroup_[index].size();
+			for (SizeType j = 0; j < m; ++j) {
+				if (propsThisIgroup_[index][j].target == target &&
+				        propsThisIgroup_[index][j].sector == sector)
+					return propsThisIgroup_[index][j].jgroup;
+			}
+
+			throw PsimagLite::RuntimeError("GroupsStruct: groupPrimeIndex\n");
 		}
 
 		SizeType additionalOffset(SizeType target, SizeType sector) const
 		{
-			throw PsimagLite::RuntimeError("GroupsStruct: additionalOffset()\n");
-		}
-
-		SizeType rows(SizeType group) const
-		{
-			throw PsimagLite::RuntimeError("GroupsStruct: rows()\n");
-			// return m[group].rows()
-		}
-
-		SizeType cols(SizeType group, SizeType target, SizeType sector) const
-		{
-			throw PsimagLite::RuntimeError("GroupsStruct: cols()\n");
-			// find jgroup, return size for this jgroup
+			return additionalOffsets_(target, sector);
 		}
 
 		SizeType size() const
 		{
-			throw PsimagLite::RuntimeError("GroupsStruct: size()\n");
+			return seenGroups_.size();
 		}
 
 		bool expandSys() const
@@ -233,17 +241,15 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 
 	private:
 
-		void pushInternal(SizeType igroup,
-		                  SizeType jgroup)
+		SizeType groupIndex(SizeType igroup) const
 		{
-			err("GroupsStruct: pushInternal\n");
+			typename VectorSizeType::const_iterator it = std::find(seenGroups_.begin(),
+			                                                       seenGroups_.end(),
+			                                                       igroup);
+			assert(it != seenGroups_.end());
+			return it - seenGroups_.begin();
 		}
 
-		void addToGroup(SizeType groupIndex,
-		                SizeType jgroup)
-		{
-			err("GroupsStruct: addToGroup\n");
-		}
 
 		const LeftRightSuperType& lrs_;
 		SizeType direction_;
@@ -251,6 +257,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 		typename PsimagLite::Vector<VectorPropsOfGroupType>::Type propsThisIgroup_;
 		// TODO: Move matrix out
 		VectorMatrixType m_;
+		MatrixSizeType additionalOffsets_;
 	};
 
 	typedef GroupsStruct GroupsStructType;
@@ -284,13 +291,12 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 			MatrixType& matrix = allTargets_.matrix(groupBig);
 			SizeType m = v_.sector(sector_);
 			SizeType offset = v_.offset(m);
-			SizeType rows = allTargets_.rows(groupBig);
-			SizeType cols = allTargets_.cols(target_, sector_, groupBig);
-
 			SizeType nl = allTargets_.basis().size();
 			SizeType rowOffset = allTargets_.basis().partition(groupBig);
+			SizeType rows = allTargets_.basis().partition(groupBig + 1) - rowOffset;
 			SizeType groupSmall = allTargets_.groupPrimeIndex(target_, sector_, groupBig);
 			SizeType colOffset = allTargets_.basisPrime().partition(groupSmall);
+			SizeType cols = allTargets_.basisPrime().partition(groupSmall + 1) - colOffset;
 			SizeType additionalOffset = allTargets_.additionalOffset(target_, sector_);
 
 			for (SizeType ind = 0; ind < rows; ++ind) {
@@ -351,7 +357,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 
 			const BasisType& basis = allTargets_.basis();
 
-			SizeType igroup = allTargets_.groupIndex(ipatch);
+			SizeType igroup = allTargets_.groupFromIndex(ipatch);
 			SizeType offset = basis.partition(igroup);
 			SizeType partSize = basis.partition(igroup + 1) - offset;
 			blockDiagonalMatrix_.setBlock(igroup, offset, m);
@@ -399,6 +405,7 @@ public:
 		typename GenIjPatchType::LeftOrRightEnumType dir2 =
 		        (p.direction == ProgramGlobals::EXPAND_SYSTEM) ?
 		            GenIjPatchType::RIGHT : GenIjPatchType::LEFT;
+		SizeType maxSectors = 0;
 
 		for (SizeType x = 0; x  < targets; ++x) {
 			SizeType x2 = (target.includeGroundStage() && x > 0 ) ? x - 1 : x;
@@ -407,6 +414,7 @@ public:
 			            target.gs() : target(x2);
 
 			SizeType sectors = v.sectors();
+			if (maxSectors < sectors) maxSectors = sectors;
 			for (SizeType sector = 0; sector < sectors; ++sector) {
 				SizeType m = v.sector(sector);
 				int state = lrs_.super().partition(m);
@@ -421,7 +429,7 @@ public:
 			}
 		}
 
-		allTargets_.finalize();
+		allTargets_.finalize(targets, maxSectors);
 
 		{
 			PsimagLite::OstringStream msg;
