@@ -91,7 +91,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename BaseType::BuildingBlockType MatrixType;
 	typedef PsimagLite::Matrix<SizeType> MatrixSizeType;
-	typedef typename PsimagLite::Vector<MatrixType*>::Type MatrixVectorType;
+	typedef typename PsimagLite::Vector<MatrixType*>::Type VectorMatrixType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
@@ -107,6 +107,18 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
 	class GroupsStruct {
+
+		struct PropsOfGroup {
+			PropsOfGroup(SizeType t, SizeType s, SizeType j)
+			    : target(t), sector(s), jgroup(j)
+			{}
+
+			SizeType target;
+			SizeType sector;
+			SizeType jgroup;
+		};
+
+		typedef typename PsimagLite::Vector<PropsOfGroup>::Type VectorPropsOfGroupType;
 
 	public:
 
@@ -124,23 +136,48 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 			                                                 seenGroups_.end(),
 			                                                 igroup);
 			if (it == seenGroups_.end()) { // No --> create group
+				SizeType index = seenGroups_.size();
 				seenGroups_.push_back(igroup);
-				pushInternal(igroup,jgroup);
+				// included repeted jgroups here
+				assert(index < propsThisIgroup_.size());
+				propsThisIgroup_[index].push_back(PropsOfGroup(target, sector, jgroup));
+
 			} else { //  Yes, add to group
-				SizeType groupIndex = it - seenGroups_.begin();
-				addToGroup(groupIndex, jgroup);
+				SizeType index = it - seenGroups_.begin();
+				assert(index < propsThisIgroup_.size());
+				propsThisIgroup_[index].push_back(PropsOfGroup(target, sector, jgroup));
 			}
 		}
 
 		void finalize()
 		{
-			err("GroupsStruct: finalize\n");
+			SizeType n = seenGroups_.size();
+			assert(n == propsThisIgroup_.size());
+			for (SizeType i = 0; i < n; ++i) {
+				SizeType igroup = seenGroups_[i];
+				SizeType offset = this->basis().partition(igroup);
+				SizeType rows = this->basis().partition(igroup + 1) - offset;
+				SizeType cols = 0;
+				SizeType m = propsThisIgroup_[i].size();
+				for (SizeType j = 0; j < m; ++j) {
+					SizeType jgroup = propsThisIgroup_[i][j].jgroup;
+					SizeType joffset = this->basisPrime().partition(jgroup);
+					SizeType jsize = this->basisPrime().partition(jgroup + 1) - joffset;
+					cols += jsize;
+				}
+
+				m_[i] = new MatrixType(rows, cols);
+				m_[i]->setTo(0.0);
+			}
 		}
 
 		// TODO: Move matrix out
-		MatrixType& matrix(SizeType group)
+		MatrixType& matrix(SizeType igroup)
 		{
-			throw PsimagLite::RuntimeError("GroupsStruct: matrix()\n");
+			SizeType index = groupIndex(igroup);
+			assert(index < m_.size());
+			assert(m_[index]);
+			return *(m_[index]);
 		}
 
 		const BasisWithOperatorsType& basis() const
@@ -153,9 +190,13 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 			return (expandSys()) ? lrs_.right() : lrs_.left();
 		}
 
-		SizeType groupIndex(SizeType group) const
+		SizeType groupIndex(SizeType igroup) const
 		{
-			throw PsimagLite::RuntimeError("GroupsStruct: groupIndex()\n");
+			typename VectorSizeType::const_iterator it = std::find(seenGroups_.begin(),
+			                                                       seenGroups_.end(),
+			                                                       igroup);
+			assert(it != seenGroups_.end());
+			return it - seenGroups_.begin();
 		}
 
 		SizeType groupPrimeIndex(SizeType group, SizeType target, SizeType sector) const
@@ -207,6 +248,9 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 		const LeftRightSuperType& lrs_;
 		SizeType direction_;
 		VectorSizeType seenGroups_;
+		typename PsimagLite::Vector<VectorPropsOfGroupType>::Type propsThisIgroup_;
+		// TODO: Move matrix out
+		VectorMatrixType m_;
 	};
 
 	typedef GroupsStruct GroupsStructType;
@@ -258,7 +302,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 					SizeType ij = i + j * nl;
 
 					assert(i < nl);
-					assert(j < lrs_.right().size());
+					assert(j < allTargets_.basisPrime().size());
 
 					assert(ij < lrs_.super().permutationInverse().size());
 
