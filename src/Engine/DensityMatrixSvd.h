@@ -336,6 +336,8 @@ public:
 			            target.gs() : target(x2);
 
 			SizeType sectors = v.sectors();
+			if (sectors > 1)
+				err("useSvd doesn't yet work with vectorwithoffsets\n");
 			for (SizeType sector = 0; sector < sectors; ++sector) {
 				SizeType m = v.sector(sector);
 				int state = lrs.super().partition(m);
