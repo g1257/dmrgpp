@@ -358,6 +358,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 			const BasisType& basis = allTargets_.basis();
 			SizeType offset = basis.partition(igroup);
 			SizeType partSize = basis.partition(igroup + 1) - offset;
+			assert(m.rows() == m.cols());
 			blockDiagonalMatrix_.setBlock(igroup, offset, m);
 			SizeType x = eigsOnePatch.size();
 			if (x > partSize) x = partSize;
@@ -416,7 +417,8 @@ public:
 				const VectorSizeType& groups =  genIjPatch(dir1);
 				for (SizeType i = 0; i < groups.size(); ++i) {
 					SizeType igroup = groups[i];
-					SizeType jgroup = genIjPatch(dir2)[igroup];
+					assert(genIjPatch(dir2).size() > i);
+					SizeType jgroup = genIjPatch(dir2)[i];
 					allTargets_.push(igroup, jgroup, x, sector);
 				}
 			}
