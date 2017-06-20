@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_TRUNCATION_H
 
 #include "DensityMatrixLocal.h"
-#include "DensityMatrixSvd2.h"
+#include "DensityMatrixSvd.h"
 #include "DensityMatrixSu2.h"
 #include "Sort.h"
 #include "Concurrency.h"
