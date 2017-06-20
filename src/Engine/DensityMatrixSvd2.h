@@ -281,11 +281,12 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 		{
 			SizeType igroup = ijPatch_(GenIjPatchType::LEFT)[ipatch];
 			SizeType jgroup = ijPatch_(GenIjPatchType::RIGHT)[ipatch];
-			SizeType groupBig = (allTargets_.expandSys()) ? igroup : jgroup;
+			bool expandSys = allTargets_.expandSys();
+			SizeType groupBig = (expandSys) ? igroup : jgroup;
 			MatrixType& matrix = allTargets_.matrix(groupBig);
 			SizeType m = v_.sector(sector_);
 			SizeType offset = v_.offset(m);
-			SizeType nl = allTargets_.basis().size();
+			SizeType nl = lrs_.left().size();
 			SizeType rowOffset = allTargets_.basis().partition(groupBig);
 			SizeType rows = allTargets_.basis().partition(groupBig + 1) - rowOffset;
 			SizeType groupSmall = allTargets_.groupPrimeIndex(target_, sector_, groupBig);
@@ -299,10 +300,10 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 					SizeType i = ind + rowOffset;
 					SizeType j = jnd + colOffset;
 
-					SizeType ij = i + j * nl;
+					SizeType ij = (expandSys) ? i + j * nl : j + i*nl;
 
-					assert(i < nl);
-					assert(j < allTargets_.basisPrime().size());
+					assert(!expandSys || (i < nl && j < lrs_.right().size()));
+					assert(expandSys || (j < nl && i < lrs_.right().size()));
 
 					assert(ij < lrs_.super().permutationInverse().size());
 
@@ -358,6 +359,8 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 			const BasisType& basis = allTargets_.basis();
 			SizeType offset = basis.partition(igroup);
 			SizeType partSize = basis.partition(igroup + 1) - offset;
+			assert(m.rows() == partSize);
+			makeMatrixBigger(m);
 			assert(m.rows() == m.cols());
 			blockDiagonalMatrix_.setBlock(igroup, offset, m);
 			SizeType x = eigsOnePatch.size();
@@ -374,6 +377,26 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 
 	private:
 
+		void makeMatrixBigger(MatrixType& m) const
+		{
+			SizeType rows = m.rows();
+			SizeType cols = m.cols();
+			if (rows == cols) return;
+
+			SizeType max = std::max(rows, cols);
+			MatrixType m2(max, max);
+			m2.setTo(0.0);
+			for (SizeType i = 0; i < max; ++i) {
+				if (i >= rows) continue;
+				for (SizeType j = 0; j < max; ++j) {
+					if (j >= cols) continue;
+					m2(i, j) = m(i, j);
+				}
+			}
+
+			m = m2;
+		}
+
 		BlockDiagonalMatrixType& blockDiagonalMatrix_;
 		GroupsStructType& allTargets_;
 		VectorRealType& eigs_;
@@ -389,7 +412,7 @@ public:
 	      lrs_(lrs),
 	      params_(p),
 	      allTargets_(lrs, p.direction),
-	      data_(allTargets_.basis().size(), allTargets_.basis().partition()-1)
+	      data_(allTargets_.basis())
 	{
 		SizeType oneOrZero = (target.includeGroundStage()) ? 1 : 0;
 		SizeType targets = oneOrZero + target.size(); // Number of targets;

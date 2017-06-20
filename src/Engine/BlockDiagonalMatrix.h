@@ -190,6 +190,15 @@ public:
 		offsets_[blocks]=rank;
 	}
 
+	template<typename SomeBasisType>
+	BlockDiagonalMatrix(const SomeBasisType& basis)
+	    : rank_(basis.size()), offsets_(basis.partition()), data_(offsets_.size() - 1)
+	{
+		SizeType n = offsets_.size();
+		for (SizeType i = 0; i < n; ++i)
+			offsets_[i] = basis.partition(i);
+	}
+
 	void setTo(FieldType value)
 	{
 		SizeType n = data_.size();
@@ -238,6 +247,7 @@ public:
 			if (k+1 < offsets_.size() && offsets_[k+1] <= i)
 				++k;
 			SizeType end = (k + 1 < offsets_.size()) ? offsets_[k + 1] : rank_;
+			if (data_[k].rows() == 0 || data_[k].cols() == 0) continue;
 			for (SizeType j = offsets_[k]; j < end; ++j) {
 				fm.pushValue(data_[k](i-offsets_[k],j-offsets_[k]));
 				fm.pushCol(j);
@@ -249,7 +259,7 @@ public:
 		fm.checkValidity();
 	}
 
-	MatrixInBlockTemplate operator()(SizeType i) const
+	const MatrixInBlockTemplate& operator()(SizeType i) const
 	{
 		assert(i < data_.size());
 		return data_[i];

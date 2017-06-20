@@ -181,6 +181,7 @@ public:
 
 			data_.setBlock(m,data_.offsets(m),data_(p));
 		}
+
 		if (verbose_) std::cerr<<"After diagonalise\n";
 
 		if (debug_) areAllMsEqual(pBasis_);
@@ -219,7 +220,6 @@ private:
 			if (m==p) continue;
 			//is data_(m)==data_(p) ?
 			check(m,data_(m),p,data_(p));
-
 		}
 	}
 
