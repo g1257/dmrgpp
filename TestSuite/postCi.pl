@@ -76,68 +76,72 @@ for (my $i = 0; $i < $total; ++$i) {
 sub procTest
 {
 	my ($n,$workdir,$golddir) = @_;
-	procData($n,$workdir,$golddir);
+	my %newValues;
+	my %oldValues;
+	procCout(\%newValues, $n,$workdir);
+	procCout(\%oldValues, $n, $golddir);
+	compareValues(\%newValues, \%oldValues, $n);
 	procMemcheck($n);
 }
 
-sub procData
+sub procCout
 {
-	my ($n,$workdir,$golddir) = @_;
-	my $file1 = "$workdir/data$n.txt";
-	my $file2 = "$golddir/data$n.txt";
-	if (!(-r "$file1")) {
-		print "|$n|: No $file1 produced\n";
+	my ($values, $n, $dir) = @_;
+	my $file = "$dir/runForinput$n.cout";
+	if (!(-r "$file")) {
+		print "|$n|: No $file found\n";
 		return;
 	}
 
-	if (!(-r "$file2")) {
-		print "|$n|: No oracle $file2 found\n";
-		return;
-	}
-
-	my $size1 = fileSize($file1);
-	my $size2 = fileSize($file2);
-	$size1 = $size2 if ($size2 > $size1);
-	if ($memory > 0 and $size2 > $memory) {
-		print STDERR "$0: File $file1 or $file2 is too big (ignoring test)\n";
-		return;
-	}
-
-	my $cmd = "diff $file1 $file2";
-	my @version;
-	my ($newEnergy, $oldEnergy);
-	my $maxEdiff = 0;
-	open(PIPE,"$cmd |") or return;
-	while (<PIPE>) {
+	open(FILE, "$file") or return;
+	my @energies;
+	my $counter = 0;
+	while (<FILE>) {
 		chomp;
-		if (/([\<\>]) DMRG\+\+ version (.*$)/) {
-			my $tmp = ($1 eq "<") ? 0 : 1;
-			$version[$tmp] = $2;
-			next if (!defined($version[0]) or !defined($version[1]));
-			print "|$n|: New Version $version[0], Old Version $version[1]\n";
+		if (/DMRG\+\+ version (.*$)/) {
+			$values->{"version"} = $1;
 			next;
 		}
 
-		if (/\< \#Energy=(.+$)/) {
-			$newEnergy = $1;
+		if (/.+Ground state energy= (.+$)/) {
+			push(@energies, $1);
 			next;
 		}
-
-		if (/\> \#Energy=(.+$)/ and defined($newEnergy)) {
-			$oldEnergy = $1;
-			my $tmp = $newEnergy-$oldEnergy;
-			print "|$n|: EnergyNew-EnergyOld=$tmp\n";
-			$tmp = abs($tmp);
-			$maxEdiff = $tmp if ($maxEdiff < $tmp);
-			undef($newEnergy);
-			next;
-		}
-
 	}
 
-	close(PIPE);
-	print "|$n|: MaxEnergyDiff = $maxEdiff\n" if ($maxEdiff > 0);
+	close(FILE);
+	$values->{"energies"} = \@energies;
+	$values->{"version"} = "UNDEFINED" unless (defined($values->{"version"}));
+
 }
+
+sub compareValues
+{
+	my ($newValues, $oldValues, $n) = @_;
+	my $v1 = $newValues->{"version"};
+	my $v2 = $oldValues->{"version"};
+	print "|$n|: New Version $v1, Old Version $v2\n";
+	my $maxEdiff = maxEnergyDiff($newValues->{"energies"}, $oldValues->{"energies"});
+	print "|$n|: MaxEnergyDiff = $maxEdiff\n";
+}
+
+sub maxEnergyDiff
+{
+	my ($eNew, $eOld) = @_;
+	return "NEW ENERGIES UNDEFINED" if (!defined($eNew));
+	return "OLD ENERGIES UNDEFINED" if (!defined($eOld));
+	my $n = scalar(@$eNew);
+	return "ENERGY SIZES DIFFERENT" if (scalar(@$eOld) != $n);
+	return "NO ENERGIES!" if ($n == 0);
+	my $maxEdiff = 0;
+	for (my $i = 0; $i < $n; ++$i) {
+		my $tmp = abs($eNew->[$i] - $eOld->[$i]);
+		$maxEdiff = $tmp if ($tmp > $maxEdiff);
+ 	}
+
+	return "$maxEdiff [out of $n]";
+}
+
 
 sub procMemcheck
 {
