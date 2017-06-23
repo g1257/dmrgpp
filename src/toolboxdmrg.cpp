@@ -14,28 +14,71 @@ typedef float RealType;
 typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
 typedef Dmrg::ParametersDmrgSolver<RealType,InputNgType::Readable>
 ParametersDmrgSolverType;
-typedef Dmrg::ToolBox<ParametersDmrgSolverType> ToolBoxType;
+typedef PsimagLite::Concurrency ConcurrencyType;
 
 void usage(const PsimagLite::String& name)
 {
 	std::cerr<<"USAGE is "<<name<<" -f filename -a action [-s] [-p precision]\n";
 }
 
+struct ToolOptions {
+
+	ToolOptions()
+	    : extraOptions("lowest eigenvalue"), shortoption(false)
+	{}
+
+	PsimagLite::String filename;
+	PsimagLite::String action;
+	PsimagLite::String extraOptions;
+	bool shortoption;
+};
+
+template<typename ComplexOrRealType>
+void main1(InputNgType::Readable& io,
+           PsimagLite::PsiApp application,
+           const ParametersDmrgSolverType& dmrgSolverParams,
+           const ToolOptions& toolOptions)
+{
+	typedef PsimagLite::Geometry<ComplexOrRealType,
+	        InputNgType::Readable,
+	        Dmrg::ProgramGlobals> GeometryType;
+	GeometryType geometry(io);
+
+	typedef Dmrg::ToolBox<ParametersDmrgSolverType, GeometryType> ToolBoxType;
+	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
+	typename ToolBoxType::ParametersForGrepType params(toolOptions.extraOptions,
+	                                                   toolOptions.shortoption);
+	typename ToolBoxType::ActionEnum act = ToolBoxType::actionCanonical(toolOptions.action);
+	if (act == ToolBoxType::ACTION_GREP) {
+		ToolBoxType::printGrep(toolOptions.filename, dmrgSolverParams.filename,params);
+	} else if (act == ToolBoxType::ACTION_FILES) {
+		ToolBoxType::files(toolOptions.filename, dmrgSolverParams,toolOptions.extraOptions);
+	} else if (act == ToolBoxType::ACTION_INPUT) {
+		std::cout<<io.data()<<"\n";
+	} else if (act == ToolBoxType::ACTION_ANALYSIS) {
+		PsimagLite::String str("Analyzing ");
+		str += toolOptions.filename;
+		std::cout<<str<<"\n";
+		ToolBoxType::analize(dmrgSolverParams, geometry, toolOptions.extraOptions);
+	} else {
+		std::cerr<<application.name();
+		std::cerr<<": Unknown action "<<toolOptions.action<<"\n";
+		std::cerr<<"\tSupported actions are "<<ToolBoxType::actions()<<"\n";
+	}
+}
+
 int main(int argc,char **argv)
 {
 	using namespace Dmrg;
 	PsimagLite::PsiApp application("toolboxdmrg",&argc,&argv,1);
-	PsimagLite::String filename;
-	PsimagLite::String action;
-	PsimagLite::String extraOptions = "lowest eigenvalue";
+	ToolOptions toolOptions;
 	int opt = 0;
 	int precision = 6;
-	bool shortoption = false;
 	bool versionOnly = false;
 	while ((opt = getopt(argc, argv,"f:p:a:E:sV")) != -1) {
 		switch (opt) {
 		case 'f':
-			filename = optarg;
+			toolOptions.filename = optarg;
 			break;
 		case 'p':
 			precision = atoi(optarg);
@@ -43,13 +86,13 @@ int main(int argc,char **argv)
 			std::cerr.precision(precision);
 			break;
 		case 'a':
-			action = optarg;
+			toolOptions.action = optarg;
 			break;
 		case 'E':
-			extraOptions = optarg;
+			toolOptions.extraOptions = optarg;
 			break;
 		case 's':
-			shortoption = true;
+			toolOptions.shortoption = true;
 			break;
 		case 'V':
 			versionOnly = true;
@@ -61,14 +104,12 @@ int main(int argc,char **argv)
 	}
 
 	//sanity checks here
-	if (filename=="" || action == "") {
+	if (toolOptions.filename=="" || toolOptions.action == "") {
 		if (!versionOnly) {
 			usage(application.name());
 			return 1;
 		}
 	}
-
-	typedef PsimagLite::Concurrency ConcurrencyType;
 
 	// print license
 	if (ConcurrencyType::root()) {
@@ -81,12 +122,13 @@ int main(int argc,char **argv)
 
 	InputCheck inputCheck;
 
-	if (action == "files") {
-		if (extraOptions == "") extraOptions = "list";
-		inputCheck.checkFileOptions(extraOptions);
+	if (toolOptions.action == "files") {
+		if (toolOptions.extraOptions == "")
+			toolOptions.extraOptions = "list";
+		inputCheck.checkFileOptions(toolOptions.extraOptions);
 	}
 
-	InputNgType::Writeable ioWriteable(filename,
+	InputNgType::Writeable ioWriteable(toolOptions.filename,
 	                                   inputCheck,
 	                                   "#InputStartsHere",
 	                                   "#InputEndsHere");
@@ -96,19 +138,9 @@ int main(int argc,char **argv)
 	bool earlyExit = true;
 	ParametersDmrgSolverType dmrgSolverParams(io,earlyExit);
 
-	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
-	ToolBoxType::ParametersForGrepType params(extraOptions, shortoption);
-	if (ToolBoxType::actionCanonical(action) == ToolBoxType::ACTION_GREP) {
-		ToolBoxType::printGrep(filename, dmrgSolverParams.filename,params);
-	} else if (ToolBoxType::actionCanonical(action) == ToolBoxType::ACTION_FILES) {
-		ToolBoxType::files(filename, dmrgSolverParams,extraOptions);
-	} else if (ToolBoxType::actionCanonical(action) == ToolBoxType::ACTION_INPUT) {
-		std::cout<<io.data()<<"\n";
-	} else {
-		std::cerr<<application.name();
-		std::cerr<<": Unknown action "<<action<<"\n";
-		std::cerr<<"\tSupported actions are "<<ToolBoxType::actions()<<"\n";
-		return 1;
-	}
+	if (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos)
+		main1<std::complex<RealType> >(io, application, dmrgSolverParams, toolOptions);
+	else
+		main1<RealType>(io, application, dmrgSolverParams, toolOptions);
 } // main
 

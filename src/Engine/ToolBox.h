@@ -85,10 +85,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include "Geometry/Geometry.h"
 
 namespace Dmrg {
 
-template<typename DmrgParametersType>
+template<typename DmrgParametersType, typename GeometryType>
 class ToolBox  {
 
 	typedef ArchiveFiles<DmrgParametersType> ArchiveFilesType;
@@ -161,7 +162,11 @@ class ToolBox  {
 
 public:
 
-	enum ActionEnum {ACTION_UNKNOWN, ACTION_GREP, ACTION_FILES, ACTION_INPUT};
+	enum ActionEnum {ACTION_UNKNOWN,
+		             ACTION_GREP,
+		             ACTION_FILES,
+		             ACTION_INPUT,
+		             ACTION_ANALYSIS};
 
 	typedef typename GrepForLabel::ParametersType ParametersForGrepType;
 
@@ -171,13 +176,13 @@ public:
 		        || action == "Energies" || action == "grep") return ACTION_GREP;
 		if (action == "files") return ACTION_FILES;
 		if (action == "input") return ACTION_INPUT;
-
+		if (action == "analysis" || action == "analyze") return ACTION_ANALYSIS;
 		return ACTION_UNKNOWN;
 	}
 
 	static PsimagLite::String actions()
 	{
-		return "energies | grep | files | input";
+		return "energies | grep | files | input |analysis";
 	}
 
 	static void printGrep(PsimagLite::String inputfile,
@@ -212,11 +217,19 @@ public:
 		}
 	}
 
+	static void analize(const DmrgParametersType& solverParams,
+	                    const GeometryType& geometry,
+	                    PsimagLite::String extraOptions)
+	{
+		PsimagLite::String g = "";//geometry.label();
+		std::cout<<"Geometry= "<<g<<"\n";
+	}
+
 private:
 
 	static void printGrepNoTar(PsimagLite::String inputfile,
-	                      PsimagLite::String,
-	                      ParametersForGrepType params)
+	                           PsimagLite::String,
+	                           ParametersForGrepType params)
 	{
 		std::ifstream fin(inputfile.c_str());
 		GrepForLabel::hook(fin,"",1,params);
