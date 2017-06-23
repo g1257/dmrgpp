@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <sys/stat.h>
 #include <unistd.h>
 #include "Geometry/Geometry.h"
+#include "PsimagLite.h"
 
 namespace Dmrg {
 
@@ -93,6 +94,7 @@ template<typename DmrgParametersType, typename GeometryType>
 class ToolBox  {
 
 	typedef ArchiveFiles<DmrgParametersType> ArchiveFilesType;
+	typedef std::pair<SizeType, PsimagLite::String> PairSizeStringType;
 
 	class GrepForLabel {
 
@@ -221,8 +223,10 @@ public:
 	                    const GeometryType& geometry,
 	                    PsimagLite::String extraOptions)
 	{
-		PsimagLite::String g = "";//geometry.label();
+		PairSizeStringType g = findLargestGeometry(geometry);
+		SizeType m = neededKeptStates(g, geometry, solverParams);
 		std::cout<<"Geometry= "<<g<<"\n";
+		std::cout<<"Needed m="<<m<<"\n";
 	}
 
 private:
@@ -234,6 +238,62 @@ private:
 		std::ifstream fin(inputfile.c_str());
 		GrepForLabel::hook(fin,"",1,params);
 	}
+
+	static PairSizeStringType findLargestGeometry(const GeometryType& geometry)
+	{
+		SizeType terms = geometry.terms();
+		assert(terms > 0);
+		PsimagLite::String g = geometry.label(0);
+		SizeType heaviestTerm = 0;
+		for (SizeType i = 1; i < terms; ++i) {
+			PsimagLite::String tmp = geometry.label(i);
+			if (geometryGreater(tmp, g)) {
+				g = tmp;
+				heaviestTerm = i;
+			}
+		}
+
+		return PairSizeStringType(heaviestTerm, g);
+	}
+
+	static bool geometryGreater(PsimagLite::String g1, PsimagLite::String g2)
+	{
+		if (g1 == "longchain") return false;
+		std::cerr<<g1<<" "<<g2<<"\n";
+		return true;
+	}
+
+	static SizeType neededKeptStates(PairSizeStringType g,
+	                                 const GeometryType& geometry,
+	                                 const DmrgParametersType& solverParams)
+	{
+		SizeType m = 0;
+		SizeType modelFactor = getModelFactor(solverParams.model);
+		SizeType n = geometry.numberOfSites();
+		if (g.second == "longchain") { // 1D
+			return modelFactor * n; // modelFactor * Lx
+		} else if (g.second == "ladder" || g.second == "ladderx") {
+			SizeType Lx = geometry.length(0, g.first);
+			SizeType Ly = geometry.length(1, g.first);
+			SizeType TwoToTheLy = (1 << Ly);
+			m = modelFactor*Lx*TwoToTheLy; // modelFactor * Lx * 2^Ly
+		} else {
+			err("neededKeptStates: unknown geometry" + g.second + "\n");
+		}
+
+		return m;
+	}
+
+	static SizeType getModelFactor(PsimagLite::String model)
+	{
+		if (model == "HubbardOneBand")
+			return 7;
+		if (model == "Heisenberg")
+			return 4; // correct for s
+		err("getModelFactor: unknown model" + model + "\n");
+		return 0;
+	}
+
 }; //class ToolBox
 
 } // namespace Dmrg
