@@ -1,53 +1,64 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
+#
 use strict;
+use warnings;
 
-my ($label)=@ARGV;
-my ($initial,$final);
+my ($input) = @ARGV;
+defined ($input) or die "USAGE: $0 input.inp\n";
 
-$label = "\ 2015\$" if (!defined($label));
+my $root = $input;
 
-while(<STDIN>) {
-	if (/$label/ and !defined($initial)) {
-		$initial = $_;
-		next;
+if ($root =~ /\.inp$/) {
+	$root =~ s/\.inp$//;
+} else {
+	$input .= ".inp";
+}
+
+my $cout = "runFor$root.cout";
+my $t = getRunTime($cout);
+
+print "WallTimeSeconds= $t\n";
+my $m = getMemory($cout);
+print "Memory=$m\n";
+
+sub readLabel
+{
+	my ($file, $label) = @_;
+	my $value;
+	open(FILE, "$file") or die "$0: Cannot open file $file : $!\n";
+	while (<FILE>) {
+		if (/^$label(.*$)/) {
+			$value = $1;
+			last;
+		}
 	}
-	if (/$label/) {
-		$final = $_;
-		last;
+
+	close(FILE);
+
+	defined($value) or die "$0: File $file does not contain label $label\n";
+	return $value;
+}
+
+sub getRunTime
+{
+	my ($file) = @_;
+	my $v1 = readLabel($file, "UnixTimeStart=");
+	my $v2 = readLabel($file, "UnixTimeEnd=");
+	return ($v2 - $v1);
+}
+
+sub getMemory
+{
+	my ($file) = @_;
+	open(FILE, "$file") or die "$0: Cannot open file $file : $!\n";
+	my $m = "UNDEFINED";
+	while (<FILE>) {
+		chomp;
+		if (/maximum was (.+$)/) {
+			$m = $1;
+		}
 	}
+
+	close(FILE);
+	return $m;
 }
-
-die "Undefined initial\n" if (!defined($initial));
-die "Undefined final\n" if (!defined($final));
-
-
-my $rt = getRealTime($initial,$final);
-print "$rt\n";
-
-sub getRealTime
-{
-	my ($i,$j)=@_;
-	my $ti = getTimeInSeconds($i);
-	my $tj = getTimeInSeconds($j);
-	return $tj-$ti;
-}
-
-sub getTimeInSeconds
-{
-	my ($t)=@_;
-	#Fri Nov 13 20:36:05 2009
-	my @temp = split(/ +/,$t);
-	die "Error in $t\n" if ($#temp<3);
-	return timeInSeconds($temp[3])+$temp[2]*86400;
-}
-
-sub timeInSeconds
-{
-	#20:36:05
-	my ($t)=@_;
-	my @temp = split(/:/,$t);
-	die "Error in $t (timeInSeconds)\n" if ($#temp<2);
-	return $temp[0]*3600 + $temp[1]*60 + $temp[2];
-}
-
-

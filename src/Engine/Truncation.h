@@ -284,7 +284,8 @@ private:
 		waveFunctionTransformation_.push(ftransform_,EXPAND_SYSTEM,lrsForWft);
 
 		msg<<"new size of basis="<<rSprime.size();
-		msg<<" transform is "<<ftransform_.row()<<" x "<<ftransform_.col();
+		msg<<" transform is "<<ftransform_.rows()<<" x "<<ftransform_.cols();
+		msg<<" with "<<ftransform_.nonZero()<<" non-zeroes";
 		progress_.printline(msg,std::cout);
 	}
 
