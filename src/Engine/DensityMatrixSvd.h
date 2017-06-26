@@ -365,13 +365,12 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 			MatrixType vt;
 			VectorRealType eigsOnePatch;
 
-			svd('S', m, eigsOnePatch, vt);
+			svd('A', m, eigsOnePatch, vt);
 
 			const BasisType& basis = allTargets_.basis();
 			SizeType offset = basis.partition(igroup);
 			SizeType partSize = basis.partition(igroup + 1) - offset;
 			assert(m.rows() == partSize);
-			makeMatrixBigger(m);
 			assert(m.rows() == m.cols());
 			blockDiagonalMatrix_.setBlock(igroup, offset, m);
 			SizeType x = eigsOnePatch.size();
@@ -387,26 +386,6 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 		}
 
 	private:
-
-		void makeMatrixBigger(MatrixType& m) const
-		{
-			SizeType rows = m.rows();
-			SizeType cols = m.cols();
-			if (rows == cols) return;
-
-			SizeType max = std::max(rows, cols);
-			MatrixType m2(max, max);
-			m2.setTo(0.0);
-			for (SizeType i = 0; i < max; ++i) {
-				if (i >= rows) continue;
-				for (SizeType j = 0; j < max; ++j) {
-					if (j >= cols) continue;
-					m2(i, j) = m(i, j);
-				}
-			}
-
-			m = m2;
-		}
 
 		BlockDiagonalMatrixType& blockDiagonalMatrix_;
 		GroupsStructType& allTargets_;
@@ -488,6 +467,17 @@ public:
 		                        allTargets_,
 		                        eigs);
 		threaded.loopCreate(parallelSvd);
+		for (SizeType i = 0; i < data_.blocks(); ++i) {
+			SizeType n = data_(i).rows();
+			if (n > 0) continue;
+			SizeType offset = allTargets_.basis().partition(i);
+			SizeType part = allTargets_.basis().partition(i + 1) - offset;
+			MatrixType m(part, part);
+			m.setTo(0.0);
+			for (SizeType j = 0; j < part; ++j)
+				m(j, j) = 1.0;
+			data_.setBlock(i, offset, m);
+		}
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
