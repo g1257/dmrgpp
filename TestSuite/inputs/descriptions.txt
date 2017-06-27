@@ -151,7 +151,10 @@ the "half filled" case). U=2
 #5010) Takes too long Hubbard model 1 orbital on a 12x12 square with m up to 10000.
 #It has 68 electrons up and 68 electrons down (or 4+4 "holes", 72+72 being
 #the "half filled" case). U=2
-#5001 to 5499 reserved for performance work
+#5020) Small input for performance testing
+#5030) Medium input for performance testing
+#5040) Large input for performance testing
+#5000 to 5499 reserved for performance work
 5500) gs for RIXS test
 5501) RIXS static
 5502) RIXS dynamic

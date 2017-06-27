@@ -1,0 +1,25 @@
+TotalNumberOfSites=16
+NumberOfTerms=1
+DegreesOfFreedom=1
+GeometryKind=ladder
+GeometryOptions=ConstantValues
+Connectors 1 1.0
+Connectors 1 1.0
+LadderLeg=2
+
+hubbardU	16   4.0 4.0 4.0 4.0 4.0 4.0 4.0 4.0
+                     4.0 4.0 4.0 4.0 4.0 4.0 4.0 4.0
+potentialV	32  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+		    0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+		     0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+		     0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+Model=HubbardOneBand
+SolverOptions=MatrixVectorKron,useSvd
+Version=version
+OutputFile=data5030.txt
+InfiniteLoopKeptStates=100
+TargetElectronsUp=6
+TargetElectronsDown=6
+FiniteLoops 4
+7 500 0 -14 500 0 14 500 0 -14 500 0
+Threads=1
