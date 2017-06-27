@@ -276,12 +276,14 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 		                 const VectorWithOffsetType& v,
 		                 SizeType target,
 		                 SizeType sector,
+		                 RealType sqrtW,
 		                 GroupsStructType& allTargets)
 		    : lrs_(lrs),
 		      ijPatch_(ijPatch),
 		      v_(v),
 		      target_(target),
 		      sector_(sector),
+		      sqrtW_(sqrtW),
 		      allTargets_(allTargets)
 		{}
 
@@ -322,7 +324,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 					if (r < offset || r >= offset + v_.effectiveSize(m))
 						continue;
 
-					matrix(ind, jnd + additionalOffset) +=  v_.slowAccess(r);
+					matrix(ind, jnd + additionalOffset) +=  sqrtW_*v_.slowAccess(r);
 				}
 			}
 		}
@@ -339,6 +341,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 		const VectorWithOffsetType& v_;
 		SizeType target_;
 		SizeType sector_;
+		RealType sqrtW_;
 		GroupsStructType& allTargets_;
 	};
 
@@ -503,11 +506,15 @@ private:
 		const VectorWithOffsetType& v = (target.includeGroundStage() && x == 0) ?
 		            target.gs() : target(x2);
 
-		addThisTarget2(x, v);
+		RealType weight = (target.includeGroundStage() && x == 0 ) ?
+		            target.gsWeight() : target.weight(x2);
+
+		addThisTarget2(x, v, sqrt(weight));
 	}
 
 	void addThisTarget2(SizeType x,
-	                    const VectorWithOffsetType& v)
+	                    const VectorWithOffsetType& v,
+	                    RealType sqrtW)
 	{
 		const BasisType& super = lrs_.super();
 		for (SizeType sector = 0; sector < v.sectors(); ++sector) {
@@ -523,6 +530,7 @@ private:
 			                                  v,
 			                                  x,
 			                                  sector,
+			                                  sqrtW,
 			                                  allTargets_);
 			threaded.loopCreate(parallelPsiSplit);
 		}
