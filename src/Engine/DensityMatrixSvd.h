@@ -481,6 +481,8 @@ public:
 				m(j, j) = 1.0;
 			data_.setBlock(i, offset, m);
 		}
+
+		data_.enforcePhase();
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,

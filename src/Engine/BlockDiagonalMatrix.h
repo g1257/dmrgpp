@@ -150,32 +150,32 @@ public:
 			}
 		}
 
+
+		static void enforcePhase(PsimagLite::Matrix<FieldType>& a)
+		{
+			SizeType cols = a.cols();
+			for (SizeType i = 0; i < cols; ++i) {
+				enforcePhase(a, i);
+			}
+		}
+
 	private:
 
-		void enforcePhase(FieldType* v,SizeType n)
+		static void enforcePhase(PsimagLite::Matrix<FieldType>& a, SizeType col)
 		{
-			FieldType sign1=0;
-			for (SizeType j=0;j<n;j++) {
-				if (PsimagLite::norm(v[j])>1e-6) {
-					if (PsimagLite::real(v[j])>0) sign1=1;
-					else sign1= -1;
-					break;
-				}
+			RealType sign1 = 0;
+			SizeType rows = a.rows();
+			for (SizeType j = 0; j < rows; ++j) {
+				RealType val = PsimagLite::norm(a(j, col));
+				if (val < 1e-6) continue;
+				sign1 = (val > 0) ? 1 : -1;
+				break;
 			}
+
+			assert(sign1 != 0);
 			// get a consistent phase
-			for (SizeType j=0;j<n;j++) v[j] *= sign1;
-		}
-
-		void enforcePhase(typename PsimagLite::Vector<FieldType>::Type& v)
-		{
-			enforcePhase(&(v[0]),v.size());
-		}
-
-		void enforcePhase(PsimagLite::Matrix<FieldType>& a)
-		{
-			FieldType* vpointer = &(a(0,0));
-			for (SizeType i=0;i<a.n_col();i++)
-				enforcePhase(&(vpointer[i*a.n_row()]),a.n_row());
+			for (SizeType j = 0; j < rows; ++j)
+				a(j, col) *= sign1;
 		}
 
 		BlockDiagonalMatrixType& C;
@@ -231,6 +231,13 @@ public:
 		data_[i] += m;
 	}
 
+	void enforcePhase()
+	{
+		SizeType n = data_.size();
+		for (SizeType i = 0; i < n; ++i)
+			LoopForDiag::enforcePhase(data_[i]);
+	}
+
 	int rank() const { return rank_; }
 
 	int offsets(int i) const { return offsets_[i]; }
@@ -249,7 +256,10 @@ public:
 			SizeType end = (k + 1 < offsets_.size()) ? offsets_[k + 1] : rank_;
 			if (data_[k].rows() == 0 || data_[k].cols() == 0) continue;
 			for (SizeType j = offsets_[k]; j < end; ++j) {
-				fm.pushValue(data_[k](i-offsets_[k],j-offsets_[k]));
+				FieldType val = data_[k](i-offsets_[k],j-offsets_[k]);
+				if (PsimagLite::norm(val) == 0)
+					continue;
+				fm.pushValue(val);
 				fm.pushCol(j);
 				counter++;
 			}
