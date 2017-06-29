@@ -101,6 +101,7 @@ public:
 	typedef BlockDiagonalMatrix<MatrixInBlockTemplate> BlockDiagonalMatrixType;
 	typedef typename PsimagLite::Real<FieldType>::Type RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	class LoopForDiag {
 
@@ -119,34 +120,36 @@ public:
 		{
 
 			for (SizeType m=0;m<C.blocks();m++) {
-				eigsForGather[m].resize(C.offsets(m+1)-C.offsets(m));
-				weights[m] =  C.offsets(m+1)-C.offsets(m);
+				eigsForGather[m].resize(C.offsetsRows(m+1)-C.offsetsRows(m));
+				weights[m] =  C.offsetsRows(m+1)-C.offsetsRows(m);
 			}
 
-			eigs.resize(C.rank());
+			assert(C.rows() == C.cols());
+			eigs.resize(C.rows());
 		}
 
 		SizeType tasks() const { return C.blocks(); }
 
 		void doTask(SizeType taskNumber, SizeType)
 		{
+			assert(C.rows() == C.cols());
 			SizeType m = taskNumber;
 			VectorRealType eigsTmp;
 			PsimagLite::diag(C.data_[m],eigsTmp,option);
 			enforcePhase(C.data_[m]);
-			for (int j=C.offsets(m);j< C.offsets(m+1);j++)
-				eigsForGather[m][j-C.offsets(m)] = eigsTmp[j-C.offsets(m)];
+			for (SizeType j = C.offsetsRows(m); j < C.offsetsRows(m+1); ++j)
+				eigsForGather[m][j-C.offsetsRows(m)] = eigsTmp[j-C.offsetsRows(m)];
 
 		}
 
 		void gather()
 		{
-			for (SizeType m=0;m<C.blocks();m++) {
-				for (int j=C.offsets(m);j< C.offsets(m+1);j++)
-					eigs[j]=eigsForGather[m][j-C.offsets(m)];
+			assert(C.rows() == C.cols());
+			for (SizeType m = 0; m < C.blocks(); ++m) {
+				for (SizeType j = C.offsetsRows(m);j < C.offsetsRows(m+1); ++j)
+					eigs[j]=eigsForGather[m][j-C.offsetsRows(m)];
 			}
 		}
-
 
 		static void enforcePhase(PsimagLite::Matrix<FieldType>& a)
 		{
@@ -182,18 +185,39 @@ public:
 		typename PsimagLite::Vector<SizeType>::Type weights;
 	};
 
-	BlockDiagonalMatrix(int rank,int blocks) : rank_(rank),offsets_(blocks+1),data_(blocks)
+	BlockDiagonalMatrix(SizeType rows,
+	                    SizeType cols,
+	                    SizeType blocks)
+	    : isSquare_(rows == cols),
+	      offsetsRows_(blocks + 1),
+	      offsetsCols_(blocks+1),
+	      data_(blocks)
 	{
-		offsets_[blocks]=rank;
+		offsetsRows_[blocks] = rows;
+		offsetsCols_[blocks] = cols;
+	}
+
+	BlockDiagonalMatrix(SizeType rowsOrCols,
+	                    SizeType blocks)
+	    : isSquare_(true),
+	      offsetsRows_(blocks + 1),
+	      offsetsCols_(blocks+1),
+	      data_(blocks)
+	{
+		offsetsRows_[blocks] = offsetsRows_[blocks] = rowsOrCols;
 	}
 
 	template<typename SomeBasisType>
 	BlockDiagonalMatrix(const SomeBasisType& basis)
-	    : rank_(basis.size()), offsets_(basis.partition()), data_(offsets_.size() - 1)
+	    : isSquare_(true),
+	      offsetsRows_(basis.partition()),
+	      offsetsCols_(basis.partition()),
+	      data_(basis.partition() - 1)
 	{
-		SizeType n = offsets_.size();
+		SizeType n = offsetsRows_.size();
+		assert(n == offsetsCols_.size());
 		for (SizeType i = 0; i < n; ++i)
-			offsets_[i] = basis.partition(i);
+			offsetsRows_[i] = offsetsCols_[i] = basis.partition(i);
 	}
 
 	void setTo(FieldType value)
@@ -208,18 +232,21 @@ public:
 
 	void operator+=(const BlockDiagonalMatrixType& m)
 	{
+		mustBeSquare("operator+=");
 		BlockDiagonalMatrixType c;
-		if (offsets_.size()<m.blocks()) operatorPlus(c,*this,m);
+		if (offsetsRows_.size() < m.blocks())
+			operatorPlus(c,*this,m);
 		else operatorPlus(c,m,*this);
 		*this = c;
 	}
 
 	void setBlock(SizeType i,int offset,MatrixInBlockTemplate const &m)
 	{
-		assert(i<data_.size());
+		mustBeSquare("operator+=");
+		assert(i < data_.size());
 		data_[i]=m;
-		assert(i<offsets_.size());
-		offsets_[i]=offset;
+		assert(i < offsetsRows_.size() && i < offsetsCols_.size());
+		offsetsRows_[i] = offsetsCols_[i] = offset;
 	}
 
 	void sumBlock(SizeType i,MatrixInBlockTemplate const &m)
@@ -235,25 +262,48 @@ public:
 			LoopForDiag::enforcePhase(data_[i]);
 	}
 
-	int rank() const { return rank_; }
+	SizeType rows() const
+	{
+		SizeType n = offsetsRows_.size();
+		assert(n > 0);
+		return offsetsRows_[n - 1];
+	}
 
-	int offsets(int i) const { return offsets_[i]; }
+	SizeType cols() const
+	{
+		SizeType n = offsetsCols_.size();
+		assert(n > 0);
+		return offsetsCols_[n - 1];
+	}
+
+	SizeType offsetsRows(SizeType i) const
+	{
+		assert(i < offsetsRows_.size());
+		return offsetsRows_[i];
+	}
+
+	SizeType offsetsCols(SizeType i) const
+	{
+		assert(i < offsetsCols_.size());
+		return offsetsCols_[i];
+	}
 
 	SizeType blocks() const { return data_.size(); }
 
 	void toSparse(PsimagLite::CrsMatrix<FieldType>& fm) const
 	{
-		fm.resize(rank_, rank_);
+		mustBeSquare("operator+=");
+		fm.resize(rows(), cols());
 		SizeType counter=0;
 		SizeType k = 0;
-		for (int i = 0; i < rank_; ++i) {
+		for (SizeType i = 0; i < rows(); ++i) {
 			fm.setRow(i,counter);
-			if (k+1 < offsets_.size() && offsets_[k+1] <= i)
+			if (k+1 < offsetsRows_.size() && offsetsRows_[k+1] <= i)
 				++k;
-			SizeType end = (k + 1 < offsets_.size()) ? offsets_[k + 1] : rank_;
+			SizeType end = (k + 1 < offsetsRows_.size()) ? offsetsRows_[k + 1] : cols();
 			if (data_[k].rows() == 0 || data_[k].cols() == 0) continue;
-			for (SizeType j = offsets_[k]; j < end; ++j) {
-				FieldType val = data_[k](i-offsets_[k],j-offsets_[k]);
+			for (SizeType j = offsetsRows_[k]; j < end; ++j) {
+				FieldType val = data_[k](i-offsetsRows_[k],j-offsetsRows_[k]);
 				if (PsimagLite::norm(val) == 0)
 					continue;
 				fm.pushValue(val);
@@ -262,7 +312,7 @@ public:
 			}
 		}
 
-		fm.setRow(rank_, counter);
+		fm.setRow(rows(), counter);
 		fm.checkValidity();
 	}
 
@@ -313,26 +363,17 @@ public:
 		}
 	}
 
-	template<class MatrixInBlockTemplate2>
-	friend std::ostream &operator<<(std::ostream &s,
-	                                const BlockDiagonalMatrix<MatrixInBlockTemplate2>& A)
-	{
-		for (SizeType m=0;m<A.blocks();m++) {
-			int nrank = A.offsets(m+1)-A.offsets(m);
-			s<<"block number "<<m<<" has rank "<<nrank<<"\n";
-			s<<A.data_[m];
-		}
-
-		return s;
-	}
-
 private:
 
-	int rank_; //the rank of this matrix
-	//starting of diagonal offsets for each block
-	typename PsimagLite::Vector<int>::Type offsets_;
-	// data on each block
+	void mustBeSquare(PsimagLite::String msg) const
+	{
+		if (isSquare_) return;
+		err("BlockDiagonalMatrix::" + msg + " must be square\n");
+	}
 
+	bool isSquare_;
+	VectorSizeType offsetsRows_;
+	VectorSizeType offsetsCols_;
 	typename PsimagLite::Vector<MatrixInBlockTemplate>::Type data_;
 }; // class BlockDiagonalMatrix
 

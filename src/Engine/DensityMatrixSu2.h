@@ -179,7 +179,7 @@ public:
 			SizeType p = mMaximal_[m];
 			if (SizeType(m)==p) continue; // we already did these ones
 
-			data_.setBlock(m,data_.offsets(m),data_(p));
+			data_.setBlock(m,data_.offsetsRows(m),data_(p));
 		}
 
 		if (verbose_) std::cerr<<"After diagonalise\n";
@@ -346,15 +346,15 @@ private:
 		if (bp1.n_row()!=bp2.n_row()) {
 			std::cerr<<"row size different "<<bp1.n_row()<<"!="<<bp2.n_row()<<"\n";
 			std::cerr<<"p1="<<p1<<" p2="<<p2<<"\n";
-			std::cerr<<data_<<"\n";
 			throw PsimagLite::RuntimeError("Density Matrix Check: failed\n");
 		}
+
 		if (bp1.n_col()!=bp2.n_col()) {
 			std::cerr<<"col size different "<<bp1.n_col()<<"!="<<bp2.n_col()<<"\n";
 			std::cerr<<"p1="<<p1<<" p2="<<p2<<"\n";
-			std::cerr<<data_<<"\n";
 			throw PsimagLite::RuntimeError("Density Matrix Check: failed\n");
 		}
+
 		if (!debug_) return;
 
 		for (SizeType i=0;i<bp1.n_row();i++) {
