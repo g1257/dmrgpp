@@ -102,6 +102,7 @@ public:
 	typedef typename PsimagLite::Real<FieldType>::Type RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef PsimagLite::Vector<int>::Type VectorIntType;
 
 	class LoopForDiag {
 
@@ -242,7 +243,7 @@ public:
 
 	void setBlock(SizeType i,int offset,MatrixInBlockTemplate const &m)
 	{
-		mustBeSquare("operator+=");
+		mustBeSquare("setBlock");
 		assert(i < data_.size());
 		data_[i]=m;
 		assert(i < offsetsRows_.size() && i < offsetsCols_.size());
@@ -260,6 +261,21 @@ public:
 		SizeType n = data_.size();
 		for (SizeType i = 0; i < n; ++i)
 			LoopForDiag::enforcePhase(data_[i]);
+	}
+
+	// rows aren't affected, columns may be truncated
+	void truncate(const VectorSizeType& removedIndices2)
+	{
+		if (removedIndices2.size() == 0) return;
+
+		mustBeSquare("truncate");
+		SizeType n = data_.size();
+		VectorIntType remap(cols(), -1);
+		computeRemap(remap, removedIndices2);
+		VectorSizeType offsetsOld = offsetsCols_;
+		for (SizeType i = 0; i < n; ++i)
+			truncate(i, remap, offsetsOld);
+		isSquare_ = (rows() == cols());
 	}
 
 	SizeType rows() const
@@ -292,18 +308,19 @@ public:
 
 	void toSparse(PsimagLite::CrsMatrix<FieldType>& fm) const
 	{
-		mustBeSquare("operator+=");
-		fm.resize(rows(), cols());
+		SizeType r = rows();
+		SizeType c = cols();
+		fm.resize(r, c);
 		SizeType counter=0;
 		SizeType k = 0;
-		for (SizeType i = 0; i < rows(); ++i) {
-			fm.setRow(i,counter);
+		for (SizeType i = 0; i < r; ++i) {
+			fm.setRow(i, counter);
 			if (k+1 < offsetsRows_.size() && offsetsRows_[k+1] <= i)
 				++k;
-			SizeType end = (k + 1 < offsetsRows_.size()) ? offsetsRows_[k + 1] : cols();
+			SizeType end = (k + 1 < offsetsCols_.size()) ? offsetsCols_[k + 1] : c;
 			if (data_[k].rows() == 0 || data_[k].cols() == 0) continue;
-			for (SizeType j = offsetsRows_[k]; j < end; ++j) {
-				FieldType val = data_[k](i-offsetsRows_[k],j-offsetsRows_[k]);
+			for (SizeType j = offsetsCols_[k]; j < end; ++j) {
+				FieldType val = data_[k](i - offsetsRows_[k], j - offsetsCols_[k]);
 				if (PsimagLite::norm(val) == 0)
 					continue;
 				fm.pushValue(val);
@@ -312,7 +329,7 @@ public:
 			}
 		}
 
-		fm.setRow(rows(), counter);
+		fm.setRow(r, counter);
 		fm.checkValidity();
 	}
 
@@ -322,48 +339,83 @@ public:
 		return data_[i];
 	}
 
-	template<class MatrixInBlockTemplate2>
-	friend void operatorPlus(BlockDiagonalMatrix<MatrixInBlockTemplate2>& C,
-	                         const BlockDiagonalMatrix<MatrixInBlockTemplate2>& A,
-	                         const BlockDiagonalMatrix<MatrixInBlockTemplate2>& B)
-	{
-		SizeType i;
-		int counter=0;
-		C.rank_ = A.rank_;
-		C.offsets_=A.offsets_;
-		C.data_.resize(A.data_.size());
-		for (i=0;i<A.data_.size();i++) {
-			C.data_[i] = A.data_[i];
-
-			while (B.offsets_[counter] <A.offsets_[i+1]) {
-				accumulate(C.data_[i],B.data_[counter++]);
-				if (counter>=B.offsets_.size()) break;
-			}
-
-			if (counter>=B.offsets_.size() && i<A.offsets_.size()-1)
-				throw PsimagLite::RuntimeError("operatorPlus: restriction not met.\n");
-		}
-	}
-
-	template<class MatrixInBlockTemplate2>
-	friend void operatorPlus(BlockDiagonalMatrix<MatrixInBlockTemplate2>& A,
-	                         const BlockDiagonalMatrix<MatrixInBlockTemplate2>& B)
-	{
-		SizeType i;
-		int counter=0;
-
-		for (i=0;i<A.data_.size();i++) {
-			while (B.offsets_[counter] < A.offsets_[i+1]) {
-				accumulate(A.data_[i],B.data_[counter++]);
-				if (counter>=B.offsets_.size()) break;
-			}
-
-			if (counter>=B.offsets_.size() && i<A.offsets_.size()-1)
-				throw PsimagLite::RuntimeError("operatorPlus: restriction not met.\n");
-		}
-	}
-
 private:
+
+	void computeRemap(VectorIntType& remap,
+	                  const VectorSizeType& removedIndices2) const
+	{
+		VectorSizeType removedIndices = removedIndices2;
+		PsimagLite::Sort<VectorSizeType> sort;
+		VectorSizeType iperm(removedIndices.size(), 0);
+		sort.sort(removedIndices, iperm);
+		SizeType c = cols();
+		SizeType k = 0;
+		VectorSizeType::iterator b = removedIndices.begin();
+		for (SizeType j = 0; j < c; ++j) {
+			if (std::find(b, removedIndices.end(), j) != removedIndices.end())
+				continue;
+			remap[j] = k++;
+			b = removedIndices.begin() + k;
+		}
+	}
+
+	// rows aren't affected, columns may be truncated,
+	void truncate(SizeType ind, // <------ block to truncate
+	              const VectorIntType& remap,
+	              const VectorSizeType& offsetsOld)
+	{
+		assert(ind < data_.size());
+		MatrixInBlockTemplate& m = data_[ind];
+		assert(ind < offsetsOld.size());
+		SizeType offsetOld = offsetsOld[ind];
+		assert(ind < offsetsCols_.size());
+		SizeType offsetNew = offsetsCols_[ind];
+		SizeType c = m.cols();
+		SizeType counter = 0;
+		for (SizeType j = 0; j < c; ++j) {
+			assert(j + offsetOld < remap.size());
+			if (remap[j + offsetOld] >= 0)
+				continue;
+			++counter;
+		}
+
+		if (counter == 0) {
+			offsetsCols_[ind + 1] = offsetNew + c;
+			return;
+		}
+
+		if (counter == c) {
+			deleteThisColBlock(ind);
+			return;
+		}
+
+		assert(counter < c);
+
+		SizeType r = m.rows();
+		SizeType newCols = c - counter;
+		assert(newCols < c);
+		MatrixInBlockTemplate m2(r, newCols);
+		for (SizeType i = 0; i < r; ++i) {
+			for (SizeType j = 0; j < c; ++j) {
+				if (remap[j + offsetOld] < 0) continue;
+				SizeType cPrime = remap[j + offsetOld];
+				assert(offsetNew <= cPrime);
+				m2(i, cPrime - offsetNew) = m(i, j);
+			}
+		}
+
+		m = m2;
+		assert(ind + 1 < offsetsCols_.size());
+		offsetsCols_[ind + 1] = offsetNew + newCols;
+	}
+
+	void deleteThisColBlock(SizeType ind)
+	{
+		assert(ind < data_.size());
+		data_[ind].clear();
+		assert(ind + 1 < offsetsCols_.size());
+		offsetsCols_[ind + 1] = offsetsCols_[ind];
+	}
 
 	void mustBeSquare(PsimagLite::String msg) const
 	{

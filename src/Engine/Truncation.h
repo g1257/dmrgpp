@@ -268,10 +268,10 @@ private:
 		PsimagLite::OstringStream msg;
 		TruncationCache& cache = leftCache_;
 
-		cache.transform.toSparse(ftransform_);
 		PsimagLite::OstringStream msg0;
 		msg0<<"Truncating transform...";
-		utils::truncate(ftransform_,cache.removedIndices);
+		cache.transform.truncate(cache.removedIndices);
+		cache.transform.toSparse(ftransform_);
 		progress_.printline(msg0,std::cout);
 		rSprime.truncateBasis(ftransform_,
 		                      cache.eigs,
@@ -302,10 +302,10 @@ private:
 		PsimagLite::OstringStream msg;
 		TruncationCache& cache = rightCache_;
 
-		cache.transform.toSparse(ftransform_);
 		PsimagLite::OstringStream msg0;
 		msg0<<"Truncating transform...";
-		utils::truncate(ftransform_,cache.removedIndices);
+		cache.transform.truncate(cache.removedIndices);
+		cache.transform.toSparse(ftransform_);
 		progress_.printline(msg0,std::cout);
 
 		rEprime.truncateBasis(ftransform_,

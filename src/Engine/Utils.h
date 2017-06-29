@@ -145,51 +145,6 @@ truncateVector(SomeVectorType& v,
 	v=tmpVector;
 }
 
-template<class T>
-void truncate(PsimagLite::CrsMatrix<T> &A,
-              const PsimagLite::Vector<SizeType>::Type& removed)
-{
-	SizeType x=removed.size();
-	if (x==0) return;
-
-	SizeType nrow = A.row();
-
-	SizeType n = nrow;
-
-	assert(n>x);
-
-	PsimagLite::Vector<int>::Type remap(n);
-
-	//! find remapping
-	SizeType j=0;
-	for (SizeType i=0;i<n;i++) {
-		remap[i] = -1;
-		if (PsimagLite::isInVector(removed,i)>=0) continue;
-		remap[i]=j;
-		j++;
-	}
-	assert(j==n-x);
-
-	//! truncate
-	PsimagLite::CrsMatrix<T> B(nrow,nrow-x);
-	SizeType counter = 0;
-	for (SizeType i=0;i<nrow;i++) {
-		B.setRow(i,counter);
-		for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
-			j = A.getCol(k);
-			if (remap[j]<0) continue;
-			B.pushCol(remap[j]);
-			B.pushValue(A.getValue(k));
-			counter++;
-			//B(i,remap[j])=A(i,j);
-		}
-	}
-	B.setRow(nrow,counter);
-	B.checkValidity();
-	A=B;
-
-}
-
 template<typename SomeVectorType>
 static
 typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True,void>::Type
