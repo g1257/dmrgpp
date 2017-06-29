@@ -319,6 +319,7 @@ private:
 		waveFunctionTransformation_.push(ftransform_,EXPAND_ENVIRON,lrsForWft);
 		msg<<"new size of basis="<<rEprime.size();
 		msg<<" transform is "<<ftransform_.row()<<" x "<<ftransform_.col();
+		msg<<" with "<<ftransform_.nonZero()<<" non-zeroes";
 		progress_.printline(msg,std::cout);
 	}
 

@@ -205,7 +205,7 @@ public:
 	      offsetsCols_(blocks+1),
 	      data_(blocks)
 	{
-		offsetsRows_[blocks] = offsetsRows_[blocks] = rowsOrCols;
+		offsetsRows_[blocks] = offsetsCols_[blocks] = rowsOrCols;
 	}
 
 	template<typename SomeBasisType>
@@ -276,6 +276,7 @@ public:
 		for (SizeType i = 0; i < n; ++i)
 			truncate(i, remap, offsetsOld);
 		isSquare_ = (rows() == cols());
+		assert(cols() == rows() - removedIndices2.size());
 	}
 
 	SizeType rows() const
@@ -311,11 +312,11 @@ public:
 		SizeType r = rows();
 		SizeType c = cols();
 		fm.resize(r, c);
-		SizeType counter=0;
+		SizeType counter = 0;
 		SizeType k = 0;
 		for (SizeType i = 0; i < r; ++i) {
 			fm.setRow(i, counter);
-			if (k+1 < offsetsRows_.size() && offsetsRows_[k+1] <= i)
+			if (k + 1 < offsetsRows_.size() && offsetsRows_[k + 1] <= i)
 				++k;
 			SizeType end = (k + 1 < offsetsCols_.size()) ? offsetsCols_[k + 1] : c;
 			if (data_[k].rows() == 0 || data_[k].cols() == 0) continue;
@@ -325,7 +326,7 @@ public:
 					continue;
 				fm.pushValue(val);
 				fm.pushCol(j);
-				counter++;
+				++counter;
 			}
 		}
 
@@ -352,10 +353,12 @@ private:
 		SizeType k = 0;
 		VectorSizeType::iterator b = removedIndices.begin();
 		for (SizeType j = 0; j < c; ++j) {
-			if (std::find(b, removedIndices.end(), j) != removedIndices.end())
+			if (std::find(b, removedIndices.end(), j) != removedIndices.end()) {
+				++b;
 				continue;
+			}
+
 			remap[j] = k++;
-			b = removedIndices.begin() + k;
 		}
 	}
 
