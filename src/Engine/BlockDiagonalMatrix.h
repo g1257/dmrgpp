@@ -91,9 +91,6 @@ namespace Dmrg {
 
 // A block matrix class
 // Blocks can be of any type and are templated with the type MatrixInBlockTemplate
-//
-// Note: In reality, Parallelization is disabled here because a LAPACK call
-//        is needed and LAPACK is not necessarily thread safe.
 template<typename MatrixInBlockTemplate>
 class BlockDiagonalMatrix {
 
@@ -332,13 +329,18 @@ public:
 private:
 
 	int rank_; //the rank of this matrix
-	typename PsimagLite::Vector<int>::Type offsets_; //starting of diagonal offsets for each block
-	typename PsimagLite::Vector<MatrixInBlockTemplate>::Type data_; // data on each block
+	//starting of diagonal offsets for each block
+	typename PsimagLite::Vector<int>::Type offsets_;
+	// data on each block
 
+	typename PsimagLite::Vector<MatrixInBlockTemplate>::Type data_;
 }; // class BlockDiagonalMatrix
 
 // Companion Functions
 // Parallel version of the diagonalization of a block diagonal matrix
+// Note: In reality, Parallelization is disabled here because a LAPACK call
+//        is needed and LAPACK is not necessarily thread safe.
+// This function is NOT called by useSvd
 template<typename SomeVectorType,typename SomeFieldType>
 typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True,
 void>::Type
@@ -346,7 +348,8 @@ diagonalise(BlockDiagonalMatrix<PsimagLite::Matrix<SomeFieldType> >& C,
             SomeVectorType& eigs,
             char option)
 {
-	typedef typename BlockDiagonalMatrix<PsimagLite::Matrix<SomeFieldType> >::LoopForDiag LoopForDiagType;
+	typedef typename BlockDiagonalMatrix<PsimagLite::Matrix<SomeFieldType> >::LoopForDiag
+	        LoopForDiagType;
 	typedef PsimagLite::NoPthreadsNg<LoopForDiagType> ParallelizerType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	SizeType savedNpthreads = ConcurrencyType::npthreads;
