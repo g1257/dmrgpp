@@ -120,6 +120,8 @@ sub compareValues
 	my ($newValues, $oldValues, $n) = @_;
 	my $v1 = $newValues->{"version"};
 	my $v2 = $oldValues->{"version"};
+	defined($v1) or $v1 = "UNDEFINED";
+	defined($v2) or $v2 = "UNDEFINED";
 	print "|$n|: New Version $v1, Old Version $v2\n";
 	my $maxEdiff = maxEnergyDiff($newValues->{"energies"}, $oldValues->{"energies"});
 	print "|$n|: MaxEnergyDiff = $maxEdiff\n";
