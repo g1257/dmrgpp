@@ -431,8 +431,8 @@ private:
 	ProgressIndicatorType progress_;
 	RealType error_;
 	TransformType ftransform_;
-	TruncationCache leftCache_,rightCache_;
-
+	TruncationCache leftCache_;
+	TruncationCache rightCache_;
 }; // class Truncation
 
 } // namespace
