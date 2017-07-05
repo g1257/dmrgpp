@@ -54,7 +54,7 @@ public:
 
 	Braket(const ModelType& model,const PsimagLite::String& braket)
 	    : model_(model), braket_(2,""),savedString_(braket)
-	{		
+	{
 		VectorStringType vecStr;
 		PsimagLite::tokenizer(braket,vecStr,"|");
 
@@ -156,7 +156,7 @@ private:
 
 		OperatorType nup;
 		try {
-			nup = findOperator(opLabel);
+			nup = findOperator(opLabel, site);
 		} catch (std::exception& e) {
 			if (opLabel[0] == ':') {
 				std::cerr<<e.what();
@@ -220,7 +220,8 @@ private:
 		return site;
 	}
 
-	OperatorType findOperator(const PsimagLite::String& name) const
+	OperatorType findOperator(const PsimagLite::String& name,
+	                          SizeType site) const
 	{
 		if (name.length()<2 || name[0]!=':') {
 			PsimagLite::String str("OperatorInterpreter: syntax error for ");
@@ -230,9 +231,24 @@ private:
 
 		PsimagLite::String label = name.substr(1,name.length()-1);
 
+		replaceString(label, ttos(site));
 		PsimagLite::IoSimple::In io(label);
 
 		return OperatorType(io,model_,OperatorType::MUST_BE_NONZERO);
+	}
+
+	void replaceString(PsimagLite::String& str,
+	                   PsimagLite::String substr) const
+	{
+		/* Locate the substring to replace. */
+		size_t index = str.find('$');
+		if (index == PsimagLite::String::npos) return;
+
+		PsimagLite::String str1 = str.substr(0, index);
+		++index;
+		PsimagLite::String str2 = str.substr(index);
+
+		str = str1 + substr + str2;
 	}
 
 	const ModelType& model_;
