@@ -404,6 +404,7 @@ template<typename FieldType>
 FieldType operator*(const Dmrg::VectorWithOffset<FieldType>& v1,
                     const Dmrg::VectorWithOffset<FieldType>& v2)
 {
+	if (v1.m_ != v2.m_) return 0.0;
 	return (v1.data_ * v2.data_);
 }
 

@@ -1,9 +1,8 @@
-
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009, 2017, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 4.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -68,19 +67,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 */
-// END LICENSE BLOCK
+
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file TargetingCorrelations.h
+/*! \file TargetingInSitu.h
  *
  * Implements the multi-targetting for measuring
  * 2-point correlations in situ
  *
  */
 
-#ifndef TARGETING_CORRELATIONS_H
-#define TARGETING_CORRELATIONS_H
+#ifndef DMRG_TARGETING_IN_SITU_H
+#define DMRG_TARGETING_IN_SITU_H
 
 #include "ProgressIndicator.h"
 #include "BLAS.h"
@@ -96,7 +95,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingCorrelations : public TargetingBase<LanczosSolverType_,VectorWithOffsetType_> {
+class TargetingInSitu : public TargetingBase<LanczosSolverType_,VectorWithOffsetType_> {
 
 public:
 
@@ -127,8 +126,8 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
 	typedef typename BaseType::TargetingCommonType::VectorVectorWithOffsetType
-	                 VectorVectorWithOffsetType;
- 
+	VectorVectorWithOffsetType;
+
 	enum StageEnum {DISABLED,CONVERGING};
 
 	enum {
@@ -140,37 +139,36 @@ public:
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
 
-	TargetingCorrelations(const LeftRightSuperType& lrs,
-	                 const ModelType& model,
-	                 const WaveFunctionTransfType& wft,
-	                 const SizeType&,
-	                 InputValidatorType& io)
+	TargetingInSitu(const LeftRightSuperType& lrs,
+	                const ModelType& model,
+	                const WaveFunctionTransfType& wft,
+	                const SizeType&,
+	                InputValidatorType& io)
 	    : BaseType(lrs,model,wft,0),
 	      tstStruct_(io,model),
 	      wft_(wft),
-	      progress_("TargetingCorrelations"),
+	      progress_("TargetingInSitu"),
 	      gsWeight_(tstStruct_.gsWeight()),
 	      paramsForSolver_(io,"CorrelationsDmrg"),
 	      weightForContinuedFraction_(0),
 	      stage_(DISABLED)
 	{
-		SizeType n = model.geometry().numberOfSites();
-		this->common().init(&tstStruct_,n);
-		if (!wft.isEnabled())
-			throw PsimagLite::RuntimeError(" TargetingCorrelations needs an enabled wft\n");
 
 		if (tstStruct_.sites() == 0)
-			throw PsimagLite::RuntimeError("TST needs at least one TSPSite\n");
+			err("TargetingInSitu needs at least one TSPSite\n");
 
-		//SizeType n = model.geometry().numberOfSites();
-		//this->common().targetVectorsResize(n);
+		if (!wft.isEnabled())
+			err("TargetingInSitu needs an enabled wft\n");
+
+		this->common().init(&tstStruct_,tstStruct_.sites());
+
 		setWeights();
 	}
 
 	RealType weight(SizeType i) const
 	{
 		return (this->common().targetVectors(i).size() == 0) ?
-		      0 : weight_[i];
+		            0 : weight_[i];
 	}
 
 	RealType gsWeight() const
@@ -181,7 +179,7 @@ public:
 	SizeType size() const
 	{
 		return (stage_ == CONVERGING) ?
-		    this->common().targetVectors().size() : 0;
+		            this->common().targetVectors().size() : 0;
 	}
 
 	void evolve(RealType Eg,
@@ -262,11 +260,14 @@ private:
 		// if no apply operator at site and add into targetVectors[site]
 		// also wft everything
 		this->common().wftAll(i,site,direction);
-		this->common().applyOneOperator(loopNumber,
-		                                i,
-		                                site,
-		                                this->common().targetVectors(site),
-		                                direction);
+		int ind = tstStruct_.findIndexOfSite(site);
+		if (ind >= 0) {
+			this->common().applyOneOperator(loopNumber,
+			                                i,
+			                                site,
+			                                this->common().targetVectors(ind),
+			                                direction);
+		}
 
 		typename PsimagLite::Vector<SizeType>::Type block(1,site);
 		cocoon(block,direction);
@@ -296,26 +297,17 @@ private:
 	void cocoon(const BlockType& block,SizeType direction) const
 	{
 		const VectorVectorWithOffsetType& tv = this->common().targetVectors();
+		const VectorWithOffsetType& psi = this->common().psi();
 
 		assert(block.size() > 0);
 		SizeType site = block[0];
 		SizeType max = tv.size();
-		DenseMatrixType results(max,max);
 
-		if (max > 0) max--; // FIXME: include borders
-		for (SizeType i = 1; i < max; ++i) {  // FIXME: include borders
-			for (SizeType j = i; j < max; ++j) {
-				this->common().cocoon(direction,site,tv[i],"P"+ttos(i),tv[j],"P"+ttos(j));
-				results(i,j) = this->common().inSitu(site);
-			}
-		}
-
-		if (results.n_row() == 0 || results.n_col() == 0) return;
-		std::cout<<"TargetingCorrelations\n";
+		std::cout<<"TargetingInSitu\n";
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
-		for (SizeType i = 0; i < results.n_row(); ++i) {
-			for (SizeType j = 0; j < results.n_col(); ++j)
-				std::cout<<results(i,j)<<" ";
+		for (SizeType i = 0; i < max; ++i) {
+			this->common().cocoon(direction,site,psi,"gs",tv[i],"P"+ttos(i));
+			std::cout<<this->common().inSitu(site)<<" ";
 			std::cout<<"\n";
 		}
 
@@ -332,11 +324,11 @@ private:
 	DenseMatrixRealType reortho_;
 	RealType weightForContinuedFraction_;
 	StageEnum stage_;
-}; // class TargetingCorrelations
+}; // class TargetingInSitu
 
 template<typename LanczosSolverType, typename VectorWithOffsetType>
 std::ostream& operator<<(std::ostream& os,
-                         const TargetingCorrelations<LanczosSolverType,VectorWithOffsetType>&)
+                         const TargetingInSitu<LanczosSolverType,VectorWithOffsetType>&)
 {
 	os<<"DT=NothingToSeeHereYet\n";
 	return os;
@@ -344,5 +336,5 @@ std::ostream& operator<<(std::ostream& os,
 
 } // namespace
 /*@}*/
-#endif // TARGETING_CORRELATIONS_H
+#endif // DMRG_TARGETING_IN_SITU_H
 

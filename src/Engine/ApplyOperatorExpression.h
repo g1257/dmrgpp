@@ -101,6 +101,7 @@ class ApplyOperatorExpression {
 
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
+	static SizeType const DONT_MIX = TargetParamsType::DONT_MIX;
 
 public:
 
@@ -166,7 +167,8 @@ public:
 			if (count2 == 0) continue;
 			count += count2;
 
-			if (targetHelper_.tstStruct().concatenation() == PRODUCT) {
+			if (targetHelper_.tstStruct().concatenation() == PRODUCT
+			        || targetHelper_.tstStruct().concatenation() == DONT_MIX) {
 				phiOld = phiNew;
 			} else {
 				if (stage_[i] == OPERATOR) vectorSum += phiNew;
@@ -254,11 +256,13 @@ public:
 
 	VectorWithOffsetType& targetVectors(SizeType i) // <--- FIXME
 	{
+		assert(i < targetVectors_.size());
 		return targetVectors_[i];
 	}
 
 	const VectorWithOffsetType& targetVectors(SizeType i) const
 	{
+		assert(i < targetVectors_.size());
 		return targetVectors_[i];
 	}
 
@@ -359,11 +363,11 @@ public:
 		if (targetHelper_.tstStruct().startingLoops().size()>0 &&
 		        targetHelper_.tstStruct().startingLoops()[i]>loopNumber) return;
 
-		VectorWithOffsetType phiOld = psi_;
-		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
-		bool hasBeenApplied = (targetVectors_[site].size() > 0);
+		const bool hasBeenApplied = (phiNew.size() > 0);
 		if (hasBeenApplied) return;
 
+		VectorWithOffsetType phiOld = psi_;
+		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
 
 		BorderEnumType corner = (site == 0 || site == numberOfSites -1) ?
 			            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
@@ -395,7 +399,8 @@ public:
 	                  bool guessNonZeroSector)
 	{
 		if (guessNonZeroSector) {
-			if (targetHelper_.tstStruct().aOperators().size() == 1) {
+			if (targetHelper_.tstStruct().aOperators().size() == 1
+			        || targetHelper_.tstStruct().concatenation() == DONT_MIX) {
 				guessPhiSectors(phiNew,i,systemOrEnviron,site);
 			} else {
 				if (targetHelper_.tstStruct().useQns())

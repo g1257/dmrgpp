@@ -99,7 +99,7 @@ public:
 	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 
-	enum {PRODUCT,SUM};
+	enum ConcatEnum {PRODUCT, SUM, DONT_MIX};
 
 	enum {KRYLOV,RUNGE_KUTTA,SUZUKI_TROTTER};
 

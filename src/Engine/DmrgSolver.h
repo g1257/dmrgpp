@@ -96,6 +96,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingCorrectionVector.h"
 #include "TargetingMetts.h"
 #include "TargetingCorrelations.h"
+#include "TargetingInSitu.h"
 #include "TargetingRixsStatic.h"
 #include "TargetingRixsDynamic.h"
 #include "PsiBase64.h"
@@ -170,6 +171,7 @@ public:
 	typedef TargetingCorrection<LanczosSolverType,VectorWithOffsetType> TargetingCorrectionType;
 	typedef TargetingMetts<LanczosSolverType,VectorWithOffsetType> TargetingMettsType;
 	typedef TargetingCorrelations<LanczosSolverType,VectorWithOffsetType> TargetingCorrelationsType;
+	typedef TargetingInSitu<LanczosSolverType,VectorWithOffsetType> TargetingInSituType;
 	typedef TargetingRixsStatic<LanczosSolverType,VectorWithOffsetType> TargetingRixsStaticType;
 	typedef TargetingRixsDynamic<LanczosSolverType,VectorWithOffsetType> TargetingRixsDynamicType;
 	typedef PrinterInDetail<LeftRightSuperType> PrinterInDetailType;
@@ -273,6 +275,8 @@ public:
 			psi = new TargetingMettsType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting == "TargetingCorrelations") {
 			psi = new TargetingCorrelationsType(lrs_,model_,wft_,quantumSector_,ioIn_);
+		} else if (targeting == "TargetingInSitu") {
+			psi = new TargetingInSituType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting == "TargetingRixsStatic") {
 			psi = new TargetingRixsStaticType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting == "TargetingRixsDynamic") {

@@ -167,8 +167,9 @@ void mainLoop0(InputNgType::Readable& io,
 	if (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos &&
 	        targeting != "TimeStepTargetting" &&
 	        targeting != "GroundStateTargetting" &&
-		targeting != "TargetingCorrelations" &&
-		targeting != "CorrectionTargetting") {
+	        targeting != "TargetingCorrelations" &&
+	        targeting != "CorrectionTargetting" &&
+	        targeting != "TargetingInSitu") {
 		PsimagLite::String str("SolverOptions=useComplex not allowed for ");
 		str += targeting + "\n";
 		throw PsimagLite::RuntimeError(str);
@@ -328,7 +329,7 @@ int main(int argc, char *argv[])
 		dmrgSolverParams.options += ",noSaveWft,noSaveStacks,noSaveData";
 
 	bool setAffinities = (dmrgSolverParams.options.find("setAffinities")
-                                  != PsimagLite::String::npos);
+	                      != PsimagLite::String::npos);
 	ConcurrencyType::setOptions(dmrgSolverParams.nthreads, setAffinities);
 
 	registerSignals();

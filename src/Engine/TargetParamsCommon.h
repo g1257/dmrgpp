@@ -102,12 +102,10 @@ public:
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 
-	enum {PRODUCT,SUM};
-
 	TargetParamsCommon(InputValidatorType& io,const ModelType& model)
 	    : sites_(0),
 	      startingLoops_(0),
-	      concatenation_(PRODUCT),
+	      concatenation_(BaseType::PRODUCT),
 	      noOperator_(false),
 	      skipTimeZero_(false),
 	      isEnergyForExp_(false),
@@ -163,9 +161,11 @@ public:
 		//! Concatenation specifies what to do with
 		//! operators at different sites, add them or multiply them
 		if (productOrSum == "product") {
-			this->concatenation_ = PRODUCT;
+			this->concatenation_ = BaseType::PRODUCT;
 		} else if (productOrSum == "sum") {
-			this->concatenation_ = SUM;
+			this->concatenation_ = BaseType::SUM;
+		} else if (productOrSum == "dontmix") {
+			this->concatenation_ = BaseType::DONT_MIX;
 		} else {
 			PsimagLite::String s(__FILE__);
 			s += " : Unknown concatentation " + productOrSum + "\n";
@@ -215,6 +215,15 @@ public:
 	{
 		assert(i < sites_.size());
 		return sites_[i];
+	}
+
+	virtual int findIndexOfSite(SizeType site) const
+	{
+		VectorSizeType::const_iterator it = std::find(sites_.begin(),
+		                                              sites_.end(),
+		                                              site);
+		if (it == sites_.end()) return -1;
+		return it - sites_.begin();
 	}
 
 	virtual void setOperator(SizeType i, SizeType j, const OperatorType& op)
@@ -370,7 +379,7 @@ private:
 	//serializr normal startingLoops_
 	VectorSizeType startingLoops_;
 	//serializr normal concatenation_
-	SizeType concatenation_;
+	typename BaseType::ConcatEnum concatenation_;
 	//serializr normal noOperator_
 	bool noOperator_;
 	bool skipTimeZero_;

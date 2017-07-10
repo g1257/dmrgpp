@@ -373,10 +373,11 @@ public:
 		                       "MettsTargetting",
 		                       "TargetingAncilla",
 		                       "TargetingCorrelations",
+		                       "TargetingInSitu",
 		                       "TargetingRixsStatic",
 		                       "TargetingRixsDynamic"};
 
-		SizeType totalTargets = 11;
+		SizeType totalTargets = 12;
 
 		SizeType count = 0;
 		for (SizeType i = 0;i<totalTargets;++i) {
