@@ -944,6 +944,7 @@ void permute(CrsMatrix<S>& A,
 	A.resize(B.row(),B.col());
 
 	typename Vector<int>::Type permInverse(n);
+	assert(perm.size() == permInverse.size());
 	for (SizeType i=0;i<n;i++) permInverse[perm[i]]=i;
 
 	SizeType counter=0;
