@@ -355,13 +355,14 @@ public:
 	}
 
 	void applyOneOperator(SizeType loopNumber,
-	                      SizeType i,
+	                      SizeType indexOfOperator,
 	                      SizeType site,
 	                      VectorWithOffsetType& phiNew,
 	                      SizeType systemOrEnviron)
 	{
 		if (targetHelper_.tstStruct().startingLoops().size()>0 &&
-		        targetHelper_.tstStruct().startingLoops()[i]>loopNumber) return;
+		        targetHelper_.tstStruct().startingLoops()[indexOfOperator]>loopNumber)
+			return;
 
 		const bool hasBeenApplied = (phiNew.size() > 0);
 		if (hasBeenApplied) return;
@@ -370,7 +371,7 @@ public:
 		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
 
 		BorderEnumType corner = (site == 0 || site == numberOfSites -1) ?
-			            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
+		            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
 
 		PsimagLite::OstringStream msg;
 		msg<<"I'm applying a local operator now";
@@ -378,8 +379,8 @@ public:
 		typename PsimagLite::Vector<SizeType>::Type electrons;
 		findElectronsOfOneSite(electrons,site);
 		FermionSign fs(targetHelper_.lrs().left(),electrons);
-		applyOpLocal_(phiNew,phiOld,targetHelper_.tstStruct().aOperators()[i],
-			          fs,systemOrEnviron,corner);
+		applyOpLocal_(phiNew,phiOld,targetHelper_.tstStruct().aOperators()[indexOfOperator],
+		              fs,systemOrEnviron,corner);
 
 		RealType norma = norm(phiNew);
 		if (norma<1e-6) {
@@ -392,16 +393,16 @@ public:
 	}
 
 	void wftOneVector(VectorWithOffsetType& phiNew,
-	                  SizeType i,
+	                  const VectorWithOffsetType& src,
+	                  SizeType indexOfOperator,
 	                  SizeType site,
 	                  SizeType systemOrEnviron,
-	                  SizeType index,
 	                  bool guessNonZeroSector)
 	{
 		if (guessNonZeroSector) {
 			if (targetHelper_.tstStruct().aOperators().size() == 1
 			        || targetHelper_.tstStruct().concatenation() == DONT_MIX) {
-				guessPhiSectors(phiNew,i,systemOrEnviron,site);
+				guessPhiSectors(phiNew,indexOfOperator,systemOrEnviron,site);
 			} else {
 				if (targetHelper_.tstStruct().useQns())
 					phiNew.populateFromQns(nonZeroQns_,targetHelper_.lrs().super());
@@ -413,23 +414,24 @@ public:
 		// OK, now that we got the partition number right, let's wft:
 		VectorSizeType nk(1,targetHelper_.model().hilbertSize(site));
 		targetHelper_.wft().setInitialVector(phiNew,
-		                                     targetVectors_[index],
+		                                     src,
 		                                     targetHelper_.lrs(),
 		                                     nk);
 		phiNew.collapseSectors();
 	}
 
-	void wftAll(SizeType i,
+	void wftAll(const VectorSizeType& indexForOperators,
 	            SizeType site,
 	            SizeType systemOrEnviron)
 	{
 		for (SizeType index = 0; index < targetVectors_.size(); ++index) {
-			if (targetVectors_[index].size() == 0) continue;
+			const VectorWithOffsetType& src = targetVectors_[index];
+			if (src.size() == 0) continue;
 			VectorWithOffsetType phiNew;
 			if (targetHelper_.tstStruct().useQns())
-                                        phiNew.populateFromQns(nonZeroQns_,
-										                       targetHelper_.lrs().super());
-			wftOneVector(phiNew,i,site,systemOrEnviron,index,true);
+				phiNew.populateFromQns(nonZeroQns_, targetHelper_.lrs().super());
+			assert(index < indexForOperators.size());
+			wftOneVector(phiNew,src,indexForOperators[index],site,systemOrEnviron,true);
 			targetVectors_[index] = phiNew;
 		}
 	}
@@ -586,6 +588,7 @@ private:
 		} else if (stage_[i] >= WFT_NOADVANCE) {
 
 			SizeType advance = indexNoAdvance_;
+
 			if (advanceEach > 0 && stage_[i] == WFT_ADVANCE) {
 				SizeType timeSteps = targetHelper_.tstStruct().timeSteps();
 				advance = (timeSteps > 0) ? timeSteps - 1 : 0;
@@ -599,7 +602,9 @@ private:
 				throw PsimagLite::RuntimeError(s);
 			}
 
-			if (targetVectors_[advance].size() == 0) {
+			const VectorWithOffsetType& src = targetVectors_[advance];
+
+			if (src.size() == 0) {
 				PsimagLite::String s(__FILE__);
 				s += ": TargetVectors[" + ttos(advance) + "].size()==0\n";
 				throw PsimagLite::RuntimeError(s);
@@ -608,7 +613,7 @@ private:
 			if (site==0 || site==numberOfSites -1)  {
 				// don't wft since we did it before
 				assert(advance < targetVectors_.size());
-				phiNew = targetVectors_[advance];
+				phiNew = src;
 				return;
 			}
 
@@ -616,7 +621,7 @@ private:
 			msg<<"I'm calling the WFT now";
 			progress_.printline(msg,std::cout);
 
-			wftOneVector(phiNew,i,site,systemOrEnviron,advance,true);
+			wftOneVector(phiNew,src,i,site,systemOrEnviron,true);
 		} else {
 			throw PsimagLite::RuntimeError("computePhi\n");
 		}

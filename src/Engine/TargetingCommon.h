@@ -412,29 +412,38 @@ public:
 	}
 
 	void applyOneOperator(SizeType loopNumber,
-	                      SizeType i,
+	                      SizeType indexOfOperator,
 	                      SizeType site,
 	                      VectorWithOffsetType& phiNew,
 	                      SizeType systemOrEnviron)
 	{
-		applyOpExpression_.applyOneOperator(loopNumber,i,site,phiNew,systemOrEnviron);
+		applyOpExpression_.applyOneOperator(loopNumber,
+		                                    indexOfOperator,
+		                                    site,
+		                                    phiNew,
+		                                    systemOrEnviron);
 	}
 
 	void wftOneVector(VectorWithOffsetType& phiNew,
-	                  SizeType i,
+	                  const VectorWithOffsetType& src,
+	                  SizeType indexOfOperator,
 	                  SizeType site,
 	                  SizeType systemOrEnviron,
-	                  SizeType index,
 	                  bool guessNonZeroSector)
 	{
-		applyOpExpression_.wftOneVector(phiNew,i,site,systemOrEnviron,index,guessNonZeroSector);
+		applyOpExpression_.wftOneVector(phiNew,
+		                                src,
+		                                indexOfOperator,
+		                                site,
+		                                systemOrEnviron,
+		                                guessNonZeroSector);
 	}
 
-	void wftAll(SizeType i,
+	void wftAll(const VectorSizeType& indexForOperators,
 	            SizeType site,
 	            SizeType systemOrEnviron)
 	{
-		applyOpExpression_.wftAll(i,site,systemOrEnviron);
+		applyOpExpression_.wftAll(indexForOperators, site, systemOrEnviron);
 	}
 
 	void cocoon(const BlockType& block,SizeType direction) const

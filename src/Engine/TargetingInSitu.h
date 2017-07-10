@@ -118,6 +118,7 @@ public:
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
@@ -248,24 +249,27 @@ public:
 
 private:
 
-	void evolve(RealType Eg,
+	void evolve(RealType,
 	            SizeType direction,
 	            SizeType site,
 	            SizeType loopNumber)
 	{
 		if (direction == INFINITE) return;
-		SizeType i = 0;
 
 		// see if operator at site has been applied and result put into targetVectors[site]
 		// if no apply operator at site and add into targetVectors[site]
 		// also wft everything
-		this->common().wftAll(i,site,direction);
-		int ind = tstStruct_.findIndexOfSite(site);
-		if (ind >= 0) {
+		VectorSizeType indexForOperators(this->common().targetVectors().size(), 0);
+		for (SizeType i = 0; i < indexForOperators.size(); ++i)
+			indexForOperators[i] = i;
+
+		this->common().wftAll(indexForOperators, site, direction);
+		int indexOfOperator = tstStruct_.findIndexOfSite(site);
+		if (indexOfOperator >= 0) {
 			this->common().applyOneOperator(loopNumber,
-			                                i,
+			                                indexOfOperator,
 			                                site,
-			                                this->common().targetVectors(ind),
+			                                this->common().targetVectors(indexOfOperator),
 			                                direction);
 		}
 
@@ -307,8 +311,8 @@ private:
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 		for (SizeType i = 0; i < max; ++i) {
 			this->common().cocoon(direction,site,psi,"gs",tv[i],"P"+ttos(i));
-			std::cout<<this->common().inSitu(site)<<" ";
-			std::cout<<"\n";
+			std::cerr<<site<<" "<<this->common().inSitu(site)<<" "<<tv[i]*tv[i];
+			std::cerr<<"\n";
 		}
 
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";

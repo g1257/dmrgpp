@@ -258,16 +258,17 @@ private:
 	{
 		if (direction == INFINITE) return;
 
-		SizeType center = tstStruct_.sites(0);
-		SizeType i = 0;
-		this->common().wftAll(i,site,direction);
+		SizeType indexOfOperator = 0;
+		VectorSizeType indexForOperators(this->common().targetVectors().size(), 0);
+		SizeType center = tstStruct_.sites(indexOfOperator);
+		this->common().wftAll(indexForOperators, site,direction);
 		this->common().applyOneOperator(loopNumber,
-		                                i,
+		                                indexOfOperator,
 		                                site,
 		                                this->common().targetVectors(2*center),
 		                                direction);
 		this->common().applyOneOperator(loopNumber,
-		                                i,
+		                                indexOfOperator,
 		                                site,
 		                                this->common().targetVectors(2*center+1),
 		                                direction);
@@ -289,9 +290,8 @@ private:
 	void calcDynVectors(SizeType site,
 	                    SizeType direction)
 	{
-		SizeType i = 0;
-
-		this->common().wftAll(i,site,direction);
+		VectorSizeType indexForOperators(this->common().targetVectors().size(), 0);
+		this->common().wftAll(indexForOperators, site, direction);
 		SizeType numberOfSites = this->lrs().super().block().size();
 		SizeType center = tstStruct_.sites(0);
 		skeleton_.calcDynVectors(this->common().targetVectors(2*center),

@@ -252,28 +252,35 @@ private:
 	            SizeType loopNumber)
 	{
 		if (direction == INFINITE) return;
-		SizeType i = 0;
 		bool guessNonZeroSector = true;
 		SizeType numberOfSites = this->lrs().super().block().size();
+		SizeType indexOfOperator = 0;
 
 		// see if operator at site has been applied and result put into targetVectors[site]
 		// if no apply operator at site and add into targetVectors[site]
 		// also wft everything
 		if (stage_ != STAGE_STATIC2) {
-			this->common().wftAll(i,site,direction);
+			VectorSizeType indexForOperators(this->common().targetVectors().size(), 0);
+			this->common().wftAll(indexForOperators, site, direction);
 			this->common().applyOneOperator(loopNumber,
-			                                i,
+			                                indexOfOperator,
 			                                site,
 			                                this->common().targetVectors(3*site),
 			                                direction);
 
 		} else {
 			for (SizeType s = 0; s < numberOfSites; ++s) {
-				if (this->common().targetVectors(3*s).size() == 0) continue;
+				const VectorWithOffsetType& src = this->common().targetVectors(3*s);
+				if (src.size() == 0) continue;
 				VectorWithOffsetType phiNew;
 				if (tstStruct_.useQns()) phiNew.populateFromQns(this->common().nonZeroQns(),
 				                                                this->lrs().super());
-				this->common().wftOneVector(phiNew,i,site,direction,3*s,guessNonZeroSector);
+				this->common().wftOneVector(phiNew,
+				                            src,
+				                            indexOfOperator,
+				                            site,
+				                            direction,
+				                            guessNonZeroSector);
 				this->common().targetVectors(3*s) = phiNew;
 			}
 
