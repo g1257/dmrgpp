@@ -57,7 +57,15 @@ Dmrg::ModelHelperSu2<
    Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance6Type,CvectorSizeType> >  >,Dmrg::Basis<SparseMatrixInstance6Type,CvectorSizeType> >
   >
 >::hasSpinOrbit_ = false;
-}
+
+template<>
+SizeType LinkProductHeisenberg<
+Dmrg::ModelHelperSu2<
+   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance6Type,CvectorSizeType> >  >,Dmrg::Basis<SparseMatrixInstance6Type,CvectorSizeType> >
+  >
+>::terms_ = 2;
+
+} // namespace Dmrg
 
 typedef PsimagLite::CrsMatrix<RealType> SparseMatrixInstance7Type;
 typedef PsimagLite::Geometry<RealType,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance7Type;

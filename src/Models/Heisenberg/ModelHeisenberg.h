@@ -140,12 +140,16 @@ public:
 
 	ModelHeisenberg(const SolverParamsType& solverParams,
 	                InputValidatorType& io,
-	                GeometryType const &geometry)
+	                const GeometryType& geometry,
+	                PsimagLite::String additional)
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 	{
+		if (additional == "Anistropic")
+			LinkProductType::setAnistropic();
+
 		SizeType n = geometry_.numberOfSites();
 		SizeType m = modelParameters_.magneticField.size();
 		SizeType md = modelParameters_.anisotropy.size();
@@ -270,6 +274,14 @@ public:
 			typename OperatorType::Su2RelatedType su2related2;
 			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
 			operatorMatrices.push_back(myOp2);
+
+
+			// Set the operators S^x_i in the natural basis
+			tmpMatrix = findSxMatrices(i,natBasis);
+			typename OperatorType::Su2RelatedType su2related3;
+			OperatorType myOp3(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related3);
+			operatorMatrices.push_back(myOp3);
+
 		}
 	}
 
@@ -451,6 +463,20 @@ private:
 
 		SparseMatrixType operatorMatrix(cm);
 		return operatorMatrix;
+	}
+
+	SparseMatrixType findSxMatrices(SizeType site,
+	                                const HilbertBasisType& natBasis) const
+	{
+		SparseMatrixType Splus_temp=findSplusMatrices(site,natBasis);
+		SparseMatrixType Sminus_temp,Sx;
+		transposeConjugate(Sminus_temp,Splus_temp);
+		RealType tmp=0.5;
+
+		Sx = tmp*Splus_temp;
+		Sx += tmp*Sminus_temp;
+
+		return Sx;
 	}
 
 	void setSymmetryRelated(SymmetryElectronsSzType& q,

@@ -84,11 +84,19 @@ namespace Dmrg {
 template<typename ModelHelperType>
 class LinkProductHeisenberg {
 
+	static SizeType terms_;
+
 public:
+
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename ModelHelperType::RealType RealType;
+
+	static void setAnistropic()
+	{
+		terms_ = 3;
+	}
 
 	template<typename SomeStructType>
 	static void setLinkData(SizeType term,
@@ -114,6 +122,10 @@ public:
 			angularFactor = 0.5;
 			category = 1;
 			break;
+		case 2: //SxSx
+			angularFactor = 1; //may be wrong
+			category = 0;
+			break;
 		}
 	}
 
@@ -137,16 +149,18 @@ public:
 		return PairType(0,0); // no orbital
 	}
 
-	//! For TERM_J there are 2 terms:
+	//! For TERM_J there are 3 terms:
 	//! Splus Sminus and
 	//! Sz Sz
-	static SizeType terms() { return 2; }
+	//! Sx Sx
+	static SizeType terms() { return terms_; }
 
 private:
 
 	static PairType operatorDofs(SizeType term,bool isSu2)
 	{
 		if (term<1) return PairType(0,0);
+		if (term==2) return PairType(2,2);
 		SizeType x = (isSu2) ? 0 : 1;
 		return PairType(x,x);
 	}

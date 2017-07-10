@@ -83,7 +83,7 @@ class ModelSelector {
 	typedef HeisenbergAncillaC<ModelBaseType> HeisenbergAncillaCType;
 	typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
 	typedef ExtendedHubbard1Orb<ModelBaseType> ModelHubbardExtType;
-        typedef ExtendedSuperHubbard1Orb<ModelBaseType> ModelHubbardExtSuperType;
+	typedef ExtendedSuperHubbard1Orb<ModelBaseType> ModelHubbardExtSuperType;
 	typedef ModelFeBasedSc<ModelBaseType> FeBasedScType;
 	typedef FeAsBasedScExtended<ModelBaseType> FeBasedScExtType;
 	typedef Immm<ModelBaseType> ImmmType;
@@ -117,13 +117,15 @@ public:
 		if (name_ == "HubbardOneBand") {
 			model_ = new ModelHubbardType(solverParams,io,geometry);
 		} else if (name_ == "Heisenberg") {
-			model_ = new ModelHeisenbergType(solverParams,io,geometry);
+			model_ = new ModelHeisenbergType(solverParams,io,geometry,"");
+		} else if (name_ == "HeisenbergAnistropic") {
+			model_ = new ModelHeisenbergType(solverParams,io,geometry,"Anistropic");
 		} else if (name_ == "HeisenbergAncillaC") {
 			model_ = new HeisenbergAncillaCType(solverParams,io,geometry);
 		} else if (name_ == "HubbardOneBandExtended") {
 			model_ = new ModelHubbardExtType(solverParams,io,geometry);
-                } else if (name_ == "HubbardOneBandExtendedSuper") {
-                        model_ = new ModelHubbardExtSuperType(solverParams,io,geometry);
+		} else if (name_ == "HubbardOneBandExtendedSuper") {
+			model_ = new ModelHubbardExtSuperType(solverParams,io,geometry);
 		} else if (name_ == "FeAsBasedSc") {
 			model_ = new FeBasedScType(solverParams,io,geometry);
 		} else if (name_ == "FeAsBasedScExtended") {
@@ -145,8 +147,8 @@ public:
 			model_ = new ModelHubbardType(solverParams,io,geometry);
 		} else if (name_ == "HubbardAncilla") {
 			model_ = new HubbardAncillaType(solverParams,io,geometry);
-        } else if (name_ == "HubbardAncillaExtended") {
-            model_ = new HubbardAncillaExtendedType(solverParams,io,geometry);
+		} else if (name_ == "HubbardAncillaExtended") {
+			model_ = new HubbardAncillaExtendedType(solverParams,io,geometry);
 		} else if (name_ == "FermionSpinless") {
 			model_ = new FermionSpinlessType(solverParams,io,geometry);
 		} else {

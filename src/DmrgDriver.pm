@@ -153,7 +153,15 @@ Dmrg::ModelHelper$modelHelper<
    $lrs
   >
 >::hasSpinOrbit_ = false;
-}
+
+template<>
+SizeType LinkProductHeisenberg<
+Dmrg::ModelHelper$modelHelper<
+   $lrs
+  >
+>::terms_ = 2;
+
+} // namespace Dmrg
 EOF
 }
 
