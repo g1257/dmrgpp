@@ -217,9 +217,10 @@ public:
 		return sites_[i];
 	}
 
-	virtual int findIndexOfSite(SizeType site) const
+	virtual int findIndexOfSite(SizeType site, SizeType start) const
 	{
-		VectorSizeType::const_iterator it = std::find(sites_.begin(),
+		if (start >= sites_.size()) return -1;
+		VectorSizeType::const_iterator it = std::find(sites_.begin() + start,
 		                                              sites_.end(),
 		                                              site);
 		if (it == sites_.end()) return -1;

@@ -264,13 +264,16 @@ private:
 			indexForOperators[i] = i;
 
 		this->common().wftAll(indexForOperators, site, direction);
-		int indexOfOperator = tstStruct_.findIndexOfSite(site);
-		if (indexOfOperator >= 0) {
+
+		int indexOfOperator = 0;
+		SizeType start = 0;
+		while ((indexOfOperator = tstStruct_.findIndexOfSite(site, start)) >= 0) {
 			this->common().applyOneOperator(loopNumber,
 			                                indexOfOperator,
 			                                site,
 			                                this->common().targetVectors(indexOfOperator),
 			                                direction);
+			start = indexOfOperator + 1;
 		}
 
 		typename PsimagLite::Vector<SizeType>::Type block(1,site);
