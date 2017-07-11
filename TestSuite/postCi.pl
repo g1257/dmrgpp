@@ -103,7 +103,7 @@ sub procCout
 			next;
 		}
 
-		if (/.+Ground state energy= (.+$)/) {
+		if (/lowest eigenvalue= ([^ ]+) /) {
 			push(@energies, $1);
 			next;
 		}

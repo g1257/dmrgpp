@@ -5,12 +5,14 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 
-my ($min,$max,$submit,$valgrind,$workdir,
+my ($min,$max,$valgrind,$workdir,
     $restart,$n,$postprocess,$noSu2,$help);
+my %submit;
 GetOptions(
 'm=f' => \$min,
 'M=f' => \$max,
-'S=s' => \$submit,
+'S=s' => \$submit{"command"},
+'delay=s' => \$submit{"delay"},
 'valgrind=s' => \$valgrind,
 'w=s' => \$workdir,
 'R' => \$restart,
@@ -28,6 +30,8 @@ if (defined($help)) {
 	print "using batchDollarized.pbs as template, and ";
 	print "with command command, usually command is qsub but you can also use ";
 	print "bash to run in the command line without a batching system.\n";
+	print "\t-delay delay\n";
+	print "\t\tDelay in seconds between subsequent submissions.\n";
 	print "\t-m min\n";
 	print "\t\tMinimum test to run is min (inclusive)\n";
 	print "\t-M max\n";
@@ -49,7 +53,7 @@ if (defined($help)) {
 	exit(0);
 }
 
-defined($submit) or $submit = "";
+defined($submit{"command"}) or $submit{"command"} = "";
 defined($noSu2) or $noSu2 = 0;
 
 defined($valgrind) or $valgrind = "";
@@ -94,11 +98,11 @@ for (my $i = 0; $i < $total; ++$i) {
 	my $whatN = scalar(@what);
 	print STDERR "$0: Run $n has $whatN postprocess lines\n" if ($whatN > 0);
 	if ($whatN > 0 and $postprocess) {
-		postTest($n,\@what,$submit);
+		postTest($n,\@what,\%submit);
 		next;
 	}
 
-	procTest($n,$valgrind,$submit);
+	procTest($n,$valgrind,\%submit);
 }
 
 sub postTest
@@ -112,7 +116,7 @@ sub postTest
 	}
 
 	my $batch = createBatch($n,$cmd);
-    submitBatch($submit, $batch) if ($submit ne "");
+	submitBatch($submit, $batch) if ($submit->{"command"} ne "");
 }
 
 sub postTestOne
@@ -178,7 +182,7 @@ sub procTest
 	$valgrind .= " --callgrind-out-file=callgrind$n.out " if ($tool eq "callgrind");
 	my $cmd = "$valgrind./dmrg -f ../inputs/input$n.inp &> output$n.txt";
 	my $batch = createBatch($n,$cmd);
-	submitBatch($submit, $batch) if ($submit ne "");
+	submitBatch($submit, $batch) if ($submit->{"command"} ne "");
 }
 
 sub createBatch
@@ -212,14 +216,21 @@ sub createBatch
 
 sub submitBatch
 {
-	my ($qsub, $batch, $extra) = @_;
+	my ($submit, $batch) = @_;
+	my $extra = $submit->{"extra"};
+	my $delay = $submit->{"delay"};
+	defined($delay) or die "$0: Please say -delay delay, where delay > 0 in seconds\n";
+	($delay > 0) or die "$0: delay must be positive\n";
 	defined($extra) or $extra = "";
 	sleep(1);
 	print STDERR "$0: Submitted $batch $extra $batch\n";
 
+	my $qsub = $submit->{"command"};
+	($qsub eq "bash" or $qsub eq "qsub") or die "$0: -S qsub | bash\n";
 	my $ret = `$qsub $extra $batch`;
+	defined($ret) or $ret = "";
 	chomp($ret);
-	sleep(30);
+	sleep($delay);
 	return $ret;
 }
 
