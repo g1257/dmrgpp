@@ -173,6 +173,7 @@ public:
 		knownLabels_.push_back("CorrectionVectorOmega");
 		knownLabels_.push_back("CorrectionVectorEta");
 		knownLabels_.push_back("CorrectionVectorAlgorithm");
+		knownLabels_.push_back("CorrelationsType");
 		knownLabels_.push_back("LongChainDistance");
 		knownLabels_.push_back("IsPeriodicY");
 		knownLabels_.push_back("TruncationTolerance");
@@ -320,6 +321,7 @@ public:
 		registerOpts.push_back("AdaptiveDynamicTargetting");
 		registerOpts.push_back("CorrectionVectorTargetting");
 		registerOpts.push_back("CorrectionTargetting");
+		registerOpts.push_back("TargetingInSitu");
 		registerOpts.push_back("MettsTargetting");
 		registerOpts.push_back("TargetingAncilla");
 		registerOpts.push_back("geometryallinsystem");

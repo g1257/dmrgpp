@@ -128,6 +128,7 @@ public:
 	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
 	typedef typename BaseType::TargetingCommonType::VectorVectorWithOffsetType
 	VectorVectorWithOffsetType;
+	typedef typename BaseType::TargetingCommonType::BraketType BraketType;
 
 	enum StageEnum {DISABLED,CONVERGING};
 
@@ -154,7 +155,6 @@ public:
 	      weightForContinuedFraction_(0),
 	      stage_(DISABLED)
 	{
-
 		if (tstStruct_.sites() == 0)
 			err("TargetingInSitu needs at least one TSPSite\n");
 
@@ -298,21 +298,17 @@ private:
 		for (SizeType r=0;r<weight_.size();r++) weight_[r] *=(1.0-gsWeight_)/sum;
 	}
 
-	void cocoon(const BlockType& block,SizeType direction) const
+	void cocoon(const BlockType& block, SizeType direction) const
 	{
-		const VectorVectorWithOffsetType& tv = this->common().targetVectors();
-		const VectorWithOffsetType& psi = this->common().psi();
-
 		assert(block.size() > 0);
-		SizeType site = block[0];
-		SizeType max = tv.size();
-
 		std::cout<<"TargetingInSitu\n";
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
-		for (SizeType i = 0; i < max; ++i) {
-			this->common().cocoon(direction,site,psi,"gs",tv[i],"P"+ttos(i));
-			std::cerr<<site<<" "<<this->common().inSitu(site)<<" "<<tv[i]*tv[i];
-			std::cerr<<"\n";
+		typename BraketType::VectorStringType vecStr;
+		PsimagLite::tokenizer(this->model().params().insitu, vecStr, ",");
+
+		for (SizeType i = 0; i < vecStr.size(); ++i) {
+			BraketType braket(this->model(), vecStr[i]);
+			this->common().calcBracket(direction, block[0], braket);
 		}
 
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";

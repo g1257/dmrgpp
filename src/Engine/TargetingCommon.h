@@ -234,8 +234,8 @@ public:
 
 		TimeSerializerType ts(currentTime(),
 		                      block[0],
-		                      applyOpExpression_.targetVectors(),
-		                      marker);
+		        applyOpExpression_.targetVectors(),
+		        marker);
 		ts.save(io);
 	}
 
@@ -541,6 +541,38 @@ public:
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
 
+	void calcBracket(SizeType direction,
+	                 SizeType site,
+	                 const BraketType& braket) const
+	{
+		if (braket.points() != 1)
+			err("Brakets in situ must be one-points\n");
+
+		const VectorWithOffsetType& v1 = getVector(braket.bra());
+		const VectorWithOffsetType& v2 = getVector(braket.ket());
+		std::cout<<"-------------&*&*&* In-situ measurements start\n";
+		RealType norm1 = norm(v1);
+		RealType norm2 = norm(v2);
+		if (norm1 < 1e-6 || norm2 < 1e-6) {
+			std::cout<<"cocoon: At least 1 NORM IS ZERO ";
+			std::cout<<braket.bra()<<" has norm "<<norm1;
+			std::cout<<" "<<braket.ket()<<" has norm "<<norm2<<"\n";
+			return;
+		}
+
+		BorderEnumType border = ApplyOperatorType::BORDER_NO;
+		test(v1,v2,direction,braket.toString(),site,braket.op(0),border);
+
+		int site2 = findBorderSiteFrom(site,direction);
+
+		if (site2 >= 0) {
+			border = ApplyOperatorType::BORDER_YES;
+			test(v1,v2,direction,braket.toString(),site2,braket.op(0),border);
+		}
+
+		std::cout<<"-------------&*&*&* In-situ measurements end\n";
+	}
+
 	ComplexOrRealType rixsCocoon(SizeType direction,
 	                             SizeType site,
 	                             SizeType index1,
@@ -633,9 +665,9 @@ private:
 		VectorStringType vecStr = getOperatorLabels();
 
 		for (SizeType i=0;i<vecStr.size();i++) {
-			PsimagLite::String opLabel = vecStr[i];
+			PsimagLite::String opLabel = braketIfNeeded(vecStr[i],site);
 
-			BraketType Braket(targetHelper_.model(),"<gs|"+opLabel+"[" + ttos(site) + "]|gs>");
+			BraketType Braket(targetHelper_.model(), opLabel);
 
 			OperatorType nup = Braket.op(0);
 
@@ -645,11 +677,31 @@ private:
 		}
 	}
 
+	PsimagLite::String braketIfNeeded(PsimagLite::String opLabel,
+	                                  SizeType site) const
+	{
+
+		if (opLabel.length() ==0 || opLabel[0] == '<') return opLabel;
+		return "<gs|"+opLabel+"[" + ttos(site) + "]|gs>";
+	}
+
 	VectorStringType getOperatorLabels() const
 	{
 		VectorStringType vecStr;
 		PsimagLite::tokenizer(targetHelper_.model().params().insitu,vecStr,",");
 		return vecStr;
+	}
+
+	const VectorWithOffsetType& getVector(PsimagLite::String braOrKet) const
+	{
+		if (braOrKet == "gs")
+			return applyOpExpression_.psi();
+
+		int ind = BraketType::getPtype(braOrKet);
+		if (ind <= 0)
+			err("Malformed braket " + braOrKet + "\n");
+
+		return applyOpExpression_.targetVectors(ind - 1);
 	}
 
 	// prints <src2|A|src1>
