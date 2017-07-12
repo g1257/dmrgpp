@@ -21,18 +21,6 @@ class Braket {
 		NaturalOpStruct(PsimagLite::String label_)
 		    : dof(0),label(label_),transpose(false)
 		{
-			SizeType i = 0;
-			for (; i < label_.length(); ++i) {
-				if (label_[i] == '?') break;
-			}
-
-			if (i == label_.length()) return;
-			SizeType j = i;
-			label = label_.substr(0,j);
-			for (; i < label_.length(); ++i) {
-				if (label_[i] == '-') break;
-			}
-
 			SizeType lastIndex = label.length();
 			if (lastIndex > 0) lastIndex--;
 			if (label[lastIndex] == '\'') {
@@ -40,7 +28,20 @@ class Braket {
 				transpose = true;
 			}
 
-			dof = atoi(label_.substr(j+1,i).c_str());
+			label_ = label;
+
+			SizeType i = 0;
+			for (; i < label.length(); ++i) {
+				if (label[i] == '?') break;
+			}
+
+			if (i == label.length()) return;
+
+			if (i + 1 == label.length())
+				err("WRONG op. spec. " + label_ + ", nothing after ?\n");
+
+			label = label_.substr(0, i);
+			dof = atoi(label_.substr(i + 1, label_.length()).c_str());
 		}
 
 		SizeType dof;
