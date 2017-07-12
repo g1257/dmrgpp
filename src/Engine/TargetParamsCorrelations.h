@@ -97,14 +97,13 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrReal;
 	typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
 
-	static SizeType const PRODUCT = TargetParamsCommonType::PRODUCT;
-	static SizeType const SUM = TargetParamsCommonType::SUM;
-
 	template<typename IoInputter>
 	TargetParamsCorrelations(IoInputter& io,const ModelType& model)
 	    : TargetParamsCommonType(io,model)
 	{
 		io.readline(type_,"CorrelationsType=");
+		if (this->concatenation() != TargetParamsCommonType::DONT_MIX)
+			err("Please say TSPProductOrSum=dontmix\n");
 	}
 
 	virtual SizeType memResolv(PsimagLite::MemResolv&,

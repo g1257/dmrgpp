@@ -94,8 +94,6 @@ public:
 	typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
 	typedef typename ModelType::RealType RealType;
 
-	static SizeType const PRODUCT = TargetParamsCommonType::PRODUCT;
-
 	template<typename IoInputter>
 	TargetParamsTimeStep(IoInputter& io,const ModelType& model)
 	    : TimeVectorParamsType(io,model),
