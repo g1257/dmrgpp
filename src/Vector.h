@@ -62,6 +62,10 @@ istream& operator>>(istream& is,pair<T1,T2>& v)
 template<typename X,typename A>
 X operator*(const vector<X,A>& v,const vector<X,A>& w)
 {
+	if (v.size() != w.size())
+		throw std::runtime_error("operator*\n");
+
+
 	X result=0;
 	for (SizeType i=0;i<v.size();i++) result += v[i]*PsimagLite::conj(w[i]);
 	return result;
