@@ -91,7 +91,7 @@ namespace Dmrg {
 The \cppClass{Operators} class stores the local operators for this basis.
 Only the local operators corresponding to the most recently added sites
 will be meaningful. Indeed, if we  apply transformation $W$ (possibly
-truncating the basis, see Eq.~(\ref{eq:transformation})) then
+truncating the basis, then
 \begin{equation}
 (W^\dagger A W)  (W^\dagger BW) \neq W^\dagger  (AB)  W,
 \end{equation}

@@ -13,43 +13,50 @@ more precisely \emph{strictly DMRG-natural}
 if it appears in a Hamiltonian connection. In the Hubbard model
 with Hamiltonian
 \begin{equation}
-H=\sum_{\sigma, i\neq j}t_{i,j} c^\dagger_i c_j + U\sum_i n_i,
+H=\sum_{\sigma, i\neq j}t_{i,j} c^\dagger_{i,\sigma} c_{j,sigma} + V\sum_i n_i,
 \end{equation}
-the operators $c_i$ are natural (and $c^\dagger_i$) but not $n_i$.
-The naturality of an operator is thus a model-dependent property.
+the operators $c_{i,\sigma}$ are natural (and $c^\dagger_{i,sigma}$) 
+but not $n_i$.
+Naturality is thus model-dependent.
 For example, $n_i$ isn't natural in the Hubbard model as we've just
 seen, but it is natural
 in the Hubbard extended model or in the t-J model, due to the $n_i n_j$ connection.
-\emph{Unnatural operators} are those which are not necessarily natural.
+\emph{Unnatural operators} are those that are not necessarily natural.
  The member function \texttt{naturalOperator}
-of each Model provides all natural operators and a few others
-in the one-site Hilbert space.
+of each Model provides all natural operators
+in the one-site Hilbert space, and a few others.
 
 \marginnote{Definition of Resilient}
-Let $A$ be an one-site operator and $\{B_0, B_1, \cdots B_{n-1}\}$ be a set
-of $n$ one-site operators, such that there exists some function $f$ such that
-\begin{equation}
-A = f(B_0, B_1, \cdots, B_{n-1}).
-\label{eq:AfB}
-\end{equation}
 Let $\{W_0, W_1, \cdots, W_{m-1}\}$ be a set of $m$ \emph{sequential} DMRG 
  transformations and let 
- $\tilde{X} = 
- W^\dagger_{m-1} W^\dagger_{m-2}\cdots W^\dagger_0 X W_0\cdots W_{m-2} W_{m-1}$ be
- the DMRG transformed operator of $X$ after these $m$ transformations.
-Eq.~(\ref{eq:AfB}) is said to be \emph{DMRG-transformation resilient}
-or just DMRG-resilient, if
-$\tilde{A} =  f(\tilde{B}_0, \tilde{B}_1, ...)$ for any sequential set.
-For example, $n_\uparrow=c^\dagger_\uparrow c_\uparrow$ is \emph{not} DMRG-resilient,
-but  $c^\dagger_\uparrow = (c_\uparrow)^\dagger$ and
-$n=n_\uparrow + n_\downarrow$ both are.
+ $\tilde{B} = 
+ W^\dagger_{m-1} W^\dagger_{m-2}\cdots W^\dagger_0\, B\, W_0\cdots W_{m-2} W_{m-1}$ be
+ the DMRG transformed operator of $B$ after these $m$ transformations.
+Let $\{B_0, B_1, \cdots B_{n-1}\}$ be a set
+of $n$ one-site operators in some basis, and let $f$ be a function with
+$f(B_0, B_1, \cdots, B_{n-1})$ an operator in the same basis.
+Let $\tilde{f}$ be the function such that
+\begin{equation}
+\tilde{f}(B_0, B_1, \cdots, B_{n-1}) = 
+f(\tilde{B}_0, \tilde{B}_1, \cdots, \tilde{B}_{n-1})
+\end{equation}
+
+The operator function $f$ is said to be \emph{DMRG-transformation resilient},
+or just DMRG-resilient, if $\tilde{f}=f$.
+For example, $f(A,B) = A*B$ is \emph{not} DMRG-resilient,
+but  $f(A) = A^\dagger$ and
+$f(A,B) = A + B$ both are.
 
 \marginnote{Minimally complete natural set}
 A set of operators $\{B_0, B_1, \cdots, B_{n-1}\}$ is a \emph{minimally complete
-natural set}, if (i) all $B_i$ are natural, (ii) there is no DMRG-resilient
-equation connecting one of them to the others, and (iii) if $A$ is a 
-natural operator, either $A=B_i$ for some $i$ or there exists $f$ such that
-$A = f(B_0, B_1, \cdots, B_{n-1})$ is resilient.
+natural set}, if (i) all $B_i$ are natural, (ii) there is no DMRG-resilient operator
+function yielding one of them from the others, and (iii) if $A$ is a 
+natural operator, then there exists 
+a resilient operator function $f$ such that
+$A = f(B_0, B_1, \cdots, B_{n-1})$.
+For the Hubbard model, the set $\{c_{i, \uparrow}, c_{i, \downarrow}\}_i$ is 
+a minimally complete natural set. For the extended Hubbard model we must
+add $n_i$ for $i$, and for the t-J model we must add $S^+_i$ and $S^z_i$ for all i.
 
 \marginnote{Tracking an operator}{\sc Tracking an operator}
 $A_i$ means to (i) create it of rows and columns equal to the 
@@ -96,13 +103,13 @@ had to be natural. This feature
 adds an optional underscore \_ that allows for an unnatural operator.}
 
 \begin{verbatim}
-./dmrg -f input.inp '<gs|_A;_B|gs>'
+./dmrg -f input.inp '<gs|A_;B_|gs>'
 \end{verbatim}
-where $\_A$ and $\_B$ are unnatural operators that are specified to be
+where $A\_$ and $B\_$ are unnatural operators specified to be
 tracked in the input file as follows.
 \begin{verbatim}
-TrackUnnaturalOperatorsTotal=3
-TrackUnnaturalOperatorsDelay 3    l0 l1 l2
+UnnaturalOperatorsTotal=3
+UnnaturalOperatorsDelay 3    l0 l1 l2
 <block0>
 <block1>
 <block2>
@@ -112,15 +119,15 @@ The delay specifies the delay of each for its creation, in units
 of finite loops.
 Each \texttt{<block>} has the following syntax.
 \begin{verbatim}
-TrackUnnaturalOperatorName=_A
+UnnaturalOperatorName=A_
 <file form operator specification>,
 \end{verbatim}
-Note that the name of the to-be-tracked operators starts (or ends haven't
-decided yet FIXME) with a specific prefix which shall be underscore \_
+Note that the name of the to-be-tracked operators ends
+ with a specific prefix which shall be underscore \_
 (or something else haven't
 decided yet FIXME)/
 Finally, the block \texttt{<file form operator specification>} is well-known
-and has been described elsewhere.
+and has been described in the DMRG++ manual.
 
 \marginnote{Implementation and Coder Perspective}To be Written TBW.
 \end{document}

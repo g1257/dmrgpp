@@ -508,7 +508,7 @@ and the ground state vector is computed and stored in psi, following Eq.~(\ref{e
 The object called concurrency is used to handle parallelization over matrix blocks
 related to symmetries present in the model (see section).
 Next, in Fig.~\ref{fig:infiniteloop}(e) the bases are changed
-following Eqs.~(\ref{eq:rhoSystem},\ref{eq:rhoEnviron},\ref{eq:transformation}),
+following Eqs.~(\ref{eq:rhoSystem},\ref{eq:rhoEnviron}),
 truncated if necessary, and the result is stored in
 pS for the system, and in pE, Fig.~\ref{fig:infiniteloop}(f),
 for the environment. Note that this overwrites the old pS and pE, preparing these
@@ -938,9 +938,9 @@ TO BE ABLE TO PRODUCE DATA FOR THE OBSERVER.}
 \end{itemize}
 
 \section*{LICENSE}
-\begin{Verbatim}
+\begin{verbatim}
 \ptexReadFile{../src/LICENSE}
-\end{Verbatim}
+\end{verbatim}
 \bibliographystyle{plain}
 \bibliography{thesis}
 \end{document}
