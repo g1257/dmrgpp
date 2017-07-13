@@ -138,11 +138,6 @@ All rights reserved
 \chapter{Input}\label{sec:inputfile}
 
 \section{Running DMRG++}
-There is a single input file that is passed as the argument to \verb!-f!, like so
-
-\begin{lstlisting}
-    ./dmrg -f input.inp.
-\end{lstlisting}
 
 \ptexPaste{DmrgDriver}
 
@@ -192,16 +187,20 @@ program start.
 After the program finishes, all files are put in a tar file. You can obtain the energies
 with
 \begin{verbatim}
-./toolboxdmrg -f input.inp -a energies
+grep -i energy runForinput.cout
 \end{verbatim}
 
-\section{\emph{In-situ} measurements}
+\section{The Disk Stacks}
 
+\section{The Wft Data Files}
+
+\chapter{\emph{In-situ} measurements}
+\section{Bare braket specification}
 \emph{In-situ} measurements are possible only for \emph{one-point} observables.
 If you need \emph{two-} or \emph{four-point} operators, please see
 section \ref{sec:observe}. If you run
 \begin{verbatim}
-./dmrg -f input.inp -o ':operator.txt'
+./dmrg -f input.inp ':operator.txt'
 \end{verbatim}
 you will get the observable
 \begin{equation}
@@ -213,8 +212,6 @@ The file \verb!operator.txt!
 contains the operator to be measured in the Hilbert space of one site.
 It is recommended that the \verb!operator! executable be used to generate the
 \verb!operator.txt!.
-
-\ptexPaste{OperatorDriver}
 
 The meaning of $|\psi\rangle$ in Eq.~(\ref{eq:insitu}) depends on the targeting used.
 For GroundStateTargetting, $|\psi\rangle$ is the current target, usually the ground state,
@@ -245,7 +242,7 @@ CorrectionVectorTargetting, where $|\phi_0\rangle$ is the correction vector.
 
 To compute multiple operators in the same DMRG++ run, use
 \begin{verbatim}
-./dmrg -f input.inp -o ':operator0.txt,:operator1.txt:...'
+./dmrg -f input.inp ':operator0.txt,:operator1.txt:...'
 \end{verbatim}
 which will show
 \begin{align}
@@ -254,21 +251,67 @@ which will show
 &\cdots.\nonumber
 \end{align}
 
+\section{Operator specifications}
 In general, the following syntax can be used
 \begin{verbatim}
-./dmrg -f input.inp -o 'opspec,opspec,...'
+./dmrg -f input.inp 'opspec,opspec,...'
 \end{verbatim}
 where \verb!opspec! is an operator specification. There are
-two kinds of operator specifications: raw operators and cooked operators.
-Raw operators are given in a file, and the specification is 
-\verb!':file.txt'! as has been described.
-The other operator specification, the cooked one, 
-is given by \verb!'label?dof-1'!, where 
-\verb!label! is a name for the operator, \verb!dof! is 
-an non-negative integer indicating the degree of freedom, and 
--1 indicates that it is a fermionic operator. 
--1 must be omitted for bosonic operators.
-\verb!?dof! may be omitted for bosonic operators and defaults to \verb!dof=0!.
+two kinds of operator specifications: by label and by file.
+
+By label, it is given by \verb!name[site]?dof'!
+Name is mandatory; it is a non-empty string \verb![a-zA-Z_]+!
+Optionally, a site may be specified by enclosing it in brakets.
+Optionally, the character ? may be present, and if so, it must
+be followed by a non-negative integer \verb![0-9]+! that becomes 
+\texttt{dof.}
+Optionally, a single quote ' may be present at the end, to mean
+that the whole operator must be transposed.
+The operator is obtained by calling the model member function
+\verb!naturalOperator! with arguments
+\verb!(name,site,dof)! and optionally transposing it. Defaults
+values of \verb!site! and \verb!dof! are 0.
+Note that the fermion sign and the $SU(2)$ properties of the
+resulting operator are determined by the member function in
+the corresponding model class.
+
+By file, it is given by \verb!:filename!,
+where filename must be a non-empty string. Every occurrence (if any)
+ of the character \$ in filename is replaced by the current site.
+The resulting string names a file that must exist and be
+readable by the DMRG++ process owner. The file must contain an
+operator in file form; the format of this file is given by the
+following items, in order.
+
+\begin{itemize}
+\ptexPaste{Operator}
+\end{itemize}
+
+\section{Dressed braket specification}
+Note: This is an experimental feature.
+Operators in braket specifications may be dressed, as follows.
+\begin{verbatim}
+./dmrg -f input.inp '<bra0|opspec0|ket0>,<bra1|opspec1|ket1>,...'
+\end{verbatim}
+The opsec was described previously.\footnote{What is new here 
+is that bras and kets dress the operators, whereas before,
+an automatic dressing procedure was used, choosing what bras and kets to use.}
+The bras and kets must be in the set $\{gs, P0, P1, \cdots\}$.
+The meaning of $gs$ is context dependent, but often 
+refers to the ground state vector, whether freshly computed or WFTed.
+``P0'' is (always?) the first targeted vector other than ``gs'', ``P1'' the
+next targeted vector, and so on.
+FIXME: EXPLORE USE OF DRESSED BRAKETS IN ALL NGSTs.
+Bare and dressed braket specifications may be combined:
+\begin{verbatim}
+./dmrg -f input.inp 'opsec0,<bra|opspec1|ket>,...'
+\end{verbatim}
+
+\section{The operator Driver}\label{sec:operator}
+The operator driver may be used to produce an operator by file.
+\ptexPaste{OperatorDriver}
+
+\chapter{Post Processing}
 
 \section{The Observer Driver}\label{sec:observe}
 \ptexPaste{ObserveDriver}
@@ -277,9 +320,11 @@ an non-negative integer indicating the degree of freedom, and
 \ptexPaste{ToolboxDriver}
 \ptexPaste{ToolBoxActions}
 
-\section{The Disk Stacks}
+\chapter{Miscellanea}
 
-\section{The Wft Data Files}
+\section{Restarting a run}
+
+\section{The TestSuite}
 
 \section{Signals}
 
@@ -890,11 +935,6 @@ TO BE ABLE TO PRODUCE DATA FOR THE OBSERVER.}
 \begin{itemize}
 \ptexPaste{TargetParamsTimeVectors}
 \ptexPaste{TargetParamsCommon}
-\end{itemize}
-
-\subsection{Operator Input}
-\begin{itemize}
-\ptexPaste{Operator}
 \end{itemize}
 
 \section*{LICENSE}

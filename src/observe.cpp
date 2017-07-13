@@ -134,10 +134,19 @@ void usage(const PsimagLite::String& name)
 }
 
 /* PSIDOC ObserveDriver
+ The observe driver may be used to measure after the main dmrg run has finished.
+The observe driver is used as follows,
+\begin{verbatim}
+./observe -f input.inp whatToMeasure
+\end{verbatim}
+  The command line arguments of observe are the following.
 \begin{itemize}
 \item[-f] [Mandatory, String] Input to use. Files
  referred to by \verb!OutputFile=! are now inputs, and
 must be present.
+\item[whatToMeasure] {[}Mandatory, String{]} What to measure post process.
+This is a comma-separated list of braket specifications.
+Braket specifications can be bare or dressed, and are explained elsewhere.
 \item[-p] [Optional, Integer] Digits of precision for printing.
 \item[-F] [Optional, string] TBW
 \item[-V] [Optional] Print version and exit

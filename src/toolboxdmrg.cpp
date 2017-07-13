@@ -68,6 +68,7 @@ void main1(InputNgType::Readable& io,
 }
 
 /* PSIDOC ToolboxDriver
+ The command line arguments of toolboxdmrg are the following.
   \begin{itemize}
   \item[-f] {[}Mandatory, String{]} Input to use. Files
  referred to by \verb!OutputFile=! are now inputs, and

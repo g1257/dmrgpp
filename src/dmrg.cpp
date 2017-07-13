@@ -197,10 +197,19 @@ int main(int argc, char *argv[])
 	bool keepFiles = false;
 	bool versionOnly = false;
 	/* PSIDOC DmrgDriver
+There is a single input file that is passed as the
+argument to \verb!-f!, like so
+\begin{lstlisting}
+    ./dmrg -f input.inp whatToMeasure
+\end{lstlisting}
+where \verb!whatToMeasure! is optional. The command line arguments
+to the main dmrg driver are the following.
 	  \begin{itemize}
 	  \item[-f] {[}Mandatory, String{]} Input to use.
 	  \item[-p] [Optional, Integer] Digits of precision for printing.
-	  \item[whatToMeasure] {[}Optional, String{]} What to measure in-situ
+	  \item[whatToMeasure] {[}Optional, String{]} What to measure in-situ.
+	  This is a comma-separated list of braket specifications.
+	  Braket specifications can be bare or dressed, and are explained elsewhere.
 	  \item[-l] {[}Optional, String{]} Without this option std::cout is redirected
 	  to a file.
 	  This option with the string ``?'' prints name of such log file.
