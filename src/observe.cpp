@@ -133,6 +133,16 @@ void usage(const PsimagLite::String& name)
 	std::cerr<<" [-V] whatToMeasure\n";
 }
 
+/* PSIDOC ObserveDriver
+\begin{itemize}
+\item[-f] [Mandatory, String] Input to use. Files
+ referred to by \verb!OutputFile=! are now inputs, and
+must be present.
+\item[-p] [Optional, Integer] Digits of precision for printing.
+\item[-F] [Optional, string] TBW
+\item[-V] [Optional] Print version and exit
+\end{itemize}
+  */
 int main(int argc,char **argv)
 {
 	using namespace Dmrg;

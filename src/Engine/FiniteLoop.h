@@ -45,10 +45,11 @@ and the third bit compute the g.s. of WFT it updating eigenvalue and eigenvector
 It is a fatal error to have both bits 1 and 2 set.
 \begin{table}
 \begin{tabular}{ll}\toprule
-Bit & Description\\
-0       & save or don't save state for the observe code\\
-1       & compute the g.s. or fast WFT it\\
-2       & compute the g.s. or slowly WFT it\\
+Bit & What Happens if Set\\
+0       & Saves state for the observe code\\
+1       & WFTs the ground state in a fast way instead of computing it\\
+2       & WFTs the ground state slowly  instead of computing it\\
+3       & Forces random guess for ground state\\
 \end{tabular}
 \caption{Meaning of each bit of the third number in the
 finite loop triplet. It is a fatal error to have both bits 1 and 2 set.}

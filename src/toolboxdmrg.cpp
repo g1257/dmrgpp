@@ -67,6 +67,18 @@ void main1(InputNgType::Readable& io,
 	}
 }
 
+/* PSIDOC ToolboxDriver
+  \begin{itemize}
+  \item[-f] {[}Mandatory, String{]} Input to use. Files
+ referred to by \verb!OutputFile=! are now inputs, and
+must be present.
+  \item[-a] {[}Mandatory, String{]} Action, see below.
+  \item[-E] {[}Optional, String{]} Extra options, see below.
+  \item[-s] {[}Optional, no argument needed{]} Short option.
+  \item[-p] [Optional, Integer] Digits of precision for printing.
+ \item[-V] [Optional] Print version and exit
+  \end{itemize}
+*/
 int main(int argc,char **argv)
 {
 	using namespace Dmrg;

@@ -271,6 +271,11 @@ an non-negative integer indicating the degree of freedom, and
 \verb!?dof! may be omitted for bosonic operators and defaults to \verb!dof=0!.
 
 \section{The Observer Driver}\label{sec:observe}
+\ptexPaste{ObserveDriver}
+
+\section{The DMRG ToolBox Driver}\label{sec:toolbox}
+\ptexPaste{ToolboxDriver}
+\ptexPaste{ToolBoxActions}
 
 \section{The Disk Stacks}
 

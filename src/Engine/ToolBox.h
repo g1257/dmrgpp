@@ -172,6 +172,16 @@ public:
 
 	typedef typename GrepForLabel::ParametersType ParametersForGrepType;
 
+	/* PSIDOC ToolBoxActions
+	 Actions marked with an asterix are only meaningful postprocessing.
+	 \begin{itemize}
+	 \item[energy] or Energy or energies or Energies. It lists energies of all stages. (*)
+	 \item[files] TBW
+	 \item[input] It echoes the input file.
+	 \item[analysis] or analyze. It opines about the needed ``m'' values for this run,
+	 as well as the needed CPU and RAM that will be required.
+	 \end{itemize}
+	 */
 	static ActionEnum actionCanonical(PsimagLite::String action)
 	{
 		if (action == "energy" || action == "Energy" || action == "energies"

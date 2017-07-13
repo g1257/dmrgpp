@@ -275,6 +275,7 @@ public:
 			\item[CorrectionTargetting] TBW
 			\item[TargetingAncilla] TBW
 			\item[MettsTargetting] TBW
+			\item[TargetingInSitu] TBW
 			\item[geometryallinsystem] During infinite algorithm make environment
 			contain always exactly one site
 			\item[vectorwithoffsets] TBW
