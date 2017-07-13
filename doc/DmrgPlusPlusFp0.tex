@@ -1,0 +1,126 @@
+\documentclass{article}
+\usepackage{marginnote}
+
+\begin{document}
+
+\title{DMRG++ Feature Proposal:\\
+Tracking Unnatural Operators}
+\author{various}
+\maketitle
+
+\marginnote{Definition of Natural}{\sc An Operator is natural} or
+more precisely \emph{strictly DMRG-natural}
+if it appears in a Hamiltonian connection. In the Hubbard model
+with Hamiltonian
+\begin{equation}
+H=\sum_{\sigma, i\neq j}t_{i,j} c^\dagger_i c_j + U\sum_i n_i,
+\end{equation}
+the operators $c_i$ are natural (and $c^\dagger_i$) but not $n_i$.
+The naturality of an operator is thus a model-dependent property.
+For example, $n_i$ isn't natural in the Hubbard model as we've just
+seen, but it is natural
+in the Hubbard extended model or in the t-J model, due to the $n_i n_j$ connection.
+\emph{Unnatural operators} are those which are not necessarily natural.
+ The member function \texttt{naturalOperator}
+of each Model provides all natural operators and a few others
+in the one-site Hilbert space.
+
+\marginnote{Definition of Resilient}
+Let $A$ be an one-site operator and $\{B_0, B_1, \cdots B_{n-1}\}$ be a set
+of $n$ one-site operators, such that there exists some function $f$ such that
+\begin{equation}
+A = f(B_0, B_1, \cdots, B_{n-1}).
+\label{eq:AfB}
+\end{equation}
+Let $\{W_0, W_1, \cdots, W_{m-1}\}$ be a set of $m$ \emph{sequential} DMRG 
+ transformations and let 
+ $\tilde{X} = 
+ W^\dagger_{m-1} W^\dagger_{m-2}\cdots W^\dagger_0 X W_0\cdots W_{m-2} W_{m-1}$ be
+ the DMRG transformed operator of $X$ after these $m$ transformations.
+Eq.~(\ref{eq:AfB}) is said to be \emph{DMRG-transformation resilient}
+or just DMRG-resilient, if
+$\tilde{A} =  f(\tilde{B}_0, \tilde{B}_1, ...)$ for any sequential set.
+For example, $n_\uparrow=c^\dagger_\uparrow c_\uparrow$ is \emph{not} DMRG-resilient,
+but  $c^\dagger_\uparrow = (c_\uparrow)^\dagger$ and
+$n=n_\uparrow + n_\downarrow$ both are.
+
+\marginnote{Minimally complete natural set}
+A set of operators $\{B_0, B_1, \cdots, B_{n-1}\}$ is a \emph{minimally complete
+natural set}, if (i) all $B_i$ are natural, (ii) there is no DMRG-resilient
+equation connecting one of them to the others, and (iii) if $A$ is a 
+natural operator, either $A=B_i$ for some $i$ or there exists $f$ such that
+$A = f(B_0, B_1, \cdots, B_{n-1})$ is resilient.
+
+\marginnote{Tracking an operator}{\sc Tracking an operator}
+$A_i$ means to (i) create it of rows and columns equal to the 
+one-site Hilbert space basis when
+site $i$ is first in view. (ii) To transform it by DMRG transform $W$ as
+$\tilde{A}_i = W^\dagger A_i W$, and to keep transforming it in this way
+as the lattice is swept. DMRG++ must track all operators
+of a minimally complete
+natural set in order to build the Hamiltonian. FIXME: EXPLAIN WHY.
+
+The targeting abstract module defines an interface to the
+density matrix module that specifies what vectors to target, with what
+weights, and how to construct and update said vectors.
+\marginnote{Definition of targeting and NGSTs}
+There are different ways to implement this abstract interface, and each
+way defines a \emph{instance} targeting. For instance, \texttt{GroundStateTargeting}
+is the simplest of them as it targets \emph{only} the ground state vector.
+All other instances are referred to as \emph{non ground state targets} or NGSTs; 
+see \texttt{EngineTargeting*.h} in DMRG++ for a list. For example, 
+\texttt{TargetingTimeStep.h}
+does t{\sc{DMRG.}}
+
+\marginnote{Rationale} To obtain correlations $\langle gs| A_i B_j |gs\rangle$
+\emph{in-situ} we need to target vectors $B_j |gs\rangle$.
+This approach has two problems: (i) We cannot use more than one \emph{NGSTs}
+as \texttt{TargetingInSitu} is already in use, and
+even if we could (ii) the vectors to target might become too many if 
+targeting other things---considering
+that we have only one MPS. Tracking Operators $A_i$ and $B_j$ would make
+the braket $\langle gs| A_i B_j |gs\rangle$ directly available, and could
+be used in \emph{NGSTs} because this feature would be independent
+of the targeting feature, allowing for the calculation of
+ $\langle P0| A_i B_j |gs\rangle$ or for other bra and kets.
+
+\marginnote{Syntax and User Perspective} 
+We would run DMRG++ with\footnote{Instead of the bra and ket gs, other
+non ground state vectors may be used, like P0, P1, etc, depending on the
+NGST in use. Note that there are two ways of specifying operators in
+the command line: (1) by filename, as in ``:filename'' where \$ substitution
+is applied, (2) by natural operator \texttt{\_name[site]?dof'}, where
+site, dof and the transpose single quote are all optional. 
+Before this feature the underscore did not exist, and the operator name
+had to be natural. This feature
+adds an optional underscore \_ that allows for an unnatural operator.}
+
+\begin{verbatim}
+./dmrg -f input.inp '<gs|_A;_B|gs>'
+\end{verbatim}
+where $\_A$ and $\_B$ are unnatural operators that are specified to be
+tracked in the input file as follows.
+\begin{verbatim}
+TrackUnnaturalOperatorsTotal=3
+TrackUnnaturalOperatorsDelay 3    l0 l1 l2
+<block0>
+<block1>
+<block2>
+\end{verbatim}
+where we here wish to track 3 unnatural operators. 
+The delay specifies the delay of each for its creation, in units
+of finite loops.
+Each \texttt{<block>} has the following syntax.
+\begin{verbatim}
+TrackUnnaturalOperatorName=_A
+<file form operator specification>,
+\end{verbatim}
+Note that the name of the to-be-tracked operators starts (or ends haven't
+decided yet FIXME) with a specific prefix which shall be underscore \_
+(or something else haven't
+decided yet FIXME)/
+Finally, the block \texttt{<file form operator specification>} is well-known
+and has been described elsewhere.
+
+\marginnote{Implementation and Coder Perspective}To be Written TBW.
+\end{document}
