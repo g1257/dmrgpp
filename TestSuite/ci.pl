@@ -150,7 +150,9 @@ sub runObserveOne
 
 	defined($args) or die "$0: observe must have arguments\n";
 
-	my $cmd = "./observe -f ../inputs/input$n.inp \'$args\'";
+	my $output = "observe$n.txt";
+	unlink($output) if ($ind == 0);
+	my $cmd = "./observe -f ../inputs/input$n.inp \"$args\" >> $output";
 	print "|$n|: postTest $cmd\n";
 	return $cmd;
 }
@@ -230,6 +232,7 @@ sub createBatch
 			$_ = $line;
 		}
 
+		s/cd +\$PBS_O_WORKDIR//;
 		print FOUT;
 	}
 
@@ -269,6 +272,6 @@ sub prepareDir
 	system("cp -a ../src/dmrg $workdir/") if ($ret != 0);
 	$cmd = "diff ../src/observe $workdir/observe &> /dev/null";
 	$ret = system($cmd);
-	system("cp -a ../src/observe $workdir/") if ($ret != 0);
+	system("cp -av  ../src/observe $workdir/") if ($ret != 0);
 	chdir("$workdir/");
 }
