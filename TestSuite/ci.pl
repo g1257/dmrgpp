@@ -94,24 +94,44 @@ for (my $i = 0; $i < $total; ++$i) {
 	my $isSu2 = Ci::isSu2("../inputs/input$n.inp",$n);
 	next if ($isSu2 and $noSu2);
 
-	my @what = getPostProcess("../inputs/input$n.inp",$n);
-	my $whatN = scalar(@what);
-	print STDERR "$0: Run $n has $whatN postprocess lines\n" if ($whatN > 0);
-	if ($whatN > 0 and $postprocess) {
-		postTest($n,\@what,\%submit);
-		next;
+	my %ciAnnotations = getCiAnnotations("../inputs/input$n.inp",$n);
+	my $whatObserve = $ciAnnotations{"observe"};
+	my $whatObserveN = scalar(@$whatObserve);
+	if ($whatObserveN > 0) {
+		print "|$n| has $whatObserveN observe lines\n";
+		if ($postprocess) {
+			runObserve($n,$whatObserve,\%submit);
+			next;
+		}
 	}
 
-	procTest($n,$valgrind,\%submit);
+	my $whatDmrg = $ciAnnotations{"dmrg"};
+	my $extraCmdArgs = findArguments($whatDmrg);
+	procTest($n,$valgrind,\%submit,$extraCmdArgs);
 }
 
-sub postTest
+sub findArguments
+{
+	my ($a) = @_;
+	my $n = scalar(@$a);
+	for (my $i = 0; $i < $n; ++$i) {
+		if ($a->[$i] =~/^arguments=(.+$)/) {
+			return $1;
+		}
+
+		die "$0: #ci dmrg annotation: $a->[$i] not understood\n";
+	}
+
+	return "";
+}
+
+sub runObserve
 {
 	my ($n,$what,$submit) = @_;
 	my $whatN = scalar(@$what);
 	my $cmd = "";
 	for (my $i = 0; $i < $whatN; ++$i) {
-		$cmd .= postTestOne($n,$i,$what->[$i],$submit);
+		$cmd .= runObserveOne($n,$i,$what->[$i],$submit);
 		$cmd .= "\n";
 	}
 
@@ -119,41 +139,47 @@ sub postTest
 	submitBatch($submit, $batch) if ($submit->{"command"} ne "");
 }
 
-sub postTestOne
+sub runObserveOne
 {
 	my ($n,$ind,$what,$submit) = @_;
-	# what == #ci observe arguments=something
-	my @temp = split/\s/,$what;
-	scalar(@temp) > 2 or die "$0: Not enough info in $what\n";
-	$temp[0] eq "#ci" or die "$0: postprocess string does not start with #ci\n";
-	$temp[1] eq "observe" or die "$0: can only postprocess observe for now, not $temp[1]\n";
+	# what == arguments=something
 	my $args;
-	if ($temp[2] =~ /^arguments=(.+$)/) {
+	if ($what =~ /^arguments=(.+$)/) {
 		$args = $1;
 	}
 
 	defined($args) or die "$0: observe must have arguments\n";
 
-	my $cmd = "./observe -f ../inputs/input$n.inp $args";
-	print STDERR "$0: postTest $cmd\n";
+	my $cmd = "./observe -f ../inputs/input$n.inp \'$args\'";
+	print "|$n|: postTest $cmd\n";
 	return $cmd;
 }
 
-sub getPostProcess
+sub getCiAnnotations
 {
 	my ($file,$n) = @_;
 	open(FILE, "$file") or return "";
-	my @what;
+	my @whatObserve;
+	my @whatDmrg;
 	my $counter = 0;
 	while (<FILE>) {
-		if (/^\#ci /) {
-			chomp;
-			$what[$counter++]=$_;
+		chomp;
+		if (/^\#ci observe (.*$)/) {
+			push (@whatObserve, "$1");
+			next;
+		}
+
+		if (/^#ci dmrg (.*$)/) {
+			push (@whatDmrg, "$1");
+			next;
 		}
 	}
 
 	close(FILE);
-	return @what;
+	my %h;
+	$h{"dmrg"} = \@whatDmrg;
+	$h{"observe"} = \@whatObserve;
+	return %h;
 }
 
 sub isRestart
@@ -177,10 +203,10 @@ sub isRestart
 
 sub procTest
 {
-	my ($n,$tool,$submit) = @_;
+	my ($n,$tool,$submit,$extraCmdArgs) = @_;
 	my $valgrind = ($tool eq "") ? "" : "valgrind --tool=$tool ";
 	$valgrind .= " --callgrind-out-file=callgrind$n.out " if ($tool eq "callgrind");
-	my $cmd = "$valgrind./dmrg -f ../inputs/input$n.inp &> output$n.txt";
+	my $cmd = "$valgrind./dmrg -f ../inputs/input$n.inp $extraCmdArgs &> output$n.txt";
 	my $batch = createBatch($n,$cmd);
 	submitBatch($submit, $batch) if ($submit->{"command"} ne "");
 }

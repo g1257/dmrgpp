@@ -331,8 +331,6 @@ private:
 		Again, note that $X$ and $Y$ are sets of blocks whereas $S$ and $E$ are blocks. This is shown schematically in Fig.~\ref{fig:sxye}.
 		All sites in $S$, $X$, $Y$ and $E$ are numbered as shown in the figure.
 		\begin{figure}
-		\centering{
-		\includegraphics[width=8cm]{dmrg_sxye}}
 		\caption{Labeling of blocks for the DMRG procedure. Blocks from  vector of blocks X are added one at a time to block $S$ to form
 		the system and blocks from  vector of blocks
 		Y are added one at a time to E to form the environment. Blocks are vectors of integers. The integers (numbers at the top of the figure)

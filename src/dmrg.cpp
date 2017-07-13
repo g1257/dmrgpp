@@ -207,6 +207,7 @@ int main(int argc, char *argv[])
 	  This option with the string ``-'' writes std::cout to terminal.
 	  In other cases, string is the name of the file to redirect std::cout to.
 	 \item[-k] [Optional] Keep untar files
+	 \item[-V] [Optional] Print version and exit
 	  \end{itemize}
 	 */
 	/* PSIDOC OperatorDriver
