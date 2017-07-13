@@ -194,73 +194,57 @@ grep -i energy runForinput.cout
 
 \section{The Wft Data Files}
 
-\chapter{\emph{In-situ} measurements}
-\section{Bare braket specification}
-\emph{In-situ} measurements are possible only for \emph{one-point} observables.
-If you need \emph{two-} or \emph{four-point} operators, please see
-section \ref{sec:observe}. If you run
+\chapter{Measurements}
+Both the main dmrg driver and the observe driver (CROSS REFERENCE) may
+have a whatToMeasure argument as follows.
 \begin{verbatim}
-./dmrg -f input.inp ':operator.txt'
+./dmrg -f input.inp whatToMeasure
+./observe -f input.inp whatToMeasure
 \end{verbatim}
-you will get the observable
-\begin{equation}
-\langle\psi|\text{:operator.txt}|\psi\rangle,\label{eq:insitu}
-\end{equation}
-where \verb!:operator! is any \emph{one-point} operator, and
-the meaning of $|\psi\rangle$ is explained later in this section.
-The file \verb!operator.txt!
-contains the operator to be measured in the Hilbert space of one site.
-It is recommended that the \verb!operator! executable be used to generate the
-\verb!operator.txt!.
+\texttt{whatToMeasure} is a comma separated list of braket specifications:
+\texttt{whatToMeasure = braket spec, braket spec, ...}
+Braket specifications come in two forms: bare and dressed.
 
-The meaning of $|\psi\rangle$ in Eq.~(\ref{eq:insitu}) depends on the targeting used.
-For GroundStateTargetting, $|\psi\rangle$ is the current target, usually the ground state,
-sometimes only in \emph{wft} form. But if restarting a run, the current target
+\section{Bare braket specification}
+A bare braket specification is a semicolon-separated list of at least one opspecs:
+\verb!braket spec=opspec; opspec; opspec; ...!
+If just one opspec is given (no semicolon), then the bare braket is referred to as 
+``local'' or one-point;
+if two opspecs are given (one semicolon), then the bare braket is refererred to as a
+two-point correlation; and so on.
+Bare brakets cannot be computed directly by DMRG++, but must instead be
+dressed with a bra and a ket. What bra and ket is chosen is Targeting and context dependent.
+
+For GroundStateTargetting, bra and ket are both equal to the current target, usually the ground state,
+sometimes only in \emph{WFT} form. But if restarting a run, the current target
 can be the state left off by the previous run.
 
 For MettsTargetting and TargetingAncilla,
-Eq.~(\ref{eq:insitu}) is computed multiple times
-at each DMRG step for different $|\psi\rangle$ vectors.
+\verb!<bra|bare braket spec|ket>! is computed multiple times
+at each DMRG step for different bra=ket vectors.
 These are all the temperature evolved states, and the collapsed state for
 MettsTargetting.
 
-For all other targetings, Eq.~(\ref{eq:insitu}) is computed multiple times
-at each DMRG step for different $|\psi\rangle$ vectors, including the the
-$|\psi\rangle$
-corresponding to GroundStateTargetting.
-The other vectors $|\psi\rangle$ are either (i) time vectors for TimeStepTargetting,
+For all other targetings, \verb!<bra|bare braket spec|ket>! is computed multiple times
+at each DMRG step for different bra=ket vectors, including the 
+one corresponding to GroundStateTargetting.
+The other vectors bra=ket are either (i) time vectors for TimeStepTargetting,
 (ii) dynamic vectors for AdaptiveDynamicTargetting and DynamicTargetting, and
 (iii) correction vectors for CorrectionVectorTargetting.
 
 To be able to compute Green functions, TimeStepTargetting computes \emph{in addition}
-\begin{equation}
-\langle\psi|\text{:operator.txt}|\phi_0\rangle,
-\end{equation}
-where $|\psi\rangle$ is the GroundStateTargetting vector, and
-$|\phi_0\rangle$ the first time vector. The same is true for
-CorrectionVectorTargetting, where $|\phi_0\rangle$ is the correction vector.
-
-To compute multiple operators in the same DMRG++ run, use
-\begin{verbatim}
-./dmrg -f input.inp ':operator0.txt,:operator1.txt:...'
-\end{verbatim}
-which will show
-\begin{align}
-&\langle\psi|\text{:operator0.txt}|\psi\rangle,\nonumber\\
-&\langle\psi|\text{:operator1.txt}|\psi\rangle,\nonumber\\
-&\cdots.\nonumber
-\end{align}
+\verb!<bra|bare braket spec|ket>! with bra not equal to ket:
+where bra is the GroundStateTargetting vector, and
+ket the first time vector. The same is true for
+CorrectionVectorTargetting, where ket is the correction vector.
 
 \section{Operator specifications}
-In general, the following syntax can be used
-\begin{verbatim}
-./dmrg -f input.inp 'opspec,opspec,...'
-\end{verbatim}
-where \verb!opspec! is an operator specification. There are
-two kinds of operator specifications: by label and by file.
+There are two kinds of operator specifications: by label and by file.
 
 By label, it is given by \verb!name[site]?dof'!
-Name is mandatory; it is a non-empty string \verb![a-zA-Z_]+!
+Name is mandatory; it is a non-empty string \verb![a-zA-Z_]+!, and if the
+label ends in underscore \_ then the operator is considered
+unnatural.\footnote{Unnatural operators aren't yet implemented.}
 Optionally, a site may be specified by enclosing it in brakets.
 Optionally, the character ? may be present, and if so, it must
 be followed by a non-negative integer \verb![0-9]+! that becomes 
@@ -291,7 +275,7 @@ following items, in order.
 Note: This is an experimental feature.
 Operators in braket specifications may be dressed, as follows.
 \begin{verbatim}
-./dmrg -f input.inp '<bra0|opspec0|ket0>,<bra1|opspec1|ket1>,...'
+./dmrg -f input.inp '<bra|bare braket|ket>,<bra|bare braket|ket>,...'
 \end{verbatim}
 The opsec was described previously.\footnote{What is new here 
 is that bras and kets dress the operators, whereas before,
@@ -304,7 +288,7 @@ next targeted vector, and so on.
 FIXME: EXPLORE USE OF DRESSED BRAKETS IN ALL NGSTs.
 Bare and dressed braket specifications may be combined:
 \begin{verbatim}
-./dmrg -f input.inp 'opsec0,<bra|opspec1|ket>,...'
+./dmrg -f input.inp 'bare braket spec,<bra|bare braket spec|ket>,...'
 \end{verbatim}
 
 \section{The operator Driver}\label{sec:operator}
