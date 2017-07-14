@@ -5,12 +5,9 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 
-my ($min,$max,$memory,$failed,$noSu2,$help);
-my ($workdir,$golddir,$n);
+my ($memory,$failed,$noSu2,$help,$workdir,$golddir,$ranges);
 GetOptions(
-'m=i' => \$min,
-'M=i' => \$max,
-'n=i' => \$n,
+'n=s' => \$ranges,
 'memory=i' => \$memory,
 'f' => \$failed,
 'nosu2' => \$noSu2,
@@ -21,12 +18,14 @@ GetOptions(
 if (defined($help)) {
 	print "USAGE: $0 [options]\n";
 	print "\tIf no option is given examines all runs\n";
-	print "\t-m min\n";
-	print "\t\tMinimum test to examine is min (inclusive)\n";
-	print "\t-M max\n";
-	print "\t\tMaximum test to examine is max (inclusive)\n";
 	print "\t-n n\n";
-	print "\t\tIgnore all tests except test number n\n";
+	print "\t\tIgnore all tests except test(s) supplied\n";
+	print "\t\tThis is a comma-separated list of at least one range.\n";
+	print "\t\tA range is one of the following.\n";
+	print "\t\t\tA number, like 2\n";
+	print "\t\t\tA number followed by a dash, like 2-; this sets the minimum\n";
+	print "\t\t\tA dash followed by a number, like -2; this sets the maximum\n";
+	print "\t\t\tTwo number separated by a dash, like 2-4, indicating the range\n";
 	print "\t-w workdir\n";
 	print "\t\tUse workdir as working directory not the default of tests/\n";
 	print "\t-g golddir\n";
@@ -48,26 +47,27 @@ defined($failed) or $failed = 0;
 defined($noSu2) or $noSu2 = 0;
 defined($workdir) or $workdir = "tests";
 defined($golddir) or $golddir = "oldTests";
-if (defined($n)) {
-	if (defined($min) or defined($max)) {
-		die "$0: -n cannot be used with either -m or -M\n";
-	}
 
-	$min = $n;
-	$max = $n;
-}
-
-my @tests;
-Ci::getTests(\@tests);
-
+my @tests = Ci::getTests();
 my $total = scalar(@tests);
-for (my $i = 0; $i < $total; ++$i) {
+
+my @inRange = Ci::procRanges($ranges, $total);
+my $rangesTotal = scalar(@inRange);
+
+die "$0: No tests specified under -n\n" if ($rangesTotal == 0);
+
+for (my $j = 0; $j < $rangesTotal; ++$j) {
+        my $i = $inRange[$j];
+        die "$0: out of range $i >= $total\n" if ($i >= $total);
 	my $n = $tests[$i];
-	next if (defined($min) and $n < $min);
-	next if (defined($max) and $n > $max);
 
 	my $isSu2 = Ci::isSu2("inputs/input$n.inp",$n);
-	next if ($isSu2 and $noSu2);
+	if ($isSu2 and $noSu2) {
+		print STDERR "$0: WARNING: Ignored test $n ";
+		print STDERR "because it's NOT an SU(2) test and ";
+		print STDERR "you specified -nosu2\n";
+		next;
+        }
 
 	procTest($n,$workdir,$golddir);
 	print "-----------------------------------------------\n";
@@ -215,8 +215,8 @@ sub fileSize
 {
 	my ($filename) = @_;
 	my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
-                  $atime,$mtime,$ctime,$blksize,$blocks)
-                      = stat($filename);
+	          $atime,$mtime,$ctime,$blksize,$blocks)
+	              = stat($filename);
 	return $size;
 }
 

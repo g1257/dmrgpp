@@ -5,19 +5,17 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 
-my ($min,$max,$valgrind,$workdir,
-    $restart,$n,$postprocess,$noSu2,$help);
+my ($valgrind,$workdir,
+    $restart,$ranges,$postprocess,$noSu2,$help);
 my %submit;
 GetOptions(
-'m=f' => \$min,
-'M=f' => \$max,
 'S=s' => \$submit{"command"},
 'delay=s' => \$submit{"delay"},
 'valgrind=s' => \$valgrind,
 'w=s' => \$workdir,
 'R' => \$restart,
 'P' => \$postprocess,
-'n=f' => \$n,
+'n=s' => \$ranges,
 'nosu2' => \$noSu2,
 'h' => \$help) or die "$0: Error in command line args, run with -h to display help\n";
 
@@ -26,18 +24,20 @@ if (defined($help)) {
 	print "\tIf no option is given creates inputs and batches for all ";
 	print "no-restart tests\n";
 	print "\t-S command\n";
-	print "\t\tAfter creating inputs and batches, submit them to the queue ";
-	print "using batchDollarized.pbs as template, and ";
-	print "with command command, usually command is qsub but you can also use ";
-	print "bash to run in the command line without a batching system.\n";
+	print "\t\tAfter creating inputs and batches, submit them to the queue\n";
+	print "\t\tusing batchDollarized.pbs as template, and\n";
+	print "\t\twith command command, usually command is qsub but you can also use\n";
+	print "\t\tbash to run in the command line without a batching system.\n";
 	print "\t-delay delay\n";
 	print "\t\tDelay in seconds between subsequent submissions.\n";
-	print "\t-m min\n";
-	print "\t\tMinimum test to run is min (inclusive)\n";
-	print "\t-M max\n";
-	print "\t\tMaximum test to run is max (inclusive)\n";
 	print "\t-n n\n";
-	print "\t\tIgnore all tests except test number n\n";
+	print "\t\tIgnore all tests except test(s) supplied\n";
+	print "\t\tThis is a comma-separated list of at least one range.\n";
+	print "\t\tA range is one of the following.\n";
+	print "\t\t\tA number, like 2\n";
+	print "\t\t\tA number followed by a dash, like 2-; this sets the minimum\n";
+	print "\t\t\tA dash followed by a number, like -2; this sets the maximum\n";
+	print "\t\t\tTwo number separated by a dash, like 2-4, indicating the range\n";
 	print "\t-w workdir\n";
 	print "\t\tUse workdir as working directory not the default of tests/\n";
 	print "\t-R\n";
@@ -61,38 +61,45 @@ defined($workdir) or $workdir = "tests";
 defined($restart) or $restart = 0;
 defined($postprocess) or $postprocess = 0;
 
-my $exact = 0;
-if (defined($n)) {
-	if (defined($min) or defined($max)) {
-		die "$0: -n cannot be used with either -m or -M\n";
-	}
-
-	$min = $n;
-	$max = $n;
-	$exact = 1;
-}
-
 my $templateBatch = "batchDollarized.pbs";
-my @tests;
-Ci::getTests(\@tests);
+my @tests = Ci::getTests();
 
 prepareDir();
 
 my $total = scalar(@tests);
-for (my $i = 0; $i < $total; ++$i) {
+
+my @inRange = Ci::procRanges($ranges, $total);
+my $rangesTotal = scalar(@inRange);
+
+die "$0: No tests specified under -n\n" if ($rangesTotal == 0);
+
+for (my $j = 0; $j < $rangesTotal; ++$j) {
+	my $i = $inRange[$j];
+	die "$0: out of range $i >= $total\n" if ($i >= $total);
 	my $n = $tests[$i];
-	next if (defined($min) and $n < $min);
-	next if (defined($max) and $n > $max);
 
 	my $ir = isRestart("../inputs/input$n.inp",$n);
-	if ($restart) {
-		next if (!$ir and !$exact);
-	} else {
-		next if ($ir and !$exact);
+	if ($restart and !$ir) {
+		print STDERR "$0: WARNING: Ignored test $n ";
+		print STDERR "because it's a restart test and ";
+		print STDERR "you did NOT specify -R\n";
+		next;
+	}
+
+	if (!$restart and $ir) {
+		print STDERR "$0: WARNING: Ignored test $n ";
+		print STDERR "because it's NOT a restart test and ";
+		print STDERR "you specified -R\n";
+		next;
 	}
 
 	my $isSu2 = Ci::isSu2("../inputs/input$n.inp",$n);
-	next if ($isSu2 and $noSu2);
+	if ($isSu2 and $noSu2) {
+		print STDERR "$0: WARNING: Ignored test $n ";
+		print STDERR "because it's NOT an SU(2) test and ";
+		print STDERR "you specified -nosu2\n";
+		next;
+	}
 
 	my %ciAnnotations = getCiAnnotations("../inputs/input$n.inp",$n);
 	my $whatObserve = $ciAnnotations{"observe"};
