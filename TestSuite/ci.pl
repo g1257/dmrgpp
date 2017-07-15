@@ -31,25 +31,16 @@ if (defined($help)) {
 	print "\t-delay delay\n";
 	print "\t\tDelay in seconds between subsequent submissions.\n";
 	print "\t-n n\n";
-	print "\t\tIgnore all tests except test(s) supplied\n";
-	print "\t\tThis is a comma-separated list of at least one range.\n";
-	print "\t\tA range is one of the following.\n";
-	print "\t\t\tA number, like 2\n";
-	print "\t\t\tA number followed by a dash, like 2-; this sets the minimum\n";
-	print "\t\t\tA dash followed by a number, like -2; this sets the maximum\n";
-	print "\t\t\tTwo number separated by a dash, like 2-4, indicating the range\n";
-	print "\t-w workdir\n";
-	print "\t\tUse workdir as working directory not the default of tests/\n";
+	print Ci::helpFor("-n");
+	print Ci::helpFor("-w");
 	print "\t-R\n";
 	print "\t\tRun restart tests only\n";
 	print "\t-P\n";
 	print "\t\tRun postprocess only\n";
 	print "\t--valgrind tool\n";
 	print "\t\tRun with valgrind using tool tool\n";
-	print "\t-nosu2\n";
-	print "\t\tDo not run SU(2) tests\n";
-	print "\t-h\n";
-	print "\t\tPrint this help and exit\n";
+	print Ci::helpFor("-nosu2");
+	print Ci::helpFor("-h");
 	exit(0);
 }
 
