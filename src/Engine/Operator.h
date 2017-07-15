@@ -148,7 +148,6 @@ struct Operator {
 		 */
 		PsimagLite::String s = "";
 		io.readline(s,"TSPOperator=");
-		;
 
 		if (s == "cooked") {
 			io.readline(s,"COOKED_OPERATOR=");
@@ -162,11 +161,24 @@ struct Operator {
 			io.readMatrix(m,"RAW_MATRIX");
 			if (checkNonZero) checkNotZeroMatrix(m);
 			fullMatrixToCrsMatrix(data,m);
+		} else if (s == "expression") {
+			err("TSPOperator=expression is not supported yet\n");
+			io.readline(s,"OperatorExpression=");
+//			int site = 0;
+//			OperatorExpression operatorExpression;
+//			Operator p = operatorExpression(s, site);
+//			data = p.data;
+//			fermionSign = p.fermionSign;
+//			jm = p.jm;
+//			angularFactor = p.angularFactor;
+//			// TODO FIXME: update documentation above
+//			// TODO FIXME: deprecate cooked
+			return;
 		} else {
 			PsimagLite::String str(__FILE__);
 			str += " : " + ttos(__LINE__) + "\n";
-			str += "Only TSPOperator=cooked or TSPOperator=raw ";
-			str += "allowed, not TSPOperator=" + s + "\n";
+			str += "Only TSPOperator= must be followed by one of";
+			str += "raw, cooked, or expression, not " + s + "\n";
 			throw PsimagLite::RuntimeError(str.c_str());
 		}
 
