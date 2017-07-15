@@ -1,4 +1,5 @@
 \documentclass{article}
+\usepackage{amsmath}
 \usepackage{marginnote}
 
 \begin{document}
@@ -28,21 +29,24 @@ in the one-site Hilbert space, and a few others.
 
 \marginnote{Definition of Resilient}
 Let $\{W_0, W_1, \cdots, W_{m-1}\}$ be a set of $m$ \emph{sequential} DMRG 
- transformations and let 
- $\tilde{B} = 
- W^\dagger_{m-1} W^\dagger_{m-2}\cdots W^\dagger_0\, B\, W_0\cdots W_{m-2} W_{m-1}$ be
+ transformations, let
+ $W =W_0\cdots W_{m-2} W_{m-1}$,  and let 
+ $\tilde{B} =   W^\dagger\, B\, W$ be
  the DMRG transformed operator of $B$ after these $m$ transformations.
 Let $\{B_0, B_1, \cdots B_{n-1}\}$ be a set
 of $n$ one-site operators in some basis, and let $f$ be a function with
 $f(B_0, B_1, \cdots, B_{n-1})$ an operator in the same basis.
-Let $\tilde{f}$ be the function such that
+Let 
 \begin{equation}
-\tilde{f}(B_0, B_1, \cdots, B_{n-1}) = 
+\tilde{f}(B_0, B_1, \cdots, B_{n-1}) \equiv 
 f(\tilde{B}_0, \tilde{B}_1, \cdots, \tilde{B}_{n-1})
 \end{equation}
 
 The operator function $f$ is said to be \emph{DMRG-transformation resilient},
-or just DMRG-resilient, if $\tilde{f}=f$.
+or just DMRG-resilient, if 
+\begin{equation}
+\tilde{f}(B_0, B_1, \cdots, B_{n-1}) = W^\dagger\, f(B_0, B_1, \cdots, B_{n-1})\, W.
+\end{equation}
 For example, $f(A,B) = A*B$ is \emph{not} DMRG-resilient,
 but  $f(A) = A^\dagger$ and
 $f(A,B) = A + B$ both are.
@@ -75,7 +79,7 @@ There are different ways to implement this abstract interface, and each
 way defines a \emph{instance} targeting. For instance, \texttt{GroundStateTargeting}
 is the simplest of them as it targets \emph{only} the ground state vector.
 All other instances are referred to as \emph{non ground state targets} or NGSTs; 
-see \texttt{EngineTargeting*.h} in DMRG++ for a list. For example, 
+see \texttt{Engine/Targeting*.h} in DMRG++ for a list. For example, 
 \texttt{TargetingTimeStep.h}
 does t{\sc{DMRG.}}
 
@@ -125,7 +129,7 @@ UnnaturalOperatorName=A_
 Note that the name of the to-be-tracked operators ends
  with a specific prefix which shall be underscore \_
 (or something else haven't
-decided yet FIXME)/
+decided yet FIXME)
 Finally, the block \texttt{<file form operator specification>} is well-known
 and has been described in the DMRG++ manual.
 
