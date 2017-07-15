@@ -16,6 +16,8 @@ public:
 	    : operatorSpec_(model)
 	{}
 
+	// make sure that if a site is specified in an opsec, it
+	// is the same in all others
 	OperatorType operator()(PsimagLite::String opLabel, int& site2)
 	{
 		return operatorSpec_(opLabel, site2);

@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "IoSimple.h"
 #include "InputNg.h"
 #include "InputCheck.h"
+#include "OperatorExpression.h"
 
 namespace Dmrg {
 
@@ -120,31 +121,38 @@ struct Operator {
 	Operator(IoInputType& io, SomeModelType& model,bool checkNonZero)
 	{
 		/*PSIDOC Operator
-		 \item[TSPOperator] [String] Either \verb!cooked! or \verb!raw! to indicate
+		 \item[TSPOperator] [String] One of \{\verb!cooked!, \verb!raw!,
+		 \verb!expression!\}, in order to indicate
 		 how the operator will be specified.
 		 \item[COOKED\_OPERATOR] [String] A label naming the operator. This is model
 		 dependent and must be listed in the \verb!naturalOperator! function for
-		 the indicated in \verb!Model! in this input file. Ignored unless
+		 the indicated in \verb!Model! in this input file. Do not specify unless
 		 \verb!TSPOperator!
 		 was set to \verb!cooked!.
 		 \item[COOKED\_EXTRA] [VectorInteger] The first number is the number of numbers
 		 to follow. The other numbers are degrees of freedom for the cooked operator
 		 mentioned, and are passed as arguments (in order)
 		 to the \verb!naturalOperator! function for
-		 the indicated in \verb!Model! in this input file. Ignored unless
+		 the indicated in \verb!Model! in this input file. Do not specify unless
 		 \verb!TSPOperator!
 		 was set to \verb!cooked!.
 		 \item[RAW\_MATRIX] [MatrixComplexOrRealType] The number of rows and
 		 columns of this matrix, followed by the matrix in zig-zag format.
-		 Ignored unless
+		 Do not specify unless
 		 \verb!TSPOperator!
 		 was set to \verb!raw!.
 		 \item[FERMIONSIGN] [RealType] Either 1 or -1, indicating if this operator
-		 commutes or anticommutes at \emph{different} sites.
+		 commutes or anticommutes at \emph{different} sites. Do not specify
+		 \verb!TSPOperator!
+		 was set to \verb!expression!.
 		 \item[JMVALUES] [Integer*2] If not using $SU(2)$ symmetry this is \verb!0 0!.
-		 Else it is the $2j$ and $j+m$ for this operator.
+		 Else it is the $2j$ and $j+m$ for this operator. Do not specify
+		 \verb!TSPOperator!
+		 was set to \verb!expression!.
 		 \item[AngularFactor] [RealType] If not using $SU(2)$ symmetry this is \verb!1!.
-		 Else FIXME.
+		 Else FIXME. Do not specify
+		 \verb!TSPOperator!
+		 was set to \verb!expression!.
 		 */
 		PsimagLite::String s = "";
 		io.readline(s,"TSPOperator=");
@@ -164,20 +172,19 @@ struct Operator {
 		} else if (s == "expression") {
 			err("TSPOperator=expression is not supported yet\n");
 			io.readline(s,"OperatorExpression=");
-//			int site = 0;
-//			OperatorExpression operatorExpression;
-//			Operator p = operatorExpression(s, site);
-//			data = p.data;
-//			fermionSign = p.fermionSign;
-//			jm = p.jm;
-//			angularFactor = p.angularFactor;
-//			// TODO FIXME: update documentation above
-//			// TODO FIXME: deprecate cooked
+			int site = 0;
+			OperatorExpression<SomeModelType> operatorExpression(model);
+			Operator p = operatorExpression(s, site);
+			data = p.data;
+			fermionSign = p.fermionSign;
+			jm = p.jm;
+			angularFactor = p.angularFactor;
+			// TODO FIXME: deprecate cooked
 			return;
 		} else {
 			PsimagLite::String str(__FILE__);
 			str += " : " + ttos(__LINE__) + "\n";
-			str += "Only TSPOperator= must be followed by one of";
+			str += "TSPOperator= must be followed by one of";
 			str += "raw, cooked, or expression, not " + s + "\n";
 			throw PsimagLite::RuntimeError(str.c_str());
 		}
