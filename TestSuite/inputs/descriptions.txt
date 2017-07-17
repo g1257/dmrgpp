@@ -44,6 +44,50 @@ Tests *with* SU(2) symmetry:
 	INF(60)+7(100)-7(100)-7(100)+7(100)
 60) t-J one-Orbital (tjOneOrbital) on a chain with t=1 J=1 with 16+16 sites
 	 INF(60)+7(100)-7(100)-7(100)+7(100)
+
+65) Paper 29, Table 1, column 1
+InternalControlNumber: 29
+NumberInThisSeries: 0
+TemporaryAssignedNumber: N/A
+TestNumber: 65
+Walltime (in seconds, approx.): 44
+Model: HubbardOneBand
+Do you need to run observe? No
+Do you need to run scripts? No
+Succint Description Of Features this test tests: 60-site chain
+Figure* (if any): N/A
+Table* (if any): 1, column 1
+Page* where more or less this feature is used: 2230
+[* Refers to published version.]
+
+66) Paper 29, Table 1, column 4
+InternalControlNumber: 29
+NumberInThisSeries: 1
+TemporaryAssignedNumber: N/A
+Walltime (in seconds, approx.): 100
+Model: HubbardOneBand
+Do you need to run observe? No
+Do you need to run scripts? No
+Succint Description Of Features this test tests: SU(2) j=0
+Figure* (if any): N/A
+Table* (if any): 1, column 4
+Page* where more or less this feature is used: 2230
+[* Refers to published version.]
+
+67) Paper 29, Table 1, column 7
+InternalControlNumber: 29
+NumberInThisSeries: 1
+TemporaryAssignedNumber: N/A
+Walltime (in seconds, approx.): 120
+Model: HubbardOneBand
+Do you need to run observe? No
+Do you need to run scripts? No
+Succint Description Of Features this test tests: SU(2) j=5, vectorwithoffsets
+Figure* (if any): N/A
+Table* (if any): 1, column 7
+Page* where more or less this feature is used: 2230
+[* Refers to published version.]
+
 80) Heisenberg spin 1 with 4 sites
 #81 to 99 are reserved for Heisenberg spin 1
 100) same as 0 but without su(2) symmetry

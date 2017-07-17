@@ -5,12 +5,13 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 
-my ($memory,$failed,$noSu2,$help,$workdir,$golddir,$ranges);
+my ($memory,$failed,$noSu2,$help,$workdir,$golddir,$ranges,$info);
 GetOptions(
 'n=s' => \$ranges,
 'memory=i' => \$memory,
 'f' => \$failed,
 'nosu2' => \$noSu2,
+'i=i' => \$info,
 'h' => \$help,
 'g=s' => \$golddir,
 'w=s' => \$workdir);
@@ -28,6 +29,8 @@ if (defined($help)) {
 	print "\t-f\n";
 	print "\t\tPrint info only about failed tests\n";
 	print Ci::helpFor("-nosu2");
+	print "\t-i number\n";
+	print "\t\tPrint info for test number number\n";
 	print Ci::helpFor("-h");
 	exit(0);
 }
@@ -38,8 +41,15 @@ defined($noSu2) or $noSu2 = 0;
 defined($workdir) or $workdir = "tests";
 defined($golddir) or $golddir = "oldTests";
 
-my @tests = Ci::getTests();
-my $total = scalar(@tests);
+my @tests = Ci::getTests("inputs/descriptions.txt");
+my %allowedTests = Ci::getAllowedTests(\@tests);
+my $total = scalar(keys %allowedTests);
+
+if (defined($info)) {
+	print STDERR "$0: INFO for $info\n";
+	print STDERR " ".$allowedTests{$info}."\n";
+	exit(0);
+}
 
 my @inRange = Ci::procRanges($ranges, $total);
 my $rangesTotal = scalar(@inRange);
@@ -47,9 +57,11 @@ my $rangesTotal = scalar(@inRange);
 die "$0: No tests specified under -n\n" if ($rangesTotal == 0);
 
 for (my $j = 0; $j < $rangesTotal; ++$j) {
-        my $i = $inRange[$j];
-        die "$0: out of range $i >= $total\n" if ($i >= $total);
-	my $n = $tests[$i];
+        my $n = $inRange[$j];
+       if (!exists($allowedTests{"$n"})) {
+		print STDERR "$0: Test $n does not exist, ignored\n";
+		next;
+	}
 
 	my $isSu2 = Ci::isSu2("inputs/input$n.inp",$n);
 	if ($isSu2 and $noSu2) {

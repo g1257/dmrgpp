@@ -7,24 +7,41 @@ package Ci;
 
 sub getTests
 {
-	my $desc = "inputs/descriptions.txt";
+	my ($desc) = @_;
 	my @tests;
 	my $counter = 0;
 	open(FILE,"$desc") or die "$0: Cannot open $desc : $!\n";
 
+	my $prevNumber;
+	my $description = "";
 	while (<FILE>) {
-		last if (/^\#TAGSTART/);
-	}
-
-	while (<FILE>) {
-		last if (/^\#TAGEND/);
 		next if (/^\#/);
 		if (/^(\d+)\)/) {
-			$tests[$counter++] = $1;
+			my $number = $1;			
+			if ($counter == 0) {
+				$prevNumber = $number;
+				++$counter;
+				next;
+			}
+
+			my %h;
+			$h{"number"} = $prevNumber;
+			$h{"description"} = $description; 
+			$tests[$counter - 1] = \%h;
+			$prevNumber = $number;
+			++$counter;
+		} else {
+			$description .= $_;
 		}
 	}
 
 	close(FILE);
+
+	my %h;
+	$h{"number"} = $prevNumber;
+	$h{"description"} = $description; 
+	$tests[$counter - 1] = \%h;
+
 	return @tests;
 }
 
@@ -49,13 +66,7 @@ sub procRanges
 {
 	my ($range, $total) = @_;
 	my @inRange;
-	if (!defined($range)) {
-		for (my $i = 0; $i < $total; ++$i) {
-			push @inRange, $i;
-		}
-
-		return @inRange;
-	}
+	return @inRange if (!defined($range));
 
 	my @temp = split(/,/, $range);
 	my $n = scalar(@temp);
@@ -89,13 +100,27 @@ sub procRange
 	die "$0: FATAL: Invalid range spec.: $range\n";
 }
 
+sub getAllowedTests
+{
+	my ($a) = @_;
+	my %hh;
+	my $n = scalar(@$a);
+	for (my $i = 0; $i < $n; ++$i) {
+		my $h = $a->[$i];
+		my $n = $h->{"number"};
+		$hh{"$n"} = $h->{"description"};
+	}
+
+	return %hh;
+}
+
 sub helpFor
 {
 	my ($label) = @_;
 	my $h = "";
 	if ($label eq "-n") {
 		$h .= "\t-n n\n";
-		$h .= "\t\tIgnore all tests except test(s) supplied\n";
+		$h .= "\t\tSupply tests to run, this is mandatory.";
 		$h .= "\t\tThis is a comma-separated list of at least one range.\n";
 		$h .= "\t\tA range is one of the following.\n";
 		$h .= "\t\t\tA number, like 2\n";

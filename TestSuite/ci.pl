@@ -5,8 +5,7 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 
-my ($valgrind,$workdir,
-    $restart,$ranges,$postprocess,$noSu2,$help);
+my ($valgrind,$workdir,$restart,$ranges,$postprocess,$noSu2,$info,$help);
 my %submit;
 GetOptions(
 'S=s' => \$submit{"command"},
@@ -16,6 +15,7 @@ GetOptions(
 'R' => \$restart,
 'P' => \$postprocess,
 'n=s' => \$ranges,
+'i=i' => \$info,
 'nosu2' => \$noSu2,
 'h' => \$help) or die "$0: Error in command line args, run with -h to display help\n";
 
@@ -39,6 +39,8 @@ if (defined($help)) {
 	print "\t\tRun postprocess only\n";
 	print "\t--valgrind tool\n";
 	print "\t\tRun with valgrind using tool tool\n";
+	print "\t-i number\n";
+	print "\t\tPrint info for test number number\n";
 	print Ci::helpFor("-nosu2");
 	print Ci::helpFor("-h");
 	exit(0);
@@ -53,21 +55,31 @@ defined($restart) or $restart = 0;
 defined($postprocess) or $postprocess = 0;
 
 my $templateBatch = "batchDollarized.pbs";
-my @tests = Ci::getTests();
 
 prepareDir();
 
-my $total = scalar(@tests);
+my @tests = Ci::getTests("../inputs/descriptions.txt");
+my %allowedTests = Ci::getAllowedTests(\@tests);
+my $total = scalar(keys %allowedTests);
+
+if (defined($info)) {
+	print STDERR "$0: INFO for $info\n";
+	print STDERR " ".$allowedTests{$info}."\n";
+	exit(0);
+}
 
 my @inRange = Ci::procRanges($ranges, $total);
 my $rangesTotal = scalar(@inRange);
 
 die "$0: No tests specified under -n\n" if ($rangesTotal == 0);
+print STDERR "@inRange"."\n";
 
 for (my $j = 0; $j < $rangesTotal; ++$j) {
-	my $i = $inRange[$j];
-	die "$0: out of range $i >= $total\n" if ($i >= $total);
-	my $n = $tests[$i];
+	my $n = $inRange[$j];
+	if (!exists($allowedTests{"$n"})) {
+		print STDERR "$0: Test $n does not exist, ignored\n";
+		next;
+	}
 
 	my $ir = isRestart("../inputs/input$n.inp",$n);
 	if ($restart and !$ir) {
