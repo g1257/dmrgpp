@@ -124,6 +124,8 @@ struct Operator {
 		 \item[TSPOperator] [String] One of \{\verb!cooked!, \verb!raw!,
 		 \verb!expression!\}, in order to indicate
 		 how the operator will be specified.
+		 \item[OperatorExpression=] A label containing an operator expression.
+		 Specify only if \verb!TSPOperator! was set to \verb!expression!
 		 \item[COOKED\_OPERATOR] [String] A label naming the operator. This is model
 		 dependent and must be listed in the \verb!naturalOperator! function for
 		 the indicated in \verb!Model! in this input file. Do not specify unless
@@ -142,15 +144,15 @@ struct Operator {
 		 \verb!TSPOperator!
 		 was set to \verb!raw!.
 		 \item[FERMIONSIGN] [RealType] Either 1 or -1, indicating if this operator
-		 commutes or anticommutes at \emph{different} sites. Do not specify
+		 commutes or anticommutes at \emph{different} sites. Do not specify if
 		 \verb!TSPOperator!
 		 was set to \verb!expression!.
 		 \item[JMVALUES] [Integer*2] If not using $SU(2)$ symmetry this is \verb!0 0!.
-		 Else it is the $2j$ and $j+m$ for this operator. Do not specify
+		 Else it is the $2j$ and $j+m$ for this operator. Do not specify if
 		 \verb!TSPOperator!
 		 was set to \verb!expression!.
 		 \item[AngularFactor] [RealType] If not using $SU(2)$ symmetry this is \verb!1!.
-		 Else FIXME. Do not specify
+		 Else FIXME. Do not specify if
 		 \verb!TSPOperator!
 		 was set to \verb!expression!.
 		 */
