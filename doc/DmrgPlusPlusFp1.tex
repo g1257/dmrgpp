@@ -45,20 +45,15 @@ The sample expression above in canonical form is
 3*nup + 1.5*ndown*:sz.txt + (-3.5)*ndown*c?1'*c?1 + 3.5*ndown*I.
 \end{verbatim}
 
-\marginnote{Where expressions can be used} 
+\marginnote{Where expressions (canonical or general) can be used} 
 An \texttt{opExpr} can be used in the following cases.
 
 (1) In a bare braket spec:
  \texttt{braketSpec = opExpr;opExpr;...}
 (2) In a dressed braket spec:
  \texttt{braketSpec =} \texttt{<bra|opExpr;opExpr;...|ket>}.
-And (3) After the input label \texttt{COOKED\_OPERATOR=}.
- The \texttt{TSPOperator=} will in the future take the
- value \verb!expression! instead of \verb!cooked!, and
- the label  \texttt{COOKED\_OPERATOR=} will be replaced
- with \texttt{OperatorExpression=}. The old labels will
-be still honored but deprecated, and a warning shall be printed
-if they are used.
+And (3) After the input label \texttt{OperatorExpression=} when
+ \texttt{TSPOperator=expression} is specified.
 
 \marginnote{Implementation and Coder Perspective}
 We shall first implement canonical operator expressions, and then general expressions,
@@ -71,7 +66,11 @@ we finally multiply by the optional scalar. This term is then added to an
 accumulation variable that yields the final result at the end of the process.
 
 For a general operator expression, we first assign a depth to each
-opening parenthesis. We then find the deepest opening parenthesis and its closing parenthesis;
+opening parenthesis.\footnote{We assign depth to opening parentheses as follows. 
+We set counter=0. Each
+time we find an opening parenthesis we assign it depth=counter, and increase counter.
+Each time we find a closing parenthesis we decrease counter.}
+We then find the deepest opening parenthesis and its closing parenthesis;
 we take the contents, which shall contain no parentheses, and is thus
 almost canonical. We canonicalize this expression by removing all leading $+$ signs;
 by converting $-opsec...$ into $+(-1)*opsec...$; and 
@@ -82,8 +81,6 @@ there are no more parentheses left.
 Syntax in errors in expression shall be found while parsing it in the way
 just described.
 
-We assign depth to opening parentheses as follows. We set counter=0. Each
-time we find an opening parenthesis we assign it depth=counter, and increase counter.
-Each time we find a closing parenthesis we decrease counter.
+
 
 \end{document}
