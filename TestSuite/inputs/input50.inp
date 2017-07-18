@@ -1,0 +1,55 @@
+TotalNumberOfSites=50
+NumberOfTerms=1
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 1.0
+
+hubbardU	50
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+
+potentialV	 100
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+Model=HubbardOneBand
+SolverOptions=TimeStepTargetting
+Version=4.52
+OutputFile=data50.txt
+InfiniteLoopKeptStates=200
+FiniteLoops 3
+24 200 0
+-48 200 0 48 200 0
+RepeatFiniteLoopsFrom=1
+RepeatFiniteLoopsTimes=5
+
+TargetElectronsUp=25
+TargetElectronsDown=25
+GsWeight=0.1
+TSPTau=0.1
+TSPTimeSteps=5
+TSPAdvanceEach=48
+TSPAlgorithm=Krylov
+TSPSites 1 25
+TSPLoops 1 1
+TSPProductOrSum=product
+
+TSPOperator=expression
+OperatorExpression=c'
+
+Threads=4
+
+#ci getTimeObservablesInSitu 25 '<P0|nup|P0>'
+#ci getTimeObservablesInSitu 18 '<P0|nup|P0>'

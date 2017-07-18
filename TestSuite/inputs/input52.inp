@@ -1,0 +1,68 @@
+TotalNumberOfSites=8
+NumberOfTerms=1
+DegreesOfFreedom=1
+GeometryKind=ladder
+GeometryOptions=ConstantValues
+Connectors 1 1.0
+Connectors 1 0.5
+LadderLeg=2
+
+hubbardU	8
+10 10 10 10 10 10 10 10
+
+potentialV	 16
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+Model=HubbardOneBand
+SolverOptions=TimeStepTargetting,vectorwithoffsets
+Version=4.52
+OutputFile=data52.txt
+InfiniteLoopKeptStates=200
+FiniteLoops 3
+3 400 0
+-6 400 0 6 200 0
+RepeatFiniteLoopsFrom=1
+RepeatFiniteLoopsTimes=5
+
+TargetElectronsUp=4
+TargetElectronsDown=4
+GsWeight=0.1
+TSPTau=0.1
+TSPTimeSteps=5
+TSPAdvanceEach=6
+TSPAlgorithm=Krylov
+TSPSites 2 4 2
+TSPLoops 2 1 1
+TSPProductOrSum=product
+
+TSPOperator=raw
+RAW_MATRIX
+4 4
+0.0    0.0    0.0   0.0
+0.0   0.0    0.0   -1.0
+0.0    0.0    0.0   1.0
+0.0    0.0    0.0   0.0
+FERMIONSIGN=-1
+JMVALUES 0 0
+AngularFactor=1
+
+TSPOperator=raw
+RAW_MATRIX
+4 4
+0.0    0.0    0.0   0.0
+1.0    0.0    0.0   0.0
+1.0    0.0    0.0   0.0
+0.0    0.0    0.0   0.0
+FERMIONSIGN=-1
+JMVALUES 0 0
+AngularFactor=1
+
+peratorExpression=c'+(-1.0)*c*'c?1*c?1'+c?1'+(-1.0)*c?1'*c*c'
+
+peratorExpression=c*c?1*c?1'+c?1*c*c'
+
+Threads=1
+
+#ci getTimeObservablesInSitu 2 '<P0|nup|P0>'
+#ci getTimeObservablesInSitu 4 '<P0|nup|P0>'
+#ci getTimeObservablesInSitu 5 '<P0|nup|P0>'
