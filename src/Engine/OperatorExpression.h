@@ -90,6 +90,7 @@ private:
 		bool isScalar =  isCanonicalScalar(termStr);
 		if (isScalar) {
 			ComplexOrRealType f = findFactor(termStr,
+			                                 false,
 			                                 static_cast<ComplexOrRealType*>(0));
 			factor *= f;
 			return;
@@ -122,6 +123,7 @@ private:
 
 	// Deal with complex here, FIXME
 	ComplexOrRealType findFactor(PsimagLite::String termStr,
+	                             bool prevHadParens,
 	                             RealType* dummy) const
 	{
 		SizeType l = termStr.length();
@@ -133,17 +135,28 @@ private:
 		if (c == '.') termStr  = "0" + termStr;
 		if (isDigit || c == '.') return atof(termStr.c_str());
 
+		if (c == '-') {
+			if (!prevHadParens)
+				err("Negative scalar must have enclosing parens\n");
+
+			return atof(termStr.c_str());
+		}
+
 		if (c != '(' || termStr[l-1] != ')')
 			err("OperatorExpression: expected enclosing parens\n");
 
 		PsimagLite::String tmp = termStr.substr(1, l-2);
-		return findFactor(tmp, dummy);
+		return findFactor(tmp, true, dummy);
 	}
 
-	ComplexOrRealType findFactor(PsimagLite::String termStr, std::complex<RealType>*) const
+	ComplexOrRealType findFactor(PsimagLite::String termStr,
+	                             bool prevHadParens,
+	                             std::complex<RealType>*) const
 	{
-		err("OperatorExpression: Complex scalars not yet implemented (sorry)\n");
-		return 0.0;
+		std::cerr<<"WARNING: OperatorExpression: ";
+		std::cerr<<"Complex scalars not yet implemented (sorry)\n";
+		RealType *x = 0;
+		return findFactor(termStr, prevHadParens, x);
 	}
 
 	SizeType checkMetaEqual(const OperatorType& op1, const OperatorType& op2) const

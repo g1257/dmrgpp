@@ -159,6 +159,7 @@ public:
 		knownLabels_.push_back("RestartFilename");
 		knownLabels_.push_back("COOKED_OPERATOR");
 		knownLabels_.push_back("COOKED_EXTRA");
+		knownLabels_.push_back("OperatorExpression");
 		knownLabels_.push_back("TargetExtra");
 		knownLabels_.push_back("TSPEnergyForExp");
 		knownLabels_.push_back("AdjustQuantumNumbers");

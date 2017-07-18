@@ -172,7 +172,6 @@ struct Operator {
 			if (checkNonZero) checkNotZeroMatrix(m);
 			fullMatrixToCrsMatrix(data,m);
 		} else if (s == "expression") {
-			err("TSPOperator=expression is not supported yet\n");
 			io.readline(s,"OperatorExpression=");
 			int site = 0;
 			OperatorExpression<SomeModelType> operatorExpression(model);

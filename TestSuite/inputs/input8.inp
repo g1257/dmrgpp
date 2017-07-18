@@ -1,4 +1,4 @@
-TotalNumberOfSites=16 
+TotalNumberOfSites=16
 NumberOfTerms=1
 DegreesOfFreedom=1
 GeometryKind=chain
@@ -12,8 +12,8 @@ Model=HubbardOneBand
 SolverOptions=TimeStepTargetting
 Version=53725d9b8f22615ccccc782082f4cd6f51a4e374
 OutputFile=data8.txt
-InfiniteLoopKeptStates=200 
-FiniteLoops 12  4 200 0 -4 200 0 4 200 0 -4 200 0 
+InfiniteLoopKeptStates=200
+FiniteLoops 12  4 200 0 -4 200 0 4 200 0 -4 200 0
 		4 200 0 -4 200 0 4 200 0 -4 200 0
 		4 200 0 -4 200 0 4 200 0 -4 200 0
 
@@ -28,16 +28,14 @@ TSPSites 1 10
 TSPLoops 1 0
 TSPProductOrSum=product
 
-TSPOperator=raw 
-RAW_MATRIX 
+TSPOperator=raw
+RAW_MATRIX
 4 4
 0.0    0.0    0.0   0.0
 1.0    0.0    0.0   0.0
-0.0    0.0    0.0   0.0 
-0.0    0.0    1.0   0.0 
+0.0    0.0    0.0   0.0
+0.0    0.0    1.0   0.0
 FERMIONSIGN=-1
 JMVALUES 0 0
 AngularFactor=1
 
-
-   

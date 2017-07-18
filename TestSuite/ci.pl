@@ -105,6 +105,16 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	}
 
 	my %ciAnnotations = getCiAnnotations("../inputs/input$n.inp",$n);
+	my $whatTimeInSituObs = $ciAnnotations{"getTimeObservablesInSitu"};
+	my $x = scalar(@$whatTimeInSituObs);
+	if ($x > 0) {
+		print "|$n| has $x getTimeObservablesInSitu lines\n";
+		if ($postprocess) {
+			runTimeInSituObs($n, $whatTimeInSituObs, \%submit);
+			next;
+		}
+	}
+
 	my $whatObserve = $ciAnnotations{"observe"};
 	my $whatObserveN = scalar(@$whatObserve);
 	if ($whatObserveN > 0) {
@@ -133,6 +143,31 @@ sub findArguments
 	}
 
 	return "";
+}
+
+sub runTimeInSituObs
+{
+	my ($n,$what,$submit) = @_;
+	my $whatN = scalar(@$what);
+	for (my $i = 0; $i < $whatN; ++$i) {
+		my $file = "runForinput$n.cout";
+		if (!(-r "$file")) {
+			print STDERR "|$n|: WARNING: $file not readable\n";
+			next;
+		}
+
+		my $cmd = "../../scripts/getTimeObservablesInSitu.pl ";
+		$cmd .= $what->[$i];
+		$cmd .= " <  $file ";
+		$cmd .= " > getTimeObservablesInSitu${n}_$i.txt";
+		$cmd =~ s/;/SEMI_COLON/g;
+		if ($submit->{"command"} ne "") {
+			print STDERR "|$n|: Executing $cmd\n";
+			system($cmd);
+		} else {
+			print STDERR "|$n|: Dry run $cmd\n";
+		}
+	}
 }
 
 sub runObserve
@@ -173,6 +208,7 @@ sub getCiAnnotations
 	open(FILE, "$file") or return "";
 	my @whatObserve;
 	my @whatDmrg;
+	my @whatTimeObsInSitu;
 	my $counter = 0;
 	while (<FILE>) {
 		chomp;
@@ -185,12 +221,19 @@ sub getCiAnnotations
 			push (@whatDmrg, "$1");
 			next;
 		}
+
+		if (/^#ci getTimeObservablesInSitu (.*$)/) {
+			push (@whatTimeObsInSitu, "$1");
+			next;
+		}
 	}
 
 	close(FILE);
 	my %h;
 	$h{"dmrg"} = \@whatDmrg;
 	$h{"observe"} = \@whatObserve;
+	$h{"getTimeObservablesInSitu"} = \@whatTimeObsInSitu;
+
 	return %h;
 }
 
