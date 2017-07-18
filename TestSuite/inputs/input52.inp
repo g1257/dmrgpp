@@ -35,34 +35,17 @@ TSPSites 2 4 2
 TSPLoops 2 1 1
 TSPProductOrSum=product
 
-TSPOperator=raw
-RAW_MATRIX
-4 4
-0.0    0.0    0.0   0.0
-0.0   0.0    0.0   -1.0
-0.0    0.0    0.0   1.0
-0.0    0.0    0.0   0.0
-FERMIONSIGN=-1
-JMVALUES 0 0
-AngularFactor=1
+TSPOperator=expression
+OperatorExpression=c+(-1.0)*c*c?1*c?1'+c?1+(-1.0)*c?1*c*c'
 
-TSPOperator=raw
-RAW_MATRIX
-4 4
-0.0    0.0    0.0   0.0
-1.0    0.0    0.0   0.0
-1.0    0.0    0.0   0.0
-0.0    0.0    0.0   0.0
-FERMIONSIGN=-1
-JMVALUES 0 0
-AngularFactor=1
+TSPOperator=expression
+OperatorExpression=c'*c?1*c?1'+c?1'*c*c'
 
-peratorExpression=c'+(-1.0)*c*'c?1*c?1'+c?1'+(-1.0)*c?1'*c*c'
-
-peratorExpression=c*c?1*c?1'+c?1*c*c'
-
-Threads=1
+Threads=4
 
 #ci getTimeObservablesInSitu 2 '<P0|nup|P0>'
 #ci getTimeObservablesInSitu 4 '<P0|nup|P0>'
 #ci getTimeObservablesInSitu 5 '<P0|nup|P0>'
+#ci getTimeObservablesInSitu 2 '<P0|doubleOcc|P0>'
+#ci getTimeObservablesInSitu 4 '<P0|doubleOcc|P0>'
+#ci getTimeObservablesInSitu 5 '<P0|doubleOcc|P0>'
