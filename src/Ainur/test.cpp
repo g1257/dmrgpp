@@ -3,6 +3,7 @@
 #include "Vector.h"
 #include "TypeToString.h"
 #include "PsimagLite.h"
+#include "Tokenizer.h"
 
 typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
@@ -29,19 +30,31 @@ public:
 
 		replaceAndStoreQuotes(vecChar_, str, '\'');
 
+		removeComments(str);
+
 		replaceAndStoreBraces(vecBrace_, str);
 
 		std::cout<<str<<"\n";
-		std::cout<<"------------\n";
-		std::cout<<"------------\n";
-		std::cout<<vecStr_;
-		std::cout<<"------------\n";
-		std::cout<<vecChar_<<"\n";
-		std::cout<<"------------\n";
-		std::cout<<vecBrace_<<"\n";
+		printContainers(std::cout);
+
+		VectorStringType statements;
+		PsimagLite::tokenizer(str, statements, ";");
+
+		procStatements(statements);
 	}
 
 private:
+
+	void printContainers(std::ostream& os) const
+	{
+		os<<"------------\n";
+		os<<"------------\n";
+		os<<vecStr_;
+		os<<"------------\n";
+		os<<vecChar_<<"\n";
+		os<<"------------\n";
+		os<<vecBrace_<<"\n";
+	}
 
 	template<typename T>
 	void replaceAndStoreQuotes(T& t, PsimagLite::String& str, char q)
@@ -162,6 +175,100 @@ private:
 		if (q == '\'') return 'q';
 		err("getMetaChar\n");
 		return 0;
+	}
+
+	void removeTrailingWhitespace(PsimagLite::String& s) const
+	{
+		SizeType start = 0;
+		SizeType l = s.length();
+		for (SizeType i = 0; i < l; ++i) {
+			if (isWhitespace(s[i]) || isEOL(s[i]))
+				start = i + 1;
+			else
+				break;
+		}
+
+		if (start == l) {
+			s = "";
+			return;
+		}
+
+
+		PsimagLite::String newStr = s.substr(start);
+		l = newStr.length();
+		SizeType end = l;
+		for (int i = l - 1; i >= 0; --i) {
+			if (isWhitespace(newStr[i]) || isEOL(newStr[i]))
+				end = i;
+			else
+				break;
+		}
+
+		s = newStr.substr(0, end);
+	}
+
+	void removeComments(PsimagLite::String& str) const
+	{
+		SizeType l = str.length();
+		PsimagLite::String newStr("");
+		char qComment = '#';
+		bool comment = false;
+		for (SizeType i = 0; i < l; ++i) {
+			if (str[i] == qComment) {
+				comment = true;
+				continue;
+			}
+
+			if (isEOL(str[i]))
+				comment = false;
+
+			if (comment)
+				continue;
+
+			newStr += str[i];
+		}
+
+		str = newStr;
+	}
+
+	bool isWhitespace(char c) const
+	{
+		return (c == ' ' || c == '\t');
+	}
+
+	bool isEOL(char c) const
+	{
+		return (c == '\n' || c == '\r');
+	}
+
+	void procStatements(VectorStringType& s) const
+	{
+		SizeType n = s.size();
+		for (SizeType i = 0; i < n; ++i) {
+			removeTrailingWhitespace(s[i]);
+			procStatement(s[i]);
+		}
+	}
+
+	void procStatement(const PsimagLite::String& s) const
+	{
+		bool bEq = (s.find("=") != PsimagLite::String::npos);
+		bool bScOrFunc = (s.find("@b") != PsimagLite::String::npos);
+
+		if (bEq && bScOrFunc) {
+			std::cout<<s<<" <---- syntax error\n";
+			return;
+		}
+
+		if  (bEq) {
+			std::cout<<s<<" <--- equality\n";
+			return;
+		}
+
+		if  (bScOrFunc) {
+			std::cout<<s<<" <--- function or scope\n";
+			return;
+		}
 	}
 
 	PsimagLite::String escapedChars_;
