@@ -1,0 +1,115 @@
+\documentclass[twocolumn]{article}
+\usepackage{marginnote}
+
+\begin{document}
+
+\title{PsimagLite Feature Proposal:\\
+Input System}
+\author{G.A.}
+\maketitle
+
+\section{Lexical}
+ASCII and UTF-8 (maybe).
+Define EOF, whitespace, and EOL.
+Comments: \verb!#! until EOL
+
+\subsection{Tokens}
+Tokens + Strings Literals + Other literals
+
+\subsection{Keywords}
+\verb!let! \verb!function! \verb!Matrix!
+Mathematical functions
+
+\section{Grammar}
+Declarations, Types.
+Properties for all types: \verb!defined! \verb!typeof!
+
+\subsection{Scalars} 
+\begin{verbatim}
+let a=1;
+let b=a+3.5;
+\end{verbatim}
+\subsection{Vectors} 
+\begin{verbatim}
+let v=[ 1 2 3 ];
+let w=[ 1 a 3*a ];
+let x=v+w;
+\end{verbatim}
+Properties: \verb!size!
+
+\subsection{Matrices} 
+\begin{verbatim}
+let m = [[0 1] [1 0]];
+let m2 = Matrix(4,2, 0 1 1 0 0 1 1 0);
+let m3 = 3.5*m;
+\end{verbatim}
+Properties: \verb!rows! and \verb!cols!
+
+\subsection{Strings} 
+\begin{verbatim}
+let s="Hello, ";
+s += "World!";
+\end{verbatim}
+Properties: \verb!length!
+
+\subsection{Groups} 
+\begin{verbatim}
+groupName {
+let name=chain;
+let Connections=[ 1 1 ]; }
+\end{verbatim}
+Unnamed groups?
+
+\section{Statements, Expressions}
+Imports: Symbols defined in template files for each application
+Globally defined symbols
+
+Conditionals:
+\begin{verbatim}
+if (expression) {
+} elsif (somethingelse) {
+} else {
+}
+\end{verbatim}
+Loops
+\begin{verbatim}
+loop (condition) {
+	// body
+	// break;
+	// continue;
+}
+\end{verbatim}
+
+Labels and gotos
+\begin{verbatim}
+label:
+if (expression) goto label;
+\end{verbatim}
+\section{Associative arrays?}
+\verb!a["key"]!
+
+\section{Type qualifiers?}
+\verb!const! \verb!required!
+
+\section{Functions}
+\begin{verbatim}
+functionName(b)
+{
+  let a = 3.5;
+  return a + b;
+}
+
+let c = functionName(1.2);
+\end{verbatim}
+Functions pass by value. To pass by reference say \verb!functionName(&b)!
+
+\section{Error Handling}
+
+\section{Implementation}
+Replace strings with positionals.
+Remove comments.
+Deal with groups and functions.
+Break on semicolon.
+Process statements.
+
+\end{document}
