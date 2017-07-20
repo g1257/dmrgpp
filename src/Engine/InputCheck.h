@@ -294,6 +294,7 @@ public:
 			\item [useSvd] TBW
 			\item [KronNoLoadBalance] Disable load balancing for MatrixVectorKron
 			\item [setAffinities] TBW
+			\item [wftInPatches] WFT calculation will be done using symmetry patches
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,const PsimagLite::String& val,SizeType)
@@ -348,6 +349,7 @@ public:
 		registerOpts.push_back("useSvd");
 		registerOpts.push_back("KronNoLoadBalance");
 		registerOpts.push_back("setAffinities");
+		registerOpts.push_back("wftInPatches");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);

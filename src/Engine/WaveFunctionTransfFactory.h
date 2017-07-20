@@ -157,11 +157,11 @@ public:
 			}
 		}
 
-		bool inBlocks = (params.options.find("wftInBlocks")!=PsimagLite::String::npos);
+		bool inBlocks = (params.options.find("wftInPatches")!=PsimagLite::String::npos);
 
 		if (BasisType::useSu2Symmetry()) {
 			if (inBlocks)
-				err("wftInBlocks not allowed when SU(2) is in use\n");
+				err("wftInPatches not allowed when SU(2) is in use\n");
 
 			wftImpl_=new WaveFunctionTransfSu2Type(stage_,
 			                                       firstCall_,
