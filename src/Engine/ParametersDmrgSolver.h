@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BoostSerializationHeaders.h"
 #include "IoSimple.h"
 #include "ArchiveFiles.h"
-#include "Tokenizer.h"
+#include "PsimagLite.h"
 #include "RestartStruct.h"
 #include "FiniteLoop.h"
 
@@ -225,7 +225,7 @@ struct ParametersDmrgSolver {
 			PsimagLite::String s("");
 			VectorStringType tokens;
 			io.readline(s,"TruncationTolerance=");
-			PsimagLite::tokenizer(s,tokens,",");
+			PsimagLite::split(tokens, s, ",");
 			truncationControl.first = atof(tokens[0].c_str());
 			if (tokens.size() > 1)
 				truncationControl.second = atoi(tokens[1].c_str());

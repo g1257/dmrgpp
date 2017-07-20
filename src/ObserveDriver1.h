@@ -25,7 +25,7 @@ bool observeOneFullSweep(IoInputType& io,
 	SizeType trail = 0;
 
 	PsimagLite::Vector<PsimagLite::String>::Type vecOptions;
-	PsimagLite::tokenizer(list,vecOptions,",");
+	PsimagLite::split(vecOptions, list, ",");
 	bool hasTrail = false;
 
 	for (SizeType i = 0; i < vecOptions.size(); ++i) {

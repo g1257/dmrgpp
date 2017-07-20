@@ -1,7 +1,7 @@
 #ifndef DMRG_braket_H
 #define DMRG_braket_H
 #include "Vector.h"
-#include "Tokenizer.h"
+#include "PsimagLite.h"
 #include "Matrix.h"
 #include "OperatorExpression.h"
 
@@ -29,7 +29,7 @@ public:
 	    : model_(model), braket_(2,""),savedString_(braket)
 	{
 		VectorStringType vecStr;
-		PsimagLite::tokenizer(braket,vecStr,"|");
+		PsimagLite::split(vecStr, braket, "|");
 
 		if (vecStr.size() != 3) {
 			PsimagLite::String str("ObserverInterpreter: syntax error for ");
@@ -51,7 +51,7 @@ public:
 			throw PsimagLite::RuntimeError(str);
 		}
 
-		PsimagLite::tokenizer(vecStr[1],opExprName_,";");
+		PsimagLite::split(opExprName_, vecStr[1], ";");
 
 		sites_.resize(opExprName_.size(),-1);
 

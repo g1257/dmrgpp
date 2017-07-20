@@ -90,7 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "ApplyOperatorExpression.h"
 #include "IoSimple.h"
-#include "Tokenizer.h"
+#include "PsimagLite.h"
 
 namespace Dmrg {
 
@@ -688,7 +688,7 @@ private:
 	VectorStringType getOperatorLabels() const
 	{
 		VectorStringType vecStr;
-		PsimagLite::tokenizer(targetHelper_.model().params().insitu,vecStr,",");
+		PsimagLite::split(vecStr, targetHelper_.model().params().insitu, ",");
 		return vecStr;
 	}
 

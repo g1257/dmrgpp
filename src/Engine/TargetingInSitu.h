@@ -307,7 +307,7 @@ private:
 		std::cout<<"TargetingInSitu\n";
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 		typename BraketType::VectorStringType vecStr;
-		PsimagLite::tokenizer(this->model().params().insitu, vecStr, ",");
+		PsimagLite::split(vecStr, this->model().params().insitu, ",");
 
 		for (SizeType i = 0; i < vecStr.size(); ++i) {
 			BraketType braket(this->model(), vecStr[i]);

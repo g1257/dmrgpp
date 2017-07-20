@@ -1,7 +1,7 @@
 #ifndef OPERATOREXPRESSION_H
 #define OPERATOREXPRESSION_H
 #include "OperatorSpec.h"
-#include "Tokenizer.h"
+#include "PsimagLite.h"
 
 namespace Dmrg {
 
@@ -34,7 +34,7 @@ public:
 		VectorStringType vecStr;
 		OperatorType op;
 
-		PsimagLite::tokenizer(opLabelCanonical, vecStr, "+");
+		PsimagLite::split(vecStr, opLabelCanonical, "+");
 		if (isSu2 && vecStr.size() > 1)
 			err("Expressions not supported when SU(2) is in use\n");
 
@@ -66,7 +66,7 @@ private:
 		bool isSu2 = BasisType::useSu2Symmetry();
 		ComplexOrRealType factor = 1.0;
 		VectorStringType vecStr;
-		PsimagLite::tokenizer(opTermCanonical, vecStr, "*");
+		PsimagLite::split(vecStr, opTermCanonical, "*");
 		if (isSu2 && vecStr.size() > 1)
 			err("Expressions not supported when SU(2) is in use\n");
 

@@ -143,7 +143,7 @@ public:
 	void interpret(const PsimagLite::String& list, SizeType rows, SizeType cols)
 	{
 		typename BraketType::VectorStringType vecStr;
-		PsimagLite::tokenizer(list,vecStr,",");
+		PsimagLite::split(vecStr, list, ",");
 
 		for (SizeType i = 0; i < vecStr.size(); ++i) {
 			BraketType braket(model_, vecStr[i]);
