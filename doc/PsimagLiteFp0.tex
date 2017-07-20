@@ -1,9 +1,12 @@
 \documentclass[twocolumn]{article}
+\usepackage{booktabs}
 \usepackage{marginnote}
+\usepackage{textcomp}
+\usepackage[T1]{fontenc}
 
 \begin{document}
 
-\title{PsimagLite Feature Proposal:\\
+\title{PsimagLite Feature Proposal:
 Input System}
 \author{G.A.}
 \maketitle
@@ -13,62 +16,246 @@ ASCII.
 Define EOF, whitespace, and EOL.
 Comments: \verb!#! until EOL
 
-\subsection{Tokens}
 Tokens + Strings Literals + Other literals
 
-\subsection{Keywords}
-\verb!let! \verb!require! \verb!const! \verb!import! \verb!Matrix!
-Mathematical functions
-
-\section{Grammar}
-Declarations, Types.
+Keywords:
+\verb!let! \verb!require! \verb!const! \verb!import! \verb!matrix!.
 Properties for all types: \verb!defined! \verb!typeof!
-
-\subsection{Scalars} 
 \begin{verbatim}
-let a=1;
-let b=a+3.5;
+# declare a, require a,  and
+# require it to be integer
+require a.typeof = "integer";
+# declare pi, make pi value constant
+const pi = 3.1415927;
+pi = 3.14; # ERROR, pi constant
+# declare b, make type of b constant 
+# and equal to integer
+const b.typeof = "integer"; 
+b = 3; # OK
+b = 3.5; # ERROR, not integer
+b.typeof = "real"; # ERROR, type constant
+c = 3.5; # ERROR c undefined
 \end{verbatim}
-\subsection{Vectors} 
-\begin{verbatim}
-let v=[ 1 2 3 ];
-let w=[ 1 a 3*a ];
-let x=v+w;
-\end{verbatim}
-Properties: \verb!size!
-
-\subsection{Matrices} 
-\begin{verbatim}
-let m = [[0 1] [1 0]];
-let m2 = Matrix(4,2, 0 1 1 0 0 1 1 0);
-let m3 = 3.5*m;
-\end{verbatim}
-Properties: \verb!rows! and \verb!cols!
 
 \subsection{Strings and Characters} 
 \begin{verbatim}
 let s="Hello, ";
-s += "World!";
-let c = 'a';
+let c = 'W';
+s = s + c + "orld!";
+let d = "'"; # OK
+# let e = '"'; # ERROR
+let e = '\"'; # OK
 \end{verbatim}
-Properties: \verb!length!
+Properties: \verb!s.length! \verb!s[0]!
+
+\subsection{Scalars} 
+\begin{verbatim}
+let a=1; # defines int scalar
+let b=a+3.5; # defines real scalar
+let c=3*i + 1.2; # defines complex scalar
+a = a + 1.5; # OK, a promoted to real
+a = a + 1.5*i; # ERROR
+\end{verbatim}
+Sub-type for scalars: integer, real, complex.
+
+\subsection{Vectors} 
+\begin{verbatim}
+let v=[ 1, 2, 3 ];
+let w=[ 1, a, 3*a ];
+let x=v+w;
+let y = [];
+y.size = 4;
+# equivalent to y = [ 1, 1 ,1, 1]
+y = [1, ... ] 
+\end{verbatim}
+Properties: \verb!v.size! \verb!v[0]!
+Vectors values: scalars, strings, and characters.
+
+\section{Associative arrays or Hashes}
+\begin{verbatim}
+let a = ({key1 : 3, key2 : "Hello"}); 
+# defines a["key1"] and a["key2"]
+# to have the corresponding values.
+\end{verbatim}
+Hash values: scalars, strings, characters, vectors.
+
+\subsection{Matrices} 
+\begin{verbatim}
+# As vector of vectors
+let m = [[0, 1], [1, 0]];
+# As a hash
+let m2 = ({ rows : 4, cols : 2, data :
+[0, 1, 1, 0, 0, 1, 1, 0] });
+let m3 = 3.5*m;
+\end{verbatim}
+Properties: \verb!rows! \verb!cols! \verb!data!. 
+Matrix values: scalars.
 
 \subsection{Groups} 
 \begin{verbatim}
-groupName {
-name="chain";
-Connections=[ 1 1 ];
-let a = "my local value"; }
-\end{verbatim}
-The above would be lowered to
-\begin{verbatim}
+groupName={ name="chain";
+Connections=[ 1, 1 ];
+let a = "my local value"; };
+#The above would be lowered to
 groupName.name="chain";
-groupName.Connections=[ 1 1 ];
+groupName.Connections=[ 1, 1 ];
 let groupName.a = "my local value";
+# Unnamed groups?
 \end{verbatim}
-Unnamed groups?
 
-\section{Associative arrays?}
-\verb!a["key"]!
+\section{Operators and Functions}
+\begin{tabular}{lll}\toprule
+Op. & Type & Description\\\midrule
+$+,-$ & 3, [], [[]] & scalar, vector, matrix\\
+$+$ & ``''& str. + str. or str. + char\\
+$*,/$ & 3*3, 3/3 & scalar $*$ and $/$\\
+$*$ & various & 3*[], 3*[[]], [[]]*[]\\
+$*$ & [[]]*[[]] & matrix*matrix = matrix\\
+$*$ & []*[] & vector*vector = scalar\\
+$**$ & 3$**$2 & $=9$\\
+$\%$ & 3\%2 & modulus\\
+$[]$ & vectors & entry\\
+{[}\textquotedbl\textquotedbl{]} & hashes & value given key\\
+(,) & matrices & matrix element\\
+\bottomrule\\
+\end{tabular}
 
+Operators for binary numbers? User defined operators are not allowed.
+User defined functions must be entered as a string 
+AST. (To be explained later.)
+Mathematical functions for scalars:
+\texttt{abs, conj, sqrt, exp, log, sin, cos, atan}.
+Functions for complex numbers \verb!abs! \verb!real! \verb!imag! \verb!arg! 
+Example \texttt{let a = 3.5*sin(b);}
+\\
+
+\begin{tabular}{ll}\toprule
+Type & Description\\\midrule
+unknown & let a;\\
+string & let a = \textquotedbl\textquotedbl;\\
+character & let a = \textquotesingle\textquotesingle;\\
+scalar & let a = 3.5;\\
+vector & let a = [];\\
+matrix & let a = [[]];\\
+group & let a = \{\};\\
+hash & let a = (\{\});\\
+\bottomrule\\
+\end{tabular}
+
+Inputs 52 from the TestSuite follows.
+\begin{tiny}
+\begin{verbatim}
+##1.0
+TotalNumberOfSites=8;
+NumberOfTerms=1;
+DegreesOfFreedom=1;
+GeometryKind="ladder";
+GeometryOptions="ConstantValues";
+dir0.Connectors = [1.0];
+dir1.Connectors = [0.5];
+LadderLeg=2;
+
+hubbardU	.size = 8;
+hubbardU = [10, ...];
+
+potentialV.size = 16;
+potentialV = [ 0, ...];
+Model="HubbardOneBand";
+SolverOptions="TimeStepTargetting,vectorwithoffsets";
+Version="4.52";
+OutputFile="data52.txt"
+InfiniteLoopKeptStates=200;
+FiniteLoops = [
+[ 3, 400, 0],
+[-6, 400, 0],
+[ 6, 200, 0]
+];
+RepeatFiniteLoopsFrom=1;
+RepeatFiniteLoopsTimes=5;
+
+TargetElectronsUp=4;
+TargetElectronsDown=4;
+GsWeight=0.1;
+TSPTau=0.1;
+TSPTimeSteps=5;
+TSPAdvanceEach=6;
+TSPAlgorithm="Krylov";
+TSPSites = [4, 2];
+TSPLoops = [1, 1];
+TSPProductOrSum="product";
+
+TSPOperator="expression";
+OperatorExpression="c+(-1.0)*c*c?1*c?1'+c?1+(-1.0)*c?1*c*c'";
+
+TSPOperator="expression";
+OperatorExpression="c'*c?1*c?1'+c?1'*c*c'";
+
+Threads=4;
+
+#ci getTimeObservablesInSitu 2 '<P0|nup|P0>'
+#ci getTimeObservablesInSitu 4 '<P0|nup|P0>'
+#ci getTimeObservablesInSitu 5 '<P0|nup|P0>'
+#ci getTimeObservablesInSitu 2 '<P0|doubleOcc|P0>'
+#ci getTimeObservablesInSitu 4 '<P0|doubleOcc|P0>'
+#ci getTimeObservablesInSitu 5 '<P0|doubleOcc|P0>'
+\end{verbatim}
+\end{tiny}
+
+Inputs 340 from the TestSuite follows.
+\begin{tiny}
+\begin{verbatim}
+##1.0
+TotalNumberOfSites=8;
+Orbitals=2;
+NumberOfTerms=3;
+
+gt0={ # gt means geometry term
+  DegreesOfFreedom=Orbitals;
+  GeometryKind="ladderx";
+  GeometryOptions="ConstantValues";
+  LadderLeg=2;
+  dir0.Connectors = [ # x-dir
+    [-0.058, 0],
+    [0, -0.2196]];
+  dir1.Connectors = [ # y-dir
+    [-0.2196, 0],
+    [0, -0.058]];
+  dir2.Connectors = [ # x+y
+    [0.20828, 0.079],
+    [0.079, 0.20828]];
+  dir3.Connectors = [ # x-y
+    [0.20828, -0.079]
+    [-0.079, 0.20828]];
+};
+
+gt1={
+  DegreesOfFreedom=1;
+  GeometryKind="ladderx";
+  GeometryOptions="ConstantValues";
+  LadderLeg=2;
+  dir0.Connectors = [0.1];
+  dir1.Connectors = [0.1];
+  dir2.Connectors = [0.02];
+  dir3.Connectors = [0.02]; 
+};
+
+gt2=gt1; # note the abbreviation here
+
+hubbardU	 = [0.0, 0.0, 0.0, 0.0]; 
+potentialV.size = 32;
+potentialV = [0, ...];
+
+Model="FeAsBasedScExtended";
+FeAsMode="INT_PAPER33";
+SolverOptions="none"
+Version="61289987cdd32b8485213ac0415baf4e9cd16432";
+OutputFile="data340.txt";
+InfiniteLoopKeptStates=60;
+let v1 = [ 3, 100, 0];
+let v2 = [-3, 100, 0];
+FiniteLoops = [v1, v2, v2, v1]; # note the abbreviation here
+TargetElectronsUp=8;
+TargetElectronsDown=TargetElectronsUp;
+\end{verbatim}
+\end{tiny}
 \end{document}
