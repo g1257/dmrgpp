@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009-2013, 2017, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 4.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -74,7 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /*! \file WaveFunctionTransfLocal.h
  *
  *  This class implements the wave function transformation, see PRL 77, 3633 (1996)
- *
+ *  this is for when NOT using SU(2)
  */
 
 #ifndef WFT_LOCAL_HEADER_H
@@ -171,7 +171,7 @@ private:
 		if (twoSiteDmrg_)
 			return transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
 
-		typename ParallelWftType::DirectionEnum dir1 = ParallelWftType::DIR_1;
+		typename DmrgWaveStructType::DirectionEnum dir1 = DmrgWaveStructType::DIR_1;
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
 			transformVectorParallel(psiDest,psiSrc,lrs,i0,nk,dir1);
@@ -184,7 +184,7 @@ private:
 	                             const LeftRightSuperType& lrs,
 	                             SizeType i0,
 	                             const VectorSizeType& nk,
-	                             typename ParallelWftType::DirectionEnum dir) const
+	                             typename DmrgWaveStructType::DirectionEnum dir) const
 	{
 		typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
 		ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
@@ -220,7 +220,7 @@ private:
 	                                  SizeType i0,
 	                                  const VectorSizeType& nk) const
 	{
-		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
+		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
 		SizeType nip = lrs.super().permutationInverse().size()/
 		        lrs.right().permutationInverse().size();
 
@@ -255,7 +255,7 @@ private:
 	                                          const SparseMatrixType& weT,
 	                                          const VectorSizeType& nk) const
 	{
-		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
+		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
 		SizeType ni=dmrgWaveStruct_.lrs.left().size();
 		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
 		MatrixOrIdentityType wsRef2(twoSiteDmrg_ && nip>volumeOfNk,ws);
@@ -286,7 +286,7 @@ private:
 		if (twoSiteDmrg_)
 			return transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
 
-		typename ParallelWftType::DirectionEnum dir2 = ParallelWftType::DIR_2;
+		typename DmrgWaveStructType::DirectionEnum dir2 = DmrgWaveStructType::DIR_2;
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
 			transformVectorParallel(psiDest,psiSrc,lrs,i0,nk,dir2);
@@ -329,7 +329,7 @@ private:
 	                                  const LeftRightSuperType& lrs,
 	                                  const VectorSizeType& nk) const
 	{
-		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
+		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
 		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
 		SizeType nalpha = lrs.left().permutationInverse().size();
 
@@ -364,7 +364,7 @@ private:
 	{
 		SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 		SparseElementType sum=0;
-		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
+		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
 		SizeType ni = dmrgWaveStruct_.lrs.right().size()/volumeOfNk;
 
 		MatrixOrIdentityType weRef(twoSiteDmrg_ && ni>volumeOfNk,we);
@@ -409,8 +409,9 @@ private:
 	                            SizeType i0,
 	                            const VectorSizeType& nk) const
 	{
-		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
-		SizeType nip = lrs.super().permutationInverse().size()/lrs.right().permutationInverse().size();
+		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
+		SizeType nip = lrs.super().permutationInverse().size()/
+		        lrs.right().permutationInverse().size();
 		PsimagLite::OstringStream msg;
 		msg<<" We're bouncing on the right, so buckle up!";
 		progress_.printline(msg,std::cout);
@@ -460,7 +461,7 @@ private:
 	                            SizeType i0,
 	                            const VectorSizeType& nk) const
 	{
-		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
+		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
 		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
 		SizeType nalpha = lrs.left().permutationInverse().size();
 

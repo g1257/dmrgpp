@@ -74,7 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /*! \file WaveFunctionTransfSu2.h
  *
  *  This class implements the wave function transformation, see PRL 77, 3633 (1996)
- *
+ *  this is for when using SU(2)
  */
 
 #ifndef WFT_SU2_H

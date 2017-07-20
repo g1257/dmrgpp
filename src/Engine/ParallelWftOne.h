@@ -89,16 +89,13 @@ class ParallelWftOne {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type
-	VectorVectorWithOffsetType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
+	typedef typename DmrgWaveStructType::VectorSizeType VectorSizeType;
 	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
 public:
-
-	enum DirectionEnum {DIR_1, DIR_2};
 
 	typedef typename VectorWithOffsetType::value_type VectorElementType;
 	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
@@ -109,7 +106,7 @@ public:
 	               SizeType i0,
 	               const VectorSizeType& nk,
 	               const DmrgWaveStructType& dmrgWaveStruct,
-	               DirectionEnum dir)
+	               typename DmrgWaveStructType::DirectionEnum dir)
 	    : psiDest_(psiDest),
 	      psiSrc_(psiSrc),
 	      lrs_(lrs),
@@ -124,23 +121,22 @@ public:
 	{
 		transposeConjugate(wsT_,ws_);
 		transposeConjugate(weT_,we_);
-
-		if (dir_ == DIR_2) {
+		SizeType vOfNk = DmrgWaveStructType::volumeOf(nk);
+		if (dir_ == DmrgWaveStructType::DIR_2) {
 			assert(dmrgWaveStruct_.lrs.right().permutationInverse().size()==
 			       dmrgWaveStruct_.we.row());
-			assert(lrs_.left().permutationInverse().size()/volumeOf(nk)==
+			assert(lrs_.left().permutationInverse().size()/vOfNk==
 			       dmrgWaveStruct_.ws.col());
 			pack1_ = new PackIndicesType(lrs.left().permutationInverse().size());
-			pack2_ = new PackIndicesType(lrs.left().permutationInverse().size()/
-			                             volumeOf(nk));
+			pack2_ = new PackIndicesType(lrs.left().permutationInverse().size()/vOfNk);
 		} else {
 			assert(dmrgWaveStruct_.lrs.left().permutationInverse().size()==
 			       dmrgWaveStruct_.ws.row());
-			assert(lrs_.right().permutationInverse().size()/volumeOf(nk)==
+			assert(lrs_.right().permutationInverse().size()/vOfNk==
 			       dmrgWaveStruct_.we.col());
 			pack1_ = new PackIndicesType(lrs.super().permutationInverse().size()/
 			                             lrs.right().permutationInverse().size());
-			pack2_ = new PackIndicesType(volumeOf(nk));
+			pack2_ = new PackIndicesType(vOfNk);
 		}
 	}
 
@@ -150,21 +146,13 @@ public:
 		delete pack2_;
 	}
 
-	static SizeType volumeOf(const VectorSizeType& v)
-	{
-		assert(v.size()>0);
-		SizeType ret = v[0];
-		for (SizeType i=1;i<v.size();i++) ret *= v[i];
-		return ret;
-	}
-
 	SizeType tasks() const { return psiDest_.effectiveSize(i0_); }
 
 	void doTask(SizeType taskNumber, SizeType)
 	{
 		SizeType start = psiDest_.offset(i0_);
 
-		if (dir_ == DIR_2) {
+		if (dir_ == DmrgWaveStructType::DIR_2) {
 			SizeType ip = 0;
 			SizeType alpha = 0;
 			SizeType kp = 0;
@@ -205,7 +193,7 @@ private:
 		assert(nalpha==wsT.col());
 
 		SparseElementType sum=0;
-		SizeType volumeOfNk = this->volumeOf(nk);
+		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
 		SizeType beta = dmrgWaveStruct_.lrs.right().permutationInverse(kp+jp*volumeOfNk);
 
 		for (int k=wsT.getRowPtr(ip);k<wsT.getRowPtr(ip+1);k++) {
@@ -219,6 +207,7 @@ private:
 				sum += wsT.getValue(k)*we.getValue(k2)*psiSrc.slowAccess(x);
 			}
 		}
+
 		return sum;
 	}
 
@@ -231,7 +220,7 @@ private:
 	                              const SparseMatrixType& weT,
 	                              const typename PsimagLite::Vector<SizeType>::Type& nk) const
 	{
-		SizeType volumeOfNk = volumeOf(nk);
+		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
 		SizeType ni=dmrgWaveStruct_.ws.col();
 		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
 		SizeType alpha = dmrgWaveStruct_.lrs.left().permutationInverse(ip+kp*nip);
@@ -256,7 +245,7 @@ private:
 	SizeType i0_;
 	const VectorSizeType& nk_;
 	const DmrgWaveStructType& dmrgWaveStruct_;
-	DirectionEnum dir_;
+	typename DmrgWaveStructType::DirectionEnum dir_;
 	const SparseMatrixType& we_;
 	const SparseMatrixType& ws_;
 	PackIndicesType* pack1_;

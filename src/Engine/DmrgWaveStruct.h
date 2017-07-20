@@ -91,12 +91,23 @@ struct DmrgWaveStruct {
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+
+	enum DirectionEnum {DIR_1, DIR_2};
 
 	SparseMatrixType ws;
 	SparseMatrixType we;
 	LeftRightSuperType lrs;
 
 	DmrgWaveStruct() : lrs("pSE","pSprime","pEprime") { }
+
+	static SizeType volumeOf(const VectorSizeType& v)
+	{
+		assert(v.size()>0);
+		SizeType ret = v[0];
+		for (SizeType i=1;i<v.size();i++) ret *= v[i];
+		return ret;
+	}
 
 	template<typename IoInputType>
 	void load(IoInputType& io)
