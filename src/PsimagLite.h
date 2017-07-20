@@ -23,6 +23,8 @@ struct MatchPathSeparator {
     }
 };
 
+void split(Vector<String>::Type& tokens, String str, String delimiters = " ");
+
 String basename(const String&);
 
 class PsiApp {

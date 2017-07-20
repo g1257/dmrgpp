@@ -3,7 +3,6 @@
 #include "Vector.h"
 #include "TypeToString.h"
 #include "PsimagLite.h"
-#include "Tokenizer.h"
 
 typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
@@ -38,7 +37,7 @@ public:
 		printContainers(std::cout);
 
 		VectorStringType statements;
-		PsimagLite::tokenizer(str, statements, ";");
+		PsimagLite::split(statements, str, ";");
 
 		procStatements(statements);
 	}
@@ -262,11 +261,11 @@ private:
 
 		if  (bEq) {
 			VectorStringType leftAndRight;
-			PsimagLite::tokenizer(s, leftAndRight, "=");
+			PsimagLite::split(leftAndRight, s, "=");
 			if (leftAndRight.size() != 2)
 				err("Syntax error: " + s + "\n");
 			VectorStringType lhs;
-			PsimagLite::tokenizer(leftAndRight[0], lhs, " ");
+			PsimagLite::split(lhs, leftAndRight[0], " ");
 			SizeType storageIndex = procLeftEquality(lhs, s);
 			std::cerr<<"[" << storageIndex <<"] <--- " << leftAndRight[1] <<"\n";
  		}

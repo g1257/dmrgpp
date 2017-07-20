@@ -92,7 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LongChain.h"
 #include "LongRange.h"
 #include "ExpressionCalculator.h"
-#include "Tokenizer.h"
+#include "PsimagLite.h"
 
 namespace PsimagLite {
 
@@ -209,7 +209,7 @@ public:
 
 		typedef ExpressionCalculator<T> ExpressionCalculatorType;
 		typename ExpressionCalculatorType::VectorStringType ve;
-		tokenizer(vModifier_,ve,",");
+		split(ve, vModifier_, ",");
 
 		PrepassData<T> pd;
 		typename PrepassData<T>::VectorType vr(2,0);

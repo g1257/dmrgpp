@@ -31,6 +31,24 @@ SizeType log2Integer(SizeType x)
 	return count;
 }
 
+void split(Vector<String>::Type& tokens, String str, String delimiters)
+{
+	// Skip delimiters at beginning.
+	String::size_type lastPos = str.find_first_not_of(delimiters, 0);
+	// Find first "non-delimiter".
+	String::size_type pos     = str.find_first_of(delimiters, lastPos);
+
+	while (String::npos != pos || String::npos != lastPos)
+	{
+		// Found a token, add it to the vector.
+		tokens.push_back(str.substr(lastPos, pos - lastPos));
+		// Skip delimiters.  Note the "not_of"
+		lastPos = str.find_first_not_of(delimiters, pos);
+		// Find next "non-delimiter"
+		pos = str.find_first_of(delimiters, lastPos);
+	}
+}
+
 String basename(const String& path)
 {
 	return String(std::find_if(path.rbegin(),

@@ -1,5 +1,4 @@
 #include "ExpressionCalculator.h"
-#include "Tokenizer.h"
 
 int main(int argc, char **argv)
 {
@@ -9,7 +8,7 @@ int main(int argc, char **argv)
 	typedef PsimagLite::PrepassData<double> PrepassDataType;
 
 	ExpressionCalculatorType::VectorStringType ve;
-	PsimagLite::tokenizer(argv[1],ve,",");
+	PsimagLite::split(ve, argv[1], ",");
 
 	PrepassDataType pd;
 	PrepassDataType::VectorType vr(1,0.25);

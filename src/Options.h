@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <algorithm>
 #include <iostream>
-#include "Tokenizer.h"
+#include "PsimagLite.h"
 
 namespace PsimagLite {
 
@@ -108,7 +108,7 @@ public:
 		void set(Vector<String>::Type& optsThatAreSet,String opts)
 		{
 			if (mode_==DISABLED) return;
-			tokenizer(opts,optsThatAreSet,",");
+			split(optsThatAreSet, opts, ",");
 			for (SizeType i=0;i<optsThatAreSet.size();i++) {
 				bool b = (find(registeredOptions_.begin(),
 				               registeredOptions_.end(),

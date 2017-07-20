@@ -91,7 +91,6 @@ Rusage // Rusage class is deprecated, use MemoryUsage instead
 Profiling // Profiling through constructor/destructor paradigm as done by M.S in DCA++
 It should be called actually scope
 ProgressIndicator
-Tokenizer
 TypeToString
 LineMarker
 
