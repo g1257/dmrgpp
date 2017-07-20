@@ -9,7 +9,7 @@ Input System}
 \maketitle
 
 \section{Lexical}
-ASCII and UTF-8 (maybe).
+ASCII.
 Define EOF, whitespace, and EOL.
 Comments: \verb!#! until EOL
 
@@ -17,7 +17,7 @@ Comments: \verb!#! until EOL
 Tokens + Strings Literals + Other literals
 
 \subsection{Keywords}
-\verb!let! \verb!function! \verb!Matrix!
+\verb!let! \verb!require! \verb!const! \verb!import! \verb!Matrix!
 Mathematical functions
 
 \section{Grammar}
@@ -45,71 +45,30 @@ let m3 = 3.5*m;
 \end{verbatim}
 Properties: \verb!rows! and \verb!cols!
 
-\subsection{Strings} 
+\subsection{Strings and Characters} 
 \begin{verbatim}
 let s="Hello, ";
 s += "World!";
+let c = 'a';
 \end{verbatim}
 Properties: \verb!length!
 
 \subsection{Groups} 
 \begin{verbatim}
 groupName {
-let name=chain;
-let Connections=[ 1 1 ]; }
+name="chain";
+Connections=[ 1 1 ];
+let a = "my local value"; }
+\end{verbatim}
+The above would be lowered to
+\begin{verbatim}
+groupName.name="chain";
+groupName.Connections=[ 1 1 ];
+let groupName.a = "my local value";
 \end{verbatim}
 Unnamed groups?
 
-\section{Statements, Expressions}
-Imports: Symbols defined in template files for each application
-Globally defined symbols
-
-Conditionals:
-\begin{verbatim}
-if (expression) {
-} elsif (somethingelse) {
-} else {
-}
-\end{verbatim}
-Loops
-\begin{verbatim}
-loop (condition) {
-	// body
-	// break;
-	// continue;
-}
-\end{verbatim}
-
-Labels and gotos
-\begin{verbatim}
-label:
-if (expression) goto label;
-\end{verbatim}
 \section{Associative arrays?}
 \verb!a["key"]!
-
-\section{Type qualifiers?}
-\verb!const! \verb!required!
-
-\section{Functions}
-\begin{verbatim}
-functionName(b)
-{
-  let a = 3.5;
-  return a + b;
-}
-
-let c = functionName(1.2);
-\end{verbatim}
-Functions pass by value. To pass by reference say \verb!functionName(&b)!
-
-\section{Error Handling}
-
-\section{Implementation}
-Replace strings with positionals.
-Remove comments.
-Deal with groups and functions.
-Break on semicolon.
-Process statements.
 
 \end{document}

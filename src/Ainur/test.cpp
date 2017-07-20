@@ -23,6 +23,8 @@ public:
 		            std::istreambuf_iterator<char>());
 		fin.close();
 
+		replaceAtAndCheck(str);
+
 		replaceAndStoreEscaped(escapedChars_, str);
 
 		replaceAndStoreQuotes(vecStr_, str, '"');
@@ -53,6 +55,26 @@ private:
 		os<<vecChar_<<"\n";
 		os<<"------------\n";
 		os<<vecBrace_<<"\n";
+	}
+
+	void replaceAtAndCheck(PsimagLite::String& str)
+	{
+		SizeType l = str.length();
+		PsimagLite::String newStr("");
+		char atChar = '@';
+		for (SizeType i = 0; i < l; ++i) {
+			if (str[i] == atChar) {
+				newStr += "@a";
+				continue;
+			}
+
+			if (!allowedChar(str[i]))
+				err("Lexical error: Not allowed char " + getContext(str,i) + "\n");
+
+			newStr += str[i];
+		}
+
+		str = newStr;
 	}
 
 	template<typename T>
@@ -99,7 +121,7 @@ private:
 			if (str[i] == q) {
 				newStr += "@e" + ttos(t.length());
 				if (l == i + 1)
-					err("Syntax Error (escaped): " + getContext(str) + "\n");
+					err("Syntax Error (escaped): " + getContext(str, i) + "\n");
 				t += str[++i];
 				continue;
 			}
@@ -121,13 +143,17 @@ private:
 		for (SizeType i = 0; i < l; ++i) {
 			if (str[i] == qOpen) {
 				++openBrace;
+				if (openBrace > 1)
+					err("Syntax error (nested braces not allowed) " +
+					    getContext(str, i) + "\n");
+
 				buffer += qOpen;
 				continue;
 			}
 
 			if (str[i] == qClose) {
 				if (openBrace == 0)
-					err("Syntax Error (closing brace): " + getContext(str) + "\n");
+					err("Syntax Error (closing brace): " + getContext(str, i) + "\n");
 				--openBrace;
 				buffer += qClose;
 				if (openBrace > 0)
@@ -150,11 +176,13 @@ private:
 
 
 	PsimagLite::String getContext(const PsimagLite::String& str,
+	                              SizeType start,
 	                              SizeType n = 10) const
 	{
 		SizeType l = str.length();
-		SizeType start = (l < n) ? 0 : l - n;
-		return str.substr(start);
+		SizeType end = start + n;
+		if (end >= l) end = l;
+		return str.substr(start, end);
 	}
 
 	void pushInto(PsimagLite::String& dest, PsimagLite::String src) const
@@ -238,6 +266,14 @@ private:
 	bool isEOL(char c) const
 	{
 		return (c == '\n' || c == '\r');
+	}
+
+	bool allowedChar(unsigned char c) const
+	{
+		if (isWhitespace(c) || isEOL(c)) return true;
+		if (c < 33 ||c > 126) return false;
+		if (c == 95 || c == 96) return false;
+		return true;
 	}
 
 	void procStatements(VectorStringType& s)
