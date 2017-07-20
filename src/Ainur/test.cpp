@@ -241,7 +241,7 @@ private:
 		return (c == '\n' || c == '\r');
 	}
 
-	void procStatements(VectorStringType& s) const
+	void procStatements(VectorStringType& s)
 	{
 		SizeType n = s.size();
 		for (SizeType i = 0; i < n; ++i) {
@@ -250,7 +250,7 @@ private:
 		}
 	}
 
-	void procStatement(const PsimagLite::String& s) const
+	void procStatement(const PsimagLite::String& s)
 	{
 		bool bEq = (s.find("=") != PsimagLite::String::npos);
 		bool bScOrFunc = (s.find("@b") != PsimagLite::String::npos);
@@ -261,20 +261,65 @@ private:
 		}
 
 		if  (bEq) {
-			std::cout<<s<<" <--- equality\n";
-			return;
+			VectorStringType leftAndRight;
+			PsimagLite::tokenizer(s, leftAndRight, "=");
+			if (leftAndRight.size() != 2)
+				err("Syntax error: " + s + "\n");
+			VectorStringType lhs;
+			PsimagLite::tokenizer(leftAndRight[0], lhs, " ");
+			SizeType storageIndex = procLeftEquality(lhs, s);
+			std::cerr<<"[" << storageIndex <<"] <--- " << leftAndRight[1] <<"\n";
+ 		}
+
+		if (bScOrFunc)
+			err("Unimplemented: function or scope\n");
+	}
+
+	SizeType procLeftEquality(const VectorStringType& lhs,
+	                          PsimagLite::String context)
+	{
+		SizeType l = lhs.size();
+		if (l == 0 || l > 2)
+			err("Nothing or too much on left? " + context + "\n");
+		int x = -1;
+		PsimagLite::String name = lhs[0];
+		if (l == 1)
+			x = storageIndexByName(name);
+		if (l == 2) {
+			if (lhs[0] != "let" && lhs[0] != "require" && lhs[0] != "const")
+				err("Expected let require or const " + context + "\n");
+			name = lhs[1];
+			x = assignStorageByName(name);
 		}
 
-		if  (bScOrFunc) {
-			std::cout<<s<<" <--- function or scope\n";
-			return;
-		}
+		if (x < 0)
+			err("Undeclared variable " + name + "\n");
+
+		return x;
+	}
+
+	int assignStorageByName(PsimagLite::String name)
+	{
+		int x = storageIndexByName(name);
+		if (x >= 0)
+			err("Already in scope " + name + "\n");
+		names_.push_back(name);
+		return names_.size() - 1;
+	}
+
+	int storageIndexByName(PsimagLite::String name) const
+	{
+		VectorStringType::const_iterator it = std::find(names_.begin(), names_.end(), name);
+		if (it == names_.end())
+			return -1;
+		return it - names_.begin();
 	}
 
 	PsimagLite::String escapedChars_;
 	VectorStringType vecStr_;
 	PsimagLite::String vecChar_;
 	VectorStringType vecBrace_;
+	VectorStringType names_;
 };
 
 int main(int argc, char** argv)
