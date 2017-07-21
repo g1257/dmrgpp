@@ -73,7 +73,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /*@{*/
 
 /*! \file ExtendedHubbard1Orb.h
- *
+ *  FIXME: Merge into Hubbard
  *  Hubbard + V_{ij} n_i n_j
  *
  */

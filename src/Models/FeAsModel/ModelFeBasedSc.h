@@ -325,33 +325,9 @@ public:
 		SizeType nrow = creationMatrix_[0].data.row();
 		PsimagLite::String what2 = what;
 
-		if (what2 == "i" || what2=="identity") {
-			VectorSizeType allowed(1,0);
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			SparseMatrixType tmp(nrow,nrow);
-			tmp.makeDiagonal(nrow,1.0);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
 
-		if (what2 == "0") {
-			VectorSizeType allowed(1,0);
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			SparseMatrixType tmp(nrow,nrow);
-			tmp.makeDiagonal(nrow,0.0);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
 
-		if (what2=="+") {
+		if (what2 == "splus") {
 			VectorSizeType allowed(modelParameters_.orbitals,0);
 			for (SizeType x = 0; x < modelParameters_.orbitals; ++x)
 				allowed[x] = x;
@@ -367,7 +343,8 @@ public:
 			                    1.0,
 			                    su2Related);
 		}
-		if (what2=="-") {
+
+		if (what2 == "sminus") {
 			VectorSizeType allowed(modelParameters_.orbitals,0);
 			for (SizeType x = 0; x < modelParameters_.orbitals; ++x)
 				allowed[x] = x;
@@ -383,7 +360,8 @@ public:
 			                    1.0,
 			                    su2Related);
 		}
-		if (what2=="z") {
+
+		if (what2 == "z" || what2 == "sz") { // S^z
 			VectorSizeType allowed(modelParameters_.orbitals,0);
 			for (SizeType x = 0; x < modelParameters_.orbitals; ++x)
 				allowed[x] = x;
@@ -427,14 +405,6 @@ public:
 			VectorOperatorType cm = creationMatrix_;
 			cm[orbital + spin*modelParameters_.orbitals].conjugate();
 			return cm[orbital + spin*modelParameters_.orbitals];
-		}
-
-		if (what2=="c\'") {
-			VectorSizeType allowed(2*modelParameters_.orbitals,0);
-			for (SizeType x = 0; x < allowed.size(); ++x)
-				allowed[x] = x;
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			return creationMatrix_[orbital + spin*modelParameters_.orbitals];
 		}
 
 		if (what2=="d") { // delta = c^\dagger * c^dagger

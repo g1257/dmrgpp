@@ -308,7 +308,7 @@ public:
 			                    su2Related);
 		}
 
-		if (what=="+") {
+		if (what == "splus") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> tmp =
@@ -322,7 +322,7 @@ public:
 			                    su2Related);
 		}
 
-		if (what=="-") {
+		if (what == "sminus") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> tmp =
@@ -336,7 +336,7 @@ public:
 			                    su2Related);
 		}
 
-		if (what=="z") {
+		if (what == "z" || what == "sz") { // S^z
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> tmp =
@@ -353,7 +353,7 @@ public:
 			                    su2Related);
 		}
 
-		if (what=="n") {
+		if (what == "n") {
 			PsimagLite::Matrix<SparseElementType> dense1;
 			crsMatrixToFullMatrix(dense1,naturalOperator("nup",site,0).data);
 			PsimagLite::Matrix<SparseElementType> dense2;
@@ -368,7 +368,7 @@ public:
 			                    su2Related);
 		}
 
-		if (what=="c") {
+		if (what == "c") {
 			VectorSizeType allowed(2,0);
 			allowed[1] = 1;
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
@@ -376,7 +376,7 @@ public:
 			return creationMatrix[dof];
 		}
 
-		if (what=="nup") {
+		if (what == "nup") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			OperatorType cup = naturalOperator("c",site,SPIN_UP);
@@ -390,7 +390,7 @@ public:
 			                    su2Related);
 		}
 
-		if (what=="ndown") {
+		if (what == "ndown") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			OperatorType cdown = naturalOperator("c",site,SPIN_DOWN);
@@ -404,7 +404,7 @@ public:
 			                    su2Related);
 		}
 
-		if (what=="d") {
+		if (what == "d") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> cup;

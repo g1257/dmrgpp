@@ -310,16 +310,16 @@ public:
 			                    su2Related);
 		}
 
-		if (what=="+") {
+		if (what == "splus") {
 			return creationMatrix[2];
 		}
 
-		if (what=="-") {
+		if (what == "sminus") {
 			creationMatrix[2].conjugate();
 			return creationMatrix[2];
 		}
 
-		if (what=="z") {
+		if (what == "z" || what == "sz") { // S^z
 			return creationMatrix[3];
 		}
 

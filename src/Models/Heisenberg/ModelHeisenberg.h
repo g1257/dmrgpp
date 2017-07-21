@@ -294,29 +294,17 @@ public:
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		setOperatorMatrices(creationMatrix,block);
 		assert(creationMatrix.size()>0);
-		SizeType nrow = creationMatrix[0].data.row();
 
-		if (what == "i" || what=="identity") {
-			SparseMatrixType tmp(nrow,nrow);
-			tmp.makeDiagonal(nrow,1.0);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		if (what=="+") { // S^+
+		if (what=="splus") { // S^+
 			return creationMatrix[0];
 		}
 
-		if (what=="-") { // S^-
+		if (what=="sminus") { // S^-
 			creationMatrix[0].conjugate();
 			return creationMatrix[0];
 		}
 
-		if (what=="z") { // S^z
+		if (what == "z" || what == "sz") { // S^z
 			return creationMatrix[1];
 		}
 
@@ -392,7 +380,7 @@ private:
 
 		PsimagLite::String warning("HeisenbergAnisotropic: ");
 		warning += "canonical mode in use. ";
-		warning += "results will likely be WRONG.\n";
+		warning += "Results will likely be WRONG.\n";
 		warning += "Please delete the TargetSzPlusConst= ";
 		warning += "line in the input file.\n";
 

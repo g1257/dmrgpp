@@ -77,6 +77,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *  An implementation of a Hubbard model for Fe-based superconductors
  *  to use with the DmrgSolver
  *  This extends the FeAsBasedSc model to include JNN and JNNN couplings
+ *  FIXME: Merge into FeAsBasedSc
  *
  */
 #ifndef FEAS_BASED_SC_EX
@@ -236,14 +237,14 @@ public:
 			return creationMatrix[x];
 		}
 
-		if (what=="naturalS+") {
+		if (what=="naturalSplus") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			SizeType x = 2*orbitals_;
 			return creationMatrix[x];
 		}
 
-		if (what=="naturalS-") { // delta = c^\dagger * c^dagger
+		if (what=="naturalSminus") { // delta = c^\dagger * c^dagger
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			SizeType x = 2*orbitals_;

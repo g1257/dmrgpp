@@ -7,6 +7,8 @@ template<typename ModelType>
 class OperatorSpec {
 
 	typedef typename ModelType::OperatorType OperatorType;
+	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 
 	struct NaturalOpStruct {
 		NaturalOpStruct(PsimagLite::String label_)
@@ -52,6 +54,12 @@ public:
 
 		SizeType site = (site2 < 0) ? 0 : site2;
 
+		if (opLabel == "_1" || opLabel == "identity")
+			return specialOperator(site, 1.0);
+
+		if (opLabel == "_0" || opLabel == "zero")
+			return specialOperator(site, 0.0);
+
 		OperatorType nup;
 		try {
 			nup = findOperator(opLabel, site);
@@ -81,6 +89,19 @@ public:
 	}
 
 private:
+
+	OperatorType specialOperator(SizeType site, ComplexOrRealType value) const
+	{
+		SizeType rows = model_.hilbertSize(site);
+		SparseMatrixType tmp(rows,rows);
+		tmp.makeDiagonal(rows, value);
+		typename OperatorType::Su2RelatedType su2Related;
+		return OperatorType(tmp,
+		                    1.0,
+		                    typename OperatorType::PairType(0,0),
+		                    1.0,
+		                    su2Related);
+	}
 
 	int extractSiteIfAny(PsimagLite::String& name) const
 	{

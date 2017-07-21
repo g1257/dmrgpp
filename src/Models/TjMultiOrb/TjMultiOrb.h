@@ -215,7 +215,7 @@ public:
 			                    su2Related);
 		}
 
-		if (what=="+") {
+		if (what == "splus") {
 			VectorSizeType allowed(orbitals,0);
 			for (SizeType i = 0; i < allowed.size(); ++i) allowed[i] = i;
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
@@ -223,7 +223,7 @@ public:
 			return creationMatrix_[2*orbitals+dof];
 		}
 
-		if (what=="-") {
+		if (what == "sminus") {
 			VectorSizeType allowed(orbitals,0);
 			for (SizeType i = 0; i < allowed.size(); ++i) allowed[i] = i;
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
@@ -233,7 +233,7 @@ public:
 			return cm;
 		}
 
-		if (what=="z") {
+		if (what == "z" || what == "sz") { // S^z
 			VectorSizeType allowed(orbitals,0);
 			for (SizeType i = 0; i < allowed.size(); ++i) allowed[i] = i;
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);

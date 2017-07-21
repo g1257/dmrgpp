@@ -302,18 +302,18 @@ public:
 			return creationMatrix[offset+dof];
 		}
 
-		if (what=="+") { // S^+
+		if (what == "splus") { // S^+
 			SizeType offset = (!hot_) ? 4 : 6;
 			return creationMatrix[offset+dof];
 		}
 
-		if (what=="-") { // S^-
+		if (what == "sminus") { // S^-
 			SizeType offset = (!hot_) ? 4 : 6;
 			creationMatrix[offset+dof].conjugate();
 			return creationMatrix[offset+dof];
 		}
 
-		if (what=="z") { // S^z
+		if (what == "z" || what == "sz") { // S^z
 			SizeType offset = (!hot_) ? 5 : 8;
 			return creationMatrix[offset+dof];
 		}

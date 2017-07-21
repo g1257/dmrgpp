@@ -263,18 +263,18 @@ public:
 			                    su2Related);
 		}
 
-		if (what=="+") {
+		if (what == "splus") {
 			assert(dof < 2);
 			return creationMatrix[(hot_) ? 4 + dof : 2];
 		}
 
-		if (what=="-") {
+		if (what == "sminus") {
 			assert(dof < 2);
 			creationMatrix[(hot_) ? 4 + dof : 2].conjugate();
 			return creationMatrix[(hot_) ? 4 + dof : 2];
 		}
 
-		if (what=="z") {
+		if (what == "z" || what == "sz") { // S^z
 			assert(dof < 2);
 			return creationMatrix[(hot_) ? 6 + dof : 3];
 		}

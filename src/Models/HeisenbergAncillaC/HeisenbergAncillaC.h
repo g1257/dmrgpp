@@ -306,19 +306,19 @@ public:
 			                    su2Related);
 		}
 
-		if (what=="+") { // S^+
+		if (what=="splus") { // S^+
 			if (!hot_) dof = 0;
 			return creationMatrix[dof];
 		}
 
-		if (what=="-") { // S^-
+		if (what=="sminus") { // S^-
 			if (!hot_) dof = 0;
 			assert(dof < creationMatrix.size());
 			creationMatrix[dof].conjugate();
 			return creationMatrix[dof];
 		}
 
-		if (what=="z") { // S^z
+		if (what == "z" || what == "sz") { // S^z
 			if (!hot_) dof = 0;
 			SizeType offset = (hot_) ? 2 : 1;
 			assert(offset + dof < creationMatrix.size());

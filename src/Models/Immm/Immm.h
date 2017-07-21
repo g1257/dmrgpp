@@ -290,15 +290,16 @@ public:
 		SizeType orbitals = orbitalsAtSite(site);
 		SizeType orbital = dof % orbitals;
 		SizeType spin = dof / orbitals;
-		if (what=="+" or what=="i") {
+
+		if (what == "splus") {
 			return cDaggerCi(block,SPIN_UP,SPIN_DOWN);
 		}
 
-		if (what=="-") {
+		if (what == "sminus") {
 			return cDaggerCi(block,SPIN_DOWN,SPIN_UP);
 		}
 
-		if (what=="z") {
+		if (what == "z" || what == "sz") { // S^z
 			MatrixType tmp1;
 			crsMatrixToFullMatrix(tmp1,nUpOrDown(block,SPIN_UP).data);
 			MatrixType tmp2;
