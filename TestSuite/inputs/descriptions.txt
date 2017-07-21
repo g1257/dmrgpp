@@ -213,6 +213,7 @@ correction vector algorithm (type=3).
 #4002 to 4099 are hereby reserved for the KMH model.
 #4100-4200) <--- reserved for kron
 4300) BaFe2S3 FeS two-leg ladder two-orbital Hubbard
+4500) HeisenbergAnisotropic
 5000) Hubbard model 1 orbital on a 32x2 ladder with m up to 800.
 It has 14 electrons up and 14 electrons down (or 2+2 "holes", 16+16 being
 the "half filled" case). U=2

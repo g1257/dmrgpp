@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009, 2017, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 4.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -66,7 +66,6 @@ INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
 DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
-
 
 */
 /** \ingroup DMRG */
@@ -147,8 +146,9 @@ public:
 	      geometry_(geometry),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 	{
-		if (additional == "Anistropic")
-			LinkProductType::setAnistropic();
+		if (additional == "Anisotropic") {
+			setAnisotropic(solverParams);
+		}
 
 		SizeType n = geometry_.numberOfSites();
 		SizeType m = modelParameters_.magneticField.size();
@@ -381,6 +381,30 @@ public:
 	}
 
 private:
+
+	void setAnisotropic(const SolverParamsType& solverParams)
+	{
+		LinkProductType::setAnisotropic();
+		bool isCanonical = (modelParameters_.targetQuantum.isCanonical);
+		bool useTheForce = (solverParams.options.find("useTheForce") !=
+		        PsimagLite::String::npos);
+		if (!isCanonical) return;
+
+		PsimagLite::String warning("HeisenbergAnisotropic: ");
+		warning += "canonical mode in use. ";
+		warning += "results will likely be WRONG.\n";
+		warning += "Please delete the TargetSzPlusConst= ";
+		warning += "line in the input file.\n";
+
+		if (useTheForce) {
+			std::cerr<<"WARNING: "<<warning;
+			std::cout<<"WARNING: "<<warning;
+			return;
+		}
+
+		std::cerr<<"FATAL: "<<warning;
+		err("You may useTheForce in SolverOptions to run it anyway\n");
+	}
 
 	SizeType logBase2(SizeType x) const
 	{

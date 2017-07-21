@@ -118,8 +118,8 @@ public:
 			model_ = new ModelHubbardType(solverParams,io,geometry);
 		} else if (name_ == "Heisenberg") {
 			model_ = new ModelHeisenbergType(solverParams,io,geometry,"");
-		} else if (name_ == "HeisenbergAnistropic") {
-			model_ = new ModelHeisenbergType(solverParams,io,geometry,"Anistropic");
+		} else if (name_ == "HeisenbergAnisotropic") {
+			model_ = new ModelHeisenbergType(solverParams,io,geometry,"Anisotropic");
 		} else if (name_ == "HeisenbergAncillaC") {
 			model_ = new HeisenbergAncillaCType(solverParams,io,geometry);
 		} else if (name_ == "HubbardOneBandExtended") {

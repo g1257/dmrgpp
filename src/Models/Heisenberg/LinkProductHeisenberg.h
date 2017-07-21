@@ -93,7 +93,7 @@ public:
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename ModelHelperType::RealType RealType;
 
-	static void setAnistropic()
+	static void setAnisotropic()
 	{
 		terms_ = 3;
 	}
