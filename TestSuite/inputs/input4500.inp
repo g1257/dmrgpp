@@ -1,0 +1,59 @@
+TotalNumberOfSites=8
+NumberOfTerms=3
+
+DegreesOfFreedom=1
+GeometryKind=LongRange
+GeometryOptions=none
+Connectors 8 8
+0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0
+1.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0
+0.0 1.0 0.0 1.0 0.0 0.0 0.0 0.0
+0.0 0.0 1.0 0.0 1.0 0.0 0.0 0.0
+0.0 0.0 0.0 1.0 0.0 1.0 0.0 0.0
+0.0 0.0 0.0 0.0 1.0 0.0 1.0 0.0
+0.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0
+0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0
+
+DegreesOfFreedom=1
+GeometryKind=LongRange
+GeometryOptions=none
+Connectors 8 8
+0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0
+1.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0
+0.0 1.0 0.0 1.0 0.0 0.0 0.0 0.0
+0.0 0.0 1.0 0.0 1.0 0.0 0.0 0.0
+0.0 0.0 0.0 1.0 0.0 1.0 0.0 0.0
+0.0 0.0 0.0 0.0 1.0 0.0 1.0 0.0
+0.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0
+0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0
+
+DegreesOfFreedom=1
+GeometryKind=LongRange
+GeometryOptions=none
+Connectors 8 8
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+
+MagneticField 8
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+
+Model=HeisenbergAnisotropic
+HeisenbergTwiceS=1
+
+SolverOptions=twositedmrg,MatrixVectorKron
+Version=none
+OutputFile=data4500.txt
+InfiniteLoopKeptStates=50
+FiniteLoops 5
+ 3 100 0
+-6 150 0 6 150 0
+-6 150 0 6 150 0
+
+TruncationTolerance=1e-8
+Threads=4
