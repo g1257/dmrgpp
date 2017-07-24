@@ -10,9 +10,72 @@ namespace PsimagLite {
 
 class Ainur {
 
+	struct Store {
+
+		enum Type {UNKNOWN, STRING, CHAR, SCALAR, VECTOR, MATRIX}; // FUNCTION, GROUP, HASH,
+
+		enum SubType {UNDEFINED, INTEGER, REAL, COMPLEX};
+
+		enum Attribute {NONE, REQUIRED, CONST};
+
+		Store(Type t, SubType s, Attribute a)
+		    : type(t), subType(s), attr(a)
+		{}
+
+		void fromString(String s)
+		{
+			if (s == "string") {
+				type = STRING;
+				return;
+			}
+
+			if (s == "char") {
+				type = CHAR;
+				return;
+			}
+
+			if (s == "integer" || s == "real" || s == "complex") {
+				type = SCALAR;
+				subType = subTypeFromString(s);
+				return;
+			}
+
+			VectorStringType words;
+			split(words, s, ".");
+			if (words.size() == 0) return;
+
+			if (words[0] == "vector") {
+				type = VECTOR;
+				if (words.size() > 1)
+					subType = subTypeFromString(words[1]);
+				return;
+			}
+
+			if (words[0] == "matrix") {
+				type = MATRIX;
+				if (words.size() > 1)
+					subType = subTypeFromString(words[1]);
+				return;
+			}
+		}
+
+		static SubType subTypeFromString(String s)
+		{
+			if (s == "integer") return INTEGER;
+			if (s == "real") return REAL;
+			if (s == "complex") return COMPLEX;
+			return UNDEFINED;
+		}
+
+		Type type;
+		SubType subType;
+		Attribute attr;
+	};
+
 public:
 
 	typedef Vector<String>::Type VectorStringType;
+	typedef Vector<Store>::Type VectorStoreType;
 
 	Ainur(String filename, String import)
 	{
@@ -24,7 +87,7 @@ public:
 		fin.seekg(0, std::ios::beg);
 
 		str.assign((std::istreambuf_iterator<char>(fin)),
-		            std::istreambuf_iterator<char>());
+		           std::istreambuf_iterator<char>());
 		fin.close();
 
 		str = import + str;
@@ -181,8 +244,8 @@ private:
 
 
 	String getContext(const String& str,
-	                              SizeType start,
-	                              SizeType n = 10) const
+	                  SizeType start,
+	                  SizeType n = 10) const
 	{
 		SizeType l = str.length();
 		SizeType end = start + n;
@@ -292,11 +355,13 @@ private:
 
 	void procStatement(const String& s)
 	{
+		if (s == "") return;
 		bool sEq = (s.find("=") != String::npos);
-		bool sBrace = (s.find("@b") != String::npos);
+		SizeType storageIndex = 0;
+		VectorStringType dotified;
 
-		if (sEq && sBrace) {
-			std::cout<<s<<" <---- syntax error\n";
+		if (!sEq) { // declare but don't define
+			procLeftEquality(storageIndex, dotified, s, s);
 			return;
 		}
 
@@ -305,37 +370,55 @@ private:
 			split(leftAndRight, s, "=");
 			if (leftAndRight.size() != 2)
 				err("Syntax error: " + s + "\n");
-			VectorStringType lhs;
-			split(lhs, leftAndRight[0], " ");
-			SizeType storageIndex = procLeftEquality(lhs, s);
-			std::cerr<<"[" << storageIndex <<"] <--- " << leftAndRight[1] <<"\n";
- 		}
+			procLeftEquality(storageIndex, dotified, leftAndRight[0], s);
+			if (storageIndex >= storage_.size())
+				err("StorageIndex too big\n");
+			if (dotified.size() > 1 && dotified[1] == "typeof")
+				storage_[storageIndex].fromString(leftAndRight[1]);
 
-		if (sBrace)
-			err("Unimplemented: scope\n");
+		}
 	}
 
-	SizeType procLeftEquality(const VectorStringType& lhs,
-	                          String context)
+	void procLeftEquality(SizeType& y,
+	                      VectorStringType& dotified,
+	                      String s,
+	                      String context)
 	{
+		VectorStringType lhs;
+		split(lhs,s," ");
 		SizeType l = lhs.size();
 		if (l == 0 || l > 2)
 			err("Nothing or too much on left? " + context + "\n");
 		int x = -1;
-		String name = lhs[0];
-		if (l == 1)
-			x = storageIndexByName(name);
-		if (l == 2) {
-			if (lhs[0] != "let" && lhs[0] != "require" && lhs[0] != "const")
-				err("Expected let require or const " + context + "\n");
-			name = lhs[1];
-			x = assignStorageByName(name);
+
+		if (l == 1) {
+			split(dotified,lhs[0],".");
+			if (dotified.size() == 0)
+				err("Name too short " + context + "\n");
+			x = storageIndexByName(dotified[0]);
+		} else if (l == 2) {
+			Store::Attribute attr = getAttribute(lhs[0], context);
+			split(dotified,lhs[1],".");
+			if (dotified.size() == 0)
+				err("Name too short " + context + "\n");
+			x = assignStorageByName(dotified[0]);
+			storage_.push_back(Store(Store::UNKNOWN, Store::UNDEFINED, attr));
 		}
 
 		if (x < 0)
-			err("Undeclared variable " + name + "\n");
+			err("Undeclared variable " + dotified[0] + "\n");
 
-		return x;
+		y = x;
+	}
+
+	Store::Attribute getAttribute(String s, String context) const
+	{
+		if (s == "let" || s == "function") return Store::NONE;
+		if (s == "require") return Store::REQUIRED;
+		if (s == "const") return Store::CONST;
+
+		err("Expected let require or const " + context + "\n");
+		return Store::NONE;
 	}
 
 	int assignStorageByName(String name)
@@ -360,6 +443,7 @@ private:
 	String vecChar_;
 	VectorStringType vecBrace_;
 	VectorStringType names_;
+	VectorStoreType storage_;
 };
 
 }
