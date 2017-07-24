@@ -19,7 +19,7 @@ Comments: \verb!#! until EOL
 Tokens + Strings Literals + Other literals
 
 Keywords:
-\verb!let! \verb!require! \verb!const! \verb!import! \verb!matrix!.
+\verb!let! \verb!require! \verb!const! \verb!import! \verb!function!.
 Properties for all types: \verb!defined! \verb!typeof!
 \begin{verbatim}
 # declare a, require a,  and
@@ -121,8 +121,12 @@ $[]$ & vectors & entry\\
 \end{tabular}
 
 Operators for binary numbers? User defined operators are not allowed.
-User defined functions must be entered as a string 
-AST. (To be explained later.)
+User defined functions must be entered as a string in prefix notation.
+\begin{verbatim}
+# f(t) = 3.5*cos(t)
+function f = "*,cos,%t,3.5";
+let a = f(0.25); # = 3.3911...
+\end{verbatim}
 Mathematical functions for scalars:
 \texttt{abs, conj, sqrt, exp, log, sin, cos, atan}.
 Functions for complex numbers \verb!abs! \verb!real! \verb!imag! \verb!arg! 
@@ -139,6 +143,7 @@ vector & let a = [];\\
 matrix & let a = [[]];\\
 group & let a = \{\};\\
 hash & let a = (\{\});\\
+function & function a;\\
 \bottomrule\\
 \end{tabular}
 
