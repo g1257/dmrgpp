@@ -285,6 +285,8 @@ public:
 			throw PsimagLite::RuntimeError("Unknown targeting " + targeting + "\n");
 		}
 
+		ioIn_.printUnused(std::cerr);
+
 		if (saveData_) psi->print(ioOut_);
 
 		MyBasisWithOperators pS("BasisWithOperators.System");
