@@ -17,20 +17,8 @@ public:
 	typedef AinurStatements AinurStatementsType;
 	typedef AinurStatementsType::AinurLexicalType AinurLexicalType;
 
-	Ainur(String filename, String import)
+	Ainur(String str)
 	{
-		std::ifstream fin(filename.c_str());
-		String str;
-
-		fin.seekg(0, std::ios::end);
-		str.reserve(fin.tellg());
-		fin.seekg(0, std::ios::beg);
-
-		str.assign((std::istreambuf_iterator<char>(fin)),
-		           std::istreambuf_iterator<char>());
-		fin.close();
-
-		str = import + str;
 		replaceAtAndCheck(str);
 
 		replaceAndStoreEscaped(escapedChars_, str);
@@ -52,9 +40,10 @@ public:
 		procStatements(statements);
 	}
 
-	int getLabel(String label) const
+	template<typename SomeType>
+	void readValue(SomeType& t, String label) const
 	{
-		return statements_.getInteger(label);
+		return statements_.readValue(t, label);
 	}
 
 private:

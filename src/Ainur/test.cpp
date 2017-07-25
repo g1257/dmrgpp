@@ -47,8 +47,19 @@ void partiallyReadSomething(const PsimagLite::Ainur& ainur)
 int main(int argc, char** argv)
 {
 	if (argc == 1) return 1;
-	PsimagLite::String dmrgppImport = dmrgImport();
-	PsimagLite::Ainur ainur(argv[1], dmrgppImport);
+	std::ifstream fin(argv[1]);
+	PsimagLite::String str;
+
+	fin.seekg(0, std::ios::end);
+	str.reserve(fin.tellg());
+	fin.seekg(0, std::ios::beg);
+
+	str.assign((std::istreambuf_iterator<char>(fin)),
+	           std::istreambuf_iterator<char>());
+	fin.close();
+
+	str = dmrgImport() + str;
+	PsimagLite::Ainur ainur(str);
 	partiallyReadSomething(ainur);
 
 }

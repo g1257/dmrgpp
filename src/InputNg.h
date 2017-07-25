@@ -92,6 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h"
 #include "loki/TypeTraits.h"
 #include "PsiBase64.h"
+#include "Ainur/Ainur.h"
 
 namespace PsimagLite {
 
@@ -161,7 +162,8 @@ public:
 		      lastLabel_(""),
 		      file_(file),
 		      inputCheck_(inputCheck),
-		      verbose_(false)
+		      verbose_(false),
+		      ainurMode_(false)
 		{
 			internal(file);
 		}
@@ -177,7 +179,8 @@ public:
 		      lastLabel_(""),
 		      file_(file),
 		      inputCheck_(inputCheck),
-		      verbose_(false)
+		      verbose_(false),
+		      ainurMode_(false)
 		{
 			std::ifstream fin(file.c_str());
 			if (!fin || !fin.good() || fin.bad()) {
@@ -234,6 +237,7 @@ public:
 		         MapStrVecType& mapStrVec,
 		         Vector<String>::Type& labelsForRemoval) const
 		{
+			if (ainurMode_) return;
 			mapStrStr=mapStrStr_;
 			mapStrVec=mapStrVec_,
 			        labelsForRemoval=labelsForRemoval_;
@@ -242,6 +246,10 @@ public:
 		const String& filename() const { return file_; }
 
 		const String& data() const { return data_; }
+
+		bool ainurMode() const { return ainurMode_; }
+
+		const InputCheckType& inputCheck() const { return inputCheck_; }
 
 	private:
 
@@ -261,6 +269,11 @@ public:
 			}
 
 			fin.close();
+			if (data_.size() > 2 && data_[0] == '#' && data_[1] == '#') {
+				ainurMode_ = true;
+				return;
+			}
+
 			check();
 
 			if (verbose_) {
@@ -446,6 +459,7 @@ public:
 		String file_;
 		InputCheckType inputCheck_;
 		bool verbose_;
+		bool ainurMode_;
 		typename Map<String,String,MyCompareType>::Type mapStrStr_;
 		typename Map<String,Vector<String>::Type,MyCompareType>::Type mapStrVec_;
 		Vector<String>::Type labelsForRemoval_;
@@ -460,36 +474,27 @@ public:
 	public:
 
 		Readable(const Writeable& inputWriteable)
-		    : file_(inputWriteable.filename()),data_(inputWriteable.data())
+		    : file_(inputWriteable.filename()),
+		      data_(inputWriteable.data()),
+		      ainur_(0)
 		{
 			inputWriteable.set(mapStrStr_,mapStrVec_,labelsForRemoval_);
+			if (inputWriteable.ainurMode())
+				ainur_ = new Ainur(inputWriteable.inputCheck().import() + data_);
+		}
+
+		~Readable()
+		{
+			delete ainur_;
+			ainur_ = 0;
 		}
 
 		template<typename SomeMemResolvType>
-		SizeType memResolv(SomeMemResolvType& mres,
+		SizeType memResolv(SomeMemResolvType&,
 		                   SizeType,
-		                   String msg = "") const
+		                   String = "") const
 		{
-			String str = msg;
-			str += "InputNgReadable";
-
-			const char* start = reinterpret_cast<const char *>(this);
-			const char* end = reinterpret_cast<const char *>(&mapStrStr_);
-			SizeType total = mres.memResolv(&file_, end-start, str + " file");
-
-			start = end;
-			end = reinterpret_cast<const char *>(&mapStrVec_);
-			total += mres.memResolv(&mapStrStr_, end-start, str + " mapStrStr");
-
-			start = end;
-			end = reinterpret_cast<const char *>(&labelsForRemoval_);
-			total += sizeof(mapStrVec_); //mres.memResolv(&mapStrVec_, end-start, str + " mapStrVec");
-
-			total += mres.memResolv(&labelsForRemoval_,
-			                        sizeof(*this) - total,
-			                        str + " labelsForRemoval");
-
-			return total;
+			return 0;
 		}
 
 		void rewind() {}
@@ -501,6 +506,18 @@ public:
 		              bool clean = true,
 		              bool forceRemoval = false)
 		{
+			if (ainur_) {
+				String label2 = label;
+				SizeType last = label2.length();
+				if (last > 0) {
+					--last;
+					if (label2[last] == '=')
+						label2 = label.substr(0, last);
+				}
+
+				return ainur_->readValue(val, label2);
+			}
+
 			String label2 = label2label(label);
 			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
@@ -514,6 +531,7 @@ public:
 		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
 		readline(FloatingType& val,const String& label)
 		{
+			assert(!ainurMode_);
 			String label2 = label2label(label);
 			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
@@ -525,6 +543,7 @@ public:
 
 		void readline(long int& val,const String& label)
 		{
+			assert(!ainurMode_);
 			String label2 = label2label(label);
 			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
@@ -536,6 +555,7 @@ public:
 
 		void readline(SizeType& val,const String& label)
 		{
+			assert(!ainurMode_);
 			String label2 = label2label(label);
 			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
@@ -547,6 +567,7 @@ public:
 
 		void readline(int& val,const String& label)
 		{
+			assert(!ainurMode_);
 			String label2 = label2label(label);
 			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
@@ -558,6 +579,7 @@ public:
 
 		void read(SizeType& val,const String& label)
 		{
+			assert(!ainurMode_);
 			String label2 = label2label(label);
 
 			MapStringIteratorType it =  findFirstValueForLabel(label2,mapStrStr_);
@@ -572,6 +594,7 @@ public:
 		typename EnableIf<IsMapLike<MapLikeType>::True,void>::Type
 		read(MapLikeType& val,const String& label)
 		{
+			assert(!ainurMode_);
 			String label2 = label2label(label);
 
 			typedef typename Map<String,String,MyCompareType>::Type::iterator MyIteratorType;
@@ -598,6 +621,7 @@ public:
 		typename EnableIf<IsVectorLike<VectorLikeType>::True,void>::Type
 		read(VectorLikeType& val,const String& label)
 		{
+			assert(!ainurMode_);
 			String label2 = label2label(label);
 			typedef typename VectorLikeType::value_type NumericType;
 			MapStringVectorIteratorType it = findFirstValueForLabel(label2,mapStrVec_);
@@ -615,6 +639,7 @@ public:
 		template<typename VectorLikeType>
 		void readKnownSize(VectorLikeType& val,const String& label)
 		{
+			assert(!ainurMode_);
 			String label2 = label2label(label);
 			typedef typename VectorLikeType::value_type NumericType;
 			MapStringVectorIteratorType it =  findFirstValueForLabel(label2,mapStrVec_);
@@ -632,6 +657,7 @@ public:
 		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
 		readMatrix(Matrix<FloatingType>& m,const String& label)
 		{
+			assert(!ainurMode_);
 			String label2 = label2label(label);
 
 			MapStringVectorIteratorType it =  findFirstValueForLabel(label2,mapStrVec_);
@@ -665,6 +691,7 @@ public:
 		readMatrix(Matrix<std::complex<FloatingType> >& m,
 		           const String& label)
 		{
+			assert(!ainurMode_);
 			String label2 = label2label(label);
 
 			MapStringVectorIteratorType it =  findFirstValueForLabel(label2,mapStrVec_);
@@ -816,6 +843,8 @@ public:
 		typename Map<String,Vector<String>::Type,MyCompareType>::Type mapStrVec_;
 		//serializr normal labelsForRemoval_
 		Vector<String>::Type labelsForRemoval_;
+		bool ainurMode_;
+		Ainur* ainur_;
 	}; // class Readable
 
 	static String findRootLabel(const String& label)

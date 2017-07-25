@@ -36,7 +36,7 @@ public:
 		storage_[storageIndex].setRhs(leftAndRight[1]);
 	}
 
-	int getInteger(String s) const
+	void readValue(int& t, String s) const
 	{
 		int x = storageIndexByName(s);
 		if (x < 0)
@@ -45,7 +45,19 @@ public:
 		if (store.type() != Store::SCALAR && store.subType() != Store::INTEGER)
 			err("In input, " + s + " must be an integer\n");
 		store.increaseUsage();
-		return atoi(store.value(0).c_str());
+		t = atoi(store.value(0).c_str());
+	}
+
+	void readValue(String& t, String s) const
+	{
+		int x = storageIndexByName(s);
+		if (x < 0)
+			err("Not found " + s + "\n");
+		Store store = storage_[x];
+		if (store.type() != Store::SCALAR && store.subType() != Store::INTEGER)
+			err("In input, " + s + " must be an integer\n");
+		store.increaseUsage();
+		t = store.value(0);
 	}
 
 private:
