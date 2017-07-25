@@ -237,7 +237,10 @@ public:
 		str += "string OperatorExpression;\n";
 		str += "integer Threads = 1;\n";
 		str += "integer Orbitals;\n";
-
+		str += "string FeAsMode;\n";
+		str += "group gt0;\n";
+		str += "group gt1;\n";
+		str += "group gt2;\n";
 		return str;
 	}
 

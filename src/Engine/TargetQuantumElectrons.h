@@ -89,9 +89,12 @@ struct TargetQuantumElectrons {
 
 	template<typename IoInputType>
 	TargetQuantumElectrons(IoInputType& io, bool allowUpDown = true)
-	    : totalElectrons(0),twiceJ(0),isCanonical(true)
+	    : isSu2(false),
+	      totalNumberOfSites(0),
+	      totalElectrons(0),
+	      twiceJ(0),
+	      isCanonical(true)
 	{
-		int totalNumberOfSites = 0;
 		io.readline(totalNumberOfSites, "TotalNumberOfSites=");
 
 		PsimagLite::String  msg("TargetQuantumElectrons: ");
@@ -182,6 +185,7 @@ struct TargetQuantumElectrons {
 	}
 
 	bool isSu2;
+	SizeType totalNumberOfSites;
 	SizeType totalElectrons;
 	VectorSizeType other;
 	SizeType twiceJ;
