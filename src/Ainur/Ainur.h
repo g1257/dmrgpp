@@ -15,7 +15,7 @@ public:
 
 	typedef Vector<String>::Type VectorStringType;
 	typedef AinurStatements AinurStatementsType;
-	typedef AinurStatementsType::AinurLexicalType AinurLexicalType;
+	typedef typename AinurStatementsType::AinurLexicalType AinurLexicalType;
 
 	Ainur(String str)
 	{
@@ -250,7 +250,7 @@ private:
 	VectorStringType vecStr_;
 	String vecChar_;
 	VectorStringType vecBrace_;
-	AinurStatements statements_;
+	AinurStatementsType statements_;
 };
 
 }

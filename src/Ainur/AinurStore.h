@@ -10,9 +10,9 @@ public:
 
 	typedef PsimagLite::Vector<String>::Type VectorStringType;
 
-	enum Type {UNKNOWN, STRING, CHAR, SCALAR, VECTOR, MATRIX, FUNCTION}; // GROUP, HASH,
+	enum Type {UNKNOWN, SCALAR, VECTOR, MATRIX}; // GROUP, HASH, FUNCTION
 
-	enum SubType {UNDEFINED, INTEGER, REAL, COMPLEX};
+	enum SubType {UNDEFINED, INTEGER, REAL, COMPLEX, STRING, CHAR};
 
 	enum Attribute {NONE, REQUIRED, CONST};
 
@@ -37,9 +37,6 @@ public:
 	{
 		value_.clear();
 		switch (type_) {
-		case STRING:
-		case CHAR:
-		case FUNCTION:
 		case SCALAR:
 			value_.push_back(rhs);
 			break;
@@ -58,6 +55,8 @@ public:
 
 	SubType subType() const { return subType_; }
 
+	SizeType valueSize() const { return value_.size(); }
+
 	String value(SizeType ind) const
 	{
 		assert(ind < value_.size());
@@ -70,19 +69,9 @@ private:
 
 	void setTypeOf(String s)
 	{
-		if (s == "string") {
-			type_ = STRING;
-			return;
-		}
-
-		if (s == "char") {
-			type_ = CHAR;
-			return;
-		}
-
-		if (s == "integer" || s == "real" || s == "complex") {
+		subType_ = subTypeFromString(s);
+		if (subType_ != UNDEFINED) {
 			type_ = SCALAR;
-			subType_ = subTypeFromString(s);
 			return;
 		}
 
@@ -110,6 +99,8 @@ private:
 		if (s == "integer") return INTEGER;
 		if (s == "real") return REAL;
 		if (s == "complex") return COMPLEX;
+		if (s == "char") return CHAR;
+		if (s == "string") return STRING;
 		return UNDEFINED;
 	}
 

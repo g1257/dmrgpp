@@ -531,7 +531,18 @@ public:
 		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
 		readline(FloatingType& val,const String& label)
 		{
-			assert(!ainurMode_);
+			if (ainur_) {
+				String label2 = label;
+				SizeType last = label2.length();
+				if (last > 0) {
+					--last;
+					if (label2[last] == '=')
+						label2 = label.substr(0, last);
+				}
+
+				return ainur_->readValue(val, label2);
+			}
+
 			String label2 = label2label(label);
 			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
@@ -543,7 +554,18 @@ public:
 
 		void readline(long int& val,const String& label)
 		{
-			assert(!ainurMode_);
+			if (ainur_) {
+				String label2 = label;
+				SizeType last = label2.length();
+				if (last > 0) {
+					--last;
+					if (label2[last] == '=')
+						label2 = label.substr(0, last);
+				}
+
+				return ainur_->readValue(val, label2);
+			}
+
 			String label2 = label2label(label);
 			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
@@ -555,7 +577,18 @@ public:
 
 		void readline(SizeType& val,const String& label)
 		{
-			assert(!ainurMode_);
+			if (ainur_) {
+				String label2 = label;
+				SizeType last = label2.length();
+				if (last > 0) {
+					--last;
+					if (label2[last] == '=')
+						label2 = label.substr(0, last);
+				}
+
+				return ainur_->readValue(val, label2);
+			}
+
 			String label2 = label2label(label);
 			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
@@ -567,7 +600,18 @@ public:
 
 		void readline(int& val,const String& label)
 		{
-			assert(!ainurMode_);
+			if (ainur_) {
+				String label2 = label;
+				SizeType last = label2.length();
+				if (last > 0) {
+					--last;
+					if (label2[last] == '=')
+						label2 = label.substr(0, last);
+				}
+
+				return ainur_->readValue(val, label2);
+			}
+
 			String label2 = label2label(label);
 			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
@@ -579,7 +623,9 @@ public:
 
 		void read(SizeType& val,const String& label)
 		{
-			assert(!ainurMode_);
+			if (ainur_)
+				err("Read not supported. Label= " + label + "\n");
+
 			String label2 = label2label(label);
 
 			MapStringIteratorType it =  findFirstValueForLabel(label2,mapStrStr_);
@@ -594,7 +640,9 @@ public:
 		typename EnableIf<IsMapLike<MapLikeType>::True,void>::Type
 		read(MapLikeType& val,const String& label)
 		{
-			assert(!ainurMode_);
+			if (ainur_)
+				err("Read not supported. Label= " + label + "\n");
+
 			String label2 = label2label(label);
 
 			typedef typename Map<String,String,MyCompareType>::Type::iterator MyIteratorType;
@@ -621,7 +669,9 @@ public:
 		typename EnableIf<IsVectorLike<VectorLikeType>::True,void>::Type
 		read(VectorLikeType& val,const String& label)
 		{
-			assert(!ainurMode_);
+			if (ainur_)
+				return ainur_->readValue(val, label);
+
 			String label2 = label2label(label);
 			typedef typename VectorLikeType::value_type NumericType;
 			MapStringVectorIteratorType it = findFirstValueForLabel(label2,mapStrVec_);
@@ -639,7 +689,9 @@ public:
 		template<typename VectorLikeType>
 		void readKnownSize(VectorLikeType& val,const String& label)
 		{
-			assert(!ainurMode_);
+			if (ainur_)
+				err("readKnownSize not supported. Label= " + label + "\n");
+
 			String label2 = label2label(label);
 			typedef typename VectorLikeType::value_type NumericType;
 			MapStringVectorIteratorType it =  findFirstValueForLabel(label2,mapStrVec_);
@@ -657,7 +709,9 @@ public:
 		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
 		readMatrix(Matrix<FloatingType>& m,const String& label)
 		{
-			assert(!ainurMode_);
+			if (ainur_)
+				err("readMatrix not supported. Label= " + label + "\n");
+
 			String label2 = label2label(label);
 
 			MapStringVectorIteratorType it =  findFirstValueForLabel(label2,mapStrVec_);
@@ -691,7 +745,9 @@ public:
 		readMatrix(Matrix<std::complex<FloatingType> >& m,
 		           const String& label)
 		{
-			assert(!ainurMode_);
+			if (ainur_)
+				err("readMatrix not supported. Label= " + label + "\n");
+
 			String label2 = label2label(label);
 
 			MapStringVectorIteratorType it =  findFirstValueForLabel(label2,mapStrVec_);
@@ -843,7 +899,6 @@ public:
 		typename Map<String,Vector<String>::Type,MyCompareType>::Type mapStrVec_;
 		//serializr normal labelsForRemoval_
 		Vector<String>::Type labelsForRemoval_;
-		bool ainurMode_;
 		Ainur* ainur_;
 	}; // class Readable
 

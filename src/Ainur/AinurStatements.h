@@ -2,6 +2,7 @@
 #define AINURSTATEMENT_H
 #include "AinurLexical.h"
 #include "AinurStore.h"
+#include <complex>
 
 namespace PsimagLite {
 
@@ -9,6 +10,8 @@ class AinurStatements {
 
 public:
 
+	typedef double RealType;
+	typedef std::complex<RealType> ComplexType;
 	typedef AinurLexical AinurLexicalType;
 	typedef AinurLexicalType::VectorStringType VectorStringType;
 	typedef Vector<Store>::Type VectorStoreType;
@@ -36,6 +39,20 @@ public:
 		storage_[storageIndex].setRhs(leftAndRight[1]);
 	}
 
+	void readValue(long int& t, String s) const
+	{
+		int t2 = 0;
+		readValue(t2, s);
+		t = t2;
+	}
+
+	void readValue(SizeType& t, String s) const
+	{
+		int t2 = 0;
+		readValue(t2, s);
+		t = t2;
+	}
+
 	void readValue(int& t, String s) const
 	{
 		int x = storageIndexByName(s);
@@ -48,19 +65,69 @@ public:
 		t = atoi(store.value(0).c_str());
 	}
 
+	void readValue(RealType& t, String s) const
+	{
+		int x = storageIndexByName(s);
+		if (x < 0)
+			err("Not found " + s + "\n");
+		Store store = storage_[x];
+		if (store.type() != Store::SCALAR && store.subType() != Store::REAL)
+			err("In input, " + s + " must be a real\n");
+		store.increaseUsage();
+		t = atof(store.value(0).c_str());
+	}
+
 	void readValue(String& t, String s) const
 	{
 		int x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
 		Store store = storage_[x];
-		if (store.type() != Store::SCALAR && store.subType() != Store::INTEGER)
-			err("In input, " + s + " must be an integer\n");
+		if (store.type() != Store::SCALAR && store.subType() != Store::STRING)
+			err("In input, " + s + " must be a string\n");
 		store.increaseUsage();
 		t = store.value(0);
 	}
 
+	// read vectors
+	template<typename VectorLikeType>
+	typename EnableIf<IsVectorLike<VectorLikeType>::True,void>::Type
+	readValue(VectorLikeType& v, String s) const
+	{
+		int x = storageIndexByName(s);
+		if (x < 0)
+			err("Not found " + s + "\n");
+		Store store = storage_[x];
+		if (store.type() != Store::VECTOR)
+			err("In input, " + s + " must be a vector\n");
+		store.increaseUsage();
+		SizeType n = store.valueSize();
+		if (n == 0)
+			err("In input, vector " + s + " has 0 entries\n");
+
+		v.clear();
+		v.resize(n);
+		for (SizeType i = 0; i < n; ++i)
+			getEntryFromString(v[i], store.value(i));
+		store.increaseUsage();
+	}
+
 private:
+
+	void getEntryFromString(SizeType& entry, String s) const
+	{
+		entry = atoi(s.c_str());
+	}
+
+	void getEntryFromString(RealType& entry, String s) const
+	{
+		entry = atof(s.c_str());
+	}
+
+	void getEntryFromString(ComplexType& entry, String s) const
+	{
+		err("Reading complex entry for vector unimplemented\n");
+	}
 
 	void procLeftEquality(SizeType& y,
 	                      String s,
