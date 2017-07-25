@@ -220,7 +220,7 @@ public:
 		str += "require string Version;\n";
 		str += "require integer InfiniteLoopKeptStates;\n";
 		str += "require string OutputFile;\n";
-		str += "require matrix.integer FiniteLoops;\n";
+		str += "vector.integer FiniteLoops;\n";
 		str += "require integer RepeatFiniteLoopsFrom;\n";
 		str += "require integer RepeatFiniteLoopsTimes;\n";
 		str += "integer TargetElectronsUp;\n";
@@ -236,6 +236,7 @@ public:
 		str += "string TSPOperator;\n";
 		str += "string OperatorExpression;\n";
 		str += "integer Threads = 1;\n";
+		str += "integer Orbitals;\n";
 
 		return str;
 	}
