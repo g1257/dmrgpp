@@ -126,11 +126,27 @@ public:
 		if (n == 0)
 			err("In input, vector " + s + " has 0 entries\n");
 
-		v.clear();
-		v.resize(n);
+		store.increaseUsage();
+
+		String tmp = (n == 2) ? store.value(1) : "";
+		AinurLexicalType::removeTrailingWhitespace(tmp);
+		if (n == 2 && tmp == "...") {
+			assert(static_cast<SizeType>(x) < names_.size());
+			if (v.size() < 3)
+				err("Ellipsis cannot be used for this vector, " + names_[x] + "\n");
+			n = v.size();
+			for (SizeType i = 0; i < n; ++i)
+				getEntryFromString(v[i], store.value(0));
+			return;
+		}
+
+		if (v.size() != n) {
+			v.clear();
+			v.resize(n);
+		}
+
 		for (SizeType i = 0; i < n; ++i)
 			getEntryFromString(v[i], store.value(i));
-		store.increaseUsage();
 	}
 
 private:
@@ -270,6 +286,12 @@ private:
 			return vecStr_[n];
 		}
 
+		if (c == 'b') {
+			if (n >= vecBrace_.size())
+				err("Error while replacing string, index too big\n");
+			return vecBrace_[n];
+		}
+
 		if (c == 'q') {
 			if (n >= vecChar_.length())
 				err("Error while replacing string, index too big\n");
@@ -286,7 +308,7 @@ private:
 			return oneChar;
 		}
 
-		err("Expected s or q or e after replacement\n");
+		err("Expected s or b or q or e after replacement\n");
 		return "";
 	}
 

@@ -10,9 +10,9 @@ public:
 
 	typedef PsimagLite::Vector<String>::Type VectorStringType;
 
-	enum Type {UNKNOWN, SCALAR, VECTOR, MATRIX}; // GROUP, HASH, FUNCTION
+	enum Type {UNKNOWN, SCALAR, VECTOR, MATRIX}; // HASH, FUNCTION
 
-	enum SubType {UNDEFINED, INTEGER, REAL, COMPLEX, STRING, CHAR};
+	enum SubType {UNDEFINED, INTEGER, REAL, COMPLEX, STRING, CHAR, GROUP};
 
 	enum Attribute {NONE, REQUIRED, CONST};
 
@@ -59,7 +59,9 @@ public:
 
 	String value(SizeType ind) const
 	{
-		assert(ind < value_.size());
+		if (ind >= value_.size())
+			throw RuntimeError("Not such value\n");
+
 		return value_[ind];
 	}
 
@@ -103,6 +105,7 @@ private:
 		if (s == "complex") return COMPLEX;
 		if (s == "char") return CHAR;
 		if (s == "string") return STRING;
+		if (s == "group") return GROUP;
 		return UNDEFINED;
 	}
 
