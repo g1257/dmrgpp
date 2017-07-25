@@ -5,7 +5,7 @@
 
 namespace PsimagLite {
 
-class AinurStatement {
+class AinurStatements {
 
 public:
 
@@ -13,13 +13,12 @@ public:
 	typedef AinurLexicalType::VectorStringType VectorStringType;
 	typedef Vector<Store>::Type VectorStoreType;
 
-	AinurStatement(const String& s2)
+	void push(const String& s2)
 	{
 		String s = s2;
 		AinurLexicalType::removeTrailingWhitespace(s);
 		if (s == "") return;
 		SizeType storageIndex = 0;
-		VectorStringType dotified;
 
 		VectorStringType leftAndRight;
 		split(leftAndRight, s, "=");
@@ -27,42 +26,51 @@ public:
 		if (leftAndRight.size() != 1 && leftAndRight.size() != 2)
 			err("Syntax error: " + s + "\n");
 
-		procLeftEquality(storageIndex, dotified, leftAndRight[0], s);
+		procLeftEquality(storageIndex, leftAndRight[0], s);
 		if (leftAndRight.size() == 1) return;
 
 		if (storageIndex >= storage_.size())
 			err("StorageIndex too big\n");
 
 		unescape(leftAndRight[1]);
-		storage_[storageIndex].procDotified(dotified, leftAndRight[1]);
+		storage_[storageIndex].setRhs(leftAndRight[1]);
 	}
 
 private:
 
 	void procLeftEquality(SizeType& y,
-	                      VectorStringType& dotified,
 	                      String s,
 	                      String context)
 	{
+		VectorStringType dotified;
 		VectorStringType lhs;
 		split(lhs,s," ");
 		SizeType l = lhs.size();
-		if (l == 0 || l > 2)
-			err("Nothing or too much on left? " + context + "\n");
+		// require vector.vector.integer FiniteLoops
+		// matrix.integer FiniteLoops
+		// identifier
+		if (l < 1 || l > 3)
+			err("Too much or too little on left? -- " + context + " --\n");
 		int x = -1;
 
-		if (l == 1) {
+		if (l == 1) { // identifier
 			split(dotified,lhs[0],".");
-			if (dotified.size() == 0)
-				err("Name too short " + context + "\n");
+			if (dotified.size() != 1)
+				err("Dotified failed " + context + "\n");
 			x = storageIndexByName(dotified[0]);
-		} else if (l == 2) {
-			Store::Attribute attr = getAttribute(lhs[0], context);
+		} else if (l == 2) { // matrix.integer FiniteLoops
 			split(dotified,lhs[1],".");
-			if (dotified.size() == 0)
-				err("Name too short " + context + "\n");
+			if (dotified.size() != 1)
+				err("Dotified failed " + context + "\n");
 			x = assignStorageByName(dotified[0]);
-			storage_.push_back(Store(Store::UNKNOWN, Store::UNDEFINED, attr));
+			storage_.push_back(Store(lhs[0]));
+		} else if (l == 3) {
+			// require vector.vector.integer FiniteLoops
+			split(dotified,lhs[2],".");
+			if (dotified.size() != 1)
+				err("Dotified failed " + context + "\n");
+			x = assignStorageByName(dotified[0]);
+			storage_.push_back(Store(lhs[1], lhs[0]));
 		}
 
 		if (x < 0)
@@ -105,7 +113,6 @@ private:
 
 	VectorStringType names_;
 	VectorStoreType storage_;
-
-}; // class AinurStatement
+}; // class AinurStatements
 } // namespace PsimagLite
 #endif // AINURSTATEMENT_H

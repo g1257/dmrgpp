@@ -5,7 +5,7 @@
 #include "Vector.h"
 #include "TypeToString.h"
 #include "PsimagLite.h"
-#include "AinurStatement.h"
+#include "AinurStatements.h"
 
 namespace PsimagLite {
 
@@ -14,8 +14,8 @@ class Ainur {
 public:
 
 	typedef Vector<String>::Type VectorStringType;
-	typedef AinurStatement AinurStatementType;
-	typedef AinurStatementType::AinurLexicalType AinurLexicalType;
+	typedef AinurStatements AinurStatementsType;
+	typedef AinurStatementsType::AinurLexicalType AinurLexicalType;
 
 	Ainur(String filename, String import)
 	{
@@ -248,8 +248,9 @@ private:
 	void procStatements(VectorStringType& s)
 	{
 		SizeType n = s.size();
+		AinurStatements statements;
 		for (SizeType i = 0; i < n; ++i)
-			AinurStatement statement(s[i]);
+			statements.push(s[i]);
 	}
 
 	String escapedChars_;

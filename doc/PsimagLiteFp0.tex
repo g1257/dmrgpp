@@ -18,61 +18,56 @@ Comments: \verb!#! until EOL
 
 Tokens + Strings Literals + Other literals
 
-Keywords:
-\verb!let! \verb!require! \verb!const! \verb!import! \verb!function!.
-Properties for all types: \verb!defined! \verb!typeof!
+Keywords: Types: integer, real, complex, char, string, function, vector, matrix. 
+Attributes: require const. Properties: defined, typeof.
 \begin{verbatim}
-# declare a, require a,  and
-# require it to be integer
-require a.typeof = "integer";
+require integer a;
 # declare pi, make pi value constant
-const pi = 3.1415927;
+const real pi = 3.1415927;
 pi = 3.14; # ERROR, pi constant
-# declare b, make type of b constant 
-# and equal to integer
-const b.typeof = "integer"; 
-b = 3; # OK
+#
+integer b = 3;
+b = 4; # OK
 b = 3.5; # ERROR, not integer
-b.typeof = "real"; # ERROR, type constant
+#
 c = 3.5; # ERROR c undefined
 \end{verbatim}
 
 \subsection{Strings and Characters} 
 \begin{verbatim}
-let s="Hello, ";
-let c = 'W';
+string s="Hello, ";
+char c = 'W';
 s = s + c + "orld!";
-let d = "'"; # OK
-let e = '"'; # OK 
+string d = "'";
+char e = '"';
 \end{verbatim}
 Properties: \verb!s.length! \verb!s[0]!
 
 \subsection{Scalars} 
 \begin{verbatim}
-let a=1; # defines int scalar
-let b=a+3.5; # defines real scalar
-let c=3*i + 1.2; # defines complex scalar
+integer a=1; # defines int scalar
+complex b=3*i + 1.2; # defines complex scalar
 a = a + 1.5; # OK, a promoted to real
 a = a + 1.5*i; # ERROR
+b = b + 1.5*i; # OK
 \end{verbatim}
-Sub-type for scalars: integer, real, complex.
 
 \subsection{Vectors} 
 \begin{verbatim}
-let v=[ 1, 2, 3 ];
-let w=[ 1, a, 3*a ];
-let x=v+w;
-let y = [];
+vector.integer v=[ 1, 2, 3 ];
+vector w=[ 1, a, 3*a ];
+vector x=v+w;
+vector y = [];
 y.size = 4;
 # equivalent to y = [ 1, 1 ,1, 1]
-y = [1, ... ] 
+y = [1, ... ]; 
 \end{verbatim}
 Properties: \verb!v.size! \verb!v[0]!
 Vectors values: scalars, strings, and characters.
 
 \section{Associative arrays or Hashes}
 \begin{verbatim}
-let a = ({key1 : 3, key2 : "Hello"}); 
+hash a = ({key1 : 3, key2 : "Hello"}); 
 # defines a["key1"] and a["key2"]
 # to have the corresponding values.
 \end{verbatim}
@@ -80,12 +75,15 @@ Hash values: scalars, strings, characters, vectors.
 
 \subsection{Matrices} 
 \begin{verbatim}
+matrix m = [[0, 1], [1, 0]];
 # As vector of vectors
-let m = [[0, 1], [1, 0]];
+vector v1 = [0,1];
+vector v2 = [1,0];
+matrix m2 = [v1, v2];
 # As a hash
-let m2 = ({ rows : 4, cols : 2, data :
+hash m2 = ({ rows : 4, cols : 2, data :
 [0, 1, 1, 0, 0, 1, 1, 0] });
-let m3 = 3.5*m;
+matrix m3 = 3.5*m;
 \end{verbatim}
 Properties: \verb!rows! \verb!cols! \verb!data!. 
 Matrix values: scalars.
@@ -94,11 +92,11 @@ Matrix values: scalars.
 \begin{verbatim}
 groupName={ name="chain";
 Connections=[ 1, 1 ];
-let a = "my local value"; };
+string a = "my local value"; };
 #The above would be lowered to
 groupName.name="chain";
 groupName.Connections=[ 1, 1 ];
-let groupName.a = "my local value";
+string groupName.a = "my local value";
 # Unnamed groups?
 \end{verbatim}
 
@@ -124,27 +122,12 @@ User defined functions must be entered as a string in prefix notation.
 \begin{verbatim}
 # f(t) = 3.5*cos(t)
 function f = "*,cos,%t,3.5";
-let a = f(0.25); # = 3.3911...
+real a = f(0.25); # = 3.3911...
 \end{verbatim}
 Mathematical functions for scalars:
 \texttt{abs, conj, sqrt, exp, log, sin, cos, atan}.
 Functions for complex numbers \verb!abs! \verb!real! \verb!imag! \verb!arg! 
-Example \texttt{let a = 3.5*sin(b);}
-\\
-
-\begin{tabular}{ll}\toprule
-Type & Description\\\midrule
-unknown & let a;\\
-string & let a = \textquotedbl\textquotedbl;\\
-character & let a = \textquotesingle\textquotesingle;\\
-scalar & let a = 3.5;\\
-vector & let a = [];\\
-matrix & let a = [[]];\\
-group & let a = \{\};\\
-hash & let a = (\{\});\\
-function & function a;\\
-\bottomrule\\
-\end{tabular}
+Example \texttt{real a = 3.5*sin(b);}
 
 Inputs 52 from the TestSuite follows.
 \begin{tiny}
@@ -159,10 +142,8 @@ dir0.Connectors = [1.0];
 dir1.Connectors = [0.5];
 LadderLeg=2;
 
-hubbardU	.size = 8;
 hubbardU = [10, ...];
 
-potentialV.size = 16;
 potentialV = [ 0, ...];
 Model="HubbardOneBand";
 SolverOptions="TimeStepTargetting,vectorwithoffsets";
@@ -255,8 +236,8 @@ SolverOptions="none"
 Version="61289987cdd32b8485213ac0415baf4e9cd16432";
 OutputFile="data340.txt";
 InfiniteLoopKeptStates=60;
-let v1 = [ 3, 100, 0];
-let v2 = [-3, 100, 0];
+vector v1 = [ 3, 100, 0];
+vector v2 = [-3, 100, 0];
 FiniteLoops = [v1, v2, v2, v1]; # note the abbreviation here
 TargetElectronsUp=8;
 TargetElectronsDown=TargetElectronsUp;

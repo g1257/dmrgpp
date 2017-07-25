@@ -16,30 +16,24 @@ public:
 
 	enum Attribute {NONE, REQUIRED, CONST};
 
-	Store(Type t, SubType s, Attribute a)
-	    : type_(t), subType_(s), attr_(a), value_(0)
-	{}
+//	Store(Type t, SubType s, Attribute a)
+//	    : type_(t), subType_(s), attr_(a), value_(0)
+//	{}
 
-	void procDotified(const VectorStringType& dotified,
-	                  String right)
+	Store(String s): type_(UNKNOWN), subType_(UNDEFINED), attr_(NONE)
 	{
-		if (dotified.size() == 1) return;
-		if (dotified.size() > 2)
-			err("More than 2 dots not implemented\n");
+		setTypeOf(s);
+	}
 
-		if (dotified[1] == "typeof") {
-			setTypeOf(right);
-			return;
-		}
+	Store(String s, String a) : type_(UNKNOWN), subType_(UNDEFINED), attr_(NONE)
+	{
+		setTypeOf(s);
+		setAttr(a);
+	}
 
-		if (dotified[1] == "size") {
-			// only vectors support size
-			if (type_ != Store::VECTOR)
-				err(dotified[0] +" is not a vector\n");
-			return;
-		}
-
-		err("procDotified, unknown " + dotified[1] + "\n");
+	void setRhs(String rhs)
+	{
+		std::cerr<<"Not setting RHS to "<<rhs<<"\n";
 	}
 
 private:
@@ -89,10 +83,24 @@ private:
 		return UNDEFINED;
 	}
 
+	void setAttr(String s)
+	{
+		if (s == "require") {
+			attr_ = REQUIRED;
+			return;
+		}
+
+		if (s == "const") {
+			attr_ = CONST;
+			return;
+		}
+
+		err("Unknown attribute " + s + "\n");
+	}
+
 	Type type_;
 	SubType subType_;
 	Attribute attr_;
-	unsigned char *value_;
 };
 }
 #endif // AINURSTORE_H
