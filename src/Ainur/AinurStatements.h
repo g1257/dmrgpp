@@ -36,6 +36,18 @@ public:
 		storage_[storageIndex].setRhs(leftAndRight[1]);
 	}
 
+	int getInteger(String s) const
+	{
+		int x = storageIndexByName(s);
+		if (x < 0)
+			err("Not found " + s + "\n");
+		Store store = storage_[x];
+		if (store.type() != Store::SCALAR && store.subType() != Store::INTEGER)
+			err("In input, " + s + " must be an integer\n");
+		store.increaseUsage();
+		return atoi(store.value(0).c_str());
+	}
+
 private:
 
 	void procLeftEquality(SizeType& y,

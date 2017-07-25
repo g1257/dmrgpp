@@ -52,6 +52,11 @@ public:
 		procStatements(statements);
 	}
 
+	int getLabel(String label) const
+	{
+		return statements_.getInteger(label);
+	}
+
 private:
 
 	void printContainers(std::ostream& os) const
@@ -248,15 +253,15 @@ private:
 	void procStatements(VectorStringType& s)
 	{
 		SizeType n = s.size();
-		AinurStatements statements;
 		for (SizeType i = 0; i < n; ++i)
-			statements.push(s[i]);
+			statements_.push(s[i]);
 	}
 
 	String escapedChars_;
 	VectorStringType vecStr_;
 	String vecChar_;
 	VectorStringType vecBrace_;
+	AinurStatements statements_;
 };
 
 }

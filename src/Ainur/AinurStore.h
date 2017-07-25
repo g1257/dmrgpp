@@ -10,7 +10,7 @@ public:
 
 	typedef PsimagLite::Vector<String>::Type VectorStringType;
 
-	enum Type {UNKNOWN, STRING, CHAR, SCALAR, VECTOR, MATRIX}; // FUNCTION, GROUP, HASH,
+	enum Type {UNKNOWN, STRING, CHAR, SCALAR, VECTOR, MATRIX, FUNCTION}; // GROUP, HASH,
 
 	enum SubType {UNDEFINED, INTEGER, REAL, COMPLEX};
 
@@ -20,12 +20,14 @@ public:
 //	    : type_(t), subType_(s), attr_(a), value_(0)
 //	{}
 
-	Store(String s): type_(UNKNOWN), subType_(UNDEFINED), attr_(NONE)
+	Store(String s)
+	    : type_(UNKNOWN), subType_(UNDEFINED), attr_(NONE), used_(0)
 	{
 		setTypeOf(s);
 	}
 
-	Store(String s, String a) : type_(UNKNOWN), subType_(UNDEFINED), attr_(NONE)
+	Store(String s, String a)
+	    : type_(UNKNOWN), subType_(UNDEFINED), attr_(NONE), used_(0)
 	{
 		setTypeOf(s);
 		setAttr(a);
@@ -33,8 +35,36 @@ public:
 
 	void setRhs(String rhs)
 	{
-		std::cerr<<"Not setting RHS to "<<rhs<<"\n";
+		value_.clear();
+		switch (type_) {
+		case STRING:
+		case CHAR:
+		case FUNCTION:
+		case SCALAR:
+			value_.push_back(rhs);
+			break;
+		case VECTOR:
+			setVectorValue(rhs);
+			break;
+		case MATRIX:
+			setMatrixValue(rhs);
+			break;
+		default:
+			break;
+		}
 	}
+
+	Type type() const { return type_; }
+
+	SubType subType() const { return subType_; }
+
+	String value(SizeType ind) const
+	{
+		assert(ind < value_.size());
+		return value_[ind];
+	}
+
+	void increaseUsage() const { ++used_; }
 
 private:
 
@@ -98,9 +128,26 @@ private:
 		err("Unknown attribute " + s + "\n");
 	}
 
+	void setVectorValue(String rhs)
+	{
+		SizeType last = rhs.size();
+		if (last == 0) return;
+		--last;
+		if (rhs[0] != '[' || rhs[last] != ']')
+			err("Malformed vector " + rhs + "\n");
+		split(value_, rhs, ",");
+	}
+
+	void setMatrixValue(String rhs)
+	{
+		std::cerr<<"Not setting matrix value to "<<rhs<<"\n";
+	}
+
 	Type type_;
 	SubType subType_;
 	Attribute attr_;
+	VectorStringType value_;
+	mutable SizeType used_;
 };
 }
 #endif // AINURSTORE_H

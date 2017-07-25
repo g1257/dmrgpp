@@ -18,7 +18,7 @@ PsimagLite::String dmrgImport()
 	str += "require string Version;\n";
 	str += "require integer InfiniteLoopKeptStates;\n";
 	str += "require string OutputFile;\n";
-	str += "require vector.vector.integer FiniteLoops;\n";
+	str += "require matrix.integer FiniteLoops;\n";
 	str += "require integer RepeatFiniteLoopsFrom;\n";
 	str += "require integer RepeatFiniteLoopsTimes;\n";
 	str += "integer TargetElectronsUp;\n";
@@ -38,9 +38,17 @@ PsimagLite::String dmrgImport()
 	return str;
 }
 
+void partiallyReadSomething(const PsimagLite::Ainur& ainur)
+{
+	SizeType n = ainur.getLabel("TotalNumberOfSites");
+	std::cout<<"TotalNumberOfSites="<<n<<"\n";
+}
+
 int main(int argc, char** argv)
 {
 	if (argc == 1) return 1;
 	PsimagLite::String dmrgppImport = dmrgImport();
 	PsimagLite::Ainur ainur(argv[1], dmrgppImport);
+	partiallyReadSomething(ainur);
+
 }
