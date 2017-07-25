@@ -65,6 +65,8 @@ public:
 
 	void increaseUsage() const { ++used_; }
 
+	SizeType used() const { return used_; }
+
 private:
 
 	void setTypeOf(String s)

@@ -41,6 +41,11 @@ public:
 		procStatements(statements);
 	}
 
+	void printUnused(std::ostream& os) const
+	{
+		statements_.printUnused(os);
+	}
+
 	template<typename SomeType>
 	void readValue(SomeType& t, String label) const
 	{

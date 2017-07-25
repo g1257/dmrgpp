@@ -49,6 +49,17 @@ public:
 		storage_[storageIndex].setRhs(leftAndRight[1]);
 	}
 
+	void printUnused(std::ostream& os) const
+	{
+		SizeType n = storage_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			if (storage_[i].used() > 0)
+				continue;
+			assert(i < names_.size());
+			os<<"WARNING: Unused label "<<names_[i]<<"\n";
+		}
+	}
+
 	void readValue(long int& t, String s) const
 	{
 		int t2 = 0;
@@ -68,7 +79,7 @@ public:
 		int x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
-		Store store = storage_[x];
+		const Store& store = storage_[x];
 		if (store.type() != Store::SCALAR && store.subType() != Store::INTEGER)
 			err("In input, " + s + " must be an integer\n");
 		store.increaseUsage();
@@ -80,7 +91,7 @@ public:
 		int x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
-		Store store = storage_[x];
+		const Store& store = storage_[x];
 		if (store.type() != Store::SCALAR && store.subType() != Store::REAL)
 			err("In input, " + s + " must be a real\n");
 		store.increaseUsage();
@@ -92,7 +103,7 @@ public:
 		int x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
-		Store store = storage_[x];
+		const Store& store = storage_[x];
 		if (store.type() != Store::SCALAR && store.subType() != Store::STRING)
 			err("In input, " + s + " must be a string\n");
 		store.increaseUsage();
@@ -107,7 +118,7 @@ public:
 		int x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
-		Store store = storage_[x];
+		const Store& store = storage_[x];
 		if (store.type() != Store::VECTOR)
 			err("In input, " + s + " must be a vector\n");
 		store.increaseUsage();

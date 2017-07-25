@@ -501,6 +501,12 @@ public:
 
 		double version() const { return (ainur_) ?  3. : 2.; }
 
+		void printUnused(std::ostream& os) const
+		{
+			if (!ainur_) return;
+			ainur_->printUnused(os);
+		}
+
 		const PsimagLite::String& data() const { return data_; }
 
 		void readline(String& val,
