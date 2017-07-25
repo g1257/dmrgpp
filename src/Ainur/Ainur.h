@@ -236,8 +236,6 @@ private:
 		return 0;
 	}
 
-
-
 	bool allowedChar(unsigned char c) const
 	{
 		if (AinurLexicalType::isWhitespace(c) || AinurLexicalType::isEOL(c))
