@@ -113,17 +113,22 @@ public:
 			return;
 		}
 
+		String connectors = "Connectors";
+		if (io.version() > 2.5)
+			connectors = "dir" + ttos(dirId_) + ":" + connectors;
+
 		if (edof & 1) {
 			if (n == 0) n = 1;
 			for (SizeType i=0;i<n;i++) {
 				MatrixType m;
-				io.readMatrix(m,"Connectors");
+				String extraString =  (n > 1 && io.version() > 2) ? ttos(i) : "";
+				io.readMatrix(m, connectors + extraString);
 				dataMatrices_.push_back(m);
 				if (orbitals_ < m.n_row()) orbitals_ = m.n_row();
 				if (orbitals_ < m.n_col()) orbitals_ = m.n_col();
 			}
 		} else {
-			io.read(dataNumbers_,"Connectors");
+			io.read(dataNumbers_, connectors);
 			if (dataNumbers_.size()!=n) {
 				String s(__FILE__);
 				s += " " + ttos(dataNumbers_.size()) + " != " + ttos(n) + "\n";

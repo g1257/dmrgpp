@@ -18,6 +18,7 @@ public:
 	typedef typename AinurStatementsType::AinurLexicalType AinurLexicalType;
 
 	Ainur(String str)
+	    : statements_(vecStr_, vecChar_, escapedChars_, vecBrace_)
 	{
 		replaceAtAndCheck(str);
 
@@ -116,6 +117,7 @@ private:
 					String metaString("@ ");
 					metaString[1] = getMetaChar(q);
 					metaString += ttos(t.size());
+					metaString += "@";
 					newStr += metaString;
 					pushInto(t, buffer);
 					buffer = "";
@@ -145,7 +147,7 @@ private:
 		char q = '\\';
 		for (SizeType i = 0; i < l; ++i) {
 			if (str[i] == q) {
-				newStr += "@e" + ttos(t.length());
+				newStr += "@e" + ttos(t.length()) + "@";
 				if (l == i + 1)
 					err("Syntax Error (escaped): " + getContext(str, i) + "\n");
 				t += str[++i];
@@ -184,7 +186,7 @@ private:
 				buffer += qClose;
 				if (openBrace > 0)
 					continue;
-				newStr += "@b" + ttos(t.size()) + ";";
+				newStr += "@b" + ttos(t.size()) + "@;";
 				t.push_back(buffer);
 				buffer = "";
 				continue;
@@ -235,7 +237,7 @@ private:
 		if (AinurLexicalType::isWhitespace(c) || AinurLexicalType::isEOL(c))
 			return true;
 		if (c < 33 ||c > 126) return false;
-		if (c == 95 || c == 96) return false;
+		if (c == 96) return false;
 		return true;
 	}
 

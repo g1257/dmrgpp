@@ -32,7 +32,6 @@ public:
 			return;
 		}
 
-
 		String newStr = s.substr(start);
 		l = newStr.length();
 		SizeType end = l;

@@ -499,6 +499,8 @@ public:
 
 		void rewind() {}
 
+		double version() const { return (ainur_) ?  3. : 2.; }
+
 		const PsimagLite::String& data() const { return data_; }
 
 		void readline(String& val,

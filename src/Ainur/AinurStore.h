@@ -121,11 +121,14 @@ private:
 
 	void setVectorValue(String rhs)
 	{
-		SizeType last = rhs.size();
-		if (last == 0) return;
+		SizeType last = rhs.length();
+		if (last < 2)
+			err("Vector must be enclosed in brakets\n");
+
 		--last;
 		if (rhs[0] != '[' || rhs[last] != ']')
 			err("Malformed vector " + rhs + "\n");
+		rhs = (last < 2 ) ? "" : rhs.substr(1,last - 1);
 		split(value_, rhs, ",");
 	}
 

@@ -16,6 +16,16 @@ public:
 	typedef AinurLexicalType::VectorStringType VectorStringType;
 	typedef Vector<Store>::Type VectorStoreType;
 
+	AinurStatements(const VectorStringType& vecStr,
+	                const String& vecChar,
+	                const String& escapedChars,
+	                const VectorStringType& vecBrace)
+	    : vecStr_(vecStr),
+	      vecChar_(vecChar),
+	      escapedChars_(escapedChars),
+	      vecBrace_(vecBrace)
+	{}
+
 	void push(const String& s2)
 	{
 		String s = s2;
@@ -124,9 +134,11 @@ private:
 		entry = atof(s.c_str());
 	}
 
+	// One of double or double + double*i or double - double*i
+	// will later replace with general expression evaluator
 	void getEntryFromString(ComplexType& entry, String s) const
 	{
-		err("Reading complex entry for vector unimplemented\n");
+		err("getEntryFromString not implemented for complex\n");
 	}
 
 	void procLeftEquality(SizeType& y,
@@ -172,7 +184,6 @@ private:
 
 	Store::Attribute getAttribute(String s, String context) const
 	{
-		if (s == "let" || s == "function") return Store::NONE;
 		if (s == "require") return Store::REQUIRED;
 		if (s == "const") return Store::CONST;
 
@@ -191,7 +202,9 @@ private:
 
 	int storageIndexByName(String name) const
 	{
-		VectorStringType::const_iterator it = std::find(names_.begin(), names_.end(), name);
+		VectorStringType::const_iterator it = std::find(names_.begin(),
+		                                                names_.end(),
+		                                                name);
 		if (it == names_.end())
 			return -1;
 		return it - names_.begin();
@@ -199,9 +212,77 @@ private:
 
 	void unescape(String& s) const
 	{
+		SizeType l = s.length();
+		String newStr("");
+		for (SizeType i = 0; i < l; ++i) {
+			if (s[i] == '@') {
+				newStr += getReplacement(i, s, l);
+				continue;
+			}
 
+			newStr += s[i];
+		}
+
+		s = newStr;
 	}
 
+	// i @, i+1 s, i+2 0, i+3 @
+	String getReplacement(SizeType& i, String s, SizeType l) const
+	{
+		assert(i < l);
+		String oneChar(" ");
+		oneChar[0] = s[i];
+		if (i + 3 >= l) return oneChar;
+		char c = s[++i];
+		String number;
+		SizeType j = i + 1;
+		for (; j < l; ++j) {
+			if (s[j] == '@') break;
+			if (s[j] < 48 || s[j] > 57)
+				err("Error while replacing string\n");
+			number += s[j];
+		}
+
+		if (s[j] != '@')
+			err("Error while replacing string, no final @ found\n");
+
+		i = j + 1;
+		SizeType n = atoi(number.c_str());
+		return getReplacement(c, n);
+	}
+
+	String getReplacement(char c, SizeType n) const
+	{
+		if (c == 's') {
+			if (n >= vecStr_.size())
+				err("Error while replacing string, index too big\n");
+			return vecStr_[n];
+		}
+
+		if (c == 'q') {
+			if (n >= vecChar_.length())
+				err("Error while replacing string, index too big\n");
+			String oneChar(" ");
+			oneChar[0] = vecChar_[n];
+			return oneChar;
+		}
+
+		if (c == 'e') {
+			if (n >= escapedChars_.length())
+				err("Error while replacing string, index too big\n");
+			String oneChar(" ");
+			oneChar[0] = escapedChars_[n];
+			return oneChar;
+		}
+
+		err("Expected s or q or e after replacement\n");
+		return "";
+	}
+
+	const VectorStringType& vecStr_;
+	const String& vecChar_;
+	const String& escapedChars_;
+	const VectorStringType& vecBrace_;
 	VectorStringType names_;
 	VectorStoreType storage_;
 }; // class AinurStatements
