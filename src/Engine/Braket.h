@@ -3,7 +3,8 @@
 #include "Vector.h"
 #include "PsimagLite.h"
 #include "Matrix.h"
-#include "OperatorExpression.h"
+#include "OperatorSpec.h"
+#include "CanonicalExpression.h"
 
 namespace Dmrg {
 
@@ -19,7 +20,7 @@ class Braket {
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef OperatorExpression<ModelType> OperatorExpressionType;
+	typedef OperatorSpec<ModelType> OperatorSpecType;
 
 public:
 
@@ -55,9 +56,11 @@ public:
 
 		sites_.resize(opExprName_.size(),-1);
 
-		OperatorExpressionType operatorExpression(model_);
+		OperatorSpecType opSpec(model);
+		PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(opSpec);
+
 		for (SizeType i = 0; i < opExprName_.size(); ++i) {
-			OperatorType tmp = operatorExpression(opExprName_[i],sites_[i]);
+			OperatorType tmp = canonicalExpression(opExprName_[i],sites_[i]);
 			op_.push_back(tmp);
 		}
 	}

@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "IoSimple.h"
 #include "InputNg.h"
 #include "InputCheck.h"
-#include "OperatorExpression.h"
+#include "CanonicalExpression.h"
 
 namespace Dmrg {
 
@@ -174,8 +174,10 @@ struct Operator {
 		} else if (s == "expression") {
 			io.readline(s,"OperatorExpression=");
 			int site = 0;
-			OperatorExpression<SomeModelType> operatorExpression(model);
-			Operator p = operatorExpression(s, site);
+			typedef OperatorSpec<SomeModelType> OperatorSpecType;
+			OperatorSpecType opSpec(model);
+			PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(opSpec);
+			Operator p = canonicalExpression(s, site);
 			data = p.data;
 			fermionSign = p.fermionSign;
 			jm = p.jm;
