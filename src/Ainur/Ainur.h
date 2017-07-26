@@ -32,13 +32,7 @@ public:
 
 		replaceAndStoreBraces(vecBrace_, str);
 
-		//std::cout<<str<<"\n";
-		//printContainers(std::cout);
-
-		VectorStringType statements;
-		split(statements, str, ";");
-
-		procStatements(statements);
+		procStatements(str,"");
 	}
 
 	void printUnused(std::ostream& os) const
@@ -246,11 +240,22 @@ private:
 		return true;
 	}
 
-	void procStatements(VectorStringType& s)
+	void procStatements(const String& str, String prefix)
+	{
+		VectorStringType statements;
+		split(statements, str, ";");
+		procStatements(statements, prefix);
+	}
+
+	void procStatements(VectorStringType& s, String prefix)
 	{
 		SizeType n = s.size();
-		for (SizeType i = 0; i < n; ++i)
-			statements_.push(s[i]);
+		for (SizeType i = 0; i < n; ++i) {
+			VectorStringType possibleGroup = statements_.push(s[i], prefix);
+			assert(possibleGroup.size() == 0 || possibleGroup.size() == 2);
+			if (possibleGroup.size() == 2)
+				procStatements(possibleGroup[1], possibleGroup[0]);
+		}
 	}
 
 	String escapedChars_;

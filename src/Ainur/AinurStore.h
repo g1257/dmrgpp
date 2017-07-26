@@ -47,6 +47,7 @@ public:
 			setMatrixValue(rhs);
 			break;
 		default:
+			std::cerr<<"setRhs not implemented, rhs= "<<rhs<<"\n";
 			break;
 		}
 	}

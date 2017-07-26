@@ -26,11 +26,13 @@ public:
 	      vecBrace_(vecBrace)
 	{}
 
-	void push(const String& s2)
+	VectorStringType push(const String& s2, String prefix)
 	{
+		VectorStringType emptyStringVector;
 		String s = s2;
 		AinurLexicalType::removeTrailingWhitespace(s);
-		if (s == "") return;
+		AinurLexicalType::removeTrailingWhitespace(prefix);
+		if (s == "") return emptyStringVector;
 		SizeType storageIndex = 0;
 
 		VectorStringType leftAndRight;
@@ -39,14 +41,29 @@ public:
 		if (leftAndRight.size() != 1 && leftAndRight.size() != 2)
 			err("Syntax error: " + s + "\n");
 
-		procLeftEquality(storageIndex, leftAndRight[0], s);
-		if (leftAndRight.size() == 1) return;
+		String identifier = procLeftEquality(storageIndex, leftAndRight[0], prefix, s);
+		if (leftAndRight.size() == 1) return emptyStringVector;
 
 		if (storageIndex >= storage_.size())
 			err("StorageIndex too big\n");
 
 		unescape(leftAndRight[1]);
-		storage_[storageIndex].setRhs(leftAndRight[1]);
+		unescape(identifier);
+		Store& store = storage_[storageIndex];
+		if (store.type() == Store::SCALAR && store.subType() == Store::GROUP)  {
+			String right = leftAndRight[1];
+			SizeType last = right.length();
+			--last;
+			if (last >= right.length() || right[0] != '{' ||  right[last] != '}')
+				err("Group must be enclosed in braces, " + leftAndRight[0] + "\n");
+
+			leftAndRight[1] = (last < 2) ? "" : right.substr(1,last - 1);
+			leftAndRight[0] = identifier + ":";
+			return leftAndRight;
+		}
+
+		store.setRhs(leftAndRight[1]);
+		return emptyStringVector;
 	}
 
 	void printUnused(std::ostream& os) const
@@ -168,9 +185,10 @@ private:
 		err("getEntryFromString not implemented for complex\n");
 	}
 
-	void procLeftEquality(SizeType& y,
-	                      String s,
-	                      String context)
+	String procLeftEquality(SizeType& y,
+	                        String s,
+	                        String prefix,
+	                        String context)
 	{
 		VectorStringType dotified;
 		VectorStringType lhs;
@@ -184,19 +202,19 @@ private:
 		int x = -1;
 
 		if (l == 1) { // identifier
-			split(dotified,lhs[0],".");
+			split(dotified,prefix + lhs[0],".");
 			if (dotified.size() != 1)
 				err("Dotified failed " + context + "\n");
 			x = storageIndexByName(dotified[0]);
 		} else if (l == 2) { // matrix.integer FiniteLoops
-			split(dotified,lhs[1],".");
+			split(dotified,prefix + lhs[1],".");
 			if (dotified.size() != 1)
 				err("Dotified failed " + context + "\n");
 			x = assignStorageByName(dotified[0]);
 			storage_.push_back(Store(lhs[0]));
 		} else if (l == 3) {
 			// require vector.vector.integer FiniteLoops
-			split(dotified,lhs[2],".");
+			split(dotified,prefix + lhs[2],".");
 			if (dotified.size() != 1)
 				err("Dotified failed " + context + "\n");
 			x = assignStorageByName(dotified[0]);
@@ -207,6 +225,8 @@ private:
 			err("Undeclared variable " + dotified[0] + "\n");
 
 		y = x;
+
+		return dotified[0];
 	}
 
 	Store::Attribute getAttribute(String s, String context) const
