@@ -207,9 +207,9 @@ public:
 		PsimagLite::String str("");
 		str += "require integer TotalNumberOfSites;\n";
 		str += "require integer NumberOfTerms;\n";
-		str += "require integer DegreesOfFreedom;\n";
-		str += "require string GeometryKind;\n";
-		str += "require string GeometryOptions;\n";
+		str += "integer DegreesOfFreedom;\n";
+		str += "string GeometryKind;\n";
+		str += "string GeometryOptions;\n";
 		str += "vector dir0:Connectors;\n";
 		str += "vector dir1:Connectors;\n";
 		str += "integer LadderLeg;\n";
@@ -238,9 +238,34 @@ public:
 		str += "integer Threads = 1;\n";
 		str += "integer Orbitals;\n";
 		str += "string FeAsMode;\n";
-		str += "group gt0;\n";
-		str += "group gt1;\n";
-		str += "group gt2;\n";
+		str += "group gt0 = {\n";
+		str += "\t integer DegreesOfFreedom;\n";
+		str += "\t string GeometryKind;\n";
+		str += "\t string GeometryOptions;\n";
+		str += "\t vector dir0:Connectors;\n";
+		str += "\t vector dir1:Connectors;\n";
+		str += "\t vector dir2:Connectors;\n";
+		str += "\t vector dir3:Connectors;\n";
+		str += "integer LadderLeg;}\n";
+		str += "group gt1 = {\n";
+		str += "\t integer DegreesOfFreedom;\n";
+		str += "\t string GeometryKind;\n";
+		str += "\t string GeometryOptions;\n";
+		str += "\t vector dir0:Connectors;\n";
+		str += "\t vector dir1:Connectors;\n";
+		str += "\t vector dir2:Connectors;\n";
+		str += "\t vector dir3:Connectors;\n";
+		str += "integer LadderLeg;}\n";
+		str += "group gt2 = {\n";
+		str += "\t integer DegreesOfFreedom;\n";
+		str += "\t string GeometryKind;\n";
+		str += "\t string GeometryOptions;\n";
+		str += "\t vector dir0:Connectors;\n";
+		str += "\t vector dir1:Connectors;\n";
+		str += "\t vector dir2:Connectors;\n";
+		str += "\t vector dir3:Connectors;\n";
+		str += "integer LadderLeg;}\n";
+
 		return str;
 	}
 
