@@ -8,7 +8,6 @@ class OperatorSpec {
 
 	typedef typename ModelType::OperatorType OperatorType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 
 	struct NaturalOpStruct {
 		NaturalOpStruct(PsimagLite::String label_)
@@ -44,11 +43,15 @@ class OperatorSpec {
 
 public:
 
+	typedef OperatorType ResultType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef int AuxiliaryType;
+
 	OperatorSpec(const ModelType& model)
 	    : model_(model)
 	{}
 
-	OperatorType operator()(PsimagLite::String opLabel, int& site2)
+	OperatorType operator()(PsimagLite::String opLabel, int& site2) const
 	{
 		if (site2 < 0) site2 = extractSiteIfAny(opLabel);
 
@@ -86,6 +89,16 @@ public:
 		}
 
 		return nup;
+	}
+
+	static bool metaEqual(const OperatorType& op1, const OperatorType& op2)
+	{
+		return (op1.metaDiff(op2) == 0);
+	}
+
+	static bool isEmpty(const OperatorType& op)
+	{
+		return (op.data.rows() == 0);
 	}
 
 private:

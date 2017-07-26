@@ -268,6 +268,57 @@ struct Operator {
 		Dmrg::recv(su2Related,root,tag+4,mpiComm);
 	}
 
+	Operator& operator*=(SparseElementType x)
+	{
+		data *= x;
+		return *this;
+	}
+
+	Operator& operator*=(const Operator& other)
+	{
+		int fSaved = fermionSign;
+		fermionSign = other.fermionSign;
+		if (metaDiff(other) > 0)
+			err("operator+= failed for Operator: metas not equal\n");
+
+		SparseMatrixType crs;
+		multiply(crs, data, other.data);
+		data = crs;
+
+		fermionSign = fSaved * other.fermionSign;
+
+		return *this;
+	}
+
+	Operator& operator+=(const Operator& other)
+	{
+		if (metaDiff(other) > 0)
+			err("operator+= failed for Operator: metas not equal\n");
+		data += other.data;
+		return *this;
+	}
+
+	SizeType metaDiff(const Operator& op2) const
+	{
+		const Operator& op1 = *this;
+
+		SizeType code = 0;
+		PsimagLite::Vector<bool>::Type b(4, false);
+
+		b[0] = (op1.fermionSign != op2.fermionSign);
+		b[1] = (op1.angularFactor != op2.angularFactor);
+		b[2] = (op1.jm != op2.jm);
+		//b[3] = (op1.su2Related != op2.su2Related);
+
+		SizeType orFactor = 0;
+		for (SizeType i = 0; i < b.size(); ++i) {
+			if (b[i]) code |= orFactor;
+			orFactor <<= 1;
+		}
+
+		return code;
+	}
+
 	//serializr start class Operator
 	//serializr normal data
 	SparseMatrixType data;
