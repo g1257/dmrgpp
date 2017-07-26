@@ -107,8 +107,20 @@ public:
 	typedef typename GeometryBaseType::AdditionalDataType AdditionalDataType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
 
+	struct Auxiliary {
+
+		Auxiliary(bool d, SizeType t, SizeType n, SizeType l)
+		    : debug(d), termId(t), numberOfTerms(n), linSize(l)
+		{}
+
+		bool debug;
+		SizeType termId;
+		SizeType numberOfTerms;
+		SizeType linSize;
+	}; // Auxiliary
+
 	GeometryTerm()
-	    : linSize_(0),orbitals_(0),geometryBase_(0)
+	    : orbitals_(0),geometryBase_(0)
 	{}
 
 	/** @class hide_geometry2
@@ -117,56 +129,62 @@ public:
 	   or star.
 	 - GeometryOptions=string Either none or ConstantValues needs to explain more FIXME
 	*/
-	GeometryTerm(InputType& io,SizeType,SizeType linSize,bool debug=false) :
-	    linSize_(linSize),geometryBase_(0),gOptions_("none")
+	GeometryTerm(InputType& io,
+	             const Auxiliary& aux)
+	    : aux_(aux),geometryBase_(0),gOptions_("none")
 	{
+
+		String prefix = (aux.numberOfTerms > 1) ? "gt" + ttos(aux.termId) + ":" : "";
+
 		int x;
-		io.readline(x,"DegreesOfFreedom=");
+		io.readline(x, prefix + "DegreesOfFreedom=");
 		if (x<=0) throw RuntimeError("DegreesOfFreedom<=0 is an error\n");
 
 		SizeType edof = (x > 1);
 		String s;
-		io.readline(s,"GeometryKind=");
+		io.readline(s, prefix + "GeometryKind=");
 
-		io.readline(gOptions_,"GeometryOptions=");
+		io.readline(gOptions_, prefix + "GeometryOptions=");
+		bool constantValues = (gOptions_.find("ConstantValues") != String::npos);
 
 		if (s == "chain" || s=="longchain") {
-			geometryBase_ = new LongChain<ComplexOrRealType, InputType>(linSize,io);
+			geometryBase_ = new LongChain<ComplexOrRealType, InputType>(aux.linSize,io);
 		} else if (s == "chainEx") {
 			throw RuntimeError("GeometryTerm::ctor(): ChainEx: no longer supported.\n");
 		} else if (s=="ladder") {
-			geometryBase_ = new Ladder<ComplexOrRealType, InputType>(linSize,io);
+			geometryBase_ = new Ladder<ComplexOrRealType, InputType>(aux.linSize,io);
 		} else if (s=="ladderx") {
-			geometryBase_ = new LadderX<ComplexOrRealType, InputType>(linSize,io);
+			geometryBase_ = new LadderX<ComplexOrRealType, InputType>(aux.linSize,io);
 		} else if (s=="ladderbath") {
-			geometryBase_ = new LadderBath<ComplexOrRealType, InputType>(linSize,io);
+			geometryBase_ = new LadderBath<ComplexOrRealType, InputType>(aux.linSize,io);
 		} else if (s=="ktwoniffour") {
-			geometryBase_ = new KTwoNiFFour<ComplexOrRealType, InputType>(linSize,io);
+			geometryBase_ = new KTwoNiFFour<ComplexOrRealType, InputType>(aux.linSize,io);
 		} else if (s=="star") {
-			geometryBase_ = new Star<ComplexOrRealType, InputType>(linSize,io);
+			geometryBase_ = new Star<ComplexOrRealType, InputType>(aux.linSize,io);
 		} else if (s=="LongRange") {
-			geometryBase_ = new LongRange<ComplexOrRealType, InputType>(linSize,io);
+			geometryBase_ = new LongRange<ComplexOrRealType, InputType>(aux.linSize,io);
 			edof |= 2;
 		} else {
 			throw RuntimeError("Unknown geometry " + s + "\n");
 		}
 
 		for (SizeType i=0;i<geometryBase_->dirs();i++) {
-			directions_.push_back(GeometryDirectionType(io,
-			                                            i,
-			                                            edof,
-			                                            gOptions_,
-			                                            geometryBase_));
+			typename GeometryDirectionType::Auxiliary aux(constantValues,
+			                                              i,
+			                                              edof,
+			                                              prefix);
+
+			directions_.push_back(GeometryDirectionType(io, aux, geometryBase_));
 		}
 
 		try {
-			io.readline(vModifier_,"GeometryValueModifier=");
+			io.readline(vModifier_, prefix + "GeometryValueModifier=");
 		} catch (std::exception&) {}
 
 		orbitals_ = findOrbitals();
 		cacheValues();
 
-		if (debug) {
+		if (aux.debug) {
 			std::cerr<<"Cached values:\n";
 			std::cerr<<cachedValues_;
 			std::cerr<<"-----------\n";
@@ -301,7 +319,7 @@ public:
 
 	void print(std::ostream& os) const
 	{
-		SizeType linSize = linSize_;
+		SizeType linSize = aux_.linSize;
 
 		os<<"#orbital changes first\n";
 		for (SizeType i=0;i<linSize;i++) {
@@ -360,11 +378,12 @@ private:
 
 	void cacheValues()
 	{
-		SizeType matrixRank = geometryBase_->matrixRank(linSize_,orbitals_);
+		SizeType linSize = aux_.linSize;
+		SizeType matrixRank = geometryBase_->matrixRank(linSize, orbitals_);
 		cachedValues_.resize(matrixRank,matrixRank);
 
-		for (SizeType i1=0;i1<linSize_;i1++) {
-			for (SizeType i2=0;i2<linSize_;i2++) {
+		for (SizeType i1 = 0; i1 < linSize; ++i1) {
+			for (SizeType i2 = 0; i2 < linSize; ++i2) {
 				if (!geometryBase_->connected(i1,i2)) continue;
 				for (SizeType edof1=0;edof1<orbitals_;edof1++) {
 					int k1 = geometryBase_->index(i1,edof1,orbitals_);
@@ -414,7 +433,7 @@ private:
 
 	GeometryTerm& operator=(const GeometryTerm&);
 
-	SizeType linSize_;
+	Auxiliary aux_;
 	SizeType orbitals_;
 	GeometryBaseType* geometryBase_;
 	String gOptions_;

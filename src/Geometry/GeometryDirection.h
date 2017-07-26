@@ -90,34 +90,43 @@ class GeometryDirection {
 
 public:
 
-	GeometryDirection()
-	    : dirId_(0), dataType_(0), orbitals_(0), geometryBase_(0)
-	{}
+	struct Auxiliary {
+
+		Auxiliary(bool c, SizeType d, SizeType e, String p)
+		    : constantValues(c), dirId(d), edof(e), prefix(p)
+		{}
+
+		bool constantValues;
+		SizeType dirId;
+		SizeType edof;
+		String prefix;
+	}; // struct Auxiliary
+
+	//	GeometryDirection()
+	//	    : dirId_(0), dataType_(0), orbitals_(0), geometryBase_(0)
+	//	{}
 
 	template<typename IoInputter>
 	GeometryDirection(IoInputter& io,
-	                  SizeType dirId,
-	                  SizeType edof,
-	                  const String& options,
+	                  const Auxiliary& aux,
 	                  const GeometryBaseType* geometryFactory)
-	    : dirId_(dirId),
-	      constantValues_(options.find("ConstantValues")!=String::npos),
+	    : aux_(aux),
 	      geometryBase_(geometryFactory)
 	{
-		SizeType n = (edof & 2) ? 0 : getVectorSize();
-		dataType_ = edof;
+		SizeType n = (aux.edof & 2) ? 0 : getVectorSize();
+		dataType_ = aux.edof;
 		orbitals_ = 1;
 
-		if (edof & 2) {
+		if (aux.edof & 2) {
 			geometryBase_->set(rawHoppings_, orbitals_);
 			return;
 		}
 
 		String connectors = "Connectors";
 		if (io.version() > 2.5)
-			connectors = "dir" + ttos(dirId_) + ":" + connectors;
+			connectors = aux.prefix + "dir" + ttos(aux.dirId) + ":" + connectors;
 
-		if (edof & 1) {
+		if (aux.edof & 1) {
 			if (n == 0) n = 1;
 			for (SizeType i=0;i<n;i++) {
 				MatrixType m;
@@ -138,42 +147,15 @@ public:
 	}
 
 	template<class Archive>
-	void serialize(Archive& ar, const unsigned int)
-	{
-		ar & dirId_;
-		ar & dataType_;
-		ar & geometryBase_;
-		ar & dataNumbers_;
-		ar & dataMatrices_;
-		ar & rawHoppings_;
-	}
+	void serialize(Archive&, const unsigned int)
+	{}
 
 	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
+	SizeType memResolv(SomeMemResolvType&,
 	                   SizeType,
-	                   String msg) const
+	                   String) const
 	{
-		String str = msg;
-		str += "GeometryDirection";
-		const char* start = (const char *)&dirId_;
-		const char* end = (const char*)&dataType_;
-		SizeType total = mres.memResolv(&dirId_,end-start,str + " dirId");
-
-		start = end;
-		end = (const char*)&geometryBase_;
-		total += mres.memResolv(&dataType_,end-start,str + " dataType");
-
-		start = end;
-		end = (const char*)&dataNumbers_;
-		total += mres.memResolv(&geometryBase_,end-start,str + " geometryBase");
-
-		start = end;
-		end = (const char*)&dataMatrices_;
-		total += mres.memResolv(&dataNumbers_,end-start,str + " dataNumbers");
-
-		total += mres.memResolv(&dataMatrices_,sizeof(*this)-total, str+" dataMatrices");
-
-		return total;
+		return 0;
 	}
 
 	ComplexOrRealType operator()(SizeType i,
@@ -216,53 +198,55 @@ public:
 
 	bool constantValues() const
 	{
-		return constantValues_;
+		return aux_.constantValues;
 	}
 
-	template<typename RealType_,typename GeometryBaseType_>
+	friend std::ostream& operator<<(std::ostream& os, const Auxiliary& a)
+	{
+		os<<"constantValues="<<a.constantValues<<"\n";
+		os<<"dirId="<<a.dirId<<"\n";
+		os<<"edof="<<a.edof<<"\n";
+		os<<"prefix="<<a.prefix<<"\n";
+
+		return os;
+	}
+
 	friend std::ostream& operator<<(std::ostream& os,
-	                                const GeometryDirection<RealType_,
-	                                GeometryBaseType_>& gd);
+	                                const GeometryDirection& gd)
+	{
+		os<<"#GeometryDirectionAuxiliary\n";
+		os<<gd.aux_;
+		bool isMatrix = (gd.dataType_&1);
+		if (!isMatrix) {
+			os<<"#GeometryNumbersSize="<<gd.dataNumbers_.size()<<"\n";
+			os<<"#GeometryNumbers=";
+			for (SizeType i=0;i<gd.dataNumbers_.size();i++) {
+				os<<gd.dataNumbers_[i]<<" ";
+			}
+			os<<"\n";
+		} else {
+			os<<"#GeometryMatrixSize="<<gd.dataMatrices_.size()<<"\n";
+			for (SizeType i=0;i<gd.dataMatrices_.size();i++)
+				os<<gd.dataMatrices_[i];
+		}
+		return os;
+	}
 
 private:
 
 	SizeType getVectorSize()
 	{
-		if (constantValues_) return 1;
-
-		return geometryBase_->getVectorSize(dirId_);
+		return (aux_.constantValues) ? 1 : geometryBase_->getVectorSize(aux_.dirId);
 	}
 
-	SizeType dirId_;
+	Auxiliary aux_;
 	SizeType dataType_;
 	SizeType orbitals_;
-	bool constantValues_;
 	const GeometryBaseType* geometryBase_;
 	typename Vector<ComplexOrRealType>::Type dataNumbers_;
 	typename Vector<MatrixType>::Type dataMatrices_;
 	MatrixType rawHoppings_;
 }; // class GeometryDirection
-
-template<typename ComplexOrRealType,typename GeometryBaseType>
-std::ostream& operator<<(std::ostream& os,
-                         const GeometryDirection<ComplexOrRealType,GeometryBaseType>& gd)
-{
-	os<<"#GeometrydirId="<<gd.dirId_<<"\n";
-	bool isMatrix = (gd.dataType_&1);
-	if (!isMatrix) {
-		os<<"#GeometryNumbersSize="<<gd.dataNumbers_.size()<<"\n";
-		os<<"#GeometryNumbers=";
-		for (SizeType i=0;i<gd.dataNumbers_.size();i++) {
-			os<<gd.dataNumbers_[i]<<" ";
-		}
-		os<<"\n";
-	} else {
-		os<<"#GeometryMatrixSize="<<gd.dataMatrices_.size()<<"\n";
-		for (SizeType i=0;i<gd.dataMatrices_.size();i++)
-			os<<gd.dataMatrices_[i];
-	}
-	return os;
-}
 } // namespace PsimagLite
 
 /*@}*/

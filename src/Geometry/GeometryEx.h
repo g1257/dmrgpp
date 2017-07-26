@@ -25,7 +25,12 @@ public:
 	  meshStep_((meshLength_ > 0) ? static_cast<RealType>(2*M_PI/meshLength_) : 0)
 	{
 		String str;
-		io.readline(str,"GeometryKind=",false);
+		try {
+			io.readline(str,"GeometryKind=",false);
+		} catch (std::exception&) {
+			io.readline(str,"gt0:GeometryKind=",false);
+		}
+
 		if (str == "star") enabled_ = true;
 	}
 

@@ -58,10 +58,10 @@ public:
 
 	SizeType valueSize() const { return value_.size(); }
 
-	String value(SizeType ind) const
+	String value(SizeType ind, String name) const
 	{
 		if (ind >= value_.size())
-			throw RuntimeError("Not such value\n");
+			throw RuntimeError("No value for " + name + "\n");
 
 		return value_[ind];
 	}

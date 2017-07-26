@@ -116,8 +116,13 @@ public:
 		if (x<0) throw RuntimeError("NumberOfTerms<0 is an error\n");
 
 		terms_.resize(x,0);
+
 		for (SizeType i=0;i<terms_.size();i++) {
-			terms_[i] = new GeometryTermType(io,i,linSize_,debug);
+			typename GeometryTermType::Auxiliary aux(false,
+			                                         i,
+			                                         terms_.size(),
+			                                         linSize_);
+			terms_[i] = new GeometryTermType(io,aux);
 		}
 	}
 

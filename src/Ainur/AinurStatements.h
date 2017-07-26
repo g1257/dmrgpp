@@ -54,12 +54,13 @@ public:
 			String right = leftAndRight[1];
 			SizeType last = right.length();
 			--last;
-			if (last >= right.length() || right[0] != '{' ||  right[last] != '}')
-				err("Group must be enclosed in braces, " + leftAndRight[0] + "\n");
+			bool inBraces = (last < right.length() && right[0] == '{' && right[last] == '}');
 
-			leftAndRight[1] = (last < 2) ? "" : right.substr(1,last - 1);
-			leftAndRight[0] = identifier + ":";
-			return leftAndRight;
+			if (inBraces) {
+				leftAndRight[1] = (last < 2) ? "" : right.substr(1,last - 1);
+				leftAndRight[0] = identifier + ":";
+				return leftAndRight;
+			}
 		}
 
 		store.setRhs(leftAndRight[1]);
@@ -100,7 +101,7 @@ public:
 		if (store.type() != Store::SCALAR && store.subType() != Store::INTEGER)
 			err("In input, " + s + " must be an integer\n");
 		store.increaseUsage();
-		t = atoi(store.value(0).c_str());
+		t = atoi(store.value(0, names_[x]).c_str());
 	}
 
 	void readValue(RealType& t, String s) const
@@ -112,7 +113,7 @@ public:
 		if (store.type() != Store::SCALAR && store.subType() != Store::REAL)
 			err("In input, " + s + " must be a real\n");
 		store.increaseUsage();
-		t = atof(store.value(0).c_str());
+		t = atof(store.value(0, names_[x]).c_str());
 	}
 
 	void readValue(String& t, String s) const
@@ -124,7 +125,7 @@ public:
 		if (store.type() != Store::SCALAR && store.subType() != Store::STRING)
 			err("In input, " + s + " must be a string\n");
 		store.increaseUsage();
-		t = store.value(0);
+		t = store.value(0, names_[x]);
 	}
 
 	// read vectors
@@ -145,7 +146,7 @@ public:
 
 		store.increaseUsage();
 
-		String tmp = (n == 2) ? store.value(1) : "";
+		String tmp = (n == 2) ? store.value(1, names_[x]) : "";
 		AinurLexicalType::removeTrailingWhitespace(tmp);
 		if (n == 2 && tmp == "...") {
 			assert(static_cast<SizeType>(x) < names_.size());
@@ -153,7 +154,7 @@ public:
 				err("Ellipsis cannot be used for this vector, " + names_[x] + "\n");
 			n = v.size();
 			for (SizeType i = 0; i < n; ++i)
-				getEntryFromString(v[i], store.value(0));
+				getEntryFromString(v[i], store.value(0, names_[x]));
 			return;
 		}
 
@@ -163,7 +164,7 @@ public:
 		}
 
 		for (SizeType i = 0; i < n; ++i)
-			getEntryFromString(v[i], store.value(i));
+			getEntryFromString(v[i], store.value(i, names_[x]));
 	}
 
 private:
