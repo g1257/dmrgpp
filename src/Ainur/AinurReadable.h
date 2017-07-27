@@ -101,17 +101,28 @@ public:
 	// read vectors
 	template<typename VectorLikeType>
 	typename EnableIf<IsVectorLike<VectorLikeType>::True,void>::Type
-	readValue(VectorLikeType& v, String s) const
+	readValue(VectorLikeType& v, String sOrig) const
 	{
-		s = prefix_ + s;
+		String s = prefix_ + sOrig;
 		int x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
+
 		const Store& store = storage_[x];
+
+		if (store.type() == Store::MATRIX) {
+			std::cerr<<"readValue: "<<s<<" coerced into vector\n";
+			Matrix<typename VectorLikeType::value_type> m;
+			readValue(m, sOrig);
+			v = m.data();
+			return;
+		}
+
 		if (store.type() != Store::VECTOR)
 			err("In input, " + s + " must be a vector\n");
-		store.increaseUsage();
+
 		SizeType n = store.valueSize();
+
 		if (n == 0)
 			err("In input, vector " + s + " has 0 entries\n");
 
@@ -145,7 +156,7 @@ public:
 
 	// read matrices
 	template<typename FloatingType>
-	typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
+	typename EnableIf<Loki::TypeTraits<FloatingType>::isArith,void>::Type
 	readValue(Matrix<FloatingType>& m, String s) const
 	{
 		s = prefix_ + s;
@@ -178,6 +189,14 @@ public:
 		for (SizeType i = 0; i < rows; ++i)
 			for (SizeType j = 0; j < cols; ++j)
 				getEntryFromString(m(i,j), store.value(i + j*rows + 2, names_[x]));
+	}
+
+	// read matrices
+	template<typename FloatingType>
+	typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
+	readValue(Matrix<std::complex<FloatingType> >& m, String s) const
+	{
+		err("AinurReadable: Complex matrices not implemented\n");
 	}
 
 private:

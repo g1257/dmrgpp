@@ -161,6 +161,7 @@ private:
 			err("Matrix must be enclosed in brakets " + rhs + "\n");
 		assert(last > 2);
 		rhs =  rhs.substr(1,last - 1);
+		AinurLexicalType::removeTrailingBlanks(rhs);
 		VectorStringType tmp;
 		split(tmp, rhs, "[");
 		// a, b, c],

@@ -167,6 +167,11 @@ public:
 
 	SizeType cols() const { return ncol_; }
 
+	const typename Vector<T>::Type data() const
+	{
+		return data_;
+	}
+
 	const T& operator()(SizeType i,SizeType j) const
 	{
 		assert(i<nrow_ && j<ncol_);
