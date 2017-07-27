@@ -33,8 +33,6 @@ public:
 		replaceAndStoreBraces(vecBrace_, str);
 
 		procStatements(str,"");
-
-		statements_.secondPass();
 	}
 
 	String& prefix() { return statements_.readable().prefix(); }

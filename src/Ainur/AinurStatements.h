@@ -66,17 +66,11 @@ public:
 		}
 
 		store.setRhs(leftAndRight[1], identifier);
-		return emptyStringVector;
-	}
 
-	void secondPass()
-	{
-		SizeType n = storage_.size();
-		assert(n == names_.size());
-		// FIXME: Needs to check what's in scope
-		for (SizeType i = 0; i < n; ++i)
-			for (SizeType j = 0; j < storage_[i].valueSize(); ++j)
-				solveExpression(i, j);
+		for (SizeType j = 0; j < store.valueSize(); ++j)
+			solveExpression(storageIndex, j);
+
+		return emptyStringVector;
 	}
 
 	AinurReadable& readable() { return readable_; }
