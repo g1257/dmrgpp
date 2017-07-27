@@ -33,6 +33,8 @@ public:
 		replaceAndStoreBraces(vecBrace_, str);
 
 		procStatements(str,"");
+
+		statements_.secondPass();
 	}
 
 	void printUnused(std::ostream& os) const

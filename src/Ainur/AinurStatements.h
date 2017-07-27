@@ -67,6 +67,22 @@ public:
 		return emptyStringVector;
 	}
 
+	void secondPass()
+	{
+		SizeType n = storage_.size();
+		assert(n == names_.size());
+		for (SizeType i = 0; i < n; ++i) {
+			const String& name = names_[i];
+			Store& store = storage_[i];
+			SizeType total = store.valueSize();
+
+			for (SizeType j = 0; j < total; ++j) {
+				String replacement = solveExpression(store.value(j, name), i);
+				std::cerr<<"name = "<<name<<" value="<<replacement<<"\n";
+			}
+		}
+	}
+
 	void printUnused(std::ostream& os) const
 	{
 		SizeType n = storage_.size();
@@ -331,6 +347,24 @@ private:
 
 		err("Expected s or b or q or e after replacement\n");
 		return "";
+	}
+
+	// FIXME: Must be generalized to general expressions
+	String solveExpression(String s, SizeType end) const
+	{
+		assert(end <= names_.size());
+		assert(names_.size() == storage_.size());
+		for (SizeType i = 0; i < end; ++i) {
+			if (s != names_[i]) continue;
+			const Store& store = storage_[i];
+			if (store.valueSize() > 1)
+				err("Cannot replace vectors yet\n");
+
+			s = store.value(0, names_[i]);
+			break;
+		}
+
+		return s;
 	}
 
 	const VectorStringType& vecStr_;
