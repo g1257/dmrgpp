@@ -356,10 +356,12 @@ struct ParametersDmrgSolver {
 	                             VectorFiniteLoopType& vfl,
 	                             const VectorFieldType& tmpVec)
 	{
-		for (SizeType i=0;i<tmpVec.size();i+=3) {
+		for (SizeType i = 0; i < tmpVec.size(); i += 3) {
 			typename PsimagLite::Vector<int>::Type xTmp(3);
-			for (SizeType j=0;j<xTmp.size();j++) xTmp[j]=int(tmpVec[i+j]);
-			FiniteLoop fl(xTmp[0],xTmp[1],xTmp[2]);
+			assert(2 + i < tmpVec.size());
+			for (SizeType j = 0; j < xTmp.size(); ++j)
+				xTmp[j] = static_cast<int>(tmpVec[i+j]);
+			FiniteLoop fl(xTmp[0], xTmp[1], xTmp[2]);
 			vfl.push_back(fl);
 		}
 

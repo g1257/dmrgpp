@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include <stdexcept>
 #include "Options.h"
+#include "Geometry/Geometry.h"
 
 namespace Dmrg {
 
@@ -204,15 +205,8 @@ public:
 
 	PsimagLite::String import() const
 	{
-		PsimagLite::String str("");
-		str += "require integer TotalNumberOfSites;\n";
-		str += "require integer NumberOfTerms;\n";
-		str += "integer DegreesOfFreedom;\n";
-		str += "string GeometryKind;\n";
-		str += "string GeometryOptions;\n";
-		str += "vector dir0:Connectors;\n";
-		str += "vector dir1:Connectors;\n";
-		str += "integer LadderLeg;\n";
+		PsimagLite::String str = PsimagLite::Geometry<int,int,int>::import();
+
 		str += "vector hubbardU;\n";
 		str += "vector potentialV;\n";
 		str += "require string Model;\n";
@@ -220,7 +214,7 @@ public:
 		str += "require string Version;\n";
 		str += "require integer InfiniteLoopKeptStates;\n";
 		str += "require string OutputFile;\n";
-		str += "vector.integer FiniteLoops;\n";
+		str += "matrix.integer FiniteLoops;\n";
 		str += "require integer RepeatFiniteLoopsFrom;\n";
 		str += "require integer RepeatFiniteLoopsTimes;\n";
 		str += "integer TargetElectronsUp;\n";
@@ -238,33 +232,6 @@ public:
 		str += "integer Threads = 1;\n";
 		str += "integer Orbitals;\n";
 		str += "string FeAsMode;\n";
-		str += "group gt0 = {\n";
-		str += "\t integer DegreesOfFreedom;\n";
-		str += "\t string GeometryKind;\n";
-		str += "\t string GeometryOptions;\n";
-		str += "\t vector dir0:Connectors;\n";
-		str += "\t vector dir1:Connectors;\n";
-		str += "\t vector dir2:Connectors;\n";
-		str += "\t vector dir3:Connectors;\n";
-		str += "integer LadderLeg;}\n";
-		str += "group gt1 = {\n";
-		str += "\t integer DegreesOfFreedom;\n";
-		str += "\t string GeometryKind;\n";
-		str += "\t string GeometryOptions;\n";
-		str += "\t vector dir0:Connectors;\n";
-		str += "\t vector dir1:Connectors;\n";
-		str += "\t vector dir2:Connectors;\n";
-		str += "\t vector dir3:Connectors;\n";
-		str += "integer LadderLeg;}\n";
-		str += "group gt2 = {\n";
-		str += "\t integer DegreesOfFreedom;\n";
-		str += "\t string GeometryKind;\n";
-		str += "\t string GeometryOptions;\n";
-		str += "\t vector dir0:Connectors;\n";
-		str += "\t vector dir1:Connectors;\n";
-		str += "\t vector dir2:Connectors;\n";
-		str += "\t vector dir3:Connectors;\n";
-		str += "integer LadderLeg;}\n";
 
 		return str;
 	}

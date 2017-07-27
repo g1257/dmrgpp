@@ -103,7 +103,7 @@ struct Operator {
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef Su2Related Su2RelatedType;
 
-	Operator() {}
+	Operator() : fermionSign(1), angularFactor(1) {}
 
 	Operator(const SparseMatrixType& data1,
 	         int fermionSign1,
