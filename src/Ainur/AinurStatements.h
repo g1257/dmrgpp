@@ -1,8 +1,7 @@
 #ifndef AINURSTATEMENT_H
 #define AINURSTATEMENT_H
-#include "AinurLexical.h"
 #include "AinurStore.h"
-#include <complex>
+#include "AinurReadable.h"
 
 namespace PsimagLite {
 
@@ -10,11 +9,11 @@ class AinurStatements {
 
 public:
 
-	typedef double RealType;
-	typedef std::complex<RealType> ComplexType;
-	typedef AinurLexical AinurLexicalType;
+	typedef AinurReadable::RealType RealType;
+	typedef AinurReadable::VectorStoreType VectorStoreType;
+	typedef AinurReadable::StoreType StoreType;
+	typedef StoreType::AinurLexicalType AinurLexicalType;
 	typedef AinurLexicalType::VectorStringType VectorStringType;
-	typedef Vector<Store>::Type VectorStoreType;
 
 	AinurStatements(const VectorStringType& vecStr,
 	                const String& vecChar,
@@ -24,15 +23,15 @@ public:
 	      vecChar_(vecChar),
 	      escapedChars_(escapedChars),
 	      vecBrace_(vecBrace),
-	      prefix_("")
+	      readable_(names_, storage_)
 	{}
 
 	VectorStringType push(const String& s2, String prefix)
 	{
 		VectorStringType emptyStringVector;
 		String s = s2;
-		AinurLexicalType::removeTrailingWhitespace(s);
-		AinurLexicalType::removeTrailingWhitespace(prefix);
+		AinurLexicalType::removeTrailingBlanks(s);
+		AinurLexicalType::removeTrailingBlanks(prefix);
 		if (s == "") return emptyStringVector;
 		SizeType storageIndex = 0;
 
@@ -50,8 +49,8 @@ public:
 
 		unescape(leftAndRight[1]);
 		unescape(identifier);
-		Store& store = storage_[storageIndex];
-		if (store.type() == Store::SCALAR && store.subType() == Store::GROUP)  {
+		StoreType& store = storage_[storageIndex];
+		if (store.type() == StoreType::SCALAR && store.subType() == StoreType::GROUP)  {
 			String right = leftAndRight[1];
 			SizeType last = right.length();
 			--last;
@@ -76,7 +75,7 @@ public:
 		assert(n == names_.size());
 		for (SizeType i = 0; i < n; ++i) {
 			const String& name = names_[i];
-			Store& store = storage_[i];
+			StoreType& store = storage_[i];
 			SizeType total = store.valueSize();
 
 			for (SizeType j = 0; j < total; ++j) {
@@ -86,169 +85,11 @@ public:
 		}
 	}
 
-	String& prefix() { return prefix_; }
+	AinurReadable& readable() { return readable_; }
 
-	const String& prefix() const { return prefix_; }
-
-	void printUnused(std::ostream& os) const
-	{
-		SizeType n = storage_.size();
-		for (SizeType i = 0; i < n; ++i) {
-			if (storage_[i].used() > 0)
-				continue;
-			assert(i < names_.size());
-			os<<"WARNING: Unused label "<<names_[i]<<"\n";
-		}
-	}
-
-	void readValue(long int& t, String s) const
-	{
-		int t2 = 0;
-		readValue(t2, s);
-		t = t2;
-	}
-
-	void readValue(SizeType& t, String s) const
-	{
-		int t2 = 0;
-		readValue(t2, s);
-		t = t2;
-	}
-
-	void readValue(int& t, String s) const
-	{
-		s = prefix_ + s;
-		int x = storageIndexByName(s);
-		if (x < 0)
-			err("Not found " + s + "\n");
-		const Store& store = storage_[x];
-		if (store.type() != Store::SCALAR && store.subType() != Store::INTEGER)
-			err("In input, " + s + " must be an integer\n");
-		store.increaseUsage();
-		t = atoi(store.value(0, names_[x]).c_str());
-	}
-
-	void readValue(RealType& t, String s) const
-	{
-		s = prefix_ + s;
-		int x = storageIndexByName(s);
-		if (x < 0)
-			err("Not found " + s + "\n");
-		const Store& store = storage_[x];
-		if (store.type() != Store::SCALAR && store.subType() != Store::REAL)
-			err("In input, " + s + " must be a real\n");
-		store.increaseUsage();
-		t = atof(store.value(0, names_[x]).c_str());
-	}
-
-	void readValue(String& t, String s) const
-	{
-		s = prefix_ + s;
-		int x = storageIndexByName(s);
-		if (x < 0)
-			err("Not found " + s + "\n");
-		const Store& store = storage_[x];
-		if (store.type() != Store::SCALAR && store.subType() != Store::STRING)
-			err("In input, " + s + " must be a string\n");
-		store.increaseUsage();
-		t = store.value(0, names_[x]);
-	}
-
-	// read vectors
-	template<typename VectorLikeType>
-	typename EnableIf<IsVectorLike<VectorLikeType>::True,void>::Type
-	readValue(VectorLikeType& v, String s) const
-	{
-		s = prefix_ + s;
-		int x = storageIndexByName(s);
-		if (x < 0)
-			err("Not found " + s + "\n");
-		const Store& store = storage_[x];
-		if (store.type() != Store::VECTOR)
-			err("In input, " + s + " must be a vector\n");
-		store.increaseUsage();
-		SizeType n = store.valueSize();
-		if (n == 0)
-			err("In input, vector " + s + " has 0 entries\n");
-
-		store.increaseUsage();
-
-		String tmp = (n == 2) ? store.value(1, names_[x]) : "";
-		AinurLexicalType::removeTrailingWhitespace(tmp);
-		if (n == 2 && tmp == "...") {
-			assert(static_cast<SizeType>(x) < names_.size());
-			if (v.size() < 3)
-				err("Ellipsis cannot be used for this vector, " + names_[x] + "\n");
-			n = v.size();
-			for (SizeType i = 0; i < n; ++i)
-				getEntryFromString(v[i], store.value(0, names_[x]));
-			return;
-		}
-
-		if (v.size() != n) {
-			v.clear();
-			v.resize(n);
-		}
-
-		for (SizeType i = 0; i < n; ++i)
-			getEntryFromString(v[i], store.value(i, names_[x]));
-	}
-
-	// read matrices
-	template<typename FloatingType>
-	typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
-	readValue(Matrix<FloatingType>& m, String s) const
-	{
-		s = prefix_ + s;
-		int x = storageIndexByName(s);
-		if (x < 0)
-			err("Not found " + s + "\n");
-		const Store& store = storage_[x];
-		if (store.type() != Store::MATRIX)
-			err("In input, " + s + " must be a matrix\n");
-		store.increaseUsage();
-		SizeType n = store.valueSize();
-		if (n < 2)
-			err("In input, matrix " + s + " internal storage error I\n");
-
-		store.increaseUsage();
-
-		SizeType rows = atoi(store.value(0, names_[x]).c_str());
-		SizeType cols = atoi(store.value(1, names_[x]).c_str());
-
-		m.clear();
-		if (rows == 0 && cols == 0) return;
-		if (rows*cols == 0)
-			err("Matrix with one of {rows, cols} 0 must have both 0\n");
-
-		m.resize(rows, cols);
-
-		if (rows*cols +2 != n)
-			err("In input, matrix " + s + " internal storage error II\n");
-
-		for (SizeType i = 0; i < rows; ++i)
-			for (SizeType j = 0; j < cols; ++j)
-				getEntryFromString(m(i,j), store.value(i + j*rows + 2, names_[x]));
-	}
+	const AinurReadable& readable() const { return readable_; }
 
 private:
-
-	void getEntryFromString(SizeType& entry, String s) const
-	{
-		entry = atoi(s.c_str());
-	}
-
-	void getEntryFromString(RealType& entry, String s) const
-	{
-		entry = atof(s.c_str());
-	}
-
-	// One of double or double + double*i or double - double*i
-	// will later replace with general expression evaluator
-	void getEntryFromString(ComplexType& entry, String s) const
-	{
-		err("getEntryFromString not implemented for complex\n");
-	}
 
 	String procLeftEquality(SizeType& y,
 	                        String s,
@@ -270,20 +111,20 @@ private:
 			split(dotified,prefix + lhs[0],".");
 			if (dotified.size() != 1)
 				err("Dotified failed " + context + "\n");
-			x = storageIndexByName(dotified[0]);
+			x = readable_.storageIndexByName(dotified[0]);
 		} else if (l == 2) { // matrix.integer FiniteLoops
 			split(dotified,prefix + lhs[1],".");
 			if (dotified.size() != 1)
 				err("Dotified failed " + context + "\n");
 			x = assignStorageByName(dotified[0]);
-			storage_.push_back(Store(lhs[0],""));
+			storage_.push_back(StoreType(lhs[0],""));
 		} else if (l == 3) {
 			// require vector.vector.integer FiniteLoops
 			split(dotified,prefix + lhs[2],".");
 			if (dotified.size() != 1)
 				err("Dotified failed " + context + "\n");
 			x = assignStorageByName(dotified[0]);
-			storage_.push_back(Store(lhs[1], lhs[0]));
+			storage_.push_back(StoreType(lhs[1], lhs[0]));
 		}
 
 		if (x < 0)
@@ -294,32 +135,22 @@ private:
 		return dotified[0];
 	}
 
-	Store::Attribute getAttribute(String s, String context) const
+	StoreType::Attribute getAttribute(String s, String context) const
 	{
-		if (s == "require") return Store::REQUIRED;
-		if (s == "const") return Store::CONST;
+		if (s == "require") return StoreType::REQUIRED;
+		if (s == "const") return StoreType::CONST;
 
 		err("Expected let require or const " + context + "\n");
-		return Store::NONE;
+		return StoreType::NONE;
 	}
 
 	int assignStorageByName(String name)
 	{
-		int x = storageIndexByName(name);
+		int x = readable_.storageIndexByName(name);
 		if (x >= 0)
 			err("Already in scope " + name + "\n");
 		names_.push_back(name);
 		return names_.size() - 1;
-	}
-
-	int storageIndexByName(String name) const
-	{
-		VectorStringType::const_iterator it = std::find(names_.begin(),
-		                                                names_.end(),
-		                                                name);
-		if (it == names_.end())
-			return -1;
-		return it - names_.begin();
 	}
 
 	void unescape(String& s) const
@@ -404,7 +235,7 @@ private:
 		assert(names_.size() == storage_.size());
 		for (SizeType i = 0; i < end; ++i) {
 			if (s != names_[i]) continue;
-			const Store& store = storage_[i];
+			const StoreType& store = storage_[i];
 			if (store.valueSize() > 1)
 				err("Cannot replace vectors yet\n");
 
@@ -421,7 +252,7 @@ private:
 	const VectorStringType& vecBrace_;
 	VectorStringType names_;
 	VectorStoreType storage_;
-	String prefix_;
+	AinurReadable readable_;
 }; // class AinurStatements
 } // namespace PsimagLite
 #endif // AINURSTATEMENT_H

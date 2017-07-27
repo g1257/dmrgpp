@@ -37,19 +37,19 @@ public:
 		statements_.secondPass();
 	}
 
-	String& prefix() { return statements_.prefix(); }
+	String& prefix() { return statements_.readable().prefix(); }
 
-	const String& prefix() const { return statements_.prefix(); }
+	const String& prefix() const { return statements_.readable().prefix(); }
 
 	void printUnused(std::ostream& os) const
 	{
-		statements_.printUnused(os);
+		statements_.readable().printUnused(os);
 	}
 
 	template<typename SomeType>
 	void readValue(SomeType& t, String label) const
 	{
-		return statements_.readValue(t, label);
+		return statements_.readable().readValue(t, label);
 	}
 
 private:

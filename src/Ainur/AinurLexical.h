@@ -13,10 +13,10 @@ public:
 	static void removeTrailingWhitespace(VectorStringType& v)
 	{
 		for (SizeType i = 0; i < v.size(); ++i)
-			removeTrailingWhitespace(v[i]);
+			removeTrailingBlanks(v[i]);
 	}
 
-	static void removeTrailingWhitespace(String& s)
+	static void removeTrailingBlanks(String& s)
 	{
 		SizeType start = 0;
 		SizeType l = s.length();

@@ -1,6 +1,7 @@
 #ifndef AINURSTORE_H
 #define AINURSTORE_H
 #include "Vector.h"
+#include "AinurLexical.h"
 
 namespace PsimagLite {
 
@@ -8,7 +9,8 @@ class Store {
 
 public:
 
-	typedef PsimagLite::Vector<String>::Type VectorStringType;
+	typedef AinurLexical AinurLexicalType;
+	typedef AinurLexicalType::VectorStringType VectorStringType;
 
 	enum Type {UNKNOWN, SCALAR, VECTOR, MATRIX}; // HASH, FUNCTION
 
@@ -133,7 +135,17 @@ private:
 		--last;
 		if (rhs[0] != '[' || rhs[last] != ']')
 			err("Vector must be enclosed in brakets, name= " + name + "\n");
+
 		rhs = (last < 2 ) ? "" : rhs.substr(1,last - 1);
+		AinurLexicalType::removeTrailingBlanks(rhs);
+		last = rhs.length();
+		if (last > 1 && rhs[0] == '[' && rhs[--last] == ']') {
+			// it's really a matrix
+			setMatrixValue("[" + rhs + "]", name);
+			type_ = MATRIX;
+			return;
+		}
+
 		split(v, rhs, ",");
 	}
 
@@ -161,15 +173,19 @@ private:
 		for (SizeType row = 0; row < rows; ++row) {
 			VectorStringType v;
 			String s = tmp[row];
-			removeTrailing(s, ',');
+			AinurLexicalType::removeTrailingBlanks(s);
+			SizeType last = s.length();
+			if (last > 0 && s[--last] == ',')
+				s = s.substr(0, last);
+
 			s = "[" + s;
 			setVectorValue(v, s, name);
 			SizeType thisCol = v.size();
 			if (row == 0) {
 				cols = thisCol;
 				value_.resize(rows*cols + 2);
-				value_[0] = rows;
-				value_[1] = cols;
+				value_[0] = ttos(rows);
+				value_[1] = ttos(cols);
 			} else if (cols != thisCol) {
 				err("Malformed matrix, " + name + "\n");
 			}
@@ -177,18 +193,6 @@ private:
 			appendToVecStr(value_, v, offset);
 			offset += v.size();
 		}
-	}
-
-	void removeTrailing(String& s, char c) const
-	{
-		SizeType end = s.length();
-		if (end == 0) return;
-
-		int i = end - 1;
-		for (; i >= 0; --i)
-			if (s[i] == c) break;
-
-		s = s.substr(0, i);
 	}
 
 	void appendToVecStr(VectorStringType& dest,
