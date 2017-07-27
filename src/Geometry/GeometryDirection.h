@@ -92,19 +92,14 @@ public:
 
 	struct Auxiliary {
 
-		Auxiliary(bool c, SizeType d, SizeType e, String p)
-		    : constantValues(c), dirId(d), edof(e), prefix(p)
+		Auxiliary(bool c, SizeType d, SizeType e)
+		    : constantValues(c), dirId(d), edof(e)
 		{}
 
 		bool constantValues;
 		SizeType dirId;
 		SizeType edof;
-		String prefix;
 	}; // struct Auxiliary
-
-	//	GeometryDirection()
-	//	    : dirId_(0), dataType_(0), orbitals_(0), geometryBase_(0)
-	//	{}
 
 	template<typename IoInputter>
 	GeometryDirection(IoInputter& io,
@@ -123,8 +118,8 @@ public:
 		}
 
 		String connectors = "Connectors";
-		if (io.version() > 2.5)
-			connectors = aux.prefix + "dir" + ttos(aux.dirId) + ":" + connectors;
+		String savedPrefix = io.prefix();
+		io.prefix() += "dir" + ttos(aux.dirId) + ":";
 
 		if (aux.edof & 1) {
 			if (n == 0) n = 1;
@@ -144,6 +139,8 @@ public:
 				throw RuntimeError(s.c_str());
 			}
 		}
+
+		io.prefix() = savedPrefix;
 	}
 
 	template<class Archive>
@@ -206,7 +203,6 @@ public:
 		os<<"constantValues="<<a.constantValues<<"\n";
 		os<<"dirId="<<a.dirId<<"\n";
 		os<<"edof="<<a.edof<<"\n";
-		os<<"prefix="<<a.prefix<<"\n";
 
 		return os;
 	}

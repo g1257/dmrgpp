@@ -476,7 +476,8 @@ public:
 		Readable(const Writeable& inputWriteable)
 		    : file_(inputWriteable.filename()),
 		      data_(inputWriteable.data()),
-		      ainur_(0)
+		      ainur_(0),
+		      dummy_("")
 		{
 			inputWriteable.set(mapStrStr_,mapStrVec_,labelsForRemoval_);
 			if (inputWriteable.ainurMode())
@@ -508,6 +509,16 @@ public:
 		}
 
 		const PsimagLite::String& data() const { return data_; }
+
+		String& prefix()
+		{
+			return (ainur_) ? ainur_->prefix() : dummy_;
+		}
+
+		const String& prefix() const
+		{
+			return (ainur_) ? ainur_->prefix() : dummy_;
+		}
 
 		void readline(String& val,
 		              const String& label,
@@ -718,7 +729,7 @@ public:
 		readMatrix(Matrix<FloatingType>& m,const String& label)
 		{
 			if (ainur_)
-				err("readMatrix not supported. Label= " + label + "\n");
+				return ainur_->readValue(m, label);
 
 			String label2 = label2label(label);
 
@@ -754,7 +765,7 @@ public:
 		           const String& label)
 		{
 			if (ainur_)
-				err("readMatrix not supported. Label= " + label + "\n");
+				err("readMatrix complex not supported. Label= " + label + "\n");
 
 			String label2 = label2label(label);
 
@@ -908,6 +919,7 @@ public:
 		//serializr normal labelsForRemoval_
 		Vector<String>::Type labelsForRemoval_;
 		Ainur* ainur_;
+		String dummy_;
 	}; // class Readable
 
 	static String findRootLabel(const String& label)

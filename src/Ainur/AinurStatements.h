@@ -23,7 +23,8 @@ public:
 	    : vecStr_(vecStr),
 	      vecChar_(vecChar),
 	      escapedChars_(escapedChars),
-	      vecBrace_(vecBrace)
+	      vecBrace_(vecBrace),
+	      prefix_("")
 	{}
 
 	VectorStringType push(const String& s2, String prefix)
@@ -56,14 +57,16 @@ public:
 			--last;
 			bool inBraces = (last < right.length() && right[0] == '{' && right[last] == '}');
 
-			if (inBraces) {
-				leftAndRight[1] = (last < 2) ? "" : right.substr(1,last - 1);
-				leftAndRight[0] = identifier + ":";
-				return leftAndRight;
-			}
+			if (!inBraces)
+				err("Group must be in braces, " + leftAndRight[0] + "\n");
+
+			leftAndRight[1] = (last < 2) ? "" : right.substr(1,last - 1);
+			leftAndRight[0] = identifier + ":";
+			return leftAndRight;
+
 		}
 
-		store.setRhs(leftAndRight[1]);
+		store.setRhs(leftAndRight[1], identifier);
 		return emptyStringVector;
 	}
 
@@ -78,10 +81,14 @@ public:
 
 			for (SizeType j = 0; j < total; ++j) {
 				String replacement = solveExpression(store.value(j, name), i);
-				std::cerr<<"name = "<<name<<" value="<<replacement<<"\n";
+				store.value(j, name) = replacement;
 			}
 		}
 	}
+
+	String& prefix() { return prefix_; }
+
+	const String& prefix() const { return prefix_; }
 
 	void printUnused(std::ostream& os) const
 	{
@@ -110,6 +117,7 @@ public:
 
 	void readValue(int& t, String s) const
 	{
+		s = prefix_ + s;
 		int x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
@@ -122,6 +130,7 @@ public:
 
 	void readValue(RealType& t, String s) const
 	{
+		s = prefix_ + s;
 		int x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
@@ -134,6 +143,7 @@ public:
 
 	void readValue(String& t, String s) const
 	{
+		s = prefix_ + s;
 		int x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
@@ -149,6 +159,7 @@ public:
 	typename EnableIf<IsVectorLike<VectorLikeType>::True,void>::Type
 	readValue(VectorLikeType& v, String s) const
 	{
+		s = prefix_ + s;
 		int x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
@@ -181,6 +192,43 @@ public:
 
 		for (SizeType i = 0; i < n; ++i)
 			getEntryFromString(v[i], store.value(i, names_[x]));
+	}
+
+	// read matrices
+	template<typename FloatingType>
+	typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
+	readValue(Matrix<FloatingType>& m, String s) const
+	{
+		s = prefix_ + s;
+		int x = storageIndexByName(s);
+		if (x < 0)
+			err("Not found " + s + "\n");
+		const Store& store = storage_[x];
+		if (store.type() != Store::MATRIX)
+			err("In input, " + s + " must be a matrix\n");
+		store.increaseUsage();
+		SizeType n = store.valueSize();
+		if (n < 2)
+			err("In input, matrix " + s + " internal storage error I\n");
+
+		store.increaseUsage();
+
+		SizeType rows = atoi(store.value(0, names_[x]).c_str());
+		SizeType cols = atoi(store.value(1, names_[x]).c_str());
+
+		m.clear();
+		if (rows == 0 && cols == 0) return;
+		if (rows*cols == 0)
+			err("Matrix with one of {rows, cols} 0 must have both 0\n");
+
+		m.resize(rows, cols);
+
+		if (rows*cols +2 != n)
+			err("In input, matrix " + s + " internal storage error II\n");
+
+		for (SizeType i = 0; i < rows; ++i)
+			for (SizeType j = 0; j < cols; ++j)
+				getEntryFromString(m(i,j), store.value(i + j*rows + 2, names_[x]));
 	}
 
 private:
@@ -228,7 +276,7 @@ private:
 			if (dotified.size() != 1)
 				err("Dotified failed " + context + "\n");
 			x = assignStorageByName(dotified[0]);
-			storage_.push_back(Store(lhs[0]));
+			storage_.push_back(Store(lhs[0],""));
 		} else if (l == 3) {
 			// require vector.vector.integer FiniteLoops
 			split(dotified,prefix + lhs[2],".");
@@ -373,6 +421,7 @@ private:
 	const VectorStringType& vecBrace_;
 	VectorStringType names_;
 	VectorStoreType storage_;
+	String prefix_;
 }; // class AinurStatements
 } // namespace PsimagLite
 #endif // AINURSTATEMENT_H

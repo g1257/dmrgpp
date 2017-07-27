@@ -16,24 +16,15 @@ public:
 
 	enum Attribute {NONE, REQUIRED, CONST};
 
-//	Store(Type t, SubType s, Attribute a)
-//	    : type_(t), subType_(s), attr_(a), value_(0)
-//	{}
-
-	Store(String s)
-	    : type_(UNKNOWN), subType_(UNDEFINED), attr_(NONE), used_(0)
-	{
-		setTypeOf(s);
-	}
-
 	Store(String s, String a)
 	    : type_(UNKNOWN), subType_(UNDEFINED), attr_(NONE), used_(0)
 	{
 		setTypeOf(s);
-		setAttr(a);
+		if (a != "")
+			setAttr(a);
 	}
 
-	void setRhs(String rhs)
+	void setRhs(String rhs, String name)
 	{
 		value_.clear();
 		switch (type_) {
@@ -41,10 +32,10 @@ public:
 			value_.push_back(rhs);
 			break;
 		case VECTOR:
-			setVectorValue(rhs);
+			setVectorValue(value_, rhs, name);
 			break;
 		case MATRIX:
-			setMatrixValue(rhs);
+			setMatrixValue(rhs, name);
 			break;
 		default:
 			std::cerr<<"setRhs not implemented, rhs= "<<rhs<<"\n";
@@ -58,7 +49,15 @@ public:
 
 	SizeType valueSize() const { return value_.size(); }
 
-	String value(SizeType ind, String name) const
+	const String& value(SizeType ind, String name) const
+	{
+		if (ind >= value_.size())
+			throw RuntimeError("No value for " + name + "\n");
+
+		return value_[ind];
+	}
+
+	String& value(SizeType ind, String name)
 	{
 		if (ind >= value_.size())
 			throw RuntimeError("No value for " + name + "\n");
@@ -125,22 +124,81 @@ private:
 		err("Unknown attribute " + s + "\n");
 	}
 
-	void setVectorValue(String rhs)
+	void setVectorValue(VectorStringType& v, String rhs, String name)
 	{
 		SizeType last = rhs.length();
 		if (last < 2)
-			err("Vector must be enclosed in brakets\n");
+			err("Vector must be enclosed in brakets, name= " + name + "\n");
 
 		--last;
 		if (rhs[0] != '[' || rhs[last] != ']')
-			err("Malformed vector " + rhs + "\n");
+			err("Vector must be enclosed in brakets, name= " + name + "\n");
 		rhs = (last < 2 ) ? "" : rhs.substr(1,last - 1);
-		split(value_, rhs, ",");
+		split(v, rhs, ",");
 	}
 
-	void setMatrixValue(String rhs)
+	// [[a, b, c], [a, b, c]]
+	void setMatrixValue(String rhs, String name)
 	{
-		std::cerr<<"Not setting matrix value to "<<rhs<<"\n";
+		SizeType last = rhs.length();
+		if (last < 4)
+			err("Matrix must be enclosed in brakets\n");
+
+		--last;
+		if (rhs[0] != '[' || rhs[last] != ']')
+			err("Matrix must be enclosed in brakets " + rhs + "\n");
+		assert(last > 2);
+		rhs =  rhs.substr(1,last - 1);
+		VectorStringType tmp;
+		split(tmp, rhs, "[");
+		// a, b, c],
+		// a, b, c]
+		SizeType rows = tmp.size();
+		assert(rows > 0);
+		SizeType cols = 0;
+		value_.clear();
+		SizeType offset = 2;
+		for (SizeType row = 0; row < rows; ++row) {
+			VectorStringType v;
+			String s = tmp[row];
+			removeTrailing(s, ',');
+			s = "[" + s;
+			setVectorValue(v, s, name);
+			SizeType thisCol = v.size();
+			if (row == 0) {
+				cols = thisCol;
+				value_.resize(rows*cols + 2);
+				value_[0] = rows;
+				value_[1] = cols;
+			} else if (cols != thisCol) {
+				err("Malformed matrix, " + name + "\n");
+			}
+
+			appendToVecStr(value_, v, offset);
+			offset += v.size();
+		}
+	}
+
+	void removeTrailing(String& s, char c) const
+	{
+		SizeType end = s.length();
+		if (end == 0) return;
+
+		int i = end - 1;
+		for (; i >= 0; --i)
+			if (s[i] == c) break;
+
+		s = s.substr(0, i);
+	}
+
+	void appendToVecStr(VectorStringType& dest,
+	                    const VectorStringType& src,
+	                    SizeType offset) const
+	{
+		SizeType n = src.size();
+		assert(offset + n <= dest.size());
+		for (SizeType i = 0; i < n; ++i)
+			dest[offset + i] = src[i];
 	}
 
 	Type type_;

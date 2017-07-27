@@ -37,6 +37,10 @@ public:
 		statements_.secondPass();
 	}
 
+	String& prefix() { return statements_.prefix(); }
+
+	const String& prefix() const { return statements_.prefix(); }
+
 	void printUnused(std::ostream& os) const
 	{
 		statements_.printUnused(os);

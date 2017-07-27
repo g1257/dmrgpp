@@ -133,18 +133,18 @@ public:
 	             const Auxiliary& aux)
 	    : aux_(aux),geometryBase_(0),gOptions_("none")
 	{
+		String savedPrefix = io.prefix();
+		io.prefix() += (aux.numberOfTerms > 1) ? "gt" + ttos(aux.termId) + ":" : "";
 
-		String prefix = (aux.numberOfTerms > 1) ? "gt" + ttos(aux.termId) + ":" : "";
-
-		int x;
-		io.readline(x, prefix + "DegreesOfFreedom=");
+		int x = -1;
+		io.readline(x,   "DegreesOfFreedom=");
 		if (x<=0) throw RuntimeError("DegreesOfFreedom<=0 is an error\n");
 
 		SizeType edof = (x > 1);
 		String s;
-		io.readline(s, prefix + "GeometryKind=");
+		io.readline(s,  "GeometryKind=");
 
-		io.readline(gOptions_, prefix + "GeometryOptions=");
+		io.readline(gOptions_, "GeometryOptions=");
 		bool constantValues = (gOptions_.find("ConstantValues") != String::npos);
 
 		if (s == "chain" || s=="longchain") {
@@ -169,20 +169,19 @@ public:
 		}
 
 		for (SizeType i=0;i<geometryBase_->dirs();i++) {
-			typename GeometryDirectionType::Auxiliary aux(constantValues,
-			                                              i,
-			                                              edof,
-			                                              prefix);
+			typename GeometryDirectionType::Auxiliary aux(constantValues, i, edof);
 
 			directions_.push_back(GeometryDirectionType(io, aux, geometryBase_));
 		}
 
 		try {
-			io.readline(vModifier_, prefix + "GeometryValueModifier=");
+			io.readline(vModifier_,  "GeometryValueModifier=");
 		} catch (std::exception&) {}
 
 		orbitals_ = findOrbitals();
 		cacheValues();
+
+		io.prefix() = savedPrefix;
 
 		if (aux.debug) {
 			std::cerr<<"Cached values:\n";
