@@ -38,7 +38,7 @@ public:
 	{
 		SizeType n = storage_.size();
 		for (SizeType i = 0; i < n; ++i) {
-			if (storage_[i].used() > 0)
+			if (storage_[i].used() > 0 || storage_[i].valueSize() == 0)
 				continue;
 			assert(i < names_.size());
 			os<<"WARNING: Unused label "<<names_[i]<<"\n";

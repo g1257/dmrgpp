@@ -73,16 +73,10 @@ public:
 	{
 		SizeType n = storage_.size();
 		assert(n == names_.size());
-		for (SizeType i = 0; i < n; ++i) {
-			const String& name = names_[i];
-			StoreType& store = storage_[i];
-			SizeType total = store.valueSize();
-
-			for (SizeType j = 0; j < total; ++j) {
-				String replacement = solveExpression(store.value(j, name), i);
-				store.value(j, name) = replacement;
-			}
-		}
+		// FIXME: Needs to check what's in scope
+		for (SizeType i = 0; i < n; ++i)
+			for (SizeType j = 0; j < storage_[i].valueSize(); ++j)
+				solveExpression(i, j);
 	}
 
 	AinurReadable& readable() { return readable_; }
@@ -229,21 +223,42 @@ private:
 	}
 
 	// FIXME: Must be generalized to general expressions
-	String solveExpression(String s, SizeType end) const
+	// FIXME: Needs to check what's in scope
+	void solveExpression(SizeType ind, SizeType jnd)
 	{
-		assert(end <= names_.size());
-		assert(names_.size() == storage_.size());
-		for (SizeType i = 0; i < end; ++i) {
-			if (s != names_[i]) continue;
-			const StoreType& store = storage_[i];
-			if (store.valueSize() > 1)
-				err("Cannot replace vectors yet\n");
+		SizeType total = names_.size();
+		assert(total == storage_.size());
+		StoreType::Type whatType = storage_[ind].type();
 
-			s = store.value(0, names_[i]);
-			break;
+		for (SizeType i = 0; i < total; ++i) {
+			if (storage_[ind].value(jnd, names_[ind]) != names_[i])
+				continue;
+
+			StoreType::Type replType = storage_[i].type();
+			if (whatType == Store::SCALAR) {
+				assert(jnd == 0);
+				// replacement must be scalar
+				if (replType != Store::SCALAR)
+					err("Must be scalar " + names_[i] + " in " + names_[ind]);
+
+				if (storage_[i].subType() != storage_[ind].subType())
+					err("Subtype mismatch " + names_[i] + " in " + names_[ind]);
+
+				storage_[ind].value(jnd,names_[ind]) = storage_[i].value(jnd, names_[i]);
+				break;
+			}
+
+			if (whatType != Store::VECTOR)
+				err("Cannot replace in matrix yet\n");
+
+			assert(whatType == Store::VECTOR);
+			if (replType == Store::SCALAR) {
+				storage_[ind].value(jnd,names_[ind]) = storage_[i].value(0, names_[i]);
+				break;
+			}
+
+			err("Replacement in vector can only be scalar\n");
 		}
-
-		return s;
 	}
 
 	const VectorStringType& vecStr_;
