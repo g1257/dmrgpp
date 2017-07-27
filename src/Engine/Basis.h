@@ -407,8 +407,8 @@ public:
 	//! returns the number of electrons for state i of this basis
 	SizeType electrons(SizeType i) const
 	{
-		assert(i < electrons_.size());
-		return electrons_[i];
+		assert(i < electrons_.size() || electrons_.size() == 0);
+		return (i < electrons_.size()) ? electrons_[i] : 0;
 	}
 
 	//! returns the flavor of state i of this basis
