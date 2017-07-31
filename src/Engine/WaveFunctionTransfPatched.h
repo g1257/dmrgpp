@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffset.h" // so that PsimagLite::norm() becomes visible here
 #include "WaveFunctionTransfBase.h"
 #include "MatrixOrIdentity.h"
+#include "MatrixVectorKron/GenIjPatch.h"
 
 namespace Dmrg {
 
@@ -183,6 +184,22 @@ private:
 	                             typename DmrgWaveStructType::DirectionEnum dir) const
 	{
 		err("WaveFunctionTransfPatched: not implemented yet\n");
+//		SizeType m = psiSrc.sector(i0);
+//		SizeType target = dmrgWaveStruct_.lrs.super.qn(m);
+//		GenIjPatch<LeftRightSuperType> genIjPatch(dmrgWaveStruct_.lrs, target);
+//		VectorSizeType lv = genIjPatch(GenIjPatch<LeftRightSuperType>::LEFT);
+//		VectorSizeType rv = genIjPatch(GenIjPatch<LeftRightSuperType>::RIGHT);
+//		SizeType total = lv.size();
+//		assert(total == rv.size());
+		// if (dir_ == DmrgWaveStructType::DIR_2)
+		// reshape psiSrc --> psiSrc(ip', beta')
+		// Ws^T_(ip, ip') psiSrc(ip', beta') We^T(beta', beta)
+		// (ip, beta) --> (ip, (kp, jp)) --> ((ip, kp), jp)  --> psiDest(alpha, jp)
+		//
+		// else
+		// reshape psiSrc --> psiSrc(alpha', jp')
+		// Ws(alpha, alpha') psiSrc(alpha', jp') We(jp', jp)
+		// (alpha, jp) --> ((ip, kp), jp) --> (ip, (kp, jp)) --> psiDest(ip, beta)
 	}
 
 	template<typename SomeVectorType>
