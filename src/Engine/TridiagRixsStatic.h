@@ -163,6 +163,7 @@ public:
 	    : lrs_(lrs),
 	      model_(model),
 	      io_(io),
+	      A_(io, model, false, "RS:"),
 	      direction_(direction)
 	{
 		SizeType numberOfSites = model.geometry().numberOfSites();
@@ -170,8 +171,6 @@ public:
 		int site2 = ProgramGlobals::findBorderSiteFrom(site, direction, numberOfSites);
 		corner_ = (site2 >= 0) ? ApplyOperatorLocalType::BORDER_YES :
 		                         ApplyOperatorLocalType::BORDER_NO;
-
-		err("Set A_ FIXME\n");
 	}
 
 	void operator()(const VectorWithOffsetType& phi,
