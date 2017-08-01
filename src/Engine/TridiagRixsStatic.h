@@ -92,14 +92,15 @@ class TridiagRixsStatic {
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef typename LanczosSolverType::ParametersSolverType ParametersSolverType;
-	typedef ApplyOperatorLocal<LeftRightSuperType, VectorWithOffsetType> ApplyOperatorLocalType;
+	typedef ApplyOperatorLocal<LeftRightSuperType, VectorWithOffset<ComplexOrRealType> >
+	ApplyOperatorLocalType;
 	typedef typename VectorWithOffset<ComplexOrRealType>::VectorSizeType VectorSizeType;
 
 	class MyMatrixVector : public LanczosSolverType::LanczosMatrixType {
+
 		typedef typename LanczosSolverType::LanczosMatrixType BasisType;
 
 	public:
@@ -115,7 +116,7 @@ class TridiagRixsStatic {
 		      A_(A),
 		      dir_(dir),
 		      corner_(corner),
-		      fs_(modelHelper->leftRightSuper().left().electronsVector()),
+		      fs_(modelHelper->leftRightSuper().left().electronsVector()), // FIXME CHECK
 		      x2_(weights, modelHelper->leftRightSuper().super()),
 		      y2_(weights, modelHelper->leftRightSuper().super())
 		{}
@@ -128,6 +129,7 @@ class TridiagRixsStatic {
 			x2_.setDataInSector(x,0);
 			y2_.setDataInSector(y,0);
 			applyOperatorLocal_(x2_, y2_, A_, fs_, dir_, corner_);
+			x2_.extract(x, 0);
 		}
 
 	private:
@@ -145,6 +147,7 @@ class TridiagRixsStatic {
 	typedef PsimagLite::LanczosSolver<ParametersSolverType,
 	MyMatrixVectorType,
 	typename MyMatrixVectorType::VectorType> MyLanczosSolverType;
+	typedef typename MyLanczosSolverType::TridiagonalMatrixType MyTridiagonalMatrixType;
 
 public:
 
@@ -162,7 +165,13 @@ public:
 	      io_(io),
 	      direction_(direction)
 	{
-		err("Set A_ and corner_ FIXME\n");
+		SizeType numberOfSites = model.geometry().numberOfSites();
+
+		int site2 = ProgramGlobals::findBorderSiteFrom(site, direction, numberOfSites);
+		corner_ = (site2 >= 0) ? ApplyOperatorLocalType::BORDER_YES :
+		                         ApplyOperatorLocalType::BORDER_NO;
+
+		err("Set A_ FIXME\n");
 	}
 
 	void operator()(const VectorWithOffsetType& phi,
@@ -202,7 +211,7 @@ private:
 
 		MyLanczosSolverType lanczosSolver(lanczosHelper,params,&V);
 
-		TridiagonalMatrixType ab;
+		MyTridiagonalMatrixType ab;
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
 		phi.extract(phi2,i0);

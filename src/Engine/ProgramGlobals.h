@@ -109,6 +109,17 @@ struct ProgramGlobals {
 		maxElectronsOneSpin = maxElectronsOneSpin_;
 	}
 
+	static int findBorderSiteFrom(SizeType site,
+	                              SizeType direction,
+	                              SizeType n)
+	{
+		if (site == 1 && direction == EXPAND_ENVIRON) return 0;
+
+		if (site == n - 2 && direction == EXPAND_SYSTEM) return n - 1;
+
+		return -1;
+	}
+
 	static PsimagLite::String WFT_STRING;
 	static PsimagLite::String SYSTEM_STACK_STRING;
 	static PsimagLite::String ENVIRON_STACK_STRING;

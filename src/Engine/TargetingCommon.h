@@ -531,7 +531,9 @@ public:
 		BorderEnumType border = ApplyOperatorType::BORDER_NO;
 		cocoon_(direction,site,v1,label1,v2,label2,border,needsPrinting);
 
-		int site2 = findBorderSiteFrom(site,direction);
+		SizeType numberOfSites = targetHelper_.model().geometry().numberOfSites();
+
+		int site2 = ProgramGlobals::findBorderSiteFrom(site, direction, numberOfSites);
 
 		if (site2 >= 0) {
 			border = ApplyOperatorType::BORDER_YES;
@@ -563,7 +565,9 @@ public:
 		BorderEnumType border = ApplyOperatorType::BORDER_NO;
 		test(v1,v2,direction,braket.toString(),site,braket.op(0),border);
 
-		int site2 = findBorderSiteFrom(site,direction);
+		SizeType numberOfSites = targetHelper_.model().geometry().numberOfSites();
+
+		int site2 = ProgramGlobals::findBorderSiteFrom(site, direction, numberOfSites);
 
 		if (site2 >= 0) {
 			border = ApplyOperatorType::BORDER_YES;
@@ -640,16 +644,6 @@ private:
 			wft.createRandomVector(v1);
 		else
 			wft.setInitialVector(v1,v2,targetHelper_.lrs(),nk);
-	}
-
-	int findBorderSiteFrom(SizeType site, SizeType direction) const
-	{
-		if (site == 1 && direction == EXPAND_ENVIRON) return 0;
-
-		SizeType n = targetHelper_.model().geometry().numberOfSites();
-		if (site == n - 2 && direction == EXPAND_SYSTEM) return n - 1;
-
-		return -1;
 	}
 
 	// prints <v1|A|v2>
