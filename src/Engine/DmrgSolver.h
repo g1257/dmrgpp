@@ -587,12 +587,10 @@ private:
 			if (target.end()) break;
 		}
 
-		if (direction==EXPAND_SYSTEM) {
+		if (direction==EXPAND_SYSTEM)
 			pE = lrs_.right();
-
-		} else {
+		else
 			pS = lrs_.left();
-		}
 
 		if (!saveData_) return;
 		if (saveOption & 1) {

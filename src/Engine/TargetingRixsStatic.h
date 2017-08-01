@@ -284,7 +284,7 @@ private:
 				this->common().targetVectors(3*s) = phiNew;
 			}
 
-			doCorrectionVector();
+			doCorrectionVector(direction, site);
 		}
 
 		// typename PsimagLite::Vector<SizeType>::Type block(1,site);
@@ -307,14 +307,16 @@ private:
 			stage_ = STAGE_STATIC2;
 	}
 
-	void doCorrectionVector()
+	void doCorrectionVector(SizeType direction, SizeType site)
 	{
 		assert(stage_ == STAGE_STATIC2);
 		SizeType numberOfSites = this->lrs().super().block().size();
 		for (SizeType s = 0; s < numberOfSites; ++s)
 			skeleton_.calcDynVectors(this->common().targetVectors(3*s),
 			                         this->common().targetVectors(3*s+1),
-			                         this->common().targetVectors(3*s+2));
+			                         this->common().targetVectors(3*s+2),
+			                         direction,
+			                         site);
 		setWeights();
 	}
 

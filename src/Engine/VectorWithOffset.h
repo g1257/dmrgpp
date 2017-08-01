@@ -90,6 +90,7 @@ public:
 	typedef FieldType value_type;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	static const FieldType zero_;
 
@@ -98,7 +99,7 @@ public:
 	{}
 
 	template<typename SomeBasisType>
-	VectorWithOffset(const typename PsimagLite::Vector<SizeType>::Type& weights,
+	VectorWithOffset(const VectorSizeType& weights,
 	                 const SomeBasisType& someBasis)
 	    : progress_("VectorWithOffset"),size_(someBasis.size())
 	{
@@ -245,7 +246,7 @@ public:
 	}
 
 	template<typename SomeBasisType>
-	void populateFromQns(const typename PsimagLite::Vector<SizeType>::Type& qns,
+	void populateFromQns(const VectorSizeType& qns,
 	                     const SomeBasisType& someBasis)
 	{
 		if (qns.size() == 0) return;

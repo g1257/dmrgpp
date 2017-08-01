@@ -223,7 +223,7 @@ public:
 	VectorWithOffsetType> ParallelTriDiagType;
 	typedef typename ParallelTriDiagType::MatrixComplexOrRealType MatrixComplexOrRealType;
 	typedef typename ParallelTriDiagType::VectorMatrixFieldType VectorMatrixFieldType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename TargetingBaseType::InputSimpleOutType InputSimpleOutType;
@@ -250,7 +250,9 @@ public:
 
 	void calcDynVectors(const VectorWithOffsetType& tv0,
 	                    VectorWithOffsetType& tv1,
-	                    VectorWithOffsetType& tv2)
+	                    VectorWithOffsetType& tv2,
+	                    SizeType direction,
+	                    SizeType site)
 	{
 		const VectorWithOffsetType& phi = tv0;
 		tv1 = tv2 = phi;
@@ -260,7 +262,12 @@ public:
 
 		VectorSizeType steps(phi.sectors());
 
-		triDiag(phi,T,V,steps);
+		const PsimagLite::String options = model_.params().options;
+		bool isRixsStatic = (options.find("TargetingRixsStatic") != PsimagLite::String::npos);
+		if (isRixsStatic)
+			triDiagRixs(phi, T, V, steps, direction, site);
+		else
+			triDiag(phi,T,V,steps);
 
 		VectorVectorRealType eigs(phi.sectors());
 
@@ -297,12 +304,14 @@ public:
 	void calcDynVectors(const VectorWithOffsetType& tv0,
 	                    const VectorWithOffsetType& tv1,
 	                    VectorWithOffsetType& tv2,
-	                    VectorWithOffsetType& tv3)
+	                    VectorWithOffsetType& tv3,
+	                    SizeType direction,
+	                    SizeType site)
 	{
-		calcDynVectors(tv0,tv2,tv3);
+		calcDynVectors(tv0,tv2,tv3,direction, site);
 		VectorWithOffsetType tv4;
 		VectorWithOffsetType tv5;
-		calcDynVectors(tv1,tv4,tv5);
+		calcDynVectors(tv1,tv4,tv5,direction, site);
 		tv2 += (-1.0)*tv5;
 		tv3 += tv4;
 	}
@@ -457,7 +466,7 @@ private:
 	void triDiag(const VectorWithOffsetType& phi,
 	             VectorMatrixFieldType& T,
 	             VectorMatrixFieldType& V,
-	             typename PsimagLite::Vector<SizeType>::Type& steps)
+	             VectorSizeType& steps)
 	{
 		RealType fakeTime = 0;
 		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
@@ -474,6 +483,14 @@ private:
 
 		threadedTriDiag.loopCreate(helperTriDiag);
 	}
+
+	void triDiagRixs(const VectorWithOffsetType& phi,
+	                 VectorMatrixFieldType& T,
+	                 VectorMatrixFieldType& V,
+	                 VectorSizeType& steps,
+	                 SizeType direction,
+	                 SizeType site)
+	{}
 
 	RealType dynWeightOf(VectorType& v,const VectorType& w) const
 	{

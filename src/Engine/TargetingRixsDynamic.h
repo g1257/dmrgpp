@@ -297,7 +297,9 @@ private:
 		skeleton_.calcDynVectors(this->common().targetVectors(2*center),
 		                         this->common().targetVectors(2*center+1),
 		                         this->common().targetVectors(2*numberOfSites),
-		                         this->common().targetVectors(2*numberOfSites+1));
+		                         this->common().targetVectors(2*numberOfSites+1),
+		                         direction,
+		                         site);
 		setWeights();
 	}
 
