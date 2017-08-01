@@ -183,8 +183,9 @@ public:
 			isEnergyForExp_ = true;
 		} catch (std::exception&) {}
 
+		PsimagLite::String prefix = "";
 		for (SizeType i=0;i<sites_.size();i++) {
-			OperatorType myOp(io,model_,OperatorType::MUST_BE_NONZERO);
+			OperatorType myOp(io,model_,OperatorType::MUST_BE_NONZERO, prefix);
 			aOperators_.push_back(myOp);
 		}
 

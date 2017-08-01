@@ -168,7 +168,8 @@ private:
 		replaceString(label, ttos(site));
 		PsimagLite::IoSimple::In io(label);
 
-		return OperatorType(io,model_,OperatorType::MUST_BE_NONZERO);
+		PsimagLite::String prefix = "";
+		return OperatorType(io,model_,OperatorType::MUST_BE_NONZERO, prefix);
 	}
 
 	void replaceString(PsimagLite::String& str,

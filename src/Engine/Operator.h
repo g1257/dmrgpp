@@ -118,7 +118,10 @@ struct Operator {
 	{}
 
 	template<typename IoInputType, typename SomeModelType>
-	Operator(IoInputType& io, SomeModelType& model,bool checkNonZero)
+	Operator(IoInputType& io,
+	         SomeModelType& model,
+	         bool checkNonZero,
+	         PsimagLite::String prefix)
 	{
 		/*PSIDOC Operator
 		 \item[TSPOperator] [String] One of \{\verb!cooked!, \verb!raw!,
@@ -157,22 +160,22 @@ struct Operator {
 		 was set to \verb!expression!.
 		 */
 		PsimagLite::String s = "";
-		io.readline(s,"TSPOperator=");
+		io.readline(s, prefix + "TSPOperator=");
 
 		if (s == "cooked") {
-			io.readline(s,"COOKED_OPERATOR=");
+			io.readline(s, prefix + "COOKED_OPERATOR=");
 			VectorSizeType v;
-			io.read(v,"COOKED_EXTRA");
+			io.read(v,prefix + "COOKED_EXTRA");
 			if (v.size() != 2)
 				throw PsimagLite::RuntimeError("COOKED_EXTRA must be followed 2 v0 v1\n");
 			data = model.naturalOperator(s,v[0],v[1]).data;
 		} else if (s == "raw") {
 			PsimagLite::Matrix<SparseElementType> m;
-			io.readMatrix(m,"RAW_MATRIX");
+			io.readMatrix(m, prefix + "RAW_MATRIX");
 			if (checkNonZero) checkNotZeroMatrix(m);
 			fullMatrixToCrsMatrix(data,m);
 		} else if (s == "expression") {
-			io.readline(s,"OperatorExpression=");
+			io.readline(s,prefix + "OperatorExpression=");
 			int site = 0;
 			typedef OperatorSpec<SomeModelType> OperatorSpecType;
 			OperatorSpecType opSpec(model);
@@ -192,13 +195,13 @@ struct Operator {
 			throw PsimagLite::RuntimeError(str.c_str());
 		}
 
-		io.readline(fermionSign,"FERMIONSIGN=");
+		io.readline(fermionSign,prefix + "FERMIONSIGN=");
 
 		VectorSizeType v(2);
-		io.readKnownSize(v,"JMVALUES");
+		io.readKnownSize(v,prefix + "JMVALUES");
 		jm.first = v[0]; jm.second = v[1];
 
-		io.readline(angularFactor,"AngularFactor=");
+		io.readline(angularFactor,prefix + "AngularFactor=");
 
 		// FIXME: su2related needs to be set properly for when SU(2) is running
 	}
