@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "Concurrency.h"
 #include "PackIndices.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -99,8 +100,6 @@ class ParallelWftSu2 {
 
 public:
 
-	enum DirectionEnum {DIR_1, DIR_2};
-
 	typedef typename VectorWithOffsetType::value_type VectorElementType;
 	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
 
@@ -110,7 +109,7 @@ public:
 	               SizeType i0,
 	               const VectorSizeType& nk,
 	               const DmrgWaveStructType& dmrgWaveStruct,
-	               DirectionEnum dir)
+	               ProgramGlobals::DirectionEnum dir)
 	    : psiDest_(psiDest),
 	      psiSrc_(psiSrc),
 	      lrs_(lrs),
@@ -126,7 +125,7 @@ public:
 		transposeConjugate(wsT_,ws_);
 		transposeConjugate(weT_,we_);
 
-		if (dir_ == DIR_2) {
+		if (dir_ == ProgramGlobals::DIR_2) {
 			assert(dmrgWaveStruct_.lrs.right().permutationInverse().size()==
 			       dmrgWaveStruct_.we.row());
 			assert(lrs_.left().permutationInverse().size()/volumeOf(nk)==
@@ -178,7 +177,7 @@ public:
 		for (int kI = factorsInvSE_.getRowPtr(xx);
 		     kI < factorsInvSE_.getRowPtr(xx+1);
 		     kI++) {
-			if (dir_ == DIR_2) {
+			if (dir_ == ProgramGlobals::DIR_2) {
 				SizeType ip = 0;
 				SizeType alpha = 0;
 				SizeType kp = 0;
@@ -306,7 +305,7 @@ private:
 	SizeType i0_;
 	const VectorSizeType& nk_;
 	const DmrgWaveStructType& dmrgWaveStruct_;
-	DirectionEnum dir_;
+	ProgramGlobals::DirectionEnum dir_;
 	const SparseMatrixType& we_;
 	const SparseMatrixType& ws_;
 	PackIndicesType* pack1_;

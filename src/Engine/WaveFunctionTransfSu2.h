@@ -181,7 +181,7 @@ private:
 		if (twoSiteDmrg_)
 			return transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
 
-		typename ParallelWftType::DirectionEnum dir1 = ParallelWftType::DIR_1;
+		typename ProgramGlobals::DirectionEnum dir1 = ProgramGlobals::DIR_1;
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
 			transformVectorParallel(psiDest,psiSrc,lrs,i0,nk,dir1);
@@ -197,7 +197,7 @@ private:
 		if (twoSiteDmrg_)
 			return transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
 
-		typename ParallelWftType::DirectionEnum dir2 = ParallelWftType::DIR_2;
+		typename ProgramGlobals::DirectionEnum dir2 = ProgramGlobals::DIR_2;
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
 			transformVectorParallel(psiDest,psiSrc,lrs,i0,nk,dir2);
@@ -210,7 +210,7 @@ private:
 	                             const LeftRightSuperType& lrs,
 	                             SizeType i0,
 	                             const VectorSizeType& nk,
-	                             typename ParallelWftType::DirectionEnum dir) const
+	                             typename ProgramGlobals::DirectionEnum dir) const
 	{
 		typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
 		ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,

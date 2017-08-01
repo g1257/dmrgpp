@@ -93,8 +93,6 @@ struct DmrgWaveStruct {
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-	enum DirectionEnum {DIR_1, DIR_2};
-
 	SparseMatrixType ws;
 	SparseMatrixType we;
 	LeftRightSuperType lrs;

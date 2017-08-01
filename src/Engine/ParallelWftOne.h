@@ -106,7 +106,7 @@ public:
 	               SizeType i0,
 	               const VectorSizeType& nk,
 	               const DmrgWaveStructType& dmrgWaveStruct,
-	               typename DmrgWaveStructType::DirectionEnum dir)
+	               typename ProgramGlobals::DirectionEnum dir)
 	    : psiDest_(psiDest),
 	      psiSrc_(psiSrc),
 	      lrs_(lrs),
@@ -122,7 +122,7 @@ public:
 		transposeConjugate(wsT_,ws_);
 		transposeConjugate(weT_,we_);
 		SizeType vOfNk = DmrgWaveStructType::volumeOf(nk);
-		if (dir_ == DmrgWaveStructType::DIR_2) {
+		if (dir_ == ProgramGlobals::DIR_2) {
 			assert(dmrgWaveStruct_.lrs.right().permutationInverse().size()==
 			       dmrgWaveStruct_.we.row());
 			assert(lrs_.left().permutationInverse().size()/vOfNk==
@@ -152,7 +152,7 @@ public:
 	{
 		SizeType start = psiDest_.offset(i0_);
 
-		if (dir_ == DmrgWaveStructType::DIR_2) {
+		if (dir_ == ProgramGlobals::DIR_2) {
 			SizeType ip = 0;
 			SizeType alpha = 0;
 			SizeType kp = 0;
@@ -245,7 +245,7 @@ private:
 	SizeType i0_;
 	const VectorSizeType& nk_;
 	const DmrgWaveStructType& dmrgWaveStruct_;
-	typename DmrgWaveStructType::DirectionEnum dir_;
+	typename ProgramGlobals::DirectionEnum dir_;
 	const SparseMatrixType& we_;
 	const SparseMatrixType& ws_;
 	PackIndicesType* pack1_;
