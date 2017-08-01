@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeSerializer.h"
 #include "FreqEnum.h"
 #include "NoPthreadsNg.h"
+#include "TridiagRixsStatic.h"
 
 namespace Dmrg {
 
@@ -218,9 +219,10 @@ public:
 	typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
 	typedef CorrectionVectorFunction<LanczosMatrixType,
 	TargetParamsType> CorrectionVectorFunctionType;
-	typedef ParallelTriDiag<ModelType,
-	LanczosSolverType,
-	VectorWithOffsetType> ParallelTriDiagType;
+	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
+	ParallelTriDiagType;
+	typedef TridiagRixsStatic<ModelType, LanczosSolverType, VectorWithOffsetType>
+	TridiagRixsStaticType;
 	typedef typename ParallelTriDiagType::MatrixComplexOrRealType MatrixComplexOrRealType;
 	typedef typename ParallelTriDiagType::VectorMatrixFieldType VectorMatrixFieldType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -264,10 +266,12 @@ public:
 
 		const PsimagLite::String options = model_.params().options;
 		bool isRixsStatic = (options.find("TargetingRixsStatic") != PsimagLite::String::npos);
-		if (isRixsStatic)
-			triDiagRixs(phi, T, V, steps, direction, site);
-		else
+		if (isRixsStatic) {
+			TridiagRixsStaticType rixsStatic(lrs_, model_, ioIn_, site, direction);
+			rixsStatic(phi, T, V, steps);
+		} else {
 			triDiag(phi,T,V,steps);
+		}
 
 		VectorVectorRealType eigs(phi.sectors());
 
