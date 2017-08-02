@@ -117,7 +117,7 @@ public:
 
 	struct TruncationCache {
 		TruncationCache()
-		    : transform(0,0)
+		    : transform(0, 0, 0)
 		{}
 
 		BlockDiagonalMatrixType transform;

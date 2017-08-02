@@ -90,6 +90,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
+template<typename T>
+struct IsBasisType {
+	enum {True = false};
+};
+
 // A block matrix class
 // Blocks can be of any type and are templated with the type MatrixInBlockTemplate
 template<typename MatrixInBlockTemplate>
@@ -116,18 +121,10 @@ public:
 		offsetsCols_[blocks] = cols;
 	}
 
-	BlockDiagonalMatrix(SizeType rowsOrCols,
-	                    SizeType blocks)
-	    : isSquare_(true),
-	      offsetsRows_(blocks + 1),
-	      offsetsCols_(blocks+1),
-	      data_(blocks)
-	{
-		offsetsRows_[blocks] = offsetsCols_[blocks] = rowsOrCols;
-	}
-
 	template<typename SomeBasisType>
-	BlockDiagonalMatrix(const SomeBasisType& basis)
+	BlockDiagonalMatrix(const SomeBasisType& basis,
+	                    typename PsimagLite::EnableIf<
+	                    IsBasisType<SomeBasisType>::True, int>::Type = 0)
 	    : isSquare_(true),
 	      offsetsRows_(basis.partition()),
 	      offsetsCols_(basis.partition()),

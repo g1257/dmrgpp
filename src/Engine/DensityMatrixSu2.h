@@ -110,12 +110,9 @@ public:
 	DensityMatrixSu2(const TargettingType& target,
 	                 const LeftRightSuperType& lrs,
 	                 const ParamsType& p)
-	    : data_((p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.left().size() :
-	                                                             lrs.right().size(),
-	            (p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.left().partition() -1 :
-	                                                             lrs.right().partition() -1),
+	    : pBasis_((p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.left() : lrs.right()),
+	      data_(pBasis_),
 	      mMaximal_(data_.blocks()),
-	      pBasis_((p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.left() : lrs.right()),
 	      direction_(p.direction),
 	      debug_(p.debug),
 	      verbose_(p.verbose)
@@ -402,9 +399,9 @@ private:
 		}
 	}
 
+	const BasisWithOperatorsType& pBasis_;
 	BlockDiagonalMatrixType data_;
 	typename PsimagLite::Vector<SizeType>::Type mMaximal_;
-	const BasisWithOperatorsType& pBasis_;
 	SizeType direction_;
 	bool debug_;
 	bool verbose_;

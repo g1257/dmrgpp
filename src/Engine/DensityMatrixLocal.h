@@ -115,10 +115,7 @@ public:
 	                   const ParamsType& p)
 	    :
 	      progress_("DensityMatrixLocal"),
-	      data_((p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.left().size() :
-	                                                             lrs.right().size(),
-	            (p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.left().partition() -1 :
-	                                                             lrs.right().partition() -1),
+	      data_((p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.left() : lrs.right()),
 	      direction_(p.direction),
 	      debug_(p.debug),
 	      verbose_(p.verbose)

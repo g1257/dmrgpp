@@ -392,6 +392,11 @@ std::istream& operator>>(std::istream& is,
 	throw PsimagLite::RuntimeError("Unimplemented >>\n");
 	return is;
 }
+
+template<typename OperatorsType>
+struct IsBasisType<BasisWithOperators<OperatorsType> > {
+	enum {True = true};
+};
 } // namespace Dmrg
 
 /*@}*/

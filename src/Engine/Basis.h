@@ -714,6 +714,11 @@ private:
 template<typename SparseMatrixType, typename CvectorSizeType2>
 bool Basis<SparseMatrixType, CvectorSizeType2>::useSu2Symmetry_=false;
 
+template<typename SparseMatrixType_, typename CvectorSizeType>
+struct IsBasisType<Basis<SparseMatrixType_, CvectorSizeType> > {
+	enum {True = true};
+};
+
 } // namespace Dmrg
 
 /*@}*/
