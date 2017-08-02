@@ -116,6 +116,7 @@ public:
 
 	typedef BasisType_ BasisType;
 	typedef ReducedOperators<BasisType> ReducedOperatorsType;
+	typedef typename ReducedOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename ReducedOperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -132,7 +133,7 @@ public:
 		MyLoop(bool useSu2Symmetry,
 		       ReducedOperatorsType& reducedOpImpl,
 		       typename PsimagLite::Vector<OperatorType>::Type& operators,
-		       const SparseMatrixType& ftransform1,
+		       const BlockDiagonalMatrixType& ftransform1,
 		       const BasisType* thisBasis1,
 		       const PairSizeSizeType& startEnd)
 		    : useSu2Symmetry_(useSu2Symmetry),
@@ -206,7 +207,7 @@ public:
 		bool useSu2Symmetry_;
 		ReducedOperatorsType& reducedOpImpl_;
 		typename PsimagLite::Vector<OperatorType>::Type& operators_;
-		const SparseMatrixType& ftransform;
+		const BlockDiagonalMatrixType& ftransform;
 		const BasisType* thisBasis;
 		bool hasMpi_;
 		const PairSizeSizeType& startEnd_;
@@ -281,7 +282,7 @@ public:
 		return operators_.size();
 	}
 
-	void changeBasis(const SparseMatrixType& ftransform,
+	void changeBasis(const BlockDiagonalMatrixType& ftransform,
 	                 const BasisType* thisBasis,
 	                 const PairSizeSizeType& startEnd)
 	{

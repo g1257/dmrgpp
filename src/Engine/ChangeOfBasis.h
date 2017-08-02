@@ -1,5 +1,7 @@
 #ifndef DMRG_CHANGEOFBASIS_H
 #define DMRG_CHANGEOFBASIS_H
+#include "BlockDiagonalMatrix.h"
+
 namespace Dmrg {
 
 template<typename SparseMatrixType, typename MatrixType>
@@ -7,16 +9,18 @@ class ChangeOfBasis {
 
 public:
 
-	void update(const SparseMatrixType& transform)
+	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
+
+	void update(const BlockDiagonalMatrixType& transform)
 	{
-		transform_ = transform;
-		transposeConjugate(transformT_,transform);
+		transform.toSparse(transform_);
+		transposeConjugate(transformT_,transform_);
 	}
 
-	void update(const MatrixType &v2)
+	void update(const MatrixType& v2)
 	{
-		SparseMatrixType v(v2);
-		update(v);
+		fullMatrixToCrsMatrix(transform_, v2);
+		transposeConjugate(transformT_,transform_);
 	}
 
 	void operator()(SparseMatrixType &v) const
@@ -27,8 +31,10 @@ public:
 	}
 
 	static void changeBasis(SparseMatrixType &v,
-	                        const SparseMatrixType& ftransform)
+	                        const BlockDiagonalMatrixType& ftransform1)
 	{
+		SparseMatrixType ftransform;
+		ftransform1.toSparse(ftransform);
 		SparseMatrixType ftransformT;
 		transposeConjugate(ftransformT,ftransform);
 		SparseMatrixType tmp;

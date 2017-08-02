@@ -175,6 +175,9 @@ public:
 	typedef TargetingRixsStatic<LanczosSolverType,VectorWithOffsetType> TargetingRixsStaticType;
 	typedef TargetingRixsDynamic<LanczosSolverType,VectorWithOffsetType> TargetingRixsDynamicType;
 	typedef PrinterInDetail<LeftRightSuperType> PrinterInDetailType;
+	typedef typename DiagonalizationType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
+
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 		  INFINITE=WaveFunctionTransfType::INFINITE};
@@ -631,13 +634,15 @@ private:
 	void serialize(const FermionSignType& fsS,
 	               const FermionSignType& fsE,
 	               const TargettingType& target,
-	               const SparseMatrixType& transform,
+	               const BlockDiagonalMatrixType& transform1,
 	               SizeType direction,
 	               int saveOption)
 	{
 		if (!(saveOption & 1)) return;
 		if (!saveData_) return;
 
+		SparseMatrixType transform;
+		transform1.toSparse(transform);
 		DmrgSerializerType ds(fsS,fsE,lrs_,target.gs(),transform,direction);
 
 		SizeType saveOption2 = (saveOption & 4) ? SAVE_ALL : SAVE_PARTIAL;

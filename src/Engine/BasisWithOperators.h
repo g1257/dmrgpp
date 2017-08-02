@@ -127,9 +127,12 @@ public:
 	typedef typename OperatorsType::BasisType BasisType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-	typedef BasisWithOperators<OperatorsType> 	ThisType;
+	typedef BasisWithOperators<OperatorsType> ThisType;
 	typedef typename BasisType::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename BasisType::FactorsType FactorsType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
 
 	enum {GROW_RIGHT,GROW_LEFT};
 
@@ -249,7 +252,7 @@ public:
 
 	//! transform this basis by transform
 	//! note: basis change must conserve total number of electrons and all quantum numbers
-	RealType truncateBasis(const SparseMatrixType& ftransform,
+	RealType truncateBasis(const BlockDiagonalMatrixType& ftransform,
 	                       const typename PsimagLite::Vector<RealType>::Type& eigs,
 	                       const typename PsimagLite::Vector<SizeType>::Type& removedIndices,
 	                       const PairSizeSizeType& startEnd)

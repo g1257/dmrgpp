@@ -105,6 +105,7 @@ public:
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
+	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
@@ -317,11 +318,14 @@ public:
 
 	}
 
-	void push(const SparseMatrixType& transform,
+	void push(const BlockDiagonalMatrixType& transform1,
 	          SizeType direction,
 	          const LeftRightSuperType& lrs)
 	{
 		if (!isEnabled_) return;
+
+		SparseMatrixType transform;
+		transform1.toSparse(transform);
 
 		switch (stage_) {
 		case INFINITE:

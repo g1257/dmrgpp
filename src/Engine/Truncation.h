@@ -113,7 +113,7 @@ class Truncation  {
 public:
 
 	typedef typename DensityMatrixBaseType::Params ParamsDensityMatrixType;
-	typedef typename LeftRightSuperType::SparseMatrixType TransformType;
+	typedef BlockDiagonalMatrixType TransformType;
 
 	struct TruncationCache {
 		TruncationCache()
@@ -137,7 +137,8 @@ public:
 	      maxConnections_(maxConnections),
 	      verbose_(verbose),
 	      progress_("Truncation"),
-	      error_(0.0)
+	      error_(0.0),
+	      ftransform_(0,0,0)
 	{
 		if (parameters_.truncationControl.first < 0) return;
 		PsimagLite::OstringStream msg;
@@ -180,7 +181,6 @@ public:
 
 		truncateBasisSystem(sBasis,lrs_.right());
 		truncateBasisEnviron(eBasis,lrs_.left());
-
 	}
 
 private:
@@ -271,7 +271,7 @@ private:
 		PsimagLite::OstringStream msg0;
 		msg0<<"Truncating transform...";
 		cache.transform.truncate(cache.removedIndices);
-		cache.transform.toSparse(ftransform_);
+		ftransform_ = cache.transform;
 		progress_.printline(msg0,std::cout);
 		rSprime.truncateBasis(ftransform_,
 		                      cache.eigs,
@@ -285,7 +285,7 @@ private:
 
 		msg<<"new size of basis="<<rSprime.size();
 		msg<<" transform is "<<ftransform_.rows()<<" x "<<ftransform_.cols();
-		msg<<" with "<<ftransform_.nonZero()<<" non-zeroes";
+		msg<<" with "<<ftransform_.blocks()<<" symmetry blocks";
 		progress_.printline(msg,std::cout);
 	}
 
@@ -305,7 +305,7 @@ private:
 		PsimagLite::OstringStream msg0;
 		msg0<<"Truncating transform...";
 		cache.transform.truncate(cache.removedIndices);
-		cache.transform.toSparse(ftransform_);
+		ftransform_ = cache.transform;
 		progress_.printline(msg0,std::cout);
 
 		rEprime.truncateBasis(ftransform_,
@@ -318,8 +318,8 @@ private:
 		const LeftRightSuperType& lrsForWft = (twoSiteDmrg) ? lrs_ : lrs;
 		waveFunctionTransformation_.push(ftransform_,EXPAND_ENVIRON,lrsForWft);
 		msg<<"new size of basis="<<rEprime.size();
-		msg<<" transform is "<<ftransform_.row()<<" x "<<ftransform_.col();
-		msg<<" with "<<ftransform_.nonZero()<<" non-zeroes";
+		msg<<" transform is "<<ftransform_.rows()<<" x "<<ftransform_.cols();
+		msg<<" with "<<ftransform_.blocks()<<" blocks";
 		progress_.printline(msg,std::cout);
 	}
 

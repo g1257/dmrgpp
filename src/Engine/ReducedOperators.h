@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2015, UT-Battelle, LLC
+Copyright (c) 2009-2015, 2017, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 3.0]
+[DMRG++, Version 4.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -66,7 +66,6 @@ INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
 DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
-
 */
 
 /** \ingroup DMRG */
@@ -106,6 +105,7 @@ class ReducedOperators {
 
 public:
 
+	typedef typename ChangeOfBasisType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef OperatorType_ OperatorType;
 
 	ReducedOperators(const BasisType* thisBasis)
@@ -254,13 +254,17 @@ public:
 		calcFastBasis(fastBasisRight_,basis2,basis3,false,thisBasis_->reducedSize());
 	}
 
-	void prepareTransform(const SparseMatrixType& ftransform,const BasisType* thisBasis)
+	void prepareTransform(const BlockDiagonalMatrixType& ftransform1,
+	                      const BasisType* thisBasis)
 	{
 
 		if (!useSu2Symmetry_) {
-			changeOfBasis_.update(ftransform);
+			changeOfBasis_.update(ftransform1);
 			return;
 		}
+
+		SparseMatrixType ftransform;
+		ftransform1.toSparse(ftransform);
 
 		SizeType nr=thisBasis->reducedSize();
 		SizeType nold = thisBasis_->reducedSize();
@@ -295,7 +299,7 @@ public:
 	}
 
 	void changeBasisHamiltonian(SparseMatrixType& hamiltonian,
-	                            const SparseMatrixType& transform)
+	                            const BlockDiagonalMatrixType& transform)
 	{
 		
 		ChangeOfBasisType::changeBasis(hamiltonian,transform);
