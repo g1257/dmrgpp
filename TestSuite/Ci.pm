@@ -89,8 +89,12 @@ sub procRange
 		return;
 	}
 
-	if ($n == 2 and $temp[0] =~ /^[0-9]+$/ and $temp[1] =~ /^[0-9]+$/) {
-		for (my $i = $temp[0]; $i <= $temp[1]; ++$i) {
+	if ($n == 2) {
+		my $start = $temp[0];
+		my $end = $temp[1];
+		$start = 0 unless ($start =~ /^[0-9]+$/);
+		$end = $total unless ($end =~ /^[0-9]+$/);
+		for (my $i = $start; $i <= $end; ++$i) {
 			push @$ranges, $i;
 		}
 
@@ -143,6 +147,29 @@ sub helpFor
 	}
 
 	die "$0: No printHelpFor $label\n";
+}
+
+sub compactList
+{
+	my ($str) = @_;
+	my @temp = split(/ /, $str);
+	my $n = scalar(@temp);
+	return $str if ($n < 3);
+	my $prev = $temp[0];
+	my $begin = $prev;
+	my $text = "";
+	for (my $i = 1; $i < $n; ++$i) {
+		if ($temp[$i] == $prev + 1) {
+			$prev = $temp[$i];
+			next;
+		}
+
+		$text .= ($begin == $prev) ? "$begin, " : "${begin}-${prev}, ";
+		$prev = $begin = $temp[$i];
+	}
+
+	$text .= ($begin == $prev) ? $begin : "${begin}-${prev}";
+	return $text;
 }
 
 1;

@@ -60,7 +60,7 @@ prepareDir();
 
 my @tests = Ci::getTests("../inputs/descriptions.txt");
 my %allowedTests = Ci::getAllowedTests(\@tests);
-my $total = scalar(keys %allowedTests);
+my $total = $tests[$#tests]->{"number"};
 
 if (defined($info)) {
 	print STDERR "$0: INFO for $info\n";
@@ -72,13 +72,20 @@ my @inRange = Ci::procRanges($ranges, $total);
 my $rangesTotal = scalar(@inRange);
 
 die "$0: No tests specified under -n\n" if ($rangesTotal == 0);
-print STDERR "@inRange"."\n";
+#print STDERR "@inRange"."\n";
+my $nonExistent = "";
 
 for (my $j = 0; $j < $rangesTotal; ++$j) {
 	my $n = $inRange[$j];
 	if (!exists($allowedTests{"$n"})) {
-		print STDERR "$0: Test $n does not exist, ignored\n";
+		$nonExistent .= "$n ";
 		next;
+	}
+
+	if ($nonExistent ne "") {
+		$nonExistent = Ci::compactList($nonExistent);
+		#print STDERR "$0: Test(s) $nonExistent do(es) not exist, ignored\n";
+		$nonExistent = "";
 	}
 
 	my $ir = isRestart("../inputs/input$n.inp",$n);
@@ -285,7 +292,6 @@ sub createBatch
 			$_ = $line;
 		}
 
-		s/cd +\$PBS_O_WORKDIR//;
 		print FOUT;
 	}
 
