@@ -122,7 +122,7 @@ public:
 		transposeConjugate(wsT_,ws_);
 		transposeConjugate(weT_,we_);
 		SizeType vOfNk = DmrgWaveStructType::volumeOf(nk);
-		if (dir_ == ProgramGlobals::DIR_2) {
+		if (dir_ == ProgramGlobals::EXPAND_SYSTEM) {
 			assert(dmrgWaveStruct_.lrs.right().permutationInverse().size()==
 			       dmrgWaveStruct_.we.row());
 			assert(lrs_.left().permutationInverse().size()/vOfNk==
@@ -152,7 +152,7 @@ public:
 	{
 		SizeType start = psiDest_.offset(i0_);
 
-		if (dir_ == ProgramGlobals::DIR_2) {
+		if (dir_ == ProgramGlobals::EXPAND_SYSTEM) {
 			SizeType ip = 0;
 			SizeType alpha = 0;
 			SizeType kp = 0;

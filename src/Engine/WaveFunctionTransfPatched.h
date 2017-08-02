@@ -168,7 +168,7 @@ private:
 		if (twoSiteDmrg_)
 			return transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
 
-		typename ProgramGlobals::DirectionEnum dir1 = ProgramGlobals::DIR_1;
+		typename ProgramGlobals::DirectionEnum dir1 = ProgramGlobals::EXPAND_ENVIRON;
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
 			transformVectorParallel(psiDest,psiSrc,lrs,i0,nk,dir1);
@@ -287,7 +287,7 @@ private:
 		if (twoSiteDmrg_)
 			return transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
 
-		typename ProgramGlobals::DirectionEnum dir2 = ProgramGlobals::DIR_2;
+		typename ProgramGlobals::DirectionEnum dir2 = ProgramGlobals::EXPAND_SYSTEM;
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
 			transformVectorParallel(psiDest,psiSrc,lrs,i0,nk,dir2);

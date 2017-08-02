@@ -125,7 +125,7 @@ public:
 		transposeConjugate(wsT_,ws_);
 		transposeConjugate(weT_,we_);
 
-		if (dir_ == ProgramGlobals::DIR_2) {
+		if (dir_ == ProgramGlobals::EXPAND_SYSTEM) {
 			assert(dmrgWaveStruct_.lrs.right().permutationInverse().size()==
 			       dmrgWaveStruct_.we.row());
 			assert(lrs_.left().permutationInverse().size()/volumeOf(nk)==
@@ -177,7 +177,7 @@ public:
 		for (int kI = factorsInvSE_.getRowPtr(xx);
 		     kI < factorsInvSE_.getRowPtr(xx+1);
 		     kI++) {
-			if (dir_ == ProgramGlobals::DIR_2) {
+			if (dir_ == ProgramGlobals::EXPAND_SYSTEM) {
 				SizeType ip = 0;
 				SizeType alpha = 0;
 				SizeType kp = 0;

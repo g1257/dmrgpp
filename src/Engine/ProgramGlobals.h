@@ -90,13 +90,11 @@ struct ProgramGlobals {
 
 	static const SizeType MAX_LPS = 1000;
 
-	enum {INFINITE=0,EXPAND_ENVIRON=1,EXPAND_SYSTEM=2};
-
-	enum DirectionEnum {DIR_1, DIR_2};
+	enum DirectionEnum {INFINITE=0,EXPAND_ENVIRON=1,EXPAND_SYSTEM=2};
 
 	enum {SYSTEM_SYSTEM,SYSTEM_ENVIRON,ENVIRON_SYSTEM,ENVIRON_ENVIRON};
 
-	enum {SYSTEM,ENVIRON};
+	enum {SYSTEM, ENVIRON};
 
 	enum FermionOrBosonEnum {FERMION,BOSON};
 
