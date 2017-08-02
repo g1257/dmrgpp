@@ -101,6 +101,7 @@ public:
 
 	enum {DO_NOT_RESET_COUNTER,RESET_COUNTER};
 
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
@@ -229,7 +230,7 @@ public:
 	void setInitialVector(SomeVectorType& dest,
 	                      const SomeVectorType2& src,
 	                      const LeftRightSuperType& lrs,
-	                      const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	                      const VectorSizeType& nk) const
 	{
 		bool allow=false;
 		switch (stage_) {
@@ -477,7 +478,7 @@ private:
 	void createVector(VectorWithOffsetType& psiDest,
 	                  const VectorWithOffsetType& psiSrc,
 	                  const LeftRightSuperType& lrs,
-	                  const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	                  const VectorSizeType& nk) const
 	{
 		wftImpl_->transformVector(psiDest,psiSrc,lrs,nk);
 
@@ -560,7 +561,7 @@ private:
 	bool twoSiteDmrg_;
 	bool noLoad_;
 	bool save_;
-	typename PsimagLite::Vector<SizeType>::Type sitesSeen_;
+	VectorSizeType sitesSeen_;
 }; // class WaveFunctionTransformation
 } // namespace Dmrg
 

@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "NoPthreadsNg.h"
 #include "CrsMatrix.h"
 #include "PsimagLite.h"
+#include "EnforcePhase.h"
 
 namespace Dmrg {
 
@@ -97,94 +98,11 @@ class BlockDiagonalMatrix {
 public:
 
 	typedef MatrixInBlockTemplate BuildingBlockType;
-	typedef typename BuildingBlockType::value_type FieldType;
-	typedef BlockDiagonalMatrix<MatrixInBlockTemplate> BlockDiagonalMatrixType;
-	typedef typename PsimagLite::Real<FieldType>::Type RealType;
+	typedef typename BuildingBlockType::value_type ComplexOrRealType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef PsimagLite::Vector<int>::Type VectorIntType;
-
-	class LoopForDiag {
-
-		typedef PsimagLite::Concurrency ConcurrencyType;
-
-	public:
-
-		LoopForDiag(BlockDiagonalMatrixType& C1,
-		            VectorRealType& eigs1,
-		            char option1)
-		    : C(C1),
-		      eigs(eigs1),
-		      option(option1),
-		      eigsForGather(C.blocks()),
-		      weights(C.blocks())
-		{
-
-			for (SizeType m=0;m<C.blocks();m++) {
-				eigsForGather[m].resize(C.offsetsRows(m+1)-C.offsetsRows(m));
-				weights[m] =  C.offsetsRows(m+1)-C.offsetsRows(m);
-			}
-
-			assert(C.rows() == C.cols());
-			eigs.resize(C.rows());
-		}
-
-		SizeType tasks() const { return C.blocks(); }
-
-		void doTask(SizeType taskNumber, SizeType)
-		{
-			assert(C.rows() == C.cols());
-			SizeType m = taskNumber;
-			VectorRealType eigsTmp;
-			PsimagLite::diag(C.data_[m],eigsTmp,option);
-			enforcePhase(C.data_[m]);
-			for (SizeType j = C.offsetsRows(m); j < C.offsetsRows(m+1); ++j)
-				eigsForGather[m][j-C.offsetsRows(m)] = eigsTmp[j-C.offsetsRows(m)];
-
-		}
-
-		void gather()
-		{
-			assert(C.rows() == C.cols());
-			for (SizeType m = 0; m < C.blocks(); ++m) {
-				for (SizeType j = C.offsetsRows(m);j < C.offsetsRows(m+1); ++j)
-					eigs[j]=eigsForGather[m][j-C.offsetsRows(m)];
-			}
-		}
-
-		static void enforcePhase(PsimagLite::Matrix<FieldType>& a)
-		{
-			SizeType cols = a.cols();
-			for (SizeType i = 0; i < cols; ++i) {
-				enforcePhase(a, i);
-			}
-		}
-
-	private:
-
-		static void enforcePhase(PsimagLite::Matrix<FieldType>& a, SizeType col)
-		{
-			RealType sign1 = 0;
-			SizeType rows = a.rows();
-			for (SizeType j = 0; j < rows; ++j) {
-				RealType val = PsimagLite::norm(a(j, col));
-				if (val < 1e-6) continue;
-				sign1 = (val > 0) ? 1 : -1;
-				break;
-			}
-
-			assert(sign1 != 0);
-			// get a consistent phase
-			for (SizeType j = 0; j < rows; ++j)
-				a(j, col) *= sign1;
-		}
-
-		BlockDiagonalMatrixType& C;
-		VectorRealType& eigs;
-		char option;
-		typename PsimagLite::Vector<VectorRealType>::Type eigsForGather;
-		typename PsimagLite::Vector<SizeType>::Type weights;
-	};
 
 	BlockDiagonalMatrix(SizeType rows,
 	                    SizeType cols,
@@ -221,7 +139,7 @@ public:
 			offsetsRows_[i] = offsetsCols_[i] = basis.partition(i);
 	}
 
-	void setTo(FieldType value)
+	void setTo(ComplexOrRealType value)
 	{
 		SizeType n = data_.size();
 		if (n == 0)
@@ -231,10 +149,10 @@ public:
 			data_[i].setTo(value);
 	}
 
-	void operator+=(const BlockDiagonalMatrixType& m)
+	void operator+=(const BlockDiagonalMatrix& m)
 	{
 		mustBeSquare("operator+=");
-		BlockDiagonalMatrixType c;
+		BlockDiagonalMatrix c;
 		if (offsetsRows_.size() < m.blocks())
 			operatorPlus(c,*this,m);
 		else operatorPlus(c,m,*this);
@@ -260,7 +178,7 @@ public:
 	{
 		SizeType n = data_.size();
 		for (SizeType i = 0; i < n; ++i)
-			LoopForDiag::enforcePhase(data_[i]);
+			EnforcePhase<ComplexOrRealType>::enforcePhase(data_[i]);
 	}
 
 	// rows aren't affected, columns may be truncated
@@ -307,7 +225,7 @@ public:
 
 	SizeType blocks() const { return data_.size(); }
 
-	void toSparse(PsimagLite::CrsMatrix<FieldType>& fm) const
+	void toSparse(PsimagLite::CrsMatrix<ComplexOrRealType>& fm) const
 	{
 		SizeType r = rows();
 		SizeType c = cols();
@@ -321,7 +239,7 @@ public:
 			SizeType end = (k + 1 < offsetsCols_.size()) ? offsetsCols_[k + 1] : c;
 			if (data_[k].rows() == 0 || data_[k].cols() == 0) continue;
 			for (SizeType j = offsetsCols_[k]; j < end; ++j) {
-				FieldType val = data_[k](i - offsetsRows_[k], j - offsetsCols_[k]);
+				ComplexOrRealType val = data_[k](i - offsetsRows_[k], j - offsetsCols_[k]);
 				if (PsimagLite::norm(val) == 0)
 					continue;
 				fm.pushValue(val);
@@ -332,6 +250,13 @@ public:
 
 		fm.setRow(r, counter);
 		fm.checkValidity();
+	}
+
+	void diagAndEnforcePhase(SizeType m, VectorRealType& eigsTmp, char option)
+	{
+		assert(m < data_.size());
+		PsimagLite::diag(data_[m], eigsTmp, option);
+		EnforcePhase<ComplexOrRealType>::enforcePhase(data_[m]);
 	}
 
 	const MatrixInBlockTemplate& operator()(SizeType i) const
@@ -433,35 +358,6 @@ private:
 }; // class BlockDiagonalMatrix
 
 // Companion Functions
-// Parallel version of the diagonalization of a block diagonal matrix
-// Note: In reality, Parallelization is disabled here because a LAPACK call
-//        is needed and LAPACK is not necessarily thread safe.
-// This function is NOT called by useSvd
-template<typename SomeVectorType,typename SomeFieldType>
-typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True,
-void>::Type
-diagonalise(BlockDiagonalMatrix<PsimagLite::Matrix<SomeFieldType> >& C,
-            SomeVectorType& eigs,
-            char option)
-{
-	typedef typename BlockDiagonalMatrix<PsimagLite::Matrix<SomeFieldType> >::LoopForDiag
-	        LoopForDiagType;
-	typedef PsimagLite::NoPthreadsNg<LoopForDiagType> ParallelizerType;
-	typedef PsimagLite::Concurrency ConcurrencyType;
-	SizeType savedNpthreads = ConcurrencyType::npthreads;
-	ConcurrencyType::npthreads = 1;
-	ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,
-	                              PsimagLite::MPI::COMM_WORLD,
-	                              false);
-
-	LoopForDiagType helper(C,eigs,option);
-
-	threadObject.loopCreate(helper); // FIXME: needs weights
-
-	helper.gather();
-
-	ConcurrencyType::npthreads = savedNpthreads;
-}
 
 template<class MatrixInBlockTemplate>
 bool isUnitary(const BlockDiagonalMatrix<MatrixInBlockTemplate>& B)

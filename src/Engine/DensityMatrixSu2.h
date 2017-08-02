@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BlockDiagonalMatrix.h"
 #include "DensityMatrixBase.h"
 #include "ProgramGlobals.h"
+#include "DiagBlockDiagMatrix.h"
 
 namespace Dmrg {
 template<typename TargettingType>
@@ -169,7 +170,7 @@ public:
 
 	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 	{
-		diagonalise(data_,eigs,jobz);
+		DiagBlockDiagMatrix<BlockDiagonalMatrixType>::diagonalise(data_,eigs,jobz);
 
 		//make sure non-maximals are equal to maximals
 		// this is needed because otherwise there's no assure that m-independence

@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "NoPthreads.h"
 #include "Concurrency.h"
 #include "Parallelizer.h"
+#include "DiagBlockDiagMatrix.h"
 
 namespace Dmrg {
 
@@ -184,7 +185,7 @@ public:
 
 	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 	{
-		diagonalise(data_,eigs,jobz);
+		DiagBlockDiagMatrix<BlockDiagonalMatrixType>::diagonalise(data_,eigs,jobz);
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,

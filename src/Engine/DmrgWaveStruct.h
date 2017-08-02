@@ -85,8 +85,8 @@ namespace Dmrg {
 template<typename LeftRightSuperType_>
 struct DmrgWaveStruct {
 	typedef LeftRightSuperType_ LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType
-			BasisWithOperatorsType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
@@ -97,7 +97,8 @@ struct DmrgWaveStruct {
 	SparseMatrixType we;
 	LeftRightSuperType lrs;
 
-	DmrgWaveStruct() : lrs("pSE","pSprime","pEprime") { }
+	DmrgWaveStruct()
+	    : lrs("pSE","pSprime","pEprime") { }
 
 	static SizeType volumeOf(const VectorSizeType& v)
 	{
