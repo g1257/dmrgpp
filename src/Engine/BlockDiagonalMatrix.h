@@ -109,17 +109,9 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef PsimagLite::Vector<int>::Type VectorIntType;
 
-	BlockDiagonalMatrix(SizeType rows,
-	                    SizeType cols,
-	                    SizeType blocks)
-	    : isSquare_(rows == cols),
-	      offsetsRows_(blocks + 1),
-	      offsetsCols_(blocks+1),
-	      data_(blocks)
-	{
-		offsetsRows_[blocks] = rows;
-		offsetsCols_[blocks] = cols;
-	}
+	BlockDiagonalMatrix()
+	    : isSquare_(true)
+	{}
 
 	template<typename SomeBasisType>
 	BlockDiagonalMatrix(const SomeBasisType& basis,

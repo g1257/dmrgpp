@@ -371,7 +371,7 @@ private:
 
 	void calcTimeVectors(const PairType& startEnd,
 	                     RealType Eg,
-	                     SizeType systemOrEnviron,
+	                     ProgramGlobals::DirectionEnum systemOrEnviron,
 	                     const VectorSizeType& block)
 	{
 		const VectorWithOffsetType& phi = this->common().targetVectors()[startEnd.first];

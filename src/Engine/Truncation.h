@@ -113,10 +113,6 @@ public:
 	typedef BlockDiagonalMatrixType TransformType;
 
 	struct TruncationCache {
-		TruncationCache()
-		    : transform(0, 0, 0)
-		{}
-
 		BlockDiagonalMatrixType transform;
 		typename PsimagLite::Vector<RealType>::Type eigs;
 		typename PsimagLite::Vector<SizeType>::Type removedIndices;
@@ -134,8 +130,7 @@ public:
 	      maxConnections_(maxConnections),
 	      verbose_(verbose),
 	      progress_("Truncation"),
-	      error_(0.0),
-	      ftransform_(0,0,0)
+	      error_(0.0)
 	{
 		if (parameters_.truncationControl.first < 0) return;
 		PsimagLite::OstringStream msg;
@@ -161,9 +156,10 @@ public:
 		}
 	}
 
-	const TransformType& transform() const
+	const TransformType& transform(ProgramGlobals::DirectionEnum direction) const
 	{
-		return ftransform_;
+		return (direction == ProgramGlobals::EXPAND_SYSTEM) ?
+		            leftCache_.transform : rightCache_.transform;
 	}
 
 	const RealType& error() const { return error_; }
@@ -269,9 +265,8 @@ private:
 		PsimagLite::OstringStream msg0;
 		msg0<<"Truncating transform...";
 		cache.transform.truncate(cache.removedIndices);
-		ftransform_ = cache.transform;
 		progress_.printline(msg0,std::cout);
-		rSprime.truncateBasis(ftransform_,
+		rSprime.truncateBasis(cache.transform,
 		                      cache.eigs,
 		                      cache.removedIndices,
 		                      startEnd);
@@ -279,13 +274,13 @@ private:
 		                       (BasisType&)lrs_.super());
 		bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=PsimagLite::String::npos);
 		const LeftRightSuperType& lrsForWft = (twoSiteDmrg) ? lrs_ : lrs;
-		waveFunctionTransformation_.push(ftransform_,
+		waveFunctionTransformation_.push(cache.transform,
 		                                 ProgramGlobals::EXPAND_SYSTEM,
 		                                 lrsForWft);
 
 		msg<<"new size of basis="<<rSprime.size();
-		msg<<" transform is "<<ftransform_.rows()<<" x "<<ftransform_.cols();
-		msg<<" with "<<ftransform_.blocks()<<" symmetry blocks";
+		msg<<" transform is "<<cache.transform.rows()<<" x "<<cache.transform.cols();
+		msg<<" with "<<cache.transform.blocks()<<" symmetry blocks";
 		progress_.printline(msg,std::cout);
 	}
 
@@ -305,10 +300,9 @@ private:
 		PsimagLite::OstringStream msg0;
 		msg0<<"Truncating transform...";
 		cache.transform.truncate(cache.removedIndices);
-		ftransform_ = cache.transform;
 		progress_.printline(msg0,std::cout);
 
-		rEprime.truncateBasis(ftransform_,
+		rEprime.truncateBasis(cache.transform,
 		                      cache.eigs,
 		                      cache.removedIndices,
 		                      startEnd);
@@ -316,12 +310,12 @@ private:
 		                       rEprime,(BasisType&)lrs_.super());
 		bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=PsimagLite::String::npos);
 		const LeftRightSuperType& lrsForWft = (twoSiteDmrg) ? lrs_ : lrs;
-		waveFunctionTransformation_.push(ftransform_,
+		waveFunctionTransformation_.push(cache.transform,
 		                                 ProgramGlobals::EXPAND_ENVIRON,
 		                                 lrsForWft);
 		msg<<"new size of basis="<<rEprime.size();
-		msg<<" transform is "<<ftransform_.rows()<<" x "<<ftransform_.cols();
-		msg<<" with "<<ftransform_.blocks()<<" blocks";
+		msg<<" transform is "<<cache.transform.rows()<<" x "<<cache.transform.cols();
+		msg<<" with "<<cache.transform.blocks()<<" blocks";
 		progress_.printline(msg,std::cout);
 	}
 
@@ -432,7 +426,6 @@ private:
 	bool verbose_;
 	ProgressIndicatorType progress_;
 	RealType error_;
-	TransformType ftransform_;
 	TruncationCache leftCache_;
 	TruncationCache rightCache_;
 }; // class Truncation

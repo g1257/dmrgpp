@@ -205,7 +205,7 @@ private:
 	                   const TargetVectorType& v,
 	                   BasisWithOperatorsType const &pBasisSummed,
 	                   BasisType const &pSE,
-	                   SizeType direction,
+	                   ProgramGlobals::DirectionEnum direction,
 	                   RealType weight)
 	{
 		ParallelDensityMatrixType helperDm(v,
@@ -224,7 +224,7 @@ private:
 
 	ProgressIndicatorType progress_;
 	BlockDiagonalMatrixType data_;
-	SizeType direction_;
+	ProgramGlobals::DirectionEnum direction_;
 	bool debug_;
 	bool verbose_;
 }; // class DensityMatrixLocal

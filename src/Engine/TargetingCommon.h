@@ -161,7 +161,7 @@ public:
 
 	SizeType getPhi(VectorWithOffsetType& phiNew,
 	                RealType Eg,
-	                SizeType direction,
+	                ProgramGlobals::DirectionEnum direction,
 	                SizeType site,
 	                SizeType loopNumber)
 	{
@@ -171,7 +171,7 @@ public:
 	SizeType getPhi(VectorWithOffsetType& phiNew,
 	                const VectorWithOffsetType& phiSrc,
 	                RealType Eg,
-	                SizeType direction,
+	                ProgramGlobals::DirectionEnum direction,
 	                SizeType site,
 	                SizeType loopNumber)
 	{
@@ -294,7 +294,7 @@ public:
 		setInitialVector(v,applyOpExpression_.psi(), nk, noguess);
 	}
 
-	void computeCorrection(SizeType direction,
+	void computeCorrection(ProgramGlobals::DirectionEnum direction,
 	                       const BlockType& block1)
 	{
 		const VectorWithOffsetType& psi = applyOpExpression_.psi();
@@ -395,7 +395,7 @@ public:
 	void calcTimeVectors(const PairType& startEnd,
 	                     RealType Eg,
 	                     const VectorWithOffsetType& phi,
-	                     SizeType direction,
+	                     ProgramGlobals::DirectionEnum direction,
 	                     bool allOperatorsApplied,
 	                     const PsimagLite::Vector<SizeType>::Type& block)
 	{
@@ -474,7 +474,7 @@ public:
 		}
 	}
 
-	void cocoonLegacy(SizeType direction,const BlockType& block) const
+	void cocoonLegacy(ProgramGlobals::DirectionEnum direction,const BlockType& block) const
 	{
 		const VectorWithOffsetType& psi = applyOpExpression_.psi();
 		const VectorWithOffsetType& tv0 = applyOpExpression_.targetVectors()[0];
@@ -574,7 +574,7 @@ public:
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
 
-	ComplexOrRealType rixsCocoon(SizeType direction,
+	ComplexOrRealType rixsCocoon(ProgramGlobals::DirectionEnum direction,
 	                             SizeType site,
 	                             SizeType index1,
 	                             SizeType index2) const
@@ -644,7 +644,7 @@ private:
 	}
 
 	// prints <v1|A|v2>
-	void cocoon_(SizeType direction,
+	void cocoon_(ProgramGlobals::DirectionEnum direction,
 	             SizeType site,
 	             const VectorWithOffsetType& v1,
 	             PsimagLite::String label1,

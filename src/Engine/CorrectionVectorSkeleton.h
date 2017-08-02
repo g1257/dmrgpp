@@ -488,7 +488,7 @@ private:
 	                 VectorMatrixFieldType& T,
 	                 VectorMatrixFieldType& V,
 	                 VectorSizeType& steps,
-	                 SizeType direction,
+	                 ProgramGlobals::DirectionEnum direction,
 	                 SizeType site)
 	{}
 

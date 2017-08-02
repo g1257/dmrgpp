@@ -106,9 +106,6 @@ public:
 	typedef KroneckerDumper<ThisType> KroneckerDumperType;
 	typedef typename KroneckerDumperType::ParamsForKroneckerDumper ParamsForKroneckerDumperType;
 
-	enum {GROW_TO_THE_RIGHT = BasisWithOperatorsType::GROW_RIGHT,
-	      GROW_TO_THE_LEFT= BasisWithOperatorsType::GROW_LEFT};
-
 	enum {SAVE_ALL = SuperBlockType::SAVE_ALL,
 	      SAVE_PARTIAL = SuperBlockType::SAVE_PARTIAL};
 
@@ -177,7 +174,7 @@ public:
 	                   BlockType const &X,
 	                   RealType time)
 	{
-		grow(*left_,model,pS,X,GROW_TO_THE_RIGHT,time);
+		grow(*left_,model,pS,X,ProgramGlobals::EXPAND_SYSTEM,time);
 	}
 
 	template<typename SomeModelType>
@@ -186,7 +183,7 @@ public:
 	                    BlockType const &X,
 	                    RealType time)
 	{
-		grow(*right_,model,pE,X,GROW_TO_THE_LEFT,time);
+		grow(*right_,model,pE,X,ProgramGlobals::EXPAND_SYSTEM,time);
 	}
 
 	void printSizes(const PsimagLite::String& label,std::ostream& os) const
@@ -290,7 +287,7 @@ private:
 	          const SomeModelType& model,
 	          BasisWithOperatorsType &pS,
 	          const BlockType& X,
-	          SizeType dir,
+	          ProgramGlobals::DirectionEnum dir,
 	          RealType time)
 	{
 		SparseMatrixType hmatrix;
@@ -306,7 +303,7 @@ private:
 
 		ThisType* lrs;
 		BasisType* leftOrRightL =  &leftOrRight;
-		if (dir==GROW_TO_THE_RIGHT) {
+		if (dir == ProgramGlobals::EXPAND_SYSTEM) {
 			lrs = new ThisType(pS,Xbasis,*leftOrRightL);
 		} else {
 			lrs = new  ThisType(Xbasis,pS,*leftOrRightL);

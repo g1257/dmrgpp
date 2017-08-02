@@ -108,7 +108,7 @@ class TridiagRixsStatic {
 		MyMatrixVector(ModelType const *model,
 		               ModelHelperType const *modelHelper,
 		               const OperatorType& A,
-		               SizeType dir,
+		               ProgramGlobals::DirectionEnum dir,
 		               typename ApplyOperatorLocalType::BorderEnum corner,
 		               const VectorSizeType& weights)
 		    : BasisType(model, modelHelper),
@@ -136,7 +136,7 @@ class TridiagRixsStatic {
 
 		ApplyOperatorLocalType applyOperatorLocal_;
 		const OperatorType& A_;
-		SizeType dir_;
+		ProgramGlobals::DirectionEnum dir_;
 		typename ApplyOperatorLocalType::BorderEnum corner_;
 		FermionSign fs_;
 		mutable VectorWithOffset<ComplexOrRealType> x2_;
@@ -224,7 +224,7 @@ private:
 	InputValidatorType& io_;
 	OperatorType A_;
 	typename ApplyOperatorLocalType::BorderEnum corner_;
-	SizeType direction_;
+	ProgramGlobals::DirectionEnum direction_;
 }; // class TridiagRixsStatic
 } // namespace Dmrg
 #endif // TRIDIAGRIXSSTATIC_H

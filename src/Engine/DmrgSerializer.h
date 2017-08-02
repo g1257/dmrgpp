@@ -105,7 +105,7 @@ public:
 		       const LeftRightSuperType& lrs,
 		       const VectorType& wf,
 		       const SparseMatrixType& transform,
-		       SizeType direction)
+		       ProgramGlobals::DirectionEnum direction)
 		: fS_(fS),
 		  fE_(fE),
 		  lrs_(lrs),
@@ -131,11 +131,7 @@ public:
 		io.readMatrix(transform_,s);
 		transposeConjugate(transformC_,transform_);
 		s = "#DIRECTION=";
-		int x = 0;
-		io.readline(x,s);
-		if (x<0) throw PsimagLite::RuntimeError(
-					"DmrgSerializer:: direction must be non-negative\n");
-		direction_ = x;
+		io.readline(direction_,s);
 	}
 
 	// Save to disk everything needed to compute any observable (OBSOLETE!!)
@@ -185,7 +181,7 @@ public:
 
 	SizeType rows() const { return transform_.row(); }
 
-	SizeType direction() const { return direction_; }
+	ProgramGlobals::DirectionEnum direction() const { return direction_; }
 
 	SizeType site() const
 	{
@@ -212,7 +208,7 @@ private:
 	VectorType wavefunction_;
 	SparseMatrixType transform_;
 	SparseMatrixType transformC_;
-	SizeType direction_;
+	ProgramGlobals::DirectionEnum direction_;
 }; // class DmrgSerializer
 } // namespace Dmrg 
 

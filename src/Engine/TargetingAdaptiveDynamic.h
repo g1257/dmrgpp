@@ -226,7 +226,7 @@ public:
 
 private:
 
-	void evolve(RealType Eg,SizeType direction,SizeType site,SizeType loopNumber)
+	void evolve(RealType Eg,ProgramGlobals::DirectionEnum direction,SizeType site,SizeType loopNumber)
 	{
 		Eg_ = Eg;
 		VectorWithOffsetType phiNew;

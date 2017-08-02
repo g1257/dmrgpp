@@ -100,7 +100,7 @@ public:
 	                      const BasisWithOperatorsType& pBasis,
 	                      const BasisWithOperatorsType& pBasisSummed,
 	                      const BasisType& pSE,
-	                      int direction,
+	                      ProgramGlobals::DirectionEnum direction,
 	                      SizeType m,
 	                      RealType weight,
 	                      BuildingBlockType& matrixBlock)
@@ -136,7 +136,7 @@ public:
 
 private:
 
-	DensityMatrixElementType densityMatrixExpand(SizeType direction,
+	DensityMatrixElementType densityMatrixExpand(ProgramGlobals::DirectionEnum direction,
 	                                             SizeType alpha1,
 	                                             SizeType alpha2,
 	                                             const TargetVectorType& v)
@@ -212,7 +212,7 @@ private:
 	const BasisWithOperatorsType& pBasis_;
 	const BasisWithOperatorsType& pBasisSummed_;
 	const BasisType& pSE_;
-	int direction_;
+	ProgramGlobals::DirectionEnum direction_;
 	SizeType m_;
 	RealType weight_;
 	BuildingBlockType& matrixBlock_;

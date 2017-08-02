@@ -624,21 +624,20 @@ private:
 		else
 			checkpoint_.push((twoSiteDmrg) ? lrs_.right() : pE, ProgramGlobals::ENVIRON);
 
-		serialize(fsS,fsE,target,truncate_.transform(),direction,saveOption);
+		serialize(fsS,fsE,target,direction,saveOption);
 	}
 
 	void serialize(const FermionSignType& fsS,
 	               const FermionSignType& fsE,
 	               const TargettingType& target,
-	               const BlockDiagonalMatrixType& transform1,
-	               SizeType direction,
+	               ProgramGlobals::DirectionEnum direction,
 	               int saveOption)
 	{
 		if (!(saveOption & 1)) return;
 		if (!saveData_) return;
 
 		SparseMatrixType transform;
-		transform1.toSparse(transform);
+		truncate_.transform(direction).toSparse(transform);
 		DmrgSerializerType ds(fsS,fsE,lrs_,target.gs(),transform,direction);
 
 		SizeType saveOption2 = (saveOption & 4) ? SAVE_ALL : SAVE_PARTIAL;

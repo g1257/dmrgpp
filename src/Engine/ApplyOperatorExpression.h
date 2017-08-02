@@ -142,7 +142,7 @@ public:
 
 	SizeType getPhi(VectorWithOffsetType& phiNew,
 	                RealType Eg,
-	                SizeType direction,
+	                ProgramGlobals::DirectionEnum direction,
 	                SizeType site,
 	                SizeType loopNumber)
 	{
@@ -342,7 +342,7 @@ public:
 	void calcTimeVectors(const PairType& startEnd,
 	                     RealType Eg,
 	                     const VectorWithOffsetType& phi,
-	                     SizeType direction,
+	                     ProgramGlobals::DirectionEnum direction,
 	                     bool allOperatorsApplied,
 	                     const PsimagLite::Vector<SizeType>::Type& block)
 	{
@@ -483,7 +483,7 @@ private:
 	                VectorWithOffsetType& phiNew,
 	                VectorWithOffsetType& phiOld,
 	                RealType Eg,
-	                SizeType direction,
+	                ProgramGlobals::DirectionEnum direction,
 	                SizeType site,
 	                SizeType loopNumber,
 	                SizeType lastI)

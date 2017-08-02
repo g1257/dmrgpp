@@ -202,7 +202,7 @@ public:
 		return dSerializerV_[currentPos_[threadId]]->leftRightSuper();
 	}
 
-	SizeType direction(SizeType threadId) const
+	ProgramGlobals::DirectionEnum direction(SizeType threadId) const
 	{
 		assert(checkPos(threadId));
 		return dSerializerV_[currentPos_[threadId]]->direction();

@@ -101,8 +101,6 @@ class DensityMatrixSu2 : public DensityMatrixBase<TargettingType> {
 	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 	typedef typename DensityMatrixBase<TargettingType>::Params ParamsType;
 
-	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
-
 public:
 
 	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
@@ -262,7 +260,7 @@ private:
 	                                          const TargettingType& target,
 	                                          const BasisWithOperatorsType& pBasisSummed,
 	                                          const BasisType& pSE,
-	                                          SizeType direction)
+	                                          ProgramGlobals::DirectionEnum direction)
 	{
 		DensityMatrixElementType sum=0;
 		// The g.s. has to be treated separately because it's
@@ -294,12 +292,12 @@ private:
 	                                                 const TargetVectorType& v,
 	                                                 const BasisWithOperatorsType& pBasisSummed,
 	                                                 const BasisType& pSE,
-	                                                 SizeType direction)
+	                                                 ProgramGlobals::DirectionEnum direction)
 	{
 		int ne = pBasisSummed.size();
 		int ns = pSE.size()/ne;
 		SizeType total=pBasisSummed.size();
-		if (direction!=EXPAND_SYSTEM) {
+		if (direction != ProgramGlobals::EXPAND_SYSTEM) {
 			ns=pBasisSummed.size();
 			ne=pSE.size()/ns;
 		}
@@ -314,7 +312,7 @@ private:
 			int i1 = alpha1+beta*ns;
 			int i2 = alpha2+beta*ns;
 			// sum over system:
-			if (direction!=EXPAND_SYSTEM) {
+			if (direction != ProgramGlobals::EXPAND_SYSTEM) {
 				i1 = beta + alpha1*ns;
 				i2 = beta + alpha2*ns;
 			}
@@ -402,7 +400,7 @@ private:
 	const BasisWithOperatorsType& pBasis_;
 	BlockDiagonalMatrixType data_;
 	typename PsimagLite::Vector<SizeType>::Type mMaximal_;
-	SizeType direction_;
+	ProgramGlobals::DirectionEnum direction_;
 	bool debug_;
 	bool verbose_;
 }; // class DensityMatrixSu2

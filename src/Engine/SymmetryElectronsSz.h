@@ -186,7 +186,7 @@ public:
 	}
 
 	static SizeType adjustQn(const VectorSizeType& adjustQuantumNumbers,
-	                         SizeType direction,
+	                         ProgramGlobals::DirectionEnum direction,
 	                         PsimagLite::IoSimple::Out& ioOut,
 	                         bool useSu2Symmetry,
 	                         SizeType step,
@@ -211,7 +211,7 @@ public:
 	static SizeType getQuantumSector(const TargetQuantumElectronsType& targetQuantum,
 	                                 SizeType sites,
 	                                 SizeType total,
-	                                 SizeType direction,
+	                                 ProgramGlobals::DirectionEnum direction,
 	                                 PsimagLite::IoSimple::Out* ioOut,
 	                                 bool useSu2Symmetry)
 	{
@@ -260,7 +260,7 @@ private:
 	                             const TargetQuantumElectronsType& targetQ,
 	                             SizeType sites,
 	                             SizeType totalSites,
-	                             SizeType direction)
+	                             ProgramGlobals::DirectionEnum direction)
 	{
 		SizeType mode = targetQ.other.size();
 		assert(mode > 0);
@@ -310,7 +310,7 @@ private:
 	}
 
 	static SizeType getQuantumSector(const VectorSizeType& targetQuantumNumbers,
-	                                 SizeType direction,
+	                                 ProgramGlobals::DirectionEnum direction,
 	                                 PsimagLite::IoSimple::Out* ioOut,
 	                                 bool useSu2Symmetry)
 	{

@@ -575,7 +575,7 @@ private:
 		return sum;
 	}
 
-	void addCorrection(SizeType direction,const BlockType& block1)
+	void addCorrection(ProgramGlobals::DirectionEnum direction,const BlockType& block1)
 	{
 		if (tstStruct_.correctionA() == 0) return;
 		weight_.resize(1);

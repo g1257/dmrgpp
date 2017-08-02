@@ -104,9 +104,6 @@ class MettsCollapse  {
 	typedef typename MettsStochasticsType::ModelType ModelType;
 	typedef PsimagLite::Matrix<RealType> MatrixType;
 
-	enum {EXPAND_ENVIRON=ProgramGlobals::EXPAND_ENVIRON,
-		  EXPAND_SYSTEM=ProgramGlobals::EXPAND_SYSTEM};
-
 	static const bool COLLAPSE_INTO_RANDOM_BASIS = false;
 
 public:
@@ -128,7 +125,7 @@ public:
 	bool operator()(VectorWithOffsetType& c,
 	                const VectorWithOffsetType& eToTheBetaH,
 	                typename PsimagLite::Vector<SizeType>::Type& block,
-	                SizeType direction)
+	                ProgramGlobals::DirectionEnum direction)
 	{
 		assert(direction!=ProgramGlobals::INFINITE);
 
@@ -190,7 +187,7 @@ private:
 	void internalAction(VectorWithOffsetType& dest2,
 	                    const VectorWithOffsetType& src2,
 	                    const typename PsimagLite::Vector<SizeType>::Type& block,
-	                    SizeType direction,
+	                    ProgramGlobals::DirectionEnum direction,
 	                    bool border) const
 	{
 		if (dest2.size()==0) {
@@ -234,7 +231,7 @@ private:
 
 	void collapseVector(VectorWithOffsetType& dest2, // <<---- CPS
 	                    const VectorWithOffsetType& src, // <--- MPS
-	                    SizeType direction,
+	                    ProgramGlobals::DirectionEnum direction,
 	                    SizeType indexFixed, // <--- m1
 	                    SizeType nk,  // <-- size of the Hilbert sp. of one site
 	                    bool border) const
@@ -253,14 +250,16 @@ private:
 
 	void collapseVector(VectorWithOffsetType& w, // <<---- CPS
 	                    const VectorWithOffsetType& v, // <--- MPS
-	                    SizeType direction,
+	                    ProgramGlobals::DirectionEnum direction,
 	                    SizeType m, // <-- non-zero sector
 	                    SizeType indexFixed, // <--- m1
 	                    SizeType nk,// <-- size of the Hilbert sp. of one site
 	                    bool border) const
 	{
-		if (direction==EXPAND_SYSTEM)  collapseVectorLeft(w,v,m,indexFixed,nk,border);
-		else  collapseVectorRight(w,v,m,indexFixed,nk,border);
+		if (direction == ProgramGlobals::EXPAND_SYSTEM)
+			collapseVectorLeft(w,v,m,indexFixed,nk,border);
+		else
+			collapseVectorRight(w,v,m,indexFixed,nk,border);
 	}
 
 	void compare1(const VectorType& v1,const VectorType& v2) const
@@ -428,7 +427,7 @@ private:
 	// p[m] = norm2 of the collapsed_m
 	void probability(typename PsimagLite::Vector<RealType>::Type& p,
 	                 const VectorWithOffsetType& src,
-	                 SizeType direction,
+	                 ProgramGlobals::DirectionEnum direction,
 	                 SizeType volumeOfNk,
 	                 bool border) const
 	{
@@ -551,14 +550,14 @@ private:
 		m(y,x) = -sin(theta);
 	}
 
-	bool atBorder(SizeType direction,
+	bool atBorder(ProgramGlobals::DirectionEnum direction,
 	              const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
 		typename PsimagLite::Vector<SizeType>::Type nk;
 		setNk(nk,block);
 		SizeType volumeOfNk = volumeOf(nk);
-		bool b1 = (direction==EXPAND_SYSTEM && lrs_.right().size()==volumeOfNk);
-		bool b2 = (direction==EXPAND_ENVIRON && lrs_.left().size()==volumeOfNk);
+		bool b1 = (direction == ProgramGlobals::EXPAND_SYSTEM && lrs_.right().size()==volumeOfNk);
+		bool b2 = (direction == ProgramGlobals::EXPAND_ENVIRON && lrs_.left().size()==volumeOfNk);
 		return (b1 || b2);
 	}
 

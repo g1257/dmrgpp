@@ -193,7 +193,7 @@ private:
 	}
 
 	RealType internalMain_(TargettingType& target,
-	                       SizeType direction,
+	                       ProgramGlobals::DirectionEnum direction,
 	                       SizeType loopIndex,
 	                       bool,
 	                       const VectorSizeType& block)

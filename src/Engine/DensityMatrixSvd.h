@@ -123,7 +123,8 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 
 	public:
 
-		GroupsStruct(const LeftRightSuperType& lrs, SizeType direction)
+		GroupsStruct(const LeftRightSuperType& lrs,
+		             ProgramGlobals::DirectionEnum direction)
 		    : lrs_(lrs),
 		      direction_(direction),
 		      propsThisIgroup_(this->basis().partition())
@@ -258,7 +259,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 
 
 		const LeftRightSuperType& lrs_;
-		SizeType direction_;
+		ProgramGlobals::DirectionEnum direction_;
 		VectorSizeType seenGroups_;
 		typename PsimagLite::Vector<VectorPropsOfGroupType>::Type propsThisIgroup_;
 		// TODO: Move matrix out
