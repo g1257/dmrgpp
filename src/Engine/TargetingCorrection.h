@@ -145,7 +145,7 @@ public:
 	}
 
 	void evolve(RealType,
-	            SizeType direction,
+	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType&,
 	            SizeType)

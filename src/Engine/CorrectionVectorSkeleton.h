@@ -230,10 +230,6 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename TargetingBaseType::InputSimpleOutType InputSimpleOutType;
 
-	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-		  INFINITE=WaveFunctionTransfType::INFINITE};
-
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
 
@@ -253,7 +249,7 @@ public:
 	void calcDynVectors(const VectorWithOffsetType& tv0,
 	                    VectorWithOffsetType& tv1,
 	                    VectorWithOffsetType& tv2,
-	                    SizeType direction,
+	                    ProgramGlobals::DirectionEnum direction,
 	                    SizeType site)
 	{
 		const VectorWithOffsetType& phi = tv0;
@@ -309,7 +305,7 @@ public:
 	                    const VectorWithOffsetType& tv1,
 	                    VectorWithOffsetType& tv2,
 	                    VectorWithOffsetType& tv3,
-	                    SizeType direction,
+	                    ProgramGlobals::DirectionEnum direction,
 	                    SizeType site)
 	{
 		calcDynVectors(tv0,tv2,tv3,direction, site);

@@ -122,14 +122,10 @@ public:
 	typedef WaveFunctionTransfSu2<DmrgWaveStructType,VectorWithOffsetType>
 	WaveFunctionTransfSu2Type;
 
-	static const SizeType INFINITE = ProgramGlobals::INFINITE;
-	static const SizeType EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
-	static const SizeType EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
-
 	template<typename SomeParametersType>
 	WaveFunctionTransfFactory(SomeParametersType& params)
 	    : isEnabled_(!(params.options.find("nowft")!=PsimagLite::String::npos)),
-	      stage_(INFINITE),
+	      stage_(ProgramGlobals::INFINITE),
 	      counter_(0),
 	      firstCall_(true),
 	      progress_("WaveFunctionTransf"),
@@ -193,7 +189,7 @@ public:
 		delete wftImpl_;
 	}
 
-	void setStage(SizeType stage)
+	void setStage(ProgramGlobals::DirectionEnum stage)
 	{
 		if (stage == stage_) return;
 		stage_=stage;
@@ -204,13 +200,13 @@ public:
 	{
 		bool allow=false;
 		switch (stage_) {
-		case INFINITE:
+		case ProgramGlobals::INFINITE:
 			allow=false;
 			break;
-		case EXPAND_SYSTEM:
+		case ProgramGlobals::EXPAND_SYSTEM:
 			allow=true;
 
-		case EXPAND_ENVIRON:
+		case ProgramGlobals::EXPAND_ENVIRON:
 			allow=true;
 		}
 		// FIXME: Must check the below change when using SU(2)!!
@@ -234,15 +230,16 @@ public:
 	{
 		bool allow=false;
 		switch (stage_) {
-		case INFINITE:
+		case ProgramGlobals::INFINITE:
 			allow=false;
 			break;
-		case EXPAND_SYSTEM:
+		case ProgramGlobals::EXPAND_SYSTEM:
 			allow=true;
 
-		case EXPAND_ENVIRON:
+		case ProgramGlobals::EXPAND_ENVIRON:
 			allow=true;
 		}
+
 		// FIXME: Must check the below change when using SU(2)!!
 		//if (m<0) allow = false; // isEnabled_=false;
 
@@ -266,15 +263,16 @@ public:
 	{
 		bool allow=false;
 		switch (stage_) {
-		case INFINITE:
+		case ProgramGlobals::INFINITE:
 			allow=false;
 			break;
-		case EXPAND_SYSTEM:
+		case ProgramGlobals::EXPAND_SYSTEM:
 			allow=true;
 
-		case EXPAND_ENVIRON:
+		case ProgramGlobals::EXPAND_ENVIRON:
 			allow=true;
 		}
+
 		// FIXME: Must check the below change when using SU(2)!!
 		//if (m<0) allow = false; // isEnabled_=false;
 
@@ -320,7 +318,7 @@ public:
 	}
 
 	void push(const BlockDiagonalMatrixType& transform1,
-	          SizeType direction,
+	          ProgramGlobals::DirectionEnum direction,
 	          const LeftRightSuperType& lrs)
 	{
 		if (!isEnabled_) return;
@@ -329,8 +327,8 @@ public:
 		transform1.toSparse(transform);
 
 		switch (stage_) {
-		case INFINITE:
-			if (direction==EXPAND_SYSTEM) {
+		case ProgramGlobals::INFINITE:
+			if (direction == ProgramGlobals::EXPAND_SYSTEM) {
 				wsStack_.push(transform);
 				dmrgWaveStruct_.ws=transform;
 			} else {
@@ -338,15 +336,15 @@ public:
 				dmrgWaveStruct_.we=transform;
 			}
 			break;
-		case EXPAND_ENVIRON:
-			if (direction!=EXPAND_ENVIRON)
+		case ProgramGlobals::EXPAND_ENVIRON:
+			if (direction != ProgramGlobals::EXPAND_ENVIRON)
 				throw std::logic_error("EXPAND_ENVIRON but option==0\n");
 			dmrgWaveStruct_.we=transform;
 			dmrgWaveStruct_.ws=transform;
 			weStack_.push(transform);
 			break;
-		case EXPAND_SYSTEM:
-			if (direction!=EXPAND_SYSTEM)
+		case ProgramGlobals::EXPAND_SYSTEM:
+			if (direction != ProgramGlobals::EXPAND_SYSTEM)
 				throw std::logic_error("EXPAND_SYSTEM but option==1\n");
 			dmrgWaveStruct_.ws=transform;
 			dmrgWaveStruct_.we=transform;
@@ -441,7 +439,7 @@ private:
 
 	void beforeWft(const LeftRightSuperType&)
 	{
-		if (stage_==EXPAND_ENVIRON) {
+		if (stage_ == ProgramGlobals::EXPAND_ENVIRON) {
 			if (wsStack_.size()>=1) {
 				dmrgWaveStruct_.ws=wsStack_.top();
 				wsStack_.pop();
@@ -452,7 +450,7 @@ private:
 			}
 		}
 
-		if (stage_==EXPAND_SYSTEM) {
+		if (stage_ == ProgramGlobals::EXPAND_SYSTEM) {
 			if (weStack_.size()>=1) {
 				dmrgWaveStruct_.we=weStack_.top();
 				weStack_.pop();
@@ -462,13 +460,13 @@ private:
 				throw PsimagLite::RuntimeError("Environ Stack is empty\n");
 			}
 		}
-		if (counter_==0 && stage_==EXPAND_SYSTEM) {
+		if (counter_ == 0 && stage_ == ProgramGlobals::EXPAND_SYSTEM) {
 			if (weStack_.size()>=1) {
 				dmrgWaveStruct_.we=weStack_.top();
 			}
 		}
 
-		if (counter_==0 && stage_==EXPAND_ENVIRON) {
+		if (counter_ == 0 && stage_ == ProgramGlobals::EXPAND_ENVIRON) {
 			if (wsStack_.size()>=1) {
 				dmrgWaveStruct_.ws=wsStack_.top();
 			}
@@ -511,7 +509,7 @@ private:
 
 	SizeType computeCenter(const LeftRightSuperType& lrs,SizeType direction) const
 	{
-		if (direction==EXPAND_SYSTEM) {
+		if (direction == ProgramGlobals::EXPAND_SYSTEM) {
 			SizeType total = lrs.left().block().size();
 			assert(total>0);
 			total--;
@@ -547,7 +545,7 @@ private:
 	}
 
 	bool isEnabled_;
-	SizeType stage_;
+	ProgramGlobals::DirectionEnum stage_;
 	SizeType counter_;
 	bool firstCall_;
 	PsimagLite::ProgressIndicator progress_;

@@ -146,10 +146,6 @@ public:
 
 	enum StageEnum {STAGE_DISABLED, STAGE_OPERATOR, STAGE_STATIC1, STAGE_STATIC2};
 
-	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-		  INFINITE=WaveFunctionTransfType::INFINITE};
-
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
 
@@ -189,7 +185,7 @@ public:
 	}
 
 	void evolve(RealType Eg,
-	            SizeType direction,
+	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType& block2,
 	            SizeType loopNumber)
@@ -205,7 +201,7 @@ public:
 		evolve(Eg,direction,site,loopNumber);
 		SizeType numberOfSites = this->lrs().super().block().size();
 		if (site>1 && site<numberOfSites-2) return;
-		if (site == 1 && direction == EXPAND_SYSTEM) return;
+		if (site == 1 && direction == ProgramGlobals::EXPAND_SYSTEM) return;
 		//corner case
 		//		SizeType x = (site==1) ? 0 : numberOfSites-1;
 		//		evolve(Eg,direction,x,loopNumber);
@@ -247,11 +243,11 @@ private:
 	// tv[i+1] = imaginary cv for tv[i]
 	// tv[i+2] = real      cv for tv[i]
 	void evolve(RealType Eg,
-	            SizeType direction,
+	            ProgramGlobals::DirectionEnum direction,
 	            SizeType site,
 	            SizeType loopNumber)
 	{
-		if (direction == INFINITE) return;
+		if (direction == ProgramGlobals::INFINITE) return;
 		bool guessNonZeroSector = true;
 		SizeType numberOfSites = this->lrs().super().block().size();
 		SizeType indexOfOperator = 0;
@@ -307,7 +303,8 @@ private:
 			stage_ = STAGE_STATIC2;
 	}
 
-	void doCorrectionVector(SizeType direction, SizeType site)
+	void doCorrectionVector(ProgramGlobals::DirectionEnum direction,
+	                        SizeType site)
 	{
 		assert(stage_ == STAGE_STATIC2);
 		SizeType numberOfSites = this->lrs().super().block().size();

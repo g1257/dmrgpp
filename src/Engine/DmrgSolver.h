@@ -178,10 +178,6 @@ public:
 	typedef typename DiagonalizationType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 
-	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-		  INFINITE=WaveFunctionTransfType::INFINITE};
-
 	enum {SAVE_ALL=MyBasis::SAVE_ALL, SAVE_PARTIAL=MyBasis::SAVE_PARTIAL};
 
 	DmrgSolver(ModelType const &model,
@@ -201,7 +197,7 @@ public:
 	      reflectionOperator_(lrs_,
 	                          model_.hilbertSize(0),
 	                          parameters_.useReflectionSymmetry,
-	                          EXPAND_SYSTEM),
+	                          ProgramGlobals::EXPAND_SYSTEM),
 	      diagonalization_(parameters_,
 	                       model,
 	                       verbose_,
@@ -405,12 +401,12 @@ private:
 			progress_.print("Growth done.\n",std::cout);
 			lrs_.printSizes("Infinite",std::cout);
 
-			updateQuantumSector(lrs_.sites(),INFINITE,step);
+			updateQuantumSector(lrs_.sites(),ProgramGlobals::INFINITE,step);
 
 			lrs_.setToProduct(quantumSector_);
 
 			const BlockType& ystep = findRightBlock(Y,step,E);
-			energy_ = diagonalization_(psi,INFINITE,X[step],ystep);
+			energy_ = diagonalization_(psi,ProgramGlobals::INFINITE,X[step],ystep);
 			printEnergy(energy_);
 
 			truncate_.changeBasis(pS,pE,psi,parameters_.keptStatesInfinite);
@@ -419,7 +415,8 @@ private:
 				if (!twoSiteDmrg) checkpoint_.push(pS,pE);
 				else checkpoint_.push(lrs_.left(),lrs_.right());
 			} else {
-				checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS,ProgramGlobals::SYSTEM);
+				checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS,
+				                 ProgramGlobals::SYSTEM);
 			}
 
 			progress_.printMemoryUsage();
@@ -457,17 +454,17 @@ private:
 		// basically we have pS on the left and pE on the right,
 		// and we need to determine which site is to be added
 		// let us set the initial direction first:
-		SizeType direction = EXPAND_SYSTEM;
-		if (parameters_.finiteLoop[0].stepLength<0) direction=EXPAND_ENVIRON;
-		// all right, now we can get the actual site to add:
+		ProgramGlobals::DirectionEnum direction = (parameters_.finiteLoop[0].stepLength<0) ?
+		            ProgramGlobals::EXPAND_ENVIRON :  ProgramGlobals::EXPAND_SYSTEM;
 
+		// all right, now we can get the actual site to add:
 		SizeType sitesPerBlock = parameters_.sitesPerBlock;
 		VectorSizeType siteToAdd(sitesPerBlock);
 		// left-most site of pE
 		for (SizeType j=0;j<siteToAdd.size();j++)
 			siteToAdd[j] = pE.block()[j];
 
-		if (direction==EXPAND_ENVIRON) {
+		if (direction == ProgramGlobals::EXPAND_ENVIRON) {
 			// right-most site of pS
 			for (SizeType j=0;j<siteToAdd.size();j++)
 				siteToAdd[j] = pS.block()[pS.block().size()-1-j];
@@ -529,8 +526,8 @@ private:
 		SizeType keptStates = parameters_.finiteLoop[loopIndex].keptStates;
 		int saveOption = parameters_.finiteLoop[loopIndex].saveOption;
 
-		SizeType direction=EXPAND_SYSTEM;
-		if (stepLength<0) direction=EXPAND_ENVIRON;
+		ProgramGlobals::DirectionEnum direction = (stepLength < 0) ?
+		            ProgramGlobals::EXPAND_ENVIRON : ProgramGlobals::EXPAND_SYSTEM;
 
 		wft_.setStage(direction);
 
@@ -546,7 +543,7 @@ private:
 
 			RealType time = target.time();
 			printerInDetail.print(std::cout, "finite");
-			if (direction==EXPAND_SYSTEM) {
+			if (direction == ProgramGlobals::EXPAND_SYSTEM) {
 				lrs_.growLeftBlock(model_,pS,sitesIndices_[stepCurrent_],time);
 				lrs_.right(checkpoint_.shrink(ProgramGlobals::ENVIRON,target));
 			} else {
@@ -590,7 +587,7 @@ private:
 			if (target.end()) break;
 		}
 
-		if (direction==EXPAND_SYSTEM)
+		if (direction == ProgramGlobals::EXPAND_SYSTEM)
 			pE = lrs_.right();
 		else
 			pS = lrs_.left();
@@ -606,7 +603,7 @@ private:
 	                                MyBasisWithOperators& pE,
 	                                const TargettingType& target,
 	                                SizeType keptStates,
-	                                SizeType direction,
+	                                ProgramGlobals::DirectionEnum direction,
 	                                int saveOption)
 	{
 		bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=
@@ -622,11 +619,10 @@ private:
 		msg2<<"#Error="<<truncate_.error();
 		if (saveData_) ioOut_.printline(msg2);
 
-		if (direction==EXPAND_SYSTEM) {
-			checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS,ProgramGlobals::SYSTEM);
-		} else {
-			checkpoint_.push((twoSiteDmrg) ? lrs_.right() : pE,ProgramGlobals::ENVIRON);
-		}
+		if (direction == ProgramGlobals::EXPAND_SYSTEM)
+			checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS, ProgramGlobals::SYSTEM);
+		else
+			checkpoint_.push((twoSiteDmrg) ? lrs_.right() : pE, ProgramGlobals::ENVIRON);
 
 		serialize(fsS,fsE,target,truncate_.transform(),direction,saveOption);
 	}
@@ -670,17 +666,19 @@ private:
 		return false;
 	}
 
-	PsimagLite::String getDirection(SizeType dir) const
+	PsimagLite::String getDirection(ProgramGlobals::DirectionEnum dir) const
 	{
-		if (dir==INFINITE) return  "INFINITE";
-		if (dir==EXPAND_ENVIRON) return "EXPAND_ENVIRON";
-		return "EXPAND_SYSTEM";
+		if (dir == ProgramGlobals::INFINITE) return  "INFINITE";
+		return (dir == ProgramGlobals::EXPAND_ENVIRON) ?
+		            "EXPAND_ENVIRON" : "EXPAND_SYSTEM";
 	}
 
-	void updateQuantumSector(SizeType sites,SizeType direction,SizeType step)
+	void updateQuantumSector(SizeType sites,
+	                         ProgramGlobals::DirectionEnum direction,
+	                         SizeType step)
 	{
 		SizeType maxSites = model_.geometry().numberOfSites();
-		if (direction==INFINITE &&
+		if (direction == ProgramGlobals::INFINITE &&
 		        sites < maxSites &&
 		        parameters_.adjustQuantumNumbers.size()>0) {
 			quantumSector_ = SymmetryElectronsSzType::adjustQn(parameters_.adjustQuantumNumbers,

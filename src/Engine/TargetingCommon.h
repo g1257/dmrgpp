@@ -142,10 +142,6 @@ public:
 		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,
 		  WFT_NOADVANCE=ApplyOperatorExpressionType::WFT_NOADVANCE};
 
-	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-		  INFINITE=WaveFunctionTransfType::INFINITE};
-
 	TargetingCommon(const LeftRightSuperType& lrs,
 	                const ModelType& model,
 	                const WaveFunctionTransfType& wft,
@@ -446,7 +442,8 @@ public:
 		applyOpExpression_.wftAll(indexForOperators, site, systemOrEnviron);
 	}
 
-	void cocoon(const BlockType& block,SizeType direction) const
+	void cocoon(const BlockType& block,
+	            ProgramGlobals::DirectionEnum direction) const
 	{
 		const ModelType& model = targetHelper_.model();
 		const VectorVectorWithOffsetType& tv = applyOpExpression_.targetVectors();
@@ -509,7 +506,7 @@ public:
 
 	// in situ computation:
 	// prints <v1|A|v2>
-	void cocoon(SizeType direction,
+	void cocoon(ProgramGlobals::DirectionEnum direction,
 	            SizeType site,
 	            const VectorWithOffsetType& v1,
 	            PsimagLite::String label1,
@@ -543,7 +540,7 @@ public:
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
 
-	void calcBracket(SizeType direction,
+	void calcBracket(ProgramGlobals::DirectionEnum direction,
 	                 SizeType site,
 	                 const BraketType& braket) const
 	{

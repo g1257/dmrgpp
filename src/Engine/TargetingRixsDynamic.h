@@ -150,10 +150,6 @@ public:
 
 	enum {DISABLED,OPERATOR,CONVERGING};
 
-	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-		  INFINITE=WaveFunctionTransfType::INFINITE};
-
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
 
@@ -192,7 +188,7 @@ public:
 	}
 
 	void evolve(RealType Eg,
-	            SizeType direction,
+	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType& block2,
 	            SizeType loopNumber)
@@ -208,7 +204,7 @@ public:
 		evolve(Eg,direction,site,loopNumber);
 		SizeType numberOfSites = this->lrs().super().block().size();
 		if (site>1 && site<numberOfSites-2) return;
-		if (site == 1 && direction == EXPAND_SYSTEM) return;
+		if (site == 1 && direction == ProgramGlobals::EXPAND_SYSTEM) return;
 		//corner case
 		//		SizeType x = (site==1) ? 0 : numberOfSites-1;
 		//		evolve(Eg,direction,x,loopNumber);
@@ -252,11 +248,11 @@ private:
 	// tv[2*N] = imaginary cv for (tv[2*site],tv[2*site+1])
 	// tv[2*N+1] = real      cv for (tv[2*site],tv[2*site+1])
 	void evolve(RealType,
-	            SizeType direction,
+	            ProgramGlobals::DirectionEnum direction,
 	            SizeType site,
 	            SizeType loopNumber)
 	{
-		if (direction == INFINITE) return;
+		if (direction == ProgramGlobals::INFINITE) return;
 
 		SizeType indexOfOperator = 0;
 		VectorSizeType indexForOperators(this->common().targetVectors().size(), 0);
@@ -288,7 +284,7 @@ private:
 	}
 
 	void calcDynVectors(SizeType site,
-	                    SizeType direction)
+	                    ProgramGlobals::DirectionEnum direction)
 	{
 		VectorSizeType indexForOperators(this->common().targetVectors().size(), 0);
 		this->common().wftAll(indexForOperators, site, direction);

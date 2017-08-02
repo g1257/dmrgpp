@@ -122,7 +122,6 @@ public:
 
 	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 
-	static const SizeType EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM;
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
 
@@ -190,7 +189,7 @@ public:
 	}
 
 	void evolve(RealType Eg,
-	            SizeType direction,
+	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType&,
 	            SizeType loopNumber)
@@ -200,7 +199,7 @@ public:
 		evolve(Eg,direction,block1,loopNumber);
 		SizeType numberOfSites = this->lrs().super().block().size();
 		if (site > 1 && site < numberOfSites-2) return;
-		if (site == 1 && direction == EXPAND_SYSTEM) return;
+		if (site == 1 && direction == ProgramGlobals::EXPAND_SYSTEM) return;
 		//corner case
 		SizeType x = (site == 1) ? 0 : numberOfSites-1;
 		BlockType block(1,x);
@@ -259,7 +258,7 @@ public:
 private:
 
 	void evolve(RealType Eg,
-	            SizeType direction,
+	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            SizeType loopNumber)
 	{
@@ -358,7 +357,8 @@ private:
 	}
 
 	// in situ computation:
-	void cocoon(SizeType direction,const BlockType& block) const
+	void cocoon(ProgramGlobals::DirectionEnum direction,
+	            const BlockType& block) const
 	{
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 

@@ -126,10 +126,6 @@ public:
 		  OPERATOR=BaseType::OPERATOR,
 		  WFT_NOADVANCE=BaseType::WFT_NOADVANCE};
 
-	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-		  INFINITE=WaveFunctionTransfType::INFINITE};
-
 	TargetingAdaptiveDynamic(const LeftRightSuperType& lrs,
 	                         const ModelType& model,
 	                         const WaveFunctionTransfType& wft,
@@ -170,7 +166,7 @@ public:
 	}
 
 	void evolve(RealType Eg,
-	            SizeType direction,
+	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType& block2,
 	            SizeType loopNumber)

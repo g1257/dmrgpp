@@ -107,9 +107,6 @@ class Truncation  {
 	typedef typename TargettingType::ModelType ModelType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 
-	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM};
-
 public:
 
 	typedef typename DensityMatrixBaseType::Params ParamsDensityMatrixType;
@@ -151,9 +148,9 @@ public:
 	                BasisWithOperatorsType& pE,
 	                const TargettingType& target,
 	                SizeType keptStates,
-	                SizeType direction)
+	                ProgramGlobals::DirectionEnum direction)
 	{
-		if (direction==EXPAND_SYSTEM) {
+		if (direction == ProgramGlobals::EXPAND_SYSTEM) {
 			progress_.print("for Environment\n",std::cout);
 			changeBasis(pS,target,keptStates,direction);
 			truncateBasisSystem(pS,lrs_.right());
@@ -176,8 +173,8 @@ public:
 	                 const TargettingType& target,
 	                 SizeType keptStates)
 	{
-		changeBasis(sBasis,target,keptStates,EXPAND_SYSTEM);
-		changeBasis(eBasis,target,keptStates,EXPAND_ENVIRON);
+		changeBasis(sBasis,target, keptStates, ProgramGlobals::EXPAND_SYSTEM);
+		changeBasis(eBasis,target, keptStates, ProgramGlobals::EXPAND_ENVIRON);
 
 		truncateBasisSystem(sBasis,lrs_.right());
 		truncateBasisEnviron(eBasis,lrs_.left());
@@ -188,7 +185,7 @@ private:
 	void changeBasis(BasisWithOperatorsType& rSprime,
 	                 const TargettingType& target,
 	                 SizeType keptStates,
-	                 SizeType direction)
+	                 ProgramGlobals::DirectionEnum direction)
 	{
 		/* PSIDOC Truncation
 			Let us define the density matrices for system:
@@ -207,13 +204,14 @@ private:
 			in $\mathcal{V}(E')$.
 			*/
 
-		const BasisWithOperatorsType& pBasis = (direction==EXPAND_SYSTEM) ?
+		const BasisWithOperatorsType& pBasis = (direction == ProgramGlobals::EXPAND_SYSTEM) ?
 		            lrs_.left() : lrs_.right();
 
 		bool debug = false;
 		bool useSvd = (parameters_.options.find("useSvd") != PsimagLite::String::npos);
 		ParamsDensityMatrixType p(useSvd, direction, verbose_, debug);
-		TruncationCache& cache = (direction==EXPAND_SYSTEM) ? leftCache_ : rightCache_;
+		TruncationCache& cache = (direction == ProgramGlobals::EXPAND_SYSTEM) ?
+		            leftCache_ : rightCache_;
 		DensityMatrixBaseType* dmS = 0;
 
 		if (BasisType::useSu2Symmetry()) {
@@ -281,7 +279,9 @@ private:
 		                       (BasisType&)lrs_.super());
 		bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=PsimagLite::String::npos);
 		const LeftRightSuperType& lrsForWft = (twoSiteDmrg) ? lrs_ : lrs;
-		waveFunctionTransformation_.push(ftransform_,EXPAND_SYSTEM,lrsForWft);
+		waveFunctionTransformation_.push(ftransform_,
+		                                 ProgramGlobals::EXPAND_SYSTEM,
+		                                 lrsForWft);
 
 		msg<<"new size of basis="<<rSprime.size();
 		msg<<" transform is "<<ftransform_.rows()<<" x "<<ftransform_.cols();
@@ -316,7 +316,9 @@ private:
 		                       rEprime,(BasisType&)lrs_.super());
 		bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=PsimagLite::String::npos);
 		const LeftRightSuperType& lrsForWft = (twoSiteDmrg) ? lrs_ : lrs;
-		waveFunctionTransformation_.push(ftransform_,EXPAND_ENVIRON,lrsForWft);
+		waveFunctionTransformation_.push(ftransform_,
+		                                 ProgramGlobals::EXPAND_ENVIRON,
+		                                 lrsForWft);
 		msg<<"new size of basis="<<rEprime.size();
 		msg<<" transform is "<<ftransform_.rows()<<" x "<<ftransform_.cols();
 		msg<<" with "<<ftransform_.blocks()<<" blocks";

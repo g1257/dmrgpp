@@ -129,11 +129,6 @@ public:
 	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
 
 	enum {DISABLED,OPERATOR,CONVERGING};
-	enum {
-		EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-		EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-		INFINITE=WaveFunctionTransfType::INFINITE
-	};
 
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
@@ -169,7 +164,7 @@ public:
 	}
 
 	void evolve(RealType Eg,
-	            SizeType direction,
+	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType& block2,
 	            SizeType loopNumber)
@@ -235,7 +230,7 @@ public:
 private:
 
 	void evolve(RealType Eg,
-	            SizeType direction,
+	            ProgramGlobals::DirectionEnum direction,
 	            SizeType site,
 	            SizeType loopNumber)
 	{

@@ -159,7 +159,7 @@ public:
 	                  const ModelType& model,
 	                  InputValidatorType& io,
 	                  SizeType site,
-	                  SizeType direction)
+	                  ProgramGlobals::DirectionEnum direction)
 	    : lrs_(lrs),
 	      model_(model),
 	      io_(io),

@@ -132,12 +132,6 @@ public:
  
 	enum StageEnum {DISABLED,CONVERGING};
 
-	enum {
-		EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-		EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-		INFINITE=WaveFunctionTransfType::INFINITE
-	};
-
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
 
@@ -186,7 +180,7 @@ public:
 	}
 
 	void evolve(RealType Eg,
-	            SizeType direction,
+	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType& block2,
 	            SizeType loopNumber)
@@ -252,11 +246,11 @@ public:
 private:
 
 	void evolve(RealType Eg,
-	            SizeType direction,
+	            ProgramGlobals::DirectionEnum direction,
 	            SizeType site,
 	            SizeType loopNumber)
 	{
-		if (direction == INFINITE) return;
+		if (direction == ProgramGlobals::INFINITE) return;
 
 		// see if operator at site has been applied and result put into targetVectors[site]
 		// if no apply operator at site and add into targetVectors[site]
@@ -294,7 +288,8 @@ private:
 		for (SizeType r=0;r<weight_.size();r++) weight_[r] *=(1.0-gsWeight_)/sum;
 	}
 
-	void cocoon(const BlockType& block,SizeType direction) const
+	void cocoon(const BlockType& block,
+	            ProgramGlobals::DirectionEnum direction) const
 	{
 		const VectorVectorWithOffsetType& tv = this->common().targetVectors();
 

@@ -78,7 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PROGRAM_LIMITS_H
 #define PROGRAM_LIMITS_H
-
+#include "PsimagLite.h"
 #include "Vector.h"
 
 namespace Dmrg {
@@ -108,7 +108,7 @@ struct ProgramGlobals {
 	}
 
 	static int findBorderSiteFrom(SizeType site,
-	                              SizeType direction,
+	                              DirectionEnum direction,
 	                              SizeType n)
 	{
 		if (site == 1 && direction == EXPAND_ENVIRON) return 0;
@@ -116,6 +116,23 @@ struct ProgramGlobals {
 		if (site == n - 2 && direction == EXPAND_SYSTEM) return n - 1;
 
 		return -1;
+	}
+
+	friend std::istream& operator>>(std::istream& is, DirectionEnum& direction)
+	{
+		int x = -1;
+		is >> x;
+		if (x == 0) {
+			direction = INFINITE;
+		} else if (x == 1) {
+			direction = EXPAND_ENVIRON;
+		} else if (x == 2) {
+			direction = EXPAND_SYSTEM;
+		} else {
+			err("istream& operator>> DirectionEnum\n");
+		}
+
+		return is;
 	}
 
 	static PsimagLite::String WFT_STRING;

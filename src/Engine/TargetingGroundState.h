@@ -116,10 +116,6 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
 
-	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-		  INFINITE=WaveFunctionTransfType::INFINITE};
-
 	TargetingGroundState(const LeftRightSuperType& lrs,
 	                     const ModelType& model,
 	                     const WaveFunctionTransfType& wft,
@@ -148,7 +144,7 @@ public:
 	}
 
 	void evolve(RealType,
-	            SizeType direction,
+	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType&,
 	            SizeType)

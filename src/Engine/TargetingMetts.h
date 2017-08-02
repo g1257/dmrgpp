@@ -156,10 +156,6 @@ public:
 
 	enum {DISABLED,WFT_NOADVANCE,WFT_ADVANCE,COLLAPSE};
 
-	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-		  INFINITE=WaveFunctionTransfType::INFINITE};
-
 	const static SizeType SYSTEM = ProgramGlobals::SYSTEM;
 
 	TargetingMetts(const LeftRightSuperType& lrs,
@@ -176,7 +172,7 @@ public:
 	      progress_("TargetingMetts"),
 	      mettsStochastics_(model,mettsStruct_.rngSeed,mettsStruct_.pure),
 	      mettsCollapse_(mettsStochastics_,lrs,mettsStruct_),
-	      prevDirection_(INFINITE),
+	      prevDirection_(ProgramGlobals::INFINITE),
 	      systemPrev_(),
 	      environPrev_()
 	{
@@ -224,19 +220,19 @@ public:
 	}
 
 	void evolve(RealType Eg,
-	            SizeType direction,
+	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType& block2,
 	            SizeType loopNumber)
 	{
 		VectorSizeType sites;
-		if (direction==INFINITE)
+		if (direction == ProgramGlobals::INFINITE)
 			utils::blockUnion(sites,block1,block2);
 		else sites = block1;
 
 		SizeType n1 = mettsStruct_.timeSteps();
 
-		if (direction==INFINITE) {
+		if (direction == ProgramGlobals::INFINITE) {
 			updateStochastics(block1,block2);
 			getNewPures(block1,block2);
 			return;
@@ -515,7 +511,7 @@ private:
 		SizeType qn = SymmetryElectronsSzType::getQuantumSector(model_.targetQuantum(),
 		                                                        linSize,
 		                                                        linSize,
-		                                                        INFINITE,
+		                                                        ProgramGlobals::INFINITE,
 		                                                        0,
 		                                                        BasisType::useSu2Symmetry());
 		mettsStochastics_.update(qn,block1,block2,mettsStruct_.rngSeed);
@@ -733,7 +729,8 @@ private:
 	}
 
 	// in situ computation:
-	void cocoon(SizeType direction,const BlockType& block) const
+	void cocoon(ProgramGlobals::DirectionEnum direction,
+	            const BlockType& block) const
 	{
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 

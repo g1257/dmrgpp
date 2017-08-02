@@ -146,7 +146,7 @@ public:
 	virtual RealType weight(SizeType i) const = 0;
 
 	virtual void evolve(RealType Eg,
-	                    SizeType direction,
+	                    ProgramGlobals::DirectionEnum direction,
 	                    const BlockType& block1,
 	                    const BlockType& block2,
 	                    SizeType loopNumber) = 0;

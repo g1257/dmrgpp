@@ -233,10 +233,6 @@ public:
 
 	enum {DISABLED,OPERATOR,CONVERGING};
 
-	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-		  INFINITE=WaveFunctionTransfType::INFINITE};
-
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
 
@@ -276,7 +272,7 @@ public:
 	}
 
 	void evolve(RealType Eg,
-	            SizeType direction,
+	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType& block2,
 	            SizeType loopNumber)
@@ -292,7 +288,7 @@ public:
 		evolve(Eg,direction,site,loopNumber);
 		SizeType numberOfSites = this->lrs().super().block().size();
 		if (site>1 && site<numberOfSites-2) return;
-		if (site == 1 && direction == EXPAND_SYSTEM) return;
+		if (site == 1 && direction == ProgramGlobals::EXPAND_SYSTEM) return;
 		//corner case
 		SizeType x = (site==1) ? 0 : numberOfSites-1;
 		evolve(Eg,direction,x,loopNumber);
@@ -352,14 +348,14 @@ public:
 private:
 
 	void evolve(RealType Eg,
-	            SizeType direction,
+	            ProgramGlobals::DirectionEnum direction,
 	            SizeType site,
 	            SizeType loopNumber)
 	{
 		VectorWithOffsetType phiNew;
 		SizeType count = this->common().getPhi(phiNew,Eg,direction,site,loopNumber);
 
-		if (direction!=INFINITE) {
+		if (direction != ProgramGlobals::INFINITE) {
 			correctionEnabled_=true;
 			typename PsimagLite::Vector<SizeType>::Type block1(1,site);
 			addCorrection(direction,block1);

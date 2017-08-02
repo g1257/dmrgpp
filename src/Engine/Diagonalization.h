@@ -147,11 +147,11 @@ public:
 
 	//!PTEX_LABEL{Diagonalization}
 	RealType operator()(TargettingType& target,
-	                    SizeType direction,
+	                    ProgramGlobals::DirectionEnum direction,
 	                    const BlockType& blockLeft,
 	                    const BlockType& blockRight)
 	{
-		assert(direction == WaveFunctionTransfType::INFINITE);
+		assert(direction == ProgramGlobals::INFINITE);
 		SizeType loopIndex = 0;
 		VectorSizeType sectors;
 		targetedSymmetrySectors(sectors,target.lrs());
@@ -164,12 +164,12 @@ public:
 	}
 
 	RealType operator()(TargettingType& target,
-	                    SizeType direction,
+	                    ProgramGlobals::DirectionEnum direction,
 	                    const BlockType& block,
 	                    SizeType loopIndex,
 	                    bool)
 	{
-		assert(direction != WaveFunctionTransfType::INFINITE);
+		assert(direction != ProgramGlobals::INFINITE);
 
 		RealType gsEnergy = internalMain_(target,direction,loopIndex,false,block);
 		//  targetting:
@@ -210,7 +210,7 @@ private:
 		checkSaveOption(saveOption);
 
 		bool onlyWft = false;
-		if (direction != WaveFunctionTransfType::INFINITE)
+		if (direction != ProgramGlobals::INFINITE)
 			onlyWft = ((saveOption & 2)>0);
 
 		bool noguess = ((saveOption & 8) > 0); // bit 3 set means guess is random vector
