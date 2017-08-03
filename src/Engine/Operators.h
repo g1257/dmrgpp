@@ -241,7 +241,9 @@ public:
 	}
 
 	template<typename IoInputter>
-	void load(IoInputter& io)
+	void load(IoInputter& io,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
 		if (!useSu2Symmetry_)
 			io.read(operators_,"#OPERATORS");
@@ -425,7 +427,10 @@ public:
 	}
 
 	template<typename IoOutputter>
-	void save(IoOutputter& io,const PsimagLite::String& s) const
+	void save(IoOutputter& io,
+	          const PsimagLite::String& s,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
 		if (!useSu2Symmetry_) io.printVector(operators_,"#OPERATORS");
 		else reducedOpImpl_.save(io,s);

@@ -90,7 +90,9 @@ namespace Dmrg {
 
 template<typename ParametersType,typename TargettingType>
 class Checkpoint {
+
 public:
+
 	typedef typename TargettingType::RealType  RealType;
 	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;

@@ -119,7 +119,9 @@ struct DmrgWaveStruct {
 	}
 
 	template<typename IoOutputType>
-	void save(IoOutputType& io) const
+	void save(IoOutputType& io,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
 	{
 		io.printMatrix(ws,"Ws");
 		io.printMatrix(we,"We");

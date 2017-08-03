@@ -116,7 +116,11 @@ public:
 	}
 
 	template<typename IoInputter>
-	ReducedOperators(IoInputter& io,SizeType,const BasisType* thisBasis)
+	ReducedOperators(IoInputter& io,
+	                 SizeType,
+	                 const BasisType* thisBasis,
+	                 typename PsimagLite::EnableIf<
+	                 PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	    : thisBasis_(thisBasis),
 	      useSu2Symmetry_(BasisType::useSu2Symmetry()),
 	      cgObject_(&(Su2SymmetryGlobalsType::clebschGordanObject))

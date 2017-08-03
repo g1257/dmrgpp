@@ -508,7 +508,9 @@ public:
 	template<typename IoOutputter>
 	void save(IoOutputter& io,
 	          const PsimagLite::String& ss,
-	          bool minimizeWrite) const
+	          bool minimizeWrite,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
 		io.printline("#NAME="+ss);
 		saveInternal(io, minimizeWrite);
@@ -516,7 +518,9 @@ public:
 
 	//! saves this basis to disk
 	template<typename IoOutputter>
-	void save(IoOutputter& io, bool minimizeWrite) const
+	void save(IoOutputter& io, bool minimizeWrite,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
 		io.printline("#NAME="+name_);
 		saveInternal(io, minimizeWrite);
@@ -551,7 +555,10 @@ public:
 private:
 
 	template<typename IoInputter>
-	void loadInternal(IoInputter& io, bool minimizeRead = false)
+	void loadInternal(IoInputter& io,
+	                  bool minimizeRead = false,
+	                  typename PsimagLite::EnableIf<
+	                  PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
 		int x=0;
 		useSu2Symmetry_=false;
@@ -578,7 +585,10 @@ private:
 	}
 
 	template<typename IoOutputter>
-	void saveInternal(IoOutputter& io, bool minimizeWrite) const
+	void saveInternal(IoOutputter& io,
+	                  bool minimizeWrite,
+	                  typename PsimagLite::EnableIf<
+	                  PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
 		PsimagLite::String s="#useSu2Symmetry="+ttos(useSu2Symmetry_);
 		io.printline(s);
@@ -644,13 +654,16 @@ private:
 	}
 
 	/* PSIDOC BasisQuantumNumbers
-		Symmetries will allow the solver to block the Hamiltonian matrix in blocks, using less memory, speeding up
+		Symmetries will allow the solver to block the Hamiltonian matrix in blocks,
+using less memory, speeding up
 		the computation and allowing the code to parallelize matrix blocks related by symmetry.
 		Let us assume that our particular model has $N_s$ symmetries labeled by $0\le \alpha < N_s$.
 		Therefore, each element $k$  of the basis has $N_s$ associated ``good'' quantum numbers
 		 $\tilde{q}_{k,\alpha}$. These quantum numbers can refer to practically anything,
-		 for example, to number of particles with a given spin or orbital or to the $z$ component of the spin.
-		We do not need to know the details to block the matrix. We know, however, that these numbers are
+		 for example, to number of particles with a given spin or orbital or to the $z$
+component of the spin.
+		We do not need to know the details to block the matrix. We know, however, that
+these numbers are
 		finite, and let $Q$ be an integer such that $\tilde{q}_{k,\alpha}< Q$ $\forall k,\alpha$.
 		We can then combine all these quantum numbers into a single one,
 		like this: $q_k = \sum_\alpha \tilde{q}_{k,\alpha} Q^\alpha$,

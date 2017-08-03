@@ -149,14 +149,17 @@ public:
 	}
 
 	template<typename IoInputter>
-	void load(IoInputter& io)
+	void load(IoInputter& io,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
 		BasisType::load(io); // parent loads
 		operators_.load(io);
 		io.read(operatorsPerSite_,"#OPERATORSPERSITE");
 	}
 
-	//! set this basis to the outer product of   basis2 and basis3 or basis3 and basis2  depending on dir
+	// set this basis to the outer product of
+	// basis2 and basis3 or basis3 and basis2  depending on dir
 	void setToProduct(const ThisType& basis2,
 	                  const ThisType& basis3,
 	                  ProgramGlobals::DirectionEnum dir)
@@ -227,7 +230,8 @@ public:
 					                                  basis2,
 					                                  basis3,
 					                                  false,
-					                                  basis3.getReducedOperatorByIndex(i-basis2.numberOfOperators()));
+					                                  basis3.getReducedOperatorByIndex(
+					                                      i-basis2.numberOfOperators()));
 				}
 			}
 		}
@@ -340,7 +344,11 @@ public:
 	}
 
 	template<typename IoOutputter>
-	void save(IoOutputter& io,const PsimagLite::String& s,SizeType option) const
+	void save(IoOutputter& io,
+	          const PsimagLite::String& s,
+	          SizeType option,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
 		BasisType::save(io,s,false); // parent saves
 		if (option == BasisType::SAVE_ALL)
@@ -351,7 +359,10 @@ public:
 	}
 
 	template<typename IoOutputter>
-	void save(IoOutputter& io,SizeType option) const
+	void save(IoOutputter& io,
+	          SizeType option,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
 		BasisType::save(io,false); // parent saves
 		if (option == BasisType::SAVE_ALL)

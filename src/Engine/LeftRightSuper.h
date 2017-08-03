@@ -208,7 +208,11 @@ public:
 	}
 
 	template<typename IoOutputType>
-	void save(IoOutputType& io,SizeType option,SizeType numberOfSites) const
+	void save(IoOutputType& io,
+	          SizeType option,
+	          SizeType numberOfSites,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
 	{
 		bool minimizeWrite = (super_->block().size() == numberOfSites);
 		super_->save(io, minimizeWrite);

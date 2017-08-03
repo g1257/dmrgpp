@@ -135,7 +135,10 @@ public:
 	}
 
 	template<typename IoInputter>
-	void load(IoInputter& io, bool minimizeRead)
+	void load(IoInputter& io,
+	          bool minimizeRead,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
 		SizeType tmp=0;
 		io.readline(tmp,"#FACTORSSIZE=");
@@ -144,7 +147,9 @@ public:
 	}
 
 	template<typename IoOutputter>
-	void save(IoOutputter& io) const
+	void save(IoOutputter& io,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
 		PsimagLite::String tmp = ttos(factors_.row());
 		PsimagLite::String s="#FACTORSSIZE="+tmp;

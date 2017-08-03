@@ -1,9 +1,8 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2017, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 4.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -68,9 +67,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
+
 /** \ingroup DMRG */
 /*@{*/
 
@@ -90,140 +88,149 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	template<typename PairType_>
-	class JmPairs {
-	public:
-		typedef PairType_ PairType;
-		typedef PairType value_type;
+template<typename PairType_>
+class JmPairs {
 
-		PairType operator[](SizeType alpha) const
-		{
-			return jmPairs_[indices_[alpha]];
-		}
+	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-		JmPairs<PairType>& operator=(const typename PsimagLite::Vector<PairType>::Type& jmpairs)
-		{
-			jmPairs_.clear();
-			indices_.clear();
-			for (SizeType i=0;i<jmpairs.size();i++) {
-				int x = PsimagLite::isInVector(jmPairs_,jmpairs[i]);
-				if (x<0) {
-					jmPairs_.push_back(jmpairs[i]);
-					x=jmPairs_.size()-1;
-				}
-				indices_.push_back(x);
-			}
-			return *this;
-		}
+public:
 
-		//! indices_[alpha] = jm
-		void push(const PairType& jm,SizeType)
-		{
-			int x = PsimagLite::isInVector(jmPairs_,jm);
+	typedef PairType_ PairType;
+	typedef PairType value_type;
 
+	PairType operator[](SizeType alpha) const
+	{
+		return jmPairs_[indices_[alpha]];
+	}
+
+	JmPairs<PairType>& operator=(const typename PsimagLite::Vector<PairType>::Type& jmpairs)
+	{
+		jmPairs_.clear();
+		indices_.clear();
+		for (SizeType i=0;i<jmpairs.size();i++) {
+			int x = PsimagLite::isInVector(jmPairs_,jmpairs[i]);
 			if (x<0) {
-				jmPairs_.push_back(jm);
+				jmPairs_.push_back(jmpairs[i]);
 				x=jmPairs_.size()-1;
 			}
-
 			indices_.push_back(x);
 		}
+		return *this;
+	}
 
-		void clear()
-		{
-			jmPairs_.clear();
-			indices_.clear();
+	//! indices_[alpha] = jm
+	void push(const PairType& jm,SizeType)
+	{
+		int x = PsimagLite::isInVector(jmPairs_,jm);
+
+		if (x<0) {
+			jmPairs_.push_back(jm);
+			x=jmPairs_.size()-1;
 		}
 
-		void reorder(const typename PsimagLite::Vector<SizeType>::Type& permutation)
-		{
-			utils::reorder(indices_,permutation);
-		}
+		indices_.push_back(x);
+	}
 
-		void truncate(const typename PsimagLite::Vector<SizeType>::Type& removedIndices)
-		{
-			utils::truncateVector(indices_,removedIndices);
-			typename PsimagLite::Vector<SizeType>::Type unusedPairs;
-			findUnusedJmPairs(unusedPairs);
-			removeUnusedPairs(unusedPairs);
-		}
+	void clear()
+	{
+		jmPairs_.clear();
+		indices_.clear();
+	}
 
-		template<typename Op>
-		void maxFirst(SizeType& maxvalue)
-		{
-			Op f;
-			for (SizeType i=0;i<jmPairs_.size();i++) {
-				if (f(jmPairs_[i].first,maxvalue)) {
-					maxvalue=jmPairs_[i].first;
-				}
+	void reorder(const VectorSizeType& permutation)
+	{
+		utils::reorder(indices_,permutation);
+	}
+
+	void truncate(const VectorSizeType& removedIndices)
+	{
+		utils::truncateVector(indices_,removedIndices);
+		VectorSizeType unusedPairs;
+		findUnusedJmPairs(unusedPairs);
+		removeUnusedPairs(unusedPairs);
+	}
+
+	template<typename Op>
+	void maxFirst(SizeType& maxvalue)
+	{
+		Op f;
+		for (SizeType i=0;i<jmPairs_.size();i++) {
+			if (f(jmPairs_[i].first,maxvalue)) {
+				maxvalue=jmPairs_[i].first;
 			}
 		}
+	}
 
-		SizeType size() const { return indices_.size(); }
+	SizeType size() const { return indices_.size(); }
 
-		void resize(SizeType dummy) { }; // does nothing, safely
+	void resize(SizeType) { } // does nothing, safely
 
-		template<typename IoOutputter>
-		void save(IoOutputter& io) const
-		{
-			io.printVector(jmPairs_,"#su2JmPairs");
-			io.printVector(indices_,"#su2JmIndices");
-		}
+	template<typename IoOutputter>
+	void save(IoOutputter& io,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
+	{
+		io.printVector(jmPairs_,"#su2JmPairs");
+		io.printVector(indices_,"#su2JmIndices");
+	}
 
-		template<typename IoInputter>
-		void load(IoInputter& io)
-		{
-			io.read(jmPairs_,"#su2JmPairs");
-			io.read(indices_,"#su2JmIndices");
-		}
+	template<typename IoInputter>
+	void load(IoInputter& io,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
+	{
+		io.read(jmPairs_,"#su2JmPairs");
+		io.read(indices_,"#su2JmIndices");
+	}
 
-	private:
-		typename PsimagLite::Vector<PairType>::Type jmPairs_;
-		typename PsimagLite::Vector<SizeType>::Type indices_;
-
-		void findUnusedJmPairs(typename PsimagLite::Vector<SizeType>::Type& unusedPairs)
-		{
-			for (SizeType i=0;i<jmPairs_.size();i++)
-				if (isUnusedPair(i)) unusedPairs.push_back(i);
-		}
-
-		void removeUnusedPairs(const typename PsimagLite::Vector<SizeType>::Type& unusedPairs)
-		{
-			SizeType counter=0;
-			typename PsimagLite::Vector<SizeType>::Type neworder(jmPairs_.size());
-			typename PsimagLite::Vector<PairType>::Type tmpVector(jmPairs_.size()-unusedPairs.size());
-
-			for (SizeType i=0;i<jmPairs_.size();i++) {
-				if (PsimagLite::isInVector(unusedPairs,i)>=0) continue;
-				tmpVector[counter]=jmPairs_[i];
-				neworder[i]=counter;
-				counter++;
-			}
-			jmPairs_=tmpVector;
-			typename PsimagLite::Vector<SizeType>::Type tmpVector2(indices_.size());
-			for (SizeType i=0;i<indices_.size();i++)
-				tmpVector2[i]=neworder[indices_[i]];
-			indices_=tmpVector2;
-		}
-
-		bool isUnusedPair(SizeType ind)
-		{
-			for (SizeType i=0;i<indices_.size();i++)
-				if (indices_[i]==ind) return false;
-			return true;
-		}
-	}; // JmPairs
-
-	template<typename PairType>
-	std::ostream& operator<<(std::ostream& os,JmPairs<PairType> jmPairs)
+	friend std::ostream& operator<<(std::ostream& os,
+	                                JmPairs<PairType> jmPairs)
 	{
 		for (SizeType i=0;i<jmPairs.size();i++)
 			os<<"jmPair["<<i<<"]="<<jmPairs[i]<<"\n";
 		return os;
 	}
 
-} // namespace Dmrg
+private:
 
+	void findUnusedJmPairs(VectorSizeType& unusedPairs)
+	{
+		for (SizeType i=0;i<jmPairs_.size();i++)
+			if (isUnusedPair(i)) unusedPairs.push_back(i);
+	}
+
+	void removeUnusedPairs(const VectorSizeType& unusedPairs)
+	{
+		SizeType counter=0;
+		VectorSizeType neworder(jmPairs_.size());
+		typename PsimagLite::Vector<PairType>::Type tmpVector(jmPairs_.size() -
+		                                                      unusedPairs.size());
+
+		for (SizeType i=0;i<jmPairs_.size();i++) {
+			if (PsimagLite::isInVector(unusedPairs,i)>=0) continue;
+			tmpVector[counter]=jmPairs_[i];
+			neworder[i]=counter;
+			counter++;
+		}
+
+		jmPairs_=tmpVector;
+		VectorSizeType tmpVector2(indices_.size());
+		for (SizeType i=0;i<indices_.size();i++)
+			tmpVector2[i]=neworder[indices_[i]];
+		indices_=tmpVector2;
+	}
+
+	bool isUnusedPair(SizeType ind)
+	{
+		for (SizeType i=0;i<indices_.size();i++)
+			if (indices_[i]==ind) return false;
+		return true;
+	}
+
+	typename PsimagLite::Vector<PairType>::Type jmPairs_;
+	VectorSizeType indices_;
+}; // JmPairs
+} // namespace Dmrg
 /*@}*/
 #endif
 

@@ -120,7 +120,10 @@ public:
 	}
 
 	template<typename IoInputter>
-	FermionSign(IoInputter& io,bool bogus = false)
+	FermionSign(IoInputter& io,
+	            bool bogus = false,
+	            typename PsimagLite::EnableIf<
+	            PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
 		if (bogus) return;
 		io.read(signs_,"#FERMIONICSIGN");
@@ -133,7 +136,9 @@ public:
 	}
 
 	template<typename IoOutputter>
-	void save(IoOutputter& io) const
+	void save(IoOutputter& io,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
 		io.printVector(signs_,"#FERMIONICSIGN");
 	}

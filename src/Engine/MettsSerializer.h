@@ -152,7 +152,9 @@ public:
 	}
 
 	template<typename IoOutputter>
-	void save(IoOutputter& io) const
+	void save(IoOutputter& io,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
 		PsimagLite::String s = "#BETA=" + ttos(currentBeta_);
 		io.printline(s);

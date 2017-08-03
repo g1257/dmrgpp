@@ -136,7 +136,11 @@ public:
 
 	// Save to disk everything needed to compute any observable (OBSOLETE!!)
 	template<typename IoOutputter>
-	void save(IoOutputter& io,SizeType option, SizeType numberOfSites) const
+	void save(IoOutputter& io,
+	          SizeType option,
+	          SizeType numberOfSites,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
 		fS_.save(io);
 		fE_.save(io);

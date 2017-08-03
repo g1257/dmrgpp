@@ -235,7 +235,10 @@ public:
 	SizeType size() const {return jmValues_.size(); }
 
 	template<typename IoInputter>
-	void load(IoInputter& io, bool minimizeRead)
+	void load(IoInputter& io,
+	          bool minimizeRead,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
 		if (minimizeRead) return;
 		jmValues_.load(io);
@@ -248,7 +251,9 @@ public:
 	}
 
 	template<typename IoOutputter>
-	void save(IoOutputter& io) const
+	void save(IoOutputter& io,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
 		jmValues_.save(io);
 		io.printVector(flavors_,"#su2flavors");

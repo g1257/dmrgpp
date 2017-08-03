@@ -371,7 +371,10 @@ private:
 }; // struct SymmetryElectronsSz
 
 template<typename IoOutputter, typename RealType>
-void save(IoOutputter& io,const SymmetryElectronsSz<RealType>& bd)
+void save(IoOutputter& io,
+          const SymmetryElectronsSz<RealType>& bd,
+          typename PsimagLite::EnableIf<
+          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0)
 {
 	io.printVector(bd.electronsUp,"#bdElectronsUp");
 	io.printVector(bd.electronsDown,"#bdElectronsDown");
