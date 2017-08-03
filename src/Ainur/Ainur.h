@@ -15,7 +15,7 @@ public:
 
 	typedef Vector<String>::Type VectorStringType;
 	typedef AinurStatements AinurStatementsType;
-	typedef typename AinurStatementsType::AinurLexicalType AinurLexicalType;
+	typedef AinurStatementsType::AinurLexicalType AinurLexicalType;
 
 	Ainur(String str)
 	    : statements_(vecStr_, vecChar_, escapedChars_, vecBrace_)

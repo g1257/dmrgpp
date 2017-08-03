@@ -160,7 +160,9 @@ public:
 		}
 
 		template<typename X>
-		void printVector(X const &x,String const &label)
+		void printVector(X const &x,
+		                 String const &label,
+		                 typename EnableIf<IsVectorLike<X>::True, int>::Type = 0)
 		{
 			if (rank_!=0) return;
 			(*fout_)<<label<<"\n";
@@ -169,7 +171,7 @@ public:
 		}
 
 		template<class T>
-		void print(const String& label,const T&  something)
+		void print(const String& label, const T& something)
 		{
 			if (rank_!=0) return;
 			if (!(*fout_) || !fout_->good())
@@ -195,15 +197,9 @@ public:
 		}
 
 		template<typename X>
-		void printMatrix(Matrix<X> const &mat,String const &s)
-		{
-			if (rank_!=0) return;
-			(*fout_)<<s<<"\n";
-			(*fout_)<<mat;
-		}
-
-		template<typename X>
-		void printMatrix(X const &mat,String const &s)
+		void printMatrix(const X& mat,
+		                 String const &s,
+		                 typename EnableIf<IsMatrixLike<X>::True, int>::Type = 0)
 		{
 			if (rank_!=0) return;
 			(*fout_)<<s<<"\n";
@@ -340,6 +336,18 @@ public:
 				fin_>>tmp;
 				x[i]=tmp;
 			}
+			return sc;
+		}
+
+		template<typename X>
+		typename EnableIf<IsStackLike<X>::True,std::pair<String,SizeType> >::Type
+		read(X &x,
+		     String const &s,
+		     LongIntegerType level=0,
+		     bool beQuiet = false)
+		{
+			std::pair<String,SizeType> sc = advance(s,level,beQuiet);
+			fin_ >> x;
 			return sc;
 		}
 
@@ -496,7 +504,8 @@ public:
 		template<typename X>
 		void readMatrix(X &mat,
 		                String const &s,
-		                LongIntegerType level= 0)
+		                LongIntegerType level= 0,
+		                typename EnableIf<IsMatrixLike<X>::True, int>::Type  = 0)
 		{
 			advance(s,level);
 			fin_>>mat;
