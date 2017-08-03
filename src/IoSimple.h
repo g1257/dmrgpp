@@ -593,6 +593,10 @@ struct IsInputLike<IoSimple::In> {
 	enum {True = true};
 };
 
+template<>
+struct IsOutputLike<IoSimple::Out> {
+	enum {True = true};
+};
 
 } // namespace PsimagLite
 

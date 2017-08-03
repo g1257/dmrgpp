@@ -41,6 +41,12 @@ struct IsInputLike {
 };
 
 template<typename T>
+struct IsOutputLike {
+	enum {True = false};
+};
+
+
+template<typename T>
 class IsVectorLike {
 public:
 	enum {True = false};
