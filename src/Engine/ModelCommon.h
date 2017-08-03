@@ -310,7 +310,11 @@ private:
 		const LinkProductStructType& lps = modelHelper.lps();
 		typename PsimagLite::Vector<SparseElementType>::Type x,y; // bogus
 		HamiltonianConnectionType hc(this->geometry(),modelHelper,&lps,&x,&y);
-		SizeType i =0, j = 0, type = 0,term = 0, dofs =0;
+		SizeType i = 0;
+		SizeType j = 0;
+		ProgramGlobals::ConnectionEnum type;
+		SizeType term = 0;
+		SizeType dofs = 0;
 		SparseElementType tmp = 0.0;
 		AdditionalDataType additionalData;
 		hc.prepare(ix,i,j,type,tmp,term,dofs,additionalData);
@@ -378,7 +382,7 @@ private:
 		if (sysEnvOnly && ind < middle && jnd < middle) return;
 		if (sysEnvOnly && ind >= middle && jnd >= middle) return;
 
-		SizeType type = 0;
+		ProgramGlobals::ConnectionEnum type = ProgramGlobals::SYSTEM_SYSTEM;
 		SizeType offset = cm.size()/block.size();
 
 		AdditionalDataType additionalData;

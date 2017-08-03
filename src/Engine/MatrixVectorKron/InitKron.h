@@ -182,7 +182,17 @@ private:
 		identityR_.makeDiagonal(aR.row(), value);
 		std::pair<SizeType, SizeType> ops(0,0);
 		std::pair<char, char> mods('n', 'n');
-		LinkType link(0,0,0,value,0, ProgramGlobals::BOSON, ops, mods,1,value,0);
+		LinkType link(0,
+		              0,
+		              ProgramGlobals::SYSTEM_SYSTEM,
+		              value,
+		              0,
+		              ProgramGlobals::BOSON,
+		              ops,
+		              mods,
+		              1,
+		              value,
+		              0);
 		addOneConnection(aL,identityR_,link);
 		addOneConnection(identityL_,aR,link);
 	}

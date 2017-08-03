@@ -128,7 +128,7 @@ public:
 		SizeType jnd = modelHelper_.leftRightSuper().super().block()[j];
 
 		if (!geometry_.connected(smax_,emin_,ind,jnd)) return flag;
-		SizeType type = geometry_.connectionKind(smax_,ind,jnd);
+		ProgramGlobals::ConnectionEnum type = geometry_.connectionKind(smax_,ind,jnd);
 
 		if (type==ProgramGlobals::SYSTEM_SYSTEM ||
 		        type==ProgramGlobals::ENVIRON_ENVIRON) return flag;
@@ -200,7 +200,7 @@ public:
 		AdditionalDataType additionalData;
 		SizeType i = 0;
 		SizeType j = 0;
-		SizeType type = 0;
+		ProgramGlobals::ConnectionEnum type;
 		SizeType term = 0;
 		SizeType dofs =0;
 		prepare(taskNumber,i,j,type,tmp,term,dofs,additionalData);
@@ -233,7 +233,7 @@ public:
 	void prepare(SizeType ix,
 	             SizeType& i,
 	             SizeType& j,
-	             SizeType& type,
+	             ProgramGlobals::ConnectionEnum& type,
 	             SparseElementType& tmp,
 	             SizeType& term,
 	             SizeType& dofs,
@@ -254,7 +254,7 @@ public:
 	                 const SparseMatrixType** B,
 	                 SizeType i,
 	                 SizeType j,
-	                 SizeType type,
+	                 ProgramGlobals::ConnectionEnum type,
 	                 const SparseElementType& valuec,
 	                 SizeType term,
 	                 SizeType dofs,
@@ -327,7 +327,7 @@ private:
 	SizeType calcBond(SparseMatrixType &matrixBlock,
 	                  SizeType i,
 	                  SizeType j,
-	                  SizeType type,
+	                  ProgramGlobals::ConnectionEnum type,
 	                  const SparseElementType& valuec,
 	                  SizeType term,
 	                  SizeType dofs,
@@ -346,7 +346,7 @@ private:
 	                 const typename PsimagLite::Vector<SparseElementType>::Type& y,
 	                 SizeType i,
 	                 SizeType j,
-	                 SizeType type,
+	                 ProgramGlobals::ConnectionEnum type,
 	                 const SparseElementType &valuec,
 	                 SizeType term,
 	                 SizeType dofs,

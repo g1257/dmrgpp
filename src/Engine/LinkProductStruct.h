@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef LINK_PRODUCT_STRUCT_H
 #define LINK_PRODUCT_STRUCT_H
-
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 	template<typename FieldType>
@@ -122,7 +122,7 @@ namespace Dmrg {
 		bool sealed;
 		typename PsimagLite::Vector<SizeType>::Type isaved;
 		typename PsimagLite::Vector<SizeType>::Type jsaved;
-		typename PsimagLite::Vector<int>::Type typesaved;
+		typename PsimagLite::Vector<ProgramGlobals::ConnectionEnum>::Type typesaved;
 		typename PsimagLite::Vector<FieldType>::Type tmpsaved;
 		typename PsimagLite::Vector<SizeType>::Type dofssaved;
 		typename PsimagLite::Vector<SizeType>::Type termsaved;

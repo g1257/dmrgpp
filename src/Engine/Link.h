@@ -91,7 +91,7 @@ struct Link {
 
 	Link(SizeType i,
 	     SizeType j,
-	     SizeType type1,
+	     ProgramGlobals::ConnectionEnum type1,
 	     const FieldType& value1,
 	     SizeType dofs1,
 	     ProgramGlobals::FermionOrBosonEnum fOb,
@@ -107,7 +107,7 @@ struct Link {
 	{}
 
 	SizeType site1,site2;
-	SizeType type;
+	ProgramGlobals::ConnectionEnum type;
 	FieldType value;
 	SizeType dofs;
 	ProgramGlobals::FermionOrBosonEnum fermionOrBoson;

@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include "Options.h"
 #include "Geometry/Geometry.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -205,7 +206,7 @@ public:
 
 	PsimagLite::String import() const
 	{
-		PsimagLite::String str = PsimagLite::Geometry<int,int,int>::import();
+		PsimagLite::String str = PsimagLite::Geometry<int,int,ProgramGlobals>::import();
 
 		str += "vector hubbardU;\n";
 		str += "vector potentialV;\n";
