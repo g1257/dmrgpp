@@ -220,6 +220,10 @@ public:
 	static SizeType terms() { return 5; }
 
 }; // class LinkProdExtendedSuperHubbard1Orb
+
+
+template<typename ModelHelperType>
+bool LinkProdExtendedSuperHubbard1Orb<ModelHelperType>::hasSpinOrbit_ = false;
 } // namespace Dmrg
 /*@}*/
 #endif // LINKPROD_EXTENDED_SUPER_HUBBARD_1ORB_H

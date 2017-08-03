@@ -29,43 +29,6 @@ InputNgType::Readable&,
 const OperatorOptions&,
 PsimagLite::String);
 
-namespace Dmrg {
-template<>
-bool LinkProductHeisenbergAncillaC<
-Dmrg::ModelHelperLocal<
-   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance0Type,CvectorSizeType> >  >,Dmrg::Basis<SparseMatrixInstance0Type,CvectorSizeType> >
-  >
->::hot_ = false;
-
-template<>
-bool LinkProductHubbardAncillaExtended<
-Dmrg::ModelHelperLocal<
-   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance0Type,CvectorSizeType> >  >,Dmrg::Basis<SparseMatrixInstance0Type,CvectorSizeType> >
-  >
->::hot_ = false;
-
-template<>
-bool LinkProductTjAncillaC2<
-Dmrg::ModelHelperLocal<
-   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance0Type,CvectorSizeType> >  >,Dmrg::Basis<SparseMatrixInstance0Type,CvectorSizeType> >
-  >
->::hot_ = false;
-
-template<>
-bool LinkProdExtendedSuperHubbard1Orb<
-Dmrg::ModelHelperLocal<
-   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance0Type,CvectorSizeType> >  >,Dmrg::Basis<SparseMatrixInstance0Type,CvectorSizeType> >
-  >
->::hasSpinOrbit_ = false;
-
-template<>
-SizeType LinkProductHeisenberg<
-Dmrg::ModelHelperLocal<
-   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance0Type,CvectorSizeType> >  >,Dmrg::Basis<SparseMatrixInstance0Type,CvectorSizeType> >
-  >
->::terms_ = 2;
-
-} // namespace Dmrg
 
 typedef PsimagLite::CrsMatrix<RealType> SparseMatrixInstance1Type;
 typedef PsimagLite::Geometry<RealType,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance1Type;

@@ -234,6 +234,9 @@ private:
 
 	static bool hot_;
 }; // class LinkProductHubbardAncillaExtended
+
+template<typename ModelHelperType>
+bool LinkProductHubbardAncillaExtended<ModelHelperType>::hot_ = false;
 } // namespace Dmrg
 /*@}*/
 #endif //DMRG_LINKPROD_HUBBARD_ANCILLA_EXTENDED_H

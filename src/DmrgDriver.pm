@@ -124,45 +124,6 @@ foreach my $item (@$values) {
 
 system("echo \"-------------------\" >> out.txt");
 
-print FOUT<<EOF;
-namespace Dmrg {
-template<>
-bool LinkProductHeisenbergAncillaC<
-Dmrg::ModelHelper$modelHelper<
-   $lrs
-  >
->::hot_ = false;
-
-template<>
-bool LinkProductHubbardAncillaExtended<
-Dmrg::ModelHelper$modelHelper<
-   $lrs
-  >
->::hot_ = false;
-
-template<>
-bool LinkProductTjAncillaC2<
-Dmrg::ModelHelper$modelHelper<
-   $lrs
-  >
->::hot_ = false;
-
-template<>
-bool LinkProdExtendedSuperHubbard1Orb<
-Dmrg::ModelHelper$modelHelper<
-   $lrs
-  >
->::hasSpinOrbit_ = false;
-
-template<>
-SizeType LinkProductHeisenberg<
-Dmrg::ModelHelper$modelHelper<
-   $lrs
-  >
->::terms_ = 2;
-
-} // namespace Dmrg
-EOF
 }
 
 sub isComplexOption

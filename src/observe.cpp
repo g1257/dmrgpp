@@ -1,20 +1,5 @@
 #include "ObserveDriver.h"
 
-template<typename ModelHelperType>
-bool Dmrg::LinkProductHeisenbergAncillaC<ModelHelperType>::hot_ = false;
-
-template<typename ModelHelperType>
-bool Dmrg::LinkProductHubbardAncillaExtended<ModelHelperType>::hot_ = false;
-
-template<typename ModelHelperType>
-bool Dmrg::LinkProductTjAncillaC2<ModelHelperType>::hot_ = false;
-
-template<typename ModelHelperType>
-bool Dmrg::LinkProdExtendedSuperHubbard1Orb<ModelHelperType>::hasSpinOrbit_ = false;
-
-template<typename ModelHelperType>
-SizeType Dmrg::LinkProductHeisenberg<ModelHelperType>::terms_ = 2;
-
 using namespace Dmrg;
 
 template<typename GeometryType,

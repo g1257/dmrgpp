@@ -177,6 +177,9 @@ private:
 
 	static bool hot_;
 }; // class LinkProductHeisenbergAncillaC
+
+template<typename ModelHelperType>
+bool LinkProductHeisenbergAncillaC<ModelHelperType>::hot_ = false;
 } // namespace Dmrg
 /*@}*/
 #endif

@@ -265,6 +265,9 @@ private:
 
 	static bool hot_;
 }; // class LinkProductTjAncillaC3
+
+template<typename ModelHelperType>
+bool LinkProductTjAncillaC2<ModelHelperType>::hot_ = false;
 } // namespace Dmrg
 /*@}*/
 #endif

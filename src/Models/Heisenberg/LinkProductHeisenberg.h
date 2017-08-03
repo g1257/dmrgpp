@@ -165,6 +165,9 @@ private:
 		return PairType(x,x);
 	}
 }; // class LinkProductHeisenberg
+
+template<typename ModelHelperType>
+SizeType LinkProductHeisenberg<ModelHelperType>::terms_ = 2;
 } // namespace Dmrg
 /*@}*/
 #endif
