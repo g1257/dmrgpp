@@ -183,7 +183,7 @@ public:
 	                    BlockType const &X,
 	                    RealType time)
 	{
-		grow(*right_,model,pE,X,ProgramGlobals::EXPAND_SYSTEM,time);
+		grow(*right_,model,pE,X,ProgramGlobals::EXPAND_ENVIRON,time);
 	}
 
 	void printSizes(const PsimagLite::String& label,std::ostream& os) const

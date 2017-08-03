@@ -134,8 +134,6 @@ public:
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
 
-	enum {GROW_RIGHT,GROW_LEFT};
-
 	BasisWithOperators(const PsimagLite::String& s)
 	    : BasisType(s),operators_(this)
 	{}
@@ -159,10 +157,14 @@ public:
 	}
 
 	//! set this basis to the outer product of   basis2 and basis3 or basis3 and basis2  depending on dir
-	void setToProduct(const ThisType& basis2,const ThisType& basis3,int dir)
+	void setToProduct(const ThisType& basis2,
+	                  const ThisType& basis3,
+	                  ProgramGlobals::DirectionEnum dir)
 	{
-		if (dir==GROW_RIGHT) setToProduct(basis2,basis3);
-		else setToProduct(basis3,basis2);
+		if (dir == ProgramGlobals::EXPAND_SYSTEM)
+			setToProduct(basis2,basis3);
+		else
+			setToProduct(basis3,basis2);
 	}
 
 	//! set this basis to the outer product of   basis2 and basis3
