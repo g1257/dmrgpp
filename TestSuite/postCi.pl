@@ -43,7 +43,7 @@ defined($golddir) or $golddir = "oldTests";
 
 my @tests = Ci::getTests("inputs/descriptions.txt");
 my %allowedTests = Ci::getAllowedTests(\@tests);
-my $total = scalar(keys %allowedTests);
+my $total = $tests[$#tests]->{"number"};
 
 if (defined($info)) {
 	print STDERR "$0: INFO for $info\n";

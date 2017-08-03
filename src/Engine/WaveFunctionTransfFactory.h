@@ -507,7 +507,8 @@ private:
 		std::cerr<<"counter="<<counter_<<"\n";
 	}
 
-	SizeType computeCenter(const LeftRightSuperType& lrs,ProgramGlobals::DirectionEnum direction) const
+	SizeType computeCenter(const LeftRightSuperType& lrs,
+	                       ProgramGlobals::DirectionEnum direction) const
 	{
 		if (direction == ProgramGlobals::EXPAND_SYSTEM) {
 			SizeType total = lrs.left().block().size();
