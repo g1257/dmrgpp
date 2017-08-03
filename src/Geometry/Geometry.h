@@ -98,14 +98,14 @@ public:
 
 
 	/** @class hide_geometry1
-	    - TotalNumberOfSites=integer This is the total number of sites including bath sites
-	      (if any) and all system and environment sites.
-	    - NumberOfTerms=integer This is the number of Hamiltonian off-site terms. This number
-	      must match the model's expected number of terms. Note that each Hamiltonian off-site
-	      term can have a different geometry!
+		- TotalNumberOfSites=integer This is the total number of sites including bath sites
+		  (if any) and all system and environment sites.
+		- NumberOfTerms=integer This is the number of Hamiltonian off-site terms. This number
+		  must match the model's expected number of terms. Note that each Hamiltonian off-site
+		  term can have a different geometry!
 	*/
 	Geometry(InputType& io,bool debug=false,SizeType meshPoints=0)
-	: GeometryExType(io,meshPoints)
+	    : GeometryExType(io,meshPoints)
 	{
 		int x;
 		io.readline(x,"TotalNumberOfSites=");
@@ -150,9 +150,9 @@ public:
 	}
 
 	template<class Archive>
-    void serialize(Archive & ar, const unsigned int)
-    {
-        ar & linSize_;
+	void serialize(Archive & ar, const unsigned int)
+	{
+		ar & linSize_;
 		ar & terms_;
 	}
 
@@ -180,7 +180,9 @@ public:
 
 	String label(SizeType i) const { return terms_[i]->label(); }
 
-	SizeType connectionKind(SizeType smax,SizeType ind,SizeType jnd) const
+	typename ProgramGlobalsType::ConnectionEnum connectionKind(SizeType smax,
+	                                                           SizeType ind,
+	                                                           SizeType jnd) const
 	{
 		SizeType middle = smax + 1;
 		if (ind<middle && jnd>=middle) return ProgramGlobalsType::SYSTEM_ENVIRON;

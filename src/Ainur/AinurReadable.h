@@ -130,7 +130,7 @@ public:
 
 		String tmp = (n == 2) ? store.value(1, names_[x]) : "";
 		AinurLexicalType::removeTrailingBlanks(tmp);
-		SizeType start = tmp.find("...");
+		size_t start = tmp.find("...");
 		SizeType times = (start != String::npos && tmp.length() > 3)  ?
 		            atoi(tmp.substr(start + 3, tmp.length() - 3).c_str()) : 0;
 
