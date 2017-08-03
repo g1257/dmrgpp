@@ -588,6 +588,12 @@ void operator>>(IoSimple::In& io,T& t)
 	(io.fin_)>>t;
 }
 
+template<>
+struct IsInputLike<IoSimple::In> {
+	enum {True = true};
+};
+
+
 } // namespace PsimagLite
 
 namespace Spf {

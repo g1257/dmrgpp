@@ -36,6 +36,11 @@ Please see full open source license included in file LICENSE.
 namespace PsimagLite {
 
 template<typename T>
+struct IsInputLike {
+	enum {True = false};
+};
+
+template<typename T>
 class IsVectorLike {
 public:
 	enum {True = false};
