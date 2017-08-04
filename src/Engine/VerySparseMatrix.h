@@ -429,5 +429,13 @@ bool isHermitian(const VerySparseMatrix<T>& m)
 	return true;
 }
 } // namespace Dmrg
+
+namespace PsimagLite {
+template<typename T>
+struct IsMatrixLike<Dmrg::VerySparseMatrix<T> >
+{
+	enum {True = true};
+};
+}
 /*@}*/
 #endif
