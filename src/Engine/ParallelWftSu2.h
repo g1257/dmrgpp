@@ -173,34 +173,35 @@ public:
 		SizeType start = psiDest_.offset(i0_);
 		psiDest_.fastAccess(i0_,taskNumber) = 0.0;
 		SizeType xx = taskNumber + start;
+		assert(dir_ == ProgramGlobals::EXPAND_SYSTEM ||
+		       dir_ == ProgramGlobals::EXPAND_ENVIRON);
 
-		for (int kI = factorsInvSE_.getRowPtr(xx);
-		     kI < factorsInvSE_.getRowPtr(xx+1);
-		     kI++) {
-			if (dir_ == ProgramGlobals::EXPAND_SYSTEM) {
-				SizeType ip = 0;
-				SizeType alpha = 0;
-				SizeType kp = 0;
-				SizeType jp = 0;
-				for (int kI=factorsInvSE_.getRowPtr(xx);
-				     kI<factorsInvSE_.getRowPtr(xx+1);
-				     kI++) {
-					pack1_->unpack(alpha,jp,static_cast<SizeType>(factorsInvSE_.getCol(kI)));
-					for (int k2I=factorsInvS_.getRowPtr(alpha);
-					     k2I<factorsInvS_.getRowPtr(alpha+1);
-					     k2I++) {
-						pack2_->unpack(ip,kp,static_cast<SizeType>(factorsInvS_.getCol(k2I)));
-						psiDest_.fastAccess(i0_,taskNumber) += factorsInvSE_.getValue(kI)*
-						        factorsInvS_.getValue(k2I)*
-						        createAux2b(psiSrc_,ip,kp,jp,wsT_,we_,nk_);
-					}
+		if (dir_ == ProgramGlobals::EXPAND_SYSTEM) {
+			SizeType ip = 0;
+			SizeType alpha = 0;
+			SizeType kp = 0;
+			SizeType jp = 0;
+			for (int kI=factorsInvSE_.getRowPtr(xx);
+			     kI<factorsInvSE_.getRowPtr(xx+1);
+			     kI++) {
+				pack1_->unpack(alpha,jp,static_cast<SizeType>(factorsInvSE_.getCol(kI)));
+				for (int k2I=factorsInvS_.getRowPtr(alpha);
+				     k2I<factorsInvS_.getRowPtr(alpha+1);
+				     k2I++) {
+					pack2_->unpack(ip,kp,static_cast<SizeType>(factorsInvS_.getCol(k2I)));
+					psiDest_.fastAccess(i0_,taskNumber) += factorsInvSE_.getValue(kI)*
+					        factorsInvS_.getValue(k2I)*
+					        createAux2b(psiSrc_,ip,kp,jp,wsT_,we_,nk_);
 				}
-
-			} else {
-				SizeType ip = 0;
-				SizeType beta = 0;
-				SizeType kp = 0;
-				SizeType jp = 0;
+			}
+		} else {
+			SizeType ip = 0;
+			SizeType beta = 0;
+			SizeType kp = 0;
+			SizeType jp = 0;
+			for (int kI=factorsInvSE_.getRowPtr(xx);
+			     kI<factorsInvSE_.getRowPtr(xx+1);
+			     kI++) {
 				pack1_->unpack(ip,beta,static_cast<SizeType>(factorsInvSE_.getCol(kI)));
 				for (int k2I = factorsInvE_.getRowPtr(beta);
 				     k2I < factorsInvE_.getRowPtr(beta+1);

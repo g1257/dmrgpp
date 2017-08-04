@@ -330,20 +330,21 @@ private:
 		msg<<" Destination sectors "<<psiDest.sectors();
 		msg<<" Source sectors "<<psiSrc.sectors();
 		progress_.printline(msg,std::cout);
-		assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
+		const LeftRightSuperType& lrsOld = dmrgWaveStruct_.lrs;
+		assert(lrsOld.super().permutationInverse().size() == psiSrc.size());
 
 		VectorType psiV;
 		for (SizeType srcI = 0; srcI < psiSrc.sectors(); ++srcI) {
 			SizeType srcII = psiSrc.sector(srcI);
 			psiSrc.extract(psiV,srcII);
 			SizeType offset = psiSrc.offset(srcII);
-			SizeType qSrc = lrs.super().qn(lrs.super().partition(srcI));
+			SizeType qSrc = lrsOld.super().qn(lrsOld.super().partition(srcII));
 			for (SizeType ii=0;ii<psiDest.sectors();ii++) {
-				SizeType tmp = dmrgWaveStruct_.lrs.super().partition(ii);
-				SizeType qDest = dmrgWaveStruct_.lrs.super().qn(tmp);
+				SizeType i0 = psiDest.sector(ii);
+				SizeType tmp = lrs.super().partition(i0);
+				SizeType qDest = lrs.super().qn(tmp);
 				if (qSrc != qDest) continue;
 
-				SizeType i0 = psiDest.sector(ii);
 				SizeType start = psiDest.offset(i0);
 				SizeType final = psiDest.effectiveSize(i0)+start;
 				VectorType dest(final-start,0.0);
@@ -443,6 +444,7 @@ private:
 		return sum;
 	}
 
+	// THIS FUNCTION IS BUGGY <--- FIXME
 	template<typename SomeVectorType>
 	void transformVector1bounce(SomeVectorType& psiDest,
 	                            const SomeVectorType& psiSrc,
@@ -455,6 +457,7 @@ private:
 		}
 	}
 
+	// THIS FUNCTION IS BUGGY <--- FIXME
 	template<typename SomeVectorType>
 	void transformVector1bounce(SomeVectorType& psiDest,
 	                            const SomeVectorType& psiSrc,
