@@ -93,7 +93,7 @@ $path../../PsimagLite/lib/libpsimaglite.a:
 Makefile.dep: $allCpps $additional
 	\$(CXX) \$(CPPFLAGS) -MM $allCpps  > Makefile.dep
 
-clean: Makefile.dep
+clean::
 	rm -f core* $allExecutables *.o *.dep $additional2
 
 include Makefile.dep
