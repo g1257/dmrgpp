@@ -400,8 +400,8 @@ public:
 		io.printline("dmrgWaveStruct");
 
 		dmrgWaveStruct_.save(io);
-		io.print("wsStack", wsStack_);
-		io.print("weStack", weStack_);
+		io.print("wsStack\n", wsStack_);
+		io.print("weStack\n", weStack_);
 	}
 
 	void appendFileList(VectorStringType& files, PsimagLite::String rootName) const
