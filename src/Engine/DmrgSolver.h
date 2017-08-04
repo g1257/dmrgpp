@@ -224,7 +224,7 @@ public:
 		ioOut_.print("#InputStartsHere\n");
 		ioOut_.print(base64encode());
 		ioOut_.print("#InputEndsHere\n");
-		ioOut_.print("PARAMETERS\n",parameters_);
+		ioOut_.print("PARAMETERS\n", parameters_);
 		ioOut_.print(model);
 		if (parameters_.options.find("verbose")!=PsimagLite::String::npos) verbose_=true;
 	}

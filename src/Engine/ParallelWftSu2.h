@@ -127,17 +127,17 @@ public:
 
 		if (dir_ == ProgramGlobals::EXPAND_SYSTEM) {
 			assert(dmrgWaveStruct_.lrs.right().permutationInverse().size()==
-			       dmrgWaveStruct_.we.row());
+			       dmrgWaveStruct_.we.rows());
 			assert(lrs_.left().permutationInverse().size()/volumeOf(nk)==
-			       dmrgWaveStruct_.ws.col());
+			       dmrgWaveStruct_.ws.cols());
 			pack1_ = new PackIndicesType(lrs.left().permutationInverse().size());
 			pack2_ = new PackIndicesType(lrs.left().permutationInverse().size()/
 			                             volumeOf(nk));
 		} else {
 			assert(dmrgWaveStruct_.lrs.left().permutationInverse().size()==
-			       dmrgWaveStruct_.ws.row());
+			       dmrgWaveStruct_.ws.rows());
 			assert(lrs_.right().permutationInverse().size()/volumeOf(nk)==
-			       dmrgWaveStruct_.we.col());
+			       dmrgWaveStruct_.we.cols());
 			pack1_ = new PackIndicesType(lrs.super().permutationInverse().size()/
 			                             lrs.right().permutationInverse().size());
 			pack2_ = new PackIndicesType(volumeOf(nk));
@@ -273,7 +273,7 @@ private:
 	                              const VectorSizeType& nk) const
 	{
 		SizeType volumeOfNk = volumeOf(nk);
-		SizeType ni=dmrgWaveStruct_.ws.col();
+		SizeType ni=dmrgWaveStruct_.ws.cols();
 		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
 		const FactorsType& factorsS = dmrgWaveStruct_.lrs.left().getFactors();
 		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();

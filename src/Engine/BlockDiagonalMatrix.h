@@ -128,6 +128,42 @@ public:
 			offsetsRows_[i] = offsetsCols_[i] = basis.partition(i);
 	}
 
+	template<typename IoInputType>
+	void load(IoInputType& io,
+	          PsimagLite::String name,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
+	{
+		if (name != "") io.advance(name);
+		io.readline(isSquare_, "#IsSquare=");
+		io.read(offsetsRows_, "#OffsetRows");
+		io.read(offsetsCols_, "#OffsetCols");
+		int total = 0;
+		io.readline(total, "#Total=");
+		if (total < 0)
+			err("While reading BlockDiagonalMatrix with label " + name + "\n");
+		if (total == 0) return;
+		data_.resize(total);
+		for (SizeType i = 0; i < data_.size(); ++i)
+			io.readMatrix(data_[i], "#" + ttos(i));
+	}
+
+	template<typename IoOutputType>
+	void save(IoOutputType& io,
+	          PsimagLite::String name,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
+	{
+		io.printline(name);
+		PsimagLite::String str = (isSquare_) ? "1" : "0";
+		io.printline("#IsSquare=" + str);
+		io.printVector(offsetsRows_, "#OffsetRows");
+		io.printVector(offsetsCols_, "#OffsetCols");
+		io.printline("#Total=" + ttos(data_.size()));
+		for (SizeType i = 0; i < data_.size(); ++i)
+			io.printMatrix(data_[i], "#" + ttos(i));
+	}
+
 	void setTo(ComplexOrRealType value)
 	{
 		SizeType n = data_.size();
@@ -252,6 +288,39 @@ public:
 	{
 		assert(i < data_.size());
 		return data_[i];
+	}
+
+	friend std::ostream& operator<<(std::ostream& os, const BlockDiagonalMatrix& m)
+	{
+		PsimagLite::String str = (m.isSquare_) ? "1" : "0";
+		os<<str<<"\n";
+		os<<m.offsetsRows_;
+		os<<m.offsetsCols_;
+		os<<"#Total="<<m.data_.size()<<"\n";
+		for (SizeType i = 0; i < m.data_.size(); ++i)
+			os<<m.data_[i];
+		return os;
+	}
+
+	friend std::istream& operator>>(std::istream& is, BlockDiagonalMatrix& m)
+	{
+		int x = -1;
+		is>>x;
+		if (x != 0 && x != 1)
+			err("std::istream& operator>> BlockDiagonalMatrix(1)\n");
+		m.isSquare_ = (x == 1);
+		is>>m.offsetsRows_;
+		is>>m.offsetsCols_;
+		int total = 0;
+		is>>total;
+		if (total < 0)
+			err("std::istream& operator>> BlockDiagonalMatrix(2)\n");
+		if (total == 0)
+			return is;
+		m.data_.resize(total);
+		for (SizeType i = 0; i < m.data_.size(); ++i)
+			is>>m.data_[i];
+		return is;
 	}
 
 private:

@@ -111,15 +111,11 @@ public:
 	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
 	typedef MatrixOrIdentity<SparseMatrixType> MatrixOrIdentityType;
 
-	static const SizeType INFINITE = ProgramGlobals::INFINITE;
-	static const SizeType EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
-	static const SizeType EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
-
-	WaveFunctionTransfPatched(const SizeType& stage,
-	                        const bool& firstCall,
-	                        const SizeType& counter,
-	                        const DmrgWaveStructType& dmrgWaveStruct,
-	                        bool twoSiteDmrg)
+	WaveFunctionTransfPatched(const ProgramGlobals::DirectionEnum& stage,
+	                          const bool& firstCall,
+	                          const SizeType& counter,
+	                          const DmrgWaveStructType& dmrgWaveStruct,
+	                          bool twoSiteDmrg)
 	    : stage_(stage),
 	      firstCall_(firstCall),
 	      counter_(counter),
@@ -138,7 +134,9 @@ public:
 	                             const VectorSizeType& nk) const
 
 	{
-		if (stage_==EXPAND_ENVIRON) {
+		bool done = false;
+		if (stage_ == ProgramGlobals::EXPAND_ENVIRON) {
+			done = true;
 			if (firstCall_) {
 				transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
 			} else if (counter_==0) {
@@ -148,13 +146,18 @@ public:
 			}
 		}
 
-		if (stage_==EXPAND_SYSTEM) {
+		if (stage_ == ProgramGlobals::EXPAND_SYSTEM) {
+			done = true;
 			if (firstCall_)
 				transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
 			else if (counter_==0)
 				transformVector2bounce(psiDest,psiSrc,lrs,nk);
 			else transformVector2(psiDest,psiSrc,lrs,nk);
 		}
+
+		if (!done)
+			err("WFT Patched: Stage is not EXPAND_ENVIRON or EXPAND_SYSTEM\n");
+
 	}
 
 private:
@@ -184,13 +187,13 @@ private:
 	                             typename ProgramGlobals::DirectionEnum dir) const
 	{
 		err("WaveFunctionTransfPatched: not implemented yet\n");
-//		SizeType m = psiSrc.sector(i0);
-//		SizeType target = dmrgWaveStruct_.lrs.super.qn(m);
-//		GenIjPatch<LeftRightSuperType> genIjPatch(dmrgWaveStruct_.lrs, target);
-//		VectorSizeType lv = genIjPatch(GenIjPatch<LeftRightSuperType>::LEFT);
-//		VectorSizeType rv = genIjPatch(GenIjPatch<LeftRightSuperType>::RIGHT);
-//		SizeType total = lv.size();
-//		assert(total == rv.size());
+		//		SizeType m = psiSrc.sector(i0);
+		//		SizeType target = dmrgWaveStruct_.lrs.super.qn(m);
+		//		GenIjPatch<LeftRightSuperType> genIjPatch(dmrgWaveStruct_.lrs, target);
+		//		VectorSizeType lv = genIjPatch(GenIjPatch<LeftRightSuperType>::LEFT);
+		//		VectorSizeType rv = genIjPatch(GenIjPatch<LeftRightSuperType>::RIGHT);
+		//		SizeType total = lv.size();
+		//		assert(total == rv.size());
 		// if (dir_ == DmrgWaveStructType::DIR_2)
 		// reshape psiSrc --> psiSrc(ip', beta')
 		// Ws^T_(ip, ip') psiSrc(ip', beta') We^T(beta', beta)
@@ -226,8 +229,8 @@ private:
 		        lrs.right().permutationInverse().size();
 
 		assert(lrs.left().permutationInverse().size()==volumeOfNk ||
-		       lrs.left().permutationInverse().size()==dmrgWaveStruct_.ws.row());
-		assert(lrs.right().permutationInverse().size()/volumeOfNk==dmrgWaveStruct_.we.col());
+		       lrs.left().permutationInverse().size()==dmrgWaveStruct_.ws.rows());
+		assert(lrs.right().permutationInverse().size()/volumeOfNk==dmrgWaveStruct_.we.cols());
 
 		SizeType start = psiDest.offset(i0);
 		SizeType total = psiDest.effectiveSize(i0);
@@ -334,7 +337,7 @@ private:
 		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
 		SizeType nalpha = lrs.left().permutationInverse().size();
 
-		assert(nip==dmrgWaveStruct_.ws.col());
+		assert(nip==dmrgWaveStruct_.ws.cols());
 
 		const SparseMatrixType& we = dmrgWaveStruct_.we;
 		const SparseMatrixType& ws = dmrgWaveStruct_.ws;
@@ -426,7 +429,7 @@ private:
 		PackIndicesType pack1(nip);
 		PackIndicesType pack2(volumeOfNk);
 		MatrixOrIdentityType wsRef(twoSiteDmrg_,dmrgWaveStruct_.ws);
-		SizeType nip2 = (twoSiteDmrg_) ? dmrgWaveStruct_.ws.col() : nip;
+		SizeType nip2 = (twoSiteDmrg_) ? dmrgWaveStruct_.ws.cols() : nip;
 
 		for (SizeType x=0;x<total;x++) {
 			psiDest.fastAccess(i0,x) = 0.0;
@@ -498,7 +501,7 @@ private:
 		}
 	}
 
-	const SizeType& stage_;
+	const ProgramGlobals::DirectionEnum& stage_;
 	const bool& firstCall_;
 	const SizeType& counter_;
 	const DmrgWaveStructType& dmrgWaveStruct_;

@@ -185,6 +185,7 @@ public:
 	}
 
 private:
+
 	RealType currentTime_;
 	SizeType site_;
 	typename PsimagLite::Vector<VectorType>::Type targetVectors_;
