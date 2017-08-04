@@ -4,7 +4,7 @@ NumberOfTerms=5
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
-Connectors  1 -1 
+Connectors  1 -1
 
 DegreesOfFreedom=1
 GeometryKind=chain
@@ -27,8 +27,8 @@ GeometryOptions=ConstantValues
 Connectors  1 0
 
 Model=TjAncillaC2
-potentialV	 12 0 0 0 0 0 0 
-                    0 0 0 0 0 0 
+potentialV	 12 0 0 0 0 0 0
+                    0 0 0 0 0 0
 
 SolverOptions=restart,TargetingAncilla,twositedmrg
 Version=version
@@ -59,7 +59,7 @@ TSPUseQns=1
 GsWeight=0.0
 
 TSPOperator=cooked
-COOKED_OPERATOR=i
+COOKED_OPERATOR=identity
 COOKED_EXTRA 2 0 0
 FERMIONSIGN=1
 JMVALUES 0 0
