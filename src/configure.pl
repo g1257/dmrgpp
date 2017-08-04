@@ -110,6 +110,8 @@ libkronutil.a:
 ../doc/manual.tex: ../doc/manual.ptex
 	cd ../doc; find ../src -iname "*.h" -or -iname "*.cpp" | ../../PsimagLite/scripts/doc.pl manual.ptex
 
+clean::
+	\$(MAKE) -C KronUtil clean
 EOF
 
 	close($fh);

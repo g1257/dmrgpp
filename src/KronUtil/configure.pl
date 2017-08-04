@@ -61,10 +61,10 @@ libkronutil.a: $dotos ../Config.make Makefile
 	${gccdash}ranlib libkronutil.a
 
 test1: libkronutil.a test1.o $dotos ../Config.make
-	\$(CXX) \$(CFLAGS) -o test1 test1.o \$(LDFLAGS) libkronutil.a
+	\$(CXX) \$(CFLAGS) -o test1 test1.o libkronutil.a \$(LDFLAGS)
 
 test2: libkronutil.a test2.o ../Config.make
-	\$(CXX) \$(CFLAGS) -o test2 test2.o \$(LDFLAGS) libkronutil.a
+	\$(CXX) \$(CFLAGS) -o test2 test2.o libkronutil.a \$(LDFLAGS)
 
 EOF
 
