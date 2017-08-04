@@ -400,8 +400,8 @@ public:
 		io.printline("dmrgWaveStruct");
 
 		dmrgWaveStruct_.save(io);
-		io.printMatrix(wsStack_,"wsStack");
-		io.printMatrix(weStack_,"weStack");
+		io.print("wsStack", wsStack_);
+		io.print("weStack", weStack_);
 	}
 
 	void appendFileList(VectorStringType& files, PsimagLite::String rootName) const
@@ -423,8 +423,8 @@ private:
 		firstCall_=false;
 		io.advance("dmrgWaveStruct");
 		dmrgWaveStruct_.load(io);
-		io.readMatrix(wsStack_,"wsStack");
-		io.readMatrix(weStack_,"weStack");
+		io.read(wsStack_,"wsStack");
+		io.read(weStack_,"weStack");
 	}
 
 	void myRandomT(std::complex<RealType> &value) const
@@ -487,6 +487,9 @@ private:
 		if (fabs(norm1-norm2)>1e-5) {
 			msg<<"WARNING: orig. norm= "<<norm1<<" resulting norm= "<<norm2;
 		}
+
+		if (norm2 < 1e-5)
+			err("WFT Factory: norm2 = " + ttos(norm2) + " < 1e-5\n");
 
 		progress_.printline(msg,std::cout);
 	}

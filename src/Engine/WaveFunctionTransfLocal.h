@@ -114,11 +114,7 @@ public:
 	DmrgWaveStructType,
 	LeftRightSuperType> ParallelWftType;
 
-	static const SizeType INFINITE = ProgramGlobals::INFINITE;
-	static const SizeType EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
-	static const SizeType EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
-
-	WaveFunctionTransfLocal(const SizeType& stage,
+	WaveFunctionTransfLocal(const ProgramGlobals::DirectionEnum& stage,
 	                        const bool& firstCall,
 	                        const SizeType& counter,
 	                        const DmrgWaveStructType& dmrgWaveStruct,
@@ -141,7 +137,7 @@ public:
 	                             const VectorSizeType& nk) const
 
 	{
-		if (stage_==EXPAND_ENVIRON) {
+		if (stage_ == ProgramGlobals::EXPAND_ENVIRON) {
 			if (firstCall_) {
 				transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
 			} else if (counter_==0) {
@@ -149,15 +145,21 @@ public:
 			} else {
 				transformVector1(psiDest,psiSrc,lrs,nk);
 			}
+
+			return;
 		}
 
-		if (stage_==EXPAND_SYSTEM) {
+		if (stage_ == ProgramGlobals::EXPAND_SYSTEM) {
 			if (firstCall_)
 				transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
 			else if (counter_==0)
 				transformVector2bounce(psiDest,psiSrc,lrs,nk);
 			else transformVector2(psiDest,psiSrc,lrs,nk);
+
+			return;
 		}
+
+		err("WFT Local: Stage is not EXPAND_ENVIRON or EXPAND_SYSTEM\n");
 	}
 
 private:
@@ -225,8 +227,8 @@ private:
 		        lrs.right().permutationInverse().size();
 
 		assert(lrs.left().permutationInverse().size()==volumeOfNk ||
-		       lrs.left().permutationInverse().size()==dmrgWaveStruct_.ws.row());
-		assert(lrs.right().permutationInverse().size()/volumeOfNk==dmrgWaveStruct_.we.col());
+		       lrs.left().permutationInverse().size()==dmrgWaveStruct_.ws.rows());
+		assert(lrs.right().permutationInverse().size()/volumeOfNk==dmrgWaveStruct_.we.cols());
 
 		SizeType start = psiDest.offset(i0);
 		SizeType total = psiDest.effectiveSize(i0);
@@ -333,7 +335,7 @@ private:
 		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
 		SizeType nalpha = lrs.left().permutationInverse().size();
 
-		assert(nip==dmrgWaveStruct_.ws.col());
+		assert(nip==dmrgWaveStruct_.ws.cols());
 
 		const SparseMatrixType& we = dmrgWaveStruct_.we;
 		const SparseMatrixType& ws = dmrgWaveStruct_.ws;
@@ -497,7 +499,7 @@ private:
 		}
 	}
 
-	const SizeType& stage_;
+	const ProgramGlobals::DirectionEnum& stage_;
 	const bool& firstCall_;
 	const SizeType& counter_;
 	const DmrgWaveStructType& dmrgWaveStruct_;

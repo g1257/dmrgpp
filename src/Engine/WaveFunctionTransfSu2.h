@@ -114,16 +114,11 @@ public:
 	LeftRightSuperType> ParallelWftType;
 	typedef MatrixOrIdentity<SparseMatrixType> MatrixOrIdentityType;
 
-	static const SizeType INFINITE = ProgramGlobals::INFINITE;
-	static const SizeType EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
-	static const SizeType EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
-
-	WaveFunctionTransfSu2(
-	        const SizeType& stage,
-	        const bool& firstCall,
-	        const SizeType& counter,
-	        const DmrgWaveStructType& dmrgWaveStruct,
-	        bool twoSiteDmrg)
+	WaveFunctionTransfSu2(const ProgramGlobals::DirectionEnum& stage,
+	                      const bool& firstCall,
+	                      const SizeType& counter,
+	                      const DmrgWaveStructType& dmrgWaveStruct,
+	                      bool twoSiteDmrg)
 	    : stage_(stage),
 	      firstCall_(firstCall),
 	      counter_(counter),
@@ -142,7 +137,9 @@ public:
 	                             const VectorSizeType& nk) const
 
 	{
-		if (stage_==EXPAND_ENVIRON) {
+		bool done = false;
+		if (stage_ == ProgramGlobals::EXPAND_ENVIRON) {
+			done = true;
 			if (firstCall_) {
 				transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
 			} else if (counter_==0) {
@@ -152,7 +149,8 @@ public:
 			}
 		}
 
-		if (stage_==EXPAND_SYSTEM) {
+		if (stage_ == ProgramGlobals::EXPAND_SYSTEM) {
+			done = true;
 			if (firstCall_)
 				transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
 			else if (counter_==0)
@@ -160,14 +158,8 @@ public:
 			else transformVector2(psiDest,psiSrc,lrs,nk);
 		}
 
-		RealType norm1 = norm(psiSrc);
-		RealType norm2 = norm(psiDest);
-
-		if (fabs(norm1-norm2)>1e-5) {
-			PsimagLite::OstringStream msg;
-			msg<<"WARNING: orig. norm= "<<norm1<<" resulting norm= "<<norm2;
-			progress_.printline(msg,std::cout);
-		}
+		if (!done)
+			err("WFT SU(2): Stage is not EXPAND_ENVIRON or EXPAND_SYSTEM\n");
 	}
 
 private:
@@ -251,8 +243,8 @@ private:
 		        lrs.right().permutationInverse().size();
 
 		assert(lrs.left().permutationInverse().size()==volumeOfNk ||
-		       lrs.left().permutationInverse().size()==dmrgWaveStruct_.ws.row());
-		assert(lrs.right().permutationInverse().size()/volumeOfNk==dmrgWaveStruct_.we.col());
+		       lrs.left().permutationInverse().size()==dmrgWaveStruct_.ws.rows());
+		assert(lrs.right().permutationInverse().size()/volumeOfNk==dmrgWaveStruct_.we.cols());
 
 		SizeType start = psiDest.offset(i0);
 		SizeType total = psiDest.effectiveSize(i0);
@@ -300,7 +292,7 @@ private:
 	                                          const VectorSizeType& nk) const
 	{
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
-		SizeType ni=dmrgWaveStruct_.ws.col();
+		SizeType ni=dmrgWaveStruct_.ws.cols();
 		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
 		MatrixOrIdentityType wsRef2(twoSiteDmrg_ && nip>volumeOfNk,ws);
 		const FactorsType& factorsS = dmrgWaveStruct_.lrs.left().getFactors();
@@ -518,7 +510,7 @@ private:
 	                                            const VectorSizeType& nk) const
 	{
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
-		SizeType ni=dmrgWaveStruct_.ws.col();
+		SizeType ni=dmrgWaveStruct_.ws.cols();
 		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
 		MatrixOrIdentityType wsRef2(twoSiteDmrg_ && nip>volumeOfNk,ws);
 		const FactorsType& factorsS = dmrgWaveStruct_.lrs.left().getFactors();
@@ -636,7 +628,7 @@ private:
 		return sum;
 	}
 
-	const SizeType& stage_;
+	const ProgramGlobals::DirectionEnum& stage_;
 	const bool& firstCall_;
 	const SizeType& counter_;
 	const DmrgWaveStructType& dmrgWaveStruct_;

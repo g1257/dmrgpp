@@ -588,7 +588,7 @@ private:
 	mutable RngType rng_;
 	const TargetParamsType& targetParams_;
 	PsimagLite::ProgressIndicator progress_;
-	SizeType prevDirection_;
+	ProgramGlobals::DirectionEnum prevDirection_;
 	MatrixType collapseBasis_;
 	typename PsimagLite::Vector<SizeType>::Type sitesSeen_;
 };  //class MettsCollapse
