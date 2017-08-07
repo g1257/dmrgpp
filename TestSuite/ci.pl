@@ -91,15 +91,15 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	my $ir = isRestart("../inputs/input$n.inp",$n);
 	if ($restart and !$ir) {
 		print STDERR "$0: WARNING: Ignored test $n ";
-		print STDERR "because it's a restart test and ";
-		print STDERR "you did NOT specify -R\n";
+		print STDERR "because it's NOT a restart test and ";
+		print STDERR "you specified -R\n";
 		next;
 	}
 
 	if (!$restart and $ir) {
 		print STDERR "$0: WARNING: Ignored test $n ";
-		print STDERR "because it's NOT a restart test and ";
-		print STDERR "you specified -R\n";
+		print STDERR "because it's a restart test and ";
+		print STDERR "you NOT specify -R\n";
 		next;
 	}
 

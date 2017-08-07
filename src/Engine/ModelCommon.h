@@ -453,7 +453,7 @@ private:
 	                              const ModelHelperType& modelHelper) const
 	{
 		SizeType n=modelHelper.leftRightSuper().sites();
-		SizeType matrixRank = matrix.rank();
+		SizeType matrixRank = matrix.rows();
 		VerySparseMatrixType matrix2(matrixRank);
 		typedef HamiltonianConnection<
 		        GeometryType,

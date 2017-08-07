@@ -224,7 +224,9 @@ public:
 		sorted_=true;
 	}
 
-	SizeType rank() const { return rank_; }
+	SizeType rows() const { return rank_; }
+
+	SizeType cols() const { return rank_; }
 
 	SizeType getRow(SizeType i) const
 	{
