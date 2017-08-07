@@ -297,10 +297,10 @@ public:
 
 		clear();
 		SizeType nonZeros = m.nonZero();
-		resize(m.rank(),m.rank(),nonZeros);
+		resize(m.rows(),m.cols(),nonZeros);
 
 		SizeType counter=0;
-		for (SizeType i=0;i<m.rank();++i) {
+		for (SizeType i=0;i<m.rows();++i) {
 			setRow(i,counter);
 
 			while (counter < nonZeros && m.getRow(counter) == i) {
@@ -310,7 +310,7 @@ public:
 			}
 		}
 
-		setRow(m.rank(),counter);
+		setRow(m.rows(),counter);
 		checkValidity();
 	}
 
