@@ -190,7 +190,7 @@ private:
 	                              const VectorSizeType& nk) const
 	{
 		SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
-		assert(nalpha==wsT.col());
+		assert(nalpha==wsT.cols());
 
 		SparseElementType sum=0;
 		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);

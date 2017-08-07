@@ -366,7 +366,7 @@ private:
 		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
 		SizeType nalpha = lrs.left().permutationInverse().size();
 
-		assert(nip==dmrgWaveStruct_.ws.col());
+		assert(nip==dmrgWaveStruct_.ws.cols());
 
 		const FactorsType& factorsS = lrs.left().getFactors();
 		const FactorsType& factorsSE = lrs.super().getFactors();

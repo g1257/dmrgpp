@@ -397,7 +397,7 @@ public:
 				r=beta;
 			}
 
-			assert(r<hamiltonian.row());
+			assert(r<hamiltonian.rows());
 			// row i of the ordered product basis
 			for (k=hamiltonian.getRowPtr(r);k<hamiltonian.getRowPtr(r+1);k++) {
 
@@ -460,10 +460,10 @@ private:
 	                       const BasisWithOperatorsType& basis)
 	{
 		if (basistc.size()==0) return;
-		SizeType n=basis.getOperatorByIndex(0).data.row();
+		SizeType n=basis.getOperatorByIndex(0).data.rows();
 		bool b = true;
 		for (SizeType i=0;i<basistc.size();i++) {
-			if (basis.getOperatorByIndex(i).data.row()!=n) {
+			if (basis.getOperatorByIndex(i).data.rows()!=n) {
 				b=false;
 				break;
 			}
@@ -483,12 +483,12 @@ private:
 	                             const BasisWithOperatorsType& basis)
 	{
 		if (basistc.size()==0) return;
-		SizeType n=basis.getOperatorByIndex(0).data.row();
+		SizeType n=basis.getOperatorByIndex(0).data.rows();
 		typename PsimagLite::Vector<PsimagLite::Vector<int>::Type>::Type col(n);
 		typename PsimagLite::Vector<VectorSparseElementType>::Type value(n);
 		for (SizeType i=0;i<basistc.size();i++) {
 			const SparseMatrixType& tmp = basis.getOperatorByIndex(i).data;
-			assert(tmp.row()==n);
+			assert(tmp.rows()==n);
 			transposeConjugate(basistc[i],tmp,col,value);
 
 		}

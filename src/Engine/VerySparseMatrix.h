@@ -102,12 +102,12 @@ public:
 
 	template<typename CrsMatrixType>
 	VerySparseMatrix(const CrsMatrixType& crs)
-	    : rank_(crs.row()),
+	    : rank_(crs.rows()),
 	      values_(crs.nonZero()),
 	      coordinates_(crs.nonZero()),
 	      sorted_(true)
 	{
-		assert(crs.row()==crs.col());
+		assert(crs.rows()==crs.cols());
 		SizeType counter = 0;
 		for (SizeType i=0;i<rank_;++i) {
 			for (int k=crs.getRowPtr(i);k<crs.getRowPtr(i+1);++k) {

@@ -157,7 +157,7 @@ private:
 	{
 		const VectorSizeType& permInverse = initKron_.lrs().super().permutationInverse();
 		const SparseMatrixType& leftH = initKron_.lrs().left().hamiltonian();
-		SizeType nl = leftH.row();
+		SizeType nl = leftH.rows();
 
 		SizeType offset = initKron_.offset();
 		SizeType npatches = initKron_.patch(GenIjPatchType::LEFT).size();
@@ -187,7 +187,7 @@ private:
 					SizeType ij = i + j * nl;
 
 					assert(i < nl);
-					assert(j < initKron_.lrs().right().hamiltonian().row());
+					assert(j < initKron_.lrs().right().hamiltonian().rows());
 
 					assert(ij < permInverse.size());
 
@@ -215,7 +215,7 @@ private:
 	{
 		const VectorSizeType& permInverse = initKron_.lrs().super().permutationInverse();
 		SizeType offset = initKron_.offset();
-		SizeType nl = initKron_.lrs().left().hamiltonian().row();
+		SizeType nl = initKron_.lrs().left().hamiltonian().rows();
 		SizeType npatches = initKron_.patch(GenIjPatchType::LEFT).size();
 		const BasisType& left = initKron_.lrs().left();
 		const BasisType& right = initKron_.lrs().right();
@@ -241,7 +241,7 @@ private:
 					SizeType j = iright + right_offset;
 
 					assert(i < nl);
-					assert(j < initKron_.lrs().right().hamiltonian().row());
+					assert(j < initKron_.lrs().right().hamiltonian().rows());
 
 					assert(i + j*nl < permInverse.size());
 

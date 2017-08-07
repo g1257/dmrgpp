@@ -261,7 +261,7 @@ public:
 		VectorOperatorType creationMatrix;
 		setOperatorMatrices(creationMatrix,block);
 		assert(creationMatrix.size()>0);
-		SizeType nrow = creationMatrix[0].data.row();
+		SizeType nrow = creationMatrix[0].data.rows();
 		PsimagLite::String what2 = what;
 
 		if (what2 == "i" || what2=="identity") {

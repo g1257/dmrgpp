@@ -151,8 +151,8 @@ private:
 
 	void printMatrix(const SparseMatrixType& matrix)
 	{
-		fout_<<matrix.row()<<" "<<matrix.col()<<"\n";
-		for (SizeType i = 0; i < matrix.row(); ++i) {
+		fout_<<matrix.rows()<<" "<<matrix.cols()<<"\n";
+		for (SizeType i = 0; i < matrix.rows(); ++i) {
 			for (int k = matrix.getRowPtr(i); k < matrix.getRowPtr(i+1); ++k) {
 				ComplexOrRealType value = matrix.getValue(k);
 				if (PsimagLite::norm(value) == 0) continue;
@@ -205,7 +205,7 @@ private:
 	                   ProgramGlobals::FermionOrBosonEnum bosonOrFermion) const
 	{
 		Ahat = A;
-		SizeType rows = Ahat.row();
+		SizeType rows = Ahat.rows();
 		SizeType counter = 0;
 		for (SizeType i = 0; i < rows; ++i) {
 			RealType sign = (bosonOrFermion == ProgramGlobals::FERMION &&

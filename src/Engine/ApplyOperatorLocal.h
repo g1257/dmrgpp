@@ -157,7 +157,7 @@ public:
 		SizeType offset = src.offset(i0);
 		SizeType final = offset + src.effectiveSize(i0);
 		SizeType ns = lrs_.left().permutationVector().size();
-		SizeType nx = ns/A.data.row();
+		SizeType nx = ns/A.data.rows();
 		if (src.size()!=lrs_.super().permutationVector().size())
 			throw PsimagLite::RuntimeError("applyLocalOpSystem SE\n");
 
@@ -218,7 +218,7 @@ private:
 		SizeType final = offset + src.effectiveSize(i0);
 		//SizeType counter=0;
 		SizeType ns = lrs_.left().permutationVector().size();
-		SizeType nx = ns/A.data.row();
+		SizeType nx = ns/A.data.rows();
 		if (src.size()!=lrs_.super().permutationVector().size())
 			throw PsimagLite::RuntimeError("applyLocalOpSystem SE\n");
 
@@ -275,7 +275,7 @@ private:
 		SizeType final = offset + src.effectiveSize(i0);
 
 		SizeType ns = lrs_.left().size();
-		SizeType nx = A.data.row();
+		SizeType nx = A.data.rows();
 		PackIndicesType pack1(ns);
 		PackIndicesType pack2(nx);
 
@@ -353,7 +353,7 @@ private:
 	                        const OperatorType& A,
 	                        const FermionSign& fermionSign) const
 	{
-		if (lrs_.right().size() == A.data.row()) { // right corner
+		if (lrs_.right().size() == A.data.rows()) { // right corner
 			applyLocalOpSystem(dest,src,A,fermionSign,RIGHT_CORNER);
 			return;
 		}

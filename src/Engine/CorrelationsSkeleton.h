@@ -293,7 +293,7 @@ private:
 	                        SizeType ns,
 	                        SizeType threadId)
 	{
-		SizeType ni=O1.row();
+		SizeType ni=O1.rows();
 
 		helper_.setPointer(threadId,ns);
 		SizeType sprime = helper_.leftRightSuper(threadId).left().size(); //ni*nj;
@@ -335,7 +335,7 @@ private:
 				col[i] = 0;
 			}
 		}
-		result.setRow(result.row(),counter);
+		result.setRow(result.rows(),counter);
 		result.checkValidity();
 	}
 
@@ -346,7 +346,7 @@ private:
 	                         SizeType ns,
 	                         SizeType threadId)
 	{
-		SizeType nj=O2.row();
+		SizeType nj=O2.rows();
 
 		helper_.setPointer(threadId,ns);
 		SizeType eprime = helper_.leftRightSuper(threadId).right().size(); //ni*nj;
@@ -394,7 +394,7 @@ private:
 			}
 		}
 
-		result.setRow(result.row(),counter);
+		result.setRow(result.rows(),counter);
 		result.checkValidity();
 	}
 
@@ -459,7 +459,7 @@ private:
 	                         int growOption,
 	                         SizeType threadId)
 	{
-		SizeType n = O.row();
+		SizeType n = O.rows();
 		SizeType m = SizeType(helper_.leftRightSuper(threadId).left().size()/n);
 		RealType sign = static_cast<RealType>(1.0);
 
@@ -493,7 +493,7 @@ private:
 	                          int growOption,
 	                          SizeType threadId)
 	{
-		SizeType n = O.row();
+		SizeType n = O.rows();
 		SizeType m = SizeType(helper_.leftRightSuper(threadId).right().size()/n);
 		RealType sign = 1;
 
@@ -561,7 +561,7 @@ private:
 				for (int k=Acrs.getRowPtr(r);k<Acrs.getRowPtr(r+1);k++) {
 					SizeType r2 = Acrs.getCol(k);
 					SizeType t2 = helper_.leftRightSuper(threadId).super().
-					        permutationInverse(r2+eta*A.col());
+					        permutationInverse(r2+eta*A.cols());
 					if (t2<offset || t2>=total) continue;
 					sum += Acrs.getValue(k)*vec1.slowAccess(t)*
 					        PsimagLite::conj(vec2.slowAccess(t2));
@@ -592,7 +592,7 @@ private:
 
 				pack.unpack(r,eta,helper_.leftRightSuper(threadId).super().
 				            permutation(t));
-				if (eta>=Acrs.row()) throw PsimagLite::RuntimeError("Error\n");
+				if (eta>=Acrs.rows()) throw PsimagLite::RuntimeError("Error\n");
 				SizeType nx0 = helper_.leftRightSuper(threadId).left().
 				        electrons(BasisType::AFTER_TRANSFORM);
 				RealType sign = (nx0 & 1) ? fermionicSign : 1;
@@ -647,13 +647,13 @@ private:
 
 		FieldType sum=0;
 		SizeType leftSize = helper_.leftRightSuper(threadId).left().size();
-		SizeType ni = helper_.leftRightSuper(threadId).left().size()/Bcrs.row();
+		SizeType ni = helper_.leftRightSuper(threadId).left().size()/Bcrs.rows();
 
 		// some sanity checks:
 		if (vec1.size()!=vec2.size() || vec1.size()!=
 		    helper_.leftRightSuper(threadId).super().size())
 			throw PsimagLite::RuntimeError("Observe::brRghtCrnrSystem_(...)\n");
-		if (ni!=Acrs.row())
+		if (ni!=Acrs.rows())
 			throw PsimagLite::RuntimeError("Observe::brRghtCrnrSystem_(...)\n");
 
 		// ok, we're ready for the main course:
@@ -707,14 +707,14 @@ private:
 			std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";
 
 		FieldType sum=0;
-		SizeType ni = Bcrs.row();
+		SizeType ni = Bcrs.rows();
 		SizeType leftSize = helper_.leftRightSuper(threadId).left().size();
 
 		// some sanity checks:
 		if (vec1.size()!=vec2.size() ||
 		    vec1.size()!=helper_.leftRightSuper(threadId).super().size())
 			throw PsimagLite::RuntimeError("Observe::brLftCrnrEnviron_(...)\n");
-		if (helper_.leftRightSuper(threadId).right().size()/Bcrs.row()!=Acrs.row())
+		if (helper_.leftRightSuper(threadId).right().size()/Bcrs.rows()!=Acrs.rows())
 			throw PsimagLite::RuntimeError("Observe::bracketRightCorner_(...)\n");
 
 		// ok, we're ready for the main course:
@@ -773,7 +773,7 @@ private:
 		SparseMatrixType A2crs(A2);
 		SparseMatrixType Bcrs(B);
 		FieldType sum=0;
-		SizeType ni = helper_.leftRightSuper(threadId).left().size()/Bcrs.row();
+		SizeType ni = helper_.leftRightSuper(threadId).left().size()/Bcrs.rows();
 		SizeType leftSize = helper_.leftRightSuper(threadId).left().size();
 
 		// some sanity checks:
@@ -782,8 +782,8 @@ private:
 		if (vec1.size()==0) return 0;
 
 		assert(vec1.size()==helper_.leftRightSuper(threadId).super().size());
-		assert(ni==A1crs.row());
-		assert(Bcrs.row()==A2crs.row());
+		assert(ni==A1crs.rows());
+		assert(Bcrs.rows()==A2crs.rows());
 
 		// ok, we're ready for the main course:
 		PackIndicesType pack1(helper_.leftRightSuper(threadId).left().size());

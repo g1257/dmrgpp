@@ -27,7 +27,7 @@ void csr_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
   * ----------------------------------------------------
   */
 
-	const int ncol_A = a.col();
+	const int ncol_A = a.cols();
 
 	int* cmap = new int[ncol_A];
 	int* nnz = new int[nrow_B];
@@ -63,7 +63,7 @@ void csr_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
 		int istart = a.getRowPtr(ia);
 		int iend = a.getRowPtr(ia + 1);
 
-		assert((0 <= ia) && (static_cast<SizeType>(ia) < a.row()));
+		assert((0 <= ia) && (static_cast<SizeType>(ia) < a.rows()));
 
 		int k = 0;
 		for( k=istart; k < iend; k++) {

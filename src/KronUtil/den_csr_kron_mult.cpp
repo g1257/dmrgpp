@@ -14,10 +14,10 @@ void den_csr_kron_mult_method(const int imethod,
 	const int isTransA = (transA == 'T') || (transA == 't');
 	const int isTransB = (transB == 'T') || (transB == 't');
 
-	const int nrow_A = a_.n_row();
-	const int ncol_A = a_.n_col();
-	const int nrow_B = b.row();
-	const int ncol_B = b.col();
+	const int nrow_A = a_.rows();
+	const int ncol_A = a_.cols();
+	const int nrow_B = b.rows();
+	const int ncol_B = b.cols();
 
 	const int nrow_1 = (isTransA) ? ncol_A : nrow_A;
 	const int ncol_1 = (isTransA) ? nrow_A : ncol_A;
@@ -376,10 +376,10 @@ void den_csr_kron_mult(const char transA,
  *   -------------------------------------------------------------
  */
 
-	const int nrow_A = a_.n_row();
-	const int ncol_A = a_.n_col();
-	const int nrow_B = b.row();
-	const int ncol_B = b.col();
+	const int nrow_A = a_.rows();
+	const int ncol_A = a_.cols();
+	const int nrow_B = b.rows();
+	const int ncol_B = b.cols();
 
 	int nnz_A = den_nnz(a_);
 	int nnz_B = csr_nnz(b);

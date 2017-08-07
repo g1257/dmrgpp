@@ -182,7 +182,7 @@ public:
 			SizeType threadId = 0;
 			ModelHelperType modelHelper(m,lrs,currentTime,threadId);
 
-			VerySparseMatrixType vsm(matrixBlock.row());
+			VerySparseMatrixType vsm(matrixBlock.rows());
 			addHamiltonianConnection(vsm,modelHelper);
 			SparseMatrixType matrixBlock2;
 			matrixBlock2 = vsm;

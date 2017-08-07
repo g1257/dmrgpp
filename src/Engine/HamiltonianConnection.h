@@ -360,7 +360,7 @@ private:
 
 	bool isNonZeroMatrix(const SparseMatrixType& m) const
 	{
-		if (m.row() > 0 && m.col() > 0) return true;
+		if (m.rows() > 0 && m.cols() > 0) return true;
 		return false;
 	}
 

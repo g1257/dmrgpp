@@ -30,16 +30,16 @@ public:
 
 		io.readMatrix(hamLeft,"#LeftHamiltonian");
 		io.move(-20);
-		std::cerr<<"Read H_L square, rank="<<hamLeft.rank()<<"\n";
+		std::cerr<<"Read H_L square, rank="<<hamLeft.rows()<<"\n";
 		assert(isHermitian(hamLeft));
 
 		io.readMatrix(hamRight,"#RightHamiltonian");
 		io.move(-2);
-		std::cerr<<"Read H_R square, rank="<<hamRight.rank()<<"\n";
+		std::cerr<<"Read H_R square, rank="<<hamRight.rows()<<"\n";
 		assert(isHermitian(hamRight));
 
-		SizeType nLeft = hamLeft.rank();
-		SizeType nRight = hamRight.rank();
+		SizeType nLeft = hamLeft.rows();
+		SizeType nRight = hamRight.cols();
 		SizeType nSuper = nLeft*nRight;
 		hamSuper_.resize(nSuper,nSuper);
 		hamSuper_.setTo(0.0);
@@ -89,7 +89,7 @@ private:
 	void buildHconnection(const SparseMatrixType Ahat,
 	                      const SparseMatrixType B)
 	{
-		SizeType nLeft = Ahat.rank();
+		SizeType nLeft = Ahat.rows();
 
 		for (SizeType k = 0; k < Ahat.nonZero(); ++k) {
 			SizeType i = Ahat.getRow(k);
@@ -107,8 +107,8 @@ private:
 	void buildHLeftAndRight(const SparseMatrixType hamLeft,
 	                        const SparseMatrixType hamRight)
 	{
-		SizeType nLeft = hamLeft.rank();
-		SizeType nRight = hamRight.rank();
+		SizeType nLeft = hamLeft.rows();
+		SizeType nRight = hamRight.cols();
 
 		// hamLeft
 		for (SizeType k = 0; k < hamLeft.nonZero(); ++k) {

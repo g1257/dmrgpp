@@ -427,7 +427,7 @@ private:
 		PackIndicesType pack1(nip);
 		PackIndicesType pack2(volumeOfNk);
 		MatrixOrIdentityType wsRef(twoSiteDmrg_,dmrgWaveStruct_.ws);
-		SizeType nip2 = (twoSiteDmrg_) ? dmrgWaveStruct_.ws.col() : nip;
+		SizeType nip2 = (twoSiteDmrg_) ? dmrgWaveStruct_.ws.cols() : nip;
 
 		for (SizeType x=0;x<total;x++) {
 			psiDest.fastAccess(i0,x) = 0.0;

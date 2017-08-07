@@ -316,7 +316,7 @@ private:
 		}
 
 		for (SizeType i=0;i<aOperators_.size();i++) {
-			SizeType n = aOperators_[i].data.row();
+			SizeType n = aOperators_[i].data.rows();
 			SizeType hilbert = model_.hilbertSize(sites_[i]);
 			if (n != hilbert) {
 				PsimagLite::String str(__FILE__);

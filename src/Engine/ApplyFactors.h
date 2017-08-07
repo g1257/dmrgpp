@@ -93,7 +93,7 @@ public:
 	void operator()(SparseMatrixType& m) const
 	{
 		if (!enabled_) return;
-		if (factors_.row()!=m.row())
+		if (factors_.rows()!=m.rows())
 			throw PsimagLite::RuntimeError("Problem applying factors\n");
 		applyFactors(m);
 

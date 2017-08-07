@@ -261,7 +261,7 @@ namespace Dmrg {
 		                           const BasisWithOperatorsType& basis,
 		                           const typename PsimagLite::Vector<SizeType>::Type& basisrInverse)
 		{
-			for (SizeType i=0;i<opSrc.data.row();i++) {
+			for (SizeType i=0;i<opSrc.data.rows();i++) {
 				PairType jm = basis.jmValue(i);
 				for (int l=opSrc.data.getRowPtr(i);l<opSrc.data.getRowPtr(i+1);l++) {
 					SizeType iprime = opSrc.data.getCol(l);

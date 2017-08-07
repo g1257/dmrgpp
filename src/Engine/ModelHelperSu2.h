@@ -183,7 +183,7 @@ public:
 		SizeType counter=0;
 		for (SizeType i=0;i<su2reduced_.reducedEffectiveSize();i++) {
 			int ix = su2reduced_.flavorMapping(i)-offset;
-			if (ix<0 || ix>=int(matrixBlock.row())) continue;
+			if (ix<0 || ix>=int(matrixBlock.rows())) continue;
 			matrixBlock.setRow(ix,counter);
 
 			SizeType i1=su2reduced_.reducedEffective(i).first;
@@ -218,7 +218,7 @@ public:
 					lfactor *= link.angularFactor;
 
 					int jx = su2reduced_.flavorMapping(i1prime,i2prime)-offset;
-					if (jx<0 || jx >= int(matrixBlock.row()) ) continue;
+					if (jx<0 || jx >= int(matrixBlock.rows()) ) continue;
 
 					matrixBlock.pushCol(jx);
 					matrixBlock.pushValue(fsign*link.value*lfactor*
@@ -227,7 +227,7 @@ public:
 				}
 			}
 		}
-		matrixBlock.setRow(matrixBlock.row(),counter);
+		matrixBlock.setRow(matrixBlock.rows(),counter);
 	}
 
 	// Does x+= (AB)y, where A belongs to pSprime and B
@@ -389,7 +389,7 @@ public:
 		for (SizeType i=0;i<su2reduced_.reducedEffectiveSize();i++) {
 			int ix = su2reduced_.flavorMapping(i)-offset;
 			matrixBlock.setRow(ix,counter);
-			if (ix<0 || ix>=int(matrixBlock.row())) continue;
+			if (ix<0 || ix>=int(matrixBlock.rows())) continue;
 
 			SizeType i1=su2reduced_.reducedEffective(i).first;
 			SizeType i2=su2reduced_.reducedEffective(i).second;
@@ -404,7 +404,7 @@ public:
 				if (lfactor==static_cast<SparseElementType>(0)) continue;
 
 				int jx = su2reduced_.flavorMapping(i1prime,i2)-offset;
-				if (jx<0 || jx >= int(matrixBlock.row()) ) continue;
+				if (jx<0 || jx >= int(matrixBlock.rows()) ) continue;
 
 				matrixBlock.pushCol(jx);
 				matrixBlock.pushValue(A.getValue(k1));
@@ -428,7 +428,7 @@ public:
 		for (SizeType i=0;i<su2reduced_.reducedEffectiveSize();i++) {
 			int ix = su2reduced_.flavorMapping(i)-offset;
 			matrixBlock.setRow(ix,counter);
-			if (ix<0 || ix>=int(matrixBlock.row())) continue;
+			if (ix<0 || ix>=int(matrixBlock.rows())) continue;
 
 			SizeType i1=su2reduced_.reducedEffective(i).first;
 			SizeType i2=su2reduced_.reducedEffective(i).second;
@@ -442,7 +442,7 @@ public:
 				if (lfactor==static_cast<SparseElementType>(0)) continue;
 
 				int jx = su2reduced_.flavorMapping(i1,i2prime)-offset;
-				if (jx<0 || jx >= int(matrixBlock.row()) ) continue;
+				if (jx<0 || jx >= int(matrixBlock.rows()) ) continue;
 
 				matrixBlock.pushCol(jx);
 				matrixBlock.pushValue(B.getValue(k2));

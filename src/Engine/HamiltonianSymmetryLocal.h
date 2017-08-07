@@ -151,7 +151,7 @@ public:
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
-		PsimagLite::String tmp = ttos(factors_.row());
+		PsimagLite::String tmp = ttos(factors_.rows());
 		PsimagLite::String s="#FACTORSSIZE="+tmp;
 		io.printline(s);
 	}

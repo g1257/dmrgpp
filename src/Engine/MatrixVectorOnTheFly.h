@@ -118,7 +118,7 @@ public:
 	template<typename SomeVectorType>
 	void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y) const
 	{
-		if (matrixStored_.row() > 0)
+		if (matrixStored_.rows() > 0)
 			matrixStored_.matrixVectorProduct(x,y);
 		else
 			model_->matrixVectorProduct(x,y,*modelHelper_);

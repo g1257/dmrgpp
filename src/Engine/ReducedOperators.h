@@ -275,7 +275,7 @@ public:
 
 		PsimagLite::Matrix<SparseElementType> fm(nold,nr);
 
-		PsimagLite::Vector<int>::Type inverseP(ftransform.col(),-1);
+		PsimagLite::Vector<int>::Type inverseP(ftransform.cols(),-1);
 		for (SizeType j=0;j<nr;j++) {
 			SizeType jj = thisBasis->reducedIndex(j); //new
 			assert(jj<inverseP.size());
@@ -522,7 +522,7 @@ private:
 	{
 		//			SizeType n=opSrc.rank();
 		transposeConjugate(opDest,opSrc);
-		for (SizeType i=0;i<opSrc.row();i++) {
+		for (SizeType i=0;i<opSrc.rows();i++) {
 			PairType jm = thisBasis_->jmValue(thisBasis_->reducedIndex(i));
 			for (int k=opDest.getRowPtr(i);k<opDest.getRowPtr(i+1);k++) {
 				SizeType j=opDest.getCol(k);
@@ -551,7 +551,7 @@ private:
 
 	void createReducedOperator(DenseMatrixType& opDest1,const OperatorType& opSrc)
 	{
-		for (SizeType i=0;i<opSrc.data.row();i++) {
+		for (SizeType i=0;i<opSrc.data.rows();i++) {
 			PairType jm = thisBasis_->jmValue(i);
 			for (int l=opSrc.data.getRowPtr(i);l<opSrc.data.getRowPtr(i+1);l++) {
 				SizeType iprime = opSrc.data.getCol(l);

@@ -230,7 +230,7 @@ public:
 	                             RealType factorForDiagonals=1.0,
 	                             bool sysEnvOnly=false)  const
 	{
-		hmatrix.makeDiagonal(cm[0].data.row());
+		hmatrix.makeDiagonal(cm[0].data.rows());
 
 		modelCommon_->addConnectionsInNaturalBasis(hmatrix,cm,block,sysEnvOnly,time);
 

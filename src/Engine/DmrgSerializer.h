@@ -181,9 +181,9 @@ public:
 
 	const VectorType& wavefunction() const { return wavefunction_; }
 
-	SizeType columns() const { return transform_.col(); }
+	SizeType columns() const { return transform_.cols(); }
 
-	SizeType rows() const { return transform_.row(); }
+	SizeType rows() const { return transform_.rows(); }
 
 	ProgramGlobals::DirectionEnum direction() const { return direction_; }
 

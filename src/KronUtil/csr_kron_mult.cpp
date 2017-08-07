@@ -44,10 +44,10 @@ void csr_kron_mult_method(const int imethod,
 	const int isTransA = (transA == 'T') || (transA == 't');
 	const int isTransB = (transB == 'T') || (transB == 't');
 
-	const int nrow_A = a.row();
-	const int ncol_A = a.col();
-	const int nrow_B = b.row();
-	const int ncol_B = b.col();
+	const int nrow_A = a.rows();
+	const int ncol_A = a.cols();
+	const int nrow_B = b.rows();
+	const int ncol_B = b.cols();
 
 	const int nrow_1 = (isTransA) ? ncol_A : nrow_A;
 	const int ncol_1 = (isTransA) ? nrow_A : ncol_A;
@@ -322,10 +322,10 @@ void csr_kron_mult_method(const int imethod,
 	const int isTransA = (transA == 'T') || (transA == 't');
 	const int isTransB = (transB == 'T') || (transB == 't');
 
-	const int nrow_A = a.row();
-	const int ncol_A = a.col();
-	const int nrow_B = b.row();
-	const int ncol_B = b.col();
+	const int nrow_A = a.rows();
+	const int ncol_A = a.cols();
+	const int nrow_B = b.rows();
+	const int ncol_B = b.cols();
 
 	const int nrow_1 = (isTransA) ? ncol_A : nrow_A;
 	const int ncol_1 = (isTransA) ? nrow_A : ncol_A;
@@ -402,10 +402,10 @@ void csr_kron_mult(const char transA,
 	const int isTransA = (transA == 'T') || (transA == 't');
 	const int isTransB = (transB == 'T') || (transB == 't');
 
-	const int nrow_A = a.row();
-	const int ncol_A = a.col();
-	const int nrow_B = b.row();
-	const int ncol_B = b.col();
+	const int nrow_A = a.rows();
+	const int ncol_A = a.cols();
+	const int nrow_B = b.rows();
+	const int ncol_B = b.cols();
 
 	// -----------------------------------
 	// both A and B are considered sparse

@@ -118,7 +118,7 @@ public:
 			model->fullHamiltonian(matrixStored_[0],*modelHelper);
 			assert(isHermitian(matrixStored_[0],true));
 			PsimagLite::OstringStream msg;
-			msg<<"fullHamiltonian has rank="<<matrixStored_[0].row();
+			msg<<"fullHamiltonian has rank="<<matrixStored_[0].rows();
 			msg<<" nonzeros="<<matrixStored_[0].nonZero();
 			progress_.printline(msg,std::cout);
 			if (debugMatrix)
@@ -130,11 +130,11 @@ public:
 		model->fullHamiltonian(matrix2,*modelHelper);
 		rs->transform(matrixStored_[0],matrixStored_[1],matrix2);
 		PsimagLite::OstringStream msg;
-		msg<<" sector="<<matrixStored_[0].row()<<" and sector="<<matrixStored_[1].row();
+		msg<<" sector="<<matrixStored_[0].rows()<<" and sector="<<matrixStored_[1].rows();
 		progress_.printline(msg,std::cout);
 	}
 
-	SizeType rows() const { return matrixStored_[pointer_].row(); }
+	SizeType rows() const { return matrixStored_[pointer_].rows(); }
 
 	template<typename SomeVectorType>
 	void matrixVectorProduct(SomeVectorType &x, SomeVectorType const &y) const

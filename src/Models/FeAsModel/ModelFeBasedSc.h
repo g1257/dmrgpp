@@ -322,7 +322,7 @@ public:
 		SizeType orbital = dof % modelParameters_.orbitals;
 		SizeType spin = dof/modelParameters_.orbitals;
 		assert(creationMatrix_.size()>0);
-		SizeType nrow = creationMatrix_[0].data.row();
+		SizeType nrow = creationMatrix_[0].data.rows();
 		PsimagLite::String what2 = what;
 
 
@@ -932,7 +932,7 @@ private:
 		if (modelParameters_.spinOrbit.n_row()<4) return;
 		SizeType orbitals = modelParameters_.orbitals;
 		int dof=2*orbitals;
-		SizeType nrow = cm[0].data.row();
+		SizeType nrow = cm[0].data.rows();
 		MatrixType tmp(nrow,nrow);
 		SparseMatrixType tmpMatrix;
 

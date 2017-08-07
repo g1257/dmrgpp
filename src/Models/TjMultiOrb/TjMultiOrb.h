@@ -173,7 +173,7 @@ public:
 	SizeType hilbertSize(SizeType) const
 	{
 		assert(0 < creationMatrix_.size());
-		return creationMatrix_[0].data.row();
+		return creationMatrix_[0].data.rows();
 	}
 
 	//! find creation operator matrices for (i,sigma) in the natural basis,
@@ -199,7 +199,7 @@ public:
 	                             SizeType dof) const
 	{
 		assert(creationMatrix_.size()>0);
-		SizeType nrow = creationMatrix_[0].data.row();
+		SizeType nrow = creationMatrix_[0].data.rows();
 		SizeType orbitals = modelParameters_.orbitals;
 
 		if (what == "i" || what=="identity") {

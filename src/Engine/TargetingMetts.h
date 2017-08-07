@@ -550,7 +550,7 @@ private:
 		progress_.printline(msg,std::cerr);
 
 		const SparseMatrixType& transformSystem =  wft_.transform(ProgramGlobals::SYSTEM);
-		TargetVectorType newVector1(transformSystem.row(),0);
+		TargetVectorType newVector1(transformSystem.rows(),0);
 
 		VectorSizeType nk1;
 		mettsCollapse_.setNk(nk1,block1);
@@ -562,7 +562,7 @@ private:
 
 		const SparseMatrixType& transformEnviron =
 		        wft_.transform(ProgramGlobals::ENVIRON);
-		TargetVectorType newVector2(transformEnviron.row(),0);
+		TargetVectorType newVector2(transformEnviron.rows(),0);
 
 		VectorSizeType nk2;
 		mettsCollapse_.setNk(nk2,block2);
@@ -608,7 +608,7 @@ private:
 		if (oldVector.size()==0)
 			setInitialPure(oldVector,block);
 		TargetVectorType tmpVector;
-		if (transform.row()==0) {
+		if (transform.rows()==0) {
 			tmpVector = oldVector;
 			assert(PsimagLite::norm(tmpVector)>1e-6);
 		} else {
@@ -619,8 +619,8 @@ private:
 		VectorSizeType nk;
 		mettsCollapse_.setNk(nk,block);
 		SizeType volumeOfNk = mettsCollapse_.volumeOf(nk);
-		SizeType newSize =  (transform.col()==0) ? (ns*ns) :
-		                                           transform.col() * volumeOfNk;
+		SizeType newSize =  (transform.cols()==0) ? (ns*ns) :
+		                                           transform.cols() * volumeOfNk;
 		newVector.resize(newSize);
 		for (SizeType alpha=0;alpha<newVector.size();alpha++)
 			newVector[alpha] = 0;
@@ -647,7 +647,7 @@ private:
 	                      const SparseMatrixType& transform,
 	                      const VectorSizeType& block)
 	{
-		assert(oldVector.size()==transform.row());
+		assert(oldVector.size()==transform.rows());
 
 		VectorSizeType nk;
 		mettsCollapse_.setNk(nk,block);
@@ -657,7 +657,7 @@ private:
 		        ? systemPrev_.permutationInverse : environPrev_.permutationInverse;
 		SizeType nsPrev = permutationInverse.size()/ne;
 
-		newVector.resize(transform.col());
+		newVector.resize(transform.cols());
 		//newVector = oldVector * transform;
 		for (SizeType gamma=0;gamma<newVector.size();gamma++) {
 			newVector[gamma] = 0;
@@ -668,7 +668,7 @@ private:
 
 				SizeType gammaPrime = permutationInverse[noPermIndex];
 
-				assert(gammaPrime<transform.row());
+				assert(gammaPrime<transform.rows());
 				newVector[gamma] += transform.element(gammaPrime,gamma) *
 				        oldVector[gammaPrime];
 			}

@@ -134,9 +134,9 @@ public:
 		size_t threadId = 0;
 		result.resize(rows);
 		SparseMatrixType Og;
-		SparseMatrixType identity(O.row(),O.col());
+		SparseMatrixType identity(O.rows(),O.cols());
 
-		identity.makeDiagonal(O.row(),1.0);
+		identity.makeDiagonal(O.rows(),1.0);
 
 		size_t rowsOver2 = static_cast<size_t>(rows/2);
 

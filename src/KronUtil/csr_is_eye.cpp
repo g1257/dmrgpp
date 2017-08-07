@@ -7,8 +7,8 @@ bool csr_is_eye(const PsimagLite::CrsMatrix<ComplexOrRealType>& a)
    // check whether a sparse matrix is the identity matrix
    // ----------------------------------------------------
         
-   const int nrow_A = a.row();
-   const int ncol_A = a.col();
+   const int nrow_A = a.rows();
+   const int ncol_A = a.cols();
 
    bool is_eye = (nrow_A == ncol_A);
 

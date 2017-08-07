@@ -178,8 +178,8 @@ private:
 		const RealType value = 1.0;
 		const SparseMatrixType& aL = modelHelper_.leftRightSuper().left().hamiltonian();
 		const SparseMatrixType& aR = modelHelper_.leftRightSuper().right().hamiltonian();
-		identityL_.makeDiagonal(aL.row(), value);
-		identityR_.makeDiagonal(aR.row(), value);
+		identityL_.makeDiagonal(aL.rows(), value);
+		identityR_.makeDiagonal(aR.rows(), value);
 		std::pair<SizeType, SizeType> ops(0,0);
 		std::pair<char, char> mods('n', 'n');
 		LinkType link(0,
@@ -248,7 +248,7 @@ private:
 	                   ProgramGlobals::FermionOrBosonEnum bosonOrFermion) const
 	{
 		Ahat = A;
-		SizeType rows = Ahat.row();
+		SizeType rows = Ahat.rows();
 		assert(signs_.size() == rows);
 		SizeType counter = 0;
 		for (SizeType i = 0; i < rows; ++i) {

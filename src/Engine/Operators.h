@@ -381,11 +381,11 @@ public:
 	                             ApplyFactorsType& apply)
 	{
 		SparseMatrixType tmpMatrix;
-		assert(h2.row()==h2.col());
-		VectorRealType ones(h2.row(),1.0);
-		PsimagLite::externalProduct(hamiltonian_,h2,h3.row(),ones,true);
+		assert(h2.rows()==h2.cols());
+		VectorRealType ones(h2.rows(),1.0);
+		PsimagLite::externalProduct(hamiltonian_,h2,h3.rows(),ones,true);
 
-		PsimagLite::externalProduct(tmpMatrix,h3,h2.row(),ones,false);
+		PsimagLite::externalProduct(tmpMatrix,h3,h2.rows(),ones,false);
 
 		hamiltonian_ += tmpMatrix;
 
@@ -453,8 +453,8 @@ private:
 
 	void reorder(SparseMatrixType &v,const   VectorSizeType& permutation)
 	{
-		if (v.row() == 0 || v.col() == 0) {
-			assert(v.row() == 0 && v.col() == 0);
+		if (v.rows() == 0 || v.cols() == 0) {
+			assert(v.rows() == 0 && v.cols() == 0);
 			return;
 		}
 

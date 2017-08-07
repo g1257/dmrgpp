@@ -375,8 +375,8 @@ private:
 		PackIndicesType packRight(hilbertSize);
 
 		if (!twoSiteDmrg_) {
-			assert(transform.col()==lrs_.right().size());
-			assert(transform.row()==oldLrs.right().permutationInverse().size());
+			assert(transform.cols()==lrs_.right().size());
+			assert(transform.rows()==oldLrs.right().permutationInverse().size());
 		}
 
 		MatrixOrIdentityType transformT1(!twoSiteDmrg_,transformT);
@@ -438,8 +438,8 @@ private:
 		PackIndicesType packRight(hilbertSize);
 
 		if (!twoSiteDmrg_) {
-			assert(transform.col()==lrs_.left().size());
-			assert(transform.row()==oldLrs.left().permutationInverse().size());
+			assert(transform.cols()==lrs_.left().size());
+			assert(transform.rows()==oldLrs.left().permutationInverse().size());
 		}
 
 		MatrixOrIdentityType transformT1(!twoSiteDmrg_,transformT);

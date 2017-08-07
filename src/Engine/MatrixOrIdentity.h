@@ -101,7 +101,7 @@ public:
 	int getColOrExit(SizeType i) const
 	{
 		if (enabled_) return m_.getCol(i);
-		if (i < m_.col()) return i;
+		if (i < m_.cols()) return i;
 		return -1;
 	}
 

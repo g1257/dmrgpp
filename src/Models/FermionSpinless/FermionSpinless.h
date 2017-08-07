@@ -249,7 +249,7 @@ public:
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		setOperatorMatrices(creationMatrix,block);
 		assert(creationMatrix.size()>0);
-		SizeType nrow = creationMatrix[0].data.row();
+		SizeType nrow = creationMatrix[0].data.rows();
 
 		if (what == "i" || what=="identity") {
 			SparseMatrixType tmp(nrow,nrow);

@@ -160,7 +160,7 @@ private:
 
 	MatrixType Jz_opr_original_basis(VectorOperatorType& creationMatrix)
 	{
-		SizeType nrow = creationMatrix[0].data.row();
+		SizeType nrow = creationMatrix[0].data.rows();
 		MatrixType tmp(nrow,nrow);
 		MatrixType tmp2(nrow,nrow);
 		//Works only for 3 orbital model
@@ -492,7 +492,7 @@ private:
 		SparseMatrixType tmp_crs;
 
 		for(SizeType i=0;i<creationMatrix.size();i++){
-			nrow = creationMatrix[i].data.row();
+			nrow = creationMatrix[i].data.rows();
 			R_crs.resize(nrow,nrow);
 			R_dagg_crs.resize(nrow,nrow);
 			tmp_crs.resize(nrow,nrow);
@@ -507,8 +507,6 @@ private:
 
 		}
 	}
-
-
 
 	void Rotate(const MatrixType& R, MatrixType& O)
 	{

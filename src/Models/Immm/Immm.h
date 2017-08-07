@@ -597,7 +597,7 @@ private:
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		setOperatorMatrices(creationMatrix,block);
 		assert(creationMatrix.size()>0);
-		SizeType rank = creationMatrix[0].data.row();
+		SizeType rank = creationMatrix[0].data.rows();
 		MatrixType tmp(rank,rank);
 		assert(norb*2-1<creationMatrix.size());
 		assert(spin1<2);

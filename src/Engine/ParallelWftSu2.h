@@ -234,7 +234,7 @@ private:
 	                              const VectorSizeType& nk) const
 	{
 		SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
-		assert(nalpha==wsT.col());
+		assert(nalpha==wsT.cols());
 
 		const FactorsType& factorsE = dmrgWaveStruct_.lrs.right().getFactors();
 		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();

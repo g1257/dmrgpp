@@ -107,9 +107,9 @@ public:
 	              int tmp) const
 	{
 		SizeType maxMatrixRankStored = (tmp < 0) ? 0 : tmp;
-		if (matrixStored.row() == 0 || matrixStored.row() > maxMatrixRankStored) {
+		if (matrixStored.rows() == 0 || matrixStored.rows() > maxMatrixRankStored) {
 			PsimagLite::String str("MatrixVectorBase: fullDiag too big or zero\n");
-			str += "\trow= " + ttos(matrixStored.row()) + " max row= ";
+			str += "\trow= " + ttos(matrixStored.rows()) + " max row= ";
 			str += ttos(maxMatrixRankStored) + "\n";
 			throw PsimagLite::RuntimeError(str);
 		}

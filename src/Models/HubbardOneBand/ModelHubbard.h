@@ -295,7 +295,7 @@ public:
 		SizeType iup = SPIN_UP;
 		SizeType idown = SPIN_DOWN;
 		assert(creationMatrix.size()>0);
-		SizeType nrow = creationMatrix[0].data.row();
+		SizeType nrow = creationMatrix[0].data.rows();
 
 		if (what == "i" || what=="identity") {
 			SparseMatrixType tmp(nrow,nrow);

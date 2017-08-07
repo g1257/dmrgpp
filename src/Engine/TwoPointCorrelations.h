@@ -192,7 +192,7 @@ private:
 	        int,
 	        SizeType threadId)
 	{
-		SizeType n = O1.row();
+		SizeType n = O1.rows();
 		SparseMatrixType O1new=identity(n);
 
 		SparseMatrixType O2new = O1 * O2;

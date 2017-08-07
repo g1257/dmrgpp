@@ -24,13 +24,13 @@ void csr_kron_submatrix(
  * -------------------------------------------------
  */
 
-	const int ncol_A = a.col();
-	const int nrow_B = b.row();
-	const int ncol_B = b.col();
+	const int ncol_A = a.cols();
+	const int nrow_B = b.rows();
+	const int ncol_B = b.cols();
 
     const int ncol_C = ncol_A * ncol_B;
 #ifndef NDEBUG
-	const int nrow_A = a.row();
+	const int nrow_A = a.rows();
     const int nrow_C = nrow_A * nrow_B;
 #endif
     const int nrow_H = nrindex;
