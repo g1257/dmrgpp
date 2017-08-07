@@ -122,7 +122,7 @@ namespace PsimagLite {
 			SizeType counter = 0;
 			ValueType value = 0;
 			for (SizeType i=0;i<cols_.size();i++) {
-				assert(cols_[i]<matrix.col());
+				assert(cols_[i]<matrix.cols());
 				if (cols_[i]==prevCol) {
 					value += values_[iperm[i]];
 					continue;

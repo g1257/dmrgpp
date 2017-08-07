@@ -87,12 +87,12 @@ void createRandomCrs(PsimagLite::CrsMatrix<T>& crs,
                      T maxValue)
 {
 	srand48(seed);
-	PsimagLite::Matrix<T> m(crs.row(),crs.col());
+	PsimagLite::Matrix<T> m(crs.rows(),crs.cols());
 	for (SizeType i=0;i<nonZeros;i++) {
 		// pick a row
-		SizeType row = SizeType(drand48()*m.n_row());
+		SizeType row = SizeType(drand48()*m.rows());
 		// and a column
-		SizeType col = SizeType(drand48()*m.n_col());
+		SizeType col = SizeType(drand48()*m.cols());
 		// and a value
 		T val = drand48()*maxValue;
 		m(row,col) = val;
