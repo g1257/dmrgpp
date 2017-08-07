@@ -1,5 +1,44 @@
 https://github.com/g1257/dmrgpp/commits/master
 
+2017-08-07 Version 4.52
+
+* Kron optimizations
+
+* useSvd should work now
+
+* operator driver bug fixed
+
+* TestSuite: improvements to ci and postCi
+
+* TestSuite: new tests for papers
+
+* KMH model regression is marked but not fixed
+
+* toolboxdmrg action analysis
+
+* BlockDiagonalMatrix improvements
+
+* $ character in operator specs
+
+* HeisenbergAnisotropic implemented
+
+* TargetingInSitu added
+
+* Feature Proposal: Tracking Unnatural Operators
+
+* manual: Braket specifications
+
+* Operator Expressions: canonical expr. implemented
+
+* Preparation for WFT in patches
+
+* Ainur input system: very early usage
+
+* enums become named
+
+* Rixs is ready for tests
+
+
 2017-06-15 Version 4.50
 
 * Standalone input label DenseSparseThreshold
