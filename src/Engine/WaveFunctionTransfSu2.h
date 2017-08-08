@@ -225,9 +225,15 @@ private:
 	                                  const LeftRightSuperType& lrs,
 	                                  const VectorSizeType& nk) const
 	{
+		SparseMatrixType ws;
+		dmrgWaveStruct_.ws.toSparse(ws);
+		SparseMatrixType we;
+		dmrgWaveStruct_.we.toSparse(we);
+		SparseMatrixType weT;
+		transposeConjugate(weT,we);
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
-			transformVector1FromInfinite(psiDest,psiSrc,lrs,i0,nk);
+			transformVector1FromInfinite(psiDest,psiSrc,lrs,i0,nk,ws,weT);
 		}
 	}
 
@@ -236,7 +242,9 @@ private:
 	                                  const SomeVectorType& psiSrc,
 	                                  const LeftRightSuperType& lrs,
 	                                  SizeType i0,
-	                                  const VectorSizeType& nk) const
+	                                  const VectorSizeType& nk,
+	                                  const SparseMatrixType& ws,
+	                                  const SparseMatrixType& weT) const
 	{
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType nip = lrs.super().permutationInverse().size()/
@@ -254,11 +262,6 @@ private:
 		SparseMatrixType factorsInverseSE, factorsInverseE;
 		transposeConjugate(factorsInverseSE,factorsSE);
 		transposeConjugate(factorsInverseE,factorsE);
-
-		SparseMatrixType ws(dmrgWaveStruct_.ws);
-		SparseMatrixType we(dmrgWaveStruct_.we);
-		SparseMatrixType weT;
-		transposeConjugate(weT,we);
 
 		PackIndicesType pack1(nip);
 		PackIndicesType pack2(volumeOfNk);
@@ -333,6 +336,13 @@ private:
 		const LeftRightSuperType& lrsOld = dmrgWaveStruct_.lrs;
 		assert(lrsOld.super().permutationInverse().size() == psiSrc.size());
 
+		SparseMatrixType we;
+		dmrgWaveStruct_.we.toSparse(we);
+		SparseMatrixType ws;
+		dmrgWaveStruct_.ws.toSparse(ws);
+		SparseMatrixType wsT;
+		transposeConjugate(wsT,ws);
+
 		VectorType psiV;
 		for (SizeType srcI = 0; srcI < psiSrc.sectors(); ++srcI) {
 			SizeType srcII = psiSrc.sector(srcI);
@@ -349,7 +359,7 @@ private:
 				SizeType final = psiDest.effectiveSize(i0)+start;
 				VectorType dest(final-start,0.0);
 				if (srcI > 0) psiDest.extract(dest,i0);
-				transformVector2FromInfinite(dest,start,psiV,offset,lrs,nk);
+				transformVector2FromInfinite(dest,start,psiV,offset,lrs,nk,wsT,we);
 				psiDest.setDataInSector(dest,i0);
 			}
 		}
@@ -360,7 +370,9 @@ private:
 	                                  const VectorType& psiV,
 	                                  SizeType startSrc,
 	                                  const LeftRightSuperType& lrs,
-	                                  const VectorSizeType& nk) const
+	                                  const VectorSizeType& nk,
+	                                  const SparseMatrixType& wsT,
+	                                  const SparseMatrixType& we) const
 	{
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
@@ -373,11 +385,6 @@ private:
 		SparseMatrixType factorsInverseSE, factorsInverseS;
 		transposeConjugate(factorsInverseSE,factorsSE);
 		transposeConjugate(factorsInverseS,factorsS);
-
-		const SparseMatrixType& we = dmrgWaveStruct_.we;
-		const SparseMatrixType& ws = dmrgWaveStruct_.ws;
-		SparseMatrixType wsT;
-		transposeConjugate(wsT,ws);
 
 		PackIndicesType pack1(nalpha);
 		PackIndicesType pack2(nip);
@@ -451,9 +458,11 @@ private:
 	                            const LeftRightSuperType& lrs,
 	                            const VectorSizeType& nk) const
 	{
+		SparseMatrixType ws;
+		dmrgWaveStruct_.ws.toSparse(ws);
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
-			transformVector1bounce(psiDest,psiSrc,lrs,i0,nk);
+			transformVector1bounce(psiDest,psiSrc,lrs,i0,nk,ws);
 		}
 	}
 
@@ -463,7 +472,8 @@ private:
 	                            const SomeVectorType& psiSrc,
 	                            const LeftRightSuperType& lrs,
 	                            SizeType i0,
-	                            const VectorSizeType& nk) const
+	                            const VectorSizeType& nk,
+	                            const SparseMatrixType& ws) const
 	{
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType nip = lrs.super().permutationInverse().size()/
@@ -479,8 +489,6 @@ private:
 		SparseMatrixType factorsInverseSE, factorsInverseE;
 		transposeConjugate(factorsInverseSE,factorsSE);
 		transposeConjugate(factorsInverseE,factorsE);
-
-		SparseMatrixType ws(dmrgWaveStruct_.ws);
 
 		PackIndicesType pack1(nip);
 		PackIndicesType pack2(volumeOfNk);
@@ -545,9 +553,11 @@ private:
 	                            const LeftRightSuperType& lrs,
 	                            const VectorSizeType& nk) const
 	{
+		SparseMatrixType we;
+		dmrgWaveStruct_.we.toSparse(we);
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
-			transformVector2bounce(psiDest,psiSrc,lrs,i0,nk);
+			transformVector2bounce(psiDest,psiSrc,lrs,i0,nk,we);
 		}
 	}
 
@@ -556,7 +566,8 @@ private:
 	                            const SomeVectorType& psiSrc,
 	                            const LeftRightSuperType& lrs,
 	                            SizeType i0,
-	                            const VectorSizeType& nk) const
+	                            const VectorSizeType& nk,
+	                            const SparseMatrixType& we) const
 	{
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
@@ -571,7 +582,6 @@ private:
 		transposeConjugate(factorsInverseS,factorsS);
 		SizeType start = psiDest.offset(i0);
 		SizeType end = start + psiDest.effectiveSize(i0);
-		const SparseMatrixType& we = dmrgWaveStruct_.we;
 
 		PackIndicesType pack1(nalpha);
 		PackIndicesType pack2(nip);

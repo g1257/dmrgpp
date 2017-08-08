@@ -129,7 +129,7 @@ public:
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef MettsParams<ModelType> TargetParamsType;
 	typedef typename BasisType::BlockType BlockType;
-	typedef PsimagLite::Matrix<RealType> MatrixType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
@@ -549,26 +549,34 @@ private:
 			msg<<" site="<<block2[i]<<" is "<<betaFixed[i];
 		progress_.printline(msg,std::cerr);
 
-		const SparseMatrixType& transformSystem =  wft_.transform(ProgramGlobals::SYSTEM);
+		const BlockDiagonalMatrixType& transformSystem =  wft_.transform(ProgramGlobals::SYSTEM);
 		TargetVectorType newVector1(transformSystem.rows(),0);
 
 		VectorSizeType nk1;
 		mettsCollapse_.setNk(nk1,block1);
 		SizeType alphaFixedVolume = mettsCollapse_.volumeOf(alphaFixed,nk1);
 
-		getNewPure(newVector1,pureVectors_.first,ProgramGlobals::SYSTEM,
-		           alphaFixedVolume,lrs_.left(),transformSystem,block1);
+		getNewPure(newVector1,
+		           pureVectors_.first,
+		           ProgramGlobals::SYSTEM,
+		           alphaFixedVolume,
+		           lrs_.left(),
+		           transformSystem,
+		           block1);
 		pureVectors_.first = newVector1;
 
-		const SparseMatrixType& transformEnviron =
-		        wft_.transform(ProgramGlobals::ENVIRON);
+		const BlockDiagonalMatrixType& transformEnviron = wft_.transform(ProgramGlobals::ENVIRON);
 		TargetVectorType newVector2(transformEnviron.rows(),0);
 
 		VectorSizeType nk2;
 		mettsCollapse_.setNk(nk2,block2);
 		SizeType betaFixedVolume = mettsCollapse_.volumeOf(betaFixed,nk2);
-		getNewPure(newVector2,pureVectors_.second,ProgramGlobals::ENVIRON,
-		           betaFixedVolume,lrs_.right(),transformEnviron,block2);
+		getNewPure(newVector2,
+		           pureVectors_.second,
+		           ProgramGlobals::ENVIRON,
+		           betaFixedVolume,
+		           lrs_.right(),
+		           transformEnviron,block2);
 		pureVectors_.second = newVector2;
 		setFromInfinite(this->common().targetVectors(0),lrs_);
 		assert(norm(this->common().targetVectors()[0])>1e-6);
@@ -602,7 +610,7 @@ private:
 	                SizeType direction,
 	                SizeType alphaFixed,
 	                const BasisWithOperatorsType& basis,
-	                const SparseMatrixType& transform,
+	                const BlockDiagonalMatrixType& transform,
 	                const VectorSizeType& block)
 	{
 		if (oldVector.size()==0)
@@ -612,7 +620,9 @@ private:
 			tmpVector = oldVector;
 			assert(PsimagLite::norm(tmpVector)>1e-6);
 		} else {
-			delayedTransform(tmpVector,oldVector,direction,transform,block);
+			MatrixType transform1;
+			transform.toDense(transform1);
+			delayedTransform(tmpVector,oldVector,direction,transform1,block);
 			assert(PsimagLite::norm(tmpVector)>1e-6);
 		}
 		SizeType ns = tmpVector.size();
@@ -644,7 +654,7 @@ private:
 	void delayedTransform(TargetVectorType& newVector,
 	                      TargetVectorType& oldVector,
 	                      SizeType direction,
-	                      const SparseMatrixType& transform,
+	                      const MatrixType& transform,
 	                      const VectorSizeType& block)
 	{
 		assert(oldVector.size()==transform.rows());
@@ -669,7 +679,7 @@ private:
 				SizeType gammaPrime = permutationInverse[noPermIndex];
 
 				assert(gammaPrime<transform.rows());
-				newVector[gamma] += transform.element(gammaPrime,gamma) *
+				newVector[gamma] += transform(gammaPrime,gamma) *
 				        oldVector[gammaPrime];
 			}
 		}

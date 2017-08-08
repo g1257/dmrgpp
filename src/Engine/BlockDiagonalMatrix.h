@@ -277,6 +277,25 @@ public:
 		fm.checkValidity();
 	}
 
+	void toDense(PsimagLite::Matrix<ComplexOrRealType>& fm) const
+	{
+		SizeType r = rows();
+		SizeType c = cols();
+		fm.resize(r, c);
+		fm.setTo(static_cast<ComplexOrRealType>(0));
+		SizeType k = 0;
+		for (SizeType i = 0; i < r; ++i) {
+			if (k + 1 < offsetsRows_.size() && offsetsRows_[k + 1] <= i)
+				++k;
+			SizeType end = (k + 1 < offsetsCols_.size()) ? offsetsCols_[k + 1] : c;
+			if (data_[k].rows() == 0 || data_[k].cols() == 0) continue;
+			for (SizeType j = offsetsCols_[k]; j < end; ++j) {
+				ComplexOrRealType val = data_[k](i - offsetsRows_[k], j - offsetsCols_[k]);
+				fm(i, j) = val;
+			}
+		}
+	}
+
 	void diagAndEnforcePhase(SizeType m, VectorRealType& eigsTmp, char option)
 	{
 		assert(m < data_.size());
@@ -431,6 +450,13 @@ bool isUnitary(const BlockDiagonalMatrix<MatrixInBlockTemplate>& B)
 }
 
 } // namespace Dmrg
+
+namespace PsimagLite {
+template<typename T>
+struct IsMatrixLike<Dmrg::BlockDiagonalMatrix<T> > {
+	enum {True=true};
+};
+} // namespace PsimagLite
 /*@}*/
 
 #endif

@@ -104,9 +104,9 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
@@ -317,14 +317,11 @@ public:
 
 	}
 
-	void push(const BlockDiagonalMatrixType& transform1,
+	void push(const BlockDiagonalMatrixType& transform,
 	          ProgramGlobals::DirectionEnum direction,
 	          const LeftRightSuperType& lrs)
 	{
 		if (!isEnabled_) return;
-
-		SparseMatrixType transform;
-		transform1.toSparse(transform);
 
 		switch (stage_) {
 		case ProgramGlobals::INFINITE:
@@ -363,12 +360,12 @@ public:
 		}
 	}
 
-	const SparseMatrixType& transform(SizeType what) const
+	const BlockDiagonalMatrixType& transform(SizeType what) const
 	{
 		return (what==ProgramGlobals::SYSTEM) ? dmrgWaveStruct_.ws : dmrgWaveStruct_.we;
 	}
 
-	const SparseMatrixType& stackTransform(SizeType what) const
+	const BlockDiagonalMatrixType& stackTransform(SizeType what) const
 	{
 		if (what==ProgramGlobals::SYSTEM) {
 			if (wsStack_.size()==0) return dmrgWaveStruct_.ws;
@@ -557,7 +554,7 @@ private:
 	PsimagLite::String filenameOut_;
 	const PsimagLite::String WFT_STRING;
 	DmrgWaveStructType dmrgWaveStruct_;
-	typename PsimagLite::Stack<SparseMatrixType>::Type wsStack_,weStack_;
+	typename PsimagLite::Stack<BlockDiagonalMatrixType>::Type wsStack_,weStack_;
 	WaveFunctionTransfBaseType* wftImpl_;
 	PsimagLite::Random48<RealType> rng_;
 	bool twoSiteDmrg_;

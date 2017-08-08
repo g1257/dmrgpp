@@ -210,10 +210,41 @@ public:
 			return;
 		}
 
+		SparseMatrixType transformS;
+		wft_.stackTransform(ProgramGlobals::SYSTEM).toSparse(transformS);
+		SparseMatrixType transformST;
+		transposeConjugate(transformST,transformS);
+
+		SparseMatrixType transformE;
+		wft_.stackTransform(ProgramGlobals::ENVIRON).toSparse(transformE);
+		SparseMatrixType transformET;
+		transposeConjugate(transformET,transformE);
+
+		SizeType hilbertSize = model_.hilbertSize(block[0]);
+		if (systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM &&
+		    lrs_.right().size()==hilbertSize) {
+			transformE.makeDiagonal(hilbertSize,1);
+			transformET.makeDiagonal(hilbertSize,1);
+		}
+
+		if (systemOrEnviron==ProgramGlobals::EXPAND_ENVIRON &&
+		    lrs_.left().size()==hilbertSize) {
+			transformS.makeDiagonal(hilbertSize,1);
+			transformST.makeDiagonal(hilbertSize,1);
+		}
+
 		for (SizeType i=startEnd.first+1;i<startEnd.second;i++) {
 			VectorWithOffsetType src = targetVectors_[i];
 			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
-			calcTargetVector(targetVectors_[i],Eg,src,systemOrEnviron,times_[i]);
+			calcTargetVector(targetVectors_[i],
+			                 Eg,
+			                 src,
+			                 systemOrEnviron,
+			                 times_[i],
+			                 transformS,
+			                 transformST,
+			                 transformE,
+			                 transformET);
 			assert(targetVectors_[i].size()==targetVectors_[0].size());
 		}
 	}
@@ -265,13 +296,26 @@ private:
 	                      RealType Eg,
 	                      const VectorWithOffsetType& phi,
 	                      SizeType systemOrEnviron,
-	                      const RealType& time)
+	                      const RealType& time,
+	                      const SparseMatrixType& S,
+	                      const SparseMatrixType& ST,
+	                      const SparseMatrixType& E,
+	                      const SparseMatrixType& ET)
 	{
 		for (SizeType ii=0;ii<phi.sectors();ii++) {
 			SizeType i0 = phi.sector(ii);
 			SizeType total = phi.effectiveSize(i0);
 			TargetVectorType result(total,0.0);
-			calcTimeVectorsSuzukiTrotter(result,Eg,phi,systemOrEnviron,i0,time);
+			calcTimeVectorsSuzukiTrotter(result,
+			                             Eg,
+			                             phi,
+			                             systemOrEnviron,
+			                             i0,
+			                             time,
+			                             S,
+			                             ST,
+			                             E,
+			                             ET);
 			//NOTE: targetVectors_[0] = exp(iHt) |phi>
 			target.setDataInSector(result,i0);
 		}
@@ -282,7 +326,11 @@ private:
 	                                  const VectorWithOffsetType& phi,
 	                                  SizeType systemOrEnviron,
 	                                  SizeType i0,
-	                                  const RealType& time) const
+	                                  const RealType& time,
+	                                  const SparseMatrixType& transformS,
+	                                  const SparseMatrixType& transformST,
+	                                  const SparseMatrixType& transformE,
+	                                  const SparseMatrixType& transformET) const
 	{
 		SizeType offset = phi.offset(i0);
 		TargetVectorType phi0(result.size());
@@ -297,27 +345,6 @@ private:
 
 		MatrixComplexOrRealType m;
 		getMatrix(m,systemOrEnviron,block,time);
-
-		SparseMatrixType transformS = wft_.stackTransform(ProgramGlobals::SYSTEM);
-		SparseMatrixType transformST;
-		transposeConjugate(transformST,transformS);
-
-		SparseMatrixType transformE = wft_.stackTransform(ProgramGlobals::ENVIRON);
-		SparseMatrixType transformET;
-		transposeConjugate(transformET,transformE);
-
-		SizeType hilbertSize = model_.hilbertSize(block[0]);
-		if (systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM &&
-		    lrs_.right().size()==hilbertSize) {
-			transformE.makeDiagonal(hilbertSize,1);
-			transformET.makeDiagonal(hilbertSize,1);
-		}
-
-		if (systemOrEnviron==ProgramGlobals::EXPAND_ENVIRON &&
-		    lrs_.left().size()==hilbertSize) {
-			transformS.makeDiagonal(hilbertSize,1);
-			transformST.makeDiagonal(hilbertSize,1);
-		}
 
 		VectorSizeType iperm;
 		suzukiTrotterPerm(iperm,block);

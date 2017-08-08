@@ -114,11 +114,11 @@ public:
 	      nk_(nk),
 	      dmrgWaveStruct_(dmrgWaveStruct),
 	      dir_(dir),
-	      we_(dmrgWaveStruct_.we),
-	      ws_(dmrgWaveStruct_.ws),
 	      pack1_(0),
 	      pack2_(0)
 	{
+		dmrgWaveStruct_.we.toSparse(we_);
+        dmrgWaveStruct_.ws.toSparse(ws_);
 		transposeConjugate(wsT_,ws_);
 		transposeConjugate(weT_,we_);
 		SizeType vOfNk = DmrgWaveStructType::volumeOf(nk);
@@ -246,8 +246,8 @@ private:
 	const VectorSizeType& nk_;
 	const DmrgWaveStructType& dmrgWaveStruct_;
 	typename ProgramGlobals::DirectionEnum dir_;
-	const SparseMatrixType& we_;
-	const SparseMatrixType& ws_;
+	SparseMatrixType we_;
+	SparseMatrixType ws_;
 	PackIndicesType* pack1_;
 	PackIndicesType* pack2_;
 	SparseMatrixType wsT_;
