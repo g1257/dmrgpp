@@ -136,8 +136,8 @@ hence non-trivial.
 1801) Ancilla: Real      Hamiltonian Heisenberg 6 sites
 1810) Ancilla: Entangler Hamiltonian Heisenberg 6 sites Canonical
 1811) Ancilla: Real Hamiltonian Heisenberg 6 sites Canonical
-#1850) Ancilla canonical: Entangler Hamiltonian t-J 6 sites --> TOO BIG DISABLED
-#1851) Ancilla canonical: Real      Hamiltonian t-J 6 sites --> Restart from previous
+#1850 Ancilla canonical: Entangler Hamiltonian t-J 6 sites --> TOO BIG DISABLED
+#1851 Ancilla canonical: Real      Hamiltonian t-J 6 sites --> Restart from previous
 1860) Ancilla canonical: Entangler Hamiltonian t-J 6 sites Canonical
 1861) Ancilla canonical: Real      Hamiltonian t-J 6 sites Canonical
 1880) Ancilla grand canonical Hamiltonian t-J 6x2 sites: Entangler
@@ -214,7 +214,7 @@ correction vector algorithm (type=3).
 #4100-4200) <--- reserved for kron
 4300) BaFe2S3 FeS two-leg ladder two-orbital Hubbard
 4500) HeisenbergAnisotropic
-5000) Hubbard model 1 orbital on a 32x2 ladder with m up to 800.
+#5000 TOO BIG Hubbard model 1 orbital on a 32x2 ladder with m up to 800.
 It has 14 electrons up and 14 electrons down (or 2+2 "holes", 16+16 being
 the "half filled" case). U=2
 #5010) Takes too long Hubbard model 1 orbital on a 12x12 square with m up to 10000.
