@@ -7,7 +7,7 @@ use lib '../scripts';
 use Make;
 
 my @drivers = ("integrator","sparseSolverTest", "testCRSMatrix", "rungeKuttaTest", "combineContinuedFraction",
-"continuedFractionCollection", "gitrev", "range",
+"continuedFractionCollection", "range",
 "kernelPolynomial", "linearPrediction", "options", "randomTest", "svd", "testLapack", "threads",
 "testIsClass","testMemResolv1","sumDecomposition","calculator","closuresTest","base64test");
 
