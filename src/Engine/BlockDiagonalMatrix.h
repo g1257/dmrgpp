@@ -315,7 +315,7 @@ public:
 		os<<str<<"\n";
 		os<<m.offsetsRows_;
 		os<<m.offsetsCols_;
-		os<<"#Total="<<m.data_.size()<<"\n";
+		os<<m.data_.size()<<"\n";
 		for (SizeType i = 0; i < m.data_.size(); ++i)
 			os<<m.data_[i];
 		return os;
