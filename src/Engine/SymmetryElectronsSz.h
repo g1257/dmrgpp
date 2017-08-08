@@ -351,7 +351,9 @@ private:
 	{
 		SizeType maxElectrons = 2*ProgramGlobals::maxElectronsOneSpin;
 
-		for (SizeType x = 0; x < v.size(); ++x)
+		assert(v.size() > 0);
+		SizeType n = (v.size() == 0) ? 0 : v.size() - 1;
+		for (SizeType x = 0; x < n; ++x)
 			assert(v[x] < maxElectrons);
 
 		SizeType index = 0;
