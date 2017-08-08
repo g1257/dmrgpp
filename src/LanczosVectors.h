@@ -168,9 +168,9 @@ public:
 		return data_->operator()(i,j);
 	}
 
-	SizeType n_col() const { return data_->n_col(); }
+	SizeType cols() const { return data_->cols(); }
 
-	SizeType n_row() const { return data_->n_row(); }
+	SizeType rows() const { return data_->rows(); }
 
 	bool lotaMemory() const { return lotaMemory_; }
 
@@ -199,9 +199,9 @@ public:
 			return;
 		}
 
-		for (SizeType j = 0; j < data_->n_col(); j++) {
+		for (SizeType j = 0; j < data_->cols(); j++) {
 			RealType ctmp = c[j];
-			for (SizeType i = 0; i < data_->n_row(); i++) {
+			for (SizeType i = 0; i < data_->rows(); i++) {
 				z[i] += ctmp * data_->operator()(i,j);
 			}
 		}
@@ -227,7 +227,7 @@ public:
 		for (SizeType i = 0; i < x.size(); i++)
 			if (PsimagLite::real(x[i]*PsimagLite::conj(x[i]))!=0) return false;
 
-		for (SizeType j=0; j < data_->n_col(); j++) {
+		for (SizeType j=0; j < data_->cols(); j++) {
 			for (SizeType i = 0; i < mat_.rows(); i++) {
 				data_->operator()(i,j) = (i==j) ? 0.0 : 1.1;
 			}
@@ -275,7 +275,7 @@ public:
 
 	const DenseMatrixRealType& reorthogonalizationMatrix()
 	{
-		if (reortho_.n_row() == 0) {
+		if (reortho_.rows() == 0) {
 			calculateReortho();
 		}
 
@@ -288,7 +288,7 @@ private:
 	{
 		if (!lotaMemory_) return;
 
-		SizeType nlanczos = data_->n_col();
+		SizeType nlanczos = data_->cols();
 		DenseMatrixType w(nlanczos,nlanczos);
 
 		computeOverlap(w);
@@ -301,7 +301,7 @@ private:
 
 	void computeOverlap(DenseMatrixType& w) const
 	{
-		SizeType nlanczos = w.n_row();
+		SizeType nlanczos = w.rows();
 
 		for (SizeType i = 0; i < nlanczos; ++i) {
 			for (SizeType j = i; j < nlanczos; ++j) {
@@ -314,7 +314,7 @@ private:
 	{
 		ComplexOrRealType sum = 0.0;
 
-		SizeType n = data_->n_row();
+		SizeType n = data_->rows();
 
 		for (SizeType i = 0; i < n; ++i) {
 			sum += PsimagLite::conj(data_->operator ()(i,ind)) * data_->operator ()(i,jnd);
@@ -325,7 +325,7 @@ private:
 
 	void computeS(DenseMatrixRealType& s,const DenseMatrixType& w) const
 	{
-		SizeType nlanczos = s.n_row();
+		SizeType nlanczos = s.rows();
 		VectorType kvalue(nlanczos);
 		VectorType v(nlanczos);
 

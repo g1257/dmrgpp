@@ -107,8 +107,8 @@ bool checkCrs(const PsimagLite::CrsMatrix<T>& m,
 {
 	PsimagLite::Matrix<T> mf;
 	crsMatrixToFullMatrix(mf,m);
-	for (SizeType i = 0; i < fm.n_row(); ++i) {
-		for (SizeType j = 0; j < fm.n_col(); ++j) {
+	for (SizeType i = 0; i < fm.rows(); ++i) {
+		for (SizeType j = 0; j < fm.cols(); ++j) {
 			if (fabs(mf(i,j)-fm(i,j)) > 1e-6) {
 				std::cout<<mf;
 				std::cout<<fm;

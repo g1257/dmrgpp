@@ -87,9 +87,9 @@ public:
 		try {
 			io.readMatrix(reortho_,"#ReorthogonalizationMatrix");
 		} catch(std::exception& e) {
-			assert(reortho_.n_row() == 0);
+			assert(reortho_.rows() == 0);
 			std::cerr<<"ContinuedFraction: #ReorthogonalizationMatrix (nrow=";
-			std::cerr<<reortho_.n_row()<<") DISABLED\n";
+			std::cerr<<reortho_.rows()<<") DISABLED\n";
 			io.rewind();
 		}
 
@@ -206,15 +206,15 @@ private:
 		MatrixType T;
 		ab_.buildDenseMatrix(T);
 
-		if (reortho_.n_row()>0) {
+		if (reortho_.rows()>0) {
 			MatrixType tmp = T * reortho_;
 			T = multiplyTransposeConjugate(reortho_,tmp);
 		}
 
-		eigs_.resize(T.n_row());
+		eigs_.resize(T.rows());
 		diag(T,eigs_,'V');
-		intensity_.resize(T.n_row());
-		for (SizeType i=0;i<T.n_row();i++) {
+		intensity_.resize(T.rows());
+		for (SizeType i=0;i<T.rows();i++) {
 			intensity_[i]= T(0,i)*T(0,i);
 		}
 	}

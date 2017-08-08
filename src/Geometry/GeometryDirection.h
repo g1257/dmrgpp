@@ -128,8 +128,8 @@ public:
 				String extraString =  (n > 1 && io.version() > 2) ? ttos(i) : "";
 				io.readMatrix(m, connectors + extraString);
 				dataMatrices_.push_back(m);
-				if (orbitals_ < m.n_row()) orbitals_ = m.n_row();
-				if (orbitals_ < m.n_col()) orbitals_ = m.n_col();
+				if (orbitals_ < m.rows()) orbitals_ = m.rows();
+				if (orbitals_ < m.cols()) orbitals_ = m.cols();
 			}
 		} else {
 			io.read(dataNumbers_, connectors);
@@ -179,11 +179,11 @@ public:
 
 		assert(dataMatrices_.size()>h);
 
-		bool b = (dataMatrices_[h].n_row()>edof1 &&
-		          dataMatrices_[h].n_col()>edof2);
+		bool b = (dataMatrices_[h].rows()>edof1 &&
+		          dataMatrices_[h].cols()>edof2);
 
-		assert(b ||  (dataMatrices_[h].n_row()>edof2 &&
-		              dataMatrices_[h].n_col()>edof1));
+		assert(b ||  (dataMatrices_[h].rows()>edof2 &&
+		              dataMatrices_[h].cols()>edof1));
 
 		ComplexOrRealType tmp = (b) ?
 		            dataMatrices_[h](edof1,edof2) : dataMatrices_[h](edof2,edof1);

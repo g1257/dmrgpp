@@ -131,8 +131,8 @@ public:
 	void buildDenseMatrix(SomeMatrixType& m) const
 	{
 		m.resize(a_.size(),a_.size());
-		for (SizeType i=0;i<m.n_row();i++)
-			for (SizeType j=0;j<m.n_col();j++)
+		for (SizeType i=0;i<m.rows();i++)
+			for (SizeType j=0;j<m.cols();j++)
 				m(i,j)=0;
 
 		for (SizeType i=0;i<a_.size();i++) {
@@ -158,8 +158,8 @@ public:
 		typedef typename SomeVectorType::value_type ElementType;
 		Matrix<ElementType> m;
 		buildDenseMatrix(m);
-		SizeType n = m.n_row();
-		assert(m.n_col() == n);
+		SizeType n = m.rows();
+		assert(m.cols() == n);
 		typename Vector<RealType>::Type eigs(n);
 		diag(m,eigs,'V');
 		assert(level < n);

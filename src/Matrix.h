@@ -75,8 +75,8 @@ public:
 	Matrix(const Matrix<RealType>& m,
 	       typename EnableIf<!IsComplexNumber<RealType>::True,int>::Type = 0)
 	{
-		nrow_=m.n_row();
-		ncol_=m.n_col();
+		nrow_=m.rows();
+		ncol_=m.cols();
 		data_.resize(nrow_*ncol_);
 		for (SizeType i=0;i<nrow_;i++)
 			for (SizeType j=0;j<ncol_;j++)
@@ -429,12 +429,12 @@ private:
 	template<typename T1>
 	void matrixMatrix(const Matrix<T>& a, const Matrix<T>& b, const T1& t1)
 	{
-		Matrix<T> m(a.n_row(), b.n_col());
-		assert(a.n_col()==b.n_row());
-		for (SizeType i=0;i<a.n_row();i++) {
-			for (SizeType j=0;j<b.n_col();j++) {
+		Matrix<T> m(a.rows(), b.cols());
+		assert(a.cols()==b.rows());
+		for (SizeType i=0;i<a.rows();i++) {
+			for (SizeType j=0;j<b.cols();j++) {
 				T sum = 0.0;
-				for (SizeType k=0;k<a.n_col();k++) {
+				for (SizeType k=0;k<a.cols();k++) {
 					sum += a(i,k) * b(k,j);
 				}
 
@@ -486,9 +486,9 @@ template<typename T>
 std::ostream &operator<<(std::ostream &os,Matrix<T> const &A)
 {
 	SizeType i,j;
-	os<<A.n_row()<<" "<<A.n_col()<<"\n";
-	for (i=0;i<A.n_row();i++) {
-		for (j=0;j<A.n_col();j++) os<<A(i,j)<<" ";
+	os<<A.rows()<<" "<<A.cols()<<"\n";
+	for (i=0;i<A.rows();i++) {
+		for (j=0;j<A.cols();j++) os<<A(i,j)<<" ";
 		os<<"\n";
 	}
 	return os;
@@ -498,14 +498,14 @@ template<typename T>
 void mathematicaPrint(std::ostream& os,const Matrix<T>& A)
 {
 	os<<"m:={";
-	for (SizeType i=0;i<A.n_row();i++) {
+	for (SizeType i=0;i<A.rows();i++) {
 		os<<"{";
-		for (SizeType j=0;j<A.n_col();j++) {
+		for (SizeType j=0;j<A.cols();j++) {
 			os<<A(i,j);
-			if (j+1<A.n_col()) os<<",";
+			if (j+1<A.cols()) os<<",";
 		}
 		os<<"}";
-		if (i+1<A.n_row()) os<<",\n";
+		if (i+1<A.rows()) os<<",\n";
 	}
 	os<<"}\n";
 }
@@ -514,12 +514,12 @@ template<typename T>
 void symbolicPrint(std::ostream& os,const Matrix<T>& A)
 {
 	SizeType i,j;
-	os<<A.n_row()<<" "<<A.n_col()<<"\n";
+	os<<A.rows()<<" "<<A.cols()<<"\n";
 	typename Vector<T>::Type values;
 	String s = "symbolicPrint: Not enough characters\n";
 	SizeType maxCharacters = 25;
-	for (i=0;i<A.n_row();i++) {
-		for (j=0;j<A.n_col();j++) {
+	for (i=0;i<A.rows();i++) {
+		for (j=0;j<A.cols();j++) {
 
 			const T& val = A(i,j);
 			if (PsimagLite::norm(val)<1e-6) {
@@ -567,10 +567,10 @@ void symbolicPrint(std::ostream& os,const Matrix<T>& A)
 template<typename T>
 void printNonZero(const Matrix<T>& m,std::ostream& os)
 {
-	os<<"#size="<<m.n_row()<<"x"<<m.n_col()<<"\n";
-	for (SizeType i=0;i<m.n_row();i++) {
+	os<<"#size="<<m.rows()<<"x"<<m.cols()<<"\n";
+	for (SizeType i=0;i<m.rows();i++) {
 		SizeType nonzero = 0;
-		for (SizeType j=0;j<m.n_col();j++) {
+		for (SizeType j=0;j<m.cols();j++) {
 			const T& val = m(i,j);
 			if (val!=static_cast<T>(0)) {
 				os<<val<<" ";
@@ -580,7 +580,7 @@ void printNonZero(const Matrix<T>& m,std::ostream& os)
 		if (nonzero>0) os<<"\n";
 	}
 	os<<"#diagonal non-zero\n";
-	for (SizeType i=0;i<m.n_row();i++) {
+	for (SizeType i=0;i<m.rows();i++) {
 		const T& val = m(i,i);
 		if (val!=static_cast<T>(0)) {
 			os<<val<<" ";
@@ -598,7 +598,7 @@ std::istream& operator>>(std::istream& is, Matrix<T>& A)
 
 	if (is) {
 		A.reset(nrow,ncol);
-		for (SizeType j=0; j<A.n_row(); j++) for (SizeType i=0; i<A.n_col(); i++) {
+		for (SizeType j=0; j<A.rows(); j++) for (SizeType i=0; i<A.cols(); i++) {
 			is >> A(j,i);
 		}
 	}
@@ -613,9 +613,9 @@ std::istream& operator>>(std::istream& is, Matrix<T>& A)
 template<typename T>
 bool isHermitian(Matrix<T> const &A,bool verbose=false)
 {
-	SizeType n=A.n_row();
+	SizeType n=A.rows();
 	double eps=1e-6;
-	if (n!=A.n_col())
+	if (n!=A.cols())
 		throw RuntimeError("isHermitian called on a non-square matrix.\n");
 	for (SizeType i=0;i<n;i++) for (SizeType j=0;j<n;j++) {
 		if (PsimagLite::norm(A(i,j)-PsimagLite::conj(A(j,i)))>eps) {
@@ -633,8 +633,8 @@ template<typename T>
 bool isTheIdentity(Matrix<T> const &a)
 {
 
-	for (SizeType i=0;i<a.n_row();i++) {
-		for (SizeType j=0;j<a.n_col();j++) {
+	for (SizeType i=0;i<a.rows();i++) {
+		for (SizeType j=0;j<a.cols();j++) {
 			if (i!=j && PsimagLite::norm(a(i,j))>1e-6)  {
 				std::cerr<<"a("<<i<<","<<j<<")="<<a(i,j)<<"\n";
 				return false;
@@ -642,7 +642,7 @@ bool isTheIdentity(Matrix<T> const &a)
 		}
 	}
 
-	for (SizeType i=0;i<a.n_row();i++)
+	for (SizeType i=0;i<a.rows();i++)
 		if (PsimagLite::norm(a(i,i)-static_cast<T>(1.0))>1e-6) return false;
 
 	return true;
@@ -652,8 +652,8 @@ template<typename T>
 bool isZero(Matrix<std::complex<T> > const &a)
 {
 
-	for (SizeType i=0;i<a.n_row();i++)
-		for (SizeType j=0;j<a.n_col();j++)
+	for (SizeType i=0;i<a.rows();i++)
+		for (SizeType j=0;j<a.cols();j++)
 			if (PsimagLite::norm(a(i,j))>0) return false;
 	return true;
 }
@@ -661,8 +661,8 @@ bool isZero(Matrix<std::complex<T> > const &a)
 template<typename T>
 bool isZero(const Matrix<T>& m)
 {
-	for (SizeType i=0;i<m.n_row();i++)
-		for (SizeType j=0;j<m.n_col();j++)
+	for (SizeType i=0;i<m.rows();i++)
+		for (SizeType j=0;j<m.cols();j++)
 			if (fabs(m(i,j))>0) return false;
 	return true;
 }
@@ -699,9 +699,9 @@ void operator<=(std::vector<T,A>& v, const std::ClosureOperator<Matrix<T>,
 {
 	const std::vector<T,A>& b = c.r2;
 	const Matrix<T>& a = c.r1;
-	assert(a.n_col()==b.size());
-	v.resize(a.n_row());
-	for (SizeType i=0;i<a.n_row();i++) {
+	assert(a.cols()==b.size());
+	v.resize(a.rows());
+	for (SizeType i=0;i<a.rows();i++) {
 		T sum = 0;
 		for (SizeType j=0;j<b.size();j++) sum += a(i,j)*b[j];
 		v[i] = sum;
@@ -715,9 +715,9 @@ void operator<=(std::vector<T,A>& v, const std::ClosureOperator<std::vector<T,A>
 {
 	const std::vector<T,A>& b = c.r1;
 	const Matrix<T>& a = c.r2;
-	assert(a.n_row()==b.size());
-	v.resize(a.n_col());
-	for (SizeType i=0;i<a.n_col();i++) {
+	assert(a.rows()==b.size());
+	v.resize(a.cols());
+	for (SizeType i=0;i<a.cols();i++) {
 		T sum = 0;
 		for (SizeType j=0;j<b.size();j++) sum += b[j] * a(j,i);
 		v[i] = sum;
@@ -729,7 +729,7 @@ Matrix<T> multiplyTransposeConjugate(const Matrix<T>& O1,
                                      const Matrix<T>& O2,
                                      char modifier='C')
 {
-	SizeType n=O1.n_row();
+	SizeType n=O1.rows();
 	Matrix<T> ret(n,n);
 	if (modifier=='C') {
 		for (SizeType s=0;s<n;s++)
@@ -748,9 +748,9 @@ Matrix<T> multiplyTransposeConjugate(const Matrix<T>& O1,
 template<class T>
 void transposeConjugate(Matrix<T>& m2,const Matrix<T>& m)
 {
-	m2.resize(m.n_col(),m.n_row());
-	for (SizeType i=0;i<m2.n_row();i++)
-		for (SizeType j=0;j<m2.n_col();j++)
+	m2.resize(m.cols(),m.rows());
+	for (SizeType i=0;i<m2.rows();i++)
+		for (SizeType j=0;j<m2.cols();j++)
 			m2(i,j)=PsimagLite::conj(m(j,i));
 
 }
@@ -758,18 +758,18 @@ void transposeConjugate(Matrix<T>& m2,const Matrix<T>& m)
 template<class T>
 void transpose(Matrix<T>& m2,const Matrix<T>& m)
 {
-	m2.resize(m.n_col(),m.n_row());
-	for (SizeType i=0;i<m2.n_row();++i)
-		for (SizeType j=0;j<m2.n_col();++j)
+	m2.resize(m.cols(),m.rows());
+	for (SizeType i=0;i<m2.rows();++i)
+		for (SizeType j=0;j<m2.cols();++j)
 			m2(i,j) = m(j,i);
 }
 
 template<typename T>
 Matrix<T> transposeConjugate(const Matrix<T>& A)
 {
-	Matrix<T> ret(A.n_col(),A.n_row());
-	for (SizeType i=0;i<A.n_col();i++)
-		for (SizeType j=0;j<A.n_row();j++)
+	Matrix<T> ret(A.cols(),A.rows());
+	for (SizeType i=0;i<A.cols();i++)
+		for (SizeType j=0;j<A.rows();j++)
 			ret(i,j)=PsimagLite::conj(A(j,i));
 	return ret;
 }
@@ -777,7 +777,7 @@ Matrix<T> transposeConjugate(const Matrix<T>& A)
 template<typename T>
 void exp(Matrix<T>& m)
 {
-	SizeType n = m.n_row();
+	SizeType n = m.rows();
 	typename Vector<typename Real<T>::Type>::Type eigs(n);
 	diag(m,eigs,'V');
 	Matrix<T> expm(n,n);
@@ -801,8 +801,8 @@ template<typename T>
 T norm2(const Matrix<T>& m)
 {
 	T sum = 0;
-	for (SizeType i=0;i<m.n_row();i++)
-		for (SizeType j=0;j<m.n_col();j++)
+	for (SizeType i=0;i<m.rows();i++)
+		for (SizeType j=0;j<m.cols();j++)
 			sum += m(i,j) * m(i,j);
 	return sum;
 }
@@ -811,8 +811,8 @@ template<typename T>
 T norm2(const Matrix<std::complex<T> >& m)
 {
 	T sum = 0;
-	for (SizeType i=0;i<m.n_row();i++)
-		for (SizeType j=0;j<m.n_col();j++)
+	for (SizeType i=0;i<m.rows();i++)
+		for (SizeType j=0;j<m.cols();j++)
 			sum += PsimagLite::real(PsimagLite::conj(m(i,j)) * m(i,j));
 	return sum;
 }
@@ -820,15 +820,15 @@ T norm2(const Matrix<std::complex<T> >& m)
 template<typename T>
 void outerProduct(Matrix<T>& A,const Matrix<T>& B,const Matrix<T>& C)
 {
-	SizeType ni = B.n_row();
-	SizeType nj = B.n_col();
+	SizeType ni = B.rows();
+	SizeType nj = B.cols();
 
-	A.resize(B.n_row()*C.n_row(),B.n_col()*C.n_col());
+	A.resize(B.rows()*C.rows(),B.cols()*C.cols());
 
-	for (SizeType i1 = 0; i1 < B.n_row(); ++i1)
-		for (SizeType j1 = 0; j1 < B.n_col(); ++j1)
-			for (SizeType i2 = 0; i2 < C.n_row(); ++i2)
-				for (SizeType j2 = 0; j2 < C.n_col(); ++j2)
+	for (SizeType i1 = 0; i1 < B.rows(); ++i1)
+		for (SizeType j1 = 0; j1 < B.cols(); ++j1)
+			for (SizeType i2 = 0; i2 < C.rows(); ++i2)
+				for (SizeType j2 = 0; j2 < C.cols(); ++j2)
 					A(i1+i2*ni,j1+j2*nj) = B(i1,j1) * C(i2,j2);
 }
 
@@ -857,7 +857,7 @@ void>::Type allReduce(SomeMatrixType& v,
 {
 	SomeMatrixType recvbuf = v;
 	MPI_Datatype datatype = MpiData<typename SomeMatrixType::value_type>::Type;
-	SizeType total = v.n_row() * v.n_col();
+	SizeType total = v.rows() * v.cols();
 	int errorCode = MPI_Allreduce(&(v(0,0)),&(recvbuf(0,0)),total,datatype,op,mpiComm);
 	checkError(errorCode,"MPI_Allreduce",mpiComm);
 	v = recvbuf;
@@ -872,7 +872,7 @@ void>::Type allReduce(SomeMatrixType& v,
 {
 	SomeMatrixType recvbuf = v;
 	MPI_Datatype datatype = MpiData<typename SomeMatrixType::value_type::value_type>::Type;
-	SizeType total = v.n_row() * v.n_col();
+	SizeType total = v.rows() * v.cols();
 	int errorCode = MPI_Allreduce(&(v(0,0)),&(recvbuf(0,0)),2*total,datatype,op,mpiComm);
 	checkError(errorCode,"MPI_Allreduce",mpiComm);
 	v = recvbuf;

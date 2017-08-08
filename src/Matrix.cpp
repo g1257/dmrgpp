@@ -18,8 +18,8 @@ void diag(Matrix<double> &m,Vector<double> ::Type& eigs,char option)
 #else
 	char jobz=option;
 	char uplo='U';
-	int n=m.n_row();
-	int lda=m.n_col();
+	int n=m.rows();
+	int lda=m.cols();
 	Vector<double>::Type work(3);
 	int info;
 	int lwork= -1;
@@ -54,8 +54,8 @@ void diag(Matrix<std::complex<double> > &m,Vector<double> ::Type&eigs,char optio
 #else
 	char jobz=option;
 	char uplo='U';
-	int n=m.n_row();
-	int lda=m.n_col();
+	int n=m.rows();
+	int lda=m.cols();
 	Vector<std::complex<double> >::Type work(3);
 	Vector<double>::Type rwork(3*n);
 	int info;
@@ -89,8 +89,8 @@ void diag(Matrix<float> &m,Vector<float> ::Type& eigs,char option)
 #else
 	char jobz=option;
 	char uplo='U';
-	int n=m.n_row();
-	int lda=m.n_col();
+	int n=m.rows();
+	int lda=m.cols();
 	Vector<float>::Type work(3);
 	int info;
 	int lwork= -1;
@@ -126,8 +126,8 @@ void diag(Matrix<std::complex<float> > &m,Vector<float> ::Type& eigs,char option
 #else
 	char jobz=option;
 	char uplo='U';
-	int n=m.n_row();
-	int lda=m.n_col();
+	int n=m.rows();
+	int lda=m.cols();
 	Vector<std::complex<float> >::Type work(3);
 	Vector<float>::Type rwork(3*n);
 	int info,lwork= -1;
@@ -164,10 +164,10 @@ void geev(char jobvl,
 #ifdef NO_LAPACK
 	throw RuntimeError("diag: geev: NO LAPACK!\n");
 #else
-	int n = a.n_row();
-	int lda = a.n_col();
-	int ldvl = vl.n_row();
-	int ldvr = vr.n_row();
+	int n = a.rows();
+	int lda = a.cols();
+	int ldvl = vl.rows();
+	int ldvr = vr.rows();
 	int info = 0;
 	Vector<std::complex<double> >::Type work(10,0);
 	Vector<double>::Type rwork(2*n+1,0);
@@ -215,7 +215,7 @@ void inverse(Matrix<std::complex<double> > &m)
 #ifdef NO_LAPACK
 	throw RuntimeError("inverse: NO LAPACK!\n");
 #else
-	int n = m.n_row();
+	int n = m.rows();
 	int info = 0;
 	Vector<int>::Type ipiv(n,0);
 	psimag::LAPACK::zgetrf_(&n,&n,&(m(0,0)),&n,&(ipiv[0]),&info);
@@ -235,7 +235,7 @@ void inverse(Matrix<double> &m)
 #ifdef NO_LAPACK
 	throw RuntimeError("inverse: NO LAPACK!\n");
 #else
-	int n = m.n_row();
+	int n = m.rows();
 	int info = 0;
 	Vector<int>::Type ipiv(n,0);
 	psimag::LAPACK::dgetrf_(&n,&n,&(m(0,0)),&n,&(ipiv[0]),&info);
@@ -262,8 +262,8 @@ void svd(char jobz,Matrix<double>& a,Vector<double>::Type& s,Matrix<double>& vt)
 		throw RuntimeError(msg + ", not " + jobzString + "\n");
 	}
 
-	int m = a.n_row();
-	int n = a.n_col();
+	int m = a.rows();
+	int n = a.cols();
 	int lda = m;
 	int min = (m<n) ? m : n;
 
@@ -355,8 +355,8 @@ void svd(char jobz,
 		throw RuntimeError(msg + ", not " + jobzString + "\n");
 	}
 
-	int m = a.n_row();
-	int n = a.n_col();
+	int m = a.rows();
+	int n = a.cols();
 	int lda = m;
 	int min = (m<n) ? m : n;
 

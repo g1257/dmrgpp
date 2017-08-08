@@ -168,11 +168,11 @@ public:
 		int counter=0;
 		double eps = 0;
 
-		resize(a.n_row(),a.n_col());
+		resize(a.rows(),a.cols());
 
-		for (SizeType i = 0; i < a.n_row(); i++) {
+		for (SizeType i = 0; i < a.rows(); i++) {
 			setRow(i,counter);
-			for (SizeType j=0;j<a.n_col();j++) {
+			for (SizeType j=0;j<a.cols();j++) {
 				if (PsimagLite::norm(a(i,j))<=eps) continue;
 				pushValue(a(i,j));
 				pushCol(j);
@@ -180,7 +180,7 @@ public:
 			}
 
 		}
-		setRow(a.n_row(),counter);
+		setRow(a.rows(),counter);
 	}
 
 	// start closure ctors
@@ -621,12 +621,12 @@ void crsMatrixToFullMatrix(Matrix<T>& m,const CrsMatrix<T>& crsMatrix)
 template<typename T>
 void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
 {
-	crsMatrix.resize(a.n_row(),a.n_col());
+	crsMatrix.resize(a.rows(),a.cols());
 
 	SizeType counter = 0;
-	for (SizeType i = 0; i < a.n_row(); i++) {
+	for (SizeType i = 0; i < a.rows(); i++) {
 		crsMatrix.setRow(i,counter);
-		for (SizeType j=0;j<a.n_col();j++) {
+		for (SizeType j=0;j<a.cols();j++) {
 			if (a(i,j)==static_cast<T>(0)) continue;
 			crsMatrix.pushValue(a(i,j));
 			crsMatrix.pushCol(j);

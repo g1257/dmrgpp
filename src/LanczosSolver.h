@@ -545,9 +545,9 @@ private:
 		std::cerr<<a;
 		std::cerr<<"----------------\n";
 
-		typename Vector<RealType>::Type eigs(a.n_row());
+		typename Vector<RealType>::Type eigs(a.rows());
 		diag(a,eigs,'V');
-		for (SizeType i=0;i<a.n_row();i++) std::cerr<<a(i,0)<<" ";
+		for (SizeType i=0;i<a.rows();i++) std::cerr<<a(i,0)<<" ";
 		std::cerr<<"\n";
 		std::cerr<<"--------------------------------\n";
 		std::cerr<<"eigs["<<excited<<"]="<<eigs[excited]<<"\n";

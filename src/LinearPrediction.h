@@ -150,7 +150,7 @@ namespace PsimagLite {
 
 		void computeA(MatrixType& A) const
 		{
-			SizeType n = A.n_row();
+			SizeType n = A.rows();
 			for (SizeType l=0;l<n;l++) {
 				for (SizeType j=0;j<n;j++) {
 					A(l,j) = 0;

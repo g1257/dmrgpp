@@ -94,8 +94,8 @@ public:
 	    : linSize_(linSize), maxConnections_(0)
 	{
 		io.readMatrix(matrix_,"Connectors");
-		assert(matrix_.n_row()%linSize == 0);
-		orbitals_ = static_cast<SizeType>(matrix_.n_row()/linSize);
+		assert(matrix_.rows()%linSize == 0);
+		orbitals_ = static_cast<SizeType>(matrix_.rows()/linSize);
 		try {
 			io.readline(maxConnections_,"GeometryMaxConnections=");
 		} catch (std::exception&) {}

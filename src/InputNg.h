@@ -752,8 +752,8 @@ public:
 				throw RuntimeError(s.c_str());
 			}
 			SizeType k = 2;
-			for (SizeType i=0;i<m.n_row();i++)
-				for (SizeType j=0;j<m.n_col();j++)
+			for (SizeType i=0;i<m.rows();i++)
+				for (SizeType j=0;j<m.cols();j++)
 					m(i,j) = atof(it->second[k++].c_str());
 
 			cleanLabelsIfNeeded(label2,mapStrVec_,it);
@@ -788,8 +788,8 @@ public:
 				throw RuntimeError(s.c_str());
 			}
 			SizeType k = 2;
-			for (SizeType i=0;i<m.n_row();i++) {
-				for (SizeType j=0;j<m.n_col();j++) {
+			for (SizeType i=0;i<m.rows();i++) {
+				for (SizeType j=0;j<m.cols();j++) {
 					IstringStream is(it->second[k++]);
 					is >> m(i,j);
 				}
