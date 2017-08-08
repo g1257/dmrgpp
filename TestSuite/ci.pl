@@ -132,6 +132,8 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 		}
 	}
 
+	next if ($postprocess);
+
 	my $whatDmrg = $ciAnnotations{"dmrg"};
 	my $extraCmdArgs = findArguments($whatDmrg);
 	procTest($n,$valgrind,\%submit,$extraCmdArgs);
