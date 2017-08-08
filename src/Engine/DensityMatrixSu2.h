@@ -339,22 +339,22 @@ private:
 	           SizeType p2,
 	           const BuildingBlockType& bp2)
 	{
-		if (bp1.n_row()!=bp2.n_row()) {
-			std::cerr<<"row size different "<<bp1.n_row()<<"!="<<bp2.n_row()<<"\n";
+		if (bp1.rows()!=bp2.rows()) {
+			std::cerr<<"row size different "<<bp1.rows()<<"!="<<bp2.rows()<<"\n";
 			std::cerr<<"p1="<<p1<<" p2="<<p2<<"\n";
 			throw PsimagLite::RuntimeError("Density Matrix Check: failed\n");
 		}
 
-		if (bp1.n_col()!=bp2.n_col()) {
-			std::cerr<<"col size different "<<bp1.n_col()<<"!="<<bp2.n_col()<<"\n";
+		if (bp1.cols()!=bp2.cols()) {
+			std::cerr<<"col size different "<<bp1.cols()<<"!="<<bp2.cols()<<"\n";
 			std::cerr<<"p1="<<p1<<" p2="<<p2<<"\n";
 			throw PsimagLite::RuntimeError("Density Matrix Check: failed\n");
 		}
 
 		if (!debug_) return;
 
-		for (SizeType i=0;i<bp1.n_row();i++) {
-			for (SizeType j=0;j<bp1.n_col();j++) {
+		for (SizeType i=0;i<bp1.rows();i++) {
+			for (SizeType j=0;j<bp1.cols();j++) {
 				RealType x = PsimagLite::norm(bp1(i,j)-bp2(i,j));
 				if (x>1e-5) {
 					std::cerr<<bp1(i,j)<<"!="<<bp2(i,j)<<" i="<<i<<" j= "<<j<<"\n";
@@ -375,7 +375,7 @@ private:
 	            const BuildingBlockType& bp2)
 	{
 		DensityMatrixElementType alpha=1.0,beta=0.0;
-		int n =bp1.n_col();
+		int n =bp1.cols();
 		PsimagLite::Matrix<DensityMatrixElementType> result(n,n);
 		psimag::BLAS::GEMM('C',
 		                   'N',

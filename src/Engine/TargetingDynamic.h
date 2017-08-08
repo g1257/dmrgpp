@@ -259,8 +259,8 @@ private:
 			SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
 			getLanczosVectors(V,sv,p);
 			if (i==0) {
-				assert(V.n_col() > 0);
-				this->common().targetVectorsResize(V.n_col());
+				assert(V.cols() > 0);
+				this->common().targetVectorsResize(V.cols());
 				for (SizeType j=0;j<this->common().targetVectors().size();j++)
 					this->common().targetVectors(j) = phi;
 			}
@@ -295,7 +295,7 @@ private:
 	                SizeType i0)
 	{
 		for (SizeType i=0;i<this->common().targetVectors().size();i++) {
-			VectorType tmp(V.n_row());
+			VectorType tmp(V.rows());
 			for (SizeType j=0;j<tmp.size();j++) tmp[j] = V(j,i);
 			this->common().targetVectors(i).setDataInSector(tmp,i0);
 		}

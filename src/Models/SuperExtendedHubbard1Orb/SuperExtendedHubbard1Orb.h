@@ -289,7 +289,7 @@ private:
 		crsMatrixToFullMatrix(dn1,n1);
 		crsMatrixToFullMatrix(dn2,n2);
 
-		SizeType n = dn1.n_row();
+		SizeType n = dn1.rows();
 		MatrixType szmatrix(n,n);
 
 

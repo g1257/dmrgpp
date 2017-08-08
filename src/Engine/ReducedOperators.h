@@ -483,8 +483,8 @@ private:
 		}
 		fMax++;
 		reducedMapping_.reset(thisBasis_->jMax(),fMax);
-		for (SizeType i=0;i<reducedMapping_.n_row();i++)
-			for (SizeType j=0;j<reducedMapping_.n_col();j++)
+		for (SizeType i=0;i<reducedMapping_.rows();i++)
+			for (SizeType j=0;j<reducedMapping_.cols();j++)
 				reducedMapping_(i,j)= -1;
 		for (SizeType i=0;i<thisBasis_->reducedSize();i++) {
 			SizeType ii = thisBasis_->reducedIndex(i);
@@ -747,7 +747,7 @@ private:
 	                   bool order,
 	                   int fermionSign)
 	{
-		SizeType n = B.n_row();
+		SizeType n = B.rows();
 		//SizeType angularMomentum = 0;
 		//if (ki>=0) angularMomentum = momentumOfOperators_[ki];
 		const typename PsimagLite::Vector<VectorSizeType>::Type* fastBasis =

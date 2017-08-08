@@ -570,20 +570,20 @@ private:
 		findIndicesToRemove(target, natBasis);
 		assert(target.size() > 0);
 
-		SizeType n = cm.n_row();
-		assert(n == cm.n_col());
+		SizeType n = cm.rows();
+		assert(n == cm.cols());
 		assert(n > target.size());
 		n -= target.size();
 
 		MatrixType cm2(n,n);
 		SizeType ii = 0;
-		for (SizeType i = 0; i < cm.n_row(); ++i) {
+		for (SizeType i = 0; i < cm.rows(); ++i) {
 			VectorSizeType::const_iterator it = std::find(target.begin(),
 			                                              target.end(),
 			                                              i);
 			if (it != target.end()) continue;
 			SizeType jj = 0;
-			for (SizeType j = 0; j < cm.n_col(); ++j) {
+			for (SizeType j = 0; j < cm.cols(); ++j) {
 				VectorSizeType::const_iterator it = std::find(target.begin(), target.end(), j);
 				if (it != target.end()) continue;
 				cm2(ii,jj) = cm(i,j);

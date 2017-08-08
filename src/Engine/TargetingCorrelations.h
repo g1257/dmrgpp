@@ -306,11 +306,11 @@ private:
 			}
 		}
 
-		if (results.n_row() == 0 || results.n_col() == 0) return;
+		if (results.rows() == 0 || results.cols() == 0) return;
 		std::cout<<"TargetingCorrelations\n";
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
-		for (SizeType i = 0; i < results.n_row(); ++i) {
-			for (SizeType j = 0; j < results.n_col(); ++j)
+		for (SizeType i = 0; i < results.rows(); ++i) {
+			for (SizeType j = 0; j < results.cols(); ++j)
 				std::cout<<results(i,j)<<" ";
 			std::cout<<"\n";
 		}

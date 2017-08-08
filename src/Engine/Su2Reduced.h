@@ -429,7 +429,7 @@ namespace Dmrg {
 			PsimagLite::Sort<typename PsimagLite::Vector<SizeType>::Type > sort;
 			sort.sort(flavorsOldInverse_,perm);
 			typename PsimagLite::Vector<PairType>::Type r(reducedEffective_.size());
-			PsimagLite::Matrix<SizeType> reducedInverse(reducedInverse_.n_row(),reducedInverse_.n_col());
+			PsimagLite::Matrix<SizeType> reducedInverse(reducedInverse_.rows(),reducedInverse_.cols());
 
 			for (SizeType i=0;i<reducedEffective_.size();i++) {
 				r[i]=reducedEffective_[perm[i]];

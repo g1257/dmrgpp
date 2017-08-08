@@ -370,7 +370,7 @@ private:
 	                   SizeType spin1,
 	                   VectorSparseMatrixType& vm) const
 	{
-		SizeType n = dlambda.n_row();
+		SizeType n = dlambda.rows();
 		MatrixType corrector(n,n);
 		computeCorrector(corrector,spin1,vm);
 
@@ -393,7 +393,7 @@ private:
 		crsMatrixToFullMatrix(dn1,n1);
 		crsMatrixToFullMatrix(dn2,n2);
 
-		SizeType n = corrector.n_row();
+		SizeType n = corrector.rows();
 		SparseElementType f1 = (-1.0);
 		for (SizeType i = 0; i < n; ++i)
 			corrector(i,i) = std::abs(dn1(i,i) + dn2(i,i) + f1);

@@ -402,7 +402,7 @@ private:
 			if (!isHermitian(fullm,true))
 				throw PsimagLite::RuntimeError("Not hermitian matrix block\n");
 
-			typename PsimagLite::Vector<RealType>::Type eigs(fullm2.n_row());
+			typename PsimagLite::Vector<RealType>::Type eigs(fullm2.rows());
 			PsimagLite::diag(fullm2,eigs,'V');
 			std::cerr<<"eigs[0]="<<eigs[0]<<"\n";
 			if (options.find("test")!=PsimagLite::String::npos)

@@ -470,8 +470,8 @@ private:
 	                          SizeType steps)
 	{
 		SizeType n2 = steps;
-		SizeType n = V.n_row();
-		if (T.n_col()!=T.n_row()) throw PsimagLite::RuntimeError("T is not square\n");
+		SizeType n = V.rows();
+		if (T.n_col()!=T.rows()) throw PsimagLite::RuntimeError("T is not square\n");
 		if (V.n_col()!=T.n_col()) throw PsimagLite::RuntimeError("V is not nxn2\n");
 		// for (SizeType j=0;j<v.size();j++) v[j] = 0; <-- harmful if v is sparse
 		ComplexOrRealType zone = 1.0;

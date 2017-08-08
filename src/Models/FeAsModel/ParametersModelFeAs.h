@@ -227,9 +227,9 @@ struct ParametersModelFeAs {
 			io.read(potentialT,"potentialT");
 		} catch (std::exception& e) {}
 
-		if (magneticField.n_row()!=0 && magneticField.n_row()!=3)
+		if (magneticField.rows()!=0 && magneticField.rows()!=3)
 			throw PsimagLite::RuntimeError("MagneticField: if present must have 3 rows\n");
-		if (magneticField.n_row()!=0 && magneticField.n_col()!=potentialV.size())
+		if (magneticField.rows()!=0 && magneticField.cols()!=potentialV.size())
 			throw PsimagLite::RuntimeError("MagneticField: Expecting columns == sites\n");
 
 		try {
@@ -291,11 +291,11 @@ std::ostream& operator<<(std::ostream &os,
 	os<<parameters.hubbardU;
 	os<<"potentialV\n";
 	os<<parameters.potentialV;
-	if (parameters.magneticField.n_row()>0) {
+	if (parameters.magneticField.rows()>0) {
 		os<<"magneticField\n";
 		os<<parameters.magneticField;
 	}
-	if (parameters.spinOrbit.n_row()>0) {
+	if (parameters.spinOrbit.rows()>0) {
 		os<<"SpinOrbit\n";
 		os<<parameters.spinOrbit;
 	}

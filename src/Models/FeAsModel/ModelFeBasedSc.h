@@ -647,7 +647,7 @@ private:
 			SizeType electronsDown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
 			                                                                      SPIN_DOWN);
 			electrons[i] = electronsDown + electronsUp[i];
-			if (modelParameters_.spinOrbit.n_row() == 0) continue;
+			if (modelParameters_.spinOrbit.rows() == 0) continue;
 			if (!modelParameters_.jzSymmetry) {
 				electronsUp[i] = 0;
 				continue;
@@ -707,7 +707,7 @@ private:
 	{
 		if (!reinterpret_ || modelParameters_.orbitals!=2) return;
 
-		int n  = cm.n_row();
+		int n  = cm.rows();
 		if (n!=16)
 			throw PsimagLite::RuntimeError("blocks.size must be 1, and basis.size 16\n");
 
@@ -929,7 +929,7 @@ private:
 	                  SizeType ,
 	                  RealType factorForDiagonals) const
 	{
-		if (modelParameters_.spinOrbit.n_row()<4) return;
+		if (modelParameters_.spinOrbit.rows()<4) return;
 		SizeType orbitals = modelParameters_.orbitals;
 		int dof=2*orbitals;
 		SizeType nrow = cm[0].data.rows();
@@ -967,7 +967,7 @@ private:
 	                      SizeType actualIndexOfSite,
 	                      RealType factorForDiagonals) const
 	{
-		if (modelParameters_.magneticField.n_row()<3) return;
+		if (modelParameters_.magneticField.rows()<3) return;
 		assert(actualIndexOfSite<modelParameters_.magneticField.n_col());
 		for (SizeType orb=0;orb<modelParameters_.orbitals;orb++)
 			addMagneticField(hmatrix,cm,i,actualIndexOfSite,orb,factorForDiagonals);
@@ -1369,7 +1369,7 @@ private:
 		if (fullm.rank()!=256) return;
 		MatrixType fullm2;
 		crsMatrixToFullMatrix(fullm2,fullm);
-		typename PsimagLite::Vector<RealType>::Type eigs(fullm2.n_row());
+		typename PsimagLite::Vector<RealType>::Type eigs(fullm2.rows());
 		PsimagLite::diag(fullm2,eigs,'V');
 		std::cout<<str<<" diagTest size="<<fullm.rank()<<" eigs[0]="<<eigs[0]<<"\n";
 		std::cout<<fullm;

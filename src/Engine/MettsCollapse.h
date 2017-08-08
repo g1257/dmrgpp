@@ -130,7 +130,7 @@ public:
 		assert(direction!=ProgramGlobals::INFINITE);
 
 		if (targetParams_.collapse.find("every")!=PsimagLite::String::npos ||
-		    collapseBasis_.n_row() == 0) setCollapseBasis(block);
+		    collapseBasis_.rows() == 0) setCollapseBasis(block);
 
 		internalAction(c,eToTheBetaH,block,direction,false);
 
@@ -497,10 +497,10 @@ private:
 
 	void particleCollapse(MatrixType& m) const
 	{
-		if (m.n_row()!=4 || m.n_col()!=4)
+		if (m.rows()!=4 || m.cols()!=4)
 			throw PsimagLite::RuntimeError("particleCollapse: only for 4 states\n");
 
-		MatrixType m2(m.n_row(),m.n_col());
+		MatrixType m2(m.rows(),m.cols());
 		RealType theta = M_PI*rng_();
 		rotation2d(m2,1,2,theta);
 		m=m2;
@@ -530,7 +530,7 @@ private:
 	void rotationNd(MatrixType& m,SizeType hilbertSize) const
 	{
 		for (SizeType i=0;i<hilbertSize;i++) {
-			MatrixType aux1(m.n_row(),m.n_col());
+			MatrixType aux1(m.rows(),m.n_col());
 			RealType theta = M_PI*rng_();
 			SizeType i1 = i;
 			SizeType i2 = i+1;
@@ -544,7 +544,7 @@ private:
 	void rotation2d(MatrixType& m,SizeType x,SizeType y,const RealType& theta) const
 	{
 		std::cout<<"Theta="<<theta<<"\n";
-		for (SizeType i=0;i<m.n_row();i++) m(i,i) = 1.0;
+		for (SizeType i=0;i<m.rows();i++) m(i,i) = 1.0;
 		m(x,x) = m(y,y) = cos(theta);
 		m(x,y) = sin(theta);
 		m(y,x) = -sin(theta);
