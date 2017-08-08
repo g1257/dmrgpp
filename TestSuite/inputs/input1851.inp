@@ -59,9 +59,5 @@ TSPEnergyForExp=-3
 TSPUseQns=1
 GsWeight=0.0
 
-TSPOperator=cooked
-COOKED_OPERATOR=identity
-COOKED_EXTRA 2 0 0
-FERMIONSIGN=1
-JMVALUES 0 0
-AngularFactor=1
+TSPOperator=expression
+OperatorExpression=identity

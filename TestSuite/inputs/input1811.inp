@@ -43,10 +43,5 @@ TSPSites 1 3
 TSPLoops 1 2
 TSPProductOrSum=product
 
-TSPOperator=cooked
-COOKED_OPERATOR=identity
-COOKED_EXTRA 2 0 0
-FERMIONSIGN=1
-JMVALUES 0 0
-AngularFactor=1
-
+TSPOperator=expression
+OperatorExpression=identity
