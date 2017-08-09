@@ -65,14 +65,6 @@ y = [1, ... ];
 Properties: \verb!v.size! \verb!v[0]!
 Vectors values: scalars, strings, and characters.
 
-\section{Associative arrays or Hashes}
-\begin{verbatim}
-hash a = ({key1 : 3, key2 : "Hello"}); 
-# defines a["key1"] and a["key2"]
-# to have the corresponding values.
-\end{verbatim}
-Hash values: scalars, strings, characters, vectors.
-
 \subsection{Matrices} 
 \begin{verbatim}
 matrix m = [[0, 1], [1, 0]];
@@ -97,6 +89,7 @@ string a = "my local value"; };
 groupName.name="chain";
 groupName.Connections=[ 1, 1 ];
 string groupName.a = "my local value";
+# Groups can be nested
 # Unnamed groups?
 \end{verbatim}
 
@@ -138,17 +131,15 @@ NumberOfTerms=1;
 DegreesOfFreedom=1;
 GeometryKind="ladder";
 GeometryOptions="ConstantValues";
-dir0.Connectors = [1.0];
-dir1.Connectors = [0.5];
+dir0:Connectors = [1.0];
+dir1:Connectors = [0.5];
 LadderLeg=2;
-
-hubbardU = [10, ...];
-
-potentialV = [ 0, ...];
 Model="HubbardOneBand";
-SolverOptions="TimeStepTargetting,vectorwithoffsets";
+hubbardU = [10, ... ];
+potentialV = [0, ...];
+SolverOptions="TimeStepTargetting";
 Version="4.52";
-OutputFile="data52.txt"
+OutputFile="data52.txt";
 InfiniteLoopKeptStates=200;
 FiniteLoops = [
 [ 3, 400, 0],
@@ -175,7 +166,6 @@ OperatorExpression="c+(-1.0)*c*c?1*c?1'+c?1+(-1.0)*c?1*c*c'";
 TSPOperator="expression";
 OperatorExpression="c'*c?1*c?1'+c?1'*c*c'";
 
-Threads=4;
 
 #ci getTimeObservablesInSitu 2 '<P0|nup|P0>'
 #ci getTimeObservablesInSitu 4 '<P0|nup|P0>'
@@ -199,16 +189,16 @@ gt0={ # gt means geometry term
   GeometryKind="ladderx";
   GeometryOptions="ConstantValues";
   LadderLeg=2;
-  dir0.Connectors = [ # x-dir
+  dir0:Connectors = [ # x-dir
     [-0.058, 0],
     [0, -0.2196]];
-  dir1.Connectors = [ # y-dir
+  dir1:Connectors = [ # y-dir
     [-0.2196, 0],
     [0, -0.058]];
-  dir2.Connectors = [ # x+y
+  dir2:Connectors = [ # x+y
     [0.20828, 0.079],
     [0.079, 0.20828]];
-  dir3.Connectors = [ # x-y
+  dir3:Connectors = [ # x-y
     [0.20828, -0.079]
     [-0.079, 0.20828]];
 };
@@ -218,27 +208,45 @@ gt1={
   GeometryKind="ladderx";
   GeometryOptions="ConstantValues";
   LadderLeg=2;
-  dir0.Connectors = [0.1];
-  dir1.Connectors = [0.1];
-  dir2.Connectors = [0.02];
-  dir3.Connectors = [0.02]; 
+  dir0:Connectors = [0.1];
+  dir1:Connectors = [0.1];
+  dir2:Connectors = [0.02];
+  dir3:Connectors = [0.02];
 };
 
-gt2=gt1; # note the abbreviation here
+gt2={ # gt means geometry term
+  DegreesOfFreedom=Orbitals;
+  GeometryKind="ladderx";
+  GeometryOptions="ConstantValues";
+  LadderLeg=2;
+  dir0:Connectors = [ # x-dir
+    [-0.058, 0],
+    [0, -0.2196]];
+  dir1:Connectors = [ # y-dir
+    [-0.2196, 0],
+    [0, -0.058]];
+  dir2:Connectors = [ # x+y
+    [0.20828, 0.079],
+    [0.079, 0.20828]];
+  dir3:Connectors = [ # x-y
+    [0.20828, -0.079]
+    [-0.079, 0.20828]];
+};
 
-hubbardU	 = [0.0, 0.0, 0.0, 0.0]; 
-potentialV.size = 32;
-potentialV = [0, ...];
+hubbardU	 = [0.0, 0.0, 0.0, 0.0];
+potentialV = [0, ...32];
 
 Model="FeAsBasedScExtended";
 FeAsMode="INT_PAPER33";
-SolverOptions="none"
+SolverOptions="none";
 Version="61289987cdd32b8485213ac0415baf4e9cd16432";
 OutputFile="data340.txt";
 InfiniteLoopKeptStates=60;
-vector v1 = [ 3, 100, 0];
-vector v2 = [-3, 100, 0];
-FiniteLoops = [v1, v2, v2, v1]; # note the abbreviation here
+FiniteLoops = [
+[ 3, 100, 0],
+[-3, 100, 0],
+[-3, 100, 0],
+[ 3, 100, 0]]; # note the abbreviation here
 TargetElectronsUp=8;
 TargetElectronsDown=TargetElectronsUp;
 \end{verbatim}
