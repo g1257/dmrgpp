@@ -1016,7 +1016,6 @@ private:
 		SizeType j1 = j;
 		SizeType j2 = j + 1;
 
-		int fermionicSign = -1;
 		SizeType threadId = 0;
 		FieldType sum = 0.0;
 		SizeType site = 0;
@@ -1026,30 +1025,24 @@ private:
 
 		for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 			// c(i1,orb1,spin0)
-			SparseMatrixType O1 = model_.naturalOperator("c",site,orb1+spin0*orbitals).data;
+			PsimagLite::String str("<gs|c[" + ttos(site) + "]?" +
+			                       ttos(orb1+spin0*orbitals) + ";");
+
 			// c(i2,orb2,1-spin0)
-			SparseMatrixType O2 = model_.naturalOperator("c",site,orb2+(1-spin0)*orbitals).data;
+			str += "c[" + ttos(site) + "]?" + ttos(orb2+(1-spin0)*orbitals) + ";";
+
 			for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
 				// c(i2,orb2,spin1)
-				SparseMatrixType O3 = model_.naturalOperator("c",site,orb3+spin1*orbitals).data;
+				PsimagLite::String str2("c[" + ttos(site) + "]?" +
+				                        ttos(orb3+spin1*orbitals) + "';");
+
 				// c(i3,orb1,1-spin1)
-				SparseMatrixType O4 = model_.naturalOperator("c",site,orb4+(1-spin1)*orbitals).data;
+				str2 += "c[" + ttos(site) + "]?" + ttos(orb4+(1-spin1)*orbitals) + "'|gs>";
+
+				BraketType braket(model_, str + str2);
 				SizeType val = spin0 + spin1 + 1;
 				int signTerm = (val & 1) ? sign : 1;
-				sum +=  signTerm*observe_.fourpoint()('N',
-				                                      i1,
-				                                      O1,
-				                                      'N',
-				                                      i2,
-				                                      O2,
-				                                      'C',
-				                                      j1,
-				                                      O3,
-				                                      'C',
-				                                      j2,
-				                                      O4,
-				                                      fermionicSign,
-				                                      threadId);
+				sum +=  signTerm*observe_.fourpoint()(i1,i2,j1,j2,braket,threadId);
 			}
 		}
 

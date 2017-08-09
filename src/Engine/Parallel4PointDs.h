@@ -87,6 +87,7 @@ class Parallel4PointDs {
 
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename FourPointCorrelationsType::MatrixType MatrixType;
+	typedef typename FourPointCorrelationsType::BraketType BraketType;
 	typedef typename MatrixType::value_type FieldType;
 	typedef typename FourPointCorrelationsType::SparseMatrixType SparseMatrixType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
@@ -103,7 +104,12 @@ public:
 	                 const typename PsimagLite::Vector<SizeType>::Type& gammas,
 	                 const typename PsimagLite::Vector<PairType>::Type& pairs,
 	                 FourPointModeEnum mode)
-	    : fpd_(fpd),fourpoint_(fourpoint),model_(model),gammas_(gammas),pairs_(pairs),mode_(mode)
+	    : fpd_(fpd),
+	      fourpoint_(fourpoint),
+	      model_(model),
+	      gammas_(gammas),
+	      pairs_(pairs),
+	      mode_(mode)
 	{}
 
 	void doTask(SizeType taskNumber, SizeType threadNum)
@@ -136,18 +142,23 @@ private:
 		nx /= 2;
 		SizeType site = 0;
 		// C_{gamma0,up}
-		const SparseMatrixType& opC0 = model.naturalOperator("c",site,gammas[0] + 0*nx).data;
-		// C_{gamma1,down}
-		const SparseMatrixType& opC1 = model.naturalOperator("c",site,gammas[1] + 1*nx).data;
-		// C_{gamma2,down}
-		const SparseMatrixType& opC2 = model.naturalOperator("c",site,gammas[2] + 1*nx).data;
-		// C_{gamma3,up}
-		const SparseMatrixType& opC3 = model.naturalOperator("c",site,gammas[3] + 0*nx).data;
+		PsimagLite::String str("<gs|c[" + ttos(site) + "]?" + ttos(gammas[0] + 0*nx) + "';");
+		// const SparseMatrixType& opC0 = model.naturalOperator("c",site,gammas[0] + 0*nx).data;
 
-		return fourpoint_('C',i,opC0,
-		                  'C',i+1,opC1,
-		                  'N',j,opC2,
-		                  'N',j+1,opC3,-1,threadId);
+		// C_{gamma1,down}
+		str += "<gs|c[" + ttos(site) + "]?" + ttos(gammas[1] + 1*nx) + "';";
+		// const SparseMatrixType& opC1 = model.naturalOperator("c",site,gammas[1] + 1*nx).data;
+
+		// C_{gamma2,down}
+		str += "<gs|c[" + ttos(site) + "]?" + ttos(gammas[2] + 1*nx) + ";";
+		//const SparseMatrixType& opC2 = model.naturalOperator("c",site,gammas[2] + 1*nx).data;
+
+		// C_{gamma3,up}
+		str += "<gs|c[" + ttos(site) + "]?" + ttos(gammas[3] + 0*nx) + "|gs>";
+		//const SparseMatrixType& opC3 = model.naturalOperator("c",site,gammas[3] + 0*nx).data;
+
+		BraketType braket(model, str);
+		return fourpoint_(i,i+1,j,j+1,braket,threadId);
 	}
 
 	template<typename SomeModelType>
@@ -173,21 +184,24 @@ private:
 		SizeType site = 0;
 
 		// c(i1,orb1,spin0)
-		SparseMatrixType O1 = model_.naturalOperator("c",site,spin0).data;
+		PsimagLite::String str = "<gs|c[" + ttos(site) + "]?" + ttos(spin0) + ";";
+		// SparseMatrixType O1 = model_.naturalOperator("c",site,spin0).data;
 		// c(i2,orb2,1-spin0)
-		SparseMatrixType O2 = model_.naturalOperator("c",site,1-spin0).data;
+		str += "c[" + ttos(site) + "]?" + ttos(1 - spin0) + ";";
+		//SparseMatrixType O2 = model_.naturalOperator("c",site,1-spin0).data;
 
 		// c(i2,orb2,spin1)
-		SparseMatrixType O3 = model_.naturalOperator("c",site,spin1).data;
+		str += "c[" + ttos(site) + "]?" + ttos(spin1) + "';";
+		// SparseMatrixType O3 = model_.naturalOperator("c",site,spin1).data;
+
 		// c(i3,orb1,1-spin1)
-		SparseMatrixType O4 = model_.naturalOperator("c",site,1-spin1).data;
+		str += "c[" + ttos(site) + "]?" + ttos(1 - spin1) + "'|gs>";
+		//SparseMatrixType O4 = model_.naturalOperator("c",site,1-spin1).data;
 		SizeType val = spin0 + spin1 + 1;
 		int signTerm = (val & 1) ? sign : 1;
+		BraketType braket(model_, str);
 
-		return signTerm*fourpoint_('N',thini1,O1,
-		                           'N',thini2,O2,
-		                           'C',thinj1,O3,
-		                           'C',thinj2,O4,-1,threadId);
+		return signTerm*fourpoint_(thini1,thini2,thinj1,thinj2,braket,threadId);
 
 	}
 

@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define FOURPOINT_C_H
 
 #include "CrsMatrix.h"
+#include "Braket.h"
 
 namespace Dmrg {
 template<typename CorrelationsSkeletonType>
@@ -101,10 +102,12 @@ class FourPointCorrelations {
 public:
 
 	typedef typename CorrelationsSkeletonType::SparseMatrixType SparseMatrixType;
+	typedef typename CorrelationsSkeletonType::OperatorType OperatorType;
 	typedef typename ObserverHelperType::MatrixType MatrixType;
 	typedef PsimagLite::Vector<char>::Type VectorCharType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
+	typedef typename CorrelationsSkeletonType::BraketType BraketType;
 
 	FourPointCorrelations(ObserverHelperType& precomp,
 	                      CorrelationsSkeletonType& skeleton,
@@ -115,11 +118,11 @@ public:
 
 	//! Four-point: these are expensive and uncached!!!
 	//! requires i1<i2<i3<i4
-	FieldType operator()(char mod1,SizeType i1,const SparseMatrixType& O1,
-	                     char mod2,SizeType i2,const SparseMatrixType& O2,
-	                     char mod3,SizeType i3,const SparseMatrixType& O3,
-	                     char mod4,SizeType i4,const SparseMatrixType& O4,
-	                     int fermionicSign,
+	FieldType operator()(SizeType i1,
+	                     SizeType i2,
+	                     SizeType i3,
+	                     SizeType i4,
+	                     const BraketType& braket,
 	                     SizeType threadId) const
 	{
 		if (i1>i2 || i3>i4 || i2>i3)
@@ -133,17 +136,17 @@ public:
 
 		SparseMatrixType O2gt;
 
-		firstStage(O2gt,mod1,i1,O1,mod2,i2,O2,fermionicSign,threadId);
+		firstStage(O2gt,'N',i1,'N',i2,braket,0,1,threadId);
 
-		return secondStage(O2gt,i2,mod3,i3,O3,mod4,i4,O4,fermionicSign,threadId);
+		return secondStage(O2gt,i2,'N',i3,'N',i4,braket,2,3,threadId);
 	}
 
 	//! 3-point: these are expensive and uncached!!!
 	//! requires i1<i2<i3
-	FieldType threePoint(char mod1,SizeType i1,const SparseMatrixType& O1,
-	                     char mod2,SizeType i2,const SparseMatrixType& O2,
-	                     char mod3,SizeType i3,const SparseMatrixType& O3,
-	                     int fermionicSign,
+	FieldType threePoint(SizeType i1,
+	                     SizeType i2,
+	                     SizeType i3,
+	                     const BraketType& braket,
 	                     SizeType threadId) const
 	{
 		if (i1>i2 || i2>i3)
@@ -153,73 +156,82 @@ public:
 
 		SparseMatrixType O2gt;
 
-		firstStage(O2gt,mod1,i1,O1,mod2,i2,O2,fermionicSign,threadId);
+		firstStage(O2gt,'N',i1,'N',i2,braket,0,1,threadId);
 
-		return secondStage(O2gt,i2,mod3,i3,O3,fermionicSign,threadId);
+		return secondStage(O2gt,i2,'N',i3,braket,2,threadId);
 	}
 
 	//! 4-points or more: these are expensive and uncached!!!
 	//! requires i0<i1<i2<i3<...<i_{n-1}
-	FieldType anyPoint(const VectorCharType& mods,
-	                   const VectorSizeType& indices,
-	                   const VectorSparseMatrixType& Omatrices,
-	                   int fermionicSign,
-	                   SizeType threadId) const
+	FieldType anyPoint(const BraketType& braket, SizeType threadId) const
 	{
-		checkIndicesForStrictOrdering(indices);
-		checkSizes(mods,indices,Omatrices);
+		SizeType n = braket.points();
+		if (n < 4)
+			err("anyPoint: FATAL ERROR: 4 or more points expected\n");
+
+		checkIndicesForStrictOrdering(braket);
 
 		SparseMatrixType O2gt;
 		firstStage(O2gt,
-		           mods[0],
-		        indices[0],
-		        Omatrices[0],
-		        mods[1],
-		        indices[1],
-		        Omatrices[1],
-		        fermionicSign,
-		        threadId);
+		           'N',
+		           braket.site(0),
+		           'N',
+		           braket.site(1),
+		           braket,
+		           0,
+		           1,
+		           threadId);
 
-		SizeType n = indices.size();
 		assert(n > 3);
 		SizeType end = n - 2;
 		// do the middle
 		for (SizeType i = 2; i < end; ++i) {
-			SizeType i2 = indices[i - 1];
+			SizeType i2 = braket.site(i - 1);
 			SparseMatrixType OsoFar;
-			middleStage(OsoFar,O2gt,i2,mods[i],indices[i],Omatrices[i],fermionicSign,threadId);
+			middleStage(OsoFar,
+			            O2gt,
+			            i2,
+			            'N',
+			            braket.site(i),
+			            braket.op(i),
+			            braket.op(i - 1).fermionSign,
+			            threadId);
 			O2gt = OsoFar;
 		}
 
 		// handle the last 2 sites
-		SizeType i2 = indices[n - 3];
-		SizeType i3 = indices[n - 2];
-		SizeType i4 = indices[n - 1];
+		SizeType i2 = braket.site(n - 3);
+		SizeType i3 = braket.site(n - 2);
+		SizeType i4 = braket.site(n - 1);
 
 		return secondStage(O2gt,
 		                   i2,
-		                   mods[n-2],
-		        i3,
-		        Omatrices[n-2],
-		        mods[n-1],
-		        i4,
-		        Omatrices[n-1],
-		        fermionicSign,
-		        threadId);
+		                   'N',
+		                   i3,
+		                   'N',
+		                   i4,
+		                   braket,
+		                   n - 2,
+		                   n - 1,
+		                   threadId);
 	}
 
 	//! requires i1<i2
 	void firstStage(SparseMatrixType& O2gt,
-	                char mod1,SizeType i1,const SparseMatrixType& O1,
-	                char mod2,SizeType i2,const SparseMatrixType& O2,
-	                int fermionicSign,
+	                char mod1,
+	                SizeType i1,
+	                char mod2,
+	                SizeType i2,
+	                const BraketType& braket,
+	                SizeType index0,
+	                SizeType index1,
 	                SizeType threadId) const
 	{
 
 		// Take care of modifiers
 		SparseMatrixType O1m, O2m;
-		skeleton_.createWithModification(O1m,O1,mod1);
-		skeleton_.createWithModification(O2m,O2,mod2);
+		skeleton_.createWithModification(O1m,braket.op(index0).data,mod1);
+		skeleton_.createWithModification(O2m,braket.op(index1).data,mod2);
 		if (verbose_) {
 			std::cerr<<"O1m, mod="<<mod1<<"\n";
 			std::cerr<<O1m;
@@ -232,8 +244,8 @@ public:
 
 		int ns = i2-1;
 		if (ns<0) ns = 0;
-		skeleton_.growDirectly(O1g,O1m,i1,fermionicSign,ns,true,threadId);
-		skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns,threadId);
+		skeleton_.growDirectly(O1g,O1m,i1,braket.op(index0).fermionSign,ns,true,threadId);
+		skeleton_.dmrgMultiply(O2g,O1g,O2m,braket.op(index1).fermionSign,ns,threadId);
 
 		helper_.setPointer(threadId,ns);
 		helper_.transform(O2gt,O2g,threadId);
@@ -248,23 +260,26 @@ public:
 	                      SizeType i2,
 	                      char mod3,
 	                      SizeType i3,
-	                      const SparseMatrixType& O3,
 	                      char mod4,
 	                      SizeType i4,
-	                      const SparseMatrixType& O4,
-	                      int fermionicSign,
+	                      const BraketType& braket,
+	                      SizeType index0,
+	                      SizeType index1,
 	                      SizeType threadId) const
 	{
 		// Take care of modifiers
 		SparseMatrixType O3m,O4m;
-		skeleton_.createWithModification(O3m,O3,mod3);
-		skeleton_.createWithModification(O4m,O4,mod4);
+		skeleton_.createWithModification(O3m,braket.op(index0).data,mod3);
+		skeleton_.createWithModification(O4m,braket.op(index1).data,mod4);
 
 		int ns = i3-1;
 		if (ns<0) ns = 0;
 		helper_.setPointer(threadId,ns);
 		SparseMatrixType Otmp;
-		growDirectly4p(Otmp,O2gt,i2+1,fermionicSign,ns,threadId);
+		if (index0 == 0) err("secondStage\n");
+
+		int fermionS = braket.op(index0 - 1).fermionSign;
+		growDirectly4p(Otmp,O2gt,i2+1,fermionS,ns,threadId);
 		if (verbose_) {
 			std::cerr<<"Otmp\n";
 			std::cerr<<Otmp;
@@ -273,16 +288,30 @@ public:
 		SparseMatrixType O3g,O4g;
 		if (i4==skeleton_.numberOfSites(threadId)-1) {
 			if (i3<i4-1) { // not tested
-				skeleton_.dmrgMultiply(O3g,Otmp,O3m,fermionicSign,ns,threadId);
-				skeleton_.growDirectly(Otmp,O3g,i3,fermionicSign,i4-2,true,threadId);
+				skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index0).fermionSign,ns,threadId);
+				skeleton_.growDirectly(Otmp,
+				                       O3g,
+				                       i3,
+				                       braket.op(index0).fermionSign,
+				                       i4 - 2,
+				                       true,
+				                       threadId);
 				helper_.setPointer(threadId,i4-2);
-				return skeleton_.bracketRightCorner(Otmp,O4m,fermionicSign,threadId);
+				return skeleton_.bracketRightCorner(Otmp,
+				                                    O4m,
+				                                    braket.op(index1).fermionSign,
+				                                    threadId);
 			}
+
 			helper_.setPointer(threadId,i4-2);
-			return skeleton_.bracketRightCorner(Otmp,O3m,O4m,fermionicSign,threadId);
+			return skeleton_.bracketRightCorner(Otmp,
+			                                    O3m,
+			                                    O4m,
+			                                    braket.op(index1).fermionSign,
+			                                    threadId);
 		}
 
-		skeleton_.dmrgMultiply(O3g,Otmp,O3m,fermionicSign,ns,threadId);
+		skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index0).fermionSign,ns,threadId);
 		if (verbose_) {
 			std::cerr<<"O3g\n";
 			std::cerr<<O3g;
@@ -300,14 +329,14 @@ public:
 		ns = i4-1;
 		if (ns<0) ns = 0;
 		helper_.setPointer(threadId,ns);
-		growDirectly4p(Otmp,O3gt,i3+1,fermionicSign,ns,threadId);
+		growDirectly4p(Otmp,O3gt,i3+1,braket.op(index0).fermionSign,ns,threadId);
 		if (verbose_) {
 			std::cerr<<"Otmp\n";
 			std::cerr<<Otmp;
 		}
 
-		skeleton_.dmrgMultiply(O4g,Otmp,O4m,fermionicSign,ns,threadId);
-		return skeleton_.bracket(O4g,fermionicSign,threadId);
+		skeleton_.dmrgMultiply(O4g,Otmp,O4m,braket.op(index1).fermionSign,ns,threadId);
+		return skeleton_.bracket(O4g,braket.op(index1).fermionSign,threadId);
 	}
 
 	//! requires i2<i3<i4
@@ -316,8 +345,8 @@ public:
 	                 SizeType i2,
 	                 char mod3,
 	                 SizeType i3,
-	                 const SparseMatrixType& O3,
-	                 int fermionicSign,
+	                 const OperatorType& Op3,
+	                 int fermionS,
 	                 SizeType threadId) const
 	{
 		// Take care of modifiers
@@ -327,20 +356,20 @@ public:
 			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs distinct points\n");
 
 		SparseMatrixType O3m;
-		skeleton_.createWithModification(O3m,O3,mod3);
+		skeleton_.createWithModification(O3m,Op3.data,mod3);
 
 		int ns = i3-1;
 		if (ns < 0) ns = 0;
 		helper_.setPointer(threadId,ns);
 		SparseMatrixType Otmp;
-		growDirectly4p(Otmp,OsoFar,i2+1,fermionicSign,ns,threadId);
+		growDirectly4p(Otmp,OsoFar,i2+1,fermionS,ns,threadId);
 		if (verbose_) {
 			std::cerr<<"Otmp\n";
 			std::cerr<<Otmp;
 		}
 
 		SparseMatrixType O3g;
-		skeleton_.dmrgMultiply(O3g,Otmp,O3m,fermionicSign,ns,threadId);
+		skeleton_.dmrgMultiply(O3g,Otmp,O3m,Op3.fermionSign,ns,threadId);
 		if (verbose_) {
 			std::cerr<<"O3g\n";
 			std::cerr<<O3g;
@@ -363,18 +392,20 @@ private:
 	                      SizeType i2,
 	                      char mod3,
 	                      SizeType i3,
-	                      const SparseMatrixType& O3,
-	                      int fermionicSign,
+	                      const BraketType& braket,
+	                      SizeType index,
 	                      SizeType threadId) const
 	{
 		// Take care of modifiers
 		SparseMatrixType O3m;
-		skeleton_.createWithModification(O3m,O3,mod3);
+		skeleton_.createWithModification(O3m,braket.op(index).data,mod3);
 
 		int ns = i3-1;
 		if (ns<0) ns = 0;
 		SparseMatrixType Otmp;
-		growDirectly4p(Otmp,O2gt,i2+1,fermionicSign,ns,threadId);
+		if (index == 0) err("secondStage\n");
+		int fermionS = braket.op(index - 1).fermionSign;
+		growDirectly4p(Otmp,O2gt,i2+1,fermionS,ns,threadId);
 		if (verbose_) {
 			std::cerr<<"Otmp\n";
 			std::cerr<<Otmp;
@@ -382,19 +413,22 @@ private:
 
 		if (i3 == skeleton_.numberOfSites(threadId)-1) {
 			helper_.setPointer(threadId,i3-2);
-			return skeleton_.bracketRightCorner(Otmp,O3m,fermionicSign,threadId);
+			return skeleton_.bracketRightCorner(Otmp,
+			                                    O3m,
+			                                    braket.op(index).fermionSign,
+			                                    threadId);
 		}
 
 		helper_.setPointer(threadId,ns);
 		SparseMatrixType O3g;
-		skeleton_.dmrgMultiply(O3g,Otmp,O3m,fermionicSign,ns,threadId);
+		skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index).fermionSign,ns,threadId);
 		if (verbose_) {
 			std::cerr<<"O3g\n";
 			std::cerr<<O3g;
 		}
 
 		helper_.setPointer(threadId,ns);
-		return skeleton_.bracket(O3g,fermionicSign,threadId);
+		return skeleton_.bracket(O3g,braket.op(index).fermionSign,threadId);
 	}
 
 	//! i can be zero here!!
@@ -422,14 +456,14 @@ private:
 		}
 	}
 
-	void checkIndicesForStrictOrdering(const VectorSizeType& indices) const
+	void checkIndicesForStrictOrdering(const BraketType& braket) const
 	{
-		if (indices.size() < 2) return;
+		if (braket.points() < 2) return;
 
 		bool flag = true;
-		SizeType prev = indices[0];
-		for (SizeType i = 1; i < indices.size(); ++i) {
-			if (indices[i] <= prev) {
+		SizeType prev = braket.site(0);
+		for (SizeType i = 1; i < braket.points(); ++i) {
+			if (braket.site(i) <= prev) {
 				flag = false;
 				break;
 			}
@@ -437,19 +471,6 @@ private:
 
 		if (flag) return;
 		throw PsimagLite::RuntimeError("AnyPoint: Point must be strictly ordered\n");
-	}
-
-	void checkSizes(const VectorCharType& mods,
-	                const VectorSizeType& indices,
-	                const VectorSparseMatrixType& Omatrices) const
-	{
-		SizeType n = mods.size();
-		if (n != indices.size() || n != Omatrices.size()) {
-			throw PsimagLite::RuntimeError("AnyPoint: Internal Error\n");
-		}
-
-		if (n < 4)
-			throw PsimagLite::RuntimeError("AnyPoint: 4 or more points expected\n");
 	}
 
 	ObserverHelperType& helper_; // <-- NB: not the owner

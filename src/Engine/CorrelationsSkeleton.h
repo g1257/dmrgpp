@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 #include "Profiling.h"
 #include "ApplyOperatorLocal.h"
+#include "Braket.h"
 
 namespace Dmrg {
 
@@ -114,6 +115,8 @@ class CorrelationsSkeleton {
 	typedef PsimagLite::PackIndices PackIndicesType;
 
 public:
+
+	typedef Braket<ModelType> BraketType;
 	typedef ObserverHelperType_ ObserverHelperType;
 	typedef typename ObserverHelperType::MatrixType MatrixType;
 	typedef typename ObserverHelperType::VectorType VectorType ;
@@ -289,7 +292,7 @@ private:
 	void dmrgMultiplySystem(SparseMatrixType& result,
 	                        const SparseMatrixType& O1,
 	                        const SparseMatrixType& O2,
-	                        int fermionicSign,
+	                        int fermionicSign, // fermion sign of O2
 	                        SizeType ns,
 	                        SizeType threadId)
 	{
@@ -412,8 +415,7 @@ private:
 
 		for (SizeType e=0;e<n;e++) {
 			for (SizeType e2=0;e2<n;e2++) {
-				ret(e,e2) = fluffUpSystem_(
-				            O,e,e2,fermionicSign,growOption,threadId);
+				ret(e,e2) = fluffUpSystem_(O,e,e2,fermionicSign,growOption,threadId);
 			}
 		}
 
@@ -454,7 +456,8 @@ private:
 
 	// Perfomance critical:
 	FieldType fluffUpSystem_(const SparseMatrixType& O,
-	                         SizeType e,SizeType e2,
+	                         SizeType e,
+	                         SizeType e2,
 	                         int fermionicSign,
 	                         int growOption,
 	                         SizeType threadId)
