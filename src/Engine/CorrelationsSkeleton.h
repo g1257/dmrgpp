@@ -322,7 +322,7 @@ private:
 					SizeType u2 = O2.getCol(k2);
 					SizeType r2 = helper_.leftRightSuper(threadId).left().
 					        permutationInverse(e2 + u2*ni);
-					value[r2] += PsimagLite::conj(O1.getValue(k))*O2.getValue(k2)*f;
+					value[r2] += O1.getValue(k)*O2.getValue(k2)*f;
 					col[r2] = 1;
 				}
 			}
@@ -381,7 +381,7 @@ private:
 					        permutationInverse(e2 + u2*nj);
 					assert(r2<eprime);
 					col[r2] = 1;
-					value[r2] += O2.getValue(k)*PsimagLite::conj(O1.getValue(k2))*f;
+					value[r2] += O2.getValue(k)*O1.getValue(k2)*f;
 				}
 			}
 			for (SizeType i=0;i<col.size();i++) {
@@ -546,7 +546,6 @@ private:
 	                        const VectorWithOffsetType& vec2,
 	                        SizeType threadId)
 	{
-		SparseMatrixType Acrs(A);
 		FieldType sum=0;
 		PackIndicesType pack(helper_.leftRightSuper(threadId).left().size());
 		for (SizeType x=0;x<vec1.sectors();x++) {
@@ -558,13 +557,13 @@ private:
 
 				pack.unpack(r,eta,helper_.leftRightSuper(threadId).super().
 				            permutation(t));
-				for (int k=Acrs.getRowPtr(r);k<Acrs.getRowPtr(r+1);k++) {
-					SizeType r2 = Acrs.getCol(k);
+				for (int k=A.getRowPtr(r);k<A.getRowPtr(r+1);k++) {
+					SizeType r2 = A.getCol(k);
 					SizeType t2 = helper_.leftRightSuper(threadId).super().
 					        permutationInverse(r2+eta*A.cols());
 					if (t2<offset || t2>=total) continue;
-					sum += Acrs.getValue(k)*vec1.slowAccess(t)*
-					        PsimagLite::conj(vec2.slowAccess(t2));
+					sum += A.getValue(k)*PsimagLite::conj(vec1.slowAccess(t))*
+					        vec2.slowAccess(t2);
 				}
 			}
 		}
@@ -578,7 +577,6 @@ private:
 	                         int fermionicSign,
 	                         SizeType threadId)
 	{
-		SparseMatrixType Acrs(A);
 		FieldType sum=0;
 		PackIndicesType pack(helper_.leftRightSuper(threadId).left().size());
 		SizeType leftSize = helper_.leftRightSuper(threadId).left().size();
@@ -592,17 +590,17 @@ private:
 
 				pack.unpack(r,eta,helper_.leftRightSuper(threadId).super().
 				            permutation(t));
-				if (eta>=Acrs.rows()) throw PsimagLite::RuntimeError("Error\n");
+				if (eta>=A.rows()) throw PsimagLite::RuntimeError("Error\n");
 				SizeType nx0 = helper_.leftRightSuper(threadId).left().
 				        electrons(BasisType::AFTER_TRANSFORM);
 				RealType sign = (nx0 & 1) ? fermionicSign : 1;
-				for (int k=Acrs.getRowPtr(eta);k<Acrs.getRowPtr(eta+1);k++) {
-					SizeType eta2 = Acrs.getCol(k);
+				for (int k=A.getRowPtr(eta);k<A.getRowPtr(eta+1);k++) {
+					SizeType eta2 = A.getCol(k);
 					SizeType t2 = helper_.leftRightSuper(threadId).super().
 					        permutationInverse(r+eta2*leftSize);
 					if (t2<offset || t2>=total) continue;
-					sum += Acrs.getValue(k)*vec1.slowAccess(t)*
-					        PsimagLite::conj(vec2.slowAccess(t2))*sign;
+					sum += A.getValue(k)*PsimagLite::conj(vec1.slowAccess(t))*
+					        vec2.slowAccess(t2)*sign;
 				}
 			}
 		}
@@ -685,9 +683,9 @@ private:
 						SizeType t2 = helper_.leftRightSuper(threadId).super().
 						        permutationInverse(rprime+eta2*leftSize);
 						if (t2<offset || t2>=total) continue;
-						sum += PsimagLite::conj(Acrs.getValue(k))*Bcrs.getValue(k2)*
-						        vec1.slowAccess(t)*
-						        PsimagLite::conj(vec2.slowAccess(t2))*sign;
+						sum += Acrs.getValue(k)*Bcrs.getValue(k2)*
+						        PsimagLite::conj(vec1.slowAccess(t))*
+						        vec2.slowAccess(t2)*sign;
 					}
 				}
 			}
@@ -746,8 +744,8 @@ private:
 						        permutationInverse(eta2+rprime*leftSize);
 						if (t2<offset || t2>=total) continue;
 						sum += PsimagLite::conj(Acrs.getValue(k))*Bcrs.getValue(k2)*
-						        vec1.slowAccess(t)*
-						        PsimagLite::conj(vec2.slowAccess(t2))*sign;
+						        PsimagLite::conj(vec1.slowAccess(t))*
+						        vec2.slowAccess(t2)*sign;
 					}
 				}
 			}
@@ -817,10 +815,10 @@ private:
 							SizeType t2 = helper_.leftRightSuper(threadId).super().
 							        permutationInverse(rprime+eta2*leftSize);
 							if (t2<offset || t2>=total) continue;
-							sum += PsimagLite::conj(A1crs.getValue(k1)*A2crs.getValue(k2))*
+							sum +=  A1crs.getValue(k1)*A2crs.getValue(k2)*
 							        Bcrs.getValue(k3)*
-							        vec1.slowAccess(t)*
-							        PsimagLite::conj(vec2.slowAccess(t2))*sign;
+							        PsimagLite::conj(vec1.slowAccess(t))*
+							        vec2.slowAccess(t2)*sign;
 						}
 					}
 				}
