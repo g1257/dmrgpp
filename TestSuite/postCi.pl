@@ -246,7 +246,6 @@ sub checkTimeInSituObs
 		my $file = "runForinput$n.cout";
 		if (!(-r "$file")) {
 			print STDERR "|$n|: WARNING: $file not readable\n";
-			next;
 		}
 
 		my $file2 = "getTimeObservablesInSitu${n}_$i.txt";

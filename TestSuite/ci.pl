@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use Getopt::Long qw(:config no_ignore_case);
 use Ci;
+use lib "../scripts";
+use timeObservablesInSitu;
 
 my ($valgrind,$workdir,$restart,$ranges,$postprocess,$noSu2,$info,$help);
 my %submit;
@@ -163,16 +165,22 @@ sub runTimeInSituObs
 			next;
 		}
 
-		my $cmd = "../../scripts/getTimeObservablesInSitu.pl ";
-		$cmd .= $what->[$i];
-		$cmd .= " <  $file ";
-		$cmd .= " > getTimeObservablesInSitu${n}_$i.txt";
-		$cmd =~ s/;/SEMI_COLON/g;
+		my @temp = split(/,/, $what->[$i]);
+		(scalar(@temp) == 2) or die "$0: FATAL annotation ".$what->[$i]."\n";
+		my ($site, $label) = @temp;		
+		my $fin;
+		open($fin, $file) or die "$0: Could not open $file : $!\n";
+		my $fout;
+		my $foutname = "getTimeObservablesInSitu${n}_$i.txt";
+		if (!open($fout, "> $foutname")) {
+			close($fin);
+			die "$0: Could not write to $foutname: $!\n";
+		}
+
 		if ($submit->{"command"} ne "") {
-			print STDERR "|$n|: Executing $cmd\n";
-			system($cmd);
+			timeObservablesInSitu::main($site, $label, $fin, $fout);
 		} else {
-			print STDERR "|$n|: Dry run $cmd\n";
+			print STDERR "|$n|: Dry run $site $label\n";
 		}
 	}
 }
