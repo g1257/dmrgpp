@@ -85,7 +85,7 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	my $whatObserveN = scalar(@$whatObserve);
 	if ($whatObserveN > 0) {
 		print "|$n| has $whatObserveN observe lines\n";
-		checkObserve($n);
+		checkObserve($n,$workdir,$golddir);
 	}
 
 	print "-----------------------------------------------\n";
@@ -255,8 +255,138 @@ sub checkTimeInSituObs
 
 sub checkObserve
 {
-	my ($n) = @_;
-	my $file2 = "observe$n.txt";
-	print "$0: MUST CHECK $file2\n";
+	my ($n, $workdir, $golddir) = @_;
+	my $file1 = "$workdir/observe$n.txt";
+	my $file2 = "$golddir/observe$n.txt";
+	print "$0: Checking $file1 against $file2\n";
+	my @m1 = loadObserveData($file1);
+	my @m2 = loadObserveData($file2);
+	compareObserveData(\@m1, \@m2);
 }
 
+sub compareObserveData
+{
+	my ($m1, $m2) = @_;
+	my $n1 = scalar(@$m1);
+	my $n2 = scalar(@$m2);
+	print "work has $n1 observe matrices -- gold has $n2 observe matrices\n";
+	return if ($n1 != $n2);
+	for (my $i = 0; $i < $n1; ++$i) {
+		compareObserveDatum($m1->[$i], $m2->[$i]);
+	}
+}
+
+sub compareObserveDatum
+{
+	my ($h1, $h2) = @_;
+	my $l1 = $h1->{"label"};
+	my $l2 = $h2->{"label"};
+	if ($l1 ne $l2) {
+		print "Label $l1 NOT EQUAL to $l2\n";
+		return;
+	}
+
+	print "Comparing $l1\n";
+	compareMatrix($h1->{"data"}, $h2->{"data"});
+}
+
+sub compareMatrix
+{
+	my ($m1, $m2) = @_;
+	if (scalar(@$m1) < 3 || scalar(@$m2) < 3) {
+		print "\tMatrix TOO SMALL\n";
+		return;
+	}
+
+	if ($m1->[0] != $m2->[0]) {
+		print "\tRows not equal\n";
+		return;
+	}
+
+	if ($m1->[1] != $m2->[1]) {
+		print "\tCols not equal\n";
+		return;
+	}
+
+	my $total = $m1->[0] * $m1->[1];
+
+	my $max = 0;
+	for (my $i = 0; $i < $total; ++$i) {
+		my $val = abs($m1->[$i] - $m2->[$i]);
+		$max = $val if ($max < $val);
+	}
+
+	print "\tMaximum difference= $max\n";
+}
+
+
+sub loadObserveData
+{
+	my ($file) = @_;
+	my @m;
+	my $fh;
+	if (!open($fh, "$file")) {
+		print "$0: File $file NOT FOUND\n";
+		return @m;
+	}
+	
+	while (<$fh>) {
+		my $label = readNextLabel($fh);
+		my @m1;
+		my $ret = readNextMatrix($fh, \@m1);
+		if ($ret ne "ok") {
+			print "$0: label=$label, $ret\n";
+			last;
+		}
+
+		my %h = ("label" => $label, "data" => \@m1);
+		push @m, \%h;
+	}
+
+	close($fh);
+	return @m;
+}
+
+sub readNextLabel
+{
+	my ($fh) = @_;
+	while (<$fh>) {
+		#print;
+		chomp;
+		last if (/^\</);
+	}
+
+	return $_;
+}
+
+sub readNextMatrix
+{
+	my ($fh, $m) = @_;
+	$_ = <$fh>;
+	defined($_) or return "eof";
+	chomp;
+	my @temp = split;
+	if (scalar(@temp) != 2) {
+		return "not a matrix";
+	}
+
+	my ($rows, $cols) = @temp;
+	$m->[0] = $rows;
+	$m->[1] = $cols;
+	for (my $i = 0; $i < $rows; ++$i) {
+		$_ = <$fh>;
+		defined($_) or return "file ended while reading matrix";
+		chomp;
+		my @temp = split;
+		(scalar(@temp) == $cols) or return "cols wrong for row $i";
+		for (my $j = 0; $j < $cols; ++$j) {
+			$m->[2 + $i +$j*$rows] = $temp[$j];
+		}
+	}
+
+	return "ok";
+}
+
+
+
+			

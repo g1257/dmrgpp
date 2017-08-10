@@ -19,6 +19,7 @@ sub main
 		next unless /\Q$label/;
 		if (/^${site} /) {
 			my @temp = split;
+			(scalar(@temp) >= 5) or next;
 			my $value = procValue($temp[1]);
 			my $time = $temp[2];
 			my $superdensity = procValue($temp[4]);
