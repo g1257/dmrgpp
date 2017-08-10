@@ -1,0 +1,67 @@
+TotalNumberOfSites=32
+NumberOfTerms=5
+Model=HubbardOneBandExtendedSuper
+
+SolverOptions=twositedmrg
+Version=version
+OutputFile=data467.txt
+InfiniteLoopKeptStates=64
+FiniteLoops 5 15 100 0
+-30 100 0 30 100 0
+-30 100 0 30 100 1
+
+TargetElectronsUp=16
+TargetElectronsDown=16
+Threads=4
+
+hubbardU 32
+6.400 6.400 6.400 6.400 6.400 6.400 6.400 6.400 6.400 6.400
+6.400 6.400 6.400 6.400 6.400 6.400 6.400 6.400 6.400 6.400
+6.400 6.400 6.400 6.400 6.400 6.400 6.400 6.400 6.400 6.400
+6.400 6.400
+
+potentialV 64
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0
+
+LadderLeg=2
+DegreesOfFreedom=1
+GeometryKind=ladder
+GeometryOptions=ConstantValues
+Connectors 1  -1.0
+Connectors 1  0.0
+
+LadderLeg=2
+DegreesOfFreedom=1
+GeometryKind=ladder
+GeometryOptions=ConstantValues
+Connectors 1  0.0
+Connectors 1  2.40000
+
+LadderLeg=2
+DegreesOfFreedom=1
+GeometryKind=ladder
+GeometryOptions=ConstantValues
+Connectors 1  0.0
+Connectors 1  -3.20000
+
+LadderLeg=2
+DegreesOfFreedom=1
+GeometryKind=ladder
+GeometryOptions=ConstantValues
+Connectors 1  0.0
+Connectors 1  -3.20000
+
+LadderLeg=2
+DegreesOfFreedom=1
+GeometryKind=ladder
+GeometryOptions=ConstantValues
+Connectors 1  0.0
+Connectors 1  1.60000
+
+#ci observe arguments="onepoint,ss"
