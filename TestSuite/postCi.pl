@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use Getopt::Long qw(:config no_ignore_case);
 use Ci;
+use lib "../scripts";
+use timeObservablesInSitu;
 
 my ($memory,$failed,$noSu2,$help,$workdir,$golddir,$ranges,$info);
 GetOptions(
@@ -78,7 +80,7 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	my $x = scalar(@$whatTimeInSituObs);
 	if ($x > 0) {
 		print "|$n| has $x getTimeObservablesInSitu lines\n";
-		checkTimeInSituObs($n, $whatTimeInSituObs);
+		checkTimeInSituObs($n, $whatTimeInSituObs, $workdir, $golddir);
 	}
 
 	my $whatObserve = $ciAnnotations{"observe"};
@@ -240,7 +242,7 @@ sub fileSize
 
 sub checkTimeInSituObs
 {
-	my ($n,$what) = @_;
+	my ($n, $what, $workdir, $golddir) = @_;
 	my $whatN = scalar(@$what);
 	for (my $i = 0; $i < $whatN; ++$i) {
 		my $file = "runForinput$n.cout";
@@ -248,8 +250,34 @@ sub checkTimeInSituObs
 			print STDERR "|$n|: WARNING: $file not readable\n";
 		}
 
-		my $file2 = "getTimeObservablesInSitu${n}_$i.txt";
-		print "$0: MUST CHECK $file2\n";
+		my $file1 = "$workdir/timeObservablesInSitu${n}_$i.txt";
+		my $file2 = "$golddir/timeObservablesInSitu${n}_$i.txt";
+		print "Comparing $file1 against $file2\n";
+		my %m1 = timeObservablesInSitu::load($file1);
+		my %m2 = timeObservablesInSitu::load($file2);
+		if (keys %m1 != 4 or keys %m2 != 4) {
+			print "\tIncorrect file $file1 or $file2\n";
+			return;
+		}
+
+		my $site = $m1{"site"};
+		my $label = $m1{"label"};
+		if ($label ne $m2{"label"}) {
+			print "\tlabels NOT EQUAL\n";
+			next;
+		}
+
+		if ($site ne $m2{"site"}) {
+			print "\tsites NOT EQUAL\n";
+			next;
+		}
+
+		if (!vectorsEqual($m1{"times"}, $m2{"times"})) {
+			print "\ttimes NOT EQUAL\n";
+			next;
+		}
+
+		compareMatrices($m1{"data"}, $m2{"data"});
 	}
 }
 
@@ -287,10 +315,10 @@ sub compareObserveDatum
 	}
 
 	print "Comparing $l1\n";
-	compareMatrix($h1->{"data"}, $h2->{"data"});
+	compareMatrices($h1->{"data"}, $h2->{"data"});
 }
 
-sub compareMatrix
+sub compareMatrices
 {
 	my ($m1, $m2) = @_;
 	if (scalar(@$m1) < 3 || scalar(@$m2) < 3) {

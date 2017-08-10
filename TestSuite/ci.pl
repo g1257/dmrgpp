@@ -171,7 +171,7 @@ sub runTimeInSituObs
 		my $fin;
 		open($fin, $file) or die "$0: Could not open $file : $!\n";
 		my $fout;
-		my $foutname = "getTimeObservablesInSitu${n}_$i.txt";
+		my $foutname = "timeObservablesInSitu${n}_$i.txt";
 		if (!open($fout, "> $foutname")) {
 			close($fin);
 			die "$0: Could not write to $foutname: $!\n";
