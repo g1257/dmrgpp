@@ -59,7 +59,7 @@ die "$0: No tests specified under -n\n" if ($rangesTotal == 0);
 for (my $j = 0; $j < $rangesTotal; ++$j) {
         my $n = $inRange[$j];
        if (!exists($allowedTests{"$n"})) {
-		print STDERR "$0: Test $n does not exist, ignored\n";
+		#print STDERR "$0: Test $n does not exist, ignored\n";
 		next;
 	}
 
@@ -72,6 +72,22 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
         }
 
 	procTest($n,$workdir,$golddir);
+
+	my %ciAnnotations = Ci::getCiAnnotations("inputs/input$n.inp",$n);
+	my $whatTimeInSituObs = $ciAnnotations{"getTimeObservablesInSitu"};
+	my $x = scalar(@$whatTimeInSituObs);
+	if ($x > 0) {
+		print "|$n| has $x getTimeObservablesInSitu lines\n";
+		checkTimeInSituObs($n, $whatTimeInSituObs);
+	}
+
+	my $whatObserve = $ciAnnotations{"observe"};
+	my $whatObserveN = scalar(@$whatObserve);
+	if ($whatObserveN > 0) {
+		print "|$n| has $whatObserveN observe lines\n";
+		checkObserve($n);
+	}
+
 	print "-----------------------------------------------\n";
 }
 
@@ -220,5 +236,28 @@ sub fileSize
 	          $atime,$mtime,$ctime,$blksize,$blocks)
 	              = stat($filename);
 	return $size;
+}
+
+sub checkTimeInSituObs
+{
+	my ($n,$what) = @_;
+	my $whatN = scalar(@$what);
+	for (my $i = 0; $i < $whatN; ++$i) {
+		my $file = "runForinput$n.cout";
+		if (!(-r "$file")) {
+			print STDERR "|$n|: WARNING: $file not readable\n";
+			next;
+		}
+
+		my $file2 = "getTimeObservablesInSitu${n}_$i.txt";
+		print "$0: MUST CHECK $file2\n";
+	}
+}
+
+sub checkObserve
+{
+	my ($n) = @_;
+	my $file2 = "observe$n.txt";
+	print "$0: MUST CHECK $file2\n";
 }
 

@@ -172,5 +172,40 @@ sub compactList
 	return $text;
 }
 
+sub getCiAnnotations
+{
+	my ($file,$n) = @_;
+	open(FILE, "$file") or return "";
+	my @whatObserve;
+	my @whatDmrg;
+	my @whatTimeObsInSitu;
+	my $counter = 0;
+	while (<FILE>) {
+		chomp;
+		if (/^\#ci observe (.*$)/) {
+			push (@whatObserve, "$1");
+			next;
+		}
+
+		if (/^#ci dmrg (.*$)/) {
+			push (@whatDmrg, "$1");
+			next;
+		}
+
+		if (/^#ci getTimeObservablesInSitu (.*$)/) {
+			push (@whatTimeObsInSitu, "$1");
+			next;
+		}
+	}
+
+	close(FILE);
+	my %h;
+	$h{"dmrg"} = \@whatDmrg;
+	$h{"observe"} = \@whatObserve;
+	$h{"getTimeObservablesInSitu"} = \@whatTimeObsInSitu;
+
+	return %h;
+}
+
 1;
 

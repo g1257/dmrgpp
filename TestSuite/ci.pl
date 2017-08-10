@@ -111,14 +111,13 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 		next;
 	}
 
-	my %ciAnnotations = getCiAnnotations("../inputs/input$n.inp",$n);
+	my %ciAnnotations = Ci::getCiAnnotations("../inputs/input$n.inp",$n);
 	my $whatTimeInSituObs = $ciAnnotations{"getTimeObservablesInSitu"};
 	my $x = scalar(@$whatTimeInSituObs);
 	if ($x > 0) {
 		print "|$n| has $x getTimeObservablesInSitu lines\n";
 		if ($postprocess) {
 			runTimeInSituObs($n, $whatTimeInSituObs, \%submit);
-			next;
 		}
 	}
 
@@ -128,7 +127,6 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 		print "|$n| has $whatObserveN observe lines\n";
 		if ($postprocess) {
 			runObserve($n,$whatObserve,\%submit);
-			next;
 		}
 	}
 
@@ -209,41 +207,6 @@ sub runObserveOne
 	my $cmd = "./observe -f ../inputs/input$n.inp \"$args\" >> $output";
 	print "|$n|: postTest $cmd\n";
 	return $cmd;
-}
-
-sub getCiAnnotations
-{
-	my ($file,$n) = @_;
-	open(FILE, "$file") or return "";
-	my @whatObserve;
-	my @whatDmrg;
-	my @whatTimeObsInSitu;
-	my $counter = 0;
-	while (<FILE>) {
-		chomp;
-		if (/^\#ci observe (.*$)/) {
-			push (@whatObserve, "$1");
-			next;
-		}
-
-		if (/^#ci dmrg (.*$)/) {
-			push (@whatDmrg, "$1");
-			next;
-		}
-
-		if (/^#ci getTimeObservablesInSitu (.*$)/) {
-			push (@whatTimeObsInSitu, "$1");
-			next;
-		}
-	}
-
-	close(FILE);
-	my %h;
-	$h{"dmrg"} = \@whatDmrg;
-	$h{"observe"} = \@whatObserve;
-	$h{"getTimeObservablesInSitu"} = \@whatTimeObsInSitu;
-
-	return %h;
 }
 
 sub isRestart
