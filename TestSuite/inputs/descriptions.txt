@@ -42,7 +42,7 @@ Tests *with* SU(2) symmetry:
 	 INF(60)+7(100)-7(100)-7(100)+7(100)
 41) Fe-based Superconductors model (HuFeAS-2orb) on a ladder (LadderFeAs) with U=1 J=1 with 4+4 sites
 	INF(60)+7(100)-7(100)-7(100)+7(100)
-50)
+50) paper40
 InternalControlNumber: 40
 Walltime (in seconds, approx.): 620
 Model: HubbardOneBand
@@ -54,7 +54,7 @@ Table* (if any): N/A
 Page* where more or less this feature is used: 056706-4
 [* Refers to published version.]
 
-52)
+52) paper40
 InternalControlNumber: 40
 Walltime (in seconds, approx.): 168
 Model: HubbardOneBand
@@ -121,7 +121,36 @@ Page* where more or less this feature is used: 2230
 200) Time Evolution preparation ground state
 201) Time Evolution proper
 340) A test of the Fe-based Superconductors extended model
+
+363) paper63
+InternalControlNumber: 63
+NumberInThisSeries: 0
+Walltime (in seconds, approx.): 217
+Model: FeAsBasedSc
+Do you need to run observe? yes
+Do you need to run scripts? yes
+Succint Description Of Features this test tests: twositedmrg, ss, onepoint
+Figure* (if any): Figure 4
+Page* where more or less this feature is used: Page 5
+[* Refers to published version.]
+
 410) Postprocessing of time evolution for Hubbard model
+
+467) paper67
+InternalControlNumber: 67
+DOI: https://dx.doi.org/10.1103/PhysRevB%2E96%2E024520
+NumberInThisSeries: 0
+Walltime (in seconds, approx.): 44
+Model: FeAsBasedSc
+Do you need to run observe? yes
+Do you need to run scripts? yes
+Succint Description Of Features this test tests: Reproduce figure 1 curve for 0 hole
+doping (N-0) by doing the fourier transform of the si.sj matrix obtained from
+the observe code.
+Figure* (if any): Figure 1
+Page* where more or less this feature is used: Page 4
+[* Refers to published version.]
+
 600) Test on 6-site chain with U=10, standard Hubbard model.
 	Tests the density and double occupation of a time vector,
 	defined as exp(iHt) h d |gs>, where h a holon and d a doublon.
@@ -171,6 +200,7 @@ hence non-trivial. (Krylov)
 2040) Time Evolution (Krylov)
 2045) LadderBath without time advancement (Krylov)
 2048) Time Evolution at U>0 with 6 site chain (Krylov)
+
 #2050) Reserved
 #2055) Reserved
 #2058) Reserved
@@ -180,6 +210,7 @@ hence non-trivial. (Krylov)
 2061) Test on 6-site chain with U=10, standard Hubbard model.
       Tests the density and double occupation of a time vector,
       defined as exp(iHt) h d |gs>, where h a holon and d a doblon (Krylov)
+
 #2062) Reserved
 #2070) Time Evolution (Suzuki-Trotter)
 2071) Time Evolution (Krylov)
@@ -214,6 +245,7 @@ correction vector algorithm (type=3).
 #4100-4200) <--- reserved for kron
 4300) BaFe2S3 FeS two-leg ladder two-orbital Hubbard
 4500) HeisenbergAnisotropic
+
 #5000 TOO BIG Hubbard model 1 orbital on a 32x2 ladder with m up to 800.
 It has 14 electrons up and 14 electrons down (or 2+2 "holes", 16+16 being
 the "half filled" case). U=2

@@ -14,24 +14,34 @@ sub getTests
 
 	my $prevNumber;
 	my $description = "";
+	my $barrier = 0;
 	while (<FILE>) {
 		next if (/^\#/);
-		if (/^(\d+)\)/) {
-			my $number = $1;			
+		my $line = $_;
+		chomp($line);
+		$line =~ s/[ \t]+//g;
+		$barrier = 1 if ($line eq "");
+		if (/^(\d+)\)(.*$)/) {
+			my $number = $1;
 			if ($counter == 0) {
 				$prevNumber = $number;
 				++$counter;
+				$description = $2;
+				$description .= "\n" if ($description ne "");
 				next;
 			}
 
 			my %h;
 			$h{"number"} = $prevNumber;
-			$h{"description"} = $description; 
+			$h{"description"} = $description;
+			$description = $2;
+			$description .= "\n" if ($description ne "");
 			$tests[$counter - 1] = \%h;
 			$prevNumber = $number;
 			++$counter;
+			$barrier = 0;
 		} else {
-			$description .= $_;
+			$description .= $_ unless($barrier);
 		}
 	}
 

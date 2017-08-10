@@ -65,8 +65,10 @@ my %allowedTests = Ci::getAllowedTests(\@tests);
 my $total = $tests[$#tests]->{"number"};
 
 if (defined($info)) {
+	my $desc = $allowedTests{$info};
+	defined($desc) or die "$0: No test $info\n";
 	print STDERR "$0: INFO for $info\n";
-	print STDERR " ".$allowedTests{$info}."\n";
+	print STDERR " ".$desc."\n";
 	exit(0);
 }
 
