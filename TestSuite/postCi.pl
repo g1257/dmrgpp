@@ -335,7 +335,8 @@ sub loadObserveData
 		my @m1;
 		my $ret = readNextMatrix($fh, \@m1);
 		if ($ret ne "ok") {
-			print "$0: label=$label, $ret\n";
+			print "$0: $ret\n";
+			print "$0: $label\n" if (defined($label));
 			last;
 		}
 
@@ -365,10 +366,19 @@ sub readNextMatrix
 	$_ = <$fh>;
 	defined($_) or return "eof";
 	chomp;
+	if (!/^\d+ /) {
+		# double label, read again
+		$_ = <$fh>;
+		defined($_) or return "eof";
+		chomp;
+	}
+
 	my @temp = split;
+	
 	if (scalar(@temp) != 2) {
 		return "not a matrix";
 	}
+
 
 	my ($rows, $cols) = @temp;
 	$m->[0] = $rows;
