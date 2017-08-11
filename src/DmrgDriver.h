@@ -22,6 +22,8 @@
 #include "Operators.h"
 #include "CrsMatrix.h"
 #include "CvectorSize.h"
+#include "OperatorSpec.h"
+#include "CanonicalExpression.h"
 
 #ifndef USE_FLOAT
 typedef double RealType;
@@ -35,6 +37,8 @@ struct OperatorOptions {
 	    : site(0),
 	      dof(0),
 	      label(""),
+	      opexpr(""),
+	      hasOperatorExpression(false),
 	      transpose(false),
 	      enabled(false)
 	{}
@@ -42,6 +46,8 @@ struct OperatorOptions {
 	SizeType site;
 	SizeType dof;
 	PsimagLite::String label;
+	PsimagLite::String opexpr;
+	bool hasOperatorExpression;
 	bool transpose;
 	bool enabled;
 };
@@ -57,22 +63,41 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
+	typedef Dmrg::OperatorSpec<ModelBaseType> OperatorSpecType;
 
-	if (obsOptions.label == "B") {
-		model.printBasis(obsOptions.site);
-		return;
-	}
-
-	if (obsOptions.label=="") {
+	if (obsOptions.hasOperatorExpression && obsOptions.label != "") {
+		std::cerr<<"You must provide exactly one option: -l or -e;";
+		std::cerr<<" both were given\n";
 		usageOperator();
 		return;
 	}
 
-	OperatorType opC = model.naturalOperator(obsOptions.label,
-	                                         obsOptions.site,
-	                                         obsOptions.dof);
-	std::cerr<<"#label="<<obsOptions.label<<" site="<<obsOptions.site;
-	std::cerr<<" dof="<<obsOptions.dof<<"\n";
+	if (!obsOptions.hasOperatorExpression && obsOptions.label == "") {
+		std::cerr<<"You must provide exactly one option: -l or -e;";
+		std::cerr<<" none were given\n";
+		usageOperator();
+		return;
+	}
+
+	OperatorType opC;
+
+	if (obsOptions.hasOperatorExpression) {
+		OperatorSpecType opSpec(model);
+		int site = -1;
+		PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(opSpec);
+		opC = canonicalExpression(obsOptions.opexpr, site);
+	} else {
+		if (obsOptions.label == "B") {
+			model.printBasis(obsOptions.site);
+			return;
+		}
+
+		opC = model.naturalOperator(obsOptions.label,
+		                            obsOptions.site,
+		                            obsOptions.dof);
+		std::cerr<<"#label="<<obsOptions.label<<" site="<<obsOptions.site;
+		std::cerr<<" dof="<<obsOptions.dof<<"\n";
+	}
 
 	if (obsOptions.transpose) opC.conjugate();
 

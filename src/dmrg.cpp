@@ -19,8 +19,8 @@ std::ofstream GlobalCoutStream;
 
 void usageOperator()
 {
-	std::cerr<<"USAGE is operator -f filename ";
-	std::cerr<<"-l label [-d dof] [-s site] [-t]\n";
+	std::cerr<<"USAGE is operator -f filename -e canonical_operator_expression\n";
+	std::cerr<<"Deprecated options are: -l label [-d dof] [-s site] [-t]\n";
 }
 
 void restoreCoutBuffer()
@@ -225,29 +225,36 @@ to the main dmrg driver are the following.
 	 \item[-f] [Mandatory, String] Input to use. The Model= line is
 	very important in input.inp.
 
-	\item[-s] [Optional, Integer] Site for operator.
+	\item[-e] [Mandatory unless -l, String] OperatorExpression; see manual
+
+	\item[-s] [Optional, Integer] \emph{Deprecated. Use -e.}
+	Site for operator.
 	Meaningful only for Models where
 	the Hilbert space depends on the site (different kinds of atoms).
 	Defaults to 0.
 
-	\item[-l] [Mandatory, String] The label or name for this operator.
+	\item[-l] [Mandatory unless -e, String] \emph{Deprecated. Use -e.}
+	The label or name for this operator.
 	This is model dependent. For example to obtain $c_{\uparrow}$ for
 	the Hubbard model, say \begin{verbatim}
 	./operator -l c -f input.inp\end{verbatim}
 	See the function naturalOperator for each Model.
 
-	\item[-d] [Optional, Integer] Degree of freedom (spin, orbital or
+	\item[-d] [Optional, Integer] \emph{Deprecated. Use -e.}
+	Degree of freedom (spin, orbital or
 	combination of both) to use. This is model dependent. For example to
 	obtain $c_\downarrow$ for the Hubbard model, say
 	\begin{verbatim}./operator -l c -d 1 -f input.inp\end{verbatim}
 	See the function naturalOperator for each Model. Defaults to 0.
 
-	\item[-t] [Optional, Void] Transpose the operator. For example to
+	\item[-t] [Optional, Void] \emph{Note: When using -e, it transposes
+	the whole expression.}
+	Transpose the operator. For example to
 	obtain $c^\dagger_\uparrow$ for a Hubbard model, say
 	\begin{verbatim}./operator -l c -t -f input.inp\end{verbatim}
 	\end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:s:l:d:p:tkV")) != -1) {
+	while ((opt = getopt(argc, argv,"f:s:l:d:p:e:tkV")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -271,6 +278,10 @@ to the main dmrg driver are the following.
 			precision = atoi(optarg);
 			std::cout.precision(precision);
 			std::cerr.precision(precision);
+			break;
+		case 'e':
+			options.hasOperatorExpression = true;
+			options.opexpr = optarg;
 			break;
 		case 'V':
 			versionOnly = true;
