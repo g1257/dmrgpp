@@ -221,7 +221,7 @@ sub runMetts
 		my $fin;
 		open($fin, $file) or die "$0: Could not open $file : $!\n";
 		my $fout;
-		my $foutname = "metts${label}${n}_$i.txt";
+		my $foutname = "metts${n}_$i.txt";
 		if (!open($fout, "> $foutname")) {
 			close($fin);
 			die "$0: Could not write to $foutname: $!\n";
@@ -230,7 +230,7 @@ sub runMetts
 		
 		if ($submit->{"command"} ne "") {
 			my ($sum, $counter) = $actions{"$label"}($arg0, $arg1,0, $fin);
-			print $fout "#Energy=$sum $counter\n";
+			print $fout "#"."$label=$sum $counter\n";
 		} else {
 			print STDERR "|$n|: Dry run $arg0 $arg1\n";
 		}

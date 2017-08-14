@@ -124,6 +124,25 @@ sub density
 	return ($average, $total);
 }
 
+sub load
+{
+	my ($file) = @_;
+	my %h;
+	open(FILE, "$file") or return %h;
+	while (<FILE>) {
+		# label= values
+		next unless (/=/);
+		my @temp = split(/=/);
+		(scalar(@temp) == 2) or next;
+		my $label = $temp[0];
+		$_ = $temp[1];
+		my @values = split;
+		$h{"$label"} = \@values;
+	}
+
+	close(FILE);
+	return %h;
+}
 
 sub complexCtor
 {

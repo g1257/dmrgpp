@@ -6,6 +6,7 @@ use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 use lib "../scripts";
 use timeObservablesInSitu;
+use Metts;
 
 my ($memory,$failed,$noSu2,$help,$workdir,$golddir,$ranges,$info);
 GetOptions(
@@ -81,6 +82,13 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	if ($x > 0) {
 		print "|$n| has $x getTimeObservablesInSitu lines\n";
 		checkTimeInSituObs($n, $whatTimeInSituObs, $workdir, $golddir);
+	}
+
+	my $metts = $ciAnnotations{"metts"};
+	$x = scalar(@$metts);
+	if ($x > 0) {
+		print "|$n| has $x metts lines\n";
+		checkMetts($n, $metts, $workdir, $golddir);
 	}
 
 	my $whatObserve = $ciAnnotations{"observe"};
@@ -281,6 +289,19 @@ sub checkTimeInSituObs
 	}
 }
 
+sub checkMetts
+{
+	my ($n,$what,$workdir, $golddir) = @_;
+	my $whatN = scalar(@$what);
+	for (my $i = 0; $i < $whatN; ++$i) {
+		my $file1 = "$workdir/metts${n}_$i.txt";
+		my $file2 = "$golddir/metts${n}_$i.txt";
+		my %vals1 = Metts::load($file1);
+		my %vals2 = Metts::load($file2);
+		compareHashes(\%vals1, \%vals2);
+	}
+}
+
 sub checkObserve
 {
 	my ($n, $workdir, $golddir) = @_;
@@ -425,6 +446,24 @@ sub readNextMatrix
 	return "ok";
 }
 
+sub compareHashes
+{
+	my ($h1, $h2) = @_;
+	my $max = 0;
+	foreach my $key1 (keys %$h1) {
+		my $val2 = $h2->{"$key1"};
+		if (!defined($val2)) {
+			print "\tNot value for $key1 in hash2\n";
+			next;
+		}
+
+		my $val1 = $h1->{"$key1"};
+		my $d = abs($val1->[0] - $val2->[0]);
+		$max = $d if ($max < $d);
+	}
+
+	print "Maximum Error $max\n";
+}
 
 
 			
