@@ -160,6 +160,16 @@ hence non-trivial.
 1200) Tj 1 orb with hopping = 1 and J = 0.3 dens = 0.5
 1201) Tj 1 orb with hopping = 1 and J = 0.3 and W = -0.4 dens = 0.25
 1500) Figure 1 of METTS paper
+InternalControlNumber: 40
+Walltime (in seconds, approx.): 430
+Model: [as in the Model= line in the input] HubbardOneBand
+Do you need to run observe? No
+Do you need to run scripts? Yes
+Succint Description Of Features this test tests: METTS energy and density
+Figure* (if any): 1
+Page* where more or less this feature is used: 245130-2
+[* Refers to published version.]
+
 #1550) Same as 1500 with Suzuki-Trotter
 1800) Ancilla: Entangler Hamiltonian Heisenberg 6 sites
 1801) Ancilla: Real      Hamiltonian Heisenberg 6 sites
