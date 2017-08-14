@@ -52,10 +52,10 @@ An \texttt{opExpr} can be used in the following cases.
  \texttt{braketSpec = opExpr;opExpr;...}
 (2) In a dressed braket spec:
  \texttt{braketSpec =} \texttt{<bra|opExpr;opExpr;...|ket>}.
-And (3) After the input label \texttt{OperatorExpression=} when
+(3) After the input label \texttt{OperatorExpression=} when
  \texttt{TSPOperator=expression} is specified.
+And (4) after the option \verb!-e! in the operator driver.
 
-\marginnote{Implementation and Coder Perspective}
 We shall first implement canonical operator expressions, and then general expressions,
 as we now describe.
 To compute a canonical expression we split on $+$, and obtain one or more terms.
@@ -65,6 +65,7 @@ We loop over each factor, multiplying them as we go, and
 we finally multiply by the optional scalar. This term is then added to an
 accumulation variable that yields the final result at the end of the process.
 
+\marginnote{Implementation and Coder Perspective}
 For a general operator expression, we first assign a depth to each
 opening parenthesis.\footnote{We assign depth to opening parentheses as follows. 
 We set counter=0. Each
