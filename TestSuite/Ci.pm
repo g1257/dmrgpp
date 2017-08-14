@@ -189,6 +189,7 @@ sub getCiAnnotations
 	my @whatObserve;
 	my @whatDmrg;
 	my @whatTimeObsInSitu;
+	my @metts;
 	my $counter = 0;
 	while (<FILE>) {
 		chomp;
@@ -206,6 +207,10 @@ sub getCiAnnotations
 			push (@whatTimeObsInSitu, "$1");
 			next;
 		}
+
+		if (/^#ci metts (.*)/) {
+			push (@metts, "$1");
+		}
 	}
 
 	close(FILE);
@@ -213,7 +218,7 @@ sub getCiAnnotations
 	$h{"dmrg"} = \@whatDmrg;
 	$h{"observe"} = \@whatObserve;
 	$h{"getTimeObservablesInSitu"} = \@whatTimeObsInSitu;
-
+	$h{"metts"} = \@metts;
 	return %h;
 }
 

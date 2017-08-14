@@ -36,3 +36,7 @@ BetaDividedByTwo=1.0
 GsWeight=0.0
 TSPOperator=expression
 OperatorExpression=identity
+
+#ci dmrg arguments="<P0|n|P0>"
+#ci metts Energy 1 time
+#ci metts Density 1 <P0|n|P0>

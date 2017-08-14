@@ -6,6 +6,7 @@ use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 use lib "../scripts";
 use timeObservablesInSitu;
+use Metts;
 
 my ($valgrind,$workdir,$restart,$ranges,$postprocess,$noSu2,$info,$help);
 my %submit;
@@ -125,6 +126,15 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 		}
 	}
 
+	my $metts = $ciAnnotations{"metts"};
+	$x = scalar(@$metts);
+	if ($x > 0) {
+		print "|$n| has $x metts lines\n";
+		if ($postprocess) {
+			runMetts($n, $metts, \%submit);
+		}
+	}
+
 	my $whatObserve = $ciAnnotations{"observe"};
 	my $whatObserveN = scalar(@$whatObserve);
 	if ($whatObserveN > 0) {
@@ -184,6 +194,49 @@ sub runTimeInSituObs
 		} else {
 			print STDERR "|$n|: Dry run $site $label\n";
 		}
+	}
+}
+
+sub runMetts
+{
+	my ($n,$what,$submit) = @_;
+	my $whatN = scalar(@$what);
+	my %actions = ("Energy" => \&Metts::energy, 
+	               "Density" => \&Metts::density);
+	for (my $i = 0; $i < $whatN; ++$i) {
+		my $file = "runForinput$n.cout";
+		if (!(-r "$file")) {
+			print STDERR "|$n|: WARNING: $file not readable\n";
+			next;
+		}
+
+		my @temp = split(/ /, $what->[$i]);
+		(scalar(@temp) == 3) or next;
+
+		my ($label, $arg0, $arg1) = @temp;
+		if (($label ne "Energy") and ($label ne "Density")) {
+			die "$0: Wrong annotation: $what->[$i]\n";
+		}
+ 
+		my $fin;
+		open($fin, $file) or die "$0: Could not open $file : $!\n";
+		my $fout;
+		my $foutname = "metts${label}${n}_$i.txt";
+		if (!open($fout, "> $foutname")) {
+			close($fin);
+			die "$0: Could not write to $foutname: $!\n";
+		}
+
+		
+		if ($submit->{"command"} ne "") {
+			my ($sum, $counter) = $actions{"$label"}($arg0, $arg1,0, $fin);
+			print $fout "#Energy=$sum $counter\n";
+		} else {
+			print STDERR "|$n|: Dry run $arg0 $arg1\n";
+		}
+
+		close($fin);
+		close($fout);
 	}
 }
 
