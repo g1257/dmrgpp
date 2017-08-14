@@ -225,15 +225,13 @@ public:
 	SizeType rows() const
 	{
 		SizeType n = offsetsRows_.size();
-		assert(n > 0);
-		return offsetsRows_[n - 1];
+		return (n == 0) ? 0 : offsetsRows_[n - 1];
 	}
 
 	SizeType cols() const
 	{
 		SizeType n = offsetsCols_.size();
-		assert(n > 0);
-		return offsetsCols_[n - 1];
+		return (n == 0) ? 0 : offsetsCols_[n - 1];
 	}
 
 	SizeType offsetsRows(SizeType i) const
