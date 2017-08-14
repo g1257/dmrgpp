@@ -151,7 +151,6 @@ public:
 		knownLabels_.push_back("RepeatFiniteLoopsTimes");
 		knownLabels_.push_back("BetaDividedByTwo");
 		knownLabels_.push_back("TSPRngSeed");
-		knownLabels_.push_back("TSPRotateBasis");
 		knownLabels_.push_back("TSPOperatorMultiplier");
 		knownLabels_.push_back("MettsCollapse");
 		knownLabels_.push_back("HeisenbergTwiceS");

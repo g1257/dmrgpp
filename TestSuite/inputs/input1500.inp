@@ -13,10 +13,12 @@ Model=HubbardOneBand
 SolverOptions=MettsTargetting,vectorwithoffsets
 Version=version
 OutputFile=data1500.txt
-InfiniteLoopKeptStates=200
-FiniteLoops 4
-                   3 200 0 -3 200 0 -3 200 0 3 200 0
-RepeatFiniteLoopsTimes=50
+InfiniteLoopKeptStates=60
+FiniteLoops 3
+ 3 200 0
+-6 200 0 6 200 0
+RepeatFiniteLoopsTimes=60
+RepeatFiniteLoopsFrom=1
 
 TargetElectronsUp=4
 TargetElectronsDown=4
@@ -28,19 +30,9 @@ TSPAlgorithm=Krylov
 TSPSites 1 5
 TSPLoops 1 0
 TSPProductOrSum=product
-BetaDividedByTwo=1.0
-TSPRngSeed=0
-TSPRotateBasis=1
+TSPRngSeed=1234
 MettsCollapse=random
+BetaDividedByTwo=1.0
 GsWeight=0.0
-TSPOperator=raw
-RAW_MATRIX
-4 4
-1.0    0.0    0.0   0.0
-0.0    1.0    0.0   0.0
-0.0    0.0    1.0   0.0
-0.0    0.0    0.0   1.0
-FERMIONSIGN=1
-JMVALUES 0 0
-AngularFactor=1
-
+TSPOperator=expression
+OperatorExpression=identity
