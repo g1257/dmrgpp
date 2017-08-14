@@ -12,7 +12,7 @@ FiniteLoops 5 15 100 0
 
 TargetElectronsUp=16
 TargetElectronsDown=16
-Threads=4
+Threads=16
 
 hubbardU 32
 6.400 6.400 6.400 6.400 6.400 6.400 6.400 6.400 6.400 6.400

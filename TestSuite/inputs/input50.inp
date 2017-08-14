@@ -33,7 +33,7 @@ FiniteLoops 3
 24 200 0
 -48 200 0 48 200 0
 RepeatFiniteLoopsFrom=1
-RepeatFiniteLoopsTimes=5
+RepeatFiniteLoopsTimes=3
 
 TargetElectronsUp=25
 TargetElectronsDown=25
@@ -51,5 +51,5 @@ OperatorExpression=c'
 
 Threads=4
 
-#ci getTimeObservablesInSitu 25 '<P0|nup|P0>'
-#ci getTimeObservablesInSitu 18 '<P0|nup|P0>'
+#ci getTimeObservablesInSitu 25 <P0|nup|P0>
+#ci getTimeObservablesInSitu 18 <P0|nup|P0>

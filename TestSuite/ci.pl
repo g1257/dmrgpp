@@ -167,7 +167,7 @@ sub runTimeInSituObs
 			next;
 		}
 
-		my @temp = split(/,/, $what->[$i]);
+		my @temp = split(/ /, $what->[$i]);
 		(scalar(@temp) == 2) or die "$0: FATAL annotation ".$what->[$i]."\n";
 		my ($site, $label) = @temp;		
 		my $fin;

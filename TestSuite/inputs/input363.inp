@@ -17,7 +17,7 @@ FiniteLoops 7
 TargetElectronsUp=8
 TargetElectronsDown=8
 
-Threads=1
+Threads=16
 LanczosSteps=500
 
 NumberOfTerms=1
