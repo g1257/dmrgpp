@@ -662,8 +662,7 @@ private:
 
 			OperatorType nup = Braket.op(0);
 
-			PsimagLite::String tmpStr = "<"+ label1 + "|" + opLabel + "|" + label2 + ">";
-			if (wantsPrinting) test(v1,v2,direction,tmpStr,site,nup,border);
+			if (wantsPrinting) test(v1,v2,direction,opLabel,site,nup,border);
 			else test_(v1,v2,direction,site,nup,border);
 		}
 	}
@@ -672,8 +671,8 @@ private:
 	                                  SizeType site) const
 	{
 
-		if (opLabel.length() ==0 || opLabel[0] == '<') return opLabel;
-		return "<gs|"+opLabel+"[" + ttos(site) + "]|gs>";
+		if (opLabel.length() == 0 || opLabel[0] == '<') return opLabel;
+		return "<gs|" + opLabel + "|gs>";
 	}
 
 	VectorStringType getOperatorLabels() const
