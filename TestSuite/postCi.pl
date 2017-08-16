@@ -280,13 +280,29 @@ sub checkTimeInSituObs
 			next;
 		}
 
-		if (!vectorsEqual($m1{"times"}, $m2{"times"})) {
-			print "\ttimes NOT EQUAL\n";
-			next;
-		}
+		print "\tChecking times...\n";
+		checkVectorsEqual($m1{"times"}, $m2{"times"});
 
 		compareMatrices($m1{"data"}, $m2{"data"});
 	}
+}
+
+sub checkVectorsEqual
+{
+	my ($a, $b) = @_;
+	my $n = scalar(@$a);
+	if ($n != scalar(@$b)) {
+		print "\t\tSIZES NOT EQUAL\n";
+		return 0;
+	}
+
+	my $max = 0;
+	for (my $i = 0; $i < $n; ++$i) {
+		$_ = abs($a->[$i] - $b->[$i]);
+		$max = $_ if ($max < $_);
+	}
+
+	print "\t\tMax diff=$max\n";
 }
 
 sub checkMetts
