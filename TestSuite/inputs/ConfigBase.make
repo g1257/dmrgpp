@@ -31,6 +31,8 @@ CPPFLAGS += -Wall -Werror -Wendif-labels
 # This enables the custom allocator (use only for debugging)
 #CPPFLAGS += -DUSE_CUSTOM_ALLOCATOR
 
+#CPPFLAGS += -DUSE_BOOST
+
 # Specify the strip command to use (or use true to disable)
 STRIP_COMMAND = true
 

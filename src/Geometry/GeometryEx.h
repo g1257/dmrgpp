@@ -101,7 +101,9 @@ public:
 	void getMeshVector(VectorRealType& kvector,SizeType k) const
 	{
 		assert(enabled_);
-		div_t q = div(k,meshLength_);
+		int k1 = k;
+		int m = meshLength_;
+		div_t q = std::div(k1, m);
 		kvector[0] = -M_PI + q.quot*meshStep_;
 		kvector[1] = -M_PI + q.rem*meshStep_;
 	}

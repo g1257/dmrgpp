@@ -54,8 +54,8 @@ sub createMakefile
 	print FH<<EOF;
 include Config.make
 all: libpsimaglite.a
-libpsimaglite.a: Makefile $combinedUnits
-\tar rcs libpsimaglite.a $combinedUnits
+libpsimaglite.a: Makefile $combinedUnits AinurSpirit.o
+\tar rcs libpsimaglite.a $combinedUnits AinurSpirit.o
 EOF
 
 	foreach my $unit (@units) {
@@ -66,7 +66,10 @@ EOF
 	}
 
 print FH<<EOF;
-Makefile.dep: $combinedUnits2
+AinurSpirit.o: ../src/Ainur/AinurSpirit.cpp ../src/Ainur/AinurSpirit.h Makefile
+\t\$(CXX) \$(CPPFLAGS) -c ../src/Ainur/AinurSpirit.cpp
+
+Makefile.dep: $combinedUnits2 ../src/Ainur/AinurSpirit.cpp
 \t\$(CXX) \$(CPPFLAGS) -MM  $combinedUnits2  > Makefile.dep
 
 clean: Makefile.dep
