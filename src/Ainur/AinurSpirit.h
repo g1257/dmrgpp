@@ -5,10 +5,6 @@
 #include "../Vector.h"
 #include "../TypeToString.h"
 #include "../PsimagLite.h"
-#include <boost/config/warning_disable.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -35,7 +31,6 @@ class Ainur {
 
 public:
 
-	typedef boost::fusion::vector<std::string, std::string> AttribType;
 	typedef std::string::iterator Iterator;
 	typedef Vector<String>::Type VectorStringType;
 	//typedef AinurStatements AinurStatementsType;
@@ -53,15 +48,14 @@ public:
 	}
 
 	template<typename SomeType>
-	void readValue(SomeType& t, String label) const;
+	void readValue(SomeType& t, String label) const
+	{
+		std::cerr<<"readValue called for label="<<label<<"\n";
+	}
 
 private:
 
 	String dummy_;
-	boost::spirit::qi::rule<Iterator, std::string(), boost::spirit::qi::space_type> keywords_;
-	boost::spirit::qi::rule<Iterator, std::string(), boost::spirit::qi::space_type> quoted2_;
-	boost::spirit::qi::rule<Iterator, std::string(), boost::spirit::qi::space_type> quotedString_;
-	boost::spirit::qi::rule<Iterator, AttribType, boost::spirit::qi::space_type> statement1_;
 }; // class AinurSpirit
 
 }

@@ -1,4 +1,8 @@
 #include "AinurSpirit.h"
+#include <boost/config/warning_disable.hpp>
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
 
 namespace PsimagLite {
 
@@ -28,6 +32,12 @@ Ainur::Ainur(String str)
 {
 	namespace qi = boost::spirit::qi;
 	namespace ascii = boost::spirit::ascii;
+	typedef boost::fusion::vector<std::string, std::string> AttribType;
+
+	boost::spirit::qi::rule<Iterator, std::string(), boost::spirit::qi::space_type> keywords_;
+	boost::spirit::qi::rule<Iterator, std::string(), boost::spirit::qi::space_type> quoted2_;
+	boost::spirit::qi::rule<Iterator, std::string(), boost::spirit::qi::space_type> quotedString_;
+	boost::spirit::qi::rule<Iterator, AttribType, boost::spirit::qi::space_type> statement1_;
 
 	quotedString_ %= qi::lexeme['"' >> +(qi::char_ - '"')  >> '"'];
 	quoted2_ %= quotedString_ [Action("lexeme2")];
@@ -45,13 +55,5 @@ Ainur::Ainur(String str)
 	std::cout<<"finished="<<finished<<" r= "<<r<<"\n";
 }
 
-template<typename SomeType>
-void Ainur::readValue(SomeType& t, String label) const
-{
-	std::cerr<<"readValue called for label="<<label<<"\n";
-}
-
-
-
-}
+} // namespace PsimagLite
 
