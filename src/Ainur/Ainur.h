@@ -5,7 +5,7 @@
 #include "Vector.h"
 #include "TypeToString.h"
 #include "PsimagLite.h"
-#include "AinurStatements.h"
+//#include "AinurStatements.h"
 
 namespace PsimagLite {
 
@@ -14,259 +14,31 @@ class Ainur {
 public:
 
 	typedef Vector<String>::Type VectorStringType;
-	typedef AinurStatements AinurStatementsType;
-	typedef AinurStatementsType::AinurLexicalType AinurLexicalType;
+	//typedef AinurStatements AinurStatementsType;
+	//typedef AinurStatementsType::AinurLexicalType AinurLexicalType;
 
 	Ainur(String str)
-	    : statements_(vecStr_, vecChar_, escapedChars_, vecBrace_)
-	{
-		replaceAtAndCheck(str);
+	    : dummy_("")
+	{}
 
-		replaceAndStoreEscaped(escapedChars_, str);
+	 String& prefix() { return dummy_; }
 
-		replaceAndStoreQuotes(vecStr_, str, '"');
-
-		replaceAndStoreQuotes(vecChar_, str, '\'');
-
-		removeComments(str);
-
-		replaceAndStoreBraces(vecBrace_, str);
-
-		procStatements(str,"");
-	}
-
-	String& prefix() { return statements_.readable().prefix(); }
-
-	const String& prefix() const { return statements_.readable().prefix(); }
+	 const String& prefix() const { return dummy_; }
 
 	void printUnused(std::ostream& os) const
 	{
-		statements_.readable().printUnused(os);
+		os<<"PRINT UNUSED\n";
 	}
 
 	template<typename SomeType>
 	void readValue(SomeType& t, String label) const
 	{
-		return statements_.readable().readValue(t, label);
+		std::cerr<<"readValue called for label="<<label<<"\n";
 	}
 
 private:
 
-	void printContainers(std::ostream& os) const
-	{
-		os<<"------------\n";
-		os<<"------------\n";
-		os<<vecStr_;
-		os<<"------------\n";
-		os<<vecChar_<<"\n";
-		os<<"------------\n";
-		os<<vecBrace_<<"\n";
-	}
-
-	void removeComments(String& str)
-	{
-		SizeType l = str.length();
-		String newStr("");
-		char qComment = '#';
-		bool comment = false;
-		for (SizeType i = 0; i < l; ++i) {
-			if (str[i] == qComment) {
-				comment = true;
-				continue;
-			}
-
-			if (AinurLexicalType::isEOL(str[i]))
-				comment = false;
-
-			if (comment)
-				continue;
-
-			newStr += str[i];
-		}
-
-		str = newStr;
-	}
-
-	void replaceAtAndCheck(String& str)
-	{
-		SizeType l = str.length();
-		String newStr("");
-		char atChar = '@';
-		for (SizeType i = 0; i < l; ++i) {
-			if (str[i] == atChar) {
-				newStr += "@a";
-				continue;
-			}
-
-			if (!allowedChar(str[i]))
-				err("Lexical error: Not allowed char " + getContext(str,i) + "\n");
-
-			newStr += str[i];
-		}
-
-		str = newStr;
-	}
-
-	template<typename T>
-	void replaceAndStoreQuotes(T& t, String& str, char q)
-	{
-		SizeType l = str.length();
-		bool openQuote = false;
-		String newStr("");
-		String buffer("");
-		for (SizeType i = 0; i < l; ++i) {
-			if (str[i] == q) {
-				if (openQuote) {
-					String metaString("@ ");
-					metaString[1] = getMetaChar(q);
-					metaString += ttos(t.size());
-					metaString += "@";
-					newStr += metaString;
-					pushInto(t, buffer);
-					buffer = "";
-					openQuote = false;
-				} else {
-					openQuote = true;
-				}
-
-				continue;
-			}
-
-			if (openQuote) {
-				buffer += str[i];
-			} else {
-				newStr += str[i];
-			}
-		}
-
-		str = newStr;
-	}
-
-	void replaceAndStoreEscaped(String& t, String& str)
-	{
-		SizeType l = str.length();
-		String newStr("");
-
-		char q = '\\';
-		for (SizeType i = 0; i < l; ++i) {
-			if (str[i] == q) {
-				newStr += "@e" + ttos(t.length()) + "@";
-				if (l == i + 1)
-					err("Syntax Error (escaped): " + getContext(str, i) + "\n");
-				t += str[++i];
-				continue;
-			}
-
-			newStr += str[i];
-		}
-
-		str = newStr;
-	}
-
-	void replaceAndStoreBraces(VectorStringType& t, String& str)
-	{
-		SizeType l = str.length();
-		SizeType openBrace = 0;
-		String newStr("");
-		String buffer("");
-		char qOpen = '{';
-		char qClose = '}';
-		for (SizeType i = 0; i < l; ++i) {
-			if (str[i] == qOpen) {
-				++openBrace;
-				if (openBrace > 1)
-					err("Syntax error (nested braces not allowed) " +
-					    getContext(str, i) + "\n");
-
-				buffer += qOpen;
-				continue;
-			}
-
-			if (str[i] == qClose) {
-				if (openBrace == 0)
-					err("Syntax Error (closing brace): " + getContext(str, i) + "\n");
-				--openBrace;
-				buffer += qClose;
-				if (openBrace > 0)
-					continue;
-				newStr += "@b" + ttos(t.size()) + "@;";
-				t.push_back(buffer);
-				buffer = "";
-				continue;
-			}
-
-			if (openBrace > 0) {
-				buffer += str[i];
-			} else {
-				newStr += str[i];
-			}
-		}
-
-		str = newStr;
-	}
-
-
-	String getContext(const String& str,
-	                  SizeType start,
-	                  SizeType n = 10) const
-	{
-		SizeType l = str.length();
-		SizeType end = start + n;
-		if (end >= l) end = l;
-		return str.substr(start, end);
-	}
-
-	void pushInto(String& dest, String src) const
-	{
-		dest += src;
-	}
-
-	void pushInto(VectorStringType& dest,
-	              String src) const
-	{
-		dest.push_back(src);
-	}
-
-	char getMetaChar(char q) const
-	{
-		if (q == '"') return 's';
-		if (q == '\'') return 'q';
-		err("getMetaChar\n");
-		return 0;
-	}
-
-	bool allowedChar(unsigned char c) const
-	{
-		if (AinurLexicalType::isWhitespace(c) || AinurLexicalType::isEOL(c))
-			return true;
-		if (c < 33 ||c > 126) return false;
-		if (c == 96) return false;
-		return true;
-	}
-
-	void procStatements(const String& str, String prefix)
-	{
-		VectorStringType statements;
-		split(statements, str, ";");
-		procStatements(statements, prefix);
-	}
-
-	void procStatements(VectorStringType& s, String prefix)
-	{
-		SizeType n = s.size();
-		for (SizeType i = 0; i < n; ++i) {
-			VectorStringType possibleGroup = statements_.push(s[i], prefix);
-			assert(possibleGroup.size() == 0 || possibleGroup.size() == 2);
-			if (possibleGroup.size() == 2)
-				procStatements(possibleGroup[1], possibleGroup[0]);
-		}
-	}
-
-	String escapedChars_;
-	VectorStringType vecStr_;
-	String vecChar_;
-	VectorStringType vecBrace_;
-	AinurStatementsType statements_;
+	String dummy_;
 };
 
 }
