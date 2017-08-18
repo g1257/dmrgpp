@@ -192,7 +192,8 @@ int main(int argc, char *argv[])
 	OperatorOptions options;
 	PsimagLite::String strUsage(application.name());
 	if (utils::basename(argv[0]) == "operator") options.enabled = true;
-	strUsage += " -f filename [-k] [-p precision] [-V] [whatToMeasure]";
+	strUsage += " -f filename [-k] [-p precision] [-o solverOptions] [-V] [whatToMeasure]";
+	PsimagLite::String sOptions("");
 	int precision = 6;
 	bool keepFiles = false;
 	bool versionOnly = false;
@@ -206,6 +207,7 @@ where \verb!whatToMeasure! is optional. The command line arguments
 to the main dmrg driver are the following.
 	  \begin{itemize}
 	  \item[-f] {[}Mandatory, String{]} Input to use.
+	  \item[-o] {[}Optional, String{]} Extra options for SolverOptions
 	  \item[-p] [Optional, Integer] Digits of precision for printing.
 	  \item[whatToMeasure] {[}Optional, String{]} What to measure in-situ.
 	  This is a comma-separated list of braket specifications.
@@ -254,7 +256,7 @@ to the main dmrg driver are the following.
 	\begin{verbatim}./operator -l c -t -f input.inp\end{verbatim}
 	\end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:s:l:d:p:e:tkV")) != -1) {
+	while ((opt = getopt(argc, argv,"f:s:l:d:p:e:o:tkV")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -282,6 +284,9 @@ to the main dmrg driver are the following.
 		case 'e':
 			options.hasOperatorExpression = true;
 			options.opexpr = optarg;
+			break;
+		case 'o':
+			sOptions += optarg;
 			break;
 		case 'V':
 			versionOnly = true;
@@ -343,6 +348,7 @@ to the main dmrg driver are the following.
 
 	ParametersDmrgSolverType dmrgSolverParams(io, false);
 
+	dmrgSolverParams.options += sOptions;
 	ArchiveFilesType af(dmrgSolverParams,filename,options.enabled,options.label);
 
 	if (insitu!="") dmrgSolverParams.insitu = insitu;
