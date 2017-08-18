@@ -66,7 +66,7 @@ EOF
 	}
 
 print FH<<EOF;
-AinurSpirit.o: ../src/Ainur/AinurSpirit.cpp ../src/Ainur/AinurSpirit.h Makefile
+AinurSpirit.o: ../src/Ainur/AinurSpirit.cpp ../src/Ainur/AinurSpirit.h Makefile ../src/Ainur/AinurSpirit1.cpp
 \t\$(CXX) \$(CPPFLAGS) -c ../src/Ainur/AinurSpirit.cpp
 
 Makefile.dep: $combinedUnits2 ../src/Ainur/AinurSpirit.cpp

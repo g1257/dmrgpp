@@ -34,10 +34,10 @@ Ainur::Ainur(String str)
 	namespace ascii = boost::spirit::ascii;
 	typedef boost::fusion::vector<std::string, std::string> AttribType;
 
-	boost::spirit::qi::rule<Iterator, std::string(), boost::spirit::qi::space_type> keywords_;
-	boost::spirit::qi::rule<Iterator, std::string(), boost::spirit::qi::space_type> quoted2_;
-	boost::spirit::qi::rule<Iterator, std::string(), boost::spirit::qi::space_type> quotedString_;
-	boost::spirit::qi::rule<Iterator, AttribType, boost::spirit::qi::space_type> statement1_;
+	qi::rule<IteratorType, std::string(), qi::space_type> keywords_;
+	qi::rule<IteratorType, std::string(), qi::space_type> quoted2_;
+	qi::rule<IteratorType, std::string(), qi::space_type> quotedString_;
+	qi::rule<IteratorType, AttribType, qi::space_type> statement1_;
 
 	quotedString_ %= qi::lexeme['"' >> +(qi::char_ - '"')  >> '"'];
 	quoted2_ %= quotedString_ [Action("lexeme2")];

@@ -1,7 +1,5 @@
 #ifndef _AINUR_SPIRIT_H_
 #define _AINUR_SPIRIT_H_
-#include <iostream>
-#include <fstream>
 #include "../Vector.h"
 #include "../TypeToString.h"
 #include "../PsimagLite.h"
@@ -31,7 +29,7 @@ class Ainur {
 
 public:
 
-	typedef std::string::iterator Iterator;
+	typedef std::string::iterator IteratorType;
 	typedef Vector<String>::Type VectorStringType;
 	//typedef AinurStatements AinurStatementsType;
 	//typedef AinurStatementsType::AinurLexicalType AinurLexicalType;
