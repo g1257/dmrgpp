@@ -46,3 +46,6 @@ LDFLAGS += -LKronUtil
 # Specify the strip command to use (or use true to disable)
 STRIP_COMMAND = true
 
+#This enables boost support that is needed for Ainur
+#CPPFLAGS += -DUSE_BOOST
+
