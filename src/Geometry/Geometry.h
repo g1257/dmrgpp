@@ -142,8 +142,8 @@ public:
 	static String import()
 	{
 		String str("");
-		str += "require integer TotalNumberOfSites;\n";
-		str += "require integer NumberOfTerms;\n";
+		str += "integer TotalNumberOfSites;\n";
+		str += "integer NumberOfTerms;\n";
 		str += GeometryTermType::import();
 
 		return str;
