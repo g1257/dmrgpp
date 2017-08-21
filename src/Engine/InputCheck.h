@@ -209,14 +209,14 @@ public:
 
 		str += "vector hubbardU;\n";
 		str += "vector potentialV;\n";
-		str += "require string Model;\n";
-		str += "require string SolverOptions;\n";
-		str += "require string Version;\n";
-		str += "require integer InfiniteLoopKeptStates;\n";
-		str += "require string OutputFile;\n";
+		str += "string Model;\n";
+		str += "string SolverOptions;\n";
+		str += "string Version;\n";
+		str += "integer InfiniteLoopKeptStates;\n";
+		str += "string OutputFile;\n";
 		str += "matrix.integer FiniteLoops;\n";
-		str += "require integer RepeatFiniteLoopsFrom;\n";
-		str += "require integer RepeatFiniteLoopsTimes;\n";
+		str += "integer RepeatFiniteLoopsFrom;\n";
+		str += "integer RepeatFiniteLoopsTimes;\n";
 		str += "integer TargetElectronsUp;\n";
 		str += "integer TargetElectronsDown;\n";
 		str += "real GsWeight;\n";
