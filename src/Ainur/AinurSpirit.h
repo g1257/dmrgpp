@@ -13,18 +13,18 @@ class Ainur {
 
 	struct Action {
 
-		Action(const char *name)
+		Action(String name)
 		    : name_(name)
 		{}
 
-		template <typename A, typename ContextType, typename PassType>
+		template <typename A, typename ContextType> //, typename PassType>
 		void operator()(A& attr,
-		                ContextType& context,
-		                PassType hit) const;
+		                const ContextType& context,
+		                bool& hit) const;
 
 	private:
 
-		const char* name_;
+		String name_;
 	};
 
 	struct myprint
@@ -32,7 +32,7 @@ class Ainur {
 		template <typename T>
 		void operator()(const T &t) const
 		{
-			std::cout << "|  " << std::boolalpha << t << '\n';
+			std::cout << " --------> " << t << '\n';
 		}
 	};
 
@@ -40,6 +40,7 @@ public:
 
 	typedef std::string::iterator IteratorType;
 	typedef Vector<String>::Type VectorStringType;
+	typedef Vector<char>::Type VectorCharType;
 	//typedef AinurStatements AinurStatementsType;
 	//typedef AinurStatementsType::AinurLexicalType AinurLexicalType;
 
@@ -54,6 +55,14 @@ public:
 		os<<"PRINT UNUSED\n";
 	}
 
+	void printAll(std::ostream& os) const
+	{
+		SizeType n = keys_.size();
+		assert(n == values_.size());
+		for (SizeType i = 0; i < n; ++i)
+			os<<keys_[i]<<" "<<values_[i]<<"\n";
+	}
+
 	template<typename SomeType>
 	void readValue(SomeType& t, String label) const
 	{
@@ -64,6 +73,8 @@ public:
 private:
 
 	String dummy_;
+	VectorStringType keys_;
+	VectorStringType values_;
 }; // class AinurSpirit
 
 }

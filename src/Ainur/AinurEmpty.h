@@ -32,6 +32,11 @@ public:
 		errorMessage();
 	}
 
+	void printAll(std::ostream& os) const
+	{
+		errorMessage();
+	}
+
 	template<typename SomeType>
 	void readValue(SomeType& t, String label) const
 	{
