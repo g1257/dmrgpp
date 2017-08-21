@@ -27,6 +27,15 @@ class Ainur {
 		const char* name_;
 	};
 
+	struct myprint
+	{
+		template <typename T>
+		void operator()(const T &t) const
+		{
+			std::cout << "|  " << std::boolalpha << t << '\n';
+		}
+	};
+
 public:
 
 	typedef std::string::iterator IteratorType;
@@ -49,6 +58,7 @@ public:
 	void readValue(SomeType& t, String label) const
 	{
 		std::cerr<<"readValue called for label="<<label<<"\n";
+		err("Ainur isn't ready, throwing...\n");
 	}
 
 private:
