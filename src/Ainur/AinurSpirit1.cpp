@@ -22,12 +22,14 @@ void Ainur::Action::operator()(A& attr,
 	std::cerr << "attr = "<<attr<<"\n";
 	//std::cout << "hit = "<<hit<<"\n";
 
-	if (name_ == "statement2") {
-		// String v1 = boost::fusion::at_c<0>(attr);
-		//		String v2 = boost::fusion::at_c<2>(attr);
-
-		// keys_.push_back(v1);
-		//		values_.push_back(v2);
+	if (name_ == "statement1") {
+		String v1 = boost::fusion::at_c<0>(attr);
+		String v2 = boost::fusion::at_c<1>(attr);
+		state_.assign(v1, v2);
+	} else if (name_ == "statement2") {
+		String v1 = boost::fusion::at_c<0>(attr);
+		String v2 = boost::fusion::at_c<1>(attr);
+		state_.declare(v1, v2);
 	}
 
 }
@@ -41,7 +43,6 @@ Ainur::Ainur(String str)
 	namespace ascii = boost::spirit::ascii;
 	typedef boost::fusion::vector<std::string, std::string> AttribType;
 	typedef boost::fusion::vector<std::string, std::string, std::string> Attrib3Type;
-	typedef  boost::spirit::qi::locals<State> LocalsType;
 
 	typedef BOOST_TYPEOF(AINUR_COMMENTS) SkipperType;
 
@@ -50,9 +51,9 @@ Ainur::Ainur(String str)
 	qi::rule<IteratorType, std::string(), qi::unused_type> keywords;
 	qi::rule<IteratorType, std::string(), qi::unused_type> value;
 	qi::rule<IteratorType, std::string(), qi::unused_type> typeQualifier;
-	qi::rule<IteratorType, AttribType, LocalsType, SkipperType> statement1;
-	qi::rule<IteratorType, AttribType, LocalsType, SkipperType> statement2;
-	qi::rule<IteratorType, Attrib3Type, LocalsType, SkipperType> statement3;
+	qi::rule<IteratorType, AttribType, SkipperType> statement1;
+	qi::rule<IteratorType, AttribType, SkipperType> statement2;
+	qi::rule<IteratorType, Attrib3Type, SkipperType> statement3;
 	qi::rule<IteratorType, SkipperType> statement;
 	value %= +(qi::char_ - (qi::char_(";") | qi::space | qi::eol));
 	aToZ = ascii::char_("a","z") | ascii::char_("A", "Z");
@@ -62,9 +63,11 @@ Ainur::Ainur(String str)
 	statement1   %= keywords >> '=' >> value;
 	statement2 %= typeQualifier >> keywords;
 	statement3 %= typeQualifier >>  keywords >> '=' >> value;
-	statement %= statement3 [Action("statement3")] |
-	        statement2 [Action("statement2")] |
-	        statement1 [Action("statement1")];
+
+	Action action1("statement1", state_);
+	Action action2("statement2", state_);
+	Action action3("statement3", state_);
+	statement %= statement3 [action3] | statement2 [action2] | statement1 [action1];
 
 	IteratorType first = str.begin();
 	IteratorType last = str.end();
@@ -76,6 +79,8 @@ Ainur::Ainur(String str)
 	bool finished = (first != last);// fail if we did not get a full match
 	std::cout<<"finished="<<finished<<" r= "<<r<<"\n";
 }
+
+String Ainur::State::ZERO_CHAR_STRING_(1, ' ');
 
 } // namespace PsimagLite
 

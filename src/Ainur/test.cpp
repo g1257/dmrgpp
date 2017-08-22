@@ -22,6 +22,7 @@ int main(int argc, char** argv)
 	fin.close();
 
 	PsimagLite::Ainur ainur(str);
-	partiallyReadSomething(ainur);
 	ainur.printAll(std::cout);
+	partiallyReadSomething(ainur);
+
 }
