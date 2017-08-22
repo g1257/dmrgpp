@@ -17,9 +17,9 @@ class Ainur {
 		    : name_(name)
 		{}
 
-		template <typename A, typename ContextType> //, typename PassType>
+		template <typename A, typename ContextType>
 		void operator()(A& attr,
-		                const ContextType& context,
+		                ContextType& context,
 		                bool& hit) const;
 
 	private:
@@ -34,6 +34,10 @@ class Ainur {
 		{
 			std::cout << " --------> " << t << '\n';
 		}
+	};
+
+	class State {
+
 	};
 
 public:
