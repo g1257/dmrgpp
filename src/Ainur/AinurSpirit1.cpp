@@ -11,7 +11,7 @@ void Ainur::Action::operator()(A& attr,
                                ContextType&,
                                bool&) const
 {
-	bool verbose = Ainur::State::verbose();
+	bool verbose = AinurState::verbose();
 
 	if (verbose) {
 		std::cerr <<" ****************** Action name = "<<name_<<"\n";
@@ -41,7 +41,7 @@ void Ainur::Action::operator()(A& attr,
 Ainur::Ainur(String str)
     : dummy_("")
 {
-	bool verbose = Ainur::State::verbose();
+	bool verbose = AinurState::verbose();
 
 	if (verbose)
 		std::cerr<<str<<"\n\n";
@@ -89,7 +89,7 @@ Ainur::Ainur(String str)
 	}
 }
 
-String Ainur::State::ZERO_CHAR_STRING_(1, ' ');
+String AinurState::ZERO_CHAR_STRING_(1, ' ');
 
 } // namespace PsimagLite
 
