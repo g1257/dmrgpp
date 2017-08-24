@@ -64,7 +64,7 @@ Ainur::Ainur(String str)
 	qi::rule<IteratorType, AttribType, SkipperType> statement2;
 	qi::rule<IteratorType, Attrib3Type, SkipperType> statement3;
 	qi::rule<IteratorType, SkipperType> statement;
-	value %= +(qi::char_ - (qi::char_(";") | qi::space | qi::eol));
+	value %= qi::lexeme[+(qi::char_ - qi::char_(";"))];
 	aToZ = ascii::char_("a","z") | ascii::char_("A", "Z");
 	zeroToNine = ascii::char_("0","9");
 	typeQualifier %= +(aToZ | ascii::char_("."));
@@ -88,6 +88,12 @@ Ainur::Ainur(String str)
 	if (verbose) {
 		bool finished = (first != last);
 		std::cout<<"finished="<<finished<<" r= "<<r<<"\n";
+	}
+
+	if (!r) {
+		IteratorType e = (first + 10 < last) ? first + 10 : last;
+		err(AinurState::errLabel(AinurState::ERR_PARSE_FAILED,
+		                         String(first,e)));
 	}
 }
 

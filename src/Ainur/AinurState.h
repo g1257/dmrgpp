@@ -8,15 +8,16 @@ class AinurState {
 
 	typedef Vector<String>::Type VectorStringType;
 
+public:
+
 	enum ErrorEnum
 	{
 		ERR_PARSE_UNDECLARED,
 		ERR_PARSE_DECLARED,
+		ERR_PARSE_FAILED,
 		ERR_READ_UNDECLARED,
 		ERR_READ_NO_VALUE
 	};
-
-public:
 
 	AinurState()
 	{
@@ -68,6 +69,36 @@ public:
 
 	static bool verbose() { return false; }
 
+	static String errLabel(ErrorEnum e, String key)
+	{
+		switch (e) {
+		case ERR_PARSE_UNDECLARED:
+			return "FATAL parse error: Undeclared " + key + "\n" +
+			        "You provided a label in the " +
+			        "input file that was not recognized.\n" +
+			        "Please check the spelling. If you intended " +
+			        "to introduce a temporary label,\nyou must declare " +
+			        "it first; please see Ainur input format documentation.\n";
+		case ERR_PARSE_DECLARED:
+			return "FATAL parse error: Already declared " + key + "\n" +
+			        "You tried to re-declare a variable that was already declared.\n" +
+			        "If you intended to just provide a value for " + key +
+			        " then please remove the declaration word.\n";
+		case ERR_PARSE_FAILED:
+			return "FATAL parse error: Parsing failed near " + key + "\n" +
+			        "This is probably a syntax error.\n";
+		case ERR_READ_UNDECLARED:
+			return "FATAL read error: No such label " + key + "\n" +
+			        "The label " + key + " must appear in the input file\n";
+		case ERR_READ_NO_VALUE:
+			return "FATAL read error: No value provided for label " + key + "\n" +
+			        "The label " + key + " must appear in the input file with " +
+			        "a non-empty value\n";
+		default:
+			return "FATAL Ainur error: Unknown error\n";
+		}
+	}
+
 private:
 
 	int assignStorageByName(String key)
@@ -89,41 +120,25 @@ private:
 		return it - keys_.begin();
 	}
 
+	template<typename T>
+	void convertInternal(T& t, String value) const
+	{
+		err("convertInternal generic type value = " + value + "\n");
+	}
+
 	void convertInternal(SizeType& t, String label) const
 	{
 		t = atoi(label.c_str());
 	}
 
+	void convertInternal(String& t, String label) const
+	{
+		t = label;
+	}
+
 	static bool isEmptyValue(String s)
 	{
 		return (s.length() == 0 || s == ZERO_CHAR_STRING_);
-	}
-
-	static String errLabel(ErrorEnum e, String key)
-	{
-		switch (e) {
-		case ERR_PARSE_UNDECLARED:
-			return "FATAL parse error: Undeclared " + key + "\n" +
-			        "You provided a label in the " +
-			        "input file that was not recognized.\n" +
-			        "Please check the spelling. If you intended " +
-			        "to introduce a temporary label,\nyou must declare " +
-			        "it first; please see Ainur input format documentation.\n";
-		case ERR_PARSE_DECLARED:
-			return "FATAL parse error: Already declared " + key + "\n" +
-			        "You tried to re-declare a variable that was already declared.\n" +
-			        "If you intended to just provide a value for " + key +
-			        " then please remove the declaration word.\n";
-		case ERR_READ_UNDECLARED:
-			return "FATAL read error: No such label " + key + "\n" +
-			        "The label " + key + " must appear in the input file\n";
-		case ERR_READ_NO_VALUE:
-			return "FATAL read error: No value provided for label " + key + "\n" +
-			        "The label " + key + " must appear in the input file with " +
-			        "a non-empty value\n";
-		default:
-			return "FATAL Ainur error: Unknown error\n";
-		}
 	}
 
 	static String ZERO_CHAR_STRING_;
