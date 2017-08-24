@@ -5,17 +5,12 @@
 #include "Vector.h"
 #include "TypeToString.h"
 #include "PsimagLite.h"
-//#include "AinurStatements.h"
 
 namespace PsimagLite {
 
 class Ainur {
 
 public:
-
-	typedef Vector<String>::Type VectorStringType;
-	//typedef AinurStatements AinurStatementsType;
-	//typedef AinurStatementsType::AinurLexicalType AinurLexicalType;
 
 	Ainur(String str)
 	    : dummy_("")

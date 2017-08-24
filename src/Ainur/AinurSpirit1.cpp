@@ -3,6 +3,7 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
+#include "AinurLexical.h"
 
 namespace PsimagLite {
 
@@ -41,6 +42,7 @@ void Ainur::Action::operator()(A& attr,
 Ainur::Ainur(String str)
     : dummy_("")
 {
+	AinurLexical discard(str);
 	bool verbose = AinurState::verbose();
 
 	if (verbose)

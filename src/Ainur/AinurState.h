@@ -118,7 +118,7 @@ private:
 			return "FATAL read error: No such label " + key + "\n" +
 			        "The label " + key + " must appear in the input file\n";
 		case ERR_READ_NO_VALUE:
-			return "No value provided for label " + key + "\n" +
+			return "FATAL read error: No value provided for label " + key + "\n" +
 			        "The label " + key + " must appear in the input file with " +
 			        "a non-empty value\n";
 		default:
