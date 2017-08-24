@@ -8,6 +8,14 @@ class AinurState {
 
 	typedef Vector<String>::Type VectorStringType;
 
+	enum ErrorEnum
+	{
+		ERR_PARSE_UNDECLARED,
+		ERR_PARSE_DECLARED,
+		ERR_READ_UNDECLARED,
+		ERR_READ_NO_VALUE
+	};
+
 public:
 
 	AinurState()
@@ -23,7 +31,7 @@ public:
 	{
 		int x = storageIndexByName(k);
 		if (x < 0)
-			err("Undeclared " + k + " in this scope\n");
+			err(errLabel(ERR_PARSE_UNDECLARED, k));
 
 		assert(static_cast<SizeType>(x) < values_.size());
 		values_[x] = v;
@@ -49,11 +57,11 @@ public:
 	{
 		int x = storageIndexByName(label);
 		if (x < 0)
-			err("No such label " + label + "\n");
+			err(errLabel(ERR_READ_UNDECLARED, label));
 		assert(static_cast<SizeType>(x) < values_.size());
 		String val = values_[x];
 		if (isEmptyValue(val))
-			err("No value provided for label " + label + "\n");
+			err(errLabel(ERR_READ_NO_VALUE, label));
 
 		convertInternal(t, val);
 	}
@@ -66,7 +74,7 @@ private:
 	{
 		int x = storageIndexByName(key);
 		if (x >= 0)
-			err("Already in scope " + key + "\n");
+			err(errLabel(ERR_PARSE_DECLARED, key));
 		keys_.push_back(key);
 		return keys_.size() - 1;
 	}
@@ -89,6 +97,33 @@ private:
 	static bool isEmptyValue(String s)
 	{
 		return (s.length() == 0 || s == ZERO_CHAR_STRING_);
+	}
+
+	static String errLabel(ErrorEnum e, String key)
+	{
+		switch (e) {
+		case ERR_PARSE_UNDECLARED:
+			return "FATAL parse error: Undeclared " + key + "\n" +
+			        "You provided a label in the " +
+			        "input file that was not recognized.\n" +
+			        "Please check the spelling. If you intended " +
+			        "to introduce a temporary label,\nyou must declare " +
+			        "it first; please see Ainur input format documentation.\n";
+		case ERR_PARSE_DECLARED:
+			return "FATAL parse error: Already declared " + key + "\n" +
+			        "You tried to re-declare a variable that was already declared.\n" +
+			        "If you intended to just provide a value for " + key +
+			        " then please remove the declaration word.\n";
+		case ERR_READ_UNDECLARED:
+			return "FATAL read error: No such label " + key + "\n" +
+			        "The label " + key + " must appear in the input file\n";
+		case ERR_READ_NO_VALUE:
+			return "No value provided for label " + key + "\n" +
+			        "The label " + key + " must appear in the input file with " +
+			        "a non-empty value\n";
+		default:
+			return "FATAL Ainur error: Unknown error\n";
+		}
 	}
 
 	static String ZERO_CHAR_STRING_;
