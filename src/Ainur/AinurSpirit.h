@@ -51,6 +51,22 @@ class Ainur {
 				os<<keys_[i]<<" "<<values_[i]<<"\n";
 		}
 
+		template<typename SomeType>
+		void readValue(SomeType& t, String label) const
+		{
+			int x = storageIndexByName(label);
+			if (x < 0)
+				err("No such label " + label + "\n");
+			assert(static_cast<SizeType>(x) < values_.size());
+			String val = values_[x];
+			if (isEmptyValue(val))
+				err("No value provided for label " + label + "\n");
+
+			convertInternal(t, val);
+		}
+
+		static bool verbose() { return false; }
+
 	private:
 
 		int assignStorageByName(String key)
@@ -70,6 +86,16 @@ class Ainur {
 			if (it == keys_.end())
 				return -1;
 			return it - keys_.begin();
+		}
+
+		void convertInternal(SizeType& t, String label) const
+		{
+			t = atoi(label.c_str());
+		}
+
+		static bool isEmptyValue(String s)
+		{
+			return (s.length() == 0 || s == ZERO_CHAR_STRING_);
 		}
 
 		static String ZERO_CHAR_STRING_;
@@ -108,8 +134,6 @@ public:
 
 	typedef std::string::iterator IteratorType;
 	typedef Vector<char>::Type VectorCharType;
-	//typedef AinurStatements AinurStatementsType;
-	//typedef AinurStatementsType::AinurLexicalType AinurLexicalType;
 
 	Ainur(String str);
 
@@ -130,8 +154,7 @@ public:
 	template<typename SomeType>
 	void readValue(SomeType& t, String label) const
 	{
-		std::cerr<<"readValue called for label="<<label<<"\n";
-		err("Ainur isn't ready, throwing...\n");
+		state_.readValue(t, label);
 	}
 
 private:

@@ -11,16 +11,20 @@ void Ainur::Action::operator()(A& attr,
                                ContextType&,
                                bool&) const
 {
-	std::cerr <<" ****************** Action name = "<<name_<<"\n";
-	std::cerr << "typeid(A).name() = " << typeid(A).name() << "\n";
-	std::cerr << "typeid(ContextType).name() = " << typeid(ContextType).name() << "\n";
-	//std::cout << "typeid(Locals).name()     = " << typeid(Locals).name() << "\n";
+	bool verbose = Ainur::State::verbose();
 
-	std::cerr << "attributes: \n";
-	boost::fusion::for_each(attr, myprint());
+	if (verbose) {
+		std::cerr <<" ****************** Action name = "<<name_<<"\n";
+		std::cerr << "typeid(A).name() = " << typeid(A).name() << "\n";
+		std::cerr << "typeid(ContextType).name() = " << typeid(ContextType).name() << "\n";
+		//std::cout << "typeid(Locals).name()     = " << typeid(Locals).name() << "\n";
 
-	std::cerr << "attr = "<<attr<<"\n";
-	//std::cout << "hit = "<<hit<<"\n";
+		std::cerr << "attributes: \n";
+		boost::fusion::for_each(attr, myprint());
+
+		std::cerr << "attr = "<<attr<<"\n";
+		//std::cout << "hit = "<<hit<<"\n";
+	}
 
 	if (name_ == "statement1") {
 		String v1 = boost::fusion::at_c<0>(attr);
@@ -37,7 +41,10 @@ void Ainur::Action::operator()(A& attr,
 Ainur::Ainur(String str)
     : dummy_("")
 {
-	std::cerr<<str<<"\n\n";
+	bool verbose = Ainur::State::verbose();
+
+	if (verbose)
+		std::cerr<<str<<"\n\n";
 #define AINUR_COMMENTS ('#' >> *(qi::char_ - qi::eol) >> qi::eol) | qi::eol | qi::space
 	namespace qi = boost::spirit::qi;
 	namespace ascii = boost::spirit::ascii;
@@ -76,8 +83,10 @@ Ainur::Ainur(String str)
 	                          statement % ";",
 	                          AINUR_COMMENTS);
 
-	bool finished = (first != last);// fail if we did not get a full match
-	std::cout<<"finished="<<finished<<" r= "<<r<<"\n";
+	if (verbose) {
+		bool finished = (first != last);
+		std::cout<<"finished="<<finished<<" r= "<<r<<"\n";
+	}
 }
 
 String Ainur::State::ZERO_CHAR_STRING_(1, ' ');
