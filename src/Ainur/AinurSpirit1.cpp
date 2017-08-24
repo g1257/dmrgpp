@@ -35,8 +35,7 @@ void Ainur::Action::operator()(A& attr,
 		String v1 = boost::fusion::at_c<0>(attr);
 		String v2 = boost::fusion::at_c<1>(attr);
 		state_.declare(v1, v2);
-	}
-
+	} // FIXME: deal with statement3
 }
 
 Ainur::Ainur(String str)

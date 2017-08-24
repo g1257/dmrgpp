@@ -1,12 +1,19 @@
 #ifndef AINURSTATE_H
 #define AINURSTATE_H
 #include "../Vector.h"
+#include <cassert>
+#include "../PsimagLite.h"
 
 namespace PsimagLite {
 
 class AinurState {
 
+	//enum TypeEnum {UNKNOWN, SCALAR, VECTOR, MATRIX}; // HASH, FUNCTION
+
+	//enum SubTypeEnum {UNDEFINED, INTEGER, REAL, COMPLEX, STRING, CHAR, GROUP};
+
 	typedef Vector<String>::Type VectorStringType;
+//	typedef Vector<TypeEnum>::Type VectorTypeEnumType;
 
 public:
 
@@ -28,20 +35,13 @@ public:
 		ZERO_CHAR_STRING_[0] = 0;
 	}
 
-	void assign(String k, String v)
-	{
-		int x = storageIndexByName(k);
-		if (x < 0)
-			err(errLabel(ERR_PARSE_UNDECLARED, k));
-
-		assert(static_cast<SizeType>(x) < values_.size());
-		values_[x] = v;
-	}
+	void assign(String k, String v);
 
 	void declare(String d, String k)
 	{
 		assignStorageByName(k);
-		typesDotified_.push_back(d);
+		typesSpec_.push_back(d);
+		std::cerr<<"TYPE SPEC= "<<d<<"\n";
 		values_.push_back(ZERO_CHAR_STRING_);
 	}
 
@@ -64,6 +64,7 @@ public:
 		if (isEmptyValue(val))
 			err(errLabel(ERR_READ_NO_VALUE, label));
 
+		assert(static_cast<SizeType>(x) < typesSpec_.size());
 		convertInternal(t, val);
 	}
 
@@ -142,7 +143,7 @@ private:
 	}
 
 	static String ZERO_CHAR_STRING_;
-	VectorStringType typesDotified_;
+	VectorStringType typesSpec_;
 	VectorStringType keys_;
 	VectorStringType values_;
 };
