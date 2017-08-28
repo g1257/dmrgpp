@@ -1,3 +1,13 @@
+2017-08-28 Version 1.68
+
+* Ainur: boost-spirit backend
+
+* USE_BOOST: optional compilation with boost
+
+* deleted gitrev
+
+* rows() and cols() for most matrix types
+
 2017-08-07 Version 1.66
 
 * Matrix class: new ctor, clear and data members
