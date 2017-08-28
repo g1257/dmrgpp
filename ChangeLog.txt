@@ -1,5 +1,26 @@
 https://github.com/g1257/dmrgpp/commits/master
 
+2017-08-28 Version 4.54
+
+* Targetting common: printing fixed
+
+* dmrg driver accepts -o solver_options
+
+* operator driver accepts -e canonical_expression
+
+* observe: 2-points fixed for complex numbers
+
+* WFT transform in block diagonal form
+
+* correlationsSymmetry.pl added to check
+  symmetry of correlation matrix
+
+* continuous integration (ci) improvements
+
+* fixed assert in encodeQuantumNumber
+
+* rows() and cols() for most matrix types
+
 2017-08-07 Version 4.52
 
 * Kron optimizations
