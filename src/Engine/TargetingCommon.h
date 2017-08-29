@@ -656,7 +656,10 @@ private:
 		VectorStringType vecStr = getOperatorLabels();
 
 		for (SizeType i=0;i<vecStr.size();i++) {
-			PsimagLite::String opLabel = braketIfNeeded(vecStr[i],site);
+			PsimagLite::String opLabel = braketIfNeeded(vecStr[i],
+			                                            site,
+			                                            label1,
+			                                            label2);
 
 			BraketType Braket(targetHelper_.model(), opLabel);
 
@@ -668,11 +671,14 @@ private:
 	}
 
 	PsimagLite::String braketIfNeeded(PsimagLite::String opLabel,
-	                                  SizeType site) const
+	                                  SizeType site,
+	                                  PsimagLite::String label1,
+	                                  PsimagLite::String label2) const
 	{
-
+		if (label1 == "PSI") label1 = "gs";
+		if (label2 == "PSI") label2 = "gs";
 		if (opLabel.length() == 0 || opLabel[0] == '<') return opLabel;
-		return "<gs|" + opLabel + "|gs>";
+		return "<"+label1 + "|" + opLabel + "|" + label2 + ">";
 	}
 
 	VectorStringType getOperatorLabels() const
