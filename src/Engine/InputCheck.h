@@ -196,6 +196,7 @@ public:
 		knownLabels_.push_back("GeometryMaxConnections");
 		knownLabels_.push_back("LanczosNoSaveLanczosVectors");
 		knownLabels_.push_back("DenseSparseThreshold");
+		knownLabels_.push_back("TridiagonalEps");
 	}
 
 	~InputCheck()

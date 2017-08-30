@@ -256,6 +256,33 @@ correction vector algorithm (type=3).
 4300) BaFe2S3 FeS two-leg ladder two-orbital Hubbard
 4500) HeisenbergAnisotropic
 
+4600) Paper72
+InternalControlNumber: 72
+DOI:  Will be given when published
+NumberInThisSeries: 0
+Walltime (in seconds, approx.): 
+Model: HubbardOneBandExtendedSuper
+Do you need to run observe? ???
+Do you need to run scripts? yes
+Succint Description Of Features this test tests: Ground state for 4601
+Figure* (if any):
+Page* where more or less this feature is used: Will be given when published
+[* Refers to published version.]
+
+4601) Paper72
+InternalControlNumber: 72
+DOI:  Will be given when published
+NumberInThisSeries: 1
+Walltime (in seconds, approx.): 
+Model: HubbardOneBandExtendedSuper
+Do you need to run observe? ???
+Do you need to run scripts? yes
+Succint Description Of Features this test tests: Dynamics for
+Figure* (if any):
+Page* where more or less this feature is used: Will be given when published
+[* Refers to published version.]
+
+
 #5000 TOO BIG Hubbard model 1 orbital on a 32x2 ladder with m up to 800.
 It has 14 electrons up and 14 electrons down (or 2+2 "holes", 16+16 being
 the "half filled" case). U=2

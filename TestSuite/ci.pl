@@ -50,6 +50,8 @@ if (defined($help)) {
 }
 
 defined($submit{"command"}) or $submit{"command"} = "";
+$submit{"PBS_O_WORKDIR"} = ($submit{"command"} eq "qsub") ? 1 : 0;
+
 defined($noSu2) or $noSu2 = 0;
 
 defined($valgrind) or $valgrind = "";
@@ -250,7 +252,7 @@ sub runObserve
 		$cmd .= "\n";
 	}
 
-	my $batch = createBatch($n,$cmd);
+	my $batch = createBatch($n,$cmd, $submit->{"PBS_O_WORKDIR"});
 	submitBatch($submit, $batch) if ($submit->{"command"} ne "");
 }
 
@@ -297,19 +299,20 @@ sub procTest
 	my $valgrind = ($tool eq "") ? "" : "valgrind --tool=$tool ";
 	$valgrind .= " --callgrind-out-file=callgrind$n.out " if ($tool eq "callgrind");
 	my $cmd = "$valgrind./dmrg -f ../inputs/input$n.inp $extraCmdArgs &> output$n.txt";
-	my $batch = createBatch($n,$cmd);
+	my $batch = createBatch($n, $cmd, $submit->{"PBS_O_WORKDIR"});
 	submitBatch($submit, $batch) if ($submit->{"command"} ne "");
 }
 
 sub createBatch
 {
-	my ($ind,$cmd) = @_;
+	my ($ind,$cmd,$pbsOworkDir) = @_;
 	my $file = "Batch$ind.pbs";
 	open(FOUT,">$file") or die "$0: Cannot write to $file: $!\n";
 
 	open(FILE,"../$templateBatch") or die "$0: Cannot open ../$templateBatch: $!\n";
 
 	while (<FILE>) {
+		s/\$PBS_O_WORKDIR/\./g if (!$pbsOworkDir);
 		while (/\$\$([a-zA-Z0-9\[\]]+)/) {
 			my $line = $_;
 			my $name = $1;
