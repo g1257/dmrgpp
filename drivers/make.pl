@@ -23,7 +23,8 @@ sub make
 
 sub writeMakefile
 {
-	open(my $fh,">Makefile") or die "Cannot open Makefile for writing: $!\n";
+	my $fh;
+	open($fh, ">", "Makefile") or die "Cannot open Makefile for writing: $!\n";
 
 	my $libs = " -lm  -lpthread -lpsimaglite $lapack";
 	my $cxx = "g++ -O3 -DNDEBUG";

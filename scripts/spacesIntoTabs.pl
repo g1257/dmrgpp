@@ -5,13 +5,13 @@ use Getopt::Long;
 my ($file,$noerrors,$tabLength,$fix)=("YOU MUST SPECIFY -file filename",0,4,0);
 defined($file) or die "$0: Needs one argument: the filename\n";
 GetOptions ("ne" => \$noerrors,    # do not display errors
-	"tl=s"   => \$tabLength,      # 
+	"tl=s"   => \$tabLength,      #
 	"fix"  => \$fix,
 	"file=s"=>\$file);  # fix in place
 
 my $fout = "tmp.txt";
-open(FILE,$file) or die "Cannot open file $file: $!\n";
-open(FOUT,">$fout") or die "Cannot open file $fout for writing: $!\n";
+open(FILE, "<", "$file") or die "Cannot open file $file: $!\n";
+open(FOUT, ">", "$fout") or die "Cannot open file $fout for writing: $!\n";
 while(<FILE>) {
 	if (/^ +/) {
 		my ($spaces,$tabs)=("","");

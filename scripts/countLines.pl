@@ -2,22 +2,21 @@
 
 use strict;
 use warnings;
+use File::Find::Rule;
 
 my ($directory)=@ARGV;
 
 defined($directory) or die "$0: USAGE: $0 directory\n";
 
-open(PIPE,"find $directory -iname \"*.h\" -o -iname \"*.cpp\" | ") or die "Cannot open pipe: $!\n";
-
+my @files = File::Find::Rule->file()->name("*.cpp", "*.h")
+                                ->in($directory);
 my $counter=0;
 my $fileCounter = 0;
-while(<PIPE>) {
-	next if ($_ eq "" or $_ eq "\n");
-	$counter += countThisFile($_);
+foreach my $file (@files) {
+	$counter += countThisFile($file);
 	$fileCounter++;
 }
 
-close(PIPE);
 print "Total Lines=$counter\n";
 print "Total Files=$fileCounter\n";
 

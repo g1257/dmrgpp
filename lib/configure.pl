@@ -42,7 +42,7 @@ sub createMakefile
 	}
 
 	my $fh;
-	open($fh,">Makefile") or die "Cannot open Makefile for writing: $!\n";
+	open($fh, ">", "Makefile") or die "Cannot open Makefile for writing: $!\n";
 
 	local *FH = $fh;
 	my @units = ("MersenneTwister","Matrix","Mpi","Concurrency",

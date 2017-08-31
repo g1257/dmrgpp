@@ -2,6 +2,7 @@
 
 use warnings;
 use strict;
+use File::Find::Rule;
 use FunctionParsing;
 
 =pod
@@ -89,14 +90,12 @@ EOF
 sub loadMacros
 {
 	my ($passNumber)=@_;
-	open(PIPE,"find ../src -iname \"*.h\" |") or die "Cannot open pipe: $!\n";
-	while(<PIPE>) {
-		chomp;
-		my $file = $_;
+	my @files = File::Find::Rule->file()->name("*.h")
+                                ->in("../src");
+	foreach my $file (@files) {
 		procThisFile($file,$passNumber);
 		procThisFile($file,$passNumber+10);
 	}
-	close(PIPE);
 }
 
 sub procThisFile
@@ -106,7 +105,7 @@ sub procThisFile
 	$GlobalLabel="";
 	$GlobalBuffer="";
 	$GlobalIsInterface = 0;
-	open(FILE,$file) or die "Cannot open file $file: $!\n";
+	open(FILE, "<", $file) or die "Cannot open file $file: $!\n";
 	while(<FILE>) {
 		procThisLine($_,$file,$passNumber);
 	}
@@ -227,12 +226,12 @@ sub readFileVerbatim
 sub readFile
 {
 	my ($f)=@_;
-	open(OTHERFILE,$f) or die "Cannot open file $f: $!\n";
+	open(OTHERFILE, "<", $f) or die "Cannot open file $f: $!\n";
 	while(<OTHERFILE>) {
 		print;
 	}
 	close(OTHERFILE);
-	
+
 }
 
 sub getFunctionName

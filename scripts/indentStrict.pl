@@ -25,8 +25,8 @@ my $namespacesOpen = 0;
 my $lastLabel = "NO_LABEL";
 
 my $fout = "tmp.txt";
-open(FILE,$file) or die "Cannot open file $file: $!\n";
-open(FOUT,">$fout") or die "Cannot open file $fout for writing: $!\n";
+open(FILE, "<", $file) or die "Cannot open file $file: $!\n";
+open(FOUT, ">", "$fout") or die "Cannot open file $fout for writing: $!\n";
 my $lforEcho = "";
 my $appendNext = 0;
 my $parensBalance = 0;

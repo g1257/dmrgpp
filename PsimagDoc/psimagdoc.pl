@@ -58,7 +58,7 @@ while(<STDIN>) {
 sub readFile
 {
 	my ($file)=@_;
-	open(FILE,$file) or die "Cannot open $file: $!\n";
+	open(FILE, "<", $file) or die "Cannot open $file: $!\n";
 	while(<FILE>) {
 		print;
 	}

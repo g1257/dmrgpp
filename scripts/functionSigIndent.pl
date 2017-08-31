@@ -16,7 +16,7 @@ my @GlobalCvQualifiers=("const","virtual","volatile","static");
 while(<STDIN>) {
 
 	my $savedLine = $_;
-	
+
 	s/\/\*.*\*\///;
 	s/\/\/.*$//;
 	$multiLineComment = 1 if (/^[\t ]*\/\*/);

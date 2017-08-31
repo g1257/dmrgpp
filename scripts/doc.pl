@@ -36,7 +36,7 @@ sub loadFiles
 {
 	my ($a,$f) = @_;
 	my %labels = %$a;
-	open(FILE,$f) or die "$0: Cannot open $f : $!\n";
+	open(FILE, "<", $f) or die "$0: Cannot open $f : $!\n";
 
 	while (<FILE>) {
 	    if (/\\ptexReadFile\{([^\}]+)\}/) {
@@ -44,7 +44,7 @@ sub loadFiles
 			if ($doc_root != "") {
 			    $file = $doc_root . "/" . $file;
 			}
-			my $ret = open(FILE2,$file);
+			my $ret = open(FILE2, "<", $file);
 			if (!$ret) {
 				close(FILE);
 				die "$0: ERROR: Cannot read $file, line $_\n";
@@ -89,7 +89,7 @@ sub procFile
 	my %labels = %$a;
 	my $label = "!DISABLED";
 	my $buffer = "";
-	open(FILE,$f) or die "$0: Cannot open $f : $!\n";
+	open(FILE, "<", $f) or die "$0: Cannot open $f : $!\n";
 	while (<FILE>) {
 		if (/\/\* *PSIDOC *([^ ]+)/) {
 			$label = $1;
@@ -135,8 +135,8 @@ sub replaceLabels
 	$fout=~s/\.ptex$/\.tex/;
 	die "$0: $file must have extension .ptex\n" if ($file eq $fout);
 
-	open(FOUT,"> $fout") or die "$0: Cannot write to $fout : $!\n";
-	open(FILE,$file) or die "$0: Cannot open $file : $!\n";
+	open(FOUT, ">", "$fout") or die "$0: Cannot write to $fout : $!\n";
+	open(FILE, "<", $file) or die "$0: Cannot open $file : $!\n";
 	while (<FILE>) {
 		next if (/^[ \t]*%/);
 		if (/\\ptexPaste\{([^\}]+)\}/) {
