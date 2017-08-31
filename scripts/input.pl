@@ -1,4 +1,4 @@
-#!/usr/bin/perl 
+#!/usr/bin/perl
 =pod
 // BEGIN LICENSE BLOCK
 Copyright © 2009 , UT-Battelle, LLC
@@ -11,7 +11,7 @@ THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. 
+PARTICULAR PURPOSE ARE DISCLAIMED.
 
 Please see full open source license included in file LICENSE.
 *********************************************************
@@ -176,13 +176,13 @@ sub askQuestionsFeAs()
 sub createInput
 {
 	system("cp input.inp input.bak") if (-r "input.inp");
-	open(FOUT,">input.inp") or die "Cannot open file input.inp for writing: $!\n";
+	open(FOUT, ">", "input.inp") or die "Cannot open file input.inp for writing: $!\n";
 	my $connectorValues=createConnectors($connectorValue);
 	my $version=getVersion();
 	my $qns = "2 0.5 0.5";
 	my $inputForTimeEvolution = getTimeEvolutionInput();
 	my $geometryName = getGeometryName();
-	
+
 	if ($su2Symmetry=~/y/i) {
 		$_ = $electrons/(2*$linSize);
 		$momentumJ /= ($linSize);
@@ -200,7 +200,7 @@ sub createInput
 	print FOUT "GeometryOptions=ConstantValues\n";
 	print FOUT "Connectors 1 1.0\n"; # FIXME only valid for hubbard model
 	if ($model=~/febasedsc/i) {
-	$qns = "3 1.0 1.0 0.0"; 
+	$qns = "3 1.0 1.0 0.0";
 	print FOUT<<EOF;
 hoppings 2 2
 -0.058 0
@@ -244,7 +244,7 @@ OutputFile=data.txt
 InfiniteLoopKeptStates=$infiniteKeptStates
 FiniteLoops $finiteLoops
 TargetQuantumNumbers $qns
-   
+  
 EOF
 	print FOUT "Threads=$nthreads\n" if ($pthreads);
 	print FOUT "$inputForTimeEvolution\n\n" if ($targetting=~/timestep/i);
@@ -258,17 +258,17 @@ sub getTimeEvolutionInput
 	my $ret = <<EOF;
 FILENAME tst.txt
 TIMESTEP 0.1
-MAXTIMES 4 
-ADVANCEEACH 5 
-SITE  2 10 11 
-STARTINGLOOP 2 0 0 
+MAXTIMES 4
+ADVANCEEACH 5
+SITE  2 10 11
+STARTINGLOOP 2 0 0
 
-TIMEEVOLUTION raw 
+TIMEEVOLUTION raw
 RAW_MATRIX 4 4
 0.0    0.0    0.0   0.0
 0.0   0.0    0.0   -1.0
-0.0    0.0    0.0   1.0 
-0.0    0.0    0.0   0.0 
+0.0    0.0    0.0   1.0
+0.0    0.0    0.0   0.0
 FERMIONSIGN -1
 JMVALUES 0 0
 angularFactor 1
@@ -401,11 +401,10 @@ sub getVersion
 		$hasGit=1;
 	}
 	$version=getGitVersion() if ($hasGit);
-	
-	 
+
 	#If not then read it from a file
 	if ($version=~/NOGIT/i) {
-		if (open(VERSIONF,"version.txt")) {
+		if (open(VERSIONF, "<", "version.txt")) {
 			while(<VERSIONF>) {
 				chomp;
 				if (/commit (.*$)/) {
@@ -433,7 +432,7 @@ sub getGitVersion
 		}
 	}
 	close(PIPE);
-	if (open(VERSIONF,">version.txt")) {
+	if (open(VERSIONF, ">", "version.txt")) {
 		print VERSIONF "commit $version\n";
 		close(VERSIONF);
 	} else {

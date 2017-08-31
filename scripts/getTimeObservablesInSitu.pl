@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use lib "../scripts";
 use timeObservablesInSitu;
 
 

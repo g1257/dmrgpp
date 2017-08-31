@@ -79,13 +79,13 @@ sub createInput
 {
 	my ($n,$ind,$omega)=@_;
 	my $file="input$ind.inp";
-	open(FOUT,">$file") or die "$0: Cannot write to $file\n";
+	open(FOUT, ">", "$file") or die "$0: Cannot write to $file\n";
 	my $steps = int($n/2) - 1;
 	my $data = "data$ind.txt";
 	my $nup = int($n/2);
 	my $ndown = $nup;
 
-	open(FILE,"$templateInput") or die "$0: Cannot open $templateInput: $!\n";
+	open(FILE, "<", "$templateInput") or die "$0: Cannot open $templateInput: $!\n";
 
 	while(<FILE>) {
 		next if (/^#/);
@@ -111,8 +111,8 @@ sub createFinalBatch
 	createBatch($ind,0,"FINAL");
 	my $fout = "temp.pbs";
 	my $file = "Batch$ind.pbs";
-	open(FOUT,">$fout") or die "$0: Cannot write to $file: $!\n";
-	open(FILE,"$file") or die "$0: Cannot open $fout: $!\n";
+	open(FOUT, ">", "$fout") or die "$0: Cannot write to $file: $!\n";
+	open(FILE, "<", "$file") or die "$0: Cannot open $fout: $!\n";
 	my @outfiles = @$files;
 	while (<FILE>) {
 		if (/FINAL/) {
@@ -134,9 +134,9 @@ sub createBatch
 {
         my ($ind,$omega,$input) = @_;
         my $file = "Batch$ind.pbs";
-        open(FOUT,">$file") or die "$0: Cannot write to $file: $!\n";
+        open(FOUT, ">", "$file") or die "$0: Cannot write to $file: $!\n";
 
-        open(FILE,"$templateBatch") or die "$0: Cannot open $templateBatch: $!\n";
+        open(FILE, "<", "$templateBatch") or die "$0: Cannot open $templateBatch: $!\n";
 
         while (<FILE>) {
                 while (/\$\$([a-zA-Z0-9\[\]]+)/) {

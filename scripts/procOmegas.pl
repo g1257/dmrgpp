@@ -33,7 +33,7 @@ OmegaUtils::getLabels($hptr,$templateInput);
 my $logFile = "Log$templateInput";
 $logFile =~ s/\..*$//;
 $logFile .= ".log";
-open(LOGFILEOUT,">$logFile") or die "$0: Cannot write to $logFile : $!\n";
+open(LOGFILEOUT, ">", "$logFile") or die "$0: Cannot write to $logFile : $!\n";
 
 if ($omegaStep < 0) {
 	my $beta = -$omegaStep;
@@ -43,7 +43,7 @@ if ($omegaStep < 0) {
 
 my @omegas;
 my $outSpectrum = "out.spectrum";
-open(FOUTSPECTRUM,"> $outSpectrum") or die "$0: Cannot write to $outSpectrum : $!\n";
+open(FOUTSPECTRUM, ">", "$outSpectrum") or die "$0: Cannot write to $outSpectrum : $!\n";
 for (my $i = 0; $i < $total; ++$i) {
 
 	my $omega = $omega0 + $omegaStep * $i;
@@ -79,7 +79,7 @@ sub printGnuplot
 {
 	my ($inFile,$omegas,$geometry) = @_;
 
-	open(FIN,"$inFile") or die "$0: Cannot open $inFile : $!\n";
+	open(FIN, "<", "$inFile") or die "$0: Cannot open $inFile : $!\n";
 
 	my @array;
 	my $counter = 0;
@@ -107,7 +107,7 @@ sub printGnuplot
 
 	foreach my $fileIndex (@fileIndices) {
 		my $outFile = "outSpectrum$fileIndex.gnuplot";
-		open(FOUT,"> $outFile") or die "$0: Cannot write to $outFile : $!\n";
+		open(FOUT, ">", "$outFile") or die "$0: Cannot write to $outFile : $!\n";
 
 		for (my $i = 0; $i < $numberOfOmegas; ++$i) {
 			my $omega = $omegas->[$i];
@@ -146,7 +146,7 @@ sub printSpectrumToColor
 		                                      $geometry,
 		                                      $fileIndex);
 
-		open(FOUTSPECTRUM,"> $outSpectrum")
+		open(FOUTSPECTRUM, ">", "$outSpectrum")
 			or die "$0: Cannot write to $outSpectrum : $!\n";
 		print FOUTSPECTRUM "$counter $size $omegaMax\n";
 
@@ -209,17 +209,17 @@ sub correctionVectorRead
 {
 	my ($v1,$v2,$inFile,$fh) = @_;
 	if (-r "$inFile") {
-		open(FIN,"$inFile") or die "$0: Cannot open $inFile : $!\n";
+		open(FIN, "<", "$inFile") or die "$0: Cannot open $inFile : $!\n";
 	} else {
 		my $input = $inFile;
 		$input =~s/runFor//;
 		$input =~s/\.cout/\.inp/;
-		open(FIN,"./toolboxdmrg -f $input -a grep -E \"<\" 2>/dev/null |")
+		open(FIN,"./toolboxdmrg -f \"$input\" -a grep -E \"<\" 2>/dev/null |")
 		or die "$0: Cannot open pipe : $!\n";
 	}
-	
+
 	my $maxSite = 0;
-	
+
 	$maxSite = correctionVectorReadOpen($v1,$v2,$inFile,\*FIN);
 	close(FIN);
 	$maxSite++;
@@ -260,13 +260,13 @@ sub correctionVectorWrite
 {
 	my ($outFile, $v1, $v2, $maxSite, $omega) = @_;
 
-	open(FOUT,"> $outFile") or die "$0: Cannot write to $outFile : $!\n";
+	open(FOUT, ">", "$outFile") or die "$0: Cannot write to $outFile : $!\n";
 
 	print FOUT "#omega=$omega\n";
 	for (my $i = 0; $i < $maxSite; ++$i) {
 		my $vv1 = $v1->[$i];
 		my $vv2 = $v2->[$i];
-		if (!defined($vv1)) { 
+		if (!defined($vv1)) {
 			print STDERR "$0: Undefined value for site = $i and omega = $omega\n";
 			$vv1 = $vv2 = 0.0;
 		}
@@ -281,7 +281,7 @@ sub readSpace
 	my ($space,$inFile) = @_;
 	my $counter = 0;
 
-	open(FIN,"$inFile") or die "$0: Cannot open $inFile : $!\n";
+	open(FIN, "<", "$inFile") or die "$0: Cannot open $inFile : $!\n";
 	while(<FIN>) {
 		if (/^#/) {
 		        next;
@@ -332,7 +332,7 @@ sub readAllQs
 	my $counter = 0;
 	my $inputRoot = "input";
 	my $prefix = "runFor$inputRoot$ind";
-	open(FILE,"$prefix.sq") or die "$0: Cannot open file : $!\n";
+	open(FILE, "<", "$prefix.sq") or die "$0: Cannot open file : $!\n";
 	while (<FILE>) {
 		chomp;
 		my @temp = split;
@@ -369,7 +369,7 @@ sub printFourierChain
 {
 	my ($outFile,$f) = @_;
 
-	open(FOUT,"> $outFile") or die "$0: Cannot write to $outFile : $!\n";
+	open(FOUT, ">", "$outFile") or die "$0: Cannot write to $outFile : $!\n";
 
 	my $n = scalar(@$f);
 	for (my $m = 0; $m < $n; ++$m) {
@@ -386,7 +386,7 @@ sub printFourierLadder
 {
 	my ($outFile,$f) = @_;
 
-	open(FOUT,"> $outFile") or die "$0: Cannot write to $outFile : $!\n";
+	open(FOUT, ">", "$outFile") or die "$0: Cannot write to $outFile : $!\n";
 
 	my $n = scalar(@$f);
 	for (my $m = 0; $m < $n; ++$m) {
@@ -505,7 +505,7 @@ sub getQ
 sub extractValue
 {
 	my ($file,$q) = @_;
-	open(FILE,$file) or die "$0: Cannot open file $file : $!\n";
+	open(FILE, "<", $file) or die "$0: Cannot open file $file : $!\n";
 
 	my $omega;
 	while(<FILE>) {
@@ -536,7 +536,7 @@ sub spectrumToColor
 	my $size;
 	my $finalSize;
 
-	open(FIN,$file) or die "$0: Cannot open file $file : $!\n";
+	open(FIN, "<", $file) or die "$0: Cannot open file $file : $!\n";
 	while (<FIN>) {
 		next if (/^#/);
 		chomp;

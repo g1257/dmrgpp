@@ -25,7 +25,7 @@ sub readLabel
 {
 	my ($file, $label) = @_;
 	my $value;
-	open(FILE, "$file") or die "$0: Cannot open file $file : $!\n";
+	open(FILE, "<", "$file") or die "$0: Cannot open file $file : $!\n";
 	while (<FILE>) {
 		if (/^$label(.*$)/) {
 			$value = $1;
@@ -50,7 +50,7 @@ sub getRunTime
 sub getMemory
 {
 	my ($file) = @_;
-	open(FILE, "$file") or die "$0: Cannot open file $file : $!\n";
+	open(FILE, "<", "$file") or die "$0: Cannot open file $file : $!\n";
 	my $m = "UNDEFINED";
 	while (<FILE>) {
 		chomp;

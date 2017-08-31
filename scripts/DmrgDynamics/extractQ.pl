@@ -14,9 +14,9 @@ foreach my $file (@files) {
 sub procFile
 {
 	my ($file,$q) = @_;
-	open(FILE,$file) or die "$0: Cannot open file $file : $!\n";
+	open(FILE, "<", $file) or die "$0: Cannot open file $file : $!\n";
 
-	my $omega;	
+	my $omega;
 	while(<FILE>) {
 
 		chomp;

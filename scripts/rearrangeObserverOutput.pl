@@ -4,7 +4,7 @@ use strict;
 
 my ($file)=@ARGV;
 
-my ($label1,$label2) = ("nupNdown","nUp+nDown"); 
+my ($label1,$label2) = ("nupNdown","nUp+nDown");
 
 printSuper($file);
 
@@ -15,13 +15,13 @@ rearrange($file,$label2);
 sub printSuper
 {
 	 my ($file)=@_;
-	 open(FILE,$file) or die "Cannot open file $file: $!\n";
+	 open(FILE, "<", $file) or die "Cannot open file $file: $!\n";
 	 my $found = 0;
 	 my $saved = "NOT_FOUND";
 	 while(<FILE>) {
-	 	if (/superdensity/i) {
+		if (/superdensity/i) {
 			my $newSuperDensity = $_;
-			last if (!($saved eq "NOT_FOUND") and 
+			last if (!($saved eq "NOT_FOUND") and
 				diffBetweenSuperDensities($newSuperDensity,$saved)<1e-5);
 			$saved = $_;
 			$found = 1;
@@ -55,7 +55,7 @@ sub getNumericSuperDensity
 sub rearrange
 {
 	my ($file,$label)=@_;
-	open(FILE,$file) or die "Cannot open file $file: $!\n";
+	open(FILE, "<", $file) or die "Cannot open file $file: $!\n";
 
 	while(<FILE>) {
 		last if (/^#Using Matrix A:/);
@@ -70,7 +70,7 @@ sub rearrange
 
 }
 
-sub doOneBlock 
+sub doOneBlock
 {
 	my ($label,$saved,$counter)=@_;
 	while(<FILE>) {
@@ -85,7 +85,7 @@ sub doOneBlock
 	my $needsPrinting = 0;
 	$needsPrinting = 1 if (/\Q$label/i);
 
-	print $saved if ($needsPrinting and $counter<2); 
+	print $saved if ($needsPrinting and $counter<2);
 
 	while(<FILE>) {
 		last if (/^#/);

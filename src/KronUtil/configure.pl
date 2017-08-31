@@ -45,7 +45,7 @@ sub createMakefile
 	Make::backupMakefile();
 
 	my $fh;
-	open($fh,">Makefile") or die "Cannot open Makefile for writing: $!\n";
+	open($fh, ">", "Makefile") or die "Cannot open Makefile for writing: $!\n";
 
 	my %args;
 	$args{"code"} = "KronUtil";

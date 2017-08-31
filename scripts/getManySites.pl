@@ -22,7 +22,7 @@ for (my $site=$firstSite;$site<$n-1;$site++)
 printTotalNd($file,$sd);
 printAllSites($file,$sd);
 
-sub getOutputName 
+sub getOutputName
 {
 	my ($file,$ext) = @_;
 	my $fout = $file;
@@ -37,7 +37,7 @@ sub printTotalNd
 	my ($file,$sd)=@_;
 	my $fout = getOutputName($file,"ndt");
 
-	open(FOUT,">$fout") or die 
+	open(FOUT, ">", "$fout") or die
 		"Cannot open $fout for writing: $!\n";
 
 	foreach my $t (@times) {
@@ -51,7 +51,7 @@ sub printAllSites
 {
 	my ($file,$sd)=@_;
 	my $fout = getOutputName($file,"nds");
-	open(FOUT,">$fout") or die
+	open(FOUT, ">", "$fout") or die
 		"Cannot open $fout for writing: $!\n";
 
 	# first row (labels:):
@@ -77,7 +77,7 @@ sub getSuperDensity
 {
 	my ($site)=@_;
 	my $sd;
-	open(FILE,$file) or die "Cannot open file $file: $!\n";
+	open(FILE, "<", $file) or die "Cannot open file $file: $!\n";
 	while(<FILE>) {
 		if (/SuperDensity.*=\(([^,]+),/) {
 			$sd = $1;
@@ -92,10 +92,10 @@ sub getSuperDensity
 sub doOneSite
 {
 	my ($site)=@_;
-	
+
 	system("perl getTimeObs.pl $site < $file > out1");
-	system("perl gatherTimes.pl < out1 > out "); 
-	open(FILE,"out") or die "Cannot open file out: $!\n";
+	system("perl gatherTimes.pl < out1 > out ");
+	open(FILE, "<", "out") or die "Cannot open file out: $!\n";
 	my $counter = 0;
 	my @timesNow;
 	while(<FILE>) {
@@ -106,7 +106,7 @@ sub doOneSite
 		} else {
 			$val{$temp[0]} = $temp[1];
 		}
-		$nd[$site]{$temp[0]}=$temp[1]; 
+		$nd[$site]{$temp[0]}=$temp[1];
 	}
 	close(FILE);
 	if ($site==$firstSite) {

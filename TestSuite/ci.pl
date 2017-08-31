@@ -183,10 +183,10 @@ sub runTimeInSituObs
 		(scalar(@temp) == 2) or die "$0: FATAL annotation ".$what->[$i]."\n";
 		my ($site, $label) = @temp;		
 		my $fin;
-		open($fin, $file) or die "$0: Could not open $file : $!\n";
+		open($fin, "<", $file) or die "$0: Could not open $file : $!\n";
 		my $fout;
 		my $foutname = "timeObservablesInSitu${n}_$i.txt";
-		if (!open($fout, "> $foutname")) {
+		if (!open($fout, ">", "$foutname")) {
 			close($fin);
 			die "$0: Could not write to $foutname: $!\n";
 		}
@@ -203,7 +203,7 @@ sub runMetts
 {
 	my ($n,$what,$submit) = @_;
 	my $whatN = scalar(@$what);
-	my %actions = ("Energy" => \&Metts::energy, 
+	my %actions = ("Energy" => \&Metts::energy,
 	               "Density" => \&Metts::density);
 	for (my $i = 0; $i < $whatN; ++$i) {
 		my $file = "runForinput$n.cout";
@@ -219,17 +219,16 @@ sub runMetts
 		if (($label ne "Energy") and ($label ne "Density")) {
 			die "$0: Wrong annotation: $what->[$i]\n";
 		}
- 
+
 		my $fin;
-		open($fin, $file) or die "$0: Could not open $file : $!\n";
+		open($fin, "<", $file) or die "$0: Could not open $file : $!\n";
 		my $fout;
 		my $foutname = "metts${n}_$i.txt";
-		if (!open($fout, "> $foutname")) {
+		if (!open($fout, ">", "$foutname")) {
 			close($fin);
 			die "$0: Could not write to $foutname: $!\n";
 		}
 
-		
 		if ($submit->{"command"} ne "") {
 			my ($sum, $counter) = $actions{"$label"}($arg0, $arg1,0, $fin);
 			print $fout "#"."$label=$sum $counter\n";
@@ -277,7 +276,7 @@ sub runObserveOne
 sub isRestart
 {
 	my ($file,$n) = @_;
-	open(FILE, "$file") or return 0;
+	open(FILE, "<", "$file") or return 0;
 	my $so;
 	while (<FILE>) {
 		chomp;
@@ -307,9 +306,9 @@ sub createBatch
 {
 	my ($ind,$cmd,$pbsOworkDir) = @_;
 	my $file = "Batch$ind.pbs";
-	open(FOUT,">$file") or die "$0: Cannot write to $file: $!\n";
+	open(FOUT, ">", "$file") or die "$0: Cannot write to $file: $!\n";
 
-	open(FILE,"../$templateBatch") or die "$0: Cannot open ../$templateBatch: $!\n";
+	open(FILE, "<", "../$templateBatch") or die "$0: Cannot open ../$templateBatch: $!\n";
 
 	while (<FILE>) {
 		s/\$PBS_O_WORKDIR/\./g if (!$pbsOworkDir);

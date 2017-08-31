@@ -72,7 +72,7 @@ sub printPairs2
 sub readMatrix
 {
 	my ($file, $label) = @_;
-	open(FILE, "$file") or die "$0: Cannot open file $file : $!\n";
+	open(FILE, "<", "$file") or die "$0: Cannot open file $file : $!\n";
 	while (<FILE>) {
 		last if (/^\Q$label/);
 	}

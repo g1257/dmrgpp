@@ -23,7 +23,7 @@ sub runThisOmega
 sub getResults
 {
 	my ($f,$ind,$omega)=@_;
-	open(FILE,$f) or die "Cannot open $f: $!\n";
+	open(FILE, "<", $f) or die "Cannot open $f: $!\n";
 	my $ptrn = $omega;
 	$ptrn =~ s/\./\\./;
 	my $val=0;
@@ -42,7 +42,7 @@ sub createInput
 {
 	my ($ind,$omega)=@_;
 	my $inputFile = "input.inp";
-	open(FOUT,">$inputFile") or die "Cannot open $inputFile for writing: $!\n";
+	open(FOUT, ">", "$inputFile") or die "Cannot open $inputFile for writing: $!\n";
 	print FOUT<<EOF;
 TotalNumberOfSites=8 
 NumberOfTerms=1

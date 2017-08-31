@@ -10,7 +10,7 @@ my $FileData;
 my $BatchName;
 my $InputFile;
 my @ignoreVars=("PBS_O_WORKDIR");
-	
+
 my $tstSites=" 6 4 ";
 my $templateInput="inputDollar.inp";
 my $templateBatch="batchDollar.pbs";
@@ -47,11 +47,11 @@ askToSubmit($counter,"n");
 sub createRun
 {
 	my ($counter)=@_;
-	
+
 	$FileTst="$rootTstFile$counter.txt";
 	$FileData="$rootDataFile$counter.txt";
-	
-	
+
+
 	my $fout = "$rootInput$counter.inp";
 	unDollarize($templateInput,$fout);
 }
@@ -59,11 +59,11 @@ sub createRun
 sub createBatch
 {
 	my ($counter)=@_;
-	
+
 	$BatchName="$rootBatchName$counter";
 	$InputFile="$rootInput$counter.inp";
 	my $batchFile="$rootBatchFile$counter.pbs";
-	
+
 	unDollarize($templateBatch,$batchFile);
 }
 
@@ -71,7 +71,7 @@ sub readLabel
 {
 	my ($file,$label)=@_;
 	my $ret;
-	open(FILE,$file) or die
+	open(FILE, "<", $file) or die
 		"Cannot open $file: $!\n";
 	while(<FILE>) {
 		chomp;
@@ -98,9 +98,9 @@ sub fillVector
 sub unDollarize
 {
 	my ($inFile,$outFile)=@_;
-	open(FILE,$inFile) or die
+	open(FILE, "<", $inFile) or die
 		"Cannot open $inFile: $!\n";
-	open(FOUT,">$outFile") or die
+	open(FOUT, ">", "$outFile") or die
 		"Cannot open $outFile for writing: $!\n"; 
 	while(<FILE>) {
 		my $line = $_;
@@ -144,7 +144,6 @@ sub askToSubmit
 	$_="$d" if ($_ eq "");
 	return if ($_=~/n/i);
 	submitAll($total);
-	
 }
 
 sub submitAll

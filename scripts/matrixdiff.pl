@@ -22,7 +22,7 @@ my $label2="Energy=";
 # and places the first word in $file1 and the second in $file2
 my ($file1,$file2) = @ARGV;
 
-# These are the two matrices. 
+# These are the two matrices.
 # Note that perl has no matrix data type, so we use vectors, and
 # store matrix element $m($i,$j) in $matrix[$i + $j*$rows], this is called
 # linear ordering
@@ -80,7 +80,7 @@ sub printMatrix
 sub loadMatrix1
 {
 	my ($m,$f)=@_; # Read the arguments
-	open(FILE,$f) or die "Cannot open file $f: $!\n";
+	open(FILE, "<", $f) or die "Cannot open file $f: $!\n";
 	# Note that $! above contains the error message
 	# Read up to let's say "OperatorC:", which is contained in $label
 	while(<FILE>) {
@@ -102,7 +102,7 @@ sub loadMatrix1
 		}
 		#increment the row
 		$i++;
-		# exit if we're done: 
+		# exit if we're done:
 		last if ($i==$rows);
 	}
 	close(FILE);
@@ -110,13 +110,13 @@ sub loadMatrix1
 }
 
 # Now for loading the second matrix. Again we need a different
-# function because the matrix formats are different, 
+# function because the matrix formats are different,
 # compare file1.txt with file2.txt
 
 sub loadMatrix2
 {
 	my ($m,$f)=@_; # Read the arguments
-	open(FILE,$f) or die "Cannot open file $f: $!\n";
+	open(FILE, "<", $f) or die "Cannot open file $f: $!\n";
 	# Read up to let's say "Energy=", which is contained in $label2
 	while(<FILE>) {
 		last if (/^$label2/);
@@ -133,7 +133,7 @@ sub loadMatrix2
 		}
 		#increment the row
 		$i++;
-		# exit if we're done: 
+		# exit if we're done:
 		last if ($i==$cols);
 	}
 	close(FILE);
@@ -148,7 +148,7 @@ sub realPartOf
 	s/\(//; # kill the starting parens
 	s/,.*$//; # kill everything from the comma to the end
 	return $_;
-	
+
 }
 	
 sub percentageDiff

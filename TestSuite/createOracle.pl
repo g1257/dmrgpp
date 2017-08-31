@@ -51,7 +51,7 @@ sub readLabel
 {
 	my ($file, $label) = @_;
 	my $value;
-	open(FILE, "$file") or die "$0: Cannot open file $file : $!\n";
+	open(FILE, "<", "$file") or die "$0: Cannot open file $file : $!\n";
 	while (<FILE>) {
 		if (/^$label(.*$)/) {
 			$value = $1;

@@ -110,7 +110,7 @@ sub addRectangle
 sub loadColors
 {
 	my ($c,$file) = @_;
-	open(FILE,"$file") or die "$0: Cannot open file $file : $!\n";
+	open(FILE, "<", "$file") or die "$0: Cannot open file $file : $!\n";
 	$_=<FILE>;
 	chomp;
 	my ($ytotal,$xtotal,$omegaMax) = split;
@@ -182,7 +182,7 @@ sub tikzCreate
 	my $texFile = $graph;
 	$texFile =~ s/\..*$//;
 	$texFile .= ".tex";
-	open(FOUT,">$texFile") or die "$0: Cannot write to $graph : $!\n";
+	open(FOUT, ">", "$texFile") or die "$0: Cannot write to $graph : $!\n";
 	print FOUT<<EOF;
 \\documentclass[border=0pt]{standalone}
 \\usepackage{tikz}
@@ -243,7 +243,7 @@ sub tikzHeight
 {
 	my ($w,$graph) = @_;
 	my $h;
-	open(FIN,$graph) or die "$0: Cannot open $graph : $!\n";
+	open(FIN, "<", $graph) or die "$0: Cannot open $graph : $!\n";
 	while (<FIN>) {
 		chomp;
 		if (/%%BoundingBox:/) {

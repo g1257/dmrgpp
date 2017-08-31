@@ -121,7 +121,7 @@ sub procCout
 		return;
 	}
 
-	open(FILE, "$file") or return;
+	open(FILE, "<", "$file") or return;
 	my @energies;
 	my $counter = 0;
 	while (<FILE>) {
@@ -180,7 +180,7 @@ sub procMemcheck
 	my $mode = "OK";
 	my $extra = "UNDEFINED";
 	my %lost;
-	open(FILE,$file1) or die "$0: Cannot open $file1 : $!\n";
+	open(FILE, "<", $file1) or die "$0: Cannot open $file1 : $!\n";
 	while (<FILE>) {
 		if (/FATAL: You are requesting/ || /mandatory label/) {
 			$mode = "FATAL";
@@ -390,11 +390,11 @@ sub loadObserveData
 	my ($file) = @_;
 	my @m;
 	my $fh;
-	if (!open($fh, "$file")) {
+	if (!open($fh, "<", "$file")) {
 		print "$0: File $file NOT FOUND\n";
 		return @m;
 	}
-	
+
 	while (<$fh>) {
 		my $label = readNextLabel($fh);
 		my @m1;
