@@ -89,3 +89,4 @@ JMVALUES 0 0
 AngularFactor=1
 
 #ci dmrg arguments=":../inputs/sz4601.txt"
+#ci CollectBrakets 0

@@ -84,6 +84,13 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 		checkTimeInSituObs($n, $whatTimeInSituObs, $workdir, $golddir);
 	}
 
+	my $brakets = $ciAnnotations{"CollectBrakets"};
+	my $x = scalar(@$brakets);
+	if ($x > 0) {
+		print "|$n| has $x CollectBrakets lines\n";
+		checkCollectBrakets($n, $brakets, $workdir, $golddir);
+	}
+
 	my $metts = $ciAnnotations{"metts"};
 	$x = scalar(@$metts);
 	if ($x > 0) {
@@ -284,6 +291,22 @@ sub checkTimeInSituObs
 		checkVectorsEqual($m1{"times"}, $m2{"times"});
 
 		compareMatrices($m1{"data"}, $m2{"data"});
+	}
+}
+
+sub checkCollectBrakets
+{
+	my ($n, $what, $workdir, $golddir) = @_;
+	my $whatN = scalar(@$what);
+	for (my $i = 0; $i < $whatN; ++$i) {
+		my $file = "runForinput$n.cout";
+		if (!(-r "$file")) {
+			print STDERR "|$n|: WARNING: $file not readable\n";
+		}
+
+		my $file1 = "$workdir/CollectBrakets${n}_$i.txt";
+		my $file2 = "$golddir/CollectBrakets${n}_$i.txt";
+		print "WARNING unimplemented: Comparing $file1 against $file2\n";
 	}
 }
 

@@ -189,6 +189,7 @@ sub getCiAnnotations
 	my @whatObserve;
 	my @whatDmrg;
 	my @whatTimeObsInSitu;
+	my @brakets;
 	my @metts;
 	my $counter = 0;
 	while (<FILE>) {
@@ -208,6 +209,11 @@ sub getCiAnnotations
 			next;
 		}
 
+		if (/^#ci CollectBrakets (.*$)/) {
+			push (@brakets, "$1");
+			next;
+		}
+
 		if (/^#ci metts (.*)/) {
 			push (@metts, "$1");
 		}
@@ -218,6 +224,7 @@ sub getCiAnnotations
 	$h{"dmrg"} = \@whatDmrg;
 	$h{"observe"} = \@whatObserve;
 	$h{"getTimeObservablesInSitu"} = \@whatTimeObsInSitu;
+	$h{"CollectBrakets"} = \@brakets;
 	$h{"metts"} = \@metts;
 	return %h;
 }

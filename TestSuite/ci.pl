@@ -6,6 +6,7 @@ use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 use lib "../scripts";
 use timeObservablesInSitu;
+use CollectBrakets;
 use Metts;
 
 my ($valgrind,$workdir,$restart,$ranges,$postprocess,$noSu2,$info,$help);
@@ -128,6 +129,15 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 		}
 	}
 
+	my $brakets = $ciAnnotations{"CollectBrakets"};
+	$x = scalar(@$brakets);
+	if ($x > 0) {
+		print "|$n| has $x CollectBrakets lines\n";
+		if ($postprocess) {
+			runCollectBrakets($n, $brakets, \%submit);
+		}
+	}
+
 	my $metts = $ciAnnotations{"metts"};
 	$x = scalar(@$metts);
 	if ($x > 0) {
@@ -195,6 +205,31 @@ sub runTimeInSituObs
 			timeObservablesInSitu::main($site, $label, $fin, $fout);
 		} else {
 			print STDERR "|$n|: Dry run $site $label\n";
+		}
+
+		close($fin);
+		close($fout);
+	}
+}
+
+sub runCollectBrakets
+{
+	my ($n,$what,$submit) = @_;
+	my $whatN = scalar(@$what);
+	for (my $i = 0; $i < $whatN; ++$i) {
+		my $file = "runForinput$n.cout";
+		if (!(-r "$file")) {
+			print STDERR "|$n|: WARNING: $file not readable\n";
+			next;
+		}
+
+		#my @temp = split(/ /, $what->[$i]); # arguments ot CollectBrakets
+		my $foutname = "CollectBrakets${n}_$i.txt";
+		
+		if ($submit->{"command"} ne "") {
+			CollectBrakets::main($file, $foutname);
+		} else {
+			print STDERR "|$n|: Dry run $file $foutname\n";
 		}
 	}
 }
