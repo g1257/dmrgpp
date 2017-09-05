@@ -187,55 +187,6 @@ sub combineAllDrivers
 	return $buffer;
 }
 
-sub tryWith
-{
-	my ($stringToTest) = @_;
-	my $tmpfile = `mktemp XXXXXXXXXX.cpp`;
-	open(FOUT,">$tmpfile") or return 1;
-	print FOUT "int main() {}\n";
-	close(FOUT);
-	chomp($tmpfile);
-	my $ret = open(PIPE,"g++ $tmpfile $stringToTest  2>&1 | ");
-	if (!$ret) {
-	 	system("rm -f $tmpfile");
-		return 1;
-	}
-	my $buffer = "";
-	while(<PIPE>) {
-		$buffer .= $_;
-	}
-	close(PIPE);
-	system("rm -f $tmpfile");
-	$buffer =~ s/ //;
-	$ret = ($buffer eq "" or $buffer eq "\n") ? 0 : 1;
-	return $ret;
-}
-
-sub gccVersion
-{
-	my $version = 4.1;
-	open(PIPE,"gcc --version |") or return $version;
-	while (<PIPE>) {
-		if (/^gcc +\([^\)]+\) +([^ ]+)/) {
-			$version = $1;
-			last;
-		}
-	}
-
-	close(PIPE);
-
-	my @temp = split(/\./,$version);
-	my $n = scalar(@temp);
-	my $factor = 1.0;
-	$version = 0;
-	for (my $i = 0; $i < $n; ++$i) {
-		$version += $temp[$i]*$factor;
-		$factor *= 0.1;
-	}
-
-	return $version;
-}
-
 sub psimagLiteLibMake
 {
 	print STDERR "$0: Make sure to compile PsimagLite/lib first\n";
@@ -289,8 +240,8 @@ sub createConfigMake
 		return;
 	}
 
-	open(FILE, $flavor) or return;
-	if (!open(FOUT, ">> Config.make.new")) {
+	open(FILE, "<", $flavor) or return;
+	if (!open(FOUT, ">>", "Config.make.new")) {
 		close(FILE);
 		return;
 	}
@@ -330,18 +281,6 @@ sub createConfigMake
 	$cmd = "mv Config.make.new Config.make";
 	system($cmd);
 	print STDERR "$0: Written Config.make\n";
-}
-
-sub isMacOs
-{
-	open(PIPE, "uname |") or return 0;
-	my $flag = 0;
-	while (<PIPE>) {
-		$flag = 1 if (/darwin/i);
-	}
-
-	close(PIPE);
-	return $flag;
 }
 
 1;
