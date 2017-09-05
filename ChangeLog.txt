@@ -1,5 +1,11 @@
 https://github.com/g1257/dmrgpp/commits/master
 
+2017-09-05 Version 4.56
+
+* bug fix: braket names for NGSTs
+
+* tests 4600 and 4601 added
+
 2017-08-28 Version 4.54
 
 * Targetting common: printing fixed
