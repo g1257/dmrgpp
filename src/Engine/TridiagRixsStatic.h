@@ -124,7 +124,7 @@ class TridiagRixsStatic {
 		template<typename SomeVectorType>
 		void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y) const
 		{
-			this->matrixVectorProduct(x, y);
+			BasisType::matrixVectorProduct(x, y);
 			// add here x += Ay
 			x2_.setDataInSector(x,0);
 			y2_.setDataInSector(y,0);
