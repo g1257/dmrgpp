@@ -294,7 +294,6 @@ private:
 			if (this->common().targetVectors(i).size() != 0) {
 				if (stage_ != STAGE_STATIC2) stage_ = STAGE_STATIC1;
 				counter++;
-				break;
 			}
 		}
 

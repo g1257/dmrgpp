@@ -241,10 +241,10 @@ public:
 	           const PsimagLite::Vector<PsimagLite::String>::Type& vec,
 	           SizeType line) const
 	{
-		if (label=="JMVALUES") {
+		if (label=="JMVALUES" || label=="RS:JMVALUES") {
 			if (vec.size()!=2) return error1("JMVALUES",line);
 			return true;
-		} else if (label=="RAW_MATRIX" || label == "SpinOrbit") {
+		} else if (label=="RAW_MATRIX" || label=="RS:RAW_MATRIX" || label == "SpinOrbit") {
 			if (!checkForMatrix(vec)) return error1(label,line);
 			return true;
 		} else if (label=="Connectors") {
