@@ -166,14 +166,14 @@ private:
 		PsimagLite::String envReadFile = "/dev/null";
 
 		{
-			MemoryStackType systemStackCopy = checkpoint_.memoryStack(SYSTEM);
+			MemoryStackType systemStackCopy(checkpoint_.memoryStack(SYSTEM));
 			DiskStackType systemDiskTemp(sysReadFile,sysWriteFile,false,isObserveCode);
 			files_.push_back(sysWriteFile);
 			CheckpointType::loadStack(systemDiskTemp,systemStackCopy);
 		}
 
 		{
-			MemoryStackType envStackCopy = checkpoint_.memoryStack(ENVIRON);
+			MemoryStackType envStackCopy(checkpoint_.memoryStack(ENVIRON));
 			DiskStackType envDiskTemp(envReadFile,envWriteFile,false,isObserveCode);
 			files_.push_back(envWriteFile);
 			CheckpointType::loadStack(envDiskTemp,envStackCopy);

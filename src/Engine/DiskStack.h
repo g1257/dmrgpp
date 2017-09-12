@@ -132,6 +132,8 @@ public:
 
 	static bool persistent() { return true; }
 
+	bool inDisk() const { return true; }
+
 	void push(DataType const &d)
 	{
 		ioOut_.open(fileOut_,std::ios_base::app);
@@ -157,12 +159,38 @@ public:
 
 	SizeType size() const { return stack_.size(); }
 
-	template<typename DataType_>
-	friend std::ostream& operator<<(std::ostream& os,const DiskStack<DataType_>& ds);
+	friend void copyDiskToDisk(DiskStack& dest, const DiskStack& src)
+	{
+		dest.isObserveCode_ = src.isObserveCode_;
+		dest.total_ = src.total_;
+		dest.stack_ = src.stack_;
+		// copy src.fileIn_ --> dest.fileIn_
+		myCopy(src.fileIn_, dest.fileIn_);
+		// copy src.fileOut_ --> dest.fileOut_
+		myCopy(src.fileOut_, dest.fileOut_);
+	}
+
+	friend std::ostream& operator<<(std::ostream& os,
+	                                const DiskStack& ds)
+	{
+		os<<"DISKSTACK: filein: "<<ds.fileIn_<<" fileout="<<ds.fileOut_<<"\n";
+		os<<"total="<<ds.total_<<"\n";
+		os<<ds.stack_;
+		return os;
+	}
 
 private:
 
-	PsimagLite::String fileIn_,fileOut_;
+	static void myCopy(PsimagLite::String src, PsimagLite::String dest)
+	{
+		std::ifstream  src2(src.c_str(), std::ios::binary);
+		std::ofstream  dst2(dest.c_str(), std::ios::binary);
+
+		dst2 << src2.rdbuf();
+	}
+
+	PsimagLite::String fileIn_;
+	PsimagLite::String fileOut_;
 	bool isObserveCode_;
 	int total_;
 	PsimagLite::ProgressIndicator progress_;
@@ -171,14 +199,6 @@ private:
 	PsimagLite::Stack<int>::Type stack_;
 }; // class DiskStack
 
-template<typename DataType>
-std::ostream& operator<<(std::ostream& os,const DiskStack<DataType>& ds)
-{
-	os<<"DISKSTACK: filein: "<<ds.fileIn_<<" fileout="<<ds.fileOut_<<"\n";
-	os<<"total="<<ds.total_<<"\n";
-	os<<ds.stack_;
-	return os;
-}
 } // namespace DMrg
 
 #endif

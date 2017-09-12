@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DiskStack.h"
 #include "ProgressIndicator.h"
 #include "ProgramGlobals.h"
+#include "BaseStack.h"
 
 namespace Dmrg {
 
@@ -102,7 +103,7 @@ public:
 	typedef typename ModelType::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-	typedef typename PsimagLite::Stack<BasisWithOperatorsType>::Type MemoryStackType;
+	typedef BaseStack<BasisWithOperatorsType> MemoryStackType;
 	typedef DiskStack<BasisWithOperatorsType>  DiskStackType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -119,6 +120,8 @@ public:
 	    parameters_(parameters),
 	    enabled_(parameters_.options.find("checkpoint")!=PsimagLite::String::npos ||
 	        parameters_.options.find("restart")!=PsimagLite::String::npos),
+	    systemStack_(parameters_.options.find("diskstacks")!=PsimagLite::String::npos),
+	    envStack_(parameters_.options.find("diskstacks")!=PsimagLite::String::npos),
 	    systemDisk_(utils::pathPrepend(SYSTEM_STACK_STRING,parameters_.checkpoint.filename),
 	                utils::pathPrepend(SYSTEM_STACK_STRING,parameters_.filename),
 	                enabled_,
@@ -255,6 +258,11 @@ public:
 		}
 	}
 
+	static void loadStack(DiskStackType& stackInMemory,DiskStackType& stackInDisk)
+	{
+		copyDiskToDisk(stackInMemory, stackInDisk);
+	}
+
 	const ParametersType& parameters() const { return parameters_; }
 
 	const RealType& energy() const { return energyFromFile_; }
@@ -365,7 +373,7 @@ private:
 	{
 		thisStack.pop();
 		assert(thisStack.size() > 0);
-		BasisWithOperatorsType& basisWithOps =  thisStack.top();
+		BasisWithOperatorsType basisWithOps =  thisStack.top();
 		// only updates the extreme sites:
 		target.updateOnSiteForCorners(basisWithOps);
 		return basisWithOps;
@@ -405,7 +413,8 @@ private:
 
 	const ParametersType& parameters_;
 	bool enabled_;
-	MemoryStackType systemStack_,envStack_; // <--we're the owner
+	MemoryStackType systemStack_;
+	MemoryStackType envStack_;
 	DiskStackType systemDisk_,envDisk_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType energyFromFile_;
