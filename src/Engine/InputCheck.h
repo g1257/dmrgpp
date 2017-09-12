@@ -330,6 +330,8 @@ public:
 			\item [KronNoLoadBalance] Disable load balancing for MatrixVectorKron
 			\item [setAffinities] TBW
 			\item [wftInPatches] WFT calculation will be done using symmetry patches
+			\item [diskstacks] Save and load stacks used for shrinking to and from disk,
+			                   instead of to and from memory
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,const PsimagLite::String& val,SizeType)
@@ -385,6 +387,7 @@ public:
 		registerOpts.push_back("KronNoLoadBalance");
 		registerOpts.push_back("setAffinities");
 		registerOpts.push_back("wftInPatches");
+		registerOpts.push_back("diskstacks");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);

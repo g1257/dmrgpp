@@ -9,6 +9,7 @@ template<typename DataType>
 class BaseStack {
 
 	typedef DiskStack<DataType> DiskStackType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 public:
 
@@ -16,7 +17,9 @@ public:
 	    : m_(!disk), diskStack_(0)
 	{
 		if (m_) return;
-		diskStack_ = new DiskStackType(tmpFname(), tmpFname(),false,true);
+		PsimagLite::String tmpfname = tmpFname();
+		files_.push_back(tmpfname);
+		diskStack_ = new DiskStackType(tmpfname, tmpfname, false, false);
 	}
 
 	BaseStack(const BaseStack& other)
@@ -30,12 +33,16 @@ public:
 		if (other.diskStack_ == 0)
 			err("other.diskStack_ pointer is 0\n");
 
-		diskStack_ = new DiskStackType(tmpFname(), tmpFname(),false,true);
+		PsimagLite::String tmpfname = tmpFname();
+		files_.push_back(tmpfname);
+		diskStack_ = new DiskStackType(tmpfname, tmpfname, false, false);
 		copyDiskToDisk(*diskStack_, *(other.diskStack_));
 	}
 
 	~BaseStack()
 	{
+		deleteFiles();
+
 		delete diskStack_;
 		diskStack_ = 0;
 	}
@@ -87,11 +94,22 @@ private:
 		return PsimagLite::String(templ);
 	}
 
+	void deleteFiles()
+	{
+		for (SizeType i = 0; i < files_.size(); ++i) {
+			int x = unlink(files_[i].c_str());
+			if (x == 0) continue;
+			std::cerr<<"unlink "<<files_[i]<<" failed\n";
+			std::cerr<<strerror(errno)<<"\n";
+		}
+	}
+
 	BaseStack& operator=(const BaseStack&);
 
 	bool m_;
 	typename PsimagLite::Stack<DataType>::Type stack_;
 	DiskStackType* diskStack_;
+	VectorStringType files_;
 };
 }
 #endif // BASESTACK_H
