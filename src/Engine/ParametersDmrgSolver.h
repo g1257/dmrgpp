@@ -130,6 +130,7 @@ struct ParametersDmrgSolver {
 	typedef ParametersDmrgSolver<FieldType, InputValidatorType> ThisType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorFieldType;
+	typedef PsimagLite::Matrix<FieldType> MatrixFieldType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef std::pair<FieldType, SizeType> PairRealSizeType;
 	typedef typename PsimagLite::Vector<FiniteLoop>::Type VectorFiniteLoopType;
@@ -184,7 +185,7 @@ struct ParametersDmrgSolver {
 	      maxMatrixRankStored(0),
 	      excited(0),
 	      dumperBegin(0),
-		  dumperEnd(0),
+	      dumperEnd(0),
 	      precision(6),
 	      recoverySave("0"),
 	      degeneracyMax(1e-12),
@@ -346,9 +347,15 @@ struct ParametersDmrgSolver {
 	static void readFiniteLoops(SomeInputType& io,
 	                            VectorFiniteLoopType& vfl)
 	{
-		VectorFieldType tmpVec;
-		io.read(tmpVec,"FiniteLoops");
-		readFiniteLoops_(io,vfl,tmpVec);
+		if (io.version() < io.versionAinur()) {
+			VectorFieldType tmpVec;
+			io.read(tmpVec,"FiniteLoops");
+			readFiniteLoops_(io,vfl,tmpVec);
+		} else {
+			MatrixFieldType tmpMat;
+			io.readMatrix(tmpMat,"FiniteLoops");
+			readFiniteLoops_(io,vfl,tmpMat);
+		}
 	}
 
 	template<typename SomeInputType>
@@ -365,6 +372,26 @@ struct ParametersDmrgSolver {
 			vfl.push_back(fl);
 		}
 
+		readFiniteLoops_(io, vfl);
+	}
+
+	template<typename SomeInputType>
+	static void readFiniteLoops_(SomeInputType& io,
+	                             VectorFiniteLoopType& vfl,
+	                             const MatrixFieldType& tmpMat)
+	{
+		for (SizeType i = 0; i < tmpMat.rows(); ++i) {
+			FiniteLoop fl(tmpMat(i,0), tmpMat(i,1), tmpMat(i,2));
+			vfl.push_back(fl);
+		}
+
+		readFiniteLoops_(io, vfl);
+	}
+
+	template<typename SomeInputType>
+	static void readFiniteLoops_(SomeInputType& io,
+	                             VectorFiniteLoopType& vfl)
+	{
 		SizeType repeat = 0;
 
 		try {
