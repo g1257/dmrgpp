@@ -121,19 +121,36 @@ private:
 		return it - keys_.begin();
 	}
 
+
 	template<typename T>
-	void convertInternal(T& t, String value) const
+	void convertInternal(T& t,
+	                     String value,
+	                     typename EnableIf<!Loki::TypeTraits<T>::isIntegral, int>::Type = 0) const
 	{
 		err("convertInternal generic type value = " + value + "\n");
 	}
 
-	void convertInternal(SizeType& t, String label) const
+	template<typename T>
+	void convertInternal(Matrix<T>& t,
+	                     String value,
+	                     typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0) const;
+
+	template<typename T>
+	void convertInternal(T& t,
+	                     String label,
+	                     typename EnableIf<Loki::TypeTraits<T>::isIntegral, int>::Type = 0) const
 	{
 		t = atoi(label.c_str());
 	}
 
 	void convertInternal(String& t, String label) const
 	{
+		SizeType l = label.size();
+		if (l > 1 && label[0] == '"' && label[l - 1] == '"') {
+			t = (l == 2) ? "" : label.substr(1,l - 2);
+			return;
+		}
+
 		t = label;
 	}
 

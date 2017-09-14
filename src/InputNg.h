@@ -500,6 +500,8 @@ public:
 
 		void rewind() {}
 
+		double versionAinur() const { return 2.5; }
+
 		double version() const { return (ainur_) ?  3. : 2.; }
 
 		void printUnused(std::ostream& os) const
