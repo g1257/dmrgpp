@@ -62,7 +62,7 @@ public:
 	template<typename SomeType>
 	void readValue(SomeType& t, String label) const
 	{
-		state_.readValue(t, label);
+		state_.readValue(t, dummy_ + label);
 	}
 
 private:

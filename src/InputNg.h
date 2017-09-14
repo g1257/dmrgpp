@@ -519,7 +519,7 @@ public:
 
 		const String& prefix() const
 		{
-			return (ainur_) ? ainur_->prefix() : dummy_;
+			return (ainur_) ? ainur_->prefix() : "";
 		}
 
 		void readline(String& val,

@@ -13,7 +13,7 @@ class AinurState {
 	//enum SubTypeEnum {UNDEFINED, INTEGER, REAL, COMPLEX, STRING, CHAR, GROUP};
 
 	typedef Vector<String>::Type VectorStringType;
-//	typedef Vector<TypeEnum>::Type VectorTypeEnumType;
+	//	typedef Vector<TypeEnum>::Type VectorTypeEnumType;
 
 public:
 
@@ -125,20 +125,35 @@ private:
 	template<typename T>
 	void convertInternal(T& t,
 	                     String value,
-	                     typename EnableIf<!Loki::TypeTraits<T>::isIntegral, int>::Type = 0) const
+	                     typename EnableIf<!Loki::TypeTraits<T>::isIntegral,
+	                     int>::Type = 0) const
 	{
 		err("convertInternal generic type value = " + value + "\n");
 	}
 
 	template<typename T>
+	void convertInternal(std::vector<T>& t,
+	                     String value,
+	                     typename EnableIf<Loki::TypeTraits<T>::isArith,
+	                     int>::Type = 0) const;
+
+	template<typename T>
+	void convertInternal(std::vector<std::complex<T> >& t,
+	                     String value,
+	                     typename EnableIf<Loki::TypeTraits<T>::isArith,
+	                     int>::Type = 0) const;
+
+	template<typename T>
 	void convertInternal(Matrix<T>& t,
 	                     String value,
-	                     typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0) const;
+	                     typename EnableIf<Loki::TypeTraits<T>::isArith,
+	                     int>::Type = 0) const;
 
 	template<typename T>
 	void convertInternal(T& t,
 	                     String label,
-	                     typename EnableIf<Loki::TypeTraits<T>::isIntegral, int>::Type = 0) const
+	                     typename EnableIf<Loki::TypeTraits<T>::isIntegral,
+	                     int>::Type = 0) const
 	{
 		t = atoi(label.c_str());
 	}

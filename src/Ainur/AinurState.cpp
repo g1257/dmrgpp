@@ -19,7 +19,8 @@ void AinurState::assign(String k, String v)
 template<typename T>
 void AinurState::convertInternal(Matrix<T>& t,
                                  String value,
-                                 typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type) const
+                                 typename EnableIf<Loki::TypeTraits<T>::isArith,
+                                 int>::Type) const
 {
 	namespace qi = boost::spirit::qi;
 	typedef std::string::iterator IteratorType;
@@ -58,8 +59,47 @@ void AinurState::convertInternal(Matrix<T>& t,
 	}
 }
 
-template
-void AinurState::convertInternal(Matrix<double>& t,
-String value,
-int) const;
+template<typename T>
+void AinurState::convertInternal(std::vector<T>& t,
+                                 String value,
+                                 typename EnableIf<Loki::TypeTraits<T>::isArith,
+                                 int>::Type) const
+{
+	namespace qi = boost::spirit::qi;
+	typedef std::string::iterator IteratorType;
+	typedef std::vector<T> LocalVectorType;
+
+	IteratorType it = value.begin();
+	qi::rule<IteratorType, LocalVectorType(), qi::space_type> ruRows =
+	        "[" >> -(qi::double_ % ",") >> "]";
+
+	//LocalVectorType data;
+	bool r = qi::phrase_parse(it,
+	                          value.end(),
+	                          ruRows,
+	                          qi::space,
+	                          t);
+
+	//check if we have a match
+	std::cerr << "matched: " << std::boolalpha << r << '\n';
+	if (it != value.end())
+		std::cerr << "unmatched part exists\n";
+}
+
+template<typename T>
+void AinurState::convertInternal(std::vector<std::complex<T> >& t,
+                                 String value,
+                                 typename EnableIf<Loki::TypeTraits<T>::isArith,
+                                 int>::Type) const
+{
+	err("Ainur: Reading vector of complex is not supported yet (sorry)\n");
+}
+
+template void AinurState::convertInternal(Matrix<double>&,String, int) const;
+
+template void AinurState::convertInternal(std::vector<double>&, String, int) const;
+template void AinurState::convertInternal(std::vector<SizeType>&, String, int) const;
+
+template void AinurState::convertInternal(std::vector<std::complex<double> >&,
+String, int) const;
 } // namespace PsimagLite
