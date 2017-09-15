@@ -66,13 +66,32 @@ void AinurState::assign(String k, String v)
 }
 
 template <typename T>
-template <typename A, typename ContextType> void
-//typename EnableIf<TypesEqual<A,T>::True,void>::Type
+template <typename A, typename ContextType>
+typename EnableIf<!TypesEqual<std::vector<std::vector<T> >, A>::True,void>::Type
 AinurState::ActionMatrix<T>::operator()(A& attr,
-                                  ContextType&,
-                                  bool&) const
+                                        ContextType&,
+                                        bool&) const
 {
-	err("Action Matrix\n");
+	err("Ainur: Not sure how to handle this\n");
+}
+
+template <typename T>
+template <typename A, typename ContextType>
+typename EnableIf<TypesEqual<std::vector<std::vector<T> >, A>::True,void>::Type
+AinurState::ActionMatrix<T>::operator()(A& attr,
+                                        ContextType&,
+                                        bool&) const
+{
+	SizeType rows = attr.size();
+	if (rows == 0) return;
+	SizeType cols = attr[0].size();
+	t_.resize(rows, cols);
+	for (SizeType i = 0; i < rows; ++i) {
+		if (attr[i].size() != cols)
+			err("Ainur: Problem reading matrix\n");
+		for (SizeType j = 0; j < cols; ++j)
+			t_(i, j) = attr[i][j];
+	}
 }
 
 template <typename T>
@@ -82,6 +101,16 @@ AinurState::Action<T>::operator()(A& attr,
                                   ContextType&,
                                   bool&) const
 {
+	if (name_ == "elipsis") {
+		SizeType total = t_.size();
+		if (total == 0)
+			err("Elipsis cannot be used for this vector, because size is unknown\n");
+
+		for (SizeType i = 0; i < total; ++i)
+			t_[i] = attr;
+		return;
+	}
+
 	t_.push_back(attr);
 }
 
@@ -92,30 +121,7 @@ AinurState::Action<T>::operator()(A& attr,
                                   ContextType&,
                                   bool&) const
 {
-	if (true) {
-		std::cerr <<" ****************** Action name = "<<name_<<"\n";
-		std::cerr << "typeid(A).name() = " << typeid(A).name() << "\n";
-		std::cerr << "typeid(ContextType).name() = " << typeid(ContextType).name() << "\n";
-		//std::cout << "typeid(Locals).name()     = " << typeid(Locals).name() << "\n";
-
-		//std::cerr << "attributes: \n";
-		//boost::fusion::for_each(attr, myprint());
-
-		// std::cerr << "attr = "<<attr<<"\n";
-		//std::cout << "hit = "<<hit<<"\n";
-	}
-
 	t_ = attr;
-
-	//	if (name_ == "statement1") {
-	//		String v1 = boost::fusion::at_c<0>(attr);
-	//		String v2 = boost::fusion::at_c<1>(attr);
-	//		state_.assign(v1, v2);
-	//	} else if (name_ == "statement2") {
-	//		String v1 = boost::fusion::at_c<0>(attr);
-	//		String v2 = boost::fusion::at_c<1>(attr);
-	//		state_.declare(v1, v2);
-	//	}
 }
 
 template<typename T>
@@ -146,18 +152,18 @@ void AinurState::convertInternal(Matrix<T>& t,
 	if (it != value.end())
 		std::cerr << "matrix parsing: unmatched part exists\n";
 
-//	SizeType rows = data.size();
-//	if (rows == 0) return;
-//	SizeType cols = data[0].size();
-//	t.resize(rows, cols);
-//	for (SizeType i = 0; i < rows; ++i) {
-//		if (data[i].size() != cols)
-//			err("Error in matrix at row " + ttos(i) + "\n");
+	//	SizeType rows = data.size();
+	//	if (rows == 0) return;
+	//	SizeType cols = data[0].size();
+	//	t.resize(rows, cols);
+	//	for (SizeType i = 0; i < rows; ++i) {
+	//		if (data[i].size() != cols)
+	//			err("Error in matrix at row " + ttos(i) + "\n");
 
-//		for (SizeType j = 0; j < cols; ++j) {
-//			t(i,j) = data[i][j];
-//		}
-//	}
+	//		for (SizeType j = 0; j < cols; ++j) {
+	//			t(i,j) = data[i][j];
+	//		}
+	//	}
 }
 
 template<typename T>

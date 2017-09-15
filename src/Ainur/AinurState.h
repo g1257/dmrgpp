@@ -61,11 +61,17 @@ class AinurState {
 		    : name_(name), t_(t)
 		{}
 
-		template <typename A, typename ContextType> void
-		//typename EnableIf<!TypesEqual<A,T>::True,void>::Type
+		template <typename A, typename ContextType>
+		typename EnableIf<!TypesEqual<std::vector<std::vector<T> >, A>::True,void>::Type
 		operator()(A& attr,
-		           ContextType& context,
-		           bool& hit) const;
+		           ContextType&,
+		           bool&) const;
+
+		template <typename A, typename ContextType>
+		typename EnableIf<TypesEqual<std::vector<std::vector<T> >, A>::True,void>::Type
+		operator()(A& attr,
+		           ContextType&,
+		           bool&) const;
 
 	private:
 
