@@ -6,14 +6,72 @@
 
 namespace PsimagLite {
 
+template<typename T1, typename T2>
+struct TypesEqual {
+	enum {True = false};
+};
+
+template<typename T>
+struct TypesEqual<T, T> {
+	enum {True = true};
+};
+
+
 class AinurState {
 
-	//enum TypeEnum {UNKNOWN, SCALAR, VECTOR, MATRIX}; // HASH, FUNCTION
-
-	//enum SubTypeEnum {UNDEFINED, INTEGER, REAL, COMPLEX, STRING, CHAR, GROUP};
-
 	typedef Vector<String>::Type VectorStringType;
-	//	typedef Vector<TypeEnum>::Type VectorTypeEnumType;
+
+	struct myprint
+	{
+		template <typename T>
+		void operator()(const T &t) const
+		{
+			std::cout << " --------> " << t << '\n';
+		}
+	};
+
+	template<typename T>
+	struct Action {
+
+		Action(String name, std::vector<T>& t)
+		    : name_(name), t_(t)
+		{}
+
+		template <typename A, typename ContextType>
+		typename EnableIf<!TypesEqual<A,T>::True,void>::Type
+		operator()(A& attr,
+		           ContextType& context,
+		           bool& hit) const;
+
+		template <typename A, typename ContextType>
+		typename EnableIf<TypesEqual<A,T>::True,void>::Type
+		operator()(A& attr,
+		           ContextType&,
+		           bool&) const;
+	private:
+
+		String name_;
+		std::vector<T>& t_;
+	}; // struct Action
+
+	template<typename T>
+	struct ActionMatrix {
+
+		ActionMatrix(String name, Matrix<T>& t)
+		    : name_(name), t_(t)
+		{}
+
+		template <typename A, typename ContextType> void
+		//typename EnableIf<!TypesEqual<A,T>::True,void>::Type
+		operator()(A& attr,
+		           ContextType& context,
+		           bool& hit) const;
+
+	private:
+
+		String name_;
+		Matrix<T>& t_;
+	}; // struct ActionMatrix
 
 public:
 
