@@ -4,7 +4,7 @@ NumberOfTerms=1;
 DegreesOfFreedom=1;
 GeometryKind="chain";
 GeometryOptions="ConstantValues";
-Connectors=[1.0];
+dir0:Connectors=[1.0];
 
 #Model params
 hubbardU=[0.0, ...];
