@@ -403,6 +403,10 @@ struct ParametersDmrgSolver {
 			io.readline(fromFl,"RepeatFiniteLoopsFrom=");
 		}  catch (std::exception& e) {}
 
+		if (vfl.size() == 0) {
+			std::cerr<<"WARNING: No finite loops found\n";
+		}
+
 		SizeType upToFl = vfl.size()-1;
 		try {
 			io.readline(upToFl,"RepeatFiniteLoopsTo=");

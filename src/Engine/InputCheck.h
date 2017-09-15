@@ -233,6 +233,8 @@ public:
 		str += "integer Threads = 1;\n";
 		str += "integer Orbitals;\n";
 		str += "string FeAsMode;\n";
+		str += "integer TargetSpinTimesTwo;\n";
+		str += "integer UseSu2Symmetry;\n";
 
 		return str;
 	}
@@ -331,7 +333,7 @@ public:
 			\item [setAffinities] TBW
 			\item [wftInPatches] WFT calculation will be done using symmetry patches
 			\item [diskstacks] Save and load stacks used for shrinking to and from disk,
-			                   instead of to and from memory
+							   instead of to and from memory
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,const PsimagLite::String& val,SizeType)
