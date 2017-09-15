@@ -151,19 +151,6 @@ void AinurState::convertInternal(Matrix<T>& t,
 	std::cerr << "matrix parsing: matched: " << std::boolalpha << r << '\n';
 	if (it != value.end())
 		std::cerr << "matrix parsing: unmatched part exists\n";
-
-	//	SizeType rows = data.size();
-	//	if (rows == 0) return;
-	//	SizeType cols = data[0].size();
-	//	t.resize(rows, cols);
-	//	for (SizeType i = 0; i < rows; ++i) {
-	//		if (data[i].size() != cols)
-	//			err("Error in matrix at row " + ttos(i) + "\n");
-
-	//		for (SizeType j = 0; j < cols; ++j) {
-	//			t(i,j) = data[i][j];
-	//		}
-	//	}
 }
 
 template<typename T>
@@ -179,8 +166,6 @@ void AinurState::convertInternal(std::vector<T>& t,
 	IteratorType it = value.begin();
 	qi::rule<IteratorType, LocalVectorType(), qi::space_type> ruRows = ruleRows<T>();
 	qi::rule<IteratorType, T(), qi::space_type> ruElipsis = ruleElipsis<T>();
-
-	//SizeType oldSize = t.size();
 
 	Action<T> actionRows("rows", t);
 	Action<T> actionElipsis("elipsis", t);

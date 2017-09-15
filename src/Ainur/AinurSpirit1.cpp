@@ -92,7 +92,7 @@ Ainur::Ainur(String str)
 		std::cout<<"finished="<<finished<<" r= "<<r<<"\n";
 	}
 
-	if (!r) {
+	if (first != last && !allEmpty(first, last)) {
 		IteratorType e = (first + 10 < last) ? first + 10 : last;
 		err(AinurState::errLabel(AinurState::ERR_PARSE_FAILED,
 		                         String(first,e)));

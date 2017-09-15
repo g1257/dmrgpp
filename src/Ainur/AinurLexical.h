@@ -20,6 +20,11 @@ public:
 		}
 	}
 
+	bool static isEmptyChar(char c)
+	{
+		return 	(isWhitespace(c) || isEOL(c));
+	}
+
 private:
 
 	String getContext(String::const_iterator c,

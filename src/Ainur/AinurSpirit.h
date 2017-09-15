@@ -7,6 +7,7 @@
 #include <string>
 #include <fstream>
 #include "AinurState.h"
+#include "AinurLexical.h"
 
 namespace PsimagLite {
 
@@ -66,6 +67,16 @@ public:
 	}
 
 private:
+
+	static bool allEmpty(IteratorType first,IteratorType last)
+	{
+		for (IteratorType it = first + 1; it != last; ++it) {
+			if (AinurLexical::isEmptyChar(*it)) continue;
+			return false;
+		}
+
+		return true;
+	}
 
 	String dummy_;
 	AinurState state_;
