@@ -12,21 +12,6 @@ void Ainur::Action::operator()(A& attr,
                                ContextType&,
                                bool&) const
 {
-	bool verbose = AinurState::verbose();
-
-	if (verbose) {
-		std::cerr <<" ****************** Action name = "<<name_<<"\n";
-		std::cerr << "typeid(A).name() = " << typeid(A).name() << "\n";
-		std::cerr << "typeid(ContextType).name() = " << typeid(ContextType).name() << "\n";
-		//std::cout << "typeid(Locals).name()     = " << typeid(Locals).name() << "\n";
-
-		std::cerr << "attributes: \n";
-		boost::fusion::for_each(attr, myprint());
-
-		std::cerr << "attr = "<<attr<<"\n";
-		//std::cout << "hit = "<<hit<<"\n";
-	}
-
 	if (name_ == "statement1") {
 		String v1 = boost::fusion::at_c<0>(attr);
 		String v2 = boost::fusion::at_c<1>(attr);
@@ -82,18 +67,22 @@ Ainur::Ainur(String str)
 
 	IteratorType first = str.begin();
 	IteratorType last = str.end();
-	bool r = qi::phrase_parse(first,
-	                          last,
-	                          statement % ";",
-	                          AINUR_COMMENTS);
+	qi::phrase_parse(first,
+	                 last,
+	                 statement % ";",
+	                 AINUR_COMMENTS);
 
-	if (verbose) {
-		bool finished = (first != last);
-		std::cout<<"finished="<<finished<<" r= "<<r<<"\n";
-	}
+	++first;
+	if (first == last || allEmpty(first, last)) return;
 
-	if (first != last && !allEmpty(first, last)) {
-		IteratorType e = (first + 10 < last) ? first + 10 : last;
+	qi::parse(first,
+	          last,
+	          +('#' >> *(qi::char_ - qi::eol) >> qi::eol
+	            | qi::eol
+	            | qi::space));
+
+	if (first + 1 != last && !allEmpty(first, last)) {
+		IteratorType e = (first + 20 < last) ? first + 20 : last;
 		err(AinurState::errLabel(AinurState::ERR_PARSE_FAILED,
 		                         String(first,e)));
 	}

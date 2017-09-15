@@ -148,7 +148,9 @@ void AinurState::convertInternal(Matrix<T>& t,
 	                          qi::space);
 
 	//check if we have a match
-	std::cerr << "matrix parsing: matched: " << std::boolalpha << r << '\n';
+	if (!r)
+		err("matrix parsing failed\n");
+
 	if (it != value.end())
 		std::cerr << "matrix parsing: unmatched part exists\n";
 }
@@ -176,7 +178,9 @@ void AinurState::convertInternal(std::vector<T>& t,
 	                          qi::space);
 
 	//check if we have a match
-	std::cerr << "vector parsing: matched: " << std::boolalpha << r << '\n';
+	if (!r)
+		err("vector parsing failed\n");
+
 	if (it != value.end())
 		std::cerr << "vector parsing: unmatched part exists\n";
 }

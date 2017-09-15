@@ -70,7 +70,7 @@ private:
 
 	static bool allEmpty(IteratorType first,IteratorType last)
 	{
-		for (IteratorType it = first + 1; it != last; ++it) {
+		for (IteratorType it = first; it != last; ++it) {
 			if (AinurLexical::isEmptyChar(*it)) continue;
 			return false;
 		}
