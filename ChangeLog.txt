@@ -1,5 +1,14 @@
 https://github.com/g1257/dmrgpp/commits/master
 
+2017-09-20 Version 4.58
+
+* rixs static bug fixes
+
+* diskstacks option to store
+  stacks to disk and use less RAM
+
+* Ainur related changes and added samples
+
 2017-09-05 Version 4.56
 
 * bug fix: braket names for NGSTs
