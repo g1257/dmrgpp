@@ -210,11 +210,11 @@ public:
 
 		str += "vector hubbardU;\n";
 		str += "vector potentialV;\n";
-		str += "string Model;\n";
-		str += "string SolverOptions;\n";
-		str += "string Version;\n";
-		str += "integer InfiniteLoopKeptStates;\n";
-		str += "string OutputFile;\n";
+		str += "string! Model;\n";
+		str += "string! SolverOptions;\n";
+		str += "string! Version;\n";
+		str += "integer! InfiniteLoopKeptStates;\n";
+		str += "string! OutputFile;\n";
 		str += "matrix.integer FiniteLoops;\n";
 		str += "integer RepeatFiniteLoopsFrom;\n";
 		str += "integer RepeatFiniteLoopsTimes;\n";
@@ -231,7 +231,7 @@ public:
 		str += "string TSPOperator;\n";
 		str += "string OperatorExpression;\n";
 		str += "integer Threads = 1;\n";
-		str += "integer Orbitals;\n";
+		str += "integer Orbitals = 1;\n";
 		str += "string FeAsMode;\n";
 		str += "integer TargetSpinTimesTwo;\n";
 		str += "integer UseSu2Symmetry;\n";
