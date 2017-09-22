@@ -3,6 +3,7 @@
 #include "../Vector.h"
 #include <cassert>
 #include "../PsimagLite.h"
+#include <numeric>
 
 namespace PsimagLite {
 
@@ -19,6 +20,7 @@ struct TypesEqual<T, T> {
 
 class AinurState {
 
+	typedef Vector<SizeType>::Type VectorSizeType;
 	typedef Vector<String>::Type VectorStringType;
 
 	struct myprint
@@ -101,12 +103,48 @@ public:
 
 	void assign(String k, String v);
 
-	void declare(String d, String k)
+	void declare(String d, String k, String v)
 	{
 		assignStorageByName(k);
+		SizeType u = 1;
+		SizeType last = d.length();
+		assert(last > 0);
+		if (last > 1 && d[last - 1] == '!') {
+			u = 0;
+			d = d.substr(0,last - 1);
+		}
+
 		typesSpec_.push_back(d);
-		std::cerr<<"TYPE SPEC= "<<d<<"\n";
-		values_.push_back(ZERO_CHAR_STRING_);
+		values_.push_back(v);
+		used_.push_back(u);
+	}
+
+	void declare(String d, String k)
+	{
+		declare(d, k, ZERO_CHAR_STRING_);
+	}
+
+	void printUnused(std::ostream& os) const
+	{
+		SizeType n = used_.size();
+		bool flag = false;
+		for (SizeType i = 0; i < n; ++i) {
+			if (used_[i] > 0) continue;
+			flag = true;
+			break;
+		}
+
+		if (!flag) return;
+
+		os<<"Unused keys:\n";
+
+		if (n != keys_.size())
+			err("printUnused: internal error\n");
+
+		for (SizeType i = 0; i < n; ++i) {
+			if (used_[i] > 0) continue;
+			os<<keys_[i]<<"\n";
+		}
 	}
 
 	void printAll(std::ostream& os) const
@@ -130,6 +168,7 @@ public:
 
 		assert(static_cast<SizeType>(x) < typesSpec_.size());
 		convertInternal(t, val);
+		used_[x]++;
 	}
 
 	static bool verbose() { return false; }
@@ -242,6 +281,7 @@ private:
 	VectorStringType typesSpec_;
 	VectorStringType keys_;
 	VectorStringType values_;
+	mutable VectorSizeType used_;
 };
 
 }

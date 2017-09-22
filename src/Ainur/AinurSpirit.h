@@ -30,6 +30,23 @@ class Ainur {
 		AinurState& state_;
 	};
 
+	struct Action3 {
+
+		Action3(String name, AinurState& state)
+		    : name_(name), state_(state)
+		{}
+
+		template <typename A, typename ContextType>
+		void operator()(A& attr,
+		                ContextType& context,
+		                bool& hit) const;
+
+	private:
+
+		String name_;
+		AinurState& state_;
+	};
+
 	struct myprint
 	{
 		template <typename T>
@@ -52,7 +69,7 @@ public:
 
 	void printUnused(std::ostream& os) const
 	{
-		os<<"PRINT UNUSED\n";
+		state_.printUnused(os);
 	}
 
 	void printAll(std::ostream& os) const

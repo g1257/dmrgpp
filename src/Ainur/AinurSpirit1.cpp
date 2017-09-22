@@ -20,7 +20,20 @@ void Ainur::Action::operator()(A& attr,
 		String v1 = boost::fusion::at_c<0>(attr);
 		String v2 = boost::fusion::at_c<1>(attr);
 		state_.declare(v1, v2);
-	} // FIXME: deal with statement3
+	} else {
+		err("Ainur: bad action name " + name_ + "\n");
+	}
+}
+
+template <typename A, typename ContextType>
+void Ainur::Action3::operator()(A& attr,
+                                ContextType&,
+                                bool&) const
+{
+	String v1 = boost::fusion::at_c<0>(attr);
+	String v2 = boost::fusion::at_c<1>(attr);
+	String v3 = boost::fusion::at_c<2>(attr);
+	state_.declare(v1, v2, v3);
 }
 
 Ainur::Ainur(String str)
@@ -51,7 +64,7 @@ Ainur::Ainur(String str)
 	value %= qi::lexeme[+(qi::char_ - qi::char_(";"))];
 	aToZ = ascii::char_("a","z") | ascii::char_("A", "Z");
 	zeroToNine = ascii::char_("0","9");
-	typeQualifier %= +(aToZ | ascii::char_("."));
+	typeQualifier %= +(aToZ | ascii::char_(".") | ascii::char_("!"));
 	keywords = +aToZ >> *(ascii::char_("a","z")
 	                      | ascii::char_("A", "Z")
 	                      | ascii::char_("0","9")
@@ -62,7 +75,7 @@ Ainur::Ainur(String str)
 
 	Action action1("statement1", state_);
 	Action action2("statement2", state_);
-	Action action3("statement3", state_);
+	Action3 action3("statement3", state_);
 	statement %= statement3 [action3] | statement2 [action2] | statement1 [action1];
 
 	IteratorType first = str.begin();

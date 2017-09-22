@@ -198,11 +198,10 @@ public:
 	static String import()
 	{
 		String str("");
-		str += "integer DegreesOfFreedom;\n";
-		str += "string GeometryKind;\n";
-		str += "string GeometryOptions;\n";
-		str += "vector Connectors;\n";
-		str += "vector dir0:Connectors;\n";
+		str += "integer! DegreesOfFreedom;\n";
+		str += "string! GeometryKind;\n";
+		str += "string! GeometryOptions;\n";
+		str += "vector! dir0:Connectors;\n";
 		str += "vector dir1:Connectors;\n";
 		str += "integer LadderLeg;\n";
 //		str += "group gt0 = {\n";
