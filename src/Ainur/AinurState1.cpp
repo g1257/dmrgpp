@@ -116,12 +116,20 @@ AinurState::Action<T>::operator()(A& attr,
 
 template <typename T>
 template <typename A, typename ContextType>
-typename EnableIf<!TypesEqual<A,T>::True,void>::Type
+typename EnableIf<!TypesEqual<A,T>::True, void>::Type
 AinurState::Action<T>::operator()(A& attr,
                                   ContextType&,
                                   bool&) const
 {
 	t_ = attr;
+}
+
+template <typename A, typename ContextType>
+void AinurState::ActionCmplx::operator()(A& attr,
+                                         ContextType&,
+                                         bool&) const
+{
+	err("Do something here\n");
 }
 
 template<typename T>
@@ -191,7 +199,32 @@ void AinurState::convertInternal(std::vector<std::complex<T> >& t,
                                  typename EnableIf<Loki::TypeTraits<T>::isArith,
                                  int>::Type) const
 {
-	err("Ainur: Reading vector of complex is not supported yet (sorry)\n");
+	namespace qi = boost::spirit::qi;
+	typedef std::string::iterator IteratorType;
+	typedef std::vector<std::complex<T> > LocalVectorType;
+
+	IteratorType it = value.begin();
+	qi::rule<IteratorType, std::complex<T>, qi::space_type> cmplxN =
+	        qi::double_ >> -((qi::char_("+") | qi::char_("-")) >> qi::double_ >> "i");
+	qi::rule<IteratorType, LocalVectorType(), qi::space_type> ruRows =
+	        "[" >> -(cmplxN % ",") >> "]";
+	//	qi::rule<IteratorType, std::complex<T>(), qi::space_type> ruElipsis =
+	//	        ruleElipsis<std::complex<T> >();
+
+	Action<std::complex<T> > actionRows("rows", t);
+	//Action<std::complex<T> > actionElipsis("elipsis", t);
+
+	bool r = qi::phrase_parse(it,
+	                          value.end(),
+	                          ruRows [actionRows],// | ruElipsis[actionElipsis],
+	                          qi::space);
+
+	//check if we have a match
+	if (!r)
+		err("vector parsing failed\n");
+
+	if (it != value.end())
+		std::cerr << "vector parsing: unmatched part exists\n";
 }
 
 template void AinurState::convertInternal(Matrix<double>&,String, int) const;

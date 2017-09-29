@@ -22,6 +22,7 @@ class AinurState {
 
 	typedef Vector<SizeType>::Type VectorSizeType;
 	typedef Vector<String>::Type VectorStringType;
+	typedef std::complex<double> ComplexType;
 
 	struct myprint
 	{
@@ -32,6 +33,21 @@ class AinurState {
 		}
 	};
 
+	struct ActionCmplx {
+
+		ActionCmplx(String name, ComplexType& t)
+		    : name_(name), t_(t)
+		{}
+
+		template <typename A, typename ContextType>
+		void operator()(A& attr,
+		                ContextType&,
+		                bool&) const;
+
+		String name_;
+		ComplexType& t_;
+	};
+
 	template<typename T>
 	struct Action {
 
@@ -40,16 +56,17 @@ class AinurState {
 		{}
 
 		template <typename A, typename ContextType>
-		typename EnableIf<!TypesEqual<A,T>::True,void>::Type
+		typename EnableIf<TypesEqual<A,T>::True, void>::Type
+		operator()(A& attr,
+		           ContextType&,
+		           bool&) const;
+
+		template <typename A, typename ContextType>
+		typename EnableIf<!TypesEqual<A,T>::True, void>::Type
 		operator()(A& attr,
 		           ContextType& context,
 		           bool& hit) const;
 
-		template <typename A, typename ContextType>
-		typename EnableIf<TypesEqual<A,T>::True,void>::Type
-		operator()(A& attr,
-		           ContextType&,
-		           bool&) const;
 	private:
 
 		String name_;
@@ -228,7 +245,8 @@ private:
 	template<typename T>
 	void convertInternal(T& t,
 	                     String value,
-	                     typename EnableIf<!Loki::TypeTraits<T>::isIntegral,
+	                     typename EnableIf<!Loki::TypeTraits<T>::isIntegral
+	                     && !Loki::TypeTraits<T>::isFloat,
 	                     int>::Type = 0) const
 	{
 		err("convertInternal generic type value = " + value + "\n");
@@ -259,6 +277,15 @@ private:
 	                     int>::Type = 0) const
 	{
 		t = atoi(label.c_str());
+	}
+
+	template<typename T>
+	void convertInternal(T& t,
+	                     String label,
+	                     typename EnableIf<Loki::TypeTraits<T>::isFloat,
+	                     int>::Type = 0) const
+	{
+		t = atof(label.c_str());
 	}
 
 	void convertInternal(String& t, String label) const
