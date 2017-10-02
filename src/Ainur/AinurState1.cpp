@@ -201,17 +201,19 @@ void AinurState::convertInternal(std::vector<std::complex<T> >& t,
 {
 	namespace qi = boost::spirit::qi;
 	typedef std::string::iterator IteratorType;
-	typedef std::vector<std::complex<T> > LocalVectorType;
+	typedef std::complex<T> OneType;
+	typedef std::vector<OneType> LocalVectorType;
 
 	IteratorType it = value.begin();
-	qi::rule<IteratorType, std::complex<T>, qi::space_type> cmplxN =
-	        qi::double_ >> -((qi::char_("+") | qi::char_("-")) >> qi::double_ >> "i");
-	qi::rule<IteratorType, LocalVectorType(), qi::space_type> ruRows =
-	        "[" >> -(cmplxN % ",") >> "]";
+	qi::rule<IteratorType, OneType(), qi::space_type> cmplxN;
+	cmplxN %=  (qi::double_ >> qi::double_ >>  "i") | qi::double_;
+	qi::rule<IteratorType, LocalVectorType(), qi::space_type> ruRows;
+	ruRows %= "[" >> -(cmplxN  % ",") >> "]";
 	//	qi::rule<IteratorType, std::complex<T>(), qi::space_type> ruElipsis =
 	//	        ruleElipsis<std::complex<T> >();
+//	LocalVectorType str;
 
-	Action<std::complex<T> > actionRows("rows", t);
+	Action<OneType> actionRows("rows", t);
 	//Action<std::complex<T> > actionElipsis("elipsis", t);
 
 	bool r = qi::phrase_parse(it,

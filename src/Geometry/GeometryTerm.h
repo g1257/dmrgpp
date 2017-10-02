@@ -198,39 +198,20 @@ public:
 	static String import()
 	{
 		String str("");
-		str += "integer! DegreesOfFreedom;\n";
-		str += "string! GeometryKind;\n";
-		str += "string! GeometryOptions;\n";
-		str += "vector! dir0:Connectors;\n";
-		str += "vector dir1:Connectors;\n";
-		str += "integer LadderLeg;\n";
-//		str += "group gt0 = {\n";
-//		str += "\t integer DegreesOfFreedom;\n";
-//		str += "\t string GeometryKind;\n";
-//		str += "\t string GeometryOptions;\n";
-//		str += "\t vector dir0:Connectors;\n";
-//		str += "\t vector dir1:Connectors;\n";
-//		str += "\t vector dir2:Connectors;\n";
-//		str += "\t vector dir3:Connectors;\n";
-//		str += "integer LadderLeg;}\n";
-//		str += "group gt1 = {\n";
-//		str += "\t integer DegreesOfFreedom;\n";
-//		str += "\t string GeometryKind;\n";
-//		str += "\t string GeometryOptions;\n";
-//		str += "\t vector dir0:Connectors;\n";
-//		str += "\t vector dir1:Connectors;\n";
-//		str += "\t vector dir2:Connectors;\n";
-//		str += "\t vector dir3:Connectors;\n";
-//		str += "integer LadderLeg;}\n";
-//		str += "group gt2 = {\n";
-//		str += "\t integer DegreesOfFreedom;\n";
-//		str += "\t string GeometryKind;\n";
-//		str += "\t string GeometryOptions;\n";
-//		str += "\t vector dir0:Connectors;\n";
-//		str += "\t vector dir1:Connectors;\n";
-//		str += "\t vector dir2:Connectors;\n";
-//		str += "\t vector dir3:Connectors;\n";
-//		str += "integer LadderLeg;}\n";
+
+		for (SizeType i = 0; i < 9; ++i) {
+			String istr = (i < 8) ? "gt" + ttos(i) + ":" : "";
+			str += "integer " + istr + "DegreesOfFreedom;\n";
+			str += "string " + istr + "GeometryKind;\n";
+			str += "string " + istr + "GeometryOptions;\n";
+			str += "integer " + istr + "LadderLeg;\n";
+			str += "integer " + istr + "LongChainDistance;\n";
+			for (SizeType j = 0; j < 9; ++j) {
+				String jstr = "dir" + ttos(j) + ":";
+				str += "vector " + istr + jstr + "Connectors;\n";
+			}
+		}
+
 		return str;
 	}
 
