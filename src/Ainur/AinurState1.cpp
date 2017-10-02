@@ -125,18 +125,31 @@ AinurState::Action<T>::operator()(A& attr,
 }
 
 template <typename A, typename ContextType>
-void AinurState::ActionCmplx::operator()(A& attr,
+typename EnableIf<TypesEqual<A, double>::True, void>::Type
+AinurState::ActionCmplx::operator()(A& attr,
                                          ContextType&,
                                          bool&) const
 {
-	typedef boost::fusion::vector2<double, double> PairOfDoublesType;
-	if (attr.which() == 0) {
-		PairOfDoublesType v = boost::get<PairOfDoublesType>(attr);
+	if (name_ == "rows2")
+		t_.push_back(std::complex<double>(0.0, attr));
+	else if (name_ == "rows3")
+		t_.push_back(attr);
+	else
+		err("Error parsing complex number\n");
+}
+
+template <typename A, typename ContextType>
+typename EnableIf<!TypesEqual<A, double>::True, void>::Type
+AinurState::ActionCmplx::operator()(A& attr,
+                                         ContextType&,
+                                         bool&) const
+{
+	if (name_ == "rows1") {
 		t_.push_back(std::complex<double>(
-		                 boost::fusion::at_c<0>(v),
-		                 boost::fusion::at_c<1>(v)));
+		                 boost::fusion::at_c<0>(attr),
+		                 boost::fusion::at_c<1>(attr)));
 	} else {
-		t_.push_back(boost::get<double>(attr));
+		err("Error parsing complex number\n");
 	}
 }
 
@@ -208,16 +221,19 @@ void AinurState::convertInternal(std::vector<std::complex<T> >& t,
                                  int>::Type) const
 { 
 	namespace qi = boost::spirit::qi;
-#define MY_COMPLEX (qi::double_ >> qi::double_ >>  "i") | qi::double_
+	ActionCmplx actionRows1("rows1", t);
+	ActionCmplx actionRows2("rows2", t);
+	ActionCmplx actionRows3("rows3", t);
+#define MY_COMPLEX (qi::double_ >> qi::double_ >>  "i") [actionRows1] | (qi::double_ >> "i") [actionRows2] | qi::double_ [actionRows3]
+
 	typedef BOOST_TYPEOF(MY_COMPLEX) OneType;
 	typedef std::string::iterator IteratorType;
 
-	ActionCmplx actionRows("rows", t);
 	IteratorType it = value.begin();
 
 
 	OneType cmplxN =  MY_COMPLEX;
-#define MY_V_OF_COMPLEX "[" >> (cmplxN [actionRows] % ",") >> "]"
+#define MY_V_OF_COMPLEX "[" >> -(cmplxN  % ",") >> "]"
 	typedef BOOST_TYPEOF(MY_V_OF_COMPLEX) ManyTypes;
 	ManyTypes ruRows = MY_V_OF_COMPLEX;
 	//	qi::rule<IteratorType, std::complex<T>(), qi::space_type> ruElipsis =

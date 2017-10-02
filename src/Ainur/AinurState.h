@@ -40,9 +40,17 @@ class AinurState {
 		{}
 
 		template <typename A, typename ContextType>
-		void operator()(A& attr,
+		typename EnableIf<TypesEqual<A, double>::True, void>::Type
+		operator()(A& attr,
 		                ContextType&,
 		                bool&) const;
+
+		template <typename A, typename ContextType>
+		typename EnableIf<!TypesEqual<A, double>::True, void>::Type
+		operator()(A& attr,
+		                ContextType&,
+		                bool&) const;
+
 
 		String name_;
 		std::vector<ComplexType>& t_;
