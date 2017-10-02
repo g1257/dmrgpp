@@ -129,7 +129,15 @@ void AinurState::ActionCmplx::operator()(A& attr,
                                          ContextType&,
                                          bool&) const
 {
-	err("Do something here\n");
+	typedef boost::fusion::vector2<double, double> PairOfDoublesType;
+	if (attr.which() == 0) {
+		PairOfDoublesType v = boost::get<PairOfDoublesType>(attr);
+		t_.push_back(std::complex<double>(
+		                 boost::fusion::at_c<0>(v),
+		                 boost::fusion::at_c<1>(v)));
+	} else {
+		t_.push_back(boost::get<double>(attr));
+	}
 }
 
 template<typename T>
@@ -198,27 +206,29 @@ void AinurState::convertInternal(std::vector<std::complex<T> >& t,
                                  String value,
                                  typename EnableIf<Loki::TypeTraits<T>::isArith,
                                  int>::Type) const
-{
+{ 
 	namespace qi = boost::spirit::qi;
+#define MY_COMPLEX (qi::double_ >> qi::double_ >>  "i") | qi::double_
+	typedef BOOST_TYPEOF(MY_COMPLEX) OneType;
 	typedef std::string::iterator IteratorType;
-	typedef std::complex<T> OneType;
-	typedef std::vector<OneType> LocalVectorType;
 
+	ActionCmplx actionRows("rows", t);
 	IteratorType it = value.begin();
-	qi::rule<IteratorType, OneType(), qi::space_type> cmplxN;
-	cmplxN %=  (qi::double_ >> qi::double_ >>  "i") | qi::double_;
-	qi::rule<IteratorType, LocalVectorType(), qi::space_type> ruRows;
-	ruRows %= "[" >> -(cmplxN  % ",") >> "]";
+
+
+	OneType cmplxN =  MY_COMPLEX;
+#define MY_V_OF_COMPLEX "[" >> (cmplxN [actionRows] % ",") >> "]"
+	typedef BOOST_TYPEOF(MY_V_OF_COMPLEX) ManyTypes;
+	ManyTypes ruRows = MY_V_OF_COMPLEX;
 	//	qi::rule<IteratorType, std::complex<T>(), qi::space_type> ruElipsis =
 	//	        ruleElipsis<std::complex<T> >();
-//	LocalVectorType str;
 
-	Action<OneType> actionRows("rows", t);
+
 	//Action<std::complex<T> > actionElipsis("elipsis", t);
 
 	bool r = qi::phrase_parse(it,
 	                          value.end(),
-	                          ruRows [actionRows],// | ruElipsis[actionElipsis],
+	                          ruRows,// | ruElipsis[actionElipsis],
 	                          qi::space);
 
 	//check if we have a match

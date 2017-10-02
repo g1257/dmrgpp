@@ -35,7 +35,7 @@ class AinurState {
 
 	struct ActionCmplx {
 
-		ActionCmplx(String name, ComplexType& t)
+		ActionCmplx(String name, std::vector<ComplexType>& t)
 		    : name_(name), t_(t)
 		{}
 
@@ -45,7 +45,7 @@ class AinurState {
 		                bool&) const;
 
 		String name_;
-		ComplexType& t_;
+		std::vector<ComplexType>& t_;
 	};
 
 	template<typename T>
