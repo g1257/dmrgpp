@@ -85,7 +85,7 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	}
 
 	my $brakets = $ciAnnotations{"CollectBrakets"};
-	my $x = scalar(@$brakets);
+	$x = scalar(@$brakets);
 	if ($x > 0) {
 		print "|$n| has $x CollectBrakets lines\n";
 		checkCollectBrakets($n, $brakets, $workdir, $golddir);
