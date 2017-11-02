@@ -517,7 +517,7 @@ public:
 			return (ainur_) ? ainur_->prefix() : dummy_;
 		}
 
-		const String& prefix() const
+		String prefix() const
 		{
 			return (ainur_) ? ainur_->prefix() : "";
 		}
