@@ -175,7 +175,7 @@ public:
 	{
 		os<<"DISKSTACK: filein: "<<ds.fileIn_<<" fileout="<<ds.fileOut_<<"\n";
 		os<<"total="<<ds.total_<<"\n";
-		os<<ds.stack_;
+		PsimagLite::operator<<(os,ds.stack_);
 		return os;
 	}
 

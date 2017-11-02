@@ -95,8 +95,7 @@ class TridiagRixsStatic {
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef typename LanczosSolverType::ParametersSolverType ParametersSolverType;
-	typedef ApplyOperatorLocal<LeftRightSuperType, VectorWithOffset<ComplexOrRealType> >
-	ApplyOperatorLocalType;
+	typedef ApplyOperatorLocal<LeftRightSuperType, VectorWithOffsetType> ApplyOperatorLocalType;
 	typedef typename VectorWithOffset<ComplexOrRealType>::VectorSizeType VectorSizeType;
 
 	class MyMatrixVector : public LanczosSolverType::LanczosMatrixType {
@@ -139,8 +138,8 @@ class TridiagRixsStatic {
 		ProgramGlobals::DirectionEnum dir_;
 		typename ApplyOperatorLocalType::BorderEnum corner_;
 		FermionSign fs_;
-		mutable VectorWithOffset<ComplexOrRealType> x2_;
-		mutable VectorWithOffset<ComplexOrRealType> y2_;
+		mutable VectorWithOffsetType x2_;
+		mutable VectorWithOffsetType y2_;
 	}; // class MyMatrixVector
 
 	typedef MyMatrixVector MyMatrixVectorType;
