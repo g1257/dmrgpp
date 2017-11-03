@@ -151,6 +151,8 @@ public:
 		return  site_;
 	}
 
+	SizeType numberOfVectors() const { return targetVectors_.size(); }
+
 	const VectorType& vector(SizeType i) const
 	{
 		if (i < targetVectors_.size())

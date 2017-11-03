@@ -232,7 +232,11 @@ public:
 		typename BaseType::IoInputType io(f);
 
 		TimeSerializerType ts(io,BaseType::IoInputType::LAST_INSTANCE);
-		SizeType numberOfSites = this->lrs().super().block().size();
+		SizeType n = ts.numberOfVectors();
+		if (n % 3 != 0)
+			err("TargetingRixsDynamic: number of TVs not divisible by 3\n");
+
+		SizeType numberOfSites = n/3;
 		for (SizeType site = 0; site < numberOfSites; ++site) {
 			this->common().targetVectors(2*site) = ts.vector(3*site + 1);
 			this->common().targetVectors(2*site + 1) = ts.vector(3*site + 2);
@@ -286,8 +290,6 @@ private:
 	void calcDynVectors(SizeType site,
 	                    ProgramGlobals::DirectionEnum direction)
 	{
-		VectorSizeType indexForOperators(this->common().targetVectors().size(), 0);
-		this->common().wftAll(indexForOperators, site, direction);
 		SizeType numberOfSites = this->lrs().super().block().size();
 		SizeType center = tstStruct_.sites(0);
 		skeleton_.calcDynVectors(this->common().targetVectors(2*center),
