@@ -138,7 +138,7 @@ public:
 
 		firstStage(O2gt,'N',i1,'N',i2,braket,0,1,threadId);
 
-		return secondStage(O2gt,i2,'N',i3,'N',i4,braket,2,3,threadId);
+		return secondStage(O2gt,i2,'C',i3,'C',i4,braket,2,3,threadId);
 	}
 
 	//! 3-point: these are expensive and uncached!!!

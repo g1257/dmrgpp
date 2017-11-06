@@ -183,20 +183,41 @@ private:
 
 		SizeType site = 0;
 
+//		// c(i1,orb1,spin0)
+//		PsimagLite::String str = "<gs|c[" + ttos(site) + "]?" + ttos(spin0) + ";";
+//		// SparseMatrixType O1 = model_.naturalOperator("c",site,spin0).data;
+//		// c(i2,orb2,1-spin0)
+//		str += "c[" + ttos(site) + "]?" + ttos(1 - spin0) + ";";
+//		//SparseMatrixType O2 = model_.naturalOperator("c",site,1-spin0).data;
+
+//		// c(i2,orb2,spin1)
+//		str += "c[" + ttos(site) + "]?" + ttos(spin1) + "';";
+//		// SparseMatrixType O3 = model_.naturalOperator("c",site,spin1).data;
+
+//		// c(i3,orb1,1-spin1)
+//		str += "c[" + ttos(site) + "]?" + ttos(1 - spin1) + "'|gs>";
+//		//SparseMatrixType O4 = model_.naturalOperator("c",site,1-spin1).data;
+
+
+
 		// c(i1,orb1,spin0)
-		PsimagLite::String str = "<gs|c[" + ttos(site) + "]?" + ttos(spin0) + ";";
+		PsimagLite::String str = "<gs|c?"+ ttos(spin0) + "[" + ttos(site) + "];";
 		// SparseMatrixType O1 = model_.naturalOperator("c",site,spin0).data;
 		// c(i2,orb2,1-spin0)
-		str += "c[" + ttos(site) + "]?" + ttos(1 - spin0) + ";";
+
+		str += "c?"+ ttos(1- spin0) + "[" + ttos(site) + "];";
 		//SparseMatrixType O2 = model_.naturalOperator("c",site,1-spin0).data;
 
 		// c(i2,orb2,spin1)
-		str += "c[" + ttos(site) + "]?" + ttos(spin1) + "';";
+		str += "c?"+ ttos(spin1) + "[" + ttos(site) + "];";
 		// SparseMatrixType O3 = model_.naturalOperator("c",site,spin1).data;
 
 		// c(i3,orb1,1-spin1)
-		str += "c[" + ttos(site) + "]?" + ttos(1 - spin1) + "'|gs>";
+
+		str += "c?"+ ttos(1 - spin1) + "[" + ttos(site) + "]|gs>";
 		//SparseMatrixType O4 = model_.naturalOperator("c",site,1-spin1).data;
+
+
 		SizeType val = spin0 + spin1 + 1;
 		int signTerm = (val & 1) ? sign : 1;
 		BraketType braket(model_, str);

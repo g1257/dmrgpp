@@ -705,7 +705,7 @@ private:
 		} else if (flag==2) {
 			SizeType orb1 = 0;
 			SizeType orb2 = 1;
-			SizeType orb3 = 1;
+			SizeType orb3 =	1;
 			SizeType orb4 = 0;
 			int sign = 1;
 			PsimagLite::String onsiteOrNot = "two";
@@ -1092,7 +1092,7 @@ private:
 		m1 = new MatrixType(rows,cols);
 		std::cout << "PairPair Correlations S^{lu}_{nn}" << std::endl;
 		names.push_back("S^{lu}_{nn}");
-		ppFour(*m1,0,1,1,0,onsiteOrNot,-1);
+		ppFour(*m1,0,1,0,1,onsiteOrNot,-1);
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
@@ -1109,15 +1109,15 @@ private:
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
-		std::cout << "PairPair Correlations T{^{u}_{nn}" << std::endl;
-		names.push_back("T{^{u}_{nn}");
+		std::cout << "PairPair Correlations T^{u}_{nn}" << std::endl;
+		names.push_back("T^{u}_{nn}");
 		ppFour(*m1,1,1,1,1,onsiteOrNot,1);
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
 		std::cout << "PairPair Correlations T^{lu}_{nn}" << std::endl;
 		names.push_back("T^{lu}_{nn}");
-		ppFour(*m1,0,1,1,0,onsiteOrNot,1);
+		ppFour(*m1,0,1,0,1,onsiteOrNot,1);
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
