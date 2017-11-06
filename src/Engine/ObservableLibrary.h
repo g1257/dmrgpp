@@ -407,7 +407,7 @@ private:
 			SizeType counter = 0;
 			for (SizeType i = 0; i < orbitals; ++i) {
 				for (SizeType j = i; j < orbitals; ++j) {
-					PsimagLite::String str = "<gs|+?" + ttos(i) + ";-?" + ttos(j) + "|gs>";
+					PsimagLite::String str = "<gs|splus?" + ttos(i) + ";sminus?" + ttos(j) + "|gs>";
 					BraketType braket(model_,str);
 					manyPoint(&sPlusSminus_[counter],braket,rows,cols);
 					MatrixType tSpThis = sPlusSminus_[counter];
@@ -455,7 +455,7 @@ private:
 			SizeType counter = 0;
 			for (SizeType i = 0; i < orbitals; ++i) {
 				for (SizeType j = i; j < orbitals; ++j) {
-					PsimagLite::String str = "<gs|-?" + ttos(i) + ";+?" + ttos(j) + "|gs>";
+					PsimagLite::String str = "<gs|sminus?" + ttos(i) + ";splus?" + ttos(j) + "|gs>";
 					BraketType braket(model_,str);
 					manyPoint(&sMinusSplus_[counter],braket,rows,cols);
 					MatrixType tSmThis = sMinusSplus_[counter];
