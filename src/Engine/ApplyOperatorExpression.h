@@ -399,8 +399,14 @@ public:
 	                  SizeType systemOrEnviron)
 	{
 
-		if (targetHelper_.tstStruct().aOperators().size() == 1
-		        || targetHelper_.tstStruct().concatenation() == DONT_MIX) {
+		bool guessOne = (targetHelper_.tstStruct().aOperators().size() == 1);
+		if (targetHelper_.tstStruct().concatenation() == DONT_MIX)
+			guessOne = true;
+
+		if (targetHelper_.tstStruct().concatenation() == TargetParamsType::DONT_APPLY)
+			guessOne = false;
+
+		if (guessOne) {
 			guessPhiSectors(phiNew,indexOfOperator,systemOrEnviron,site);
 		} else {
 			if (targetHelper_.tstStruct().useQns())

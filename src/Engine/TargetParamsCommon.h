@@ -166,6 +166,8 @@ public:
 			this->concatenation_ = BaseType::SUM;
 		} else if (productOrSum == "dontmix") {
 			this->concatenation_ = BaseType::DONT_MIX;
+		} else if (productOrSum == "dontapply") {
+			this->concatenation_ = BaseType::DONT_APPLY;
 		} else {
 			PsimagLite::String s(__FILE__);
 			s += " : Unknown concatentation " + productOrSum + "\n";
