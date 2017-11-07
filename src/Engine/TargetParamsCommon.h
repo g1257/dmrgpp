@@ -171,6 +171,7 @@ public:
 		} else {
 			PsimagLite::String s(__FILE__);
 			s += " : Unknown concatentation " + productOrSum + "\n";
+			s += "Possible values: product sum dontmix dontapply\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 

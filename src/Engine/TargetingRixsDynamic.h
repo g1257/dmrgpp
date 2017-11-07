@@ -246,6 +246,18 @@ public:
 		}
 
 		this->common().template load<TimeSerializerType>(f,0);
+		const VectorWithOffsetType& v = ts.vector(3);
+
+		for (SizeType i = 0; i < v.sectors(); ++i) {
+			SizeType m = v.sector(i);
+
+			PsimagLite::String str("PSI.QN." + ttos(m) + "=");
+			int x = 0;
+			io.readline(x, str);
+			if (x < 0)
+				err("TargetingRixsDynamic: PSI.QN. is negative\n");
+			 this->common().appendToNonZeroQns(x);
+		}
 	}
 
 private:

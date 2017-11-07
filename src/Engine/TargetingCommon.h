@@ -612,7 +612,17 @@ public:
 		return inSitu_[site];
 	}
 
+	void appendToNonZeroQns(SizeType qn)
+	{
+		applyOpExpression_.appendToNonZeroQns(qn);
+	}
+
 private:
+
+	void setQuantumNumbers(const VectorWithOffsetType& v)
+	{
+		applyOpExpression_.setQuantumNumbers(v);
+	}
 
 	void noCocoon(const PsimagLite::String& msg) const
 	{

@@ -440,7 +440,24 @@ public:
 		}
 	}
 
+	void appendToNonZeroQns(SizeType qn)
+	{
+		nonZeroQns_.push_back(qn);
+	}
+
 private:
+
+	void setQuantumNumbers(const VectorWithOffsetType& v)
+	{
+		nonZeroQns_.clear();
+		assert(v.size()==targetHelper_.lrs().super().size());
+		for (SizeType i=0;i<v.sectors();i++) {
+			SizeType i0 = v.sector(i);
+			SizeType state = v.offset(i0);
+			SizeType qn = targetHelper_.lrs().super().qn(state);
+			nonZeroQns_.push_back(qn);
+		}
+	}
 
 	void checkOrder(SizeType i) const
 	{
@@ -658,18 +675,6 @@ private:
 		              fs,
 		              systemOrEnviron,
 		              ApplyOperatorType::BORDER_NO);
-	}
-
-	void setQuantumNumbers(const VectorWithOffsetType& v)
-	{
-		nonZeroQns_.clear();
-		assert(v.size()==targetHelper_.lrs().super().size());
-		for (SizeType i=0;i<v.sectors();i++) {
-			SizeType i0 = v.sector(i);
-			SizeType state = v.offset(i0);
-			SizeType qn = targetHelper_.lrs().super().qn(state);
-			nonZeroQns_.push_back(qn);
-		}
 	}
 
 	PsimagLite::ProgressIndicator progress_;
