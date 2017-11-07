@@ -88,17 +88,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 // FIXME: a more generic solution is needed instead of tying
 // the non-zero structure to basis
 namespace Dmrg {
-template<typename FieldType>
+template<typename ComplexOrRealType>
 class VectorWithOffsets {
-	typedef VectorWithOffsets<FieldType> ThisType;
-	static FieldType const zero_;
+
+	typedef VectorWithOffsets<ComplexOrRealType> ThisType;
+	static ComplexOrRealType const zero_;
 
 public:
 
-	typedef FieldType value_type;
-	typedef typename PsimagLite::Real<FieldType>::Type RealType;
-	typedef std::pair<SizeType,SizeType> PairType;
-	typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
+	typedef ComplexOrRealType value_type;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	typedef std::pair<SizeType,SizeType> PairSizeType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 
 	VectorWithOffsets()
 	    : progress_("VectorWithOffsets"),size_(0),index2Sector_(0)
@@ -117,10 +118,12 @@ public:
 			data_[i].resize(weights[i]);
 			offsets_[i] = someBasis.partition(i);
 			if (weights[i]>0) {
-				nonzeroSectors_.push_back(i);
+				SizeType qn = someBasis.pseudoEffectiveNumber(offsets_[i]);
+				nzMsAndQns_.push_back(PairSizeType(i,qn));
 				//firstSector_ = i;
 			}
 		}
+
 		offsets_[weights.size()]=size_;
 		setIndex2Sector();
 	}
@@ -131,7 +134,7 @@ public:
 		index2Sector_.resize(x);
 		data_.clear();
 		offsets_.clear();
-		nonzeroSectors_.clear();
+		nzMsAndQns_.clear();
 	}
 
 	template<typename SomeBasisType>
@@ -139,7 +142,7 @@ public:
 	         const SomeBasisType& someBasis)
 	{
 		size_ = someBasis.size();
-		nonzeroSectors_.clear();
+		nzMsAndQns_.clear();
 		data_.clear();
 		data_.resize(v.size());
 		offsets_.resize(v.size()+1);
@@ -147,7 +150,8 @@ public:
 			data_[i] = v[i];
 			offsets_[i] = someBasis.partition(i);
 			if (v[i].size()>0) {
-				nonzeroSectors_.push_back(i);
+				SizeType qn = someBasis.pseudoEffectiveNumber(offsets_[i]);
+				nzMsAndQns_.push_back(PairSizeType(i, qn));
 			}
 		}
 
@@ -160,7 +164,7 @@ public:
 	{
 		SizeType np = someBasis.partition()-1;
 		size_ = someBasis.size();
-		nonzeroSectors_.clear();
+		nzMsAndQns_.clear();
 		data_.clear();
 		data_.resize(np);
 		offsets_.resize(np+1);
@@ -169,8 +173,10 @@ public:
 			SizeType total = someBasis.partition(i+1)-offsets_[i];
 			VectorType tmpV(total,0);
 			data_[i] = tmpV;
-			nonzeroSectors_.push_back(i);
+			SizeType qn = someBasis.pseudoEffectiveNumber(offsets_[i]);
+			nzMsAndQns_.push_back(PairSizeType(i, qn));
 		}
+
 		offsets_[np]=size_;
 		setIndex2Sector();
 		PsimagLite::OstringStream msg;
@@ -184,7 +190,7 @@ public:
 	{
 		SizeType np = someBasis.partition()-1;
 		size_ = someBasis.size();
-		nonzeroSectors_.clear();
+		nzMsAndQns_.clear();
 		data_.clear();
 		data_.resize(np);
 		offsets_.resize(np+1);
@@ -198,7 +204,7 @@ public:
 			SizeType total = someBasis.partition(ip+1)-offsets_[ip];
 			VectorType tmpV(total,0);
 			data_[ip] = tmpV;
-			nonzeroSectors_.push_back(ip);
+			nzMsAndQns_.push_back(PairSizeType(ip, qns[i]));
 		}
 
 		setIndex2Sector();
@@ -210,17 +216,19 @@ public:
 	void collapseSectors()
 	{
 		SizeType np = data_.size();
-		nonzeroSectors_.clear();
+
+		typename PsimagLite::Vector<PairSizeType>::Type nzMsAndQns;
 		for (SizeType i=0;i<np;i++) {
-			if (isZero(data_[i])) {
+			if (isZero(data_[i]))
 				data_[i].resize(0);
-			} else {
-				nonzeroSectors_.push_back(i);
-			}
+			else
+				nzMsAndQns.push_back(nzMsAndQns_[i]);
 		}
+
+		nzMsAndQns_ = nzMsAndQns;
 		setIndex2Sector();
 		PsimagLite::OstringStream msg;
-		msg<<"Collapsed. Non-zero sectors now are "<<nonzeroSectors_.size();
+		msg<<"Collapsed. Non-zero sectors now are "<<nzMsAndQns_.size();
 		progress_.printline(msg,std::cout);
 	}
 
@@ -229,12 +237,12 @@ public:
 		data_[i0] = v;
 	}
 
-	SizeType sectors() const { return nonzeroSectors_.size(); }
+	SizeType sectors() const { return nzMsAndQns_.size(); }
 
 	SizeType sector(SizeType i) const
 	{
-		assert(i < nonzeroSectors_.size());
-		return nonzeroSectors_[i];
+		assert(i < nzMsAndQns_.size());
+		return nzMsAndQns_[i];
 	}
 
 	template<typename SomeBasisType>
@@ -250,10 +258,10 @@ public:
 		data_.clear();
 		data_.resize(someBasis.partition()-1);
 
-		nonzeroSectors_.clear();
-		findPartitions(nonzeroSectors_,v,someBasis);
-		for (SizeType jj=0;jj<nonzeroSectors_.size();jj++) {
-			SizeType j = nonzeroSectors_[jj];
+		nzMsAndQns_.clear();
+		findPartitions(nzMsAndQns_,v,someBasis);
+		for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
+			SizeType j = nzMsAndQns_[jj];
 			//firstSector_ = j;
 			SizeType offset = offsets_[j];
 			SizeType total = offsets_[j+1]-offset;
@@ -274,21 +282,21 @@ public:
 
 	SizeType offset(SizeType i) const { return offsets_[i]; }
 
-	const FieldType& fastAccess(SizeType i,SizeType j) const
+	const ComplexOrRealType& fastAccess(SizeType i,SizeType j) const
 	{
 		assert(i < data_.size());
 		assert(j < data_[i].size());
 		return data_[i][j];
 	}
 
-	FieldType& fastAccess(SizeType i,SizeType j)
+	ComplexOrRealType& fastAccess(SizeType i,SizeType j)
 	{
 		assert(i < data_.size());
 		assert(j < data_[i].size());
 		return data_[i][j];
 	}
 
-	const FieldType& slowAccess(SizeType i) const
+	const ComplexOrRealType& slowAccess(SizeType i) const
 	{
 		assert(i<index2Sector_.size());
 		int j = index2Sector_[i];
@@ -296,7 +304,7 @@ public:
 		return data_[j][i-offsets_[j]];
 	}
 
-	FieldType& slowAccess(SizeType i)
+	ComplexOrRealType& slowAccess(SizeType i)
 	{
 		int j = index2Sector_[i];
 		if (j<0) {
@@ -312,8 +320,8 @@ public:
 	void toSparse(SparseVectorType& sv) const
 	{
 		sv.resize(size_);
-		for (SizeType jj=0;jj<nonzeroSectors_.size();jj++) {
-			SizeType j =  nonzeroSectors_[jj];
+		for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
+			SizeType j =  nzMsAndQns_[jj].first;
 			for (SizeType i=0;i<data_[j].size();i++)
 				sv[i+offsets_[j]] = data_[j][i];
 		}
@@ -326,11 +334,11 @@ public:
 		PsimagLite::String s="#size="+ttos(size_);
 		io.printline(s);
 		io.printVector(offsets_,"#offsets");
-		s = "#nonzero="+ttos(nonzeroSectors_.size());
+		s = "#nonzero="+ttos(nzMsAndQns_.size());
 		io.printline(s);
 
-		for (SizeType jj=0;jj<nonzeroSectors_.size();jj++) {
-			SizeType j =  nonzeroSectors_[jj];
+		for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
+			SizeType j =  nzMsAndQns_[jj];
 			s="#sector="+ttos(j);
 			io.printline(s);
 			io.printVector(data_[j],s);
@@ -353,14 +361,18 @@ public:
 		io.readline(x,"#nonzero=");
 		if (x<0)
 			throw PsimagLite::RuntimeError(msg + ":load(...): nonzerosectors<0\n");
-		nonzeroSectors_.resize(x);
-		for (SizeType jj=0;jj<nonzeroSectors_.size();jj++) {
+		nzMsAndQns_.resize(x);
+		for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
 			io.readline(x,"#sector=");
 			if (x<0)
 				throw PsimagLite::RuntimeError(msg + ":load(...): sector<0\n");
 			if (SizeType(x)>=data_.size())
 				throw PsimagLite::RuntimeError(msg + ":load(...): sector too big\n");
-			nonzeroSectors_[jj] = x;
+			int y = 0;
+			io.readline(y, "#qn=");
+			if (y < 0)
+				throw PsimagLite::RuntimeError(msg + ":load(...): qn<0\n");
+			nzMsAndQns_[jj] = PairSizeType(x, y);
 			io.read(data_[x],"#sector=");
 		}
 
@@ -391,35 +403,41 @@ public:
 		io.readline(x,"#nonzero=");
 		if (x < 0)
 			throw PsimagLite::RuntimeError(msg + ":loadOneSector(...): nonzerosectors<0\n");
-		nonzeroSectors_.resize(x);
+		nzMsAndQns_.resize(x);
 
-		for (SizeType jj=0;jj<nonzeroSectors_.size();jj++) {
+		for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
 			io.readline(x,"#sector=");
 			if (x<0)
 				throw PsimagLite::RuntimeError(msg + ":loadOneSector(...): sector<0\n");
 			if (SizeType(x)>=data_.size())
 				throw PsimagLite::RuntimeError(msg + ":loadOneSector(...): sector too big\n");
-			nonzeroSectors_[jj] = x;
+			int y = 0;
+			io.readline(y, "#qn=");
+			if (y < 0)
+				throw PsimagLite::RuntimeError(msg + ":load(...): qn<0\n");
+			nzMsAndQns_[jj] = PairSizeType(x, y);
 			io.read(data_[x],"#sector=");
 		}
 
 		setIndex2Sector();
 	}
 
-	VectorWithOffsets<FieldType> operator+=(const VectorWithOffsets<FieldType>& v)
+	VectorWithOffsets<ComplexOrRealType> operator+=(const VectorWithOffsets<ComplexOrRealType>& v)
 	{
-		if (nonzeroSectors_.size()==0) {
+		if (nzMsAndQns_.size()==0) {
 			size_ = v.size_;
 			data_ = v.data_;
 			offsets_ = v.offsets_;
-			nonzeroSectors_ = v.nonzeroSectors_;
+			nzMsAndQns_ = v.nzMsAndQns_;
 			setIndex2Sector();
 			return *this;
 		}
-		for (SizeType ii=0;ii<nonzeroSectors_.size();ii++) {
-			SizeType i = nonzeroSectors_[ii];
+
+		for (SizeType ii=0;ii<nzMsAndQns_.size();ii++) {
+			SizeType i = nzMsAndQns_[ii].first;
 			data_[i] += v.data_[i];
 		}
+
 		setIndex2Sector();
 		return *this;
 	}
@@ -430,22 +448,22 @@ public:
 		return index2Sector_[i];
 	}
 
-	template<typename FieldType2>
-	friend FieldType2 norm(const Dmrg::VectorWithOffsets<FieldType2>& v);
+	template<typename ComplexOrRealType2>
+	friend ComplexOrRealType2 norm(const Dmrg::VectorWithOffsets<ComplexOrRealType2>& v);
 
-	template<typename FieldType2>
-	friend FieldType2 norm(const Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v);
+	template<typename ComplexOrRealType2>
+	friend ComplexOrRealType2 norm(const Dmrg::VectorWithOffsets<std::complex<ComplexOrRealType2> >& v);
 
-	template<typename FieldType2>
-	friend void normalize(Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v);
+	template<typename ComplexOrRealType2>
+	friend void normalize(Dmrg::VectorWithOffsets<std::complex<ComplexOrRealType2> >& v);
 
-	template<typename FieldType3,typename FieldType2>
-	friend VectorWithOffsets<FieldType2> operator*(const FieldType3&,
-	                                               const VectorWithOffsets<FieldType2>&);
+	template<typename ComplexOrRealType3,typename ComplexOrRealType2>
+	friend VectorWithOffsets<ComplexOrRealType2> operator*(const ComplexOrRealType3&,
+	                                                       const VectorWithOffsets<ComplexOrRealType2>&);
 
-	template<typename FieldType2>
-	friend VectorWithOffsets<FieldType2> operator+(const VectorWithOffsets<FieldType2>&,
-	                                               const VectorWithOffsets<FieldType2>&);
+	template<typename ComplexOrRealType2>
+	friend VectorWithOffsets<ComplexOrRealType2> operator+(const VectorWithOffsets<ComplexOrRealType2>&,
+	                                                       const VectorWithOffsets<ComplexOrRealType2>&);
 
 private:
 
@@ -454,8 +472,8 @@ private:
 		if (index2Sector_.size()!=size_) index2Sector_.resize(size_);
 		for (SizeType i=0;i<size_;i++) {
 			index2Sector_[i] = -1;
-			for (SizeType jj=0;jj<nonzeroSectors_.size();jj++) {
-				SizeType j = nonzeroSectors_[jj];
+			for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
+				SizeType j = nzMsAndQns_[jj].first;
 				if (i<offsets_[j] || i>=offsets_[j+1]) continue;
 				index2Sector_[i] = j;
 			}
@@ -520,38 +538,38 @@ private:
 	typename PsimagLite::Vector<int>::Type index2Sector_;
 	typename PsimagLite::Vector<VectorType>::Type data_;
 	typename PsimagLite::Vector<SizeType>::Type offsets_;
-	typename PsimagLite::Vector<SizeType>::Type nonzeroSectors_;
+	typename PsimagLite::Vector<PairSizeType>::Type nzMsAndQns_;
 }; // class VectorWithOffset
 
-template<typename FieldType>
-inline FieldType norm(const Dmrg::VectorWithOffsets<FieldType>& v)
+template<typename ComplexOrRealType>
+inline ComplexOrRealType norm(const Dmrg::VectorWithOffsets<ComplexOrRealType>& v)
 {
-	FieldType sum=0;
-	for (SizeType ii=0;ii<v.nonzeroSectors_.size();ii++) {
-		SizeType i = v.nonzeroSectors_[ii];
-		FieldType tmp = PsimagLite::norm(v.data_[i]);
+	ComplexOrRealType sum=0;
+	for (SizeType ii=0;ii<v.nzMsAndQns_.size();ii++) {
+		SizeType i = v.nzMsAndQns_[ii];
+		ComplexOrRealType tmp = PsimagLite::norm(v.data_[i]);
 		sum += tmp*tmp;
 	}
 	return sqrt(sum);
 }
 
-template<typename FieldType>
-inline FieldType norm(const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v)
+template<typename ComplexOrRealType>
+inline ComplexOrRealType norm(const Dmrg::VectorWithOffsets<std::complex<ComplexOrRealType> >& v)
 {
-	FieldType sum=0;
-	for (SizeType ii=0;ii<v.nonzeroSectors_.size();ii++) {
-		SizeType i = v.nonzeroSectors_[ii];
-		FieldType tmp = PsimagLite::norm(v.data_[i]);
+	ComplexOrRealType sum=0;
+	for (SizeType ii=0;ii<v.nzMsAndQns_.size();ii++) {
+		SizeType i = v.nzMsAndQns_[ii];
+		ComplexOrRealType tmp = PsimagLite::norm(v.data_[i]);
 		sum += tmp*tmp;
 	}
 	return sqrt(sum);
 }
 
-template<typename FieldType>
-inline void normalize(Dmrg::VectorWithOffsets<std::complex<FieldType> >& v)
+template<typename ComplexOrRealType>
+inline void normalize(Dmrg::VectorWithOffsets<std::complex<ComplexOrRealType> >& v)
 {
-	FieldType norma = PsimagLite::norm(v);
-	FieldType eps = 1e-5;
+	ComplexOrRealType norma = PsimagLite::norm(v);
+	ComplexOrRealType eps = 1e-5;
 
 	if (fabs(norma-1.0)<eps) return;
 
@@ -565,11 +583,11 @@ inline void normalize(Dmrg::VectorWithOffsets<std::complex<FieldType> >& v)
 			v.data_[i][j] /= norma;
 }
 
-template<typename FieldType>
-inline FieldType operator*(const Dmrg::VectorWithOffsets<FieldType>& v1,
-                           const Dmrg::VectorWithOffsets<FieldType>& v2)
+template<typename ComplexOrRealType>
+inline ComplexOrRealType operator*(const Dmrg::VectorWithOffsets<ComplexOrRealType>& v1,
+                                   const Dmrg::VectorWithOffsets<ComplexOrRealType>& v2)
 {
-	FieldType sum = 0;
+	ComplexOrRealType sum = 0;
 	for (SizeType ii=0;ii<v1.sectors();ii++) {
 		SizeType i = v1.sector(ii);
 		for (SizeType jj=0;jj<v1.sectors();jj++) {
@@ -582,38 +600,38 @@ inline FieldType operator*(const Dmrg::VectorWithOffsets<FieldType>& v1,
 	return sum;
 }
 
-template<typename FieldType,typename FieldType2>
-inline VectorWithOffsets<FieldType2> operator*(const FieldType& value,
-                                               const VectorWithOffsets<FieldType2>& v)
+template<typename ComplexOrRealType,typename ComplexOrRealType2>
+inline VectorWithOffsets<ComplexOrRealType2> operator*(const ComplexOrRealType& value,
+                                                       const VectorWithOffsets<ComplexOrRealType2>& v)
 {
-	VectorWithOffsets<FieldType2> w = v;
+	VectorWithOffsets<ComplexOrRealType2> w = v;
 
-	for (SizeType ii=0;ii<w.nonzeroSectors_.size();ii++) {
-		SizeType i = w.nonzeroSectors_[ii];
+	for (SizeType ii=0;ii<w.nzMsAndQns_.size();ii++) {
+		SizeType i = w.nzMsAndQns_[ii];
 		w.data_[i] *= value;
 	}
 	return w;
 }
 
-template<typename FieldType>
-VectorWithOffsets<FieldType> operator+(const VectorWithOffsets<FieldType>& v1,
-                                       const VectorWithOffsets<FieldType>& v2)
+template<typename ComplexOrRealType>
+VectorWithOffsets<ComplexOrRealType> operator+(const VectorWithOffsets<ComplexOrRealType>& v1,
+                                               const VectorWithOffsets<ComplexOrRealType>& v2)
 {
 	PsimagLite::String s = "VectorWithOffsets + VectorWithOffsets failed\n";
-	if (v1.nonzeroSectors_!=v2.nonzeroSectors_)
+	if (v1.nzMsAndQns_!=v2.nzMsAndQns_)
 		throw PsimagLite::RuntimeError(s.c_str());
-	for (SizeType ii=0;ii<v1.nonzeroSectors_.size();ii++) {
-		SizeType i = v1.nonzeroSectors_[ii];
+	for (SizeType ii=0;ii<v1.nzMsAndQns_.size();ii++) {
+		SizeType i = v1.nzMsAndQns_[ii];
 		if (v1.data_[i].size()!=v2.data_[i].size())
 			throw PsimagLite::RuntimeError(s.c_str());
 	}
-	VectorWithOffsets<FieldType> w = v1;
+	VectorWithOffsets<ComplexOrRealType> w = v1;
 	w += v2;
 	return w;
 }
 
-template<typename FieldType>
-const FieldType VectorWithOffsets<FieldType>::zero_ = 0;
+template<typename ComplexOrRealType>
+const ComplexOrRealType VectorWithOffsets<ComplexOrRealType>::zero_ = 0;
 }
 /*@}*/
 #endif
