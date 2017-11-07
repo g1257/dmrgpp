@@ -249,8 +249,8 @@ private:
 
 	// tv[2*site] = Imaginary of (w*-Htilde+i\eta)^{-1}A^\dagger_{site}|gs>
 	// tv[2*site+1] = Real of (w*-Htilde+i\eta)^{-1}A^\dagger_{site}|gs>
-	// tv[2*N] = imaginary cv for (tv[2*site],tv[2*site+1])
-	// tv[2*N+1] = real      cv for (tv[2*site],tv[2*site+1])
+	// tv[2*N] = imaginary cv for (tv[2*center],tv[2*center+1])
+	// tv[2*N+1] = real      cv for (tv[2*center],tv[2*center+1])
 	void evolve(RealType,
 	            ProgramGlobals::DirectionEnum direction,
 	            SizeType site,

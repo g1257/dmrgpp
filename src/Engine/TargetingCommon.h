@@ -424,15 +424,13 @@ public:
 	                  const VectorWithOffsetType& src,
 	                  SizeType indexOfOperator,
 	                  SizeType site,
-	                  SizeType systemOrEnviron,
-	                  bool guessNonZeroSector)
+	                  SizeType systemOrEnviron)
 	{
 		applyOpExpression_.wftOneVector(phiNew,
 		                                src,
 		                                indexOfOperator,
 		                                site,
-		                                systemOrEnviron,
-		                                guessNonZeroSector);
+		                                systemOrEnviron);
 	}
 
 	void wftAll(const VectorSizeType& indexForOperators,

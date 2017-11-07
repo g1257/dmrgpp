@@ -248,7 +248,6 @@ private:
 	            SizeType loopNumber)
 	{
 		if (direction == ProgramGlobals::INFINITE) return;
-		bool guessNonZeroSector = true;
 		SizeType numberOfSites = this->lrs().super().block().size();
 		SizeType indexOfOperator = 0;
 
@@ -275,8 +274,7 @@ private:
 				                            src,
 				                            indexOfOperator,
 				                            site,
-				                            direction,
-				                            guessNonZeroSector);
+				                            direction);
 				this->common().targetVectors(3*s) = phiNew;
 			}
 

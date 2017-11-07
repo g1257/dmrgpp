@@ -396,19 +396,17 @@ public:
 	                  const VectorWithOffsetType& src,
 	                  SizeType indexOfOperator,
 	                  SizeType site,
-	                  SizeType systemOrEnviron,
-	                  bool guessNonZeroSector)
+	                  SizeType systemOrEnviron)
 	{
-		if (guessNonZeroSector) {
-			if (targetHelper_.tstStruct().aOperators().size() == 1
-			        || targetHelper_.tstStruct().concatenation() == DONT_MIX) {
-				guessPhiSectors(phiNew,indexOfOperator,systemOrEnviron,site);
-			} else {
-				if (targetHelper_.tstStruct().useQns())
-					phiNew.populateFromQns(nonZeroQns_,targetHelper_.lrs().super());
-				else
-					phiNew.populateSectors(targetHelper_.lrs().super());
-			}
+
+		if (targetHelper_.tstStruct().aOperators().size() == 1
+		        || targetHelper_.tstStruct().concatenation() == DONT_MIX) {
+			guessPhiSectors(phiNew,indexOfOperator,systemOrEnviron,site);
+		} else {
+			if (targetHelper_.tstStruct().useQns())
+				phiNew.populateFromQns(nonZeroQns_,targetHelper_.lrs().super());
+			else
+				phiNew.populateSectors(targetHelper_.lrs().super());
 		}
 
 		// OK, now that we got the partition number right, let's wft:
@@ -431,7 +429,7 @@ public:
 			if (targetHelper_.tstStruct().useQns())
 				phiNew.populateFromQns(nonZeroQns_, targetHelper_.lrs().super());
 			assert(index < indexForOperators.size());
-			wftOneVector(phiNew,src,indexForOperators[index],site,systemOrEnviron,true);
+			wftOneVector(phiNew,src,indexForOperators[index],site,systemOrEnviron);
 			targetVectors_[index] = phiNew;
 		}
 	}
@@ -621,7 +619,7 @@ private:
 			msg<<"I'm calling the WFT now";
 			progress_.printline(msg,std::cout);
 
-			wftOneVector(phiNew,src,i,site,systemOrEnviron,true);
+			wftOneVector(phiNew,src,i,site,systemOrEnviron);
 		} else {
 			throw PsimagLite::RuntimeError("computePhi\n");
 		}
