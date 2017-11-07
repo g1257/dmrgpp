@@ -411,12 +411,28 @@ public:
 	                      SizeType indexOfOperator,
 	                      SizeType site,
 	                      VectorWithOffsetType& phiNew,
+	                      const VectorWithOffsetType& psiSrc,
 	                      SizeType systemOrEnviron)
 	{
 		applyOpExpression_.applyOneOperator(loopNumber,
 		                                    indexOfOperator,
 		                                    site,
 		                                    phiNew,
+		                                    psiSrc,
+		                                    systemOrEnviron);
+	}
+
+	void applyOneOperator(SizeType loopNumber,
+	                      SizeType indexOfOperator,
+	                      SizeType site,
+	                      VectorWithOffsetType& phiNew,
+	                      SizeType systemOrEnviron)
+	{
+		applyOpExpression_.applyOneOperator(loopNumber,
+		                                    indexOfOperator,
+		                                    site,
+		                                    phiNew,
+		                                    applyOpExpression_.psi(),
 		                                    systemOrEnviron);
 	}
 

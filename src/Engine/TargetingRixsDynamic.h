@@ -164,7 +164,8 @@ public:
 	      progress_("TargetingRixsDynamic"),
 	      gsWeight_(1.0),
 	      paramsForSolver_(ioIn,"DynamicDmrg"),
-	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().energy())
+	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().energy()),
+	      applied_(false)
 	{
 		if (tstStruct_.concatenation() != TargetParamsType::DONT_APPLY)
 			err("TargetingRixsDynamic needs TSPProductOrSum=dontapply\n");
@@ -256,7 +257,7 @@ public:
 			io.readline(x, str);
 			if (x < 0)
 				err("TargetingRixsDynamic: PSI.QN. is negative\n");
-			 this->common().appendToNonZeroQns(x);
+			this->common().appendToNonZeroQns(x);
 		}
 	}
 
@@ -276,21 +277,38 @@ private:
 		SizeType indexOfOperator = 0;
 		VectorSizeType indexForOperators(this->common().targetVectors().size(), 0);
 		SizeType center = tstStruct_.sites(indexOfOperator);
+		SizeType numberOfSites = this->lrs().super().block().size();
 		this->common().wftAll(indexForOperators, site,direction);
-		this->common().applyOneOperator(loopNumber,
-		                                indexOfOperator,
-		                                site,
-		                                this->common().targetVectors(2*center),
-		                                direction);
-		this->common().applyOneOperator(loopNumber,
-		                                indexOfOperator,
-		                                site,
-		                                this->common().targetVectors(2*center+1),
-		                                direction);
+
+		if (!applied_) {
+			VectorWithOffsetType tmpV1;
+			this->common().applyOneOperator(loopNumber,
+			                                indexOfOperator,
+			                                site,
+			                                tmpV1,
+			                                this->common().targetVectors(2*center),
+			                                direction);
+			if (tmpV1.size() > 0)
+				this->common().targetVectors(2*center) = tmpV1;
+
+			VectorWithOffsetType tmpV2;
+			this->common().applyOneOperator(loopNumber,
+			                                indexOfOperator,
+			                                site,
+			                                tmpV2,
+			                                this->common().targetVectors(2*center+1),
+			                                direction);
+			if (tmpV2.size() > 0) {
+				this->common().targetVectors(2*center + 1) = tmpV2;
+				applied_ = true;
+				PsimagLite::OstringStream msg;
+				msg<<"Applied";
+				progress_.printline(msg, std::cout);
+			}
+		}
 
 		calcDynVectors(site,direction);
 
-		SizeType numberOfSites = this->lrs().super().block().size();
 		ComplexOrRealType rr = this->common().rixsCocoon(direction,site,2*site,2*numberOfSites);
 		ComplexOrRealType ri = this->common().rixsCocoon(direction,site,2*site,2*numberOfSites+1);
 		ComplexOrRealType ir = this->common().rixsCocoon(direction,site,2*site+1,2*numberOfSites);
@@ -305,6 +323,7 @@ private:
 	void calcDynVectors(SizeType site,
 	                    ProgramGlobals::DirectionEnum direction)
 	{
+		if (!applied_) return;
 		SizeType numberOfSites = this->lrs().super().block().size();
 		SizeType center = tstStruct_.sites(0);
 		skeleton_.calcDynVectors(this->common().targetVectors(2*center),
@@ -354,6 +373,7 @@ private:
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
 	CorrectionVectorSkeletonType skeleton_;
+	bool applied_;
 }; // class TargetingRixsDynamic
 
 template<typename LanczosSolverType, typename VectorWithOffsetType>

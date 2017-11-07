@@ -358,6 +358,7 @@ public:
 	                      SizeType indexOfOperator,
 	                      SizeType site,
 	                      VectorWithOffsetType& phiNew,
+	                      const VectorWithOffsetType& psiSrc,
 	                      SizeType systemOrEnviron)
 	{
 		if (targetHelper_.tstStruct().startingLoops().size()>0 &&
@@ -367,7 +368,7 @@ public:
 		const bool hasBeenApplied = (phiNew.size() > 0);
 		if (hasBeenApplied) return;
 
-		VectorWithOffsetType phiOld = psi_;
+		VectorWithOffsetType phiOld = psiSrc;
 		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
 
 		BorderEnumType corner = (site == 0 || site == numberOfSites -1) ?
@@ -669,6 +670,7 @@ private:
 			}
 			return;
 		}
+
 		applyOpLocal_(phi,
 		              psi_,
 		              targetHelper_.tstStruct().aOperators()[i],
