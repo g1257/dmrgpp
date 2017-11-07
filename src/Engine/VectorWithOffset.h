@@ -84,18 +84,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 
 namespace Dmrg {
-template<typename FieldType>
-struct VectorWithOffset {
+template<typename ComplexOrRealType>
+class VectorWithOffset {
+
 public:
-	typedef FieldType value_type;
-	typedef std::pair<SizeType,SizeType> PairType;
-	typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
+
+	typedef ComplexOrRealType value_type;
+	typedef std::pair<SizeType,SizeType> PairSizeType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-	static const FieldType zero_;
+	static const ComplexOrRealType zero_;
 
 	VectorWithOffset()
-	    : progress_("VectorWithOffset"), size_(0), offset_(0), m_(0)
+	    : progress_("VectorWithOffset"), size_(0), offset_(0), mAndq_(PairSizeType(0,0))
 	{}
 
 	template<typename SomeBasisType>
@@ -115,7 +117,8 @@ public:
 
 				data_.resize(weights[i]);
 				offset_ = someBasis.partition(i);
-				m_ = i;
+				SizeType qn = someBasis.pseudoEffectiveNumber(offset_);
+				mAndq_ = PairSizeType(i, qn);
 				found = true;
 			}
 		}
@@ -126,7 +129,7 @@ public:
 		size_ = x;
 		data_.clear();
 		offset_=0;
-		m_=0;
+		mAndq_ = PairSizeType(0,0);
 	}
 
 	template<typename SomeBasisType>
@@ -146,7 +149,8 @@ public:
 
 				data_ = v[i];
 				offset_ = someBasis.partition(i);
-				m_ = i;
+				SizeType qn = someBasis.pseudoEffectiveNumber(offset_);
+				mAndq_ = PairSizeType(i, qn);
 				found = true;
 			}
 		}
@@ -159,14 +163,16 @@ public:
 	{
 		size_ = someBasis.size();
 		try {
-			m_ = findPartition(v,someBasis);
-			offset_ = someBasis.partition(m_);
-			SizeType total = someBasis.partition(m_+1) - offset_;
+			SizeType m = findPartition(v,someBasis);
+			offset_ = someBasis.partition(m);
+			SizeType qn = someBasis.pseudoEffectiveNumber(offset_);
+			mAndq_ = PairSizeType(m, qn);
+			SizeType total = someBasis.partition(m + 1) - offset_;
 			data_.resize(total);
 			for (SizeType i=0;i<total;i++) data_[i] = v[i+offset_];
 		} catch (std::exception& e) {
 			std::cout<<e.what();
-			m_=0;
+			mAndq_ = PairSizeType(0,0);
 			offset_=0;
 			data_.resize(0);
 		}
@@ -174,7 +180,7 @@ public:
 
 	SizeType sectors() const { return (size_ == 0) ? 0 : 1; }
 
-	SizeType sector(SizeType) const { return m_; }
+	SizeType sector(SizeType) const { return mAndq_.first; }
 
 	SizeType offset(SizeType) const { return offset_; }
 
@@ -206,7 +212,9 @@ public:
 		io.printline(s);
 		s="#offset="+ttos(offset_);
 		io.printline(s);
-		s="#m="+ttos(m_);
+		s="#m="+ttos(mAndq_.first);
+		io.printline(s);
+		s="#qn="+ttos(mAndq_.second);
 		io.printline(s);
 		io.printVector(data_,"#data");
 	}
@@ -227,7 +235,11 @@ public:
 		io.readline(x,"#m=");
 		if (x<0)
 			throw PsimagLite::RuntimeError("VectorWithOffset::load(...): m<0\n");
-		m_ = x;
+		int y = 0;
+		io.readline(y,"#qn=");
+		if (y < 0)
+			throw PsimagLite::RuntimeError("VectorWithOffset::load(...): qn<0\n");
+		mAndq_ = PairSizeType(x, y);
 		io.read(data_,"#data");
 	}
 
@@ -258,9 +270,11 @@ public:
 		size_ = someBasis.size();
 
 		SizeType q = qns[0];
-		m_ = findPartitionWithThisQn(q,someBasis);
-		offset_ = someBasis.partition(m_);
-		SizeType total = someBasis.partition(m_+1) - offset_;
+		SizeType m = findPartitionWithThisQn(q,someBasis);
+		offset_ = someBasis.partition(m);
+		SizeType qn = someBasis.pseudoEffectiveNumber(offset_);
+		mAndq_ = PairSizeType(m, qn);
+		SizeType total = someBasis.partition(m+1) - offset_;
 		VectorType tmpV(total,0);
 		data_ = tmpV;
 
@@ -277,17 +291,17 @@ public:
 
 	SizeType offset() const { return offset_; }
 
-	VectorWithOffset<FieldType> operator+=(const VectorWithOffset<FieldType>& v)
+	VectorWithOffset<ComplexOrRealType> operator+=(const VectorWithOffset<ComplexOrRealType>& v)
 	{
-		if (size_ == 0 && offset_ == 0 && m_ == 0) {
+		if (size_ == 0 && offset_ == 0 && mAndq_.first == 0 && mAndq_.second == 0) {
 			data_ = v.data_;
 			size_ = v.size_;
 			offset_ = v.offset_;
-			m_ = v.m_;
+			mAndq_ = v.mAndq_;
 			return *this;
 		}
 
-		if (size_ != v.size_ || offset_ != v.offset_ || m_ != v.m_)
+		if (size_ != v.size_ || offset_ != v.offset_ || mAndq_ != v.mAndq_)
 			throw PsimagLite::RuntimeError("VectorWithOffset::operator+=\n");
 
 		data_ += v.data_;
@@ -295,26 +309,26 @@ public:
 		return *this;
 	}
 
-	const FieldType& slowAccess(SizeType i) const
+	const ComplexOrRealType& slowAccess(SizeType i) const
 	{
 		assert(i>=offset_ && i<(offset_+data_.size()));
 		return data_[i-offset_];
 	}
 
-	FieldType& slowAccess(SizeType i)
+	ComplexOrRealType& slowAccess(SizeType i)
 	{
 		assert(i >= offset_);
 		assert(i-offset_ < data_.size());
 		return data_[i-offset_];
 	}
 
-	const FieldType& fastAccess(SizeType,SizeType j) const
+	const ComplexOrRealType& fastAccess(SizeType,SizeType j) const
 	{
 		assert(j<data_.size());
 		return data_[j];
 	}
 
-	FieldType& fastAccess(SizeType,SizeType j)
+	ComplexOrRealType& fastAccess(SizeType,SizeType j)
 	{
 		assert(j<data_.size());
 		return data_[j];
@@ -325,19 +339,19 @@ public:
 		return ((i < offset_) || (i >= (offset_+data_.size()))) ? (-1) : (0);
 	}
 
-	template<typename FieldType2>
-	friend FieldType2 norm(const Dmrg::VectorWithOffset<FieldType2>& v);
+	template<typename ComplexOrRealType2>
+	friend ComplexOrRealType2 norm(const Dmrg::VectorWithOffset<ComplexOrRealType2>& v);
 
-	template<typename FieldType2>
-	friend FieldType2 norm(const Dmrg::VectorWithOffset<std::complex<FieldType2> >& v);
+	template<typename ComplexOrRealType2>
+	friend ComplexOrRealType2 norm(const Dmrg::VectorWithOffset<std::complex<ComplexOrRealType2> >& v);
 
-	template<typename FieldType2>
-	friend FieldType2 operator*(const Dmrg::VectorWithOffset<FieldType2>& v1,
-	                            const Dmrg::VectorWithOffset<FieldType2>& v2);
+	template<typename ComplexOrRealType2>
+	friend ComplexOrRealType2 operator*(const Dmrg::VectorWithOffset<ComplexOrRealType2>& v1,
+	                            const Dmrg::VectorWithOffset<ComplexOrRealType2>& v2);
 
-	template<typename FieldType3,typename FieldType2>
-	friend VectorWithOffset<FieldType2> operator*(const FieldType3& value,
-	                                              const VectorWithOffset<FieldType2>& v);
+	template<typename ComplexOrRealType3,typename ComplexOrRealType2>
+	friend VectorWithOffset<ComplexOrRealType2> operator*(const ComplexOrRealType3& value,
+	                                              const VectorWithOffset<ComplexOrRealType2>& v);
 
 private:
 
@@ -395,37 +409,37 @@ private:
 	SizeType size_;
 	VectorType data_;
 	SizeType offset_;
-	SizeType m_; // partition
+	PairSizeType mAndq_; // partition
 }; // class VectorWithOffset
 
-template<typename FieldType>
-const FieldType VectorWithOffset<FieldType>::zero_=0;
+template<typename ComplexOrRealType>
+const ComplexOrRealType VectorWithOffset<ComplexOrRealType>::zero_=0;
 
-template<typename FieldType>
-FieldType operator*(const Dmrg::VectorWithOffset<FieldType>& v1,
-                    const Dmrg::VectorWithOffset<FieldType>& v2)
+template<typename ComplexOrRealType>
+ComplexOrRealType operator*(const Dmrg::VectorWithOffset<ComplexOrRealType>& v1,
+                    const Dmrg::VectorWithOffset<ComplexOrRealType>& v2)
 {
-	if (v1.m_ != v2.m_) return 0.0;
+	if (v1.mAndq_ != v2.mAndq_) return 0.0;
 	return (v1.data_ * v2.data_);
 }
 
-template<typename FieldType,typename FieldType2>
-VectorWithOffset<FieldType2> operator*(const FieldType& value,
-                                       const VectorWithOffset<FieldType2>& v)
+template<typename ComplexOrRealType,typename ComplexOrRealType2>
+VectorWithOffset<ComplexOrRealType2> operator*(const ComplexOrRealType& value,
+                                       const VectorWithOffset<ComplexOrRealType2>& v)
 {
-	VectorWithOffset<FieldType2> w = v;
+	VectorWithOffset<ComplexOrRealType2> w = v;
 	w.data_ *= value;
 	return w;
 }
 
-template<typename FieldType>
-FieldType norm(const Dmrg::VectorWithOffset<FieldType>& v)
+template<typename ComplexOrRealType>
+ComplexOrRealType norm(const Dmrg::VectorWithOffset<ComplexOrRealType>& v)
 {
 	return PsimagLite::norm(v.data_);
 }
 
-template<typename FieldType>
-FieldType norm(const Dmrg::VectorWithOffset<std::complex<FieldType> >& v)
+template<typename ComplexOrRealType>
+ComplexOrRealType norm(const Dmrg::VectorWithOffset<std::complex<ComplexOrRealType> >& v)
 {
 	return PsimagLite::norm(v.data_);
 }
