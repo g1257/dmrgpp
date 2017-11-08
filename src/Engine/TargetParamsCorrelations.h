@@ -102,8 +102,6 @@ public:
 	    : TargetParamsCommonType(io,model)
 	{
 		io.readline(type_,"CorrelationsType=");
-		if (this->concatenation() != TargetParamsCommonType::DONT_MIX)
-			err("Please say TSPProductOrSum=dontmix\n");
 	}
 
 	virtual SizeType memResolv(PsimagLite::MemResolv&,

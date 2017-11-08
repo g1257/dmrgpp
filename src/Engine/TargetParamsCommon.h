@@ -164,14 +164,10 @@ public:
 			this->concatenation_ = BaseType::PRODUCT;
 		} else if (productOrSum == "sum") {
 			this->concatenation_ = BaseType::SUM;
-		} else if (productOrSum == "dontmix") {
-			this->concatenation_ = BaseType::DONT_MIX;
-		} else if (productOrSum == "dontapply") {
-			this->concatenation_ = BaseType::DONT_APPLY;
 		} else {
 			PsimagLite::String s(__FILE__);
 			s += " : Unknown concatentation " + productOrSum + "\n";
-			s += "Possible values: product sum dontmix dontapply\n";
+			s += "Possible values: product sum\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 

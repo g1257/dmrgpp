@@ -101,7 +101,6 @@ class ApplyOperatorExpression {
 
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
-	static SizeType const DONT_MIX = TargetParamsType::DONT_MIX;
 
 public:
 
@@ -167,8 +166,7 @@ public:
 			if (count2 == 0) continue;
 			count += count2;
 
-			if (targetHelper_.tstStruct().concatenation() == PRODUCT
-			        || targetHelper_.tstStruct().concatenation() == DONT_MIX) {
+			if (targetHelper_.tstStruct().concatenation() == PRODUCT) {
 				phiOld = phiNew;
 			} else {
 				if (stage_[i] == OPERATOR) vectorSum += phiNew;

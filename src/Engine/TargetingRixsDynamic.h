@@ -167,9 +167,6 @@ public:
 	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().energy()),
 	      applied_(false)
 	{
-		if (tstStruct_.concatenation() != TargetParamsType::DONT_APPLY)
-			err("TargetingRixsDynamic needs TSPProductOrSum=dontapply\n");
-
 		SizeType numberOfSites = model.geometry().numberOfSites();
 		this->common().init(&tstStruct_,2*numberOfSites+2);
 		if (!wft.isEnabled())
