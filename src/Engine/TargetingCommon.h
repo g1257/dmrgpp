@@ -362,11 +362,6 @@ public:
 		return applyOpExpression_.currentTime();
 	}
 
-	const VectorSizeType& nonZeroQns() const
-	{
-		return applyOpExpression_.nonZeroQns();
-	}
-
 	const VectorVectorWithOffsetType& targetVectors() const
 	{
 		return applyOpExpression_.targetVectors();
@@ -626,11 +621,6 @@ public:
 	{
 		assert(site < inSitu_.size());
 		return inSitu_[site];
-	}
-
-	void appendToNonZeroQns(SizeType qn)
-	{
-		applyOpExpression_.appendToNonZeroQns(qn);
 	}
 
 private:

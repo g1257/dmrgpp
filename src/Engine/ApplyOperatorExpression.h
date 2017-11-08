@@ -234,11 +234,6 @@ public:
 		return applyOpLocal_;
 	}
 
-	const VectorSizeType& nonZeroQns() const
-	{
-		return nonZeroQns_;
-	}
-
 	VectorWithOffsetType& psi() // <--- FIXME
 	{
 		return psi_;
@@ -312,8 +307,7 @@ public:
 			                                                    model,
 			                                                    wft,
 			                                                    lrs,
-			                                                    E0_,
-			                                                    &nonZeroQns_);
+			                                                    E0_);
 			break;
 		default:
 			throw PsimagLite::RuntimeError(s.c_str());
@@ -389,8 +383,6 @@ public:
 			msg2<<"Norm of phi is zero\n";
 			progress_.printline(msg2,std::cout);
 		}
-
-		if (targetHelper_.tstStruct().useQns()) setQuantumNumbers(phiNew);
 	}
 
 	void wftOneVector(VectorWithOffsetType& phiNew,
@@ -399,22 +391,7 @@ public:
 	                  SizeType site,
 	                  SizeType systemOrEnviron)
 	{
-
-		bool guessOne = (targetHelper_.tstStruct().aOperators().size() == 1);
-		if (targetHelper_.tstStruct().concatenation() == DONT_MIX)
-			guessOne = true;
-
-		if (targetHelper_.tstStruct().concatenation() == TargetParamsType::DONT_APPLY)
-			guessOne = false;
-
-		if (guessOne) {
-			guessPhiSectors(phiNew,indexOfOperator,systemOrEnviron,site);
-		} else {
-			if (targetHelper_.tstStruct().useQns())
-				phiNew.populateFromQns(nonZeroQns_,targetHelper_.lrs().super());
-			else
-				phiNew.populateSectors(targetHelper_.lrs().super());
-		}
+		phiNew.populateFromQns(src,targetHelper_.lrs().super());
 
 		// OK, now that we got the partition number right, let's wft:
 		VectorSizeType nk(1,targetHelper_.model().hilbertSize(site));
@@ -433,29 +410,13 @@ public:
 			const VectorWithOffsetType& src = targetVectors_[index];
 			if (src.size() == 0) continue;
 			VectorWithOffsetType phiNew;
-			if (targetHelper_.tstStruct().useQns())
-				phiNew.populateFromQns(nonZeroQns_, targetHelper_.lrs().super());
 			assert(index < indexForOperators.size());
 			wftOneVector(phiNew,src,indexForOperators[index],site,systemOrEnviron);
 			targetVectors_[index] = phiNew;
 		}
 	}
 
-	void appendToNonZeroQns(SizeType qn)
-	{
-		nonZeroQns_.push_back(qn);
-	}
-
 private:
-
-	void setQuantumNumbers(const VectorWithOffsetType& v)
-	{
-		nonZeroQns_.clear();
-		for (SizeType i=0;i<v.sectors();i++) {
-			SizeType qn = v.qn(i);
-			nonZeroQns_.push_back(qn);
-		}
-	}
 
 	void checkOrder(SizeType i) const
 	{
@@ -601,9 +562,6 @@ private:
 				msg2<<"Norm of phi is zero\n";
 				progress_.printline(msg2,std::cout);
 			}
-
-			if (targetHelper_.tstStruct().useQns()) setQuantumNumbers(phiNew);
-
 		} else if (stage_[i] >= WFT_NOADVANCE) {
 
 			SizeType advance = indexNoAdvance_;
@@ -683,7 +641,6 @@ private:
 	RealType currentTime_;
 	SizeType indexNoAdvance_;
 	ApplyOperatorType applyOpLocal_;
-	VectorSizeType nonZeroQns_;
 	VectorWithOffsetType psi_;
 	typename PsimagLite::Vector<VectorWithOffsetType>::Type targetVectors_;
 	TimeVectorsBaseType* timeVectorsBase_;

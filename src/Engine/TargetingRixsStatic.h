@@ -229,16 +229,7 @@ public:
 		                      this->common().targetVectors(),
 		                      marker);
 		ts.save(io);
-		const VectorWithOffsetType& v = this->common().targetVectors()[3];
 		this->common().psi().save(io,"PSI");
-
-		for (SizeType i = 0; i < v.sectors(); ++i) {
-			SizeType m = v.sector(i);
-			SizeType state = this->lrs().super().partition(m);
-			SizeType qn = this->lrs().super().pseudoEffectiveNumber(state);
-			PsimagLite::String str("PSI.QN." + ttos(m) + "=" + ttos(qn));
-			io.printline(str);
-		}
 	}
 
 	void load(const PsimagLite::String& f)
@@ -277,8 +268,7 @@ private:
 				const VectorWithOffsetType& src = this->common().targetVectors(3*s);
 				if (src.size() == 0) continue;
 				VectorWithOffsetType phiNew;
-				if (tstStruct_.useQns()) phiNew.populateFromQns(this->common().nonZeroQns(),
-				                                                this->lrs().super());
+
 				this->common().wftOneVector(phiNew,
 				                            src,
 				                            indexOfOperator,

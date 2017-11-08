@@ -133,8 +133,7 @@ public:
 	                         const ModelType& model,
 	                         const WaveFunctionTransfType& wft,
 	                         const LeftRightSuperType& lrs,
-	                         const RealType& E0,
-	                         const VectorSizeType* nonZeroQns)
+	                         const RealType& E0)
 	    : progress_("TimeVectorsSuzukiTrotter"),
 	      currentTime_(currentTime),
 	      tstStruct_(tstStruct),
@@ -144,7 +143,6 @@ public:
 	      wft_(wft),
 	      lrs_(lrs),
 	      E0_(E0),
-	      nonZeroQns_(nonZeroQns),
 	      twoSiteDmrg_(wft_.twoSiteDmrg())
 	{}
 
@@ -600,7 +598,6 @@ private:
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;
 	RealType E0_;
-	const VectorSizeType* nonZeroQns_;
 	bool twoSiteDmrg_;
 	VectorSizeType linksSeen_;
 }; //class TimeVectorsSuzukiTrotter

@@ -261,18 +261,14 @@ public:
 	}
 
 	template<typename SomeBasisType>
-	void populateFromQns(const VectorSizeType& qns,
+	void populateFromQns(const VectorWithOffset& v,
 	                     const SomeBasisType& someBasis)
 	{
-		if (qns.size() == 0) return;
-		if (qns.size() != 1) {
-			PsimagLite::String msg("FATAL: VectorWithOffset::populateFromQns: ");
-			throw PsimagLite::RuntimeError(msg + "more than one sector found\n");
-		}
+		if (v.size() == 0) return;
 
 		size_ = someBasis.size();
 
-		SizeType q = qns[0];
+		SizeType q = v.qn(0);
 		SizeType m = findPartitionWithThisQn(q,someBasis);
 		offset_ = someBasis.partition(m);
 		assert(q == someBasis.pseudoEffectiveNumber(offset_));

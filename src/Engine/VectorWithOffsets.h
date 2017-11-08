@@ -185,7 +185,7 @@ public:
 	}
 
 	template<typename SomeBasisType>
-	void populateFromQns(const typename PsimagLite::Vector<SizeType>::Type& qns,
+	void populateFromQns(const VectorWithOffsets& v,
 	                     const SomeBasisType& someBasis)
 	{
 		SizeType np = someBasis.partition()-1;
@@ -199,17 +199,17 @@ public:
 		}
 		offsets_[np]=size_;
 
-		for (SizeType i=0;i<qns.size();i++) {
-			SizeType ip = findPartitionWithThisQn(qns[i],someBasis);
+		for (SizeType i=0;i<v.sectors();i++) {
+			SizeType ip = findPartitionWithThisQn(v.qn(i),someBasis);
 			SizeType total = someBasis.partition(ip+1)-offsets_[ip];
 			VectorType tmpV(total,0);
 			data_[ip] = tmpV;
-			nzMsAndQns_.push_back(PairSizeType(ip, qns[i]));
+			nzMsAndQns_.push_back(PairSizeType(ip, v.qn(i)));
 		}
 
 		setIndex2Sector();
 		PsimagLite::OstringStream msg;
-		msg<<"populateFromQns "<<qns.size()<<" sectors";
+		msg<<"populateFromQns "<<v.sectors()<<" sectors";
 		progress_.printline(msg,std::cout);
 	}
 
