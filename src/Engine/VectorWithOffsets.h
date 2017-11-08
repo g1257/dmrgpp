@@ -197,10 +197,13 @@ public:
 		for (SizeType i=0;i<np;i++) {
 			offsets_[i] = someBasis.partition(i);
 		}
+
 		offsets_[np]=size_;
 
 		for (SizeType i=0;i<v.sectors();i++) {
 			SizeType ip = findPartitionWithThisQn(v.qn(i),someBasis);
+			if (ip >= np)
+				err("VectorWithOffsets: populateFromQns\n");
 			SizeType total = someBasis.partition(ip+1)-offsets_[ip];
 			VectorType tmpV(total,0);
 			data_[ip] = tmpV;
@@ -240,6 +243,9 @@ public:
 
 	void setDataInSector(const VectorType& v,SizeType i0)
 	{
+		if (i0 >= data_.size())
+			err("VectorWithOffsets: setDataInSector\n");
+
 		data_[i0] = v;
 	}
 
@@ -274,24 +280,41 @@ public:
 		findPartitions(nzMsAndQns_,v,someBasis);
 		for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
 			SizeType j = nzMsAndQns_[jj].first;
+			assert(j < data_.size());
 			SizeType offset = offsets_[j];
 			SizeType total = offsets_[j+1]-offset;
 			data_[j].resize(total);
-			for (SizeType i=0;i<total;i++) data_[j][i] = v[i+offset];
+			for (SizeType i=0;i<total;i++)
+				data_[j][i] = v[i+offset];
 		}
+
 		setIndex2Sector();
 	}
 
 	void extract(VectorType& v,SizeType i) const
 	{
+		if (i >= data_.size())
+			err("VectorWithOffsets: extract\n");
+
 		v=data_[i];
 	}
 
 	SizeType size() const { return size_; }
 
-	SizeType effectiveSize(SizeType i) const { return data_[i].size(); }
+	SizeType effectiveSize(SizeType i) const
+	{
+		if (i >= data_.size())
+			err("VectorWithOffsets: effectiveSize\n");
 
-	SizeType offset(SizeType i) const { return offsets_[i]; }
+		return data_[i].size();
+	}
+
+	SizeType offset(SizeType i) const
+	{
+		if (i >= offsets_.size())
+			err("VectorWithOffsets: offset\n");
+		return offsets_[i];
+	}
 
 	const ComplexOrRealType& fastAccess(SizeType i,SizeType j) const
 	{
@@ -324,6 +347,8 @@ public:
 			return data_[0][0];
 		}
 
+		assert(j < data_.size());
+		assert(i - offsets_[j] < data_[j].size());
 		return data_[j][i-offsets_[j]];
 	}
 
@@ -333,6 +358,7 @@ public:
 		sv.resize(size_);
 		for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
 			SizeType j =  nzMsAndQns_[jj].first;
+			assert(j < data_.size());
 			for (SizeType i=0;i<data_[j].size();i++)
 				sv[i+offsets_[j]] = data_[j][i];
 		}
@@ -355,7 +381,9 @@ public:
 			j = nzMsAndQns_[jj].second;
 			s="#qn="+ttos(j);
 			io.printline(s);
-			io.printVector(data_[j],s);
+			if (jj >= data_.size())
+				err("VectorWithOffsets: save\n");
+			io.printVector(data_[jj],s);
 		}
 	}
 
@@ -367,26 +395,28 @@ public:
 		int x = 0;
 		io.readline(x,"#size=");
 		if (x<0)
-			throw PsimagLite::RuntimeError(msg + ":load(...): size<0\n");
+			err(msg + ":load(...): size<0\n");
 		size_ = x;
 		io.read(offsets_,"#offsets");
 		data_.clear();
 		data_.resize(offsets_.size());
 		io.readline(x,"#nonzero=");
 		if (x<0)
-			throw PsimagLite::RuntimeError(msg + ":load(...): nonzerosectors<0\n");
+			err(msg + ":load(...): nonzerosectors<0\n");
 		nzMsAndQns_.resize(x);
 		for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
 			io.readline(x,"#sector=");
 			if (x<0)
-				throw PsimagLite::RuntimeError(msg + ":load(...): sector<0\n");
-			if (SizeType(x)>=data_.size())
-				throw PsimagLite::RuntimeError(msg + ":load(...): sector too big\n");
+				err(msg + ":load(...): sector<0\n");
+
 			int y = 0;
 			io.readline(y, "#qn=");
 			if (y < 0)
-				throw PsimagLite::RuntimeError(msg + ":load(...): qn<0\n");
+				err(msg + ":load(...): qn<0\n");
 			nzMsAndQns_[jj] = PairSizeType(x, y);
+
+			if (static_cast<SizeType>(x)>=data_.size())
+				err(msg + ":load(...): sector too big\n");
 			io.read(data_[x],"#sector=");
 		}
 
@@ -406,7 +436,7 @@ public:
 		int x = 0;
 		io.readline(x,"#size=");
 		if (x<0)
-			throw PsimagLite::RuntimeError(msg + ":loadOneSector(...): size<0\n");
+			err(msg + ":loadOneSector(...): size<0\n");
 		size_ = x;
 
 		io.read(offsets_,"#offsets");
@@ -416,20 +446,22 @@ public:
 
 		io.readline(x,"#nonzero=");
 		if (x < 0)
-			throw PsimagLite::RuntimeError(msg + ":loadOneSector(...): nonzerosectors<0\n");
+			err(msg + ":loadOneSector(...): nonzerosectors<0\n");
 		nzMsAndQns_.resize(x);
 
 		for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
 			io.readline(x,"#sector=");
 			if (x<0)
-				throw PsimagLite::RuntimeError(msg + ":loadOneSector(...): sector<0\n");
-			if (SizeType(x)>=data_.size())
-				throw PsimagLite::RuntimeError(msg + ":loadOneSector(...): sector too big\n");
+				err(msg + ":loadOneSector(...): sector<0\n");
+
 			int y = 0;
 			io.readline(y, "#qn=");
 			if (y < 0)
-				throw PsimagLite::RuntimeError(msg + ":load(...): qn<0\n");
+				err(msg + ":load(...): qn<0\n");
 			nzMsAndQns_[jj] = PairSizeType(x, y);
+
+			if (static_cast<SizeType>(x)>=data_.size())
+				err(msg + ":loadOneSector(...): sector too big\n");
 			io.read(data_[x],"#sector=");
 		}
 
@@ -449,6 +481,7 @@ public:
 
 		for (SizeType ii=0;ii<nzMsAndQns_.size();ii++) {
 			SizeType i = nzMsAndQns_[ii].first;
+			assert(i < data_.size());
 			data_[i] += v.data_[i];
 		}
 
@@ -467,6 +500,7 @@ public:
 		RealType sum=0;
 		for (SizeType ii=0;ii<v.nzMsAndQns_.size();ii++) {
 			SizeType i = v.nzMsAndQns_[ii].first;
+			assert(i < v.data_.size());
 			RealType tmp = PsimagLite::norm(v.data_[i]);
 			sum += tmp*tmp;
 		}
@@ -495,15 +529,16 @@ public:
 	                                   const VectorWithOffsets& v2)
 	{
 		ComplexOrRealType sum = 0;
-		for (SizeType ii=0;ii<v1.sectors();ii++) {
+		for (SizeType ii = 0; ii < v1.sectors(); ++ii) {
 			SizeType i = v1.sector(ii);
-			for (SizeType jj=0;jj<v1.sectors();jj++) {
+			for (SizeType jj = 0; jj < v1.sectors(); ++jj) {
 				SizeType j = v2.sector(jj);
-				if (i!=j) continue;
-				for (SizeType k=0;k<v1.effectiveSize(i);k++)
+				if (i != j) continue;
+				for (SizeType k = 0; k < v1.effectiveSize(i); ++k)
 					sum+= v1.fastAccess(i,k)*PsimagLite::conj(v2.fastAccess(j,k));
 			}
 		}
+
 		return sum;
 	}
 
@@ -512,10 +547,12 @@ public:
 	{
 		VectorWithOffsets w = v;
 
-		for (SizeType ii=0;ii<w.nzMsAndQns_.size();ii++) {
+		for (SizeType ii = 0; ii < w.nzMsAndQns_.size(); ++ii) {
 			SizeType i = w.nzMsAndQns_[ii].first;
+			assert(i < w.data_.size());
 			w.data_[i] *= value;
 		}
+
 		return w;
 	}
 
@@ -523,13 +560,17 @@ public:
 	                                   const VectorWithOffsets& v2)
 	{
 		PsimagLite::String s = "VectorWithOffsets + VectorWithOffsets failed\n";
-		if (v1.nzMsAndQns_!=v2.nzMsAndQns_)
-			throw PsimagLite::RuntimeError(s.c_str());
+		if (v1.nzMsAndQns_ != v2.nzMsAndQns_)
+			err(s.c_str());
+
 		for (SizeType ii=0;ii<v1.nzMsAndQns_.size();ii++) {
 			SizeType i = v1.nzMsAndQns_[ii];
+			if (i >= v1.data_.size() || i >= v2.data_.size())
+				err(s.c_str());
 			if (v1.data_[i].size()!=v2.data_[i].size())
-				throw PsimagLite::RuntimeError(s.c_str());
+				err(s.c_str());
 		}
+
 		VectorWithOffsets w = v1;
 		w += v2;
 		return w;
@@ -539,12 +580,16 @@ private:
 
 	void setIndex2Sector()
 	{
-		if (index2Sector_.size()!=size_) index2Sector_.resize(size_);
-		for (SizeType i=0;i<size_;i++) {
+		if (index2Sector_.size()!=size_)
+			index2Sector_.resize(size_);
+
+		for (SizeType i = 0; i < size_; ++i) {
 			index2Sector_[i] = -1;
-			for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
+			for (SizeType jj = 0; jj < nzMsAndQns_.size(); ++jj) {
 				SizeType j = nzMsAndQns_[jj].first;
-				if (i<offsets_[j] || i>=offsets_[j+1]) continue;
+				assert(j + 1 < offsets_.size());
+				if (i < offsets_[j] || i >= offsets_[j+1])
+					continue;
 				index2Sector_[i] = j;
 			}
 		}
@@ -564,12 +609,12 @@ private:
 				p.push_back(PairSizeType(i, qn));
 			}
 		}
+
 		if (!found) {
 			PsimagLite::OstringStream msg;
 			msg<<"No partition found";
 			progress_.printline(msg,std::cout);
 		}
-
 	}
 
 	template<typename SomeBasisType>
@@ -577,18 +622,21 @@ private:
 	                      const SomeBasisType& someBasis,SizeType i)
 	{
 		typename VectorType::value_type zero = 0;
-		for (SizeType j=someBasis.partition(i);j<someBasis.partition(i+1);j++) {
-			if (v[j]!=zero) return true;
+		for (SizeType j = someBasis.partition(i); j < someBasis.partition(i+1); ++j) {
+			assert(j < v.size());
+			if (v[j] != zero) return true;
 		}
+
 		return false;
 	}
 
 	bool isZero(const VectorType& v) const
 	{
 		RealType eps = 1e-5;
-		for (SizeType i=0;i<v.size();i++)
+		for (SizeType i = 0; i < v.size(); ++i)
 			if (fabs(PsimagLite::real(v[i]))>eps || fabs(PsimagLite::imag(v[i]))>eps)
 				return false;
+
 		return true;
 	}
 
@@ -601,6 +649,7 @@ private:
 			SizeType state = someBasis.partition(i);
 			if (SizeType(someBasis.qn(state))==qn) return i;
 		}
+
 		throw PsimagLite::RuntimeError("findPartitionWithThisQn\n");
 	}
 
