@@ -216,13 +216,19 @@ public:
 	void collapseSectors()
 	{
 		SizeType np = data_.size();
+		if (np != nzMsAndQns_.size()) {
+			PsimagLite::String str("VectorWithOffsets: collapseSectors cannot be called");
+			err(str + " on a partially populated vector\n");
+		}
 
 		typename PsimagLite::Vector<PairSizeType>::Type nzMsAndQns;
-		for (SizeType i=0;i<np;i++) {
-			if (isZero(data_[i]))
+		for (SizeType i = 0; i < np; ++i) {
+			if (isZero(data_[i])) {
 				data_[i].resize(0);
-			else
+			} else {
+				assert(i < nzMsAndQns_.size());
 				nzMsAndQns.push_back(nzMsAndQns_[i]);
+			}
 		}
 
 		nzMsAndQns_ = nzMsAndQns;

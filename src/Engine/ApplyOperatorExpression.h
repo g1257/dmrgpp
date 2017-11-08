@@ -395,7 +395,6 @@ public:
 		                                     src,
 		                                     targetHelper_.lrs(),
 		                                     nk);
-		phiNew.collapseSectors();
 	}
 
 	void wftAll(SizeType site)
@@ -595,36 +594,6 @@ private:
 		} else {
 			throw PsimagLite::RuntimeError("computePhi\n");
 		}
-	}
-
-	void guessPhiSectors(VectorWithOffsetType& phi,
-	                     SizeType i,
-	                     SizeType systemOrEnviron,
-	                     SizeType site)
-	{
-		VectorSizeType electrons;
-		targetHelper_.model().findElectronsOfOneSite(electrons,site);
-		FermionSign fs(targetHelper_.lrs().left(),electrons);
-		if (allStages(WFT_NOADVANCE)) {
-			VectorWithOffsetType tmpVector = psi_;
-			for (SizeType j=0;j<targetHelper_.tstStruct().aOperators().size();j++) {
-				applyOpLocal_(phi,
-				              tmpVector,
-				              targetHelper_.tstStruct().aOperators()[j],
-				              fs,
-				              systemOrEnviron,
-				              ApplyOperatorType::BORDER_NO);
-				tmpVector = phi;
-			}
-			return;
-		}
-
-		applyOpLocal_(phi,
-		              psi_,
-		              targetHelper_.tstStruct().aOperators()[i],
-		              fs,
-		              systemOrEnviron,
-		              ApplyOperatorType::BORDER_NO);
 	}
 
 	PsimagLite::ProgressIndicator progress_;
