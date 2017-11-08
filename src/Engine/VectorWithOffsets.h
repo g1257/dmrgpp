@@ -239,7 +239,7 @@ public:
 
 	SizeType sectors() const { return nzMsAndQns_.size(); }
 
-	SizeType sector(SizeType i) const
+	PairSizeType sector(SizeType i) const
 	{
 		assert(i < nzMsAndQns_.size());
 		return nzMsAndQns_[i];
@@ -422,7 +422,7 @@ public:
 		setIndex2Sector();
 	}
 
-	VectorWithOffsets<ComplexOrRealType> operator+=(const VectorWithOffsets<ComplexOrRealType>& v)
+	VectorWithOffsets operator+=(const VectorWithOffsets& v)
 	{
 		if (nzMsAndQns_.size()==0) {
 			size_ = v.size_;
@@ -448,22 +448,88 @@ public:
 		return index2Sector_[i];
 	}
 
-	template<typename ComplexOrRealType2>
-	friend ComplexOrRealType2 norm(const Dmrg::VectorWithOffsets<ComplexOrRealType2>& v);
+	friend ComplexOrRealType norm(const VectorWithOffsets& v)
+	{
+		ComplexOrRealType sum=0;
+		for (SizeType ii=0;ii<v.nzMsAndQns_.size();ii++) {
+			SizeType i = v.nzMsAndQns_[ii];
+			ComplexOrRealType tmp = PsimagLite::norm(v.data_[i]);
+			sum += tmp*tmp;
+		}
+		return sqrt(sum);
+	}
 
-	template<typename ComplexOrRealType2>
-	friend ComplexOrRealType2 norm(const Dmrg::VectorWithOffsets<std::complex<ComplexOrRealType2> >& v);
+	friend ComplexOrRealType norm(const VectorWithOffsets<std::complex<ComplexOrRealType> >& v)
+	{
+		ComplexOrRealType sum=0;
+		for (SizeType ii=0;ii<v.nzMsAndQns_.size();ii++) {
+			SizeType i = v.nzMsAndQns_[ii];
+			ComplexOrRealType tmp = PsimagLite::norm(v.data_[i]);
+			sum += tmp*tmp;
+		}
+		return sqrt(sum);
+	}
 
-	template<typename ComplexOrRealType2>
-	friend void normalize(Dmrg::VectorWithOffsets<std::complex<ComplexOrRealType2> >& v);
+	friend void normalize(VectorWithOffsets<std::complex<ComplexOrRealType> >& v)
+	{
+		ComplexOrRealType norma = PsimagLite::norm(v);
+		ComplexOrRealType eps = 1e-5;
 
-	template<typename ComplexOrRealType3,typename ComplexOrRealType2>
-	friend VectorWithOffsets<ComplexOrRealType2> operator*(const ComplexOrRealType3&,
-	                                                       const VectorWithOffsets<ComplexOrRealType2>&);
+		if (fabs(norma-1.0)<eps) return;
 
-	template<typename ComplexOrRealType2>
-	friend VectorWithOffsets<ComplexOrRealType2> operator+(const VectorWithOffsets<ComplexOrRealType2>&,
-	                                                       const VectorWithOffsets<ComplexOrRealType2>&);
+		PsimagLite::String s(__FILE__);
+		s += " " + ttos(__LINE__);
+		std::cerr<<s<<" norm= "<<norma<<"\n";
+		assert(fabs(norma)>eps);
+
+		for (SizeType i=0;i<v.data_.size();i++)
+			for (SizeType j=0;j<v.data_[i].size();j++)
+				v.data_[i][j] /= norma;
+	}
+
+	friend ComplexOrRealType operator*(const VectorWithOffsets& v1,
+	                                   const VectorWithOffsets& v2)
+	{
+		ComplexOrRealType sum = 0;
+		for (SizeType ii=0;ii<v1.sectors();ii++) {
+			SizeType i = v1.sector(ii);
+			for (SizeType jj=0;jj<v1.sectors();jj++) {
+				SizeType j = v2.sector(jj);
+				if (i!=j) continue;
+				for (SizeType k=0;k<v1.effectiveSize(i);k++)
+					sum+= v1.fastAccess(i,k)*PsimagLite::conj(v2.fastAccess(j,k));
+			}
+		}
+		return sum;
+	}
+
+	friend VectorWithOffsets<ComplexOrRealType2> operator*(const ComplexOrRealType& value,
+	                                                       const VectorWithOffsets& v)
+	{
+		VectorWithOffsets<ComplexOrRealType2> w = v;
+
+		for (SizeType ii=0;ii<w.nzMsAndQns_.size();ii++) {
+			SizeType i = w.nzMsAndQns_[ii];
+			w.data_[i] *= value;
+		}
+		return w;
+	}
+
+	friend VectorWithOffsets operator+(const VectorWithOffsets& v1,
+	                                   const VectorWithOffsets& v2)
+	{
+		PsimagLite::String s = "VectorWithOffsets + VectorWithOffsets failed\n";
+		if (v1.nzMsAndQns_!=v2.nzMsAndQns_)
+			throw PsimagLite::RuntimeError(s.c_str());
+		for (SizeType ii=0;ii<v1.nzMsAndQns_.size();ii++) {
+			SizeType i = v1.nzMsAndQns_[ii];
+			if (v1.data_[i].size()!=v2.data_[i].size())
+				throw PsimagLite::RuntimeError(s.c_str());
+		}
+		VectorWithOffsets w = v1;
+		w += v2;
+		return w;
+	}
 
 private:
 
@@ -540,95 +606,6 @@ private:
 	typename PsimagLite::Vector<SizeType>::Type offsets_;
 	typename PsimagLite::Vector<PairSizeType>::Type nzMsAndQns_;
 }; // class VectorWithOffset
-
-template<typename ComplexOrRealType>
-inline ComplexOrRealType norm(const Dmrg::VectorWithOffsets<ComplexOrRealType>& v)
-{
-	ComplexOrRealType sum=0;
-	for (SizeType ii=0;ii<v.nzMsAndQns_.size();ii++) {
-		SizeType i = v.nzMsAndQns_[ii];
-		ComplexOrRealType tmp = PsimagLite::norm(v.data_[i]);
-		sum += tmp*tmp;
-	}
-	return sqrt(sum);
-}
-
-template<typename ComplexOrRealType>
-inline ComplexOrRealType norm(const Dmrg::VectorWithOffsets<std::complex<ComplexOrRealType> >& v)
-{
-	ComplexOrRealType sum=0;
-	for (SizeType ii=0;ii<v.nzMsAndQns_.size();ii++) {
-		SizeType i = v.nzMsAndQns_[ii];
-		ComplexOrRealType tmp = PsimagLite::norm(v.data_[i]);
-		sum += tmp*tmp;
-	}
-	return sqrt(sum);
-}
-
-template<typename ComplexOrRealType>
-inline void normalize(Dmrg::VectorWithOffsets<std::complex<ComplexOrRealType> >& v)
-{
-	ComplexOrRealType norma = PsimagLite::norm(v);
-	ComplexOrRealType eps = 1e-5;
-
-	if (fabs(norma-1.0)<eps) return;
-
-	PsimagLite::String s(__FILE__);
-	s += " " + ttos(__LINE__);
-	std::cerr<<s<<" norm= "<<norma<<"\n";
-	assert(fabs(norma)>eps);
-
-	for (SizeType i=0;i<v.data_.size();i++)
-		for (SizeType j=0;j<v.data_[i].size();j++)
-			v.data_[i][j] /= norma;
-}
-
-template<typename ComplexOrRealType>
-inline ComplexOrRealType operator*(const Dmrg::VectorWithOffsets<ComplexOrRealType>& v1,
-                                   const Dmrg::VectorWithOffsets<ComplexOrRealType>& v2)
-{
-	ComplexOrRealType sum = 0;
-	for (SizeType ii=0;ii<v1.sectors();ii++) {
-		SizeType i = v1.sector(ii);
-		for (SizeType jj=0;jj<v1.sectors();jj++) {
-			SizeType j = v2.sector(jj);
-			if (i!=j) continue;
-			for (SizeType k=0;k<v1.effectiveSize(i);k++)
-				sum+= v1.fastAccess(i,k)*PsimagLite::conj(v2.fastAccess(j,k));
-		}
-	}
-	return sum;
-}
-
-template<typename ComplexOrRealType,typename ComplexOrRealType2>
-inline VectorWithOffsets<ComplexOrRealType2> operator*(const ComplexOrRealType& value,
-                                                       const VectorWithOffsets<ComplexOrRealType2>& v)
-{
-	VectorWithOffsets<ComplexOrRealType2> w = v;
-
-	for (SizeType ii=0;ii<w.nzMsAndQns_.size();ii++) {
-		SizeType i = w.nzMsAndQns_[ii];
-		w.data_[i] *= value;
-	}
-	return w;
-}
-
-template<typename ComplexOrRealType>
-VectorWithOffsets<ComplexOrRealType> operator+(const VectorWithOffsets<ComplexOrRealType>& v1,
-                                               const VectorWithOffsets<ComplexOrRealType>& v2)
-{
-	PsimagLite::String s = "VectorWithOffsets + VectorWithOffsets failed\n";
-	if (v1.nzMsAndQns_!=v2.nzMsAndQns_)
-		throw PsimagLite::RuntimeError(s.c_str());
-	for (SizeType ii=0;ii<v1.nzMsAndQns_.size();ii++) {
-		SizeType i = v1.nzMsAndQns_[ii];
-		if (v1.data_[i].size()!=v2.data_[i].size())
-			throw PsimagLite::RuntimeError(s.c_str());
-	}
-	VectorWithOffsets<ComplexOrRealType> w = v1;
-	w += v2;
-	return w;
-}
 
 template<typename ComplexOrRealType>
 const ComplexOrRealType VectorWithOffsets<ComplexOrRealType>::zero_ = 0;

@@ -180,7 +180,7 @@ public:
 
 	SizeType sectors() const { return (size_ == 0) ? 0 : 1; }
 
-	SizeType sector(SizeType) const { return mAndq_.first; }
+	PairSizeType sector(SizeType) const { return mAndq_; }
 
 	SizeType offset(SizeType) const { return offset_; }
 
@@ -272,8 +272,8 @@ public:
 		SizeType q = qns[0];
 		SizeType m = findPartitionWithThisQn(q,someBasis);
 		offset_ = someBasis.partition(m);
-		SizeType qn = someBasis.pseudoEffectiveNumber(offset_);
-		mAndq_ = PairSizeType(m, qn);
+		assert(q == someBasis.pseudoEffectiveNumber(offset_));
+		mAndq_ = PairSizeType(m, q);
 		SizeType total = someBasis.partition(m+1) - offset_;
 		VectorType tmpV(total,0);
 		data_ = tmpV;
@@ -339,19 +339,30 @@ public:
 		return ((i < offset_) || (i >= (offset_+data_.size()))) ? (-1) : (0);
 	}
 
-	template<typename ComplexOrRealType2>
-	friend ComplexOrRealType2 norm(const Dmrg::VectorWithOffset<ComplexOrRealType2>& v);
+	friend ComplexOrRealType operator*(const VectorWithOffset& v1,
+	                                   const VectorWithOffset& v2)
+	{
+		if (v1.mAndq_ != v2.mAndq_) return 0.0;
+		return (v1.data_ * v2.data_);
+	}
 
-	template<typename ComplexOrRealType2>
-	friend ComplexOrRealType2 norm(const Dmrg::VectorWithOffset<std::complex<ComplexOrRealType2> >& v);
+	friend VectorWithOffset<ComplexOrRealType> operator*(const ComplexOrRealType& value,
+	                                                     const VectorWithOffset& v)
+	{
+		VectorWithOffset w = v;
+		w.data_ *= value;
+		return w;
+	}
 
-	template<typename ComplexOrRealType2>
-	friend ComplexOrRealType2 operator*(const Dmrg::VectorWithOffset<ComplexOrRealType2>& v1,
-	                            const Dmrg::VectorWithOffset<ComplexOrRealType2>& v2);
+	friend ComplexOrRealType norm(const VectorWithOffset& v)
+	{
+		return PsimagLite::norm(v.data_);
+	}
 
-	template<typename ComplexOrRealType3,typename ComplexOrRealType2>
-	friend VectorWithOffset<ComplexOrRealType2> operator*(const ComplexOrRealType3& value,
-	                                              const VectorWithOffset<ComplexOrRealType2>& v);
+	friend ComplexOrRealType norm(const VectorWithOffset<std::complex<ComplexOrRealType> >& v)
+	{
+		return PsimagLite::norm(v.data_);
+	}
 
 private:
 
@@ -414,35 +425,6 @@ private:
 
 template<typename ComplexOrRealType>
 const ComplexOrRealType VectorWithOffset<ComplexOrRealType>::zero_=0;
-
-template<typename ComplexOrRealType>
-ComplexOrRealType operator*(const Dmrg::VectorWithOffset<ComplexOrRealType>& v1,
-                    const Dmrg::VectorWithOffset<ComplexOrRealType>& v2)
-{
-	if (v1.mAndq_ != v2.mAndq_) return 0.0;
-	return (v1.data_ * v2.data_);
-}
-
-template<typename ComplexOrRealType,typename ComplexOrRealType2>
-VectorWithOffset<ComplexOrRealType2> operator*(const ComplexOrRealType& value,
-                                       const VectorWithOffset<ComplexOrRealType2>& v)
-{
-	VectorWithOffset<ComplexOrRealType2> w = v;
-	w.data_ *= value;
-	return w;
-}
-
-template<typename ComplexOrRealType>
-ComplexOrRealType norm(const Dmrg::VectorWithOffset<ComplexOrRealType>& v)
-{
-	return PsimagLite::norm(v.data_);
-}
-
-template<typename ComplexOrRealType>
-ComplexOrRealType norm(const Dmrg::VectorWithOffset<std::complex<ComplexOrRealType> >& v)
-{
-	return PsimagLite::norm(v.data_);
-}
 
 }
 /*@}*/
