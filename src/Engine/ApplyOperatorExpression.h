@@ -452,7 +452,7 @@ private:
 	{
 		nonZeroQns_.clear();
 		for (SizeType i=0;i<v.sectors();i++) {
-			SizeType qn = v.sector(i).second;
+			SizeType qn = v.qn(i);
 			nonZeroQns_.push_back(qn);
 		}
 	}

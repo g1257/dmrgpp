@@ -477,8 +477,8 @@ private:
 	{
 		wftImpl_->transformVector(psiDest,psiSrc,lrs,nk);
 
-		RealType norm1 = Dmrg::norm(psiSrc);
-		RealType norm2 = Dmrg::norm(psiDest);
+		RealType norm1 = norm(psiSrc);
+		RealType norm2 = norm(psiDest);
 		PsimagLite::OstringStream msg;
 		msg<<"Transformation completed ";
 		if (fabs(norm1-norm2)>1e-5) {

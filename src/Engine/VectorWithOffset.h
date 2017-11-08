@@ -90,6 +90,7 @@ class VectorWithOffset {
 public:
 
 	typedef ComplexOrRealType value_type;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef std::pair<SizeType,SizeType> PairSizeType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -180,7 +181,9 @@ public:
 
 	SizeType sectors() const { return (size_ == 0) ? 0 : 1; }
 
-	PairSizeType sector(SizeType) const { return mAndq_; }
+	SizeType sector(SizeType) const { return mAndq_.first; }
+
+	SizeType qn(SizeType) const { return mAndq_.second; }
 
 	SizeType offset(SizeType) const { return offset_; }
 
@@ -354,12 +357,7 @@ public:
 		return w;
 	}
 
-	friend ComplexOrRealType norm(const VectorWithOffset& v)
-	{
-		return PsimagLite::norm(v.data_);
-	}
-
-	friend ComplexOrRealType norm(const VectorWithOffset<std::complex<ComplexOrRealType> >& v)
+	friend RealType norm(const VectorWithOffset& v)
 	{
 		return PsimagLite::norm(v.data_);
 	}

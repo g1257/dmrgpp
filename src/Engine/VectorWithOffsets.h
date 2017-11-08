@@ -239,10 +239,16 @@ public:
 
 	SizeType sectors() const { return nzMsAndQns_.size(); }
 
-	PairSizeType sector(SizeType i) const
+	SizeType sector(SizeType i) const
 	{
 		assert(i < nzMsAndQns_.size());
-		return nzMsAndQns_[i];
+		return nzMsAndQns_[i].first;
+	}
+
+	SizeType qn(SizeType i) const
+	{
+		assert(i < nzMsAndQns_.size());
+		return nzMsAndQns_[i].second;
 	}
 
 	template<typename SomeBasisType>
@@ -261,8 +267,7 @@ public:
 		nzMsAndQns_.clear();
 		findPartitions(nzMsAndQns_,v,someBasis);
 		for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
-			SizeType j = nzMsAndQns_[jj];
-			//firstSector_ = j;
+			SizeType j = nzMsAndQns_[jj].first;
 			SizeType offset = offsets_[j];
 			SizeType total = offsets_[j+1]-offset;
 			data_[j].resize(total);
@@ -338,8 +343,11 @@ public:
 		io.printline(s);
 
 		for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
-			SizeType j =  nzMsAndQns_[jj];
+			SizeType j =  nzMsAndQns_[jj].first;
 			s="#sector="+ttos(j);
+			io.printline(s);
+			j = nzMsAndQns_[jj].second;
+			s="#qn="+ttos(j);
 			io.printline(s);
 			io.printVector(data_[j],s);
 		}
@@ -448,29 +456,19 @@ public:
 		return index2Sector_[i];
 	}
 
-	friend ComplexOrRealType norm(const VectorWithOffsets& v)
+	friend RealType norm(const VectorWithOffsets& v)
 	{
-		ComplexOrRealType sum=0;
+		RealType sum=0;
 		for (SizeType ii=0;ii<v.nzMsAndQns_.size();ii++) {
-			SizeType i = v.nzMsAndQns_[ii];
-			ComplexOrRealType tmp = PsimagLite::norm(v.data_[i]);
+			SizeType i = v.nzMsAndQns_[ii].first;
+			RealType tmp = PsimagLite::norm(v.data_[i]);
 			sum += tmp*tmp;
 		}
+
 		return sqrt(sum);
 	}
 
-	friend ComplexOrRealType norm(const VectorWithOffsets<std::complex<ComplexOrRealType> >& v)
-	{
-		ComplexOrRealType sum=0;
-		for (SizeType ii=0;ii<v.nzMsAndQns_.size();ii++) {
-			SizeType i = v.nzMsAndQns_[ii];
-			ComplexOrRealType tmp = PsimagLite::norm(v.data_[i]);
-			sum += tmp*tmp;
-		}
-		return sqrt(sum);
-	}
-
-	friend void normalize(VectorWithOffsets<std::complex<ComplexOrRealType> >& v)
+	friend void normalize(VectorWithOffsets& v)
 	{
 		ComplexOrRealType norma = PsimagLite::norm(v);
 		ComplexOrRealType eps = 1e-5;
@@ -503,13 +501,13 @@ public:
 		return sum;
 	}
 
-	friend VectorWithOffsets<ComplexOrRealType2> operator*(const ComplexOrRealType& value,
-	                                                       const VectorWithOffsets& v)
+	friend VectorWithOffsets operator*(const ComplexOrRealType& value,
+	                                   const VectorWithOffsets& v)
 	{
-		VectorWithOffsets<ComplexOrRealType2> w = v;
+		VectorWithOffsets w = v;
 
 		for (SizeType ii=0;ii<w.nzMsAndQns_.size();ii++) {
-			SizeType i = w.nzMsAndQns_[ii];
+			SizeType i = w.nzMsAndQns_[ii].first;
 			w.data_[i] *= value;
 		}
 		return w;
@@ -547,7 +545,7 @@ private:
 	}
 
 	template<typename SomeBasisType>
-	void findPartitions(typename PsimagLite::Vector<SizeType>::Type& p,
+	void findPartitions(typename PsimagLite::Vector<PairSizeType>::Type& p,
 	                    const VectorType& v,
 	                    const SomeBasisType& someBasis)
 	{
@@ -556,7 +554,8 @@ private:
 		for (SizeType i=0;i<someBasis.partition()-1;i++) {
 			if (nonZeroPartition(v,someBasis,i)) {
 				found = true;
-				p.push_back(i);
+				SizeType qn = someBasis.pseudoEffectiveNumber(someBasis.partition(i));
+				p.push_back(PairSizeType(i, qn));
 			}
 		}
 		if (!found) {
