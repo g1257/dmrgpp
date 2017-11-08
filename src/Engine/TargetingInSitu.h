@@ -253,11 +253,7 @@ private:
 		// see if operator at site has been applied and result put into targetVectors[site]
 		// if no apply operator at site and add into targetVectors[site]
 		// also wft everything
-		VectorSizeType indexForOperators(this->common().targetVectors().size(), 0);
-		for (SizeType i = 0; i < indexForOperators.size(); ++i)
-			indexForOperators[i] = i;
-
-		this->common().wftAll(indexForOperators, site, direction);
+		this->common().wftAll(site);
 
 		int indexOfOperator = 0;
 		SizeType start = 0;

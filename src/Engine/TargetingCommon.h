@@ -433,22 +433,14 @@ public:
 
 	void wftOneVector(VectorWithOffsetType& phiNew,
 	                  const VectorWithOffsetType& src,
-	                  SizeType indexOfOperator,
-	                  SizeType site,
-	                  SizeType systemOrEnviron)
+	                  SizeType site)
 	{
-		applyOpExpression_.wftOneVector(phiNew,
-		                                src,
-		                                indexOfOperator,
-		                                site,
-		                                systemOrEnviron);
+		applyOpExpression_.wftOneVector(phiNew, src, site);
 	}
 
-	void wftAll(const VectorSizeType& indexForOperators,
-	            SizeType site,
-	            SizeType systemOrEnviron)
+	void wftAll(SizeType site)
 	{
-		applyOpExpression_.wftAll(indexForOperators, site, systemOrEnviron);
+		applyOpExpression_.wftAll(site);
 	}
 
 	void cocoon(const BlockType& block,

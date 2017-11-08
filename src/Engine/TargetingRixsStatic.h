@@ -255,8 +255,7 @@ private:
 		// if no apply operator at site and add into targetVectors[site]
 		// also wft everything
 		if (stage_ != STAGE_STATIC2) {
-			VectorSizeType indexForOperators(this->common().targetVectors().size(), 0);
-			this->common().wftAll(indexForOperators, site, direction);
+			this->common().wftAll(site);
 			this->common().applyOneOperator(loopNumber,
 			                                indexOfOperator,
 			                                site,
@@ -269,11 +268,7 @@ private:
 				if (src.size() == 0) continue;
 				VectorWithOffsetType phiNew;
 
-				this->common().wftOneVector(phiNew,
-				                            src,
-				                            indexOfOperator,
-				                            site,
-				                            direction);
+				this->common().wftOneVector(phiNew, src, site);
 				this->common().targetVectors(3*s) = phiNew;
 			}
 

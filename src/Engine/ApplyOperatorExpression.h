@@ -387,9 +387,7 @@ public:
 
 	void wftOneVector(VectorWithOffsetType& phiNew,
 	                  const VectorWithOffsetType& src,
-	                  SizeType indexOfOperator,
-	                  SizeType site,
-	                  SizeType systemOrEnviron)
+	                  SizeType site)
 	{
 		phiNew.populateFromQns(src,targetHelper_.lrs().super());
 
@@ -402,16 +400,13 @@ public:
 		phiNew.collapseSectors();
 	}
 
-	void wftAll(const VectorSizeType& indexForOperators,
-	            SizeType site,
-	            SizeType systemOrEnviron)
+	void wftAll(SizeType site)
 	{
 		for (SizeType index = 0; index < targetVectors_.size(); ++index) {
 			const VectorWithOffsetType& src = targetVectors_[index];
 			if (src.size() == 0) continue;
 			VectorWithOffsetType phiNew;
-			assert(index < indexForOperators.size());
-			wftOneVector(phiNew,src,indexForOperators[index],site,systemOrEnviron);
+			wftOneVector(phiNew,src,site);
 			targetVectors_[index] = phiNew;
 		}
 	}
@@ -598,7 +593,7 @@ private:
 			msg<<"I'm calling the WFT now";
 			progress_.printline(msg,std::cout);
 
-			wftOneVector(phiNew,src,i,site,systemOrEnviron);
+			wftOneVector(phiNew, src, site);
 		} else {
 			throw PsimagLite::RuntimeError("computePhi\n");
 		}

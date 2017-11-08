@@ -263,10 +263,9 @@ private:
 		if (direction == ProgramGlobals::INFINITE) return;
 
 		SizeType indexOfOperator = 0;
-		VectorSizeType indexForOperators(this->common().targetVectors().size(), 0);
 		SizeType center = tstStruct_.sites(indexOfOperator);
 		SizeType numberOfSites = this->lrs().super().block().size();
-		this->common().wftAll(indexForOperators, site,direction);
+		this->common().wftAll(site);
 
 		if (!applied_) {
 			VectorWithOffsetType tmpV1;
