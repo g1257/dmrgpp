@@ -110,7 +110,6 @@ public:
 	TargetParamsCorrectionVector(IoInputter& io,const ModelType& model)
 	    : BaseType(io,model),
 	      cgSteps_(1000),
-	      useQns_(false),
 	      cgEps_(1e-6)
 	{
 		io.readline(correctionA_,"CorrectionA=");
@@ -153,7 +152,7 @@ public:
 		try {
 			int x = 0;
 			io.readline(x,"TSPUseQns=");
-			useQns_ = (x > 0);
+			err("TSPUseQns= is no longer needed, please delete it from the input file\n");
 		} catch (std::exception&) {}
 	}
 
@@ -202,17 +201,11 @@ public:
 		return algorithm_;
 	}
 
-	virtual bool useQns() const
-	{
-		return useQns_;
-	}
-
 private:
 
 	SizeType type_;
 	SizeType algorithm_;
 	SizeType cgSteps_;
-	bool useQns_;
 	RealType correctionA_;
 	PairFreqType omega_;
 	RealType eta_;
@@ -231,7 +224,6 @@ inline std::ostream& operator<<(std::ostream& os,
 	os<<"CorrectionVectorEta="<<t.eta()<<"\n";
 	os<<"ConjugateGradientSteps"<<t.cgSteps()<<"\n";
 	os<<"ConjugateGradientEps"<<t.cgEps()<<"\n";
-	os<<"TSPUseQns="<<t.useQns()<<"\n";
 	return os;
 }
 } // namespace Dmrg

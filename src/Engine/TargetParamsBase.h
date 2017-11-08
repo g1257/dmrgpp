@@ -200,11 +200,6 @@ public:
 		return unimplemented("maxTime");
 	}
 
-	virtual bool useQns() const
-	{
-		return false;
-	}
-
 	virtual SizeType timeSteps() const
 	{
 		return unimplementedInt("timeSteps");

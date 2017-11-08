@@ -125,7 +125,6 @@ public:
 		knownLabels_.push_back("TSPSites");
 		knownLabels_.push_back("TSPLoops");
 		knownLabels_.push_back("TSPProductOrSum");
-		knownLabels_.push_back("TSPUseQns");
 		knownLabels_.push_back("IsPeriodicX");
 		knownLabels_.push_back("Orbitals");
 		knownLabels_.push_back("TSPOperator");
@@ -364,6 +363,8 @@ public:
 		registerOpts.push_back("CorrectionVectorTargetting");
 		registerOpts.push_back("CorrectionTargetting");
 		registerOpts.push_back("TargetingInSitu");
+		registerOpts.push_back("TargetingRixsStatic");
+		registerOpts.push_back("TargetingRixsDynamic");
 		registerOpts.push_back("MettsTargetting");
 		registerOpts.push_back("TargetingAncilla");
 		registerOpts.push_back("geometryallinsystem");

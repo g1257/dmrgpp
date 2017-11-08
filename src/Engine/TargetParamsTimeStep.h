@@ -97,7 +97,7 @@ public:
 	template<typename IoInputter>
 	TargetParamsTimeStep(IoInputter& io,const ModelType& model)
 	    : TimeVectorParamsType(io,model),
-	      maxTime_(0),useQns_(false)
+	      maxTime_(0)
 	{
 		try {
 			io.readline(maxTime_,"TSPMaxTime=");
@@ -106,7 +106,7 @@ public:
 		try {
 			int x = 0;
 			io.readline(x,"TSPUseQns=");
-			useQns_ = (x > 0);
+			err("TSPUseQns= is no longer needed, please delete it from the input file\n");
 		} catch (std::exception&) {}
 	}
 
@@ -115,16 +115,9 @@ public:
 		return maxTime_;
 	}
 
-	virtual bool useQns() const
-	{
-		return useQns_;
-	}
-
 private:
 
 	RealType maxTime_;
-	bool useQns_;
-
 }; // class TargetParamsTimeStep
 
 template<typename ModelType>
@@ -141,8 +134,6 @@ operator<<(std::ostream& os,const TargetParamsTimeStep<ModelType>& t)
 
 	if (t.maxTime() > 0)
 		os<<"TSPMaxTime="<<t.maxTime()<<"\n";
-
-	os<<"TSPUseQns= "<<t.useQns()<<"\n";
 
 	return os;
 }
