@@ -391,11 +391,7 @@ sub prepareDir
 {
 	my $b = (-r "$workdir");
 	system("mkdir $workdir") if (!$b);
-	my $cmd = "diff ../src/dmrg $workdir/dmrg &> /dev/null";
-	my $ret = system($cmd);
-	system("cp -a ../src/dmrg $workdir/") if ($ret != 0);
-	$cmd = "diff ../src/observe $workdir/observe &> /dev/null";
-	$ret = system($cmd);
-	system("cp -av  ../src/observe $workdir/") if ($ret != 0);
+	system("cp -av ../src/dmrg $workdir/");
+	system("cp -av  ../src/observe $workdir/");
 	chdir("$workdir/");
 }
