@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2012, UT-Battelle, LLC
+Copyright (c) 2009-2017, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 4.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -67,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -81,46 +79,43 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef INIT_KRON_HEADER_H
 #define INIT_KRON_HEADER_H
 
-#include "ArrayOfMatStruct.h"
 #include "ProgramGlobals.h"
 
 namespace Dmrg {
 
-template<typename ModelType,typename ModelHelperType_>
+template<typename PreInitKronType>
 class InitKron {
 
 	static const bool KRON_USE_SYMMETRY = false;
 
 public:
 
-	typedef ModelHelperType_ ModelHelperType;
+	typedef typename PreInitKronType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef ArrayOfMatStruct<LeftRightSuperType> ArrayOfMatStructType;
+	typedef typename PreInitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename ArrayOfMatStructType::VectorSizeType VectorSizeType;
 	typedef typename ArrayOfMatStructType::GenIjPatchType GenIjPatchType;
 	typedef typename ModelHelperType::LinkType LinkType;
+	typedef typename PreInitKronType::ModelType ModelType;
 	typedef typename ModelType::LinkProductStructType LinkProductStructType;
-	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 
-	InitKron(const ModelType& model,
-	         const ModelHelperType& modelHelper)
+	InitKron(const ModelType& model, const ModelHelperType& modelHelper)
 	    : model_(model),
 	      modelHelper_(modelHelper),
-	      ijpatches_(modelHelper_.leftRightSuper(),modelHelper_.quantumNumber())
+	      ijpatches_(modelHelper_.leftRightSuper(),modelHelper_.quantumNumber()),
+	      preInitKron_(model_, modelHelper_, ijpatches_, xc_, yc_, values_)
 	{
-		cacheSigns(modelHelper_.leftRightSuper().left().electronsVector());
-		convertXcYcArrays();
-		addHlAndHr();
+		preInitKron_.convertXcYcArrays();
+		preInitKron_.addHlAndHr();
 	}
 
 	~InitKron()
 	{
 		for (SizeType ic=0;ic<xc_.size();ic++) delete xc_[ic];
 		for (SizeType ic=0;ic<yc_.size();ic++) delete yc_[ic];
-
 	}
 
 	bool useSymmetry() const { return KRON_USE_SYMMETRY; }
@@ -173,101 +168,6 @@ public:
 
 private:
 
-	void addHlAndHr()
-	{
-		const RealType value = 1.0;
-		const SparseMatrixType& aL = modelHelper_.leftRightSuper().left().hamiltonian();
-		const SparseMatrixType& aR = modelHelper_.leftRightSuper().right().hamiltonian();
-		identityL_.makeDiagonal(aL.rows(), value);
-		identityR_.makeDiagonal(aR.rows(), value);
-		std::pair<SizeType, SizeType> ops(0,0);
-		std::pair<char, char> mods('n', 'n');
-		LinkType link(0,
-		              0,
-		              ProgramGlobals::SYSTEM_SYSTEM,
-		              value,
-		              0,
-		              ProgramGlobals::BOSON,
-		              ops,
-		              mods,
-		              1,
-		              value,
-		              0);
-		addOneConnection(aL,identityR_,link);
-		addOneConnection(identityL_,aR,link);
-	}
-
-	void convertXcYcArrays()
-	{
-		SizeType total = model_.getLinkProductStruct(modelHelper_);
-
-		for (SizeType ix=0;ix<total;ix++) {
-			SparseMatrixType const* A = 0;
-			SparseMatrixType const* B = 0;
-
-			LinkType link2 = model_.getConnection(&A,&B,ix,modelHelper_);
-			if (link2.type==ProgramGlobals::ENVIRON_SYSTEM)  {
-				LinkType link3 = link2;
-				link3.type = ProgramGlobals::SYSTEM_ENVIRON;
-				if (link3.fermionOrBoson == ProgramGlobals::FERMION)
-					link3.value *= -1.0;
-				addOneConnection(*B,*A,link3);
-				continue;
-			}
-
-			addOneConnection(*A,*B,link2);
-		}
-	}
-
-	void addOneConnection(const SparseMatrixType& A,
-	                      const SparseMatrixType& B,
-	                      const LinkType& link2)
-	{
-		SparseMatrixType Ahat;
-		calculateAhat(Ahat, A, link2.value, link2.fermionOrBoson);
-		values_.push_back(link2.value);
-		RealType threshold = model_.params().denseSparseThreshold;
-		ArrayOfMatStructType* x1 = new ArrayOfMatStructType(Ahat,
-		                                                    ijpatches_,
-		                                                    GenIjPatchType::LEFT,
-		                                                    threshold);
-
-		xc_.push_back(x1);
-
-		ArrayOfMatStructType* y1 = new ArrayOfMatStructType(B,
-		                                                    ijpatches_,
-		                                                    GenIjPatchType::RIGHT,
-		                                                    threshold);
-		yc_.push_back(y1);
-	}
-
-	// Ahat(ia,ja) = (-1)^e_L(ia) A(ia,ja)*value
-	void calculateAhat(SparseMatrixType& Ahat,
-	                   const SparseMatrixType& A,
-	                   ComplexOrRealType val,
-	                   ProgramGlobals::FermionOrBosonEnum bosonOrFermion) const
-	{
-		Ahat = A;
-		SizeType rows = Ahat.rows();
-		assert(signs_.size() == rows);
-		SizeType counter = 0;
-		for (SizeType i = 0; i < rows; ++i) {
-			RealType sign = (bosonOrFermion == ProgramGlobals::FERMION &&
-			                 signs_[i]) ? -1.0 : 1.0;
-			for (int k = Ahat.getRowPtr(i); k < Ahat.getRowPtr(i+1); ++k) {
-				ComplexOrRealType tmp = Ahat.getValue(k)*sign*val;
-				Ahat.setValues(counter++, tmp);
-			}
-		}
-	}
-
-	void cacheSigns(const VectorSizeType& electrons)
-	{
-		signs_.resize(electrons.size(), false);
-		for (SizeType i = 0; i < electrons.size(); ++i)
-			signs_[i] = (electrons[i] & 1) ? true : false;
-	}
-
 	InitKron(const InitKron& other);
 
 	InitKron& operator=(const InitKron& other);
@@ -275,12 +175,10 @@ private:
 	const ModelType& model_;
 	const ModelHelperType& modelHelper_;
 	GenIjPatchType  ijpatches_;
-	SparseMatrixType identityL_;
-	SparseMatrixType identityR_;
-	VectorBoolType signs_;
 	typename PsimagLite::Vector<ArrayOfMatStructType*>::Type xc_;
 	typename PsimagLite::Vector<ArrayOfMatStructType*>::Type yc_;
 	typename PsimagLite::Vector<ComplexOrRealType>::Type values_;
+	PreInitKronType preInitKron_;
 
 }; //class InitKron
 } // namespace PsimagLite

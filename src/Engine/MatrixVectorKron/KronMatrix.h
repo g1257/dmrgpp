@@ -88,13 +88,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ModelType,typename ModelHelperType_>
+template<typename InitKronType>
 class KronMatrix {
 
-	typedef InitKron<ModelType, ModelHelperType_> InitKronType;
 	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef KronConnections<ModelType, ModelHelperType_> KronConnectionsType;
+	typedef KronConnections<InitKronType> KronConnectionsType;
 	typedef typename KronConnectionsType::MatrixType MatrixType;
 	typedef typename KronConnectionsType::VectorType VectorType;
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;

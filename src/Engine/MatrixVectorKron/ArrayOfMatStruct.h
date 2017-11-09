@@ -101,7 +101,7 @@ public:
 	typedef typename GenIjPatchType::BasisType BasisType;
 
 	ArrayOfMatStruct(const SparseMatrixType& sparse,
-	                 GenIjPatchType& patch,
+	                 const GenIjPatchType& patch,
 	                 typename GenIjPatchType::LeftOrRightEnumType leftOrRight,
 	                 const RealType& threshold)
 	    : data_(patch(leftOrRight).size(), patch(leftOrRight).size())

@@ -203,6 +203,18 @@ private:
 		threadedWft.loopCreate(helperWft);
 	}
 
+
+	template<typename SomeVectorType>
+	void transformVectorParallelPatched(SomeVectorType& psiDest,
+	                                    const SomeVectorType& psiSrc,
+	                                    const LeftRightSuperType& lrs,
+	                                    SizeType i0,
+	                                    const VectorSizeType& nk,
+	                                    typename ProgramGlobals::DirectionEnum dir) const
+	{
+
+	}
+
 	template<typename SomeVectorType>
 	void transformVector1FromInfinite(SomeVectorType& psiDest,
 	                                  const SomeVectorType& psiSrc,

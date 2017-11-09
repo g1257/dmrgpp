@@ -87,9 +87,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ModelType, typename ModelHelperType_>
+template<typename InitKronType>
 class KronConnections {
-	typedef InitKron<ModelType,ModelHelperType_> InitKronType;
 
 	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -146,7 +145,6 @@ public:
 				kronMult(x_, offsetX, y_, offsetY, 'n', 'n', Amat, Bmat);
 			}
 		}
-
 	}
 
 	void sync()
