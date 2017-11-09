@@ -1,3 +1,9 @@
+2017-11-09 Version 1.72
+
+* Ainur improvements
+
+* clang compilation fix
+
 2017-09-20 Version 1.70
 
 * scripts: perl open with 3 arguments
