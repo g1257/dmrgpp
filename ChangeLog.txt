@@ -1,5 +1,23 @@
 https://github.com/g1257/dmrgpp/commits/master
 
+2017-11-09 Version 4.60
+
+* IMPORTANT: Compilation fix for new gcc
+
+* Ainur related change
+
+* postCi fix
+
+* RIXS Statics and Dynamics improvements
+  RIXS is still a feature in development
+
+* VectorWithOffset(s) stores qn
+
+* TSPUseQns no longer needed, easier to
+  guess symmetry sector for WFT
+
+* DONT_MIX deleted
+
 2017-09-20 Version 4.58
 
 * rixs static bug fixes
