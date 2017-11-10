@@ -94,12 +94,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename DmrgWaveStructType,typename VectorWithOffsetType>
+template<typename ModelType,
+         typename DmrgWaveStructType,
+         typename VectorWithOffsetType>
 class WaveFunctionTransfLocal : public
-        WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType> {
+        WaveFunctionTransfBase<ModelType, DmrgWaveStructType,VectorWithOffsetType> {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
-	typedef WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType> BaseType;
+	typedef WaveFunctionTransfBase<ModelType,DmrgWaveStructType,VectorWithOffsetType> BaseType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 
 public:
@@ -116,8 +118,7 @@ public:
 	typedef ParallelWftOne<VectorWithOffsetType,
 	DmrgWaveStructType,
 	LeftRightSuperType> ParallelWftType;
-	typedef typename LeftRightSuperType::ModelType ModelType;
-	typedef typename LeftRightSuperType::ModelHelperType ModelHelperType;
+	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef PreInitKronWft<ModelType> PreInitKronType;
 	typedef InitKron<PreInitKronType> InitKronType;
 
