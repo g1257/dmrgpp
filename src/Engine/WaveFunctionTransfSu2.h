@@ -115,15 +115,9 @@ public:
 	LeftRightSuperType> ParallelWftType;
 	typedef MatrixOrIdentity<SparseMatrixType> MatrixOrIdentityType;
 
-	WaveFunctionTransfSu2(const ProgramGlobals::DirectionEnum& stage,
-	                      const bool& firstCall,
-	                      const SizeType& counter,
-	                      const DmrgWaveStructType& dmrgWaveStruct,
+	WaveFunctionTransfSu2(const DmrgWaveStructType& dmrgWaveStruct,
 	                      const WftOptions& wftOptions)
-	    : stage_(stage),
-	      firstCall_(firstCall),
-	      counter_(counter),
-	      dmrgWaveStruct_(dmrgWaveStruct),
+	    : dmrgWaveStruct_(dmrgWaveStruct),
 	      wftOptions_(wftOptions),
 	      progress_("WaveFunctionTransfLocal")
 	{
@@ -139,22 +133,22 @@ public:
 
 	{
 		bool done = false;
-		if (stage_ == ProgramGlobals::EXPAND_ENVIRON) {
+		if (wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) {
 			done = true;
-			if (firstCall_) {
+			if (wftOptions_.firstCall) {
 				transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
-			} else if (counter_==0) {
+			} else if (wftOptions_.counter == 0) {
 				transformVector1bounce(psiDest,psiSrc,lrs,nk);
 			} else {
 				transformVector1(psiDest,psiSrc,lrs,nk);
 			}
 		}
 
-		if (stage_ == ProgramGlobals::EXPAND_SYSTEM) {
+		if (wftOptions_.dir == ProgramGlobals::EXPAND_SYSTEM) {
 			done = true;
-			if (firstCall_)
+			if (wftOptions_.firstCall)
 				transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
-			else if (counter_==0)
+			else if (wftOptions_.counter == 0)
 				transformVector2bounce(psiDest,psiSrc,lrs,nk);
 			else transformVector2(psiDest,psiSrc,lrs,nk);
 		}
@@ -642,9 +636,6 @@ private:
 		return sum;
 	}
 
-	const ProgramGlobals::DirectionEnum& stage_;
-	const bool& firstCall_;
-	const SizeType& counter_;
 	const DmrgWaveStructType& dmrgWaveStruct_;
 	const WftOptions& wftOptions_;
 	PsimagLite::ProgressIndicator progress_;

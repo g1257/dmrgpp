@@ -118,15 +118,9 @@ public:
 	LeftRightSuperType> ParallelWftType;
 	typedef InitKronWft<LeftRightSuperType> InitKronType;
 
-	WaveFunctionTransfLocal(const ProgramGlobals::DirectionEnum& stage,
-	                        const bool& firstCall,
-	                        const SizeType& counter,
-	                        const DmrgWaveStructType& dmrgWaveStruct,
+	WaveFunctionTransfLocal(const DmrgWaveStructType& dmrgWaveStruct,
 	                        const WftOptions& wftOptions)
-	    : stage_(stage),
-	      firstCall_(firstCall),
-	      counter_(counter),
-	      dmrgWaveStruct_(dmrgWaveStruct),
+	    : dmrgWaveStruct_(dmrgWaveStruct),
 	      wftOptions_(wftOptions),
 	      progress_("WaveFunctionTransfLocal")
 	{
@@ -141,10 +135,10 @@ public:
 	                             const VectorSizeType& nk) const
 
 	{
-		if (stage_ == ProgramGlobals::EXPAND_ENVIRON) {
-			if (firstCall_) {
+		if (wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) {
+			if (wftOptions_.firstCall) {
 				transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
-			} else if (counter_==0) {
+			} else if (wftOptions_.counter == 0) {
 				transformVector1bounce(psiDest,psiSrc,lrs,nk);
 			} else {
 				transformVector1(psiDest,psiSrc,lrs,nk);
@@ -153,10 +147,10 @@ public:
 			return;
 		}
 
-		if (stage_ == ProgramGlobals::EXPAND_SYSTEM) {
-			if (firstCall_)
+		if (wftOptions_.dir == ProgramGlobals::EXPAND_SYSTEM) {
+			if (wftOptions_.firstCall)
 				transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
-			else if (counter_==0)
+			else if (wftOptions_.counter == 0)
 				transformVector2bounce(psiDest,psiSrc,lrs,nk);
 			else transformVector2(psiDest,psiSrc,lrs,nk);
 
@@ -545,9 +539,6 @@ private:
 		}
 	}
 
-	const ProgramGlobals::DirectionEnum& stage_;
-	const bool& firstCall_;
-	const SizeType& counter_;
 	const DmrgWaveStructType& dmrgWaveStruct_;
 	const WftOptions& wftOptions_;
 	PsimagLite::ProgressIndicator progress_;

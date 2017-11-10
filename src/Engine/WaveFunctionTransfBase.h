@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef WFT_BASE_H
 #define WFT_BASE_H
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -91,13 +92,28 @@ public:
 		typedef typename DmrgWaveStructType::SparseElementType ComplexOrRealType;
 		typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
-		WftOptions(bool t, bool w, bool k, RealType d)
-		    : twoSiteDmrg(t), wftInPatches(w), kronLoadBalance(k), denseSparseThreshold(d)
+		WftOptions(ProgramGlobals::DirectionEnum dir1,
+		           bool t,
+		           bool w,
+		           bool k,
+		           bool f,
+		           SizeType c,
+		           RealType d)
+		    : dir(dir1),
+		      twoSiteDmrg(t),
+		      wftInPatches(w),
+		      kronLoadBalance(k),
+		      firstCall(f),
+		      counter(c),
+		      denseSparseThreshold(d)
 		{}
 
+		ProgramGlobals::DirectionEnum dir;
 		bool twoSiteDmrg;
 		bool wftInPatches;
 		bool kronLoadBalance;
+		bool firstCall;
+		SizeType counter;
 		RealType denseSparseThreshold;
 	};
 

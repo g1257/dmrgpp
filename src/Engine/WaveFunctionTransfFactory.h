@@ -122,16 +122,19 @@ public:
 	template<typename SomeParametersType>
 	WaveFunctionTransfFactory(SomeParametersType& params)
 	    : isEnabled_(!(params.options.find("nowft")!=PsimagLite::String::npos)),
-	      stage_(ProgramGlobals::INFINITE),
-	      counter_(0),
-	      firstCall_(true),
+	      wftOptions_(ProgramGlobals::INFINITE,
+	                  params.options.find("twositedmrg")!=PsimagLite::String::npos,
+	                  params.options.find("wftInPatches")!=PsimagLite::String::npos,
+	                  params.options.find("KronLoadBalance") != PsimagLite::String::npos,
+	                  true,
+	                  0,
+	                  params.denseSparseThreshold),
 	      progress_("WaveFunctionTransf"),
 	      filenameIn_(params.checkpoint.filename),
 	      filenameOut_(params.filename),
 	      WFT_STRING(ProgramGlobals::WFT_STRING),
 	      wftImpl_(0),
 	      rng_(3433117),
-	      twoSiteDmrg_(params.options.find("twositedmrg")!=PsimagLite::String::npos),
 	      noLoad_(false),
 	      save_(params.options.find("noSaveWft") == PsimagLite::String::npos)
 	{
@@ -152,29 +155,10 @@ public:
 			}
 		}
 
-		bool wftInPatches = (params.options.find("wftInPatches")!=PsimagLite::String::npos);
-		RealType threshold = params.denseSparseThreshold;
-		bool kronLoadBalance = (params.options.find("KronLoadBalance") !=
-		        PsimagLite::String::npos);
-
-		typename WaveFunctionTransfBaseType::WftOptions wftOptions(twoSiteDmrg_,
-		                                                           wftInPatches,
-		                                                           kronLoadBalance,
-		                                                           threshold);
-
-		if (BasisType::useSu2Symmetry()) {
-			wftImpl_=new WaveFunctionTransfSu2Type(stage_,
-			                                       firstCall_,
-			                                       counter_,
-			                                       dmrgWaveStruct_,
-			                                       wftOptions);
-		} else {
-			wftImpl_=new WaveFunctionTransfLocalType(stage_,
-			                                         firstCall_,
-			                                         counter_,
-			                                         dmrgWaveStruct_,
-			                                         wftOptions);
-		}
+		if (BasisType::useSu2Symmetry())
+			wftImpl_=new WaveFunctionTransfSu2Type(dmrgWaveStruct_, wftOptions_);
+		else
+			wftImpl_=new WaveFunctionTransfLocalType(dmrgWaveStruct_, wftOptions_);
 	}
 
 	~WaveFunctionTransfFactory()
@@ -186,15 +170,15 @@ public:
 
 	void setStage(ProgramGlobals::DirectionEnum stage)
 	{
-		if (stage == stage_) return;
-		stage_=stage;
-		counter_=0;
+		if (stage == wftOptions_.dir) return;
+		wftOptions_.dir = stage;
+		wftOptions_.counter = 0;
 	}
 
 	void triggerOn(const LeftRightSuperType& lrs)
 	{
 		bool allow=false;
-		switch (stage_) {
+		switch (wftOptions_.dir) {
 		case ProgramGlobals::INFINITE:
 			allow=false;
 			break;
@@ -224,7 +208,7 @@ public:
 	                      const VectorSizeType& nk) const
 	{
 		bool allow=false;
-		switch (stage_) {
+		switch (wftOptions_.dir) {
 		case ProgramGlobals::INFINITE:
 			allow=false;
 			break;
@@ -257,7 +241,7 @@ public:
 	void triggerOff(const LeftRightSuperType& lrs)
 	{
 		bool allow=false;
-		switch (stage_) {
+		switch (wftOptions_.dir) {
 		case ProgramGlobals::INFINITE:
 			allow=false;
 			break;
@@ -318,7 +302,7 @@ public:
 	{
 		if (!isEnabled_) return;
 
-		switch (stage_) {
+		switch (wftOptions_.dir) {
 		case ProgramGlobals::INFINITE:
 			if (direction == ProgramGlobals::EXPAND_SYSTEM) {
 				wsStack_.push(transform);
@@ -346,7 +330,7 @@ public:
 
 		dmrgWaveStruct_.lrs=lrs;
 		PsimagLite::OstringStream msg;
-		msg<<"OK, pushing option="<<direction<<" and stage="<<stage_;
+		msg<<"OK, pushing option="<<direction<<" and stage="<<wftOptions_.dir;
 		progress_.printline(msg,std::cout);
 
 		if (noLoad_) {
@@ -385,9 +369,9 @@ public:
 		if (!save_) return;
 		PsimagLite::String s="isEnabled="+ttos(isEnabled_);
 		io.printline(s);
-		s="stage="+ttos(stage_);
+		s="stage="+ttos(wftOptions_.dir);
 		io.printline(s);
-		s="counter="+ttos(counter_);
+		s="counter="+ttos(wftOptions_.counter);
 		io.printline(s);
 		io.printline("dmrgWaveStruct");
 
@@ -410,9 +394,9 @@ private:
 
 		typename IoType::In io(utils::pathPrepend(WFT_STRING,filenameIn_));
 		io.readline(isEnabled_,"isEnabled=");
-		io.readline(stage_,"stage=");
-		io.readline(counter_,"counter=");
-		firstCall_=false;
+		io.readline(wftOptions_.dir,"stage=");
+		io.readline(wftOptions_.counter,"counter=");
+		wftOptions_.firstCall = false;
 		io.advance("dmrgWaveStruct");
 		dmrgWaveStruct_.load(io);
 		io.read(wsStack_,"wsStack");
@@ -431,7 +415,7 @@ private:
 
 	void beforeWft(const LeftRightSuperType&)
 	{
-		if (stage_ == ProgramGlobals::EXPAND_ENVIRON) {
+		if (wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) {
 			if (wsStack_.size()>=1) {
 				dmrgWaveStruct_.ws=wsStack_.top();
 				wsStack_.pop();
@@ -442,7 +426,7 @@ private:
 			}
 		}
 
-		if (stage_ == ProgramGlobals::EXPAND_SYSTEM) {
+		if (wftOptions_.dir == ProgramGlobals::EXPAND_SYSTEM) {
 			if (weStack_.size()>=1) {
 				dmrgWaveStruct_.we=weStack_.top();
 				weStack_.pop();
@@ -452,13 +436,13 @@ private:
 				throw PsimagLite::RuntimeError("Environ Stack is empty\n");
 			}
 		}
-		if (counter_ == 0 && stage_ == ProgramGlobals::EXPAND_SYSTEM) {
+		if (wftOptions_.counter == 0 && wftOptions_.dir == ProgramGlobals::EXPAND_SYSTEM) {
 			if (weStack_.size()>=1) {
 				dmrgWaveStruct_.we=weStack_.top();
 			}
 		}
 
-		if (counter_ == 0 && stage_ == ProgramGlobals::EXPAND_ENVIRON) {
+		if (wftOptions_.counter == 0 && wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) {
 			if (wsStack_.size()>=1) {
 				dmrgWaveStruct_.ws=wsStack_.top();
 			}
@@ -488,9 +472,9 @@ private:
 
 	void afterWft(const LeftRightSuperType& lrs)
 	{
-		dmrgWaveStruct_.lrs=lrs;
-		firstCall_=false;
-		counter_++;
+		dmrgWaveStruct_.lrs = lrs;
+		wftOptions_.firstCall = false;
+		wftOptions_.counter++;
 	}
 
 	void printDmrgWave() const
@@ -499,7 +483,7 @@ private:
 		dmrgWaveStruct_.save(io);
 		std::cerr<<"wsStack="<<wsStack_.size()<<"\n";
 		std::cerr<<"weStack="<<weStack_.size()<<"\n";
-		std::cerr<<"counter="<<counter_<<"\n";
+		std::cerr<<"counter="<<wftOptions_.counter<<"\n";
 	}
 
 	SizeType computeCenter(const LeftRightSuperType& lrs,
@@ -541,9 +525,7 @@ private:
 	}
 
 	bool isEnabled_;
-	ProgramGlobals::DirectionEnum stage_;
-	SizeType counter_;
-	bool firstCall_;
+	typename WaveFunctionTransfBaseType::WftOptions wftOptions_;
 	PsimagLite::ProgressIndicator progress_;
 	PsimagLite::String filenameIn_;
 	PsimagLite::String filenameOut_;
