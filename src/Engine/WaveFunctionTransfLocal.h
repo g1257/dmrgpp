@@ -104,6 +104,7 @@ class WaveFunctionTransfLocal : public
 
 public:
 
+	typedef typename BaseType::WftOptions WftOptions;
 	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
@@ -123,12 +124,12 @@ public:
 	                        const bool& firstCall,
 	                        const SizeType& counter,
 	                        const DmrgWaveStructType& dmrgWaveStruct,
-	                        bool twoSiteDmrg)
+	                        const WftOptions& wftOptions)
 	    : stage_(stage),
 	      firstCall_(firstCall),
 	      counter_(counter),
 	      dmrgWaveStruct_(dmrgWaveStruct),
-	      twoSiteDmrg_(twoSiteDmrg),
+	      wftOptions_(wftOptions),
 	      progress_("WaveFunctionTransfLocal")
 	{
 		PsimagLite::OstringStream msg;
@@ -175,13 +176,17 @@ private:
 	                      const LeftRightSuperType& lrs,
 	                      const VectorSizeType& nk) const
 	{
-		if (twoSiteDmrg_)
+		if (wftOptions_.twoSiteDmrg)
 			return transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
 
 		typename ProgramGlobals::DirectionEnum dir1 = ProgramGlobals::EXPAND_ENVIRON;
+
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
-			transformVectorParallel(psiDest,psiSrc,lrs,i0,nk,dir1);
+			if (wftOptions_.wftInPatches)
+				transformVectorParallelPatched(psiDest, psiSrc, lrs, i0, nk, dir1);
+			else
+				transformVectorParallel(psiDest,psiSrc,lrs,i0,nk,dir1);
 		}
 	}
 
@@ -217,9 +222,22 @@ private:
 	                                    const VectorSizeType& nk,
 	                                    typename ProgramGlobals::DirectionEnum dir) const
 	{
-		InitKronType initKron(lrs.model(), lrs.modelHelper());
+		SizeType qn = psiSrc.qn(i0);
+		PreInitKronType preInitKron(lrs,
+		                            i0,
+		                            qn,
+		                            wftOptions_.kronLoadBalance,
+		                            wftOptions_.denseSparseThreshold);
+		//<-- FIXME: dmrgWaveStruct_.lrs
+		InitKronType initKron(preInitKron);
 		KronMatrix<InitKronType> kronMatrix(initKron);
-		kronMatrix.matrixVectorProduct(psiDest, psiSrc);
+		VectorType psiDestOneSector;
+		psiDest.extract(psiDestOneSector, i0);
+
+		VectorType psiSrcOneSector;
+		psiSrc.extract(psiSrcOneSector, i0);
+
+		kronMatrix.matrixVectorProduct(psiDestOneSector, psiSrcOneSector);
 	}
 
 	template<typename SomeVectorType>
@@ -281,7 +299,7 @@ private:
 		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
 		SizeType ni=dmrgWaveStruct_.lrs.left().size();
 		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
-		MatrixOrIdentityType wsRef2(twoSiteDmrg_ && nip>volumeOfNk,ws);
+		MatrixOrIdentityType wsRef2(wftOptions_.twoSiteDmrg && nip>volumeOfNk,ws);
 		SizeType start = weT.getRowPtr(jp);
 		SizeType end = weT.getRowPtr(jp+1);
 		SparseElementType sum=0;
@@ -306,7 +324,7 @@ private:
 	                      const LeftRightSuperType& lrs,
 	                      const VectorSizeType& nk) const
 	{
-		if (twoSiteDmrg_)
+		if (wftOptions_.twoSiteDmrg)
 			return transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
 
 		typename ProgramGlobals::DirectionEnum dir2 = ProgramGlobals::EXPAND_SYSTEM;
@@ -393,7 +411,7 @@ private:
 		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
 		SizeType ni = dmrgWaveStruct_.lrs.right().size()/volumeOfNk;
 
-		MatrixOrIdentityType weRef(twoSiteDmrg_ && ni>volumeOfNk,we);
+		MatrixOrIdentityType weRef(wftOptions_.twoSiteDmrg && ni>volumeOfNk,we);
 		SizeType start = wsT.getRowPtr(is);
 		SizeType end = wsT.getRowPtr(is+1);
 		for (SizeType k2=weRef.getRowPtr(jen);k2<weRef.getRowPtr(jen+1);k2++) {
@@ -424,7 +442,7 @@ private:
 	{
 		SparseMatrixType ws;
 		dmrgWaveStruct_.ws.toSparse(ws);
-		MatrixOrIdentityType wsRef(twoSiteDmrg_,ws);
+		MatrixOrIdentityType wsRef(wftOptions_.twoSiteDmrg, ws);
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
 			transformVector1bounce(psiDest,psiSrc,lrs,i0,nk,wsRef);
@@ -455,7 +473,7 @@ private:
 		PackIndicesType pack1(nip);
 		PackIndicesType pack2(volumeOfNk);
 
-		SizeType nip2 = (twoSiteDmrg_) ? dmrgWaveStruct_.ws.cols() : nip;
+		SizeType nip2 = (wftOptions_.twoSiteDmrg) ? dmrgWaveStruct_.ws.cols() : nip;
 
 		for (SizeType x=0;x<total;x++) {
 			psiDest.fastAccess(i0,x) = 0.0;
@@ -480,7 +498,7 @@ private:
 	{
 		SparseMatrixType we;
 		dmrgWaveStruct_.we.toSparse(we);
-		MatrixOrIdentityType weRef(twoSiteDmrg_, we);
+		MatrixOrIdentityType weRef(wftOptions_.twoSiteDmrg, we);
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
 			transformVector2bounce(psiDest,psiSrc,lrs,i0,nk,weRef);
@@ -534,7 +552,7 @@ private:
 	const bool& firstCall_;
 	const SizeType& counter_;
 	const DmrgWaveStructType& dmrgWaveStruct_;
-	bool twoSiteDmrg_;
+	const WftOptions& wftOptions_;
 	PsimagLite::ProgressIndicator progress_;
 }; // class WaveFunctionTransfLocal
 } // namespace Dmrg

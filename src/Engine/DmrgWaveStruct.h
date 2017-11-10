@@ -84,6 +84,7 @@ namespace Dmrg {
 	
 template<typename LeftRightSuperType_>
 struct DmrgWaveStruct {
+
 	typedef LeftRightSuperType_ LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;

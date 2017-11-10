@@ -83,16 +83,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename LeftRightSuperType>
-class PreInitKronWft : public PreInitKronBase<LeftRightSuperType> {
+template<typename LeftRightSuperType_>
+class PreInitKronWft : public PreInitKronBase<LeftRightSuperType_> {
 
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 
 public:
 
+	typedef LeftRightSuperType_ LeftRightSuperType;
 	typedef PreInitKronBase<LeftRightSuperType> BaseType;
 	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
-	typedef typename LeftRightSuperType::LinkType LinkType;
+	typedef typename BaseType::LinkType LinkType;
 	typedef typename LeftRightSuperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename BaseType::ArrayOfMatStructType ArrayOfMatStructType;
@@ -103,8 +104,12 @@ public:
 	typedef typename LinkType::PairSizeType PairSizetype;
 	typedef typename LinkType::PairCharType PairCharType;
 
-	PreInitKronWft(const LeftRightSuperType& lrs)
-	    : BaseType(lrs)
+	PreInitKronWft(const LeftRightSuperType& lrs,
+	               SizeType m,
+	               SizeType qn,
+	               bool kronLoadBalance,
+	               RealType denseOrSparseThreshold)
+	    : BaseType(lrs, m, qn, denseOrSparseThreshold), kronLoadBalance_(kronLoadBalance)
 	{
 		// FIXME: dmrgWaveStruct_.lrs() vs. modelHelper_.lrs(), which one to use?
 		SparseMatrixType we;
@@ -113,25 +118,24 @@ public:
 		const PairSizetype dummy(0, 0);
 		const ComplexOrRealType value = 1.0;
 
-		LinkType(0,
-		         0,
-		         ProgramGlobals::SYSTEM_ENVIRON,
-		         value,
-		         1,
-		         ProgramGlobals::BOSON,
-		         dummy,
-		         nn,
-		         1,
-		         1,
-		         0);
+		LinkType link(0,
+		              0,
+		              ProgramGlobals::SYSTEM_ENVIRON,
+		              value,
+		              1,
+		              ProgramGlobals::BOSON,
+		              dummy,
+		              nn,
+		              1,
+		              1,
+		              0);
 
 		SparseMatrixType ws;
 		//dmrgWaveStruct_.ws.toSparse(ws);
-		LinkType link();
 		//if (dir_ == ProgramGlobals::EXPAND_SYSTEM) {
 		SparseMatrixType wsT;
 		transposeConjugate(wsT,ws);
-		addOneConnection(wsT, we, link);
+		this->addOneConnection(wsT, we, link);
 		/*} else {
 			SparseMatrixType weT;
 			transposeConjugate(weT,we);
@@ -139,7 +143,14 @@ public:
 		}*/
 	}
 
+	bool loadBalance() const
+	{
+		return kronLoadBalance_;
+	}
+
 private:
+
+	const bool kronLoadBalance_;
 
 	PreInitKronWft(const PreInitKronWft&);
 

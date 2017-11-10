@@ -98,20 +98,16 @@ public:
 	typedef typename ArrayOfMatStructType::VectorSizeType VectorSizeType;
 	typedef typename ArrayOfMatStructType::GenIjPatchType GenIjPatchType;
 	typedef typename PreInitKronType::LinkType LinkType;
-	typedef typename PreInitKronType::ModelType ModelType;
-	typedef typename ModelType::LinkProductStructType LinkProductStructType;
 
-	InitKron(PreInitKronType& preInitKron, bool loadBalance)
-	    : preInitKron_(preInitKron), loadBalance_(loadBalance)
+	InitKron(PreInitKronType& preInitKron)
+	    : preInitKron_(preInitKron)
 	{}
 
 	bool useSymmetry() const { return KRON_USE_SYMMETRY; }
 
 	bool loadBalance() const
 	{
-		return loadBalance_;
-//		return (model_.params().options.find("KronNoLoadBalance")
-//		        == PsimagLite::String::npos);
+		return preInitKron_.loadBalance();
 	}
 
 	const ArrayOfMatStructType& xc(SizeType ic) const
@@ -126,21 +122,20 @@ public:
 
 	const VectorSizeType& patch(typename GenIjPatchType::LeftOrRightEnumType i) const
 	{
-		return ijpatches_(i);
+		return preInitKron_.patch(i);
 	}
 
-//	const LeftRightSuperType& lrs() const
-//	{
-//		return modelHelper_.leftRightSuper();
-//	}
+	const LeftRightSuperType& lrs() const
+	{
+		return preInitKron_.lrs();
+	}
 
-//	SizeType offset() const
-//	{
-//		SizeType m = modelHelper_.m();
-//		return modelHelper_.leftRightSuper().super().partition(m);
-//	}
+	SizeType offset() const
+	{
+		return preInitKron_.offset();
+	}
 
-//	SizeType size() const { return modelHelper_.size(); }
+	SizeType size() const { return preInitKron_.size(); }
 
 	SizeType connections() const { return preInitKron_.connections(); }
 
@@ -156,7 +151,6 @@ private:
 	InitKron& operator=(const InitKron& other);
 
 	PreInitKronType& preInitKron_;
-	bool loadBalance_;
 }; //class InitKron
 } // namespace PsimagLite
 

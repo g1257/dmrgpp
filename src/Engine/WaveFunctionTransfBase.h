@@ -84,7 +84,22 @@ namespace Dmrg {
 
 template<typename DmrgWaveStructType,typename VectorWithOffsetType>
 class WaveFunctionTransfBase {
+
 public:
+
+	struct WftOptions {
+		typedef typename DmrgWaveStructType::SparseElementType ComplexOrRealType;
+		typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+
+		WftOptions(bool t, bool w, bool k, RealType d)
+		    : twoSiteDmrg(t), wftInPatches(w), kronLoadBalance(k), denseSparseThreshold(d)
+		{}
+
+		bool twoSiteDmrg;
+		bool wftInPatches;
+		bool kronLoadBalance;
+		RealType denseSparseThreshold;
+	};
 
 	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
 	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;

@@ -114,6 +114,11 @@ public:
 		convertXcYcArrays();
 	}
 
+	bool loadBalance() const
+	{
+			return (model_.params().options.find("KronLoadBalance") != PsimagLite::String::npos);
+	}
+
 private:
 
 	void addHlAndHr()

@@ -102,10 +102,12 @@ public:
 	typedef typename ArrayOfMatStructType::VectorSizeType VectorSizeType;
 
 	PreInitKronBase(const LeftRightSuperType& lrs,
+	                SizeType m,
 	                SizeType qn,
 	                RealType denseSparseThreshold)
-	    : denseSparseThreshold_(denseSparseThreshold),
-	      ijpatches_(lrs,qn)
+	    : m_(m),
+	      denseSparseThreshold_(denseSparseThreshold),
+	      ijpatches_(lrs, qn)
 	{
 		cacheSigns(lrs.left().electronsVector());
 	}
@@ -114,6 +116,21 @@ public:
 	{
 		for (SizeType ic=0;ic<xc_.size();ic++) delete xc_[ic];
 		for (SizeType ic=0;ic<yc_.size();ic++) delete yc_[ic];
+	}
+
+	const LeftRightSuperType& lrs() const
+	{
+		return ijpatches_.lrs();
+	}
+
+	const VectorSizeType& patch(typename GenIjPatchType::LeftOrRightEnumType i) const
+	{
+		return ijpatches_(i);
+	}
+
+	SizeType offset() const
+	{
+		return ijpatches_.lrs().super().partition(m_);
 	}
 
 	const ArrayOfMatStructType& xc(SizeType ic) const
@@ -137,6 +154,14 @@ public:
 	}
 
 	SizeType connections() const { return xc_.size(); }
+
+	SizeType size() const
+	{
+		assert(ijpatches_.lrs().super().partition(m_ + 1) >=
+		       ijpatches_.lrs().super().partition(m_));
+		return ijpatches_.lrs().super().partition(m_ + 1) -
+		       ijpatches_.lrs().super().partition(m_);
+	}
 
 protected:
 
@@ -194,6 +219,7 @@ private:
 
 	PreInitKronBase& operator=(const PreInitKronBase&);
 
+	SizeType m_;
 	const RealType& denseSparseThreshold_;
 	GenIjPatchType ijpatches_;
 	VectorArrayOfMatStructType xc_;

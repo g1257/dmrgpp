@@ -97,7 +97,7 @@ public:
 	enum LeftOrRightEnumType {LEFT=0,RIGHT=1};
 
 	GenIjPatch(const LeftRightSuperType& lrs, int target)
-	    : lrs_(lrs)
+	    : lrs_(lrs), qn_(target)
 	{
 		for (SizeType i=0;i<lrs.left().partition()-1;i++) {
 			SizeType istart = lrs.left().partition(i);
@@ -115,6 +115,8 @@ public:
 		}
 	}
 
+	SizeType qn() const { return qn_; }
+
 	const VectorSizeType& operator()(LeftOrRightEnumType leftOrRight) const
 	{
 		return (leftOrRight==LEFT) ? patchesLeft_ : patchesRight_;
@@ -125,6 +127,7 @@ public:
 private:
 
 	const LeftRightSuperType& lrs_;
+	SizeType qn_;
 	VectorSizeType patchesLeft_;
 	VectorSizeType patchesRight_;
 

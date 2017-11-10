@@ -101,6 +101,7 @@ class WaveFunctionTransfSu2  : public
 
 public:
 
+	typedef typename BaseType::WftOptions WftOptions;
 	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
@@ -118,12 +119,12 @@ public:
 	                      const bool& firstCall,
 	                      const SizeType& counter,
 	                      const DmrgWaveStructType& dmrgWaveStruct,
-	                      bool twoSiteDmrg)
+	                      const WftOptions& wftOptions)
 	    : stage_(stage),
 	      firstCall_(firstCall),
 	      counter_(counter),
 	      dmrgWaveStruct_(dmrgWaveStruct),
-	      twoSiteDmrg_(twoSiteDmrg),
+	      wftOptions_(wftOptions),
 	      progress_("WaveFunctionTransfLocal")
 	{
 		PsimagLite::OstringStream msg;
@@ -170,7 +171,7 @@ private:
 	                      const LeftRightSuperType& lrs,
 	                      const VectorSizeType& nk) const
 	{
-		if (twoSiteDmrg_)
+		if (wftOptions_.twoSiteDmrg)
 			return transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
 
 		typename ProgramGlobals::DirectionEnum dir1 = ProgramGlobals::EXPAND_ENVIRON;
@@ -186,7 +187,7 @@ private:
 	                      const LeftRightSuperType& lrs,
 	                      const VectorSizeType& nk) const
 	{
-		if (twoSiteDmrg_)
+		if (wftOptions_.twoSiteDmrg)
 			return transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
 
 		typename ProgramGlobals::DirectionEnum dir2 = ProgramGlobals::EXPAND_SYSTEM;
@@ -297,7 +298,7 @@ private:
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType ni=dmrgWaveStruct_.ws.cols();
 		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
-		MatrixOrIdentityType wsRef2(twoSiteDmrg_ && nip>volumeOfNk,ws);
+		MatrixOrIdentityType wsRef2(wftOptions_.twoSiteDmrg && nip>volumeOfNk,ws);
 		const FactorsType& factorsS = dmrgWaveStruct_.lrs.left().getFactors();
 		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
 		SparseElementType sum=0;
@@ -424,7 +425,7 @@ private:
 		SizeType ni = dmrgWaveStruct_.lrs.right().size()/volumeOfNk;
 		const FactorsType& factorsE = dmrgWaveStruct_.lrs.right().getFactors();
 		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
-		MatrixOrIdentityType weRef(twoSiteDmrg_ && ni>volumeOfNk,we);
+		MatrixOrIdentityType weRef(wftOptions_.twoSiteDmrg && ni>volumeOfNk,we);
 
 		for (SizeType k2=weRef.getRowPtr(jp);k2<weRef.getRowPtr(jp+1);k2++) {
 			int j = weRef.getColOrExit(k2);
@@ -523,7 +524,7 @@ private:
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType ni=dmrgWaveStruct_.ws.cols();
 		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
-		MatrixOrIdentityType wsRef2(twoSiteDmrg_ && nip>volumeOfNk,ws);
+		MatrixOrIdentityType wsRef2(wftOptions_.twoSiteDmrg && nip>volumeOfNk,ws);
 		const FactorsType& factorsS = dmrgWaveStruct_.lrs.left().getFactors();
 		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
 		SparseElementType sum=0;
@@ -620,7 +621,7 @@ private:
 		SizeType ni = dmrgWaveStruct_.lrs.right().size()/volumeOfNk;
 		const FactorsType& factorsE = dmrgWaveStruct_.lrs.right().getFactors();
 		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
-		MatrixOrIdentityType weRef(twoSiteDmrg_ && ni>volumeOfNk,we);
+		MatrixOrIdentityType weRef(wftOptions_.twoSiteDmrg && ni>volumeOfNk,we);
 
 		for (SizeType k2=weRef.getRowPtr(jp);k2<weRef.getRowPtr(jp+1);k2++) {
 			int j = weRef.getColOrExit(k2);
@@ -645,7 +646,7 @@ private:
 	const bool& firstCall_;
 	const SizeType& counter_;
 	const DmrgWaveStructType& dmrgWaveStruct_;
-	bool twoSiteDmrg_;
+	const WftOptions& wftOptions_;
 	PsimagLite::ProgressIndicator progress_;
 
 }; // class WaveFunctionTransfSu2

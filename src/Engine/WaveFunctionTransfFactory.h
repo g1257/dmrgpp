@@ -152,20 +152,28 @@ public:
 			}
 		}
 
-		// bool inBlocks = (params.options.find("wftInPatches")!=PsimagLite::String::npos);
+		bool wftInPatches = (params.options.find("wftInPatches")!=PsimagLite::String::npos);
+		RealType threshold = params.denseSparseThreshold;
+		bool kronLoadBalance = (params.options.find("KronLoadBalance") !=
+		        PsimagLite::String::npos);
+
+		typename WaveFunctionTransfBaseType::WftOptions wftOptions(twoSiteDmrg_,
+		                                                           wftInPatches,
+		                                                           kronLoadBalance,
+		                                                           threshold);
 
 		if (BasisType::useSu2Symmetry()) {
 			wftImpl_=new WaveFunctionTransfSu2Type(stage_,
 			                                       firstCall_,
 			                                       counter_,
 			                                       dmrgWaveStruct_,
-			                                       twoSiteDmrg_);
+			                                       wftOptions);
 		} else {
 			wftImpl_=new WaveFunctionTransfLocalType(stage_,
 			                                         firstCall_,
 			                                         counter_,
 			                                         dmrgWaveStruct_,
-			                                         twoSiteDmrg_);
+			                                         wftOptions);
 		}
 	}
 
