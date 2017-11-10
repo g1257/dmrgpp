@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename LeftRightSuperType_>
+template<typename LeftRightSuperType_, typename WftOptionsType, typename DmrgWaveStructType>
 class InitKronWft : public InitKronBase<LeftRightSuperType_> {
 
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
@@ -105,15 +105,16 @@ public:
 	typedef typename LinkType::PairCharType PairCharType;
 
 	InitKronWft(const LeftRightSuperType& lrs,
-	               SizeType m,
-	               SizeType qn,
-	               bool kronLoadBalance,
-	               RealType denseOrSparseThreshold)
-	    : BaseType(lrs, m, qn, denseOrSparseThreshold), kronLoadBalance_(kronLoadBalance)
+	            SizeType m,
+	            SizeType qn,
+	            const WftOptionsType& wftOptions,
+	            const DmrgWaveStructType& dmrgWaveStruct)
+	    : BaseType(lrs, m, qn, wftOptions.denseSparseThreshold),
+	      wftOptions_(wftOptions)
 	{
 		// FIXME: dmrgWaveStruct_.lrs() vs. modelHelper_.lrs(), which one to use?
 		SparseMatrixType we;
-		// dmrgWaveStruct_.we.toSparse(we);
+		dmrgWaveStruct.we.toSparse(we);
 		const PairCharType nn('N', 'N');
 		const PairSizetype dummy(0, 0);
 		const ComplexOrRealType value = 1.0;
@@ -131,26 +132,26 @@ public:
 		              0);
 
 		SparseMatrixType ws;
-		//dmrgWaveStruct_.ws.toSparse(ws);
-		//if (dir_ == ProgramGlobals::EXPAND_SYSTEM) {
+		dmrgWaveStruct.ws.toSparse(ws);
+		if (wftOptions_.dir == ProgramGlobals::EXPAND_SYSTEM) {
 		SparseMatrixType wsT;
 		transposeConjugate(wsT,ws);
 		this->addOneConnection(wsT, we, link);
-		/*} else {
+		} else {
 			SparseMatrixType weT;
 			transposeConjugate(weT,we);
-			addOneConnection(ws, weT, link);
-		}*/
+			this->addOneConnection(ws, weT, link);
+		}
 	}
 
 	bool loadBalance() const
 	{
-		return kronLoadBalance_;
+		return wftOptions_.kronLoadBalance;
 	}
 
 private:
 
-	const bool kronLoadBalance_;
+	const WftOptionsType& wftOptions_;
 
 	InitKronWft(const InitKronWft&);
 

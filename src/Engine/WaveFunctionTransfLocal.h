@@ -116,7 +116,7 @@ public:
 	typedef ParallelWftOne<VectorWithOffsetType,
 	DmrgWaveStructType,
 	LeftRightSuperType> ParallelWftType;
-	typedef InitKronWft<LeftRightSuperType> InitKronType;
+	typedef InitKronWft<LeftRightSuperType, WftOptions, DmrgWaveStructType> InitKronType;
 
 	WaveFunctionTransfLocal(const DmrgWaveStructType& dmrgWaveStruct,
 	                        const WftOptions& wftOptions)
@@ -215,11 +215,7 @@ private:
 	                                    typename ProgramGlobals::DirectionEnum dir) const
 	{
 		SizeType qn = psiSrc.qn(i0);
-		InitKronType initKron(lrs,
-		                      i0,
-		                      qn,
-		                      wftOptions_.kronLoadBalance,
-		                      wftOptions_.denseSparseThreshold);
+		InitKronType initKron(lrs, i0, qn, wftOptions_, dmrgWaveStruct_);
 		//<-- FIXME: dmrgWaveStruct_.lrs
 		KronMatrix<InitKronType> kronMatrix(initKron);
 		VectorType psiDestOneSector;
@@ -229,6 +225,7 @@ private:
 		psiSrc.extract(psiSrcOneSector, i0);
 
 		kronMatrix.matrixVectorProduct(psiDestOneSector, psiSrcOneSector);
+		psiDest.setDataInSector(psiDestOneSector, i0);
 	}
 
 	template<typename SomeVectorType>
