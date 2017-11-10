@@ -91,14 +91,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ModelType,
-         typename DmrgWaveStructType,
-         typename VectorWithOffsetType>
+template<typename DmrgWaveStructType,typename VectorWithOffsetType>
 class WaveFunctionTransfSu2  : public
-        WaveFunctionTransfBase<ModelType, DmrgWaveStructType,VectorWithOffsetType> {
+        WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType> {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
-	typedef WaveFunctionTransfBase<ModelType,DmrgWaveStructType,VectorWithOffsetType> BaseType;
+	typedef WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType> BaseType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 
 public:

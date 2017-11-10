@@ -108,7 +108,8 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename BasisType::BlockType BlockType;
-	typedef WaveFunctionTransfFactory<ModelType, VectorWithOffsetType> WaveFunctionTransfType;
+	typedef WaveFunctionTransfFactory<LeftRightSuperType,
+	                                  VectorWithOffsetType> WaveFunctionTransfType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
 	typedef TargetParamsBase<ModelType> TargetParamsType;

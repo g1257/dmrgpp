@@ -82,11 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ModelType,
-         typename DmrgWaveStructType,
-         typename VectorWithOffsetType>
+template<typename DmrgWaveStructType,typename VectorWithOffsetType>
 class WaveFunctionTransfBase {
-
 public:
 
 	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
@@ -100,6 +97,11 @@ public:
 	                             const VectorSizeType& nk) const = 0;
 
 	virtual ~WaveFunctionTransfBase() {}
+
+protected:
+
+
+
 }; // class WaveFunctionTransfBase
 } // namespace Dmrg
 

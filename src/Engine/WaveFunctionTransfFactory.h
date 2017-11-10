@@ -91,7 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DiskStack.h"
 
 namespace Dmrg {
-template<typename ModelType,typename VectorWithOffsetType_>
+template<typename LeftRightSuperType,typename VectorWithOffsetType_>
 class WaveFunctionTransfFactory {
 
 	typedef PsimagLite::IoSimple IoType;
@@ -100,7 +100,6 @@ public:
 
 	enum {DO_NOT_RESET_COUNTER,RESET_COUNTER};
 
-	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
@@ -113,11 +112,11 @@ public:
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef DmrgWaveStruct<LeftRightSuperType> DmrgWaveStructType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
-	typedef WaveFunctionTransfBase<ModelType, DmrgWaveStructType,VectorWithOffsetType>
+	typedef WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType>
 	WaveFunctionTransfBaseType;
-	typedef WaveFunctionTransfLocal<ModelType, DmrgWaveStructType,VectorWithOffsetType>
+	typedef WaveFunctionTransfLocal<DmrgWaveStructType,VectorWithOffsetType>
 	WaveFunctionTransfLocalType;
-	typedef WaveFunctionTransfSu2<ModelType, DmrgWaveStructType,VectorWithOffsetType>
+	typedef WaveFunctionTransfSu2<DmrgWaveStructType,VectorWithOffsetType>
 	WaveFunctionTransfSu2Type;
 
 	template<typename SomeParametersType>

@@ -78,13 +78,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PREINITKRON_HAMILTONIAN_H
 #define PREINITKRON_HAMILTONIAN_H
 #include "ProgramGlobals.h"
-#include "ArrayOfMatStruct.h"
+#include "PreInitKronBase.h"
 #include "Vector.h"
 
 namespace Dmrg {
 
 template<typename ModelType_>
-class PreInitKronHamiltonian {
+class PreInitKronHamiltonian : public PreInitKronBase<typename ModelType_::LeftRightSuperType> {
 
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 
@@ -92,32 +92,29 @@ public:
 
 	typedef ModelType_ ModelType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef PreInitKronBase<LeftRightSuperType> BaseType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::LinkType LinkType;
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef ArrayOfMatStruct<LeftRightSuperType> ArrayOfMatStructType;
+	typedef typename BaseType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename ArrayOfMatStructType::GenIjPatchType GenIjPatchType;
 	typedef typename PsimagLite::Vector<ArrayOfMatStructType*>::Type VectorArrayOfMatStructType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef typename ArrayOfMatStructType::VectorSizeType VectorSizeType;
 
 	PreInitKronHamiltonian(const ModelType& model,
-	                       const ModelHelperType& modelHelper,
-	                       const GenIjPatchType& ijpatches,
-	                       VectorArrayOfMatStructType& xc,
-	                       VectorArrayOfMatStructType& yc,
-	                       VectorType& values)
-	    : model_(model),
-	      modelHelper_(modelHelper),
-	      ijpatches_(ijpatches),
-	      xc_(xc),
-	      yc_(yc),
-	      values_(values)
+	                       const ModelHelperType& modelHelper)
+	    : BaseType(modelHelper_.leftRightSuper()),
+	      model_(model),
+	      modelHelper_(modelHelper)
 	{
-		cacheSigns(modelHelper_.leftRightSuper().left().electronsVector());
+		addHlAndHr();
+		convertXcYcArrays();
 	}
+
+private:
 
 	void addHlAndHr()
 	{
@@ -165,68 +162,12 @@ public:
 		}
 	}
 
-private:
-
-	void addOneConnection(const SparseMatrixType& A,
-	                      const SparseMatrixType& B,
-	                      const LinkType& link2)
-	{
-		SparseMatrixType Ahat;
-		calculateAhat(Ahat, A, link2.value, link2.fermionOrBoson);
-		values_.push_back(link2.value);
-		RealType threshold = model_.params().denseSparseThreshold;
-		ArrayOfMatStructType* x1 = new ArrayOfMatStructType(Ahat,
-		                                                    ijpatches_,
-		                                                    GenIjPatchType::LEFT,
-		                                                    threshold);
-
-		xc_.push_back(x1);
-
-		ArrayOfMatStructType* y1 = new ArrayOfMatStructType(B,
-		                                                    ijpatches_,
-		                                                    GenIjPatchType::RIGHT,
-		                                                    threshold);
-		yc_.push_back(y1);
-	}
-
-	// Ahat(ia,ja) = (-1)^e_L(ia) A(ia,ja)*value
-	void calculateAhat(SparseMatrixType& Ahat,
-	                   const SparseMatrixType& A,
-	                   ComplexOrRealType val,
-	                   ProgramGlobals::FermionOrBosonEnum bosonOrFermion) const
-	{
-		Ahat = A;
-		SizeType rows = Ahat.rows();
-		assert(signs_.size() == rows);
-		SizeType counter = 0;
-		for (SizeType i = 0; i < rows; ++i) {
-			RealType sign = (bosonOrFermion == ProgramGlobals::FERMION &&
-			                 signs_[i]) ? -1.0 : 1.0;
-			for (int k = Ahat.getRowPtr(i); k < Ahat.getRowPtr(i+1); ++k) {
-				ComplexOrRealType tmp = Ahat.getValue(k)*sign*val;
-				Ahat.setValues(counter++, tmp);
-			}
-		}
-	}
-
-	void cacheSigns(const VectorSizeType& electrons)
-	{
-		signs_.resize(electrons.size(), false);
-		for (SizeType i = 0; i < electrons.size(); ++i)
-			signs_[i] = (electrons[i] & 1) ? true : false;
-	}
-
 	PreInitKronHamiltonian(const PreInitKronHamiltonian&);
 
 	PreInitKronHamiltonian& operator=(const PreInitKronHamiltonian&);
 
 	const ModelType& model_;
 	const ModelHelperType& modelHelper_;
-	const GenIjPatchType& ijpatches_;
-	VectorArrayOfMatStructType& xc_;
-	VectorArrayOfMatStructType& yc_;
-	VectorType& values_;
-	VectorBoolType signs_;
 	SparseMatrixType identityL_;
 	SparseMatrixType identityR_;
 };

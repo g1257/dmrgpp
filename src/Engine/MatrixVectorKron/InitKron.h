@@ -90,54 +90,38 @@ class InitKron {
 
 public:
 
-	typedef typename PreInitKronType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename PreInitKronType::LeftRightSuperType LeftRightSuperType;
+	typedef typename LeftRightSuperType::RealType RealType;
+	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename PreInitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename ArrayOfMatStructType::VectorSizeType VectorSizeType;
 	typedef typename ArrayOfMatStructType::GenIjPatchType GenIjPatchType;
-	typedef typename ModelHelperType::LinkType LinkType;
+	typedef typename PreInitKronType::LinkType LinkType;
 	typedef typename PreInitKronType::ModelType ModelType;
 	typedef typename ModelType::LinkProductStructType LinkProductStructType;
 
-	InitKron(const ModelType& model, const ModelHelperType& modelHelper)
-	    : model_(model),
-	      modelHelper_(modelHelper),
-	      ijpatches_(modelHelper_.leftRightSuper(),modelHelper_.quantumNumber()),
-	      preInitKron_(model_, modelHelper_, ijpatches_, xc_, yc_, values_)
-	{
-		preInitKron_.convertXcYcArrays();
-		preInitKron_.addHlAndHr();
-	}
-
-	~InitKron()
-	{
-		for (SizeType ic=0;ic<xc_.size();ic++) delete xc_[ic];
-		for (SizeType ic=0;ic<yc_.size();ic++) delete yc_[ic];
-	}
+	InitKron(PreInitKronType& preInitKron, bool loadBalance)
+	    : preInitKron_(preInitKron), loadBalance_(loadBalance)
+	{}
 
 	bool useSymmetry() const { return KRON_USE_SYMMETRY; }
 
 	bool loadBalance() const
 	{
-		return (model_.params().options.find("KronNoLoadBalance")
-		        == PsimagLite::String::npos);
+		return loadBalance_;
+//		return (model_.params().options.find("KronNoLoadBalance")
+//		        == PsimagLite::String::npos);
 	}
 
 	const ArrayOfMatStructType& xc(SizeType ic) const
 	{
-		assert(ic < xc_.size());
-		assert(xc_[ic]);
-		return *xc_[ic];
+		return preInitKron_.xc(ic);
 	}
 
 	const ArrayOfMatStructType& yc(SizeType ic) const
 	{
-		assert(ic < yc_.size());
-		assert(yc_[ic]);
-		return *yc_[ic];
+		return preInitKron_.yc(ic);
 	}
 
 	const VectorSizeType& patch(typename GenIjPatchType::LeftOrRightEnumType i) const
@@ -145,25 +129,24 @@ public:
 		return ijpatches_(i);
 	}
 
-	const LeftRightSuperType& lrs() const
-	{
-		return modelHelper_.leftRightSuper();
-	}
+//	const LeftRightSuperType& lrs() const
+//	{
+//		return modelHelper_.leftRightSuper();
+//	}
 
-	SizeType offset() const
-	{
-		SizeType m = modelHelper_.m();
-		return modelHelper_.leftRightSuper().super().partition(m);
-	}
+//	SizeType offset() const
+//	{
+//		SizeType m = modelHelper_.m();
+//		return modelHelper_.leftRightSuper().super().partition(m);
+//	}
 
-	SizeType size() const { return modelHelper_.size(); }
+//	SizeType size() const { return modelHelper_.size(); }
 
-	SizeType connections() const { return xc_.size(); }
+	SizeType connections() const { return preInitKron_.connections(); }
 
 	const ComplexOrRealType& value(SizeType i) const
 	{
-		assert(values_.size()>i);
-		return values_[i];
+		return preInitKron_.value(i);
 	}
 
 private:
@@ -172,14 +155,8 @@ private:
 
 	InitKron& operator=(const InitKron& other);
 
-	const ModelType& model_;
-	const ModelHelperType& modelHelper_;
-	GenIjPatchType  ijpatches_;
-	typename PsimagLite::Vector<ArrayOfMatStructType*>::Type xc_;
-	typename PsimagLite::Vector<ArrayOfMatStructType*>::Type yc_;
-	typename PsimagLite::Vector<ComplexOrRealType>::Type values_;
-	PreInitKronType preInitKron_;
-
+	PreInitKronType& preInitKron_;
+	bool loadBalance_;
 }; //class InitKron
 } // namespace PsimagLite
 
