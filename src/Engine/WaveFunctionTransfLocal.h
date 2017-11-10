@@ -118,7 +118,7 @@ public:
 	LeftRightSuperType> ParallelWftType;
 	typedef typename LeftRightSuperType::ModelType ModelType;
 	typedef typename LeftRightSuperType::ModelHelperType ModelHelperType;
-	typedef PreInitKronWft<ModelType, ModelHelperType> PreInitKronType;
+	typedef PreInitKronWft<ModelType> PreInitKronType;
 	typedef InitKron<PreInitKronType> InitKronType;
 
 	WaveFunctionTransfLocal(const ProgramGlobals::DirectionEnum& stage,

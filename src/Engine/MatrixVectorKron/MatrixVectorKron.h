@@ -100,7 +100,7 @@ public:
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
-	typedef PreInitKronHamiltonian<ModelType,ModelHelperType> PreInitKronType;
+	typedef PreInitKronHamiltonian<ModelType> PreInitKronType;
 	typedef InitKron<PreInitKronType> InitKronType;
 	typedef KronMatrix<InitKronType> KronMatrixType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;

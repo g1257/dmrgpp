@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ModelType_, typename ModelHelperType_>
+template<typename ModelType_>
 class PreInitKronHamiltonian {
 
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
@@ -91,7 +91,7 @@ class PreInitKronHamiltonian {
 public:
 
 	typedef ModelType_ ModelType;
-	typedef ModelHelperType_ ModelHelperType;
+	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::LinkType LinkType;
 	typedef typename ModelHelperType::RealType RealType;
