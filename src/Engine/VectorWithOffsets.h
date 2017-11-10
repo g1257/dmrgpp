@@ -347,7 +347,7 @@ public:
 			return data_[0][0];
 		}
 
-		assert(j < data_.size());
+		assert(static_cast<SizeType>(j) < data_.size());
 		assert(i - offsets_[j] < data_[j].size());
 		return data_[j][i-offsets_[j]];
 	}

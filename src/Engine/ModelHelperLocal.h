@@ -513,7 +513,7 @@ private:
 	}
 
 	int m_;
-	const LeftRightSuperType&  lrs_;
+	const LeftRightSuperType& lrs_;
 	RealType targetTime_;
 	SizeType threadId_;
 	typename PsimagLite::Vector<PsimagLite::Vector<int>::Type>::Type buffer_;

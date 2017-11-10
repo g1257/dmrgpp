@@ -105,8 +105,11 @@ public:
 	typedef typename ArrayOfMatStructType::VectorSizeType VectorSizeType;
 
 	InitKronHamiltonian(const ModelType& model,
-	                       const ModelHelperType& modelHelper)
-	    : BaseType(modelHelper_.leftRightSuper()),
+	                    const ModelHelperType& modelHelper)
+	    : BaseType(modelHelper.leftRightSuper(),
+	               modelHelper.m(),
+	               modelHelper.quantumNumber(),
+	               model.params().denseSparseThreshold),
 	      model_(model),
 	      modelHelper_(modelHelper)
 	{
@@ -116,7 +119,7 @@ public:
 
 	bool loadBalance() const
 	{
-			return (model_.params().options.find("KronLoadBalance") != PsimagLite::String::npos);
+		return (model_.params().options.find("KronLoadBalance") != PsimagLite::String::npos);
 	}
 
 private:
@@ -141,8 +144,8 @@ private:
 		              1,
 		              value,
 		              0);
-		addOneConnection(aL,identityR_,link);
-		addOneConnection(identityL_,aR,link);
+		this->addOneConnection(aL,identityR_,link);
+		this->addOneConnection(identityL_,aR,link);
 	}
 
 	void convertXcYcArrays()
@@ -159,11 +162,11 @@ private:
 				link3.type = ProgramGlobals::SYSTEM_ENVIRON;
 				if (link3.fermionOrBoson == ProgramGlobals::FERMION)
 					link3.value *= -1.0;
-				addOneConnection(*B,*A,link3);
+				this->addOneConnection(*B,*A,link3);
 				continue;
 			}
 
-			addOneConnection(*A,*B,link2);
+			this->addOneConnection(*A,*B,link2);
 		}
 	}
 
