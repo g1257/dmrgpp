@@ -88,8 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MatrixOrIdentity.h"
 #include "ParallelWftOne.h"
 #include "Parallelizer.h"
-#include "MatrixVectorKron/PreInitKronWft.h"
-#include "MatrixVectorKron/InitKron.h"
+#include "MatrixVectorKron/InitKronWft.h"
 #include "MatrixVectorKron/KronMatrix.h"
 
 namespace Dmrg {
@@ -117,8 +116,7 @@ public:
 	typedef ParallelWftOne<VectorWithOffsetType,
 	DmrgWaveStructType,
 	LeftRightSuperType> ParallelWftType;
-	typedef PreInitKronWft<LeftRightSuperType> PreInitKronType;
-	typedef InitKron<PreInitKronType> InitKronType;
+	typedef InitKronWft<LeftRightSuperType> InitKronType;
 
 	WaveFunctionTransfLocal(const ProgramGlobals::DirectionEnum& stage,
 	                        const bool& firstCall,
@@ -223,13 +221,12 @@ private:
 	                                    typename ProgramGlobals::DirectionEnum dir) const
 	{
 		SizeType qn = psiSrc.qn(i0);
-		PreInitKronType preInitKron(lrs,
-		                            i0,
-		                            qn,
-		                            wftOptions_.kronLoadBalance,
-		                            wftOptions_.denseSparseThreshold);
+		InitKronType initKron(lrs,
+		                      i0,
+		                      qn,
+		                      wftOptions_.kronLoadBalance,
+		                      wftOptions_.denseSparseThreshold);
 		//<-- FIXME: dmrgWaveStruct_.lrs
-		InitKronType initKron(preInitKron);
 		KronMatrix<InitKronType> kronMatrix(initKron);
 		VectorType psiDestOneSector;
 		psiDest.extract(psiDestOneSector, i0);

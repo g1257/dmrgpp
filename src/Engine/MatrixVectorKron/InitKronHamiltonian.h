@@ -75,87 +75,107 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  *
  */
-#ifndef PREINITKRON_WFT_H
-#define PREINITKRON_WFT_H
+#ifndef INITKRON_HAMILTONIAN_H
+#define INITKRON_HAMILTONIAN_H
 #include "ProgramGlobals.h"
-#include "PreInitKronBase.h"
+#include "InitKronBase.h"
 #include "Vector.h"
 
 namespace Dmrg {
 
-template<typename LeftRightSuperType_>
-class PreInitKronWft : public PreInitKronBase<LeftRightSuperType_> {
+template<typename ModelType_>
+class InitKronHamiltonian : public InitKronBase<typename ModelType_::LeftRightSuperType> {
 
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 
 public:
 
-	typedef LeftRightSuperType_ LeftRightSuperType;
-	typedef PreInitKronBase<LeftRightSuperType> BaseType;
-	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
-	typedef typename BaseType::LinkType LinkType;
-	typedef typename LeftRightSuperType::RealType RealType;
+	typedef ModelType_ ModelType;
+	typedef typename ModelType::ModelHelperType ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef InitKronBase<LeftRightSuperType> BaseType;
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename ModelHelperType::LinkType LinkType;
+	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename BaseType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename ArrayOfMatStructType::GenIjPatchType GenIjPatchType;
 	typedef typename PsimagLite::Vector<ArrayOfMatStructType*>::Type VectorArrayOfMatStructType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef typename ArrayOfMatStructType::VectorSizeType VectorSizeType;
-	typedef typename LinkType::PairSizeType PairSizetype;
-	typedef typename LinkType::PairCharType PairCharType;
 
-	PreInitKronWft(const LeftRightSuperType& lrs,
-	               SizeType m,
-	               SizeType qn,
-	               bool kronLoadBalance,
-	               RealType denseOrSparseThreshold)
-	    : BaseType(lrs, m, qn, denseOrSparseThreshold), kronLoadBalance_(kronLoadBalance)
+	InitKronHamiltonian(const ModelType& model,
+	                       const ModelHelperType& modelHelper)
+	    : BaseType(modelHelper_.leftRightSuper()),
+	      model_(model),
+	      modelHelper_(modelHelper)
 	{
-		// FIXME: dmrgWaveStruct_.lrs() vs. modelHelper_.lrs(), which one to use?
-		SparseMatrixType we;
-		// dmrgWaveStruct_.we.toSparse(we);
-		const PairCharType nn('N', 'N');
-		const PairSizetype dummy(0, 0);
-		const ComplexOrRealType value = 1.0;
-
-		LinkType link(0,
-		              0,
-		              ProgramGlobals::SYSTEM_ENVIRON,
-		              value,
-		              1,
-		              ProgramGlobals::BOSON,
-		              dummy,
-		              nn,
-		              1,
-		              1,
-		              0);
-
-		SparseMatrixType ws;
-		//dmrgWaveStruct_.ws.toSparse(ws);
-		//if (dir_ == ProgramGlobals::EXPAND_SYSTEM) {
-		SparseMatrixType wsT;
-		transposeConjugate(wsT,ws);
-		this->addOneConnection(wsT, we, link);
-		/*} else {
-			SparseMatrixType weT;
-			transposeConjugate(weT,we);
-			addOneConnection(ws, weT, link);
-		}*/
+		addHlAndHr();
+		convertXcYcArrays();
 	}
 
 	bool loadBalance() const
 	{
-		return kronLoadBalance_;
+			return (model_.params().options.find("KronLoadBalance") != PsimagLite::String::npos);
 	}
 
 private:
 
-	const bool kronLoadBalance_;
+	void addHlAndHr()
+	{
+		const RealType value = 1.0;
+		const SparseMatrixType& aL = modelHelper_.leftRightSuper().left().hamiltonian();
+		const SparseMatrixType& aR = modelHelper_.leftRightSuper().right().hamiltonian();
+		identityL_.makeDiagonal(aL.rows(), value);
+		identityR_.makeDiagonal(aR.rows(), value);
+		std::pair<SizeType, SizeType> ops(0,0);
+		std::pair<char, char> mods('n', 'n');
+		LinkType link(0,
+		              0,
+		              ProgramGlobals::SYSTEM_SYSTEM,
+		              value,
+		              0,
+		              ProgramGlobals::BOSON,
+		              ops,
+		              mods,
+		              1,
+		              value,
+		              0);
+		addOneConnection(aL,identityR_,link);
+		addOneConnection(identityL_,aR,link);
+	}
 
-	PreInitKronWft(const PreInitKronWft&);
+	void convertXcYcArrays()
+	{
+		SizeType total = model_.getLinkProductStruct(modelHelper_);
 
-	PreInitKronWft& operator=(const PreInitKronWft&);
+		for (SizeType ix=0;ix<total;ix++) {
+			SparseMatrixType const* A = 0;
+			SparseMatrixType const* B = 0;
+
+			LinkType link2 = model_.getConnection(&A,&B,ix,modelHelper_);
+			if (link2.type==ProgramGlobals::ENVIRON_SYSTEM)  {
+				LinkType link3 = link2;
+				link3.type = ProgramGlobals::SYSTEM_ENVIRON;
+				if (link3.fermionOrBoson == ProgramGlobals::FERMION)
+					link3.value *= -1.0;
+				addOneConnection(*B,*A,link3);
+				continue;
+			}
+
+			addOneConnection(*A,*B,link2);
+		}
+	}
+
+	InitKronHamiltonian(const InitKronHamiltonian&);
+
+	InitKronHamiltonian& operator=(const InitKronHamiltonian&);
+
+	const ModelType& model_;
+	const ModelHelperType& modelHelper_;
+	SparseMatrixType identityL_;
+	SparseMatrixType identityR_;
 };
 } // namespace Dmrg
 
-#endif // PREINITKRON_WFT_H
+#endif // INITKRON_HAMILTONIAN_H

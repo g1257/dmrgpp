@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Matrix.h"
 #include "Concurrency.h"
-#include "InitKron.h"
 
 namespace Dmrg {
 

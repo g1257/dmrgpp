@@ -81,10 +81,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define MATRIX_VECTOR_KRON_H
 
 #include "Vector.h"
-#include "InitKron.h"
+#include "InitKronHamiltonian.h"
 #include "KronMatrix.h"
 #include "MatrixVectorBase.h"
-#include "PreInitKronHamiltonian.h"
 
 namespace Dmrg {
 template<typename ModelType_>
@@ -100,8 +99,7 @@ public:
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
-	typedef PreInitKronHamiltonian<ModelType> PreInitKronType;
-	typedef InitKron<PreInitKronType> InitKronType;
+	typedef InitKronHamiltonian<ModelType> InitKronType;
 	typedef KronMatrix<InitKronType> KronMatrixType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;

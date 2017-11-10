@@ -71,12 +71,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file PreInitKronBase.h
+/*! \file InitKronBase.h
  *
  *
  */
-#ifndef PREINITKRON_BASE_H
-#define PREINITKRON_BASE_H
+#ifndef INITKRON_BASE_H
+#define INITKRON_BASE_H
 #include "ProgramGlobals.h"
 #include "ArrayOfMatStruct.h"
 #include "Vector.h"
@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<typename LeftRightSuperType>
-class PreInitKronBase {
+class InitKronBase {
 
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 
@@ -101,7 +101,7 @@ public:
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef typename ArrayOfMatStructType::VectorSizeType VectorSizeType;
 
-	PreInitKronBase(const LeftRightSuperType& lrs,
+	InitKronBase(const LeftRightSuperType& lrs,
 	                SizeType m,
 	                SizeType qn,
 	                RealType denseSparseThreshold)
@@ -112,7 +112,7 @@ public:
 		cacheSigns(lrs.left().electronsVector());
 	}
 
-	~PreInitKronBase()
+	~InitKronBase()
 	{
 		for (SizeType ic=0;ic<xc_.size();ic++) delete xc_[ic];
 		for (SizeType ic=0;ic<yc_.size();ic++) delete yc_[ic];
@@ -215,9 +215,9 @@ private:
 			signs_[i] = (electrons[i] & 1) ? true : false;
 	}
 
-	PreInitKronBase(const PreInitKronBase&);
+	InitKronBase(const InitKronBase&);
 
-	PreInitKronBase& operator=(const PreInitKronBase&);
+	InitKronBase& operator=(const InitKronBase&);
 
 	SizeType m_;
 	const RealType& denseSparseThreshold_;
@@ -229,4 +229,4 @@ private:
 };
 } // namespace Dmrg
 
-#endif // PREINITKRON_BASE_H
+#endif // INITKRON_BASE_H
