@@ -88,6 +88,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MatrixOrIdentity.h"
 #include "ParallelWftOne.h"
 #include "Parallelizer.h"
+#include "MatrixVectorKron/PreInitKronWft.h"
+#include "MatrixVectorKron/InitKron.h"
+#include "MatrixVectorKron/KronMatrix.h"
 
 namespace Dmrg {
 
@@ -113,6 +116,10 @@ public:
 	typedef ParallelWftOne<VectorWithOffsetType,
 	DmrgWaveStructType,
 	LeftRightSuperType> ParallelWftType;
+	typedef typename LeftRightSuperType::ModelType ModelType;
+	typedef typename LeftRightSuperType::ModelHelperType ModelHelperType;
+	typedef PreInitKronWft<ModelType, ModelHelperType> PreInitKronType;
+	typedef InitKron<PreInitKronType> InitKronType;
 
 	WaveFunctionTransfLocal(const ProgramGlobals::DirectionEnum& stage,
 	                        const bool& firstCall,
@@ -212,7 +219,9 @@ private:
 	                                    const VectorSizeType& nk,
 	                                    typename ProgramGlobals::DirectionEnum dir) const
 	{
-
+		InitKronType initKron(lrs.model(), lrs.modelHelper());
+		KronMatrix<InitKronType> kronMatrix(initKron);
+		kronMatrix.matrixVectorProduct(psiDest, psiSrc);
 	}
 
 	template<typename SomeVectorType>

@@ -93,21 +93,17 @@ public:
 	typedef BasisWithOperatorsType_ BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisType::SymmetryElectronsSzType SymmetryElectronsSzType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType
-	SparseMatrixType;
-	typedef typename BasisWithOperatorsType::OperatorsType
-	OperatorsType;
-	typedef typename OperatorsType::OperatorType
-	OperatorType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
+	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
-	typedef  LeftRightSuper<
-	BasisWithOperatorsType_,SuperBlockType> ThisType;
+	typedef  LeftRightSuper<BasisWithOperatorsType_,SuperBlockType> ThisType;
 	typedef KroneckerDumper<ThisType> KroneckerDumperType;
 	typedef typename KroneckerDumperType::ParamsForKroneckerDumper ParamsForKroneckerDumperType;
 
 	enum {SAVE_ALL = SuperBlockType::SAVE_ALL,
-	      SAVE_PARTIAL = SuperBlockType::SAVE_PARTIAL};
+		  SAVE_PARTIAL = SuperBlockType::SAVE_PARTIAL};
 
 	template<typename IoInputter>
 	LeftRightSuper(IoInputter& io, bool isObserveCode)
@@ -121,10 +117,9 @@ public:
 		right_ = new BasisWithOperatorsType(io,"",0,true);
 	}
 
-	LeftRightSuper(
-	        const PsimagLite::String& slabel,
-	        const PsimagLite::String& elabel,
-	        const PsimagLite::String& selabel)
+	LeftRightSuper(const PsimagLite::String& slabel,
+	               const PsimagLite::String& elabel,
+	               const PsimagLite::String& selabel)
 	    : progress_("LeftRightSuper"),
 	      left_(0),right_(0),super_(0),refCounter_(0)
 	{
@@ -144,10 +139,9 @@ public:
 		delete super_;
 	}
 
-	LeftRightSuper(
-	        BasisWithOperatorsType& left,
-	        BasisWithOperatorsType& right,
-	        SuperBlockType& super)
+	LeftRightSuper(BasisWithOperatorsType& left,
+	               BasisWithOperatorsType& right,
+	               SuperBlockType& super)
 	    : progress_("LeftRightSuper"),
 	      left_(&left),right_(&right),super_(&super),refCounter_(1)
 	{
@@ -258,6 +252,7 @@ public:
 	}
 
 private:
+
 	LeftRightSuper(ThisType& rls);
 
 	void deepCopy(const ThisType& rls)
@@ -275,9 +270,9 @@ private:
 		When adding sites to the system or environment the program does a
 		full outer product, i.e., it increases the size of all local operators.
 		This is performed by the call to \verb!setToProduct!
-	    \verb!(pSprime,pS,Xbasis,dir,option)!
+		\verb!(pSprime,pS,Xbasis,dir,option)!
 		in the grow function, which actually calls \verb!pSprime.setToProduct!
-	    \verb!(pS,xBasis,dir)!
+		\verb!(pS,xBasis,dir)!
 		This function also recalculates the Hamiltonian in the outer product
 		of (i) the previous system basis $pS$, and (ii) the basis $Xbasis$
 		corresponding to the site(s) that is (are) being added.
@@ -325,7 +320,6 @@ private:
 	BasisWithOperatorsType* right_;
 	SuperBlockType* super_;
 	SizeType refCounter_;
-
 }; // class LeftRightSuper
 
 } // namespace Dmrg

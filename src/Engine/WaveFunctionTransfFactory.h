@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Utils.h"
 #include "ProgressIndicator.h"
 #include "WaveFunctionTransfLocal.h"
-#include "WaveFunctionTransfPatched.h"
 #include "WaveFunctionTransfSu2.h"
 #include "DmrgWaveStruct.h"
 #include "IoSimple.h"
@@ -117,8 +116,6 @@ public:
 	WaveFunctionTransfBaseType;
 	typedef WaveFunctionTransfLocal<DmrgWaveStructType,VectorWithOffsetType>
 	WaveFunctionTransfLocalType;
-	typedef WaveFunctionTransfPatched<DmrgWaveStructType,VectorWithOffsetType>
-	WaveFunctionTransfPatchedType;
 	typedef WaveFunctionTransfSu2<DmrgWaveStructType,VectorWithOffsetType>
 	WaveFunctionTransfSu2Type;
 
@@ -155,30 +152,20 @@ public:
 			}
 		}
 
-		bool inBlocks = (params.options.find("wftInPatches")!=PsimagLite::String::npos);
+		// bool inBlocks = (params.options.find("wftInPatches")!=PsimagLite::String::npos);
 
 		if (BasisType::useSu2Symmetry()) {
-			if (inBlocks)
-				err("wftInPatches not allowed when SU(2) is in use\n");
-
 			wftImpl_=new WaveFunctionTransfSu2Type(stage_,
 			                                       firstCall_,
 			                                       counter_,
 			                                       dmrgWaveStruct_,
 			                                       twoSiteDmrg_);
 		} else {
-			if (inBlocks)
-				wftImpl_ = new WaveFunctionTransfPatchedType(stage_,
-				                                             firstCall_,
-				                                             counter_,
-				                                             dmrgWaveStruct_,
-				                                             twoSiteDmrg_);
-			else
-				wftImpl_=new WaveFunctionTransfLocalType(stage_,
-				                                         firstCall_,
-				                                         counter_,
-				                                         dmrgWaveStruct_,
-				                                         twoSiteDmrg_);
+			wftImpl_=new WaveFunctionTransfLocalType(stage_,
+			                                         firstCall_,
+			                                         counter_,
+			                                         dmrgWaveStruct_,
+			                                         twoSiteDmrg_);
 		}
 	}
 
