@@ -175,10 +175,7 @@ private:
 
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
-			if (wftOptions_.wftInPatches)
-				transformVectorParallelPatched(psiDest, psiSrc, lrs, i0, nk, dir1);
-			else
-				transformVectorParallel(psiDest,psiSrc,lrs,i0,nk,dir1);
+			transformVectorParallel(psiDest,psiSrc,lrs,i0,nk,dir1);
 		}
 	}
 
@@ -190,6 +187,9 @@ private:
 	                             const VectorSizeType& nk,
 	                             typename ProgramGlobals::DirectionEnum dir) const
 	{
+		if (wftOptions_.wftInPatches)
+			return transformVectorParallelPatched(psiDest, psiSrc, lrs, i0, nk, dir);
+
 		typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
 		ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
 		                             PsimagLite::MPI::COMM_WORLD);

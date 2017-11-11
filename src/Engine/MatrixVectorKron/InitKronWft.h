@@ -133,14 +133,15 @@ public:
 
 		SparseMatrixType ws;
 		dmrgWaveStruct.ws.toSparse(ws);
+
 		if (wftOptions_.dir == ProgramGlobals::EXPAND_SYSTEM) {
-		SparseMatrixType wsT;
-		transposeConjugate(wsT,ws);
-		this->addOneConnection(wsT, we, link);
+			this->addOneConnection(ws, we, link);
 		} else {
 			SparseMatrixType weT;
 			transposeConjugate(weT,we);
-			this->addOneConnection(ws, weT, link);
+			SparseMatrixType wsT;
+			transposeConjugate(wsT,ws);
+			this->addOneConnection(wsT, weT, link);
 		}
 	}
 
