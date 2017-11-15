@@ -96,6 +96,7 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef Link<ComplexOrRealType> LinkType;
 	typedef ArrayOfMatStruct<LeftRightSuperType> ArrayOfMatStructType;
+	typedef typename LeftRightSuperType::BasisType BasisType;
 	typedef typename ArrayOfMatStructType::GenIjPatchType GenIjPatchType;
 	typedef typename PsimagLite::Vector<ArrayOfMatStructType*>::Type VectorArrayOfMatStructType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
@@ -112,6 +113,7 @@ public:
 	      denseSparseThreshold_(denseSparseThreshold),
 	      ijpatchesOld_(lrs, qn),
 	      ijpatchesNew_(&ijpatchesOld_),
+	      weightsOfPatches_(patch(NEW, GenIjPatchType::LEFT).size(), 1),
 	      wftMode_(false)
 	{
 		cacheSigns(signsNew_, lrs.left().electronsVector());
@@ -189,6 +191,12 @@ public:
 		                       sizeInternal(*ijpatchesNew_, mNew_);
 	}
 
+
+	const VectorSizeType& weightsOfPatchesNew() const
+	{
+		return weightsOfPatches_;
+	}
+
 protected:
 
 	void addOneConnection(const SparseMatrixType& A,
@@ -214,7 +222,58 @@ protected:
 		yc_.push_back(y1);
 	}
 
+	// -------------------------------------------
+	// setup vstart(:) for beginning of each patch
+	// -------------------------------------------
+	void setUpVstart(VectorSizeType& vstart, WhatBasisEnum what)
+	{
+		SizeType npatches = patch(what, GenIjPatchType::LEFT).size();
+
+		SizeType ip = 0;
+		PsimagLite::Vector<long unsigned int>::Type weights(npatches, 0);
+		const BasisType& left = lrs(what).left();
+		const BasisType& right = lrs(what).right();
+
+		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
+			vstart[ipatch] = ip;
+
+			SizeType igroup = patch(what, GenIjPatchType::LEFT)[ipatch];
+			SizeType jgroup = patch(what, GenIjPatchType::RIGHT)[ipatch];
+
+			assert(left.partition(igroup+1) >= left.partition(igroup));
+			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
+
+			assert(right.partition(jgroup+1) >= right.partition(jgroup));
+			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
+
+			assert(1 <= sizeLeft);
+			assert(1 <= sizeRight);
+
+			weights[ipatch] = sizeLeft * sizeRight * (sizeLeft + sizeRight);
+
+			ip += sizeLeft * sizeRight;
+		}
+
+		vstart[npatches] = ip;
+
+		if (what == NEW)
+			setAndFixWeights(weights);
+	}
+
 private:
+
+	void setAndFixWeights(const PsimagLite::Vector<long unsigned int>::Type& weights)
+	{
+		long unsigned int max = *(std::max_element(weights.begin(), weights.end()));
+		max >>= 31;
+		SizeType bits = 1 + PsimagLite::log2Integer(max);
+		SizeType npatches = weights.size();
+		assert(npatches == weightsOfPatches_.size());
+		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
+			long unsigned int tmp = (weights[ipatch] >> bits);
+			weightsOfPatches_[ipatch] = (max == 0) ? weights[ipatch] : tmp;
+		}
+	}
 
 	static SizeType sizeInternal(const GenIjPatchType& ijpatches,
 	                             SizeType m)
@@ -261,6 +320,7 @@ private:
 	const RealType& denseSparseThreshold_;
 	GenIjPatchType ijpatchesOld_;
 	GenIjPatchType* ijpatchesNew_;
+	VectorSizeType weightsOfPatches_;
 	VectorArrayOfMatStructType xc_;
 	VectorArrayOfMatStructType yc_;
 	VectorType values_;

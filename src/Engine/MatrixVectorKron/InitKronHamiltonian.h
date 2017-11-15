@@ -113,12 +113,11 @@ public:
 	               model.params().denseSparseThreshold),
 	      model_(model),
 	      modelHelper_(modelHelper),
-	      vstart_(this->patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1),
-	      weightsOfPatches_(this->patch(BaseType::NEW, GenIjPatchType::LEFT).size(), 1)
+	      vstart_(this->patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1)
 	{
 		addHlAndHr();
 		convertXcYcArrays();
-		setUpVstart();
+		this->setUpVstart(vstart_, BaseType::NEW);
 		assert(vstart_.size() > 0);
 		SizeType nsize = vstart_[vstart_.size() - 1];
 		assert(nsize > 0);
@@ -137,7 +136,7 @@ public:
 	// copy vin(:) to yin(:)
 	// -------------------
 	void copyIn(const VectorType& vout,
-	            const VectorType& vin) const
+	            const VectorType& vin)
 	{
 		VectorType& xout = xout_;
 		VectorType& yin = yin_;
@@ -195,7 +194,7 @@ public:
 	// -------------------
 	// copy xout(:) to vout(:)
 	// -------------------
-	void copyOut(VectorType& vout) const
+	void copyOut(VectorType& vout)
 	{
 		const VectorType& xout = xout_;
 		const VectorSizeType& permInverse = this->lrs(BaseType::NEW).super().permutationInverse();
@@ -241,11 +240,6 @@ public:
 				}
 			}
 		}
-	}
-
-	const VectorSizeType& weightsOfPatches() const
-	{
-		return weightsOfPatches_;
 	}
 
 	const VectorType& yin() const { return yin_; }
@@ -300,57 +294,6 @@ private:
 		}
 	}
 
-
-	// -------------------------------------------
-	// setup vstart(:) for beginning of each patch
-	// -------------------------------------------
-	void setUpVstart()
-	{
-		SizeType npatches = this->patch(BaseType::NEW, GenIjPatchType::LEFT).size();
-
-		SizeType ip = 0;
-		PsimagLite::Vector<long unsigned int>::Type weights(npatches, 0);
-		const BasisType& left = this->lrs(BaseType::NEW).left();
-		const BasisType& right = this->lrs(BaseType::NEW).right();
-
-		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
-			vstart_[ipatch] = ip;
-
-			SizeType igroup = this->patch(BaseType::NEW, GenIjPatchType::LEFT)[ipatch];
-			SizeType jgroup = this->patch(BaseType::NEW, GenIjPatchType::RIGHT)[ipatch];
-
-			assert(left.partition(igroup+1) >= left.partition(igroup));
-			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
-
-			assert(right.partition(jgroup+1) >= right.partition(jgroup));
-			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
-
-			assert(1 <= sizeLeft);
-			assert(1 <= sizeRight);
-
-			weights[ipatch] = sizeLeft * sizeRight * (sizeLeft + sizeRight);
-
-			ip += sizeLeft * sizeRight;
-		}
-
-		vstart_[npatches] = ip;
-
-		setAndFixWeights(weights);
-	}
-
-	void setAndFixWeights(const PsimagLite::Vector<long unsigned int>::Type& weights)
-	{
-		long unsigned int max = *(std::max_element(weights.begin(), weights.end()));
-		max >>= 31;
-		SizeType bits = 1 + PsimagLite::log2Integer(max);
-		SizeType npatches = weights.size();
-		assert(npatches == weightsOfPatches_.size());
-		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
-			long unsigned int tmp = (weights[ipatch] >> bits);
-			weightsOfPatches_[ipatch] = (max == 0) ? weights[ipatch] : tmp;
-		}
-	}
-
 	InitKronHamiltonian(const InitKronHamiltonian&);
 
 	InitKronHamiltonian& operator=(const InitKronHamiltonian&);
@@ -360,9 +303,8 @@ private:
 	SparseMatrixType identityL_;
 	SparseMatrixType identityR_;
 	VectorSizeType vstart_;
-	VectorSizeType weightsOfPatches_;
-	mutable VectorType yin_;
-	mutable VectorType xout_;
+	VectorType yin_;
+	VectorType xout_;
 };
 } // namespace Dmrg
 

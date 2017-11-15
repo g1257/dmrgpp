@@ -92,6 +92,7 @@ public:
 
 	typedef LeftRightSuperType_ LeftRightSuperType;
 	typedef InitKronBase<LeftRightSuperType> BaseType;
+	typedef typename LeftRightSuperType::BasisType BasisType;
 	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
 	typedef typename BaseType::LinkType LinkType;
 	typedef typename LeftRightSuperType::RealType RealType;
@@ -116,8 +117,13 @@ public:
 	               mNew,
 	               qn,
 	               wftOptions.denseSparseThreshold),
-	      wftOptions_(wftOptions)
+	      wftOptions_(wftOptions),
+	      vstartNew_(this->patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1),
+	      vstartOld_(this->patch(BaseType::OLD, GenIjPatchType::LEFT).size() + 1)
 	{
+		this->setUpVstart(vstartNew_, BaseType::NEW);
+		this->setUpVstart(vstartOld_, BaseType::OLD);
+
 		SparseMatrixType we;
 		dmrgWaveStruct.we.toSparse(we);
 		const PairCharType nn('N', 'N');
@@ -161,22 +167,18 @@ public:
 	// copy vin(:) to yin(:)
 	// -------------------
 	void copyIn(const VectorType& vout,
-	            const VectorType& vin) const
+	            const VectorType& vin)
 	{
-		err("InitKronWft: copyIn unimplemented\n");
+		copyIn(xout_, vout, vstartNew_, BaseType::NEW);
+		copyIn(yin_, vin, vstartOld_, BaseType::OLD);
 	}
 
 	// -------------------
 	// copy xout(:) to vout(:)
 	// -------------------
-	void copyOut(VectorType& vout) const
+	void copyOut(VectorType& vout)
 	{
 		err("InitKronWft: copyOut unimplemented\n");
-	}
-
-	const VectorSizeType& weightsOfPatches() const
-	{
-		throw PsimagLite::RuntimeError("InitKronWft: weightsOfPatches unimplemented\n");
 	}
 
 	const VectorType& yin() const { return yin_; }
@@ -185,14 +187,70 @@ public:
 
 private:
 
-	const WftOptionsType& wftOptions_;
+	void copyIn(VectorType& x,
+	            const VectorType& v,
+	            const VectorSizeType& vstart,
+	            typename BaseType::WhatBasisEnum what) const
+	{
+		const VectorSizeType& permInverse = this->lrs(what).super().permutationInverse();
+		const SparseMatrixType& leftH = this->lrs(what).left().hamiltonian();
+		SizeType nl = leftH.rows();
+
+		SizeType offset = this->offset(what);
+		SizeType npatches = this->patch(what, GenIjPatchType::LEFT).size();
+		const BasisType& left = this->lrs(what).left();
+		const BasisType& right = this->lrs(what).right();
+
+		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
+
+			SizeType igroup = this->patch(what, GenIjPatchType::LEFT)[ipatch];
+			SizeType jgroup = this->patch(what, GenIjPatchType::RIGHT)[ipatch];
+
+			assert(left.partition(igroup+1) >= left.partition(igroup));
+			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
+
+			assert(right.partition(jgroup+1) >= right.partition(jgroup));
+			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
+
+			SizeType left_offset = left.partition(igroup);
+			SizeType right_offset = right.partition(jgroup);
+
+			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
+				for (SizeType iright=0; iright < sizeRight; ++iright) {
+
+					SizeType i = ileft + left_offset;
+					SizeType j = iright + right_offset;
+
+					SizeType ij = i + j * nl;
+
+					assert(i < nl);
+					assert(j < this->lrs(what).right().hamiltonian().rows());
+
+					assert(ij < permInverse.size());
+
+					SizeType r = permInverse[ ij ];
+					assert(!((r < offset) || (r >= (offset + this->size(what)))));
+
+					SizeType ip = vstart[ipatch] + (iright + ileft * sizeRight);
+					assert(ip < x.size());
+
+					assert( (r >= offset) && ((r-offset) < v.size()) );
+
+					x[ip] = v[r-offset];
+				}
+			}
+		}
+	}
 
 	InitKronWft(const InitKronWft&);
 
 	InitKronWft& operator=(const InitKronWft&);
 
-	mutable VectorType yin_;
-	mutable VectorType xout_;
+	const WftOptionsType& wftOptions_;
+	VectorSizeType vstartNew_;
+	VectorSizeType vstartOld_;
+	VectorType yin_;
+	VectorType xout_;
 };
 } // namespace Dmrg
 

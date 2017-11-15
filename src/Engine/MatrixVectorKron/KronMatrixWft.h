@@ -110,7 +110,8 @@ public:
 	{
 		PsimagLite::String str((initKron.loadBalance()) ? "true" : "false");
 		PsimagLite::OstringStream msg;
-		msg<<"KronMatrixWft: preparation done for size="<<initKron.size(InitKronType::NEW);
+		msg<<"KronMatrixWft: sizes="<<initKron.size(InitKronType::NEW);
+		msg<<" "<<initKron.size(InitKronType::OLD);
 		msg<<" loadBalance "<<str;
 		progress_.printline(msg, std::cout);
 	}
@@ -126,7 +127,7 @@ public:
 		                                     PsimagLite::MPI::COMM_WORLD);
 
 		if (initKron_.loadBalance())
-			parallelConnections.loopCreate(kc, initKron_.weightsOfPatches());
+			parallelConnections.loopCreate(kc, initKron_.weightsOfPatchesNew());
 		else
 			parallelConnections.loopCreate(kc);
 

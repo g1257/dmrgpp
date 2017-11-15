@@ -126,7 +126,7 @@ public:
 		                                     PsimagLite::MPI::COMM_WORLD);
 
 		if (initKron_.loadBalance())
-			parallelConnections.loopCreate(kc, initKron_.weightsOfPatches());
+			parallelConnections.loopCreate(kc, initKron_.weightsOfPatchesNew());
 		else
 			parallelConnections.loopCreate(kc);
 
