@@ -88,7 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MatrixOrIdentity.h"
 #include "ParallelWftOne.h"
 #include "Parallelizer.h"
-#include "MatrixVectorKron/InitKronWft.h"
+//#include "MatrixVectorKron/InitKronWft.h"
 #include "MatrixVectorKron/KronMatrix.h"
 
 namespace Dmrg {
@@ -116,7 +116,7 @@ public:
 	typedef ParallelWftOne<VectorWithOffsetType,
 	DmrgWaveStructType,
 	LeftRightSuperType> ParallelWftType;
-	typedef InitKronWft<LeftRightSuperType, WftOptions, DmrgWaveStructType> InitKronType;
+	//typedef InitKronWft<LeftRightSuperType, WftOptions, DmrgWaveStructType> InitKronType;
 
 	WaveFunctionTransfLocal(const DmrgWaveStructType& dmrgWaveStruct,
 	                        const WftOptions& wftOptions)
@@ -214,18 +214,18 @@ private:
 	                                    const VectorSizeType& nk,
 	                                    typename ProgramGlobals::DirectionEnum dir) const
 	{
-		SizeType qn = psiSrc.qn(i0);
-		InitKronType initKron(lrs, i0, qn, wftOptions_, dmrgWaveStruct_);
-		//<-- FIXME: dmrgWaveStruct_.lrs
-		KronMatrix<InitKronType> kronMatrix(initKron);
-		VectorType psiDestOneSector;
-		psiDest.extract(psiDestOneSector, i0);
+//		SizeType qn = psiDest.qn(i0);
+//		SizeType iOld = findIold(psiSrc, psiDest, i0);
+//		InitKronType initKron(lrs, i0, qn, wftOptions_, dmrgWaveStruct_, iOld);
+//		KronMatrix<InitKronType> kronMatrix(initKron);
+//		VectorType psiDestOneSector;
+//		psiDest.extract(psiDestOneSector, i0);
 
-		VectorType psiSrcOneSector;
-		psiSrc.extract(psiSrcOneSector, i0);
+//		VectorType psiSrcOneSector;
+//		psiSrc.extract(psiSrcOneSector, iOld);
 
-		kronMatrix.matrixVectorProduct(psiDestOneSector, psiSrcOneSector);
-		psiDest.setDataInSector(psiDestOneSector, i0);
+//		kronMatrix.matrixVectorProduct(psiDestOneSector, psiSrcOneSector);
+//		psiDest.setDataInSector(psiDestOneSector, i0);
 	}
 
 	template<typename SomeVectorType>
@@ -534,6 +534,19 @@ private:
 				psiDest.fastAccess(i0,x) += psiSrc.slowAccess(y) * weRef.getValue(k);
 			}
 		}
+	}
+
+	SizeType findIold(const VectorWithOffsetType& psiSrc,
+	                  const VectorWithOffsetType& psiDest,
+	                  SizeType iNew) const
+	{
+		SizeType sectors = psiSrc.sectors();
+		for (SizeType i = 0; i < sectors; ++i) {
+			if (psiSrc.qn(i) == psiDest.qn(iNew))
+				return psiSrc.sector(i);
+		}
+
+		err("WaveFunctionTransfLocal::findIold(): Cannot find sector in old vector\n");
 	}
 
 	const DmrgWaveStructType& dmrgWaveStruct_;

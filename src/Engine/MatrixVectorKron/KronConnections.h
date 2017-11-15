@@ -106,33 +106,38 @@ public:
 	typedef typename InitKronType::RealType RealType;
 	typedef typename GenIjPatchType::BasisType BasisType;
 
-	KronConnections(const InitKronType& initKron,
-	                VectorType& x,
-	                const VectorType& y,
-	                SizeType)
+	KronConnections(InitKronType& initKron)
 	    : initKron_(initKron),
-	      x_(x),
-	      y_(y),
-	      offsetForPatches_(initKron_.patch(GenIjPatchType::LEFT).size())
+	      x_(initKron.xout()),
+	      y_(initKron.yin()),
+	      offsetForPatchesNew_(initKron_.patch(InitKronType::NEW, GenIjPatchType::LEFT).size()),
+	      offsetForPatchesOld_(0)
 	{
-		computeOffsets();
+		computeOffsets(offsetForPatchesNew_, InitKronType::NEW);
+		if (initKron.isWft()) {
+			 offsetForPatchesOld_ = new VectorSizeType(
+			             initKron_.patch(InitKronType::NEW, GenIjPatchType::LEFT).size());
+			 computeOffsets(*offsetForPatchesOld_, InitKronType::OLD);
+		} else {
+			offsetForPatchesOld_ = &offsetForPatchesNew_;
+		}
 	}
 
 	SizeType tasks() const
 	{
-		assert(initKron_.patch(GenIjPatchType::LEFT).size() ==
-		       initKron_.patch(GenIjPatchType::RIGHT).size());
-		return initKron_.patch(GenIjPatchType::LEFT).size();
+		return tasksInternal(InitKronType::NEW);
 	}
 
 	void doTask(SizeType outPatch, SizeType)
 	{
 		SizeType nC = initKron_.connections();
-		SizeType total = tasks();
-		SizeType offsetX = offsetForPatches_[outPatch];
+		SizeType total = tasksInternal(InitKronType::OLD);
+		assert(outPatch < offsetForPatchesNew_.size());
+		SizeType offsetX = offsetForPatchesNew_[outPatch];
 		assert(offsetX < x_.size());
 		for (SizeType inPatch=0;inPatch<total;++inPatch) {
-			SizeType offsetY = offsetForPatches_[inPatch];
+			assert(inPatch < offsetForPatchesOld_->size());
+			SizeType offsetY = (*offsetForPatchesOld_)[inPatch];
 			assert(offsetY < y_.size());
 			for (SizeType ic=0;ic<nC;++ic) {
 				const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
@@ -146,26 +151,26 @@ public:
 		}
 	}
 
-	void sync()
-	{}
+	void sync() {}
 
 private:
 
-	void computeOffsets()
+	void computeOffsets(VectorSizeType& offsetForPatches,
+	                    typename InitKronType::WhatBasisEnum what)
 	{
-		assert(initKron_.patch(GenIjPatchType::LEFT).size() ==
-		       initKron_.patch(GenIjPatchType::RIGHT).size());
+		assert(initKron_.patch(what, GenIjPatchType::LEFT).size() ==
+		       initKron_.patch(what, GenIjPatchType::RIGHT).size());
 
-		SizeType npatch = initKron_.patch(GenIjPatchType::LEFT).size();
+		SizeType npatch = initKron_.patch(what, GenIjPatchType::LEFT).size();
 		SizeType sum = 0;
-		const BasisType& left = initKron_.lrs().left();
-		const BasisType& right = initKron_.lrs().right();
+		const BasisType& left = initKron_.lrs(what).left();
+		const BasisType& right = initKron_.lrs(what).right();
 
 		for( SizeType ipatch=0; ipatch < npatch; ipatch++) {
-			offsetForPatches_[ipatch] = sum;
+			offsetForPatches[ipatch] = sum;
 
-			SizeType igroup = initKron_.patch(GenIjPatchType::LEFT)[ipatch];
-			SizeType jgroup = initKron_.patch(GenIjPatchType::RIGHT)[ipatch];
+			SizeType igroup = initKron_.patch(what, GenIjPatchType::LEFT)[ipatch];
+			SizeType jgroup = initKron_.patch(what, GenIjPatchType::RIGHT)[ipatch];
 
 			assert(left.partition(igroup+1) >= left.partition(igroup));
 			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
@@ -184,10 +189,10 @@ private:
 	            SizeType jpatch) const
 	{
 #ifndef NDEBUG
-		SizeType lSizeI = lSizeFunction(ipatch);
-		SizeType lSizeJ = lSizeFunction(jpatch);
-		SizeType rSizeI = rSizeFunction(ipatch);
-		SizeType rSizeJ = rSizeFunction(jpatch);
+		SizeType lSizeI = lSizeFunction(InitKronType::NEW, ipatch);
+		SizeType lSizeJ = lSizeFunction(InitKronType::OLD, jpatch);
+		SizeType rSizeI = rSizeFunction(InitKronType::NEW, ipatch);
+		SizeType rSizeJ = rSizeFunction(InitKronType::OLD, jpatch);
 		assert(Amat.rows() == lSizeI);
 		assert(Amat.cols() == lSizeJ);
 		assert(Bmat.rows() == rSizeI);
@@ -195,24 +200,34 @@ private:
 #endif
 	}
 
-	SizeType lSizeFunction(SizeType ipatch) const
+	SizeType lSizeFunction(typename InitKronType::WhatBasisEnum what,
+	                       SizeType ipatch) const
 	{
-		SizeType igroup = initKron_.patch(GenIjPatchType::LEFT)[ipatch];
-		return initKron_.lrs().left().partition(igroup+1) -
-		        initKron_.lrs().left().partition(igroup);
+		SizeType igroup = initKron_.patch(what, GenIjPatchType::LEFT)[ipatch];
+		return initKron_.lrs(what).left().partition(igroup+1) -
+		        initKron_.lrs(what).left().partition(igroup);
 	}
 
-	SizeType rSizeFunction(SizeType ipatch) const
+	SizeType rSizeFunction(typename InitKronType::WhatBasisEnum what,
+	                       SizeType ipatch) const
 	{
-		SizeType jgroup = initKron_.patch(GenIjPatchType::RIGHT)[ipatch];
-		return initKron_.lrs().right().partition(jgroup+1) -
-		        initKron_.lrs().right().partition(jgroup);
+		SizeType jgroup = initKron_.patch(what, GenIjPatchType::RIGHT)[ipatch];
+		return initKron_.lrs(what).right().partition(jgroup+1) -
+		        initKron_.lrs(what).right().partition(jgroup);
+	}
+
+	SizeType tasksInternal(typename InitKronType::WhatBasisEnum what) const
+	{
+		assert(initKron_.patch(what, GenIjPatchType::LEFT).size() ==
+		       initKron_.patch(what, GenIjPatchType::RIGHT).size());
+		return initKron_.patch(what, GenIjPatchType::LEFT).size();
 	}
 
 	const InitKronType& initKron_;
 	VectorType& x_;
 	const VectorType& y_;
-	VectorSizeType offsetForPatches_;
+	VectorSizeType offsetForPatchesNew_;
+	VectorSizeType* offsetForPatchesOld_;
 }; //class KronConnections
 
 } // namespace PsimagLite

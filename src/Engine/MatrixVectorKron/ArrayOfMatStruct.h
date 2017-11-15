@@ -101,23 +101,27 @@ public:
 	typedef typename GenIjPatchType::BasisType BasisType;
 
 	ArrayOfMatStruct(const SparseMatrixType& sparse,
-	                 const GenIjPatchType& patch,
+	                 const GenIjPatchType& patchOld,
+	                 const GenIjPatchType& patchNew,
 	                 typename GenIjPatchType::LeftOrRightEnumType leftOrRight,
 	                 const RealType& threshold)
-	    : data_(patch(leftOrRight).size(), patch(leftOrRight).size())
+	    : data_(patchOld(leftOrRight).size(), patchNew(leftOrRight).size())
 	{
-		const BasisType& basis = (leftOrRight == GenIjPatchType::LEFT) ?
-		            patch.lrs().left() : patch.lrs().right();
-		SizeType npatch = patch(leftOrRight).size();
-		for (SizeType jpatch=0; jpatch < npatch; ++jpatch) {
-			SizeType jgroup = patch(leftOrRight)[jpatch];
-			SizeType j1 = basis.partition(jgroup);
-			SizeType j2 = basis.partition(jgroup+1);
+		const BasisType& basisOld = (leftOrRight == GenIjPatchType::LEFT) ?
+		            patchOld.lrs().left() : patchOld.lrs().right();
+		const BasisType& basisNew = (leftOrRight == GenIjPatchType::LEFT) ?
+		            patchNew.lrs().left() : patchNew.lrs().right();
+		SizeType npatchOld = patchOld(leftOrRight).size();
+		SizeType npatchNew = patchNew(leftOrRight).size();
+		for (SizeType jpatch=0; jpatch < npatchNew; ++jpatch) {
+			SizeType jgroup = patchNew(leftOrRight)[jpatch];
+			SizeType j1 = basisNew.partition(jgroup);
+			SizeType j2 = basisNew.partition(jgroup+1);
 			SizeType cols = j2 - j1;
-			for (SizeType ipatch=0; ipatch < npatch; ++ipatch) {
-				SizeType igroup = patch(leftOrRight)[ipatch];
-				SizeType i1 = basis.partition(igroup);
-				SizeType i2 = basis.partition(igroup+1);
+			for (SizeType ipatch=0; ipatch < npatchOld; ++ipatch) {
+				SizeType igroup = patchOld(leftOrRight)[ipatch];
+				SizeType i1 = basisOld.partition(igroup);
+				SizeType i2 = basisOld.partition(igroup+1);
 
 				SizeType rows = i2 - i1;
 

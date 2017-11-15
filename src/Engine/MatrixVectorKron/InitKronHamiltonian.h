@@ -93,6 +93,7 @@ public:
 	typedef ModelType_ ModelType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisType BasisType;
 	typedef InitKronBase<LeftRightSuperType> BaseType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::LinkType LinkType;
@@ -111,16 +112,145 @@ public:
 	               modelHelper.quantumNumber(),
 	               model.params().denseSparseThreshold),
 	      model_(model),
-	      modelHelper_(modelHelper)
+	      modelHelper_(modelHelper),
+	      vstart_(this->patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1),
+	      weightsOfPatches_(this->patch(BaseType::NEW, GenIjPatchType::LEFT).size(), 1)
 	{
 		addHlAndHr();
 		convertXcYcArrays();
+		setUpVstart();
+		assert(vstart_.size() > 0);
+		SizeType nsize = vstart_[vstart_.size() - 1];
+		assert(nsize > 0);
+		yin_.resize(nsize, 0.0);
+		xout_.resize(nsize, 0.0);
 	}
+
+	bool isWft() const {return false; }
 
 	bool loadBalance() const
 	{
 		return (model_.params().options.find("KronLoadBalance") != PsimagLite::String::npos);
 	}
+
+	// -------------------
+	// copy vin(:) to yin(:)
+	// -------------------
+	void copyIn(const VectorType& vout,
+	            const VectorType& vin) const
+	{
+		VectorType& xout = xout_;
+		VectorType& yin = yin_;
+
+		const VectorSizeType& permInverse = this->lrs(BaseType::NEW).super().permutationInverse();
+		const SparseMatrixType& leftH = this->lrs(BaseType::NEW).left().hamiltonian();
+		SizeType nl = leftH.rows();
+
+		SizeType offset = this->offset(BaseType::NEW);
+		SizeType npatches = this->patch(BaseType::NEW, GenIjPatchType::LEFT).size();
+		const BasisType& left = this->lrs(BaseType::NEW).left();
+		const BasisType& right = this->lrs(BaseType::NEW).right();
+
+		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
+
+			SizeType igroup = this->patch(BaseType::NEW, GenIjPatchType::LEFT)[ipatch];
+			SizeType jgroup = this->patch(BaseType::NEW, GenIjPatchType::RIGHT)[ipatch];
+
+			assert(left.partition(igroup+1) >= left.partition(igroup));
+			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
+
+			assert(right.partition(jgroup+1) >= right.partition(jgroup));
+			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
+
+			SizeType left_offset = left.partition(igroup);
+			SizeType right_offset = right.partition(jgroup);
+
+			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
+				for (SizeType iright=0; iright < sizeRight; ++iright) {
+
+					SizeType i = ileft + left_offset;
+					SizeType j = iright + right_offset;
+
+					SizeType ij = i + j * nl;
+
+					assert(i < nl);
+					assert(j < this->lrs(BaseType::NEW).right().hamiltonian().rows());
+
+					assert(ij < permInverse.size());
+
+					SizeType r = permInverse[ ij ];
+					assert(!((r < offset) || (r >= (offset + this->size(BaseType::NEW)))));
+
+					SizeType ip = vstart_[ipatch] + (iright + ileft * sizeRight);
+					assert(ip < yin.size());
+
+					assert( (r >= offset) && ((r-offset) < vin.size()) );
+					yin[ip] = vin[r-offset];
+					xout[ip] = vout[r-offset];
+				}
+			}
+		}
+	}
+
+	// -------------------
+	// copy xout(:) to vout(:)
+	// -------------------
+	void copyOut(VectorType& vout) const
+	{
+		const VectorType& xout = xout_;
+		const VectorSizeType& permInverse = this->lrs(BaseType::NEW).super().permutationInverse();
+		SizeType offset = this->offset(BaseType::NEW);
+		SizeType nl = this->lrs(BaseType::NEW).left().hamiltonian().rows();
+		SizeType npatches = this->patch(BaseType::NEW, GenIjPatchType::LEFT).size();
+		const BasisType& left = this->lrs(BaseType::NEW).left();
+		const BasisType& right = this->lrs(BaseType::NEW).right();
+
+		for( SizeType ipatch=0; ipatch < npatches; ++ipatch) {
+
+			SizeType igroup = this->patch(BaseType::NEW, GenIjPatchType::LEFT)[ipatch];
+			SizeType jgroup = this->patch(BaseType::NEW, GenIjPatchType::RIGHT)[ipatch];
+
+			assert(left.partition(igroup+1) >= left.partition(igroup));
+			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
+
+			assert(right.partition(jgroup+1) >= right.partition(jgroup));
+			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
+
+			SizeType left_offset = left.partition(igroup);
+			SizeType right_offset = right.partition(jgroup);
+
+			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
+				for (SizeType iright=0; iright < sizeRight; ++iright) {
+
+					SizeType i = ileft + left_offset;
+					SizeType j = iright + right_offset;
+
+					assert(i < nl);
+					assert(j < this->lrs(BaseType::NEW).right().hamiltonian().rows());
+
+					assert(i + j*nl < permInverse.size());
+
+					SizeType r = permInverse[i + j*nl];
+					assert( !(  (r < offset) || (r >= (offset + this->size(BaseType::NEW))) ) );
+
+					SizeType ip = vstart_[ipatch] + (iright + ileft * sizeRight);
+					assert(ip < xout.size());
+
+					assert(r >= offset && ((r-offset) < vout.size()) );
+					vout[r-offset] = xout[ip];
+				}
+			}
+		}
+	}
+
+	const VectorSizeType& weightsOfPatches() const
+	{
+		return weightsOfPatches_;
+	}
+
+	const VectorType& yin() const { return yin_; }
+
+	VectorType& xout() { return xout_; }
 
 private:
 
@@ -170,6 +300,57 @@ private:
 		}
 	}
 
+
+	// -------------------------------------------
+	// setup vstart(:) for beginning of each patch
+	// -------------------------------------------
+	void setUpVstart()
+	{
+		SizeType npatches = this->patch(BaseType::NEW, GenIjPatchType::LEFT).size();
+
+		SizeType ip = 0;
+		PsimagLite::Vector<long unsigned int>::Type weights(npatches, 0);
+		const BasisType& left = this->lrs(BaseType::NEW).left();
+		const BasisType& right = this->lrs(BaseType::NEW).right();
+
+		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
+			vstart_[ipatch] = ip;
+
+			SizeType igroup = this->patch(BaseType::NEW, GenIjPatchType::LEFT)[ipatch];
+			SizeType jgroup = this->patch(BaseType::NEW, GenIjPatchType::RIGHT)[ipatch];
+
+			assert(left.partition(igroup+1) >= left.partition(igroup));
+			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
+
+			assert(right.partition(jgroup+1) >= right.partition(jgroup));
+			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
+
+			assert(1 <= sizeLeft);
+			assert(1 <= sizeRight);
+
+			weights[ipatch] = sizeLeft * sizeRight * (sizeLeft + sizeRight);
+
+			ip += sizeLeft * sizeRight;
+		}
+
+		vstart_[npatches] = ip;
+
+		setAndFixWeights(weights);
+	}
+
+	void setAndFixWeights(const PsimagLite::Vector<long unsigned int>::Type& weights)
+	{
+		long unsigned int max = *(std::max_element(weights.begin(), weights.end()));
+		max >>= 31;
+		SizeType bits = 1 + PsimagLite::log2Integer(max);
+		SizeType npatches = weights.size();
+		assert(npatches == weightsOfPatches_.size());
+		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
+			long unsigned int tmp = (weights[ipatch] >> bits);
+			weightsOfPatches_[ipatch] = (max == 0) ? weights[ipatch] : tmp;
+		}
+	}
+
 	InitKronHamiltonian(const InitKronHamiltonian&);
 
 	InitKronHamiltonian& operator=(const InitKronHamiltonian&);
@@ -178,6 +359,10 @@ private:
 	const ModelHelperType& modelHelper_;
 	SparseMatrixType identityL_;
 	SparseMatrixType identityR_;
+	VectorSizeType vstart_;
+	VectorSizeType weightsOfPatches_;
+	mutable VectorType yin_;
+	mutable VectorType xout_;
 };
 } // namespace Dmrg
 

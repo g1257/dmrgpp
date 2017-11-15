@@ -104,219 +104,45 @@ class KronMatrix {
 
 public:
 
-	KronMatrix(const InitKronType& initKron)
+	KronMatrix(InitKronType& initKron)
 	    : initKron_(initKron),
-	      progress_("KronMatrix"),
-	      vstart_(initKron_.patch(GenIjPatchType::LEFT).size() + 1),
-	      weightsOfPatches_(initKron_.patch(GenIjPatchType::LEFT).size(), 1)
+	      progress_("KronMatrix")
 	{
-		setUpVstart();
-		assert(vstart_.size() > 0);
-		SizeType nsize = vstart_[vstart_.size() - 1];
-		assert(nsize > 0);
-		yin_.resize(nsize, 0.0);
-		xout_.resize(nsize, 0.0);
-
 		PsimagLite::String str((initKron.loadBalance()) ? "true" : "false");
 		PsimagLite::OstringStream msg;
-		msg<<"KronMatrix: preparation done for size="<<initKron.size();
+		msg<<"KronMatrix: preparation done for size="<<initKron.size(InitKronType::NEW);
 		msg<<" loadBalance "<<str;
 		progress_.printline(msg, std::cout);
 	}
 
 	void matrixVectorProduct(VectorType& vout, const VectorType& vin) const
 	{
-		copyIn(xout_, yin_, vout, vin);
+		initKron_.copyIn(vout, vin);
 
-		KronConnectionsType kc(initKron_,xout_,yin_,PsimagLite::Concurrency::npthreads);
+		KronConnectionsType kc(initKron_);
 
 		typedef PsimagLite::Parallelizer<KronConnectionsType> ParallelizerType;
 		ParallelizerType parallelConnections(PsimagLite::Concurrency::npthreads,
 		                                     PsimagLite::MPI::COMM_WORLD);
 
 		if (initKron_.loadBalance())
-			parallelConnections.loopCreate(kc, weightsOfPatches_);
+			parallelConnections.loopCreate(kc, initKron_.weightsOfPatches());
 		else
 			parallelConnections.loopCreate(kc);
 
 		kc.sync();
 
-		copyOut(vout, xout_);
+		initKron_.copyOut(vout);
 	}
 
 private:
-
-	// -------------------
-	// copy vin(:) to yin(:)
-	// -------------------
-	void copyIn(VectorType& xout,
-	            VectorType& yin,
-	            const VectorType& vout,
-	            const VectorType& vin) const
-	{
-		const VectorSizeType& permInverse = initKron_.lrs().super().permutationInverse();
-		const SparseMatrixType& leftH = initKron_.lrs().left().hamiltonian();
-		SizeType nl = leftH.rows();
-
-		SizeType offset = initKron_.offset();
-		SizeType npatches = initKron_.patch(GenIjPatchType::LEFT).size();
-		const BasisType& left = initKron_.lrs().left();
-		const BasisType& right = initKron_.lrs().right();
-
-		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
-
-			SizeType igroup = initKron_.patch(GenIjPatchType::LEFT)[ipatch];
-			SizeType jgroup = initKron_.patch(GenIjPatchType::RIGHT)[ipatch];
-
-			assert(left.partition(igroup+1) >= left.partition(igroup));
-			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
-
-			assert(right.partition(jgroup+1) >= right.partition(jgroup));
-			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
-
-			SizeType left_offset = left.partition(igroup);
-			SizeType right_offset = right.partition(jgroup);
-
-			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
-				for (SizeType iright=0; iright < sizeRight; ++iright) {
-
-					SizeType i = ileft + left_offset;
-					SizeType j = iright + right_offset;
-
-					SizeType ij = i + j * nl;
-
-					assert(i < nl);
-					assert(j < initKron_.lrs().right().hamiltonian().rows());
-
-					assert(ij < permInverse.size());
-
-					SizeType r = permInverse[ ij ];
-					assert( !(  (r < offset) || (r >= (offset + initKron_.size())) ) );
-
-
-					SizeType ip = vstart_[ipatch] + (iright + ileft * sizeRight);
-					// SizeType ip = vstart[ipatch] + (ileft + iright * sizeLeft);
-
-					assert(ip < yin.size());
-
-					assert( (r >= offset) && ((r-offset) < vin.size()) );
-					yin[ip] = vin[r-offset];
-					xout[ip] = vout[r-offset];
-				}
-			}
-		}
-	}
-
-	// -------------------
-	// copy xout(:) to vout(:)
-	// -------------------
-	void copyOut(VectorType& vout, const VectorType& xout) const
-	{
-		const VectorSizeType& permInverse = initKron_.lrs().super().permutationInverse();
-		SizeType offset = initKron_.offset();
-		SizeType nl = initKron_.lrs().left().hamiltonian().rows();
-		SizeType npatches = initKron_.patch(GenIjPatchType::LEFT).size();
-		const BasisType& left = initKron_.lrs().left();
-		const BasisType& right = initKron_.lrs().right();
-
-		for( SizeType ipatch=0; ipatch < npatches; ++ipatch) {
-
-			SizeType igroup = initKron_.patch(GenIjPatchType::LEFT)[ipatch];
-			SizeType jgroup = initKron_.patch(GenIjPatchType::RIGHT)[ipatch];
-
-			assert(left.partition(igroup+1) >= left.partition(igroup));
-			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
-
-			assert(right.partition(jgroup+1) >= right.partition(jgroup));
-			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
-
-			SizeType left_offset = left.partition(igroup);
-			SizeType right_offset = right.partition(jgroup);
-
-			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
-				for (SizeType iright=0; iright < sizeRight; ++iright) {
-
-					SizeType i = ileft + left_offset;
-					SizeType j = iright + right_offset;
-
-					assert(i < nl);
-					assert(j < initKron_.lrs().right().hamiltonian().rows());
-
-					assert(i + j*nl < permInverse.size());
-
-					SizeType r = permInverse[i + j*nl];
-					assert( !(  (r < offset) || (r >= (offset + initKron_.size())) ) );
-
-					SizeType ip = vstart_[ipatch] + (iright + ileft * sizeRight);
-					assert(ip < xout.size());
-
-					assert(r >= offset && ((r-offset) < vout.size()) );
-					vout[r-offset] = xout[ip];
-				}
-			}
-		}
-	}
-
-	// -------------------------------------------
-	// setup vstart(:) for beginning of each patch
-	// -------------------------------------------
-	void setUpVstart()
-	{
-		SizeType npatches = initKron_.patch(GenIjPatchType::LEFT).size();
-
-		SizeType ip = 0;
-		PsimagLite::Vector<long unsigned int>::Type weights(npatches, 0);
-		const BasisType& left = initKron_.lrs().left();
-		const BasisType& right = initKron_.lrs().right();
-
-		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
-			vstart_[ipatch] = ip;
-
-			SizeType igroup = initKron_.patch(GenIjPatchType::LEFT)[ipatch];
-			SizeType jgroup = initKron_.patch(GenIjPatchType::RIGHT)[ipatch];
-
-			assert(left.partition(igroup+1) >= left.partition(igroup));
-			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
-
-			assert(right.partition(jgroup+1) >= right.partition(jgroup));
-			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
-
-			assert(1 <= sizeLeft);
-			assert(1 <= sizeRight);
-
-			weights[ipatch] = sizeLeft * sizeRight * (sizeLeft + sizeRight);
-
-			ip += sizeLeft * sizeRight;
-		}
-
-		vstart_[npatches] = ip;
-
-		setAndFixWeights(weights);
-	}
-
-	void setAndFixWeights(const PsimagLite::Vector<long unsigned int>::Type& weights)
-	{
-		long unsigned int max = *(std::max_element(weights.begin(), weights.end()));
-		max >>= 31;
-		SizeType bits = 1 + PsimagLite::log2Integer(max);
-		SizeType npatches = weights.size();
-		assert(npatches == weightsOfPatches_.size());
-		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
-			long unsigned int tmp = (weights[ipatch] >> bits);
-			weightsOfPatches_[ipatch] = (max == 0) ? weights[ipatch] : tmp;
-		}
-	}
 
 	KronMatrix(const KronMatrix&);
 
 	const KronMatrix& operator=(const KronMatrix&);
 
-	const InitKronType& initKron_;
+	InitKronType& initKron_;
 	PsimagLite::ProgressIndicator progress_;
-	VectorSizeType vstart_;
-	VectorSizeType weightsOfPatches_;
-	mutable VectorType yin_;
-	mutable VectorType xout_;
 }; //class KronMatrix
 
 } // namespace PsimagLite

@@ -104,15 +104,20 @@ public:
 	typedef typename LinkType::PairSizeType PairSizetype;
 	typedef typename LinkType::PairCharType PairCharType;
 
-	InitKronWft(const LeftRightSuperType& lrs,
-	            SizeType m,
+	InitKronWft(const LeftRightSuperType& lrsNew,
+	            SizeType mNew,
 	            SizeType qn,
 	            const WftOptionsType& wftOptions,
-	            const DmrgWaveStructType& dmrgWaveStruct)
-	    : BaseType(lrs, m, qn, wftOptions.denseSparseThreshold),
+	            const DmrgWaveStructType& dmrgWaveStruct,
+	            SizeType mOld)
+	    : BaseType(dmrgWaveStruct.lrs,
+	               mOld,
+	               lrsNew,
+	               mNew,
+	               qn,
+	               wftOptions.denseSparseThreshold),
 	      wftOptions_(wftOptions)
 	{
-		// FIXME: dmrgWaveStruct_.lrs() vs. modelHelper_.lrs(), which one to use?
 		SparseMatrixType we;
 		dmrgWaveStruct.we.toSparse(we);
 		const PairCharType nn('N', 'N');
@@ -144,6 +149,8 @@ public:
 			this->addOneConnection(wsT, weT, link);
 		}
 	}
+
+	bool isWft() const {return true; }
 
 	bool loadBalance() const
 	{

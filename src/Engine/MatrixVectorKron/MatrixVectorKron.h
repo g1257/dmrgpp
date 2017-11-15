@@ -124,7 +124,7 @@ public:
 		checkKron();
 	}
 
-	SizeType rows() const { return initKron_.size(); }
+	SizeType rows() const { return initKron_.size(InitKronType::NEW); }
 
 	template<typename SomeVectorType>
 	void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y) const
