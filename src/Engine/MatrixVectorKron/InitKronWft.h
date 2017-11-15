@@ -118,11 +118,11 @@ public:
 	               qn,
 	               wftOptions.denseSparseThreshold),
 	      wftOptions_(wftOptions),
-	      vstartNew_(this->patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1),
-	      vstartOld_(this->patch(BaseType::OLD, GenIjPatchType::LEFT).size() + 1)
+	      vstartNew_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1),
+	      vstartOld_(BaseType::patch(BaseType::OLD, GenIjPatchType::LEFT).size() + 1)
 	{
-		this->setUpVstart(vstartNew_, BaseType::NEW);
-		this->setUpVstart(vstartOld_, BaseType::OLD);
+		BaseType::setUpVstart(vstartNew_, BaseType::NEW);
+		BaseType::setUpVstart(vstartOld_, BaseType::OLD);
 
 		SparseMatrixType we;
 		dmrgWaveStruct.we.toSparse(we);
@@ -146,13 +146,13 @@ public:
 		dmrgWaveStruct.ws.toSparse(ws);
 
 		if (wftOptions_.dir == ProgramGlobals::EXPAND_SYSTEM) {
-			this->addOneConnection(ws, we, link);
+			BaseType::addOneConnection(ws, we, link);
 		} else {
 			SparseMatrixType weT;
 			transposeConjugate(weT,we);
 			SparseMatrixType wsT;
 			transposeConjugate(wsT,ws);
-			this->addOneConnection(wsT, weT, link);
+			BaseType::addOneConnection(wsT, weT, link);
 		}
 	}
 
@@ -176,9 +176,9 @@ public:
 	// -------------------
 	// copy xout(:) to vout(:)
 	// -------------------
-	void copyOut(VectorType& vout)
+	void copyOut(VectorType& vout) const
 	{
-		err("InitKronWft: copyOut unimplemented\n");
+		BaseType::copyOut(vout, xout_, vstartNew_);
 	}
 
 	const VectorType& yin() const { return yin_; }
@@ -192,19 +192,19 @@ private:
 	            const VectorSizeType& vstart,
 	            typename BaseType::WhatBasisEnum what) const
 	{
-		const VectorSizeType& permInverse = this->lrs(what).super().permutationInverse();
-		const SparseMatrixType& leftH = this->lrs(what).left().hamiltonian();
+		const VectorSizeType& permInverse = BaseType::lrs(what).super().permutationInverse();
+		const SparseMatrixType& leftH = BaseType::lrs(what).left().hamiltonian();
 		SizeType nl = leftH.rows();
 
-		SizeType offset = this->offset(what);
-		SizeType npatches = this->patch(what, GenIjPatchType::LEFT).size();
-		const BasisType& left = this->lrs(what).left();
-		const BasisType& right = this->lrs(what).right();
+		SizeType offset = BaseType::offset(what);
+		SizeType npatches = BaseType::patch(what, GenIjPatchType::LEFT).size();
+		const BasisType& left = BaseType::lrs(what).left();
+		const BasisType& right = BaseType::lrs(what).right();
 
 		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
 
-			SizeType igroup = this->patch(what, GenIjPatchType::LEFT)[ipatch];
-			SizeType jgroup = this->patch(what, GenIjPatchType::RIGHT)[ipatch];
+			SizeType igroup = BaseType::patch(what, GenIjPatchType::LEFT)[ipatch];
+			SizeType jgroup = BaseType::patch(what, GenIjPatchType::RIGHT)[ipatch];
 
 			assert(left.partition(igroup+1) >= left.partition(igroup));
 			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
@@ -224,12 +224,12 @@ private:
 					SizeType ij = i + j * nl;
 
 					assert(i < nl);
-					assert(j < this->lrs(what).right().hamiltonian().rows());
+					assert(j < BaseType::lrs(what).right().hamiltonian().rows());
 
 					assert(ij < permInverse.size());
 
 					SizeType r = permInverse[ ij ];
-					assert(!((r < offset) || (r >= (offset + this->size(what)))));
+					assert(!((r < offset) || (r >= (offset + BaseType::size(what)))));
 
 					SizeType ip = vstart[ipatch] + (iright + ileft * sizeRight);
 					assert(ip < x.size());

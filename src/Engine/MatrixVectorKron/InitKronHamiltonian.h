@@ -113,11 +113,11 @@ public:
 	               model.params().denseSparseThreshold),
 	      model_(model),
 	      modelHelper_(modelHelper),
-	      vstart_(this->patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1)
+	      vstart_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1)
 	{
 		addHlAndHr();
 		convertXcYcArrays();
-		this->setUpVstart(vstart_, BaseType::NEW);
+		BaseType::setUpVstart(vstart_, BaseType::NEW);
 		assert(vstart_.size() > 0);
 		SizeType nsize = vstart_[vstart_.size() - 1];
 		assert(nsize > 0);
@@ -141,19 +141,19 @@ public:
 		VectorType& xout = xout_;
 		VectorType& yin = yin_;
 
-		const VectorSizeType& permInverse = this->lrs(BaseType::NEW).super().permutationInverse();
-		const SparseMatrixType& leftH = this->lrs(BaseType::NEW).left().hamiltonian();
+		const VectorSizeType& permInverse = BaseType::lrs(BaseType::NEW).super().permutationInverse();
+		const SparseMatrixType& leftH = BaseType::lrs(BaseType::NEW).left().hamiltonian();
 		SizeType nl = leftH.rows();
 
-		SizeType offset = this->offset(BaseType::NEW);
-		SizeType npatches = this->patch(BaseType::NEW, GenIjPatchType::LEFT).size();
-		const BasisType& left = this->lrs(BaseType::NEW).left();
-		const BasisType& right = this->lrs(BaseType::NEW).right();
+		SizeType offset = BaseType::offset(BaseType::NEW);
+		SizeType npatches = BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size();
+		const BasisType& left = BaseType::lrs(BaseType::NEW).left();
+		const BasisType& right = BaseType::lrs(BaseType::NEW).right();
 
 		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
 
-			SizeType igroup = this->patch(BaseType::NEW, GenIjPatchType::LEFT)[ipatch];
-			SizeType jgroup = this->patch(BaseType::NEW, GenIjPatchType::RIGHT)[ipatch];
+			SizeType igroup = BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT)[ipatch];
+			SizeType jgroup = BaseType::patch(BaseType::NEW, GenIjPatchType::RIGHT)[ipatch];
 
 			assert(left.partition(igroup+1) >= left.partition(igroup));
 			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
@@ -173,12 +173,12 @@ public:
 					SizeType ij = i + j * nl;
 
 					assert(i < nl);
-					assert(j < this->lrs(BaseType::NEW).right().hamiltonian().rows());
+					assert(j < BaseType::lrs(BaseType::NEW).right().hamiltonian().rows());
 
 					assert(ij < permInverse.size());
 
 					SizeType r = permInverse[ ij ];
-					assert(!((r < offset) || (r >= (offset + this->size(BaseType::NEW)))));
+					assert(!((r < offset) || (r >= (offset + BaseType::size(BaseType::NEW)))));
 
 					SizeType ip = vstart_[ipatch] + (iright + ileft * sizeRight);
 					assert(ip < yin.size());
@@ -194,52 +194,9 @@ public:
 	// -------------------
 	// copy xout(:) to vout(:)
 	// -------------------
-	void copyOut(VectorType& vout)
+	void copyOut(VectorType& vout) const
 	{
-		const VectorType& xout = xout_;
-		const VectorSizeType& permInverse = this->lrs(BaseType::NEW).super().permutationInverse();
-		SizeType offset = this->offset(BaseType::NEW);
-		SizeType nl = this->lrs(BaseType::NEW).left().hamiltonian().rows();
-		SizeType npatches = this->patch(BaseType::NEW, GenIjPatchType::LEFT).size();
-		const BasisType& left = this->lrs(BaseType::NEW).left();
-		const BasisType& right = this->lrs(BaseType::NEW).right();
-
-		for( SizeType ipatch=0; ipatch < npatches; ++ipatch) {
-
-			SizeType igroup = this->patch(BaseType::NEW, GenIjPatchType::LEFT)[ipatch];
-			SizeType jgroup = this->patch(BaseType::NEW, GenIjPatchType::RIGHT)[ipatch];
-
-			assert(left.partition(igroup+1) >= left.partition(igroup));
-			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
-
-			assert(right.partition(jgroup+1) >= right.partition(jgroup));
-			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
-
-			SizeType left_offset = left.partition(igroup);
-			SizeType right_offset = right.partition(jgroup);
-
-			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
-				for (SizeType iright=0; iright < sizeRight; ++iright) {
-
-					SizeType i = ileft + left_offset;
-					SizeType j = iright + right_offset;
-
-					assert(i < nl);
-					assert(j < this->lrs(BaseType::NEW).right().hamiltonian().rows());
-
-					assert(i + j*nl < permInverse.size());
-
-					SizeType r = permInverse[i + j*nl];
-					assert( !(  (r < offset) || (r >= (offset + this->size(BaseType::NEW))) ) );
-
-					SizeType ip = vstart_[ipatch] + (iright + ileft * sizeRight);
-					assert(ip < xout.size());
-
-					assert(r >= offset && ((r-offset) < vout.size()) );
-					vout[r-offset] = xout[ip];
-				}
-			}
-		}
+		BaseType::copyOut(vout, xout_, vstart_);
 	}
 
 	const VectorType& yin() const { return yin_; }
@@ -268,8 +225,8 @@ private:
 		              1,
 		              value,
 		              0);
-		this->addOneConnection(aL,identityR_,link);
-		this->addOneConnection(identityL_,aR,link);
+		BaseType::addOneConnection(aL,identityR_,link);
+		BaseType::addOneConnection(identityL_,aR,link);
 	}
 
 	void convertXcYcArrays()
@@ -286,11 +243,11 @@ private:
 				link3.type = ProgramGlobals::SYSTEM_ENVIRON;
 				if (link3.fermionOrBoson == ProgramGlobals::FERMION)
 					link3.value *= -1.0;
-				this->addOneConnection(*B,*A,link3);
+				BaseType::addOneConnection(*B,*A,link3);
 				continue;
 			}
 
-			this->addOneConnection(*A,*B,link2);
+			BaseType::addOneConnection(*A,*B,link2);
 		}
 	}
 

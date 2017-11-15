@@ -260,6 +260,58 @@ protected:
 			setAndFixWeights(weights);
 	}
 
+	// -------------------
+	// copy xout(:) to vout(:)
+	// -------------------
+	void copyOut(VectorType& vout,
+	             const VectorType& xout,
+	             const VectorSizeType& vstart) const
+	{
+		const VectorSizeType& permInverse = lrs(NEW).super().permutationInverse();
+		SizeType offset1 = offset(NEW);
+		SizeType nl = lrs(NEW).left().hamiltonian().rows();
+		SizeType npatches = patch(NEW, GenIjPatchType::LEFT).size();
+		const BasisType& left = lrs(NEW).left();
+		const BasisType& right = lrs(NEW).right();
+
+		for( SizeType ipatch=0; ipatch < npatches; ++ipatch) {
+
+			SizeType igroup = patch(NEW, GenIjPatchType::LEFT)[ipatch];
+			SizeType jgroup = patch(NEW, GenIjPatchType::RIGHT)[ipatch];
+
+			assert(left.partition(igroup+1) >= left.partition(igroup));
+			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
+
+			assert(right.partition(jgroup+1) >= right.partition(jgroup));
+			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
+
+			SizeType left_offset = left.partition(igroup);
+			SizeType right_offset = right.partition(jgroup);
+
+			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
+				for (SizeType iright=0; iright < sizeRight; ++iright) {
+
+					SizeType i = ileft + left_offset;
+					SizeType j = iright + right_offset;
+
+					assert(i < nl);
+					assert(j < lrs(NEW).right().hamiltonian().rows());
+
+					assert(i + j*nl < permInverse.size());
+
+					SizeType r = permInverse[i + j*nl];
+					assert( !(  (r < offset1) || (r >= (offset1 + size(NEW))) ) );
+
+					SizeType ip = vstart[ipatch] + (iright + ileft * sizeRight);
+					assert(ip < xout.size());
+
+					assert(r >= offset1 && ((r - offset1) < vout.size()) );
+					vout[r-offset1] = xout[ip];
+				}
+			}
+		}
+	}
+
 private:
 
 	void setAndFixWeights(const PsimagLite::Vector<long unsigned int>::Type& weights)
