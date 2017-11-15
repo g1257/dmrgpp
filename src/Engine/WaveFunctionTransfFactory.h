@@ -359,7 +359,7 @@ public:
 
 	bool isEnabled() const { return isEnabled_; }
 
-	bool twoSiteDmrg() const { return twoSiteDmrg_; }
+	bool twoSiteDmrg() const { return wftOptions_.twoSiteDmrg; }
 
 	void save(PsimagLite::String fileOut) const
 	{
@@ -419,7 +419,7 @@ private:
 			if (wsStack_.size()>=1) {
 				dmrgWaveStruct_.ws=wsStack_.top();
 				wsStack_.pop();
-				if (twoSiteDmrg_ && wsStack_.size()>0)
+				if (wftOptions_.twoSiteDmrg && wsStack_.size()>0)
 					dmrgWaveStruct_.ws=wsStack_.top();
 			} else {
 				throw PsimagLite::RuntimeError("System Stack is empty\n");
@@ -430,7 +430,7 @@ private:
 			if (weStack_.size()>=1) {
 				dmrgWaveStruct_.we=weStack_.top();
 				weStack_.pop();
-				if (twoSiteDmrg_ && weStack_.size()>0)
+				if (wftOptions_.twoSiteDmrg && weStack_.size()>0)
 					dmrgWaveStruct_.we=weStack_.top();
 			} else {
 				throw PsimagLite::RuntimeError("Environ Stack is empty\n");
@@ -534,7 +534,6 @@ private:
 	typename PsimagLite::Stack<BlockDiagonalMatrixType>::Type wsStack_,weStack_;
 	WaveFunctionTransfBaseType* wftImpl_;
 	PsimagLite::Random48<RealType> rng_;
-	bool twoSiteDmrg_;
 	bool noLoad_;
 	bool save_;
 	VectorSizeType sitesSeen_;

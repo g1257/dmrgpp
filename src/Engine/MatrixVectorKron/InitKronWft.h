@@ -122,7 +122,16 @@ public:
 	      vstartOld_(BaseType::patch(BaseType::OLD, GenIjPatchType::LEFT).size() + 1)
 	{
 		BaseType::setUpVstart(vstartNew_, BaseType::NEW);
+		assert(vstartNew_.size() > 0);
+		SizeType nsizeNew = vstartNew_[vstartNew_.size() - 1];
+		assert(nsizeNew > 0);
+		xout_.resize(nsizeNew, 0.0);
+
 		BaseType::setUpVstart(vstartOld_, BaseType::OLD);
+		assert(vstartOld_.size() > 0);
+		SizeType nsizeOld = vstartOld_[vstartOld_.size() - 1];
+		assert(nsizeOld > 0);
+		yin_.resize(nsizeOld, 0.0);
 
 		SparseMatrixType we;
 		dmrgWaveStruct.we.toSparse(we);
@@ -229,14 +238,14 @@ private:
 					assert(ij < permInverse.size());
 
 					SizeType r = permInverse[ ij ];
-					assert(!((r < offset) || (r >= (offset + BaseType::size(what)))));
-
+					assert(ipatch < vstart.size());
 					SizeType ip = vstart[ipatch] + (iright + ileft * sizeRight);
 					assert(ip < x.size());
+					assert(r >= offset);
+					r -= offset;
+					assert(r < v.size());
 
-					assert( (r >= offset) && ((r-offset) < v.size()) );
-
-					x[ip] = v[r-offset];
+					x[ip] = v[r];
 				}
 			}
 		}

@@ -113,7 +113,6 @@ public:
 	      denseSparseThreshold_(denseSparseThreshold),
 	      ijpatchesOld_(lrs, qn),
 	      ijpatchesNew_(&ijpatchesOld_),
-	      weightsOfPatches_(patch(NEW, GenIjPatchType::LEFT).size(), 1),
 	      wftMode_(false)
 	{
 		cacheSigns(signsNew_, lrs.left().electronsVector());
@@ -128,8 +127,8 @@ public:
 	    : mOld_(mOld),
 	      mNew_(mNew),
 	      denseSparseThreshold_(denseSparseThreshold),
-	      ijpatchesOld_(lrsOld, mOld),
-	      ijpatchesNew_(new GenIjPatchType(lrsNew, mNew)),
+	      ijpatchesOld_(lrsOld, qn),
+	      ijpatchesNew_(new GenIjPatchType(lrsNew, qn)),
 	      wftMode_(true)
 	{
 		cacheSigns(signsNew_, lrsNew.left().electronsVector());
@@ -228,9 +227,9 @@ protected:
 	void setUpVstart(VectorSizeType& vstart, WhatBasisEnum what)
 	{
 		SizeType npatches = patch(what, GenIjPatchType::LEFT).size();
-
+		assert(npatches > 0);
 		SizeType ip = 0;
-		PsimagLite::Vector<long unsigned int>::Type weights(npatches, 0);
+		VectorSizeType weights(npatches, 0);
 		const BasisType& left = lrs(what).left();
 		const BasisType& right = lrs(what).right();
 
@@ -314,13 +313,13 @@ protected:
 
 private:
 
-	void setAndFixWeights(const PsimagLite::Vector<long unsigned int>::Type& weights)
+	void setAndFixWeights(const VectorSizeType& weights)
 	{
 		long unsigned int max = *(std::max_element(weights.begin(), weights.end()));
 		max >>= 31;
 		SizeType bits = 1 + PsimagLite::log2Integer(max);
 		SizeType npatches = weights.size();
-		assert(npatches == weightsOfPatches_.size());
+		weightsOfPatches_.resize(npatches);
 		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
 			long unsigned int tmp = (weights[ipatch] >> bits);
 			weightsOfPatches_[ipatch] = (max == 0) ? weights[ipatch] : tmp;
@@ -351,7 +350,7 @@ private:
 	{
 		Ahat = A;
 		SizeType rows = Ahat.rows();
-		assert(signsNew_.size() == rows);
+		assert(signsNew_.size() >= rows);
 		SizeType counter = 0;
 		for (SizeType i = 0; i < rows; ++i) {
 			RealType sign = (bosonOrFermion == ProgramGlobals::FERMION &&

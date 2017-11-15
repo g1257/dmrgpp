@@ -226,10 +226,14 @@ public:
 	}
 
 	//! returns the effective quantum number of basis state i
-	int qn(int i,SizeType beforeOrAfterTransform=AFTER_TRANSFORM) const
+	int qn(SizeType i,SizeType beforeOrAfterTransform=AFTER_TRANSFORM) const
 	{
-		if (beforeOrAfterTransform==AFTER_TRANSFORM)
+		if (beforeOrAfterTransform==AFTER_TRANSFORM) {
+			assert(i < quantumNumbers_.size());
 			return quantumNumbers_[i];
+		}
+
+		assert(i < quantumNumbersOld_.size());
 		return quantumNumbersOld_[i];
 	}
 
