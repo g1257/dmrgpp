@@ -157,6 +157,32 @@ public:
 		return wftOptions_.kronLoadBalance;
 	}
 
+	// -------------------
+	// copy vin(:) to yin(:)
+	// -------------------
+	void copyIn(const VectorType& vout,
+	            const VectorType& vin) const
+	{
+		err("InitKronWft: copyIn unimplemented\n");
+	}
+
+	// -------------------
+	// copy xout(:) to vout(:)
+	// -------------------
+	void copyOut(VectorType& vout) const
+	{
+		err("InitKronWft: copyOut unimplemented\n");
+	}
+
+	const VectorSizeType& weightsOfPatches() const
+	{
+		throw PsimagLite::RuntimeError("InitKronWft: weightsOfPatches unimplemented\n");
+	}
+
+	const VectorType& yin() const { return yin_; }
+
+	VectorType& xout() { return xout_; }
+
 private:
 
 	const WftOptionsType& wftOptions_;
@@ -164,6 +190,9 @@ private:
 	InitKronWft(const InitKronWft&);
 
 	InitKronWft& operator=(const InitKronWft&);
+
+	mutable VectorType yin_;
+	mutable VectorType xout_;
 };
 } // namespace Dmrg
 

@@ -89,7 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParallelWftOne.h"
 #include "Parallelizer.h"
 #include "MatrixVectorKron/InitKronWft.h"
-#include "MatrixVectorKron/KronMatrix.h"
+#include "MatrixVectorKron/KronMatrixWft.h"
 
 namespace Dmrg {
 
@@ -547,6 +547,7 @@ private:
 		}
 
 		err("WaveFunctionTransfLocal::findIold(): Cannot find sector in old vector\n");
+		throw PsimagLite::RuntimeError("UNREACHABLE\n");
 	}
 
 	const DmrgWaveStructType& dmrgWaveStruct_;

@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Vector.h"
 #include "InitKronHamiltonian.h"
-#include "KronMatrix.h"
+#include "KronMatrixHamiltonian.h"
 #include "MatrixVectorBase.h"
 
 namespace Dmrg {
@@ -100,7 +100,7 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef InitKronHamiltonian<ModelType> InitKronType;
-	typedef KronMatrix<InitKronType> KronMatrixType;
+	typedef KronMatrixHamiltonian<InitKronType> KronMatrixType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;

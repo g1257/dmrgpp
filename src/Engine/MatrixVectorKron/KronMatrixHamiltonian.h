@@ -71,13 +71,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file KronMatrix.h
+/*! \file KronMatrixHamiltonian.h
  *
  *
  */
 
-#ifndef KRON_MATRIX_HEADER_H
-#define KRON_MATRIX_HEADER_H
+#ifndef KRON_MATRIX_HAM_HEADER_H
+#define KRON_MATRIX_HAM_HEADER_H
 
 #include "Matrix.h"
 #include "KronConnections.h"
@@ -89,7 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<typename InitKronType>
-class KronMatrix {
+class KronMatrixHamiltonian {
 
 	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -104,13 +104,13 @@ class KronMatrix {
 
 public:
 
-	KronMatrix(InitKronType& initKron)
+	KronMatrixHamiltonian(InitKronType& initKron)
 	    : initKron_(initKron),
-	      progress_("KronMatrix")
+	      progress_("KronMatrixHamiltonian")
 	{
 		PsimagLite::String str((initKron.loadBalance()) ? "true" : "false");
 		PsimagLite::OstringStream msg;
-		msg<<"KronMatrix: preparation done for size="<<initKron.size(InitKronType::NEW);
+		msg<<"KronMatrixHamiltonian: preparation done for size="<<initKron.size(InitKronType::NEW);
 		msg<<" loadBalance "<<str;
 		progress_.printline(msg, std::cout);
 	}
@@ -137,16 +137,16 @@ public:
 
 private:
 
-	KronMatrix(const KronMatrix&);
+	KronMatrixHamiltonian(const KronMatrixHamiltonian&);
 
-	const KronMatrix& operator=(const KronMatrix&);
+	const KronMatrixHamiltonian& operator=(const KronMatrixHamiltonian&);
 
 	InitKronType& initKron_;
 	PsimagLite::ProgressIndicator progress_;
-}; //class KronMatrix
+}; //class KronMatrixHamiltonian
 
 } // namespace PsimagLite
 
 /*@}*/
 
-#endif // KRON_MATRIX_HEADER_H
+#endif // KRON_MATRIX_HAM_HEADER_H
