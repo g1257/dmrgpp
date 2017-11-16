@@ -261,13 +261,13 @@ public:
 		VectorSizeType steps(phi.sectors());
 
 		const PsimagLite::String options = model_.params().options;
-		bool isRixsStatic = (options.find("TargetingRixsStatic") != PsimagLite::String::npos);
-		if (isRixsStatic) {
-			TridiagRixsStaticType rixsStatic(lrs_, model_, ioIn_, site, direction);
-			rixsStatic(phi, T, V, steps);
-		} else {
-			triDiag(phi,T,V,steps);
-		}
+		//	bool isRixsStatic = (options.find("TargetingRixsStatic") != PsimagLite::String::npos);
+		//	if (isRixsStatic) {
+		//		TridiagRixsStaticType rixsStatic(lrs_, model_, ioIn_, site, direction);
+		//		rixsStatic(phi, T, V, steps);
+		//	} else {
+		triDiag(phi,T,V,steps);
+		//	}
 
 		VectorVectorRealType eigs(phi.sectors());
 
@@ -280,7 +280,7 @@ public:
 			tv0.extract(sv,i0);
 			// g.s. is included separately
 			// set Aq
-			// tv0.setDataInSector(sv,i0);
+			//tv0.setDataInSector(sv,i0);
 			// set xi
 			SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 			VectorType xi(sv.size(),0),xr(sv.size(),0);

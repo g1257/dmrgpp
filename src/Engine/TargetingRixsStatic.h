@@ -141,10 +141,10 @@ public:
 	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
 	typedef CorrectionVectorSkeleton<LanczosSolverType,
 	VectorWithOffsetType,
-    BaseType,
-    TargetParamsType> CorrectionVectorSkeletonType;
+	BaseType,
+	TargetParamsType> CorrectionVectorSkeletonType;
 
-	enum StageEnum {STAGE_DISABLED, STAGE_OPERATOR, STAGE_STATIC1, STAGE_STATIC2};
+	enum {DISABLED,OPERATOR,CONVERGING};
 
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
@@ -155,16 +155,15 @@ public:
 	                    const SizeType&,
 	                    InputValidatorType& ioIn)
 	    : BaseType(lrs,model,wft,1),
-	      stage_(STAGE_DISABLED),
 	      tstStruct_(ioIn,model),
 	      ioIn_(ioIn),
 	      progress_("TargetingRixsStatic"),
 	      gsWeight_(1.0),
 	      paramsForSolver_(ioIn,"DynamicDmrg"),
-	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().energy())
+	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().energy()),
+	      applied_(false)
 	{
-		SizeType numberOfSites = model.geometry().numberOfSites();
-		this->common().init(&tstStruct_,3*numberOfSites);
+		this->common().init(&tstStruct_,6);
 		if (!wft.isEnabled())
 			throw PsimagLite::RuntimeError("TargetingRixsStatic needs wft\n");
 	}
@@ -181,7 +180,7 @@ public:
 
 	SizeType size() const
 	{
-		return BaseType::size();
+		return (applied_) ? 6 : 3;
 	}
 
 	void evolve(RealType Eg,
@@ -221,111 +220,131 @@ public:
 	void save(const VectorSizeType& block,
 	          PsimagLite::IoSimple::Out& io) const
 	{
-		assert(block.size() > 0);
-
-		SizeType marker = (this->common().noStageIs(STAGE_DISABLED)) ? 1 : 0;
-		TimeSerializerType ts(this->common().currentTime(),
-		                      block[0],
-		                      this->common().targetVectors(),
-		                      marker);
-		ts.save(io);
-		this->common().psi().save(io,"PSI");
+		skeleton_.save(this->common(),block,io);
 	}
+
 
 	void load(const PsimagLite::String& f)
 	{
-		this->common().template load<TimeSerializerType>(f);
+		typename BaseType::IoInputType io(f);
+
+		TimeSerializerType ts(io,BaseType::IoInputType::LAST_INSTANCE);
+		SizeType n = ts.numberOfVectors();
+		if (n != 4)
+			err("TargetingRixsStatic: number of TVs must be 4\n");
+
+		for (SizeType site = 0; site < 3; ++site) {
+			this->common().targetVectors(site) = ts.vector(site+1);
+		}
+
+		this->common().template load<TimeSerializerType>(f,0);
 	}
+
 
 private:
 
-	// tv[i] = A_site |gs> if i%3 == 0. site = i/3.
-	// tv[i+1] = imaginary cv for tv[i]
-	// tv[i+2] = real      cv for tv[i]
+	// tv[0] = A_site |gs>
+	// tv[1] = imaginary cv for tv[0]
+	// tv[2] = real      cv for tv[0]
+	// tv[3] = A_sitep |gs>
+	// tv[4] = imaginary cv for tv[3]
+	// tv[5] = real      cv for tv[3]
+
 	void evolve(RealType Eg,
 	            ProgramGlobals::DirectionEnum direction,
 	            SizeType site,
 	            SizeType loopNumber)
 	{
 		if (direction == ProgramGlobals::INFINITE) return;
-		SizeType numberOfSites = this->lrs().super().block().size();
 		SizeType indexOfOperator = 0;
 
-		// see if operator at site has been applied and result put into targetVectors[site]
-		// if no apply operator at site and add into targetVectors[site]
+		// see if operator at sitep has been applied and result put into targetVectors[3]
+		// if no apply operator at site and add into targetVectors[3]
 		// also wft everything
-		if (stage_ != STAGE_STATIC2) {
-			this->common().wftAll(site);
-			this->common().applyOneOperator(loopNumber,
-			                                indexOfOperator,
-			                                site,
-			                                this->common().targetVectors(3*site),
-			                                direction);
 
-		} else {
-			for (SizeType s = 0; s < numberOfSites; ++s) {
-				const VectorWithOffsetType& src = this->common().targetVectors(3*s);
-				if (src.size() == 0) continue;
-				VectorWithOffsetType phiNew;
+		this->common().wftAll(site);
 
-				this->common().wftOneVector(phiNew, src, site);
-				this->common().targetVectors(3*s) = phiNew;
+		if (!applied_) {
+			if (site == tstStruct_.sites(0)) {
+				VectorWithOffsetType tmpV1;
+				this->common().applyOneOperator(loopNumber,
+				                                indexOfOperator,
+				                                site,
+				                                tmpV1,
+				                                this->common().psi(),
+				                                direction);
+				if (tmpV1.size() > 0) {
+					this->common().targetVectors(3) = tmpV1;
+					applied_ = true;
+					PsimagLite::OstringStream msg;
+					msg<<"Applied operator";
+					progress_.printline(msg, std::cout);
+				}
 			}
-
-			doCorrectionVector(direction, site);
 		}
 
-		// typename PsimagLite::Vector<SizeType>::Type block(1,site);
-		// skeleton_.cocoon(block,direction);
+		doCorrectionVector(direction, site);
 
-		if (stage_ == STAGE_STATIC2) return;
-
-		SizeType counter = 0;
 		for (SizeType i = 0; i < this->common().targetVectors().size(); ++i) {
-			if (i%3 != 0) continue;
-			if (this->common().targetVectors(i).size() != 0) {
-				if (stage_ != STAGE_STATIC2) stage_ = STAGE_STATIC1;
-				counter++;
-			}
+			PsimagLite::String label = "P" + ttos(i);
+			this->common().cocoon(direction,
+			                      site,
+			                      this->common().psi(),
+			                      "PSI",
+			                      this->common().targetVectors(i),
+			                      label);
 		}
-
-		// -2 here because borders not done (needs FIXING FIXME TODO)
-		if (counter == numberOfSites-2 && stage_ == STAGE_STATIC1)
-			stage_ = STAGE_STATIC2;
+		for (SizeType i = 0; i < this->common().targetVectors().size(); ++i) {
+			PsimagLite::String label = "P" + ttos(i);
+			this->common().cocoon(direction,
+			                      site,
+			                      this->common().targetVectors(i),
+			                      label,
+			                      this->common().targetVectors(i),
+			                      label);
+		}
+		for (SizeType i = 0; i < this->common().targetVectors().size(); ++i) {
+			this->common().cocoon(direction,
+			                      site,
+			                      this->common().psi(),
+			                      "PSI",
+			                      this->common().psi(),
+			                      "PSI");
+		}
+		printNormsAndWeights();
 	}
 
 	void doCorrectionVector(ProgramGlobals::DirectionEnum direction,
 	                        SizeType site)
 	{
-		assert(stage_ == STAGE_STATIC2);
-		SizeType numberOfSites = this->lrs().super().block().size();
-		for (SizeType s = 0; s < numberOfSites; ++s)
-			skeleton_.calcDynVectors(this->common().targetVectors(3*s),
-			                         this->common().targetVectors(3*s+1),
-			                         this->common().targetVectors(3*s+2),
-			                         direction,
-			                         site);
-		setWeights();
+		if (!applied_) {
+			setWeights(3);
+			return;
+		}
+
+		skeleton_.calcDynVectors(this->common().targetVectors(3),
+		                         this->common().targetVectors(4),
+		                         this->common().targetVectors(5),
+		                         direction,
+		                         site);
+		//		this->common().targetVectors(4) = this->common().targetVectors(1);
+		//		this->common().targetVectors(5) = this->common().targetVectors(2);
+
+		setWeights(6);
 	}
 
-	void setWeights()
+	void setWeights(SizeType n)
 	{
 		gsWeight_ = tstStruct_.gsWeight();
 
-		RealType sum  = 0;
-		weight_.resize(this->common().targetVectors().size());
-		for (SizeType r=1;r<weight_.size();r++) {
-			weight_[r] = 1;
-			sum += weight_[r];
-		}
+		RealType sum  = n;
+		weight_.resize(n, 1);
 
-		for (SizeType r=0;r<weight_.size();r++) weight_[r] *= (1.0 - gsWeight_)/sum;
+		for (SizeType r=0;r<weight_.size();r++) weight_[r] = (1.0 - gsWeight_)/sum;
 	}
 
 	void printNormsAndWeights() const
 	{
-		if (this->common().allStages(STAGE_DISABLED)) return;
-
 		PsimagLite::OstringStream msg;
 		msg<<"gsWeight="<<gsWeight_<<" weights= ";
 		for (SizeType i = 0; i < weight_.size(); i++)
@@ -339,7 +358,6 @@ private:
 		progress_.printline(msg2,std::cout);
 	}
 
-	StageEnum stage_;
 	TargetParamsType tstStruct_;
 	InputValidatorType& ioIn_;
 	PsimagLite::ProgressIndicator progress_;
@@ -347,6 +365,7 @@ private:
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
 	CorrectionVectorSkeletonType skeleton_;
+	bool applied_;
 }; // class TargetingRixsStatic
 
 template<typename LanczosSolverType, typename VectorWithOffsetType>

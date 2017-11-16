@@ -94,6 +94,8 @@ class TridiagRixsStatic {
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename LanczosSolverType::ParametersSolverType ParametersSolverType;
 	typedef ApplyOperatorLocal<LeftRightSuperType, VectorWithOffset<ComplexOrRealType> >
 	ApplyOperatorLocalType;
@@ -116,8 +118,7 @@ class TridiagRixsStatic {
 		      A_(A),
 		      dir_(dir),
 		      corner_(corner),
-		      fs_(modelHelper->leftRightSuper().left().electronsVector(
-		              BasisWithOperatorsType::AFTER_TRANSFORM)),
+		      fs_(modelHelper->leftRightSuper().left().electronsVector()), // FIXME CHECK
 		      x2_(weights, modelHelper->leftRightSuper().super()),
 		      y2_(weights, modelHelper->leftRightSuper().super())
 		{}
@@ -126,6 +127,10 @@ class TridiagRixsStatic {
 		void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y) const
 		{
 			BasisType::matrixVectorProduct(x, y);
+			MatrixType fullA;
+			crsMatrixToFullMatrix(fullA,A_.data);
+			if(isZero(fullA))
+				return;
 			// add here x += Ay
 			x2_.setDataInSector(x,0);
 			y2_.setDataInSector(y,0);
