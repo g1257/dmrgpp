@@ -98,8 +98,6 @@ class WaveFunctionTransfFactory {
 
 public:
 
-	enum {DO_NOT_RESET_COUNTER,RESET_COUNTER};
-
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
@@ -118,6 +116,7 @@ public:
 	WaveFunctionTransfLocalType;
 	typedef WaveFunctionTransfSu2<DmrgWaveStructType,VectorWithOffsetType>
 	WaveFunctionTransfSu2Type;
+	typedef typename WaveFunctionTransfBaseType::WftOptions WftOptionsType;
 
 	template<typename SomeParametersType>
 	WaveFunctionTransfFactory(SomeParametersType& params)
@@ -359,7 +358,7 @@ public:
 
 	bool isEnabled() const { return isEnabled_; }
 
-	bool twoSiteDmrg() const { return wftOptions_.twoSiteDmrg; }
+	const WftOptionsType options() const { return wftOptions_; }
 
 	void save(PsimagLite::String fileOut) const
 	{
@@ -525,13 +524,14 @@ private:
 	}
 
 	bool isEnabled_;
-	typename WaveFunctionTransfBaseType::WftOptions wftOptions_;
+	WftOptionsType wftOptions_;
 	PsimagLite::ProgressIndicator progress_;
 	PsimagLite::String filenameIn_;
 	PsimagLite::String filenameOut_;
 	const PsimagLite::String WFT_STRING;
 	DmrgWaveStructType dmrgWaveStruct_;
-	typename PsimagLite::Stack<BlockDiagonalMatrixType>::Type wsStack_,weStack_;
+	typename PsimagLite::Stack<BlockDiagonalMatrixType>::Type wsStack_;
+	typename PsimagLite::Stack<BlockDiagonalMatrixType>::Type weStack_;
 	WaveFunctionTransfBaseType* wftImpl_;
 	PsimagLite::Random48<RealType> rng_;
 	bool noLoad_;

@@ -143,7 +143,7 @@ public:
 	      wft_(wft),
 	      lrs_(lrs),
 	      E0_(E0),
-	      twoSiteDmrg_(wft_.twoSiteDmrg())
+	      twoSiteDmrg_(wft_.options().twoSiteDmrg)
 	{}
 
 	virtual void calcTimeVectors(const PairType& startEnd,
