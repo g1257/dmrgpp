@@ -43,7 +43,7 @@ private:
 		for (SizeType i = 0; i < n - 1; ++i) {
 			SizeType s = basis.partition(i + 1, BasisWithOperatorsType::AFTER_TRANSFORM) -
 			        basis.partition(i, BasisWithOperatorsType::AFTER_TRANSFORM);
-			SizeType j = basis.qn(basis.partition(i));
+			SizeType j = basis.qn(basis.partition(i), BasisWithOperatorsType::AFTER_TRANSFORM);
 			PsimagLite::String q = SymmetryElectronsSzType::qnPrint(j,mode_ + 1);
 			os<<q<<" "<<s<<"\n";
 		}

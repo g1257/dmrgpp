@@ -108,7 +108,7 @@ public:
 	typedef SparseMatrixType_ SparseMatrixType;
 	typedef RealType_ RealType;
 
-	enum {BEFORE_TRANSFORM,AFTER_TRANSFORM};
+	enum WhenTransformEnum {BEFORE_TRANSFORM, AFTER_TRANSFORM};
 
 	enum {SAVE_ALL, SAVE_PARTIAL};
 
@@ -226,9 +226,9 @@ public:
 	}
 
 	//! returns the effective quantum number of basis state i
-	int qn(SizeType i,SizeType beforeOrAfterTransform=AFTER_TRANSFORM) const
+	int qn(SizeType i, WhenTransformEnum beforeOrAfterTransform) const
 	{
-		if (beforeOrAfterTransform==AFTER_TRANSFORM) {
+		if (beforeOrAfterTransform == AFTER_TRANSFORM) {
 			assert(i < quantumNumbers_.size());
 			return quantumNumbers_[i];
 		}
@@ -239,12 +239,12 @@ public:
 
 	//! Returns the partition that corresponds to quantum number qn
 	int partitionFromQn(SizeType qn,
-	                    SizeType beforeOrAfterTransform=AFTER_TRANSFORM) const
+	                    WhenTransformEnum beforeOrAfterTransform) const
 	{
 		const VectorSizeType* quantumNumbers;
 		const VectorSizeType* partition;
 
-		if (beforeOrAfterTransform==AFTER_TRANSFORM) {
+		if (beforeOrAfterTransform == AFTER_TRANSFORM) {
 			quantumNumbers = &quantumNumbers_;
 			partition = &partition_;
 		} else {
@@ -254,6 +254,7 @@ public:
 
 		for (SizeType i=0;i<partition->size();i++) {
 			SizeType state = (*partition)[i];
+			assert(state < quantumNumbers->size());
 			if ((*quantumNumbers)[state]==qn) return i;
 		}
 		return -1;
@@ -261,10 +262,14 @@ public:
 
 	//! returns the start of basis partition i (see paper)
 	SizeType partition(SizeType i,
-	                   SizeType beforeOrAfterTransform=AFTER_TRANSFORM) const
+	                   WhenTransformEnum beforeOrAfterTransform = AFTER_TRANSFORM) const
 	{
-		if (beforeOrAfterTransform==AFTER_TRANSFORM)
+		if (beforeOrAfterTransform == AFTER_TRANSFORM) {
+			assert(i < partition_.size());
 			return partition_[i];
+		}
+
+		assert(i < partitionOld_.size());
 		return partitionOld_[i];
 	}
 
@@ -314,7 +319,8 @@ public:
 	{
 		for (SizeType j=0;j<partition_.size()-1;j++)
 			if (i>=partition_[j] && i<partition_[j+1]) return j;
-		throw PsimagLite::RuntimeError("BasisImplementation:: No partition found for this state\n");
+		throw PsimagLite::RuntimeError(
+		            "BasisImplementation:: No partition found for this state\n");
 	}
 
 	//! Encodes the quantum numbers into a single unique SizeType and returns it
@@ -447,15 +453,18 @@ public:
 	}
 
 	//! Returns the vector of electrons for this basis
-	const VectorSizeType&
-	electronsVector(SizeType beforeOrAfterTransform=AFTER_TRANSFORM) const
+	const VectorSizeType& electronsVector(WhenTransformEnum beforeOrAfterTransform) const
 	{
-		if (beforeOrAfterTransform == AFTER_TRANSFORM) return electrons_;
-		return electronsOld_;
+		return (beforeOrAfterTransform == AFTER_TRANSFORM) ? electrons_ :
+		                                                     electronsOld_;
 	}
 
 	//! Returns the fermionic sign for state i
-	int fermionicSign(SizeType i,int f) const { return (electrons_[i]&1) ? f : 1; }
+	int fermionicSign(SizeType i,int f) const
+	{
+		assert(i < electrons_.size());
+		return (electrons_[i] & 1) ? f : 1;
+	}
 
 	//! Returns the (j,m) for state i of this basis
 	PairType jmValue(SizeType i) const

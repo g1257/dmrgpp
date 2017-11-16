@@ -115,7 +115,7 @@ public:
 	      ijpatchesNew_(&ijpatchesOld_),
 	      wftMode_(false)
 	{
-		cacheSigns(signsNew_, lrs.left().electronsVector());
+		cacheSigns(signsNew_, lrs.left().electronsVector(BasisType::AFTER_TRANSFORM));
 	}
 
 	InitKronBase(const LeftRightSuperType& lrsOld,
@@ -131,7 +131,7 @@ public:
 	      ijpatchesNew_(new GenIjPatchType(lrsNew, qn)),
 	      wftMode_(true)
 	{
-		cacheSigns(signsNew_, lrsNew.left().electronsVector());
+		cacheSigns(signsNew_, lrsNew.left().electronsVector(BasisType::AFTER_TRANSFORM));
 	}
 
 	~InitKronBase()

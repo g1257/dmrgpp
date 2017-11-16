@@ -608,10 +608,10 @@ private:
 	{
 		bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=
 		        PsimagLite::String::npos);
-		const VectorSizeType& eS = pS.electronsVector();
+		const VectorSizeType& eS = pS.electronsVector(BasisWithOperatorsType::AFTER_TRANSFORM);
 		FermionSignType fsS(eS);
 
-		const VectorSizeType& eE = pS.electronsVector();
+		const VectorSizeType& eE = pS.electronsVector(BasisWithOperatorsType::AFTER_TRANSFORM);
 		FermionSignType fsE(eE);
 
 		truncate_(pS,pE,target,keptStates,direction);

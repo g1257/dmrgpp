@@ -119,8 +119,9 @@ class BasisWithOperators : public OperatorsType_::BasisType {
 
 public:
 
+	typedef typename OperatorsType_::BasisType BaseType;
 	typedef std::pair<SizeType,SizeType> PairType;
-	typedef typename OperatorsType_::BasisType::RealType RealType;
+	typedef typename BaseType::RealType RealType;
 	typedef OperatorsType_ OperatorsType;
 	typedef typename OperatorsType::PairSizeSizeType PairSizeSizeType;
 	typedef typename OperatorsType::OperatorType OperatorType;
@@ -192,7 +193,7 @@ public:
 					const OperatorType& myOp =  basis2.getOperatorByIndex(i);
 					if (savedSign != myOp.fermionSign) {
 						utils::fillFermionicSigns(fermionicSigns,
-						                          basis2.electronsVector(),
+						                          basis2.electronsVector(BaseType::AFTER_TRANSFORM),
 						                          myOp.fermionSign);
 						savedSign = myOp.fermionSign;
 					}
@@ -211,11 +212,12 @@ public:
 				}
 			} else {
 				if (!this->useSu2Symmetry()) {
-					const OperatorType& myOp = basis3.getOperatorByIndex(i-basis2.numberOfOperators());
+					const OperatorType& myOp = basis3.
+					        getOperatorByIndex(i - basis2.numberOfOperators());
 
 					if (savedSign != myOp.fermionSign) {
 						utils::fillFermionicSigns(fermionicSigns,
-						                          basis2.electronsVector(),
+						                          basis2.electronsVector(BaseType::AFTER_TRANSFORM),
 						                          myOp.fermionSign);
 						savedSign = myOp.fermionSign;
 					}

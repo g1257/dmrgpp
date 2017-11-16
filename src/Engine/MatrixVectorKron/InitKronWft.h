@@ -205,7 +205,7 @@ private:
 		const SparseMatrixType& leftH = BaseType::lrs(what).left().hamiltonian();
 		SizeType nl = leftH.rows();
 
-		SizeType offset = BaseType::offset(what);
+		SizeType offset1 = BaseType::offset(what);
 		SizeType npatches = BaseType::patch(what, GenIjPatchType::LEFT).size();
 		const BasisType& left = BaseType::lrs(what).left();
 		const BasisType& right = BaseType::lrs(what).right();
@@ -241,8 +241,8 @@ private:
 					assert(ipatch < vstart.size());
 					SizeType ip = vstart[ipatch] + (iright + ileft * sizeRight);
 					assert(ip < x.size());
-					assert(r >= offset);
-					r -= offset;
+					assert(r >= offset1);
+					r -= offset1;
 					assert(r < v.size());
 
 					x[ip] = v[r];

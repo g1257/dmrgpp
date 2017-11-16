@@ -116,7 +116,8 @@ class TridiagRixsStatic {
 		      A_(A),
 		      dir_(dir),
 		      corner_(corner),
-		      fs_(modelHelper->leftRightSuper().left().electronsVector()), // FIXME CHECK
+		      fs_(modelHelper->leftRightSuper().left().electronsVector(
+		              BasisWithOperatorsType::AFTER_TRANSFORM)),
 		      x2_(weights, modelHelper->leftRightSuper().super()),
 		      y2_(weights, modelHelper->leftRightSuper().super())
 		{}

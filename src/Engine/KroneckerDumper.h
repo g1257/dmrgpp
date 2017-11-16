@@ -76,13 +76,13 @@ public:
 
 		fout_<<"#SuperBasisPermutation\n";
 		fout_<<lrs.super().permutationVector();
-		SizeType qtarget = lrs.super().qn(lrs.super().partition(m));
+		SizeType qtarget = lrs.super().qn(lrs.super().partition(m), BasisType::AFTER_TRANSFORM);
 
 		PairSizeType etarget = getNupNdown(qtarget,p->nOfQns);
 		fout_<<"#TargetElectronsUp="<<etarget.first<<"\n";
 		fout_<<"#TargetElectronsDown="<<etarget.second<<"\n";
 
-		cacheSigns(lrs.left().electronsVector());
+		cacheSigns(lrs.left().electronsVector(BasisType::AFTER_TRANSFORM));
 		counter_++;
 	}
 
@@ -179,7 +179,7 @@ private:
 		}
 
 		fout_<<"#Electrons\n";
-		fout_<<basis.electronsVector();
+		fout_<<basis.electronsVector(BasisType::AFTER_TRANSFORM);
 	}
 
 	PairSizeType getNupNdown(SizeType q, SizeType nOfQns) const

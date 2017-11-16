@@ -106,7 +106,8 @@ public:
 				SizeType jstart = lrs.right().partition(j);
 				assert(jstart<lrs.right().size());
 
-				if (lrs.left().qn(istart) + lrs.right().qn(jstart)!=target)
+				if (lrs.left().qn(istart, BasisType::AFTER_TRANSFORM) +
+				        lrs.right().qn(jstart, BasisType::AFTER_TRANSFORM) != target)
 					continue;
 
 				patchesLeft_.push_back(i);

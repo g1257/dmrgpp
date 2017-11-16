@@ -240,7 +240,8 @@ private:
 		for (SizeType i=0;i<total;i++) {
 			SizeType bs = lrs.super().partition(i+1)-lrs.super().partition(i);
 			if (verbose_) {
-				SizeType j = lrs.super().qn(lrs.super().partition(i));
+				SizeType j = lrs.super().qn(lrs.super().partition(i),
+				                            BasisWithOperatorsType::AFTER_TRANSFORM);
 				std::cerr<<SymmetryElectronsSzType::qnPrint(j,mode+1);
 			}
 
@@ -271,7 +272,8 @@ private:
 			if (weights[i]==0) continue;
 			PsimagLite::OstringStream msg;
 			msg<<"About to diag. sector with quantum numbs. ";
-			SizeType j = lrs.super().qn(lrs.super().partition(i));
+			SizeType j = lrs.super().qn(lrs.super().partition(i),
+			                            BasisWithOperatorsType::AFTER_TRANSFORM);
 			msg<<SymmetryElectronsSzType::qnPrint(j,mode+1);
 			msg<<" pseudo="<<lrs.super().pseudoEffectiveNumber(
 			         lrs.super().partition(i));
@@ -335,7 +337,8 @@ private:
 				weights[i] = 0;
 			if (weights[i]==0) continue;
 
-			SizeType j = lrs.super().qn(lrs.super().partition(i));
+			SizeType j = lrs.super().qn(lrs.super().partition(i),
+			                            BasisWithOperatorsType::AFTER_TRANSFORM);
 			PsimagLite::OstringStream msg;
 			msg<<"Found targetted symmetry sector in partition "<<i;
 			msg<<" of size="<<vecSaved[i].size();
