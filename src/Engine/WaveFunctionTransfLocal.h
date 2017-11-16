@@ -168,7 +168,7 @@ private:
 	                      const LeftRightSuperType& lrs,
 	                      const VectorSizeType& nk) const
 	{
-		if (wftOptions_.twoSiteDmrg)
+		if (wftOptions_.twoSiteDmrg && !wftOptions_.wftInPatches)
 			return transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
 
 		typename ProgramGlobals::DirectionEnum dir1 = ProgramGlobals::EXPAND_ENVIRON;
@@ -312,7 +312,7 @@ private:
 	                      const LeftRightSuperType& lrs,
 	                      const VectorSizeType& nk) const
 	{
-		if (wftOptions_.twoSiteDmrg)
+		if (wftOptions_.twoSiteDmrg && !wftOptions_.wftInPatches)
 			return transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
 
 		typename ProgramGlobals::DirectionEnum dir2 = ProgramGlobals::EXPAND_SYSTEM;

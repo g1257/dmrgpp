@@ -272,11 +272,12 @@ private:
 		                      startEnd);
 		LeftRightSuperType lrs(rSprime,(BasisWithOperatorsType&) eBasis,
 		                       (BasisType&)lrs_.super());
-		bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=PsimagLite::String::npos);
-		const LeftRightSuperType& lrsForWft = (twoSiteDmrg) ? lrs_ : lrs;
+		bool twoSiteDmrg = waveFunctionTransformation_.options().twoSiteDmrg;
+		bool wftInPatches = waveFunctionTransformation_.options().wftInPatches;
+		const LeftRightSuperType& lrsForWft = (twoSiteDmrg || wftInPatches) ? lrs_ : lrs;
 		waveFunctionTransformation_.push(cache.transform,
 		                                 ProgramGlobals::EXPAND_SYSTEM,
-		                                 lrsForWft);
+						 lrsForWft);
 
 		msg<<"new size of basis="<<rSprime.size();
 		msg<<" transform is "<<cache.transform.rows()<<" x "<<cache.transform.cols();
