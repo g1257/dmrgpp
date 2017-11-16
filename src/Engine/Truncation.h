@@ -308,8 +308,9 @@ private:
 		                      startEnd);
 		LeftRightSuperType lrs((BasisWithOperatorsType&) sBasis,
 		                       rEprime,(BasisType&)lrs_.super());
-		bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=PsimagLite::String::npos);
-		const LeftRightSuperType& lrsForWft = (twoSiteDmrg) ? lrs_ : lrs;
+		bool twoSiteDmrg = waveFunctionTransformation_.options().twoSiteDmrg;
+		bool wftInPatches = waveFunctionTransformation_.options().wftInPatches;
+		const LeftRightSuperType& lrsForWft = (twoSiteDmrg || wftInPatches) ? lrs_ : lrs;
 		waveFunctionTransformation_.push(cache.transform,
 		                                 ProgramGlobals::EXPAND_ENVIRON,
 		                                 lrsForWft);
