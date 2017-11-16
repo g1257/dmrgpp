@@ -153,15 +153,16 @@ public:
 
 		SparseMatrixType ws;
 		dmrgWaveStruct.ws.toSparse(ws);
-
+		SparseMatrixType weT;
+		transposeConjugate(weT,we);
+		SparseMatrixType wsT;
+		transposeConjugate(wsT,ws);
 		if (wftOptions_.dir == ProgramGlobals::EXPAND_SYSTEM) {
-			BaseType::addOneConnection(ws, we, link);
+
+			BaseType::addOneConnection(wsT, we, link);
 		} else {
-			SparseMatrixType weT;
-			transposeConjugate(weT,we);
-			SparseMatrixType wsT;
-			transposeConjugate(wsT,ws);
-			BaseType::addOneConnection(wsT, weT, link);
+
+			BaseType::addOneConnection(ws, we, link);
 		}
 	}
 

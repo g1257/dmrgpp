@@ -105,7 +105,7 @@ public:
 	                 const GenIjPatchType& patchNew,
 	                 typename GenIjPatchType::LeftOrRightEnumType leftOrRight,
 	                 const RealType& threshold)
-	    : data_(patchOld(leftOrRight).size(), patchNew(leftOrRight).size())
+	    : data_(patchNew(leftOrRight).size(), patchOld(leftOrRight).size())
 	{
 		const BasisType& basisOld = (leftOrRight == GenIjPatchType::LEFT) ?
 		            patchOld.lrs().left() : patchOld.lrs().right();
@@ -113,22 +113,25 @@ public:
 		            patchNew.lrs().left() : patchNew.lrs().right();
 		SizeType npatchOld = patchOld(leftOrRight).size();
 		SizeType npatchNew = patchNew(leftOrRight).size();
-		for (SizeType jpatch=0; jpatch < npatchNew; ++jpatch) {
-			SizeType jgroup = patchNew(leftOrRight)[jpatch];
-			SizeType j1 = basisNew.partition(jgroup);
-			SizeType j2 = basisNew.partition(jgroup+1);
+		for (SizeType jpatch=0; jpatch < npatchOld; ++jpatch) {
+			SizeType jgroup = patchOld(leftOrRight)[jpatch];
+			SizeType j1 = basisOld.partition(jgroup);
+			SizeType j2 = basisOld.partition(jgroup+1);
 			SizeType cols = j2 - j1;
-			for (SizeType ipatch=0; ipatch < npatchOld; ++ipatch) {
-				SizeType igroup = patchOld(leftOrRight)[ipatch];
-				SizeType i1 = basisOld.partition(igroup);
-				SizeType i2 = basisOld.partition(igroup+1);
+			for (SizeType ipatch=0; ipatch < npatchNew; ++ipatch) {
+				SizeType igroup = patchNew(leftOrRight)[ipatch];
+				SizeType i1 = basisNew.partition(igroup);
+				SizeType i2 = basisNew.partition(igroup+1);
 
 				SizeType rows = i2 - i1;
 
-				data_(ipatch,jpatch) = new MatrixDenseOrSparseType(rows,
-				                                                   cols);
+				data_(ipatch, jpatch) = new MatrixDenseOrSparseType(rows, cols);
 
 				MatrixType& m = data_(ipatch, jpatch)->matrix();
+
+				// for WFT we need padding of the matrices:
+				if (i2 > sparse.rows()) i2 = sparse.rows();
+
 				for (SizeType ii = i1; ii < i2; ++ii) {
 					SizeType start = sparse.getRowPtr(ii);
 					SizeType end = sparse.getRowPtr(ii+1);
@@ -141,7 +144,7 @@ public:
 					}
 				}
 
-				data_(ipatch,jpatch)->finalize(threshold);
+				data_(ipatch, jpatch)->finalize(threshold);
 			}
 		}
 	}

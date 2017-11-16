@@ -116,7 +116,7 @@ public:
 		computeOffsets(offsetForPatchesNew_, InitKronType::NEW);
 		if (initKron.isWft()) {
 			 offsetForPatchesOld_ = new VectorSizeType(
-			             initKron_.patch(InitKronType::NEW, GenIjPatchType::LEFT).size());
+			             initKron_.patch(InitKronType::OLD, GenIjPatchType::LEFT).size());
 			 computeOffsets(*offsetForPatchesOld_, InitKronType::OLD);
 		} else {
 			offsetForPatchesOld_ = &offsetForPatchesNew_;
