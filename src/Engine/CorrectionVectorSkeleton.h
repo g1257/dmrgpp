@@ -248,9 +248,7 @@ public:
 
 	void calcDynVectors(const VectorWithOffsetType& tv0,
 	                    VectorWithOffsetType& tv1,
-	                    VectorWithOffsetType& tv2,
-	                    ProgramGlobals::DirectionEnum direction,
-	                    SizeType site)
+	                    VectorWithOffsetType& tv2)
 	{
 		const VectorWithOffsetType& phi = tv0;
 		tv1 = tv2 = phi;
@@ -260,7 +258,7 @@ public:
 
 		VectorSizeType steps(phi.sectors());
 
-		const PsimagLite::String options = model_.params().options;
+		//const PsimagLite::String options = model_.params().options;
 		//	bool isRixsStatic = (options.find("TargetingRixsStatic") != PsimagLite::String::npos);
 		//	if (isRixsStatic) {
 		//		TridiagRixsStaticType rixsStatic(lrs_, model_, ioIn_, site, direction);
@@ -304,14 +302,12 @@ public:
 	void calcDynVectors(const VectorWithOffsetType& tv0,
 	                    const VectorWithOffsetType& tv1,
 	                    VectorWithOffsetType& tv2,
-	                    VectorWithOffsetType& tv3,
-	                    ProgramGlobals::DirectionEnum direction,
-	                    SizeType site)
+	                    VectorWithOffsetType& tv3)
 	{
-		calcDynVectors(tv0,tv2,tv3,direction, site);
+		calcDynVectors(tv0,tv2,tv3);
 		VectorWithOffsetType tv4;
 		VectorWithOffsetType tv5;
-		calcDynVectors(tv1,tv4,tv5,direction, site);
+		calcDynVectors(tv1,tv4,tv5);
 		tv2 += (-1.0)*tv5;
 		tv3 += tv4;
 	}
@@ -351,6 +347,24 @@ public:
 
 		targetingCommon.save(block,io,cf,targetingCommon.targetVectors());
 		targetingCommon.psi().save(io,"PSI");
+	}
+
+	template<typename SomeTargetingCommonType>
+	void printNormsAndWeights(const SomeTargetingCommonType& targetingCommon,
+	                          const VectorRealType& weights,
+	                          const RealType& gsWeight) const
+	{
+		PsimagLite::OstringStream msg;
+		msg<<"gsWeight="<<gsWeight<<" weights= ";
+		for (SizeType i = 0; i < weights.size(); i++)
+			msg<<weights[i]<<" ";
+		progress_.printline(msg,std::cout);
+
+		PsimagLite::OstringStream msg2;
+		msg2<<"gsNorm="<<norm(targetingCommon.psi())<<" norms= ";
+		for (SizeType i = 0; i < weights.size(); i++)
+			msg2<<targetingCommon.normSquared(i)<<" ";
+		progress_.printline(msg2,std::cout);
 	}
 
 	void getLanczosVectors(DenseMatrixType& V,

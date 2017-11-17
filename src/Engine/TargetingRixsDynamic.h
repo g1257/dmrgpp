@@ -291,7 +291,9 @@ private:
 			}
 		}
 
-		calcDynVectors(site,direction);
+		calcDynVectors();
+
+		// FIXME: SET WEIGHTS HERE
 
 		ComplexOrRealType rr = this->common().rixsCocoon(direction,site,2*site,2*numberOfSites);
 		ComplexOrRealType ri = this->common().rixsCocoon(direction,site,2*site,2*numberOfSites+1);
@@ -304,8 +306,7 @@ private:
 		std::cout<<" <gs|A|P3> 1\n";   // 1 here is the "superdensity"
 	}
 
-	void calcDynVectors(SizeType site,
-	                    ProgramGlobals::DirectionEnum direction)
+	void calcDynVectors()
 	{
 		if (!applied_) return;
 		SizeType numberOfSites = this->lrs().super().block().size();
@@ -313,9 +314,7 @@ private:
 		skeleton_.calcDynVectors(this->common().targetVectors(2*center),
 		                         this->common().targetVectors(2*center+1),
 		                         this->common().targetVectors(2*numberOfSites),
-		                         this->common().targetVectors(2*numberOfSites+1),
-		                         direction,
-		                         site);
+		                         this->common().targetVectors(2*numberOfSites+1));
 		setWeights();
 	}
 

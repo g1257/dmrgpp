@@ -205,7 +205,7 @@ public:
 		//		SizeType x = (site==1) ? 0 : numberOfSites-1;
 		//		evolve(Eg,direction,x,loopNumber);
 
-		// skeleton_.printNormsAndWeights();
+		skeleton_.printNormsAndWeights(this->common(), weight_, gsWeight_);
 	}
 
 	void print(InputSimpleOutType& ioOut) const
@@ -283,7 +283,7 @@ private:
 			}
 		}
 
-		doCorrectionVector(direction, site);
+		doCorrectionVector();
 
 		for (SizeType i = 0; i < this->common().targetVectors().size(); ++i) {
 			PsimagLite::String label = "P" + ttos(i);
@@ -311,11 +311,9 @@ private:
 			                      this->common().psi(),
 			                      "PSI");
 		}
-		printNormsAndWeights();
 	}
 
-	void doCorrectionVector(ProgramGlobals::DirectionEnum direction,
-	                        SizeType site)
+	void doCorrectionVector()
 	{
 		if (!applied_) {
 			setWeights(3);
@@ -324,9 +322,7 @@ private:
 
 		skeleton_.calcDynVectors(this->common().targetVectors(3),
 		                         this->common().targetVectors(4),
-		                         this->common().targetVectors(5),
-		                         direction,
-		                         site);
+		                         this->common().targetVectors(5));
 		//		this->common().targetVectors(4) = this->common().targetVectors(1);
 		//		this->common().targetVectors(5) = this->common().targetVectors(2);
 
@@ -341,21 +337,6 @@ private:
 		weight_.resize(n, 1);
 
 		for (SizeType r=0;r<weight_.size();r++) weight_[r] = (1.0 - gsWeight_)/sum;
-	}
-
-	void printNormsAndWeights() const
-	{
-		PsimagLite::OstringStream msg;
-		msg<<"gsWeight="<<gsWeight_<<" weights= ";
-		for (SizeType i = 0; i < weight_.size(); i++)
-			msg<<weight_[i]<<" ";
-		progress_.printline(msg,std::cout);
-
-		PsimagLite::OstringStream msg2;
-		msg2<<"gsNorm="<<norm(this->common().psi())<<" norms= ";
-		for (SizeType i = 0; i < weight_.size(); i++)
-			msg2<<this->common().normSquared(i)<<" ";
-		progress_.printline(msg2,std::cout);
 	}
 
 	TargetParamsType tstStruct_;

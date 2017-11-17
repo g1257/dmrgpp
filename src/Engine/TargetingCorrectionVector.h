@@ -207,7 +207,7 @@ public:
 		SizeType x = (site==1) ? 0 : numberOfSites-1;
 		evolve(Eg,direction,x,loopNumber);
 
-		printNormsAndWeights();
+		skeleton_.printNormsAndWeights(this->common(), weight_, gsWeight_);
 	}
 
 	void print(InputSimpleOutType& ioOut) const
@@ -248,7 +248,12 @@ private:
 
 		if (count==0) return;
 
-		calcDynVectors(phiNew,direction);
+		this->common().targetVectors(1) = phiNew;
+		skeleton_.calcDynVectors(this->common().targetVectors(1),
+		                         this->common().targetVectors(2),
+		                         this->common().targetVectors(3));
+
+		setWeights();
 
 		for (SizeType i = 1; i < this->common().targetVectors().size(); ++i) {
 			PsimagLite::String label = "P" + ttos(i);
@@ -259,52 +264,6 @@ private:
 			                      this->common().targetVectors(i),
 			                      label);
 		}
-	}
-
-	void calcDynVectors(const VectorWithOffsetType& phi,
-	                    SizeType)
-	{
-		for (SizeType i=1;i<this->common().targetVectors().size();i++)
-			this->common().targetVectors(i) = phi;
-
-		VectorMatrixFieldType V(phi.sectors());
-		VectorMatrixFieldType T(phi.sectors());
-
-		VectorSizeType steps(phi.sectors());
-
-		skeleton_.triDiag(phi,T,V,steps);
-
-		VectorVectorRealType eigs(phi.sectors());
-
-		for (SizeType ii=0;ii<phi.sectors();ii++)
-			PsimagLite::diag(T[ii],eigs[ii],'V');
-
-		for (SizeType i=0;i<phi.sectors();i++) {
-			VectorType sv;
-			SizeType i0 = phi.sector(i);
-			phi.extract(sv,i0);
-			// g.s. is included separately
-			// set Aq
-			this->common().targetVectors(1).setDataInSector(sv,i0);
-			// set xi
-			SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
-			VectorType xi(sv.size(),0),xr(sv.size(),0);
-
-			if (tstStruct_.algorithm() == TargetParamsType::KRYLOV) {
-				skeleton_.computeXiAndXrKrylov(xi,xr,phi,i0,V[i],T[i],eigs[i],steps[i]);
-			} else {
-				skeleton_.computeXiAndXrIndirect(xi,xr,sv,p);
-			}
-
-			this->common().targetVectors(2).setDataInSector(xi,i0);
-			//set xr
-			this->common().targetVectors(3).setDataInSector(xr,i0);
-			DenseMatrixType V;
-			skeleton_.getLanczosVectors(V,sv,p);
-		}
-
-		setWeights();
-		weightForContinuedFraction_ = PsimagLite::real(phi*phi);
 	}
 
 	void setWeights()
@@ -340,32 +299,12 @@ private:
 		gsWeight_ = 1.0-weight_[0];
 	}
 
-	void printNormsAndWeights() const
-	{
-		if (this->common().allStages(DISABLED)) return;
-
-		PsimagLite::OstringStream msg;
-		msg<<"gsWeight="<<gsWeight_<<" weights= ";
-		for (SizeType i = 0; i < weight_.size(); i++)
-			msg<<weight_[i]<<" ";
-		progress_.printline(msg,std::cout);
-
-		PsimagLite::OstringStream msg2;
-		msg2<<"gsNorm="<<norm(this->common().psi())<<" norms= ";
-		for (SizeType i = 0; i < weight_.size(); i++)
-			msg2<<this->common().normSquared(i)<<" ";
-		progress_.printline(msg2,std::cout);
-	}
-
 	TargetParamsType tstStruct_;
 	InputValidatorType& ioIn_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
 	bool correctionEnabled_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
-	TridiagonalMatrixType ab_;
-	DenseMatrixRealType reortho_;
-	RealType weightForContinuedFraction_;
 	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
 	CorrectionVectorSkeletonType skeleton_;
 }; // class TargetingCorrectionVector
