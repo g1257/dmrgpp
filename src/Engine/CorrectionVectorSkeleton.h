@@ -353,8 +353,6 @@ public:
 		targetingCommon.psi().save(io,"PSI");
 	}
 
-private:
-
 	void getLanczosVectors(DenseMatrixType& V,
 	                       const VectorType& sv,
 	                       SizeType p)
@@ -483,6 +481,8 @@ private:
 
 		threadedTriDiag.loopCreate(helperTriDiag);
 	}
+
+private:
 
 	void triDiagRixs(const VectorWithOffsetType& phi,
 	                 VectorMatrixFieldType& T,

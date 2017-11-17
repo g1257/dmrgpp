@@ -92,6 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeSerializer.h"
 #include "FreqEnum.h"
 #include "NoPthreadsNg.h"
+#include "CorrectionVectorSkeleton.h"
 
 namespace Dmrg {
 
@@ -100,98 +101,6 @@ class TargetingCorrectionVector : public TargetingBase<LanczosSolverType_,Vector
 
 	typedef LanczosSolverType_ LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType,VectorWithOffsetType_> BaseType;
-
-	class CalcR {
-
-		typedef typename LanczosSolverType::LanczosMatrixType::ModelType ModelType;
-		typedef typename ModelType::RealType RealType;
-		typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-		typedef TargetParamsCorrectionVector<ModelType> TargetParamsType;
-
-		class Action {
-
-		public:
-
-			enum ActionEnum {ACTION_IMAG, ACTION_REAL};
-
-			Action(const TargetParamsType& tstStruct,
-			       RealType E0,
-			       const VectorRealType& eigs)
-			    : tstStruct_(tstStruct),E0_(E0),eigs_(eigs)
-			{}
-
-			RealType operator()(SizeType k) const
-			{
-				if (tstStruct_.omega().first == PsimagLite::FREQ_REAL)
-					return actionWhenReal(k);
-
-				return actionWhenMatsubara(k);
-			}
-
-			void setReal() const
-			{
-				action_ = ACTION_REAL;
-			}
-
-			void setImag() const
-			{
-				action_ = ACTION_IMAG;
-			}
-
-		private:
-
-			RealType actionWhenReal(SizeType k) const
-			{
-				RealType sign = (tstStruct_.type() == 0) ? -1.0 : 1.0;
-				RealType part1 =  (eigs_[k] - E0_)*sign + tstStruct_.omega().second;
-				RealType denom = part1*part1 + tstStruct_.eta()*tstStruct_.eta();
-				return (action_ == ACTION_IMAG) ? tstStruct_.eta()/denom :
-				                                  -part1/denom;
-			}
-
-			RealType actionWhenMatsubara(SizeType k) const
-			{
-				RealType sign = (tstStruct_.type() == 0) ? -1.0 : 1.0;
-				RealType wn = tstStruct_.omega().second;
-				RealType part1 =  (eigs_[k] - E0_)*sign;
-				RealType denom = part1*part1 + wn*wn;
-				return (action_ == ACTION_IMAG) ? wn/denom : -part1 / denom;
-			}
-
-			const TargetParamsType& tstStruct_;
-			RealType E0_;
-			const VectorRealType& eigs_;
-			mutable ActionEnum action_;
-		};
-
-	public:
-
-		typedef Action ActionType;
-
-		CalcR(const TargetParamsType& tstStruct,
-		      RealType E0,
-		      const VectorRealType& eigs)
-		    : action_(tstStruct,E0,eigs)
-		{}
-
-		const Action& imag() const
-		{
-			action_.setImag();
-			return action_;
-		}
-
-		const Action& real() const
-		{
-			action_.setReal();
-			return action_;
-		}
-
-	private:
-
-		Action action_;
-	};
-
-	typedef CalcR CalcRType;
 
 public:
 
@@ -230,6 +139,10 @@ public:
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
+	typedef CorrectionVectorSkeleton<LanczosSolverType,
+	VectorWithOffsetType,
+	BaseType,
+	TargetParamsType> CorrectionVectorSkeletonType;
 
 	enum {DISABLED,OPERATOR,CONVERGING};
 
@@ -247,7 +160,8 @@ public:
 	      progress_("TargetingCorrectionVector"),
 	      gsWeight_(1.0),
 	      correctionEnabled_(false),
-	      paramsForSolver_(ioIn,"DynamicDmrg")
+	      paramsForSolver_(ioIn,"DynamicDmrg"),
+	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().energy())
 	{
 		this->common().init(&tstStruct_,4);
 		if (!wft.isEnabled())
@@ -387,7 +301,7 @@ private:
 
 		VectorSizeType steps(phi.sectors());
 
-		triDiag(phi,T,V,steps);
+		skeleton_.triDiag(phi,T,V,steps);
 
 		VectorVectorRealType eigs(phi.sectors());
 
@@ -406,149 +320,20 @@ private:
 			VectorType xi(sv.size(),0),xr(sv.size(),0);
 
 			if (tstStruct_.algorithm() == TargetParamsType::KRYLOV) {
-				computeXiAndXrKrylov(xi,xr,phi,i0,V[i],T[i],eigs[i],steps[i]);
+				skeleton_.computeXiAndXrKrylov(xi,xr,phi,i0,V[i],T[i],eigs[i],steps[i]);
 			} else {
-				computeXiAndXrIndirect(xi,xr,sv,p);
+				skeleton_.computeXiAndXrIndirect(xi,xr,sv,p);
 			}
 
 			this->common().targetVectors(2).setDataInSector(xi,i0);
 			//set xr
 			this->common().targetVectors(3).setDataInSector(xr,i0);
 			DenseMatrixType V;
-			getLanczosVectors(V,sv,p);
+			skeleton_.getLanczosVectors(V,sv,p);
 		}
+
 		setWeights();
 		weightForContinuedFraction_ = PsimagLite::real(phi*phi);
-	}
-
-	void getLanczosVectors(DenseMatrixType& V,
-	                       const VectorType& sv,
-	                       SizeType p)
-	{
-		SizeType threadId = 0;
-		RealType fakeTime = 0;
-		typename ModelType::ModelHelperType modelHelper(p,this->lrs(),fakeTime,threadId);
-		typedef typename LanczosSolverType::LanczosMatrixType
-		        LanczosMatrixType;
-		LanczosMatrixType h(&this->model(),&modelHelper);
-		LanczosSolverType lanczosSolver(h,paramsForSolver_,&V);
-
-		lanczosSolver.decomposition(sv,ab_);
-		reortho_ = lanczosSolver.reorthogonalizationMatrix();
-	}
-
-	void computeXiAndXrIndirect(VectorType& xi,
-	                            VectorType& xr,
-	                            const VectorType& sv,
-	                            SizeType p)
-	{
-		if (tstStruct_.omega().first != PsimagLite::FREQ_REAL)
-			throw PsimagLite::RuntimeError("Matsubara only with KRYLOV\n");
-
-		SizeType threadId = 0;
-		RealType fakeTime = 0;
-		typename ModelType::ModelHelperType modelHelper(p,this->lrs(),fakeTime,threadId);
-		LanczosMatrixType h(&this->model(),&modelHelper);
-		RealType E0 = this->common().energy();
-		CorrectionVectorFunctionType cvft(h,tstStruct_,E0);
-
-		cvft.getXi(xi,sv);
-		// make sure xr is zero
-		for (SizeType i=0;i<xr.size();i++) xr[i] = 0;
-		h.matrixVectorProduct(xr,xi);
-		xr -= (tstStruct_.omega().second+E0)*xi;
-		xr /= tstStruct_.eta();
-	}
-
-	void computeXiAndXrKrylov(VectorType& xi,
-	                          VectorType& xr,
-	                          const VectorWithOffsetType& phi,
-	                          SizeType i0,
-	                          const MatrixComplexOrRealType& V,
-	                          const MatrixComplexOrRealType& T,
-	                          const VectorRealType& eigs,
-	                          SizeType steps)
-	{
-		SizeType n2 = steps;
-		SizeType n = V.rows();
-		if (T.n_col()!=T.rows()) throw PsimagLite::RuntimeError("T is not square\n");
-		if (V.n_col()!=T.n_col()) throw PsimagLite::RuntimeError("V is not nxn2\n");
-		// for (SizeType j=0;j<v.size();j++) v[j] = 0; <-- harmful if v is sparse
-		ComplexOrRealType zone = 1.0;
-		ComplexOrRealType zzero = 0.0;
-
-		TargetVectorType tmp(n2);
-		VectorType r(n2);
-		CalcRType what(tstStruct_,this->common().energy(),eigs);
-
-		calcR(r,what.imag(),T,V,phi,eigs,n2,i0);
-
-		psimag::BLAS::GEMV('N',n2,n2,zone,&(T(0,0)),n2,&(r[0]),1,zzero,&(tmp[0]),1);
-
-		xi.resize(n);
-		psimag::BLAS::GEMV('N',n,n2,zone,&(V(0,0)),n,&(tmp[0]),1,zzero,&(xi[0]),1);
-
-		calcR(r,what.real(),T,V,phi,eigs,n2,i0);
-
-		psimag::BLAS::GEMV('N',n2,n2,zone,&(T(0,0)),n2,&(r[0]),1,zzero,&(tmp[0]),1);
-
-		xr.resize(n);
-		psimag::BLAS::GEMV('N',n,n2,zone,&(V(0,0)),n,&(tmp[0]),1,zzero,&(xr[0]),1);
-	}
-
-	void calcR(TargetVectorType& r,
-	           const typename CalcRType::ActionType& whatRorI,
-	           const MatrixComplexOrRealType& T,
-	           const MatrixComplexOrRealType& V,
-	           const VectorWithOffsetType& phi,
-	           const VectorRealType&,
-	           SizeType n2,
-	           SizeType i0)
-	{
-		for (SizeType k=0;k<n2;k++) {
-			ComplexOrRealType sum = 0.0;
-			for (SizeType kprime=0;kprime<n2;kprime++) {
-				ComplexOrRealType tmpV = calcVTimesPhi(kprime,V,phi,i0);
-				sum += PsimagLite::conj(T(kprime,k))*tmpV;
-			}
-
-			r[k] = sum * whatRorI(k);
-		}
-	}
-
-	ComplexOrRealType calcVTimesPhi(SizeType kprime,
-	                                const MatrixComplexOrRealType& V,
-	                                const VectorWithOffsetType& phi,
-	                                SizeType i0) const
-	{
-		ComplexOrRealType ret = 0;
-		SizeType total = phi.effectiveSize(i0);
-
-		for (SizeType j=0;j<total;j++)
-			ret += PsimagLite::conj(V(j,kprime))*phi.fastAccess(i0,j);
-		return ret;
-	}
-
-	void triDiag(const VectorWithOffsetType& phi,
-	             VectorMatrixFieldType& T,
-	             VectorMatrixFieldType& V,
-	             typename PsimagLite::Vector<SizeType>::Type& steps)
-	{
-		RealType fakeTime = 0;
-
-		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
-		ParallelizerType threadedTriDiag(1,0,false);
-
-		ParallelTriDiagType helperTriDiag(phi,
-		                                  T,
-		                                  V,
-		                                  steps,
-		                                  this->lrs(),
-		                                  fakeTime,
-		                                  this->model(),
-		                                  ioIn_);
-
-		threadedTriDiag.loopCreate(helperTriDiag);
 	}
 
 	void setWeights()
@@ -611,6 +396,7 @@ private:
 	DenseMatrixRealType reortho_;
 	RealType weightForContinuedFraction_;
 	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
+	CorrectionVectorSkeletonType skeleton_;
 }; // class TargetingCorrectionVector
 
 template<typename LanczosSolverType, typename VectorWithOffsetType>
