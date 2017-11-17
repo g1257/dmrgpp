@@ -222,36 +222,7 @@ public:
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
 	          PsimagLite::IoSimple::Out& io) const
 	{
-		if (block.size()!=1) {
-			PsimagLite::String str("TargetingCorrectionVector ");
-			str += "only supports blocks of size 1\n";
-			throw PsimagLite::RuntimeError(str);
-		}
-
-		SizeType type = tstStruct_.type();
-		int fermionSign = this->common().findFermionSignOfTheOperators();
-		int s = (type&1) ? -1 : 1;
-		int s2 = (type>1) ? -1 : 1;
-		int s3 = (type&1) ? -fermionSign : 1;
-
-		typename PostProcType::ParametersType params(ioIn_,"DynamicDmrg");
-		params.Eg = this->common().energy();
-		params.weight = s2*weightForContinuedFraction_*s3;
-		params.isign = s;
-		if (ab_.size() == 0) {
-			PsimagLite::OstringStream msg;
-			msg<<"WARNING:  Trying to save a tridiagonal matrix with size zero.\n";
-			msg<<"\tHINT: Maybe the dyn vectors were never calculated.\n";
-			msg<<"\tHINT: Maybe TSPLoops is too large";
-			if (params.weight != 0)
-				msg<<"\n\tExpect a throw anytime now...";
-			progress_.printline(msg,std::cerr);
-		}
-
-		PostProcType cf(ab_,reortho_,params);
-
-		this->common().save(block,io,cf,this->common().targetVectors());
-		this->common().psi().save(io,"PSI");
+		skeleton_.save(this->common(), block, io);
 	}
 
 	void load(const PsimagLite::String& f)

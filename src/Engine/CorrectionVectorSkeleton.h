@@ -237,7 +237,7 @@ public:
 	                         const TargetParamsType& tstStruct,
 	                         const ModelType& model,
 	                         const LeftRightSuperType& lrs,
-	                         RealType energy)
+	                         const RealType& energy)
 	    : ioIn_(ioIn),
 	      tstStruct_(tstStruct),
 	      model_(model),
@@ -506,7 +506,7 @@ private:
 	const TargetParamsType& tstStruct_;
 	const ModelType& model_;
 	const LeftRightSuperType& lrs_;
-	RealType energy_;
+	const RealType& energy_;
 	PsimagLite::ProgressIndicator progress_;
 	TridiagonalMatrixType ab_;
 	DenseMatrixRealType reortho_;
