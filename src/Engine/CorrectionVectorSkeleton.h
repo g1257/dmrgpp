@@ -349,6 +349,15 @@ public:
 		targetingCommon.psi().save(io,"PSI");
 	}
 
+	void load()
+	{
+//		PostProcType cf(io);
+//		ab_ = cf.ab;
+//		reortho_ = cf.rortho;
+
+//		targetingCommon.load(io);
+	}
+
 	template<typename SomeTargetingCommonType>
 	void printNormsAndWeights(const SomeTargetingCommonType& targetingCommon,
 	                          const VectorRealType& weights,

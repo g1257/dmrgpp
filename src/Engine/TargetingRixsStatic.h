@@ -198,6 +198,8 @@ public:
 
 		SizeType site = block1[0];
 		evolve(Eg,direction,site,loopNumber);
+		skeleton_.printNormsAndWeights(this->common(), weight_, gsWeight_);
+
 		SizeType numberOfSites = this->lrs().super().block().size();
 		if (site>1 && site<numberOfSites-2) return;
 		if (site == 1 && direction == ProgramGlobals::EXPAND_SYSTEM) return;
@@ -205,7 +207,7 @@ public:
 		//		SizeType x = (site==1) ? 0 : numberOfSites-1;
 		//		evolve(Eg,direction,x,loopNumber);
 
-		skeleton_.printNormsAndWeights(this->common(), weight_, gsWeight_);
+
 	}
 
 	void print(InputSimpleOutType& ioOut) const
@@ -326,6 +328,12 @@ private:
 		//		this->common().targetVectors(4) = this->common().targetVectors(1);
 		//		this->common().targetVectors(5) = this->common().targetVectors(2);
 
+		RealType n4 = PsimagLite::real(this->common().targetVectors(4)*
+		                               this->common().targetVectors(4));
+		RealType n5 = PsimagLite::real(this->common().targetVectors(5)*
+		                               this->common().targetVectors(5));
+		std::cout<<"HERE============> n4="<<n4<<" n5="<<n5;
+		std::cout<<" "<<this->common().energy()<<"\n";
 		setWeights(6);
 	}
 

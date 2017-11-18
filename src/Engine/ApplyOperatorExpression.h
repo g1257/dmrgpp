@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2014, UT-Battelle, LLC
+Copyright (c) 2014-2017, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 3.0]
+[DMRG++, Version 4.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -324,6 +324,13 @@ public:
 	{
 		for (SizeType i=0;i<targetVectors_.size();i++)
 			targetVectors_[i] = serializer.vector(i);
+	}
+
+	void loadEnergy(PsimagLite::IoSimple::In& io,
+	                PsimagLite::String label,
+	                PsimagLite::IoSimple::In::LongIntegerType option)
+	{
+		io.readline(E0_, label, option);
 	}
 
 	void multiplyTimeVector(SizeType i,RealType factor)
