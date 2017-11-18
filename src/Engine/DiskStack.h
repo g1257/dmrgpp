@@ -159,6 +159,16 @@ public:
 
 	SizeType size() const { return stack_.size(); }
 
+	void copyFromIo(PsimagLite::IoSimple::In& io, PsimagLite::String label)
+	{
+		err("copyFromIo: not implemented yet, sorry\n");
+	}
+
+	void copyToIo(PsimagLite::IoSimple::Out& io, PsimagLite::String label)
+	{
+		err("copyToIo: not implemented yet, sorry\n");
+	}
+
 	friend void copyDiskToDisk(DiskStack& dest, const DiskStack& src)
 	{
 		dest.isObserveCode_ = src.isObserveCode_;

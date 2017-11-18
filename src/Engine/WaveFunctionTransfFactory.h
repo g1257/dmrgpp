@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2012, UT-Battelle, LLC
+Copyright (c) 2009-2012, 2012-2017, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 4.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DmrgWaveStruct.h"
 #include "IoSimple.h"
 #include "Random48.h"
+//#include "BaseStack.h"
 #include "DiskStack.h"
 
 namespace Dmrg {
@@ -117,6 +118,7 @@ public:
 	typedef WaveFunctionTransfSu2<DmrgWaveStructType,VectorWithOffsetType>
 	WaveFunctionTransfSu2Type;
 	typedef typename WaveFunctionTransfBaseType::WftOptions WftOptionsType;
+	typedef typename PsimagLite::Stack<BlockDiagonalMatrixType>::Type WftStackType;
 
 	template<typename SomeParametersType>
 	WaveFunctionTransfFactory(SomeParametersType& params)
@@ -132,6 +134,8 @@ public:
 	      filenameIn_(params.checkpoint.filename),
 	      filenameOut_(params.filename),
 	      WFT_STRING(ProgramGlobals::WFT_STRING),
+	    //  wsStack_(params.options.find("wftstackindisk")!=PsimagLite::String::npos),
+	    //  weStack_(params.options.find("wftstackindisk")!=PsimagLite::String::npos),
 	      wftImpl_(0),
 	      rng_(3433117),
 	      noLoad_(false),
@@ -375,8 +379,8 @@ public:
 		io.printline("dmrgWaveStruct");
 
 		dmrgWaveStruct_.save(io);
-		io.print("wsStack\n", wsStack_);
-		io.print("weStack\n", weStack_);
+		io.print("wsStack\n", wsStack_); // wsStack_.save(io, "wsStack\n");
+		io.print("weStack\n", weStack_); // weStack_.save(io, "weStack\n");
 	}
 
 	void appendFileList(VectorStringType& files, PsimagLite::String rootName) const
@@ -398,8 +402,8 @@ private:
 		wftOptions_.firstCall = false;
 		io.advance("dmrgWaveStruct");
 		dmrgWaveStruct_.load(io);
-		io.read(wsStack_,"wsStack");
-		io.read(weStack_,"weStack");
+		io.read(wsStack_, "wsStack"); // wsStack_.load(io,"wsStack");
+		io.read(weStack_, "weStack"); // weStack_.load(io,"weStack");
 	}
 
 	void myRandomT(std::complex<RealType> &value) const
@@ -530,8 +534,8 @@ private:
 	PsimagLite::String filenameOut_;
 	const PsimagLite::String WFT_STRING;
 	DmrgWaveStructType dmrgWaveStruct_;
-	typename PsimagLite::Stack<BlockDiagonalMatrixType>::Type wsStack_;
-	typename PsimagLite::Stack<BlockDiagonalMatrixType>::Type weStack_;
+	WftStackType wsStack_;
+	WftStackType weStack_;
 	WaveFunctionTransfBaseType* wftImpl_;
 	PsimagLite::Random48<RealType> rng_;
 	bool noLoad_;

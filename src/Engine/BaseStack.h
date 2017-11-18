@@ -8,6 +8,7 @@ namespace Dmrg {
 template<typename DataType>
 class BaseStack {
 
+	typedef typename PsimagLite::Stack<DataType>::Type MemoryStackType;
 	typedef DiskStack<DataType> DiskStackType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
@@ -45,6 +46,26 @@ public:
 
 		delete diskStack_;
 		diskStack_ = 0;
+	}
+
+	void save(PsimagLite::IoSimple::Out& io, PsimagLite::String label) const
+	{
+		if (!m_) {
+			io.print(label, stack_);
+			return;
+		}
+
+		diskStack_->copyToIo(io, label);
+	}
+
+	void load(PsimagLite::IoSimple::In& io, PsimagLite::String label)
+	{
+		if (!m_) {
+			io.read(stack_, label);
+			return;
+		}
+
+		diskStack_->copyFromIo(io, label);
 	}
 
 	void push(const DataType& d)
@@ -107,7 +128,7 @@ private:
 	BaseStack& operator=(const BaseStack&);
 
 	bool m_;
-	typename PsimagLite::Stack<DataType>::Type stack_;
+	MemoryStackType stack_;
 	DiskStackType* diskStack_;
 	VectorStringType files_;
 };
