@@ -50,7 +50,7 @@ public:
 
 	void save(PsimagLite::IoSimple::Out& io, PsimagLite::String label) const
 	{
-		if (!m_) {
+		if (m_) {
 			io.print(label, stack_);
 			return;
 		}
@@ -60,7 +60,7 @@ public:
 
 	void load(PsimagLite::IoSimple::In& io, PsimagLite::String label)
 	{
-		if (!m_) {
+		if (m_) {
 			io.read(stack_, label);
 			return;
 		}
@@ -80,7 +80,7 @@ public:
 		return (m_) ? stack_.pop() : diskStack_->pop();
 	}
 
-	DataType top()
+	DataType top() const
 	{
 		check();
 		return (m_) ? stack_.top() : diskStack_->top();

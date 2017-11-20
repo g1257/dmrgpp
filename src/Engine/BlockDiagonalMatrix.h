@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 #include "PsimagLite.h"
 #include "EnforcePhase.h"
+#include "IoSimple.h"
 
 namespace Dmrg {
 
@@ -101,6 +102,8 @@ template<typename MatrixInBlockTemplate>
 class BlockDiagonalMatrix {
 
 public:
+
+	enum SaveEnum {SAVE_ALL, SAVE_PARTIAL};
 
 	typedef MatrixInBlockTemplate BuildingBlockType;
 	typedef typename BuildingBlockType::value_type ComplexOrRealType;
@@ -128,6 +131,15 @@ public:
 			offsetsRows_[i] = offsetsCols_[i] = basis.partition(i);
 	}
 
+	BlockDiagonalMatrix(PsimagLite::IoSimple::In& io,
+	                    PsimagLite::String label,
+	                    SizeType counter,
+	                    bool minimizeRead)
+	{
+		io.advance("#NAME="+label,counter);
+		loadInternal(io, minimizeRead);
+	}
+
 	template<typename IoInputType>
 	void load(IoInputType& io,
 	          PsimagLite::String name,
@@ -146,6 +158,15 @@ public:
 		data_.resize(total);
 		for (SizeType i = 0; i < data_.size(); ++i)
 			io.readMatrix(data_[i], "#" + ttos(i));
+	}
+
+	template<typename IoOutputType>
+	void save(IoOutputType& io,
+	          SaveEnum,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
+	{
+		save(io, "#NAME=");
 	}
 
 	template<typename IoOutputType>
@@ -424,6 +445,23 @@ private:
 	{
 		if (isSquare_) return;
 		err("BlockDiagonalMatrix::" + msg + " must be square\n");
+	}
+
+	void loadInternal(PsimagLite::IoSimple::In& io, bool)
+	{
+		SizeType isSquare = 0;
+		io.readline(isSquare, "#IsSquare=");
+		if (isSquare > 1)
+			err("BlockDiagonalMatrix:: loadInternal isSquare\n");
+		isSquare_ = (isSquare > 0);
+		io.read(offsetsRows_, "#OffsetRows");
+		io.read(offsetsRows_, "#OffsetRows");
+		io.read(offsetsCols_, "#OffsetCols");
+		io.readline(isSquare, "#Total=");
+		data_.resize(isSquare);
+		for (SizeType i = 0; i < data_.size(); ++i) {
+			io.readMatrix(data_[i], "#" + ttos(i));
+		}
 	}
 
 	bool isSquare_;

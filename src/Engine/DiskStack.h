@@ -149,7 +149,7 @@ public:
 		stack_.pop();
 	}
 
-	DataType top()
+	DataType top() const
 	{
 		ioIn_.open(fileIn_);
 		DataType dt(ioIn_,"",stack_.top(),isObserveCode_);
@@ -204,7 +204,7 @@ private:
 	bool isObserveCode_;
 	int total_;
 	PsimagLite::ProgressIndicator progress_;
-	IoInType ioIn_;
+	mutable IoInType ioIn_;
 	IoOutType ioOut_;
 	PsimagLite::Stack<int>::Type stack_;
 }; // class DiskStack
