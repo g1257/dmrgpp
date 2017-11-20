@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2012, 2012-2017, UT-Battelle, LLC
+Copyright (c) 2009-2012, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 4.]
+[DMRG++, Version 2.0.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -88,7 +88,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DmrgWaveStruct.h"
 #include "IoSimple.h"
 #include "Random48.h"
-#include "BaseStack.h"
 #include "DiskStack.h"
 
 namespace Dmrg {
@@ -118,7 +117,7 @@ public:
 	typedef WaveFunctionTransfSu2<DmrgWaveStructType,VectorWithOffsetType>
 	WaveFunctionTransfSu2Type;
 	typedef typename WaveFunctionTransfBaseType::WftOptions WftOptionsType;
-	typedef BaseStack<BlockDiagonalMatrixType> WftStackType;
+
 	template<typename SomeParametersType>
 	WaveFunctionTransfFactory(SomeParametersType& params)
 	    : isEnabled_(!(params.options.find("nowft")!=PsimagLite::String::npos)),
@@ -133,8 +132,6 @@ public:
 	      filenameIn_(params.checkpoint.filename),
 	      filenameOut_(params.filename),
 	      WFT_STRING(ProgramGlobals::WFT_STRING),
-	      wsStack_(params.options.find("wftstackindisk")!=PsimagLite::String::npos),
-	      weStack_(params.options.find("wftstackindisk")!=PsimagLite::String::npos),
 	      wftImpl_(0),
 	      rng_(3433117),
 	      noLoad_(false),
@@ -346,16 +343,14 @@ public:
 		return (what==ProgramGlobals::SYSTEM) ? dmrgWaveStruct_.ws : dmrgWaveStruct_.we;
 	}
 
-	const BlockDiagonalMatrixType stackTransform(SizeType what) const
+	const BlockDiagonalMatrixType& stackTransform(SizeType what) const
 	{
 		if (what==ProgramGlobals::SYSTEM) {
 			if (wsStack_.size()==0) return dmrgWaveStruct_.ws;
-			dummy_ = wsStack_.top();
-			return dummy_;
+			return wsStack_.top();
 		} else {
 			if (weStack_.size()==0) return dmrgWaveStruct_.we;
-			dummy_ = weStack_.top();
-			return dummy_;
+			return weStack_.top();
 		}
 	}
 
@@ -380,9 +375,8 @@ public:
 		io.printline("dmrgWaveStruct");
 
 		dmrgWaveStruct_.save(io);
-
-		wsStack_.save(io, "wsStack\n");
-		weStack_.save(io, "weStack\n");
+		io.print("wsStack\n", wsStack_);
+		io.print("weStack\n", weStack_);
 	}
 
 	void appendFileList(VectorStringType& files, PsimagLite::String rootName) const
@@ -404,9 +398,8 @@ private:
 		wftOptions_.firstCall = false;
 		io.advance("dmrgWaveStruct");
 		dmrgWaveStruct_.load(io);
-
-		wsStack_.load(io,"wsStack");
-		weStack_.load(io,"weStack");
+		io.read(wsStack_,"wsStack");
+		io.read(weStack_,"weStack");
 	}
 
 	void myRandomT(std::complex<RealType> &value) const
@@ -537,14 +530,13 @@ private:
 	PsimagLite::String filenameOut_;
 	const PsimagLite::String WFT_STRING;
 	DmrgWaveStructType dmrgWaveStruct_;
-	WftStackType wsStack_;
-	WftStackType weStack_;
+	typename PsimagLite::Stack<BlockDiagonalMatrixType>::Type wsStack_;
+	typename PsimagLite::Stack<BlockDiagonalMatrixType>::Type weStack_;
 	WaveFunctionTransfBaseType* wftImpl_;
 	PsimagLite::Random48<RealType> rng_;
 	bool noLoad_;
 	bool save_;
 	VectorSizeType sitesSeen_;
-	mutable BlockDiagonalMatrixType dummy_;
 }; // class WaveFunctionTransformation
 } // namespace Dmrg
 

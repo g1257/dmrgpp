@@ -149,7 +149,7 @@ public:
 		stack_.pop();
 	}
 
-	DataType top() const
+	DataType top()
 	{
 		ioIn_.open(fileIn_);
 		DataType dt(ioIn_,"",stack_.top(),isObserveCode_);
@@ -158,16 +158,6 @@ public:
 	}
 
 	SizeType size() const { return stack_.size(); }
-
-	void copyFromIo(PsimagLite::IoSimple::In& io, PsimagLite::String label)
-	{
-		err("copyFromIo: not implemented yet, sorry\n");
-	}
-
-	void copyToIo(PsimagLite::IoSimple::Out& io, PsimagLite::String label)
-	{
-		err("copyToIo: not implemented yet, sorry\n");
-	}
 
 	friend void copyDiskToDisk(DiskStack& dest, const DiskStack& src)
 	{
@@ -204,7 +194,7 @@ private:
 	bool isObserveCode_;
 	int total_;
 	PsimagLite::ProgressIndicator progress_;
-	mutable IoInType ioIn_;
+	IoInType ioIn_;
 	IoOutType ioOut_;
 	PsimagLite::Stack<int>::Type stack_;
 }; // class DiskStack

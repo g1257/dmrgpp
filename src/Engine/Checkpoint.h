@@ -415,8 +415,7 @@ private:
 	bool enabled_;
 	MemoryStackType systemStack_;
 	MemoryStackType envStack_;
-	DiskStackType systemDisk_;
-	DiskStackType envDisk_;
+	DiskStackType systemDisk_,envDisk_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType energyFromFile_;
 }; // class Checkpoint
