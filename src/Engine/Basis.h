@@ -190,7 +190,8 @@ public:
 			                      pseudoQn,
 			                      su2Symmetry2.electrons_,
 			                      su2Symmetry3.electrons_,
-			                      electrons_,quantumNumbers_);
+			                      electrons_,
+			                      quantumNumbers_);
 		} else {
 			SizeType ns = su2Symmetry2.size();
 			SizeType ne = su2Symmetry3.size();
@@ -583,15 +584,19 @@ private:
 		io.read(block_,"#BLOCK");
 
 		if (!minimizeRead) {
-			io.read(quantumNumbers_,"#QN");
 			io.read(electrons_,"#ELECTRONS");
 			io.read(electronsOld_,"#0OLDELECTRONS");
 		}
+
 		io.read(partition_,"#PARTITION");
 		io.read(permInverse_,"#PERMUTATIONINVERSE");
 		permutationVector_.resize(permInverse_.size());
 		for (SizeType i=0;i<permInverse_.size();i++)
 			permutationVector_[permInverse_[i]]=i;
+
+		VectorSizeType qnShrink;
+		io.read(qnShrink,"#QNShrink");
+		unShrinkVector(quantumNumbers_, qnShrink, partition_);
 
 		dmrgTransformed_=false;
 		if (useSu2Symmetry_)
@@ -611,7 +616,6 @@ private:
 		io.printVector(block_,"#BLOCK");
 
 		if (!minimizeWrite) {
-			io.printVector(quantumNumbers_,"#QN");
 			io.printVector(electrons_,"#ELECTRONS");
 			io.printVector(electronsOld_,"#0OLDELECTRONS");
 		}
@@ -619,8 +623,44 @@ private:
 		io.printVector(partition_,"#PARTITION");
 		io.printVector(permInverse_,"#PERMUTATIONINVERSE");
 
+		VectorSizeType qnShrink;
+		shrinkVector(qnShrink, quantumNumbers_, partition_);
+		io.printVector(qnShrink,"#QNShrink");
+
 		if (useSu2Symmetry_) symmSu2_.save(io);
 		else symmLocal_.save(io);
+	}
+
+	void shrinkVector(VectorSizeType& dest,
+	                  const VectorSizeType& src,
+	                  const VectorSizeType& partition) const
+	{
+		SizeType n = partition.size();
+		assert(n > 0);
+		dest.resize(n -1 , 0);
+		for (SizeType i = 0; i < n - 1; ++i) {
+			assert(i < partition.size());
+			assert(partition[i] < src.size());
+			assert(i < dest.size());
+			dest[i] = src[partition[i]];
+		}
+	}
+
+	void unShrinkVector(VectorSizeType& dest,
+	                  const VectorSizeType& src,
+	                  const VectorSizeType& partition) const
+	{
+		SizeType n = partition.size();
+		assert(n > 0);
+		assert(src.size() == n -1);
+		dest.resize(partition[n - 1], 0);
+		for (SizeType i = 0; i < n - 1; ++i) {
+			SizeType start = partition[i];
+			SizeType end = partition[i + 1];
+			assert(end < 1 + dest.size());
+			for (SizeType j = start; j < end; ++j)
+				dest[j] = src[i];
+		}
 	}
 
 	RealType calcError(const typename PsimagLite::Vector<RealType>::Type& eigs,
