@@ -89,7 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParallelWftOne.h"
 #include "Parallelizer.h"
 #include "MatrixVectorKron/InitKronWft.h"
-#include "MatrixVectorKron/KronMatrixWft.h"
+#include "MatrixVectorKron/KronMatrix.h"
 
 namespace Dmrg {
 
