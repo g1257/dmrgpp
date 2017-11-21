@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2014, UT-Battelle, LLC
+Copyright (c) 2012-2017, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 3.0]
+[DMRG++, Version 4.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -71,59 +71,83 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file MatrixVectorBase.h
+/*! \file KronMatrix.h
  *
- *  The base of a hierarchy to encapsulate the product x+=Hy,
- *  where x and y are vectors and H is the Hamiltonian matrix
  *
  */
-#ifndef	DMRG_MATRIX_VECTOR_BASE_H
-#define DMRG_MATRIX_VECTOR_BASE_H
 
-#include <vector>
+#ifndef KRON_MATRIX_HEADER_H
+#define KRON_MATRIX_HEADER_H
+
+#include "Matrix.h"
+#include "KronConnections.h"
+#include "Concurrency.h"
+#include "Parallelizer.h"
+#include "PsimagLite.h"
+#include "ProgressIndicator.h"
 
 namespace Dmrg {
-template<typename ModelType_>
-class MatrixVectorBase {
+
+template<typename InitKronType>
+class KronMatrix {
+
+	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef KronConnections<InitKronType> KronConnectionsType;
+	typedef typename KronConnectionsType::MatrixType MatrixType;
+	typedef typename KronConnectionsType::VectorType VectorType;
+	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
+	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
+	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
+	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename GenIjPatchType::BasisType BasisType;
 
 public:
 
-	typedef ModelType_ ModelType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
-
-	SizeType reflectionSector() const { return 0; }
-
-	void reflectionSector(SizeType) {  }
-
-	void fullDiag(VectorRealType& eigs,
-	              FullMatrixType& fm,
-	              const SparseMatrixType& matrixStored,
-	              int tmp) const
+	KronMatrix(InitKronType& initKron, PsimagLite::String name)
+	    : initKron_(initKron),
+	      progress_("KronMatrix")
 	{
-		SizeType maxMatrixRankStored = (tmp < 0) ? 0 : tmp;
-		if (matrixStored.rows() == 0 || matrixStored.rows() > maxMatrixRankStored) {
-			PsimagLite::String str("MatrixVectorBase: fullDiag too big or zero\n");
-			str += "\trow= " + ttos(matrixStored.rows()) + " max row= ";
-			str += ttos(maxMatrixRankStored) + "\n";
-			throw PsimagLite::RuntimeError(str);
-		}
-
-		fm = matrixStored.toDense();
-		diag(fm,eigs,'V');
+		PsimagLite::String str((initKron.loadBalance()) ? "true" : "false");
+		PsimagLite::OstringStream msg;
+		msg<<"KronMatrix: "<<name<<" sizes="<<initKron.size(InitKronType::NEW);
+		msg<<" "<<initKron.size(InitKronType::OLD);
+		msg<<" loadBalance "<<str;
+		progress_.printline(msg, std::cout);
 	}
 
-	void initialize(VectorType&) const {}
+	void matrixVectorProduct(VectorType& vout, const VectorType& vin) const
+	{
+		initKron_.copyIn(vout, vin);
 
-	void finalize(VectorType&) const {}
-}; // class MatrixVectorBase
-} // namespace Dmrg
+		KronConnectionsType kc(initKron_);
+
+		typedef PsimagLite::Parallelizer<KronConnectionsType> ParallelizerType;
+		ParallelizerType parallelConnections(PsimagLite::Concurrency::npthreads,
+		                                     PsimagLite::MPI::COMM_WORLD);
+
+		if (initKron_.loadBalance())
+			parallelConnections.loopCreate(kc, initKron_.weightsOfPatchesNew());
+		else
+			parallelConnections.loopCreate(kc);
+
+		kc.sync();
+
+		initKron_.copyOut(vout);
+	}
+
+private:
+
+	KronMatrix(const KronMatrix&);
+
+	const KronMatrix& operator=(const KronMatrix&);
+
+	InitKronType& initKron_;
+	PsimagLite::ProgressIndicator progress_;
+}; //class KronMatrix
+
+} // namespace PsimagLite
 
 /*@}*/
-#endif
 
+#endif // KRON_MATRIX_HEADER_H

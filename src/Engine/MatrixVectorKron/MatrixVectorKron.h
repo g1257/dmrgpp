@@ -142,7 +142,6 @@ public:
 
 private:
 
-
 	void checkKron() const
 	{
 		if (!CHECK_KRON)
