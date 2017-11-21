@@ -1,9 +1,8 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2008 , UT-Battelle, LLC
+Copyright (c) 2008-2017, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 1.0.0]
+[DMRG++, Version 4.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -92,133 +89,147 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	template<typename ObserverHelperType>
-	class OnePointCorrelations {
-		typedef typename ObserverHelperType::MatrixType MatrixType;
-		typedef typename ObserverHelperType::VectorType VectorType ;
-		typedef typename ObserverHelperType::VectorWithOffsetType
-				VectorWithOffsetType;
-		typedef typename ObserverHelperType::BasisWithOperatorsType
-				BasisWithOperatorsType;
-		typedef typename VectorType::value_type FieldType;
-		typedef typename BasisWithOperatorsType::RealType RealType;
+template<typename ObserverHelperType>
+class OnePointCorrelations {
+	typedef typename ObserverHelperType::MatrixType MatrixType;
+	typedef typename ObserverHelperType::VectorType VectorType ;
+	typedef typename ObserverHelperType::VectorWithOffsetType
+	VectorWithOffsetType;
+	typedef typename ObserverHelperType::BasisWithOperatorsType
+	BasisWithOperatorsType;
+	typedef typename VectorType::value_type FieldType;
+	typedef typename BasisWithOperatorsType::RealType RealType;
 
-		enum {LEFT_BRAKET=ObserverHelperType::LEFT_BRAKET,
-			RIGHT_BRAKET=ObserverHelperType::RIGHT_BRAKET};
-	public:
-		OnePointCorrelations(ObserverHelperType& helper,
-				bool verbose=false)
-		: helper_(helper),
-		  verbose_(verbose)
-		{}
+	enum {LEFT_BRAKET=ObserverHelperType::LEFT_BRAKET,
+		  RIGHT_BRAKET=ObserverHelperType::RIGHT_BRAKET};
+public:
+	OnePointCorrelations(ObserverHelperType& helper,
+	                     bool verbose=false)
+	    : helper_(helper),
+	      verbose_(verbose)
+	{}
 
-		template<typename ApplyOperatorType>
-		FieldType operator()(SizeType site,
-			const typename ApplyOperatorType::OperatorType& A,
-			typename ApplyOperatorType::BorderEnum corner)
-		{
-			SizeType threadId =0;
-			SizeType pnter=site;
-			helper_.setPointer(threadId,pnter);
-			try {
-				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRAKET,threadId);
-				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRAKET,threadId);
+	template<typename ApplyOperatorType>
+	FieldType operator()(SizeType site,
+	                     const typename ApplyOperatorType::OperatorType& A,
+	                     typename ApplyOperatorType::BorderEnum corner)
+	{
+		SizeType threadId =0;
+		SizeType pnter=site;
+		helper_.setPointer(threadId,pnter);
+		try {
+			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRAKET,
+			                                                                  threadId);
+			const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRAKET,
+			                                                                   threadId);
 
-				return onePointInternal<ApplyOperatorType>(site,A,src1,src2,corner,threadId);
-			} catch (std::exception& e) {
-				std::cerr<<"CAUGHT: "<<e.what();
-				std::cerr<<"WARNING: Observer::onePoint(...): Nothing here yet\n";
-				return 0;
+			return onePointInternal<ApplyOperatorType>(site,A,src1,src2,corner,threadId);
+		} catch (std::exception& e) {
+			std::cerr<<"CAUGHT: "<<e.what();
+			std::cerr<<"WARNING: Observer::onePoint(...): Nothing here yet\n";
+			return 0;
+		}
+	}
+
+	template<typename ApplyOperatorType>
+	FieldType hookForZero(SizeType site,
+	                      const typename ApplyOperatorType::OperatorType& A,
+	                      bool corner = false)
+	{
+		SizeType pnter=site;
+		SizeType threadId = 0;
+		helper_.setPointer(threadId,pnter);
+		try {
+			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRAKET,
+			                                                                  threadId);
+			const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRAKET,
+			                                                                   threadId);
+
+			return onePointInternalHookForZero<ApplyOperatorType>(site,
+			                                                      A,
+			                                                      src1,
+			                                                      src2,
+			                                                      corner,
+			                                                      threadId);
+		} catch (std::exception& e) {
+			std::cerr<<"CAUGHT: "<<e.what();
+			std::cerr<<"WARNING: Observer::onePoint(...): Nothing here yet\n";
+			return 0;
+		}
+	}
+
+private:
+
+	template<typename ApplyOperatorType>
+	FieldType onePointInternal(SizeType,
+	                           const typename ApplyOperatorType::OperatorType& A,
+	                           const VectorWithOffsetType& src1,
+	                           const VectorWithOffsetType& src2,
+	                           typename ApplyOperatorType::BorderEnum corner,
+	                           SizeType threadId)
+	{
+		if (src1.sectors() == 0 || src2.sectors() == 0) return 0.0;
+		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(threadId));
+		VectorWithOffsetType dest;
+		applyOpLocal1(dest,
+		              src1,
+		              A,
+		              helper_.fermionicSignLeft(threadId),
+		              helper_.direction(threadId),corner);
+
+		FieldType sum = static_cast<FieldType>(0.0);
+		const VectorWithOffsetType& v1 = dest;
+		const VectorWithOffsetType& v2 = src2;
+		for (SizeType ii=0;ii<v1.sectors();ii++) {
+			SizeType i = v1.sector(ii);
+			for (SizeType jj=0;jj<v1.sectors();jj++) {
+				SizeType j = v2.sector(jj);
+				if (i!=j) continue;
+				SizeType offset = v1.offset(i);
+				for (SizeType k=0;k<v1.effectiveSize(i);k++)
+					sum+= v1.slowAccess(k+offset)*PsimagLite::conj(v2.slowAccess(k+offset));
 			}
 		}
+		return sum;
+	}
 
-		template<typename ApplyOperatorType>
-		FieldType hookForZero(SizeType site,
-					  const typename ApplyOperatorType::OperatorType& A,
-					  bool corner = false)
-		{
-			SizeType pnter=site;
-			SizeType threadId = 0;
-			helper_.setPointer(threadId,pnter);
-			try {
-				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRAKET,threadId);
-				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRAKET,threadId);
+	template<typename ApplyOperatorType>
+	FieldType onePointInternalHookForZero(SizeType,
+	                                      const typename ApplyOperatorType::OperatorType& A,
+	                                      const VectorWithOffsetType& src1,
+	                                      const VectorWithOffsetType& src2,
+	                                      bool, //= false
+	                                      SizeType threadId)
+	{
 
-				return onePointInternalHookForZero<ApplyOperatorType>(site,A,src1,src2,corner,threadId);
-			} catch (std::exception& e) {
-				std::cerr<<"CAUGHT: "<<e.what();
-				std::cerr<<"WARNING: Observer::onePoint(...): Nothing here yet\n";
-				return 0;
+		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(threadId));
+		VectorWithOffsetType dest;
+		applyOpLocal1.hookForZero(dest,
+		                          src1,
+		                          A,
+		                          helper_.fermionicSignLeft(threadId),
+		                          helper_.direction(threadId));
+
+		FieldType sum = static_cast<FieldType>(0.0);
+		const VectorWithOffsetType& v1 = dest;
+		const VectorWithOffsetType& v2 = src2;
+		for (SizeType ii=0;ii<v1.sectors();ii++) {
+			SizeType i = v1.sector(ii);
+			for (SizeType jj=0;jj<v1.sectors();jj++) {
+				SizeType j = v2.sector(jj);
+				if (i!=j) continue;
+				SizeType offset = v1.offset(i);
+				for (SizeType k=0;k<v1.effectiveSize(i);k++)
+					sum+= v1.slowAccess(k+offset)*PsimagLite::conj(v2.slowAccess(k+offset));
 			}
 		}
+		return sum;
+	}
 
-	private:
+	ObserverHelperType& helper_;
+	bool verbose_;
 
-		template<typename ApplyOperatorType>
-		FieldType onePointInternal(SizeType,
-								   const typename ApplyOperatorType::OperatorType& A,
-								   const VectorWithOffsetType& src1,
-								   const VectorWithOffsetType& src2,
-								   typename ApplyOperatorType::BorderEnum corner,
-								   SizeType threadId)
-		{
-			if (src1.sectors() == 0 || src2.sectors() == 0) return 0.0;
-			ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(threadId));
-			VectorWithOffsetType dest;
-//			assert(helper_.fermionicSignLeft().size()==helper_.leftRightSuper().left().size());
-			applyOpLocal1(dest,src1,A,helper_.fermionicSignLeft(threadId),
-					helper_.direction(threadId),corner);
-
-			FieldType sum = static_cast<FieldType>(0.0);
-			const VectorWithOffsetType& v1 = dest;
-			const VectorWithOffsetType& v2 = src2;
-			for (SizeType ii=0;ii<v1.sectors();ii++) {
-				SizeType i = v1.sector(ii);
-				for (SizeType jj=0;jj<v1.sectors();jj++) {
-					SizeType j = v2.sector(jj);
-					if (i!=j) continue;
-					SizeType offset = v1.offset(i);
-					for (SizeType k=0;k<v1.effectiveSize(i);k++)
-						sum+= v1.slowAccess(k+offset)*PsimagLite::conj(v2.slowAccess(k+offset));
-				}
-			}
-			return sum;
-		}
-
-		template<typename ApplyOperatorType>
-		FieldType onePointInternalHookForZero(SizeType,
-						      const typename ApplyOperatorType::OperatorType& A,
-						      const VectorWithOffsetType& src1,
-						      const VectorWithOffsetType& src2,
-							  bool, //= false
-											  SizeType threadId)
-		{
-
-			ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(threadId));
-			VectorWithOffsetType dest;
-//			assert(helper_.fermionicSignLeft().size()==helper_.leftRightSuper().left().size());
-			applyOpLocal1.hookForZero(dest,src1,A,helper_.fermionicSignLeft(threadId),helper_.direction(threadId));
-
-			FieldType sum = static_cast<FieldType>(0.0);
-			const VectorWithOffsetType& v1 = dest;
-			const VectorWithOffsetType& v2 = src2;
-			for (SizeType ii=0;ii<v1.sectors();ii++) {
-				SizeType i = v1.sector(ii);
-				for (SizeType jj=0;jj<v1.sectors();jj++) {
-					SizeType j = v2.sector(jj);
-					if (i!=j) continue;
-					SizeType offset = v1.offset(i);
-					for (SizeType k=0;k<v1.effectiveSize(i);k++)
-						sum+= v1.slowAccess(k+offset)*PsimagLite::conj(v2.slowAccess(k+offset));
-				}
-			}
-			return sum;
-		}
-
-		ObserverHelperType& helper_;
-		bool verbose_;
-
-	};  //class OnePointCorrelations
+};  //class OnePointCorrelations
 } // namespace Dmrg
 
 /*@}*/

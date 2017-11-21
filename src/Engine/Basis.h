@@ -336,11 +336,13 @@ public:
 	//! Inverse of pseudoQuantumNumber
 	SizeType pseudoEffectiveNumber(SizeType i) const
 	{
-		if (useSu2Symmetry_)
+		if (useSu2Symmetry_) {
 			return SymmetryElectronsSzType::pseudoEffectiveNumber(electrons_[i],
 			                                                      symmSu2_.jmValue(i).first);
-		else
+		} else {
+			assert(i < quantumNumbers_.size());
 			return quantumNumbers_[i];
+		}
 	}
 
 	//! removes the indices contained in removedIndices and
