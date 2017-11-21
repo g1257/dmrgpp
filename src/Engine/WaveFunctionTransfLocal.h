@@ -217,14 +217,14 @@ private:
 		SizeType qn = psiDest.qn(i0);
 		SizeType iOld = findIold(psiSrc, psiDest, i0);
 		InitKronType initKron(lrs, i0, qn, wftOptions_, dmrgWaveStruct_, iOld);
-		KronMatrixWft<InitKronType> kronMatrixWft(initKron);
+		KronMatrix<InitKronType> kronMatrix(initKron, "WFT");
 		VectorType psiDestOneSector;
 		psiDest.extract(psiDestOneSector, i0);
 
 		VectorType psiSrcOneSector;
 		psiSrc.extract(psiSrcOneSector, iOld);
 
-		kronMatrixWft.matrixVectorProduct(psiDestOneSector, psiSrcOneSector);
+		kronMatrix.matrixVectorProduct(psiDestOneSector, psiSrcOneSector);
 		psiDest.setDataInSector(psiDestOneSector, i0);
 	}
 
