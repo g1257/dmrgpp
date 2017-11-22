@@ -113,14 +113,16 @@ public:
 	               model.params().denseSparseThreshold),
 	      model_(model),
 	      modelHelper_(modelHelper),
-	      vstart_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1),
-	      yin_(0),
-	      xout_(0)
+	      vstart_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1)
 	{
 		addHlAndHr();
 		convertXcYcArrays();
 		BaseType::setUpVstart(vstart_, BaseType::NEW);
 		assert(vstart_.size() > 0);
+		SizeType nsize = vstart_[vstart_.size() - 1];
+		assert(nsize > 0);
+		yin_.resize(nsize, 0.0);
+		xout_.resize(nsize, 0.0);
 	}
 
 	bool isWft() const {return false; }
@@ -130,26 +132,76 @@ public:
 		return (model_.params().options.find("KronLoadBalance") != PsimagLite::String::npos);
 	}
 
-	void shallowCopy(VectorType& vout,
-	                 const VectorType& vin)
+	// -------------------
+	// copy vin(:) to yin(:)
+	// -------------------
+	void copyIn(const VectorType& vout,
+	            const VectorType& vin)
 	{
-		xout_ = &vout;
-		yin_ = &vin;
+		VectorType& xout = xout_;
+		VectorType& yin = yin_;
+
+		const VectorSizeType& permInverse = BaseType::lrs(BaseType::NEW).super().permutationInverse();
+		const SparseMatrixType& leftH = BaseType::lrs(BaseType::NEW).left().hamiltonian();
+		SizeType nl = leftH.rows();
+
+		SizeType offset = BaseType::offset(BaseType::NEW);
+		SizeType npatches = BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size();
+		const BasisType& left = BaseType::lrs(BaseType::NEW).left();
+		const BasisType& right = BaseType::lrs(BaseType::NEW).right();
+
+		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
+
+			SizeType igroup = BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT)[ipatch];
+			SizeType jgroup = BaseType::patch(BaseType::NEW, GenIjPatchType::RIGHT)[ipatch];
+
+			assert(left.partition(igroup+1) >= left.partition(igroup));
+			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
+
+			assert(right.partition(jgroup+1) >= right.partition(jgroup));
+			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
+
+			SizeType left_offset = left.partition(igroup);
+			SizeType right_offset = right.partition(jgroup);
+
+			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
+				for (SizeType iright=0; iright < sizeRight; ++iright) {
+
+					SizeType i = ileft + left_offset;
+					SizeType j = iright + right_offset;
+
+					SizeType ij = i + j * nl;
+
+					assert(i < nl);
+					assert(j < BaseType::lrs(BaseType::NEW).right().hamiltonian().rows());
+
+					assert(ij < permInverse.size());
+
+					SizeType r = permInverse[ ij ];
+					assert(!((r < offset) || (r >= (offset + BaseType::size(BaseType::NEW)))));
+
+					SizeType ip = vstart_[ipatch] + (iright + ileft * sizeRight);
+					assert(ip < yin.size());
+
+					assert( (r >= offset) && ((r-offset) < vin.size()) );
+					yin[ip] = vin[r-offset];
+					xout[ip] = vout[r-offset];
+				}
+			}
+		}
 	}
 
-	void copyIn(VectorType& vin) const
-	{
-		BaseType::copyIn(vin, vstart_);
-	}
-
+	// -------------------
+	// copy xout(:) to vout(:)
+	// -------------------
 	void copyOut(VectorType& vout) const
 	{
-		BaseType::copyOut(vout, vstart_);
+		BaseType::copyOut(vout, xout_, vstart_);
 	}
 
-	const VectorType& yin() const { return *yin_; }
+	const VectorType& yin() const { return yin_; }
 
-	VectorType& xout() { return *xout_; }
+	VectorType& xout() { return xout_; }
 
 private:
 
@@ -208,8 +260,8 @@ private:
 	SparseMatrixType identityL_;
 	SparseMatrixType identityR_;
 	VectorSizeType vstart_;
-	const VectorType* yin_;
-	VectorType* xout_;
+	VectorType yin_;
+	VectorType xout_;
 };
 } // namespace Dmrg
 

@@ -124,16 +124,6 @@ public:
 		checkKron();
 	}
 
-	void initialize(VectorType& y) const
-	{
-		kronMatrix_.initialize(y);
-	}
-
-	void finalize(VectorType& z) const
-	{
-		kronMatrix_.finalize(z);
-	}
-
 	SizeType rows() const { return initKron_.size(InitKronType::NEW); }
 
 	template<typename SomeVectorType>
@@ -186,16 +176,8 @@ private:
 	KronMatrixType kronMatrix_;
 	SparseMatrixType matrixStored_;
 }; // class MatrixVectorKron
-
 } // namespace Dmrg
 
-namespace PsimagLite {
-template<>
-template<typename ModelType>
-struct HasInitFin<Dmrg::MatrixVectorKron<ModelType> > {
-	enum {True = true};
-};
-}
 /*@}*/
 #endif
 

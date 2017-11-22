@@ -221,32 +221,6 @@ protected:
 		yc_.push_back(y1);
 	}
 
-	// -------------------
-	// copy vin(:) to yin(:)
-	// -------------------
-	void copyIn(VectorType& vin, const VectorSizeType& vstart) const
-	{
-		assert(vstart.size() > 0);
-		SizeType nsize = vstart[vstart.size() - 1];
-		assert(nsize > 0);
-		VectorType yin(nsize, 0.0);
-		copyIn(yin, vin, vstart, OLD);
-		vin = yin;
-	}
-
-	// -------------------
-	// copy xout(:) to vout(:)
-	// -------------------
-	void copyOut(VectorType& vout, const VectorSizeType& vstart) const
-	{
-		assert(vstart.size() > 0);
-		SizeType nsize = vstart[vstart.size() - 1];
-		assert(nsize > 0);
-		VectorType xout(nsize, 0.0);
-		copyOut(xout, vout, vstart);
-		vout = xout;
-	}
-
 	// -------------------------------------------
 	// setup vstart(:) for beginning of each patch
 	// -------------------------------------------
@@ -283,63 +257,6 @@ protected:
 
 		if (what == NEW)
 			setAndFixWeights(weights);
-	}
-
-private:
-
-	void copyIn(VectorType& x,
-	            const VectorType& v,
-	            const VectorSizeType& vstart,
-	            WhatBasisEnum what) const
-	{
-		const VectorSizeType& permInverse = lrs(what).super().permutationInverse();
-		const SparseMatrixType& leftH = lrs(what).left().hamiltonian();
-		SizeType nl = leftH.rows();
-
-		SizeType offset1 = offset(what);
-		SizeType npatches = patch(what, GenIjPatchType::LEFT).size();
-		const BasisType& left = lrs(what).left();
-		const BasisType& right = lrs(what).right();
-
-		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
-
-			SizeType igroup = patch(what, GenIjPatchType::LEFT)[ipatch];
-			SizeType jgroup = patch(what, GenIjPatchType::RIGHT)[ipatch];
-
-			assert(left.partition(igroup+1) >= left.partition(igroup));
-			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
-
-			assert(right.partition(jgroup+1) >= right.partition(jgroup));
-			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
-
-			SizeType left_offset = left.partition(igroup);
-			SizeType right_offset = right.partition(jgroup);
-
-			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
-				for (SizeType iright=0; iright < sizeRight; ++iright) {
-
-					SizeType i = ileft + left_offset;
-					SizeType j = iright + right_offset;
-
-					SizeType ij = i + j * nl;
-
-					assert(i < nl);
-					assert(j < lrs(what).right().hamiltonian().rows());
-
-					assert(ij < permInverse.size());
-
-					SizeType r = permInverse[ ij ];
-					assert(ipatch < vstart.size());
-					SizeType ip = vstart[ipatch] + (iright + ileft * sizeRight);
-					assert(ip < x.size());
-					assert(r >= offset1);
-					r -= offset1;
-					assert(r < v.size());
-
-					x[ip] = v[r];
-				}
-			}
-		}
 	}
 
 	// -------------------
@@ -393,6 +310,8 @@ private:
 			}
 		}
 	}
+
+private:
 
 	void setAndFixWeights(const VectorSizeType& weights)
 	{
