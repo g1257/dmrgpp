@@ -267,7 +267,7 @@ sub checkTimeInSituObs
 
 		my $file1 = "$workdir/timeObservablesInSitu${n}_$i.txt";
 		my $file2 = "$golddir/timeObservablesInSitu${n}_$i.txt";
-		print "Comparing $file1 against $file2\n";
+		print "Comparing $file1 $file2\n";
 		my %m1 = timeObservablesInSitu::load($file1);
 		my %m2 = timeObservablesInSitu::load($file2);
 		if (keys %m1 != 4 or keys %m2 != 4) {

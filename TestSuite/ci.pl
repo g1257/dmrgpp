@@ -298,7 +298,7 @@ sub runObserveOne
 	# what == arguments=something
 	my $args;
 	if ($what =~ /^arguments=(.+$)/) {
-		$args .= "  ".$1;
+		$args = $1;
 	}
 
 	defined($args) or die "$0: observe must have arguments\n";
