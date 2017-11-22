@@ -74,10 +74,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /*! \file TargetingRixsStatic.h
  *
  * Implements the targeting required by
- * RIXS Static
- * tv[3*site] = A^\dagger_{site}|gs>
- * tv[3*site+1] = Imaginary of (w*-Htilde+i\eta)^{-1}A^\dagger_{site}|gs>
- * tv[3*site+2] = Real of (w*-Htilde+i\eta)^{-1}A^\dagger_{site}|gs>
+ * RIXS Static, restarts from Correction Vector run
+ * tv[0] = A^\dagger_{site}|gs>
+ * tv[1] = Imaginary of (w*-Htilde+i\eta)^{-1} A^\dagger_{site}|gs>
+ * tv[2] = Real of (w*-Htilde+i\eta)^{-1} A^\dagger_{site}|gs>
+ * tv[3] = A^\dagger_{sitep}|gs>
+ * tv[4] = Imaginary of (w*-Htildep+i\eta)^{-1} A^\dagger_{sitep}|gs>
+ * tv[5] = Real of (w*-Htildep+i\eta)^{-1} A^\dagger_{sitep}|gs>
  *
  */
 
@@ -222,7 +225,15 @@ public:
 	void save(const VectorSizeType& block,
 	          PsimagLite::IoSimple::Out& io) const
 	{
-		skeleton_.save(this->common(),block,io);
+		assert(block.size() > 0);
+
+        SizeType marker = (this->common().noStageIs(DISABLED)) ? 1 : 0;
+        TimeSerializerType ts(this->common().currentTime(),
+                              block[0],
+                              this->common().targetVectors(),
+                              marker);
+        ts.save(io);
+        this->common().psi().save(io,"PSI");
 	}
 
 

@@ -78,10 +78,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  * Must be restarted from RIXS Static
  *
- * We read from static tv[3*site+1] --> tv[2*site]
- *                     tv[3*site+2] --> tv[2*site+1]
- * the correction vectors are imag  --> tv[2*N]
- *                            real  --> tv[2*N+1]
+ * We read from static tv[i] --> tv[i]
+ *
+ * the correction vectors are imag  --> tv[8]
+ *                            real  --> tv[9]
  *
  */
 
@@ -167,8 +167,8 @@ public:
 	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().energy()),
 	      applied_(false)
 	{
-		SizeType numberOfSites = model.geometry().numberOfSites();
-		this->common().init(&tstStruct_,2*numberOfSites+2);
+		//		SizeType numberOfSites = model.geometry().numberOfSites();
+		this->common().init(&tstStruct_,12);
 		if (!wft.isEnabled())
 			throw PsimagLite::RuntimeError("TargetingRixsDynamic needs wft\n");
 	}
@@ -185,7 +185,7 @@ public:
 
 	SizeType size() const
 	{
-		return BaseType::size();
+		return (applied_) ? 10 : 6;
 	}
 
 	void evolve(RealType Eg,
@@ -234,13 +234,11 @@ public:
 
 		TimeSerializerType ts(io,BaseType::IoInputType::LAST_INSTANCE);
 		SizeType n = ts.numberOfVectors();
-		if (n % 3 != 0)
-			err("TargetingRixsDynamic: number of TVs not divisible by 3\n");
+		if (n != 6)
+			err("TargetingRixsDynamic: number of TVs must be 6\n");
 
-		SizeType numberOfSites = n/3;
-		for (SizeType site = 0; site < numberOfSites; ++site) {
-			this->common().targetVectors(2*site) = ts.vector(3*site + 1);
-			this->common().targetVectors(2*site + 1) = ts.vector(3*site + 2);
+		for (SizeType site = 0; site < 6; ++site) {
+			this->common().targetVectors(site) = ts.vector(site);
 		}
 
 		this->common().template load<TimeSerializerType>(f,0);
@@ -248,10 +246,14 @@ public:
 
 private:
 
-	// tv[2*site] = Imaginary of (w*-Htilde+i\eta)^{-1}A^\dagger_{site}|gs>
-	// tv[2*site+1] = Real of (w*-Htilde+i\eta)^{-1}A^\dagger_{site}|gs>
-	// tv[2*N] = imaginary cv for (tv[2*center],tv[2*center+1])
-	// tv[2*N+1] = real      cv for (tv[2*center],tv[2*center+1])
+	// tv[6] = A^\dagger_{site} |tv[1]>
+	// tv[7] = A^\dagger_{site} |tv[2]>
+
+	// tv[8] = Re of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[6]>
+	// - Im of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[7]>
+	// tv[9] = Im of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[6]>
+	// + Re of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[7]>
+
 	void evolve(RealType,
 	            ProgramGlobals::DirectionEnum direction,
 	            SizeType site,
@@ -260,45 +262,44 @@ private:
 		if (direction == ProgramGlobals::INFINITE) return;
 
 		SizeType indexOfOperator = 0;
-		SizeType center = tstStruct_.sites(indexOfOperator);
-		SizeType numberOfSites = this->lrs().super().block().size();
 		this->common().wftAll(site);
 
 		if (!applied_) {
-			VectorWithOffsetType tmpV1;
-			this->common().applyOneOperator(loopNumber,
-			                                indexOfOperator,
-			                                site,
-			                                tmpV1,
-			                                this->common().targetVectors(2*center),
-			                                direction);
-			if (tmpV1.size() > 0)
-				this->common().targetVectors(2*center) = tmpV1;
+			if (site == tstStruct_.sites(0)) {
+				VectorWithOffsetType tmpV1;
+				this->common().applyOneOperator(loopNumber,
+				                                indexOfOperator,
+				                                site,
+				                                tmpV1,
+				                                this->common().targetVectors(1),
+				                                direction);
+				if (tmpV1.size() > 0)
+					this->common().targetVectors(6) = tmpV1;
 
-			VectorWithOffsetType tmpV2;
-			this->common().applyOneOperator(loopNumber,
-			                                indexOfOperator,
-			                                site,
-			                                tmpV2,
-			                                this->common().targetVectors(2*center+1),
-			                                direction);
-			if (tmpV2.size() > 0) {
-				this->common().targetVectors(2*center + 1) = tmpV2;
-				applied_ = true;
-				PsimagLite::OstringStream msg;
-				msg<<"Applied";
-				progress_.printline(msg, std::cout);
+				VectorWithOffsetType tmpV2;
+				this->common().applyOneOperator(loopNumber,
+				                                indexOfOperator,
+				                                site,
+				                                tmpV2,
+				                                this->common().targetVectors(2),
+				                                direction);
+				if (tmpV2.size() > 0) {
+					this->common().targetVectors(7) = tmpV2;
+					applied_ = true;
+					PsimagLite::OstringStream msg;
+					msg<<"Applied";
+					progress_.printline(msg, std::cout);
+				}
 			}
 		}
-
 		calcDynVectors();
 
-		// FIXME: SET WEIGHTS HERE
+		// WEIGHTS ARE SET IN calcDynVectors()
 
-		ComplexOrRealType rr = this->common().rixsCocoon(direction,site,2*site,2*numberOfSites);
-		ComplexOrRealType ri = this->common().rixsCocoon(direction,site,2*site,2*numberOfSites+1);
-		ComplexOrRealType ir = this->common().rixsCocoon(direction,site,2*site+1,2*numberOfSites);
-		ComplexOrRealType ii = this->common().rixsCocoon(direction,site,2*site+1,2*numberOfSites+1);
+		ComplexOrRealType rr = this->common().rixsCocoon(direction,site,8,4);
+		ComplexOrRealType ri = this->common().rixsCocoon(direction,site,8,5);
+		ComplexOrRealType ir = this->common().rixsCocoon(direction,site,9,4);
+		ComplexOrRealType ii = this->common().rixsCocoon(direction,site,9,5);
 
 		std::cout<<site<<" "<<(ri+ir)<<" 0"; // 0 here is the currentTime
 		std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
@@ -308,28 +309,25 @@ private:
 
 	void calcDynVectors()
 	{
-		if (!applied_) return;
-		SizeType numberOfSites = this->lrs().super().block().size();
-		SizeType center = tstStruct_.sites(0);
-		skeleton_.calcDynVectors(this->common().targetVectors(2*center),
-		                         this->common().targetVectors(2*center+1),
-		                         this->common().targetVectors(2*numberOfSites),
-		                         this->common().targetVectors(2*numberOfSites+1));
-		setWeights();
+		if (!applied_) {
+			setWeights(6);
+			return;
+		}
+		skeleton_.calcDynVectors(this->common().targetVectors(6),
+		                         this->common().targetVectors(7),
+		                         this->common().targetVectors(8),
+		                         this->common().targetVectors(9));
+		setWeights(10);
 	}
 
-	void setWeights()
+	void setWeights(SizeType n)
 	{
 		gsWeight_ = tstStruct_.gsWeight();
 
-		RealType sum  = 0;
-		weight_.resize(this->common().targetVectors().size());
-		for (SizeType r=1;r<weight_.size();r++) {
-			weight_[r] = 1;
-			sum += weight_[r];
-		}
+		RealType sum  = n;
+		weight_.resize(n, 1);
 
-		for (SizeType r=0;r<weight_.size();r++) weight_[r] *= (1.0 - gsWeight_)/sum;
+		for (SizeType r=0;r<weight_.size();r++) weight_[r] = (1.0 - gsWeight_)/sum;
 	}
 
 	void printNormsAndWeights() const
