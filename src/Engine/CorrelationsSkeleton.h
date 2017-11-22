@@ -372,8 +372,7 @@ private:
 			SizeType e,u;
 
 			pack.unpack(e,u,helper_.leftRightSuper(threadId).right().permutation(r));
-			SizeType nx0 = helper_.leftRightSuper(threadId).right().
-			        electrons(BasisType::AFTER_TRANSFORM);
+			SizeType nx0 = helper_.leftRightSuper(threadId).right().electrons();
 			RealType f = (nx0 & 1) ? fermionicSign : 1;
 
 			for (int k=O2.getRowPtr(e);k<O2.getRowPtr(e+1);k++) {
@@ -509,15 +508,13 @@ private:
 			PackIndicesType pack(n);
 			pack.unpack(i,k,helper_.leftRightSuper(threadId).right().permutation(e));
 			pack.unpack(j,k2,helper_.leftRightSuper(threadId).right().permutation(e2));
-			SizeType nx0 = helper_.leftRightSuper(threadId).left().
-			        electrons(BasisType::AFTER_TRANSFORM);
+			SizeType nx0 = helper_.leftRightSuper(threadId).left().electrons();
 			sign = (nx0 & 1) ? fermionicSign : 1;
 		} else {
 			PackIndicesType pack(m);
 			pack.unpack(k,i,helper_.leftRightSuper(threadId).right().permutation(e));
 			pack.unpack(k2,j,helper_.leftRightSuper(threadId).right().permutation(e2));
-			SizeType nx0 = helper_.leftRightSuper(threadId).super().
-			        electrons(BasisType::AFTER_TRANSFORM);
+			SizeType nx0 = helper_.leftRightSuper(threadId).super().electrons();
 			sign = (nx0 & 1) ?  fermionicSign : 1;
 		}
 		if (k!=k2) return 0;
@@ -594,8 +591,7 @@ private:
 				pack.unpack(r,eta,helper_.leftRightSuper(threadId).super().
 				            permutation(t));
 				if (eta>=A.rows()) throw PsimagLite::RuntimeError("Error\n");
-				SizeType nx0 = helper_.leftRightSuper(threadId).left().
-				        electrons(BasisType::AFTER_TRANSFORM);
+				SizeType nx0 = helper_.leftRightSuper(threadId).left().electrons();
 				RealType sign = (nx0 & 1) ? fermionicSign : 1;
 				for (int k=A.getRowPtr(eta);k<A.getRowPtr(eta+1);k++) {
 					SizeType eta2 = A.getCol(k);

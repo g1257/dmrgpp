@@ -647,8 +647,7 @@ private:
 		SizeType np = someBasis.partition()-1;
 		for (SizeType i=0;i<np;i++) {
 			SizeType state = someBasis.partition(i);
-			if (SizeType(someBasis.qn(state,
-			                          SomeBasisType::AFTER_TRANSFORM))==qn) return i;
+			if (SizeType(someBasis.qn(state)) == qn) return i;
 		}
 
 		throw PsimagLite::RuntimeError("findPartitionWithThisQn\n");

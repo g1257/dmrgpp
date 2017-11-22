@@ -76,7 +76,7 @@ public:
 
 		fout_<<"#SuperBasisPermutation\n";
 		fout_<<lrs.super().permutationVector();
-		SizeType qtarget = lrs.super().qn(lrs.super().partition(m), BasisType::AFTER_TRANSFORM);
+		SizeType qtarget = lrs.super().qn(lrs.super().partition(m));
 
 		PairSizeType etarget = getNupNdown(qtarget,p->nOfQns);
 		fout_<<"#TargetElectronsUp="<<etarget.first<<"\n";

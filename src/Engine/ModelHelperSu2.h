@@ -138,7 +138,7 @@ public:
 	int quantumNumber() const
 	{
 		int state = lrs_.super().partition(m_);
-		return lrs_.super().qn(state, BasisType::AFTER_TRANSFORM);
+		return lrs_.super().qn(state);
 	}
 
 	const SparseMatrixType& getReducedOperator(char modifier,

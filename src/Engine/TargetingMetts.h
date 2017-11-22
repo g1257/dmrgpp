@@ -727,8 +727,7 @@ private:
 			getFullVector(v,i0,lrs);
 			RealType tmpNorm = PsimagLite::norm(v);
 			if (fabs(tmpNorm-1.0)<1e-6) {
-				SizeType j = lrs.super().qn(lrs.super().partition(i0),
-				                            BasisType::AFTER_TRANSFORM);
+				SizeType j = lrs.super().qn(lrs.super().partition(i0));
 				std::cerr<<"setFromInfinite: qns= ";
 				std::cerr<<SymmetryElectronsSzType::qnPrint(j,mode+1);
 				std::cerr<<"\n";

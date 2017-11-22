@@ -427,8 +427,7 @@ public:
 			for (SizeType sector = 0; sector < sectors; ++sector) {
 				SizeType m = v.sector(sector);
 				int state = lrs_.super().partition(m);
-				SizeType qn = lrs_.super().qn(state,
-				                              BasisWithOperatorsType::AFTER_TRANSFORM);
+				SizeType qn = lrs_.super().qn(state);
 				GenIjPatchType genIjPatch(lrs, qn);
 				const VectorSizeType& groups =  genIjPatch(dir1);
 				for (SizeType i = 0; i < groups.size(); ++i) {
@@ -524,7 +523,7 @@ private:
 		for (SizeType sector = 0; sector < v.sectors(); ++sector) {
 			SizeType m = v.sector(sector);
 			int state = super.partition(m);
-			SizeType qn = super.qn(state, BasisType::AFTER_TRANSFORM);
+			SizeType qn = super.qn(state);
 			GenIjPatchType genIjPatch(lrs_, qn);
 			typedef PsimagLite::Parallelizer<ParallelPsiSplit> ParallelizerType;
 			ParallelizerType threaded(PsimagLite::Concurrency::npthreads,

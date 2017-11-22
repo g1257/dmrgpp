@@ -227,32 +227,17 @@ public:
 	}
 
 	//! returns the effective quantum number of basis state i
-	int qn(SizeType i,
-	       WhenTransformEnum beforeOrAfterTransform = AFTER_TRANSFORM) const
+	int qn(SizeType i) const
 	{
-		if (beforeOrAfterTransform == AFTER_TRANSFORM) {
-			assert(i < quantumNumbers_.size());
-			return quantumNumbers_[i];
-		}
-
-		assert(i < quantumNumbersOld_.size());
-		return quantumNumbersOld_[i];
+		assert(i < quantumNumbers_.size());
+		return quantumNumbers_[i];
 	}
 
 	//! Returns the partition that corresponds to quantum number qn
-	int partitionFromQn(SizeType qn,
-	                    WhenTransformEnum beforeOrAfterTransform) const
+	int partitionFromQn(SizeType qn) const
 	{
-		const VectorSizeType* quantumNumbers;
-		const VectorSizeType* partition;
-
-		if (beforeOrAfterTransform == AFTER_TRANSFORM) {
-			quantumNumbers = &quantumNumbers_;
-			partition = &partition_;
-		} else {
-			quantumNumbers = &quantumNumbersOld_;
-			partition = &partitionOld_;
-		}
+		const VectorSizeType* quantumNumbers = &quantumNumbers_;
+		const VectorSizeType* partition = &partition_;
 
 		for (SizeType i=0;i<partition->size();i++) {
 			SizeType state = (*partition)[i];
@@ -263,16 +248,10 @@ public:
 	}
 
 	//! returns the start of basis partition i (see paper)
-	SizeType partition(SizeType i,
-	                   WhenTransformEnum beforeOrAfterTransform = AFTER_TRANSFORM) const
+	SizeType partition(SizeType i) const
 	{
-		if (beforeOrAfterTransform == AFTER_TRANSFORM) {
-			assert(i < partition_.size());
-			return partition_[i];
-		}
-
-		assert(i < partitionOld_.size());
-		return partitionOld_[i];
+		assert(i < partition_.size());
+		return partition_[i];
 	}
 
 	//! returns number of partitions for this basis (see paper)
@@ -647,8 +626,8 @@ private:
 	}
 
 	void unShrinkVector(VectorSizeType& dest,
-	                  const VectorSizeType& src,
-	                  const VectorSizeType& partition) const
+	                    const VectorSizeType& src,
+	                    const VectorSizeType& partition) const
 	{
 		SizeType n = partition.size();
 		assert(n > 0);

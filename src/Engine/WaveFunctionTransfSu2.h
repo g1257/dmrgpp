@@ -343,12 +343,11 @@ private:
 			SizeType srcII = psiSrc.sector(srcI);
 			psiSrc.extract(psiV,srcII);
 			SizeType offset = psiSrc.offset(srcII);
-			SizeType qSrc = lrsOld.super().qn(lrsOld.super().partition(srcII),
-			                                  BasisType::AFTER_TRANSFORM);
+			SizeType qSrc = lrsOld.super().qn(lrsOld.super().partition(srcII));
 			for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 				SizeType i0 = psiDest.sector(ii);
 				SizeType tmp = lrs.super().partition(i0);
-				SizeType qDest = lrs.super().qn(tmp, BasisType::AFTER_TRANSFORM);
+				SizeType qDest = lrs.super().qn(tmp);
 				if (qSrc != qDest) continue;
 
 				SizeType start = psiDest.offset(i0);
