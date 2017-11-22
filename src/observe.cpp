@@ -133,6 +133,7 @@ must be present.
 This is a comma-separated list of braket specifications.
 Braket specifications can be bare or dressed, and are explained elsewhere.
 \item[-p] [Optional, Integer] Digits of precision for printing.
+\item[-o] {[}Optional, String{]} Extra options for SolverOptions
 \item[-F] [Optional, string] TBW
 \item[-V] [Optional] Print version and exit
 \end{itemize}
@@ -146,7 +147,8 @@ int main(int argc,char **argv)
 	int opt = 0;
 	int precision = 6;
 	bool versionOnly = false;
-	while ((opt = getopt(argc, argv,"f:p:F:V")) != -1) {
+	PsimagLite::String sOptions("");
+	while ((opt = getopt(argc, argv,"f:p:o:F:V")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -155,6 +157,9 @@ int main(int argc,char **argv)
 			precision = atoi(optarg);
 			std::cout.precision(precision);
 			std::cerr.precision(precision);
+			break;
+		case 'o':
+			sOptions += optarg;
 			break;
 		case 'F':
 			filesOption = optarg;
@@ -199,6 +204,7 @@ int main(int argc,char **argv)
 	InputNgType::Readable io(ioWriteable);
 
 	ParametersDmrgSolverType dmrgSolverParams(io,false,true);
+	dmrgSolverParams.options += sOptions;
 
 	bool setAffinities = (dmrgSolverParams.options.find("setAffinities")
                                   != PsimagLite::String::npos);
