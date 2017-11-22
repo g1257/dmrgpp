@@ -124,6 +124,8 @@ public:
 			delete fout_;
 		}
 
+		const String& filename() const { return filename_; }
+
 		void open(String const &fn,
 		          std::ios_base::openmode mode)
 		{
@@ -141,7 +143,6 @@ public:
 		{
 			if (filename_=="OSTREAM")
 				throw RuntimeError("close: not possible\n");
-			filename_="FILE_IS_CLOSED";
 			fout_->close();
 		}
 
@@ -274,7 +275,6 @@ public:
 
 		void close()
 		{
-			filename_="FILE_IS_CLOSED";
 			fin_.close();
 		}
 

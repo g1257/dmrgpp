@@ -92,6 +92,33 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
+template<typename T>
+struct HasInitFin {
+	enum {True = false};
+};
+
+template<typename MatrixType, typename VectorType, bool>
+struct InitFin {
+
+	static void initialize(const MatrixType&, VectorType&) {}
+
+	static void finalize(const MatrixType&, VectorType&) {}
+};
+
+template<typename MatrixType, typename VectorType>
+struct InitFin<MatrixType, VectorType, true> {
+
+	static void initialize(const MatrixType& mat, VectorType& y)
+	{
+		mat.initialize(y);
+	}
+
+	static void finalize(const MatrixType& mat, VectorType& y)
+	{
+		mat.finalize(y);
+	}
+};
+
 //! MatrixType must have the following interface:
 //! 	RealType type to indicate the matrix type
 //! 	rows() member function to indicate the rank of the matrix
@@ -106,6 +133,8 @@ class LanczosSolver : public LanczosOrDavidsonBase<SolverParametersType,MatrixTy
 	typedef LanczosVectors<MatrixType,VectorType> LanczosVectorsType;
 	typedef typename LanczosVectorsType::DenseMatrixType DenseMatrixType;
 	typedef typename LanczosVectorsType::DenseMatrixRealType DenseMatrixRealType;
+
+	enum {WhatInitFin = HasInitFin<MatrixType>::True };
 
 public:
 
@@ -144,7 +173,8 @@ public:
 	}
 
 	// FIXME : Deprecate this function
-	virtual void computeGroundState(RealType& gsEnergy,VectorType& z)
+	virtual void computeGroundState(RealType& gsEnergy,
+	                                VectorType& z)
 	{
 		SizeType n =mat_.rows();
 		RealType atmp=0.0;
@@ -181,9 +211,11 @@ public:
 			y[i]=initialVector[i];
 			atmp += PsimagLite::real(y[i]*PsimagLite::conj(y[i]));
 		}
+
 		atmp = 1.0 / sqrt (atmp);
 		for (SizeType i = 0; i < mat_.rows(); i++) y[i] *= atmp;
 
+		InitFin<MatrixType, VectorType, WhatInitFin>::initialize(mat_, y);
 		TridiagonalMatrixType ab;
 
 		decomposition(y,ab);
@@ -202,6 +234,7 @@ public:
 		if (norm(z)<1e-6)
 			throw RuntimeError(str + " norm is zero\n");
 
+		InitFin<MatrixType, VectorType, WhatInitFin>::finalize(mat_, z);
 		if (mode_ & WITH_INFO) info(gsEnergy,initialVector,0,std::cout);
 	}
 
@@ -251,9 +284,10 @@ public:
 
 		TridiagonalMatrixType ab;
 
+		InitFin<MatrixType, VectorType, WhatInitFin>::initialize(mat_, y);
 		decomposition(y,ab);
 		gsEnergy = ab.excited(z,excited);
-
+		InitFin<MatrixType, VectorType, WhatInitFin>::finalize(mat_, z);
 		if (mode_ & WITH_INFO) info(gsEnergy,initialVector,excited,std::cout);
 	}
 
@@ -359,12 +393,11 @@ public:
 		}
 	}
 
-	void oneStepDecomposition(
-	        VectorType& x,
-	        VectorType& y,
-	        RealType& atmp,
-	        RealType& btmp,
-	        bool) const
+	void oneStepDecomposition(VectorType& x,
+	                          VectorType& y,
+	                          RealType& atmp,
+	                          RealType& btmp,
+	                          bool) const
 	{
 		lanczosVectors_.oneStepDecomposition(x,y,atmp,btmp);
 	}
@@ -501,16 +534,16 @@ private:
 		}
 
 		s = groundD_[l = 0];
-		for (int i = 1; i < n; i++)
-			if (groundD_[i] < s) s = groundD_[l = i];
+		        for (int i = 1; i < n; i++)
+		        if (groundD_[i] < s) s = groundD_[l = i];
 
-		if (gs.size() > 0) {
+		        if (gs.size() > 0) {
 			vki = &(groundV_[0]) + l;
 			for (int k = 0; k < n; k++, vki += n) gs[k] = (*vki);
 		}
 
 		if (intCounter > maxCounter)
-			throw RuntimeError("LanczosSolver::ground(): internal error\n");
+		throw RuntimeError("LanczosSolver::ground(): internal error\n");
 	}
 
 	void getColumn(MatrixType const &mat,VectorType& x,SizeType col)
