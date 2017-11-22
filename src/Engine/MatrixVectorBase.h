@@ -117,10 +117,6 @@ public:
 		fm = matrixStored.toDense();
 		diag(fm,eigs,'V');
 	}
-
-	void initialize(VectorType&) const {}
-
-	void finalize(VectorType&) const {}
 }; // class MatrixVectorBase
 } // namespace Dmrg
 

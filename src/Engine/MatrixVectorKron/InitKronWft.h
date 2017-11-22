@@ -119,19 +119,15 @@ public:
 	               wftOptions.denseSparseThreshold),
 	      wftOptions_(wftOptions),
 	      vstartNew_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1),
-	      vstartOld_(BaseType::patch(BaseType::OLD, GenIjPatchType::LEFT).size() + 1)
+	      vstartOld_(BaseType::patch(BaseType::OLD, GenIjPatchType::LEFT).size() + 1),
+	      yin_(0),
+	      xout_(0)
 	{
 		BaseType::setUpVstart(vstartNew_, BaseType::NEW);
 		assert(vstartNew_.size() > 0);
-		SizeType nsizeNew = vstartNew_[vstartNew_.size() - 1];
-		assert(nsizeNew > 0);
-		xout_.resize(nsizeNew, 0.0);
 
 		BaseType::setUpVstart(vstartOld_, BaseType::OLD);
 		assert(vstartOld_.size() > 0);
-		SizeType nsizeOld = vstartOld_[vstartOld_.size() - 1];
-		assert(nsizeOld > 0);
-		yin_.resize(nsizeOld, 0.0);
 
 		SparseMatrixType we;
 		dmrgWaveStruct.we.toSparse(we);
@@ -173,84 +169,28 @@ public:
 		return wftOptions_.kronLoadBalance;
 	}
 
-	// -------------------
-	// copy vin(:) to yin(:)
-	// -------------------
-	void copyIn(const VectorType& vout,
-	            const VectorType& vin)
+	void shallowCopy(VectorType& vout,
+	                 const VectorType& vin)
 	{
-		copyIn(xout_, vout, vstartNew_, BaseType::NEW);
-		copyIn(yin_, vin, vstartOld_, BaseType::OLD);
+		xout_ = &vout;
+		yin_ = &vin;
 	}
 
-	// -------------------
-	// copy xout(:) to vout(:)
-	// -------------------
+	void copyIn(VectorType& vin) const
+	{
+		BaseType::copyIn(vin, vstartOld_);
+	}
+
 	void copyOut(VectorType& vout) const
 	{
-		BaseType::copyOut(vout, xout_, vstartNew_);
+		BaseType::copyOut(vout, vstartNew_);
 	}
 
-	const VectorType& yin() const { return yin_; }
+	const VectorType& yin() const { return *yin_; }
 
-	VectorType& xout() { return xout_; }
+	VectorType& xout() { return *xout_; }
 
 private:
-
-	void copyIn(VectorType& x,
-	            const VectorType& v,
-	            const VectorSizeType& vstart,
-	            typename BaseType::WhatBasisEnum what) const
-	{
-		const VectorSizeType& permInverse = BaseType::lrs(what).super().permutationInverse();
-		const SparseMatrixType& leftH = BaseType::lrs(what).left().hamiltonian();
-		SizeType nl = leftH.rows();
-
-		SizeType offset1 = BaseType::offset(what);
-		SizeType npatches = BaseType::patch(what, GenIjPatchType::LEFT).size();
-		const BasisType& left = BaseType::lrs(what).left();
-		const BasisType& right = BaseType::lrs(what).right();
-
-		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
-
-			SizeType igroup = BaseType::patch(what, GenIjPatchType::LEFT)[ipatch];
-			SizeType jgroup = BaseType::patch(what, GenIjPatchType::RIGHT)[ipatch];
-
-			assert(left.partition(igroup+1) >= left.partition(igroup));
-			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
-
-			assert(right.partition(jgroup+1) >= right.partition(jgroup));
-			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
-
-			SizeType left_offset = left.partition(igroup);
-			SizeType right_offset = right.partition(jgroup);
-
-			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
-				for (SizeType iright=0; iright < sizeRight; ++iright) {
-
-					SizeType i = ileft + left_offset;
-					SizeType j = iright + right_offset;
-
-					SizeType ij = i + j * nl;
-
-					assert(i < nl);
-					assert(j < BaseType::lrs(what).right().hamiltonian().rows());
-
-					assert(ij < permInverse.size());
-
-					SizeType r = permInverse[ ij ];
-					assert(ipatch < vstart.size());
-					SizeType ip = vstart[ipatch] + (iright + ileft * sizeRight);
-					assert(ip < x.size());
-					assert(r >= offset1);
-					r -= offset1;
-					assert(r < v.size());
-
-					x[ip] = v[r];
-				}
-			}
-		}
-	}
 
 	InitKronWft(const InitKronWft&);
 
@@ -259,8 +199,8 @@ private:
 	const WftOptionsType& wftOptions_;
 	VectorSizeType vstartNew_;
 	VectorSizeType vstartOld_;
-	VectorType yin_;
-	VectorType xout_;
+	const VectorType* yin_;
+	VectorType* xout_;
 };
 } // namespace Dmrg
 

@@ -116,10 +116,19 @@ public:
 		progress_.printline(msg, std::cout);
 	}
 
+	void initialize(VectorType& y) const
+	{
+		initKron_.copyIn(y);
+	}
+
+	void finalize(VectorType& z) const
+	{
+		initKron_.copyOut(z);
+	}
+
 	void matrixVectorProduct(VectorType& vout, const VectorType& vin) const
 	{
-		initKron_.copyIn(vout, vin);
-
+		initKron_.shallowCopy(vout, vin);
 		KronConnectionsType kc(initKron_);
 
 		typedef PsimagLite::Parallelizer<KronConnectionsType> ParallelizerType;
@@ -132,8 +141,6 @@ public:
 			parallelConnections.loopCreate(kc);
 
 		kc.sync();
-
-		initKron_.copyOut(vout);
 	}
 
 private:
