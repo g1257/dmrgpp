@@ -9,7 +9,7 @@ use timeObservablesInSitu;
 use CollectBrakets;
 use Metts;
 
-my ($valgrind,$workdir,$restart,$ranges,$postprocess,$noSu2,$info,$help);
+my ($valgrind,$workdir,$restart,$ranges,$postprocess,$noSu2,$info,$sOptions,$help);
 my %submit;
 GetOptions(
 'S=s' => \$submit{"command"},
@@ -20,6 +20,7 @@ GetOptions(
 'P' => \$postprocess,
 'n=s' => \$ranges,
 'i=i' => \$info,
+'o=s' => \$sOptions,
 'nosu2' => \$noSu2,
 'h' => \$help) or die "$0: Error in command line args, run with -h to display help\n";
 
@@ -54,6 +55,7 @@ defined($submit{"command"}) or $submit{"command"} = "";
 $submit{"PBS_O_WORKDIR"} = ($submit{"command"} eq "qsub") ? 1 : 0;
 
 defined($noSu2) or $noSu2 = 0;
+defined($sOptions) or $sOptions = "";
 
 defined($valgrind) or $valgrind = "";
 defined($workdir) or $workdir = "tests";
@@ -152,14 +154,14 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	if ($whatObserveN > 0) {
 		print "|$n| has $whatObserveN observe lines\n";
 		if ($postprocess) {
-			runObserve($n,$whatObserve,\%submit);
+			runObserve($n,$whatObserve,$sOptions,\%submit);
 		}
 	}
 
 	next if ($postprocess);
 
 	my $whatDmrg = $ciAnnotations{"dmrg"};
-	my $extraCmdArgs = findArguments($whatDmrg);
+	my $extraCmdArgs = $sOptions."  ".findArguments($whatDmrg);
 	procTest($n,$valgrind,\%submit,$extraCmdArgs);
 }
 
@@ -278,11 +280,11 @@ sub runMetts
 
 sub runObserve
 {
-	my ($n,$what,$submit) = @_;
+	my ($n,$what,$sOptions,$submit) = @_;
 	my $whatN = scalar(@$what);
 	my $cmd = "";
 	for (my $i = 0; $i < $whatN; ++$i) {
-		$cmd .= runObserveOne($n,$i,$what->[$i],$submit);
+		$cmd .= runObserveOne($n,$i,$what->[$i],$sOptions,$submit);
 		$cmd .= "\n";
 	}
 
@@ -292,18 +294,18 @@ sub runObserve
 
 sub runObserveOne
 {
-	my ($n,$ind,$what,$submit) = @_;
+	my ($n, $ind, $what, $sOptions, $submit) = @_;
 	# what == arguments=something
 	my $args;
 	if ($what =~ /^arguments=(.+$)/) {
-		$args = $1;
+		$args .= "  ".$1;
 	}
 
 	defined($args) or die "$0: observe must have arguments\n";
 
 	my $output = "observe$n.txt";
 	unlink($output) if ($ind == 0);
-	my $cmd = "./observe -f ../inputs/input$n.inp \"$args\" >> $output";
+	my $cmd = "./observe -f ../inputs/input$n.inp $sOptions \"$args\" >> $output";
 	print "|$n|: postTest $cmd\n";
 	return $cmd;
 }
