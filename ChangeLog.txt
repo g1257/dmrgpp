@@ -1,5 +1,38 @@
 https://github.com/g1257/dmrgpp/commits/master
 
+2017-11-27 Version 4.62
+
+- Bug fixes
+
+* bug fix in minimize read/write
+
+- Features
+
+* initKronBase/Hamiltonian/Wft
+
+* observe supports -o
+
+* RIXS static and dynamic
+
+* WftOptions struct
+
+* WFT in patches: tons of work; still not done
+
+- Clean up
+
+* TargetingCorrectionVector uses 
+  CorrectionVectorSkeleton
+
+* AFTER/BEFORE_TRANSFORM minimized usage
+
+- TestSuite 
+
+* ci: test 467 fixed
+
+* ci supports -o
+
+* ci.pl: Now copies executables correctly
+
 2017-11-09 Version 4.60
 
 * IMPORTANT: Compilation fix for new gcc
