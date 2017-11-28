@@ -150,11 +150,11 @@ public:
 	            const BlockType&,
 	            SizeType)
 	{
-		this->common().cocoon(block1,direction);
-
 		if (direction == ProgramGlobals::INFINITE) return;
+
 		this->common().setAllStagesTo(ENABLED);
 		this->common().computeCorrection(direction,block1);
+		this->common().cocoon(block1,direction);
 	}
 
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
