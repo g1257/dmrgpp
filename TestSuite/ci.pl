@@ -131,6 +131,15 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 		}
 	}
 
+	my $whatEnergyAncilla = $ciAnnotations{"getEnergyAncilla"};
+	my $x = scalar(@$whatEnergyAncilla);
+	if ($x > 0) {
+		print "|$n| has $x getEnergyAncilla lines\n";
+		if ($postprocess) {
+			runEnergyAncillaInSituObs($n, $whatEnergyAncilla, \%submit);
+		}
+	}
+
 	my $brakets = $ciAnnotations{"CollectBrakets"};
 	$x = scalar(@$brakets);
 	if ($x > 0) {
@@ -205,6 +214,40 @@ sub runTimeInSituObs
 
 		if ($submit->{"command"} ne "") {
 			timeObservablesInSitu::main($site, $label, $fin, $fout);
+		} else {
+			print STDERR "|$n|: Dry run $site $label\n";
+		}
+
+		close($fin);
+		close($fout);
+	}
+}
+
+sub runEnergyAncillaInSituObs
+{
+	my ($n,$what,$submit) = @_;
+	my $whatN = scalar(@$what);
+	for (my $i = 0; $i < $whatN; ++$i) {
+		my $file = "runForinput$n.cout";
+		if (!(-r "$file")) {
+			print STDERR "|$n|: WARNING: $file not readable\n";
+			next;
+		}
+
+		my @temp = split(/ /, $what->[$i]);
+		(scalar(@temp) == 2) or die "$0: FATAL annotation ".$what->[$i]."\n";
+		my ($beta, $label) = @temp;		
+		my $fin;
+		open($fin, "<", $file) or die "$0: Could not open $file : $!\n";
+		my $fout;
+		my $foutname = "energyAncillaInSitu${n}_$i.txt";
+		if (!open($fout, ">", "$foutname")) {
+			close($fin);
+			die "$0: Could not write to $foutname: $!\n";
+		}
+
+		if ($submit->{"command"} ne "") {
+			EnergyAncillaInSitu::main($beta, $label, $fin, $fout);
 		} else {
 			print STDERR "|$n|: Dry run $site $label\n";
 		}

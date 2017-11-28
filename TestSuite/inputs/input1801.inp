@@ -44,3 +44,7 @@ TSPProductOrSum=sum
 
 TSPOperator=expression
 OperatorExpression=identity
+
+#ci getEnergyAncilla 1 time
+#ci getEnergyAncilla 10 time
+
