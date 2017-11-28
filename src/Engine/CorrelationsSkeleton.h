@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Profiling.h"
 #include "ApplyOperatorLocal.h"
 #include "Braket.h"
+#include <numeric>
 
 namespace Dmrg {
 
@@ -125,7 +126,7 @@ public:
 	typedef typename BasisWithOperatorsType::RealType RealType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename ObserverHelperType::FermionSignType FermionSignType;
-
+	typedef typename BasisType::VectorSizeType VectorSizeType;
 	typedef typename VectorType::value_type FieldType;
 	typedef PsimagLite::Profiling ProfilingType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
@@ -289,6 +290,13 @@ public:
 
 private:
 
+	int fermionSignBasis(int fermionicSign, const BasisType& basis) const
+	{
+		const VectorSizeType& v = basis.electronsVector(BasisType::AFTER_TRANSFORM);
+		SizeType nx0 = std::accumulate(v.begin(), v.end(), 0);
+		return (nx0 & 1) ? fermionicSign : 1;
+	}
+
 	void dmrgMultiplySystem(SparseMatrixType& result,
 	                        const SparseMatrixType& O1,
 	                        const SparseMatrixType& O2,
@@ -349,6 +357,8 @@ private:
 	                         SizeType ns,
 	                         SizeType threadId)
 	{
+		RealType f = fermionSignBasis(fermionicSign,
+		                              helper_.leftRightSuper(threadId).right());
 		SizeType nj=O2.rows();
 
 		helper_.setPointer(threadId,ns);
@@ -372,8 +382,6 @@ private:
 			SizeType e,u;
 
 			pack.unpack(e,u,helper_.leftRightSuper(threadId).right().permutation(r));
-			SizeType nx0 = helper_.leftRightSuper(threadId).right().electrons();
-			RealType f = (nx0 & 1) ? fermionicSign : 1;
 
 			for (int k=O2.getRowPtr(e);k<O2.getRowPtr(e+1);k++) {
 				SizeType e2 = O2.getCol(k);
@@ -386,6 +394,7 @@ private:
 					value[r2] += O2.getValue(k)*O1.getValue(k2)*f;
 				}
 			}
+
 			for (SizeType i=0;i<col.size();i++) {
 				if (col[i]==0) continue;
 				result.pushCol(i);
@@ -508,17 +517,15 @@ private:
 			PackIndicesType pack(n);
 			pack.unpack(i,k,helper_.leftRightSuper(threadId).right().permutation(e));
 			pack.unpack(j,k2,helper_.leftRightSuper(threadId).right().permutation(e2));
-			SizeType nx0 = helper_.leftRightSuper(threadId).left().electrons();
-			sign = (nx0 & 1) ? fermionicSign : 1;
+			sign = fermionSignBasis(fermionicSign, helper_.leftRightSuper(threadId).left());
 		} else {
 			PackIndicesType pack(m);
 			pack.unpack(k,i,helper_.leftRightSuper(threadId).right().permutation(e));
 			pack.unpack(k2,j,helper_.leftRightSuper(threadId).right().permutation(e2));
-			SizeType nx0 = helper_.leftRightSuper(threadId).super().electrons();
-			sign = (nx0 & 1) ?  fermionicSign : 1;
+			sign = fermionSignBasis(fermionicSign,  helper_.leftRightSuper(threadId).super());
 		}
-		if (k!=k2) return 0;
-		return O.element(i,j)*sign;
+
+		return (k != k2) ? 0 : O.element(i,j)*sign;
 	}
 
 	FieldType bracket_(const SparseMatrixType& A,
@@ -577,6 +584,9 @@ private:
 	                         int fermionicSign,
 	                         SizeType threadId)
 	{
+		RealType sign = fermionSignBasis(fermionicSign,
+		                                 helper_.leftRightSuper(threadId).left());
+
 		FieldType sum=0;
 		PackIndicesType pack(helper_.leftRightSuper(threadId).left().size());
 		SizeType leftSize = helper_.leftRightSuper(threadId).left().size();
@@ -591,8 +601,7 @@ private:
 				pack.unpack(r,eta,helper_.leftRightSuper(threadId).super().
 				            permutation(t));
 				if (eta>=A.rows()) throw PsimagLite::RuntimeError("Error\n");
-				SizeType nx0 = helper_.leftRightSuper(threadId).left().electrons();
-				RealType sign = (nx0 & 1) ? fermionicSign : 1;
+
 				for (int k=A.getRowPtr(eta);k<A.getRowPtr(eta+1);k++) {
 					SizeType eta2 = A.getCol(k);
 					SizeType t2 = helper_.leftRightSuper(threadId).super().

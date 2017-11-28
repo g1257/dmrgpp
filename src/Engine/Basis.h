@@ -97,10 +97,10 @@ class Basis {
 	typedef  Basis<SparseMatrixType_, CvectorSizeType> ThisType;
 	typedef HamiltonianSymmetryLocal<SparseMatrixType_>  HamiltonianSymmetryLocalType;
 	typedef HamiltonianSymmetrySu2<SparseMatrixType_>  HamiltonianSymmetrySu2Type;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 public:
 
+	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename HamiltonianSymmetrySu2Type::FactorsType FactorsType;
 	typedef typename HamiltonianSymmetrySu2Type::PairType PairType;
 	typedef SymmetryElectronsSz<RealType_> SymmetryElectronsSzType;
