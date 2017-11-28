@@ -297,4 +297,5 @@ the "half filled" case). U=2
 5501) RIXS static
 5502) RIXS dynamic
 #5503-5699 reserved for RIXS
+5700) TargetingCorrection small test
 #TAGEND DO NOT REMOVE THIS TAG
