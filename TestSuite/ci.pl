@@ -123,49 +123,19 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	}
 
 	my %ciAnnotations = Ci::getCiAnnotations("../inputs/input$n.inp",$n);
-	my $whatTimeInSituObs = $ciAnnotations{"getTimeObservablesInSitu"};
-	my $x = defined($whatTimeInSituObs) ? scalar(@$whatTimeInSituObs) : 0;
-	if ($x > 0) {
-		print "|$n| has $x getTimeObservablesInSitu lines\n";
-		if ($postprocess) {
-			runTimeInSituObs($n, $whatTimeInSituObs, \%submit);
-		}
-	}
-
-	my $whatEnergyAncilla = $ciAnnotations{"getEnergyAncilla"};
-	$x = defined($whatEnergyAncilla) ? scalar(@$whatEnergyAncilla) : 0;
-	if ($x > 0) {
-		print "|$n| has $x getEnergyAncilla lines\n";
-		if ($postprocess) {
-			runEnergyAncillaInSituObs($n, $whatEnergyAncilla, \%submit);
-		}
-	}
-
-	my $brakets = $ciAnnotations{"CollectBrakets"};
-	$x = defined($brakets) ? scalar(@$brakets) : 0;
-	if ($x > 0) {
-		print "|$n| has $x CollectBrakets lines\n";
-		if ($postprocess) {
-			runCollectBrakets($n, $brakets, \%submit);
-		}
-	}
-
-	my $metts = $ciAnnotations{"metts"};
-	$x = defined($metts) ? scalar(@$metts) : 0;
-	if ($x > 0) {
-		print "|$n| has $x metts lines\n";
-		if ($postprocess) {
-			runMetts($n, $metts, \%submit);
-		}
-	}
-
-	my $whatObserve = $ciAnnotations{"observe"};
-	$x = defined($whatObserve) ? scalar(@$whatObserve) : 0;
-	if ($x > 0) {
-		print "|$n| has $x observe lines\n";
-		if ($postprocess) {
-			runObserve($n,$whatObserve,$sOptions,\%submit);
-		}
+	my @postProcessLabels = qw(getTimeObservablesInSitu getEnergyAncilla CollectBrakets metts observe);
+	my %actions = (getTimeObservablesInSitu => \&runTimeInSituObs,
+	               getEnergyAncilla => \&runEnergyAncillaInSituObs,
+	               CollectBrakets => \&runCollectBrakets,
+	               metts => \&runMetts,
+	               observe => \&runObserve);
+	foreach my $ppLabel (@postProcessLabels) {
+		my $w = $ciAnnotations{$ppLabel};
+		my $x = defined($w) ? scalar(@$w) : 0;
+		next if ($x == 0);
+		print "|$n| has $x $ppLabel lines\n";
+		next unless ($postprocess);
+		$actions{$ppLabel}->($n, $w, \%submit, $sOptions);
 	}
 
 	next if ($postprocess);
@@ -325,7 +295,7 @@ sub runMetts
 
 sub runObserve
 {
-	my ($n,$what,$sOptions,$submit) = @_;
+	my ($n,$what,$submit,$sOptions) = @_;
 	my $whatN = scalar(@$what);
 	my $cmd = "";
 	for (my $i = 0; $i < $whatN; ++$i) {
