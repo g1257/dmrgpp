@@ -186,46 +186,24 @@ sub getCiAnnotations
 {
 	my ($file,$n) = @_;
 	open(FILE, "$file") or return "";
-	my @whatObserve;
-	my @whatDmrg;
-	my @whatTimeObsInSitu;
-	my @brakets;
-	my @metts;
 	my $counter = 0;
+	my %h;
+
 	while (<FILE>) {
 		chomp;
-		if (/^\#ci observe (.*$)/) {
-			push (@whatObserve, "$1");
+		if (/^\#ci ([^ ]+) (.*$)/) {
+			my $key = $1;
+			my $args = $2;
+			my $ptr = $h{"$key"};
+			my @a = (defined($ptr)) ? @$ptr : ();
+			
+			push (@a, "$2");
+			$h{"$key"} = \@a;
 			next;
-		}
-
-		if (/^#ci dmrg (.*$)/) {
-			push (@whatDmrg, "$1");
-			next;
-		}
-
-		if (/^#ci getTimeObservablesInSitu (.*$)/) {
-			push (@whatTimeObsInSitu, "$1");
-			next;
-		}
-
-		if (/^#ci CollectBrakets (.*$)/) {
-			push (@brakets, "$1");
-			next;
-		}
-
-		if (/^#ci metts (.*)/) {
-			push (@metts, "$1");
 		}
 	}
 
 	close(FILE);
-	my %h;
-	$h{"dmrg"} = \@whatDmrg;
-	$h{"observe"} = \@whatObserve;
-	$h{"getTimeObservablesInSitu"} = \@whatTimeObsInSitu;
-	$h{"CollectBrakets"} = \@brakets;
-	$h{"metts"} = \@metts;
 	return %h;
 }
 

@@ -6,6 +6,7 @@ use Getopt::Long qw(:config no_ignore_case);
 use Ci;
 use lib "../scripts";
 use timeObservablesInSitu;
+use EnergyAncillaInSitu;
 use CollectBrakets;
 use Metts;
 
@@ -123,7 +124,7 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 
 	my %ciAnnotations = Ci::getCiAnnotations("../inputs/input$n.inp",$n);
 	my $whatTimeInSituObs = $ciAnnotations{"getTimeObservablesInSitu"};
-	my $x = scalar(@$whatTimeInSituObs);
+	my $x = defined($whatTimeInSituObs) ? scalar(@$whatTimeInSituObs) : 0;
 	if ($x > 0) {
 		print "|$n| has $x getTimeObservablesInSitu lines\n";
 		if ($postprocess) {
@@ -132,7 +133,7 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	}
 
 	my $whatEnergyAncilla = $ciAnnotations{"getEnergyAncilla"};
-	my $x = scalar(@$whatEnergyAncilla);
+	$x = defined($whatEnergyAncilla) ? scalar(@$whatEnergyAncilla) : 0;
 	if ($x > 0) {
 		print "|$n| has $x getEnergyAncilla lines\n";
 		if ($postprocess) {
@@ -141,7 +142,7 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	}
 
 	my $brakets = $ciAnnotations{"CollectBrakets"};
-	$x = scalar(@$brakets);
+	$x = defined($brakets) ? scalar(@$brakets) : 0;
 	if ($x > 0) {
 		print "|$n| has $x CollectBrakets lines\n";
 		if ($postprocess) {
@@ -150,7 +151,7 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	}
 
 	my $metts = $ciAnnotations{"metts"};
-	$x = scalar(@$metts);
+	$x = defined($metts) ? scalar(@$metts) : 0;
 	if ($x > 0) {
 		print "|$n| has $x metts lines\n";
 		if ($postprocess) {
@@ -159,9 +160,9 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	}
 
 	my $whatObserve = $ciAnnotations{"observe"};
-	my $whatObserveN = scalar(@$whatObserve);
-	if ($whatObserveN > 0) {
-		print "|$n| has $whatObserveN observe lines\n";
+	$x = defined($whatObserve) ? scalar(@$whatObserve) : 0;
+	if ($x > 0) {
+		print "|$n| has $x observe lines\n";
 		if ($postprocess) {
 			runObserve($n,$whatObserve,$sOptions,\%submit);
 		}
@@ -177,6 +178,7 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 sub findArguments
 {
 	my ($a) = @_;
+	return "" unless defined($a);
 	my $n = scalar(@$a);
 	for (my $i = 0; $i < $n; ++$i) {
 		if ($a->[$i] =~/^arguments=(.+$)/) {
@@ -249,7 +251,7 @@ sub runEnergyAncillaInSituObs
 		if ($submit->{"command"} ne "") {
 			EnergyAncillaInSitu::main($beta, $label, $fin, $fout);
 		} else {
-			print STDERR "|$n|: Dry run $site $label\n";
+			print STDERR "|$n|: Dry run $beta $label\n";
 		}
 
 		close($fin);
