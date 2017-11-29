@@ -4,14 +4,14 @@ NumberOfTerms=2
 DegreesOfFreedom=1
 GeometryKind=ladder
 GeometryOptions=none
-Connectors 10 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0
+Connectors 10 -1.0 0.0 -1.0 0.0 -1.0 0.0 -1.0 0.0 -1.0 0.0 
 Connectors 6  0 0 0 0 0 0
 LadderLeg=2
 
 DegreesOfFreedom=1
 GeometryKind=ladder
-GeometryOptions=twositedmrg
-Connectors 10  -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0
+GeometryOptions=none
+Connectors 10 -1.0 0.0 -1.0 0.0 -1.0 0.0 -1.0 0.0 -1.0 0.0 
 Connectors 6  0 0 0 0 0 0
 LadderLeg=2
 
@@ -23,24 +23,22 @@ Version=version
 OutputFile=data1801.txt
 InfiniteLoopKeptStates=64
 FiniteLoops 4
+5 800 2 -5 800 2 -5 800 2  5 800 2
 
-5 100 0 -10 100 0
-
-10 100 0 -10 100 0
-
-RepeatFiniteLoopsFrom=2
-RepeatFiniteLoopsTimes=100
+RepeatFiniteLoopsFrom=0
+RepeatFiniteLoopsTimes=10
 
 TargetSzPlusConst=6
 RestartFilename=data1800.txt
-GsWeight=0.1
+
 TSPTau=0.1
 TSPTimeSteps=5
 TSPAdvanceEach=10
 TSPAlgorithm=Krylov
-TSPSites 1 7
-TSPLoops 1 6
+TSPSites 1 6 
+TSPLoops 1 6 
 TSPProductOrSum=sum
+GsWeight=0.1
 
 TSPOperator=expression
 OperatorExpression=identity
