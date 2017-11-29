@@ -89,15 +89,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template<typename MatrixType,typename VectorType>
+template<typename MatrixType_,typename VectorType_>
 class LanczosVectors {
 
-	typedef typename VectorType::value_type ComplexOrRealType;
+	typedef typename VectorType_::value_type ComplexOrRealType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
-	typedef LanczosVectors<MatrixType,VectorType> ThisType;
+	typedef LanczosVectors<MatrixType_, VectorType_> ThisType;
 
 public:
 
+	typedef MatrixType_ MatrixType;
+	typedef VectorType_ VectorType;
 	typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
 	typedef typename VectorType::value_type VectorElementType;
 	typedef Matrix<VectorElementType> DenseMatrixType;
@@ -156,16 +158,14 @@ public:
 		data_->reset(matrixRank,steps);
 	}
 
-	VectorElementType& operator()(SizeType i,SizeType j)
+	const DenseMatrixType* data() const
 	{
-		if (!lotaMemory_) return dummy_;
-		return data_->operator()(i,j);
+		return data_;
 	}
 
-	const VectorElementType& operator()(SizeType i,SizeType j) const
+	DenseMatrixType* data()
 	{
-		if (!lotaMemory_) return dummy_;
-		return data_->operator()(i,j);
+		return data_;
 	}
 
 	SizeType cols() const { return data_->cols(); }

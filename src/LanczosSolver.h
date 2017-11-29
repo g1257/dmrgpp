@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2011, UT-Battelle, LLC
+Copyright (c) 2009-2011-2017, UT-Battelle, LLC
 All rights reserved
 
-[PsimagLite, Version 1.0.0]
+[PsimagLite, Version 1.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -67,7 +67,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
 /** \ingroup PsimagLite */
 /*@{*/
@@ -92,33 +91,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template<typename T>
-struct HasInitFin {
-	enum {True = false};
-};
-
-template<typename MatrixType, typename VectorType, bool>
-struct InitFin {
-
-	static void initialize(const MatrixType&, VectorType&) {}
-
-	static void finalize(const MatrixType&, VectorType&) {}
-};
-
-template<typename MatrixType, typename VectorType>
-struct InitFin<MatrixType, VectorType, true> {
-
-	static void initialize(const MatrixType& mat, VectorType& y)
-	{
-		mat.initialize(y);
-	}
-
-	static void finalize(const MatrixType& mat, VectorType& y)
-	{
-		mat.finalize(y);
-	}
-};
-
 //! MatrixType must have the following interface:
 //! 	RealType type to indicate the matrix type
 //! 	rows() member function to indicate the rank of the matrix
@@ -133,8 +105,6 @@ class LanczosSolver : public LanczosOrDavidsonBase<SolverParametersType,MatrixTy
 	typedef LanczosVectors<MatrixType,VectorType> LanczosVectorsType;
 	typedef typename LanczosVectorsType::DenseMatrixType DenseMatrixType;
 	typedef typename LanczosVectorsType::DenseMatrixRealType DenseMatrixRealType;
-
-	enum {WhatInitFin = HasInitFin<MatrixType>::True };
 
 public:
 
@@ -204,21 +174,9 @@ public:
 		}
 
 		SizeType n=mat_.rows();
-		VectorType y(n);
-
-		RealType atmp=0.0;
-		for (SizeType i=0;i<n;i++) {
-			y[i]=initialVector[i];
-			atmp += PsimagLite::real(y[i]*PsimagLite::conj(y[i]));
-		}
-
-		atmp = 1.0 / sqrt (atmp);
-		for (SizeType i = 0; i < mat_.rows(); i++) y[i] *= atmp;
-
-		InitFin<MatrixType, VectorType, WhatInitFin>::initialize(mat_, y);
 		TridiagonalMatrixType ab;
 
-		decomposition(y,ab);
+		decomposition(initialVector, ab);
 		typename Vector<RealType>::Type c(steps_);
 		groundAllocations(steps_ + 2,c.size() > 0);
 		try {
@@ -234,7 +192,6 @@ public:
 		if (norm(z)<1e-6)
 			throw RuntimeError(str + " norm is zero\n");
 
-		InitFin<MatrixType, VectorType, WhatInitFin>::finalize(mat_, z);
 		if (mode_ & WITH_INFO) info(gsEnergy,initialVector,0,std::cout);
 	}
 
@@ -271,23 +228,11 @@ public:
 			return;
 		}
 
-		SizeType n=mat_.rows();
-		VectorType y(n);
-
-		RealType atmp=0.0;
-		for (SizeType i=0;i<n;i++) {
-			y[i]=initialVector[i];
-			atmp += PsimagLite::real(y[i]*PsimagLite::conj(y[i]));
-		}
-		atmp = 1.0 / sqrt (atmp);
-		for (SizeType i = 0; i < mat_.rows(); i++) y[i] *= atmp;
-
 		TridiagonalMatrixType ab;
 
-		InitFin<MatrixType, VectorType, WhatInitFin>::initialize(mat_, y);
-		decomposition(y,ab);
+		decomposition(initialVector, ab);
 		gsEnergy = ab.excited(z,excited);
-		InitFin<MatrixType, VectorType, WhatInitFin>::finalize(mat_, z);
+
 		if (mode_ & WITH_INFO) info(gsEnergy,initialVector,excited,std::cout);
 	}
 
@@ -354,8 +299,11 @@ public:
 		typename Vector<RealType>::Type nullVector;
 		groundAllocations(max_nstep + 2,false);
 		for (; j < max_nstep; j++) {
-			for (SizeType i = 0; i < mat_.rows(); i++)
-				lanczosVectors_(i,j) = y[i];
+			if (lanczosVectors_.lotaMemory() && lanczosVectors_.data()) {
+				DenseMatrixType& lv = *(lanczosVectors_.data());
+				for (SizeType i = 0; i < mat_.rows(); i++)
+					lv(i,j) = y[i];
+			}
 
 			RealType btmp = 0;
 			oneStepDecomposition(x,y,atmp,btmp,j==0);

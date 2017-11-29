@@ -180,8 +180,12 @@ public:
 		lanczosVectors_.reset(y.size(),params_.steps);
 		ab.resize(2*params_.steps,0);
 		for (SizeType j=0; j < lanczosVectors_.cols(); j++) {
-			for (SizeType i = 0; i < mat_.rows(); i++)
-				lanczosVectors_(i,j) = y[i];
+			if (lanczosVectors_.lotaMemory() && lanczosVectors_.data()) {
+				DenseMatrixType& lv = *(lanczosVectors_.data());
+				for (SizeType i = 0; i < mat_.rows(); i++)
+					lv(i,j) = y[i];
+			}
+
 			RealType atmp = 0;
 			RealType btmp = 0;
 			oneStepDecomposition(x,y,atmp,btmp,j==0);
