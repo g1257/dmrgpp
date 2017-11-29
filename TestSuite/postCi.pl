@@ -77,32 +77,19 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	procTest($n,$workdir,$golddir);
 
 	my %ciAnnotations = Ci::getCiAnnotations("inputs/input$n.inp",$n);
-	my $whatTimeInSituObs = $ciAnnotations{"getTimeObservablesInSitu"};
-	my $x = scalar(@$whatTimeInSituObs);
-	if ($x > 0) {
-		print "|$n| has $x getTimeObservablesInSitu lines\n";
-		checkTimeInSituObs($n, $whatTimeInSituObs, $workdir, $golddir);
-	}
 
-	my $brakets = $ciAnnotations{"CollectBrakets"};
-	$x = scalar(@$brakets);
-	if ($x > 0) {
-		print "|$n| has $x CollectBrakets lines\n";
-		checkCollectBrakets($n, $brakets, $workdir, $golddir);
-	}
-
-	my $metts = $ciAnnotations{"metts"};
-	$x = scalar(@$metts);
-	if ($x > 0) {
-		print "|$n| has $x metts lines\n";
-		checkMetts($n, $metts, $workdir, $golddir);
-	}
-
-	my $whatObserve = $ciAnnotations{"observe"};
-	my $whatObserveN = scalar(@$whatObserve);
-	if ($whatObserveN > 0) {
-		print "|$n| has $whatObserveN observe lines\n";
-		checkObserve($n,$workdir,$golddir);
+	my @postProcessLabels = qw(getTimeObservablesInSitu getEnergyAncilla CollectBrakets metts observe);
+	my %actions = (getTimeObservablesInSitu => \&checkTimeInSituObs,
+	               getEnergyAncilla => \&checkEnergyAncillaInSitu,
+	               CollectBrakets => \&checkCollectBrakets,
+	               metts => \&checkMetts,
+	               observe => \&checkObserve);
+	foreach my $ppLabel (@postProcessLabels) {
+		my $w = $ciAnnotations{$ppLabel};
+		my $x = defined($w) ? scalar(@$w) : 0;
+		next if ($x == 0);
+		print "|$n| has $x $ppLabel lines\n";
+		$actions{$ppLabel}->($n, $w, $workdir, $golddir);
 	}
 
 	print "-----------------------------------------------\n";
@@ -255,6 +242,25 @@ sub fileSize
 	return $size;
 }
 
+sub checkEnergyAncillaInSitu
+{
+	my ($n, $what, $workdir, $golddir) = @_;
+	my $whatN = scalar(@$what);
+	for (my $i = 0; $i < $whatN; ++$i) {
+		my $file = "runForinput$n.cout";
+		if (!(-r "$file")) {
+			print STDERR "|$n|: WARNING: $file not readable\n";
+		}
+
+		my $file1 = "$workdir/energyAncillaInSitu${n}_$i.txt";
+		my $file2 = "$golddir/energyAncillaInSitu${n}_$i.txt";
+		print "Comparing $file1 $file2\n";
+		my %vals1 = Metts::load($file1);
+		my %vals2 = Metts::load($file2);
+		compareHashes(\%vals1, \%vals2);
+	}
+}
+
 sub checkTimeInSituObs
 {
 	my ($n, $what, $workdir, $golddir) = @_;
@@ -343,7 +349,7 @@ sub checkMetts
 
 sub checkObserve
 {
-	my ($n, $workdir, $golddir) = @_;
+	my ($n, $ignored, $workdir, $golddir) = @_;
 	my $file1 = "$workdir/observe$n.txt";
 	my $file2 = "$golddir/observe$n.txt";
 	print "$0: Checking $file1 against $file2\n";
