@@ -28,7 +28,8 @@ void mainLoop(GeometryType& geometry,
 	const PsimagLite::String& datafile = params.filename;
 	ArchiveFiles<ParametersDmrgSolverType>::unpackIfNeeded(datafile);
 	IoInputType dataIo(datafile);
-	bool hasTimeEvolution = (targetting != "GroundStateTargetting");
+	bool hasTimeEvolution = (targetting != "GroundStateTargetting" &&
+	        targetting != "CorrectionTargetting");
 
 	while (moreData) {
 		try {
