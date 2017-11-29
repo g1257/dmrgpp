@@ -383,7 +383,8 @@ public:
 			io.printline(s);
 			if (jj >= data_.size())
 				err("VectorWithOffsets: save\n");
-			io.printVector(data_[jj],s);
+			s = "data" + ttos(jj);
+			io.printVector(data_[jj], s);
 		}
 	}
 
@@ -417,7 +418,8 @@ public:
 
 			if (static_cast<SizeType>(x)>=data_.size())
 				err(msg + ":load(...): sector too big\n");
-			io.read(data_[x],"#sector=");
+			PsimagLite::String s = "data" + ttos(jj);
+			io.read(data_[x], s);
 		}
 
 		setIndex2Sector();
