@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetParamsBase.h"
 #include "TargetHelper.h"
 #include "TargetingCommon.h"
-#include "WaveFunctionTransfFactory.h"
+#include "Wft/WaveFunctionTransfFactory.h"
 
 namespace Dmrg {
 
