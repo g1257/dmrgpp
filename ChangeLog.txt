@@ -1,5 +1,19 @@
 https://github.com/g1257/dmrgpp/commits/master
 
+2017-11-30 Version 4.64
+
+* observe compilation fix
+
+* TargetingCorrection, crash fixed
+
+* ci: EnergyAncilla
+
+* ci: test 1801 fixed
+
+* VectorWithOffsets: bug fix for load/save
+
+* WFT: Acceleration with temporary possible
+
 2017-11-27 Version 4.62
 
 - Bug fixes
