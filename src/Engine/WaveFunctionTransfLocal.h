@@ -168,7 +168,7 @@ private:
 	                      const LeftRightSuperType& lrs,
 	                      const VectorSizeType& nk) const
 	{
-		if (wftOptions_.twoSiteDmrg && !wftOptions_.wftInPatches)
+		if (wftOptions_.twoSiteDmrg && wftOptions_.accel != WftOptions::ACCEL_PATCHES)
 			return transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
 
 		typename ProgramGlobals::DirectionEnum dir1 = ProgramGlobals::EXPAND_ENVIRON;
@@ -187,7 +187,7 @@ private:
 	                             const VectorSizeType& nk,
 	                             typename ProgramGlobals::DirectionEnum dir) const
 	{
-		if (wftOptions_.wftInPatches)
+		if (wftOptions_.accel == WftOptions::ACCEL_PATCHES)
 			return transformVectorParallelPatched(psiDest, psiSrc, lrs, i0, nk, dir);
 
 		typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
@@ -312,7 +312,7 @@ private:
 	                      const LeftRightSuperType& lrs,
 	                      const VectorSizeType& nk) const
 	{
-		if (wftOptions_.twoSiteDmrg && !wftOptions_.wftInPatches)
+		if (wftOptions_.twoSiteDmrg && wftOptions_.accel != WftOptions::ACCEL_PATCHES)
 			return transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
 
 		typename ProgramGlobals::DirectionEnum dir2 = ProgramGlobals::EXPAND_SYSTEM;

@@ -92,25 +92,33 @@ public:
 		typedef typename DmrgWaveStructType::SparseElementType ComplexOrRealType;
 		typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
+		enum AccelEnum {ACCEL_NONE, ACCEL_TEMP, ACCEL_PATCHES};
+
 		WftOptions(ProgramGlobals::DirectionEnum dir1,
 		           bool t,
-		           bool w,
+		           bool inPatches,
+		           bool withTemp,
 		           bool k,
 		           bool f,
 		           SizeType c,
 		           RealType d)
 		    : dir(dir1),
 		      twoSiteDmrg(t),
-		      wftInPatches(w),
+		      accel(ACCEL_NONE),
 		      kronLoadBalance(k),
 		      firstCall(f),
 		      counter(c),
 		      denseSparseThreshold(d)
-		{}
+		{
+			if (inPatches && withTemp)
+				err("WFTOptions: Cannot accel with both patches and temporary\n");
+			if (inPatches) accel = ACCEL_PATCHES;
+			if (withTemp)  accel = ACCEL_TEMP;
+		}
 
 		ProgramGlobals::DirectionEnum dir;
 		bool twoSiteDmrg;
-		bool wftInPatches;
+		AccelEnum accel;
 		bool kronLoadBalance;
 		bool firstCall;
 		SizeType counter;

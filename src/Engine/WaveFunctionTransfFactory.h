@@ -124,6 +124,7 @@ public:
 	      wftOptions_(ProgramGlobals::INFINITE,
 	                  params.options.find("twositedmrg")!=PsimagLite::String::npos,
 	                  params.options.find("wftInPatches")!=PsimagLite::String::npos,
+	                  params.options.find("wftWithTemp")!=PsimagLite::String::npos,
 	                  params.options.find("KronLoadBalance") != PsimagLite::String::npos,
 	                  true,
 	                  0,

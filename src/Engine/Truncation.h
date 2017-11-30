@@ -273,7 +273,8 @@ private:
 		LeftRightSuperType lrs(rSprime,(BasisWithOperatorsType&) eBasis,
 		                       (BasisType&)lrs_.super());
 		bool twoSiteDmrg = waveFunctionTransformation_.options().twoSiteDmrg;
-		bool wftInPatches = waveFunctionTransformation_.options().wftInPatches;
+		bool wftInPatches = (waveFunctionTransformation_.options().accel ==
+		                     WaveFunctionTransfType::WftOptionsType::ACCEL_PATCHES);
 		const LeftRightSuperType& lrsForWft = (twoSiteDmrg || wftInPatches) ? lrs_ : lrs;
 		waveFunctionTransformation_.push(cache.transform,
 		                                 ProgramGlobals::EXPAND_SYSTEM,
@@ -310,7 +311,8 @@ private:
 		LeftRightSuperType lrs((BasisWithOperatorsType&) sBasis,
 		                       rEprime,(BasisType&)lrs_.super());
 		bool twoSiteDmrg = waveFunctionTransformation_.options().twoSiteDmrg;
-		bool wftInPatches = waveFunctionTransformation_.options().wftInPatches;
+		bool wftInPatches = (waveFunctionTransformation_.options().accel ==
+		                     WaveFunctionTransfType::WftOptionsType::ACCEL_PATCHES);
 		const LeftRightSuperType& lrsForWft = (twoSiteDmrg || wftInPatches) ? lrs_ : lrs;
 		waveFunctionTransformation_.push(cache.transform,
 		                                 ProgramGlobals::EXPAND_ENVIRON,
