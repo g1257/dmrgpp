@@ -320,6 +320,8 @@ private:
 		SizeType nip = lrs.super().permutationInverse().size()/
 		        lrs.right().permutationInverse().size();
 
+		SizeType nip2 = dmrgWaveStruct_.lrs.left().size()/volumeOfNk;
+
 		assert(lrs.left().permutationInverse().size()==volumeOfNk ||
 		       lrs.left().permutationInverse().size()==dmrgWaveStruct_.ws.rows());
 		assert(lrs.right().permutationInverse().size()/volumeOfNk==dmrgWaveStruct_.we.cols());
@@ -351,7 +353,7 @@ private:
 			for (SizeType k3=wsRef2.getRowPtr(ip);k3<wsRef2.getRowPtr(ip+1);k3++) {
 				int ip2 = wsRef2.getColOrExit(k3);
 				if (ip2<0) continue;
-				SizeType alpha = dmrgWaveStruct_.lrs.left().permutationInverse(ip2+kp*nip);
+				SizeType alpha = dmrgWaveStruct_.lrs.left().permutationInverse(ip2+kp*nip2);
 				psiDest.fastAccess(i0,x) += temporary(jp, alpha)*wsRef2.getValue(k3);
 			}
 		}

@@ -112,6 +112,8 @@ public:
 		{
 			if (inPatches && withTemp)
 				err("WFTOptions: Cannot accel with both patches and temporary\n");
+			if (!twoSiteDmrg && withTemp)
+				err("WFTOptions: accel with temporary only for twoSiteDmrg for now\n");
 			if (inPatches) accel = ACCEL_PATCHES;
 			if (withTemp)  accel = ACCEL_TEMP;
 		}

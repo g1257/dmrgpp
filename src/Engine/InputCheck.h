@@ -333,6 +333,7 @@ public:
 			\item [wftInPatches] WFT calculation will be done using symmetry patches
 			\item [diskstacks] Save and load stacks used for shrinking to and from disk,
 							   instead of to and from memory
+			\item [wftWithTemp] Accelerate the WFT by using a temporary
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,const PsimagLite::String& val,SizeType)
@@ -391,6 +392,7 @@ public:
 		registerOpts.push_back("setAffinities");
 		registerOpts.push_back("wftInPatches");
 		registerOpts.push_back("diskstacks");
+		registerOpts.push_back("wftWithTemp");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);
