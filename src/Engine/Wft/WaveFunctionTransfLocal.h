@@ -163,9 +163,8 @@ public:
 
 private:
 
-	template<typename SomeVectorType>
-	void transformVector1(SomeVectorType& psiDest,
-	                      const SomeVectorType& psiSrc,
+	void transformVector1(VectorWithOffsetType& psiDest,
+	                      const VectorWithOffsetType& psiSrc,
 	                      const LeftRightSuperType& lrs,
 	                      const VectorSizeType& nk) const
 	{
@@ -180,9 +179,8 @@ private:
 		}
 	}
 
-	template<typename SomeVectorType>
-	void transformVectorParallel(SomeVectorType& psiDest,
-	                             const SomeVectorType& psiSrc,
+	void transformVectorParallel(VectorWithOffsetType& psiDest,
+	                             const VectorWithOffsetType& psiSrc,
 	                             const LeftRightSuperType& lrs,
 	                             SizeType i0,
 	                             const VectorSizeType& nk,
@@ -206,10 +204,8 @@ private:
 		threadedWft.loopCreate(helperWft);
 	}
 
-
-	template<typename SomeVectorType>
-	void transformVectorParallelPatched(SomeVectorType& psiDest,
-	                                    const SomeVectorType& psiSrc,
+	void transformVectorParallelPatched(VectorWithOffsetType& psiDest,
+	                                    const VectorWithOffsetType& psiSrc,
 	                                    const LeftRightSuperType& lrs,
 	                                    SizeType i0,
 	                                    const VectorSizeType& nk,
@@ -229,9 +225,8 @@ private:
 		psiDest.setDataInSector(psiDestOneSector, i0);
 	}
 
-	template<typename SomeVectorType>
-	void transformVector1FromInfinite(SomeVectorType& psiDest,
-	                                  const SomeVectorType& psiSrc,
+	void transformVector1FromInfinite(VectorWithOffsetType& psiDest,
+	                                  const VectorWithOffsetType& psiSrc,
 	                                  const LeftRightSuperType& lrs,
 	                                  const VectorSizeType& nk) const
 	{
@@ -241,15 +236,17 @@ private:
 		}
 	}
 
-	template<typename SomeVectorType>
-	void tVector1FromInfinite(SomeVectorType& psiDest,
-	                          const SomeVectorType& psiSrc,
+	void tVector1FromInfinite(VectorWithOffsetType& psiDest,
+	                          const VectorWithOffsetType& psiSrc,
 	                          const LeftRightSuperType& lrs,
 	                          SizeType i0,
 	                          const VectorSizeType& nk) const
 	{
 		if (wftOptions_.accel == WftOptions::ACCEL_TEMP)
 			return transformTemp1FromInfinite(psiDest, psiSrc, lrs, i0, nk);
+
+//		if (wftOptions_.accel == WftOptions::ACCEL_BLOCKS)
+//			return transformBlocks1FromInfinite(psiDest, psiSrc, lrs, i0, nk);
 
 		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
 		SizeType nip = lrs.super().permutationInverse().size()/
@@ -279,8 +276,7 @@ private:
 		}
 	}
 
-	template<typename SomeVectorType>
-	SparseElementType createAux1bFromInfinite(const SomeVectorType& psiSrc,
+	SparseElementType createAux1bFromInfinite(const VectorWithOffsetType& psiSrc,
 	                                          SizeType ip,
 	                                          SizeType kp,
 	                                          SizeType jp,
@@ -385,9 +381,8 @@ private:
 		}
 	}
 
-	template<typename SomeVectorType>
-	void transformVector2(SomeVectorType& psiDest,
-	                      const SomeVectorType& psiSrc,
+	void transformVector2(VectorWithOffsetType& psiDest,
+	                      const VectorWithOffsetType& psiSrc,
 	                      const LeftRightSuperType& lrs,
 	                      const VectorSizeType& nk) const
 	{
@@ -401,9 +396,8 @@ private:
 		}
 	}
 
-	template<typename SomeVectorType>
-	void transformVector2FromInfinite(SomeVectorType& psiDest,
-	                                  const SomeVectorType& psiSrc,
+	void transformVector2FromInfinite(VectorWithOffsetType& psiDest,
+	                                  const VectorWithOffsetType& psiSrc,
 	                                  const LeftRightSuperType& lrs,
 	                                  const VectorSizeType& nk) const
 	{
@@ -578,9 +572,8 @@ private:
 		}
 	}
 
-	template<typename SomeVectorType>
-	void transformVector1bounce(SomeVectorType& psiDest,
-	                            const SomeVectorType& psiSrc,
+	void transformVector1bounce(VectorWithOffsetType& psiDest,
+	                            const VectorWithOffsetType& psiSrc,
 	                            const LeftRightSuperType& lrs,
 	                            const VectorSizeType& nk) const
 	{
@@ -593,9 +586,8 @@ private:
 		}
 	}
 
-	template<typename SomeVectorType>
-	void tVector1bounce(SomeVectorType& psiDest,
-	                    const SomeVectorType& psiSrc,
+	void tVector1bounce(VectorWithOffsetType& psiDest,
+	                    const VectorWithOffsetType& psiSrc,
 	                    const LeftRightSuperType& lrs,
 	                    SizeType i0,
 	                    const VectorSizeType& nk,
@@ -634,9 +626,8 @@ private:
 		}
 	}
 
-	template<typename SomeVectorType>
-	void transformVector2bounce(SomeVectorType& psiDest,
-	                            const SomeVectorType& psiSrc,
+	void transformVector2bounce(VectorWithOffsetType& psiDest,
+	                            const VectorWithOffsetType& psiSrc,
 	                            const LeftRightSuperType& lrs,
 	                            const VectorSizeType& nk) const
 	{
@@ -649,9 +640,8 @@ private:
 		}
 	}
 
-	template<typename SomeVectorType>
-	void tVector2bounce(SomeVectorType& psiDest,
-	                    const SomeVectorType& psiSrc,
+	void tVector2bounce(VectorWithOffsetType& psiDest,
+	                    const VectorWithOffsetType& psiSrc,
 	                    const LeftRightSuperType& lrs,
 	                    SizeType i0,
 	                    const VectorSizeType& nk,
@@ -709,7 +699,7 @@ private:
 	const DmrgWaveStructType& dmrgWaveStruct_;
 	const WftOptions& wftOptions_;
 	PsimagLite::ProgressIndicator progress_;
-}; // class WaveFunctionTransfLocal
+}; // class WaveFunctionTransfLocals
 } // namespace Dmrg
 
 /*@}*/

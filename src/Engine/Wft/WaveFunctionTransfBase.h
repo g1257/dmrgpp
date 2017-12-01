@@ -92,30 +92,35 @@ public:
 		typedef typename DmrgWaveStructType::SparseElementType ComplexOrRealType;
 		typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
-		enum AccelEnum {ACCEL_NONE, ACCEL_TEMP, ACCEL_PATCHES};
+		enum AccelEnum {ACCEL_NONE, ACCEL_TEMP, ACCEL_PATCHES, ACCEL_BLOCKS};
 
 		WftOptions(ProgramGlobals::DirectionEnum dir1,
-		           bool t,
-		           bool inPatches,
-		           bool withTemp,
-		           bool k,
+		           PsimagLite::String options,
 		           bool f,
 		           SizeType c,
 		           RealType d)
 		    : dir(dir1),
-		      twoSiteDmrg(t),
+		      twoSiteDmrg(options.find("twositedmrg") != PsimagLite::String::npos),
 		      accel(ACCEL_NONE),
-		      kronLoadBalance(k),
+		      kronLoadBalance(options.find("KronLoadBalance") != PsimagLite::String::npos),
 		      firstCall(f),
 		      counter(c),
 		      denseSparseThreshold(d)
 		{
-			if (inPatches && withTemp)
-				err("WFTOptions: Cannot accel with both patches and temporary\n");
-			if (!twoSiteDmrg && withTemp)
-				err("WFTOptions: accel with temporary only for twoSiteDmrg for now\n");
-			if (inPatches) accel = ACCEL_PATCHES;
-			if (withTemp)  accel = ACCEL_TEMP;
+			if (options.find("wftInPatches")!=PsimagLite::String::npos) {
+				accelMustBeNone(0);
+				accel = ACCEL_PATCHES;
+			}
+
+			if (options.find("wftWithTemp")!=PsimagLite::String::npos) {
+				accelMustBeNone(1);
+				accel = ACCEL_TEMP;
+			}
+
+			if (options.find("wftInBlocks")!=PsimagLite::String::npos) {
+				accelMustBeNone(1);
+				accel = ACCEL_BLOCKS;
+			}
 		}
 
 		ProgramGlobals::DirectionEnum dir;
@@ -125,6 +130,20 @@ public:
 		bool firstCall;
 		SizeType counter;
 		RealType denseSparseThreshold;
+
+	private:
+
+		void accelMustBeNone(SizeType x) const
+		{
+			if (accel != ACCEL_NONE) {
+				err("WFTOptions: More than one accel mode specified. Specify none or 1\n");
+				return;
+			}
+
+			if (x == 0 || twoSiteDmrg) return;
+
+			err("WFTOptions: onesitedmrg only with ACCEL_NONE or ACCEL_PATCHES\n");
+		}
 	};
 
 	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
