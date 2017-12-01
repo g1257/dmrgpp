@@ -90,6 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Parallelizer.h"
 #include "MatrixVectorKron/InitKronWft.h"
 #include "MatrixVectorKron/KronMatrix.h"
+#include "WftAccelBlocks.h"
 
 namespace Dmrg {
 
@@ -118,6 +119,7 @@ public:
 	LeftRightSuperType> ParallelWftType;
 	typedef InitKronWft<LeftRightSuperType, WftOptions, DmrgWaveStructType> InitKronType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
+	typedef WftAccelBlocks<BaseType> WftAccelBlocksType;
 
 	WaveFunctionTransfLocal(const DmrgWaveStructType& dmrgWaveStruct,
 	                        const WftOptions& wftOptions)
@@ -245,8 +247,8 @@ private:
 		if (wftOptions_.accel == WftOptions::ACCEL_TEMP)
 			return transformTemp1FromInfinite(psiDest, psiSrc, lrs, i0, nk);
 
-//		if (wftOptions_.accel == WftOptions::ACCEL_BLOCKS)
-//			return transformBlocks1FromInfinite(psiDest, psiSrc, lrs, i0, nk);
+		if (wftOptions_.accel == WftOptions::ACCEL_BLOCKS)
+			return wftAccelBlocks_.environFromInfinite(psiDest, psiSrc, lrs, i0, nk);
 
 		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
 		SizeType nip = lrs.super().permutationInverse().size()/
@@ -426,13 +428,22 @@ private:
 				if (srcI > 0) psiDest.extract(dest,i0);
 				if (wftOptions_.accel == WftOptions::ACCEL_TEMP)
 					transformTemp2FromInfinite(dest,
-					                                  start,
-					                                  psiV,
-					                                  offset,
-					                                  lrs,
-					                                  nk,
-					                                  ws,
-					                                  we);
+					                           start,
+					                           psiV,
+					                           offset,
+					                           lrs,
+					                           nk,
+					                           ws,
+					                           we);
+				else if (wftOptions_.accel == WftOptions::ACCEL_BLOCKS)
+					wftAccelBlocks_.systemFromInfinite(dest,
+					                                   start,
+					                                   psiV,
+					                                   offset,
+					                                   lrs,
+					                                   nk,
+					                                   ws,
+					                                   we);
 				else
 					tVector2FromInfinite(dest,start,psiV,offset,lrs,nk,wsT,we);
 				psiDest.setDataInSector(dest,i0);
@@ -699,6 +710,7 @@ private:
 	const DmrgWaveStructType& dmrgWaveStruct_;
 	const WftOptions& wftOptions_;
 	PsimagLite::ProgressIndicator progress_;
+	WftAccelBlocksType wftAccelBlocks_;
 }; // class WaveFunctionTransfLocals
 } // namespace Dmrg
 

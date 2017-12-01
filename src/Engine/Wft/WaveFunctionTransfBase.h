@@ -83,10 +83,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename DmrgWaveStructType,typename VectorWithOffsetType>
+template<typename DmrgWaveStructType_,typename VectorWithOffsetType_>
 class WaveFunctionTransfBase {
 
 public:
+
+	typedef DmrgWaveStructType_ DmrgWaveStructType;
+	typedef VectorWithOffsetType_ VectorWithOffsetType;
 
 	struct WftOptions {
 		typedef typename DmrgWaveStructType::SparseElementType ComplexOrRealType;
