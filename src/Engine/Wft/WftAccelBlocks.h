@@ -95,16 +95,71 @@ public:
 		environCopyOut(psiDest, i0, result, lrs, volumeOfNk);
 	}
 
-	void systemFromInfinite(VectorType& dest,
-	                        SizeType destOffset,
-	                        const VectorType& psiV,
-	                        SizeType offset,
+	void systemFromInfinite(VectorWithOffsetType& psiDest,
+	                        SizeType i0,
+	                        const VectorWithOffsetType& psiSrc,
+	                        SizeType i0src,
 	                        const LeftRightSuperType& lrs,
-	                        const VectorSizeType& nk,
-	                        const SparseMatrixType& wsT,
-	                        const SparseMatrixType& we) const
+	                        const VectorSizeType& nk) const
 	{
-		err("systemFromInfinite not yet implemented\n");
+		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
+		MatrixType ws;
+		dmrgWaveStruct_.ws.toDense(ws);
+
+		MatrixType we;
+		dmrgWaveStruct_.we.toDense(we);
+
+		SizeType isSize = ws.cols();
+		SizeType ipSize = ws.rows();
+		SizeType jprSize = we.cols();
+		SizeType jenSize = we.rows();
+
+		VectorMatrixType psi(volumeOfNk);
+		for (SizeType kp = 0; kp < volumeOfNk; ++kp) {
+			psi[kp].resize(ipSize, jprSize);
+			psi[kp].setTo(0.0);
+		}
+
+		systemPreparePsi(psi, psiSrc, i0src, volumeOfNk);
+
+		MatrixType tmp(ipSize, jenSize);
+		VectorMatrixType result(volumeOfNk);
+
+		for (SizeType jpl = 0; jpl < volumeOfNk; ++jpl) {
+			result[jpl].resize(isSize, jenSize);
+			result[jpl].setTo(0.0);
+			tmp.setTo(0.0);
+
+			psimag::BLAS::GEMM('N',
+			                   'C',
+			                   ipSize,
+			                   jenSize,
+			                   jprSize,
+			                   1.0,
+			                   &((psi[jpl])(0,0)),
+			                   ipSize,
+			                   &(we(0,0)),
+			                   jprSize,
+			                   0.0,
+			                   &(tmp(0,0)),
+			                   ipSize);
+
+			psimag::BLAS::GEMM('C',
+			                   'N',
+			                   isSize,
+			                   jenSize,
+			                   ipSize,
+			                   1.0,
+			                   &(ws(0,0)),
+			                   isSize,
+			                   &(tmp(0,0)),
+			                   ipSize,
+			                   0.0,
+			                   &((result[jpl])(0,0)),
+			                   isSize);
+		}
+
+		systemCopyOut(psiDest, i0, result, lrs, volumeOfNk);
 	}
 
 private:
@@ -151,6 +206,51 @@ private:
 			SizeType jp = 0;
 			pack2.unpack(kp,jp,(SizeType)lrs.right().permutation(beta));
 			psiDest.fastAccess(i0, x) += result[kp](ip, jp);
+		}
+	}
+
+	void systemPreparePsi(VectorMatrixType& psi,
+	                      const VectorWithOffsetType& psiSrc,
+	                      SizeType i0src,
+	                      SizeType volumeOfNk) const
+	{
+		SizeType total = psiSrc.effectiveSize(i0src);
+		SizeType offset = psiSrc.offset(i0src);
+		PackIndicesType packSuper(dmrgWaveStruct_.lrs.left().size());
+		PackIndicesType packRight(volumeOfNk);
+
+		for (SizeType y = 0; y < total; ++y) {
+			SizeType ip = 0;
+			SizeType jp = 0;
+			packSuper.unpack(ip, jp, dmrgWaveStruct_.lrs.super().permutation(y + offset));
+			SizeType jpl = 0;
+			SizeType jpr = 0;
+			packRight.unpack(jpl, jpr, dmrgWaveStruct_.lrs.right().permutation(jp));
+			psi[jpl](ip, jpr) = psiSrc.fastAccess(i0src, y);
+		}
+	}
+
+	void systemCopyOut(VectorWithOffsetType& psiDest,
+	                   SizeType i0,
+	                   const VectorMatrixType& result,
+	                   const LeftRightSuperType& lrs,
+	                   SizeType volumeOfNk) const
+	{
+		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
+		SizeType nalpha = lrs.left().permutationInverse().size();
+		PackIndicesType pack1(nalpha);
+		PackIndicesType pack2(nip);
+		SizeType total = psiDest.effectiveSize(i0);
+		SizeType start = psiDest.offset(i0);
+
+		for (SizeType x = 0; x < total; ++x) {
+			SizeType isn = 0;
+			SizeType jen = 0;
+			pack1.unpack(isn, jen, lrs.super().permutation(x+start));
+			SizeType is = 0;
+			SizeType jpl = 0;
+			pack2.unpack(is, jpl, lrs.left().permutation(isn));
+			psiDest.fastAccess(i0, x) += result[jpl](is, jen);
 		}
 	}
 
