@@ -431,7 +431,7 @@ private:
 				SizeType final = psiDest.effectiveSize(i0)+start;
 				VectorType dest(final-start,0.0);
 				if (srcI > 0) psiDest.extract(dest,i0);
-				if (wftOptions_.accel == WftOptions::ACCEL_TEMP)
+				if (wftOptions_.accel == WftOptions::ACCEL_TEMP) {
 					transformTemp2FromInfinite(dest,
 					                           start,
 					                           psiV,
@@ -440,15 +440,18 @@ private:
 					                           nk,
 					                           ws,
 					                           we);
-				else if (wftOptions_.accel == WftOptions::ACCEL_BLOCKS)
+				} else if (wftOptions_.accel == WftOptions::ACCEL_BLOCKS) {
 					wftAccelBlocks_.systemFromInfinite(psiDest,
 					                                   i0,
 					                                   psiSrc,
 					                                   srcII,
 					                                   lrs,
 					                                   nk);
-				else
+					continue;
+				} else {
 					tVector2FromInfinite(dest,start,psiV,offset,lrs,nk,wsT,we);
+				}
+
 				psiDest.setDataInSector(dest,i0);
 			}
 		}

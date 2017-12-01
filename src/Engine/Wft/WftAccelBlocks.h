@@ -36,8 +36,16 @@ public:
 	                         const VectorSizeType& nk) const
 	{
 		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
-		SizeType jp2size = dmrgWaveStruct_.lrs.super().size();
-		SizeType i2psize = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
+		MatrixType ws;
+		dmrgWaveStruct_.ws.toDense(ws);
+
+		MatrixType we;
+		dmrgWaveStruct_.we.toDense(we);
+
+		SizeType ipsize = ws.rows();
+		SizeType i2psize = ws.cols();
+		SizeType jp2size = we.rows();
+		SizeType jpsize = we.cols();
 
 		VectorMatrixType psi(volumeOfNk);
 		for (SizeType kp = 0; kp < volumeOfNk; ++kp) {
@@ -46,21 +54,13 @@ public:
 		}
 
 		environPreparePsi(psi, psiSrc, i0src, volumeOfNk);
-		MatrixType ws;
-		dmrgWaveStruct_.ws.toDense(ws);
 
-		MatrixType we;
-		dmrgWaveStruct_.we.toDense(we);
-
-		SizeType jpsize = we.cols();
-		SizeType ipsize = ws.rows();
 		MatrixType tmp(i2psize, jpsize);
 		VectorMatrixType result(volumeOfNk);
 
 		for (SizeType kp = 0; kp < volumeOfNk; ++kp) {
 			result[kp].resize(ipsize, jpsize);
 			result[kp].setTo(0.0);
-			SizeType ip = result[kp].rows();
 			tmp.setTo(0.0);
 
 			psimag::BLAS::GEMM('N',
@@ -84,7 +84,7 @@ public:
 			                   i2psize,
 			                   1.0,
 			                   &(ws(0,0)),
-			                   ip,
+			                   ipsize,
 			                   &(tmp(0,0)),
 			                   i2psize,
 			                   0.0,
@@ -139,7 +139,7 @@ public:
 			                   &((psi[jpl])(0,0)),
 			                   ipSize,
 			                   &(we(0,0)),
-			                   jprSize,
+			                   jenSize,
 			                   0.0,
 			                   &(tmp(0,0)),
 			                   ipSize);
@@ -151,7 +151,7 @@ public:
 			                   ipSize,
 			                   1.0,
 			                   &(ws(0,0)),
-			                   isSize,
+			                   ipSize,
 			                   &(tmp(0,0)),
 			                   ipSize,
 			                   0.0,
@@ -201,10 +201,10 @@ private:
 		for (SizeType x = 0; x < total; ++x) {
 			SizeType ip = 0;
 			SizeType beta = 0;
-			pack1.unpack(ip,beta,(SizeType)lrs.super().permutation(x+start));
+			pack1.unpack(ip, beta, lrs.super().permutation(x+start));
 			SizeType kp = 0;
 			SizeType jp = 0;
-			pack2.unpack(kp,jp,(SizeType)lrs.right().permutation(beta));
+			pack2.unpack(kp, jp, lrs.right().permutation(beta));
 			psiDest.fastAccess(i0, x) += result[kp](ip, jp);
 		}
 	}
