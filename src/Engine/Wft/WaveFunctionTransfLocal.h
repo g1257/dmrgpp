@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef WFT_LOCAL_HEADER_H
 #define WFT_LOCAL_HEADER_H
 
-#include "PackIndices.h"
 #include "ProgressIndicator.h"
 #include "VectorWithOffsets.h" // so that PsimagLite::norm() becomes visible here
 #include "VectorWithOffset.h" // so that PsimagLite::norm() becomes visible here
@@ -98,9 +97,10 @@ template<typename DmrgWaveStructType,typename VectorWithOffsetType>
 class WaveFunctionTransfLocal : public
         WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType> {
 
-	typedef PsimagLite::PackIndices PackIndicesType;
+
 	typedef WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType> BaseType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
+	typedef typename BaseType::PackIndicesType PackIndicesType;
 
 public:
 
@@ -125,6 +125,7 @@ public:
 	                        const WftOptions& wftOptions)
 	    : dmrgWaveStruct_(dmrgWaveStruct),
 	      wftOptions_(wftOptions),
+	      wftAccelBlocks_(dmrgWaveStruct, wftOptions),
 	      progress_("WaveFunctionTransfLocal")
 	{
 		PsimagLite::OstringStream msg;
@@ -234,21 +235,23 @@ private:
 	{
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
-			tVector1FromInfinite(psiDest,psiSrc,lrs,i0,nk);
+			SizeType iOld = findIold(psiSrc, psiDest, i0);
+			tVector1FromInfinite(psiDest, i0, psiSrc, iOld, lrs, nk);
 		}
 	}
 
 	void tVector1FromInfinite(VectorWithOffsetType& psiDest,
-	                          const VectorWithOffsetType& psiSrc,
-	                          const LeftRightSuperType& lrs,
 	                          SizeType i0,
+	                          const VectorWithOffsetType& psiSrc,
+	                          SizeType iOld,
+	                          const LeftRightSuperType& lrs,
 	                          const VectorSizeType& nk) const
 	{
 		if (wftOptions_.accel == WftOptions::ACCEL_TEMP)
 			return transformTemp1FromInfinite(psiDest, psiSrc, lrs, i0, nk);
 
 		if (wftOptions_.accel == WftOptions::ACCEL_BLOCKS)
-			return wftAccelBlocks_.environFromInfinite(psiDest, psiSrc, lrs, i0, nk);
+			return wftAccelBlocks_.environFromInfinite(psiDest, i0, psiSrc, iOld, lrs, nk);
 
 		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
 		SizeType nip = lrs.super().permutationInverse().size()/
@@ -709,8 +712,8 @@ private:
 
 	const DmrgWaveStructType& dmrgWaveStruct_;
 	const WftOptions& wftOptions_;
-	PsimagLite::ProgressIndicator progress_;
 	WftAccelBlocksType wftAccelBlocks_;
+	PsimagLite::ProgressIndicator progress_;
 }; // class WaveFunctionTransfLocals
 } // namespace Dmrg
 

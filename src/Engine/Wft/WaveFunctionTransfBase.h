@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef WFT_BASE_H
 #define WFT_BASE_H
 #include "ProgramGlobals.h"
+#include "PackIndices.h"
 
 namespace Dmrg {
 
@@ -90,6 +91,7 @@ public:
 
 	typedef DmrgWaveStructType_ DmrgWaveStructType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
+	typedef PsimagLite::PackIndices PackIndicesType;
 
 	struct WftOptions {
 		typedef typename DmrgWaveStructType::SparseElementType ComplexOrRealType;
