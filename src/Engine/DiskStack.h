@@ -119,7 +119,7 @@ public:
 
 	}
 
-	~DiskStack()
+	void finalize()
 	{
 		int x = 0;
 		ioOut_.open(fileOut_,std::ios_base::app);

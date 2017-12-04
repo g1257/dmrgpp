@@ -178,8 +178,11 @@ public:
 
 	~Checkpoint()
 	{
-		if (parameters_.options.find("noSaveStacks") == PsimagLite::String::npos)
+		if (parameters_.options.find("noSaveStacks") == PsimagLite::String::npos) {
 			loadStacksMemoryToDisk();
+			systemDisk_.finalize();
+			envDisk_.finalize();
+		}
 	}
 
 	// Not related to stacks
@@ -415,7 +418,8 @@ private:
 	bool enabled_;
 	MemoryStackType systemStack_;
 	MemoryStackType envStack_;
-	DiskStackType systemDisk_,envDisk_;
+	DiskStackType systemDisk_;
+	DiskStackType envDisk_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType energyFromFile_;
 }; // class Checkpoint
