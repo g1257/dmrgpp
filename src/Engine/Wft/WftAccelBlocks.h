@@ -35,6 +35,9 @@ public:
 	                         const LeftRightSuperType& lrs,
 	                         const VectorSizeType& nk) const
 	{
+		if (lrs.left().block().size() < 2)
+			err("Bounce!?\n");
+
 		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
 		MatrixType ws;
 		dmrgWaveStruct_.ws.toDense(ws);
@@ -102,6 +105,9 @@ public:
 	                        const LeftRightSuperType& lrs,
 	                        const VectorSizeType& nk) const
 	{
+		if (lrs.right().block().size() < 2)
+			err("Bounce!?\n");
+
 		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
 		MatrixType ws;
 		dmrgWaveStruct_.ws.toDense(ws);

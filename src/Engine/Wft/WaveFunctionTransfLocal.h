@@ -156,7 +156,8 @@ public:
 				transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
 			else if (wftOptions_.counter == 0)
 				transformVector2bounce(psiDest,psiSrc,lrs,nk);
-			else transformVector2(psiDest,psiSrc,lrs,nk);
+			else
+				transformVector2(psiDest,psiSrc,lrs,nk);
 
 			return;
 		}
@@ -250,7 +251,8 @@ private:
 		if (wftOptions_.accel == WftOptions::ACCEL_TEMP)
 			return transformTemp1FromInfinite(psiDest, psiSrc, lrs, i0, nk);
 
-		if (wftOptions_.accel == WftOptions::ACCEL_BLOCKS)
+		if (wftOptions_.accel == WftOptions::ACCEL_BLOCKS &&
+		        lrs.left().block().size() > 1)
 			return wftAccelBlocks_.environFromInfinite(psiDest, i0, psiSrc, iOld, lrs, nk);
 
 		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
@@ -411,7 +413,8 @@ private:
 		msg<<" Source sectors "<<psiSrc.sectors();
 		progress_.printline(msg,std::cout);
 		assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
-
+		bool inBlocks = (lrs.right().block().size() > 1 &&
+		                 wftOptions_.accel == WftOptions::ACCEL_BLOCKS);
 		SparseMatrixType we;
 		dmrgWaveStruct_.we.toSparse(we);
 		SparseMatrixType ws;
@@ -440,7 +443,7 @@ private:
 					                           nk,
 					                           ws,
 					                           we);
-				} else if (wftOptions_.accel == WftOptions::ACCEL_BLOCKS) {
+				} else if (inBlocks) {
 					wftAccelBlocks_.systemFromInfinite(psiDest,
 					                                   i0,
 					                                   psiSrc,
