@@ -134,30 +134,10 @@ public:
 	BlockDiagonalMatrix(PsimagLite::IoSimple::In& io,
 	                    PsimagLite::String label,
 	                    SizeType counter,
-	                    bool minimizeRead)
+	                    bool)
 	{
 		io.advance("#NAME="+label,counter);
-		loadInternal(io, minimizeRead);
-	}
-
-	template<typename IoInputType>
-	void load(IoInputType& io,
-	          PsimagLite::String name,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
-	{
-		if (name != "") io.advance(name);
-		io.readline(isSquare_, "#IsSquare=");
-		io.read(offsetsRows_, "#OffsetRows");
-		io.read(offsetsCols_, "#OffsetCols");
-		int total = 0;
-		io.readline(total, "#Total=");
-		if (total < 0)
-			err("While reading BlockDiagonalMatrix with label " + name + "\n");
-		if (total == 0) return;
-		data_.resize(total);
-		for (SizeType i = 0; i < data_.size(); ++i)
-			io.readMatrix(data_[i], "#" + ttos(i));
+		io>>(*this);
 	}
 
 	template<typename IoOutputType>
@@ -166,23 +146,8 @@ public:
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
 	{
-		save(io, "#NAME=");
-	}
-
-	template<typename IoOutputType>
-	void save(IoOutputType& io,
-	          PsimagLite::String name,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
-	{
-		io.printline(name);
-		PsimagLite::String str = (isSquare_) ? "1" : "0";
-		io.printline("#IsSquare=" + str);
-		io.printVector(offsetsRows_, "#OffsetRows");
-		io.printVector(offsetsCols_, "#OffsetCols");
-		io.printline("#Total=" + ttos(data_.size()));
-		for (SizeType i = 0; i < data_.size(); ++i)
-			io.printMatrix(data_[i], "#" + ttos(i));
+		io<<"#NAME=\n";
+		io<<(*this);
 	}
 
 	void setTo(ComplexOrRealType value)
@@ -445,22 +410,6 @@ private:
 	{
 		if (isSquare_) return;
 		err("BlockDiagonalMatrix::" + msg + " must be square\n");
-	}
-
-	void loadInternal(PsimagLite::IoSimple::In& io, bool)
-	{
-		SizeType isSquare = 0;
-		io.readline(isSquare, "#IsSquare=");
-		if (isSquare > 1)
-			err("BlockDiagonalMatrix:: loadInternal isSquare\n");
-		isSquare_ = (isSquare > 0);
-		io.read(offsetsRows_, "#OffsetRows");
-		io.read(offsetsCols_, "#OffsetCols");
-		io.readline(isSquare, "#Total=");
-		data_.resize(isSquare);
-		for (SizeType i = 0; i < data_.size(); ++i) {
-			io.readMatrix(data_[i], "#" + ttos(i));
-		}
 	}
 
 	bool isSquare_;

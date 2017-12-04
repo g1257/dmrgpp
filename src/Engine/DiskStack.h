@@ -127,7 +127,7 @@ public:
 	void finalize()
 	{
 		ioOut_.open(fileOut_,std::ios_base::app);
-		finalizeInternal(ioOut_);
+		finalizeInternal(ioOut_, "#STACKMETASTACK\n");
 		ioOut_.close();
 	}
 
@@ -170,7 +170,10 @@ public:
 
 	void copyToIo(PsimagLite::IoSimple::Out& io, PsimagLite::String label)
 	{
-		finalizeInternal(io);
+		io<<label<<"\n";
+		io<<stack_.size()<<"\n";
+		std::ifstream  src2(fileIn_.c_str(), std::ios::binary);
+		io<<src2.rdbuf();
 	}
 
 	friend void copyDiskToDisk(DiskStack& dest, const DiskStack& src)
@@ -203,12 +206,16 @@ private:
 		dst2 << src2.rdbuf();
 	}
 
-	void finalizeInternal(PsimagLite::IoSimple::Out& io) const
+	void finalizeInternal(PsimagLite::IoSimple::Out& io,
+	                      PsimagLite::String label) const
 	{
 		int x = 0;
 		io.printline("#STACKMETARANK="+ttos(x));
 		io.printline("#STACKMETATOTAL="+ttos(total_));
-		io.print("#STACKMETASTACK\n", stack_);
+		SizeType last = label.length();
+		assert(last > 0);
+		if (last > 0 && label[last - 1] != '\n') label += "\n";
+		io.print(label, stack_);
 	}
 
 	PsimagLite::String fileIn_;
