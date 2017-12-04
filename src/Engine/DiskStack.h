@@ -110,9 +110,7 @@ public:
 
 		int x = 0;
 		ioIn_.readline(x,"#STACKMETARANK=",IoInType::LAST_INSTANCE);
-
-		ioIn_.advance("#STACKMETASTACK");
-		ioIn_>>stack_;
+		ioIn_.read(stack_, "#STACKMETASTACK");
 		ioIn_.close();
 		PsimagLite::OstringStream msg;
 		msg<<"Attempt to read from file " + fileIn_ + " succeeded";
@@ -128,12 +126,8 @@ public:
 
 	void finalize()
 	{
-		int x = 0;
 		ioOut_.open(fileOut_,std::ios_base::app);
-		ioOut_.printline("#STACKMETARANK="+ttos(x));
-		ioOut_.printline("#STACKMETATOTAL="+ttos(total_));
-		ioOut_<<"#STACKMETASTACK\n";
-		ioOut_<<stack_;
+		finalizeInternal(ioOut_);
 		ioOut_.close();
 	}
 
@@ -161,6 +155,7 @@ public:
 		ioIn_.open(fileIn_);
 		if (dt_) delete dt_;
 		dt_ = 0;
+		assert(stack_.size() > 0);
 		dt_ = new DataType(ioIn_,"",stack_.top(),isObserveCode_);
 		ioIn_.close();
 		return *dt_;
@@ -175,7 +170,7 @@ public:
 
 	void copyToIo(PsimagLite::IoSimple::Out& io, PsimagLite::String label)
 	{
-		err("copyToIo: not implemented yet, sorry\n");
+		finalizeInternal(io);
 	}
 
 	friend void copyDiskToDisk(DiskStack& dest, const DiskStack& src)
@@ -206,6 +201,14 @@ private:
 		std::ofstream  dst2(dest.c_str(), std::ios::binary);
 
 		dst2 << src2.rdbuf();
+	}
+
+	void finalizeInternal(PsimagLite::IoSimple::Out& io) const
+	{
+		int x = 0;
+		io.printline("#STACKMETARANK="+ttos(x));
+		io.printline("#STACKMETATOTAL="+ttos(total_));
+		io.print("#STACKMETASTACK\n", stack_);
 	}
 
 	PsimagLite::String fileIn_;

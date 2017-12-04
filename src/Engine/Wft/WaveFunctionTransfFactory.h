@@ -361,6 +361,11 @@ public:
 
 	const WftOptionsType options() const { return wftOptions_; }
 
+	void appendFileList(VectorStringType& files, PsimagLite::String rootName) const
+	{
+		files.push_back(utils::pathPrepend(WFT_STRING,rootName));
+	}
+
 	void save(PsimagLite::String fileOut) const
 	{
 		if (!isEnabled_) return;
@@ -378,11 +383,6 @@ public:
 		dmrgWaveStruct_.save(io);
 		wsStack_.save(io, "wsStack\n");
 		weStack_.save(io, "weStack\n");
-	}
-
-	void appendFileList(VectorStringType& files, PsimagLite::String rootName) const
-	{
-		files.push_back(utils::pathPrepend(WFT_STRING,rootName));
 	}
 
 private:
