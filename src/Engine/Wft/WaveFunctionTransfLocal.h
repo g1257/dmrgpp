@@ -720,7 +720,7 @@ private:
 	const WftOptions& wftOptions_;
 	WftAccelBlocksType wftAccelBlocks_;
 	PsimagLite::ProgressIndicator progress_;
-}; // class WaveFunctionTransfLocals
+}; // class WaveFunctionTransfLocal
 } // namespace Dmrg
 
 /*@}*/

@@ -334,6 +334,7 @@ public:
 			\item [diskstacks] Save and load stacks used for shrinking to and from disk,
 							   instead of to and from memory
 			\item [wftWithTemp] Accelerate the WFT by using a temporary
+			\item [wftInBlocks] Accelerate the WFT by using dense blocks
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,const PsimagLite::String& val,SizeType)
@@ -391,6 +392,7 @@ public:
 		registerOpts.push_back("KronNoLoadBalance");
 		registerOpts.push_back("setAffinities");
 		registerOpts.push_back("wftInPatches");
+		registerOpts.push_back("wftInBlocks");
 		registerOpts.push_back("diskstacks");
 		registerOpts.push_back("wftWithTemp");
 
