@@ -59,7 +59,7 @@ public:
 		return (m_) ? stack_.pop() : diskStack_->pop();
 	}
 
-	DataType top()
+	const DataType& top() const
 	{
 		check();
 		return (m_) ? stack_.top() : diskStack_->top();
@@ -72,6 +72,26 @@ public:
 	}
 
 	bool inDisk() const { return !m_; }
+
+	void save(PsimagLite::IoSimple::Out& io, PsimagLite::String label) const
+	{
+		if (m_) {
+			io.print(label, stack_);
+			return;
+		}
+
+		diskStack_->copyToIo(io, label);
+	}
+
+	void load(PsimagLite::IoSimple::In& io, PsimagLite::String label)
+	{
+		if (m_) {
+			io.read(stack_, label);
+			return;
+		}
+
+		diskStack_->copyFromIo(io, label);
+	}
 
 private:
 

@@ -88,7 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DmrgWaveStruct.h"
 #include "IoSimple.h"
 #include "Random48.h"
-#include "DiskStack.h"
+#include "BaseStack.h"
 
 namespace Dmrg {
 template<typename LeftRightSuperType,typename VectorWithOffsetType_>
@@ -117,6 +117,7 @@ public:
 	typedef WaveFunctionTransfSu2<DmrgWaveStructType,VectorWithOffsetType>
 	WaveFunctionTransfSu2Type;
 	typedef typename WaveFunctionTransfBaseType::WftOptions WftOptionsType;
+	typedef BaseStack<BlockDiagonalMatrixType> WftStackType;
 
 	template<typename SomeParametersType>
 	WaveFunctionTransfFactory(SomeParametersType& params)
@@ -130,6 +131,8 @@ public:
 	      filenameIn_(params.checkpoint.filename),
 	      filenameOut_(params.filename),
 	      WFT_STRING(ProgramGlobals::WFT_STRING),
+	      wsStack_(params.options.find("wftStacksInDisk")!=PsimagLite::String::npos),
+	      weStack_(params.options.find("wftStacksInDisk")!=PsimagLite::String::npos),
 	      wftImpl_(0),
 	      rng_(3433117),
 	      noLoad_(false),
@@ -373,8 +376,8 @@ public:
 		io.printline("dmrgWaveStruct");
 
 		dmrgWaveStruct_.save(io);
-		io.print("wsStack\n", wsStack_);
-		io.print("weStack\n", weStack_);
+		wsStack_.save(io, "wsStack\n");
+		weStack_.save(io, "weStack\n");
 	}
 
 	void appendFileList(VectorStringType& files, PsimagLite::String rootName) const
@@ -396,8 +399,8 @@ private:
 		wftOptions_.firstCall = false;
 		io.advance("dmrgWaveStruct");
 		dmrgWaveStruct_.load(io);
-		io.read(wsStack_,"wsStack");
-		io.read(weStack_,"weStack");
+		wsStack_.load(io,"wsStack");
+		weStack_.load(io,"weStack");
 	}
 
 	void myRandomT(std::complex<RealType> &value) const
@@ -528,8 +531,8 @@ private:
 	PsimagLite::String filenameOut_;
 	const PsimagLite::String WFT_STRING;
 	DmrgWaveStructType dmrgWaveStruct_;
-	typename PsimagLite::Stack<BlockDiagonalMatrixType>::Type wsStack_;
-	typename PsimagLite::Stack<BlockDiagonalMatrixType>::Type weStack_;
+	WftStackType wsStack_;
+	WftStackType weStack_;
 	WaveFunctionTransfBaseType* wftImpl_;
 	PsimagLite::Random48<RealType> rng_;
 	bool noLoad_;

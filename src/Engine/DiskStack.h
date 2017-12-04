@@ -95,7 +95,8 @@ public:
 	      fileOut_(file2),
 	      isObserveCode_(isObserveCode),
 	      total_(0),
-	      progress_("DiskStack")
+	      progress_("DiskStack"),
+	      dt_(0)
 	{
 		unlink(fileOut_.c_str());
 		if (!hasLoad) return;
@@ -117,6 +118,12 @@ public:
 		msg<<"Attempt to read from file " + fileIn_ + " succeeded";
 		progress_.printline(msg,std::cout);
 
+	}
+
+	~DiskStack()
+	{
+		delete dt_;
+		dt_ = 0;
 	}
 
 	void finalize()
@@ -149,15 +156,27 @@ public:
 		stack_.pop();
 	}
 
-	DataType top()
+	const DataType& top() const
 	{
 		ioIn_.open(fileIn_);
-		DataType dt(ioIn_,"",stack_.top(),isObserveCode_);
+		if (dt_) delete dt_;
+		dt_ = 0;
+		dt_ = new DataType(ioIn_,"",stack_.top(),isObserveCode_);
 		ioIn_.close();
-		return dt;
+		return *dt_;
 	}
 
 	SizeType size() const { return stack_.size(); }
+
+	void copyFromIo(PsimagLite::IoSimple::In& io, PsimagLite::String label)
+	{
+		err("copyFromIo: not implemented yet, sorry\n");
+	}
+
+	void copyToIo(PsimagLite::IoSimple::Out& io, PsimagLite::String label)
+	{
+		err("copyToIo: not implemented yet, sorry\n");
+	}
 
 	friend void copyDiskToDisk(DiskStack& dest, const DiskStack& src)
 	{
@@ -194,9 +213,10 @@ private:
 	bool isObserveCode_;
 	int total_;
 	PsimagLite::ProgressIndicator progress_;
-	IoInType ioIn_;
+	mutable IoInType ioIn_;
 	IoOutType ioOut_;
 	PsimagLite::Stack<int>::Type stack_;
+	mutable DataType* dt_;
 }; // class DiskStack
 
 } // namespace DMrg
