@@ -172,8 +172,15 @@ public:
 	{
 		io<<label<<"\n";
 		io<<stack_.size()<<"\n";
-		std::ifstream  src2(fileIn_.c_str(), std::ios::binary);
-		io<<src2.rdbuf();
+		ioIn_.open(fileIn_);
+		while (!stack_.empty()) {
+			DataType dt(ioIn_,"",stack_.top(),isObserveCode_);
+			io<<dt;
+			ioIn_.rewind();
+			stack_.pop();
+		}
+
+		ioIn_.close();
 	}
 
 	friend void copyDiskToDisk(DiskStack& dest, const DiskStack& src)

@@ -308,7 +308,13 @@ public:
 	friend std::istream& operator>>(std::istream& is, BlockDiagonalMatrix& m)
 	{
 		int x = -1;
-		is>>x;
+		PsimagLite::String temp;
+		is>>temp;
+		if (temp == "#NAME=")
+			is>>x;
+		else
+			x = atoi(temp.c_str());
+
 		if (x != 0 && x != 1)
 			err("std::istream& operator>> BlockDiagonalMatrix(1)\n");
 		m.isSquare_ = (x == 1);
