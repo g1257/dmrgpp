@@ -164,6 +164,7 @@ public:
 
 	void copyFromIo(PsimagLite::IoSimple::In& io, PsimagLite::String label)
 	{
+		std::cerr<<"WARNING: EXPECT A CRASH SOON!\n";
 		std::ofstream fout(fileIn_.c_str());
 		io.rewind();
 		PsimagLite::String temp;

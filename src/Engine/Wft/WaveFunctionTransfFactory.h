@@ -144,6 +144,9 @@ public:
 		        params.options.find("restart")!=PsimagLite::String::npos);
 
 		if (b) {
+			if (wsStack_.inDisk())
+				err("The options restart and wftStacksInDisk cannot be combined yet\n");
+
 			if (params.options.find("noloadwft")!=PsimagLite::String::npos)
 				noLoad_=true;
 			else

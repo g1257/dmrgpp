@@ -335,9 +335,13 @@ public:
 							   instead of to and from memory
 			\item [wftWithTemp] Accelerate the WFT by using a temporary
 			\item [wftInBlocks] Accelerate the WFT by using dense blocks
+			\item [wftStacksInDisk] Save and load stacks for WFT to and from disk,
+							   instead of to and from memory. Cannot be used with restart yet.
 		\end{itemize}
 		*/
-	void check(const PsimagLite::String& label,const PsimagLite::String& val,SizeType)
+	void check(const PsimagLite::String& label,
+	           const PsimagLite::String& val,
+	           SizeType)
 	{
 		if (label!="SolverOptions") return;
 		PsimagLite::Vector<PsimagLite::String>::Type registerOpts;
@@ -395,9 +399,10 @@ public:
 		registerOpts.push_back("wftInBlocks");
 		registerOpts.push_back("diskstacks");
 		registerOpts.push_back("wftWithTemp");
+		registerOpts.push_back("wftStacksInDisk");
 
-		PsimagLite::Options::Writeable
-		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);
+		PsimagLite::Options::Writeable optWriteable(registerOpts,
+		                                            PsimagLite::Options::Writeable::PERMISSIVE);
 		optsReadable_ = new  OptionsReadableType(optWriteable,val);
 	}
 
