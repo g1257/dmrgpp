@@ -115,7 +115,6 @@ public:
 		PsimagLite::OstringStream msg;
 		msg<<"Attempt to read from file " + fileIn_ + " succeeded";
 		progress_.printline(msg,std::cout);
-
 	}
 
 	~DiskStack()
@@ -165,16 +164,39 @@ public:
 
 	void copyFromIo(PsimagLite::IoSimple::In& io, PsimagLite::String label)
 	{
-		err("copyFromIo: not implemented yet, sorry\n");
+		std::ofstream fout(fileIn_.c_str());
+		io.rewind();
+		PsimagLite::String temp;
+		while (!io.eof()) {
+			io>>temp;
+			if (temp == label)
+				break;
+		}
+
+		fout<<label<<"\n";
+		while (!io.eof()) {
+			io>>temp;
+			fout<<temp<<"\n";
+		}
+
+		fout.close();
+		std::cerr<<"copyFromIo: wrote to "<<fileIn_<<"\n";
+
+		io.rewind();
+		io.read(stack_, "META" + label);
+		invertStack(stack_);
 	}
 
 	void copyToIo(PsimagLite::IoSimple::Out& io, PsimagLite::String label)
 	{
+		io.print("META" + label + "\n", stack_);
+
 		io<<label<<"\n";
 		io<<stack_.size()<<"\n";
 		ioIn_.open(fileIn_);
 		while (!stack_.empty()) {
 			DataType dt(ioIn_,"",stack_.top(),isObserveCode_);
+			io<<"#NAME=\n";
 			io<<dt;
 			ioIn_.rewind();
 			stack_.pop();
@@ -223,6 +245,18 @@ private:
 		assert(last > 0);
 		if (last > 0 && label[last - 1] != '\n') label += "\n";
 		io.print(label, stack_);
+	}
+
+	void invertStack(PsimagLite::Stack<int>::Type& st)
+	{
+		PsimagLite::Stack<int>::Type tmp;
+
+		while (!st.empty()) {
+			tmp.push(st.top());
+			st.pop();
+		}
+
+		st = tmp;
 	}
 
 	PsimagLite::String fileIn_;
