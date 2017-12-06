@@ -113,7 +113,8 @@ public:
 	               model.params().denseSparseThreshold),
 	      model_(model),
 	      modelHelper_(modelHelper),
-	      vstart_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1)
+	      vstart_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1),
+	      offsetForPatches_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size())
 	{
 		addHlAndHr();
 		convertXcYcArrays();
@@ -123,6 +124,7 @@ public:
 		assert(nsize > 0);
 		yin_.resize(nsize, 0.0);
 		xout_.resize(nsize, 0.0);
+		BaseType::computeOffsets(offsetForPatches_, BaseType::NEW);
 	}
 
 	bool isWft() const {return false; }
@@ -203,6 +205,11 @@ public:
 
 	VectorType& xout() { return xout_; }
 
+	const VectorSizeType& offsetForPatches(typename BaseType::WhatBasisEnum) const
+	{
+		return  offsetForPatches_;
+	}
+
 private:
 
 	void addHlAndHr()
@@ -262,6 +269,7 @@ private:
 	VectorSizeType vstart_;
 	VectorType yin_;
 	VectorType xout_;
+	VectorSizeType offsetForPatches_;
 };
 } // namespace Dmrg
 

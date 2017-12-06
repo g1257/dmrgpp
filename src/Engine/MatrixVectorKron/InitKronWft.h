@@ -119,7 +119,9 @@ public:
 	               wftOptions.denseSparseThreshold),
 	      wftOptions_(wftOptions),
 	      vstartNew_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1),
-	      vstartOld_(BaseType::patch(BaseType::OLD, GenIjPatchType::LEFT).size() + 1)
+	      vstartOld_(BaseType::patch(BaseType::OLD, GenIjPatchType::LEFT).size() + 1),
+	      offsetForPatchesNew_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size()),
+	      offsetForPatchesOld_(BaseType::patch(BaseType::OLD, GenIjPatchType::LEFT).size())
 	{
 		BaseType::setUpVstart(vstartNew_, BaseType::NEW);
 		assert(vstartNew_.size() > 0);
@@ -164,6 +166,9 @@ public:
 
 			BaseType::addOneConnection(ws, we, link);
 		}
+
+		BaseType::computeOffsets(offsetForPatchesNew_, BaseType::NEW);
+		BaseType::computeOffsets(offsetForPatchesOld_, BaseType::OLD);
 	}
 
 	bool isWft() const {return true; }
@@ -194,6 +199,11 @@ public:
 	const VectorType& yin() const { return yin_; }
 
 	VectorType& xout() { return xout_; }
+
+	const VectorSizeType& offsetForPatches(typename BaseType::WhatBasisEnum what) const
+	{
+		return (what == BaseType::NEW) ? offsetForPatchesNew_ : offsetForPatchesOld_;
+	}
 
 private:
 
@@ -261,6 +271,8 @@ private:
 	VectorSizeType vstartOld_;
 	VectorType yin_;
 	VectorType xout_;
+	VectorSizeType offsetForPatchesNew_;
+	VectorSizeType offsetForPatchesOld_;
 };
 } // namespace Dmrg
 

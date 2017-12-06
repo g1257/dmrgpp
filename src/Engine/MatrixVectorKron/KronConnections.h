@@ -109,19 +109,8 @@ public:
 	KronConnections(InitKronType& initKron)
 	    : initKron_(initKron),
 	      x_(initKron.xout()),
-	      y_(initKron.yin()),
-	      offsetForPatchesNew_(initKron_.patch(InitKronType::NEW, GenIjPatchType::LEFT).size()),
-	      offsetForPatchesOld_(0)
-	{
-		computeOffsets(offsetForPatchesNew_, InitKronType::NEW);
-		if (initKron.isWft()) {
-			 offsetForPatchesOld_ = new VectorSizeType(
-			             initKron_.patch(InitKronType::OLD, GenIjPatchType::LEFT).size());
-			 computeOffsets(*offsetForPatchesOld_, InitKronType::OLD);
-		} else {
-			offsetForPatchesOld_ = &offsetForPatchesNew_;
-		}
-	}
+	      y_(initKron.yin())
+	{}
 
 	SizeType tasks() const
 	{
@@ -132,12 +121,12 @@ public:
 	{
 		SizeType nC = initKron_.connections();
 		SizeType total = tasksInternal(InitKronType::OLD);
-		assert(outPatch < offsetForPatchesNew_.size());
-		SizeType offsetX = offsetForPatchesNew_[outPatch];
+		assert(outPatch < initKron_.offsetForPatches(InitKronType::NEW).size());
+		SizeType offsetX = initKron_.offsetForPatches(InitKronType::NEW)[outPatch];
 		assert(offsetX < x_.size());
 		for (SizeType inPatch=0;inPatch<total;++inPatch) {
-			assert(inPatch < offsetForPatchesOld_->size());
-			SizeType offsetY = (*offsetForPatchesOld_)[inPatch];
+			assert(inPatch < initKron_.offsetForPatches(InitKronType::OLD).size());
+			SizeType offsetY = initKron_.offsetForPatches(InitKronType::OLD)[inPatch];
 			assert(offsetY < y_.size());
 			for (SizeType ic=0;ic<nC;++ic) {
 				const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
@@ -154,33 +143,6 @@ public:
 	void sync() {}
 
 private:
-
-	void computeOffsets(VectorSizeType& offsetForPatches,
-	                    typename InitKronType::WhatBasisEnum what)
-	{
-		assert(initKron_.patch(what, GenIjPatchType::LEFT).size() ==
-		       initKron_.patch(what, GenIjPatchType::RIGHT).size());
-
-		SizeType npatch = initKron_.patch(what, GenIjPatchType::LEFT).size();
-		SizeType sum = 0;
-		const BasisType& left = initKron_.lrs(what).left();
-		const BasisType& right = initKron_.lrs(what).right();
-
-		for( SizeType ipatch=0; ipatch < npatch; ipatch++) {
-			offsetForPatches[ipatch] = sum;
-
-			SizeType igroup = initKron_.patch(what, GenIjPatchType::LEFT)[ipatch];
-			SizeType jgroup = initKron_.patch(what, GenIjPatchType::RIGHT)[ipatch];
-
-			assert(left.partition(igroup+1) >= left.partition(igroup));
-			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
-
-			assert(right.partition(jgroup+1) >= right.partition(jgroup));
-			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
-
-			sum +=  sizeLeft*sizeRight;
-		}
-	}
 
 	// In production mode this function should be empty
 	void checks(const MatrixDenseOrSparseType& Amat,
@@ -226,8 +188,6 @@ private:
 	const InitKronType& initKron_;
 	VectorType& x_;
 	const VectorType& y_;
-	VectorSizeType offsetForPatchesNew_;
-	VectorSizeType* offsetForPatchesOld_;
 }; //class KronConnections
 
 } // namespace PsimagLite

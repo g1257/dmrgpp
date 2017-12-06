@@ -196,6 +196,33 @@ public:
 		return weightsOfPatches_;
 	}
 
+
+	void computeOffsets(VectorSizeType& offsetForPatches,
+	                    WhatBasisEnum what)
+	{
+		assert(patch(what, GenIjPatchType::LEFT).size() ==
+		       patch(what, GenIjPatchType::RIGHT).size());
+
+		SizeType npatch = patch(what, GenIjPatchType::LEFT).size();
+		SizeType sum = 0;
+		const BasisType& left = lrs(what).left();
+		const BasisType& right = lrs(what).right();
+
+		for( SizeType ipatch=0; ipatch < npatch; ipatch++) {
+			offsetForPatches[ipatch] = sum;
+
+			SizeType igroup = patch(what, GenIjPatchType::LEFT)[ipatch];
+			SizeType jgroup = patch(what, GenIjPatchType::RIGHT)[ipatch];
+
+			assert(left.partition(igroup+1) >= left.partition(igroup));
+			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
+			assert(right.partition(jgroup+1) >= right.partition(jgroup));
+			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
+
+			sum +=  sizeLeft*sizeRight;
+		}
+	}
+
 protected:
 
 	void addOneConnection(const SparseMatrixType& A,

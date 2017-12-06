@@ -85,6 +85,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Parallelizer.h"
 #include "PsimagLite.h"
 #include "ProgressIndicator.h"
+#ifdef PLUGIN_SC
+#include "DmrgppPluginSC.h"
+#endif
 
 namespace Dmrg {
 
@@ -118,6 +121,9 @@ public:
 
 	void matrixVectorProduct(VectorType& vout, const VectorType& vin) const
 	{
+//		if (usePluginSc_)
+//			return matrixVectorPluginSc(vout, vin);
+
 		initKron_.copyIn(vout, vin);
 
 		KronConnectionsType kc(initKron_);
