@@ -426,10 +426,8 @@ private:
 			SizeType srcII = psiSrc.sector(srcI);
 			psiSrc.extract(psiV,srcII);
 			SizeType offset = psiSrc.offset(srcII);
-			SizeType qn = psiSrc.qn(srcII);
 			for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 				SizeType i0 = psiDest.sector(ii);
-				if (qn != psiDest.qn(i0)) continue;
 				SizeType start = psiDest.offset(i0);
 				SizeType final = psiDest.effectiveSize(i0)+start;
 				VectorType dest(final-start,0.0);
