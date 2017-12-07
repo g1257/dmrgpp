@@ -2,6 +2,7 @@
 #define WFTACCELBLOCKS_H
 #include "Matrix.h"
 #include "BLAS.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -20,6 +21,126 @@ class WftAccelBlocks {
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
 	typedef typename WaveFunctionTransfBaseType::PackIndicesType PackIndicesType;
+
+	class ParallelWftInBlocks {
+
+	public:
+
+		ParallelWftInBlocks(VectorMatrixType& result,
+		                    const VectorMatrixType& psi,
+		                    const MatrixType& ws,
+		                    const MatrixType& we,
+		                    SizeType volumeOfNk,
+		                    SizeType sysOrEnv)
+		    : result_(result),
+		      psi_(psi),
+		      ws_(ws),
+		      we_(we),
+		      volumeOfNk_(volumeOfNk),
+		      sysOrEnv_(sysOrEnv)
+		{}
+
+		SizeType tasks() const { return volumeOfNk_; }
+
+		void doTask(SizeType kp, SizeType)
+		{
+			if (sysOrEnv_ == ProgramGlobals::SYSTEM)
+				return doTaskSystem(kp);
+
+			doTaskEnviron(kp);
+		}
+
+	private:
+
+		void doTaskEnviron(SizeType kp)
+		{
+			SizeType ipsize = ws_.rows();
+			SizeType i2psize = ws_.cols();
+			SizeType jp2size = we_.rows();
+			SizeType jpsize = we_.cols();
+			MatrixType tmp(i2psize, jpsize);
+
+			result_[kp].resize(ipsize, jpsize);
+			result_[kp].setTo(0.0);
+			tmp.setTo(0.0);
+
+			psimag::BLAS::GEMM('N',
+			                   'N',
+			                   i2psize,
+			                   jpsize,
+			                   jp2size,
+			                   1.0,
+			                   &((psi_[kp])(0,0)),
+			                   i2psize,
+			                   &(we_(0,0)),
+			                   jp2size,
+			                   0.0,
+			                   &(tmp(0,0)),
+			                   i2psize);
+
+			psimag::BLAS::GEMM('N',
+			                   'N',
+			                   ipsize,
+			                   jpsize,
+			                   i2psize,
+			                   1.0,
+			                   &(ws_(0,0)),
+			                   ipsize,
+			                   &(tmp(0,0)),
+			                   i2psize,
+			                   0.0,
+			                   &((result_[kp])(0,0)),
+			                   ipsize);
+		}
+
+		void doTaskSystem(SizeType kp)
+		{
+			SizeType ipSize = ws_.rows();
+			SizeType isSize = ws_.cols();
+			SizeType jenSize = we_.rows();
+			SizeType jprSize = we_.cols();
+			MatrixType tmp(ipSize, jenSize);
+
+			result_[kp].resize(isSize, jenSize);
+			result_[kp].setTo(0.0);
+			tmp.setTo(0.0);
+
+			psimag::BLAS::GEMM('N',
+			                   'C',
+			                   ipSize,
+			                   jenSize,
+			                   jprSize,
+			                   1.0,
+			                   &((psi_[kp])(0,0)),
+			                   ipSize,
+			                   &(we_(0,0)),
+			                   jenSize,
+			                   0.0,
+			                   &(tmp(0,0)),
+			                   ipSize);
+
+			psimag::BLAS::GEMM('C',
+			                   'N',
+			                   isSize,
+			                   jenSize,
+			                   ipSize,
+			                   1.0,
+			                   &(ws_(0,0)),
+			                   ipSize,
+			                   &(tmp(0,0)),
+			                   ipSize,
+			                   0.0,
+			                   &((result_[kp])(0,0)),
+			                   isSize);
+		}
+
+		VectorMatrixType& result_;
+		const VectorMatrixType& psi_;
+		const MatrixType& ws_;
+		const MatrixType& we_;
+		SizeType volumeOfNk_;
+		SizeType sysOrEnv_;
+	};
 
 public:
 
@@ -45,10 +166,8 @@ public:
 		MatrixType we;
 		dmrgWaveStruct_.we.toDense(we);
 
-		SizeType ipsize = ws.rows();
 		SizeType i2psize = ws.cols();
 		SizeType jp2size = we.rows();
-		SizeType jpsize = we.cols();
 
 		VectorMatrixType psi(volumeOfNk);
 		for (SizeType kp = 0; kp < volumeOfNk; ++kp) {
@@ -58,42 +177,16 @@ public:
 
 		environPreparePsi(psi, psiSrc, i0src, volumeOfNk);
 
-		MatrixType tmp(i2psize, jpsize);
+
 		VectorMatrixType result(volumeOfNk);
 
-		for (SizeType kp = 0; kp < volumeOfNk; ++kp) {
-			result[kp].resize(ipsize, jpsize);
-			result[kp].setTo(0.0);
-			tmp.setTo(0.0);
+		SizeType threads = std::min(volumeOfNk, PsimagLite::Concurrency::npthreads);
+		typedef PsimagLite::Parallelizer<ParallelWftInBlocks> ParallelizerType;
+		ParallelizerType threadedWft(threads, PsimagLite::MPI::COMM_WORLD);
 
-			psimag::BLAS::GEMM('N',
-			                   'N',
-			                   i2psize,
-			                   jpsize,
-			                   jp2size,
-			                   1.0,
-			                   &((psi[kp])(0,0)),
-			                   i2psize,
-			                   &(we(0,0)),
-			                   jp2size,
-			                   0.0,
-			                   &(tmp(0,0)),
-			                   i2psize);
+		ParallelWftInBlocks helperWft(result, psi, ws, we, volumeOfNk, ProgramGlobals::ENVIRON);
 
-			psimag::BLAS::GEMM('N',
-			                   'N',
-			                   ipsize,
-			                   jpsize,
-			                   i2psize,
-			                   1.0,
-			                   &(ws(0,0)),
-			                   ipsize,
-			                   &(tmp(0,0)),
-			                   i2psize,
-			                   0.0,
-			                   &((result[kp])(0,0)),
-			                   ipsize);
-		}
+		threadedWft.loopCreate(helperWft);
 
 		environCopyOut(psiDest, i0, result, lrs, volumeOfNk);
 	}
@@ -115,10 +208,8 @@ public:
 		MatrixType we;
 		dmrgWaveStruct_.we.toDense(we);
 
-		SizeType isSize = ws.cols();
 		SizeType ipSize = ws.rows();
 		SizeType jprSize = we.cols();
-		SizeType jenSize = we.rows();
 
 		VectorMatrixType psi(volumeOfNk);
 		for (SizeType kp = 0; kp < volumeOfNk; ++kp) {
@@ -128,42 +219,15 @@ public:
 
 		systemPreparePsi(psi, psiSrc, i0src, volumeOfNk);
 
-		MatrixType tmp(ipSize, jenSize);
 		VectorMatrixType result(volumeOfNk);
 
-		for (SizeType jpl = 0; jpl < volumeOfNk; ++jpl) {
-			result[jpl].resize(isSize, jenSize);
-			result[jpl].setTo(0.0);
-			tmp.setTo(0.0);
+		SizeType threads = std::min(volumeOfNk, PsimagLite::Concurrency::npthreads);
+		typedef PsimagLite::Parallelizer<ParallelWftInBlocks> ParallelizerType;
+		ParallelizerType threadedWft(threads, PsimagLite::MPI::COMM_WORLD);
 
-			psimag::BLAS::GEMM('N',
-			                   'C',
-			                   ipSize,
-			                   jenSize,
-			                   jprSize,
-			                   1.0,
-			                   &((psi[jpl])(0,0)),
-			                   ipSize,
-			                   &(we(0,0)),
-			                   jenSize,
-			                   0.0,
-			                   &(tmp(0,0)),
-			                   ipSize);
+		ParallelWftInBlocks helperWft(result, psi, ws, we, volumeOfNk, ProgramGlobals::SYSTEM);
 
-			psimag::BLAS::GEMM('C',
-			                   'N',
-			                   isSize,
-			                   jenSize,
-			                   ipSize,
-			                   1.0,
-			                   &(ws(0,0)),
-			                   ipSize,
-			                   &(tmp(0,0)),
-			                   ipSize,
-			                   0.0,
-			                   &((result[jpl])(0,0)),
-			                   isSize);
-		}
+		threadedWft.loopCreate(helperWft);
 
 		systemCopyOut(psiDest, i0, result, lrs, volumeOfNk);
 	}
