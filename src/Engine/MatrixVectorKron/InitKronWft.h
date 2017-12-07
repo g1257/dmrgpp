@@ -200,9 +200,18 @@ public:
 
 	VectorType& xout() { return xout_; }
 
-	const VectorSizeType& offsetForPatches(typename BaseType::WhatBasisEnum what) const
+	SizeType offsetForPatches(typename BaseType::WhatBasisEnum what) const
 	{
-		return (what == BaseType::NEW) ? offsetForPatchesNew_ : offsetForPatchesOld_;
+		return (what == BaseType::NEW) ? offsetForPatchesNew_.size() :
+		                                 offsetForPatchesOld_.size();
+	}
+
+	const SizeType& offsetForPatches(typename BaseType::WhatBasisEnum what,
+	                                       SizeType ind) const
+	{
+		assert(ind < offsetForPatches(what));
+		return (what == BaseType::NEW) ? offsetForPatchesNew_[ind] :
+		                                 offsetForPatchesOld_[ind];
 	}
 
 private:

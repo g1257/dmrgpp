@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PsimagLite.h"
 #include "ProgressIndicator.h"
 #ifdef PLUGIN_SC
-#include "DmrgppPluginSC.h"
+#include "BatchedGemm.h"
 #endif
 
 namespace Dmrg {
@@ -104,12 +104,14 @@ class KronMatrix {
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename GenIjPatchType::BasisType BasisType;
+	typedef BatchedGemm<InitKronType> BatchedGemmType;
 
 public:
 
 	KronMatrix(InitKronType& initKron, PsimagLite::String name)
 	    : initKron_(initKron),
-	      progress_("KronMatrix")
+	      progress_("KronMatrix"),
+	      batchedGemm_(initKron)
 	{
 		PsimagLite::String str((initKron.loadBalance()) ? "true" : "false");
 		PsimagLite::OstringStream msg;
@@ -121,8 +123,8 @@ public:
 
 	void matrixVectorProduct(VectorType& vout, const VectorType& vin) const
 	{
-//		if (usePluginSc_)
-//			return matrixVectorPluginSc(vout, vin);
+		if (batchedGemm_.enabled())
+			return batchedGemm_.matrixVector(vout, vin);
 
 		initKron_.copyIn(vout, vin);
 
@@ -150,6 +152,7 @@ private:
 
 	InitKronType& initKron_;
 	PsimagLite::ProgressIndicator progress_;
+	BatchedGemmType batchedGemm_;
 }; //class KronMatrix
 
 } // namespace PsimagLite

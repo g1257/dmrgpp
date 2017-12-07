@@ -104,7 +104,6 @@ public:
 	typedef typename MatrixDenseOrSparseType::VectorType VectorType;
 	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
 	typedef typename InitKronType::RealType RealType;
-	typedef typename GenIjPatchType::BasisType BasisType;
 
 	KronConnections(InitKronType& initKron)
 	    : initKron_(initKron),
@@ -114,19 +113,19 @@ public:
 
 	SizeType tasks() const
 	{
-		return tasksInternal(InitKronType::NEW);
+		return initKron_.numberOfPatches(InitKronType::NEW);
 	}
 
 	void doTask(SizeType outPatch, SizeType)
 	{
 		SizeType nC = initKron_.connections();
-		SizeType total = tasksInternal(InitKronType::OLD);
-		assert(outPatch < initKron_.offsetForPatches(InitKronType::NEW).size());
-		SizeType offsetX = initKron_.offsetForPatches(InitKronType::NEW)[outPatch];
+		SizeType total = initKron_.numberOfPatches(InitKronType::OLD);
+		assert(outPatch < initKron_.offsetForPatches(InitKronType::NEW));
+		SizeType offsetX = initKron_.offsetForPatches(InitKronType::NEW, outPatch);
 		assert(offsetX < x_.size());
 		for (SizeType inPatch=0;inPatch<total;++inPatch) {
-			assert(inPatch < initKron_.offsetForPatches(InitKronType::OLD).size());
-			SizeType offsetY = initKron_.offsetForPatches(InitKronType::OLD)[inPatch];
+			assert(inPatch < initKron_.offsetForPatches(InitKronType::OLD));
+			SizeType offsetY = initKron_.offsetForPatches(InitKronType::OLD, inPatch);
 			assert(offsetY < y_.size());
 			for (SizeType ic=0;ic<nC;++ic) {
 				const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
@@ -176,13 +175,6 @@ private:
 		SizeType jgroup = initKron_.patch(what, GenIjPatchType::RIGHT)[ipatch];
 		return initKron_.lrs(what).right().partition(jgroup+1) -
 		        initKron_.lrs(what).right().partition(jgroup);
-	}
-
-	SizeType tasksInternal(typename InitKronType::WhatBasisEnum what) const
-	{
-		assert(initKron_.patch(what, GenIjPatchType::LEFT).size() ==
-		       initKron_.patch(what, GenIjPatchType::RIGHT).size());
-		return initKron_.patch(what, GenIjPatchType::LEFT).size();
 	}
 
 	const InitKronType& initKron_;

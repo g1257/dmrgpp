@@ -223,6 +223,12 @@ public:
 		}
 	}
 
+	SizeType numberOfPatches(WhatBasisEnum what) const
+	{
+		assert(patch(what, GenIjPatchType::LEFT).size() ==
+		       patch(what, GenIjPatchType::RIGHT).size());
+		return patch(what, GenIjPatchType::LEFT).size();
+	}
 protected:
 
 	void addOneConnection(const SparseMatrixType& A,
