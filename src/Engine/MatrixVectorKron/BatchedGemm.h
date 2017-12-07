@@ -8,13 +8,15 @@ typedef PsimagLite::Vector<BatchedDgemmIntegerType>::Type VectorBatchedDgemmInte
 typedef double BatchedDgemmFpType;
 typedef std::complex<BatchedDgemmFpType> BatchedDgemmComplexType;
 
+/*** BEGIN Functions symbols that need to be provided by PLUGIN_SC */
+
 extern "C" void setup_vbatch(BatchedDgemmIntegerType,
                              BatchedDgemmIntegerType,
                              BatchedDgemmIntegerType*,
                              BatchedDgemmIntegerType*,
                              BatchedDgemmIntegerType*,
-                             BatchedDgemmFpType*,
-                             BatchedDgemmFpType*,
+                             BatchedDgemmFpType**,
+                             BatchedDgemmFpType**,
                              BatchedDgemmFpType**,
                              BatchedDgemmFpType**);
 
@@ -33,8 +35,8 @@ extern "C" void setup_vbatchCmplx(BatchedDgemmIntegerType,
                                   BatchedDgemmIntegerType*,
                                   BatchedDgemmIntegerType*,
                                   BatchedDgemmIntegerType*,
-                                  BatchedDgemmComplexType*,
-                                  BatchedDgemmComplexType*,
+                                  BatchedDgemmComplexType**,
+                                  BatchedDgemmComplexType**,
                                   BatchedDgemmComplexType**,
                                   BatchedDgemmComplexType**);
 
@@ -47,7 +49,14 @@ extern "C" void apply_Htarget_vbatchCmplx(BatchedDgemmIntegerType,
                                           BatchedDgemmComplexType*,
                                           BatchedDgemmComplexType*,
                                           BatchedDgemmComplexType*);
-/******/
+
+extern "C" void unsetup_vbatch(BatchedDgemmFpType**,
+                               BatchedDgemmFpType**);
+
+extern "C" void unsetup_vbatchCmplx(BatchedDgemmComplexType**,
+                                    BatchedDgemmComplexType**);
+
+/*** END Functions symbols that need to be provided by PLUGIN_SC */
 
 template<typename T>
 void applyHtargetVbatch(BatchedDgemmIntegerType,
@@ -102,8 +111,8 @@ void setupVbatch(BatchedDgemmIntegerType,
                  const VectorBatchedDgemmIntegerType&,
                  const VectorBatchedDgemmIntegerType&,
                  const VectorBatchedDgemmIntegerType&,
-                 T*,
-                 T*,
+                 T**,
+                 T**,
                  T**,
                  T**);
 
@@ -113,8 +122,8 @@ void setupVbatch<BatchedDgemmComplexType>(BatchedDgemmIntegerType a,
                                           const VectorBatchedDgemmIntegerType& c,
                                           const VectorBatchedDgemmIntegerType& d,
                                           const VectorBatchedDgemmIntegerType& e,
-                                          BatchedDgemmComplexType* f,
-                                          BatchedDgemmComplexType* g,
+                                          BatchedDgemmComplexType** f,
+                                          BatchedDgemmComplexType** g,
                                           BatchedDgemmComplexType** h,
                                           BatchedDgemmComplexType** i)
 {
@@ -130,8 +139,8 @@ void setupVbatch<BatchedDgemmFpType>(BatchedDgemmIntegerType a,
                                      const VectorBatchedDgemmIntegerType& c,
                                      const VectorBatchedDgemmIntegerType& d,
                                      const VectorBatchedDgemmIntegerType& e,
-                                     BatchedDgemmFpType* f,
-                                     BatchedDgemmFpType* g,
+                                     BatchedDgemmFpType** f,
+                                     BatchedDgemmFpType** g,
                                      BatchedDgemmFpType** h,
                                      BatchedDgemmFpType** i)
 {
@@ -140,6 +149,24 @@ void setupVbatch<BatchedDgemmFpType>(BatchedDgemmIntegerType a,
 	BatchedDgemmIntegerType* eptr = const_cast<BatchedDgemmIntegerType*>(&(e[0]));
 	setup_vbatch(a, b, cptr, dptr, eptr, f, g, h, i);
 }
+
+template<typename T>
+void unsetupVbatch(T**, T**);
+
+template<>
+void unsetupVbatch<BatchedDgemmFpType>(BatchedDgemmFpType** f,
+                                       BatchedDgemmFpType** g)
+{
+	unsetup_vbatch(f, g);
+}
+
+template<>
+void unsetupVbatch<BatchedDgemmComplexType>(BatchedDgemmComplexType** f,
+                                       BatchedDgemmComplexType** g)
+{
+	unsetup_vbatchCmplx(f, g);
+}
+
 /******/
 
 namespace Dmrg {
@@ -197,8 +224,8 @@ public:
 		            pLeft_,
 		            pRight_,
 		            offsets_,
-		            Abatch_,
-		            Bbatch_,
+		            &Abatch_,
+		            &Bbatch_,
 		            aptr,
 		            bptr);
 
@@ -206,6 +233,11 @@ public:
 		aptr = 0;
 		delete[] bptr;
 		bptr = 0;
+	}
+
+	~BatchedGemm()
+	{
+		unsetupVbatch(&Abatch_, &Bbatch_);
 	}
 
 	bool enabled() const { return true; }
