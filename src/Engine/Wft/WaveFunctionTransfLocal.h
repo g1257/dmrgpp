@@ -177,22 +177,21 @@ private:
 
 		typename ProgramGlobals::DirectionEnum dir1 = ProgramGlobals::EXPAND_ENVIRON;
 
-		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
-			SizeType i0 = psiDest.sector(ii);
-			transformVectorParallel(psiDest,psiSrc,lrs,i0,nk,dir1);
-		}
+		for (SizeType ii=0;ii<psiDest.sectors();ii++)
+			transformVectorParallel(psiDest,psiSrc,lrs,ii,nk,dir1);
 	}
 
 	void transformVectorParallel(VectorWithOffsetType& psiDest,
 	                             const VectorWithOffsetType& psiSrc,
 	                             const LeftRightSuperType& lrs,
-	                             SizeType i0,
+	                             SizeType ii,
 	                             const VectorSizeType& nk,
 	                             typename ProgramGlobals::DirectionEnum dir) const
 	{
 		if (wftOptions_.accel == WftOptions::ACCEL_PATCHES)
-			return transformVectorParallelPatched(psiDest, psiSrc, lrs, i0, nk, dir);
+			return transformVectorParallelPatched(psiDest, psiSrc, lrs, ii, nk, dir);
 
+		SizeType i0 = psiDest.sector(ii);
 		typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
 		ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
 		                             PsimagLite::MPI::COMM_WORLD);
@@ -211,12 +210,13 @@ private:
 	void transformVectorParallelPatched(VectorWithOffsetType& psiDest,
 	                                    const VectorWithOffsetType& psiSrc,
 	                                    const LeftRightSuperType& lrs,
-	                                    SizeType i0,
+	                                    SizeType ii,
 	                                    const VectorSizeType& nk,
 	                                    typename ProgramGlobals::DirectionEnum dir) const
 	{
-		SizeType qn = psiDest.qn(i0);
-		SizeType iOld = findIold(psiSrc, psiDest, i0);
+		SizeType qn = psiDest.qn(ii);
+		SizeType iOld = findIold(psiSrc, qn);
+		SizeType i0 = psiDest.sector(ii);
 		InitKronType initKron(lrs, i0, qn, wftOptions_, dmrgWaveStruct_, iOld);
 		KronMatrix<InitKronType> kronMatrix(initKron, "WFT");
 		VectorType psiDestOneSector;
@@ -236,7 +236,8 @@ private:
 	{
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
-			SizeType iOld = findIold(psiSrc, psiDest, i0);
+			SizeType qn = psiDest.qn(ii);
+			SizeType iOld = findIold(psiSrc, qn);
 			tVector1FromInfinite(psiDest, i0, psiSrc, iOld, lrs, nk);
 		}
 	}
@@ -701,14 +702,12 @@ private:
 	}
 
 	SizeType findIold(const VectorWithOffsetType& psiSrc,
-	                  const VectorWithOffsetType& psiDest,
-	                  SizeType iNew) const
+	                  SizeType qn) const
 	{
 		SizeType sectors = psiSrc.sectors();
-		for (SizeType i = 0; i < sectors; ++i) {
-			if (psiSrc.qn(i) == psiDest.qn(iNew))
+		for (SizeType i = 0; i < sectors; ++i)
+			if (psiSrc.qn(i) == qn)
 				return psiSrc.sector(i);
-		}
 
 		err("WaveFunctionTransfLocal::findIold(): Cannot find sector in old vector\n");
 		throw PsimagLite::RuntimeError("UNREACHABLE\n");
