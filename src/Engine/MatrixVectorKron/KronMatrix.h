@@ -87,6 +87,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #ifdef PLUGIN_SC
 #include "BatchedGemm.h"
+#else
+#include "BatchedGemmEmpty.h"
 #endif
 
 namespace Dmrg {

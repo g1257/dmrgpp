@@ -49,3 +49,5 @@ STRIP_COMMAND = true
 #This enables boost support that is needed for Ainur
 #CPPFLAGS += -DUSE_BOOST
 
+#This enables the PLUGIN_SC repository
+#CPPFLAGS += -DPLUGIN_SC
