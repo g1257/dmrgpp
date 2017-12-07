@@ -125,10 +125,13 @@ public:
 
 	void matrixVectorProduct(VectorType& vout, const VectorType& vin) const
 	{
-		if (batchedGemm_.enabled())
-			return batchedGemm_.matrixVector(vout, vin);
-
 		initKron_.copyIn(vout, vin);
+
+		if (batchedGemm_.enabled()) {
+			batchedGemm_.matrixVector(initKron_.xout(), initKron_.yin());
+			initKron_.copyOut(vout);
+			return;
+		}
 
 		KronConnectionsType kc(initKron_);
 
