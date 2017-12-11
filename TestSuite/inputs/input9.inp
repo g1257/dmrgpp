@@ -13,9 +13,10 @@ SolverOptions=TimeStepTargetting
 Version=53725d9b8f22615ccccc782082f4cd6f51a4e374
 OutputFile=data9.txt
 InfiniteLoopKeptStates=200 
-FiniteLoops 10   1 200 0 -8 200 0 7 200 1 
-			7 200 1 -7 200 1 -7 200 1 7 200 1
-		    7 200 1 -7 200 1 -7 200 1 
+FiniteLoops 5
+  7 200 0
+-14 200 0 14 200 0
+-14 200 0 14 200 0
 
 TargetElectronsUp=8
 TargetElectronsDown=8
@@ -39,4 +40,3 @@ FERMIONSIGN=-1
 JMVALUES 0 0
 AngularFactor=1
 
-   

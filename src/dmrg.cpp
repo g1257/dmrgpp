@@ -346,9 +346,8 @@ to the main dmrg driver are the following.
 	InputNgType::Writeable ioWriteable(filename,inputCheck);
 	InputNgType::Readable io(ioWriteable);
 
-	ParametersDmrgSolverType dmrgSolverParams(io, false);
+	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, false);
 
-	dmrgSolverParams.options += sOptions;
 	ArchiveFilesType af(dmrgSolverParams,filename,options.enabled,options.label);
 
 	if (insitu!="") dmrgSolverParams.insitu = insitu;

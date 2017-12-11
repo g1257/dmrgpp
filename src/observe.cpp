@@ -204,8 +204,7 @@ int main(int argc,char **argv)
 	                                   "#InputEndsHere");
 	InputNgType::Readable io(ioWriteable);
 
-	ParametersDmrgSolverType dmrgSolverParams(io,false,true);
-	dmrgSolverParams.options += sOptions;
+	ParametersDmrgSolverType dmrgSolverParams(io,sOptions,false,true);
 
 	bool setAffinities = (dmrgSolverParams.options.find("setAffinities")
                                   != PsimagLite::String::npos);

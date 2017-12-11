@@ -13,9 +13,10 @@ SolverOptions=TimeStepTargetting
 Version=53725d9b8f22615ccccc782082f4cd6f51a4e374
 OutputFile=data8.txt
 InfiniteLoopKeptStates=200
-FiniteLoops 12  4 200 0 -4 200 0 4 200 0 -4 200 0
-		4 200 0 -4 200 0 4 200 0 -4 200 0
-		4 200 0 -4 200 0 4 200 0 -4 200 0
+FiniteLoops 5
+  7 200 0
+-14 200 0 14 200 0
+-14 200 0 14 200 0
 
 TargetElectronsUp=8
 TargetElectronsDown=8

@@ -179,6 +179,7 @@ struct ParametersDmrgSolver {
 
 	//! Read Dmrg parameters from inp file
 	ParametersDmrgSolver(InputValidatorType& io,
+	                     PsimagLite::String sOptions,
 	                     bool earlyExit = false,
 	                     bool isObserveCode = false)
 	    : sitesPerBlock(1),
@@ -193,6 +194,7 @@ struct ParametersDmrgSolver {
 	{
 		io.readline(model,"Model=");
 		io.readline(options,"SolverOptions=");
+		options += sOptions;
 		io.readline(version,"Version=");
 		io.readline(filename,"OutputFile=");
 		if (earlyExit) return;

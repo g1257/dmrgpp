@@ -208,7 +208,7 @@ sub runEnergyAncillaInSituObs
 
 		my @temp = split(/ /, $what->[$i]);
 		(scalar(@temp) == 2) or die "$0: FATAL annotation ".$what->[$i]."\n";
-		my ($beta, $label) = @temp;		
+		my ($beta, $label) = @temp;
 		my $fin;
 		open($fin, "<", $file) or die "$0: Could not open $file : $!\n";
 		my $fout;
@@ -320,7 +320,7 @@ sub runObserveOne
 
 	my $output = "observe$n.txt";
 	unlink($output) if ($ind == 0);
-	my $cmd = "./observe -f ../inputs/input$n.inp $sOptions \"$args\" >> $output";
+	my $cmd = "./observe -f ../inputs/input$n.inp $sOptions $args >> $output";
 	print "|$n|: postTest $cmd\n";
 	return $cmd;
 }

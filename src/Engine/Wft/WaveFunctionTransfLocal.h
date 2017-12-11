@@ -234,11 +234,11 @@ private:
 	                                  const LeftRightSuperType& lrs,
 	                                  const VectorSizeType& nk) const
 	{
-		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
-			SizeType i0 = psiDest.sector(ii);
-			SizeType qn = psiDest.qn(ii);
-			SizeType iOld = findIold(psiSrc, qn);
-			tVector1FromInfinite(psiDest, i0, psiSrc, iOld, lrs, nk);
+		for (SizeType ii=0;ii<psiSrc.sectors();ii++) {
+			SizeType iOld = psiSrc.sector(ii);
+			SizeType qn = psiSrc.qn(ii);
+			SizeType iNew = findIold(psiDest, qn);
+			tVector1FromInfinite(psiDest, iNew, psiSrc, iOld, lrs, nk);
 		}
 	}
 
