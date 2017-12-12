@@ -1,5 +1,18 @@
 https://github.com/g1257/dmrgpp/commits/master
 
+2017-12-12 Version 4.66
+
+* Wft files in Engine/Wft directory
+
+* wftInBlocks: only with twositedmrg, and
+               still doesn't work with NGSTs
+
+* baseStack files are now deleted on normal completion
+
+* Interface to PLUGIN_SC: work in progress
+
+* toolboxdmrg supports -o option
+
 2017-11-30 Version 4.64
 
 * observe compilation fix
