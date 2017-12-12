@@ -27,14 +27,19 @@ extern "C" void setup_vbatch(BatchedDgemmIntegerType, // number of connections (
                              BatchedDgemmFpType**, // Matrices B (INPUT)
                              BatchedDgemmIntegerType*); // Rows of Matrices B (INPUT)
 
-// All INPUTS except for vout, Abatch and Bbatch are for library internal use
-extern "C" void apply_Htarget_vbatch(BatchedDgemmIntegerType, // number of connections
-                                     BatchedDgemmIntegerType, // number of patches
-                                     BatchedDgemmIntegerType*, // permutation left
-                                     BatchedDgemmIntegerType*, // permutation right
-                                     BatchedDgemmIntegerType*, // summed offsets
-                                     BatchedDgemmFpType*, // Abatch for library internal use
-                                     BatchedDgemmFpType*, // Bbatch for library internal use
+// OUTPUT vout is used
+// All other OUTPUTS are for library internal use
+extern "C" void apply_Htarget_vbatch(BatchedDgemmIntegerType, // number of connections (INPUT)
+                                     BatchedDgemmIntegerType, // number of patches (INPUT)
+                                     BatchedDgemmIntegerType*, // left_patch_size[] (INPUT)
+                                     BatchedDgemmIntegerType*, // right_patch_size[] (INPUT)
+                                     BatchedDgemmIntegerType**, // left_patch_start[] (OUTPUT)
+                                     BatchedDgemmIntegerType**, // right_patch_start[] (OUTPUT)
+                                     BatchedDgemmIntegerType**, // xy_patch_start[] (OUTPUT)
+                                     BatchedDgemmFpType**, // Abatch[] (OUTPUT)
+                                     BatchedDgemmIntegerType**, // ld_Abatch Matrices A (OUTPUT)
+                                     BatchedDgemmFpType**, // Bbatch[] (OUTPUT)
+                                     BatchedDgemmIntegerType**, // ld_Bbatch (OUTPUT)
                                      BatchedDgemmFpType*, // vin, already copied in
                                      BatchedDgemmFpType*); // vout, will be copied out (OUTPUT)
 
@@ -57,13 +62,19 @@ extern "C" void setup_vbatchCmplx(BatchedDgemmIntegerType, // number of connecti
                                   BatchedDgemmIntegerType*); // Rows of Matrices B (INPUT)
 
 // SEE apply_Htarget_vbatch above
-extern "C" void apply_Htarget_vbatchCmplx(BatchedDgemmIntegerType,
-                                          BatchedDgemmIntegerType,
-                                          BatchedDgemmIntegerType*,
-                                          BatchedDgemmIntegerType*,
-                                          BatchedDgemmIntegerType*,
-                                          BatchedDgemmComplexType*,
-                                          BatchedDgemmComplexType*,
+// OUTPUT vout is used
+// All other OUTPUTS are for library internal use
+extern "C" void apply_Htarget_vbatchCmplx(BatchedDgemmIntegerType, // number of connections (INPUT)
+                                          BatchedDgemmIntegerType, // number of patches (INPUT)
+                                          BatchedDgemmIntegerType*, // left_patch_size[] (INPUT)
+                                          BatchedDgemmIntegerType*, // right_patch_size[] (INPUT)
+                                          BatchedDgemmIntegerType**, // left_patch_start[] (OUTPUT)
+                                          BatchedDgemmIntegerType**, // right_patch_start[] (OUTPUT)
+                                          BatchedDgemmIntegerType**, // xy_patch_start[] (OUTPUT)
+                                          BatchedDgemmComplexType**, // Abatch[] (OUTPUT)
+                                          BatchedDgemmIntegerType**, // ld_Abatch Matrices A (OUTPUT)
+                                          BatchedDgemmComplexType**, // Bbatch[] (OUTPUT)
+                                          BatchedDgemmIntegerType**, // ld_Bbatch (OUTPUT)
                                           BatchedDgemmComplexType*,
                                           BatchedDgemmComplexType*);
 
@@ -93,9 +104,13 @@ void applyHtargetVbatch(BatchedDgemmIntegerType,
                         BatchedDgemmIntegerType,
                         const VectorBatchedDgemmIntegerType&,
                         const VectorBatchedDgemmIntegerType&,
-                        const VectorBatchedDgemmIntegerType&,
-                        T*,
-                        T*,
+                        BatchedDgemmIntegerType**,
+                        BatchedDgemmIntegerType**,
+                        BatchedDgemmIntegerType**,
+                        T**,
+                        BatchedDgemmIntegerType**,
+                        T**,
+                        BatchedDgemmIntegerType**,
                         T*,
                         T*);
 
@@ -104,16 +119,19 @@ inline void applyHtargetVbatch<BatchedDgemmComplexType>(BatchedDgemmIntegerType 
                                                         BatchedDgemmIntegerType b,
                                                         const VectorBatchedDgemmIntegerType& c,
                                                         const VectorBatchedDgemmIntegerType& d,
-                                                        const VectorBatchedDgemmIntegerType& e,
-                                                        BatchedDgemmComplexType* f,
-                                                        BatchedDgemmComplexType* g,
-                                                        BatchedDgemmComplexType* h,
-                                                        BatchedDgemmComplexType* i)
+                                                        BatchedDgemmIntegerType** e,
+                                                        BatchedDgemmIntegerType** f,
+                                                        BatchedDgemmIntegerType** g,
+                                                        BatchedDgemmComplexType** h,
+                                                        BatchedDgemmIntegerType** i,
+                                                        BatchedDgemmComplexType** j,
+                                                        BatchedDgemmIntegerType** k,
+                                                        BatchedDgemmComplexType* l,
+                                                        BatchedDgemmComplexType* m)
 {
 	BatchedDgemmIntegerType* cptr = const_cast<BatchedDgemmIntegerType*>(&(c[0]));
 	BatchedDgemmIntegerType* dptr = const_cast<BatchedDgemmIntegerType*>(&(d[0]));
-	BatchedDgemmIntegerType* eptr = const_cast<BatchedDgemmIntegerType*>(&(e[0]));
-	apply_Htarget_vbatchCmplx(a, b, cptr, dptr, eptr, f, g, h, i);
+	apply_Htarget_vbatchCmplx(a, b, cptr, dptr, e, f, g, h, i, j, k, l, m);
 }
 
 template<>
@@ -121,16 +139,19 @@ inline void applyHtargetVbatch<BatchedDgemmFpType>(BatchedDgemmIntegerType a,
                                                    BatchedDgemmIntegerType b,
                                                    const VectorBatchedDgemmIntegerType& c,
                                                    const VectorBatchedDgemmIntegerType& d,
-                                                   const VectorBatchedDgemmIntegerType& e,
-                                                   BatchedDgemmFpType* f,
-                                                   BatchedDgemmFpType* g,
-                                                   BatchedDgemmFpType* h,
-                                                   BatchedDgemmFpType* i)
+                                                   BatchedDgemmIntegerType** e,
+                                                   BatchedDgemmIntegerType** f,
+                                                   BatchedDgemmIntegerType** g,
+                                                   BatchedDgemmFpType** h,
+                                                   BatchedDgemmIntegerType** i,
+                                                   BatchedDgemmFpType** j,
+                                                   BatchedDgemmIntegerType** k,
+                                                   BatchedDgemmFpType* l,
+                                                   BatchedDgemmFpType* m)
 {
 	BatchedDgemmIntegerType* cptr = const_cast<BatchedDgemmIntegerType*>(&(c[0]));
 	BatchedDgemmIntegerType* dptr = const_cast<BatchedDgemmIntegerType*>(&(d[0]));
-	BatchedDgemmIntegerType* eptr = const_cast<BatchedDgemmIntegerType*>(&(e[0]));
-	apply_Htarget_vbatch(a, b, cptr, dptr, eptr, f, g, h, i);
+	apply_Htarget_vbatch(a, b, cptr, dptr, e, f, g, h, i, j, k, l, m);
 }
 
 /******/
@@ -284,11 +305,11 @@ public:
 
 					ComplexOrRealType* a = const_cast<ComplexOrRealType*>(&(AmatDense(0,0)));
 					ComplexOrRealType* b = const_cast<ComplexOrRealType*>(&(BmatDense(0,0)));
-					aptr[inPatch + outPatch*total + ic*total*total] = a;
-					bptr[inPatch + outPatch*total + ic*total*total] = b;
+					aptr[outPatch + inPatch*total + ic*total*total] = a;
+					bptr[outPatch + inPatch*total + ic*total*total] = b;
 
-					ldAptr[inPatch + outPatch*total + ic*total*total] = AmatDense.rows();
-					ldBptr[inPatch + outPatch*total + ic*total*total] = BmatDense.rows();
+					ldAptr[outPatch + inPatch*total + ic*total*total] = AmatDense.rows();
+					ldBptr[outPatch + inPatch*total + ic*total*total] = BmatDense.rows();
 				}
 			}
 		}
@@ -337,13 +358,17 @@ public:
 	{
 		ComplexOrRealType* vinptr = const_cast<ComplexOrRealType*>(&(vin[0]));
 		ComplexOrRealType* voutptr = const_cast<ComplexOrRealType*>(&(vout[0]));
-		applyHtargetVbatch(initKron_.connections(),
+		applyHtargetVbatch(initKron_.connections(), // number of connections (INPUT)
 		                   initKron_.patch(InitKronType::NEW, GenIjPatchType::LEFT).size(),
-		                   pLeft_,
-		                   pRight_,
-		                   offsets_,
-		                   Abatch_,
-		                   Bbatch_,
+			               pLeft_,
+			               pRight_,
+			               &leftPatchStart_,
+			               &rightPatchStart_,
+			               &xyPatchStart_,
+			               &Abatch_,
+			               &ldAbatch_,
+			               &Bbatch_,
+			               &ldBbatch_,
 		                   vinptr,
 		                   voutptr);
 	}
@@ -352,11 +377,11 @@ private:
 
 	void convertToVector(VectorBatchedDgemmIntegerType& v, const BasisType& b) const
 	{
-		SizeType total = b.partition();
+		SizeType total = b.partition() - 1;
 		v.clear();
 		v.resize(total + baseForIntegerVectors_, 0);
 		for (SizeType i = 0; i < total; ++i)
-			v[i + baseForIntegerVectors_] = b.partition(i);
+			v[i + baseForIntegerVectors_] = b.partition(i + 1) - b.partition(i);
 	}
 
 	void convertOffsets(VectorBatchedDgemmIntegerType& v) const
@@ -376,13 +401,13 @@ private:
 	VectorBatchedDgemmIntegerType offsets_;
 	VectorBatchedDgemmIntegerType pLeft_;
 	VectorBatchedDgemmIntegerType pRight_;
-	ComplexOrRealType* Abatch_;
-	ComplexOrRealType* Bbatch_;
-	BatchedDgemmIntegerType* leftPatchStart_;
-	BatchedDgemmIntegerType* rightPatchStart_;
-	BatchedDgemmIntegerType* xyPatchStart_;
-	BatchedDgemmIntegerType* ldAbatch_;
-	BatchedDgemmIntegerType* ldBbatch_;
+	mutable ComplexOrRealType* Abatch_;
+	mutable ComplexOrRealType* Bbatch_;
+	mutable BatchedDgemmIntegerType* leftPatchStart_;
+	mutable BatchedDgemmIntegerType* rightPatchStart_;
+	mutable BatchedDgemmIntegerType* xyPatchStart_;
+	mutable BatchedDgemmIntegerType* ldAbatch_;
+	mutable BatchedDgemmIntegerType* ldBbatch_;
 };
 }
 #endif // BATCHEDGEMM_H
