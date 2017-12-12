@@ -75,6 +75,7 @@ void main1(InputNgType::Readable& io,
 must be present.
   \item[-a] {[}Mandatory, String{]} Action, see below.
   \item[-E] {[}Optional, String{]} Extra options, see below.
+  \item[-o] {[}Optional, String{]} Extra options for SolverOptions
   \item[-s] {[}Optional, no argument needed{]} Short option.
   \item[-p] [Optional, Integer] Digits of precision for printing.
  \item[-V] [Optional] Print version and exit
@@ -88,7 +89,8 @@ int main(int argc,char **argv)
 	int opt = 0;
 	int precision = 6;
 	bool versionOnly = false;
-	while ((opt = getopt(argc, argv,"f:p:a:E:sV")) != -1) {
+	PsimagLite::String sOptions;
+	while ((opt = getopt(argc, argv,"f:p:a:E:o:sV")) != -1) {
 		switch (opt) {
 		case 'f':
 			toolOptions.filename = optarg;
@@ -103,6 +105,9 @@ int main(int argc,char **argv)
 			break;
 		case 'E':
 			toolOptions.extraOptions = optarg;
+			break;
+		case 'o':
+			sOptions += optarg;
 			break;
 		case 's':
 			toolOptions.shortoption = true;
@@ -149,7 +154,7 @@ int main(int argc,char **argv)
 
 	//! Read the parameters for this run
 	bool earlyExit = true;
-	ParametersDmrgSolverType dmrgSolverParams(io,earlyExit);
+	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, earlyExit);
 
 	if (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos)
 		main1<std::complex<RealType> >(io, application, dmrgSolverParams, toolOptions);
