@@ -398,10 +398,8 @@ private:
 			return transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
 
 		typename ProgramGlobals::DirectionEnum dir2 = ProgramGlobals::EXPAND_SYSTEM;
-		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
-			SizeType i0 = psiDest.sector(ii);
-			transformVectorParallel(psiDest,psiSrc,lrs,i0,nk,dir2);
-		}
+		for (SizeType ii=0;ii<psiDest.sectors();ii++)
+			transformVectorParallel(psiDest,psiSrc,lrs,ii,nk,dir2);
 	}
 
 	void transformVector2FromInfinite(VectorWithOffsetType& psiDest,

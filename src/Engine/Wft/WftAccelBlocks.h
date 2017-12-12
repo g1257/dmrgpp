@@ -177,7 +177,6 @@ public:
 
 		environPreparePsi(psi, psiSrc, i0src, volumeOfNk);
 
-
 		VectorMatrixType result(volumeOfNk);
 
 		SizeType threads = std::min(volumeOfNk, PsimagLite::Concurrency::npthreads);
