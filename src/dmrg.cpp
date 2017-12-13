@@ -324,8 +324,8 @@ to the main dmrg driver are the following.
 			throw PsimagLite::RuntimeError(str);
 		}
 
-		std::cerr<<application.name()<<"\x1b[38;5;240m";
-		std::cerr<<" [master] "<<PsimagLite::AnsiColor::reset;
+		std::cerr<<application.name()<<"\x1b[38;5;124m";
+		std::cerr<<" [features] "<<PsimagLite::AnsiColor::reset;
 		std::cerr<<"Standard output sent to ";
 		std::cerr<<options.label<<"\n";
 		std::cerr.flush();
@@ -361,6 +361,11 @@ to the main dmrg driver are the following.
 	registerSignals();
 
 	PsimagLite::String targeting = inputCheck.getTargeting(dmrgSolverParams.options);
+
+	if (targeting != "CorrectionTargetting" &&
+	        targeting != "GroundStateTargetting" &&
+	        dmrgSolverParams.options.find("wftInBlocks") != PsimagLite::String::npos)
+		err("wftInBlocks only for GroundStateTargetting or CorrectionTargetting\n");
 
 	bool isComplex = (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos);
 	if (targeting=="TimeStepTargetting") isComplex = true;
