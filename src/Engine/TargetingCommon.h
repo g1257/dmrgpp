@@ -434,13 +434,6 @@ public:
 		                                    systemOrEnviron);
 	}
 
-	void wftOneVector(VectorWithOffsetType& phiNew,
-	                  const VectorWithOffsetType& src,
-	                  SizeType site)
-	{
-		applyOpExpression_.wftOneVector(phiNew, src, site);
-	}
-
 	void wftAll(SizeType site)
 	{
 		applyOpExpression_.wftAll(site);

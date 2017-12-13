@@ -204,9 +204,8 @@ public:
 	}
 
 	// FIXME: change name to transformVector
-	template<typename SomeVectorType,typename SomeVectorType2>
-	void setInitialVector(SomeVectorType& dest,
-	                      const SomeVectorType2& src,
+	void setInitialVector(VectorWithOffsetType& dest,
+	                      const VectorWithOffsetType& src,
 	                      const LeftRightSuperType& lrs,
 	                      const VectorSizeType& nk) const
 	{
@@ -267,12 +266,11 @@ public:
 		progress_.printline(msg,std::cout);
 	}
 
-	template<typename SomeVectorType>
-	void createRandomVector(SomeVectorType& y) const
+	void createRandomVector(VectorWithOffsetType& y) const
 	{
 		for (SizeType jj=0;jj<y.sectors();jj++) {
 			SizeType j = y.sector(jj);
-			createRandomVector(y,j);
+			createRandomVector(y, j);
 		}
 
 		if (!isEnabled_) return; // don't make noise unless enabled
@@ -281,11 +279,10 @@ public:
 		progress_.printline(msg,std::cout);
 	}
 
-	template<typename SomeVectorType>
-	void createRandomVector(SomeVectorType& y,SizeType i0) const
+	void createRandomVector(VectorWithOffsetType& y, SizeType i0) const
 	{
 		SizeType total = y.effectiveSize(i0);
-		typename SomeVectorType::value_type tmp;
+		typename VectorWithOffsetType::value_type tmp;
 		RealType atmp=0;
 		for (SizeType i=0;i<total;i++) {
 			myRandomT(tmp);
@@ -457,7 +454,7 @@ private:
 	                  const LeftRightSuperType& lrs,
 	                  const VectorSizeType& nk) const
 	{
-		wftImpl_->transformVector(psiDest,psiSrc,lrs,nk);
+		wftImpl_->transformVector(psiDest, psiSrc, lrs, nk);
 
 		RealType norm1 = norm(psiSrc);
 		RealType norm2 = norm(psiDest);

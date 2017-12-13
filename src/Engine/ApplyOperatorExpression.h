@@ -390,20 +390,6 @@ public:
 		}
 	}
 
-	void wftOneVector(VectorWithOffsetType& phiNew,
-	                  const VectorWithOffsetType& src,
-	                  SizeType site)
-	{
-		phiNew.populateFromQns(src,targetHelper_.lrs().super());
-
-		// OK, now that we got the partition number right, let's wft:
-		VectorSizeType nk(1,targetHelper_.model().hilbertSize(site));
-		targetHelper_.wft().setInitialVector(phiNew,
-		                                     src,
-		                                     targetHelper_.lrs(),
-		                                     nk);
-	}
-
 	void wftAll(SizeType site)
 	{
 		for (SizeType index = 0; index < targetVectors_.size(); ++index) {
@@ -416,6 +402,20 @@ public:
 	}
 
 private:
+
+	void wftOneVector(VectorWithOffsetType& phiNew,
+	                  const VectorWithOffsetType& src,
+	                  SizeType site)
+	{
+		phiNew.populateFromQns(src, targetHelper_.lrs().super());
+
+		// OK, now that we got the partition number right, let's wft:
+		VectorSizeType nk(1,targetHelper_.model().hilbertSize(site));
+		targetHelper_.wft().setInitialVector(phiNew,
+		                                     src,
+		                                     targetHelper_.lrs(),
+		                                     nk);
+	}
 
 	void checkOrder(SizeType i) const
 	{
