@@ -91,6 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MatrixVectorKron/KronMatrix.h"
 #include "WftAccelBlocks.h"
 #include "WftAccelWithTemp.h"
+#include "WftSparseTwoSite.h"
 
 namespace Dmrg {
 
@@ -122,6 +123,7 @@ public:
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef WftAccelBlocks<BaseType> WftAccelBlocksType;
 	typedef WftAccelWithTemp<BaseType, MatrixOrIdentityType> WftAccelWithTempType;
+	typedef WftSparseTwoSite<BaseType, MatrixOrIdentityType> WftSparseTwoSiteType;
 
 	WaveFunctionTransfLocal(const DmrgWaveStructType& dmrgWaveStruct,
 	                        const WftOptions& wftOptions)
@@ -259,16 +261,7 @@ private:
 		        lrs.left().block().size() > 1)
 			return wftAccelBlocks_.environFromInfinite(psiDest, i0, psiSrc, iOld, lrs, nk);
 
-		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
-		SizeType nip = lrs.super().permutationInverse().size()/
-		        lrs.right().permutationInverse().size();
-
-		assert(lrs.left().permutationInverse().size()==volumeOfNk ||
-		       lrs.left().permutationInverse().size()==dmrgWaveStruct_.ws.rows());
-		assert(lrs.right().permutationInverse().size()/volumeOfNk==dmrgWaveStruct_.we.cols());
-
-		SizeType start = psiDest.offset(i0);
-		SizeType total = psiDest.effectiveSize(i0);
+		typedef PsimagLite::Parallelizer<WftSparseTwoSiteType> ParallelizerType;
 
 		SparseMatrixType ws;
 		dmrgWaveStruct_.ws.toSparse(ws);
@@ -277,45 +270,25 @@ private:
 		SparseMatrixType weT;
 		transposeConjugate(weT,we);
 
-		PackIndicesType pack1(nip);
-		PackIndicesType pack2(volumeOfNk);
-		for (SizeType x=0;x<total;x++) {
-			SizeType ip,beta,kp,jp;
-			pack1.unpack(ip,beta,(SizeType)lrs.super().permutation(x+start));
-			pack2.unpack(kp,jp,(SizeType)lrs.right().permutation(beta));
-			psiDest.fastAccess(i0,x)=createAux1bFromInfinite(psiSrc,ip,kp,jp,ws,weT,nk);
-		}
+		ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
+		                             PsimagLite::MPI::COMM_WORLD);
+
+		WftSparseTwoSiteType helperWft(psiDest,
+		                               i0,
+		                               psiSrc,
+		                               iOld,
+		                               dmrgWaveStruct_,
+		                               wftOptions_,
+		                               lrs,
+		                               nk,
+		                               ws,
+		                               weT,
+		                               ProgramGlobals::ENVIRON);
+
+		threadedWft.loopCreate(helperWft);
 	}
 
-	SparseElementType createAux1bFromInfinite(const VectorWithOffsetType& psiSrc,
-	                                          SizeType ip,
-	                                          SizeType kp,
-	                                          SizeType jp,
-	                                          const SparseMatrixType& ws,
-	                                          const SparseMatrixType& weT,
-	                                          const VectorSizeType& nk) const
-	{
-		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
-		SizeType ni=dmrgWaveStruct_.lrs.left().size();
-		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
-		MatrixOrIdentityType wsRef2(wftOptions_.twoSiteDmrg && nip>volumeOfNk,ws);
-		SizeType start = weT.getRowPtr(jp);
-		SizeType end = weT.getRowPtr(jp+1);
-		SparseElementType sum=0;
-		for (SizeType k3=wsRef2.getRowPtr(ip);k3<wsRef2.getRowPtr(ip+1);k3++) {
-			int ip2 = wsRef2.getColOrExit(k3);
-			if (ip2<0) continue;
-			SizeType alpha = dmrgWaveStruct_.lrs.left().permutationInverse(ip2+kp*nip);
-
-			for (SizeType k = start; k < end; k++) {
-				SizeType jp2 = weT.getCol(k);
-				SizeType x = dmrgWaveStruct_.lrs.super().permutationInverse(alpha+jp2*ni);
-				sum += weT.getValue(k)*psiSrc.slowAccess(x)*wsRef2.getValue(k3);
-
-			}
-		}
-		return sum;
-	}
+	// --------------------------
 
 	void transformVector2(VectorWithOffsetType& psiDest,
 	                      const VectorWithOffsetType& psiSrc,
@@ -335,6 +308,8 @@ private:
 	                                  const LeftRightSuperType& lrs,
 	                                  const VectorSizeType& nk) const
 	{
+		typedef PsimagLite::Parallelizer<WftSparseTwoSiteType> ParallelizerType;
+
 		PsimagLite::OstringStream msg;
 		msg<<" Destination sectors "<<psiDest.sectors();
 		msg<<" Source sectors "<<psiSrc.sectors();
@@ -361,13 +336,14 @@ private:
 				if (srcI > 0) psiDest.extract(dest,i0);
 				if (wftOptions_.accel == WftOptions::ACCEL_TEMP) {
 					wftAccelWithTemp_.systemFromInfinite(dest,
-					                           start,
-					                           psiV,
-					                           offset,
-					                           lrs,
-					                           nk,
-					                           ws,
-					                           we);
+					                                     start,
+					                                     psiV,
+					                                     offset,
+					                                     lrs,
+					                                     nk,
+					                                     ws,
+					                                     we);
+					psiDest.setDataInSector(dest,i0);
 				} else if (inBlocks) {
 					wftAccelBlocks_.systemFromInfinite(psiDest,
 					                                   i0,
@@ -377,77 +353,25 @@ private:
 					                                   nk);
 					continue;
 				} else {
-					tVector2FromInfinite(dest,start,psiV,offset,lrs,nk,wsT,we);
+					ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
+					                             PsimagLite::MPI::COMM_WORLD);
+
+					WftSparseTwoSiteType helperWft(psiDest,
+					                               i0,
+					                               psiSrc,
+					                               srcII,
+					                               dmrgWaveStruct_,
+					                               wftOptions_,
+					                               lrs,
+					                               nk,
+					                               wsT,
+					                               we,
+					                               ProgramGlobals::SYSTEM);
+
+					threadedWft.loopCreate(helperWft);
 				}
-
-				psiDest.setDataInSector(dest,i0);
 			}
 		}
-	}
-
-	void tVector2FromInfinite(VectorType& dest,
-	                          SizeType destOffset,
-	                          const VectorType& psiV,
-	                          SizeType offset,
-	                          const LeftRightSuperType& lrs,
-	                          const VectorSizeType& nk,
-	                          const SparseMatrixType& wsT,
-	                          const SparseMatrixType& we) const
-	{
-		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
-		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
-		SizeType nalpha = lrs.left().permutationInverse().size();
-
-		assert(nip==dmrgWaveStruct_.ws.cols());
-
-		PackIndicesType pack1(nalpha);
-		PackIndicesType pack2(nip);
-		for (SizeType x=0;x<dest.size();x++) {
-			SizeType isn,jen;
-			pack1.unpack(isn,jen,(SizeType)lrs.super().permutation(x+destOffset));
-			SizeType is,jpl;
-			pack2.unpack(is,jpl,(SizeType)lrs.left().permutation(isn));
-
-			dest[x] += createAux2bFromInfinite(psiV,offset,is,jpl,jen,wsT,we,nk);
-
-		}
-	}
-
-	SparseElementType createAux2bFromInfinite(const VectorType& psiV,
-	                                          SizeType offset,
-	                                          SizeType is,
-	                                          SizeType jpl,
-	                                          SizeType jen,
-	                                          const SparseMatrixType& wsT,
-	                                          const SparseMatrixType& we,
-	                                          const VectorSizeType& nk) const
-	{
-		SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
-		SparseElementType sum=0;
-		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
-		SizeType ni = dmrgWaveStruct_.lrs.right().size()/volumeOfNk;
-
-		MatrixOrIdentityType weRef(wftOptions_.twoSiteDmrg && ni>volumeOfNk,we);
-		SizeType start = wsT.getRowPtr(is);
-		SizeType end = wsT.getRowPtr(is+1);
-		for (SizeType k2=weRef.getRowPtr(jen);k2<weRef.getRowPtr(jen+1);k2++) {
-			int jpr = weRef.getColOrExit(k2);
-			// jpr < 0 could be due to an m smaller than h, the Hilbert size of one site
-			// this is checked against elsewhere
-			assert(jpr >= 0);
-			SizeType jp = dmrgWaveStruct_.lrs.right().permutationInverse(jpl + jpr*volumeOfNk);
-			SparseElementType sum2 = 0;
-			for (SizeType k = start;k < end;k++) {
-				SizeType ip = wsT.getCol(k);
-				SizeType y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + jp*nalpha);
-				if (y < offset || y - offset >= psiV.size()) continue;
-				sum2 += wsT.getValue(k)*psiV[y-offset]*weRef.getValue(k2);
-			}
-
-			sum += sum2;
-		}
-
-		return sum;
 	}
 
 	void transformVector1bounce(VectorWithOffsetType& psiDest,
