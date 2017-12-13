@@ -818,7 +818,7 @@ in class \cppClass{WaveFunctionTransformation}. Here I focus on the system
 without SU(2) symmetry support first.
 We need to consider that site $j$ has just been swallowed by the growing environment.
 See figure~\ref{fig:wft} for the setup.
-\begin{figure}
+\begin{figure}[b]
 \centering{
 \includegraphics[width=4cm]{wft}}
 \caption{TBW.\label{fig:wft}}
@@ -841,6 +841,21 @@ the new system-environment permutation $P^{SE}_p$, the new environment
 permutation $P^E_p$,
 the old system-environment permutation $P^{SE}$, and the new system permutation $P^S$.
 A sum should be assumed for all indices except $\eta_p$.
+\pagebreak
+
+Here are formulas for WFT when expanding system.
+\begin{equation}
+\psi^{\text{new}}(i, k; j) = \sum_{i', j'} W_S^{T}(i, i') \psi^{\text{old}}(i', j')W_E^{T}(j'; k, j)
+\,\,\,\text{one-site DMRG}
+\end{equation}
+%
+\begin{equation}
+\psi^{\text{new}}(i, k, j) = \sum_{i', j'} W_S^{T}(i, i') \psi^{\text{old}}(i', k, j')W_E^{T}(j', j)
+\,\,\,\text{two-site DMRG}
+\end{equation}
+
+\todo{Write equivalent formulas when expanding environ.}
+
 \subsection{SU(2) Reduced Operators}
 
 \subsection{Checkpointing}
