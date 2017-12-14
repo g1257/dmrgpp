@@ -86,9 +86,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PsimagLite.h"
 #include "ProgressIndicator.h"
 #ifdef PLUGIN_SC
-#include "BatchedGemm.h"
+#include "BatchedGemmPluginSc.h"
 #else
-#include "BatchedGemmEmpty.h"
+#include "BatchedGemm.h"
 #endif
 
 namespace Dmrg {
