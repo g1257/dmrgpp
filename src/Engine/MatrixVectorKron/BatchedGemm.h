@@ -1,5 +1,6 @@
 #ifndef BATCHEDGEMM_H
 #define BATCHEDGEMM_H
+#include "Vector.h"
 
 namespace Dmrg {
 
@@ -9,15 +10,24 @@ class BatchedGemm {
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
 	typedef typename MatrixDenseOrSparseType::VectorType VectorType;
+	typedef long int IntegerType;
 
 public:
 
-	BatchedGemm(const InitKronType&) {}
+	BatchedGemm(const InitKronType& initKron) : initKron_(initKron)
+	{}
 
-	bool enabled() const { return false; }
+	bool enabled() const { return initKron_.batchedGemm(); }
 
 	void matrixVector(VectorType&, const VectorType&) const
-	{}
+	{
+		err("BatchedGemm: matrixVector not implemented yet, sorry\n");
+	}
+
+private:
+
+	const InitKronType& initKron_;
+	bool enabled_;
 };
 }
 #endif // BATCHEDGEMM_H

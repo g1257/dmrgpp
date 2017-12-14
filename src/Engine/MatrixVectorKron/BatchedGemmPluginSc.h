@@ -352,7 +352,7 @@ public:
 		              &ldBbatch_);
 	}
 
-	bool enabled() const { return true; }
+	bool enabled() const { return initKron_.batchedGemm(); }
 
 	void matrixVector(VectorType& vout, const VectorType& vin) const
 	{
@@ -360,15 +360,15 @@ public:
 		ComplexOrRealType* voutptr = const_cast<ComplexOrRealType*>(&(vout[0]));
 		applyHtargetVbatch(initKron_.connections(), // number of connections (INPUT)
 		                   initKron_.patch(InitKronType::NEW, GenIjPatchType::LEFT).size(),
-			               pLeft_,
-			               pRight_,
-			               &leftPatchStart_,
-			               &rightPatchStart_,
-			               &xyPatchStart_,
-			               &Abatch_,
-			               &ldAbatch_,
-			               &Bbatch_,
-			               &ldBbatch_,
+		                   pLeft_,
+		                   pRight_,
+		                   &leftPatchStart_,
+		                   &rightPatchStart_,
+		                   &xyPatchStart_,
+		                   &Abatch_,
+		                   &ldAbatch_,
+		                   &Bbatch_,
+		                   &ldBbatch_,
 		                   vinptr,
 		                   voutptr);
 	}

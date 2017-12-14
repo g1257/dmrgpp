@@ -214,6 +214,8 @@ public:
 		                                 offsetForPatchesOld_[ind];
 	}
 
+	bool batchedGemm() const { return false; }
+
 private:
 
 	void copyIn(VectorType& x,

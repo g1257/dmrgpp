@@ -217,6 +217,11 @@ public:
 		return  offsetForPatches_[ind];
 	}
 
+	bool batchedGemm() const
+	{
+		return (model_.params().options.find("BatchedGemm") != PsimagLite::String::npos);
+	}
+
 private:
 
 	void addHlAndHr()
