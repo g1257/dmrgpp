@@ -294,8 +294,8 @@ the "half filled" case). U=2
 #5040) Large input for performance testing
 #5000 to 5499 reserved for performance work
 5500) gs for RIXS test
-5501) RIXS static
-5502) RIXS dynamic
+#5501) RIXS static
+#5502) RIXS dynamic
 #5503-5699 reserved for RIXS
 5700) TargetingCorrection small test
 #TAGEND DO NOT REMOVE THIS TAG
