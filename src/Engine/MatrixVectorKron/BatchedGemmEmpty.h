@@ -5,7 +5,7 @@
 namespace Dmrg {
 
 template<typename InitKronType>
-class BatchedGemm {
+class BatchedGemm2 {
 
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
@@ -14,7 +14,7 @@ class BatchedGemm {
 
 public:
 
-	BatchedGemm(const InitKronType& initKron) : initKron_(initKron)
+	BatchedGemm2(const InitKronType& initKron) : initKron_(initKron)
 	{}
 
 	bool enabled() const { return initKron_.batchedGemm(); }

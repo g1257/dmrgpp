@@ -88,7 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifdef PLUGIN_SC
 #include "BatchedGemmPluginSc.h"
 #else
-#include "BatchedGemm.h"
+#include "BatchedGemmEmpty.h"
 #endif
 
 namespace Dmrg {
@@ -106,7 +106,7 @@ class KronMatrix {
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename GenIjPatchType::BasisType BasisType;
-	typedef BatchedGemm<InitKronType> BatchedGemmType;
+	typedef BatchedGemm2<InitKronType> BatchedGemmType;
 
 public:
 
