@@ -52,7 +52,7 @@ STRIP_COMMAND = true
 #This enables the PLUGIN_SC repository
 #CPPFLAGS += -DPLUGIN_SC
 
-#This add linkage for the PLUGIN_SC libraries 
-LDFLAGS += -L../../dmrgppPluginSc/src -L../../../dmrgppPluginSc/src \
-  -ldmrgppPluginSc -lgomp
+#This adds linkage for the PLUGIN_SC libraries 
+#LDFLAGS += -L../../dmrgppPluginSc/src -L../../../dmrgppPluginSc/src \
+#  -ldmrgppPluginSc -lgomp
 
