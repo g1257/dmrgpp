@@ -420,6 +420,25 @@ public:
 		                                    systemOrEnviron);
 	}
 
+	void applyOneOperatorRixs(SizeType loopNumber,
+	                          SizeType indexOfOperator,
+	                          SizeType site,
+	                          VectorWithOffsetType& phiNew,
+	                          const VectorWithOffsetType& psiSrc1,
+	                          const VectorWithOffsetType& psiSrc2,
+	                          ComplexOrRealType factor,
+	                          SizeType systemOrEnviron)
+	{
+		applyOpExpression_.applyOneOperatorRixs(loopNumber,
+		                                        indexOfOperator,
+		                                        site,
+		                                        phiNew,
+		                                        psiSrc1,
+		                                        psiSrc2,
+		                                        factor,
+		                                        systemOrEnviron);
+	}
+
 	void applyOneOperator(SizeType loopNumber,
 	                      SizeType indexOfOperator,
 	                      SizeType site,
@@ -574,8 +593,11 @@ public:
 	ComplexOrRealType rixsCocoon(ProgramGlobals::DirectionEnum direction,
 	                             SizeType site,
 	                             SizeType index1,
-	                             SizeType index2) const
+	                             SizeType index2,
+	                             bool needsShift) const
 	{
+
+		const ModelType& model = targetHelper_.model();
 		ComplexOrRealType value = 0.0;
 		VectorStringType vecStr = getOperatorLabels();
 		if (vecStr.size() == 0) return value;
@@ -595,12 +617,14 @@ public:
 			PsimagLite::String opLabel = vecStr[i];
 
 			BraketType Braket(targetHelper_.model(),"<gs|"+opLabel+"[" + ttos(site) + "]|gs>");
-
-			OperatorType A = Braket.op(0);
-
-			value = test_(v1,v2,direction,site,A,border);
+			if (needsShift) {
+				OperatorType A = Braket.op(0);
+				value = test_(v1,v2,direction,site,A,border);
+			} else {
+				OperatorType id = model.naturalOperator("identity",site,0);
+				value = test_(v1,v2,direction,site,id,border);
+			}
 		}
-
 		return value;
 	}
 

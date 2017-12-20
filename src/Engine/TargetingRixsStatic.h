@@ -316,14 +316,6 @@ private:
 			                      this->common().targetVectors(i),
 			                      label);
 		}
-		for (SizeType i = 0; i < this->common().targetVectors().size(); ++i) {
-			this->common().cocoon(direction,
-			                      site,
-			                      this->common().psi(),
-			                      "PSI",
-			                      this->common().psi(),
-			                      "PSI");
-		}
 	}
 
 	void doCorrectionVector()
