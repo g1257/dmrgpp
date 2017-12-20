@@ -418,39 +418,13 @@ public:
 		                                    phiNew,
 		                                    psiSrc,
 		                                    systemOrEnviron);
-	}
 
-	void applyOneOperatorRixs(SizeType loopNumber,
-	                          SizeType indexOfOperator,
-	                          SizeType site,
-	                          VectorWithOffsetType& phiNew,
-	                          const VectorWithOffsetType& psiSrc1,
-	                          const VectorWithOffsetType& psiSrc2,
-	                          ComplexOrRealType factor,
-	                          SizeType systemOrEnviron)
-	{
-		applyOpExpression_.applyOneOperatorRixs(loopNumber,
-		                                        indexOfOperator,
-		                                        site,
-		                                        phiNew,
-		                                        psiSrc1,
-		                                        psiSrc2,
-		                                        factor,
-		                                        systemOrEnviron);
-	}
-
-	void applyOneOperator(SizeType loopNumber,
-	                      SizeType indexOfOperator,
-	                      SizeType site,
-	                      VectorWithOffsetType& phiNew,
-	                      SizeType systemOrEnviron)
-	{
-		applyOpExpression_.applyOneOperator(loopNumber,
-		                                    indexOfOperator,
-		                                    site,
-		                                    phiNew,
-		                                    applyOpExpression_.psi(),
-		                                    systemOrEnviron);
+		RealType norma = norm(phiNew);
+		if (norma<1e-6) {
+			PsimagLite::OstringStream msg2;
+			msg2<<"Norm of phi is zero\n";
+			progress_.printline(msg2,std::cout);
+		}
 	}
 
 	void wftAll(SizeType site)

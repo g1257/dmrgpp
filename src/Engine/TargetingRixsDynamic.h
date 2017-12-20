@@ -284,26 +284,28 @@ private:
 			if (site == tstStruct_.sites(0)) {
 
 				VectorWithOffsetType tmpV1;
-				this->common().applyOneOperatorRixs(loopNumber,
-				                                    indexOfOperator,
-				                                    site,
-				                                    tmpV1,
-				                                    this->common().targetVectors(1),
-				                                    this->common().psi(),
-				                                    densCre,
-				                                    direction);
+				this->common().applyOneOperator(loopNumber,
+				                                indexOfOperator,
+				                                site,
+				                                tmpV1, // phiNew
+				                                this->common().targetVectors(1), // src1
+				                                direction);
+
+				addFactor(tmpV1, this->common().psi(), densCre);
+
 				if (tmpV1.size() > 0)
 					this->common().targetVectors(6) = tmpV1;
 
 				VectorWithOffsetType tmpV2;
-				this->common().applyOneOperatorRixs(loopNumber,
-				                                    indexOfOperator,
-				                                    site,
-				                                    tmpV2,
-				                                    this->common().targetVectors(2),
-				                                    this->common().psi(),
-				                                    densCim,
-				                                    direction);
+				this->common().applyOneOperator(loopNumber,
+				                                indexOfOperator,
+				                                site,
+				                                tmpV2,                            // phiNew
+				                                this->common().targetVectors(2), // src1
+				                                direction);
+
+				addFactor(tmpV2, this->common().psi(), densCim);
+
 				if (tmpV2.size() > 0) {
 					this->common().targetVectors(7) = tmpV2;
 					applied_ = true;
@@ -326,6 +328,22 @@ private:
 		std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
 		std::cout<<site<<" "<<(rr+ii)<<" 0"; // 0 here is the currentTime
 		std::cout<<" <gs|A|P3> 1\n";   // 1 here is the "superdensity"
+	}
+
+	void addFactor(VectorWithOffsetType& phiNew,
+	               const VectorWithOffsetType& psiSrc2,
+	               ComplexOrRealType factor) const
+	{
+		// CHECK if psiSrc2 and phiNew have the same offset!
+		if (psiSrc2.offset(0) == phiNew.offset(0))
+			phiNew += (-factor)*psiSrc2;
+
+		RealType norma = norm(phiNew);
+		if (norma<1e-6) {
+			PsimagLite::OstringStream msg2;
+			msg2<<"Norm of phi is zero\n";
+			progress_.printline(msg2,std::cout);
+		}
 	}
 
 	void calcDynVectors()

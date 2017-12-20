@@ -262,6 +262,7 @@ private:
 			                                indexOfOperator,
 			                                site,
 			                                this->common().targetVectors(indexOfOperator),
+			                                this->common().psi(),
 			                                direction);
 			start = indexOfOperator + 1;
 		}

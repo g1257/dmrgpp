@@ -88,6 +88,9 @@ class ApplyOperatorExpression {
 	typedef typename TargetHelperType::ModelType ModelType;
 	typedef typename TargetHelperType::TargetParamsType TargetParamsType;
 	typedef typename TargetHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename TargetHelperType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef TimeVectorsBase<TargetParamsType,ModelType,WaveFunctionTransfType,
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsBaseType;

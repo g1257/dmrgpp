@@ -260,6 +260,7 @@ private:
 		                                0, // indexOfOperator
 		                                site,
 		                                this->common().targetVectors(site),
+		                                this->common().psi(),
 		                                direction);
 
 		typename PsimagLite::Vector<SizeType>::Type block(1,site);
