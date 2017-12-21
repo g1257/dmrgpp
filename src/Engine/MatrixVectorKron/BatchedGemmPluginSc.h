@@ -72,14 +72,14 @@ public:
 		convertToVector(pLeft_, initKron_.lrs(InitKronType::NEW).left());
 		convertToVector(pRight_, initKron_.lrs(InitKronType::NEW).right());
 
-		batchedGemm_ = new BatchedGemmPluginScType(initKron.connections(),
-		                               initKron_.patch(InitKronType::NEW, GenIjPatchType::LEFT).size(),
-		                               &(pLeft_[0]),
-		                               &(pRight_[0]),
-		                               aptr,
-		                               &(ldAptr[0]),
-		                               bptr,
-		                               &(ldBptr[0]));
+		batchedGemm_ = new BatchedGemmPluginScType(nC,
+		                                           total,
+		                                           &(pLeft_[0]),
+		                                           &(pRight_[0]),
+		                                           aptr,
+		                                           &(ldAptr[0]),
+		                                           bptr,
+		                                           &(ldBptr[0]));
 		delete[] aptr;
 		aptr = 0;
 		delete[] bptr;
