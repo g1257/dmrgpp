@@ -23,7 +23,7 @@ class BatchedGemm2 {
 	typedef BatchedGemm<ComplexOrRealType> BatchedGemmPluginScType;
 
 	// Say 1 for 1-based, 0 for 0-based
-	static const SizeType baseForIntegerVectors_ = 1;
+	static const SizeType baseForIntegerVectors_ = 0;
 
 public:
 
