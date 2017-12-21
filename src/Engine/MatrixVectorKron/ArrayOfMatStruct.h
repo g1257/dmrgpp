@@ -104,7 +104,7 @@ public:
 	                 const GenIjPatchType& patchOld,
 	                 const GenIjPatchType& patchNew,
 	                 typename GenIjPatchType::LeftOrRightEnumType leftOrRight,
-	                 const RealType& threshold)
+	                 RealType threshold)
 	    : data_(patchNew(leftOrRight).size(), patchOld(leftOrRight).size())
 	{
 		const BasisType& basisOld = (leftOrRight == GenIjPatchType::LEFT) ?

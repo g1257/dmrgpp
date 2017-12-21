@@ -401,7 +401,7 @@ private:
 
 	SizeType mOld_;
 	SizeType mNew_;
-	const RealType& denseSparseThreshold_;
+	const RealType denseSparseThreshold_;
 	GenIjPatchType ijpatchesOld_;
 	GenIjPatchType* ijpatchesNew_;
 	VectorSizeType weightsOfPatches_;
