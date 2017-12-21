@@ -36,6 +36,7 @@ public:
 	      xyPatchStart_(0),
 	      batchedGemm_(0)
 	{
+		if (!enabled()) return;
 		convertOffsets(offsets_);
 		SizeType total = initKron_.numberOfPatches(InitKronType::OLD);
 		SizeType nC = initKron_.connections();
@@ -97,6 +98,7 @@ public:
 
 	void matrixVector(VectorType& vout, const VectorType& vin) const
 	{
+		assert(enabled());
 		ComplexOrRealType* vinptr = const_cast<ComplexOrRealType*>(&(vin[0]));
 		ComplexOrRealType* voutptr = const_cast<ComplexOrRealType*>(&(vout[0]));
 		batchedGemm_->apply_Htarget(vinptr, voutptr);

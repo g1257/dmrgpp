@@ -337,6 +337,8 @@ public:
 			\item [wftInBlocks] Accelerate the WFT by using dense blocks
 			\item [wftStacksInDisk] Save and load stacks for WFT to and from disk,
 							   instead of to and from memory. Cannot be used with restart yet.
+			\item [BatchedGemm] Only meaningful with MatrixVectorKron. Enables
+			                    batched gemm and might need plugin sc
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,
@@ -400,6 +402,7 @@ public:
 		registerOpts.push_back("diskstacks");
 		registerOpts.push_back("wftWithTemp");
 		registerOpts.push_back("wftStacksInDisk");
+		registerOpts.push_back("BatchedGemm");
 
 		PsimagLite::Options::Writeable optWriteable(registerOpts,
 		                                            PsimagLite::Options::Writeable::PERMISSIVE);
