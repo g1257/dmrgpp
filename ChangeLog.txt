@@ -1,5 +1,16 @@
 https://github.com/g1257/dmrgpp/commits/master
 
+2017-12-20 Version 4.68
+
+* BatchedGemm option added
+  Needs PluginSc, work in progress
+
+* wftInBlocks only for ground state
+
+* WFT for twositedmrg is now parallel
+
+* RIXS patches
+
 2017-12-12 Version 4.66
 
 * Wft files in Engine/Wft directory
