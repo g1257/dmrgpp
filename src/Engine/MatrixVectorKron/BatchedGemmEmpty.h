@@ -1,6 +1,8 @@
 #ifndef BATCHEDGEMM_H
 #define BATCHEDGEMM_H
 #include "Vector.h"
+#include <numeric>
+#include "BLAS.h"
 
 namespace Dmrg {
 
@@ -16,6 +18,8 @@ class BatchedGemm2 {
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef PsimagLite::Vector<char>::Type VectorCharType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType*>::Type VectorStarType;
+	typedef typename PsimagLite::Vector<const ComplexOrRealType*>::Type VectorConstStarType;
 
 public:
 
@@ -47,8 +51,8 @@ public:
 		int ldAbatch = ialign * iceil(nrowAbatch, ialign );
 		int ldBbatch = ialign * iceil(nrowBbatch, ialign );
 
-		MatrixType Abatch(ldAbatch, ncolAbatch);
-		MatrixType Bbatch(ldBbatch, ncolBbatch);
+		Abatch_.resize(ldAbatch, ncolAbatch);
+		Bbatch_.resize(ldBbatch, ncolBbatch);
 
 		for (SizeType ipatch = 0; ipatch < npatches - 1; ++ipatch) {
 			int nrowX = initKron_.lrs(InitKronType::NEW).right().partition(ipatch + 1)
@@ -70,11 +74,7 @@ public:
 		assert(sizeAbatch >= 1);
 		assert(sizeBbatch >= 1);
 
-		//#ifdef USE_GETSET
-		//		ComplexOrRealType *hAbatch_ = (ComplexOrRealType *) malloc( sizeof(ComplexOrRealType) * sizeAbatch );
-		//#else
-		//		ComplexOrRealType *hAbatch_ = Abatch_;
-		//#endif
+		// USE_GETSET FIXME
 
 		for (SizeType ioperator = 0; ioperator < noperator; ++ioperator) {
 			const ArrayOfMatStructType& xiStruct = initKron_.xc(ioperator);
@@ -91,10 +91,10 @@ public:
 					int ia = initKron_.lrs(InitKronType::NEW).left().partition(ipatch);
 					int ja = initKron_.lrs(InitKronType::NEW).left().partition(jpatch);
 
-					ComplexOrRealType *Adest = &(Abatch(ia, ja + ioperator*leftMaxState));
+					ComplexOrRealType *Adest = &(Abatch_(ia, ja + ioperator*leftMaxState));
 
 					SizeType tmp = nrowAsrc - 1 + (ncolAsrc - 1)*ldAbatch;
-					assert(tmp < Abatch.rows()*Abatch.cols());
+					assert(tmp < Abatch_.rows()*Abatch_.cols());
 					std::cerr<<"HERE "<<ioperator<<" "<<jpatch<<" "<<ipatch<<"\n";
 					mylacpy(nrowAsrc, ncolAsrc, Asrc, Adest, ldAbatch);
 				}
@@ -118,9 +118,9 @@ public:
 					int ib = initKron_.lrs(InitKronType::NEW).right().partition(ipatch);
 					int jb = initKron_.lrs(InitKronType::NEW).right().partition(jpatch);
 
-					ComplexOrRealType* Bdest = &(Bbatch(ib,jb + ioperator*rightMaxState));
+					ComplexOrRealType* Bdest = &(Bbatch_(ib,jb + ioperator*rightMaxState));
 					SizeType tmp = nrowBsrc - 1 + (ncolBsrc - 1)*ldBbatch;
-						assert(tmp < Bbatch.rows()*Bbatch.cols());
+					assert(tmp < Bbatch_.rows()*Bbatch_.cols());
 					mylacpy(nrowBsrc, ncolBsrc, Bsrc, Bdest, ldBbatch);
 				}
 			}
@@ -128,17 +128,17 @@ public:
 
 		// USE_GETSET block here omitted
 
-//		*pAbatch = Abatch_;
-//		*pBbatch = Bbatch_;
-//		*pleftPatchStart = leftPatchStart_;
-//		*prightPatchStart = rightPatchStart_;
-//		*pxyPatchStart = xyPatchStart_;
+		//		*pAbatch = Abatch_;
+		//		*pBbatch = Bbatch_;
+		//		*pleftPatchStart = leftPatchStart_;
+		//		*prightPatchStart = rightPatchStart_;
+		//		*pxyPatchStart = xyPatchStart_;
 	}
 
 
 	bool enabled() const { return initKron_.batchedGemm(); }
 
-	void matrixVector(VectorType&, const VectorType&) const
+	void matrixVector(VectorType& vout, const VectorType& vin) const
 	{
 		if (!enabled())
 			err("BatchedGemm::matrixVector called but BatchedGemm not enabled\n");
@@ -148,7 +148,7 @@ public:
 		RealType gflops2 = 0.0;
 		RealType time1stVbatch = 0.0;
 		RealType time2ndVbatch = 0.0;
-/*
+		/*
  ------------------
  compute  Y = H * X
  ------------------
@@ -181,10 +181,9 @@ public:
 
 		VectorType alphaArray(ngroupsDim);
 		VectorType betaArray(ngroupsDim);
-//		ComplexOrRealType *aArray_[batchSizeDim];
-//		ComplexOrRealType *bArray_[batchSizeDim];
-//		ComplexOrRealType *cArray_[batchSizeDim];
-
+		VectorConstStarType aArray(batchSizeDim);
+		VectorConstStarType bArray(batchSizeDim);
+		VectorStarType cArray(batchSizeDim);
 		VectorSizeType mArray(ngroupsDim);
 		VectorSizeType nArray(ngroupsDim);
 		VectorSizeType kArray(ngroupsDim);
@@ -204,51 +203,49 @@ public:
 		int nrowBX = nrowB;
 		int ncolBX = ncolA * noperator;
 		int ldBX = ialign * iceil(nrowBX, ialign);
+		MatrixType BX(ldBX,  ncolA*noperator);
 
-// ComplexOrRealType *BX_ = (ComplexOrRealType *) dmrg_malloc( (sizeof(ComplexOrRealType) * ldBX) * (ncolA * noperator) );
-// assert( BX_ != NULL );
-
-//#define BX(i,j) BX_[ indx2f(i,j,ldBX) ]
 		SizeType idx = 0;
 		for (SizeType jpatch = 0; jpatch < npatches; ++jpatch) {
-			int igroup = jpatch;
+			SizeType igroup = jpatch;
 			long j1 = xyPatchStart_[jpatch];
 			long j2 = xyPatchStart_[jpatch + 1];
 			int nrowX = rightPatchSize[jpatch];
 			int ncolX = leftPatchSize[jpatch];
 			assert(j2 - j1 == nrowX * ncolX);
 
-    /*
-     --------------------------------------
-     XJ = reshape( X(j1:j2), nrowX, ncolX )
-     --------------------------------------
-     */
-			ComplexOrRealType *XJ = &( X(j1) );
+			/*
+	 --------------------------------------
+	 XJ = reshape( X(j1:j2), nrowX, ncolX )
+	 --------------------------------------
+	 */
+			assert(static_cast<SizeType>(j1) < vin.size());
+			const ComplexOrRealType* XJ = &(vin[j1]);
 			int ldXJ = nrowX;
 
 			int R1 = initKron_.lrs(InitKronType::NEW).right().partition(jpatch);
 			int R2 = initKron_.lrs(InitKronType::NEW).right().partition(jpatch + 1);
 			int L1 = initKron_.lrs(InitKronType::NEW).left().partition(jpatch);
 			int L2 = initKron_.lrs(InitKronType::NEW).left().partition(jpatch + 1);
-			int kmax = noperator;
+			SizeType kmax = noperator;
 
-    /*
-     -------------------------------
-     independent DGEMM in same group
-     -------------------------------
-     */
+			/*
+	 -------------------------------
+	 independent DGEMM in same group
+	 -------------------------------
+	 */
 			assert(igroup < groupSize.size());
 			groupSize[igroup] = kmax;
 			for (SizeType k = 0; k < kmax; ++k) {
-				int offsetB = (k - 1)*ncolB;
-				int offsetBX = (k - 1)*ncolA;
+				int offsetB = k*ncolB;
+				int offsetBX = k*ncolA;
 
-        /*
-        ------------------------------------------------------------------------
-        BX(1:nrowBX, offsetBX + (L1:L2)) = Bbatch(1:nrowBX, offsetB + (R1:R2) ) *
-                                             XJ( 1:(R2-R1+1), 1:(L2-L1+1));
-        ------------------------------------------------------------------------
-        */
+				/*
+		------------------------------------------------------------------------
+		BX(1:nrowBX, offsetBX + (L1:L2)) = Bbatch(1:nrowBX, offsetB + (R1:R2) ) *
+											 XJ( 1:(R2-R1+1), 1:(L2-L1+1));
+		------------------------------------------------------------------------
+		*/
 				transaArray[igroup] = 'N';
 				transbArray[igroup] = 'N';
 				int mm = nrowBX;
@@ -263,32 +260,41 @@ public:
 				alphaArray[igroup] = 1.0;
 				betaArray[igroup] = 0.0;
 
-				cArray(idx) = &(BX(1,offsetBX+L1));
+				cArray[idx] = &(BX(0, offsetBX + L1));
 				ldcArray[igroup] = ldBX;
 
-				aArray(idx) = &(Bbatch(1,offsetB+R1));
-				ldaArray[igroup] = ld_Bbatch;
+				aArray[idx] = &(Bbatch_(0, offsetB + R1));
+				ldaArray[igroup] = Bbatch_.rows();
 
-				bArray(idx) = XJ;
+				bArray[idx] = XJ;
 				ldbArray[igroup] = ldXJ;
 				++idx;
 			}
 		}
-   /*
-    ------------------
-    first vbatch DGEMM
-    ------------------
-    */
-		time1stVbatch = -dmrg_get_wtime();
-		dmrg_Xgemm_vbatch( transaArray, transbArray,
-		                   mArray, nArray, kArray,
-		                   alphaArray_,  aArray_, ldaArray, bArray_, ldbArray,
-		                   betaArray,   cArray_, ldcArray,
-		                   ngroups, groupSize );
-		time1stVbatch += dmrg_get_wtime();
+		/*
+	------------------
+	first vbatch DGEMM
+	------------------
+	*/
+		time1stVbatch = -dmrgGetWtime();
+		xGemmVbatch(transaArray,
+		            transbArray,
+		            mArray,
+		            nArray,
+		            kArray,
+		            alphaArray,
+		            aArray,
+		            ldaArray,
+		            bArray,
+		            ldbArray,
+		            betaArray,
+		            cArray,
+		            ldcArray,
+		            groupSize);
+		time1stVbatch += dmrgGetWtime();
 		gflops1 = gflops1/(1000.0*1000.0*1000.0);
 
-/*
+		/*
  -------------------------------------------------
  perform computations with  Y += (BX)*transpose(A)
  -------------------------------------------------
@@ -299,27 +305,28 @@ public:
 			long i1 = xyPatchStart_[ipatch];
 			long i2 = xyPatchStart_[ipatch + 1];
 
-			int R1 = initKron_.lrs(InitKronType::NEW).right().partition(ipatch);
-			int R2 = initKron_.lrs(InitKronType::NEW).right().partition(ipatch + 1);
+			SizeType R1 = initKron_.lrs(InitKronType::NEW).right().partition(ipatch);
+			SizeType R2 = initKron_.lrs(InitKronType::NEW).right().partition(ipatch + 1);
 
-			int L1 = initKron_.lrs(InitKronType::NEW).left().partition(ipatch);
-			int L2 = initKron_.lrs(InitKronType::NEW).left().partition(ipatch + 1);
+			SizeType L1 = initKron_.lrs(InitKronType::NEW).left().partition(ipatch);
+			SizeType L2 = initKron_.lrs(InitKronType::NEW).left().partition(ipatch + 1);
 
 			assert(R2 - R1 == rightPatchSize[ipatch] &&
 			       L2 - L1 == leftPatchSize[ipatch]);
 
-			//     ComplexOrRealType *YI = &(Y(i1));
+			assert(static_cast<SizeType>(i1) < vout.size());
+			ComplexOrRealType *YI = &(vout[i1]);
 			int nrowYI = R2 - R1;
 			int ldYI = nrowYI;
 			int ncolYI = L2 - L1;
 			assert(i2 - i1 == nrowYI * ncolYI);
 
-     /*
-        --------------------------------------------------------------------
-        YI(1:(R2-R1+1),1:(L2-L1+1)) = BX( R1:R2,1:ncolBX) *
-                                         transpose( Abatch( L1:L2,1:ncolBX) );
-        --------------------------------------------------------------------
-      */
+			/*
+		--------------------------------------------------------------------
+		YI(1:(R2-R1+1),1:(L2-L1+1)) = BX( R1:R2,1:ncolBX) *
+										 transpose( Abatch( L1:L2,1:ncolBX) );
+		--------------------------------------------------------------------
+	  */
 			groupSize[igroup] = 1;
 			transaArray[igroup] = 'N';
 			transbArray[igroup] = 'T';
@@ -332,28 +339,37 @@ public:
 			gflops2 += ((2.0*mm)*nn)*kk;
 			alphaArray[igroup] = 1.0;
 			betaArray[igroup] = 0.0;
-			aArray[igroup] =  &(BX(R1,1));
+			aArray[igroup] =  &(BX(R1, 0));
 			ldaArray[igroup] = ldBX;
-			bArray[igroup] = &(Abatch(L1,1));
-			ldbArray[igroup] = ld_Abatch;
+			bArray[igroup] = &(Abatch_(L1, 0));
+			ldbArray[igroup] = Abatch_.rows();
 			cArray[igroup] = YI;
 			ldcArray[igroup] = ldYI;
 		}
 
 		ngroups = npatches;
 
-   /*
-    ------------------
-    second vbatch DGEMM
-    ------------------
+		/*
+	------------------
+	second vbatch DGEMM
+	------------------
 	*/
-		time2ndVbatch = -dmrg_get_wtime();
-		dmrg_Xgemm_vbatch( transaArray, transbArray,
-		                   mArray, nArray, kArray,
-		                   alphaArray_,  aArray_, ldaArray, bArray_, ldbArray,
-		                   betaArray,   cArray_, ldcArray,
-		                   ngroups, groupSize );
-		time2ndVbatch += dmrg_get_wtime();
+		time2ndVbatch = -dmrgGetWtime();
+		xGemmVbatch(transaArray,
+		            transbArray,
+		            mArray,
+		            nArray,
+		            kArray,
+		            alphaArray,
+		            aArray,
+		            ldaArray,
+		            bArray,
+		            ldbArray,
+		            betaArray,
+		            cArray,
+		            ldcArray,
+		            groupSize);
+		time2ndVbatch += dmrgGetWtime();
 		gflops2 = gflops2/(1000.0*1000.0*1000.0);
 
 		std::cerr<<"1st vbatch "<<gflops1/time1stVbatch;
@@ -363,7 +379,7 @@ public:
 
 		std::cerr<<"overall "<<(gflops1+gflops2)/(time1stVbatch + time2ndVbatch);
 		std::cerr<<" gflops/sec\n";
-// dmrg_free( (void *) BX_ );
+		// dmrg_free( (void *) BX_ );
 	}
 
 private:
@@ -380,9 +396,95 @@ private:
 				b[i + j*(ldb)] = a(i, j);
 	}
 
+	void xGemmVbatch(const VectorCharType& ctransaArray,
+	                 const VectorCharType& ctransbArray,
+	                 const VectorSizeType& mAarray,
+	                 const VectorSizeType& nAarray,
+	                 const VectorSizeType& kAarray,
+	                 const VectorType& alphaArray,
+	                 const VectorConstStarType& aArray,
+	                 const VectorSizeType& ldaArray,
+	                 const VectorConstStarType& bArray,
+	                 const VectorSizeType& ldbArray,
+	                 const VectorType& betaArray,
+	                 const VectorStarType& cArray,
+	                 const VectorSizeType& ldcArray,
+	                 const VectorSizeType& groupSize) const
+	{
+		SizeType ngroups = initKron_.numberOfPatches(InitKronType::OLD);
+		const int idebug = 1;
+		RealType gflops = 0;
+		RealType elapsedTime = 0;
+
+		if (idebug >= 1) {
+			elapsedTime = -dmrgGetWtime();
+
+			for (SizeType igroup = 0; igroup < ngroups; ++igroup)
+				gflops += mAarray[igroup]*nAarray[igroup]*kAarray[igroup]*groupSize[igroup]*2.0;
+
+			gflops /= (1000.0*1000.0*1000.0);
+		}
+
+		/*
+	  ---------------------
+	  expand out the groups
+	  ---------------------
+	  */
+		SizeType batchSize = std::accumulate(groupSize.begin(), groupSize.end(), 0);
+		VectorSizeType idxVector(batchSize, 0);
+		SizeType idx = 0;
+		for(SizeType igroup = 0; igroup < ngroups; ++igroup)
+			for(SizeType i = 0; i < groupSize[igroup]; ++i)
+				idxVector[igroup + i*ngroups] = idx++;
+		/*
+	 ----------------------------------------------------------
+	 Note magma_dgemmVbatched need arrays of size batchSize+1
+	 Set vbatchDim to be multiple of 32 for better alignment in memory
+	 ----------------------------------------------------------
+	 */
+
+		// parallelize over batchSize FIXME
+		for(SizeType igroup = 0; igroup < ngroups; ++igroup) {
+			for(SizeType i = 0; i < groupSize[igroup]; ++i) {
+				assert(igroup + i*ngroups < idxVector.size());
+				SizeType idx = idxVector[igroup + i*ngroups];
+
+				psimag::BLAS::GEMM(ctransaArray[igroup],
+				                   ctransbArray[igroup],
+				                   mAarray[igroup],
+				                   nAarray[igroup],
+				                   kAarray[igroup],
+				                   alphaArray[igroup],
+				                   aArray[idx],
+				                   ldaArray[igroup],
+				                   bArray[idx],
+				                   ldbArray[igroup],
+				                   betaArray[igroup],
+				                   cArray[idx],
+				                   ldcArray[igroup]);
+			}
+		}
+
+		if (idebug >= 1) {
+			elapsedTime += dmrgGetWtime();
+			RealType gflopsPerSec = (elapsedTime > 0) ? gflops/elapsedTime : 0;
+			std::cerr<<"dmrgVbatch: gflops="<<gflops;
+			std::cerr<<", elapsedTime="<<elapsedTime;
+			std::cerr<<", gflops/sec="<<gflopsPerSec<<"\n";
+		}
+	}
+
+
+	static RealType dmrgGetWtime()
+	{
+		return clock()/CLOCKS_PER_SEC;
+	}
+
 	const InitKronType& initKron_;
 	bool enabled_;
 	VectorSizeType xyPatchStart_;
+	MatrixType Abatch_;
+	MatrixType Bbatch_;
 };
 }
 #endif // BATCHEDGEMM_H
