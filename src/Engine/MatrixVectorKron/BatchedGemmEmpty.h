@@ -25,7 +25,7 @@ public:
 
 	BatchedGemm2(const InitKronType& initKron)
 	    : initKron_(initKron),
-	      xyPatchStart_(initKron_.numberOfPatches(InitKronType::OLD), 0)
+	      xyPatchStart_(initKron_.numberOfPatches(InitKronType::OLD) + 1, 0)
 	{
 		if (!enabled()) return;
 
@@ -54,7 +54,7 @@ public:
 		Abatch_.resize(ldAbatch, ncolAbatch);
 		Bbatch_.resize(ldBbatch, ncolBbatch);
 
-		for (SizeType ipatch = 0; ipatch < npatches - 1; ++ipatch) {
+		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
 			int nrowX = initKron_.lrs(InitKronType::NEW).right().partition(ipatch + 1)
 			        - initKron_.lrs(InitKronType::NEW).right().partition(ipatch);
 			int ncolX = initKron_.lrs(InitKronType::NEW).left().partition(ipatch + 1)
