@@ -234,9 +234,9 @@ sub correctionVectorReadOpen
 	my $status;
 	my $maxSite = 0;
 	while (<$fh>) {
-		if (/P3/ and /PSI/) {
+		if (/P3/ and /gs/) {
 		        $status="p3";
-		} elsif (/P2/ and /PSI/) {
+		} elsif (/P2/ and /gs/) {
 		        $status="p2";
 		} else {
 		        next;
@@ -324,6 +324,7 @@ sub procAllQs
 	my ($array,$ind,$omega,$centralSite) = @_;
 	procCommon($ind,$omega,$centralSite);
 	readAllQs($array,$ind);
+	die "procAllQs: array is empty\n" if (scalar(@$array) == 0);
 }
 
 sub readAllQs
@@ -556,6 +557,7 @@ sub spectrumToColor
 
 	close(FIN);
 
+	die "No data found in $file\n" if ($counter == 0);
 	print LOGFILEOUT "$0: Read $counter lines size=$size for $realOrImag from $file\n";
 
 	my ($min,$max) = minMaxData($data);
@@ -569,6 +571,7 @@ sub minMaxData
 {
 	my ($a) = @_;
 	my $rows = scalar(@$a);
+	die "minMaxData, rows=0\n" if ($rows == 0);
 	my ($min,$max) = ($a->[0]->[1],$a->[0]->[1]);
 	for (my $i = 0; $i < $rows; ++$i) {
 		my @thisRow = @{$a->[$i]};
