@@ -51,8 +51,8 @@ public:
 					const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
 					const ArrayOfMatStructType& yiStruct = initKron_.yc(ic);
 
-					const MatrixDenseOrSparseType& Amat =  xiStruct(outPatch,inPatch);
-					const MatrixDenseOrSparseType& Bmat =  yiStruct(outPatch,inPatch);
+					const MatrixDenseOrSparseType& Amat = xiStruct(outPatch,inPatch);
+					const MatrixDenseOrSparseType& Bmat = yiStruct(outPatch,inPatch);
 
 					const MatrixType& AmatDense = Amat.dense();
 					const MatrixType& BmatDense = Bmat.dense();

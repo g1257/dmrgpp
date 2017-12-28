@@ -176,12 +176,6 @@ public:
 		return *yc_[ic];
 	}
 
-	const ComplexOrRealType& value(SizeType i) const
-	{
-		assert(values_.size()>i);
-		return values_[i];
-	}
-
 	SizeType connections() const { return xc_.size(); }
 
 	SizeType size(WhatBasisEnum what) const
@@ -237,7 +231,6 @@ protected:
 	{
 		SparseMatrixType Ahat;
 		calculateAhat(Ahat, A, link2.value, link2.fermionOrBoson);
-		values_.push_back(link2.value);
 		ArrayOfMatStructType* x1 = new ArrayOfMatStructType(Ahat,
 		                                                    ijpatchesOld_,
 		                                                    *ijpatchesNew_,
@@ -407,7 +400,6 @@ private:
 	VectorSizeType weightsOfPatches_;
 	VectorArrayOfMatStructType xc_;
 	VectorArrayOfMatStructType yc_;
-	VectorType values_;
 	VectorBoolType signsNew_;
 	bool wftMode_;
 };
