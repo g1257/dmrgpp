@@ -21,6 +21,8 @@ class BatchedGemm2 {
 	typedef typename PsimagLite::Vector<ComplexOrRealType*>::Type VectorStarType;
 	typedef typename PsimagLite::Vector<const ComplexOrRealType*>::Type VectorConstStarType;
 
+	static const int ialign_ = 32;
+
 public:
 
 	BatchedGemm2(const InitKronType& initKron)
@@ -47,9 +49,8 @@ public:
 		int nrowBbatch = rightMaxState;
 		int ncolBbatch = rightMaxState * noperator;
 
-		const int ialign = 32;
-		int ldAbatch = ialign * iceil(nrowAbatch, ialign );
-		int ldBbatch = ialign * iceil(nrowBbatch, ialign );
+		int ldAbatch = ialign_ * iceil(nrowAbatch, ialign_ );
+		int ldBbatch = ialign_ * iceil(nrowBbatch, ialign_ );
 
 		Abatch_.resize(ldAbatch, ncolAbatch);
 		Bbatch_.resize(ldBbatch, ncolBbatch);
@@ -127,12 +128,6 @@ public:
 		}
 
 		// USE_GETSET block here omitted
-
-		//		*pAbatch = Abatch_;
-		//		*pBbatch = Bbatch_;
-		//		*pleftPatchStart = leftPatchStart_;
-		//		*prightPatchStart = rightPatchStart_;
-		//		*pxyPatchStart = xyPatchStart_;
 	}
 
 
@@ -143,7 +138,6 @@ public:
 		if (!enabled())
 			err("BatchedGemm::matrixVector called but BatchedGemm not enabled\n");
 
-		const int ialign = 32;
 		RealType gflops1 = 0.0;
 		RealType gflops2 = 0.0;
 		RealType time1stVbatch = 0.0;
@@ -175,10 +169,9 @@ public:
 		}
 
 		int ngroups = npatches;
-		int ngroupsDim = ialign * iceil(ngroups, ialign);
+		int ngroupsDim = ialign_ * iceil(ngroups, ialign_);
 		int batchSize = ngroups * noperator;
-		int batchSizeDim = ialign * iceil(batchSize, ialign);
-
+		int batchSizeDim = ialign_ * iceil(batchSize, ialign_);
 		VectorType alphaArray(ngroupsDim);
 		VectorType betaArray(ngroupsDim);
 		VectorConstStarType aArray(batchSizeDim);
@@ -191,18 +184,15 @@ public:
 		VectorSizeType ldaArray(batchSizeDim);
 		VectorSizeType ldbArray(batchSizeDim);
 		VectorSizeType ldcArray(batchSizeDim);
-
 		VectorCharType transaArray(ngroupsDim);
 		VectorCharType transbArray(ngroupsDim);
-
 		int nrowA = leftMaxStates;
 		int ncolA = nrowA;
 		int nrowB = rightMaxStates;
 		int ncolB = nrowB;
-
 		int nrowBX = nrowB;
 		int ncolBX = ncolA * noperator;
-		int ldBX = ialign * iceil(nrowBX, ialign);
+		int ldBX = ialign_ * iceil(nrowBX, ialign_);
 		MatrixType BX(ldBX,  ncolA*noperator);
 
 		SizeType idx = 0;
@@ -370,7 +360,7 @@ public:
 		            ldcArray,
 		            groupSize);
 		time2ndVbatch += dmrgGetWtime();
-		gflops2 = gflops2/(1000.0*1000.0*1000.0);
+		gflops2 /= (1000.0*1000.0*1000.0);
 
 		std::cerr<<"1st vbatch "<<gflops1/time1stVbatch;
 		std::cerr<<" gflops/sec (gflops1="<<gflops1<<",time="<<time1stVbatch<<")\n";
@@ -379,7 +369,6 @@ public:
 
 		std::cerr<<"overall "<<(gflops1+gflops2)/(time1stVbatch + time2ndVbatch);
 		std::cerr<<" gflops/sec\n";
-		// dmrg_free( (void *) BX_ );
 	}
 
 private:
@@ -393,7 +382,7 @@ private:
 	{
 		for (int j = 0; j < n; ++j)
 			for (int i = 0; i < m; ++i)
-				b[i + j*(ldb)] = a(i, j);
+				b[i + j*ldb] = a(i, j);
 	}
 
 	void xGemmVbatch(const VectorCharType& ctransaArray,
@@ -432,10 +421,12 @@ private:
 	  */
 		SizeType batchSize = std::accumulate(groupSize.begin(), groupSize.end(), 0);
 		VectorSizeType idxVector(batchSize, 0);
-		SizeType idx = 0;
-		for(SizeType igroup = 0; igroup < ngroups; ++igroup)
-			for(SizeType i = 0; i < groupSize[igroup]; ++i)
-				idxVector[igroup + i*ngroups] = idx++;
+		{
+			SizeType idx = 0;
+			for(SizeType igroup = 0; igroup < ngroups; ++igroup)
+				for(SizeType i = 0; i < groupSize[igroup]; ++i)
+					idxVector[igroup + i*ngroups] = idx++;
+		}
 		/*
 	 ----------------------------------------------------------
 	 Note magma_dgemmVbatched need arrays of size batchSize+1
