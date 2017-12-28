@@ -362,6 +362,8 @@ public:
 		time2ndVbatch += dmrgGetWtime();
 		gflops2 /= (1000.0*1000.0*1000.0);
 
+		if (time1stVbatch < 1e-6 || time2ndVbatch < 1e-6)
+			return;
 		std::cerr<<"1st vbatch "<<gflops1/time1stVbatch;
 		std::cerr<<" gflops/sec (gflops1="<<gflops1<<",time="<<time1stVbatch<<")\n";
 		std::cerr<<"2nd vbatch "<<gflops2/time2ndVbatch<<" gflops/sec (gflops2=";
