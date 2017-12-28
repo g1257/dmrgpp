@@ -25,6 +25,36 @@ class BatchedGemm2 {
 	static const int ialign_ = 32;
 	static const int idebug_ = 0; // set to 0 until it gives correct results
 
+	class MatrixOrVector {
+
+	public:
+
+		MatrixOrVector(const VectorType& v) : v_(&v), m_(0) {}
+
+		MatrixOrVector(const MatrixType& m) : v_(0), m_(&m) {}
+
+		const ComplexOrRealType& operator()(SizeType first,
+		                                    SizeType row,
+		                                    SizeType col,
+		                                    SizeType ld) const
+		{
+			if (v_) {
+				assert(!m_);
+				SizeType offset = first + row + col*ld;
+				assert(offset < v_->size());
+				return v_->operator[](offset);
+			}
+
+			assert(m_);
+			return m_->operator()(row + first, col);
+		}
+
+	private:
+
+		const VectorType* v_;
+		const MatrixType* m_;
+	};
+
 public:
 
 	BatchedGemm2(const InitKronType& initKron) : initKron_(initKron)
@@ -151,20 +181,16 @@ public:
 		int ngroupsDim = ialign_ * iceil(ngroups, ialign_);
 		int batchSize = ngroups * noperator;
 		int batchSizeDim = ialign_ * iceil(batchSize, ialign_);
-		VectorType alphaArray(ngroupsDim);
-		VectorType betaArray(ngroupsDim);
-		VectorConstStarType aArray(batchSizeDim);
-		VectorConstStarType bArray(batchSizeDim);
+
+		VectorSizeType aArray(batchSizeDim);
+		VectorSizeType bArray(batchSizeDim);
 		VectorStarType cArray(batchSizeDim);
 		VectorSizeType mArray(ngroupsDim);
 		VectorSizeType nArray(ngroupsDim);
 		VectorSizeType kArray(ngroupsDim);
-		VectorSizeType groupSize(ngroupsDim);
-		VectorSizeType ldaArray(batchSizeDim);
 		VectorSizeType ldbArray(batchSizeDim);
 		VectorSizeType ldcArray(batchSizeDim);
-		VectorCharType transaArray(ngroupsDim);
-		VectorCharType transbArray(ngroupsDim);
+
 		int nrowA = leftMaxStates;
 		int ncolA = nrowA;
 		int nrowB = rightMaxStates;
@@ -173,6 +199,8 @@ public:
 		int ncolBX = ncolA * noperator;
 		int ldBX = ialign_ * iceil(nrowBX, ialign_);
 		MatrixType BX(ldBX,  ncolA*noperator);
+
+		MatrixOrVector mOvVin(vin);
 
 		SizeType idx = 0;
 		for (SizeType jpatch = 0; jpatch < npatches; ++jpatch) {
@@ -188,26 +216,24 @@ public:
 	 --------------------------------------
 	 */
 			assert(static_cast<SizeType>(j1) < vin.size());
-			const ComplexOrRealType* XJ = &(vin[j1]);
 			int ldXJ = nrowX;
-			SizeType igroup = initKron_.patch(InitKronType::NEW,
-			                                  GenIjPatchType::LEFT)[jpatch];
+
 			SizeType jgroup = initKron_.patch(InitKronType::NEW,
 			                                  GenIjPatchType::RIGHT)[jpatch];
 			int R1 = initKron_.lrs(InitKronType::NEW).right().partition(jgroup);
 			int R2 = initKron_.lrs(InitKronType::NEW).right().partition(jgroup + 1);
+
+			SizeType igroup = initKron_.patch(InitKronType::NEW,
+			                                  GenIjPatchType::LEFT)[jpatch];
 			int L1 = initKron_.lrs(InitKronType::NEW).left().partition(igroup);
 			int L2 = initKron_.lrs(InitKronType::NEW).left().partition(igroup + 1);
-			SizeType kmax = noperator;
 
 			/*
 	 -------------------------------
 	 independent DGEMM in same group
 	 -------------------------------
 	 */
-			assert(igroup < groupSize.size());
-			groupSize[igroup] = kmax;
-			for (SizeType k = 0; k < kmax; ++k) {
+			for (SizeType k = 0; k < noperator; ++k) {
 				int offsetB = k*ncolB;
 				int offsetBX = k*ncolA;
 
@@ -217,8 +243,6 @@ public:
 											 XJ( 1:(R2-R1+1), 1:(L2-L1+1));
 		------------------------------------------------------------------------
 		*/
-				transaArray[igroup] = 'N';
-				transbArray[igroup] = 'N';
 				int mm = nrowBX;
 				int nn = L2 - L1;
 				int kk = R2 - R1;
@@ -228,16 +252,12 @@ public:
 
 				gflops1 += ((2.0*mm)*nn)*kk;
 
-				alphaArray[igroup] = 1.0;
-				betaArray[igroup] = 0.0;
-
 				cArray[idx] = &(BX(0, offsetBX + L1));
 				ldcArray[igroup] = ldBX;
 
-				aArray[idx] = &(Bbatch_(0, offsetB + R1));
-				ldaArray[igroup] = Bbatch_.rows();
+				aArray[idx] = offsetB + R1;
 
-				bArray[idx] = XJ;
+				bArray[idx] = j1;
 				ldbArray[igroup] = ldXJ;
 				++idx;
 			}
@@ -248,20 +268,18 @@ public:
 	------------------
 	*/
 		time1stVbatch = -dmrgGetWtime();
-		xGemmVbatch(transaArray,
-		            transbArray,
+		xGemmVbatch('N',
 		            mArray,
 		            nArray,
 		            kArray,
-		            alphaArray,
 		            aArray,
-		            ldaArray,
+		            Bbatch_,
 		            bArray,
 		            ldbArray,
-		            betaArray,
+		            mOvVin,
 		            cArray,
 		            ldcArray,
-		            groupSize);
+		            noperator);
 		time1stVbatch += dmrgGetWtime();
 		gflops1 = gflops1/(1000.0*1000.0*1000.0);
 
@@ -270,6 +288,8 @@ public:
  perform computations with  Y += (BX)*transpose(A)
  -------------------------------------------------
 */
+		MatrixOrVector mOvAbatch(Abatch_);
+
 		for(SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
 
 			long i1 = initKron_.offsetForPatches(InitKronType::NEW, ipatch);
@@ -302,9 +322,6 @@ public:
 										 transpose( Abatch( L1:L2,1:ncolBX) );
 		--------------------------------------------------------------------
 	  */
-			groupSize[igroup] = 1;
-			transaArray[igroup] = 'N';
-			transbArray[igroup] = 'T';
 			int mm = nrowYI;
 			int nn = ncolYI;
 			int kk = ncolBX;
@@ -312,11 +329,8 @@ public:
 			nArray[igroup] = nn;
 			kArray[igroup] = kk;
 			gflops2 += ((2.0*mm)*nn)*kk;
-			alphaArray[igroup] = 1.0;
-			betaArray[igroup] = 0.0;
-			aArray[igroup] =  &(BX(R1, 0));
-			ldaArray[igroup] = ldBX;
-			bArray[igroup] = &(Abatch_(L1, 0));
+			aArray[igroup] =  R1;
+			bArray[igroup] = L1;
 			ldbArray[igroup] = Abatch_.rows();
 			cArray[igroup] = YI;
 			ldcArray[igroup] = ldYI;
@@ -330,20 +344,18 @@ public:
 	------------------
 	*/
 		time2ndVbatch = -dmrgGetWtime();
-		xGemmVbatch(transaArray,
-		            transbArray,
+		xGemmVbatch('T',
 		            mArray,
 		            nArray,
 		            kArray,
-		            alphaArray,
 		            aArray,
-		            ldaArray,
+		            BX,
 		            bArray,
 		            ldbArray,
-		            betaArray,
+		            mOvAbatch,
 		            cArray,
 		            ldcArray,
-		            groupSize);
+		            1);
 		time2ndVbatch += dmrgGetWtime();
 		gflops2 /= (1000.0*1000.0*1000.0);
 
@@ -377,20 +389,18 @@ private:
 				b(i + xstart, j + ystart) = a(i, j);
 	}
 
-	void xGemmVbatch(const VectorCharType& ctransaArray,
-	                 const VectorCharType& ctransbArray,
+	void xGemmVbatch(char transb,
 	                 const VectorSizeType& mAarray,
 	                 const VectorSizeType& nAarray,
 	                 const VectorSizeType& kAarray,
-	                 const VectorType& alphaArray,
-	                 const VectorConstStarType& aArray,
-	                 const VectorSizeType& ldaArray,
-	                 const VectorConstStarType& bArray,
+	                 const VectorSizeType& aColsOrRows,
+	                 const MatrixType& aMatrix,
+	                 const VectorSizeType& bArray,
 	                 const VectorSizeType& ldbArray,
-	                 const VectorType& betaArray,
+	                 const MatrixOrVector& b,
 	                 const VectorStarType& cArray,
 	                 const VectorSizeType& ldcArray,
-	                 const VectorSizeType& groupSize) const
+	                 SizeType groupSize) const
 	{
 		SizeType ngroups = initKron_.numberOfPatches(InitKronType::OLD);
 		RealType gflops = 0;
@@ -400,7 +410,7 @@ private:
 			elapsedTime = -dmrgGetWtime();
 
 			for (SizeType igroup = 0; igroup < ngroups; ++igroup)
-				gflops += mAarray[igroup]*nAarray[igroup]*kAarray[igroup]*groupSize[igroup]*2.0;
+				gflops += mAarray[igroup]*nAarray[igroup]*kAarray[igroup]*groupSize*2.0;
 
 			gflops /= (1000.0*1000.0*1000.0);
 		}
@@ -410,12 +420,12 @@ private:
 	  expand out the groups
 	  ---------------------
 	  */
-		SizeType batchSize = std::accumulate(groupSize.begin(), groupSize.end(), 0);
+		SizeType batchSize = groupSize*ngroups;
 		VectorSizeType idxVector(batchSize, 0);
 		{
 			SizeType idx = 0;
 			for(SizeType igroup = 0; igroup < ngroups; ++igroup)
-				for(SizeType i = 0; i < groupSize[igroup]; ++i)
+				for(SizeType i = 0; i < groupSize; ++i)
 					idxVector[igroup + i*ngroups] = idx++;
 		}
 		/*
@@ -427,25 +437,24 @@ private:
 
 		// parallelize over batchSize FIXME
 		for(SizeType igroup = 0; igroup < ngroups; ++igroup) {
-			for(SizeType i = 0; i < groupSize[igroup]; ++i) {
+			for(SizeType i = 0; i < groupSize; ++i) {
 				assert(igroup + i*ngroups < idxVector.size());
 				SizeType idx = idxVector[igroup + i*ngroups];
 
 				std::cerr<<"igroup = "<<igroup<<" i = "<<i<<" idx = "<<idx;
-				std::cerr<<"transb = "<<ctransbArray[igroup]<<"\n";
-				fakeGEMM(ctransaArray[igroup],
-				                   ctransbArray[igroup],
-				                   mAarray[igroup],
-				                   nAarray[igroup],
-				                   kAarray[igroup],
-				                   alphaArray[igroup],
-				                   aArray[idx],
-				                   ldaArray[igroup],
-				                   bArray[idx],
-				                   ldbArray[igroup],
-				                   betaArray[igroup],
-				                   cArray[idx],
-				                   ldcArray[igroup]);
+				std::cerr<<"transb = "<<transb<<"\n";
+
+				fakeGEMM(transb,
+				         mAarray[igroup],
+				         nAarray[igroup],
+				         kAarray[igroup],
+				         aMatrix,
+				         aColsOrRows[idx],
+				         bArray[idx],
+				         ldbArray[igroup],
+				         b,
+				         cArray[idx],
+				         ldcArray[igroup]);
 			}
 		}
 
@@ -464,17 +473,20 @@ private:
 		return clock()/CLOCKS_PER_SEC;
 	}
 
-	static void fakeGEMM(char transa, char transb, int m, int n, int ktotal,
-	                     ComplexOrRealType alpha, const ComplexOrRealType* A,
-	                     int lda, const ComplexOrRealType* B, int ldb,
-	                     ComplexOrRealType beta, ComplexOrRealType* C, int ldc)
+	static void fakeGEMM(char transb, int m, int n, int ktotal,
+	                     const MatrixType& A, SizeType rowOrCol,
+	                     SizeType firstB, int ldb, const MatrixOrVector& B,
+	                     ComplexOrRealType* C, int ldc)
 	{
 		for (int j = 0; j < n; ++j) {
 			for (int i = 0; i < m; ++i) {
+				C[i + j*ldc] = 0.0;
 				for (int k = 0; k < ktotal; ++k) {
-					ComplexOrRealType opAik = (transa == 'N') ? A[i + k*lda] : A[k + i*lda];
-					ComplexOrRealType opBkj = (transb == 'N') ? B[k + j*ldb] : B[j + k*ldb];
-					C[i + j*ldc] = alpha*opAik*opBkj + beta*C[i + j*ldc];
+					ComplexOrRealType opAik =  (transb == 'N') ? A(i, k + rowOrCol) :
+					                                             A(i + rowOrCol, k);
+					ComplexOrRealType opBkj = (transb == 'N') ? B(firstB, k, j, ldb) :
+					                                            B(firstB, j, k, ldb);
+					C[i + j*ldc] += opAik*opBkj;
 				}
 			}
 		}
