@@ -88,7 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifdef PLUGIN_SC
 #include "BatchedGemmPluginSc.h"
 #else
-#include "BatchedGemmEmpty.h"
+#include "BatchedGemm2.h"
 #endif
 
 namespace Dmrg {
