@@ -407,6 +407,10 @@ public:
 		PsimagLite::Options::Writeable optWriteable(registerOpts,
 		                                            PsimagLite::Options::Writeable::PERMISSIVE);
 		optsReadable_ = new  OptionsReadableType(optWriteable,val);
+
+		if (val.find("BatchedGemm") != PsimagLite::String::npos &&
+		        val.find("MatrixVectorKron") == PsimagLite::String::npos)
+			err("FATAL: BatchedGemm only with MatrixVectorKron\n");
 	}
 
 	bool isSet(const PsimagLite::String& thisOption) const

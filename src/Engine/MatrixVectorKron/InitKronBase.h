@@ -202,6 +202,7 @@ public:
 		const BasisType& left = lrs(what).left();
 		const BasisType& right = lrs(what).right();
 
+		assert(offsetForPatches.size() == npatch + 1);
 		for( SizeType ipatch=0; ipatch < npatch; ipatch++) {
 			offsetForPatches[ipatch] = sum;
 
@@ -215,6 +216,8 @@ public:
 
 			sum +=  sizeLeft*sizeRight;
 		}
+
+		offsetForPatches[npatch] = sum;
 	}
 
 	SizeType numberOfPatches(WhatBasisEnum what) const

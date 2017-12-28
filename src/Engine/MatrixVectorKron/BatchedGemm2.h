@@ -10,6 +10,7 @@ template<typename InitKronType>
 class BatchedGemm2 {
 
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
+	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
 	typedef typename MatrixDenseOrSparseType::VectorType VectorType;
 	typedef typename VectorType::value_type ComplexOrRealType;
@@ -22,26 +23,19 @@ class BatchedGemm2 {
 	typedef typename PsimagLite::Vector<const ComplexOrRealType*>::Type VectorConstStarType;
 
 	static const int ialign_ = 32;
+	static const int idebug_ = 0; // set to 0 until it gives correct results
 
 public:
 
-	BatchedGemm2(const InitKronType& initKron)
-	    : initKron_(initKron),
-	      xyPatchStart_(initKron_.numberOfPatches(InitKronType::OLD) + 1, 0)
+	BatchedGemm2(const InitKronType& initKron) : initKron_(initKron)
 	{
 		if (!enabled()) return;
 
 		SizeType npatches = initKron_.numberOfPatches(InitKronType::OLD);
 		SizeType noperator = initKron_.connections();
 
-		SizeType leftMaxState = 0;
-		SizeType rightMaxState = 0;
-		for(SizeType ipatch = 0; ipatch <  npatches; ++ipatch) {
-			leftMaxState += initKron_.lrs(InitKronType::NEW).left().partition(ipatch + 1)
-			        - initKron_.lrs(InitKronType::NEW).left().partition(ipatch);
-			rightMaxState += initKron_.lrs(InitKronType::NEW).right().partition(ipatch + 1)
-			        - initKron_.lrs(InitKronType::NEW).right().partition(ipatch);
-		}
+		SizeType leftMaxState = initKron_.lrs(InitKronType::NEW).left().size();
+		SizeType rightMaxState = initKron_.lrs(InitKronType::NEW).right().size();
 
 		int nrowAbatch = leftMaxState;
 		int ncolAbatch = leftMaxState * noperator;
@@ -54,14 +48,6 @@ public:
 
 		Abatch_.resize(ldAbatch, ncolAbatch);
 		Bbatch_.resize(ldBbatch, ncolBbatch);
-
-		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
-			int nrowX = initKron_.lrs(InitKronType::NEW).right().partition(ipatch + 1)
-			        - initKron_.lrs(InitKronType::NEW).right().partition(ipatch);
-			int ncolX = initKron_.lrs(InitKronType::NEW).left().partition(ipatch + 1)
-			        - initKron_.lrs(InitKronType::NEW).left().partition(ipatch);
-			xyPatchStart_[ipatch + 1] = xyPatchStart_[ipatch] + nrowX*ncolX;
-		}
 
 		/*
   -------------------------
@@ -83,21 +69,14 @@ public:
 				for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
 
 					const MatrixType& Asrc =  xiStruct(ipatch,jpatch).dense();
+					SizeType igroup = initKron_.patch(InitKronType::NEW,
+					                                  GenIjPatchType::LEFT)[ipatch];
+					SizeType jgroup = initKron_.patch(InitKronType::NEW,
+					                                  GenIjPatchType::LEFT)[jpatch];
+					int ia = initKron_.lrs(InitKronType::NEW).left().partition(igroup);
+					int ja = initKron_.lrs(InitKronType::NEW).left().partition(jgroup);
 
-					int nrowAsrc = initKron_.lrs(InitKronType::NEW).left().partition(ipatch + 1)
-					        - initKron_.lrs(InitKronType::NEW).left().partition(ipatch);
-					int ncolAsrc = initKron_.lrs(InitKronType::NEW).left().partition(jpatch + 1)
-					        - initKron_.lrs(InitKronType::NEW).left().partition(jpatch);
-
-					int ia = initKron_.lrs(InitKronType::NEW).left().partition(ipatch);
-					int ja = initKron_.lrs(InitKronType::NEW).left().partition(jpatch);
-
-					ComplexOrRealType *Adest = &(Abatch_(ia, ja + ioperator*leftMaxState));
-
-					SizeType tmp = nrowAsrc - 1 + (ncolAsrc - 1)*ldAbatch;
-					assert(tmp < Abatch_.rows()*Abatch_.cols());
-					std::cerr<<"HERE "<<ioperator<<" "<<jpatch<<" "<<ipatch<<"\n";
-					mylacpy(nrowAsrc, ncolAsrc, Asrc, Adest, ldAbatch);
+					mylacpy(Asrc, Abatch_, ia, ja + ioperator*leftMaxState);
 				}
 			}
 		}
@@ -110,19 +89,14 @@ public:
 				for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
 
 					const MatrixType& Bsrc =  yiStruct(ipatch,jpatch).dense();
+					SizeType igroup = initKron_.patch(InitKronType::NEW,
+					                                  GenIjPatchType::RIGHT)[ipatch];
+					SizeType jgroup = initKron_.patch(InitKronType::NEW,
+					                                  GenIjPatchType::RIGHT)[jpatch];
+					int ib = initKron_.lrs(InitKronType::NEW).right().partition(igroup);
+					int jb = initKron_.lrs(InitKronType::NEW).right().partition(jgroup);
 
-					int nrowBsrc = initKron_.lrs(InitKronType::NEW).right().partition(ipatch + 1)
-					        - initKron_.lrs(InitKronType::NEW).right().partition(ipatch);
-					int ncolBsrc = initKron_.lrs(InitKronType::NEW).right().partition(jpatch + 1)
-					        - initKron_.lrs(InitKronType::NEW).right().partition(jpatch);
-
-					int ib = initKron_.lrs(InitKronType::NEW).right().partition(ipatch);
-					int jb = initKron_.lrs(InitKronType::NEW).right().partition(jpatch);
-
-					ComplexOrRealType* Bdest = &(Bbatch_(ib,jb + ioperator*rightMaxState));
-					SizeType tmp = nrowBsrc - 1 + (ncolBsrc - 1)*ldBbatch;
-					assert(tmp < Bbatch_.rows()*Bbatch_.cols());
-					mylacpy(nrowBsrc, ncolBsrc, Bsrc, Bdest, ldBbatch);
+					mylacpy(Bsrc, Bbatch_, ib, jb + ioperator*rightMaxState);
 				}
 			}
 		}
@@ -156,15 +130,20 @@ public:
 		VectorSizeType rightPatchSize(npatches);
 
 		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
-			int L1 = initKron_.lrs(InitKronType::NEW).left().partition(ipatch);
-			int L2 = initKron_.lrs(InitKronType::NEW).left().partition(ipatch + 1);
+			SizeType igroup = initKron_.patch(InitKronType::NEW,
+			                                  GenIjPatchType::LEFT)[ipatch];
+
+			int L1 = initKron_.lrs(InitKronType::NEW).left().partition(igroup);
+			int L2 = initKron_.lrs(InitKronType::NEW).left().partition(igroup + 1);
 
 			leftPatchSize[ipatch] =  L2 - L1;
 		}
 
 		for(SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
-			int  R1 = initKron_.lrs(InitKronType::NEW).right().partition(ipatch);
-			int  R2 = initKron_.lrs(InitKronType::NEW).right().partition(ipatch + 1);
+			SizeType igroup = initKron_.patch(InitKronType::NEW,
+			                                  GenIjPatchType::RIGHT)[ipatch];
+			int  R1 = initKron_.lrs(InitKronType::NEW).right().partition(igroup);
+			int  R2 = initKron_.lrs(InitKronType::NEW).right().partition(igroup + 1);
 			rightPatchSize[ipatch] = R2 - R1;
 		}
 
@@ -197,9 +176,8 @@ public:
 
 		SizeType idx = 0;
 		for (SizeType jpatch = 0; jpatch < npatches; ++jpatch) {
-			SizeType igroup = jpatch;
-			long j1 = xyPatchStart_[jpatch];
-			long j2 = xyPatchStart_[jpatch + 1];
+			long j1 = initKron_.offsetForPatches(InitKronType::NEW, jpatch);
+			long j2 = initKron_.offsetForPatches(InitKronType::NEW, jpatch + 1);
 			int nrowX = rightPatchSize[jpatch];
 			int ncolX = leftPatchSize[jpatch];
 			assert(j2 - j1 == nrowX * ncolX);
@@ -212,11 +190,14 @@ public:
 			assert(static_cast<SizeType>(j1) < vin.size());
 			const ComplexOrRealType* XJ = &(vin[j1]);
 			int ldXJ = nrowX;
-
-			int R1 = initKron_.lrs(InitKronType::NEW).right().partition(jpatch);
-			int R2 = initKron_.lrs(InitKronType::NEW).right().partition(jpatch + 1);
-			int L1 = initKron_.lrs(InitKronType::NEW).left().partition(jpatch);
-			int L2 = initKron_.lrs(InitKronType::NEW).left().partition(jpatch + 1);
+			SizeType igroup = initKron_.patch(InitKronType::NEW,
+			                                  GenIjPatchType::LEFT)[jpatch];
+			SizeType jgroup = initKron_.patch(InitKronType::NEW,
+			                                  GenIjPatchType::RIGHT)[jpatch];
+			int R1 = initKron_.lrs(InitKronType::NEW).right().partition(jgroup);
+			int R2 = initKron_.lrs(InitKronType::NEW).right().partition(jgroup + 1);
+			int L1 = initKron_.lrs(InitKronType::NEW).left().partition(igroup);
+			int L2 = initKron_.lrs(InitKronType::NEW).left().partition(igroup + 1);
 			SizeType kmax = noperator;
 
 			/*
@@ -290,16 +271,20 @@ public:
  -------------------------------------------------
 */
 		for(SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
-			int igroup = ipatch;
 
-			long i1 = xyPatchStart_[ipatch];
-			long i2 = xyPatchStart_[ipatch + 1];
+			long i1 = initKron_.offsetForPatches(InitKronType::NEW, ipatch);
+			long i2 = initKron_.offsetForPatches(InitKronType::NEW, ipatch + 1);
 
-			SizeType R1 = initKron_.lrs(InitKronType::NEW).right().partition(ipatch);
-			SizeType R2 = initKron_.lrs(InitKronType::NEW).right().partition(ipatch + 1);
 
-			SizeType L1 = initKron_.lrs(InitKronType::NEW).left().partition(ipatch);
-			SizeType L2 = initKron_.lrs(InitKronType::NEW).left().partition(ipatch + 1);
+			SizeType jgroup = initKron_.patch(InitKronType::NEW,
+			                                  GenIjPatchType::RIGHT)[ipatch];
+			SizeType R1 = initKron_.lrs(InitKronType::NEW).right().partition(jgroup);
+			SizeType R2 = initKron_.lrs(InitKronType::NEW).right().partition(jgroup + 1);
+
+			SizeType igroup = initKron_.patch(InitKronType::NEW,
+			                                  GenIjPatchType::LEFT)[ipatch];
+			SizeType L1 = initKron_.lrs(InitKronType::NEW).left().partition(igroup);
+			SizeType L2 = initKron_.lrs(InitKronType::NEW).left().partition(igroup + 1);
 
 			assert(R2 - R1 == rightPatchSize[ipatch] &&
 			       L2 - L1 == leftPatchSize[ipatch]);
@@ -380,11 +365,16 @@ private:
 		return (x + n - 1)/n;
 	}
 
-	static void mylacpy(int m, int n, const MatrixType& a, ComplexOrRealType *b, int ldb)
+	static void mylacpy(const MatrixType& a,
+	                    MatrixType& b,
+	                    SizeType xstart,
+	                    SizeType ystart)
 	{
+		int m = a.rows();
+		int n = a.cols();
 		for (int j = 0; j < n; ++j)
 			for (int i = 0; i < m; ++i)
-				b[i + j*ldb] = a(i, j);
+				b(i + xstart, j + ystart) = a(i, j);
 	}
 
 	void xGemmVbatch(const VectorCharType& ctransaArray,
@@ -403,11 +393,10 @@ private:
 	                 const VectorSizeType& groupSize) const
 	{
 		SizeType ngroups = initKron_.numberOfPatches(InitKronType::OLD);
-		const int idebug = 1;
 		RealType gflops = 0;
 		RealType elapsedTime = 0;
 
-		if (idebug >= 1) {
+		if (idebug_ >= 1) {
 			elapsedTime = -dmrgGetWtime();
 
 			for (SizeType igroup = 0; igroup < ngroups; ++igroup)
@@ -442,7 +431,9 @@ private:
 				assert(igroup + i*ngroups < idxVector.size());
 				SizeType idx = idxVector[igroup + i*ngroups];
 
-				psimag::BLAS::GEMM(ctransaArray[igroup],
+				std::cerr<<"igroup = "<<igroup<<" i = "<<i<<" idx = "<<idx;
+				std::cerr<<"transb = "<<ctransbArray[igroup]<<"\n";
+				fakeGEMM(ctransaArray[igroup],
 				                   ctransbArray[igroup],
 				                   mAarray[igroup],
 				                   nAarray[igroup],
@@ -458,7 +449,7 @@ private:
 			}
 		}
 
-		if (idebug >= 1) {
+		if (idebug_ >= 1) {
 			elapsedTime += dmrgGetWtime();
 			RealType gflopsPerSec = (elapsedTime > 0) ? gflops/elapsedTime : 0;
 			std::cerr<<"dmrgVbatch: gflops="<<gflops;
@@ -473,9 +464,25 @@ private:
 		return clock()/CLOCKS_PER_SEC;
 	}
 
+	static void fakeGEMM(char transa, char transb, int m, int n, int ktotal,
+	                     ComplexOrRealType alpha, const ComplexOrRealType* A,
+	                     int lda, const ComplexOrRealType* B, int ldb,
+	                     ComplexOrRealType beta, ComplexOrRealType* C, int ldc)
+	{
+		for (int j = 0; j < n; ++j) {
+			for (int i = 0; i < m; ++i) {
+				for (int k = 0; k < ktotal; ++k) {
+					ComplexOrRealType opAik = (transa == 'N') ? A[i + k*lda] : A[k + i*lda];
+					ComplexOrRealType opBkj = (transb == 'N') ? B[k + j*ldb] : B[j + k*ldb];
+					C[i + j*ldc] = alpha*opAik*opBkj + beta*C[i + j*ldc];
+				}
+			}
+		}
+
+	}
+
 	const InitKronType& initKron_;
 	bool enabled_;
-	VectorSizeType xyPatchStart_;
 	MatrixType Abatch_;
 	MatrixType Bbatch_;
 };

@@ -120,11 +120,9 @@ public:
 	{
 		SizeType nC = initKron_.connections();
 		SizeType total = initKron_.numberOfPatches(InitKronType::OLD);
-		assert(outPatch < initKron_.offsetForPatches(InitKronType::NEW));
 		SizeType offsetX = initKron_.offsetForPatches(InitKronType::NEW, outPatch);
 		assert(offsetX < x_.size());
 		for (SizeType inPatch=0;inPatch<total;++inPatch) {
-			assert(inPatch < initKron_.offsetForPatches(InitKronType::OLD));
 			SizeType offsetY = initKron_.offsetForPatches(InitKronType::OLD, inPatch);
 			assert(offsetY < y_.size());
 			for (SizeType ic=0;ic<nC;++ic) {

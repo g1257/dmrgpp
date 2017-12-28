@@ -114,7 +114,7 @@ public:
 	      model_(model),
 	      modelHelper_(modelHelper),
 	      vstart_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1),
-	      offsetForPatches_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size())
+	      offsetForPatches_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1)
 	{
 		addHlAndHr();
 		convertXcYcArrays();
@@ -204,11 +204,6 @@ public:
 	const VectorType& yin() const { return yin_; }
 
 	VectorType& xout() { return xout_; }
-
-	SizeType offsetForPatches(typename BaseType::WhatBasisEnum) const
-	{
-		return offsetForPatches_.size();
-	}
 
 	const SizeType& offsetForPatches(typename BaseType::WhatBasisEnum,
 	                                       SizeType ind) const

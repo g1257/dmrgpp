@@ -120,8 +120,8 @@ public:
 	      wftOptions_(wftOptions),
 	      vstartNew_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1),
 	      vstartOld_(BaseType::patch(BaseType::OLD, GenIjPatchType::LEFT).size() + 1),
-	      offsetForPatchesNew_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size()),
-	      offsetForPatchesOld_(BaseType::patch(BaseType::OLD, GenIjPatchType::LEFT).size())
+	      offsetForPatchesNew_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1),
+	      offsetForPatchesOld_(BaseType::patch(BaseType::OLD, GenIjPatchType::LEFT).size() + 1)
 	{
 		BaseType::setUpVstart(vstartNew_, BaseType::NEW);
 		assert(vstartNew_.size() > 0);
@@ -200,12 +200,6 @@ public:
 
 	VectorType& xout() { return xout_; }
 
-	SizeType offsetForPatches(typename BaseType::WhatBasisEnum what) const
-	{
-		return (what == BaseType::NEW) ? offsetForPatchesNew_.size() :
-		                                 offsetForPatchesOld_.size();
-	}
-
 	const SizeType& offsetForPatches(typename BaseType::WhatBasisEnum what,
 	                                       SizeType ind) const
 	{
@@ -217,6 +211,13 @@ public:
 	bool batchedGemm() const { return false; }
 
 private:
+
+
+	SizeType offsetForPatches(typename BaseType::WhatBasisEnum what) const
+	{
+		return (what == BaseType::NEW) ? offsetForPatchesNew_.size() :
+		                                 offsetForPatchesOld_.size();
+	}
 
 	void copyIn(VectorType& x,
 	            const VectorType& v,
