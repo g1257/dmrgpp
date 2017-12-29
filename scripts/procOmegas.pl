@@ -18,7 +18,7 @@ GetOptions('f=s' => \$templateInput,
            'M:i' => \$mMax,
            'r' => \$wantsRealPart) or die "$usage\n";
 
-(defined($templateInput)) or die "$0: USAGE: $usage\n";
+(defined($templateInput) and defined($isPeriodic)) or die "$0: USAGE: $usage\n";
 
 my ($omega0,$total,$omegaStep,$centralSite);
 my $hptr = {"#OmegaBegin" => \$omega0,
@@ -41,13 +41,11 @@ if ($omegaStep < 0) {
 	$omega0 = $omegaStep = 2.0*pi/$beta;
 }
 
-my @omegas;
 my $outSpectrum = "out.spectrum";
 open(FOUTSPECTRUM, ">", "$outSpectrum") or die "$0: Cannot write to $outSpectrum : $!\n";
 for (my $i = 0; $i < $total; ++$i) {
 
 	my $omega = $omega0 + $omegaStep * $i;
-	$omegas[$i] = $omega;
 	print FOUTSPECTRUM "$omega ";
 	print LOGFILEOUT "$0: About to proc for omega = $omega\n";
 
@@ -70,60 +68,32 @@ print STDERR "$0: Spectrum written to $outSpectrum\n";
 my $wantsRealOrImag = (defined($wantsRealPart)) ? "real" : "imag";
 my $omegaMax = $omega0 + $omegaStep * $total;
 printSpectrumToColor($outSpectrum,$wantsRealOrImag,$geometry,$omegaMax);
-printGnuplot($outSpectrum,\@omegas,$geometry);
+printGnuplot($outSpectrum, $geometry);
 
 close(LOGFILEOUT);
 print STDERR "$0: Log written to $logFile\n";
 
 sub printGnuplot
 {
-	my ($inFile,$omegas,$geometry) = @_;
+	my ($inFile, $geometry) = @_;
 
 	open(FIN, "<", "$inFile") or die "$0: Cannot open $inFile : $!\n";
 
-	my @array;
-	my $counter = 0;
+	my %h;
 	while (<FIN>) {
 		my @temp = split;
-		$array[$counter++] = \@temp;
+		if (scalar(@temp) < 1) {
+			print STDERR "$0: line $. in $inFile is empty, skipping\n";
+			next;
+		}
+
+		my $omega = $temp[0];
+		$h{$omega} = \@temp;
 	}
 
 	close(FIN);
 
-	my $numberOfOmegas = scalar(@$omegas);
-	($counter == $numberOfOmegas) or
-		die "$0: Found $counter omegas in $inFile but was expecting $numberOfOmegas\n";
-
-	my $factor = 0;
-	my @fileIndices=(0);
-	if ($geometry eq "chain") {
-		$factor = 0.5;
-	} elsif ($geometry eq "ladder") {
-		$factor = 0.25;
-		@fileIndices=(0,1);
-	} else {
-		die "$0: Unknown geometry $geometry\n";
-	}
-
-	foreach my $fileIndex (@fileIndices) {
-		my $outFile = "outSpectrum$fileIndex.gnuplot";
-		open(FOUT, ">", "$outFile") or die "$0: Cannot write to $outFile : $!\n";
-
-		for (my $i = 0; $i < $numberOfOmegas; ++$i) {
-			my $omega = $omegas->[$i];
-			my $a = $array[$i];
-			my $numberOfQs = int($factor*scalar(@$a));
-			for (my $m = 0; $m < $numberOfQs; ++$m) {
-				my $q = getQ($m,$numberOfQs);
-				my $realPart = $a->[2*$m+1+2*$fileIndex*$numberOfQs];
-				my $imagPart = $a->[2*$m+2+2*$fileIndex*$numberOfQs];
-				print FOUT "$q $omega $realPart $imagPart\n";
-			}
-		}
-
-		close(FOUT);
-		print "$0: Written $outFile\n";
-	}
+	OmegaUtils::printGnuplot(\%h, $geometry, $isPeriodic);
 }
 
 sub printSpectrumToColor
@@ -374,7 +344,7 @@ sub printFourierChain
 
 	my $n = scalar(@$f);
 	for (my $m = 0; $m < $n; ++$m) {
-		my $q = getQ($m,$n);
+		my $q = OmegaUtils::getQ($m, $n, $isPeriodic);
 		my $ptr = $f->[$m];
 		my @temp = @$ptr;
 		print FOUT "$q $temp[0] $temp[1]\n";
@@ -421,7 +391,7 @@ sub fourierChain
 	my $numberOfQs = (defined($mMax)) ? $mMax : $n;
 	for (my $m = 0; $m < $numberOfQs; ++$m) {
 		my @sum = (0,0);
-		my $q = getQ($m,$numberOfQs);
+		my $q = OmegaUtils::getQ($m, $numberOfQs, $isPeriodic);
 		for (my $i = 0; $i < $n; $i++) {
 			my $ptr = $v->[$i];
 			my @temp = @$ptr;
@@ -442,7 +412,7 @@ sub fourierLadder
 	my $n = scalar(@$v);
 	my $numberOfQs = (defined($mMax)) ? $mMax : int(0.5*$n);
 	for (my $m = 0; $m < $numberOfQs; ++$m) {
-		my $q = getQ($m,$numberOfQs);
+		my $q = OmegaUtils::getQ($m, $numberOfQs, $isPeriodic);
 		my @f0 = fourierF0($v,$q);
 		my @f1 = fourierF1($v,$q);
 		for (my $x = 0; $x < 2; ++$x) {
@@ -497,11 +467,7 @@ sub distanceLadder
 	return $first - $second;
 }
 
-sub getQ
-{
-	my ($m,$n) = @_;
-	return ($isPeriodic) ? 2.0*pi*$m/$n : pi*$m/($n+1.0);
-}
+
 
 sub extractValue
 {
