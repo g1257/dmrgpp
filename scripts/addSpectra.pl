@@ -8,17 +8,19 @@ use OmegaUtils;
 
 use Getopt::Long qw(:config no_ignore_case);
 
-my $usage = "-f dollarizedInput [-p]\n";
+my $usage = "-f dollarizedInput [-p] [-z]\n";
 
 my $templateInput;
 my $isPeriodic;
-my $geometry;
+my $zeroAtCenter = 0;
 
 GetOptions('f=s' => \$templateInput,
-           'p' => \$isPeriodic) or die "$usage\n";
+           'p' => \$isPeriodic,
+           'z' => \$zeroAtCenter) or die "$usage\n";
 
 (defined($templateInput) and defined($isPeriodic)) or die "$0: USAGE: $usage\n";
 
+my $geometry;
 my $hptr = {"GeometryKind" => \$geometry};
 OmegaUtils::getLabels($hptr,$templateInput);
 
@@ -30,7 +32,7 @@ foreach my $file (@ARGV) {
 }
 
 #printSpectrum($outSpectrum, \%a);
-OmegaUtils::printGnuplot(\%a, $geometry,  $isPeriodic);
+OmegaUtils::printGnuplot(\%a, $geometry,  $isPeriodic, $zeroAtCenter);
 
 sub printSpectrum
 {

@@ -32,7 +32,7 @@ sub getLabels
 
 sub printGnuplot
 {
-	my ($ptr, $geometry, $isPeriodic) = @_;
+	my ($ptr, $geometry, $isPeriodic, $zeroAtCenter) = @_;
 
 	my $factor = 0;
 	my @fileIndices=(0);
@@ -54,6 +54,7 @@ sub printGnuplot
 			my $nks = scalar(@$aptr) - 1;
 			my $numberOfQs = int($factor*$nks);
 			my $centerShift = ($numberOfQs & 1) ? ($numberOfQs - 1)/2 : $numberOfQs/2;
+			$centerShift = 0 unless ($zeroAtCenter);
 			for (my $m2 = 0; $m2 < $numberOfQs; ++$m2) {
 				my $m = $m2 - $centerShift;
 				$m += $numberOfQs if ($m < 0);

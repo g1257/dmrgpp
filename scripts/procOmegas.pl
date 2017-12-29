@@ -6,17 +6,19 @@ use Math::Trig;
 use OmegaUtils;
 use Getopt::Long qw(:config no_ignore_case);
 
-my $usage = "-f dollarizedInput [-M mForQ] [-S site] [-p] [-r]\n";
+my $usage = "-f dollarizedInput [-M mForQ] [-S site] [-p] [-r] [-z]\n";
 
 my ($templateInput,$site,$m,$geometry,$GlobalNumberOfSites);
 my ($siteForSpectrum,$mForQ,$isPeriodic,$mMax,$wantsRealPart);
+my $zeroAtCenter = 0;
 
 GetOptions('f=s' => \$templateInput,
            'S:i' => \$siteForSpectrum,
            'm:i' => \$mForQ,
            'p' => \$isPeriodic,
            'M:i' => \$mMax,
-           'r' => \$wantsRealPart) or die "$usage\n";
+           'r' => \$wantsRealPart,
+           'z' => \$zeroAtCenter) or die "$usage\n";
 
 (defined($templateInput) and defined($isPeriodic)) or die "$0: USAGE: $usage\n";
 
@@ -93,7 +95,7 @@ sub printGnuplot
 
 	close(FIN);
 
-	OmegaUtils::printGnuplot(\%h, $geometry, $isPeriodic);
+	OmegaUtils::printGnuplot(\%h, $geometry, $isPeriodic, $zeroAtCenter);
 }
 
 sub printSpectrumToColor
