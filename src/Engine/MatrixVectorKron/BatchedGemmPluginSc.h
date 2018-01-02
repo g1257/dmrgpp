@@ -23,6 +23,8 @@ class BatchedGemm2 {
 	typedef typename GenIjPatchType::BasisType BasisType;
 	typedef BatchedGemm<ComplexOrRealType> BatchedGemmPluginScType;
 
+	static const typename InitKronType::WhatBasisEnum DUMMY = InitKronType::OLD;
+
 public:
 
 	BatchedGemm2(const InitKronType& initKron)
@@ -36,12 +38,17 @@ public:
 	{
 		if (!enabled()) return;
 		convertOffsets(offsets_);
-		SizeType npatches = initKron_.numberOfPatches(InitKronType::OLD);
+		SizeType npatches = initKron_.numberOfPatches(DUMMY);
 		SizeType nC = initKron_.connections();
 		ComplexOrRealType** aptr = new ComplexOrRealType*[npatches*npatches*nC];
 		ComplexOrRealType** bptr = new ComplexOrRealType*[npatches*npatches*nC];
 		VectorIntType ldAptr(npatches*npatches*nC);
 		VectorIntType ldBptr(npatches*npatches*nC);
+
+		convertToVector(pLeft_, initKron_.lrs(DUMMY).left());
+		convertToVector(pRight_, initKron_.lrs(DUMMY).right());
+		assert(pLeft_.size() == npatches);
+		assert(pRight_.size() == npatches);
 
 		for (SizeType outPatch = 0; outPatch < npatches; ++outPatch) {
 			for (SizeType inPatch = 0; inPatch < npatches; ++inPatch) {
@@ -60,27 +67,32 @@ public:
 					aptr[outPatch + inPatch*npatches + ic*npatches*npatches] = a;
 					bptr[outPatch + inPatch*npatches + ic*npatches*npatches] = b;
 
+#ifndef NDEBUG
+					SizeType nrowA = pLeft_[outPatch];
+					SizeType ncolA = pLeft_[inPatch];
+					SizeType nrowB = pRight_[outPatch];
+					SizeType ncolB = pRight_[inPatch];
+
+					assert( nrowA == AmatDense.rows() );
+					assert( ncolA == AmatDense.cols() );
+					assert( nrowB == BmatDense.rows() );
+					assert( ncolB == BmatDense.cols() );
+#endif
+
 					ldAptr[outPatch + inPatch*npatches + ic*npatches*npatches] = AmatDense.rows();
 					ldBptr[outPatch + inPatch*npatches + ic*npatches*npatches] = BmatDense.rows();
 				}
 			}
 		}
 
-		// call setup_vbatch and fill aBatch_ and bBatch_
-
-		convertToVector(pLeft_, initKron_.lrs(InitKronType::NEW).left());
-		convertToVector(pRight_, initKron_.lrs(InitKronType::NEW).right());
-		assert(pLeft_.size() == npatches);
-		assert(pRight_.size() == npatches);
-
 		batchedGemm_ = new BatchedGemmPluginScType(nC,
 		                                           npatches,
 		                                           &(pLeft_[0]),
-		                                           &(pRight_[0]),
-		                                           aptr,
-		                                           &(ldAptr[0]),
-		                                           bptr,
-		                                           &(ldBptr[0]));
+		        &(pRight_[0]),
+		        aptr,
+		        &(ldAptr[0]),
+		        bptr,
+		        &(ldBptr[0]));
 		delete[] aptr;
 		aptr = 0;
 		delete[] bptr;
@@ -117,11 +129,11 @@ private:
 
 	void convertOffsets(VectorIntegerType& v) const
 	{
-		SizeType npatches = initKron_.numberOfPatches(InitKronType::NEW);
+		SizeType npatches = initKron_.numberOfPatches(DUMMY);
 		v.clear();
 		v.resize(npatches, 0);
 		for (SizeType i = 0; i < npatches; ++i)
-			v[i] =initKron_.offsetForPatches(InitKronType::NEW, i);
+			v[i] =initKron_.offsetForPatches(DUMMY, i);
 	}
 
 	BatchedGemm2(const BatchedGemm2&);
