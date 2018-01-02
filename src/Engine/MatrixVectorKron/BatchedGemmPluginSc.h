@@ -1,5 +1,6 @@
 #ifndef BATCHEDGEMM_H
 #define BATCHEDGEMM_H
+#include <cassert>
 #include <complex>
 #include "Vector.h"
 #include "../../../../dmrgppPluginSc/src/BatchedGemm.h"
@@ -22,9 +23,6 @@ class BatchedGemm2 {
 	typedef typename GenIjPatchType::BasisType BasisType;
 	typedef BatchedGemm<ComplexOrRealType> BatchedGemmPluginScType;
 
-	// Say 1 for 1-based, 0 for 0-based
-	static const SizeType baseForIntegerVectors_ = 0;
-
 public:
 
 	BatchedGemm2(const InitKronType& initKron)
@@ -38,15 +36,15 @@ public:
 	{
 		if (!enabled()) return;
 		convertOffsets(offsets_);
-		SizeType total = initKron_.numberOfPatches(InitKronType::OLD);
+		SizeType npatches = initKron_.numberOfPatches(InitKronType::OLD);
 		SizeType nC = initKron_.connections();
-		ComplexOrRealType** aptr = new ComplexOrRealType*[total*total*nC];
-		ComplexOrRealType** bptr = new ComplexOrRealType*[total*total*nC];
-		VectorIntType ldAptr(total*total*nC);
-		VectorIntType ldBptr(total*total*nC);
+		ComplexOrRealType** aptr = new ComplexOrRealType*[npatches*npatches*nC];
+		ComplexOrRealType** bptr = new ComplexOrRealType*[npatches*npatches*nC];
+		VectorIntType ldAptr(npatches*npatches*nC);
+		VectorIntType ldBptr(npatches*npatches*nC);
 
-		for (SizeType outPatch = 0; outPatch < total; ++outPatch) {
-			for (SizeType inPatch = 0; inPatch < total; ++inPatch) {
+		for (SizeType outPatch = 0; outPatch < npatches; ++outPatch) {
+			for (SizeType inPatch = 0; inPatch < npatches; ++inPatch) {
 				for (SizeType ic=0;ic<nC;++ic) {
 					const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
 					const ArrayOfMatStructType& yiStruct = initKron_.yc(ic);
@@ -59,11 +57,11 @@ public:
 
 					ComplexOrRealType* a = const_cast<ComplexOrRealType*>(&(AmatDense(0,0)));
 					ComplexOrRealType* b = const_cast<ComplexOrRealType*>(&(BmatDense(0,0)));
-					aptr[outPatch + inPatch*total + ic*total*total] = a;
-					bptr[outPatch + inPatch*total + ic*total*total] = b;
+					aptr[outPatch + inPatch*npatches + ic*npatches*npatches] = a;
+					bptr[outPatch + inPatch*npatches + ic*npatches*npatches] = b;
 
-					ldAptr[outPatch + inPatch*total + ic*total*total] = AmatDense.rows();
-					ldBptr[outPatch + inPatch*total + ic*total*total] = BmatDense.rows();
+					ldAptr[outPatch + inPatch*npatches + ic*npatches*npatches] = AmatDense.rows();
+					ldBptr[outPatch + inPatch*npatches + ic*npatches*npatches] = BmatDense.rows();
 				}
 			}
 		}
@@ -72,9 +70,11 @@ public:
 
 		convertToVector(pLeft_, initKron_.lrs(InitKronType::NEW).left());
 		convertToVector(pRight_, initKron_.lrs(InitKronType::NEW).right());
+		assert(pLeft_.size() == npatches);
+		assert(pRight_.size() == npatches);
 
 		batchedGemm_ = new BatchedGemmPluginScType(nC,
-		                                           total,
+		                                           npatches,
 		                                           &(pLeft_[0]),
 		                                           &(pRight_[0]),
 		                                           aptr,
@@ -110,18 +110,18 @@ private:
 	{
 		SizeType total = b.partition() - 1;
 		v.clear();
-		v.resize(total + baseForIntegerVectors_, 0);
+		v.resize(total, 0);
 		for (SizeType i = 0; i < total; ++i)
-			v[i + baseForIntegerVectors_] = b.partition(i + 1) - b.partition(i);
+			v[i] = b.partition(i + 1) - b.partition(i);
 	}
 
 	void convertOffsets(VectorIntegerType& v) const
 	{
-		SizeType total = initKron_.offsetForPatches(InitKronType::NEW);
+		SizeType npatches = initKron_.numberOfPatches(InitKronType::NEW);
 		v.clear();
-		v.resize(total + baseForIntegerVectors_, 0);
-		for (SizeType i = 0; i < total; ++i)
-			v[i + baseForIntegerVectors_] =initKron_.offsetForPatches(InitKronType::NEW, i);
+		v.resize(npatches, 0);
+		for (SizeType i = 0; i < npatches; ++i)
+			v[i] =initKron_.offsetForPatches(InitKronType::NEW, i);
 	}
 
 	BatchedGemm2(const BatchedGemm2&);

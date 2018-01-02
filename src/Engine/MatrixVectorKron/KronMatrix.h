@@ -128,7 +128,12 @@ public:
 		initKron_.copyIn(vout, vin);
 
 		if (batchedGemm_.enabled()) {
-			batchedGemm_.matrixVector(initKron_.xout(), initKron_.yin());
+			VectorType& xout = initKron_.xout();
+			VectorType xoutTmp(xout.size(), 0.0);
+			batchedGemm_.matrixVector(xoutTmp, initKron_.yin());
+			for(SizeType i = 0; i < xoutTmp.size(); ++i)
+				xout[i] += xoutTmp[i];
+
 			initKron_.copyOut(vout);
 			return;
 		}
