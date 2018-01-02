@@ -50,10 +50,16 @@ STRIP_COMMAND = true
 #CPPFLAGS += -DUSE_BOOST
 
 #This enables the PLUGIN_SC repository
-#CPPFLAGS += -DPLUGIN_SC
+#CPPFLAGS += -DPLUGIN_SC \
+#    -I ../../../dmrgppPluginSc/src \
+#    -I ../../dmrgppPluginSc/src \
+#    -I ../../../dmrgppPluginSc/include \
+#    -I ../../dmrgppPluginSc/include
+#CPPFLAGS +=    -fopenmp
 
 #This adds linkage for the PLUGIN_SC libraries
 #LDFLAGS += -L../../dmrgppPluginSc/src -L../../../dmrgppPluginSc/src
 #LDFLAGS +=  -ldmrgppPluginSc
 #LDFLAGS +=  -lgomp
+#LDFLAGS +=  -fopenmp
 

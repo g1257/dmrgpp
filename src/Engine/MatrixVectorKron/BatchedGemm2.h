@@ -436,9 +436,6 @@ private:
 				assert(igroup + i*ngroups < idxVector.size());
 				SizeType idx = idxVector[igroup + i*ngroups];
 
-				std::cerr<<"igroup = "<<igroup<<" i = "<<i<<" idx = "<<idx;
-				std::cerr<<"transb = "<<transb<<"\n";
-
 				fakeGEMM(transb,
 				         mAarray[igroup],
 				         nAarray[igroup],
