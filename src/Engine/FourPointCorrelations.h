@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "CrsMatrix.h"
 #include "Braket.h"
+#include "AnsiColors.h"
 
 namespace Dmrg {
 template<typename CorrelationsSkeletonType>
@@ -288,6 +289,9 @@ public:
 		SparseMatrixType O3g,O4g;
 		if (i4==skeleton_.numberOfSites(threadId)-1) {
 			if (i3<i4-1) { // not tested
+				std::cerr<<PsimagLite::AnsiColor::red;
+				std::cerr<<"WARNING: Correlation code patch might be WRONG!";
+				std::cerr<<PsimagLite::AnsiColor::reset<<"\n";
 				skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index0).fermionSign,ns,threadId);
 				skeleton_.growDirectly(Otmp,
 				                       O3g,

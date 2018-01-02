@@ -85,11 +85,8 @@ public:
   -------------------------
   */
 
-		const size_t sizeAbatch = ldAbatch * leftMaxState * noperator;
-		const size_t sizeBbatch = ldBbatch * rightMaxState * noperator;
-
-		assert(sizeAbatch >= 1);
-		assert(sizeBbatch >= 1);
+		assert(ldAbatch * leftMaxState * noperator >= 1);
+		assert(ldBbatch * rightMaxState * noperator >= 1);
 
 		// USE_GETSET FIXME
 
@@ -205,10 +202,8 @@ public:
 		SizeType idx = 0;
 		for (SizeType jpatch = 0; jpatch < npatches; ++jpatch) {
 			long j1 = initKron_.offsetForPatches(InitKronType::NEW, jpatch);
-			long j2 = initKron_.offsetForPatches(InitKronType::NEW, jpatch + 1);
 			int nrowX = rightPatchSize[jpatch];
-			int ncolX = leftPatchSize[jpatch];
-			assert(j2 - j1 == nrowX * ncolX);
+			assert(initKron_.offsetForPatches(InitKronType::NEW, jpatch + 1) - j1 == nrowX * leftPatchSize[jpatch]);
 
 			/*
 	 --------------------------------------
@@ -293,7 +288,6 @@ public:
 		for(SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
 
 			long i1 = initKron_.offsetForPatches(InitKronType::NEW, ipatch);
-			long i2 = initKron_.offsetForPatches(InitKronType::NEW, ipatch + 1);
 
 
 			SizeType jgroup = initKron_.patch(InitKronType::NEW,
@@ -314,7 +308,8 @@ public:
 			int nrowYI = R2 - R1;
 			int ldYI = nrowYI;
 			int ncolYI = L2 - L1;
-			assert(i2 - i1 == nrowYI * ncolYI);
+			assert(initKron_.offsetForPatches(InitKronType::NEW, ipatch + 1) - i1 ==
+			       nrowYI * ncolYI);
 
 			/*
 		--------------------------------------------------------------------
