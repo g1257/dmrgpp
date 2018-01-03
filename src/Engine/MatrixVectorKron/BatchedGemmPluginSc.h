@@ -28,8 +28,7 @@ class BatchedGemm2 {
 public:
 
 	BatchedGemm2(const InitKronType& initKron)
-	    :  initKron_(initKron),
-	      batchedGemm_(0)
+	    :  initKron_(initKron), batchedGemm_(0)
 	{
 		if (!enabled()) return;
 		std::cout<<"PLUGIN_SC: is in use\n";

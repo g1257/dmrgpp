@@ -223,6 +223,8 @@ public:
 			int L1 = initKron_.lrs(InitKronType::NEW).left().partition(igroup);
 			int L2 = initKron_.lrs(InitKronType::NEW).left().partition(igroup + 1);
 
+			assert(static_cast<SizeType>(j1 + R2 - R1 - 1 + (L2 - L1 - 1)*nrowX) <
+			       vin.size());
 			/*
 	 -------------------------------
 	 independent DGEMM in same group
@@ -254,9 +256,15 @@ public:
 
 				bArray[idx] = j1;
 				ldbArray[igroup] = ldXJ;
+
+				if (kArray[igroup]*nArray[igroup] > 0)
+					assert(bArray[idx] + kArray[igroup] - 1 + (nArray[igroup] - 1)*ldbArray[igroup]
+				       < vin.size());
 				++idx;
 			}
 		}
+
+		assert(idx == noperator*npatches);
 		/*
 	------------------
 	first vbatch DGEMM
@@ -274,7 +282,8 @@ public:
 		            mOvVin,
 		            cArray,
 		            ldcArray,
-		            noperator);
+		            noperator,
+		            vin.size());
 		time1stVbatch += dmrgGetWtime();
 		gflops1 = gflops1/(1000.0*1000.0*1000.0);
 
@@ -350,7 +359,8 @@ public:
 		            mOvAbatch,
 		            cArray,
 		            ldcArray,
-		            1);
+		            1,
+		            vin.size());
 		time2ndVbatch += dmrgGetWtime();
 		gflops2 /= (1000.0*1000.0*1000.0);
 
@@ -395,7 +405,8 @@ private:
 	                 const MatrixOrVector& b,
 	                 const VectorStarType& cArray,
 	                 const VectorSizeType& ldcArray,
-	                 SizeType groupSize) const
+	                 SizeType groupSize,
+	                 SizeType vinSize) const
 	{
 		SizeType ngroups = initKron_.numberOfPatches(InitKronType::OLD);
 		RealType gflops = 0;
@@ -415,14 +426,6 @@ private:
 	  expand out the groups
 	  ---------------------
 	  */
-		SizeType batchSize = groupSize*ngroups;
-		VectorSizeType idxVector(batchSize, 0);
-		{
-			SizeType idx = 0;
-			for(SizeType igroup = 0; igroup < ngroups; ++igroup)
-				for(SizeType i = 0; i < groupSize; ++i)
-					idxVector[igroup + i*ngroups] = idx++;
-		}
 		/*
 	 ----------------------------------------------------------
 	 Note magma_dgemmVbatched need arrays of size batchSize+1
@@ -431,11 +434,13 @@ private:
 	 */
 
 		// parallelize over batchSize FIXME
+		SizeType idx = 0;
 		for(SizeType igroup = 0; igroup < ngroups; ++igroup) {
 			for(SizeType i = 0; i < groupSize; ++i) {
-				assert(igroup + i*ngroups < idxVector.size());
-				SizeType idx = idxVector[igroup + i*ngroups];
 
+				if (kAarray[igroup]*nAarray[igroup] > 0)
+					assert(transb == 'T' || bArray[idx] + kAarray[igroup] - 1 + (nAarray[igroup] - 1)*ldbArray[igroup]
+				       < vinSize);
 				fakeGEMM(transb,
 				         mAarray[igroup],
 				         nAarray[igroup],
@@ -447,6 +452,7 @@ private:
 				         b,
 				         cArray[idx],
 				         ldcArray[igroup]);
+				++idx;
 			}
 		}
 
