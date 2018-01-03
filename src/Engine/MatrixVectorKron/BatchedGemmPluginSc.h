@@ -32,6 +32,7 @@ public:
 	      batchedGemm_(0)
 	{
 		if (!enabled()) return;
+		std::cout<<"PLUGIN_SC: is in use\n";
 		convertOffsets(offsets_);
 		SizeType npatches = initKron_.numberOfPatches(DUMMY);
 		SizeType nC = initKron_.connections();
@@ -40,8 +41,8 @@ public:
 		VectorIntType ldAptr(npatches*npatches*nC);
 		VectorIntType ldBptr(npatches*npatches*nC);
 
-		convertToVector(pLeft_, initKron_.lrs(DUMMY).left());
-		convertToVector(pRight_, initKron_.lrs(DUMMY).right());
+		convertToVector(pLeft_, initKron_.lrs(DUMMY).left(), GenIjPatchType::LEFT);
+		convertToVector(pRight_, initKron_.lrs(DUMMY).right(), GenIjPatchType::RIGHT);
 		assert(pLeft_.size() == npatches);
 		assert(pRight_.size() == npatches);
 
@@ -103,13 +104,18 @@ public:
 
 private:
 
-	void convertToVector(VectorIntType& v, const BasisType& b) const
+	void convertToVector(VectorIntType& v,
+	                     const BasisType& b,
+	                     typename GenIjPatchType::LeftOrRightEnumType lOrR) const
 	{
-		SizeType total = b.partition() - 1;
+		SizeType npatches = initKron_.numberOfPatches(DUMMY);
 		v.clear();
-		v.resize(total, 0);
-		for (SizeType i = 0; i < total; ++i)
-			v[i] = b.partition(i + 1) - b.partition(i);
+		v.resize(npatches, 0);
+		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
+			SizeType igroup = initKron_.patch(DUMMY,
+			                                  lOrR)[ipatch];
+			v[ipatch] = b.partition(igroup + 1) - b.partition(igroup);
+		}
 	}
 
 	void convertOffsets(VectorIntegerType& v) const
