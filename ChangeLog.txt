@@ -1,4 +1,16 @@
-https://github.com/g1257/dmrgpp/commits/master
+2018-01-03 Version 4.70
+
+* InitKronBase: threshold bug fix
+
+* BatchedGemm: PLUGIN_SC implementation
+  almost done
+
+* BatchedGemm: mainstream implementation
+  needs more work
+
+* Scripts for dynamics added and updated
+
+* Border 4-point marked buggy in some cases
 
 2017-12-20 Version 4.68
 
