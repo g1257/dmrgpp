@@ -131,7 +131,7 @@ public:
 
 				const MatrixDenseOrSparseType& Amat =  xiStruct(outPatch,inPatch);
 				const MatrixDenseOrSparseType& Bmat =  yiStruct(outPatch,inPatch);
-				checks(Amat, Bmat, outPatch, inPatch);
+				initKron_.checks(Amat, Bmat, outPatch, inPatch);
 				kronMult(x_, offsetX, y_, offsetY, 'n', 'n', Amat, Bmat);
 			}
 		}
@@ -140,40 +140,6 @@ public:
 	void sync() {}
 
 private:
-
-	// In production mode this function should be empty
-	void checks(const MatrixDenseOrSparseType& Amat,
-	            const MatrixDenseOrSparseType& Bmat,
-	            SizeType ipatch,
-	            SizeType jpatch) const
-	{
-#ifndef NDEBUG
-		SizeType lSizeI = lSizeFunction(InitKronType::NEW, ipatch);
-		SizeType lSizeJ = lSizeFunction(InitKronType::OLD, jpatch);
-		SizeType rSizeI = rSizeFunction(InitKronType::NEW, ipatch);
-		SizeType rSizeJ = rSizeFunction(InitKronType::OLD, jpatch);
-		assert(Amat.rows() == lSizeI);
-		assert(Amat.cols() == lSizeJ);
-		assert(Bmat.rows() == rSizeI);
-		assert(Bmat.cols() == rSizeJ);
-#endif
-	}
-
-	SizeType lSizeFunction(typename InitKronType::WhatBasisEnum what,
-	                       SizeType ipatch) const
-	{
-		SizeType igroup = initKron_.patch(what, GenIjPatchType::LEFT)[ipatch];
-		return initKron_.lrs(what).left().partition(igroup+1) -
-		        initKron_.lrs(what).left().partition(igroup);
-	}
-
-	SizeType rSizeFunction(typename InitKronType::WhatBasisEnum what,
-	                       SizeType ipatch) const
-	{
-		SizeType jgroup = initKron_.patch(what, GenIjPatchType::RIGHT)[ipatch];
-		return initKron_.lrs(what).right().partition(jgroup+1) -
-		        initKron_.lrs(what).right().partition(jgroup);
-	}
 
 	const InitKronType& initKron_;
 	VectorType& x_;

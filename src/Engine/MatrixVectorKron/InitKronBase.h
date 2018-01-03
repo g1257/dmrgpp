@@ -96,6 +96,7 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef Link<ComplexOrRealType> LinkType;
 	typedef ArrayOfMatStruct<LeftRightSuperType> ArrayOfMatStructType;
+	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
 	typedef typename LeftRightSuperType::BasisType BasisType;
 	typedef typename ArrayOfMatStructType::GenIjPatchType GenIjPatchType;
 	typedef typename PsimagLite::Vector<ArrayOfMatStructType*>::Type VectorArrayOfMatStructType;
@@ -226,6 +227,25 @@ public:
 		       patch(what, GenIjPatchType::RIGHT).size());
 		return patch(what, GenIjPatchType::LEFT).size();
 	}
+
+	// In production mode this function should be empty
+	void checks(const MatrixDenseOrSparseType& Amat,
+	            const MatrixDenseOrSparseType& Bmat,
+	            SizeType ipatch,
+	            SizeType jpatch) const
+	{
+#ifndef NDEBUG
+		SizeType lSizeI = lSizeFunction(NEW, ipatch);
+		SizeType lSizeJ = lSizeFunction(OLD, jpatch);
+		SizeType rSizeI = rSizeFunction(NEW, ipatch);
+		SizeType rSizeJ = rSizeFunction(OLD, jpatch);
+		assert(Amat.rows() == lSizeI);
+		assert(Amat.cols() == lSizeJ);
+		assert(Bmat.rows() == rSizeI);
+		assert(Bmat.cols() == rSizeJ);
+#endif
+	}
+
 protected:
 
 	void addOneConnection(const SparseMatrixType& A,
@@ -389,6 +409,22 @@ private:
 				Ahat.setValues(counter++, tmp);
 			}
 		}
+	}
+
+	SizeType lSizeFunction(WhatBasisEnum what,
+	                       SizeType ipatch) const
+	{
+		SizeType igroup = patch(what, GenIjPatchType::LEFT)[ipatch];
+		return lrs(what).left().partition(igroup+1) -
+		        lrs(what).left().partition(igroup);
+	}
+
+	SizeType rSizeFunction(WhatBasisEnum what,
+	                       SizeType ipatch) const
+	{
+		SizeType jgroup = patch(what, GenIjPatchType::RIGHT)[ipatch];
+		return lrs(what).right().partition(jgroup+1) -
+		        lrs(what).right().partition(jgroup);
 	}
 
 	InitKronBase(const InitKronBase&);

@@ -29,11 +29,6 @@ public:
 
 	BatchedGemm2(const InitKronType& initKron)
 	    :  initKron_(initKron),
-	      Abatch_(0),
-	      Bbatch_(0),
-	      leftPatchStart_(0),
-	      rightPatchStart_(0),
-	      xyPatchStart_(0),
 	      batchedGemm_(0)
 	{
 		if (!enabled()) return;
@@ -67,17 +62,7 @@ public:
 					aptr[outPatch + inPatch*npatches + ic*npatches*npatches] = a;
 					bptr[outPatch + inPatch*npatches + ic*npatches*npatches] = b;
 
-#ifndef NDEBUG
-					SizeType nrowA = pLeft_[outPatch];
-					SizeType ncolA = pLeft_[inPatch];
-					SizeType nrowB = pRight_[outPatch];
-					SizeType ncolB = pRight_[inPatch];
-
-					assert( nrowA == AmatDense.rows() );
-					assert( ncolA == AmatDense.cols() );
-					assert( nrowB == BmatDense.rows() );
-					assert( ncolB == BmatDense.cols() );
-#endif
+					initKron_.checks(Amat, Bmat, outPatch, inPatch);
 
 					ldAptr[outPatch + inPatch*npatches + ic*npatches*npatches] = AmatDense.rows();
 					ldBptr[outPatch + inPatch*npatches + ic*npatches*npatches] = BmatDense.rows();
@@ -144,13 +129,6 @@ private:
 	VectorIntegerType offsets_;
 	VectorIntType pLeft_;
 	VectorIntType pRight_;
-	mutable ComplexOrRealType* Abatch_;
-	mutable ComplexOrRealType* Bbatch_;
-	mutable IntegerType* leftPatchStart_;
-	mutable IntegerType* rightPatchStart_;
-	mutable IntegerType* xyPatchStart_;
-	mutable int* ldAbatch_;
-	mutable int* ldBbatch_;
 	BatchedGemm<ComplexOrRealType>* batchedGemm_;
 };
 }

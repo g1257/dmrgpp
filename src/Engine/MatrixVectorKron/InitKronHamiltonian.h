@@ -206,7 +206,7 @@ public:
 	VectorType& xout() { return xout_; }
 
 	const SizeType& offsetForPatches(typename BaseType::WhatBasisEnum,
-	                                       SizeType ind) const
+	                                 SizeType ind) const
 	{
 		assert(ind < offsetForPatches_.size());
 		return  offsetForPatches_[ind];
