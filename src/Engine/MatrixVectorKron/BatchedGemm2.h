@@ -3,6 +3,7 @@
 #include "Vector.h"
 #include <numeric>
 #include "BLAS.h"
+#include "ProgressIndicator.h"
 
 namespace Dmrg {
 
@@ -25,52 +26,16 @@ class BatchedGemm2 {
 	static const int ialign_ = 32;
 	static const int idebug_ = 0; // set to 0 until it gives correct results
 
-	class MatrixOrVector {
-
-	public:
-
-		MatrixOrVector(const VectorType& v) : v_(&v), m_(0) {}
-
-		MatrixOrVector(const MatrixType& m) : v_(0), m_(&m) {}
-
-		const ComplexOrRealType* operator()(SizeType first) const
-		{
-			if (v_) {
-				assert(!m_);
-				return &(v_->operator[](first));
-			}
-
-			assert(m_);
-			return &(m_->operator()(first, 0));
-		}
-
-		const ComplexOrRealType& operator()(SizeType first,
-		                                    SizeType row,
-		                                    SizeType col,
-		                                    SizeType ld) const
-		{
-			if (v_) {
-				assert(!m_);
-				SizeType offset = first + row + col*ld;
-				assert(offset < v_->size());
-				return v_->operator[](offset);
-			}
-
-			assert(m_);
-			return m_->operator()(row + first, col);
-		}
-
-	private:
-
-		const VectorType* v_;
-		const MatrixType* m_;
-	};
-
 public:
 
-	BatchedGemm2(const InitKronType& initKron) : initKron_(initKron)
+	BatchedGemm2(const InitKronType& initKron)
+	    : initKron_(initKron), progress_("BatchedGemm")
 	{
 		if (!enabled()) return;
+
+		PsimagLite::OstringStream msg;
+		msg<<"Constructing...";
+		progress_.printline(msg,std::cout);
 
 		SizeType npatches = initKron_.numberOfPatches(InitKronType::OLD);
 		SizeType noperator = initKron_.connections();
@@ -136,6 +101,15 @@ public:
 		}
 	}
 
+	~BatchedGemm2()
+	{
+		if (!enabled()) return;
+
+		PsimagLite::OstringStream msg;
+		msg<<"Destructing...";
+		progress_.printline(msg,std::cout);
+	}
+
 	bool enabled() const { return initKron_.batchedGemm(); }
 
 	void matrixVector(VectorType& vout, const VectorType& vin) const
@@ -187,8 +161,6 @@ public:
 		int ldBX = ialign_ * iceil(nrowBX, ialign_);
 		MatrixType BX(ldBX,  ncolA*noperator);
 
-		MatrixOrVector mOvVin(vin);
-
 		time1stVbatch = -dmrgGetWtime();
 
 		for (SizeType jpatch = 0; jpatch < npatches; ++jpatch) {
@@ -232,23 +204,20 @@ public:
 											 XJ( 1:(R2-R1+1), 1:(L2-L1+1));
 		------------------------------------------------------------------------
 		*/
-				int mm = nrowBX;
-				int nn = L2 - L1;
-				int kk = R2 - R1;
-
-				gflops1 += ((2.0*mm)*nn)*kk;
-
-				almostGemm('N',
-				           mm,
-				           nn,
-				           kk,
-				           Bbatch_,
-				           offsetB + R1,
-				           j1,
-				           ldXJ,
-				           mOvVin,
-				           &(BX(0, offsetBX + L1)),
-				           ldBX);
+				gflops1 += ((2.0*nrowBX)*(L2 - L1))*(R2 - R1);
+				psimag::BLAS::GEMM('N',
+				                   'N',
+				                   nrowBX,
+				                   L2 - L1,
+				                   R2 - R1,
+				                   1.0,
+				                   &(Bbatch_(0, offsetB + R1)),
+				                   Bbatch_.rows(),
+				                   &(vin[j1]),
+				                   ldXJ,
+				                   0.0,
+				                   &(BX(0, offsetBX + L1)),
+				                   ldBX);
 
 				gflops1 = gflops1/(1000.0*1000.0*1000.0);
 			}
@@ -261,8 +230,6 @@ public:
  -------------------------------------------------
 */
 		time2ndVbatch = -dmrgGetWtime();
-
-		MatrixOrVector mOvAbatch(Abatch_);
 
 		for(SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
 
@@ -296,23 +263,21 @@ public:
 										 transpose( Abatch( L1:L2,1:ncolBX) );
 		--------------------------------------------------------------------
 	  */
-			int mm = nrowYI;
-			int nn = ncolYI;
-			int kk = ncolBX;
+			gflops2 += ((2.0*nrowYI)*ncolYI)*ncolBX;
 
-			gflops2 += ((2.0*mm)*nn)*kk;
-
-			almostGemm('T',
-			           mm,
-			           nn,
-			           kk,
-			           BX,
-			           R1,
-			           L1,
-			           Abatch_.rows(),
-			           mOvAbatch,
-			           YI,
-			           ldYI);
+			psimag::BLAS::GEMM('N',
+			                   'T',
+			                   nrowYI,
+			                   ncolYI,
+			                   ncolBX,
+			                   1.0,
+			                   &(BX(R1, 0)),
+			                   BX.rows(),
+			                   &(Abatch_(L1, 0)),
+			                   Abatch_.rows(),
+			                   0.0,
+			                   YI,
+			                   ldYI);
 		}
 
 		time2ndVbatch += dmrgGetWtime();
@@ -354,60 +319,8 @@ private:
 		return clock()/CLOCKS_PER_SEC;
 	}
 
-	static void almostGemm(char transb, int m, int n, int ktotal,
-	                       const MatrixType& A, SizeType rowOrCol,
-	                       SizeType firstB, int ldb, const MatrixOrVector& B,
-	                       ComplexOrRealType* C, int ldc)
-	{
-		const ComplexOrRealType* aptr = (transb == 'N') ? &(A(0, rowOrCol)) : &(A(rowOrCol, 0));
-		psimag::BLAS::GEMM('N',
-		                   transb,
-		                   m,
-		                   n,
-		                   ktotal,
-		                   1.0,
-		                   aptr,
-		                   A.rows(),
-		                   B(firstB),
-		                   ldb,
-		                   0.0,
-		                   C,
-		                   ldc);
-		//		for (int j = 0; j < n; ++j) {
-		//			for (int i = 0; i < m; ++i) {
-		//				C[i + j*ldc] = 0.0;
-		//				for (int k = 0; k < ktotal; ++k) {
-		//					ComplexOrRealType opAik =  (transb == 'N') ? A(i, k + rowOrCol) :
-		//					                                             A(i + rowOrCol, k);
-		//					ComplexOrRealType opBkj = (transb == 'N') ? B(firstB, k, j, ldb) :
-		//					                                            B(firstB, j, k, ldb);
-		//					C[i + j*ldc] += opAik*opBkj;
-		//				}
-		//			}
-		//		}
-	}
-
-	static void almostGemmOld(char transb, int m, int n, int ktotal,
-	                          const MatrixType& A, SizeType rowOrCol,
-	                          SizeType firstB, int ldb, const MatrixOrVector& B,
-	                          ComplexOrRealType* C, int ldc)
-	{
-		for (int j = 0; j < n; ++j) {
-			for (int i = 0; i < m; ++i) {
-				C[i + j*ldc] = 0.0;
-				for (int k = 0; k < ktotal; ++k) {
-					ComplexOrRealType opAik =  (transb == 'N') ? A(i, k + rowOrCol) :
-					                                             A(i + rowOrCol, k);
-					ComplexOrRealType opBkj = (transb == 'N') ? B(firstB, k, j, ldb) :
-					                                            B(firstB, j, k, ldb);
-					C[i + j*ldc] += opAik*opBkj;
-				}
-			}
-		}
-	}
-
 	const InitKronType& initKron_;
-	bool enabled_;
+	PsimagLite::ProgressIndicator progress_;
 	MatrixType Abatch_;
 	MatrixType Bbatch_;
 };
