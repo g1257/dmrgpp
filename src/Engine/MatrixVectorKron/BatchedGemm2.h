@@ -174,20 +174,6 @@ public:
 			rightPatchSize[ipatch] = R2 - R1;
 		}
 
-		int ngroups = npatches;
-		int ngroupsDim = ialign_ * iceil(ngroups, ialign_);
-		int batchSize = ngroups * noperator;
-		int batchSizeDim = ialign_ * iceil(batchSize, ialign_);
-
-		VectorSizeType aArray(batchSizeDim);
-		VectorSizeType bArray(batchSizeDim);
-		VectorStarType cArray(batchSizeDim);
-		VectorSizeType mArray(ngroupsDim);
-		VectorSizeType nArray(ngroupsDim);
-		VectorSizeType kArray(ngroupsDim);
-		VectorSizeType ldbArray(batchSizeDim);
-		VectorSizeType ldcArray(batchSizeDim);
-
 		int nrowA = leftMaxStates;
 		int ncolA = nrowA;
 		int nrowB = rightMaxStates;
@@ -199,7 +185,8 @@ public:
 
 		MatrixOrVector mOvVin(vin);
 
-		SizeType idx = 0;
+		time1stVbatch = -dmrgGetWtime();
+
 		for (SizeType jpatch = 0; jpatch < npatches; ++jpatch) {
 			long j1 = initKron_.offsetForPatches(InitKronType::NEW, jpatch);
 			int nrowX = rightPatchSize[jpatch];
@@ -243,55 +230,37 @@ public:
 				int mm = nrowBX;
 				int nn = L2 - L1;
 				int kk = R2 - R1;
-				mArray[igroup] = mm;
-				nArray[igroup] = nn;
-				kArray[igroup] = kk;
 
 				gflops1 += ((2.0*mm)*nn)*kk;
 
-				cArray[idx] = &(BX(0, offsetBX + L1));
-				ldcArray[igroup] = ldBX;
+//				if (kArray[igroup]*nArray[igroup] > 0)
+//					assert(bArray[idx] + kArray[igroup] - 1 + (nArray[igroup] - 1)*ldbArray[igroup]
+//					       < vin.size());
 
-				aArray[idx] = offsetB + R1;
+				fakeGEMM('N',
+				         mm,
+				         nn,
+				         kk,
+				         Bbatch_,
+				         offsetB + R1,
+				         j1,
+				         ldXJ,
+				         mOvVin,
+				         &(BX(0, offsetBX + L1)),
+				         ldBX);
 
-				bArray[idx] = j1;
-				ldbArray[igroup] = ldXJ;
-
-				if (kArray[igroup]*nArray[igroup] > 0)
-					assert(bArray[idx] + kArray[igroup] - 1 + (nArray[igroup] - 1)*ldbArray[igroup]
-				       < vin.size());
-				++idx;
+				gflops1 = gflops1/(1000.0*1000.0*1000.0);
 			}
 		}
 
-		assert(idx == noperator*npatches);
-		/*
-	------------------
-	first vbatch DGEMM
-	------------------
-	*/
-		time1stVbatch = -dmrgGetWtime();
-		xGemmVbatch('N',
-		            mArray,
-		            nArray,
-		            kArray,
-		            aArray,
-		            Bbatch_,
-		            bArray,
-		            ldbArray,
-		            mOvVin,
-		            cArray,
-		            ldcArray,
-		            noperator,
-		            vin.size());
 		time1stVbatch += dmrgGetWtime();
-		gflops1 = gflops1/(1000.0*1000.0*1000.0);
-
 		/*
  -------------------------------------------------
  perform computations with  Y += (BX)*transpose(A)
  -------------------------------------------------
 */
+		time2ndVbatch = -dmrgGetWtime();
+
 		MatrixOrVector mOvAbatch(Abatch_);
 
 		for(SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
@@ -329,38 +298,22 @@ public:
 			int mm = nrowYI;
 			int nn = ncolYI;
 			int kk = ncolBX;
-			mArray[igroup] = mm;
-			nArray[igroup] = nn;
-			kArray[igroup] = kk;
+
 			gflops2 += ((2.0*mm)*nn)*kk;
-			aArray[igroup] =  R1;
-			bArray[igroup] = L1;
-			ldbArray[igroup] = Abatch_.rows();
-			cArray[igroup] = YI;
-			ldcArray[igroup] = ldYI;
+
+			fakeGEMM('T',
+			         mm,
+			         nn,
+			         kk,
+			         BX,
+			         R1,
+			         L1,
+			         Abatch_.rows(),
+			         mOvAbatch,
+			         YI,
+			         ldYI);
 		}
 
-		ngroups = npatches;
-
-		/*
-	------------------
-	second vbatch DGEMM
-	------------------
-	*/
-		time2ndVbatch = -dmrgGetWtime();
-		xGemmVbatch('T',
-		            mArray,
-		            nArray,
-		            kArray,
-		            aArray,
-		            BX,
-		            bArray,
-		            ldbArray,
-		            mOvAbatch,
-		            cArray,
-		            ldcArray,
-		            1,
-		            vin.size());
 		time2ndVbatch += dmrgGetWtime();
 		gflops2 /= (1000.0*1000.0*1000.0);
 
@@ -392,77 +345,6 @@ private:
 		for (int j = 0; j < n; ++j)
 			for (int i = 0; i < m; ++i)
 				b(i + xstart, j + ystart) = a(i, j);
-	}
-
-	void xGemmVbatch(char transb,
-	                 const VectorSizeType& mAarray,
-	                 const VectorSizeType& nAarray,
-	                 const VectorSizeType& kAarray,
-	                 const VectorSizeType& aColsOrRows,
-	                 const MatrixType& aMatrix,
-	                 const VectorSizeType& bArray,
-	                 const VectorSizeType& ldbArray,
-	                 const MatrixOrVector& b,
-	                 const VectorStarType& cArray,
-	                 const VectorSizeType& ldcArray,
-	                 SizeType groupSize,
-	                 SizeType vinSize) const
-	{
-		SizeType ngroups = initKron_.numberOfPatches(InitKronType::OLD);
-		RealType gflops = 0;
-		RealType elapsedTime = 0;
-
-		if (idebug_ >= 1) {
-			elapsedTime = -dmrgGetWtime();
-
-			for (SizeType igroup = 0; igroup < ngroups; ++igroup)
-				gflops += mAarray[igroup]*nAarray[igroup]*kAarray[igroup]*groupSize*2.0;
-
-			gflops /= (1000.0*1000.0*1000.0);
-		}
-
-		/*
-	  ---------------------
-	  expand out the groups
-	  ---------------------
-	  */
-		/*
-	 ----------------------------------------------------------
-	 Note magma_dgemmVbatched need arrays of size batchSize+1
-	 Set vbatchDim to be multiple of 32 for better alignment in memory
-	 ----------------------------------------------------------
-	 */
-
-		// parallelize over batchSize FIXME
-		SizeType idx = 0;
-		for(SizeType igroup = 0; igroup < ngroups; ++igroup) {
-			for(SizeType i = 0; i < groupSize; ++i) {
-
-				if (kAarray[igroup]*nAarray[igroup] > 0)
-					assert(transb == 'T' || bArray[idx] + kAarray[igroup] - 1 + (nAarray[igroup] - 1)*ldbArray[igroup]
-				       < vinSize);
-				fakeGEMM(transb,
-				         mAarray[igroup],
-				         nAarray[igroup],
-				         kAarray[igroup],
-				         aMatrix,
-				         aColsOrRows[idx],
-				         bArray[idx],
-				         ldbArray[igroup],
-				         b,
-				         cArray[idx],
-				         ldcArray[igroup]);
-				++idx;
-			}
-		}
-
-		if (idebug_ >= 1) {
-			elapsedTime += dmrgGetWtime();
-			RealType gflopsPerSec = (elapsedTime > 0) ? gflops/elapsedTime : 0;
-			std::cerr<<"dmrgVbatch: gflops="<<gflops;
-			std::cerr<<", elapsedTime="<<elapsedTime;
-			std::cerr<<", gflops/sec="<<gflopsPerSec<<"\n";
-		}
 	}
 
 
