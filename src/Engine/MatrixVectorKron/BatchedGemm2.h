@@ -33,6 +33,17 @@ class BatchedGemm2 {
 
 		MatrixOrVector(const MatrixType& m) : v_(0), m_(&m) {}
 
+		const ComplexOrRealType* operator()(SizeType first) const
+		{
+			if (v_) {
+				assert(!m_);
+				return &(v_->operator[](first));
+			}
+
+			assert(m_);
+			return &(m_->operator()(first, 0));
+		}
+
 		const ComplexOrRealType& operator()(SizeType first,
 		                                    SizeType row,
 		                                    SizeType col,
@@ -88,8 +99,6 @@ public:
 		assert(ldAbatch * leftMaxState * noperator >= 1);
 		assert(ldBbatch * rightMaxState * noperator >= 1);
 
-		// USE_GETSET FIXME
-
 		for (SizeType ioperator = 0; ioperator < noperator; ++ioperator) {
 			const ArrayOfMatStructType& xiStruct = initKron_.xc(ioperator);
 			for (SizeType jpatch = 0; jpatch < npatches; ++jpatch) {
@@ -108,8 +117,6 @@ public:
 			}
 		}
 
-		// USE_GETSET block omitted (2 blocks)
-
 		for (SizeType ioperator = 0; ioperator < noperator; ++ioperator) {
 			const ArrayOfMatStructType& yiStruct = initKron_.yc(ioperator);
 			for (SizeType jpatch = 0; jpatch < npatches; ++jpatch) {
@@ -127,10 +134,7 @@ public:
 				}
 			}
 		}
-
-		// USE_GETSET block here omitted
 	}
-
 
 	bool enabled() const { return initKron_.batchedGemm(); }
 
@@ -190,7 +194,8 @@ public:
 		for (SizeType jpatch = 0; jpatch < npatches; ++jpatch) {
 			long j1 = initKron_.offsetForPatches(InitKronType::NEW, jpatch);
 			int nrowX = rightPatchSize[jpatch];
-			assert(initKron_.offsetForPatches(InitKronType::NEW, jpatch + 1) - j1 == nrowX * leftPatchSize[jpatch]);
+			assert(initKron_.offsetForPatches(InitKronType::NEW, jpatch + 1) - j1 ==
+			       nrowX * leftPatchSize[jpatch]);
 
 			/*
 	 --------------------------------------
@@ -233,21 +238,17 @@ public:
 
 				gflops1 += ((2.0*mm)*nn)*kk;
 
-//				if (kArray[igroup]*nArray[igroup] > 0)
-//					assert(bArray[idx] + kArray[igroup] - 1 + (nArray[igroup] - 1)*ldbArray[igroup]
-//					       < vin.size());
-
-				fakeGEMM('N',
-				         mm,
-				         nn,
-				         kk,
-				         Bbatch_,
-				         offsetB + R1,
-				         j1,
-				         ldXJ,
-				         mOvVin,
-				         &(BX(0, offsetBX + L1)),
-				         ldBX);
+				almostGemm('N',
+				           mm,
+				           nn,
+				           kk,
+				           Bbatch_,
+				           offsetB + R1,
+				           j1,
+				           ldXJ,
+				           mOvVin,
+				           &(BX(0, offsetBX + L1)),
+				           ldBX);
 
 				gflops1 = gflops1/(1000.0*1000.0*1000.0);
 			}
@@ -301,17 +302,17 @@ public:
 
 			gflops2 += ((2.0*mm)*nn)*kk;
 
-			fakeGEMM('T',
-			         mm,
-			         nn,
-			         kk,
-			         BX,
-			         R1,
-			         L1,
-			         Abatch_.rows(),
-			         mOvAbatch,
-			         YI,
-			         ldYI);
+			almostGemm('T',
+			           mm,
+			           nn,
+			           kk,
+			           BX,
+			           R1,
+			           L1,
+			           Abatch_.rows(),
+			           mOvAbatch,
+			           YI,
+			           ldYI);
 		}
 
 		time2ndVbatch += dmrgGetWtime();
@@ -353,10 +354,43 @@ private:
 		return clock()/CLOCKS_PER_SEC;
 	}
 
-	static void fakeGEMM(char transb, int m, int n, int ktotal,
-	                     const MatrixType& A, SizeType rowOrCol,
-	                     SizeType firstB, int ldb, const MatrixOrVector& B,
-	                     ComplexOrRealType* C, int ldc)
+	static void almostGemm(char transb, int m, int n, int ktotal,
+	                       const MatrixType& A, SizeType rowOrCol,
+	                       SizeType firstB, int ldb, const MatrixOrVector& B,
+	                       ComplexOrRealType* C, int ldc)
+	{
+		const ComplexOrRealType* aptr = (transb == 'N') ? &(A(0, rowOrCol)) : &(A(rowOrCol, 0));
+		psimag::BLAS::GEMM('N',
+		                   transb,
+		                   m,
+		                   n,
+		                   ktotal,
+		                   1.0,
+		                   aptr,
+		                   A.rows(),
+		                   B(firstB),
+		                   ldb,
+		                   0.0,
+		                   C,
+		                   ldc);
+		//		for (int j = 0; j < n; ++j) {
+		//			for (int i = 0; i < m; ++i) {
+		//				C[i + j*ldc] = 0.0;
+		//				for (int k = 0; k < ktotal; ++k) {
+		//					ComplexOrRealType opAik =  (transb == 'N') ? A(i, k + rowOrCol) :
+		//					                                             A(i + rowOrCol, k);
+		//					ComplexOrRealType opBkj = (transb == 'N') ? B(firstB, k, j, ldb) :
+		//					                                            B(firstB, j, k, ldb);
+		//					C[i + j*ldc] += opAik*opBkj;
+		//				}
+		//			}
+		//		}
+	}
+
+	static void almostGemmOld(char transb, int m, int n, int ktotal,
+	                          const MatrixType& A, SizeType rowOrCol,
+	                          SizeType firstB, int ldb, const MatrixOrVector& B,
+	                          ComplexOrRealType* C, int ldc)
 	{
 		for (int j = 0; j < n; ++j) {
 			for (int i = 0; i < m; ++i) {
@@ -370,7 +404,6 @@ private:
 				}
 			}
 		}
-
 	}
 
 	const InitKronType& initKron_;
