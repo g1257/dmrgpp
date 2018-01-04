@@ -1,5 +1,6 @@
 #ifndef ANSICOLORS_H
 #define ANSICOLORS_H
+#include "AllocatorCpu.h"
 
 namespace PsimagLite {
 

@@ -30,6 +30,7 @@ Please see full open source license included in file LICENSE.
 #include <vector>
 #include <stdexcept>
 #include <cstdlib>
+#include <sstream>
 #ifdef USE_CUSTOM_ALLOCATOR
 #include "MemoryCpu.h"
 #endif
