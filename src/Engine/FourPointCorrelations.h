@@ -292,15 +292,18 @@ public:
 				std::cerr<<PsimagLite::AnsiColor::red;
 				std::cerr<<"WARNING: This code path might give WRONG results";
 				std::cerr<<PsimagLite::AnsiColor::reset<<"\n";
+
 				skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index0).fermionSign,ns,threadId);
-				skeleton_.growDirectly(Otmp,
-				                       O3g,
-				                       i3,
-				                       braket.op(index0).fermionSign,
-				                       i4 - 2,
-				                       true,
-				                       threadId);
+
+				SparseMatrixType O3gt;
+				helper_.transform(O3gt,O3g,threadId);
+
+				ns = i4-2;
+				if (ns<0) ns = 0;
+				helper_.setPointer(threadId,ns);
+				growDirectly4p(Otmp,O3gt,i3+1,braket.op(index0).fermionSign,ns,threadId);
 				helper_.setPointer(threadId,i4-2);
+
 				return skeleton_.bracketRightCorner(Otmp,
 				                                    O4m,
 				                                    braket.op(index1).fermionSign,
