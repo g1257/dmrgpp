@@ -35,15 +35,76 @@ readSpectrum(\%specMinus, \$numberKs, $fileMinus);
 my %specPlus;
 readSpectrum(\%specPlus, \$numberKs, $filePlus);
 
-my @nkxpi;
-sumOverOmega(\@nkxpi, \%specMinus, 1);
-printTwoColumn("outnkxpi.dat", \@nkxpi);
+if ($geometry eq "ladder") {
+	my @nkxpi;
+	sumOverOmega(\@nkxpi, \%specMinus, 1);
+	printVsQ("outnkxpi.dat", \@nkxpi);
+}
 
 my @nkx0;
 sumOverOmega(\@nkx0, \%specMinus, 0);
-printTwoColumn("outnkx0.dat", \@nkx0);
+printVsQ("outnkx0.dat", \@nkx0);
 
-sub printTwoColumn
+my $totalMy = ($geometry eq "ladder") ? 2 : 1;
+
+for (my $mp = 0; $mp < 2; ++$mp) { #mp = 0 is -, mp=1 is +
+	my $ptr = ($mp == 0) ? \%specMinus : \%specPlus;
+	for (my $my = 0; $my < $totalMy; ++$my) {
+		my %h;
+		sumOverKx(\%h, $ptr, $my);
+		printVsOmega("nVsOmegaky$my"."Sector$mp.dat", \%h);
+	}
+}
+
+sub printVsOmega
+{
+	my ($fout, $ptr) = @_;
+	open(FOUT, ">", "$fout") or die "$0: Cannot write to $fout : $!\n";
+	for my $omega (sort {$a <=> $b} keys %$ptr) {
+		my $val = $ptr->{$omega};
+		$val = 0 if ($val < 0);
+		print FOUT "$omega $val\n";
+	}
+
+	close(FOUT);
+	print STDERR "$0: File $fout has been written.\n";
+}
+
+sub sumOverKx
+{
+	my ($v, $ptr, $my) = @_;
+	my $factor = 0;
+	my @fileIndices=(0);
+	if ($geometry eq "chain") {
+		$factor = 0.5;
+		die "$0: Chain does not have ky != 0\n" if ($my != 0)
+	} elsif ($geometry eq "ladder") {
+		$factor = 0.25;
+		@fileIndices=(0,1);
+	} else {
+		die "$0: Unknown geometry $geometry\n";
+	}
+
+	my $fileIndex = $my;
+
+	for my $omega (sort {$a <=> $b} keys %$ptr) {
+		my $aptr = $ptr->{$omega};
+		my $nks = scalar(@$aptr) - 1;
+		my $numberOfQs = int($factor*$nks);
+		for (my $m2 = 0; $m2 < $numberOfQs; ++$m2) {
+			my $realPart = $aptr->[2*$m2+1+2*$fileIndex*$numberOfQs];
+			#my $imagPart = $aptr->[2*$m2+2+2*$fileIndex*$numberOfQs];
+			if (defined($v->{$omega})) {
+				$v->{$omega} += $realPart;
+			} else {
+				$v->{$omega} = $realPart;
+			}
+		}
+	}
+	
+}
+
+sub printVsQ
 {
 	my ($fout, $v) = @_;
 	my $numberOfQs = scalar(@$v);
@@ -59,6 +120,7 @@ sub printTwoColumn
 	}
 
 	close(FOUT);
+	print STDERR "$0: File $fout has been written.\n";
 }
 
 sub sumOverOmega
