@@ -5,6 +5,7 @@
 #include "AllocatorCpu.h"
 #include <iostream>
 #include "AnsiColors.h"
+#include <sstream>
 
 class Provenance {
 

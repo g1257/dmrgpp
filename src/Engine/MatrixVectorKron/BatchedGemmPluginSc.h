@@ -83,11 +83,10 @@ public:
 		bptr = 0;
 	}
 
-	BatchedGemm2()
+	~BatchedGemm2()
 	{
 		delete batchedGemm_;
 		batchedGemm_ = 0;
-
 	}
 
 	bool enabled() const { return initKron_.batchedGemm(); }
