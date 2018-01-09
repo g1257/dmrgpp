@@ -92,12 +92,12 @@ sub sumOverKx
 		my $nks = scalar(@$aptr) - 1;
 		my $numberOfQs = int($factor*$nks);
 		for (my $m2 = 0; $m2 < $numberOfQs; ++$m2) {
-			my $realPart = $aptr->[2*$m2+1+2*$fileIndex*$numberOfQs];
-			#my $imagPart = $aptr->[2*$m2+2+2*$fileIndex*$numberOfQs];
+			#my $realPart = $aptr->[2*$m2+1+2*$fileIndex*$numberOfQs];
+			my $imagPart = $aptr->[2*$m2+2+2*$fileIndex*$numberOfQs];
 			if (defined($v->{$omega})) {
-				$v->{$omega} += $realPart;
+				$v->{$omega} += $imagPart;
 			} else {
-				$v->{$omega} = $realPart;
+				$v->{$omega} = $imagPart;
 			}
 		}
 	}
@@ -147,12 +147,12 @@ sub sumOverOmega
 		my $nks = scalar(@$aptr) - 1;
 		my $numberOfQs = int($factor*$nks);
 		for (my $m2 = 0; $m2 < $numberOfQs; ++$m2) {
-			my $realPart = $aptr->[2*$m2+1+2*$fileIndex*$numberOfQs];
-			#my $imagPart = $aptr->[2*$m2+2+2*$fileIndex*$numberOfQs];
+			#my $realPart = $aptr->[2*$m2+1+2*$fileIndex*$numberOfQs];
+			my $imagPart = $aptr->[2*$m2+2+2*$fileIndex*$numberOfQs];
 			if (defined($v->[$m2])) {
-				$v->[$m2] += $realPart;
+				$v->[$m2] += $imagPart;
 			} else {
-				$v->[$m2] = $realPart;
+				$v->[$m2] = $imagPart;
 			}
 		}
 	}
