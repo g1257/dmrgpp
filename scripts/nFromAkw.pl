@@ -10,20 +10,23 @@ my $pi = Math::Trig::pi;
 
 use Getopt::Long qw(:config no_ignore_case);
 
-my $usage = "-f dollarizedInput [-p] [-z] minusSpectrum plusSpectrum\n";
+my $usage = "-f dollarizedInput [-m mu] [-p] [-z] minusSpectrum plusSpectrum\n";
 
 my $templateInput;
 my $isPeriodic;
 my $zeroAtCenter = 0;
+my $mu;
 
 GetOptions('f=s' => \$templateInput,
+           'm=f' => \$mu,
            'p' => \$isPeriodic,
            'z' => \$zeroAtCenter) or die "$usage\n";
 
 (defined($templateInput) and defined($isPeriodic)) or die "$0: USAGE: $usage\n";
 
 my $geometry;
-my $hptr = {"GeometryKind" => \$geometry};
+my $sites;
+my $hptr = {"GeometryKind" => \$geometry, "TotalNumberOfSites" => \$sites};
 OmegaUtils::getLabels($hptr,$templateInput);
 
 my ($fileMinus, $filePlus) = @ARGV;
@@ -47,12 +50,67 @@ printVsQ("outnkx0.dat", \@nkx0);
 
 my $totalMy = ($geometry eq "ladder") ? 2 : 1;
 
+my %fullVsOmega;
 for (my $mp = 0; $mp < 2; ++$mp) { #mp = 0 is -, mp=1 is +
 	my $ptr = ($mp == 0) ? \%specMinus : \%specPlus;
 	for (my $my = 0; $my < $totalMy; ++$my) {
 		my %h;
 		sumOverKx(\%h, $ptr, $my);
 		printVsOmega("nVsOmegaky$my"."Sector$mp.dat", \%h);
+		addToFullOmega(\%fullVsOmega, \%h);
+	}
+}
+
+printVsOmega("nVsOmega.dat", \%fullVsOmega);
+
+if (defined($mu)) {
+	sumWeight(\%fullVsOmega, $mu);
+}
+
+sub sumWeight
+{
+	my ($ptr, $mu) = @_;
+	my ($below, $above) = (0, 0);
+	my $max = 0;
+	for my $omega (sort {$a <=> $b} keys %$ptr) {
+		my $val = $ptr->{$omega};
+		$max = $val if ($val > $max);
+		$val = 0 if ($val < 0);
+		if ($omega < $mu) {
+			$below += $val;
+		} else {
+			$above += $val;
+		}
+	}
+
+	my $fout = "mu.dat";
+	open(FOUT, ">", "$fout") or die "$0: Cannot write to $fout : $!\n";
+	print FOUT "$mu 0\n";
+	print FOUT "$mu $max\n";	
+	close(FOUT);
+	print STDERR "File $fout written\n";
+
+	my $factor = $below + $above;
+	$factor = $sites/$factor;
+	$below *= $factor;
+	$above *= $factor;
+	print STDERR "Below $mu : $below, above $mu: $above\n";
+
+
+	
+}
+
+sub addToFullOmega
+{
+	my ($v, $ptr) = @_;
+	for my $omega (sort {$a <=> $b} keys %$ptr) {
+		my $val = $ptr->{$omega};
+		$val = 0 if ($val < 0);
+		if (!defined($v->{$omega})) {
+			$v->{$omega} = $val;
+		} else {
+			$v->{$omega} += $val;
+		}
 	}
 }
 
