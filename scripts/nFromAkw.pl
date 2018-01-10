@@ -10,7 +10,7 @@ my $pi = Math::Trig::pi;
 
 use Getopt::Long qw(:config no_ignore_case);
 
-my $usage = "-f dollarizedInput [-m mu] [-p] [-z] minusSpectrum plusSpectrum\n";
+my $usage = "USAGE: $0 -f dollarizedInput [-m mu] [-p] [-z] minusSpectrum plusSpectrum\n";
 
 my $templateInput;
 my $isPeriodic;
@@ -22,21 +22,31 @@ GetOptions('f=s' => \$templateInput,
            'p' => \$isPeriodic,
            'z' => \$zeroAtCenter) or die "$usage\n";
 
-(defined($templateInput) and defined($isPeriodic)) or die "$0: USAGE: $usage\n";
+(defined($templateInput) and defined($isPeriodic)) or die "$usage\n";
 
 my $geometry;
 my $sites;
 my $hptr = {"GeometryKind" => \$geometry, "TotalNumberOfSites" => \$sites};
 OmegaUtils::getLabels($hptr,$templateInput);
 
-my ($fileMinus, $filePlus) = @ARGV;
+my ($fmString, $fpString) = @ARGV;
+defined($fpString) or die "$usage\n";
+
+my (@filesMinus, @filesPlus);
+
+getFiles(\@filesMinus, $fmString);
+getFiles(\@filesPlus, $fpString);
 
 my $numberKs;
 my %specMinus;
-readSpectrum(\%specMinus, \$numberKs, $fileMinus);
+for (my $i = 0; $i < scalar(@filesMinus); ++$i) {
+	readSpectrum(\%specMinus, \$numberKs, $filesMinus[$i]);
+}
 
 my %specPlus;
-readSpectrum(\%specPlus, \$numberKs, $filePlus);
+for (my $i = 0; $i < scalar(@filesPlus); ++$i) {
+	readSpectrum(\%specPlus, \$numberKs, $filesPlus[$i]);
+}
 
 if ($geometry eq "ladder") {
 	my @nkxpi;
@@ -120,7 +130,7 @@ sub printVsOmega
 	open(FOUT, ">", "$fout") or die "$0: Cannot write to $fout : $!\n";
 	for my $omega (sort {$a <=> $b} keys %$ptr) {
 		my $val = $ptr->{$omega};
-		$val = 0 if ($val < 0);
+		#$val = 0 if ($val < 0);
 		print FOUT "$omega $val\n";
 	}
 
@@ -262,4 +272,10 @@ sub getQ
 	return ($isPeriodic) ? 2.0*$pi*$m/$n : $m*$pi/($n+1.0);
 }
 
+sub getFiles
+{
+	my ($fm, $string) = @_;
+	my @temp = split(/,/, $string);
+	@$fm = @temp;
+}
 
