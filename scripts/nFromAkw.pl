@@ -48,6 +48,11 @@ for (my $i = 0; $i < scalar(@filesPlus); ++$i) {
 	readSpectrum(\%specPlus, \$numberKs, $filesPlus[$i]);
 }
 
+my %specFull;
+addSpectrum(\%specFull, \%specMinus);
+addSpectrum(\%specFull, \%specPlus);
+OmegaUtils::printGnuplot(\%specFull, $geometry,  $isPeriodic, $zeroAtCenter);
+
 if ($geometry eq "ladder") {
 	my @nkxpi;
 	sumOverOmega(\@nkxpi, \%specMinus, 1);
@@ -265,6 +270,25 @@ sub readSpectrum
 
 	die "$0: $file with at least 1 line with wrong number of cols, ".$$ptrN." expected\n";
 }
+
+sub addSpectrum
+{
+	my ($v, $ptr) = @_;
+	for my $omega (sort {$a <=> $b} keys %$ptr) { #no need to sort
+		my $oldVal = $ptr->{$omega};
+		my $aptr = $v->{$omega};
+		if (defined($aptr)) {
+			my $n = scalar(@$aptr);
+			for (my $i = 1; $i < $n; ++$i) {
+				$v->{$omega}->[$i] += $oldVal->[$i];
+			}
+		} else {
+			my @temp = @$oldVal;
+			$v->{$omega} = \@temp;
+		}
+	}
+}
+
 
 sub getQ
 {

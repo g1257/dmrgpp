@@ -8,6 +8,8 @@ use OmegaUtils;
 
 use Getopt::Long qw(:config no_ignore_case);
 
+die "$0 is no longer needed; use nFromAkw.pl instead\n";
+
 my $usage = "-f dollarizedInput [-p] [-z]\n";
 
 my $templateInput;
