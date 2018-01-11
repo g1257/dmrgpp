@@ -31,9 +31,10 @@ public:
 	    :  initKron_(initKron), batchedGemm_(0)
 	{
 		if (!enabled()) return;
-		std::cout<<"PLUGIN_SC: is in use\n";
 		SizeType npatches = initKron_.numberOfPatches(DUMMY);
 		SizeType nC = initKron_.connections();
+		std::cout<<"PLUGIN_SC: is in use, npatches="<<npatches;
+		std::cout<<" connections="<<nC<<"\n";
 		ComplexOrRealType** aptr = new ComplexOrRealType*[npatches*npatches*nC];
 		ComplexOrRealType** bptr = new ComplexOrRealType*[npatches*npatches*nC];
 		VectorIntType ldAptr(npatches*npatches*nC);

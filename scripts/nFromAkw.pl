@@ -26,7 +26,10 @@ GetOptions('f=s' => \$templateInput,
 
 my $geometry;
 my $sites;
-my $hptr = {"GeometryKind" => \$geometry, "TotalNumberOfSites" => \$sites};
+my $eta;
+my $hptr = {"GeometryKind" => \$geometry,
+	    "TotalNumberOfSites" => \$sites,
+            "CorrectionVectorEta" => \$eta};
 OmegaUtils::getLabels($hptr,$templateInput);
 
 my ($fmString, $fpString) = @ARGV;
@@ -90,7 +93,7 @@ sub sumWeight
 	for my $omega (sort {$a <=> $b} keys %$ptr) {
 		my $val = $ptr->{$omega};
 		$max = $val if ($val > $max);
-		$val = 0 if ($val < 0);
+		#$val = 0 if ($val < 0);
 		if ($omega < $mu) {
 			$below += $val;
 		} else {
@@ -101,18 +104,17 @@ sub sumWeight
 	my $fout = "mu.dat";
 	open(FOUT, ">", "$fout") or die "$0: Cannot write to $fout : $!\n";
 	print FOUT "$mu 0\n";
-	print FOUT "$mu $max\n";	
+	print FOUT "$mu $max\n";
 	close(FOUT);
 	print STDERR "File $fout written\n";
 
 	my $factor = $below + $above;
+	print STDERR "Factor= $factor, ";
+	print STDERR "factor*eta/sites= ".$factor*$eta/$sites."\n";
 	$factor = $sites/$factor;
 	$below *= $factor;
 	$above *= $factor;
 	print STDERR "Below $mu : $below, above $mu: $above\n";
-
-
-	
 }
 
 sub addToFullOmega
@@ -174,7 +176,6 @@ sub sumOverKx
 			}
 		}
 	}
-	
 }
 
 sub printVsQ
@@ -198,9 +199,7 @@ sub printVsQ
 
 sub sumOverOmega
 {
-
 	my ($v, $ptr, $my) = @_;
-	
 	my $factor = 0;
 	my @fileIndices=(0);
 	if ($geometry eq "chain") {
