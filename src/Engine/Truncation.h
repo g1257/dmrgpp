@@ -106,6 +106,7 @@ class Truncation  {
 	typedef typename DensityMatrixBaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename TargettingType::ModelType ModelType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 public:
 
@@ -114,7 +115,7 @@ public:
 
 	struct TruncationCache {
 		BlockDiagonalMatrixType transform;
-		typename PsimagLite::Vector<RealType>::Type eigs;
+		VectorRealType eigs;
 		typename PsimagLite::Vector<SizeType>::Type removedIndices;
 	}; // TruncationCache
 
@@ -278,7 +279,7 @@ private:
 		const LeftRightSuperType& lrsForWft = (twoSiteDmrg || wftInPatches) ? lrs_ : lrs;
 		waveFunctionTransformation_.push(cache.transform,
 		                                 ProgramGlobals::EXPAND_SYSTEM,
-						 lrsForWft);
+		                                 lrsForWft);
 
 		msg<<"new size of basis="<<rSprime.size();
 		msg<<" transform is "<<cache.transform.rows()<<" x "<<cache.transform.cols();
@@ -324,11 +325,11 @@ private:
 	}
 
 	void updateKeptStates(SizeType& keptStates,
-	                      const typename PsimagLite::Vector<RealType>::Type& eigs2)
+	                      const VectorRealType& eigs2)
 	{
-		typename PsimagLite::Vector<RealType>::Type eigs = eigs2;
+		VectorRealType eigs = eigs2;
 		typename PsimagLite::Vector<SizeType>::Type perm(eigs.size());
-		PsimagLite::Sort<typename PsimagLite::Vector<RealType>::Type> sort;
+		PsimagLite::Sort<VectorRealType> sort;
 		sort.sort(eigs,perm);
 		dumpEigs(eigs);
 
@@ -337,9 +338,7 @@ private:
 		if (eigs.size()>=newKeptStates)
 			statesToRemove = eigs.size()-newKeptStates;
 		RealType discWeight = sumUpTo(eigs,statesToRemove);
-		RealType Ententropy = entropy(eigs,1.0);
-		RealType R2p0entropy = entropy(eigs,2.0);
-		PsimagLite::OstringStream msg, msg2;
+		PsimagLite::OstringStream msg;
 		if (newKeptStates != keptStates) {
 			// we report that the "m" value has been changed and...
 			msg<<"Reducing kept states to "<<newKeptStates<<" from "<<keptStates;
@@ -349,13 +348,53 @@ private:
 			// we report that the "m" value remains the same
 			msg<<"Not changing kept states="<<keptStates;
 		}
+
 		error_ = discWeight;
 		// we report the discarded weight
 		msg<<"Discarded weight (Truncation error): "<< discWeight;
 		progress_.printline(msg,std::cout);
+
+		calcAndPrintEntropies(eigs);
+	}
+
+	void calcAndPrintEntropies(const VectorRealType& eigs)
+	{
+		RealType rntentropy = entropy(eigs, 1.0);
+		const RealType reyniIndex = 2.0;
+		RealType r2p0entropy = entropy(eigs, reyniIndex);
+		PsimagLite::OstringStream msg;
 		// von-neumann entaglement entropy; and 2nd order Reyni entropy
-		msg2<<"Entropy E(1)= " << Ententropy << ", E(2)= " << R2p0entropy;
-		progress_.printline(msg2,std::cout);
+		msg<<"EntropyVonNeumann= "<<rntentropy;
+		msg<<"; ReyniIndex= "<<reyniIndex<<" EntropyReyni="<<r2p0entropy;
+		progress_.printline(msg, std::cout);
+	}
+
+	RealType entropy(const VectorRealType& eigs,
+	                 const RealType reyniIndex) const
+	{
+		RealType ent = 0;
+		RealType val = 0;
+
+		// von-neumann entanglement entropy
+		if (reyniIndex == 1.0) {
+			for (SizeType i = 0; i < eigs.size(); ++i) {
+				val = eigs[i];
+				if (val <= 1e-12) continue;
+				ent += -1.0*val*log(val);
+			}
+
+			return ent;
+		}
+
+		// Reyni entropy of index n
+		val = 0.0;
+		for (SizeType i = 0;i < eigs.size(); ++i) {
+			if (eigs[i] <= 1e-12) continue;
+			val += pow(eigs[i], reyniIndex);
+		}
+
+		ent = 1.0/(1.0 - reyniIndex);
+		return ent*log(val);
 	}
 
 	/* PSIDOC RemovalOfStates
@@ -373,7 +412,7 @@ private:
 		!PTEX-END */
 	//! eigenvalues are ordered in increasing order
 	SizeType computeKeptStates(SizeType& keptStates,
-	                           const typename PsimagLite::Vector<RealType>::Type& eigs) const
+	                           const VectorRealType& eigs) const
 	{
 		if (parameters_.truncationControl.first < 0) return keptStates;
 		int start = eigs.size() - keptStates;
@@ -406,7 +445,7 @@ private:
 		return total;
 	}
 
-	RealType sumUpTo(const typename PsimagLite::Vector<RealType>::Type& eigs,
+	RealType sumUpTo(const VectorRealType& eigs,
 	                 SizeType x) const
 	{
 		RealType discWeight = 0;
@@ -415,33 +454,7 @@ private:
 		return discWeight;
 	}
 
-	RealType entropy(const typename PsimagLite::Vector<RealType>::Type& eigs,
-	                        const double ReyniIndex) const
-	{
-		RealType ent = 0;
-		RealType val;
-
-		// von-neumann entanglement entropy
-		if (ReyniIndex==1.0) {
-			for (SizeType i=0;i<eigs.size();i++) {
-				val = eigs[i];
-				if(val<=1e-12) continue;
-				ent += -1.0*val*log(val);
-			}
-			return ent;
-		} else { // Reyni entropy of index n
-			val=0.0;
-			for (SizeType i=0;i<eigs.size();i++) {
-				if(eigs[i]<=1e-12) continue;
-				val += pow(eigs[i],ReyniIndex);
-			}
-			ent = 1.0/(1.0-ReyniIndex);
-			return ent*log(val);
-		}
-	}
-
-
-	void dumpEigs(const typename PsimagLite::Vector<RealType>::Type& eigs) const
+	void dumpEigs(const VectorRealType& eigs) const
 	{
 		static SizeType counter = 0;
 		if (parameters_.fileForDensityMatrixEigs=="") return;
