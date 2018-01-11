@@ -337,6 +337,7 @@ private:
 		if (eigs.size()>=newKeptStates)
 			statesToRemove = eigs.size()-newKeptStates;
 		RealType discWeight = sumUpTo(eigs,statesToRemove);
+		RealType entropy = entanglEntropy(eigs);
 		PsimagLite::OstringStream msg;
 		if (newKeptStates != keptStates) {
 			// we report that the "m" value has been changed and...
@@ -351,6 +352,7 @@ private:
 		progress_.printline(msg,std::cout);
 		// we report the discarded weight
 		msg<<"Discarded weight (Truncation error): "<< discWeight ;
+		msg<<" With entropy = " << entropy;
 		progress_.printline(msg,std::cout);
 	}
 
@@ -409,6 +411,14 @@ private:
 		for (SizeType i=0;i<x;i++)
 			discWeight += fabs(eigs[i]);
 		return discWeight;
+	}
+
+	RealType entanglEntropy(const typename PsimagLite::Vector<RealType>::Type& eigs) const
+	{
+		RealType ent = 0;
+		for (SizeType i=0;i<eigs.size();i++)
+			ent += -1.0*eigs[i]*log(eigs[i]);
+		return ent;
 	}
 
 	void dumpEigs(const typename PsimagLite::Vector<RealType>::Type& eigs) const
