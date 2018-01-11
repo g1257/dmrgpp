@@ -337,8 +337,9 @@ private:
 		if (eigs.size()>=newKeptStates)
 			statesToRemove = eigs.size()-newKeptStates;
 		RealType discWeight = sumUpTo(eigs,statesToRemove);
-		RealType entropy = entanglEntropy(eigs);
-		PsimagLite::OstringStream msg;
+		RealType Ententropy = entropy(eigs,1.0);
+		RealType R2p0entropy = entropy(eigs,2.0);
+		PsimagLite::OstringStream msg, msg2;
 		if (newKeptStates != keptStates) {
 			// we report that the "m" value has been changed and...
 			msg<<"Reducing kept states to "<<newKeptStates<<" from "<<keptStates;
@@ -349,11 +350,12 @@ private:
 			msg<<"Not changing kept states="<<keptStates;
 		}
 		error_ = discWeight;
-		progress_.printline(msg,std::cout);
 		// we report the discarded weight
-		msg<<"Discarded weight (Truncation error): "<< discWeight ;
-		msg<<" With entropy = " << entropy;
+		msg<<"Discarded weight (Truncation error): "<< discWeight;
 		progress_.printline(msg,std::cout);
+		// von-neumann entaglement entropy; and 2nd order Reyni entropy
+		msg2<<"Entropy E(1)= " << Ententropy << ", E(2)= " << R2p0entropy;
+		progress_.printline(msg2,std::cout);
 	}
 
 	/* PSIDOC RemovalOfStates
@@ -413,13 +415,31 @@ private:
 		return discWeight;
 	}
 
-	RealType entanglEntropy(const typename PsimagLite::Vector<RealType>::Type& eigs) const
+	RealType entropy(const typename PsimagLite::Vector<RealType>::Type& eigs,
+	                        const double ReyniIndex) const
 	{
 		RealType ent = 0;
-		for (SizeType i=0;i<eigs.size();i++)
-			ent += -1.0*eigs[i]*log(eigs[i]);
-		return ent;
+		RealType val;
+
+		// von-neumann entanglement entropy
+		if (ReyniIndex==1.0) {
+			for (SizeType i=0;i<eigs.size();i++) {
+				val = eigs[i];
+				if(val<=1e-12) continue;
+				ent += -1.0*val*log(val);
+			}
+			return ent;
+		} else { // Reyni entropy of index n
+			val=0.0;
+			for (SizeType i=0;i<eigs.size();i++) {
+				if(eigs[i]<=1e-12) continue;
+				val += pow(eigs[i],ReyniIndex);
+			}
+			ent = 1.0/(1.0-ReyniIndex);
+			return ent*log(val);
+		}
 	}
+
 
 	void dumpEigs(const typename PsimagLite::Vector<RealType>::Type& eigs) const
 	{
