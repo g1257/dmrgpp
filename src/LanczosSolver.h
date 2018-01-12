@@ -122,18 +122,16 @@ public:
 	              Matrix<VectorElementType>* storageForLanczosVectors=0)
 	    : progress_("LanczosSolver",params.threadId),
 	      mat_(mat),
+	      params_(params),
 	      steps_(params.steps),
-	      minSteps_(params.minSteps),
-	      eps_(params.tolerance),
 	      mode_(WITH_INFO),
-	      stepsForEnergyConvergence_(params.stepsForEnergyConvergence),
 	      rng_(343311),
 	      lanczosVectors_(mat_,params.lotaMemory,params.steps,storageForLanczosVectors)
 	{
 		setMode(params.options);
 		OstringStream msg;
 		msg<<"Constructing... mat.rank="<<mat_.rows();
-		msg<<" maximum steps="<<steps_<<" maximum eps="<<eps_<<" requested";
+		msg<<" maximum steps="<<steps_<<" maximum eps="<<params_.tolerance<<" requested";
 		progress_.printline(msg,std::cout);
 		if (storageForLanczosVectors) {
 			OstringStream msg2;
@@ -310,11 +308,11 @@ public:
 			ab.a(j) = atmp;
 			ab.b(j) = btmp;
 
-			if (eps_>0) {
+			if (params_.tolerance>0) {
 				ground(enew,j+1, ab,nullVector);
-				if (fabs (enew - eold) < eps_) exitFlag=true;
+				if (fabs (enew - eold) < params_.tolerance) exitFlag=true;
 				if (exitFlag && mat_.rows()<=4) break;
-				if (exitFlag && j >= minSteps_) break;
+				if (exitFlag && j >= params_.minSteps) break;
 			}
 
 			eold = enew;
@@ -329,7 +327,7 @@ public:
 		OstringStream msg;
 		msg<<"Decomposition done for mat.rank="<<mat_.rows();
 		msg<<" after "<<j<<" steps";
-		if (eps_>0) msg<<", actual eps="<<fabs(enew - eold);
+		if (params_.tolerance>0) msg<<", actual eps="<<fabs(enew - eold);
 
 		progress_.printline(msg,std::cout);
 
@@ -339,6 +337,9 @@ public:
 			msg2<<"Increasing this maximum is recommended.";
 			progress_.printline(msg2,std::cout);
 		}
+
+//		if (
+//		        )if (lanczosVectors_.lotaMemory() && lanczosVectors_.data())
 	}
 
 	void oneStepDecomposition(VectorType& x,
@@ -409,7 +410,7 @@ private:
 	            typename Vector<RealType>::Type& gs)
 	{
 		RealType* vki = 0;
-		long int maxCounter = stepsForEnergyConvergence_;
+		long int maxCounter = params_.stepsForEnergyConvergence;
 
 		if (gs.size() > 0) {
 			std::fill(groundV_.begin(),groundV_.end(),0.0);
@@ -538,11 +539,9 @@ private:
 
 	ProgressIndicator progress_;
 	MatrixType const& mat_;
+	const SolverParametersType& params_;
 	SizeType steps_;
-	SizeType minSteps_;
-	RealType eps_;
 	SizeType mode_;
-	SizeType stepsForEnergyConvergence_;
 	Random48<RealType> rng_;
 	LanczosVectorsType lanczosVectors_;
 	VectorRealType groundD_;
