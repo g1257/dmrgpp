@@ -232,6 +232,20 @@ public:
 		return lanczosVectors_.reorthogonalizationMatrix();
 	}
 
+	void reortho(DenseMatrixType& T)
+	{
+		bool canReortho = (lanczosVectors_.lotaMemory() && lanczosVectors_.data());
+		if (params_.options.find("reortho") != PsimagLite::String::npos) {
+			if (!canReortho) {
+				PsimagLite::String str("LanczosSolver: Reortho requested but cannot");
+				str += "Suggestion: Delete reortho from input or set lotaMemory=true\n";
+				throw PsimagLite::RuntimeError(str);
+			}
+
+			lanczosVectors_.reortho(T);
+		}
+	}
+
 private:
 
 	void unimplemented(const String& s) const

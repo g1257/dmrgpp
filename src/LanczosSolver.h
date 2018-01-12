@@ -104,10 +104,10 @@ class LanczosSolver : public LanczosOrDavidsonBase<SolverParametersType,MatrixTy
 	typedef typename SolverParametersType::RealType RealType;
 	typedef LanczosVectors<MatrixType,VectorType> LanczosVectorsType;
 	typedef typename LanczosVectorsType::DenseMatrixType DenseMatrixType;
-	typedef typename LanczosVectorsType::DenseMatrixRealType DenseMatrixRealType;
 
 public:
 
+	typedef typename LanczosVectorsType::DenseMatrixRealType DenseMatrixRealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef SolverParametersType ParametersSolverType;
 	typedef MatrixType LanczosMatrixType;
@@ -337,9 +337,6 @@ public:
 			msg2<<"Increasing this maximum is recommended.";
 			progress_.printline(msg2,std::cout);
 		}
-
-//		if (
-//		        )if (lanczosVectors_.lotaMemory() && lanczosVectors_.data())
 	}
 
 	void oneStepDecomposition(VectorType& x,
@@ -349,6 +346,20 @@ public:
 	                          bool) const
 	{
 		lanczosVectors_.oneStepDecomposition(x,y,atmp,btmp);
+	}
+
+	void reortho(DenseMatrixType& T)
+	{
+		bool canReortho = (lanczosVectors_.lotaMemory() && lanczosVectors_.data());
+		if (params_.options.find("reortho") != PsimagLite::String::npos) {
+			if (!canReortho) {
+				PsimagLite::String str("LanczosSolver: Reortho requested but cannot");
+				str += "Suggestion: Delete reortho from input or set lotaMemory=true\n";
+				throw PsimagLite::RuntimeError(str);
+			}
+
+			lanczosVectors_.reortho(T);
+		}
 	}
 
 	SizeType steps() const {return steps_; }

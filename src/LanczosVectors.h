@@ -282,6 +282,24 @@ public:
 		return reortho_;
 	}
 
+	void reortho(DenseMatrixType& T)
+	{
+		if (!lotaMemory_) return;
+
+		if (reortho_.rows() == 0) {
+			calculateReortho();
+		}
+
+
+		DenseMatrixType reortho2 = reortho_;
+
+		DenseMatrixType tmp = T * reortho2;
+		T = multiplyTransposeConjugate(reortho2,tmp);
+		OstringStream msg;
+		msg<<"Reortho done";
+		progress_.printline(msg,std::cout);
+	}
+
 private:
 
 	void calculateReortho()
