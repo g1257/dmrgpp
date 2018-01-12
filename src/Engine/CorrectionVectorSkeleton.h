@@ -258,14 +258,7 @@ public:
 
 		VectorSizeType steps(phi.sectors());
 
-		//const PsimagLite::String options = model_.params().options;
-		//	bool isRixsStatic = (options.find("TargetingRixsStatic") != PsimagLite::String::npos);
-		//	if (isRixsStatic) {
-		//		TridiagRixsStaticType rixsStatic(lrs_, model_, ioIn_, site, direction);
-		//		rixsStatic(phi, T, V, steps);
-		//	} else {
 		triDiag(phi,T,V,steps);
-		//	}
 
 		VectorVectorRealType eigs(phi.sectors());
 
@@ -292,8 +285,6 @@ public:
 			tv1.setDataInSector(xi,i0);
 			//set xr
 			tv2.setDataInSector(xr,i0);
-			DenseMatrixType V;
-			getLanczosVectors(V,sv,p);
 		}
 
 		weightForContinuedFraction_ = PsimagLite::real(phi*phi);
@@ -323,38 +314,12 @@ public:
 			throw PsimagLite::RuntimeError(str);
 		}
 
-		SizeType type = tstStruct_.type();
-		int fermionSign = targetingCommon.findFermionSignOfTheOperators();
-		int s = (type&1) ? -1 : 1;
-		int s2 = (type>1) ? -1 : 1;
-		int s3 = (type&1) ? -fermionSign : 1;
-
-		typename PostProcType::ParametersType params(ioIn_,"DynamicDmrg");
-		params.Eg = targetingCommon.energy();
-		params.weight = s2*weightForContinuedFraction_*s3;
-		params.isign = s;
-		if (ab_.size() == 0) {
-			PsimagLite::OstringStream msg;
-			msg<<"WARNING:  Trying to save a tridiagonal matrix with size zero.\n";
-			msg<<"\tHINT: Maybe the dyn vectors were never calculated.\n";
-			msg<<"\tHINT: Maybe TSPLoops is too large";
-			if (params.weight != 0)
-				msg<<"\n\tExpect a throw anytime now...";
-			progress_.printline(msg,std::cerr);
-		}
-
-		PostProcType cf(ab_,reortho_,params);
-
-		targetingCommon.save(block,io,cf,targetingCommon.targetVectors());
-		targetingCommon.psi().save(io,"PSI");
+		targetingCommon.save(block, io, targetingCommon.targetVectors());
+		targetingCommon.psi().save(io, "PSI");
 	}
 
 	void load()
 	{
-//		PostProcType cf(io);
-//		ab_ = cf.ab;
-//		reortho_ = cf.rortho;
-
 //		targetingCommon.load(io);
 	}
 
@@ -374,22 +339,6 @@ public:
 		for (SizeType i = 0; i < weights.size(); i++)
 			msg2<<targetingCommon.normSquared(i)<<" ";
 		progress_.printline(msg2,std::cout);
-	}
-
-	void getLanczosVectors(DenseMatrixType& V,
-	                       const VectorType& sv,
-	                       SizeType p)
-	{
-		SizeType threadId = 0;
-		RealType fakeTime = 0;
-		typename ModelType::ModelHelperType modelHelper(p,lrs_,fakeTime,threadId);
-		typedef typename LanczosSolverType::LanczosMatrixType
-		        LanczosMatrixType;
-		LanczosMatrixType h(&model_,&modelHelper);
-		LanczosSolverType lanczosSolver(h,paramsForSolver_,&V);
-
-		lanczosSolver.decomposition(sv,ab_);
-		reortho_ = lanczosSolver.reorthogonalizationMatrix();
 	}
 
 	void computeXiAndXrIndirect(VectorType& xi,
@@ -531,7 +480,6 @@ private:
 	const LeftRightSuperType& lrs_;
 	const RealType& energy_;
 	PsimagLite::ProgressIndicator progress_;
-	TridiagonalMatrixType ab_;
 	DenseMatrixRealType reortho_;
 	RealType weightForContinuedFraction_;
 	typename LanczosSolverType::ParametersSolverType paramsForSolver_;

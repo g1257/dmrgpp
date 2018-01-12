@@ -235,6 +235,20 @@ public:
 		ts.save(io);
 	}
 
+	template<typename IoOutputType>
+	void save(const VectorSizeType& block,
+	          IoOutputType& io,
+	          const VectorVectorWithOffsetType& targetVectors) const
+	{
+		SizeType marker = (noStageIs(DISABLED)) ? 1 : 0;
+
+		TimeSerializerType ts(currentTime(),
+		                      block[0],
+		        applyOpExpression_.targetVectors(),
+		        marker);
+		ts.save(io);
+	}
+
 	template<typename SomeSerializerType>
 	void load(const PsimagLite::String& f)
 	{
