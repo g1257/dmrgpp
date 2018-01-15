@@ -110,6 +110,22 @@ public:
 	// To avoid compiler warnings
 	virtual ~LanczosOrDavidsonBase() { }
 
+	static bool isReorthoEnabled(const SolverParametersType& params, bool hasStorage)
+	{
+		if (params.options.find("reortho") == PsimagLite::String::npos)
+			return false;
+
+		bool canReortho = (params.lotaMemory && hasStorage);
+
+		if (!canReortho) {
+			PsimagLite::String str("LanczosOrDavidsonBase: Reortho requested but cannot");
+			str += "Suggestion: Delete reortho from input or set lotaMemory=true\n";
+			throw PsimagLite::RuntimeError(str);
+		}
+
+		return true;
+	}
+
 }; // class LanczosOrDavidsonBase
 
 } // namespace PsimagLite

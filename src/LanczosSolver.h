@@ -101,6 +101,7 @@ namespace PsimagLite {
 template<typename SolverParametersType,typename MatrixType,typename VectorType>
 class LanczosSolver : public LanczosOrDavidsonBase<SolverParametersType,MatrixType,VectorType> {
 
+	typedef LanczosOrDavidsonBase<SolverParametersType,MatrixType,VectorType> BaseType;
 	typedef typename SolverParametersType::RealType RealType;
 	typedef LanczosVectors<MatrixType,VectorType> LanczosVectorsType;
 	typedef typename LanczosVectorsType::DenseMatrixType DenseMatrixType;
@@ -126,7 +127,11 @@ public:
 	      steps_(params.steps),
 	      mode_(WITH_INFO),
 	      rng_(343311),
-	      lanczosVectors_(mat_,params.lotaMemory,params.steps,storageForLanczosVectors)
+	      lanczosVectors_(mat_,
+	                      params.lotaMemory,
+	                      params.steps,
+	                      BaseType::isReorthoEnabled(params, storageForLanczosVectors),
+	                      storageForLanczosVectors)
 	{
 		setMode(params.options);
 		OstringStream msg;
@@ -304,7 +309,7 @@ public:
 			}
 
 			RealType btmp = 0;
-			oneStepDecomposition(x,y,atmp,btmp,j==0);
+			oneStepDec(x, y, atmp, btmp, j);
 			ab.a(j) = atmp;
 			ab.b(j) = btmp;
 
@@ -339,27 +344,13 @@ public:
 		}
 	}
 
-	void oneStepDecomposition(VectorType& x,
-	                          VectorType& y,
-	                          RealType& atmp,
-	                          RealType& btmp,
-	                          bool) const
+	void oneStepDec(VectorType& x,
+	                VectorType& y,
+	                RealType& atmp,
+	                RealType& btmp,
+	                SizeType it) const
 	{
-		lanczosVectors_.oneStepDecomposition(x,y,atmp,btmp);
-	}
-
-	void reortho(DenseMatrixType& T)
-	{
-		bool canReortho = (lanczosVectors_.lotaMemory() && lanczosVectors_.data());
-		if (params_.options.find("reortho") != PsimagLite::String::npos) {
-			if (!canReortho) {
-				PsimagLite::String str("LanczosSolver: Reortho requested but cannot");
-				str += "Suggestion: Delete reortho from input or set lotaMemory=true\n";
-				throw PsimagLite::RuntimeError(str);
-			}
-
-			lanczosVectors_.reortho(T);
-		}
+		lanczosVectors_.oneStepDecomposition(x,y,atmp,btmp, it);
 	}
 
 	SizeType steps() const {return steps_; }

@@ -111,51 +111,45 @@ public:
 	LanczosVectors(const MatrixType& mat,
 	               bool lotaMemory,
 	               SizeType steps,
+	               bool isReorthoEnabled,
 	               DenseMatrixType* storage)
 	    : progress_("LanczosVectors"),
 	      mat_(mat),
 	      lotaMemory_(lotaMemory),
+	      isReorthoEnabled_(isReorthoEnabled),
 	      dummy_(0),
 	      needsDelete_(false),
 	      ysaved_(0),
-	      data_(storage)
+	      data_(storage),
+	      overlap_(0)
 	{
-		if (storage || !lotaMemory)
-			return;
-
-		// if lotaMemory is set, we still degrade gracefully if we can't allocate
-		SizeType maxNstep =  std::min(steps , mat_.rows());
-		try {
-			data_ = new DenseMatrixType(mat_.rows(),maxNstep);
-			needsDelete_ = true;
-			OstringStream msg;
-			msg<<"lotaMemory_=true";
-			progress_.printline(msg,std::cout);
-		} catch (std::exception&) {
-			// FIXME: option to store in secondary
-			OstringStream msg;
-			msg<<"Memory allocation failed, setting lotaMemory_=false\n";
-			progress_.printline(msg,std::cout);
-			lotaMemory_ = false;
-			data_ = 0;
-		}
+		dealWithStorageOfV(steps);
+		dealWithOverlapStorage(steps);
 	}
 
 	~LanczosVectors()
 	{
-		if (needsDelete_) delete data_;
+		delete overlap_;
+		overlap_ = 0;
+
+		if (!needsDelete_) return;
+
+		delete data_;
+		data_ = 0;
 	}
 
 	void resize(SizeType matrixRank,SizeType steps)
 	{
 		if (!lotaMemory_) return;
 		data_->reset(matrixRank,steps);
+		overlap_->resize(steps);
 	}
 
 	void reset(SizeType matrixRank,SizeType steps)
 	{
 		if (!lotaMemory_) return;
 		data_->reset(matrixRank,steps);
+		overlap_->resize(steps);
 	}
 
 	const DenseMatrixType* data() const
@@ -194,8 +188,9 @@ public:
 				for (SizeType i = 0; i < y.size(); i++)
 					z[i] += ctmp * y[i];
 				RealType btmp = 0;
-				oneStepDecomposition(x,y,atmp,btmp);
+				oneStepDecomposition(x,y,atmp,btmp, j);
 			}
+
 			return;
 		}
 
@@ -240,7 +235,8 @@ public:
 	void oneStepDecomposition(VectorType& x,
 	                          VectorType& y,
 	                          RealType& atmp,
-	                          RealType& btmp) const
+	                          RealType& btmp,
+	                          SizeType it) const
 	{
 		mat_.matrixVectorProduct (x, y); // x+= Hy
 
@@ -271,6 +267,8 @@ public:
 			y[i] = x[i] * inverseBtmp;
 			x[i] = -btmp * tmp;
 		}
+
+		reorthoIfNecessary(x, it);
 	}
 
 	const DenseMatrixRealType& reorthogonalizationMatrix()
@@ -282,25 +280,23 @@ public:
 		return reortho_;
 	}
 
-	void reortho(DenseMatrixType& T)
-	{
-		if (!lotaMemory_) return;
-
-		if (reortho_.rows() == 0) {
-			calculateReortho();
-		}
-
-
-		DenseMatrixType reortho2 = reortho_;
-
-		DenseMatrixType tmp = T * reortho2;
-		T = multiplyTransposeConjugate(reortho2,tmp);
-		OstringStream msg;
-		msg<<"Reortho done";
-		progress_.printline(msg,std::cout);
-	}
-
 private:
+
+	void reorthoIfNecessary(VectorType& x, SizeType it) const
+	{
+		if (!isReorthoEnabled_) return;
+
+		if (overlap_->size() <= it)
+			throw RuntimeError("reorthoIfNecessary failed\n");
+
+		for (SizeType j = 0; j < it; ++j)
+			for (SizeType i = 0; i < x.size(); ++i)
+				overlap_->operator[](j) += PsimagLite::conj(data_->operator()(i, j))*x[i];
+
+		for (SizeType i = 0; i < x.size(); ++i)
+			for (SizeType j = 0; j < it; ++j)
+				x[i] -= overlap_->operator[](j)*data_->operator()(i, j);
+	}
 
 	void calculateReortho()
 	{
@@ -314,8 +310,6 @@ private:
 		reortho_.resize(nlanczos,nlanczos);
 		computeS(reortho_,w);
 	}
-
-private:
 
 	void computeOverlap(DenseMatrixType& w) const
 	{
@@ -383,21 +377,57 @@ private:
 
 		for (SizeType p = 0; p <= n; ++p)
 			s(p,n) = PsimagLite::real(v[p]) * nn;
+	}
 
+	void dealWithStorageOfV(SizeType steps)
+	{
+		if (data_ || !lotaMemory_) return;
+		// if lotaMemory is set, we still degrade gracefully if we can't allocate
+		SizeType maxNstep = std::min(steps , mat_.rows());
+		try {
+			data_ = new DenseMatrixType(mat_.rows(),maxNstep);
+			needsDelete_ = true;
+			OstringStream msg;
+			msg<<"lotaMemory_=true";
+			progress_.printline(msg,std::cout);
+		} catch (std::exception&) {
+			// FIXME: option to store in secondary
+			OstringStream msg;
+			msg<<"Memory allocation failed, setting lotaMemory_=false\n";
+			progress_.printline(msg,std::cout);
+			lotaMemory_ = false;
+			data_ = 0;
+		}
+	}
+
+	void dealWithOverlapStorage(SizeType steps)
+	{
+		if (!isReorthoEnabled_) return;
+
+		OstringStream msg;
+		msg<<"Reortho enabled";
+		progress_.printline(msg,std::cout);
+		return;
+
+		SizeType maxNstep = std::min(steps , mat_.rows());
+		overlap_  = new VectorType(maxNstep, 0);
 	}
 
 	//! copy ctor and assigment operator are invalid
 	//! because this class contains a pointer:
 	ThisType& operator=(const ThisType& other);
+
 	LanczosVectors(const ThisType& copy);
 
 	ProgressIndicator progress_;
 	const MatrixType& mat_;
 	bool lotaMemory_;
+	bool isReorthoEnabled_;
 	VectorElementType dummy_;
 	bool needsDelete_;
 	VectorType ysaved_;
 	DenseMatrixType* data_;
+	VectorType* overlap_;
 	DenseMatrixRealType reortho_;
 }; // class LanczosVectors
 

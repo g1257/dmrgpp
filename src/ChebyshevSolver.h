@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TypeToString.h"
 #include "ChebyshevSerializer.h"
 #include "LanczosSolver.h"
+#include "LanczosOrDavidsonBase.h"
 
 namespace PsimagLite {
 
@@ -105,8 +106,9 @@ namespace PsimagLite {
 	 *
 	 */
 template<typename SolverParametersType,typename MatrixType,typename VectorType>
-class ChebyshevSolver {
+class ChebyshevSolver  {
 
+	typedef LanczosOrDavidsonBase<SolverParametersType,MatrixType,VectorType> NotBaseType;
 	typedef typename SolverParametersType::RealType RealType;
 	typedef LanczosVectors<MatrixType,VectorType> LanczosVectorsType;
 	typedef typename LanczosVectorsType::DenseMatrixType DenseMatrixType;
@@ -131,7 +133,11 @@ public:
 	      params_(params),
 	      mode_(WITH_INFO),
 	      rng_(343311),
-	      lanczosVectors_(mat,params.lotaMemory,params.steps,storageForLanczosVectors)
+	      lanczosVectors_(mat,
+	                      params.lotaMemory,
+	                      params.steps,
+	                      NotBaseType::isReorthoEnabled(params, storageForLanczosVectors),
+	                      storageForLanczosVectors)
 	{
 		params.steps=400;
 		setMode(params.options);
@@ -158,7 +164,7 @@ public:
 	}
 
 	void buildDenseMatrix(DenseMatrixType&,
-	                       const TridiagonalMatrixType&) const
+	                      const TridiagonalMatrixType&) const
 	{
 		unimplemented("buildDenseMatrix");
 	}
@@ -188,7 +194,7 @@ public:
 
 			RealType atmp = 0;
 			RealType btmp = 0;
-			oneStepDecomposition(x,y,atmp,btmp,j==0);
+			oneStepDec(x,y,atmp,btmp,j);
 			ab[2*j] = 2*atmp-ab[0];
 			ab[2*j+1] = 2*btmp-ab[1];
 		}
@@ -196,12 +202,13 @@ public:
 
 	//! atmp = < phi_n | phi_n>
 	//! btmp = < phi_n | phi_{n+1}>
-	void oneStepDecomposition(VectorType& x,
-	                          VectorType& y,
-	                          RealType& atmp,
-	                          RealType& btmp,
-	                          bool isFirst) const
+	void oneStepDec(VectorType& x,
+	                VectorType& y,
+	                RealType& atmp,
+	                RealType& btmp,
+	                SizeType jind) const
 	{
+		bool isFirst = (jind == 0);
 		VectorType z(x.size(),0.0);
 		mat_.matrixVectorProduct (z, y); // z+= Hy
 		// scale matrix:
@@ -230,20 +237,6 @@ public:
 	const DenseMatrixRealType& reorthogonalizationMatrix()
 	{
 		return lanczosVectors_.reorthogonalizationMatrix();
-	}
-
-	void reortho(DenseMatrixType& T)
-	{
-		bool canReortho = (lanczosVectors_.lotaMemory() && lanczosVectors_.data());
-		if (params_.options.find("reortho") != PsimagLite::String::npos) {
-			if (!canReortho) {
-				PsimagLite::String str("LanczosSolver: Reortho requested but cannot");
-				str += "Suggestion: Delete reortho from input or set lotaMemory=true\n";
-				throw PsimagLite::RuntimeError(str);
-			}
-
-			lanczosVectors_.reortho(T);
-		}
 	}
 
 private:
