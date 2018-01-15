@@ -280,13 +280,18 @@ private:
 		if (overlap_->size() <= it)
 			throw RuntimeError("reorthoIfNecessary failed\n");
 
-		for (SizeType j = 0; j < it; ++j)
+		for (SizeType j = 0; j < it; ++j) {
+			overlap_->operator[](j) = 0;
 			for (SizeType i = 0; i < x.size(); ++i)
 				overlap_->operator[](j) += PsimagLite::conj(data_->operator()(i, j))*x[i];
+		}
 
-		for (SizeType i = 0; i < x.size(); ++i)
+		for (SizeType i = 0; i < x.size(); ++i) {
+			ComplexOrRealType sum = 0.0;
 			for (SizeType j = 0; j < it; ++j)
-				x[i] -= overlap_->operator[](j)*data_->operator()(i, j);
+				sum -= overlap_->operator[](j)*data_->operator()(i, j);
+			x[i] += sum;
+		}
 	}
 
 	void dealWithStorageOfV(SizeType steps)
