@@ -212,7 +212,7 @@ public:
 		params.isign = s;
 		if (tstStruct_.aOperators()[0].fermionSign>0) s2 *= s;
 
-		PostProcType cf(ab_,reortho_,params);
+		PostProcType cf(ab_,params);
 
 		PsimagLite::String str = "#TCENTRALSITE=" + ttos(block[0]);
 		io.printline(str);
@@ -287,8 +287,6 @@ private:
 		LanczosSolverType lanczosSolver(h,paramsForSolver_,&V);
 
 		lanczosSolver.decomposition(sv,ab_);
-
-		reortho_ = lanczosSolver.reorthogonalizationMatrix();
 	}
 
 	void setVectors(const DenseMatrixType& V,
@@ -330,7 +328,6 @@ private:
 	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	TridiagonalMatrixType ab_;
-	DenseMatrixRealType reortho_;
 	RealType weightForContinuedFraction_;
 }; // class TargetingDynamic
 

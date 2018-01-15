@@ -226,7 +226,7 @@ public:
 		params.isign = s;
 		if (tstStruct_.aOperators()[0].fermionSign>0) s2 *= s;
 
-		PostProcType cf(ab_,reortho_,params);
+		PostProcType cf(ab_, params);
 
 		PsimagLite::String str = "#TCENTRALSITE=" + ttos(block[0]);
 		io.printline(str);
@@ -316,7 +316,6 @@ private:
 	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	TridiagonalMatrixType ab_;
-	DenseMatrixRealType reortho_;
 	RealType weightForContinuedFraction_;
 	StageEnum stage_;
 }; // class TargetingInSitu

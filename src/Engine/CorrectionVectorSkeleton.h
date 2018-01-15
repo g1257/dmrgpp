@@ -480,7 +480,6 @@ private:
 	const LeftRightSuperType& lrs_;
 	const RealType& energy_;
 	PsimagLite::ProgressIndicator progress_;
-	DenseMatrixRealType reortho_;
 	RealType weightForContinuedFraction_;
 	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
 }; // class CorrectionVectorSkeleton
