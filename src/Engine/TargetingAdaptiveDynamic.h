@@ -306,7 +306,7 @@ private:
 
 		if (lastLanczosVector_==0) normalize(y);
 
-		lanczosSolver.oneStepDecomposition(x,y,a,b,lastLanczosVector_==0);
+		lanczosSolver.oneStepDec(x,y,a,b,lastLanczosVector_);
 
 		if (lastLanczosVector_<2) lastLanczosVector_++;
 
@@ -337,7 +337,7 @@ private:
 		phiNew.extract(yy,i0);
 		normalize(yy);
 		RealType a1=0,b1=0;
-		lanczosSolver.oneStepDecomposition(xx,yy,a1,b1,lastLanczosVector_==0);
+		lanczosSolver.oneStepDec(xx,yy,a1,b1,lastLanczosVector_);
 		lanczosSolver.push(ab_,a1,b1);
 		if (tstStruct_.advanceEach()<=1) return;
 		lanczosSolver.push(ab_,a,b);

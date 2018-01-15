@@ -151,7 +151,6 @@ private:
 		phi.extract(phi2,i0);
 		lanczosSolver.decomposition(phi2,ab);
 		lanczosSolver.buildDenseMatrix(T,ab);
-		lanczosSolver.reortho(T);
 
 		return lanczosSolver.steps();
 	}
