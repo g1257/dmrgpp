@@ -55,12 +55,10 @@ public:
 	typedef ParametersForSolver<RealType> ParametersType;
 
 	ContinuedFraction(const TridiagonalMatrixType& ab,
-	                  const MatrixType& reortho,
 	                  const ParametersType& params)
 	    : progress_("ContinuedFraction"),
 	      freqEnum_(FREQ_REAL),
 	      ab_(ab),
-	      reortho_(reortho),
 	      Eg_(params.Eg),
 	      weight_(params.weight),
 	      isign_(params.isign)
@@ -69,7 +67,7 @@ public:
 	}
 
 	ContinuedFraction(FreqEnum freqEnum = FREQ_REAL) : progress_("ContinuedFraction"),
-	    freqEnum_(freqEnum),ab_(),reortho_(),Eg_(0),weight_(0),isign_(1) { }
+	    freqEnum_(freqEnum),ab_(),Eg_(0),weight_(0),isign_(1) { }
 
 	ContinuedFraction(IoSimple::In& io)
 	    : progress_("ContinuedFraction"), freqEnum_(FREQ_REAL),ab_(io)
@@ -84,14 +82,6 @@ public:
 		}
 
 		if (f == "Matsubara") freqEnum_ = FREQ_MATSUBARA;
-		try {
-			io.readMatrix(reortho_,"#ReorthogonalizationMatrix");
-		} catch(std::exception& e) {
-			assert(reortho_.rows() == 0);
-			std::cerr<<"ContinuedFraction: #ReorthogonalizationMatrix (nrow=";
-			std::cerr<<reortho_.rows()<<") DISABLED\n";
-			io.rewind();
-		}
 
 		io.readline(weight_,"#CFWeight=");
 		io.readline(Eg_,"#CFEnergy=");
@@ -109,7 +99,6 @@ public:
 
 		String f = (freqEnum_ == FREQ_MATSUBARA) ? "Matsubara" : "Real";
 		io.print("#FreqEnum=",f);
-		io.printMatrix(reortho_,"#ReorthogonalizationMatrix");
 
 		io.print("#CFWeight=",weight_);
 
@@ -122,13 +111,11 @@ public:
 	}
 
 	void set(const TridiagonalMatrixType& ab,
-	         const MatrixRealType& reortho,
 	         const RealType& Eg,
 	         RealType weight,
 	         int isign)
 	{
 		ab_ = ab;
-		reortho_ = reortho;
 		Eg_ = Eg;
 		weight_ = weight;
 		isign_ = isign;
@@ -205,12 +192,6 @@ private:
 		if (weight_==0) return;
 		MatrixType T;
 		ab_.buildDenseMatrix(T);
-
-		if (reortho_.rows()>0) {
-			MatrixType tmp = T * reortho_;
-			T = multiplyTransposeConjugate(reortho_,tmp);
-		}
-
 		eigs_.resize(T.rows());
 		diag(T,eigs_,'V');
 		intensity_.resize(T.rows());
@@ -227,7 +208,6 @@ private:
 	ProgressIndicator progress_;
 	FreqEnum freqEnum_;
 	TridiagonalMatrixType ab_;
-	MatrixRealType reortho_;
 	RealType Eg_;
 	RealType weight_;
 	int isign_;

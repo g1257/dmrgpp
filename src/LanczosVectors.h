@@ -271,15 +271,6 @@ public:
 		reorthoIfNecessary(x, it);
 	}
 
-	const DenseMatrixRealType& reorthogonalizationMatrix()
-	{
-		if (reortho_.rows() == 0) {
-			calculateReortho();
-		}
-
-		return reortho_;
-	}
-
 private:
 
 	void reorthoIfNecessary(VectorType& x, SizeType it) const
@@ -296,87 +287,6 @@ private:
 		for (SizeType i = 0; i < x.size(); ++i)
 			for (SizeType j = 0; j < it; ++j)
 				x[i] -= overlap_->operator[](j)*data_->operator()(i, j);
-	}
-
-	void calculateReortho()
-	{
-		if (!lotaMemory_) return;
-
-		SizeType nlanczos = data_->cols();
-		DenseMatrixType w(nlanczos,nlanczos);
-
-		computeOverlap(w);
-
-		reortho_.resize(nlanczos,nlanczos);
-		computeS(reortho_,w);
-	}
-
-	void computeOverlap(DenseMatrixType& w) const
-	{
-		SizeType nlanczos = w.rows();
-
-		for (SizeType i = 0; i < nlanczos; ++i) {
-			for (SizeType j = i; j < nlanczos; ++j) {
-				w(i,j) = computeOverlap(i,j);
-			}
-		}
-	}
-
-	ComplexOrRealType computeOverlap(SizeType ind, SizeType jnd) const
-	{
-		ComplexOrRealType sum = 0.0;
-
-		SizeType n = data_->rows();
-
-		for (SizeType i = 0; i < n; ++i) {
-			sum += PsimagLite::conj(data_->operator ()(i,ind)) * data_->operator ()(i,jnd);
-		}
-
-		return sum;
-	}
-
-	void computeS(DenseMatrixRealType& s,const DenseMatrixType& w) const
-	{
-		SizeType nlanczos = s.rows();
-		VectorType kvalue(nlanczos);
-		VectorType v(nlanczos);
-
-		for (SizeType n = 0; n < nlanczos; ++n) {
-			s(n,n) = 1.0;
-			computeS(s,w,n,kvalue,v);
-		}
-	}
-
-	void computeS(DenseMatrixRealType& s,
-	              const DenseMatrixType& w,
-	              SizeType n,
-	              VectorType& kvalue,
-	              VectorType& v) const
-	{
-		for (SizeType q = 0; q < n; ++q) {
-			kvalue[q] = 0.0;
-			for (SizeType k = 0; k <= q; ++k)
-				kvalue[q] += s(k,q) * w(n,k);
-		}
-
-		for (SizeType p = 0; p < n; ++p) {
-			v[p] = 0.0;
-			for (SizeType q = p; q < n; ++q)
-				v[p] -= kvalue[q] * s(p,q);
-		}
-
-		v[n] = 1;
-
-		RealType nn = 0;
-
-		for (SizeType p = 0; p <= n; ++p)
-			for (SizeType q = 0; q <= n; ++q)
-				nn += PsimagLite::real(v[p] * v[q] * w(p,q));
-		assert(nn>0);
-		nn = 1.0/sqrt(nn);
-
-		for (SizeType p = 0; p <= n; ++p)
-			s(p,n) = PsimagLite::real(v[p]) * nn;
 	}
 
 	void dealWithStorageOfV(SizeType steps)
@@ -428,7 +338,6 @@ private:
 	VectorType ysaved_;
 	DenseMatrixType* data_;
 	VectorType* overlap_;
-	DenseMatrixRealType reortho_;
 }; // class LanczosVectors
 
 } // namespace PsimagLite

@@ -234,11 +234,6 @@ public:
 
 	SizeType steps() const {return params_.steps; }
 
-	const DenseMatrixRealType& reorthogonalizationMatrix()
-	{
-		return lanczosVectors_.reorthogonalizationMatrix();
-	}
-
 private:
 
 	void unimplemented(const String& s) const

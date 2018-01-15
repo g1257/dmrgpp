@@ -244,11 +244,6 @@ public:
 		ab.buildDenseMatrix(T);
 	}
 
-	const DenseMatrixRealType& reorthogonalizationMatrix()
-	{
-		return lanczosVectors_.reorthogonalizationMatrix();
-	}
-
 	void push(TridiagonalMatrixType& ab,const RealType& a,const RealType& b) const
 	{
 		ab.push(a,b);

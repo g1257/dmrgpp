@@ -79,7 +79,6 @@ public:
 	typedef KernelPolynomialParameters<RealType> KernelParametersType;
 
 	ChebyshevSerializer(const VectorType& ab,
-	                    const MatrixType&,
 	                    const ParametersType& params)
 	    : progress_("ChebyshevSerializer"),
 	      moments_(ab),
