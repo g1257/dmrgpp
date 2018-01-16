@@ -142,14 +142,20 @@ public:
 	{
 		if (!lotaMemory_) return;
 		data_->reset(matrixRank,steps);
-		overlap_->resize(steps);
+		if (overlap_)
+			overlap_->resize(steps, 0);
+		else
+			overlap_ = new VectorType(steps, 0);
 	}
 
 	void reset(SizeType matrixRank,SizeType steps)
 	{
 		if (!lotaMemory_) return;
 		data_->reset(matrixRank,steps);
-		overlap_->resize(steps);
+		if (overlap_)
+			overlap_->resize(steps);
+		else
+			overlap_ = new VectorType(steps, 0);
 	}
 
 	const DenseMatrixType* data() const
@@ -277,7 +283,7 @@ private:
 	{
 		if (!isReorthoEnabled_) return;
 
-		if (overlap_->size() <= it)
+		if (!overlap_ || overlap_->size() <= it)
 			throw RuntimeError("reorthoIfNecessary failed\n");
 
 		for (SizeType j = 0; j < it; ++j) {
