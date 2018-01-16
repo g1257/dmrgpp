@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 use strict;
+use lib ".";
 use AkimaSumBatch;
 
 my ($root,$total,$ext)=@ARGV;

@@ -21,6 +21,7 @@ use strict;
 
 use lib "../../PsimagLite/scripts";
 use Make;
+use lib ".";
 use DmrgDriver;
 
 my ($flavor, $generateSources) = @ARGV;

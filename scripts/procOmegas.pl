@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use Math::Trig;
+use lib ".";
 use OmegaUtils;
 use Getopt::Long qw(:config no_ignore_case);
 

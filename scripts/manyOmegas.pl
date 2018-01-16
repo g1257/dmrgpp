@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use Math::Trig;
+use lib ".";
 use OmegaUtils;
 
 my ($templateInput,$templateBatch,$parallel) = @ARGV;

@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use Getopt::Long qw(:config no_ignore_case);
+use lib ".";
 use Ci;
 use lib "../scripts";
 use timeObservablesInSitu;

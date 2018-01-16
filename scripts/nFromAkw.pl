@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use utf8;
 use Math::Trig;
+use lib ".";
 use OmegaUtils;
 
 my $pi = Math::Trig::pi;
