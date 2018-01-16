@@ -266,6 +266,7 @@ public:
 			return;
 		}
 
+		assert(btmp >= 1e-12);
 		RealType inverseBtmp = 1.0/btmp;
 		for (SizeType i = 0; i < mat_.rows(); i++) {
 			//lanczosVectors(i,j) = y[i];
@@ -292,12 +293,21 @@ private:
 				overlap_->operator[](j) += PsimagLite::conj(data_->operator()(i, j))*x[i];
 		}
 
+		RealType oldNorm = 0;
+		RealType newNorm = 0;
 		for (SizeType i = 0; i < x.size(); ++i) {
 			ComplexOrRealType sum = 0.0;
 			for (SizeType j = 0; j < it; ++j)
 				sum -= overlap_->operator[](j)*data_->operator()(i, j);
-			x[i] += sum;
+			ComplexOrRealType tmp = x[i];
+			oldNorm += PsimagLite::real(tmp*PsimagLite::conj(tmp));
+			tmp += sum;
+			x[i] = tmp;
+			newNorm += PsimagLite::real(tmp*PsimagLite::conj(tmp));
 		}
+
+		RealType factor = oldNorm/newNorm;
+		for (SizeType i = 0; i < x.size(); ++i) x[i] *= factor;
 	}
 
 	void dealWithStorageOfV(SizeType steps)
