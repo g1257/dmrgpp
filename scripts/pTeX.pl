@@ -3,6 +3,7 @@
 use warnings;
 use strict;
 use File::Find::Rule;
+use lib ".";
 use FunctionParsing;
 
 =pod
