@@ -11,6 +11,18 @@ my $pi = Math::Trig::pi;
 
 use Getopt::Long qw(:config no_ignore_case);
 
+=pod
+Place the out.spectrum for minus spectrum into (say) outMinus.spectrum
+and   the out.spectrum for plus  spectrum into (say) outPlus.spectrum
+Compute the mu = E(Nup, Ndown) - E(Nup - 1, Ndown) or with the +1 particle
+Take one input dollarized file (either one is fine) and run
+perl nFromAkw.pl -f InputDollarized.inp -p -z -m 1.16 outMinus.spectrum outPlus.spectrum
+The mu is optional; if not given weights aren't computed.
+Moreover, outMinus.spectrum can be outMinus1.spectrum,outMinus2.spectrum,...
+and similarly for outPlus.spectrum. This is useful if you have multiple patches to build
+a full omega, but not that patches of omega should NOT overlap for one sign (minus or plus). 
+=cut
+
 my $usage = "USAGE: $0 -f dollarizedInput [-m mu] [-p] [-z] minusSpectrum plusSpectrum\n";
 
 my $templateInput;
