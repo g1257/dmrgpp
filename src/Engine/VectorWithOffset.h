@@ -215,7 +215,9 @@ public:
 		io.printline(s);
 		s="#offset="+ttos(offset_);
 		io.printline(s);
-		s="#m="+ttos(mAndq_.first);
+		s = "#nonzero=1";
+		io.printline(s);
+		s="#sector="+ttos(mAndq_.first);
 		io.printline(s);
 		s="#qn="+ttos(mAndq_.second);
 		io.printline(s);
@@ -235,7 +237,7 @@ public:
 		if (x<0)
 			throw PsimagLite::RuntimeError("VectorWithOffset::load(...): offset<0\n");
 		offset_ = x;
-		io.readline(x,"#m=");
+		io.readline(x,"#sector=");
 		if (x<0)
 			throw PsimagLite::RuntimeError("VectorWithOffset::load(...): m<0\n");
 		int y = 0;

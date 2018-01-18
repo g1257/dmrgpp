@@ -380,11 +380,13 @@ public:
 			io.printline(s);
 			if (j >= data_.size())
 				err("VectorWithOffsets: save\n");
+
+			s="#qn="+ttos(j);
+			io.printline(s);
+
 			s = "data" + ttos(jj);
 			io.printVector(data_[j], s);
 			j = nzMsAndQns_[jj].second;
-			s="#qn="+ttos(j);
-			io.printline(s);
 		}
 	}
 
@@ -411,14 +413,15 @@ public:
 				err(msg + ":load(...): sector<0\n");
 			if (static_cast<SizeType>(x)>=data_.size())
 				err(msg + ":load(...): sector too big\n");
-			PsimagLite::String s = "data" + ttos(jj);
-			io.read(data_[x], s);
 
 			int y = 0;
 			io.readline(y, "#qn=");
 			if (y < 0)
 				err(msg + ":load(...): qn<0\n");
 			nzMsAndQns_[jj] = PairSizeType(x, y);
+
+			PsimagLite::String s = "data" + ttos(jj);
+			io.read(data_[x], s);
 		}
 
 		setIndex2Sector();
@@ -463,7 +466,9 @@ public:
 
 			if (static_cast<SizeType>(x)>=data_.size())
 				err(msg + ":loadOneSector(...): sector too big\n");
-			io.read(data_[x],"#sector=");
+
+			PsimagLite::String s = "data" + ttos(jj);
+			io.read(data_[x], s);
 		}
 
 		setIndex2Sector();
