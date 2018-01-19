@@ -98,6 +98,7 @@ private:
 	                                          SizeType jen) const
 	{
 		SizeType offset = src_.offset(iOld_);
+		SizeType offsetPlusOne = src_.offset(iOld_ + 1);
 		SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 		SizeType ni = dmrgWaveStruct_.lrs.right().size()/volumeOfNk_;
 		MatrixOrIdentityType weRef(wftOptions_.twoSiteDmrg && ni>volumeOfNk_,we_);
@@ -114,6 +115,7 @@ private:
 			for (SizeType k = start;k < end;k++) {
 				SizeType ip = wsT_.getCol(k);
 				SizeType y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + jp*nalpha);
+				if (y >= offsetPlusOne || y < offset) continue;
 				y -= offset;
 				sum2 += wsT_.getValue(k)*src_.fastAccess(iOld_, y)*weRef.getValue(k2);
 			}
