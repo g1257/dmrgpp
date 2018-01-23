@@ -57,6 +57,10 @@ public:
 
 					ComplexOrRealType* a = const_cast<ComplexOrRealType*>(&(AmatDense(0,0)));
 					ComplexOrRealType* b = const_cast<ComplexOrRealType*>(&(BmatDense(0,0)));
+
+					if (AmatDense.isZero()) a = 0;
+					if (BmatDense.isZero()) b = 0;
+
 					aptr[outPatch + inPatch*npatches + ic*npatches*npatches] = a;
 					bptr[outPatch + inPatch*npatches + ic*npatches*npatches] = b;
 
