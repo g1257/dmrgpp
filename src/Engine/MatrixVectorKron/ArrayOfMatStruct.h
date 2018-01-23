@@ -93,9 +93,7 @@ public:
 
 	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
 	typedef MatrixDenseOrSparse<SparseMatrixType> MatrixDenseOrSparseType;
-	typedef typename MatrixDenseOrSparseType::VectorType VectorType;
 	typedef typename MatrixDenseOrSparseType::RealType RealType;
-	typedef typename MatrixDenseOrSparseType::MatrixType MatrixType;
 	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
 	typedef typename GenIjPatchType::VectorSizeType VectorSizeType;
 	typedef typename GenIjPatchType::BasisType BasisType;
@@ -117,34 +115,30 @@ public:
 			SizeType jgroup = patchOld(leftOrRight)[jpatch];
 			SizeType j1 = basisOld.partition(jgroup);
 			SizeType j2 = basisOld.partition(jgroup+1);
-			SizeType cols = j2 - j1;
 			for (SizeType ipatch=0; ipatch < npatchNew; ++ipatch) {
 				SizeType igroup = patchNew(leftOrRight)[ipatch];
 				SizeType i1 = basisNew.partition(igroup);
 				SizeType i2 = basisNew.partition(igroup+1);
 
-				SizeType rows = i2 - i1;
-
-				data_(ipatch, jpatch) = new MatrixDenseOrSparseType(rows, cols);
-
-				MatrixType& m = data_(ipatch, jpatch)->matrix();
-
-				// for WFT we need padding of the matrices:
-				if (i2 > sparse.rows()) i2 = sparse.rows();
-
+				SparseMatrixType tmp(i2-i1,  j2-j1);
+				SizeType counter = 0;
 				for (SizeType ii = i1; ii < i2; ++ii) {
+					tmp.setRow(ii - i1, counter);
 					SizeType start = sparse.getRowPtr(ii);
 					SizeType end = sparse.getRowPtr(ii+1);
 					for (SizeType k = start; k < end; ++k) {
-						int col = sparse.getCol(k) - j1;
+						int col = sparse.getCol(k)-j1;
 						if (col < 0) continue;
-						if (static_cast<SizeType>(col) >= cols)
-							continue;
-						m(ii - i1, col) = sparse.getValue(k);
+						if (SizeType(col)>=j2-j1) continue;
+						tmp.pushValue(sparse.getValue(k));
+						tmp.pushCol(col);
+						++counter;
 					}
 				}
 
-				data_(ipatch, jpatch)->finalize(threshold);
+				tmp.setRow(i2-i1,counter);
+				tmp.checkValidity();
+				data_(ipatch,jpatch) = new MatrixDenseOrSparseType(tmp, threshold);
 			}
 		}
 	}

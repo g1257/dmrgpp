@@ -6,9 +6,6 @@
 
 namespace Dmrg {
 
-template<typename LeftRightSuperType>
-class ArrayOfMatStruct;
-
 template<typename SparseMatrixType>
 class MatrixDenseOrSparse {
 
@@ -17,18 +14,29 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef PsimagLite::Vector<int>::Type VectorIntType;
+
+	explicit MatrixDenseOrSparse(const SparseMatrixType& sparse,
+	                             const RealType& threshold)
+	    : isDense_(sparse.nonZero() > static_cast<int>(threshold*sparse.rows()*sparse.cols())),
+	      sparseMatrix_(sparse)
+	{
+		sparseMatrix_.checkValidity();
+
+		if (isDense_) // A(i,j) at  val[ (i) + (j)*nrow ]
+			crsMatrixToFullMatrix(denseMatrix_, sparse);
+	}
 
 	bool isDense() const { return isDense_; }
 
 	SizeType rows() const
 	{
-		return rows_;
+		return sparseMatrix_.rows();
 	}
 
 	SizeType cols() const
 	{
-		return cols_;
+		return sparseMatrix_.cols();
 	}
 
 	const PsimagLite::Matrix<ComplexOrRealType>& dense() const
@@ -38,9 +46,7 @@ public:
 
 	const SparseMatrixType& sparse() const
 	{
-		if (isDense_)
-			err("MatrixDenseOrSparse::sparse() cannot be called when isDense\n");
-
+		sparseMatrix_.checkValidity();
 		return sparseMatrix_;
 	}
 
@@ -49,31 +55,16 @@ public:
 		return (isDense_) ? false : (sparseMatrix_.nonZero() == 0);
 	}
 
-	template<typename LeftRightSuperType>
-	friend class ArrayOfMatStruct;
+	SparseMatrixType toSparse() const
+	{
+		return (isDense_) ? SparseMatrixType(denseMatrix_) : sparse();
+	}
 
 private:
 
-	explicit MatrixDenseOrSparse(SizeType rows,
-	                             SizeType cols)
-	    : rows_(rows), cols_(cols), isDense_(false), denseMatrix_(rows, cols)
-	{}
-
-	MatrixType& matrix() { return denseMatrix_; }
-
-	void finalize(RealType threshold)
-	{
-		SizeType elements = denseMatrix_.rows()*denseMatrix_.cols();
-		isDense_ = (denseMatrix_.nonZeros() > threshold*elements);
-		if (isDense_) return;
-		fullMatrixToCrsMatrix(sparseMatrix_, denseMatrix_);
-	}
-
-	SizeType rows_;
-	SizeType cols_;
 	bool isDense_;
-	PsimagLite::CrsMatrix<ComplexOrRealType> sparseMatrix_;
-	MatrixType denseMatrix_;
+	const PsimagLite::CrsMatrix<ComplexOrRealType> sparseMatrix_;
+	PsimagLite::Matrix<ComplexOrRealType> denseMatrix_;
 }; // class MatrixDenseOrSparse
 
 template<typename SparseMatrixType>

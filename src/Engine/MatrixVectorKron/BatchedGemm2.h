@@ -15,7 +15,7 @@ class BatchedGemm2 {
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
 	typedef typename MatrixDenseOrSparseType::VectorType VectorType;
 	typedef typename VectorType::value_type ComplexOrRealType;
-	typedef typename MatrixDenseOrSparseType::MatrixType MatrixType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef long int IntegerType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
