@@ -339,6 +339,7 @@ public:
 							   instead of to and from memory. Cannot be used with restart yet.
 			\item [BatchedGemm] Only meaningful with MatrixVectorKron. Enables
 			                    batched gemm and might need plugin sc
+			\item [KrylovAbridge] TBW
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,
@@ -403,6 +404,7 @@ public:
 		registerOpts.push_back("wftWithTemp");
 		registerOpts.push_back("wftStacksInDisk");
 		registerOpts.push_back("BatchedGemm");
+		registerOpts.push_back("KrylovAbridge");
 
 		PsimagLite::Options::Writeable optWriteable(registerOpts,
 		                                            PsimagLite::Options::Writeable::PERMISSIVE);

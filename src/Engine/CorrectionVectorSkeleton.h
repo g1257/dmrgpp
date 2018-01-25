@@ -377,7 +377,7 @@ public:
 		SizeType n = V.n_row();
 		if (T.n_col()!=T.n_row()) throw PsimagLite::RuntimeError("T is not square\n");
 		if (V.n_col()!=T.n_col()) throw PsimagLite::RuntimeError("V is not nxn2\n");
-		// for (SizeType j=0;j<v.size();j++) v[j] = 0; <-- harmful if v is sparse
+
 		ComplexOrRealType zone = 1.0;
 		ComplexOrRealType zzero = 0.0;
 
@@ -409,15 +409,26 @@ public:
 	           SizeType n2,
 	           SizeType i0)
 	{
-		for (SizeType k=0;k<n2;k++) {
+		bool krylovAbridge = (model_.params().options.find("KrylovAbridge") !=
+		        PsimagLite::String::npos);
+		SizeType n3 = (krylovAbridge) ? 1 : n2;
+		ComplexOrRealType sum2 = 0.0;
+		for (SizeType k = 0; k < n2; ++k) {
 			ComplexOrRealType sum = 0.0;
-			for (SizeType kprime=0;kprime<n2;kprime++) {
-				ComplexOrRealType tmpV = calcVTimesPhi(kprime,V,phi,i0);
-				sum += PsimagLite::conj(T(kprime,k))*tmpV;
+			for (SizeType kprime = 0; kprime < n3; ++kprime) {
+				ComplexOrRealType tmp = PsimagLite::conj(T(kprime,k))*
+				        calcVTimesPhi(kprime,V,phi,i0);
+				sum += tmp;
+				if (kprime > 0) sum2 += tmp;
 			}
 
 			r[k] = sum * whatRorI(k);
 		}
+
+		PsimagLite::OstringStream msg;
+		msg<<"Abridgment="<<sum2;
+		if (krylovAbridge) msg<<" KrylovAbridge enabled";
+		progress_.printline(msg, std::cout);
 	}
 
 	ComplexOrRealType calcVTimesPhi(SizeType kprime,
