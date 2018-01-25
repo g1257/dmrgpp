@@ -115,6 +115,7 @@ public:
 			if (options.find("wftInPatches")!=PsimagLite::String::npos) {
 				accelMustBeNone(0);
 				accel = ACCEL_PATCHES;
+				throw PsimagLite::RuntimeError("wftInPatches is disallowed\n");
 			}
 
 			if (options.find("wftWithTemp")!=PsimagLite::String::npos) {
