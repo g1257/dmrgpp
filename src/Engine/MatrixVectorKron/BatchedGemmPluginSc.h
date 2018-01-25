@@ -2,6 +2,7 @@
 #define BATCHEDGEMM_H
 #include <cassert>
 #include <complex>
+#include "Matrix.h"
 #include "Vector.h"
 #include "../../../../dmrgppPluginSc/src/BatchedGemm.h"
 
@@ -18,7 +19,7 @@ class BatchedGemm2 {
 	typedef typename MatrixDenseOrSparseType::VectorType VectorType;
 	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename MatrixDenseOrSparseType::MatrixType MatrixType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
 	typedef typename GenIjPatchType::BasisType BasisType;
 	typedef BatchedGemm<ComplexOrRealType> BatchedGemmPluginScType;
@@ -57,9 +58,6 @@ public:
 
 					ComplexOrRealType* a = const_cast<ComplexOrRealType*>(&(AmatDense(0,0)));
 					ComplexOrRealType* b = const_cast<ComplexOrRealType*>(&(BmatDense(0,0)));
-
-					if (AmatDense.isZero()) a = 0;
-					if (BmatDense.isZero()) b = 0;
 
 					aptr[outPatch + inPatch*npatches + ic*npatches*npatches] = a;
 					bptr[outPatch + inPatch*npatches + ic*npatches*npatches] = b;

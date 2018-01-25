@@ -41,6 +41,8 @@ public:
 
 	const PsimagLite::Matrix<ComplexOrRealType>& dense() const
 	{
+		if (!isDense_)
+			throw PsimagLite::RuntimeError("FATAL: Matrix isn't dense\n");
 		return denseMatrix_;
 	}
 
