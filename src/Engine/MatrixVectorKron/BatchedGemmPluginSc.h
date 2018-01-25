@@ -20,6 +20,7 @@ class BatchedGemm2 {
 	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef typename PsimagLite::Vector<MatrixType*>::Type VectorMatrixType;
 	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
 	typedef typename GenIjPatchType::BasisType BasisType;
 	typedef BatchedGemm<ComplexOrRealType> BatchedGemmPluginScType;
@@ -29,13 +30,11 @@ class BatchedGemm2 {
 public:
 
 	BatchedGemm2(const InitKronType& initKron)
-	    :  initKron_(initKron), batchedGemm_(0)
+	    :  progress_("BatchedGemm"), initKron_(initKron), batchedGemm_(0)
 	{
 		if (!enabled()) return;
 		SizeType npatches = initKron_.numberOfPatches(DUMMY);
 		SizeType nC = initKron_.connections();
-		std::cout<<"PLUGIN_SC: is in use, npatches="<<npatches;
-		std::cout<<" connections="<<nC<<"\n";
 		ComplexOrRealType** aptr = new ComplexOrRealType*[npatches*npatches*nC];
 		ComplexOrRealType** bptr = new ComplexOrRealType*[npatches*npatches*nC];
 		VectorIntType ldAptr(npatches*npatches*nC);
@@ -44,6 +43,7 @@ public:
 		pLeft_.resize(npatches, 0);
 		pRight_.resize(npatches, 0);
 
+		SizeType zeroes = 0;
 		for (SizeType outPatch = 0; outPatch < npatches; ++outPatch) {
 			for (SizeType inPatch = 0; inPatch < npatches; ++inPatch) {
 				for (SizeType ic=0;ic<nC;++ic) {
@@ -53,11 +53,14 @@ public:
 					const MatrixDenseOrSparseType& Amat = xiStruct(outPatch,inPatch);
 					const MatrixDenseOrSparseType& Bmat = yiStruct(outPatch,inPatch);
 
-					const MatrixType& AmatDense = Amat.dense();
-					const MatrixType& BmatDense = Bmat.dense();
+					ComplexOrRealType* a = 0;
+					ComplexOrRealType* b = 0;
+					getMatrixPointers(&a, &b, Amat, Bmat);
 
-					ComplexOrRealType* a = const_cast<ComplexOrRealType*>(&(AmatDense(0,0)));
-					ComplexOrRealType* b = const_cast<ComplexOrRealType*>(&(BmatDense(0,0)));
+					if (a == 0) {
+						assert(b == 0);
+						++zeroes;
+					}
 
 					aptr[outPatch + inPatch*npatches + ic*npatches*npatches] = a;
 					bptr[outPatch + inPatch*npatches + ic*npatches*npatches] = b;
@@ -66,10 +69,17 @@ public:
 					pLeft_[inPatch] = Amat.cols();
 					pRight_[inPatch] = Bmat.cols();
 
-					ldAptr[outPatch + inPatch*npatches + ic*npatches*npatches] = AmatDense.rows();
-					ldBptr[outPatch + inPatch*npatches + ic*npatches*npatches] = BmatDense.rows();
+					ldAptr[outPatch + inPatch*npatches + ic*npatches*npatches] = Amat.rows();
+					ldBptr[outPatch + inPatch*npatches + ic*npatches*npatches] = Bmat.rows();
 				}
 			}
+		}
+
+		{
+			PsimagLite::OstringStream msg;
+			msg<<"PLUGIN_SC: is in use, npatches="<<npatches;
+			msg<<" connections="<<nC<<" zeroConnections="<<zeroes;
+			progress_.printline(msg,std::cout);
 		}
 
 		batchedGemm_ = new BatchedGemmPluginScType(nC,
@@ -90,6 +100,10 @@ public:
 	{
 		delete batchedGemm_;
 		batchedGemm_ = 0;
+		for (SizeType i = 0; i < garbage_.size(); ++i) {
+			delete garbage_[i];
+			garbage_[i] = 0;
+		}
 	}
 
 	bool enabled() const { return initKron_.batchedGemm(); }
@@ -104,14 +118,40 @@ public:
 
 private:
 
+	void getMatrixPointers(ComplexOrRealType** a,
+	                       ComplexOrRealType** b,
+	                       const MatrixDenseOrSparseType& Amat,
+	                       const MatrixDenseOrSparseType& Bmat) const
+	{
+		*a = *b = 0;
+		if (Amat.isZero() || Bmat.isZero()) return;
+
+		*a = getMatrixPointer(Amat);
+		*b = getMatrixPointer(Bmat);
+	}
+
+	ComplexOrRealType* getMatrixPointer(const MatrixDenseOrSparseType& mat) const
+	{
+		if (!mat.isDense()) {
+			MatrixType* matDense = new MatrixType();
+			crsMatrixToFullMatrix(*matDense, mat.sparse());
+			garbage_.push_back(matDense);
+			return const_cast<ComplexOrRealType*>(&(matDense->operator()(0,0)));
+		}
+
+		return const_cast<ComplexOrRealType*>(&(mat.dense()(0,0)));
+	}
+
 	BatchedGemm2(const BatchedGemm2&);
 
 	BatchedGemm2& operator=(const BatchedGemm2&);
 
+	PsimagLite::ProgressIndicator progress_;
 	const InitKronType& initKron_;
 	VectorIntType pLeft_;
 	VectorIntType pRight_;
 	BatchedGemm<ComplexOrRealType>* batchedGemm_;
+	mutable VectorMatrixType garbage_;
 };
 }
 #endif // BATCHEDGEMM_H
