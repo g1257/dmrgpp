@@ -1,3 +1,27 @@
+2018-01-25 Version 5.00 
+
+* BatchedGemm is ready
+
+* observe 4-point at borders corrected
+
+* nFromAkw script added
+
+* Renyi entropy added
+
+* correction vector: spurious tridiag deleted
+
+* Lanczos reortho
+
+* use lib "." in scripts
+
+* VectorWithffset(s) load/save fixes
+
+* WFT check due to symmetry sector leaks
+
+* 2 regression fixes
+
+* wftInPatches now disallowed
+ 
 2018-01-03 Version 4.70
 
 * InitKronBase: threshold bug fix
