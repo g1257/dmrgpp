@@ -143,7 +143,7 @@ private:
 		params.lotaMemory = true;
 		params.threadId = threadNum;
 
-		LanczosSolverType lanczosSolver(lanczosHelper,params,&V);
+		LanczosSolverType lanczosSolver(lanczosHelper, params);
 
 		TridiagonalMatrixType ab;
 		SizeType total = phi.effectiveSize(i0);
@@ -151,6 +151,8 @@ private:
 		phi.extract(phi2,i0);
 		lanczosSolver.decomposition(phi2,ab);
 		lanczosSolver.buildDenseMatrix(T,ab);
+
+		V = lanczosSolver.lanczosVectors();
 
 		return lanczosSolver.steps();
 	}

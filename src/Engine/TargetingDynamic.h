@@ -284,9 +284,11 @@ private:
 		                                                threadId);
 		typename LanczosSolverType::LanczosMatrixType h(&this->model(),&modelHelper);
 		paramsForSolver_.lotaMemory = true;
-		LanczosSolverType lanczosSolver(h,paramsForSolver_,&V);
+		LanczosSolverType lanczosSolver(h,paramsForSolver_);
 
 		lanczosSolver.decomposition(sv,ab_);
+
+		V = lanczosSolver.lanczosVectors();
 	}
 
 	void setVectors(const DenseMatrixType& V,
