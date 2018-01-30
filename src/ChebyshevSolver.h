@@ -127,8 +127,7 @@ public:
 	enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 
 	ChebyshevSolver(MatrixType const &mat,
-	                SolverParametersType& params,
-	                DenseMatrixType* storageForLanczosVectors=0)
+	                SolverParametersType& params)
 	    : progress_("ChebyshevSolver",params.threadId),
 	      mat_(mat),
 	      params_(params),
@@ -137,8 +136,7 @@ public:
 	      lanczosVectors_(mat,
 	                      params.lotaMemory,
 	                      params.steps,
-	                      NotBaseType::isReorthoEnabled(params, storageForLanczosVectors),
-	                      storageForLanczosVectors)
+	                      NotBaseType::isReorthoEnabled(params))
 	{
 		params.steps=400;
 		setMode(params.options);
@@ -185,6 +183,7 @@ public:
 		VectorType y = initVector;
 		VectorVectorType lv;
 
+		lanczosVectors_.prepareOverlap(lanczosVectors_.cols());
 		ab.resize(2*params_.steps,0);
 		for (SizeType j=0; j < lanczosVectors_.cols(); j++) {
 			if (lanczosVectors_.lotaMemory())
@@ -233,6 +232,14 @@ public:
 	}
 
 	SizeType steps() const {return params_.steps; }
+
+	const DenseMatrixType& lanczosVectors() const
+	{
+		const DenseMatrixType* ptr = lanczosVectors_.data();
+		if (!ptr)
+			err("LanczosSolver::lanczosVectors() called but no data stored\n");
+		return *(ptr);
+	}
 
 private:
 

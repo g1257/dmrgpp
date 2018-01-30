@@ -110,12 +110,12 @@ public:
 	// To avoid compiler warnings
 	virtual ~LanczosOrDavidsonBase() { }
 
-	static bool isReorthoEnabled(const SolverParametersType& params, bool hasStorage)
+	static bool isReorthoEnabled(const SolverParametersType& params)
 	{
 		if (params.options.find("reortho") == PsimagLite::String::npos)
 			return false;
 
-		bool canReortho = (params.lotaMemory && hasStorage);
+		bool canReortho = (params.lotaMemory);
 
 		if (!canReortho) {
 			PsimagLite::String str("LanczosOrDavidsonBase: Reortho requested but cannot");

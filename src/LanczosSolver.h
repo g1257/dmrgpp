@@ -120,8 +120,7 @@ public:
 	enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 
 	LanczosSolver(MatrixType const &mat,
-	              const SolverParametersType& params,
-	              Matrix<VectorElementType>* storageForLanczosVectors=0)
+	              const SolverParametersType& params)
 	    : progress_("LanczosSolver",params.threadId),
 	      mat_(mat),
 	      params_(params),
@@ -131,19 +130,13 @@ public:
 	      lanczosVectors_(mat_,
 	                      params.lotaMemory,
 	                      params.steps,
-	                      BaseType::isReorthoEnabled(params, storageForLanczosVectors),
-	                      storageForLanczosVectors)
+	                      BaseType::isReorthoEnabled(params))
 	{
 		setMode(params.options);
 		OstringStream msg;
 		msg<<"Constructing... mat.rank="<<mat_.rows();
 		msg<<" maximum steps="<<steps_<<" maximum eps="<<params_.tolerance<<" requested";
 		progress_.printline(msg,std::cout);
-		if (storageForLanczosVectors) {
-			OstringStream msg2;
-			msg2<<"storageForLanczosVectors: managed elsewhere";
-			progress_.printline(msg2,std::cout);
-		}
 	}
 
 	// FIXME : Deprecate this function
@@ -297,6 +290,7 @@ public:
 		typename Vector<RealType>::Type nullVector;
 		groundAllocations(max_nstep + 2,false);
 		VectorVectorType lv;
+		lanczosVectors_.prepareOverlap(max_nstep);
 		for (; j < max_nstep; j++) {
 			if (lanczosVectors_.lotaMemory())
 				lv.push_back(y);
@@ -348,6 +342,14 @@ public:
 	}
 
 	SizeType steps() const {return steps_; }
+
+	const DenseMatrixType& lanczosVectors() const
+	{
+		const DenseMatrixType* ptr = lanczosVectors_.data();
+		if (!ptr)
+			err("LanczosSolver::lanczosVectors() called but no data stored\n");
+		return *(ptr);
+	}
 
 private:
 

@@ -112,8 +112,7 @@ public:
 	LanczosVectors(const MatrixType& mat,
 	               bool lotaMemory,
 	               SizeType steps,
-	               bool isReorthoEnabled,
-	               DenseMatrixType* storage)
+	               bool isReorthoEnabled)
 	    : progress_("LanczosVectors"),
 	      mat_(mat),
 	      lotaMemory_(lotaMemory),
@@ -121,7 +120,7 @@ public:
 	      dummy_(0),
 	      needsDelete_(false),
 	      ysaved_(0),
-	      data_(storage),
+	      data_(0),
 	      overlap_(0)
 	{
 		dealWithOverlapStorage(steps);
@@ -144,12 +143,22 @@ public:
 		SizeType cols = lv.size();
 		SizeType rows = lv[0].size();
 		dealWithStorageOfV(rows, cols);
+		if (data_->rows() == 0 && data_->cols() == 0) return;
 		for (SizeType j = 0; j < cols; ++j) {
 			for (SizeType i = 0; i < rows; ++i) {
 				assert(i < lv[j].size());
 				data_->operator()(i, j) = lv[j][i];
 			}
 		}
+	}
+
+	void prepareOverlap(SizeType steps)
+	{
+		if (!lotaMemory_) return;
+		if (overlap_)
+			overlap_->resize(steps, 0);
+		else
+			overlap_ = new VectorType(steps, 0);
 	}
 
 	const DenseMatrixType* data() const
@@ -306,7 +315,9 @@ private:
 
 	void dealWithStorageOfV(SizeType rows, SizeType cols)
 	{
-		if (data_ || !lotaMemory_) return;
+		if (!lotaMemory_) return;
+
+		if (data_) err("LanczosVectors: data has already been set!\n");
 
 		data_ = new DenseMatrixType(rows, cols);
 		needsDelete_ = true;
