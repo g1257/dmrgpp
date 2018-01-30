@@ -113,6 +113,7 @@ class ChebyshevSolver  {
 	typedef LanczosVectors<MatrixType,VectorType> LanczosVectorsType;
 	typedef typename LanczosVectorsType::DenseMatrixType DenseMatrixType;
 	typedef typename LanczosVectorsType::DenseMatrixRealType DenseMatrixRealType;
+	typedef typename LanczosVectorsType::VectorVectorType VectorVectorType;
 
 public:
 
@@ -182,15 +183,12 @@ public:
 	{
 		VectorType x(initVector.size(),0.0);
 		VectorType y = initVector;
+		VectorVectorType lv;
 
-		lanczosVectors_.reset(y.size(),params_.steps);
 		ab.resize(2*params_.steps,0);
 		for (SizeType j=0; j < lanczosVectors_.cols(); j++) {
-			if (lanczosVectors_.lotaMemory() && lanczosVectors_.data()) {
-				DenseMatrixType& lv = *(lanczosVectors_.data());
-				for (SizeType i = 0; i < mat_.rows(); i++)
-					lv(i,j) = y[i];
-			}
+			if (lanczosVectors_.lotaMemory())
+				lv.push_back(y);
 
 			RealType atmp = 0;
 			RealType btmp = 0;
@@ -198,6 +196,8 @@ public:
 			ab[2*j] = 2*atmp-ab[0];
 			ab[2*j+1] = 2*btmp-ab[1];
 		}
+
+		lanczosVectors_.setVectors(lv);
 	}
 
 	//! atmp = < phi_n | phi_n>

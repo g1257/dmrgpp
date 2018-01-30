@@ -2,7 +2,7 @@
 Copyright (c) 2009-2011-2017, UT-Battelle, LLC
 All rights reserved
 
-[PsimagLite, Version 1.]
+[PsimagLite, Version 2.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -105,6 +105,7 @@ class LanczosSolver : public LanczosOrDavidsonBase<SolverParametersType,MatrixTy
 	typedef typename SolverParametersType::RealType RealType;
 	typedef LanczosVectors<MatrixType,VectorType> LanczosVectorsType;
 	typedef typename LanczosVectorsType::DenseMatrixType DenseMatrixType;
+	typedef typename LanczosVectorsType::VectorVectorType VectorVectorType;
 
 public:
 
@@ -284,7 +285,6 @@ public:
 		for (SizeType i = 0; i < y.size(); i++) y[i] /= sqrt(atmp);
 
 		if (max_nstep > mat_.rows()) max_nstep = mat_.rows();
-		lanczosVectors_.resize(mat_.rows(),max_nstep);
 		ab.resize(max_nstep,0);
 
 		if (mode_ & ALLOWS_ZERO && lanczosVectors_.isHyZero(y,ab)) return;
@@ -296,12 +296,10 @@ public:
 		lanczosVectors_.saveInitialVector(y);
 		typename Vector<RealType>::Type nullVector;
 		groundAllocations(max_nstep + 2,false);
+		VectorVectorType lv;
 		for (; j < max_nstep; j++) {
-			if (lanczosVectors_.lotaMemory() && lanczosVectors_.data()) {
-				DenseMatrixType& lv = *(lanczosVectors_.data());
-				for (SizeType i = 0; i < mat_.rows(); i++)
-					lv(i,j) = y[i];
-			}
+			if (lanczosVectors_.lotaMemory())
+				lv.push_back(y);
 
 			RealType btmp = 0;
 			oneStepDec(x, y, atmp, btmp, j);
@@ -320,9 +318,10 @@ public:
 
 		if (j < max_nstep) {
 			max_nstep = j + 1;
-			lanczosVectors_.reset(mat_.rows(),max_nstep);
 			ab.resize(max_nstep);
 		}
+
+		lanczosVectors_.setVectors(lv);
 
 		OstringStream msg;
 		msg<<"Decomposition done for mat.rank="<<mat_.rows();

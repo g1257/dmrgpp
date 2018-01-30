@@ -105,6 +105,7 @@ public:
 	typedef Matrix<VectorElementType> DenseMatrixType;
 	typedef Matrix<RealType> DenseMatrixRealType;
 	typedef ContinuedFraction<TridiagonalMatrixType> PostProcType;
+	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
 
 	enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 
@@ -123,7 +124,6 @@ public:
 	      data_(storage),
 	      overlap_(0)
 	{
-		dealWithStorageOfV(steps);
 		dealWithOverlapStorage(steps);
 	}
 
@@ -138,24 +138,18 @@ public:
 		data_ = 0;
 	}
 
-	void resize(SizeType matrixRank,SizeType steps)
+	void setVectors(const VectorVectorType& lv)
 	{
 		if (!lotaMemory_) return;
-		data_->reset(matrixRank,steps);
-		if (overlap_)
-			overlap_->resize(steps, 0);
-		else
-			overlap_ = new VectorType(steps, 0);
-	}
-
-	void reset(SizeType matrixRank,SizeType steps)
-	{
-		if (!lotaMemory_) return;
-		data_->reset(matrixRank,steps);
-		if (overlap_)
-			overlap_->resize(steps);
-		else
-			overlap_ = new VectorType(steps, 0);
+		SizeType cols = lv.size();
+		SizeType rows = lv[0].size();
+		dealWithStorageOfV(rows, cols);
+		for (SizeType j = 0; j < cols; ++j) {
+			for (SizeType i = 0; i < rows; ++i) {
+				assert(i < lv[j].size());
+				data_->operator()(i, j) = lv[j][i];
+			}
+		}
 	}
 
 	const DenseMatrixType* data() const
@@ -310,25 +304,15 @@ private:
 		for (SizeType i = 0; i < x.size(); ++i) x[i] *= factor;
 	}
 
-	void dealWithStorageOfV(SizeType steps)
+	void dealWithStorageOfV(SizeType rows, SizeType cols)
 	{
 		if (data_ || !lotaMemory_) return;
-		// if lotaMemory is set, we still degrade gracefully if we can't allocate
-		SizeType maxNstep = std::min(steps , mat_.rows());
-		try {
-			data_ = new DenseMatrixType(mat_.rows(),maxNstep);
-			needsDelete_ = true;
-			OstringStream msg;
-			msg<<"lotaMemory_=true";
-			progress_.printline(msg,std::cout);
-		} catch (std::exception&) {
-			// FIXME: option to store in secondary
-			OstringStream msg;
-			msg<<"Memory allocation failed, setting lotaMemory_=false\n";
-			progress_.printline(msg,std::cout);
-			lotaMemory_ = false;
-			data_ = 0;
-		}
+
+		data_ = new DenseMatrixType(rows, cols);
+		needsDelete_ = true;
+		OstringStream msg;
+		msg<<"lotaMemory_=true";
+		progress_.printline(msg,std::cout);
 	}
 
 	void dealWithOverlapStorage(SizeType steps)
