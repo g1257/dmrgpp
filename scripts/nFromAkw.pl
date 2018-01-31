@@ -69,15 +69,17 @@ addSpectrum(\%specFull, \%specMinus);
 addSpectrum(\%specFull, \%specPlus);
 OmegaUtils::printGnuplot(\%specFull, $geometry,  $isPeriodic, $zeroAtCenter);
 
+my @nkx0;
+my $norm = sumOverOmega(\@nkx0, \%specMinus, 0);
+print "Norm=$norm\n";
 if ($geometry eq "ladder") {
 	my @nkxpi;
-	sumOverOmega(\@nkxpi, \%specMinus, 1);
-	printVsQ("outnkxpi.dat", \@nkxpi);
+	$norm += sumOverOmega(\@nkxpi, \%specMinus, 1);
+	printVsQ("outnkxpi.dat", \@nkxpi, $norm*$eta);
 }
 
-my @nkx0;
-sumOverOmega(\@nkx0, \%specMinus, 0);
-printVsQ("outnkx0.dat", \@nkx0);
+print "Norm=$norm\n";
+printVsQ("outnkx0.dat", \@nkx0, $norm*$eta);
 
 my $totalMy = ($geometry eq "ladder") ? 2 : 1;
 
@@ -87,20 +89,20 @@ for (my $mp = 0; $mp < 2; ++$mp) { #mp = 0 is -, mp=1 is +
 	for (my $my = 0; $my < $totalMy; ++$my) {
 		my %h;
 		sumOverKx(\%h, $ptr, $my);
-		printVsOmega("nVsOmegaky$my"."Sector$mp.dat", \%h);
+		printVsOmega("nVsOmegaky$my"."Sector$mp.dat", \%h, $norm*$eta);
 		addToFullOmega(\%fullVsOmega, \%h);
 	}
 }
 
-printVsOmega("nVsOmega.dat", \%fullVsOmega);
+printVsOmega("nVsOmega.dat", \%fullVsOmega, $norm*$eta);
 
 if (defined($mu)) {
-	sumWeight(\%fullVsOmega, $mu);
+	sumWeight(\%fullVsOmega, $mu, $norm*$eta);
 }
 
 sub sumWeight
 {
-	my ($ptr, $mu) = @_;
+	my ($ptr, $mu, $scale) = @_;
 	my ($below, $above) = (0, 0);
 	my $max = 0;
 	for my $omega (sort {$a <=> $b} keys %$ptr) {
@@ -113,6 +115,8 @@ sub sumWeight
 			$above += $val;
 		}
 	}
+
+	$max /= $scale;
 
 	my $fout = "mu.dat";
 	open(FOUT, ">", "$fout") or die "$0: Cannot write to $fout : $!\n";
@@ -146,11 +150,10 @@ sub addToFullOmega
 
 sub printVsOmega
 {
-	my ($fout, $ptr) = @_;
+	my ($fout, $ptr, $norm) = @_;
 	open(FOUT, ">", "$fout") or die "$0: Cannot write to $fout : $!\n";
 	for my $omega (sort {$a <=> $b} keys %$ptr) {
-		my $val = $ptr->{$omega};
-		#$val = 0 if ($val < 0);
+		my $val = $ptr->{$omega}/$norm;
 		print FOUT "$omega $val\n";
 	}
 
@@ -193,7 +196,7 @@ sub sumOverKx
 
 sub printVsQ
 {
-	my ($fout, $v) = @_;
+	my ($fout, $v, $norm) = @_;
 	my $numberOfQs = scalar(@$v);
 	my $centerShift = ($numberOfQs & 1) ? ($numberOfQs - 1)/2 : $numberOfQs/2;
 	$centerShift = 0 unless ($zeroAtCenter);
@@ -203,7 +206,8 @@ sub printVsQ
 		my $m = $m2 - $centerShift;
 		$m += $numberOfQs if ($m < 0);
 		my $q = getQ($m2 - $centerShift, $numberOfQs, $isPeriodic);
-		print FOUT "$q ".$v->[$m2]."\n";
+		my $val = pi*$v->[$m]/$norm;
+		print FOUT "$q $val\n";
 	}
 
 	close(FOUT);
@@ -226,7 +230,7 @@ sub sumOverOmega
 	}
 
 	my $fileIndex = $my;
-
+	my $norm = 0;
 	for my $omega (sort {$a <=> $b} keys %$ptr) { #no need to sort
 		my $aptr = $ptr->{$omega};
 		my $nks = scalar(@$aptr) - 1;
@@ -234,6 +238,7 @@ sub sumOverOmega
 		for (my $m2 = 0; $m2 < $numberOfQs; ++$m2) {
 			#my $realPart = $aptr->[2*$m2+1+2*$fileIndex*$numberOfQs];
 			my $imagPart = $aptr->[2*$m2+2+2*$fileIndex*$numberOfQs];
+			$norm += $imagPart;
 			if (defined($v->[$m2])) {
 				$v->[$m2] += $imagPart;
 			} else {
@@ -241,6 +246,8 @@ sub sumOverOmega
 			}
 		}
 	}
+
+	return $norm;
 }
 
 sub readSpectrum
