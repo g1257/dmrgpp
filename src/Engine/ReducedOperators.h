@@ -293,7 +293,8 @@ public:
 		}
 
 		thisBasis_ = thisBasis;
-		changeOfBasis_.update(fm);
+		fullMatrixToCrsMatrix(su2Transform_, fm);
+		transposeConjugate(su2TransformT_,su2Transform_);
 	}
 
 	void changeBasis(SizeType k)
@@ -415,7 +416,12 @@ public:
 
 	void changeBasis(SparseMatrixType &v)
 	{
-		changeOfBasis_(v);
+		if (!useSu2Symmetry_)
+			return changeOfBasis_(v);
+
+		SparseMatrixType tmp;
+		multiply(tmp,v,su2Transform_);
+		multiply(v,su2TransformT_,tmp);
 	}
 
 private:
@@ -893,6 +899,8 @@ private:
 	PsimagLite::Vector<PsimagLite::Vector<SizeType>::Type>::Type fastBasisRight_;
 	PsimagLite::Matrix<SizeType> flavorIndexCached_;
 	ChangeOfBasisType changeOfBasis_;
+	SparseMatrixType su2Transform_;
+	SparseMatrixType su2TransformT_;
 }; // ReducedOperators
 }// namespace Dmrg
 

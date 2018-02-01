@@ -1,6 +1,7 @@
 #ifndef DMRG_CHANGEOFBASIS_H
 #define DMRG_CHANGEOFBASIS_H
 #include "BlockDiagonalMatrix.h"
+#include "BlockOffDiagMatrix.h"
 
 namespace Dmrg {
 
@@ -10,42 +11,31 @@ class ChangeOfBasis {
 public:
 
 	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
+	typedef BlockOffDiagMatrix<MatrixType> BlockOffDiagMatrixType;
 
 	void update(const BlockDiagonalMatrixType& transform)
 	{
-		transform.toSparse(transform_);
-		transposeConjugate(transformT_,transform_);
-	}
-
-	void update(const MatrixType& v2)
-	{
-		fullMatrixToCrsMatrix(transform_, v2);
-		transposeConjugate(transformT_,transform_);
+		transform_ = transform;
 	}
 
 	void operator()(SparseMatrixType &v) const
-	{
-		SparseMatrixType tmp;
-		multiply(tmp,v,transform_);
-		multiply(v,transformT_,tmp);
+	{		
+		BlockOffDiagMatrixType vBlocked(v, transform_.offsetsRows());
+		vBlocked.transform(transform_);
+		vBlocked.toSparse(v);
 	}
 
 	static void changeBasis(SparseMatrixType &v,
 	                        const BlockDiagonalMatrixType& ftransform1)
 	{
-		SparseMatrixType ftransform;
-		ftransform1.toSparse(ftransform);
-		SparseMatrixType ftransformT;
-		transposeConjugate(ftransformT,ftransform);
-		SparseMatrixType tmp;
-		multiply(tmp,v,ftransform);
-		multiply(v,ftransformT,tmp);
+		BlockOffDiagMatrixType vBlocked(v, ftransform1.offsetsRows());
+		vBlocked.transform(ftransform1);
+		vBlocked.toSparse(v);
 	}
 
 private:
 
-	SparseMatrixType transform_;
-	SparseMatrixType transformT_;
+	BlockDiagonalMatrixType transform_;
 }; // class ChangeOfBasis
 } // namespace Dmrg
 #endif // DMRG_CHANGEOFBASIS_H

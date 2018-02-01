@@ -220,6 +220,10 @@ public:
 		return (n == 0) ? 0 : offsetsCols_[n - 1];
 	}
 
+	const VectorSizeType& offsetsRows() const { return offsetsRows_; }
+
+	const VectorSizeType& offsetsCols() const { return offsetsCols_; }
+
 	SizeType offsetsRows(SizeType i) const
 	{
 		assert(i < offsetsRows_.size());
