@@ -23,39 +23,63 @@ public:
 	                   const VectorSizeType& partitions)
 	    : partitions_(partitions), size_(0)
 	{
+		if (sparse.rows() != sparse.cols())
+			err("BlockOffDiagMatrix::ctor() expects square sparse matrix\n");
+
 		if (partitions.size() == 0)
-			err("BlockOffDiagMatrix has no partitions\n");
+			err("BlockOffDiagMatrix::ctor() expects partitions.size() > 0\n");
 
 		SizeType n = partitions.size() - 1;
 		size_ = partitions_[n];
 
+		MatrixBlockType value(size_, size_);
+		value.setTo(0.0);
+
+		VectorSizeType indexToPart(size_, 0);
+		fillIndexToPart(indexToPart);
+		VectorSizeType parts(n, 0);
+
 		for (SizeType i = 0; i < n; ++i) {
-			SizeType start = partitions_[i];
-			SizeType end = partitions_[i + 1];
-			MatrixBlockType* mptr = new MatrixBlockType(end - start, end - start);
-			MatrixBlockType& m = *mptr;
-			m.setTo(0.0);
+			SizeType startRow = partitions_[i];
+			SizeType rtotal = partitions_[i + 1] - startRow;
 			SizeType count = 0;
-			for (SizeType row = start; row < end; ++row) {
-				SizeType colStart = sparse.getRowPtr(row);
-				SizeType colEnd = sparse.getRowPtr(row + 1);
-				SizeType j = findPartition(colStart, partitions);
-				// FIXME: Only one partition
-				for (SizeType k = colStart; k < colEnd; ++k) {
+			for (SizeType r = 0; r < rtotal; ++r) {
+				SizeType kStart = sparse.getRowPtr(r + startRow);
+				SizeType kEnd = sparse.getRowPtr(r + startRow + 1);
+				for (SizeType k = kStart; k < kEnd; ++k) {
 					SizeType col = sparse.getCol(k);
-					m(row - start, col - partitions[j]) = sparse.getValue(k);
+					SizeType j = indexToPart[col];
+					parts[j] = 1;
+					value(r, col) = sparse.getValue(k);
 					++count;
 				}
 			}
 
-			if (count == 0) {
-				delete mptr;
-				mptr = 0;
-				continue;
-			}
+			if (count == 0) continue;
 
-			data_.push_back(mptr);
-			pairs_.push_back(PairType(i,j));
+			for (SizeType j = 0; j < n; ++j) {
+				if (parts[j] == 0) continue;
+				assert(j + 1 < partitions_.size());
+				SizeType startCol = partitions_[j];
+				SizeType ctotal = partitions_[j + 1] - startCol;
+				MatrixBlockType* mptr = new MatrixBlockType(rtotal, ctotal);
+				MatrixBlockType& m = *mptr;
+				for (SizeType r = 0; r < rtotal; ++r)
+					for (SizeType c = 0; c < ctotal; ++c)
+						m(r, c) = value(r, c + startCol);
+
+				data_.push_back(mptr);
+				pairs_.push_back(PairType(i,j));
+			}
+		}
+	}
+
+	~BlockOffDiagMatrix()
+	{
+		SizeType n = data_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			delete data_[i];
+			data_[i] = 0;
 		}
 	}
 
@@ -74,16 +98,24 @@ public:
 				assert(ii < pairs_.size());
 				SizeType i = pairs_[ii].first;
 				SizeType j = pairs_[ii].second;
+				assert(ii < data_.size());
+				const MatrixBlockType& m = *(data_[ii]);
 				assert(i < partitions_.size());
 				SizeType start = partitions_[i];
+				assert(row >= start);
+				SizeType r = row - start;
+				if (r >= m.cols()) continue;
+
 				assert(j + 1 < partitions_.size());
 				SizeType colStart = partitions_[j];
-				SizeType colEnd = partitions_[j + 1];
-				for (SizeType col = colStart; col < colEnd; ++col) {
-					sparse.pushCol(col);
-					assert(row >= start);
-					assert(col >= colStart);
-					sparse.pushValue(data_(row - start, col - colStart));
+				SizeType ctotal = partitions_[j + 1] - colStart;
+
+				if (ctotal > m.cols())
+					ctotal = m.cols();
+
+				for (SizeType c = 0; c < ctotal; ++c) {
+					sparse.pushCol(c + colStart);
+					sparse.pushValue(m(r, c));
 					++count;
 				}
 			}
@@ -92,7 +124,7 @@ public:
 		sparse.setRow(size_, count);
 	}
 
-	void transform(BlockDiagonalMatrixType& f)
+	void transform(const BlockDiagonalMatrixType& f)
 	{
 		SizeType n = pairs_.size();
 		assert(n == data_.size());
@@ -101,7 +133,7 @@ public:
 			SizeType j = pairs_[ii].second;
 			const MatrixBlockType& mRight = f(j);
 			const MatrixBlockType& mLeft = f(i);
-			MatrixBlockType& m = data_[ii];
+			MatrixBlockType& m = *(data_[ii]);
 			MatrixBlockType tmp(m.rows(), mRight.cols());
 			// tmp = data_[ii] * mRight;
 			psimag::BLAS::GEMM('N',
@@ -134,6 +166,12 @@ public:
 			                   &(m(0,0)),
 			                   m.rows());
 		}
+
+		partitions_ = f.offsetsCols();
+		n = partitions_.size();
+		assert(n > 0);
+		--n;
+		size_ = partitions_[n];
 	}
 
 	SizeType rows() const
@@ -146,14 +184,9 @@ public:
 		return size_;
 	}
 
-	SizeType blocks() const
-	{
-		return data_.size();
-	}
-
 private:
 
-	SizeType findIndicesForEachRow(VectorVectorSizeType& indices) const
+	void findIndicesForEachRow(VectorVectorSizeType& indices) const
 	{
 		SizeType n = pairs_.size();
 		for (SizeType ii = 0; ii < n; ++ii) {
@@ -168,8 +201,22 @@ private:
 		}
 	}
 
-	SizeType size_;
+	void fillIndexToPart(VectorSizeType& indexToPart) const
+	{
+		assert(size_ == indexToPart.size());
+		SizeType n = partitions_.size();
+		assert(n > 0);
+		--n;
+		for (SizeType i = 0; i < n; ++i) {
+			SizeType start = partitions_[i];
+			SizeType total = partitions_[i + 1] - start;
+			for (SizeType r = 0; r < total; ++r)
+				indexToPart[r + start] = i;
+		}
+	}
+
 	VectorSizeType partitions_;
+	SizeType size_;
 	typename PsimagLite::Vector<MatrixBlockType*>::Type data_;
 	typename PsimagLite::Vector<PairType>::Type pairs_;
 };

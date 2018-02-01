@@ -35,15 +35,7 @@ public:
 	static void changeBasis(SparseMatrixType &v,
 	                        const BlockDiagonalMatrixType& ftransform1)
 	{
-//		SparseMatrixType ftransform;
-//		ftransform1.toSparse(ftransform);
-//		SparseMatrixType ftransformT;
-//		transposeConjugate(ftransformT,ftransform);
-//		SparseMatrixType tmp;
-//		multiply(tmp,v,ftransform);
-//		multiply(v,ftransformT,tmp);
-
-		BlockOffDiagMatrixType vBlocked(v);
+		BlockOffDiagMatrixType vBlocked(v, ftransform1.offsetRows());
 		vBlocked.transform(ftransform1);
 		vBlocked.toSparse(v);
 	}
