@@ -19,7 +19,7 @@ public:
 	}
 
 	void operator()(SparseMatrixType &v) const
-	{		
+	{
 		BlockOffDiagMatrixType vBlocked(v, transform_.offsetsRows());
 		vBlocked.transform(transform_);
 		vBlocked.toSparse(v);
