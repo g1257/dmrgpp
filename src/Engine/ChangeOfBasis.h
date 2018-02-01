@@ -1,7 +1,6 @@
 #ifndef DMRG_CHANGEOFBASIS_H
 #define DMRG_CHANGEOFBASIS_H
 #include "BlockDiagonalMatrix.h"
-#include "BlockOffDiagMatrix.h"
 
 namespace Dmrg {
 
@@ -11,7 +10,6 @@ class ChangeOfBasis {
 public:
 
 	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
-	typedef BlockOffDiagMatrix<MatrixType> BlockOffDiagMatrixType;
 
 	void update(const BlockDiagonalMatrixType& transform)
 	{
@@ -35,9 +33,13 @@ public:
 	static void changeBasis(SparseMatrixType &v,
 	                        const BlockDiagonalMatrixType& ftransform1)
 	{
-		BlockOffDiagMatrixType vBlocked(v, ftransform1.offsetRows());
-		vBlocked.transform(ftransform1);
-		vBlocked.toSparse(v);
+		SparseMatrixType ftransform;
+		ftransform1.toSparse(ftransform);
+		SparseMatrixType ftransformT;
+		transposeConjugate(ftransformT,ftransform);
+		SparseMatrixType tmp;
+		multiply(tmp,v,ftransform);
+		multiply(v,ftransformT,tmp);
 	}
 
 private:
