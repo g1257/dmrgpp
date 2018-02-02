@@ -90,6 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MatrixVectorKron/InitKronWft.h"
 #include "MatrixVectorKron/KronMatrix.h"
 #include "WftAccelBlocks.h"
+#include "WftAccelPatches.h"
 #include "WftAccelWithTemp.h"
 #include "WftSparseTwoSite.h"
 
@@ -122,6 +123,7 @@ public:
 	typedef InitKronWft<LeftRightSuperType, WftOptions, DmrgWaveStructType> InitKronType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef WftAccelBlocks<BaseType> WftAccelBlocksType;
+	typedef WftAccelPatches<BaseType> WftAccelPatchesType;
 	typedef WftAccelWithTemp<BaseType, MatrixOrIdentityType> WftAccelWithTempType;
 	typedef WftSparseTwoSite<BaseType, MatrixOrIdentityType> WftSparseTwoSiteType;
 
@@ -130,6 +132,7 @@ public:
 	    : dmrgWaveStruct_(dmrgWaveStruct),
 	      wftOptions_(wftOptions),
 	      wftAccelBlocks_(dmrgWaveStruct, wftOptions),
+	      wftAccelPatches_(dmrgWaveStruct, wftOptions),
 	      wftAccelWithTemp_(dmrgWaveStruct, wftOptions),
 	      progress_("WaveFunctionTransfLocal")
 	{
@@ -194,7 +197,7 @@ private:
 	                             typename ProgramGlobals::DirectionEnum dir) const
 	{
 		if (wftOptions_.accel == WftOptions::ACCEL_PATCHES)
-			return transformVectorParallelPatched(psiDest, psiSrc, lrs, ii, nk, dir);
+			return wftAccelPatches_(psiDest, psiSrc, lrs, ii, nk, dir);
 
 		SizeType i0 = psiDest.sector(ii);
 		typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
@@ -212,28 +215,6 @@ private:
 		threadedWft.loopCreate(helperWft);
 	}
 
-	void transformVectorParallelPatched(VectorWithOffsetType& psiDest,
-	                                    const VectorWithOffsetType& psiSrc,
-	                                    const LeftRightSuperType& lrs,
-	                                    SizeType ii,
-	                                    const VectorSizeType& nk,
-	                                    typename ProgramGlobals::DirectionEnum dir) const
-	{
-		SizeType qn = psiDest.qn(ii);
-		SizeType iOld = findIold(psiSrc, qn);
-		SizeType i0 = psiDest.sector(ii);
-		InitKronType initKron(lrs, i0, qn, wftOptions_, dmrgWaveStruct_, iOld);
-		KronMatrix<InitKronType> kronMatrix(initKron, "WFT");
-		VectorType psiDestOneSector;
-		psiDest.extract(psiDestOneSector, i0);
-
-		VectorType psiSrcOneSector;
-		psiSrc.extract(psiSrcOneSector, iOld);
-
-		kronMatrix.matrixVectorProduct(psiDestOneSector, psiSrcOneSector);
-		psiDest.setDataInSector(psiDestOneSector, i0);
-	}
-
 	void transformVector1FromInfinite(VectorWithOffsetType& psiDest,
 	                                  const VectorWithOffsetType& psiSrc,
 	                                  const LeftRightSuperType& lrs,
@@ -242,7 +223,7 @@ private:
 		for (SizeType ii=0;ii<psiSrc.sectors();ii++) {
 			SizeType iOld = psiSrc.sector(ii);
 			SizeType qn = psiSrc.qn(ii);
-			SizeType iNew = findIold(psiDest, qn);
+			SizeType iNew = WftAccelPatchesType::findIold(psiDest, qn);
 			tVector1FromInfinite(psiDest, iNew, psiSrc, iOld, lrs, nk);
 		}
 	}
@@ -484,21 +465,10 @@ private:
 		}
 	}
 
-	SizeType findIold(const VectorWithOffsetType& psiSrc,
-	                  SizeType qn) const
-	{
-		SizeType sectors = psiSrc.sectors();
-		for (SizeType i = 0; i < sectors; ++i)
-			if (psiSrc.qn(i) == qn)
-				return psiSrc.sector(i);
-
-		err("WaveFunctionTransfLocal::findIold(): Cannot find sector in old vector\n");
-		throw PsimagLite::RuntimeError("UNREACHABLE\n");
-	}
-
 	const DmrgWaveStructType& dmrgWaveStruct_;
 	const WftOptions& wftOptions_;
 	WftAccelBlocksType wftAccelBlocks_;
+	WftAccelPatchesType wftAccelPatches_;
 	WftAccelWithTempType wftAccelWithTemp_;
 	PsimagLite::ProgressIndicator progress_;
 }; // class WaveFunctionTransfLocal
