@@ -86,11 +86,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename LeftRightSuperType>
+template<typename LeftRightSuperType_>
 class GenIjPatch {
 
 public:
 
+	typedef LeftRightSuperType_ LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisType BasisType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 

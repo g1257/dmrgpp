@@ -3,6 +3,8 @@
 #include "Matrix.h"
 #include "BLAS.h"
 #include "ProgramGlobals.h"
+#include "MatrixVectorKron/GenIjPatch.h"
+#include "BlockDiagWf.h"
 
 namespace Dmrg {
 
@@ -18,9 +20,11 @@ class WftAccelPatches {
 	typedef typename VectorType::value_type ComplexOrRealType;
 	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
 	typedef typename WaveFunctionTransfBaseType::PackIndicesType PackIndicesType;
+	typedef typename DmrgWaveStructType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
+	typedef typename BlockDiagonalMatrixType::BuildingBlockType MatrixType;
+	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
+	typedef BlockDiagWf<GenIjPatchType, VectorWithOffsetType> BlockDiagWfType;
 
 public:
 
@@ -36,20 +40,20 @@ public:
 	                const VectorSizeType& nk,
 	                typename ProgramGlobals::DirectionEnum dir) const
 	{
-		SizeType qn = psiDest.qn(ii);
-		SizeType iOld = findIold(psiSrc, qn);
-		SizeType i0 = psiDest.sector(ii);
-		VectorType psiDestOneSector;
-		psiDest.extract(psiDestOneSector, i0);
+		char charLeft = (dir == ProgramGlobals::EXPAND_SYSTEM) ? 'C' : 'N';
+		char charRight = charLeft;
+		const BlockDiagonalMatrixType& transformLeft = dmrgWaveStruct_.ws;
+		const BlockDiagonalMatrixType& transformRight = dmrgWaveStruct_.we;
+		BlockDiagWfType psi(psiSrc,
+		                         psiSrc.sector(ii),
+		                         dmrgWaveStruct_.lrs);
 
-		VectorType psiSrcOneSector;
-		psiSrc.extract(psiSrcOneSector, iOld);
-
-		psiDest.setDataInSector(psiDestOneSector, i0);
+		psi.transform(charLeft, charRight, transformLeft, transformRight);
+		psi.toVectorWithOffsets(psiDest);
 	}
 
 	static SizeType findIold(const VectorWithOffsetType& psiSrc,
-	                  SizeType qn)
+	                         SizeType qn)
 	{
 		SizeType sectors = psiSrc.sectors();
 		for (SizeType i = 0; i < sectors; ++i)
