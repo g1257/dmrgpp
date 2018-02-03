@@ -223,7 +223,7 @@ private:
 		for (SizeType ii=0;ii<psiSrc.sectors();ii++) {
 			SizeType iOld = psiSrc.sector(ii);
 			SizeType qn = psiSrc.qn(ii);
-			SizeType iNew = WftAccelPatchesType::findIold(psiDest, qn);
+			SizeType iNew = findIold(psiDest, qn);
 			tVector1FromInfinite(psiDest, iNew, psiSrc, iOld, lrs, nk);
 		}
 	}
@@ -463,6 +463,18 @@ private:
 				psiDest.fastAccess(i0,x) += psiSrc.slowAccess(y) * weRef.getValue(k);
 			}
 		}
+	}
+
+	static SizeType findIold(const VectorWithOffsetType& psiSrc,
+	                         SizeType qn)
+	{
+		SizeType sectors = psiSrc.sectors();
+		for (SizeType i = 0; i < sectors; ++i)
+			if (psiSrc.qn(i) == qn)
+				return psiSrc.sector(i);
+
+		err("WaveFunctionTransfLocal::findIold(): Cannot find sector in old vector\n");
+		throw PsimagLite::RuntimeError("UNREACHABLE\n");
 	}
 
 	const DmrgWaveStructType& dmrgWaveStruct_;

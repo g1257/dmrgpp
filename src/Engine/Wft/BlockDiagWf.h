@@ -26,22 +26,22 @@ class BlockDiagWf {
 public:
 
 	BlockDiagWf(const VectorWithOffsetType& src,
-	                 SizeType srcIndex,
-	                 const LeftRightSuperType& lrs)
-	    : rows_(0), cols_(0)
+	            SizeType srcIndex,
+	            const LeftRightSuperType& lrs)
+	    : rows_(lrs.left().size()),
+	      cols_(lrs.right().size()),
+	      offsetRows_(lrs.left().partition()),
+	      offsetCols_(lrs.right().partition()),
+	      genIjPatch_(lrs, src.qn(srcIndex))
 	{
 		storeOffsets(offsetRows_, lrs.left());
 		storeOffsets(offsetCols_, lrs.right());
-		rows_ = lrs.left().size();
-		cols_ = lrs.right().size();
 
 		SizeType ns = lrs.left().size();
 		PackIndicesType packSuper(ns);
 		SizeType offset = src.offset(srcIndex);
-		SizeType targetQn = src.qn(srcIndex);
-		GenIjPatchType g(lrs, targetQn);
-		const VectorSizeType& patchesLeft = g(GenIjPatchType::LEFT);
-		const VectorSizeType& patchesRight = g(GenIjPatchType::RIGHT);
+		const VectorSizeType& patchesLeft = genIjPatch_(GenIjPatchType::LEFT);
+		const VectorSizeType& patchesRight = genIjPatch_(GenIjPatchType::RIGHT);
 		SizeType npatches = patchesLeft.size();
 		assert(npatches == patchesRight.size());
 
@@ -50,10 +50,10 @@ public:
 		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
 			SizeType partL = patchesLeft[ipatch];
 			SizeType partR = patchesRight[ipatch];
-			SizeType offsetL = lrs.left().partition(partL);
-			SizeType rtotal = lrs.left().partition(partL + 1) - offsetL;
-			SizeType offsetR = lrs.right().partition(partR);
-			SizeType ctotal = lrs.right().partition(partR + 1) - offsetR;
+			SizeType offsetL = offsetRows_[partL];
+			SizeType rtotal = offsetRows_[partL + 1] - offsetL;
+			SizeType offsetR = offsetCols_[partR];
+			SizeType ctotal = offsetCols_[partR + 1] - offsetR;
 			data_[ipatch] = new MatrixType(rtotal, ctotal);
 			MatrixType& m = *(data_[ipatch]);
 			for (SizeType r = 0; r < rtotal; ++r) {
@@ -89,7 +89,76 @@ public:
 	               const BlockDiagonalMatrixType& tLeft,
 	               const BlockDiagonalMatrixType& tRight)
 	{
-		err("BlockDiagWf::transform() not implemented yet\n");
+		const VectorSizeType& patchesLeft = genIjPatch_(GenIjPatchType::LEFT);
+		const VectorSizeType& patchesRight = genIjPatch_(GenIjPatchType::RIGHT);
+
+		SizeType npatches = data_.size();
+		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
+			MatrixType* mptr = data_[ipatch];
+
+			if (mptr == 0) continue;
+
+			MatrixType& m = *mptr;
+			const MatrixType& mRight = tRight(patchesRight[ipatch]);
+			const MatrixType& mLeft = tLeft(patchesLeft[ipatch]);
+			MatrixType tmp(m.rows(), (charRight == 'N') ? mRight.cols() : mRight.rows());
+
+			if (mRight.cols() == 0 && mRight.rows() == 0) {
+				m.clear();
+				continue;
+			}
+
+			if (mLeft.cols() == 0 && mLeft.rows() == 0) {
+				m.clear();
+				continue;
+			}
+
+			// tmp = data_[ii] * op(mRight, charRight);
+
+			// columns of the matrix op(A) ==  rows of the matrix op(B)
+			assert(m.cols() == (charRight == 'N') ? mRight.rows() : mRight.cols());
+
+			psimag::BLAS::GEMM('N',
+			                   charRight,
+			                   m.rows(),
+			                   tmp.cols(),
+			                   m.cols(),
+			                   1.0,
+			                   &(m(0,0)),
+			                   m.rows(),
+			                   &(mRight(0,0)),
+			                   mRight.rows(),
+			                   0.0,
+			                   &(tmp(0,0)),
+			                   tmp.rows());
+
+			// data_[ii] = op(mLeft, charLeft) * tmp;
+
+			// columns of the matrix op(A) ==  rows of the matrix op(B)
+			assert((charLeft == 'N') ? mLeft.cols() : mLeft.rows() == tmp.rows());
+
+			m.clear();
+			m.resize((charLeft == 'N') ? mLeft.rows() : mLeft.cols(), tmp.cols());
+			psimag::BLAS::GEMM(charLeft,
+			                   'N',
+			                   m.rows(),
+			                   m.cols(),
+			                   tmp.rows(),
+			                   1.0,
+			                   &(mLeft(0,0)),
+			                   mLeft.rows(),
+			                   &(tmp(0,0)),
+			                   tmp.rows(),
+			                   0.0,
+			                   &(m(0,0)),
+			                   m.rows());
+
+		}
+
+		offsetRows_ = (charLeft == 'N')  ? tLeft.offsetsRows() : tLeft.offsetsCols();
+		offsetCols_ = (charRight == 'N') ? tRight.offsetsCols() : tRight.offsetsRows();
+		rows_ = (charLeft == 'N')  ? tLeft.rows() : tLeft.cols();
+		cols_ = (charRight == 'N') ? tRight.cols() : tRight.rows();
 	}
 
 	SizeType rows() const
@@ -106,13 +175,19 @@ private:
 
 	static void storeOffsets(VectorSizeType& offsets, const BasisType& basis)
 	{
-		err("BlockDiagWf::storeOffsets() not implemented yet\n");
+		SizeType n = basis.partition();
+		if (n != offsets.size())
+			err("BlockDiagWf::storeOffsets() offsets size\n");
+
+		for (SizeType i = 0; i < n; ++i)
+			offsets[i] = basis.partition(i);
 	}
 
-	VectorSizeType offsetRows_;
-	VectorSizeType offsetCols_;
 	SizeType rows_;
 	SizeType cols_;
+	VectorSizeType offsetRows_;
+	VectorSizeType offsetCols_;
+	GenIjPatchType genIjPatch_;
 	typename PsimagLite::Vector<MatrixType*>::Type data_;
 };
 }

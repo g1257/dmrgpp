@@ -52,18 +52,6 @@ public:
 		psi.toVectorWithOffsets(psiDest);
 	}
 
-	static SizeType findIold(const VectorWithOffsetType& psiSrc,
-	                         SizeType qn)
-	{
-		SizeType sectors = psiSrc.sectors();
-		for (SizeType i = 0; i < sectors; ++i)
-			if (psiSrc.qn(i) == qn)
-				return psiSrc.sector(i);
-
-		err("WaveFunctionTransfLocal::findIold(): Cannot find sector in old vector\n");
-		throw PsimagLite::RuntimeError("UNREACHABLE\n");
-	}
-
 private:
 
 	const DmrgWaveStructType& dmrgWaveStruct_;
