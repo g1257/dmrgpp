@@ -79,11 +79,6 @@ public:
 		}
 	}
 
-	void toVectorWithOffsets(VectorWithOffsetType& dest) const
-	{
-		err("BlockDiagWf::toVectorWithOffsets() not implemented yet\n");
-	}
-
 	void transform(char charLeft,
 	               char charRight,
 	               const BlockDiagonalMatrixType& tLeft,
@@ -159,6 +154,44 @@ public:
 		offsetCols_ = (charRight == 'N') ? tRight.offsetsCols() : tRight.offsetsRows();
 		rows_ = (charLeft == 'N')  ? tLeft.rows() : tLeft.cols();
 		cols_ = (charRight == 'N') ? tRight.cols() : tRight.rows();
+	}
+
+	void toVectorWithOffsets(VectorWithOffsetType& dest,
+	                         SizeType destIndex,
+	                         const LeftRightSuperType& lrs) const
+	{
+		const VectorSizeType& patchesLeft = genIjPatch_(GenIjPatchType::LEFT);
+		const VectorSizeType& patchesRight = genIjPatch_(GenIjPatchType::RIGHT);
+		SizeType npatches = patchesLeft.size();
+
+		assert(npatches == patchesRight.size());
+
+		SizeType ns = lrs.left().size();
+		PackIndicesType packSuper(ns);
+		SizeType offset = dest.offset(destIndex);
+		SizeType max = dest.offset(destIndex + 1);
+		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
+			SizeType partL = patchesLeft[ipatch];
+			SizeType partR = patchesRight[ipatch];
+			SizeType offsetL = offsetRows_[partL];
+			SizeType offsetR = offsetCols_[partR];
+			const MatrixType* mptr = data_[ipatch];
+
+			if (mptr == 0) continue;
+
+			const MatrixType& m = *mptr;
+			for (SizeType r = 0; r < m.rows(); ++r) {
+				SizeType row = r + offsetL;
+				for (SizeType c = 0; c < m.cols(); ++c) {
+					SizeType col = c + offsetR;
+					SizeType ind = packSuper.pack(row,
+					                              col,
+					                              lrs.super().permutationInverse());
+					if (ind < offset || ind >= max) continue;
+					dest.fastAccess(destIndex, ind - offset) = m(r, c);
+				}
+			}
+		}
 	}
 
 	SizeType rows() const

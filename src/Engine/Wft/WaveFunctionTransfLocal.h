@@ -192,14 +192,19 @@ private:
 	void transformVectorParallel(VectorWithOffsetType& psiDest,
 	                             const VectorWithOffsetType& psiSrc,
 	                             const LeftRightSuperType& lrs,
-	                             SizeType ii,
+	                             SizeType iNew,
 	                             const VectorSizeType& nk,
 	                             typename ProgramGlobals::DirectionEnum dir) const
-	{
-		if (wftOptions_.accel == WftOptions::ACCEL_PATCHES)
-			return wftAccelPatches_(psiDest, psiSrc, lrs, ii, nk, dir);
+	{		
+		if (wftOptions_.accel == WftOptions::ACCEL_PATCHES) {
+			if (psiSrc.sectors() > 1)
+				err("ACCEL_PATCHES cannot deal with multiple src sectors yet (sorry)\n");
 
-		SizeType i0 = psiDest.sector(ii);
+			SizeType iOld = 0;
+			return wftAccelPatches_(psiDest, iNew, psiSrc, iOld, lrs, nk, dir);
+		}
+
+		SizeType i0 = psiDest.sector(iNew);
 		typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
 		ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
 		                             PsimagLite::MPI::COMM_WORLD);

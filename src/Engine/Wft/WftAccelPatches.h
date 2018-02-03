@@ -34,22 +34,23 @@ public:
 	{}
 
 	void operator()(VectorWithOffsetType& psiDest,
+	                SizeType iNew,
 	                const VectorWithOffsetType& psiSrc,
+	                SizeType iOld,
 	                const LeftRightSuperType& lrs,
-	                SizeType ii,
 	                const VectorSizeType& nk,
 	                typename ProgramGlobals::DirectionEnum dir) const
 	{
-		char charLeft = (dir == ProgramGlobals::EXPAND_SYSTEM) ? 'C' : 'N';
+		char charLeft = (dir == ProgramGlobals::EXPAND_SYSTEM) ? 'N' : 'C';
 		char charRight = charLeft;
 		const BlockDiagonalMatrixType& transformLeft = dmrgWaveStruct_.ws;
 		const BlockDiagonalMatrixType& transformRight = dmrgWaveStruct_.we;
 		BlockDiagWfType psi(psiSrc,
-		                         psiSrc.sector(ii),
-		                         dmrgWaveStruct_.lrs);
+		                    psiSrc.sector(iOld),
+		                    dmrgWaveStruct_.lrs);
 
 		psi.transform(charLeft, charRight, transformLeft, transformRight);
-		psi.toVectorWithOffsets(psiDest);
+		psi.toVectorWithOffsets(psiDest, psiDest.sector(iNew), lrs);
 	}
 
 private:
