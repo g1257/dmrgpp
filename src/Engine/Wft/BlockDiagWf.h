@@ -31,13 +31,8 @@ public:
 	            const LeftRightSuperType& lrs)
 	    : lrs_(lrs),
 	      rows_(lrs.left().size()),
-	      cols_(lrs.right().size()),
-	      offsetRows_(lrs.left().partition()),
-	      offsetCols_(lrs.right().partition())
+	      cols_(lrs.right().size())
 	{
-		storeOffsets(offsetRows_, lrs.left());
-		storeOffsets(offsetCols_, lrs.right());
-
 		SizeType ns = lrs.left().size();
 		PackIndicesType packSuper(ns);
 		SizeType offset = src.offset(srcIndex);
@@ -48,21 +43,17 @@ public:
 		assert(npatches == patchesRight.size());
 
 		data_.resize(npatches, 0);
-		qns_.resize(npatches);
 		patches_.resize(npatches);
 
-		ComplexOrRealType sum = 0.0;
+		//ComplexOrRealType sum = 0.0;
 		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
 			SizeType partL = patchesLeft[ipatch];
 			SizeType partR = patchesRight[ipatch];
-			SizeType offsetL = offsetRows_[partL];
-			SizeType qnL = lrs.left().qn(offsetL);
-			SizeType rtotal = offsetRows_[partL + 1] - offsetL;
-			SizeType offsetR = offsetCols_[partR];
-			SizeType qnR = lrs.right().qn(offsetR);
-			qns_[ipatch] = PairType(qnL, qnR);
+			SizeType offsetL = lrs.left().partition(partL);
+			SizeType rtotal = lrs.left().partition(partL + 1) - offsetL;
+			SizeType offsetR = lrs.right().partition(partR);
 			patches_[ipatch] = PairType(partL, partR);
-			SizeType ctotal = offsetCols_[partR + 1] - offsetR;
+			SizeType ctotal = lrs.right().partition(partR + 1) - offsetR;
 			data_[ipatch] = new MatrixType(rtotal, ctotal);
 			MatrixType& m = *(data_[ipatch]);
 			for (SizeType r = 0; r < rtotal; ++r) {
@@ -74,12 +65,12 @@ public:
 					                              lrs.super().permutationInverse());
 					assert(ind >= offset);
 					m(r, c) = src.fastAccess(srcIndex, ind - offset);
-					sum += PsimagLite::conj(m(r, c))*m(r, c);
+					//sum += PsimagLite::conj(m(r, c))*m(r, c);
 				}
 			}
 		}
 
-		std::cout<<"sum -----------> "<<sum<<"\n";
+		// std::cout<<"sum -----------> "<<sum<<"\n";
 	}
 
 	~BlockDiagWf()
@@ -103,7 +94,7 @@ public:
 		patchConvert(patchConvertRight, (charRight == 'C'), tRight);
 
 		SizeType npatches = data_.size();
-		ComplexOrRealType sum = 0.0;
+		//ComplexOrRealType sum = 0.0;
 		SizeType rowsum = 0;
 		SizeType colsum = 0;
 		offsetCols_.clear();
@@ -201,15 +192,13 @@ public:
 			                   &(m(0,0)),
 			                   m.rows());
 
-			sum += normOfMatrix(m);
+			//sum += normOfMatrix(m);
 
 		}
 
-		//offsetRows_ = (charLeft == 'N')  ? tLeft.offsetsRows() : tLeft.offsetsCols();
-		//offsetCols_ = (charRight == 'N') ? tRight.offsetsCols() : tRight.offsetsRows();
 		rows_ = (charLeft == 'N')  ? tLeft.rows() : tLeft.cols();
 		cols_ = (charRight == 'N') ? tRight.cols() : tRight.rows();
-		std::cout<<"sum transform "<<sum<<" rowsum="<<rowsum<<" colsum="<<colsum<<"\n";
+		//std::cout<<"sum transform "<<sum<<" rowsum="<<rowsum<<" colsum="<<colsum<<"\n";
 	}
 
 	void toVectorWithOffsets(VectorWithOffsetType& dest,
@@ -250,10 +239,8 @@ private:
 		PackIndicesType packLeft(lrs.left().size()/hilbert);
 		PackIndicesType packRight(hilbert);
 		SizeType offset = lrs.super().partition(destIndex);
-		SizeType max = lrs.super().partition(destIndex + 1);
-		ComplexOrRealType sum = 0.0;
-		ComplexOrRealType sumBad = 0.0;
-		VectorType v(lrs.super().size(), 0.0);
+		//ComplexOrRealType sum = 0.0;
+		//ComplexOrRealType sumBad = 0.0;
 		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
 			const MatrixType* mptr = data_[ipatch];
 
@@ -270,22 +257,23 @@ private:
 					SizeType k = 0;
 					SizeType rind = 0;
 					packRight.unpack(k, rind, lrs_.right().permutation(col));
+					assert(k < hilbert);
 					SizeType lind = packLeft.pack(row, k, lrs.left().permutationInverse());
 
 					SizeType ind = packSuper.pack(lind,
 					                              rind,
 					                              lrs.super().permutationInverse());
-					v[ind] = m(r, c);
-					sum += PsimagLite::conj(v[ind])*v[ind];
-					//if (ind < offset || ind >= max)
-					//	sumBad += PsimagLite::conj(v[ind])*v[ind];
-					assert(ind >= offset && ind < max);
-					dest.fastAccess(destIndex, ind - offset) = m(r, c);
+					const ComplexOrRealType& value = m(r, c);
+					//sum += PsimagLite::conj(value)*value;
+					//if (ind < offset || ind >= lrs.super().partition(destIndex + 1))
+					//	sumBad += PsimagLite::conj(value)*value;
+					assert(ind >= offset && ind < lrs.super().partition(destIndex + 1));
+					dest.fastAccess(destIndex, ind - offset) = value;
 				}
 			}
 		}
 
-		std::cout<<"sum = "<<sum<<" sumBad= "<<sumBad<<"\n";
+		//std::cout<<"sum = "<<sum<<" sumBad= "<<sumBad<<"\n";
 	}
 
 	void toVectorExpandEnviron(VectorWithOffsetType& dest,
@@ -302,10 +290,8 @@ private:
 		PackIndicesType packLeft(lrs_.left().permutationInverse().size()/hilbert);
 		PackIndicesType packRight(hilbert);
 		SizeType offset = lrs.super().partition(destIndex);
-		SizeType max = lrs.super().partition(destIndex + 1);
-		ComplexOrRealType sum = 0.0;
-		ComplexOrRealType sumBad = 0.0;
-		VectorType v(lrs.super().size(), 0.0);
+		//ComplexOrRealType sum = 0.0;
+		//ComplexOrRealType sumBad = 0.0;
 		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
 			const MatrixType* mptr = data_[ipatch];
 
@@ -328,53 +314,17 @@ private:
 					SizeType ind = packSuper.pack(lind,
 					                              rind,
 					                              lrs.super().permutationInverse());
-					v[ind] = m(r, c);
-					sum += PsimagLite::conj(v[ind])*v[ind];
-					//if (ind < offset || ind >= max)
-					//	sumBad += PsimagLite::conj(v[ind])*v[ind];
-					assert(ind >= offset && ind < max);
-					dest.fastAccess(destIndex, ind - offset) = m(r, c);
+					const ComplexOrRealType& value = m(r, c);
+					//sum += PsimagLite::conj(value)*value;
+					//if (ind < offset || ind >= lrs.super().partition(destIndex + 1))
+					//	sumBad += PsimagLite::conj(value)*value;
+					assert(ind >= offset && ind < lrs.super().partition(destIndex + 1));
+					dest.fastAccess(destIndex, ind - offset) = value;
 				}
 			}
 		}
 
-		std::cout<<"sum = "<<sum<<" sumBad= "<<sumBad<<"\n";
-	}
-
-	void getPatchesLocations(VectorSizeType& patches,
-	                         const BasisType& basis,
-	                         bool isFirst) const
-	{
-		SizeType npatches = qns_.size();
-		assert(patches.size() == npatches);
-		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
-			SizeType qn = (isFirst) ? qns_[ipatch].first : qns_[ipatch].second;
-			patches[ipatch] = findPatch(basis, qn);
-		}
-	}
-
-	static void storeOffsets(VectorSizeType& offsets, const BasisType& basis)
-	{
-		SizeType n = basis.partition();
-		if (n != offsets.size())
-			err("BlockDiagWf::storeOffsets() offsets size\n");
-
-		for (SizeType i = 0; i < n; ++i)
-			offsets[i] = basis.partition(i);
-	}
-
-	static SizeType findPatch(const BasisType& basis, SizeType q)
-	{
-		SizeType n = basis.partition();
-		if (n == 0)
-			err("BlockDiagWf::findPatch(): no partitions in basis\n");
-		--n;
-		for (SizeType i = 0; i < n; ++i) {
-			SizeType offset = basis.partition(i);
-			if (static_cast<SizeType>(basis.qn(offset)) == q) return i;
-		}
-
-		return n + 1;
+		//std::cout<<"sum = "<<sum<<" sumBad= "<<sumBad<<"\n";
 	}
 
 	static void patchConvert(VectorSizeType& v,
@@ -411,7 +361,6 @@ private:
 	SizeType cols_;
 	VectorSizeType offsetRows_;
 	VectorSizeType offsetCols_;
-	VectorPairType qns_;
 	VectorPairType patches_;
 	typename PsimagLite::Vector<MatrixType*>::Type data_;
 };
