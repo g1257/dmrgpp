@@ -131,7 +131,7 @@ public:
 			}
 
 			offsetRows_[ipatch] = (charLeft == 'N') ? tLeft.offsetsRows(partL) :
-			                                           tLeft.offsetsCols(partL);
+			                                          tLeft.offsetsCols(partL);
 			offsetCols_[ipatch] = (charRight == 'N') ? tRight.offsetsCols(partR) :
 			                                           tRight.offsetsRows(partR);
 
@@ -215,7 +215,31 @@ public:
 	void toVectorWithOffsets(VectorWithOffsetType& dest,
 	                         SizeType destIndex,
 	                         const LeftRightSuperType& lrs,
-	                         const VectorSizeType& nk) const
+	                         const VectorSizeType& nk,
+	                         typename ProgramGlobals::DirectionEnum dir) const
+	{
+		if (dir == ProgramGlobals::EXPAND_SYSTEM)
+			return toVectorExpandSys(dest, destIndex, lrs, nk);
+
+		toVectorExpandEnviron(dest, destIndex, lrs, nk);
+	}
+
+	SizeType rows() const
+	{
+		return rows_;
+	}
+
+	SizeType cols() const
+	{
+		return cols_;
+	}
+
+private:
+
+	void toVectorExpandSys(VectorWithOffsetType& dest,
+	                       SizeType destIndex,
+	                       const LeftRightSuperType& lrs,
+	                       const VectorSizeType& nk) const
 	{
 		assert(nk.size() > 0);
 		SizeType hilbert = nk[0];
@@ -264,26 +288,57 @@ public:
 		std::cout<<"sum = "<<sum<<" sumBad= "<<sumBad<<"\n";
 	}
 
-	SizeType rows() const
+	void toVectorExpandEnviron(VectorWithOffsetType& dest,
+	                           SizeType destIndex,
+	                           const LeftRightSuperType& lrs,
+	                           const VectorSizeType& nk) const
 	{
-		return rows_;
-	}
+		assert(nk.size() > 0);
+		SizeType hilbert = nk[0];
 
-	SizeType cols() const
-	{
-		return cols_;
-	}
+		SizeType npatches = data_.size();
+		SizeType ns = lrs.left().size();
+		PackIndicesType packSuper(ns);
+		PackIndicesType packLeft(lrs_.left().permutationInverse().size()/hilbert);
+		PackIndicesType packRight(hilbert);
+		SizeType offset = lrs.super().partition(destIndex);
+		SizeType max = lrs.super().partition(destIndex + 1);
+		ComplexOrRealType sum = 0.0;
+		ComplexOrRealType sumBad = 0.0;
+		VectorType v(lrs.super().size(), 0.0);
+		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
+			const MatrixType* mptr = data_[ipatch];
 
-private:
+			if (mptr == 0) continue;
 
-	static void storeOffsets(VectorSizeType& offsets, const BasisType& basis)
-	{
-		SizeType n = basis.partition();
-		if (n != offsets.size())
-			err("BlockDiagWf::storeOffsets() offsets size\n");
+			const MatrixType& m = *mptr;
+			SizeType offsetL = offsetRows_[ipatch];
+			SizeType offsetR = offsetCols_[ipatch];
 
-		for (SizeType i = 0; i < n; ++i)
-			offsets[i] = basis.partition(i);
+			for (SizeType r = 0; r < m.rows(); ++r) {
+				SizeType row = r + offsetL;
+				for (SizeType c = 0; c < m.cols(); ++c) {
+					SizeType col = c + offsetR;
+					SizeType k = 0;
+					SizeType lind = 0;
+					packLeft.unpack(lind, k, lrs_.left().permutation(row));
+					assert(k < hilbert);
+					SizeType rind = packRight.pack(k, col, lrs.right().permutationInverse());
+
+					SizeType ind = packSuper.pack(lind,
+					                              rind,
+					                              lrs.super().permutationInverse());
+					v[ind] = m(r, c);
+					sum += PsimagLite::conj(v[ind])*v[ind];
+					//if (ind < offset || ind >= max)
+					//	sumBad += PsimagLite::conj(v[ind])*v[ind];
+					assert(ind >= offset && ind < max);
+					dest.fastAccess(destIndex, ind - offset) = m(r, c);
+				}
+			}
+		}
+
+		std::cout<<"sum = "<<sum<<" sumBad= "<<sumBad<<"\n";
 	}
 
 	void getPatchesLocations(VectorSizeType& patches,
@@ -296,6 +351,16 @@ private:
 			SizeType qn = (isFirst) ? qns_[ipatch].first : qns_[ipatch].second;
 			patches[ipatch] = findPatch(basis, qn);
 		}
+	}
+
+	static void storeOffsets(VectorSizeType& offsets, const BasisType& basis)
+	{
+		SizeType n = basis.partition();
+		if (n != offsets.size())
+			err("BlockDiagWf::storeOffsets() offsets size\n");
+
+		for (SizeType i = 0; i < n; ++i)
+			offsets[i] = basis.partition(i);
 	}
 
 	static SizeType findPatch(const BasisType& basis, SizeType q)

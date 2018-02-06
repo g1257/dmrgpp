@@ -50,7 +50,7 @@ public:
 		                    dmrgWaveStruct_.lrs);
 
 		psi.transform(charLeft, charRight, transformLeft, transformRight);
-		psi.toVectorWithOffsets(psiDest, psiDest.sector(iNew), lrs, nk);
+		psi.toVectorWithOffsets(psiDest, psiDest.sector(iNew), lrs, nk, dir);
 	}
 
 private:
