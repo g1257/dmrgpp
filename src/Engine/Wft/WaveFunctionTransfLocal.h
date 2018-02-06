@@ -87,7 +87,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MatrixOrIdentity.h"
 #include "ParallelWftOne.h"
 #include "Parallelizer.h"
-#include "MatrixVectorKron/InitKronWft.h"
 #include "MatrixVectorKron/KronMatrix.h"
 #include "WftAccelBlocks.h"
 #include "WftAccelPatches.h"
@@ -120,7 +119,6 @@ public:
 	typedef ParallelWftOne<VectorWithOffsetType,
 	DmrgWaveStructType,
 	LeftRightSuperType> ParallelWftType;
-	typedef InitKronWft<LeftRightSuperType, WftOptions, DmrgWaveStructType> InitKronType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef WftAccelBlocks<BaseType> WftAccelBlocksType;
 	typedef WftAccelPatches<BaseType> WftAccelPatchesType;
