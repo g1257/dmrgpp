@@ -51,6 +51,7 @@ public:
 		qns_.resize(npatches);
 		patches_.resize(npatches);
 
+		ComplexOrRealType sum = 0.0;
 		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
 			SizeType partL = patchesLeft[ipatch];
 			SizeType partR = patchesRight[ipatch];
@@ -73,9 +74,12 @@ public:
 					                              lrs.super().permutationInverse());
 					assert(ind >= offset);
 					m(r, c) = src.fastAccess(srcIndex, ind - offset);
+					sum += PsimagLite::conj(m(r, c))*m(r, c);
 				}
 			}
 		}
+
+		std::cout<<"sum -----------> "<<sum<<"\n";
 	}
 
 	~BlockDiagWf()
@@ -99,6 +103,7 @@ public:
 		patchConvert(patchConvertRight, true, tRight);
 
 		SizeType npatches = data_.size();
+		ComplexOrRealType sum = 0.0;
 		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
 			MatrixType* mptr = data_[ipatch];
 
@@ -176,12 +181,15 @@ public:
 			                   &(m(0,0)),
 			                   m.rows());
 
+			sum += normOfMatrix(m);
+
 		}
 
 		offsetRows_ = (charLeft == 'N')  ? tLeft.offsetsRows() : tLeft.offsetsCols();
 		offsetCols_ = (charRight == 'N') ? tRight.offsetsCols() : tRight.offsetsRows();
 		rows_ = (charLeft == 'N')  ? tLeft.rows() : tLeft.cols();
 		cols_ = (charRight == 'N') ? tRight.cols() : tRight.rows();
+		std::cout<<"sum transform "<<sum<<"\n";
 	}
 
 	void toVectorWithOffsets(VectorWithOffsetType& dest,
@@ -200,33 +208,44 @@ public:
 
 		SizeType ns = lrs.left().size();
 		PackIndicesType packSuper(ns);
-		SizeType offset = dest.offset(destIndex);
-		SizeType max = dest.offset(destIndex + 1);
+		//SizeType offset = lrs.super().partition(destIndex);
+		//SizeType max = lrs.super().partition(destIndex + 1);
+		ComplexOrRealType sum = 0.0;
+		VectorType v(lrs.super().size(), 0.0);
 		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
 			SizeType partL = patchesLeft[ipatch];
 			if (partL >= lrs.left().partition()) continue;
 			SizeType partR = patchesRight[ipatch];
 			if (partR >= lrs.right().partition()) continue;
-			SizeType offsetL = offsetRows_[partL];
-			SizeType offsetR = offsetCols_[partR];
+			SizeType offsetL = lrs.left().partition(partL);
+			SizeType offsetR = lrs.right().partition(partR);
 			const MatrixType* mptr = data_[ipatch];
 
 			if (mptr == 0) continue;
 
 			const MatrixType& m = *mptr;
+
 			for (SizeType r = 0; r < m.rows(); ++r) {
 				SizeType row = r + offsetL;
+				if (row >= lrs.left().size())
+					break;
 				for (SizeType c = 0; c < m.cols(); ++c) {
 					SizeType col = c + offsetR;
+					if (col >= lrs.right().size())
+						break;
 					SizeType ind = packSuper.pack(row,
 					                              col,
 					                              lrs.super().permutationInverse());
+					v[ind] = m(r, c);
+					sum += PsimagLite::conj(v[ind])*v[ind];
 					//if (ind < offset || ind >= max) continue;
-					assert(ind >= offset && ind < max);
-					dest.fastAccess(destIndex, ind - offset) = m(r, c);
+					//assert(ind >= offset && ind < max);
+					//dest.fastAccess(destIndex, ind - offset) = m(r, c);
 				}
 			}
 		}
+
+		std::cout<<"sum = "<<sum<<"\n";
 	}
 
 	SizeType rows() const
@@ -294,6 +313,16 @@ private:
 
 			v[c++] = i;
 		}
+	}
+
+	static ComplexOrRealType normOfMatrix(const MatrixType& m)
+	{
+		ComplexOrRealType sum = 0.0;
+		for (SizeType j = 0; j < m.cols(); ++j)
+			for (SizeType i = 0; i < m.rows(); ++i)
+				sum += PsimagLite::conj(m(i, j))*m(i, j);
+
+		return sum;
 	}
 
 	const LeftRightSuperType& lrs_;
