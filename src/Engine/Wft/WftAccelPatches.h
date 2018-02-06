@@ -41,7 +41,7 @@ public:
 	                const VectorSizeType& nk,
 	                typename ProgramGlobals::DirectionEnum dir) const
 	{
-		char charLeft = (dir == ProgramGlobals::EXPAND_SYSTEM) ? 'N' : 'C';
+		char charLeft = (dir == ProgramGlobals::EXPAND_SYSTEM) ? 'C' : 'N';
 		char charRight = charLeft;
 		const BlockDiagonalMatrixType& transformLeft = dmrgWaveStruct_.ws;
 		const BlockDiagonalMatrixType& transformRight = dmrgWaveStruct_.we;
