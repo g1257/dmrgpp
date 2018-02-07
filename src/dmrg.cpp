@@ -361,12 +361,6 @@ to the main dmrg driver are the following.
 	registerSignals();
 
 	PsimagLite::String targeting = inputCheck.getTargeting(dmrgSolverParams.options);
-
-	if (targeting != "CorrectionTargetting" &&
-	        targeting != "GroundStateTargetting" &&
-	        dmrgSolverParams.options.find("wftInBlocks") != PsimagLite::String::npos)
-		err("wftInBlocks only for GroundStateTargetting or CorrectionTargetting\n");
-
 	bool isComplex = (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos);
 	if (targeting=="TimeStepTargetting") isComplex = true;
 	if (isComplex) {

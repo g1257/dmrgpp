@@ -64,6 +64,8 @@ class WftAccelBlocks {
 			result_[kp].setTo(0.0);
 			tmp.setTo(0.0);
 
+			const MatrixType& weModif = getWeModif(we_);
+
 			psimag::BLAS::GEMM('N',
 			                   'N',
 			                   i2psize,
@@ -72,7 +74,7 @@ class WftAccelBlocks {
 			                   1.0,
 			                   &((psi_[kp])(0,0)),
 			                   i2psize,
-			                   &(we_(0,0)),
+			                   &(weModif(0,0)),
 			                   jp2size,
 			                   0.0,
 			                   &(tmp(0,0)),
@@ -106,7 +108,7 @@ class WftAccelBlocks {
 			tmp.setTo(0.0);
 
 			psimag::BLAS::GEMM('N',
-			                   'C',
+			                   'T',
 			                   ipSize,
 			                   jenSize,
 			                   jprSize,
@@ -134,12 +136,31 @@ class WftAccelBlocks {
 			                   isSize);
 		}
 
+		const MatrixType& getWeModif(const PsimagLite::Matrix<double>& m)
+		{
+			return m;
+		}
+
+		const MatrixType& getWeModif(const PsimagLite::Matrix<std::complex<double> >& m)
+		{
+			storage_.clear();
+			SizeType rows = m.rows();
+			SizeType cols = m.cols();
+			storage_.resize(rows, cols);
+			for (SizeType j = 0; j < cols; ++j)
+				for (SizeType i = 0; i < rows; ++i)
+					storage_(i, j) = PsimagLite::conj(m(i, j));
+
+			return storage_;
+		}
+
 		VectorMatrixType& result_;
 		const VectorMatrixType& psi_;
 		const MatrixType& ws_;
 		const MatrixType& we_;
 		SizeType volumeOfNk_;
 		SizeType sysOrEnv_;
+		MatrixType storage_;
 	};
 
 public:
