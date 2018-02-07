@@ -305,4 +305,6 @@ the "half filled" case). U=2
 #5502) RIXS dynamic
 #5503-5699 reserved for RIXS
 5700) TargetingCorrection small test
+5800) SOC with Jz symmetry Ground State, using "fat site"
+5810) 3-orbital Hubbard model Ground State, using "fat site"
 #TAGEND DO NOT REMOVE THIS TAG

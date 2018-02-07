@@ -1,0 +1,32 @@
+TotalNumberOfSites=8
+NumberOfTerms=1
+DegreesOfFreedom=3
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 3 3
+0.5 0 -0.1
+0 0.5 -0.1
+-0.1 -0.1 0.15
+Model=FeAsBasedSc
+FeAsMode=INT_PAPER33
+Orbitals=3
+hubbardU 5 2.165 0.811875 -1.082500 -0.541250 -1.082500
+potentialV 48
+-0.1 -0.1 -0.1 -0.1 -0.1 -0.1 -0.1 -0.1 
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8
+-0.1 -0.1 -0.1 -0.1 -0.1 -0.1 -0.1 -0.1
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8
+CorrectionA=0.005
+SolverOptions=CorrectionTargetting,vectorwithoffsets,MatrixVectorKron,useSvd
+Version=version
+OutputFile=data.txt
+InfiniteLoopKeptStates=70
+FiniteLoops 3
+3 70 0 -6 70 0 6 70 0
+LanczosEps=1e-6
+LanczosSteps=200
+TargetElectronsUp=16
+TargetElectronsDown=16
+Threads=1
