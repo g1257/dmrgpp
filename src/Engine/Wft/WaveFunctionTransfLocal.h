@@ -195,10 +195,7 @@ private:
 	                             typename ProgramGlobals::DirectionEnum dir) const
 	{		
 		if (wftOptions_.accel == WftOptions::ACCEL_PATCHES) {
-			if (psiSrc.sectors() > 1)
-				err("ACCEL_PATCHES cannot deal with multiple src sectors yet (sorry)\n");
-
-			SizeType iOld = 0;
+			SizeType iOld = findIold(psiSrc, psiDest.qn(iNew));
 			return wftAccelPatches_(psiDest, iNew, psiSrc, iOld, lrs, nk, dir);
 		}
 
@@ -226,7 +223,7 @@ private:
 		for (SizeType ii=0;ii<psiSrc.sectors();ii++) {
 			SizeType iOld = psiSrc.sector(ii);
 			SizeType qn = psiSrc.qn(ii);
-			SizeType iNew = findIold(psiDest, qn);
+			SizeType iNew = psiDest.sector(findIold(psiDest, qn));
 			tVector1FromInfinite(psiDest, iNew, psiSrc, iOld, lrs, nk);
 		}
 	}
@@ -474,7 +471,7 @@ private:
 		SizeType sectors = psiSrc.sectors();
 		for (SizeType i = 0; i < sectors; ++i)
 			if (psiSrc.qn(i) == qn)
-				return psiSrc.sector(i);
+				return i;
 
 		err("WaveFunctionTransfLocal::findIold(): Cannot find sector in old vector\n");
 		throw PsimagLite::RuntimeError("UNREACHABLE\n");

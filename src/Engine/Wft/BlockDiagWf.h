@@ -27,7 +27,7 @@ class BlockDiagWf {
 public:
 
 	BlockDiagWf(const VectorWithOffsetType& src,
-	            SizeType srcIndex,
+	            SizeType iSrc,
 	            const LeftRightSuperType& lrs)
 	    : lrs_(lrs),
 	      rows_(lrs.left().size()),
@@ -35,8 +35,9 @@ public:
 	{
 		SizeType ns = lrs.left().size();
 		PackIndicesType packSuper(ns);
+		SizeType srcIndex = src.sector(iSrc);
 		SizeType offset = src.offset(srcIndex);
-		GenIjPatchType genIjPatch(lrs, src.qn(srcIndex));
+		GenIjPatchType genIjPatch(lrs, src.qn(iSrc));
 		const VectorSizeType& patchesLeft = genIjPatch(GenIjPatchType::LEFT);
 		const VectorSizeType& patchesRight = genIjPatch(GenIjPatchType::RIGHT);
 		SizeType npatches = patchesLeft.size();
@@ -91,7 +92,7 @@ public:
 		VectorSizeType patchConvertRight(tRight.blocks(), 0);
 
 		patchConvert(patchConvertLeft, (charLeft == 'N'), tLeft);
-		patchConvert(patchConvertRight, (charRight == 'C'), tRight);
+		patchConvert(patchConvertRight, (charRight != 'N'), tRight);
 
 		SizeType npatches = data_.size();
 		//ComplexOrRealType sum = 0.0;
@@ -126,7 +127,7 @@ public:
 			offsetCols_[ipatch] = (charRight == 'N') ? tRight.offsetsCols(partR) :
 			                                           tRight.offsetsRows(partR);
 
-			const MatrixType& mRight = tRight(partR);
+			const MatrixType& mRight = getRightMatrix(tRight(partR), charRight);
 			const MatrixType& mLeft = tLeft(partL);
 			MatrixType tmp(m.rows(), (charRight == 'N') ? mRight.cols() : mRight.rows());
 
@@ -202,11 +203,12 @@ public:
 	}
 
 	void toVectorWithOffsets(VectorWithOffsetType& dest,
-	                         SizeType destIndex,
+	                         SizeType iNew,
 	                         const LeftRightSuperType& lrs,
 	                         const VectorSizeType& nk,
 	                         typename ProgramGlobals::DirectionEnum dir) const
 	{
+		SizeType destIndex = dest.sector(iNew);
 		if (dir == ProgramGlobals::EXPAND_SYSTEM)
 			return toVectorExpandSys(dest, destIndex, lrs, nk);
 
@@ -356,12 +358,38 @@ private:
 		return sum;
 	}
 
+	const MatrixType& getRightMatrix(const MatrixType& m, char c)
+	{
+		if (c != 'N') return m;
+
+		return getRightMatrixT(m);
+	}
+
+	const MatrixType& getRightMatrixT(const PsimagLite::Matrix<std::complex<double> >& m)
+	{
+		storage_.clear();
+		SizeType rows = m.rows();
+		SizeType cols = m.cols();
+		storage_.resize(rows, cols);
+		for (SizeType j = 0; j < cols; ++j)
+			for (SizeType i = 0; i < rows; ++i)
+				storage_(i, j) = PsimagLite::conj(m(i, j));
+
+		return storage_;
+	}
+
+	const MatrixType& getRightMatrixT(const PsimagLite::Matrix<double>& m)
+	{
+		return m;
+	}
+
 	const LeftRightSuperType& lrs_;
 	SizeType rows_;
 	SizeType cols_;
 	VectorSizeType offsetRows_;
 	VectorSizeType offsetCols_;
 	VectorPairType patches_;
+	MatrixType storage_;
 	typename PsimagLite::Vector<MatrixType*>::Type data_;
 };
 }

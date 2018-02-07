@@ -42,15 +42,15 @@ public:
 	                typename ProgramGlobals::DirectionEnum dir) const
 	{
 		char charLeft = (dir == ProgramGlobals::EXPAND_SYSTEM) ? 'C' : 'N';
-		char charRight = charLeft;
+		char charRight = (dir == ProgramGlobals::EXPAND_SYSTEM) ? 'T' : 'N';
 		const BlockDiagonalMatrixType& transformLeft = dmrgWaveStruct_.ws;
 		const BlockDiagonalMatrixType& transformRight = dmrgWaveStruct_.we;
 		BlockDiagWfType psi(psiSrc,
-		                    psiSrc.sector(iOld),
+		                    iOld,
 		                    dmrgWaveStruct_.lrs);
 
 		psi.transform(charLeft, charRight, transformLeft, transformRight);
-		psi.toVectorWithOffsets(psiDest, psiDest.sector(iNew), lrs, nk, dir);
+		psi.toVectorWithOffsets(psiDest, iNew, lrs, nk, dir);
 	}
 
 private:
