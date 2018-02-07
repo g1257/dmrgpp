@@ -111,7 +111,9 @@ public:
 		{
 			if (rank_!=0) return;
 			if (!fout_) fout_=new std::ofstream;
+#ifdef PSI_PUBSETBUF
 			fout_->rdbuf()->pubsetbuf(0,0);
+#endif
 			fout_->open(fn.c_str());
 			if (!(*fout_) || !fout_->good())
 				throw RuntimeError("Out: error while opening file!\n");
@@ -135,7 +137,9 @@ public:
 				throw RuntimeError("open: not possible\n");
 			filename_=fn;
 			if (!fout_) fout_=new std::ofstream;
+#ifdef PSI_PUBSETBUF
 			fout_->rdbuf()->pubsetbuf(0,0);
+#endif
 			fout_->open(fn.c_str(),mode);
 			if (!(*fout_) || !fout_->good())
 				throw RuntimeError("Out: error while opening file!\n");

@@ -396,13 +396,17 @@ public:
 		SizeType n = nrow_;
 		assert(n+1==rowptr_.size());
 		assert(nrow_>0 && ncol_>0);
+		typename Vector<SizeType>::Type p(ncol_,0);
 		for (SizeType i=0;i<n;i++) {
-			typename Vector<SizeType>::Type p(ncol_,0);
 			for (int k=rowptr_[i];k<rowptr_[i+1];k++) {
 				SizeType col = colind_[k];
+				assert(col < p.size());
 				assert(p[col]==0);
 				p[col] = 1;
 			}
+
+			for (int k=rowptr_[i];k<rowptr_[i+1];k++)
+				p[colind_[k]] = 0;
 		}
 #endif
 	}
