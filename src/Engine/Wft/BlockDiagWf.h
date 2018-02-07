@@ -84,6 +84,194 @@ class BlockDiagWf {
 		SizeType srcIndex_;
 		SizeType offset_;
 		VectorPairType& patches_;
+		VectorMatrixType& data_;
+	};
+
+	class ParallelBlockTransform {
+
+	public:
+
+		ParallelBlockTransform(const BlockDiagonalMatrixType& tLeft,
+		                       const BlockDiagonalMatrixType& tRight,
+		                       char charLeft,
+		                       char charRight,
+		                       SizeType threads,
+		                       const VectorPairType& patches,
+		                       VectorSizeType& offsetRows,
+		                       VectorSizeType& offsetCols,
+		                       VectorMatrixType& data)
+		    : tLeft_(tLeft),
+		      tRight_(tRight),
+		      patchConvertLeft_(tLeft.blocks(), 0),
+		      patchConvertRight_(tRight.blocks(), 0),
+		      charLeft_(charLeft),
+		      charRight_(charRight),
+		      storage_(threads),
+		      patches_(patches),
+		      offsetRows_(offsetRows),
+		      offsetCols_(offsetCols),
+		      data_(data)
+		{
+			patchConvert(patchConvertLeft_, (charLeft == 'N'), tLeft);
+			patchConvert(patchConvertRight_, (charRight != 'N'), tRight);
+			SizeType npatches = data_.size();
+			offsetCols_.clear();
+			offsetRows_.clear();
+			offsetCols_.resize(npatches, 0);
+			offsetRows_.resize(npatches, 0);
+		}
+
+		SizeType tasks() const { return data_.size(); }
+
+		void doTask(SizeType ipatch, SizeType threadNum)
+		{
+			MatrixType* mptr = data_[ipatch];
+
+			if (mptr == 0) return;
+
+			MatrixType& m = *mptr;
+			SizeType partL = patchConvertLeft_[patches_[ipatch].first];
+			SizeType partR = patchConvertRight_[patches_[ipatch].second];
+
+			if (partL >= tLeft_.blocks()) {
+				m.clear();
+				return;
+			}
+
+
+			if (partR >= tRight_.blocks()) {
+				m.clear();
+				return;
+			}
+
+			offsetRows_[ipatch] = (charLeft_ == 'N') ? tLeft_.offsetsRows(partL) :
+			                                           tLeft_.offsetsCols(partL);
+			offsetCols_[ipatch] = (charRight_ == 'N') ? tRight_.offsetsCols(partR) :
+			                                            tRight_.offsetsRows(partR);
+
+			const MatrixType& mRight = getRightMatrix(tRight_(partR), charRight_, threadNum);
+			const MatrixType& mLeft = tLeft_(partL);
+			MatrixType tmp(m.rows(), (charRight_ == 'N') ? mRight.cols() : mRight.rows());
+
+			if (mRight.cols() == 0 && mRight.rows() == 0) {
+				m.clear();
+				return;
+			}
+
+			if (mLeft.cols() == 0 && mLeft.rows() == 0) {
+				m.clear();
+				return;
+			}
+
+			// tmp = data_[ii] * op(mRight, charRight);
+
+			// columns of the matrix op(A) ==  rows of the matrix op(B)
+			if (charRight_ == 'N')
+				assert(m.cols() == mRight.rows());
+			else
+				assert(m.cols() == mRight.cols());
+
+			psimag::BLAS::GEMM('N',
+			                   charRight_,
+			                   m.rows(),
+			                   tmp.cols(),
+			                   m.cols(),
+			                   1.0,
+			                   &(m(0,0)),
+			                   m.rows(),
+			                   &(mRight(0,0)),
+			                   mRight.rows(),
+			                   0.0,
+			                   &(tmp(0,0)),
+			                   tmp.rows());
+
+			// data_[ii] = op(mLeft, charLeft) * tmp;
+
+			m.clear();
+
+			// columns of the matrix op(A) ==  rows of the matrix op(B)
+			if (charLeft_ == 'N') {
+				m.resize(mLeft.rows(), tmp.cols());
+				assert(mLeft.cols() == tmp.rows());
+			} else {
+				m.resize(mLeft.cols(), tmp.cols());
+				assert(mLeft.rows() == tmp.rows());
+			}
+
+			psimag::BLAS::GEMM(charLeft_,
+			                   'N',
+			                   m.rows(),
+			                   m.cols(),
+			                   tmp.rows(),
+			                   1.0,
+			                   &(mLeft(0,0)),
+			                   mLeft.rows(),
+			                   &(tmp(0,0)),
+			                   tmp.rows(),
+			                   0.0,
+			                   &(m(0,0)),
+			                   m.rows());
+
+			//sum += normOfMatrix(m);
+		}
+
+	private:
+
+		static void patchConvert(VectorSizeType& v,
+		                         bool isNeeded,
+		                         const BlockDiagonalMatrixType& b)
+		{
+			SizeType n = b.blocks();
+			assert(v.size() == n);
+			SizeType c = 0;
+			for (SizeType i = 0; i < n; ++i) {
+				const MatrixType& m = b(i);
+				if (m.rows() == 0 && isNeeded) {
+					if (m.cols() != 0)
+						err("patchConvert error\n");
+					continue;
+				}
+
+				v[c++] = i;
+			}
+		}
+
+		const MatrixType& getRightMatrix(const MatrixType& m, char c, SizeType threadNum)
+		{
+			if (c != 'N') return m;
+
+			return getRightMatrixT(m, threadNum);
+		}
+
+		const MatrixType& getRightMatrixT(const PsimagLite::Matrix<std::complex<double> >& m,
+		                                  SizeType threadNum)
+		{
+			storage_[threadNum].clear();
+			SizeType rows = m.rows();
+			SizeType cols = m.cols();
+			storage_[threadNum].resize(rows, cols);
+			for (SizeType j = 0; j < cols; ++j)
+				for (SizeType i = 0; i < rows; ++i)
+					storage_[threadNum](i, j) = PsimagLite::conj(m(i, j));
+
+			return storage_[threadNum];
+		}
+
+		const MatrixType& getRightMatrixT(const PsimagLite::Matrix<double>& m, SizeType)
+		{
+			return m;
+		}
+
+		const BlockDiagonalMatrixType& tLeft_;
+		const BlockDiagonalMatrixType& tRight_;
+		VectorSizeType patchConvertLeft_;
+		VectorSizeType patchConvertRight_;
+		char charLeft_;
+		char charRight_;
+		typename PsimagLite::Vector<MatrixType>::Type storage_;
+		const VectorPairType& patches_;
+        VectorSizeType& offsetRows_;
+        VectorSizeType& offsetCols_;
         VectorMatrixType& data_;
 	};
 
@@ -128,114 +316,22 @@ public:
 	               const BlockDiagonalMatrixType& tLeft,
 	               const BlockDiagonalMatrixType& tRight)
 	{
-		VectorSizeType patchConvertLeft(tLeft.blocks(), 0);
-		VectorSizeType patchConvertRight(tRight.blocks(), 0);
-
-		patchConvert(patchConvertLeft, (charLeft == 'N'), tLeft);
-		patchConvert(patchConvertRight, (charRight != 'N'), tRight);
-
 		SizeType npatches = data_.size();
-		//ComplexOrRealType sum = 0.0;
-		SizeType rowsum = 0;
-		SizeType colsum = 0;
-		offsetCols_.clear();
-		offsetRows_.clear();
-		offsetCols_.resize(npatches, 0);
-		offsetRows_.resize(npatches, 0);
-		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
-			MatrixType* mptr = data_[ipatch];
+		SizeType threads = std::min(npatches, PsimagLite::Concurrency::npthreads);
+		typedef PsimagLite::Parallelizer<ParallelBlockTransform> ParallelizerType;
+		ParallelizerType threadedTransform(threads, PsimagLite::MPI::COMM_WORLD);
 
-			if (mptr == 0) continue;
+		ParallelBlockTransform helper(tLeft,
+		                              tRight,
+		                              charLeft,
+		                              charRight,
+		                              threads,
+		                              patches_,
+		                              offsetRows_,
+		                              offsetCols_,
+		                              data_);
 
-			MatrixType& m = *mptr;
-			SizeType partL = patchConvertLeft[patches_[ipatch].first];
-			SizeType partR = patchConvertRight[patches_[ipatch].second];
-
-			if (partL >= tLeft.blocks()) {
-				m.clear();
-				continue;
-			}
-
-
-			if (partR >= tRight.blocks()) {
-				m.clear();
-				continue;
-			}
-
-			offsetRows_[ipatch] = (charLeft == 'N') ? tLeft.offsetsRows(partL) :
-			                                          tLeft.offsetsCols(partL);
-			offsetCols_[ipatch] = (charRight == 'N') ? tRight.offsetsCols(partR) :
-			                                           tRight.offsetsRows(partR);
-
-			const MatrixType& mRight = getRightMatrix(tRight(partR), charRight);
-			const MatrixType& mLeft = tLeft(partL);
-			MatrixType tmp(m.rows(), (charRight == 'N') ? mRight.cols() : mRight.rows());
-
-			if (mRight.cols() == 0 && mRight.rows() == 0) {
-				m.clear();
-				continue;
-			}
-
-			if (mLeft.cols() == 0 && mLeft.rows() == 0) {
-				m.clear();
-				continue;
-			}
-
-			// tmp = data_[ii] * op(mRight, charRight);
-
-			// columns of the matrix op(A) ==  rows of the matrix op(B)
-			if (charRight == 'N')
-				assert(m.cols() == mRight.rows());
-			else
-				assert(m.cols() == mRight.cols());
-
-			psimag::BLAS::GEMM('N',
-			                   charRight,
-			                   m.rows(),
-			                   tmp.cols(),
-			                   m.cols(),
-			                   1.0,
-			                   &(m(0,0)),
-			                   m.rows(),
-			                   &(mRight(0,0)),
-			                   mRight.rows(),
-			                   0.0,
-			                   &(tmp(0,0)),
-			                   tmp.rows());
-
-			// data_[ii] = op(mLeft, charLeft) * tmp;
-
-			m.clear();
-
-			// columns of the matrix op(A) ==  rows of the matrix op(B)
-			if (charLeft == 'N') {
-				m.resize(mLeft.rows(), tmp.cols());
-				assert(mLeft.cols() == tmp.rows());
-			} else {
-				m.resize(mLeft.cols(), tmp.cols());
-				assert(mLeft.rows() == tmp.rows());
-			}
-
-			rowsum += m.rows();
-			colsum += m.cols();
-
-			psimag::BLAS::GEMM(charLeft,
-			                   'N',
-			                   m.rows(),
-			                   m.cols(),
-			                   tmp.rows(),
-			                   1.0,
-			                   &(mLeft(0,0)),
-			                   mLeft.rows(),
-			                   &(tmp(0,0)),
-			                   tmp.rows(),
-			                   0.0,
-			                   &(m(0,0)),
-			                   m.rows());
-
-			//sum += normOfMatrix(m);
-
-		}
+		threadedTransform.loopCreate(helper);
 
 		rows_ = (charLeft == 'N')  ? tLeft.rows() : tLeft.cols();
 		cols_ = (charRight == 'N') ? tRight.cols() : tRight.rows();
@@ -367,60 +463,6 @@ private:
 		}
 
 		//std::cout<<"sum = "<<sum<<" sumBad= "<<sumBad<<"\n";
-	}
-
-	static void patchConvert(VectorSizeType& v,
-	                         bool isNeeded,
-	                         const BlockDiagonalMatrixType& b)
-	{
-		SizeType n = b.blocks();
-		assert(v.size() == n);
-		SizeType c = 0;
-		for (SizeType i = 0; i < n; ++i) {
-			const MatrixType& m = b(i);
-			if (m.rows() == 0 && isNeeded) {
-				if (m.cols() != 0)
-					err("patchConvert error\n");
-				continue;
-			}
-
-			v[c++] = i;
-		}
-	}
-
-	static ComplexOrRealType normOfMatrix(const MatrixType& m)
-	{
-		ComplexOrRealType sum = 0.0;
-		for (SizeType j = 0; j < m.cols(); ++j)
-			for (SizeType i = 0; i < m.rows(); ++i)
-				sum += PsimagLite::conj(m(i, j))*m(i, j);
-
-		return sum;
-	}
-
-	const MatrixType& getRightMatrix(const MatrixType& m, char c)
-	{
-		if (c != 'N') return m;
-
-		return getRightMatrixT(m);
-	}
-
-	const MatrixType& getRightMatrixT(const PsimagLite::Matrix<std::complex<double> >& m)
-	{
-		storage_.clear();
-		SizeType rows = m.rows();
-		SizeType cols = m.cols();
-		storage_.resize(rows, cols);
-		for (SizeType j = 0; j < cols; ++j)
-			for (SizeType i = 0; i < rows; ++i)
-				storage_(i, j) = PsimagLite::conj(m(i, j));
-
-		return storage_;
-	}
-
-	const MatrixType& getRightMatrixT(const PsimagLite::Matrix<double>& m)
-	{
-		return m;
 	}
 
 	const LeftRightSuperType& lrs_;
