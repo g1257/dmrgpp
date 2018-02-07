@@ -22,7 +22,7 @@ public:
 	ChangeOfBasis()
 	{
 		if (!jzSymmetry_) return;
-		std::cout<<"JZ_SYMMETRY in use\n";
+		std::cout<<"Old ChangeOfBasis in use\n";
 	}
 
 	void update(const BlockDiagonalMatrixType& transform)

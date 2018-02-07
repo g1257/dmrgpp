@@ -61,7 +61,12 @@ public:
 
 	FeAsJzSymmetry(bool isEnabled) :
 	    isEnabled_(isEnabled), isSet_(false)
-	{}
+	{
+#ifndef JZ_SYMMETRY
+		if (isEnabled_)
+			err("Please add CPPFLAGS += -DJZ_SYMMETRY to Config.make\n");
+#endif
+	}
 
 	void init(const HilbertBasisType& natBasis,
 	          VectorOperatorType& creationMatrix)
