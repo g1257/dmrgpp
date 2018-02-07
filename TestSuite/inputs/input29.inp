@@ -1,0 +1,62 @@
+TotalNumberOfSites=8
+NumberOfTerms=2
+
+DegreesOfFreedom=1
+GeometryKind=ladder
+GeometryOptions=ConstantValues
+Connectors 1  1.0
+Connectors 1  1.0
+LadderLeg=2
+
+DegreesOfFreedom=1
+GeometryKind=ladder
+GeometryOptions=ConstantValues
+Connectors 1  1.0
+Connectors 1  1.0
+LadderLeg=2
+
+Model=Heisenberg
+HeisenbergTwiceS=1
+
+InfiniteLoopKeptStates=128
+FiniteLoops 4
+-6 200 2 6 200 2 
+-6 200 2 6 200 2
+
+TargetSzPlusConst=4
+TargetSpinTimesTwo=0
+Threads=1
+
+SolverOptions=CorrectionVectorTargetting,twositedmrg,minimizeDisk,restart,MatrixVectorKron,useSvd
+CorrectionA=0
+Version=version
+RestartFilename=data28.txt
+TruncationTolerance=1e-7
+LanczosEps=1e-7
+TridiagonalEps=1e-7
+
+OutputFile=data29.txt
+
+DynamicDmrgType=0
+TSPSites 1 2
+TSPLoops 1 1
+TSPProductOrSum=sum
+CorrectionVectorFreqType=Real
+
+CorrectionVectorEta=0.08
+CorrectionVectorAlgorithm=Krylov
+Orbitals=1
+
+GsWeight=0.1
+CorrectionVectorOmega=2.0
+
+TSPOperator=raw
+RAW_MATRIX
+2 2
+0.5 0  
+0 -0.5
+FERMIONSIGN=1
+JMVALUES 0 0
+AngularFactor=1
+
+#ci dmrg arguments= -p 12 "z"

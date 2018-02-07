@@ -37,6 +37,8 @@ Tests *with* SU(2) symmetry:
 25)  Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=2.5 with 8+8 sites
         INF(100)+7(200)-7(200)-7(200)+7(200) To check the WFT
 26) Fig 6(c) of PhysRevB48-10345
+28)  Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=1.0 with 8 sites
+29) S(q,omega) cut at omega=2.0 for Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=1.0 with 8 sites
 #27 to 39 are reserved for Heisenberg spin 1/2
 40) Fe-based Superconductors model (HuFeAS-2orb) on a ladder (LadderFeAs) with U=0 J=0 with 4+4 sites
 	 INF(60)+7(100)-7(100)-7(100)+7(100)
@@ -68,6 +70,9 @@ Page* where more or less this feature is used: 056706-5
 
 60) t-J one-Orbital (tjOneOrbital) on a chain with t=1 J=1 with 16+16 sites
 	 INF(60)+7(100)-7(100)-7(100)+7(100)
+
+62) t-J one-Orbital (tjOneOrbital) on a chain with t=-1.0 J=0.25 with 8 sites
+63)  S(q,omega) cut at omega=0.2 for t-J one-Orbital (tjOneOrbital) on a chain with t=-1.0 J=0.25 with 8 sites
 
 65) Paper 29, Table 1, column 1
 InternalControlNumber: 29
@@ -118,6 +123,8 @@ Page* where more or less this feature is used: 2230
 101) same as 1 but without su(2) symmetry
 #102) same as 2 but without su(2) symmetry <-- DISABLED DUE TO BUG (SEE GITHUBISSUES)
 103) same as 3 but without su(2) symmetry
+105) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=6 with 8 sites.
+106) A^{-}(q,omega) cut at omega=-1.0 Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=6 with 8 sites.
 200) Time Evolution preparation ground state
 201) Time Evolution proper
 340) A test of the Fe-based Superconductors extended model

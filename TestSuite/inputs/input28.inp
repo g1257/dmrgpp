@@ -1,0 +1,37 @@
+TotalNumberOfSites=8
+NumberOfTerms=2
+
+DegreesOfFreedom=1
+GeometryKind=ladder
+GeometryOptions=ConstantValues
+Connectors 1  1.0
+Connectors 1  1.0
+LadderLeg=2
+
+DegreesOfFreedom=1
+GeometryKind=ladder
+GeometryOptions=ConstantValues
+Connectors 1  1.0
+Connectors 1  1.0
+LadderLeg=2
+
+Model=Heisenberg
+HeisenbergTwiceS=1
+
+InfiniteLoopKeptStates=128
+FiniteLoops 5
+3 200 0 
+-6 200 0 6 200 0
+-6 200 0 6 200 1
+
+TargetSzPlusConst=4
+TargetSpinTimesTwo=0
+
+Threads=1
+SolverOptions=twositedmrg,MatrixVectorKron,useSvd
+Version=version
+TruncationTolerance=1e-7
+LanczosEps=1e-7
+OutputFile=data28.txt
+Orbitals=1
+
