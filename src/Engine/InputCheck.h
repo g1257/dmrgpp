@@ -333,7 +333,6 @@ public:
 			\item [wftInPatches] WFT calculation will be done using symmetry patches
 			\item [diskstacks] Save and load stacks used for shrinking to and from disk,
 							   instead of to and from memory
-			\item [wftWithTemp] Accelerate the WFT by using a temporary
 			\item [wftInBlocks] Accelerate the WFT by using dense blocks
 			\item [wftStacksInDisk] Save and load stacks for WFT to and from disk,
 							   instead of to and from memory. Cannot be used with restart yet.
