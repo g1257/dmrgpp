@@ -23,6 +23,69 @@ class BlockDiagWf {
 	typedef typename GenIjPatchType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisType BasisType;
 	typedef PsimagLite::PackIndices PackIndicesType;
+	typedef typename PsimagLite::Vector<MatrixType*>::Type VectorMatrixType;
+
+	class ParallelBlockCtor {
+
+	public:
+
+		ParallelBlockCtor(const VectorSizeType& patcheLeft,
+		                  const VectorSizeType& patchesRight,
+		                  const LeftRightSuperType& lrs,
+		                  const VectorWithOffsetType& src,
+		                  SizeType iSrc,
+		                  VectorPairType& patches,
+		                  VectorMatrixType& data)
+		    : patchesLeft_(patcheLeft),
+		      patchesRight_(patchesRight),
+		      lrs_(lrs),
+		      packSuper_(lrs.left().size()),
+		      src_(src),
+		      srcIndex_(src.sector(iSrc)),
+		      offset_(src.offset(srcIndex_)),
+		      patches_(patches),
+		      data_(data)
+		{}
+
+		SizeType tasks() const { return patchesLeft_.size(); }
+
+		void doTask(SizeType ipatch, SizeType)
+		{
+			SizeType partL = patchesLeft_[ipatch];
+			SizeType partR = patchesRight_[ipatch];
+			SizeType offsetL = lrs_.left().partition(partL);
+			SizeType rtotal = lrs_.left().partition(partL + 1) - offsetL;
+			SizeType offsetR = lrs_.right().partition(partR);
+			patches_[ipatch] = PairType(partL, partR);
+			SizeType ctotal = lrs_.right().partition(partR + 1) - offsetR;
+			data_[ipatch] = new MatrixType(rtotal, ctotal);
+			MatrixType& m = *(data_[ipatch]);
+			for (SizeType r = 0; r < rtotal; ++r) {
+				SizeType row = r + offsetL;
+				for (SizeType c = 0; c < ctotal; ++c) {
+					SizeType col = c + offsetR;
+					SizeType ind = packSuper_.pack(row,
+					                               col,
+					                               lrs_.super().permutationInverse());
+					assert(ind >= offset_);
+					m(r, c) = src_.fastAccess(srcIndex_, ind - offset_);
+					//sum += PsimagLite::conj(m(r, c))*m(r, c);
+				}
+			}
+		}
+
+	private:
+
+		const VectorSizeType& patchesLeft_;
+		const VectorSizeType& patchesRight_;
+		const LeftRightSuperType& lrs_;
+		const PackIndicesType packSuper_;
+		const VectorWithOffsetType& src_;
+		SizeType srcIndex_;
+		SizeType offset_;
+		VectorPairType& patches_;
+        VectorMatrixType& data_;
+	};
 
 public:
 
@@ -33,10 +96,6 @@ public:
 	      rows_(lrs.left().size()),
 	      cols_(lrs.right().size())
 	{
-		SizeType ns = lrs.left().size();
-		PackIndicesType packSuper(ns);
-		SizeType srcIndex = src.sector(iSrc);
-		SizeType offset = src.offset(srcIndex);
 		GenIjPatchType genIjPatch(lrs, src.qn(iSrc));
 		const VectorSizeType& patchesLeft = genIjPatch(GenIjPatchType::LEFT);
 		const VectorSizeType& patchesRight = genIjPatch(GenIjPatchType::RIGHT);
@@ -46,32 +105,13 @@ public:
 		data_.resize(npatches, 0);
 		patches_.resize(npatches);
 
-		//ComplexOrRealType sum = 0.0;
-		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
-			SizeType partL = patchesLeft[ipatch];
-			SizeType partR = patchesRight[ipatch];
-			SizeType offsetL = lrs.left().partition(partL);
-			SizeType rtotal = lrs.left().partition(partL + 1) - offsetL;
-			SizeType offsetR = lrs.right().partition(partR);
-			patches_[ipatch] = PairType(partL, partR);
-			SizeType ctotal = lrs.right().partition(partR + 1) - offsetR;
-			data_[ipatch] = new MatrixType(rtotal, ctotal);
-			MatrixType& m = *(data_[ipatch]);
-			for (SizeType r = 0; r < rtotal; ++r) {
-				SizeType row = r + offsetL;
-				for (SizeType c = 0; c < ctotal; ++c) {
-					SizeType col = c + offsetR;
-					SizeType ind = packSuper.pack(row,
-					                              col,
-					                              lrs.super().permutationInverse());
-					assert(ind >= offset);
-					m(r, c) = src.fastAccess(srcIndex, ind - offset);
-					//sum += PsimagLite::conj(m(r, c))*m(r, c);
-				}
-			}
-		}
+		SizeType threads = std::min(npatches, PsimagLite::Concurrency::npthreads);
+		typedef PsimagLite::Parallelizer<ParallelBlockCtor> ParallelizerType;
+		ParallelizerType threadedCtor(threads, PsimagLite::MPI::COMM_WORLD);
 
-		// std::cout<<"sum -----------> "<<sum<<"\n";
+		ParallelBlockCtor helper(patchesLeft, patchesRight, lrs, src, iSrc, patches_, data_);
+
+		threadedCtor.loopCreate(helper);
 	}
 
 	~BlockDiagWf()
@@ -390,7 +430,7 @@ private:
 	VectorSizeType offsetCols_;
 	VectorPairType patches_;
 	MatrixType storage_;
-	typename PsimagLite::Vector<MatrixType*>::Type data_;
+	VectorMatrixType data_;
 };
 }
 #endif // BLOCKDIAGMATRIXWF_H
