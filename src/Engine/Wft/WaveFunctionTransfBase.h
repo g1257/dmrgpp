@@ -97,7 +97,7 @@ public:
 		typedef typename DmrgWaveStructType::SparseElementType ComplexOrRealType;
 		typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
-		enum AccelEnum {ACCEL_NONE, ACCEL_TEMP, ACCEL_PATCHES, ACCEL_BLOCKS};
+		enum AccelEnum {ACCEL_NONE, ACCEL_PATCHES, ACCEL_BLOCKS};
 
 		WftOptions(ProgramGlobals::DirectionEnum dir1,
 		           PsimagLite::String options,
@@ -119,10 +119,8 @@ public:
 					err("wftInPatches cannot be used with twositedmrg\n");
 			}
 
-			if (options.find("wftWithTemp")!=PsimagLite::String::npos) {
-				accelMustBeNone(1);
-				accel = ACCEL_TEMP;
-			}
+			if (options.find("wftWithTemp")!=PsimagLite::String::npos)
+				err("wftWithTemp is no longer available\n");
 
 			if (options.find("wftInBlocks")!=PsimagLite::String::npos) {
 				accelMustBeNone(1);

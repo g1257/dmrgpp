@@ -90,7 +90,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MatrixVectorKron/KronMatrix.h"
 #include "WftAccelBlocks.h"
 #include "WftAccelPatches.h"
-#include "WftAccelWithTemp.h"
 #include "WftSparseTwoSite.h"
 
 namespace Dmrg {
@@ -122,7 +121,6 @@ public:
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef WftAccelBlocks<BaseType> WftAccelBlocksType;
 	typedef WftAccelPatches<BaseType> WftAccelPatchesType;
-	typedef WftAccelWithTemp<BaseType, MatrixOrIdentityType> WftAccelWithTempType;
 	typedef WftSparseTwoSite<BaseType, MatrixOrIdentityType> WftSparseTwoSiteType;
 
 	WaveFunctionTransfLocal(const DmrgWaveStructType& dmrgWaveStruct,
@@ -131,7 +129,6 @@ public:
 	      wftOptions_(wftOptions),
 	      wftAccelBlocks_(dmrgWaveStruct, wftOptions),
 	      wftAccelPatches_(dmrgWaveStruct, wftOptions),
-	      wftAccelWithTemp_(dmrgWaveStruct, wftOptions),
 	      progress_("WaveFunctionTransfLocal")
 	{
 		PsimagLite::OstringStream msg;
@@ -235,9 +232,6 @@ private:
 	                          const LeftRightSuperType& lrs,
 	                          const VectorSizeType& nk) const
 	{
-		if (wftOptions_.accel == WftOptions::ACCEL_TEMP)
-			return wftAccelWithTemp_.environFromInfinite(psiDest, psiSrc, lrs, i0, nk);
-
 		if (wftOptions_.accel == WftOptions::ACCEL_BLOCKS &&
 		        lrs.left().block().size() > 1)
 			return wftAccelBlocks_.environFromInfinite(psiDest, i0, psiSrc, iOld, lrs, nk);
@@ -308,24 +302,13 @@ private:
 		for (SizeType srcI = 0; srcI < psiSrc.sectors(); ++srcI) {
 			SizeType srcII = psiSrc.sector(srcI);
 			psiSrc.extract(psiV,srcII);
-			SizeType offset = psiSrc.offset(srcII);
 			for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 				SizeType i0 = psiDest.sector(ii);
 				SizeType start = psiDest.offset(i0);
 				SizeType final = psiDest.effectiveSize(i0)+start;
 				VectorType dest(final-start,0.0);
 				if (srcI > 0) psiDest.extract(dest,i0);
-				if (wftOptions_.accel == WftOptions::ACCEL_TEMP) {
-					wftAccelWithTemp_.systemFromInfinite(dest,
-					                                     start,
-					                                     psiV,
-					                                     offset,
-					                                     lrs,
-					                                     nk,
-					                                     ws,
-					                                     we);
-					psiDest.setDataInSector(dest,i0);
-				} else if (inBlocks) {
+				if (inBlocks) {
 					wftAccelBlocks_.systemFromInfinite(psiDest,
 					                                   i0,
 					                                   psiSrc,
@@ -481,7 +464,6 @@ private:
 	const WftOptions& wftOptions_;
 	WftAccelBlocksType wftAccelBlocks_;
 	WftAccelPatchesType wftAccelPatches_;
-	WftAccelWithTempType wftAccelWithTemp_;
 	PsimagLite::ProgressIndicator progress_;
 }; // class WaveFunctionTransfLocal
 } // namespace Dmrg
