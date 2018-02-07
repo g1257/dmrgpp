@@ -31,28 +31,30 @@ class WftAccelBlocks {
 		                    const MatrixType& ws,
 		                    const MatrixType& we,
 		                    SizeType volumeOfNk,
-		                    SizeType sysOrEnv)
+		                    SizeType sysOrEnv,
+		                    SizeType threads)
 		    : result_(result),
 		      psi_(psi),
 		      ws_(ws),
 		      we_(we),
 		      volumeOfNk_(volumeOfNk),
-		      sysOrEnv_(sysOrEnv)
+		      sysOrEnv_(sysOrEnv),
+		      storage_(threads)
 		{}
 
 		SizeType tasks() const { return volumeOfNk_; }
 
-		void doTask(SizeType kp, SizeType)
+		void doTask(SizeType kp, SizeType threadNum)
 		{
 			if (sysOrEnv_ == ProgramGlobals::SYSTEM)
 				return doTaskSystem(kp);
 
-			doTaskEnviron(kp);
+			doTaskEnviron(kp, threadNum);
 		}
 
 	private:
 
-		void doTaskEnviron(SizeType kp)
+		void doTaskEnviron(SizeType kp, SizeType threadNum)
 		{
 			SizeType ipsize = ws_.rows();
 			SizeType i2psize = ws_.cols();
@@ -64,7 +66,7 @@ class WftAccelBlocks {
 			result_[kp].setTo(0.0);
 			tmp.setTo(0.0);
 
-			const MatrixType& weModif = getWeModif(we_);
+			const MatrixType& weModif = getWeModif(we_, threadNum);
 
 			psimag::BLAS::GEMM('N',
 			                   'N',
@@ -136,22 +138,23 @@ class WftAccelBlocks {
 			                   isSize);
 		}
 
-		const MatrixType& getWeModif(const PsimagLite::Matrix<double>& m)
+		const MatrixType& getWeModif(const PsimagLite::Matrix<double>& m, SizeType)
 		{
 			return m;
 		}
 
-		const MatrixType& getWeModif(const PsimagLite::Matrix<std::complex<double> >& m)
+		const MatrixType& getWeModif(const PsimagLite::Matrix<std::complex<double> >& m,
+		                             SizeType threadNum)
 		{
-			storage_.clear();
+			storage_[threadNum].clear();
 			SizeType rows = m.rows();
 			SizeType cols = m.cols();
-			storage_.resize(rows, cols);
+			storage_[threadNum].resize(rows, cols);
 			for (SizeType j = 0; j < cols; ++j)
 				for (SizeType i = 0; i < rows; ++i)
-					storage_(i, j) = PsimagLite::conj(m(i, j));
+					storage_[threadNum](i, j) = PsimagLite::conj(m(i, j));
 
-			return storage_;
+			return storage_[threadNum];
 		}
 
 		VectorMatrixType& result_;
@@ -160,7 +163,7 @@ class WftAccelBlocks {
 		const MatrixType& we_;
 		SizeType volumeOfNk_;
 		SizeType sysOrEnv_;
-		MatrixType storage_;
+		VectorMatrixType storage_;
 	};
 
 public:
@@ -204,7 +207,13 @@ public:
 		typedef PsimagLite::Parallelizer<ParallelWftInBlocks> ParallelizerType;
 		ParallelizerType threadedWft(threads, PsimagLite::MPI::COMM_WORLD);
 
-		ParallelWftInBlocks helperWft(result, psi, ws, we, volumeOfNk, ProgramGlobals::ENVIRON);
+		ParallelWftInBlocks helperWft(result,
+		                              psi,
+		                              ws,
+		                              we,
+		                              volumeOfNk,
+		                              ProgramGlobals::ENVIRON,
+		                              threads);
 
 		threadedWft.loopCreate(helperWft);
 
@@ -245,7 +254,13 @@ public:
 		typedef PsimagLite::Parallelizer<ParallelWftInBlocks> ParallelizerType;
 		ParallelizerType threadedWft(threads, PsimagLite::MPI::COMM_WORLD);
 
-		ParallelWftInBlocks helperWft(result, psi, ws, we, volumeOfNk, ProgramGlobals::SYSTEM);
+		ParallelWftInBlocks helperWft(result,
+		                              psi,
+		                              ws,
+		                              we,
+		                              volumeOfNk,
+		                              ProgramGlobals::SYSTEM,
+		                              threads);
 
 		threadedWft.loopCreate(helperWft);
 
