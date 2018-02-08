@@ -1,3 +1,10 @@
+2018-02-08 Version 2.02
+
+* LanczosVectors storage managed internally
+
+* PSI_PUBSETBUF should be set for lustre filesystem
+  to disable buffering.
+
 2018-01-25 Version 2.00
 
 * Lanczos Solver reortho now possible
