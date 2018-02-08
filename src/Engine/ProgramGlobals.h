@@ -86,6 +86,8 @@ struct ProgramGlobals {
 
 	static SizeType maxElectronsOneSpin;
 
+	static bool oldChangeOfBasis;
+
 	static const PsimagLite::String license;
 
 	static const SizeType MAX_LPS = 1000;

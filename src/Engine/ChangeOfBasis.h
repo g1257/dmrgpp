@@ -2,17 +2,12 @@
 #define DMRG_CHANGEOFBASIS_H
 #include "BlockDiagonalMatrix.h"
 #include "BlockOffDiagMatrix.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
 template<typename SparseMatrixType, typename MatrixType>
 class ChangeOfBasis {
-
-#ifdef JZ_SYMMETRY
-	static const bool jzSymmetry_ = true;
-#else
-	static const bool jzSymmetry_ = false;
-#endif
 
 public:
 
@@ -21,32 +16,32 @@ public:
 
 	ChangeOfBasis()
 	{
-		if (!jzSymmetry_) return;
+		if (!ProgramGlobals::oldChangeOfBasis) return;
 		std::cout<<"Old ChangeOfBasis in use\n";
 	}
 
 	void update(const BlockDiagonalMatrixType& transform)
 	{
-		if (!jzSymmetry_) {
+		if (!ProgramGlobals::oldChangeOfBasis) {
 			transform_ = transform;
 			return;
 		}
 
-		assert(jzSymmetry_);
+		assert(ProgramGlobals::oldChangeOfBasis);
 		transform.toSparse(oldT_);
 		transposeConjugate(oldTtranspose_, oldT_);
 	}
 
 	void operator()(SparseMatrixType &v) const
 	{
-		if (!jzSymmetry_) {
+		if (!ProgramGlobals::oldChangeOfBasis) {
 			BlockOffDiagMatrixType vBlocked(v, transform_.offsetsRows());
 			vBlocked.transform(transform_);
 			vBlocked.toSparse(v);
 			return;
 		}
 
-		assert(jzSymmetry_);
+		assert(ProgramGlobals::oldChangeOfBasis);
 		SparseMatrixType tmp;
 		multiply(tmp, v, oldT_);
 		multiply(v, oldTtranspose_, tmp);
@@ -55,14 +50,14 @@ public:
 	static void changeBasis(SparseMatrixType &v,
 	                        const BlockDiagonalMatrixType& ftransform1)
 	{
-		if (!jzSymmetry_) {
+		if (!ProgramGlobals::oldChangeOfBasis) {
 			BlockOffDiagMatrixType vBlocked(v, ftransform1.offsetsRows());
 			vBlocked.transform(ftransform1);
 			vBlocked.toSparse(v);
 			return;
 		}
 
-		assert(jzSymmetry_);
+		assert(ProgramGlobals::oldChangeOfBasis);
 		SparseMatrixType ftransform;
 		ftransform1.toSparse(ftransform);
 		SparseMatrixType ftransformT;

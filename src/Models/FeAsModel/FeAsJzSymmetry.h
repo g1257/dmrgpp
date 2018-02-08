@@ -6,6 +6,7 @@
 #include "ModelBase.h"
 #include "HilbertSpaceFeAs.h"
 #include "Matrix.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -62,10 +63,8 @@ public:
 	FeAsJzSymmetry(bool isEnabled) :
 	    isEnabled_(isEnabled), isSet_(false)
 	{
-#ifndef JZ_SYMMETRY
-		if (isEnabled_)
-			err("Please add CPPFLAGS += -DJZ_SYMMETRY to Config.make\n");
-#endif
+		if (!isEnabled_) return;
+		ProgramGlobals::oldChangeOfBasis = true;
 	}
 
 	void init(const HilbertBasisType& natBasis,

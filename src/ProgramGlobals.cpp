@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 SizeType ProgramGlobals::maxElectronsOneSpin = 0;
+bool ProgramGlobals::oldChangeOfBasis = false;
 const PsimagLite::String ProgramGlobals::license=
 "Copyright (c) 2009-2016, UT-Battelle, LLC\n"
 "All rights reserved\n"
