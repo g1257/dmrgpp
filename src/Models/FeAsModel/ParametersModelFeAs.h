@@ -237,12 +237,21 @@ struct ParametersModelFeAs {
 		} catch (std::exception& e) {}
 
 		try {
-			io.readMatrix(spinOrbit,"SpinOrbit");
-		} catch (std::exception&) {}
-
-		try {
 			io.readline(jzSymmetry,"JzSymmetry=");
 		} catch (std::exception&) {}
+
+		bool hasSpinOrbitMatrix = false;
+		try {
+			io.readMatrix(spinOrbit,"SpinOrbit");
+			hasSpinOrbitMatrix = true;
+		} catch (std::exception&) {}
+
+		if (!hasSpinOrbitMatrix && jzSymmetry > 0)
+			err("jzSymmetry > 0 needs SpinOrbit matrix in input file\n");
+
+		if (hasSpinOrbitMatrix && jzSymmetry == 0)
+			err("SpinOrbit matrix found in input but jzSymmetry set to 0\n");
+
 		std::cout<<"JzSymmetry="<<jzSymmetry<<std::endl;
 	}
 
