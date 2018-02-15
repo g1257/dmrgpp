@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h"
 #include "Stack.h"
 #include "Map.h"
+#include "H5Cpp.h"
 
 namespace PsimagLite {
 
@@ -96,22 +97,52 @@ public:
 
 	public:
 
-		Out()  { throw RuntimeError("IoNg:: not implemented\n"); }
+		typedef std::vector<String> VectorStringType;
 
-		Out(std::ostream& os)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
+		Out() : hdf5File_(0), groupDef_(0) {}
 
 		Out(const String& fn)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
+		    : hdf5File_(new H5::H5File(fn, H5F_ACC_TRUNC)),
+		      groupDef_(new H5::Group(hdf5File_->createGroup("/Def")))
+		{}
 
-		const String& filename() const { throw RuntimeError("IoNg:: not implemented\n"); }
+		~Out()
+		{
+			delete groupDef_; // should I close something first? FIXME
+			groupDef_ = 0;
+			delete hdf5File_; // should I close something first? FIXME
+			hdf5File_ = 0;
+		}
+
+		const String& filename() const
+		{
+			// find member that returns filename FIXME
+			// assert(hdf5File_);
+			// return hdf5File_.filename();
+			throw RuntimeError("IoNg:: not implemented\n");
+		}
 
 		void open(String const &fn,
 		          std::ios_base::openmode mode)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
+		{
+			if (hdf5File_) delete hdf5File_;
+
+			// deal with mode
+			hdf5File_ = new H5::H5File(fn, H5F_ACC_TRUNC);
+
+			labels_.clear();
+
+			throw RuntimeError("IoNg:: open cannot handle mode yet\n");
+		}
 
 		void close()
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
+		{
+			delete groupDef_; // should I close something first? FIXME
+			groupDef_ = 0;
+			delete hdf5File_; // should I close something first? FIXME
+			hdf5File_ = 0;
+			labels_.clear();
+		}
 
 		void printline(const String &s)
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
@@ -119,11 +150,26 @@ public:
 		void printline(OstringStream &s)
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
-		template<typename X>
-		void printVector(X const &x,
-		                 String const &label,
-		                 typename EnableIf<IsVectorLike<X>::True, int>::Type = 0)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
+		void printVector(const std::vector<double>& v,
+		                 const String& label)
+		{
+			assert(hdf5File_);
+
+			SizeType count = findCount(label);
+			hsize_t dims[1];
+			dims[0] = v.size();
+			H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
+			H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
+			H5::DataSet* dataset =
+			        new H5::DataSet(hdf5File_->createDataSet("/Def/" + label + ttos(count),
+			                                                 H5::PredType::NATIVE_DOUBLE,
+			                                                 *dataspace,
+			                                                 dsCreatPlist));
+			dataset->write(&(v[0]), H5T_NATIVE_DOUBLE);
+			delete dataset;
+			delete dataspace;
+			labels_.push_back(label);
+		}
 
 		template<class T>
 		void print(const String& label, const T& something)
@@ -157,6 +203,25 @@ public:
 		template<typename T>
 		friend Out& operator<<(Out& io, const T& t)
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
+
+	private:
+
+		SizeType findCount(const String& label) const
+		{
+			SizeType c = 0;
+			SizeType total = labels_.size();
+			for (SizeType i = 0; i < total; ++i) {
+				if (std::find(labels_.begin(), labels_.end(), label) == labels_.end())
+					continue;
+				++c;
+			}
+
+			return c;
+		}
+
+		H5::H5File* hdf5File_;
+		H5::Group* groupDef_;
+		VectorStringType labels_;
 	};
 
 	class In {
@@ -167,10 +232,20 @@ public:
 		static const LongIntegerType LAST_INSTANCE=-1;
 		typedef unsigned int long LongSizeType;
 
-		In() { throw RuntimeError("IoNg:: not implemented\n"); }
+		In() : hdf5File_(0), groupDef_(0) {}
 
 		In(String const &fn)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
+		    : hdf5File_(new H5::H5File(fn, H5F_ACC_RDONLY)),
+		      groupDef_(new H5::Group(hdf5File_->openGroup("Def")))
+		{}
+
+		~In()
+		{
+			delete groupDef_; // should I close something first? FIXME
+			groupDef_ = 0;
+			delete hdf5File_; // should I close something first? FIXME
+			hdf5File_ = 0;
+		}
 
 		void open(String const &fn)
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
@@ -182,13 +257,32 @@ public:
 		SizeType readline(X &x,const String &s,LongIntegerType level=0)
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
-		template<typename X>
-		typename EnableIf<IsVectorLike<X>::True,std::pair<String,SizeType> >::Type
-		read(X &x,
-		     String const &s,
-		     LongIntegerType level=0,
-		     bool beQuiet = false)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
+		void read(std::vector<double>& x,
+		          String const &s,
+		          LongIntegerType level = 0,
+		          bool beQuiet = false)
+		{
+			assert(hdf5File_);
+			assert(groupDef_);
+
+			// proper failure reporting is needed here
+			String name = "/Def/" + s + ttos(level);
+			H5::DataSet dataset = H5::DataSet(groupDef_->openDataSet(name));
+			H5T_class_t typeClass = dataset.getTypeClass();
+			if( typeClass != H5T_NATIVE_DOUBLE) //<--- this fails for some reason FIXME
+				throw RuntimeError("Reading " + s + " has incorrect type\n");
+			H5::DataSpace dataspace = dataset.getSpace();
+			int rank = dataspace.getSimpleExtentNdims();
+			if (rank != 1)
+				throw RuntimeError("Reading " + s + " is not a vector\n");
+			/*
+			* Get the dimension size of each dimension in the dataspace
+			*/
+			hsize_t dimsOut[1];
+			dataspace.getSimpleExtentDims(dimsOut, NULL);
+			x.resize(dimsOut[0]);
+			dataset.read(&(x[0]), H5::PredType::NATIVE_DOUBLE);
+		}
 
 		template<typename X>
 		typename EnableIf<IsStackLike<X>::True,std::pair<String,SizeType> >::Type
@@ -266,6 +360,10 @@ public:
 		friend void operator>>(In& io, T& t)
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
+	private:
+
+		H5::H5File* hdf5File_;
+		H5::Group* groupDef_;
 	};
 }; //class IoNg
 

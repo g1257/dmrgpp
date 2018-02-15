@@ -2,5 +2,20 @@
 
 int main(int argc, char** argv)
 {
-	PsimagLite::IoNg::Out ioWrite;
+	PsimagLite::IoNg::Out ioOut("hello.hdf5");
+
+	std::vector<double> v(10, 42.0);
+	ioOut.printVector(v, "MyVector");
+
+//	ioOut.close();
+
+	return 1;
+
+	PsimagLite::IoNg::In ioIn("hello.hdf5");
+
+	std::vector<double> w;
+
+	ioIn.read(w, "MyVector");
+
+	std::cout<<w;
 }
