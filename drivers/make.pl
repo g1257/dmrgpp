@@ -6,31 +6,17 @@ use warnings;
 use lib '../scripts';
 use Make;
 
-my @drivers = ("integrator","sparseSolverTest", "testCRSMatrix", "rungeKuttaTest", "combineContinuedFraction",
-"continuedFractionCollection", "range",
-"kernelPolynomial", "linearPrediction", "options", "randomTest", "svd", "testLapack", "threads",
-"testIsClass","testMemResolv1","sumDecomposition","calculator","closuresTest","base64test");
+my @drivers = qw/integrator sparseSolverTest testCRSMatrix
+                 combineContinuedFraction continuedFractionCollection range
+                 kernelPolynomial linearPrediction options randomTest svd
+		 testLapack threads testIsClass testMemResolv1 sumDecomposition
+		 calculator closuresTest base64test testIoNg/;
+my $fh;
+open($fh, ">", "Makefile") or die "$0: Cannot open Makefile for writing\n";
 
-my $lapack = Make::findLapack();
-Make::backupMakefile();
-writeMakefile();
-make();
+Make::newMake($fh, \@drivers, {"code" => "PsimagLite"});
 
-sub make
-{
-	system("make");
-}
+close($fh);
 
-sub writeMakefile
-{
-	my $fh;
-	open($fh, ">", "Makefile") or die "Cannot open Makefile for writing: $!\n";
+print "$0: Makefile has been written\n";
 
-	my $libs = " -lm  -lpthread -lpsimaglite $lapack";
-	my $cxx = "g++ -O3 -DNDEBUG";
-	my $cppflags = " -I../  -I../src";
-	Make::make($fh,\@drivers,"PsimagLite","Linux",0,$libs,$cxx,$cppflags,"true"," "," ");
-
-	close($fh);
-	print "$0: Done writing Makefile\n";
-}

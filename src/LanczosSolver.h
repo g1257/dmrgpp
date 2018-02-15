@@ -347,7 +347,8 @@ public:
 	{
 		const DenseMatrixType* ptr = lanczosVectors_.data();
 		if (!ptr)
-			err("LanczosSolver::lanczosVectors() called but no data stored\n");
+			throw RuntimeError("LanczosSolver::lanczosVectors() called but no data stored\n");
+
 		return *(ptr);
 	}
 

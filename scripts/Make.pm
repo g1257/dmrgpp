@@ -26,6 +26,8 @@ sub newMake
 {
 	local *FH = shift;
 	my ($drivers, $additionals) = @_;
+	die "newMake: needs additionals as 3rd argument\n" if (!defined($additionals));
+
 	my %a = %$additionals;
 	my $additional = $a{"additional"};
 	my $additional2 = $a{"additional2"};
@@ -118,8 +120,6 @@ sub make
 	$additional3 = "" unless defined($additional3);
 	my $allExecutables = combineAllDrivers($drivers,"");
 	my $allCpps = combineAllDrivers($drivers,".cpp");
-
-	my $gccVersion = gccVersion();
 
 	my $libTarget = "";
 	if ($libs=~/\-lpsimaglite/) {
