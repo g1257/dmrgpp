@@ -162,7 +162,7 @@ public:
 
 	SizeType size() const { return stack_.size(); }
 
-	void copyFromIo(PsimagLite::IoSimple::In& io, PsimagLite::String label)
+	void copyFromIo(IoInType& io, PsimagLite::String label)
 	{
 		std::cerr<<"WARNING: EXPECT A CRASH SOON!\n";
 		std::ofstream fout(fileIn_.c_str());
@@ -188,7 +188,7 @@ public:
 		invertStack(stack_);
 	}
 
-	void copyToIo(PsimagLite::IoSimple::Out& io, PsimagLite::String label)
+	void copyToIo(IoOutType& io, PsimagLite::String label)
 	{
 		io.print("META" + label + "\n", stack_);
 
@@ -236,7 +236,7 @@ private:
 		dst2 << src2.rdbuf();
 	}
 
-	void finalizeInternal(PsimagLite::IoSimple::Out& io,
+	void finalizeInternal(IoOutType& io,
 	                      PsimagLite::String label) const
 	{
 		int x = 0;
