@@ -150,8 +150,8 @@ public:
 		void printline(OstringStream &s)
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
-		void printVector(const std::vector<double>& v,
-		                 const String& label)
+		void write(const std::vector<double>& v,
+		           const String& label)
 		{
 			assert(hdf5File_);
 
@@ -165,7 +165,7 @@ public:
 			                                                 H5::PredType::NATIVE_DOUBLE,
 			                                                 *dataspace,
 			                                                 dsCreatPlist));
-			dataset->write(&(v[0]), H5T_NATIVE_DOUBLE);
+			dataset->write(&(v[0]), H5::PredType::NATIVE_DOUBLE);
 			delete dataset;
 			delete dataspace;
 			labels_.push_back(label);
@@ -269,8 +269,10 @@ public:
 			String name = "/Def/" + s + ttos(level);
 			H5::DataSet dataset = H5::DataSet(groupDef_->openDataSet(name));
 			H5T_class_t typeClass = dataset.getTypeClass();
-			if( typeClass != H5T_NATIVE_DOUBLE) //<--- this fails for some reason FIXME
+			if (typeClass != H5T_FLOAT)
 				throw RuntimeError("Reading " + s + " has incorrect type\n");
+			// H5::FloatType ft = dataset.getFloatType(); // <-- check correct subtype FIXME
+
 			H5::DataSpace dataspace = dataset.getSpace();
 			int rank = dataspace.getSimpleExtentNdims();
 			if (rank != 1)

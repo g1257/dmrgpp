@@ -33,6 +33,9 @@ CPPFLAGS += -DNDEBUG
 # Optimization level here
 CPPFLAGS += -O3
 
+# Enable HDF5
+#LDFLAGS += -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5
+
 # This enables partial debugging (make sure to comment out previous line)
 #CPPFLAGS +=   -g3
 

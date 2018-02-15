@@ -5,11 +5,11 @@ int main(int argc, char** argv)
 	PsimagLite::IoNg::Out ioOut("hello.hdf5");
 
 	std::vector<double> v(10, 42.0);
-	ioOut.printVector(v, "MyVector");
+	ioOut.write(v, "MyVector");
 
-//	ioOut.close();
+	ioOut.close();
 
-	return 1;
+	sleep(1);
 
 	PsimagLite::IoNg::In ioIn("hello.hdf5");
 
