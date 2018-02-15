@@ -89,6 +89,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
+template<typename T>
+struct ToH5 {};
+
+template<>
+struct ToH5<double> {
+	static const H5::PredType type;
+	static const H5T_class_t super;
+};
+
 class IoNg {
 
 public:
@@ -150,7 +159,8 @@ public:
 		void printline(OstringStream &s)
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
-		void write(const std::vector<double>& v,
+		template<typename T>
+		void write(const std::vector<T>& v,
 		           const String& label)
 		{
 			assert(hdf5File_);
@@ -160,13 +170,8 @@ public:
 			dims[0] = v.size();
 			H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
 			H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
-			H5::DataSet* dataset =
-			        new H5::DataSet(hdf5File_->createDataSet("/Def/" + label + ttos(count),
-			                                                 H5::PredType::NATIVE_DOUBLE,
-			                                                 *dataspace,
-			                                                 dsCreatPlist));
-			dataset->write(&(v[0]), H5::PredType::NATIVE_DOUBLE);
-			delete dataset;
+			String name = "/Def/" + label + ttos(count);
+			internalWrite<T>(&(v[0]), name, *dataspace, dsCreatPlist);
 			delete dataspace;
 			labels_.push_back(label);
 		}
@@ -205,6 +210,21 @@ public:
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
 	private:
+
+		template<typename T>
+		void internalWrite(const void *ptr,
+		                   String name,
+		                   H5::DataSpace& dataspace,
+		                   H5::DSetCreatPropList& dsCreatPlist)
+		{
+
+			H5::DataSet* dataset = new H5::DataSet(hdf5File_->createDataSet(name,
+			                                                                ToH5<T>::type,
+			                                                                dataspace,
+			                                                                dsCreatPlist));
+			dataset->write(ptr, ToH5<T>::type);
+			delete dataset;
+		}
 
 		SizeType findCount(const String& label) const
 		{
@@ -268,22 +288,16 @@ public:
 			// proper failure reporting is needed here
 			String name = "/Def/" + s + ttos(level);
 			H5::DataSet dataset = H5::DataSet(groupDef_->openDataSet(name));
-			H5T_class_t typeClass = dataset.getTypeClass();
-			if (typeClass != H5T_FLOAT)
-				throw RuntimeError("Reading " + s + " has incorrect type\n");
-			// H5::FloatType ft = dataset.getFloatType(); // <-- check correct subtype FIXME
-
 			H5::DataSpace dataspace = dataset.getSpace();
 			int rank = dataspace.getSimpleExtentNdims();
 			if (rank != 1)
 				throw RuntimeError("Reading " + s + " is not a vector\n");
-			/*
-			* Get the dimension size of each dimension in the dataspace
-			*/
+
 			hsize_t dimsOut[1];
 			dataspace.getSimpleExtentDims(dimsOut, NULL);
 			x.resize(dimsOut[0]);
-			dataset.read(&(x[0]), H5::PredType::NATIVE_DOUBLE);
+
+			internalRead<double>(&(x[0]), s, dataset);
 		}
 
 		template<typename X>
@@ -363,6 +377,17 @@ public:
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
 	private:
+
+		template<typename T>
+		void internalRead(void* ptr, String label, H5::DataSet& dataset) const
+		{
+			H5T_class_t typeClass = dataset.getTypeClass();
+			if (typeClass != ToH5<T>::super)
+				throw RuntimeError("Reading " + label + " has incorrect type\n");
+			// H5::FloatType ft = dataset.getFloatType(); // <-- check correct subtype FIXME
+
+			dataset.read(ptr, ToH5<T>::type);
+		}
 
 		H5::H5File* hdf5File_;
 		H5::Group* groupDef_;
