@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "IoSelector.h"
 #include "TargetQuantumElectrons.h"
-#include "CvectorSize.h"
 
 namespace Dmrg {
 
@@ -113,7 +112,7 @@ public:
 		return *(std::max_element(electrons_.begin(),electrons_.end()));
 	}
 
-	const CvectorSizeType& electrons() const {return electrons_; }
+	const VectorSizeType& electrons() const {return electrons_; }
 
 	const VectorSizeType& flavors() const { return flavors_; }
 
@@ -122,7 +121,7 @@ public:
 		return jmValues_;
 	}
 
-	void findQuantumNumbers(CvectorSizeType& qn, bool useSu2Symmetry) const
+	void findQuantumNumbers(VectorSizeType& qn, bool useSu2Symmetry) const
 	{
 		if (useSu2Symmetry)
 			findQuantumNumbersSu2(qn);
@@ -223,7 +222,7 @@ public:
 
 private:
 
-	void findQuantumNumbersSu2(CvectorSizeType& q) const
+	void findQuantumNumbersSu2(VectorSizeType& q) const
 	{
 		q.resize(electrons_.size());
 		for (SizeType i=0;i<q.size();i++) {
@@ -235,7 +234,7 @@ private:
 
 	//! find quantum numbers for each state of this basis,
 	//! considered symmetries for this model are: n_up and n_down
-	void findQuantumNumbersLocal(CvectorSizeType& q) const
+	void findQuantumNumbersLocal(VectorSizeType& q) const
 	{
 		SizeType mode = static_cast<SizeType>(other_.size()/electrons_.size());
 		assert(other_.size() % electrons_.size() == 0);
@@ -367,7 +366,7 @@ private:
 		return index;
 	}
 
-	CvectorSizeType electrons_;
+	VectorSizeType electrons_;
 	VectorSizeType other_;
 	VectorPairSizeType jmValues_;
 	VectorSizeType flavors_;

@@ -66,9 +66,9 @@ sub printInstance
 	my ($counter,$target,$lanczos,$matrixVector,$modelHelper,$vecWithOffset,$complexOrNot,
 	$values) = @_;
 	my $sparseMatrix = "SparseMatrixInstance${counter}Type";
-	my $ops = "Dmrg::Operators<Dmrg::Basis<$sparseMatrix,CvectorSizeType> > ";
+	my $ops = "Dmrg::Operators<Dmrg::Basis<$sparseMatrix> > ";
 	my $basisWith = "Dmrg::BasisWithOperators<$ops >";
-	my $basisWithout = "Dmrg::Basis<$sparseMatrix,CvectorSizeType>";
+	my $basisWithout = "Dmrg::Basis<$sparseMatrix>";
 	my $basis = $basisWithout;
 	my $inputNg = "PsimagLite::InputNg<Dmrg::InputCheck>::Readable";
 	my $geometry = "GeometryInstance${counter}Type";

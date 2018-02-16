@@ -21,7 +21,6 @@
 #include "ChebyshevSolver.h"
 #include "Operators.h"
 #include "CrsMatrix.h"
-#include "CvectorSize.h"
 #include "OperatorSpec.h"
 #include "CanonicalExpression.h"
 

@@ -11,7 +11,7 @@ typedef PsimagLite::Geometry<std::complex<RealType> ,PsimagLite::InputNg<Dmrg::I
 typedef Dmrg::MatrixVectorStored<
  Dmrg::ModelBase<
   Dmrg::ModelHelperSu2<
-   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance34Type,CvectorSizeType> >  >,Dmrg::Basis<SparseMatrixInstance34Type,CvectorSizeType> >
+   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance34Type> >  >,Dmrg::Basis<SparseMatrixInstance34Type> >
   >,
   ParametersDmrgSolverType,
   InputNgType::Readable,
@@ -36,7 +36,7 @@ typedef PsimagLite::Geometry<std::complex<RealType> ,PsimagLite::InputNg<Dmrg::I
 typedef Dmrg::MatrixVectorKron<
  Dmrg::ModelBase<
   Dmrg::ModelHelperSu2<
-   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance35Type,CvectorSizeType> >  >,Dmrg::Basis<SparseMatrixInstance35Type,CvectorSizeType> >
+   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance35Type> >  >,Dmrg::Basis<SparseMatrixInstance35Type> >
   >,
   ParametersDmrgSolverType,
   InputNgType::Readable,

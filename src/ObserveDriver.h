@@ -28,7 +28,6 @@
 #include "InputCheck.h"
 #include "ModelSelector.h"
 #include "ArchiveFiles.h"
-#include "CvectorSize.h"
 
 namespace Dmrg {
 

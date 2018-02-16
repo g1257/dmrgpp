@@ -89,12 +89,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 // A class to represent in a light way a Dmrg basis (used only to implement symmetries).
 // (See corresponding section in paper)
-template<typename SparseMatrixType_, typename CvectorSizeType>
+template<typename SparseMatrixType_>
 class Basis {
 
 	typedef typename SparseMatrixType_::value_type SparseElementType;
 	typedef typename PsimagLite::Real<SparseElementType>::Type RealType_;
-	typedef  Basis<SparseMatrixType_, CvectorSizeType> ThisType;
+	typedef  Basis<SparseMatrixType_> ThisType;
 	typedef HamiltonianSymmetryLocal<SparseMatrixType_>  HamiltonianSymmetryLocalType;
 	typedef HamiltonianSymmetrySu2<SparseMatrixType_>  HamiltonianSymmetrySu2Type;
 
@@ -525,7 +525,7 @@ public:
 
 	//! The operator<< is a friend
 	friend std::ostream& operator<<(std::ostream& os,
-	                                const Basis<SparseMatrixType,CvectorSizeType>& x)
+	                                const Basis<SparseMatrixType>& x)
 	{
 		os<<"dmrgTransformed="<<x.dmrgTransformed_<<"\n";
 		os<<"name="<<x.name_<<"\n";
@@ -543,7 +543,7 @@ public:
 	}
 
 	friend std::istream& operator>>(std::istream& is,
-	                                Basis<SparseMatrixType,CvectorSizeType>&)
+	                                Basis<SparseMatrixType>&)
 	{
 		throw PsimagLite::RuntimeError("Unimplemented >>");
 	}
@@ -714,10 +714,10 @@ these numbers are
 		order of hundreds for usual symmetries, making this implementation very practical for
 		systems of correlated electrons.)
 		*/
-	CvectorSizeType quantumNumbers_;
-	CvectorSizeType quantumNumbersOld_;
-	CvectorSizeType electrons_;
-	CvectorSizeType electronsOld_;
+	VectorSizeType quantumNumbers_;
+	VectorSizeType quantumNumbersOld_;
+	VectorSizeType electrons_;
+	VectorSizeType electronsOld_;
 
 	/* PSIDOC BasisPartition
 		What remains to be done is to find a partition of the basis which
@@ -759,11 +759,11 @@ these numbers are
 
 }; // class Basis
 
-template<typename SparseMatrixType, typename CvectorSizeType2>
-bool Basis<SparseMatrixType, CvectorSizeType2>::useSu2Symmetry_=false;
+template<typename SparseMatrixType>
+bool Basis<SparseMatrixType>::useSu2Symmetry_=false;
 
-template<typename SparseMatrixType_, typename CvectorSizeType>
-struct IsBasisType<Basis<SparseMatrixType_, CvectorSizeType> > {
+template<typename SparseMatrixType_>
+struct IsBasisType<Basis<SparseMatrixType_> > {
 	enum {True = true};
 };
 

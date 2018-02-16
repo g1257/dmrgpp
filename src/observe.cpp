@@ -52,7 +52,7 @@ void mainLoop1(GeometryType& geometry,
                const ParametersDmrgSolverType& params,
                const PsimagLite::String& list)
 {
-	typedef Basis<MySparseMatrix, CvectorSizeType> BasisType;
+	typedef Basis<MySparseMatrix> BasisType;
 	typedef Operators<BasisType> OperatorsType;
 	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;

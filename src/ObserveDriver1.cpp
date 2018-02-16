@@ -15,12 +15,12 @@ typedef PsimagLite::Geometry<ComplexType,
 InputNgType::Readable,
 ProgramGlobals> Geometry2Type;
 
-typedef Basis<MySparseMatrixReal, CvectorSizeType> Basis1Type;
+typedef Basis<MySparseMatrixReal> Basis1Type;
 typedef Operators<Basis1Type> Operators1Type;
 typedef BasisWithOperators<Operators1Type> BasisWithOperators1Type;
 typedef LeftRightSuper<BasisWithOperators1Type,Basis1Type> LeftRightSuper1Type;
 
-typedef Basis<MySparseMatrixComplex, CvectorSizeType> Basis2Type;
+typedef Basis<MySparseMatrixComplex> Basis2Type;
 typedef Operators<Basis2Type> Operators2Type;
 typedef BasisWithOperators<Operators2Type> BasisWithOperators2Type;
 typedef LeftRightSuper<BasisWithOperators2Type,Basis2Type> LeftRightSuper2Type;

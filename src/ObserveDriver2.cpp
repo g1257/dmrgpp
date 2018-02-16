@@ -10,7 +10,7 @@ InputNgType::Readable,
 ProgramGlobals> Geometry1Type;
 
 
-typedef Basis<MySparseMatrixComplex, CvectorSizeType> Basis2Type;
+typedef Basis<MySparseMatrixComplex> Basis2Type;
 typedef Operators<Basis2Type> Operators2Type;
 typedef BasisWithOperators<Operators2Type> BasisWithOperators2Type;
 typedef LeftRightSuper<BasisWithOperators2Type,Basis2Type> LeftRightSuper2Type;

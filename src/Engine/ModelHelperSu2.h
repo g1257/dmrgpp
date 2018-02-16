@@ -98,8 +98,7 @@ public:
 	enum { System=0,Environ=1 };
 
 	typedef LeftRightSuperType_ LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType
-	BasisWithOperatorsType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;

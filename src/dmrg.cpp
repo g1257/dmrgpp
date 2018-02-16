@@ -85,15 +85,14 @@ void mainLoop2(typename MatrixVectorType::ModelType::GeometryType& geometry,
 
 template<typename GeometryType,
          template<typename> class ModelHelperTemplate,
-         typename MySparseMatrix,
-         typename CvectorSizeType>
+         typename MySparseMatrix>
 void mainLoop1(GeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io,
                const OperatorOptions& opOptions,
                PsimagLite::String targeting)
 {
-	typedef Basis<MySparseMatrix, CvectorSizeType> BasisType;
+	typedef Basis<MySparseMatrix> BasisType;
 	typedef Operators<BasisType> OperatorsType;
 	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
@@ -127,7 +126,7 @@ void mainLoop1(GeometryType& geometry,
 	}
 }
 
-template<typename MySparseMatrix, typename CvectorSizeType>
+template<typename MySparseMatrix>
 void mainLoop0(InputNgType::Readable& io,
                const ParametersDmrgSolverType& dmrgSolverParams,
                PsimagLite::String targeting,
@@ -155,11 +154,11 @@ void mainLoop0(InputNgType::Readable& io,
 	}
 
 	if (su2) {
-		mainLoop1<GeometryType,ModelHelperSu2,MySparseMatrix,CvectorSizeType>(geometry,
-		                                                                      dmrgSolverParams,
-		                                                                      io,
-		                                                                      opOptions,
-		                                                                      targeting);
+		mainLoop1<GeometryType,ModelHelperSu2,MySparseMatrix>(geometry,
+		                                                      dmrgSolverParams,
+		                                                      io,
+		                                                      opOptions,
+		                                                      targeting);
 		return;
 	}
 
@@ -174,11 +173,11 @@ void mainLoop0(InputNgType::Readable& io,
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix,CvectorSizeType>(geometry,
-	                                                                        dmrgSolverParams,
-	                                                                        io,
-	                                                                        opOptions,
-	                                                                        targeting);
+	mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix>(geometry,
+	                                                        dmrgSolverParams,
+	                                                        io,
+	                                                        opOptions,
+	                                                        targeting);
 }
 
 int main(int argc, char *argv[])
@@ -200,7 +199,7 @@ int main(int argc, char *argv[])
 There is a single input file that is passed as the
 argument to \verb!-f!, like so
 \begin{lstlisting}
-    ./dmrg -f input.inp whatToMeasure
+	./dmrg -f input.inp whatToMeasure
 \end{lstlisting}
 where \verb!whatToMeasure! is optional. The command line arguments
 to the main dmrg driver are the following.
@@ -363,9 +362,9 @@ to the main dmrg driver are the following.
 	bool isComplex = (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos);
 	if (targeting=="TimeStepTargetting") isComplex = true;
 	if (isComplex) {
-		mainLoop0<MySparseMatrixComplex, CvectorSizeType>(io,dmrgSolverParams,targeting,options);
+		mainLoop0<MySparseMatrixComplex>(io,dmrgSolverParams,targeting,options);
 	} else {
-		mainLoop0<MySparseMatrixReal, CvectorSizeType>(io,dmrgSolverParams,targeting,options);
+		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,targeting,options);
 	}
 
 	if (options.enabled) return 0;
