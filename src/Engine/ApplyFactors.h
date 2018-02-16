@@ -85,15 +85,15 @@ class ApplyFactors {
 
 public:
 
-	ApplyFactors(const FactorsType& factors,bool enabled)
+	ApplyFactors(const FactorsType* factors,bool enabled)
 	    : factors_(factors),enabled_(enabled)
 	{}
 
 	template<typename SparseMatrixType>
 	void operator()(SparseMatrixType& m) const
 	{
-		if (!enabled_) return;
-		if (factors_.rows()!=m.rows())
+		if (!enabled_ || factors_ == 0) return;
+		if (factors_->rows()!=m.rows())
 			throw PsimagLite::RuntimeError("Problem applying factors\n");
 		applyFactors(m);
 
@@ -105,13 +105,13 @@ private:
 	void applyFactors(SparseMatrixType& m) const
 	{
 		SparseMatrixType tmp;
-		multiply(tmp,m,factors_);
+		multiply(tmp,m,*factors_);
 		SparseMatrixType tmp2;
-		transposeConjugate(tmp2,factors_);
+		transposeConjugate(tmp2,*factors_);
 		multiply(m,tmp2,tmp);
 	}
 
-	const FactorsType& factors_;
+	const FactorsType* factors_;
 	bool enabled_;
 
 }; // class ApplyFactors

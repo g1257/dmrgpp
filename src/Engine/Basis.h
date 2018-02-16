@@ -115,9 +115,7 @@ public:
 	//! Constructor, s=name of this basis
 	Basis(const PsimagLite::String& s)
 	    : dmrgTransformed_(false), name_(s), progress_(s)
-	{
-		symmLocal_.createDummyFactors(1,1);
-	}
+	{}
 
 	//! Loads this basis from memory or disk
 	template<typename IoInputter>
@@ -213,12 +211,11 @@ public:
 			for (SizeType j=0;j<ne;j++) for (SizeType i=0;i<ns;i++) {
 				quantumNumbers_.push_back(su2Symmetry2.quantumNumbers_[i]+
 				                          su2Symmetry3.quantumNumbers_[j]);
-				electrons_.push_back(su2Symmetry2.electrons(i)+
-				                     su2Symmetry3.electrons(j));
+				electrons_.push_back(su2Symmetry2.electrons_[i]+
+				                     su2Symmetry3.electrons_[j]);
 			}
-
-			symmLocal_.createDummyFactors(ns,ne);
 		}
+
 		// order quantum numbers of combined basis:
 		findPermutationAndPartition();
 
@@ -391,10 +388,9 @@ public:
 
 	//! Returns the factors that mix this basis
 	//! If not using SU(2) this is trivial
-	const FactorsType& getFactors() const
+	const FactorsType* getFactors() const
 	{
-		if (useSu2Symmetry_) return symmSu2_.getFactors();
-		else return symmLocal_.getFactors();
+		return (useSu2Symmetry_) ? &(symmSu2_.getFactors()) : 0;
 	}
 
 	//! returns the number of electrons for state i of this basis

@@ -124,26 +124,14 @@ public:
 		}
 	}
 
-	const FactorsType& getFactors() const
-	{
-		return factors_;
-	}
-
-	void createDummyFactors(SizeType ns, SizeType ne)
-	{
-		factors_.makeDiagonal(ns*ne,1);
-	}
-
 	template<typename IoInputter>
 	void load(IoInputter& io,
-	          bool minimizeRead,
+	          bool,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
 		SizeType tmp=0;
 		io.readline(tmp,"#FACTORSSIZE=");
-		if (minimizeRead) return;
-		factors_.makeDiagonal(tmp,1);
 	}
 
 	template<typename IoOutputter>
@@ -151,14 +139,9 @@ public:
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
-		PsimagLite::String tmp = ttos(factors_.rows());
-		PsimagLite::String s="#FACTORSSIZE="+tmp;
+		PsimagLite::String s="#FACTORSSIZE=0";
 		io.printline(s);
 	}
-
-private:
-
-	FactorsType factors_;
 }; //class HamiltonianSymmetryLocal
 } // namespace Dmrg
 

@@ -251,8 +251,13 @@ private:
 
 		SizeType start = psiDest.offset(i0);
 		SizeType total = psiDest.effectiveSize(i0);
-		const FactorsType& factorsSE = lrs.super().getFactors();
-		const FactorsType& factorsE = lrs.right().getFactors();
+		const FactorsType* fptrSE = lrs.super().getFactors();
+		assert(fptrSE);
+		const FactorsType& factorsSE = *fptrSE;
+
+		const FactorsType* fptrE = lrs.right().getFactors();
+		assert(fptrE);
+		const FactorsType& factorsE = *fptrE;
 
 		SparseMatrixType factorsInverseSE, factorsInverseE;
 		transposeConjugate(factorsInverseSE,factorsSE);
@@ -293,8 +298,15 @@ private:
 		SizeType ni=dmrgWaveStruct_.ws.cols();
 		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
 		MatrixOrIdentityType wsRef2(wftOptions_.twoSiteDmrg && nip>volumeOfNk,ws);
-		const FactorsType& factorsS = dmrgWaveStruct_.lrs.left().getFactors();
-		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
+
+		const FactorsType* fptrS = dmrgWaveStruct_.lrs.left().getFactors();
+		assert(fptrS);
+		const FactorsType& factorsS = *fptrS;
+
+		const FactorsType* fptrSE = dmrgWaveStruct_.lrs.super().getFactors();
+		assert(fptrSE);
+		const FactorsType& factorsSE = *fptrSE;
+
 		SparseElementType sum=0;
 
 		for (SizeType k=wsRef2.getRowPtr(ip);k<wsRef2.getRowPtr(ip+1);k++) {
@@ -375,8 +387,14 @@ private:
 
 		assert(nip==dmrgWaveStruct_.ws.cols());
 
-		const FactorsType& factorsS = lrs.left().getFactors();
-		const FactorsType& factorsSE = lrs.super().getFactors();
+		const FactorsType* fptrS = lrs.left().getFactors();
+		assert(fptrS);
+		const FactorsType& factorsS = *fptrS;
+
+		const FactorsType* fptrSE = lrs.super().getFactors();
+		assert(fptrSE);
+		const FactorsType& factorsSE = *fptrSE;
+
 		SparseMatrixType factorsInverseSE, factorsInverseS;
 		transposeConjugate(factorsInverseSE,factorsSE);
 		transposeConjugate(factorsInverseS,factorsS);
@@ -417,8 +435,15 @@ private:
 		SparseElementType sum=0;
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType ni = dmrgWaveStruct_.lrs.right().size()/volumeOfNk;
-		const FactorsType& factorsE = dmrgWaveStruct_.lrs.right().getFactors();
-		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
+
+		const FactorsType* fptrSE = dmrgWaveStruct_.lrs.super().getFactors();
+		assert(fptrSE);
+		const FactorsType& factorsSE = *fptrSE;
+
+		const FactorsType* fptrE = dmrgWaveStruct_.lrs.right().getFactors();
+		assert(fptrE);
+		const FactorsType& factorsE = *fptrE;
+
 		MatrixOrIdentityType weRef(wftOptions_.twoSiteDmrg && ni>volumeOfNk,we);
 
 		for (SizeType k2=weRef.getRowPtr(jp);k2<weRef.getRowPtr(jp+1);k2++) {
@@ -478,8 +503,13 @@ private:
 
 		SizeType start = psiDest.offset(i0);
 		SizeType total = psiDest.effectiveSize(i0);
-		const FactorsType& factorsSE = lrs.super().getFactors();
-		const FactorsType& factorsE = lrs.right().getFactors();
+		const FactorsType* fptrSE = lrs.super().getFactors();
+		assert(fptrSE);
+		const FactorsType& factorsSE = *fptrSE;
+
+		const FactorsType* fptrE = lrs.right().getFactors();
+		assert(fptrE);
+		const FactorsType& factorsE = *fptrE;
 
 		SparseMatrixType factorsInverseSE, factorsInverseE;
 		transposeConjugate(factorsInverseSE,factorsSE);
@@ -519,8 +549,14 @@ private:
 		SizeType ni=dmrgWaveStruct_.ws.cols();
 		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
 		MatrixOrIdentityType wsRef2(wftOptions_.twoSiteDmrg && nip>volumeOfNk,ws);
-		const FactorsType& factorsS = dmrgWaveStruct_.lrs.left().getFactors();
-		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
+		const FactorsType* fptrS = dmrgWaveStruct_.lrs.left().getFactors();
+		assert(fptrS);
+		const FactorsType& factorsS = *fptrS;
+
+		const FactorsType* fptrSE = dmrgWaveStruct_.lrs.super().getFactors();
+		assert(fptrSE);
+		const FactorsType& factorsSE = *fptrSE;
+
 		SparseElementType sum=0;
 
 		for (SizeType k=wsRef2.getRowPtr(ip);k<wsRef2.getRowPtr(ip+1);k++) {
@@ -570,8 +606,14 @@ private:
 
 		assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
 
-		const FactorsType& factorsS = lrs.left().getFactors();
-		const FactorsType& factorsSE = lrs.super().getFactors();
+		const FactorsType* fptrS = lrs.left().getFactors();
+		assert(fptrS);
+		const FactorsType& factorsS = *fptrS;
+
+		const FactorsType* fptrSE = lrs.super().getFactors();
+		assert(fptrSE);
+		const FactorsType& factorsSE = *fptrSE;
+
 		SparseMatrixType factorsInverseSE, factorsInverseS;
 		transposeConjugate(factorsInverseSE,factorsSE);
 		transposeConjugate(factorsInverseS,factorsS);
@@ -613,8 +655,14 @@ private:
 		SparseElementType sum=0;
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType ni = dmrgWaveStruct_.lrs.right().size()/volumeOfNk;
-		const FactorsType& factorsE = dmrgWaveStruct_.lrs.right().getFactors();
-		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
+		const FactorsType* fptrE = dmrgWaveStruct_.lrs.right().getFactors();
+		assert(fptrE);
+		const FactorsType& factorsE = *fptrE;
+
+		const FactorsType* fptrSE = dmrgWaveStruct_.lrs.super().getFactors();
+		assert(fptrSE);
+		const FactorsType& factorsSE = *fptrSE;
+
 		MatrixOrIdentityType weRef(wftOptions_.twoSiteDmrg && ni>volumeOfNk,we);
 
 		for (SizeType k2=weRef.getRowPtr(jp);k2<weRef.getRowPtr(jp+1);k2++) {

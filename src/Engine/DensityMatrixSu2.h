@@ -305,7 +305,9 @@ private:
 		DensityMatrixElementType sum=0;
 
 		// Make sure we don't copy just get the reference here!!
-		const FactorsType& factors = pSE.getFactors();
+		const FactorsType* fptr = pSE.getFactors();
+		assert(fptr);
+		const FactorsType& factors = *fptr;
 
 		for (SizeType beta=0;beta<total;beta++) {
 			// sum over environ:

@@ -143,9 +143,17 @@ public:
 			pack2_ = new PackIndicesType(volumeOf(nk));
 		}
 
-		const FactorsType& factorsSE = lrs_.super().getFactors();
-		const FactorsType& factorsS = lrs_.left().getFactors();
-		const FactorsType& factorsE = lrs_.right().getFactors();
+		const FactorsType* fptrSE = lrs_.super().getFactors();
+		assert(fptrSE);
+		const FactorsType& factorsSE = *fptrSE;
+
+		const FactorsType* fptrS = lrs_.left().getFactors();
+		assert(fptrS);
+		const FactorsType& factorsS = *fptrS;
+
+		const FactorsType* fptrE = lrs_.right().getFactors();
+		assert(fptrE);
+		const FactorsType& factorsE = *fptrE;
 
 		transposeConjugate(factorsInvSE_,factorsSE);
 		transposeConjugate(factorsInvS_,factorsS);
@@ -236,8 +244,14 @@ private:
 		SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 		assert(nalpha==wsT.cols());
 
-		const FactorsType& factorsE = dmrgWaveStruct_.lrs.right().getFactors();
-		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
+		const FactorsType* fptrE = dmrgWaveStruct_.lrs.right().getFactors();
+		assert(fptrE);
+		const FactorsType& factorsE = *fptrE;
+
+		const FactorsType* fptrSE = dmrgWaveStruct_.lrs.super().getFactors();
+		assert(fptrSE);
+		const FactorsType& factorsSE = *fptrSE;
+
 		SizeType volumeOfNk = this->volumeOf(nk);
 		SparseElementType sum=0;
 
@@ -276,8 +290,15 @@ private:
 		SizeType volumeOfNk = volumeOf(nk);
 		SizeType ni=dmrgWaveStruct_.ws.cols();
 		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
-		const FactorsType& factorsS = dmrgWaveStruct_.lrs.left().getFactors();
-		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
+
+		const FactorsType* fptrS = dmrgWaveStruct_.lrs.left().getFactors();
+		assert(fptrS);
+		const FactorsType& factorsS = *fptrS;
+
+		const FactorsType* fptrSE = dmrgWaveStruct_.lrs.super().getFactors();
+		assert(fptrSE);
+		const FactorsType& factorsSE = *fptrSE;
+
 		SparseElementType sum=0;
 
 		SizeType ipkp=ip+kp*nip;
