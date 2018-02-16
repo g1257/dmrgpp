@@ -106,8 +106,8 @@ public:
 
 		io.print("#CFIsign=" ,isign_);
 
-		io.printVector(eigs_,"#CFEigs");
-		io.printVector(intensity_,"#CFIntensities");
+		io.write(eigs_,"#CFEigs");
+		io.write(intensity_,"#CFIntensities");
 	}
 
 	void set(const TridiagonalMatrixType& ab,

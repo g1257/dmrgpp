@@ -167,9 +167,9 @@ public:
 		}
 
 		template<typename X>
-		void printVector(X const &x,
-		                 String const &label,
-		                 typename EnableIf<IsVectorLike<X>::True, int>::Type = 0)
+		void write(X const &x,
+		           String const &label,
+		           typename EnableIf<IsVectorLike<X>::True, int>::Type = 0)
 		{
 			if (rank_!=0) return;
 			(*fout_)<<label<<"\n";

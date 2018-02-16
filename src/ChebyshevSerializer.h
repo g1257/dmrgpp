@@ -101,7 +101,7 @@ public:
 		io.print("#ChebyshevOneOverA=",params_.oneOverA);
 		io.print("#ChebyshevB=",params_.b);
 
-		io.printVector(moments_,"#ChebyshevMoments");
+		io.write(moments_,"#ChebyshevMoments");
 	}
 
 	static const String& stringMarker() { return stringMarker_; }

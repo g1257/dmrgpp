@@ -277,7 +277,8 @@ public:
 		SizeType readline(X &x,const String &s,LongIntegerType level=0)
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
-		void read(std::vector<double>& x,
+		template<typename T>
+		void read(std::vector<T>& x,
 		          String const &s,
 		          LongIntegerType level = 0,
 		          bool beQuiet = false)
@@ -297,7 +298,7 @@ public:
 			dataspace.getSimpleExtentDims(dimsOut, NULL);
 			x.resize(dimsOut[0]);
 
-			internalRead<double>(&(x[0]), s, dataset);
+			internalRead<T>(&(x[0]), s, dataset);
 		}
 
 		template<typename X>

@@ -103,8 +103,8 @@ public:
 	template<typename IoOutputType>
 	void save(IoOutputType& io) const
 	{
-		io.printVector(a_,"#Avector");
-		io.printVector(b_,"#Bvector");
+		io.write(a_,"#Avector");
+		io.write(b_,"#Bvector");
 	}
 
 	void resize(SizeType n,FieldType value)
