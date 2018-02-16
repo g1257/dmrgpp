@@ -90,10 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace PsimagLite {
 
 template<typename T>
-struct ToH5 {};
-
-template<>
-struct ToH5<double> {
+struct ToH5 {
 	static const H5::PredType type;
 	static const H5T_class_t super;
 };
@@ -159,9 +156,15 @@ public:
 		void printline(OstringStream &s)
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
+		void write(const std::vector<bool>&, const String&)
+		{
+			throw RuntimeError("IoNg:: not implemented write to vector<bool>\n");
+		}
+
 		template<typename T>
 		void write(const std::vector<T>& v,
-		           const String& label)
+		           const String& label,
+		           typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
 		{
 			assert(hdf5File_);
 
@@ -174,6 +177,14 @@ public:
 			internalWrite<T>(&(v[0]), name, *dataspace, dsCreatPlist);
 			delete dataspace;
 			labels_.push_back(label);
+		}
+
+		template<typename T>
+		void write(const std::vector<T>& v,
+		           const String& label,
+		           typename EnableIf<!Loki::TypeTraits<T>::isArith, int>::Type = 0)
+		{
+			throw RuntimeError("IoNg:: write for vector<NOT ARITH> not implemented\n");
 		}
 
 		template<class T>
@@ -277,11 +288,40 @@ public:
 		SizeType readline(X &x,const String &s,LongIntegerType level=0)
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
+		void read(std::vector<bool>& x,
+		          String const &s,
+		          LongIntegerType level = 0,
+		          bool beQuiet = false)
+		{
+			throw RuntimeError("IoNg:: read vector<bool> not implemented\n");
+		}
+
+		template<typename T>
+		void read(std::vector<std::complex<T> >& x,
+		          String const &s,
+		          LongIntegerType level = 0,
+		          bool beQuiet = false,
+		          typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
+		{
+			throw RuntimeError("IoNg:: read vector<complex> not implemented\n");
+		}
+
 		template<typename T>
 		void read(std::vector<T>& x,
 		          String const &s,
 		          LongIntegerType level = 0,
-		          bool beQuiet = false)
+		          bool beQuiet = false,
+		          typename EnableIf<!Loki::TypeTraits<T>::isArith, int>::Type = 0)
+		{
+			throw RuntimeError("IoNg:: read vector<NOT ARITH> not implemented\n");
+		}
+
+		template<typename T>
+		void read(std::vector<T>& x,
+		          String const &s,
+		          LongIntegerType level = 0,
+		          bool beQuiet = false,
+		          typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
 		{
 			assert(hdf5File_);
 			assert(groupDef_);
