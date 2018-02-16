@@ -460,7 +460,7 @@ private:
 		if (parameters_.fileForDensityMatrixEigs=="") return;
 		PsimagLite::String file(parameters_.fileForDensityMatrixEigs);
 		file += ttos(counter);
-		PsimagLite::IoSimple::Out io(file);
+		typename TargettingType::IoType::Out io(file);
 		io<<eigs;
 		counter++;
 	}

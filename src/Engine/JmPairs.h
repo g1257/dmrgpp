@@ -170,8 +170,8 @@ public:
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
-		io.printVector(jmPairs_,"#su2JmPairs");
-		io.printVector(indices_,"#su2JmIndices");
+		io.write(jmPairs_,"#su2JmPairs");
+		io.write(indices_,"#su2JmIndices");
 	}
 
 	template<typename IoInputter>

@@ -221,7 +221,7 @@ public:
 		io.printline(s);
 		s="#qn="+ttos(mAndq_.second);
 		io.printline(s);
-		io.printVector(data_,"#data");
+		io.write(data_,"#data");
 	}
 
 	template<typename IoInputter>

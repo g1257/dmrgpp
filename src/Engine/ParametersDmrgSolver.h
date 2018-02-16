@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "Provenance.h"
 #include "BoostSerializationHeaders.h"
-#include "IoSimple.h"
+#include "IoSelector.h"
 #include "ArchiveFiles.h"
 #include "PsimagLite.h"
 #include "RestartStruct.h"
@@ -475,7 +475,7 @@ private:
 	static void checkTwoSiteDmrg(PsimagLite::String filename2,
 	                             PsimagLite::String options)
 	{
-		PsimagLite::IoSimple::In io(filename2);
+		PsimagLite::IoSelector::In io(filename2);
 		PsimagLite::String optionsOld;
 		io.readline(optionsOld,"parameters.options");
 		bool bOld = (optionsOld.find("twositedmrg")!=PsimagLite::String::npos);

@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "ProgramGlobals.h"
 #include "BaseStack.h"
+#include "IoSelector.h"
 
 namespace Dmrg {
 
@@ -97,7 +98,7 @@ public:
 	typedef typename TargettingType::RealType  RealType;
 	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
-	typedef typename PsimagLite::IoSimple IoType;
+	typedef typename PsimagLite::IoSelector IoType;
 	typedef typename TargettingType::ModelType ModelType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename ModelType::SymmetryElectronsSzType SymmetryElectronsSzType;
@@ -288,9 +289,9 @@ private:
 		bool checkPoint = false;
 
 		if (enabled_) {
-			PsimagLite::IoSimple::In io1(parameters_.checkpoint.filename);
+			PsimagLite::IoSelector::In io1(parameters_.checkpoint.filename);
 			io1.readline(lastSite,"#TCENTRALSITE=",
-			             PsimagLite::IoSimple::In::LAST_INSTANCE);
+			             PsimagLite::IoSelector::In::LAST_INSTANCE);
 			io1.readline(prevDeltaSign,"#LastLoopSign=");
 			checkPoint = true;
 		}

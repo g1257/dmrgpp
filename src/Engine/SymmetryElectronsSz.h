@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "TypeToString.h"
 #include "ProgramGlobals.h"
-#include "IoSimple.h"
+#include "IoSelector.h"
 #include "TargetQuantumElectrons.h"
 #include "CvectorSize.h"
 
@@ -89,6 +89,7 @@ namespace Dmrg {
 template<typename RealType>
 class SymmetryElectronsSz {
 
+	typedef PsimagLite::IoSelector::Out IoOutType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<PairType>::Type VectorPairSizeType;
@@ -187,7 +188,7 @@ public:
 
 	static SizeType adjustQn(const VectorSizeType& adjustQuantumNumbers,
 	                         ProgramGlobals::DirectionEnum direction,
-	                         PsimagLite::IoSimple::Out& ioOut,
+	                         IoOutType& ioOut,
 	                         bool useSu2Symmetry,
 	                         SizeType step,
 	                         SizeType mode)
@@ -212,7 +213,7 @@ public:
 	                                 SizeType sites,
 	                                 SizeType total,
 	                                 ProgramGlobals::DirectionEnum direction,
-	                                 PsimagLite::IoSimple::Out* ioOut,
+	                                 IoOutType* ioOut,
 	                                 bool useSu2Symmetry)
 	{
 		VectorSizeType v;
@@ -311,7 +312,7 @@ private:
 
 	static SizeType getQuantumSector(const VectorSizeType& targetQuantumNumbers,
 	                                 ProgramGlobals::DirectionEnum direction,
-	                                 PsimagLite::IoSimple::Out* ioOut,
+	                                 IoOutType* ioOut,
 	                                 bool useSu2Symmetry)
 	{
 		PsimagLite::OstringStream msg;
@@ -320,7 +321,7 @@ private:
 			msg<<targetQuantumNumbers[ii]<<" ";
 		std::cout<<msg.str()<<"\n";
 		if (ioOut && direction == ProgramGlobals::INFINITE)
-			ioOut->printVector(targetQuantumNumbers,"TargetedQuantumNumbers");
+			ioOut->write(targetQuantumNumbers,"TargetedQuantumNumbers");
 		return pseudoQuantumNumber(targetQuantumNumbers,useSu2Symmetry);
 	}
 
@@ -378,10 +379,10 @@ void save(IoOutputter& io,
           typename PsimagLite::EnableIf<
           PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0)
 {
-	io.printVector(bd.electronsUp,"#bdElectronsUp");
-	io.printVector(bd.electronsDown,"#bdElectronsDown");
-	io.printVector(bd.jmValues,"#bdJmValues");
-	io.printVector(bd.flavors,"#bdFlavors=");
+	io.write(bd.electronsUp,"#bdElectronsUp");
+	io.write(bd.electronsDown,"#bdElectronsDown");
+	io.write(bd.jmValues,"#bdJmValues");
+	io.write(bd.flavors,"#bdFlavors=");
 	PsimagLite::String msg("Symmetry=ElectronsSz\n");
 	io.print(msg);
 }

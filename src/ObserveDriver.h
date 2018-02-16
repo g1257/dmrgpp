@@ -5,7 +5,7 @@
 #define USE_PTHREADS_OR_NOT_NG
 #include "Observer.h"
 #include "ObservableLibrary.h"
-#include "IoSimple.h"
+#include "IoSelector.h"
 #include "Operators.h"
 #include "Geometry/Geometry.h"
 #include "CrsMatrix.h"
@@ -32,7 +32,7 @@
 
 namespace Dmrg {
 
-typedef PsimagLite::IoSimple::In IoInputType;
+typedef PsimagLite::IoSelector::In IoInputType;
 
 #ifndef USE_FLOAT
 typedef double RealType;

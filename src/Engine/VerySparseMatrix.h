@@ -311,8 +311,8 @@ public:
 	{
 		PsimagLite::String s = "rank="+ttos(rank_);
 		outHandle.printline(s);
-		outHandle.printVector(coordinates_,"coordinates");
-		outHandle.printVector(values_,"values");
+		outHandle.write(coordinates_,"coordinates");
+		outHandle.write(values_,"values");
 		s="#######\n";
 		outHandle.printline(s);
 	}

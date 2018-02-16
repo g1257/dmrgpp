@@ -138,7 +138,7 @@ public:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
+	typedef typename BaseType::IoType IoType;
 	typedef CorrectionVectorSkeleton<LanczosSolverType,
 	VectorWithOffsetType,
 	BaseType,
@@ -211,7 +211,7 @@ public:
 		evolve(Eg,direction,x,loopNumber);
 	}
 
-	void print(InputSimpleOutType& ioOut) const
+	void print(typename IoType::Out& ioOut) const
 	{
 		ioOut.print("TARGETSTRUCT",tstStruct_);
 		PsimagLite::OstringStream msg;
@@ -221,7 +221,7 @@ public:
 	}
 
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
-	          PsimagLite::IoSimple::Out& io) const
+	          typename IoType::Out& io) const
 	{
 		skeleton_.save(this->common(), block, io);
 	}

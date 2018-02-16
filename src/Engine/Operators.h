@@ -432,7 +432,7 @@ public:
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
-		if (!useSu2Symmetry_) io.printVector(operators_,"#OPERATORS");
+		if (!useSu2Symmetry_) io.write(operators_,"#OPERATORS");
 		else reducedOpImpl_.save(io,s);
 		io.printMatrix(hamiltonian_,"#HAMILTONIAN");
 	}
@@ -441,7 +441,7 @@ public:
 	void saveEmpty(IoOutputter& io,const PsimagLite::String& s) const
 	{
 		PsimagLite::Vector<SizeType>::Type tmp;
-		if (!useSu2Symmetry_) io.printVector(tmp,"#OPERATORS");
+		if (!useSu2Symmetry_) io.write(tmp,"#OPERATORS");
 		else reducedOpImpl_.saveEmpty(io,s);
 		PsimagLite::Matrix<SizeType> tmp2(0,0);
 		io.printMatrix(tmp2,"#HAMILTONIAN");

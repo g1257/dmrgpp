@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "ProgressIndicator.h"
 #include "TarPack.h"
-#include "IoSimple.h"
+#include "IoSelector.h"
 
 namespace Dmrg {
 
@@ -132,7 +132,7 @@ public:
 
 	static void unpackIfNeeded(PsimagLite::String rootname)
 	{
-		PsimagLite::IoSimple::In io;
+		PsimagLite::IoSelector::In io;
 		try {
 			io.open(rootname);
 		} catch (std::exception&) {

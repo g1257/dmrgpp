@@ -370,7 +370,7 @@ public:
 		io.printline(label);
 		PsimagLite::String s="#size="+ttos(size_);
 		io.printline(s);
-		io.printVector(offsets_,"#offsets");
+		io.write(offsets_,"#offsets");
 		s = "#nonzero="+ttos(nzMsAndQns_.size());
 		io.printline(s);
 
@@ -385,7 +385,7 @@ public:
 			io.printline(s);
 
 			s = "data" + ttos(jj);
-			io.printVector(data_[j], s);
+			io.write(data_[j], s);
 			j = nzMsAndQns_[jj].second;
 		}
 	}

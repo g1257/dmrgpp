@@ -76,6 +76,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsKrylov.h"
 #include "TimeVectorsRungeKutta.h"
 #include "TimeVectorsSuzukiTrotter.h"
+#include "IoSelector.h"
 
 namespace Dmrg {
 
@@ -329,9 +330,9 @@ public:
 			targetVectors_[i] = serializer.vector(i);
 	}
 
-	void loadEnergy(PsimagLite::IoSimple::In& io,
+	void loadEnergy(PsimagLite::IoSelector::In& io,
 	                PsimagLite::String label,
-	                PsimagLite::IoSimple::In::LongIntegerType option)
+	                PsimagLite::IoSelector::In::LongIntegerType option)
 	{
 		io.readline(E0_, label, option);
 	}

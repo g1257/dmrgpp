@@ -125,7 +125,7 @@ public:
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
+	typedef typename BaseType::IoType IoType;
 	typedef typename BaseType::TargetingCommonType::VectorVectorWithOffsetType
 	VectorVectorWithOffsetType;
 	typedef typename BaseType::TargetingCommonType::BraketType BraketType;
@@ -199,7 +199,7 @@ public:
 		//evolve(Eg,direction,x,loopNumber);
 	}
 
-	void print(InputSimpleOutType& ioOut) const
+	void print(typename IoType::Out& ioOut) const
 	{
 		ioOut.print("TARGETSTRUCT",tstStruct_);
 		PsimagLite::OstringStream msg;
@@ -209,7 +209,7 @@ public:
 	}
 
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
-	          PsimagLite::IoSimple::Out& io) const
+	          typename IoType::Out& io) const
 	{
 		assert(block.size()==1);
 

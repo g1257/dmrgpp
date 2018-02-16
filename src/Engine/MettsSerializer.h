@@ -78,7 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef METTS_SERIALIZER_H
 #define METTS_SERIALIZER_H
 
-#include "IoSimple.h"
+#include "IoSelector.h"
 #include "TypeToString.h"
 
 namespace Dmrg {
@@ -101,7 +101,7 @@ public:
 	    : currentBeta_(currentBeta),site_(site),targetVectors_(targetVectors)
 	{}
 
-	MettsSerializer(typename PsimagLite::IoSimple::In& io,SizeType lastInstance = 0)
+	MettsSerializer(typename PsimagLite::IoSelector::In& io,SizeType lastInstance = 0)
 	{
 		RealType x=0;
 		PsimagLite::String s = "#BETA=";

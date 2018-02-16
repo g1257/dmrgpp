@@ -1,7 +1,7 @@
 #ifndef MINIAPPKRONECKER_H
 #define MINIAPPKRONECKER_H
 #include "Vector.h"
-#include "IoSimple.h"
+#include "IoSelector.h"
 #include "VerySparseMatrix.h"
 #include "Matrix.h"
 
@@ -20,7 +20,7 @@ public:
 	{
 		SparseMatrixType hamLeft(static_cast<SizeType>(0));
 		SparseMatrixType hamRight(static_cast<SizeType>(0));
-		PsimagLite::IoSimple::In io(filename);
+		PsimagLite::IoSelector::In io(filename);
 		VectorSizeType pse;
 		io.read(pse,"#SuperBasisPermutation");
 		std::cerr<<"Read pse_.size="<<pse.size()<<"\n";

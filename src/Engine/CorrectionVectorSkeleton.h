@@ -228,7 +228,7 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename TargetingBaseType::InputSimpleOutType InputSimpleOutType;
+	typedef typename TargetingBaseType::IoType IoType;
 
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
@@ -306,7 +306,7 @@ public:
 	template<typename SomeTargetingCommonType>
 	void save(const SomeTargetingCommonType& targetingCommon,
 	          const VectorSizeType& block,
-	          PsimagLite::IoSimple::Out& io) const
+	          typename IoType::Out& io) const
 	{
 		if (block.size()!=1) {
 			PsimagLite::String str("TargetingCorrectionVector ");

@@ -111,7 +111,7 @@ public:
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef TargetParamsCorrection<ModelType> TargetParamsType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
+	typedef typename BaseType::IoType IoType;
 
 	enum {DISABLED,ENABLED};
 
@@ -158,7 +158,7 @@ public:
 	}
 
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
-	          PsimagLite::IoSimple::Out& io) const
+	          typename IoType::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";
@@ -177,7 +177,7 @@ public:
 		this->common().template load<int>(f,0);
 	}
 
-	void print(InputSimpleOutType& ioOut) const
+	void print(typename IoType::Out& ioOut) const
 	{
 		ioOut.print("TARGETSTRUCT",tstStruct_);
 		PsimagLite::OstringStream msg;

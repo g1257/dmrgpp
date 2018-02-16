@@ -256,15 +256,15 @@ public:
 	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
 		jmValues_.save(io);
-		io.printVector(flavors_,"#su2flavors");
+		io.write(flavors_,"#su2flavors");
 		PsimagLite::String s="#su2FlavorsMax=" + ttos(flavorsMax_)+"\n";
 		io.print(s);
 		s="#su2ElectronsMax="+ttos(electronsMax_)+"\n";
 		io.print(s);
 		s="#su2JMax="+ttos(jMax_)+"\n";
 		io.print(s);
-		io.printVector(statesReduced_,"#su2StatesReduced");
-		io.printVector(jvals_,"#su2Jvals");
+		io.write(statesReduced_,"#su2StatesReduced");
+		io.write(jvals_,"#su2Jvals");
 	}
 
 	SizeType flavor2Index(SizeType f1,

@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TIME_SERIAL_H
 #define TIME_SERIAL_H
 
-#include "IoSimple.h"
+#include "IoSelector.h"
 #include "TypeToString.h"
 
 namespace Dmrg {
@@ -106,8 +106,8 @@ public:
 	      marker_(marker)
 	{}
 
-	TimeSerializer(typename PsimagLite::IoSimple::In& io,
-	               PsimagLite::IoSimple::In::LongIntegerType lastInstance = 0)
+	TimeSerializer(typename PsimagLite::IoSelector::In& io,
+	               PsimagLite::IoSelector::In::LongIntegerType lastInstance = 0)
 	{
 		RealType x=0;
 		PsimagLite::String s = "#TIME=";

@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 #include "SymmetryElectronsSz.h"
 #include "TargetingBase.h"
+#include "IoSelector.h"
 
 namespace Dmrg {
 
@@ -153,6 +154,7 @@ public:
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsSuzukiTrotterType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
+	typedef typename BaseType::IoType IoType;
 
 	enum {DISABLED,WFT_NOADVANCE,WFT_ADVANCE,COLLAPSE};
 
@@ -295,7 +297,7 @@ public:
 	{
 		this->common().setAllStagesTo(WFT_NOADVANCE);
 
-		typedef PsimagLite::IoSimple::In IoInType;
+		typedef PsimagLite::IoSelector::In IoInType;
 
 		IoInType io(f);
 
@@ -305,7 +307,7 @@ public:
 		this->common().setTime(ts.time());
 	}
 
-	void print(PsimagLite::IoSimple::Out& ioOut) const
+	void print(typename IoType::Out& ioOut) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"PSI\n";
@@ -320,7 +322,7 @@ public:
 		ioOut.print(msg.str());
 	}
 
-	void save(const VectorSizeType& block,PsimagLite::IoSimple::Out& io) const
+	void save(const VectorSizeType& block,typename IoType::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";

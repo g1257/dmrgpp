@@ -89,7 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ContinuedFraction.h"
 #include <cassert>
 #include "ApplyOperatorExpression.h"
-#include "IoSimple.h"
+#include "IoSelector.h"
 #include "PsimagLite.h"
 
 namespace Dmrg {
@@ -101,7 +101,7 @@ class TargetingCommon  {
 
 public:
 
-	typedef PsimagLite::IoSimple IoType;
+	typedef PsimagLite::IoSelector IoType;
 	typedef typename IoType::In IoInputType;
 	typedef typename TargetHelperType::RealType RealType;
 	typedef typename TargetHelperType::ModelType ModelType;

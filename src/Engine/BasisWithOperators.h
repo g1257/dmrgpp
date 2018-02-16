@@ -357,7 +357,7 @@ public:
 			operators_.save(io,s);
 		else
 			operators_.saveEmpty(io,s);
-		io.printVector(operatorsPerSite_,"#OPERATORSPERSITE");
+		io.write(operatorsPerSite_,"#OPERATORSPERSITE");
 	}
 
 	template<typename IoOutputter>
@@ -371,7 +371,7 @@ public:
 			operators_.save(io,this->name());
 		else
 			operators_.saveEmpty(io,this->name());
-		io.printVector(operatorsPerSite_,"#OPERATORSPERSITE");
+		io.write(operatorsPerSite_,"#OPERATORSPERSITE");
 	}
 
 private:

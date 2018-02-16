@@ -114,7 +114,7 @@ public:
 	typedef VectorType TargetVectorType;
 	typedef TargetParamsGroundState<ModelType> TargetParamsType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
+	typedef typename BaseType::IoType IoType;
 
 	TargetingGroundState(const LeftRightSuperType& lrs,
 	                     const ModelType& model,
@@ -152,7 +152,7 @@ public:
 		this->common().cocoon(block1,direction);
 	}
 
-	void print(InputSimpleOutType& ioOut) const
+	void print(typename IoType::Out& ioOut) const
 	{
 		ioOut.print("TARGETSTRUCT",tstStruct_);
 		PsimagLite::OstringStream msg;
@@ -162,7 +162,7 @@ public:
 	}
 
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
-	          PsimagLite::IoSimple::Out& io) const
+	          typename IoType::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";

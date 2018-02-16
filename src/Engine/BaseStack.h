@@ -2,6 +2,7 @@
 #define BASESTACK_H
 #include "DiskStack.h"
 #include <errno.h>
+#include "IoSelector.h"
 
 namespace Dmrg {
 
@@ -10,6 +11,8 @@ class BaseStack {
 
 	typedef DiskStack<DataType> DiskStackType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef typename PsimagLite::IoSelector::In IoInType;
+	typedef typename PsimagLite::IoSelector::Out IoOutType;
 
 public:
 
@@ -73,7 +76,7 @@ public:
 
 	bool inDisk() const { return !m_; }
 
-	void save(PsimagLite::IoSimple::Out& io, PsimagLite::String label) const
+	void save(IoOutType& io, PsimagLite::String label) const
 	{
 		if (m_) {
 			io.print(label, stack_);
@@ -83,7 +86,7 @@ public:
 		diskStack_->copyToIo(io, label);
 	}
 
-	void load(PsimagLite::IoSimple::In& io, PsimagLite::String label)
+	void load(IoInType& io, PsimagLite::String label)
 	{
 		if (m_) {
 			io.read(stack_, label);

@@ -141,7 +141,7 @@ public:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
+	typedef typename BaseType::IoType IoType;
 	typedef CorrectionVectorSkeleton<LanczosSolverType,
 	VectorWithOffsetType,
 	BaseType,
@@ -213,7 +213,7 @@ public:
 
 	}
 
-	void print(InputSimpleOutType& ioOut) const
+	void print(typename IoType::Out& ioOut) const
 	{
 		ioOut.print("TARGETSTRUCT",tstStruct_);
 		PsimagLite::OstringStream msg;
@@ -223,7 +223,7 @@ public:
 	}
 
 	void save(const VectorSizeType& block,
-	          PsimagLite::IoSimple::Out& io) const
+	          typename IoType::Out& io) const
 	{
 		assert(block.size() > 0);
 
@@ -236,12 +236,11 @@ public:
         this->common().psi().save(io,"PSI");
 	}
 
-
 	void load(const PsimagLite::String& f)
 	{
-		typename BaseType::IoInputType io(f);
+		typename BaseType::IoType::In io(f);
 
-		TimeSerializerType ts(io,BaseType::IoInputType::LAST_INSTANCE);
+		TimeSerializerType ts(io,BaseType::IoType::In::LAST_INSTANCE);
 		SizeType n = ts.numberOfVectors();
 		if (n != 4)
 			err("TargetingRixsStatic: number of TVs must be 4\n");
@@ -252,7 +251,6 @@ public:
 
 		this->common().template load<TimeSerializerType>(f,0);
 	}
-
 
 private:
 

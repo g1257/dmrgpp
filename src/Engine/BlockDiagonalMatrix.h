@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 #include "PsimagLite.h"
 #include "EnforcePhase.h"
-#include "IoSimple.h"
+#include "IoSelector.h"
 
 namespace Dmrg {
 
@@ -111,6 +111,7 @@ public:
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef PsimagLite::Vector<int>::Type VectorIntType;
+	typedef PsimagLite::IoSelector::In IoInType;
 
 	BlockDiagonalMatrix()
 	    : isSquare_(true)
@@ -131,7 +132,7 @@ public:
 			offsetsRows_[i] = offsetsCols_[i] = basis.partition(i);
 	}
 
-	BlockDiagonalMatrix(PsimagLite::IoSimple::In& io,
+	BlockDiagonalMatrix(IoInType& io,
 	                    PsimagLite::String label,
 	                    SizeType counter,
 	                    bool)

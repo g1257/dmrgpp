@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "WaveFunctionTransfLocal.h"
 #include "WaveFunctionTransfSu2.h"
 #include "DmrgWaveStruct.h"
-#include "IoSimple.h"
+#include "IoSelector.h"
 #include "Random48.h"
 #include "BaseStack.h"
 
@@ -94,7 +94,7 @@ namespace Dmrg {
 template<typename LeftRightSuperType,typename VectorWithOffsetType_>
 class WaveFunctionTransfFactory {
 
-	typedef PsimagLite::IoSimple IoType;
+	typedef PsimagLite::IoSelector IoType;
 
 public:
 
@@ -479,7 +479,7 @@ private:
 
 	void printDmrgWave() const
 	{
-		PsimagLite::IoSimple::Out io(std::cerr);
+		IoType::Out io(std::cerr);
 		dmrgWaveStruct_.save(io);
 		std::cerr<<"wsStack="<<wsStack_.size()<<"\n";
 		std::cerr<<"weStack="<<weStack_.size()<<"\n";

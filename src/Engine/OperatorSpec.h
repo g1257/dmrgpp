@@ -1,5 +1,6 @@
 #ifndef OPERATORSPEC_H
 #define OPERATORSPEC_H
+#include "IoSelector.h"
 
 namespace Dmrg {
 
@@ -166,7 +167,7 @@ private:
 		PsimagLite::String label = name.substr(1,name.length()-1);
 
 		replaceString(label, ttos(site));
-		PsimagLite::IoSimple::In io(label);
+		PsimagLite::IoSelector::In io(label);
 
 		PsimagLite::String prefix = "";
 		return OperatorType(io,model_,OperatorType::MUST_BE_NONZERO, prefix);

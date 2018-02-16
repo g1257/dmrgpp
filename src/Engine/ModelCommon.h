@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 
 #include "VerySparseMatrix.h"
-#include "IoSimple.h"
 #include "HamiltonianConnection.h"
 #include "Su2SymmetryGlobals.h"
 #include "InputNg.h"

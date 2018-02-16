@@ -140,7 +140,7 @@ public:
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
-		io.printVector(signs_,"#FERMIONICSIGN");
+		io.write(signs_,"#FERMIONICSIGN");
 	}
 
 	SizeType size() const { return signs_.size(); }

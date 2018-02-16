@@ -404,14 +404,14 @@ public:
 	template<typename IoOutputter>
 	void save(IoOutputter& io,const PsimagLite::String&) const
 	{
-		io.printVector(reducedOperators_,"#OPERATORS");
+		io.write(reducedOperators_,"#OPERATORS");
 	}
 
 	template<typename IoOutputter>
 	void saveEmpty(IoOutputter& io,const PsimagLite::String&) const
 	{
 		PsimagLite::Vector<SizeType>::Type tmp;
-		io.printVector(tmp,"#OPERATORS");
+		io.write(tmp,"#OPERATORS");
 	}
 
 	void changeBasis(SparseMatrixType &v)

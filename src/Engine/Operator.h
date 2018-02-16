@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define OPERATOR_H
 #include "Su2Related.h"
 #include "CrsMatrix.h"
-#include "IoSimple.h"
+#include "IoSelector.h"
 #include "InputNg.h"
 #include "InputCheck.h"
 #include "CanonicalExpression.h"
@@ -340,7 +340,7 @@ struct Operator {
 
 private:
 
-	PsimagLite::String readLabel(PsimagLite::IoSimple::In& io,
+	PsimagLite::String readLabel(PsimagLite::IoSelector::In& io,
 	                             PsimagLite::String label)
 	{
 		PsimagLite::String s;

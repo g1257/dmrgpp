@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetHelper.h"
 #include "TargetingCommon.h"
 #include "Wft/WaveFunctionTransfFactory.h"
+#include "IoSelector.h"
 
 namespace Dmrg {
 
@@ -97,7 +98,6 @@ public:
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef typename LanczosSolverType::LanczosMatrixType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef PsimagLite::IoSimple::In IoInputType;
 	typedef typename ModelType::RealType RealType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -124,7 +124,7 @@ public:
 	typedef typename BasisWithOperatorsType::SymmetryElectronsSzType
 	SymmetryElectronsSzType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef PsimagLite::IoSimple::Out InputSimpleOutType;
+	typedef PsimagLite::IoSelector IoType;
 
 	enum {DISABLED=ApplyOperatorExpressionType::DISABLED,
 		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,
@@ -191,12 +191,12 @@ public:
 		return commonTargetting_.normSquared(i);
 	}
 
-	virtual void print(InputSimpleOutType&) const = 0;
+	virtual void print(IoType::Out&) const = 0;
 
 	virtual void load(const PsimagLite::String&) = 0;
 
 	virtual void save(const typename PsimagLite::Vector<SizeType>::Type&,
-	                  PsimagLite::IoSimple::Out&) const = 0;
+	                  IoType::Out&) const = 0;
 
 	// non-virtual below
 

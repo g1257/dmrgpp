@@ -118,7 +118,7 @@ public:
 	typedef typename BasisWithOperatorsType::SymmetryElectronsSzType
 	SymmetryElectronsSzType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename BaseType::InputSimpleOutType InputSimpleOutType;
+	typedef typename BaseType::IoType IoType;
 
 	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 
@@ -219,7 +219,7 @@ public:
 		this->common().template load<TimeSerializerType>(f);
 	}
 
-	void print(InputSimpleOutType& ioOut) const
+	void print(typename IoType::Out& ioOut) const
 	{
 		ioOut.print("TARGETSTRUCT",tstStruct_);
 		PsimagLite::OstringStream msg;
@@ -232,7 +232,7 @@ public:
 		ioOut.print(msg.str());
 	}
 
-	void save(const VectorSizeType& block,PsimagLite::IoSimple::Out& io) const
+	void save(const VectorSizeType& block, typename IoType::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";

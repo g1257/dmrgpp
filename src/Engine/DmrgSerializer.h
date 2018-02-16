@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_SERIAL_H
 
 #include "BLAS.h"
-#include "IoSimple.h"
+#include "IoSelector.h"
 #include "FermionSign.h"
 #include "ProgramGlobals.h"
 
@@ -117,7 +117,7 @@ public:
 	}
 
 
-	DmrgSerializer(typename PsimagLite::IoSimple::In& io,
+	DmrgSerializer(typename PsimagLite::IoSelector::In& io,
 	               bool bogus,
 	               bool isObserveCode)
 		: fS_(io,bogus),

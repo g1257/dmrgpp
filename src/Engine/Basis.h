@@ -592,19 +592,19 @@ private:
 	{
 		PsimagLite::String s="#useSu2Symmetry="+ttos(useSu2Symmetry_);
 		io.printline(s);
-		io.printVector(block_,"#BLOCK");
+		io.write(block_,"#BLOCK");
 
 		if (!minimizeWrite) {
-			io.printVector(electrons_,"#ELECTRONS");
-			io.printVector(electronsOld_,"#0OLDELECTRONS");
+			io.write(electrons_,"#ELECTRONS");
+			io.write(electronsOld_,"#0OLDELECTRONS");
 		}
 
-		io.printVector(partition_,"#PARTITION");
-		io.printVector(permInverse_,"#PERMUTATIONINVERSE");
+		io.write(partition_,"#PARTITION");
+		io.write(permInverse_,"#PERMUTATIONINVERSE");
 
 		VectorSizeType qnShrink;
 		shrinkVector(qnShrink, quantumNumbers_, partition_);
-		io.printVector(qnShrink,"#QNShrink");
+		io.write(qnShrink,"#QNShrink");
 
 		if (useSu2Symmetry_) symmSu2_.save(io);
 		else symmLocal_.save(io);

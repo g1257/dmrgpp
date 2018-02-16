@@ -101,6 +101,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingRixsDynamic.h"
 #include "PsiBase64.h"
 #include "PrinterInDetail.h"
+#include "IoSelector.h"
 
 namespace Dmrg {
 
@@ -721,7 +722,7 @@ private:
 	PsimagLite::ApplicationInfo appInfo_;
 	bool verbose_;
 	LeftRightSuperType lrs_;
-	PsimagLite::IoSimple::Out ioOut_;
+	PsimagLite::IoSelector::Out ioOut_;
 	PsimagLite::ProgressIndicator progress_;
 	SizeType quantumSector_;
 	int stepCurrent_;
