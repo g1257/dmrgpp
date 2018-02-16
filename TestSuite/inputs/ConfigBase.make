@@ -46,6 +46,9 @@ LDFLAGS += -LKronUtil
 # Specify the strip command to use (or use true to disable)
 STRIP_COMMAND = true
 
+#When using IoNg one has to compile with HDF5 libraries
+#LDFLAGS += -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5
+
 #This enables boost support that is needed for Ainur
 #CPPFLAGS += -DUSE_BOOST
 

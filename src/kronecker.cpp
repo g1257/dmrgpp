@@ -5,6 +5,7 @@
 #include "ProgramGlobals.h"
 #include "Provenance.h"
 #include "MiniAppKronecker.h"
+#include <fstream>
 
 void usage(const char* name)
 {
