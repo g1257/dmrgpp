@@ -1,3 +1,5 @@
+#ifdef USE_IO_NG
+
 #include "IoNg.h"
 
 namespace PsimagLite {
@@ -14,3 +16,5 @@ const H5::PredType ToH5<unsigned int>::type = H5::PredType::NATIVE_UINT8;
 template<>
 const H5T_class_t ToH5<unsigned int>::super = H5T_INTEGER;
 } // namespace PsimagLite
+#endif
+

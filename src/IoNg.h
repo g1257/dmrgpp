@@ -187,16 +187,54 @@ public:
 			throw RuntimeError("IoNg:: write for vector<NOT ARITH> not implemented\n");
 		}
 
-		template<class T>
-		void print(const String& label, const T& something)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
+		template<typename T>
+		void write(const std::stack<T>& something, const String& label)
+		{
+			assert(hdf5File_);
+			assert(groupDef_);
+			throw RuntimeError("IoNg:: write for stack not implemented\n");
+		}
 
-		void print(const String& something)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
+		template<typename T>
+		void print(const String& label,
+		           const T& something)
+		{
+			assert(hdf5File_);
+			assert(groupDef_);
+			SizeType count = findCount(label);
+			String name = "/Def/" + label + ttos(count);
+			something.hdf5Write(name, *hdf5File_, *groupDef_);
+		}
 
 		template<typename SomePrintableType>
 		void print(const SomePrintableType& something)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
+		{
+			assert(hdf5File_);
+			assert(groupDef_);
+			something.hdf5Write(*hdf5File_, *groupDef_);
+		}
+
+		void print(const char* str)
+		{
+			print(String(str));
+		}
+
+		void print(const String str)
+		{
+			assert(hdf5File_);
+
+			hsize_t dims[1];
+			dims[0] = 1;
+			H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
+			H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
+			String name = "/Def/" + String(str);
+			H5::DataSet* dataset = new H5::DataSet(hdf5File_->createDataSet(name,
+			                                                                ToH5<SizeType>::type,
+			                                                                *dataspace,
+			                                                                dsCreatPlist));
+			delete dataset;
+			delete dataspace;
+		}
 
 		template<typename X>
 		void printMatrix(const X& mat,
