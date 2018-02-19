@@ -694,71 +694,71 @@ externalProduct(CrsMatrix<T>& B,
 	B.setRow(na*nout,counter);
 }
 
-//! Computes C = A external product B
-template<class T>
-void externalProduct(CrsMatrix<T>  &C,CrsMatrix<T> const &A,CrsMatrix<T> const &B)
-{
-	assert(A.row()==A.col());
-	assert(B.row()==B.col());
-	int n=A.getSize()*B.getSize();
-	C.resize(n);
-	int na = A.getSize();
-	T tmp;
-	int i,k,kk,alpha,beta,j,counter=0;
+////! Computes C = A external product B
+//template<class T>
+//void externalProduct(CrsMatrix<T>  &C,CrsMatrix<T> const &A,CrsMatrix<T> const &B)
+//{
+//	assert(A.row()==A.col());
+//	assert(B.row()==B.col());
+//	int n=A.getSize()*B.getSize();
+//	C.resize(n);
+//	int na = A.getSize();
+//	T tmp;
+//	int i,k,kk,alpha,beta,j,counter=0;
 
-	for (i=0;i<n;i++) {
-		C.setRow(i,counter);
-		// i = alpha + beta * na
-		beta = int(i/na);
-		alpha = i - beta * na;
-		for (k=A.getRowPtr(alpha);k<A.getRowPtr(alpha+1);k++) {
-			for (kk=B.getRowPtr(beta);kk<B.getRowPtr(beta+1);kk++) {
-				j = A.getCol(k) + B.getCol(kk) *na;
-				C.pushCol(j);
-				tmp = A.getValue(k) * B.getValue(kk);
-				C.pushValue(tmp);
-				counter++;
-			}
-		}
-	}
-	C.setRow(n,counter);
-}
+//	for (i=0;i<n;i++) {
+//		C.setRow(i,counter);
+//		// i = alpha + beta * na
+//		beta = int(i/na);
+//		alpha = i - beta * na;
+//		for (k=A.getRowPtr(alpha);k<A.getRowPtr(alpha+1);k++) {
+//			for (kk=B.getRowPtr(beta);kk<B.getRowPtr(beta+1);kk++) {
+//				j = A.getCol(k) + B.getCol(kk) *na;
+//				C.pushCol(j);
+//				tmp = A.getValue(k) * B.getValue(kk);
+//				C.pushValue(tmp);
+//				counter++;
+//			}
+//		}
+//	}
+//	C.setRow(n,counter);
+//}
 
-//! Computes C = A external product B (with signs)
-template<class T>
-void externalProduct(CrsMatrix<T>  &C,
-                     CrsMatrix<T> const &A,
-                     CrsMatrix<T> const &B,
-                     const typename Vector<int>::Type& signs,
-                     bool option=false)
-{
-	assert(A.row()==A.col());
-	assert(B.row()==B.col());
-	int n=A.getSize()*B.getSize();
-	C.resize(n);
-	int na = A.getSize();
-	T tmp;
-	int i,k,kk,alpha,beta,j,counter=0;
+////! Computes C = A external product B (with signs)
+//template<class T>
+//void externalProduct(CrsMatrix<T>  &C,
+//                     CrsMatrix<T> const &A,
+//                     CrsMatrix<T> const &B,
+//                     const typename Vector<int>::Type& signs,
+//                     bool option=false)
+//{
+//	assert(A.row()==A.col());
+//	assert(B.row()==B.col());
+//	int n=A.getSize()*B.getSize();
+//	C.resize(n);
+//	int na = A.getSize();
+//	T tmp;
+//	int i,k,kk,alpha,beta,j,counter=0;
 
-	for (i=0;i<n;i++) {
-		C.setRow(i,counter);
-		// i = alpha + beta * na
-		beta = int(i/na);
-		alpha = i - beta * na;
-		for (k=A.getRowPtr(alpha);k<A.getRowPtr(alpha+1);k++) {
-			for (kk=B.getRowPtr(beta);kk<B.getRowPtr(beta+1);kk++) {
-				j = A.getCol(k) + B.getCol(kk) *na;
-				C.pushCol(j);
-				int sign = signs[alpha];
-				if (option) sign=signs[beta];
-				tmp = A.getValue(k) * B.getValue(kk)*sign;
-				C.pushValue(tmp);
-				counter++;
-			}
-		}
-	}
-	C.setRow(n,counter);
-}
+//	for (i=0;i<n;i++) {
+//		C.setRow(i,counter);
+//		// i = alpha + beta * na
+//		beta = int(i/na);
+//		alpha = i - beta * na;
+//		for (k=A.getRowPtr(alpha);k<A.getRowPtr(alpha+1);k++) {
+//			for (kk=B.getRowPtr(beta);kk<B.getRowPtr(beta+1);kk++) {
+//				j = A.getCol(k) + B.getCol(kk) *na;
+//				C.pushCol(j);
+//				int sign = signs[alpha];
+//				if (option) sign=signs[beta];
+//				tmp = A.getValue(k) * B.getValue(kk)*sign;
+//				C.pushValue(tmp);
+//				counter++;
+//			}
+//		}
+//	}
+//	C.setRow(n,counter);
+//}
 
 template<typename T>
 void printFullMatrix(const CrsMatrix<T>& s,
