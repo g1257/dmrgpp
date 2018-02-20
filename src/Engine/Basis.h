@@ -347,8 +347,6 @@ public:
 	RealType truncateBasis(const typename PsimagLite::Vector<RealType>::Type& eigs,
 	                       const VectorSizeType& removedIndices)
 	{
-		quantumNumbersOld_ = quantumNumbers_;
-		partitionOld_ = partition_;
 		dmrgTransformed_=true;
 
 		if (removedIndices.size()==0) return 0;
@@ -711,7 +709,6 @@ these numbers are
 		systems of correlated electrons.)
 		*/
 	VectorSizeType quantumNumbers_;
-	VectorSizeType quantumNumbersOld_;
 	VectorSizeType electrons_;
 	VectorSizeType electronsOld_;
 
@@ -730,7 +727,6 @@ these numbers are
 		block of 4x4, then of a block of 2x2, etc.
 		*/
 	VectorSizeType partition_;
-	VectorSizeType partitionOld_;
 
 	/* PSIDOC BasisPermutationVector
 		We then reorder our basis such that its elements are given in
