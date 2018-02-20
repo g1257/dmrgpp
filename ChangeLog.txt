@@ -1,3 +1,11 @@
+2018-02-20 Version 2.04
+
+* make.pl for drivers updated
+
+* IoNg work started
+
+* CRS: unneeded externalProducts commented out
+
 2018-02-08 Version 2.02
 
 * LanczosVectors storage managed internally
