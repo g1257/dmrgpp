@@ -176,10 +176,10 @@ public:
 				if (PsimagLite::norm(a(i,j))<=eps) continue;
 				pushValue(a(i,j));
 				pushCol(j);
-				counter++;
+				++counter;
 			}
-
 		}
+
 		setRow(a.rows(),counter);
 	}
 
@@ -655,110 +655,61 @@ Loki::TypeTraits<typename VectorLikeType::value_type>::isFloat,
 void>::Type
 externalProduct(CrsMatrix<T>& B,
                 const CrsMatrix<T>& A,
-                int nout,
+                SizeType nout,
                 const VectorLikeType& signs,
-                bool order=true)
+                bool order)
 {
-	int na=A.rows();
-	T tmp;
-	assert(A.rows()==A.cols());
-	B.resize(na*nout,na*nout);
+	SizeType nrowA = A.rows();
+	SizeType ncolA = A.cols();
 
-	int i,ii,jj,alpha,k,j,beta;
+	if (nrowA != ncolA)
+		throw RuntimeError("externalProduct: matrices must be square\n");
+
+	SizeType nnzA = A.nonZeros();
+	SizeType nnz = nnzA * nout;
+	SizeType nrow = nrowA * nout;
+	SizeType ncol = ncolA * nout;
+
+	B.resize(nrow, ncol, nnz);
+	T tmp = 0.0;
+
+	int i = 0;
+	int jj = 0;
+	int alpha = 0;
 	int counter=0;
-	for (ii=0;ii<na*nout;ii++) {
+	for (SizeType ii = 0; ii < nrow; ++ii) {
 		if (order) {
 			// ii = i+alpha*na;
-			alpha = int(ii/na);
-			i = ii-alpha*na;
+			alpha = ii/nrowA;
+			i = ii - alpha*nrowA;
 		} else {
 			//ii = alpha + i*nout;
-			i = int(ii/nout);
+			i = ii/nout;
 			alpha = ii - i*nout;
 		}
-		B.setRow(ii,counter);
-		for (k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
-			j = A.getCol(k);
-			beta=alpha;
-			if (order) jj = j+beta*na;
-			else       jj = beta+j*nout;
-			//B.setCol(counter,jj);
-			B.pushCol(jj);
+
+		B.setRow(ii, counter);
+		SizeType start = A.getRowPtr(i);
+		SizeType end = A.getRowPtr(i + 1);
+
+		for (SizeType k = start; k < end; ++k) {
+			SizeType j = A.getCol(k);
+			if (order) jj = j + alpha*nrowA;
+			else       jj = alpha+j*nout;
+			B.setCol(counter, jj);
+			// B.pushCol(jj);
 			tmp = A.getValue(k);
-			if (!order) tmp*=signs[alpha];
-			//B.setValues(counter,tmp);
-			B.pushValue(tmp);
-			counter++;
+			if (!order) tmp *= signs[alpha];
+			B.setValues(counter, tmp);
+			//B.pushValue(tmp);
+			++counter;
 		}
 	}
-	B.setRow(na*nout,counter);
+
+	B.setRow(nrow, counter);
+
+	if (nrow != 0) B.checkValidity();
 }
-
-////! Computes C = A external product B
-//template<class T>
-//void externalProduct(CrsMatrix<T>  &C,CrsMatrix<T> const &A,CrsMatrix<T> const &B)
-//{
-//	assert(A.row()==A.col());
-//	assert(B.row()==B.col());
-//	int n=A.getSize()*B.getSize();
-//	C.resize(n);
-//	int na = A.getSize();
-//	T tmp;
-//	int i,k,kk,alpha,beta,j,counter=0;
-
-//	for (i=0;i<n;i++) {
-//		C.setRow(i,counter);
-//		// i = alpha + beta * na
-//		beta = int(i/na);
-//		alpha = i - beta * na;
-//		for (k=A.getRowPtr(alpha);k<A.getRowPtr(alpha+1);k++) {
-//			for (kk=B.getRowPtr(beta);kk<B.getRowPtr(beta+1);kk++) {
-//				j = A.getCol(k) + B.getCol(kk) *na;
-//				C.pushCol(j);
-//				tmp = A.getValue(k) * B.getValue(kk);
-//				C.pushValue(tmp);
-//				counter++;
-//			}
-//		}
-//	}
-//	C.setRow(n,counter);
-//}
-
-////! Computes C = A external product B (with signs)
-//template<class T>
-//void externalProduct(CrsMatrix<T>  &C,
-//                     CrsMatrix<T> const &A,
-//                     CrsMatrix<T> const &B,
-//                     const typename Vector<int>::Type& signs,
-//                     bool option=false)
-//{
-//	assert(A.row()==A.col());
-//	assert(B.row()==B.col());
-//	int n=A.getSize()*B.getSize();
-//	C.resize(n);
-//	int na = A.getSize();
-//	T tmp;
-//	int i,k,kk,alpha,beta,j,counter=0;
-
-//	for (i=0;i<n;i++) {
-//		C.setRow(i,counter);
-//		// i = alpha + beta * na
-//		beta = int(i/na);
-//		alpha = i - beta * na;
-//		for (k=A.getRowPtr(alpha);k<A.getRowPtr(alpha+1);k++) {
-//			for (kk=B.getRowPtr(beta);kk<B.getRowPtr(beta+1);kk++) {
-//				j = A.getCol(k) + B.getCol(kk) *na;
-//				C.pushCol(j);
-//				int sign = signs[alpha];
-//				if (option) sign=signs[beta];
-//				tmp = A.getValue(k) * B.getValue(kk)*sign;
-//				C.pushValue(tmp);
-//				counter++;
-//			}
-//		}
-//	}
-//	C.setRow(n,counter);
-//}
 
 template<typename T>
 void printFullMatrix(const CrsMatrix<T>& s,
