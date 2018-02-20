@@ -1,3 +1,11 @@
+2018-02-20 Version 5.04
+
+* jzSymmetry checks
+
+* SU(2) factors allocated only when using SU(2)
+
+* IoNg work started
+
 2018-02-08 Version 5.02
 
 * ci: added inputs for papers 58, 62, 66 and 68
