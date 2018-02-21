@@ -101,10 +101,10 @@ public:
 				const MatrixBlockType* mptr = data_(ipatch, jpatch);
 				if (mptr == 0) continue;
 				const MatrixBlockType& m = *mptr;
+				count += m.cols()*m.rows();
 				for (SizeType r = 0; r < m.rows(); ++r) {
 					SizeType row = r + offsetRows_[ipatch];
 					nonzeroInThisRow[row] += m.cols();
-					count += m.cols()*m.rows();
 				}
 			}
 		}
