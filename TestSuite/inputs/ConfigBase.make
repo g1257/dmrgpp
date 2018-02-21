@@ -48,6 +48,7 @@ STRIP_COMMAND = true
 
 #When using IoNg one has to compile with HDF5 libraries
 #CPPFLAGS += -DUSE_IO_NG
+#CPPFLAGS += -I/usr/include/hdf5/serial
 #LDFLAGS += -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5
 
 #This enables boost support that is needed for Ainur
