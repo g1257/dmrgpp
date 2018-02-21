@@ -254,9 +254,26 @@ public:
 
 	void resize(SizeType nrow,SizeType ncol,SizeType nonzero)
 	{
-		resize(nrow,ncol);
+		nrow_ = nrow;
+		ncol_ = ncol;
+
+		// ------------------------------------
+		// Note arrays are not cleared out
+		// arrays should retain original values
+		// ------------------------------------
+		rowptr_.resize(nrow_+1);
 		colind_.resize(nonzero);
 		values_.resize(nonzero);
+	}
+
+	void reserve( SizeType nonzero )
+	{
+		// -------------------------------------------------
+		// increase internal capacity
+		// to avoid repeated allocation expansion and copies
+		// -------------------------------------------------
+		colind_.reserve(nonzero);
+		values_.reserve(nonzero);
 	}
 
 	void setRow(SizeType n,SizeType v)
@@ -328,7 +345,20 @@ public:
 		return static_cast<T>(0.0);
 	}
 
-	SizeType nonZeros() const { return colind_.size(); }
+	SizeType nonZeros() const
+	{
+		if (nrow_ >= 1) {
+			assert( rowptr_.size() == 1+nrow_);
+
+			assert(static_cast<SizeType>(rowptr_[ nrow_ ])  == colind_.size() );
+			assert(static_cast<SizeType>(rowptr_[ nrow_ ])  == values_.size() );
+
+			return colind_.size();
+		}
+		else {
+			return 0;
+		};
+	}
 
 	/** performs x = x + A * y
 		 ** where x and y are vectors and A is a sparse matrix in
@@ -659,57 +689,124 @@ externalProduct(CrsMatrix<T>& B,
                 const VectorLikeType& signs,
                 bool order)
 {
-	SizeType nrowA = A.rows();
-	SizeType ncolA = A.cols();
+	// -------------------------------------
+	//  B = kron(eye, A)   if (is_A_fastest)
+	//  B = kron(A, eye)   otherwise
+	// -------------------------------------
+	SizeType nrow_A = A.rows();
+	SizeType ncol_A = A.cols();
+	SizeType n = nout;
+	SizeType nrow_eye = n;
+	SizeType ncol_eye = n;
+	SizeType nnz_A = A.nonZeros();
 
-	if (nrowA != ncolA)
+	SizeType nrow_B = n * nrow_A;
+	SizeType ncol_B = n * ncol_A;
+	SizeType nnz_B = n * nnz_A;
+
+	B.resize(nrow_B, ncol_B, nnz_B );
+
+
+	bool is_A_fastest = order;
+
+	if (nrow_A != ncol_A)
 		throw RuntimeError("externalProduct: matrices must be square\n");
 
-	SizeType nnzA = A.nonZeros();
-	SizeType nnz = nnzA * nout;
-	SizeType nrow = nrowA * nout;
-	SizeType ncol = ncolA * nout;
+	// -----------------------
+	// setup row pointers in B
+	// Note: if (is_A_fastest)  then
+	//          B( [ia,ie], [ja,je] ) = A(ia,ja) * eye(ie,je)
+	//       else
+	//          B( [ie,ia], [je,ja] ) = A(ia,ja) * eye(ie,je)
+	//       endif
+	//
+	//  where [ia,ie] = ia + ie * nrow_A,   [ja,je] = ja + je * ncol_A
+	//        [ie,ia] = ie + ia * nrow_eye, [je,ja] = je + ja * ncol_eye
+	// -----------------------
 
-	B.resize(nrow, ncol, nnz);
-	T tmp = 0.0;
 
-	int i = 0;
-	int jj = 0;
-	int alpha = 0;
-	int counter=0;
-	for (SizeType ii = 0; ii < nrow; ++ii) {
-		if (order) {
-			// ii = i+alpha*na;
-			alpha = ii/nrowA;
-			i = ii - alpha*nrowA;
-		} else {
-			//ii = alpha + i*nout;
-			i = ii/nout;
-			alpha = ii - i*nout;
-		}
+	// -------------------------------------------------
+	// calculate the number of nonzeros in each row of B
+	// -------------------------------------------------
+	std::vector<int> nnz_B_row( nrow_B );
 
-		B.setRow(ii, counter);
-		SizeType start = A.getRowPtr(i);
-		SizeType end = A.getRowPtr(i + 1);
+	for( SizeType ia=0; ia < nrow_A; ia++) {
 
-		for (SizeType k = start; k < end; ++k) {
-			SizeType j = A.getCol(k);
-			if (order) jj = j + alpha*nrowA;
-			else       jj = alpha+j*nout;
-			B.setCol(counter, jj);
-			// B.pushCol(jj);
-			tmp = A.getValue(k);
-			if (!order) tmp *= signs[alpha];
-			B.setValues(counter, tmp);
-			//B.pushValue(tmp);
-			++counter;
-		}
-	}
+		SizeType nnz_row = A.getRowPtr(ia+1) - A.getRowPtr(ia);
 
-	B.setRow(nrow, counter);
+		for( SizeType ie=0; ie < nrow_eye;  ie++) {
+			SizeType ib = (is_A_fastest) ?   ia + ie * nrow_A :
+			                                 ie + ia * nrow_eye;
+			nnz_B_row[ ib ] = nnz_row;
+		};
+	};
 
-	if (nrow != 0) B.checkValidity();
+	// -------------------------------
+	// setup row pointers in matrix B
+	// -------------------------------
+	std::vector<SizeType> B_rowptr(nrow_B);
+
+	SizeType ip = 0;
+	for(SizeType ib=0; ib < nrow_B; ib++) {
+
+		B_rowptr[ ib ] = ip;
+		B.setRow( ib, ip);
+
+		ip += nnz_B_row[ ib ];
+	};
+	assert( ip == nnz_B );
+	B.setRow( nrow_B, nnz_B );
+
+
+	// ---------------------------
+	// copy entries into matrix B
+	// ---------------------------
+
+
+
+	// ----------------------------------------------
+	// single pass over non-zero entries of matrix A
+	// ----------------------------------------------
+	for(SizeType ia=0; ia < nrow_A; ia++) {
+		for(int k = A.getRowPtr(ia); k < A.getRowPtr(ia+1); k++) {
+
+			// --------------------
+			// entry aij = A(ia,ja)
+			// --------------------
+			SizeType ja = A.getCol( k );
+			T       aij = A.getValue( k );
+
+			for(SizeType ie=0; ie < nrow_eye; ie++) {
+				SizeType je = ie;
+
+				SizeType ib = (is_A_fastest) ? ia + ie * nrow_A :
+				                               ie + ia * nrow_eye;
+
+				SizeType jb = (is_A_fastest) ? ja + je * ncol_A :
+				                               je + ja * ncol_eye;
+
+
+				// --------------------
+				// entry bij = B(ib,jb)
+				// --------------------
+				int alpha  = ie;
+				T bij = (is_A_fastest) ? aij : aij * signs[ alpha ];
+
+
+				SizeType ip = B_rowptr[ ib ];
+
+				B.setCol( ip, jb );
+				B.setValues( ip, bij );
+
+				++B_rowptr[ ib ];
+			};
+		};
+	};
+
+
+	if (nrow_B != 0) B.checkValidity();
 }
+
 
 template<typename T>
 void printFullMatrix(const CrsMatrix<T>& s,
@@ -803,34 +900,80 @@ void multiply(typename Vector<S>::Type& v2,
 template<typename S,typename S2>
 void transposeConjugate(CrsMatrix<S>& B, const CrsMatrix<S2>& A)
 {
-	SizeType n=A.rows();
-	Vector<Vector<int>::Type >::Type col(n);
-	typename Vector<typename Vector<S2>::Type>::Type value(n);
+	SizeType nrowA=A.rows();
+	SizeType ncolA=A.cols();
+	SizeType nrowB = ncolA;
+	SizeType ncolB = nrowA;
 
-	// B(j,i) = conj(A(i,j))
-	for (SizeType i=0;i<n;i++) {
-		for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
-			col[A.getCol(k)].push_back(i);
-			S2 w = A.getValue(k);
-			value[A.getCol(k)].push_back(w);
-		}
-	}
+	SizeType nnz_A = A.nonZeros();
+	SizeType nnz_B = nnz_A;
 
-	B.resize(A.cols(),A.rows());
+	B.resize( nrowB, ncolB,  nnz_B );
 
-	SizeType counter=0;
-	for (SizeType i=0; i<B.rows(); ++i) {
+	std::vector<SizeType> nnz_count(ncolA);
 
-		B.setRow(i,counter);
-		for (SizeType j=0;j<col[i].size();j++) {
-			if (value[i][j]==static_cast<S>(0.0)) continue;
-			B.pushCol(col[i][j]);
-			B.pushValue(PsimagLite::conj(value[i][j]));
-			counter++;
-		}
-	}
+	for(SizeType ja=0; ja < ncolA; ja++) {
+		nnz_count[ ja ] = 0;
+	};
 
-	B.setRow(B.rows(),counter);
+	// ----------------------------------------------------
+	// 1st pass to count number of nonzeros per column in A
+	// which is equivalent to number of nonzeros
+	// per row in B = transpose(conjugate(A))
+	// ----------------------------------------------------
+	for (SizeType ia=0; ia < nrowA; ia++) {
+		for (int k=A.getRowPtr(ia); k < A.getRowPtr(ia+1); k++) {
+			SizeType ja = A.getCol(k);
+			++nnz_count[ ja ];
+		};
+	};
+
+	// -----------------------
+	// setup row pointers in B
+	// -----------------------
+	SizeType ipos = 0;
+	for (SizeType ib=0; ib < nrowB; ib++) {
+		B.setRow(ib,  ipos);
+		ipos +=  nnz_count[ ib ];
+	};
+	assert( ipos == nnz_B );
+	B.setRow( nrowB, nnz_B );
+
+	// -------------------------------
+	// setup row pointers in B matrix
+	// -------------------------------
+	std::vector<SizeType> B_rowptr(nrowB);
+	for( SizeType ib=0; ib < nrowB; ib++) {
+		B_rowptr[ ib ] = B.getRowPtr(ib);
+	};
+
+	// -------------------------------------------
+	// 2nd pass over matrix A to assign values to B
+	// -------------------------------------------
+	for( SizeType ia=0; ia < nrowA; ia++) {
+		for( int k=A.getRowPtr(ia); k < A.getRowPtr(ia+1); k++) {
+
+			SizeType ja = A.getCol(k);
+			S2 aij = A.getValue(k);
+
+			// ---------------------------------
+			// B(ib=ja,jb=ia) = conj( A(ia,ja) )
+			// ---------------------------------
+			SizeType ib = ja;
+			SizeType jb = ia;
+
+			SizeType ip = B_rowptr[ ib ];
+
+			// B.colind_[ ip ] = jb;
+			// B.values_[ ip ] = PsimagLite::conj( aij );
+
+			B.setCol( ip, jb );
+			B.setValues( ip, PsimagLite::conj( aij ) );
+
+			++B_rowptr[ ib ];
+		};
+	};
+
 }
 
 //! Sets B=transpose(conjugate(A))
@@ -937,70 +1080,160 @@ void operatorPlus(CrsMatrix<T>& A,
                   const CrsMatrix<T>& C,
                   T1& c1)
 {
-	SizeType n = B.rows();
-	assert(B.rows()==B.cols());
-	assert(C.rows()==C.cols());
+	const T zero = static_cast<T>(0.0);
 
-	T tmp;
+	SizeType nrow_B = B.rows();
+	SizeType ncol_B = B.cols();
+	SizeType nrow_C = C.rows();
+	SizeType ncol_C = C.cols();
 
-	assert(n>=C.rows());
+	// ------------------------------
+	// nrow_A = MAX( nrow_B, nrow_C )
+	// ncol_A = MAX( ncol_B, ncol_C )
+	// ------------------------------
+	SizeType nrow_A = (nrow_B >= nrow_C) ? nrow_B :
+	                                       nrow_C;
+	SizeType ncol_A = (ncol_B >= ncol_C) ? ncol_B :
+	                                       ncol_C;
 
-	typename Vector<T>::Type  valueTmp(n);
-	typename Vector<int>::Type index;
-	A.resize(n,B.cols());
+	A.resize( nrow_A, ncol_A );
 
-	SizeType counter=0;
-	for (SizeType k2=0;k2<n;k2++) valueTmp[k2]= static_cast<T>(0.0);
+	// ------------------------------------------------------
+	// TODO: using A.resize(nrow_A,ncol_A,nnz_A) may not work correctly
+	// ------------------------------------------------------
+	const bool set_nonzeros = true;
+	if (set_nonzeros) {
+		SizeType nnz_B = B.nonZeros();
+		SizeType nnz_C = C.nonZeros();
 
-	for (SizeType i = 0; i < n; i++) {
-		int k;
-		A.setRow(i,counter);
+		// -----------------------------------------------
+		// worst case when no overlap in sparsity pattern
+		// between matrix B and matrix C
+		// -----------------------------------------------
+		SizeType nnz_A = nnz_B + nnz_C;
 
-		if (i<C.rows()) {
-			// inspect this
-			index.clear();
-			for (k=B.getRowPtr(i);k<B.getRowPtr(i+1);k++) {
-				if (B.getCol(k)<0 || SizeType(B.getCol(k))>=n)
-					throw RuntimeError("operatorPlus (1)\n");
-				valueTmp[B.getCol(k)]=B.getValue(k)*b1;
-				index.push_back(B.getCol(k));
-			}
+		A.reserve( nnz_A );
+	};
 
-			// inspect C
-			for (k=C.getRowPtr(i);k<C.getRowPtr(i+1);k++) {
-				tmp = C.getValue(k)*c1;
-				if (C.getCol(k)>=int(valueTmp.size()) || C.getCol(k)<0)
-					throw RuntimeError("operatorPlus (2)\n");
 
-				valueTmp[C.getCol(k)] += tmp;
-				index.push_back(C.getCol(k));
-			}
-			std::sort(index.begin(),index.end());
-			k= -1;
-			for (SizeType kk=0;kk<index.size();kk++) {
-				if (k==index[kk]) continue;
-				k=index[kk];
-				if (k<0 || SizeType(k)>=n)
-					throw RuntimeError("operatorPlus (3)\n");
-				tmp = valueTmp[k];
-				if (tmp!=static_cast<T>(0.0)) {
-					A.pushCol(k);
-					A.pushValue(tmp);
+
+	// ------------------------------------------
+	// temporary vectors to accelerate processing
+	// ------------------------------------------
+	std::vector<T> valueTmp( ncol_A);
+	std::vector<bool> is_examined_already( ncol_A);
+
+	for(SizeType jcol=0; jcol < ncol_A; jcol++) {
+		valueTmp[ jcol ] = zero;
+		is_examined_already[ jcol ] = false;
+	};
+
+	SizeType counter = 0;
+	for(SizeType irow=0; irow < nrow_A; irow++) {
+		A.setRow(irow, counter );
+
+		const bool is_valid_B_row = (irow < nrow_B);
+		const bool is_valid_C_row = (irow < nrow_C);
+
+		const int kstart_B = (is_valid_B_row) ?  B.getRowPtr(irow) :
+		                                         0;
+		const int kend_B   = (is_valid_B_row) ?  B.getRowPtr(irow+1) :
+		                                         0;
+
+		const int kstart_C = (is_valid_C_row) ?  C.getRowPtr(irow) :
+		                                         0;
+		const int kend_C   = (is_valid_C_row) ?  C.getRowPtr(irow+1) :
+		                                         0;
+
+		// --------------------------------
+		// check whether there is work to do
+		// --------------------------------
+		const bool has_work = (  (kend_B-kstart_B) + (kend_C-kstart_C) >= 1 );
+		if (!has_work) continue;
+
+		// -------------------------------
+		// add contributions from matrix B and matrix C
+		// -------------------------------
+		for(int k=kstart_B;  k < kend_B; k++) {
+			const T bij = B.getValue( k );
+			const SizeType jcol = B.getCol(k);
+
+			assert( jcol < ncol_A );
+
+			valueTmp[ jcol ] += (bij * b1);
+		};
+
+		for(int k=kstart_C;  k < kend_C; k++) {
+			const T cij = C.getValue( k );
+			const SizeType jcol = C.getCol(k);
+
+			assert( jcol < ncol_A );
+
+			valueTmp[ jcol ] += (cij * c1);
+		};
+
+		// --------------------
+		// copy row to matrix A
+		// --------------------
+
+		for(int k = kstart_B; k < kend_B; k++) {
+			const SizeType jcol = B.getCol(k);
+			if (!is_examined_already[ jcol ]) {
+				is_examined_already[ jcol ] = true;
+
+				const T aij = valueTmp[ jcol ];
+				const bool is_zero = (aij == zero);
+				if (!is_zero) {
+					A.pushCol(  jcol );
+					A.pushValue( aij );
 					counter++;
-					valueTmp[k]=static_cast<T>(0.0);
-				}
-			}
-		} else {
-			for (k=B.getRowPtr(i);k<B.getRowPtr(i+1);k++) {
-				tmp = B.getValue(k)*b1;
-				A.pushCol(B.getCol(k));
-				A.pushValue(tmp);
-				counter++;
-			}
-		}
-	}
+				};
+			};
+		};
 
-	A.setRow(n,counter);
+		for(int k = kstart_C; k < kend_C; k++) {
+			const SizeType jcol = C.getCol(k);
+			if (!is_examined_already[ jcol ]) {
+				is_examined_already[ jcol ] = true;
+
+				const T aij = valueTmp[ jcol ];
+				const bool is_zero = (aij == zero);
+				if (!is_zero) {
+					A.pushCol(  jcol );
+					A.pushValue( aij );
+					counter++;
+				};
+			};
+		};
+
+		// --------------------------------------------------
+		// reset vectors valueTmp[] and is_examined_already[]
+		// --------------------------------------------------
+
+		for(int k = kstart_B; k < kend_B; k++) {
+			const SizeType jcol = B.getCol( k );
+			valueTmp[ jcol ] = zero;
+			is_examined_already[ jcol ] = false;
+		};
+
+		for(int k = kstart_C; k < kend_C; k++) {
+			const SizeType jcol = C.getCol( k );
+			valueTmp[ jcol ] = zero;
+			is_examined_already[ jcol ] = false;
+		};
+
+	}; // end for irow
+
+
+	A.setRow(nrow_A,counter);
+
+	// ----------------------------------------
+	// set exact number of nonzeros in matrix A
+	// ----------------------------------------
+	SizeType nnz_A = counter;
+	A.resize(nrow_A,ncol_A,nnz_A);
+
+	A.checkValidity();
 }
 
 template<typename T>
@@ -1097,4 +1330,3 @@ Matrix<T> multiplyTc(const CrsMatrix<T>& a,const CrsMatrix<T>& b)
 } // namespace PsimagLite
 /*@}*/
 #endif
-
