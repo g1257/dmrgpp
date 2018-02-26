@@ -973,50 +973,6 @@ void transposeConjugate(CrsMatrix<S>& B, const CrsMatrix<S2>& A)
 			++B_rowptr[ ib ];
 		};
 	};
-
-}
-
-//! Sets B=transpose(conjugate(A))
-template<typename S,typename S2>
-void transposeConjugate(CrsMatrix<S>& B,
-                        const CrsMatrix<S2>& A,
-                        typename Vector<typename Vector<int>::Type >::Type& col,
-                        typename Vector<typename Vector<S2>::Type >::Type& value)
-{
-	SizeType n=A.rows();
-	assert(col.size()==n);
-	assert(value.size()==n);
-	for (SizeType i=0;i<n;i++) {
-		col[i].clear();
-		value[i].clear();
-	}
-
-	// B(j,i) = conj(A(i,j))
-	SizeType counter=0;
-	for (SizeType i=0;i<n;i++) {
-		for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
-			col[A.getCol(k)].push_back(i);
-			S2 w = A.getValue(k);
-			value[A.getCol(k)].push_back(w);
-			counter++;
-		}
-	}
-
-	B.clear();
-	B.resize(A.cols(),A.rows(),counter);
-
-	counter=0;
-	for (SizeType i=0;i<B.rows();i++) {
-
-		B.setRow(i,counter);
-		for (SizeType j=0;j<col[i].size();j++) {
-			B.setCol(counter,col[i][j]);
-			B.setValues(counter,PsimagLite::conj(value[i][j]));
-			counter++;
-		}
-	}
-
-	B.setRow(B.rows(),counter);
 }
 
 //! Sets A = B(i,perm(j)), A and B CRS matrices
