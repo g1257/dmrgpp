@@ -341,12 +341,12 @@ private:
 		PsimagLite::OstringStream msg;
 		if (newKeptStates != keptStates) {
 			// we report that the "m" value has been changed and...
-			msg<<"Reducing kept states to "<<newKeptStates<<" from "<<keptStates;
+			msg<<"Reducing kept states to "<<newKeptStates<<" from "<<keptStates<<"\n";
 			// ... we change it:
 			keptStates = newKeptStates;
 		} else {
 			// we report that the "m" value remains the same
-			msg<<"Not changing kept states="<<keptStates;
+			msg<<"Not changing kept states="<<keptStates<<"\n";
 		}
 
 		error_ = discWeight;
