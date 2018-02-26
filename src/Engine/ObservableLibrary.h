@@ -580,7 +580,7 @@ private:
 
 			typename PsimagLite::Vector<MatrixType*>::Type results;
 			typename PsimagLite::Vector<PsimagLite::String>::Type names;
-			ppTwopoint(results,names,rows,cols);
+			//ppTwopoint(results,names,rows,cols);
 			ppFourpoint(results,names,rows,cols);
 
 		} else if (label=="dd4") {
@@ -635,34 +635,30 @@ private:
 	                SizeType cols)
 	{
 		// Two-point Pair
-		MatrixType* m1 = new MatrixType(rows,cols);
-		names.push_back("S^{l}_{on}");
-		names.push_back("S^{u}_{on}");
-		ppTwo(*m1,0);
-		result.push_back(m1);
+		MatrixType m1(rows,cols);
+		MatrixType m2(rows,cols);
+		ppTwo(m1,m2,0);
 
 		if (model_.params().model=="HubbardOneBandExtendedSuper") {
 			rows = rows/2;   // Actually: divided by # of orbitals
 			cols = cols/2;
 		}
 
-		m1 = new MatrixType(rows,cols);
-		names.push_back("S^{lu}_{on}");
-		ppTwo(*m1,1);
-		result.push_back(m1);
+		m1.clear(); m1.resize(rows,cols);
+		m2.clear(); m2.resize(rows,cols);
+		ppTwo(m1,m2,1);
+		std::cout << "PairPair Correlations S^{lu}_{on}" << std::endl;
+		std::cout << m1;
+		std::cout << "PairPair Correlations T^{lu}_{on}" << std::endl;
+		std::cout << m2;
 
-		m1 = new MatrixType(rows,cols);
-		names.push_back("T^{lu}_{on}");
-		ppTwo(*m1,2);
-		result.push_back(m1);
-
-		m1 = new MatrixType(rows,cols);
+		m1.clear(); m1.resize(rows,cols);
+		m2.clear(); m2.resize(rows,cols);
 		names.push_back("T_{on}");
-		ppTwo(*m1,3);
-		result.push_back(m1);
+		ppTwo(m1,m2,3);
 	}
 
-	void ppTwo(MatrixType& m, SizeType flag)
+	void ppTwo(MatrixType& m,MatrixType& m2, SizeType flag)
 	{
 		int fermionicSign = 1; //bosons
 		SizeType site = 1;
@@ -699,8 +695,8 @@ private:
 			PsimagLite::String onsiteOrNot = "two";
 			// notice - orb3 and orb4 order had to be fliped to preserve
 			// i1 > i2 > i3 > i4 thin site ordering, this should add multiplication by (-1.0);
-			std::cout << "PairPair Correlations S^{lu}_{on}" << std::endl;
-			ppFour(m,orb1,orb2,orb4,orb3,onsiteOrNot,sign);
+			//std::cout << "PairPair Correlations S^{lu}_{on}" << std::endl;
+			ppFour(m,m2,orb1,orb2,orb4,orb3,onsiteOrNot,sign);
 
 		} else if (flag==2) {
 			SizeType orb1 = 0;
@@ -712,49 +708,102 @@ private:
 			// notice - orb3 and orb4 order had to be fliped to preserve
 			// i1 > i2 > i3 > i4 ordering, this adds multiplication by (-1.0);
 			std::cout << "PairPair Correlations T^{lu}_{on}" << std::endl;
-			ppFour(m,orb1,orb2,orb4,orb3,onsiteOrNot,sign);
+			ppFour(m,m2,orb1,orb2,orb4,orb3,onsiteOrNot,sign);
 		} else if (flag==3) {
-			SizeType spin0 = 0; // up
-			SizeType spin1 = 1; // down
-//			SizeType orb1 = 0;
-//			SizeType orb2 = 1;
-//			SizeType orb3 = 0;
-//			SizeType orb4 = 1;
-//			int fermionicSign = -1;
-//			SizeType threadId = 0;
-			SizeType site = 0;
+			SizeType orb1 = 0;
+			SizeType orb2 = 1;
+			SizeType orb3 = 0;
+			SizeType orb4 = 1;
+			ppupupdndn(m, m2, orb1, orb2, orb3, orb4);
 
-			std::cout << "PairPair Correlations T_{on}" << std::endl;
-			SparseMatrixType O1 = model_.naturalOperator("c",site,spin0).data; // c_up
-			SparseMatrixType O2 = model_.naturalOperator("c",site,spin1).data; // c_down
-
-//			for (SizeType i = 0; i < m.n_row(); ++i) {  //loop over fat sites
-//				for (SizeType j = i+1; j < m.n_col(); ++j) {
-//					SizeType thini1 = i*2 + orb1;
-//					SizeType thini2 = i*2 + orb2;
-//					SizeType thinj1 = j*2 + orb3;
-//					SizeType thinj2 = j*2 + orb4;
-//					m(i,j) = observe_.fourpoint()('N',thini1,O1,
-//					                              'N',thini2,O1,
-//					                              'C',thinj1,O1,
-//					                              'C',thinj2,O1,
-//					                              fermionicSign,
-//					                              threadId); // up
-
-//					m(i,j) += observe_.fourpoint()('N',thini1,O2,
-//					                               'N',thini2,O2,
-//					                               'C',thinj1,O2,
-//					                               'C',thinj2,O2,
-//					                               fermionicSign,
-//					                               threadId); // down
-
-//				}
-//			}
+			std::cout << "PairPair Correlations T^{ab-upup}_{on}" << std::endl;
 			std::cout << m;
+			std::cout << "PairPair Correlations T^{ab-dndn}_{on}" << std::endl;
+			std::cout << m2;
 		} else {
 			PsimagLite::String s = "Unknown flag: " + ttos(flag);
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
+	}
+
+	void ppupupdndn(MatrixType& m, MatrixType& m2,
+	                SizeType orb1,
+	                SizeType orb2,
+	                SizeType orb3,
+	                SizeType orb4) const
+	{
+		PsimagLite::String string = "two";
+		if (string!="four" && string!="two") {
+			throw PsimagLite::RuntimeError("ppFour: only string = 'two' or 'four' is allowed \n");
+		}
+		SizeType rows = m.n_row();
+		SizeType cols = m.n_col();
+		assert(rows == cols);
+		typename PsimagLite::Vector<PairSizeType>::Type pairs;
+		int sign = 1;
+		VectorSizeType gammas(1,1+sign);
+		SizeType orbitals = 2;
+		SizeType bigSize = rows*orbitals*rows*orbitals*2;
+		m.reset(bigSize,bigSize);
+		m.setTo(0.0);
+
+		SizeType offset = (string=="four") ? orbitals : 1;
+		SizeType jmax = (string=="four") ? cols-1 : cols;
+		for (SizeType i = 0; i < rows; ++i) {
+			SizeType thini1 = i*orbitals + orb1;
+			SizeType thini2 = (string=="four") ? (i+1)*orbitals + orb2 : i*orbitals+orb2;
+			for (SizeType j = i + offset; j < jmax; ++j) {
+				SizeType thinj1 = j*orbitals + orb3;
+				SizeType thinj2 = (string=="four") ? (j+1)*orbitals + orb4 : j*orbitals + orb4;
+				for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
+					SizeType spin1=spin0;
+					pairs.push_back(PairSizeType(thini1+thini2*rows*orbitals+rows*orbitals*rows*orbitals*spin0,
+					                             thinj1+thinj2*rows*orbitals+rows*orbitals*rows*orbitals*spin1));
+				}
+			}
+		}
+
+		typedef typename ObserverType::Parallel4PointDsType Parallel4PointDsType;
+		typedef PsimagLite::Parallelizer<Parallel4PointDsType> ParallelizerType;
+		ParallelizerType threaded4PointDs(PsimagLite::Concurrency::npthreads,
+		                                  PsimagLite::MPI::COMM_WORLD);
+
+		Parallel4PointDsType helper4PointDs(m,
+		                                    observe_.fourpoint(),
+		                                    model_,
+		                                    gammas,
+		                                    pairs,
+		                                    Parallel4PointDsType::MODE_THINupdn);
+
+		threaded4PointDs.loopCreate(helper4PointDs);
+
+		MatrixType mup(rows,cols);
+		MatrixType mdown(rows,cols);
+		for (SizeType i = 0; i < rows; ++i) {
+			SizeType thini1 = i*orbitals + orb1;
+			SizeType thini2 = (string=="four") ? (i+1)*orbitals + orb2 : i*orbitals+orb2;
+			for (SizeType j = i + offset; j < jmax; ++j) {
+				SizeType thinj1 = j*orbitals + orb3;
+				SizeType thinj2 = (string=="four") ? (j+1)*orbitals + orb4 : j*orbitals + orb4;
+
+				double vsign = -1.0;
+				SizeType spin0=0;
+				SizeType spin1=0;
+				mup(i,j) += vsign*m(thini1+thini2*rows*orbitals+spin0*rows*orbitals*rows*orbitals,
+				                    thinj1+thinj2*rows*orbitals+spin1*rows*orbitals*rows*orbitals);
+
+				spin0=1;
+				spin1=1;
+				mdown(i,j) += vsign*m(thini1+thini2*rows*orbitals+spin0*rows*orbitals*rows*orbitals,
+				                      thinj1+thinj2*rows*orbitals+spin1*rows*orbitals*rows*orbitals);
+			}
+		}
+
+		m = mup;
+		m2 = mdown;
+		//std::cout << mSinglet;
+		//std::cout << mTriplet;
+
 	}
 
 	void ddOrbitalsTwopoint(typename PsimagLite::Vector<MatrixType*>::Type& result,
@@ -1077,57 +1126,67 @@ private:
 
 		PsimagLite::String onsiteOrNot = "four";
 		// Singlet four-points
-		MatrixType* m1 = new MatrixType(rows,cols);
-		std::cout << "PairPair Correlations S^{l}_{nn}" << std::endl;
-		names.push_back("S^{l}_{nn}");
-		ppFour(*m1,0,0,0,0,onsiteOrNot,-1);
-		result.push_back(m1);
+		MatrixType m1(rows,cols);
+		MatrixType m2(rows,cols);
+//		std::cout << "PairPair Correlations S^{l}_{nn}" << std::endl;
+//		names.push_back("S^{l}_{nn}");
+//		ppFour(*m1,0,0,0,0,onsiteOrNot,-1);
+//		result.push_back(m1);
 
-		m1 = new MatrixType(rows,cols);
-		std::cout << "PairPair Correlations S^{u}_{nn}" << std::endl;
-		names.push_back("S^{u}_{nn}");
-		ppFour(*m1,1,1,1,1,onsiteOrNot,-1);
-		result.push_back(m1);
+//		m1 = new MatrixType(rows,cols);
+//		std::cout << "PairPair Correlations S^{u}_{nn}" << std::endl;
+//		names.push_back("S^{u}_{nn}");
+//		ppFour(*m1,1,1,1,1,onsiteOrNot,-1);
+//		result.push_back(m1);
 
-		m1 = new MatrixType(rows,cols);
-		std::cout << "PairPair Correlations S^{lu}_{nn}" << std::endl;
-		names.push_back("S^{lu}_{nn}");
-		ppFour(*m1,0,1,0,1,onsiteOrNot,-1);
-		result.push_back(m1);
+//		m1 = new MatrixType(rows,cols);
+//		m2 = new MatrixType(rows,cols);
+//		ppFour(m1,m2,0,1,0,1,onsiteOrNot,-1);
+//		result.push_back(m1);
+//		std::cout << "PairPair Correlations S^{lu}_{nn}" << std::endl;
+//		std::cout << m1;
+//		std::cout << "PairPair Correlations T^{lu}_{nn}" << std::endl;
+//		std::cout << m2;
 
-		m1 = new MatrixType(rows,cols);
-		std::cout << "PairPair Correlations S^{l-u}_{nn}" << std::endl;
-		names.push_back("S^{l-u}_{nn}");
-		ppFour(*m1,0,0,1,1,onsiteOrNot,-1);
-		result.push_back(m1);
+		m1.clear();
+		m2.clear();
+		m1.resize(rows,cols);
+		m2.resize(rows,cols);
+		ppFour(m1,m2,0,1,1,0,onsiteOrNot,-1);
+//		result.push_back(m1);
+		std::cout << "PairPair Correlations S_RL^{lu}_{nn}" << std::endl;
+		std::cout << m1;
+		std::cout << "PairPair Correlations T_RL^{lu}_{nn}" << std::endl;
+		std::cout << m2;
+
+
+//		m1 = new MatrixType(rows,cols);
+//		std::cout << "PairPair Correlations S^{l-u}_{nn}" << std::endl;
+//		names.push_back("S^{l-u}_{nn}");
+//		ppFour(*m1,0,0,1,1,onsiteOrNot,-1);
+//		result.push_back(m1);
 
 		// Triplet four-points
-		m1 = new MatrixType(rows,cols);
-		std::cout << "PairPair Correlations T^{l}_{nn}" << std::endl;
-		names.push_back("T^{l}_{nn}");
-		ppFour(*m1,0,0,0,0,onsiteOrNot,1);
-		result.push_back(m1);
+//		m1 = new MatrixType(rows,cols);
+//		std::cout << "PairPair Correlations T^{l}_{nn}" << std::endl;
+//		names.push_back("T^{l}_{nn}");
+//		ppFour(*m1,0,0,0,0,onsiteOrNot,1);
+//		result.push_back(m1);
 
-		m1 = new MatrixType(rows,cols);
-		std::cout << "PairPair Correlations T^{u}_{nn}" << std::endl;
-		names.push_back("T^{u}_{nn}");
-		ppFour(*m1,1,1,1,1,onsiteOrNot,1);
-		result.push_back(m1);
+//		m1 = new MatrixType(rows,cols);
+//		std::cout << "PairPair Correlations T^{u}_{nn}" << std::endl;
+//		names.push_back("T^{u}_{nn}");
+//		ppFour(*m1,1,1,1,1,onsiteOrNot,1);
+//		result.push_back(m1);
 
-		m1 = new MatrixType(rows,cols);
-		std::cout << "PairPair Correlations T^{lu}_{nn}" << std::endl;
-		names.push_back("T^{lu}_{nn}");
-		ppFour(*m1,0,1,0,1,onsiteOrNot,1);
-		result.push_back(m1);
-
-		m1 = new MatrixType(rows,cols);
-		std::cout << "PairPair Correlations T^{l-u}_{nn}" << std::endl;
-		names.push_back("T^{l-u}_{nn}");
-		ppFour(*m1,0,0,1,1,onsiteOrNot,1);
-		result.push_back(m1);
+//		m1 = new MatrixType(rows,cols);
+//		std::cout << "PairPair Correlations T^{l-u}_{nn}" << std::endl;
+//		names.push_back("T^{l-u}_{nn}");
+//		ppFour(*m1,0,0,1,1,onsiteOrNot,1);
+//		result.push_back(m1);
 	}
 
-	void ppFour(MatrixType& m,
+	void ppFour(MatrixType& m, MatrixType& m2,
 	            SizeType orb1,
 	            SizeType orb2,
 	            SizeType orb3,
@@ -1181,7 +1240,8 @@ private:
 
 		threaded4PointDs.loopCreate(helper4PointDs);
 
-		MatrixType m2(rows,cols);
+		MatrixType mTriplet(rows,cols);
+		MatrixType mSinglet(rows,cols);
 		for (SizeType i = 0; i < rows; ++i) {
 			SizeType thini1 = i*orbitals + orb1;
 			SizeType thini2 = (string=="four") ? (i+1)*orbitals + orb2 : i*orbitals+orb2;
@@ -1190,15 +1250,24 @@ private:
 				SizeType thinj2 = (string=="four") ? (j+1)*orbitals + orb4 : j*orbitals + orb4;
 				for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 					for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
-						m2(i,j) += m(thini1+thini2*rows*orbitals+spin0*rows*orbitals*rows*orbitals,
-						             thinj1+thinj2*rows*orbitals+spin1*rows*orbitals*rows*orbitals);
+
+						double TripletSign = (spin0==spin1) ? -1.0:-1.0;
+						mTriplet(i,j) += TripletSign*m(thini1+thini2*rows*orbitals+spin0*rows*orbitals*rows*orbitals,
+						                               thinj1+thinj2*rows*orbitals+spin1*rows*orbitals*rows*orbitals);
+
+						double SingletSign = (spin0==spin1) ? -1.0:1.0;
+						mSinglet(i,j) += SingletSign*m(thini1+thini2*rows*orbitals+spin0*rows*orbitals*rows*orbitals,
+						                               thinj1+thinj2*rows*orbitals+spin1*rows*orbitals*rows*orbitals);
 					}
 				}
 			}
 		}
 
-		m = m2;
-		std::cout << m;
+		m = mSinglet;
+		m2 = mTriplet;
+		//std::cout << mSinglet;
+		//std::cout << mTriplet;
+
 	}
 
 	FieldType ppFour2(SizeType i1,
