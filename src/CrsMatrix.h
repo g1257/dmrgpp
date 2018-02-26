@@ -438,6 +438,8 @@ public:
 #ifndef NDEBUG
 		SizeType n = nrow_;
 		assert(n+1==rowptr_.size());
+		assert(static_cast<SizeType>(rowptr_[nrow_]) == colind_.size());
+		assert(values_.size() == colind_.size());
 		assert(nrow_>0 && ncol_>0);
 		typename Vector<SizeType>::Type p(ncol_,0);
 		for (SizeType i=0;i<n;i++) {
