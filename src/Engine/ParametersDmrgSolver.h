@@ -233,6 +233,10 @@ struct ParametersDmrgSolver {
 			if (tokens.size() > 1)
 				truncationControl.second = atoi(tokens[1].c_str());
 			warnIfFiniteMlessThanMin(finiteLoop, truncationControl.second);
+			if (options.find("twositedmrg") == PsimagLite::String::npos) {
+				std::cerr<<"WARNING: TruncationTolerance used without twositedmrg\n";
+				std::cout<<"WARNING: TruncationTolerance used without twositedmrg\n";
+			}
 		} catch (std::exception&) {}
 
 		nthreads=1; // provide a default value
