@@ -482,16 +482,9 @@ private:
 	void createTcOperatorsCached(VectorSparseMatrixType& basistc,
 	                             const BasisWithOperatorsType& basis)
 	{
-		if (basistc.size()==0) return;
-		SizeType n=basis.getOperatorByIndex(0).data.rows();
-		typename PsimagLite::Vector<PsimagLite::Vector<int>::Type>::Type col(n);
-		typename PsimagLite::Vector<VectorSparseElementType>::Type value(n);
-		for (SizeType i=0;i<basistc.size();i++) {
-			const SparseMatrixType& tmp = basis.getOperatorByIndex(i).data;
-			assert(tmp.rows()==n);
-			transposeConjugate(basistc[i],tmp,col,value);
-
-		}
+		SizeType n = basistc.size();
+		for (SizeType i = 0; i < n; ++i)
+			transposeConjugate(basistc[i], basis.getOperatorByIndex(i).data);
 	}
 
 	void createAlphaAndBeta()
