@@ -31,14 +31,13 @@ sub loadData
 		my $name = $1;
 		my $t = $2;
 		my $dt = $t - $prevt;
+		$prevt = $t;
 		next if ($dt < $cutoff);
 		if (defined($h->{$name})) {
 			$h->{$name} += $dt;
 		} else {
 			$h->{$name} = $dt;
 		}
-		
-		$prevt = $t;
 	}
 
 	close(FILE);
