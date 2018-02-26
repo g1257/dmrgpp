@@ -996,10 +996,11 @@ void permute(CrsMatrix<S>& A,
              const CrsMatrix<S>& B,
              const Vector<SizeType>::Type& perm)
 {
+	assert(B.rows()==B.cols());
+
 	SizeType  n = B.rows();
 
-	assert(B.rows()==B.cols());
-	A.resize(B.rows(),B.cols());
+	A.resize(B.rows(), B.cols(), B.nonZeros());
 
 	typename Vector<int>::Type permInverse(n);
 	assert(perm.size() == permInverse.size());
@@ -1008,14 +1009,15 @@ void permute(CrsMatrix<S>& A,
 	SizeType counter=0;
 	for (SizeType i=0;i<n;i++) {
 		A.setRow(i,counter);
-		for (int k=B.getRowPtr(i);k<B.getRowPtr(i+1);k++) {
-			A.pushCol(permInverse[B.getCol(k)]);
-			S tmp = B.getValue(k);
-			A.pushValue(tmp);
-			counter++;
+		SizeType start = B.getRowPtr(i);
+		SizeType end = B.getRowPtr(i + 1);
+		for (SizeType k = start; k < end; ++k) {
+			A.setCol(counter, permInverse[B.getCol(k)]);
+			A.setValues(counter++, B.getValue(k));
 		}
 	}
-	A.setRow(n,counter);
+
+	A.setRow(n, counter);
 	A.checkValidity();
 }
 
@@ -1025,22 +1027,24 @@ void permuteInverse(CrsMatrix<S>& A,
                     const CrsMatrix<S>& B,
                     const Vector<SizeType>::Type& perm)
 {
-	SizeType n = B.rows();
-	A.resize(n,B.cols());
 	assert(B.rows()==B.cols());
+	SizeType n = B.rows();
+	A.resize(n, B.cols(), B.nonZeros());
 
-	SizeType counter=0;
-	for (SizeType i=0;i<n;i++) {
+	SizeType counter = 0;
+	for (SizeType i = 0; i < n; ++i) {
 		SizeType ii = perm[i];
-		A.setRow(i,counter);
-		for (int k=B.getRowPtr(ii);k<B.getRowPtr(ii+1);k++) {
-			A.pushCol(B.getCol(k));
-			S tmp = B.getValue(k);
-			A.pushValue(tmp);
-			counter++;
+		A.setRow(i, counter);
+		SizeType start = B.getRowPtr(ii);
+		SizeType end = B.getRowPtr(ii + 1);
+		for (SizeType k = start; k < end; ++k) {
+			A.setCol(counter, B.getCol(k));
+			A.setValues(counter++, B.getValue(k));
 		}
 	}
-	A.setRow(n,counter);
+
+	A.setRow(n, counter);
+	A.checkValidity();
 }
 
 //! Sets A=B*b1+C*c1, restriction: B.size has to be larger or equal than C.size
