@@ -386,6 +386,19 @@ public:
 
 	SizeType cols() const { return ncol_; }
 
+	void swap(CrsMatrix& other)
+	{
+		this->rowptr_.swap(other.rowptr_);
+		this->colind_.swap(other.colind_);
+		this->values_.swap(other.values_);
+		SizeType nrow = this->nrow_;
+		this->nrow_ = other.nrow_;
+		other.nrow_ = nrow;
+		SizeType ncol = this->ncol_;
+		this->ncol_ = other.ncol_;
+		other.ncol_ = ncol;
+	}
+
 	void pushCol(SizeType i) { colind_.push_back(i); }
 
 	void pushValue(T const &value) { values_.push_back(value); }
@@ -464,7 +477,7 @@ public:
 	{
 		CrsMatrix s;
 		add(s,c.r2,c.r1);
-		*this = s;
+		this->swap(s);
 		return *this;
 	}
 
@@ -481,7 +494,7 @@ public:
 		multiply(s,c.r1.r2,c.r2);
 		CrsMatrix s2;
 		add(s2,s,c.r1.r1);
-		*this = s2;
+		this->swap(s2);
 		return *this;
 	}
 
