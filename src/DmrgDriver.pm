@@ -21,6 +21,7 @@ my $cppFiles = 0;
 my $counter = 0;
 my $fout;
 my $target = "TargetingBase";
+my @su2files;
 foreach my $complexOrNot (@complexOrReal) {
 	foreach my $lanczos (@lanczos) {
 		foreach my $modelHelper (@modelHelpers) {
@@ -33,7 +34,8 @@ foreach my $complexOrNot (@complexOrReal) {
 						}
 
 						$fout = "DmrgDriver$cppFiles.cpp";
-						$cppFiles++;
+						$su2files[$cppFiles++] = ($modelHelper eq "Su2") ? 1 : 0;
+
 						if ($generateSources) {
 							open(FOUT,"> $fout") or die "$0: Cannot write to $fout : $!\n";
 							printHeader();
@@ -58,7 +60,7 @@ if ($generateSources) {
 	print STDERR "$0: $counter instances and $cppFiles files\n";
 }
 
-return $cppFiles;
+return @su2files;
 }
 
 sub printInstance

@@ -24,7 +24,7 @@ use Make;
 use lib ".";
 use DmrgDriver;
 
-my ($flavor, $generateSources) = @ARGV;
+my ($flavor, $generateSources, $su2enabled) = @ARGV;
 $flavor = procFlavor($flavor);
 my $gccdash = "";
 my $lto = "";
@@ -37,6 +37,8 @@ if (defined($generateSources)) {
 } else {
 	$generateSources = 0;
 }
+
+defined($su2enabled) or $su2enabled = 0;
 
 system("cd KronUtil; perl configure.pl $gccdash");
 
@@ -65,9 +67,11 @@ my @drivers = (\%provenanceDriver,\%su2RelatedDriver,
 $dotos = "dmrg.o Provenance.o RestartStruct.o FiniteLoop.o Utils.o ";
 $dotos .= " ProgramGlobals.o Su2Related.o";
 
-my $templates = DmrgDriver::createTemplates($generateSources);
+my @su2files = DmrgDriver::createTemplates($generateSources);
+my $templates = scalar(@su2files);
 
 for (my $i = 0; $i < $templates; ++$i) {
+	next if (!$su2enabled && $su2files[$i]);
 	my $name = "DmrgDriver$i";
 	my %dmrgDriver = (name => $name, aux => 1);
 	push @drivers,\%dmrgDriver;
@@ -133,7 +137,7 @@ sub procFlavor
 
 	if ($flavor eq "help") {
 		print "USAGE: $0 [production | debug | callgrind";
-		print " | helgrind | drd]\n";
+		print " | helgrind | drd] [generate sources] [enable SU(2)]\n";
 		exit(0);
 	}
 

@@ -46,6 +46,11 @@ LDFLAGS += -LKronUtil
 # Specify the strip command to use (or use true to disable)
 STRIP_COMMAND = true
 
+#Enable SU(2)
+#You will also need to run perl configure.pl production 0 1
+#to rebuild the Makefile
+#CPPFLAGS += -DENABLE_SU2
+
 #When using IoNg one has to compile with HDF5 libraries
 #CPPFLAGS += -DUSE_IO_NG
 #CPPFLAGS += -I/usr/include/hdf5/serial

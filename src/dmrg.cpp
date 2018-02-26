@@ -154,11 +154,18 @@ void mainLoop0(InputNgType::Readable& io,
 	}
 
 	if (su2) {
+#ifdef ENABLE_SU2
 		mainLoop1<GeometryType,ModelHelperSu2,MySparseMatrix>(geometry,
 		                                                      dmrgSolverParams,
 		                                                      io,
 		                                                      opOptions,
 		                                                      targeting);
+#else
+		PsimagLite::String str1("To run with SU(2) you need -DENABLE_SU2 in Config.make\n");
+		PsimagLite::String str2("\n\tYou might also need to run ");
+		str2 += "perl configure.pl production 0 1\n";
+		throw PsimagLite::RuntimeError("FATAL: " + str1 + str2);
+#endif
 		return;
 	}
 
