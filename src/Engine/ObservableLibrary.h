@@ -332,24 +332,8 @@ private:
 
 					PsimagLite::String str = "<gs|n?" + ttos(i) + ";n?" + ttos(j) + "|gs>";
 					observe_.twoPoint(out,n1,n2,fermionicSign);
-					if (modelName=="HubbardOneBandExtendedSuper") {
-						MatrixType tmp;
-						PsimagLite::String str1;
-						str1 = str + " orbitals 0-0:";
-						std::cout << str1 << std::endl;
-						tmp = SliceOrbital(out,0,0);
-
-						str1 = str + " orbitals 0-1:";
-						std::cout << str1 << std::endl;
-						tmp = SliceOrbital(out,0,1);
-
-						str1 = str + " orbitals 1-1:";
-						std::cout << str1 << std::endl;
-						tmp = SliceOrbital(out,1,1);
-					} else {
-						std::cout << str << std::endl;
-						std::cout << out;
-					}
+					std::cout << str << std::endl;
+					std::cout << out;
 				}
 			}
 
@@ -369,28 +353,10 @@ private:
 					else
 						tSzTotal +=  factor*tSzThis;
 
-					if (modelName=="HubbardOneBandExtendedSuper") {
-						MatrixType tmp;
-						str = "OperatorSz orb";
-						PsimagLite::String str1;
-						str1 = str + " 0-0:";
-						std::cout << str1 << std::endl;
-						tmp = SliceOrbital(tSzThis,0,0);
-
-						str1 = str + " 0-1:";
-						std::cout << str1 << std::endl;
-						tmp = SliceOrbital(tSzThis,0,1);
-
-						str1 = str + " 1-1:";
-						std::cout << str1 << std::endl;
-						tmp = SliceOrbital(tSzThis,1,1);
-					} else {
-						if (PsimagLite::Concurrency::root()) {
-							std::cout<<"OperatorSz orb"<<i<<"-"<<j<<":\n";
-							std::cout<<tSzThis;
-						}
+					if (PsimagLite::Concurrency::root()) {
+						std::cout<<"OperatorSz orb"<<i<<"-"<<j<<":\n";
+						std::cout<<tSzThis;
 					}
-
 					counter++;
 				}
 			}
@@ -417,28 +383,11 @@ private:
 					else
 						tSpTotal +=  factor*tSpThis;
 
-					if (modelName=="HubbardOneBandExtendedSuper") {
-						MatrixType tmp;
-						str = "OperatorS+S- orb";
-						PsimagLite::String str1;
-						str1 = str + " 0-0:";
-						std::cout << str1 << std::endl;
-						tmp = SliceOrbital(tSpTotal,0,0);
-
-						str1 = str + " 0-1:";
-						std::cout << str1 << std::endl;
-						tmp = SliceOrbital(tSpTotal,0,1);
-
-						str1 = str + " 1-1:";
-						std::cout << str1 << std::endl;
-						tmp = SliceOrbital(tSpTotal,1,1);
-					} else {
-						if (PsimagLite::Concurrency::root()) {
-							std::cout<<"OperatorS+S- orb"<<i<<"-"<<j<<":\n";
-							std::cout<<tSpTotal;
-						}
+					
+					if (PsimagLite::Concurrency::root()) {
+						std::cout<<"OperatorS+S- orb"<<i<<"-"<<j<<":\n";
+						std::cout<<tSpTotal;
 					}
-
 					counter++;
 				}
 			}
@@ -465,28 +414,11 @@ private:
 					else
 						tSmTotal +=  factor*tSmThis;
 
-					if (modelName=="HubbardOneBandExtendedSuper") {
-						MatrixType tmp;
-						str = "OperatorS-S+ orb";
-						PsimagLite::String str1;
-						str1 = str + " 0-0:";
-						std::cout << str1 << std::endl;
-						tmp = SliceOrbital(tSmTotal,0,0);
 
-						str1 = str + " 0-1:";
-						std::cout << str1 << std::endl;
-						tmp = SliceOrbital(tSmTotal,0,1);
-
-						str1 = str + " 1-1:";
-						std::cout << str1 << std::endl;
-						tmp = SliceOrbital(tSmTotal,1,1);
-					} else {
-						if (PsimagLite::Concurrency::root()) {
-							std::cout<<"OperatorS-S+ orb"<<i<<"-"<<j<<":\n";
-							std::cout<<tSmTotal;
-						}
+					if (PsimagLite::Concurrency::root()) {
+						std::cout<<"OperatorS-S+ orb"<<i<<"-"<<j<<":\n";
+						std::cout<<tSmTotal;
 					}
-
 					counter++;
 				}
 			}
@@ -524,42 +456,13 @@ private:
 					else
 						spinTotalTotal +=  factor*spinTotal;
 
-					if (modelName=="HubbardOneBandExtendedSuper") {
-						MatrixType AA, BB, AB;
-						PsimagLite::String str = "SpinTotal";
-						PsimagLite::String str1;
-						str1 = str + " orb 0-0:";
-						std::cout << str1 << std::endl;
-						AA = SliceOrbital(spinTotal,0,0);
-
-						str1 = str + " orb 0-1:";
-						std::cout << str1 << std::endl;
-						AB = SliceOrbital(spinTotal,0,1);
-
-						str1 = str + " orb 1-1:";
-						std::cout << str1 << std::endl;
-						BB = SliceOrbital(spinTotal,1,1);
-
-						SizeType nsite = spinTotal.n_row()/2;
-						RealType ab_factor = 2.0;
-						MatrixType newtotal(nsite,nsite);
-						for (SizeType i=0;i<nsite;i++)
-							for (SizeType j=0;j<nsite;j++)
-								newtotal(i,j) = ab_factor*(AB(i,j)) + AA(i,j) + BB(i,j);
-
-						str1 = str + ":";
-						std::cout << str1 << std::endl;
-						std::cout << newtotal;
-
-					} else {
-						if (PsimagLite::Concurrency::root()) {
+				
+					if (PsimagLite::Concurrency::root()) {
 							std::cout<<"SpinTotal orb"<<x<<"-"<<y<<":\n";
 							std::cout<<spinTotal;
-						}
 					}
-
 					counter++;
-				}
+				}	
 			}
 
 			if (PsimagLite::Concurrency::root() && orbitals > 1) {
