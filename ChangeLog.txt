@@ -1,3 +1,24 @@
+2018-02-27 Version 5.06
+
+* On February 1st, 2018 a massive
+  overuse of RAM was introduced.
+  This has been fixed now.
+
+* Basis.h : small memory improvements
+
+* Changes due to CRS improvements
+
+* added coutAnalysis.pl script to analyze output
+  to .cout produced by DMRG++
+
+* SU(2) no longer built by default, making
+  compilation faster
+
+* DMRG++ now warns if TruncationTolerance
+  is used without twositedmrg
+
+* Various improvements to Observables by Nirav
+
 2018-02-20 Version 5.04
 
 * jzSymmetry checks
