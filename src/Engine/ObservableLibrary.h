@@ -483,7 +483,7 @@ private:
 
 			typename PsimagLite::Vector<MatrixType*>::Type results;
 			typename PsimagLite::Vector<PsimagLite::String>::Type names;
-			//ppTwopoint(results,names,rows,cols);
+			ppTwopoint(results,names,rows,cols);
 			ppFourpoint(results,names,rows,cols);
 
 		} else if (label=="dd4") {
@@ -1033,30 +1033,31 @@ private:
 		MatrixType m2(rows,cols);
 //		std::cout << "PairPair Correlations S^{l}_{nn}" << std::endl;
 //		names.push_back("S^{l}_{nn}");
-//		ppFour(*m1,0,0,0,0,onsiteOrNot,-1);
-//		result.push_back(m1);
+//		ppFour(m1,m2,0,0,0,0,onsiteOrNot,-1);
 
-//		m1 = new MatrixType(rows,cols);
+
+//		m1.clear();
+//		m1.resize(rows,cols);
 //		std::cout << "PairPair Correlations S^{u}_{nn}" << std::endl;
 //		names.push_back("S^{u}_{nn}");
-//		ppFour(*m1,1,1,1,1,onsiteOrNot,-1);
-//		result.push_back(m1);
+//		ppFour(m1,m2,1,1,1,1,onsiteOrNot,-1);
 
-//		m1 = new MatrixType(rows,cols);
-//		m2 = new MatrixType(rows,cols);
-//		ppFour(m1,m2,0,1,0,1,onsiteOrNot,-1);
-//		result.push_back(m1);
-//		std::cout << "PairPair Correlations S^{lu}_{nn}" << std::endl;
-//		std::cout << m1;
-//		std::cout << "PairPair Correlations T^{lu}_{nn}" << std::endl;
-//		std::cout << m2;
+
+		m1.clear();
+		m2.clear();
+		m1.resize(rows,cols);
+		m2.resize(rows,cols);
+		ppFour(m1,m2,0,1,0,1,onsiteOrNot,-1);
+		std::cout << "PairPair Correlations S^{lu}_{nn}" << std::endl;
+		std::cout << m1;
+		std::cout << "PairPair Correlations T^{lu}_{nn}" << std::endl;
+		std::cout << m2;
 
 		m1.clear();
 		m2.clear();
 		m1.resize(rows,cols);
 		m2.resize(rows,cols);
 		ppFour(m1,m2,0,1,1,0,onsiteOrNot,-1);
-//		result.push_back(m1);
 		std::cout << "PairPair Correlations S_RL^{lu}_{nn}" << std::endl;
 		std::cout << m1;
 		std::cout << "PairPair Correlations T_RL^{lu}_{nn}" << std::endl;

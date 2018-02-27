@@ -94,7 +94,7 @@ class Parallel4PointDs {
 
 public:
 
-	enum FourPointModeEnum {MODE_NORMAL, MODE_THIN};
+	enum FourPointModeEnum {MODE_NORMAL, MODE_THIN, MODE_THINupdn};
 
 	typedef typename ModelType::RealType RealType;
 
@@ -119,6 +119,15 @@ public:
 
 		fpd_(i,j) = (mode_ == MODE_NORMAL) ? fourPointDelta(2*i,2*j,gammas_,model_,threadNum)
 		                                   : fourPointThin(i,j,gammas_,model_,threadNum);
+		if (mode_ == MODE_NORMAL) {
+			fpd_(i,j) = fourPointDelta(2*i,2*j,gammas_,model_,threadNum);
+		} else if (mode_ == MODE_THIN) {
+			fpd_(i,j) = fourPointThin(i,j,gammas_,model_,threadNum);
+		} else if (mode_ == MODE_THINupdn) {
+			fpd_(i,j) = fourPointThinupdn(i,j,gammas_,model_,threadNum);
+		} else {
+			throw PsimagLite::RuntimeError("Parallel4PointDs: No matching mode_ found \n");
+		}
 	}
 
 	SizeType tasks() const { return pairs_.size(); }
@@ -179,7 +188,7 @@ private:
 		tmp = j % number1;
 		SizeType thinj2 = tmp/number2;
 		SizeType thinj1 = tmp % number2;
-		int sign = gammas[0] - 1;
+		//int sign = gammas[0] - 1;
 
 		SizeType site = 0;
 
@@ -200,12 +209,54 @@ private:
 		//SparseMatrixType O4 = model_.naturalOperator("c",site,1-spin1).data;
 
 
-		SizeType val = spin0 + spin1 + 1;
-		int signTerm = (val & 1) ? sign : 1;
+//		SizeType val = spin0 + spin1 + 1;
+//		int signTerm = (val & 1) ? sign : 1;
+//		FieldType fourval = fourpoint_(thini1,thini2,thinj1,thinj2,braket,threadId);
+//		return signTerm*fourval;
+
 		BraketType braket(model_, str);
+		FieldType fourval = fourpoint_(thini1,thini2,thinj1,thinj2,braket,threadId);
+		return fourval;
+	}
 
-		return signTerm*fourpoint_(thini1,thini2,thinj1,thinj2,braket,threadId);
 
+	template<typename SomeModelType>
+	FieldType fourPointThinupdn(SizeType i,
+	                            SizeType j,
+	                            const typename PsimagLite::Vector<SizeType>::Type& gammas,
+	                            const SomeModelType& model,
+	                            SizeType threadId) const
+	{
+		SizeType number1 = fpd_.n_row()/2;
+		SizeType spin0 = i/number1;
+		SizeType tmp = i % number1;
+		SizeType number2 = sqrt(number1);
+		SizeType thini2 = tmp/number2;
+		SizeType thini1 = tmp % number2;
+
+		SizeType spin1 = j/number1;
+		tmp = j % number1;
+		SizeType thinj2 = tmp/number2;
+		SizeType thinj1 = tmp % number2;
+		//int sign = gammas[0] - 1;
+
+		SizeType site = 0;
+
+		// c(i1,orb1,spin0)
+		PsimagLite::String str = "<gs|c?"+ ttos(spin0) + "[" + ttos(site) + "];";
+
+		// c(i2,orb2,spin0)
+		str += "c?"+ ttos(spin0) + "[" + ttos(site) + "];";
+
+		// c(i2,orb2,spin1)
+		str += "c?"+ ttos(spin1) + "[" + ttos(site) + "];";
+
+		// c(i3,orb1,spin1)
+		str += "c?"+ ttos(spin1) + "[" + ttos(site) + "]|gs>";
+
+		BraketType braket(model_, str);
+		FieldType fourval = fourpoint_(thini1,thini2,thinj1,thinj2,braket,threadId);
+		return fourval;
 	}
 
 	MatrixType& fpd_;
