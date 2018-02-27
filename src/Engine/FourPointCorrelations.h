@@ -288,11 +288,7 @@ public:
 
 		SparseMatrixType O3g,O4g;
 		if (i4==skeleton_.numberOfSites(threadId)-1) {
-			if (i3<i4-1) { // not tested
-				std::cerr<<PsimagLite::AnsiColor::red;
-				std::cerr<<"WARNING: This code path might give WRONG results";
-				std::cerr<<PsimagLite::AnsiColor::reset<<"\n";
-
+			if (i3<i4-1) { // still not tested (2018-02-27)
 				skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index0).fermionSign,ns,threadId);
 
 				SparseMatrixType O3gt;
