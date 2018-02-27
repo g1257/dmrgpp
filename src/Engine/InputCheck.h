@@ -412,9 +412,9 @@ public:
 		if (val.find("BatchedGemm") != PsimagLite::String::npos &&
 		        val.find("MatrixVectorKron") == PsimagLite::String::npos)
 			err("FATAL: BatchedGemm only with MatrixVectorKron\n");
-#ifndef USE_PLUGIN_SC
+#ifndef PLUGIN_SC
 		if (val.find("BatchedGemm") != PsimagLite::String::npos)
-			err("BatchedGemm needs -DUSE_PLUGIN_SC in Config.make\n");
+			err("BatchedGemm needs -DPLUGIN_SC in Config.make\n");
 #endif
 	}
 

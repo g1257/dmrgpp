@@ -1,9 +1,9 @@
 #!/usr/bin/perl
 =pod
-Copyright (c) 2009-2015, UT-Battelle, LLC
+Copyright (c) 2009-2018, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 3.0]
+[DMRG++, Version 5.]
 
 *********************************************************
 THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
