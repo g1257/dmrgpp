@@ -313,7 +313,7 @@ public:
 			throw RuntimeError("CrsMatrix: VerySparseMatrix must be sorted\n");
 
 		clear();
-		SizeType nonZeros = m.nonZero();
+		SizeType nonZeros = m.nonZeros();
 		resize(m.rows(),m.cols(),nonZeros);
 
 		SizeType counter=0;
@@ -594,7 +594,7 @@ std::ostream &operator<<(std::ostream &os,const CrsMatrix<T> &m)
 	for (SizeType i=0;i<n+1;i++) os<<m.rowptr_[i]<<" ";
 	os<<"\n";
 
-	SizeType nonzero=m.nonZero();
+	SizeType nonzero=m.nonZeros();
 	os<<nonzero<<"\n";
 	for (SizeType i=0;i<nonzero;i++) os<<m.colind_[i]<<" ";
 	os<<"\n";
