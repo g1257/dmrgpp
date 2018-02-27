@@ -91,10 +91,10 @@ private:
 	{
 		SizeType nLeft = Ahat.rows();
 
-		for (SizeType k = 0; k < Ahat.nonZero(); ++k) {
+		for (SizeType k = 0; k < Ahat.nonZeros(); ++k) {
 			SizeType i = Ahat.getRow(k);
 			SizeType ip = Ahat.getColumn(k);
-			for (SizeType k2 = 0; k2 < B.nonZero(); ++k2) {
+			for (SizeType k2 = 0; k2 < B.nonZeros(); ++k2) {
 				SizeType j = B.getRow(k2);
 				SizeType jp = B.getColumn(k2);
 				SizeType is = pack(i,j,nLeft);
@@ -111,7 +111,7 @@ private:
 		SizeType nRight = hamRight.cols();
 
 		// hamLeft
-		for (SizeType k = 0; k < hamLeft.nonZero(); ++k) {
+		for (SizeType k = 0; k < hamLeft.nonZeros(); ++k) {
 			SizeType i = hamLeft.getRow(k);
 			SizeType ip = hamLeft.getColumn(k);
 			for (SizeType j = 0; j < nRight; ++j) {
@@ -124,7 +124,7 @@ private:
 		std::cerr<<"Done hamLeft\n";
 
 		// hamRight
-		for (SizeType k = 0; k < hamRight.nonZero(); ++k) {
+		for (SizeType k = 0; k < hamRight.nonZeros(); ++k) {
 			SizeType i = hamRight.getRow(k);
 			SizeType ip = hamRight.getColumn(k);
 			for (SizeType j = 0; j < nLeft; ++j) {

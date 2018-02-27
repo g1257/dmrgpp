@@ -306,7 +306,7 @@ bool csr_is_zeros(const PsimagLite::CrsMatrix<ComplexOrRealType>& a)
 template<typename ComplexOrRealType>
 int csr_nnz(const PsimagLite::CrsMatrix<ComplexOrRealType>& a)
 {
-	return a.nonZero();
+	return a.nonZeros();
 }
 
 #endif

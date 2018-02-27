@@ -391,7 +391,8 @@ private:
 			s= jmSubspaces_[i].createFactors(factors,offset);
 			offset += s;
 		}
-		if (factors.nonZero()==0) {
+
+		if (factors.nonZeros()==0) {
 			for (SizeType i=0;i<jmSubspaces_.size();i++) {
 				std::cerr<<"subspace number "<<i;
 				SizeType nelectrons=jmSubspaces_[i].getNe();

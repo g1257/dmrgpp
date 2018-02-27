@@ -103,8 +103,8 @@ public:
 	template<typename CrsMatrixType>
 	VerySparseMatrix(const CrsMatrixType& crs)
 	    : rank_(crs.rows()),
-	      values_(crs.nonZero()),
-	      coordinates_(crs.nonZero()),
+	      values_(crs.nonZeros()),
+	      coordinates_(crs.nonZeros()),
 	      sorted_(true)
 	{
 		assert(crs.rows()==crs.cols());
@@ -259,7 +259,7 @@ public:
 			if (coordinates_[i].second == col) rows.push_back(i);
 	}
 
-	SizeType nonZero() const { return values_.size(); }
+	SizeType nonZeros() const { return values_.size(); }
 
 	ComplexOrRealType getValue(SizeType i) const
 	{
@@ -421,7 +421,7 @@ template<typename T>
 bool isHermitian(const VerySparseMatrix<T>& m)
 {
 	T eps =1e-6;
-	for (SizeType i=0;i<m.nonZero();i++) {
+	for (SizeType i=0;i<m.nonZeros();i++) {
 		SizeType row = m.getRow(i);
 		SizeType col = m.getColumn(i);
 		if (fabs(m.getValue(i)-m(col,row))>eps) {

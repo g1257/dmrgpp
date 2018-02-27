@@ -90,6 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "InputCheck.h"
 #include "ProgressIndicator.h"
 #include "NoPthreads.h"
+#include "Sort.h"
 
 namespace Dmrg {
 
@@ -122,6 +123,7 @@ public:
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename PsimagLite::Vector<LinkProductStructType>::Type VectorLinkProductStructType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	ModelCommon(const SolverParamsType& params,const GeometryType& geometry)
 	    : ModelCommonBaseType(params,geometry),progress_("ModelCommon")
@@ -171,23 +173,46 @@ public:
 	                              const LeftRightSuperType& lrs,
 	                              RealType currentTime) const
 	{
-		int bs,offset;
-		SparseMatrixType matrixBlock;
+		assert(lrs.super().partition() > 0);
+		SizeType total = lrs.super().partition()-1;
+		typename PsimagLite::Vector<VerySparseMatrixType*>::Type vvsm(total);
+		VectorSizeType nzs(total, 0);
 
-		for (SizeType m=0;m<lrs.super().partition()-1;m++) {
-			offset =lrs.super().partition(m);
-			bs = lrs.super().partition(m+1)-offset;
-			matrixBlock.makeDiagonal(bs);
+		for (SizeType m = 0; m < total; ++m) {
+			SizeType offset = lrs.super().partition(m);
+			assert(lrs.super().partition(m + 1) >= offset);
+			SizeType bs = lrs.super().partition(m + 1) - offset;
+
+			vvsm[m] = new VerySparseMatrixType(bs);
+			VerySparseMatrixType& vsm = *(vvsm[m]);
 			SizeType threadId = 0;
-			ModelHelperType modelHelper(m,lrs,currentTime,threadId);
+			ModelHelperType modelHelper(m, lrs, currentTime, threadId);
+			addHamiltonianConnection(vsm, modelHelper);
+			nzs[m] = vsm.nonZeros();
+		}
 
-			VerySparseMatrixType vsm(matrixBlock.rows());
-			addHamiltonianConnection(vsm,modelHelper);
+		PsimagLite::Sort<VectorSizeType> sort;
+		VectorSizeType permutation(total, 0);
+		sort.sort(nzs, permutation);
+
+		assert(total == nzs.size());
+		for (SizeType i = 0; i < total; ++i) { // loop over new order
+
+			SizeType m = permutation[i]; // get old index from new index
+			if (nzs[i] == 0) { // nzs is in new order
+				delete vvsm[m];
+				vvsm[m] = 0; // vvsm is in old order
+				continue;
+			}
+
+			const VerySparseMatrixType& vsm = *(vvsm[m]);
 			SparseMatrixType matrixBlock2;
 			matrixBlock2 = vsm;
-			matrixBlock += matrixBlock2;
 
-			sumBlock(matrix,matrixBlock,offset);
+			SizeType offset = lrs.super().partition(m);
+			sumBlock(matrix, matrixBlock2, offset);
+			delete vvsm[m];
+			vvsm[m] = 0;
 		}
 	}
 

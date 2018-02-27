@@ -338,7 +338,7 @@ private:
 		LinkType link2 = getKron(&A,&B,i,j,type,valuec,term,dofs,additionalData);
 		modelHelper_.fastOpProdInter(*A,*B,matrixBlock,link2);
 
-		return matrixBlock.nonZero();
+		return matrixBlock.nonZeros();
 	}
 
 	//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment

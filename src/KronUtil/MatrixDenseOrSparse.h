@@ -18,7 +18,9 @@ public:
 
 	explicit MatrixDenseOrSparse(const SparseMatrixType& sparse,
 	                             const RealType& threshold)
-	    : isDense_(sparse.nonZero() > static_cast<int>(threshold*sparse.rows()*sparse.cols())),
+	    : isDense_(sparse.nonZeros() > static_cast<SizeType>(threshold*
+	                                                         sparse.rows()*
+	                                                         sparse.cols())),
 	      sparseMatrix_(sparse)
 	{
 		sparseMatrix_.checkValidity();
@@ -54,7 +56,7 @@ public:
 
 	bool isZero() const
 	{
-		return (isDense_) ? false : (sparseMatrix_.nonZero() == 0);
+		return (isDense_) ? false : (sparseMatrix_.nonZeros() == 0);
 	}
 
 	SparseMatrixType toSparse() const
