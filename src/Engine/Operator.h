@@ -197,8 +197,10 @@ struct Operator {
 
 		io.readline(fermionSign,prefix + "FERMIONSIGN=");
 
-		VectorSizeType v(2);
-		io.readKnownSize(v,prefix + "JMVALUES");
+		VectorSizeType v;
+		io.read(v, prefix + "JMVALUES");
+		if (v.size() != 2)
+			err("FATAL: JMVALUES is not a vector of 2 values\n");
 		jm.first = v[0]; jm.second = v[1];
 
 		io.readline(angularFactor,prefix + "AngularFactor=");
@@ -397,6 +399,8 @@ std::istream& operator>>(std::istream& is,Operator<SparseMatrixType>& op)
 {
 	is>>op.data;
 	is>>op.fermionSign;
+	SizeType theNumber2 = 0;
+	is>>theNumber2;
 	is>>op.jm;
 	is>>op.angularFactor;
 	is>>op.su2Related;
@@ -408,7 +412,7 @@ std::ostream& operator<<(std::ostream& os,const Operator<SparseMatrixType>& op)
 {
 	os<<op.data;
 	os<<op.fermionSign<<"\n";
-	os<<op.jm.first<<" "<<op.jm.second<<"\n";
+	os<<"2\n"<<op.jm.first<<" "<<op.jm.second<<"\n";
 	os<<op.angularFactor<<"\n";
 	os<<op.su2Related;
 	return os;
