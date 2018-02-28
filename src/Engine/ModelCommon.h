@@ -175,7 +175,7 @@ public:
 	{
 		assert(lrs.super().partition() > 0);
 		SizeType total = lrs.super().partition()-1;
-		typename PsimagLite::Vector<VerySparseMatrixType*>::Type vvsm(total);
+		typename PsimagLite::Vector<VerySparseMatrixType*>::Type vvsm(total, 0);
 		VectorSizeType nzs(total, 0);
 
 		for (SizeType m = 0; m < total; ++m) {
@@ -189,30 +189,30 @@ public:
 			ModelHelperType modelHelper(m, lrs, currentTime, threadId);
 			addHamiltonianConnection(vsm, modelHelper);
 			nzs[m] = vsm.nonZeros();
+			if (nzs[m] > 0) continue;
+			delete vvsm[m];
+			vvsm[m] = 0;
 		}
 
 		PsimagLite::Sort<VectorSizeType> sort;
 		VectorSizeType permutation(total, 0);
 		sort.sort(nzs, permutation);
 
-		assert(total == nzs.size());
+		assert(total == permutation.size());
 		for (SizeType i = 0; i < total; ++i) { // loop over new order
 
 			SizeType m = permutation[i]; // get old index from new index
-			if (nzs[i] == 0) { // nzs is in new order
-				delete vvsm[m];
-				vvsm[m] = 0; // vvsm is in old order
-				continue;
-			}
+
+			if (vvsm[m] == 0) continue;
 
 			const VerySparseMatrixType& vsm = *(vvsm[m]);
 			SparseMatrixType matrixBlock2;
 			matrixBlock2 = vsm;
+			delete vvsm[m];
+			vvsm[m] = 0;
 
 			SizeType offset = lrs.super().partition(m);
 			sumBlock(matrix, matrixBlock2, offset);
-			delete vvsm[m];
-			vvsm[m] = 0;
 		}
 	}
 
