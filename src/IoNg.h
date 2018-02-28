@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Stack.h"
 #include "Map.h"
 #include "H5Cpp.h"
+#include <typeinfo>
 
 namespace PsimagLite {
 
@@ -151,10 +152,26 @@ public:
 		}
 
 		void printline(const String &s)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
+		{
+			assert(hdf5File_);
+			assert(groupDef_);
+			// So s may be of the from s.str() == #Energy=42.0
+			// We can't save to name #Energy=42.0 because it isn't valid
+			// Even if it were, it might not be unique
+			std::cerr<<__FILE__<<" printline(string) unimplemented ";
+			std::cerr<<" string "<<s<<" (FIXME TODO)\n";
+		}
 
 		void printline(OstringStream &s)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
+		{
+			assert(hdf5File_);
+			assert(groupDef_);
+			// So s may be of the from s.str() == #Energy=42.0
+			// We can't save to name #Energy=42.0 because it isn't valid
+			// Even if it were, it might not be unique
+			std::cerr<<__FILE__<<" printline(ostringstream) unimplemented ";
+			std::cerr<<" string "<<s.str()<<" (FIXME TODO)\n";
+		}
 
 		void write(const std::vector<bool>&, const String&)
 		{
@@ -184,7 +201,24 @@ public:
 		           const String& label,
 		           typename EnableIf<!Loki::TypeTraits<T>::isArith, int>::Type = 0)
 		{
-			throw RuntimeError("IoNg:: write for vector<NOT ARITH> not implemented\n");
+			// Here we have a recursion
+			// We've got a vector of things
+			// each thing need to be printed in turn
+			// We could create a folder label and go from there perhaps?
+			assert(hdf5File_);
+
+			SizeType count = findCount(label);
+			String name = label + ttos(count);
+			SizeType n = v.size();
+			// what if n == 0?
+			if (n == 0)
+				throw RuntimeError("FATAL: Refusing to write vector of empty size\n");
+			std::cerr<<__FILE__<<" "<<__LINE__<<" Need to save vector size = "<<n;
+			std::cerr<<" somewhere in the file (TODO FIXME)\n";
+			for (SizeType i = 0; i < n; ++i)
+				print(name, v[i]);
+
+			labels_.push_back(label);
 		}
 
 		template<typename T>
@@ -201,17 +235,18 @@ public:
 		{
 			assert(hdf5File_);
 			assert(groupDef_);
-			SizeType count = findCount(label);
-			String name = "/Def/" + label + ttos(count);
-			something.hdf5Write(name, *hdf5File_, *groupDef_);
+			String name = String(typeid(T).name());
+			std::cerr<<__FILE__<<" Not printing class "<<name;
+			std::cerr<<" With label "<<label<<" (FIXME TODO)\n";
 		}
 
 		template<typename SomePrintableType>
-		void print(const SomePrintableType& something)
+		void print(const SomePrintableType&)
 		{
 			assert(hdf5File_);
 			assert(groupDef_);
-			something.hdf5Write(*hdf5File_, *groupDef_);
+			String name = String(typeid(SomePrintableType).name());
+			std::cerr<<__FILE__<<" Not printing class "<<name<<" (FIXME TODO)\n";
 		}
 
 		void print(const char* str)
@@ -236,11 +271,14 @@ public:
 			delete dataspace;
 		}
 
+		// Delete this function and use write instead
 		template<typename X>
 		void printMatrix(const X& mat,
 		                 String const &s,
 		                 typename EnableIf<IsMatrixLike<X>::True, int>::Type = 0)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
+		{
+			print(s, mat);
+		}
 
 		int rank() { throw RuntimeError("IoNg:: not implemented\n"); }
 

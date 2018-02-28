@@ -1,6 +1,6 @@
 #include "IoNg.h"
 
-int main(int argc, char** argv)
+void test1()
 {
 	PsimagLite::IoNg::Out ioOut("hello.hdf5");
 
@@ -18,4 +18,10 @@ int main(int argc, char** argv)
 	ioIn.read(w, "MyVector");
 
 	std::cout<<w;
+}
+
+
+int main(int argc, char** argv)
+{
+	test1();
 }

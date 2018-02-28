@@ -22,8 +22,7 @@ public:
 
 		bool operator()(const PairType& x1,const PairType& x2)
 		{
-			if (x1.first<x2.first) return true;
-			return false;
+			return (x1.first < x2.first);
 		}
 
 	private:

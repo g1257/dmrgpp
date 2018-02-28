@@ -101,16 +101,18 @@ public:
 	    : name_(name),runId_(runIdInternal())
 	{}
 
-	void finalize(std::ostream& os) const
+	String finalize() const
 	{
-		os<<name_<<" sizeof(SizeType)="<<sizeof(SizeType)<<"\n";
+		OstringStream msg;
+		msg<<name_<<" sizeof(SizeType)="<<sizeof(SizeType)<<"\n";
 #ifdef USE_FLOAT
-		os<<name_<<" using float\n";
+		msg<<name_<<" using float\n";
 #else
-		os<<name_<<" using double\n";
+		msg<<name_<<" using double\n";
 #endif
-		os<<"UnixTimeEnd="<<unixTime(false)<<"\n";
-		os<<getTimeDate();
+		msg<<"UnixTimeEnd="<<unixTime(false)<<"\n";
+		msg<<getTimeDate();
+		return msg.str();
 	}
 	
 	time_t unixTime(bool arg  = false) const
