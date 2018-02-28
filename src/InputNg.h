@@ -779,25 +779,6 @@ public:
 			}
 		}
 
-		template<typename VectorLikeType>
-		void readKnownSize(VectorLikeType& val,const String& label)
-		{
-			if (ainur_)
-				err("readKnownSize not supported. Label= " + label + "\n");
-
-			String label2 = label2label(label);
-			typedef typename VectorLikeType::value_type NumericType;
-			MapStringVectorIteratorType it =  findFirstValueForLabel(label2,mapStrVec_);
-			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
-
-			SizeType len =  it->second.size();
-			val.resize(len);
-			for (SizeType i=0;i<len;i++) {
-				val[i]=static_cast<NumericType>(atof(it->second[i].c_str()));
-			}
-			cleanLabelsIfNeeded(label2,mapStrVec_,it);
-		}
-
 		const String& filename() const
 		{
 			return file_;
@@ -936,9 +917,7 @@ public:
 
 }; //InputNg
 
-class InputEmptyCheck {
-
-};
+class InputEmptyCheck {};
 
 } // namespace PsimagLite
 

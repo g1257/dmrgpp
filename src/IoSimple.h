@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2012, UT-Battelle, LLC
+Copyright (c) 2009-2018, UT-Battelle, LLC
 All rights reserved
 
-[PsimagLite, Version 1.0.0]
+[PsimagLite, Version 2.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -215,27 +215,19 @@ public:
 
 		int rank() { return rank_; }
 
-		void flush()
-		{
-			if (rank_!=0 || !fout_) return;
-			fout_->flush();
-		}
-
 		void setPrecision(SizeType x)
 		{
 			if (!fout_) return;
 			fout_->precision(x);
 		}
 
-		template<typename ActionType>
-		void action(ActionType& a)
-		{
-			assert(fout_);
-			a.action(*fout_);
-		}
-
 		template<typename X>
-		friend Out& operator<<(Out& io,const X& t);
+		friend Out& operator<<(Out& io, const X& t)
+		{
+			if (io.rank_!=0) return io;
+			(*(io.fout_))<<t;
+			return io;
+		}
 
 	private:
 
@@ -367,55 +359,6 @@ public:
 			return sc;
 		}
 
-		//! Assumes something of the form
-		//! label[key]=value
-		template<typename MapType>
-		typename EnableIf<IsMapLike<MapType>::True,void>::Type
-		read(MapType& x,
-		     String const &s,
-		     LongIntegerType level=0)
-		{
-			SizeType counter=0;
-			bool beQuiet = true;
-			while (true) {
-				try {
-					std::pair<String,SizeType> sc = advance(s,level,beQuiet);
-					// sc.first contains the full string and also value
-					String key;
-					typename MapType::mapped_type val=0;
-					getKey(key,val,sc.first);
-
-					x[key]=val;
-					counter++;
-				} catch (std::exception& e) {
-					break;
-				}
-			}
-
-			rewind();
-			if (counter==0) {
-				String s2 (__FILE__);
-				s2 += " No " + s + " found in the input file or ";
-				s2 += " could not parse it\n";
-				throw RuntimeError(s2.c_str());
-			}
-		}
-
-		template<typename X>
-		std::pair<String,SizeType> readKnownSize(X &x,
-		                                         String const &s,
-		                                         LongIntegerType level=0)
-		{
-			std::pair<String,SizeType> sc = advance(s,level);
-
-			for (SizeType i=0;i<x.size();i++) {
-				typename X::value_type tmp;
-				fin_>>tmp;
-				x[i]=tmp;
-			}
-			return sc;
-		}
-
 		std::pair<String,SizeType> advance(String const &s,
 		                                   LongIntegerType level=0,
 		                                   bool beQuiet=false)
@@ -458,26 +401,6 @@ public:
 			return std::pair<String,SizeType>(tempSaved,counter);
 		}
 
-		void readFullLine(String& temp)
-		{
-			getline(fin_,temp);
-		}
-
-		LongSizeType advanceToLine(LongSizeType line)
-		{
-			LongSizeType counter=0;
-			String temp;
-
-			while (!fin_.eof()) {
-				readFullLine(temp);
-				if (fin_.eof() || !fin_.good() || fin_.bad()) break;
-				counter++;
-				if (counter == line) break;
-			}
-
-			return counter;
-		}
-
 		SizeType count(const String& s)
 		{
 			SizeType i = 0;
@@ -497,111 +420,26 @@ public:
 
 		}
 
-		template<typename X,template<typename> class SomeType>
-		void readSparseVector(SomeType<X> &x,
-		                      String const &s,
-		                      LongIntegerType level=0)
-		{
-			advance(s,level);
-			int xsize;
-			fin_>>xsize;
-			x.resize(xsize);
-			fin_>>xsize;
-			for (int i=0;i<xsize;i++) {
-				int index;
-				X value;
-				fin_>>index;
-				fin_>>value;
-				x[index]=value;
-			}
-
-		}
-
-//		template<
-//		        typename FieldType,
-//		        template <typename> class SparseMatrixTemplate,
-//		        template<typename,template<typename> class>
-//		        class X>
-//		void read(X<FieldType,SparseMatrixTemplate>& op,
-//		                const String& s,
-//		                LongIntegerType level=0)
-//		{
-//			advance(s,level);
-//			fin_>>op.data;
-//			fin_>>op.fermionSign;
-//			fin_>>op.j;
-//		}
-
 		void rewind()
 		{
 			fin_.clear(); // forget we hit the end of file
 			fin_.seekg(0, std::ios::beg); // move to the start of the file
 		}
 
-		void move(int x)
-		{
-			SizeType c = fin_.tellg();
-			if (x < 0 && c < static_cast<SizeType>(-x)) return;
-			fin_.seekg(c+x, std::ios::beg);
-		}
-
 		bool eof() const { return fin_.eof(); }
 
-		const char* filename() const
-		{
-			return filename_.c_str();
-		}
-
 		template<typename X>
-		friend void operator>>(In& io,X& t);
+		friend void operator>>(In& io, X& t)
+		{
+			(io.fin_)>>t;
+		}
 
 	private:
-
-		//! full contains label[key]=value
-		template<typename X>
-		void getKey(String& key,X& x,const String& full)
-		{
-			SizeType i=0;
-			for (;i<full.length();i++) {
-				if (full[i]=='[') break;
-			}
-			key = "";
-			SizeType j=i+1;
-			for (;j<full.length();j++) {
-				if (full[j]==']') break;
-				key += full[j];
-			}
-			j++;
-			if (full[j++]!='=') {
-				String s(__FILE__);
-				s += "Something failed while parsing line " + full;
-				s += " of input file\n";
-				throw RuntimeError(s.c_str());
-			}
-			String val="";
-			for (SizeType k=j;k<full.length();k++)
-				val += full[k];
-			x = atof(val.c_str());
-		}
 
 		String filename_;
 		std::ifstream fin_;
 	};
 }; //class IoSimple
-
-template<typename T>
-IoSimple::Out& operator<<(IoSimple::Out& io,const T& t)
-{
-	if (io.rank_!=0) return io;
-	(*(io.fout_))<<t;
-	return io;
-}
-
-template<typename T>
-void operator>>(IoSimple::In& io,T& t)
-{
-	(io.fin_)>>t;
-}
 
 template<>
 struct IsInputLike<IoSimple::In> {
