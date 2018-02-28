@@ -359,7 +359,7 @@ struct ParametersDmrgSolver {
 			readFiniteLoops_(io,vfl,tmpVec);
 		} else {
 			MatrixFieldType tmpMat;
-			io.readMatrix(tmpMat,"FiniteLoops");
+			io.read(tmpMat, "FiniteLoops");
 			readFiniteLoops_(io,vfl,tmpMat);
 		}
 	}

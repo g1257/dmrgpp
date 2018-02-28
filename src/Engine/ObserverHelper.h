@@ -320,7 +320,8 @@ private:
 
 	void integrityChecks()
 	{
-		if (dSerializerV_.size()!=timeSerializerV_.size()) throw PsimagLite::RuntimeError("Error 1\n");
+		if (dSerializerV_.size()!=timeSerializerV_.size())
+			throw PsimagLite::RuntimeError("Error 1\n");
 		if (dSerializerV_.size()==0) return;
 		for (SizeType x=0;x<dSerializerV_.size()-1;x++) {
 			SizeType n = dSerializerV_[x]->leftRightSuper().super().size();
@@ -333,7 +334,7 @@ private:
 
 	void getTransform(MatrixType& transform,int ns)
 	{
-		io_.readMatrix(transform,"#TRANSFORM_sites",ns);
+		io_.read(transform, "#TRANSFORM_sites",ns);
 		io_.rewind();
 	}
 

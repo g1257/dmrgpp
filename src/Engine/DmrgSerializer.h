@@ -128,7 +128,7 @@ public:
 		PsimagLite::String s = "#WAVEFUNCTION_sites=";
 		wavefunction_.load(io,s);
 		s = "#TRANSFORM_sites=";
-		io.readMatrix(transform_,s);
+		io.read(transform_, s);
 		transposeConjugate(transformC_,transform_);
 		s = "#DIRECTION=";
 		io.readline(direction_,s);
@@ -158,7 +158,7 @@ public:
 		for (SizeType i=0;i<lrs_.left().block().size();i++) {
 			label += ttos(lrs_.left().block()[i])+",";
 		}
-		io.printMatrix(transform_,label);
+		io.write(transform_, label);
 		PsimagLite::String s = "#DIRECTION="+ttos(direction_);
 		io.printline(s);
 //		io.print("#DIRECTION=",direction_);

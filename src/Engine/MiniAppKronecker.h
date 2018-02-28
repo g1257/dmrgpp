@@ -28,12 +28,12 @@ public:
 		for (SizeType i = 0; i < pse_.size(); ++i)
 			pse_[pse[i]] = i;
 
-		io.readMatrix(hamLeft,"#LeftHamiltonian");
+		io.read(hamLeft, "#LeftHamiltonian");
 		io.move(-20);
 		std::cerr<<"Read H_L square, rank="<<hamLeft.rows()<<"\n";
 		assert(isHermitian(hamLeft));
 
-		io.readMatrix(hamRight,"#RightHamiltonian");
+		io.read(hamRight, "#RightHamiltonian");
 		io.move(-2);
 		std::cerr<<"Read H_R square, rank="<<hamRight.rows()<<"\n";
 		assert(isHermitian(hamRight));
@@ -52,13 +52,13 @@ public:
 			SparseMatrixType Ahat(static_cast<SizeType>(0));
 			SparseMatrixType B(static_cast<SizeType>(0));
 			try {
-				io.readMatrix(Ahat,"#Ahat"+ttos(counter));
+				io.read(Ahat, "#Ahat" + ttos(counter));
 			} catch (std::exception&) {
 				break;
 			}
 
 			io.move(-20);
-			io.readMatrix(B,"#B"+ttos(counter));
+			io.read(B, "#B" + ttos(counter));
 			io.move(-20);
 			buildHconnection(Ahat,B);
 			counter++;

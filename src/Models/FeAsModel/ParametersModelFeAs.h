@@ -220,12 +220,12 @@ struct ParametersModelFeAs {
 			}
 		}
 		try {
-			io.readMatrix(magneticField,"magneticField");
-		} catch (std::exception& e) {}
+			io.read(magneticField, "magneticField");
+		} catch (std::exception&) {}
 
 		try {
 			io.read(potentialT,"potentialT");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 
 		if (magneticField.rows()!=0 && magneticField.rows()!=3)
 			throw PsimagLite::RuntimeError("MagneticField: if present must have 3 rows\n");
@@ -242,7 +242,7 @@ struct ParametersModelFeAs {
 
 		bool hasSpinOrbitMatrix = false;
 		try {
-			io.readMatrix(spinOrbit,"SpinOrbit");
+			io.read(spinOrbit, "SpinOrbit");
 			hasSpinOrbitMatrix = true;
 		} catch (std::exception&) {}
 

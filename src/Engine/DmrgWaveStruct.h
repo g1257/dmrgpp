@@ -114,8 +114,8 @@ struct DmrgWaveStruct {
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
 	{
-		io.readMatrix(ws,"Ws");
-		io.readMatrix(we,"We");
+		io.read(ws, "Ws");
+		io.read(we, "We");
 		lrs.load(io);
 	}
 
@@ -124,8 +124,8 @@ struct DmrgWaveStruct {
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
 	{
-		io.printMatrix(ws,"Ws");
-		io.printMatrix(we,"We");
+		io.write(ws, "Ws");
+		io.write(we, "We");
 		lrs.save(io,LeftRightSuperType::SAVE_ALL,false);
 	}
 

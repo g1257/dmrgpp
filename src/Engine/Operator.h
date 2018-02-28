@@ -171,7 +171,7 @@ struct Operator {
 			data = model.naturalOperator(s,v[0],v[1]).data;
 		} else if (s == "raw") {
 			PsimagLite::Matrix<SparseElementType> m;
-			io.readMatrix(m, prefix + "RAW_MATRIX");
+			io.read(m, prefix + "RAW_MATRIX");
 			if (checkNonZero) checkNotZeroMatrix(m);
 			fullMatrixToCrsMatrix(data,m);
 		} else if (s == "expression") {
