@@ -117,24 +117,6 @@ class DmrgSolver {
 	typedef ObservablesInSitu<typename TargettingType::TargetVectorType>
 	ObservablesInSituType;
 
-	class Finalize {
-
-	public:
-
-		Finalize(PsimagLite::ApplicationInfo& a)
-		    : appInfo_(a)
-		{}
-
-		void action(std::ostream& os)
-		{
-			appInfo_.finalize(os);
-		}
-
-	private:
-
-		PsimagLite::ApplicationInfo& appInfo_;
-	};
-
 public:
 
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
@@ -232,13 +214,12 @@ public:
 
 	~DmrgSolver()
 	{
-		Finalize finalize(appInfo_);
-		ioOut_.action(finalize);
+		ioOut_.printline(appInfo_.finalize());
 
 		PsimagLite::OstringStream msg2;
 		msg2<<"Turning off the engine.";
 		progress_.printline(msg2,std::cout);
-		appInfo_.finalize(std::cout);
+		std::cout<<appInfo_.finalize();
 	}
 
 	void main(const GeometryType& geometry, PsimagLite::String targeting)
@@ -508,8 +489,8 @@ private:
 		checkpoint_.save(pS,pE,ioOut_);
 		psi.save(sitesIndices_[stepCurrent_],ioOut_);
 		PsimagLite::OstringStream msg2;
-		msg2<<"#LastLoopSign="<<lastSign<<"\n";
-		ioOut_<<msg2.str();
+		msg2<<"#LastLoopSign="<<lastSign;
+		ioOut_.printline(msg2);
 	}
 
 	void finiteStep(BlockType const &,
