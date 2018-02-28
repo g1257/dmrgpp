@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
 
 	MatrixType y0;
 	IoInType io2(file2);
-	io2.readMatrix(y0,"MatrixCiCj");
+	io2.read(y0, "MatrixCiCj");
 	for (SizeType i=0;i<y0.n_row();i++) {
 		for (SizeType j=0;j<y0.n_col();j++) {
 			//if (i==j) y0(i,j) = 1.-y0(i,j);

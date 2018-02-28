@@ -93,7 +93,7 @@ public:
 	LongRange(SizeType linSize,InputType& io)
 	    : linSize_(linSize), maxConnections_(0)
 	{
-		io.readMatrix(matrix_,"Connectors");
+		io.read(matrix_, "Connectors");
 		assert(matrix_.rows()%linSize == 0);
 		orbitals_ = static_cast<SizeType>(matrix_.rows()/linSize);
 		try {

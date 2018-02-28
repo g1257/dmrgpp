@@ -11,7 +11,7 @@ void readMe(const String& myfile)
 	std::cout<<"------------------\n";
 
 	PsimagLite::Matrix<float> m;
-	fin.readMatrix(m,"MyMatrix");
+	fin.read(m, "MyMatrix");
 	std::cout<<"MyMatrix";
 	std::cout<<m;
 	std::cout<<"------------------\n";
@@ -39,7 +39,7 @@ int main()
 		for (SizeType j=0;j<a.n_col();j++)
 			a(i,j)=drand48();
 
-	fout.printMatrix(a,"MyMatrix");
+	fout.write(a, "MyMatrix");
 	fout.close();
 
 	readMe(myfile);

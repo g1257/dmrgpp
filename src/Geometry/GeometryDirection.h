@@ -126,7 +126,7 @@ public:
 			for (SizeType i=0;i<n;i++) {
 				MatrixType m;
 				String extraString =  (n > 1 && io.version() > 2) ? ttos(i) : "";
-				io.readMatrix(m, connectors + extraString);
+				io.read(m, connectors + extraString);
 				dataMatrices_.push_back(m);
 				if (orbitals_ < m.rows()) orbitals_ = m.rows();
 				if (orbitals_ < m.cols()) orbitals_ = m.cols();

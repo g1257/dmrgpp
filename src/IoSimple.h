@@ -168,13 +168,23 @@ public:
 
 		template<typename X>
 		void write(X const &x,
-		           String const &label,
+		           const String& label,
 		           typename EnableIf<IsVectorLike<X>::True, int>::Type = 0)
 		{
 			if (rank_!=0) return;
 			(*fout_)<<label<<"\n";
 			(*fout_)<<x.size()<<"\n";
 			for (SizeType i=0;i<x.size();i++) (*fout_)<<x[i]<<"\n";
+		}
+
+		template<typename X>
+		void write(const X& mat,
+		           const String& label,
+		           typename EnableIf<IsMatrixLike<X>::True, int>::Type = 0)
+		{
+			if (rank_!=0) return;
+			(*fout_)<<label<<"\n";
+			(*fout_)<<mat;
 		}
 
 		template<class T>
@@ -201,16 +211,6 @@ public:
 		{
 			if (rank_!=0) return;
 			(*fout_)<<something;
-		}
-
-		template<typename X>
-		void printMatrix(const X& mat,
-		                 String const &s,
-		                 typename EnableIf<IsMatrixLike<X>::True, int>::Type = 0)
-		{
-			if (rank_!=0) return;
-			(*fout_)<<s<<"\n";
-			(*fout_)<<mat;
 		}
 
 		int rank() { return rank_; }
@@ -343,6 +343,16 @@ public:
 				x[i]=tmp;
 			}
 			return sc;
+		}
+
+		template<typename X>
+		void read(X &mat,
+		          String const &s,
+		          LongIntegerType level= 0,
+		          typename EnableIf<IsMatrixLike<X>::True, int>::Type  = 0)
+		{
+			advance(s,level);
+			fin_>>mat;
 		}
 
 		template<typename X>
@@ -507,30 +517,20 @@ public:
 
 		}
 
-		template<typename X>
-		void readMatrix(X &mat,
-		                String const &s,
-		                LongIntegerType level= 0,
-		                typename EnableIf<IsMatrixLike<X>::True, int>::Type  = 0)
-		{
-			advance(s,level);
-			fin_>>mat;
-		}
-
-		template<
-		        typename FieldType,
-		        template <typename> class SparseMatrixTemplate,
-		        template<typename,template<typename> class>
-		        class X>
-		void readMatrix(X<FieldType,SparseMatrixTemplate>& op,
-		                const String& s,
-		                LongIntegerType level=0)
-		{
-			advance(s,level);
-			fin_>>op.data;
-			fin_>>op.fermionSign;
-			fin_>>op.j;
-		}
+//		template<
+//		        typename FieldType,
+//		        template <typename> class SparseMatrixTemplate,
+//		        template<typename,template<typename> class>
+//		        class X>
+//		void read(X<FieldType,SparseMatrixTemplate>& op,
+//		                const String& s,
+//		                LongIntegerType level=0)
+//		{
+//			advance(s,level);
+//			fin_>>op.data;
+//			fin_>>op.fermionSign;
+//			fin_>>op.j;
+//		}
 
 		void rewind()
 		{

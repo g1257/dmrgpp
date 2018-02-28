@@ -401,7 +401,7 @@ public:
 			SizeType adjExpected = atoi(numericVector_[0].c_str());
 
 			if (!inputCheck_.check(lastLabel_,numericVector_,line_) &&
-			    numericVector_.size()!=adjExpected+1) {
+			        numericVector_.size()!=adjExpected+1) {
 				std::cout<<" Number of numbers to follow is wrong, expected ";
 				std::cout<<adjExpected<<" got ";
 				std::cout<<(numericVector_.size()-1)<<"\n";
@@ -442,8 +442,8 @@ public:
 		typename EnableIf<IsMapLike<MapType>::True,void>::Type
 		printMap(MapType& mp,const String& label)
 		{
-//			typedef typename MapType::key_type KeyType;
-//			typedef typename MapType::mapped_type MappedType;
+			//			typedef typename MapType::key_type KeyType;
+			//			typedef typename MapType::mapped_type MappedType;
 			std::cout<<label<<"\n";
 			typename MapType::iterator it;
 			for (it=mp.begin();it!=mp.end();++it) {
@@ -469,7 +469,7 @@ public:
 
 		typedef typename Map<String,String,MyCompareType>::Type::iterator MapStringIteratorType;
 		typedef typename Map<String,Vector<String>::Type,MyCompareType>::Type::iterator
-		                 MapStringVectorIteratorType;
+		MapStringVectorIteratorType;
 
 	public:
 
@@ -657,6 +657,99 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrStr_,it);
 		}
 
+		template<typename VectorLikeType>
+		typename EnableIf<IsVectorLike<VectorLikeType>::True,void>::Type
+		read(VectorLikeType& val,const String& label)
+		{
+			if (ainur_)
+				return ainur_->readValue(val, label);
+
+			String label2 = label2label(label);
+			typedef typename VectorLikeType::value_type NumericType;
+			MapStringVectorIteratorType it = findFirstValueForLabel(label2,mapStrVec_);
+			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
+
+			SizeType len =  it->second.size();
+			assert(len>1);
+			val.resize(len-1);
+			for (SizeType i=0;i<len-1;i++) {
+				val[i]=stringToComplexOrReal<NumericType>(it->second[i+1].c_str());
+			}
+			cleanLabelsIfNeeded(label2,mapStrVec_,it);
+		}
+
+		template<typename FloatingType>
+		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
+		read(Matrix<FloatingType>& m, const String& label)
+		{
+			if (ainur_)
+				return ainur_->readValue(m, label);
+
+			String label2 = label2label(label);
+
+			MapStringVectorIteratorType it =  findFirstValueForLabel(label2,mapStrVec_);
+			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
+
+			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 ||
+			        atoi(it->second[1].c_str())<=0) {
+				String s(__FILE__);
+				s += " reading a matrix: \n";
+				throw RuntimeError(s.c_str());
+			}
+
+			SizeType nrow = SizeType(atoi(it->second[0].c_str()));
+			SizeType ncol = SizeType(atoi(it->second[1].c_str()));
+			m.resize(nrow,ncol);
+			if (it->second.size()<2+nrow*ncol) {
+				String s(__FILE__);
+				s += " reading a matrix: \n";
+				throw RuntimeError(s.c_str());
+			}
+			SizeType k = 2;
+			for (SizeType i=0;i<m.rows();i++)
+				for (SizeType j=0;j<m.cols();j++)
+					m(i,j) = atof(it->second[k++].c_str());
+
+			cleanLabelsIfNeeded(label2,mapStrVec_,it);
+		}
+
+		template<typename FloatingType>
+		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
+		read(Matrix<std::complex<FloatingType> >& m, const String& label)
+		{
+			if (ainur_)
+				err("reading a matrix complex not supported. Label= " + label + "\n");
+
+			String label2 = label2label(label);
+
+			MapStringVectorIteratorType it =  findFirstValueForLabel(label2,mapStrVec_);
+			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
+
+			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 ||
+			        atoi(it->second[1].c_str())<=0) {
+				String s(__FILE__);
+				s += " reading a matrix: \n";
+				throw RuntimeError(s.c_str());
+			}
+
+			SizeType nrow = SizeType(atoi(it->second[0].c_str()));
+			SizeType ncol = SizeType(atoi(it->second[1].c_str()));
+			m.resize(nrow,ncol);
+			if (it->second.size()<2+nrow*ncol) {
+				String s(__FILE__);
+				s += " reading a matrix: \n";
+				throw RuntimeError(s.c_str());
+			}
+			SizeType k = 2;
+			for (SizeType i=0;i<m.rows();i++) {
+				for (SizeType j=0;j<m.cols();j++) {
+					IstringStream is(it->second[k++]);
+					is >> m(i,j);
+				}
+			}
+			cleanLabelsIfNeeded(label2,mapStrVec_,it);
+		}
+
 		template<typename MapLikeType>
 		typename EnableIf<IsMapLike<MapLikeType>::True,void>::Type
 		read(MapLikeType& val,const String& label)
@@ -687,27 +780,6 @@ public:
 		}
 
 		template<typename VectorLikeType>
-		typename EnableIf<IsVectorLike<VectorLikeType>::True,void>::Type
-		read(VectorLikeType& val,const String& label)
-		{
-			if (ainur_)
-				return ainur_->readValue(val, label);
-
-			String label2 = label2label(label);
-			typedef typename VectorLikeType::value_type NumericType;
-			MapStringVectorIteratorType it = findFirstValueForLabel(label2,mapStrVec_);
-			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
-
-			SizeType len =  it->second.size();
-			assert(len>1);
-			val.resize(len-1);
-			for (SizeType i=0;i<len-1;i++) {
-				val[i]=stringToComplexOrReal<NumericType>(it->second[i+1].c_str());
-			}
-			cleanLabelsIfNeeded(label2,mapStrVec_,it);
-		}
-
-		template<typename VectorLikeType>
 		void readKnownSize(VectorLikeType& val,const String& label)
 		{
 			if (ainur_)
@@ -722,79 +794,6 @@ public:
 			val.resize(len);
 			for (SizeType i=0;i<len;i++) {
 				val[i]=static_cast<NumericType>(atof(it->second[i].c_str()));
-			}
-			cleanLabelsIfNeeded(label2,mapStrVec_,it);
-		}
-
-		template<typename FloatingType>
-		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
-		readMatrix(Matrix<FloatingType>& m,const String& label)
-		{
-			if (ainur_)
-				return ainur_->readValue(m, label);
-
-			String label2 = label2label(label);
-
-			MapStringVectorIteratorType it =  findFirstValueForLabel(label2,mapStrVec_);
-			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
-
-			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 ||
-			    atoi(it->second[1].c_str())<=0) {
-				String s(__FILE__);
-				s += " readMatrix: \n";
-				throw RuntimeError(s.c_str());
-			}
-
-			SizeType nrow = SizeType(atoi(it->second[0].c_str()));
-			SizeType ncol = SizeType(atoi(it->second[1].c_str()));
-			m.resize(nrow,ncol);
-			if (it->second.size()<2+nrow*ncol) {
-				String s(__FILE__);
-				s += " readMatrix: \n";
-				throw RuntimeError(s.c_str());
-			}
-			SizeType k = 2;
-			for (SizeType i=0;i<m.rows();i++)
-				for (SizeType j=0;j<m.cols();j++)
-					m(i,j) = atof(it->second[k++].c_str());
-
-			cleanLabelsIfNeeded(label2,mapStrVec_,it);
-		}
-
-		template<typename FloatingType>
-		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
-		readMatrix(Matrix<std::complex<FloatingType> >& m,
-		           const String& label)
-		{
-			if (ainur_)
-				err("readMatrix complex not supported. Label= " + label + "\n");
-
-			String label2 = label2label(label);
-
-			MapStringVectorIteratorType it =  findFirstValueForLabel(label2,mapStrVec_);
-			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
-
-			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 ||
-			    atoi(it->second[1].c_str())<=0) {
-				String s(__FILE__);
-				s += " readMatrix: \n";
-				throw RuntimeError(s.c_str());
-			}
-
-			SizeType nrow = SizeType(atoi(it->second[0].c_str()));
-			SizeType ncol = SizeType(atoi(it->second[1].c_str()));
-			m.resize(nrow,ncol);
-			if (it->second.size()<2+nrow*ncol) {
-				String s(__FILE__);
-				s += " readMatrix: \n";
-				throw RuntimeError(s.c_str());
-			}
-			SizeType k = 2;
-			for (SizeType i=0;i<m.rows();i++) {
-				for (SizeType j=0;j<m.cols();j++) {
-					IstringStream is(it->second[k++]);
-					is >> m(i,j);
-				}
 			}
 			cleanLabelsIfNeeded(label2,mapStrVec_,it);
 		}
