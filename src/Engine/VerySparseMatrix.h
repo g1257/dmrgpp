@@ -116,6 +116,8 @@ public:
 				values_[counter++] = crs.getValue(k);
 			}
 		}
+
+		sort();
 	}
 
 	ComplexOrRealType& operator()(SizeType row,SizeType col)
@@ -128,6 +130,7 @@ public:
 			x=values_.size()-1;
 			sorted_=false;
 		}
+
 		return values_[x];
 	}
 
@@ -187,7 +190,7 @@ public:
 		return values_[i];
 	}
 
-	void operator+=(VerySparseMatrix<ComplexOrRealType>& other)
+	void operator+=(const VerySparseMatrix<ComplexOrRealType>& other)
 	{
 		if (sorted_ && other.sorted())
 			plusEqualOrd(other);
@@ -197,31 +200,21 @@ public:
 
 	void sort()
 	{
-		VectorSizeType perm;
-		sort(perm);
-	}
-
-	void sort(VectorSizeType& perm)
-	{
-		VectorSizeType rows(coordinates_.size());
-		VectorSizeType cols(coordinates_.size());
-		VectorComplexOrRealType values = values_;
-		for (SizeType i=0;i<coordinates_.size();i++) {
-			rows[i]=coordinates_[i].first;
-			cols[i]=coordinates_[i].second;
-
-		}
-
-		perm.resize(rows.size());
-		PsimagLite::Sort<VectorSizeType> sort;
-		sort.sort(rows,perm);
-
-		for (SizeType i=0;i<coordinates_.size();i++) {
-			coordinates_[i].first = rows[i];
-			coordinates_[i].second = cols[perm[i]];
-			values_[i] = values[perm[i]];
-		}
 		sorted_=true;
+
+		SizeType n = coordinates_.size();
+
+		if (n == 0) return;
+
+		VectorSizeType perm(n, 0);
+		PsimagLite::Sort<VectorPairType> sort;
+		sort.sort(coordinates_, perm);
+
+		VectorComplexOrRealType values(n, 0.0);
+		for (SizeType i = 0; i < n; ++i)
+			values[i] = values_[perm[i]];
+
+		values_.swap(values);
 	}
 
 	SizeType rows() const { return rank_; }
@@ -355,54 +348,128 @@ public:
 
 private:
 
-	void plusEqualOrd(VerySparseMatrix<ComplexOrRealType>& other)
+	void plusEqualOrd(const VerySparseMatrix<ComplexOrRealType>& other)
 	{
-		SizeType j = 0;
-		SizeType i = 0;
 		// pre-alloc memory:
-		VectorPairType newcoord(coordinates_.size()+other.coordinates_.size());
-		VectorComplexOrRealType newvals(coordinates_.size()+other.coordinates_.size());
+		VectorPairType newcoord(coordinates_.size());
+		VectorComplexOrRealType newvals(coordinates_.size());
+
+		newcoord.reserve(coordinates_.size()+other.coordinates_.size());
+		newvals.reserve(coordinates_.size()+other.coordinates_.size());
+
+		// ----------------------------
+		// check coordinates are sorted
+		// ----------------------------
+
+		SizeType n = coordinates_.size();
+		if (n > 0) --n;
+		for( SizeType i = 0; i < n; ++i) {
+			assert( coordinates_[i] <= coordinates_[i+1] );
+		}
+
+		SizeType m = other.coordinates_.size();
+		if (m > 0) --m;
+		for( SizeType i = 0; i < m; ++i) {
+			assert( other.coordinates_[i] <= other.coordinates_[i+1] );
+		};
+
+		// ---------------------------------------------------------
+		// initialization to place something reasonable in newcoord
+		// ---------------------------------------------------------
+
+
+		// ------------------------------------------------------
+		// note use "maxrc" as sentinel end marker to simplify coding
+		// ------------------------------------------------------
+		const unsigned int bigval = 1024*1024*1024;
+		const PairType maxrc(bigval,bigval);
+
+		SizeType jp = 0;
+		SizeType ip = 0;
 		SizeType counter = 0;
-		while(i<coordinates_.size() && j<other.coordinates_.size()) {
-			PairType row = coordinates_[i];
-			PairType row2 = other.coordinates_[j];
-			//std::cerr<<row<<" "<<row2<<"\n";
-			if (row2 < row) {
-				//newcoord.push_back(j);
-				newcoord[counter]=row2;
-				newvals[counter]=other.values_[j];
-				counter++;
-				j++;
-			} else if (row2 == row) {
-				newcoord[counter]=row2;
-				newvals[counter]=values_[i] + other.values_[j];
-				j++;
-				i++;
-				counter++;
-			} else {
-				newcoord[counter]=row;
-				newvals[counter]=values_[i];
-				i++;
-				counter++;
+
+		PairType irc = (coordinates_.size() > 0) ? coordinates_[ip] : maxrc;
+		PairType jrc = (other.coordinates_.size() > 0) ?
+		            other.coordinates_[jp] : maxrc;
+		if (irc < jrc) {
+			newcoord[0] = irc;
+			newvals[0] = values_[0];
+			ip = 1;
+		}
+		else {
+			newcoord[0] = jrc;
+			newvals[0] = other.values_[0];
+			jp = 1;
+		};
+
+		bool has_work_ip = (ip < coordinates_.size());
+		bool has_work_jp = (jp < other.coordinates_.size());
+		bool has_work = has_work_ip || has_work_jp;
+		while (has_work) {
+
+			has_work_ip = (ip < coordinates_.size());
+			has_work_jp = (jp < other.coordinates_.size());
+			has_work = has_work_ip || has_work_jp;
+			if (!has_work) { break; };
+
+			// ------------------------------------------------------
+			// unified treatment of  coordinate_ or other.coordinate_
+			// ------------------------------------------------------
+			PairType irc = (has_work_ip) ? coordinates_[ip] : maxrc;
+			ComplexOrRealType val_irc = (has_work_ip) ? values_[ip] : 0;
+
+			PairType jrc = (has_work_jp) ? other.coordinates_[jp] : maxrc;
+			ComplexOrRealType val_jrc = (has_work_jp) ? other.values_[jp] : 0;
+
+			PairType ijrc = (irc < jrc) ? irc : jrc;
+			ComplexOrRealType val_ijrc = (irc < jrc) ? val_irc : val_jrc;
+
+			if (irc < jrc) {
+				// ----------------------------
+				// pick coordinate_, advance ip
+				// ----------------------------
+				ip++;
 			}
-		}
-		for (SizeType j1=j;j1<other.coordinates_.size();j1++) {
-			newcoord[counter]=other.coordinates_[j1];
-			newvals[counter]=other.values_[j1];
-			counter++;
-		}
-		for (SizeType j1=i;j1<coordinates_.size();j1++) {
-			newcoord[counter]=coordinates_[j1];
-			newvals[counter]=values_[j1];
-			counter++;
-		}
-		coordinates_.resize(counter);
-		values_.resize(counter);
-		for (SizeType j1=0;j1<counter;j1++) {
-			coordinates_[j1] = newcoord[j1];
-			values_[j1] = newvals[j1];
-		}
-		// this is sorted
+			else  {
+				// ----------------------------------
+				// pick other.coordinate_, advance jp
+				// ----------------------------------
+				jp++;
+			};
+
+			PairType newrc = newcoord[counter];
+			if (newrc == ijrc) {
+				// ------------------------
+				// common entry: just add accumulate value
+				// ------------------------
+				newvals[counter] += val_ijrc;
+			}
+			else {
+				// -------------------------
+				// advance to next new entry
+				// -------------------------
+				counter++;
+				newvals[counter] = val_ijrc;
+				newcoord[counter] = ijrc;
+			};
+		};
+
+
+
+		// update vector
+		// TODO: add swap method to just swap pointers
+
+
+		SizeType nonzeros = counter+1;
+		coordinates_.resize(nonzeros);
+		values_.resize(nonzeros);
+
+		for(SizeType i=0; i < nonzeros; i++) {
+			coordinates_[i] = newcoord[i];
+			values_[i] = newvals[i];
+		};
+
+
 	}
 
 	bool notEqual(const char *s) const
