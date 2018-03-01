@@ -68,6 +68,7 @@ my %specFull;
 addSpectrum(\%specFull, \%specMinus);
 addSpectrum(\%specFull, \%specPlus);
 OmegaUtils::printGnuplot(\%specFull, $geometry,  $isPeriodic, $zeroAtCenter);
+OmegaUtils::printOffsetPlots(\%specFull, $geometry,  $isPeriodic, $zeroAtCenter);
 
 my @nkx0;
 my $norm = sumOverOmega(\@nkx0, \%specMinus, 0);
