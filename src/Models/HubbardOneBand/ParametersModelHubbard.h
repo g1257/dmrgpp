@@ -94,10 +94,20 @@ struct ParametersModelHubbard {
 		potentialV.resize(2*nsites, 0.0);
 		io.read(hubbardU,"hubbardU");
 		io.read(potentialV,"potentialV");
+		try {
+			anisotropy.resize(nsites, 0.0);
+			io.read(anisotropy,"AnisotropyD");
+		} catch (std::exception&) {
+			std::cerr<<"AnisotropyD: ";
+			std::cerr<<"Not given \n";
+		}
 
 		try {
 			io.read(potentialT,"PotentialT");
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+			std::cerr<<"PotentialT: ";
+			std::cerr<<"Not given \n";
+		}
 
 		bool hasT = (potentialT.size() > 0);
 
@@ -137,6 +147,7 @@ struct ParametersModelHubbard {
 	typename PsimagLite::Vector<RealType>::Type hubbardU;
 	// Onsite potential values, one for each site
 	typename PsimagLite::Vector<RealType>::Type potentialV;
+	typename PsimagLite::Vector<RealType>::Type anisotropy;
 
 	// for time-dependent H:
 	typename PsimagLite::Vector<RealType>::Type potentialT;

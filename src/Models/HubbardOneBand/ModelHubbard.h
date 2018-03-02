@@ -474,7 +474,7 @@ public:
 	                     RealType factorForDiagonals=1.0)  const
 	{
 		SizeType n=block.size();
-		SparseMatrixType tmpMatrix,niup,nidown;
+		SparseMatrixType tmpMatrix,niup,nidown,Szsquare,Szi;
 		SizeType linSize = geometry_.numberOfSites();
 
 		for (SizeType i=0;i<n;i++) {
@@ -499,6 +499,16 @@ public:
 			// V_idown term
 			tmp = modelParameters_.potentialV[block[i]+1*linSize]*factorForDiagonals;
 			hmatrix += tmp*nidown;
+
+			// anisotropy
+			if (modelParameters_.anisotropy.size() == linSize) {
+				RealType mult1, mult2;
+				mult1 = 1.0; mult2 = -1.0;
+				operatorPlus(Szi,niup,mult1,nidown,mult2);
+				multiply(Szsquare,Szi,Szi);
+				RealType tmp = modelParameters_.anisotropy[block[i*2]]*0.25;
+				hmatrix += tmp*Szsquare;
+			}
 
 			if (modelParameters_.potentialT.size()==0) continue;
 			RealType cosarg = cos(time*modelParameters_.omega +
