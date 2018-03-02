@@ -97,17 +97,15 @@ struct ParametersModelHubbard {
 		try {
 			anisotropy.resize(nsites, 0.0);
 			io.read(anisotropy,"AnisotropyD");
+			std::cerr<<"Has AnisotropyD\n";
 		} catch (std::exception&) {
-			std::cerr<<"AnisotropyD: ";
-			std::cerr<<"Not given \n";
+			anisotropy.clear();
 		}
 
 		try {
 			io.read(potentialT,"PotentialT");
-		} catch (std::exception&) {
-			std::cerr<<"PotentialT: ";
-			std::cerr<<"Not given \n";
-		}
+			std::cerr<<"Has PotentialT\n";
+		} catch (std::exception&) {}
 
 		bool hasT = (potentialT.size() > 0);
 

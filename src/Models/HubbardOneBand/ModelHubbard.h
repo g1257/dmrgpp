@@ -502,10 +502,12 @@ public:
 
 			// anisotropy
 			if (modelParameters_.anisotropy.size() == linSize) {
-				RealType mult1, mult2;
-				mult1 = 1.0; mult2 = -1.0;
+				RealType mult1 =  1.0;
+				RealType mult2 = -1.0;
 				operatorPlus(Szi,niup,mult1,nidown,mult2);
 				multiply(Szsquare,Szi,Szi);
+				assert(i*2 < block.size());
+				assert(block[i*2] < modelParameters_.anisotropy.size());
 				RealType tmp = modelParameters_.anisotropy[block[i*2]]*0.25;
 				hmatrix += tmp*Szsquare;
 			}
