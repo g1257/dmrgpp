@@ -350,6 +350,13 @@ private:
 
 	void plusEqualOrd(const VerySparseMatrix<ComplexOrRealType>& other)
 	{
+		if (coordinates_.size() == 0) {
+			*this = other;
+			return;
+		}
+
+		if (other.coordinates_.size() == 0) return;
+
 		// pre-alloc memory:
 		VectorPairType newcoord(coordinates_.size());
 		VectorComplexOrRealType newvals(coordinates_.size());
