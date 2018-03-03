@@ -126,7 +126,13 @@ public:
 
 	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const
 	{
-		BaseType::fullDiag(eigs,fm,matrixStored_,model_->params().maxMatrixRankStored);
+		int mrs = model_->params().maxMatrixRankStored;
+		if (mrs < static_cast<int>(rows())) {
+			std::cerr<<"Full diag will likely fail, it would need ";
+			std::cerr<<rows()<<" but you gave only "<<mrs<<"\n";
+		}
+
+		BaseType::fullDiag(eigs, fm, matrixStored_, mrs);
 	}
 
 private:
