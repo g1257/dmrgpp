@@ -150,27 +150,12 @@ public:
 		return pow(3,NUMBER_OF_ORBITALS);
 	}
 
-	//! find creation operator matrices for (i,sigma) in the natural basis,
-	//! find quantum numbers and number of electrons
-	//! for each state in the basis
-	virtual void setNaturalBasis(VectorOperatorType& creationMatrix,
-	                             SparseMatrixType &hamiltonian,
-	                             SymmetryElectronsSzType& q,
-	                             const BlockType& block,
-	                             const RealType& time) const
+	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
 	{
-
-		HilbertBasisType natBasis;
-		VectorSizeType quantumNumbs;
-		setNaturalBasis(natBasis,quantumNumbs,block);
-
-		setOperatorMatrices(creationMatrix,block);
-
-		//! Set symmetry related
-		setSymmetryRelated(q,natBasis,block.size());
-
-		//! set hamiltonian
-		this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
+		VectorSizeType qns;
+		HilbertBasisType basis;
+		setNaturalBasis(basis, qns, block);
+		setSymmetryRelated(q, basis, block.size());
 	}
 
 	//! set creation matrices for sites in block

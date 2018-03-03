@@ -276,16 +276,11 @@ public:
 		if (checkpoint_()) {
 			checkpoint_.load(pS,pE,*psi,false);
 		} else { // move this block elsewhere:
-			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-			SparseMatrixType hmatrix;
-			SymmetryElectronsSzType q;
 
 			RealType time = 0;
-			model_.setNaturalBasis(creationMatrix,hmatrix,q,E,time);
-			pE.setVarious(E,hmatrix,q,creationMatrix);
+			pE.setVarious(E, model_, time);
+			pS.setVarious(S, model_, time);
 
-			model_.setNaturalBasis(creationMatrix,hmatrix,q,S,time);
-			pS.setVarious(S,hmatrix,q,creationMatrix);
 			infiniteDmrgLoop(S,X,Y,E,pS,pE,*psi);
 		}
 

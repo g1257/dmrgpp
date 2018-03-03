@@ -119,8 +119,8 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeTypeType;
 
 	SuperHubbardExtended(const SolverParamsType& solverParams,
-	                    InputValidatorType& io,
-	                    GeometryType const &geometry)
+	                     InputValidatorType& io,
+	                     GeometryType const &geometry)
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
 	      geometry_(geometry),
@@ -139,23 +139,9 @@ public:
 		return extendedHubbard_.hilbertSize(site);
 	}
 
-	//! find creation operator matrices for (i,sigma) in the natural basis,
-	//! find quantum numbers and number of electrons
-	//! for each state in the basis
-	virtual void setNaturalBasis(VectorOperatorType& creationMatrix,
-	                             SparseMatrixType &hamiltonian,
-	                             SymmetryElectronsSzType& q,
-	                             const BlockType& block,
-	                             const RealType& time) const
+	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
 	{
-
-		extendedHubbard_.setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
-
-		// add S+ and Sz to creationMatrix
-		setSpinMatrices(creationMatrix,block);
-
-		// add J_{ij} S_i S_j to hamiltonian
-		addSiSj(hamiltonian,creationMatrix,block);
+		extendedHubbard_.setQuantumNumbers(q, block);
 	}
 
 	//! set creation matrices for sites in block
@@ -214,10 +200,10 @@ public:
 	                                        RealType factorForDiagonals=1.0)  const
 	{
 		extendedHubbard_.addDiagonalsInNaturalBasis(hmatrix,
-		                                         cm,
-		                                         block,
-		                                         time,
-		                                         factorForDiagonals);
+		                                            cm,
+		                                            block,
+		                                            time,
+		                                            factorForDiagonals);
 	}
 
 	virtual const TargetQuantumElectronsType& targetQuantum() const

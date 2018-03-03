@@ -146,21 +146,9 @@ public:
 		return (1<<2);
 	}
 
-	//! find creation operator matrices for (i,sigma) in the natural basis,
-	//! find quantum numbers and number of electrons
-	//! for each state in the basis
-	void setNaturalBasis(VectorOperatorType& creationMatrix,
-	                     SparseMatrixType &hamiltonian,
-	                     SymmetryElectronsSzType &q,
-	                     const BlockType& block,
-	                     const RealType& time)  const
+	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
 	{
-		extendedHubbard_.setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
-
-		addAditionalOperatorMatrices(creationMatrix,block);
-
-		//! set hamiltonian
-		this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
+		extendedHubbard_.setQuantumNumbers(q, block);
 	}
 
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,

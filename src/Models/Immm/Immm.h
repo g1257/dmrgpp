@@ -218,27 +218,12 @@ public:
 
 	void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
-	//! find creation operator matrices for (i,sigma) in the natural basis,
-	//! find quantum numbers and number of electrons
-	//! for each state in the basis
-	void setNaturalBasis(typename PsimagLite::Vector<OperatorType>::Type& creationMatrix,
-	                     SparseMatrixType& hamiltonian,
-	                     SymmetryElectronsSzType& q,
-	                     const BlockType& block,
-	                     const RealType& time)  const
+	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
 	{
-		assert(block.size()==1);
-		HilbertBasisType natBasis;
-		typename PsimagLite::Vector<SizeType>::Type qvector;
-		setNaturalBasis(natBasis,qvector,block);
-
-		setOperatorMatrices(creationMatrix,block);
-
-		//! Set symmetry related
-		setSymmetryRelated(q,natBasis,block.size());
-
-		//! set hamiltonian
-		this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
+		VectorSizeType qns;
+		HilbertBasisType basis;
+		setNaturalBasis(basis, qns, block);
+		setSymmetryRelated(q, basis, block.size());
 	}
 
 	//! set creation matrices for sites in block

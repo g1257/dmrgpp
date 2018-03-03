@@ -290,19 +290,9 @@ public:
 
 	void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
-	//! find creation operator matrices for (i,sigma) in the natural basis,
-	//! find quantum numbers and number of electrons
-	//! for each state in the basis
-	void setNaturalBasis(VectorOperatorType& creationMatrix,
-	                     SparseMatrixType &hamiltonian,
-	                     SymmetryElectronsSzType &qq,
-	                     const BlockType& block,
-	                     const RealType& time)  const
+	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType&) const
 	{
-		creationMatrix = creationMatrix_;
-		qq = qq_;
-		//! set hamiltonian
-		this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
+		q = qq_;
 	}
 
 	//! set creation matrices for sites in block

@@ -177,37 +177,14 @@ public:
 
 	void print(std::ostream& os) const { modelFeAs_.print(os); }
 
-	//! find creation operator matrices for (i,sigma) in the natural basis,
-	//! find quantum numbers and number of electrons
-	//! for each state in the basis
-	void setNaturalBasis(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
-	                     SparseMatrixType &hamiltonian,
-	                     SymmetryElectronsSzType &q,
-	                     BlockType const &block,
-	                     const RealType& time)  const
+	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
 	{
-		blockIsSize1OrThrow(block);
-
-		modelFeAs_.setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
-
-		// add S^+_i to creationMatrix
-		setSplus(creationMatrix,block);
-
-		// add S^z_i to creationMatrix
-		setSz(creationMatrix,block);
-
-		// add J_{ij} S^+_i S^-_j + S^-_i S^+_j to Hamiltonia
-		addSplusSminus(hamiltonian,creationMatrix,block);
-
-		// add J_{ij} S^z_i S^z_j to Hamiltonian
-		addSzSz(hamiltonian,creationMatrix,block);
-
+		modelFeAs_.setQuantumNumbers(q, block);
 	}
 
 	//! set creation matrices for sites in block
-	void setOperatorMatrices(
-	        typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
-	        BlockType const &block) const
+	void setOperatorMatrices(VectorOperatorType& creationMatrix,
+	                         const BlockType& block) const
 	{
 		blockIsSize1OrThrow(block);
 

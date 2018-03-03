@@ -164,15 +164,7 @@ public:
 		if (X[0] != 0 && X[0] != lrs_.super().block().size()-1)
 			return;
 
-		VectorOperatorType creationMatrix;
-		SparseMatrixType hmatrix;
-		SymmetryElectronsSzType q;
-		model_.setNaturalBasis(creationMatrix,
-		                       hmatrix,
-		                       q,
-		                       X,
-		                       commonTargetting_.currentTime());
-		basisWithOps.setVarious(X,hmatrix,q,creationMatrix);
+		basisWithOps.setVarious(X, model_, commonTargetting_.currentTime());
 	}
 
 	virtual bool end() const

@@ -512,27 +512,28 @@ private:
 	void suzukiTrotterPerm(VectorSizeType& iperm,
 	                       const VectorSizeType& block) const
 	{
-		HilbertBasisType  basis;
-		VectorSizeType q;
-		model_.setNaturalBasis(basis,q,block);
-		HilbertBasisType  basis1;
-		VectorSizeType q1;
-		VectorSizeType block1(1,0);
-		model_.setNaturalBasis(basis1,q1,block1);
-		iperm.resize(basis.size());
-		assert(basis1.size() > 0);
-		SizeType bitnumber = utils::bitSizeOfInteger(basis1.size()-1);
-		for (SizeType i=0;i<basis1.size();i++) {
-			for (SizeType j=0;j<basis1.size();j++) {
-				HilbertStateType ket = basis1[i];
-				HilbertStateType ket2 = basis1[j];
-				ket2 <<= bitnumber;
-				ket |= ket2;
-				assert(ket < basis.size());
-				assert(i+j*basis1.size() < iperm.size());
-				iperm[i+j*basis1.size()] = PsimagLite::isInVector(basis,ket);
-			}
-		}
+		std::cerr<<"suzukiTrotter no longer supported (sorry!)\n";
+//		HilbertBasisType  basis;
+//		VectorSizeType q;
+//		model_.setNaturalBasis(basis,q,block);
+//		HilbertBasisType  basis1;
+//		VectorSizeType q1;
+//		VectorSizeType block1(1,0);
+//		model_.setNaturalBasis(basis1,q1,block1);
+//		iperm.resize(basis.size());
+//		assert(basis1.size() > 0);
+//		SizeType bitnumber = utils::bitSizeOfInteger(basis1.size()-1);
+//		for (SizeType i=0;i<basis1.size();i++) {
+//			for (SizeType j=0;j<basis1.size();j++) {
+//				HilbertStateType ket = basis1[i];
+//				HilbertStateType ket2 = basis1[j];
+//				ket2 <<= bitnumber;
+//				ket |= ket2;
+//				assert(ket < basis.size());
+//				assert(i+j*basis1.size() < iperm.size());
+//				iperm[i+j*basis1.size()] = PsimagLite::isInVector(basis,ket);
+//			}
+//		}
 	}
 
 	void getMatrix(MatrixComplexOrRealType& m,

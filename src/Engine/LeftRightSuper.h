@@ -291,13 +291,9 @@ private:
 	          ProgramGlobals::DirectionEnum dir,
 	          RealType time)
 	{
-		SparseMatrixType hmatrix;
-		SymmetryElectronsSzType q;
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		model.setNaturalBasis(creationMatrix,hmatrix,q,X,time);
 		BasisWithOperatorsType Xbasis("Xbasis");
 
-		Xbasis.setVarious(X,hmatrix,q,creationMatrix);
+		Xbasis.setVarious(X, model, time);
 		leftOrRight.setToProduct(pS,Xbasis,dir);
 
 		SparseMatrixType matrix=leftOrRight.hamiltonian();

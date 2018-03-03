@@ -381,7 +381,7 @@ public:
 		msg<<"I'm applying a local operator now";
 		progress_.printline(msg,std::cout);
 		typename PsimagLite::Vector<SizeType>::Type electrons;
-		findElectronsOfOneSite(electrons,site);
+		targetHelper_.model().findElectronsOfOneSite(electrons,site);
 		FermionSign fs(targetHelper_.lrs().left(),electrons);
 		applyOpLocal_(phiNew,phiOld,targetHelper_.tstStruct().aOperators()[indexOfOperator],
 		              fs,systemOrEnviron,corner);
@@ -450,16 +450,6 @@ private:
 		}
 
 		return "undefined";
-	}
-
-	void findElectronsOfOneSite(typename PsimagLite::Vector<SizeType>::Type& electrons,
-	                            SizeType site) const
-	{
-		typename PsimagLite::Vector<SizeType>::Type block(1,site);
-		typename ModelType::HilbertBasisType basis;
-		typename PsimagLite::Vector<SizeType>::Type quantumNumbs;
-		targetHelper_.model().setNaturalBasis(basis,quantumNumbs,block);
-		targetHelper_.model().findElectrons(electrons,basis,site);
 	}
 
 	SizeType evolve(SizeType i,
@@ -554,7 +544,7 @@ private:
 			msg<<"I'm applying a local operator now";
 			progress_.printline(msg,std::cout);
 			typename PsimagLite::Vector<SizeType>::Type electrons;
-			findElectronsOfOneSite(electrons,site);
+			targetHelper_.model().findElectronsOfOneSite(electrons,site);
 			FermionSign fs(targetHelper_.lrs().left(),electrons);
 			applyOpLocal_(phiNew,phiOld,targetHelper_.tstStruct().aOperators()[i],
 			              fs,systemOrEnviron,corner);

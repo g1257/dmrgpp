@@ -289,13 +289,23 @@ public:
 		return operators_.reducedHamiltonian();
 	}
 
-	void setVarious(BlockType const &block,
-	                SparseMatrixType const &h,
-	                SymmetryElectronsSzType const &qm,
-	                const typename PsimagLite::Vector<OperatorType>::Type& ops)
+	template<typename SomeModelType>
+	void setVarious(const BlockType& block,
+	                const SomeModelType& model,
+	                RealType time)
 	{
+		SymmetryElectronsSzType qm;
+		model.setQuantumNumbers(qm, block);
+
 		this->set(block);
 		this->setSymmetryRelated(qm);
+
+		typename PsimagLite::Vector<OperatorType>::Type ops;
+		SparseMatrixType h;
+
+		model.setOperatorMatrices(ops, block);
+		model.calcHamiltonian(h, ops, block, time);
+
 		setHamiltonian(h);
 		operators_.setOperators(ops);
 		operatorsPerSite_.clear();

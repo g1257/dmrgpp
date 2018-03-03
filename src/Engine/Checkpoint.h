@@ -161,11 +161,8 @@ public:
 			SizeType operatorsPerSite = v[0];
 
 			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-			SparseMatrixType hmatrix;
-			SymmetryElectronsSzType q;
-			RealType time = 0;
 			VectorSizeType test(1,0);
-			model.setNaturalBasis(creationMatrix,hmatrix,q,test,time);
+			model.setOperatorMatrices(creationMatrix, test);
 
 			if (creationMatrix.size() != operatorsPerSite) {
 				PsimagLite::String msg("CheckPoint: FATAL: Perhaps trying to");

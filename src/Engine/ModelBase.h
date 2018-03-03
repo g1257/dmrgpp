@@ -132,12 +132,6 @@ public:
 		delete modelCommon_;
 	}
 
-	virtual void setNaturalBasis(VectorOperatorType& creationMatrix,
-	                             SparseMatrixType &hamiltonian,
-	                             SymmetryElectronsSzType& q,
-	                             const BlockType& block,
-	                             const RealType& time) const = 0;
-
 	virtual OperatorType naturalOperator(const PsimagLite::String& what,
 	                                     SizeType site,
 	                                     SizeType dof) const = 0;
@@ -152,10 +146,6 @@ public:
 
 	virtual void setOperatorMatrices(VectorOperatorType& creationMatrix,
 	                                 const BlockType& block) const = 0;
-
-	virtual void setNaturalBasis(HilbertBasisType& basis,
-	                             typename PsimagLite::Vector<SizeType>::Type& q,
-	                             const BlockType& block) const = 0;
 
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                        const VectorOperatorType& cm,
@@ -221,6 +211,9 @@ public:
 	{
 		return modelCommon_->getConnection(A,B,ix,modelHelper);
 	}
+
+	virtual void setQuantumNumbers(SymmetryElectronsSzType&,
+	                               const BlockType&) const = 0;
 
 	//! Full hamiltonian from creation matrices cm
 	virtual void calcHamiltonian(SparseMatrixType &hmatrix,
@@ -327,6 +320,12 @@ public:
 		str += "\n";
 		throw PsimagLite::RuntimeError(str);
 	}
+
+protected:
+
+	virtual void setNaturalBasis(HilbertBasisType& basis,
+	                             VectorSizeType& q,
+	                             const BlockType& block) const = 0;
 
 private:
 

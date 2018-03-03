@@ -167,23 +167,9 @@ public:
 		return modelHubbard_.hilbertSize(site);
 	}
 
-	//! find creation operator matrices for (i,sigma) in the natural basis,
-	//! find quantum numbers and number of electrons
-	//! for each state in the basis
-	virtual void setNaturalBasis(VectorOperatorType& creationMatrix,
-	                             SparseMatrixType &hamiltonian,
-	                             SymmetryElectronsSzType& q,
-	                             const BlockType& block,
-	                             const RealType& time) const
+	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
 	{
-
-		modelHubbard_.setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
-
-		// add ni to creationMatrix
-		setNi(creationMatrix,block);
-
-		// add V_{ij} n_i n_j to hamiltonian
-		this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
+		modelHubbard_.setQuantumNumbers(q, block);
 	}
 
 	//! set creation matrices for sites in block

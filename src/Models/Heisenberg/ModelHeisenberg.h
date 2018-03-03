@@ -221,25 +221,12 @@ public:
 		return modelParameters_.twiceTheSpin + 1;
 	}
 
-	//! find  operator matrices for (i,sigma) in the natural basis,
-	//! find quantum numbers and number of electrons
-	//! for each state in the basis
-	void setNaturalBasis(VectorOperatorType& operatorMatrices,
-	                     SparseMatrixType &hamiltonian,
-	                     SymmetryElectronsSzType &q,
-	                     const BlockType& block,
-	                     const RealType& time) const
+	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
 	{
-		HilbertBasisType natBasis;
-
-		VectorSizeType qvector;
-		setNaturalBasis(natBasis,qvector,block);
-
-		setOperatorMatrices(operatorMatrices,block);
-
-		setSymmetryRelated(q,natBasis,block.size());
-
-		this->calcHamiltonian(hamiltonian,operatorMatrices,block,time);
+		VectorSizeType qns;
+		HilbertBasisType basis;
+		setNaturalBasis(basis, qns, block);
+		setSymmetryRelated(q, basis, block.size());
 	}
 
 	//! set operator matrices for sites in block

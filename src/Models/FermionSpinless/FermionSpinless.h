@@ -167,33 +167,12 @@ public:
 		return (SizeType)pow(2,NUMBER_OF_ORBITALS);
 	}
 
-	/** Function \cppFunction{!PTEX_THISFUNCTION} sets certain aspects of the
-		``natural basis'' (usually the real-space basis) on a given block.
-		The operator matrices (e.g., $c^\dagger_{i\sigma}$ for the Hubbard
-		model or $S_i^+$ and $S_i^z$ for the Heisenberg model) need to be set
-		there, as well as the Hamiltonian and the effective quantum number for
-		each state of this natural basis. To implement the algorithm for a
-		fixed density, the number of electrons for each state is also needed.*/
-	virtual void setNaturalBasis(VectorOperatorType& creationMatrix,
-	                             SparseMatrixType &hamiltonian,
-	                             SymmetryElectronsSzType& q,
-	                             const BlockType& block,
-	                             const RealType& time) const
+	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
 	{
-		HilbertBasisType natBasis;
-		typename PsimagLite::Vector<SizeType>::Type quantumNumbs;
-		setNaturalBasis(natBasis,quantumNumbs,block);
-
-		setOperatorMatrices(creationMatrix,block);
-
-		// add ni to creationMatrix
-		setNi(creationMatrix,block);
-
-		//! Set symmetry related
-		setSymmetryRelated(q,natBasis,block.size());
-
-		//! set hamiltonian
-		this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
+		VectorSizeType qns;
+		HilbertBasisType basis;
+		setNaturalBasis(basis, qns, block);
+		setSymmetryRelated(q, basis, block.size());
 	}
 
 	/** \cppFunction{!PTEX_THISFUNCTION} sets local operators needed to

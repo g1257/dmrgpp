@@ -176,20 +176,9 @@ public:
 		return creationMatrix_[0].data.rows();
 	}
 
-	//! find creation operator matrices for (i,sigma) in the natural basis,
-	//! find quantum numbers and number of electrons
-	//! for each state in the basis
-	virtual void setNaturalBasis(VectorOperatorType& creationMatrix,
-	                             SparseMatrixType &hamiltonian,
-	                             SymmetryElectronsSzType& qq,
-	                             const BlockType& block,
-	                             const RealType& time) const
+	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
 	{
-		creationMatrix = creationMatrix_;
-		qq = qq_;
-
-		//! set hamiltonian
-		this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
+		q = qq_;
 	}
 
 	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
@@ -321,7 +310,6 @@ public:
 		basis = basis_;
 		q = q_;
 	}
-
 
 	virtual const TargetQuantumElectronsType& targetQuantum() const
 	{
