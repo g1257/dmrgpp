@@ -221,6 +221,14 @@ public:
 			labels_.push_back(label);
 		}
 
+		template<typename X>
+		void write(const X& mat,
+		           const String& label,
+		           typename EnableIf<IsMatrixLike<X>::True, int>::Type = 0)
+		{
+			throw RuntimeError("IoNg:: write for matrix not implemented\n");
+		}
+
 		template<typename T>
 		void write(const std::stack<T>& something, const String& label)
 		{
@@ -418,6 +426,23 @@ public:
 		}
 
 		template<typename X>
+		void read(X &mat,
+		          String const &s,
+		          LongIntegerType level= 0,
+		          typename EnableIf<IsMatrixLike<X>::True, int>::Type  = 0)
+		{ throw RuntimeError("IoNg:: not implemented\n"); }
+
+		template<
+		        typename FieldType,
+		        template <typename> class SparseMatrixTemplate,
+		        template<typename,template<typename> class>
+		        class X>
+		void read(X<FieldType,SparseMatrixTemplate>& op,
+		          const String& s,
+		          LongIntegerType level=0)
+		{ throw RuntimeError("IoNg:: not implemented\n"); }
+
+		template<typename X>
 		typename EnableIf<IsStackLike<X>::True,std::pair<String,SizeType> >::Type
 		read(X &x,
 		     String const &s,
@@ -458,23 +483,6 @@ public:
 		void readSparseVector(SomeType<X> &x,
 		                      String const &s,
 		                      LongIntegerType level=0)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
-
-		template<typename X>
-		void readMatrix(X &mat,
-		                String const &s,
-		                LongIntegerType level= 0,
-		                typename EnableIf<IsMatrixLike<X>::True, int>::Type  = 0)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
-
-		template<
-		        typename FieldType,
-		        template <typename> class SparseMatrixTemplate,
-		        template<typename,template<typename> class>
-		        class X>
-		void readMatrix(X<FieldType,SparseMatrixTemplate>& op,
-		                const String& s,
-		                LongIntegerType level=0)
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
 		void rewind()
