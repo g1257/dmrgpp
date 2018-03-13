@@ -46,12 +46,13 @@ my $hptr = {"GeometryKind" => \$geometry,
 OmegaUtils::getLabels($hptr,$templateInput);
 
 my ($fmString, $fpString) = @ARGV;
-defined($fpString) or die "$usage\n";
+defined($fmString) or die "$usage\n";
+defined($fpString) or print STDERR "$0: WARNING: Only one spectrum\n";
 
 my (@filesMinus, @filesPlus);
 
 getFiles(\@filesMinus, $fmString);
-getFiles(\@filesPlus, $fpString);
+getFiles(\@filesPlus, $fpString) if (defined($fpString));
 
 my $numberKs;
 my %specMinus;
@@ -66,9 +67,11 @@ for (my $i = 0; $i < scalar(@filesPlus); ++$i) {
 
 my %specFull;
 addSpectrum(\%specFull, \%specMinus);
-addSpectrum(\%specFull, \%specPlus);
+addSpectrum(\%specFull, \%specPlus) if (defined($fpString));
 OmegaUtils::printGnuplot(\%specFull, $geometry,  $isPeriodic, $zeroAtCenter);
 OmegaUtils::printOffsetPlots(\%specFull, $geometry,  $isPeriodic, $zeroAtCenter);
+
+exit(0) if (!defined($fpString));
 
 my @nkx0;
 my $norm = sumOverOmega(\@nkx0, \%specMinus, 0);
