@@ -400,9 +400,10 @@ sub fourierChain
 			my @temp = @$ptr;
 			my $arg = $q*($i-$centralSite);
 			my $carg = cos($arg);
-			my $sarg = sin($arg);
-			$sum[0] += $temp[0]*$carg;
-			$sum[1] += $temp[1]*$carg;
+			my $sarg = sin($q*($i + 1));
+			my $cOrSarg = ($isPeriodic) ? $carg : $sarg;
+			$sum[0] += $temp[0]*$cOrSarg;
+			$sum[1] += $temp[1]*$cOrSarg;
 		}
 
 		$f->[$m] = \@sum;
@@ -437,6 +438,7 @@ sub fourierF0
 		my $ptr = $v->[$i];
 		my @temp = @$ptr;
 		my $arg = $q*($i-$centralSite)*0.5;
+		# FIXME THINK ABOUT OPEN BC
 		my $carg = cos($arg);
 		$sum[0] += $temp[0]*$carg;
 		$sum[1] += $temp[1]*$carg;
@@ -455,6 +457,7 @@ sub fourierF1
 		my @temp = @$ptr;
 		my $arg = $q*distanceLadder($i,$centralSite);
 		my $carg = cos($arg);
+		# FIXME THINK ABOUT OPEN BC
 		$sum[0] += $temp[0]*$carg;
 		$sum[1] += $temp[1]*$carg;
 	}
@@ -469,8 +472,6 @@ sub distanceLadder
 	my $second = $jnd/2;
 	return $first - $second;
 }
-
-
 
 sub extractValue
 {

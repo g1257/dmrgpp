@@ -316,7 +316,7 @@ sub addSpectrum
 sub getQ
 {
 	my ($m, $n, $isPeriodic) = @_;
-	return ($isPeriodic) ? 2.0*$pi*$m/$n : $m*$pi/($n+1.0);
+	return ($isPeriodic) ? 2.0*$pi*$m/$n : ($m + 1)*$pi/($n+1.0);
 }
 
 sub getFiles
