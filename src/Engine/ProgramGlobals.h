@@ -113,9 +113,11 @@ struct ProgramGlobals {
 	                              DirectionEnum direction,
 	                              SizeType n)
 	{
-		if (site == 1 && direction == EXPAND_ENVIRON) return 0;
+		if (site == 1 && direction == EXPAND_ENVIRON)
+			return 0;
 
-		if (site == n - 2 && direction == EXPAND_SYSTEM) return n - 1;
+		if (site == n - 2 && direction == EXPAND_SYSTEM)
+			return n - 1;
 
 		return -1;
 	}

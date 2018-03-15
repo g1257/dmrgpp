@@ -243,7 +243,7 @@ public:
 	           SizeType line) const
 	{
 		if (label=="JMVALUES" || label=="RS:JMVALUES") {
-			if (vec.size()!=2) return error1("JMVALUES",line);
+			if (vec.size()!=3) return error1("JMVALUES",line);
 			return true;
 		} else if (label=="RAW_MATRIX" || label=="RS:RAW_MATRIX" || label == "SpinOrbit") {
 			if (!checkForMatrix(vec)) return error1(label,line);
