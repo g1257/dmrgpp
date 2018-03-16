@@ -140,7 +140,8 @@ public:
 		if (stage_.size() != 0)
 			throw PsimagLite::RuntimeError("ApplyOperatorExpression: Internal Error\n");
 
-		stage_.resize(targetHelper_.tstStruct().sites(),DISABLED);
+		SizeType tstSites = targetHelper_.tstStruct().sites();
+		stage_.resize((tstSites == 0) ? 1 : tstSites, DISABLED);
 	}
 
 	SizeType getPhi(VectorWithOffsetType& phiNew,

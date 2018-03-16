@@ -124,7 +124,7 @@ public:
 	      tstStruct_(io,model),
 	      progress_("TargetingCorrection")
 	{
-		this->common().init(&tstStruct_,1);
+		this->common().init(&tstStruct_, 1);
 	}
 
 	RealType normSquared(SizeType i) const
