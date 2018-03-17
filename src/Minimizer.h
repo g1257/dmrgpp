@@ -20,7 +20,8 @@ template<typename FunctionType>
 typename FunctionType::FieldType myFunction(const gsl_vector *v, void *params)
 {
 	FunctionType* ft = (FunctionType *)params;
-	return ft->operator()(v->data,v->size);
+	typename Vector<typename FunctionType::FieldType>::Type stdv(v->data, v->data+ v->size);
+	return ft->operator()(stdv);
 }
 
 template<typename FunctionType>
@@ -106,7 +107,9 @@ public:
 			status_ = gsl_multimin_test_size(size, tolerance);
 
 			if (verbose_) {
-				RealType thisValue = function_(gslS_->x->data,func.n);
+				typename Vector<typename FunctionType::FieldType>::Type v(gslS_->x->data,
+				                                                          gslS_->x->data+ func.n);
+				RealType thisValue = function_(v);
 				RealType diff = fabs(thisValue - prevValue);
 				std::cerr<<"simplex: "<<iter<<" "<<thisValue<<" diff= "<<diff;
 				std::cerr<<" status= "<<status_<<" size="<<size<<"\n";

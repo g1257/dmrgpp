@@ -6,7 +6,7 @@ use warnings;
 use lib '../scripts';
 use Make;
 
-my @drivers = qw/integrator sparseSolverTest testCRSMatrix
+my @drivers = qw/integrator sparseSolverTest testCRSMatrix minimizer
                  combineContinuedFraction continuedFractionCollection range
                  kernelPolynomial linearPrediction options randomTest svd
 		 testLapack threads testIsClass testMemResolv1 sumDecomposition

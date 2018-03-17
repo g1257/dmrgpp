@@ -1,4 +1,4 @@
-
+#include "Vector.h"
 #include "Minimizer.h"
 //#include "Square.h"
 
@@ -9,7 +9,7 @@ T square(const T& t1)
 }
 
 template<typename T>
-std::ostream& operator<<(std::ostream& os,const typename Vector<T>::Type& v)
+std::ostream& operator<<(std::ostream& os, const typename PsimagLite::Vector<T>::Type& v)
 {
 	os<<v.size()<<"\n";
 	for (SizeType i=0;i<v.size();i++)
