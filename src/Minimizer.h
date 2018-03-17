@@ -30,7 +30,9 @@ void myDfunction(const gsl_vector *v,
                  gsl_vector* df)
 {
 	FunctionType* ft = (FunctionType *)params;
-	ft->df(v->data,v->size,df->data,df->size);
+	typename Vector<typename FunctionType::FieldType>::Type src(v->data, v->data+ v->size);
+	typename Vector<typename FunctionType::FieldType>::Type dest(df->data, df->data+ df->size);
+	ft->df(dest, src);
 }
 
 template<typename FunctionType>
@@ -161,7 +163,9 @@ public:
 			status_ = gsl_multimin_test_gradient (gslDs_->gradient, tolerance);
 
 			if (verbose_) {
-				RealType thisValue = function_(gslDs_->x->data,func.n);
+				typename Vector<typename FunctionType::FieldType>::Type v(gslDs_->x->data,
+				                                                          gslDs_->x->data + func.n);
+				RealType thisValue = function_(v);
 				RealType diff = fabs(thisValue - prevValue);
 				std::cerr<<"conjugateGradient: "<<iter<<" "<<thisValue;
 				std::cerr<<" diff= "<<diff;
@@ -219,7 +223,7 @@ private:
 		gsl_vector* df = gsl_vector_alloc (function_.size());
 		myDfunction<FunctionType>(v,&function_,df);
 		RealType sum = 0;
-		for (int i = 0; i < df->size; ++i) {
+		for (SizeType i = 0; i < df->size; ++i) {
 			RealType tmp = gsl_vector_get(df,i);
 			sum += PsimagLite::conj(tmp) * tmp;
 		}
