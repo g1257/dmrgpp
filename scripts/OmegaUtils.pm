@@ -73,7 +73,7 @@ sub printGnuplot
 
 sub printOffsetPlots
 {
-	my ($ptr, $geometry, $isPeriodic, $zeroAtCenter) = @_;
+	my ($ext, $ptr, $geometry, $isPeriodic, $zeroAtCenter) = @_;
 
 	my $factor = 0;
 	my @fileIndices=(0);
@@ -88,7 +88,7 @@ sub printOffsetPlots
 
 	foreach my $fileIndex (@fileIndices) {
 		my $offset = 0.7*findMaxVertical($ptr, $factor, $fileIndex);
-		my $outFile = "outSpectrum$fileIndex.offset";
+		my $outFile = "outSpectrum$fileIndex.$ext";
 		open(FOUT, ">", "$outFile") or die "$0: Cannot write to $outFile : $!\n";
 
 		for my $omega (sort {$a <=> $b} keys %$ptr) {

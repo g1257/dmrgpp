@@ -69,7 +69,7 @@ my %specFull;
 addSpectrum(\%specFull, \%specMinus);
 addSpectrum(\%specFull, \%specPlus) if (defined($fpString));
 OmegaUtils::printGnuplot(\%specFull, $geometry,  $isPeriodic, $zeroAtCenter);
-OmegaUtils::printOffsetPlots(\%specFull, $geometry,  $isPeriodic, $zeroAtCenter);
+OmegaUtils::printOffsetPlots("offset", \%specFull, $geometry,  $isPeriodic, $zeroAtCenter);
 
 exit(0) if (!defined($fpString));
 
