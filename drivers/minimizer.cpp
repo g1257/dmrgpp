@@ -46,7 +46,7 @@ int main(int argc,char *argv[])
 	
 	SizeType maxIter = 100;
 	MyFunctionTest f;
-	Minimizer<RealType,MyFunctionTest> min(f,maxIter);
+	Minimizer<RealType,MyFunctionTest> min(f,maxIter,true);
 
 	int iter = min.simplex(x,1e-3,1e-5);
 	if (iter<0) {

@@ -33,6 +33,8 @@ void myDfunction(const gsl_vector *v,
 	typename Vector<typename FunctionType::FieldType>::Type src(v->data, v->data+ v->size);
 	typename Vector<typename FunctionType::FieldType>::Type dest(df->data, df->data+ df->size);
 	ft->df(dest, src);
+	for (SizeType ind = 0; ind < df->size; ++ind)
+		gsl_vector_set(df, ind, dest[ind]);
 }
 
 template<typename FunctionType>

@@ -66,6 +66,7 @@ public:
 
 	FitData(const VectorRealType& omegas, RealType mu, RealType kf, int ky)
 	    : omegas_(omegas),
+	      mu_(mu),
 	      ekf_(dispersion(kf, ky*M_PI) - mu),
 	      initDelta_(1),
 	      initGamma_(0.1),
@@ -119,14 +120,24 @@ private:
 
 	RealType dfDelta(RealType omega, RealType delta, RealType gamma) const
 	{
-		err("fixme\n");
-		return 0;
+		RealType gaom = gamma*omega;
+		RealType num = (omega + ekf_)*gaom*2.0*anorm_/M_PI;
+		RealType omega2 = omega*omega;
+		RealType phi2 = ekf_*ekf_ + gamma*gamma + delta*delta;
+		RealType den = square(omega2 - phi2) + 4*gaom*gaom;
+		RealType numd = 4.0*delta*(phi2 - omega2);
+		return -num*numd/square(den);
 	}
 
 	RealType dfGamma(RealType omega, RealType delta, RealType gamma) const
 	{
-		err("fixme\n");
-		return 0;
+		RealType gaom = gamma*omega;
+		RealType num0 = (omega + ekf_)*omega*2.0*anorm_/M_PI;
+		RealType omega2 = omega*omega;
+		RealType phi2 = ekf_*ekf_ + gamma*gamma + delta*delta;
+		RealType den = square(omega2 - phi2) + 4.0*gaom*gaom;
+		RealType num = -num0*gamma*(4*(phi2 - omega2)*gamma + 8*gamma*omega2);
+		return num0/den - num/square(den);
 	}
 
 	RealType dispersion(RealType kx, RealType ky) const
@@ -146,6 +157,7 @@ private:
 	static RealType square(RealType x) { return x*x; }
 
 	VectorRealType omegas_;
+	RealType mu_;
 	RealType ekf_;
 	const RealType initDelta_;
 	const RealType initGamma_;
@@ -188,11 +200,11 @@ class Fitter {
 				SizeType n = od_.omegas().size();
 				for (SizeType i = 0; i < n; ++i) {
 					// FIXME CHECK SIGN OF DERIVATIVE HERE
-					RealType x = fabs(od_(i) - fd_(i, v))*2.0*fd_.df(i,v,j);
+					RealType x = (fd_(i, v) - od_(i))*fd_.df(i,v,j);
 					sum += x;
 				}
 
-				result[j] = sum;
+				result[j] = sum*2.0;
 			}
 		}
 
@@ -220,6 +232,10 @@ public:
 		int iter = min.simplex(results_, 1e-5, 1e-7);
 		if (iter<0)
 			std::cerr<<"No minimum found\n";
+		std::cerr<<"#Converged after "<<iter<<" iterations.\n";
+		std::cerr<<"#Minimum is "<<f(results_)<<"\n";
+		std::ofstream of("test.out");
+		printComparison(of);
 	}
 
 	void fit2(SizeType maxIter)
@@ -229,7 +245,7 @@ public:
 		MyFunctionTest f(od_, fd_);
 		PsimagLite::Minimizer<RealType,MyFunctionTest> min(f, maxIter);
 
-		int iter = min.conjugateGradient(results_, 1e-5, 1e-5, 1e-7);
+		int iter = min.conjugateGradient(results_, 1e-3, 1e-3, 1e-3);
 		if (iter<0)
 			std::cerr<<"No minimum found\n";
 	}
@@ -244,6 +260,13 @@ public:
 	}
 
 private:
+
+	void printComparison(std::ostream& os) const
+	{
+		SizeType n = od_.omegas().size();
+		for (SizeType i = 0; i < n; ++i)
+			os << od_.omegas()[i] << " " << od_(i) << " " << fd_(i, results_)<<"\n";
+	}
 
 	const OracleType& od_;
 	const FitDataType& fd_;
@@ -267,7 +290,7 @@ int main(int argc, char** argv)
 	Fitter<OracleData<double>, FitData<double> > fitter(od, fit);
 
 	SizeType maxIter = 1000;
-	fitter.fit(maxIter);
+	fitter.fit2(maxIter);
 
 	fitter.print(std::cout);
 }
