@@ -42,14 +42,14 @@ class AinurState {
 		template <typename A, typename ContextType>
 		typename EnableIf<TypesEqual<A, double>::True, void>::Type
 		operator()(A& attr,
-		                ContextType&,
-		                bool&) const;
+		           ContextType&,
+		           bool&) const;
 
 		template <typename A, typename ContextType>
 		typename EnableIf<!TypesEqual<A, double>::True, void>::Type
 		operator()(A& attr,
-		                ContextType&,
-		                bool&) const;
+		           ContextType&,
+		           bool&) const;
 
 
 		String name_;
