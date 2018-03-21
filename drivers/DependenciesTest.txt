@@ -1,0 +1,159 @@
+TEST #0. Preparation
+
+[pull latest PsimagLite]
+
+cd PsimagLite/lib
+perl configure.pl
+(edit Config.make if needed)
+make -j 8
+
+cd ../drivers/
+perl make.pl
+
+NOTE 1: in the below installer-command can be apt, dnf, zypper, etc,
+depending on your distribution.
+NOTE 2: -devel libraries are only needed for compilation of the program, not for
+running it.
+NOTE 3: make -j 8 is used, adjust 8 to the number of cores you want make to use.
+
+----------------------------------------------------------------------
+
+TEST #1. LAPACK
+
+Why? Because LAPACK does diagonalization and SVD really well.
+
+make testLapack
+./testLapack
+echo $?
+TEST PASSES IF: You get 0 here.
+
+TROUBLESHOOTING: If test does not pass 
+installer-command install lapack-devel blas-devel lapack blas
+
+TODO: Add BLAS test. 
+TODO: Add test of thread safety.
+
+----------------------------------------------------------------------
+
+TEST #2. Perl6
+
+Why? Because we need scripts, and perl6 is the best scripting language ever.
+
+installer-command install rakudo
+Create a file perl6test.pl containing the following:
+
+#!/usr/bin/env perl6
+
+use v6;
+
+my @fibonacci = 1, 1, { $^a + $^b } ... *;
+say @fibonacci[6];     # 13
+#########################################
+chmod u+x perl6test.pl
+./perl6test.pl
+
+TEST PASSES IF: You get 13 here.
+
+TROUBLESHOOTING: If test does not pass 
+installer-command install rakudo
+
+----------------------------------------------------------------------
+
+TEST #3. hdf5
+
+Why? Because we need fastly indexed and verifyable i/o, and the hdf5 backend is the best option.
+
+cd PsimagLite/lib
+perl configure.pl
+Edit Config.make and make sure
+CPPFLAGS += -DUSE_IO_NG
+CPPFLAGS += -I/usr/include/hdf5/serial
+LDFLAGS += -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5
+is enabled
+make clean
+make -j 8
+cd ../drivers
+make clean
+make testIoNg
+./testIoNg
+
+TEST PASSES IF: You should see the number 10 followed by 10 42s.
+
+CLEAN-UP: See Appendix I.
+
+TROUBLESHOOTING: If test does not pass 
+installer-command install hdf5 hdf5-devel
+
+----------------------------------------------------------------------
+
+TEST #4. boost-spirit
+
+Why? Because we need a language to input structured ASCII data to a scientific application,
+     and parsing with boost-spirit is the best C++ parser.
+
+cd PsimagLite/lib
+perl configure.pl
+Edit Config.make and make sure
+CPPFLAGS += -DUSE_BOOST
+is enabled
+make clean
+make -j 8
+cd ../src/Ainur
+perl configure.pl
+Edit Config.make and make sure
+CPPFLAGS += -DUSE_BOOST
+make clean
+make -j 8
+ ./test prelude.ain input0.ain
+
+TEST PASSES IF: You get
+Read: TotalNumberOfSites=16
+
+CLEAN-UP: See Appendix I.
+
+TROUBLESHOOTING: If test does not pass install either
+installer-command install libboost-dev
+or
+installer-command install boost-devel
+
+Note: We only need boost-spirit, which the distros include under boost-devel
+
+----------------------------------------------------------------------
+
+TEST #5. GSL
+
+Why? Because the GSL implement many complicated numerical algorithms like integration and minimization well.
+
+cd PsimagLite/drivers
+perl configure.pl
+Edit Config.make and make sure
+CPPFLAGS +=-DUSE_GSL
+LDFLAGS += -lgsl -lgslcblas
+is enabled. 
+(Enabling these flags under PsimagLite/lib/Config.make
+and recompiling the library can be done also, but it is currently not needed.)
+make clean
+make minimizer
+./minimizer
+
+TEST PASSES IF: You get 2 2 3 or so.
+
+TROUBLESHOOTING: If test does not pass install either
+installer-command install gsl gsl-devel
+
+----------------------------------------------------------------------
+
+Appendix I.
+
+If you enable something in your PsimagLite/lib/Config.make like
+CPPFLAGS += -DUSE_BOOST
+and dont' enable it in your test or application (DMRG++, Lanczos++, etc)
+then BAD THINGS(tm) will happen.
+Make sure that your choices for PsimagLite/lib/Config.make and your
+application are the same, and recompile both with the same options.
+
+----------------------------------------------------------------------
+
+
+
+
