@@ -1,3 +1,24 @@
+2018-03-22 Version 5.08
+
+* i/o API changes
+
+* nFromAkw.pl improvements
+
+* VerySparseMatrix improvements
+
+* Anisotropy in Hubbard model added (optional)
+
+* Needed MaxMatrixRankStored now printed on failure
+
+* omega scripts for open boundary conditions
+
+* tst fix: border sites were printed twice
+
+* correction targeting: bug fix
+
+* wftInPatches is switched to wftInBlocks
+  when twositedmrg is used
+
 2018-02-27 Version 5.06
 
 * On February 1st, 2018 a massive
