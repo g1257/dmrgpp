@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009-2013-2018, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 5.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -115,8 +115,11 @@ public:
 			if (options.find("wftInPatches")!=PsimagLite::String::npos) {
 				accelMustBeNone(0);
 				accel = ACCEL_PATCHES;
-				if (twoSiteDmrg)
-					err("wftInPatches cannot be used with twositedmrg\n");
+				if (twoSiteDmrg) {
+					std::cerr<<"WARNING: wftInPatches not with twositedmrg, ";
+					std::cerr<<"switching to wftInBlocks instead\n";
+					accel = ACCEL_BLOCKS;
+				}
 			}
 
 			if (options.find("wftWithTemp")!=PsimagLite::String::npos)
