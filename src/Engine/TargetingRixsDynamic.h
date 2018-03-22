@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2016, UT-Battelle, LLC
+Copyright (c) 2009-2016-2018, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 4.]

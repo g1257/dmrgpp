@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2016, UT-Battelle, LLC
+Copyright (c) 2009-2016-2018, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 3]
+[DMRG++, Version 5.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -81,10 +81,10 @@ namespace Dmrg {
 SizeType ProgramGlobals::maxElectronsOneSpin = 0;
 bool ProgramGlobals::oldChangeOfBasis = false;
 const PsimagLite::String ProgramGlobals::license=
-"Copyright (c) 2009-2016, UT-Battelle, LLC\n"
+"Copyright (c) 2009-2016-2018, UT-Battelle, LLC\n"
 "All rights reserved\n"
 "\n"
-"[DMRG++, Version 3]\n"
+"[DMRG++, Version 5.]\n"
 "\n"
 "---------------------------------------------------------\n"
 "THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND\n"

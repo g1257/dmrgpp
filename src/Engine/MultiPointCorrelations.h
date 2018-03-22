@@ -2,7 +2,7 @@
 Copyright (c) 2013, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 3.0.0]
+[DMRG++, Version 5..0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
