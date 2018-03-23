@@ -66,6 +66,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/HubbardAncilla/HubbardAncilla.h"
 #include "../Models/HubbardAncillaExtended/HubbardAncillaExtended.h"
 #include "../Models/FermionSpinless/FermionSpinless.h"
+#include "../Models/Kitaev/Kitaev.h"
 
 namespace Dmrg {
 
@@ -95,6 +96,7 @@ class ModelSelector {
 	typedef HubbardAncilla<ModelBaseType> HubbardAncillaType;
 	typedef HubbardAncillaExtended<ModelBaseType> HubbardAncillaExtendedType;
 	typedef FermionSpinless<ModelBaseType> FermionSpinlessType;
+	typedef Kitaev<ModelBaseType> KitaevType;
 	// end models
 
 public:
@@ -151,6 +153,8 @@ public:
 			model_ = new HubbardAncillaExtendedType(solverParams,io,geometry);
 		} else if (name_ == "FermionSpinless") {
 			model_ = new FermionSpinlessType(solverParams,io,geometry);
+		} else if (name_ == "Kitaev") {
+			model_ = new KitaevType(solverParams,io,geometry);
 		} else {
 			PsimagLite::String s(__FILE__);
 			s += " Unknown model " + name_ + "\n";

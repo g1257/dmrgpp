@@ -72,7 +72,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ParametersModelKitaev.h
+/*! \file ParametersKitaev.h
  *
  *  Contains the parameters for the Kitaev model and function
  *  to read them from a file (started March 2018)
@@ -86,22 +86,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 //! Kitaev Model Parameters
 template<typename RealType>
-struct ParametersModelKitaev {
+struct ParametersKitaev {
 
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	// no connectors here, connectors are handled by the geometry
 	template<typename IoInputType>
-	ParametersModelKitaev(IoInputType& io)
+	ParametersKitaev(IoInputType& io)
 	    : targetQuantum(io,false)
 	{
-		io.readline(twiceTheSpin,"KitaevTwiceS=");
-
 		try {
 			io.read(magneticField,"MagneticField");
-		} catch (std::exception&) {}
-
-		try {
-			io.read(anisotropy,"AnisotropyD");
 		} catch (std::exception&) {}
 	}
 
@@ -113,22 +107,16 @@ struct ParametersModelKitaev {
 		return 0;
 	}
 
-	//serializr start class ParametersModelKitaev
 	TargetQuantumElectrons<RealType> targetQuantum;
-	//serializr normal twiceTheSpin
-	SizeType twiceTheSpin;
 	VectorRealType magneticField;
-	VectorRealType anisotropy;
 };
 
 //! Function that prints model parameters to stream os
 template<typename RealTypeType>
 std::ostream& operator<<(std::ostream &os,
-                         const ParametersModelKitaev<RealTypeType>& parameters)
+                         const ParametersKitaev<RealTypeType>& parameters)
 {
 	os<<"MagneticField="<<parameters.magneticField<<"\n";
-	os<<"AnisotropyD="<<parameters.anisotropy<<"\n";
-	os<<"KitaevTwiceS="<<parameters.twiceTheSpin<<"\n";
 	os<<parameters.targetQuantum;
 	return os;
 }

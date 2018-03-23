@@ -71,7 +71,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ModelKitaev.h
+/*! \file Kitaev.h
  *
  *  An implementation of the Kitaev model (started March 2018)
  *
@@ -91,11 +91,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "ModelCommon.h"
 #include "Utils.h"
+#include "Complex.h"
 
 namespace Dmrg {
 
 template<typename ModelBaseType>
-class ModelKitaev : public ModelBaseType {
+class Kitaev : public ModelBaseType {
 
 public:
 
@@ -124,8 +125,9 @@ private:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelBaseType::VectorRealType VectorRealType;
 
-	static const int NUMBER_OF_ORBITALS=1;
-	static const int DEGREES_OF_FREEDOM=2; // spin up and down
+	static const int TWICE_THE_SPIN = 1;
+
+	enum InternalDir {DIR_X, DIR_Y, DIR_Z};
 
 public:
 
@@ -137,38 +139,25 @@ public:
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 
-	ModelKitaev(const SolverParamsType& solverParams,
-	                InputValidatorType& io,
-	                const GeometryType& geometry,
-	                PsimagLite::String additional)
+	Kitaev(const SolverParamsType& solverParams,
+	       InputValidatorType& io,
+	       const GeometryType& geometry)
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
-	      geometry_(geometry),
-	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
+	      geometry_(geometry)
 	{
-		if (additional == "Anisotropic") {
-			setAnisotropic(solverParams);
-		}
 
 		SizeType n = geometry_.numberOfSites();
 		SizeType m = modelParameters_.magneticField.size();
-		SizeType md = modelParameters_.anisotropy.size();
 
 		if (m > 0 && m != n) {
-			PsimagLite::String msg("ModelKitaev: If provided, ");
+			PsimagLite::String msg("Kitaev: If provided, ");
 			msg += " MagneticField must be a vector of " + ttos(n) + " entries.\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
 
-		if (md > 0 && md != n) {
-			PsimagLite::String msg("ModelKitaev: If provided, ");
-			msg += " Anisotropy must be a vector of " + ttos(n) + " entries.\n";
-			throw PsimagLite::RuntimeError(msg);
-		}
-
-		if (BasisType::useSu2Symmetry() && modelParameters_.twiceTheSpin != 1) {
-			PsimagLite::String msg("ModelKitaev: SU(2) symmetry, ");
-			msg += " for spin different than 1/2 is not implemented yet.\n";
+		if (BasisType::useSu2Symmetry()) {
+			PsimagLite::String msg("Kitaev does not have SU(2) symmetry\n");
 			throw PsimagLite::RuntimeError(msg);
 		}
 	}
@@ -177,49 +166,12 @@ public:
 	                   SizeType,
 	                   PsimagLite::String msg = "") const
 	{
-		PsimagLite::String str = msg;
-		str += "ModelKitaev";
-
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&modelParameters_);
-		SizeType total = end - start;
-		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
-		          total,
-		          start,
-		          msg + " ModelKitaev vptr");
-
-		start = end;
-		end = start + PsimagLite::MemResolv::SIZEOF_HEAPPTR;
-		total += mres.memResolv(&modelParameters_, end-start, str + " modelParameters");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&spinSquaredHelper_);
-		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
-		          PsimagLite::MemResolv::SIZEOF_HEAPREF,
-		          start,
-		          str + " ref to geometry");
-		total += (end - start);
-		mres.memResolv(&geometry_, 0, str + " geometry");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&spinSquared_);
-		total += mres.memResolv(&spinSquaredHelper_,
-		                        end-start,
-		                        str + " spinSquaredHelper");
-
-		total += mres.memResolv(&spinSquared_,
-		                        sizeof(*this) - total,
-		                        str + " spinSquared");
-
-		return total;
+		return 0;
 	}
 
 	void print(std::ostream& os) const { os<<modelParameters_; }
 
-	SizeType hilbertSize(SizeType) const
-	{
-		return modelParameters_.twiceTheSpin + 1;
-	}
+	SizeType hilbertSize(SizeType) const { return TWICE_THE_SPIN + 1; }
 
 	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
 	{
@@ -239,34 +191,26 @@ public:
 		VectorSizeType qvector;
 		setNaturalBasis(natBasis,qvector,block);
 
+		typename MatrixType::value_type dummy = 0.0;
+
 		operatorMatrices.clear();
 		for (SizeType i=0;i<block.size();i++) {
-			// Set the operators S^+_i in the natural basis
-			tmpMatrix=findSplusMatrices(i,natBasis);
+			// Set the operators S^x_i in the natural basis
+			tmpMatrix = findSdirMatrices(i, natBasis, DIR_X, dummy);
 
 			typename OperatorType::Su2RelatedType su2related;
-			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
-			su2related.source.push_back(i*DEGREES_OF_FREEDOM+NUMBER_OF_ORBITALS);
-			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
-			su2related.transpose.push_back(-1);
-			su2related.transpose.push_back(-1);
-			su2related.transpose.push_back(1);
-			su2related.offset = NUMBER_OF_ORBITALS;
 
-			OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
+			OperatorType myOp(tmpMatrix, 1, PairType(0, 0), 1.0, su2related);
 			operatorMatrices.push_back(myOp);
 
-			// Set the operators S^z_i in the natural basis
-			tmpMatrix = findSzMatrices(i,natBasis);
-			typename OperatorType::Su2RelatedType su2related2;
-			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
+			// Set the operators S^y_i in the natural basis
+			tmpMatrix = findSdirMatrices(i, natBasis, DIR_Y, dummy);
+			OperatorType myOp2(tmpMatrix, 1, PairType(0, 0), 1.0, su2related);
 			operatorMatrices.push_back(myOp2);
 
-			if (LinkProductType::terms() == 2) continue;
-			// Set the operators S^x_i in the natural basis
-			tmpMatrix = findSxMatrices(i,natBasis);
-			typename OperatorType::Su2RelatedType su2related3;
-			OperatorType myOp3(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related3);
+			// Set the operators S^z_i in the natural basis
+			tmpMatrix = findSdirMatrices(i, natBasis, DIR_Z, dummy);
+			OperatorType myOp3(tmpMatrix, 1, PairType(0, 0), 1.0, su2related);
 			operatorMatrices.push_back(myOp3);
 		}
 	}
@@ -282,20 +226,16 @@ public:
 		setOperatorMatrices(creationMatrix,block);
 		assert(creationMatrix.size()>0);
 
-		if (what=="splus") { // S^+
+		if (what == "sx") // S^x
 			return creationMatrix[0];
-		}
 
-		if (what=="sminus") { // S^-
-			creationMatrix[0].conjugate();
-			return creationMatrix[0];
-		}
-
-		if (what == "z" || what == "sz") { // S^z
+		if (what == "sy") // S^y
 			return creationMatrix[1];
-		}
 
-		PsimagLite::String str("ModelKitaev: naturalOperator: no label ");
+		if (what == "sz") // S^z
+			return creationMatrix[2];
+
+		PsimagLite::String str("Kitaev: naturalOperator: no label ");
 		str += what + "\n";
 		throw PsimagLite::RuntimeError(str);
 	}
@@ -305,11 +245,12 @@ public:
 	                     VectorSizeType& q,
 	                     const VectorSizeType& block) const
 	{
-		SizeType total = utils::powUint(modelParameters_.twiceTheSpin + 1,block.size());
+		SizeType total = utils::powUint(TWICE_THE_SPIN + 1, block.size());
 
-		for (SizeType i=0;i<total;i++) basis.push_back(i);
+		for (SizeType i = 0; i < total; ++i) basis.push_back(i);
+
 		SymmetryElectronsSzType qq;
-		setSymmetryRelated(qq,basis,block.size());
+		setSymmetryRelated(qq, basis, block.size());
 		qq.findQuantumNumbers(q, MyBasis::useSu2Symmetry());
 	}
 
@@ -319,8 +260,7 @@ public:
 	                   SizeType) const
 	{
 		electrons.resize(basis.size());
-		for (SizeType i=0;i<electrons.size();i++)
-			electrons[i] = 0;
+		std::fill(electrons.begin(), electrons.end(), 0);
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
@@ -330,24 +270,16 @@ public:
 	                                RealType factorForDiagonals=1.0)  const
 	{
 		SizeType linSize = geometry_.numberOfSites();
-		SizeType n=block.size();
-		SparseMatrixType Szsquare;
+		if (modelParameters_.magneticField.size() != linSize)
+			return; // <<---- PLEASE NOTE EARLY EXIT HERE
 
-		for (SizeType i=0;i<n;i++) {
+		SizeType n=block.size();
+
+		for (SizeType i = 0; i < n; ++i) {
 			// magnetic field
-			if (modelParameters_.magneticField.size() != linSize) continue;
 			RealType tmp = modelParameters_.magneticField[block[i*2]]*factorForDiagonals;
 			hmatrix += tmp*cm[1+i*2].data;
 		}
-
-		for (SizeType i=0;i<n;i++) {
-			// anisotropy
-			if (modelParameters_.anisotropy.size() != linSize) continue;
-			RealType tmp = modelParameters_.anisotropy[block[i*2]]*factorForDiagonals;
-			multiply(Szsquare,cm[1+i*2].data,cm[1+i*2].data);
-			hmatrix += tmp*Szsquare;
-		}
-
 	}
 
 	virtual const TargetQuantumElectronsType& targetQuantum() const
@@ -356,30 +288,6 @@ public:
 	}
 
 private:
-
-	void setAnisotropic(const SolverParamsType& solverParams)
-	{
-		LinkProductType::setAnisotropic();
-		bool isCanonical = (modelParameters_.targetQuantum.isCanonical);
-		bool useTheForce = (solverParams.options.find("useTheForce") !=
-		        PsimagLite::String::npos);
-		if (!isCanonical) return;
-
-		PsimagLite::String warning("KitaevAnisotropic: ");
-		warning += "canonical mode in use. ";
-		warning += "Results will likely be WRONG.\n";
-		warning += "Please delete the TargetSzPlusConst= ";
-		warning += "line in the input file.\n";
-
-		if (useTheForce) {
-			std::cerr<<"WARNING: "<<warning;
-			std::cout<<"WARNING: "<<warning;
-			return;
-		}
-
-		std::cerr<<"FATAL: "<<warning;
-		err("You may useTheForce in SolverOptions to run it anyway\n");
-	}
 
 	SizeType logBase2(SizeType x) const
 	{
@@ -392,161 +300,65 @@ private:
 		return (counter == 0) ? counter : counter - 1;
 	}
 
-	//! Find S^+_site in the natural basis natBasis
-	SparseMatrixType findSplusMatrices(SizeType site,
-	                                   const HilbertBasisType& natBasis) const
+	SparseMatrixType findSdirMatrices(SizeType,
+	                                  const HilbertBasisType&,
+	                                  InternalDir,
+	                                  RealType) const
+	{
+		err("Kitaev needs useComplex in SolverOptions in the input file\n");
+		throw PsimagLite::RuntimeError("FATAL\n");
+	}
+
+	SparseMatrixType findSdirMatrices(SizeType,// site,
+	                                  const HilbertBasisType& natBasis,
+	                                  InternalDir dir,
+	                                  std::complex<RealType>) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
-		RealType j = 0.5*modelParameters_.twiceTheSpin;
-		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
-		SizeType bits = 1 + logBase2(modelParameters_.twiceTheSpin);
-		SizeType mask = 1;
-		mask <<= bits; // mask = 2^bits
-		assert(mask > 0);
-		mask--;
-		mask <<= (site*bitsForOneSite);
+		cm.setTo(0.0);
+		assert(total == TWICE_THE_SPIN + 1);
+		assert(TWICE_THE_SPIN == 1);
 
-		for (SizeType ii=0;ii<total;ii++) {
-			SizeType ket = natBasis[ii];
-
-			SizeType ketsite = ket & mask;
-			ketsite >>= (site*bitsForOneSite);
-
-			assert(ketsite == ket);
-			SizeType brasite = ketsite + 1;
-			if (brasite >= modelParameters_.twiceTheSpin+1) continue;
-
-			SizeType bra = ket & (~mask);
-			assert(bra == 0);
-			brasite <<= (site*bitsForOneSite);
-			bra |= brasite;
-			assert(bra == brasite);
-
-			RealType m = ketsite - j;
-			RealType x = j*(j+1)-m*(m+1);
-			assert(x>=0);
-
-			cm(ket,bra) = sqrt(x);
+		if (dir == DIR_X) {
+			cm(0,1) = cm(1,0) = 1.0;
+		} else if (dir == DIR_Y) {
+			cm(0, 1) = std::complex<RealType>(0.0, 1.0);  // FIXME TODO CHECK SIGN HERE
+			cm(1, 0) = std::complex<RealType>(0.0, -1.0); // FIXME TODO CHECK SIGN HERE
+		} else if (dir == DIR_Z) {
+			cm(0, 0) = 1.0;
+			cm(1, 1) = -1.0;
+		} else {
+			assert(false);
 		}
 
 		SparseMatrixType operatorMatrix(cm);
 		return operatorMatrix;
-	}
-
-	//! Find S^z_i in the natural basis natBasis
-	SparseMatrixType findSzMatrices(SizeType site,
-	                                const HilbertBasisType& natBasis) const
-	{
-		SizeType total = natBasis.size();
-		MatrixType cm(total,total);
-		RealType j = 0.5*modelParameters_.twiceTheSpin;
-		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
-		SizeType bits = logBase2(modelParameters_.twiceTheSpin) + 1;
-		SizeType mask = 1;
-		mask <<= bits; // mask = 2^bits
-		assert(mask > 0);
-		mask--;
-		mask <<= (site*bitsForOneSite);
-
-		for (SizeType ii=0;ii<total;ii++) {
-			SizeType ket = natBasis[ii];
-
-			SizeType ketsite = ket & mask;
-			ketsite >>= (site*bitsForOneSite);
-			assert(ketsite == ket);
-			RealType m = ketsite - j;
-			cm(ket,ket) = m;
-		}
-
-		SparseMatrixType operatorMatrix(cm);
-		return operatorMatrix;
-	}
-
-	SparseMatrixType findSxMatrices(SizeType site,
-	                                const HilbertBasisType& natBasis) const
-	{
-		SparseMatrixType Splus_temp=findSplusMatrices(site,natBasis);
-		SparseMatrixType Sminus_temp,Sx;
-		transposeConjugate(Sminus_temp,Splus_temp);
-		RealType tmp=0.5;
-
-		Sx = tmp*Splus_temp;
-		Sx += tmp*Sminus_temp;
-
-		return Sx;
 	}
 
 	void setSymmetryRelated(SymmetryElectronsSzType& q,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
+		assert(n == 1);
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
-		typename PsimagLite::Vector<PairType>::Type jmvalues;
-		VectorSizeType flavors;
-		PairType jmSaved;
-		jmSaved.first = modelParameters_.twiceTheSpin;
-		jmSaved.second = basis[0];
-		jmSaved.first++;
-		jmSaved.second++;
+		SizeType nbasis = basis.size();
+		typename PsimagLite::Vector<PairType>::Type jmvalues(nbasis, PairType(0, 0));
+		VectorSizeType flavors(nbasis, 1);
 
-		SizeType totalElectrons = modelParameters_.targetQuantum.totalElectrons;
-		if (!modelParameters_.targetQuantum.isSu2 && totalElectrons > 0) {
-			PsimagLite::String msg("Please delete the line ");
-			msg += "TargetElectronsTotal= in the input file\n";
-			throw PsimagLite::RuntimeError(msg);
-		}
-
-		bool isCanonical = (modelParameters_.targetQuantum.isCanonical);
-		VectorSizeType szPlusConst(basis.size());
-		VectorSizeType electrons(basis.size());
-		for (SizeType i=0;i<basis.size();i++) {
-			PairType jmpair;
-			jmpair.first = modelParameters_.twiceTheSpin;
-			jmpair.second = basis[i];
-			jmvalues.push_back(jmpair);
-			szPlusConst[i] = (isCanonical) ? getSzPlusConst(basis[i],n) : 0;
-			electrons[i] = (modelParameters_.targetQuantum.isSu2) ? 1 : 0;
-			flavors.push_back(1);
-			jmSaved = jmpair;
-		}
+		VectorSizeType szPlusConst(nbasis, 0);
+		VectorSizeType electrons(basis.size(), 0);
 
 		q.set(jmvalues,flavors,electrons,szPlusConst);
 	}
 
-	SizeType getSzPlusConst(SizeType ket, SizeType n) const
-	{
-		if (n == 1) return ket;
-
-		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
-
-		SizeType sum = 0;
-		for (SizeType site = 0; site < n; ++site) {
-			SizeType mask = modelParameters_.twiceTheSpin;
-			mask <<= (site*bitsForOneSite);
-			SizeType ketsite = ket & mask;
-			ketsite >>= (site*bitsForOneSite);
-			sum += ketsite;
-		}
-
-		return sum;
-	}
-
-	//serializr start class ModelKitaev
-	//serializr vptr
-	//serializr normal modelParameters_
-	ParametersModelKitaev<RealType>  modelParameters_;
-	//serializr ref geometry_ start
-	GeometryType const &geometry_;
-	//serializr normal spinSquaredHelper_
-	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
-	//serializr normal spinSquared_
-	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
-}; // class ModelKitaev
+	ParametersKitaev<RealType>  modelParameters_;
+	const GeometryType& geometry_;
+}; // class Kitaev
 
 } // namespace Dmrg
 /*@}*/

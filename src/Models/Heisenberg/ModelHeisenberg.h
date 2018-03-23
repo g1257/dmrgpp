@@ -330,19 +330,22 @@ public:
 	                                RealType factorForDiagonals=1.0)  const
 	{
 		SizeType linSize = geometry_.numberOfSites();
-		SizeType n=block.size();
-		SparseMatrixType Szsquare;
+		SizeType n = block.size();
 
-		for (SizeType i=0;i<n;i++) {
-			// magnetic field
-			if (modelParameters_.magneticField.size() != linSize) continue;
-			RealType tmp = modelParameters_.magneticField[block[i*2]]*factorForDiagonals;
-			hmatrix += tmp*cm[1+i*2].data;
+		if (modelParameters_.magneticField.size() == linSize) {
+			for (SizeType i = 0; i < n; ++i) {
+				// magnetic field
+				RealType tmp = modelParameters_.magneticField[block[i*2]]*factorForDiagonals;
+				hmatrix += tmp*cm[1+i*2].data;
+			}
 		}
 
-		for (SizeType i=0;i<n;i++) {
+		if (modelParameters_.anisotropy.size() != linSize)
+			return; // <--- PLEASE NOTE EARLY EXIT HERE
+
+		SparseMatrixType Szsquare;
+		for (SizeType i = 0; i < n; ++i) {
 			// anisotropy
-			if (modelParameters_.anisotropy.size() != linSize) continue;
 			RealType tmp = modelParameters_.anisotropy[block[i*2]]*factorForDiagonals;
 			multiply(Szsquare,cm[1+i*2].data,cm[1+i*2].data);
 			hmatrix += tmp*Szsquare;

@@ -84,7 +84,7 @@ namespace Dmrg {
 template<typename ModelHelperType>
 class LinkProductKitaev {
 
-	static SizeType terms_;
+	static const SizeType terms_ = 3;
 
 public:
 
@@ -105,28 +105,14 @@ public:
 	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
 	                        std::pair<SizeType,SizeType>& ops,
 	                        std::pair<char,char>&,
-	                        SizeType& angularMomentum,
-	                        RealType& angularFactor,
-	                        SizeType& category,
+	                        SizeType&,// angularMomentum,
+	                        RealType&,// angularFactor,
+	                        SizeType&,// category,
 	                        const SomeStructType&)
 	{
+		assert(!isSu2);
 		fermionOrBoson = ProgramGlobals::BOSON;
-		ops = operatorDofs(term,isSu2);
-		angularMomentum = 2;
-		switch (term) {
-		case 0: // S+S-
-			angularFactor = -1;
-			category = 2;
-			break;
-		case 1: // SzSz
-			angularFactor = 0.5;
-			category = 1;
-			break;
-		case 2: //SxSx
-			angularFactor = 1; //may be wrong
-			category = 0;
-			break;
-		}
+		ops = PairType(term, term);
 	}
 
 	template<typename SomeStructType>
@@ -136,7 +122,7 @@ public:
 	                          bool isSu2,
 	                          const SomeStructType&)
 	{
-		if (isSu2) value = -value;
+		assert(!isSu2);
 		value *= 0.5;
 	}
 
@@ -149,25 +135,11 @@ public:
 		return PairType(0,0); // no orbital
 	}
 
-	//! For TERM_J there are 3 terms:
-	//! Splus Sminus and
-	//! Sz Sz
 	//! Sx Sx
+	//! Sy Sy
+	//! Sz Sz
 	static SizeType terms() { return terms_; }
-
-private:
-
-	static PairType operatorDofs(SizeType term,bool isSu2)
-	{
-		if (term<1) return PairType(0,0);
-		if (term==2) return PairType(2,2);
-		SizeType x = (isSu2) ? 0 : 1;
-		return PairType(x,x);
-	}
 }; // class LinkProductKitaev
-
-template<typename ModelHelperType>
-SizeType LinkProductKitaev<ModelHelperType>::terms_ = 2;
 } // namespace Dmrg
 /*@}*/
 #endif
