@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009, 2017, UT-Battelle, LLC
+Copyright (c) 2009-2017-2018 UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 4.]
+[DMRG++, Version 5.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -71,19 +71,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ModelHeisenberg.h
+/*! \file ModelKitaev.h
  *
- *  An implementation of the Quantum Heisenberg Model to use with  DmrgSolver
+ *  An implementation of the Kitaev model (started March 2018)
  *
  */
 
-#ifndef DMRG_MODEL_HEISENBERG_HEADER_H
-#define DMRG_MODEL_HEISENBERG_HEADER_H
+#ifndef DMRG_KITAEV_H
+#define DMRG_KITAEV_H
 
 #include <algorithm>
 #include "ModelBase.h"
-#include "ParametersModelHeisenberg.h"
-#include "LinkProductHeisenberg.h"
+#include "ParametersKitaev.h"
+#include "LinkProductKitaev.h"
 #include "CrsMatrix.h"
 #include "VerySparseMatrix.h"
 #include "SpinSquaredHelper.h"
@@ -95,7 +95,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<typename ModelBaseType>
-class ModelHeisenberg : public ModelBaseType {
+class ModelKitaev : public ModelBaseType {
 
 public:
 
@@ -117,7 +117,7 @@ private:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef unsigned int long WordType;
-	typedef LinkProductHeisenberg<ModelHelperType> LinkProductType;
+	typedef LinkProductKitaev<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
@@ -137,7 +137,7 @@ public:
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 
-	ModelHeisenberg(const SolverParamsType& solverParams,
+	ModelKitaev(const SolverParamsType& solverParams,
 	                InputValidatorType& io,
 	                const GeometryType& geometry,
 	                PsimagLite::String additional)
@@ -155,19 +155,19 @@ public:
 		SizeType md = modelParameters_.anisotropy.size();
 
 		if (m > 0 && m != n) {
-			PsimagLite::String msg("ModelHeisenberg: If provided, ");
+			PsimagLite::String msg("ModelKitaev: If provided, ");
 			msg += " MagneticField must be a vector of " + ttos(n) + " entries.\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
 
 		if (md > 0 && md != n) {
-			PsimagLite::String msg("ModelHeisenberg: If provided, ");
+			PsimagLite::String msg("ModelKitaev: If provided, ");
 			msg += " Anisotropy must be a vector of " + ttos(n) + " entries.\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
 
 		if (BasisType::useSu2Symmetry() && modelParameters_.twiceTheSpin != 1) {
-			PsimagLite::String msg("ModelHeisenberg: SU(2) symmetry, ");
+			PsimagLite::String msg("ModelKitaev: SU(2) symmetry, ");
 			msg += " for spin different than 1/2 is not implemented yet.\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
@@ -178,7 +178,7 @@ public:
 	                   PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
-		str += "ModelHeisenberg";
+		str += "ModelKitaev";
 
 		const char* start = reinterpret_cast<const char *>(this);
 		const char* end = reinterpret_cast<const char *>(&modelParameters_);
@@ -186,7 +186,7 @@ public:
 		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
 		          total,
 		          start,
-		          msg + " ModelHeisenberg vptr");
+		          msg + " ModelKitaev vptr");
 
 		start = end;
 		end = start + PsimagLite::MemResolv::SIZEOF_HEAPPTR;
@@ -295,7 +295,7 @@ public:
 			return creationMatrix[1];
 		}
 
-		PsimagLite::String str("ModelHeisenberg: naturalOperator: no label ");
+		PsimagLite::String str("ModelKitaev: naturalOperator: no label ");
 		str += what + "\n";
 		throw PsimagLite::RuntimeError(str);
 	}
@@ -365,7 +365,7 @@ private:
 		        PsimagLite::String::npos);
 		if (!isCanonical) return;
 
-		PsimagLite::String warning("HeisenbergAnisotropic: ");
+		PsimagLite::String warning("KitaevAnisotropic: ");
 		warning += "canonical mode in use. ";
 		warning += "Results will likely be WRONG.\n";
 		warning += "Please delete the TargetSzPlusConst= ";
@@ -536,19 +536,19 @@ private:
 		return sum;
 	}
 
-	//serializr start class ModelHeisenberg
+	//serializr start class ModelKitaev
 	//serializr vptr
 	//serializr normal modelParameters_
-	ParametersModelHeisenberg<RealType>  modelParameters_;
+	ParametersModelKitaev<RealType>  modelParameters_;
 	//serializr ref geometry_ start
 	GeometryType const &geometry_;
 	//serializr normal spinSquaredHelper_
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 	//serializr normal spinSquared_
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
-}; // class ModelHeisenberg
+}; // class ModelKitaev
 
 } // namespace Dmrg
 /*@}*/
-#endif //DMRG_MODEL_HEISENBERG_HEADER_H
+#endif //DMRG_KITAEV_H
 

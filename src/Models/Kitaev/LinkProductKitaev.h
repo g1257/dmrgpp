@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2015, UT-Battelle, LLC
+Copyright (c) 2009-2015-2018, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 5.]
@@ -71,18 +71,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file LinkProductHeisenberg.h
+/*! \file LinkProductKitaev.h
  *
- *  LinkProduct for Heisenberg model
+ *  LinkProduct for Kitaev model (started March 2018)
  *
  */
-#ifndef LINK_PRODUCT_HEIS_ONE_HALF_H
-#define LINK_PRODUCT_HEIS_ONE_HALF_H
+#ifndef LINK_PRODUCT_KITAEV_H
+#define LINK_PRODUCT_KITAEV_H
 #include "ProgramGlobals.h"
 
 namespace Dmrg {
 template<typename ModelHelperType>
-class LinkProductHeisenberg {
+class LinkProductKitaev {
 
 	static SizeType terms_;
 
@@ -164,10 +164,10 @@ private:
 		SizeType x = (isSu2) ? 0 : 1;
 		return PairType(x,x);
 	}
-}; // class LinkProductHeisenberg
+}; // class LinkProductKitaev
 
 template<typename ModelHelperType>
-SizeType LinkProductHeisenberg<ModelHelperType>::terms_ = 2;
+SizeType LinkProductKitaev<ModelHelperType>::terms_ = 2;
 } // namespace Dmrg
 /*@}*/
 #endif

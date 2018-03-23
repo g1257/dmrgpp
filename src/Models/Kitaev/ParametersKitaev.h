@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2012, UT-Battelle, LLC
+Copyright (c) 2009-2012-2018, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 5.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -67,35 +67,34 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
 
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ParametersModelHeisenberg.h
+/*! \file ParametersModelKitaev.h
  *
- *  Contains the parameters for the Heisenberg model and function
- *  to read them from a file
+ *  Contains the parameters for the Kitaev model and function
+ *  to read them from a file (started March 2018)
  *
  */
-#ifndef PARAMETERSMODELHEISENBERG_H
-#define PARAMETERSMODELHEISENBERG_H
+#ifndef PARAMETERS_KITAEV_H
+#define PARAMETERS_KITAEV_H
 #include "Vector.h"
 #include "TargetQuantumElectrons.h"
 
 namespace Dmrg {
-//! Heisenberg Model Parameters
+//! Kitaev Model Parameters
 template<typename RealType>
-struct ParametersModelHeisenberg {
+struct ParametersModelKitaev {
 
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	// no connectors here, connectors are handled by the geometry
 	template<typename IoInputType>
-	ParametersModelHeisenberg(IoInputType& io)
+	ParametersModelKitaev(IoInputType& io)
 	    : targetQuantum(io,false)
 	{
-		io.readline(twiceTheSpin,"HeisenbergTwiceS=");
+		io.readline(twiceTheSpin,"KitaevTwiceS=");
 
 		try {
 			io.read(magneticField,"MagneticField");
@@ -114,7 +113,7 @@ struct ParametersModelHeisenberg {
 		return 0;
 	}
 
-	//serializr start class ParametersModelHeisenberg
+	//serializr start class ParametersModelKitaev
 	TargetQuantumElectrons<RealType> targetQuantum;
 	//serializr normal twiceTheSpin
 	SizeType twiceTheSpin;
@@ -125,11 +124,11 @@ struct ParametersModelHeisenberg {
 //! Function that prints model parameters to stream os
 template<typename RealTypeType>
 std::ostream& operator<<(std::ostream &os,
-                         const ParametersModelHeisenberg<RealTypeType>& parameters)
+                         const ParametersModelKitaev<RealTypeType>& parameters)
 {
 	os<<"MagneticField="<<parameters.magneticField<<"\n";
 	os<<"AnisotropyD="<<parameters.anisotropy<<"\n";
-	os<<"HeisenbergTwiceS="<<parameters.twiceTheSpin<<"\n";
+	os<<"KitaevTwiceS="<<parameters.twiceTheSpin<<"\n";
 	os<<parameters.targetQuantum;
 	return os;
 }
