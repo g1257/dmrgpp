@@ -91,6 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Star.h"
 #include "LongChain.h"
 #include "LongRange.h"
+#include "Honeycomb.h"
 #include "ExpressionCalculator.h"
 #include "PsimagLite.h"
 
@@ -164,6 +165,8 @@ public:
 		} else if (s=="LongRange") {
 			geometryBase_ = new LongRange<ComplexOrRealType, InputType>(aux.linSize,io);
 			edof |= 2;
+		} else if (s == "Honeycomb") {
+			geometryBase_ = new Honeycomb<ComplexOrRealType, InputType>(aux.linSize,io);
 		} else {
 			throw RuntimeError("Unknown geometry " + s + "\n");
 		}

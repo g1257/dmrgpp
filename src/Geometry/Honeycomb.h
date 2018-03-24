@@ -71,39 +71,46 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup PsimagLite */
 /*@{*/
 
-/*! \file LadderX.h
+/*! \file Honeycomb.h
  *
  *  HoneyComb lattice implementation (started March 2018)
  */
-#ifndef LADDERX_H
-#define LADDERX_H
+#ifndef PSI_GEOMETRY_HONEYCOMB_H
+#define PSI_GEOMETRY_HONEYCOMB_H
 
 #include <stdexcept>
-#include "Ladder.h"
+#include "GeometryBase.h"
 
 namespace PsimagLite {
 
 template<typename ComplexOrRealType, typename InputType>
-class LadderX : public GeometryBase<ComplexOrRealType, InputType> {
-
-	typedef Ladder<ComplexOrRealType, InputType> LadderType;
+class Honeycomb : public GeometryBase<ComplexOrRealType, InputType> {
 
 public:
 
-	enum {DIRECTION_X=LadderType::DIRECTION_X,
-		  DIRECTION_Y=LadderType::DIRECTION_Y,
-		  DIRECTION_XPY,
-		  DIRECTION_XMY};
+	enum Dir {DIR_X = 0, DIR_Y = 1, DIR_Z = 2};
+	enum GeLe {GREATER_OR_EQUAL, LESS_OR_EQUAL};
 
-	LadderX() {}
+	Honeycomb(SizeType linSize, InputType& io)
+	    : linSize_(linSize), periodicY_(false), periodicX_(false)
+	{
+		io.readline(ly_,"HoneycombLy=");
+		int x = 0;
+		io.readline(x, "IsPeriodicY=");
+		periodicY_ = (x > 0);
 
-	LadderX(SizeType linSize,InputType& io)
-	    : ladder_(linSize,io),linSize_(linSize),leg_(ladder_.leg())
-	{}
+		try {
+			io.readline(x, "IsPeriodicX=");
+			periodicX_ = (x > 0);
+		} catch (std::exception&) {}
+	}
 
-	virtual SizeType maxConnections() const { return leg_ + 1; }
+	virtual SizeType maxConnections() const
+	{
+		throw RuntimeError("Honeycomb::maxConnections() unimplemented\n");
+	}
 
-	virtual SizeType dirs() const { return 4; }
+	virtual SizeType dirs() const { return 3; }
 
 	virtual SizeType length(SizeType) const
 	{
@@ -117,75 +124,48 @@ public:
 
 	SizeType getVectorSize(SizeType dirId) const
 	{
-		switch (dirId) {
-		case DIRECTION_XPY:
-			return linSize_ - linSize_/leg_;
-		case DIRECTION_XMY:
-			return linSize_ - linSize_/leg_;
-		}
-		return ladder_.getVectorSize(dirId);
+		throw RuntimeError("Honeycomb::getVectorSize() unimplemented\n");
 	}
 
-	bool connected(SizeType i1,SizeType i2) const
+	bool connected(SizeType i1, SizeType i2) const
 	{
-		if (i1==i2) return false;
-		if (ladder_.connected(i1,i2)) return true;
-		SizeType c1 = i1/leg_;
-		SizeType c2 = i2/leg_;
-		SizeType r1 = i1%leg_;
-		SizeType r2 = i2%leg_;
-		if (c1==c2) return this->neighbors(r1,r2);
-		if (r1==r2) return this->neighbors(c1,c2);
-		return (this->neighbors(r1,r2) && this->neighbors(c1,c2));
+		return connectedInternal(i1, i2).first;
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType calcDir(SizeType i1,SizeType i2) const
+	SizeType calcDir(SizeType i1, SizeType i2) const
 	{
-		if (ladder_.sameColumn(i1,i2)) return DIRECTION_Y;
-		if (ladder_.sameRow(i1,i2)) return DIRECTION_X;
-		SizeType imin = (i1<i2) ? i1 : i2;
-		if (imin&1) return DIRECTION_XPY;
-		return DIRECTION_XMY;
+		std::pair<bool, Dir> bdir = connectedInternal(i1, i2);
+		assert(bdir.first);
+		return bdir.second;
 	}
 
 	bool fringe(SizeType i,SizeType smax,SizeType emin) const
 	{
-		bool a = (i<emin && i>=smax-1);
-		bool b = (i>smax && i<=emin+1);
-		if (smax & 1) return (a || b);
-		a = (i<emin && i>=smax-2);
-		b = (i>smax && i<=emin+2);
-		return (a || b);
+		if (i <= smax)
+			return isThereAneighbor(i, emin, linSize_);
+
+		if (i >= emin)
+			return isThereAneighbor(i, 0, smax);
+
+		return false;
 	}
 
 	// assumes i1 and i2 are connected
 	SizeType handle(SizeType i1,SizeType i2) const
 	{
-		SizeType dir = calcDir(i1,i2);
-		SizeType imin = (i1<i2) ? i1 : i2;
-		switch(dir) {
-		case DIRECTION_X:
-			return imin;
-		case DIRECTION_Y:
-			return imin-imin/leg_;
-		case DIRECTION_XPY: // only checked for leg_=2
-			return (imin-1)/leg_;
-		case DIRECTION_XMY:// only checked for leg_=2
-			return imin/leg_;
-		}
-		throw RuntimeError("handle: Unknown direction\n");
+		throw RuntimeError("Honeycomb::handle() unimplemented\n");
 	}
 
 	// siteNew2 is fringe in the environment
 	SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
 	{
-		return smax+siteNew2-emin+1;
+		throw RuntimeError("Honeycomb::getSubstituteSite() unimplemented\n");
 	}
 
 	String label() const
 	{
-		return "ladderx";
+		return "Honeycomb";
 	}
 
 	SizeType findReflection(SizeType) const
@@ -197,41 +177,151 @@ public:
 	void serialize(Archive & ar, const unsigned int)
 	{
 		ar & boost::serialization::base_object<GeometryBase<ComplexOrRealType, InputType> >(*this);
-		ar & ladder_;
 		ar & linSize_;
-		ar & leg_;
+		ar & ly_;
 	}
 
-	SizeType memResolv(MemResolv& mres,
+	SizeType memResolv(MemResolv&,
 	                   SizeType,
-	                   String msg) const
+	                   String) const
 	{
-		String str = msg;
-		str += "LadderBath";
-		const char* start = (const char *)this;
-		const char* end = (const char*)&ladder_;
-		SizeType total = end - start;
-		mres.push(MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
-
-		start = end;
-		end = (const char*)&linSize_;
-		total += mres.memResolv(&ladder_,end-start,str + " ladder");
-
-		start = end;
-		end = (const char*)&leg_;
-		total += mres.memResolv(&linSize_,end-start,str + " linSize");
-
-		mres.memResolv(&leg_,sizeof(*this)-total, str + " leg");
-
-		return sizeof(*this);
+		return 0;
 	}
 
 private:
 
-	LadderType ladder_; // owner
+	std::pair<bool, Dir> connectedInternal(SizeType ii1, SizeType ii2) const
+	{
+		std::pair<bool, Dir> falseDir(false, DIR_X);
+		if (ii1 == ii2) return falseDir;
+
+		bool normal = (ii1 < ii2);
+		SizeType i1 = (normal) ? ii1 : ii2;
+		SizeType i2 = (normal) ? ii2 : ii1;
+
+		SizeType x1 = 0;
+		SizeType y1 = 0;
+		getCoordinates(x1, y1, i1);
+
+		SizeType x2 = 0;
+		SizeType y2 = 0;
+		getCoordinates(x2, y2, i2);
+
+		if (isDirectionX(x1, y1, x2, y2))
+			return std::pair<bool, Dir>(true, DIR_X);
+
+		if (isDirectionY(x1, y1, x2, y2))
+			return std::pair<bool, Dir>(true, DIR_Y);
+
+		if (isDirectionZ(x1, y1, x2, y2))
+			return std::pair<bool, Dir>(true, DIR_Z);
+
+		return falseDir;
+	}
+
+	void getCoordinates(SizeType& x, SizeType& y, SizeType i) const
+	{
+		throw RuntimeError("Honeycomb::getCoordinates() unimplemented\n");
+	}
+
+	// assumes i1 < i2
+	bool isDirectionZ(SizeType x1, SizeType y1, SizeType x2, SizeType y2) const
+	{
+		if (x1 != x2) return false;
+		assert(y1 < y2);
+		SizeType d = y2 - y1;
+		if ((d == 1) && (y1 & 1)) return true;
+
+		if (!periodicY_) return false;
+
+		// periodic in y direction
+		return (d + 1 == ly_);
+	}
+
+	// assumes i1 < i2
+	bool isDirectionY(SizeType x1, SizeType y1, SizeType x2, SizeType y2) const
+	{
+		if (x1 == x2)
+			return isDirectionYsameCol(y1, y2);
+
+		SizeType dy = abs(y2 - y1);
+		if (dy != 1)
+			return false;
+
+		assert(x1 < x2);
+		SizeType dx = x2 - x1;
+		if ((dx == 1) && isMultipleOf3(y1) && (y2 < y1))
+			return true;
+
+		if (!periodicX_) return false;
+
+		// periodic in x direction
+		SizeType lx = linSize_/ly_;
+		if (dx + 1 != lx)
+			return false;
+
+		return (isMultipleOf3(y2) && (y1 < y2));
+	}
+
+	// assumes i1 < i2
+	bool isDirectionX(SizeType x1, SizeType y1, SizeType x2, SizeType y2) const
+	{
+		if (x1 == x2)
+			return isDirectionXsameCol(y1, y2);
+
+		SizeType dy = abs(y2 - y1);
+		if (dy != 1)
+			return false;
+
+		assert(x1 < x2);
+		SizeType dx = x2 - x1;
+		if ((dx == 1) && isMultipleOf4(y1) && (y1 < y2))
+			return true;
+
+		if (!periodicX_) return false;
+
+		// periodic in x direction
+		SizeType lx = linSize_/ly_;
+		if (dx + 1 != lx)
+			return false;
+
+		return (isMultipleOf4(y2) && (y2 < y1));
+	}
+
+	bool isDirectionYsameCol(SizeType y1, SizeType y2) const
+	{
+		throw RuntimeError("Honeycomb::isDirectionYsameCol() unimplemented\n");
+	}
+
+	bool isDirectionXsameCol(SizeType y1, SizeType y2) const
+	{
+		throw RuntimeError("Honeycomb::isDirectionXsameCol() unimplemented\n");
+	}
+
+	bool isThereAneighbor(SizeType ind, SizeType start, SizeType end) const
+	{
+		for (SizeType i = start; i < end; ++i) {
+			if (connectedInternal(ind, i).first) return true;
+		}
+
+		return false;
+	}
+
+	static bool isMultipleOf3(SizeType y)
+	{
+		return ((y % 3) == 0);
+	}
+
+	static bool isMultipleOf4(SizeType y)
+	{
+		return ((y % 4) == 0);
+	}
+
 	SizeType linSize_;
-	SizeType leg_;
-}; // class LadderBath
+	SizeType ly_;
+	bool periodicY_;
+	bool periodicX_;
+};
 } // namespace PsimagLite
 
 /*@}*/
