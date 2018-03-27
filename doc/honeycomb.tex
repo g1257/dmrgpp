@@ -1,0 +1,76 @@
+\documentclass{article}
+%\usepackage{fontspec}
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{calligra}
+\definecolor{myred}{HTML}{ff4136}
+\definecolor{myorange}{HTML}{ff851b}
+\definecolor{mypurple}{HTML}{b10dc9}
+%\definecolor{myolive}{HTML}{3d9970}
+
+\def\a{1.8}
+\def\c{.86602540378443864676}
+\def\s{.5}
+
+\begin{document}
+	\begin{tikzpicture}[
+	ystyle/.style={myred, thick},
+	zstyle/.style={mypurple, thick},
+	xstyle/.style={myorange, thick},
+	nstyle/.style={circle, draw=black, thick}]
+	\node[nstyle] (0) at (0,0) {00};
+	\node[nstyle] (1) at (-\a*\c, -\a*\s) {01};
+	\node[nstyle] (2) at (-\a*\c, -\a-\a*\s) {02};
+	\node[nstyle] (3) at (0, -\a-2*\a*\s) {03};
+	
+	\node[nstyle] (4) at (2*\a*\c, 0) {04};
+	\node[nstyle] (5) at (\a*\c, -\a*\s) {05};
+	\node[nstyle] (6) at (\a*\c, -\a-\a*\s) {06};
+	\node[nstyle] (7) at (2*\a*\c, -\a-2*\a*\s) {07};
+	
+	\node[nstyle] (8) at (4*\a*\c, 0) {08};
+	\node[nstyle] (9) at (3*\a*\c, -\a*\s) {09};
+	\node[nstyle] (10) at (3*\a*\c, -\a-\a*\s) {10};
+	\node[nstyle] (11) at (4*\a*\c, -\a-2*\a*\s) {11};
+	
+	\node[nstyle] (12) at (6*\a*\c, 0) {12};
+	\node[nstyle] (13) at (5*\a*\c, -\a*\s) {13};
+	\node[nstyle] (14) at (5*\a*\c, -\a-\a*\s) {14};
+	\node[nstyle] (15) at (6*\a*\c, -\a-2*\a*\s) {15};
+	
+	\node[nstyle] (16) at (8*\a*\c, 0) {16};
+	\node[nstyle] (17) at (7*\a*\c, -\a*\s) {17};
+	\node[nstyle] (18) at (7*\a*\c, -\a-\a*\s) {18};
+	\node[nstyle] (19) at (8*\a*\c, -\a-2*\a*\s) {19};
+	
+	\draw[ystyle] (0) -- (1);
+	\draw[zstyle] (1) -- (2);
+	\draw[xstyle] (2) -- (3);
+	
+	\draw[xstyle] (0) -- (5);
+	\draw[zstyle] (5) -- (6);
+	\draw[ystyle] (6) -- (3);
+	\draw[xstyle] (6) -- (7);
+	\draw[ystyle] (5) -- (4);
+	
+	\draw[xstyle] (4) -- (9);
+	\draw[zstyle] (9) -- (10);
+	\draw[ystyle] (10) -- (7);
+	\draw[xstyle] (10) -- (11);
+	\draw[ystyle] (9) -- (8);
+	
+	\draw[xstyle] (8) -- (13);
+	\draw[zstyle] (13) -- (14);
+	\draw[ystyle] (14) -- (11);
+	\draw[xstyle] (14) -- (15);
+	\draw[ystyle] (13) -- (12);
+	
+	\draw[xstyle] (12) -- (17);
+	\draw[zstyle] (17) -- (18);
+	\draw[ystyle] (18) -- (15);
+	\draw[xstyle] (18) -- (19);
+	\draw[ystyle] (17) -- (16);
+	
+	\end{tikzpicture}
+\end{document}

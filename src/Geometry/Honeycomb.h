@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <stdexcept>
 #include "GeometryBase.h"
+#include <cstdlib>
 
 namespace PsimagLite {
 
@@ -107,7 +108,8 @@ public:
 
 	virtual SizeType maxConnections() const
 	{
-		throw RuntimeError("Honeycomb::maxConnections() unimplemented\n");
+		// max connections broken when splitting the lattice
+		return ly_ + 1; // overestimate probably
 	}
 
 	virtual SizeType dirs() const { return 3; }
@@ -174,12 +176,7 @@ public:
 	}
 
 	template<class Archive>
-	void serialize(Archive & ar, const unsigned int)
-	{
-		ar & boost::serialization::base_object<GeometryBase<ComplexOrRealType, InputType> >(*this);
-		ar & linSize_;
-		ar & ly_;
-	}
+	void serialize(Archive &, const unsigned int) {}
 
 	SizeType memResolv(MemResolv&,
 	                   SizeType,
@@ -221,7 +218,9 @@ private:
 
 	void getCoordinates(SizeType& x, SizeType& y, SizeType i) const
 	{
-		throw RuntimeError("Honeycomb::getCoordinates() unimplemented\n");
+		div_t q = div(i, ly_);
+		x = q.quot;
+		y = q.rem;
 	}
 
 	// assumes i1 < i2
@@ -290,12 +289,18 @@ private:
 
 	bool isDirectionYsameCol(SizeType y1, SizeType y2) const
 	{
-		throw RuntimeError("Honeycomb::isDirectionYsameCol() unimplemented\n");
+		assert(y1 < y2);
+		SizeType dy = y2 - y1;
+		if (dy == 1 && isMultipleOf4(y1)) return true;
+		return (periodicY_ && (dy + 1 == ly_) && isMultipleOf4(y2));
 	}
 
 	bool isDirectionXsameCol(SizeType y1, SizeType y2) const
 	{
-		throw RuntimeError("Honeycomb::isDirectionXsameCol() unimplemented\n");
+		assert(y1 < y2);
+		SizeType dy = y2 - y1;
+		if (dy == 1 && is4nPlus2(y1)) return true;
+		return (periodicY_ && (dy + 1 == ly_) && is4nPlus2(y2));
 	}
 
 	bool isThereAneighbor(SizeType ind, SizeType start, SizeType end) const
@@ -314,6 +319,13 @@ private:
 
 	static bool isMultipleOf4(SizeType y)
 	{
+		return ((y % 4) == 0);
+	}
+
+	static bool is4nPlus2(SizeType y)
+	{
+		if (y < 2) return false;
+		y -= 2;
 		return ((y % 4) == 0);
 	}
 
