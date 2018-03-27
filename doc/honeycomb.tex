@@ -15,6 +15,7 @@
 
 \begin{document}
 	\newcounter{mycounter};
+	\setcounter{mycounter}{0}
 	\begin{tikzpicture}[
 	ystyle/.style={myred, thick},
 	zstyle/.style={mypurple, thick},
@@ -23,7 +24,6 @@
 	
 	\foreach \x in {0,...,4} {
 		\def\y{4*\x}
-		\stepcounter{mycounter}
 		\node[nstyle] (0\x) at (2*\a*\c*\x,0) {\themycounter};
 		\stepcounter{mycounter}
 		\node[nstyle] (1\x) at (2*\a*\c*\x-\a*\c, -\a*\s) {\themycounter};
@@ -31,7 +31,7 @@
 		\node[nstyle] (2\x) at (2*\a*\c*\x-\a*\c, -\a-\a*\s) {\themycounter};
 		\stepcounter{mycounter}
 		\node[nstyle] (3\x) at (2*\a*\c*\x, -\a-2*\a*\s) {\themycounter};
-		
+		\stepcounter{mycounter}
 	
 		\draw[zstyle] (1\x) -- (2\x);
 		\draw[xstyle] (2\x) -- (3\x);
