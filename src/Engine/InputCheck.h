@@ -196,6 +196,7 @@ public:
 		knownLabels_.push_back("LanczosNoSaveLanczosVectors");
 		knownLabels_.push_back("DenseSparseThreshold");
 		knownLabels_.push_back("TridiagonalEps");
+		knownLabels_.push_back("HoneycombLy");
 	}
 
 	~InputCheck()

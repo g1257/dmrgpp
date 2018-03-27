@@ -93,11 +93,6 @@ public:
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename ModelHelperType::RealType RealType;
 
-	static void setAnisotropic()
-	{
-		terms_ = 3;
-	}
-
 	template<typename SomeStructType>
 	static void setLinkData(SizeType term,
 	                        SizeType,
