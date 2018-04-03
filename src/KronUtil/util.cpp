@@ -27,278 +27,284 @@
 #include "den_is_zeros.cpp"
 #include "den_kron_form.cpp"
 
+#ifndef USE_FLOAT
+typedef double RealType;
+#else
+typedef float RealType;
+#endif
+
 template
 void estimate_kron_cost
-<double>(const int nrow_A,
+<RealType>(const int nrow_A,
                          const int ncol_A,
                          const int nnz_A,
                          const int nrow_B,
                          const int ncol_B,
                          const int nnz_B,
-                         double *p_kron_nnz,
-                         double *p_kron_flops,
+                         RealType *p_kron_nnz,
+                         RealType *p_kron_flops,
                          int *p_imethod );
 
 template
-void csr_den_kron_mult_method<double>(const int imethod,
+void csr_den_kron_mult_method<RealType>(const int imethod,
                               const char transA,
                               const char transB,
 
-                              const PsimagLite::CrsMatrix<double>& a_,
-                              const PsimagLite::Matrix<double>& b_,
+                              const PsimagLite::CrsMatrix<RealType>& a_,
+                              const PsimagLite::Matrix<RealType>& b_,
 
-                              const PsimagLite::Vector<double>::Type& yin_,
+                              const PsimagLite::Vector<RealType>::Type& yin_,
                               SizeType offsetY ,
-                              PsimagLite::Vector<double>::Type& xout_,
+                              PsimagLite::Vector<RealType>::Type& xout_,
                               SizeType offsetX);
 
 template
-bool csr_is_eye<double>(const PsimagLite::CrsMatrix<double>&);
+bool csr_is_eye<RealType>(const PsimagLite::CrsMatrix<RealType>&);
 
 template
-void csr_transpose<double>(const int nrow_A,
+void csr_transpose<RealType>(const int nrow_A,
                    const int ncol_A,
                    const int arowptr[],
                    const int acol[],
-                   const double aval[],
+                   const RealType aval[],
                    int atrowptr[],
                    int atcol[],
-                   double atval[] );
+                   RealType atval[] );
 
 template
-void csr_kron_mult_method<double>(const int imethod,
+void csr_kron_mult_method<RealType>(const int imethod,
                           const char transA,
                           const char transB,
 
-                          const PsimagLite::CrsMatrix<double>& a,
-                          const PsimagLite::CrsMatrix<double>& b,
+                          const PsimagLite::CrsMatrix<RealType>& a,
+                          const PsimagLite::CrsMatrix<RealType>& b,
 
-                          const PsimagLite::MatrixNonOwned<const double>& yin,
-                          PsimagLite::MatrixNonOwned<double>& xout);
+                          const PsimagLite::MatrixNonOwned<const RealType>& yin,
+                          PsimagLite::MatrixNonOwned<RealType>& xout);
 
 
 
 template
-void csr_matmul_post<double>(const char trans_A,
-                     const PsimagLite::CrsMatrix<double>&,
+void csr_matmul_post<RealType>(const char trans_A,
+                     const PsimagLite::CrsMatrix<RealType>&,
                      const int nrow_Y,
                      const int ncol_Y,
-                     const PsimagLite::MatrixNonOwned<const double>& yin,
+                     const PsimagLite::MatrixNonOwned<const RealType>& yin,
                      const int nrow_X,
                      const int ncol_X,
-                     PsimagLite::MatrixNonOwned<double>& xout);
+                     PsimagLite::MatrixNonOwned<RealType>& xout);
 
 template
-void csr_matmul_pre<double>(const char trans_A,
-                     const PsimagLite::CrsMatrix<double>&,
+void csr_matmul_pre<RealType>(const char trans_A,
+                     const PsimagLite::CrsMatrix<RealType>&,
                      const int nrow_Y,
                      const int ncol_Y,
-                     const PsimagLite::MatrixNonOwned<const double>& yin,
+                     const PsimagLite::MatrixNonOwned<const RealType>& yin,
                      const int nrow_X,
                      const int ncol_X,
-                     PsimagLite::MatrixNonOwned<double>& xout);
+                     PsimagLite::MatrixNonOwned<RealType>& xout);
 
 template
-void csr_submatrix<double>(const PsimagLite::CrsMatrix<double>& a,
+void csr_submatrix<RealType>(const PsimagLite::CrsMatrix<RealType>& a,
                    const int nrow_B,
                    const int ncol_B,
                    const int max_nnz,
                    const PsimagLite::Vector<int>::Type& rindex,
                    const PsimagLite::Vector<int>::Type& cindex,
-                   PsimagLite::CrsMatrix<double>& b);
+                   PsimagLite::CrsMatrix<RealType>& b);
 
 
 template
-void csr_eye<double>(const int nrow_B,
+void csr_eye<RealType>(const int nrow_B,
              const int ncol_B,
-             PsimagLite::CrsMatrix<double>& b);
+             PsimagLite::CrsMatrix<RealType>& b);
 
 template
-void csr_kron_submatrix<double>(const PsimagLite::CrsMatrix<double>& a,
-                        const PsimagLite::CrsMatrix<double>& b,
+void csr_kron_submatrix<RealType>(const PsimagLite::CrsMatrix<RealType>& a,
+                        const PsimagLite::CrsMatrix<RealType>& b,
                         const int nrindex,
                         const int ncindex,
                         const int max_nnz,
                         const PsimagLite::Vector<int>::Type& rindex,
                         const PsimagLite::Vector<int>::Type& cindex,
-                        PsimagLite::CrsMatrix<double>& h);
+                        PsimagLite::CrsMatrix<RealType>& h);
 
 template
-void csc_matmul_pre<double>(const char trans_A,
+void csc_matmul_pre<RealType>(const char trans_A,
                      const int nrow_A,
                      const int ncol_A,
                      const PsimagLite::Vector<int>::Type& acolptr,
                      const PsimagLite::Vector<int>::Type& arow,
-                     const PsimagLite::Vector<double>::Type& aval,
+                     const PsimagLite::Vector<RealType>::Type& aval,
                      const int nrow_Y,
                      const int ncol_Y,
-                     const PsimagLite::Matrix<double>& yin,
+                     const PsimagLite::Matrix<RealType>& yin,
                      const int nrow_X,
                      const int ncol_X,
-                     PsimagLite::Matrix<double>& xout );
+                     PsimagLite::Matrix<RealType>& xout );
 
 template
-void csc_matmul_post<double>(const char trans_A,
+void csc_matmul_post<RealType>(const char trans_A,
                      const int nrow_A,
                      const int ncol_A,
                      const PsimagLite::Vector<int>::Type& acolptr,
                      const PsimagLite::Vector<int>::Type& arow,
-                     const PsimagLite::Vector<double>::Type& aval,
+                     const PsimagLite::Vector<RealType>::Type& aval,
                      const int nrow_Y,
                      const int ncol_Y,
-                     const PsimagLite::Matrix<double>& yin,
+                     const PsimagLite::Matrix<RealType>& yin,
                      const int nrow_X,
                      const int ncol_X,
-                     PsimagLite::Matrix<double>& xout);
+                     PsimagLite::Matrix<RealType>& xout);
 
 template
-void csc_kron_mult_method<double>(const int imethod,
+void csc_kron_mult_method<RealType>(const int imethod,
                           const int nrow_A,
                           const int ncol_A,
                           const PsimagLite::Vector<int>::Type& acolptr,
                           const PsimagLite::Vector<int>::Type& arow,
-                          const PsimagLite::Vector<double>::Type& aval,
+                          const PsimagLite::Vector<RealType>::Type& aval,
                           const int nrow_B,
                           const int ncol_B,
                           const PsimagLite::Vector<int>::Type& bcolptr,
                           const PsimagLite::Vector<int>::Type& brow,
-                          const PsimagLite::Vector<double>::Type& bval,
-                          const PsimagLite::Matrix<double>& yin,
-                          PsimagLite::Matrix<double>& xout );
+                          const PsimagLite::Vector<RealType>::Type& bval,
+                          const PsimagLite::Matrix<RealType>& yin,
+                          PsimagLite::Matrix<RealType>& xout );
 
 template
-void csc_kron_mult<double>(const int nrow_A,
+void csc_kron_mult<RealType>(const int nrow_A,
                    const int ncol_A,
                    const PsimagLite::Vector<int>::Type& acolptr,
                    const PsimagLite::Vector<int>::Type& arow,
-                   const PsimagLite::Vector<double>::Type& aval,
+                   const PsimagLite::Vector<RealType>::Type& aval,
                    const int nrow_B,
                    const int ncol_B,
                    const PsimagLite::Vector<int>::Type& bcolptr,
                    const PsimagLite::Vector<int>::Type& brow,
-                   const PsimagLite::Vector<double>::Type& bval,
-                   const PsimagLite::Matrix<double>& yin,
-                   PsimagLite::Matrix<double>& xout );
+                   const PsimagLite::Vector<RealType>::Type& bval,
+                   const PsimagLite::Matrix<RealType>& yin,
+                   PsimagLite::Matrix<RealType>& xout );
 
 template
-void coord2csr<double>(const int nrow_A,
+void coord2csr<RealType>(const int nrow_A,
                const int ncol_A,
                const int nnz,
                const int ilist[],
                const int jlist[],
-               const double alist[],
+               const RealType alist[],
                int arowptr[],
                int acol[],
-               double aval[] );
+               RealType aval[] );
 
 template
-void den_csr_kron_mult_method<double>(const int imethod,
+void den_csr_kron_mult_method<RealType>(const int imethod,
                               const char transA,
                               const char transB,
-                              const PsimagLite::Matrix<double>& a_,
-                              const PsimagLite::CrsMatrix<double>& b,
-                              const PsimagLite::Vector<double>::Type& yin,
+                              const PsimagLite::Matrix<RealType>& a_,
+                              const PsimagLite::CrsMatrix<RealType>& b,
+                              const PsimagLite::Vector<RealType>::Type& yin,
                               SizeType offsetY,
-                              PsimagLite::Vector<double>::Type& xout_,
+                              PsimagLite::Vector<RealType>::Type& xout_,
                               SizeType offsetX);
 
 template
-void den_zeros<double>(const int nrow_A,
+void den_zeros<RealType>(const int nrow_A,
                 const int ncol_A,
-                PsimagLite::Matrix<double>& a_);
+                PsimagLite::Matrix<RealType>& a_);
 
 template
-void den_transpose<double>(const int nrow_A,
+void den_transpose<RealType>(const int nrow_A,
                     const int ncol_A,
-                    const double a_[],
-                    double at_[] );
+                    const RealType a_[],
+                    RealType at_[] );
 
 template
-void den_gen_matrix<double>(const int nrow_A,
+void den_gen_matrix<RealType>(const int nrow_A,
                      const int ncol_A,
-                     const double& threshold,
-                     PsimagLite::Matrix<double>& a_);
+                     const RealType& threshold,
+                     PsimagLite::Matrix<RealType>& a_);
 
 template
-void den_matmul_pre<double>(const char trans_A,
+void den_matmul_pre<RealType>(const char trans_A,
                     const int nrow_A,
                     const int ncol_A,
-                    const PsimagLite::Matrix<double>& a_,
+                    const PsimagLite::Matrix<RealType>& a_,
                     const int nrow_Y,
                     const int ncol_Y,
-                    const PsimagLite::MatrixNonOwned<const double>& yin,
+                    const PsimagLite::MatrixNonOwned<const RealType>& yin,
                     const int nrow_X,
                     const int ncol_X,
-                    PsimagLite::MatrixNonOwned<double>& xout);
+                    PsimagLite::MatrixNonOwned<RealType>& xout);
 
 template
-void den_matmul_post<double>(const char trans_A,
+void den_matmul_post<RealType>(const char trans_A,
                      const int nrow_A,
                      const int ncol_A,
-                     const PsimagLite::Matrix<double>& a_,
+                     const PsimagLite::Matrix<RealType>& a_,
                      const int nrow_Y,
                      const int ncol_Y,
-                     const PsimagLite::MatrixNonOwned<const double>& yin,
+                     const PsimagLite::MatrixNonOwned<const RealType>& yin,
                      const int nrow_X,
                      const int ncol_X,
-                     PsimagLite::MatrixNonOwned<double>& xout);
+                     PsimagLite::MatrixNonOwned<RealType>& xout);
 
 template
-void den_kron_submatrix<double>(const int nrow_A,
+void den_kron_submatrix<RealType>(const int nrow_A,
         const int ncol_A,
-        const PsimagLite::Matrix<double>& a_,
+        const PsimagLite::Matrix<RealType>& a_,
         const int nrow_B,
         const int ncol_B,
-        const PsimagLite::Matrix<double>& b_,
+        const PsimagLite::Matrix<RealType>& b_,
         const int nrindex,
         const int ncindex,
         const PsimagLite::Vector<int>::Type& rindex,
         const PsimagLite::Vector<int>::Type& cindex,
-        PsimagLite::Matrix<double>& c_ );
+        PsimagLite::Matrix<RealType>& c_ );
 
 template
-void den_kron_mult_method<double>(const int imethod,
+void den_kron_mult_method<RealType>(const int imethod,
                           const char transA,
                           const char transB,
-                          const PsimagLite::Matrix<double>& a_,
-                          const PsimagLite::Matrix<double>& b_,
-                          const PsimagLite::Vector<double>::Type& yin,
+                          const PsimagLite::Matrix<RealType>& a_,
+                          const PsimagLite::Matrix<RealType>& b_,
+                          const PsimagLite::Vector<RealType>::Type& yin,
                           SizeType offsetY ,
-                          PsimagLite::Vector<double>::Type& xout,
+                          PsimagLite::Vector<RealType>::Type& xout,
                           SizeType offsetX);
 
 template
-int den_nnz<double>(const PsimagLite::Matrix<double>&);
+int den_nnz<RealType>(const PsimagLite::Matrix<RealType>&);
 
 template
-bool den_is_eye<double>(const PsimagLite::Matrix<double>&);
+bool den_is_eye<RealType>(const PsimagLite::Matrix<RealType>&);
 
 template
-bool den_is_zeros<double>(const PsimagLite::Matrix<double>&);
+bool den_is_zeros<RealType>(const PsimagLite::Matrix<RealType>&);
 
 
 template
-void den_kron_form<double>(const int nrow_A,
+void den_kron_form<RealType>(const int nrow_A,
                     const int ncol_A,
-                    const PsimagLite::Matrix<double>& a_,
+                    const PsimagLite::Matrix<RealType>& a_,
                     const int nrow_B,
                     const int ncol_B,
-                    const PsimagLite::Matrix<double>& b_,
-                    PsimagLite::Matrix<double>& c_);
+                    const PsimagLite::Matrix<RealType>& b_,
+                    PsimagLite::Matrix<RealType>& c_);
 
 
 template
-void den_submatrix<double>(const int nrow_A,
+void den_submatrix<RealType>(const int nrow_A,
                     const int ncol_A,
-                    const PsimagLite::Matrix<double>& a_,
+                    const PsimagLite::Matrix<RealType>& a_,
                     const int nrindex,
                     const int ncindex,
                     const PsimagLite::Vector<int>::Type& rindex,
                     const PsimagLite::Vector<int>::Type& cindex,
-                    PsimagLite::Matrix<double>& c_);
+                    PsimagLite::Matrix<RealType>& c_);
 
 template
-void den_eye<double>(const int nrow_A,
+void den_eye<RealType>(const int nrow_A,
              const int ncol_A,
-             PsimagLite::Matrix<double>& c_);
+             PsimagLite::Matrix<RealType>& c_);
 

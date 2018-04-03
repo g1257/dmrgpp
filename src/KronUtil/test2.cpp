@@ -1,13 +1,19 @@
 #include "util.h"
 #include "KronUtil.h"
 
+#ifndef USE_FLOAT
+typedef double RealType;
+#else
+typedef float RealType;
+#endif
+
 int main()
 {
-  typedef double RealType;
-  typedef std::complex<double> ComplexOrRealType;
+  typedef RealType RealType;
+  typedef std::complex<RealType> ComplexOrRealType;
   int nerrors = 0;
-  double thresholdA = 0;
-  double thresholdB = 0;
+  RealType thresholdA = 0;
+  RealType thresholdB = 0;
   int nrow_A = 0;
   int ncol_A = 0;
   int nrow_B = 0;

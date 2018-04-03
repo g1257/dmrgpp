@@ -1,12 +1,18 @@
 #include "util.h"
 #include "KronUtil.h"
 
+#ifndef USE_FLOAT
+typedef double RealType;
+#else
+typedef float RealType;
+#endif
+
 int main()
 {
   const int idebug = 0;
   int nerrors = 0;
-  double thresholdA = 0;
-  double thresholdB = 0;
+  RealType thresholdA = 0;
+  RealType thresholdB = 0;
   int nrow_A = 0;
   int ncol_A = 0;
   int nrow_B = 0;
@@ -44,24 +50,24 @@ int main()
      int nrow_Y = ncol_2;
      int ncol_Y = ncol_1;
 
-     PsimagLite::Matrix<double> a_(nrow_A, ncol_A);
-     PsimagLite::Matrix<double> b_(nrow_B, ncol_B);
-     PsimagLite::Matrix<double> y_(nrow_Y, ncol_Y);
-	PsimagLite::MatrixNonOwned<const double> yRef(y_);
+     PsimagLite::Matrix<RealType> a_(nrow_A, ncol_A);
+     PsimagLite::Matrix<RealType> b_(nrow_B, ncol_B);
+     PsimagLite::Matrix<RealType> y_(nrow_Y, ncol_Y);
+	PsimagLite::MatrixNonOwned<const RealType> yRef(y_);
 
-     PsimagLite::Matrix<double> x1_(nrow_X, ncol_X);
-	 PsimagLite::MatrixNonOwned<double> x1Ref(x1_);
-     PsimagLite::Matrix<double> x2_(nrow_X, ncol_X);
-	 PsimagLite::MatrixNonOwned<double> x2Ref(x2_);
-     PsimagLite::Matrix<double> x3_(nrow_X, ncol_X);
-	PsimagLite::MatrixNonOwned<double> x3Ref(x3_);
+     PsimagLite::Matrix<RealType> x1_(nrow_X, ncol_X);
+	 PsimagLite::MatrixNonOwned<RealType> x1Ref(x1_);
+     PsimagLite::Matrix<RealType> x2_(nrow_X, ncol_X);
+	 PsimagLite::MatrixNonOwned<RealType> x2Ref(x2_);
+     PsimagLite::Matrix<RealType> x3_(nrow_X, ncol_X);
+	PsimagLite::MatrixNonOwned<RealType> x3Ref(x3_);
 
-     PsimagLite::Matrix<double> sx1_(nrow_X, ncol_X);
-	  PsimagLite::MatrixNonOwned<double> sx1Ref(sx1_);
-     PsimagLite::Matrix<double> sx2_(nrow_X, ncol_X);
-	 PsimagLite::MatrixNonOwned<double> sx2Ref(sx2_);
-     PsimagLite::Matrix<double> sx3_(nrow_X, ncol_X);
-	 PsimagLite::MatrixNonOwned<double> sx3Ref(sx3_);
+     PsimagLite::Matrix<RealType> sx1_(nrow_X, ncol_X);
+	  PsimagLite::MatrixNonOwned<RealType> sx1Ref(sx1_);
+     PsimagLite::Matrix<RealType> sx2_(nrow_X, ncol_X);
+	 PsimagLite::MatrixNonOwned<RealType> sx2Ref(sx2_);
+     PsimagLite::Matrix<RealType> sx3_(nrow_X, ncol_X);
+	 PsimagLite::MatrixNonOwned<RealType> sx3Ref(sx3_);
 
      if (thresholdA == 0) {
       if (nrow_A == ncol_A) {
@@ -76,7 +82,7 @@ int main()
           den_eye( nrow_A, ncol_A, a_ );
           assert( den_is_eye(a_) );
    
-          PsimagLite::CrsMatrix<double> a(a_);
+          PsimagLite::CrsMatrix<RealType> a(a_);
           assert( csr_is_eye(a) );
           }
        else {
@@ -87,14 +93,14 @@ int main()
            den_zeros(nrow_A,ncol_A,a_);
            assert( den_is_zeros(a_) );
            
-           PsimagLite::CrsMatrix<double> a(a_);
+           PsimagLite::CrsMatrix<RealType> a(a_);
            assert( csr_is_zeros(a) );
           };
       }
      else {
        den_gen_matrix( nrow_A, ncol_A,  thresholdA, a_);
 
-       PsimagLite::CrsMatrix<double> a(a_);
+       PsimagLite::CrsMatrix<RealType> a(a_);
        assert( den_is_eye(a_) == csr_is_eye(a) );
        assert( den_is_zeros(a_) == csr_is_zeros(a) );
 
@@ -113,13 +119,13 @@ int main()
        den_eye( nrow_B, ncol_B, b_ );
        assert( den_is_eye(b_));
 
-       PsimagLite::CrsMatrix<double> b(b_);
+       PsimagLite::CrsMatrix<RealType> b(b_);
        assert( csr_is_eye(b) );
        }
      else {
        den_gen_matrix( nrow_B, ncol_B,  thresholdB, b_);
 
-       PsimagLite::CrsMatrix<double> b(b_);
+       PsimagLite::CrsMatrix<RealType> b(b_);
        assert( den_is_eye(b_) == csr_is_eye(b) );
        assert( den_is_zeros(b_) == csr_is_zeros(b) );
        };
@@ -171,11 +177,11 @@ int main()
 
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {
-        double diff12 = std::abs( x1_(ix,jx) - x2_(ix,jx) );
-        double diff23 = std::abs( x2_(ix,jx) - x3_(ix,jx) );
-        double diff31 = std::abs( x3_(ix,jx) - x1_(ix,jx) );
-        double diffmax = std::max( diff12, std::max( diff23, diff31) );
-        const double tol = 1.0/(1000.0*1000.0*1000.0);
+        RealType diff12 = std::abs( x1_(ix,jx) - x2_(ix,jx) );
+        RealType diff23 = std::abs( x2_(ix,jx) - x3_(ix,jx) );
+        RealType diff31 = std::abs( x3_(ix,jx) - x1_(ix,jx) );
+        RealType diffmax = std::max( diff12, std::max( diff23, diff31) );
+        const RealType tol = 1.0/(1000.0*1000.0*1000.0);
 
         int isok = (diffmax <= tol);
         if (!isok) {
@@ -194,11 +200,11 @@ int main()
      * test sparse matrix
      * ------------------
      */
-     PsimagLite::CrsMatrix<double> a(a_);
+     PsimagLite::CrsMatrix<RealType> a(a_);
      assert( den_is_eye(a_) == csr_is_eye(a) );
      assert( den_is_zeros(a_) == csr_is_zeros(a) );
 
-     PsimagLite::CrsMatrix<double> b(b_);
+     PsimagLite::CrsMatrix<RealType> b(b_);
      assert( den_is_eye(b_) == csr_is_eye(b) );
      assert( den_is_zeros(b_) == csr_is_zeros(b) );
 
@@ -243,11 +249,11 @@ int main()
 
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {
-        double diff1 = std::abs( x1_(ix,jx) - sx1_(ix,jx));
-        double diff2 = std::abs( x2_(ix,jx) - sx2_(ix,jx));
-        double diff3 = std::abs( x3_(ix,jx) - sx3_(ix,jx));
-        double diffmax = std::max( diff1, std::max( diff2, diff3) );
-        const double tol = 1.0/(1000.0*1000.0*1000.0);
+        RealType diff1 = std::abs( x1_(ix,jx) - sx1_(ix,jx));
+        RealType diff2 = std::abs( x2_(ix,jx) - sx2_(ix,jx));
+        RealType diff3 = std::abs( x3_(ix,jx) - sx3_(ix,jx));
+        RealType diffmax = std::max( diff1, std::max( diff2, diff3) );
+        const RealType tol = 1.0/(1000.0*1000.0*1000.0);
         int isok = (diffmax <= tol );
         if (!isok) {
            nerrors += 1;
@@ -290,8 +296,8 @@ int main()
      
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {
-       double diff = std::abs( x1_(ix,jx) - sx1_(ix,jx) );
-       const double tol = 1.0/(1000.0 * 1000.0 * 1000.0);
+       RealType diff = std::abs( x1_(ix,jx) - sx1_(ix,jx) );
+       const RealType tol = 1.0/(1000.0 * 1000.0 * 1000.0);
 
        int isok  = (diff <= tol);
        if (!isok) {
@@ -327,11 +333,11 @@ int main()
 
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {
-        double diff1 = std::abs( x1_(ix,jx) - sx1_(ix,jx));
-        double diff2 = 0;
-        double diff3 = 0;
-        double diffmax = std::max( diff1, std::max( diff2, diff3) );
-        const double tol = 1.0/(1000.0*1000.0*1000.0);
+        RealType diff1 = std::abs( x1_(ix,jx) - sx1_(ix,jx));
+        RealType diff2 = 0;
+        RealType diff3 = 0;
+        RealType diffmax = std::max( diff1, std::max( diff2, diff3) );
+        const RealType tol = 1.0/(1000.0*1000.0*1000.0);
         int isok = (diffmax <= tol );
         if (!isok) {
            nerrors += 1;
@@ -395,11 +401,11 @@ int main()
 
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {
-        double diff1 = std::abs( x1_(ix,jx) - sx1_(ix,jx));
-        double diff2 = std::abs( x2_(ix,jx) - sx2_(ix,jx));
-        double diff3 = std::abs( x3_(ix,jx) - sx3_(ix,jx));
-        double diffmax = std::max( diff1, std::max( diff2, diff3) );
-        const double tol = 1.0/(1000.0*1000.0*1000.0);
+        RealType diff1 = std::abs( x1_(ix,jx) - sx1_(ix,jx));
+        RealType diff2 = std::abs( x2_(ix,jx) - sx2_(ix,jx));
+        RealType diff3 = std::abs( x3_(ix,jx) - sx3_(ix,jx));
+        RealType diffmax = std::max( diff1, std::max( diff2, diff3) );
+        const RealType tol = 1.0/(1000.0*1000.0*1000.0);
         int isok = (diffmax <= tol );
         if (!isok) {
            nerrors += 1;
@@ -438,11 +444,11 @@ int main()
 
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {
-        double diff1 = std::abs( x1_(ix,jx) - sx1_(ix,jx));
-        double diff2 = 0;
-        double diff3 = 0;
-        double diffmax = std::max( diff1, std::max( diff2, diff3) );
-        const double tol = 1.0/(1000.0*1000.0*1000.0);
+        RealType diff1 = std::abs( x1_(ix,jx) - sx1_(ix,jx));
+        RealType diff2 = 0;
+        RealType diff3 = 0;
+        RealType diffmax = std::max( diff1, std::max( diff2, diff3) );
+        const RealType tol = 1.0/(1000.0*1000.0*1000.0);
         int isok = (diffmax <= tol );
         if (!isok) {
            nerrors += 1;
@@ -507,11 +513,11 @@ int main()
 
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {
-        double diff1 = std::abs( x1_(ix,jx) - sx1_(ix,jx));
-        double diff2 = std::abs( x2_(ix,jx) - sx2_(ix,jx));
-        double diff3 = std::abs( x3_(ix,jx) - sx3_(ix,jx));
-        double diffmax = std::max( diff1, std::max( diff2, diff3) );
-        const double tol = 1.0/(1000.0*1000.0*1000.0);
+        RealType diff1 = std::abs( x1_(ix,jx) - sx1_(ix,jx));
+        RealType diff2 = std::abs( x2_(ix,jx) - sx2_(ix,jx));
+        RealType diff3 = std::abs( x3_(ix,jx) - sx3_(ix,jx));
+        RealType diffmax = std::max( diff1, std::max( diff2, diff3) );
+        const RealType tol = 1.0/(1000.0*1000.0*1000.0);
         int isok = (diffmax <= tol );
         if (!isok) {
            nerrors += 1;
