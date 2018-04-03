@@ -173,11 +173,11 @@ void geev(char jobvl,
 	Vector<double>::Type rwork(2*n+1,0);
 	int lwork = -1;
 	zgeev_(&jobvl,
-	      &jobvr,
-	      &n,
-	      &(a(0,0)),
-	      &lda,
-	      &(w[0]),
+	       &jobvr,
+	       &n,
+	       &(a(0,0)),
+	       &lda,
+	       &(w[0]),
 	        &(vl(0,0)),
 	        &ldvl,
 	        &(vr(0,0)),
@@ -192,11 +192,11 @@ void geev(char jobvl,
 	work.resize(lwork);
 
 	zgeev_(&jobvl,
-	      &jobvr,
-	      &n,
-	      &(a(0,0)),
-	      &lda,
-	      &(w[0]),
+	       &jobvr,
+	       &n,
+	       &(a(0,0)),
+	       &lda,
+	       &(w[0]),
 	        &(vl(0,0)),
 	        &ldvl,
 	        &(vr(0,0)),
@@ -328,15 +328,84 @@ void svd(char jobz,Matrix<double>& a,Vector<double>::Type& s,Matrix<double>& vt)
 #endif
 }
 
-void svd(char,
-         Matrix<float>&,
-         Vector<float>::Type&,
-         Matrix<float>&)
+void svd(char jobz,
+         Matrix<float>& a,
+         Vector<float>::Type& s,
+         Matrix<float>& vt)
 {
 #ifdef NO_LAPACK
 	throw RuntimeError("svd: dgesdd_: NO LAPACK!\n");
 #else
-	throw RuntimeError("svd: with float not ready yet\n");
+	if (jobz != 'A' && jobz != 'S') {
+		String msg("svd: jobz must be either A or S");
+		String jobzString = " ";
+		jobzString[0] = jobz;
+		throw RuntimeError(msg + ", not " + jobzString + "\n");
+	}
+
+	int m = a.rows();
+	int n = a.cols();
+	int lda = m;
+	int min = (m<n) ? m : n;
+
+	s.resize(min);
+	int ldu = m;
+	int ucol = (jobz == 'A') ? m : min;
+	Matrix<float> u(ldu,ucol);
+	int ldvt = (jobz == 'A') ? n : min;
+	vt.resize(ldvt,n);
+
+	Vector<float>::Type work(100,0);
+	int info = 0;
+	Vector<int>::Type iwork(8*min,0);
+
+	// query optimal work
+	int lwork = -1;
+	psimag::LAPACK::sgesdd_(&jobz,
+	                        &m,
+	                        &n,
+	                        &(a(0,0)),
+	                        &lda,
+	                        &(s[0]),
+	        &(u(0,0)),
+	        &ldu,
+	        &(vt(0,0)),
+	        &ldvt,
+	        &(work[0]),
+	        &lwork,
+	        &(iwork[0]),
+	        &info);
+	if (info!=0) {
+		String str(__FILE__);
+		str += " " + ttos(__LINE__);
+		str += " svd(...) failed with info=" + ttos(info) + "\n";
+		throw RuntimeError(str.c_str());
+	}
+
+	lwork = int(work[0]) + (m+n)*256;
+	work.resize(lwork+10);
+	// real work:
+	psimag::LAPACK::sgesdd_(&jobz,
+	                        &m,
+	                        &n,
+	                        &(a(0,0)),
+	                        &lda,
+	                        &(s[0]),
+	        &(u(0,0)),
+	        &ldu,
+	        &(vt(0,0)),
+	        &ldvt,
+	        &(work[0]),
+	        &lwork,
+	        &(iwork[0]),
+	        &info);
+	if (info!=0) {
+		String str(__FILE__);
+		str += " " + ttos(__LINE__);
+		str += " svd(...) failed with info=" + ttos(info) + "\n";
+		throw RuntimeError(str.c_str());
+	}
+	a = u;
 #endif
 }
 
@@ -425,15 +494,88 @@ void svd(char jobz,
 #endif
 }
 
-void svd(char,
-         Matrix<std::complex<float> >&,
-         Vector<float>::Type&,
-         Matrix<std::complex<float> >&)
+void svd(char jobz,
+         Matrix<std::complex<float> >& a,
+         Vector<float>::Type& s,
+         Matrix<std::complex<float> >& vt)
 {
 #ifdef NO_LAPACK
 	throw RuntimeError("svd: dgesdd_: NO LAPACK!\n");
 #else
-	throw RuntimeError("svd: with std::complex<float> not ready yet\n");
+	if (jobz != 'A' && jobz != 'S') {
+		String msg("svd: jobz must be either A or S");
+		String jobzString = " ";
+		jobzString[0] = jobz;
+		throw RuntimeError(msg + ", not " + jobzString + "\n");
+	}
+
+	int m = a.rows();
+	int n = a.cols();
+	int lda = m;
+	int min = (m<n) ? m : n;
+
+	s.resize(min);
+	int ldu = m;
+	int ucol = (jobz == 'A') ? m : min;
+	Matrix<std::complex<float> > u(ldu,ucol);
+	int ldvt = (jobz == 'A') ? n : min;
+	vt.resize(ldvt,n);
+	int lrwork = 2.0*min*std::max(5*min+7,2*std::max(m,n)+2*min+1);
+	Vector<float>::Type rwork(lrwork, 0.0);
+
+	Vector<std::complex<float> >::Type work(100,0);
+	int info = 0;
+	Vector<int>::Type iwork(8*min,0);
+
+	// query optimal work
+	int lwork = -1;
+	psimag::LAPACK::cgesdd_(&jobz,
+	                        &m,
+	                        &n,
+	                        &(a(0,0)),
+	                        &lda,
+	                        &(s[0]),
+	        &(u(0,0)),
+	        &ldu,
+	        &(vt(0,0)),
+	        &ldvt,
+	        &(work[0]),
+	        &lwork,
+	        &(rwork[0]),
+	        &(iwork[0]),
+	        &info);
+	if (info!=0) {
+		String str(__FILE__);
+		str += " " + ttos(__LINE__);
+		str += " svd(...) failed with info=" + ttos(info) + "\n";
+		throw RuntimeError(str.c_str());
+	}
+
+	lwork = int(std::real(work[0])) + (m+n)*256;
+	work.resize(lwork+10);
+	// real work:
+	psimag::LAPACK::cgesdd_(&jobz,
+	                        &m,
+	                        &n,
+	                        &(a(0,0)),
+	                        &lda,
+	                        &(s[0]),
+	        &(u(0,0)),
+	        &ldu,
+	        &(vt(0,0)),
+	        &ldvt,
+	        &(work[0]),
+	        &lwork,
+	        &(rwork[0]),
+	        &(iwork[0]),
+	        &info);
+	if (info!=0) {
+		String str(__FILE__);
+		str += " " + ttos(__LINE__);
+		str += " svd(...) failed with info=" + ttos(info) + "\n";
+		throw RuntimeError(str.c_str());
+	}
+	a = u;
 #endif
 }
 
