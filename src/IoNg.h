@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Map.h"
 #include "H5Cpp.h"
 #include <typeinfo>
+#include "IoNgSerializer.h"
 
 namespace PsimagLite {
 
@@ -106,11 +107,13 @@ public:
 
 		typedef std::vector<String> VectorStringType;
 
-		Out() : hdf5File_(0), groupDef_(0) {}
+		Out() : hdf5File_(0), groupDef_(0), ioNgSerializer_(hdf5File_, groupDef_)
+		{}
 
 		Out(const String& fn)
 		    : hdf5File_(new H5::H5File(fn, H5F_ACC_TRUNC)),
-		      groupDef_(new H5::Group(hdf5File_->createGroup("/Def")))
+		      groupDef_(new H5::Group(hdf5File_->createGroup("/Def"))),
+		      ioNgSerializer_(hdf5File_, groupDef_)
 		{}
 
 		~Out()
@@ -140,10 +143,12 @@ public:
 			labels_.clear();
 
 			throw RuntimeError("IoNg:: open cannot handle mode yet\n");
+			throw RuntimeError("IoNg:: open cannot handle serializer object yet\n");
 		}
 
 		void close()
 		{
+			// deal with the serializer object FIXME
 			delete groupDef_; // should I close something first? FIXME
 			groupDef_ = 0;
 			delete hdf5File_; // should I close something first? FIXME
@@ -238,23 +243,32 @@ public:
 		}
 
 		template<typename T>
-		void print(const String& label,
-		           const T& something)
+		void print(String label,
+		           const std::stack<T>&)
 		{
 			assert(hdf5File_);
 			assert(groupDef_);
-			String name = String(typeid(T).name());
+			String name(typeid(std::stack<T>).name());
 			std::cerr<<__FILE__<<" Not printing class "<<name;
 			std::cerr<<" With label "<<label<<" (FIXME TODO)\n";
 		}
 
-		template<typename SomePrintableType>
-		void print(const SomePrintableType&)
+		template<typename T1, typename T2>
+		void print(String label,
+		           const std::pair<T1, T2>&)
 		{
 			assert(hdf5File_);
 			assert(groupDef_);
-			String name = String(typeid(SomePrintableType).name());
-			std::cerr<<__FILE__<<" Not printing class "<<name<<" (FIXME TODO)\n";
+			String name(typeid(std::pair<T1, T2>).name());
+			std::cerr<<__FILE__<<" Not printing class "<<name;
+			std::cerr<<" With label "<<label<<" (FIXME TODO)\n";
+		}
+
+		template<typename T>
+		void print(String label,
+		           const T& something)
+		{
+			something.serialize(label, ioNgSerializer_);
 		}
 
 		void print(const char* str)
@@ -336,6 +350,7 @@ public:
 
 		H5::H5File* hdf5File_;
 		H5::Group* groupDef_;
+		IoNgSerializer ioNgSerializer_;
 		VectorStringType labels_;
 	};
 

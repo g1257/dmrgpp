@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "loki/TypeTraits.h"
 #include "Mpi.h"
+#include "IoSerializerStub.h"
 
 namespace PsimagLite {
 
@@ -518,6 +519,12 @@ public:
 		MPI::recv(rowptr_,root,tag+2,mpiComm);
 		MPI::recv(colind_,root,tag+3,mpiComm);
 		MPI::recv(values_,root,tag+4,mpiComm);
+	}
+
+	void serialize(String label, IoSerializer& serializer) const
+	{
+		std::cerr<<"WARNING: serializer not ready for CrsMatrix ";
+		std::cerr<<"with label "<<label<<" yet\n";
 	}
 
 	friend bool isZero(const CrsMatrix& A, double eps = 0.0)

@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "GeometryTerm.h"
 #include "GeometryEx.h"
 #include "BoostSerializationHeaders.h"
+#include "IoSerializerStub.h"
 
 namespace PsimagLite {
 
@@ -149,11 +150,10 @@ public:
 		return str;
 	}
 
-	template<class Archive>
-	void serialize(Archive & ar, const unsigned int)
+	void serialize(PsimagLite::String label, IoSerializer&) const
 	{
-		ar & linSize_;
-		ar & terms_;
+		std::cerr<<"WARNING: serializer not ready for ParametersDmrgSolver";
+		std::cerr<<" with label "<<label<<" yet\n";
 	}
 
 	template<typename SomeMemResolvType>

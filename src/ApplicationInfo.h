@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BitManip.h"
 #include <cstdlib>
 #include <cassert>
+#include "IoSerializerStub.h"
 
 namespace PsimagLite {
 
@@ -148,6 +149,12 @@ public:
 	const RunIdType runId() const
 	{
 		return runId_;
+	}
+
+	void serialize(String label, IoSerializer& serializer) const
+	{
+		std::cerr<<"WARNING: serializer not ready for ApplicationInfo ";
+		std::cerr<<"with label "<<label<<" yet\n";
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,

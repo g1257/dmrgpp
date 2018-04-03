@@ -91,8 +91,15 @@ public:
 		diagonalize();
 	}
 
-	template<typename IoOutputType>
-	void save(IoOutputType& io) const
+	template<typename SomeIoOutputType>
+	void save(SomeIoOutputType&) const
+	{
+		String name(typeid(SomeIoOutputType).name());
+		std::cerr<<"WARNING: cannot save ContinuedFraction";
+		std::cerr<<"to output type "<<name<<"\n";
+	}
+
+	void save(IoSimple::Out& io) const
 	{
 		io.setPrecision(12);
 		ab_.save(io);
