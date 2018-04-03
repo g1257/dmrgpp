@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <iostream>
 #include "TargetParamsBase.h"
+#include "IoSerializerStub.h"
 
 namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
@@ -280,9 +281,27 @@ public:
 		return gsWeight_;
 	}
 
-	template<typename ModelType_>
+	void serialize(PsimagLite::String label,
+	               PsimagLite::IoSerializer& serializer) const
+	{
+		std::cerr<<"WARNING: serializer not ready for TargetParamsCommon ";
+		std::cerr<<"with label "<<label<<" yet\n";
+	}
+
 	friend std::ostream& operator<<(std::ostream& os,
-	                                const TargetParamsCommon<ModelType_>& t);
+	                                const TargetParamsCommon& t)
+	{
+		os<<"#TargetParams.operators="<<t.aOperators_.size()<<"\n";
+		for (SizeType i=0;i<t.aOperators_.size();i++) {
+			os<<"#TargetParams.operator "<<i<<"\n";
+			os<<t.aOperators_[i];
+		}
+
+		os<<"#TargetParams.site="<<t.sites_;
+		os<<"#TargetParams.startingLoop="<<t.startingLoops_<<"\n";
+
+		return os;
+	}
 
 private:
 
@@ -394,22 +413,6 @@ private:
 	//serializr ref model_
 	const ModelType& model_;
 }; // class TargetParamsCommon
-
-template<typename ModelType>
-inline std::ostream&
-operator<<(std::ostream& os,const TargetParamsCommon<ModelType>& t)
-{
-	os<<"#TargetParams.operators="<<t.aOperators_.size()<<"\n";
-	for (SizeType i=0;i<t.aOperators_.size();i++) {
-		os<<"#TargetParams.operator "<<i<<"\n";
-		os<<t.aOperators_[i];
-	}
-
-	os<<"#TargetParams.site="<<t.sites_;
-	os<<"#TargetParams.startingLoop="<<t.startingLoops_<<"\n";
-
-	return os;
-}
 } // namespace Dmrg
 
 /*@}*/

@@ -113,6 +113,13 @@ public:
 		return correctionA_;
 	}
 
+	void serialize(PsimagLite::String label,
+	               PsimagLite::IoSerializer&) const
+	{
+		std::cerr<<"WARNING: serializer not ready for TargetParamsGroundState ";
+		std::cerr<<"with label "<<label<<" yet\n";
+	}
+
 private:
 
 	RealType correctionA_;

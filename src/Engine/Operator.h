@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "InputNg.h"
 #include "InputCheck.h"
 #include "CanonicalExpression.h"
+#include "IoSerializerStub.h"
 
 namespace Dmrg {
 
@@ -243,6 +244,13 @@ struct Operator {
 	{
 		SparseMatrixType data2 = data;
 		transposeConjugate(data,data2);
+	}
+
+	void serialize(PsimagLite::String label,
+	               PsimagLite::IoSerializer& serializer) const
+	{
+		std::cerr<<"WARNING: serializer not ready for Operator ";
+		std::cerr<<"with label "<<label<<" yet\n";
 	}
 
 	void save(std::ostream& os) const

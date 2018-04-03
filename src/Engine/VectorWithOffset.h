@@ -82,6 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define VECTOR_WITH_OFFSET_H
 #include "Vector.h"
 #include "ProgressIndicator.h"
+#include "IoSimple.h"
+#include <typeinfo>
 
 namespace Dmrg {
 template<typename ComplexOrRealType>
@@ -207,8 +209,15 @@ public:
 			sv[i+offset_] = data_[i];
 	}
 
-	template<typename IoOutputter>
-	void save(IoOutputter& io,const PsimagLite::String& label) const
+	template<typename SomeIoOutputType>
+	void save(SomeIoOutputType&, const PsimagLite::String& label) const
+	{
+		PsimagLite::String name(typeid(SomeIoOutputType).name());
+		std::cerr<<"WARNING: cannot save VectorWithOffset";
+		std::cerr<<"to output type "<<name<<" with label "<<label<<"\n";
+	}
+
+	void save(PsimagLite::IoSimple::Out& io, const PsimagLite::String& label) const
 	{
 		io.printline(label);
 		PsimagLite::String s="#size="+ttos(size_);

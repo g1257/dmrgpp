@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h"
 #include "MemResolv.h"
 #include "TargetQuantumElectrons.h"
+#include "IoSerializerStub.h"
 
 namespace Dmrg {
 
@@ -238,6 +239,13 @@ public:
 		if (tmp & 1) maxElectrons++;
 
 		return maxElectrons*modelCommon_->geometry().numberOfSites() + 1;
+	}
+
+	// FIXME: should it be virtual
+	void serialize(PsimagLite::String& label, PsimagLite::IoSerializer&) const
+	{
+		std::cerr<<"WARNING: serializer not ready for ModelBase ";
+		std::cerr<<"with label "<<label<<" yet\n";
 	}
 
 	void printBasis(SizeType site) const

@@ -84,6 +84,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include <cassert>
 #include "ProgramGlobals.h"
+#include "IoSimple.h"
+#include <typeinfo>
 
 // FIXME: a more generic solution is needed instead of tying
 // the non-zero structure to basis
@@ -364,8 +366,17 @@ public:
 		}
 	}
 
-	template<typename IoOutputter>
-	void save(IoOutputter& io,const PsimagLite::String& label) const
+	template<typename SomeIoOutputType>
+	void save(SomeIoOutputType&,
+	          const PsimagLite::String& label) const
+	{
+		PsimagLite::String name(typeid(SomeIoOutputType).name());
+		std::cerr<<"WARNING: cannot save ChebyshevSerializer";
+		std::cerr<<"to output type "<<name<<" with label "<<label<<"\n";
+	}
+
+	void save(PsimagLite::IoSimple::Out& io,
+	          const PsimagLite::String& label) const
 	{
 		io.printline(label);
 		PsimagLite::String s="#size="+ttos(size_);

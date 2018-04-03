@@ -90,6 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PsimagLite.h"
 #include "RestartStruct.h"
 #include "FiniteLoop.h"
+#include "IoSerializerStub.h"
 
 namespace Dmrg {
 
@@ -158,9 +159,11 @@ struct ParametersDmrgSolver {
 	FieldType degeneracyMax;
 	FieldType denseSparseThreshold;
 
-	template<class Archive>
-	void serialize(Archive&, const unsigned int)
-	{}
+	void serialize(PsimagLite::String label, PsimagLite::IoSerializer&) const
+	{
+		std::cerr<<"WARNING: serializer not ready for ParametersDmrgSolver";
+		std::cerr<<" with label "<<label<<" yet\n";
+	}
 
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,

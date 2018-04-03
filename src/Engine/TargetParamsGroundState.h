@@ -103,6 +103,13 @@ public:
 
 	virtual SizeType sites() const { return 0; }
 
+	void serialize(PsimagLite::String label,
+	               PsimagLite::IoSerializer&) const
+	{
+		std::cerr<<"WARNING: serializer not ready for TargetParamsGroundState ";
+		std::cerr<<"with label "<<label<<" yet\n";
+	}
+
 }; // class TargetParamsGroundState
 
 template<typename ModelType>

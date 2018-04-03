@@ -201,14 +201,14 @@ public:
 		PsimagLite::OstringStream msg;
 		msg<<"Turning the engine on";
 		progress_.printline(msg,std::cout);
-		ioOut_.print(appInfo_);
+		ioOut_.print("ApplicationInfo", appInfo_);
 
 		PsimagLite::PsiBase64::Encode base64encode(ioIn.data());
 		ioOut_.print("#InputStartsHere\n");
 		ioOut_.print(base64encode());
 		ioOut_.print("#InputEndsHere\n");
 		ioOut_.print("PARAMETERS\n", parameters_);
-		ioOut_.print(model);
+		ioOut_.print("Model", model);
 		if (parameters_.options.find("verbose")!=PsimagLite::String::npos) verbose_=true;
 	}
 
