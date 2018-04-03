@@ -248,7 +248,7 @@ public:
 			int nrowYI = R2 - R1;
 			int ldYI = nrowYI;
 			int ncolYI = L2 - L1;
-			assert(initKron_.offsetForPatches(InitKronType::NEW, ipatch + 1) - i1 ==
+			assert(static_cast<int>(initKron_.offsetForPatches(InitKronType::NEW, ipatch + 1) - i1) ==
 			       nrowYI * ncolYI);
 
 			/*

@@ -16,9 +16,34 @@ public:
 		PsimagLite::OstringStream msg;
 		msg<<appName<<"\x1b[38;5;124m";
 		msg<<" [features "<<DMRGPP_VERSION<<"] "<<PsimagLite::AnsiColor::reset;
-#ifdef PLUGIN_SC
-		msg<<"[PLUGIN_SC] ";
+		PsimagLite::String ctOpts("");
+#ifdef USE_LONG
+		ctOpts += "LONG ";
 #endif
+#ifdef USE_FLOAT
+		ctOpts += "FLOAT ";
+#endif
+#ifdef USE_SIGNALS
+		ctOpts += "SIGNALS ";
+#endif
+#ifdef USE_GSL
+		ctOpts += "GSL ";
+#endif
+#ifdef USE_IO_NG
+		ctOpts += "IO_NG ";
+#endif
+#ifdef USE_BOOST
+		ctOpts += "BOOST ";
+#endif
+#ifdef PLUGIN_SC
+		ctOpts += "PLUGIN_SC ";
+#endif
+#ifndef NDEBUG
+		ctOpts += "DEBUG ";
+#endif
+
+		if (ctOpts != "")
+			msg<<"["<<ctOpts<<"]";
 
 		return msg.str();
 	}
