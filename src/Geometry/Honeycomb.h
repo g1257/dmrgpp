@@ -243,7 +243,7 @@ private:
 		if (x1 == x2)
 			return isDirectionYsameCol(y1, y2);
 
-		SizeType dy = abs(y2 - y1);
+		SizeType dy = y2 - y1;
 		if (dy != 1)
 			return false;
 
@@ -268,7 +268,7 @@ private:
 		if (x1 == x2)
 			return isDirectionXsameCol(y1, y2);
 
-		SizeType dy = abs(y2 - y1);
+		SizeType dy = y2 - y1;
 		if (dy != 1)
 			return false;
 
