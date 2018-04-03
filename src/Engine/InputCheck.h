@@ -338,7 +338,7 @@ public:
 			\item [wftStacksInDisk] Save and load stacks for WFT to and from disk,
 							   instead of to and from memory. Cannot be used with restart yet.
 			\item [BatchedGemm] Only meaningful with MatrixVectorKron. Enables
-			                    batched gemm and might need plugin sc
+								batched gemm and might need plugin sc
 			\item [KrylovAbridge] TBW
 		\end{itemize}
 		*/
@@ -365,7 +365,7 @@ public:
 		registerOpts.push_back("noloadwft");
 		registerOpts.push_back("ChebyshevSolver");
 		registerOpts.push_back("MatrixVectorStored");
-		registerOpts.push_back("MatrixVectorKron");
+		registerOpts.push_back("MatrixVectorOnTheFly");
 		registerOpts.push_back("TimeStepTargetting");
 		registerOpts.push_back("DynamicTargetting");
 		registerOpts.push_back("AdaptiveDynamicTargetting");
@@ -410,13 +410,16 @@ public:
 		                                            PsimagLite::Options::Writeable::PERMISSIVE);
 		optsReadable_ = new  OptionsReadableType(optWriteable,val);
 
-		if (val.find("BatchedGemm") != PsimagLite::String::npos &&
-		        val.find("MatrixVectorKron") == PsimagLite::String::npos)
-			err("FATAL: BatchedGemm only with MatrixVectorKron\n");
+		bool mvs =  (val.find("MatrixVectorStored") != PsimagLite::String::npos);
+		bool mvo =  (val.find("MatrixVectorOnTheFly") != PsimagLite::String::npos);
+		bool notMvk = (mvs || mvo);
+		if (val.find("BatchedGemm") != PsimagLite::String::npos) {
+			if (notMvk)
+				err("FATAL: BatchedGemm only with MatrixVectorKron\n");
 #ifndef PLUGIN_SC
-		if (val.find("BatchedGemm") != PsimagLite::String::npos)
 			err("BatchedGemm needs -DPLUGIN_SC in Config.make\n");
 #endif
+		}
 	}
 
 	bool isSet(const PsimagLite::String& thisOption) const

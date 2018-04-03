@@ -108,21 +108,20 @@ void mainLoop1(GeometryType& geometry,
 		                                              io,
 		                                              opOptions,
 		                                              targeting);
-	} else if (dmrgSolverParams.options.find("MatrixVectorKron")!=PsimagLite::String::npos) {
-		if (ModelHelperType::isSu2())
-			throw PsimagLite::RuntimeError("MatrixVectorKron does not support SU(2)\n");
+	} else if (dmrgSolverParams.options.find("MatrixVectorOnTheFly")!=PsimagLite::String::npos
+	           || ModelHelperType::isSu2()) {
 
-		mainLoop2<MatrixVectorKron<ModelBaseType> >(geometry,
-		                                            dmrgSolverParams,
-		                                            io,
-		                                            opOptions,
-		                                            targeting);
-	} else {
 		mainLoop2<MatrixVectorOnTheFly<ModelBaseType> >(geometry,
 		                                                dmrgSolverParams,
 		                                                io,
 		                                                opOptions,
 		                                                targeting);
+	} else {
+		mainLoop2<MatrixVectorKron<ModelBaseType> >(geometry,
+		                                            dmrgSolverParams,
+		                                            io,
+		                                            opOptions,
+		                                            targeting);
 	}
 }
 
