@@ -16,6 +16,7 @@ class WftAccelBlocks {
 	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef typename VectorType::value_type ComplexOrRealType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
@@ -138,12 +139,12 @@ class WftAccelBlocks {
 			                   isSize);
 		}
 
-		const MatrixType& getWeModif(const PsimagLite::Matrix<double>& m, SizeType)
+		const MatrixType& getWeModif(const PsimagLite::Matrix<RealType>& m, SizeType)
 		{
 			return m;
 		}
 
-		const MatrixType& getWeModif(const PsimagLite::Matrix<std::complex<double> >& m,
+		const MatrixType& getWeModif(const PsimagLite::Matrix<std::complex<RealType> >& m,
 		                             SizeType threadNum)
 		{
 			storage_[threadNum].clear();

@@ -185,7 +185,6 @@ private:
 
 
 		//i(czx_dn_dagg*cyz_dn) + hc (first with i, sec with -i,
-		// std::complex<double>(0.0,1.0)*)
 		ComplexOrRealType sqrtMinus1(0,1);
 
 		tmp += +sqrtMinus1*(multiplyTc(creationMatrix[4].data,creationMatrix[5].data));

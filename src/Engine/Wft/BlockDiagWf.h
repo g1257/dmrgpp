@@ -243,7 +243,7 @@ class BlockDiagWf {
 			return getRightMatrixT(m, threadNum);
 		}
 
-		const MatrixType& getRightMatrixT(const PsimagLite::Matrix<std::complex<double> >& m,
+		const MatrixType& getRightMatrixT(const PsimagLite::Matrix<std::complex<RealType> >& m,
 		                                  SizeType threadNum)
 		{
 			storage_[threadNum].clear();
@@ -257,7 +257,7 @@ class BlockDiagWf {
 			return storage_[threadNum];
 		}
 
-		const MatrixType& getRightMatrixT(const PsimagLite::Matrix<double>& m, SizeType)
+		const MatrixType& getRightMatrixT(const PsimagLite::Matrix<RealType>& m, SizeType)
 		{
 			return m;
 		}

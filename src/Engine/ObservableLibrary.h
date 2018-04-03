@@ -689,7 +689,7 @@ private:
 				SizeType thinj1 = j*orbitals + orb3;
 				SizeType thinj2 = (string=="four") ? (j+1)*orbitals + orb4 : j*orbitals + orb4;
 
-				double vsign = -1.0;
+				RealType vsign = -1.0;
 				SizeType spin0=0;
 				SizeType spin1=0;
 				mup(i,j) += vsign*m(thini1+thini2*rows*orbitals+spin0*rows*orbitals*rows*orbitals,
@@ -1155,13 +1155,17 @@ private:
 				for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 					for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
 
-						double TripletSign = (spin0==spin1) ? -1.0:-1.0;
-						mTriplet(i,j) += TripletSign*m(thini1+thini2*rows*orbitals+spin0*rows*orbitals*rows*orbitals,
-						                               thinj1+thinj2*rows*orbitals+spin1*rows*orbitals*rows*orbitals);
+						RealType TripletSign = (spin0==spin1) ? -1.0:-1.0;
+						mTriplet(i,j) += TripletSign*m(thini1+thini2*rows*orbitals+
+						                               spin0*rows*orbitals*rows*orbitals,
+						                               thinj1+thinj2*rows*orbitals+
+						                               spin1*rows*orbitals*rows*orbitals);
 
-						double SingletSign = (spin0==spin1) ? -1.0:1.0;
-						mSinglet(i,j) += SingletSign*m(thini1+thini2*rows*orbitals+spin0*rows*orbitals*rows*orbitals,
-						                               thinj1+thinj2*rows*orbitals+spin1*rows*orbitals*rows*orbitals);
+						RealType SingletSign = (spin0==spin1) ? -1.0:1.0;
+						mSinglet(i,j) += SingletSign*m(thini1+thini2*rows*orbitals+
+						                               spin0*rows*orbitals*rows*orbitals,
+						                               thinj1+thinj2*rows*orbitals+
+						                               spin1*rows*orbitals*rows*orbitals);
 					}
 				}
 			}
