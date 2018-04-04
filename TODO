@@ -1,8 +1,6 @@
 
 BUGS:
 
-SU(2) + WFT is broookeeeeeen!! (issued posted on github)
-
 observer: fails if lattice has less than 6 sites.
 
 observer: backwards move give wrong results for fermionic ops.
@@ -19,17 +17,7 @@ place save(...) functions next to "load" ctors.
 
 string name for basis objects
 
-json format for input?
-
 DensityMatrixSu2 needs optimization
-
-DynamicDMRG needs debugging,--> actually it needs rewriting :-( <-- now under testing
-
-FourPoint needs optimization/parallelization
-
-finite loops aren't checked if checkpoint is an option
-
-unused stuff gets saved in data file
 
 cannot go backwards from infinite loop when WFT is in use
 (see WaveFunctionTransfFactory.h line 137)
@@ -37,12 +25,11 @@ cannot go backwards from infinite loop when WFT is in use
 basis.eq(...) could be uninitialized due to quantumNumbersOld_
 being uninitialized. Also true for other private data of BasisImplementation, need to fix
 
-IoSimple needs to be completely replaced by InputNg (issue 5 on github)
-
-Route all options.find("whatever")!=std::string::npos through the inputCheck
-Problem is not everyone has inputCheck, it'd need to be connected by the ParametersDmrgSolver object.
+IoSimple needs to be completely replaced by IoNg (issue 5 on github)
 
 Add guard code for singletons.
  
+Random number selection needed
+
 
 

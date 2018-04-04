@@ -197,6 +197,7 @@ public:
 		knownLabels_.push_back("DenseSparseThreshold");
 		knownLabels_.push_back("TridiagonalEps");
 		knownLabels_.push_back("HoneycombLy");
+		knownLabels_.push_back("GeometryValueModifier");
 	}
 
 	~InputCheck()
