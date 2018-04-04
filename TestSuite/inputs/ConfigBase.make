@@ -10,7 +10,12 @@ CPPFLAGS += -pedantic -std=c++98
 # CPPFLAGS += -DUSE_MPI
 
 # Enable warnings and treat warnings as errors
-CPPFLAGS += -Wall -Werror -Wendif-labels
+CPPFLAGS += -Wall -Wendif-labels
+
+# Treat warnings as errors
+# (hdf5 on Ubuntu does not pass this, so it's
+# commented out by default now)
+#CPPFLAGS += -Werror
 
 # This enables additional debugging
 #CPPFLAGS += -D_GLIBCXX_DEBUG -D_GLIBCXX_PROFILE

@@ -65,7 +65,7 @@ class ExpressionCalculator {
 	struct Node {
 
 		Node(PsimagLite::String str,SizeType ind)
-		: type(NODE_OPERATOR),index(ind),ary(0),value(0.0)
+		    : type(NODE_OPERATOR),index(ind),ary(0),value(0.0)
 		{
 			for (SizeType i = 0; i < 4; ++i) op[i] = '\0';
 			SizeType l = str.size();
@@ -104,7 +104,7 @@ public:
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	ExpressionCalculator(const VectorStringType& ve)
-	: ve_(ve), value_(0.0)
+	    : ve_(ve), value_(0.0)
 	{
 		VectorNodeType vne(ve.size(),NodeType("",0));
 		fillNodes(vne,ve);
@@ -186,15 +186,17 @@ private:
 	}
 
 	static ComplexOrRealType executeOperator(const unsigned char op[],
-	                                const VectorType& values)
+	                                         const VectorType& values)
 	{
+		// IMPORTANT: IF YOU ADD SOMETHING HERE PLEASE ALSO ADD IT
+		// TO findAry(...) below
 		if (op[0] == '+') return values[0] + values[1];
 		if (op[0] == '-') return values[0] - values[1];
 		if (op[0] == '*') return values[0] * values[1];
 		if (op[0] == 'c') return cos(values[0]);
 		if (op[0] == 's') return sin(values[0]);
 		if (op[0] == '?') return (PsimagLite::real(values[0]) > 0) ? values[1] : values[2];
-		if (op[0] == 'e') return myExponential(values[0]);
+		if (op[0] == 'e') return (op[1] == 'i') ? eToTheI(values[0]) : myExponential(values[0]);
 		if (op[0] == 'l') return log(values[0]);
 		return 0.0;
 	}
@@ -214,10 +216,26 @@ private:
 		return ::exp(PsimagLite::real(v))*T(cos(c),sin(c));
 	}
 
+	template<typename T>
+	static typename EnableIf<Loki::TypeTraits<T>::isStdFloat,
+	T>::Type eToTheI(T x)
+	{
+		throw RuntimeError("eToTheI(" + ttos(x) + "): not unless T is complex\n");
+	}
+
+	template<typename T>
+	static typename EnableIf<IsComplexNumber<T>::True,
+	T>::Type eToTheI(T x)
+	{
+		typename Real<T>::Type r = PsimagLite::real(x);
+		return T(cos(r),sin(r));
+	}
+
 	static SizeType findAry(PsimagLite::String op)
 	{
 		if (op == "+" || op == "-" || op == "*") return 2;
-		if (op == "c" || op == "s" || op == "e" || op == "l") return 1;
+		if (op == "c" || op == "s" || op == "e" || op == "l" || op == "ei")
+			return 1;
 		if (op == "?") return 3;
 		return 0;
 	}
