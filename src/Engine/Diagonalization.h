@@ -484,6 +484,7 @@ private:
 				msg0<<"Lanczos or Davidson solver failed, ";
 				msg0<<"trying with exact diagonalization...";
 				progress_.printline(msg0,std::cout);
+				progress_.printline(msg0,std::cerr);
 
 				VectorRealType eigs(lanczosHelper.rows());
 				PsimagLite::Matrix<ComplexOrRealType> fm;
