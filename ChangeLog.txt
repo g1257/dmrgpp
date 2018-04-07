@@ -1,3 +1,26 @@
+2018-04-06 Version 5.10
+
+* Kitaev model implemented
+
+* Kitaev.tex and input6000.inp
+
+* IoNg serialization work in progress
+
+* compilation with float
+
+* MatrixVectorKron is the default now
+
+* Compiler options printed to cout
+
+* When Lanczos fails prints why
+
+* -Werror no longer a default
+  But please keep reporting compilation warnings
+
+* bug fix for complex hoppings
+  This only affected useComplex for geometry
+  terms with dofs=2 (spin up and spin down with 1 orbital)
+
 2018-03-22 Version 5.08
 
 * i/o API changes
