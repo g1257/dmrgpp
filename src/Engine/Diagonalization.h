@@ -157,7 +157,7 @@ public:
 		targetedSymmetrySectors(sectors,target.lrs());
 		reflectionOperator_.update(sectors);
 		RealType gsEnergy = internalMain_(target,direction,loopIndex,false,blockLeft);
-		//  targetting:
+		//  targeting:
 		target.evolve(gsEnergy,direction,blockLeft,blockRight,loopIndex);
 		wft_.triggerOff(target.lrs());
 		return gsEnergy;
@@ -172,7 +172,7 @@ public:
 		assert(direction != ProgramGlobals::INFINITE);
 
 		RealType gsEnergy = internalMain_(target,direction,loopIndex,false,block);
-		//  targetting:
+		//  targeting:
 		target.evolve(gsEnergy,direction,block,block,loopIndex);
 		wft_.triggerOff(target.lrs());
 		return gsEnergy;
@@ -215,7 +215,7 @@ private:
 
 		bool noguess = ((saveOption & 8) > 0); // bit 3 set means guess is random vector
 
-		if (parameters_.options.find("MettsTargetting")!=PsimagLite::String::npos)
+		if (parameters_.options.find("MettsTargeting")!=PsimagLite::String::npos)
 			return gsEnergy;
 
 		if (parameters_.options.find("TargetingAncilla")!=PsimagLite::String::npos)

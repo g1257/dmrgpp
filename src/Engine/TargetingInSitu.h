@@ -73,7 +73,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file TargetingInSitu.h
  *
- * Implements the multi-targetting for measuring
+ * Implements the multi-targeting for measuring
  * 2-point correlations in situ
  *
  */

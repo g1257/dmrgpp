@@ -73,8 +73,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file TargetingCorrectionVector.h
  *
- * Implements the targetting required by
- * the correction targetting method
+ * Implements the targeting required by
+ * the correction targeting method
  *
  */
 

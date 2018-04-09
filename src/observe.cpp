@@ -6,7 +6,7 @@ template<typename GeometryType,
          typename ModelHelperType,
          typename VectorWithOffsetType>
 void mainLoop(GeometryType& geometry,
-              const PsimagLite::String& targetting,
+              const PsimagLite::String& targeting,
               InputNgType::Readable& io,
               const ParametersDmrgSolverType& params,
               const PsimagLite::String& list)
@@ -28,8 +28,8 @@ void mainLoop(GeometryType& geometry,
 	const PsimagLite::String& datafile = params.filename;
 	ArchiveFiles<ParametersDmrgSolverType>::unpackIfNeeded(datafile);
 	IoInputType dataIo(datafile);
-	bool hasTimeEvolution = (targetting != "GroundStateTargetting" &&
-	        targetting != "CorrectionTargetting");
+	bool hasTimeEvolution = (targeting != "GroundStateTargeting" &&
+	        targeting != "CorrectionTargeting");
 
 	while (moreData) {
 		try {
@@ -47,7 +47,7 @@ template<typename GeometryType,
          template<typename> class ModelHelperTemplate,
          typename MySparseMatrix>
 void mainLoop1(GeometryType& geometry,
-               const PsimagLite::String& targetting,
+               const PsimagLite::String& targeting,
                InputNgType::Readable& io,
                const ParametersDmrgSolverType& params,
                const PsimagLite::String& list)
@@ -62,11 +62,11 @@ void mainLoop1(GeometryType& geometry,
 	if (params.options.find("vectorwithoffsets")!=PsimagLite::String::npos) {
 		typedef VectorWithOffsets<ComplexOrRealType> VectorWithOffsetType;
 		mainLoop<GeometryType,ModelHelperType,VectorWithOffsetType>
-		        (geometry,targetting,io,params, list);
+		        (geometry,targeting,io,params, list);
 	} else {
 		typedef VectorWithOffset<ComplexOrRealType> VectorWithOffsetType;
 		mainLoop<GeometryType,ModelHelperType,VectorWithOffsetType>
-		        (geometry,targetting,io,params, list);
+		        (geometry,targeting,io,params, list);
 	}
 }
 
@@ -89,27 +89,27 @@ void mainLoop0(InputNgType::Readable& io,
 
 	bool su2 = (tmp > 0);
 
-	PsimagLite::String targetting=inputCheck.getTargeting(dmrgSolverParams.options);
+	PsimagLite::String targeting=inputCheck.getTargeting(dmrgSolverParams.options);
 
-	if (targetting!="GroundStateTargetting" && su2)
-		throw PsimagLite::RuntimeError("SU(2) supports only GroundStateTargetting");
+	if (targeting!="GroundStateTargeting" && su2)
+		throw PsimagLite::RuntimeError("SU(2) supports only GroundStateTargeting");
 
 	if (su2) {
 		mainLoop1<GeometryType,ModelHelperSu2,MySparseMatrix>
-		        (geometry,targetting,io,dmrgSolverParams, list);
+		        (geometry,targeting,io,dmrgSolverParams, list);
 
 		return;
 	}
 
-	if (targetting=="GroundStateTargetting") {
+	if (targeting=="GroundStateTargeting") {
 		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix>
-		        (geometry,targetting,io,dmrgSolverParams, list);
-	} else if (targetting=="TimeStepTargetting") {
+		        (geometry,targeting,io,dmrgSolverParams, list);
+	} else if (targeting=="TimeStepTargeting") {
 		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrixComplex>
-		        (geometry,targetting,io,dmrgSolverParams, list);
+		        (geometry,targeting,io,dmrgSolverParams, list);
 	} else {
 		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix>
-		        (geometry,targetting,io,dmrgSolverParams, list);
+		        (geometry,targeting,io,dmrgSolverParams, list);
 	}
 }
 

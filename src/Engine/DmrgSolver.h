@@ -240,19 +240,19 @@ public:
 
 		TargetingType* psi = 0;
 
-		if (targeting=="TimeStepTargetting" || targeting == "TargetingAncilla") {
+		if (targeting=="TimeStepTargeting" || targeting == "TargetingAncilla") {
 			psi = new TargetingTimeStepType(lrs_,model_,wft_,quantumSector_,ioIn_);
-		} else if (targeting=="DynamicTargetting") {
+		} else if (targeting=="DynamicTargeting") {
 			psi = new TargetingDynamicType(lrs_,model_,wft_,quantumSector_,ioIn_);
-		} else if (targeting=="AdaptiveDynamicTargetting") {
+		} else if (targeting=="AdaptiveDynamicTargeting") {
 			psi = new TargetingAdaptiveDynamicType(lrs_,model_,wft_,quantumSector_,ioIn_);
-		} else if (targeting=="CorrectionVectorTargetting") {
+		} else if (targeting=="CorrectionVectorTargeting") {
 			psi = new TargetingCorrectionVectorType(lrs_,model_,wft_,quantumSector_,ioIn_);
-		} else if (targeting=="CorrectionTargetting") {
+		} else if (targeting=="CorrectionTargeting") {
 			psi = new TargetingCorrectionType(lrs_,model_,wft_,quantumSector_,ioIn_);
-		} else if (targeting == "GroundStateTargetting") {
+		} else if (targeting == "GroundStateTargeting") {
 			psi = new TargetingGroundStateType(lrs_,model_,wft_,quantumSector_,ioIn_);
-		} else if (targeting == "MettsTargetting") {
+		} else if (targeting == "MettsTargeting") {
 			psi = new TargetingMettsType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting == "TargetingCorrelations") {
 			psi = new TargetingCorrelationsType(lrs_,model_,wft_,quantumSector_,ioIn_);

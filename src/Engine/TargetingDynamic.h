@@ -74,7 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file TargetingDynamic.h
  *
- * Implements the targetting required by
+ * Implements the targeting required by
  * a simple continued fraction calculation
  * of dynamical observables
  *

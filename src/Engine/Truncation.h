@@ -88,23 +88,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<typename ParametersType,
-         typename TargettingType>
+         typename TargetingType>
 class Truncation  {
 
-	typedef typename TargettingType::LeftRightSuperType LeftRightSuperType;
+	typedef typename TargetingType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::PairSizeSizeType PairSizeSizeType;
 	typedef typename LeftRightSuperType::ProgressIndicatorType ProgressIndicatorType;
-	typedef typename TargettingType::SparseMatrixType SparseMatrixType;
-	typedef typename TargettingType::RealType RealType;
-	typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef DensityMatrixLocal<TargettingType> DensityMatrixLocalType;
-	typedef DensityMatrixSvd<TargettingType> DensityMatrixSvdType;
-	typedef DensityMatrixSu2<TargettingType> DensityMatrixSu2Type;
-	typedef DensityMatrixBase<TargettingType> DensityMatrixBaseType;
+	typedef typename TargetingType::SparseMatrixType SparseMatrixType;
+	typedef typename TargetingType::RealType RealType;
+	typedef typename TargetingType::WaveFunctionTransfType WaveFunctionTransfType;
+	typedef DensityMatrixLocal<TargetingType> DensityMatrixLocalType;
+	typedef DensityMatrixSvd<TargetingType> DensityMatrixSvdType;
+	typedef DensityMatrixSu2<TargetingType> DensityMatrixSu2Type;
+	typedef DensityMatrixBase<TargetingType> DensityMatrixBaseType;
 	typedef typename DensityMatrixBaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename TargettingType::ModelType ModelType;
+	typedef typename TargetingType::ModelType ModelType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
@@ -142,7 +142,7 @@ public:
 
 	void operator()(BasisWithOperatorsType& pS,
 	                BasisWithOperatorsType& pE,
-	                const TargettingType& target,
+	                const TargetingType& target,
 	                SizeType keptStates,
 	                ProgramGlobals::DirectionEnum direction)
 	{
@@ -167,7 +167,7 @@ public:
 
 	void changeBasis(BasisWithOperatorsType& sBasis,
 	                 BasisWithOperatorsType& eBasis,
-	                 const TargettingType& target,
+	                 const TargetingType& target,
 	                 SizeType keptStates)
 	{
 		changeBasis(sBasis,target, keptStates, ProgramGlobals::EXPAND_SYSTEM);
@@ -180,7 +180,7 @@ public:
 private:
 
 	void changeBasis(BasisWithOperatorsType& rSprime,
-	                 const TargettingType& target,
+	                 const TargetingType& target,
 	                 SizeType keptStates,
 	                 ProgramGlobals::DirectionEnum direction)
 	{
@@ -460,7 +460,7 @@ private:
 		if (parameters_.fileForDensityMatrixEigs=="") return;
 		PsimagLite::String file(parameters_.fileForDensityMatrixEigs);
 		file += ttos(counter);
-		typename TargettingType::IoType::Out io(file);
+		typename TargetingType::IoType::Out io(file);
 		io<<eigs;
 		counter++;
 	}

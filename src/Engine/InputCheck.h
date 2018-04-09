@@ -307,13 +307,13 @@ public:
 			\item[MatrixVectorStored] Store superblock sector of Hamiltonian matrix
 			in memory instead of constructing it on the fly.
 			\item[MatrixVectorKron] TBW
-			\item[TimeStepTargetting] TDMRG algorithm
-			\item[DynamicTargetting] TBW
-			\item[AdaptiveDynamicTargetting] TBW
-			\item[CorrectionVectorTargetting] TBW
-			\item[CorrectionTargetting] TBW
+			\item[TimeStepTargeting] TDMRG algorithm
+			\item[DynamicTargeting] TBW
+			\item[AdaptiveDynamicTargeting] TBW
+			\item[CorrectionVectorTargeting] TBW
+			\item[CorrectionTargeting] TBW
 			\item[TargetingAncilla] TBW
-			\item[MettsTargetting] TBW
+			\item[MettsTargeting] TBW
 			\item[TargetingInSitu] TBW
 			\item[geometryallinsystem] During infinite algorithm make environment
 			contain always exactly one site
@@ -363,15 +363,15 @@ public:
 		registerOpts.push_back("ChebyshevSolver");
 		registerOpts.push_back("MatrixVectorStored");
 		registerOpts.push_back("MatrixVectorOnTheFly");
-		registerOpts.push_back("TimeStepTargetting");
-		registerOpts.push_back("DynamicTargetting");
-		registerOpts.push_back("AdaptiveDynamicTargetting");
-		registerOpts.push_back("CorrectionVectorTargetting");
-		registerOpts.push_back("CorrectionTargetting");
+		registerOpts.push_back("TimeStepTargeting");
+		registerOpts.push_back("DynamicTargeting");
+		registerOpts.push_back("AdaptiveDynamicTargeting");
+		registerOpts.push_back("CorrectionVectorTargeting");
+		registerOpts.push_back("CorrectionTargeting");
 		registerOpts.push_back("TargetingInSitu");
 		registerOpts.push_back("TargetingRixsStatic");
 		registerOpts.push_back("TargetingRixsDynamic");
-		registerOpts.push_back("MettsTargetting");
+		registerOpts.push_back("MettsTargeting");
 		registerOpts.push_back("TargetingAncilla");
 		registerOpts.push_back("geometryallinsystem");
 		registerOpts.push_back("vectorwithoffsets");
@@ -429,15 +429,15 @@ public:
 
 	PsimagLite::String getTargeting(const PsimagLite::String& options) const
 	{
-		PsimagLite::String targetting="GroundStateTargetting";
+		PsimagLite::String targeting="GroundStateTargeting";
 
-		const char *targets[]={"GroundStateTargetting",
-		                       "TimeStepTargetting",
-		                       "AdaptiveDynamicTargetting",
-		                       "DynamicTargetting",
-		                       "CorrectionVectorTargetting",
-		                       "CorrectionTargetting",
-		                       "MettsTargetting",
+		const char *targets[]={"GroundStateTargeting",
+		                       "TimeStepTargeting",
+		                       "AdaptiveDynamicTargeting",
+		                       "DynamicTargeting",
+		                       "CorrectionVectorTargeting",
+		                       "CorrectionTargeting",
+		                       "MettsTargeting",
 		                       "TargetingAncilla",
 		                       "TargetingCorrelations",
 		                       "TargetingInSitu",
@@ -449,9 +449,9 @@ public:
 		SizeType count = 0;
 		for (SizeType i = 0;i<totalTargets;++i) {
 			if (options.find(targets[i])!=PsimagLite::String::npos) {
-				if (targetting == "AdaptiveDynamicTargetting" &&
-				        std::string(targets[i]) == "DynamicTargetting") continue;
-				targetting = targets[i];
+				if (targeting == "AdaptiveDynamicTargeting" &&
+				        std::string(targets[i]) == "DynamicTargeting") continue;
+				targeting = targets[i];
 				count++;
 			}
 		}
@@ -460,7 +460,7 @@ public:
 			throw PsimagLite::RuntimeError("Only one targeting supported\n");
 		}
 
-		return targetting;
+		return targeting;
 	}
 
 	void checkFileOptions(PsimagLite::String fileOption)

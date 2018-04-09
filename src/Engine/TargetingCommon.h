@@ -73,7 +73,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file TargetingCommon.h
  *
- * Functionality used by many targetting classes
+ * Functionality used by many targeting classes
  *
  */
 
@@ -354,7 +354,7 @@ public:
 
 			if (f == myoperator[i].fermionSign) continue;
 
-			PsimagLite::String str("CorrectionVectorTargetting: ");
+			PsimagLite::String str("CorrectionVectorTargeting: ");
 			str += "inconsistent sign for operators\n";
 			throw PsimagLite::RuntimeError(str);
 

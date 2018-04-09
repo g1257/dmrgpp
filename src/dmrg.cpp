@@ -147,8 +147,8 @@ void mainLoop0(InputNgType::Readable& io,
 
 	bool su2 = (tmp > 0);
 
-	if (targeting != "GroundStateTargetting" && su2) {
-		PsimagLite::String str("SU(2) supports only GroundStateTargetting (sorry!)\n");
+	if (targeting != "GroundStateTargeting" && su2) {
+		PsimagLite::String str("SU(2) supports only GroundStateTargeting (sorry!)\n");
 		throw PsimagLite::RuntimeError(str);
 	}
 
@@ -169,10 +169,10 @@ void mainLoop0(InputNgType::Readable& io,
 	}
 
 	if (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos &&
-	        targeting != "TimeStepTargetting" &&
-	        targeting != "GroundStateTargetting" &&
+	        targeting != "TimeStepTargeting" &&
+	        targeting != "GroundStateTargeting" &&
 	        targeting != "TargetingCorrelations" &&
-	        targeting != "CorrectionTargetting" &&
+	        targeting != "CorrectionTargeting" &&
 	        targeting != "TargetingInSitu") {
 		PsimagLite::String str("SolverOptions=useComplex not allowed for ");
 		str += targeting + "\n";
@@ -366,7 +366,7 @@ to the main dmrg driver are the following.
 
 	PsimagLite::String targeting = inputCheck.getTargeting(dmrgSolverParams.options);
 	bool isComplex = (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos);
-	if (targeting=="TimeStepTargetting") isComplex = true;
+	if (targeting=="TimeStepTargeting") isComplex = true;
 	if (isComplex) {
 		mainLoop0<MySparseMatrixComplex>(io,dmrgSolverParams,targeting,options);
 	} else {

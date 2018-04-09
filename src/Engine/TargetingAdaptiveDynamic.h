@@ -73,7 +73,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file TargetingAdaptiveDynamic.h
  *
- * Implements the targetting required by
+ * Implements the targeting required by
  * arXiv:1012.5543v1
  *
  */
