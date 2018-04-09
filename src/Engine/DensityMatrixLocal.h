@@ -83,21 +83,21 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename TargettingType>
-class DensityMatrixLocal : public DensityMatrixBase<TargettingType> {
+template<typename TargetingType>
+class DensityMatrixLocal : public DensityMatrixBase<TargetingType> {
 
-	typedef DensityMatrixBase<TargettingType> BaseType;
-	typedef typename TargettingType::LeftRightSuperType LeftRightSuperType;
-	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef DensityMatrixBase<TargetingType> BaseType;
+	typedef typename TargetingType::LeftRightSuperType LeftRightSuperType;
+	typedef typename TargetingType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename TargettingType::VectorWithOffsetType TargetVectorType;
-	typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
+	typedef typename TargetingType::VectorWithOffsetType TargetVectorType;
+	typedef typename TargetingType::TargetVectorType::value_type DensityMatrixElementType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
 	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
-	typedef typename DensityMatrixBase<TargettingType>::Params ParamsType;
+	typedef typename DensityMatrixBase<TargetingType>::Params ParamsType;
 
 	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
@@ -110,7 +110,7 @@ public:
 	TargetVectorType> ParallelDensityMatrixType;
 	typedef PsimagLite::Parallelizer<ParallelDensityMatrixType> ParallelizerType;
 
-	DensityMatrixLocal(const TargettingType& target,
+	DensityMatrixLocal(const TargetingType& target,
 	                   const LeftRightSuperType& lrs,
 	                   const ParamsType& p)
 	    :

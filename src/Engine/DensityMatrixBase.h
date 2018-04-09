@@ -83,13 +83,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PsimagLite.h"
 
 namespace Dmrg {
-template<typename TargettingType>
+template<typename TargetingType>
 class DensityMatrixBase {
 
-	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename TargetingType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
+	typedef typename TargetingType::TargetVectorType::value_type DensityMatrixElementType;
 	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 	typedef typename BasisType::FactorsType FactorsType;
 	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };

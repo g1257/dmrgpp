@@ -79,16 +79,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename TargettingType>
-class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
+template<typename TargetingType>
+class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 
-	typedef DensityMatrixBase<TargettingType> BaseType;
-	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename TargettingType::LeftRightSuperType LeftRightSuperType;
+	typedef DensityMatrixBase<TargetingType> BaseType;
+	typedef typename TargetingType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename TargetingType::LeftRightSuperType LeftRightSuperType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
+	typedef typename TargetingType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename BaseType::BuildingBlockType MatrixType;
 	typedef PsimagLite::Matrix<SizeType> MatrixSizeType;
 	typedef typename PsimagLite::Vector<MatrixType*>::Type VectorMatrixType;
@@ -398,7 +398,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargettingType> {
 
 public:
 
-	DensityMatrixSvd(const TargettingType& target,
+	DensityMatrixSvd(const TargetingType& target,
 	                 const LeftRightSuperType& lrs,
 	                 const ParamsType& p)
 	    :
@@ -501,7 +501,7 @@ public:
 private:
 
 	void addThisTarget(SizeType x,
-	                   const TargettingType& target)
+	                   const TargetingType& target)
 
 	{
 		SizeType x2 = (target.includeGroundStage() && x > 0 ) ? x - 1 : x;

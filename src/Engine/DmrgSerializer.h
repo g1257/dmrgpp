@@ -151,7 +151,7 @@ public:
 		for (SizeType i=0;i<lrs_.super().block().size();i++) {
 			label += ttos(lrs_.super().block()[i])+",";
 		}
-		//SparseVector<typename TargettingType::TargetVectorType::value_type> psiSparse(target.gs());
+
 		wavefunction_.save(io,label);
 
 		label = "#TRANSFORM_sites=";

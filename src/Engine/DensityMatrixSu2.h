@@ -87,25 +87,25 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DiagBlockDiagMatrix.h"
 
 namespace Dmrg {
-template<typename TargettingType>
-class DensityMatrixSu2 : public DensityMatrixBase<TargettingType> {
+template<typename TargetingType>
+class DensityMatrixSu2 : public DensityMatrixBase<TargetingType> {
 
-	typedef DensityMatrixBase<TargettingType> BaseType;
-	typedef typename TargettingType::LeftRightSuperType LeftRightSuperType;
-	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef DensityMatrixBase<TargetingType> BaseType;
+	typedef typename TargetingType::LeftRightSuperType LeftRightSuperType;
+	typedef typename TargetingType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType  BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
+	typedef typename TargetingType::TargetVectorType::value_type DensityMatrixElementType;
 	typedef typename BaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
-	typedef typename DensityMatrixBase<TargettingType>::Params ParamsType;
+	typedef typename DensityMatrixBase<TargetingType>::Params ParamsType;
 
 public:
 
 	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
 
-	DensityMatrixSu2(const TargettingType& target,
+	DensityMatrixSu2(const TargetingType& target,
 	                 const LeftRightSuperType& lrs,
 	                 const ParamsType& p)
 	    : pBasis_((p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.left() : lrs.right()),
@@ -257,7 +257,7 @@ private:
 
 	DensityMatrixElementType densityMatrixAux(SizeType alpha1,
 	                                          SizeType alpha2,
-	                                          const TargettingType& target,
+	                                          const TargetingType& target,
 	                                          const BasisWithOperatorsType& pBasisSummed,
 	                                          const BasisType& pSE,
 	                                          ProgramGlobals::DirectionEnum direction)

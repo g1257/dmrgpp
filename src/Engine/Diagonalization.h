@@ -89,19 +89,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ParametersType, typename TargettingType>
+template<typename ParametersType, typename TargetingType>
 class Diagonalization {
 
 public:
 
 	typedef std::pair<SizeType,SizeType> PairSizeType;
-	typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename TargettingType::ModelType ModelType;
-	typedef typename TargettingType::BasisType BasisType;
-	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename TargettingType::BlockType BlockType;
-	typedef typename TargettingType::TargetVectorType TargetVectorType;
-	typedef typename TargettingType::RealType RealType;
+	typedef typename TargetingType::WaveFunctionTransfType WaveFunctionTransfType;
+	typedef typename TargetingType::ModelType ModelType;
+	typedef typename TargetingType::BasisType BasisType;
+	typedef typename TargetingType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename TargetingType::BlockType BlockType;
+	typedef typename TargetingType::TargetVectorType TargetVectorType;
+	typedef typename TargetingType::RealType RealType;
 	typedef SymmetryElectronsSz<RealType> SymmetryElectronsSzType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename  OperatorsType::SparseMatrixType SparseMatrixType;
@@ -111,7 +111,7 @@ public:
 	typedef typename ModelHelperType::ParamsForKroneckerDumperType
 	ParamsForKroneckerDumperType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
-	typedef typename TargettingType::MatrixVectorType MatrixVectorType;
+	typedef typename TargetingType::MatrixVectorType MatrixVectorType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -146,7 +146,7 @@ public:
 	{}
 
 	//!PTEX_LABEL{Diagonalization}
-	RealType operator()(TargettingType& target,
+	RealType operator()(TargetingType& target,
 	                    ProgramGlobals::DirectionEnum direction,
 	                    const BlockType& blockLeft,
 	                    const BlockType& blockRight)
@@ -163,7 +163,7 @@ public:
 		return gsEnergy;
 	}
 
-	RealType operator()(TargettingType& target,
+	RealType operator()(TargetingType& target,
 	                    ProgramGlobals::DirectionEnum direction,
 	                    const BlockType& block,
 	                    SizeType loopIndex,
@@ -192,7 +192,7 @@ private:
 		}
 	}
 
-	RealType internalMain_(TargettingType& target,
+	RealType internalMain_(TargetingType& target,
 	                       ProgramGlobals::DirectionEnum direction,
 	                       SizeType loopIndex,
 	                       bool,
@@ -261,7 +261,7 @@ private:
 			throw PsimagLite::RuntimeError(msg);
 		}
 
-		typedef typename TargettingType::VectorWithOffsetType
+		typedef typename TargetingType::VectorWithOffsetType
 		        VectorWithOffsetType;
 		VectorWithOffsetType initialVector(weights,lrs.super());
 

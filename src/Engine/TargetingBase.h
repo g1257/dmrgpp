@@ -136,7 +136,7 @@ public:
 	              SizeType indexNoAdvance)
 	    : lrs_(lrs),
 	      model_(model),
-	      commonTargetting_(lrs,model,wft,indexNoAdvance)
+	      commonTargeting_(lrs,model,wft,indexNoAdvance)
 	{}
 
 	virtual ~TargetingBase() {}
@@ -164,7 +164,7 @@ public:
 		if (X[0] != 0 && X[0] != lrs_.super().block().size()-1)
 			return;
 
-		basisWithOps.setVarious(X, model_, commonTargetting_.currentTime());
+		basisWithOps.setVarious(X, model_, commonTargeting_.currentTime());
 	}
 
 	virtual bool end() const
@@ -174,13 +174,13 @@ public:
 
 	virtual SizeType size() const
 	{
-		if (commonTargetting_.allStages(DISABLED)) return 0;
-		return commonTargetting_.targetVectors().size();
+		if (commonTargeting_.allStages(DISABLED)) return 0;
+		return commonTargeting_.targetVectors().size();
 	}
 
 	virtual RealType normSquared(SizeType i) const
 	{
-		return commonTargetting_.normSquared(i);
+		return commonTargeting_.normSquared(i);
 	}
 
 	virtual void print(IoType::Out&) const = 0;
@@ -198,31 +198,31 @@ public:
 	void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,
 	           const SomeBasisType& someBasis)
 	{
-		commonTargetting_.setGs(v,someBasis);
+		commonTargeting_.setGs(v,someBasis);
 	}
 
 	const VectorWithOffsetType& gs() const
 	{
-		return commonTargetting_.psi();
+		return commonTargeting_.psi();
 	}
 
 	const VectorWithOffsetType& operator()(SizeType i) const
 	{
-		return commonTargetting_.targetVectors()[i];
+		return commonTargeting_.targetVectors()[i];
 	}
 
 	void initialGuess(VectorWithOffsetType& initialVector,
 	                  const typename PsimagLite::Vector<SizeType>::Type& block,
 	                  bool noguess) const
 	{
-		commonTargetting_.initialGuess(initialVector, block, noguess);
+		commonTargeting_.initialGuess(initialVector, block, noguess);
 	}
 
-	const RealType& time() const {return commonTargetting_.currentTime(); }
+	const RealType& time() const {return commonTargeting_.currentTime(); }
 
 	const ComplexOrRealType& inSitu(SizeType i) const
 	{
-		return commonTargetting_.inSitu(i);
+		return commonTargeting_.inSitu(i);
 	}
 
 	const LeftRightSuperType& lrs() const { return lrs_; }
@@ -231,19 +231,19 @@ protected:
 
 	TargetingCommonType& common()
 	{
-		return commonTargetting_;
+		return commonTargeting_;
 	}
 
 	const TargetingCommonType& common() const
 	{
-		return commonTargetting_;
+		return commonTargeting_;
 	}
 
 private:
 
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;
-	TargetingCommonType commonTargetting_;
+	TargetingCommonType commonTargeting_;
 };     //class TargetingBase
 
 } // namespace Dmrg

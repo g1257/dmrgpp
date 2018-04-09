@@ -89,16 +89,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ParametersType,typename TargettingType>
+template<typename ParametersType,typename TargetingType>
 class Checkpoint {
 
 public:
 
-	typedef typename TargettingType::RealType  RealType;
-	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename TargetingType::RealType  RealType;
+	typedef typename TargetingType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
 	typedef typename PsimagLite::IoSelector IoType;
-	typedef typename TargettingType::ModelType ModelType;
+	typedef typename TargetingType::ModelType ModelType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename ModelType::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename OperatorsType::OperatorType OperatorType;
@@ -195,7 +195,7 @@ public:
 	// Not related to stacks
 	void load(BasisWithOperatorsType &pS,
 	          BasisWithOperatorsType &pE,
-	          TargettingType& psi,
+	          TargetingType& psi,
 	          bool isObserveCode)
 	{
 
@@ -227,7 +227,7 @@ public:
 		else systemStack_.push(pSorE);
 	}
 
-	BasisWithOperatorsType shrink(SizeType what,const TargettingType& target)
+	BasisWithOperatorsType shrink(SizeType what,const TargetingType& target)
 	{
 		if (what==ProgramGlobals::ENVIRON) return shrink(envStack_,target);
 		else return shrink(systemStack_,target);
@@ -367,7 +367,7 @@ private:
 
 	//! shrink  (we don't really shrink, we just undo the growth)
 	BasisWithOperatorsType shrink(MemoryStackType& thisStack,
-	                              const TargettingType& target)
+	                              const TargetingType& target)
 	{
 		thisStack.pop();
 		assert(thisStack.size() > 0);

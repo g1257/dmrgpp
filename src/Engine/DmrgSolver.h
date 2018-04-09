@@ -109,12 +109,12 @@ namespace Dmrg {
 template<typename SolverType, typename VectorWithOffsetType_>
 class DmrgSolver {
 
-	typedef TargetingBase<SolverType,VectorWithOffsetType_> TargettingType;
-	typedef typename TargettingType::ModelType ModelType;
+	typedef TargetingBase<SolverType,VectorWithOffsetType_> TargetingType;
+	typedef typename TargetingType::ModelType ModelType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef ObservablesInSitu<typename TargettingType::TargetVectorType>
+	typedef ObservablesInSitu<typename TargetingType::TargetVectorType>
 	ObservablesInSituType;
 
 public:
@@ -127,23 +127,23 @@ public:
 	typedef typename ModelType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelType::ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
-	typedef typename TargettingType::TargetVectorType TargetVectorType;
+	typedef typename TargetingType::TargetVectorType TargetVectorType;
 	typedef typename TargetVectorType::value_type DensityMatrixElementType;
-	typedef typename TargettingType::TargetParamsType TargetParamsType;
+	typedef typename TargetingType::TargetParamsType TargetParamsType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename ModelType::SolverParamsType ParametersType;
-	typedef Diagonalization<ParametersType,TargettingType> DiagonalizationType;
-	typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef Truncation<ParametersType,TargettingType> TruncationType;
+	typedef Diagonalization<ParametersType,TargetingType> DiagonalizationType;
+	typedef typename TargetingType::WaveFunctionTransfType WaveFunctionTransfType;
+	typedef Truncation<ParametersType,TargetingType> TruncationType;
 	typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> DmrgSerializerType;
 	typedef typename ModelType::GeometryType GeometryType;
-	typedef Recovery<ParametersType,TargettingType> RecoveryType;
+	typedef Recovery<ParametersType,TargetingType> RecoveryType;
 	typedef typename RecoveryType::CheckpointType CheckpointType;
 	typedef typename DmrgSerializerType::FermionSignType FermionSignType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename PsimagLite::Vector<BlockType>::Type VectorBlockType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename TargettingType::LanczosSolverType LanczosSolverType;
+	typedef typename TargetingType::LanczosSolverType LanczosSolverType;
 	typedef TargetingGroundState<LanczosSolverType,VectorWithOffsetType> TargetingGroundStateType;
 	typedef TargetingTimeStep<LanczosSolverType,VectorWithOffsetType> TargetingTimeStepType;
 	typedef TargetingDynamic<LanczosSolverType,VectorWithOffsetType> TargetingDynamicType;
@@ -238,7 +238,7 @@ public:
 			sitesIndices_.push_back(X[i]);
 		for (SizeType i=0;i<Y.size();i++) sitesIndices_.push_back(Y[Y.size()-i-1]);
 
-		TargettingType* psi = 0;
+		TargetingType* psi = 0;
 
 		if (targeting=="TimeStepTargetting" || targeting == "TargetingAncilla") {
 			psi = new TargetingTimeStepType(lrs_,model_,wft_,quantumSector_,ioIn_);
@@ -347,7 +347,7 @@ private:
 	        BlockType const &E,
 	        MyBasisWithOperators &pS,
 	        MyBasisWithOperators &pE,
-	        TargettingType& psi)
+	        TargetingType& psi)
 	{
 		bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=
 		        PsimagLite::String::npos);
@@ -415,7 +415,7 @@ private:
 	                     BlockType const &E,
 	                     MyBasisWithOperators &pS,
 	                     MyBasisWithOperators &pE,
-	                     TargettingType& psi)
+	                     TargetingType& psi)
 	{
 		if (parameters_.options.find("nofiniteloops")!=PsimagLite::String::npos) return;
 
@@ -493,7 +493,7 @@ private:
 	                MyBasisWithOperators &pS,
 	                MyBasisWithOperators &pE,
 	                SizeType loopIndex,
-	                TargettingType& target)
+	                TargetingType& target)
 	{
 		bool extendedPrint = (parameters_.options.find("extendedPrint") !=
 		        PsimagLite::String::npos);
@@ -578,7 +578,7 @@ private:
 
 	void changeTruncateAndSerialize(MyBasisWithOperators& pS,
 	                                MyBasisWithOperators& pE,
-	                                const TargettingType& target,
+	                                const TargetingType& target,
 	                                SizeType keptStates,
 	                                ProgramGlobals::DirectionEnum direction,
 	                                int saveOption)
@@ -606,7 +606,7 @@ private:
 
 	void serialize(const FermionSignType& fsS,
 	               const FermionSignType& fsE,
-	               const TargettingType& target,
+	               const TargetingType& target,
 	               ProgramGlobals::DirectionEnum direction,
 	               int saveOption)
 	{

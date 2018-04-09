@@ -144,7 +144,7 @@ public:
 	      paramsForSolver_(io,"DynamicDmrg")
 	{
 		this->common().init(&tstStruct_,2);
-		if (!wft.isEnabled()) throw PsimagLite::RuntimeError(" DynamicTargetting "
+		if (!wft.isEnabled()) throw PsimagLite::RuntimeError(" DynamicTargeting "
 		                                                     "needs an enabled wft\n");
 	}
 
@@ -226,7 +226,10 @@ public:
 
 private:
 
-	void evolve(RealType Eg,ProgramGlobals::DirectionEnum direction,SizeType site,SizeType loopNumber)
+	void evolve(RealType Eg,
+	            ProgramGlobals::DirectionEnum direction,
+	            SizeType site,
+	            SizeType loopNumber)
 	{
 		Eg_ = Eg;
 		VectorWithOffsetType phiNew;
@@ -271,7 +274,8 @@ private:
 			VectorType sv;
 			SizeType i0 = this->common().targetVectors()[0].sector(i);
 			this->common().targetVectors()[0].extract(sv,i0);
-			SizeType p = this->lrs().super().findPartitionNumber(this->common().targetVectors()[0].offset(i0));
+			SizeType p = this->lrs().super().findPartitionNumber(this->common().
+			                                                     targetVectors()[0].offset(i0));
 			if (i==0) {
 				if (lastLanczosVector_==0)
 					this->common().targetVectors(1) = this->common().targetVectors()[0];
@@ -280,7 +284,8 @@ private:
 		}
 		setWeights();
 		if (lastLanczosVector_==1 && fabs(weightForContinuedFraction_)<1e-6)
-			weightForContinuedFraction_ = PsimagLite::real(this->common().targetVectors()[0]*this->common().targetVectors()[0]);
+			weightForContinuedFraction_ = PsimagLite::real(this->common().targetVectors()
+			                                               [0]*this->common().targetVectors()[0]);
 	}
 
 	void setLanczosVectors(SizeType i0,
@@ -386,7 +391,7 @@ private:
 	RealType weightForContinuedFraction_;
 	TridiagonalMatrixType ab_;
 	mutable typename LanczosSolverType::ParametersSolverType paramsForSolver_;
-}; // class DynamicTargetting
+}; // class DynamicTargeting
 
 template<typename LanczosSolverType, typename VectorWithOffsetType>
 std::ostream& operator<<(std::ostream& os,
