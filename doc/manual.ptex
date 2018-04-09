@@ -49,7 +49,7 @@ keywordstyle=\color{blue}\bfseries,frame=shadowbox}
 \vspace*{\stretch{1}}
 \HRule
 \begin{flushright}
-\LARGE  DMRG++ v3 Manual\\
+\LARGE  DMRG++ v5 Manual\\
 \end{flushright}
 \HRule
 \vspace*{\stretch{2}}
@@ -60,7 +60,7 @@ keywordstyle=\color{blue}\bfseries,frame=shadowbox}
 \end{center}
 
 \begin{center}
-\textsc{Oak Ridge, 2014}
+\textsc{Oak Ridge, 2018}
 \end{center}
 
 \end{titlepage}
