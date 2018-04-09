@@ -88,7 +88,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DmrgWaveStruct.h"
 #include "IoSelector.h"
 #include "Random48.h"
-#include "BaseStack.h"
 
 namespace Dmrg {
 template<typename LeftRightSuperType,typename VectorWithOffsetType_>
@@ -117,7 +116,7 @@ public:
 	typedef WaveFunctionTransfSu2<DmrgWaveStructType,VectorWithOffsetType>
 	WaveFunctionTransfSu2Type;
 	typedef typename WaveFunctionTransfBaseType::WftOptions WftOptionsType;
-	typedef BaseStack<BlockDiagonalMatrixType> WftStackType;
+	typedef typename PsimagLite::Stack<BlockDiagonalMatrixType>::Type WftStackType;
 
 	template<typename SomeParametersType>
 	WaveFunctionTransfFactory(SomeParametersType& params)
@@ -131,8 +130,6 @@ public:
 	      filenameIn_(params.checkpoint.filename),
 	      filenameOut_(params.filename),
 	      WFT_STRING(ProgramGlobals::WFT_STRING),
-	      wsStack_(params.options.find("wftStacksInDisk")!=PsimagLite::String::npos),
-	      weStack_(params.options.find("wftStacksInDisk")!=PsimagLite::String::npos),
 	      wftImpl_(0),
 	      rng_(3433117),
 	      noLoad_(false),
@@ -144,9 +141,6 @@ public:
 		        params.options.find("restart")!=PsimagLite::String::npos);
 
 		if (b) {
-			if (wsStack_.inDisk())
-				err("The options restart and wftStacksInDisk cannot be combined yet\n");
-
 			if (params.options.find("noloadwft")!=PsimagLite::String::npos)
 				noLoad_=true;
 			else
@@ -381,8 +375,8 @@ public:
 		io.printline("dmrgWaveStruct");
 
 		dmrgWaveStruct_.save(io);
-		wsStack_.save(io, "wsStack\n");
-		weStack_.save(io, "weStack\n");
+		io.print("wsStack\n", wsStack_);
+		io.print("weStack\n", weStack_);
 	}
 
 private:
@@ -399,8 +393,8 @@ private:
 		wftOptions_.firstCall = false;
 		io.advance("dmrgWaveStruct");
 		dmrgWaveStruct_.load(io);
-		wsStack_.load(io,"wsStack");
-		weStack_.load(io,"weStack");
+		io.read(wsStack_, "wsStack");
+		io.read(weStack_, "weStack");
 	}
 
 	void myRandomT(std::complex<RealType> &value) const

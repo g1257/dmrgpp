@@ -85,7 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DiskStack.h"
 #include "ProgressIndicator.h"
 #include "ProgramGlobals.h"
-#include "BaseStack.h"
 #include "IoSelector.h"
 
 namespace Dmrg {
@@ -104,7 +103,7 @@ public:
 	typedef typename ModelType::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-	typedef BaseStack<BasisWithOperatorsType> MemoryStackType;
+	typedef typename PsimagLite::Stack<BasisWithOperatorsType>::Type MemoryStackType;
 	typedef DiskStack<BasisWithOperatorsType>  DiskStackType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -121,8 +120,6 @@ public:
 	    parameters_(parameters),
 	    enabled_(parameters_.options.find("checkpoint")!=PsimagLite::String::npos ||
 	        parameters_.options.find("restart")!=PsimagLite::String::npos),
-	    systemStack_(parameters_.options.find("diskstacks")!=PsimagLite::String::npos),
-	    envStack_(parameters_.options.find("diskstacks")!=PsimagLite::String::npos),
 	    systemDisk_(utils::pathPrepend(SYSTEM_STACK_STRING,parameters_.checkpoint.filename),
 	                utils::pathPrepend(SYSTEM_STACK_STRING,parameters_.filename),
 	                enabled_,
