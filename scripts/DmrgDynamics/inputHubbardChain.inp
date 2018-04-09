@@ -8,7 +8,7 @@ Model=HubbardOneBand
 hubbardU	8   8 8 8 8 8 8 8 8 
 potentialV      16  -4 -4 -4 -4 -4 -4 -4 -4
                     -4 -4 -4 -4 -4 -4 -4 -4
-SolverOptions=CorrectionVectorTargetting
+SolverOptions=CorrectionVectorTargeting
 CorrectionA=0
 Version=version
 OutputFile=data.txt

@@ -54,7 +54,7 @@ TargetElectronsUp=2
 TargetElectronsDown=2
 Threads=1
 
-SolverOptions=CorrectionVectorTargetting,twositedmrg,minimizeDisk,restart,MatrixVectorKron,useSvd
+SolverOptions=CorrectionVectorTargeting,twositedmrg,minimizeDisk,restart,MatrixVectorKron,useSvd
 CorrectionA=0
 Version=version
 RestartFilename=data4600.txt

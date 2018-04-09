@@ -25,7 +25,7 @@ potentialV	 100
 0 0 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0 0
 Model=HubbardOneBand
-SolverOptions=TimeStepTargetting
+SolverOptions=TimeStepTargeting
 Version=4.52
 OutputFile=data50.txt
 InfiniteLoopKeptStates=200

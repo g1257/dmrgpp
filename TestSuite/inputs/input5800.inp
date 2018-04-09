@@ -27,7 +27,7 @@ TargetElectronsTotal=30
 TargetSzPlusConst=45
 JzSymmetry=1
 CorrectionA=0.005
-SolverOptions=CorrectionTargetting,useComplex,vectorwithoffsets,MatrixVectorKron,useSvd
+SolverOptions=CorrectionTargeting,useComplex,vectorwithoffsets,MatrixVectorKron,useSvd
 Version=version
 OutputFile=data.txt
 AdjustQuantumNumbers 4 22 15 34 22

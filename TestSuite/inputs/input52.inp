@@ -14,7 +14,7 @@ potentialV	 16
 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0
 Model=HubbardOneBand
-SolverOptions=TimeStepTargetting,vectorwithoffsets
+SolverOptions=TimeStepTargeting,vectorwithoffsets
 Version=4.52
 OutputFile=data52.txt
 InfiniteLoopKeptStates=200

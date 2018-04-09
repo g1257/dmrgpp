@@ -11,9 +11,9 @@ Tests *with* SU(2) symmetry:
 3) Hubbard Model One Orbital (HuStd-1orb) on a ladder (CubicStd2d) for U=0 with 8+8 sites
 	INF(100)+7(200)-7(200)-7(200)+7(200) [to calculate correlations]
 4) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=1 with 8+8 sites.
-        INF(60)+7(100)-7(100)-7(100)+7(100) test for TimeStepTargetting "creation op"
+        INF(60)+7(100)-7(100)-7(100)+7(100) test for TimeStepTargeting "creation op"
 5) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=1 with 8+8 sites.
-        INF(60)+7(100)-7(100)-7(100)+7(100) test for TimeStepTargetting "identity op"
+        INF(60)+7(100)-7(100)-7(100)+7(100) test for TimeStepTargeting "identity op"
 6) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=1 V=-0.5 with 30+30 sites.
         INF(226)+29(226)-29(226)-29(226)+29(226) with angularMomentum j=5 (as in the literature)
 7) Like test 4 but with many times
@@ -197,9 +197,9 @@ Page* where more or less this feature is used: 245130-2
 #2001) Tests time evolution with 3 operators, which is more than the holon-doublon case, and
 #hence non-trivial. (Suzuki-Trotter)
 #2004) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=1 with 8+8 sites.
-#       INF(60)+7(100)-7(100)-7(100)+7(100) test for TimeStepTargetting "creation op" (Suzuk-Trotter)
+#       INF(60)+7(100)-7(100)-7(100)+7(100) test for TimeStepTargeting "creation op" (Suzuk-Trotter)
 #2008) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=1 with 8+8 sites.
-#        INF(60)+7(100)-7(100)-7(100)+7(100) test for TimeStepTargetting "identity op"(Suzuk-Trotter)
+#        INF(60)+7(100)-7(100)-7(100)+7(100) test for TimeStepTargeting "identity op"(Suzuk-Trotter)
 #2009) Time Evolution (Suzuki-Trotter)
 #2010) Time Evolution (Suzuki-Trotter)
 #2015) LadderBath without time advancement (Suzuki-Trotter)
@@ -207,9 +207,9 @@ Page* where more or less this feature is used: 245130-2
 2021) Tests time evolution with 3 operators, which is more than the holon-doublon case, and
 hence non-trivial. (Krylov)
 2024) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=1 with 8+8 sites.
-       INF(60)+7(100)-7(100)-7(100)+7(100) test for TimeStepTargetting "creation op" (Krylov)
+       INF(60)+7(100)-7(100)-7(100)+7(100) test for TimeStepTargeting "creation op" (Krylov)
 2028) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=1 with 8+8 sites.
-        INF(60)+7(100)-7(100)-7(100)+7(100) test for TimeStepTargetting "identity op" (Krylov)
+        INF(60)+7(100)-7(100)-7(100)+7(100) test for TimeStepTargeting "identity op" (Krylov)
 2029) Time Evolution (Krylov)
 #2034) Reserved
 #2038) Reserved

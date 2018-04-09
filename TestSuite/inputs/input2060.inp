@@ -9,7 +9,7 @@ hubbardU	6  10 10 10 10 10 10
 potentialV	12 0 0 0 0 0 0
      		   0 0 0 0 0 0
 Model=HubbardOneBand
-SolverOptions=TimeStepTargetting,twositedmrg
+SolverOptions=TimeStepTargeting,twositedmrg
 Version=version
 OutputFile=data2060.txt
 InfiniteLoopKeptStates=200

@@ -215,28 +215,28 @@ two-point correlation; and so on.
 Bare brakets cannot be computed directly by DMRG++, but must instead be
 dressed with a bra and a ket. What bra and ket is chosen is Targeting and context dependent.
 
-For GroundStateTargetting, bra and ket are both equal to the current target, usually the ground state,
+For GroundStateTargeting, bra and ket are both equal to the current target, usually the ground state,
 sometimes only in \emph{WFT} form. But if restarting a run, the current target
 can be the state left off by the previous run.
 
-For MettsTargetting and TargetingAncilla,
+For MettsTargeting and TargetingAncilla,
 \verb!<bra|bare braket spec|ket>! is computed multiple times
 at each DMRG step for different bra=ket vectors.
 These are all the temperature evolved states, and the collapsed state for
-MettsTargetting.
+MettsTargeting.
 
 For all other targetings, \verb!<bra|bare braket spec|ket>! is computed multiple times
 at each DMRG step for different bra=ket vectors, including the 
-one corresponding to GroundStateTargetting.
-The other vectors bra=ket are either (i) time vectors for TimeStepTargetting,
-(ii) dynamic vectors for AdaptiveDynamicTargetting and DynamicTargetting, and
-(iii) correction vectors for CorrectionVectorTargetting.
+one corresponding to GroundStateTargeting.
+The other vectors bra=ket are either (i) time vectors for TimeStepTargeting,
+(ii) dynamic vectors for AdaptiveDynamicTargeting and DynamicTargeting, and
+(iii) correction vectors for CorrectionVectorTargeting.
 
-To be able to compute Green functions, TimeStepTargetting computes \emph{in addition}
+To be able to compute Green functions, TimeStepTargeting computes \emph{in addition}
 \verb!<bra|bare braket spec|ket>! with bra not equal to ket:
-where bra is the GroundStateTargetting vector, and
+where bra is the GroundStateTargeting vector, and
 ket the first time vector. The same is true for
-CorrectionVectorTargetting, where ket is the correction vector.
+CorrectionVectorTargeting, where ket is the correction vector.
 
 \section{Operator specifications}
 There are two kinds of operator specifications: by label and by file.

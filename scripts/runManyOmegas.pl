@@ -54,7 +54,7 @@ Connectors 1 1.0
 hubbardU	8   0 0 0 0   0 0 0 0
 potentialV	16  0 0 0 0   0 0 0 0 
 		    0 0 0 0   0 0 0 0
-SolverOptions=hasQuantumNumbers,wft,nosu2,DynamicTargetting
+SolverOptions=hasQuantumNumbers,wft,nosu2,DynamicTargeting
 Version=6ce41a4b7dfa08978e53fa756f7f139e2fb18251
 OutputFile=data.txt
 InfiniteLoopKeptStates=200 

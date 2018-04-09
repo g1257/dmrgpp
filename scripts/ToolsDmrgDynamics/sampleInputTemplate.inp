@@ -14,7 +14,7 @@ hubbardU $hubbardU
 ##V=0.0
 potentialV $potentialV
 
-SolverOptions=twositedmrg,CorrectionVectorTargetting
+SolverOptions=twositedmrg,CorrectionVectorTargeting
 CorrectionA=0
 Version=1219aeb832f7990323cca0baa17ad7b87b731ea6
 OutputFile=$data

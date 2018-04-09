@@ -50,15 +50,15 @@ sub askQuestions
 		$legOfLadder=$_;
 	}
 	
-	print "What targetting do you want?\n";
-	print "Available: GroundStateTargetting TimeStepTargetting\n";
-	print "Default is: GroundStateTargetting (press ENTER): ";
+	print "What targeting do you want?\n";
+	print "Available: GroundStateTargeting TimeStepTargeting\n";
+	print "Default is: GroundStateTargeting (press ENTER): ";
 	$_=<STDIN>;
 	chomp;
 	if ($_ eq "" or $_ eq "\n") {
-		$_="GroundStateTargetting";
+		$_="GroundStateTargeting";
 	}
-	$targetting = $_;
+	$targeting = $_;
 	
 	print "Enter the number of kept states for the infinite loop\n";
 	print "Available: any\n";
@@ -238,7 +238,7 @@ EOF
 	$hasThreads = "hasThreads" if ($pthreads);
 
 	print FOUT<<EOF;
-SolverOptions=hasQuantumNumbers,nowft,$su2Symmetry,$hasLoops,$hasThreads,$targetting
+SolverOptions=hasQuantumNumbers,nowft,$su2Symmetry,$hasLoops,$hasThreads,$targeting
 Version=$version
 OutputFile=data.txt
 InfiniteLoopKeptStates=$infiniteKeptStates
@@ -247,14 +247,14 @@ TargetQuantumNumbers $qns
   
 EOF
 	print FOUT "Threads=$nthreads\n" if ($pthreads);
-	print FOUT "$inputForTimeEvolution\n\n" if ($targetting=~/timestep/i);
+	print FOUT "$inputForTimeEvolution\n\n" if ($targeting=~/timestep/i);
 	print STDERR "File input.inp has been written\n";
 	close(FOUT);
 }
 
 sub getTimeEvolutionInput
 {
-	return "#NO_TIME_EVOLUTION" unless ($targetting=~/timestep/i);
+	return "#NO_TIME_EVOLUTION" unless ($targeting=~/timestep/i);
 	my $ret = <<EOF;
 FILENAME tst.txt
 TIMESTEP 0.1

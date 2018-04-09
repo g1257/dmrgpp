@@ -233,7 +233,7 @@
 
 2017-08-28 Version 4.54
 
-* Targetting common: printing fixed
+* Targeting common: printing fixed
 
 * dmrg driver accepts -o solver_options
 

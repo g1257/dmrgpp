@@ -27,7 +27,7 @@ TargetSzPlusConst=4
 TargetSpinTimesTwo=0
 Threads=1
 
-SolverOptions=CorrectionVectorTargetting,twositedmrg,minimizeDisk,restart,MatrixVectorKron,useSvd
+SolverOptions=CorrectionVectorTargeting,twositedmrg,minimizeDisk,restart,MatrixVectorKron,useSvd
 CorrectionA=0
 Version=version
 RestartFilename=data28.txt
