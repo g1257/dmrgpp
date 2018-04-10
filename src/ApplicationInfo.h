@@ -99,23 +99,11 @@ public:
 	typedef String RunIdType;
 
 	ApplicationInfo(const PsimagLite::String& name)
-	    : name_(name),runId_(runIdInternal())
+	    : name_(name),runId_(runIdInternal()),isFinalized_(false)
 	{}
-
-	String finalize() const
-	{
-		OstringStream msg;
-		msg<<name_<<" sizeof(SizeType)="<<sizeof(SizeType)<<"\n";
-#ifdef USE_FLOAT
-		msg<<name_<<" using float\n";
-#else
-		msg<<name_<<" using double\n";
-#endif
-		msg<<"UnixTimeEnd="<<unixTime(false)<<"\n";
-		msg<<getTimeDate();
-		return msg.str();
-	}
 	
+	void finalize() { isFinalized_ = true;}
+
 	time_t unixTime(bool arg  = false) const
 	{
 		struct timeval tv;
@@ -153,21 +141,52 @@ public:
 
 	void serialize(String label, IoSerializer& serializer) const
 	{
-		std::cerr<<"WARNING: serializer not ready for ApplicationInfo ";
-		std::cerr<<"with label "<<label<<" yet\n";
+		String root = "Def/" + label;
+		if (!isFinalized_) {
+			serializer.createGroup(root);
+
+			serializer.writeToTag(root + "/Name", name_);
+			serializer.writeToTag(root + "/RunId", runId_);
+			serializer.writeToTag(root + "UnixTimeStart", unixTime(false));
+		} else {
+			serializer.writeToTag(root + "UnixTimeEnd", unixTime(false));
+		}
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
 	                                const ApplicationInfo& ai)
 	{
-		os<<ai.getTimeDate();
-		os<<"Hostname: "<<ai.hostname()<<"\n";
-		os<<"RunID="<<ai.runId_<<"\n";
-		os<<"UnixTimeStart="<<ai.unixTime(false)<<"\n";
+		if (ai.isFinalized_)
+			printFinalLegacy(os, ai);
+		else
+			printInit(os, ai);
+
 		return os;
 	}
 
 private:
+
+	static void printInit(std::ostream& os, const ApplicationInfo& ai)
+	{
+		os<<ai.getTimeDate();
+		os<<"Hostname: "<<ai.hostname()<<"\n";
+		os<<"RunID="<<ai.runId_<<"\n";
+		os<<"UnixTimeStart="<<ai.unixTime(false)<<"\n";
+	}
+
+	static void printFinalLegacy(std::ostream& os, const ApplicationInfo& ai)
+	{
+		OstringStream msg;
+		msg<<ai.name_<<" sizeof(SizeType)="<<sizeof(SizeType)<<"\n";
+#ifdef USE_FLOAT
+		msg<<ai.name_<<" using float\n";
+#else
+		msg<<ai.name_<<" using double\n";
+#endif
+		msg<<"UnixTimeEnd="<<ai.unixTime(false)<<"\n";
+		msg<<ai.getTimeDate();
+		os<<msg.str();
+	}
 
 	RunIdType runIdInternal() const
 	{
@@ -207,6 +226,7 @@ private:
 
 	PsimagLite::String name_;
 	const RunIdType runId_;
+	bool isFinalized_;
 }; // class ApplicationInfo
 
 std::ostream& operator<<(std::ostream& os,const ApplicationInfo& ai);

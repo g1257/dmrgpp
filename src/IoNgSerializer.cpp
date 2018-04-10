@@ -19,6 +19,8 @@ const H5T_class_t ToH5<unsigned int>::super = H5T_INTEGER;
 template<>
 const H5::PredType ToH5<bool>::type = H5::PredType::NATIVE_HBOOL;
 
+template<>
+const H5::PredType ToH5<char>::type = H5::PredType::NATIVE_CHAR;
 } // namespace PsimagLite
 #endif
 

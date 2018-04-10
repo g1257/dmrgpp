@@ -91,12 +91,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template<typename T>
-struct ToH5 {
-	static const H5::PredType type;
-	static const H5T_class_t super;
-};
-
 class IoNg {
 
 public:
@@ -298,18 +292,6 @@ public:
 		{
 			std::cerr<<"IoNg: WARNING: FIXME: TODO: Refusing to print bare string\n";
 //			assert(hdf5File_);
-
-//			hsize_t dims[1];
-//			dims[0] = 1;
-//			H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
-//			H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
-//			String name = "/Def/" + String(str);
-//			H5::DataSet* dataset = new H5::DataSet(hdf5File_->createDataSet(name,
-//			                                                                ToH5<SizeType>::type,
-//			                                                                *dataspace,
-//			                                                                dsCreatPlist));
-//			delete dataset;
-//			delete dataspace;
 		}
 
 		// Delete this function and use write instead
