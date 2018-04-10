@@ -247,10 +247,15 @@ struct Operator {
 	}
 
 	void serialize(PsimagLite::String label,
-	               PsimagLite::IoSerializer& serializer) const
+	               PsimagLite::IoSerializer& ioSerializer) const
 	{
-		std::cerr<<"WARNING: serializer not ready for Operator ";
-		std::cerr<<"with label "<<label<<" yet\n";
+		ioSerializer.createGroup(label);
+
+		data.serialize(label + "/data", ioSerializer);
+		ioSerializer.writeToTag(label + "/fermionSign", fermionSign);
+		ioSerializer.writeToTag(label + "/jm", jm);
+		ioSerializer.writeToTag(label + "/angularFactor", angularFactor);
+		su2Related.serialize(label + "/su2Related", ioSerializer);
 	}
 
 	void save(std::ostream& os) const
@@ -334,18 +339,12 @@ struct Operator {
 		return code;
 	}
 
-	//serializr start class Operator
-	//serializr normal data
 	SparseMatrixType data;
 	// does this operator commute or anticommute with others of the
 	// same class on different sites
-	//serializr normal fermionSign
 	int fermionSign;
-	//serializr normal jm
 	PairType  jm; // angular momentum of this operator
-	//serializr normal angularFactor
 	RealType angularFactor;
-	//serializr normal su2Related
 	Su2RelatedType su2Related;
 
 private:

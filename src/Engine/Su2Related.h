@@ -93,30 +93,20 @@ struct Su2Related {
 	                   SizeType,
 	                   PsimagLite::String msg = "") const
 	{
-		PsimagLite::String str = msg;
-		str += "Su2Related";
-
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&source);
-		SizeType total = mres.memResolv(&offset, end-start, str + " offset");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&transpose);
-		total += mres.memResolv(&source, end-start, str + " source");
-
-		total += mres.memResolv(&transpose,
-		                        sizeof(*this) - total,
-		                        str + " transpose");
-
-		return total;
+		return 0;
 	}
 
-	//serializr start class Su2Related
-	//serializr normal offset
+	void serialize(PsimagLite::String label,
+	               PsimagLite::IoSerializer& ioSerializer) const
+	{
+		ioSerializer.createGroup(label);
+		ioSerializer.writeToTag(label + "/offset", offset);
+		ioSerializer.writeToTag(label + "/source", source);
+		ioSerializer.writeToTag(label + "/transpose", transpose);
+	}
+
 	SizeType offset;
-	//serializr normal source
 	PsimagLite::Vector<SizeType>::Type source;
-	//serializr normal transpose
 	PsimagLite::Vector<int>::Type transpose;
 };
 

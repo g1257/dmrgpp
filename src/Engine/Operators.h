@@ -236,7 +236,7 @@ public:
 
 		if (!useSu2Symmetry_) io.read(operators_,"Operators");
 
-		io.read(hamiltonian_, "#HAMILTONIAN");
+		io.read(hamiltonian_, "Hamiltonian");
 		reducedOpImpl_.setHamiltonian(hamiltonian_);
 	}
 
@@ -249,7 +249,7 @@ public:
 			io.read(operators_,"Operators");
 		else reducedOpImpl_.load(io);
 
-		io.read(hamiltonian_, "#HAMILTONIAN");
+		io.read(hamiltonian_, "Hamiltonian");
 		reducedOpImpl_.setHamiltonian(hamiltonian_);
 	}
 
@@ -426,15 +426,23 @@ public:
 		}
 	}
 
-	template<typename IoOutputter>
-	void save(IoOutputter& io,
+	template<typename SomeIoOutType>
+	void save(SomeIoOutType& io,
 	          const PsimagLite::String& s,
 	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
+	          PsimagLite::IsOutputLike<SomeIoOutType>::True, int>::Type = 0) const
+	{
+		if (!useSu2Symmetry_) io.write(operators_,s + "/Operators");
+		else reducedOpImpl_.save(io,s);
+		io.write(hamiltonian_, s + "/Hamiltonian");
+	}
+
+	void save(PsimagLite::IoSimple::Out& io,
+	          const PsimagLite::String& s) const
 	{
 		if (!useSu2Symmetry_) io.write(operators_,"Operators");
 		else reducedOpImpl_.save(io,s);
-		io.write(hamiltonian_, "#HAMILTONIAN");
+		io.write(hamiltonian_, "Hamiltonian");
 	}
 
 	template<typename IoOutputter>
@@ -444,7 +452,7 @@ public:
 		if (!useSu2Symmetry_) io.write(tmp,"Operators");
 		else reducedOpImpl_.saveEmpty(io,s);
 		PsimagLite::Matrix<SizeType> tmp2(0,0);
-		io.write(tmp2, "#HAMILTONIAN");
+		io.write(tmp2, "Hamiltonian");
 	}
 
 	SizeType size() const { return operators_.size(); }

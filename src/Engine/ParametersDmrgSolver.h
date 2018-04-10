@@ -159,10 +159,35 @@ struct ParametersDmrgSolver {
 	FieldType degeneracyMax;
 	FieldType denseSparseThreshold;
 
-	void serialize(PsimagLite::String label, PsimagLite::IoSerializer&) const
+	void serialize(PsimagLite::String label,
+	               PsimagLite::IoSerializer& ioSerializer) const
 	{
-		std::cerr<<"WARNING: serializer not ready for ParametersDmrgSolver";
-		std::cerr<<" with label "<<label<<" yet\n";
+		PsimagLite::String root = label;
+
+		ioSerializer.createGroup(root);
+
+		ioSerializer.writeToTag(root + "/nthreads", nthreads);
+		ioSerializer.writeToTag(root + "/sitesPerBlock", sitesPerBlock);
+		ioSerializer.writeToTag(root + "/maxMatrixRankStored", maxMatrixRankStored);
+		ioSerializer.writeToTag(root + "/keptStatesInfinite", keptStatesInfinite);
+		ioSerializer.writeToTag(root + "/excited", excited);
+		ioSerializer.writeToTag(root + "/dumperBegin", dumperBegin);
+		ioSerializer.writeToTag(root + "/dumperEnd", dumperEnd);
+		ioSerializer.writeToTag(root + "/precision", precision);
+		ioSerializer.writeToTag(root + "/useReflectionSymmetry", useReflectionSymmetry);
+		ioSerializer.writeToTag(root + "/truncationControl", truncationControl);
+		ioSerializer.writeToTag(root + "/filename", filename);
+		ioSerializer.writeToTag(root + "/version", version);
+		ioSerializer.writeToTag(root + "/options", options);
+		ioSerializer.writeToTag(root + "/model", model);
+		ioSerializer.writeToTag(root + "/insitu", insitu);
+		ioSerializer.writeToTag(root + "/fileForDensityMatrixEigs", fileForDensityMatrixEigs);
+		ioSerializer.writeToTag(root + "/recoverySave", recoverySave);
+		checkpoint.serialize(label + "/checkpoint", ioSerializer);
+		ioSerializer.writeToTag(root + "/adjustQuantumNumbers", adjustQuantumNumbers);
+		ioSerializer.writeToTag(root + "/finiteLoop", finiteLoop);
+		ioSerializer.writeToTag(root + "/degeneracyMax", degeneracyMax);
+		ioSerializer.writeToTag(root + "/denseSparseThreshold", denseSparseThreshold);
 	}
 
 	template<typename SomeMemResolvType>

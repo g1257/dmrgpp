@@ -204,22 +204,20 @@ public:
 		ioOut_.print("ApplicationInfo", appInfo_);
 
 		PsimagLite::PsiBase64::Encode base64encode(ioIn.data());
-		ioOut_.print("#InputStartsHere\n");
-		ioOut_.print(base64encode());
-		ioOut_.print("#InputEndsHere\n");
-		ioOut_.print("PARAMETERS\n", parameters_);
+		ioOut_.print("InputBase64Encoded", base64encode);
+		ioOut_.print("PARAMETERS", parameters_);
 		ioOut_.print("Model", model);
 		if (parameters_.options.find("verbose")!=PsimagLite::String::npos) verbose_=true;
 	}
 
 	~DmrgSolver()
 	{
-		ioOut_.printline(appInfo_.finalize());
+		appInfo_.finalize();
+		ioOut_.print("ApplicationInfo", appInfo_);
 
 		PsimagLite::OstringStream msg2;
 		msg2<<"Turning off the engine.";
 		progress_.printline(msg2,std::cout);
-		std::cout<<appInfo_.finalize();
 	}
 
 	void main(const GeometryType& geometry, PsimagLite::String targeting)

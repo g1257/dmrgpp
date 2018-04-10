@@ -3,6 +3,7 @@
 
 #include "Vector.h"
 #include <iostream>
+#include "IoSerializerStub.h"
 
 namespace Dmrg {
 /* PSIDOC FiniteLoop
@@ -82,12 +83,15 @@ struct FiniteLoop {
 	    : stepLength(sl),keptStates(ks),saveOption(so)
 	{}
 
-	template<class Archive>
-	void serialize(Archive & ar, const unsigned int version)
+	void serialize(PsimagLite::String label,
+	               PsimagLite::IoSerializer& ioSerializer) const
 	{
-		ar & stepLength;
-		ar & keptStates;
-		ar & saveOption;
+		PsimagLite::String root = label;
+
+		ioSerializer.createGroup(root);
+		ioSerializer.writeToTag(root + "/stepLength", stepLength);
+		ioSerializer.writeToTag(root + "/keptStates", keptStates);
+		ioSerializer.writeToTag(root + "/saveOption", saveOption);
 	}
 
 	template<typename SomeMemResolvType>

@@ -3,6 +3,7 @@
 
 #include "Vector.h"
 #include <iostream>
+#include "IoSerializerStub.h"
 
 namespace Dmrg {
 
@@ -18,6 +19,18 @@ struct RestartStruct {
 	                   PsimagLite::String = "") const
 	{
 		return 0;
+	}
+
+	void serialize(PsimagLite::String label,
+	               PsimagLite::IoSerializer& ioSerializer) const
+	{
+		PsimagLite::String root = label;
+		ioSerializer.createGroup(root);
+		ioSerializer.writeToTag(root + "/filename", filename);
+		ioSerializer.writeToTag(root + "/into", into);
+		ioSerializer.writeToTag(root + "/labelForPsi", labelForPsi);
+		ioSerializer.writeToTag(root + "/labelForEnergy", labelForEnergy);
+
 	}
 
 	PsimagLite::String filename;
