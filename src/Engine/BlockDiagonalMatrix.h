@@ -141,16 +141,6 @@ public:
 		io>>(*this);
 	}
 
-	template<typename IoOutputType>
-	void save(IoOutputType& io,
-	          SaveEnum,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
-	{
-		io<<"#NAME=\n";
-		io<<(*this);
-	}
-
 	void setTo(ComplexOrRealType value)
 	{
 		SizeType n = data_.size();
@@ -296,6 +286,12 @@ public:
 	{
 		assert(i < data_.size());
 		return data_[i];
+	}
+
+	void serialize(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
+	{
+		std::cerr<<"BlockDiagonalMatrix::serialize(...) with label ";
+		std::cerr<<label<<" unimplemented FIXME WARNING\n";
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const BlockDiagonalMatrix& m)
