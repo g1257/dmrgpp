@@ -14,6 +14,9 @@ template<>
 const H5::PredType ToH5<unsigned int>::type = H5::PredType::NATIVE_UINT8;
 
 template<>
+const H5::PredType ToH5<int>::type = H5::PredType::NATIVE_INT8;
+
+template<>
 const H5T_class_t ToH5<unsigned int>::super = H5T_INTEGER;
 
 template<>

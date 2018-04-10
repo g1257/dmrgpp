@@ -202,40 +202,9 @@ public:
 
 		template<typename T>
 		void write(const std::vector<T>& v,
-		           const String& label,
-		           typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
+		           const String& label)
 		{
-			assert(hdf5File_);
-
-			hsize_t dims[1];
-			dims[0] = v.size();
-			H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
-			H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
-			String name = "/Def/" + label;
-			internalWrite<T>(&(v[0]), name, *dataspace, dsCreatPlist);
-			delete dataspace;
-		}
-
-		template<typename T>
-		void write(const std::vector<T>& v,
-		           const String& label,
-		           typename EnableIf<!Loki::TypeTraits<T>::isArith, int>::Type = 0)
-		{
-			// Here we have a recursion
-			// We've got a vector of things
-			// each thing need to be printed in turn
-			// We could create a folder label and go from there perhaps?
-			assert(hdf5File_);
-
-			String name = label;
-			SizeType n = v.size();
-			// what if n == 0?
-			if (n == 0)
-				throw RuntimeError("FATAL: Refusing to write vector of empty size\n");
-			std::cerr<<__FILE__<<" "<<__LINE__<<" Need to save vector size = "<<n;
-			std::cerr<<" somewhere in the file (TODO FIXME)\n";
-			for (SizeType i = 0; i < n; ++i)
-				print(name, v[i]);
+			ioNgSerializer_.writeToTag(label, v);
 		}
 
 		template<typename X>
@@ -320,21 +289,6 @@ public:
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
 	private:
-
-		template<typename T>
-		void internalWrite(const void *ptr,
-		                   String name,
-		                   H5::DataSpace& dataspace,
-		                   H5::DSetCreatPropList& dsCreatPlist)
-		{
-
-			H5::DataSet* dataset = new H5::DataSet(hdf5File_->createDataSet(name,
-			                                                                ToH5<T>::type,
-			                                                                dataspace,
-			                                                                dsCreatPlist));
-			dataset->write(ptr, ToH5<T>::type);
-			delete dataset;
-		}
 
 		SizeType findCount(const String& label) const
 		{

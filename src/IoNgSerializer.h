@@ -2,6 +2,7 @@
 #define IONGSERIALIZER_H
 #include "H5Cpp.h"
 #include "Vector.h"
+#include "TypeToString.h"
 
 namespace PsimagLite {
 
@@ -58,7 +59,57 @@ public:
 		delete dataspace;
 	}
 
+	template<typename T1, typename T2>
+	void writeToTag(String name2,
+	                const std::pair<T1, T2>& what)
+	{
+		createGroup(name2);
+		writeToTag(name2 + "/0", what.first);
+		writeToTag(name2 + "/1", what.second);
+	}
+
+	template<typename T>
+	void writeToTag(String name2,
+	                const std::vector<T>& what,
+	                typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
+	{
+		String name = "Def/" + name2;
+		hsize_t dims[1];
+		dims[0] = what.size();
+		H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
+		H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
+		internalWrite<T>(&(what[0]), name, *dataspace, dsCreatPlist);
+		delete dataspace;
+	}
+
+	template<typename T>
+	void writeToTag(String name2,
+	                const std::vector<T>& what,
+	                typename EnableIf<!Loki::TypeTraits<T>::isArith, int>::Type = 0)
+	{
+		SizeType n = what.size();
+		createGroup(name2);
+		writeToTag(name2 + "/SIZE", n);
+		for (SizeType i = 0; i < n; ++i)
+			what[i].serialize(name2 + "/" + typeToString(i), *this);
+	}
+
 private:
+
+	template<typename T>
+	void internalWrite(const void *ptr,
+	                   String name,
+	                   H5::DataSpace& dataspace,
+	                   H5::DSetCreatPropList& dsCreatPlist)
+	{
+
+		H5::DataSet* dataset = new H5::DataSet(hdf5file_->createDataSet(name,
+		                                                                ToH5<T>::type,
+		                                                                dataspace,
+		                                                                dsCreatPlist));
+		dataset->write(ptr, ToH5<T>::type);
+		delete dataset;
+	}
 
 	H5::H5File* hdf5file_;
 	H5::Group* hdf5group_;
