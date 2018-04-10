@@ -28,7 +28,7 @@ Please see full open source license included in file LICENSE.
 #include <cassert>
 #include "TypeToString.h"
 #include "Mpi.h"
-#include "BoostSerializationHeaders.h"
+#include "IoSerializerStub.h"
 
 namespace PsimagLite {
 
@@ -110,12 +110,10 @@ public:
 	}
 	// end all ctors
 
-	template<class Archive>
-	void serialize(Archive& ar, const unsigned int)
+	void serialize(String label, IoSerializer& ioSerializer) const
 	{
-		ar & nrow_;
-		ar & ncol_;
-		ar & data_;
+		std::cerr<<"Matrix::serialize(...) with label ";
+		std::cerr<<label<<" unimplemented FIXME WARNING\n";
 	}
 
 	template<typename SomeMemResolvType>

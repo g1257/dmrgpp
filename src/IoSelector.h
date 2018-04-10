@@ -1,5 +1,8 @@
 #ifndef IOSELECTOR_H
 #define IOSELECTOR_H
+
+#include "IoSerializerStub.h"
+
 #ifndef USE_IO_NG
 #include "IoSimple.h"
 #else

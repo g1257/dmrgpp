@@ -231,7 +231,8 @@ public:
 		           const String& label,
 		           typename EnableIf<IsMatrixLike<X>::True, int>::Type = 0)
 		{
-			throw RuntimeError("IoNg:: write for matrix not implemented\n");
+			mat.serialize(label, ioNgSerializer_);
+			//throw RuntimeError("IoNg:: write for matrix1 not implemented\n");
 		}
 
 		template<typename T>
