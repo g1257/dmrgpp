@@ -592,7 +592,9 @@ private:
 		truncate_(pS,pE,target,keptStates,direction);
 		PsimagLite::OstringStream msg2;
 		msg2<<"#Error="<<truncate_.error();
-		if (saveData_) ioOut_.printline(msg2);
+		static SizeType counter = 0;
+		if (saveData_)
+			writeLabel(truncate_.error(), "Error" + ttos(counter++), msg2);
 
 		if (direction == ProgramGlobals::EXPAND_SYSTEM)
 			checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS, ProgramGlobals::SYSTEM);
@@ -678,7 +680,18 @@ private:
 		PsimagLite::OstringStream msg;
 		msg.precision(8);
 		msg<<"#Energy="<<energy;
-		ioOut_.printline(msg);
+		static SizeType counter = 0;
+		writeLabel(energy, "Energy" + ttos(counter++), msg);
+	}
+
+	void writeLabel(RealType x,
+	                PsimagLite::String str,
+	                PsimagLite::OstringStream& msg)
+	{
+		if (!ioOut_.ng())
+			ioOut_.printline(msg);
+		else
+			ioOut_.write(x, str);
 	}
 
 	const BlockType& findRightBlock(const VectorBlockType& y,
