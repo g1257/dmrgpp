@@ -521,10 +521,15 @@ public:
 		MPI::recv(values_,root,tag+4,mpiComm);
 	}
 
-	void serialize(String label, IoSerializer& serializer) const
+	void serialize(String label, IoSerializer& ioSerializer) const
 	{
-		std::cerr<<"WARNING: serializer not ready for CrsMatrix ";
-		std::cerr<<"with label "<<label<<" yet\n";
+		ioSerializer.createGroup(label);
+
+		ioSerializer.writeToTag(label + "/rowptr_",  rowptr_);
+		ioSerializer.writeToTag(label + "/colind_",  colind_);
+		ioSerializer.writeToTag(label + "/values_",  values_);
+		ioSerializer.writeToTag(label + "/nrow_",  nrow_);
+		ioSerializer.writeToTag(label + "/ncol_",  ncol_);
 	}
 
 	friend bool isZero(const CrsMatrix& A, double eps = 0.0)
@@ -573,16 +578,10 @@ private:
 		else operatorPlus(c,m,t1,*this,one);
 	}
 
-	//serializr start class CrsMatrix
-	//serializr normal rowptr_
 	typename Vector<int>::Type rowptr_;
-	//serializr normal colind_
 	typename Vector<int>::Type colind_;
-	//serializr normal values_
 	typename Vector<T>::Type values_;
-	//serializr normal nrow_
 	SizeType nrow_;
-	//serializr normal ncol_
 	SizeType ncol_;
 }; // class CrsMatrix
 

@@ -68,6 +68,13 @@ public:
 		writeToTag(name2 + "/1", what.second);
 	}
 
+	void writeToTag(String name2,
+	                const std::vector<bool>&)
+	{
+		std::cerr<<"Vector of booleans with name "<<name2<<" cannot be printed ";
+		std::cerr<<"FIXME TODO WARNING\n";
+	}
+
 	template<typename T>
 	void writeToTag(String name2,
 	                const std::vector<T>& what,
@@ -84,8 +91,23 @@ public:
 
 	template<typename T>
 	void writeToTag(String name2,
+	                const std::vector<std::complex<T> >& what,
+	                typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
+	{
+		String name = "Def/" + name2;
+		hsize_t dims[1];
+		dims[0] = 2*what.size();
+		H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
+		H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
+		internalWrite<T>(&(what[0]), name, *dataspace, dsCreatPlist);
+		delete dataspace;
+	}
+
+	template<typename T>
+	void writeToTag(String name2,
 	                const std::vector<T>& what,
-	                typename EnableIf<!Loki::TypeTraits<T>::isArith, int>::Type = 0)
+	                typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
+	                int>::Type = 0)
 	{
 		SizeType n = what.size();
 		createGroup(name2);

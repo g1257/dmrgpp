@@ -118,6 +118,8 @@ public:
 			hdf5File_ = 0;
 		}
 
+		bool ng() const { return true; }
+
 		const String& filename() const
 		{
 			// find member that returns filename FIXME
@@ -152,7 +154,7 @@ public:
 
 		void createGroup(String groupName)
 		{
-			hdf5File_->createGroup("/Def/" + groupName);
+			ioNgSerializer_.createGroup(groupName);
 		}
 
 		void printline(const String &s)
@@ -177,50 +179,20 @@ public:
 			std::cerr<<" string "<<s.str()<<" (FIXME TODO)\n";
 		}
 
-		void write(bool b, const String& label)
+		template<typename T>
+		void write(const T& x,
+		           String label,
+		           typename EnableIf<!IsMatrixLike<T>::True, int>::Type = 0)
 		{
-			std::cerr<<"WARNING: Cannot write boolean to HDF5 yet (FIXME TODO)\n";
-			return;
-			hsize_t dims[1];
-			dims[0] = 1;
-			H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
-			H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
-			String name = "/Def/" + label;
-			H5::DataSet* dataset = new H5::DataSet(hdf5File_->createDataSet(name,
-			                                                                ToH5<bool>::type,
-			                                                                *dataspace,
-			                                                                dsCreatPlist));
-			dataset->write(&b, ToH5<bool>::type);
-			delete dataset;
-			delete dataspace;
-		}
-
-		void write(const std::vector<bool>&, const String&)
-		{
-			throw RuntimeError("IoNg:: not implemented write to vector<bool>\n");
+			ioNgSerializer_.writeToTag(label, x);
 		}
 
 		template<typename T>
-		void write(const std::vector<T>& v,
-		           const String& label)
+		void write(const T& what,
+		           String name2,
+		           typename EnableIf<IsMatrixLike<T>::True, int>::Type = 0)
 		{
-			ioNgSerializer_.writeToTag(label, v);
-		}
-
-		template<typename X>
-		void write(const X& mat,
-		           const String& label,
-		           typename EnableIf<IsMatrixLike<X>::True, int>::Type = 0)
-		{
-			mat.serialize(label, ioNgSerializer_);
-		}
-
-		template<typename T>
-		void write(const std::stack<T>& something, const String& label)
-		{
-			assert(hdf5File_);
-			assert(groupDef_);
-			throw RuntimeError("IoNg:: write for stack not implemented\n");
+			what.serialize(name2, ioNgSerializer_);
 		}
 
 		template<typename T>
@@ -260,7 +232,7 @@ public:
 		void print(const String str)
 		{
 			std::cerr<<"IoNg: WARNING: FIXME: TODO: Refusing to print bare string\n";
-//			assert(hdf5File_);
+			//			assert(hdf5File_);
 		}
 
 		// Delete this function and use write instead
