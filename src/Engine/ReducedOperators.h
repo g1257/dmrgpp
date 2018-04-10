@@ -126,14 +126,14 @@ public:
 	      cgObject_(&(Su2SymmetryGlobalsType::clebschGordanObject))
 	{
 		if (!useSu2Symmetry_) return;
-		io.read(reducedOperators_,"#OPERATORS");
+		io.read(reducedOperators_,"Operators");
 	}
 
 	template<typename IoInputter>
 	void load(IoInputter& io)
 	{
 		if (!useSu2Symmetry_) return;
-		io.read(reducedOperators_,"#OPERATORS");
+		io.read(reducedOperators_,"Operators");
 	}
 
 	const OperatorType& getReducedOperatorByIndex(int i) const
@@ -404,14 +404,14 @@ public:
 	template<typename IoOutputter>
 	void save(IoOutputter& io,const PsimagLite::String&) const
 	{
-		io.write(reducedOperators_,"#OPERATORS");
+		io.write(reducedOperators_,"Operators");
 	}
 
 	template<typename IoOutputter>
 	void saveEmpty(IoOutputter& io,const PsimagLite::String&) const
 	{
 		PsimagLite::Vector<SizeType>::Type tmp;
-		io.write(tmp,"#OPERATORS");
+		io.write(tmp,"Operators");
 	}
 
 	void changeBasis(SparseMatrixType &v)

@@ -146,7 +146,7 @@ public:
 	                   bool isObserveCode)
 	    : BasisType(io,ss,counter),operators_(io,0,this,isObserveCode)
 	{
-		io.read(operatorsPerSite_,"#OPERATORSPERSITE");
+		io.read(operatorsPerSite_,"OperatorPerSite");
 	}
 
 	template<typename IoInputter>
@@ -156,7 +156,7 @@ public:
 	{
 		BasisType::load(io); // parent loads
 		operators_.load(io);
-		io.read(operatorsPerSite_,"#OPERATORSPERSITE");
+		io.read(operatorsPerSite_,"OperatorPerSite");
 	}
 
 	// set this basis to the outer product of
@@ -355,19 +355,31 @@ public:
 		return parent.fermionicSign(i,fsign);
 	}
 
-	template<typename IoOutputter>
-	void save(IoOutputter& io,
+	template<typename SomeIoType>
+	void save(SomeIoType& io,
 	          const PsimagLite::String& s,
 	          SizeType option,
 	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
+	          PsimagLite::IsOutputLike<SomeIoType>::True, int>::Type = 0) const
 	{
 		BasisType::save(io,s,false); // parent saves
 		if (option == BasisType::SAVE_ALL)
 			operators_.save(io,s);
 		else
 			operators_.saveEmpty(io,s);
-		io.write(operatorsPerSite_,"#OPERATORSPERSITE");
+		io.write(operatorsPerSite_, s + "/OperatorPerSite");
+	}
+
+	void save(PsimagLite::IoSimple::Out& io,
+	          const PsimagLite::String& s,
+	          SizeType option) const
+	{
+		BasisType::save(io,s,false); // parent saves
+		if (option == BasisType::SAVE_ALL)
+			operators_.save(io,s);
+		else
+			operators_.saveEmpty(io,s);
+		io.write(operatorsPerSite_, "OperatorPerSite");
 	}
 
 	template<typename IoOutputter>
@@ -376,12 +388,7 @@ public:
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
-		BasisType::save(io,false); // parent saves
-		if (option == BasisType::SAVE_ALL)
-			operators_.save(io,this->name());
-		else
-			operators_.saveEmpty(io,this->name());
-		io.write(operatorsPerSite_,"#OPERATORSPERSITE");
+		save(io, this->name(), option);
 	}
 
 private:

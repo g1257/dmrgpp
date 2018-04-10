@@ -314,13 +314,15 @@ private:
 	                                 IoOutType* ioOut,
 	                                 bool useSu2Symmetry)
 	{
+		static SizeType counter = 0;
 		PsimagLite::OstringStream msg;
 		msg<<"SymmetryElectronsSz: Integer target quantum numbers are: ";
 		for (SizeType ii=0;ii<targetQuantumNumbers.size();ii++)
 			msg<<targetQuantumNumbers[ii]<<" ";
 		std::cout<<msg.str()<<"\n";
 		if (ioOut && direction == ProgramGlobals::INFINITE)
-			ioOut->write(targetQuantumNumbers,"TargetedQuantumNumbers");
+			ioOut->write(targetQuantumNumbers,"TargetedQuantumNumbers" + ttos(counter));
+		++counter;
 		return pseudoQuantumNumber(targetQuantumNumbers,useSu2Symmetry);
 	}
 

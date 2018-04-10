@@ -149,7 +149,7 @@ public:
 			PsimagLite::String label = parameters_.checkpoint.labelForEnergy;
 			label += "=";
 			ioIn2.readline(energyFromFile_,label,IoType::In::LAST_INSTANCE);
-			label = "#OPERATORSPERSITE";
+			label = "OperatorPerSite";
 			VectorSizeType v;
 			ioIn2.rewind();
 			ioIn2.read(v,label);
@@ -188,8 +188,8 @@ public:
 		PsimagLite::OstringStream msg;
 		msg<<"Saving pS and pE...";
 		progress_.printline(msg,std::cout);
-		pS.save(io,"#CHKPOINTSYSTEM",BasisWithOperatorsType::SAVE_ALL);
-		pE.save(io,"#CHKPOINTENVIRON",BasisWithOperatorsType::SAVE_ALL);
+		pS.save(io,"CHKPOINTSYSTEM",BasisWithOperatorsType::SAVE_ALL);
+		pE.save(io,"CHKPOINTENVIRON",BasisWithOperatorsType::SAVE_ALL);
 	}
 
 	// Not related to stacks
@@ -200,17 +200,17 @@ public:
 	{
 
 		typename IoType::In ioTmp(parameters_.checkpoint.filename);
-		SizeType loop = ioTmp.count("#NAME=#CHKPOINTSYSTEM");
+		SizeType loop = ioTmp.count("#NAME=CHKPOINTSYSTEM");
 		if (loop<1) {
 			std::cerr<<"There are no resumable loops in file ";
 			std::cerr<<parameters_.checkpoint.filename<<"\n";
 			throw PsimagLite::RuntimeError("Checkpoint::load(...)\n");
 		}
 		loop--;
-		BasisWithOperatorsType pS1(ioTmp,"#CHKPOINTSYSTEM",loop,isObserveCode);
+		BasisWithOperatorsType pS1(ioTmp,"CHKPOINTSYSTEM",loop,isObserveCode);
 
 		pS=pS1;
-		BasisWithOperatorsType pE1(ioTmp,"#CHKPOINTENVIRON",0,isObserveCode);
+		BasisWithOperatorsType pE1(ioTmp,"CHKPOINTENVIRON",0,isObserveCode);
 		pE=pE1;
 		psi.load(parameters_.checkpoint.filename);
 	}

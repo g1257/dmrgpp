@@ -134,10 +134,7 @@ public:
 		io.readline(tmp,"#FACTORSSIZE=");
 	}
 
-	template<typename IoOutputter>
-	void save(IoOutputter& io,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
+	void save(PsimagLite::IoSimple::Out& io) const
 	{
 		PsimagLite::String s="#FACTORSSIZE=0";
 		io.printline(s);

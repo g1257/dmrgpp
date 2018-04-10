@@ -495,26 +495,67 @@ public:
 	}
 
 	//! saves this basis to disk
-	template<typename IoOutputter>
-	void save(IoOutputter& io,
+	void save(PsimagLite::IoSimple::Out& io,
 	          const PsimagLite::String& ss,
-	          bool minimizeWrite,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
+	          bool minimizeWrite) const
 	{
 		io.printline("#NAME="+ss);
-		saveInternal(io, minimizeWrite);
+		PsimagLite::String s="#useSu2Symmetry="+ttos(useSu2Symmetry_);
+		io.printline(s);
+		io.write(block_,"#BLOCK");
+
+		if (!minimizeWrite) {
+			io.write(electrons_,"#ELECTRONS");
+			io.write(electronsOld_,"#0OLDELECTRONS");
+		}
+
+		io.write(partition_,"#PARTITION");
+		io.write(permInverse_,"#PERMUTATIONINVERSE");
+
+		VectorSizeType qnShrink;
+		shrinkVector(qnShrink, quantumNumbers_, partition_);
+		io.write(qnShrink,"#QNShrink");
+
+		if (useSu2Symmetry_) symmSu2_.save(io);
+		else symmLocal_.save(io);
+	}
+
+	//! saves this basis to disk
+	template<typename SomeIoType>
+	void save(SomeIoType& io,
+	          const PsimagLite::String& ss,
+	          bool minimizeWrite) const
+	{
+		PsimagLite::String label = ss + "/";
+		io.createGroup(ss);
+		io.write(useSu2Symmetry_, label + "useSu2Symmetry");
+		io.write(block_, label + "Block");
+
+		if (!minimizeWrite) {
+			io.write(electrons_, label + "Electrons");
+			io.write(electronsOld_, label + "OldElectrons");
+		}
+
+		io.write(partition_, label + "Partition");
+		io.write(permInverse_, label + "PermutationInverse");
+
+		VectorSizeType qnShrink;
+		shrinkVector(qnShrink, quantumNumbers_, partition_);
+		io.write(qnShrink, label + "QNShrink");
+
+		// FIXME: implement the below calls
+		// if (useSu2Symmetry_) symmSu2_.save(io);
+		// else symmLocal_.save(io);
 	}
 
 	//! saves this basis to disk
 	template<typename IoOutputter>
-	void save(IoOutputter& io, bool minimizeWrite,
+	void save(IoOutputter& io,
+	          bool minimizeWrite,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
-		io.printline("#NAME="+name_);
-		saveInternal(io, minimizeWrite);
-
+		save(io, name_, minimizeWrite);
 	}
 
 	//! The operator<< is a friend
@@ -576,32 +617,6 @@ private:
 			symmSu2_.load(io,minimizeRead);
 		else
 			symmLocal_.load(io,minimizeRead);
-	}
-
-	template<typename IoOutputter>
-	void saveInternal(IoOutputter& io,
-	                  bool minimizeWrite,
-	                  typename PsimagLite::EnableIf<
-	                  PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
-	{
-		PsimagLite::String s="#useSu2Symmetry="+ttos(useSu2Symmetry_);
-		io.printline(s);
-		io.write(block_,"#BLOCK");
-
-		if (!minimizeWrite) {
-			io.write(electrons_,"#ELECTRONS");
-			io.write(electronsOld_,"#0OLDELECTRONS");
-		}
-
-		io.write(partition_,"#PARTITION");
-		io.write(permInverse_,"#PERMUTATIONINVERSE");
-
-		VectorSizeType qnShrink;
-		shrinkVector(qnShrink, quantumNumbers_, partition_);
-		io.write(qnShrink,"#QNShrink");
-
-		if (useSu2Symmetry_) symmSu2_.save(io);
-		else symmLocal_.save(io);
 	}
 
 	void shrinkVector(VectorSizeType& dest,

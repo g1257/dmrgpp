@@ -250,10 +250,7 @@ public:
 		io.read(jvals_,"#su2Jvals");
 	}
 
-	template<typename IoOutputter>
-	void save(IoOutputter& io,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
+	void save(PsimagLite::IoSimple::Out& io) const
 	{
 		jmValues_.save(io);
 		io.write(flavors_,"#su2flavors");
