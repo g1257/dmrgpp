@@ -156,6 +156,11 @@ public:
 			labels_.clear();
 		}
 
+		void createGroup(String groupName)
+		{
+			hdf5File_->createGroup("/Def/" + groupName);
+		}
+
 		void printline(const String &s)
 		{
 			assert(hdf5File_);
@@ -178,6 +183,24 @@ public:
 			std::cerr<<" string "<<s.str()<<" (FIXME TODO)\n";
 		}
 
+		void write(bool b, const String& label)
+		{
+			std::cerr<<"WARNING: Cannot write boolean to HDF5 yet (FIXME TODO)\n";
+			return;
+			hsize_t dims[1];
+			dims[0] = 1;
+			H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
+			H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
+			String name = "/Def/" + label;
+			H5::DataSet* dataset = new H5::DataSet(hdf5File_->createDataSet(name,
+			                                                                ToH5<bool>::type,
+			                                                                *dataspace,
+			                                                                dsCreatPlist));
+			dataset->write(&b, ToH5<bool>::type);
+			delete dataset;
+			delete dataspace;
+		}
+
 		void write(const std::vector<bool>&, const String&)
 		{
 			throw RuntimeError("IoNg:: not implemented write to vector<bool>\n");
@@ -190,15 +213,13 @@ public:
 		{
 			assert(hdf5File_);
 
-			SizeType count = findCount(label);
 			hsize_t dims[1];
 			dims[0] = v.size();
 			H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
 			H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
-			String name = "/Def/" + label + ttos(count);
+			String name = "/Def/" + label;
 			internalWrite<T>(&(v[0]), name, *dataspace, dsCreatPlist);
 			delete dataspace;
-			labels_.push_back(label);
 		}
 
 		template<typename T>
@@ -212,8 +233,7 @@ public:
 			// We could create a folder label and go from there perhaps?
 			assert(hdf5File_);
 
-			SizeType count = findCount(label);
-			String name = label + ttos(count);
+			String name = label;
 			SizeType n = v.size();
 			// what if n == 0?
 			if (n == 0)
@@ -222,8 +242,6 @@ public:
 			std::cerr<<" somewhere in the file (TODO FIXME)\n";
 			for (SizeType i = 0; i < n; ++i)
 				print(name, v[i]);
-
-			labels_.push_back(label);
 		}
 
 		template<typename X>
@@ -232,7 +250,6 @@ public:
 		           typename EnableIf<IsMatrixLike<X>::True, int>::Type = 0)
 		{
 			mat.serialize(label, ioNgSerializer_);
-			//throw RuntimeError("IoNg:: write for matrix1 not implemented\n");
 		}
 
 		template<typename T>
@@ -279,19 +296,20 @@ public:
 
 		void print(const String str)
 		{
-			assert(hdf5File_);
+			std::cerr<<"IoNg: WARNING: FIXME: TODO: Refusing to print bare string\n";
+//			assert(hdf5File_);
 
-			hsize_t dims[1];
-			dims[0] = 1;
-			H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
-			H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
-			String name = "/Def/" + String(str);
-			H5::DataSet* dataset = new H5::DataSet(hdf5File_->createDataSet(name,
-			                                                                ToH5<SizeType>::type,
-			                                                                *dataspace,
-			                                                                dsCreatPlist));
-			delete dataset;
-			delete dataspace;
+//			hsize_t dims[1];
+//			dims[0] = 1;
+//			H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
+//			H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
+//			String name = "/Def/" + String(str);
+//			H5::DataSet* dataset = new H5::DataSet(hdf5File_->createDataSet(name,
+//			                                                                ToH5<SizeType>::type,
+//			                                                                *dataspace,
+//			                                                                dsCreatPlist));
+//			delete dataset;
+//			delete dataspace;
 		}
 
 		// Delete this function and use write instead
