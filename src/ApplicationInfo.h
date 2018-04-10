@@ -141,15 +141,15 @@ public:
 
 	void serialize(String label, IoSerializer& serializer) const
 	{
-		String root = "Def/" + label;
+		String root = label;
 		if (!isFinalized_) {
 			serializer.createGroup(root);
 
 			serializer.writeToTag(root + "/Name", name_);
 			serializer.writeToTag(root + "/RunId", runId_);
-			serializer.writeToTag(root + "UnixTimeStart", unixTime(false));
+			serializer.writeToTag(root + "/UnixTimeStart", unixTime(false));
 		} else {
-			serializer.writeToTag(root + "UnixTimeEnd", unixTime(false));
+			serializer.writeToTag(root + "/UnixTimeEnd", unixTime(false));
 		}
 	}
 

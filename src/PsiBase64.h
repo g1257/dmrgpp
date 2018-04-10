@@ -37,6 +37,7 @@ René Nyffenegger rene.nyffenegger@adp-gmbh.ch
 #define PSIBASE64_H
 
 #include "Vector.h"
+#include "IoSerializerStub.h"
 
 namespace PsimagLite {
 
@@ -61,6 +62,19 @@ public:
 		}
 
 		const String& operator()() const { return buffer_; }
+
+		void serialize(String label, PsimagLite::IoSerializer& ioSerializer) const
+		{
+			ioSerializer.writeToTag(label, buffer_);
+		}
+
+		friend std::ostream& operator<<(std::ostream& os, const Encode& encode)
+		{
+			os<<"#InputStartsHere\n";
+			os<<encode.buffer_;
+			os<<"\n#InputEndsHere\n";
+			return os;
+		}
 
 	private:
 

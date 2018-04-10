@@ -21,11 +21,12 @@ public:
 
 	void createGroup(String group)
 	{
-		hdf5file_->createGroup(group);
+		hdf5file_->createGroup("Def/" + group);
 	}
 
-	void writeToTag(String name, SizeType what)
+	void writeToTag(String name2, SizeType what)
 	{
+		String name = "Def/" + name2;
 		hsize_t dims[1];
 		dims[0] = 1;
 		H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
@@ -40,8 +41,9 @@ public:
 		delete dataspace;
 	}
 
-	void writeToTag(String name, String what)
+	void writeToTag(String name2, String what)
 	{
+		String name = "Def/" + name2;
 		hsize_t dims[1];
 		dims[0] = what.length();
 		H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
