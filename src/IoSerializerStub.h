@@ -10,6 +10,18 @@ typedef IoNgSerializer IoSerializer;
 namespace PsimagLite {
 class IoSerializer {
 
+public:
+
+	void createGroup(String root)
+	{
+		std::cerr<<"IoSerializer::createGroup("<<root<<"): I'm just a dummy!\n";
+	}
+
+	template<typename T>
+	void writeToTag(String name2, const T& what)
+	{
+		std::cerr<<"IoSerializer::writeToTag("<<name2<<","<<what<<"): I'm just a dummy!\n";
+	}
 };
 }
 #endif
