@@ -688,10 +688,11 @@ private:
 	                PsimagLite::String str,
 	                PsimagLite::OstringStream& msg)
 	{
-		if (!ioOut_.ng())
-			ioOut_.printline(msg);
-		else
-			ioOut_.write(x, str);
+#ifndef USE_IO_NG
+		ioOut_.printline(msg);
+#else
+		ioOut_.write(x, str);
+#endif
 	}
 
 	const BlockType& findRightBlock(const VectorBlockType& y,
