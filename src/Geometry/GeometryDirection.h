@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define GEOMETRY_DIR_H
 #include <cassert>
 #include "BoostSerializationHeaders.h"
+#include "IoSerializerStub.h"
 
 namespace PsimagLite {
 
@@ -95,6 +96,14 @@ public:
 		Auxiliary(bool c, SizeType d, SizeType e)
 		    : constantValues(c), dirId(d), edof(e)
 		{}
+
+		void serialize(PsimagLite::String label, IoSerializer& ioSerializer) const
+		{
+			ioSerializer.createGroup(label);
+			ioSerializer.writeToTag(label + "/constantValues", constantValues);
+			ioSerializer.writeToTag(label + "/dirId", dirId);
+			ioSerializer.writeToTag(label + "/edof", edof);
+		}
 
 		bool constantValues;
 		SizeType dirId;
@@ -143,9 +152,17 @@ public:
 		io.prefix() = savedPrefix;
 	}
 
-	template<class Archive>
-	void serialize(Archive&, const unsigned int)
-	{}
+	void serialize(PsimagLite::String label, IoSerializer& ioSerializer) const
+	{
+		ioSerializer.createGroup(label);
+		aux_.serialize(label + "/aux_", ioSerializer);
+		ioSerializer.writeToTag(label + "/dataType_", dataType_);
+		ioSerializer.writeToTag(label + "/orbitals_", orbitals_);
+		// geometryBase_
+		ioSerializer.writeToTag(label + "/dataNumbers_", dataNumbers_);
+		ioSerializer.writeToTag(label + "/dataMatrices_", dataMatrices_);
+		rawHoppings_.serialize(label + "/rawHoppings_", ioSerializer);
+	}
 
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType&,

@@ -150,32 +150,19 @@ public:
 		return str;
 	}
 
-	void serialize(PsimagLite::String label, IoSerializer&) const
+	void serialize(PsimagLite::String label, IoSerializer& ioSerializer) const
 	{
-		std::cerr<<"WARNING: serializer not ready for ParametersDmrgSolver";
-		std::cerr<<" with label "<<label<<" yet\n";
+		ioSerializer.createGroup(label);
+		ioSerializer.writeToTag(label + "/linSize_", linSize_);
+		ioSerializer.writeToTag(label + "/terms_", terms_);
 	}
 
 	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
+	SizeType memResolv(SomeMemResolvType&,
 	                   SizeType,
-	                   String msg) const
+	                   String) const
 	{
-		const char* start = (const char *)this;
-		const char* end = (const char*)&linSize_;
-		SizeType total = GeometryExType::memResolv(mres,end-start,msg);
-		String str = msg;
-		str += "Geometry";
-
-		start = end;
-		end = (const char*)&terms_;
-		total += mres.memResolv(&linSize_,end-start,str + " linSize");
-		total += mres.memResolvPtr(&terms_,sizeof(*this)-total, str + " terms");
-
-		for (SizeType i = 0; i < terms_.size(); ++i)
-			mres.memResolv(terms_[i],0,msg);
-
-		return total;
+		return 0;
 	}
 
 	String label(SizeType i) const { return terms_[i]->label(); }

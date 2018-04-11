@@ -112,8 +112,10 @@ public:
 
 	void serialize(String label, IoSerializer& ioSerializer) const
 	{
-		std::cerr<<"Matrix::serialize(...) with label ";
-		std::cerr<<label<<" unimplemented FIXME WARNING\n";
+		ioSerializer.createGroup(label);
+		ioSerializer.writeToTag(label + "/nrow_", nrow_);
+		ioSerializer.writeToTag(label + "/ncol_", ncol_);
+		ioSerializer.writeToTag(label + "/data_", data_);
 	}
 
 	template<typename SomeMemResolvType>
@@ -443,7 +445,8 @@ private:
 		*this = m; // copy is needed in case a or b are *this matrix
 	}
 
-	SizeType nrow_,ncol_;
+	SizeType nrow_;
+	SizeType ncol_;
 	typename Vector<T>::Type data_;
 }; // class Matrix
 

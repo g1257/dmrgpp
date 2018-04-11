@@ -116,6 +116,19 @@ public:
 			what[i].serialize(name2 + "/" + typeToString(i), *this);
 	}
 
+	template<typename T>
+	void writeToTag(String name2,
+	                const std::vector<T*>& what,
+	                typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
+	                int>::Type = 0)
+	{
+		SizeType n = what.size();
+		createGroup(name2);
+		writeToTag(name2 + "/SIZE", n);
+		for (SizeType i = 0; i < n; ++i)
+			what[i]->serialize(name2 + "/" + typeToString(i), *this);
+	}
+
 private:
 
 	template<typename T>

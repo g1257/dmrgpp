@@ -114,6 +114,15 @@ public:
 		    : debug(d), termId(t), numberOfTerms(n), linSize(l)
 		{}
 
+		void serialize(PsimagLite::String label, IoSerializer& ioSerializer) const
+		{
+			ioSerializer.createGroup(label);
+			ioSerializer.writeToTag(label + "/debug", debug);
+			ioSerializer.writeToTag(label + "/termId", termId);
+			ioSerializer.writeToTag(label + "/numberOfTerms", numberOfTerms);
+			ioSerializer.writeToTag(label + "/linSize", linSize);
+		}
+
 		bool debug;
 		SizeType termId;
 		SizeType numberOfTerms;
@@ -196,6 +205,18 @@ public:
 	~GeometryTerm()
 	{
 		if (geometryBase_) delete geometryBase_;
+	}
+
+	void serialize(PsimagLite::String label, IoSerializer& ioSerializer) const
+	{
+		ioSerializer.createGroup(label);
+		aux_.serialize(label + "/aux_", ioSerializer);
+		ioSerializer.writeToTag(label + "/orbitals_", orbitals_);
+		// geometryBase_->serialize(label + "/geometryBase_", ioSerializer);
+		ioSerializer.writeToTag(label + "/gOptions_", gOptions_);
+		ioSerializer.writeToTag(label + "/vModifier_", vModifier_);
+		ioSerializer.writeToTag(label + "/directions_", directions_);
+		cachedValues_.serialize(label + "/cachedValues_", ioSerializer);
 	}
 
 	static String import()
