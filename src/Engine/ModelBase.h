@@ -241,13 +241,6 @@ public:
 		return maxElectrons*modelCommon_->geometry().numberOfSites() + 1;
 	}
 
-	// FIXME: should it be virtual
-	void serialize(PsimagLite::String& label, PsimagLite::IoSerializer&) const
-	{
-		std::cerr<<"WARNING: serializer not ready for ModelBase ";
-		std::cerr<<"with label "<<label<<" yet\n";
-	}
-
 	void printBasis(SizeType site) const
 	{
 		BlockType block(1,site);

@@ -206,7 +206,9 @@ public:
 		PsimagLite::PsiBase64::Encode base64encode(ioIn.data());
 		ioOut_.print("InputBase64Encoded", base64encode);
 		ioOut_.print("PARAMETERS", parameters_);
+#ifndef USE_IO_NG
 		ioOut_.print("Model", model);
+#endif
 		if (parameters_.options.find("verbose")!=PsimagLite::String::npos) verbose_=true;
 	}
 
@@ -223,7 +225,6 @@ public:
 	void main(const GeometryType& geometry, PsimagLite::String targeting)
 	{
 		ioOut_.print("GEOMETRY",geometry);
-		ioOut_.print("MODEL",model_);
 
 		BlockType S,E;
 		VectorBlockType X,Y;
@@ -266,7 +267,9 @@ public:
 
 		ioIn_.printUnused(std::cerr);
 
+#ifndef USE_IO_NG
 		if (saveData_) psi->print(ioOut_);
+#endif
 
 		MyBasisWithOperators pS("BasisWithOperators.System");
 		MyBasisWithOperators pE("BasisWithOperators.Environ");

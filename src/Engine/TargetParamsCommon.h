@@ -282,10 +282,19 @@ public:
 	}
 
 	void serialize(PsimagLite::String label,
-	               PsimagLite::IoSerializer& serializer) const
+	               PsimagLite::IoSerializer& ioSerializer) const
 	{
-		std::cerr<<"WARNING: serializer not ready for TargetParamsCommon ";
-		std::cerr<<"with label "<<label<<" yet\n";
+		ioSerializer.createGroup(label);
+
+		ioSerializer.writeToTag(label + "/sites_", sites_);
+		ioSerializer.writeToTag(label + "/startingLoops_", startingLoops_);
+		ioSerializer.writeToTag(label + "/concatenation_", concatenation_);
+		ioSerializer.writeToTag(label + "/noOperator_", noOperator_);
+		ioSerializer.writeToTag(label + "/skipTimeZero_", skipTimeZero_);
+		ioSerializer.writeToTag(label + "/isEnergyForExp_", isEnergyForExp_);
+		ioSerializer.writeToTag(label + "/gsWeight_", gsWeight_);
+		ioSerializer.writeToTag(label + "/energyForExp_", energyForExp_);
+		ioSerializer.writeToTag(label + "/aOperators_", aOperators_);
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
@@ -392,25 +401,16 @@ private:
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	//serializr start class TargetParamsCommon
-	//serializr vptr
-	//serializr normal sites_
 	VectorSizeType sites_;
-	//serializr normal startingLoops_
 	VectorSizeType startingLoops_;
-	//serializr normal concatenation_
 	typename BaseType::ConcatEnum concatenation_;
-	//serializr normal noOperator_
 	bool noOperator_;
 	bool skipTimeZero_;
 	bool isEnergyForExp_;
 	RealType gsWeight_;
 	RealType energyForExp_;
-	//serializr normal aOperators_
 	VectorOperatorType aOperators_;
-	//serializr ref io_
 	InputValidatorType& io_;
-	//serializr ref model_
 	const ModelType& model_;
 }; // class TargetParamsCommon
 } // namespace Dmrg

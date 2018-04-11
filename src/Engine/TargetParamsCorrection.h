@@ -114,10 +114,10 @@ public:
 	}
 
 	void serialize(PsimagLite::String label,
-	               PsimagLite::IoSerializer&) const
+	               PsimagLite::IoSerializer& ioSerializer) const
 	{
-		std::cerr<<"WARNING: serializer not ready for TargetParamsGroundState ";
-		std::cerr<<"with label "<<label<<" yet\n";
+		ioSerializer.createGroup(label);
+		ioSerializer.writeToTag(label + "/correctionA_", correctionA_);
 	}
 
 private:
