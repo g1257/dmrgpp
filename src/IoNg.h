@@ -101,9 +101,6 @@ public:
 
 		typedef std::vector<String> VectorStringType;
 
-		Out() : hdf5File_(0), groupDef_(0), ioNgSerializer_(hdf5File_, groupDef_)
-		{}
-
 		Out(const String& fn)
 		    : hdf5File_(new H5::H5File(fn, H5F_ACC_TRUNC)),
 		      groupDef_(new H5::Group(hdf5File_->createGroup("/Def"))),

@@ -1,0 +1,136 @@
+\documentclass{article}
+\usepackage{booktabs}
+\usepackage{marginnote}
+\usepackage{textcomp}
+\usepackage{fancyhdr}
+\usepackage[T1]{fontenc}
+\usepackage{lastpage}
+\usepackage{xcolor}
+
+\definecolor{mygray}{HTML}{AAAAAA}
+\cfoot{}
+\rfoot{\thepage~of~\pageref{LastPage}}
+\rhead{\textcolor{mygray}{Version 0.2}}
+\lhead{\textcolor{mygray}{IoNg specification DRAFT}}
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0pt}
+
+\newcommand{\code}[1]{{\ttfamily #1}}
+\begin{document}
+
+\title{IoNg Specification (DRAFT)}
+\author{G.A.}
+\maketitle
+\thispagestyle{fancy}
+
+\section{IoNg}
+\subsection{Overview}
+\code{IoNg} is the next generation (ng) input and output (io) subsystem for 
+\textsc{DMRG++} and related 
+scientific applications. To output data to a file the
+client program first includes the \code{IoNg.h} header and then creates an object of class
+\code{IoNg::Out io;} with argument the filename to be written to.
+Next, the client code calls \code{io.write(object, label);} where
+\code{object} is the object to be written with label \code{label}.
+To input data from a file the client program first includes the 
+\code{IoNg.h} header and then creates an object of class
+\code{IoNg::In io;} with argument the filename to be read from.
+Next, the client code calls \code{io.read(object, label);} where
+\code{object} is the object to be read with label \code{label}.
+If an object's constructor accepts an \code{IoNg::In} argument the object
+can be constructed from data on the file.
+The classes \code{IoNg::In} and \code{IoNg::Out} should be passed
+to functions as \emph{non-const} references.
+The copy constructor, assignment operator, and default constructor shall not
+be available for either \code{IoNg::In} or \code{IoNg::Out}.
+
+\subsection{How data is stored on disk}
+The data on disk can be either a group (implemented as an HDF5 group) semantically
+equivalent to a directory, or a dataset (implemented as an HDF5 dataset)
+semantically equivalent to a file.
+The following types are written as a single dataset:
+Native types, complex of native types, std::vector of native types, 
+std::vector of complex types, \code{std::pair<T1, T2>} if both \code{T1} and \code{T2} 
+are either native types or complex of native types.
+All other types involve the creation of one or more groups.
+Moreover, \code{IoNg} will add the root group $/Def$, but client
+source code must not use it. For example, client code
+can write a \code{std::vector<double>} \code{myvector} with \code{io.write(myvector,} 
+\code{``myvector'');}
+and read it back with \code{io.read} \code{(myvector,} \code{``myvector'');}.
+The HDF5 file will contain \code{myvector}  in the dataset \code{/Def} \code{/myvector,} but the client
+code should not use the \code{/Def} group prefix when reading back with the \code{IoNg} class.
+Only when using third-party tools should the \code{/Def} group prefix be added.
+
+\subsection{Labels of datasets and groups}
+Labels for dataset and groups must be of the form $/label_0/label_1/.../label_{n-1}$.
+where each $label_i$ is of the form $a-zA-Z0-9\\-\_+$.
+
+\subsection{API Reference}
+TBW. This will be pulled directly form the source code.
+
+\section{IoNgSerializer}
+\subsection{Overview}
+A client call to \code{io.write(label, object);} executes differently depending on the
+object type. For source code purposes two kinds of types need to be considered:
+\emph{root-undelegated} types, and \emph{root-delegated} types; the latter 
+types are either native types or STL types. All other types that need
+serialization are considered \emph{root-delegated}. STL containers of \emph{root-delegated} types
+are themselves \emph{root-undelegated}: For example \code{std::vector<A>} is
+\emph{root-undelegated} even if \code{A} is \emph{root-delegated}.
+
+\subsection{Root-undelegated Types}
+Root-undelegated types are one of the following: native types or STL types.
+Root-undelegateds are always at least partially written to by \code{IoNg},
+and, if needed, parts of it are delegated.
+For example, all native types are written by \code{IoNg} directly into a single dataset. 
+\code{std::complex<T>} where \code{T}
+is a native type is written directly by doubling the size of the array into a single dataset.
+
+\subsubsection{Serialization of std::vector}
+A single dataset is also used for \code{std::vector<T>} 
+if \code{T} is native or the complex of a native.
+If T is neither native nor the std::complex of a native, then \code{IoNg} creates a group with 
+\code{label}, and inside that group
+creates a dataset named \code{Size} containing the size of the vector.
+\code{IoNg} then runs a loop over \code{index} and delegates the writing. 
+If \code{T} is a root-undelegated type then
+\code{write(label + ``/''} \code{ + ttos(index),} \code{ data[index]);} is used,
+and if \code{T} is root-delegated
+then
+\code{data[index].serialize(} \code{ioNgSerializer\_,} \code{ label + ``/''}
+\code{ + ttos(index))}  is used instead,
+where \code{data} is the underlying \code{std::vector}.
+Moreover, for  \code{std::vector} \code{<T*>} with T root-delegated, the variant
+\code{data[index]} \code{->serialize} \code{(ioNgSerializer\_, } \code{label +}
+\code{``/'' + ttos(index))} is used.
+	
+\subsubsection{Serialization of std::string}
+TBW
+
+\subsubsection{Serialization of std::pair}
+TBW
+
+\subsubsection{Serialization of std::stack}
+TBW
+
+\subsubsection{Serialization of std::map}
+TBW
+
+\subsection{Root-delegated Types}
+A type is root-delegated if it is not root-undelegated.
+Root-delegateds must include the \code{IoSerializer.h} class
+but should not include \code{IoNg.h} unless needed. 
+Root-delegateds must have a function named \code{serialize} returning \code{void}
+and taking two arguments: the serializer object \code{ioSerializer}
+by \emph{non-const} reference, and string \code{label}.
+In their \code{serialize} function, root-delegateds must first create a group called label by calling
+\code{io.createGroup} \code{(label),} and
+should then go over their data members, and for each call either
+\code{ioSerializer.} \code{write(dataMember,} \code{label +} \code{"/" + name);}
+if \code{dataMember} is a root-undelegated type or
+\code{dataMember.} \code{serialize(} \code{ioSerializer, } \code{label +} \code{"/" + names)}
+if \code{dataMember} is a root-delegated type,
+with the name being the name of the \code{dataMember} in question.
+
+\end{document}
