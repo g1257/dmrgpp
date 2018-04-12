@@ -154,7 +154,6 @@ public:
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsSuzukiTrotterType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
-	typedef typename BaseType::IoType IoType;
 
 	enum {DISABLED,WFT_NOADVANCE,WFT_ADVANCE,COLLAPSE};
 
@@ -307,7 +306,7 @@ public:
 		this->common().setTime(ts.time());
 	}
 
-	void print(typename IoType::Out& ioOut) const
+	void print(PsimagLite::IoSimple::Out& ioOut) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"PSI\n";
@@ -322,7 +321,12 @@ public:
 		ioOut.print(msg.str());
 	}
 
-	void save(const VectorSizeType& block,typename IoType::Out& io) const
+	void save(const VectorSizeType& block, typename BaseType::IoNgOutOrDummyType& io) const
+	{
+		std::cerr<<__FILE__<<" save() WARNING UNIMPLEMENTED FIXME\n";
+	}
+
+	void save(const VectorSizeType& block, PsimagLite::IoSimple::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";

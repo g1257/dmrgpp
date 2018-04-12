@@ -114,7 +114,7 @@ public:
 	typedef VectorType TargetVectorType;
 	typedef TargetParamsGroundState<ModelType> TargetParamsType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename BaseType::IoType IoType;
+	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	TargetingGroundState(const LeftRightSuperType& lrs,
 	                     const ModelType& model,
@@ -152,7 +152,7 @@ public:
 		this->common().cocoon(block1,direction);
 	}
 
-	void print(typename IoType::Out& ioOut) const
+	void print(PsimagLite::IoSimple::Out& ioOut) const
 	{
 		ioOut.print("TARGETSTRUCT",tstStruct_);
 		PsimagLite::OstringStream msg;
@@ -162,7 +162,7 @@ public:
 	}
 
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
-	          typename IoType::Out& io) const
+	          PsimagLite::IoSimple::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";
@@ -172,6 +172,11 @@ public:
 		PsimagLite::String s = "#TCENTRALSITE=" + ttos(block[0]);
 		io.printline(s);
 		this->common().psi().save(io,"PSI");
+	}
+
+	void save(const VectorSizeType& block, typename BaseType::IoNgOutOrDummyType& io) const
+	{
+		std::cerr<<__FILE__<<" save() WARNING UNIMPLEMENTED FIXME\n";
 	}
 
 	void load(const PsimagLite::String& f)

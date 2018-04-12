@@ -120,7 +120,7 @@ public:
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename BaseType::IoType IoType;
+	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	enum {DISABLED=BaseType::DISABLED,
 		  OPERATOR=BaseType::OPERATOR,
@@ -187,7 +187,7 @@ public:
 		evolve(Eg,direction,x,loopNumber);
 	}
 
-	void print(typename IoType::Out& ioOut) const
+	void print(PsimagLite::IoSimple::Out& ioOut) const
 	{
 		ioOut.print("TARGETSTRUCT",tstStruct_);
 		PsimagLite::OstringStream msg;
@@ -196,8 +196,13 @@ public:
 		ioOut.print(msg.str());
 	}
 
-	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
-	          typename IoType::Out& io) const
+	void save(const VectorSizeType& block, typename BaseType::IoNgOutOrDummyType& io) const
+	{
+		std::cerr<<__FILE__<<" save() WARNING UNIMPLEMENTED FIXME\n";
+	}
+
+	void save(const VectorSizeType& block,
+	          PsimagLite::IoSimple::Out& io) const
 	{
 		assert(block.size()==1);
 		SizeType type = tstStruct_.type();
@@ -255,7 +260,7 @@ private:
 
 	void wftOneDynVector(SizeType i,SizeType site)
 	{
-		typename PsimagLite::Vector<SizeType>::Type nk(1,this->model().hilbertSize(site));
+		VectorSizeType nk(1,this->model().hilbertSize(site));
 
 		VectorWithOffsetType result;
 		result.populateSectors(this->lrs().super());

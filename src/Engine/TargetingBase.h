@@ -124,7 +124,11 @@ public:
 	typedef typename BasisWithOperatorsType::SymmetryElectronsSzType
 	SymmetryElectronsSzType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef PsimagLite::IoSelector IoType;
+#ifdef USE_IO_NG
+	typedef PsimagLite::IoNg::Out IoNgOutOrDummyType;
+#else
+	typedef int IoNgOutOrDummyType;
+#endif
 
 	enum {DISABLED=ApplyOperatorExpressionType::DISABLED,
 		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,
@@ -183,12 +187,12 @@ public:
 		return commonTargeting_.normSquared(i);
 	}
 
-	virtual void print(IoType::Out&) const = 0;
+	virtual void print(PsimagLite::IoSimple::Out&) const = 0;
 
 	virtual void load(const PsimagLite::String&) = 0;
 
 	virtual void save(const typename PsimagLite::Vector<SizeType>::Type&,
-	                  IoType::Out&) const = 0;
+	                  PsimagLite::IoSelector::Out&) const = 0;
 
 	// non-virtual below
 
@@ -226,6 +230,12 @@ public:
 	}
 
 	const LeftRightSuperType& lrs() const { return lrs_; }
+
+	template<typename IoOutType>
+	void print(IoOutType&) const
+	{
+		std::cerr<<__FILE__<<" print() isn't needed WARNING REMOVE FIXME\n";
+	}
 
 protected:
 

@@ -142,7 +142,6 @@ public:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename BaseType::IoType IoType;
 	typedef CorrectionVectorSkeleton<LanczosSolverType,
 	VectorWithOffsetType,
 	BaseType,
@@ -213,7 +212,7 @@ public:
 		// skeleton_.printNormsAndWeights();
 	}
 
-	void print(typename IoType::Out& ioOut) const
+	void print(PsimagLite::IoSimple::Out& ioOut) const
 	{
 		ioOut.print("TARGETSTRUCT",tstStruct_);
 		PsimagLite::OstringStream msg;
@@ -222,14 +221,22 @@ public:
 		ioOut.print(msg.str());
 	}
 
+	void save(const VectorSizeType& block, typename BaseType::IoNgOutOrDummyType& io) const
+	{
+		std::cerr<<__FILE__<<" save() WARNING UNIMPLEMENTED FIXME\n";
+	}
+
 	void save(const VectorSizeType& block,
-	          typename IoType::Out& io) const
+	          PsimagLite::IoSimple::Out& io) const
 	{
 		skeleton_.save(this->common(),block,io);
 	}
 
 	void load(const PsimagLite::String& f)
 	{
+#ifdef USE_IO_NG
+		std::cerr<<__FILE__<<" load() WARNING UNIMPLEMENTED FIXME\n";
+#else
 		typename BaseType::IoType::In io(f);
 
 		TimeSerializerType ts(io, BaseType::IoType::In::LAST_INSTANCE);
@@ -242,6 +249,7 @@ public:
 		}
 
 		this->common().template load<TimeSerializerType>(f,0);
+#endif
 	}
 
 private:

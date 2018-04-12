@@ -118,7 +118,6 @@ public:
 	typedef typename BasisWithOperatorsType::SymmetryElectronsSzType
 	SymmetryElectronsSzType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename BaseType::IoType IoType;
 
 	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 
@@ -237,7 +236,7 @@ public:
 		this->common().template load<TimeSerializerType>(f);
 	}
 
-	void print(typename IoType::Out& ioOut) const
+	void print(PsimagLite::IoSimple::Out& ioOut) const
 	{
 		ioOut.print("TARGETSTRUCT",tstStruct_);
 		PsimagLite::OstringStream msg;
@@ -250,7 +249,12 @@ public:
 		ioOut.print(msg.str());
 	}
 
-	void save(const VectorSizeType& block, typename IoType::Out& io) const
+	void save(const VectorSizeType& block, typename BaseType::IoNgOutOrDummyType& io) const
+	{
+		std::cerr<<__FILE__<<" save() WARNING UNIMPLEMENTED FIXME\n";
+	}
+
+	void save(const VectorSizeType& block, PsimagLite::IoSimple::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";

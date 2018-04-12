@@ -456,13 +456,17 @@ private:
 
 	void dumpEigs(const VectorRealType& eigs) const
 	{
-		static SizeType counter = 0;
 		if (parameters_.fileForDensityMatrixEigs=="") return;
+#ifndef USE_IO_NG
+		static SizeType counter = 0;
 		PsimagLite::String file(parameters_.fileForDensityMatrixEigs);
 		file += ttos(counter);
 		typename TargetingType::IoType::Out io(file);
 		io<<eigs;
 		counter++;
+#else
+		std::cerr<<__FILE__<<" dumpEigs feature not implemented with IoNg\n";
+#endif
 	}
 
 	ReflectionSymmetryType& reflectionOperator_;

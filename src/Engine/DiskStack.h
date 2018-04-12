@@ -239,6 +239,7 @@ private:
 	void finalizeInternal(IoOutType& io,
 	                      PsimagLite::String label) const
 	{
+#ifndef USE_IO_NG
 		int x = 0;
 		io.printline("#STACKMETARANK="+ttos(x));
 		io.printline("#STACKMETATOTAL="+ttos(total_));
@@ -246,6 +247,9 @@ private:
 		assert(last > 0);
 		if (last > 0 && label[last - 1] != '\n') label += "\n";
 		io.print(label, stack_);
+#else
+		std::cerr<<"DisStack: finalizeInternal UNIMPLEMENTED WARNING FIXME\n";
+#endif
 	}
 
 	void invertStack(PsimagLite::Stack<int>::Type& st)

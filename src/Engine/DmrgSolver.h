@@ -267,9 +267,7 @@ public:
 
 		ioIn_.printUnused(std::cerr);
 
-#ifndef USE_IO_NG
 		if (saveData_) psi->print(ioOut_);
-#endif
 
 		MyBasisWithOperators pS("BasisWithOperators.System");
 		MyBasisWithOperators pE("BasisWithOperators.Environ");
@@ -571,9 +569,12 @@ private:
 			pS = lrs_.left();
 
 		if (!saveData_) return;
+		static SizeType counter = 0;
 		if (saveOption & 1) {
-			PsimagLite::String s="#WAVEFUNCTION_ENERGY="+ttos(energy_);
-			ioOut_.printline(s);
+			PsimagLite::OstringStream msg;
+			msg.precision(8);
+			msg<<"#WAVEFUNCTION_ENERGY="<<energy_;
+			ioOut_.writeLabel(energy_, "WaveFunctionEnergy", msg, counter++);
 		}
 	}
 
@@ -597,7 +598,7 @@ private:
 		msg2<<"#Error="<<truncate_.error();
 		static SizeType counter = 0;
 		if (saveData_)
-			writeLabel(truncate_.error(), "Error" + ttos(counter++), msg2);
+			ioOut_.writeLabel(truncate_.error(), "Error", msg2, counter++);
 
 		if (direction == ProgramGlobals::EXPAND_SYSTEM)
 			checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS, ProgramGlobals::SYSTEM);
@@ -684,18 +685,7 @@ private:
 		msg.precision(8);
 		msg<<"#Energy="<<energy;
 		static SizeType counter = 0;
-		writeLabel(energy, "Energy" + ttos(counter++), msg);
-	}
-
-	void writeLabel(RealType x,
-	                PsimagLite::String str,
-	                PsimagLite::OstringStream& msg)
-	{
-#ifndef USE_IO_NG
-		ioOut_.printline(msg);
-#else
-		ioOut_.write(x, str);
-#endif
+		ioOut_.writeLabel(energy, "Energy" , msg, counter++);
 	}
 
 	const BlockType& findRightBlock(const VectorBlockType& y,

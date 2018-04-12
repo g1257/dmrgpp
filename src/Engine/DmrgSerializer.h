@@ -134,13 +134,21 @@ public:
 		io.readline(direction_,s);
 	}
 
-	// Save to disk everything needed to compute any observable (OBSOLETE!!)
-	template<typename IoOutputter>
-	void save(IoOutputter& io,
+	// Save to disk everything needed to compute any observable
+	template<typename IoOutType>
+	void save(IoOutType& io,
 	          SizeType option,
 	          SizeType numberOfSites,
 	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
+	          PsimagLite::IsOutputLike<IoOutType>::True, int>::Type = 0) const
+	{
+		std::cerr<<__FILE__<<" save(): IoNg does not support saving for observe code yet\n";
+	}
+
+	// Save to disk everything needed to compute any observable
+	void save(PsimagLite::IoSimple::Out& io,
+	          SizeType option,
+	          SizeType numberOfSites) const
 	{
 		fS_.save(io);
 		fE_.save(io);
@@ -161,7 +169,6 @@ public:
 		io.write(transform_, label);
 		PsimagLite::String s = "#DIRECTION="+ttos(direction_);
 		io.printline(s);
-//		io.print("#DIRECTION=",direction_);
 	}
 
 	const FermionSignType& fermionicSignLeft() const

@@ -363,7 +363,7 @@ public:
 	void save(PsimagLite::String fileOut) const
 	{
 		if (!isEnabled_) return;
-
+#ifndef USE_IO_NG
 		typename IoType::Out io(utils::pathPrepend(WFT_STRING, fileOut));
 		if (!save_) return;
 		PsimagLite::String s="isEnabled="+ttos(isEnabled_);
@@ -377,6 +377,10 @@ public:
 		dmrgWaveStruct_.save(io);
 		io.print("wsStack\n", wsStack_);
 		io.print("weStack\n", weStack_);
+#else
+		std::cerr<<__FILE__<<" WFT cannot be saved for restart yet ";
+		std::cerr<<"UNIMPLEMENTED WARNING FIXME\n";
+#endif
 	}
 
 private:

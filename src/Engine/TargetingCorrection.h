@@ -111,7 +111,7 @@ public:
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef TargetParamsCorrection<ModelType> TargetParamsType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename BaseType::IoType IoType;
+	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	enum {DISABLED,ENABLED};
 
@@ -130,7 +130,7 @@ public:
 	RealType normSquared(SizeType i) const
 	{
 		return PsimagLite::real(this->common().targetVectors()[i]*
-		                          this->common().targetVectors()[i]);
+		                        this->common().targetVectors()[i]);
 	}
 
 	RealType weight(SizeType) const
@@ -157,8 +157,27 @@ public:
 		this->common().cocoon(block1,direction);
 	}
 
+	void load(const PsimagLite::String& f)
+	{
+		this->common().template load<int>(f,0);
+	}
+
+	void print(PsimagLite::IoSimple::Out& ioOut) const
+	{
+		ioOut.print("TARGETSTRUCT",tstStruct_);
+		PsimagLite::OstringStream msg;
+		msg<<"PSI\n";
+		msg<<"CorrectionWeightGroundState=1\n";
+		ioOut.print(msg.str());
+	}
+
+	void save(const VectorSizeType& block, typename BaseType::IoNgOutOrDummyType& io) const
+	{
+		std::cerr<<__FILE__<<" save() WARNING UNIMPLEMENTED FIXME\n";
+	}
+
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
-	          typename IoType::Out& io) const
+	          PsimagLite::IoSimple::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";
@@ -170,20 +189,6 @@ public:
 		PsimagLite::String s = "#TCENTRALSITE=" + ttos(block[0]);
 		io.printline(s);
 		this->common().psi().save(io,"PSI");
-	}
-
-	void load(const PsimagLite::String& f)
-	{
-		this->common().template load<int>(f,0);
-	}
-
-	void print(typename IoType::Out& ioOut) const
-	{
-		ioOut.print("TARGETSTRUCT",tstStruct_);
-		PsimagLite::OstringStream msg;
-		msg<<"PSI\n";
-		msg<<"CorrectionWeightGroundState=1\n";
-		ioOut.print(msg.str());
 	}
 
 private:
