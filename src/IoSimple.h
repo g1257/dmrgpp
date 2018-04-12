@@ -175,6 +175,14 @@ public:
 			s.seekp(std::ios_base::beg);
 		}
 
+		template<typename T>
+		void write(const T&x,
+		           const String& label,
+		           typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
+		{
+			(*fout_)<<label<<"="<<x<<"\n";
+		}
+
 		template<typename X>
 		void write(X const &x,
 		           const String& label,

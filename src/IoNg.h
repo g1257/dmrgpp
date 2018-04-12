@@ -170,17 +170,6 @@ public:
 				ioNgSerializer_.overwrite(str + "/Size", counter);
 		}
 
-		void printline(OstringStream &s)
-		{
-			assert(hdf5File_);
-			assert(groupDef_);
-			// So s may be of the from s.str() == #Energy=42.0
-			// We can't save to name #Energy=42.0 because it isn't valid
-			// Even if it were, it might not be unique
-			std::cerr<<__FILE__<<" printline(ostringstream) unimplemented ";
-			std::cerr<<" string "<<s.str()<<" (FIXME TODO)\n";
-		}
-
 		template<typename T>
 		void write(const T& x,
 		           String label,
