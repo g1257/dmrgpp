@@ -114,6 +114,33 @@ public:
 
 	template<typename T>
 	void writeToTag(String name2,
+	                const std::vector<std::vector<T> >& what,
+	                typename EnableIf<Loki::TypeTraits<typename Real<T>::Type>::isArith,
+	                int>::Type = 0)
+	{
+		SizeType n = what.size();
+		createGroup(name2);
+		writeToTag(name2 + "/SIZE", n);
+		for (SizeType i = 0; i < n; ++i)
+			writeToTag(name2 + "/" + typeToString(i), what[i]);
+	}
+
+	template<typename T1, typename T2>
+	void writeToTag(String name2,
+	                const std::vector<std::pair<T1, T2> >& what,
+	                typename EnableIf<
+	                Loki::TypeTraits<T1>::isArith && Loki::TypeTraits<T2>::isArith,
+	                int>::Type = 0)
+	{
+		SizeType n = what.size();
+		createGroup(name2);
+		writeToTag(name2 + "/SIZE", n);
+		for (SizeType i = 0; i < n; ++i)
+			writeToTag(name2 + "/" + typeToString(i), what[i]);
+	}
+
+	template<typename T>
+	void writeToTag(String name2,
 	                const std::vector<T>& what,
 	                typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
 	                int>::Type = 0)
