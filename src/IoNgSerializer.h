@@ -25,6 +25,15 @@ public:
 		hdf5file_->createGroup("Def/" + group);
 	}
 
+	void overwrite(String name2, SizeType what)
+	{
+		String name = "Def/" + name2;
+		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet(name));
+		void* ptr = static_cast<SizeType*>(&what);
+		dataset->write(ptr, ToH5<SizeType>::type);
+		delete dataset;
+	}
+
 	void writeToTag(String name2, SizeType what)
 	{
 		String name = "Def/" + name2;

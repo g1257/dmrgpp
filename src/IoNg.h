@@ -118,8 +118,6 @@ public:
 			hdf5File_ = 0;
 		}
 
-		bool ng() const { return true; }
-
 		const String& filename() const
 		{
 			// find member that returns filename FIXME
@@ -157,15 +155,19 @@ public:
 			ioNgSerializer_.createGroup(groupName);
 		}
 
-		void printline(const String &s)
+		template<typename T>
+		void writeLabel(T x,
+		                PsimagLite::String str,
+		                PsimagLite::OstringStream&,
+		                SizeType counter)
 		{
-			assert(hdf5File_);
-			assert(groupDef_);
-			// So s may be of the from s.str() == #Energy=42.0
-			// We can't save to name #Energy=42.0 because it isn't valid
-			// Even if it were, it might not be unique
-			std::cerr<<__FILE__<<" printline(string) unimplemented ";
-			std::cerr<<" string "<<s<<" (FIXME TODO)\n";
+			if (counter == 0) createGroup(str);
+
+			ioNgSerializer_.writeToTag(str + "/" + ttos(counter), x);
+			if (counter == 0)
+				ioNgSerializer_.writeToTag(str + "/Size", counter);
+			else
+				ioNgSerializer_.overwrite(str + "/Size", counter);
 		}
 
 		void printline(OstringStream &s)
