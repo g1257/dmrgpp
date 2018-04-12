@@ -367,12 +367,15 @@ public:
 	}
 
 	template<typename SomeIoOutputType>
-	void save(SomeIoOutputType&,
+	void save(SomeIoOutputType& io,
 	          const PsimagLite::String& label) const
 	{
-		PsimagLite::String name(typeid(SomeIoOutputType).name());
-		std::cerr<<"WARNING: cannot save ChebyshevSerializer";
-		std::cerr<<"to output type "<<name<<" with label "<<label<<"\n";
+		io.createGroup(label);
+		io.write(size_, label + "/size_");
+		io.write(index2Sector_, label + "/index2Sector_");
+		io.write(data_, label + "/data_");
+		io.write(offsets_, label + "/offsets_");
+		io.write(nzMsAndQns_, label + "/nzMsAndQns_");
 	}
 
 	void save(PsimagLite::IoSimple::Out& io,

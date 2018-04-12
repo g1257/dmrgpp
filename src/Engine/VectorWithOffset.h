@@ -210,11 +210,14 @@ public:
 	}
 
 	template<typename SomeIoOutputType>
-	void save(SomeIoOutputType&, const PsimagLite::String& label) const
+	void save(SomeIoOutputType& io, const PsimagLite::String& label) const
 	{
-		PsimagLite::String name(typeid(SomeIoOutputType).name());
-		std::cerr<<"WARNING: cannot save VectorWithOffset";
-		std::cerr<<"to output type "<<name<<" with label "<<label<<"\n";
+		// FIXME: Shouldn't this be called serialize?
+		io.createGroup(label);
+		io.write(size_, label + "/size_");
+		io.write(offset_, label + "/offset_");
+		io.write(mAndq_, label + "/mAndq_");
+		io.write(data_, label + "/data_");
 	}
 
 	void save(PsimagLite::IoSimple::Out& io, const PsimagLite::String& label) const
