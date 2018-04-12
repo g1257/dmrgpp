@@ -461,7 +461,7 @@ private:
 		static SizeType counter = 0;
 		PsimagLite::String file(parameters_.fileForDensityMatrixEigs);
 		file += ttos(counter);
-		typename TargetingType::IoType::Out io(file);
+		PsimagLite::IoSimple::Out io(file);
 		io<<eigs;
 		counter++;
 #else

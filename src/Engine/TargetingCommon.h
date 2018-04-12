@@ -219,6 +219,14 @@ public:
 
 	void timeHasAdvanced() { applyOpExpression_.timeHasAdvanced(); }
 
+	void save(PsimagLite::IoSelector::Out& io, const VectorSizeType& block) const
+	{
+		if (block.size() != 1)
+			err(PsimagLite::String(__FILE__) + " save() only supports blocks.size=1\n");
+
+		io.write(block[0], "TargetCentralSite");
+	}
+
 	template<typename IoOutputType>
 	void save(const VectorSizeType& block,
 	          IoOutputType& io,
@@ -273,7 +281,7 @@ public:
 			setAllStagesTo(DISABLED);
 			io.rewind();
 			int site = 0;
-			io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
+			io.readline(site,"TargetCentralSite=",IoType::In::LAST_INSTANCE);
 			applyOpExpression_.psi().loadOneSector(io,labelForPsi);
 		}
 	}
@@ -285,7 +293,7 @@ public:
 
 		applyOpExpression_.loadEnergy(io, "#Energy=", IoType::In::LAST_INSTANCE);
 		int site=0;
-		io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
+		io.readline(site,"TargetCentralSite=",IoType::In::LAST_INSTANCE);
 		if (site<0)
 			throw PsimagLite::RuntimeError("GST::load(...): site cannot be negative\n");
 

@@ -482,9 +482,7 @@ private:
 		if (!saveData_) return;
 		checkpoint_.save(pS,pE,ioOut_);
 		psi.save(sitesIndices_[stepCurrent_],ioOut_);
-		PsimagLite::OstringStream msg2;
-		msg2<<"#LastLoopSign="<<lastSign;
-		ioOut_.printline(msg2);
+		ioOut_.write(lastSign, "LastLoopSign=");
 	}
 
 	void finiteStep(BlockType const &,

@@ -249,12 +249,7 @@ public:
 		ioOut.print(msg.str());
 	}
 
-	void save(const VectorSizeType& block, typename BaseType::IoNgOutOrDummyType& io) const
-	{
-		std::cerr<<__FILE__<<" save() WARNING UNIMPLEMENTED FIXME\n";
-	}
-
-	void save(const VectorSizeType& block, PsimagLite::IoSimple::Out& io) const
+	void save(const VectorSizeType& block, PsimagLite::IoSelector::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";
@@ -262,19 +257,17 @@ public:
 
 		SizeType marker = (this->common().noStageIs(DISABLED)) ? 1 : 0;
 
+		assert(block.size() > 0);
+		SizeType site = block[0];
 		TimeSerializerType ts(this->common().currentTime(),
-		                      block[0],
-		        this->common().targetVectors(),
-		        marker);
+		                      site,
+		                      this->common().targetVectors(),
+		                      marker);
 		ts.save(io);
 		this->common().psi().save(io,"PSI");
 
-		// TODO: FIXME: Integrate these energies into serializer
-		for (SizeType i = 0; i < tvEnergy_.size(); ++i) {
-			PsimagLite::OstringStream msg2;
-			msg2<<"TargetVectorEnergy"<<i<<"="<<tvEnergy_[i];
-			io.printline(msg2);
-		}
+		// Does anyone read these?
+		io.write(tvEnergy_, "TargetVectorEnergy");
 	}
 
 private:

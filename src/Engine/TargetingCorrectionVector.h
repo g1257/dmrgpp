@@ -219,13 +219,8 @@ public:
 		ioOut.print(msg.str());
 	}
 
-	void save(const VectorSizeType& block, typename BaseType::IoNgOutOrDummyType& io) const
-	{
-		std::cerr<<__FILE__<<" save() WARNING UNIMPLEMENTED FIXME\n";
-	}
-
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
-	          PsimagLite::IoSimple::Out& io) const
+	          PsimagLite::IoSelector::Out& io) const
 	{
 		skeleton_.save(this->common(), block, io);
 	}

@@ -194,34 +194,26 @@ public:
 		ioOut.print(msg.str());
 	}
 
-	void save(const VectorSizeType& block, typename BaseType::IoNgOutOrDummyType& io) const
-	{
-		std::cerr<<__FILE__<<" save() WARNING UNIMPLEMENTED FIXME\n";
-	}
-
 	void save(const VectorSizeType& block,
-	          PsimagLite::IoSimple::Out& io) const
+	          PsimagLite::IoSelector::Out& io) const
 	{
-		assert(block.size()==1);
-
 		SizeType type = tstStruct_.type();
 		int fermionSign = this->common().findFermionSignOfTheOperators();
 		int s = (type&1) ? -1 : 1;
 		int s2 = (type>1) ? -1 : 1;
 		int s3 = (type&1) ? -fermionSign : 1;
 
-		if (ab_.size()<2) return;
+		if (ab_.size() < 2) return;
+
 		typename PostProcType::ParametersType params = paramsForSolver_;
 		params.Eg = this->common().energy();
 		params.weight = s2*weightForContinuedFraction_*s3;
 		params.isign = s;
 		if (tstStruct_.aOperators()[0].fermionSign>0) s2 *= s;
 
+		this->common().save(io, block);
+
 		PostProcType cf(ab_,params);
-
-		PsimagLite::String str = "#TCENTRALSITE=" + ttos(block[0]);
-		io.printline(str);
-
 		this->common().save(block,io,cf,this->common().targetVectors());
 
 		this->common().psi().save(io,"PSI");

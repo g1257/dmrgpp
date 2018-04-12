@@ -114,7 +114,7 @@ public:
 
 		currentBeta_ = x;
 
-		s = "#TCENTRALSITE=";
+		s = "TargetCentralSite=";
 		int xi=0;
 		io.readline(xi,s);
 		if (xi<0)
@@ -158,7 +158,7 @@ public:
 	{
 		PsimagLite::String s = "#BETA=" + ttos(currentBeta_);
 		io.printline(s);
-		s = "#TCENTRALSITE=" + ttos(site_);
+		s = "TargetCentralSite=" + ttos(site_);
 		io.printline(s);
 		s = "#TNUMBEROFVECTORS="+ttos(targetVectors_.size());
 		io.printline(s);

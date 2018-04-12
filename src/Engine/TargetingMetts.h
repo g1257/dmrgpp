@@ -160,10 +160,10 @@ public:
 	const static SizeType SYSTEM = ProgramGlobals::SYSTEM;
 
 	TargetingMetts(const LeftRightSuperType& lrs,
-	                const ModelType& model,
-	                const WaveFunctionTransfType& wft,
-	                const SizeType& quantumSector,
-	                InputValidatorType& ioIn)
+	               const ModelType& model,
+	               const WaveFunctionTransfType& wft,
+	               const SizeType& quantumSector,
+	               InputValidatorType& ioIn)
 	    : BaseType(lrs,model,wft,0),
 	      model_(model),
 	      lrs_(lrs),
@@ -321,12 +321,7 @@ public:
 		ioOut.print(msg.str());
 	}
 
-	void save(const VectorSizeType& block, typename BaseType::IoNgOutOrDummyType& io) const
-	{
-		std::cerr<<__FILE__<<" save() WARNING UNIMPLEMENTED FIXME\n";
-	}
-
-	void save(const VectorSizeType& block, PsimagLite::IoSimple::Out& io) const
+	void save(const VectorSizeType& block, PsimagLite::IoSelector::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";
@@ -341,10 +336,14 @@ public:
 		} else {
 			targetVectors = this->common().targetVectors();
 		}
+
+		if (block.size() != 1)
+			err(PsimagLite::String(__FILE__) + " save() only supports blocks.size=1\n");
+		SizeType site = block[0];
 		TimeSerializerType ts(this->common().currentTime(),
-		                      block[0],
-		        targetVectors,
-		        marker);
+		                      site,
+		                      targetVectors,
+		                      marker);
 		ts.save(io);
 	}
 
@@ -435,7 +434,7 @@ private:
 		}
 
 		if (this->common().noStageIs(COLLAPSE) &&
-		    this->common().currentTime() < mettsStruct_.beta) {
+		        this->common().currentTime() < mettsStruct_.beta) {
 			this->common().setAllStagesTo(WFT_ADVANCE);
 			RealType tmp = this->common().currentTime() + mettsStruct_.tau();
 			this->common().setTime(tmp);
@@ -445,14 +444,14 @@ private:
 		}
 
 		if (this->common().noStageIs(COLLAPSE) &&
-		    this->common().currentTime() >= mettsStruct_.beta &&
-		    block[0]!=block.size()) {
+		        this->common().currentTime() >= mettsStruct_.beta &&
+		        block[0]!=block.size()) {
 			printAdvancement(timesWithoutAdvancement);
 			return;
 		}
 
 		if (this->common().noStageIs(COLLAPSE) &&
-		    this->common().currentTime() >= mettsStruct_.beta) {
+		        this->common().currentTime() >= mettsStruct_.beta) {
 			this->common().setAllStagesTo(COLLAPSE);
 			sitesCollapsed_.clear();
 			SizeType n1 = mettsStruct_.timeSteps();
@@ -482,8 +481,8 @@ private:
 		mettsCollapse_.setNk(nk,block);
 
 		if (this->common().allStages(WFT_NOADVANCE) ||
-		    this->common().allStages(WFT_ADVANCE) ||
-		    this->common().allStages(COLLAPSE)) {
+		        this->common().allStages(WFT_ADVANCE) ||
+		        this->common().allStages(COLLAPSE)) {
 			SizeType advance = index;
 			if (this->common().allStages(WFT_ADVANCE)) {
 				advance = indexAdvance;
@@ -529,7 +528,7 @@ private:
 		for (SizeType i=0;i<total;i++) {
 			// Do only one sector unless doing su(2) with j>0, then do all m's
 			if (lrs_.super().pseudoEffectiveNumber(lrs_.super().partition(i)) ==
-			    quantumSector_ ) return i;
+			        quantumSector_ ) return i;
 		}
 		throw PsimagLite::RuntimeError("TargetingMetts: getPartition()\n");
 	}
@@ -636,7 +635,7 @@ private:
 		mettsCollapse_.setNk(nk,block);
 		SizeType volumeOfNk = mettsCollapse_.volumeOf(nk);
 		SizeType newSize =  (transform.cols()==0) ? (ns*ns) :
-		                                           transform.cols() * volumeOfNk;
+		                                            transform.cols() * volumeOfNk;
 		newVector.resize(newSize);
 		for (SizeType alpha=0;alpha<newVector.size();alpha++)
 			newVector[alpha] = 0;
@@ -758,8 +757,8 @@ private:
 		PsimagLite::String modelName = this->model().params().model;
 
 		if (modelName == "HubbardOneBand" ||
-		    modelName == "HubbardOneBandExtended" ||
-		    modelName == "Immm") {
+		        modelName == "HubbardOneBandExtended" ||
+		        modelName == "Immm") {
 			this->common().cocoonLegacy(direction,block);
 		}
 

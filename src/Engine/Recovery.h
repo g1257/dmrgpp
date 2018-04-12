@@ -139,7 +139,7 @@ public:
 		checkpoint_.save(pS_,pE_,ioOut);
 		psi.save(vsites,ioOut);
 		PsimagLite::OstringStream msg;
-		msg<<"#LastLoopSign="<<lastSign<<"\n";
+		msg<<"LastLoopSign="<<lastSign<<"\n";
 		ioOut<<msg.str();
 		files_.push_back(rootName);
 

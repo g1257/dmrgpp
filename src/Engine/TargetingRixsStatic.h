@@ -221,23 +221,20 @@ public:
 		ioOut.print(msg.str());
 	}
 
-	void save(const VectorSizeType& block, typename BaseType::IoNgOutOrDummyType& io) const
-	{
-		std::cerr<<__FILE__<<" save() WARNING UNIMPLEMENTED FIXME\n";
-	}
-
 	void save(const VectorSizeType& block,
-	          PsimagLite::IoSimple::Out& io) const
+	          PsimagLite::IoSelector::Out& io) const
 	{
-		assert(block.size() > 0);
+		if (block.size() != 1)
+			err(PsimagLite::String(__FILE__) + " save() only supports blocks.size=1\n");
 
-        SizeType marker = (this->common().noStageIs(DISABLED)) ? 1 : 0;
-        TimeSerializerType ts(this->common().currentTime(),
-                              block[0],
-                              this->common().targetVectors(),
-                              marker);
-        ts.save(io);
-        this->common().psi().save(io,"PSI");
+		SizeType site = block[0];
+		SizeType marker = (this->common().noStageIs(DISABLED)) ? 1 : 0;
+		TimeSerializerType ts(this->common().currentTime(),
+		                      site,
+		                      this->common().targetVectors(),
+		                      marker);
+		ts.save(io);
+		this->common().psi().save(io,"PSI");
 	}
 
 	void load(const PsimagLite::String& f)
@@ -245,9 +242,9 @@ public:
 #ifdef USE_IO_NG
 		std::cerr<<__FILE__<<" load() WARNING UNIMPLEMENTED FIXME\n";
 #else
-		typename BaseType::IoType::In io(f);
+		PsimagLite::IoSimple::In io(f);
 
-		TimeSerializerType ts(io,BaseType::IoType::In::LAST_INSTANCE);
+		TimeSerializerType ts(io, PsimagLite::IoSimple::In::LAST_INSTANCE);
 		SizeType n = ts.numberOfVectors();
 		if (n != 4)
 			err("TargetingRixsStatic: number of TVs must be 4\n");

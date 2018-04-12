@@ -221,13 +221,8 @@ public:
 		ioOut.print(msg.str());
 	}
 
-	void save(const VectorSizeType& block, typename BaseType::IoNgOutOrDummyType& io) const
-	{
-		std::cerr<<__FILE__<<" save() WARNING UNIMPLEMENTED FIXME\n";
-	}
-
 	void save(const VectorSizeType& block,
-	          PsimagLite::IoSimple::Out& io) const
+	          PsimagLite::IoSelector::Out& io) const
 	{
 		skeleton_.save(this->common(),block,io);
 	}
@@ -237,9 +232,9 @@ public:
 #ifdef USE_IO_NG
 		std::cerr<<__FILE__<<" load() WARNING UNIMPLEMENTED FIXME\n";
 #else
-		typename BaseType::IoType::In io(f);
+		PsimagLite::IoSimple::In io(f);
 
-		TimeSerializerType ts(io, BaseType::IoType::In::LAST_INSTANCE);
+		TimeSerializerType ts(io, PsimagLite::IoSimple::In::LAST_INSTANCE);
 		SizeType n = ts.numberOfVectors();
 		if (n != 6)
 			err("TargetingRixsDynamic: number of TVs must be 6\n");

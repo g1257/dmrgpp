@@ -110,14 +110,14 @@ public:
 	               PsimagLite::IoSelector::In::LongIntegerType lastInstance = 0)
 	{
 		RealType x=0;
-		PsimagLite::String s = "#TIME=";
+		PsimagLite::String s = "Time=";
 		if (lastInstance) io.readline(x,s,lastInstance);
 		else io.readline(x,s);
 		if (x<0)
 			throw PsimagLite::RuntimeError("TimeSerializer:: time cannot be negative\n");
 		currentTime_ = x;
 
-		s = "#TCENTRALSITE=";
+		s = "TargetCentralSite=";
 		int xi=0;
 		io.readline(xi,s);
 		if (xi<0)
@@ -170,9 +170,14 @@ public:
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
-		PsimagLite::String s = "#TIME=" + ttos(currentTime_);
+		std::cerr<<__FILE__<<" save() needs IMPLEMENTATION WARNING FIXME\n";
+	}
+
+	void save(PsimagLite::IoSimple::Out& io)
+	{
+		PsimagLite::String s = "Time=" + ttos(currentTime_);
 		io.printline(s);
-		s = "#TCENTRALSITE=" + ttos(site_);
+		s = "TargetCentralSite=" + ttos(site_);
 		io.printline(s);
 		s = "#TNUMBEROFVECTORS="+ttos(targetVectors_.size());
 		io.printline(s);

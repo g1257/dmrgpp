@@ -196,15 +196,9 @@ public:
 		ioOut.print(msg.str());
 	}
 
-	void save(const VectorSizeType& block, typename BaseType::IoNgOutOrDummyType& io) const
-	{
-		std::cerr<<__FILE__<<" save() WARNING UNIMPLEMENTED FIXME\n";
-	}
-
 	void save(const VectorSizeType& block,
-	          PsimagLite::IoSimple::Out& io) const
+	          PsimagLite::IoSelector::Out& io) const
 	{
-		assert(block.size()==1);
 		SizeType type = tstStruct_.type();
 		int s = (type&1) ? -1 : 1;
 		int s2 = (type>1) ? -1 : 1;
@@ -215,8 +209,11 @@ public:
 		paramsForSolver_.weight = s2*weightForContinuedFraction_;
 		paramsForSolver_.isign = s;
 		PostProcType cf(ab_, paramsForSolver_);
-		PsimagLite::String str = "#TCENTRALSITE=" + ttos(block[0]);
-		io.printline(str);
+
+		if (block.size() != 1)
+			err(PsimagLite::String(__FILE__) + " save() only supports blocks.size=1\n");
+
+		io.write(block[0], "TargetCentralSite");
 		this->common().save(block,io,cf,this->common().targetVectors());
 
 		this->common().psi().save(io,"PSI");

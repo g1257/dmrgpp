@@ -284,9 +284,9 @@ private:
 
 		if (enabled_) {
 			PsimagLite::IoSelector::In io1(parameters_.checkpoint.filename);
-			io1.readline(lastSite,"#TCENTRALSITE=",
+			io1.readline(lastSite,"TargetCentralSite=",
 			             PsimagLite::IoSelector::In::LAST_INSTANCE);
-			io1.readline(prevDeltaSign,"#LastLoopSign=");
+			io1.readline(prevDeltaSign,"LastLoopSign=");
 			checkPoint = true;
 		}
 

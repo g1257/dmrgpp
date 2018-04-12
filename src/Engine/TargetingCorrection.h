@@ -171,24 +171,15 @@ public:
 		ioOut.print(msg.str());
 	}
 
-	void save(const VectorSizeType& block, typename BaseType::IoNgOutOrDummyType& io) const
-	{
-		std::cerr<<__FILE__<<" save() WARNING UNIMPLEMENTED FIXME\n";
-	}
-
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
-	          PsimagLite::IoSimple::Out& io) const
+	          PsimagLite::IoSelector::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";
 		progress_.printline(msg,std::cout);
 
-		if (block.size()!=1)
-			throw PsimagLite::RuntimeError("GST only supports blocks of size 1\n");
-
-		PsimagLite::String s = "#TCENTRALSITE=" + ttos(block[0]);
-		io.printline(s);
-		this->common().psi().save(io,"PSI");
+		this->common().save(io, block);
+		this->common().psi().save(io, "PSI");
 	}
 
 private:

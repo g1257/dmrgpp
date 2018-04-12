@@ -124,11 +124,6 @@ public:
 	typedef typename BasisWithOperatorsType::SymmetryElectronsSzType
 	SymmetryElectronsSzType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-#ifdef USE_IO_NG
-	typedef PsimagLite::IoNg::Out IoNgOutOrDummyType;
-#else
-	typedef int IoNgOutOrDummyType;
-#endif
 
 	enum {DISABLED=ApplyOperatorExpressionType::DISABLED,
 		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,

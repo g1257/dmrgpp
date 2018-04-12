@@ -302,17 +302,11 @@ public:
 		tv3 += tv4;
 	}
 
-	template<typename IoOutType>
-	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
-	          IoOutType& io) const
-	{
-		std::cerr<<__FILE__<<" save() WARNING UNIMPLEMENTED FIXME\n";
-	}
 
 	template<typename SomeTargetingCommonType>
 	void save(const SomeTargetingCommonType& targetingCommon,
 	          const VectorSizeType& block,
-	          PsimagLite::IoSimple::Out& io) const
+	          PsimagLite::IoSelector::Out& io) const
 	{
 		if (block.size()!=1) {
 			PsimagLite::String str("TargetingCorrectionVector ");

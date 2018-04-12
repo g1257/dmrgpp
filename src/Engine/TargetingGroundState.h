@@ -162,21 +162,14 @@ public:
 	}
 
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
-	          PsimagLite::IoSimple::Out& io) const
+	          PsimagLite::IoSelector::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";
 		progress_.printline(msg,std::cout);
 
-		assert(block.size()>0);
-		PsimagLite::String s = "#TCENTRALSITE=" + ttos(block[0]);
-		io.printline(s);
+		this->common().save(io, block);
 		this->common().psi().save(io,"PSI");
-	}
-
-	void save(const VectorSizeType& block, typename BaseType::IoNgOutOrDummyType& io) const
-	{
-		std::cerr<<__FILE__<<" save() WARNING UNIMPLEMENTED FIXME\n";
 	}
 
 	void load(const PsimagLite::String& f)
