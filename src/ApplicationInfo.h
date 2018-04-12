@@ -177,7 +177,7 @@ private:
 	static void printFinalLegacy(std::ostream& os, const ApplicationInfo& ai)
 	{
 		OstringStream msg;
-		msg<<ai.name_<<" sizeof(SizeType)="<<sizeof(SizeType)<<"\n";
+		msg<<ai.name_<<"\nsizeof(SizeType)="<<sizeof(SizeType)<<"\n";
 #ifdef USE_FLOAT
 		msg<<ai.name_<<" using float\n";
 #else
