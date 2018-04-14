@@ -196,55 +196,6 @@ public:
 			what.serialize(name2, ioNgSerializer_);
 		}
 
-		//		template<typename T>
-		//		void print(String label,
-		//		           const std::stack<T>&)
-		//		{
-		//			assert(hdf5File_);
-		//			assert(groupDef_);
-		//			String name(typeid(std::stack<T>).name());
-		//			std::cerr<<__FILE__<<" Not printing class "<<name;
-		//			std::cerr<<" With label "<<label<<" (FIXME TODO)\n";
-		//		}
-
-		//		template<typename T1, typename T2>
-		//		void print(String label,
-		//		           const std::pair<T1, T2>&)
-		//		{
-		//			assert(hdf5File_);
-		//			assert(groupDef_);
-		//			String name(typeid(std::pair<T1, T2>).name());
-		//			std::cerr<<__FILE__<<" Not printing class "<<name;
-		//			std::cerr<<" With label "<<label<<" (FIXME TODO)\n";
-		//		}
-
-		//		template<typename T>
-		//		void print(String label,
-		//		           const T& something)
-		//		{
-		//			something.serialize(label, ioNgSerializer_);
-		//		}
-
-		//		void print(const char* str)
-		//		{
-		//			print(String(str));
-		//		}
-
-		//		void print(const String str)
-		//		{
-		//			std::cerr<<"IoNg: WARNING: FIXME: TODO: Refusing to print bare string\n";
-		//			//			assert(hdf5File_);
-		//		}
-
-		//		// Delete this function and use write instead
-		//		template<typename X>
-		//		void printMatrix(const X& mat,
-		//		                 String const &s,
-		//		                 typename EnableIf<IsMatrixLike<X>::True, int>::Type = 0)
-		//		{
-		//			print(s, mat);
-		//		}
-
 		int rank() { throw RuntimeError("IoNg:: not implemented\n"); }
 
 		void flush()

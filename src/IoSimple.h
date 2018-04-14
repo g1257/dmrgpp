@@ -195,22 +195,6 @@ public:
 			(*fout_)<<something<<"\n";
 		}
 
-		void print(const String& something)
-		{
-			if (rank_!=0) return;
-			(*fout_)<<something;
-			SizeType last = something.length();
-			if (last>0) last--;
-			if (something[last]!='\n') (*fout_)<<"\n";
-		}
-
-		template<typename SomePrintableType>
-		void print(const SomePrintableType& something)
-		{
-			if (rank_!=0) return;
-			(*fout_)<<something;
-		}
-
 		int rank() { return rank_; }
 
 		void setPrecision(SizeType x)

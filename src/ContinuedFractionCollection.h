@@ -77,8 +77,7 @@ public:
 	template<typename IoOutputType>
 	void save(IoOutputType& io) const
 	{
-		String s = "#CONTINUEDFRACTIONCOLLECTION=";
-		io.print(s,data_.size());
+		io.write(data_.size(), "#CONTINUEDFRACTIONCOLLECTION");
 		for (SizeType i=0;i<data_.size();i++) data_[i].save(io);
 	}
 

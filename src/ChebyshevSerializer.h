@@ -104,12 +104,10 @@ public:
 
 	void save(IoSimple::Out& io) const
 	{
-		String s(stringMarker_);
-		io.print(s);
+		io.write(0, stringMarker_);
 		io.write(params_.Eg, "#ChebyshevEnergy=");
 		io.write(params_.oneOverA, "#ChebyshevOneOverA=");
 		io.write(params_.b, "#ChebyshevB=");
-
 		io.write(moments_,"#ChebyshevMoments");
 	}
 
