@@ -198,15 +198,6 @@ public:
 		//evolve(Eg,direction,x,loopNumber);
 	}
 
-	void print(PsimagLite::IoSimple::Out& ioOut) const
-	{
-		ioOut.write(tstStruct_, "TARGETSTRUCT");
-		PsimagLite::OstringStream msg;
-		msg<<"PSI\n";
-		msg<<(*this);
-		ioOut.print(msg.str());
-	}
-
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
 	          PsimagLite::IoSelector::Out& io) const
 	{
@@ -316,15 +307,6 @@ private:
 	RealType weightForContinuedFraction_;
 	StageEnum stage_;
 }; // class TargetingInSitu
-
-template<typename LanczosSolverType, typename VectorWithOffsetType>
-std::ostream& operator<<(std::ostream& os,
-                         const TargetingInSitu<LanczosSolverType,VectorWithOffsetType>&)
-{
-	os<<"DT=NothingToSeeHereYet\n";
-	return os;
-}
-
 } // namespace
 /*@}*/
 #endif // DMRG_TARGETING_IN_SITU_H

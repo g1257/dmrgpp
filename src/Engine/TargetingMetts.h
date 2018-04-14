@@ -306,21 +306,6 @@ public:
 		this->common().setTime(ts.time());
 	}
 
-	void print(PsimagLite::IoSimple::Out& ioOut) const
-	{
-		PsimagLite::OstringStream msg;
-		msg<<"PSI\n";
-		msg<<"TSTStruct\n";
-		msg<<mettsStruct_;
-		msg<<"MettsWeightsTimeVectors=";
-		for (SizeType i=0;i<weight_.size();i++)
-			msg<<weight_[i]<<" ";
-		msg<<"\n";
-		msg<<"MettsWeightGroundState="<<gsWeight_<<"\n";
-
-		ioOut.print(msg.str());
-	}
-
 	void save(const VectorSizeType& block, PsimagLite::IoSelector::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
@@ -894,15 +879,6 @@ private:
 	std::pair<TargetVectorType,TargetVectorType> pureVectors_;
 	VectorSizeType sitesCollapsed_;
 };     //class TargetingMetts
-
-template<typename LanczosSolverType, typename VectorWithOffsetType>
-std::ostream& operator<<(std::ostream& os,
-                         const TargetingMetts<LanczosSolverType,
-                         VectorWithOffsetType>& tst)
-{
-	tst.print(os);
-	return os;
-}
 } // namespace Dmrg
 
 #endif //DMRG_TARGETING_METTS_H

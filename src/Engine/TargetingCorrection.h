@@ -162,15 +162,6 @@ public:
 		this->common().template load<int>(f,0);
 	}
 
-	void print(PsimagLite::IoSimple::Out& ioOut) const
-	{
-		ioOut.write(tstStruct_, "TARGETSTRUCT");
-		PsimagLite::OstringStream msg;
-		msg<<"PSI\n";
-		msg<<"CorrectionWeightGroundState=1\n";
-		ioOut.print(msg.str());
-	}
-
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
 	          PsimagLite::IoSelector::Out& io) const
 	{
@@ -187,14 +178,6 @@ private:
 	TargetParamsType tstStruct_;
 	PsimagLite::ProgressIndicator progress_;
 };     //class TargetingCorrection
-
-template<typename LanczosSolverType, typename VectorWithOffsetType>
-std::ostream& operator<<(std::ostream& os,
-                         const TargetingCorrection<LanczosSolverType, VectorWithOffsetType>& tst)
-{
-	tst.print(os);
-	return os;
-}
 } // namespace Dmrg
 /*@}*/
 #endif

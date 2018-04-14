@@ -236,19 +236,6 @@ public:
 		this->common().template load<TimeSerializerType>(f);
 	}
 
-	void print(PsimagLite::IoSimple::Out& ioOut) const
-	{
-		ioOut.write(tstStruct_, "TARGETSTRUCT");
-		PsimagLite::OstringStream msg;
-		msg<<"PSI\n";
-		msg<<"TSTWeightsTimeVectors=";
-		for (SizeType i=0;i<weight_.size();i++)
-			msg<<weight_[i]<<" ";
-		msg<<"\n";
-		msg<<"TSTWeightGroundState="<<gsWeight_<<"\n";
-		ioOut.print(msg.str());
-	}
-
 	void save(const VectorSizeType& block, PsimagLite::IoSelector::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
@@ -366,14 +353,6 @@ private:
 	mutable VectorRealType tvEnergy_;
 	RealType gsWeight_;
 };     //class TargetingTimeStep
-
-template<typename LanczosSolverType, typename VectorWithOffsetType>
-std::ostream& operator<<(std::ostream& os,
-                         const TargetingTimeStep<LanczosSolverType, VectorWithOffsetType>& tst)
-{
-	tst.print(os);
-	return os;
-}
 } // namespace Dmrg
 
 #endif

@@ -182,8 +182,6 @@ public:
 		return commonTargeting_.normSquared(i);
 	}
 
-	virtual void print(PsimagLite::IoSimple::Out&) const = 0;
-
 	virtual void load(const PsimagLite::String&) = 0;
 
 	virtual void save(const typename PsimagLite::Vector<SizeType>::Type&,

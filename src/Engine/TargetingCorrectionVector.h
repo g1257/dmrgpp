@@ -210,15 +210,6 @@ public:
 		evolve(Eg,direction,x,loopNumber);
 	}
 
-	void print(PsimagLite::IoSimple::Out& ioOut) const
-	{
-		ioOut.write(tstStruct_, "TARGETSTRUCT");
-		PsimagLite::OstringStream msg;
-		msg<<"PSI\n";
-		msg<<(*this);
-		ioOut.print(msg.str());
-	}
-
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
 	          PsimagLite::IoSelector::Out& io) const
 	{
@@ -308,15 +299,6 @@ private:
 	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
 	CorrectionVectorSkeletonType skeleton_;
 }; // class TargetingCorrectionVector
-
-template<typename LanczosSolverType, typename VectorWithOffsetType>
-std::ostream& operator<<(std::ostream& os,
-                         const TargetingCorrectionVector<LanczosSolverType,VectorWithOffsetType>&)
-{
-	os<<"DT=NothingToSeeHereYet\n";
-	return os;
-}
-
 } // namespace
 /*@}*/
 #endif // TARGETING_CORRECTION_VECTOR_H

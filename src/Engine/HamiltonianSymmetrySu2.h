@@ -254,12 +254,9 @@ public:
 	{
 		jmValues_.save(io);
 		io.write(flavors_,"#su2flavors");
-		PsimagLite::String s="#su2FlavorsMax=" + ttos(flavorsMax_)+"\n";
-		io.print(s);
-		s="#su2ElectronsMax="+ttos(electronsMax_)+"\n";
-		io.print(s);
-		s="#su2JMax="+ttos(jMax_)+"\n";
-		io.print(s);
+		io.write(flavorsMax_, "#su2FlavorsMax");
+		io.write(electronsMax_, "#su2ElectronsMax");
+		io.write(jMax_, "#su2JMax");
 		io.write(statesReduced_,"#su2StatesReduced");
 		io.write(jvals_,"#su2Jvals");
 	}

@@ -212,15 +212,6 @@ public:
 		// skeleton_.printNormsAndWeights();
 	}
 
-	void print(PsimagLite::IoSimple::Out& ioOut) const
-	{
-		ioOut.write(tstStruct_, "TARGETSTRUCT");
-		PsimagLite::OstringStream msg;
-		msg<<"PSI\n";
-		msg<<(*this);
-		ioOut.print(msg.str());
-	}
-
 	void save(const VectorSizeType& block,
 	          PsimagLite::IoSelector::Out& io) const
 	{
@@ -398,15 +389,6 @@ private:
 	CorrectionVectorSkeletonType skeleton_;
 	bool applied_;
 }; // class TargetingRixsDynamic
-
-template<typename LanczosSolverType, typename VectorWithOffsetType>
-std::ostream& operator<<(std::ostream& os,
-                         const TargetingRixsDynamic<LanczosSolverType,VectorWithOffsetType>&)
-{
-	os<<"DT=NothingToSeeHereYet\n";
-	return os;
-}
-
 } // namespace
 /*@}*/
 #endif // TARGETING_RIXS_DYNAMIC_H
