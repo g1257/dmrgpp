@@ -113,9 +113,9 @@ public:
 	void serialize(String label, IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
-		ioSerializer.writeToTag(label + "/nrow_", nrow_);
-		ioSerializer.writeToTag(label + "/ncol_", ncol_);
-		ioSerializer.writeToTag(label + "/data_", data_);
+		ioSerializer.write(label + "/nrow_", nrow_);
+		ioSerializer.write(label + "/ncol_", ncol_);
+		ioSerializer.write(label + "/data_", data_);
 	}
 
 	template<typename SomeMemResolvType>

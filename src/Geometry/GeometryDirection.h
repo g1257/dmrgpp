@@ -100,9 +100,9 @@ public:
 		void serialize(PsimagLite::String label, IoSerializer& ioSerializer) const
 		{
 			ioSerializer.createGroup(label);
-			ioSerializer.writeToTag(label + "/constantValues", constantValues);
-			ioSerializer.writeToTag(label + "/dirId", dirId);
-			ioSerializer.writeToTag(label + "/edof", edof);
+			ioSerializer.write(label + "/constantValues", constantValues);
+			ioSerializer.write(label + "/dirId", dirId);
+			ioSerializer.write(label + "/edof", edof);
 		}
 
 		bool constantValues;
@@ -156,11 +156,11 @@ public:
 	{
 		ioSerializer.createGroup(label);
 		aux_.serialize(label + "/aux_", ioSerializer);
-		ioSerializer.writeToTag(label + "/dataType_", dataType_);
-		ioSerializer.writeToTag(label + "/orbitals_", orbitals_);
+		ioSerializer.write(label + "/dataType_", dataType_);
+		ioSerializer.write(label + "/orbitals_", orbitals_);
 		// geometryBase_
-		ioSerializer.writeToTag(label + "/dataNumbers_", dataNumbers_);
-		ioSerializer.writeToTag(label + "/dataMatrices_", dataMatrices_);
+		ioSerializer.write(label + "/dataNumbers_", dataNumbers_);
+		ioSerializer.write(label + "/dataMatrices_", dataMatrices_);
 		rawHoppings_.serialize(label + "/rawHoppings_", ioSerializer);
 	}
 

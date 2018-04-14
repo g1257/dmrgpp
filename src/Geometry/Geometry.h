@@ -153,8 +153,8 @@ public:
 	void serialize(PsimagLite::String label, IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
-		ioSerializer.writeToTag(label + "/linSize_", linSize_);
-		ioSerializer.writeToTag(label + "/terms_", terms_);
+		ioSerializer.write(label + "/linSize_", linSize_);
+		ioSerializer.write(label + "/terms_", terms_);
 	}
 
 	template<typename SomeMemResolvType>

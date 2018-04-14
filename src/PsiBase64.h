@@ -65,7 +65,7 @@ public:
 
 		void serialize(String label, PsimagLite::IoSerializer& ioSerializer) const
 		{
-			ioSerializer.writeToTag(label, buffer_);
+			ioSerializer.write(label, buffer_);
 		}
 
 		friend std::ostream& operator<<(std::ostream& os, const Encode& encode)

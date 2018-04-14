@@ -525,11 +525,11 @@ public:
 	{
 		ioSerializer.createGroup(label);
 
-		ioSerializer.writeToTag(label + "/rowptr_",  rowptr_);
-		ioSerializer.writeToTag(label + "/colind_",  colind_);
-		ioSerializer.writeToTag(label + "/values_",  values_);
-		ioSerializer.writeToTag(label + "/nrow_",  nrow_);
-		ioSerializer.writeToTag(label + "/ncol_",  ncol_);
+		ioSerializer.write(label + "/rowptr_",  rowptr_);
+		ioSerializer.write(label + "/colind_",  colind_);
+		ioSerializer.write(label + "/values_",  values_);
+		ioSerializer.write(label + "/nrow_",  nrow_);
+		ioSerializer.write(label + "/ncol_",  ncol_);
 	}
 
 	friend bool isZero(const CrsMatrix& A, double eps = 0.0)

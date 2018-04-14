@@ -91,6 +91,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
+template<typename T>
+struct IsRootUnDelegated {
+	enum {True = Loki::TypeTraits<T>::isArith ||
+		  IsVectorLike<T>::True ||
+		  IsPairLike<T>::True};
+};
+
 class IoNg {
 
 public:
@@ -101,14 +108,21 @@ public:
 
 		typedef std::vector<String> VectorStringType;
 
+		Out() : hdf5File_(0), groupDef_(0), ioNgSerializer_(0, 0)
+		{
+			std::cerr<<"IoNg::Out() default ctor please don't use\n";
+		}
+
 		Out(const String& fn)
-		    : hdf5File_(new H5::H5File(fn, H5F_ACC_TRUNC)),
+		    : filename_(fn),
+		      hdf5File_(new H5::H5File(fn, H5F_ACC_TRUNC)),
 		      groupDef_(new H5::Group(hdf5File_->createGroup("/Def"))),
 		      ioNgSerializer_(hdf5File_, groupDef_)
 		{}
 
 		~Out()
 		{
+			filename_ = "";
 			delete groupDef_; // should I close something first? FIXME
 			groupDef_ = 0;
 			delete hdf5File_; // should I close something first? FIXME
@@ -117,10 +131,7 @@ public:
 
 		const String& filename() const
 		{
-			// find member that returns filename FIXME
-			// assert(hdf5File_);
-			// return hdf5File_.filename();
-			throw RuntimeError("IoNg:: not implemented\n");
+			return filename_;
 		}
 
 		void open(String const &fn,
@@ -128,6 +139,7 @@ public:
 		{
 			if (hdf5File_) delete hdf5File_;
 
+			filename_ = fn;
 			// deal with mode
 			hdf5File_ = new H5::H5File(fn, H5F_ACC_TRUNC);
 
@@ -145,6 +157,7 @@ public:
 			delete hdf5File_; // should I close something first? FIXME
 			hdf5File_ = 0;
 			labels_.clear();
+			filename_ = "";
 		}
 
 		void createGroup(String groupName)
@@ -160,77 +173,77 @@ public:
 		{
 			if (counter == 0) createGroup(str);
 
-			ioNgSerializer_.writeToTag(str + "/" + ttos(counter), x);
+			ioNgSerializer_.write(str + "/" + ttos(counter), x);
 			if (counter == 0)
-				ioNgSerializer_.writeToTag(str + "/Size", counter);
+				ioNgSerializer_.write(str + "/Size", counter);
 			else
 				ioNgSerializer_.overwrite(str + "/Size", counter);
 		}
 
 		template<typename T>
-		void write(const T& x,
-		           String label,
-		           typename EnableIf<!IsMatrixLike<T>::True, int>::Type = 0)
+		void write(const T& what,
+		           String name2,
+		           typename EnableIf<IsRootUnDelegated<T>::True, int>::Type = 0)
 		{
-			ioNgSerializer_.writeToTag(label, x);
+			ioNgSerializer_.write(name2, what);
 		}
 
 		template<typename T>
 		void write(const T& what,
 		           String name2,
-		           typename EnableIf<IsMatrixLike<T>::True, int>::Type = 0)
+		           typename EnableIf<!IsRootUnDelegated<T>::True, int>::Type = 0)
 		{
 			what.serialize(name2, ioNgSerializer_);
 		}
 
-		template<typename T>
-		void print(String label,
-		           const std::stack<T>&)
-		{
-			assert(hdf5File_);
-			assert(groupDef_);
-			String name(typeid(std::stack<T>).name());
-			std::cerr<<__FILE__<<" Not printing class "<<name;
-			std::cerr<<" With label "<<label<<" (FIXME TODO)\n";
-		}
+		//		template<typename T>
+		//		void print(String label,
+		//		           const std::stack<T>&)
+		//		{
+		//			assert(hdf5File_);
+		//			assert(groupDef_);
+		//			String name(typeid(std::stack<T>).name());
+		//			std::cerr<<__FILE__<<" Not printing class "<<name;
+		//			std::cerr<<" With label "<<label<<" (FIXME TODO)\n";
+		//		}
 
-		template<typename T1, typename T2>
-		void print(String label,
-		           const std::pair<T1, T2>&)
-		{
-			assert(hdf5File_);
-			assert(groupDef_);
-			String name(typeid(std::pair<T1, T2>).name());
-			std::cerr<<__FILE__<<" Not printing class "<<name;
-			std::cerr<<" With label "<<label<<" (FIXME TODO)\n";
-		}
+		//		template<typename T1, typename T2>
+		//		void print(String label,
+		//		           const std::pair<T1, T2>&)
+		//		{
+		//			assert(hdf5File_);
+		//			assert(groupDef_);
+		//			String name(typeid(std::pair<T1, T2>).name());
+		//			std::cerr<<__FILE__<<" Not printing class "<<name;
+		//			std::cerr<<" With label "<<label<<" (FIXME TODO)\n";
+		//		}
 
-		template<typename T>
-		void print(String label,
-		           const T& something)
-		{
-			something.serialize(label, ioNgSerializer_);
-		}
+		//		template<typename T>
+		//		void print(String label,
+		//		           const T& something)
+		//		{
+		//			something.serialize(label, ioNgSerializer_);
+		//		}
 
-		void print(const char* str)
-		{
-			print(String(str));
-		}
+		//		void print(const char* str)
+		//		{
+		//			print(String(str));
+		//		}
 
-		void print(const String str)
-		{
-			std::cerr<<"IoNg: WARNING: FIXME: TODO: Refusing to print bare string\n";
-			//			assert(hdf5File_);
-		}
+		//		void print(const String str)
+		//		{
+		//			std::cerr<<"IoNg: WARNING: FIXME: TODO: Refusing to print bare string\n";
+		//			//			assert(hdf5File_);
+		//		}
 
-		// Delete this function and use write instead
-		template<typename X>
-		void printMatrix(const X& mat,
-		                 String const &s,
-		                 typename EnableIf<IsMatrixLike<X>::True, int>::Type = 0)
-		{
-			print(s, mat);
-		}
+		//		// Delete this function and use write instead
+		//		template<typename X>
+		//		void printMatrix(const X& mat,
+		//		                 String const &s,
+		//		                 typename EnableIf<IsMatrixLike<X>::True, int>::Type = 0)
+		//		{
+		//			print(s, mat);
+		//		}
 
 		int rank() { throw RuntimeError("IoNg:: not implemented\n"); }
 
@@ -250,19 +263,7 @@ public:
 
 	private:
 
-		SizeType findCount(const String& label) const
-		{
-			SizeType c = 0;
-			SizeType total = labels_.size();
-			for (SizeType i = 0; i < total; ++i) {
-				if (std::find(labels_.begin(), labels_.end(), label) == labels_.end())
-					continue;
-				++c;
-			}
-
-			return c;
-		}
-
+		String filename_;
 		H5::H5File* hdf5File_;
 		H5::Group* groupDef_;
 		IoNgSerializer ioNgSerializer_;

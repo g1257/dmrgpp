@@ -145,11 +145,11 @@ public:
 		if (!isFinalized_) {
 			serializer.createGroup(root);
 
-			serializer.writeToTag(root + "/Name", name_);
-			serializer.writeToTag(root + "/RunId", runId_);
-			serializer.writeToTag(root + "/UnixTimeStart", unixTime(false));
+			serializer.write(root + "/Name", name_);
+			serializer.write(root + "/RunId", runId_);
+			serializer.write(root + "/UnixTimeStart", unixTime(false));
 		} else {
-			serializer.writeToTag(root + "/UnixTimeEnd", unixTime(false));
+			serializer.write(root + "/UnixTimeEnd", unixTime(false));
 		}
 	}
 

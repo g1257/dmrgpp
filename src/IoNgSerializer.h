@@ -34,7 +34,7 @@ public:
 		delete dataset;
 	}
 
-	void writeToTag(String name2, SizeType what)
+	void write(String name2, SizeType what)
 	{
 		String name = "Def/" + name2;
 		hsize_t dims[1];
@@ -51,7 +51,7 @@ public:
 		delete dataspace;
 	}
 
-	void writeToTag(String name2, String what)
+	void write(String name2, String what)
 	{
 		String name = "Def/" + name2;
 		hsize_t dims[1];
@@ -69,15 +69,15 @@ public:
 	}
 
 	template<typename T1, typename T2>
-	void writeToTag(String name2,
+	void write(String name2,
 	                const std::pair<T1, T2>& what)
 	{
 		createGroup(name2);
-		writeToTag(name2 + "/0", what.first);
-		writeToTag(name2 + "/1", what.second);
+		write(name2 + "/0", what.first);
+		write(name2 + "/1", what.second);
 	}
 
-	void writeToTag(String name2,
+	void write(String name2,
 	                const std::vector<bool>&)
 	{
 		std::cerr<<"Vector of booleans with name "<<name2<<" cannot be printed ";
@@ -85,7 +85,7 @@ public:
 	}
 
 	template<typename T>
-	void writeToTag(String name2,
+	void write(String name2,
 	                const std::vector<T>& what,
 	                typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
 	{
@@ -99,7 +99,7 @@ public:
 	}
 
 	template<typename T>
-	void writeToTag(String name2,
+	void write(String name2,
 	                const std::vector<std::complex<T> >& what,
 	                typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
 	{
@@ -113,20 +113,20 @@ public:
 	}
 
 	template<typename T>
-	void writeToTag(String name2,
+	void write(String name2,
 	                const std::vector<std::vector<T> >& what,
 	                typename EnableIf<Loki::TypeTraits<typename Real<T>::Type>::isArith,
 	                int>::Type = 0)
 	{
 		SizeType n = what.size();
 		createGroup(name2);
-		writeToTag(name2 + "/SIZE", n);
+		write(name2 + "/SIZE", n);
 		for (SizeType i = 0; i < n; ++i)
-			writeToTag(name2 + "/" + typeToString(i), what[i]);
+			write(name2 + "/" + typeToString(i), what[i]);
 	}
 
 	template<typename T1, typename T2>
-	void writeToTag(String name2,
+	void write(String name2,
 	                const std::vector<std::pair<T1, T2> >& what,
 	                typename EnableIf<
 	                Loki::TypeTraits<T1>::isArith && Loki::TypeTraits<T2>::isArith,
@@ -134,33 +134,33 @@ public:
 	{
 		SizeType n = what.size();
 		createGroup(name2);
-		writeToTag(name2 + "/SIZE", n);
+		write(name2 + "/SIZE", n);
 		for (SizeType i = 0; i < n; ++i)
-			writeToTag(name2 + "/" + typeToString(i), what[i]);
+			write(name2 + "/" + typeToString(i), what[i]);
 	}
 
 	template<typename T>
-	void writeToTag(String name2,
+	void write(String name2,
 	                const std::vector<T>& what,
 	                typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
 	                int>::Type = 0)
 	{
 		SizeType n = what.size();
 		createGroup(name2);
-		writeToTag(name2 + "/SIZE", n);
+		write(name2 + "/SIZE", n);
 		for (SizeType i = 0; i < n; ++i)
 			what[i].serialize(name2 + "/" + typeToString(i), *this);
 	}
 
 	template<typename T>
-	void writeToTag(String name2,
+	void write(String name2,
 	                const std::vector<T*>& what,
 	                typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
 	                int>::Type = 0)
 	{
 		SizeType n = what.size();
 		createGroup(name2);
-		writeToTag(name2 + "/SIZE", n);
+		write(name2 + "/SIZE", n);
 		for (SizeType i = 0; i < n; ++i)
 			what[i]->serialize(name2 + "/" + typeToString(i), *this);
 	}
