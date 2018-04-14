@@ -18,9 +18,9 @@ public:
 	}
 
 	template<typename T>
-	void writeToTag(String name2, const T& what)
+	void write(String name2, const T& what)
 	{
-		std::cerr<<"IoSerializer::writeToTag("<<name2<<","<<what<<"): I'm just a dummy!\n";
+		std::cerr<<"IoSerializer::write("<<name2<<","<<what<<"): I'm just a dummy!\n";
 	}
 };
 }

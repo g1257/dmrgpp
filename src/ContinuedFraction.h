@@ -37,6 +37,7 @@ Please see full open source license included in file LICENSE.
 #include "ParametersForSolver.h"
 #include "IoSimple.h"
 #include "FreqEnum.h"
+#include <typeinfo>
 
 namespace PsimagLite {
 template<typename TridiagonalMatrixType_>
@@ -105,13 +106,13 @@ public:
 		ab_.save(io);
 
 		String f = (freqEnum_ == FREQ_MATSUBARA) ? "Matsubara" : "Real";
-		io.print("#FreqEnum=",f);
+		io.write(f, "#FreqEnum=");
 
-		io.print("#CFWeight=",weight_);
+		io.write(weight_, "#CFWeight=");
 
-		io.print("#CFEnergy=",Eg_);
+		io.write(Eg_, "#CFEnergy=");
 
-		io.print("#CFIsign=" ,isign_);
+		io.write(isign_, "#CFIsign=");
 
 		io.write(eigs_,"#CFEigs");
 		io.write(intensity_,"#CFIntensities");

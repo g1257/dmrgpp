@@ -41,6 +41,8 @@ Please see full open source license included in file LICENSE.
 #include "PlotParams.h"
 #include "ChebyshevFunction.h"
 #include <cassert>
+#include "IoSelector.h"
+#include <typeinfo>
 
 namespace PsimagLite {
 
@@ -104,9 +106,9 @@ public:
 	{
 		String s(stringMarker_);
 		io.print(s);
-		io.print("#ChebyshevEnergy=",params_.Eg);
-		io.print("#ChebyshevOneOverA=",params_.oneOverA);
-		io.print("#ChebyshevB=",params_.b);
+		io.write(params_.Eg, "#ChebyshevEnergy=");
+		io.write(params_.oneOverA, "#ChebyshevOneOverA=");
+		io.write(params_.b, "#ChebyshevB=");
 
 		io.write(moments_,"#ChebyshevMoments");
 	}

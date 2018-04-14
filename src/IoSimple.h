@@ -183,29 +183,10 @@ public:
 			(*fout_)<<label<<"="<<x<<"\n";
 		}
 
-		template<typename X>
-		void write(X const &x,
-		           const String& label,
-		           typename EnableIf<IsVectorLike<X>::True, int>::Type = 0)
-		{
-			if (rank_!=0) return;
-			(*fout_)<<label<<"\n";
-			(*fout_)<<x.size()<<"\n";
-			for (SizeType i=0;i<x.size();i++) (*fout_)<<x[i]<<"\n";
-		}
-
-		template<typename X>
-		void write(const X& mat,
-		           const String& label,
-		           typename EnableIf<IsMatrixLike<X>::True, int>::Type = 0)
-		{
-			if (rank_!=0) return;
-			(*fout_)<<label<<"\n";
-			(*fout_)<<mat;
-		}
-
 		template<class T>
-		void print(const String& label, const T& something)
+		void write(const T& something,
+		           const String& label,
+		           typename EnableIf<!Loki::TypeTraits<T>::isArith, int>::Type = 0)
 		{
 			if (rank_!=0) return;
 			if (!(*fout_) || !fout_->good())
