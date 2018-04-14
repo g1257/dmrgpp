@@ -207,9 +207,10 @@ public:
 		ioOut_.write(base64encode, "InputBase64Encoded");
 		ioOut_.write(parameters_, "PARAMETERS");
 #ifndef USE_IO_NG
-		ioOut_.print("Model", model);
+		ioOut_.write(model, "Model");
 #endif
-		if (parameters_.options.find("verbose")!=PsimagLite::String::npos) verbose_=true;
+		if (parameters_.options.find("verbose")!=PsimagLite::String::npos)
+			verbose_=true;
 	}
 
 	~DmrgSolver()

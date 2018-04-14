@@ -238,7 +238,7 @@ public:
 
 	void print(PsimagLite::IoSimple::Out& ioOut) const
 	{
-		ioOut.print("TARGETSTRUCT",tstStruct_);
+		ioOut.write(tstStruct_, "TARGETSTRUCT");
 		PsimagLite::OstringStream msg;
 		msg<<"PSI\n";
 		msg<<"TSTWeightsTimeVectors=";

@@ -246,7 +246,7 @@ private:
 		SizeType last = label.length();
 		assert(last > 0);
 		if (last > 0 && label[last - 1] != '\n') label += "\n";
-		io.print(label, stack_);
+		io.write(stack_, label);
 #else
 		std::cerr<<"DisStack: finalizeInternal UNIMPLEMENTED WARNING FIXME\n";
 #endif

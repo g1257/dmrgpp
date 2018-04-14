@@ -375,8 +375,8 @@ public:
 		io.printline("dmrgWaveStruct");
 
 		dmrgWaveStruct_.save(io);
-		io.print("wsStack\n", wsStack_);
-		io.print("weStack\n", weStack_);
+		io.write(wsStack_, "wsStack\n");
+		io.write(weStack_, "weStack\n");
 #else
 		std::cerr<<__FILE__<<" WFT cannot be saved for restart yet ";
 		std::cerr<<"UNIMPLEMENTED WARNING FIXME\n";

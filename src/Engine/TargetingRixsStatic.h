@@ -208,13 +208,11 @@ public:
 		//corner case
 		//		SizeType x = (site==1) ? 0 : numberOfSites-1;
 		//		evolve(Eg,direction,x,loopNumber);
-
-
 	}
 
 	void print(PsimagLite::IoSimple::Out& ioOut) const
 	{
-		ioOut.print("TARGETSTRUCT",tstStruct_);
+		ioOut.write(tstStruct_, "TARGETSTRUCT");
 		PsimagLite::OstringStream msg;
 		msg<<"PSI\n";
 		msg<<(*this);
