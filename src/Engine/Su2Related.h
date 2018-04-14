@@ -100,9 +100,9 @@ struct Su2Related {
 	               PsimagLite::IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
-		ioSerializer.writeToTag(label + "/offset", offset);
-		ioSerializer.writeToTag(label + "/source", source);
-		ioSerializer.writeToTag(label + "/transpose", transpose);
+		ioSerializer.write(label + "/offset", offset);
+		ioSerializer.write(label + "/source", source);
+		ioSerializer.write(label + "/transpose", transpose);
 	}
 
 	SizeType offset;

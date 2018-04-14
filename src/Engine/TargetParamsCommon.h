@@ -286,15 +286,15 @@ public:
 	{
 		ioSerializer.createGroup(label);
 
-		ioSerializer.writeToTag(label + "/sites_", sites_);
-		ioSerializer.writeToTag(label + "/startingLoops_", startingLoops_);
-		ioSerializer.writeToTag(label + "/concatenation_", concatenation_);
-		ioSerializer.writeToTag(label + "/noOperator_", noOperator_);
-		ioSerializer.writeToTag(label + "/skipTimeZero_", skipTimeZero_);
-		ioSerializer.writeToTag(label + "/isEnergyForExp_", isEnergyForExp_);
-		ioSerializer.writeToTag(label + "/gsWeight_", gsWeight_);
-		ioSerializer.writeToTag(label + "/energyForExp_", energyForExp_);
-		ioSerializer.writeToTag(label + "/aOperators_", aOperators_);
+		ioSerializer.write(label + "/sites_", sites_);
+		ioSerializer.write(label + "/startingLoops_", startingLoops_);
+		ioSerializer.write(label + "/concatenation_", concatenation_);
+		ioSerializer.write(label + "/noOperator_", noOperator_);
+		ioSerializer.write(label + "/skipTimeZero_", skipTimeZero_);
+		ioSerializer.write(label + "/isEnergyForExp_", isEnergyForExp_);
+		ioSerializer.write(label + "/gsWeight_", gsWeight_);
+		ioSerializer.write(label + "/energyForExp_", energyForExp_);
+		ioSerializer.write(label + "/aOperators_", aOperators_);
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,

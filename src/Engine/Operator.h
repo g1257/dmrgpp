@@ -252,9 +252,9 @@ struct Operator {
 		ioSerializer.createGroup(label);
 
 		data.serialize(label + "/data", ioSerializer);
-		ioSerializer.writeToTag(label + "/fermionSign", fermionSign);
-		ioSerializer.writeToTag(label + "/jm", jm);
-		ioSerializer.writeToTag(label + "/angularFactor", angularFactor);
+		ioSerializer.write(label + "/fermionSign", fermionSign);
+		ioSerializer.write(label + "/jm", jm);
+		ioSerializer.write(label + "/angularFactor", angularFactor);
 		su2Related.serialize(label + "/su2Related", ioSerializer);
 	}
 

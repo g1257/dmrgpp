@@ -201,11 +201,11 @@ public:
 		PsimagLite::OstringStream msg;
 		msg<<"Turning the engine on";
 		progress_.printline(msg,std::cout);
-		ioOut_.print("ApplicationInfo", appInfo_);
+		ioOut_.write(appInfo_, "ApplicationInfo");
 
 		PsimagLite::PsiBase64::Encode base64encode(ioIn.data());
-		ioOut_.print("InputBase64Encoded", base64encode);
-		ioOut_.print("PARAMETERS", parameters_);
+		ioOut_.write(base64encode, "InputBase64Encoded");
+		ioOut_.write(parameters_, "PARAMETERS");
 #ifndef USE_IO_NG
 		ioOut_.print("Model", model);
 #endif
@@ -215,7 +215,7 @@ public:
 	~DmrgSolver()
 	{
 		appInfo_.finalize();
-		ioOut_.print("ApplicationInfo", appInfo_);
+		ioOut_.write(appInfo_, "ApplicationInfo");
 
 		PsimagLite::OstringStream msg2;
 		msg2<<"Turning off the engine.";
@@ -224,7 +224,7 @@ public:
 
 	void main(const GeometryType& geometry, PsimagLite::String targeting)
 	{
-		ioOut_.print("GEOMETRY",geometry);
+		ioOut_.write(geometry, "GEOMETRY");
 
 		BlockType S,E;
 		VectorBlockType X,Y;

@@ -166,28 +166,28 @@ struct ParametersDmrgSolver {
 
 		ioSerializer.createGroup(root);
 
-		ioSerializer.writeToTag(root + "/nthreads", nthreads);
-		ioSerializer.writeToTag(root + "/sitesPerBlock", sitesPerBlock);
-		ioSerializer.writeToTag(root + "/maxMatrixRankStored", maxMatrixRankStored);
-		ioSerializer.writeToTag(root + "/keptStatesInfinite", keptStatesInfinite);
-		ioSerializer.writeToTag(root + "/excited", excited);
-		ioSerializer.writeToTag(root + "/dumperBegin", dumperBegin);
-		ioSerializer.writeToTag(root + "/dumperEnd", dumperEnd);
-		ioSerializer.writeToTag(root + "/precision", precision);
-		ioSerializer.writeToTag(root + "/useReflectionSymmetry", useReflectionSymmetry);
-		ioSerializer.writeToTag(root + "/truncationControl", truncationControl);
-		ioSerializer.writeToTag(root + "/filename", filename);
-		ioSerializer.writeToTag(root + "/version", version);
-		ioSerializer.writeToTag(root + "/options", options);
-		ioSerializer.writeToTag(root + "/model", model);
-		ioSerializer.writeToTag(root + "/insitu", insitu);
-		ioSerializer.writeToTag(root + "/fileForDensityMatrixEigs", fileForDensityMatrixEigs);
-		ioSerializer.writeToTag(root + "/recoverySave", recoverySave);
+		ioSerializer.write(root + "/nthreads", nthreads);
+		ioSerializer.write(root + "/sitesPerBlock", sitesPerBlock);
+		ioSerializer.write(root + "/maxMatrixRankStored", maxMatrixRankStored);
+		ioSerializer.write(root + "/keptStatesInfinite", keptStatesInfinite);
+		ioSerializer.write(root + "/excited", excited);
+		ioSerializer.write(root + "/dumperBegin", dumperBegin);
+		ioSerializer.write(root + "/dumperEnd", dumperEnd);
+		ioSerializer.write(root + "/precision", precision);
+		ioSerializer.write(root + "/useReflectionSymmetry", useReflectionSymmetry);
+		ioSerializer.write(root + "/truncationControl", truncationControl);
+		ioSerializer.write(root + "/filename", filename);
+		ioSerializer.write(root + "/version", version);
+		ioSerializer.write(root + "/options", options);
+		ioSerializer.write(root + "/model", model);
+		ioSerializer.write(root + "/insitu", insitu);
+		ioSerializer.write(root + "/fileForDensityMatrixEigs", fileForDensityMatrixEigs);
+		ioSerializer.write(root + "/recoverySave", recoverySave);
 		checkpoint.serialize(label + "/checkpoint", ioSerializer);
-		ioSerializer.writeToTag(root + "/adjustQuantumNumbers", adjustQuantumNumbers);
-		ioSerializer.writeToTag(root + "/finiteLoop", finiteLoop);
-		ioSerializer.writeToTag(root + "/degeneracyMax", degeneracyMax);
-		ioSerializer.writeToTag(root + "/denseSparseThreshold", denseSparseThreshold);
+		ioSerializer.write(root + "/adjustQuantumNumbers", adjustQuantumNumbers);
+		ioSerializer.write(root + "/finiteLoop", finiteLoop);
+		ioSerializer.write(root + "/degeneracyMax", degeneracyMax);
+		ioSerializer.write(root + "/denseSparseThreshold", denseSparseThreshold);
 	}
 
 	template<typename SomeMemResolvType>

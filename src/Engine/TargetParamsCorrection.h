@@ -117,7 +117,7 @@ public:
 	               PsimagLite::IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
-		ioSerializer.writeToTag(label + "/correctionA_", correctionA_);
+		ioSerializer.write(label + "/correctionA_", correctionA_);
 	}
 
 private:

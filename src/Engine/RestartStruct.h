@@ -26,10 +26,10 @@ struct RestartStruct {
 	{
 		PsimagLite::String root = label;
 		ioSerializer.createGroup(root);
-		ioSerializer.writeToTag(root + "/filename", filename);
-		ioSerializer.writeToTag(root + "/into", into);
-		ioSerializer.writeToTag(root + "/labelForPsi", labelForPsi);
-		ioSerializer.writeToTag(root + "/labelForEnergy", labelForEnergy);
+		ioSerializer.write(root + "/filename", filename);
+		ioSerializer.write(root + "/into", into);
+		ioSerializer.write(root + "/labelForPsi", labelForPsi);
+		ioSerializer.write(root + "/labelForEnergy", labelForEnergy);
 
 	}
 

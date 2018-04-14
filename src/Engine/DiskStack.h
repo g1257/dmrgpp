@@ -190,7 +190,7 @@ public:
 
 	void copyToIo(IoOutType& io, PsimagLite::String label)
 	{
-		io.print("META" + label + "\n", stack_);
+		io.write(stack_, "META" + label + "\n");
 
 		io<<label<<"\n";
 		io<<stack_.size()<<"\n";

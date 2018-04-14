@@ -89,9 +89,9 @@ struct FiniteLoop {
 		PsimagLite::String root = label;
 
 		ioSerializer.createGroup(root);
-		ioSerializer.writeToTag(root + "/stepLength", stepLength);
-		ioSerializer.writeToTag(root + "/keptStates", keptStates);
-		ioSerializer.writeToTag(root + "/saveOption", saveOption);
+		ioSerializer.write(root + "/stepLength", stepLength);
+		ioSerializer.write(root + "/keptStates", keptStates);
+		ioSerializer.write(root + "/saveOption", saveOption);
 	}
 
 	template<typename SomeMemResolvType>
