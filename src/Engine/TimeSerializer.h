@@ -173,22 +173,18 @@ public:
 		std::cerr<<__FILE__<<" save() needs IMPLEMENTATION WARNING FIXME\n";
 	}
 
-	void save(PsimagLite::IoSimple::Out& io)
+	void save(PsimagLite::IoSelector::Out& io)
 	{
-		PsimagLite::String s = "Time=" + ttos(currentTime_);
-		io.printline(s);
-		s = "TargetCentralSite=" + ttos(site_);
-		io.printline(s);
-		s = "#TNUMBEROFVECTORS="+ttos(targetVectors_.size());
-		io.printline(s);
+		io.write(currentTime_, "Time");
+		io.write(site_, "TargetCentralSite");
+		io.write(targetVectors_.size(), "#TNUMBEROFVECTORS");
 
 		for (SizeType i=0;i<targetVectors_.size();i++) {
 			PsimagLite::String label = "targetVector"+ttos(i)+"_"+ttos(currentTime_);
 			targetVectors_[i].save(io,label);
 		}
 
-		s="#MARKER="+ttos(marker_);
-		io.printline(s);
+		io.write(marker_, "#MARKER");
 	}
 
 private:

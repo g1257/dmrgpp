@@ -146,7 +146,7 @@ public:
 	}
 
 	// Save to disk everything needed to compute any observable
-	void save(PsimagLite::IoSimple::Out& io,
+	void save(PsimagLite::IoSelector::Out& io,
 	          SizeType option,
 	          SizeType numberOfSites) const
 	{
@@ -166,9 +166,9 @@ public:
 		for (SizeType i=0;i<lrs_.left().block().size();i++) {
 			label += ttos(lrs_.left().block()[i])+",";
 		}
+
 		io.write(transform_, label);
-		PsimagLite::String s = "#DIRECTION="+ttos(direction_);
-		io.printline(s);
+		io.write(direction_, "#DIRECTION");
 	}
 
 	const FermionSignType& fermionicSignLeft() const
