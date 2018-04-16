@@ -1,3 +1,13 @@
+2018-04-16 Version 5.12
+
+* SolverOptions diskstacks and wftStacksInDisk deleted
+
+* Targetting is now Targeting
+
+* manual updated
+
+* IoNg: work in progress
+
 2018-04-06 Version 5.10
 
 * Kitaev model implemented
