@@ -95,7 +95,8 @@ template<typename T>
 struct IsRootUnDelegated {
 	enum {True = Loki::TypeTraits<T>::isArith ||
 		  IsVectorLike<T>::True ||
-		  IsPairLike<T>::True};
+		  IsPairLike<T>::True ||
+	     __is_enum(T)};
 };
 
 class IoNg {
