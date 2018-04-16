@@ -70,7 +70,7 @@ public:
 
 	template<typename T1, typename T2>
 	void write(String name2,
-	                const std::pair<T1, T2>& what)
+	           const std::pair<T1, T2>& what)
 	{
 		createGroup(name2);
 		write(name2 + "/0", what.first);
@@ -78,7 +78,7 @@ public:
 	}
 
 	void write(String name2,
-	                const std::vector<bool>&)
+	           const std::vector<bool>&)
 	{
 		std::cerr<<"Vector of booleans with name "<<name2<<" cannot be printed ";
 		std::cerr<<"FIXME TODO WARNING\n";
@@ -86,8 +86,8 @@ public:
 
 	template<typename T>
 	void write(String name2,
-	                const std::vector<T>& what,
-	                typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
+	           const std::vector<T>& what,
+	           typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
 	{
 		String name = "Def/" + name2;
 		hsize_t dims[1];
@@ -100,8 +100,8 @@ public:
 
 	template<typename T>
 	void write(String name2,
-	                const std::vector<std::complex<T> >& what,
-	                typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
+	           const std::vector<std::complex<T> >& what,
+	           typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
 	{
 		String name = "Def/" + name2;
 		hsize_t dims[1];
@@ -114,9 +114,9 @@ public:
 
 	template<typename T>
 	void write(String name2,
-	                const std::vector<std::vector<T> >& what,
-	                typename EnableIf<Loki::TypeTraits<typename Real<T>::Type>::isArith,
-	                int>::Type = 0)
+	           const std::vector<std::vector<T> >& what,
+	           typename EnableIf<Loki::TypeTraits<typename Real<T>::Type>::isArith,
+	           int>::Type = 0)
 	{
 		SizeType n = what.size();
 		createGroup(name2);
@@ -127,10 +127,10 @@ public:
 
 	template<typename T1, typename T2>
 	void write(String name2,
-	                const std::vector<std::pair<T1, T2> >& what,
-	                typename EnableIf<
-	                Loki::TypeTraits<T1>::isArith && Loki::TypeTraits<T2>::isArith,
-	                int>::Type = 0)
+	           const std::vector<std::pair<T1, T2> >& what,
+	           typename EnableIf<
+	           Loki::TypeTraits<T1>::isArith && Loki::TypeTraits<T2>::isArith,
+	           int>::Type = 0)
 	{
 		SizeType n = what.size();
 		createGroup(name2);
@@ -141,9 +141,9 @@ public:
 
 	template<typename T>
 	void write(String name2,
-	                const std::vector<T>& what,
-	                typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
-	                int>::Type = 0)
+	           const std::vector<T>& what,
+	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
+	           int>::Type = 0)
 	{
 		SizeType n = what.size();
 		createGroup(name2);
@@ -154,9 +154,9 @@ public:
 
 	template<typename T>
 	void write(String name2,
-	                const std::vector<T*>& what,
-	                typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
-	                int>::Type = 0)
+	           const std::vector<T*>& what,
+	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
+	           int>::Type = 0)
 	{
 		SizeType n = what.size();
 		createGroup(name2);
