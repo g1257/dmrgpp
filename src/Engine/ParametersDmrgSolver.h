@@ -105,7 +105,10 @@ PSIDOCCOPY dmrgSolverOptions
 result
 of doing \verb!git rev-parse HEAD!.
 
-\item[outputfile=string]  The output file. This file will be created if non-existent,
+\item[outputfile=string]  The root for the output file.
+If IoNg is used the output file will be added the hdf5 extension.
+If IoNg is not used then no extension will be added.
+This file will be created if non-existent,
  and if it
 exits it will be truncated.
 
@@ -225,6 +228,16 @@ struct ParametersDmrgSolver {
 		options += sOptions;
 		io.readline(version,"Version=");
 		io.readline(filename,"OutputFile=");
+#ifdef USE_IO_NG
+		size_t findIndex = filename.find(".txt");
+		if (findIndex != PsimagLite::String::npos)
+			filename.replace(findIndex, PsimagLite::String(".txt").length(), ".hd5");
+
+		findIndex = filename.find(".hd5");
+		if (findIndex == PsimagLite::String::npos)
+			filename += ".hd5";
+#endif
+
 		if (earlyExit) return;
 
 		io.readline(keptStatesInfinite,"InfiniteLoopKeptStates=");
