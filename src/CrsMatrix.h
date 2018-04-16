@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "loki/TypeTraits.h"
 #include "Mpi.h"
-#include "IoSerializerStub.h"
+#include "Io/IoSerializerStub.h"
 
 namespace PsimagLite {
 

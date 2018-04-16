@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "GeometryTerm.h"
 #include "GeometryEx.h"
 #include "BoostSerializationHeaders.h"
-#include "IoSerializerStub.h"
+#include "Io/IoSerializerStub.h"
 
 namespace PsimagLite {
 

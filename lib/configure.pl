@@ -47,15 +47,17 @@ sub createMakefile
 	local *FH = $fh;
 	my @units = ("MersenneTwister","Matrix","Mpi","Concurrency",
 	"ProgressIndicator","MemResolv","PsimagLite","PsiBase64",
-	"SpecialFunctions", "IoNgSerializer");
+	"SpecialFunctions", "Io/IoNgSerializer");
 	my $combinedUnits = combine("",\@units,".o ");
+	my $combinedUnitsModif = $combinedUnits;
+	$combinedUnitsModif =~ s/Io\///;
 	my $combinedUnits2 = combine("../src/",\@units,".cpp ");
 
 	print FH<<EOF;
 include Config.make
 all: libpsimaglite.a
 libpsimaglite.a: Makefile $combinedUnits AinurSpirit.o AinurState.o
-\tar rcs libpsimaglite.a $combinedUnits AinurSpirit.o AinurState.o
+\tar rcs libpsimaglite.a $combinedUnitsModif AinurSpirit.o AinurState.o
 EOF
 
 	foreach my $unit (@units) {

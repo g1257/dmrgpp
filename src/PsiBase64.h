@@ -37,7 +37,7 @@ René Nyffenegger rene.nyffenegger@adp-gmbh.ch
 #define PSIBASE64_H
 
 #include "Vector.h"
-#include "IoSerializerStub.h"
+#include "Io/IoSerializerStub.h"
 
 namespace PsimagLite {
 

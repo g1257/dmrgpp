@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define GEOMETRY_DIR_H
 #include <cassert>
 #include "BoostSerializationHeaders.h"
-#include "IoSerializerStub.h"
+#include "Io/IoSerializerStub.h"
 
 namespace PsimagLite {
 

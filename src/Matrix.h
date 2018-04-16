@@ -28,7 +28,7 @@ Please see full open source license included in file LICENSE.
 #include <cassert>
 #include "TypeToString.h"
 #include "Mpi.h"
-#include "IoSerializerStub.h"
+#include "Io/IoSerializerStub.h"
 
 namespace PsimagLite {
 
