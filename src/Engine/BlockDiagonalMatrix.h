@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 #include "PsimagLite.h"
 #include "EnforcePhase.h"
-#include "IoSelector.h"
+#include "Io/IoSelector.h"
 
 namespace Dmrg {
 

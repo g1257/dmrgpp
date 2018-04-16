@@ -5,7 +5,7 @@
 #define USE_PTHREADS_OR_NOT_NG
 #include "Observer.h"
 #include "ObservableLibrary.h"
-#include "IoSelector.h"
+#include "Io/IoSelector.h"
 #include "Operators.h"
 #include "Geometry/Geometry.h"
 #include "CrsMatrix.h"

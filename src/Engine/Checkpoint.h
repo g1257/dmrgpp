@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DiskStack.h"
 #include "ProgressIndicator.h"
 #include "ProgramGlobals.h"
-#include "IoSelector.h"
+#include "Io/IoSelector.h"
 
 namespace Dmrg {
 

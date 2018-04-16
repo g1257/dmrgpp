@@ -89,7 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 #include "SymmetryElectronsSz.h"
 #include "TargetingBase.h"
-#include "IoSelector.h"
+#include "Io/IoSelector.h"
 
 namespace Dmrg {
 

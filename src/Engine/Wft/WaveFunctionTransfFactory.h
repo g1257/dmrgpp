@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "WaveFunctionTransfLocal.h"
 #include "WaveFunctionTransfSu2.h"
 #include "DmrgWaveStruct.h"
-#include "IoSelector.h"
+#include "Io/IoSelector.h"
 #include "Random48.h"
 
 namespace Dmrg {

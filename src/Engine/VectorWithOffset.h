@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define VECTOR_WITH_OFFSET_H
 #include "Vector.h"
 #include "ProgressIndicator.h"
-#include "IoSimple.h"
+#include "Io/IoSimple.h"
 #include <typeinfo>
 
 namespace Dmrg {

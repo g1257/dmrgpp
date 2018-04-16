@@ -1,6 +1,6 @@
 #ifndef OPERATORSPEC_H
 #define OPERATORSPEC_H
-#include "IoSelector.h"
+#include "Io/IoSelector.h"
 
 namespace Dmrg {
 

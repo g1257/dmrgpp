@@ -3,7 +3,7 @@
 
 #include "Vector.h"
 #include <iostream>
-#include "IoSerializerStub.h"
+#include "Io/IoSerializerStub.h"
 
 namespace Dmrg {
 /* PSIDOC FiniteLoop

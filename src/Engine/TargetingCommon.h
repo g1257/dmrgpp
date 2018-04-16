@@ -89,7 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ContinuedFraction.h"
 #include <cassert>
 #include "ApplyOperatorExpression.h"
-#include "IoSelector.h"
+#include "Io/IoSelector.h"
 #include "PsimagLite.h"
 
 namespace Dmrg {

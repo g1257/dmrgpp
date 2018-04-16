@@ -78,7 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef METTS_SERIALIZER_H
 #define METTS_SERIALIZER_H
 
-#include "IoSelector.h"
+#include "Io/IoSelector.h"
 #include "TypeToString.h"
 
 namespace Dmrg {

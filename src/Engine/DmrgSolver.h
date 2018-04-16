@@ -101,7 +101,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingRixsDynamic.h"
 #include "PsiBase64.h"
 #include "PrinterInDetail.h"
-#include "IoSelector.h"
+#include "Io/IoSelector.h"
 
 namespace Dmrg {
 

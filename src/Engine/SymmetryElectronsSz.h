@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "TypeToString.h"
 #include "ProgramGlobals.h"
-#include "IoSelector.h"
+#include "Io/IoSelector.h"
 #include "TargetQuantumElectrons.h"
 
 namespace Dmrg {

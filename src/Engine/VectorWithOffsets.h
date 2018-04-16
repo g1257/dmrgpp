@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include <cassert>
 #include "ProgramGlobals.h"
-#include "IoSimple.h"
+#include "Io/IoSimple.h"
 #include <typeinfo>
 
 // FIXME: a more generic solution is needed instead of tying

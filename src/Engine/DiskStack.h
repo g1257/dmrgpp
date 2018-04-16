@@ -74,7 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 // All these includes are in PsimagLite
 #include "Stack.h"
-#include "IoSelector.h"
+#include "Io/IoSelector.h"
 #include "ProgressIndicator.h"
 
 // A disk stack, similar to std::stack but stores in disk not in memory

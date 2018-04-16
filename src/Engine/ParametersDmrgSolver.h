@@ -85,12 +85,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "Provenance.h"
 #include "BoostSerializationHeaders.h"
-#include "IoSelector.h"
+#include "Io/IoSelector.h"
 #include "ArchiveFiles.h"
 #include "PsimagLite.h"
 #include "RestartStruct.h"
 #include "FiniteLoop.h"
-#include "IoSerializerStub.h"
+#include "Io/IoSerializerStub.h"
 
 namespace Dmrg {
 
