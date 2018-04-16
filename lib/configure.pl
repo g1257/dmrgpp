@@ -47,7 +47,7 @@ sub createMakefile
 	local *FH = $fh;
 	my @units = ("MersenneTwister","Matrix","Mpi","Concurrency",
 	"ProgressIndicator","MemResolv","PsimagLite","PsiBase64",
-	"SpecialFunctions", "Io/IoNgSerializer");
+	"SpecialFunctions", "Io/TypeToH5");
 	my $combinedUnits = combine("",\@units,".o ");
 	my $combinedUnitsModif = $combinedUnits;
 	$combinedUnitsModif =~ s/Io\///;

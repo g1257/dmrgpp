@@ -390,11 +390,11 @@ public:
 		void internalRead(void* ptr, String label, H5::DataSet& dataset) const
 		{
 			H5T_class_t typeClass = dataset.getTypeClass();
-			if (typeClass != ToH5<T>::super)
+			if (typeClass != TypeToH5<T>::super)
 				throw RuntimeError("Reading " + label + " has incorrect type\n");
 			// H5::FloatType ft = dataset.getFloatType(); // <-- check correct subtype FIXME
 
-			dataset.read(ptr, ToH5<T>::type);
+			dataset.read(ptr, TypeToH5<T>::type);
 		}
 
 		H5::H5File* hdf5File_;

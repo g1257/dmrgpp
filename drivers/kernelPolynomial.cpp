@@ -23,7 +23,7 @@ Please see full open source license included in file LICENSE.
 #include <cstdlib>
 #include <unistd.h>
 #include "ChebyshevSerializer.h"
-#include "IoSimple.h"
+#include "Io/IoSimple.h"
 
 void usage(const char *progName)
 {

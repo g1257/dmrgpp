@@ -1,6 +1,6 @@
 #ifdef USE_IO_NG
 
-#include "TypeToH5.h".h"
+#include "TypeToH5.h"
 
 namespace PsimagLite {
 

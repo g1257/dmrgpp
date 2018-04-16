@@ -22,7 +22,7 @@ Please see full open source license included in file LICENSE.
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
-#include "IoSimple.h"
+#include "Io/IoSimple.h"
 #include "TridiagonalMatrix.h"
 #include "ContinuedFraction.h"
 #include "ContinuedFractionCollection.h"
