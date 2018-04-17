@@ -4,12 +4,12 @@ NumberOfTerms=3
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
-Connectors 1 0.0 
+Connectors 1 0.0
 
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
-Connectors 1 0.0 
+Connectors 1 0.0
 
 DegreesOfFreedom=1
 GeometryKind=LongRange
@@ -25,11 +25,11 @@ Connectors 6 6
 Model=HeisenbergAncillaC
 HeisenbergTwiceS=1
 
-SolverOptions=twositedmrg
+SolverOptions=twositedmrg,MatrixVectorOnTheFly
 Version=version
 OutputFile=data1810.txt
 InfiniteLoopKeptStates=60
-FiniteLoops 4  2 100 0 -2 100 0 -2 100 0 2 100 0 
+FiniteLoops 4  2 100 0 -2 100 0 -2 100 0 2 100 0
 TargetElectronsTotal=3
 TargetSzPlusConst=6
 

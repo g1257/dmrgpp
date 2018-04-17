@@ -4,11 +4,6 @@ NumberOfTerms=5
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
-Connectors  1 0 
-
-DegreesOfFreedom=1
-GeometryKind=chain
-GeometryOptions=ConstantValues
 Connectors  1 0
 
 DegreesOfFreedom=1
@@ -19,7 +14,12 @@ Connectors  1 0
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
-Connectors  1 0 
+Connectors  1 0
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors  1 0
 
 DegreesOfFreedom=1
 GeometryKind=LongRange
@@ -33,9 +33,9 @@ Connectors 6 6
 -1 -1 -1 -1 -1  0
 
 Model=TjAncillaC
-potentialV	 12 0 0 0 0 0 0 
+potentialV	 12 0 0 0 0 0 0
                     0 0 0 0 0 0
-SolverOptions=twositedmrg
+SolverOptions=twositedmrg,MatrixVectorOnTheFly
 Version=version
 OutputFile=data1850.txt
 InfiniteLoopKeptStates=60

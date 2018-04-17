@@ -123,7 +123,7 @@ sub getMinParams
 {
 	my ($gamma, $delta, $anorm, $file, $mu, $kx) = @_;
 	my $ky = 0;
-	my $cmd = "../../PsimagLite/drivers/fit $file $mu $kx $ky";
+	my $cmd = $ENV{"HOME"}."/github/PsimagLite/drivers/fit $file $mu $kx $ky";
 	open(PIPE, "$cmd |") or die "$0: Cannot open pipe : $!\n";
 	while (<PIPE>) {
 		next if (/^#/);
