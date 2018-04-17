@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CHECKPOINT_H
 
 #include "Stack.h"
-#include "DiskStack.h"
+#include "DiskStackSelector.h"
 #include "ProgressIndicator.h"
 #include "ProgramGlobals.h"
 #include "Io/IoSelector.h"

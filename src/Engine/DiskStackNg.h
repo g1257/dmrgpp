@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2015, UT-Battelle, LLC
+Copyright (c) 2009-2015-2018, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 5.]
@@ -69,8 +69,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 */
 
-#ifndef DISKSTACK_H
-#define DISKSTACK_H
+#ifndef DISKSTACK_NG_H
+#define DISKSTACK_NG_H
 
 // All these includes are in PsimagLite
 #include "Stack.h"
