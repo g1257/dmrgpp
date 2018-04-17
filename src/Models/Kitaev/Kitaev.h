@@ -321,13 +321,13 @@ private:
 		assert(TWICE_THE_SPIN == 1);
 
 		if (dir == DIR_X) {
-			cm(0,1) = cm(1,0) = 1.0;
+			cm(0,1) = cm(1,0) = 0.5;
 		} else if (dir == DIR_Y) {
-			cm(0, 1) = std::complex<RealType>(0.0, -1.0); 
-			cm(1, 0) = std::complex<RealType>(0.0, 1.0);  
+			cm(0, 1) = std::complex<RealType>(0.0, -0.5); 
+			cm(1, 0) = std::complex<RealType>(0.0, 0.5);  
 		} else if (dir == DIR_Z) {
-			cm(0, 0) = 1.0;
-			cm(1, 1) = -1.0;
+			cm(0, 0) = 0.5;
+			cm(1, 1) = -0.5;
 		} else {
 			assert(false);
 		}
