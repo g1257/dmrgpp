@@ -514,7 +514,7 @@ public:
 
 		VectorSizeType qnShrink;
 		shrinkVector(qnShrink, quantumNumbers_, partition_);
-		io.write(qnShrink,"#QNShrink");
+		io.write(qnShrink,"QNShrink");
 
 		if (useSu2Symmetry_) symmSu2_.write(io);
 		else symmLocal_.write(io);
@@ -609,7 +609,7 @@ private:
 			permutationVector_[permInverse_[i]]=i;
 
 		VectorSizeType qnShrink;
-		io.read(qnShrink,"#QNShrink");
+		io.read(qnShrink,"QNShrink");
 		unShrinkVector(quantumNumbers_, qnShrink, partition_);
 
 		dmrgTransformed_=false;

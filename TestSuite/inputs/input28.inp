@@ -20,7 +20,7 @@ HeisenbergTwiceS=1
 
 InfiniteLoopKeptStates=128
 FiniteLoops 5
-3 200 0 
+3 200 0
 -6 200 0 6 200 0
 -6 200 0 6 200 1
 

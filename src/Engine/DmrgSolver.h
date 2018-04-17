@@ -483,7 +483,7 @@ private:
 		if (!saveData_) return;
 		checkpoint_.write(pS,pE,ioOut_);
 		psi.write(sitesIndices_[stepCurrent_],ioOut_);
-		ioOut_.write(lastSign, "LastLoopSign=");
+		ioOut_.write(lastSign, "LastLoopSign");
 	}
 
 	void finiteStep(BlockType const &,
