@@ -234,7 +234,7 @@ public:
 			this->common().targetVectors(site) = ts.vector(site);
 		}
 
-		this->common().template load<TimeSerializerType>(f,0);
+		this->common().template read<TimeSerializerType>(f,0);
 #endif
 	}
 
