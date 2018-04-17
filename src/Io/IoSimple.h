@@ -93,6 +93,11 @@ namespace PsimagLite {
 //! IoSimple class handles Input/Output (IO) for the Dmrg++ program
 class IoSimple {
 
+	template<typename T>
+	struct PrintWithEqualSign {
+		enum { True = Loki::TypeTraits<T>::isArith || __is_enum(T) };
+	};
+
 public:
 
 	class Out {
@@ -178,7 +183,7 @@ public:
 		template<typename T>
 		void write(const T&x,
 		           const String& label,
-		           typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
+		           typename EnableIf<PrintWithEqualSign<T>::True, int>::Type = 0)
 		{
 			(*fout_)<<label<<"="<<x<<"\n";
 		}
@@ -186,7 +191,7 @@ public:
 		template<class T>
 		void write(const T& something,
 		           const String& label,
-		           typename EnableIf<!Loki::TypeTraits<T>::isArith, int>::Type = 0)
+		           typename EnableIf<!PrintWithEqualSign<T>::True, int>::Type = 0)
 		{
 			if (rank_!=0) return;
 			if (!(*fout_) || !fout_->good())
