@@ -173,6 +173,7 @@ void mainLoop0(InputNgType::Readable& io,
 	        targeting != "GroundStateTargeting" &&
 	        targeting != "TargetingCorrelations" &&
 	        targeting != "CorrectionTargeting" &&
+	        targeting != "CorrectionVectorTargeting" &&
 	        targeting != "TargetingInSitu") {
 		PsimagLite::String str("SolverOptions=useComplex not allowed for ");
 		str += targeting + "\n";
