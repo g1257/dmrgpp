@@ -14,7 +14,7 @@ potentialV	32  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 		     0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 		     0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 Model=HubbardOneBand
-SolverOptions=MatrixVectorKron,useSvd
+SolverOptions=useSvd
 Version=version
 OutputFile=data5030.txt
 InfiniteLoopKeptStates=100

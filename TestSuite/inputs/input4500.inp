@@ -46,7 +46,7 @@ MagneticField 8
 Model=HeisenbergAnisotropic
 HeisenbergTwiceS=1
 
-SolverOptions=twositedmrg,MatrixVectorKron
+SolverOptions=twositedmrg
 Version=none
 OutputFile=data4500.txt
 InfiniteLoopKeptStates=50

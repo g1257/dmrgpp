@@ -27,7 +27,7 @@ TargetSzPlusConst=4
 TargetSpinTimesTwo=0
 Threads=1
 
-SolverOptions=CorrectionVectorTargeting,twositedmrg,minimizeDisk,restart,MatrixVectorKron,useSvd
+SolverOptions=CorrectionVectorTargeting,twositedmrg,minimizeDisk,restart,useSvd
 CorrectionA=0
 Version=version
 RestartFilename=data28.txt
@@ -56,7 +56,7 @@ RAW_MATRIX
 0.5 0  
 0 -0.5
 FERMIONSIGN=1
-JMVALUES 0 0
+JMVALUES 2 0 0
 AngularFactor=1
 
 #ci dmrg arguments= -p 12 "z"

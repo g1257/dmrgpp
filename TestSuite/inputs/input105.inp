@@ -24,7 +24,7 @@ FiniteLoops 5
 TargetElectronsUp=4
 TargetElectronsDown=4
 Threads=1
-SolverOptions=twositedmrg,MatrixVectorKron,useSvd
+SolverOptions=twositedmrg,useSvd
 Version=version
 TruncationTolerance=1e-7
 LanczosEps=1e-7

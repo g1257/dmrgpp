@@ -60,7 +60,7 @@ RAW_MATRIX
 0.0    0.0    0.0   1
 0.0    0.0    0.0   0.0 
 FERMIONSIGN=-1
-JMVALUES 0 0
+JMVALUES 2 0 0
 AngularFactor=1
 
 TSPOperator=raw 
@@ -71,7 +71,7 @@ RAW_MATRIX
 0.0    0.0    0.0   1
 0.0    0.0    0.0   0.0 
 FERMIONSIGN=-1
-JMVALUES 0 0
+JMVALUES 2 0 0
 AngularFactor=1
 
 TSPOperator=raw 
@@ -82,7 +82,7 @@ RAW_MATRIX
 0.0    0.0    0.0   1
 0.0    0.0    0.0   0.0 
 FERMIONSIGN=-1
-JMVALUES 0 0
+JMVALUES 2 0 0
 AngularFactor=1
 
 TSPOperator=raw 
@@ -93,7 +93,7 @@ RAW_MATRIX
 0.0    0.0    0.0   1
 0.0    0.0    0.0   0.0 
 FERMIONSIGN=-1
-JMVALUES 0 0
+JMVALUES 2 0 0
 AngularFactor=1
 
 TSPOperator=raw 
@@ -104,7 +104,7 @@ RAW_MATRIX
 0.0    0.0    0.0   1
 0.0    0.0    0.0   0.0 
 FERMIONSIGN=-1
-JMVALUES 0 0
+JMVALUES 2 0 0
 AngularFactor=1
 
 TSPOperator=raw 
@@ -115,7 +115,7 @@ RAW_MATRIX
 0.0    0.0    0.0   1
 0.0    0.0    0.0   0.0 
 FERMIONSIGN=-1
-JMVALUES 0 0
+JMVALUES 2 0 0
 AngularFactor=1
 
 TSPOperator=raw 
@@ -126,7 +126,7 @@ RAW_MATRIX
 0.0    0.0    0.0   1
 0.0    0.0    0.0   0.0 
 FERMIONSIGN=-1
-JMVALUES 0 0
+JMVALUES 2 0 0
 AngularFactor=1
 
 TSPOperator=raw 
@@ -137,6 +137,6 @@ RAW_MATRIX
 0.0    0.0    0.0   1
 0.0    0.0    0.0   0.0 
 FERMIONSIGN=-1
-JMVALUES 0 0
+JMVALUES 2 0 0
 AngularFactor=1
 
