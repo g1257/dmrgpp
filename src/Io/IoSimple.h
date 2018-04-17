@@ -191,7 +191,7 @@ public:
 			if (rank_!=0) return;
 			if (!(*fout_) || !fout_->good())
 				throw RuntimeError("Out: file not open!\n");
-			(*fout_)<<label;
+			(*fout_)<<label<<"\n";
 			(*fout_)<<something<<"\n";
 		}
 
