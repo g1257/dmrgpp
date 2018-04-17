@@ -93,17 +93,17 @@ public:
 	}
 
 	template<typename SomeIoOutputType>
-	void save(SomeIoOutputType&) const
+	void write(SomeIoOutputType&) const
 	{
 		String name(typeid(SomeIoOutputType).name());
 		std::cerr<<"WARNING: cannot save ContinuedFraction";
 		std::cerr<<"to output type "<<name<<"\n";
 	}
 
-	void save(IoSimple::Out& io) const
+	void write(IoSimple::Out& io) const
 	{
 		io.setPrecision(12);
-		ab_.save(io);
+		ab_.write(io);
 
 		String f = (freqEnum_ == FREQ_MATSUBARA) ? "Matsubara" : "Real";
 		io.write(f, "#FreqEnum=");

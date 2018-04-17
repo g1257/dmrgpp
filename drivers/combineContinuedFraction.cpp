@@ -57,7 +57,7 @@ int main(int argc,char *argv[])
 
 	IoSimple::Out ioOut(std::cout);
 	ioOut.setPrecision(12);
-	cfCollection.save(ioOut);
+	cfCollection.write(ioOut);
 
 }
 

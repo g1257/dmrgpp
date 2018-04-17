@@ -101,7 +101,7 @@ public:
 	}
 
 	template<typename IoOutputType>
-	void save(IoOutputType& io) const
+	void write(IoOutputType& io) const
 	{
 		io.write(a_,"#Avector");
 		io.write(b_,"#Bvector");
