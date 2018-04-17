@@ -268,8 +268,6 @@ public:
 
 		ioIn_.printUnused(std::cerr);
 
-		if (saveData_) psi->print(ioOut_);
-
 		MyBasisWithOperators pS("BasisWithOperators.System");
 		MyBasisWithOperators pE("BasisWithOperators.Environ");
 

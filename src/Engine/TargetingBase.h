@@ -224,12 +224,6 @@ public:
 
 	const LeftRightSuperType& lrs() const { return lrs_; }
 
-	template<typename IoOutType>
-	void print(IoOutType&) const
-	{
-		std::cerr<<__FILE__<<" print() isn't needed WARNING REMOVE FIXME\n";
-	}
-
 protected:
 
 	TargetingCommonType& common()
