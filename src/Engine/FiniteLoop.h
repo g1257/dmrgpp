@@ -83,7 +83,7 @@ struct FiniteLoop {
 	    : stepLength(sl),keptStates(ks),saveOption(so)
 	{}
 
-	void serialize(PsimagLite::String label,
+	void write(PsimagLite::String label,
 	               PsimagLite::IoSerializer& ioSerializer) const
 	{
 		PsimagLite::String root = label;

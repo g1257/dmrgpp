@@ -604,10 +604,10 @@ private:
 		else
 			checkpoint_.push((twoSiteDmrg) ? lrs_.right() : pE, ProgramGlobals::ENVIRON);
 
-		serialize(fsS,fsE,target,direction,saveOption);
+		write(fsS,fsE,target,direction,saveOption);
 	}
 
-	void serialize(const FermionSignType& fsS,
+	void write(const FermionSignType& fsS,
 	               const FermionSignType& fsE,
 	               const TargetingType& target,
 	               ProgramGlobals::DirectionEnum direction,

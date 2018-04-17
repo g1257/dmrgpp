@@ -246,16 +246,16 @@ struct Operator {
 		transposeConjugate(data,data2);
 	}
 
-	void serialize(PsimagLite::String label,
+	void write(PsimagLite::String label,
 	               PsimagLite::IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
 
-		data.serialize(label + "/data", ioSerializer);
+		data.write(label + "/data", ioSerializer);
 		ioSerializer.write(label + "/fermionSign", fermionSign);
 		ioSerializer.write(label + "/jm", jm);
 		ioSerializer.write(label + "/angularFactor", angularFactor);
-		su2Related.serialize(label + "/su2Related", ioSerializer);
+		su2Related.write(label + "/su2Related", ioSerializer);
 	}
 
 	void write(std::ostream& os) const

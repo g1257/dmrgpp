@@ -281,7 +281,7 @@ public:
 		return gsWeight_;
 	}
 
-	void serialize(PsimagLite::String label,
+	void write(PsimagLite::String label,
 	               PsimagLite::IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);

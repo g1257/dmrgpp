@@ -103,7 +103,7 @@ public:
 
 	virtual SizeType sites() const { return 0; }
 
-	void serialize(PsimagLite::String,
+	void write(PsimagLite::String,
 	               PsimagLite::IoSerializer&) const
 	{
 		// this function intentionally left blank

@@ -21,7 +21,7 @@ struct RestartStruct {
 		return 0;
 	}
 
-	void serialize(PsimagLite::String label,
+	void write(PsimagLite::String label,
 	               PsimagLite::IoSerializer& ioSerializer) const
 	{
 		PsimagLite::String root = label;

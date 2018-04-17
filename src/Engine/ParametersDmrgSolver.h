@@ -162,7 +162,7 @@ struct ParametersDmrgSolver {
 	FieldType degeneracyMax;
 	FieldType denseSparseThreshold;
 
-	void serialize(PsimagLite::String label,
+	void write(PsimagLite::String label,
 	               PsimagLite::IoSerializer& ioSerializer) const
 	{
 		PsimagLite::String root = label;
@@ -186,7 +186,7 @@ struct ParametersDmrgSolver {
 		ioSerializer.write(root + "/insitu", insitu);
 		ioSerializer.write(root + "/fileForDensityMatrixEigs", fileForDensityMatrixEigs);
 		ioSerializer.write(root + "/recoverySave", recoverySave);
-		checkpoint.serialize(label + "/checkpoint", ioSerializer);
+		checkpoint.write(label + "/checkpoint", ioSerializer);
 		ioSerializer.write(root + "/adjustQuantumNumbers", adjustQuantumNumbers);
 		ioSerializer.write(root + "/finiteLoop", finiteLoop);
 		ioSerializer.write(root + "/degeneracyMax", degeneracyMax);

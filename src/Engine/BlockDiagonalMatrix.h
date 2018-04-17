@@ -288,9 +288,9 @@ public:
 		return data_[i];
 	}
 
-	void serialize(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
+	void write(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
 	{
-		std::cerr<<"BlockDiagonalMatrix::serialize(...) with label ";
+		std::cerr<<"BlockDiagonalMatrix::write(...) with label ";
 		std::cerr<<label<<" unimplemented FIXME WARNING\n";
 	}
 
