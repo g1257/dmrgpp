@@ -324,7 +324,7 @@ public:
 			\item[tarNoDelete] Do not delete output files after taring them.
 			\item[recoveryNoDelete] Do not delete recovery files even if run finishes OK
 			\item[neverNormalizeVectors] TBW
-			\item [advanceOnlyAtBorder] Advance time only at borders
+			\item [advanceUnrestricted] Don't restrict advance time to borders
 			\item [findSymmetrySector] Find symmetry sector with lowest energy, and
 			ignore value set in TargetElectronsUp or TargetSzPlusConst
 			\item [KroneckerDumper] TBW
@@ -387,7 +387,7 @@ public:
 		registerOpts.push_back("noSaveData");
 		registerOpts.push_back("noSaveWft");
 		registerOpts.push_back("minimizeDisk");
-		registerOpts.push_back("advanceOnlyAtBorder");
+		registerOpts.push_back("advanceUnrestricted");
 		registerOpts.push_back("findSymmetrySector");
 		registerOpts.push_back("KroneckerDumper");
 		registerOpts.push_back("doNotCheckTwoSiteDmrg");

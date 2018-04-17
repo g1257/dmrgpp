@@ -489,7 +489,7 @@ private:
 		if (stage_[i] == OPERATOR) checkOrder(i);
 
 		PsimagLite::String options = targetHelper_.model().params().options;
-		bool advanceOnlyAtBorder = (options.find("advanceOnlyAtBorder") !=
+		bool advanceOnlyAtBorder = (options.find("advanceUnrestricted") ==
 		        PsimagLite::String::npos);
 		SizeType sites = targetHelper_.model().geometry().numberOfSites();
 		bool weAreAtBorder = (site < 2 || site >= sites-2);
