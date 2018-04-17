@@ -521,7 +521,7 @@ public:
 		MPI::recv(values_,root,tag+4,mpiComm);
 	}
 
-	void serialize(String label, IoSerializer& ioSerializer) const
+	void write(String label, IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
 

@@ -150,7 +150,7 @@ public:
 		return str;
 	}
 
-	void serialize(PsimagLite::String label, IoSerializer& ioSerializer) const
+	void write(PsimagLite::String label, IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
 		ioSerializer.write(label + "/linSize_", linSize_);

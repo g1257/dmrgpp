@@ -110,7 +110,7 @@ public:
 	}
 	// end all ctors
 
-	void serialize(String label, IoSerializer& ioSerializer) const
+	void write(String label, IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
 		ioSerializer.write(label + "/nrow_", nrow_);

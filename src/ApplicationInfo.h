@@ -139,7 +139,7 @@ public:
 		return runId_;
 	}
 
-	void serialize(String label, IoSerializer& serializer) const
+	void write(String label, IoSerializer& serializer) const
 	{
 		String root = label;
 		if (!isFinalized_) {

@@ -194,7 +194,7 @@ public:
 		           String name2,
 		           typename EnableIf<!IsRootUnDelegated<T>::True, int>::Type = 0)
 		{
-			what.serialize(name2, ioNgSerializer_);
+			what.write(name2, ioNgSerializer_);
 		}
 
 		int rank() { throw RuntimeError("IoNg:: not implemented\n"); }

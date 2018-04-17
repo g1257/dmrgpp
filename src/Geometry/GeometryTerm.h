@@ -114,7 +114,7 @@ public:
 		    : debug(d), termId(t), numberOfTerms(n), linSize(l)
 		{}
 
-		void serialize(PsimagLite::String label, IoSerializer& ioSerializer) const
+		void write(PsimagLite::String label, IoSerializer& ioSerializer) const
 		{
 			ioSerializer.createGroup(label);
 			ioSerializer.write(label + "/debug", debug);
@@ -207,16 +207,16 @@ public:
 		if (geometryBase_) delete geometryBase_;
 	}
 
-	void serialize(PsimagLite::String label, IoSerializer& ioSerializer) const
+	void write(PsimagLite::String label, IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
-		aux_.serialize(label + "/aux_", ioSerializer);
+		aux_.write(label + "/aux_", ioSerializer);
 		ioSerializer.write(label + "/orbitals_", orbitals_);
-		// geometryBase_->serialize(label + "/geometryBase_", ioSerializer);
+		// geometryBase_->write(label + "/geometryBase_", ioSerializer);
 		ioSerializer.write(label + "/gOptions_", gOptions_);
 		ioSerializer.write(label + "/vModifier_", vModifier_);
 		ioSerializer.write(label + "/directions_", directions_);
-		cachedValues_.serialize(label + "/cachedValues_", ioSerializer);
+		cachedValues_.write(label + "/cachedValues_", ioSerializer);
 	}
 
 	static String import()
@@ -240,7 +240,7 @@ public:
 	}
 
 	template<class Archive>
-	void serialize(Archive &, const unsigned int)
+	void write(Archive &, const unsigned int)
 	{}
 
 	template<typename SomeMemResolvType>

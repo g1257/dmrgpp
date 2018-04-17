@@ -176,9 +176,9 @@ public:
 	}
 
 	template<class Archive>
-	void serialize(Archive&, const unsigned int)
+	void write(Archive&, const unsigned int)
 	{
-		throw RuntimeError("LongRange::serialize(): unimplemented\n");
+		throw RuntimeError("LongRange::write(): unimplemented\n");
 	}
 
 	SizeType memResolv(MemResolv&,

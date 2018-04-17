@@ -97,7 +97,7 @@ public:
 		    : constantValues(c), dirId(d), edof(e)
 		{}
 
-		void serialize(PsimagLite::String label, IoSerializer& ioSerializer) const
+		void write(PsimagLite::String label, IoSerializer& ioSerializer) const
 		{
 			ioSerializer.createGroup(label);
 			ioSerializer.write(label + "/constantValues", constantValues);
@@ -152,16 +152,16 @@ public:
 		io.prefix() = savedPrefix;
 	}
 
-	void serialize(PsimagLite::String label, IoSerializer& ioSerializer) const
+	void write(PsimagLite::String label, IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
-		aux_.serialize(label + "/aux_", ioSerializer);
+		aux_.write(label + "/aux_", ioSerializer);
 		ioSerializer.write(label + "/dataType_", dataType_);
 		ioSerializer.write(label + "/orbitals_", orbitals_);
 		// geometryBase_
 		ioSerializer.write(label + "/dataNumbers_", dataNumbers_);
 		ioSerializer.write(label + "/dataMatrices_", dataMatrices_);
-		rawHoppings_.serialize(label + "/rawHoppings_", ioSerializer);
+		rawHoppings_.write(label + "/rawHoppings_", ioSerializer);
 	}
 
 	template<typename SomeMemResolvType>

@@ -95,7 +95,7 @@ public:
 	{}
 
 	template<class Archive>
-	void serialize(Archive & ar, const unsigned int)
+	void write(Archive & ar, const unsigned int)
 	{
 		ar & boost::serialization::base_object<GeometryBase<ComplexOrRealType, InputType> >(*this);
 		ar & linSize_;

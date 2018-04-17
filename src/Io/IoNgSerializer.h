@@ -144,7 +144,7 @@ public:
 		createGroup(name2);
 		write(name2 + "/SIZE", n);
 		for (SizeType i = 0; i < n; ++i)
-			what[i].serialize(name2 + "/" + typeToString(i), *this);
+			what[i].write(name2 + "/" + typeToString(i), *this);
 	}
 
 	template<typename T>
@@ -157,7 +157,7 @@ public:
 		createGroup(name2);
 		write(name2 + "/SIZE", n);
 		for (SizeType i = 0; i < n; ++i)
-			what[i]->serialize(name2 + "/" + typeToString(i), *this);
+			what[i]->write(name2 + "/" + typeToString(i), *this);
 	}
 
 private:

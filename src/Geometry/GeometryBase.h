@@ -110,7 +110,7 @@ public:
 	{}
 
 	template<class Archive>
-	void serialize(Archive&, const unsigned int)
+	void write(Archive&, const unsigned int)
 	{}
 
 	virtual SizeType memResolv(MemResolv& mres,

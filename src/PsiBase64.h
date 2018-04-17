@@ -63,7 +63,7 @@ public:
 
 		const String& operator()() const { return buffer_; }
 
-		void serialize(String label, PsimagLite::IoSerializer& ioSerializer) const
+		void write(String label, PsimagLite::IoSerializer& ioSerializer) const
 		{
 			ioSerializer.write(label, buffer_);
 		}
