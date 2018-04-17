@@ -175,7 +175,7 @@ public:
 	}
 
 	template<typename IoInputter>
-	void load(IoInputter& io,
+	void read(IoInputter& io,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{

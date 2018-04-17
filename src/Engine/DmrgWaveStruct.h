@@ -110,13 +110,13 @@ struct DmrgWaveStruct {
 	}
 
 	template<typename IoInputType>
-	void load(IoInputType& io,
+	void read(IoInputType& io,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
 	{
 		io.read(ws, "Ws");
 		io.read(we, "We");
-		lrs.load(io);
+		lrs.read(io);
 	}
 
 	template<typename IoOutputType>

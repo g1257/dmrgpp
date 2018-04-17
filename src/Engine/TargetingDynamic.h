@@ -210,9 +210,9 @@ public:
 		this->common().psi().write(io,"PSI");
 	}
 
-	void load(const PsimagLite::String& f)
+	void read(const PsimagLite::String& f)
 	{
-		this->common().template load<TimeSerializerType>(f);
+		this->common().template read<TimeSerializerType>(f);
 	}
 
 private:

@@ -126,7 +126,7 @@ public:
 	{
 		if (bogus) return;
 		PsimagLite::String s = "#WAVEFUNCTION_sites=";
-		wavefunction_.load(io,s);
+		wavefunction_.read(io,s);
 		s = "#TRANSFORM_sites=";
 		io.read(transform_, s);
 		transposeConjugate(transformC_,transform_);

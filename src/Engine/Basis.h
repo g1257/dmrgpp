@@ -132,7 +132,7 @@ public:
 
 	//! Loads this basis from memory or disk
 	template<typename IoInputter>
-	void load(IoInputter& io)
+	void read(IoInputter& io)
 	{
 		PsimagLite::String nn="#NAME=";
 		std::pair<PsimagLite::String,SizeType> sc = io.advance(nn);
@@ -614,9 +614,9 @@ private:
 
 		dmrgTransformed_=false;
 		if (useSu2Symmetry_)
-			symmSu2_.load(io,minimizeRead);
+			symmSu2_.read(io,minimizeRead);
 		else
-			symmLocal_.load(io,minimizeRead);
+			symmLocal_.read(io,minimizeRead);
 	}
 
 	void shrinkVector(VectorSizeType& dest,

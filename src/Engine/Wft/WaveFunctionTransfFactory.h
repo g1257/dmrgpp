@@ -144,7 +144,7 @@ public:
 			if (params.options.find("noloadwft")!=PsimagLite::String::npos)
 				noLoad_=true;
 			else
-				load();
+				read();
 		} else {
 			if (params.options.find("noloadwft")!=PsimagLite::String::npos) {
 				PsimagLite::String str("Error: noloadwft needs restart or checkpoint\n");
@@ -385,10 +385,10 @@ public:
 
 private:
 
-	void load()
+	void read()
 	{
 		if (!isEnabled_)
-			throw PsimagLite::RuntimeError("WFT::load(...) called but wft is disabled\n");
+			throw PsimagLite::RuntimeError("WFT::read(...) called but wft is disabled\n");
 
 		typename IoType::In io(utils::pathPrepend(WFT_STRING,filenameIn_));
 		io.readline(isEnabled_,"isEnabled=");
@@ -396,7 +396,7 @@ private:
 		io.readline(wftOptions_.counter,"counter=");
 		wftOptions_.firstCall = false;
 		io.advance("dmrgWaveStruct");
-		dmrgWaveStruct_.load(io);
+		dmrgWaveStruct_.read(io);
 		io.read(wsStack_, "wsStack");
 		io.read(weStack_, "weStack");
 	}

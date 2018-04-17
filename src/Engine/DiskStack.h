@@ -105,7 +105,7 @@ public:
 			ioIn_.open(fileIn_);
 		} catch (std::exception& e) {
 			std::cerr<<"Problem opening reading file "<<fileIn_<<"\n";
-			throw PsimagLite::RuntimeError("DiskStack::load(...)\n");
+			throw PsimagLite::RuntimeError("DiskStack::read(...)\n");
 		}
 
 		int x = 0;

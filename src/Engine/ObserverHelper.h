@@ -341,7 +341,7 @@ private:
 	void getWaveFunction(VectorType& wavefunction,SizeType ns)
 	{
 		VectorWithOffsetType tmpV;
-		tmpV.load(io_,"#WAVEFUNCTION_sites=",ns);
+		tmpV.read(io_,"#WAVEFUNCTION_sites=",ns);
 		tmpV.toSparse(wavefunction);
 		io_.rewind();
 	}

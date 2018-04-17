@@ -318,9 +318,9 @@ public:
 		targetingCommon.psi().write(io, "PSI");
 	}
 
-	void load()
+	void read()
 	{
-//		targetingCommon.load(io);
+//		targetingCommon.read(io);
 	}
 
 	template<typename SomeTargetingCommonType>

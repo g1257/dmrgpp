@@ -157,9 +157,9 @@ public:
 		this->common().cocoon(block1,direction);
 	}
 
-	void load(const PsimagLite::String& f)
+	void read(const PsimagLite::String& f)
 	{
-		this->common().template load<int>(f,0);
+		this->common().template read<int>(f,0);
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,

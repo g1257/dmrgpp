@@ -235,13 +235,13 @@ public:
 	SizeType size() const {return jmValues_.size(); }
 
 	template<typename IoInputter>
-	void load(IoInputter& io,
+	void read(IoInputter& io,
 	          bool minimizeRead,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
 		if (minimizeRead) return;
-		jmValues_.load(io);
+		jmValues_.read(io);
 		io.read(flavors_,"#su2flavors");
 		io.readline(flavorsMax_,"#su2FlavorsMax=");
 		io.readline(electronsMax_,"#su2ElectronsMax=");

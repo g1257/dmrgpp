@@ -226,10 +226,10 @@ public:
 		this->common().psi().write(io,"PSI");
 	}
 
-	void load(const PsimagLite::String& f)
+	void read(const PsimagLite::String& f)
 	{
 #ifdef USE_IO_NG
-		std::cerr<<__FILE__<<" load() WARNING UNIMPLEMENTED FIXME\n";
+		std::cerr<<__FILE__<<" read() WARNING UNIMPLEMENTED FIXME\n";
 #else
 		PsimagLite::IoSimple::In io(f);
 

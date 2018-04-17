@@ -216,9 +216,9 @@ public:
 		skeleton_.write(this->common(), block, io);
 	}
 
-	void load(const PsimagLite::String& f)
+	void read(const PsimagLite::String& f)
 	{
-		this->common().template load<TimeSerializerType>(f);
+		this->common().template read<TimeSerializerType>(f);
 	}
 
 private:

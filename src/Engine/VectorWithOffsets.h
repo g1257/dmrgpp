@@ -405,33 +405,33 @@ public:
 	}
 
 	template<typename IoInputter>
-	void load(IoInputter& io,const PsimagLite::String& label,SizeType counter=0)
+	void read(IoInputter& io,const PsimagLite::String& label,SizeType counter=0)
 	{
 		PsimagLite::String msg("VectorWithOffsets:");
 		io.advance(label,counter);
 		int x = 0;
 		io.readline(x,"#size=");
 		if (x<0)
-			err(msg + ":load(...): size<0\n");
+			err(msg + ":read(...): size<0\n");
 		size_ = x;
 		io.read(offsets_,"#offsets");
 		data_.clear();
 		data_.resize(offsets_.size());
 		io.readline(x,"#nonzero=");
 		if (x<0)
-			err(msg + ":load(...): nonzerosectors<0\n");
+			err(msg + ":read(...): nonzerosectors<0\n");
 		nzMsAndQns_.resize(x);
 		for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
 			io.readline(x,"#sector=");
 			if (x<0)
-				err(msg + ":load(...): sector<0\n");
+				err(msg + ":read(...): sector<0\n");
 			if (static_cast<SizeType>(x)>=data_.size())
-				err(msg + ":load(...): sector too big\n");
+				err(msg + ":read(...): sector too big\n");
 
 			int y = 0;
 			io.readline(y, "#qn=");
 			if (y < 0)
-				err(msg + ":load(...): qn<0\n");
+				err(msg + ":read(...): qn<0\n");
 			nzMsAndQns_[jj] = PairSizeType(x, y);
 
 			PsimagLite::String s = "data" + ttos(jj);
@@ -475,7 +475,7 @@ public:
 			int y = 0;
 			io.readline(y, "#qn=");
 			if (y < 0)
-				err(msg + ":load(...): qn<0\n");
+				err(msg + ":read(...): qn<0\n");
 			nzMsAndQns_[jj] = PairSizeType(x, y);
 
 			if (static_cast<SizeType>(x)>=data_.size())

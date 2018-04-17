@@ -231,9 +231,9 @@ public:
 		        this->common().currentTime() >= tstStruct_.maxTime());
 	}
 
-	void load(const PsimagLite::String& f)
+	void read(const PsimagLite::String& f)
 	{
-		this->common().template load<TimeSerializerType>(f);
+		this->common().template read<TimeSerializerType>(f);
 	}
 
 	void write(const VectorSizeType& block, PsimagLite::IoSelector::Out& io) const

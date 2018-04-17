@@ -150,12 +150,12 @@ public:
 	}
 
 	template<typename IoInputter>
-	void load(IoInputter& io,
+	void read(IoInputter& io,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
-		BasisType::load(io); // parent loads
-		operators_.load(io);
+		BasisType::read(io); // parent loads
+		operators_.read(io);
 		io.read(operatorsPerSite_,"OperatorPerSite");
 	}
 

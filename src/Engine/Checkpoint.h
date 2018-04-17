@@ -193,7 +193,7 @@ public:
 	}
 
 	// Not related to stacks
-	void load(BasisWithOperatorsType &pS,
+	void read(BasisWithOperatorsType &pS,
 	          BasisWithOperatorsType &pE,
 	          TargetingType& psi,
 	          bool isObserveCode)
@@ -204,7 +204,7 @@ public:
 		if (loop<1) {
 			std::cerr<<"There are no resumable loops in file ";
 			std::cerr<<parameters_.checkpoint.filename<<"\n";
-			throw PsimagLite::RuntimeError("Checkpoint::load(...)\n");
+			throw PsimagLite::RuntimeError("Checkpoint::read(...)\n");
 		}
 		loop--;
 		BasisWithOperatorsType pS1(ioTmp,"CHKPOINTSYSTEM",loop,isObserveCode);
@@ -212,7 +212,7 @@ public:
 		pS=pS1;
 		BasisWithOperatorsType pE1(ioTmp,"CHKPOINTENVIRON",0,isObserveCode);
 		pE=pE1;
-		psi.load(parameters_.checkpoint.filename);
+		psi.read(parameters_.checkpoint.filename);
 	}
 
 	void push(const BasisWithOperatorsType &pS,const BasisWithOperatorsType &pE)

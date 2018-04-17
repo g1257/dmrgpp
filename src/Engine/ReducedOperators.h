@@ -130,7 +130,7 @@ public:
 	}
 
 	template<typename IoInputter>
-	void load(IoInputter& io)
+	void read(IoInputter& io)
 	{
 		if (!useSu2Symmetry_) return;
 		io.read(reducedOperators_,"Operators");

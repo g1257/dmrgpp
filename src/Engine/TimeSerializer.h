@@ -131,7 +131,7 @@ public:
 		targetVectors_.resize(xi);
 		for (SizeType i=0;i<targetVectors_.size();i++) {
 			s = "targetVector"+ttos(i);
-			targetVectors_[i].load(io,s);
+			targetVectors_[i].read(io,s);
 		}
 		s = "#MARKER=";
 		io.readline(xi,s);

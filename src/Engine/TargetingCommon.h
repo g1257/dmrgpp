@@ -258,7 +258,7 @@ public:
 	}
 
 	template<typename SomeSerializerType>
-	void load(const PsimagLite::String& f)
+	void read(const PsimagLite::String& f)
 	{
 		IoInputType io(f);
 		PsimagLite::String loadInto = targetHelper_.model().params().checkpoint.into;
@@ -275,7 +275,7 @@ public:
 
 			applyOpExpression_.setTime(ts.time());
 
-			applyOpExpression_.psi().load(io,labelForPsi);
+			applyOpExpression_.psi().read(io,labelForPsi);
 
 		} else {
 			setAllStagesTo(DISABLED);
@@ -287,7 +287,7 @@ public:
 	}
 
 	template<typename SomeSerializerType>
-	void load(const PsimagLite::String& f,int)
+	void read(const PsimagLite::String& f,int)
 	{
 		IoInputType io(f);
 
@@ -295,9 +295,9 @@ public:
 		int site=0;
 		io.readline(site,"TargetCentralSite=",IoType::In::LAST_INSTANCE);
 		if (site<0)
-			throw PsimagLite::RuntimeError("GST::load(...): site cannot be negative\n");
+			throw PsimagLite::RuntimeError("GST::read(...): site cannot be negative\n");
 
-		applyOpExpression_.psi().load(io,"PSI");
+		applyOpExpression_.psi().read(io,"PSI");
 	}
 
 	bool allStages(SizeType x) const

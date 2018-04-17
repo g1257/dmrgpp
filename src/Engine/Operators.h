@@ -241,13 +241,13 @@ public:
 	}
 
 	template<typename IoInputter>
-	void load(IoInputter& io,
+	void read(IoInputter& io,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
 		if (!useSu2Symmetry_)
 			io.read(operators_,"Operators");
-		else reducedOpImpl_.load(io);
+		else reducedOpImpl_.read(io);
 
 		io.read(hamiltonian_, "Hamiltonian");
 		reducedOpImpl_.setHamiltonian(hamiltonian_);

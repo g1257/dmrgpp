@@ -292,7 +292,7 @@ public:
 		}
 	}
 
-	void load(const PsimagLite::String& f)
+	void read(const PsimagLite::String& f)
 	{
 		this->common().setAllStagesTo(WFT_NOADVANCE);
 

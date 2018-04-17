@@ -274,7 +274,7 @@ public:
 		MyBasisWithOperators pE("BasisWithOperators.Environ");
 
 		if (checkpoint_()) {
-			checkpoint_.load(pS,pE,*psi,false);
+			checkpoint_.read(pS,pE,*psi,false);
 		} else { // move this block elsewhere:
 
 			RealType time = 0;

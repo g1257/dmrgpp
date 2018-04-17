@@ -242,13 +242,13 @@ public:
 	}
 
 	template<typename IoInputType>
-	void load(IoInputType& io,
+	void read(IoInputType& io,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
 	{
-		super_->load(io);
-		left_->load(io);
-		right_->load(io);
+		super_->read(io);
+		left_->read(io);
+		right_->read(io);
 	}
 
 private:
