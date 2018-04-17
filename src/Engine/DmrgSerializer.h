@@ -136,23 +136,23 @@ public:
 
 	// Save to disk everything needed to compute any observable
 	template<typename IoOutType>
-	void save(IoOutType& io,
+	void write(IoOutType& io,
 	          SizeType option,
 	          SizeType numberOfSites,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutType>::True, int>::Type = 0) const
 	{
-		std::cerr<<__FILE__<<" save(): IoNg does not support saving for observe code yet\n";
+		std::cerr<<__FILE__<<" write(): IoNg does not support saving for observe code yet\n";
 	}
 
 	// Save to disk everything needed to compute any observable
-	void save(PsimagLite::IoSelector::Out& io,
+	void write(PsimagLite::IoSelector::Out& io,
 	          SizeType option,
 	          SizeType numberOfSites) const
 	{
-		fS_.save(io);
-		fE_.save(io);
-		lrs_.save(io,option,numberOfSites);
+		fS_.write(io);
+		fE_.write(io);
+		lrs_.write(io,option,numberOfSites);
 
 		// save wavefunction
 		PsimagLite::String label = "#WAVEFUNCTION_sites=";
@@ -160,7 +160,7 @@ public:
 			label += ttos(lrs_.super().block()[i])+",";
 		}
 
-		wavefunction_.save(io,label);
+		wavefunction_.write(io,label);
 
 		label = "#TRANSFORM_sites=";
 		for (SizeType i=0;i<lrs_.left().block().size();i++) {

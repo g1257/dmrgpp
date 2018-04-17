@@ -402,7 +402,7 @@ public:
 	}
 
 	template<typename IoOutputter>
-	void save(IoOutputter& io,const PsimagLite::String&) const
+	void write(IoOutputter& io,const PsimagLite::String&) const
 	{
 		io.write(reducedOperators_,"Operators");
 	}

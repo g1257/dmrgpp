@@ -166,14 +166,14 @@ public:
 	}
 
 	template<typename IoOutputter>
-	void save(IoOutputter& io,
+	void write(IoOutputter& io,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
-		std::cerr<<__FILE__<<" save() needs IMPLEMENTATION WARNING FIXME\n";
+		std::cerr<<__FILE__<<" write() needs IMPLEMENTATION WARNING FIXME\n";
 	}
 
-	void save(PsimagLite::IoSelector::Out& io)
+	void write(PsimagLite::IoSelector::Out& io)
 	{
 		io.write(currentTime_, "Time");
 		io.write(site_, "TargetCentralSite");
@@ -181,7 +181,7 @@ public:
 
 		for (SizeType i=0;i<targetVectors_.size();i++) {
 			PsimagLite::String label = "targetVector"+ttos(i)+"_"+ttos(currentTime_);
-			targetVectors_[i].save(io,label);
+			targetVectors_[i].write(io,label);
 		}
 
 		io.write(marker_, "#MARKER");

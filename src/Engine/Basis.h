@@ -495,7 +495,7 @@ public:
 	}
 
 	//! saves this basis to disk
-	void save(PsimagLite::IoSimple::Out& io,
+	void write(PsimagLite::IoSimple::Out& io,
 	          const PsimagLite::String& ss,
 	          bool minimizeWrite) const
 	{
@@ -516,13 +516,13 @@ public:
 		shrinkVector(qnShrink, quantumNumbers_, partition_);
 		io.write(qnShrink,"#QNShrink");
 
-		if (useSu2Symmetry_) symmSu2_.save(io);
-		else symmLocal_.save(io);
+		if (useSu2Symmetry_) symmSu2_.write(io);
+		else symmLocal_.write(io);
 	}
 
 	//! saves this basis to disk
 	template<typename SomeIoType>
-	void save(SomeIoType& io,
+	void write(SomeIoType& io,
 	          const PsimagLite::String& ss,
 	          bool minimizeWrite) const
 	{
@@ -544,18 +544,18 @@ public:
 		io.write(qnShrink, label + "QNShrink");
 
 		// FIXME: implement the below calls
-		// if (useSu2Symmetry_) symmSu2_.save(io);
-		// else symmLocal_.save(io);
+		// if (useSu2Symmetry_) symmSu2_.write(io);
+		// else symmLocal_.write(io);
 	}
 
 	//! saves this basis to disk
 	template<typename IoOutputter>
-	void save(IoOutputter& io,
+	void write(IoOutputter& io,
 	          bool minimizeWrite,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
-		save(io, name_, minimizeWrite);
+		write(io, name_, minimizeWrite);
 	}
 
 	//! The operator<< is a friend

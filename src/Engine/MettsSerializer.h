@@ -152,7 +152,7 @@ public:
 	}
 
 	template<typename IoOutputter>
-	void save(IoOutputter& io,
+	void write(IoOutputter& io,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
@@ -164,7 +164,7 @@ public:
 		io.printline(s);
 		for (SizeType i=0;i<targetVectors_.size();i++) {
 			PsimagLite::String label = "targetVector"+ttos(i)+"_"+ttos(currentBeta_);
-			targetVectors_[i].save(io,label);
+			targetVectors_[i].write(io,label);
 		}
 	}
 

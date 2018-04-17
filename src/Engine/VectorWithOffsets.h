@@ -367,7 +367,7 @@ public:
 	}
 
 	template<typename SomeIoOutputType>
-	void save(SomeIoOutputType& io,
+	void write(SomeIoOutputType& io,
 	          const PsimagLite::String& label) const
 	{
 		io.createGroup(label);
@@ -378,7 +378,7 @@ public:
 		io.write(nzMsAndQns_, label + "/nzMsAndQns_");
 	}
 
-	void save(PsimagLite::IoSimple::Out& io,
+	void write(PsimagLite::IoSimple::Out& io,
 	          const PsimagLite::String& label) const
 	{
 		io.printline(label);

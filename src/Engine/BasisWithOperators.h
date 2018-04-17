@@ -356,39 +356,39 @@ public:
 	}
 
 	template<typename SomeIoType>
-	void save(SomeIoType& io,
+	void write(SomeIoType& io,
 	          const PsimagLite::String& s,
 	          SizeType option,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<SomeIoType>::True, int>::Type = 0) const
 	{
-		BasisType::save(io,s,false); // parent saves
+		BasisType::write(io,s,false); // parent saves
 		if (option == BasisType::SAVE_ALL)
-			operators_.save(io,s);
+			operators_.write(io,s);
 		else
 			operators_.saveEmpty(io,s);
 		io.write(operatorsPerSite_, s + "/OperatorPerSite");
 	}
 
-	void save(PsimagLite::IoSimple::Out& io,
+	void write(PsimagLite::IoSimple::Out& io,
 	          const PsimagLite::String& s,
 	          SizeType option) const
 	{
-		BasisType::save(io,s,false); // parent saves
+		BasisType::write(io,s,false); // parent saves
 		if (option == BasisType::SAVE_ALL)
-			operators_.save(io,s);
+			operators_.write(io,s);
 		else
 			operators_.saveEmpty(io,s);
 		io.write(operatorsPerSite_, "OperatorPerSite");
 	}
 
 	template<typename IoOutputter>
-	void save(IoOutputter& io,
+	void write(IoOutputter& io,
 	          SizeType option,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
-		save(io, this->name(), option);
+		write(io, this->name(), option);
 	}
 
 private:

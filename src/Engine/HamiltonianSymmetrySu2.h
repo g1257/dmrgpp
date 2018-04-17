@@ -250,9 +250,9 @@ public:
 		io.read(jvals_,"#su2Jvals");
 	}
 
-	void save(PsimagLite::IoSimple::Out& io) const
+	void write(PsimagLite::IoSimple::Out& io) const
 	{
-		jmValues_.save(io);
+		jmValues_.write(io);
 		io.write(flavors_,"#su2flavors");
 		io.write(flavorsMax_, "#su2FlavorsMax");
 		io.write(electronsMax_, "#su2ElectronsMax");

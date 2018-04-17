@@ -304,7 +304,7 @@ public:
 
 
 	template<typename SomeTargetingCommonType>
-	void save(const SomeTargetingCommonType& targetingCommon,
+	void write(const SomeTargetingCommonType& targetingCommon,
 	          const VectorSizeType& block,
 	          PsimagLite::IoSelector::Out& io) const
 	{
@@ -314,8 +314,8 @@ public:
 			throw PsimagLite::RuntimeError(str);
 		}
 
-		targetingCommon.save(block, io, targetingCommon.targetVectors());
-		targetingCommon.psi().save(io, "PSI");
+		targetingCommon.write(block, io, targetingCommon.targetVectors());
+		targetingCommon.psi().write(io, "PSI");
 	}
 
 	void load()

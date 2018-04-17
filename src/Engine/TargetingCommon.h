@@ -219,32 +219,32 @@ public:
 
 	void timeHasAdvanced() { applyOpExpression_.timeHasAdvanced(); }
 
-	void save(PsimagLite::IoSelector::Out& io, const VectorSizeType& block) const
+	void write(PsimagLite::IoSelector::Out& io, const VectorSizeType& block) const
 	{
 		if (block.size() != 1)
-			err(PsimagLite::String(__FILE__) + " save() only supports blocks.size=1\n");
+			err(PsimagLite::String(__FILE__) + " write() only supports blocks.size=1\n");
 
 		io.write(block[0], "TargetCentralSite");
 	}
 
 	template<typename IoOutputType>
-	void save(const VectorSizeType& block,
+	void write(const VectorSizeType& block,
 	          IoOutputType& io,
 	          const PostProcType& cf,
 	          const VectorVectorWithOffsetType& targetVectors) const
 	{
-		cf.save(io);
+		cf.write(io);
 		SizeType marker = (noStageIs(DISABLED)) ? 1 : 0;
 
 		TimeSerializerType ts(currentTime(),
 		                      block[0],
 		        applyOpExpression_.targetVectors(),
 		        marker);
-		ts.save(io);
+		ts.write(io);
 	}
 
 	template<typename IoOutputType>
-	void save(const VectorSizeType& block,
+	void write(const VectorSizeType& block,
 	          IoOutputType& io,
 	          const VectorVectorWithOffsetType& targetVectors) const
 	{
@@ -254,7 +254,7 @@ public:
 		                      block[0],
 		        applyOpExpression_.targetVectors(),
 		        marker);
-		ts.save(io);
+		ts.write(io);
 	}
 
 	template<typename SomeSerializerType>

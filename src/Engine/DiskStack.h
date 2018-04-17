@@ -137,7 +137,7 @@ public:
 	void push(DataType const &d)
 	{
 		ioOut_.open(fileOut_,std::ios_base::app);
-		d.save(ioOut_,DataType::SAVE_ALL);
+		d.write(ioOut_,DataType::SAVE_ALL);
 		ioOut_.close();
 
 		stack_.push(total_);

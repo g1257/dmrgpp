@@ -210,7 +210,7 @@ public:
 	}
 
 	template<typename SomeIoOutputType>
-	void save(SomeIoOutputType& io, const PsimagLite::String& label) const
+	void write(SomeIoOutputType& io, const PsimagLite::String& label) const
 	{
 		// FIXME: Shouldn't this be called serialize?
 		io.createGroup(label);
@@ -220,7 +220,7 @@ public:
 		io.write(data_, label + "/data_");
 	}
 
-	void save(PsimagLite::IoSimple::Out& io, const PsimagLite::String& label) const
+	void write(PsimagLite::IoSimple::Out& io, const PsimagLite::String& label) const
 	{
 		io.printline(label);
 		PsimagLite::String s="#size="+ttos(size_);

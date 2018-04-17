@@ -184,7 +184,7 @@ public:
 
 	virtual void load(const PsimagLite::String&) = 0;
 
-	virtual void save(const typename PsimagLite::Vector<SizeType>::Type&,
+	virtual void write(const typename PsimagLite::Vector<SizeType>::Type&,
 	                  PsimagLite::IoSelector::Out&) const = 0;
 
 	// non-virtual below

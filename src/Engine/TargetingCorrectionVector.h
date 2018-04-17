@@ -210,10 +210,10 @@ public:
 		evolve(Eg,direction,x,loopNumber);
 	}
 
-	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
+	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
 	          PsimagLite::IoSelector::Out& io) const
 	{
-		skeleton_.save(this->common(), block, io);
+		skeleton_.write(this->common(), block, io);
 	}
 
 	void load(const PsimagLite::String& f)

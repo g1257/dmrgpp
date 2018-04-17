@@ -166,7 +166,7 @@ public:
 	void resize(SizeType) { } // does nothing, safely
 
 	template<typename IoOutputter>
-	void save(IoOutputter& io,
+	void write(IoOutputter& io,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{

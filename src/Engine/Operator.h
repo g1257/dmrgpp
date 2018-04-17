@@ -258,7 +258,7 @@ struct Operator {
 		su2Related.serialize(label + "/su2Related", ioSerializer);
 	}
 
-	void save(std::ostream& os) const
+	void write(std::ostream& os) const
 	{
 		os<<"TSPOperator=raw\n";
 		os<<"RAW_MATRIX\n";

@@ -427,21 +427,21 @@ public:
 	}
 
 	template<typename SomeIoOutType>
-	void save(SomeIoOutType& io,
+	void write(SomeIoOutType& io,
 	          const PsimagLite::String& s,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<SomeIoOutType>::True, int>::Type = 0) const
 	{
 		if (!useSu2Symmetry_) io.write(operators_,s + "/Operators");
-		else reducedOpImpl_.save(io,s);
+		else reducedOpImpl_.write(io,s);
 		io.write(hamiltonian_, s + "/Hamiltonian");
 	}
 
-	void save(PsimagLite::IoSimple::Out& io,
+	void write(PsimagLite::IoSimple::Out& io,
 	          const PsimagLite::String& s) const
 	{
 		if (!useSu2Symmetry_) io.write(operators_,"Operators");
-		else reducedOpImpl_.save(io,s);
+		else reducedOpImpl_.write(io,s);
 		io.write(hamiltonian_, "Hamiltonian");
 	}
 

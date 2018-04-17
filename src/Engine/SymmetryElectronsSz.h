@@ -375,7 +375,7 @@ private:
 }; // struct SymmetryElectronsSz
 
 template<typename IoOutputter, typename RealType>
-void save(IoOutputter& io,
+void write(IoOutputter& io,
           const SymmetryElectronsSz<RealType>& bd,
           typename PsimagLite::EnableIf<
           PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0)

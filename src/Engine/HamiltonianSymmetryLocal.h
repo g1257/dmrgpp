@@ -134,7 +134,7 @@ public:
 		io.readline(tmp,"#FACTORSSIZE=");
 	}
 
-	void save(PsimagLite::IoSimple::Out& io) const
+	void write(PsimagLite::IoSimple::Out& io) const
 	{
 		PsimagLite::String s="#FACTORSSIZE=0";
 		io.printline(s);

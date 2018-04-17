@@ -306,7 +306,7 @@ public:
 		this->common().setTime(ts.time());
 	}
 
-	void save(const VectorSizeType& block, PsimagLite::IoSelector::Out& io) const
+	void write(const VectorSizeType& block, PsimagLite::IoSelector::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";
@@ -323,13 +323,13 @@ public:
 		}
 
 		if (block.size() != 1)
-			err(PsimagLite::String(__FILE__) + " save() only supports blocks.size=1\n");
+			err(PsimagLite::String(__FILE__) + " write() only supports blocks.size=1\n");
 		SizeType site = block[0];
 		TimeSerializerType ts(this->common().currentTime(),
 		                      site,
 		                      targetVectors,
 		                      marker);
-		ts.save(io);
+		ts.write(io);
 	}
 
 	void updateOnSiteForCorners(BasisWithOperatorsType&) const

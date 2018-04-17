@@ -202,16 +202,16 @@ public:
 	}
 
 	template<typename IoOutputType>
-	void save(IoOutputType& io,
+	void write(IoOutputType& io,
 	          SizeType option,
 	          SizeType numberOfSites,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
 	{
 		bool minimizeWrite = (super_->block().size() == numberOfSites);
-		super_->save(io, minimizeWrite);
-		left_->save(io,option);
-		right_->save(io,option);
+		super_->write(io, minimizeWrite);
+		left_->write(io,option);
+		right_->write(io,option);
 	}
 
 	const BasisWithOperatorsType& left()  const { return *left_; }

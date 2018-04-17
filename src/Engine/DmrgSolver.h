@@ -477,12 +477,12 @@ private:
 
 			finiteStep(S,E,pS,pE,i,psi);
 			if (psi.end()) break;
-			recovery.save(psi,sitesIndices_[stepCurrent_],lastSign,false);
+			recovery.write(psi,sitesIndices_[stepCurrent_],lastSign,false);
 		}
 
 		if (!saveData_) return;
-		checkpoint_.save(pS,pE,ioOut_);
-		psi.save(sitesIndices_[stepCurrent_],ioOut_);
+		checkpoint_.write(pS,pE,ioOut_);
+		psi.write(sitesIndices_[stepCurrent_],ioOut_);
 		ioOut_.write(lastSign, "LastLoopSign=");
 	}
 
@@ -621,9 +621,9 @@ private:
 		DmrgSerializerType ds(fsS,fsE,lrs_,target.gs(),transform,direction);
 
 		SizeType saveOption2 = (saveOption & 4) ? SAVE_ALL : SAVE_PARTIAL;
-		ds.save(ioOut_,saveOption2,model_.geometry().numberOfSites());
+		ds.write(ioOut_,saveOption2,model_.geometry().numberOfSites());
 
-		target.save(sitesIndices_[stepCurrent_],ioOut_);
+		target.write(sitesIndices_[stepCurrent_],ioOut_);
 	}
 
 	bool finalStep(int stepLength,int stepFinal)

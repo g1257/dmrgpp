@@ -210,11 +210,11 @@ public:
 		//		evolve(Eg,direction,x,loopNumber);
 	}
 
-	void save(const VectorSizeType& block,
+	void write(const VectorSizeType& block,
 	          PsimagLite::IoSelector::Out& io) const
 	{
 		if (block.size() != 1)
-			err(PsimagLite::String(__FILE__) + " save() only supports blocks.size=1\n");
+			err(PsimagLite::String(__FILE__) + " write() only supports blocks.size=1\n");
 
 		SizeType site = block[0];
 		SizeType marker = (this->common().noStageIs(DISABLED)) ? 1 : 0;
@@ -222,8 +222,8 @@ public:
 		                      site,
 		                      this->common().targetVectors(),
 		                      marker);
-		ts.save(io);
-		this->common().psi().save(io,"PSI");
+		ts.write(io);
+		this->common().psi().write(io,"PSI");
 	}
 
 	void load(const PsimagLite::String& f)

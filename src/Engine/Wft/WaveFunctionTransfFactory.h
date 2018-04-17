@@ -161,7 +161,7 @@ public:
 	~WaveFunctionTransfFactory()
 	{
 		if (!isEnabled_) return;
-		save(filenameOut_);
+		write(filenameOut_);
 		delete wftImpl_;
 	}
 
@@ -360,7 +360,7 @@ public:
 		files.push_back(utils::pathPrepend(WFT_STRING,rootName));
 	}
 
-	void save(PsimagLite::String fileOut) const
+	void write(PsimagLite::String fileOut) const
 	{
 		if (!isEnabled_) return;
 #ifndef USE_IO_NG
@@ -374,7 +374,7 @@ public:
 		io.printline(s);
 		io.printline("dmrgWaveStruct");
 
-		dmrgWaveStruct_.save(io);
+		dmrgWaveStruct_.write(io);
 		io.write(wsStack_, "wsStack\n");
 		io.write(weStack_, "weStack\n");
 #else
@@ -478,7 +478,7 @@ private:
 	void printDmrgWave() const
 	{
 		IoType::Out io(std::cerr);
-		dmrgWaveStruct_.save(io);
+		dmrgWaveStruct_.write(io);
 		std::cerr<<"wsStack="<<wsStack_.size()<<"\n";
 		std::cerr<<"weStack="<<weStack_.size()<<"\n";
 		std::cerr<<"counter="<<wftOptions_.counter<<"\n";

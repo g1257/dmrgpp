@@ -185,7 +185,7 @@ public:
 		evolve(Eg,direction,x,loopNumber);
 	}
 
-	void save(const VectorSizeType& block,
+	void write(const VectorSizeType& block,
 	          PsimagLite::IoSelector::Out& io) const
 	{
 		SizeType type = tstStruct_.type();
@@ -202,12 +202,12 @@ public:
 		params.isign = s;
 		if (tstStruct_.aOperators()[0].fermionSign>0) s2 *= s;
 
-		this->common().save(io, block);
+		this->common().write(io, block);
 
 		PostProcType cf(ab_,params);
-		this->common().save(block,io,cf,this->common().targetVectors());
+		this->common().write(block,io,cf,this->common().targetVectors());
 
-		this->common().psi().save(io,"PSI");
+		this->common().psi().write(io,"PSI");
 	}
 
 	void load(const PsimagLite::String& f)

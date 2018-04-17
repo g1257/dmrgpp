@@ -187,7 +187,7 @@ public:
 		evolve(Eg,direction,x,loopNumber);
 	}
 
-	void save(const VectorSizeType& block,
+	void write(const VectorSizeType& block,
 	          PsimagLite::IoSelector::Out& io) const
 	{
 		SizeType type = tstStruct_.type();
@@ -202,12 +202,12 @@ public:
 		PostProcType cf(ab_, paramsForSolver_);
 
 		if (block.size() != 1)
-			err(PsimagLite::String(__FILE__) + " save() only supports blocks.size=1\n");
+			err(PsimagLite::String(__FILE__) + " write() only supports blocks.size=1\n");
 
 		io.write(block[0], "TargetCentralSite");
-		this->common().save(block,io,cf,this->common().targetVectors());
+		this->common().write(block,io,cf,this->common().targetVectors());
 
-		this->common().psi().save(io,"PSI");
+		this->common().psi().write(io,"PSI");
 	}
 
 	void load(const PsimagLite::String& f)

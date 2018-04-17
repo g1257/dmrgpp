@@ -120,13 +120,13 @@ struct DmrgWaveStruct {
 	}
 
 	template<typename IoOutputType>
-	void save(IoOutputType& io,
+	void write(IoOutputType& io,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
 	{
 		io.write(ws, "Ws");
 		io.write(we, "We");
-		lrs.save(io,LeftRightSuperType::SAVE_ALL,false);
+		lrs.write(io,LeftRightSuperType::SAVE_ALL,false);
 	}
 
 }; // struct DmrgWaveStruct

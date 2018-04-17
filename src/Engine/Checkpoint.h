@@ -181,15 +181,15 @@ public:
 	}
 
 	// Not related to stacks
-	void save(const BasisWithOperatorsType &pS,
+	void write(const BasisWithOperatorsType &pS,
 	          const BasisWithOperatorsType &pE,
 	          typename IoType::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving pS and pE...";
 		progress_.printline(msg,std::cout);
-		pS.save(io,"CHKPOINTSYSTEM",BasisWithOperatorsType::SAVE_ALL);
-		pE.save(io,"CHKPOINTENVIRON",BasisWithOperatorsType::SAVE_ALL);
+		pS.write(io,"CHKPOINTSYSTEM",BasisWithOperatorsType::SAVE_ALL);
+		pE.write(io,"CHKPOINTENVIRON",BasisWithOperatorsType::SAVE_ALL);
 	}
 
 	// Not related to stacks

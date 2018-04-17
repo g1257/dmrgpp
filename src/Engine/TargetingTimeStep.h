@@ -236,7 +236,7 @@ public:
 		this->common().template load<TimeSerializerType>(f);
 	}
 
-	void save(const VectorSizeType& block, PsimagLite::IoSelector::Out& io) const
+	void write(const VectorSizeType& block, PsimagLite::IoSelector::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";
@@ -250,8 +250,8 @@ public:
 		                      site,
 		                      this->common().targetVectors(),
 		                      marker);
-		ts.save(io);
-		this->common().psi().save(io,"PSI");
+		ts.write(io);
+		this->common().psi().write(io,"PSI");
 
 		// Does anyone read these?
 		io.write(tvEnergy_, "TargetVectorEnergy");

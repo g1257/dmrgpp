@@ -100,7 +100,7 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 
 	if (obsOptions.transpose) opC.conjugate();
 
-	opC.save(std::cout);
+	opC.write(std::cout);
 }
 
 template<typename SolverType, typename VectorWithOffsetType>

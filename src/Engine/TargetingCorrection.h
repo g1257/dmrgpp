@@ -162,15 +162,15 @@ public:
 		this->common().template load<int>(f,0);
 	}
 
-	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
+	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
 	          PsimagLite::IoSelector::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";
 		progress_.printline(msg,std::cout);
 
-		this->common().save(io, block);
-		this->common().psi().save(io, "PSI");
+		this->common().write(io, block);
+		this->common().psi().write(io, "PSI");
 	}
 
 private:

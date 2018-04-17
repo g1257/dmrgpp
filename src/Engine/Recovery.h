@@ -123,7 +123,7 @@ public:
 			unlink(files_[i].c_str());
 	}
 
-	void save(const TargetingType& psi,
+	void write(const TargetingType& psi,
 	          VectorSizeType vsites,
 	          int lastSign,
 	          bool isObserveCode) const
@@ -136,8 +136,8 @@ public:
 		PsimagLite::String rootName(prefix + checkpoint_.parameters().filename);
 		typename IoType::Out ioOut(rootName);
 		ioOut<<checkpoint_.parameters();
-		checkpoint_.save(pS_,pE_,ioOut);
-		psi.save(vsites,ioOut);
+		checkpoint_.write(pS_,pE_,ioOut);
+		psi.write(vsites,ioOut);
 		PsimagLite::OstringStream msg;
 		msg<<"LastLoopSign="<<lastSign<<"\n";
 		ioOut<<msg.str();
@@ -145,7 +145,7 @@ public:
 
 		saveStacksForRecovery(rootName,isObserveCode);
 
-		wft_.save(rootName);
+		wft_.write(rootName);
 		wft_.appendFileList(files_,rootName);
 		flag_m_ = !flag_m_;
 	}
