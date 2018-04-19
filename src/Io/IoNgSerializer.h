@@ -115,7 +115,7 @@ public:
 	{
 		SizeType n = what.size();
 		createGroup(name2);
-		write(name2 + "/SIZE", n);
+		write(name2 + "/Size", n);
 		for (SizeType i = 0; i < n; ++i)
 			write(name2 + "/" + typeToString(i), what[i]);
 	}
@@ -129,7 +129,7 @@ public:
 	{
 		SizeType n = what.size();
 		createGroup(name2);
-		write(name2 + "/SIZE", n);
+		write(name2 + "/Size", n);
 		for (SizeType i = 0; i < n; ++i)
 			write(name2 + "/" + typeToString(i), what[i]);
 	}
@@ -142,7 +142,7 @@ public:
 	{
 		SizeType n = what.size();
 		createGroup(name2);
-		write(name2 + "/SIZE", n);
+		write(name2 + "/Size", n);
 		for (SizeType i = 0; i < n; ++i)
 			what[i].write(name2 + "/" + typeToString(i), *this);
 	}
@@ -155,7 +155,7 @@ public:
 	{
 		SizeType n = what.size();
 		createGroup(name2);
-		write(name2 + "/SIZE", n);
+		write(name2 + "/Size", n);
 		for (SizeType i = 0; i < n; ++i)
 			what[i]->write(name2 + "/" + typeToString(i), *this);
 	}

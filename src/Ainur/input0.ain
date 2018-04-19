@@ -17,8 +17,8 @@ OutputFile="data0.txt";
 InfiniteLoopKeptStates=100;
 FiniteLoops=[
 	[7, 100, 0],
-       	[-7, 100, 0],
+	[-7, 100, 0],
         [-7, 100, 0],
-       	[7, 100, 0]];
+	[7, 100, 0]];
 TargetElectronsUp=8;
 TargetElectronsDown=8;

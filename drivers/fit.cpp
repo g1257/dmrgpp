@@ -290,7 +290,7 @@ int main(int argc, char** argv)
 	Fitter<OracleData<double>, FitData<double> > fitter(od, fit);
 
 	SizeType maxIter = 1000;
-	fitter.fit2(maxIter);
+	fitter.fit(maxIter);
 
 	fitter.print(std::cout);
 }
