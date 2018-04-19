@@ -13,10 +13,10 @@ class IoNgSerializer {
 
 public:
 
-	enum WriteMode {NO, ALLOW_OVERWRITE};
+	enum WriteMode {NO_OVERWRITE, ALLOW_OVERWRITE};
 
-	IoNgSerializer(H5::H5File* hdf5file, H5::Group* hdf5group)
-	    : hdf5file_(hdf5file), hdf5group_(hdf5group)
+	IoNgSerializer(H5::H5File* hdf5file)
+	    : hdf5file_(hdf5file)
 	{}
 
 	void createGroup(String group)
@@ -26,7 +26,7 @@ public:
 
 	/* write functions START */
 
-	void write(String name2, SizeType what, WriteMode allowOverwrite = NO)
+	void write(String name2, SizeType what, WriteMode allowOverwrite = NO_OVERWRITE)
 	{
 		String name = "Def/" + name2;
 		void* ptr = static_cast<SizeType*>(&what);
@@ -40,13 +40,12 @@ public:
 		}
 	}
 
-	void write(String name2, String what, WriteMode allowOverwrite = NO)
+	void write(String name2, String what, WriteMode allowOverwrite = NO_OVERWRITE)
 	{
 		overwriteNotSupported(allowOverwrite);
 		String name = "Def/" + name2;
 		hsize_t dims[1];
 		dims[0] = what.length();
-		assert(0 < what.size());
 		void* ptr = static_cast<void*>(&what[0]);
 		internalWrite<char>(name, ptr, dims, 1);
 	}
@@ -54,7 +53,7 @@ public:
 	template<typename T1, typename T2>
 	void write(String name2,
 	           const std::pair<T1, T2>& what,
-	           WriteMode allowOverwrite = NO)
+	           WriteMode allowOverwrite = NO_OVERWRITE)
 	{
 		overwriteNotSupported(allowOverwrite);
 		createGroup(name2);
@@ -64,7 +63,7 @@ public:
 
 	void write(String name2,
 	           const std::vector<bool>&,
-	           WriteMode allowOverwrite = NO)
+	           WriteMode allowOverwrite = NO_OVERWRITE)
 	{
 		overwriteNotSupported(allowOverwrite);
 		std::cerr<<"Vector of booleans with name "<<name2<<" cannot be printed ";
@@ -74,10 +73,11 @@ public:
 	template<typename T>
 	void write(String name2,
 	           const std::vector<T>& what,
-	           WriteMode allowOverwrite = NO,
+	           WriteMode allowOverwrite = NO_OVERWRITE,
 	           typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
 	{
 		overwriteNotSupported(allowOverwrite);
+		if (what.size() == 0) return;
 		String name = "Def/" + name2;
 		hsize_t dims[1];
 		dims[0] = what.size();
@@ -89,7 +89,7 @@ public:
 	template<typename T>
 	void write(String name2,
 	           const std::vector<std::complex<T> >& what,
-	           WriteMode allowOverwrite = NO,
+	           WriteMode allowOverwrite = NO_OVERWRITE,
 	           typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
 	{
 		overwriteNotSupported(allowOverwrite);
@@ -104,7 +104,7 @@ public:
 	template<typename T>
 	void write(String name2,
 	           const std::vector<std::vector<T> >& what,
-	           WriteMode allowOverwrite = NO,
+	           WriteMode allowOverwrite = NO_OVERWRITE,
 	           typename EnableIf<Loki::TypeTraits<typename Real<T>::Type>::isArith,
 	           int>::Type = 0)
 	{
@@ -119,7 +119,7 @@ public:
 	template<typename T1, typename T2>
 	void write(String name2,
 	           const std::vector<std::pair<T1, T2> >& what,
-	           WriteMode allowOverwrite = NO,
+	           WriteMode allowOverwrite = NO_OVERWRITE,
 	           typename EnableIf<
 	           Loki::TypeTraits<T1>::isArith && Loki::TypeTraits<T2>::isArith,
 	           int>::Type = 0)
@@ -135,7 +135,7 @@ public:
 	template<typename T>
 	void write(String name2,
 	           const std::vector<T>& what,
-	           WriteMode allowOverwrite = NO,
+	           WriteMode allowOverwrite = NO_OVERWRITE,
 	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
 	           int>::Type = 0)
 	{
@@ -150,7 +150,7 @@ public:
 	template<typename T>
 	void write(String name2,
 	           const std::vector<T*>& what,
-	           WriteMode allowOverwrite = NO,
+	           WriteMode allowOverwrite = NO_OVERWRITE,
 	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
 	           int>::Type = 0)
 	{
@@ -181,7 +181,7 @@ public:
 	          String name)
 	{
 		void* ptr = static_cast<void *>(&(value[0])); // FIXME CHECK SIZE
-		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet(name));
+		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet("Def/" + name));
 		dataset->read(ptr, TypeToH5<char>::type);
 		delete dataset;
 	}
@@ -245,7 +245,7 @@ private:
 
 	void overwriteNotSupported(WriteMode mode)
 	{
-		if (mode == NO) return;
+		if (mode == NO_OVERWRITE) return;
 		throw RuntimeError("Overwrite not supported for this type\n");
 	}
 
@@ -272,7 +272,6 @@ private:
 	}
 
 	H5::H5File* hdf5file_;
-	H5::Group* hdf5group_;
 };
 }
 #endif // IONGSERIALIZER_H

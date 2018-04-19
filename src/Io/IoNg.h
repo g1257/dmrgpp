@@ -103,8 +103,18 @@ class IoNg {
 
 public:
 
-	enum WriteMode {NO = IoNgSerializer::NO,
-		            ALLOW_OVERWRITE = IoNgSerializer::ALLOW_OVERWRITE};
+	enum OpenMode {ACC_TRUNC, ACC_EXCL, ACC_RDONLY, ACC_RDW};
+
+	typedef IoNgSerializer Serializer;
+
+	/*
+	    H5F_ACC_TRUNC - Truncate file, if it already exists,
+	    erasing all data previously stored in the file.
+	    H5F_ACC_EXCL - Fail if file already exists. H5F_ACC_TRUNC
+	    and H5F_ACC_EXCL are mutually exclusive
+	    H5F_ACC_RDONLY - Open file as read-only, if it already exists, and fail, otherwise
+	    H5F_ACC_RDWR - Open file for read/write, if it already exists, and fail, otherwise
+	*/
 
 	class Out {
 
@@ -112,18 +122,18 @@ public:
 
 		typedef std::vector<String> VectorStringType;
 
-		Out(const String& fn)
+		Out(const String& fn, OpenMode mode = ACC_TRUNC)
 		    : filename_(fn),
-		      hdf5File_(new H5::H5File(fn, H5F_ACC_TRUNC)),
-		      groupDef_(new H5::Group(hdf5File_->createGroup("/Def"))),
-		      ioNgSerializer_(hdf5File_, groupDef_)
-		{}
+		      hdf5File_(new H5::H5File(fn, modeToH5(mode))),
+		      ioNgSerializer_(hdf5File_)
+		{
+			if (mode == ACC_TRUNC)
+				ioNgSerializer_.createGroup("");
+		}
 
 		~Out()
 		{
 			filename_ = "";
-			delete groupDef_; // should I close something first? FIXME
-			groupDef_ = 0;
 			delete hdf5File_; // should I close something first? FIXME
 			hdf5File_ = 0;
 		}
@@ -149,8 +159,6 @@ public:
 		void close()
 		{
 			// deal with the serializer object FIXME
-			delete groupDef_; // should I close something first? FIXME
-			groupDef_ = 0;
 			delete hdf5File_; // should I close something first? FIXME
 			hdf5File_ = 0;
 			filename_ = "";
@@ -158,7 +166,7 @@ public:
 
 		void createGroup(String groupName)
 		{
-			ioNgSerializer_.createGroup(groupName);
+			ioNgSerializer_.createGroup(groupName);	
 		}
 
 		template<typename T>
@@ -171,15 +179,17 @@ public:
 
 			ioNgSerializer_.write(str + "/" + ttos(counter), x);
 			ioNgSerializer_.write(str + "/Size", counter, (counter == 0) ?
-			                          IoNgSerializer::NO : IoNgSerializer::ALLOW_OVERWRITE);
+			                          IoNgSerializer::NO_OVERWRITE :
+			                          IoNgSerializer::ALLOW_OVERWRITE);
 		}
 
 		template<typename T>
 		void write(const T& what,
 		           String name2,
+		           IoNgSerializer::WriteMode mode = IoNgSerializer::NO_OVERWRITE,
 		           typename EnableIf<IsRootUnDelegated<T>::True, int>::Type = 0)
 		{
-			ioNgSerializer_.write(name2, what);
+			ioNgSerializer_.write(name2, what, mode);
 		}
 
 		template<typename T>
@@ -208,9 +218,24 @@ public:
 
 	private:
 
+		static unsigned int modeToH5(OpenMode mode)
+		{
+			switch (mode) {
+			case ACC_TRUNC:
+				return H5F_ACC_TRUNC;
+			case ACC_EXCL:
+				return H5F_ACC_EXCL;
+			case ACC_RDONLY:
+				return H5F_ACC_RDONLY;
+			case ACC_RDW:
+				return H5F_ACC_RDWR;
+			}
+
+			throw RuntimeError("IoNg:: wrong open mode\n");
+		}
+
 		String filename_;
 		H5::H5File* hdf5File_;
-		H5::Group* groupDef_;
 		IoNgSerializer ioNgSerializer_;
 	};
 
@@ -222,20 +247,14 @@ public:
 		static const LongIntegerType LAST_INSTANCE=-1;
 		typedef unsigned int long LongSizeType;
 
-		In() : hdf5File_(0), groupDef_(0),ioNgSerializer_(hdf5File_, groupDef_)
-		{}
-
 		In(String const &fn)
 		    : filename_(fn),
 		      hdf5File_(new H5::H5File(fn, H5F_ACC_RDONLY)),
-		      groupDef_(new H5::Group(hdf5File_->openGroup("Def"))),
-		      ioNgSerializer_(hdf5File_, groupDef_)
+		      ioNgSerializer_(hdf5File_)
 		{}
 
 		~In()
 		{
-			delete groupDef_; // should I close something first? FIXME
-			groupDef_ = 0;
 			delete hdf5File_; // should I close something first? FIXME
 			hdf5File_ = 0;
 			filename_ = "";
@@ -251,7 +270,10 @@ public:
 		}
 
 		void close()
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
+		{
+			filename_ = "";
+			hdf5File_->close();
+		}
 
 		template<typename SomeType>
 		SizeType readline(SomeType &x,const String &s,LongIntegerType = 0)
@@ -333,7 +355,6 @@ public:
 
 		String filename_;
 		H5::H5File* hdf5File_;
-		H5::Group* groupDef_;
 		IoNgSerializer ioNgSerializer_;
 	};
 }; //class IoNg
