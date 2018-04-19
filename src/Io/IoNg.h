@@ -103,6 +103,9 @@ class IoNg {
 
 public:
 
+	enum WriteMode {NO = IoNgSerializer::NO,
+		            ALLOW_OVERWRITE = IoNgSerializer::ALLOW_OVERWRITE};
+
 	class Out {
 
 	public:
@@ -175,17 +178,8 @@ public:
 			if (counter == 0) createGroup(str);
 
 			ioNgSerializer_.write(str + "/" + ttos(counter), x);
-			if (counter == 0)
-				ioNgSerializer_.write(str + "/Size", counter);
-			else
-				ioNgSerializer_.overwrite(str + "/Size", counter);
-		}
-
-		template<typename T>
-		void overwrite(const T& what,
-		               String name)
-		{
-			ioNgSerializer_.overwrite(name, what);
+			ioNgSerializer_.write(str + "/Size", counter, (counter == 0) ?
+			                          IoNgSerializer::NO : IoNgSerializer::ALLOW_OVERWRITE);
 		}
 
 		template<typename T>

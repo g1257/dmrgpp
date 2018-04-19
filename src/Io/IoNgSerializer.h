@@ -11,6 +11,8 @@ class IoNgSerializer {
 
 public:
 
+	enum WriteMode {NO, ALLOW_OVERWRITE};
+
 	IoNgSerializer(H5::H5File* hdf5file, H5::Group* hdf5group)
 	    : hdf5file_(hdf5file), hdf5group_(hdf5group)
 	{}
@@ -20,34 +22,23 @@ public:
 		hdf5file_->createGroup("Def/" + group);
 	}
 
-	void overwrite(String name2, SizeType what)
+	void write(String name2, SizeType what, WriteMode allowOverwrite = NO)
 	{
 		String name = "Def/" + name2;
-		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet(name));
 		void* ptr = static_cast<SizeType*>(&what);
-		dataset->write(ptr, TypeToH5<SizeType>::type);
-		delete dataset;
+
+		if (allowOverwrite) {
+			overwrite<SizeType>(name, ptr);
+		} else {
+			hsize_t dims[1];
+			dims[0] = 1;
+			writeNew<SizeType>(name, ptr, dims, 1);
+		}
 	}
 
-	void write(String name2, SizeType what)
+	void write(String name2, String what, WriteMode allowOverwrite = NO)
 	{
-		String name = "Def/" + name2;
-		hsize_t dims[1];
-		dims[0] = 1;
-		H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
-		H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
-		H5::DataSet* dataset = new H5::DataSet(hdf5file_->createDataSet(name,
-		                                                                TypeToH5<SizeType>::type,
-		                                                                *dataspace,
-		                                                                dsCreatPlist));
-		void* ptr = static_cast<SizeType*>(&what);
-		dataset->write(ptr, TypeToH5<SizeType>::type);
-		delete dataset;
-		delete dataspace;
-	}
-
-	void write(String name2, String what)
-	{
+		overwriteNotSupported(allowOverwrite);
 		String name = "Def/" + name2;
 		hsize_t dims[1];
 		dims[0] = what.length();
@@ -65,16 +56,20 @@ public:
 
 	template<typename T1, typename T2>
 	void write(String name2,
-	           const std::pair<T1, T2>& what)
+	           const std::pair<T1, T2>& what,
+	           WriteMode allowOverwrite = NO)
 	{
+		overwriteNotSupported(allowOverwrite);
 		createGroup(name2);
 		write(name2 + "/0", what.first);
 		write(name2 + "/1", what.second);
 	}
 
 	void write(String name2,
-	           const std::vector<bool>&)
+	           const std::vector<bool>&,
+	           WriteMode allowOverwrite = NO)
 	{
+		overwriteNotSupported(allowOverwrite);
 		std::cerr<<"Vector of booleans with name "<<name2<<" cannot be printed ";
 		std::cerr<<"FIXME TODO WARNING\n";
 	}
@@ -82,8 +77,10 @@ public:
 	template<typename T>
 	void write(String name2,
 	           const std::vector<T>& what,
+	           WriteMode allowOverwrite = NO,
 	           typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
 	{
+		overwriteNotSupported(allowOverwrite);
 		String name = "Def/" + name2;
 		hsize_t dims[1];
 		dims[0] = what.size();
@@ -96,8 +93,10 @@ public:
 	template<typename T>
 	void write(String name2,
 	           const std::vector<std::complex<T> >& what,
+	           WriteMode allowOverwrite = NO,
 	           typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
 	{
+		overwriteNotSupported(allowOverwrite);
 		String name = "Def/" + name2;
 		hsize_t dims[1];
 		dims[0] = 2*what.size();
@@ -110,9 +109,11 @@ public:
 	template<typename T>
 	void write(String name2,
 	           const std::vector<std::vector<T> >& what,
+	           WriteMode allowOverwrite = NO,
 	           typename EnableIf<Loki::TypeTraits<typename Real<T>::Type>::isArith,
 	           int>::Type = 0)
 	{
+		overwriteNotSupported(allowOverwrite);
 		SizeType n = what.size();
 		createGroup(name2);
 		write(name2 + "/Size", n);
@@ -123,10 +124,12 @@ public:
 	template<typename T1, typename T2>
 	void write(String name2,
 	           const std::vector<std::pair<T1, T2> >& what,
+	           WriteMode allowOverwrite = NO,
 	           typename EnableIf<
 	           Loki::TypeTraits<T1>::isArith && Loki::TypeTraits<T2>::isArith,
 	           int>::Type = 0)
 	{
+		overwriteNotSupported(allowOverwrite);
 		SizeType n = what.size();
 		createGroup(name2);
 		write(name2 + "/Size", n);
@@ -137,9 +140,11 @@ public:
 	template<typename T>
 	void write(String name2,
 	           const std::vector<T>& what,
+	           WriteMode allowOverwrite = NO,
 	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
 	           int>::Type = 0)
 	{
+		overwriteNotSupported(allowOverwrite);
 		SizeType n = what.size();
 		createGroup(name2);
 		write(name2 + "/Size", n);
@@ -150,9 +155,11 @@ public:
 	template<typename T>
 	void write(String name2,
 	           const std::vector<T*>& what,
+	           WriteMode allowOverwrite = NO,
 	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
 	           int>::Type = 0)
 	{
+		overwriteNotSupported(allowOverwrite);
 		SizeType n = what.size();
 		createGroup(name2);
 		write(name2 + "/Size", n);
@@ -161,6 +168,29 @@ public:
 	}
 
 private:
+
+	void overwriteNotSupported(WriteMode mode) const
+	{
+		if (mode == NO) return;
+		throw RuntimeError("Overwrite not supported for this type\n");
+	}
+
+	template<typename SomeType>
+	void overwrite(String name, void* ptr)
+	{
+		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet(name));
+		dataset->write(ptr, TypeToH5<SomeType>::type);
+		delete dataset;
+	}
+
+	template<typename SomeType>
+	void writeNew(String name, void* ptr, hsize_t dims[], SizeType ndims)
+	{
+		H5::DataSpace *dataspace = new H5::DataSpace(ndims, dims); // create new dspace
+		H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
+		internalWrite<SomeType>(ptr, name, *dataspace, dsCreatPlist);
+		delete dataspace;
+	}
 
 	template<typename T>
 	void internalWrite(const void *ptr,
