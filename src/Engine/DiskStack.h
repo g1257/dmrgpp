@@ -74,7 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 // All these includes are in PsimagLite
 #include "Stack.h"
-#include "Io/IoSelector.h"
+#include "Io/IoSimple.h"
 #include "ProgressIndicator.h"
 
 // A disk stack, similar to std::stack but stores in disk not in memory
@@ -82,8 +82,8 @@ namespace Dmrg {
 template<typename DataType>
 class DiskStack {
 
-	typedef typename PsimagLite::IoSelector::In IoInType;
-	typedef typename PsimagLite::IoSelector::Out IoOutType;
+	typedef typename PsimagLite::IoSimple::In IoInType;
+	typedef typename PsimagLite::IoSimple::Out IoOutType;
 
 public:
 

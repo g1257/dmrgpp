@@ -427,10 +427,21 @@ public:
 	}
 
 	template<typename SomeIoOutType>
+	void overwrite(SomeIoOutType& io,
+	               const PsimagLite::String& s,
+	               typename PsimagLite::EnableIf<
+	               PsimagLite::IsOutputLike<SomeIoOutType>::True, int>::Type = 0) const
+	{
+		if (!useSu2Symmetry_) io.overwrite(operators_, s + "/Operators");
+		else reducedOpImpl_.overwrite(io,s);
+		io.overwrite(hamiltonian_, s + "/Hamiltonian");
+	}
+
+	template<typename SomeIoOutType>
 	void write(SomeIoOutType& io,
-	          const PsimagLite::String& s,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsOutputLike<SomeIoOutType>::True, int>::Type = 0) const
+	           const PsimagLite::String& s,
+	           typename PsimagLite::EnableIf<
+	           PsimagLite::IsOutputLike<SomeIoOutType>::True, int>::Type = 0) const
 	{
 		if (!useSu2Symmetry_) io.write(operators_,s + "/Operators");
 		else reducedOpImpl_.write(io,s);
@@ -438,7 +449,7 @@ public:
 	}
 
 	void write(PsimagLite::IoSimple::Out& io,
-	          const PsimagLite::String& s) const
+	           const PsimagLite::String& s) const
 	{
 		if (!useSu2Symmetry_) io.write(operators_,"Operators");
 		else reducedOpImpl_.write(io,s);

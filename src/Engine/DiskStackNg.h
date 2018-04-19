@@ -74,74 +74,46 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 // All these includes are in PsimagLite
 #include "Stack.h"
-#include "Io/IoSelector.h"
+#include "Io/IoNg.h"
 #include "ProgressIndicator.h"
+#include <exception>
 
 // A disk stack, similar to std::stack but stores in disk not in memory
 namespace Dmrg {
 template<typename DataType>
 class DiskStack {
 
-	typedef typename PsimagLite::IoSelector::In IoInType;
-	typedef typename PsimagLite::IoSelector::Out IoOutType;
+	typedef typename PsimagLite::IoNg::In IoInType;
+	typedef typename PsimagLite::IoNg::Out IoOutType;
 
 public:
 
-	DiskStack(const PsimagLite::String &file1,
-	          const PsimagLite::String &file2,
+	DiskStack(const PsimagLite::String name1,
+	          const PsimagLite::String name2,
 	          bool hasLoad,
 	          bool isObserveCode)
-	    : fileIn_(file1),
-	      fileOut_(file2),
+	    : ioIn_(name1),
+	      ioOut_(name2),
 	      isObserveCode_(isObserveCode),
 	      total_(0),
 	      progress_("DiskStack"),
 	      dt_(0)
 	{
-		unlink(fileOut_.c_str());
 		if (!hasLoad) return;
-
-		try {
-			ioIn_.open(fileIn_);
-		} catch (std::exception& e) {
-			std::cerr<<"Problem opening reading file "<<fileIn_<<"\n";
-			throw PsimagLite::RuntimeError("DiskStack::read(...)\n");
-		}
-
-		int x = 0;
-		ioIn_.readline(x,"#STACKMETARANK=",IoInType::LAST_INSTANCE);
-		ioIn_.read(stack_, "#STACKMETASTACK");
-		ioIn_.close();
-		PsimagLite::OstringStream msg;
-		msg<<"Attempt to read from file " + fileIn_ + " succeeded";
-		progress_.printline(msg,std::cout);
+		err("DiskStackNg does not support reading from file yet\n");
 	}
-
-	~DiskStack()
-	{
-		delete dt_;
-		dt_ = 0;
-	}
-
-	void finalize()
-	{
-		ioOut_.open(fileOut_,std::ios_base::app);
-		finalizeInternal(ioOut_, "#STACKMETASTACK\n");
-		ioOut_.close();
-	}
-
-	static bool persistent() { return true; }
 
 	bool inDisk() const { return true; }
 
-	void push(DataType const &d)
+	void push(const DataType& d)
 	{
-		ioOut_.open(fileOut_,std::ios_base::app);
-		d.write(ioOut_,DataType::SAVE_ALL);
-		ioOut_.close();
+		try {
+			d.write(ioOut_, "/" + ttos(total_), DataType::SAVE_ALL);
+		} catch (std::exception&) {
+			d.overwrite(ioOut_, "/" + ttos(total_), DataType::SAVE_ALL);
+		}
 
-		stack_.push(total_);
-		total_++;
+		stack_.push(total_++);
 	}
 
 	void pop()
@@ -151,126 +123,24 @@ public:
 
 	const DataType& top() const
 	{
-		ioIn_.open(fileIn_);
-		if (dt_) delete dt_;
-		dt_ = 0;
 		assert(stack_.size() > 0);
-		dt_ = new DataType(ioIn_,"",stack_.top(),isObserveCode_);
-		ioIn_.close();
+		const SizeType dummy = 0;
+		delete dt_;
+		dt_ = new DataType(ioIn_, "/" + ttos(stack_.top()), dummy, isObserveCode_);
 		return *dt_;
 	}
 
 	SizeType size() const { return stack_.size(); }
 
-	void copyFromIo(IoInType& io, PsimagLite::String label)
-	{
-		std::cerr<<"WARNING: EXPECT A CRASH SOON!\n";
-		std::ofstream fout(fileIn_.c_str());
-		io.rewind();
-		PsimagLite::String temp;
-		while (!io.eof()) {
-			io>>temp;
-			if (temp == label)
-				break;
-		}
-
-		fout<<label<<"\n";
-		while (!io.eof()) {
-			io>>temp;
-			fout<<temp<<"\n";
-		}
-
-		fout.close();
-		std::cerr<<"copyFromIo: wrote to "<<fileIn_<<"\n";
-
-		io.rewind();
-		io.read(stack_, "META" + label);
-		invertStack(stack_);
-	}
-
-	void copyToIo(IoOutType& io, PsimagLite::String label)
-	{
-		io.write(stack_, "META" + label + "\n");
-
-		io<<label<<"\n";
-		io<<stack_.size()<<"\n";
-		ioIn_.open(fileIn_);
-		while (!stack_.empty()) {
-			DataType dt(ioIn_,"",stack_.top(),isObserveCode_);
-			io<<"#NAME=\n";
-			io<<dt;
-			ioIn_.rewind();
-			stack_.pop();
-		}
-
-		ioIn_.close();
-	}
-
-	friend void copyDiskToDisk(DiskStack& dest, const DiskStack& src)
-	{
-		dest.isObserveCode_ = src.isObserveCode_;
-		dest.total_ = src.total_;
-		dest.stack_ = src.stack_;
-		// copy src.fileIn_ --> dest.fileIn_
-		myCopy(src.fileIn_, dest.fileIn_);
-		// copy src.fileOut_ --> dest.fileOut_
-		myCopy(src.fileOut_, dest.fileOut_);
-	}
-
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const DiskStack& ds)
-	{
-		os<<"DISKSTACK: filein: "<<ds.fileIn_<<" fileout="<<ds.fileOut_<<"\n";
-		os<<"total="<<ds.total_<<"\n";
-		PsimagLite::operator<<(os,ds.stack_);
-		return os;
-	}
+	void finalize() {}
 
 private:
 
-	static void myCopy(PsimagLite::String src, PsimagLite::String dest)
-	{
-		std::ifstream  src2(src.c_str(), std::ios::binary);
-		std::ofstream  dst2(dest.c_str(), std::ios::binary);
-
-		dst2 << src2.rdbuf();
-	}
-
-	void finalizeInternal(IoOutType& io,
-	                      PsimagLite::String label) const
-	{
-#ifndef USE_IO_NG
-		int x = 0;
-		io.printline("#STACKMETARANK="+ttos(x));
-		io.printline("#STACKMETATOTAL="+ttos(total_));
-		SizeType last = label.length();
-		assert(last > 0);
-		if (last > 0 && label[last - 1] != '\n') label += "\n";
-		io.write(stack_, label);
-#else
-		std::cerr<<"DisStack: finalizeInternal UNIMPLEMENTED WARNING FIXME\n";
-#endif
-	}
-
-	void invertStack(PsimagLite::Stack<int>::Type& st)
-	{
-		PsimagLite::Stack<int>::Type tmp;
-
-		while (!st.empty()) {
-			tmp.push(st.top());
-			st.pop();
-		}
-
-		st = tmp;
-	}
-
-	PsimagLite::String fileIn_;
-	PsimagLite::String fileOut_;
+	mutable IoInType ioIn_;
+	IoOutType ioOut_;
 	bool isObserveCode_;
 	int total_;
 	PsimagLite::ProgressIndicator progress_;
-	mutable IoInType ioIn_;
-	IoOutType ioOut_;
 	PsimagLite::Stack<int>::Type stack_;
 	mutable DataType* dt_;
 }; // class DiskStack
