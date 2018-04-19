@@ -105,8 +105,6 @@ public:
 
 	enum OpenMode {ACC_TRUNC, ACC_EXCL, ACC_RDONLY, ACC_RDW};
 
-	typedef IoNgSerializer Serializer;
-
 	/*
 	    H5F_ACC_TRUNC - Truncate file, if it already exists,
 	    erasing all data previously stored in the file.
@@ -120,6 +118,7 @@ public:
 
 	public:
 
+		typedef IoNgSerializer Serializer;
 		typedef std::vector<String> VectorStringType;
 
 		Out(const String& fn, OpenMode mode = ACC_TRUNC)

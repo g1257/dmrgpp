@@ -100,10 +100,6 @@ class IoSimple {
 
 public:
 
-	struct Serializer {
-		enum WriteMode {NO_OVERWRITE, ALLOW_OVERWRITE};
-	};
-
 	class Out {
 
 	public:
