@@ -136,13 +136,13 @@ public:
 	                io,
 	                "system",
 	                enabled_,
-	                isObserveCode_),
+	                isObserveCode),
 	    envDisk_(parameters_.checkpoint.filename,
 	             parameters_.filename,
 	             io,
 	             "environ",
 	             enabled_,
-	             isObserveCode_),
+	             isObserveCode),
     #endif
 	    progress_("Checkpoint"),
 	    energyFromFile_(0.0)
@@ -207,13 +207,13 @@ public:
 		pS.write(io,
 		         "CHKPOINTSYSTEM",
          #ifdef USE_IO_NG
-		         IoType::Serializer::NO_OVERWRITE,
+		         IoType::Out::Serializer::NO_OVERWRITE,
          #endif
 		         BasisWithOperatorsType::SAVE_ALL);
 		pE.write(io,
 		         "CHKPOINTENVIRON",
          #ifdef USE_IO_NG
-		         IoType::Serializer::NO_OVERWRITE,
+		         IoType::Out::Serializer::NO_OVERWRITE,
          #endif
 		         BasisWithOperatorsType::SAVE_ALL);
 	}

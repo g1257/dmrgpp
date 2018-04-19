@@ -122,19 +122,19 @@ public:
 		try {
 			d.write(ioOut_,
 			        label_ + "/" + ttos(total_),
-			        PsimagLite::IoNg::Serializer::NO_OVERWRITE,
+			        IoOutType::Serializer::NO_OVERWRITE,
 			        DataType::SAVE_ALL);
 		} catch (std::exception&) {
 			d.write(ioOut_,
 			        "/" + ttos(total_),
-			        PsimagLite::IoNg::Serializer::ALLOW_OVERWRITE,
+			        IoOutType::Serializer::ALLOW_OVERWRITE,
 			        DataType::SAVE_ALL);
 		}
 
 		++total_;
 		ioOut_.write(total_,
 		             label_ + "/total_",
-		             PsimagLite::IoNg::Serializer::ALLOW_OVERWRITE);
+		             IoOutType::Serializer::ALLOW_OVERWRITE);
 	}
 
 	void pop()
@@ -144,7 +144,7 @@ public:
 		--total_;
 		ioOut_.write(total_,
 		             label_ + "/total_",
-		             PsimagLite::IoNg::Serializer::ALLOW_OVERWRITE);
+		             IoOutType::Serializer::ALLOW_OVERWRITE);
 	}
 
 	const DataType& top() const
