@@ -86,7 +86,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Provenance.h"
 #include "BoostSerializationHeaders.h"
 #include "Io/IoSelector.h"
-#include "ArchiveFiles.h"
 #include "PsimagLite.h"
 #include "RestartStruct.h"
 #include "FiniteLoop.h"
@@ -163,7 +162,7 @@ struct ParametersDmrgSolver {
 	FieldType denseSparseThreshold;
 
 	void write(PsimagLite::String label,
-	               PsimagLite::IoSerializer& ioSerializer) const
+	           PsimagLite::IoSerializer& ioSerializer) const
 	{
 		PsimagLite::String root = label;
 
@@ -228,15 +227,7 @@ struct ParametersDmrgSolver {
 		options += sOptions;
 		io.readline(version,"Version=");
 		io.readline(filename,"OutputFile=");
-#ifdef USE_IO_NG
-		size_t findIndex = filename.find(".txt");
-		if (findIndex != PsimagLite::String::npos)
-			filename.replace(findIndex, PsimagLite::String(".txt").length(), ".hd5");
-
-		findIndex = filename.find(".hd5");
-		if (findIndex == PsimagLite::String::npos)
-			filename += ".hd5";
-#endif
+		filename = filenameFromRootname(filename);
 
 		if (earlyExit) return;
 
@@ -357,7 +348,7 @@ struct ParametersDmrgSolver {
 		bool hasRestart = false;
 		if (options.find("restart")!=PsimagLite::String::npos) {
 			io.readline(checkpoint.filename,"RestartFilename=");
-			ArchiveFiles<ThisType>::unpackIfNeeded(checkpoint.filename);
+			checkpoint.filename = filenameFromRootname(checkpoint.filename);
 			checkRestart(filename,checkpoint.filename,options,"RestartFilename=");
 			hasRestart = true;
 		} else {
@@ -542,6 +533,22 @@ private:
 		}
 
 		throw PsimagLite::RuntimeError(s + "\n");
+	}
+
+	PsimagLite::String filenameFromRootname(PsimagLite::String f) const
+	{
+#ifndef USE_IO_NG
+		return f;
+#endif
+		size_t findIndex = f.find(".txt");
+		if (findIndex != PsimagLite::String::npos)
+			f.replace(findIndex, PsimagLite::String(".txt").length(), ".hd5");
+
+		findIndex = f.find(".hd5");
+		if (findIndex == PsimagLite::String::npos)
+			f += ".hd5";
+
+		return f;
 	}
 };
 

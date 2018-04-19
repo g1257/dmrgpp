@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PROGRAM_LIMITS_H
 #include "PsimagLite.h"
 #include "Vector.h"
+#include "Utils.h"
 
 namespace Dmrg {
 struct ProgramGlobals {
@@ -120,6 +121,28 @@ struct ProgramGlobals {
 			return n - 1;
 
 		return -1;
+	}
+
+	static PsimagLite::String rootName(PsimagLite::String filename)
+	{
+		PsimagLite::String rootname = filename;
+		size_t index =rootname.find(".", 0);
+		if (index != PsimagLite::String::npos) {
+			rootname.erase(index,filename.length());
+		}
+
+		return rootname;
+	}
+
+	static PsimagLite::String coutName(PsimagLite::String filename)
+	{
+		PsimagLite::String rootname = utils::basename(filename);
+		size_t index =rootname.find(".", 0);
+		if (index != PsimagLite::String::npos) {
+			rootname.erase(index,filename.length());
+		}
+
+		return "runFor" + rootname + ".cout";
 	}
 
 	friend std::istream& operator>>(std::istream& is, DirectionEnum& direction)

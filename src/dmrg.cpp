@@ -2,7 +2,6 @@
 #include "Concurrency.h"
 #include "Provenance.h"
 #include "RegisterSignals.h"
-#include "ArchiveFiles.h"
 #include "DmrgDriver.h"
 
 typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
@@ -10,8 +9,6 @@ typedef  PsimagLite::CrsMatrix<std::complex<RealType> > MySparseMatrixComplex;
 typedef  PsimagLite::CrsMatrix<RealType> MySparseMatrixReal;
 
 using namespace Dmrg;
-
-typedef ArchiveFiles<ParametersDmrgSolverType> ArchiveFilesType;
 
 std::streambuf *GlobalCoutBuffer = 0;
 std::ofstream GlobalCoutStream;
@@ -200,7 +197,6 @@ int main(int argc, char *argv[])
 	strUsage += " -f filename [-k] [-p precision] [-o solverOptions] [-V] [whatToMeasure]";
 	PsimagLite::String sOptions("");
 	int precision = 6;
-	bool keepFiles = false;
 	bool versionOnly = false;
 	/* PSIDOC DmrgDriver
 There is a single input file that is passed as the
@@ -278,9 +274,6 @@ to the main dmrg driver are the following.
 		case 't':
 			options.transpose = true;
 			break;
-		case 'k':
-			keepFiles = true;
-			break;
 		case 'p':
 			precision = atoi(optarg);
 			std::cout.precision(precision);
@@ -314,7 +307,7 @@ to the main dmrg driver are the following.
 	if (!options.enabled && options.label != "-") {
 		bool queryOnly = (options.label == "?");
 		if (options.label == "" || options.label == "?") {
-			options.label = ArchiveFilesType::coutName(filename);
+			options.label = ProgramGlobals::coutName(filename);
 			if (queryOnly) {
 				std::cout<<options.label<<"\n";
 				return 0;
@@ -353,8 +346,6 @@ to the main dmrg driver are the following.
 
 	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, false);
 
-	ArchiveFilesType af(dmrgSolverParams,filename,options.enabled,options.label);
-
 	if (insitu!="") dmrgSolverParams.insitu = insitu;
 	if (dmrgSolverParams.options.find("minimizeDisk") != PsimagLite::String::npos)
 		dmrgSolverParams.options += ",noSaveWft,noSaveStacks,noSaveData";
@@ -373,11 +364,5 @@ to the main dmrg driver are the following.
 	} else {
 		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,targeting,options);
 	}
-
-	if (options.enabled) return 0;
-
-	af.deletePackedFiles();
-	if (!keepFiles)
-		ArchiveFilesType::staticDelete();
 }
 

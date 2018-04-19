@@ -26,7 +26,6 @@ void mainLoop(GeometryType& geometry,
 
 	bool moreData = true;
 	const PsimagLite::String& datafile = params.filename;
-	ArchiveFiles<ParametersDmrgSolverType>::unpackIfNeeded(datafile);
 	IoInputType dataIo(datafile);
 	bool hasTimeEvolution = (targeting != "GroundStateTargeting" &&
 	        targeting != "CorrectionTargeting");
@@ -214,8 +213,5 @@ int main(int argc,char **argv)
 	} else {
 		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck, list);
 	}
-
-	if (filesOption != "keep")
-		ArchiveFiles<ParametersDmrgSolverType>::staticDelete();
 } // main
 

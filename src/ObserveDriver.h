@@ -27,7 +27,6 @@
 #include "Provenance.h"
 #include "InputCheck.h"
 #include "ModelSelector.h"
-#include "ArchiveFiles.h"
 
 namespace Dmrg {
 

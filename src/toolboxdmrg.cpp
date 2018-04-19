@@ -50,9 +50,7 @@ void main1(InputNgType::Readable& io,
 	                                                   toolOptions.shortoption);
 	typename ToolBoxType::ActionEnum act = ToolBoxType::actionCanonical(toolOptions.action);
 	if (act == ToolBoxType::ACTION_GREP) {
-		ToolBoxType::printGrep(toolOptions.filename, dmrgSolverParams.filename,params);
-	} else if (act == ToolBoxType::ACTION_FILES) {
-		ToolBoxType::files(toolOptions.filename, dmrgSolverParams,toolOptions.extraOptions);
+		ToolBoxType::printGrep(toolOptions.filename, params);
 	} else if (act == ToolBoxType::ACTION_INPUT) {
 		std::cout<<io.data()<<"\n";
 	} else if (act == ToolBoxType::ACTION_ANALYSIS) {

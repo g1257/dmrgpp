@@ -108,9 +108,12 @@ public:
 	void push(const DataType& d)
 	{
 		try {
-			d.write(ioOut_, "/" + ttos(total_), DataType::SAVE_ALL);
+			d.write(ioOut_, "/" + ttos(total_),
+			        DataType::SAVE_ALL);
 		} catch (std::exception&) {
-			d.write(ioOut_, "/" + ttos(total_), DataType::SAVE_ALL, PsimagLite::IoNg::ALLOW_OVERWRITE);
+			d.write(ioOut_, "/" + ttos(total_),
+			        DataType::SAVE_ALL,
+			        PsimagLite::IoNg::ALLOW_OVERWRITE);
 		}
 
 		stack_.push(total_++);

@@ -78,10 +78,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef DMRG_TOOLBOX_H
 #define DMRG_TOOLBOX_H
-#include "TarPack.h"
 #include "Vector.h"
 #include "ProgramGlobals.h"
-#include "ArchiveFiles.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -93,12 +91,11 @@ namespace Dmrg {
 template<typename DmrgParametersType, typename GeometryType>
 class ToolBox  {
 
-	typedef ArchiveFiles<DmrgParametersType> ArchiveFilesType;
 	typedef std::pair<SizeType, PsimagLite::String> PairSizeStringType;
 
 	class GrepForLabel {
 
-		typedef PosixTarHeader::LongType LongType;
+		typedef long int LongType;
 
 		struct InternalName {
 			InternalName(PsimagLite::String label_, bool cooked_)
@@ -198,35 +195,11 @@ public:
 	}
 
 	static void printGrep(PsimagLite::String inputfile,
-	                      PsimagLite::String datafile,
 	                      ParametersForGrepType params)
 	{
-
-		PsimagLite::String tarname = ArchiveFilesType::rootName(datafile) + ".tar";
-		PsimagLite::String coutName = ArchiveFilesType::coutName(inputfile);
-		struct stat *buf = 0;
-		int ret = stat(tarname.c_str(), buf);
-		if (ret != 0) return printGrepNoTar(coutName,datafile,params);
-
-		UnTarPack untarpack(tarname);
-		bool rewind = false;
-		untarpack.extract<GrepForLabel>(coutName,rewind,params);
-	}
-
-	static void files(PsimagLite::String inputfile,
-	                  const DmrgParametersType& solverParams,
-	                  PsimagLite::String extraOptions)
-	{
-		PsimagLite::String coutName = ArchiveFilesType::coutName(inputfile);
-		ArchiveFilesType af(solverParams,inputfile,false,coutName);
-
-		if (extraOptions == "DELETE" || extraOptions == "list") {
-			af.listOrClear(inputfile,extraOptions);
-		} else {
-			PsimagLite::String str("ToolBox: action=files: ");
-			str += "extra option= " + extraOptions + " not understood\n";
-			throw PsimagLite::RuntimeError(str);
-		}
+		PsimagLite::String coutName = ProgramGlobals::coutName(inputfile);
+		std::ifstream fin(coutName.c_str());
+		GrepForLabel::hook(fin,"",1,params);
 	}
 
 	static void analize(const DmrgParametersType& solverParams,
@@ -240,14 +213,6 @@ public:
 	}
 
 private:
-
-	static void printGrepNoTar(PsimagLite::String inputfile,
-	                           PsimagLite::String,
-	                           ParametersForGrepType params)
-	{
-		std::ifstream fin(inputfile.c_str());
-		GrepForLabel::hook(fin,"",1,params);
-	}
 
 	static PairSizeStringType findLargestGeometry(const GeometryType& geometry)
 	{
