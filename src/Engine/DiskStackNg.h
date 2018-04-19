@@ -92,8 +92,8 @@ public:
 	          const PsimagLite::String name2,
 	          bool hasLoad,
 	          bool isObserveCode)
-	    : ioIn_(name1),
-	      ioOut_(name2),
+	    : ioOut_(name2),
+	      //ioIn_(name1),
 	      isObserveCode_(isObserveCode),
 	      total_(0),
 	      progress_("DiskStack"),
@@ -110,7 +110,7 @@ public:
 		try {
 			d.write(ioOut_, "/" + ttos(total_), DataType::SAVE_ALL);
 		} catch (std::exception&) {
-			d.overwrite(ioOut_, "/" + ttos(total_), DataType::SAVE_ALL);
+			d.write(ioOut_, "/" + ttos(total_), DataType::SAVE_ALL, PsimagLite::IoNg::ALLOW_OVERWRITE);
 		}
 
 		stack_.push(total_++);
@@ -136,8 +136,8 @@ public:
 
 private:
 
-	mutable IoInType ioIn_;
 	IoOutType ioOut_;
+	mutable IoInType ioIn_;
 	bool isObserveCode_;
 	int total_;
 	PsimagLite::ProgressIndicator progress_;

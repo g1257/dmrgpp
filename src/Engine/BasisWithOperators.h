@@ -355,21 +355,6 @@ public:
 		return parent.fermionicSign(i,fsign);
 	}
 
-	template<typename IoOutputter>
-	void overwrite(IoOutputter& io,
-	               const PsimagLite::String& s,
-	               SizeType option,
-	               typename PsimagLite::EnableIf<
-	               PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
-	{
-		BasisType::write(io,s,false); // parent saves
-		if (option == BasisType::SAVE_ALL)
-			operators_.overwrite(io,s);
-		else
-			operators_.saveEmpty(io,s);
-		io.overwrite(operatorsPerSite_, s + "/OperatorPerSite");
-	}
-
 	template<typename SomeIoType>
 	void write(SomeIoType& io,
 	           const PsimagLite::String& s,
