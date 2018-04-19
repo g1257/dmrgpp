@@ -121,18 +121,29 @@ public:
 	    parameters_(parameters),
 	    enabled_(parameters_.options.find("checkpoint")!=PsimagLite::String::npos ||
 	        parameters_.options.find("restart")!=PsimagLite::String::npos),
-	    systemDisk_(prependOrNot(SYSTEM_STACK_STRING,parameters_.checkpoint.filename),
-	                prependOrNot(SYSTEM_STACK_STRING,parameters_.filename),
-	                io,
-	                 "system",
+    #ifndef USE_IO_NG
+	    systemDisk_(utils::pathPrepend(SYSTEM_STACK_STRING,parameters_.checkpoint.filename),
+	                utils::pathPrepend(SYSTEM_STACK_STRING,parameters_.filename),
 	                enabled_,
 	                isObserveCode),
-	    envDisk_(prependOrNot(ENVIRON_STACK_STRING,parameters_.checkpoint.filename),
-	             prependOrNot(ENVIRON_STACK_STRING,parameters_.filename),
+	    envDisk_(utils::pathPrepend(ENVIRON_STACK_STRING,parameters_.checkpoint.filename),
+	             utils::pathPrepend(ENVIRON_STACK_STRING,parameters_.filename),
+	             enabled_,
+	             isObserveCode),
+    #else
+	    systemDisk_(parameters_.checkpoint.filename,
+	                parameters_.filename,
+	                io,
+	                "system",
+	                enabled_,
+	                isObserveCode_),
+	    envDisk_(parameters_.checkpoint.filename,
+	             parameters_.filename,
 	             io,
 	             "environ",
 	             enabled_,
-	             isObserveCode),
+	             isObserveCode_),
+    #endif
 	    progress_("Checkpoint"),
 	    energyFromFile_(0.0)
 	{
@@ -187,19 +198,23 @@ public:
 
 	// Not related to stacks
 	void write(const BasisWithOperatorsType &pS,
-	          const BasisWithOperatorsType &pE,
-	          typename IoType::Out& io) const
+	           const BasisWithOperatorsType &pE,
+	           typename IoType::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving pS and pE...";
 		progress_.printline(msg,std::cout);
 		pS.write(io,
 		         "CHKPOINTSYSTEM",
+         #ifdef USE_IO_NG
 		         IoType::Serializer::NO_OVERWRITE,
+         #endif
 		         BasisWithOperatorsType::SAVE_ALL);
 		pE.write(io,
 		         "CHKPOINTENVIRON",
+         #ifdef USE_IO_NG
 		         IoType::Serializer::NO_OVERWRITE,
+         #endif
 		         BasisWithOperatorsType::SAVE_ALL);
 	}
 
@@ -418,16 +433,6 @@ private:
 		PsimagLite::String suf = s2.substr(x+1,s2.length());
 		PsimagLite::String dir = s2.substr(0,s2.length()-suf.length());
 		return dir + s1 + suf;
-	}
-
-	static PsimagLite::String prependOrNot(PsimagLite::String prefix,
-	                                       PsimagLite::String f)
-	{
-#ifndef USE_IO_NG
-		return utils::pathPrepend(prefix, f);
-#else
-		return f;
-#endif
 	}
 
 	const ParametersType& parameters_;

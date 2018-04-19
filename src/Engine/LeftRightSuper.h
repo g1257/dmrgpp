@@ -209,9 +209,19 @@ public:
 	          PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
 	{
 		bool minimizeWrite = (super_->block().size() == numberOfSites);
-		super_->write(io, PsimagLite::IoSelector::Serializer::NO_OVERWRITE, minimizeWrite);
-		left_->write(io, PsimagLite::IoSelector::Serializer::NO_OVERWRITE, option);
-		right_->write(io, PsimagLite::IoSelector::Serializer::NO_OVERWRITE, option);
+		super_->write(io, IoOutputType::NO_OVERWRITE, minimizeWrite);
+		left_->write(io, IoOutputType::NO_OVERWRITE, option);
+		right_->write(io, IoOutputType::NO_OVERWRITE, option);
+	}
+
+	void write(PsimagLite::IoSimple::Out& io,
+	          SizeType option,
+	          SizeType numberOfSites) const
+	{
+		bool minimizeWrite = (super_->block().size() == numberOfSites);
+		super_->write(io, minimizeWrite);
+		left_->write(io, option);
+		right_->write(io, option);
 	}
 
 	const BasisWithOperatorsType& left()  const { return *left_; }
