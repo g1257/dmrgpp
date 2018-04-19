@@ -90,17 +90,27 @@ public:
 
 	DiskStack(const PsimagLite::String name1,
 	          const PsimagLite::String name2,
+	          PsimagLite::String label,
 	          bool hasLoad,
 	          bool isObserveCode)
-	    : ioOut_(name2),
-	      //ioIn_(name1),
+	    : name1_(name1),
+	      ioOut_(name2),
+	      label_(label),
 	      isObserveCode_(isObserveCode),
 	      total_(0),
 	      progress_("DiskStack"),
 	      dt_(0)
 	{
+		ioOut_.write(total_, label + "/total_");
+
 		if (!hasLoad) return;
-		err("DiskStackNg does not support reading from file yet\n");
+
+		IoInType ioIn(name1);
+		ioIn.read(total_, label + "/total_");
+		ioIn.close();
+		PsimagLite::OstringStream msg;
+		msg<<"Read from file " + name1 + " succeeded";
+		progress_.printline(msg,std::cout);
 	}
 
 	bool inDisk() const { return true; }
@@ -108,7 +118,7 @@ public:
 	void push(const DataType& d)
 	{
 		try {
-			d.write(ioOut_, "/" + ttos(total_),
+			d.write(ioOut_, label_ + "/" + ttos(total_),
 			        DataType::SAVE_ALL);
 		} catch (std::exception&) {
 			d.write(ioOut_, "/" + ttos(total_),
@@ -116,35 +126,42 @@ public:
 			        PsimagLite::IoNg::ALLOW_OVERWRITE);
 		}
 
-		stack_.push(total_++);
+		++total_;
+		ioOut_.write(total_, label_ + "/total_", PsimagLite::IoNg::ALLOW_OVERWRITE);
 	}
 
 	void pop()
 	{
-		stack_.pop();
+		if (total_ == 0)
+			err("Can't pop; the stack is empty!\n");
+		--total_;
+		ioOut_.write(total_, label_ + "/total_", PsimagLite::IoNg::ALLOW_OVERWRITE);
 	}
 
 	const DataType& top() const
 	{
-		assert(stack_.size() > 0);
+		assert(total_ >= 0);
 		const SizeType dummy = 0;
 		delete dt_;
-		dt_ = new DataType(ioIn_, "/" + ttos(stack_.top()), dummy, isObserveCode_);
+		dt_ = 0;
+		IoInType ioIn(name1_);
+		dt_ = new DataType(ioIn, label_ + "/" + ttos(total_), dummy, isObserveCode_);
+		ioIn.close();
 		return *dt_;
 	}
 
-	SizeType size() const { return stack_.size(); }
+	SizeType size() const { return total_; }
 
 	void finalize() {}
 
 private:
 
+	PsimagLite::String name1_;
 	IoOutType ioOut_;
-	mutable IoInType ioIn_;
+	PsimagLite::String label_;
 	bool isObserveCode_;
 	int total_;
 	PsimagLite::ProgressIndicator progress_;
-	PsimagLite::Stack<int>::Type stack_;
 	mutable DataType* dt_;
 }; // class DiskStack
 

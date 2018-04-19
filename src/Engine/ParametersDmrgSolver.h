@@ -513,7 +513,11 @@ private:
 	{
 		PsimagLite::IoSelector::In io(filename2);
 		PsimagLite::String optionsOld;
+#ifndef USE_IO_NG
 		io.readline(optionsOld,"parameters.options");
+#else
+		io.readline(optionsOld,"PARAMETERS/options");
+#endif
 		bool bOld = (optionsOld.find("twositedmrg")!=PsimagLite::String::npos);
 		bool b = (options.find("twositedmrg")!=PsimagLite::String::npos);
 		bool doNotCheck = (options.find("doNotCheckTwoSiteDmrg") != PsimagLite::String::npos);

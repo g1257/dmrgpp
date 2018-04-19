@@ -120,12 +120,14 @@ public:
 	    parameters_(parameters),
 	    enabled_(parameters_.options.find("checkpoint")!=PsimagLite::String::npos ||
 	        parameters_.options.find("restart")!=PsimagLite::String::npos),
-	    systemDisk_(utils::pathPrepend(SYSTEM_STACK_STRING,parameters_.checkpoint.filename),
-	                utils::pathPrepend(SYSTEM_STACK_STRING,parameters_.filename),
+	    systemDisk_(prependOrNot(SYSTEM_STACK_STRING,parameters_.checkpoint.filename),
+	                prependOrNot(SYSTEM_STACK_STRING,parameters_.filename),
+	                 "system",
 	                enabled_,
 	                isObserveCode),
-	    envDisk_(utils::pathPrepend(ENVIRON_STACK_STRING,parameters_.checkpoint.filename),
-	             utils::pathPrepend(ENVIRON_STACK_STRING,parameters_.filename),
+	    envDisk_(prependOrNot(ENVIRON_STACK_STRING,parameters_.checkpoint.filename),
+	             prependOrNot(ENVIRON_STACK_STRING,parameters_.filename),
+	             "environ",
 	             enabled_,
 	             isObserveCode),
 	    progress_("Checkpoint"),
@@ -407,6 +409,16 @@ private:
 		PsimagLite::String suf = s2.substr(x+1,s2.length());
 		PsimagLite::String dir = s2.substr(0,s2.length()-suf.length());
 		return dir + s1 + suf;
+	}
+
+	static PsimagLite::String prependOrNot(PsimagLite::String prefix,
+	                                       PsimagLite::String f)
+	{
+#ifndef USE_IO_NG
+		return utils::pathPrepend(prefix, f);
+#else
+		return f;
+#endif
 	}
 
 	const ParametersType& parameters_;

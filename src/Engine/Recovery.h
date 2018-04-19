@@ -130,7 +130,7 @@ public:
 	{
 		if (checkpoint_.parameters().recoverySave == "0")
 			return;
-
+#ifndef USE_IO_NG
 		PsimagLite::String prefix("Recovery");
 		prefix += (flag_m_) ? "1" : "0";
 		PsimagLite::String rootName(prefix + checkpoint_.parameters().filename);
@@ -148,6 +148,9 @@ public:
 		wft_.write(rootName);
 		wft_.appendFileList(files_,rootName);
 		flag_m_ = !flag_m_;
+#else
+		err("Recovery not yet supported with IoNg\n");
+#endif
 	}
 
 private:

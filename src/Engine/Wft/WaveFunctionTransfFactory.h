@@ -390,6 +390,7 @@ private:
 		if (!isEnabled_)
 			throw PsimagLite::RuntimeError("WFT::read(...) called but wft is disabled\n");
 
+#ifndef USE_IO_NG
 		typename IoType::In io(utils::pathPrepend(WFT_STRING,filenameIn_));
 		io.readline(isEnabled_,"isEnabled=");
 		io.readline(wftOptions_.dir,"stage=");
@@ -399,6 +400,9 @@ private:
 		dmrgWaveStruct_.read(io);
 		io.read(wsStack_, "wsStack");
 		io.read(weStack_, "weStack");
+#else
+		err("WFT loading not yet supported with IoNg\n");
+#endif
 	}
 
 	void myRandomT(std::complex<RealType> &value) const

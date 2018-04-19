@@ -89,6 +89,7 @@ public:
 
 	DiskStack(const PsimagLite::String &file1,
 	          const PsimagLite::String &file2,
+	          PsimagLite::String,
 	          bool hasLoad,
 	          bool isObserveCode)
 	    : fileIn_(file1),
