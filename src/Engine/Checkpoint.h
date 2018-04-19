@@ -114,7 +114,8 @@ public:
 	Checkpoint(const ParametersType& parameters,
 	           InputValidatorType& ioIn,
 	           const ModelType& model,
-	           bool isObserveCode) :
+	           bool isObserveCode,
+	           PsimagLite::IoSelector::Out& io) :
 	    SYSTEM_STACK_STRING(ProgramGlobals::SYSTEM_STACK_STRING),
 	    ENVIRON_STACK_STRING(ProgramGlobals::ENVIRON_STACK_STRING),
 	    parameters_(parameters),
@@ -122,11 +123,13 @@ public:
 	        parameters_.options.find("restart")!=PsimagLite::String::npos),
 	    systemDisk_(prependOrNot(SYSTEM_STACK_STRING,parameters_.checkpoint.filename),
 	                prependOrNot(SYSTEM_STACK_STRING,parameters_.filename),
+	                io,
 	                 "system",
 	                enabled_,
 	                isObserveCode),
 	    envDisk_(prependOrNot(ENVIRON_STACK_STRING,parameters_.checkpoint.filename),
 	             prependOrNot(ENVIRON_STACK_STRING,parameters_.filename),
+	             io,
 	             "environ",
 	             enabled_,
 	             isObserveCode),
@@ -190,8 +193,14 @@ public:
 		PsimagLite::OstringStream msg;
 		msg<<"Saving pS and pE...";
 		progress_.printline(msg,std::cout);
-		pS.write(io,"CHKPOINTSYSTEM",BasisWithOperatorsType::SAVE_ALL);
-		pE.write(io,"CHKPOINTENVIRON",BasisWithOperatorsType::SAVE_ALL);
+		pS.write(io,
+		         "CHKPOINTSYSTEM",
+		         IoType::Serializer::NO_OVERWRITE,
+		         BasisWithOperatorsType::SAVE_ALL);
+		pE.write(io,
+		         "CHKPOINTENVIRON",
+		         IoType::Serializer::NO_OVERWRITE,
+		         BasisWithOperatorsType::SAVE_ALL);
 	}
 
 	// Not related to stacks

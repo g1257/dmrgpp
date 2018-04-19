@@ -100,6 +100,7 @@ class Basis {
 
 public:
 
+	typedef PsimagLite::IoSelector::Serializer::WriteMode WriteMode;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename HamiltonianSymmetrySu2Type::FactorsType FactorsType;
 	typedef typename HamiltonianSymmetrySu2Type::PairType PairType;
@@ -496,8 +497,9 @@ public:
 
 	//! saves this basis to disk
 	void write(PsimagLite::IoSimple::Out& io,
-	          const PsimagLite::String& ss,
-	          bool minimizeWrite) const
+	           const PsimagLite::String& ss,
+	           WriteMode,
+	           bool minimizeWrite) const
 	{
 		io.printline("#NAME="+ss);
 		PsimagLite::String s="#useSu2Symmetry="+ttos(useSu2Symmetry_);
@@ -523,8 +525,9 @@ public:
 	//! saves this basis to disk
 	template<typename SomeIoType>
 	void write(SomeIoType& io,
-	          const PsimagLite::String& ss,
-	          bool minimizeWrite) const
+	           const PsimagLite::String& ss,
+	           WriteMode mode,
+	           bool minimizeWrite) const
 	{
 		PsimagLite::String label = ss + "/";
 		io.createGroup(ss);
@@ -551,11 +554,12 @@ public:
 	//! saves this basis to disk
 	template<typename IoOutputter>
 	void write(IoOutputter& io,
-	          bool minimizeWrite,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
+	           WriteMode mode,
+	           bool minimizeWrite,
+	           typename PsimagLite::EnableIf<
+	           PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
-		write(io, name_, minimizeWrite);
+		write(io, name_, mode, minimizeWrite);
 	}
 
 	//! The operator<< is a friend

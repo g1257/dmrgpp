@@ -209,9 +209,9 @@ public:
 	          PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
 	{
 		bool minimizeWrite = (super_->block().size() == numberOfSites);
-		super_->write(io, minimizeWrite);
-		left_->write(io,option);
-		right_->write(io,option);
+		super_->write(io, PsimagLite::IoSelector::Serializer::NO_OVERWRITE, minimizeWrite);
+		left_->write(io, PsimagLite::IoSelector::Serializer::NO_OVERWRITE, option);
+		right_->write(io, PsimagLite::IoSelector::Serializer::NO_OVERWRITE, option);
 	}
 
 	const BasisWithOperatorsType& left()  const { return *left_; }

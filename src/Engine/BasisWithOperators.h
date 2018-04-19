@@ -134,6 +134,7 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
+	typedef typename BaseType::WriteMode WriteMode;
 
 	BasisWithOperators(const PsimagLite::String& s)
 	    : BasisType(s),operators_(this)
@@ -358,16 +359,17 @@ public:
 	template<typename SomeIoType>
 	void write(SomeIoType& io,
 	           const PsimagLite::String& s,
+	           WriteMode mode,
 	           SizeType option,
 	           typename PsimagLite::EnableIf<
 	           PsimagLite::IsOutputLike<SomeIoType>::True, int>::Type = 0) const
 	{
-		BasisType::write(io,s,false); // parent saves
+		BasisType::write(io, s, mode, false); // parent saves
 		if (option == BasisType::SAVE_ALL)
-			operators_.write(io,s);
+			operators_.write(io, s, mode);
 		else
 			operators_.saveEmpty(io,s);
-		io.write(operatorsPerSite_, s + "/OperatorPerSite");
+		io.write(operatorsPerSite_, s + "/OperatorPerSite", mode);
 	}
 
 	void write(PsimagLite::IoSimple::Out& io,
@@ -384,11 +386,12 @@ public:
 
 	template<typename IoOutputter>
 	void write(IoOutputter& io,
+	           WriteMode mode,
 	           SizeType option,
 	           typename PsimagLite::EnableIf<
 	           PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
-		write(io, this->name(), option);
+		write(io, this->name(), mode, option);
 	}
 
 private:

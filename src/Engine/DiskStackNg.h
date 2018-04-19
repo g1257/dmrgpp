@@ -90,23 +90,25 @@ public:
 
 	DiskStack(const PsimagLite::String name1,
 	          const PsimagLite::String name2,
+	          IoOutType& ioOut,
 	          PsimagLite::String label,
 	          bool hasLoad,
 	          bool isObserveCode)
 	    : name1_(name1),
-	      ioOut_(name2),
-	      label_(label),
+	      ioOut_(ioOut),
+	      label_("DiskStack" + label),
 	      isObserveCode_(isObserveCode),
 	      total_(0),
 	      progress_("DiskStack"),
 	      dt_(0)
 	{
-		ioOut_.write(total_, label + "/total_");
+		ioOut_.createGroup(label_);
+		ioOut_.write(total_, label_ + "/total_");
 
 		if (!hasLoad) return;
 
 		IoInType ioIn(name1);
-		ioIn.read(total_, label + "/total_");
+		ioIn.read(total_, label_ + "/total_");
 		ioIn.close();
 		PsimagLite::OstringStream msg;
 		msg<<"Read from file " + name1 + " succeeded";
@@ -118,16 +120,21 @@ public:
 	void push(const DataType& d)
 	{
 		try {
-			d.write(ioOut_, label_ + "/" + ttos(total_),
+			d.write(ioOut_,
+			        label_ + "/" + ttos(total_),
+			        PsimagLite::IoNg::Serializer::NO_OVERWRITE,
 			        DataType::SAVE_ALL);
 		} catch (std::exception&) {
-			d.write(ioOut_, "/" + ttos(total_),
-			        DataType::SAVE_ALL,
-			        PsimagLite::IoNg::ALLOW_OVERWRITE);
+			d.write(ioOut_,
+			        "/" + ttos(total_),
+			        PsimagLite::IoNg::Serializer::ALLOW_OVERWRITE,
+			        DataType::SAVE_ALL);
 		}
 
 		++total_;
-		ioOut_.write(total_, label_ + "/total_", PsimagLite::IoNg::ALLOW_OVERWRITE);
+		ioOut_.write(total_,
+		             label_ + "/total_",
+		             PsimagLite::IoNg::Serializer::ALLOW_OVERWRITE);
 	}
 
 	void pop()
@@ -135,7 +142,9 @@ public:
 		if (total_ == 0)
 			err("Can't pop; the stack is empty!\n");
 		--total_;
-		ioOut_.write(total_, label_ + "/total_", PsimagLite::IoNg::ALLOW_OVERWRITE);
+		ioOut_.write(total_,
+		             label_ + "/total_",
+		             PsimagLite::IoNg::Serializer::ALLOW_OVERWRITE);
 	}
 
 	const DataType& top() const
@@ -157,7 +166,7 @@ public:
 private:
 
 	PsimagLite::String name1_;
-	IoOutType ioOut_;
+	IoOutType& ioOut_;
 	PsimagLite::String label_;
 	bool isObserveCode_;
 	int total_;
