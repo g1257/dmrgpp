@@ -261,6 +261,11 @@ public:
 		::read(fd,&(data_[0]),sizeof(T)*nrow_*ncol_);
 	}
 
+	void read(String label, IoSerializer& ioSerializer) const
+	{
+		throw RuntimeError("Matrix read unimplemented yet\n");
+	}
+
 	void setTo(const T& val)
 	{
 		for (SizeType i=0;i<data_.size();i++) data_[i]=val;

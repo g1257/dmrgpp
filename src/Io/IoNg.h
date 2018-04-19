@@ -96,7 +96,7 @@ struct IsRootUnDelegated {
 	enum {True = Loki::TypeTraits<T>::isArith ||
 		  IsVectorLike<T>::True ||
 		  IsPairLike<T>::True ||
-	     __is_enum(T)};
+		  IsEnum<T>::True};
 };
 
 class IoNg {
@@ -111,11 +111,6 @@ public:
 	public:
 
 		typedef std::vector<String> VectorStringType;
-
-		Out() : hdf5File_(0), groupDef_(0), ioNgSerializer_(0, 0)
-		{
-			std::cerr<<"IoNg::Out() default ctor please don't use\n";
-		}
 
 		Out(const String& fn)
 		    : filename_(fn),
@@ -147,8 +142,6 @@ public:
 			// deal with mode
 			hdf5File_ = new H5::H5File(fn, H5F_ACC_TRUNC);
 
-			labels_.clear();
-
 			throw RuntimeError("IoNg:: open cannot handle mode yet\n");
 			throw RuntimeError("IoNg:: open cannot handle serializer object yet\n");
 		}
@@ -160,7 +153,6 @@ public:
 			groupDef_ = 0;
 			delete hdf5File_; // should I close something first? FIXME
 			hdf5File_ = 0;
-			labels_.clear();
 			filename_ = "";
 		}
 
@@ -220,7 +212,6 @@ public:
 		H5::H5File* hdf5File_;
 		H5::Group* groupDef_;
 		IoNgSerializer ioNgSerializer_;
-		VectorStringType labels_;
 	};
 
 	class In {
@@ -231,11 +222,14 @@ public:
 		static const LongIntegerType LAST_INSTANCE=-1;
 		typedef unsigned int long LongSizeType;
 
-		In() : hdf5File_(0), groupDef_(0) {}
+		In() : hdf5File_(0), groupDef_(0),ioNgSerializer_(hdf5File_, groupDef_)
+		{}
 
 		In(String const &fn)
-		    : hdf5File_(new H5::H5File(fn, H5F_ACC_RDONLY)),
-		      groupDef_(new H5::Group(hdf5File_->openGroup("Def")))
+		    : filename_(fn),
+		      hdf5File_(new H5::H5File(fn, H5F_ACC_RDONLY)),
+		      groupDef_(new H5::Group(hdf5File_->openGroup("Def"))),
+		      ioNgSerializer_(hdf5File_, groupDef_)
 		{}
 
 		~In()
@@ -244,104 +238,43 @@ public:
 			groupDef_ = 0;
 			delete hdf5File_; // should I close something first? FIXME
 			hdf5File_ = 0;
+			filename_ = "";
 		}
 
 		void open(String const &fn)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
+		{
+			if (hdf5File_) delete hdf5File_;
+
+			filename_ = fn;
+			// deal with mode
+			hdf5File_ = new H5::H5File(fn, H5F_ACC_RDONLY);
+		}
 
 		void close()
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
-		template<typename X>
-		SizeType readline(X &x,const String &s,LongIntegerType level=0)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
-
-		void read(std::vector<bool>& x,
-		          String const &s,
-		          LongIntegerType level = 0,
-		          bool beQuiet = false)
+		template<typename SomeType>
+		SizeType readline(SomeType &x,const String &s,LongIntegerType = 0)
 		{
-			throw RuntimeError("IoNg:: read vector<bool> not implemented\n");
+			ioNgSerializer_.read(x, s);
+			return 0;
 		}
 
 		template<typename T>
-		void read(std::vector<std::complex<T> >& x,
-		          String const &s,
-		          LongIntegerType level = 0,
-		          bool beQuiet = false,
-		          typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
+		void read(T& what,
+		          String name,
+		          typename EnableIf<IsRootUnDelegated<T>::True, int>::Type = 0)
 		{
-			throw RuntimeError("IoNg:: read vector<complex> not implemented\n");
+			ioNgSerializer_.read(what, name);
 		}
 
 		template<typename T>
-		void read(std::vector<T>& x,
-		          String const &s,
-		          LongIntegerType level = 0,
-		          bool beQuiet = false,
-		          typename EnableIf<!Loki::TypeTraits<T>::isArith, int>::Type = 0)
+		void read(T& what,
+		          String name,
+		          typename EnableIf<!IsRootUnDelegated<T>::True, int>::Type = 0)
 		{
-			throw RuntimeError("IoNg:: read vector<NOT ARITH> not implemented\n");
+			what.read(name, ioNgSerializer_);
 		}
-
-		template<typename T>
-		void read(std::vector<T>& x,
-		          String const &s,
-		          LongIntegerType level = 0,
-		          bool beQuiet = false,
-		          typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
-		{
-			assert(hdf5File_);
-			assert(groupDef_);
-
-			// proper failure reporting is needed here
-			String name = "/Def/" + s + ttos(level);
-			H5::DataSet dataset = H5::DataSet(groupDef_->openDataSet(name));
-			H5::DataSpace dataspace = dataset.getSpace();
-			int rank = dataspace.getSimpleExtentNdims();
-			if (rank != 1)
-				throw RuntimeError("Reading " + s + " is not a vector\n");
-
-			hsize_t dimsOut[1];
-			dataspace.getSimpleExtentDims(dimsOut, NULL);
-			x.resize(dimsOut[0]);
-
-			internalRead<T>(&(x[0]), s, dataset);
-		}
-
-		template<typename X>
-		void read(X &mat,
-		          String const &s,
-		          LongIntegerType level= 0,
-		          typename EnableIf<IsMatrixLike<X>::True, int>::Type  = 0)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
-
-		template<
-		        typename FieldType,
-		        template <typename> class SparseMatrixTemplate,
-		        template<typename,template<typename> class>
-		        class X>
-		void read(X<FieldType,SparseMatrixTemplate>& op,
-		          const String& s,
-		          LongIntegerType level=0)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
-
-		template<typename X>
-		typename EnableIf<IsStackLike<X>::True,std::pair<String,SizeType> >::Type
-		read(X &x,
-		     String const &s,
-		     LongIntegerType level=0,
-		     bool beQuiet = false)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
-
-		//! Assumes something of the form
-		//! label[key]=value
-		template<typename MapType>
-		typename EnableIf<IsMapLike<MapType>::True,void>::Type
-		read(MapType& x,
-		     String const &s,
-		     LongIntegerType level=0)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
 		template<typename X>
 		std::pair<String,SizeType> readKnownSize(X &x,
@@ -398,8 +331,10 @@ public:
 			dataset.read(ptr, TypeToH5<T>::type);
 		}
 
+		String filename_;
 		H5::H5File* hdf5File_;
 		H5::Group* groupDef_;
+		IoNgSerializer ioNgSerializer_;
 	};
 }; //class IoNg
 

@@ -43,6 +43,11 @@ typedef unsigned int SizeType;
 
 namespace PsimagLite {
 
+template<typename T>
+struct IsEnum {
+	enum {True = __is_enum(T)};
+};
+
 #ifdef USE_CUSTOM_ALLOCATOR
 template<typename T,int templateParamFlags> class AllocatorCpu : public std::allocator<T> {
 	typedef typename std::allocator<T> BaseType;

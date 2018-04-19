@@ -532,6 +532,11 @@ public:
 		ioSerializer.write(label + "/ncol_",  ncol_);
 	}
 
+	void read(String label, IoSerializer& ioSerializer) const
+	{
+		throw RuntimeError("CrsMatrix read unimplemented yet\n");
+	}
+
 	friend bool isZero(const CrsMatrix& A, double eps = 0.0)
 	{
 		SizeType n = A.values_.size();

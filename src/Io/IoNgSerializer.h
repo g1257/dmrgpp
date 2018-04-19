@@ -4,6 +4,8 @@
 #include "../Vector.h"
 #include "../TypeToString.h"
 #include "TypeToH5.h"
+#include <cassert>
+#include <stack>
 
 namespace PsimagLite {
 
@@ -22,6 +24,8 @@ public:
 		hdf5file_->createGroup("Def/" + group);
 	}
 
+	/* write functions START */
+
 	void write(String name2, SizeType what, WriteMode allowOverwrite = NO)
 	{
 		String name = "Def/" + name2;
@@ -32,7 +36,7 @@ public:
 		} else {
 			hsize_t dims[1];
 			dims[0] = 1;
-			writeNew<SizeType>(name, ptr, dims, 1);
+			internalWrite<SizeType>(name, ptr, dims, 1);
 		}
 	}
 
@@ -42,16 +46,9 @@ public:
 		String name = "Def/" + name2;
 		hsize_t dims[1];
 		dims[0] = what.length();
-		H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
-		H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
-		H5::DataSet* dataset = new H5::DataSet(hdf5file_->createDataSet(name,
-		                                                                TypeToH5<char>::type,
-		                                                                *dataspace,
-		                                                                dsCreatPlist));
+		assert(0 < what.size());
 		void* ptr = static_cast<void*>(&what[0]);
-		dataset->write(ptr, TypeToH5<char>::type);
-		delete dataset;
-		delete dataspace;
+		internalWrite<char>(name, ptr, dims, 1);
 	}
 
 	template<typename T1, typename T2>
@@ -84,10 +81,9 @@ public:
 		String name = "Def/" + name2;
 		hsize_t dims[1];
 		dims[0] = what.size();
-		H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
-		H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
-		internalWrite<T>(&(what[0]), name, *dataspace, dsCreatPlist);
-		delete dataspace;
+		assert(0 < what.size());
+		const void* ptr = static_cast<const void*>(&what[0]);
+		internalWrite<T>(name, ptr, dims, 1);
 	}
 
 	template<typename T>
@@ -100,10 +96,9 @@ public:
 		String name = "Def/" + name2;
 		hsize_t dims[1];
 		dims[0] = 2*what.size();
-		H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
-		H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
-		internalWrite<T>(&(what[0]), name, *dataspace, dsCreatPlist);
-		delete dataspace;
+		assert(0 < what.size());
+		const void* ptr = static_cast<const void*>(&what[0]);
+		internalWrite<T>(name, ptr, dims, 1);
 	}
 
 	template<typename T>
@@ -167,9 +162,88 @@ public:
 			what[i]->write(name2 + "/" + typeToString(i), *this);
 	}
 
+	/* write functions END */
+
+	// read functions START
+
+	template<typename SomeType>
+	void read(SomeType& value,
+	          String name,
+	          typename EnableIf<Loki::TypeTraits<SomeType>::isArith, int>::Type = 0)
+	{
+		void* ptr = static_cast<void *>(&value);
+		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet(name));
+		dataset->read(ptr, TypeToH5<SomeType>::type);
+		delete dataset;
+	}
+
+	void read(String& value,
+	          String name)
+	{
+		void* ptr = static_cast<void *>(&(value[0])); // FIXME CHECK SIZE
+		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet(name));
+		dataset->read(ptr, TypeToH5<char>::type);
+		delete dataset;
+	}
+
+	void read(std::vector<bool>&,
+	          String name)
+	{
+		std::cerr<<"Vector of booleans with name "<<name<<" cannot be read ";
+		std::cerr<<"FIXME TODO WARNING\n";
+	}
+
+	template<typename SomeType>
+	void read(SomeType& value,
+	          String name,
+	          typename EnableIf<IsEnum<SomeType>::True, int>::Type = 0)
+	{
+		throw RuntimeError("Cannot read label " + name + " (enums not supported yet)\n");
+	}
+
+	template<typename T>
+	void read(std::vector<T>& what,
+	          String name,
+	          typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
+	{
+		void* ptr = static_cast<void *>(&(what[0]));  // FIXME CHECK SIZE
+		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet(name));
+		dataset->read(ptr, TypeToH5<T>::type);
+		delete dataset;
+	}
+
+	template<typename T>
+	void read(std::vector<std::complex<T> >& what,
+	          String name,
+	          typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
+	{
+		void* ptr = static_cast<void *>(&(what[0]));  // FIXME CHECK SIZE
+		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet(name));
+		dataset->read(ptr, TypeToH5<T>::type);
+		delete dataset;
+	}
+
+	template<typename T>
+	void read(std::vector<T>& what,
+	          String name,
+	          typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
+	          int>::Type = 0)
+	{
+		throw RuntimeError("Cannot read " + name + " (vector<compound> not yet supported)\n");
+	}
+
+	template<typename T>
+	void read(std::stack<T>& what,
+	          String name)
+	{
+		throw RuntimeError("Cannot read label " + name + " (stacks not supported yet)\n");
+	}
+
+	// read functions END
+
 private:
 
-	void overwriteNotSupported(WriteMode mode) const
+	void overwriteNotSupported(WriteMode mode)
 	{
 		if (mode == NO) return;
 		throw RuntimeError("Overwrite not supported for this type\n");
@@ -184,27 +258,17 @@ private:
 	}
 
 	template<typename SomeType>
-	void writeNew(String name, void* ptr, hsize_t dims[], SizeType ndims)
+	void internalWrite(String name, const void* ptr, hsize_t dims[], SizeType ndims)
 	{
 		H5::DataSpace *dataspace = new H5::DataSpace(ndims, dims); // create new dspace
 		H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
-		internalWrite<SomeType>(ptr, name, *dataspace, dsCreatPlist);
-		delete dataspace;
-	}
-
-	template<typename T>
-	void internalWrite(const void *ptr,
-	                   String name,
-	                   H5::DataSpace& dataspace,
-	                   H5::DSetCreatPropList& dsCreatPlist)
-	{
-
 		H5::DataSet* dataset = new H5::DataSet(hdf5file_->createDataSet(name,
-		                                                                TypeToH5<T>::type,
-		                                                                dataspace,
+		                                                                TypeToH5<SomeType>::type,
+		                                                                *dataspace,
 		                                                                dsCreatPlist));
-		dataset->write(ptr, TypeToH5<T>::type);
+		dataset->write(ptr, TypeToH5<SomeType>::type);
 		delete dataset;
+		delete dataspace;
 	}
 
 	H5::H5File* hdf5file_;
