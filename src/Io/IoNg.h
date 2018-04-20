@@ -354,9 +354,8 @@ public:
 
 		SizeType count(const String& s)
 		{
-			SizeType size = 0;
-			ioNgSerializer_.read(size, s + "/Size");
-			return size;
+			std::cerr<<"IoNg: ignoring call to count("<<s<<")\n";
+			return 1;
 		}
 
 		template<typename X,template<typename> class SomeType>

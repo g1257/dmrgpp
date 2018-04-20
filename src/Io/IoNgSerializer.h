@@ -257,6 +257,17 @@ public:
 	}
 
 	template<typename T>
+	void read(std::vector<std::vector<T> >& what,
+	          String name)
+	{
+		SizeType size = 0;
+		read(size, name + "/Size");
+		what.resize(size);
+		for (SizeType i = 0; i < size; ++i)
+			read(what[i], name + "/" + ttos(i));
+	}
+
+	template<typename T>
 	void read(std::stack<T>& what,
 	          String name)
 	{
