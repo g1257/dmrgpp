@@ -166,6 +166,9 @@ public:
 			label += "=";
 			ioIn2.readline(energyFromFile_,label,IoType::In::LAST_INSTANCE);
 			label = "OperatorPerSite";
+#ifdef USE_IO_NG
+			label = "CHKPOINTSYSTEM/" + label;
+#endif
 			VectorSizeType v;
 			ioIn2.rewind();
 			ioIn2.read(v,label);

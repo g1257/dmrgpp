@@ -571,7 +571,7 @@ private:
 			PsimagLite::OstringStream msg;
 			msg.precision(8);
 			msg<<"#WAVEFUNCTION_ENERGY="<<energy_;
-			ioOut_.writeLabel(energy_, "WaveFunctionEnergy", msg, counter++);
+			ioOut_.writeline(energy_, "WaveFunctionEnergy", msg, counter++);
 		}
 	}
 
@@ -595,7 +595,7 @@ private:
 		msg2<<"#Error="<<truncate_.error();
 		static SizeType counter = 0;
 		if (saveData_)
-			ioOut_.writeLabel(truncate_.error(), "Error", msg2, counter++);
+			ioOut_.writeline(truncate_.error(), "Error", msg2, counter++);
 
 		if (direction == ProgramGlobals::EXPAND_SYSTEM)
 			checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS, ProgramGlobals::SYSTEM);
@@ -682,7 +682,7 @@ private:
 		msg.precision(8);
 		msg<<"#Energy="<<energy;
 		static SizeType counter = 0;
-		ioOut_.writeLabel(energy, "Energy" , msg, counter++);
+		ioOut_.writeline(energy, "Energy" , msg, counter++);
 	}
 
 	const BlockType& findRightBlock(const VectorBlockType& y,
