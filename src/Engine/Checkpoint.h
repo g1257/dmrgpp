@@ -227,19 +227,22 @@ public:
 	          TargetingType& psi,
 	          bool isObserveCode)
 	{
-
 		typename IoType::In ioTmp(parameters_.checkpoint.filename);
-		SizeType loop = ioTmp.count("NAME=CHKPOINTSYSTEM");
-		if (loop<1) {
+		PsimagLite::String prefix = (ioTmp.ng()) ? "" : "NAME=";
+		SizeType loop = ioTmp.count(prefix + "CHKPOINTSYSTEM");
+		if (loop < 1) {
 			std::cerr<<"There are no resumable loops in file ";
 			std::cerr<<parameters_.checkpoint.filename<<"\n";
-			throw PsimagLite::RuntimeError("Checkpoint::read(...)\n");
+			err("Checkpoint::read(...)\n");
 		}
+
 		loop--;
-		BasisWithOperatorsType pS1(ioTmp,"CHKPOINTSYSTEM",loop,isObserveCode);
+
+		PsimagLite::String postfix = (ioTmp.ng()) ? "/" + ttos(loop) : "";
+		BasisWithOperatorsType pS1(ioTmp,"CHKPOINTSYSTEM" + postfix,loop,isObserveCode);
 
 		pS=pS1;
-		BasisWithOperatorsType pE1(ioTmp,"CHKPOINTENVIRON",0,isObserveCode);
+		BasisWithOperatorsType pE1(ioTmp,"CHKPOINTENVIRON" + postfix,0,isObserveCode);
 		pE=pE1;
 		psi.read(parameters_.checkpoint.filename);
 	}

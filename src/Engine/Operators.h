@@ -223,6 +223,7 @@ public:
 
 	template<typename IoInputter>
 	Operators(IoInputter& io,
+	          PsimagLite::String prefix,
 	          SizeType level,
 	          const BasisType* thisBasis,
 	          bool isObserveCode)
@@ -234,9 +235,9 @@ public:
 
 		announceChangeAll();
 
-		if (!useSu2Symmetry_) io.read(operators_,"Operators");
+		if (!useSu2Symmetry_) io.read(operators_, prefix + "Operators");
 
-		io.read(hamiltonian_, "Hamiltonian");
+		io.read(hamiltonian_, prefix + "Hamiltonian");
 		reducedOpImpl_.setHamiltonian(hamiltonian_);
 	}
 

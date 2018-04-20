@@ -103,12 +103,12 @@ public:
 	      dt_(0)
 	{
 		ioOut_.createGroup(label_);
-		ioOut_.write(total_, label_ + "/total_");
+		ioOut_.write(total_, label_ + "/Size");
 
 		if (!hasLoad) return;
 
 		IoInType ioIn(name1);
-		ioIn.read(total_, label_ + "/total_");
+		ioIn.read(total_, label_ + "/Size");
 		ioIn.close();
 		PsimagLite::OstringStream msg;
 		msg<<"Read from file " + name1 + " succeeded";
@@ -132,7 +132,7 @@ public:
 		}
 
 		ioOut_.write(total_,
-		             label_ + "/total_",
+		             label_ + "/Size",
 		             IoOutType::Serializer::ALLOW_OVERWRITE);
 
 		++total_;
@@ -144,7 +144,7 @@ public:
 			err("Can't pop; the stack is empty!\n");
 		--total_;
 		ioOut_.write(total_,
-		             label_ + "/total_",
+		             label_ + "/Size",
 		             IoOutType::Serializer::ALLOW_OVERWRITE);
 	}
 

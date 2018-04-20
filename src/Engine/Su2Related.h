@@ -96,6 +96,14 @@ struct Su2Related {
 		return 0;
 	}
 
+	void read(PsimagLite::String label,
+	               PsimagLite::IoSerializer& ioSerializer)
+	{
+		ioSerializer.read(offset, label + "/offset");
+		ioSerializer.read(source, label + "/source");
+		ioSerializer.read(transpose, label + "/transpose");
+	}
+
 	void write(PsimagLite::String label,
 	               PsimagLite::IoSerializer& ioSerializer) const
 	{

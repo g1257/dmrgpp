@@ -247,7 +247,7 @@ struct Operator {
 	}
 
 	void write(PsimagLite::String label,
-	               PsimagLite::IoSerializer& ioSerializer) const
+	           PsimagLite::IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
 
@@ -255,7 +255,17 @@ struct Operator {
 		ioSerializer.write(label + "/fermionSign", fermionSign);
 		ioSerializer.write(label + "/jm", jm);
 		ioSerializer.write(label + "/angularFactor", angularFactor);
-		su2Related.write(label + "/su2Related", ioSerializer);
+		// su2Related.write(label + "/su2Related", ioSerializer);
+	}
+
+	void read(PsimagLite::String label,
+	          PsimagLite::IoSerializer& ioSerializer)
+	{
+		data.read(label + "/data", ioSerializer);
+		ioSerializer.read(fermionSign, label + "/fermionSign");
+		ioSerializer.read(jm, label + "/jm");
+		ioSerializer.read(angularFactor, label + "/angularFactor");
+		// su2Related.read(label + "/su2Related", ioSerializer);
 	}
 
 	void write(std::ostream& os) const

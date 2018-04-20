@@ -144,9 +144,11 @@ public:
 	                   const PsimagLite::String& ss,
 	                   SizeType counter,
 	                   bool isObserveCode)
-	    : BasisType(io,ss,counter),operators_(io,0,this,isObserveCode)
+	    : BasisType(io, ss, counter),
+	      operators_(io, (io.ng()) ? ss + "/" : "", 0, this, isObserveCode)
 	{
-		io.read(operatorsPerSite_,"OperatorPerSite");
+		PsimagLite::String prefix = (io.ng()) ? ss + "/" : "";
+		io.read(operatorsPerSite_, prefix + "OperatorPerSite");
 	}
 
 	template<typename IoInputter>
