@@ -106,12 +106,12 @@ public:
 	enum OpenMode {ACC_TRUNC, ACC_EXCL, ACC_RDONLY, ACC_RDW};
 
 	/*
-	    H5F_ACC_TRUNC - Truncate file, if it already exists,
-	    erasing all data previously stored in the file.
-	    H5F_ACC_EXCL - Fail if file already exists. H5F_ACC_TRUNC
-	    and H5F_ACC_EXCL are mutually exclusive
-	    H5F_ACC_RDONLY - Open file as read-only, if it already exists, and fail, otherwise
-	    H5F_ACC_RDWR - Open file for read/write, if it already exists, and fail, otherwise
+		H5F_ACC_TRUNC - Truncate file, if it already exists,
+		erasing all data previously stored in the file.
+		H5F_ACC_EXCL - Fail if file already exists. H5F_ACC_TRUNC
+		and H5F_ACC_EXCL are mutually exclusive
+		H5F_ACC_RDONLY - Open file as read-only, if it already exists, and fail, otherwise
+		H5F_ACC_RDWR - Open file for read/write, if it already exists, and fail, otherwise
 	*/
 
 	class Out {
@@ -165,14 +165,15 @@ public:
 
 		void createGroup(String groupName)
 		{
-			ioNgSerializer_.createGroup(groupName);	
+			ioNgSerializer_.createGroup(groupName);
 		}
 
+		// scaffolding function FIXME DELETE (see In::readline)
 		template<typename T>
-		void writeLabel(T x,
-		                PsimagLite::String str,
-		                PsimagLite::OstringStream&,
-		                SizeType counter)
+		void writeline(T x,
+		               PsimagLite::String str,
+		               PsimagLite::OstringStream&,
+		               SizeType counter)
 		{
 			if (counter == 0) createGroup(str);
 
@@ -243,8 +244,9 @@ public:
 	public:
 
 		typedef int long LongIntegerType;
-		static const LongIntegerType LAST_INSTANCE=-1;
 		typedef unsigned int long LongSizeType;
+
+		static const LongIntegerType LAST_INSTANCE = -1; // scaffolding ONLY FIXME DELETE
 
 		In(String const &fn)
 		    : filename_(fn),
@@ -274,8 +276,9 @@ public:
 			hdf5File_->close();
 		}
 
+		// scaffolding function FIXME DELETE (see Out::writeline)
 		template<typename SomeType>
-		SizeType readline(SomeType &x, String s, LongIntegerType = 0)
+		SizeType readline(SomeType &x, String s, LongIntegerType level = 0)
 		{
 			SizeType last = s.length();
 			if (last < 2)
@@ -283,6 +286,26 @@ public:
 
 			if (s[--last] == '=')
 				s.erase(s.begin() + last, s.end());
+
+			if (s[0] == '#')
+				s.erase(s.begin(), s.begin() + 1);
+
+			if (level == LAST_INSTANCE) {
+				int total = 0;
+				try {
+					ioNgSerializer_.read(total, s + "/Size");
+				} catch (H5::Exception&) {
+					ioNgSerializer_.read(x, s);
+					return 0;
+				}
+
+				if (total <= 0)
+					throw RuntimeError("Error reading last instance of " + s + "\n");
+
+				ioNgSerializer_.read(x, s + "/" + ttos(--total));
+				return 0;
+			}
+
 			ioNgSerializer_.read(x, s);
 			return 0;
 		}
@@ -309,10 +332,13 @@ public:
 		                                         LongIntegerType level=0)
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
-		std::pair<String,SizeType> advance(String const &s,
-		                                   LongIntegerType level=0,
-		                                   bool beQuiet=false)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
+		std::pair<String,SizeType> advance(String,
+		                                   LongIntegerType = 0,
+		                                   bool = false)
+		{
+			std::cerr<<"IoNg: ignoring call to advance()\n";
+			return std::pair<String,SizeType>("IoNg?", 0);
+		}
 
 		void readFullLine(String& temp)
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
@@ -330,7 +356,9 @@ public:
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
 		void rewind()
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
+		{
+			std::cerr<<"IoNg: ignoring call to rewind()\n";
+		}
 
 		void move(int x)
 		{ throw RuntimeError("IoNg:: not implemented\n"); }

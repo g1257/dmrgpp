@@ -210,10 +210,7 @@ public:
 	          String name,
 	          typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
 	{
-		void* ptr = static_cast<void *>(&(what[0]));  // FIXME CHECK SIZE
-		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet(name));
-		dataset->read(ptr, typeToH5<T>());
-		delete dataset;
+		readInternal(what, name);
 	}
 
 	template<typename T>
@@ -221,10 +218,7 @@ public:
 	          String name,
 	          typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
 	{
-		void* ptr = static_cast<void *>(&(what[0]));  // FIXME CHECK SIZE
-		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet(name));
-		dataset->read(ptr, typeToH5<T>());
-		delete dataset;
+		readInternal(what, name);
 	}
 
 	template<typename T>
@@ -246,6 +240,30 @@ public:
 	// read functions END
 
 private:
+
+	template<typename SomeVectorType>
+	void readInternal(SomeVectorType& what, String name)
+	{
+		typedef typename Real<typename SomeVectorType::value_type>::Type UnderlyingType;
+
+		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet("Def/" + name));
+		const H5::DataSpace& dspace = dataset->getSpace();
+		const int ndims = dspace.getSimpleExtentNdims();
+		if (ndims != 1)
+			throw RuntimeError("IoNgSerializer: problem reading vector<arith> (ndims)\n");
+
+		hsize_t* dims = new hsize_t[ndims];
+		dspace.getSimpleExtentDims(dims);
+
+		if (dims[0] == 0)
+			throw RuntimeError("IoNgSerializer: problem reading vector<arith> (dims)\n");
+
+		what.resize(dims[0], 0);
+		void* ptr = static_cast<void *>(&(what[0]));
+		dataset->read(ptr, typeToH5<UnderlyingType>());
+		delete[] dims;
+		delete dataset;
+	}
 
 	void overwriteNotSupported(WriteMode mode)
 	{
