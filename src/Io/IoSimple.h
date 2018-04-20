@@ -160,10 +160,10 @@ public:
 		}
 
 		template<typename T>
-		void writeLabel(T,
-		                PsimagLite::String,
-		                PsimagLite::OstringStream& msg,
-		                SizeType)
+		void writeline(T,
+		               PsimagLite::String,
+		               PsimagLite::OstringStream& msg,
+		               SizeType)
 		{
 			printline(msg);
 		}

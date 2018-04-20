@@ -18,9 +18,15 @@ public:
 	}
 
 	template<typename T>
-	void write(String name2, const T& what)
+	void write(String name, const T& what)
 	{
-		std::cerr<<"IoSerializer::write("<<name2<<","<<what<<"): I'm just a dummy!\n";
+		std::cerr<<"IoSerializer::write("<<name<<","<<what<<"): I'm just a dummy!\n";
+	}
+
+	template<typename T>
+	void read(T& what, String name)
+	{
+		std::cerr<<"IoSerializer::read("<<what<<","<<name<<"): I'm just a dummy!\n";
 	}
 };
 }
