@@ -366,6 +366,17 @@ public:
 		}
 	}
 
+	template<typename SomeInputType>
+	void read(SomeInputType& io,
+	          PsimagLite::String label)
+	{
+		io.read(size_, label + "/size_");
+		io.read(index2Sector_, label + "/index2Sector_");
+		io.read(data_, label + "/data_");
+		io.read(offsets_, label + "/offsets_");
+		io.read(nzMsAndQns_, label + "/nzMsAndQns_");
+	}
+
 	template<typename SomeIoOutputType>
 	void write(SomeIoOutputType& io,
 	          const PsimagLite::String& label) const
@@ -404,8 +415,9 @@ public:
 		}
 	}
 
-	template<typename IoInputter>
-	void read(IoInputter& io,const PsimagLite::String& label,SizeType counter=0)
+	void read(PsimagLite::IoSimple::In& io,
+	          const PsimagLite::String& label,
+	          SizeType counter = 0)
 	{
 		PsimagLite::String msg("VectorWithOffsets:");
 		io.advance(label,counter);

@@ -209,10 +209,20 @@ public:
 			sv[i+offset_] = data_[i];
 	}
 
+	template<typename SomeInputType>
+	void read(SomeInputType& io,
+	          const PsimagLite::String& label,
+	          SizeType = 0)
+	{
+		io.read(size_, label + "/size_");
+		io.read(offset_, label + "/offset_");
+		io.read(mAndq_, label + "/mAndq_");
+		io.read(data_, label + "/data_");
+	}
+
 	template<typename SomeIoOutputType>
 	void write(SomeIoOutputType& io, const PsimagLite::String& label) const
 	{
-		// FIXME: Shouldn't this be called serialize?
 		io.createGroup(label);
 		io.write(size_, label + "/size_");
 		io.write(offset_, label + "/offset_");
@@ -236,8 +246,9 @@ public:
 		io.write(data_,"data");
 	}
 
-	template<typename IoInputter>
-	void read(IoInputter& io,const PsimagLite::String& label,SizeType counter=0)
+	void read(PsimagLite::IoSimple::In& io,
+	          const PsimagLite::String& label,
+	          SizeType counter = 0)
 	{
 		io.advance(label,counter);
 		int x = 0;
