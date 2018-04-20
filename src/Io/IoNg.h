@@ -137,6 +137,8 @@ public:
 			hdf5File_ = 0;
 		}
 
+		bool ng() const { return true; }
+
 		const String& filename() const
 		{
 			return filename_;
@@ -261,6 +263,8 @@ public:
 			filename_ = "";
 		}
 
+		const String& filename() const { return filename_; }
+
 		void open(String const &fn)
 		{
 			if (hdf5File_) delete hdf5File_;
@@ -275,6 +279,8 @@ public:
 			filename_ = "";
 			hdf5File_->close();
 		}
+
+		bool ng() const { return true; }
 
 		// scaffolding function FIXME DELETE (see Out::writeline)
 		template<typename SomeType>
@@ -364,10 +370,6 @@ public:
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
 		bool eof() const { throw RuntimeError("IoNg:: not implemented\n"); }
-
-		const char* filename() const
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
-
 
 		template<typename T>
 		friend void operator>>(In& io, T& t)

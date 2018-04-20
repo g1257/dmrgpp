@@ -132,6 +132,8 @@ public:
 			delete fout_;
 		}
 
+		bool ng() const { return false; }
+
 		const String& filename() const { return filename_; }
 
 		void open(String const &fn,
@@ -246,6 +248,8 @@ public:
 		{
 			fin_.close();
 		}
+
+		bool ng() const { return false; }
 
 		void open(String const &fn)
 		{
