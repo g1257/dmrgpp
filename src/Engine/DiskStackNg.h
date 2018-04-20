@@ -115,6 +115,12 @@ public:
 		progress_.printline(msg,std::cout);
 	}
 
+	~DiskStack()
+	{
+		delete dt_;
+		dt_ = 0;
+	}
+
 	bool inDisk() const { return true; }
 
 	void push(const DataType& d)
@@ -131,18 +137,21 @@ public:
 			        DataType::SAVE_ALL);
 		}
 
+		++total_;
+
 		ioOut_.write(total_,
 		             label_ + "/Size",
 		             IoOutType::Serializer::ALLOW_OVERWRITE);
 
-		++total_;
 	}
 
 	void pop()
 	{
 		if (total_ == 0)
 			err("Can't pop; the stack is empty!\n");
+
 		--total_;
+
 		ioOut_.write(total_,
 		             label_ + "/Size",
 		             IoOutType::Serializer::ALLOW_OVERWRITE);
@@ -150,12 +159,12 @@ public:
 
 	const DataType& top() const
 	{
-		assert(total_ >= 0);
+		assert(total_ > 0);
 		const SizeType dummy = 0;
 		delete dt_;
 		dt_ = 0;
 		IoInType ioIn(name1_);
-		dt_ = new DataType(ioIn, label_ + "/" + ttos(total_), dummy, isObserveCode_);
+		dt_ = new DataType(ioIn, label_ + "/" + ttos(total_ - 1), dummy, isObserveCode_);
 		ioIn.close();
 		return *dt_;
 	}
