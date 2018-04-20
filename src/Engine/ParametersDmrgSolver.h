@@ -200,13 +200,6 @@ struct ParametersDmrgSolver {
 		return 0;
 	}
 
-	ParametersDmrgSolver(PsimagLite::String filename)
-	{
-		std::ifstream ifs(filename.c_str());
-		boost::archive::text_iarchive ia(ifs);
-		ia >> (*this);
-	}
-
 	//! Read Dmrg parameters from inp file
 	ParametersDmrgSolver(InputValidatorType& io,
 	                     PsimagLite::String sOptions,

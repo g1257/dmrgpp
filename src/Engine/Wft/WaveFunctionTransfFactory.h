@@ -479,15 +479,6 @@ private:
 		wftOptions_.counter++;
 	}
 
-	void printDmrgWave() const
-	{
-		IoType::Out io(std::cerr);
-		dmrgWaveStruct_.write(io);
-		std::cerr<<"wsStack="<<wsStack_.size()<<"\n";
-		std::cerr<<"weStack="<<weStack_.size()<<"\n";
-		std::cerr<<"counter="<<wftOptions_.counter<<"\n";
-	}
-
 	SizeType computeCenter(const LeftRightSuperType& lrs,
 	                       ProgramGlobals::DirectionEnum direction) const
 	{
