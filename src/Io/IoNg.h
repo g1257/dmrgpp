@@ -353,7 +353,11 @@ public:
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
 		SizeType count(const String& s)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
+		{
+			SizeType size = 0;
+			ioNgSerializer_.read(size, s + "/Size");
+			return size;
+		}
 
 		template<typename X,template<typename> class SomeType>
 		void readSparseVector(SomeType<X> &x,

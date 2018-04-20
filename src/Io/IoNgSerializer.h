@@ -190,6 +190,14 @@ public:
 		delete dataset;
 	}
 
+	template<typename T1, typename T2>
+	void read(std::pair<T1, T2>& what,
+	          String name)
+	{
+		read(what.first, name + "/0");
+		read(what.second, name + "/1");
+	}
+
 	void read(std::vector<bool>&,
 	          String name)
 	{
@@ -221,13 +229,31 @@ public:
 		readInternal(what, name);
 	}
 
+	template<typename T1, typename T2>
+	void read(std::vector<std::pair<T1, T2> >& what,
+	          String name,
+	          typename EnableIf<
+	          Loki::TypeTraits<T1>::isArith && Loki::TypeTraits<T2>::isArith,
+	          int>::Type = 0)
+	{
+		SizeType size = 0;
+		read(size, name + "/Size");
+		what.resize(size);
+		for (SizeType i = 0; i < size; ++i)
+			read(what[i], name + "/" + typeToString(i));
+	}
+
 	template<typename T>
 	void read(std::vector<T>& what,
 	          String name,
 	          typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
 	          int>::Type = 0)
 	{
-		throw RuntimeError("Cannot read " + name + " (vector<compound> not yet supported)\n");
+		SizeType size = 0;
+		read(size, name + "/Size");
+		what.resize(size);
+		for (SizeType i = 0; i < size; ++i)
+			what[i].read(name + "/" + ttos(i), *this);
 	}
 
 	template<typename T>

@@ -532,9 +532,14 @@ public:
 		ioSerializer.write(label + "/ncol_",  ncol_);
 	}
 
-	void read(String label, IoSerializer& ioSerializer) const
+	void read(String label, IoSerializer& ioSerializer)
 	{
-		throw RuntimeError("CrsMatrix read unimplemented yet\n");
+		ioSerializer.read(nrow_, label + "/nrow_");
+		ioSerializer.read(ncol_, label + "/ncol_");
+		if (nrow_ == 0 || ncol_ == 0) return;
+		ioSerializer.read(rowptr_, label + "/rowptr_");
+		ioSerializer.read(colind_, label + "/colind_");
+		ioSerializer.read(values_, label + "/values_");
 	}
 
 	friend bool isZero(const CrsMatrix& A, double eps = 0.0)
