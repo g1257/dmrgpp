@@ -216,7 +216,7 @@ template<typename ModelType>
 inline std::ostream& operator<<(std::ostream& os,
                                 const TargetParamsCorrectionVector<ModelType>& t)
 {
-	os<<"#TargetParams.type=AdaptiveDynamic\n";
+	os<<"TargetParams.type=AdaptiveDynamic\n";
 	const TargetParamsCommon<ModelType>& tp = t;
 	os<<tp;
 	os<<"DynamicDmrgType="<<t.type()<<"\n";

@@ -131,12 +131,12 @@ public:
 	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
 		SizeType tmp=0;
-		io.readline(tmp,"#FACTORSSIZE=");
+		io.readline(tmp,"FACTORSSIZE=");
 	}
 
 	void write(PsimagLite::IoSimple::Out& io) const
 	{
-		PsimagLite::String s="#FACTORSSIZE=0";
+		PsimagLite::String s="FACTORSSIZE=0";
 		io.printline(s);
 	}
 }; //class HamiltonianSymmetryLocal

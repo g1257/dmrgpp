@@ -10,7 +10,7 @@ namespace Dmrg {
 struct RestartStruct {
 
 	RestartStruct()
-	: filename(""),into("GroundState"),labelForPsi("PSI"),labelForEnergy("#Energy")
+	: filename(""),into("GroundState"),labelForPsi("PSI"),labelForEnergy("Energy")
 	{}
 
 	template<typename SomeMemResolvType>

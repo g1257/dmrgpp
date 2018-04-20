@@ -306,7 +306,7 @@ public:
 		outHandle.printline(s);
 		outHandle.write(coordinates_,"coordinates");
 		outHandle.write(values_,"values");
-		s="#######\n";
+		s="######\n";
 		outHandle.printline(s);
 	}
 

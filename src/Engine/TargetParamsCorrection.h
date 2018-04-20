@@ -129,8 +129,8 @@ template<typename ModelType>
 inline std::ostream&
 operator<<(std::ostream& os,const TargetParamsCorrection<ModelType>& t)
 {
-	os<<"#TargetParams.type=correction\n";
-	os<<"#TargetCorrection.correctionA="<<t.correctionA()<<"\n";
+	os<<"TargetParams.type=correction\n";
+	os<<"TargetCorrection.correctionA="<<t.correctionA()<<"\n";
 	return os;
 }
 } // namespace Dmrg

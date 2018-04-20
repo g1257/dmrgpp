@@ -126,7 +126,7 @@ template<typename ModelType>
 inline std::ostream&
 operator<<(std::ostream& os,const TargetParamsCorrelations<ModelType>& t)
 {
-	os<<"#TargetParams.type=Correlations\n";
+	os<<"TargetParams.type=Correlations\n";
 	const typename TargetParamsDynamic<ModelType>::TargetParamsCommonType&
 	        tp = t;
 	os<<tp;

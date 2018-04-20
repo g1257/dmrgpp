@@ -334,21 +334,21 @@ private:
 
 	void getTransform(MatrixType& transform,int ns)
 	{
-		io_.read(transform, "#TRANSFORM_sites",ns);
+		io_.read(transform, "TRANSFORM_sites",ns);
 		io_.rewind();
 	}
 
 	void getWaveFunction(VectorType& wavefunction,SizeType ns)
 	{
 		VectorWithOffsetType tmpV;
-		tmpV.read(io_,"#WAVEFUNCTION_sites=",ns);
+		tmpV.read(io_,"WAVEFUNCTION_sites=",ns);
 		tmpV.toSparse(wavefunction);
 		io_.rewind();
 	}
 
 	void getDirection(int& x,int ns)
 	{
-		io_.readline(x,"#DIRECTION=",ns);
+		io_.readline(x,"DIRECTION=",ns);
 		io_.rewind();
 	}
 

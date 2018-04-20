@@ -30,8 +30,8 @@ private:
 	                  const BasisWithOperatorsType& basis) const
 	{
 		SizeType sites = basis.block().size();
-		os<<"#Side="<<msg<<"\n";
-		os<<"#SitesOnThisSide ";
+		os<<"Side="<<msg<<"\n";
+		os<<"SitesOnThisSide ";
 		for (SizeType i = 0; i < sites; ++i) {
 			os<<basis.block()[i]<<" ";
 		}
@@ -39,7 +39,7 @@ private:
 		os<<"\n";
 
 		SizeType n = basis.partition();
-		os<<"#Partitions "<<n<<"\n";
+		os<<"Partitions "<<n<<"\n";
 		for (SizeType i = 0; i < n - 1; ++i) {
 			SizeType s = basis.partition(i + 1) - basis.partition(i);
 			SizeType j = basis.qn(basis.partition(i));
@@ -56,7 +56,7 @@ private:
 			siteC = site - basis.block()[0];
 		}
 
-		os<<"#Operators at site "<<site<<" ("<<siteC<<")\n";
+		os<<"Operators at site "<<site<<" ("<<siteC<<")\n";
 		for (SizeType sigma = 0; sigma < end; ++sigma) {
 			typename BasisWithOperatorsType::PairType p = basis.getOperatorIndices(siteC, sigma);
 			os<<sigma<<" non-zeroes="<<basis.getOperatorByIndex(p.first).data.nonZeros();

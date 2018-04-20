@@ -382,20 +382,20 @@ public:
 	          const PsimagLite::String& label) const
 	{
 		io.printline(label);
-		PsimagLite::String s="#size="+ttos(size_);
+		PsimagLite::String s="size="+ttos(size_);
 		io.printline(s);
-		io.write(offsets_,"#offsets");
-		s = "#nonzero="+ttos(nzMsAndQns_.size());
+		io.write(offsets_,"offsets");
+		s = "nonzero="+ttos(nzMsAndQns_.size());
 		io.printline(s);
 
 		for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
 			SizeType j =  nzMsAndQns_[jj].first;
-			s="#sector="+ttos(j);
+			s="sector="+ttos(j);
 			io.printline(s);
 			if (j >= data_.size())
 				err("VectorWithOffsets: save\n");
 
-			s="#qn="+ttos(j);
+			s="qn="+ttos(j);
 			io.printline(s);
 
 			s = "data" + ttos(jj);
@@ -410,26 +410,26 @@ public:
 		PsimagLite::String msg("VectorWithOffsets:");
 		io.advance(label,counter);
 		int x = 0;
-		io.readline(x,"#size=");
+		io.readline(x,"size=");
 		if (x<0)
 			err(msg + ":read(...): size<0\n");
 		size_ = x;
-		io.read(offsets_,"#offsets");
+		io.read(offsets_,"offsets");
 		data_.clear();
 		data_.resize(offsets_.size());
-		io.readline(x,"#nonzero=");
+		io.readline(x,"nonzero=");
 		if (x<0)
 			err(msg + ":read(...): nonzerosectors<0\n");
 		nzMsAndQns_.resize(x);
 		for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
-			io.readline(x,"#sector=");
+			io.readline(x,"sector=");
 			if (x<0)
 				err(msg + ":read(...): sector<0\n");
 			if (static_cast<SizeType>(x)>=data_.size())
 				err(msg + ":read(...): sector too big\n");
 
 			int y = 0;
-			io.readline(y, "#qn=");
+			io.readline(y, "qn=");
 			if (y < 0)
 				err(msg + ":read(...): qn<0\n");
 			nzMsAndQns_[jj] = PairSizeType(x, y);
@@ -452,28 +452,28 @@ public:
 		PsimagLite::String msg("VectorWithOffsets:");
 		io.advance(label,counter);
 		int x = 0;
-		io.readline(x,"#size=");
+		io.readline(x,"size=");
 		if (x<0)
 			err(msg + ":loadOneSector(...): size<0\n");
 		size_ = x;
 
-		io.read(offsets_,"#offsets");
+		io.read(offsets_,"offsets");
 
 		data_.clear();
 		data_.resize(offsets_.size());
 
-		io.readline(x,"#nonzero=");
+		io.readline(x,"nonzero=");
 		if (x < 0)
 			err(msg + ":loadOneSector(...): nonzerosectors<0\n");
 		nzMsAndQns_.resize(x);
 
 		for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
-			io.readline(x,"#sector=");
+			io.readline(x,"sector=");
 			if (x<0)
 				err(msg + ":loadOneSector(...): sector<0\n");
 
 			int y = 0;
-			io.readline(y, "#qn=");
+			io.readline(y, "qn=");
 			if (y < 0)
 				err(msg + ":read(...): qn<0\n");
 			nzMsAndQns_[jj] = PairSizeType(x, y);

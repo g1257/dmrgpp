@@ -104,7 +104,7 @@ public:
 	MettsSerializer(typename PsimagLite::IoSelector::In& io,SizeType lastInstance = 0)
 	{
 		RealType x=0;
-		PsimagLite::String s = "#BETA=";
+		PsimagLite::String s = "BETA=";
 
 		if (lastInstance) io.readline(x,s,lastInstance);
 		else io.readline(x,s);
@@ -122,7 +122,7 @@ public:
 
 		site_ = xi;
 
-		s = "#TNUMBEROFVECTORS=";
+		s = "TNUMBEROFVECTORS=";
 		io.readline(xi,s);
 		if (xi<=0)
 			throw PsimagLite::RuntimeError("MettsSerializer:: n. of vectors must be positive\n");
@@ -156,11 +156,11 @@ public:
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
-		PsimagLite::String s = "#BETA=" + ttos(currentBeta_);
+		PsimagLite::String s = "BETA=" + ttos(currentBeta_);
 		io.printline(s);
 		s = "TargetCentralSite=" + ttos(site_);
 		io.printline(s);
-		s = "#TNUMBEROFVECTORS="+ttos(targetVectors_.size());
+		s = "TNUMBEROFVECTORS="+ttos(targetVectors_.size());
 		io.printline(s);
 		for (SizeType i=0;i<targetVectors_.size();i++) {
 			PsimagLite::String label = "targetVector"+ttos(i)+"_"+ttos(currentBeta_);

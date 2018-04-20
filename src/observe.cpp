@@ -198,8 +198,8 @@ int main(int argc,char **argv)
 	InputCheck inputCheck;
 	InputNgType::Writeable ioWriteable(filename,
 	                                   inputCheck,
-	                                   "#InputStartsHere",
-	                                   "#InputEndsHere");
+	                                   "InputStartsHere",
+	                                   "InputEndsHere");
 	InputNgType::Readable io(ioWriteable);
 
 	ParametersDmrgSolverType dmrgSolverParams(io,sOptions,false,true);

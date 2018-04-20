@@ -125,12 +125,12 @@ public:
 		  lrs_(io, isObserveCode)
 	{
 		if (bogus) return;
-		PsimagLite::String s = "#WAVEFUNCTION_sites=";
+		PsimagLite::String s = "WAVEFUNCTION_sites=";
 		wavefunction_.read(io,s);
-		s = "#TRANSFORM_sites=";
+		s = "TRANSFORM_sites=";
 		io.read(transform_, s);
 		transposeConjugate(transformC_,transform_);
-		s = "#DIRECTION=";
+		s = "DIRECTION=";
 		io.readline(direction_,s);
 	}
 
@@ -155,20 +155,20 @@ public:
 		lrs_.write(io,option,numberOfSites);
 
 		// save wavefunction
-		PsimagLite::String label = "#WAVEFUNCTION_sites=";
+		PsimagLite::String label = "WAVEFUNCTION_sites=";
 		for (SizeType i=0;i<lrs_.super().block().size();i++) {
 			label += ttos(lrs_.super().block()[i])+",";
 		}
 
 		wavefunction_.write(io,label);
 
-		label = "#TRANSFORM_sites=";
+		label = "TRANSFORM_sites=";
 		for (SizeType i=0;i<lrs_.left().block().size();i++) {
 			label += ttos(lrs_.left().block()[i])+",";
 		}
 
 		io.write(transform_, label);
-		io.write(direction_, "#DIRECTION");
+		io.write(direction_, "DIRECTION");
 	}
 
 	const FermionSignType& fermionicSignLeft() const

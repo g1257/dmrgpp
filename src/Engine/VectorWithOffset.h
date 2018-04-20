@@ -223,17 +223,17 @@ public:
 	void write(PsimagLite::IoSimple::Out& io, const PsimagLite::String& label) const
 	{
 		io.printline(label);
-		PsimagLite::String s="#size="+ttos(size_);
+		PsimagLite::String s="size="+ttos(size_);
 		io.printline(s);
-		s="#offset="+ttos(offset_);
+		s="offset="+ttos(offset_);
 		io.printline(s);
-		s = "#nonzero=1";
+		s = "nonzero=1";
 		io.printline(s);
-		s="#sector="+ttos(mAndq_.first);
+		s="sector="+ttos(mAndq_.first);
 		io.printline(s);
-		s="#qn="+ttos(mAndq_.second);
+		s="qn="+ttos(mAndq_.second);
 		io.printline(s);
-		io.write(data_,"#data");
+		io.write(data_,"data");
 	}
 
 	template<typename IoInputter>
@@ -241,23 +241,23 @@ public:
 	{
 		io.advance(label,counter);
 		int x = 0;
-		io.readline(x,"#size=");
+		io.readline(x,"size=");
 		if (x<0)
 			throw PsimagLite::RuntimeError("VectorWithOffset::read(...): size<0\n");
 		size_ = x;
-		io.readline(x,"#offset=");
+		io.readline(x,"offset=");
 		if (x<0)
 			throw PsimagLite::RuntimeError("VectorWithOffset::read(...): offset<0\n");
 		offset_ = x;
-		io.readline(x,"#sector=");
+		io.readline(x,"sector=");
 		if (x<0)
 			throw PsimagLite::RuntimeError("VectorWithOffset::read(...): m<0\n");
 		int y = 0;
-		io.readline(y,"#qn=");
+		io.readline(y,"qn=");
 		if (y < 0)
 			throw PsimagLite::RuntimeError("VectorWithOffset::read(...): qn<0\n");
 		mAndq_ = PairSizeType(x, y);
-		io.read(data_,"#data");
+		io.read(data_,"data");
 	}
 
 	template<typename IoInputter>

@@ -137,7 +137,7 @@ public:
 	                    SizeType counter,
 	                    bool)
 	{
-		io.advance("#NAME="+label,counter);
+		io.advance("NAME="+label,counter);
 		io>>(*this);
 	}
 
@@ -311,7 +311,7 @@ public:
 		int x = -1;
 		PsimagLite::String temp;
 		is>>temp;
-		if (temp == "#NAME=")
+		if (temp == "NAME=")
 			is>>x;
 		else
 			x = atoi(temp.c_str());

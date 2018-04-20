@@ -128,13 +128,13 @@ public:
 template<typename ModelType>
 inline std::ostream& operator<<(std::ostream& os,const MettsParams<ModelType>& t)
 {
-	os<<"#TargetParams.type=Metts";
+	os<<"TargetParams.type=Metts";
 	const typename MettsParams<ModelType>::TimeVectorParamsType& tp = t;
 	os<<tp;
-	os<<"#BetaDividedByTwo="<<t.beta<<"\n";
-	os<<"#TSPRngSeed="<<t.rngSeed<<"\n";
-	os<<"#MettsCollapse="<<t.collapse<<"\n";
-	os<<"#MettsPure="<<t.pure<<"\n";
+	os<<"BetaDividedByTwo="<<t.beta<<"\n";
+	os<<"TSPRngSeed="<<t.rngSeed<<"\n";
+	os<<"MettsCollapse="<<t.collapse<<"\n";
+	os<<"MettsPure="<<t.pure<<"\n";
 	return os;
 }
 

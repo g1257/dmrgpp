@@ -124,7 +124,7 @@ template<typename ModelType>
 inline std::ostream&
 operator<<(std::ostream& os,const TargetParamsTimeStep<ModelType>& t)
 {
-	os<<"#TargetParams.type=TimeStep\n";
+	os<<"TargetParams.type=TimeStep\n";
 
 	const typename TargetParamsTimeStep<ModelType>::TimeVectorParamsType& tp1 = t;
 	os<<tp1;

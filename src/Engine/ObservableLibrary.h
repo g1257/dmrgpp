@@ -499,7 +499,7 @@ private:
 				gammas[1] = (g & 2)>>1;
 				gammas[2] = (g & 4) >> 2;
 				gammas[3] = (g & 8) >> 3;
-				std::cout<<"#DD4 for the following orbitals: ";
+				std::cout<<"DD4 for the following orbitals: ";
 				for (SizeType i=0;i<gammas.size();i++) std::cout<<gammas[i]<<" ";
 				std::cout<<"\n";
 				MatrixType fpd(numberOfSites_/2,numberOfSites_/2);
@@ -1240,7 +1240,7 @@ private:
 		if (hasTimeEvolution_) {
 			SizeType threadId = 0;
 			printSites(threadId);
-			std::cout<<"#Time="<<observe_.time(threadId)<<"\n";
+			std::cout<<"Time="<<observe_.time(threadId)<<"\n";
 		}
 
 		std::cout<<braket.toString()<<"\n";
@@ -1459,7 +1459,7 @@ private:
 	void printSites(SizeType threadId)
 	{
 		printMarker(threadId);
-		std::cout<<"#Sites=";
+		std::cout<<"Sites=";
 		observe_.setPointer(threadId,0);
 		if (observe_.site(threadId)==1) std::cout<<"0 ";
 		if (observe_.site(threadId)==numberOfSites_-2)

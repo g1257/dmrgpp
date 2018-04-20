@@ -242,23 +242,23 @@ public:
 	{
 		if (minimizeRead) return;
 		jmValues_.read(io);
-		io.read(flavors_,"#su2flavors");
-		io.readline(flavorsMax_,"#su2FlavorsMax=");
-		io.readline(electronsMax_,"#su2ElectronsMax=");
-		io.readline(jMax_,"#su2JMax=");
-		io.read(statesReduced_,"#su2StatesReduced");
-		io.read(jvals_,"#su2Jvals");
+		io.read(flavors_,"su2flavors");
+		io.readline(flavorsMax_,"su2FlavorsMax=");
+		io.readline(electronsMax_,"su2ElectronsMax=");
+		io.readline(jMax_,"su2JMax=");
+		io.read(statesReduced_,"su2StatesReduced");
+		io.read(jvals_,"su2Jvals");
 	}
 
 	void write(PsimagLite::IoSimple::Out& io) const
 	{
 		jmValues_.write(io);
-		io.write(flavors_,"#su2flavors");
-		io.write(flavorsMax_, "#su2FlavorsMax");
-		io.write(electronsMax_, "#su2ElectronsMax");
-		io.write(jMax_, "#su2JMax");
-		io.write(statesReduced_,"#su2StatesReduced");
-		io.write(jvals_,"#su2Jvals");
+		io.write(flavors_,"su2flavors");
+		io.write(flavorsMax_, "su2FlavorsMax");
+		io.write(electronsMax_, "su2ElectronsMax");
+		io.write(jMax_, "su2JMax");
+		io.write(statesReduced_,"su2StatesReduced");
+		io.write(jvals_,"su2Jvals");
 	}
 
 	SizeType flavor2Index(SizeType f1,

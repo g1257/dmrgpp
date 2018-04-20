@@ -264,7 +264,7 @@ public:
 		PsimagLite::String loadInto = targetHelper_.model().params().checkpoint.into;
 		PsimagLite::String labelForPsi = targetHelper_.model().params().checkpoint.labelForPsi;
 
-		applyOpExpression_.loadEnergy(io, "#Energy=", IoType::In::LAST_INSTANCE);
+		applyOpExpression_.loadEnergy(io, "Energy=", IoType::In::LAST_INSTANCE);
 
 		if (loadInto == "All") {
 			setAllStagesTo(WFT_NOADVANCE);
@@ -291,7 +291,7 @@ public:
 	{
 		IoInputType io(f);
 
-		applyOpExpression_.loadEnergy(io, "#Energy=", IoType::In::LAST_INSTANCE);
+		applyOpExpression_.loadEnergy(io, "Energy=", IoType::In::LAST_INSTANCE);
 		int site=0;
 		io.readline(site,"TargetCentralSite=",IoType::In::LAST_INSTANCE);
 		if (site<0)

@@ -300,14 +300,14 @@ public:
 	friend std::ostream& operator<<(std::ostream& os,
 	                                const TargetParamsCommon& t)
 	{
-		os<<"#TargetParams.operators="<<t.aOperators_.size()<<"\n";
+		os<<"TargetParams.operators="<<t.aOperators_.size()<<"\n";
 		for (SizeType i=0;i<t.aOperators_.size();i++) {
-			os<<"#TargetParams.operator "<<i<<"\n";
+			os<<"TargetParams.operator "<<i<<"\n";
 			os<<t.aOperators_[i];
 		}
 
-		os<<"#TargetParams.site="<<t.sites_;
-		os<<"#TargetParams.startingLoop="<<t.startingLoops_<<"\n";
+		os<<"TargetParams.site="<<t.sites_;
+		os<<"TargetParams.startingLoop="<<t.startingLoops_<<"\n";
 
 		return os;
 	}

@@ -177,12 +177,12 @@ template<typename ModelType>
 inline std::ostream&
 operator<<(std::ostream& os,const TargetParamsTimeVectors<ModelType>& t)
 {
-	os<<"#TargetParams.type=TimeVectors";
-	os<<"#TargetParams.tau="<<t.tau()<<"\n";
-	os<<"#TargetParams.timeSteps="<<t.timeSteps()<<"\n";
-	os<<"#TargetParams.advanceEach="<<t.advanceEach()<<"\n";
-	os<<"#TargetParams.algorithm="<<t.algorithm()<<"\n";
-	os<<"#TargetParams.timeDirection="<<t.timeDirection()<<"\n";
+	os<<"TargetParams.type=TimeVectors";
+	os<<"TargetParams.tau="<<t.tau()<<"\n";
+	os<<"TargetParams.timeSteps="<<t.timeSteps()<<"\n";
+	os<<"TargetParams.advanceEach="<<t.advanceEach()<<"\n";
+	os<<"TargetParams.algorithm="<<t.algorithm()<<"\n";
+	os<<"TargetParams.timeDirection="<<t.timeDirection()<<"\n";
 	return os;
 }
 } // namespace Dmrg

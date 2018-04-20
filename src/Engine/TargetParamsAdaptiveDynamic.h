@@ -125,7 +125,7 @@ template<typename ModelType>
 inline std::ostream&
 operator<<(std::ostream& os,const TargetParamsAdaptiveDynamic<ModelType>& t)
 {
-	os<<"#TargetParams.type=AdaptiveDynamic\n";
+	os<<"TargetParams.type=AdaptiveDynamic\n";
 	const typename TargetParamsTimeStep<ModelType>::TargetParamsCommonType&
 	        tp = t;
 	os<<tp;

@@ -570,7 +570,7 @@ private:
 		if (saveOption & 1) {
 			PsimagLite::OstringStream msg;
 			msg.precision(8);
-			msg<<"#WAVEFUNCTION_ENERGY="<<energy_;
+			msg<<"WAVEFUNCTION_ENERGY="<<energy_;
 			ioOut_.writeline(energy_, "WaveFunctionEnergy", msg, counter++);
 		}
 	}
@@ -592,7 +592,7 @@ private:
 
 		truncate_(pS,pE,target,keptStates,direction);
 		PsimagLite::OstringStream msg2;
-		msg2<<"#Error="<<truncate_.error();
+		msg2<<"Error="<<truncate_.error();
 		static SizeType counter = 0;
 		if (saveData_)
 			ioOut_.writeline(truncate_.error(), "Error", msg2, counter++);
@@ -680,7 +680,7 @@ private:
 		if (!saveData_) return;
 		PsimagLite::OstringStream msg;
 		msg.precision(8);
-		msg<<"#Energy="<<energy;
+		msg<<"Energy="<<energy;
 		static SizeType counter = 0;
 		ioOut_.writeline(energy, "Energy" , msg, counter++);
 	}

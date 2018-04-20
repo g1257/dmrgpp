@@ -146,8 +146,8 @@ int main(int argc,char **argv)
 
 	InputNgType::Writeable ioWriteable(toolOptions.filename,
 	                                   inputCheck,
-	                                   "#InputStartsHere",
-	                                   "#InputEndsHere");
+	                                   "InputStartsHere",
+	                                   "InputEndsHere");
 	InputNgType::Readable io(ioWriteable);
 
 	//! Read the parameters for this run

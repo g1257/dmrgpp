@@ -229,7 +229,7 @@ public:
 	{
 
 		typename IoType::In ioTmp(parameters_.checkpoint.filename);
-		SizeType loop = ioTmp.count("#NAME=CHKPOINTSYSTEM");
+		SizeType loop = ioTmp.count("NAME=CHKPOINTSYSTEM");
 		if (loop<1) {
 			std::cerr<<"There are no resumable loops in file ";
 			std::cerr<<parameters_.checkpoint.filename<<"\n";

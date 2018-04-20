@@ -109,8 +109,8 @@ public:
 		}
 
 		int x = 0;
-		ioIn_.readline(x,"#STACKMETARANK=",IoInType::LAST_INSTANCE);
-		ioIn_.read(stack_, "#STACKMETASTACK");
+		ioIn_.readline(x,"STACKMETARANK=",IoInType::LAST_INSTANCE);
+		ioIn_.read(stack_, "STACKMETASTACK");
 		ioIn_.close();
 		PsimagLite::OstringStream msg;
 		msg<<"Attempt to read from file " + fileIn_ + " succeeded";
@@ -126,7 +126,7 @@ public:
 	void finalize()
 	{
 		ioOut_.open(fileOut_,std::ios_base::app);
-		finalizeInternal(ioOut_, "#STACKMETASTACK\n");
+		finalizeInternal(ioOut_, "STACKMETASTACK\n");
 		ioOut_.close();
 	}
 
@@ -197,7 +197,7 @@ public:
 		ioIn_.open(fileIn_);
 		while (!stack_.empty()) {
 			DataType dt(ioIn_,"",stack_.top(),isObserveCode_);
-			io<<"#NAME=\n";
+			io<<"NAME=\n";
 			io<<dt;
 			ioIn_.rewind();
 			stack_.pop();
@@ -241,8 +241,8 @@ private:
 	{
 #ifndef USE_IO_NG
 		int x = 0;
-		io.printline("#STACKMETARANK="+ttos(x));
-		io.printline("#STACKMETATOTAL="+ttos(total_));
+		io.printline("STACKMETARANK="+ttos(x));
+		io.printline("STACKMETATOTAL="+ttos(total_));
 		SizeType last = label.length();
 		assert(last > 0);
 		if (last > 0 && label[last - 1] != '\n') label += "\n";

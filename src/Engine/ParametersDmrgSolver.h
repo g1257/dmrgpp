@@ -561,7 +561,7 @@ template<typename FieldType,typename InputValidatorType>
 std::ostream &operator<<(std::ostream &os,
                          const ParametersDmrgSolver<FieldType,InputValidatorType> & p)
 {
-	os<<"#This is DMRG++\n";
+	os<<"This is DMRG++\n";
 	Provenance provenance;
 	os<<provenance;
 	os<<"parameters.version="<<p.version<<"\n";

@@ -67,20 +67,20 @@ public:
 		PsimagLite::String filename = "kroneckerDumper" + ttos(counter_) + ".txt";
 		fout_.open(filename.c_str());
 		fout_.precision(p->precision);
-		fout_<<"#KroneckerDumper for DMRG++ version "<<DMRGPP_VERSION<<"\n";
-		fout_<<"#Instance="<<counter_<<"\n";
-		fout_<<"#EncodingOfQuantumNumbers="<<(2*ProgramGlobals::maxElectronsOneSpin)<<"\n";
+		fout_<<"KroneckerDumper for DMRG++ version "<<DMRGPP_VERSION<<"\n";
+		fout_<<"Instance="<<counter_<<"\n";
+		fout_<<"EncodingOfQuantumNumbers="<<(2*ProgramGlobals::maxElectronsOneSpin)<<"\n";
 
 		printOneBasis("Left",lrs.left(),p->nOfQns);
 		printOneBasis("Right",lrs.right(),p->nOfQns);
 
-		fout_<<"#SuperBasisPermutation\n";
+		fout_<<"SuperBasisPermutation\n";
 		fout_<<lrs.super().permutationVector();
 		SizeType qtarget = lrs.super().qn(lrs.super().partition(m));
 
 		PairSizeType etarget = getNupNdown(qtarget,p->nOfQns);
-		fout_<<"#TargetElectronsUp="<<etarget.first<<"\n";
-		fout_<<"#TargetElectronsDown="<<etarget.second<<"\n";
+		fout_<<"TargetElectronsUp="<<etarget.first<<"\n";
+		fout_<<"TargetElectronsDown="<<etarget.second<<"\n";
 
 		cacheSigns(lrs.left().electronsVector(BasisType::AFTER_TRANSFORM));
 		counter_++;
@@ -90,7 +90,7 @@ public:
 	{
 		if (!enabled_) return;
 
-		fout_<<"#EOF\n";
+		fout_<<"EOF\n";
 		fout_.close();
 
 		ConcurrencyType::mutexDestroy(&mutex_);
@@ -112,17 +112,17 @@ public:
 		}
 
 		ConcurrencyType::mutexLock(&mutex_);
-		fout_<<"#START_AB_PAIR\n";
+		fout_<<"START_AB_PAIR\n";
 		fout_<<"link.value="<<val<<"\n";
-		fout_<<"#A"<<pairCount_<<"\n";
+		fout_<<"A"<<pairCount_<<"\n";
 		printMatrix(A);
-		fout_<<"#Ahat"<<pairCount_<<"\n";
+		fout_<<"Ahat"<<pairCount_<<"\n";
 		SparseMatrixType Ahat;
 		calculateAhat(Ahat,A,val,bosonOrFermion);
 		printMatrix(Ahat);
-		fout_<<"#B"<<pairCount_<<"\n";
+		fout_<<"B"<<pairCount_<<"\n";
 		printMatrix(B);
-		fout_<<"#END_AB_PAIR\n";
+		fout_<<"END_AB_PAIR\n";
 		pairCount_++;
 		ConcurrencyType::mutexUnlock(&mutex_);
 	}
@@ -141,9 +141,9 @@ public:
 		}
 
 		if (option)
-			fout_<<"#LeftHamiltonian\n";
+			fout_<<"LeftHamiltonian\n";
 		else
-			fout_<<"#RightHamiltonian\n";
+			fout_<<"RightHamiltonian\n";
 		printMatrix(hamiltonian);
 	}
 
@@ -165,12 +165,12 @@ private:
 	                   const BasisType& basis,
 	                   SizeType nOfQns)
 	{
-		fout_<<"#" + name + "Basis\n";
-		fout_<<"#Sites\n";
+		fout_<<"" + name + "Basis\n";
+		fout_<<"Sites\n";
 		fout_<<basis.block();
-		fout_<<"#permutationVector\n";
+		fout_<<"permutationVector\n";
 		fout_<<basis.permutationVector();
-		fout_<<"#ElectronsUp_ElectronsDown\n";
+		fout_<<"ElectronsUp_ElectronsDown\n";
 		fout_<<basis.size()<<"\n";
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			SizeType q = basis.pseudoEffectiveNumber(i);
@@ -178,7 +178,7 @@ private:
 			fout_<<nupDown.first<<" "<<nupDown.second<<"\n";
 		}
 
-		fout_<<"#Electrons\n";
+		fout_<<"Electrons\n";
 		fout_<<basis.electronsVector(BasisType::AFTER_TRANSFORM);
 	}
 

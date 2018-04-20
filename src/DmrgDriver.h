@@ -94,7 +94,7 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 		opC = model.naturalOperator(obsOptions.label,
 		                            obsOptions.site,
 		                            obsOptions.dof);
-		std::cerr<<"#label="<<obsOptions.label<<" site="<<obsOptions.site;
+		std::cerr<<"label="<<obsOptions.label<<" site="<<obsOptions.site;
 		std::cerr<<" dof="<<obsOptions.dof<<"\n";
 	}
 

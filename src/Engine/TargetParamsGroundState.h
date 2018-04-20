@@ -114,7 +114,7 @@ template<typename ModelType>
 inline std::ostream&
 operator<<(std::ostream& os,const TargetParamsGroundState<ModelType>&)
 {
-	os<<"#TargetParams.type=GroundState\n";
+	os<<"TargetParams.type=GroundState\n";
 	return os;
 }
 } // namespace Dmrg

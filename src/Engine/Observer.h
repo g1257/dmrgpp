@@ -265,7 +265,7 @@ public:
 		SizeType threadId = 0;
 
 		if (flag == 7) {
-			std::cout<<"#Fixed all sites\n";
+			std::cout<<"Fixed all sites\n";
 			typename MatrixType::value_type tmp = fourpoint_.threePoint(braket.site(0),
 			                                                            braket.site(1),
 			                                                            braket.site(2),
@@ -278,7 +278,7 @@ public:
 
 		if (flag == 1) {
 			SizeType site0 = braket.site(0);
-			std::cout<<"#Fixed site0= "<<site0<<"\n";
+			std::cout<<"Fixed site0= "<<site0<<"\n";
 			for (SizeType site1 = site0+1; site1 < rows; ++site1) {
 				for (SizeType site2 = site1+1; site2 < cols; ++site2) {
 					typename MatrixType::value_type tmp = fourpoint_.threePoint(site0,
@@ -348,7 +348,7 @@ public:
 		SizeType threadId = 0;
 
 		if (flag == 15) {
-			std::cout<<"#Fixed all sites\n";
+			std::cout<<"Fixed all sites\n";
 			SizeType site0 = braket.site(0);
 			SizeType site1 = braket.site(1);
 			typename FourPointCorrelationsType::SparseMatrixType O2gt;
@@ -369,8 +369,8 @@ public:
 		if (flag == 3) {
 			SizeType site0 = braket.site(0);
 			SizeType site1 = braket.site(1);
-			std::cout<<"#Fixed site0= "<<site0<<"\n";
-			std::cout<<"#Fixed site1= "<<site1<<"\n";
+			std::cout<<"Fixed site0= "<<site0<<"\n";
+			std::cout<<"Fixed site1= "<<site1<<"\n";
 			typename FourPointCorrelationsType::SparseMatrixType O2gt;
 			fourpoint_.firstStage(O2gt,'N',site0,'N',site1,braket,0,1,threadId);
 
@@ -454,7 +454,7 @@ public:
 		FieldType tmp = fourpoint_.anyPoint(braket,
 		                                    threadId);
 
-		std::cout<<"#Fixed all sites\n";
+		std::cout<<"Fixed all sites\n";
 		for (SizeType i = 0; i < braket.points(); ++i)
 			std::cout<<braket.site(i)<<" ";
 

@@ -170,8 +170,8 @@ public:
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
-		io.write(jmPairs_,"#su2JmPairs");
-		io.write(indices_,"#su2JmIndices");
+		io.write(jmPairs_,"su2JmPairs");
+		io.write(indices_,"su2JmIndices");
 	}
 
 	template<typename IoInputter>
@@ -179,8 +179,8 @@ public:
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
-		io.read(jmPairs_,"#su2JmPairs");
-		io.read(indices_,"#su2JmIndices");
+		io.read(jmPairs_,"su2JmPairs");
+		io.read(indices_,"su2JmIndices");
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,

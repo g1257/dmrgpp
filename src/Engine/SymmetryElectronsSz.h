@@ -380,10 +380,10 @@ void write(IoOutputter& io,
           typename PsimagLite::EnableIf<
           PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0)
 {
-	io.write(bd.electronsUp,"#bdElectronsUp");
-	io.write(bd.electronsDown,"#bdElectronsDown");
-	io.write(bd.jmValues,"#bdJmValues");
-	io.write(bd.flavors,"#bdFlavors=");
+	io.write(bd.electronsUp,"bdElectronsUp");
+	io.write(bd.electronsDown,"bdElectronsDown");
+	io.write(bd.jmValues,"bdJmValues");
+	io.write(bd.flavors,"bdFlavors=");
 	PsimagLite::String msg("Symmetry=ElectronsSz\n");
 	io.print(msg);
 }

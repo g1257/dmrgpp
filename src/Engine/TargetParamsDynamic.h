@@ -126,7 +126,7 @@ template<typename ModelType>
 inline std::ostream&
 operator<<(std::ostream& os,const TargetParamsDynamic<ModelType>& t)
 {
-	os<<"#TargetParams.type=DynamicDmrg\n";
+	os<<"TargetParams.type=DynamicDmrg\n";
 	const typename TargetParamsDynamic<ModelType>::TargetParamsCommonType&
 	        tp = t;
 	os<<tp;

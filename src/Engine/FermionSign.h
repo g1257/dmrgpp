@@ -126,7 +126,7 @@ public:
 	            PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
 		if (bogus) return;
-		io.read(signs_,"#FERMIONICSIGN");
+		io.read(signs_,"FERMIONICSIGN");
 	}
 
 	int operator()(SizeType i,int f) const
@@ -140,7 +140,7 @@ public:
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
-		io.write(signs_,"#FERMIONICSIGN");
+		io.write(signs_,"FERMIONICSIGN");
 	}
 
 	SizeType size() const { return signs_.size(); }

@@ -126,7 +126,7 @@ public:
 	      bool minimizeRead = false)
 	    : dmrgTransformed_(false), name_(ss), progress_(ss)
 	{
-		io.advance("#NAME="+ss,counter);
+		io.advance("NAME="+ss,counter);
 		loadInternal(io, minimizeRead);
 	}
 
@@ -134,7 +134,7 @@ public:
 	template<typename IoInputter>
 	void read(IoInputter& io)
 	{
-		PsimagLite::String nn="#NAME=";
+		PsimagLite::String nn="NAME=";
 		std::pair<PsimagLite::String,SizeType> sc = io.advance(nn);
 		name_ = sc.first.substr(nn.size(),sc.first.size());
 		loadInternal(io);
@@ -499,18 +499,18 @@ public:
 	           const PsimagLite::String& ss,
 	           bool minimizeWrite) const
 	{
-		io.printline("#NAME="+ss);
-		PsimagLite::String s="#useSu2Symmetry="+ttos(useSu2Symmetry_);
+		io.printline("NAME="+ss);
+		PsimagLite::String s="useSu2Symmetry="+ttos(useSu2Symmetry_);
 		io.printline(s);
-		io.write(block_,"#BLOCK");
+		io.write(block_,"BLOCK");
 
 		if (!minimizeWrite) {
-			io.write(electrons_,"#ELECTRONS");
-			io.write(electronsOld_,"#0OLDELECTRONS");
+			io.write(electrons_,"ELECTRONS");
+			io.write(electronsOld_,"0OLDELECTRONS");
 		}
 
-		io.write(partition_,"#PARTITION");
-		io.write(permInverse_,"#PERMUTATIONINVERSE");
+		io.write(partition_,"PARTITION");
+		io.write(permInverse_,"PERMUTATIONINVERSE");
 
 		VectorSizeType qnShrink;
 		shrinkVector(qnShrink, quantumNumbers_, partition_);
@@ -601,17 +601,17 @@ private:
 	{
 		int x=0;
 		useSu2Symmetry_=false;
-		io.readline(x,"#useSu2Symmetry=");
+		io.readline(x,"useSu2Symmetry=");
 		if (x>0) useSu2Symmetry_=true;
-		io.read(block_,"#BLOCK");
+		io.read(block_,"BLOCK");
 
 		if (!minimizeRead) {
-			io.read(electrons_,"#ELECTRONS");
-			io.read(electronsOld_,"#0OLDELECTRONS");
+			io.read(electrons_,"ELECTRONS");
+			io.read(electronsOld_,"0OLDELECTRONS");
 		}
 
-		io.read(partition_,"#PARTITION");
-		io.read(permInverse_,"#PERMUTATIONINVERSE");
+		io.read(partition_,"PARTITION");
+		io.read(permInverse_,"PERMUTATIONINVERSE");
 		permutationVector_.resize(permInverse_.size());
 		for (SizeType i=0;i<permInverse_.size();i++)
 			permutationVector_[permInverse_[i]]=i;
