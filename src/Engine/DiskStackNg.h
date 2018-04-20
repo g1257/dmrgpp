@@ -131,10 +131,11 @@ public:
 			        DataType::SAVE_ALL);
 		}
 
-		++total_;
 		ioOut_.write(total_,
 		             label_ + "/total_",
 		             IoOutType::Serializer::ALLOW_OVERWRITE);
+
+		++total_;
 	}
 
 	void pop()

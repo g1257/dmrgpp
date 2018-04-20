@@ -236,29 +236,35 @@ public:
 
 	template<typename IoInputter>
 	void read(IoInputter& io,
+	          PsimagLite::String label,
 	          bool minimizeRead,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
 		if (minimizeRead) return;
-		jmValues_.read(io);
-		io.read(flavors_,"su2flavors");
-		io.readline(flavorsMax_,"su2FlavorsMax=");
-		io.readline(electronsMax_,"su2ElectronsMax=");
-		io.readline(jMax_,"su2JMax=");
-		io.read(statesReduced_,"su2StatesReduced");
-		io.read(jvals_,"su2Jvals");
+		jmValues_.read(io, label);
+		io.read(flavors_, label + "su2flavors");
+		io.readline(flavorsMax_, label + "su2FlavorsMax=");
+		io.readline(electronsMax_, label + "su2ElectronsMax=");
+		io.readline(jMax_, label + "su2JMax=");
+		io.read(statesReduced_, label + "su2StatesReduced");
+		io.read(jvals_, label + "su2Jvals");
 	}
 
-	void write(PsimagLite::IoSimple::Out& io) const
+	void write(PsimagLite::IoSelector::Out& io, PsimagLite::String prefix) const
 	{
-		jmValues_.write(io);
-		io.write(flavors_,"su2flavors");
-		io.write(flavorsMax_, "su2FlavorsMax");
-		io.write(electronsMax_, "su2ElectronsMax");
-		io.write(jMax_, "su2JMax");
-		io.write(statesReduced_,"su2StatesReduced");
-		io.write(jvals_,"su2Jvals");
+#ifdef USE_IO_NG
+		io.createGroup(prefix + "SymmSu2");
+		prefix += "SymmSu2/";
+#endif
+
+		jmValues_.write(io, prefix);
+		io.write(flavors_, prefix + "su2flavors");
+		io.write(flavorsMax_, prefix + "su2FlavorsMax");
+		io.write(electronsMax_, prefix + "su2ElectronsMax");
+		io.write(jMax_, prefix + "su2JMax");
+		io.write(statesReduced_, prefix + "su2StatesReduced");
+		io.write(jvals_, prefix + "su2Jvals");
 	}
 
 	SizeType flavor2Index(SizeType f1,
@@ -482,7 +488,7 @@ private:
 			for (SizeType j=0;j<eigs.size();j++) {
 
 				if (flavors_[j]==flavors_[perm[i]] &&
-				    jmValues_[j].first==jmValues_[perm[i]].first) {
+				        jmValues_[j].first==jmValues_[perm[i]].first) {
 					int x = PsimagLite::isInVector(removedIndices,j);
 					if (x<0) {
 						VectorSizeType::iterator p1 =
@@ -523,7 +529,7 @@ private:
 			for (SizeType j=0;j<eigs.size();j++) {
 
 				if (flavors_[j]==flavors_[perm[i]] &&
-				    jmValues_[j].first==jmValues_[perm[i]].first) {
+				        jmValues_[j].first==jmValues_[perm[i]].first) {
 					int x = PsimagLite::isInVector(removedIndices,j);
 					if (x<0) {
 						removedIndices.push_back(j);

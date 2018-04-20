@@ -126,18 +126,18 @@ public:
 
 	template<typename IoInputter>
 	void read(IoInputter& io,
+	          PsimagLite::String label,
 	          bool,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
-		SizeType tmp=0;
-		io.readline(tmp,"FACTORSSIZE=");
+		SizeType tmp = 0;
+		io.readline(tmp, label + "FACTORSSIZE=");
 	}
 
-	void write(PsimagLite::IoSimple::Out& io) const
+	void write(PsimagLite::IoSelector::Out& io, PsimagLite::String label) const
 	{
-		PsimagLite::String s="FACTORSSIZE=0";
-		io.printline(s);
+		io.write(0, label + "FACTORSSIZE");
 	}
 }; //class HamiltonianSymmetryLocal
 } // namespace Dmrg

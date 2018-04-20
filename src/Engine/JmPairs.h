@@ -167,20 +167,22 @@ public:
 
 	template<typename IoOutputter>
 	void write(IoOutputter& io,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
+	           PsimagLite::String prefix,
+	           typename PsimagLite::EnableIf<
+	           PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
 	{
-		io.write(jmPairs_,"su2JmPairs");
-		io.write(indices_,"su2JmIndices");
+		io.write(jmPairs_, prefix + "su2JmPairs");
+		io.write(indices_, prefix + "su2JmIndices");
 	}
 
 	template<typename IoInputter>
 	void read(IoInputter& io,
+	          PsimagLite::String prefix,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
-		io.read(jmPairs_,"su2JmPairs");
-		io.read(indices_,"su2JmIndices");
+		io.read(jmPairs_, prefix + "su2JmPairs");
+		io.read(indices_, prefix + "su2JmIndices");
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,

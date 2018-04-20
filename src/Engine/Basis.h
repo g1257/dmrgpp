@@ -127,7 +127,8 @@ public:
 	    : dmrgTransformed_(false), name_(ss), progress_(ss)
 	{
 		io.advance("NAME="+ss,counter);
-		loadInternal(io, minimizeRead);
+		PsimagLite::String prefix = (io.ng()) ? ss + "/" : "";
+		loadInternal(io, prefix, minimizeRead);
 	}
 
 	//! Loads this basis from memory or disk
@@ -137,7 +138,8 @@ public:
 		PsimagLite::String nn="NAME=";
 		std::pair<PsimagLite::String,SizeType> sc = io.advance(nn);
 		name_ = sc.first.substr(nn.size(),sc.first.size());
-		loadInternal(io);
+		PsimagLite::String prefix = "";
+		loadInternal(io, prefix, false);
 	}
 
 	//! Returns the name of this basis
@@ -516,8 +518,8 @@ public:
 		shrinkVector(qnShrink, quantumNumbers_, partition_);
 		io.write(qnShrink,"QNShrink");
 
-		if (useSu2Symmetry_) symmSu2_.write(io);
-		else symmLocal_.write(io);
+		if (useSu2Symmetry_) symmSu2_.write(io, "");
+		else symmLocal_.write(io, "");
 	}
 
 	//! saves this basis to disk
@@ -530,23 +532,22 @@ public:
 		PsimagLite::String label = ss + "/";
 		io.createGroup(ss);
 		io.write(useSu2Symmetry_, label + "useSu2Symmetry");
-		io.write(block_, label + "Block");
+		io.write(block_, label + "BLOCK");
 
 		if (!minimizeWrite) {
-			io.write(electrons_, label + "Electrons");
-			io.write(electronsOld_, label + "OldElectrons");
+			io.write(electrons_, label + "ELECTRONS");
+			io.write(electronsOld_, label + "0OLDELECTRONS");
 		}
 
-		io.write(partition_, label + "Partition");
-		io.write(permInverse_, label + "PermutationInverse");
+		io.write(partition_, label + "PARTITION");
+		io.write(permInverse_, label + "PERMUTATIONINVERSE");
 
 		VectorSizeType qnShrink;
 		shrinkVector(qnShrink, quantumNumbers_, partition_);
 		io.write(qnShrink, label + "QNShrink");
 
-		// FIXME: implement the below calls
-		// if (useSu2Symmetry_) symmSu2_.write(io);
-		// else symmLocal_.write(io);
+		if (useSu2Symmetry_) symmSu2_.write(io, label);
+		else symmLocal_.write(io, label);
 	}
 
 	void write(PsimagLite::IoSimple::Out& io,
@@ -595,36 +596,37 @@ private:
 
 	template<typename IoInputter>
 	void loadInternal(IoInputter& io,
-	                  bool minimizeRead = false,
+	                  PsimagLite::String prefix,
+	                  bool minimizeRead,
 	                  typename PsimagLite::EnableIf<
 	                  PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
 		int x=0;
 		useSu2Symmetry_=false;
-		io.readline(x,"useSu2Symmetry=");
+		io.readline(x, prefix + "useSu2Symmetry=");
 		if (x>0) useSu2Symmetry_=true;
-		io.read(block_,"BLOCK");
+		io.read(block_, prefix + "BLOCK");
 
 		if (!minimizeRead) {
-			io.read(electrons_,"ELECTRONS");
-			io.read(electronsOld_,"0OLDELECTRONS");
+			io.read(electrons_, prefix + "ELECTRONS");
+			io.read(electronsOld_, prefix + "0OLDELECTRONS");
 		}
 
-		io.read(partition_,"PARTITION");
-		io.read(permInverse_,"PERMUTATIONINVERSE");
+		io.read(partition_, prefix + "PARTITION");
+		io.read(permInverse_, prefix + "PERMUTATIONINVERSE");
 		permutationVector_.resize(permInverse_.size());
 		for (SizeType i=0;i<permInverse_.size();i++)
 			permutationVector_[permInverse_[i]]=i;
 
 		VectorSizeType qnShrink;
-		io.read(qnShrink,"QNShrink");
+		io.read(qnShrink, prefix + "QNShrink");
 		unShrinkVector(quantumNumbers_, qnShrink, partition_);
 
 		dmrgTransformed_=false;
 		if (useSu2Symmetry_)
-			symmSu2_.read(io,minimizeRead);
+			symmSu2_.read(io,prefix, minimizeRead);
 		else
-			symmLocal_.read(io,minimizeRead);
+			symmLocal_.read(io,prefix, minimizeRead);
 	}
 
 	void shrinkVector(VectorSizeType& dest,
