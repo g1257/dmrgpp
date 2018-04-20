@@ -5,25 +5,25 @@
 namespace PsimagLite {
 
 template<>
-const H5::PredType TypeToH5<double>::type = H5::PredType::NATIVE_DOUBLE;
+ H5::PredType typeToH5<double>() { return H5::PredType::NATIVE_DOUBLE; }
 
 template<>
-const H5T_class_t TypeToH5<double>::super = H5T_FLOAT;
+ H5::PredType typeToH5<unsigned int>() { return H5::PredType::NATIVE_UINT8; }
 
 template<>
-const H5::PredType TypeToH5<unsigned int>::type = H5::PredType::NATIVE_UINT8;
+ H5::PredType typeToH5<int>() { return H5::PredType::NATIVE_INT8; }
 
 template<>
-const H5::PredType TypeToH5<int>::type = H5::PredType::NATIVE_INT8;
+ H5::PredType typeToH5<unsigned long>() { return H5::PredType::NATIVE_UINT16; }
 
 template<>
-const H5T_class_t TypeToH5<unsigned int>::super = H5T_INTEGER;
+ H5::PredType typeToH5<long>() { return H5::PredType::NATIVE_INT16; }
 
 template<>
-const H5::PredType TypeToH5<bool>::type = H5::PredType::NATIVE_HBOOL;
+ H5::PredType typeToH5<bool>() { return H5::PredType::NATIVE_HBOOL; }
 
 template<>
-const H5::PredType TypeToH5<char>::type = H5::PredType::NATIVE_CHAR;
+H5::PredType typeToH5<char>() { return H5::PredType::NATIVE_CHAR; }
 } // namespace PsimagLite
 #endif
 

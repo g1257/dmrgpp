@@ -26,17 +26,21 @@ public:
 
 	/* write functions START */
 
-	void write(String name2, SizeType what, WriteMode allowOverwrite = NO_OVERWRITE)
+	template<typename T>
+	void write(String name2,
+	           const T& what,
+	           WriteMode allowOverwrite = NO_OVERWRITE,
+	           typename EnableIf<Loki::TypeTraits<T>::isArith || IsEnum<T>::True, int>::Type = 0)
 	{
 		String name = "Def/" + name2;
-		void* ptr = static_cast<SizeType*>(&what);
+		const void* ptr = static_cast<const T*>(&what);
 
 		if (allowOverwrite) {
-			overwrite<SizeType>(name, ptr);
+			overwrite<T>(name, ptr);
 		} else {
 			hsize_t dims[1];
 			dims[0] = 1;
-			internalWrite<SizeType>(name, ptr, dims, 1);
+			internalWrite<T>(name, ptr, dims, 1);
 		}
 	}
 
@@ -172,8 +176,8 @@ public:
 	          typename EnableIf<Loki::TypeTraits<SomeType>::isArith, int>::Type = 0)
 	{
 		void* ptr = static_cast<void *>(&value);
-		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet(name));
-		dataset->read(ptr, TypeToH5<SomeType>::type);
+		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet("Def/" + name));
+		dataset->read(ptr, typeToH5<SomeType>());
 		delete dataset;
 	}
 
@@ -182,7 +186,7 @@ public:
 	{
 		void* ptr = static_cast<void *>(&(value[0])); // FIXME CHECK SIZE
 		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet("Def/" + name));
-		dataset->read(ptr, TypeToH5<char>::type);
+		dataset->read(ptr, typeToH5<char>());
 		delete dataset;
 	}
 
@@ -208,7 +212,7 @@ public:
 	{
 		void* ptr = static_cast<void *>(&(what[0]));  // FIXME CHECK SIZE
 		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet(name));
-		dataset->read(ptr, TypeToH5<T>::type);
+		dataset->read(ptr, typeToH5<T>());
 		delete dataset;
 	}
 
@@ -219,7 +223,7 @@ public:
 	{
 		void* ptr = static_cast<void *>(&(what[0]));  // FIXME CHECK SIZE
 		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet(name));
-		dataset->read(ptr, TypeToH5<T>::type);
+		dataset->read(ptr, typeToH5<T>());
 		delete dataset;
 	}
 
@@ -250,10 +254,10 @@ private:
 	}
 
 	template<typename SomeType>
-	void overwrite(String name, void* ptr)
+	void overwrite(String name, const void* ptr)
 	{
 		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet(name));
-		dataset->write(ptr, TypeToH5<SomeType>::type);
+		dataset->write(ptr, typeToH5<SomeType>());
 		delete dataset;
 	}
 
@@ -263,10 +267,10 @@ private:
 		H5::DataSpace *dataspace = new H5::DataSpace(ndims, dims); // create new dspace
 		H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
 		H5::DataSet* dataset = new H5::DataSet(hdf5file_->createDataSet(name,
-		                                                                TypeToH5<SomeType>::type,
+		                                                                typeToH5<SomeType>(),
 		                                                                *dataspace,
 		                                                                dsCreatPlist));
-		dataset->write(ptr, TypeToH5<SomeType>::type);
+		dataset->write(ptr, typeToH5<SomeType>());
 		delete dataset;
 		delete dataspace;
 	}

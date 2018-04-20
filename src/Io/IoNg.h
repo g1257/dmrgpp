@@ -275,8 +275,14 @@ public:
 		}
 
 		template<typename SomeType>
-		SizeType readline(SomeType &x,const String &s,LongIntegerType = 0)
+		SizeType readline(SomeType &x, String s, LongIntegerType = 0)
 		{
+			SizeType last = s.length();
+			if (last < 2)
+				throw RuntimeError("Wrong label " + s + " for readline\n");
+
+			if (s[--last] == '=')
+				s.erase(s.begin() + last, s.end());
 			ioNgSerializer_.read(x, s);
 			return 0;
 		}
@@ -345,11 +351,11 @@ public:
 		void internalRead(void* ptr, String label, H5::DataSet& dataset) const
 		{
 			H5T_class_t typeClass = dataset.getTypeClass();
-			if (typeClass != TypeToH5<T>::super)
+			if (typeClass != typeToH5<T>())
 				throw RuntimeError("Reading " + label + " has incorrect type\n");
 			// H5::FloatType ft = dataset.getFloatType(); // <-- check correct subtype FIXME
 
-			dataset.read(ptr, TypeToH5<T>::type);
+			dataset.read(ptr, typeToH5<T>());
 		}
 
 		String filename_;
