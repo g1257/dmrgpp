@@ -8,6 +8,9 @@ template<>
 H5::PredType typeToH5<char>() { return H5::PredType::NATIVE_CHAR; }
 
 template<>
+H5::PredType typeToH5<unsigned char>() { return H5::PredType::NATIVE_UCHAR; }
+
+template<>
 H5::PredType typeToH5<bool>() { return H5::PredType::NATIVE_HBOOL; }
 
 template<>

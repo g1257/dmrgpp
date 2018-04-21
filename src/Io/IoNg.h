@@ -95,6 +95,7 @@ template<typename T>
 struct IsRootUnDelegated {
 	enum {True = Loki::TypeTraits<T>::isArith ||
 		  IsVectorLike<T>::True ||
+		  IsStackLike<T>::True ||
 		  IsPairLike<T>::True ||
 		  IsEnum<T>::True};
 };
@@ -186,6 +187,15 @@ public:
 		}
 
 		template<typename T>
+		void write(std::stack<T>& what,
+		           String name2,
+		           IoNgSerializer::WriteMode mode = IoNgSerializer::NO_OVERWRITE,
+		           typename EnableIf<!IsRootUnDelegated<T>::True, int>::Type = 0)
+		{
+			ioNgSerializer_.write(name2, what, mode);
+		}
+
+		template<typename T>
 		void write(const T& what,
 		           String name2,
 		           IoNgSerializer::WriteMode mode = IoNgSerializer::NO_OVERWRITE,
@@ -219,6 +229,10 @@ public:
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
 	private:
+
+		Out(const Out&);
+
+		Out& operator=(const Out&);
 
 		static unsigned int modeToH5(OpenMode mode)
 		{
@@ -379,6 +393,10 @@ public:
 		{ throw RuntimeError("IoNg:: not implemented\n"); }
 
 	private:
+
+		In(const In&);
+
+		In& operator=(const In&);
 
 		template<typename T>
 		void internalRead(void* ptr, String label, H5::DataSet& dataset) const

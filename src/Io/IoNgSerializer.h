@@ -54,6 +54,18 @@ public:
 		internalWrite<char>(name, ptr, dims, 1);
 	}
 
+	void write(String name2, bool b, WriteMode allowOverwrite = NO_OVERWRITE)
+	{
+		overwriteNotSupported(allowOverwrite);
+		String name = "Def/" + name2;
+		hsize_t dims[1];
+		dims[0] = 1;
+		unsigned char tmp[1];
+		tmp[0] = (b) ? '1' : '0';
+		const void* ptr = static_cast<const void*>(tmp);
+		internalWrite<unsigned char>(name, ptr, dims, 1);
+	}
+
 	template<typename T1, typename T2>
 	void write(String name2,
 	           const std::pair<T1, T2>& what,
@@ -63,6 +75,25 @@ public:
 		createGroup(name2);
 		write(name2 + "/0", what.first);
 		write(name2 + "/1", what.second);
+	}
+
+	// Note: THIS WILL EMPTY THE STACK OBJECT!
+	template<typename T>
+	void write(String name,
+	           std::stack<T>& what,
+	           WriteMode allowOverwrite = NO_OVERWRITE,
+	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
+	           int>::Type = 0)
+	{
+		overwriteNotSupported(allowOverwrite);
+		createGroup(name);
+		write(name + "/Size", what.size());
+		SizeType i = 0;
+		while (what.size() > 0) {
+			const T& t = what.top();
+			t.write(name + "/" + ttos(i++), *this);
+			what.pop();
+		}
 	}
 
 	void write(String name2,
@@ -190,6 +221,17 @@ public:
 		delete dataset;
 	}
 
+	void read(bool& value, String name)
+	{
+		unsigned char tmp[1];
+		tmp[0] = ' ';
+		void* ptr = static_cast<void *>(tmp);
+		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet("Def/" + name));
+		dataset->read(ptr, typeToH5<unsigned char>());
+		delete dataset;
+		value = (tmp[0] == '1');
+	}
+
 	template<typename T1, typename T2>
 	void read(std::pair<T1, T2>& what,
 	          String name)
@@ -277,6 +319,10 @@ public:
 	// read functions END
 
 private:
+
+	IoNgSerializer(const IoNgSerializer&);
+
+	IoNgSerializer& operator=(const IoNgSerializer&);
 
 	template<typename SomeVectorType>
 	void readInternal(SomeVectorType& what, String name)
