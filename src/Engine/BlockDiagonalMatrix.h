@@ -290,8 +290,11 @@ public:
 
 	void write(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
 	{
-		std::cerr<<"BlockDiagonalMatrix::write(...) with label ";
-		std::cerr<<label<<" unimplemented FIXME WARNING\n";
+		ioSerializer.createGroup(label);
+		ioSerializer.write(label + "/isSquare", isSquare_);
+		ioSerializer.write(label + "/offsetsRows", offsetsRows_);
+		ioSerializer.write(label + "/offsetsCols", offsetsCols_);
+		ioSerializer.write(label + "/data", data_);
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const BlockDiagonalMatrix& m)

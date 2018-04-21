@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 namespace Dmrg {
-	
+
 template<typename LeftRightSuperType_>
 struct DmrgWaveStruct {
 
@@ -121,12 +121,15 @@ struct DmrgWaveStruct {
 
 	template<typename IoOutputType>
 	void write(IoOutputType& io,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
+	           PsimagLite::String prefix,
+	           typename PsimagLite::EnableIf<
+	           PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
 	{
-		io.write(ws, "Ws");
-		io.write(we, "We");
-		lrs.write(io,LeftRightSuperType::SAVE_ALL,false);
+		io.createGroup(prefix);
+		io.write(ws, prefix + "Ws");
+		io.write(we, prefix + "We");
+		std::cerr<<"NEEDS TO PRINT LRS\n";
+		// lrs.write(io,LeftRightSuperType::SAVE_ALL,false);
 	}
 
 }; // struct DmrgWaveStruct

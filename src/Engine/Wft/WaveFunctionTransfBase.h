@@ -131,6 +131,18 @@ public:
 			}
 		}
 
+		void write(PsimagLite::IoSelector::Out& io, PsimagLite::String label) const
+		{
+			io.createGroup(label);
+			io.write(dir, label + "/dir");
+			//io.write(twoSiteDmrg, label + "/twoSiteDmrg");
+			io.write(accel, label + "/accel");
+			//io.write(kronLoadBalance, label + "/kronLoadBalance");
+			//io.write(firstCall, label + "/firstCall");
+			io.write(counter, label + "/counter");
+			io.write(denseSparseThreshold, label + "/denseSparseThreshold");
+		}
+
 		ProgramGlobals::DirectionEnum dir;
 		bool twoSiteDmrg;
 		AccelEnum accel;

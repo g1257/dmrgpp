@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2012, UT-Battelle, LLC
+Copyright (c) 2009-2012-2018, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 5.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -119,7 +119,8 @@ public:
 	typedef typename PsimagLite::Stack<BlockDiagonalMatrixType>::Type WftStackType;
 
 	template<typename SomeParametersType>
-	WaveFunctionTransfFactory(SomeParametersType& params)
+	WaveFunctionTransfFactory(SomeParametersType& params,
+	                          PsimagLite::IoSelector::Out& ioOut)
 	    : isEnabled_(!(params.options.find("nowft")!=PsimagLite::String::npos)),
 	      wftOptions_(ProgramGlobals::INFINITE,
 	                  params.options,
@@ -128,7 +129,7 @@ public:
 	                  params.denseSparseThreshold),
 	      progress_("WaveFunctionTransf"),
 	      filenameIn_(params.checkpoint.filename),
-	      filenameOut_(params.filename),
+	      ioOut_(ioOut),
 	      WFT_STRING(ProgramGlobals::WFT_STRING),
 	      wftImpl_(0),
 	      rng_(3433117),
@@ -161,7 +162,7 @@ public:
 	~WaveFunctionTransfFactory()
 	{
 		if (!isEnabled_) return;
-		write(filenameOut_);
+		write(ioOut_);
 		delete wftImpl_;
 	}
 
@@ -360,26 +361,31 @@ public:
 		files.push_back(utils::pathPrepend(WFT_STRING,rootName));
 	}
 
-	void write(PsimagLite::String fileOut) const
+	void write(PsimagLite::IoSelector::Out& ioMain)
 	{
 		if (!isEnabled_) return;
-#ifndef USE_IO_NG
-		typename IoType::Out io(utils::pathPrepend(WFT_STRING, fileOut));
 		if (!save_) return;
+#ifndef USE_IO_NG
+		typename IoType::Out ioTmp(utils::pathPrepend(WFT_STRING, ioMain.filename()));
 		PsimagLite::String s="isEnabled="+ttos(isEnabled_);
-		io.printline(s);
+		ioTmp.printline(s);
 		s="stage="+ttos(wftOptions_.dir);
-		io.printline(s);
+		ioTmp.printline(s);
 		s="counter="+ttos(wftOptions_.counter);
-		io.printline(s);
-		io.printline("dmrgWaveStruct");
+		ioTmp.printline(s);
+		ioTmp.printline("dmrgWaveStruct");
 
-		dmrgWaveStruct_.write(io);
-		io.write(wsStack_, "wsStack\n");
-		io.write(weStack_, "weStack\n");
+		dmrgWaveStruct_.write(ioTmp, "");
+		ioTmp.write(wsStack_, "wsStack\n");
+		ioTmp.write(weStack_, "weStack\n");
 #else
-		std::cerr<<__FILE__<<" WFT cannot be saved for restart yet ";
-		std::cerr<<"UNIMPLEMENTED WARNING FIXME\n";
+		PsimagLite::String label = "Wft";
+		ioMain.createGroup(label);
+		ioMain.write(isEnabled_, label + "/isEnabled");
+		wftOptions_.write(ioMain, label + "/WftOptions");
+		dmrgWaveStruct_.write(ioMain, label + "/DmrgWaveStruct/");
+		ioMain.write(wsStack_, label + "/wsStack");
+		ioMain.write(weStack_, label + "/weStack");
 #endif
 	}
 
@@ -521,7 +527,7 @@ private:
 	WftOptionsType wftOptions_;
 	PsimagLite::ProgressIndicator progress_;
 	PsimagLite::String filenameIn_;
-	PsimagLite::String filenameOut_;
+	PsimagLite::IoSelector::Out& ioOut_;
 	const PsimagLite::String WFT_STRING;
 	DmrgWaveStructType dmrgWaveStruct_;
 	WftStackType wsStack_;
@@ -529,7 +535,7 @@ private:
 	WaveFunctionTransfBaseType* wftImpl_;
 	PsimagLite::Random48<RealType> rng_;
 	bool noLoad_;
-	bool save_;
+	const bool save_;
 	VectorSizeType sitesSeen_;
 }; // class WaveFunctionTransformation
 } // namespace Dmrg

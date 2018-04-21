@@ -176,7 +176,7 @@ public:
 	      quantumSector_(0),
 	      stepCurrent_(0),
 	      checkpoint_(parameters_,ioIn,model,false,ioOut_),
-	      wft_(parameters_),
+	      wft_(parameters_, ioOut_),
 	      reflectionOperator_(lrs_,
 	                          model_.hilbertSize(0),
 	                          parameters_.useReflectionSymmetry,
