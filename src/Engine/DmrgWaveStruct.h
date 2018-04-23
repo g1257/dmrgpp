@@ -74,7 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file DmrgWaveStruct.h
  *
- *  DOC NEEDED FIXME
+ *  DOC NEEDED FIXME (This file should go in Wft/ directory perhaps)
  */
 #ifndef DMRG_WAVE_H
 #define DMRG_WAVE_H
@@ -109,14 +109,22 @@ struct DmrgWaveStruct {
 		return ret;
 	}
 
-	template<typename IoInputType>
-	void read(IoInputType& io,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
+	void read(PsimagLite::IoSimple::In& io)
 	{
 		io.read(ws, "Ws");
 		io.read(we, "We");
-		lrs.read(io);
+		lrs.read(io, "");
+	}
+
+	template<typename IoInputType>
+	void read(IoInputType& io,
+	          PsimagLite::String prefix,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
+	{
+		io.read(ws, prefix + "Ws");
+		io.read(we, prefix + "We");
+		lrs.read(io, prefix);
 	}
 
 	template<typename IoOutputType>
@@ -128,8 +136,7 @@ struct DmrgWaveStruct {
 		io.createGroup(prefix);
 		io.write(ws, prefix + "Ws");
 		io.write(we, prefix + "We");
-		std::cerr<<"NEEDS TO PRINT LRS\n";
-		// lrs.write(io,LeftRightSuperType::SAVE_ALL,false);
+		lrs.write(io, prefix, LeftRightSuperType::SAVE_ALL, false);
 	}
 
 }; // struct DmrgWaveStruct

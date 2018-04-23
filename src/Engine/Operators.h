@@ -235,22 +235,23 @@ public:
 
 		announceChangeAll();
 
-		if (!useSu2Symmetry_) io.read(operators_, prefix + "Operators");
-
-		io.read(hamiltonian_, prefix + "Hamiltonian");
-		reducedOpImpl_.setHamiltonian(hamiltonian_);
+		read(io, prefix, false);
 	}
 
 	template<typename IoInputter>
 	void read(IoInputter& io,
+	          PsimagLite::String prefix,
+	          bool roi = true, // it is false only when called from constructor
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
-		if (!useSu2Symmetry_)
-			io.read(operators_,"Operators");
-		else reducedOpImpl_.read(io);
+		if (!useSu2Symmetry_) {
+			io.read(operators_, prefix + "Operators");
+		} else {
+			if (roi) reducedOpImpl_.read(io);
+		}
 
-		io.read(hamiltonian_, "Hamiltonian");
+		io.read(hamiltonian_, prefix + "Hamiltonian");
 		reducedOpImpl_.setHamiltonian(hamiltonian_);
 	}
 

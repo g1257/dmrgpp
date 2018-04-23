@@ -133,13 +133,12 @@ public:
 
 	//! Loads this basis from memory or disk
 	template<typename IoInputter>
-	void read(IoInputter& io)
+	void read(IoInputter& io, PsimagLite::String prefix)
 	{
 		PsimagLite::String nn="NAME=";
 		std::pair<PsimagLite::String,SizeType> sc = io.advance(nn);
 		name_ = sc.first.substr(nn.size(),sc.first.size());
-		PsimagLite::String prefix = "";
-		loadInternal(io, prefix, false);
+		loadInternal(io, (io.ng()) ? prefix : "", false);
 	}
 
 	//! Returns the name of this basis
@@ -560,11 +559,12 @@ public:
 	template<typename SomeIoType>
 	void write(SomeIoType& io,
 	           typename SomeIoType::Serializer::WriteMode mode,
+	           PsimagLite::String prefix,
 	           bool minimizeWrite,
 	           typename PsimagLite::EnableIf<
 	           PsimagLite::IsOutputLike<SomeIoType>::True, int>::Type = 0) const
 	{
-		write(io, name_, mode, minimizeWrite);
+		write(io, prefix + "/" + name_, mode, minimizeWrite);
 	}
 
 	//! The operator<< is a friend
@@ -601,10 +601,14 @@ private:
 	                  typename PsimagLite::EnableIf<
 	                  PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
-		int x=0;
 		useSu2Symmetry_=false;
+#ifndef USE_IO_NG
+		int x=0;
 		io.readline(x, prefix + "useSu2Symmetry=");
 		if (x>0) useSu2Symmetry_=true;
+#else
+		io.read(useSu2Symmetry_, prefix + "useSu2Symmetry");
+#endif
 		io.read(block_, prefix + "BLOCK");
 
 		if (!minimizeRead) {

@@ -288,6 +288,14 @@ public:
 		return data_[i];
 	}
 
+	void read(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer)
+	{
+		ioSerializer.read(isSquare_, label + "/isSquare");
+		ioSerializer.read(offsetsRows_, label + "/offsetsRows");
+		ioSerializer.read(offsetsCols_, label + "/offsetsCols");
+		ioSerializer.read(data_, label + "/data");
+	}
+
 	void write(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);

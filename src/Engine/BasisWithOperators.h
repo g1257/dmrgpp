@@ -151,14 +151,22 @@ public:
 		io.read(operatorsPerSite_, prefix + "OperatorPerSite");
 	}
 
-	template<typename IoInputter>
-	void read(IoInputter& io,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
+	void read(PsimagLite::IoSimple::In& io)
 	{
 		BasisType::read(io); // parent loads
 		operators_.read(io);
 		io.read(operatorsPerSite_,"OperatorPerSite");
+	}
+
+	template<typename IoInputter>
+	void read(IoInputter& io,
+	          PsimagLite::String prefix,
+	          typename PsimagLite::EnableIf<
+	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
+	{
+		BasisType::read(io, prefix); // parent loads
+		operators_.read(io, prefix);
+		io.read(operatorsPerSite_, prefix + "/OperatorPerSite");
 	}
 
 	// set this basis to the outer product of
@@ -394,11 +402,12 @@ public:
 	template<typename SomeOutputType>
 	void write(SomeOutputType& io,
 	           typename SomeOutputType::Serializer::WriteMode mode,
+	           PsimagLite::String prefix,
 	           SizeType option,
 	           typename PsimagLite::EnableIf<
 	           PsimagLite::IsOutputLike<SomeOutputType>::True, int>::Type = 0) const
 	{
-		write(io, this->name(), mode, option);
+		write(io, prefix + "/" + this->name(), mode, option);
 	}
 
 private:

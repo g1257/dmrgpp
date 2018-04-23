@@ -203,20 +203,22 @@ public:
 
 	template<typename IoOutputType>
 	void write(IoOutputType& io,
-	          SizeType option,
-	          SizeType numberOfSites,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
+	           PsimagLite::String prefix,
+	           SizeType option,
+	           SizeType numberOfSites,
+	           typename PsimagLite::EnableIf<
+	           PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
 	{
 		bool minimizeWrite = (super_->block().size() == numberOfSites);
-		super_->write(io, IoOutputType::Serializer::NO_OVERWRITE, minimizeWrite);
-		left_->write(io, IoOutputType::Serializer::NO_OVERWRITE, option);
-		right_->write(io, IoOutputType::Serializer::NO_OVERWRITE, option);
+		super_->write(io, IoOutputType::Serializer::NO_OVERWRITE, prefix, minimizeWrite);
+		left_->write(io, IoOutputType::Serializer::NO_OVERWRITE, prefix, option);
+		right_->write(io, IoOutputType::Serializer::NO_OVERWRITE, prefix, option);
 	}
 
 	void write(PsimagLite::IoSimple::Out& io,
-	          SizeType option,
-	          SizeType numberOfSites) const
+	           PsimagLite::String,
+	           SizeType option,
+	           SizeType numberOfSites) const
 	{
 		bool minimizeWrite = (super_->block().size() == numberOfSites);
 		super_->write(io, minimizeWrite);
@@ -253,12 +255,13 @@ public:
 
 	template<typename IoInputType>
 	void read(IoInputType& io,
+	          PsimagLite::String prefix,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
 	{
-		super_->read(io);
-		left_->read(io);
-		right_->read(io);
+		super_->read(io, prefix);
+		left_->read(io, prefix);
+		right_->read(io, prefix);
 	}
 
 private:

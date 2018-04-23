@@ -152,7 +152,7 @@ public:
 	{
 		fS_.write(io);
 		fE_.write(io);
-		lrs_.write(io,option,numberOfSites);
+		lrs_.write(io, "", option, numberOfSites);
 
 		// save wavefunction
 		PsimagLite::String label = "WAVEFUNCTION_sites=";

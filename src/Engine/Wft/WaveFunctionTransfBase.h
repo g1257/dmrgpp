@@ -131,14 +131,25 @@ public:
 			}
 		}
 
+		void read(PsimagLite::IoSelector::In& io, PsimagLite::String label)
+		{
+			io.read(dir, label + "/dir");
+			io.read(twoSiteDmrg, label + "/twoSiteDmrg");
+			io.read(accel, label + "/accel");
+			io.read(kronLoadBalance, label + "/kronLoadBalance");
+			io.read(firstCall, label + "/firstCall");
+			io.read(counter, label + "/counter");
+			io.read(denseSparseThreshold, label + "/denseSparseThreshold");
+		}
+
 		void write(PsimagLite::IoSelector::Out& io, PsimagLite::String label) const
 		{
 			io.createGroup(label);
 			io.write(dir, label + "/dir");
-			//io.write(twoSiteDmrg, label + "/twoSiteDmrg");
+			io.write(twoSiteDmrg, label + "/twoSiteDmrg");
 			io.write(accel, label + "/accel");
-			//io.write(kronLoadBalance, label + "/kronLoadBalance");
-			//io.write(firstCall, label + "/firstCall");
+			io.write(kronLoadBalance, label + "/kronLoadBalance");
+			io.write(firstCall, label + "/firstCall");
 			io.write(counter, label + "/counter");
 			io.write(denseSparseThreshold, label + "/denseSparseThreshold");
 		}

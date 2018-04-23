@@ -407,7 +407,14 @@ private:
 		io.read(wsStack_, "wsStack");
 		io.read(weStack_, "weStack");
 #else
-		err("WFT loading not yet supported with IoNg\n");
+		PsimagLite::IoSelector::In ioMain(filenameIn_);
+		PsimagLite::String label = "Wft";
+		ioMain.read(isEnabled_, label + "/isEnabled");
+		wftOptions_.read(ioMain, label + "/WftOptions");
+		dmrgWaveStruct_.read(ioMain, label + "/DmrgWaveStruct/");
+		ioMain.read(wsStack_, label + "/wsStack");
+		ioMain.read(weStack_, label + "/weStack");
+		ioMain.close();
 #endif
 	}
 
