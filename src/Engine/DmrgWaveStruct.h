@@ -127,6 +127,14 @@ struct DmrgWaveStruct {
 		lrs.read(io, prefix);
 	}
 
+	void write(PsimagLite::IoSimple::Out& io,
+	           PsimagLite::String) const
+	{
+		io.write(ws, "Ws");
+		io.write(we, "We");
+		lrs.write(io, "", LeftRightSuperType::SAVE_ALL, false);
+	}
+
 	template<typename IoOutputType>
 	void write(IoOutputType& io,
 	           PsimagLite::String prefix,
@@ -134,8 +142,8 @@ struct DmrgWaveStruct {
 	           PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
 	{
 		io.createGroup(prefix);
-		io.write(ws, prefix + "Ws");
-		io.write(we, prefix + "We");
+		io.write(ws, prefix + "/Ws");
+		io.write(we, prefix + "/We");
 		lrs.write(io, prefix, LeftRightSuperType::SAVE_ALL, false);
 	}
 

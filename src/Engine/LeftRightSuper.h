@@ -134,6 +134,7 @@ public:
 			refCounter_--;
 			return;
 		}
+
 		delete left_;
 		delete right_;
 		delete super_;
@@ -144,8 +145,7 @@ public:
 	               SuperBlockType& super)
 	    : progress_("LeftRightSuper"),
 	      left_(&left),right_(&right),super_(&super),refCounter_(1)
-	{
-	}
+	{}
 
 	LeftRightSuper(const ThisType& rls)
 	    : progress_("LeftRightSuper"),refCounter_(1)
@@ -209,6 +209,13 @@ public:
 	           typename PsimagLite::EnableIf<
 	           PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
 	{
+		prefix += "/LRS";
+		io.createGroup(prefix);
+
+		io.write(super_->name(), prefix + "/NameSuper");
+		io.write(left_->name(), prefix + "/NameSystem");
+		io.write(right_->name(), prefix + "/NameEnviron");
+
 		bool minimizeWrite = (super_->block().size() == numberOfSites);
 		super_->write(io, IoOutputType::Serializer::NO_OVERWRITE, prefix, minimizeWrite);
 		left_->write(io, IoOutputType::Serializer::NO_OVERWRITE, prefix, option);
@@ -253,15 +260,31 @@ public:
 		*right_=right; // deep copy
 	}
 
+	void read(PsimagLite::IoSimple::In& io, PsimagLite::String)
+	{
+		super_->read(io, "");
+		left_->read(io, "");
+		right_->read(io, "");
+	}
+
 	template<typename IoInputType>
 	void read(IoInputType& io,
 	          PsimagLite::String prefix,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
 	{
-		super_->read(io, prefix);
-		left_->read(io, prefix);
-		right_->read(io, prefix);
+		prefix += "/LRS";
+
+		PsimagLite::String nameSuper;
+		io.read(nameSuper, prefix + "/NameSuper");
+		PsimagLite::String nameSys;
+		io.read(nameSys, prefix + "/NameSystem");
+		PsimagLite::String nameEnviron;
+		io.read(nameEnviron, prefix + "/NameEnviron");
+
+		super_->read(io,  prefix + "/" + nameSuper);
+		left_->read(io, prefix + "/" + nameSys);
+		right_->read(io, prefix + "/" + nameEnviron);
 	}
 
 private:
