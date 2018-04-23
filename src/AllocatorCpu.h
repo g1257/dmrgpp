@@ -118,6 +118,17 @@ struct RemoveConst<const T> {
 	typedef T Type;
 };
 
+template<typename T>
+struct IsStringLike {
+	enum { True = false };
+};
+
+template<>
+template<typename A>
+struct IsStringLike<std::basic_string<char, std::char_traits<char>, A> > {
+	enum { True = true };
+};
+
 typedef std::basic_string<char,std::char_traits<char>,Allocator<char>::Type> String;
 typedef std::basic_istringstream<char,std::char_traits<char>,Allocator<char>::Type> IstringStream;
 typedef std::basic_ostringstream<char,std::char_traits<char>,Allocator<char>::Type> OstringStream;

@@ -110,12 +110,36 @@ public:
 	}
 	// end all ctors
 
+	void read(int fd)
+	{
+		::read(fd,&ncol_,sizeof(ncol_));
+		::read(fd,&nrow_,sizeof(nrow_));
+		data_.resize(nrow_*ncol_);
+		::read(fd,&(data_[0]),sizeof(T)*nrow_*ncol_);
+	}
+
+	void read(String label, IoSerializer& ioSerializer)
+	{
+		ioSerializer.read(nrow_, label + "/nrow_");
+		ioSerializer.read(ncol_, label + "/ncol_");
+		if (nrow_ == 0 || ncol_ == 0) return;
+		ioSerializer.read(data_, label + "/data_");
+	}
+
 	void write(String label, IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
 		ioSerializer.write(label + "/nrow_", nrow_);
 		ioSerializer.write(label + "/ncol_", ncol_);
 		ioSerializer.write(label + "/data_", data_);
+	}
+
+	void print(int fd) const
+	{
+		::write(fd,(const void*)&ncol_,sizeof(ncol_));
+		::write(fd,(const void*)&nrow_,sizeof(nrow_));
+		::write(fd,(const void*)&(data_[0]),sizeof(T)*nrow_*ncol_);
+
 	}
 
 	template<typename SomeMemResolvType>
@@ -243,27 +267,6 @@ public:
 			}
 			os<<"\n";
 		}
-	}
-
-	void print(int fd) const
-	{
-		::write(fd,(const void*)&ncol_,sizeof(ncol_));
-		::write(fd,(const void*)&nrow_,sizeof(nrow_));
-		::write(fd,(const void*)&(data_[0]),sizeof(T)*nrow_*ncol_);
-
-	}
-
-	void read(int fd)
-	{
-		::read(fd,&ncol_,sizeof(ncol_));
-		::read(fd,&nrow_,sizeof(nrow_));
-		data_.resize(nrow_*ncol_);
-		::read(fd,&(data_[0]),sizeof(T)*nrow_*ncol_);
-	}
-
-	void read(String label, IoSerializer& ioSerializer) const
-	{
-		throw RuntimeError("Matrix read unimplemented yet\n");
 	}
 
 	void setTo(const T& val)

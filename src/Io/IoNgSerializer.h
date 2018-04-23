@@ -212,13 +212,10 @@ public:
 		delete dataset;
 	}
 
-	void read(String& value,
+	void read(String& what,
 	          String name)
 	{
-		void* ptr = static_cast<void *>(&(value[0])); // FIXME CHECK SIZE
-		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet("Def/" + name));
-		dataset->read(ptr, typeToH5<char>());
-		delete dataset;
+		readInternal(what, name);
 	}
 
 	void read(bool& value, String name)
@@ -252,7 +249,9 @@ public:
 	          String name,
 	          typename EnableIf<IsEnum<SomeType>::True, int>::Type = 0)
 	{
-		throw RuntimeError("Cannot read label " + name + " (enums not supported yet)\n");
+		SizeType x = 0;
+		read(x, name);
+		value = static_cast<SomeType>(x);
 	}
 
 	template<typename T>

@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "H5Cpp.h"
 #include <typeinfo>
 #include "IoNgSerializer.h"
+#include "AllocatorCpu.h"
 
 namespace PsimagLite {
 
@@ -97,7 +98,8 @@ struct IsRootUnDelegated {
 		  IsVectorLike<T>::True ||
 		  IsStackLike<T>::True ||
 		  IsPairLike<T>::True ||
-		  IsEnum<T>::True};
+		  IsEnum<T>::True ||
+		  IsStringLike<T>::True};
 };
 
 class IoNg {
@@ -127,6 +129,7 @@ public:
 		      hdf5File_(new H5::H5File(fn, modeToH5(mode))),
 		      ioNgSerializer_(hdf5File_)
 		{
+			H5::Exception::dontPrint();
 			if (mode == ACC_TRUNC)
 				ioNgSerializer_.createGroup("");
 		}
@@ -268,7 +271,9 @@ public:
 		    : filename_(fn),
 		      hdf5File_(new H5::H5File(fn, H5F_ACC_RDONLY)),
 		      ioNgSerializer_(hdf5File_)
-		{}
+		{
+			H5::Exception::dontPrint();
+		}
 
 		~In()
 		{
