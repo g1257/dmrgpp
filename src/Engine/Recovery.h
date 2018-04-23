@@ -145,7 +145,7 @@ public:
 
 		saveStacksForRecovery(rootName,isObserveCode);
 
-		wft_.write(rootName);
+		wft_.write(ioOut);
 		wft_.appendFileList(files_,rootName);
 		flag_m_ = !flag_m_;
 #else

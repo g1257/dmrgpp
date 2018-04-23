@@ -153,8 +153,8 @@ public:
 
 	void read(PsimagLite::IoSimple::In& io)
 	{
-		BasisType::read(io); // parent loads
-		operators_.read(io);
+		BasisType::read(io, ""); // parent loads
+		operators_.read(io, "");
 		io.read(operatorsPerSite_,"OperatorPerSite");
 	}
 

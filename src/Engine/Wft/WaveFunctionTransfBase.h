@@ -131,6 +131,7 @@ public:
 			}
 		}
 
+#ifdef USE_IO_NG
 		void read(PsimagLite::IoSelector::In& io, PsimagLite::String label)
 		{
 			io.read(dir, label + "/dir");
@@ -153,6 +154,7 @@ public:
 			io.write(counter, label + "/counter");
 			io.write(denseSparseThreshold, label + "/denseSparseThreshold");
 		}
+#endif
 
 		ProgramGlobals::DirectionEnum dir;
 		bool twoSiteDmrg;

@@ -361,7 +361,7 @@ public:
 		files.push_back(utils::pathPrepend(WFT_STRING,rootName));
 	}
 
-	void write(PsimagLite::IoSelector::Out& ioMain)
+	void write(PsimagLite::IoSelector::Out& ioMain) const
 	{
 		if (!isEnabled_) return;
 		if (!save_) return;

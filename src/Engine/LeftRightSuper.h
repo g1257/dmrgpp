@@ -263,8 +263,8 @@ public:
 	void read(PsimagLite::IoSimple::In& io, PsimagLite::String)
 	{
 		super_->read(io, "");
-		left_->read(io, "");
-		right_->read(io, "");
+		left_->read(io);
+		right_->read(io);
 	}
 
 	template<typename IoInputType>
