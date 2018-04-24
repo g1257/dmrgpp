@@ -416,7 +416,7 @@ private:
 		PsimagLite::String label = "Wft";
 		ioMain.read(isEnabled_, label + "/isEnabled");
 		wftOptions_.read(ioMain, label + "/WftOptions");
-		dmrgWaveStruct_.read(ioMain, label + "/DmrgWaveStruct/");
+		dmrgWaveStruct_.read(ioMain, label + "/DmrgWaveStruct");
 		ioMain.read(wsStack_, label + "/wsStack");
 		ioMain.read(weStack_, label + "/weStack");
 		ioMain.close();

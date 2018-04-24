@@ -122,8 +122,8 @@ struct DmrgWaveStruct {
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
 	{
-		io.read(ws, prefix + "Ws");
-		io.read(we, prefix + "We");
+		io.read(ws, prefix + "/Ws");
+		io.read(we, prefix + "/We");
 		lrs.read(io, prefix);
 	}
 

@@ -126,6 +126,7 @@ public:
 	      bool minimizeRead = false)
 	    : dmrgTransformed_(false), name_(ss), progress_(ss)
 	{
+		if (io.ng()) correctNameIfNeeded();
 		io.advance("NAME="+ss,counter);
 		PsimagLite::String prefix = (io.ng()) ? ss + "/" : "";
 		loadInternal(io, prefix, minimizeRead);
@@ -710,6 +711,17 @@ private:
 				permInverse_[permutationVector_[i]]=i;
 
 		}
+	}
+
+	void correctNameIfNeeded()
+	{
+		if (name_.find("/") == PsimagLite::String::npos)
+			return;
+
+		if (name_.find("system") != PsimagLite::String::npos)
+			name_ = "system";
+		else
+			name_ = "environ";
 	}
 
 	/* PSIDOC BasisQuantumNumbers
