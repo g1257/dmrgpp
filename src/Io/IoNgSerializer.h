@@ -312,7 +312,13 @@ public:
 	void read(std::stack<T>& what,
 	          String name)
 	{
-		throw RuntimeError("Cannot read label " + name + " (stacks not supported yet)\n");
+		SizeType x = 0;
+		read(x, name + "/Size");
+		for (SizeType i = 0; i < x; ++i) {
+			T t;
+			t.read(name + "/" + ttos(x - i - 1), *this);
+			what.push(t);
+		}
 	}
 
 	// read functions END
