@@ -607,6 +607,7 @@ private:
 		io.readline(x, prefix + "useSu2Symmetry=");
 		if (x>0) useSu2Symmetry_=true;
 #else
+		prefix += "/";
 		io.read(useSu2Symmetry_, prefix + "useSu2Symmetry");
 #endif
 		io.read(block_, prefix + "BLOCK");

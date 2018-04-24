@@ -245,6 +245,7 @@ public:
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
+		if (io.ng()) prefix += "/";
 		if (!useSu2Symmetry_) {
 			io.read(operators_, prefix + "Operators");
 		} else {

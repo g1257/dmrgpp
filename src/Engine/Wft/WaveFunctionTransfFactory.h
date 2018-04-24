@@ -361,11 +361,11 @@ public:
 		files.push_back(utils::pathPrepend(WFT_STRING,rootName));
 	}
 
+#ifndef USE_IO_NG
 	void write(PsimagLite::IoSelector::Out& ioMain) const
 	{
 		if (!isEnabled_) return;
 		if (!save_) return;
-#ifndef USE_IO_NG
 		typename IoType::Out ioTmp(utils::pathPrepend(WFT_STRING, ioMain.filename()));
 		PsimagLite::String s="isEnabled="+ttos(isEnabled_);
 		ioTmp.printline(s);
@@ -378,7 +378,12 @@ public:
 		dmrgWaveStruct_.write(ioTmp, "");
 		ioTmp.write(wsStack_, "wsStack\n");
 		ioTmp.write(weStack_, "weStack\n");
+	}
 #else
+	void write(PsimagLite::IoSelector::Out& ioMain)
+	{
+		if (!isEnabled_) return;
+		if (!save_) return;
 		PsimagLite::String label = "Wft";
 		ioMain.createGroup(label);
 		ioMain.write(isEnabled_, label + "/isEnabled");
@@ -386,8 +391,8 @@ public:
 		dmrgWaveStruct_.write(ioMain, label + "/DmrgWaveStruct");
 		ioMain.write(wsStack_, label + "/wsStack");
 		ioMain.write(weStack_, label + "/weStack");
-#endif
 	}
+#endif
 
 private:
 
