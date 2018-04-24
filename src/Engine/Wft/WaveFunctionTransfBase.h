@@ -106,29 +106,14 @@ public:
 		           RealType d)
 		    : dir(dir1),
 		      twoSiteDmrg(options.find("twositedmrg") != PsimagLite::String::npos),
-		      accel(ACCEL_NONE),
+		      accel((twoSiteDmrg) ? ACCEL_BLOCKS : ACCEL_PATCHES),
 		      kronLoadBalance(options.find("KronLoadBalance") != PsimagLite::String::npos),
 		      firstCall(f),
 		      counter(c),
 		      denseSparseThreshold(d)
 		{
-			if (options.find("wftInPatches")!=PsimagLite::String::npos) {
-				accelMustBeNone(0);
-				accel = ACCEL_PATCHES;
-				if (twoSiteDmrg) {
-					std::cerr<<"WARNING: wftInPatches not with twositedmrg, ";
-					std::cerr<<"switching to wftInBlocks instead\n";
-					accel = ACCEL_BLOCKS;
-				}
-			}
-
-			if (options.find("wftWithTemp")!=PsimagLite::String::npos)
-				err("wftWithTemp is no longer available\n");
-
-			if (options.find("wftInBlocks")!=PsimagLite::String::npos) {
-				accelMustBeNone(1);
-				accel = ACCEL_BLOCKS;
-			}
+			if (options.find("wftNoAccel") != PsimagLite::String::npos)
+				accel = ACCEL_NONE;
 		}
 
 #ifdef USE_IO_NG

@@ -330,8 +330,7 @@ public:
 			\item [useSvd] TBW
 			\item [KronNoLoadBalance] Disable load balancing for MatrixVectorKron
 			\item [setAffinities] TBW
-			\item [wftInPatches] WFT calculation will be done using symmetry patches
-			\item [wftInBlocks] Accelerate the WFT by using dense blocks
+			\item [wftNoAccel] Disable WFT acceleration (but not the WFT itself)
 			\item [BatchedGemm] Only meaningful with MatrixVectorKron. Enables
 								batched gemm and might need plugin sc
 			\item [KrylovAbridge] TBW
@@ -390,9 +389,7 @@ public:
 		registerOpts.push_back("useSvd");
 		registerOpts.push_back("KronNoLoadBalance");
 		registerOpts.push_back("setAffinities");
-		registerOpts.push_back("wftInPatches");
-		registerOpts.push_back("wftInBlocks");
-		registerOpts.push_back("wftWithTemp");
+		registerOpts.push_back("wftNoAccel");
 		registerOpts.push_back("BatchedGemm");
 		registerOpts.push_back("KrylovAbridge");
 
