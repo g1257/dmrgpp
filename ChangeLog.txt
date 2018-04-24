@@ -1,3 +1,28 @@
+2018-04-24 Version 5.14
+
+* IoNg: OutFile= will be rootname only
+
+* IoNg: can restart GS with WFT
+
+* Correction Vector with useComplex
+now possible
+
+* advanceOnlyAtBorder is now the default
+say advanceUnrestricted not to
+restrict advance at borders
+
+* ci: entangles with MatrixVectorOnTheFly
+
+* ci: JMVALUES updated format
+
+* Kitaev Model: corrected connection to 0.5
+
+* no more print() for targets
+
+* tar support and related options deleted
+
+* compiles with clang++
+
 2018-04-16 Version 5.12
 
 * SolverOptions diskstacks and wftStacksInDisk deleted
