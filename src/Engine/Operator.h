@@ -198,6 +198,11 @@ struct Operator {
 
 		io.readline(fermionSign,prefix + "FERMIONSIGN=");
 
+		jm.first = jm.second = 0;
+		angularFactor = 1;
+		if (!SomeModelType::MyBasis::useSu2Symmetry())
+			return;
+
 		VectorSizeType v;
 		io.read(v, prefix + "JMVALUES");
 		if (v.size() != 2)
