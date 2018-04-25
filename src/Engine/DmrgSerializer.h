@@ -101,17 +101,17 @@ public:
 	typedef typename BasisType::RealType RealType;
 
 	DmrgSerializer(const FermionSignType& fS,
-		       const FermionSignType& fE,
-		       const LeftRightSuperType& lrs,
-		       const VectorType& wf,
-		       const SparseMatrixType& transform,
-		       ProgramGlobals::DirectionEnum direction)
-		: fS_(fS),
-		  fE_(fE),
-		  lrs_(lrs),
-		  wavefunction_(wf),
-		  transform_(transform),
-		  direction_(direction)
+	               const FermionSignType& fE,
+	               const LeftRightSuperType& lrs,
+	               const VectorType& wf,
+	               const SparseMatrixType& transform,
+	               ProgramGlobals::DirectionEnum direction)
+	    : fS_(fS),
+	      fE_(fE),
+	      lrs_(lrs),
+	      wavefunction_(wf),
+	      transform_(transform),
+	      direction_(direction)
 	{
 		transposeConjugate(transformC_,transform_);
 	}
@@ -120,9 +120,9 @@ public:
 	DmrgSerializer(typename PsimagLite::IoSelector::In& io,
 	               bool bogus,
 	               bool isObserveCode)
-		: fS_(io,bogus),
-		  fE_(io,bogus),
-		  lrs_(io, isObserveCode)
+	    : fS_(io,bogus),
+	      fE_(io,bogus),
+	      lrs_(io, isObserveCode)
 	{
 		if (bogus) return;
 		PsimagLite::String s = "WAVEFUNCTION_sites=";
@@ -135,20 +135,9 @@ public:
 	}
 
 	// Save to disk everything needed to compute any observable
-	template<typename IoOutType>
-	void write(IoOutType& io,
-	          SizeType option,
-	          SizeType numberOfSites,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsOutputLike<IoOutType>::True, int>::Type = 0) const
-	{
-		std::cerr<<__FILE__<<" write(): IoNg does not support saving for observe code yet\n";
-	}
-
-	// Save to disk everything needed to compute any observable
-	void write(PsimagLite::IoSelector::Out& io,
-	          SizeType option,
-	          SizeType numberOfSites) const
+	void write(PsimagLite::IoSimple::Out& io,
+	           SizeType option,
+	           SizeType numberOfSites) const
 	{
 		fS_.write(io);
 		fE_.write(io);
@@ -169,6 +158,36 @@ public:
 
 		io.write(transform_, label);
 		io.write(direction_, "DIRECTION");
+	}
+
+	template<typename SomeIoOutType>
+	void write(SomeIoOutType& io,
+	           PsimagLite::String prefix,
+	           SizeType option,
+	           SizeType numberOfSites,
+	           SizeType counter,
+	           typename PsimagLite::EnableIf<
+	           PsimagLite::IsOutputLike<SomeIoOutType>::True, int>::Type = 0) const
+	{
+		if (counter == 0) io.createGroup(prefix);
+
+		io.write(counter + 1,
+		         prefix + "/Size",
+		         (counter == 0) ? SomeIoOutType::Serializer::NO_OVERWRITE :
+		                          SomeIoOutType::Serializer::ALLOW_OVERWRITE);
+
+		prefix += ("/" + ttos(counter));
+
+		io.createGroup(prefix);
+
+		fS_.write(io, prefix + "/fS");
+		fE_.write(io, prefix + "/fE");
+		lrs_.write(io, prefix, option, numberOfSites);
+
+		wavefunction_.write(io, prefix + "/WaveFunction");
+
+		io.write(transform_, prefix + "/transform");
+		io.write(direction_, prefix + "/direction");
 	}
 
 	const FermionSignType& fermionicSignLeft() const

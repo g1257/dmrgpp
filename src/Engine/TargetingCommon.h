@@ -219,8 +219,14 @@ public:
 
 	void timeHasAdvanced() { applyOpExpression_.timeHasAdvanced(); }
 
-	void write(PsimagLite::IoSelector::Out& io, const VectorSizeType& block) const
+	void write(PsimagLite::IoSelector::Out& io,
+	           const VectorSizeType& block,
+	           PsimagLite::String,
+	           SizeType) const
 	{
+		if (io.ng())
+			err(PsimagLite::String(__FILE__) + ": target does not support IoNg yet\n");
+
 		if (block.size() != 1)
 			err(PsimagLite::String(__FILE__) + " write() only supports blocks.size=1\n");
 

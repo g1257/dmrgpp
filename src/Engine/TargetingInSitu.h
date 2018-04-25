@@ -199,8 +199,13 @@ public:
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
-	          PsimagLite::IoSelector::Out& io) const
+	           PsimagLite::IoSelector::Out& io,
+	           PsimagLite::String,
+	           SizeType) const
 	{
+		if (io.ng())
+			err(PsimagLite::String(__FILE__) + ": target does not support IoNg yet\n");
+
 		assert(block.size()==1);
 
 		SizeType type = tstStruct_.type();

@@ -236,8 +236,14 @@ public:
 		this->common().template read<TimeSerializerType>(f);
 	}
 
-	void write(const VectorSizeType& block, PsimagLite::IoSelector::Out& io) const
+	void write(const VectorSizeType& block,
+	           PsimagLite::IoSelector::Out& io,
+	           PsimagLite::String,
+	           SizeType) const
 	{
+		if (io.ng())
+			err(PsimagLite::String(__FILE__) + ": target does not support IoNg yet\n");
+
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";
 		progress_.printline(msg,std::cout);

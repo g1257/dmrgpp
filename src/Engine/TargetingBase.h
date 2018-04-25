@@ -109,16 +109,16 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef WaveFunctionTransfFactory<LeftRightSuperType,
-	                                  VectorWithOffsetType> WaveFunctionTransfType;
+	VectorWithOffsetType> WaveFunctionTransfType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
 	typedef TargetParamsBase<ModelType> TargetParamsType;
 	typedef TargetHelper<ModelType,
-	                     TargetParamsType,
-	                     WaveFunctionTransfType> TargetHelperType;
+	TargetParamsType,
+	WaveFunctionTransfType> TargetHelperType;
 	typedef TargetingCommon<TargetHelperType,
-	                        VectorWithOffsetType,
-	                        LanczosSolverType> TargetingCommonType;
+	VectorWithOffsetType,
+	LanczosSolverType> TargetingCommonType;
 	typedef typename TargetingCommonType::ApplyOperatorExpressionType
 	ApplyOperatorExpressionType;
 	typedef typename BasisWithOperatorsType::SymmetryElectronsSzType
@@ -185,7 +185,9 @@ public:
 	virtual void read(const PsimagLite::String&) = 0;
 
 	virtual void write(const typename PsimagLite::Vector<SizeType>::Type&,
-	                  PsimagLite::IoSelector::Out&) const = 0;
+	                   PsimagLite::IoSelector::Out&,
+	                   PsimagLite::String,
+	                   SizeType) const = 0;
 
 	// non-virtual below
 

@@ -547,7 +547,7 @@ private:
 			                           needsPrinting);
 			printEnergy(energy_);
 
-			changeTruncateAndSerialize(pS,pE,target,keptStates,direction,saveOption);
+			changeTruncateAndSerialize(pS,pE,target,keptStates,direction,loopIndex);
 
 			if (finalStep(stepLength,stepFinal)) break;
 			if (stepCurrent_<0) {
@@ -580,7 +580,7 @@ private:
 	                                const TargetingType& target,
 	                                SizeType keptStates,
 	                                ProgramGlobals::DirectionEnum direction,
-	                                int saveOption)
+	                                SizeType loopIndex)
 	{
 		bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=
 		        PsimagLite::String::npos);
@@ -602,15 +602,17 @@ private:
 		else
 			checkpoint_.push((twoSiteDmrg) ? lrs_.right() : pE, ProgramGlobals::ENVIRON);
 
-		write(fsS,fsE,target,direction,saveOption);
+		write(fsS,fsE,target,direction,loopIndex);
 	}
 
 	void write(const FermionSignType& fsS,
 	               const FermionSignType& fsE,
 	               const TargetingType& target,
 	               ProgramGlobals::DirectionEnum direction,
-	               int saveOption)
+	               SizeType loopIndex)
 	{
+		int saveOption = parameters_.finiteLoop[loopIndex].saveOption;
+
 		if (!(saveOption & 1)) return;
 		if (!saveData_) return;
 
@@ -619,9 +621,20 @@ private:
 		DmrgSerializerType ds(fsS,fsE,lrs_,target.gs(),transform,direction);
 
 		SizeType saveOption2 = (saveOption & 4) ? SAVE_ALL : SAVE_PARTIAL;
-		ds.write(ioOut_,saveOption2,model_.geometry().numberOfSites());
+		SizeType numberOfSites = model_.geometry().numberOfSites();
 
+#ifndef USE_IO_NG
+		ds.write(ioOut_,saveOption2,numberOfSites);
 		target.write(sitesIndices_[stepCurrent_],ioOut_);
+#else
+		static SizeType counter = 0;
+		PsimagLite::String prefix("Serializer");
+		ds.write(ioOut_, prefix, saveOption2, numberOfSites, counter);
+		target.write(sitesIndices_[stepCurrent_], ioOut_, prefix, counter);
+		++counter;
+#endif
+
+
 	}
 
 	bool finalStep(int stepLength,int stepFinal)

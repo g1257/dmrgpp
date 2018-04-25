@@ -135,12 +135,18 @@ public:
 		return (signs_[i]) ? f : 1;
 	}
 
-	template<typename IoOutputter>
-	void write(IoOutputter& io,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
+	void write(PsimagLite::IoSimple::Out& io) const
 	{
 		io.write(signs_,"FERMIONICSIGN");
+	}
+
+	template<typename IoOutputter>
+	void write(IoOutputter& io,
+	           PsimagLite::String prefix,
+	           typename PsimagLite::EnableIf<
+	           PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
+	{
+		io.write(signs_, prefix);
 	}
 
 	SizeType size() const { return signs_.size(); }

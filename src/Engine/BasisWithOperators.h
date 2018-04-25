@@ -374,10 +374,12 @@ public:
 	           PsimagLite::IsOutputLike<SomeIoType>::True, int>::Type = 0) const
 	{
 		BasisType::write(io, s, mode, false); // parent saves
-		if (option == BasisType::SAVE_ALL)
+		if (option == BasisType::SAVE_ALL) {
 			operators_.write(io, s, mode);
-		else
-			operators_.saveEmpty(io,s);
+		} else {
+			if (!io.ng()) operators_.saveEmpty(io,s);
+		}
+
 		io.write(operatorsPerSite_, s + "/OperatorPerSite", mode);
 	}
 

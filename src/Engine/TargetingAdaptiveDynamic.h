@@ -188,8 +188,13 @@ public:
 	}
 
 	void write(const VectorSizeType& block,
-	          PsimagLite::IoSelector::Out& io) const
+	           PsimagLite::IoSelector::Out& io,
+	           PsimagLite::String,
+	           SizeType) const
 	{
+		if (io.ng())
+			err(PsimagLite::String(__FILE__) + ": target does not support IoNg yet\n");
+
 		SizeType type = tstStruct_.type();
 		int s = (type&1) ? -1 : 1;
 		int s2 = (type>1) ? -1 : 1;

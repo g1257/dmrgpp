@@ -127,18 +127,18 @@ public:
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename BaseType::TargetingCommonType::VectorVectorWithOffsetType
-	                 VectorVectorWithOffsetType;
- 
+	VectorVectorWithOffsetType;
+
 	enum StageEnum {DISABLED,CONVERGING};
 
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
 
 	TargetingCorrelations(const LeftRightSuperType& lrs,
-	                 const ModelType& model,
-	                 const WaveFunctionTransfType& wft,
-	                 const SizeType&,
-	                 InputValidatorType& io)
+	                      const ModelType& model,
+	                      const WaveFunctionTransfType& wft,
+	                      const SizeType&,
+	                      InputValidatorType& io)
 	    : BaseType(lrs,model,wft,0),
 	      tstStruct_(io,model),
 	      wft_(wft),
@@ -164,7 +164,7 @@ public:
 	RealType weight(SizeType i) const
 	{
 		return (this->common().targetVectors(i).size() == 0) ?
-		      0 : weight_[i];
+		            0 : weight_[i];
 	}
 
 	RealType gsWeight() const
@@ -175,7 +175,7 @@ public:
 	SizeType size() const
 	{
 		return (stage_ == CONVERGING) ?
-		    this->common().targetVectors().size() : 0;
+		            this->common().targetVectors().size() : 0;
 	}
 
 	void evolve(RealType Eg,
@@ -201,8 +201,13 @@ public:
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
-	          PsimagLite::IoSelector::Out& io) const
+	           PsimagLite::IoSelector::Out& io,
+	           PsimagLite::String,
+	           SizeType) const
 	{
+		if (io.ng())
+			err(PsimagLite::String(__FILE__) + ": target does not support IoNg yet\n");
+
 		SizeType type = tstStruct_.type();
 		int fermionSign = this->common().findFermionSignOfTheOperators();
 		int s = (type&1) ? -1 : 1;
