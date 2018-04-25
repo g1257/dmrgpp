@@ -164,8 +164,8 @@ public:
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String,
-	           SizeType) const
+	           PsimagLite::String prefix,
+	           SizeType counter) const
 	{
 		if (io.ng())
 			err(PsimagLite::String(__FILE__) + ": target does not support IoNg yet\n");
@@ -174,7 +174,7 @@ public:
 		msg<<"Saving state...";
 		progress_.printline(msg,std::cout);
 
-		this->common().write(io, block);
+		this->common().write(io, block, prefix, counter);
 		this->common().psi().write(io, "PSI");
 	}
 

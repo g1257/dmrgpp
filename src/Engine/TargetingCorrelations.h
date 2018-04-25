@@ -202,8 +202,8 @@ public:
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String,
-	           SizeType) const
+	           PsimagLite::String prefix,
+	           SizeType counter) const
 	{
 		if (io.ng())
 			err(PsimagLite::String(__FILE__) + ": target does not support IoNg yet\n");
@@ -221,7 +221,7 @@ public:
 		params.isign = s;
 		if (tstStruct_.aOperators()[0].fermionSign>0) s2 *= s;
 
-		this->common().write(io, block);
+		this->common().write(io, block, prefix, counter);
 
 		PostProcType cf(ab_, params);
 		this->common().write(block,io,cf,this->common().targetVectors());

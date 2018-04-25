@@ -480,7 +480,7 @@ private:
 
 		if (!saveData_) return;
 		checkpoint_.write(pS,pE,ioOut_);
-		psi.write(sitesIndices_[stepCurrent_],ioOut_);
+		psi.write(sitesIndices_[stepCurrent_], ioOut_, "", 0);
 		ioOut_.write(lastSign, "LastLoopSign");
 	}
 

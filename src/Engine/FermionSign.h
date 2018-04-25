@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include <stdexcept>
 #include "PackIndices.h"
+#include "Io/IoSimple.h"
 
 namespace Dmrg {
 
