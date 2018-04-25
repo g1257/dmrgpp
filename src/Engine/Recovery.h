@@ -137,7 +137,7 @@ public:
 		typename IoType::Out ioOut(rootName);
 		ioOut<<checkpoint_.parameters();
 		checkpoint_.write(pS_,pE_,ioOut);
-		psi.write(vsites,ioOut);
+		psi.write(vsites, ioOut, "", 0);
 		PsimagLite::OstringStream msg;
 		msg<<"LastLoopSign="<<lastSign<<"\n";
 		ioOut<<msg.str();

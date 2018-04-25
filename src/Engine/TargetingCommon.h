@@ -221,16 +221,16 @@ public:
 
 	void write(PsimagLite::IoSelector::Out& io,
 	           const VectorSizeType& block,
-	           PsimagLite::String,
-	           SizeType) const
+	           PsimagLite::String prefix,
+	           SizeType counter) const
 	{
-		if (io.ng())
-			err(PsimagLite::String(__FILE__) + ": target does not support IoNg yet\n");
-
 		if (block.size() != 1)
 			err(PsimagLite::String(__FILE__) + " write() only supports blocks.size=1\n");
 
-		io.write(block[0], "TargetCentralSite");
+		if (io.ng())
+			io.write(block[0], prefix + "/TargetCentralSite");
+		else
+			io.write(block[0], "TargetCentralSite");
 	}
 
 	template<typename IoOutputType>

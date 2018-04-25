@@ -157,15 +157,16 @@ public:
 	           PsimagLite::String prefix,
 	           SizeType counter) const
 	{
-		if (io.ng())
-			err(PsimagLite::String(__FILE__) + ": target does not support IoNg yet\n");
-
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";
 		progress_.printline(msg,std::cout);
 
 		this->common().write(io, block, prefix, counter);
-		this->common().psi().write(io,"PSI");
+
+		if (io.ng())
+			this->common().psi().write(io, prefix + "/Psi");
+		else
+			this->common().psi().write(io,"PSI");
 	}
 
 	void read(const PsimagLite::String& f)

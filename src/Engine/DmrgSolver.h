@@ -625,7 +625,7 @@ private:
 
 #ifndef USE_IO_NG
 		ds.write(ioOut_,saveOption2,numberOfSites);
-		target.write(sitesIndices_[stepCurrent_],ioOut_);
+		target.write(sitesIndices_[stepCurrent_], ioOut_, "", 0);
 #else
 		static SizeType counter = 0;
 		PsimagLite::String prefix("Serializer");
