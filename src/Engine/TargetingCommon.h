@@ -222,14 +222,14 @@ public:
 	void write(PsimagLite::IoSelector::Out& io,
 	           const VectorSizeType& block,
 	           PsimagLite::String prefix,
-	           SizeType counter) const
+	           SizeType) const
 	{
 		if (block.size() != 1)
 			err(PsimagLite::String(__FILE__) + " write() only supports blocks.size=1\n");
 
 		if (io.ng())
 			io.write(block[0], prefix + "/TargetCentralSite");
-		else
+		 else
 			io.write(block[0], "TargetCentralSite");
 	}
 

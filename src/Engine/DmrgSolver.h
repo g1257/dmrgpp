@@ -479,8 +479,14 @@ private:
 		}
 
 		if (!saveData_) return;
+
 		checkpoint_.write(pS,pE,ioOut_);
-		psi.write(sitesIndices_[stepCurrent_], ioOut_, "", 0);
+
+		psi.write(sitesIndices_[stepCurrent_],
+		          ioOut_,
+		          ioOut_.ng() ? "FinalPsi" : "",
+		          0);
+
 		ioOut_.write(lastSign, "LastLoopSign");
 	}
 
@@ -630,7 +636,7 @@ private:
 		static SizeType counter = 0;
 		PsimagLite::String prefix("Serializer");
 		ds.write(ioOut_, prefix, saveOption2, numberOfSites, counter);
-		target.write(sitesIndices_[stepCurrent_], ioOut_, prefix, counter);
+		target.write(sitesIndices_[stepCurrent_], ioOut_, "Target", counter);
 		++counter;
 #endif
 
