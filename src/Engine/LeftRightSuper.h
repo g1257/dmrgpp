@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ProgressIndicator.h"
 #include "KroneckerDumper.h"
+#include "Io/IoSimple.h"
 
 namespace Dmrg {
 
@@ -106,7 +107,34 @@ public:
 		  SAVE_PARTIAL = SuperBlockType::SAVE_PARTIAL};
 
 	template<typename IoInputter>
-	LeftRightSuper(IoInputter& io, bool isObserveCode)
+	LeftRightSuper(IoInputter& io,
+	               PsimagLite::String prefix,
+	               bool isObserveCode,
+	               typename PsimagLite::EnableIf<
+	               PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
+	    : progress_("LeftRightSuper"),
+	      left_(0),right_(0),super_(0),refCounter_(0)
+	{
+		// watch out: same order as save here:
+		bool minimizeRead = isObserveCode;
+
+		prefix += "/LRS";
+
+		PsimagLite::String nameSuper;
+		io.read(nameSuper, prefix + "/NameSuper");
+
+		PsimagLite::String nameLeft;
+		io.read(nameLeft, prefix + "/NameSystem");
+
+		PsimagLite::String nameRight;
+		io.read(nameRight, prefix + "/NameEnviron");
+
+		super_ = new SuperBlockType(io, prefix + "/" + nameSuper, 0, false, minimizeRead);
+		left_ = new BasisWithOperatorsType(io, prefix + "/" + nameLeft, 0, true);
+		right_ = new BasisWithOperatorsType(io, prefix + "/" + nameRight, 0, true);
+	}
+
+	LeftRightSuper(PsimagLite::IoSimple::In& io, bool isObserveCode)
 	    : progress_("LeftRightSuper"),
 	      left_(0),right_(0),super_(0),refCounter_(0)
 	{

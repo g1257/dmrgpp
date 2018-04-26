@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Io/IoSelector.h"
 #include "FermionSign.h"
 #include "ProgramGlobals.h"
+#include "Io/IoSimple.h"
 
 namespace Dmrg {
 // Move also checkpointing from DmrgSolver to here (FIXME)
@@ -116,8 +117,25 @@ public:
 		transposeConjugate(transformC_,transform_);
 	}
 
-
+	// used only by IoNg:
 	DmrgSerializer(typename PsimagLite::IoSelector::In& io,
+	               PsimagLite::String prefix,
+	               bool bogus,
+	               bool isObserveCode)
+	    : fS_(io, prefix + "/fS", bogus),
+	      fE_(io, prefix + "/fE", bogus),
+	      lrs_(io, prefix, isObserveCode)
+	{
+		if (bogus) return;
+
+		wavefunction_.read(io, prefix + "/WaveFunction");
+		io.read(transform_, prefix + "/transform");
+		transposeConjugate(transformC_,transform_);
+		io.read(direction_, prefix + "/direction");
+	}
+
+	// legacy IoSimple ctor:
+	DmrgSerializer(typename PsimagLite::IoSimple::In& io,
 	               bool bogus,
 	               bool isObserveCode)
 	    : fS_(io,bogus),

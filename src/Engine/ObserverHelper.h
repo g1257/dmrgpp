@@ -119,23 +119,19 @@ public:
 	               SizeType numberOfPthreads,
 	               bool hasTimeEvolution,
 	               bool verbose)
-	    :	io_(io),
-	      dSerializerV_(),//(1,DmrgSerializerType(io_,true)),
-	      timeSerializerV_(),//(nf),
+	    : io_(io),
 	      currentPos_(numberOfPthreads),
 	      verbose_(verbose),
 	      bracket_(2,0),
 	      noMoreData_(false)
 	{
-		PsimagLite::String msg = "No more data to construct this object\n";
-
 		if (nf > 0)
 			if (!init(hasTimeEvolution,nf,SAVE_YES))
-				throw PsimagLite::RuntimeError(msg);
+				return;
 
 		if (trail > 0)
 			if (!init(hasTimeEvolution,trail,SAVE_NO))
-				throw PsimagLite::RuntimeError(msg);
+				return;
 	}
 
 	~ObserverHelper()
@@ -283,6 +279,8 @@ private:
 
 	bool init(bool hasTimeEvolution,SizeType nf, SaveEnum saveOrNot)
 	{
+		if (io_.ng()) return initNg(hasTimeEvolution, nf, saveOrNot);
+#ifndef USE_IO_NG
 		// Not rewinding is done here
 		// Never rewind for performance reasons
 		SizeType counter=0;
@@ -314,8 +312,39 @@ private:
 		}
 
 		if (dSerializerV_.size()==0 && noMoreData_) return false;
-
+#endif
 		return true;
+	}
+
+	bool initNg(bool hasTimeEvolution,
+	            SizeType nf,
+	            SaveEnum saveOrNot)
+	{
+		PsimagLite::String prefix = "Serializer";
+		SizeType total = 0;
+		io_.read(total, prefix + "/Size");
+		for (SizeType i = 0; i < total; ++i) {
+			if (nf > 0 && i == nf) break;
+
+			DmrgSerializerType* dSerializer = new DmrgSerializerType(io_,
+			                                                         prefix + "/" + ttos(i),
+			                                                         false,
+			                                                         true);
+			if (saveOrNot == SAVE_YES)
+				dSerializerV_.push_back(dSerializer);
+			else
+				delete dSerializer;
+			if (hasTimeEvolution) {
+				TimeSerializerType ts(io_);
+				if (saveOrNot == SAVE_YES)
+					timeSerializerV_.push_back(ts);
+			}
+
+			std::cerr<<__FILE__<<" read "<<i<<" out of "<<total<<"\n";
+		}
+
+		noMoreData_ = true;
+		return (dSerializerV_.size() > 0);
 	}
 
 	void integrityChecks()

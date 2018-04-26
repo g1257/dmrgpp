@@ -24,22 +24,13 @@ void mainLoop(GeometryType& geometry,
 	ModelSelector<ModelBaseType> modelSelector(params.model);
 	const ModelBaseType& model = modelSelector(params,io,geometry);
 
-	bool moreData = true;
 	const PsimagLite::String& datafile = params.filename;
 	IoInputType dataIo(datafile);
 	bool hasTimeEvolution = (targeting != "GroundStateTargeting" &&
 	        targeting != "CorrectionTargeting");
 
-	while (moreData) {
-		try {
-			moreData = !observeOneFullSweep<VectorWithOffsetType,ModelBaseType>
-			        (dataIo,model,list,hasTimeEvolution,orbitals);
-		} catch (std::exception& e) {
-			std::cerr<<"CAUGHT: "<<e.what();
-			std::cerr<<"There's no more data\n";
-			break;
-		}
-	}
+	while (!observeOneFullSweep<VectorWithOffsetType,ModelBaseType>
+	       (dataIo,model,list,hasTimeEvolution,orbitals));
 }
 
 template<typename GeometryType,
@@ -205,7 +196,7 @@ int main(int argc,char **argv)
 	ParametersDmrgSolverType dmrgSolverParams(io,sOptions,false,true);
 
 	bool setAffinities = (dmrgSolverParams.options.find("setAffinities")
-                                  != PsimagLite::String::npos);
+	                      != PsimagLite::String::npos);
 	ConcurrencyType::setOptions(dmrgSolverParams.nthreads, setAffinities);
 
 	if (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos) {

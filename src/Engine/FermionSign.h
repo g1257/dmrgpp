@@ -122,9 +122,16 @@ public:
 
 	template<typename IoInputter>
 	FermionSign(IoInputter& io,
-	            bool bogus = false,
+	            PsimagLite::String prefix,
+	            bool bogus,
 	            typename PsimagLite::EnableIf<
 	            PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
+	{
+		if (bogus) return;
+		io.read(signs_, prefix);
+	}
+
+	FermionSign(PsimagLite::IoSimple::In& io, bool bogus)
 	{
 		if (bogus) return;
 		io.read(signs_,"FERMIONICSIGN");
