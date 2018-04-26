@@ -277,10 +277,9 @@ public:
 
 private:
 
+#ifndef USE_IO_NG
 	bool init(bool hasTimeEvolution,SizeType nf, SaveEnum saveOrNot)
 	{
-		if (io_.ng()) return initNg(hasTimeEvolution, nf, saveOrNot);
-#ifndef USE_IO_NG
 		// Not rewinding is done here
 		// Never rewind for performance reasons
 		SizeType counter=0;
@@ -312,13 +311,12 @@ private:
 		}
 
 		if (dSerializerV_.size()==0 && noMoreData_) return false;
-#endif
 		return true;
 	}
-
-	bool initNg(bool hasTimeEvolution,
-	            SizeType nf,
-	            SaveEnum saveOrNot)
+#else
+	bool init(bool hasTimeEvolution,
+	          SizeType nf,
+	          SaveEnum saveOrNot)
 	{
 		PsimagLite::String prefix = "Serializer";
 		SizeType total = 0;
@@ -346,6 +344,7 @@ private:
 		noMoreData_ = true;
 		return (dSerializerV_.size() > 0);
 	}
+#endif
 
 	void integrityChecks()
 	{

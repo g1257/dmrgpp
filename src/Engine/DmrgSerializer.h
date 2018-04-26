@@ -118,10 +118,13 @@ public:
 	}
 
 	// used only by IoNg:
-	DmrgSerializer(typename PsimagLite::IoSelector::In& io,
+	template<typename IoInputType>
+	DmrgSerializer(IoInputType& io,
 	               PsimagLite::String prefix,
 	               bool bogus,
-	               bool isObserveCode)
+	               bool isObserveCode,
+	               typename PsimagLite::EnableIf<
+	               PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
 	    : fS_(io, prefix + "/fS", bogus),
 	      fE_(io, prefix + "/fE", bogus),
 	      lrs_(io, prefix, isObserveCode)
