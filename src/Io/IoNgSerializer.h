@@ -324,6 +324,25 @@ public:
 		}
 	}
 
+	static void unitTest(std::vector<bool>& x)
+	{
+		VectorOfBoolInternalType y = convertFromBoolean(x);
+		std::cout<<"convertFromBoolean\n";
+		std::cout<<"Input ";
+		for (SizeType i = 0; i < x.size(); ++i)
+			std::cout<<x[i]<<" ";
+		std::cout<<"\nOutput: ";
+		for (SizeType i = 0; i < y.size(); ++i)
+			std::cout<<static_cast<unsigned short int>(y[i])<<" ";
+		std::cout<<"\n\nconvertToBoolean\n";
+		x.clear();
+		convertToBoolean(x, y);
+		std::cout<<"Output ";
+		for (SizeType i = 0; i < x.size(); ++i)
+			std::cout<<x[i]<<" ";
+		std::cout<<"\n";
+	}
+
 	// read functions END
 
 private:
@@ -390,17 +409,17 @@ private:
 		SizeType total = src.size();
 
 		if (total == 0)
-			return VectorOfBoolInternalType(1, 0);
-
+			return VectorOfBoolInternalType(booleanEncodedSize_, 0);
 
 		SizeType bytesNeeded = total/8;
-		++bytesNeeded;
+		bytesNeeded += 5;
 
 		VectorOfBoolInternalType c(bytesNeeded, 0);
+		encodeBooleanSize(c, total);
 		SizeType blockSize = sizeof(ValueType);
 
 		ValueType mask = 1;
-		SizeType j = 0;
+		SizeType j = booleanEncodedStart_;
 		SizeType bytes = 0;
 		for (SizeType i = 0; i < total; ++i) {
 			assert(j < c.size());
@@ -410,7 +429,7 @@ private:
 			if (bytes == blockSize) {
 				bytes = 0;
 				++j;
-				mask = 0;
+				mask = 1;
 			}
 		}
 
@@ -424,10 +443,15 @@ private:
 		SizeType numberOfBits = sizeof(ValueType)*8*x.size();
 		SizeType blockSize = sizeof(ValueType);
 
+		SizeType encodedSize = decodeBooleanSize(x);
+		assert(encodedSize <= numberOfBits);
+
+		numberOfBits = encodedSize;
+
 		dest.resize(numberOfBits);
 
 		ValueType mask = 1;
-		SizeType j = 0;
+		SizeType j = booleanEncodedStart_;
 		SizeType bytes = 0;
 		for (SizeType i = 0; i < numberOfBits; ++i) {
 			assert(j < x.size());
@@ -437,12 +461,41 @@ private:
 			if (bytes == blockSize) {
 				bytes = 0;
 				++j;
-				mask = 0;
+				mask = 1;
 			}
 		}
 	}
 
+	static void encodeBooleanSize(VectorOfBoolInternalType& x, SizeType total)
+	{
+		static short int byteSize = 256;
+		assert(x.size() >= booleanEncodedSize_);
+		SizeType tmp = total;
+		std::fill(x.begin(), x.begin() + booleanEncodedSize_, 0);
+		for (SizeType i = 0; i < booleanEncodedSize_; ++i) {
+			x[i] = (tmp % byteSize);
+			tmp >>= 8;
+			if (tmp == 0) break;
+		}
+	}
+
+	static SizeType decodeBooleanSize(const VectorOfBoolInternalType& x)
+	{
+		static short int byteSize = 256;
+		assert(x.size() >= booleanEncodedSize_);
+		SizeType tmp = 0;
+		SizeType level = 1;
+		for (SizeType i = 0; i < booleanEncodedSize_; ++i) {
+			tmp += x[i]*level;
+			level *= byteSize;
+		}
+
+		return tmp;
+	}
+
 	H5::H5File* hdf5file_;
+	static const SizeType booleanEncodedSize_ = 4;
+	static const SizeType booleanEncodedStart_ = 4;
 };
 }
 #endif // IONGSERIALIZER_H
