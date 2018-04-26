@@ -417,13 +417,32 @@ private:
 	                   bool transform,
 	                   SizeType threadId)
 	{
-		SizeType n =helper_.leftRightSuper(threadId).left().size();
-
+		SizeType n = helper_.leftRightSuper(threadId).left().size();
+		SizeType nn = O.rows();
+		SizeType m = helper_.leftRightSuper(threadId).left().size()/nn;
 		MatrixType ret(n,n);
+		ret.setTo(0.0);
 
-		for (SizeType e=0;e<n;e++) {
-			for (SizeType e2=0;e2<n;e2++) {
-				ret(e,e2) = fluffUpSystem_(O,e,e2,fermionicSign,growOption,threadId);
+		for (SizeType e = 0; e < n; ++e) {
+			SizeType permE =helper_.leftRightSuper(threadId).left().permutation(e);
+			SizeType eOverN = permE/nn;
+			SizeType eModM = permE % m;
+			for (SizeType e2 = 0; e2 < n; ++e2) {
+				SizeType permE2 = helper_.leftRightSuper(threadId).left().permutation(e2);
+				if (growOption == GROW_RIGHT) {
+					if (eOverN != permE2/nn)
+						continue;
+				} else {
+					if (eModM != permE2 % m)
+						continue;
+				}
+
+				ret(e,e2) = fluffUpSystem_(O,
+				                           permE,
+				                           permE2,
+				                           fermionicSign,
+				                           growOption,
+				                           threadId);
 			}
 		}
 
@@ -464,8 +483,8 @@ private:
 
 	// Perfomance critical:
 	FieldType fluffUpSystem_(const SparseMatrixType& O,
-	                         SizeType e,
-	                         SizeType e2,
+	                         SizeType permE,
+	                         SizeType permE2,
 	                         int fermionicSign,
 	                         int growOption,
 	                         SizeType threadId)
@@ -478,23 +497,21 @@ private:
 		// Sperm[e2] = j+k*n or e2=k+j*m
 		SizeType i,j,k,k2;
 		if (growOption==GROW_RIGHT) {
-			if (SizeType(helper_.leftRightSuper(threadId).left().permutation(e)/n)!=
-			    SizeType(helper_.leftRightSuper(threadId).left().permutation(e2)/n))
-				return 0;
+			assert(permE/n == permE2/n);
+
 			PackIndicesType pack(n);
-			pack.unpack(i,k,helper_.leftRightSuper(threadId).left().permutation(e));
-			pack.unpack(j,k2,helper_.leftRightSuper(threadId).left().permutation(e2));
+			pack.unpack(i, k, permE);
+			pack.unpack(j, k2, permE2);
 		} else {
-			if (SizeType(helper_.leftRightSuper(threadId).left().permutation(e)%m)!=
-			    SizeType(helper_.leftRightSuper(threadId).left().permutation(e2)%m))
-				return 0;
+			assert(permE % m == permE2 % m);
+
 			PackIndicesType pack(m);
-			pack.unpack(k,i,helper_.leftRightSuper(threadId).left().permutation(e));
-			pack.unpack(k2,j,helper_.leftRightSuper(threadId).left().permutation(e2));
-			sign = helper_.fermionicSignLeft(threadId)(k,fermionicSign);
+			pack.unpack(k, i, permE);
+			pack.unpack(k2,j, permE2);
+			sign = helper_.fermionicSignLeft(threadId)(k, fermionicSign);
 		}
-		if (k!=k2) return 0;
-		return O.element(i,j)*sign;
+
+		return (k != k2) ? 0 : O.element(i,j)*sign;
 	}
 
 	// Perfomance critical:
@@ -538,7 +555,7 @@ private:
 			std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";
 
 		if (vec1.size()!=helper_.leftRightSuper(threadId).super().size() ||
-		    vec1.size()!=vec2.size())
+		        vec1.size()!=vec2.size())
 			throw PsimagLite::RuntimeError("CorrelationsSkeleton::bracket_(...): Error\n");
 
 		if (helper_.direction(threadId)==EXPAND_SYSTEM) {
@@ -549,9 +566,9 @@ private:
 	}
 
 	FieldType bracketSystem_(const SparseMatrixType& A,
-	                        const VectorWithOffsetType& vec1,
-	                        const VectorWithOffsetType& vec2,
-	                        SizeType threadId)
+	                         const VectorWithOffsetType& vec1,
+	                         const VectorWithOffsetType& vec2,
+	                         SizeType threadId)
 	{
 		FieldType sum=0;
 		PackIndicesType pack(helper_.leftRightSuper(threadId).left().size());
@@ -579,10 +596,10 @@ private:
 	}
 
 	FieldType bracketEnviron_(const SparseMatrixType& A,
-	                         const VectorWithOffsetType& vec1,
-	                         const VectorWithOffsetType& vec2,
-	                         int fermionicSign,
-	                         SizeType threadId)
+	                          const VectorWithOffsetType& vec1,
+	                          const VectorWithOffsetType& vec2,
+	                          int fermionicSign,
+	                          SizeType threadId)
 	{
 		RealType sign = fermionSignBasis(fermionicSign,
 		                                 helper_.leftRightSuper(threadId).left());
@@ -617,11 +634,11 @@ private:
 	}
 
 	FieldType bracketRightCorner_(const SparseMatrixType& A,
-	                             const SparseMatrixType& B,
-	                             int fermionSign,
-	                             const VectorWithOffsetType& vec1,
-	                             const VectorWithOffsetType& vec2,
-	                             SizeType threadId)
+	                              const SparseMatrixType& B,
+	                              int fermionSign,
+	                              const VectorWithOffsetType& vec1,
+	                              const VectorWithOffsetType& vec2,
+	                              SizeType threadId)
 	{
 		if (helper_.direction(threadId)==EXPAND_SYSTEM)
 			return brRghtCrnrSystem_(A,B,fermionSign,vec1,vec2,threadId);
@@ -642,11 +659,11 @@ private:
 	}
 
 	FieldType brRghtCrnrSystem_(const SparseMatrixType& Acrs,
-	                           const SparseMatrixType& Bcrs,
-	                           int fermionSign,
-	                           const VectorWithOffsetType& vec1,
-	                           const VectorWithOffsetType& vec2,
-	                           SizeType threadId)
+	                            const SparseMatrixType& Bcrs,
+	                            int fermionSign,
+	                            const VectorWithOffsetType& vec1,
+	                            const VectorWithOffsetType& vec2,
+	                            SizeType threadId)
 	{
 		if (verbose_)
 			std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";
@@ -657,7 +674,7 @@ private:
 
 		// some sanity checks:
 		if (vec1.size()!=vec2.size() || vec1.size()!=
-		    helper_.leftRightSuper(threadId).super().size())
+		        helper_.leftRightSuper(threadId).super().size())
 			throw PsimagLite::RuntimeError("Observe::brRghtCrnrSystem_(...)\n");
 		if (ni!=Acrs.rows())
 			throw PsimagLite::RuntimeError("Observe::brRghtCrnrSystem_(...)\n");
@@ -703,11 +720,11 @@ private:
 	}
 
 	FieldType brLftCrnrEnviron_(const SparseMatrixType& Acrs,
-	                           const SparseMatrixType& Bcrs,
-	                           int fermionSign,
-	                           const VectorWithOffsetType& vec1,
-	                           const VectorWithOffsetType& vec2,
-	                           SizeType threadId)
+	                            const SparseMatrixType& Bcrs,
+	                            int fermionSign,
+	                            const VectorWithOffsetType& vec1,
+	                            const VectorWithOffsetType& vec2,
+	                            SizeType threadId)
 	{
 		if (verbose_)
 			std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";
@@ -718,7 +735,7 @@ private:
 
 		// some sanity checks:
 		if (vec1.size()!=vec2.size() ||
-		    vec1.size()!=helper_.leftRightSuper(threadId).super().size())
+		        vec1.size()!=helper_.leftRightSuper(threadId).super().size())
 			throw PsimagLite::RuntimeError("Observe::brLftCrnrEnviron_(...)\n");
 		if (helper_.leftRightSuper(threadId).right().size()/Bcrs.rows()!=Acrs.rows())
 			throw PsimagLite::RuntimeError("Observe::bracketRightCorner_(...)\n");
@@ -763,12 +780,12 @@ private:
 	}
 
 	FieldType bracketRightCorner_(const SparseMatrixType& A1,
-	                             const SparseMatrixType& A2,
-	                             const SparseMatrixType& B,
-	                             int fermionSign,
-	                             const VectorWithOffsetType& vec1,
-	                             const VectorWithOffsetType& vec2,
-	                             SizeType threadId)
+	                              const SparseMatrixType& A2,
+	                              const SparseMatrixType& B,
+	                              int fermionSign,
+	                              const VectorWithOffsetType& vec1,
+	                              const VectorWithOffsetType& vec2,
+	                              SizeType threadId)
 	{
 		if (helper_.direction(threadId)!=EXPAND_SYSTEM) return 0;
 
