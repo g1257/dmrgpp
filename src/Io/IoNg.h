@@ -361,7 +361,7 @@ public:
 		                                   LongIntegerType = 0,
 		                                   bool = false)
 		{
-			std::cerr<<"IoNg: ignoring call to advance()\n";
+			//std::cerr<<"IoNg: ignoring call to advance()\n";
 			return std::pair<String,SizeType>("IoNg?", 0);
 		}
 

@@ -11,7 +11,7 @@ namespace PsimagLite {
 
 class IoNgSerializer {
 
-	typedef long unsigned int VectorOfBoolInternalType;
+	typedef std::vector<unsigned char> VectorOfBoolInternalType;
 
 public:
 
@@ -242,7 +242,7 @@ public:
 	void read(std::vector<bool>& what,
 	          String name)
 	{
-		VectorOfBoolInternalType original = 0;
+		VectorOfBoolInternalType original;
 		read(original, name);
 		convertToBoolean(what, original);
 	}
@@ -386,18 +386,32 @@ private:
 
 	static VectorOfBoolInternalType convertFromBoolean(const std::vector<bool>& src)
 	{
+		typedef VectorOfBoolInternalType::value_type ValueType;
 		SizeType total = src.size();
-		if (total == 0) return 0;
+
+		if (total == 0)
+			return VectorOfBoolInternalType(1, 0);
+
 
 		SizeType bytesNeeded = total/8;
-		if (bytesNeeded >= sizeof(VectorOfBoolInternalType))
-			throw RuntimeError("convertFromBoolean failed\n");
+		++bytesNeeded;
 
-		VectorOfBoolInternalType mask = 1;
-		VectorOfBoolInternalType c = 0;
+		VectorOfBoolInternalType c(bytesNeeded, 0);
+		SizeType blockSize = sizeof(ValueType);
+
+		ValueType mask = 1;
+		SizeType j = 0;
+		SizeType bytes = 0;
 		for (SizeType i = 0; i < total; ++i) {
-			if (src[i]) c |= mask;
+			assert(j < c.size());
+			if (src[i]) c[j] |= mask;
 			mask <<= 1;
+			if (i > 0 && (i % 8 == 0)) ++bytes;
+			if (bytes == blockSize) {
+				bytes = 0;
+				++j;
+				mask = 0;
+			}
 		}
 
 		return c;
@@ -406,31 +420,26 @@ private:
 	static void convertToBoolean(std::vector<bool>& dest,
 	                             const VectorOfBoolInternalType& x)
 	{
-		SizeType numberOfBits = findNumberOfBits(x);
+		typedef VectorOfBoolInternalType::value_type ValueType;
+		SizeType numberOfBits = sizeof(ValueType)*8*x.size();
+		SizeType blockSize = sizeof(ValueType);
+
 		dest.resize(numberOfBits);
-		VectorOfBoolInternalType mask = 1;
+
+		ValueType mask = 1;
+		SizeType j = 0;
+		SizeType bytes = 0;
 		for (SizeType i = 0; i < numberOfBits; ++i) {
-			dest[i] = (x & mask);
+			assert(j < x.size());
+			dest[i] = (x[j] & mask);
 			mask <<= 1;
+			if (i > 0 && (i % 8 == 0)) ++bytes;
+			if (bytes == blockSize) {
+				bytes = 0;
+				++j;
+				mask = 0;
+			}
 		}
-	}
-
-	static SizeType findNumberOfBits(const VectorOfBoolInternalType& x)
-	{
-		if (x == 0) return 1;
-
-		SizeType total = 8*sizeof(VectorOfBoolInternalType);
-		--total;
-		VectorOfBoolInternalType mask = 1;
-		mask <<= total;
-		SizeType bits = total + 1;
-		while (mask != 0) {
-			if (mask & x) return bits;
-			mask >>= 1;
-			--bits;
-		}
-
-		throw RuntimeError("findNumberOfBits failed\n");
 	}
 
 	H5::H5File* hdf5file_;
