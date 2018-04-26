@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2012, UT-Battelle, LLC
+Copyright (c) 2009-2012-2018, UT-Battelle, LLC
 All rights reserved
 
-[PsimagLite, Version 1.0.0]
+[PsimagLite, Version 2.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -66,7 +66,6 @@ INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
 DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
-
 
 */
 /** \ingroup DMRG */
@@ -686,20 +685,24 @@ void crsMatrixToFullMatrix(Matrix<T>& m,const CrsMatrix<T>& crsMatrix)
 template<typename T>
 void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
 {
-	crsMatrix.resize(a.rows(),a.cols());
+	SizeType rows = a.rows();
+	SizeType cols = a.cols();
+	SizeType nonZeros = a.nonZeros();
+	crsMatrix.resize(rows, cols, nonZeros);
 
 	SizeType counter = 0;
-	for (SizeType i = 0; i < a.rows(); i++) {
-		crsMatrix.setRow(i,counter);
-		for (SizeType j=0;j<a.cols();j++) {
-			if (a(i,j)==static_cast<T>(0)) continue;
-			crsMatrix.pushValue(a(i,j));
-			crsMatrix.pushCol(j);
-			counter++;
+	for (SizeType i = 0; i < rows; ++i) {
+		crsMatrix.setRow(i, counter);
+		for (SizeType j = 0; j < cols; ++j) {
+			const T& val = a(i,j);
+			if (val == 0.0) continue;
+			crsMatrix.setValues(counter, val);
+			crsMatrix.setCol(counter, j);
+			++counter;
 		}
-
 	}
-	crsMatrix.setRow(crsMatrix.rows(),counter);
+
+	crsMatrix.setRow(rows, counter);
 	crsMatrix.checkValidity();
 }
 
