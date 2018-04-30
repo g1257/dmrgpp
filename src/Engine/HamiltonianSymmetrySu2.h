@@ -384,7 +384,7 @@ private:
 
 	void createFactors(SizeType ns,SizeType ne)
 	{
-		VerySparseMatrixType factors(ns*ne);
+		VerySparseMatrixType factors(ns*ne, ns*ne);
 		SizeType offset=0;
 		for (SizeType i=0;i<jmSubspaces_.size();i++) {
 			SizeType s=0;

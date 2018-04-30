@@ -557,6 +557,8 @@ private:
 
 	void createReducedOperator(DenseMatrixType& opDest1,const OperatorType& opSrc)
 	{
+		DenseMatrixType opSrcDense;
+		crsMatrixToFullMatrix(opSrcDense, opSrc.data);
 		for (SizeType i=0;i<opSrc.data.rows();i++) {
 			PairType jm = thisBasis_->jmValue(i);
 			for (int l=opSrc.data.getRowPtr(i);l<opSrc.data.getRowPtr(i+1);l++) {
@@ -564,7 +566,7 @@ private:
 				PairType jmPrime = thisBasis_->jmValue(iprime);
 				RealType divisor = opSrc.angularFactor*(jmPrime.first+1);
 				opDest1(basisrinverse_[i],basisrinverse_[iprime]) +=
-				        opSrc.data.element(i,iprime)*
+				        opSrcDense(i,iprime)*
 				        cgObject_->operator()(jmPrime,jm,opSrc.jm)/divisor;
 			}
 		}

@@ -417,6 +417,8 @@ private:
 	                   bool transform,
 	                   SizeType threadId)
 	{
+		MatrixType Odense;
+		crsMatrixToFullMatrix(Odense, O);
 		SizeType n = helper_.leftRightSuper(threadId).left().size();
 		SizeType nn = O.rows();
 		SizeType m = helper_.leftRightSuper(threadId).left().size()/nn;
@@ -437,7 +439,7 @@ private:
 						continue;
 				}
 
-				ret(e,e2) = fluffUpSystem_(O,
+				ret(e,e2) = fluffUpSystem_(Odense,
 				                           permE,
 				                           permE2,
 				                           fermionicSign,
@@ -464,12 +466,12 @@ private:
 	                    SizeType threadId)
 	{
 		SizeType n =helper_.leftRightSuper(threadId).right().size();
-
+		MatrixType Odense;
+		crsMatrixToFullMatrix(Odense, O);
 		MatrixType ret(n,n);
 		for (SizeType e=0;e<n;e++) {
 			for (SizeType e2=0;e2<n;e2++) {
-				ret(e,e2) = fluffUpEnviron_(
-				            O,e,e2,fermionicSign,growOption,threadId);
+				ret(e,e2) = fluffUpEnviron_(Odense,e,e2,fermionicSign,growOption,threadId);
 			}
 		}
 		if (transform) {
@@ -482,14 +484,14 @@ private:
 	}
 
 	// Perfomance critical:
-	FieldType fluffUpSystem_(const SparseMatrixType& O,
+	FieldType fluffUpSystem_(const MatrixType& Odense,
 	                         SizeType permE,
 	                         SizeType permE2,
 	                         int fermionicSign,
 	                         int growOption,
 	                         SizeType threadId)
 	{
-		SizeType n = O.rows();
+		SizeType n = Odense.rows();
 		SizeType m = SizeType(helper_.leftRightSuper(threadId).left().size()/n);
 		RealType sign = static_cast<RealType>(1.0);
 
@@ -511,17 +513,17 @@ private:
 			sign = helper_.fermionicSignLeft(threadId)(k, fermionicSign);
 		}
 
-		return (k != k2) ? 0 : O.element(i,j)*sign;
+		return (k != k2) ? 0 : Odense(i,j)*sign;
 	}
 
 	// Perfomance critical:
-	FieldType fluffUpEnviron_(const SparseMatrixType& O,
+	FieldType fluffUpEnviron_(const MatrixType& Odense,
 	                          SizeType e,SizeType e2,
 	                          int fermionicSign,
 	                          int growOption,
 	                          SizeType threadId)
 	{
-		SizeType n = O.rows();
+		SizeType n = Odense.rows();
 		SizeType m = SizeType(helper_.leftRightSuper(threadId).right().size()/n);
 		RealType sign = 1;
 
@@ -542,7 +544,7 @@ private:
 			sign = fermionSignBasis(fermionicSign,  helper_.leftRightSuper(threadId).super());
 		}
 
-		return (k != k2) ? 0 : O.element(i,j)*sign;
+		return (k != k2) ? 0 : Odense(i,j)*sign;
 	}
 
 	FieldType bracket_(const SparseMatrixType& A,

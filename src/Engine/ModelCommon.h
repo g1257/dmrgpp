@@ -183,7 +183,7 @@ public:
 			assert(lrs.super().partition(m + 1) >= offset);
 			SizeType bs = lrs.super().partition(m + 1) - offset;
 
-			vvsm[m] = new VerySparseMatrixType(bs);
+			vvsm[m] = new VerySparseMatrixType(bs, bs);
 			VerySparseMatrixType& vsm = *(vvsm[m]);
 			SizeType threadId = 0;
 			ModelHelperType modelHelper(m, lrs, currentTime, threadId);
@@ -478,7 +478,7 @@ private:
 	{
 		SizeType n=modelHelper.leftRightSuper().sites();
 		SizeType matrixRank = matrix.rows();
-		VerySparseMatrixType matrix2(matrixRank);
+		VerySparseMatrixType matrix2(matrixRank, matrixRank);
 		typedef HamiltonianConnection<
 		        GeometryType,
 		        ModelHelperType,

@@ -152,7 +152,7 @@ namespace Dmrg {
 						counter++;
 						flavorSaved = flavorIndices_[k];
 					}
-					if (heavy_) factors.set(indices_[perm[k]],offset + counter, values_[perm[k]]);
+					if (heavy_) factors.push(indices_[perm[k]],offset + counter, values_[perm[k]]);
 				}
 				return flavors_.size();
 			}

@@ -261,6 +261,8 @@ namespace Dmrg {
 		                           const BasisWithOperatorsType& basis,
 		                           const typename PsimagLite::Vector<SizeType>::Type& basisrInverse)
 		{
+			PsimagLite::Matrix<SparseElementType> opSrcdense;
+			crsMatrixToFullMatrix(opSrcdense, opSrc.data);
 			for (SizeType i=0;i<opSrc.data.rows();i++) {
 				PairType jm = basis.jmValue(i);
 				for (int l=opSrc.data.getRowPtr(i);l<opSrc.data.getRowPtr(i+1);l++) {
@@ -269,7 +271,7 @@ namespace Dmrg {
 
 					RealType divisor = opSrc.angularFactor*(jmPrime.first+1);
 					opDest1(basisrInverse[i],basisrInverse[iprime]) +=
-					                   opSrc.data.element(i,iprime)*cgObject_(jmPrime,jm,opSrc.jm)/divisor;
+					                   opSrcdense(i,iprime)*cgObject_(jmPrime,jm,opSrc.jm)/divisor;
 
 				}
 			}

@@ -111,11 +111,9 @@ public:
 		if (siteDependent) return;
 		if (!siteDependent && i0>0) return;
 		std::cout<<"Using Matrix A:\n";
-		for (SizeType i=0;i<A.rows();i++) {
-			for (SizeType j=0;j<A.cols();j++)
-				std::cout<<A.element(i,j)<<" ";
-			std::cout<<"\n";
-		}
+		PsimagLite::Matrix<typename SparseMatrixType::value_type> dense;
+		crsMatrixToFullMatrix(dense, A);
+		std::cout<<dense;
 	}
 
 };     //class PreOperatorBase
