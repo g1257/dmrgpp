@@ -194,7 +194,8 @@ public:
 
 	const LeftRightSuperType& leftRightSuper(SizeType threadId) const
 	{
-		assert(checkPos(threadId));
+		if (!checkPos(threadId))
+			err("No more data\n");
 		return dSerializerV_[currentPos_[threadId]]->leftRightSuper();
 	}
 
