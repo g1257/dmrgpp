@@ -131,6 +131,7 @@ public:
 		ioSerializer.createGroup(label);
 		ioSerializer.write(label + "/nrow_", nrow_);
 		ioSerializer.write(label + "/ncol_", ncol_);
+		if (nrow_ == 0 || ncol_ == 0) return;
 		ioSerializer.write(label + "/data_", data_);
 	}
 

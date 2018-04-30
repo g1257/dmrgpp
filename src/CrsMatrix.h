@@ -517,12 +517,13 @@ public:
 	void write(String label, IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
-
+		ioSerializer.write(label + "/nrow_",  nrow_);
+		ioSerializer.write(label + "/ncol_",  ncol_);
+		if (nrow_ == 0 || ncol_ == 0) return;
 		ioSerializer.write(label + "/rowptr_",  rowptr_);
 		ioSerializer.write(label + "/colind_",  colind_);
 		ioSerializer.write(label + "/values_",  values_);
-		ioSerializer.write(label + "/nrow_",  nrow_);
-		ioSerializer.write(label + "/ncol_",  ncol_);
+
 	}
 
 	void read(String label, IoSerializer& ioSerializer)
