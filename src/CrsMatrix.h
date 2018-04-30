@@ -339,12 +339,6 @@ public:
 		*this = c;
 	}
 
-	T element(int i,int j) const
-	{
-		for (int k=rowptr_[i];k<rowptr_[i+1];k++) if (colind_[k]==j) return values_[k];
-		return static_cast<T>(0.0);
-	}
-
 	SizeType nonZeros() const
 	{
 		if (nrow_ >= 1) {
@@ -1233,16 +1227,10 @@ void operatorPlus(CrsMatrix<T>& A,
 template<typename T>
 bool isHermitian(const CrsMatrix<T>& A,bool=false)
 {
-	if (A.rows()!=A.cols()) return false;
-	for (SizeType i=0;i<A.rows();i++) {
-		for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
-			if (PsimagLite::norm(A.getValue(k)-PsimagLite::conj(A.element(A.getCol(k),i)))<1e-6)
-				continue;
-			assert(false);
-			return false;
-		}
-	}
-	return true;
+	if (A.rows() != A.cols()) return false;
+	Matrix<T> dense;
+	crsMatrixToFullMatrix(dense, A);
+	return isHermitian(dense);
 }
 
 template<class T>
