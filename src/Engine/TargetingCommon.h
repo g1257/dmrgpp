@@ -286,9 +286,12 @@ public:
 		} else {
 			setAllStagesTo(DISABLED);
 			io.rewind();
+			PsimagLite::String prefix = (io.ng()) ? "FinalPsi/0/" : "";
 			int site = 0;
-			io.readline(site,"TargetCentralSite=",IoType::In::LAST_INSTANCE);
-			applyOpExpression_.psi().loadOneSector(io,labelForPsi);
+			io.readline(site,
+			            prefix + "TargetCentralSite=",
+			            IoType::In::LAST_INSTANCE);
+			applyOpExpression_.psi().loadOneSector(io, prefix + labelForPsi);
 		}
 	}
 

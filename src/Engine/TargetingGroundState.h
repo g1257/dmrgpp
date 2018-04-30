@@ -178,7 +178,7 @@ public:
 		this->common().write(io, block, prefix, counter);
 
 		if (io.ng())
-			this->common().psi().write(io, prefix + "/Psi");
+			this->common().psi().write(io, prefix + "/PSI");
 		else
 			this->common().psi().write(io,"PSI");
 	}

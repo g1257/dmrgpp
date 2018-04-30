@@ -313,7 +313,8 @@ private:
 
 		if (enabled_) {
 			PsimagLite::IoSelector::In io1(parameters_.checkpoint.filename);
-			io1.readline(lastSite,"TargetCentralSite=",
+			PsimagLite::String prefix = (io1.ng()) ? "FinalPsi/0/" : "";
+			io1.readline(lastSite, prefix + "TargetCentralSite=",
 			             PsimagLite::IoSelector::In::LAST_INSTANCE);
 			io1.readline(prevDeltaSign,"LastLoopSign=");
 			checkPoint = true;

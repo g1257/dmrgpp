@@ -215,9 +215,6 @@ public:
 	           PsimagLite::String,
 	           SizeType) const
 	{
-		if (io.ng())
-			err(PsimagLite::String(__FILE__) + ": target does not support IoNg yet\n");
-
 		skeleton_.write(this->common(), block, io);
 	}
 
