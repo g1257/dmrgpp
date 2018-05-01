@@ -32,6 +32,46 @@ Please see full open source license included in file LICENSE.
 
 namespace PsimagLite {
 
+template<typename T>
+struct SvdCmplxFuncPtr {
+
+	typedef std::complex<T> ComplexType;
+
+	typedef int (*F)(char*,
+	                 int*,
+	                 int*,
+	                 ComplexType*,
+	                 int*,
+	                 T*,
+	                 ComplexType*,
+	                 int*,
+	                 ComplexType*,
+	                 int*,
+	                 ComplexType*,
+	                 int*,
+	                 T*,
+	                 int*,
+	                 int*);
+};
+
+template<typename T>
+struct SvdRealFuncPtr {
+	typedef int (*F)(char*,
+	                 int*,
+	                 int*,
+	                 T*,
+	                 int*,
+	                 T*,
+	                 T*,
+	                 int*,
+	                 T*,
+	                 int*,
+	                 T*,
+	                 int*,
+	                 int*,
+	                 int*);
+};
+
 template<typename RealType>
 void expComplexOrReal(RealType& x,const RealType& y)
 {
@@ -844,16 +884,29 @@ void outerProduct(Matrix<T>& A,const Matrix<T>& B,const Matrix<T>& C)
 
 // closures end
 
-void svd(char jobz,Matrix<double>& a,Vector<double>::Type& s,Matrix<double>& vt);
+void svd(char jobz,
+         Matrix<double>& a,
+         Vector<double>::Type& s,
+         Matrix<double>& vt,
+         SvdRealFuncPtr<double>::F = psimag::LAPACK::dgesdd_,
+         int = 0);
 void svd(char jobz,
          Matrix<std::complex<double> >& a,
          Vector<double>::Type& s,
-         Matrix<std::complex<double> >& vt);
-void svd(char jobz,Matrix<float>& a,Vector<float>::Type& s,Matrix<float>& vt);
+         Matrix<std::complex<double> >& vt,
+         SvdCmplxFuncPtr<double>::F = psimag::LAPACK::zgesdd_,
+         int = 0);
+void svd(char jobz, Matrix<float>& a,
+         Vector<float>::Type& s,
+         Matrix<float>& vt,
+         SvdRealFuncPtr<float>::F backend = psimag::LAPACK::sgesdd_,
+         int = 0);
 void svd(char jobz,
          Matrix<std::complex<float> >& a,
          Vector<float>::Type& s,
-         Matrix<std::complex<float> >& vt);
+         Matrix<std::complex<float> >& vt,
+         SvdCmplxFuncPtr<float>::F backend = psimag::LAPACK::cgesdd_,
+         int = 0);
 
 #ifdef USE_MPI
 namespace MPI {

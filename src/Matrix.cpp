@@ -250,7 +250,12 @@ void inverse(Matrix<double> &m)
 #endif
 }
 
-void svd(char jobz,Matrix<double>& a,Vector<double>::Type& s,Matrix<double>& vt)
+void svd(char jobz,
+         Matrix<double>& a,
+         Vector<double>::Type& s,
+         Matrix<double>& vt,
+         SvdRealFuncPtr<double>::F backend,
+         int counter)
 {
 #ifdef NO_LAPACK
 	throw RuntimeError("svd: dgesdd_: NO LAPACK!\n");
@@ -280,12 +285,12 @@ void svd(char jobz,Matrix<double>& a,Vector<double>::Type& s,Matrix<double>& vt)
 
 	// query optimal work
 	int lwork = -1;
-	psimag::LAPACK::dgesdd_(&jobz,
-	                        &m,
-	                        &n,
-	                        &(a(0,0)),
-	                        &lda,
-	                        &(s[0]),
+	backend(&jobz,
+	        &m,
+	        &n,
+	        &(a(0,0)),
+	        &lda,
+	        &(s[0]),
 	        &(u(0,0)),
 	        &ldu,
 	        &(vt(0,0)),
@@ -296,20 +301,20 @@ void svd(char jobz,Matrix<double>& a,Vector<double>::Type& s,Matrix<double>& vt)
 	        &info);
 	if (info!=0) {
 		String str(__FILE__);
-		str += " " + ttos(__LINE__);
-		str += " svd(...) failed with info=" + ttos(info) + "\n";
+		str += " svd(...) failed at workspace size calculation ";
+		str += "with info=" + ttos(info) + "\n";
 		throw RuntimeError(str.c_str());
 	}
 
 	lwork = int(work[0]) + (m+n)*256;
 	work.resize(lwork+10);
 	// real work:
-	psimag::LAPACK::dgesdd_(&jobz,
-	                        &m,
-	                        &n,
-	                        &(a(0,0)),
-	                        &lda,
-	                        &(s[0]),
+	backend(&jobz,
+	        &m,
+	        &n,
+	        &(a(0,0)),
+	        &lda,
+	        &(s[0]),
 	        &(u(0,0)),
 	        &ldu,
 	        &(vt(0,0)),
@@ -318,12 +323,19 @@ void svd(char jobz,Matrix<double>& a,Vector<double>::Type& s,Matrix<double>& vt)
 	        &lwork,
 	        &(iwork[0]),
 	        &info);
-	if (info!=0) {
+	if (info != 0) {
 		String str(__FILE__);
 		str += " " + ttos(__LINE__);
-		str += " svd(...) failed with info=" + ttos(info) + "\n";
-		throw RuntimeError(str.c_str());
+		str += " svd(...) failed with info=" + ttos(info);
+		str += " matrix is " + ttos(a.rows()) + " " + ttos(a.cols()) + "\n";
+		if (info < 0 || counter > 0)
+			throw RuntimeError(str);
+
+		std::cerr<<str;
+		std::cerr<<"Will try with fallback...\n";
+		svd(jobz, a, s, vt, psimag::LAPACK::dgesvd_, 1);
 	}
+
 	a = u;
 #endif
 }
@@ -331,7 +343,9 @@ void svd(char jobz,Matrix<double>& a,Vector<double>::Type& s,Matrix<double>& vt)
 void svd(char jobz,
          Matrix<float>& a,
          Vector<float>::Type& s,
-         Matrix<float>& vt)
+         Matrix<float>& vt,
+         SvdRealFuncPtr<float>::F backend,
+         int counter)
 {
 #ifdef NO_LAPACK
 	throw RuntimeError("svd: dgesdd_: NO LAPACK!\n");
@@ -361,12 +375,12 @@ void svd(char jobz,
 
 	// query optimal work
 	int lwork = -1;
-	psimag::LAPACK::sgesdd_(&jobz,
-	                        &m,
-	                        &n,
-	                        &(a(0,0)),
-	                        &lda,
-	                        &(s[0]),
+	backend(&jobz,
+	        &m,
+	        &n,
+	        &(a(0,0)),
+	        &lda,
+	        &(s[0]),
 	        &(u(0,0)),
 	        &ldu,
 	        &(vt(0,0)),
@@ -378,19 +392,20 @@ void svd(char jobz,
 	if (info!=0) {
 		String str(__FILE__);
 		str += " " + ttos(__LINE__);
-		str += " svd(...) failed with info=" + ttos(info) + "\n";
+		str += " svd(...) failed at workspace size calculation ";
+		str += "with info=" + ttos(info) + "\n";
 		throw RuntimeError(str.c_str());
 	}
 
 	lwork = int(work[0]) + (m+n)*256;
 	work.resize(lwork+10);
 	// real work:
-	psimag::LAPACK::sgesdd_(&jobz,
-	                        &m,
-	                        &n,
-	                        &(a(0,0)),
-	                        &lda,
-	                        &(s[0]),
+	backend(&jobz,
+	        &m,
+	        &n,
+	        &(a(0,0)),
+	        &lda,
+	        &(s[0]),
 	        &(u(0,0)),
 	        &ldu,
 	        &(vt(0,0)),
@@ -399,12 +414,19 @@ void svd(char jobz,
 	        &lwork,
 	        &(iwork[0]),
 	        &info);
-	if (info!=0) {
+	if (info != 0) {
 		String str(__FILE__);
 		str += " " + ttos(__LINE__);
-		str += " svd(...) failed with info=" + ttos(info) + "\n";
-		throw RuntimeError(str.c_str());
+		str += " svd(...) failed with info=" + ttos(info);
+		str += " matrix is " + ttos(a.rows()) + " " + ttos(a.cols()) + "\n";
+		if (info < 0 || counter > 0)
+			throw RuntimeError(str);
+
+		std::cerr<<str;
+		std::cerr<<"Will try with fallback...\n";
+		svd(jobz, a, s, vt, psimag::LAPACK::sgesvd_, 1);
 	}
+
 	a = u;
 #endif
 }
@@ -412,7 +434,9 @@ void svd(char jobz,
 void svd(char jobz,
          Matrix<std::complex<double> >& a,
          Vector<double>::Type& s,
-         Matrix<std::complex<double> >& vt)
+         Matrix<std::complex<double> >& vt,
+         SvdCmplxFuncPtr<double>::F backend,
+         int counter)
 {
 #ifdef NO_LAPACK
 	throw RuntimeError("svd: dgesdd_: NO LAPACK!\n");
@@ -444,12 +468,12 @@ void svd(char jobz,
 
 	// query optimal work
 	int lwork = -1;
-	psimag::LAPACK::zgesdd_(&jobz,
-	                        &m,
-	                        &n,
-	                        &(a(0,0)),
-	                        &lda,
-	                        &(s[0]),
+	backend(&jobz,
+	        &m,
+	        &n,
+	        &(a(0,0)),
+	        &lda,
+	        &(s[0]),
 	        &(u(0,0)),
 	        &ldu,
 	        &(vt(0,0)),
@@ -459,22 +483,23 @@ void svd(char jobz,
 	        &(rwork[0]),
 	        &(iwork[0]),
 	        &info);
-	if (info!=0) {
+	if (info != 0) {
 		String str(__FILE__);
 		str += " " + ttos(__LINE__);
-		str += " svd(...) failed with info=" + ttos(info) + "\n";
+		str += " svd(...) failed at workspace size calculation ";
+		str += "with info=" + ttos(info) + "\n";
 		throw RuntimeError(str.c_str());
 	}
 
 	lwork = int(std::real(work[0])) + (m+n)*256;
 	work.resize(lwork+10);
 	// real work:
-	psimag::LAPACK::zgesdd_(&jobz,
-	                        &m,
-	                        &n,
-	                        &(a(0,0)),
-	                        &lda,
-	                        &(s[0]),
+	backend(&jobz,
+	        &m,
+	        &n,
+	        &(a(0,0)),
+	        &lda,
+	        &(s[0]),
 	        &(u(0,0)),
 	        &ldu,
 	        &(vt(0,0)),
@@ -484,12 +509,19 @@ void svd(char jobz,
 	        &(rwork[0]),
 	        &(iwork[0]),
 	        &info);
-	if (info!=0) {
+	if (info != 0) {
 		String str(__FILE__);
 		str += " " + ttos(__LINE__);
-		str += " svd(...) failed with info=" + ttos(info) + "\n";
-		throw RuntimeError(str.c_str());
+		str += " svd(...) failed with info=" + ttos(info);
+		str += " matrix is " + ttos(a.rows()) + " " + ttos(a.cols()) + "\n";
+		if (info < 0 || counter > 0)
+			throw RuntimeError(str);
+
+		std::cerr<<str;
+		std::cerr<<"Will try with fallback...\n";
+		svd(jobz, a, s, vt, psimag::LAPACK::zgesvd_, 1);
 	}
+
 	a = u;
 #endif
 }
@@ -497,7 +529,9 @@ void svd(char jobz,
 void svd(char jobz,
          Matrix<std::complex<float> >& a,
          Vector<float>::Type& s,
-         Matrix<std::complex<float> >& vt)
+         Matrix<std::complex<float> >& vt,
+         SvdCmplxFuncPtr<float>::F backend,
+         int counter)
 {
 #ifdef NO_LAPACK
 	throw RuntimeError("svd: dgesdd_: NO LAPACK!\n");
@@ -529,12 +563,12 @@ void svd(char jobz,
 
 	// query optimal work
 	int lwork = -1;
-	psimag::LAPACK::cgesdd_(&jobz,
-	                        &m,
-	                        &n,
-	                        &(a(0,0)),
-	                        &lda,
-	                        &(s[0]),
+	backend(&jobz,
+	        &m,
+	        &n,
+	        &(a(0,0)),
+	        &lda,
+	        &(s[0]),
 	        &(u(0,0)),
 	        &ldu,
 	        &(vt(0,0)),
@@ -547,19 +581,20 @@ void svd(char jobz,
 	if (info!=0) {
 		String str(__FILE__);
 		str += " " + ttos(__LINE__);
-		str += " svd(...) failed with info=" + ttos(info) + "\n";
+		str += " svd(...) failed at workspace size calculation ";
+		str += "with info=" + ttos(info) + "\n";
 		throw RuntimeError(str.c_str());
 	}
 
 	lwork = int(std::real(work[0])) + (m+n)*256;
 	work.resize(lwork+10);
 	// real work:
-	psimag::LAPACK::cgesdd_(&jobz,
-	                        &m,
-	                        &n,
-	                        &(a(0,0)),
-	                        &lda,
-	                        &(s[0]),
+	backend(&jobz,
+	        &m,
+	        &n,
+	        &(a(0,0)),
+	        &lda,
+	        &(s[0]),
 	        &(u(0,0)),
 	        &ldu,
 	        &(vt(0,0)),
@@ -569,12 +604,19 @@ void svd(char jobz,
 	        &(rwork[0]),
 	        &(iwork[0]),
 	        &info);
-	if (info!=0) {
+	if (info != 0) {
 		String str(__FILE__);
 		str += " " + ttos(__LINE__);
-		str += " svd(...) failed with info=" + ttos(info) + "\n";
-		throw RuntimeError(str.c_str());
+		str += " svd(...) failed with info=" + ttos(info);
+		str += " matrix is " + ttos(a.rows()) + " " + ttos(a.cols()) + "\n";
+		if (info < 0 || counter > 0)
+			throw RuntimeError(str);
+
+		std::cerr<<str;
+		std::cerr<<"Will try with fallback...\n";
+		svd(jobz, a, s, vt, psimag::LAPACK::cgesvd_, 1);
 	}
+
 	a = u;
 #endif
 }

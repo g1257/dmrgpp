@@ -9,7 +9,6 @@
 #define PSIMAG_LAPACK
 
 #include <complex>
-#include "Matrix.h"
 
 /** \file LAPACK
  *  \author Thomas C. Schulthess, MSS
@@ -93,6 +92,68 @@ extern "C" int  zgesdd_(char* jobz,
                         int* info);
 
 extern "C" int  cgesdd_(char* jobz,
+                        int* m,
+                        int* n,
+                        std::complex<float>* a,
+                        int* lda,
+                        float* s,
+                        std::complex<float>* u,
+                        int* ldu,
+                        std::complex<float>* vt,
+                        int* ldvt,
+                        std::complex<float>* work,
+                        int* lwork,
+                        float* rwork,
+                        int* iwork,
+                        int* info);
+
+extern "C" int  dgesvd_(char* jobz,
+                        int* m,
+                        int* n,
+                        double* a,
+                        int* lda,
+                        double* s,
+                        double* u,
+                        int* ldu,
+                        double* vt,
+                        int* ldvt,
+                        double* work,
+                        int* lwork,
+                        int* iwork,
+                        int* info);
+
+extern "C" int  sgesvd_(char* jobz,
+                        int* m,
+                        int* n,
+                        float* a,
+                        int* lda,
+                        float* s,
+                        float* u,
+                        int* ldu,
+                        float* vt,
+                        int* ldvt,
+                        float* work,
+                        int* lwork,
+                        int* iwork,
+                        int* info);
+
+extern "C" int  zgesvd_(char* jobz,
+                        int* m,
+                        int* n,
+                        std::complex<double>* a,
+                        int* lda,
+                        double* s,
+                        std::complex<double>* u,
+                        int* ldu,
+                        std::complex<double>* vt,
+                        int* ldvt,
+                        std::complex<double>* work,
+                        int* lwork,
+                        double* rwork,
+                        int* iwork,
+                        int* info);
+
+extern "C" int  cgesvd_(char* jobz,
                         int* m,
                         int* n,
                         std::complex<float>* a,
