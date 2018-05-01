@@ -352,8 +352,16 @@ to the main dmrg driver are the following.
 
 	bool setAffinities = (dmrgSolverParams.options.find("setAffinities")
 	                      != PsimagLite::String::npos);
-	ConcurrencyType::setOptions(PsimagLite::CodeSectionParams(dmrgSolverParams.nthreads,
-	                                                    setAffinities));
+
+	SizeType threadsStackSize = 0;
+	try {
+		io.readline(threadsStackSize, "ThreadsStackSize=");
+	} catch (std::exception&) {}
+
+	PsimagLite::CodeSectionParams codeSection(dmrgSolverParams.nthreads,
+	                                    setAffinities,
+	                                    threadsStackSize);
+	ConcurrencyType::setOptions(codeSection);
 
 	registerSignals();
 

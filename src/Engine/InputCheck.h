@@ -198,6 +198,7 @@ public:
 		knownLabels_.push_back("TridiagonalEps");
 		knownLabels_.push_back("HoneycombLy");
 		knownLabels_.push_back("GeometryValueModifier");
+		knownLabels_.push_back("ThreadsStackSize");
 	}
 
 	~InputCheck()
