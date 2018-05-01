@@ -198,9 +198,8 @@ private:
 
 		SizeType i0 = psiDest.sector(iNew);
 		typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
-		ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
-		                             PsimagLite::MPI::COMM_WORLD);
 
+		ParallelizerType threadedWft(PsimagLite::Concurrency::codeSectionParams);
 		ParallelWftType helperWft(psiDest,
 		                          psiSrc,
 		                          lrs,
@@ -245,8 +244,7 @@ private:
 		SparseMatrixType weT;
 		transposeConjugate(weT,we);
 
-		ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
-		                             PsimagLite::MPI::COMM_WORLD);
+		ParallelizerType threadedWft(PsimagLite::Concurrency::codeSectionParams);
 
 		WftSparseTwoSiteType helperWft(psiDest,
 		                               i0,
@@ -317,8 +315,7 @@ private:
 					                                   nk);
 					continue;
 				} else {
-					ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
-					                             PsimagLite::MPI::COMM_WORLD);
+					ParallelizerType threadedWft(PsimagLite::Concurrency::codeSectionParams);
 
 					WftSparseTwoSiteType helperWft(psiDest,
 					                               i0,

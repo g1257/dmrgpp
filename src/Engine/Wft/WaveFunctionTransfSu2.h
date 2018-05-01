@@ -200,8 +200,7 @@ private:
 	                             typename ProgramGlobals::DirectionEnum dir) const
 	{
 		typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
-		ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
-		                             PsimagLite::MPI::COMM_WORLD);
+		ParallelizerType threadedWft(PsimagLite::Concurrency::codeSectionParams);
 
 		ParallelWftType helperWft(psiDest,
 		                          psiSrc,

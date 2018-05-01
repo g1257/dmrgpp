@@ -281,8 +281,7 @@ private:
 		}
 
 		typedef PsimagLite::Parallelizer<HamiltonianConnectionType> ParallelizerType;
-		ParallelizerType parallelConnections(PsimagLite::Concurrency::npthreads,
-		                                     PsimagLite::MPI::COMM_WORLD);
+		ParallelizerType parallelConnections(PsimagLite::Concurrency::codeSectionParams);
 		parallelConnections.loopCreate(hc);
 
 		hc.sync();

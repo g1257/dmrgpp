@@ -141,8 +141,7 @@ public:
 		KronConnectionsType kc(initKron_);
 
 		typedef PsimagLite::Parallelizer<KronConnectionsType> ParallelizerType;
-		ParallelizerType parallelConnections(PsimagLite::Concurrency::npthreads,
-		                                     PsimagLite::MPI::COMM_WORLD);
+		ParallelizerType parallelConnections(PsimagLite::Concurrency::codeSectionParams);
 
 		if (initKron_.loadBalance())
 			parallelConnections.loopCreate(kc, initKron_.weightsOfPatchesNew());

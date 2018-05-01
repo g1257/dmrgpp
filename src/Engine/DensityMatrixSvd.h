@@ -465,8 +465,7 @@ public:
 	void diag(VectorRealType& eigs,char jobz)
 	{
 		typedef PsimagLite::Parallelizer<ParallelSvd> ParallelizerType;
-		ParallelizerType threaded(PsimagLite::Concurrency::npthreads,
-		                          PsimagLite::MPI::COMM_WORLD);
+		ParallelizerType threaded(PsimagLite::Concurrency::codeSectionParams);
 		ParallelSvd parallelSvd(data_,
 		                        allTargets_,
 		                        eigs);
@@ -526,8 +525,7 @@ private:
 			SizeType qn = super.qn(state);
 			GenIjPatchType genIjPatch(lrs_, qn);
 			typedef PsimagLite::Parallelizer<ParallelPsiSplit> ParallelizerType;
-			ParallelizerType threaded(PsimagLite::Concurrency::npthreads,
-			                          PsimagLite::MPI::COMM_WORLD);
+			ParallelizerType threaded(PsimagLite::Concurrency::codeSectionParams);
 			ParallelPsiSplit parallelPsiSplit(lrs_,
 			                                  genIjPatch,
 			                                  v,

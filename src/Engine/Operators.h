@@ -292,8 +292,7 @@ public:
 	                 const PairSizeSizeType& startEnd)
 	{
 		typedef PsimagLite::Parallelizer<MyLoop> ParallelizerType;
-		ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,
-		                              PsimagLite::MPI::COMM_WORLD);
+		ParallelizerType threadObject(PsimagLite::Concurrency::codeSectionParams);
 
 		MyLoop helper(useSu2Symmetry_,reducedOpImpl_,operators_,ftransform,thisBasis,startEnd);
 

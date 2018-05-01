@@ -293,9 +293,10 @@ public:
 		data_.resize(npatches, 0);
 		patches_.resize(npatches);
 
-		SizeType threads = std::min(npatches, PsimagLite::Concurrency::npthreads);
+		SizeType threads = std::min(npatches, PsimagLite::Concurrency::codeSectionParams.npthreads);
 		typedef PsimagLite::Parallelizer<ParallelBlockCtor> ParallelizerType;
-		ParallelizerType threadedCtor(threads, PsimagLite::MPI::COMM_WORLD);
+		PsimagLite::CodeSectionParams codeSectionParams(threads);
+		ParallelizerType threadedCtor(codeSectionParams);
 
 		ParallelBlockCtor helper(patchesLeft, patchesRight, lrs, src, iSrc, patches_, data_);
 
@@ -317,9 +318,10 @@ public:
 	               const BlockDiagonalMatrixType& tRight)
 	{
 		SizeType npatches = data_.size();
-		SizeType threads = std::min(npatches, PsimagLite::Concurrency::npthreads);
+		SizeType threads = std::min(npatches, PsimagLite::Concurrency::codeSectionParams.npthreads);
 		typedef PsimagLite::Parallelizer<ParallelBlockTransform> ParallelizerType;
-		ParallelizerType threadedTransform(threads, PsimagLite::MPI::COMM_WORLD);
+		PsimagLite::CodeSectionParams codeSectionParams(threads);
+		ParallelizerType threadedTransform(codeSectionParams);
 
 		ParallelBlockTransform helper(tLeft,
 		                              tRight,

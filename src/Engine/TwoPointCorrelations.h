@@ -143,8 +143,7 @@ public:
 		}
 
 		typedef PsimagLite::Parallelizer<Parallel2PointCorrelationsType> ParallelizerType;
-		ParallelizerType threaded2Points(PsimagLite::Concurrency::npthreads,
-		                                 PsimagLite::MPI::COMM_WORLD);
+		ParallelizerType threaded2Points(PsimagLite::Concurrency::codeSectionParams);
 
 		Parallel2PointCorrelationsType helper2Points(w,*this,pairs,O1,O2,fermionicSign);
 

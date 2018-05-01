@@ -113,7 +113,7 @@ public:
 	      envBlock_(modelHelper.leftRightSuper().right().block()),
 	      smax_(*std::max_element(systemBlock_.begin(),systemBlock_.end())),
 	      emin_(*std::min_element(envBlock_.begin(),envBlock_.end())),
-	      xtemp_(ConcurrencyType::storageSize(ConcurrencyType::npthreads)),
+	      xtemp_(ConcurrencyType::storageSize(ConcurrencyType::codeSectionParams.npthreads)),
 	      total_(0)
 	{}
 

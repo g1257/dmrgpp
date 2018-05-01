@@ -79,11 +79,9 @@ public:
 	{
 		typedef PsimagLite::NoPthreadsNg<LoopForDiag> ParallelizerType;
 		typedef PsimagLite::Concurrency ConcurrencyType;
-		SizeType savedNpthreads = ConcurrencyType::npthreads;
-		ConcurrencyType::npthreads = 1;
-		ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,
-		                              PsimagLite::MPI::COMM_WORLD,
-		                              false);
+		SizeType savedNpthreads = ConcurrencyType::codeSectionParams.npthreads;
+		ConcurrencyType::codeSectionParams.npthreads = 1;
+		ParallelizerType threadObject(ConcurrencyType::codeSectionParams);
 
 		LoopForDiag helper(C,eigs,option);
 
@@ -91,7 +89,7 @@ public:
 
 		helper.gather();
 
-		ConcurrencyType::npthreads = savedNpthreads;
+		ConcurrencyType::codeSectionParams.npthreads = savedNpthreads;
 	}
 }; // class DiagBlockDiagMatrix
 

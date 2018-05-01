@@ -451,7 +451,7 @@ public:
 	{
 		RealType fakeTime = 0;
 		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
-		ParallelizerType threadedTriDiag(1,0,false);
+		ParallelizerType threadedTriDiag(PsimagLite::CodeSectionParams(1));
 
 		ParallelTriDiagType helperTriDiag(phi,
 		                                  T,

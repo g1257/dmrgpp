@@ -216,8 +216,7 @@ private:
 		                                   m,
 		                                   weight,
 		                                   matrixBlock);
-		ParallelizerType threadedDm(ConcurrencyType::npthreads,
-		                            PsimagLite::MPI::COMM_WORLD);
+		ParallelizerType threadedDm(ConcurrencyType::codeSectionParams);
 		threadedDm.loopCreate(helperDm);
 
 	}

@@ -45,7 +45,7 @@ void main1(InputNgType::Readable& io,
 	GeometryType geometry(io);
 
 	typedef Dmrg::ToolBox<ParametersDmrgSolverType, GeometryType> ToolBoxType;
-	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
+	ConcurrencyType::codeSectionParams.npthreads = dmrgSolverParams.nthreads;
 	typename ToolBoxType::ParametersForGrepType params(toolOptions.extraOptions,
 	                                                   toolOptions.shortoption);
 	typename ToolBoxType::ActionEnum act = ToolBoxType::actionCanonical(toolOptions.action);

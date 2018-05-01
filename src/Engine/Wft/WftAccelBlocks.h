@@ -204,9 +204,10 @@ public:
 
 		VectorMatrixType result(volumeOfNk);
 
-		SizeType threads = std::min(volumeOfNk, PsimagLite::Concurrency::npthreads);
+		SizeType threads = std::min(volumeOfNk, PsimagLite::Concurrency::codeSectionParams.npthreads);
 		typedef PsimagLite::Parallelizer<ParallelWftInBlocks> ParallelizerType;
-		ParallelizerType threadedWft(threads, PsimagLite::MPI::COMM_WORLD);
+		PsimagLite::CodeSectionParams codeSectionParams(threads);
+		ParallelizerType threadedWft(codeSectionParams);
 
 		ParallelWftInBlocks helperWft(result,
 		                              psi,
@@ -251,9 +252,10 @@ public:
 
 		VectorMatrixType result(volumeOfNk);
 
-		SizeType threads = std::min(volumeOfNk, PsimagLite::Concurrency::npthreads);
+		SizeType threads = std::min(volumeOfNk, PsimagLite::Concurrency::codeSectionParams.npthreads);
 		typedef PsimagLite::Parallelizer<ParallelWftInBlocks> ParallelizerType;
-		ParallelizerType threadedWft(threads, PsimagLite::MPI::COMM_WORLD);
+		PsimagLite::CodeSectionParams codeSectionParams(threads);
+		ParallelizerType threadedWft(codeSectionParams);
 
 		ParallelWftInBlocks helperWft(result,
 		                              psi,

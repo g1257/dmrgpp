@@ -668,8 +668,7 @@ private:
 
 		typedef typename ObserverType::Parallel4PointDsType Parallel4PointDsType;
 		typedef PsimagLite::Parallelizer<Parallel4PointDsType> ParallelizerType;
-		ParallelizerType threaded4PointDs(PsimagLite::Concurrency::npthreads,
-		                                  PsimagLite::MPI::COMM_WORLD);
+		ParallelizerType threaded4PointDs(PsimagLite::Concurrency::codeSectionParams);
 
 		Parallel4PointDsType helper4PointDs(m,
 		                                    observe_.fourpoint(),
@@ -1132,8 +1131,7 @@ private:
 
 		typedef typename ObserverType::Parallel4PointDsType Parallel4PointDsType;
 		typedef PsimagLite::Parallelizer<Parallel4PointDsType> ParallelizerType;
-		ParallelizerType threaded4PointDs(PsimagLite::Concurrency::npthreads,
-		                                  PsimagLite::MPI::COMM_WORLD);
+		ParallelizerType threaded4PointDs(PsimagLite::Concurrency::codeSectionParams);
 
 		Parallel4PointDsType helper4PointDs(m,
 		                                    observe_.fourpoint(),
