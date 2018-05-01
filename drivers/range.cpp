@@ -94,8 +94,7 @@ int main(int argc,char *argv[])
 
 	typedef MyLoop HelperType;
 	typedef PsimagLite::Parallelizer<HelperType> ParallelizerType;
-	ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,
-	                              PsimagLite::MPI::COMM_WORLD);
+	ParallelizerType threadObject(ConcurrencyType::codeSection);
 
 	if (argc < 2) return 1;
 

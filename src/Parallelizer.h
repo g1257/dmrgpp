@@ -79,6 +79,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include "Vector.h"
 #include "Concurrency.h"
+#include "CodeSection.h"
+#include "Map.h"
 
 #ifdef USE_PTHREADS_OR_NOT_NG
 #define ActualPthreadsName PthreadsNg
@@ -136,10 +138,29 @@ class Parallelizer
 
 public:
 
-	Parallelizer(SizeType npthreads,Concurrency::CommType comm)
-	    : BaseType(npthreads, comm, Concurrency::setAffinitiesDefault)
+	Parallelizer(const CodeSection& cs)
+	    : BaseType(cs)
 	{}
 
+	Parallelizer(String codeSection)
+	    : BaseType(codeSections_[codeSection])
+	{}
+
+	static bool exists(String name)
+	{
+		return (codeSections_.find(name) != codeSections_.end());
+	}
+
+	static void push(String name, const CodeSection& cs)
+	{
+		codeSections_[name] = cs;
+	}
+
+	static void clear() { codeSections_.clear(); }
+
+private:
+
+	static Map<String, CodeSection>::Type codeSections_;
 };
 } // namespace PsimagLite 
 

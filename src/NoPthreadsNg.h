@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PSI_NOPTHREADS_NG_H
 #define PSI_NOPTHREADS_NG_H
 #include "LoadBalancerDefault.h"
+#include "CodeSection.h"
 
 namespace PsimagLite {
 
@@ -89,11 +90,17 @@ public:
 
 	typedef LoadBalancerDefault::VectorSizeType VectorSizeType;
 
-	NoPthreadsNg(SizeType nNoPthreadsNg,int,bool)
+	NoPthreadsNg(const CodeSection& cs)
 	{
-		if (nNoPthreadsNg != 1)
+		if (cs.npthreads != 1)
 			throw PsimagLite::RuntimeError("NoPthreadsNg: ctor with threads != 1\n");
 	}
+
+	bool affinities() const { return false; }
+
+	size_t stackSize() const { return 0; }
+
+	void setStackSize(size_t) {}
 
 	// no weights, no balancer ==> create weights, set all weigths to 1, delegate
 	void loopCreate(PthreadFunctionHolderType& pfh)

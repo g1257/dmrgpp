@@ -86,12 +86,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LoadBalancerDefault.h"
 #include <sched.h>
 #include <unistd.h>
+#include "TypeToString.h"
+#include "CodeSection.h"
+
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
 #ifdef _GNU_SOURCE
 #include <errno.h>
 #include <string.h>
+#endif
+#ifndef PTHREAD_STACK_MIN
+#define PTHREAD_STACK_MIN 16384
 #endif
 
 namespace PsimagLite {
@@ -142,16 +148,36 @@ public:
 
 	typedef LoadBalancerDefault::VectorSizeType VectorSizeType;
 
-	PthreadsNg(SizeType nPthreadsNg,int,bool setAffinityDefault)
-	    : nthreads_(nPthreadsNg),cores_(1),setAffinities_(setAffinityDefault)
+	PthreadsNg(const CodeSection& codeSection)
+	    : nthreads_(codeSection.npthreads),
+	      cores_(1),
+	      setAffinities_(codeSection.setAffinities),
+	      stackSize_(codeSection.stackSize)
 	{
 		int cores = sysconf(_SC_NPROCESSORS_ONLN);
 		cores_ = (cores > 0) ? cores : 1;
 	}
 
+	bool affinities() const { return setAffinities_; }
+
+	size_t stackSize() const { return stackSize_; }
+
 	void setAffinities(bool flag)
 	{
 		setAffinities_ = flag;
+	}
+
+	void setStackSize(size_t stackSize)
+	{
+		if (stackSize > 0 && stackSize < PTHREAD_STACK_MIN) {
+			String str(__FILE__);
+			str += ": You are asking PthreadsNg to set stacksize to ";
+			str += ttos(stackSize) + " which is smaller than ";
+			str += "PTHREAD_STACK_MIN= " + ttos(PTHREAD_STACK_MIN);
+			throw RuntimeError(str + "\n");
+		}
+
+		stackSize_ = stackSize;
 	}
 
 	// no weights, no balancer ==> create weights, set all weigths to 1, delegate
@@ -189,7 +215,18 @@ public:
 			pfs[j].nthreads = nthreads_;
 
 			attr[j] = new pthread_attr_t;
-			int ret = pthread_attr_init(attr[j]);
+			int ret = (stackSize_ > 0) ? pthread_attr_setstacksize(attr[j], stackSize_) : 0;
+			if (ret != 0) {
+				std::cerr<<__FILE__;
+				std::cerr<<"\tpthread_attr_setstacksize() has returned non-zero "<<ret<<"\n";
+				std::cerr<<"\tIt is possible (but no certain) that the following error";
+				std::cerr<<"\thappened.\n";
+				std::cerr<<"\tEINVAL The stack size is less than ";
+				std::cerr<<"PTHREAD_STACK_MIN (16384) bytes.\n";
+				std::cerr<<"\tI will ignore this error and let you continue\n";
+			}
+
+			ret = pthread_attr_init(attr[j]);
 			checkForError(ret);
 
 			if (setAffinities_)
@@ -250,6 +287,7 @@ private:
 	SizeType nthreads_;
 	SizeType cores_;
 	bool setAffinities_;
+	size_t stackSize_;
 }; // PthreadsNg class
 
 } // namespace Dmrg

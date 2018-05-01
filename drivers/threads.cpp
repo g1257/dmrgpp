@@ -74,8 +74,7 @@ int main(int argc,char *argv[])
 
 	typedef MyHelper HelperType;
 	typedef PsimagLite::Parallelizer<HelperType> ParallelizerType;
-	ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,
-	                              PsimagLite::MPI::COMM_WORLD);
+	ParallelizerType threadObject(ConcurrencyType::codeSection);
 
 	HelperType helper(ntasks, nthreads);
 

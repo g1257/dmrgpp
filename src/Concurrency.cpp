@@ -3,8 +3,6 @@
 namespace PsimagLite {
 
 SizeType Concurrency::mode = 0;
-SizeType Concurrency::npthreads = 1;
-MpiDisabled Concurrency::mpiDisabled_;
-bool Concurrency::setAffinitiesDefault = false;
+CodeSection Concurrency::codeSection(1);
 } // namespace PsimagLite
 
