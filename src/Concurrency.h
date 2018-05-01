@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Mpi.h"
 #include "FloatingPoint.h"
 #include "LAPACK.h"
-#include "CodeSection.h"
+#include "CodeSectionParams.h"
 
 namespace PsimagLite {
 
@@ -95,7 +95,7 @@ class Concurrency {
 public:
 
 	static SizeType mode;
-	static CodeSection codeSection;
+	static CodeSectionParams codeSectionParams;
 
 #ifndef USE_PTHREADS
 	typedef int MutexType;
@@ -182,7 +182,7 @@ public:
 #endif
 	{
 		FloatingPoint::enableExcept();
-		codeSection.npthreads = nthreads;
+		codeSectionParams.npthreads = nthreads;
 		mode = 0;
 #ifdef USE_PTHREADS
 		mode |= 1;
@@ -255,10 +255,10 @@ public:
 		return mpiDisabled_(label);
 	}
 
-	static void setOptions(const CodeSection& cs)
+	static void setOptions(const CodeSectionParams& cs)
 	{
-		codeSection = cs;
-		if (codeSection.npthreads == 1) return;
+		codeSectionParams = cs;
+		if (codeSectionParams.npthreads == 1) return;
 #ifndef USE_PTHREADS
 		PsimagLite::String message1(__FILE__);
 		message1 += " FATAL: You are requesting nthreads>0 but you ";
@@ -269,8 +269,8 @@ public:
 		message1 += "and recompile\n";
 		throw PsimagLite::RuntimeError(message1.c_str());
 #else
-		std::cout<<"Concurrency::npthreads="<<codeSection.npthreads<<"\n";
-		std::cout<<"Concurrency::setAffinitiesDefault="<<codeSection.setAffinities<<"\n";
+		std::cout<<"Concurrency::npthreads="<<codeSectionParams.npthreads<<"\n";
+		std::cout<<"Concurrency::setAffinitiesDefault="<<codeSectionParams.setAffinities<<"\n";
 #endif
 	}
 

@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include "Vector.h"
 #include "Concurrency.h"
-#include "CodeSection.h"
+#include "CodeSectionParams.h"
 #include "Map.h"
 
 #ifdef USE_PTHREADS_OR_NOT_NG
@@ -138,29 +138,29 @@ class Parallelizer
 
 public:
 
-	Parallelizer(const CodeSection& cs)
+	Parallelizer(const CodeSectionParams& cs)
 	    : BaseType(cs)
 	{}
 
-	Parallelizer(String codeSection)
-	    : BaseType(codeSections_[codeSection])
+	Parallelizer(String codeSectionParams)
+	    : BaseType(codeSectionParamss_[codeSectionParams])
 	{}
 
 	static bool exists(String name)
 	{
-		return (codeSections_.find(name) != codeSections_.end());
+		return (codeSectionParamss_.find(name) != codeSectionParamss_.end());
 	}
 
-	static void push(String name, const CodeSection& cs)
+	static void push(String name, const CodeSectionParams& cs)
 	{
-		codeSections_[name] = cs;
+		codeSectionParamss_[name] = cs;
 	}
 
-	static void clear() { codeSections_.clear(); }
+	static void clear() { codeSectionParamss_.clear(); }
 
 private:
 
-	static Map<String, CodeSection>::Type codeSections_;
+	static Map<String, CodeSectionParams>::Type codeSectionParamss_;
 };
 } // namespace PsimagLite 
 

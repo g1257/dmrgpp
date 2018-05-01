@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <sched.h>
 #include <unistd.h>
 #include "TypeToString.h"
-#include "CodeSection.h"
+#include "CodeSectionParams.h"
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -148,11 +148,11 @@ public:
 
 	typedef LoadBalancerDefault::VectorSizeType VectorSizeType;
 
-	PthreadsNg(const CodeSection& codeSection)
-	    : nthreads_(codeSection.npthreads),
+	PthreadsNg(const CodeSectionParams& codeSectionParams)
+	    : nthreads_(codeSectionParams.npthreads),
 	      cores_(1),
-	      setAffinities_(codeSection.setAffinities),
-	      stackSize_(codeSection.stackSize)
+	      setAffinities_(codeSectionParams.setAffinities),
+	      stackSize_(codeSectionParams.stackSize)
 	{
 		int cores = sysconf(_SC_NPROCESSORS_ONLN);
 		cores_ = (cores > 0) ? cores : 1;

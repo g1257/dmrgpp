@@ -84,7 +84,7 @@ public:
 	void doTask(SizeType taskNumber, SizeType threadNum)
 	{
 		typedef PsimagLite::Parallelizer<InnerHelper> ParallelizerType;
-		PsimagLite::CodeSection cs(nthreadsInner_);
+		PsimagLite::CodeSectionParams cs(nthreadsInner_);
 		ParallelizerType threadObject(cs);
 		InnerHelper helper(ntasksInner_, nthreadsInner_, taskNumber);
 		threadObject.loopCreate(helper);
@@ -126,7 +126,7 @@ int main(int argc,char *argv[])
 
 	typedef MyHelper HelperType;
 	typedef PsimagLite::Parallelizer<HelperType> ParallelizerType;
-	PsimagLite::CodeSection cs(nthreadsOuter);
+	PsimagLite::CodeSectionParams cs(nthreadsOuter);
 	ParallelizerType threadObject(cs);
 
 	HelperType helper(ntasks, nthreadsOuter, ntasksInner, nthreadsInner);

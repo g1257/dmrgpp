@@ -87,7 +87,7 @@ int main(int argc,char *argv[])
 
 	typedef MyHelper HelperType;
 	typedef PsimagLite::Parallelizer<HelperType> ParallelizerType;
-	ParallelizerType threadObject(ConcurrencyType::codeSection);
+	ParallelizerType threadObject(ConcurrencyType::codeSectionParams);
 
 	HelperType helper(ntasks, nthreads);
 

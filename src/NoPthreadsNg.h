@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PSI_NOPTHREADS_NG_H
 #define PSI_NOPTHREADS_NG_H
 #include "LoadBalancerDefault.h"
-#include "CodeSection.h"
+#include "CodeSectionParams.h"
 
 namespace PsimagLite {
 
@@ -90,7 +90,7 @@ public:
 
 	typedef LoadBalancerDefault::VectorSizeType VectorSizeType;
 
-	NoPthreadsNg(const CodeSection& cs)
+	NoPthreadsNg(const CodeSectionParams& cs)
 	{
 		if (cs.npthreads != 1)
 			throw PsimagLite::RuntimeError("NoPthreadsNg: ctor with threads != 1\n");
