@@ -10,7 +10,7 @@ potentialV  16  -0.5 -0.5 -0.5 -0.5     -0.5 -0.5 -0.5 -0.5
                 -0.5 -0.5 -0.5 -0.5     -0.5 -0.5 -0.5 -0.5
 
 Model=HubbardOneBand
-SolverOptions=MettsTargeting,twositedmrg
+SolverOptions=MettsTargeting,twositedmrg,wftNoAccel,vectorwithoffsets
 Version=version
 OutputFile=data1550.txt
 InfiniteLoopKeptStates=200
@@ -32,6 +32,7 @@ BetaDividedByTwo=1.0
 TSPRngSeed=0
 TSPRotateBasis=1
 MettsCollapse=random
+GsWeight=0.1
 
 TSPOperator=raw
 RAW_MATRIX
