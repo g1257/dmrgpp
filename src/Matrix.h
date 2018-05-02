@@ -211,9 +211,8 @@ public:
 
 	// default assigment operator is fine
 
-	SizeType nonZeros() const
+	SizeType nonZeros(const T zval = 0.0) const
 	{
-		const T zval = 0.0;
 		SizeType n = nrow_*ncol_;
 		assert(data_.size() >= n);
 		SizeType count = 0;
