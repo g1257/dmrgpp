@@ -678,10 +678,9 @@ void crsMatrixToFullMatrix(Matrix<T>& m,const CrsMatrix<T>& crsMatrix)
 //! Transforms a full matrix into a Compressed-Row-Storage (CRS) Matrix
 // Use the constructor if possible
 template<typename T>
-void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix,
-                           const Matrix<T>& a,
-                           const T zval = 0.0)
+void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
 {
+	const T zval = 0.0;
 	SizeType rows = a.rows();
 	SizeType cols = a.cols();
 	SizeType nonZeros = a.nonZeros();
