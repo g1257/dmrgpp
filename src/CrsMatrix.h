@@ -680,6 +680,7 @@ void crsMatrixToFullMatrix(Matrix<T>& m,const CrsMatrix<T>& crsMatrix)
 template<typename T>
 void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
 {
+	const T zval = 0.0;
 	SizeType rows = a.rows();
 	SizeType cols = a.cols();
 	SizeType nonZeros = a.nonZeros();
@@ -690,7 +691,7 @@ void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
 		crsMatrix.setRow(i, counter);
 		for (SizeType j = 0; j < cols; ++j) {
 			const T& val = a(i,j);
-			if (val == 0.0) continue;
+			if (val == zval) continue;
 			crsMatrix.setValues(counter, val);
 			crsMatrix.setCol(counter, j);
 			++counter;

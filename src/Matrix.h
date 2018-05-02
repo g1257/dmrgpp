@@ -213,11 +213,12 @@ public:
 
 	SizeType nonZeros() const
 	{
+		const T zval = 0.0;
 		SizeType n = nrow_*ncol_;
 		assert(data_.size() >= n);
 		SizeType count = 0;
 		for (SizeType i = 0; i < n; ++i)
-			if (data_[i] != 0.0) ++count;
+			if (data_[i] != zval) ++count;
 
 		return count;
 	}
