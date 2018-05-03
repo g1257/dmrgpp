@@ -132,7 +132,15 @@ public:
 				const MatrixDenseOrSparseType& Amat =  xiStruct(outPatch,inPatch);
 				const MatrixDenseOrSparseType& Bmat =  yiStruct(outPatch,inPatch);
 				initKron_.checks(Amat, Bmat, outPatch, inPatch);
-				kronMult(x_, offsetX, y_, offsetY, 'n', 'n', Amat, Bmat);
+				kronMult(x_,
+				         offsetX,
+				         y_,
+				         offsetY,
+				         'n',
+				         'n',
+				         Amat,
+				         Bmat,
+				         initKron_.denseFlopDiscount());
 			}
 		}
 	}

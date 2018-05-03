@@ -341,7 +341,8 @@ void den_csr_kron_mult(const char transA,
                        const typename PsimagLite::Vector<ComplexOrRealType>::Type& yin_,
                        SizeType offsetY,
                        typename PsimagLite::Vector<ComplexOrRealType>::Type& xout_,
-                       SizeType offsetX)
+                       SizeType offsetX,
+                       const typename PsimagLite::Real<ComplexOrRealType>::Type denseFlopDiscount)
 
 {
 	const int idebug = 0;
@@ -448,7 +449,7 @@ void den_csr_kron_mult(const char transA,
 
 
 	estimate_kron_cost( nrow_1,ncol_1,nnz_A, nrow_2,ncol_2,nnz_B,
-	                    &kron_nnz, &kron_flops, &imethod );
+	                    &kron_nnz, &kron_flops, &imethod, denseFlopDiscount);
 
 
 	den_csr_kron_mult_method(

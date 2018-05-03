@@ -13,7 +13,8 @@ void csr_kron_mult(const char transA,
                    const typename PsimagLite::Vector<ComplexOrRealType>::Type& yin,
                    SizeType offsetY,
                    typename PsimagLite::Vector<ComplexOrRealType>::Type& xout,
-                   SizeType offsetX);
+                   SizeType offsetX,
+                   const typename PsimagLite::Real<ComplexOrRealType>::Type);
 
 //-----------------------------------------------------------------------------------
 
@@ -25,7 +26,8 @@ void den_csr_kron_mult(const char transA,
                        const typename PsimagLite::Vector<ComplexOrRealType>::Type& yin,
 	                   SizeType offsetY,
 	                   typename PsimagLite::Vector<ComplexOrRealType>::Type& xout,
-	                   SizeType offsetX);
+	                   SizeType offsetX,
+                       const typename PsimagLite::Real<ComplexOrRealType>::Type);
 
 //-----------------------------------------------------------------------------------
 
@@ -37,7 +39,8 @@ void den_kron_mult(const char transA,
                    const typename PsimagLite::Vector<ComplexOrRealType>::Type& yin,
                    SizeType offsetY,
                    typename PsimagLite::Vector<ComplexOrRealType>::Type& xout,
-                   SizeType offsetX);
+                   SizeType offsetX,
+                   const typename PsimagLite::Real<ComplexOrRealType>::Type);
 
 //-----------------------------------------------------------------------------------
 
@@ -49,6 +52,7 @@ void csr_den_kron_mult( const char transA,
                         const typename PsimagLite::Vector<ComplexOrRealType>::Type& yin,
 	                    SizeType offsetY,
 	                    typename PsimagLite::Vector<ComplexOrRealType>::Type& xout,
-	                    SizeType offsetX);
+	                    SizeType offsetX,
+                        const typename PsimagLite::Real<ComplexOrRealType>::Type);
 #endif
 

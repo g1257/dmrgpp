@@ -9,6 +9,7 @@ typedef float RealType;
 
 int main()
 {
+  const RealType denseFlopDiscount = 0.2;
   const int idebug = 0;
   int nerrors = 0;
   RealType thresholdA = 0;
@@ -292,7 +293,8 @@ int main()
 	             yRef.getVector(),
                  0,
                  sx1Ref.getVector(),
-                 0);
+                 0,
+	             denseFlopDiscount);
      
      for(jx=0; jx < ncol_X; jx++) {
      for(ix=0; ix < nrow_X; ix++) {
@@ -327,7 +329,8 @@ int main()
 	             yRef.getVector(),
                  0,
                  sx1Ref.getVector(),
-                 0);
+                 0,
+	             denseFlopDiscount);
 
 
 
@@ -439,7 +442,8 @@ int main()
 	             yRef.getVector(),
                  0,
                  sx1Ref.getVector(),
-                 0);
+                 0,
+	             denseFlopDiscount);
 
 
      for(jx=0; jx < ncol_X; jx++) {

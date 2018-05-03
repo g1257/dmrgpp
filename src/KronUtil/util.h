@@ -16,7 +16,8 @@ void estimate_kron_cost( const int nrow_A,
                          const int nnz_B,
                          ComplexOrRealType *p_kron_nnz,
                          ComplexOrRealType *p_kron_flops,
-                         int *p_imethod );
+                         int *p_imethod,
+                         const typename PsimagLite::Real<ComplexOrRealType>::Type);
 
 template<typename ComplexOrRealType>
 void csr_den_kron_mult_method(const int imethod,
@@ -164,7 +165,8 @@ void csc_kron_mult(const int nrow_A,
                    const PsimagLite::Vector<int>::Type& brow,
                    const typename PsimagLite::Vector<ComplexOrRealType>::Type& bval,
                    const PsimagLite::Matrix<ComplexOrRealType>& yin,
-                   PsimagLite::Matrix<ComplexOrRealType>& xout );
+                   PsimagLite::Matrix<ComplexOrRealType>& xout,
+                   const typename PsimagLite::Vector<ComplexOrRealType>::Type);
 
 template<typename ComplexOrRealType>
 void coord2csr(const int nrow_A,

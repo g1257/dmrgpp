@@ -213,7 +213,7 @@ struct ParametersDmrgSolver {
 	      precision(6),
 	      recoverySave("0"),
 	      degeneracyMax(1e-12),
-	      denseSparseThreshold(0.1)
+	      denseSparseThreshold(0.2)
 	{
 		io.readline(model,"Model=");
 		io.readline(options,"SolverOptions=");

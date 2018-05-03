@@ -43,7 +43,8 @@ void estimate_kron_cost
                          const int nnz_B,
                          RealType *p_kron_nnz,
                          RealType *p_kron_flops,
-                         int *p_imethod );
+                         int *p_imethod,
+                         const RealType dense_flop_discount);
 
 template
 void csr_den_kron_mult_method<RealType>(const int imethod,
@@ -174,17 +175,18 @@ void csc_kron_mult_method<RealType>(const int imethod,
 
 template
 void csc_kron_mult<RealType>(const int nrow_A,
-                   const int ncol_A,
-                   const PsimagLite::Vector<int>::Type& acolptr,
-                   const PsimagLite::Vector<int>::Type& arow,
-                   const PsimagLite::Vector<RealType>::Type& aval,
-                   const int nrow_B,
-                   const int ncol_B,
-                   const PsimagLite::Vector<int>::Type& bcolptr,
-                   const PsimagLite::Vector<int>::Type& brow,
-                   const PsimagLite::Vector<RealType>::Type& bval,
-                   const PsimagLite::Matrix<RealType>& yin,
-                   PsimagLite::Matrix<RealType>& xout );
+                             const int ncol_A,
+                             const PsimagLite::Vector<int>::Type& acolptr,
+                             const PsimagLite::Vector<int>::Type& arow,
+                             const PsimagLite::Vector<RealType>::Type& aval,
+                             const int nrow_B,
+                             const int ncol_B,
+                             const PsimagLite::Vector<int>::Type& bcolptr,
+                             const PsimagLite::Vector<int>::Type& brow,
+                             const PsimagLite::Vector<RealType>::Type& bval,
+                             const PsimagLite::Matrix<RealType>& yin,
+                             PsimagLite::Matrix<RealType>& xout,
+                             const RealType);
 
 template
 void coord2csr<RealType>(const int nrow_A,

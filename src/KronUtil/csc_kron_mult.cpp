@@ -286,7 +286,8 @@ void csc_kron_mult( const int nrow_A,
                     const PsimagLite::Vector<int>::Type& brow,
                     const typename PsimagLite::Vector<ComplexOrRealType>::Type& bval,
                     const PsimagLite::Matrix<ComplexOrRealType>& yin,
-                    PsimagLite::Matrix<ComplexOrRealType>& xout )
+                    PsimagLite::Matrix<ComplexOrRealType>& xout,
+                    const typename PsimagLite::Real<ComplexOrRealType>::Type denseFlopDiscount)
 
 {
 	/*
@@ -332,7 +333,7 @@ void csc_kron_mult( const int nrow_A,
 	};
 
 	estimate_kron_cost( nrow_A,ncol_A,nnz_A, nrow_B,ncol_B,nnz_B,
-	                    &kron_nnz, &kron_flops, &imethod );
+	                    &kron_nnz, &kron_flops, &imethod, denseFlopDiscount);
 
 
 

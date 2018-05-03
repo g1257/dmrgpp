@@ -145,6 +145,8 @@ public:
 		}
 	}
 
+	const RealType denseFlopDiscount() const { return denseSparseThreshold_; }
+
 	const LeftRightSuperType& lrs(WhatBasisEnum what) const
 	{
 		return (what == OLD) ? ijpatchesOld_.lrs() : ijpatchesNew_->lrs();

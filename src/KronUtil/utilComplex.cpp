@@ -44,7 +44,8 @@ void estimate_kron_cost
                          const int nnz_B,
                          std::complex<RealType>  *p_kron_nnz,
                          std::complex<RealType>  *p_kron_flops,
-                         int *p_imethod );
+                         int *p_imethod,
+                         const RealType dense_flop_discount);
 
 template
 void csr_den_kron_mult_method<std::complex<RealType> >(const int imethod,
@@ -174,18 +175,20 @@ void csc_kron_mult_method<std::complex<RealType> >(const int imethod,
                           PsimagLite::Matrix<std::complex<RealType> >& xout );
 
 template
-void csc_kron_mult<std::complex<RealType> >(const int nrow_A,
-                   const int ncol_A,
-                   const PsimagLite::Vector<int>::Type& acolptr,
-                   const PsimagLite::Vector<int>::Type& arow,
-                   const PsimagLite::Vector<std::complex<RealType> >::Type& aval,
-                   const int nrow_B,
-                   const int ncol_B,
-                   const PsimagLite::Vector<int>::Type& bcolptr,
-                   const PsimagLite::Vector<int>::Type& brow,
-                   const PsimagLite::Vector<std::complex<RealType> >::Type& bval,
-                   const PsimagLite::Matrix<std::complex<RealType> >& yin,
-                   PsimagLite::Matrix<std::complex<RealType> >& xout );
+void csc_kron_mult
+<std::complex<RealType> >(const int nrow_A,
+                          const int ncol_A,
+                          const PsimagLite::Vector<int>::Type& acolptr,
+                          const PsimagLite::Vector<int>::Type& arow,
+                          const PsimagLite::Vector<std::complex<RealType> >::Type&,
+                          const int nrow_B,
+                          const int ncol_B,
+                          const PsimagLite::Vector<int>::Type& bcolptr,
+                          const PsimagLite::Vector<int>::Type& brow,
+                          const PsimagLite::Vector<std::complex<RealType> >::Type&,
+                          const PsimagLite::Matrix<std::complex<RealType> >& yin,
+                          PsimagLite::Matrix<std::complex<RealType> >& xout,
+                          const RealType);
 
 template
 void coord2csr<std::complex<RealType> >(const int nrow_A,

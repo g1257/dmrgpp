@@ -9,7 +9,8 @@ void estimate_kron_cost(const int nrow_A,
                         const int nnz_B_in,
                         ComplexOrRealType *p_kron_nnz,
                         ComplexOrRealType *p_kron_flops,
-                        int *p_imethod )
+                        int *p_imethod,
+                        const typename PsimagLite::Real<ComplexOrRealType>::Type denseFlopDiscount)
 {
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
@@ -31,7 +32,6 @@ void estimate_kron_cost(const int nrow_A,
    * faster than sparse matrix operations
    * ------------------------------------
    */
-	const RealType dense_flop_discount = 0.2;
 	RealType discount = 1;
 
 	/*
@@ -45,10 +45,10 @@ void estimate_kron_cost(const int nrow_A,
   % X(ib,ia) = BY(ib,ja)*At(ja,ia)
   % ------------------------
   */
-	discount = (is_dense_B) ? dense_flop_discount : 1;
+	discount = (is_dense_B) ? denseFlopDiscount : 1;
 	RealType flops_BY =  discount * 2.0*nnz_B*ncol_A;
 
-	discount = (is_dense_A) ? dense_flop_discount : 1;
+	discount = (is_dense_A) ? denseFlopDiscount : 1;
 	RealType flops_BYAt = discount * 2.0*nnz_A*nrow_B;
 
 	RealType flops_method1 = flops_BY + flops_BYAt;
@@ -66,10 +66,10 @@ void estimate_kron_cost(const int nrow_A,
   % X(ib,ia) = B(ib,jb)*YAt(jb,ia)
   % ------------------------
   */
-	discount = (is_dense_A) ? dense_flop_discount : 1;
+	discount = (is_dense_A) ? denseFlopDiscount : 1;
 	RealType flops_YAt = discount * 2.0*nnz_A*ncol_B;
 
-	discount = (is_dense_B) ? dense_flop_discount : 1;
+	discount = (is_dense_B) ? denseFlopDiscount : 1;
 	flops_BYAt = discount * 2.0*nnz_B*nrow_A;
 
 	RealType flops_method2 = flops_YAt + flops_BYAt;
