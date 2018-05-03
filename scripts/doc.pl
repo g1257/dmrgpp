@@ -15,27 +15,28 @@ my $find = "find ../src -iname \"*.h\" -or -iname \"*.cpp\"";
 defined($file) or die "USAGE: $find | $0 file\n";
 my %labels;
 
-loadFiles(\%labels,$file);
+loadFiles(\%labels, $file);
 
 loadLabels(\%labels);
 
 recursiveExpand(\%labels);
 
-replaceLabels($file,\%labels);
+replaceLabels($file, \%labels);
 
 sub loadLabels
 {
 	while (<STDIN>) {
 		chomp;
 		my $f = $_;
-		procFile(\%labels,$f);
+		procFile(\%labels, $f);
 	}
 }
 
 sub loadFiles
 {
-	my ($a,$f) = @_;
+	my ($a, $f) = @_;
 	my %labels = %$a;
+
 	open(FILE, "<", $f) or die "$0: Cannot open $f : $!\n";
 
 	while (<FILE>) {
@@ -85,13 +86,14 @@ sub loadFiles
 
 sub procFile
 {
-	my ($a,$f) = @_;
+	my ($a, $f) = @_;
 	my %labels = %$a;
 	my $label = "!DISABLED";
 	my $buffer = "";
+
 	open(FILE, "<", $f) or die "$0: Cannot open $f : $!\n";
 	while (<FILE>) {
-		if (/\/\* *PSIDOC *([^ ]+)/) {
+		if (/\/\/ PSIDOC_CODE_START +([^ ]+)/ or /\/\* *PSIDOC +([^ ]+)/) {
 			$label = $1;
 			chomp($label) if ($label=~/\n$/);
 			my $txt = $labels{"$label"};
@@ -102,7 +104,7 @@ sub procFile
 			next;
 		}
 
-		if (/\*\//) {
+		if (/\*\// or /\/\/ PSIDOC_CODE_END/) {
 			if ($label ne "!DISABLED") {
 				my @temp = ($buffer);
 				$labels{"$label"} = \@temp;
@@ -120,13 +122,13 @@ sub procFile
 	close(FILE);
 	my $n = scalar(%labels);
 	print STDERR "$0: File $f proc'ed ($n labels found so far)\n";
+	
 	%$a = %labels;
 }
 
 sub replaceLabels
 {
-	my ($file,$a) = @_;
-	my %labels = %$a;
+	my ($file, $a) = @_;
 	my $fout = $file;
 	if ($out_dir != "") {
 	    $fout =~ s/.*\///; #chop the beginning of the path

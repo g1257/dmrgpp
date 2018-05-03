@@ -192,12 +192,7 @@ are themselves \emph{root-undelegated}: For example \code{std::vector<A>} is
 \emph{root-undelegated} even if \code{A} is \emph{root-delegated}.
 
 \subsection{Root-undelegated Types}
-Root-undelegated types are one of the following: native types or STL types.
-Root-undelegateds are always at least partially written to by \code{IoNg},
-and, if needed, parts of it are delegated.
-For example, all native types are written by \code{IoNg} directly into a single dataset. 
-\code{std::complex<T>} where \code{T}
-is a native type is written directly by doubling the size of the array into a single dataset.
+\ptexPaste{IsRootUnDelegated}
 
 \subsubsection{Serialization of std::vector}
 A single dataset is also used for \code{std::vector<T>} 

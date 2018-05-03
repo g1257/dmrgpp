@@ -92,15 +92,28 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
+/* PSIDOC IsRootUnDelegated
+Root-undelegated types are one of the following.
+\begin{lstlisting}
+PSIDOCCOPY IsRootUnDelegatedCode
+\end{lstlisting}
+Root-undelegateds are always at least partially written to by \code{IoNg},
+and, if needed, parts of it are delegated.
+For example, all native types are written by \code{IoNg} directly into a single dataset.
+\code{std::complex<T>} where \code{T}
+is a native type is written directly by doubling the size of the array into a single dataset.
+*/
+// PSIDOC_CODE_START IsRootUnDelegatedCode
 template<typename T>
 struct IsRootUnDelegated {
 	enum {True = Loki::TypeTraits<T>::isArith ||
-		  IsVectorLike<T>::True ||
-		  IsStackLike<T>::True ||
-		  IsPairLike<T>::True ||
-		  IsEnum<T>::True ||
-		  IsStringLike<T>::True};
+	      IsVectorLike<T>::True ||
+	      IsStackLike<T>::True ||
+	      IsPairLike<T>::True ||
+	      IsEnum<T>::True ||
+	      IsStringLike<T>::True};
 };
+// PSIDOC_CODE_END
 
 class IoNg {
 
