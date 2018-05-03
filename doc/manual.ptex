@@ -1,0 +1,142 @@
+\documentclass{book}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{fancyvrb} %keep
+\usepackage{fancyhdr}
+\usepackage{booktabs} %keep
+\usepackage{mathtools} %keep
+\usepackage{hyperref}
+
+\fancyhead{}
+\fancyhead[LE]{\leftmark}
+\fancyhead[RO]{\rightmark}
+\cfoot{}
+\rfoot{\thepage} %exit
+
+\hypersetup{colorlinks=true}
+
+
+\newcommand{\cppFile}[1]{\texttt{#1}}
+\newcommand{\inputItem}[1]{\noindent\texttt{\bf #1} ---}
+\newcommand{\inputSubItem}[1]{\indent\texttt{\it #1} --}
+%% Remove the below command before submission
+\newcommand{\todo}[1]{\textcolor{red}{#1}}
+%Format to denote a C++ class name:
+\newcommand{\cppClass}[1]{{\sffamily #1}}
+%Format to denote a C++ variable:
+\newcommand{\cppFunction}[1]{{\tt #1}}
+% for the cover page:
+\newcommand{\HRule}{\noindent\rule{\linewidth}{1.5pt}}
+\newcommand{\ptexPaste}[1]{\fbox{\textcolor{red}{PLEASE RUN ptex.pl on this .ptex source
+to obtain the correct test for tag #1}}}
+\newcommand{\ptexLabel}[1]{\ptexPaste{#1}}
+\newcommand{\ptexInterface}[1]{\ptexPaste{#1}}
+\newcommand{\ptexReadFile}[1]{\ptexPaste{#1}}
+\newcommand{\ptexReadFileVerbatim}[1]{\ptexPaste{#1}}
+
+\hyphenation{Wave-Function-Transformation}
+\lstset{language=c++,basicstyle=\footnotesize\ttfamily,
+keywordstyle=\color{blue}\bfseries,frame=shadowbox}
+\pagestyle{fancy}
+\begin{document}
+
+\begin{titlepage}
+\vspace*{\stretch{1}}
+\HRule
+\begin{flushright}
+\LARGE  PsimagLite v2 Manual\\
+\end{flushright}
+\HRule
+\vspace*{\stretch{2}}
+
+%
+\begin{center}
+\Large Manual Version: \today\\
+\end{center}
+
+\begin{center}
+\textsc{Oak Ridge, 2018}
+\end{center}
+
+\end{titlepage}
+%
+\begin{titlepage}
+\noindent
+\begin{minipage}{0.4\textwidth}
+\begin{flushleft}
+Gonzalo \textsc{Alvarez}\\
+Nanomaterials Theory Institute\\
+Oak Ridge National Laboratory\\[0.2cm]
+Oak Ridge, TN 37831\\
+\today
+\end{flushleft}
+\end{minipage}
+
+\vspace*{\stretch{2}}
+\noindent
+%\begin{minipage}{0.6\textwidth}
+\begin{tiny}
+\fontshape{sc}\selectfont
+%\begin{verbatim}
+\noindent
+DISCLAIMER\\[0.2cm]
+THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT OWNER, CONTRIBUTORS, UNITED STATES GOVERNMENT,
+OR THE UNITED STATES DEPARTMENT OF ENERGY BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+NEITHER THE UNITED STATES GOVERNMENT, NOR THE UNITED STATES DEPARTMENT OF ENERGY,
+NOR THE COPYRIGHT OWNER, NOR
+ANY OF THEIR EMPLOYEES, REPRESENTS THAT THE USE OF ANY
+INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
+DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.\\[1cm]
+
+\fontshape{\shapedefault}\selectfont
+%\end{verbatim}
+\end{tiny}
+%\end{minipage}
+\noindent
+\begin{minipage}{0.4\textwidth}
+Copyright \copyright 2009-2018,\\
+ UT-Battelle, LLC\\
+All rights reserved
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\begin{flushright}
+\includegraphics[width=3cm]{PsimagLiteLogo.png}
+\end{flushright}
+\end{minipage}
+\end{titlepage}
+\tableofcontents
+
+\pagebreak
+
+\ptexReadFile{../README.md}
+
+\chapter{IoNg}\label{sec:iong}
+
+\section*{LICENSE}
+\begin{verbatim}
+\ptexReadFile{../LICENSE}
+\end{verbatim}
+\bibliographystyle{plain}
+\bibliography{thesis}
+\end{document}
