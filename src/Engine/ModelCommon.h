@@ -175,6 +175,13 @@ public:
 	{
 		assert(lrs.super().partition() > 0);
 		SizeType total = lrs.super().partition()-1;
+
+		{
+			PsimagLite::OstringStream msg;
+			msg<<"addHamiltonianConnection starts, sectors="<<total;
+			progress_.printline(msg, std::cout);
+		}
+
 		typename PsimagLite::Vector<VerySparseMatrixType*>::Type vvsm(total, 0);
 		VectorSizeType nzs(total, 0);
 
@@ -213,6 +220,12 @@ public:
 
 			SizeType offset = lrs.super().partition(m);
 			sumBlock(matrix, matrixBlock2, offset);
+		}
+
+		{
+			PsimagLite::OstringStream msg;
+			msg<<"addHamiltonianConnection ends";
+			progress_.printline(msg, std::cout);
 		}
 	}
 
