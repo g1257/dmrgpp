@@ -176,7 +176,7 @@ Only when using third-party tools should the \code{/Def} group prefix be added.
 
 \subsection{Labels of datasets and groups}
 Labels for dataset and groups must be of the form $/label_0/label_1/.../label_{n-1}$.
-where each $label_i$ is of the form $a-zA-Z0-9\\-\_+$.
+where each $label_i$ is of the form $[a-zA-Z0-9-\_]+$.
 
 \subsection{API Reference}
 TBW. This will be pulled directly form the source code.
@@ -205,11 +205,11 @@ If \code{T} is a root-undelegated type then
 \code{write(label + ``/''} \code{ + ttos(index),} \code{ data[index]);} is used,
 and if \code{T} is root-delegated
 then
-\code{data[index].serialize(} \code{ioNgSerializer\_,} \code{ label + ``/''}
+\code{data[index].write(} \code{ioNgSerializer\_,} \code{ label + ``/''}
 \code{ + ttos(index))}  is used instead,
 where \code{data} is the underlying \code{std::vector}.
 Moreover, for  \code{std::vector} \code{<T*>} with T root-delegated, the variant
-\code{data[index]} \code{->serialize} \code{(ioNgSerializer\_, } \code{label +}
+\code{data[index]} \code{->write} \code{(ioNgSerializer\_, } \code{label +}
 \code{``/'' + ttos(index))} is used.
 	
 \subsubsection{Serialization of std::string}
@@ -231,12 +231,12 @@ but should not include \code{IoNg.h} unless needed.
 Root-delegateds must have a function named \code{serialize} returning \code{void}
 and taking two arguments: the serializer object \code{ioSerializer}
 by \emph{non-const} reference, and string \code{label}.
-In their \code{serialize} function, root-delegateds must first create a group called label by calling
+In their \code{write} function, root-delegateds must first create a group called label by calling
 \code{io.createGroup} \code{(label),} and
 should then go over their data members, and for each call either
 \code{ioSerializer.} \code{write(dataMember,} \code{label +} \code{"/" + name);}
 if \code{dataMember} is a root-undelegated type or
-\code{dataMember.} \code{serialize(} \code{ioSerializer, } \code{label +} \code{"/" + names)}
+\code{dataMember.} \code{write(} \code{ioSerializer, } \code{label +} \code{"/" + names)}
 if \code{dataMember} is a root-delegated type,
 with the name being the name of the \code{dataMember} in question.
 
