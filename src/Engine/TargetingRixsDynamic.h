@@ -223,10 +223,7 @@ public:
 
 	void read(const PsimagLite::String& f)
 	{
-#ifdef USE_IO_NG
-		std::cerr<<__FILE__<<" read() WARNING UNIMPLEMENTED FIXME\n";
-#else
-		PsimagLite::IoSimple::In io(f);
+		PsimagLite::IoSelector::In io(f);
 
 		TimeSerializerType ts(io, PsimagLite::IoSimple::In::LAST_INSTANCE);
 		SizeType n = ts.numberOfVectors();
@@ -238,7 +235,6 @@ public:
 		}
 
 		this->common().template read<TimeSerializerType>(f,0);
-#endif
 	}
 
 private:
