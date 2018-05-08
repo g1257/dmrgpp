@@ -1,6 +1,7 @@
 #ifndef OPERATORSPEC_H
 #define OPERATORSPEC_H
-#include "Io/IoSelector.h"
+#include "InputNg.h"
+#include "InputCheck.h"
 
 namespace Dmrg {
 
@@ -167,7 +168,12 @@ private:
 		PsimagLite::String label = name.substr(1,name.length()-1);
 
 		replaceString(label, ttos(site));
-		PsimagLite::IoSelector::In io(label);
+		InputCheck inputCheck;
+		PsimagLite::InputNg<InputCheck>::Writeable ioWriteable(label,
+		                                                       inputCheck,
+		                                                       "InputStartsHere",
+		                                                       "InputEndsHere");
+		PsimagLite::InputNg<InputCheck>::Readable io(ioWriteable);
 
 		PsimagLite::String prefix = "";
 		return OperatorType(io,model_,OperatorType::MUST_BE_NONZERO, prefix);

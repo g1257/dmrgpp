@@ -294,33 +294,12 @@ public:
 	                    VectorWithOffsetType& tv2,
 	                    VectorWithOffsetType& tv3)
 	{
-                calcDynVectors(tv0,tv2,tv3);
-                VectorWithOffsetType tv4;
-                VectorWithOffsetType tv5;
-                calcDynVectors(tv1,tv4,tv5);
+		calcDynVectors(tv0,tv2,tv3);
+		VectorWithOffsetType tv4;
+		VectorWithOffsetType tv5;
+		calcDynVectors(tv1,tv4,tv5);
 		tv2 += (-1.0)*tv5;
 		tv3 += tv4;
-	}
-
-
-	template<typename SomeTargetingCommonType>
-	void write(const SomeTargetingCommonType& targetingCommon,
-	          const VectorSizeType& block,
-	          PsimagLite::IoSelector::Out& io) const
-	{
-		if (block.size()!=1) {
-			PsimagLite::String str("TargetingCorrectionVector ");
-			str += "only supports blocks of size 1\n";
-			throw PsimagLite::RuntimeError(str);
-		}
-
-		targetingCommon.write(block, io, targetingCommon.targetVectors());
-		targetingCommon.psi().write(io, "PSI");
-	}
-
-	void read()
-	{
-//		targetingCommon.read(io);
 	}
 
 	template<typename SomeTargetingCommonType>

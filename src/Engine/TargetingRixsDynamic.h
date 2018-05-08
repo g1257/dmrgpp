@@ -217,10 +217,14 @@ public:
 	           PsimagLite::String,
 	           SizeType) const
 	{
-		if (io.ng())
-			err(PsimagLite::String(__FILE__) + ": target does not support IoNg yet\n");
+		if (block.size() != 1) {
+			PsimagLite::String str(__FILE__);
+			str += ": only supports blocks of size 1\n";
+			err(str);
+		}
 
-		skeleton_.write(this->common(),block,io);
+		this->common().write(block, io);
+		this->common().psi().write(io, "PSI");
 	}
 
 	void read(const PsimagLite::String& f)

@@ -224,7 +224,7 @@ public:
 		this->common().write(io, block, prefix, counter);
 
 		PostProcType cf(ab_, params);
-		this->common().write(block,io,cf,this->common().targetVectors());
+		this->common().write(block, io, cf);
 
 		this->common().psi().write(io, "PSI");
 	}

@@ -173,7 +173,7 @@ public:
 		std::cerr<<__FILE__<<" write() needs IMPLEMENTATION WARNING FIXME\n";
 	}
 
-	void write(PsimagLite::IoSelector::Out& io)
+	void write(PsimagLite::IoSimple::Out& io)
 	{
 		io.write(currentTime_, "Time");
 		io.write(site_, "TargetCentralSite");

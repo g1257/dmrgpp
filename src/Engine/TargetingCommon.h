@@ -229,37 +229,27 @@ public:
 
 		if (io.ng())
 			io.write(block[0], prefix + "/TargetCentralSite");
-		 else
+		else
 			io.write(block[0], "TargetCentralSite");
 	}
 
-	template<typename IoOutputType>
 	void write(const VectorSizeType& block,
-	          IoOutputType& io,
-	          const PostProcType& cf,
-	          const VectorVectorWithOffsetType& targetVectors) const
+	           PsimagLite::IoSelector::Out& io,
+	           const PostProcType& cf) const
 	{
 		cf.write(io);
-		SizeType marker = (noStageIs(DISABLED)) ? 1 : 0;
-
-		TimeSerializerType ts(currentTime(),
-		                      block[0],
-		        applyOpExpression_.targetVectors(),
-		        marker);
-		ts.write(io);
+		write(block, io);
 	}
 
-	template<typename IoOutputType>
 	void write(const VectorSizeType& block,
-	          IoOutputType& io,
-	          const VectorVectorWithOffsetType& targetVectors) const
+	           PsimagLite::IoSelector::Out& io) const
 	{
 		SizeType marker = (noStageIs(DISABLED)) ? 1 : 0;
-
+		SizeType size = block[0];
 		TimeSerializerType ts(currentTime(),
-		                      block[0],
-		        applyOpExpression_.targetVectors(),
-		        marker);
+		                      size,
+		                      applyOpExpression_.targetVectors(),
+		                      marker);
 		ts.write(io);
 	}
 

@@ -210,7 +210,7 @@ public:
 			err(PsimagLite::String(__FILE__) + " write() only supports blocks.size=1\n");
 
 		io.write(block[0], "TargetCentralSite");
-		this->common().write(block,io,cf,this->common().targetVectors());
+		this->common().write(block, io, cf);
 
 		this->common().psi().write(io,"PSI");
 	}
