@@ -285,7 +285,7 @@ public:
 		      hdf5File_(new H5::H5File(fn, H5F_ACC_RDONLY)),
 		      ioNgSerializer_(hdf5File_)
 		{
-			H5::Exception::dontPrint();
+			//H5::Exception::dontPrint();
 		}
 
 		~In()

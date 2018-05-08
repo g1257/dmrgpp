@@ -521,6 +521,8 @@ public:
 		ioSerializer.write(label + "/ncol_",  ncol_);
 		if (nrow_ == 0 || ncol_ == 0) return;
 		ioSerializer.write(label + "/rowptr_",  rowptr_);
+		assert(rowptr_.size() == nrow_ + 1);
+		if (rowptr_[nrow_] == 0) return;
 		ioSerializer.write(label + "/colind_",  colind_);
 		ioSerializer.write(label + "/values_",  values_);
 
@@ -532,6 +534,8 @@ public:
 		ioSerializer.read(ncol_, label + "/ncol_");
 		if (nrow_ == 0 || ncol_ == 0) return;
 		ioSerializer.read(rowptr_, label + "/rowptr_");
+		assert(rowptr_.size() == nrow_ + 1);
+		if (rowptr_[nrow_] == 0) return;
 		ioSerializer.read(colind_, label + "/colind_");
 		ioSerializer.read(values_, label + "/values_");
 	}
