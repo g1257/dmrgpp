@@ -217,6 +217,7 @@ public:
 		io.read(size_, label + "/size_");
 		io.read(offset_, label + "/offset_");
 		io.read(mAndq_, label + "/mAndq_");
+		if (size_ == 0) return;
 		io.read(data_, label + "/data_");
 	}
 
@@ -227,6 +228,7 @@ public:
 		io.write(size_, label + "/size_");
 		io.write(offset_, label + "/offset_");
 		io.write(mAndq_, label + "/mAndq_");
+		if (size_ == 0) return;
 		io.write(data_, label + "/data_");
 	}
 

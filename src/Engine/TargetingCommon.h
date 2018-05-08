@@ -314,12 +314,15 @@ public:
 		IoInputType io(f);
 
 		applyOpExpression_.loadEnergy(io, "Energy=", IoType::In::LAST_INSTANCE);
-		int site=0;
-		io.readline(site,"TargetCentralSite=",IoType::In::LAST_INSTANCE);
-		if (site<0)
-			throw PsimagLite::RuntimeError("GST::read(...): site cannot be negative\n");
+		if (!io.ng()) {
+			int site=0;
+			io.readline(site,"TargetCentralSite=",IoType::In::LAST_INSTANCE);
+			if (site < 0)
+				err("GST::read(...): site cannot be negative\n");
+		}
 
-		applyOpExpression_.psi().read(io,"PSI");
+		PsimagLite::String prefix = (io.ng()) ? "FinalPsi/0/" : "";
+		applyOpExpression_.psi().read(io, prefix + "PSI");
 	}
 
 	bool allStages(SizeType x) const

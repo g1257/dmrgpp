@@ -109,34 +109,56 @@ public:
 	TimeSerializer(typename PsimagLite::IoSelector::In& io,
 	               PsimagLite::IoSelector::In::LongIntegerType lastInstance = 0)
 	{
+		PsimagLite::String prefix = (io.ng()) ? "NGSTSerializer/" : "";
 		RealType x=0;
-		PsimagLite::String s = "Time=";
-		if (lastInstance) io.readline(x,s,lastInstance);
-		else io.readline(x,s);
-		if (x<0)
-			throw PsimagLite::RuntimeError("TimeSerializer:: time cannot be negative\n");
+		PsimagLite::String s = prefix + "Time=";
+		if (lastInstance) io.readline(x, s, lastInstance);
+		else io.readline(x, s);
+		if (x < 0)
+			err("TimeSerializer:: time cannot be negative\n");
 		currentTime_ = x;
 
-		s = "TargetCentralSite=";
-		int xi=0;
-		io.readline(xi,s);
-		if (xi<0)
-			throw PsimagLite::RuntimeError("TimeSerializer:: site cannot be negative\n");
+		s = prefix + "TargetCentralSite=";
+		int xi = 0;
+		io.readline(xi, s);
+		if (xi < 0)
+			err("TimeSerializer:: site cannot be negative\n");
 		site_ = xi;
 
-		s = "TNUMBEROFVECTORS=";
-		io.readline(xi,s);
-		if (xi<=0)
-			throw PsimagLite::RuntimeError("TimeSerializer:: n. of vectors must be positive\n");
+		s = prefix + "TNUMBEROFVECTORS=";
+		io.readline(xi, s);
+		if (xi <= 0)
+			err("TimeSerializer:: n. of vectors must be positive\n");
 		targetVectors_.resize(xi);
-		for (SizeType i=0;i<targetVectors_.size();i++) {
-			s = "targetVector"+ttos(i);
-			targetVectors_[i].read(io,s);
+		for (SizeType i = 0; i < targetVectors_.size(); ++i) {
+			s = prefix + "targetVector"+ttos(i);
+			targetVectors_[i].read(io, s);
 		}
-		s = "MARKER=";
+
+		s = prefix + "MARKER=";
 		io.readline(xi,s);
-		if (xi<0) throw PsimagLite::RuntimeError("TimeSerializer:: marker must be positive\n");
-		marker_=xi;
+		if (xi < 0) err("TimeSerializer:: marker must be positive\n");
+		marker_ = xi;
+	}
+
+	void write(PsimagLite::IoSelector::Out& io) const
+	{
+		PsimagLite::String prefix("");
+		if (io.ng()) {
+			io.createGroup(prefix + "NGSTSerializer");
+			prefix += "NGSTSerializer/";
+		}
+
+		io.write(currentTime_, prefix + "Time");
+		io.write(site_, prefix + "TargetCentralSite");
+		io.write(targetVectors_.size(), prefix + "TNUMBEROFVECTORS");
+
+		for (SizeType i=0;i<targetVectors_.size();i++) {
+			PsimagLite::String label = "targetVector" + ttos(i);
+			targetVectors_[i].write(io, prefix + label);
+		}
+
+		io.write(marker_, prefix + "MARKER");
 	}
 
 	SizeType size(SizeType i=0) const
@@ -163,26 +185,6 @@ public:
 	SizeType marker() const
 	{
 		return marker_;
-	}
-
-	void write(PsimagLite::IoSelector::Out& io)
-	{
-		PsimagLite::String prefix("");
-		if (io.ng()) {
-			io.createGroup(prefix + "NGSTSerializer");
-			prefix += "NGSTSerializer/";
-		}
-
-		io.write(currentTime_, prefix + "Time");
-		io.write(site_, prefix + "TargetCentralSite");
-		io.write(targetVectors_.size(), prefix + "TNUMBEROFVECTORS");
-
-		for (SizeType i=0;i<targetVectors_.size();i++) {
-			PsimagLite::String label = "targetVector"+ttos(i)+"_"+ttos(currentTime_);
-			targetVectors_[i].write(io,prefix + label);
-		}
-
-		io.write(marker_, prefix + "MARKER");
 	}
 
 private:
