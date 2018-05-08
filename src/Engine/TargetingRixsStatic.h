@@ -223,7 +223,10 @@ public:
 	{
 		PsimagLite::IoSelector::In io(f);
 
+		this->common().template read<TimeSerializerType>(f,0);
+
 		TimeSerializerType ts(io, PsimagLite::IoSimple::In::LAST_INSTANCE);
+
 		SizeType n = ts.numberOfVectors();
 		if (n != 4)
 			err("TargetingRixsStatic: number of TVs must be 4\n");
@@ -231,8 +234,6 @@ public:
 		for (SizeType site = 0; site < 3; ++site) {
 			this->common().targetVectors(site) = ts.vector(site+1);
 		}
-
-		this->common().template read<TimeSerializerType>(f,0);
 	}
 
 private:

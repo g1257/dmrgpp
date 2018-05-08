@@ -144,10 +144,10 @@ public:
 	void write(PsimagLite::IoSelector::Out& io) const
 	{
 		PsimagLite::String prefix("");
-		if (io.ng()) {
-			io.createGroup(prefix + "NGSTSerializer");
-			prefix += "NGSTSerializer/";
-		}
+#ifdef USE_IO_NG
+		io.createGroup(prefix + "NGSTSerializer");
+		prefix += "NGSTSerializer/";
+#endif
 
 		io.write(currentTime_, prefix + "Time");
 		io.write(site_, prefix + "TargetCentralSite");

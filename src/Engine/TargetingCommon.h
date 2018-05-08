@@ -246,14 +246,15 @@ public:
 #endif
 
 		if (io.ng())
+			io.write(block[0], prefix + "/TargetCentralSite");
+		else
+			io.write(block[0], "TargetCentralSite");
+
+		if (io.ng())
 			psi().write(io, prefix + "/PSI");
 		else
 			psi().write(io,"PSI");
 
-		if (io.ng())
-			io.write(block[0], prefix + "/TargetCentralSite");
-		else
-			io.write(block[0], "TargetCentralSite");
 	}
 
 	void writeNGSTs(const VectorSizeType& block,
@@ -286,6 +287,9 @@ public:
 		applyOpExpression_.loadEnergy(io, "Energy=", IoType::In::LAST_INSTANCE);
 
 		if (loadInto == "All") {
+
+			applyOpExpression_.psi().read(io,labelForPsi);
+
 			setAllStagesTo(WFT_NOADVANCE);
 
 			SomeSerializerType ts(io,IoInputType::LAST_INSTANCE);
@@ -293,9 +297,6 @@ public:
 				targetVectors(i) = ts.vector(i);
 
 			applyOpExpression_.setTime(ts.time());
-
-			applyOpExpression_.psi().read(io,labelForPsi);
-
 		} else {
 			setAllStagesTo(DISABLED);
 			io.rewind();
@@ -314,12 +315,6 @@ public:
 		IoInputType io(f);
 
 		applyOpExpression_.loadEnergy(io, "Energy=", IoType::In::LAST_INSTANCE);
-		if (!io.ng()) {
-			int site=0;
-			io.readline(site,"TargetCentralSite=",IoType::In::LAST_INSTANCE);
-			if (site < 0)
-				err("GST::read(...): site cannot be negative\n");
-		}
 
 		PsimagLite::String prefix = (io.ng()) ? "FinalPsi/0/" : "";
 		applyOpExpression_.psi().read(io, prefix + "PSI");
