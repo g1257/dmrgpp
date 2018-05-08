@@ -212,23 +212,11 @@ public:
 
 	void write(const VectorSizeType& block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String,
-	           SizeType) const
+	           PsimagLite::String prefix,
+	           SizeType counter) const
 	{
-		if (io.ng())
-			err(PsimagLite::String(__FILE__) + ": target does not support IoNg yet\n");
-
-		if (block.size() != 1)
-			err(PsimagLite::String(__FILE__) + " write() only supports blocks.size=1\n");
-
-		SizeType site = block[0];
-		SizeType marker = (this->common().noStageIs(DISABLED)) ? 1 : 0;
-		TimeSerializerType ts(this->common().currentTime(),
-		                      site,
-		                      this->common().targetVectors(),
-		                      marker);
-		ts.write(io);
-		this->common().psi().write(io,"PSI");
+		this->common().write(io, block, prefix, counter);
+		this->common().writeNGSTs(block, io);
 	}
 
 	void read(const PsimagLite::String& f)

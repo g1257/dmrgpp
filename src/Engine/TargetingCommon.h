@@ -222,10 +222,33 @@ public:
 	void write(PsimagLite::IoSelector::Out& io,
 	           const VectorSizeType& block,
 	           PsimagLite::String prefix,
-	           SizeType) const
+	           SizeType counter) const
 	{
 		if (block.size() != 1)
 			err(PsimagLite::String(__FILE__) + " write() only supports blocks.size=1\n");
+
+		PsimagLite::OstringStream msg;
+		msg<<"Saving state...";
+		progress_.printline(msg,std::cout);
+
+#ifdef USE_IO_NG
+		typedef PsimagLite::IoSelector::Out::Serializer SerializerType;
+		if (counter == 0) io.createGroup(prefix);
+
+		io.write(counter + 1,
+		         prefix + "/Size",
+		         (counter == 0) ? SerializerType::NO_OVERWRITE :
+		                          SerializerType::ALLOW_OVERWRITE);
+
+		prefix += ("/" + ttos(counter));
+
+		io.createGroup(prefix);
+#endif
+
+		if (io.ng())
+			psi().write(io, prefix + "/PSI");
+		else
+			psi().write(io,"PSI");
 
 		if (io.ng())
 			io.write(block[0], prefix + "/TargetCentralSite");
@@ -233,16 +256,16 @@ public:
 			io.write(block[0], "TargetCentralSite");
 	}
 
-	void write(const VectorSizeType& block,
-	           PsimagLite::IoSelector::Out& io,
-	           const PostProcType& cf) const
+	void writeNGSTs(const VectorSizeType& block,
+	                PsimagLite::IoSelector::Out& io,
+	                const PostProcType& cf) const
 	{
 		cf.write(io);
-		write(block, io);
+		writeNGSTs(block, io);
 	}
 
-	void write(const VectorSizeType& block,
-	           PsimagLite::IoSelector::Out& io) const
+	void writeNGSTs(const VectorSizeType& block,
+	                PsimagLite::IoSelector::Out& io) const
 	{
 		SizeType marker = (noStageIs(DISABLED)) ? 1 : 0;
 		SizeType size = block[0];

@@ -308,31 +308,19 @@ public:
 
 	void write(const VectorSizeType& block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String,
-	           SizeType) const
+	           PsimagLite::String prefix,
+	           SizeType counter) const
 	{
-		PsimagLite::OstringStream msg;
-		msg<<"Saving state...";
-		progress_.printline(msg,std::cout);
+		this->common().write(io, block, prefix, counter);
 
-		SizeType marker = 0;
-		if (this->common().noStageIs(DISABLED)) marker = 1;
-		VectorVectorWithOffsetType targetVectors(this->common().targetVectors().size());
+		VectorVectorWithOffsetType& tv = const_cast<VectorVectorWithOffsetType&>
+		        (this->common().targetVectors());
 		if (mettsStruct_.beta > this->common().currentTime()) {
-			for (SizeType i=0;i<targetVectors.size();i++)
-				targetVectors[i].resize(0);
-		} else {
-			targetVectors = this->common().targetVectors();
+			for (SizeType i = 0; i < this->common().targetVectors().size(); ++i)
+				tv[i].resize(0);
 		}
 
-		if (block.size() != 1)
-			err(PsimagLite::String(__FILE__) + " write() only supports blocks.size=1\n");
-		SizeType site = block[0];
-		TimeSerializerType ts(this->common().currentTime(),
-		                      site,
-		                      targetVectors,
-		                      marker);
-		ts.write(io);
+		this->common().writeNGSTs(block, io);
 	}
 
 	void updateOnSiteForCorners(BasisWithOperatorsType&) const

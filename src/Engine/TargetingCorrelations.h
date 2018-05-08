@@ -205,8 +205,7 @@ public:
 	           PsimagLite::String prefix,
 	           SizeType counter) const
 	{
-		if (io.ng())
-			err(PsimagLite::String(__FILE__) + ": target does not support IoNg yet\n");
+		this->common().write(io, block, prefix, counter);
 
 		SizeType type = tstStruct_.type();
 		int fermionSign = this->common().findFermionSignOfTheOperators();
@@ -221,12 +220,8 @@ public:
 		params.isign = s;
 		if (tstStruct_.aOperators()[0].fermionSign>0) s2 *= s;
 
-		this->common().write(io, block, prefix, counter);
-
 		PostProcType cf(ab_, params);
-		this->common().write(block, io, cf);
-
-		this->common().psi().write(io, "PSI");
+		this->common().writeNGSTs(block, io, cf);
 	}
 
 	void read(const PsimagLite::String& f)

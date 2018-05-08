@@ -189,17 +189,16 @@ public:
 
 	void write(const VectorSizeType& block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String,
-	           SizeType) const
+	           PsimagLite::String prefix,
+	           SizeType counter) const
 	{
-		if (io.ng())
-			err(PsimagLite::String(__FILE__) + ": target does not support IoNg yet\n");
+		this->common().write(io, block, prefix, counter);
 
 		SizeType type = tstStruct_.type();
 		int s = (type&1) ? -1 : 1;
 		int s2 = (type>1) ? -1 : 1;
 
-		if (ab_.size()<2) return;
+		if (ab_.size() < 2) return;
 
 		paramsForSolver_.Eg = Eg_;
 		paramsForSolver_.weight = s2*weightForContinuedFraction_;
@@ -207,12 +206,9 @@ public:
 		PostProcType cf(ab_, paramsForSolver_);
 
 		if (block.size() != 1)
-			err(PsimagLite::String(__FILE__) + " write() only supports blocks.size=1\n");
+			err(PsimagLite::String(__FILE__) + " write() only supports block.size=1\n");
 
-		io.write(block[0], "TargetCentralSite");
-		this->common().write(block, io, cf);
-
-		this->common().psi().write(io,"PSI");
+		this->common().writeNGSTs(block, io, cf);
 	}
 
 	void read(const PsimagLite::String& f)

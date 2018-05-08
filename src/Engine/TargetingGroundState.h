@@ -157,30 +157,7 @@ public:
 	           PsimagLite::String prefix,
 	           SizeType counter) const
 	{
-		PsimagLite::OstringStream msg;
-		msg<<"Saving state...";
-		progress_.printline(msg,std::cout);
-
-#ifdef USE_IO_NG
-		typedef PsimagLite::IoSelector::Out::Serializer SerializerType;
-		if (counter == 0) io.createGroup(prefix);
-
-		io.write(counter + 1,
-		         prefix + "/Size",
-		         (counter == 0) ? SerializerType::NO_OVERWRITE :
-		                          SerializerType::ALLOW_OVERWRITE);
-
-		prefix += ("/" + ttos(counter));
-
-		io.createGroup(prefix);
-#endif
-
 		this->common().write(io, block, prefix, counter);
-
-		if (io.ng())
-			this->common().psi().write(io, prefix + "/PSI");
-		else
-			this->common().psi().write(io,"PSI");
 	}
 
 	void read(const PsimagLite::String& f)

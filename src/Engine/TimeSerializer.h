@@ -165,26 +165,24 @@ public:
 		return marker_;
 	}
 
-	template<typename IoOutputter>
-	void write(IoOutputter& io,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
+	void write(PsimagLite::IoSelector::Out& io)
 	{
-		std::cerr<<__FILE__<<" write() needs IMPLEMENTATION WARNING FIXME\n";
-	}
+		PsimagLite::String prefix("");
+		if (io.ng()) {
+			io.createGroup(prefix + "NGSTSerializer");
+			prefix += "NGSTSerializer/";
+		}
 
-	void write(PsimagLite::IoSimple::Out& io)
-	{
-		io.write(currentTime_, "Time");
-		io.write(site_, "TargetCentralSite");
-		io.write(targetVectors_.size(), "TNUMBEROFVECTORS");
+		io.write(currentTime_, prefix + "Time");
+		io.write(site_, prefix + "TargetCentralSite");
+		io.write(targetVectors_.size(), prefix + "TNUMBEROFVECTORS");
 
 		for (SizeType i=0;i<targetVectors_.size();i++) {
 			PsimagLite::String label = "targetVector"+ttos(i)+"_"+ttos(currentTime_);
-			targetVectors_[i].write(io,label);
+			targetVectors_[i].write(io,prefix + label);
 		}
 
-		io.write(marker_, "MARKER");
+		io.write(marker_, prefix + "MARKER");
 	}
 
 private:

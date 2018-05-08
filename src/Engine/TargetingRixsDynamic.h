@@ -214,17 +214,11 @@ public:
 
 	void write(const VectorSizeType& block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String,
-	           SizeType) const
+	           PsimagLite::String prefix,
+	           SizeType counter) const
 	{
-		if (block.size() != 1) {
-			PsimagLite::String str(__FILE__);
-			str += ": only supports blocks of size 1\n";
-			err(str);
-		}
-
-		this->common().write(block, io);
-		this->common().psi().write(io, "PSI");
+		this->common().write(io, block, prefix, counter);
+		this->common().writeNGSTs(block, io);
 	}
 
 	void read(const PsimagLite::String& f)

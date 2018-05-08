@@ -215,32 +215,8 @@ public:
 	           PsimagLite::String prefix,
 	           SizeType counter) const
 	{
-		if (block.size() != 1) {
-			PsimagLite::String str(__FILE__);
-			str += ": only supports blocks of size 1\n";
-			err(str);
-		}
-
-#ifdef USE_IO_NG
-		typedef PsimagLite::IoSelector::Out::Serializer SerializerType;
-		if (counter == 0) io.createGroup(prefix);
-
-		io.write(counter + 1,
-		         prefix + "/Size",
-		         (counter == 0) ? SerializerType::NO_OVERWRITE :
-		                          SerializerType::ALLOW_OVERWRITE);
-
-		prefix += ("/" + ttos(counter));
-
-		io.createGroup(prefix);
-#endif
-
 		this->common().write(io, block, prefix, counter);
-
-		if (io.ng())
-			this->common().psi().write(io, prefix + "/PSI");
-		else
-			this->common().psi().write(io,"PSI");
+		this->common().writeNGSTs(block, io);
 	}
 
 	void read(const PsimagLite::String& f)
