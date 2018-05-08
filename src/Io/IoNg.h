@@ -142,7 +142,9 @@ public:
 		      hdf5File_(new H5::H5File(fn, modeToH5(mode))),
 		      ioNgSerializer_(hdf5File_)
 		{
-			//H5::Exception::dontPrint();
+#ifdef NDEBUG
+			H5::Exception::dontPrint();
+#endif
 			if (mode == ACC_TRUNC)
 				ioNgSerializer_.createGroup("");
 		}
@@ -285,7 +287,9 @@ public:
 		      hdf5File_(new H5::H5File(fn, H5F_ACC_RDONLY)),
 		      ioNgSerializer_(hdf5File_)
 		{
-			//H5::Exception::dontPrint();
+#ifdef NDEBUG
+			H5::Exception::dontPrint();
+#endif
 		}
 
 		~In()
