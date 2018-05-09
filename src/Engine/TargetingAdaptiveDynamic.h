@@ -189,10 +189,9 @@ public:
 
 	void write(const VectorSizeType& block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String prefix,
-	           SizeType counter) const
+	           PsimagLite::String prefix) const
 	{
-		this->common().write(io, block, prefix, counter);
+		this->common().write(io, block, prefix);
 
 		SizeType type = tstStruct_.type();
 		int s = (type&1) ? -1 : 1;
@@ -208,7 +207,7 @@ public:
 		if (block.size() != 1)
 			err(PsimagLite::String(__FILE__) + " write() only supports block.size=1\n");
 
-		this->common().writeNGSTs(block, io, cf);
+		this->common().writeNGSTs(io, block, prefix, cf);
 	}
 
 	void read(const PsimagLite::String& f)

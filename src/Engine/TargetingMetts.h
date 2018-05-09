@@ -308,10 +308,9 @@ public:
 
 	void write(const VectorSizeType& block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String prefix,
-	           SizeType counter) const
+	           PsimagLite::String prefix) const
 	{
-		this->common().write(io, block, prefix, counter);
+		this->common().write(io, block, prefix);
 
 		VectorVectorWithOffsetType& tv = const_cast<VectorVectorWithOffsetType&>
 		        (this->common().targetVectors());
@@ -320,7 +319,7 @@ public:
 				tv[i].resize(0);
 		}
 
-		this->common().writeNGSTs(block, io);
+		this->common().writeNGSTs(io, block, prefix);
 	}
 
 	void updateOnSiteForCorners(BasisWithOperatorsType&) const

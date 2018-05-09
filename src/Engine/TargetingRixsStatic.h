@@ -212,11 +212,10 @@ public:
 
 	void write(const VectorSizeType& block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String prefix,
-	           SizeType counter) const
+	           PsimagLite::String prefix) const
 	{
-		this->common().write(io, block, prefix, counter);
-		this->common().writeNGSTs(block, io);
+		this->common().write(io, block, prefix);
+		this->common().writeNGSTs(io, block, prefix);
 	}
 
 	void read(const PsimagLite::String& f)

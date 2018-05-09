@@ -238,8 +238,7 @@ public:
 
 	void write(const VectorSizeType& block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String,
-	           SizeType) const
+	           PsimagLite::String prefix) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving state...";
@@ -253,12 +252,18 @@ public:
 		                      site,
 		                      this->common().targetVectors(),
 		                      marker);
-		ts.write(io);
+#ifndef USE_IO_NG
+		ts.write(io, "");
 		this->common().psi().write(io,"PSI");
 
 		// Does anyone read these?
 		io.write(tvEnergy_, "TargetVectorEnergy");
+#else
+		this->common().write(io, block, prefix);
+		this->common().writeNGSTs(io, block, prefix);
+#endif
 	}
+
 
 private:
 

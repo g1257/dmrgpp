@@ -186,8 +186,7 @@ public:
 
 	virtual void write(const typename PsimagLite::Vector<SizeType>::Type&,
 	                   PsimagLite::IoSelector::Out&,
-	                   PsimagLite::String,
-	                   SizeType) const = 0;
+	                   PsimagLite::String) const = 0;
 
 	// non-virtual below
 
@@ -225,6 +224,28 @@ public:
 	}
 
 	const LeftRightSuperType& lrs() const { return lrs_; }
+
+	static PsimagLite::String buildPrefix(PsimagLite::IoSelector::Out& io,
+	                                      SizeType counter)
+	{
+#ifndef USE_IO_NG
+		return "";
+#else
+		PsimagLite::String prefix("TargetingCommon");
+		typedef PsimagLite::IoSelector::Out::Serializer SerializerType;
+		if (counter == 0) io.createGroup(prefix);
+
+		io.write(counter + 1,
+		         prefix + "/Size",
+		         (counter == 0) ? SerializerType::NO_OVERWRITE :
+		                          SerializerType::ALLOW_OVERWRITE);
+
+		prefix += ("/" + ttos(counter));
+
+		io.createGroup(prefix);
+		return prefix;
+#endif
+	}
 
 protected:
 

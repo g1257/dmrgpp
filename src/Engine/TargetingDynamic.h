@@ -187,10 +187,9 @@ public:
 
 	void write(const VectorSizeType& block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String prefix,
-	           SizeType counter) const
+	           PsimagLite::String prefix) const
 	{
-		this->common().write(io, block, prefix, counter);
+		this->common().write(io, block, prefix);
 
 		SizeType type = tstStruct_.type();
 		int fermionSign = this->common().findFermionSignOfTheOperators();
@@ -207,7 +206,7 @@ public:
 		if (tstStruct_.aOperators()[0].fermionSign>0) s2 *= s;
 
 		PostProcType cf(ab_,params);
-		this->common().writeNGSTs(block, io, cf);
+		this->common().writeNGSTs(io, block, prefix, cf);
 	}
 
 	void read(const PsimagLite::String& f)

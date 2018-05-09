@@ -164,10 +164,9 @@ public:
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String prefix,
-	           SizeType counter) const
+	           PsimagLite::String prefix) const
 	{
-		this->common().write(io, block, prefix, counter);
+		this->common().write(io, block, prefix);
 	}
 
 private:

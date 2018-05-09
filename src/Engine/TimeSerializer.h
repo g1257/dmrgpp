@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Io/IoSelector.h"
 #include "TypeToString.h"
+#include "Io/IoSimple.h"
 
 namespace Dmrg {
 
@@ -107,9 +108,16 @@ public:
 	{}
 
 	TimeSerializer(typename PsimagLite::IoSelector::In& io,
-	               PsimagLite::IoSelector::In::LongIntegerType lastInstance = 0)
+	               PsimagLite::IoSelector::In::LongIntegerType lastInstance)
 	{
-		PsimagLite::String prefix = (io.ng()) ? "NGSTSerializer/" : "";
+		SizeType counter = 0;
+		if (lastInstance == PsimagLite::IoSimple::In::LAST_INSTANCE && io.ng()) {
+			io.read(counter, "NGSTSerializer/Size");
+			if (counter == 0) err("NGSTSerializer/Size=0 is a FATAL error\n");
+			--counter;
+		}
+
+		PsimagLite::String prefix = (io.ng()) ? "NGSTSerializer/" + ttos(counter) + "/" : "";
 		RealType x=0;
 		PsimagLite::String s = prefix + "Time=";
 		if (lastInstance) io.readline(x, s, lastInstance);
@@ -141,14 +149,8 @@ public:
 		marker_ = xi;
 	}
 
-	void write(PsimagLite::IoSelector::Out& io) const
+	void write(PsimagLite::IoSelector::Out& io, PsimagLite::String prefix) const
 	{
-		PsimagLite::String prefix("");
-#ifdef USE_IO_NG
-		io.createGroup(prefix + "NGSTSerializer");
-		prefix += "NGSTSerializer/";
-#endif
-
 		io.write(currentTime_, prefix + "Time");
 		io.write(site_, prefix + "TargetCentralSite");
 		io.write(targetVectors_.size(), prefix + "TNUMBEROFVECTORS");
