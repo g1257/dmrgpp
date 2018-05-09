@@ -111,12 +111,13 @@ public:
 	               PsimagLite::IoSelector::In::LongIntegerType lastInstance)
 	{
 		SizeType counter = 0;
+#ifdef USE_IO_NG
 		if (lastInstance == PsimagLite::IoSimple::In::LAST_INSTANCE && io.ng()) {
 			io.read(counter, "NGSTSerializer/Size");
 			if (counter == 0) err("NGSTSerializer/Size=0 is a FATAL error\n");
 			--counter;
 		}
-
+#endif
 		PsimagLite::String prefix = (io.ng()) ? "NGSTSerializer/" + ttos(counter) + "/" : "";
 		RealType x=0;
 		PsimagLite::String s = prefix + "Time=";
