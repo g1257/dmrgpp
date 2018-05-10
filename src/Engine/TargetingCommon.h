@@ -303,6 +303,7 @@ public:
 		PsimagLite::String loadInto = targetHelper_.model().params().checkpoint.into;
 		PsimagLite::String labelForPsi = targetHelper_.model().params().checkpoint.labelForPsi;
 
+		io.rewind();
 		applyOpExpression_.loadEnergy(io, "Energy=", IoType::In::LAST_INSTANCE);
 
 		if (loadInto == "All") {
@@ -320,9 +321,7 @@ public:
 			setAllStagesTo(DISABLED);
 			io.rewind();
 			int site = 0;
-			io.readline(site,
-			            "TargetCentralSite=",
-			            IoType::In::LAST_INSTANCE);
+			io.readline(site, "TargetCentralSite=");
 			applyOpExpression_.psi().loadOneSector(io, labelForPsi);
 		}
 	}

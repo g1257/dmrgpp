@@ -111,8 +111,8 @@ public:
 	               PsimagLite::IoSelector::In::LongIntegerType lastInstance,
 	               PsimagLite::String prefix)
 	{
-		SizeType counter = 0;
 #ifdef USE_IO_NG
+		SizeType counter = 0;
 		if (lastInstance == PsimagLite::IoSimple::In::LAST_INSTANCE && io.ng()) {
 			io.read(counter, prefix + "/Size");
 			if (counter == 0) err(prefix + "/Size=0 is a FATAL error\n");
