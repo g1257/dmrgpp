@@ -482,6 +482,9 @@ private:
 
 		checkpoint_.write(pS,pE,ioOut_);
 
+#ifdef USE_IO_NG
+		ioOut_.createGroup("FinalPsi");
+#endif
 		psi.write(sitesIndices_[stepCurrent_],
 		          ioOut_,
 		          ioOut_.ng() ? "FinalPsi" : "");

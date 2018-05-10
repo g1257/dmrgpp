@@ -287,7 +287,7 @@ public:
 		} else {
 			setAllStagesTo(DISABLED);
 			io.rewind();
-			PsimagLite::String prefix = (io.ng()) ? "FinalPsi/0/" : "";
+			PsimagLite::String prefix = (io.ng()) ? "FinalPsi/" : "";
 			int site = 0;
 			io.readline(site,
 			            prefix + "TargetCentralSite=",
@@ -303,7 +303,7 @@ public:
 
 		applyOpExpression_.loadEnergy(io, "Energy=", IoType::In::LAST_INSTANCE);
 
-		PsimagLite::String prefix = (io.ng()) ? "FinalPsi/0/" : "";
+		PsimagLite::String prefix = (io.ng()) ? "FinalPsi/" : "";
 		applyOpExpression_.psi().read(io, prefix + "PSI");
 	}
 
