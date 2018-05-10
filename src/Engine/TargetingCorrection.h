@@ -95,6 +95,7 @@ public:
 
 	typedef LanczosSolverType_ LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType,VectorWithOffsetType_> BaseType;
+	typedef typename BaseType::TargetingCommonType TargetingCommonType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
@@ -157,9 +158,9 @@ public:
 		this->common().cocoon(block1,direction);
 	}
 
-	void read(const PsimagLite::String& f)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
-		this->common().template read<int>(f,0);
+		this->common().read(io, prefix);
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,

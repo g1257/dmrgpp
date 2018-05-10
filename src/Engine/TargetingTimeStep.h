@@ -95,6 +95,7 @@ public:
 
 	typedef LanczosSolverType_ LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType,VectorWithOffsetType_> BaseType;
+	typedef typename BaseType::TargetingCommonType TargetingCommonType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
@@ -225,15 +226,16 @@ public:
 
 		printNormsAndWeights();
 	}
+
 	bool end() const
 	{
 		return (tstStruct_.maxTime() != 0 &&
 		        this->common().currentTime() >= tstStruct_.maxTime());
 	}
 
-	void read(const PsimagLite::String& f)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
-		this->common().template read<TimeSerializerType>(f);
+		this->common().template readGSandNGSTs<TimeSerializerType>(io, prefix);
 	}
 
 	void write(const VectorSizeType& block,

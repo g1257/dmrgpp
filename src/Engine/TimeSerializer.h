@@ -108,17 +108,22 @@ public:
 	{}
 
 	TimeSerializer(typename PsimagLite::IoSelector::In& io,
-	               PsimagLite::IoSelector::In::LongIntegerType lastInstance)
+	               PsimagLite::IoSelector::In::LongIntegerType lastInstance,
+	               PsimagLite::String prefix)
 	{
 		SizeType counter = 0;
 #ifdef USE_IO_NG
 		if (lastInstance == PsimagLite::IoSimple::In::LAST_INSTANCE && io.ng()) {
-			io.read(counter, "NGSTSerializer/Size");
-			if (counter == 0) err("NGSTSerializer/Size=0 is a FATAL error\n");
+			io.read(counter, prefix + "/Size");
+			if (counter == 0) err(prefix + "/Size=0 is a FATAL error\n");
 			--counter;
+			prefix += ("/" + ttos(counter) + "/");
 		}
+
+		prefix += "/";
+#else
+		prefix = "";
 #endif
-		PsimagLite::String prefix = (io.ng()) ? "NGSTSerializer/" + ttos(counter) + "/" : "";
 		RealType x=0;
 		PsimagLite::String s = prefix + "Time=";
 		if (lastInstance) io.readline(x, s, lastInstance);

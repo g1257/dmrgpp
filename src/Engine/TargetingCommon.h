@@ -101,6 +101,8 @@ class TargetingCommon  {
 
 public:
 
+	enum SetTvsEnum { NO_TVS = false, READ_AND_SET_TVS = true};
+
 	typedef PsimagLite::IoSelector IoType;
 	typedef typename IoType::In IoInputType;
 	typedef typename TargetHelperType::RealType RealType;
@@ -264,10 +266,40 @@ public:
 		ts.write(io, prefix);
 	}
 
-	template<typename SomeSerializerType>
-	void read(const PsimagLite::String& f)
+	void read(IoInputType& io,
+	          PsimagLite::String prefix)
 	{
-		IoInputType io(f);
+		if (!io.ng()) prefix = "";
+		applyOpExpression_.loadEnergy(io, "Energy=", IoType::In::LAST_INSTANCE);
+		applyOpExpression_.psi().read(io, prefix + "PSI");
+	}
+
+	template<typename SomeSerializerType>
+	void readGSandNGSTs(IoInputType& io,
+	          PsimagLite::String prefix)
+	{
+		if (!io.ng()) return readLegacy<SomeSerializerType>(io);
+		else read(io, prefix);
+
+		setAllStagesTo(WFT_NOADVANCE);
+
+		SomeSerializerType ts(io, IoInputType::LAST_INSTANCE, prefix);
+
+		if (targetVectors().size() != ts.size())
+			err(PsimagLite::String(__FILE__) +
+			    ": Trying to set TVs but different sizes\n");
+
+		for (SizeType i=0;i<targetVectors().size();i++)
+			targetVectors(i) = ts.vector(i);
+
+		applyOpExpression_.setTime(ts.time());
+	}
+
+	template<typename SomeSerializerType>
+	void readLegacy(IoInputType& io)
+	{
+		assert(!io.ng());
+
 		PsimagLite::String loadInto = targetHelper_.model().params().checkpoint.into;
 		PsimagLite::String labelForPsi = targetHelper_.model().params().checkpoint.labelForPsi;
 
@@ -275,11 +307,11 @@ public:
 
 		if (loadInto == "All") {
 
-			applyOpExpression_.psi().read(io,labelForPsi);
+			applyOpExpression_.psi().read(io, labelForPsi);
 
 			setAllStagesTo(WFT_NOADVANCE);
 
-			SomeSerializerType ts(io,IoInputType::LAST_INSTANCE);
+			SomeSerializerType ts(io, IoInputType::LAST_INSTANCE, "");
 			for (SizeType i=0;i<targetVectors().size();i++)
 				targetVectors(i) = ts.vector(i);
 
@@ -287,24 +319,12 @@ public:
 		} else {
 			setAllStagesTo(DISABLED);
 			io.rewind();
-			PsimagLite::String prefix = (io.ng()) ? "FinalPsi/" : "";
 			int site = 0;
 			io.readline(site,
-			            prefix + "TargetCentralSite=",
+			            "TargetCentralSite=",
 			            IoType::In::LAST_INSTANCE);
-			applyOpExpression_.psi().loadOneSector(io, prefix + labelForPsi);
+			applyOpExpression_.psi().loadOneSector(io, labelForPsi);
 		}
-	}
-
-	template<typename SomeSerializerType>
-	void read(const PsimagLite::String& f,int)
-	{
-		IoInputType io(f);
-
-		applyOpExpression_.loadEnergy(io, "Energy=", IoType::In::LAST_INSTANCE);
-
-		PsimagLite::String prefix = (io.ng()) ? "FinalPsi/" : "";
-		applyOpExpression_.psi().read(io, prefix + "PSI");
 	}
 
 	bool allStages(SizeType x) const

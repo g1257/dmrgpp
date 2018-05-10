@@ -112,6 +112,7 @@ public:
 
 	typedef LanczosSolverType_ LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType,VectorWithOffsetType_> BaseType;
+	typedef typename BaseType::TargetingCommonType TargetingCommonType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
@@ -292,18 +293,9 @@ public:
 		}
 	}
 
-	void read(const PsimagLite::String& f)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
-		this->common().setAllStagesTo(WFT_NOADVANCE);
-
-		typedef PsimagLite::IoSelector::In IoInType;
-
-		IoInType io(f);
-
-		TimeSerializerType ts(io,IoInType::LAST_INSTANCE);
-		for (SizeType i=0;i<this->common().targetVectors().size();i++)
-			this->common().targetVectors(i) = ts.vector(i);
-		this->common().setTime(ts.time());
+		this->common().template readGSandNGSTs<TimeSerializerType>(io, prefix);
 	}
 
 	void write(const VectorSizeType& block,

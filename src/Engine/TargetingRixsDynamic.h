@@ -109,6 +109,7 @@ class TargetingRixsDynamic : public TargetingBase<LanczosSolverType_,VectorWithO
 
 public:
 
+	typedef typename BaseType::TargetingCommonType TargetingCommonType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
@@ -220,11 +221,11 @@ public:
 		this->common().writeNGSTs(io, block, prefix);
 	}
 
-	void read(const PsimagLite::String& f)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
-		PsimagLite::IoSelector::In io(f);
+		if (io.ng()) this->common().read(io, prefix);
 
-		TimeSerializerType ts(io, PsimagLite::IoSimple::In::LAST_INSTANCE);
+		TimeSerializerType ts(io, PsimagLite::IoSimple::In::LAST_INSTANCE, prefix);
 		SizeType n = ts.numberOfVectors();
 		if (n != 6)
 			err("TargetingRixsDynamic: number of TVs must be 6\n");
@@ -233,7 +234,7 @@ public:
 			this->common().targetVectors(site) = ts.vector(site);
 		}
 
-		this->common().template read<TimeSerializerType>(f,0);
+		if (!io.ng()) this->common().template readLegacy<TimeSerializerType>(io);
 	}
 
 private:

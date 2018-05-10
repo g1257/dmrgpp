@@ -225,7 +225,8 @@ public:
 	void read(BasisWithOperatorsType &pS,
 	          BasisWithOperatorsType &pE,
 	          TargetingType& psi,
-	          bool isObserveCode)
+	          bool isObserveCode,
+	          PsimagLite::String prefix)
 	{
 		typename IoType::In ioTmp(parameters_.checkpoint.filename);
 		SizeType loop = ioTmp.count("NAME=CHKPOINTSYSTEM");
@@ -241,7 +242,8 @@ public:
 		pS = pS1;
 		BasisWithOperatorsType pE1(ioTmp, "CHKPOINTENVIRON", 0, isObserveCode);
 		pE = pE1;
-		psi.read(parameters_.checkpoint.filename);
+		PsimagLite::IoSelector::In io(parameters_.checkpoint.filename);
+		psi.read(io, prefix);
 	}
 
 	void push(const BasisWithOperatorsType &pS,const BasisWithOperatorsType &pE)

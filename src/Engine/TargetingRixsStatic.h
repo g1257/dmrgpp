@@ -108,6 +108,7 @@ class TargetingRixsStatic : public TargetingBase<LanczosSolverType_,VectorWithOf
 
 public:
 
+	typedef typename BaseType::TargetingCommonType TargetingCommonType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
@@ -218,13 +219,12 @@ public:
 		this->common().writeNGSTs(io, block, prefix);
 	}
 
-	void read(const PsimagLite::String& f)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
-		PsimagLite::IoSelector::In io(f);
+		if (io.ng()) this->common().read(io, prefix);
+		else this->common().template readLegacy<TimeSerializerType>(io);
 
-		this->common().template read<TimeSerializerType>(f,0);
-
-		TimeSerializerType ts(io, PsimagLite::IoSimple::In::LAST_INSTANCE);
+		TimeSerializerType ts(io, PsimagLite::IoSimple::In::ONLY_INSTANCE, prefix);
 
 		SizeType n = ts.numberOfVectors();
 		if (n != 4)
