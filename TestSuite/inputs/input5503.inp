@@ -24,8 +24,8 @@ Connectors 1 0
 Model=TjMultiOrb
 
 potentialV 16
-0 0 0 0 0 6.666 0 0
-0 0 0 0 0 6.666 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
 InfiniteLoopKeptStates=100
 FiniteLoops 4
 -6 100 2 6 100 2
@@ -34,35 +34,35 @@ FiniteLoops 4
 TargetElectronsUp=4
 TargetElectronsDown=4
 Threads=1
-
-SolverOptions=TargetingRixsStatic,twositedmrg,restart
+SolverOptions=TargetingRixsDynamic,twositedmrg,restart,minimizeDisk
 CorrectionA=0
 Version=version
-RestartFilename=data5501
+RestartFilename=data5502
 
-OutputFile=data5502
+OutputFile=data5503
 
-CorrectionVectorOmega=1
+CorrectionVectorOmega=0.1
 DynamicDmrgType=0
 TSPProductOrSum=sum
 CorrectionVectorFreqType=Real
 
-CorrectionVectorEta=0.2
+CorrectionVectorEta=0.075
 CorrectionVectorAlgorithm=Krylov
 Orbitals=1
 
 GsWeight=0.1
 
-TSPSites 1 5
+TSPSites 1 3
 TSPLoops 1 1
+
 
 TSPOperator=raw
 RAW_MATRIX
 3 3
+0 1 0
 0 0 0
 0 0 0
-1 0 0
 FERMIONSIGN=-1
-JMVALUES 2 1 1
+JMVALUES 2 0 0
 AngularFactor=1
-#ci dmrg arguments= -p 12 'c'
+#ci dmrg arguments= -p 12 'c?1'
