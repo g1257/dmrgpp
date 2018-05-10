@@ -95,14 +95,14 @@ public:
 	}
 
 	template<typename SomeIoOutputType>
-	void write(SomeIoOutputType&) const
+	void write(SomeIoOutputType&, String) const
 	{
 		String name(typeid(SomeIoOutputType).name());
 		std::cerr<<"WARNING: cannot save ChebyshevSerializer";
 		std::cerr<<"to output type "<<name<<"\n";
 	}
 
-	void write(IoSimple::Out& io) const
+	void write(IoSimple::Out& io, String) const
 	{
 		io.write(0, stringMarker_);
 		io.write(params_.Eg, "#ChebyshevEnergy=");

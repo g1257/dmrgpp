@@ -129,6 +129,8 @@ public:
 	           WriteMode allowOverwrite = NO_OVERWRITE,
 	           typename EnableIf<Loki::TypeTraits<T>::isArith, int>::Type = 0)
 	{
+		if (what.size() == 0) return;
+
 		overwriteNotSupported(allowOverwrite);
 		String name = "Def/" + name2;
 		hsize_t dims[1];

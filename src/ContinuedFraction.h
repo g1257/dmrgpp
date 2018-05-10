@@ -93,14 +93,14 @@ public:
 	}
 
 	template<typename SomeIoOutputType>
-	void write(SomeIoOutputType&) const
+	void write(SomeIoOutputType&, String) const
 	{
 		String name(typeid(SomeIoOutputType).name());
 		std::cerr<<"WARNING: cannot save ContinuedFraction";
 		std::cerr<<"to output type "<<name<<"\n";
 	}
 
-	void write(IoSimple::Out& io) const
+	void write(IoSimple::Out& io, String) const
 	{
 		io.setPrecision(12);
 		ab_.write(io);
