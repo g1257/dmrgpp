@@ -5,21 +5,14 @@ use warnings;
 use Getopt::Long qw(:config no_ignore_case);
 use lib ".";
 use Ci;
-use lib "../scripts";
-use timeObservablesInSitu;
-use EnergyAncillaInSitu;
-use CollectBrakets;
-use Metts;
 
-my ($valgrind,$workdir,$restart,$ranges,$postprocess,$noSu2,$info,$sOptions,$help);
+my ($valgrind,$workdir,$ranges,$noSu2,$info,$sOptions,$help);
 my %submit;
 GetOptions(
 'S=s' => \$submit{"command"},
 'delay=s' => \$submit{"delay"},
 'valgrind=s' => \$valgrind,
 'w=s' => \$workdir,
-'R' => \$restart,
-'P' => \$postprocess,
 'n=s' => \$ranges,
 'i=i' => \$info,
 'o=s' => \$sOptions,
@@ -29,7 +22,7 @@ GetOptions(
 if (defined($help)) {
 	print "USAGE: $0 [options]\n";
 	print "\tIf no option is given creates inputs and batches for all ";
-	print "no-restart tests\n";
+	print "tests\n";
 	print "\t-S command\n";
 	print "\t\tAfter creating inputs and batches, submit them to the queue\n";
 	print "\t\tusing batchDollarized.pbs as template, and\n";
@@ -40,10 +33,6 @@ if (defined($help)) {
 	print "\t-n n\n";
 	print Ci::helpFor("-n");
 	print Ci::helpFor("-w");
-	print "\t-R\n";
-	print "\t\tRun restart tests only\n";
-	print "\t-P\n";
-	print "\t\tRun postprocess only\n";
 	print "\t--valgrind tool\n";
 	print "\t\tRun with valgrind using tool tool\n";
 	print "\t-i number\n";
@@ -61,8 +50,6 @@ defined($sOptions) or $sOptions = "";
 
 defined($valgrind) or $valgrind = "";
 defined($workdir) or $workdir = "tests";
-defined($restart) or $restart = 0;
-defined($postprocess) or $postprocess = 0;
 
 my $templateBatch = "batchDollarized.pbs";
 
@@ -86,6 +73,7 @@ my $rangesTotal = scalar(@inRange);
 die "$0: No tests specified under -n\n" if ($rangesTotal == 0);
 #print STDERR "@inRange"."\n";
 my $nonExistent = "";
+my @batches;
 
 for (my $j = 0; $j < $rangesTotal; ++$j) {
 	my $n = $inRange[$j];
@@ -100,21 +88,6 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 		$nonExistent = "";
 	}
 
-	my $ir = isRestart("../inputs/input$n.inp",$n);
-	if ($restart and !$ir) {
-		print STDERR "$0: WARNING: Ignored test $n ";
-		print STDERR "because it's NOT a restart test and ";
-		print STDERR "you specified -R\n";
-		next;
-	}
-
-	if (!$restart and $ir) {
-		print STDERR "$0: WARNING: Ignored test $n ";
-		print STDERR "because it's a restart test and ";
-		print STDERR "you NOT specify -R\n";
-		next;
-	}
-
 	my $isSu2 = Ci::isSu2("../inputs/input$n.inp",$n);
 	if ($isSu2 and $noSu2) {
 		print STDERR "$0: WARNING: Ignored test $n ";
@@ -123,27 +96,49 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 		next;
 	}
 
+	my $from = getRestartFrom("../inputs/input$n.inp",$n);
 	my %ciAnnotations = Ci::getCiAnnotations("../inputs/input$n.inp",$n);
-	my @postProcessLabels = qw(getTimeObservablesInSitu getEnergyAncilla CollectBrakets metts observe);
-	my %actions = (getTimeObservablesInSitu => \&runTimeInSituObs,
-	               getEnergyAncilla => \&runEnergyAncillaInSituObs,
-	               CollectBrakets => \&runCollectBrakets,
-	               metts => \&runMetts,
-	               observe => \&runObserve);
-	foreach my $ppLabel (@postProcessLabels) {
+
+	my $whatDmrg = $ciAnnotations{"dmrg"};
+	my $extraCmdArgs = $sOptions."  ".findArguments($whatDmrg);
+	my $cmd = getCmd($n, $valgrind, $extraCmdArgs);
+	
+	foreach my $ppLabel (keys %ciAnnotations) {
 		my $w = $ciAnnotations{$ppLabel};
 		my $x = defined($w) ? scalar(@$w) : 0;
 		next if ($x == 0);
 		print "|$n| has $x $ppLabel lines\n";
-		next unless ($postprocess);
-		$actions{$ppLabel}->($n, $w, \%submit, $sOptions);
+		next if ($ppLabel eq "dmrg");
+			
+		if ($ppLabel eq "observe") {
+			$cmd .= runObserve($n, $w, $sOptions);
+			next;
+		}
+
+		my $text = join ' ', map{ qq/"$_"/ } @$w;
+		my $pcmd = "perl ../actionsCi.pl $ppLabel $n $text\n";
+		$cmd .= $pcmd;
 	}
 
-	next if ($postprocess);
+	if ($from ne "") {
+		my $bi = getDeepBatchIndex($from);
+		defined($batches[$bi]) or die "$0: Cannot append to empty batch\n";
+		appendToBatch($batches[$bi], $cmd);
+		next;
+	}
 
-	my $whatDmrg = $ciAnnotations{"dmrg"};
-	my $extraCmdArgs = $sOptions."  ".findArguments($whatDmrg);
-	procTest($n,$valgrind,\%submit,$extraCmdArgs);
+	my $batch = createBatch($n, $cmd, $submit{"PBS_O_WORKDIR"});
+	die "$0: Already created $batch\n" if defined($batches[$n]);
+	$batches[$n] = $batch;
+}
+
+exit(0) if ($submit{"command"} eq "");
+
+my $totalBatches = scalar(@batches);
+for (my $i = 0; $i < $totalBatches; ++$i) {
+	my $batch = $batches[$i];
+	next if (!defined($batch));
+	submitBatch(\%submit, $batch);
 }
 
 sub findArguments
@@ -162,155 +157,22 @@ sub findArguments
 	return "";
 }
 
-sub runTimeInSituObs
-{
-	my ($n,$what,$submit) = @_;
-	my $whatN = scalar(@$what);
-	for (my $i = 0; $i < $whatN; ++$i) {
-		my $file = "runForinput$n.cout";
-		if (!(-r "$file")) {
-			print STDERR "|$n|: WARNING: $file not readable\n";
-			next;
-		}
-
-		my @temp = split(/ /, $what->[$i]);
-		(scalar(@temp) == 2) or die "$0: FATAL annotation ".$what->[$i]."\n";
-		my ($site, $label) = @temp;		
-		my $fin;
-		open($fin, "<", $file) or die "$0: Could not open $file : $!\n";
-		my $fout;
-		my $foutname = "timeObservablesInSitu${n}_$i.txt";
-		if (!open($fout, ">", "$foutname")) {
-			close($fin);
-			die "$0: Could not write to $foutname: $!\n";
-		}
-
-		if ($submit->{"command"} ne "") {
-			timeObservablesInSitu::main($site, $label, $fin, $fout);
-		} else {
-			print STDERR "|$n|: Dry run $site $label\n";
-		}
-
-		close($fin);
-		close($fout);
-	}
-}
-
-sub runEnergyAncillaInSituObs
-{
-	my ($n,$what,$submit) = @_;
-	my $whatN = scalar(@$what);
-	for (my $i = 0; $i < $whatN; ++$i) {
-		my $file = "runForinput$n.cout";
-		if (!(-r "$file")) {
-			print STDERR "|$n|: WARNING: $file not readable\n";
-			next;
-		}
-
-		my @temp = split(/ /, $what->[$i]);
-		(scalar(@temp) == 2) or die "$0: FATAL annotation ".$what->[$i]."\n";
-		my ($beta, $label) = @temp;
-		my $fin;
-		open($fin, "<", $file) or die "$0: Could not open $file : $!\n";
-		my $fout;
-		my $foutname = "energyAncillaInSitu${n}_$i.txt";
-		if (!open($fout, ">", "$foutname")) {
-			close($fin);
-			die "$0: Could not write to $foutname: $!\n";
-		}
-
-		if ($submit->{"command"} ne "") {
-			EnergyAncillaInSitu::main($beta, $label, $fin, $fout);
-		} else {
-			print STDERR "|$n|: Dry run $beta $label\n";
-		}
-
-		close($fin);
-		close($fout);
-	}
-}
-
-sub runCollectBrakets
-{
-	my ($n,$what,$submit) = @_;
-	my $whatN = scalar(@$what);
-	for (my $i = 0; $i < $whatN; ++$i) {
-		my $file = "runForinput$n.cout";
-		if (!(-r "$file")) {
-			print STDERR "|$n|: WARNING: $file not readable\n";
-			next;
-		}
-
-		#my @temp = split(/ /, $what->[$i]); # arguments ot CollectBrakets
-		my $foutname = "CollectBrakets${n}_$i.txt";
-		
-		if ($submit->{"command"} ne "") {
-			CollectBrakets::main($file, $foutname);
-		} else {
-			print STDERR "|$n|: Dry run $file $foutname\n";
-		}
-	}
-}
-
-sub runMetts
-{
-	my ($n,$what,$submit) = @_;
-	my $whatN = scalar(@$what);
-	my %actions = ("Energy" => \&Metts::energy,
-	               "Density" => \&Metts::density);
-	for (my $i = 0; $i < $whatN; ++$i) {
-		my $file = "runForinput$n.cout";
-		if (!(-r "$file")) {
-			print STDERR "|$n|: WARNING: $file not readable\n";
-			next;
-		}
-
-		my @temp = split(/ /, $what->[$i]);
-		(scalar(@temp) == 3) or next;
-
-		my ($label, $arg0, $arg1) = @temp;
-		if (($label ne "Energy") and ($label ne "Density")) {
-			die "$0: Wrong annotation: $what->[$i]\n";
-		}
-
-		my $fin;
-		open($fin, "<", $file) or die "$0: Could not open $file : $!\n";
-		my $fout;
-		my $foutname = "metts${n}_$i.txt";
-		if (!open($fout, ">", "$foutname")) {
-			close($fin);
-			die "$0: Could not write to $foutname: $!\n";
-		}
-
-		if ($submit->{"command"} ne "") {
-			my ($sum, $counter) = $actions{"$label"}($arg0, $arg1,0, $fin);
-			print $fout "#"."$label=$sum $counter\n";
-		} else {
-			print STDERR "|$n|: Dry run $arg0 $arg1\n";
-		}
-
-		close($fin);
-		close($fout);
-	}
-}
-
 sub runObserve
 {
-	my ($n,$what,$submit,$sOptions) = @_;
+	my ($n, $what, $sOptions) = @_;
 	my $whatN = scalar(@$what);
 	my $cmd = "";
 	for (my $i = 0; $i < $whatN; ++$i) {
-		$cmd .= runObserveOne($n,$i,$what->[$i],$sOptions,$submit);
+		$cmd .= runObserveOne($n,$i,$what->[$i],$sOptions);
 		$cmd .= "\n";
 	}
 
-	my $batch = createBatch($n,$cmd, $submit->{"PBS_O_WORKDIR"});
-	submitBatch($submit, $batch) if ($submit->{"command"} ne "");
+	return $cmd;
 }
 
 sub runObserveOne
 {
-	my ($n, $ind, $what, $sOptions, $submit) = @_;
+	my ($n, $ind, $what, $sOptions) = @_;
 	# what == arguments=something
 	my $args;
 	if ($what =~ /^arguments=(.+$)/) {
@@ -326,33 +188,58 @@ sub runObserveOne
 	return $cmd;
 }
 
-sub isRestart
+sub getRestartFrom
 {
 	my ($file,$n) = @_;
-	open(FILE, "<", "$file") or return 0;
-	my $so;
+	open(FILE, "<", "$file") or die "$0: Cannot open $file : $!\n";
+	my ($so, $from);
+	my $restart = 0;
 	while (<FILE>) {
 		chomp;
 		if (/SolverOptions=(.*$)/) {
 			$so = $1;
-			last;
+			last unless ($so =~ /restart/);
+			$restart = 1;
+			last if defined($from);
+		}
+
+		if (/RestartFilename=(.*$)/) {
+			$from = $1;
+			last if defined($so);
 		}
 	}
 
 	close(FILE);
-	defined($so) or return 0;
-	if ($so =~/restart/) { return 1; }
-	return 0;
+	return "" if ($restart == 0);
+	defined($from) or die "$0: restart test $n without RestartFilename\n";
+	return $from;
 }
 
-sub procTest
+sub getDeepBatchIndex
 {
-	my ($n,$tool,$submit,$extraCmdArgs) = @_;
+	my ($from) = @_;
+	# $from = data??.txt or data??
+	my $copy = $from;
+	$copy =~ s/\.txt$//;
+	my $n;
+	if ($copy =~ /(\d+$)/) {
+		$n = $1;
+	}
+
+	defined($n) or die "$0: getDeepBatchIndex $from\n";
+
+	my $file = "../inputs/input$n.inp";	
+	my $from2 = getRestartFrom($file, $n);
+		
+	return ($from2 eq "") ? $n : getDeepBatchIndex($from2);
+}
+
+sub getCmd
+{
+	my ($n, $tool, $extraCmdArgs) = @_;
 	my $valgrind = ($tool eq "") ? "" : "valgrind --tool=$tool ";
 	$valgrind .= " --callgrind-out-file=callgrind$n.out " if ($tool eq "callgrind");
-	my $cmd = "$valgrind./dmrg -f ../inputs/input$n.inp $extraCmdArgs &> output$n.txt";
-	my $batch = createBatch($n, $cmd, $submit->{"PBS_O_WORKDIR"});
-	submitBatch($submit, $batch) if ($submit->{"command"} ne "");
+	return "$valgrind./dmrg -f ../inputs/input$n.inp $extraCmdArgs &> output$n.txt\n\n";
 }
 
 sub createBatch
@@ -385,6 +272,16 @@ sub createBatch
 	return $file;
 }
 
+sub appendToBatch
+{
+	my ($fout, $cmd) = @_;
+	open(FOUT, ">>", "$fout") or die "$0: Cannot append to $fout: $!\n";
+	print FOUT "$cmd\n";
+	close(FOUT);
+
+	print STDERR "$0: $fout appended to\n";
+}
+
 sub submitBatch
 {
 	my ($submit, $batch) = @_;
@@ -413,3 +310,4 @@ sub prepareDir
 	system("cp -av  ../src/observe $workdir/");
 	chdir("$workdir/");
 }
+
