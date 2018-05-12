@@ -120,7 +120,7 @@ public:
 			prefix += ("/" + ttos(counter) + "/");
 		}
 
-		prefix += "/";
+		prefix += "/TimeSerializer/";
 #else
 		prefix = "";
 #endif
@@ -157,6 +157,14 @@ public:
 
 	void write(PsimagLite::IoSelector::Out& io, PsimagLite::String prefix) const
 	{
+#ifdef USE_IO_NG
+		prefix += "/TimeSerializer";
+		io.createGroup(prefix);
+		prefix += "/";
+#else
+		prefix = "";
+#endif
+
 		io.write(currentTime_, prefix + "Time");
 		io.write(site_, prefix + "TargetCentralSite");
 		io.write(targetVectors_.size(), prefix + "TNUMBEROFVECTORS");
