@@ -233,9 +233,13 @@ public:
 		        this->common().currentTime() >= tstStruct_.maxTime());
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io,
+	          PsimagLite::String prefix,
+	          PsimagLite::IoSelector::In::LongIntegerType instance)
 	{
-		this->common().template readGSandNGSTs<TimeSerializerType>(io, prefix);
+		this->common().template readGSandNGSTs<TimeSerializerType>(io,
+		                                                           prefix,
+		                                                           instance);
 	}
 
 	void write(const VectorSizeType& block,

@@ -158,7 +158,9 @@ public:
 		this->common().cocoon(block1,direction);
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io,
+	          PsimagLite::String prefix,
+	          PsimagLite::IoSelector::In::LongIntegerType)
 	{
 		this->common().read(io, prefix);
 	}

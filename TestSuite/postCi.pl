@@ -313,7 +313,7 @@ sub checkCollectBrakets
 
 		my $file1 = "$workdir/CollectBrakets${n}_$i.txt";
 		my $file2 = "$golddir/CollectBrakets${n}_$i.txt";
-		print "WARNING unimplemented: Comparing $file1 against $file2\n";
+		print "WARNING unimplemented: Comparing $file1 $file2\n";
 	}
 }
 

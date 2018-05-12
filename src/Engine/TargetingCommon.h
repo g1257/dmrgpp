@@ -270,29 +270,33 @@ public:
 	          PsimagLite::String prefix)
 	{
 		if (!io.ng()) prefix = "";
+		else prefix += "/";
 		applyOpExpression_.loadEnergy(io, "Energy=", IoType::In::LAST_INSTANCE);
 		applyOpExpression_.psi().read(io, prefix + "PSI");
 	}
 
 	template<typename SomeSerializerType>
 	void readGSandNGSTs(IoInputType& io,
-	          PsimagLite::String prefix)
+	                    PsimagLite::String prefix,
+	                    PsimagLite::IoSelector::In::LongIntegerType lastInstance)
 	{
 		if (!io.ng()) return readLegacy<SomeSerializerType>(io);
 		else read(io, prefix);
 
-		setAllStagesTo(WFT_NOADVANCE);
+		// restarting NGST --> NGST isn't supported yet FIXME TODO
 
-		SomeSerializerType ts(io, IoInputType::LAST_INSTANCE, prefix);
+//		setAllStagesTo(WFT_NOADVANCE);
 
-		if (targetVectors().size() != ts.size())
-			err(PsimagLite::String(__FILE__) +
-			    ": Trying to set TVs but different sizes\n");
+//		SomeSerializerType ts(io, lastInstance, prefix);
 
-		for (SizeType i=0;i<targetVectors().size();i++)
-			targetVectors(i) = ts.vector(i);
+//		if (targetVectors().size() != ts.size())
+//			err(PsimagLite::String(__FILE__) +
+//			    ": Trying to set TVs but different sizes\n");
 
-		applyOpExpression_.setTime(ts.time());
+//		for (SizeType i=0;i<targetVectors().size();i++)
+//			targetVectors(i) = ts.vector(i);
+
+//		applyOpExpression_.setTime(ts.time());
 	}
 
 	template<typename SomeSerializerType>

@@ -219,7 +219,9 @@ public:
 		this->common().writeNGSTs(io, block, prefix);
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io,
+	          PsimagLite::String prefix,
+	          PsimagLite::IoSelector::In::LongIntegerType)
 	{
 		if (io.ng()) this->common().read(io, prefix);
 		else this->common().template readLegacy<TimeSerializerType>(io);

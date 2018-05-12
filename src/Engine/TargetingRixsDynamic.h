@@ -221,11 +221,13 @@ public:
 		this->common().writeNGSTs(io, block, prefix);
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io,
+	          PsimagLite::String prefix,
+	          PsimagLite::IoSelector::In::LongIntegerType)
 	{
 		if (io.ng()) this->common().read(io, prefix);
 
-		TimeSerializerType ts(io, PsimagLite::IoSimple::In::LAST_INSTANCE, prefix);
+		TimeSerializerType ts(io, PsimagLite::IoSimple::In::ONLY_INSTANCE, prefix);
 		SizeType n = ts.numberOfVectors();
 		if (n != 6)
 			err("TargetingRixsDynamic: number of TVs must be 6\n");

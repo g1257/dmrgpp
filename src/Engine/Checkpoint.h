@@ -243,7 +243,8 @@ public:
 		BasisWithOperatorsType pE1(ioTmp, "CHKPOINTENVIRON", 0, isObserveCode);
 		pE = pE1;
 		PsimagLite::IoSelector::In io(parameters_.checkpoint.filename);
-		psi.read(io, prefix);
+		psi.read(io, prefix, (io.ng()) ? PsimagLite::IoSimple::In::ONLY_INSTANCE :
+		                                 PsimagLite::IoSimple::In::LAST_INSTANCE);
 	}
 
 	void push(const BasisWithOperatorsType &pS,const BasisWithOperatorsType &pE)
