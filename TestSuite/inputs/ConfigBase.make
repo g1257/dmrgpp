@@ -21,9 +21,9 @@ CPPFLAGS += -Wall -Wendif-labels
 #CPPFLAGS += -D_GLIBCXX_DEBUG -D_GLIBCXX_PROFILE
 
 #When using IoNg one has to compile with HDF5 libraries
-#CPPFLAGS += -DUSE_IO_NG
-#CPPFLAGS += -I/usr/include/hdf5/serial
-#LDFLAGS += -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5
+CPPFLAGS += -DUSE_IO_NG
+CPPFLAGS += -I/usr/include/hdf5/serial
+LDFLAGS += -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5
 
 # This makes the code use long instead of short integers
 #CPPFLAGS +=-DUSE_LONG
