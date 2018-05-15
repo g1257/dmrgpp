@@ -16,7 +16,7 @@ class Braket {
 	typedef typename PsimagLite::Vector<int>::Type VectorIntType;
 	typedef typename OperatorType::PairType PairType;
 	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
-	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;

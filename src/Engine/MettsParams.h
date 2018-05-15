@@ -96,7 +96,7 @@ public:
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::OperatorType OperatorType;
 	typedef TargetParamsTimeVectors<ModelType> TimeVectorParamsType;
-	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef typename OperatorType::StorageType SparseMatrixType;
 
 	template<typename IoInputter>
 	MettsParams(IoInputter& io,const ModelType& model)

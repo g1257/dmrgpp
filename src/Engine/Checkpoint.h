@@ -102,7 +102,7 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename ModelType::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename PsimagLite::Stack<BasisWithOperatorsType>::Type MemoryStackType;
 	typedef DiskStack<BasisWithOperatorsType>  DiskStackType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;

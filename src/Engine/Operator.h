@@ -92,21 +92,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 // This is a structure, don't add member functions here!
-template<typename SparseMatrixType_>
+template<typename StorageType_>
 struct Operator {
 
 	enum {CAN_BE_ZERO = false, MUST_BE_NONZERO = true};
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef SparseMatrixType_ SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
+	typedef StorageType_ StorageType;
+	typedef typename StorageType::value_type value_type;
+	typedef typename PsimagLite::Real<value_type>::Type RealType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef Su2Related Su2RelatedType;
+	typedef PsimagLite::Matrix<value_type> DenseMatrixType;
 
 	Operator() : fermionSign(1), angularFactor(1) {}
 
-	Operator(const SparseMatrixType& data1,
+	Operator(const StorageType& data1,
 	         int fermionSign1,
 	         const PairType& jm1,
 	         RealType angularFactor1,
@@ -171,7 +172,7 @@ struct Operator {
 				throw PsimagLite::RuntimeError("COOKED_EXTRA must be followed 2 v0 v1\n");
 			data = model.naturalOperator(s,v[0],v[1]).data;
 		} else if (s == "raw") {
-			PsimagLite::Matrix<SparseElementType> m;
+			DenseMatrixType m;
 			io.read(m, prefix + "RAW_MATRIX");
 			if (checkNonZero) checkNotZeroMatrix(m);
 			fullMatrixToCrsMatrix(data,m);
@@ -247,7 +248,7 @@ struct Operator {
 
 	void conjugate()
 	{
-		SparseMatrixType data2 = data;
+		StorageType data2 = data;
 		transposeConjugate(data,data2);
 	}
 
@@ -277,7 +278,7 @@ struct Operator {
 	{
 		os<<"TSPOperator=raw\n";
 		os<<"RAW_MATRIX\n";
-		PsimagLite::Matrix<SparseElementType> m;
+		DenseMatrixType m;
 		crsMatrixToFullMatrix(m,data);
 		os<<m;
 		os<<"FERMIONSIGN="<<fermionSign<<"\n";
@@ -303,7 +304,7 @@ struct Operator {
 		Dmrg::recv(su2Related,root,tag+4,mpiComm);
 	}
 
-	Operator& operator*=(SparseElementType x)
+	Operator& operator*=(value_type x)
 	{
 		data *= x;
 		return *this;
@@ -316,7 +317,7 @@ struct Operator {
 		if (metaDiff(other) > 0)
 			err("operator+= failed for Operator: metas not equal\n");
 
-		SparseMatrixType crs;
+		StorageType crs;
 		multiply(crs, data, other.data);
 		data = crs;
 
@@ -354,7 +355,7 @@ struct Operator {
 		return code;
 	}
 
-	SparseMatrixType data;
+	StorageType data;
 	// does this operator commute or anticommute with others of the
 	// same class on different sites
 	int fermionSign;
@@ -380,7 +381,7 @@ private:
 		return s;
 	}
 
-	void checkNotZeroMatrix(const PsimagLite::Matrix<SparseElementType>& m) const
+	void checkNotZeroMatrix(const DenseMatrixType& m) const
 	{
 		RealType norma = norm2(m);
 		RealType eps = 1e-6;

@@ -19,6 +19,8 @@ class BlockOffDiagMatrix {
 
 public:
 
+	typedef MatrixBlockType value_type;
+
 	BlockOffDiagMatrix(const SparseMatrixType& sparse,
 	                   const VectorSizeType& partitions)
 	    : offsetRows_(partitions), rows_(0), cols_(0)

@@ -89,7 +89,7 @@ struct DmrgWaveStruct {
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;

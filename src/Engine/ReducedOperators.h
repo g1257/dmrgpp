@@ -82,14 +82,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Su2SymmetryGlobals.h"
 #include "Operator.h"
 #include "ChangeOfBasis.h"
+#include "BlockOffDiagMatrix.h"
+#include "../KronUtil/MatrixDenseOrSparse.h"
 
 namespace Dmrg {
 template<typename BasisType>
 class ReducedOperators {
 
 	typedef typename BasisType::SparseMatrixType SparseMatrixType;
-	typedef Operator<SparseMatrixType> OperatorType_;
 	typedef typename SparseMatrixType::value_type SparseElementType;
+	// typedef BlockOffDiagMatrix<MatrixDenseOrSparse<SparseMatrixType> > BlockOffDiagMatrixType;
+	typedef Operator<SparseMatrixType> OperatorType_;
 	typedef typename BasisType::RealType RealType;
 	typedef typename OperatorType_::PairType PairType;
 	typedef ClebschGordanCached<RealType> ClebschGordanType;

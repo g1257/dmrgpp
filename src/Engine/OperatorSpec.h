@@ -9,7 +9,7 @@ template<typename ModelType>
 class OperatorSpec {
 
 	typedef typename ModelType::OperatorType OperatorType;
-	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef typename OperatorType::StorageType SparseMatrixType;
 
 	struct NaturalOpStruct {
 		NaturalOpStruct(PsimagLite::String label_)

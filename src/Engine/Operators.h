@@ -118,7 +118,7 @@ public:
 	typedef ReducedOperators<BasisType> ReducedOperatorsType;
 	typedef typename ReducedOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename ReducedOperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef PsimagLite::Concurrency ConcurrencyType;

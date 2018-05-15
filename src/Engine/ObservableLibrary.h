@@ -99,7 +99,7 @@ public:
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
 	typedef typename ModelType::RealType RealType;
-	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename VectorWithOffsetType::value_type FieldType;
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorFieldType;
 	typedef PsimagLite::Matrix<FieldType> MatrixType;

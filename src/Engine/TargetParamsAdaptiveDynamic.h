@@ -92,7 +92,7 @@ public:
 
 	typedef typename ModelType::OperatorType OperatorType;
 	typedef typename OperatorType::PairType PairType;
-	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrReal;
 	typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
 

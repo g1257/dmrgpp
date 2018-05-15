@@ -15,7 +15,7 @@ class FeAsJzSymmetry {
 public:
 
 	typedef typename VectorOperatorType::value_type OperatorType;
-	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
@@ -48,7 +48,7 @@ class FeAsJzSymmetry<HilbertBasisType,VectorOperatorType, true> {
 public:
 
 	typedef typename VectorOperatorType::value_type OperatorType;
-	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;

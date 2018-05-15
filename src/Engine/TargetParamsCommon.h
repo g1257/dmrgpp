@@ -94,7 +94,7 @@ public:
 	typedef TargetParamsBase<ModelType> BaseType;
 	typedef typename ModelType::OperatorType OperatorType;
 	typedef typename OperatorType::PairType PairType;
-	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;

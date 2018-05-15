@@ -127,7 +127,7 @@ public:
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorsType::BasisType BasisType;
 	typedef typename BasisType::BlockType BlockType;
-	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef BasisWithOperators<OperatorsType> ThisType;
 	typedef typename BasisType::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename BasisType::FactorsType FactorsType;

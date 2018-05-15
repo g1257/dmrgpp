@@ -11,6 +11,7 @@ class MatrixDenseOrSparse {
 
 public:
 
+	typedef typename SparseMatrixType::value_type value_type;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
