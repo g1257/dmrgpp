@@ -148,7 +148,17 @@ public:
 	{
 
 		SizeType n = geometry_.numberOfSites();
-		SizeType m = modelParameters_.magneticField.size();
+		SizeType mx = modelParameters_.magneticFieldX.size();
+		SizeType my = modelParameters_.magneticFieldY.size();
+		SizeType mz = modelParameters_.magneticFieldZ.size();
+		SizeType m = mz;
+
+		if (mx != my || my != mz || mz != mx ) {
+			PsimagLite::String msg("Kitaev: If provided, ");
+			msg += " MagneticField must be a vector of " + ttos(n) + " entries.\n";
+			msg += " MagneticFieldX, MagneticFieldY, MagneticFieldZ must be a provided in all 3 (x,y,z) directions.\n";
+			throw PsimagLite::RuntimeError(msg);
+		}
 
 		if (m > 0 && m != n) {
 			PsimagLite::String msg("Kitaev: If provided, ");
@@ -195,11 +205,11 @@ public:
 
 		operatorMatrices.clear();
 		for (SizeType i=0;i<block.size();i++) {
-			// Set the operators S^x_i in the natural basis
-			tmpMatrix = findSdirMatrices(i, natBasis, DIR_X, dummy);
 
 			typename OperatorType::Su2RelatedType su2related;
 
+			// Set the operators S^x_i in the natural basis
+			tmpMatrix = findSdirMatrices(i, natBasis, DIR_X, dummy);
 			OperatorType myOp(tmpMatrix, 1, PairType(0, 0), 1.0, su2related);
 			operatorMatrices.push_back(myOp);
 
@@ -270,15 +280,26 @@ public:
 	                                RealType factorForDiagonals=1.0)  const
 	{
 		SizeType linSize = geometry_.numberOfSites();
-		if (modelParameters_.magneticField.size() != linSize)
+		if (modelParameters_.magneticFieldX.size() != linSize)
+			return; // <<---- PLEASE NOTE EARLY EXIT HERE
+		if (modelParameters_.magneticFieldY.size() != linSize)
+			return; // <<---- PLEASE NOTE EARLY EXIT HERE
+		if (modelParameters_.magneticFieldZ.size() != linSize)
 			return; // <<---- PLEASE NOTE EARLY EXIT HERE
 
 		SizeType n=block.size();
-
 		for (SizeType i = 0; i < n; ++i) {
-			// magnetic field
-			RealType tmp = modelParameters_.magneticField[block[i*2]]*factorForDiagonals;
+			// magnetic field x
+			RealType tmp = modelParameters_.magneticFieldX[block[i*2]]*factorForDiagonals;
+			hmatrix += tmp*cm[0+i*2].data;
+
+			// magnetic field y
+			tmp = modelParameters_.magneticFieldY[block[i*2]]*factorForDiagonals;
 			hmatrix += tmp*cm[1+i*2].data;
+
+			// magnetic field z
+			tmp = modelParameters_.magneticFieldZ[block[i*2]]*factorForDiagonals;
+			hmatrix += tmp*cm[2+i*2].data;
 		}
 	}
 

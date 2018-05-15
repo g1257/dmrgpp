@@ -94,9 +94,31 @@ struct ParametersKitaev {
 	ParametersKitaev(IoInputType& io)
 	    : targetQuantum(io,false)
 	{
+		SizeType nsites = targetQuantum.totalNumberOfSites;
 		try {
-			io.read(magneticField,"MagneticField");
-		} catch (std::exception&) {}
+			magneticFieldX.resize(nsites, 0.0);
+			io.read(magneticFieldX,"MagneticFieldX");
+			std::cerr<<"Has MagneticFieldX \n";
+		} catch (std::exception&) {
+			magneticFieldX.clear();
+		}
+
+		try {
+			magneticFieldY.resize(nsites, 0.0);
+			io.read(magneticFieldY,"MagneticFieldY");
+			std::cerr<<"Has MagneticFieldY \n";
+		} catch (std::exception&) {
+			magneticFieldY.clear();
+		}
+
+		try {
+			magneticFieldZ.resize(nsites, 0.0);
+			io.read(magneticFieldZ,"MagneticFieldZ");
+			std::cerr<<"Has MagneticFieldZ \n";
+		} catch (std::exception&) {
+			magneticFieldZ.clear();
+		}
+
 	}
 
 	template<typename SomeMemResolvType>
@@ -108,7 +130,7 @@ struct ParametersKitaev {
 	}
 
 	TargetQuantumElectrons<RealType> targetQuantum;
-	VectorRealType magneticField;
+	VectorRealType magneticFieldZ,magneticFieldX,magneticFieldY;
 };
 
 //! Function that prints model parameters to stream os
@@ -116,7 +138,9 @@ template<typename RealTypeType>
 std::ostream& operator<<(std::ostream &os,
                          const ParametersKitaev<RealTypeType>& parameters)
 {
-	os<<"MagneticField="<<parameters.magneticField<<"\n";
+	os<<"MagneticFieldX="<<parameters.magneticFieldX<<"\n";
+	os<<"MagneticFieldY="<<parameters.magneticFieldY<<"\n";
+	os<<"MagneticFieldZ="<<parameters.magneticFieldZ<<"\n";
 	os<<parameters.targetQuantum;
 	return os;
 }
