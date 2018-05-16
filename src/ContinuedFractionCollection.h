@@ -78,7 +78,8 @@ public:
 	void write(IoOutputType& io) const
 	{
 		io.write(data_.size(), "#CONTINUEDFRACTIONCOLLECTION");
-		for (SizeType i=0;i<data_.size();i++) data_[i].write(io);
+		for (SizeType i=0;i<data_.size();i++)
+			data_[i].write(io, "");
 	}
 
 	void push(const ContinuedFractionType& cf)
