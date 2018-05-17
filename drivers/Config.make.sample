@@ -1,7 +1,7 @@
 include ../TestSuite/inputs/ConfigBase.make
 
 # PsimagLite support is needed by PsimagLite drivers
-LDFLAGS = -L../../PsimagLite/lib -lpsimaglite
+LDFLAGS += -L../../PsimagLite/lib -lpsimaglite
 
 # Here add your lapack and blas libraries or say NO_LAPACK
 # CPPFLAGS += -DNO_LAPACK

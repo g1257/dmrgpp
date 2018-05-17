@@ -43,7 +43,7 @@ sub createMakefile
 	continuedFractionCollection range kernelPolynomial
 	linearPrediction options randomTest svd testLapack threads loadImbalance testIsClass
 	testMemResolv1 sumDecomposition calculator closuresTest base64test checkRunId
-	testLanczos nested);
+	testLanczos nested testIoNg);
 	my $combinedUnits = combine("",\@units,".o ");
 	my $combinedUnits2 = combine("./",\@units,".cpp ");
 
