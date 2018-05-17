@@ -123,7 +123,6 @@ struct IsStringLike {
 	enum { True = false };
 };
 
-template<>
 template<typename A>
 struct IsStringLike<std::basic_string<char, std::char_traits<char>, A> > {
 	enum { True = true };

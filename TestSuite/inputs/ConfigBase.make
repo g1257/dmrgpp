@@ -1,6 +1,9 @@
-# Compiler to use. If using MPI then say mpicxx here (or mpic++)
-# and also say -DUSE_MPI below
-CXX = g++
+# Compiler to use. For clang++ see commented out line.
+# Note that -mtune=native -march=native should not be
+# used if you intend your executable to run in machines
+# other than the one your are compiling on
+CXX = g++ -frecord-gcc-switches -mtune=native -march=native
+#CXX = clang++ -mtune=native
 
 # We're using ansi C++
 CPPFLAGS += -pedantic -std=c++98

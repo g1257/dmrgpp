@@ -42,6 +42,7 @@ Please see full open source license included in file LICENSE.
 #include "ChebyshevFunction.h"
 #include <cassert>
 #include "Io/IoSelector.h"
+#include "Io/IoSimple.h"
 #include <typeinfo>
 
 namespace PsimagLite {
