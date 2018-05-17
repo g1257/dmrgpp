@@ -46,8 +46,9 @@ public:
 template<typename T>
 class IsComplexNumber<std::complex<T> > {
 public:
-	enum { True = true};
+	enum { True = Loki::TypeTraits<T>::isArith };
 };
+
 
 template<typename T>
 struct IsNumber {

@@ -6,6 +6,7 @@
 #include "TypeToH5.h"
 #include <cassert>
 #include <stack>
+#include "../Complex.h"
 
 namespace PsimagLite {
 
@@ -370,7 +371,9 @@ private:
 		if (dims[0] == 0)
 			throw RuntimeError("IoNgSerializer: problem reading vector<arith> (dims)\n");
 
-		what.resize(dims[0], 0);
+		SizeType complexSize = getComplexSize<typename SomeVectorType::value_type>(dims[0]);
+
+		what.resize(complexSize, 0);
 		void* ptr = static_cast<void *>(&(what[0]));
 		dataset->read(ptr, typeToH5<UnderlyingType>());
 		delete[] dims;
@@ -493,6 +496,23 @@ private:
 		}
 
 		return tmp;
+	}
+
+	template<typename T>
+	static typename EnableIf<!IsComplexNumber<T>::True, hsize_t>::Type
+	getComplexSize(hsize_t x)
+	{
+		return x;
+	}
+
+	template<typename T>
+	static typename EnableIf<IsComplexNumber<T>::True, hsize_t>::Type
+	getComplexSize(hsize_t x)
+	{
+		if (x&1)
+			throw RuntimeError("FATAL: Complex vector with uneven fp size\n");
+
+		return x/2;
 	}
 
 	H5::H5File* hdf5file_;
