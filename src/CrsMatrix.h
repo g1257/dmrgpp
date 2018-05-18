@@ -137,10 +137,16 @@ public:
 
 	~CrsMatrix() {  }
 
-	CrsMatrix(SizeType nrow,SizeType ncol)
+	CrsMatrix(SizeType nrow, SizeType ncol)
 	    : nrow_(nrow),ncol_(ncol)
 	{
-		resize(nrow,ncol);
+		resize(nrow, ncol);
+	}
+
+	CrsMatrix(SizeType nrow, SizeType ncol, SizeType nonzero)
+	    : nrow_(nrow),ncol_(ncol)
+	{
+		resize(nrow, ncol, nonzero);
 	}
 
 	template<typename S>
@@ -1230,6 +1236,151 @@ void operatorPlus(CrsMatrix<T>& A,
 	A.checkValidity();
 }
 
+//! Sets A=B0*b0+B1*b1 + ...
+// ERROR FIXME TODO: THIS FUNCTION HAS A RUNTIME MISTAKE SOMEWHERE
+// DO NOT USE UNTIL FIXED
+template<typename T, typename T1>
+void sum(CrsMatrix<T>& A,
+         const std::vector<const CrsMatrix<T>*>& Bmats,
+         const std::vector<T1>& bvec)
+{
+	SizeType Bmats_size = Bmats.size();
+
+	// ------------------------------
+	// nrow_A = MAX( nrow_B(:) )
+	// ncol_A = MAX( ncol_B(:) )
+	// ------------------------------
+	SizeType nrow_A = 0;
+	SizeType ncol_A = 0;
+	SizeType nnz_sum = 0;
+	SizeType nnz_max = 0;
+
+	for (SizeType imat = 0; imat < Bmats_size; ++imat) {
+		assert(imat < Bmats.size());
+		const CrsMatrix<T>& thisMat = *(Bmats[imat]);
+		SizeType nrow_B = thisMat.rows();
+		SizeType ncol_B = thisMat.cols();
+		SizeType nnz_B  = thisMat.nonZeros();
+
+		nrow_A = (nrow_B > nrow_A) ?  nrow_B: nrow_A;
+		ncol_A = (ncol_B > ncol_A) ?  ncol_B: ncol_A;
+
+		nnz_max = (nnz_B > nnz_max) ? nnz_B : nnz_max;
+		nnz_sum += nnz_B;
+	}
+
+	A.resize(nrow_A, ncol_A);
+
+	// ---------------------------------------------------
+	// lower bound for total number of nonzeros is nnz_max
+	// upper bound for total number of nonzeros is nnz_sum
+	// initially set it to 2 * nnz_max
+	// ---------------------------------------------------
+	A.reserve((2*nnz_max > nnz_sum) ? nnz_sum : 2*nnz_max);
+
+	// ------------------------------------------------------
+	// TODO: using A.resize(nrow_A,ncol_A,nnz_A) may not work correctly
+	// ------------------------------------------------------
+	const bool set_nonzeros = true;
+	if (set_nonzeros) {
+		// -----------------------------------------------
+		// worst case when no overlap in sparsity pattern
+		// among matrices
+		// -----------------------------------------------
+
+		A.reserve(nnz_sum);
+	}
+
+	// ------------------------------------------
+	// temporary vectors to accelerate processing
+	// ------------------------------------------
+	std::vector<T> valueTmp(ncol_A);
+	std::vector<bool> is_examined_already(ncol_A, false);
+
+	std::vector<SizeType> column_index;
+	column_index.reserve(ncol_A);
+
+	SizeType counter = 0;
+	for (SizeType irow=0; irow < nrow_A; ++irow) {
+		A.setRow(irow, counter);
+
+		column_index.clear();
+
+		for (SizeType imat=0; imat < Bmats_size; ++imat) {
+			assert(imat < Bmats.size());
+			const CrsMatrix<T>& thisMat = *(Bmats[imat]);
+			const SizeType nrow_B  = thisMat.rows();
+			const bool is_valid_B_row = (irow < nrow_B);
+
+			const SizeType kstart_B = (is_valid_B_row) ?  thisMat.getRowPtr(irow) :
+			                                              0;
+			const SizeType kend_B   = (is_valid_B_row) ?  thisMat.getRowPtr(irow+1) :
+			                                              0;
+
+			// --------------------------------
+			// check whether there is work to do
+			// --------------------------------
+			const bool has_work = ((kend_B - kstart_B)  >= 1);
+			if (!has_work) continue;
+
+			// -------------------------------
+			// add contributions from matrix Bmats[i]
+			// -------------------------------
+			const T1 b1 = bvec[imat];
+			for (SizeType k = kstart_B; k < kend_B; ++k) {
+				const T bij = thisMat.getValue(k);
+				const SizeType jcol = thisMat.getCol(k);
+
+				assert(jcol < ncol_A);
+
+				if (is_examined_already[ jcol ]) {
+					valueTmp[ jcol ] += (bij * b1);
+				} else {
+					// ------------------------------------
+					// new column entry not examined before
+					// ------------------------------------
+
+					is_examined_already[ jcol ] = true;
+
+					valueTmp[ jcol ] = (bij * b1);
+
+					column_index.push_back( jcol );
+				}
+			}
+		} // end for imat
+
+		// --------------------------------------
+		// copy row to matrix A and reset vectors
+		// --------------------------------------
+
+		const SizeType kmax = column_index.size();
+		for (SizeType k=0; k < kmax; ++k) {
+			const SizeType jcol = column_index[k];
+
+			A.pushCol( jcol );
+			A.pushValue( valueTmp[jcol]  );
+			is_examined_already[ jcol ] = false;
+		}
+
+		counter += kmax;
+	} // end for irow
+
+	SizeType nnz_A = counter;
+	A.setRow(nrow_A, nnz_A);
+
+	// ----------------------------------------
+	// set exact number of nonzeros in matrix A
+	//
+	// note: this might be expensive in allocating another copy
+	// and copying all the non-zero entries
+	// ----------------------------------------
+	const bool set_exact_nnz = true;
+	if (set_exact_nnz)
+		A.resize(nrow_A, ncol_A,nnz_A);
+
+	A.checkValidity();
+}
+
 template<typename T>
 bool isHermitian(const CrsMatrix<T>& A,bool=false)
 {
@@ -1239,31 +1390,31 @@ bool isHermitian(const CrsMatrix<T>& A,bool=false)
 	return isHermitian(dense);
 }
 
-template<class T>
-void sumBlock(CrsMatrix<T> &A,CrsMatrix<T> const &B,SizeType offset)
+template<typename T>
+void fromBlockToFull(CrsMatrix<T>& Bfull,
+                     const CrsMatrix<T>& B,
+                     SizeType offset)
 {
-	int counter=0;
-	CrsMatrix<T> Bfull(A.rows(),A.cols());
+	int counter = 0;
+	for (SizeType i = 0; i < offset; ++i)
+		Bfull.setRow(i, counter);
 
-	for (SizeType i=0;i<offset;i++) Bfull.setRow(i,counter);
-
-	for (SizeType ii=0;ii<B.rows();ii++) {
-		SizeType i=ii+offset;
-		Bfull.setRow(i,counter);
-		for (int jj=B.getRowPtr(ii);jj<B.getRowPtr(ii+1);jj++) {
-			SizeType j = B.getCol(jj)+offset;
-			T tmp  = B.getValue(jj);
-			Bfull.pushCol(j);
-			Bfull.pushValue(tmp);
-			counter++;
+	for (SizeType ii = 0; ii < B.rows(); ++ii) {
+		SizeType i = ii + offset;
+		Bfull.setRow(i, counter);
+		for (int jj = B.getRowPtr(ii); jj < B.getRowPtr(ii + 1); ++jj) {
+			SizeType j = B.getCol(jj) + offset;
+			T tmp = B.getValue(jj);
+			Bfull.setCol(counter, j);
+			Bfull.setValues(counter++, tmp);
 		}
 	}
 
-	for (SizeType i=B.rows()+offset;i<A.rows();i++) Bfull.setRow(i,counter);
-	Bfull.setRow(A.rows(),counter);
+	for (SizeType i = B.rows() + offset; i < Bfull.rows(); ++i)
+		Bfull.setRow(i, counter);
+
+	Bfull.setRow(Bfull.rows(), counter);
 	Bfull.checkValidity();
-	A += Bfull;
-	A.checkValidity();
 }
 
 template<class T>
