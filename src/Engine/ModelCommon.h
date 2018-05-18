@@ -205,6 +205,9 @@ public:
 		VectorSizeType permutation(total, 0);
 		sort.sort(nzs, permutation);
 
+#if 0
+		typename PsimagLite::Vector<const SparseMatrixType*>::Type vectorOfCrs;
+#endif
 		assert(total == permutation.size());
 		for (SizeType i = 0; i < total; ++i) { // loop over new order
 
@@ -217,13 +220,32 @@ public:
 			matrixBlock2 = vsm;
 			delete vvsm[m];
 			vvsm[m] = 0;
-			//vectorOfCrs.push_back(matrixBlock2);
 
 			SizeType offset = lrs.super().partition(m);
-			SparseMatrixType full(matrix.rows(), matrix.cols(), matrixBlock2.nonZeros());
-			fromBlockToFull(full, matrixBlock2, offset);
-			matrix += full;
+			SparseMatrixType* full = new SparseMatrixType(matrix.rows(),
+			                                              matrix.cols(),
+			                                              matrixBlock2.nonZeros());
+			fromBlockToFull(*full, matrixBlock2, offset);
+#if 0
+			vectorOfCrs.push_back(full);
+#else
+			matrix += (*full);
+			delete full;
+			full = 0;
+#endif
 		}
+
+#if 0
+		SizeType effectiveTotal = vectorOfCrs.size();
+		if (effectiveTotal == 0) return;
+
+		typename PsimagLite::Vector<SparseElementType>::Type ones(effectiveTotal, 1.0);
+		sum(matrix, vectorOfCrs, ones);
+		for (SizeType i = 0; i < effectiveTotal; ++i) {
+			delete vectorOfCrs[i];
+			vectorOfCrs[i] = 0;
+		}
+#endif
 
 		{
 			PsimagLite::OstringStream msg;
