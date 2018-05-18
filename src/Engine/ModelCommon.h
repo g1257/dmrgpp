@@ -217,9 +217,12 @@ public:
 			matrixBlock2 = vsm;
 			delete vvsm[m];
 			vvsm[m] = 0;
+			//vectorOfCrs.push_back(matrixBlock2);
 
 			SizeType offset = lrs.super().partition(m);
-			sumBlock(matrix, matrixBlock2, offset);
+			SparseMatrixType full(matrix.rows(), matrix.cols(), matrixBlock2.nonZeros());
+			fromBlockToFull(full, matrixBlock2, offset);
+			matrix += full;
 		}
 
 		{
