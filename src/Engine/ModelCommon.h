@@ -91,6 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "NoPthreads.h"
 #include "Sort.h"
+#include "Profiling.h"
 
 namespace Dmrg {
 
@@ -173,14 +174,9 @@ public:
 	                              const LeftRightSuperType& lrs,
 	                              RealType currentTime) const
 	{
+		PsimagLite::Profiling profiling("addHamiltonianConnection", std::cout);
 		assert(lrs.super().partition() > 0);
 		SizeType total = lrs.super().partition()-1;
-
-		{
-			PsimagLite::OstringStream msg;
-			msg<<"addHamiltonianConnection starts, sectors="<<total;
-			progress_.printline(msg, std::cout);
-		}
 
 		typename PsimagLite::Vector<VerySparseMatrixType*>::Type vvsm(total, 0);
 		VectorSizeType nzs(total, 0);
@@ -244,12 +240,6 @@ public:
 		}
 
 		matrix.swap(sumCrs);
-
-		{
-			PsimagLite::OstringStream msg;
-			msg<<"addHamiltonianConnection ends";
-			progress_.printline(msg, std::cout);
-		}
 	}
 
 private:
