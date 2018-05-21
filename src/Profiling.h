@@ -23,6 +23,7 @@ Please see full open source license included in file LICENSE.
 #include <iostream>
 #include "MemoryUsage.h"
 #include "PsimagLite.h"
+#include "ProgressIndicator.h"
 
 namespace PsimagLite {
 
@@ -35,14 +36,15 @@ class  Profiling {
 
 public:
 
-	Profiling(const String& s,std::ostream& os = std::cout)
-	    : message_(s),
+	Profiling(String caller, std::ostream& os)
+	    : progressIndicator_(caller),
 	      memoryUsage_("/proc/self/stat"),
-	      start_(memoryUsage_.time()),
 	      isDead_(false),
 	      os_(os)
 	{
-		os_<<"Profiling: Starting clock for "<<s<<"\n";
+		OstringStream msg;
+		msg << "starting clock";
+		progressIndicator_.printline(msg, os);
 	}
 
 	~Profiling()
@@ -60,17 +62,14 @@ private:
 	void killIt()
 	{
 		if (isDead_) return;
-		double end = memoryUsage_.time();
-		double elapsed = diff(end,start_);
-		os_<<"Profiling: Stoping clock for "<<message_;
-		os_<<" elapsed="<<elapsed<<"\n";
-		std::cout<<" start="<<start_<<" end="<<end<<"\n";
+		OstringStream msg;
+		msg << "stopping clock";
+		progressIndicator_.printline(msg, os_);
 		isDead_ = true;
 	}
 
-	String message_;
+	ProgressIndicator progressIndicator_;
 	MemoryUsage memoryUsage_;
-	double start_;
 	bool isDead_;
 	std::ostream& os_;
 }; // Profiling

@@ -1237,8 +1237,6 @@ void operatorPlus(CrsMatrix<T>& A,
 }
 
 //! Sets A=B0*b0+B1*b1 + ...
-// ERROR FIXME TODO: THIS FUNCTION HAS A RUNTIME MISTAKE SOMEWHERE
-// DO NOT USE UNTIL FIXED
 template<typename T, typename T1>
 void sum(CrsMatrix<T>& A,
          const std::vector<const CrsMatrix<T>*>& Bmats,
