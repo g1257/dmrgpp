@@ -1,3 +1,18 @@
+2018-05-21 Version 2.18
+
+* IoNg fixes
+
+* USE_IO_NG enabled by default
+
+* compiler switches, supports clang++
+
+* testIoNg compiles
+
+* CRS: sum function for multiple
+matrices (Contributed by Ed)
+
+* Profiling class changed
+
 2018-05-08 Version 2.16
 
 * IoNg for bool and std::vector<bool>

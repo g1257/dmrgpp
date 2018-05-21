@@ -1,4 +1,4 @@
 #ifndef PSIMAGLITE_VERSION
-#define PSIMAGLITE_VERSION "2.17"
+#define PSIMAGLITE_VERSION "2.18"
 #endif
 
