@@ -228,9 +228,10 @@ public:
 			vectorOfCrs.push_back(full);
 		}
 
+		if (vectorOfCrs.size() == 0) return;
+
 		vectorOfCrs.push_back(&matrix);
 		SizeType effectiveTotal = vectorOfCrs.size();
-		if (effectiveTotal == 0) return;
 
 		typename PsimagLite::Vector<SparseElementType>::Type ones(effectiveTotal, 1.0);
 		SparseMatrixType sumCrs;
