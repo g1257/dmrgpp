@@ -85,7 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 #include "VectorWithOffsets.h" // for operator*
 #include "VectorWithOffset.h" // for operator*
-#include "Profiling.h"
 
 namespace Dmrg {
 

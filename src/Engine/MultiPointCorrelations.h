@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 #include "VectorWithOffsets.h" // for operator*
 #include "VectorWithOffset.h" // for operator*
-#include "Profiling.h"
 
 namespace Dmrg {
 
@@ -97,7 +96,6 @@ class MultiPointCorrelations {
 	BasisWithOperatorsType ;
 	typedef typename VectorType::value_type FieldType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
-	typedef PsimagLite::Profiling ProfilingType;
 	typedef MultiPointCorrelations<CorrelationsSkeletonType> ThisType;
 	typedef typename CorrelationsSkeletonType::SparseMatrixType SparseMatrixType;
 

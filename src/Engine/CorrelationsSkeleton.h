@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h"
 #include "PackIndices.h"
 #include "CrsMatrix.h"
-#include "Profiling.h"
 #include "ApplyOperatorLocal.h"
 #include "Braket.h"
 #include <numeric>
@@ -128,7 +127,6 @@ public:
 	typedef typename ObserverHelperType::FermionSignType FermionSignType;
 	typedef typename BasisType::VectorSizeType VectorSizeType;
 	typedef typename VectorType::value_type FieldType;
-	typedef PsimagLite::Profiling ProfilingType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef PsimagLite::CrsMatrix<FieldType> SparseMatrixType;
 

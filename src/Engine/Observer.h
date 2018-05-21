@@ -85,7 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "FourPointCorrelations.h"
 #include "VectorWithOffsets.h" // for operator*
 #include "VectorWithOffset.h" // for operator*
-#include "Profiling.h"
 #include "Parallel4PointDs.h"
 #include "MultiPointCorrelations.h"
 #include "Concurrency.h"
@@ -115,7 +114,6 @@ class Observer {
 	typedef TwoPointCorrelations<CorrelationsSkeletonType> TwoPointCorrelationsType;
 	typedef FourPointCorrelations<CorrelationsSkeletonType> FourPointCorrelationsType;
 	typedef MultiPointCorrelations<CorrelationsSkeletonType> MultiPointCorrelationsType;
-	typedef PsimagLite::Profiling ProfilingType;
 
 	static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
 	static SizeType const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;

@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 #include "VectorWithOffsets.h" // for operator*
 #include "VectorWithOffset.h" // for operator*
-#include "Profiling.h"
 #include "Parallel2PointCorrelations.h"
 #include "Concurrency.h"
 #include "Parallelizer.h"
@@ -101,7 +100,6 @@ class TwoPointCorrelations {
 	BasisWithOperatorsType ;
 	typedef typename VectorType::value_type FieldType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
-	typedef PsimagLite::Profiling ProfilingType;
 	typedef TwoPointCorrelations<CorrelationsSkeletonType> ThisType;
 
 	static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
