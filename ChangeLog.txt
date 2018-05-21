@@ -1,3 +1,24 @@
+2018-05-21 Version 5.18
+
+* IoNg works except for Recovery
+
+* ci: RIXS tests added
+
+* ci: infrastructure changed
+
+* USE_IO_NG enabled by default
+
+* Kitaev: Magnetic field in x,y,z
+
+* mtune and march compiler switches
+
+* hdf5 -L flag for Ubuntu
+
+* addHamiltonianConnection acceleration
+in ModelCommon
+
+* Starting to use PsimagLite::Profiling
+
 2018-05-08 Version 5.16
 
 * IoNg works with observe
