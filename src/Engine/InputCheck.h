@@ -251,7 +251,7 @@ public:
 		} else if (label=="RAW_MATRIX" || label=="RS:RAW_MATRIX" || label == "SpinOrbit") {
 			if (!checkForMatrix(vec)) return error1(label,line);
 			return true;
-		} else if (label=="Connectors") {
+		} else if (label == "Connectors" || label == "hopOnSite") {
 			if (!checkForMatrix(vec) && !checkForVector(vec))
 				return error1(label,line);
 			return true;
