@@ -8,6 +8,7 @@ use timeObservablesInSitu;
 use EnergyAncillaInSitu;
 use CollectBrakets;
 use Metts;
+use Ndollar;
 
 my ($action, $n, @what) = @ARGV;
 defined($what[0]) or die "$0: USAGE: action n what\n";
@@ -15,7 +16,8 @@ defined($what[0]) or die "$0: USAGE: action n what\n";
 my %actions = (getTimeObservablesInSitu => \&runTimeInSituObs,
 	               getEnergyAncilla => \&runEnergyAncillaInSituObs,
 	               CollectBrakets => \&runCollectBrakets,
-	               metts => \&runMetts);
+	               metts => \&runMetts,
+	               nDollar => \&runNdollar);
 
 defined($actions{$action}) or die "$0: Action $action not registered\n";
 
@@ -34,7 +36,7 @@ sub runTimeInSituObs
 
 		my @temp = split(/ /, $what->[$i]);
 		(scalar(@temp) == 2) or die "$0: FATAL annotation ".$what->[$i]."\n";
-		my ($site, $label) = @temp;		
+		my ($site, $label) = @temp;
 		my $fin;
 		open($fin, "<", $file) or die "$0: Could not open $file : $!\n";
 		my $fout;
@@ -45,7 +47,7 @@ sub runTimeInSituObs
 		}
 
 		timeObservablesInSitu::main($site, $label, $fin, $fout);
-		
+
 		close($fin);
 		close($fout);
 	}
@@ -135,6 +137,14 @@ sub runMetts
 		close($fin);
 		close($fout);
 	}
+}
+
+sub runNdollar
+{
+	my ($n, $what) = @_;
+	my $nWhat = scalar(@$what);
+	die "$0: Expecting one arg\n" unless ($nWhat == 1);
+	Ndollar::main($what->[0]);
 }
 
 

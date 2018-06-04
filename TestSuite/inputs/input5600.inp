@@ -25,4 +25,5 @@ TruncationTolerance=1e-7
 LanczosEps=1e-7
 OutputFile=data5600.txt
 Orbitals=1
-
+#ci observe arguments="<gs|n|gs>"
+#ci nDollar observe5600.txt

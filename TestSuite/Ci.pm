@@ -187,24 +187,51 @@ sub getCiAnnotations
 	my ($file,$n) = @_;
 	open(FILE, "$file") or return "";
 	my $counter = 0;
-	my %h;
+	my @h;
 
 	while (<FILE>) {
 		chomp;
 		if (/^\#ci ([^ ]+) (.*$)/) {
 			my $key = $1;
 			my $args = $2;
-			my $ptr = $h{"$key"};
-			my @a = (defined($ptr)) ? @$ptr : ();
-			
-			push (@a, "$2");
-			$h{"$key"} = \@a;
+			my @a;			
+			push @a, "$2";
+			push @a, "$key";
+			$h[$counter++] = \@a;
 			next;
 		}
 	}
 
 	close(FILE);
-	return %h;
+	return @h;
+}
+
+sub readAnnotationFromIndex
+{
+	my ($a, $ind) = @_;
+	my $n = scalar(@$a);
+	die "$0: index too big $ind >= $n \n" if ($ind < 0 || $ind >= $n);
+	my $ptr = $a->[$ind];
+	my @copy = @$ptr;
+	my $key = pop @copy;
+	return ($key, \@copy);
+}
+
+sub readAnnotationFromKey
+{
+	my ($a, $key) = @_;
+	my $n = scalar(@$a);
+	for (my $i = 0; $i < $n; ++$i) {
+		my $ptr = $a->[$i];
+		my $n = scalar(@$ptr);
+		die "$0: Invalid annotation\n" if ($n == 0);
+		next if ($ptr->[$n - 1] ne $key);
+		my @copy = @$ptr;
+		pop @copy;
+		return (\@copy);
+	}
+
+	return (undef);
 }
 
 1;

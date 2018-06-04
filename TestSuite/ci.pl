@@ -97,14 +97,15 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	}
 
 	my $from = getRestartFrom("../inputs/input$n.inp",$n);
-	my %ciAnnotations = Ci::getCiAnnotations("../inputs/input$n.inp",$n);
+	my @ciAnnotations = Ci::getCiAnnotations("../inputs/input$n.inp",$n);
+	my $totalAnnotations = scalar(@ciAnnotations);
 
-	my $whatDmrg = $ciAnnotations{"dmrg"};
+	my $whatDmrg = Ci::readAnnotationFromKey(\@ciAnnotations, "dmrg");
 	my $extraCmdArgs = $sOptions."  ".findArguments($whatDmrg);
 	my $cmd = getCmd($n, $valgrind, $extraCmdArgs);
 	
-	foreach my $ppLabel (keys %ciAnnotations) {
-		my $w = $ciAnnotations{$ppLabel};
+	for (my $i = 0; $i < $totalAnnotations; ++$i) {
+		my ($ppLabel, $w) = Ci::readAnnotationFromIndex(\@ciAnnotations, $i);
 		my $x = defined($w) ? scalar(@$w) : 0;
 		next if ($x == 0);
 		print "|$n| has $x $ppLabel lines\n";

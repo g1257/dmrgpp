@@ -47,3 +47,6 @@ RAW_MATRIX
 FERMIONSIGN=1
 JMVALUES 2 0 0
 AngularFactor=1
+
+#ci dmrg arguments=":n$.txt"
+

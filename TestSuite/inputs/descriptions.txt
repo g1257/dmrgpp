@@ -304,7 +304,9 @@ the "half filled" case). U=2
 5501) RIXS correction vector
 5502) RIXS static
 5503) RIXS dynamic
-#5504-5699 reserved for RIXS
+#5504-5599 reserved for RIXS
+5600) ./dmrg -f input.inp 'n$.txt' feature GS
+5601) ./dmrg -f input.inp 'n$.txt' feature
 5700) TargetingCorrection small test
 5800) SOC with Jz symmetry Ground State, using "fat site"
 5810) 3-orbital Hubbard model Ground State, using "fat site"
