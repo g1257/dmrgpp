@@ -172,6 +172,8 @@ public:
 		setSymmetryRelatedInternal(qq_, basis_, 1);
 		qq_.findQuantumNumbers(q_, MyBasis::useSu2Symmetry());
 		this->orderBasis(basis_,q_,basisTmp);
+
+		cacheInteractionOp();
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
@@ -531,12 +533,13 @@ private:
 	}
 
 	void addInteraction(SparseMatrixType &hmatrix,
-	                    const VectorOperatorType& cm,
-	                    SizeType i,
+	                    const VectorOperatorType&,
+	                    SizeType,
 	                    RealType factorForDiagonals,
 	                    SizeType actualSite) const
 	{
-		std::cerr<<"WARNING: addInteraction unimplemented\n";
+		assert(actualSite < modelParameters_.hubbardU.size());
+		hmatrix += factorForDiagonals*modelParameters_.hubbardU[actualSite]*qx_;
 	}
 
 	void addHoppingOnSite(SparseMatrixType& hmatrix,
@@ -583,15 +586,15 @@ private:
 		if (v.size() > 1 && actualSite >= v.size())
 			err("getOnSiteHopping too small\n");
 		return (v.size() == 1) ? v[0](orb1, orb2) : v[actualSite](orb1, orb2);
-	}
+		}
 
-	void addPotentialV(SparseMatrixType &hmatrix,
-	                   const VectorOperatorType& cm,
-	                   SizeType i,
-	                   SizeType actualIndexOfSite,
-	                   RealType factorForDiagonals,
-	                   const typename PsimagLite::Vector<RealType>::Type& V) const
-	{
+		void addPotentialV(SparseMatrixType &hmatrix,
+		const VectorOperatorType& cm,
+		SizeType i,
+		SizeType actualIndexOfSite,
+		RealType factorForDiagonals,
+		const typename PsimagLite::Vector<RealType>::Type& V) const
+		{
 		SizeType v1 = 2*modelParameters_.orbitals*geometry_.numberOfSites();
 		SizeType v2 = v1*modelParameters_.orbitals;
 		if (V.size() != v1 && V.size() != v2) {
@@ -686,6 +689,37 @@ private:
 		return tmpMatrix;
 	}
 
+	void cacheInteractionOp()
+	{
+		VectorSizeType block(1, 0);
+		VectorOperatorType cm;
+		setOperatorMatricesInternal(cm, block);
+
+		SparseMatrixType m0m1;
+		SparseMatrixType m2m3;
+		SparseMatrixType m2m3t;
+		SparseMatrixType term;
+
+		SizeType orbitals = modelParameters_.orbitals;
+		for (SizeType k0 = 0; k0 < orbitals; ++k0) {
+			const SparseMatrixType& m0 = cm[k0 + SPIN_DOWN*orbitals].data;
+			for (SizeType k1 = 0; k1 < orbitals; ++k1) {
+				const SparseMatrixType& m1 = cm[k1 + SPIN_UP*orbitals].data;
+				multiply(m0m1, m0, m1);
+				for (SizeType k2 = 0; k2 < orbitals; ++k2) {
+					const SparseMatrixType& m2 = cm[k2 + SPIN_UP*orbitals].data;
+					SizeType k3 = (k0 + k1 + k2) % orbitals;
+
+					const SparseMatrixType& m3 = cm[k3 + SPIN_DOWN*orbitals].data;
+					multiply(m2m3, m3, m2);
+					transposeConjugate(m2m3t, m2m3);
+					multiply(term, m2m3t, m0m1);
+					qx_ += 0.5*term;
+				}
+			}
+		}
+	}
+
 	ParamsModelType  modelParameters_;
 	const GeometryType& geometry_;
 	SpinSquaredHelper<RealType,HilbertState> spinSquaredHelper_;
@@ -694,6 +728,7 @@ private:
 	SymmetryElectronsSzType qq_;
 	VectorSizeType q_;
 	VectorOperatorType creationMatrix_;
+	SparseMatrixType qx_;
 }; //class ModelHubbardMultiBand
 } // namespace Dmrg
 /*@}*/
