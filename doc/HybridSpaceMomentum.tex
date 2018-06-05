@@ -1,0 +1,38 @@
+\documentclass{article}
+\usepackage{marginnote}
+
+\begin{document}
+
+\title{DMRG++ Hybrid space-momentum}
+\author{G.~A.}
+\maketitle
+
+We take the Hubbard model on a ladder $L_x\times L_y$ and transform into momentum $k$ only
+in the y-direction and obtain a hybrid space-momentum lattice with points $(x, k)$.
+Moreover, we consider the $k$ values as ``orbitals'' and think of the lattice as a 
+\emph{multi-orbital chain.}
+
+We obtain for the hopping Hamiltonian term
+\begin{equation}
+H_{\textrm{hop.}}=\sum_{x\neq x',k,k',\sigma} F^{k, k'}_{x,x'} d^\dagger_{x, k, \sigma} d_{x',k',\sigma}
++ \sum_{x, k, k', \sigma} G_{x, k, k'}d^\dagger_{x, k, \sigma} d_{x,k',\sigma},
+\end{equation}
+where
+\begin{equation}
+F^{k, k'}_{x, x'} = \sum_{y, y'} t_{x,y; x',y'}\textrm{e}^{i k y} \textrm{e}^{-i k' y'},
+\end{equation}
+$t_{x,y; x',y'}$ being the fully spatial hopping of the original lattice,
+and $G_{x, k, k'} = F^{k, k'}_{x, x}$. Note that the $F$ term is a connection in DMRG++ jargon,
+but the $G$ term is on-site.
+
+The interaction becomes $H_{\textrm{int.}} = \sum_x U_x Q_x$ where
+\begin{equation}
+Q_x = \sum_{k_0, k_1, k_2, k_3} r(k_0, k_1, k_2, k_3)
+d^\dagger_{x,k_0,\downarrow} d_{x, k_1, \uparrow} d^\dagger_{x,k_2,\uparrow} 
+d_{x, k_3, \downarrow},
+\end{equation}
+where $r(k_0, k_1, k_2, k_3)  = 1$ if 
+\begin{equation}
+\sum_{i=0}^{i < 4} k_i  = 0 \textrm{ mod }2\pi
+\end{equation}
+\end{document}
