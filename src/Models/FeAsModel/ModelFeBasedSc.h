@@ -316,7 +316,6 @@ public:
 		PsimagLite::String what2 = what;
 
 
-
 		if (what2 == "splus") {
 			VectorSizeType allowed(modelParameters_.orbitals,0);
 			for (SizeType x = 0; x < modelParameters_.orbitals; ++x)

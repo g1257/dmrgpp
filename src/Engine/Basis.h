@@ -153,9 +153,11 @@ public:
 	{
 		if (useSu2Symmetry_) symmSu2_.set(basisData);
 		electrons_ = basisData.electrons();
-		basisData.findQuantumNumbers(quantumNumbers_, useSu2Symmetry_);
-		findPermutationAndPartition();
+		VectorSizeType qns;
+		basisData.findQuantumNumbers(qns, useSu2Symmetry_);
+		findPermutationAndPartition(qns, true);
 		electronsOld_=electrons_;
+		shrinkVector(qns_, qns, partition_);
 	}
 
 	/* PSIDOC BasisSetToProduct
@@ -175,29 +177,28 @@ public:
 		In this way, symmetries are implemented efficiently,
 		with minimal dependencies and in a model-independent way.
 		*/
-	void setToProduct(const ThisType& su2Symmetry2,
-	                  const ThisType& su2Symmetry3,
+	void setToProduct(const ThisType& basis1,
+	                  const ThisType& basis2,
 	                  int pseudoQn = -1)
 	{
 		block_.clear();
-		utils::blockUnion(block_,su2Symmetry2.block_,su2Symmetry3.block_);
+		utils::blockUnion(block_,basis1.block_,basis2.block_);
+		VectorSizeType qns;
 
 		if (useSu2Symmetry_) {
 			std::cout<<"Basis: SU(2) Symmetry is in use\n";
 
-			symmSu2_.setToProduct(su2Symmetry2.symmSu2_,
-			                      su2Symmetry3.symmSu2_,
+			unShrinkVector(qns, qns_, partition_);
+			symmSu2_.setToProduct(basis1.symmSu2_,
+			                      basis2.symmSu2_,
 			                      pseudoQn,
-			                      su2Symmetry2.electrons_,
-			                      su2Symmetry3.electrons_,
+			                      basis1.electrons_,
+			                      basis2.electrons_,
 			                      electrons_,
-			                      quantumNumbers_);
+			                      qns);
 		} else {
-			SizeType ns = su2Symmetry2.size();
-			SizeType ne = su2Symmetry3.size();
-
-			quantumNumbers_.clear();
-			electrons_.clear();
+			SizeType ns = basis2.size();
+			SizeType ne = basis1.size();
 
 			unsigned long int check = ns*ne;
 			unsigned int shift = 8*sizeof(SizeType)-1;
@@ -210,40 +211,41 @@ public:
 				throw PsimagLite::RuntimeError(msg);
 			}
 
-			for (SizeType j=0;j<ne;j++) for (SizeType i=0;i<ns;i++) {
-				quantumNumbers_.push_back(su2Symmetry2.quantumNumbers_[i]+
-				                          su2Symmetry3.quantumNumbers_[j]);
-				electrons_.push_back(su2Symmetry2.electrons_[i]+
-				                     su2Symmetry3.electrons_[j]);
+			SizeType npe = basis2.partition_.size();
+			if (npe > 0) --npe;
+			SizeType nps = basis1.partition_.size();
+			if (nps > 0) --nps;
+
+			qns.resize(basis1.size() * basis2.size());
+			electrons_.resize(qns.size());
+			SizeType counter = 0;
+			for (SizeType pe = 0; pe < npe; ++pe) {
+				for (SizeType i = basis2.partition_[pe]; i < basis2.partition_[pe + 1]; ++i) {
+					for (SizeType ps = 0; ps < nps; ++ps) {
+						for (SizeType j = basis1.partition_[ps];
+						     j < basis1.partition_[ps + 1];
+						     ++j) {
+								qns[counter] = basis2.qns_[pe] + basis1.qns_[ps];
+								electrons_[counter++] = basis1.electrons_[j] +
+								        basis2.electrons_[i];
+						}
+					}
+				}
 			}
 		}
 
 		// order quantum numbers of combined basis:
-		findPermutationAndPartition();
-
+		findPermutationAndPartition(qns, true);
 		reorder();
 		electronsOld_ = electrons_;
+		shrinkVector(qns_, qns, partition_);
 	}
 
 	//! returns the effective quantum number of basis state i
-	int qn(SizeType i) const
+	int qnEx(SizeType i) const
 	{
-		assert(i < quantumNumbers_.size());
-		return quantumNumbers_[i];
-	}
-
-	//! Returns the partition that corresponds to quantum number qn
-	int partitionFromQn(SizeType qn) const
-	{
-		const VectorSizeType* quantumNumbers = &quantumNumbers_;
-		const VectorSizeType* partition = &partition_;
-
-		for (SizeType i=0;i<partition->size();i++) {
-			SizeType state = (*partition)[i];
-			assert(state < quantumNumbers->size());
-			if ((*quantumNumbers)[state]==qn) return i;
-		}
-		return -1;
+		assert(i < qns_.size());
+		return qns_[i];
 	}
 
 	//! returns the start of basis partition i (see paper)
@@ -288,8 +290,6 @@ public:
 	//! returns the size of this basis
 	SizeType size() const
 	{
-		assert(quantumNumbers_.size() == 0 ||
-		       quantumNumbers_.size() == partition_[partition_.size()-1]);
 		assert(partition_.size() > 0);
 		return partition_[partition_.size()-1];
 	}
@@ -313,14 +313,15 @@ public:
 	}
 
 	//! Inverse of pseudoQuantumNumber
-	SizeType pseudoEffectiveNumber(SizeType i) const
+	SizeType pseudoQn(SizeType i) const
 	{
 		if (useSu2Symmetry_) {
-			return SymmetryElectronsSzType::pseudoEffectiveNumber(electrons_[i],
-			                                                      symmSu2_.jmValue(i).first);
+			assert(i < partition_.size());
+			SizeType ind = partition_[i];
+			return SymmetryElectronsSzType::pseudoEffectiveNumber(electrons_[ind],
+			                                                      symmSu2_.jmValue(ind).first);
 		} else {
-			assert(i < quantumNumbers_.size());
-			return quantumNumbers_[i];
+			return qnEx(i);
 		}
 	}
 
@@ -356,34 +357,20 @@ public:
 		PsimagLite::OstringStream msg2;
 		msg2<<"Truncating indices...";
 		progress_.printline(msg2,std::cout);
-		truncate(removedIndices);
+
+		VectorSizeType qns;
+		unShrinkVector(qns, qns_, partition_);
+		truncate(qns, removedIndices);
 
 		// N.B.: false below means that we don't truncate the permutation vectors
 		//	because they're needed for the WFT
-		findPermutationAndPartition(false);
+		findPermutationAndPartition(qns, false);
+		shrinkVector(qns_, qns, partition_);
+
 		PsimagLite::OstringStream msg;
 		msg<<"Done with changeBasis";
 		progress_.printline(msg,std::cout);
 		return calcError(eigs,removedIndices);
-	}
-
-	//! Finds a partition of the basis given the effecitve quantum numbers
-	//! Find a partition of the basis given the effecitve quantum numbers
-	//! (see section about Symmetries in paper)
-	void findPartition()
-	{
-		SizeType n = quantumNumbers_.size();
-		assert(n > 0);
-		SizeType qtmp = quantumNumbers_[0]+1;
-		partition_.clear();
-		for (SizeType i=0;i<n;++i) {
-			if (quantumNumbers_[i]!=qtmp) {
-				partition_.push_back(i);
-				qtmp = quantumNumbers_[i];
-			}
-		}
-
-		partition_.push_back(n);
 	}
 
 	//! Returns the factors that mix this basis
@@ -513,10 +500,7 @@ public:
 
 		io.write(partition_,"PARTITION");
 		io.write(permInverse_,"PERMUTATIONINVERSE");
-
-		VectorSizeType qnShrink;
-		shrinkVector(qnShrink, quantumNumbers_, partition_);
-		io.write(qnShrink,"QNShrink");
+		io.write(qns_,"QNShrink");
 
 		if (useSu2Symmetry_) symmSu2_.write(io, "");
 		else symmLocal_.write(io, "");
@@ -541,10 +525,7 @@ public:
 
 		io.write(partition_, label + "PARTITION");
 		io.write(permInverse_, label + "PERMUTATIONINVERSE");
-
-		VectorSizeType qnShrink;
-		shrinkVector(qnShrink, quantumNumbers_, partition_);
-		io.write(qnShrink, label + "QNShrink");
+		io.write(qns_, label + "QNShrink");
 
 		if (useSu2Symmetry_) symmSu2_.write(io, label);
 		else symmLocal_.write(io, label);
@@ -595,6 +576,25 @@ public:
 
 private:
 
+	//! Finds a partition of the basis given the effecitve quantum numbers
+	//! Find a partition of the basis given the effecitve quantum numbers
+	//! (see section about Symmetries in paper)
+	void findPartition(const VectorSizeType& qns)
+	{
+		SizeType n = qns.size();
+		assert(n > 0);
+		SizeType qtmp = qns[0] + 1;
+		partition_.clear();
+		for (SizeType i = 0; i < n; ++i) {
+			if (qns[i] != qtmp) {
+				partition_.push_back(i);
+				qtmp = qns[i];
+			}
+		}
+
+		partition_.push_back(n);
+	}
+
 	template<typename IoInputter>
 	void loadInternal(IoInputter& io,
 	                  PsimagLite::String prefix,
@@ -624,9 +624,7 @@ private:
 		for (SizeType i=0;i<permInverse_.size();i++)
 			permutationVector_[permInverse_[i]]=i;
 
-		VectorSizeType qnShrink;
-		io.read(qnShrink, prefix + "QNShrink");
-		unShrinkVector(quantumNumbers_, qnShrink, partition_);
+		io.read(qns_, prefix + "QNShrink");
 
 		dmrgTransformed_=false;
 		if (useSu2Symmetry_)
@@ -676,11 +674,11 @@ private:
 		return 1.0-sum;
 	}
 
-	void truncate(const VectorSizeType& removedIndices)
+	void truncate(VectorSizeType& qns, const VectorSizeType& removedIndices)
 	{
-		utils::truncateVector(quantumNumbers_,removedIndices);
+		utils::truncateVector(qns, removedIndices);
 		utils::truncateVector(electrons_,removedIndices);
-		if (useSu2Symmetry_) symmSu2_.truncate(removedIndices,electrons_);
+		if (useSu2Symmetry_) symmSu2_.truncate(removedIndices, electrons_);
 	}
 
 	void reorder()
@@ -689,27 +687,27 @@ private:
 		if (useSu2Symmetry_) symmSu2_.reorder(permutationVector_);
 	}
 
-	void findPermutationAndPartition(bool changePermutation=true)
+	void findPermutationAndPartition(VectorSizeType& qns,
+	                                 bool changePermutation)
 	{
 		if (changePermutation) {
-			permutationVector_.resize(quantumNumbers_.size());
+			permutationVector_.resize(qns.size());
 			if (useSu2Symmetry_) 	{
 				//symmSu2_.orderFlavors(permutationVector_,partition_);
 				for (SizeType i=0;i<permutationVector_.size();i++)
 					permutationVector_[i]=i;
 			} else {
 				PsimagLite::Sort<VectorSizeType > sort;
-				sort.sort(quantumNumbers_,permutationVector_);
+				sort.sort(qns, permutationVector_);
 			}
 		}
 
-		findPartition();
+		findPartition(qns);
 
 		if (changePermutation) {
 			permInverse_.resize(permutationVector_.size());
 			for (SizeType i=0;i<permInverse_.size();i++)
 				permInverse_[permutationVector_[i]]=i;
-
 		}
 	}
 
@@ -750,7 +748,7 @@ these numbers are
 		order of hundreds for usual symmetries, making this implementation very practical for
 		systems of correlated electrons.)
 		*/
-	VectorSizeType quantumNumbers_;
+	VectorSizeType qns_;
 	VectorSizeType electrons_;
 	VectorSizeType electronsOld_;
 

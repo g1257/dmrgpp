@@ -120,7 +120,7 @@ public:
 
 				data_.resize(weights[i]);
 				offset_ = someBasis.partition(i);
-				SizeType qn = someBasis.pseudoEffectiveNumber(offset_);
+				SizeType qn = someBasis.pseudoQn(i);
 				mAndq_ = PairSizeType(i, qn);
 				found = true;
 			}
@@ -152,7 +152,7 @@ public:
 
 				data_ = v[i];
 				offset_ = someBasis.partition(i);
-				SizeType qn = someBasis.pseudoEffectiveNumber(offset_);
+				SizeType qn = someBasis.pseudoQn(i);
 				mAndq_ = PairSizeType(i, qn);
 				found = true;
 			}
@@ -168,7 +168,7 @@ public:
 		try {
 			SizeType m = findPartition(v,someBasis);
 			offset_ = someBasis.partition(m);
-			SizeType qn = someBasis.pseudoEffectiveNumber(offset_);
+			SizeType qn = someBasis.pseudoQn(m);
 			mAndq_ = PairSizeType(m, qn);
 			SizeType total = someBasis.partition(m + 1) - offset_;
 			data_.resize(total);
@@ -298,7 +298,7 @@ public:
 		SizeType q = v.qn(0);
 		SizeType m = findPartitionWithThisQn(q,someBasis);
 		offset_ = someBasis.partition(m);
-		assert(q == someBasis.pseudoEffectiveNumber(offset_));
+		assert(q == someBasis.pseudoQn(m));
 		mAndq_ = PairSizeType(m, q);
 		SizeType total = someBasis.partition(m+1) - offset_;
 		VectorType tmpV(total,0);
@@ -392,11 +392,8 @@ private:
 	                                 const SomeBasisType& someBasis) const
 	{
 		SizeType np = someBasis.partition()-1;
-		for (SizeType i=0;i<np;i++) {
-			SizeType state = someBasis.partition(i);
-			if (SizeType(someBasis.qn(state))==qn)
-				return i;
-		}
+		for (SizeType i=0;i<np;i++)
+			if (SizeType(someBasis.qnEx(i))==qn) return i;
 
 		throw PsimagLite::RuntimeError("VectorWithOffset: findPartitionWithThisQn\n");
 	}

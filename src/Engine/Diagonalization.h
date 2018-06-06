@@ -185,9 +185,7 @@ private:
 	{
 		SizeType total = lrs.super().partition()-1;
 		for (SizeType i=0;i<total;i++) {
-			//SizeType bs = lrs.super().partition(i+1)-lrs.super().partition(i);
-			if (lrs.super().pseudoEffectiveNumber(lrs.super().partition(i))!=quantumSector_ )
-				continue;
+			if (lrs.super().pseudoQn(i) != quantumSector_) continue;
 			mVector.push_back(i);
 		}
 	}
@@ -240,14 +238,14 @@ private:
 		for (SizeType i=0;i<total;i++) {
 			SizeType bs = lrs.super().partition(i+1)-lrs.super().partition(i);
 			if (verbose_) {
-				SizeType j = lrs.super().qn(lrs.super().partition(i));
+				SizeType j = lrs.super().qnEx(i);
 				std::cerr<<SymmetryElectronsSzType::qnPrint(j,mode+1);
 			}
 
 			weights[i]=bs;
 
 			// Do only one sector unless doing su(2) with j>0, then do all m's
-			SizeType qn = lrs.super().pseudoEffectiveNumber(lrs.super().partition(i));
+			SizeType qn = lrs.super().pseudoQn(i);
 			if (qn != quantumSector_ && !findSymmetrySector) weights[i]=0;
 
 			weightsTotal += weights[i];
@@ -271,10 +269,9 @@ private:
 			if (weights[i]==0) continue;
 			PsimagLite::OstringStream msg;
 			msg<<"About to diag. sector with quantum numbs. ";
-			SizeType j = lrs.super().qn(lrs.super().partition(i));
+			SizeType j = lrs.super().qnEx(i);
 			msg<<SymmetryElectronsSzType::qnPrint(j,mode+1);
-			msg<<" pseudo="<<lrs.super().pseudoEffectiveNumber(
-			         lrs.super().partition(i));
+			msg<<" pseudo="<<lrs.super().pseudoQn(i);
 			msg<<" quantumSector="<<quantumSector_;
 
 			if (verbose_ && PsimagLite::Concurrency::root()) {
@@ -335,7 +332,7 @@ private:
 				weights[i] = 0;
 			if (weights[i]==0) continue;
 
-			SizeType j = lrs.super().qn(lrs.super().partition(i));
+			SizeType j = lrs.super().qnEx(i);
 			PsimagLite::OstringStream msg;
 			msg<<"Found targetted symmetry sector in partition "<<i;
 			msg<<" of size="<<vecSaved[i].size();

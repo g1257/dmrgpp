@@ -101,13 +101,9 @@ public:
 	    : lrs_(lrs), qn_(target)
 	{
 		for (SizeType i=0;i<lrs.left().partition()-1;i++) {
-			SizeType istart = lrs.left().partition(i);
-			assert(istart<lrs.left().size());
 			for (SizeType j=0;j<lrs.right().partition()-1;++j) {
-				SizeType jstart = lrs.right().partition(j);
-				assert(jstart<lrs.right().size());
 
-				if (lrs.left().qn(istart) + lrs.right().qn(jstart) != target)
+				if (lrs.left().qnEx(i) + lrs.right().qnEx(j) != target)
 					continue;
 
 				patchesLeft_.push_back(i);

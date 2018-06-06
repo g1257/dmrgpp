@@ -76,7 +76,7 @@ public:
 
 		fout_<<"SuperBasisPermutation\n";
 		fout_<<lrs.super().permutationVector();
-		SizeType qtarget = lrs.super().qn(lrs.super().partition(m));
+		SizeType qtarget = lrs.super().qnEx(m);
 
 		PairSizeType etarget = getNupNdown(qtarget,p->nOfQns);
 		fout_<<"TargetElectronsUp="<<etarget.first<<"\n";
@@ -172,8 +172,9 @@ private:
 		fout_<<basis.permutationVector();
 		fout_<<"ElectronsUp_ElectronsDown\n";
 		fout_<<basis.size()<<"\n";
-		for (SizeType i = 0; i < basis.size(); ++i) {
-			SizeType q = basis.pseudoEffectiveNumber(i);
+		SizeType npart = basis.partition() - 1;
+		for (SizeType i = 0; i < npart; ++i) {
+			SizeType q = basis.pseudoQn(i);
 			PairSizeType nupDown = getNupNdown(q, nOfQns);
 			fout_<<nupDown.first<<" "<<nupDown.second<<"\n";
 		}

@@ -164,8 +164,7 @@ public:
 
 	int quantumNumber() const
 	{
-		int state = lrs_.super().partition(m_);
-		return lrs_.super().qn(state);
+		return lrs_.super().qnEx(m_);
 	}
 
 	//! Does matrixBlock= (AB), A belongs to pSprime and B

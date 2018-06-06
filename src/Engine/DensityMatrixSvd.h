@@ -426,8 +426,7 @@ public:
 			SizeType sectors = v.sectors();
 			for (SizeType sector = 0; sector < sectors; ++sector) {
 				SizeType m = v.sector(sector);
-				int state = lrs_.super().partition(m);
-				SizeType qn = lrs_.super().qn(state);
+				SizeType qn = lrs_.super().qnEx(m);
 				GenIjPatchType genIjPatch(lrs, qn);
 				const VectorSizeType& groups =  genIjPatch(dir1);
 				for (SizeType i = 0; i < groups.size(); ++i) {
@@ -521,8 +520,7 @@ private:
 		const BasisType& super = lrs_.super();
 		for (SizeType sector = 0; sector < v.sectors(); ++sector) {
 			SizeType m = v.sector(sector);
-			int state = super.partition(m);
-			SizeType qn = super.qn(state);
+			SizeType qn = super.qnEx(m);
 			GenIjPatchType genIjPatch(lrs_, qn);
 			typedef PsimagLite::Parallelizer<ParallelPsiSplit> ParallelizerType;
 			ParallelizerType threaded(PsimagLite::Concurrency::codeSectionParams);

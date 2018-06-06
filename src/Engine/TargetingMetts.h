@@ -498,8 +498,7 @@ private:
 		SizeType total = lrs_.super().partition()-1;
 		for (SizeType i=0;i<total;i++) {
 			// Do only one sector unless doing su(2) with j>0, then do all m's
-			if (lrs_.super().pseudoEffectiveNumber(lrs_.super().partition(i)) ==
-			        quantumSector_ ) return i;
+			if (lrs_.super().pseudoQn(i) == quantumSector_) return i;
 		}
 		throw PsimagLite::RuntimeError("TargetingMetts: getPartition()\n");
 	}
@@ -703,7 +702,7 @@ private:
 			getFullVector(v,i0,lrs);
 			RealType tmpNorm = PsimagLite::norm(v);
 			if (fabs(tmpNorm-1.0)<1e-6) {
-				SizeType j = lrs.super().qn(lrs.super().partition(i0));
+				SizeType j = lrs.super().qnEx(i0);
 				std::cerr<<"setFromInfinite: qns= ";
 				std::cerr<<SymmetryElectronsSzType::qnPrint(j,mode+1);
 				std::cerr<<"\n";
