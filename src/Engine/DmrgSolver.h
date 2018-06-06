@@ -590,12 +590,11 @@ private:
 	                                ProgramGlobals::DirectionEnum direction,
 	                                SizeType loopIndex)
 	{
-		bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=
-		        PsimagLite::String::npos);
-		const VectorSizeType& eS = pS.electronsVector(BasisWithOperatorsType::AFTER_TRANSFORM);
+		bool twoSiteDmrg = (parameters_.options.find("twositedmrg") != PsimagLite::String::npos);
+		const VectorSizeType& eS = pS.electronsVector();
 		FermionSignType fsS(eS);
 
-		const VectorSizeType& eE = pS.electronsVector(BasisWithOperatorsType::AFTER_TRANSFORM);
+		const VectorSizeType& eE = pS.electronsVector();
 		FermionSignType fsE(eE);
 
 		truncate_(pS,pE,target,keptStates,direction);

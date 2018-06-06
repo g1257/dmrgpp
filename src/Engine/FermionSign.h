@@ -88,6 +88,7 @@ class FermionSign {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
 
 public:
 
@@ -100,24 +101,22 @@ public:
 	template<typename SomeBasisType>
 	FermionSign(const SomeBasisType& basis,const VectorSizeType& electrons)
 	{
+		if (basis.oldSigns().size() != basis.permutationInverse().size())
+			err("FermionSign: Problem\n");
 
-		const VectorSizeType& basisElectrons =
-		        basis.electronsVector(SomeBasisType::BEFORE_TRANSFORM);
-		if (basisElectrons.size()!=basis.permutationInverse().size())
-			throw PsimagLite::RuntimeError("Problem\n");
-		SizeType nx = basisElectrons.size()/electrons.size();
-		VectorSizeType el(nx);
+		SizeType n = basis.oldSigns().size();
+		SizeType nx = basis.oldSigns().size()/electrons.size();
 		PackIndicesType pack(nx);
-		for (SizeType x=0;x<basisElectrons.size();x++) {
-			SizeType x0,x1;
-			pack.unpack(x0,x1,basis.permutation(x));
-			assert(x1<electrons.size());
-			int nx0 = basisElectrons[x]-electrons[x1];
-			assert(nx0>=0 && x0<el.size());
-			el[x0] = nx0;
-		}
 
-		init(el);
+		for (SizeType x = 0; x < n; ++x) {
+			SizeType x0 = 0;
+			SizeType x1 = 0;
+			pack.unpack(x0, x1, basis.permutation(x));
+			assert(x1 < electrons.size());
+			bool parity1 = basis.oldSigns()[x];
+			bool parity2 = (electrons[x1] & 1);
+			signs_[x0] = (parity1 != parity2);
+		}
 	}
 
 	template<typename IoInputter>
@@ -168,7 +167,7 @@ private:
 			signs_[i] = (electrons[i] & 1);
 	}
 
-	PsimagLite::Vector<bool>::Type signs_;
+	VectorBoolType signs_;
 }; // class FermionSign
 } // namespace Dmrg
 

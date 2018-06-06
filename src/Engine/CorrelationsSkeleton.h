@@ -290,7 +290,7 @@ private:
 
 	int fermionSignBasis(int fermionicSign, const BasisType& basis) const
 	{
-		const VectorSizeType& v = basis.electronsVector(BasisType::AFTER_TRANSFORM);
+		const VectorSizeType& v = basis.electronsVector();
 		SizeType nx0 = std::accumulate(v.begin(), v.end(), 0);
 		return (nx0 & 1) ? fermionicSign : 1;
 	}

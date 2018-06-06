@@ -107,8 +107,7 @@ public:
 	typedef VectorSizeType BlockType;
 	typedef SparseMatrixType_ SparseMatrixType;
 	typedef RealType_ RealType;
-
-	enum WhenTransformEnum {BEFORE_TRANSFORM, AFTER_TRANSFORM};
+	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
 
 	enum {SAVE_ALL, SAVE_PARTIAL};
 
@@ -156,7 +155,7 @@ public:
 		VectorSizeType qns;
 		basisData.findQuantumNumbers(qns, useSu2Symmetry_);
 		findPermutationAndPartition(qns, true);
-		electronsOld_=electrons_;
+		electronsToSigns(electrons_);
 		shrinkVector(qns_, qns, partition_);
 	}
 
@@ -237,7 +236,7 @@ public:
 		// order quantum numbers of combined basis:
 		findPermutationAndPartition(qns, true);
 		reorder();
-		electronsOld_ = electrons_;
+		electronsToSigns(electrons_);
 		shrinkVector(qns_, qns, partition_);
 	}
 
@@ -419,11 +418,9 @@ public:
 	}
 
 	//! Returns the vector of electrons for this basis
-	const VectorSizeType& electronsVector(WhenTransformEnum beforeOrAfterTransform) const
-	{
-		return (beforeOrAfterTransform == AFTER_TRANSFORM) ? electrons_ :
-		                                                     electronsOld_;
-	}
+	const VectorSizeType& electronsVector() const { return electrons_; }
+
+	const VectorBoolType& oldSigns() const { return signsOld_; }
 
 	//! Returns the fermionic sign for state i
 	int fermionicSign(SizeType i,int f) const
@@ -495,7 +492,7 @@ public:
 
 		if (!minimizeWrite) {
 			io.write(electrons_,"ELECTRONS");
-			io.write(electronsOld_,"0OLDELECTRONS");
+			io.write(signsOld_,"SignsOld");
 		}
 
 		io.write(partition_,"PARTITION");
@@ -520,7 +517,7 @@ public:
 
 		if (!minimizeWrite) {
 			io.write(electrons_, label + "ELECTRONS");
-			io.write(electronsOld_, label + "0OLDELECTRONS");
+			io.write(signsOld_, label + "SignsOld");
 		}
 
 		io.write(partition_, label + "PARTITION");
@@ -615,7 +612,7 @@ private:
 
 		if (!minimizeRead) {
 			io.read(electrons_, prefix + "ELECTRONS");
-			io.read(electronsOld_, prefix + "0OLDELECTRONS");
+			io.read(signsOld_, prefix + "SignsOld");
 		}
 
 		io.read(partition_, prefix + "PARTITION");
@@ -711,6 +708,19 @@ private:
 		}
 	}
 
+	void electronsToSigns(const VectorSizeType& electrons)
+	{
+		SizeType n = electrons.size();
+		if (n == 0) {
+			signsOld_.clear();
+			return;
+		}
+
+		signsOld_.resize(n);
+		for (SizeType i = 0; i < n; ++i)
+			signsOld_[i] = (electrons[i] & 1);
+	}
+
 	void correctNameIfNeeded()
 	{
 		if (name_.find("/") == PsimagLite::String::npos)
@@ -750,7 +760,7 @@ these numbers are
 		*/
 	VectorSizeType qns_;
 	VectorSizeType electrons_;
-	VectorSizeType electronsOld_;
+	VectorBoolType signsOld_;
 
 	/* PSIDOC BasisPartition
 		What remains to be done is to find a partition of the basis which

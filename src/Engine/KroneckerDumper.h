@@ -82,7 +82,7 @@ public:
 		fout_<<"TargetElectronsUp="<<etarget.first<<"\n";
 		fout_<<"TargetElectronsDown="<<etarget.second<<"\n";
 
-		cacheSigns(lrs.left().electronsVector(BasisType::AFTER_TRANSFORM));
+		cacheSigns(lrs.left().electronsVector());
 		counter_++;
 	}
 
@@ -180,7 +180,7 @@ private:
 		}
 
 		fout_<<"Electrons\n";
-		fout_<<basis.electronsVector(BasisType::AFTER_TRANSFORM);
+		fout_<<basis.electronsVector();
 	}
 
 	PairSizeType getNupNdown(SizeType q, SizeType nOfQns) const

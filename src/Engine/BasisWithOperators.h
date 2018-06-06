@@ -203,7 +203,7 @@ public:
 					const OperatorType& myOp =  basis2.getOperatorByIndex(i);
 					if (savedSign != myOp.fermionSign) {
 						utils::fillFermionicSigns(fermionicSigns,
-						                          basis2.electronsVector(BaseType::AFTER_TRANSFORM),
+						                          basis2.electronsVector(),
 						                          myOp.fermionSign);
 						savedSign = myOp.fermionSign;
 					}
@@ -227,7 +227,7 @@ public:
 
 					if (savedSign != myOp.fermionSign) {
 						utils::fillFermionicSigns(fermionicSigns,
-						                          basis2.electronsVector(BaseType::AFTER_TRANSFORM),
+						                          basis2.electronsVector(),
 						                          myOp.fermionSign);
 						savedSign = myOp.fermionSign;
 					}
