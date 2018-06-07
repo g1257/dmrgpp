@@ -147,18 +147,6 @@ public:
 	//! Sets the block of sites for this basis
 	void set(BlockType const &B) { block_ = B; }
 
-	//! Sets symmetry information for this basis, see SymmetryElectronsSz.h for more
-	void setSymmetryRelated(const SymmetryElectronsSzType& basisData)
-	{
-		if (useSu2Symmetry_) symmSu2_.set(basisData);
-		electrons_ = basisData.electrons();
-		VectorSizeType qns;
-		basisData.findQuantumNumbers(qns, useSu2Symmetry_);
-		findPermutationAndPartition(qns, true);
-		electronsToSigns(electrons_);
-		shrinkVector(qns_, qns, partition_);
-	}
-
 	/* PSIDOC BasisSetToProduct
 		The quantum numbers of the original (untransformed) real-space basis
 		are set by the model class (to be described in Section~\ref{subsec:models}),
@@ -300,15 +288,6 @@ public:
 			if (i>=partition_[j] && i<partition_[j+1]) return j;
 		throw PsimagLite::RuntimeError(
 		            "BasisImplementation:: No partition found for this state\n");
-	}
-
-	//! Encodes the quantum numbers into a single unique SizeType and returns it
-	static SizeType encodeQuantumNumber(const VectorSizeType& quantumNumbers)
-	{
-		if (useSu2Symmetry_)
-			return HamiltonianSymmetrySu2Type::encodeQuantumNumber(quantumNumbers);
-		else
-			return HamiltonianSymmetryLocalType::encodeQuantumNumber(quantumNumbers);
 	}
 
 	//! Inverse of pseudoQuantumNumber
@@ -569,6 +548,20 @@ public:
 	                                Basis<SparseMatrixType>&)
 	{
 		throw PsimagLite::RuntimeError("Unimplemented >>");
+	}
+
+protected:
+
+	//! Sets symmetry information for this basis, see SymmetryElectronsSz.h for more
+	void setSymmetryRelated(const SymmetryElectronsSzType& basisData)
+	{
+		if (useSu2Symmetry_) symmSu2_.set(basisData);
+		electrons_ = basisData.electrons();
+		VectorSizeType qns;
+		basisData.findQuantumNumbers(qns, useSu2Symmetry_);
+		findPermutationAndPartition(qns, true);
+		electronsToSigns(electrons_);
+		shrinkVector(qns_, qns, partition_);
 	}
 
 private:
