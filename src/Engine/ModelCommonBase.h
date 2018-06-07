@@ -102,7 +102,6 @@ class ModelCommonBase  {
 	typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 
 public:

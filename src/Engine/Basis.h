@@ -175,7 +175,6 @@ public:
 		if (useSu2Symmetry_) {
 			std::cout<<"Basis: SU(2) Symmetry is in use\n";
 
-			unShrinkVector(qns, qns_, partition_);
 			symmSu2_.setToProduct(basis1.symmSu2_,
 			                      basis2.symmSu2_,
 			                      pseudoQn,
