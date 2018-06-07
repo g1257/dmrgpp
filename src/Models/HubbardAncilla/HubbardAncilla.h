@@ -157,21 +157,13 @@ public:
 
 	void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
-	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
-	{
-		VectorSizeType qns;
-		HilbertBasisType basis;
-		setNaturalBasis(basis, qns, block);
-		setSymmetryRelated(q, basis, block.size());
-	}
-
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
 	                         const BlockType& block) const
 	{
 		HilbertBasisType natBasis;
-		VectorSizeType qvector;
-		setNaturalBasis(natBasis,qvector,block);
+		SymmetryElectronsSzType qq;
+		ModelBaseType::blockBasis(natBasis, qq, block);
 
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 		creationMatrix.clear();
@@ -260,25 +252,6 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
-
-	//! find all states in the natural basis for a block of n sites
-	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setNaturalBasis(HilbertBasisType& basis,
-	                     VectorSizeType& q,
-	                     const VectorSizeType& block) const
-	{
-		SizeType n = block.size();
-		HilbertState total = hilbertSize(0);
-		total = pow(total,n);
-
-		HilbertBasisType basisTmp;
-		for (HilbertState a=0;a<total;a++) basisTmp.push_back(a);
-
-		// reorder the natural basis (needed for MULTIPLE BANDS)
-		findQuantumNumbers(q,basisTmp,block.size());
-		this->orderBasis(basis,q,basisTmp);
-	}
-
 	void findElectrons(VectorSizeType& electrons,
 	                   const HilbertBasisType& basis,
 	                   SizeType) const
@@ -303,8 +276,9 @@ public:
 	{
 		SizeType n=block.size();
 		HilbertBasisType natBasis;
-		VectorSizeType qvector;
-		setNaturalBasis(natBasis,qvector,block);
+		SymmetryElectronsSzType qq;
+		ModelBaseType::blockBasis(natBasis, qq, block);
+
 		for (SizeType i=0;i<n;i++) {
 			VectorSparseMatrixType cm;
 			findAllMatrices(cm,i,natBasis);
@@ -321,6 +295,22 @@ public:
 	virtual const TargetQuantumElectronsType& targetQuantum() const
 	{
 		return modelParameters_.targetQuantum;
+	}
+
+protected:
+
+	//! find all states in the natural basis for a block of n sites
+	void setBlockBasisUnordered(HilbertBasisType& basis,
+	                            SymmetryElectronsSzType& qq,
+	                            const VectorSizeType& block) const
+	{
+		SizeType n = block.size();
+		HilbertState total = hilbertSize(0);
+		total = pow(total,n);
+
+		basis.resize(total);
+		for (HilbertState a = 0; a < total; ++a) basis[a] = a;
+		setSymmetryRelated(qq, basis, block[0]);
 	}
 
 private:

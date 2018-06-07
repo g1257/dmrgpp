@@ -176,11 +176,6 @@ public:
 		return creationMatrix_[0].data.rows();
 	}
 
-	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
-	{
-		q = qq_;
-	}
-
 	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
 	 *unmangled (natural) basis of one-site */
 	OperatorType naturalOperator(const PsimagLite::String& what,
@@ -303,12 +298,12 @@ public:
 
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setNaturalBasis(HilbertBasisType  &basis,
-	                     VectorSizeType& q,
-	                     const VectorSizeType&) const
+	void blockBasis(HilbertBasisType  &basis,
+	                SymmetryElectronsSzType& qq,
+	                const VectorSizeType&) const
 	{
 		basis = basis_;
-		q = q_;
+		qq = qq_;
 	}
 
 	virtual const TargetQuantumElectronsType& targetQuantum() const
@@ -360,6 +355,15 @@ public:
 	virtual SizeType maxElectronsOneSpin() const
 	{
 		return modelParameters_.orbitals*geometry_.numberOfSites() + 1;
+	}
+
+protected:
+
+	void setBlockBasisUnordered(HilbertBasisType&,
+	                            SymmetryElectronsSzType&,
+	                            const VectorSizeType&) const
+	{
+		err("setBlockBasisUnordered should not be called for this model\n");
 	}
 
 private:

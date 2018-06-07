@@ -139,11 +139,6 @@ public:
 		return extendedHubbard_.hilbertSize(site);
 	}
 
-	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
-	{
-		extendedHubbard_.setQuantumNumbers(q, block);
-	}
-
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
 	                         const BlockType& block) const
@@ -179,15 +174,6 @@ public:
 		extendedHubbard_.findElectrons(electrons,basis,site);
 	}
 
-	//! find all states in the natural basis for a block of n sites
-	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setNaturalBasis(HilbertBasisType  &basis,
-	                     typename PsimagLite::Vector<SizeType>::Type& q,
-	                     const typename PsimagLite::Vector<SizeType>::Type& block) const
-	{
-		extendedHubbard_.setNaturalBasis(basis,q,block);
-	}
-
 	void print(std::ostream& os) const
 	{
 		extendedHubbard_.print(os);
@@ -209,6 +195,15 @@ public:
 	virtual const TargetQuantumElectronsType& targetQuantum() const
 	{
 		return modelParameters_.targetQuantum;
+	}
+
+protected:
+
+	void setBlockBasisUnordered(HilbertBasisType& basis,
+	                            SymmetryElectronsSzType& qq,
+	                            const VectorSizeType& block) const
+	{
+		extendedHubbard_.setBlockBasisUnordered(basis, qq, block);
 	}
 
 private:

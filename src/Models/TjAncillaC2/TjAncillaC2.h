@@ -150,14 +150,6 @@ public:
 		return pow(3,NUMBER_OF_ORBITALS);
 	}
 
-	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
-	{
-		VectorSizeType qns;
-		HilbertBasisType basis;
-		setNaturalBasis(basis, qns, block);
-		setSymmetryRelated(q, basis, block.size());
-	}
-
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
 	                         const BlockType& block) const
@@ -165,8 +157,8 @@ public:
 		SizeType orbitals = (hot_) ? 2 : 1;
 		VectorHilbertStateType natBasis;
 		SparseMatrixType tmpMatrix;
-		VectorSizeType quantumNumbs;
-		setNaturalBasis(natBasis,quantumNumbs,block);
+		SymmetryElectronsSzType qq;
+		ModelBaseType::blockBasis(natBasis, qq, block);
 
 		// Set the operators c^\daggger_{i\sigma} in the natural basis
 		creationMatrix.clear();
@@ -324,29 +316,6 @@ public:
 		}
 	}
 
-	//! find all states in the natural basis for a block of n sites
-	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setNaturalBasis(HilbertBasisType& basis,
-	                     VectorSizeType& q,
-	                     const VectorSizeType& block) const
-	{
-		assert(block.size()==1);
-		HilbertStateType a=0;
-		int sitesTimesDof=2*NUMBER_OF_ORBITALS;
-		HilbertStateType total = (1<<sitesTimesDof);
-
-		HilbertBasisType  basisTmp;
-		for (a=0;a<total;a++) {
-			if (!isAllowed(a)) continue;
-			basisTmp.push_back(a);
-		}
-
-		assert(basisTmp.size() == pow(3,NUMBER_OF_ORBITALS));
-		// reorder the natural basis (needed for MULTIPLE BANDS)
-		findQuantumNumbers(q,basisTmp,block.size());
-		this->orderBasis(basis,q,basisTmp);
-	}
-
 	virtual const TargetQuantumElectronsType& targetQuantum() const
 	{
 		return modelParameters_.targetQuantum;
@@ -355,6 +324,27 @@ public:
 	void print(std::ostream& os) const
 	{
 		os<<modelParameters_;
+	}
+
+protected:
+
+	//! find all states in the natural basis for a block of n sites
+	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
+	void setBlockBasisUnordered(HilbertBasisType& basis,
+	                            SymmetryElectronsSzType& qq,
+	                            const VectorSizeType& block) const
+	{
+		assert(block.size()==1);
+		int sitesTimesDof = 2*NUMBER_OF_ORBITALS;
+		HilbertStateType total = (1<<sitesTimesDof);
+
+		for (HilbertStateType a = 0; a < total; ++a) {
+			if (!isAllowed(a)) continue;
+			basis.push_back(a);
+		}
+
+		assert(basis.size() == pow(3,NUMBER_OF_ORBITALS));
+		setSymmetryRelated(qq, basis, block[0]);
 	}
 
 private:

@@ -156,11 +156,11 @@ public:
 
 	virtual void findElectronsOfOneSite(BlockType& electrons,SizeType site) const
 	{
-		typename PsimagLite::Vector<SizeType>::Type block(1,site);
+		typename PsimagLite::Vector<SizeType>::Type block(1, site);
 		HilbertBasisType basis;
-		typename PsimagLite::Vector<SizeType>::Type quantumNumbs;
-		setNaturalBasis(basis,quantumNumbs,block);
-		findElectrons(electrons,basis,site);
+		SymmetryElectronsSzType qq;
+		blockBasis(basis, qq, block);
+		findElectrons(electrons, basis, site);
 	}
 
 	virtual void hamiltonianOnLink(SparseMatrixType& hmatrix,
@@ -213,9 +213,6 @@ public:
 		return modelCommon_->getConnection(A,B,ix,modelHelper);
 	}
 
-	virtual void setQuantumNumbers(SymmetryElectronsSzType&,
-	                               const BlockType&) const = 0;
-
 	//! Full hamiltonian from creation matrices cm
 	virtual void calcHamiltonian(SparseMatrixType &hmatrix,
 	                             const VectorOperatorType& cm,
@@ -241,20 +238,59 @@ public:
 		return maxElectrons*modelCommon_->geometry().numberOfSites() + 1;
 	}
 
+	virtual void blockBasis(HilbertBasisType& basis,
+	                        SymmetryElectronsSzType& qq,
+	                        const BlockType& block) const
+	{
+		HilbertBasisType basisTmp;
+		setBlockBasisUnordered(basisTmp, qq, block);
+		VectorSizeType q;
+		qq.findQuantumNumbers(q, MyBasis::useSu2Symmetry());
+		orderBasis(basis, q, basisTmp);
+	}
+
 	void printBasis(SizeType site) const
 	{
-		BlockType block(1,site);
+		BlockType block(1, site);
 		HilbertBasisType natBasis;
-		typename PsimagLite::Vector<SizeType>::Type quantumNumbs;
-		this->setNaturalBasis(natBasis,quantumNumbs,block);
+		SymmetryElectronsSzType qq;
+		blockBasis(natBasis, qq, block);
+		VectorSizeType q;
+		qq.findQuantumNumbers(q, MyBasis::useSu2Symmetry());
 		std::cout<<"block="<<block;
 		std::cout<<"natBasis="<<natBasis;
-		std::cout<<"quantumNumbs="<<quantumNumbs;
+		std::cout<<"quantumNumbs="<<q;
 	}
 
 	const GeometryType& geometry() const { return modelCommon_->geometry(); }
 
 	const ParametersType& params() const { return modelCommon_->params(); }
+
+	virtual const TargetQuantumElectronsType& targetQuantum() const = 0;
+
+	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
+	                           SizeType x,
+	                           PsimagLite::String msg = "") const = 0;
+
+	static void checkNaturalOperatorDof(SizeType dof,
+	                                    PsimagLite::String label,
+	                                    const VectorSizeType& allowed)
+	{
+		if (std::find(allowed.begin(),allowed.end(),dof) != allowed.end()) return;
+		PsimagLite::String str("For this model and label=");
+		str += label + " dof=" + ttos(dof) + " is not allowed\n";
+		str += "Allowed dofs are ";
+		for (SizeType i = 0; i < allowed.size(); ++i)
+			str += ttos(i) + " ";
+		str += "\n";
+		throw PsimagLite::RuntimeError(str);
+	}
+
+protected:
+
+	virtual void setBlockBasisUnordered(HilbertBasisType&,
+	                                    SymmetryElectronsSzType&,
+	                                    const BlockType&) const = 0;
 
 	void orderBasis(HilbertBasisType& basis,
 	                VectorSizeType& q,
@@ -301,32 +337,6 @@ public:
 		offset += symmetryBlock.size();
 		symmetryBlock.clear();
 	}
-
-	virtual const TargetQuantumElectronsType& targetQuantum() const = 0;
-
-	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
-	                           SizeType x,
-	                           PsimagLite::String msg = "") const = 0;
-
-	static void checkNaturalOperatorDof(SizeType dof,
-	                                    PsimagLite::String label,
-	                                    const VectorSizeType& allowed)
-	{
-		if (std::find(allowed.begin(),allowed.end(),dof) != allowed.end()) return;
-		PsimagLite::String str("For this model and label=");
-		str += label + " dof=" + ttos(dof) + " is not allowed\n";
-		str += "Allowed dofs are ";
-		for (SizeType i = 0; i < allowed.size(); ++i)
-			str += ttos(i) + " ";
-		str += "\n";
-		throw PsimagLite::RuntimeError(str);
-	}
-
-protected:
-
-	virtual void setNaturalBasis(HilbertBasisType& basis,
-	                             VectorSizeType& q,
-	                             const BlockType& block) const = 0;
 
 private:
 

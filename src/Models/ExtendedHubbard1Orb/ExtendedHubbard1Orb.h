@@ -167,11 +167,6 @@ public:
 		return modelHubbard_.hilbertSize(site);
 	}
 
-	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
-	{
-		modelHubbard_.setQuantumNumbers(q, block);
-	}
-
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType&creationMatrix,
 	                         const BlockType& block) const
@@ -209,15 +204,6 @@ public:
 		modelHubbard_.findElectrons(electrons,basis,site);
 	}
 
-	//! find all states in the natural basis for a block of n sites
-	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setNaturalBasis(HilbertBasisType  &basis,
-	                     typename PsimagLite::Vector<SizeType>::Type& q,
-	                     const typename PsimagLite::Vector<SizeType>::Type& block) const
-	{
-		modelHubbard_.setNaturalBasis(basis,q,block);
-	}
-
 	void print(std::ostream& os) const
 	{
 		modelHubbard_.print(os);
@@ -251,6 +237,15 @@ public:
 		return modelHubbard_.targetQuantum();
 	}
 
+	//! find all states in the natural basis for a block of n sites
+	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
+	void setBlockBasisUnordered(HilbertBasisType  &basis,
+	                            SymmetryElectronsSzType& qq,
+	                            const VectorSizeType& block) const
+	{
+		modelHubbard_.setBlockBasisUnordered(basis, qq, block);
+	}
+
 private:
 
 	//! Find n_i in the natural basis natBasis
@@ -280,8 +275,8 @@ private:
 		VectorOperatorType creationMatrix2 = creationMatrix;
 		creationMatrix.clear();
 		VectorHilbertStateType natBasis;
-		typename PsimagLite::Vector<SizeType>::Type q;
-		modelHubbard_.setNaturalBasis(natBasis,q,block);
+		SymmetryElectronsSzType qq;
+		modelHubbard_.blockBasis(natBasis, qq, block);
 		SizeType operatorsPerSite = utils::exactDivision(creationMatrix2.size(),
 		                                                 block.size());
 		SizeType k = 0;

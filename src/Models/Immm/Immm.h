@@ -218,14 +218,6 @@ public:
 
 	void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
-	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
-	{
-		VectorSizeType qns;
-		HilbertBasisType basis;
-		setNaturalBasis(basis, qns, block);
-		setSymmetryRelated(q, basis, block.size());
-	}
-
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(typename PsimagLite::Vector<OperatorType>::Type& creationMatrix,
 	                         const BlockType& block) const
@@ -233,8 +225,8 @@ public:
 		assert(block.size()==1);
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
-		typename PsimagLite::Vector<SizeType>::Type qvector;
-		setNaturalBasis(natBasis,qvector,block);
+		SymmetryElectronsSzType qq;
+		ModelBaseType::blockBasis(natBasis, qq, block);
 
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 		creationMatrix.clear();
@@ -338,28 +330,6 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	//! find all states in the natural basis for a block of n sites
-	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setNaturalBasis(HilbertBasisType& basis,
-	                     typename PsimagLite::Vector<SizeType>::Type& q,
-	                     const typename PsimagLite::Vector<SizeType>::Type& block) const
-	{
-		assert(block.size()==1);
-		SizeType dof =  NUMBER_OF_SPINS * orbitalsAtSite(0);
-		HilbertState total = (1<<dof);
-
-		HilbertBasisType  basisTmp;
-		for (HilbertState a=0;a<total;a++) {
-			if (!isAllowedThisDof(a,block[0])) continue;
-			basisTmp.push_back(a);
-		}
-
-		// reorder the natural basis (needed for MULTIPLE BANDS)
-		findQuantumNumbers(q,basisTmp,block[0]);
-
-		this->orderBasis(basis, q, basisTmp);
-	}
-
 	void findElectrons(typename PsimagLite::Vector<SizeType>::Type& electrons,
 	                   const HilbertBasisType& basis,
 	                   SizeType site) const
@@ -382,6 +352,25 @@ public:
 	virtual const TargetQuantumElectronsType& targetQuantum() const
 	{
 		return modelParameters_.targetQuantum;
+	}
+
+protected:
+
+	void setBlockBasisUnordered(HilbertBasisType& basis,
+	                            SymmetryElectronsSzType& qq,
+	                            const VectorSizeType& block) const
+	{
+		assert(block.size()==1);
+		SizeType dof =  NUMBER_OF_SPINS * orbitalsAtSite(0);
+		HilbertState total = (1<<dof);
+
+		basis.resize(total);
+		for (HilbertState a = 0; a < total; ++a) {
+			if (!isAllowedThisDof(a,block[0])) continue;
+			basis.push_back(a);
+		}
+
+		setSymmetryRelated(qq, basis, block[0]);
 	}
 
 private:

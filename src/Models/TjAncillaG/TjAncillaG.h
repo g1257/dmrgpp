@@ -157,22 +157,14 @@ public:
 		return TjMultiOrb_.hilbertSize(site);
 	}
 
-	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
-	{
-		VectorSizeType qns;
-		HilbertBasisType basis;
-		setNaturalBasis(basis, qns, block);
-		setSymmetryRelated(q, basis, block.size());
-	}
-
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType&creationMatrix,
 	                         const BlockType& block) const
 	{
 		VectorHilbertStateType natBasis;
 		SparseMatrixType tmpMatrix;
-		VectorSizeType quantumNumbs;
-		setNaturalBasis(natBasis,quantumNumbs,block);
+		SymmetryElectronsSzType qq;
+		ModelBaseType::blockBasis(natBasis, qq, block);
 
 		// Set the operators c^\daggger_{i\sigma} in the natural basis
 		creationMatrix.clear();
@@ -243,31 +235,6 @@ public:
 			m += modelParameters_.potentialV[block[i]+linSize]*ndown;
 			hmatrix += factorForDiagonals * m;
 		}
-	}
-
-	//! find all states in the natural basis for a block of n sites
-	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setNaturalBasis(HilbertBasisType& basis,
-	                     VectorSizeType& q,
-	                     const VectorSizeType& block) const
-	{
-		assert(block.size()==1);
-		HilbertStateType a=0;
-		int sitesTimesDof=DEGREES_OF_FREEDOM;
-		HilbertStateType total = (1<<sitesTimesDof);
-		total--;
-
-		HilbertBasisType  basisTmp;
-		for (a=0;a<total;a++) basisTmp.push_back(a);
-
-		// reorder the natural basis (needed for MULTIPLE BANDS)
-		findQuantumNumbers(q,basisTmp,1);
-		VectorSizeType iperm(q.size());
-
-		PsimagLite::Sort<VectorSizeType > sort;
-		sort.sort(q,iperm);
-		basis.clear();
-		for (a=0;a<total;a++) basis.push_back(basisTmp[iperm[a]]);
 	}
 
 	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
@@ -364,6 +331,24 @@ public:
 	void print(std::ostream& os) const
 	{
 		os<<modelParameters_;
+	}
+
+protected:
+
+	//! find all states in the natural basis for a block of n sites
+	void setBlockBasisUnordered(HilbertBasisType& basis,
+	                            SymmetryElectronsSzType& qq,
+	                            const VectorSizeType& block) const
+	{
+		assert(block.size() == 1);
+		int sitesTimesDof = DEGREES_OF_FREEDOM;
+		HilbertStateType total = (1<<sitesTimesDof);
+		--total;
+
+		basis.resize(total);
+		for (HilbertStateType a = 0; a < total; ++a) basis[a] = a;
+
+		setSymmetryRelated(qq, basis, block[0]);
 	}
 
 private:

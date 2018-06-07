@@ -167,14 +167,6 @@ public:
 		return (SizeType)pow(2,NUMBER_OF_ORBITALS);
 	}
 
-	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
-	{
-		VectorSizeType qns;
-		HilbertBasisType basis;
-		setNaturalBasis(basis, qns, block);
-		setSymmetryRelated(q, basis, block.size());
-	}
-
 	/** \cppFunction{!PTEX_THISFUNCTION} sets local operators needed to
 		 construct the Hamiltonian.
 		 For example, for the Hubbard model these operators are the
@@ -184,8 +176,8 @@ public:
 	{
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
-		typename PsimagLite::Vector<SizeType>::Type quantumNumbs;
-		setNaturalBasis(natBasis,quantumNumbs,block);
+		SymmetryElectronsSzType qq;
+		ModelBaseType::blockBasis(natBasis, qq, block);
 
 		//! Set the operators c^\daggger_{i\sigma} in the natural basis
 		creationMatrix.clear();
@@ -269,27 +261,6 @@ public:
 		}
 	}
 
-	void setNaturalBasis(HilbertBasisType  &basis,
-	                     typename PsimagLite::Vector<SizeType>::Type& q,
-	                     const typename PsimagLite::Vector<SizeType>::Type& block) const
-	{
-		HilbertState a=0;
-		int sitesTimesDof=DEGREES_OF_FREEDOM*block.size();
-		HilbertState total = (1<<sitesTimesDof);
-
-		HilbertBasisType  basisTmp;
-		for (a=0;a<total;a++) basisTmp.push_back(a);
-
-		// reorder the natural basis (needed for MULTIPLE BANDS)
-		findQuantumNumbers(q,basisTmp,1);
-		typename PsimagLite::Vector<SizeType>::Type iperm(q.size());
-
-		PsimagLite::Sort<typename PsimagLite::Vector<SizeType>::Type > sort;
-		sort.sort(q,iperm);
-		basis.clear();
-		for (a=0;a<total;a++) basis.push_back(basisTmp[iperm[a]]);
-	}
-
 	void print(std::ostream& os) const
 	{
 		os<<modelParameters_;
@@ -323,6 +294,21 @@ public:
 	virtual const TargetQuantumElectronsType& targetQuantum() const
 	{
 		return modelParameters_.targetQuantum;
+	}
+
+protected:
+
+	void setBlockBasisUnordered(HilbertBasisType  &basis,
+	                     SymmetryElectronsSzType& qq,
+	                     const VectorSizeType& block) const
+	{
+		int sitesTimesDof=DEGREES_OF_FREEDOM*block.size();
+		HilbertState total = (1<<sitesTimesDof);
+
+		for (HilbertState a = 0; a < total; ++a)
+			basis[a] = a;
+
+		setSymmetryRelated(qq, basis, block[0]);
 	}
 
 private:
@@ -431,8 +417,8 @@ private:
 		VectorOperatorType creationMatrix2 = creationMatrix;
 		creationMatrix.clear();
 		VectorHilbertStateType natBasis;
-		typename PsimagLite::Vector<SizeType>::Type q;
-		setNaturalBasis(natBasis,q,block);
+		SymmetryElectronsSzType qq;
+		ModelBaseType::blockBasis(natBasis, qq, block);
 		SizeType operatorsPerSite = utils::exactDivision(creationMatrix2.size(),
 		                                                 block.size());
 		SizeType k = 0;

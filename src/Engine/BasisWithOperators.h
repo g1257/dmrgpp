@@ -304,11 +304,12 @@ public:
 	                const SomeModelType& model,
 	                RealType time)
 	{
+		typename SomeModelType::HilbertBasisType basis;
 		SymmetryElectronsSzType qm;
-		model.setQuantumNumbers(qm, block);
+		model.blockBasis(basis, qm, block);
 
-		this->set(block);
-		this->setSymmetryRelated(qm);
+		BaseType::set(block);
+		BaseType::setSymmetryRelated(qm);
 
 		typename PsimagLite::Vector<OperatorType>::Type ops;
 		SparseMatrixType h;

@@ -146,11 +146,6 @@ public:
 		return (1<<2);
 	}
 
-	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
-	{
-		extendedHubbard_.setQuantumNumbers(q, block);
-	}
-
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
 	                         const BlockType& block) const
 	{
@@ -184,15 +179,6 @@ public:
 	                   SizeType site) const
 	{
 		extendedHubbard_.findElectrons(electrons,basis,site);
-	}
-
-	//! find all states in the natural basis for a block of n sites
-	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setNaturalBasis(HilbertBasisType  &basis,
-	                     typename PsimagLite::Vector<SizeType>::Type& q,
-	                     const typename PsimagLite::Vector<SizeType>::Type& block) const
-	{
-		extendedHubbard_.setNaturalBasis(basis,q,block);
 	}
 
 	void print(std::ostream& os) const
@@ -230,14 +216,23 @@ public:
 		return extendedHubbard_.targetQuantum();
 	}
 
+protected:
+
+	void setBlockBasisUnordered(HilbertBasisType& basis,
+	                            SymmetryElectronsSzType& qq,
+	                            const VectorSizeType& block) const
+	{
+		extendedHubbard_.setBlockBasisUnordered(basis, qq, block);
+	}
+
 private:
 
 	void addAditionalOperatorMatrices(VectorOperatorType& creationMatrix,
 	                                  const BlockType& block) const
 	{
 		HilbertBasisType natBasis;
-		VectorSizeType qvector;
-		extendedHubbard_.setNaturalBasis(natBasis,qvector,block);
+		SymmetryElectronsSzType qq;
+		extendedHubbard_.blockBasis(natBasis, qq, block);
 
 		for (SizeType i=0;i<block.size();i++) {
 			setSplusi(creationMatrix,i);

@@ -290,11 +290,6 @@ public:
 
 	void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
-	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType&) const
-	{
-		q = qq_;
-	}
-
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
 	                         const BlockType&) const
@@ -420,12 +415,12 @@ public:
 
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setNaturalBasis(HilbertBasisType& basis,
-	                     VectorSizeType& q,
-	                     const VectorSizeType&) const
+	void blockBasis(HilbertBasisType& basis,
+	                SymmetryElectronsSzType& qq,
+	                const VectorSizeType&) const
 	{
 		basis = basis_;
-		q = q_;
+		qq = qq_;
 	}
 
 	void findElectrons(VectorSizeType& electrons,
@@ -481,6 +476,15 @@ public:
 	virtual const TargetQuantumElectronsType& targetQuantum() const
 	{
 		return modelParameters_.targetQuantum;
+	}
+
+protected:
+
+	void setBlockBasisUnordered(HilbertBasisType&,
+	                            SymmetryElectronsSzType&,
+	                            const VectorSizeType&) const
+	{
+		err("setBlockBasisUnordered should not be called for this model\n");
 	}
 
 private:

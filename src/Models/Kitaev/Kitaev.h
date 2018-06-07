@@ -183,14 +183,6 @@ public:
 
 	SizeType hilbertSize(SizeType) const { return TWICE_THE_SPIN + 1; }
 
-	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
-	{
-		VectorSizeType qns;
-		HilbertBasisType basis;
-		setNaturalBasis(basis, qns, block);
-		setSymmetryRelated(q, basis, block.size());
-	}
-
 	//! set operator matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& operatorMatrices,
 	                         const BlockType& block) const
@@ -198,8 +190,8 @@ public:
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
 
-		VectorSizeType qvector;
-		setNaturalBasis(natBasis,qvector,block);
+		SymmetryElectronsSzType qq;
+		ModelBaseType::blockBasis(natBasis, qq, block);
 
 		typename MatrixType::value_type dummy = 0.0;
 
@@ -250,20 +242,6 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	//! find all states in the natural basis for a block of n sites
-	void setNaturalBasis(HilbertBasisType& basis,
-	                     VectorSizeType& q,
-	                     const VectorSizeType& block) const
-	{
-		SizeType total = utils::powUint(TWICE_THE_SPIN + 1, block.size());
-
-		for (SizeType i = 0; i < total; ++i) basis.push_back(i);
-
-		SymmetryElectronsSzType qq;
-		setSymmetryRelated(qq, basis, block.size());
-		qq.findQuantumNumbers(q, MyBasis::useSu2Symmetry());
-	}
-
 	//! Dummy since this model has no fermion sign
 	void findElectrons(VectorSizeType& electrons,
 	                   const HilbertBasisType& basis,
@@ -308,6 +286,21 @@ public:
 		return modelParameters_.targetQuantum;
 	}
 
+protected:
+
+	//! find all states in the natural basis for a block of n sites
+	void setBlockBasisUnordered(HilbertBasisType& basis,
+	                            SymmetryElectronsSzType& qq,
+	                            const VectorSizeType& block) const
+	{
+		SizeType total = utils::powUint(TWICE_THE_SPIN + 1, block.size());
+
+		basis.resize(total);
+		for (SizeType i = 0; i < total; ++i) basis[i] = i;
+
+		setSymmetryRelated(qq, basis, block.size());
+	}
+
 private:
 
 	SizeType logBase2(SizeType x) const
@@ -344,8 +337,8 @@ private:
 		if (dir == DIR_X) {
 			cm(0,1) = cm(1,0) = 0.5;
 		} else if (dir == DIR_Y) {
-			cm(0, 1) = std::complex<RealType>(0.0, -0.5); 
-			cm(1, 0) = std::complex<RealType>(0.0, 0.5);  
+			cm(0, 1) = std::complex<RealType>(0.0, -0.5);
+			cm(1, 0) = std::complex<RealType>(0.0, 0.5);
 		} else if (dir == DIR_Z) {
 			cm(0, 0) = 0.5;
 			cm(1, 1) = -0.5;

@@ -177,11 +177,6 @@ public:
 
 	void print(std::ostream& os) const { modelFeAs_.print(os); }
 
-	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
-	{
-		modelFeAs_.setQuantumNumbers(q, block);
-	}
-
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
 	                         const BlockType& block) const
@@ -232,15 +227,6 @@ public:
 		return modelFeAs_.naturalOperator(what,site,dof);
 	}
 
-	//! find all states in the natural basis for a block of n sites
-	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setNaturalBasis(typename PsimagLite::Vector<HilbertState>  ::Type&basis,
-	                     typename PsimagLite::Vector<SizeType>::Type& q,
-	                     const typename PsimagLite::Vector<SizeType>::Type& block) const
-	{
-		modelFeAs_.setNaturalBasis(basis,q,block);
-	}
-
 	void findElectrons(typename PsimagLite::Vector<SizeType>::Type& electrons,
 	                   const typename PsimagLite::Vector<HilbertState>::Type& basis,
 	                   SizeType site) const
@@ -260,6 +246,24 @@ public:
 	virtual const TargetQuantumElectronsType& targetQuantum() const
 	{
 		return modelFeAs_.targetQuantum();
+	}
+
+	void blockBasis(HilbertBasisType& basis,
+	                SymmetryElectronsSzType& qq,
+	                const VectorSizeType& block) const
+	{
+		modelFeAs_.blockBasis(basis, qq, block);
+	}
+
+protected:
+
+	//! find all states in the natural basis for a block of n sites
+	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
+	void setBlockBasisUnordered(typename PsimagLite::Vector<HilbertState>::Type& basis,
+	                            SymmetryElectronsSzType& qq,
+	                            const typename PsimagLite::Vector<SizeType>::Type& block) const
+	{
+		err("setBlockBasisUnordered should not be called for this model\n");
 	}
 
 private:
