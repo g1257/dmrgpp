@@ -248,22 +248,11 @@ public:
 		return modelFeAs_.targetQuantum();
 	}
 
-	void blockBasis(HilbertBasisType& basis,
-	                SymmetryElectronsSzType& qq,
-	                const VectorSizeType& block) const
+	void setBasis(HilbertBasisType& basis,
+	              SymmetryElectronsSzType& qq,
+	              const VectorSizeType& block) const
 	{
-		modelFeAs_.blockBasis(basis, qq, block);
-	}
-
-protected:
-
-	//! find all states in the natural basis for a block of n sites
-	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setBlockBasisUnordered(typename PsimagLite::Vector<HilbertState>::Type& basis,
-	                            SymmetryElectronsSzType& qq,
-	                            const typename PsimagLite::Vector<SizeType>::Type& block) const
-	{
-		err("setBlockBasisUnordered should not be called for this model\n");
+		modelFeAs_.setBasis(basis, qq, block);
 	}
 
 private:

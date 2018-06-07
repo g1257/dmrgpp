@@ -227,7 +227,7 @@ public:
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
 		SymmetryElectronsSzType qq;
-		this->blockBasis(natBasis, qq, block);
+		setBasis(natBasis, qq, block);
 
 		//! Set the operators c^\daggger_{i\sigma} in the natural basis
 		creationMatrix.clear();
@@ -485,17 +485,18 @@ public:
 		return modelParameters_.targetQuantum;
 	}
 
-	void setBlockBasisUnordered(HilbertBasisType& basis,
-	                            SymmetryElectronsSzType& qq,
-	                            const VectorSizeType& block) const
+	void setBasis(HilbertBasisType& basis,
+	              SymmetryElectronsSzType& qq,
+	              const VectorSizeType& block) const
 	{
 		int sitesTimesDof = DEGREES_OF_FREEDOM*block.size();
 		HilbertState total = (1<<sitesTimesDof);
 
-		basis.resize(total);
-		for (HilbertState a = 0; a < total; ++a) basis[a] = a;
+		HilbertBasisType basisTmp(total);
+		for (HilbertState a = 0; a < total; ++a) basisTmp[a] = a;
 
-		setSymmetryRelated(qq, basis, block.size());
+		setSymmetryRelated(qq, basisTmp, block.size());
+		ModelBaseType::orderBasis(basis, basisTmp, qq);
 	}
 
 private:
@@ -546,15 +547,6 @@ private:
 
 		SparseMatrixType creationMatrix(cm);
 		return creationMatrix;
-	}
-
-	void findQuantumNumbers(typename PsimagLite::Vector<SizeType>::Type& q,
-	                        const HilbertBasisType& basis,
-	                        int n) const
-	{
-		SymmetryElectronsSzType qq;
-		setSymmetryRelated(qq,basis,n);
-		qq.findQuantumNumbers(q, MyBasis::useSu2Symmetry());
 	}
 
 	void setSymmetryRelated(SymmetryElectronsSzType& q,HilbertBasisType  const &basis,int) const

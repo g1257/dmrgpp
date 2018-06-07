@@ -306,7 +306,7 @@ public:
 	{
 		typename SomeModelType::HilbertBasisType basis;
 		SymmetryElectronsSzType qm;
-		model.blockBasis(basis, qm, block);
+		model.setBasis(basis, qm, block);
 
 		BaseType::set(block);
 		BaseType::setSymmetryRelated(qm);

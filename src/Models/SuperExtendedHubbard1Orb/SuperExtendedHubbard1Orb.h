@@ -216,13 +216,11 @@ public:
 		return extendedHubbard_.targetQuantum();
 	}
 
-protected:
-
-	void setBlockBasisUnordered(HilbertBasisType& basis,
-	                            SymmetryElectronsSzType& qq,
-	                            const VectorSizeType& block) const
+	void setBasis(HilbertBasisType& basis,
+	              SymmetryElectronsSzType& qq,
+	              const VectorSizeType& block) const
 	{
-		extendedHubbard_.setBlockBasisUnordered(basis, qq, block);
+		extendedHubbard_.setBasis(basis, qq, block);
 	}
 
 private:
@@ -232,7 +230,7 @@ private:
 	{
 		HilbertBasisType natBasis;
 		SymmetryElectronsSzType qq;
-		extendedHubbard_.blockBasis(natBasis, qq, block);
+		extendedHubbard_.setBasis(natBasis, qq, block);
 
 		for (SizeType i=0;i<block.size();i++) {
 			setSplusi(creationMatrix,i);

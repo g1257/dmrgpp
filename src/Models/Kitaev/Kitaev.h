@@ -191,7 +191,7 @@ public:
 		SparseMatrixType tmpMatrix;
 
 		SymmetryElectronsSzType qq;
-		ModelBaseType::blockBasis(natBasis, qq, block);
+		setBasis(natBasis, qq, block);
 
 		typename MatrixType::value_type dummy = 0.0;
 
@@ -286,19 +286,18 @@ public:
 		return modelParameters_.targetQuantum;
 	}
 
-protected:
-
 	//! find all states in the natural basis for a block of n sites
-	void setBlockBasisUnordered(HilbertBasisType& basis,
-	                            SymmetryElectronsSzType& qq,
-	                            const VectorSizeType& block) const
+	void setBasis(HilbertBasisType& basis,
+	              SymmetryElectronsSzType& qq,
+	              const VectorSizeType& block) const
 	{
 		SizeType total = utils::powUint(TWICE_THE_SPIN + 1, block.size());
 
-		basis.resize(total);
-		for (SizeType i = 0; i < total; ++i) basis[i] = i;
+		HilbertBasisType basisTmp(total);
+		for (SizeType i = 0; i < total; ++i) basisTmp[i] = i;
 
-		setSymmetryRelated(qq, basis, block.size());
+		setSymmetryRelated(qq, basisTmp, block.size());
+		ModelBaseType::orderBasis(basis, basisTmp, qq);
 	}
 
 private:

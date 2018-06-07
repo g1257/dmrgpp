@@ -150,6 +150,8 @@ public:
 	      reinterpret_(!modelParameters_.jzSymmetry),
 	      feAsJzSymmetry_(modelParameters_.jzSymmetry)
 	{
+		ProgramGlobals::init(modelParameters_.orbitals*geometry_.numberOfSites() + 1);
+
 		PsimagLite::String tspAlgo = "";
 		try {
 			io.readline(tspAlgo,"TSPAlgorithm=");
@@ -207,28 +209,26 @@ public:
 		}
 
 		VectorSizeType block(1,0);
-		int sitesTimesDof=2*modelParameters_.orbitals;
+		int sitesTimesDof = 2*modelParameters_.orbitals;
 		HilbertState total = (1<<sitesTimesDof);
-		for (HilbertState a=0;a<total;a++) {
+		for (HilbertState a = 0; a < total; ++a) {
 			if (!isAllowedThisDof(a)) continue;
 			basis_.push_back(a);
 		}
 
 		HilbertBasisType basisTmp = basis_;
 		setSymmetryRelatedInternal(qq_,basis_,1,false);
-		ProgramGlobals::init(modelParameters_.orbitals*geometry_.numberOfSites() + 1);
-		qq_.findQuantumNumbers(q_, MyBasis::useSu2Symmetry());
-		this->orderBasis(basis_,q_,basisTmp);
 
-		setOperatorMatrices(creationMatrix_,block,false);
+		ModelBaseType::orderBasis(basis_, basisTmp, qq_);
+
+		setOperatorMatrices(creationMatrix_, block, false);
 		if (feAsJzSymmetry_.isEnabled() && !feAsJzSymmetry_.isSet())
-			feAsJzSymmetry_.init(basis_,creationMatrix_);
+			feAsJzSymmetry_.init(basis_, creationMatrix_);
 
 		basisTmp = basis_;
 		// reorder the natural basis (needed for MULTIPLE BANDS)
 		setSymmetryRelatedInternal(qq_,basis_,1,true);
-		qq_.findQuantumNumbers(q_, MyBasis::useSu2Symmetry());
-		this->orderBasis(basis_,q_,basisTmp);
+		ModelBaseType::orderBasis(basis_, basisTmp, qq_);
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,
@@ -415,9 +415,9 @@ public:
 
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void blockBasis(HilbertBasisType& basis,
-	                SymmetryElectronsSzType& qq,
-	                const VectorSizeType&) const
+	void setBasis(HilbertBasisType& basis,
+	              SymmetryElectronsSzType& qq,
+	              const VectorSizeType&) const
 	{
 		basis = basis_;
 		qq = qq_;
@@ -476,15 +476,6 @@ public:
 	virtual const TargetQuantumElectronsType& targetQuantum() const
 	{
 		return modelParameters_.targetQuantum;
-	}
-
-protected:
-
-	void setBlockBasisUnordered(HilbertBasisType&,
-	                            SymmetryElectronsSzType&,
-	                            const VectorSizeType&) const
-	{
-		err("setBlockBasisUnordered should not be called for this model\n");
 	}
 
 private:

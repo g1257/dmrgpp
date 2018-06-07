@@ -298,9 +298,9 @@ public:
 
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void blockBasis(HilbertBasisType  &basis,
-	                SymmetryElectronsSzType& qq,
-	                const VectorSizeType&) const
+	void setBasis(HilbertBasisType  &basis,
+	              SymmetryElectronsSzType& qq,
+	              const VectorSizeType&) const
 	{
 		basis = basis_;
 		qq = qq_;
@@ -355,15 +355,6 @@ public:
 	virtual SizeType maxElectronsOneSpin() const
 	{
 		return modelParameters_.orbitals*geometry_.numberOfSites() + 1;
-	}
-
-protected:
-
-	void setBlockBasisUnordered(HilbertBasisType&,
-	                            SymmetryElectronsSzType&,
-	                            const VectorSizeType&) const
-	{
-		err("setBlockBasisUnordered should not be called for this model\n");
 	}
 
 private:
@@ -785,15 +776,10 @@ private:
 		weedOutBasis(basisTmp,truncated);
 
 		// reorder the natural basis (needed for MULTIPLE BANDS)
-		findQuantumNumbers(q,basisTmp,1);
-		VectorSizeType iperm(q.size());
-
-		PsimagLite::Sort<VectorSizeType > sort;
-		sort.sort(q,iperm);
-		basis.clear();
-		for (a=0;a<basisTmp.size();a++) basis.push_back(basisTmp[iperm[a]]);
+		SymmetryElectronsSzType qq;
+		setSymmetryRelated(qq, basisTmp, 1);
+		ModelBaseType::orderBasis(basis, basisTmp, qq);
 	}
-
 
 	void weedOutBasis(VectorHilbertStateType& basis, bool truncated) const
 	{
@@ -830,14 +816,6 @@ private:
 		}
 
 		basis = basisTmp;
-	}
-
-	void findQuantumNumbers(VectorSizeType& q,
-	                        const HilbertBasisType& basis,int n) const
-	{
-		SymmetryElectronsSzType qq;
-		setSymmetryRelated(qq,basis,n);
-		qq.findQuantumNumbers(q, MyBasis::useSu2Symmetry());
 	}
 
 	void setSymmetryRelated(SymmetryElectronsSzType& q,

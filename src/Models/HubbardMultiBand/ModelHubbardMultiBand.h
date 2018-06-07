@@ -138,6 +138,7 @@ public:
 	                   modelParameters_.orbitals,
 	                   2*modelParameters_.orbitals)
 	{
+		ProgramGlobals::init(modelParameters_.orbitals*geometry_.numberOfSites() + 1);
 		SizeType v1 = 2*modelParameters_.orbitals*geometry.numberOfSites();
 		SizeType v2 = v1*modelParameters_.orbitals;
 		if (modelParameters_.potentialV.size() != v1 &&
@@ -161,17 +162,9 @@ public:
 
 		HilbertBasisType basisTmp = basis_;
 		setSymmetryRelatedInternal(qq_, basis_, 1);
-		ProgramGlobals::init(modelParameters_.orbitals*geometry_.numberOfSites() + 1);
-		qq_.findQuantumNumbers(q_, MyBasis::useSu2Symmetry());
-		this->orderBasis(basis_,q_,basisTmp);
+		ModelBaseType::orderBasis(basis_, basisTmp, qq_);
 
 		setOperatorMatricesInternal(creationMatrix_, block);
-
-		basisTmp = basis_;
-		// reorder the natural basis (needed for MULTIPLE BANDS)
-		setSymmetryRelatedInternal(qq_, basis_, 1);
-		qq_.findQuantumNumbers(q_, MyBasis::useSu2Symmetry());
-		this->orderBasis(basis_,q_,basisTmp);
 
 		cacheInteractionOp();
 	}
@@ -314,9 +307,9 @@ public:
 
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void blockBasis(HilbertBasisType& basis,
-	                SymmetryElectronsSzType& qq,
-	                const VectorSizeType&) const
+	void setBasis(HilbertBasisType& basis,
+	              SymmetryElectronsSzType& qq,
+	              const VectorSizeType&) const
 	{
 		basis = basis_;
 		qq = qq_;
@@ -365,15 +358,6 @@ public:
 	virtual const TargetQuantumElectronsType& targetQuantum() const
 	{
 		return modelParameters_.targetQuantum;
-	}
-
-protected:
-
-	void setBlockBasisUnordered(HilbertBasisType&,
-	                            SymmetryElectronsSzType&,
-	                            const VectorSizeType&) const
-	{
-		err("setBlockBasisUnordered should not be called for this model\n");
 	}
 
 private:

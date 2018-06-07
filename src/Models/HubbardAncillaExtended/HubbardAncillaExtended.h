@@ -175,7 +175,7 @@ public:
 	{
 		HilbertBasisType natBasis;
 		SymmetryElectronsSzType qq;
-		ModelBaseType::blockBasis(natBasis, qq, block);
+		setBasis(natBasis, qq, block);
 
 		//! Set the operators c^\dagger_{i\gamma\sigma} in the natural basis
 		creationMatrix.clear();
@@ -336,7 +336,7 @@ public:
 		SizeType n=block.size();
 		HilbertBasisType natBasis;
 		SymmetryElectronsSzType qq;
-		ModelBaseType::blockBasis(natBasis, qq, block);
+		setBasis(natBasis, qq, block);
 
 		for (SizeType i=0;i<n;i++) {
 			VectorSparseMatrixType cm;
@@ -356,21 +356,20 @@ public:
 		return modelParameters_.targetQuantum;
 	}
 
-protected:
-
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setBlockBasisUnordered(HilbertBasisType& basis,
-	                            SymmetryElectronsSzType& qq,
-	                            const VectorSizeType& block) const
+	void setBasis(HilbertBasisType& basis,
+	              SymmetryElectronsSzType& qq,
+	              const VectorSizeType& block) const
 	{
 		SizeType n = block.size();
 		HilbertState total = hilbertSize(0);
 		total = pow(total,n);
 
-		basis.resize(total);
-		for (HilbertState a = 0; a < total; ++a) basis[a] = a;
-		setSymmetryRelated(qq, basis, block[0]);
+		HilbertBasisType basisTmp(total);
+		for (HilbertState a = 0; a < total; ++a) basisTmp[a] = a;
+		setSymmetryRelated(qq, basisTmp, block[0]);
+		ModelBaseType::orderBasis(basis, basisTmp, qq);
 	}
 
 private:
@@ -625,13 +624,6 @@ private:
 			findOperatorMatrices(m,i,sigma,natBasis);
 			vm.push_back(SparseMatrixType(m));
 		}
-	}
-
-	void findQuantumNumbers(VectorSizeType& q,const HilbertBasisType&basis,int n) const
-	{
-		SymmetryElectronsSzType qq;
-		setSymmetryRelated(qq,basis,n);
-		qq.findQuantumNumbers(q, MyBasis::useSu2Symmetry());
 	}
 
 	void setSymmetryRelated(SymmetryElectronsSzType& q,

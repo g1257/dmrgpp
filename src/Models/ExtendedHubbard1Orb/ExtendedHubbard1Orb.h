@@ -239,11 +239,11 @@ public:
 
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setBlockBasisUnordered(HilbertBasisType  &basis,
-	                            SymmetryElectronsSzType& qq,
-	                            const VectorSizeType& block) const
+	void setBasis(HilbertBasisType  &basis,
+	              SymmetryElectronsSzType& qq,
+	              const VectorSizeType& block) const
 	{
-		modelHubbard_.setBlockBasisUnordered(basis, qq, block);
+		modelHubbard_.setBasis(basis, qq, block);
 	}
 
 private:
@@ -276,7 +276,7 @@ private:
 		creationMatrix.clear();
 		VectorHilbertStateType natBasis;
 		SymmetryElectronsSzType qq;
-		modelHubbard_.blockBasis(natBasis, qq, block);
+		modelHubbard_.setBasis(natBasis, qq, block);
 		SizeType operatorsPerSite = utils::exactDivision(creationMatrix2.size(),
 		                                                 block.size());
 		SizeType k = 0;

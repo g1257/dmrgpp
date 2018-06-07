@@ -197,13 +197,11 @@ public:
 		return modelParameters_.targetQuantum;
 	}
 
-protected:
-
-	void setBlockBasisUnordered(HilbertBasisType& basis,
-	                            SymmetryElectronsSzType& qq,
-	                            const VectorSizeType& block) const
+	void setBasis(HilbertBasisType& basis,
+	              SymmetryElectronsSzType& qq,
+	              const VectorSizeType& block) const
 	{
-		extendedHubbard_.setBlockBasisUnordered(basis, qq, block);
+		extendedHubbard_.setBasis(basis, qq, block);
 	}
 
 private:

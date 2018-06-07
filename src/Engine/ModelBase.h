@@ -159,7 +159,7 @@ public:
 		typename PsimagLite::Vector<SizeType>::Type block(1, site);
 		HilbertBasisType basis;
 		SymmetryElectronsSzType qq;
-		blockBasis(basis, qq, block);
+		setBasis(basis, qq, block);
 		findElectrons(electrons, basis, site);
 	}
 
@@ -238,23 +238,16 @@ public:
 		return maxElectrons*modelCommon_->geometry().numberOfSites() + 1;
 	}
 
-	virtual void blockBasis(HilbertBasisType& basis,
-	                        SymmetryElectronsSzType& qq,
-	                        const BlockType& block) const
-	{
-		HilbertBasisType basisTmp;
-		setBlockBasisUnordered(basisTmp, qq, block);
-		VectorSizeType q;
-		qq.findQuantumNumbers(q, MyBasis::useSu2Symmetry());
-		orderBasis(basis, q, basisTmp);
-	}
+	virtual void setBasis(HilbertBasisType& basis,
+	                      SymmetryElectronsSzType& qq,
+	                      const VectorSizeType& block) const = 0;
 
 	void printBasis(SizeType site) const
 	{
 		BlockType block(1, site);
 		HilbertBasisType natBasis;
 		SymmetryElectronsSzType qq;
-		blockBasis(natBasis, qq, block);
+		setBasis(natBasis, qq, block);
 		VectorSizeType q;
 		qq.findQuantumNumbers(q, MyBasis::useSu2Symmetry());
 		std::cout<<"block="<<block;
@@ -288,9 +281,16 @@ public:
 
 protected:
 
-	virtual void setBlockBasisUnordered(HilbertBasisType&,
-	                                    SymmetryElectronsSzType&,
-	                                    const BlockType&) const = 0;
+	void orderBasis(HilbertBasisType& basis,
+	                const HilbertBasisType& basisUnordered,
+	                const SymmetryElectronsSzType& qq) const
+	{
+		VectorSizeType q;
+		qq.findQuantumNumbers(q, MyBasis::useSu2Symmetry());
+		orderBasis(basis, q, basisUnordered);
+	}
+
+private:
 
 	void orderBasis(HilbertBasisType& basis,
 	                VectorSizeType& q,
@@ -337,8 +337,6 @@ protected:
 		offset += symmetryBlock.size();
 		symmetryBlock.clear();
 	}
-
-private:
 
 	ModelCommonBaseType* modelCommon_;
 
