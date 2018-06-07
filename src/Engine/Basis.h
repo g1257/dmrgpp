@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "HamiltonianSymmetryLocal.h"
 #include "HamiltonianSymmetrySu2.h"
 #include "ProgressIndicator.h"
+#include "EffectiveQuantumNumber.h"
 
 namespace Dmrg {
 // A class to represent in a light way a Dmrg basis (used only to implement symmetries).
@@ -112,18 +113,19 @@ public:
 	enum {SAVE_ALL, SAVE_PARTIAL};
 
 	//! Constructor, s=name of this basis
-	Basis(const PsimagLite::String& s)
-	    : dmrgTransformed_(false), name_(s), progress_(s)
+	Basis(const PsimagLite::String& s, PsimagLite::String symmName)
+	    : dmrgTransformed_(false), name_(s), symm_(symmName), progress_(s)
 	{}
 
 	//! Loads this basis from memory or disk
 	template<typename IoInputter>
 	Basis(IoInputter& io,
 	      const PsimagLite::String& ss,
+	      PsimagLite::String symmName,
 	      SizeType counter=0,
 	      bool = false,
 	      bool minimizeRead = false)
-	    : dmrgTransformed_(false), name_(ss), progress_(ss)
+	    : dmrgTransformed_(false), name_(ss), symm_(symmName), progress_(ss)
 	{
 		if (io.ng()) correctNameIfNeeded();
 		io.advance("NAME="+ss,counter);
@@ -285,8 +287,8 @@ public:
 	{
 		for (SizeType j=0;j<partition_.size()-1;j++)
 			if (i>=partition_[j] && i<partition_[j+1]) return j;
-		throw PsimagLite::RuntimeError(
-		            "BasisImplementation:: No partition found for this state\n");
+
+		throw PsimagLite::RuntimeError("Basis: No partition found for this state\n");
 	}
 
 	//! Inverse of pseudoQuantumNumber
@@ -457,6 +459,8 @@ public:
 		//assert(useSu2Symmetry_);
 		return symmSu2_.jMax();
 	}
+
+	const PsimagLite::String& symmName() const { return symm_.name(); }
 
 	//! saves this basis to disk
 	void write(PsimagLite::IoSimple::Out& io,
@@ -788,6 +792,7 @@ these numbers are
 	BlockType block_;
 	bool dmrgTransformed_;
 	PsimagLite::String name_;
+	EffectiveQuantumNumber symm_;
 	PsimagLite::ProgressIndicator progress_;
 	static bool useSu2Symmetry_;
 

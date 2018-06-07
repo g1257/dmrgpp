@@ -170,13 +170,13 @@ public:
 	      ioIn_(ioIn),
 	      appInfo_("DmrgSolver:"),
 	      verbose_(false),
-	      lrs_("pSprime","pEprime","pSE"),
+	      lrs_("pSprime", "pEprime", "pSE", model.symmName()),
 	      ioOut_(parameters_.filename),
 	      progress_("DmrgSolver"),
 	      quantumSector_(0),
 	      stepCurrent_(0),
 	      checkpoint_(parameters_,ioIn,model,false,ioOut_),
-	      wft_(parameters_, ioOut_),
+	      wft_(parameters_, model.symmName(), ioOut_),
 	      reflectionOperator_(lrs_,
 	                          model_.hilbertSize(0),
 	                          parameters_.useReflectionSymmetry,
@@ -268,8 +268,8 @@ public:
 
 		ioIn_.printUnused(std::cerr);
 
-		MyBasisWithOperators pS("BasisWithOperators.System");
-		MyBasisWithOperators pE("BasisWithOperators.Environ");
+		MyBasisWithOperators pS("BasisWithOperators.System", model_.symmName());
+		MyBasisWithOperators pE("BasisWithOperators.Environ", model_.symmName());
 
 		if (checkpoint_()) {
 			checkpoint_.read(pS, pE, *psi, false, "FinalPsi");

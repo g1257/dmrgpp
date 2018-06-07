@@ -279,6 +279,8 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
+	virtual PsimagLite::String symmName() const { return "undefined"; }
+
 protected:
 
 	void orderBasis(HilbertBasisType& basis,

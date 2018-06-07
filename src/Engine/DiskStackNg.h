@@ -90,11 +90,13 @@ public:
 
 	DiskStack(const PsimagLite::String name1,
 	          const PsimagLite::String name2,
+	          PsimagLite::String symmName,
 	          IoOutType& ioOut,
 	          PsimagLite::String label,
 	          bool hasLoad,
 	          bool isObserveCode)
 	    : name1_(name1),
+	      symmName_(symmName),
 	      ioOut_(ioOut),
 	      label_("DiskStack" + label),
 	      isObserveCode_(isObserveCode),
@@ -164,7 +166,11 @@ public:
 		delete dt_;
 		dt_ = 0;
 		IoInType ioIn(name1_);
-		dt_ = new DataType(ioIn, label_ + "/" + ttos(total_ - 1), dummy, isObserveCode_);
+		dt_ = new DataType(ioIn,
+		                   label_ + "/" + ttos(total_ - 1),
+		                   symmName_,
+		                   dummy,
+		                   isObserveCode_);
 		ioIn.close();
 		return *dt_;
 	}
@@ -176,6 +182,7 @@ public:
 private:
 
 	PsimagLite::String name1_;
+	PsimagLite::String symmName_;
 	IoOutType& ioOut_;
 	PsimagLite::String label_;
 	bool isObserveCode_;

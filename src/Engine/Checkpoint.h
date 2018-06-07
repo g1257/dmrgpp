@@ -133,12 +133,14 @@ public:
     #else
 	    systemDisk_(parameters_.checkpoint.filename,
 	                parameters_.filename,
+	                model.symmName(),
 	                io,
 	                "system",
 	                enabled_,
 	                isObserveCode),
 	    envDisk_(parameters_.checkpoint.filename,
 	             parameters_.filename,
+	             model.symmName(),
 	             io,
 	             "environ",
 	             enabled_,
@@ -237,10 +239,10 @@ public:
 			err("Checkpoint::read(...)\n");
 		}
 
-		BasisWithOperatorsType pS1(ioTmp, "CHKPOINTSYSTEM", --loop, isObserveCode);
+		BasisWithOperatorsType pS1(ioTmp, "CHKPOINTSYSTEM", pS.symmName(), --loop, isObserveCode);
 
 		pS = pS1;
-		BasisWithOperatorsType pE1(ioTmp, "CHKPOINTENVIRON", 0, isObserveCode);
+		BasisWithOperatorsType pE1(ioTmp, "CHKPOINTENVIRON", pE.symmName(), 0, isObserveCode);
 		pE = pE1;
 		PsimagLite::IoSelector::In io(parameters_.checkpoint.filename);
 		psi.read(io, prefix, (io.ng()) ? PsimagLite::IoSimple::In::ONLY_INSTANCE :
