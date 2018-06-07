@@ -107,7 +107,7 @@ public:
 		SizeType n = basis.oldSigns().size();
 		SizeType nx = basis.oldSigns().size()/electrons.size();
 		PackIndicesType pack(nx);
-
+		signs_.resize(nx);
 		for (SizeType x = 0; x < n; ++x) {
 			SizeType x0 = 0;
 			SizeType x1 = 0;
@@ -115,6 +115,7 @@ public:
 			assert(x1 < electrons.size());
 			bool parity1 = basis.oldSigns()[x];
 			bool parity2 = (electrons[x1] & 1);
+			assert(x0 < signs_.size());
 			signs_[x0] = (parity1 != parity2);
 		}
 	}
