@@ -184,11 +184,12 @@ public:
 
 	//! set this basis to the outer product of   basis2 and basis3
 	//!PTEX_LABEL{setToProductOps}
-	void setToProduct(const ThisType& basis2,const ThisType& basis3)
+	void setToProduct(const ThisType& basis2, const ThisType& basis3)
 	{
 		BasisType &parent = *this;
 		// reorder the basis
-		parent.setToProduct(basis2,basis3);
+		typename ThisType::QnType qnUndefined;
+		parent.setToProduct(basis2, basis3, qnUndefined);
 
 		typename PsimagLite::Vector<RealType>::Type fermionicSigns;
 		SizeType x = basis2.numberOfOperators()+basis3.numberOfOperators();

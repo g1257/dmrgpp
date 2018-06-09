@@ -98,6 +98,7 @@ class WaveFunctionTransfSu2  : public
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType> BaseType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
+	typedef typename VectorWithOffsetType::QnType QnType;
 
 public:
 
@@ -354,10 +355,10 @@ private:
 			SizeType srcII = psiSrc.sector(srcI);
 			psiSrc.extract(psiV,srcII);
 			SizeType offset = psiSrc.offset(srcII);
-			SizeType qSrc = lrsOld.super().qnEx(srcII);
+			const QnType& qSrc = lrsOld.super().qnEx(srcII);
 			for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 				SizeType i0 = psiDest.sector(ii);
-				SizeType qDest = lrs.super().qnEx(i0);
+				const QnType& qDest = lrs.super().qnEx(i0);
 				if (qSrc != qDest) continue;
 
 				SizeType start = psiDest.offset(i0);

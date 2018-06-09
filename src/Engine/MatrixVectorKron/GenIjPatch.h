@@ -93,17 +93,20 @@ public:
 
 	typedef LeftRightSuperType_ LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisType BasisType;
+	typedef typename BasisType::EffectiveQnType EffectiveQnType;
+	typedef typename EffectiveQnType::QnType QnType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	enum LeftOrRightEnumType {LEFT=0,RIGHT=1};
 
-	GenIjPatch(const LeftRightSuperType& lrs, int target)
+	GenIjPatch(const LeftRightSuperType& lrs, const QnType& target)
 	    : lrs_(lrs), qn_(target)
 	{
 		for (SizeType i=0;i<lrs.left().partition()-1;i++) {
 			for (SizeType j=0;j<lrs.right().partition()-1;++j) {
 
-				if (lrs.left().qnEx(i) + lrs.right().qnEx(j) != target)
+				if (EffectiveQnType::tensorProduct(lrs.left().qnEx(i),
+				                                   lrs.right().qnEx(j)) != target)
 					continue;
 
 				patchesLeft_.push_back(i);
@@ -112,7 +115,7 @@ public:
 		}
 	}
 
-	SizeType qn() const { return qn_; }
+	const QnType& qn() const { return qn_; }
 
 	const VectorSizeType& operator()(LeftOrRightEnumType leftOrRight) const
 	{
@@ -124,7 +127,7 @@ public:
 private:
 
 	const LeftRightSuperType& lrs_;
-	SizeType qn_;
+	const QnType& qn_;
 	VectorSizeType patchesLeft_;
 	VectorSizeType patchesRight_;
 

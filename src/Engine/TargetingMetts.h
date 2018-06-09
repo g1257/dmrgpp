@@ -87,7 +87,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsRungeKutta.h"
 #include "TimeVectorsSuzukiTrotter.h"
 #include "CrsMatrix.h"
-#include "SymmetryElectronsSz.h"
 #include "TargetingBase.h"
 #include "Io/IoSelector.h"
 
@@ -116,12 +115,13 @@ public:
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
-	typedef SymmetryElectronsSz<RealType> SymmetryElectronsSzType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
+	typedef typename BasisType::SymmetryElectronsSzType SymmetryElectronsSzType;
+	typedef typename BasisType::EffectiveQnType EffectiveQnType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
@@ -155,6 +155,7 @@ public:
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsSuzukiTrotterType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
+	typedef typename BasisType::QnType QnType;
 
 	enum {DISABLED,WFT_NOADVANCE,WFT_ADVANCE,COLLAPSE};
 
@@ -163,7 +164,7 @@ public:
 	TargetingMetts(const LeftRightSuperType& lrs,
 	               const ModelType& model,
 	               const WaveFunctionTransfType& wft,
-	               const SizeType& quantumSector,
+	               const QnType& quantumSector,
 	               InputValidatorType& ioIn)
 	    : BaseType(lrs,model,wft,0),
 	      model_(model),
@@ -498,7 +499,7 @@ private:
 		SizeType total = lrs_.super().partition()-1;
 		for (SizeType i=0;i<total;i++) {
 			// Do only one sector unless doing su(2) with j>0, then do all m's
-			if (lrs_.super().pseudoQn(i) == quantumSector_) return i;
+			if (lrs_.super().pseudoQnEqual(i, quantumSector_)) return i;
 		}
 		throw PsimagLite::RuntimeError("TargetingMetts: getPartition()\n");
 	}
@@ -702,9 +703,9 @@ private:
 			getFullVector(v,i0,lrs);
 			RealType tmpNorm = PsimagLite::norm(v);
 			if (fabs(tmpNorm-1.0)<1e-6) {
-				SizeType j = lrs.super().qnEx(i0);
+				const QnType& j = lrs.super().qnEx(i0);
 				std::cerr<<"setFromInfinite: qns= ";
-				std::cerr<<SymmetryElectronsSzType::qnPrint(j,mode+1);
+				std::cerr<<EffectiveQnType::qnPrint(j, mode+1);
 				std::cerr<<"\n";
 			}
 			phi.setDataInSector(v,i0);
@@ -851,7 +852,7 @@ private:
 	const LeftRightSuperType& lrs_;
 	TargetParamsType mettsStruct_;
 	const WaveFunctionTransfType& wft_;
-	const SizeType& quantumSector_;
+	const QnType& quantumSector_;
 	PsimagLite::ProgressIndicator progress_;
 	VectorRealType betas_;
 	VectorRealType weight_;

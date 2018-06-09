@@ -8,7 +8,7 @@ template<typename LeftRightSuperType>
 class PrinterInDetail {
 
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SymmetryElectronsSzType SymmetryElectronsSzType;
+	typedef typename BasisWithOperatorsType::EffectiveQnType EffectiveQnType;
 
 public:
 
@@ -42,8 +42,8 @@ private:
 		os<<"Partitions "<<n<<"\n";
 		for (SizeType i = 0; i < n - 1; ++i) {
 			SizeType s = basis.partition(i + 1) - basis.partition(i);
-			SizeType j = basis.qnEx(i);
-			PsimagLite::String q = SymmetryElectronsSzType::qnPrint(j, mode_ + 1);
+			const typename BasisWithOperatorsType::QnType& j = basis.qnEx(i);
+			PsimagLite::String q = EffectiveQnType::qnPrint(j, mode_ + 1);
 			os<<q<<" "<<s<<"\n";
 		}
 

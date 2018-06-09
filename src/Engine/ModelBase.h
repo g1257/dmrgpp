@@ -113,6 +113,7 @@ public:
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
+	typedef typename MyBasis::EffectiveQnType EffectiveQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::SparseElementType ComplexOrRealType;
 	typedef ModelCommonBase<ModelHelperType,ParametersType,GeometryType> ModelCommonBaseType;

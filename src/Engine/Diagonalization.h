@@ -102,9 +102,9 @@ public:
 	typedef typename TargetingType::BlockType BlockType;
 	typedef typename TargetingType::TargetVectorType TargetVectorType;
 	typedef typename TargetingType::RealType RealType;
-	typedef SymmetryElectronsSz<RealType> SymmetryElectronsSzType;
+	typedef typename BasisType::EffectiveQnType EffectiveQnType;
 	typedef typename ModelType::OperatorsType OperatorsType;
-	typedef typename  OperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
@@ -125,13 +125,14 @@ public:
 	typedef PsimagLite::LanczosSolver<ParametersForSolverType,
 	MatrixVectorType,
 	TargetVectorType> LanczosSolverType;
+	typedef typename EffectiveQnType::QnType QnType;
 
 	Diagonalization(const ParametersType& parameters,
 	                const ModelType& model,
 	                const bool& verbose,
 	                ReflectionSymmetryType& reflectionOperator,
 	                InputValidatorType& io,
-	                const SizeType& quantumSector,
+	                const QnType& quantumSector,
 	                WaveFunctionTransfType& waveFunctionTransformation,
 	                RealType oldEnergy)
 	    : parameters_(parameters),
@@ -185,7 +186,7 @@ private:
 	{
 		SizeType total = lrs.super().partition()-1;
 		for (SizeType i=0;i<total;i++) {
-			if (lrs.super().pseudoQn(i) != quantumSector_) continue;
+			if (!lrs.super().pseudoQnEqual(i, quantumSector_)) continue;
 			mVector.push_back(i);
 		}
 	}
@@ -238,15 +239,15 @@ private:
 		for (SizeType i=0;i<total;i++) {
 			SizeType bs = lrs.super().partition(i+1)-lrs.super().partition(i);
 			if (verbose_) {
-				SizeType j = lrs.super().qnEx(i);
-				std::cerr<<SymmetryElectronsSzType::qnPrint(j,mode+1);
+				const QnType& j = lrs.super().qnEx(i);
+				std::cerr<<EffectiveQnType::qnPrint(j,mode+1);
 			}
 
 			weights[i]=bs;
 
 			// Do only one sector unless doing su(2) with j>0, then do all m's
-			SizeType qn = lrs.super().pseudoQn(i);
-			if (qn != quantumSector_ && !findSymmetrySector) weights[i]=0;
+			if (lrs.super().pseudoQn(i) != quantumSector_ && !findSymmetrySector)
+				weights[i]=0;
 
 			weightsTotal += weights[i];
 			counter+=bs;
@@ -269,9 +270,9 @@ private:
 			if (weights[i]==0) continue;
 			PsimagLite::OstringStream msg;
 			msg<<"About to diag. sector with quantum numbs. ";
-			SizeType j = lrs.super().qnEx(i);
-			msg<<SymmetryElectronsSzType::qnPrint(j,mode+1);
-			msg<<" pseudo="<<lrs.super().pseudoQn(i);
+			const QnType& j = lrs.super().qnEx(i);
+			msg<<EffectiveQnType::qnPrint(j, mode + 1);
+			//msg<<" pseudo="<<lrs.super().pseudoQn(i);
 			msg<<" quantumSector="<<quantumSector_;
 
 			if (verbose_ && PsimagLite::Concurrency::root()) {
@@ -332,7 +333,7 @@ private:
 				weights[i] = 0;
 			if (weights[i]==0) continue;
 
-			SizeType j = lrs.super().qnEx(i);
+			const QnType& j = lrs.super().qnEx(i);
 			PsimagLite::OstringStream msg;
 			msg<<"Found targetted symmetry sector in partition "<<i;
 			msg<<" of size="<<vecSaved[i].size();
@@ -340,7 +341,8 @@ private:
 
 			PsimagLite::OstringStream msg2;
 			msg2<<"Norm of vector is "<<PsimagLite::norm(vecSaved[i]);
-			msg2<<" and quantum numbers are "<<SymmetryElectronsSzType::qnPrint(j,mode+1);
+			msg2<<" and quantum numbers are ";
+			msg2<<EffectiveQnType::qnPrint(j, mode + 1);
 			progress_.printline(msg2,std::cout);
 			counter++;
 		}
@@ -590,7 +592,7 @@ private:
 	InputValidatorType& io_;
 	PsimagLite::ProgressIndicator progress_;
 	// quantumSector_ needs to be a reference since DmrgSolver will change it
-	const SizeType& quantumSector_;
+	const QnType& quantumSector_;
 	WaveFunctionTransfType& wft_;
 	RealType oldEnergy_;
 }; // class Diagonalization

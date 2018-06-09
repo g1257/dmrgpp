@@ -97,9 +97,10 @@ class TridiagRixsStatic {
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename LanczosSolverType::ParametersSolverType ParametersSolverType;
-	typedef ApplyOperatorLocal<LeftRightSuperType, VectorWithOffset<ComplexOrRealType> >
-	ApplyOperatorLocalType;
-	typedef typename VectorWithOffset<ComplexOrRealType>::VectorSizeType VectorSizeType;
+	typedef typename BasisWithOperatorsType::EffectiveQuantumNumberType EffectiveQnType;
+	typedef VectorWithOffset<ComplexOrRealType, EffectiveQnType> VectorWithOffsetType2;
+	typedef ApplyOperatorLocal<LeftRightSuperType, VectorWithOffsetType2> ApplyOperatorLocalType;
+	typedef typename VectorWithOffsetType2::VectorSizeType VectorSizeType;
 
 	class MyMatrixVector : public LanczosSolverType::LanczosMatrixType {
 
@@ -145,8 +146,8 @@ class TridiagRixsStatic {
 		ProgramGlobals::DirectionEnum dir_;
 		typename ApplyOperatorLocalType::BorderEnum corner_;
 		FermionSign fs_;
-		mutable VectorWithOffset<ComplexOrRealType> x2_;
-		mutable VectorWithOffset<ComplexOrRealType> y2_;
+		mutable VectorWithOffsetType2 x2_;
+		mutable VectorWithOffsetType2 y2_;
 	}; // class MyMatrixVector
 
 	typedef MyMatrixVector MyMatrixVectorType;

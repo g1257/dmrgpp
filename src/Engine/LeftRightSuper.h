@@ -102,6 +102,7 @@ public:
 	typedef  LeftRightSuper<BasisWithOperatorsType_,SuperBlockType> ThisType;
 	typedef KroneckerDumper<ThisType> KroneckerDumperType;
 	typedef typename KroneckerDumperType::ParamsForKroneckerDumper ParamsForKroneckerDumperType;
+	typedef typename BasisType::QnType QnType;
 
 	enum {SAVE_ALL = SuperBlockType::SAVE_ALL,
 		  SAVE_PARTIAL = SuperBlockType::SAVE_PARTIAL};
@@ -225,7 +226,7 @@ public:
 	}
 
 	/*!PTEX_LABEL{setToProductLrs} */
-	void setToProduct(SizeType quantumSector)
+	void setToProduct(QnType quantumSector)
 	{
 		super_->setToProduct(*left_,*right_,quantumSector);
 	}

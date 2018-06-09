@@ -90,17 +90,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 // FIXME: a more generic solution is needed instead of tying
 // the non-zero structure to basis
 namespace Dmrg {
-template<typename ComplexOrRealType>
+template<typename ComplexOrRealType, typename EffectiveQnType>
 class VectorWithOffsets {
 
-	typedef VectorWithOffsets<ComplexOrRealType> ThisType;
+	typedef VectorWithOffsets<ComplexOrRealType, EffectiveQnType> ThisType;
 	static ComplexOrRealType const zero_;
 
 public:
 
 	typedef ComplexOrRealType value_type;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef std::pair<SizeType,SizeType> PairSizeType;
+	typedef typename EffectiveQnType::QnType QnType;
+	typedef std::pair<SizeType, QnType> PairQnType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 
 	VectorWithOffsets()
@@ -120,8 +121,8 @@ public:
 			data_[i].resize(weights[i]);
 			offsets_[i] = someBasis.partition(i);
 			if (weights[i]>0) {
-				SizeType qn = someBasis.pseudoQn(i);
-				nzMsAndQns_.push_back(PairSizeType(i,qn));
+				QnType qn = someBasis.pseudoQn(i);
+				nzMsAndQns_.push_back(PairQnType(i,qn));
 				//firstSector_ = i;
 			}
 		}
@@ -152,8 +153,8 @@ public:
 			data_[i] = v[i];
 			offsets_[i] = someBasis.partition(i);
 			if (v[i].size()>0) {
-				SizeType qn = someBasis.pseudoQn(i);
-				nzMsAndQns_.push_back(PairSizeType(i, qn));
+				QnType qn = someBasis.pseudoQn(i);
+				nzMsAndQns_.push_back(PairQnType(i, qn));
 			}
 		}
 
@@ -175,8 +176,8 @@ public:
 			SizeType total = someBasis.partition(i+1)-offsets_[i];
 			VectorType tmpV(total,0);
 			data_[i] = tmpV;
-			SizeType qn = someBasis.pseudoQn(i);
-			nzMsAndQns_.push_back(PairSizeType(i, qn));
+			const QnType& qn = someBasis.pseudoQn(i);
+			nzMsAndQns_.push_back(PairQnType(i, qn));
 		}
 
 		offsets_[np]=size_;
@@ -209,7 +210,7 @@ public:
 			SizeType total = someBasis.partition(ip+1)-offsets_[ip];
 			VectorType tmpV(total,0);
 			data_[ip] = tmpV;
-			nzMsAndQns_.push_back(PairSizeType(ip, v.qn(i)));
+			nzMsAndQns_.push_back(PairQnType(ip, v.qn(i)));
 		}
 
 		setIndex2Sector();
@@ -226,7 +227,7 @@ public:
 			err(str + " on a partially populated vector\n");
 		}
 
-		typename PsimagLite::Vector<PairSizeType>::Type nzMsAndQns;
+		typename PsimagLite::Vector<PairQnType>::Type nzMsAndQns;
 		for (SizeType i = 0; i < np; ++i) {
 			if (isZero(data_[i])) {
 				data_[i].resize(0);
@@ -259,7 +260,7 @@ public:
 		return nzMsAndQns_[i].first;
 	}
 
-	SizeType qn(SizeType i) const
+	const QnType& qn(SizeType i) const
 	{
 		assert(i < nzMsAndQns_.size());
 		return nzMsAndQns_[i].second;
@@ -444,7 +445,7 @@ public:
 			io.readline(y, "qn=");
 			if (y < 0)
 				err(msg + ":read(...): qn<0\n");
-			nzMsAndQns_[jj] = PairSizeType(x, y);
+			nzMsAndQns_[jj] = PairQnType(x, y);
 
 			PsimagLite::String s = "data" + ttos(jj);
 			io.read(data_[x], s);
@@ -484,11 +485,9 @@ public:
 			if (x<0)
 				err(msg + ":loadOneSector(...): sector<0\n");
 
-			int y = 0;
-			io.readline(y, "qn=");
-			if (y < 0)
-				err(msg + ":read(...): qn<0\n");
-			nzMsAndQns_[jj] = PairSizeType(x, y);
+			QnType y;
+			y.read("qn", io);
+			nzMsAndQns_[jj] = PairQnType(x, y);
 
 			if (static_cast<SizeType>(x)>=data_.size())
 				err(msg + ":loadOneSector(...): sector too big\n");
@@ -628,7 +627,7 @@ private:
 	}
 
 	template<typename SomeBasisType>
-	void findPartitions(typename PsimagLite::Vector<PairSizeType>::Type& p,
+	void findPartitions(typename PsimagLite::Vector<PairQnType>::Type& p,
 	                    const VectorType& v,
 	                    const SomeBasisType& someBasis)
 	{
@@ -637,8 +636,8 @@ private:
 		for (SizeType i=0;i<someBasis.partition()-1;i++) {
 			if (nonZeroPartition(v,someBasis,i)) {
 				found = true;
-				SizeType qn = someBasis.pseudoQn(i);
-				p.push_back(PairSizeType(i, qn));
+				const QnType& qn = someBasis.pseudoQn(i);
+				p.push_back(PairQnType(i, qn));
 			}
 		}
 
@@ -673,12 +672,12 @@ private:
 	}
 
 	template<typename SomeBasisType>
-	SizeType findPartitionWithThisQn(SizeType qn,
+	SizeType findPartitionWithThisQn(const QnType& qn,
 	                                 const SomeBasisType& someBasis) const
 	{
 		SizeType np = someBasis.partition() - 1;
 		for (SizeType i = 0; i < np; ++i)
-			if (SizeType(someBasis.qnEx(i)) == qn) return i;
+			if (someBasis.qnEx(i) == qn) return i;
 
 		throw PsimagLite::RuntimeError("findPartitionWithThisQn\n");
 	}
@@ -688,11 +687,11 @@ private:
 	typename PsimagLite::Vector<int>::Type index2Sector_;
 	typename PsimagLite::Vector<VectorType>::Type data_;
 	typename PsimagLite::Vector<SizeType>::Type offsets_;
-	typename PsimagLite::Vector<PairSizeType>::Type nzMsAndQns_;
+	typename PsimagLite::Vector<PairQnType>::Type nzMsAndQns_;
 }; // class VectorWithOffset
 
-template<typename ComplexOrRealType>
-const ComplexOrRealType VectorWithOffsets<ComplexOrRealType>::zero_ = 0;
+template<typename ComplexOrRealType, typename EffectiveQnType>
+const ComplexOrRealType VectorWithOffsets<ComplexOrRealType, EffectiveQnType>::zero_ = 0;
 }
 /*@}*/
 #endif

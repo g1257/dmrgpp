@@ -6,7 +6,6 @@
 #include "../Version.h"
 #include "Concurrency.h"
 #include "ProgramGlobals.h"
-#include "SymmetryElectronsSz.h"
 
 namespace Dmrg {
 
@@ -22,7 +21,9 @@ class KroneckerDumper {
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef SymmetryElectronsSz<RealType> SymmetryElectronsSzType;
+	typedef typename BasisType::SymmetryElectronsSzType SymmetryElectronsSzType;
+	typedef typename BasisType::EffectiveQnType EffectiveQnType;
+	typedef typename EffectiveQnType::QnType QnType;
 	typedef std::pair<SizeType,SizeType> PairSizeType;
 
 public:
@@ -76,11 +77,8 @@ public:
 
 		fout_<<"SuperBasisPermutation\n";
 		fout_<<lrs.super().permutationVector();
-		SizeType qtarget = lrs.super().qnEx(m);
-
-		PairSizeType etarget = getNupNdown(qtarget,p->nOfQns);
-		fout_<<"TargetElectronsUp="<<etarget.first<<"\n";
-		fout_<<"TargetElectronsDown="<<etarget.second<<"\n";
+		QnType qtarget = lrs.super().qnEx(m);
+		fout_<<qtarget<<"\n";
 
 		cacheSigns(lrs.left().electronsVector());
 		counter_++;
@@ -173,11 +171,8 @@ private:
 		fout_<<"ElectronsUp_ElectronsDown\n";
 		fout_<<basis.size()<<"\n";
 		SizeType npart = basis.partition() - 1;
-		for (SizeType i = 0; i < npart; ++i) {
-			SizeType q = basis.pseudoQn(i);
-			PairSizeType nupDown = getNupNdown(q, nOfQns);
-			fout_<<nupDown.first<<" "<<nupDown.second<<"\n";
-		}
+		for (SizeType i = 0; i < npart; ++i)
+			fout_<<basis.pseudoQnToString(i)<<"\n";
 
 		fout_<<"Electrons\n";
 		fout_<<basis.electronsVector();

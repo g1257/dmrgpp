@@ -146,6 +146,7 @@ public:
 	VectorWithOffsetType,
 	BaseType,
 	TargetParamsType> CorrectionVectorSkeletonType;
+	typedef typename BasisType::QnType QnType;
 
 	enum {DISABLED,OPERATOR,CONVERGING};
 
@@ -155,7 +156,7 @@ public:
 	TargetingRixsStatic(const LeftRightSuperType& lrs,
 	                    const ModelType& model,
 	                    const WaveFunctionTransfType& wft,
-	                    const SizeType&,
+	                    const QnType&,
 	                    InputValidatorType& ioIn)
 	    : BaseType(lrs,model,wft,1),
 	      tstStruct_(ioIn,model),

@@ -22,7 +22,7 @@ typedef Dmrg::MatrixVectorKron<
 typedef PsimagLite::LanczosSolver<PsimagLite::ParametersForSolver<GeometryInstance8Type::RealType>,
 	MatrixVector8Type, MatrixVector8Type::VectorType> LanczosSolver8Type;
 
-template void mainLoop4<LanczosSolver8Type,Dmrg::VectorWithOffset<RealType> >
+template void mainLoop4<LanczosSolver8Type,Dmrg::VectorWithOffset<RealType, Dmrg::EffectiveQuantumNumber<RealType> > >
 (LanczosSolver8Type::LanczosMatrixType::ModelType::GeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
@@ -47,7 +47,7 @@ typedef Dmrg::MatrixVectorOnTheFly<
 typedef PsimagLite::LanczosSolver<PsimagLite::ParametersForSolver<GeometryInstance9Type::RealType>,
 	MatrixVector9Type, MatrixVector9Type::VectorType> LanczosSolver9Type;
 
-template void mainLoop4<LanczosSolver9Type,Dmrg::VectorWithOffsets<RealType> >
+template void mainLoop4<LanczosSolver9Type,Dmrg::VectorWithOffsets<RealType, Dmrg::EffectiveQuantumNumber<RealType> > >
 (LanczosSolver9Type::LanczosMatrixType::ModelType::GeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,

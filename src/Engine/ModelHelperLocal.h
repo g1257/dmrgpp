@@ -110,6 +110,8 @@ public:
 	typedef typename LeftRightSuperType::KroneckerDumperType KroneckerDumperType;
 	typedef typename LeftRightSuperType::ParamsForKroneckerDumperType
 	ParamsForKroneckerDumperType;
+	typedef typename BasisType::EffectiveQnType EffectiveQnType;
+	typedef typename EffectiveQnType::QnType QnType;
 
 	enum { System=0,Environ=1 };
 
@@ -162,7 +164,7 @@ public:
 		return tmp; //reflection_.size(tmp);
 	}
 
-	int quantumNumber() const
+	const QnType& quantumNumber() const
 	{
 		return lrs_.super().qnEx(m_);
 	}

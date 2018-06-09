@@ -98,6 +98,7 @@ public:
 	typedef ArrayOfMatStruct<LeftRightSuperType> ArrayOfMatStructType;
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
 	typedef typename LeftRightSuperType::BasisType BasisType;
+	typedef typename BasisType::QnType QnType;
 	typedef typename ArrayOfMatStructType::GenIjPatchType GenIjPatchType;
 	typedef typename PsimagLite::Vector<ArrayOfMatStructType*>::Type VectorArrayOfMatStructType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
@@ -107,7 +108,7 @@ public:
 
 	InitKronBase(const LeftRightSuperType& lrs,
 	             SizeType m,
-	             SizeType qn,
+	             const QnType& qn,
 	             RealType denseSparseThreshold)
 	    : mOld_(m),
 	      mNew_(m),

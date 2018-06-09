@@ -109,6 +109,7 @@ public:
 	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
+	typedef typename BasisType::QnType QnType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
@@ -218,7 +219,7 @@ private:
 	{
 		for (SizeType ii=0;ii<psiSrc.sectors();ii++) {
 			SizeType iOld = psiSrc.sector(ii);
-			SizeType qn = psiSrc.qn(ii);
+			const QnType& qn = psiSrc.qn(ii);
 			SizeType iNew = psiDest.sector(findIold(psiDest, qn));
 			tVector1FromInfinite(psiDest, iNew, psiSrc, iOld, lrs, nk);
 		}
@@ -446,7 +447,7 @@ private:
 	}
 
 	static SizeType findIold(const VectorWithOffsetType& psiSrc,
-	                         SizeType qn)
+	                         const QnType& qn)
 	{
 		SizeType sectors = psiSrc.sectors();
 		for (SizeType i = 0; i < sectors; ++i)

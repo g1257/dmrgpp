@@ -160,6 +160,8 @@ public:
 	typedef PrinterInDetail<LeftRightSuperType> PrinterInDetailType;
 	typedef typename DiagonalizationType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
+	typedef typename BasisWithOperatorsType::EffectiveQnType EffectiveQnType;
+	typedef typename EffectiveQnType::QnType QnType;
 
 	enum {SAVE_ALL=MyBasis::SAVE_ALL, SAVE_PARTIAL=MyBasis::SAVE_PARTIAL};
 
@@ -173,7 +175,6 @@ public:
 	      lrs_("pSprime", "pEprime", "pSE", model.symmName()),
 	      ioOut_(parameters_.filename),
 	      progress_("DmrgSolver"),
-	      quantumSector_(0),
 	      stepCurrent_(0),
 	      checkpoint_(parameters_,ioIn,model,false,ioOut_),
 	      wft_(parameters_, model.symmName(), ioOut_),
@@ -613,10 +614,10 @@ private:
 	}
 
 	void write(const FermionSignType& fsS,
-	               const FermionSignType& fsE,
-	               const TargetingType& target,
-	               ProgramGlobals::DirectionEnum direction,
-	               SizeType loopIndex)
+	           const FermionSignType& fsE,
+	           const TargetingType& target,
+	           ProgramGlobals::DirectionEnum direction,
+	           SizeType loopIndex)
 	{
 		int saveOption = parameters_.finiteLoop[loopIndex].saveOption;
 
@@ -677,21 +678,21 @@ private:
 		if (direction == ProgramGlobals::INFINITE &&
 		        sites < maxSites &&
 		        parameters_.adjustQuantumNumbers.size()>0) {
-			quantumSector_ = SymmetryElectronsSzType::adjustQn(parameters_.adjustQuantumNumbers,
-			                                                   direction,
-			                                                   ioOut_,
-			                                                   MyBasis::useSu2Symmetry(),
-			                                                   step,
-			                                                   model_.targetQuantum().other.size());
+			quantumSector_ = EffectiveQnType::adjustQn(parameters_.adjustQuantumNumbers,
+			                                           direction,
+			                                           ioOut_,
+			                                           MyBasis::useSu2Symmetry(),
+			                                           step,
+			                                           model_.targetQuantum().other.size());
 			return;
 		}
 
-		quantumSector_ = SymmetryElectronsSzType::getQuantumSector(model_.targetQuantum(),
-		                                                           sites,
-		                                                           model_.geometry().numberOfSites(),
-		                                                           direction,
-		                                                           &ioOut_,
-		                                                           MyBasis::useSu2Symmetry());
+		quantumSector_ = EffectiveQnType::getQuantumSector(model_.targetQuantum(),
+		                                                   sites,
+		                                                   model_.geometry().numberOfSites(),
+		                                                   direction,
+		                                                   &ioOut_,
+		                                                   MyBasis::useSu2Symmetry());
 	}
 
 	void printEnergy(RealType energy)
@@ -721,7 +722,7 @@ private:
 	LeftRightSuperType lrs_;
 	PsimagLite::IoSelector::Out ioOut_;
 	PsimagLite::ProgressIndicator progress_;
-	SizeType quantumSector_;
+	QnType quantumSector_;
 	int stepCurrent_;
 	CheckpointType checkpoint_;
 	WaveFunctionTransfType wft_;

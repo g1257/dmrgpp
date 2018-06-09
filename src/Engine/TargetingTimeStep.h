@@ -119,6 +119,7 @@ public:
 	typedef typename BasisWithOperatorsType::SymmetryElectronsSzType
 	SymmetryElectronsSzType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
+	typedef typename BasisType::QnType QnType;
 
 	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 
@@ -128,7 +129,7 @@ public:
 	TargetingTimeStep(const LeftRightSuperType& lrs,
 	                  const ModelType& model,
 	                  const WaveFunctionTransfType& wft,
-	                  const SizeType&,
+	                  const QnType&,
 	                  InputValidatorType& ioIn)
 	    : BaseType(lrs,model,wft,0),
 	      tstStruct_(ioIn,model),

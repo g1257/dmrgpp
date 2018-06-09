@@ -103,6 +103,8 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 	typedef typename PsimagLite::Vector<GenIjPatchType*>::Type VectorGenIjPatchType;
 	typedef std::pair<SizeType, SizeType> PairSizeType;
 	typedef typename BaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
+	typedef typename BasisType::EffectiveQnType EffectiveQnType;
+	typedef typename EffectiveQnType::QnType QnType;
 
 	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
@@ -426,7 +428,7 @@ public:
 			SizeType sectors = v.sectors();
 			for (SizeType sector = 0; sector < sectors; ++sector) {
 				SizeType m = v.sector(sector);
-				SizeType qn = lrs_.super().qnEx(m);
+				QnType qn = lrs_.super().qnEx(m);
 				GenIjPatchType genIjPatch(lrs, qn);
 				const VectorSizeType& groups =  genIjPatch(dir1);
 				for (SizeType i = 0; i < groups.size(); ++i) {
@@ -520,7 +522,7 @@ private:
 		const BasisType& super = lrs_.super();
 		for (SizeType sector = 0; sector < v.sectors(); ++sector) {
 			SizeType m = v.sector(sector);
-			SizeType qn = super.qnEx(m);
+			const QnType& qn = super.qnEx(m);
 			GenIjPatchType genIjPatch(lrs_, qn);
 			typedef PsimagLite::Parallelizer<ParallelPsiSplit> ParallelizerType;
 			ParallelizerType threaded(PsimagLite::Concurrency::codeSectionParams);

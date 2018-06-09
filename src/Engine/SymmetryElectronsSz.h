@@ -85,9 +85,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename RealType>
+template<typename EffectiveQuantumNumber_>
 class SymmetryElectronsSz {
 
+	typedef typename EffectiveQuantumNumber_::RealType RealType;
 	typedef PsimagLite::IoSelector::Out IoOutType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -95,6 +96,10 @@ class SymmetryElectronsSz {
 	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
 
 public:
+
+	typedef EffectiveQuantumNumber_ EffectiveQuantumNumberType;
+	typedef typename EffectiveQuantumNumberType::QnType QnType;
+	typedef typename EffectiveQuantumNumberType::VectorQnType VectorQnType;
 
 	void set(const VectorPairSizeType& jmvalues,
 	         const VectorSizeType& flavors,
@@ -157,14 +162,6 @@ public:
 		v[1] = nelectrons;
 		v[2] = jtilde;
 		return pseudoQuantumNumber_(v);
-	}
-
-	static PsimagLite::String qnPrint(SizeType q, SizeType total)
-	{
-		PsimagLite::String str("");
-		VectorSizeType qns = decodeQuantumNumber(q,total);
-		for (SizeType k=0;k<qns.size();k++) str += ttos(qns[k]) + " ";
-		return str;
 	}
 
 	static VectorSizeType decodeQuantumNumber(SizeType q, SizeType total)
@@ -374,9 +371,9 @@ private:
 	VectorSizeType flavors_;
 }; // struct SymmetryElectronsSz
 
-template<typename IoOutputter, typename RealType>
+template<typename IoOutputter, typename RealType, typename EffectiveQuantumNumber>
 void write(IoOutputter& io,
-          const SymmetryElectronsSz<RealType>& bd,
+          const SymmetryElectronsSz<EffectiveQuantumNumber>& bd,
           typename PsimagLite::EnableIf<
           PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0)
 {

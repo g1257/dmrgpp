@@ -90,8 +90,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename SparseMatrixType>
-class	HamiltonianSymmetrySu2 {
+template<typename SparseMatrixType, typename SymmetryElectronsSzType>
+class HamiltonianSymmetrySu2 {
 public:
 
 	typedef typename SparseMatrixType::value_type SparseElementType;
@@ -103,10 +103,12 @@ private:
 
 	typedef JmPairs<PairType> JmPairsType;
 	typedef VerySparseMatrix<RealType> VerySparseMatrixType;
-	typedef HamiltonianSymmetrySu2<SparseMatrixType> ThisType;
+	typedef HamiltonianSymmetrySu2<SparseMatrixType, SymmetryElectronsSzType> ThisType;
 	typedef JmSubspace<VerySparseMatrixType,ThisType> JmSubspaceType;
 	typedef typename JmSubspaceType::FlavorType FlavorType;
-	typedef SymmetryElectronsSz<RealType> SymmetryElectronsSzType;
+	typedef typename SymmetryElectronsSzType::VectorQnType VectorQnType;
+	typedef typename SymmetryElectronsSzType::EffectiveQuantumNumberType EffectiveQnType;
+	typedef typename EffectiveQnType::QnType QnType;
 
 public:
 
@@ -139,7 +141,7 @@ public:
 
 	void setToProduct(const HamiltonianSymmetrySu2& symm1,
 	                  const HamiltonianSymmetrySu2& symm2,
-	                  int pseudoQn,
+	                  const QnType& pseudoQn,
 	                  const VectorSizeType& electrons1,
 	                  const VectorSizeType& electrons2,
 	                  VectorSizeType& electrons,
@@ -160,7 +162,7 @@ public:
 		jMax_++;
 		calcReducedBasis();
 		normalizeFlavors();
-		SymmetryElectronsSzType::qnToElectrons(electrons,quantumNumbers,3);
+		EffectiveQnType::qnToElectrons(electrons,quantumNumbers,3);
 		electronsMax_ = *(std::max_element(electrons.begin(),electrons.end()));
 	}
 
@@ -303,23 +305,24 @@ public:
 private:
 
 	template<typename JmSubspaceType>
-	SizeType  setFlavors(VectorSizeType& quantumNumbers,
-	                     JmSubspaceType& jmSubspace,
-	                     SizeType offset)
+	SizeType setFlavors(VectorSizeType& quantumNumbers,
+	                    JmSubspaceType& jmSubspace,
+	                    SizeType offset)
 	{
 		// order is important here, electrons must be set after quantumNumbers
 		SizeType flavors = jmSubspace.numberOfFlavors();
-		if (offset==0) {
+		if (offset == 0) {
 			quantumNumbers.clear();
 			jmValues_.clear();
 			flavors_.clear();
 		}
-		for (SizeType i=0;i<flavors;i++ ) {
+		for (SizeType i = 0; i < flavors; ++i) {
 			PairType jm = jmSubspace.getJmValue();
-			quantumNumbers.push_back(SymmetryElectronsSzType::neJmToIndex(jmSubspace.getNe(),jm));
-			jmValues_.push(jm,i+offset);
+			quantumNumbers.push_back(EffectiveQnType::neJmToIndex(jmSubspace.getNe(),jm));
+			jmValues_.push(jm, i + offset);
 			flavors_.push_back(jmSubspace.getFlavor(i));
 		}
+
 		offset += flavors;
 
 		return offset;
@@ -366,7 +369,7 @@ private:
 	                   const ThisType& symm2,
 	                   const VectorSizeType& electrons1,
 	                   const VectorSizeType& electrons2,
-	                   int pseudoQn)
+	                   const QnType& pseudoQn)
 	{
 		SizeType ns = symm1.jmValues_.size();
 		SizeType ne = symm2.jmValues_.size();
@@ -419,7 +422,7 @@ private:
 	                   SizeType beta,
 	                   SizeType ns,
 	                   SizeType nelectrons,
-	                   int pseudoQn)
+	                   const QnType& pseudoQn)
 	{
 		int j1 = jm1.first, j2=jm2.first;
 		int jinitial = j1-j2;
@@ -439,8 +442,8 @@ private:
 			if (tmp>j) continue;
 			PairType jm(j,m);
 			int heavy=1;
-			SizeType pseudo = SymmetryElectronsSzType::pseudoEffectiveNumber(nelectrons,jm.first);
-			if (pseudoQn>=0 && pseudo !=static_cast<SizeType>(pseudoQn))
+			const QnType& pseudo = EffectiveQnType::pseudoEffectiveNumber(nelectrons, jm.first);
+			if (pseudoQn.isDefined() && pseudo != pseudoQn)
 				heavy=0;
 
 			addJmPair(alpha+beta*ns,jm1,jm2,jm,nelectrons,heavy);

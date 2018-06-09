@@ -129,6 +129,7 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename BaseType::TargetingCommonType::VectorVectorWithOffsetType
 	VectorVectorWithOffsetType;
+	typedef typename BasisType::QnType QnType;
 
 	enum StageEnum {DISABLED,CONVERGING};
 
@@ -138,7 +139,7 @@ public:
 	TargetingCorrelations(const LeftRightSuperType& lrs,
 	                      const ModelType& model,
 	                      const WaveFunctionTransfType& wft,
-	                      const SizeType&,
+	                      const QnType&,
 	                      InputValidatorType& io)
 	    : BaseType(lrs,model,wft,0),
 	      tstStruct_(io,model),

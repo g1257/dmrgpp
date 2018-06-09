@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <typeinfo>
 
 namespace Dmrg {
-template<typename ComplexOrRealType>
+template<typename ComplexOrRealType, typename EffectiveQnType>
 class VectorWithOffset {
 
 public:
@@ -317,7 +317,8 @@ public:
 
 	SizeType offset() const { return offset_; }
 
-	VectorWithOffset<ComplexOrRealType> operator+=(const VectorWithOffset<ComplexOrRealType>& v)
+	VectorWithOffset<ComplexOrRealType,
+	EffectiveQnType> operator+=(const VectorWithOffset<ComplexOrRealType, EffectiveQnType>& v)
 	{
 		if (size_ == 0 && offset_ == 0 && mAndq_.first == 0 && mAndq_.second == 0) {
 			data_ = v.data_;
@@ -372,8 +373,9 @@ public:
 		return (v1.data_ * v2.data_);
 	}
 
-	friend VectorWithOffset<ComplexOrRealType> operator*(const ComplexOrRealType& value,
-	                                                     const VectorWithOffset& v)
+	friend VectorWithOffset<ComplexOrRealType,
+	EffectiveQnType> operator*(const ComplexOrRealType& value,
+	                           const VectorWithOffset& v)
 	{
 		VectorWithOffset w = v;
 		w.data_ *= value;
@@ -442,8 +444,8 @@ private:
 	PairSizeType mAndq_; // partition
 }; // class VectorWithOffset
 
-template<typename ComplexOrRealType>
-const ComplexOrRealType VectorWithOffset<ComplexOrRealType>::zero_=0;
+template<typename ComplexOrRealType, typename EffectiveQnType>
+const ComplexOrRealType VectorWithOffset<ComplexOrRealType, EffectiveQnType>::zero_=0;
 
 }
 /*@}*/

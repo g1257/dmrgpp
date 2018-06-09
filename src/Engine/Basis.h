@@ -95,20 +95,25 @@ class Basis {
 
 	typedef typename SparseMatrixType_::value_type SparseElementType;
 	typedef typename PsimagLite::Real<SparseElementType>::Type RealType_;
-	typedef  Basis<SparseMatrixType_> ThisType;
+	typedef Basis<SparseMatrixType_> ThisType;
+	typedef SymmetryElectronsSz<EffectiveQuantumNumber<RealType_> > SymmetryElectronsSzType_;
 	typedef HamiltonianSymmetryLocal<SparseMatrixType_>  HamiltonianSymmetryLocalType;
-	typedef HamiltonianSymmetrySu2<SparseMatrixType_>  HamiltonianSymmetrySu2Type;
+	typedef HamiltonianSymmetrySu2<SparseMatrixType_,
+	SymmetryElectronsSzType_> HamiltonianSymmetrySu2Type;
 
 public:
 
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename HamiltonianSymmetrySu2Type::FactorsType FactorsType;
 	typedef typename HamiltonianSymmetrySu2Type::PairType PairType;
-	typedef SymmetryElectronsSz<RealType_> SymmetryElectronsSzType;
+	typedef SymmetryElectronsSzType_ SymmetryElectronsSzType;
 	typedef VectorSizeType BlockType;
 	typedef SparseMatrixType_ SparseMatrixType;
 	typedef RealType_ RealType;
 	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
+	typedef EffectiveQuantumNumber<RealType> EffectiveQnType;
+	typedef typename EffectiveQnType::QnType QnType;
+	typedef typename EffectiveQnType::VectorQnType VectorQnType;
 
 	enum {SAVE_ALL, SAVE_PARTIAL};
 
@@ -168,7 +173,7 @@ public:
 		*/
 	void setToProduct(const ThisType& basis1,
 	                  const ThisType& basis2,
-	                  int pseudoQn = -1)
+	                  const QnType& pseudoQn)
 	{
 		block_.clear();
 		utils::blockUnion(block_,basis1.block_,basis2.block_);
@@ -213,9 +218,11 @@ public:
 						for (SizeType j = basis1.partition_[ps];
 						     j < basis1.partition_[ps + 1];
 						     ++j) {
-								qns[counter] = basis2.qns_[pe] + basis1.qns_[ps];
-								electrons_[counter++] = basis1.electrons_[j] +
-								        basis2.electrons_[i];
+							qns[counter] = EffectiveQnType::tensorProduct(basis2.qns_[pe],
+							                                              basis1.qns_[ps]).
+							        toInteger();
+							electrons_[counter++] = basis1.electrons_[j] +
+							        basis2.electrons_[i];
 						}
 					}
 				}
@@ -230,7 +237,7 @@ public:
 	}
 
 	//! returns the effective quantum number of basis state i
-	int qnEx(SizeType i) const
+	const QnType& qnEx(SizeType i) const
 	{
 		assert(i < qns_.size());
 		return qns_[i];
@@ -289,19 +296,6 @@ public:
 			if (i>=partition_[j] && i<partition_[j+1]) return j;
 
 		throw PsimagLite::RuntimeError("Basis: No partition found for this state\n");
-	}
-
-	//! Inverse of pseudoQuantumNumber
-	SizeType pseudoQn(SizeType i) const
-	{
-		if (useSu2Symmetry_) {
-			assert(i < partition_.size());
-			SizeType ind = partition_[i];
-			return SymmetryElectronsSzType::pseudoEffectiveNumber(electrons_[ind],
-			                                                      symmSu2_.jmValue(ind).first);
-		} else {
-			return qnEx(i);
-		}
 	}
 
 	//! removes the indices contained in removedIndices and
@@ -462,6 +456,28 @@ public:
 
 	const PsimagLite::String& symmName() const { return symm_.name(); }
 
+	bool pseudoQnEqual(SizeType i, const QnType& qn) const
+	{
+		return (pseudoQn(i) == qn);
+	}
+
+	PsimagLite::String pseudoQnToString(SizeType i) const
+	{
+		return "unimplemented";
+	}
+
+	QnType pseudoQn(SizeType i) const
+	{
+		if (useSu2Symmetry_) {
+			assert(i < partition_.size());
+			SizeType ind = partition_[i];
+			return EffectiveQnType::pseudoEffectiveNumber(electrons_[ind],
+			                                              symmSu2_.jmValue(ind).first);
+		} else {
+			return qnEx(i);
+		}
+	}
+
 	//! saves this basis to disk
 	void write(PsimagLite::IoSimple::Out& io,
 	           const PsimagLite::String& ss,
@@ -561,7 +577,7 @@ protected:
 		if (useSu2Symmetry_) symmSu2_.set(basisData);
 		electrons_ = basisData.electrons();
 		VectorSizeType qns;
-		basisData.findQuantumNumbers(qns, useSu2Symmetry_);
+		EffectiveQnType::findQuantumNumbers(qns, basisData, useSu2Symmetry_);
 		findPermutationAndPartition(qns, true);
 		electronsToSigns(electrons_);
 		shrinkVector(qns_, qns, partition_);
@@ -579,7 +595,7 @@ private:
 		SizeType qtmp = qns[0] + 1;
 		partition_.clear();
 		for (SizeType i = 0; i < n; ++i) {
-			if (qns[i] != qtmp) {
+			if (i == 0 || qns[i] != qtmp) {
 				partition_.push_back(i);
 				qtmp = qns[i];
 			}
@@ -626,23 +642,23 @@ private:
 			symmLocal_.read(io,prefix, minimizeRead);
 	}
 
-	void shrinkVector(VectorSizeType& dest,
+	void shrinkVector(VectorQnType& dest,
 	                  const VectorSizeType& src,
 	                  const VectorSizeType& partition) const
 	{
 		SizeType n = partition.size();
 		assert(n > 0);
-		dest.resize(n -1 , 0);
+		dest.resize(n - 1);
 		for (SizeType i = 0; i < n - 1; ++i) {
 			assert(i < partition.size());
 			assert(partition[i] < src.size());
 			assert(i < dest.size());
-			dest[i] = src[partition[i]];
+			dest[i] = EffectiveQnType::fromInteger(src[partition[i]]);
 		}
 	}
 
 	void unShrinkVector(VectorSizeType& dest,
-	                    const VectorSizeType& src,
+	                    const VectorQnType& src,
 	                    const VectorSizeType& partition) const
 	{
 		SizeType n = partition.size();
@@ -654,7 +670,7 @@ private:
 			SizeType end = partition[i + 1];
 			assert(end < 1 + dest.size());
 			for (SizeType j = start; j < end; ++j)
-				dest[j] = src[i];
+				dest[j] = src[i].toInteger();
 		}
 	}
 
@@ -690,8 +706,7 @@ private:
 				for (SizeType i=0;i<permutationVector_.size();i++)
 					permutationVector_[i]=i;
 			} else {
-				PsimagLite::Sort<VectorSizeType > sort;
-				sort.sort(qns, permutationVector_);
+				 EffectiveQnType::sort(qns, permutationVector_);
 			}
 		}
 
@@ -754,7 +769,7 @@ these numbers are
 		order of hundreds for usual symmetries, making this implementation very practical for
 		systems of correlated electrons.)
 		*/
-	VectorSizeType qns_;
+	VectorQnType qns_;
 	VectorSizeType electrons_;
 	VectorBoolType signsOld_;
 
@@ -792,7 +807,7 @@ these numbers are
 	BlockType block_;
 	bool dmrgTransformed_;
 	PsimagLite::String name_;
-	EffectiveQuantumNumber symm_;
+	EffectiveQnType symm_;
 	PsimagLite::ProgressIndicator progress_;
 	static bool useSu2Symmetry_;
 
