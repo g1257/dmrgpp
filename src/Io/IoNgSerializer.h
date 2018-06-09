@@ -72,12 +72,27 @@ public:
 	template<typename T1, typename T2>
 	void write(String name2,
 	           const std::pair<T1, T2>& what,
-	           WriteMode allowOverwrite = NO_OVERWRITE)
+	           WriteMode allowOverwrite = NO_OVERWRITE,
+	           typename EnableIf<Loki::TypeTraits<T1>::isArith &&
+	           Loki::TypeTraits<T2>::isArith, int>::Type = 0)
 	{
 		overwriteNotSupported(allowOverwrite);
 		createGroup(name2);
 		write(name2 + "/0", what.first);
 		write(name2 + "/1", what.second);
+	}
+
+	template<typename T1, typename T2>
+	void write(String name2,
+	           const std::pair<T1, T2>& what,
+	           WriteMode allowOverwrite = NO_OVERWRITE,
+	           typename EnableIf<Loki::TypeTraits<T1>::isArith &&
+	           !Loki::TypeTraits<T2>::isArith, int>::Type = 0)
+	{
+		overwriteNotSupported(allowOverwrite);
+		createGroup(name2);
+		write(name2 + "/0", what.first);
+		what.second.write(name2 + "/1", *this);
 	}
 
 	// Note: THIS WILL EMPTY THE STACK OBJECT!
@@ -176,8 +191,8 @@ public:
 	void write(String name2,
 	           const std::vector<T>& what,
 	           WriteMode allowOverwrite = NO_OVERWRITE,
-	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
-	           int>::Type = 0)
+	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith
+	           && !IsPairLike<T>::True, int>::Type = 0)
 	{
 		overwriteNotSupported(allowOverwrite);
 		SizeType n = what.size();
@@ -185,6 +200,21 @@ public:
 		write(name2 + "/Size", n);
 		for (SizeType i = 0; i < n; ++i)
 			what[i].write(name2 + "/" + typeToString(i), *this);
+	}
+
+	template<typename T>
+	void write(String name2,
+	           const std::vector<T>& what,
+	           WriteMode allowOverwrite = NO_OVERWRITE,
+	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith
+	           && IsPairLike<T>::True, int>::Type = 0)
+	{
+		overwriteNotSupported(allowOverwrite);
+		SizeType n = what.size();
+		createGroup(name2);
+		write(name2 + "/Size", n);
+		for (SizeType i = 0; i < n; ++i)
+			write(name2 + "/" + typeToString(i), what[i]);
 	}
 
 	template<typename T>
@@ -236,10 +266,22 @@ public:
 
 	template<typename T1, typename T2>
 	void read(std::pair<T1, T2>& what,
-	          String name)
+	          String name,
+	          typename EnableIf<Loki::TypeTraits<T1>::isArith &&
+	          Loki::TypeTraits<T2>::isArith, int>::Type = 0)
 	{
 		read(what.first, name + "/0");
 		read(what.second, name + "/1");
+	}
+
+	template<typename T1, typename T2>
+	void read(std::pair<T1, T2>& what,
+	          String name,
+	          typename EnableIf<Loki::TypeTraits<T1>::isArith &&
+	          !Loki::TypeTraits<T2>::isArith, int>::Type = 0)
+	{
+		read(what.first, name + "/0");
+		what.second.read(name + "/1", *this);
 	}
 
 	void read(std::vector<bool>& what,
@@ -293,14 +335,27 @@ public:
 	template<typename T>
 	void read(std::vector<T>& what,
 	          String name,
-	          typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
-	          int>::Type = 0)
+	          typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith
+	          && !IsPairLike<T>::True, int>::Type = 0)
 	{
 		SizeType size = 0;
 		read(size, name + "/Size");
 		what.resize(size);
 		for (SizeType i = 0; i < size; ++i)
 			what[i].read(name + "/" + ttos(i), *this);
+	}
+
+	template<typename T>
+	void read(std::vector<T>& what,
+	          String name,
+	          typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith
+	          && IsPairLike<T>::True, int>::Type = 0)
+	{
+		SizeType size = 0;
+		read(size, name + "/Size");
+		what.resize(size);
+		for (SizeType i = 0; i < size; ++i)
+			read(what[i], name + "/" + ttos(i));
 	}
 
 	template<typename T>
