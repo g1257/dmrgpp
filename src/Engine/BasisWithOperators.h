@@ -187,8 +187,7 @@ public:
 	{
 		BasisType &parent = *this;
 		// reorder the basis
-		typename ThisType::QnType qnUndefined;
-		parent.setToProduct(basis2, basis3, qnUndefined);
+		parent.setToProduct(basis2, basis3);
 
 		typename PsimagLite::Vector<RealType>::Type fermionicSigns;
 		SizeType x = basis2.numberOfOperators()+basis3.numberOfOperators();

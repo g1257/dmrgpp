@@ -121,8 +121,6 @@ public:
 	LanczosSolverType> TargetingCommonType;
 	typedef typename TargetingCommonType::ApplyOperatorExpressionType
 	ApplyOperatorExpressionType;
-	typedef typename BasisWithOperatorsType::SymmetryElectronsSzType
-	SymmetryElectronsSzType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 
 	enum {DISABLED=ApplyOperatorExpressionType::DISABLED,

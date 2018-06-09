@@ -95,6 +95,8 @@ public:
 
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef ModelType_ ModelType;
+	typedef typename ModelType::EffectiveQnType::QnType QnType;
+	typedef typename ModelType::EffectiveQnType::VectorQnType VectorQnType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelType::HilbertBasisType HilbertBasisType;
@@ -140,7 +142,7 @@ public:
 	}
 
 	// call only from INFINITE
-	void update(SizeType qn,
+	void update(const QnType& qn,
 	            const typename PsimagLite::Vector<SizeType>::Type& block1,
 	            const typename PsimagLite::Vector<SizeType>::Type& block2,
 	            SizeType seed)
@@ -160,7 +162,7 @@ public:
 			addedSites_.push_back(block1[i]);
 		for (SizeType i=0;i<block2.size();i++)
 			addedSites_.push_back(block2[i]);
-		qnVsSize_.resize(addedSites_.size()+1,0);
+		qnVsSize_.resize(addedSites_.size() + 1);
 		qnVsSize_[addedSites_.size()]=qn;
 	}
 
@@ -190,7 +192,7 @@ private:
 	PsimagLite::ProgressIndicator progress_;
 	typename PsimagLite::Vector<SizeType>::Type pureStates_;
 	typename PsimagLite::Vector<SizeType>::Type addedSites_;
-	typename PsimagLite::Vector<SizeType>::Type qnVsSize_;
+	VectorQnType qnVsSize_;
 };  //class MettsStochastics
 } // namespace Dmrg
 /*@}*/

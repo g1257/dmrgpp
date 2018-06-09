@@ -116,8 +116,6 @@ public:
 	typedef typename BasisType::BlockType BlockType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
-	typedef typename BasisWithOperatorsType::SymmetryElectronsSzType
-	SymmetryElectronsSzType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename BasisType::QnType QnType;
 

@@ -120,7 +120,6 @@ public:
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisType::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename BasisType::EffectiveQnType EffectiveQnType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -485,12 +484,12 @@ private:
 	                       const VectorSizeType& block2)
 	{
 		SizeType linSize = model_.geometry().numberOfSites();
-		SizeType qn = SymmetryElectronsSzType::getQuantumSector(model_.targetQuantum(),
-		                                                        linSize,
-		                                                        linSize,
-		                                                        ProgramGlobals::INFINITE,
-		                                                        0,
-		                                                        BasisType::useSu2Symmetry());
+		const QnType& qn = EffectiveQnType::getQuantumSector(model_.targetQuantum(),
+		                                                     linSize,
+		                                                     linSize,
+		                                                     ProgramGlobals::INFINITE,
+		                                                     0,
+		                                                     BasisType::useSu2Symmetry());
 		mettsStochastics_.update(qn,block1,block2,mettsStruct_.rngSeed);
 	}
 

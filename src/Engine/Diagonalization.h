@@ -85,7 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DavidsonSolver.h"
 #include "ParametersForSolver.h"
 #include "Concurrency.h"
-#include "SymmetryElectronsSz.h"
 
 namespace Dmrg {
 

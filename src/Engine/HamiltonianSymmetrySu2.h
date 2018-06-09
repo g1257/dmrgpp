@@ -90,7 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename SparseMatrixType, typename SymmetryElectronsSzType>
+template<typename SparseMatrixType, typename EffectiveQnType>
 class HamiltonianSymmetrySu2 {
 public:
 
@@ -103,12 +103,12 @@ private:
 
 	typedef JmPairs<PairType> JmPairsType;
 	typedef VerySparseMatrix<RealType> VerySparseMatrixType;
-	typedef HamiltonianSymmetrySu2<SparseMatrixType, SymmetryElectronsSzType> ThisType;
+	typedef HamiltonianSymmetrySu2<SparseMatrixType, EffectiveQnType> ThisType;
 	typedef JmSubspace<VerySparseMatrixType,ThisType> JmSubspaceType;
 	typedef typename JmSubspaceType::FlavorType FlavorType;
-	typedef typename SymmetryElectronsSzType::VectorQnType VectorQnType;
-	typedef typename SymmetryElectronsSzType::EffectiveQuantumNumberType EffectiveQnType;
+	typedef typename EffectiveQnType::VectorQnType VectorQnType;
 	typedef typename EffectiveQnType::QnType QnType;
+	typedef typename EffectiveQnType::SymmetryElectronsSzType SymmetryElectronsSzType;
 
 public:
 
@@ -129,8 +129,8 @@ public:
 
 	void set(const SymmetryElectronsSzType& basisData)
 	{
-		jmValues_=basisData.jmValues();
-		flavors_=basisData.flavors();
+		jmValues_ = basisData.jmValues;
+		flavors_ = basisData.flavors;
 		flavorsMax_= *(std::max_element(flavors_.begin(),flavors_.end()));
 		electronsMax_ = basisData.electronsMax();
 		jMax_=0;
@@ -141,7 +141,7 @@ public:
 
 	void setToProduct(const HamiltonianSymmetrySu2& symm1,
 	                  const HamiltonianSymmetrySu2& symm2,
-	                  const QnType& pseudoQn,
+	                  const QnType* pseudoQn,
 	                  const VectorSizeType& electrons1,
 	                  const VectorSizeType& electrons2,
 	                  VectorSizeType& electrons,
@@ -369,7 +369,7 @@ private:
 	                   const ThisType& symm2,
 	                   const VectorSizeType& electrons1,
 	                   const VectorSizeType& electrons2,
-	                   const QnType& pseudoQn)
+	                   const QnType* pseudoQn)
 	{
 		SizeType ns = symm1.jmValues_.size();
 		SizeType ne = symm2.jmValues_.size();
@@ -402,7 +402,7 @@ private:
 				std::cerr<<" nelectrons="<<nelectrons;
 				PairType jm = jmSubspaces_[i].getJmValue();
 				std::cerr<<" pseudo=";
-				std::cerr<<SymmetryElectronsSzType::pseudoEffectiveNumber(nelectrons,jm.first);
+				std::cerr<<EffectiveQnType::pseudoEffectiveNumber(nelectrons,jm.first);
 
 				std::cerr<<" jm=("<<jm.first<<","<<jm.second<<")\n";
 				std::cerr<<" heavy="<<jmSubspaces_[i].heavy()<<"\n";
@@ -422,7 +422,7 @@ private:
 	                   SizeType beta,
 	                   SizeType ns,
 	                   SizeType nelectrons,
-	                   const QnType& pseudoQn)
+	                   const QnType* pseudoQn)
 	{
 		int j1 = jm1.first, j2=jm2.first;
 		int jinitial = j1-j2;
@@ -443,7 +443,7 @@ private:
 			PairType jm(j,m);
 			int heavy=1;
 			const QnType& pseudo = EffectiveQnType::pseudoEffectiveNumber(nelectrons, jm.first);
-			if (pseudoQn.isDefined() && pseudo != pseudoQn)
+			if (pseudoQn && pseudo != *pseudoQn)
 				heavy=0;
 
 			addJmPair(alpha+beta*ns,jm1,jm2,jm,nelectrons,heavy);

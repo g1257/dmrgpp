@@ -21,7 +21,6 @@ class KroneckerDumper {
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename BasisType::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename BasisType::EffectiveQnType EffectiveQnType;
 	typedef typename EffectiveQnType::QnType QnType;
 	typedef std::pair<SizeType,SizeType> PairSizeType;
@@ -180,7 +179,7 @@ private:
 
 	PairSizeType getNupNdown(SizeType q, SizeType nOfQns) const
 	{
-		VectorSizeType qns = SymmetryElectronsSzType::decodeQuantumNumber(q,nOfQns);
+		VectorSizeType qns = EffectiveQnType::decodeQuantumNumber(q,nOfQns);
 		SizeType electrons = qns[1];
 		SizeType electronsUp = qns[0];
 		SizeType electronsDown = electrons - qns[0];

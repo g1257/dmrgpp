@@ -96,22 +96,21 @@ class Basis {
 	typedef typename SparseMatrixType_::value_type SparseElementType;
 	typedef typename PsimagLite::Real<SparseElementType>::Type RealType_;
 	typedef Basis<SparseMatrixType_> ThisType;
-	typedef SymmetryElectronsSz<EffectiveQuantumNumber<RealType_> > SymmetryElectronsSzType_;
 	typedef HamiltonianSymmetryLocal<SparseMatrixType_>  HamiltonianSymmetryLocalType;
-	typedef HamiltonianSymmetrySu2<SparseMatrixType_,
-	SymmetryElectronsSzType_> HamiltonianSymmetrySu2Type;
 
 public:
 
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename HamiltonianSymmetrySu2Type::FactorsType FactorsType;
-	typedef typename HamiltonianSymmetrySu2Type::PairType PairType;
-	typedef SymmetryElectronsSzType_ SymmetryElectronsSzType;
 	typedef VectorSizeType BlockType;
 	typedef SparseMatrixType_ SparseMatrixType;
 	typedef RealType_ RealType;
 	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
 	typedef EffectiveQuantumNumber<RealType> EffectiveQnType;
+	typedef HamiltonianSymmetrySu2<SparseMatrixType_,
+	EffectiveQnType> HamiltonianSymmetrySu2Type;
+	typedef typename HamiltonianSymmetrySu2Type::FactorsType FactorsType;
+	typedef typename HamiltonianSymmetrySu2Type::PairType PairType;
+	typedef typename EffectiveQnType::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename EffectiveQnType::QnType QnType;
 	typedef typename EffectiveQnType::VectorQnType VectorQnType;
 
@@ -172,7 +171,7 @@ public:
 		*/
 	void setToProduct(const ThisType& basis1,
 	                  const ThisType& basis2,
-	                  const QnType& pseudoQn)
+	                  const QnType* pseudoQn = 0)
 	{
 		block_.clear();
 		utils::blockUnion(block_,basis1.block_,basis2.block_);
@@ -574,7 +573,7 @@ protected:
 	void setSymmetryRelated(const SymmetryElectronsSzType& basisData)
 	{
 		if (useSu2Symmetry_) symmSu2_.set(basisData);
-		electrons_ = basisData.electrons();
+		electrons_ = basisData.electrons;
 		VectorSizeType qns;
 		EffectiveQnType::findQuantumNumbers(qns, basisData, useSu2Symmetry_);
 		findPermutationAndPartition(qns, true);

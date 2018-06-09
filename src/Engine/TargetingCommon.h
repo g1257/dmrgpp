@@ -363,7 +363,7 @@ public:
 		typename ModelType::HilbertBasisType basis;
 		targetHelper_.model().setBasis(basis, q, block1);
 
-		FermionSign fs(targetHelper_.lrs().left(),q.electrons());
+		FermionSign fs(targetHelper_.lrs().left(), q.electrons);
 		for (SizeType j=0;j<creationMatrix.size();j++) {
 			VectorWithOffsetType phiTemp;
 			applyOpExpression_.applyOpLocal()(phiTemp,psi,creationMatrix[j],

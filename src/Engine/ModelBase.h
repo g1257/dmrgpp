@@ -250,7 +250,7 @@ public:
 		SymmetryElectronsSzType qq;
 		setBasis(natBasis, qq, block);
 		VectorSizeType q;
-		qq.findQuantumNumbers(q, MyBasis::useSu2Symmetry());
+		EffectiveQnType::findQuantumNumbers(q, qq, MyBasis::useSu2Symmetry());
 		std::cout<<"block="<<block;
 		std::cout<<"natBasis="<<natBasis;
 		std::cout<<"quantumNumbs="<<q;
@@ -289,7 +289,7 @@ protected:
 	                const SymmetryElectronsSzType& qq) const
 	{
 		VectorSizeType q;
-		qq.findQuantumNumbers(q, MyBasis::useSu2Symmetry());
+		EffectiveQnType::findQuantumNumbers(q, qq, MyBasis::useSu2Symmetry());
 		orderBasis(basis, q, basisUnordered);
 	}
 

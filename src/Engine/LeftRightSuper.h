@@ -93,7 +93,6 @@ public:
 	typedef typename SuperBlockType::RealType RealType;
 	typedef BasisWithOperatorsType_ BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisType::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
@@ -227,7 +226,7 @@ public:
 	/*!PTEX_LABEL{setToProductLrs} */
 	void setToProduct(QnType quantumSector)
 	{
-		super_->setToProduct(*left_,*right_,quantumSector);
+		super_->setToProduct(*left_, *right_, &quantumSector);
 	}
 
 	template<typename IoOutputType>
