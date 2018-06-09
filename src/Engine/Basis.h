@@ -118,19 +118,18 @@ public:
 	enum {SAVE_ALL, SAVE_PARTIAL};
 
 	//! Constructor, s=name of this basis
-	Basis(const PsimagLite::String& s, PsimagLite::String symmName)
-	    : dmrgTransformed_(false), name_(s), symm_(symmName), progress_(s)
+	Basis(const PsimagLite::String& s)
+	    : dmrgTransformed_(false), name_(s), progress_(s)
 	{}
 
 	//! Loads this basis from memory or disk
 	template<typename IoInputter>
 	Basis(IoInputter& io,
 	      const PsimagLite::String& ss,
-	      PsimagLite::String symmName,
 	      SizeType counter=0,
 	      bool = false,
 	      bool minimizeRead = false)
-	    : dmrgTransformed_(false), name_(ss), symm_(symmName), progress_(ss)
+	    : dmrgTransformed_(false), name_(ss), progress_(ss)
 	{
 		if (io.ng()) correctNameIfNeeded();
 		io.advance("NAME="+ss,counter);

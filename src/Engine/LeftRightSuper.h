@@ -148,14 +148,13 @@ public:
 
 	LeftRightSuper(const PsimagLite::String& slabel,
 	               const PsimagLite::String& elabel,
-	               const PsimagLite::String& selabel,
-	               PsimagLite::String symmName)
+	               const PsimagLite::String& selabel)
 	    : progress_("LeftRightSuper"),
 	      left_(0),right_(0),super_(0),refCounter_(0)
 	{
-		left_ = new BasisWithOperatorsType(slabel, symmName);
-		right_ = new BasisWithOperatorsType(elabel, symmName);
-		super_ = new SuperBlockType(selabel, symmName);
+		left_ = new BasisWithOperatorsType(slabel);
+		right_ = new BasisWithOperatorsType(elabel);
+		super_ = new SuperBlockType(selabel);
 	}
 
 	~LeftRightSuper()
@@ -357,7 +356,7 @@ private:
 	          ProgramGlobals::DirectionEnum dir,
 	          RealType time)
 	{
-		BasisWithOperatorsType Xbasis("Xbasis", model.symmName());
+		BasisWithOperatorsType Xbasis("Xbasis");
 
 		Xbasis.setVarious(X, model, time);
 		leftOrRight.setToProduct(pS,Xbasis,dir);

@@ -71,9 +71,6 @@ public:
 	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
 	typedef std::pair<SizeType, SizeType> PairType;
 
-	EffectiveQuantumNumber(PsimagLite::String str)
-	    : str_(str) {}
-
 	const PsimagLite::String& name() const { return str_;}
 
 	static QnType tensorProduct(const QnType& q1, const QnType& q2)

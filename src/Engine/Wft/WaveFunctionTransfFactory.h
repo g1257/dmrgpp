@@ -120,7 +120,6 @@ public:
 
 	template<typename SomeParametersType>
 	WaveFunctionTransfFactory(SomeParametersType& params,
-	                          PsimagLite::String symmName,
 	                          PsimagLite::IoSelector::Out& ioOut)
 	    : isEnabled_(!(params.options.find("nowft")!=PsimagLite::String::npos)),
 	      wftOptions_(ProgramGlobals::INFINITE,
@@ -132,7 +131,7 @@ public:
 	      filenameIn_(params.checkpoint.filename),
 	      ioOut_(ioOut),
 	      WFT_STRING(ProgramGlobals::WFT_STRING),
-	      dmrgWaveStruct_(symmName),
+	      dmrgWaveStruct_(),
 	      wftImpl_(0),
 	      rng_(3433117),
 	      noLoad_(false),

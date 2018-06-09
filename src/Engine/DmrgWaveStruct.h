@@ -98,8 +98,8 @@ struct DmrgWaveStruct {
 	BlockDiagonalMatrixType we;
 	LeftRightSuperType lrs;
 
-	DmrgWaveStruct(PsimagLite::String symmName)
-	    : lrs("pSE", "pSprime", "pEprime", symmName) { }
+	DmrgWaveStruct()
+	    : lrs("pSE", "pSprime", "pEprime") {}
 
 	static SizeType volumeOf(const VectorSizeType& v)
 	{

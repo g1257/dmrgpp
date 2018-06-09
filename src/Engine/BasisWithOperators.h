@@ -135,17 +135,16 @@ public:
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
 
-	BasisWithOperators(const PsimagLite::String& s, PsimagLite::String symmName)
-	    : BasisType(s, symmName),operators_(this)
+	BasisWithOperators(const PsimagLite::String& s)
+	    : BasisType(s), operators_(this)
 	{}
 
 	template<typename IoInputter>
 	BasisWithOperators(IoInputter& io,
 	                   const PsimagLite::String& ss,
-	                   PsimagLite::String symmName,
 	                   SizeType counter,
 	                   bool isObserveCode)
-	    : BasisType(io, ss, symmName, counter),
+	    : BasisType(io, ss, counter),
 	      operators_(io, (io.ng()) ? ss + "/" : "", 0, this, isObserveCode)
 	{
 		PsimagLite::String prefix = (io.ng()) ? ss + "/" : "";

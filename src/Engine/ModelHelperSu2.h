@@ -103,6 +103,7 @@ public:
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename OperatorsType::BasisType BasisType;
+	typedef typename BasisType::QnType QnType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef typename BasisType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
@@ -134,7 +135,7 @@ public:
 		return tmp; //reflection_.size(tmp);
 	}
 
-	int quantumNumber() const
+	const QnType& quantumNumber() const
 	{
 		return lrs_.super().qnEx(m_);
 	}
