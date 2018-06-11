@@ -103,14 +103,14 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	my $whatDmrg = Ci::readAnnotationFromKey(\@ciAnnotations, "dmrg");
 	my $extraCmdArgs = $sOptions."  ".findArguments($whatDmrg);
 	my $cmd = getCmd($n, $valgrind, $extraCmdArgs);
-	
+
 	for (my $i = 0; $i < $totalAnnotations; ++$i) {
 		my ($ppLabel, $w) = Ci::readAnnotationFromIndex(\@ciAnnotations, $i);
 		my $x = defined($w) ? scalar(@$w) : 0;
 		next if ($x == 0);
 		print "|$n| has $x $ppLabel lines\n";
 		next if ($ppLabel eq "dmrg");
-			
+
 		if ($ppLabel eq "observe") {
 			$cmd .= runObserve($n, $w, $sOptions);
 			next;

@@ -77,7 +77,8 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 
 	procTest($n,$workdir,$golddir);
 
-	my %ciAnnotations = Ci::getCiAnnotations("inputs/input$n.inp",$n);
+	my @ciAnnotations = Ci::getCiAnnotations("inputs/input$n.inp",$n);
+	my $totalAnnotations = scalar(@ciAnnotations);
 
 	my @postProcessLabels = qw(getTimeObservablesInSitu getEnergyAncilla CollectBrakets metts observe);
 	my %actions = (getTimeObservablesInSitu => \&checkTimeInSituObs,
@@ -85,11 +86,16 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	               CollectBrakets => \&checkCollectBrakets,
 	               metts => \&checkMetts,
 	               observe => \&checkObserve);
-	foreach my $ppLabel (@postProcessLabels) {
-		my $w = $ciAnnotations{$ppLabel};
+	for (my $i = 0; $i < $totalAnnotations; ++$i) {
+		my ($ppLabel, $w) = Ci::readAnnotationFromIndex(\@ciAnnotations, $i);
 		my $x = defined($w) ? scalar(@$w) : 0;
 		next if ($x == 0);
 		print "|$n| has $x $ppLabel lines\n";
+		if ($ppLabel eq "dmrg" || $ppLabel eq "nDollar") {
+			print "|$n| ignoring $ppLabel label in postCi mode\n";
+			next;
+		}
+
 		$actions{$ppLabel}->($n, $w, $workdir, $golddir);
 	}
 
@@ -222,7 +228,7 @@ sub procMemcheck
 		print "$0: ATTENTION TEST $n couldn't run because of $extra\n";
 		return;
 	}
-	
+
 	foreach my $key (keys %lost) {
 		my $val = $lost{"$key"};
 		next if ($val == 0);
