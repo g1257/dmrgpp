@@ -229,9 +229,9 @@ sub getDeepBatchIndex
 
 	defined($n) or die "$0: getDeepBatchIndex $from\n";
 
-	my $file = "../inputs/input$n.inp";	
+	my $file = "../inputs/input$n.inp";
 	my $from2 = getRestartFrom($file, $n);
-		
+
 	return ($from2 eq "") ? $n : getDeepBatchIndex($from2);
 }
 
