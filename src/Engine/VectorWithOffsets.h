@@ -373,7 +373,20 @@ public:
 	{
 		io.read(size_, label + "/size_");
 		io.read(index2Sector_, label + "/index2Sector_");
-		io.read(data_, label + "/data_");
+		SizeType x = 0;
+		io.read(x, label + "/data_/Size");
+		data_.resize(x);
+		bool flag = false;
+		for (SizeType i = 0; i < x; ++i) {
+			try {
+				io.read(data_[i], label + "/data_/" + ttos(i));
+				flag = true;
+				std::cerr<<"VectorWithOffsets: non-zero sector index "<<i<<" read \n";
+			} catch (...) {}
+		}
+
+		if (!flag) err("VectorWithOffsets: all sectors in data_ are empty (FATAL)\n");
+
 		io.read(offsets_, label + "/offsets_");
 		io.read(nzMsAndQns_, label + "/nzMsAndQns_");
 	}
