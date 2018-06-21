@@ -1,7 +1,7 @@
 #ifndef IOSERIALIZERSTUB_H
 #define IOSERIALIZERSTUB_H
 
-#ifdef USE_IO_NG
+#ifndef USE_IO_SIMPLE
 #include "IoNgSerializer.h"
 namespace PsimagLite {
 typedef IoNgSerializer IoSerializer;

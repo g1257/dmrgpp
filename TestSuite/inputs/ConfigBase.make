@@ -23,8 +23,11 @@ CPPFLAGS += -Wall -Wendif-labels
 # This enables additional debugging
 #CPPFLAGS += -D_GLIBCXX_DEBUG -D_GLIBCXX_PROFILE
 
+#If you don't have hdf5 then uncomment this line
+# and comment out the hdf5 includes and libs below
+CPPFLAGS += -DUSE_IO_SIMPLE
+
 #When using IoNg one has to compile with HDF5 libraries
-CPPFLAGS += -DUSE_IO_NG
 CPPFLAGS += -I/usr/include/hdf5/serial
 LDFLAGS += -L/usr/lib/x86_64-linux-gnu/hdf5/serial/
 LDFLAGS += -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5

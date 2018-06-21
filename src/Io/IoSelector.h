@@ -3,7 +3,7 @@
 
 #include "IoSerializerStub.h"
 
-#ifndef USE_IO_NG
+#ifdef USE_IO_SIMPLE
 #include "IoSimple.h"
 #else
 #include "IoNg.h"
@@ -11,7 +11,7 @@
 
 namespace PsimagLite {
 
-#ifndef USE_IO_NG
+#ifdef USE_IO_SIMPLE
 typedef PsimagLite::IoSimple IoSelector;
 #else
 typedef PsimagLite::IoNg IoSelector;

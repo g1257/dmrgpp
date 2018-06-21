@@ -66,7 +66,6 @@ Why? Because we need fastly indexed and verifyable i/o, and the hdf5 backend is 
 cd PsimagLite/lib
 perl configure.pl
 Edit Config.make and make sure
-CPPFLAGS += -DUSE_IO_NG
 CPPFLAGS += -I/usr/include/hdf5/serial
 LDFLAGS += -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5
 is enabled

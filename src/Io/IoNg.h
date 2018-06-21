@@ -281,6 +281,7 @@ public:
 		typedef unsigned int long LongSizeType;
 
 		static const LongIntegerType LAST_INSTANCE = -1; // scaffolding ONLY FIXME DELETE
+		static const LongIntegerType ONLY_INSTANCE = 0;
 
 		In(String const &fn)
 		    : filename_(fn),

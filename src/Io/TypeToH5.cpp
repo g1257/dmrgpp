@@ -1,4 +1,4 @@
-#ifdef USE_IO_NG
+#ifndef USE_IO_SIMPLE
 
 #include "TypeToH5.h"
 
