@@ -309,6 +309,7 @@ the "half filled" case). U=2
 5601) ./dmrg -f input.inp 'n$.txt' feature
 5700) TargetingCorrection small test
 5800) SOC with Jz symmetry Ground State, using "fat site"
+5802) SOC test
 5810) 3-orbital Hubbard model Ground State, using "fat site"
 6000) Kitaev Model Test
 6500) Hybrid space-k ladders
