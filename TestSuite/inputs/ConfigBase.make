@@ -25,7 +25,7 @@ CPPFLAGS += -Wall -Wendif-labels
 
 #If you don't have hdf5 then uncomment this line
 # and comment out the hdf5 includes and libs below
-CPPFLAGS += -DUSE_IO_SIMPLE
+#CPPFLAGS += -DUSE_IO_SIMPLE
 
 #When using IoNg one has to compile with HDF5 libraries
 CPPFLAGS += -I/usr/include/hdf5/serial
