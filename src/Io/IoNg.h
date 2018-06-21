@@ -107,11 +107,11 @@ is a native type is written directly by doubling the size of the array into a si
 template<typename T>
 struct IsRootUnDelegated {
 	enum {True = Loki::TypeTraits<T>::isArith ||
-	      IsVectorLike<T>::True ||
-	      IsStackLike<T>::True ||
-	      IsPairLike<T>::True ||
-	      IsEnum<T>::True ||
-	      IsStringLike<T>::True};
+		  IsVectorLike<T>::True ||
+		  IsStackLike<T>::True ||
+		  IsPairLike<T>::True ||
+		  IsEnum<T>::True ||
+		  IsStringLike<T>::True};
 };
 // PSIDOC_CODE_END
 
@@ -152,7 +152,7 @@ public:
 		~Out()
 		{
 			filename_ = "";
-			delete hdf5File_; // should I close something first? FIXME
+			delete hdf5File_;
 			hdf5File_ = 0;
 		}
 
@@ -179,7 +179,7 @@ public:
 		void close()
 		{
 			// deal with the serializer object FIXME
-			delete hdf5File_; // should I close something first? FIXME
+			delete hdf5File_;
 			hdf5File_ = 0;
 			filename_ = "";
 		}
@@ -189,12 +189,10 @@ public:
 			ioNgSerializer_.createGroup(groupName);
 		}
 
-		// scaffolding function FIXME DELETE (see In::readline)
 		template<typename T>
-		void writeline(T x,
-		               PsimagLite::String str,
-		               PsimagLite::OstringStream&,
-		               SizeType counter)
+		void writeVectorEntry(T x,
+		                      PsimagLite::String str,
+		                      SizeType counter)
 		{
 			if (counter == 0) createGroup(str);
 
@@ -230,22 +228,6 @@ public:
 			what.write(name2, ioNgSerializer_);
 		}
 
-		int rank() { throw RuntimeError("IoNg:: not implemented\n"); }
-
-		void flush()
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
-
-		void setPrecision(SizeType x)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
-
-		template<typename ActionType>
-		void action(ActionType& a)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
-
-		template<typename T>
-		friend Out& operator<<(Out& io, const T& t)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
-
 	private:
 
 		Out(const Out&);
@@ -280,9 +262,6 @@ public:
 		typedef int long LongIntegerType;
 		typedef unsigned int long LongSizeType;
 
-		static const LongIntegerType LAST_INSTANCE = -1; // scaffolding ONLY FIXME DELETE
-		static const LongIntegerType ONLY_INSTANCE = 0;
-
 		In(String const &fn)
 		    : filename_(fn),
 		      hdf5File_(new H5::H5File(fn, H5F_ACC_RDONLY)),
@@ -295,7 +274,7 @@ public:
 
 		~In()
 		{
-			delete hdf5File_; // should I close something first? FIXME
+			delete hdf5File_;
 			hdf5File_ = 0;
 			filename_ = "";
 		}
@@ -319,38 +298,16 @@ public:
 
 		bool ng() const { return true; }
 
-		// scaffolding function FIXME DELETE (see Out::writeline)
 		template<typename SomeType>
-		SizeType readline(SomeType &x, String s, LongIntegerType level = 0)
+		void readLastVectorEntry(SomeType &x, String s)
 		{
-			SizeType last = s.length();
-			if (last < 2)
-				throw RuntimeError("Wrong label " + s + " for readline\n");
+			int total = 0;
+			ioNgSerializer_.read(total, s + "/Size");
 
-			if (s[--last] == '=')
-				s.erase(s.begin() + last, s.end());
+			if (total <= 0)
+				throw RuntimeError("Error reading last instance of " + s + "\n");
 
-			if (s[0] == '#')
-				s.erase(s.begin(), s.begin() + 1);
-
-			if (level == LAST_INSTANCE) {
-				int total = 0;
-				try {
-					ioNgSerializer_.read(total, s + "/Size");
-				} catch (H5::Exception&) {
-					ioNgSerializer_.read(x, s);
-					return 0;
-				}
-
-				if (total <= 0)
-					throw RuntimeError("Error reading last instance of " + s + "\n");
-
-				ioNgSerializer_.read(x, s + "/" + ttos(--total));
-				return 0;
-			}
-
-			ioNgSerializer_.read(x, s);
-			return 0;
+			ioNgSerializer_.read(x, s + "/" + ttos(--total));
 		}
 
 		template<typename T>
@@ -369,68 +326,11 @@ public:
 			what.read(name, ioNgSerializer_);
 		}
 
-		template<typename X>
-		std::pair<String,SizeType> readKnownSize(X &x,
-		                                         String const &s,
-		                                         LongIntegerType level=0)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
-
-		std::pair<String,SizeType> advance(String,
-		                                   LongIntegerType = 0,
-		                                   bool = false)
-		{
-			//std::cerr<<"IoNg: ignoring call to advance()\n";
-			return std::pair<String,SizeType>("IoNg?", 0);
-		}
-
-		void readFullLine(String& temp)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
-
-		LongSizeType advanceToLine(LongSizeType line)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
-
-		SizeType count(const String& s)
-		{
-			std::cerr<<"IoNg: ignoring call to count("<<s<<")\n";
-			return 1;
-		}
-
-		template<typename X,template<typename> class SomeType>
-		void readSparseVector(SomeType<X> &x,
-		                      String const &s,
-		                      LongIntegerType level=0)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
-
-		void rewind()
-		{
-			std::cerr<<"IoNg: ignoring call to rewind()\n";
-		}
-
-		void move(int x)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
-
-		bool eof() const { throw RuntimeError("IoNg:: not implemented\n"); }
-
-		template<typename T>
-		friend void operator>>(In& io, T& t)
-		{ throw RuntimeError("IoNg:: not implemented\n"); }
-
 	private:
 
 		In(const In&);
 
 		In& operator=(const In&);
-
-		template<typename T>
-		void internalRead(void* ptr, String label, H5::DataSet& dataset) const
-		{
-			H5T_class_t typeClass = dataset.getTypeClass();
-			if (typeClass != typeToH5<T>())
-				throw RuntimeError("Reading " + label + " has incorrect type\n");
-			// H5::FloatType ft = dataset.getFloatType(); // <-- check correct subtype FIXME
-
-			dataset.read(ptr, typeToH5<T>());
-		}
 
 		String filename_;
 		H5::H5File* hdf5File_;
