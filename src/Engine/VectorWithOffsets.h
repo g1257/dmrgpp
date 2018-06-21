@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include <cassert>
 #include "ProgramGlobals.h"
-#include "Io/IoSimple.h"
 #include <typeinfo>
 
 // FIXME: a more generic solution is needed instead of tying
@@ -401,70 +400,6 @@ public:
 		io.write(data_, label + "/data_");
 		io.write(offsets_, label + "/offsets_");
 		io.write(nzMsAndQns_, label + "/nzMsAndQns_");
-	}
-
-	void write(PsimagLite::IoSimple::Out& io,
-	          const PsimagLite::String& label) const
-	{
-		io.printline(label);
-		PsimagLite::String s="size="+ttos(size_);
-		io.printline(s);
-		io.write(offsets_,"offsets");
-		s = "nonzero="+ttos(nzMsAndQns_.size());
-		io.printline(s);
-
-		for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
-			SizeType j =  nzMsAndQns_[jj].first;
-			s="sector="+ttos(j);
-			io.printline(s);
-			if (j >= data_.size())
-				err("VectorWithOffsets: save\n");
-
-			s="qn="+ttos(j);
-			io.printline(s);
-
-			s = "data" + ttos(jj);
-			io.write(data_[j], s);
-			j = nzMsAndQns_[jj].second;
-		}
-	}
-
-	void read(PsimagLite::IoSimple::In& io,
-	          const PsimagLite::String& label,
-	          SizeType counter = 0)
-	{
-		PsimagLite::String msg("VectorWithOffsets:");
-		io.advance(label,counter);
-		int x = 0;
-		io.readline(x,"size=");
-		if (x<0)
-			err(msg + ":read(...): size<0\n");
-		size_ = x;
-		io.read(offsets_,"offsets");
-		data_.clear();
-		data_.resize(offsets_.size());
-		io.readline(x,"nonzero=");
-		if (x<0)
-			err(msg + ":read(...): nonzerosectors<0\n");
-		nzMsAndQns_.resize(x);
-		for (SizeType jj=0;jj<nzMsAndQns_.size();jj++) {
-			io.readline(x,"sector=");
-			if (x<0)
-				err(msg + ":read(...): sector<0\n");
-			if (static_cast<SizeType>(x)>=data_.size())
-				err(msg + ":read(...): sector too big\n");
-
-			int y = 0;
-			io.readline(y, "qn=");
-			if (y < 0)
-				err(msg + ":read(...): qn<0\n");
-			nzMsAndQns_[jj] = PairQnType(x, y);
-
-			PsimagLite::String s = "data" + ttos(jj);
-			io.read(data_[x], s);
-		}
-
-		setIndex2Sector();
 	}
 
 	// We don't have a partitioned basis because we don't

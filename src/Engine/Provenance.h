@@ -29,9 +29,6 @@ public:
 #ifdef USE_GSL
 		ctOpts += "GSL ";
 #endif
-#ifdef USE_IO_NG
-		ctOpts += "IO_NG ";
-#endif
 #ifdef USE_BOOST
 		ctOpts += "BOOST ";
 #endif

@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ProgressIndicator.h"
 #include "KroneckerDumper.h"
-#include "Io/IoSimple.h"
 
 namespace Dmrg {
 
@@ -132,17 +131,6 @@ public:
 		super_ = new SuperBlockType(io, prefix + "/" + nameSuper, 0, false, minimizeRead);
 		left_ = new BasisWithOperatorsType(io, prefix + "/" + nameLeft, 0, true);
 		right_ = new BasisWithOperatorsType(io, prefix + "/" + nameRight, 0, true);
-	}
-
-	LeftRightSuper(PsimagLite::IoSimple::In& io, bool isObserveCode)
-	    : progress_("LeftRightSuper"),
-	      left_(0),right_(0),super_(0),refCounter_(0)
-	{
-		// watch out: same order as save here:
-		bool minimizeRead = isObserveCode;
-		super_ = new SuperBlockType(io,"",0,false,minimizeRead);
-		left_ = new BasisWithOperatorsType(io,"",0,true);
-		right_ = new BasisWithOperatorsType(io,"",0,true);
 	}
 
 	LeftRightSuper(const PsimagLite::String& slabel,
@@ -250,17 +238,6 @@ public:
 		right_->write(io, IoOutputType::Serializer::NO_OVERWRITE, prefix, option);
 	}
 
-	void write(PsimagLite::IoSimple::Out& io,
-	           PsimagLite::String,
-	           SizeType option,
-	           SizeType numberOfSites) const
-	{
-		bool minimizeWrite = (super_->block().size() == numberOfSites);
-		super_->write(io, minimizeWrite);
-		left_->write(io, option);
-		right_->write(io, option);
-	}
-
 	const BasisWithOperatorsType& left()  const { return *left_; }
 
 	const BasisWithOperatorsType& right() const { return *right_; }
@@ -286,13 +263,6 @@ public:
 		if (refCounter_>0)
 			throw PsimagLite::RuntimeError("LeftRightSuper::right(...): not the owner\n");
 		*right_=right; // deep copy
-	}
-
-	void read(PsimagLite::IoSimple::In& io, PsimagLite::String)
-	{
-		super_->read(io, "");
-		left_->read(io);
-		right_->read(io);
 	}
 
 	template<typename IoInputType>

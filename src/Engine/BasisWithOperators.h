@@ -145,17 +145,10 @@ public:
 	                   SizeType counter,
 	                   bool isObserveCode)
 	    : BasisType(io, ss, counter),
-	      operators_(io, (io.ng()) ? ss + "/" : "", 0, this, isObserveCode)
+	      operators_(io, ss + "/", 0, this, isObserveCode)
 	{
-		PsimagLite::String prefix = (io.ng()) ? ss + "/" : "";
+		const PsimagLite::String prefix = ss + "/";
 		io.read(operatorsPerSite_, prefix + "OperatorPerSite");
-	}
-
-	void read(PsimagLite::IoSimple::In& io)
-	{
-		BasisType::read(io, ""); // parent loads
-		operators_.read(io, "");
-		io.read(operatorsPerSite_,"OperatorPerSite");
 	}
 
 	template<typename IoInputter>
@@ -375,31 +368,10 @@ public:
 	           PsimagLite::IsOutputLike<SomeIoType>::True, int>::Type = 0) const
 	{
 		BasisType::write(io, s, mode, false); // parent saves
-		if (option == BasisType::SAVE_ALL) {
+		if (option == BasisType::SAVE_ALL)
 			operators_.write(io, s, mode);
-		} else {
-			if (!io.ng()) operators_.saveEmpty(io,s);
-		}
 
 		io.write(operatorsPerSite_, s + "/OperatorPerSite", mode);
-	}
-
-	void write(PsimagLite::IoSimple::Out& io,
-	           const PsimagLite::String& s,
-	           SizeType option) const
-	{
-		BasisType::write(io,s,false); // parent saves
-		if (option == BasisType::SAVE_ALL)
-			operators_.write(io,s);
-		else
-			operators_.saveEmpty(io,s);
-		io.write(operatorsPerSite_, "OperatorPerSite");
-	}
-
-	void write(PsimagLite::IoSimple::Out& io,
-	           SizeType option) const
-	{
-		write(io, this->name(), option);
 	}
 
 	template<typename SomeOutputType>

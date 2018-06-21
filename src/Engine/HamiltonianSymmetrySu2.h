@@ -255,10 +255,8 @@ public:
 
 	void write(PsimagLite::IoSelector::Out& io, PsimagLite::String prefix) const
 	{
-#ifdef USE_IO_NG
 		io.createGroup(prefix + "SymmSu2");
 		prefix += "SymmSu2/";
-#endif
 
 		jmValues_.write(io, prefix);
 		io.write(flavors_, prefix + "su2flavors");

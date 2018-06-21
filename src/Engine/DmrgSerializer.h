@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Io/IoSelector.h"
 #include "FermionSign.h"
 #include "ProgramGlobals.h"
-#include "Io/IoSimple.h"
 
 namespace Dmrg {
 // Move also checkpointing from DmrgSolver to here (FIXME)
@@ -135,50 +134,6 @@ public:
 		io.read(transform_, prefix + "/transform");
 		transposeConjugate(transformC_,transform_);
 		io.read(direction_, prefix + "/direction");
-	}
-
-	// legacy IoSimple ctor:
-	DmrgSerializer(typename PsimagLite::IoSimple::In& io,
-	               bool bogus,
-	               bool isObserveCode)
-	    : fS_(io,bogus),
-	      fE_(io,bogus),
-	      lrs_(io, isObserveCode)
-	{
-		if (bogus) return;
-		PsimagLite::String s = "WAVEFUNCTION_sites=";
-		wavefunction_.read(io,s);
-		s = "TRANSFORM_sites=";
-		io.read(transform_, s);
-		transposeConjugate(transformC_,transform_);
-		s = "DIRECTION=";
-		io.readline(direction_,s);
-	}
-
-	// Save to disk everything needed to compute any observable
-	void write(PsimagLite::IoSimple::Out& io,
-	           SizeType option,
-	           SizeType numberOfSites) const
-	{
-		fS_.write(io);
-		fE_.write(io);
-		lrs_.write(io, "", option, numberOfSites);
-
-		// save wavefunction
-		PsimagLite::String label = "WAVEFUNCTION_sites=";
-		for (SizeType i=0;i<lrs_.super().block().size();i++) {
-			label += ttos(lrs_.super().block()[i])+",";
-		}
-
-		wavefunction_.write(io,label);
-
-		label = "TRANSFORM_sites=";
-		for (SizeType i=0;i<lrs_.left().block().size();i++) {
-			label += ttos(lrs_.left().block()[i])+",";
-		}
-
-		io.write(transform_, label);
-		io.write(direction_, "DIRECTION");
 	}
 
 	template<typename SomeIoOutType>

@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CHECKPOINT_H
 
 #include "Stack.h"
-#include "DiskStackSelector.h"
+#include "DiskStackNg.h"
 #include "ProgressIndicator.h"
 #include "ProgramGlobals.h"
 #include "Io/IoSelector.h"
@@ -121,16 +121,6 @@ public:
 	    parameters_(parameters),
 	    enabled_(parameters_.options.find("checkpoint")!=PsimagLite::String::npos ||
 	        parameters_.options.find("restart")!=PsimagLite::String::npos),
-    #ifndef USE_IO_NG
-	    systemDisk_(utils::pathPrepend(SYSTEM_STACK_STRING,parameters_.checkpoint.filename),
-	                utils::pathPrepend(SYSTEM_STACK_STRING,parameters_.filename),
-	                enabled_,
-	                isObserveCode),
-	    envDisk_(utils::pathPrepend(ENVIRON_STACK_STRING,parameters_.checkpoint.filename),
-	             utils::pathPrepend(ENVIRON_STACK_STRING,parameters_.filename),
-	             enabled_,
-	             isObserveCode),
-    #else
 	    systemDisk_(parameters_.checkpoint.filename,
 	                parameters_.filename,
 	                io,
@@ -143,7 +133,6 @@ public:
 	             "environ",
 	             enabled_,
 	             isObserveCode),
-    #endif
 	    progress_("Checkpoint"),
 	    energyFromFile_(0.0)
 	{
@@ -165,10 +154,8 @@ public:
 			PsimagLite::String label = parameters_.checkpoint.labelForEnergy;
 			label += "=";
 			ioIn2.readline(energyFromFile_,label,IoType::In::LAST_INSTANCE);
-			label = "OperatorPerSite";
-#ifdef USE_IO_NG
 			label = "CHKPOINTSYSTEM/" + label;
-#endif
+
 			VectorSizeType v;
 			ioIn2.rewind();
 			ioIn2.read(v,label);
@@ -209,15 +196,11 @@ public:
 		progress_.printline(msg,std::cout);
 		pS.write(io,
 		         "CHKPOINTSYSTEM",
-         #ifdef USE_IO_NG
 		         IoType::Out::Serializer::NO_OVERWRITE,
-         #endif
 		         BasisWithOperatorsType::SAVE_ALL);
 		pE.write(io,
 		         "CHKPOINTENVIRON",
-         #ifdef USE_IO_NG
 		         IoType::Out::Serializer::NO_OVERWRITE,
-         #endif
 		         BasisWithOperatorsType::SAVE_ALL);
 	}
 
@@ -243,8 +226,7 @@ public:
 		BasisWithOperatorsType pE1(ioTmp, "CHKPOINTENVIRON", 0, isObserveCode);
 		pE = pE1;
 		PsimagLite::IoSelector::In io(parameters_.checkpoint.filename);
-		psi.read(io, prefix, (io.ng()) ? PsimagLite::IoSimple::In::ONLY_INSTANCE :
-		                                 PsimagLite::IoSimple::In::LAST_INSTANCE);
+		psi.read(io, prefix, PsimagLite::IoNg::In::ONLY_INSTANCE);
 	}
 
 	void push(const BasisWithOperatorsType &pS,const BasisWithOperatorsType &pE)

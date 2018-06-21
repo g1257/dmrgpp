@@ -278,43 +278,6 @@ public:
 
 private:
 
-#ifndef USE_IO_NG
-	bool init(bool hasTimeEvolution,SizeType nf, SaveEnum saveOrNot)
-	{
-		// Not rewinding is done here
-		// Never rewind for performance reasons
-		SizeType counter=0;
-		while (true) {
-			if (nf > 0 && counter == nf) break;
-			if (verbose_)
-				std::cerr<<"ObserverHelper "<<dSerializerV_.size()<<"\n";
-			try {
-				DmrgSerializerType* dSerializer = new
-				        DmrgSerializerType(io_,false,true);
-				if (saveOrNot == SAVE_YES)
-					dSerializerV_.push_back(dSerializer);
-				else
-					delete dSerializer;
-				if (hasTimeEvolution) {
-					TimeSerializerType ts(io_, 0, "");
-					if (saveOrNot == SAVE_YES)
-						timeSerializerV_.push_back(ts);
-				}
-
-				counter++;
-			} catch (std::exception& e) {
-				std::cerr<<"CAUGHT: "<<e.what();
-				noMoreData_ = true;
-				std::cerr<<"Ignore prev. error, if any. It simply means there's ";
-				std::cerr<<"no more data\n";
-				break;
-			}
-		}
-
-		if (dSerializerV_.size()==0 && noMoreData_) return false;
-		return true;
-	}
-#else
 	bool init(bool hasTimeEvolution,
 	          SizeType nf,
 	          SaveEnum saveOrNot)
@@ -345,7 +308,6 @@ private:
 		noMoreData_ = true;
 		return (dSerializerV_.size() > 0);
 	}
-#endif
 
 	void integrityChecks()
 	{

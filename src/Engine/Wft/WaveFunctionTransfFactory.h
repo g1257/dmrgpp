@@ -362,25 +362,6 @@ public:
 		files.push_back(utils::pathPrepend(WFT_STRING,rootName));
 	}
 
-#ifndef USE_IO_NG
-	void write(PsimagLite::IoSelector::Out& ioMain) const
-	{
-		if (!isEnabled_) return;
-		if (!save_) return;
-		typename IoType::Out ioTmp(utils::pathPrepend(WFT_STRING, ioMain.filename()));
-		PsimagLite::String s="isEnabled="+ttos(isEnabled_);
-		ioTmp.printline(s);
-		s="stage="+ttos(wftOptions_.dir);
-		ioTmp.printline(s);
-		s="counter="+ttos(wftOptions_.counter);
-		ioTmp.printline(s);
-		ioTmp.printline("dmrgWaveStruct");
-
-		dmrgWaveStruct_.write(ioTmp, "");
-		ioTmp.write(wsStack_, "wsStack\n");
-		ioTmp.write(weStack_, "weStack\n");
-	}
-#else
 	void write(PsimagLite::IoSelector::Out& ioMain)
 	{
 		if (!isEnabled_) return;
@@ -393,7 +374,6 @@ public:
 		ioMain.write(wsStack_, label + "/wsStack");
 		ioMain.write(weStack_, label + "/weStack");
 	}
-#endif
 
 private:
 
@@ -402,17 +382,6 @@ private:
 		if (!isEnabled_)
 			throw PsimagLite::RuntimeError("WFT::read(...) called but wft is disabled\n");
 
-#ifndef USE_IO_NG
-		typename IoType::In io(utils::pathPrepend(WFT_STRING,filenameIn_));
-		io.readline(isEnabled_,"isEnabled=");
-		io.readline(wftOptions_.dir,"stage=");
-		io.readline(wftOptions_.counter,"counter=");
-		wftOptions_.firstCall = false;
-		io.advance("dmrgWaveStruct");
-		dmrgWaveStruct_.read(io);
-		io.read(wsStack_, "wsStack");
-		io.read(weStack_, "weStack");
-#else
 		PsimagLite::IoSelector::In ioMain(filenameIn_);
 		PsimagLite::String label = "Wft";
 		ioMain.read(isEnabled_, label + "/isEnabled");
@@ -421,7 +390,6 @@ private:
 		ioMain.read(wsStack_, label + "/wsStack");
 		ioMain.read(weStack_, label + "/weStack");
 		ioMain.close();
-#endif
 	}
 
 	void myRandomT(std::complex<RealType> &value) const

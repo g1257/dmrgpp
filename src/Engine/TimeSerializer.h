@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Io/IoSelector.h"
 #include "TypeToString.h"
-#include "Io/IoSimple.h"
 
 namespace Dmrg {
 
@@ -111,9 +110,8 @@ public:
 	               PsimagLite::IoSelector::In::LongIntegerType lastInstance,
 	               PsimagLite::String prefix)
 	{
-#ifdef USE_IO_NG
 		SizeType counter = 0;
-		if (lastInstance == PsimagLite::IoSimple::In::LAST_INSTANCE) {
+		if (lastInstance == PsimagLite::IoNg::In::LAST_INSTANCE) {
 			io.read(counter, prefix + "/Size");
 			if (counter == 0) err(prefix + "/Size=0 is a FATAL error\n");
 			--counter;
@@ -121,9 +119,7 @@ public:
 		}
 
 		prefix += "/TimeSerializer/";
-#else
-		prefix = "";
-#endif
+
 		RealType x=0;
 		PsimagLite::String s = prefix + "Time=";
 		if (lastInstance) io.readline(x, s, lastInstance);
@@ -157,13 +153,9 @@ public:
 
 	void write(PsimagLite::IoSelector::Out& io, PsimagLite::String prefix) const
 	{
-#ifdef USE_IO_NG
 		prefix += "/TimeSerializer";
 		io.createGroup(prefix);
 		prefix += "/";
-#else
-		prefix = "";
-#endif
 
 		io.write(currentTime_, prefix + "Time");
 		io.write(site_, prefix + "TargetCentralSite");

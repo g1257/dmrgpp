@@ -109,13 +109,6 @@ struct DmrgWaveStruct {
 		return ret;
 	}
 
-	void read(PsimagLite::IoSimple::In& io)
-	{
-		io.read(ws, "Ws");
-		io.read(we, "We");
-		lrs.read(io, "");
-	}
-
 	template<typename IoInputType>
 	void read(IoInputType& io,
 	          PsimagLite::String prefix,
@@ -125,14 +118,6 @@ struct DmrgWaveStruct {
 		io.read(ws, prefix + "/Ws");
 		io.read(we, prefix + "/We");
 		lrs.read(io, prefix);
-	}
-
-	void write(PsimagLite::IoSimple::Out& io,
-	           PsimagLite::String) const
-	{
-		io.write(ws, "Ws");
-		io.write(we, "We");
-		lrs.write(io, "", LeftRightSuperType::SAVE_ALL, false);
 	}
 
 	template<typename IoOutputType>

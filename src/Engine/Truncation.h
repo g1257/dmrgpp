@@ -454,19 +454,10 @@ private:
 		return discWeight;
 	}
 
-	void dumpEigs(const VectorRealType& eigs) const
+	void dumpEigs(const VectorRealType&) const
 	{
 		if (parameters_.fileForDensityMatrixEigs=="") return;
-#ifndef USE_IO_NG
-		static SizeType counter = 0;
-		PsimagLite::String file(parameters_.fileForDensityMatrixEigs);
-		file += ttos(counter);
-		PsimagLite::IoSimple::Out io(file);
-		io<<eigs;
-		counter++;
-#else
-		std::cerr<<__FILE__<<" dumpEigs feature not implemented with IoNg\n";
-#endif
+		err("dumpEigs feature not implemented\n");
 	}
 
 	ReflectionSymmetryType& reflectionOperator_;

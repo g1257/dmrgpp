@@ -130,9 +130,9 @@ public:
 	      bool minimizeRead = false)
 	    : dmrgTransformed_(false), name_(ss), progress_(ss)
 	{
-		if (io.ng()) correctNameIfNeeded();
+		correctNameIfNeeded();
 		io.advance("NAME="+ss,counter);
-		PsimagLite::String prefix = (io.ng()) ? ss + "/" : "";
+		PsimagLite::String prefix =  ss + "/";
 		loadInternal(io, prefix, minimizeRead);
 	}
 
@@ -143,7 +143,7 @@ public:
 		PsimagLite::String nn="NAME=";
 		std::pair<PsimagLite::String,SizeType> sc = io.advance(nn);
 		name_ = sc.first.substr(nn.size(),sc.first.size());
-		loadInternal(io, (io.ng()) ? prefix : "", false);
+		loadInternal(io, prefix, false);
 	}
 
 	//! Returns the name of this basis
@@ -477,29 +477,6 @@ public:
 	}
 
 	//! saves this basis to disk
-	void write(PsimagLite::IoSimple::Out& io,
-	           const PsimagLite::String& ss,
-	           bool minimizeWrite) const
-	{
-		io.printline("NAME="+ss);
-		PsimagLite::String s="useSu2Symmetry="+ttos(useSu2Symmetry_);
-		io.printline(s);
-		io.write(block_,"BLOCK");
-
-		if (!minimizeWrite) {
-			io.write(electrons_,"ELECTRONS");
-			io.write(signsOld_,"SignsOld");
-		}
-
-		io.write(partition_,"PARTITION");
-		io.write(permInverse_,"PERMUTATIONINVERSE");
-		io.write(qns_,"QNShrink");
-
-		if (useSu2Symmetry_) symmSu2_.write(io, "");
-		else symmLocal_.write(io, "");
-	}
-
-	//! saves this basis to disk
 	template<typename SomeIoType>
 	void write(SomeIoType& io,
 	           const PsimagLite::String& ss,
@@ -522,12 +499,6 @@ public:
 
 		if (useSu2Symmetry_) symmSu2_.write(io, label);
 		else symmLocal_.write(io, label);
-	}
-
-	void write(PsimagLite::IoSimple::Out& io,
-	           bool minimizeWrite) const
-	{
-		write(io, name_, minimizeWrite);
 	}
 
 	//! saves this basis to disk
@@ -610,14 +581,8 @@ private:
 	                  PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
 		useSu2Symmetry_=false;
-#ifndef USE_IO_NG
-		int x=0;
-		io.readline(x, prefix + "useSu2Symmetry=");
-		if (x>0) useSu2Symmetry_=true;
-#else
 		prefix += "/";
 		io.read(useSu2Symmetry_, prefix + "useSu2Symmetry");
-#endif
 		io.read(block_, prefix + "BLOCK");
 
 		if (!minimizeRead) {

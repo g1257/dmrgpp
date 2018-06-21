@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include <stdexcept>
 #include "PackIndices.h"
-#include "Io/IoSimple.h"
 
 namespace Dmrg {
 
@@ -131,21 +130,10 @@ public:
 		io.read(signs_, prefix);
 	}
 
-	FermionSign(PsimagLite::IoSimple::In& io, bool bogus)
-	{
-		if (bogus) return;
-		io.read(signs_,"FERMIONICSIGN");
-	}
-
 	int operator()(SizeType i,int f) const
 	{
 		assert(i<signs_.size());
 		return (signs_[i]) ? f : 1;
-	}
-
-	void write(PsimagLite::IoSimple::Out& io) const
-	{
-		io.write(signs_,"FERMIONICSIGN");
 	}
 
 	template<typename IoOutputter>

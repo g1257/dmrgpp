@@ -228,9 +228,6 @@ public:
 	static PsimagLite::String buildPrefix(PsimagLite::IoSelector::Out& io,
 	                                      SizeType counter)
 	{
-#ifndef USE_IO_NG
-		return "";
-#else
 		PsimagLite::String prefix("TargetingCommon");
 		typedef PsimagLite::IoSelector::Out::Serializer SerializerType;
 		if (counter == 0) io.createGroup(prefix);
@@ -244,7 +241,6 @@ public:
 
 		io.createGroup(prefix);
 		return prefix;
-#endif
 	}
 
 protected:

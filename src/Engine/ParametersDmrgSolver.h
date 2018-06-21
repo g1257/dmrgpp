@@ -506,11 +506,8 @@ private:
 	{
 		PsimagLite::IoSelector::In io(filename2);
 		PsimagLite::String optionsOld;
-#ifndef USE_IO_NG
-		io.readline(optionsOld,"parameters.options");
-#else
 		io.readline(optionsOld,"PARAMETERS/options");
-#endif
+
 		bool bOld = (optionsOld.find("twositedmrg")!=PsimagLite::String::npos);
 		bool b = (options.find("twositedmrg")!=PsimagLite::String::npos);
 		bool doNotCheck = (options.find("doNotCheckTwoSiteDmrg") != PsimagLite::String::npos);
@@ -534,9 +531,6 @@ private:
 
 	PsimagLite::String filenameFromRootname(PsimagLite::String f) const
 	{
-#ifndef USE_IO_NG
-		return f;
-#endif
 		size_t findIndex = f.find(".txt");
 		if (findIndex != PsimagLite::String::npos)
 			f.replace(findIndex, PsimagLite::String(".txt").length(), ".hd5");

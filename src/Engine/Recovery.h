@@ -130,27 +130,8 @@ public:
 	{
 		if (checkpoint_.parameters().recoverySave == "0")
 			return;
-#ifndef USE_IO_NG
-		PsimagLite::String prefix("Recovery");
-		prefix += (flag_m_) ? "1" : "0";
-		PsimagLite::String rootName(prefix + checkpoint_.parameters().filename);
-		typename IoType::Out ioOut(rootName);
-		ioOut<<checkpoint_.parameters();
-		checkpoint_.write(pS_,pE_,ioOut);
-		psi.write(vsites, ioOut, "");
-		PsimagLite::OstringStream msg;
-		msg<<"LastLoopSign="<<lastSign<<"\n";
-		ioOut<<msg.str();
-		files_.push_back(rootName);
 
-		saveStacksForRecovery(rootName,isObserveCode);
-
-		wft_.write(ioOut);
-		wft_.appendFileList(files_,rootName);
-		flag_m_ = !flag_m_;
-#else
-		err("Recovery not yet supported with IoNg\n");
-#endif
+		err("Recovery not yet supported\n");
 	}
 
 private:

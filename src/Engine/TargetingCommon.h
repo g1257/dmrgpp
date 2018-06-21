@@ -232,16 +232,8 @@ public:
 		msg<<"Saving state...";
 		progress_.printline(msg,std::cout);
 
-		if (io.ng())
-			io.write(block[0], prefix + "/TargetCentralSite");
-		else
-			io.write(block[0], "TargetCentralSite");
-
-		if (io.ng())
-			psi().write(io, prefix + "/PSI");
-		else
-			psi().write(io,"PSI");
-
+		io.write(block[0], prefix + "/TargetCentralSite");
+		psi().write(io, prefix + "/PSI");
 	}
 
 	void writeNGSTs(PsimagLite::IoSelector::Out& io,
@@ -269,8 +261,7 @@ public:
 	void read(IoInputType& io,
 	          PsimagLite::String prefix)
 	{
-		if (!io.ng()) prefix = "";
-		else prefix += "/";
+		prefix += "/";
 		applyOpExpression_.loadEnergy(io, "Energy=", IoType::In::LAST_INSTANCE);
 		applyOpExpression_.psi().read(io, prefix + "PSI");
 	}
@@ -280,8 +271,7 @@ public:
 	                    PsimagLite::String prefix,
 	                    PsimagLite::IoSelector::In::LongIntegerType lastInstance)
 	{
-		if (!io.ng()) return readLegacy<SomeSerializerType>(io);
-		else read(io, prefix);
+		read(io, prefix);
 
 		// restarting NGST --> NGST isn't supported yet FIXME TODO
 
@@ -297,37 +287,6 @@ public:
 //			targetVectors(i) = ts.vector(i);
 
 //		applyOpExpression_.setTime(ts.time());
-	}
-
-	template<typename SomeSerializerType>
-	void readLegacy(IoInputType& io)
-	{
-		assert(!io.ng());
-
-		PsimagLite::String loadInto = targetHelper_.model().params().checkpoint.into;
-		PsimagLite::String labelForPsi = targetHelper_.model().params().checkpoint.labelForPsi;
-
-		io.rewind();
-		applyOpExpression_.loadEnergy(io, "Energy=", IoType::In::LAST_INSTANCE);
-
-		if (loadInto == "All") {
-
-			applyOpExpression_.psi().read(io, labelForPsi);
-
-			setAllStagesTo(WFT_NOADVANCE);
-
-			SomeSerializerType ts(io, IoInputType::LAST_INSTANCE, "");
-			for (SizeType i=0;i<targetVectors().size();i++)
-				targetVectors(i) = ts.vector(i);
-
-			applyOpExpression_.setTime(ts.time());
-		} else {
-			setAllStagesTo(DISABLED);
-			io.rewind();
-			int site = 0;
-			io.readline(site, "TargetCentralSite=");
-			applyOpExpression_.psi().loadOneSector(io, labelForPsi);
-		}
 	}
 
 	bool allStages(SizeType x) const

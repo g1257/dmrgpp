@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define VECTOR_WITH_OFFSET_H
 #include "Vector.h"
 #include "ProgressIndicator.h"
-#include "Io/IoSimple.h"
 #include <typeinfo>
 
 namespace Dmrg {
@@ -229,47 +228,6 @@ public:
 		io.write(mAndq_, label + "/mAndq_");
 		if (size_ == 0) return;
 		io.write(data_, label + "/data_");
-	}
-
-	void write(PsimagLite::IoSimple::Out& io, const PsimagLite::String& label) const
-	{
-		io.printline(label);
-		PsimagLite::String s="size="+ttos(size_);
-		io.printline(s);
-		s="offset="+ttos(offset_);
-		io.printline(s);
-		s = "nonzero=1";
-		io.printline(s);
-		s="sector="+ttos(mAndq_.first);
-		io.printline(s);
-		s="qn="+ttos(mAndq_.second);
-		io.printline(s);
-		io.write(data_,"data");
-	}
-
-	void read(PsimagLite::IoSimple::In& io,
-	          const PsimagLite::String& label,
-	          SizeType counter = 0)
-	{
-		io.advance(label,counter);
-		int x = 0;
-		io.readline(x,"size=");
-		if (x<0)
-			throw PsimagLite::RuntimeError("VectorWithOffset::read(...): size<0\n");
-		size_ = x;
-		io.readline(x,"offset=");
-		if (x<0)
-			throw PsimagLite::RuntimeError("VectorWithOffset::read(...): offset<0\n");
-		offset_ = x;
-		io.readline(x,"sector=");
-		if (x<0)
-			throw PsimagLite::RuntimeError("VectorWithOffset::read(...): m<0\n");
-		int y = 0;
-		io.readline(y,"qn=");
-		if (y < 0)
-			throw PsimagLite::RuntimeError("VectorWithOffset::read(...): qn<0\n");
-		mAndq_ = PairQnType(x, y);
-		io.read(data_,"data");
 	}
 
 	template<typename IoInputter>

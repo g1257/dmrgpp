@@ -207,9 +207,7 @@ public:
 		PsimagLite::PsiBase64::Encode base64encode(ioIn.data());
 		ioOut_.write(base64encode, "InputBase64Encoded");
 		ioOut_.write(parameters_, "PARAMETERS");
-#ifndef USE_IO_NG
-		ioOut_.write(model, "Model");
-#endif
+
 		if (parameters_.options.find("verbose")!=PsimagLite::String::npos)
 			verbose_=true;
 	}
@@ -483,9 +481,8 @@ private:
 
 		checkpoint_.write(pS,pE,ioOut_);
 
-#ifdef USE_IO_NG
 		ioOut_.createGroup("FinalPsi");
-#endif
+
 		psi.write(sitesIndices_[stepCurrent_],
 		          ioOut_,
 		          ioOut_.ng() ? "FinalPsi" : "");
@@ -631,17 +628,12 @@ private:
 		SizeType saveOption2 = (saveOption & 4) ? SAVE_ALL : SAVE_PARTIAL;
 		SizeType numberOfSites = model_.geometry().numberOfSites();
 
-#ifndef USE_IO_NG
-		ds.write(ioOut_,saveOption2,numberOfSites);
-		target.write(sitesIndices_[stepCurrent_], ioOut_, "");
-#else
 		static SizeType counter = 0;
 		PsimagLite::String prefix("Serializer");
 		ds.write(ioOut_, prefix, saveOption2, numberOfSites, counter);
 		PsimagLite::String prefixForTarget = TargetingType::buildPrefix(ioOut_, counter);
 		target.write(sitesIndices_[stepCurrent_], ioOut_, prefixForTarget);
 		++counter;
-#endif
 	}
 
 	bool finalStep(int stepLength,int stepFinal)

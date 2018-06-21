@@ -245,7 +245,8 @@ public:
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
-		if (io.ng()) prefix += "/";
+		prefix += "/";
+
 		if (!useSu2Symmetry_) {
 			io.read(operators_, prefix + "Operators");
 		} else {
@@ -448,14 +449,6 @@ public:
 		if (!useSu2Symmetry_) io.write(operators_,s + "/Operators");
 		else reducedOpImpl_.write(io,s);
 		io.write(hamiltonian_, s + "/Hamiltonian");
-	}
-
-	void write(PsimagLite::IoSimple::Out& io,
-	           const PsimagLite::String& s) const
-	{
-		if (!useSu2Symmetry_) io.write(operators_,"Operators");
-		else reducedOpImpl_.write(io,s);
-		io.write(hamiltonian_, "Hamiltonian");
 	}
 
 	template<typename IoOutputter>

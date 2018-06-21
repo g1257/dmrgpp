@@ -257,16 +257,9 @@ public:
 		                      site,
 		                      this->common().targetVectors(),
 		                      marker);
-#ifndef USE_IO_NG
-		ts.write(io, "");
-		this->common().psi().write(io,"PSI");
 
-		// Does anyone read these?
-		io.write(tvEnergy_, "TargetVectorEnergy");
-#else
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, block, prefix);
-#endif
 	}
 
 

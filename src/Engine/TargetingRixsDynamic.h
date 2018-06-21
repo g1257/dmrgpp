@@ -226,18 +226,15 @@ public:
 	          PsimagLite::String prefix,
 	          PsimagLite::IoSelector::In::LongIntegerType)
 	{
-		if (io.ng()) this->common().read(io, prefix);
+		this->common().read(io, prefix);
 
-		TimeSerializerType ts(io, PsimagLite::IoSimple::In::ONLY_INSTANCE, prefix);
+		TimeSerializerType ts(io, PsimagLite::IoNg::In::ONLY_INSTANCE, prefix);
 		SizeType n = ts.numberOfVectors();
 		if (n != 6)
 			err("TargetingRixsDynamic: number of TVs must be 6\n");
 
-		for (SizeType site = 0; site < 6; ++site) {
+		for (SizeType site = 0; site < 6; ++site)
 			this->common().targetVectors(site) = ts.vector(site);
-		}
-
-		if (!io.ng()) this->common().template readLegacy<TimeSerializerType>(io);
 	}
 
 private:
