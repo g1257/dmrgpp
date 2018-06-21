@@ -1,0 +1,35 @@
+TotalNumberOfSites=4
+NumberOfTerms=1
+DegreesOfFreedom=3
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 3 3
+-0.5 0.0 0.0
+0.0 -0.5 0.0
+0.0 0.0 -0.5
+Model=FeAsBasedSc
+FeAsMode=INT_PAPER33
+Orbitals=3
+hubbardU 5 20.0 7.5 -10.0 -5.0 -10.0
+potentialV 24
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+SpinOrbit 4 9
+(0,0) (0,0) (0,0) (0,0) (0,0) (0,-0.5) (0,0) (0,0.5) (0,0)
+(0,0) (0,-0.5) (0.5,0) (0,0.5) (0,0) (0,0) (-0.5,0) (0,0) (0,0)
+(0,0) (0,-0.5) (-0.5,0) (0,0.5) (0,0) (0,0) (0.5,0) (0,0) (0,0)
+(0,0) (0,0) (0,0) (0,0) (0,0) (0,0.5) (0,0) (0,-0.5) (0,0)
+TargetElectronsTotal=16
+TargetSzPlusConst=24
+JzSymmetry=1
+CorrectionA=0.005
+SolverOptions=CorrectionTargeting,useComplex,vectorwithoffsets,useSvd
+Version=version
+OutputFile=data5802.txt
+InfiniteLoopKeptStates=100
+FiniteLoops 3
+1 100 0 -2 100 0 2 100 1
+LanczosEps=1e-8
+LanczosSteps=400
+Threads=1
+#ci observe arguments="<gs|:../inputs/AThreeHalvesOneHalfDagger_AOneHalfOneHalf.txt|gs>"
