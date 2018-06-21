@@ -718,11 +718,14 @@ private:
 			cmCopy(i,x)=factor*(cm(i,x)+cm(i,y));
 			cmCopy(i,y)=factor*(cm(i,x)-cm(i,y));
 		}
-		RealType sf= -1;
-		cmCopy(x,x)=0.5*(cm(x,x)+cm(x,y)+cm(y,x)+cm(y,y));
-		cmCopy(x,y)=0.5*(cm(x,x)-sf*cm(x,y)+sf*cm(y,x)-cm(y,y));
-		cmCopy(y,x)=0.5*(cm(x,x)+sf*cm(x,y)-sf*cm(y,x)-cm(y,y));
-		cmCopy(y,y)=0.5*(cm(x,x)-cm(x,y)-cm(y,x)+cm(y,y));
+
+		const RealType sf= -1;
+		const RealType zeroPointFive = 0.5;
+
+		cmCopy(x,x) = zeroPointFive*(cm(x,x)+cm(x,y)+cm(y,x)+cm(y,y));
+		cmCopy(x,y) = zeroPointFive*(cm(x,x)-sf*cm(x,y)+sf*cm(y,x)-cm(y,y));
+		cmCopy(y,x) = zeroPointFive*(cm(x,x)+sf*cm(x,y)-sf*cm(y,x)-cm(y,y));
+		cmCopy(y,y) = zeroPointFive*(cm(x,x)-cm(x,y)-cm(y,x)+cm(y,y));
 
 		cm = cmCopy;
 	}
@@ -930,12 +933,10 @@ private:
 
 						SparseMatrixType c2 = cm[orb2+spin2*orbitals+i*dof].data;
 
-						tmp += 0.5*modelParameters_.spinOrbit((spin1*2)+spin2,(orb1*orbitals)+orb2)*factorForDiagonals*
-						        (multiplyTc(c1,c2));
-
-
-
-
+						tmp += static_cast<RealType>(0.5)*
+						        modelParameters_.spinOrbit(spin1*2+spin2,
+						                                   orb1*orbitals + orb2)*
+						        factorForDiagonals*multiplyTc(c1,c2);
 					}
 				}
 			}

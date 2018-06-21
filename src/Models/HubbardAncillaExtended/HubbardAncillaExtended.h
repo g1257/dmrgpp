@@ -480,10 +480,8 @@ private:
 		SizeType n = dn1.rows();
 		MatrixType szmatrix(n,n);
 
-
-		for (SizeType i = 0; i < n; ++i) {
-			szmatrix(i,i) = 0.5*(dn1(i,i) - dn2(i,i));
-		}
+		for (SizeType i = 0; i < n; ++i)
+			szmatrix(i,i) = static_cast<RealType>(0.5)*(dn1(i,i) - dn2(i,i));
 
 		OperatorType sz(SparseMatrixType(szmatrix),
 		                1,
