@@ -160,8 +160,7 @@ public:
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io,
-	          PsimagLite::String prefix,
-	          PsimagLite::IoSelector::In::LongIntegerType)
+	          PsimagLite::String prefix)
 	{
 		this->common().read(io, prefix);
 	}

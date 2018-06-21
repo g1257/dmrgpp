@@ -332,10 +332,9 @@ public:
 	}
 
 	void loadEnergy(PsimagLite::IoSelector::In& io,
-	                PsimagLite::String label,
-	                PsimagLite::IoSelector::In::LongIntegerType option)
+	                PsimagLite::String label)
 	{
-		io.readline(E0_, label, option);
+		io.readLastVectorEntry(E0_, label);
 	}
 
 	void multiplyTimeVector(SizeType i,RealType factor)

@@ -506,7 +506,7 @@ private:
 	{
 		PsimagLite::IoSelector::In io(filename2);
 		PsimagLite::String optionsOld;
-		io.readline(optionsOld,"PARAMETERS/options");
+		io.read(optionsOld,"PARAMETERS/options");
 
 		bool bOld = (optionsOld.find("twositedmrg")!=PsimagLite::String::npos);
 		bool b = (options.find("twositedmrg")!=PsimagLite::String::npos);

@@ -101,29 +101,28 @@ public:
 	    : currentBeta_(currentBeta),site_(site),targetVectors_(targetVectors)
 	{}
 
-	MettsSerializer(typename PsimagLite::IoSelector::In& io,SizeType lastInstance = 0)
+	MettsSerializer(typename PsimagLite::IoSelector::In& io)
 	{
-		RealType x=0;
-		PsimagLite::String s = "BETA=";
+		RealType x = 0;
+		PsimagLite::String s = "BETA";
 
-		if (lastInstance) io.readline(x,s,lastInstance);
-		else io.readline(x,s);
+		io.read(x, s);
 
 		if (x<0)
 			throw PsimagLite::RuntimeError("MettsSerializer:: time cannot be negative\n");
 
 		currentBeta_ = x;
 
-		s = "TargetCentralSite=";
-		int xi=0;
-		io.readline(xi,s);
+		s = "TargetCentralSite";
+		int xi = 0;
+		io.read(xi, s);
 		if (xi<0)
 			throw PsimagLite::RuntimeError("MettsSerializer:: site cannot be negative\n");
 
 		site_ = xi;
 
-		s = "TNUMBEROFVECTORS=";
-		io.readline(xi,s);
+		s = "TNUMBEROFVECTORS";
+		io.read(xi, s);
 		if (xi<=0)
 			throw PsimagLite::RuntimeError("MettsSerializer:: n. of vectors must be positive\n");
 

@@ -570,15 +570,6 @@ private:
 			pE = lrs_.right();
 		else
 			pS = lrs_.left();
-
-		if (!saveData_) return;
-		static SizeType counter = 0;
-		if (saveOption & 1) {
-			PsimagLite::OstringStream msg;
-			msg.precision(8);
-			msg<<"WAVEFUNCTION_ENERGY="<<energy_;
-			ioOut_.writeline(energy_, "WaveFunctionEnergy", msg, counter++);
-		}
 	}
 
 	void changeTruncateAndSerialize(MyBasisWithOperators& pS,
@@ -596,11 +587,6 @@ private:
 		FermionSignType fsE(eE);
 
 		truncate_(pS,pE,target,keptStates,direction);
-		PsimagLite::OstringStream msg2;
-		msg2<<"Error="<<truncate_.error();
-		static SizeType counter = 0;
-		if (saveData_)
-			ioOut_.writeline(truncate_.error(), "Error", msg2, counter++);
 
 		if (direction == ProgramGlobals::EXPAND_SYSTEM)
 			checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS, ProgramGlobals::SYSTEM);
@@ -690,11 +676,8 @@ private:
 	void printEnergy(RealType energy)
 	{
 		if (!saveData_) return;
-		PsimagLite::OstringStream msg;
-		msg.precision(8);
-		msg<<"Energy="<<energy;
 		static SizeType counter = 0;
-		ioOut_.writeline(energy, "Energy" , msg, counter++);
+		ioOut_.writeVectorEntry(energy, "Energy", counter++);
 	}
 
 	const BlockType& findRightBlock(const VectorBlockType& y,

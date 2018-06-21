@@ -293,13 +293,9 @@ public:
 		}
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io,
-	          PsimagLite::String prefix,
-	          PsimagLite::IoSelector::In::LongIntegerType instance)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
-		this->common().template readGSandNGSTs<TimeSerializerType>(io,
-		                                                           prefix,
-		                                                           instance);
+		this->common().template readGSandNGSTs<TimeSerializerType>(io, prefix);
 	}
 
 	void write(const VectorSizeType& block,

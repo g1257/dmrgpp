@@ -107,36 +107,26 @@ public:
 	{}
 
 	TimeSerializer(typename PsimagLite::IoSelector::In& io,
-	               PsimagLite::IoSelector::In::LongIntegerType lastInstance,
 	               PsimagLite::String prefix)
 	{
-		SizeType counter = 0;
-		if (lastInstance == PsimagLite::IoNg::In::LAST_INSTANCE) {
-			io.read(counter, prefix + "/Size");
-			if (counter == 0) err(prefix + "/Size=0 is a FATAL error\n");
-			--counter;
-			prefix += ("/" + ttos(counter) + "/");
-		}
-
 		prefix += "/TimeSerializer/";
 
-		RealType x=0;
-		PsimagLite::String s = prefix + "Time=";
-		if (lastInstance) io.readline(x, s, lastInstance);
-		else io.readline(x, s);
+		RealType x = 0;
+		PsimagLite::String s = prefix + "Time";
+		io.read(x, s);
 		if (x < 0)
 			err("TimeSerializer:: time cannot be negative\n");
 		currentTime_ = x;
 
-		s = prefix + "TargetCentralSite=";
+		s = prefix + "TargetCentralSite";
 		int xi = 0;
-		io.readline(xi, s);
+		io.read(xi, s);
 		if (xi < 0)
 			err("TimeSerializer:: site cannot be negative\n");
 		site_ = xi;
 
-		s = prefix + "TNUMBEROFVECTORS=";
-		io.readline(xi, s);
+		s = prefix + "TNUMBEROFVECTORS";
+		io.read(xi, s);
 		if (xi <= 0)
 			err("TimeSerializer:: n. of vectors must be positive\n");
 		targetVectors_.resize(xi);
@@ -145,8 +135,8 @@ public:
 			targetVectors_[i].read(io, s);
 		}
 
-		s = prefix + "MARKER=";
-		io.readline(xi,s);
+		s = prefix + "MARKER";
+		io.read(xi, s);
 		if (xi < 0) err("TimeSerializer:: marker must be positive\n");
 		marker_ = xi;
 	}

@@ -262,14 +262,12 @@ public:
 	          PsimagLite::String prefix)
 	{
 		prefix += "/";
-		applyOpExpression_.loadEnergy(io, "Energy=", IoType::In::LAST_INSTANCE);
+		applyOpExpression_.loadEnergy(io, "Energy");
 		applyOpExpression_.psi().read(io, prefix + "PSI");
 	}
 
 	template<typename SomeSerializerType>
-	void readGSandNGSTs(IoInputType& io,
-	                    PsimagLite::String prefix,
-	                    PsimagLite::IoSelector::In::LongIntegerType lastInstance)
+	void readGSandNGSTs(IoInputType& io, PsimagLite::String prefix)
 	{
 		read(io, prefix);
 

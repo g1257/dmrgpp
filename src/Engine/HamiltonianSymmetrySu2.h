@@ -246,9 +246,9 @@ public:
 		if (minimizeRead) return;
 		jmValues_.read(io, label);
 		io.read(flavors_, label + "su2flavors");
-		io.readline(flavorsMax_, label + "su2FlavorsMax=");
-		io.readline(electronsMax_, label + "su2ElectronsMax=");
-		io.readline(jMax_, label + "su2JMax=");
+		io.read(flavorsMax_, label + "su2FlavorsMax");
+		io.read(electronsMax_, label + "su2ElectronsMax");
+		io.read(jMax_, label + "su2JMax");
 		io.read(statesReduced_, label + "su2StatesReduced");
 		io.read(jvals_, label + "su2Jvals");
 	}

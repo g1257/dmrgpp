@@ -225,12 +225,10 @@ public:
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io,
-	          PsimagLite::String prefix,
-	          PsimagLite::IoSelector::In::LongIntegerType lastInstance)
+	          PsimagLite::String prefix)
 	{
 		this->common().template readGSandNGSTs<TimeSerializerType>(io,
-		                                                           prefix,
-		                                                           lastInstance);
+		                                                           prefix);
 	}
 
 private:

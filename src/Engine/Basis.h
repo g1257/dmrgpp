@@ -131,7 +131,6 @@ public:
 	    : dmrgTransformed_(false), name_(ss), progress_(ss)
 	{
 		correctNameIfNeeded();
-		io.advance("NAME="+ss,counter);
 		PsimagLite::String prefix =  ss + "/";
 		loadInternal(io, prefix, minimizeRead);
 	}
@@ -140,9 +139,7 @@ public:
 	template<typename IoInputter>
 	void read(IoInputter& io, PsimagLite::String prefix)
 	{
-		PsimagLite::String nn="NAME=";
-		std::pair<PsimagLite::String,SizeType> sc = io.advance(nn);
-		name_ = sc.first.substr(nn.size(),sc.first.size());
+		name_ = "";
 		loadInternal(io, prefix, false);
 	}
 

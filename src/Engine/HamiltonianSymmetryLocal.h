@@ -125,15 +125,12 @@ public:
 	}
 
 	template<typename IoInputter>
-	void read(IoInputter& io,
-	          PsimagLite::String label,
+	void read(IoInputter&,
+	          PsimagLite::String,
 	          bool,
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
-	{
-		SizeType tmp = 0;
-		io.readline(tmp, label + "FACTORSSIZE=");
-	}
+	{}
 
 	void write(PsimagLite::IoSelector::Out& io, PsimagLite::String label) const
 	{

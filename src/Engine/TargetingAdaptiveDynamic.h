@@ -213,12 +213,9 @@ public:
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io,
-	          PsimagLite::String prefix,
-	          PsimagLite::IoSelector::In::LongIntegerType instance)
+	          PsimagLite::String prefix)
 	{
-		this->common().template readGSandNGSTs<TimeSerializerType>(io,
-		                                                           prefix,
-		                                                           instance);
+		this->common().template readGSandNGSTs<TimeSerializerType>(io, prefix);
 
 		lastLanczosVector_ = this->common().targetVectors().size()-1;
 		dynCounter_ = 13;

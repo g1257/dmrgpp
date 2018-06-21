@@ -181,8 +181,7 @@ public:
 	}
 
 	virtual void read(typename TargetingCommonType::IoInputType&,
-	                  PsimagLite::String,
-	                  PsimagLite::IoSelector::In::LongIntegerType) = 0;
+	                  PsimagLite::String) = 0;
 
 	virtual void write(const typename PsimagLite::Vector<SizeType>::Type&,
 	                   PsimagLite::IoSelector::Out&,

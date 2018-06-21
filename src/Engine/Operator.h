@@ -365,22 +365,6 @@ struct Operator {
 
 private:
 
-	PsimagLite::String readLabel(PsimagLite::IoSelector::In& io,
-	                             PsimagLite::String label)
-	{
-		PsimagLite::String s;
-		io.readline(s,label);
-		return s;
-	}
-
-	PsimagLite::String readLabel(PsimagLite::InputNg<InputCheck>::Readable& io,
-	                             PsimagLite::String label)
-	{
-		PsimagLite::String s;
-		io.readline(s,label,true,true);
-		return s;
-	}
-
 	void checkNotZeroMatrix(const DenseMatrixType& m) const
 	{
 		RealType norma = norm2(m);

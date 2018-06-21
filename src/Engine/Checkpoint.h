@@ -152,12 +152,10 @@ public:
 		{
 			IoType::In ioIn2(parameters_.checkpoint.filename);
 			PsimagLite::String label = parameters_.checkpoint.labelForEnergy;
-			label += "=";
-			ioIn2.readline(energyFromFile_,label,IoType::In::LAST_INSTANCE);
+			ioIn2.readLastVectorEntry(energyFromFile_, label);
 			label = "CHKPOINTSYSTEM/" + label;
 
 			VectorSizeType v;
-			ioIn2.rewind();
 			ioIn2.read(v,label);
 			if (v.size() == 0) return;
 
@@ -212,21 +210,14 @@ public:
 	          PsimagLite::String prefix)
 	{
 		typename IoType::In ioTmp(parameters_.checkpoint.filename);
-		SizeType loop = ioTmp.count("NAME=CHKPOINTSYSTEM");
 
-		if (loop < 1) {
-			std::cerr<<"There are no resumable loops in file ";
-			std::cerr<<parameters_.checkpoint.filename<<"\n";
-			err("Checkpoint::read(...)\n");
-		}
-
-		BasisWithOperatorsType pS1(ioTmp, "CHKPOINTSYSTEM", --loop, isObserveCode);
+		BasisWithOperatorsType pS1(ioTmp, "CHKPOINTSYSTEM", 0, isObserveCode);
 
 		pS = pS1;
 		BasisWithOperatorsType pE1(ioTmp, "CHKPOINTENVIRON", 0, isObserveCode);
 		pE = pE1;
 		PsimagLite::IoSelector::In io(parameters_.checkpoint.filename);
-		psi.read(io, prefix, PsimagLite::IoNg::In::ONLY_INSTANCE);
+		psi.read(io, prefix);
 	}
 
 	void push(const BasisWithOperatorsType &pS,const BasisWithOperatorsType &pE)
@@ -298,10 +289,8 @@ private:
 
 		if (enabled_) {
 			PsimagLite::IoSelector::In io1(parameters_.checkpoint.filename);
-			PsimagLite::String prefix = (io1.ng()) ? "FinalPsi/" : "";
-			io1.readline(lastSite, prefix + "TargetCentralSite=",
-			             PsimagLite::IoSelector::In::LAST_INSTANCE);
-			io1.readline(prevDeltaSign,"LastLoopSign=");
+			io1.read(lastSite, "FinalPsi/TargetCentralSite");
+			io1.read(prevDeltaSign, "LastLoopSign");
 			checkPoint = true;
 		}
 

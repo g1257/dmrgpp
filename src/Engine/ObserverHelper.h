@@ -297,7 +297,7 @@ private:
 			else
 				delete dSerializer;
 			if (hasTimeEvolution) {
-				TimeSerializerType ts(io_, 0, ""); // FIXME
+				TimeSerializerType ts(io_, ""); // FIXME
 				if (saveOrNot == SAVE_YES)
 					timeSerializerV_.push_back(ts);
 			}
