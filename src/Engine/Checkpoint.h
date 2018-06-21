@@ -151,12 +151,11 @@ public:
 
 		{
 			IoType::In ioIn2(parameters_.checkpoint.filename);
-			PsimagLite::String label = parameters_.checkpoint.labelForEnergy;
-			ioIn2.readLastVectorEntry(energyFromFile_, label);
-			label = "CHKPOINTSYSTEM/" + label;
+			ioIn2.readLastVectorEntry(energyFromFile_,
+			                          parameters_.checkpoint.labelForEnergy);
 
 			VectorSizeType v;
-			ioIn2.read(v,label);
+			ioIn2.read(v, "CHKPOINTSYSTEM/OperatorPerSite");
 			if (v.size() == 0) return;
 
 			SizeType operatorsPerSite = v[0];
