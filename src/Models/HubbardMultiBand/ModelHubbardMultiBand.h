@@ -536,6 +536,7 @@ private:
 	                      RealType factorForDiagonals,
 	                      SizeType actualSite) const
 	{
+		const RealType zero = 0.0;
 		SizeType orbitals = modelParameters_.orbitals;
 		SizeType dof = 2*orbitals;
 		SparseMatrixType tmpMatrix;
@@ -546,7 +547,7 @@ private:
 
 			for (SizeType orb2 = 0; orb2 < orbitals; ++orb2) {
 				ComplexOrRealType val = getOnSiteHopping(actualSite, orb1, orb2);
-				if (val == 0.0) continue;
+				if (val == zero) continue;
 
 				const SparseMatrixType& m2up = cm[orb2 + SPIN_UP*orbitals + i*dof].data;
 				SparseMatrixType m2t;
@@ -687,7 +688,7 @@ private:
 		SparseMatrixType m2m3;
 		SparseMatrixType m2m3t;
 		SparseMatrixType term;
-
+		const RealType zeroPointFive = 0.5;
 		SizeType orbitals = modelParameters_.orbitals;
 		for (SizeType k0 = 0; k0 < orbitals; ++k0) {
 			const SparseMatrixType& m0 = cm[k0 + SPIN_DOWN*orbitals].data;
@@ -702,7 +703,7 @@ private:
 					multiply(m2m3, m3, m2);
 					transposeConjugate(m2m3t, m2m3);
 					multiply(term, m2m3t, m0m1);
-					qx_ += 0.5*term;
+					qx_ += zeroPointFive*term;
 				}
 			}
 		}
