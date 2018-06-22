@@ -88,35 +88,36 @@ class DiskStack {
 
 public:
 
-	DiskStack(const PsimagLite::String name1,
-	          const PsimagLite::String name2,
-	          IoOutType& ioOut,
+	DiskStack(const PsimagLite::String filename,
+	          bool initialize,
 	          PsimagLite::String label,
 	          bool hasLoad,
 	          bool isObserveCode)
-	    : name1_(name1),
-	      ioOut_(ioOut),
+	    : ioOut_(filename, PsimagLite::IoNg::ACC_RDW),
+	      ioIn_((hasLoad) ? new IoInType(filename) : 0),
 	      label_("DiskStack" + label),
 	      isObserveCode_(isObserveCode),
 	      total_(0),
 	      progress_("DiskStack"),
 	      dt_(0)
 	{
-		ioOut_.createGroup(label_);
-		ioOut_.write(total_, label_ + "/Size");
+		if (initialize) {
+			ioOut_.createGroup(label_);
+			ioOut_.write(total_, label_ + "/Size");
+		}
 
 		if (!hasLoad) return;
 
-		IoInType ioIn(name1);
-		ioIn.read(total_, label_ + "/Size");
-		ioIn.close();
+		ioIn_->read(total_, label_ + "/Size");
 		PsimagLite::OstringStream msg;
-		msg<<"Read from file " + name1 + " succeeded";
+		msg<<"Read from file " + filename + " succeeded";
 		progress_.printline(msg,std::cout);
 	}
 
 	~DiskStack()
 	{
+		delete ioIn_;
+		ioIn_ = 0;
 		delete dt_;
 		dt_ = 0;
 	}
@@ -140,8 +141,8 @@ public:
 		++total_;
 
 		ioOut_.write(total_,
-		             label_ + "/Size",
-		             IoOutType::Serializer::ALLOW_OVERWRITE);
+		              label_ + "/Size",
+		              IoOutType::Serializer::ALLOW_OVERWRITE);
 
 	}
 
@@ -153,33 +154,32 @@ public:
 		--total_;
 
 		ioOut_.write(total_,
-		             label_ + "/Size",
-		             IoOutType::Serializer::ALLOW_OVERWRITE);
+		              label_ + "/Size",
+		              IoOutType::Serializer::ALLOW_OVERWRITE);
 	}
 
 	const DataType& top() const
 	{
+		if (!ioIn_)
+			err("DiskStack::top() called with ioIn_ as nullptr\n");
+
 		assert(total_ > 0);
 		const SizeType dummy = 0;
 		delete dt_;
 		dt_ = 0;
-		IoInType ioIn(name1_);
-		dt_ = new DataType(ioIn,
+		dt_ = new DataType(*ioIn_,
 		                   label_ + "/" + ttos(total_ - 1),
 		                   dummy,
 		                   isObserveCode_);
-		ioIn.close();
 		return *dt_;
 	}
 
 	SizeType size() const { return total_; }
 
-	void finalize() {}
-
 private:
 
-	PsimagLite::String name1_;
-	IoOutType& ioOut_;
+	IoOutType ioOut_;
+	IoInType* ioIn_;
 	PsimagLite::String label_;
 	bool isObserveCode_;
 	int total_;

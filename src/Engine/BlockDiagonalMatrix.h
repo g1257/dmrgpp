@@ -132,15 +132,6 @@ public:
 			offsetsRows_[i] = offsetsCols_[i] = basis.partition(i);
 	}
 
-//	BlockDiagonalMatrix(IoInType& io,
-//	                    PsimagLite::String label,
-//	                    SizeType counter,
-//	                    bool)
-//	{
-//		io.advance("NAME="+label,counter);
-//		io>>(*this);
-//	}
-
 	void setTo(ComplexOrRealType value)
 	{
 		SizeType n = data_.size();

@@ -176,8 +176,8 @@ public:
 	      ioOut_(parameters_.filename),
 	      progress_("DmrgSolver"),
 	      stepCurrent_(0),
-	      checkpoint_(parameters_,ioIn,model,false,ioOut_),
-	      wft_(parameters_, ioOut_),
+	      checkpoint_(parameters_, ioIn, model, false),
+	      wft_(parameters_),
 	      reflectionOperator_(lrs_,
 	                          model_.hilbertSize(0),
 	                          parameters_.useReflectionSymmetry,
@@ -216,6 +216,7 @@ public:
 	{
 		appInfo_.finalize();
 		ioOut_.write(appInfo_, "ApplicationInfo");
+		ioOut_.close();
 
 		PsimagLite::OstringStream msg2;
 		msg2<<"Turning off the engine.";
@@ -474,19 +475,14 @@ private:
 
 			finiteStep(S,E,pS,pE,i,psi);
 			if (psi.end()) break;
-			recovery.write(psi,sitesIndices_[stepCurrent_],lastSign,false);
+			recovery.write(psi, sitesIndices_[stepCurrent_], lastSign, false, ioOut_);
 		}
 
 		if (!saveData_) return;
 
-		checkpoint_.write(pS,pE,ioOut_);
-
+		checkpoint_.write(pS, pE, ioOut_);
 		ioOut_.createGroup("FinalPsi");
-
-		psi.write(sitesIndices_[stepCurrent_],
-		          ioOut_,
-		          ioOut_.ng() ? "FinalPsi" : "");
-
+		psi.write(sitesIndices_[stepCurrent_], ioOut_, "FinalPsi");
 		ioOut_.write(lastSign, "LastLoopSign");
 	}
 

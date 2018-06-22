@@ -114,25 +114,13 @@ public:
 	Checkpoint(const ParametersType& parameters,
 	           InputValidatorType& ioIn,
 	           const ModelType& model,
-	           bool isObserveCode,
-	           PsimagLite::IoSelector::Out& io) :
+	           bool isObserveCode) :
 	    SYSTEM_STACK_STRING(ProgramGlobals::SYSTEM_STACK_STRING),
 	    ENVIRON_STACK_STRING(ProgramGlobals::ENVIRON_STACK_STRING),
 	    parameters_(parameters),
+	    isObserveCode_(isObserveCode),
 	    enabled_(parameters_.options.find("checkpoint")!=PsimagLite::String::npos ||
 	        parameters_.options.find("restart")!=PsimagLite::String::npos),
-	    systemDisk_(parameters_.checkpoint.filename,
-	                parameters_.filename,
-	                io,
-	                "system",
-	                enabled_,
-	                isObserveCode),
-	    envDisk_(parameters_.checkpoint.filename,
-	             parameters_.filename,
-	             io,
-	             "environ",
-	             enabled_,
-	             isObserveCode),
 	    progress_("Checkpoint"),
 	    energyFromFile_(0.0)
 	{
@@ -176,11 +164,27 @@ public:
 
 	~Checkpoint()
 	{
-		if (parameters_.options.find("noSaveStacks") == PsimagLite::String::npos) {
-			loadStacksMemoryToDisk();
-			systemDisk_.finalize();
-			envDisk_.finalize();
-		}
+		if (parameters_.options.find("noSaveStacks") != PsimagLite::String::npos)
+			return;
+
+		loadStacksMemoryToDisk();
+	}
+
+	void checkpoint()
+	{
+		// taken from dtor
+		//		PsimagLite::OstringStream msg;
+		//		msg<<"Writing sys. and env. stacks to disk...";
+		//		progress_.printline(msg,std::cout);
+		//		systemDiskCopy = systemDisk_;
+		//		systemStackCopy = systemStack_;
+		//		loadStack(systemDiskCopy, systemStackCopy);
+		//		systemDiskCopy.finalize();
+
+		//		envDiskCopy = envDisk_;
+		//		envStackCopy = envStack_;
+		//		loadStack(envDiskCopy, envStackCopy);
+		//		envDiskCopy.finalize();
 	}
 
 	// Not related to stacks
@@ -382,21 +386,43 @@ private:
 
 	void loadStacksDiskToMemory()
 	{
+		const bool initialize = false;
+		DiskStackType systemDisk(parameters_.checkpoint.filename,
+		                         initialize,
+		                         "system",
+		                         enabled_,
+		                         isObserveCode_);
+		DiskStackType envDisk(parameters_.checkpoint.filename,
+		                      initialize,
+		                      "environ",
+		                      enabled_,
+		                      isObserveCode_);
 		PsimagLite::OstringStream msg;
 		msg<<"Loading sys. and env. stacks from disk...";
 		progress_.printline(msg,std::cout);
 
-		loadStack(systemStack_,systemDisk_);
-		loadStack(envStack_,envDisk_);
+		loadStack(systemStack_, systemDisk);
+		loadStack(envStack_, envDisk);
 	}
 
 	void loadStacksMemoryToDisk()
 	{
+		const bool initialize = true;
+		DiskStackType systemDisk(parameters_.filename,
+		                         initialize,
+		                         "system",
+		                         enabled_,
+		                         isObserveCode_);
+		DiskStackType envDisk(parameters_.filename,
+		                      initialize,
+		                      "environ",
+		                      enabled_,
+		                      isObserveCode_);
 		PsimagLite::OstringStream msg;
 		msg<<"Writing sys. and env. stacks to disk...";
 		progress_.printline(msg,std::cout);
-		loadStack(systemDisk_,systemStack_);
-		loadStack(envDisk_,envStack_);
+		loadStack(systemDisk, systemStack_);
+		loadStack(envDisk, envStack_);
 	}
 
 	//! Move elsewhere
@@ -413,11 +439,10 @@ private:
 	}
 
 	const ParametersType& parameters_;
+	bool isObserveCode_;
 	bool enabled_;
 	MemoryStackType systemStack_;
 	MemoryStackType envStack_;
-	DiskStackType systemDisk_;
-	DiskStackType envDisk_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType energyFromFile_;
 }; // class Checkpoint

@@ -119,8 +119,7 @@ public:
 	typedef typename PsimagLite::Stack<BlockDiagonalMatrixType>::Type WftStackType;
 
 	template<typename SomeParametersType>
-	WaveFunctionTransfFactory(SomeParametersType& params,
-	                          PsimagLite::IoSelector::Out& ioOut)
+	WaveFunctionTransfFactory(SomeParametersType& params)
 	    : isEnabled_(!(params.options.find("nowft")!=PsimagLite::String::npos)),
 	      wftOptions_(ProgramGlobals::INFINITE,
 	                  params.options,
@@ -129,7 +128,7 @@ public:
 	                  params.denseSparseThreshold),
 	      progress_("WaveFunctionTransf"),
 	      filenameIn_(params.checkpoint.filename),
-	      ioOut_(ioOut),
+	      filenameOut_(params.filename),
 	      WFT_STRING(ProgramGlobals::WFT_STRING),
 	      dmrgWaveStruct_(),
 	      wftImpl_(0),
@@ -163,7 +162,8 @@ public:
 	~WaveFunctionTransfFactory()
 	{
 		if (!isEnabled_) return;
-		write(ioOut_);
+		IoType::Out ioOut(filenameOut_, IoType::ACC_RDW);
+		write(ioOut);
 		delete wftImpl_;
 	}
 
@@ -508,7 +508,7 @@ private:
 	WftOptionsType wftOptions_;
 	PsimagLite::ProgressIndicator progress_;
 	PsimagLite::String filenameIn_;
-	PsimagLite::IoSelector::Out& ioOut_;
+	PsimagLite::String filenameOut_;
 	const PsimagLite::String WFT_STRING;
 	DmrgWaveStructType dmrgWaveStruct_;
 	WftStackType wsStack_;

@@ -111,7 +111,7 @@ public:
 	      wft_(wft),
 	      pS_(pS),
 	      pE_(pE),
-	      flag_m_(false)
+	      counter_(0)
 	{}
 
 	~Recovery()
@@ -124,14 +124,32 @@ public:
 	}
 
 	void write(const TargetingType& psi,
-	          VectorSizeType vsites,
-	          int lastSign,
-	          bool isObserveCode) const
+	           const VectorSizeType& v,
+	           int lastSign,
+	           bool isObserveCode,
+	           typename IoType::Out& ioOutCurrent) const
 	{
 		if (checkpoint_.parameters().recoverySave == "0")
 			return;
 
-		err("Recovery not yet supported\n");
+//		PsimagLite::String prefix("Recovery");
+//		prefix += ttos(counter_++);
+//		PsimagLite::String rootName(prefix + checkpoint_.parameters().filename);
+//		files_.push_back(rootName);
+//		ioOutCurrent.copyInto(rootName);
+//		typename IoType::Out ioOut(rootName);
+
+//		// taken from end of finiteDmrgLoops
+//		checkpoint_.write(pS_, pE_, ioOut);
+//		ioOut.createGroup("FinalPsi");
+//		psi.write(v, ioOut, "FinalPsi");
+//		ioOut.write(lastSign, "LastLoopSign");
+
+//		// wft dtor
+//		wft_.write(ioOut);
+
+//		// checkpoint dtor
+//		saveStacksForRecovery(rootName,isObserveCode);
 	}
 
 private:
@@ -169,7 +187,7 @@ private:
 	const WaveFunctionTransfType& wft_;
 	const BasisWithOperatorsType& pS_;
 	const BasisWithOperatorsType& pE_;
-	mutable bool flag_m_;
+	mutable SizeType counter_;
 	mutable VectorStringType files_;
 };     //class Recovery
 

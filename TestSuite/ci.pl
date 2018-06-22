@@ -44,6 +44,7 @@ if (defined($help)) {
 
 defined($submit{"command"}) or $submit{"command"} = "";
 $submit{"PBS_O_WORKDIR"} = ($submit{"command"} eq "qsub") ? 1 : 0;
+defined($submit{"delay"}) or $submit{"delay"} = 5;
 
 defined($noSu2) or $noSu2 = 0;
 defined($sOptions) or $sOptions = "";
