@@ -18,8 +18,8 @@ public:
 
 	enum WriteMode {NO_OVERWRITE, ALLOW_OVERWRITE};
 
-	IoNgSerializer(H5::H5File* hdf5file)
-	    : hdf5file_(hdf5file)
+	IoNgSerializer(H5::H5File* hdf5file, String filename)
+	    : hdf5file_(hdf5file), filename_(filename)
 	{}
 
 	void createGroup(String group)
@@ -571,6 +571,7 @@ private:
 	}
 
 	H5::H5File* hdf5file_;
+	String filename_;
 	static const SizeType booleanEncodedSize_ = 4;
 	static const SizeType booleanEncodedStart_ = 4;
 };

@@ -140,7 +140,7 @@ public:
 		Out(const String& fn, OpenMode mode = ACC_TRUNC)
 		    : filename_(fn),
 		      hdf5File_(new H5::H5File(fn, modeToH5(mode))),
-		      ioNgSerializer_(hdf5File_)
+		      ioNgSerializer_(hdf5File_, filename_)
 		{
 #ifdef NDEBUG
 			H5::Exception::dontPrint();
@@ -155,8 +155,6 @@ public:
 			delete hdf5File_;
 			hdf5File_ = 0;
 		}
-
-		bool ng() const { return true; }
 
 		const String& filename() const
 		{
@@ -262,10 +260,10 @@ public:
 		typedef int long LongIntegerType;
 		typedef unsigned int long LongSizeType;
 
-		In(String const &fn)
+		In(String fn)
 		    : filename_(fn),
 		      hdf5File_(new H5::H5File(fn, H5F_ACC_RDONLY)),
-		      ioNgSerializer_(hdf5File_)
+		      ioNgSerializer_(hdf5File_, filename_)
 		{
 #ifdef NDEBUG
 			H5::Exception::dontPrint();
@@ -295,8 +293,6 @@ public:
 			filename_ = "";
 			hdf5File_->close();
 		}
-
-		bool ng() const { return true; }
 
 		template<typename SomeType>
 		void readLastVectorEntry(SomeType &x, String s)
