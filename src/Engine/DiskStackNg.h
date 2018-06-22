@@ -178,6 +178,10 @@ public:
 
 private:
 
+	DiskStack(const DiskStack&);
+
+	DiskStack& operator=(const DiskStack&);
+
 	IoOutType ioOut_;
 	IoInType* ioIn_;
 	PsimagLite::String label_;

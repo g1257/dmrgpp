@@ -173,7 +173,7 @@ public:
 	      appInfo_("DmrgSolver:"),
 	      verbose_(false),
 	      lrs_("pSprime", "pEprime", "pSE"),
-	      ioOut_(parameters_.filename),
+	      ioOut_(parameters_.filename, PsimagLite::IoSelector::ACC_TRUNC),
 	      progress_("DmrgSolver"),
 	      stepCurrent_(0),
 	      checkpoint_(parameters_, ioIn, model, false),

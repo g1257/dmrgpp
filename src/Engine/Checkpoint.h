@@ -275,6 +275,10 @@ public:
 
 private:
 
+	Checkpoint(const Checkpoint&);
+
+	Checkpoint& operator=(const Checkpoint&);
+
 	void checkFiniteLoops(SizeType totalSites,
 	                      SizeType hilbertOneSite,
 	                      InputValidatorType& ioIn) const

@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "ProgramGlobals.h"
 #include "ProgressIndicator.h"
+#include <fstream>
 
 namespace Dmrg {
 
@@ -132,55 +133,34 @@ public:
 		if (checkpoint_.parameters().recoverySave == "0")
 			return;
 
-//		PsimagLite::String prefix("Recovery");
-//		prefix += ttos(counter_++);
-//		PsimagLite::String rootName(prefix + checkpoint_.parameters().filename);
-//		files_.push_back(rootName);
-//		ioOutCurrent.copyInto(rootName);
-//		typename IoType::Out ioOut(rootName);
+		PsimagLite::String prefix("Recovery");
+		prefix += ttos(counter_++);
+		PsimagLite::String savedName(prefix + checkpoint_.parameters().filename);
+		files_.push_back(savedName);
+		ioOutCurrent.flush();
 
-//		// taken from end of finiteDmrgLoops
-//		checkpoint_.write(pS_, pE_, ioOut);
-//		ioOut.createGroup("FinalPsi");
-//		psi.write(v, ioOut, "FinalPsi");
-//		ioOut.write(lastSign, "LastLoopSign");
+		std::ifstream source(ioOutCurrent.filename().c_str(), std::ios::binary);
+		std::ofstream dest(savedName.c_str(), std::ios::binary);
+		dest << source.rdbuf();
+	    source.close();
+	    dest.close();
 
-//		// wft dtor
-//		wft_.write(ioOut);
+		typename IoType::Out ioOut(savedName, IoType::ACC_RDW);
 
-//		// checkpoint dtor
-//		saveStacksForRecovery(rootName,isObserveCode);
+		// taken from end of finiteDmrgLoops
+		checkpoint_.write(pS_, pE_, ioOut);
+		ioOut.createGroup("FinalPsi");
+		psi.write(v, ioOut, "FinalPsi");
+		ioOut.write(lastSign, "LastLoopSign");
+
+		// wft dtor
+		// wft_.write(ioOut);
+
+		// checkpoint dtor
+		// saveStacksForRecovery(rootName,isObserveCode);
 	}
 
 private:
-
-	void saveStacksForRecovery(PsimagLite::String rootWriteFile,
-	                           bool isObserveCode) const
-	{
-		PsimagLite::OstringStream msg;
-		msg<<"Writing sys. and env. stacks to disk (for recovery)...";
-		progress_.printline(msg,std::cout);
-		PsimagLite::String sysWriteFile = utils::pathPrepend(checkpoint_.SYSTEM_STACK_STRING,
-		                                                     rootWriteFile);
-		PsimagLite::String envWriteFile = utils::pathPrepend(checkpoint_.ENVIRON_STACK_STRING,
-		                                                     rootWriteFile);
-		PsimagLite::String sysReadFile = "/dev/null";
-		PsimagLite::String envReadFile = "/dev/null";
-
-		{
-			MemoryStackType systemStackCopy(checkpoint_.memoryStack(SYSTEM));
-			DiskStackType systemDiskTemp(sysReadFile,sysWriteFile,false,isObserveCode);
-			files_.push_back(sysWriteFile);
-			CheckpointType::loadStack(systemDiskTemp,systemStackCopy);
-		}
-
-		{
-			MemoryStackType envStackCopy(checkpoint_.memoryStack(ENVIRON));
-			DiskStackType envDiskTemp(envReadFile,envWriteFile,false,isObserveCode);
-			files_.push_back(envWriteFile);
-			CheckpointType::loadStack(envDiskTemp,envStackCopy);
-		}
-	}
 
 	PsimagLite::ProgressIndicator progress_;
 	const CheckpointType& checkpoint_;

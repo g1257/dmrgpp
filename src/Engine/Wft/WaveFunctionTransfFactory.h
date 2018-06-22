@@ -375,6 +375,8 @@ public:
 		ioMain.write(weStack_, label + "/weStack");
 	}
 
+	// writeBase and then stacks as const or non-const
+
 private:
 
 	void read()
