@@ -16,11 +16,59 @@ class IoNgSerializer {
 
 public:
 
+	/*
+		H5F_ACC_TRUNC - Truncate file, if it already exists,
+		erasing all data previously stored in the file.
+		H5F_ACC_EXCL - Fail if file already exists. H5F_ACC_TRUNC
+		and H5F_ACC_EXCL are mutually exclusive
+		H5F_ACC_RDONLY - Open file as read-only, if it already exists, and fail, otherwise
+		H5F_ACC_RDWR - Open file for read/write, if it already exists, and fail, otherwise
+	*/
+
 	enum WriteMode {NO_OVERWRITE, ALLOW_OVERWRITE};
 
-	IoNgSerializer(H5::H5File* hdf5file, String filename)
-	    : hdf5file_(hdf5file), filename_(filename)
-	{}
+	IoNgSerializer(String filename, unsigned int mode)
+	    : hdf5file_(new H5::H5File(filename, mode)), filename_(filename)
+	{
+#ifdef NDEBUG
+			H5::Exception::dontPrint();
+#endif
+			if (mode == H5F_ACC_TRUNC) createGroup("");
+	}
+
+	~IoNgSerializer()
+	{
+		filename_ = "";
+		delete hdf5file_;
+		hdf5file_ = 0;
+	}
+
+	void open(String filename,
+	          unsigned int mode)
+	{
+		if (hdf5file_) delete hdf5file_;
+
+		filename_ = filename;
+		hdf5file_ = new H5::H5File(filename, mode);
+	}
+
+	void close()
+	{
+		hdf5file_->close();
+		delete hdf5file_;
+		hdf5file_ = 0;
+		filename_ = "";
+	}
+
+	void flush()
+	{
+		hdf5file_->flush(H5F_SCOPE_GLOBAL);
+	}
+
+	const String& filename() const
+	{
+		return filename_;
+	}
 
 	void createGroup(String group)
 	{

@@ -119,8 +119,6 @@ class IoNg {
 
 public:
 
-	enum OpenMode {ACC_TRUNC, ACC_EXCL, ACC_RDONLY, ACC_RDW};
-
 	/*
 		H5F_ACC_TRUNC - Truncate file, if it already exists,
 		erasing all data previously stored in the file.
@@ -129,6 +127,7 @@ public:
 		H5F_ACC_RDONLY - Open file as read-only, if it already exists, and fail, otherwise
 		H5F_ACC_RDWR - Open file for read/write, if it already exists, and fail, otherwise
 	*/
+	enum OpenMode {ACC_TRUNC, ACC_EXCL, ACC_RDONLY, ACC_RDW};
 
 	class Out {
 
@@ -137,49 +136,29 @@ public:
 		typedef IoNgSerializer Serializer;
 		typedef std::vector<String> VectorStringType;
 
-		Out(const String& fn, OpenMode mode = ACC_TRUNC)
-		    : filename_(fn),
-		      hdf5File_(new H5::H5File(fn, modeToH5(mode))),
-		      ioNgSerializer_(hdf5File_, filename_)
-		{
-#ifdef NDEBUG
-			H5::Exception::dontPrint();
-#endif
-			if (mode == ACC_TRUNC)
-				ioNgSerializer_.createGroup("");
-		}
+		Out(const String& filename, OpenMode mode)
+		    : ioNgSerializer_(filename, modeToH5(mode))
+		{}
 
-		~Out()
+		void flush()
 		{
-			filename_ = "";
-			delete hdf5File_;
-			hdf5File_ = 0;
+			ioNgSerializer_.flush();
 		}
 
 		const String& filename() const
 		{
-			return filename_;
+			return ioNgSerializer_.filename();
 		}
 
-		void open(String const &fn,
-		          std::ios_base::openmode mode)
+		void open(String filename,
+		          OpenMode mode)
 		{
-			if (hdf5File_) delete hdf5File_;
-
-			filename_ = fn;
-			// deal with mode
-			hdf5File_ = new H5::H5File(fn, H5F_ACC_TRUNC);
-
-			throw RuntimeError("IoNg:: open cannot handle mode yet\n");
-			throw RuntimeError("IoNg:: open cannot handle serializer object yet\n");
+			ioNgSerializer_.open(filename, modeToH5(mode));
 		}
 
 		void close()
 		{
-			// deal with the serializer object FIXME
-			delete hdf5File_;
-			hdf5File_ = 0;
-			filename_ = "";
+			ioNgSerializer_.close();
 		}
 
 		void createGroup(String groupName)
@@ -248,8 +227,6 @@ public:
 			throw RuntimeError("IoNg:: wrong open mode\n");
 		}
 
-		String filename_;
-		H5::H5File* hdf5File_;
 		IoNgSerializer ioNgSerializer_;
 	};
 
@@ -260,38 +237,23 @@ public:
 		typedef int long LongIntegerType;
 		typedef unsigned int long LongSizeType;
 
-		In(String fn)
-		    : filename_(fn),
-		      hdf5File_(new H5::H5File(fn, H5F_ACC_RDONLY)),
-		      ioNgSerializer_(hdf5File_, filename_)
+		In(String filename)
+		    : ioNgSerializer_(filename, H5F_ACC_RDONLY)
+		{}
+
+		const String& filename() const
 		{
-#ifdef NDEBUG
-			H5::Exception::dontPrint();
-#endif
+			return ioNgSerializer_.filename();
 		}
 
-		~In()
+		void open(String filename)
 		{
-			delete hdf5File_;
-			hdf5File_ = 0;
-			filename_ = "";
-		}
-
-		const String& filename() const { return filename_; }
-
-		void open(String const &fn)
-		{
-			if (hdf5File_) delete hdf5File_;
-
-			filename_ = fn;
-			// deal with mode
-			hdf5File_ = new H5::H5File(fn, H5F_ACC_RDONLY);
+			ioNgSerializer_.open(filename, H5F_ACC_RDONLY);
 		}
 
 		void close()
 		{
-			filename_ = "";
-			hdf5File_->close();
+			ioNgSerializer_.close();
 		}
 
 		template<typename SomeType>
@@ -328,8 +290,6 @@ public:
 
 		In& operator=(const In&);
 
-		String filename_;
-		H5::H5File* hdf5File_;
 		IoNgSerializer ioNgSerializer_;
 	};
 }; //class IoNg
