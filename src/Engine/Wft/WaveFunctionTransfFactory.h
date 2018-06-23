@@ -364,6 +364,29 @@ public:
 
 	void write(PsimagLite::IoSelector::Out& ioMain)
 	{
+		writePartial(ioMain);
+
+		PsimagLite::String label = "Wft";
+		ioMain.write(wsStack_, label + "/wsStack");
+		ioMain.write(weStack_, label + "/weStack");
+	}
+
+	void write(PsimagLite::IoSelector::Out& ioMain) const
+	{
+		writePartial(ioMain);
+
+		PsimagLite::String label = "Wft";
+		WftStackType wsStack = wsStack_;
+		ioMain.write(wsStack, label + "/wsStack");
+
+		WftStackType weStack = weStack_;
+		ioMain.write(weStack, label + "/weStack");
+	}
+
+private:
+
+	void writePartial(PsimagLite::IoSelector::Out& ioMain) const
+	{
 		if (!isEnabled_) return;
 		if (!save_) return;
 		PsimagLite::String label = "Wft";
@@ -371,13 +394,7 @@ public:
 		ioMain.write(isEnabled_, label + "/isEnabled");
 		wftOptions_.write(ioMain, label + "/WftOptions");
 		dmrgWaveStruct_.write(ioMain, label + "/DmrgWaveStruct");
-		ioMain.write(wsStack_, label + "/wsStack");
-		ioMain.write(weStack_, label + "/weStack");
 	}
-
-	// writeBase and then stacks as const or non-const
-
-private:
 
 	void read()
 	{

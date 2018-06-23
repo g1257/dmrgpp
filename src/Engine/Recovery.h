@@ -154,10 +154,11 @@ public:
 		ioOut.write(lastSign, "LastLoopSign");
 
 		// wft dtor
-		// wft_.write(ioOut);
+		wft_.write(ioOut);
 
-		// checkpoint dtor
-		// saveStacksForRecovery(rootName,isObserveCode);
+		ioOut.close();
+		// checkpoint stacks
+		checkpoint_.checkpointStacks(savedName);
 	}
 
 private:

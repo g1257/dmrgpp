@@ -119,10 +119,11 @@ public:
 	    ENVIRON_STACK_STRING(ProgramGlobals::ENVIRON_STACK_STRING),
 	    parameters_(parameters),
 	    isObserveCode_(isObserveCode),
-	    enabled_(parameters_.options.find("checkpoint")!=PsimagLite::String::npos ||
+	    isRestart_(parameters_.options.find("checkpoint")!=PsimagLite::String::npos ||
 	        parameters_.options.find("restart")!=PsimagLite::String::npos),
 	    progress_("Checkpoint"),
-	    energyFromFile_(0.0)
+	    energyFromFile_(0.0),
+	    dummyBwo_("dummy")
 	{
 		SizeType site = 0; // FIXME for Immm model, find max of hilbert(site) over site
 		SizeType hilbertOneSite = model.hilbertSize(site);
@@ -135,29 +136,29 @@ public:
 
 		checkFiniteLoops(model.geometry().numberOfSites(), hilbertOneSite, ioIn);
 
-		if (!enabled_) return;
+		if (!isRestart_) return;
 
-		{
-			IoType::In ioIn2(parameters_.checkpoint.filename);
-			ioIn2.readLastVectorEntry(energyFromFile_,
-			                          parameters_.checkpoint.labelForEnergy);
+		IoType::In ioIn2(parameters_.checkpoint.filename);
+		ioIn2.readLastVectorEntry(energyFromFile_,
+		                          parameters_.checkpoint.labelForEnergy);
 
-			VectorSizeType v;
-			ioIn2.read(v, "CHKPOINTSYSTEM/OperatorPerSite");
-			if (v.size() == 0) return;
+		VectorSizeType v;
+		ioIn2.read(v, "CHKPOINTSYSTEM/OperatorPerSite");
+		if (v.size() == 0) return;
 
-			SizeType operatorsPerSite = v[0];
+		SizeType operatorsPerSite = v[0];
 
-			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-			VectorSizeType test(1,0);
-			model.setOperatorMatrices(creationMatrix, test);
+		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
+		VectorSizeType test(1,0);
+		model.setOperatorMatrices(creationMatrix, test);
 
-			if (creationMatrix.size() != operatorsPerSite) {
-				PsimagLite::String msg("CheckPoint: FATAL: Perhaps trying to");
-				msg += " restart one model from a different one or different variant\n";
-				throw PsimagLite::RuntimeError(msg);
-			}
+		if (creationMatrix.size() != operatorsPerSite) {
+			PsimagLite::String msg("CheckPoint: FATAL: Perhaps trying to");
+			msg += " restart one model from a different one or different variant\n";
+			throw PsimagLite::RuntimeError(msg);
 		}
+
+		ioIn2.close();
 
 		loadStacksDiskToMemory();
 	}
@@ -170,21 +171,23 @@ public:
 		loadStacksMemoryToDisk();
 	}
 
-	void checkpoint()
+	void checkpointStacks(PsimagLite::String filename) const
 	{
 		// taken from dtor
-		//		PsimagLite::OstringStream msg;
-		//		msg<<"Writing sys. and env. stacks to disk...";
-		//		progress_.printline(msg,std::cout);
-		//		systemDiskCopy = systemDisk_;
-		//		systemStackCopy = systemStack_;
-		//		loadStack(systemDiskCopy, systemStackCopy);
-		//		systemDiskCopy.finalize();
+		PsimagLite::OstringStream msg;
+		msg<<"Writing sys. and env. stacks to disk...";
+		progress_.printline(msg, std::cout);
 
-		//		envDiskCopy = envDisk_;
-		//		envStackCopy = envStack_;
-		//		loadStack(envDiskCopy, envStackCopy);
-		//		envDiskCopy.finalize();
+		const bool needsToRead = false;
+
+		MemoryStackType systemStackCopy = systemStack_;
+		DiskStackType systemDisk(filename, needsToRead, "system", isObserveCode_);
+
+		loadStack(systemDisk, systemStackCopy);
+
+		MemoryStackType envStackCopy = envStack_;
+		DiskStackType environDisk(filename, needsToRead, "environ", isObserveCode_);
+		loadStack(environDisk, envStackCopy);
 	}
 
 	// Not related to stacks
@@ -235,13 +238,13 @@ public:
 		else systemStack_.push(pSorE);
 	}
 
-	BasisWithOperatorsType shrink(SizeType what,const TargetingType& target)
+	const BasisWithOperatorsType& shrink(SizeType what,const TargetingType& target)
 	{
 		if (what==ProgramGlobals::ENVIRON) return shrink(envStack_,target);
 		else return shrink(systemStack_,target);
 	}
 
-	bool operator()() const { return enabled_; }
+	bool operator()() const { return isRestart_; }
 
 	SizeType stackSize(SizeType what) const
 	{
@@ -294,7 +297,7 @@ private:
 		int prevDeltaSign = 1;
 		bool checkPoint = false;
 
-		if (enabled_) {
+		if (isRestart_) {
 			PsimagLite::IoSelector::In io1(parameters_.checkpoint.filename);
 			io1.read(lastSite, "FinalPsi/TargetCentralSite");
 			io1.read(prevDeltaSign, "LastLoopSign");
@@ -377,29 +380,27 @@ private:
 	}
 
 	//! shrink  (we don't really shrink, we just undo the growth)
-	BasisWithOperatorsType shrink(MemoryStackType& thisStack,
-	                              const TargetingType& target)
+	const BasisWithOperatorsType& shrink(MemoryStackType& thisStack,
+	                                     const TargetingType& target)
 	{
+		assert(thisStack.size() > 0);
 		thisStack.pop();
 		assert(thisStack.size() > 0);
-		BasisWithOperatorsType basisWithOps =  thisStack.top();
+		dummyBwo_ =  thisStack.top();
 		// only updates the extreme sites:
-		target.updateOnSiteForCorners(basisWithOps);
-		return basisWithOps;
+		target.updateOnSiteForCorners(dummyBwo_);
+		return dummyBwo_;
 	}
 
 	void loadStacksDiskToMemory()
 	{
-		const bool initialize = false;
 		DiskStackType systemDisk(parameters_.checkpoint.filename,
-		                         initialize,
+		                         isRestart_,
 		                         "system",
-		                         enabled_,
 		                         isObserveCode_);
 		DiskStackType envDisk(parameters_.checkpoint.filename,
-		                      initialize,
+		                      isRestart_,
 		                      "environ",
-		                      enabled_,
 		                      isObserveCode_);
 		PsimagLite::OstringStream msg;
 		msg<<"Loading sys. and env. stacks from disk...";
@@ -411,16 +412,14 @@ private:
 
 	void loadStacksMemoryToDisk()
 	{
-		const bool initialize = true;
+		const bool needsToRead = false;
 		DiskStackType systemDisk(parameters_.filename,
-		                         initialize,
+		                         needsToRead,
 		                         "system",
-		                         enabled_,
 		                         isObserveCode_);
 		DiskStackType envDisk(parameters_.filename,
-		                      initialize,
+		                      needsToRead,
 		                      "environ",
-		                      enabled_,
 		                      isObserveCode_);
 		PsimagLite::OstringStream msg;
 		msg<<"Writing sys. and env. stacks to disk...";
@@ -444,11 +443,12 @@ private:
 
 	const ParametersType& parameters_;
 	bool isObserveCode_;
-	bool enabled_;
+	bool isRestart_;
 	MemoryStackType systemStack_;
 	MemoryStackType envStack_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType energyFromFile_;
+	BasisWithOperatorsType dummyBwo_;
 }; // class Checkpoint
 } // namespace Dmrg
 

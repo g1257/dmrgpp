@@ -89,24 +89,22 @@ class DiskStack {
 public:
 
 	DiskStack(const PsimagLite::String filename,
-	          bool initialize,
+	          bool needsToRead,
 	          PsimagLite::String label,
-	          bool hasLoad,
 	          bool isObserveCode)
-	    : ioOut_(filename, PsimagLite::IoNg::ACC_RDW),
-	      ioIn_((hasLoad) ? new IoInType(filename) : 0),
+	    : ioOut_((needsToRead) ? 0 : new IoOutType(filename, PsimagLite::IoNg::ACC_RDW)),
+	      ioIn_((needsToRead) ? new IoInType(filename) : 0),
 	      label_("DiskStack" + label),
 	      isObserveCode_(isObserveCode),
 	      total_(0),
 	      progress_("DiskStack"),
 	      dt_(0)
 	{
-		if (initialize) {
-			ioOut_.createGroup(label_);
-			ioOut_.write(total_, label_ + "/Size");
+		if (!needsToRead) {
+			ioOut_->createGroup(label_);
+			ioOut_->write(total_, label_ + "/Size");
+			return;
 		}
-
-		if (!hasLoad) return;
 
 		ioIn_->read(total_, label_ + "/Size");
 		PsimagLite::OstringStream msg;
@@ -126,13 +124,15 @@ public:
 
 	void push(const DataType& d)
 	{
+		assert(ioOut_);
+
 		try {
-			d.write(ioOut_,
+			d.write(*ioOut_,
 			        label_ + "/" + ttos(total_),
 			        IoOutType::Serializer::NO_OVERWRITE,
 			        DataType::SAVE_ALL);
 		} catch (std::exception&) {
-			d.write(ioOut_,
+			d.write(*ioOut_,
 			        "/" + ttos(total_),
 			        IoOutType::Serializer::ALLOW_OVERWRITE,
 			        DataType::SAVE_ALL);
@@ -140,7 +140,7 @@ public:
 
 		++total_;
 
-		ioOut_.write(total_,
+		ioOut_->write(total_,
 		              label_ + "/Size",
 		              IoOutType::Serializer::ALLOW_OVERWRITE);
 
@@ -153,7 +153,9 @@ public:
 
 		--total_;
 
-		ioOut_.write(total_,
+		if (!ioOut_) return;
+
+		ioOut_->write(total_,
 		              label_ + "/Size",
 		              IoOutType::Serializer::ALLOW_OVERWRITE);
 	}
@@ -182,7 +184,7 @@ private:
 
 	DiskStack& operator=(const DiskStack&);
 
-	IoOutType ioOut_;
+	IoOutType* ioOut_;
 	IoInType* ioIn_;
 	PsimagLite::String label_;
 	bool isObserveCode_;
