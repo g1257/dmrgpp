@@ -185,6 +185,8 @@ public:
 		printline(buffer_,std::cout);
 	}
 
+	static double time() { return musage_.time(); }
+
 private:
 
 	template<typename SomeOutputStreamType>
