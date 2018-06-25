@@ -114,10 +114,12 @@ public:
 
 	~DiskStack()
 	{
-		delete ioIn_;
-		ioIn_ = 0;
 		delete dt_;
 		dt_ = 0;
+		delete ioIn_;
+		ioIn_ = 0;
+		delete ioOut_;
+		ioOut_ = 0;
 	}
 
 	bool inDisk() const { return true; }
