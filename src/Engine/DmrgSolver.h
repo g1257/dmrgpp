@@ -473,9 +473,10 @@ private:
 				}
 			}
 
-			finiteStep(S,E,pS,pE,i,psi);
+			finiteStep(S, E, pS, pE, i, psi, recovery);
 			if (psi.end()) break;
-			recovery.write(psi, sitesIndices_[stepCurrent_], lastSign, false, ioOut_);
+			if (recovery.byLoop(i))
+				recovery.write(psi, sitesIndices_[stepCurrent_], lastSign, ioOut_);
 		}
 
 		if (!saveData_) return;
@@ -491,7 +492,8 @@ private:
 	                MyBasisWithOperators &pS,
 	                MyBasisWithOperators &pE,
 	                SizeType loopIndex,
-	                TargetingType& target)
+	                TargetingType& target,
+	                RecoveryType& recovery)
 	{
 		bool extendedPrint = (parameters_.options.find("extendedPrint") !=
 		        PsimagLite::String::npos);
@@ -560,6 +562,10 @@ private:
 			progress_.printMemoryUsage();
 
 			if (target.end()) break;
+			if (recovery.byTime()) {
+				int lastSign = (parameters_.finiteLoop[loopIndex].stepLength < 0) ? -1 : 1;
+				recovery.write(target, sitesIndices_[stepCurrent_], lastSign, ioOut_);
+			}
 		}
 
 		if (direction == ProgramGlobals::EXPAND_SYSTEM)

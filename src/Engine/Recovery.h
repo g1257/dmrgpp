@@ -90,6 +90,16 @@ namespace Dmrg {
 template<typename ParametersType,typename TargetingType>
 class Recovery  {
 
+	enum OptionEnum {DISABLED, BY_DELTATIME, BY_LOOP};
+
+	struct OptionSpec {
+
+		OptionSpec() : optionEnum(BY_LOOP), value(1) {}
+
+		OptionEnum optionEnum;
+		SizeType value;
+	};
+
 public:
 
 	enum {SYSTEM = ProgramGlobals::SYSTEM, ENVIRON = ProgramGlobals::ENVIRON};
@@ -112,8 +122,11 @@ public:
 	      wft_(wft),
 	      pS_(pS),
 	      pE_(pE),
+	      savedTime_(0),
 	      counter_(0)
-	{}
+	{
+		procOptions();
+	}
 
 	~Recovery()
 	{
@@ -124,15 +137,28 @@ public:
 			unlink(files_[i].c_str());
 	}
 
+	bool byLoop(SizeType loopIndex) const
+	{
+		return (optionSpec_.optionEnum == BY_LOOP &&
+		        (loopIndex % optionSpec_.value) == 0);
+	}
+
+	bool byTime() const
+	{
+		if (optionSpec_.optionEnum != BY_DELTATIME) return false;
+
+		bool firstCall = (savedTime_ == 0);
+		SizeType time = PsimagLite::ProgressIndicator::time();
+		SizeType deltaTime = time - savedTime_;
+		savedTime_ = time;
+		return (!firstCall && deltaTime > optionSpec_.value);
+	}
+
 	void write(const TargetingType& psi,
 	           const VectorSizeType& v,
 	           int lastSign,
-	           bool isObserveCode,
 	           typename IoType::Out& ioOutCurrent) const
 	{
-		if (checkpoint_.parameters().recoverySave == "0")
-			return;
-
 		PsimagLite::String prefix("Recovery");
 		prefix += ttos(counter_++);
 		PsimagLite::String savedName(prefix + checkpoint_.parameters().filename);
@@ -163,11 +189,52 @@ public:
 
 private:
 
+	void procOptions()
+	{
+		PsimagLite::String str = checkpoint_.parameters().recoverySave;
+
+		if (str == "") return;
+
+		if (str == "no") {
+			optionSpec_.optionEnum = DISABLED;
+			return;
+		}
+
+		if (str.length() < 3) dieWithError(str);
+
+		if (str[0] == 'l' && str[1] == '%') {
+			PsimagLite::String each = str.substr(2, str.length() - 2);
+			optionSpec_.optionEnum = BY_LOOP;
+			optionSpec_.value = atoi(each.c_str());
+			std::cerr<<"Recovery by loop every "<<optionSpec_.value<<" loops\n";
+			return;
+		}
+
+		if (str.length() < 4) dieWithError(str);
+
+		if (str[0] == 'd' && str[1] == 't' && str[2] == '>') {
+			PsimagLite::String each = str.substr(3, str.length() - 3);
+			optionSpec_.optionEnum = BY_DELTATIME;
+			optionSpec_.value = atoi(each.c_str());
+			std::cerr<<"Recovery by delta time greater than "<<optionSpec_.value<<" seconds\n";
+			return;
+		}
+
+		dieWithError(str);
+	}
+
+	void dieWithError(PsimagLite::String str) const
+	{
+		err("Syntax error for RecoverySave expression " + str + "\n");
+	}
+
 	PsimagLite::ProgressIndicator progress_;
+	OptionSpec optionSpec_;
 	const CheckpointType& checkpoint_;
 	const WaveFunctionTransfType& wft_;
 	const BasisWithOperatorsType& pS_;
 	const BasisWithOperatorsType& pE_;
+	mutable SizeType savedTime_;
 	mutable SizeType counter_;
 	mutable VectorStringType files_;
 };     //class Recovery

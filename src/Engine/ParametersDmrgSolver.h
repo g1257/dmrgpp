@@ -211,7 +211,7 @@ struct ParametersDmrgSolver {
 	      dumperBegin(0),
 	      dumperEnd(0),
 	      precision(6),
-	      recoverySave("0"),
+	      recoverySave(""),
 	      degeneracyMax(1e-12),
 	      denseSparseThreshold(0.2)
 	{
