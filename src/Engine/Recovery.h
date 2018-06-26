@@ -141,6 +141,10 @@ public:
 	      counter_(0)
 	{
 		procOptions();
+
+		if (checkpoint_.parameters().options.find("recoveryEnableRead") ==
+		        PsimagLite::String::npos) return;
+
 		if (!checkpoint_.parameters().autoRestart) return;
 
 		readRecovery();
@@ -158,9 +162,8 @@ public:
 
 	~Recovery()
 	{
-		if (checkpoint_.parameters().options.find("recoveryNoDelete") !=
-		        PsimagLite::String::npos) return;
-
+		// NEEDS TO CLEAN ALL Recovery + digit + filename files
+		// FIXME TODO
 		for (SizeType i = 0; i < files_.size(); ++i)
 			unlink(files_[i].c_str());
 	}
@@ -179,7 +182,7 @@ public:
 	// this function is called before the ctor
 	static void autoRestart(ParametersType& params)
 	{
-		if (params.recoverySave == "no")
+		if (params.options.find("recoveryEnableRead") == PsimagLite::String::npos)
 			return;
 
 		// params.filename must have been corrected already if necessary

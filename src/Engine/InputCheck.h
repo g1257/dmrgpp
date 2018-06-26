@@ -322,7 +322,7 @@ public:
 			\item[vectorwithoffsets] TBW
 			\item[allPvectors] TBW
 			\item[printgeometry] TBW
-			\item[recoveryNoDelete] Do not delete recovery files even if run finishes OK
+			\item[recoveryEnableRead] Enables recovery if previous run crashed
 			\item[neverNormalizeVectors] TBW
 			\item [advanceUnrestricted] Don't restrict advance time to borders
 			\item [findSymmetrySector] Find symmetry sector with lowest energy, and
@@ -376,7 +376,7 @@ public:
 		registerOpts.push_back("vectorwithoffsets");
 		registerOpts.push_back("allPvectors");
 		registerOpts.push_back("printgeometry");
-		registerOpts.push_back("recoveryNoDelete");
+		registerOpts.push_back("recoveryEnableRead");
 		registerOpts.push_back("normalizeTimeVectors");
 		registerOpts.push_back("neverNormalizeVectors");
 		registerOpts.push_back("noSaveStacks");
