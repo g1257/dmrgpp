@@ -138,8 +138,7 @@ public:
 	{
 		if (!isEnabled_) return;
 
-		bool b = (params.options.find("checkpoint")!=PsimagLite::String::npos ||
-		        params.options.find("restart")!=PsimagLite::String::npos);
+		bool b = (params.options.find("restart")!=PsimagLite::String::npos);
 
 		if (b) {
 			if (params.options.find("noloadwft")!=PsimagLite::String::npos)

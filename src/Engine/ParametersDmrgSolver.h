@@ -90,6 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "RestartStruct.h"
 #include "FiniteLoop.h"
 #include "Io/IoSerializerStub.h"
+#include "Recovery.h"
 
 namespace Dmrg {
 
@@ -129,6 +130,15 @@ See the below for more information and examples on Finite Loops.
 */
 template<typename FieldType,typename InputValidatorType>
 struct ParametersDmrgSolver {
+
+	struct FakeTargeting {
+		typedef int BasisWithOperatorsType;
+		typedef int WaveFunctionTransfType;
+		struct IoType { typedef int Out; };
+		typedef int TargetingType;
+		typedef int MemoryStackType;
+		typedef int DiskStackType;
+	};
 
 	typedef ParametersDmrgSolver<FieldType, InputValidatorType> ThisType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -354,6 +364,9 @@ struct ParametersDmrgSolver {
 			} catch (std::exception&) {}
 		}
 
+		if (!hasRestart)
+			hasRestart = Recovery<ThisType, FakeTargeting>::fakeArestartIfNeeded(*this);
+
 		if (hasRestart) {
 			try {
 				io.readline(checkpoint.into,"RestartInto=");
@@ -469,6 +482,15 @@ struct ParametersDmrgSolver {
 		}
 	}
 
+	static void checkRestart(PsimagLite::String filename1,
+	                         PsimagLite::String filename2,
+	                         PsimagLite::String options,
+	                         PsimagLite::String label)
+	{
+		checkFilesNotEqual(filename1,filename2,label);
+		checkTwoSiteDmrg(filename2,options);
+	}
+
 private:
 
 	static void warnIfFiniteMlessThanMin(const VectorFiniteLoopType& vfl, SizeType minM)
@@ -479,15 +501,6 @@ private:
 			std::cout<<" which is less than minimum m = "<<minM;
 			std::cout<<" as found in TruncationTolerance\n";
 		}
-	}
-
-	static void checkRestart(PsimagLite::String filename1,
-	                         PsimagLite::String filename2,
-	                         PsimagLite::String options,
-	                         PsimagLite::String label)
-	{
-		checkFilesNotEqual(filename1,filename2,label);
-		checkTwoSiteDmrg(filename2,options);
 	}
 
 	static void checkFilesNotEqual(PsimagLite::String filename1,

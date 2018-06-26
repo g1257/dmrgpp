@@ -89,11 +89,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ParametersType,typename TargetingType>
+template<typename ParametersType,typename TargetingType_>
 class Checkpoint {
 
 public:
 
+	typedef TargetingType_ TargetingType;
+	typedef typename TargetingType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef typename TargetingType::RealType  RealType;
 	typedef typename TargetingType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
@@ -119,8 +121,7 @@ public:
 	    ENVIRON_STACK_STRING(ProgramGlobals::ENVIRON_STACK_STRING),
 	    parameters_(parameters),
 	    isObserveCode_(isObserveCode),
-	    isRestart_(parameters_.options.find("checkpoint")!=PsimagLite::String::npos ||
-	        parameters_.options.find("restart")!=PsimagLite::String::npos),
+	    isRestart_(parameters_.options.find("restart")!=PsimagLite::String::npos),
 	    progress_("Checkpoint"),
 	    energyFromFile_(0.0),
 	    dummyBwo_("dummy")

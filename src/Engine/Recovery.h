@@ -84,10 +84,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "ProgressIndicator.h"
 #include <fstream>
+#include <sys/types.h>
+#include <dirent.h>
 
 namespace Dmrg {
 
-template<typename ParametersType,typename TargetingType>
+template<typename ParametersType,typename CheckpointType>
 class Recovery  {
 
 	enum OptionEnum {DISABLED, BY_DELTATIME, BY_LOOP};
@@ -105,10 +107,10 @@ public:
 	enum {SYSTEM = ProgramGlobals::SYSTEM, ENVIRON = ProgramGlobals::ENVIRON};
 
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-	typedef Checkpoint<ParametersType,TargetingType> CheckpointType;
-	typedef typename TargetingType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename TargetingType::WaveFunctionTransfType WaveFunctionTransfType;
+	typedef typename CheckpointType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename CheckpointType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef typename CheckpointType::IoType IoType;
+	typedef typename CheckpointType::TargetingType TargetingType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename CheckpointType::MemoryStackType MemoryStackType;
 	typedef typename CheckpointType::DiskStackType DiskStackType;
@@ -137,6 +139,25 @@ public:
 			unlink(files_[i].c_str());
 	}
 
+	static bool fakeArestartIfNeeded(ParametersType& params)
+	{
+		if (params.recoverySave == "no")
+			return false;
+
+		// params.filename must have been corrected already if necessary
+		PsimagLite::String recoveryFile = getRecoveryFile(params.filename);
+		if (recoveryFile == "")
+			return false;
+
+		// *  add the line RestartFilename= pointing to the data file of the run to be restarted.
+		params.checkpoint.filename = recoveryFile;
+		params.checkRestart(params.filename, recoveryFile, params.options, "INTERNAL=");
+
+		// * Then change the number of FiniteLoops to something like
+		err("change the number of FiniteLoops unimplemented\n");
+		return true;
+	}
+
 	bool byLoop(SizeType loopIndex) const
 	{
 		return (optionSpec_.optionEnum == BY_LOOP &&
@@ -159,7 +180,7 @@ public:
 	           int lastSign,
 	           typename IoType::Out& ioOutCurrent) const
 	{
-		PsimagLite::String prefix("Recovery");
+		PsimagLite::String prefix(recoveryFilePrefix());
 		prefix += ttos(counter_++);
 		PsimagLite::String savedName(prefix + checkpoint_.parameters().filename);
 		files_.push_back(savedName);
@@ -188,6 +209,8 @@ public:
 	}
 
 private:
+
+	static PsimagLite::String recoveryFilePrefix() { return "Recovery"; }
 
 	void procOptions()
 	{
@@ -226,6 +249,77 @@ private:
 	void dieWithError(PsimagLite::String str) const
 	{
 		err("Syntax error for RecoverySave expression " + str + "\n");
+	}
+
+	static PsimagLite::String getRecoveryFile(PsimagLite::String filename)
+	{
+		const PsimagLite::String prefix = recoveryFilePrefix();
+		std::vector<PsimagLite::String> files;
+		listFilesInDirectory(files, ".");
+
+		if (files.size() == 0) return "";
+
+		PsimagLite::String saved("");
+		SizeType max = 0;
+
+		for (SizeType i = 0; i < files.size(); ++i) {
+			std::vector<PsimagLite::String> parts;
+			makeThreeParts(parts, files[i]);
+			if (parts.size() != 3 || parts[0] != prefix || parts[2] != filename)
+				continue;
+			SizeType counter = atoi(parts[1].c_str());
+			if (counter > max) {
+				max = counter;
+				saved = files[i];
+			}
+		}
+
+		return saved;
+	}
+
+	static void makeThreeParts(std::vector<PsimagLite::String>& parts,
+	                           PsimagLite::String filename)
+	{
+		const PsimagLite::String prefix = recoveryFilePrefix();
+		const SizeType len = prefix.length();
+		if (filename.substr(0, len) != prefix) return;
+		parts.push_back(prefix);
+
+		PsimagLite::String buffer("");
+		for (SizeType i = len; i < filename.length(); ++i) {
+			if (isAdigit(filename[i])) buffer += filename[i];
+			break;
+		}
+
+		if (buffer == "") return;
+
+		parts.push_back(buffer);
+
+		SizeType lastPartLen = filename.length() - buffer.length() - len;
+		parts.push_back(filename.substr(len + buffer.length(), lastPartLen));
+	}
+
+	static bool isAdigit(char c)
+	{
+		return (c > 47 && c < 58);
+	}
+
+	static void listFilesInDirectory(std::vector<PsimagLite::String>& files,
+	                                 PsimagLite::String path)
+	{
+		DIR* dir = 0;
+		dirent* ent = 0;
+		if ((dir = opendir(path.c_str())) != 0) {
+		  while ((ent = readdir(dir)) != 0) {
+			  files.push_back(ent->d_name);
+		  }
+
+		  closedir(dir);
+		  return;
+		}
+
+		/* could not open directory */
+		perror("");
 	}
 
 	PsimagLite::ProgressIndicator progress_;
