@@ -282,7 +282,7 @@ public:
 			infiniteDmrgLoop(S,X,Y,E,pS,pE,*psi);
 		}
 
-		RecoveryType recovery(checkpoint_, wft_, pS, pE);
+		RecoveryType recovery(sitesIndices_, ioOut_, checkpoint_, wft_, pS, pE);
 		finiteDmrgLoops(S, E, pS, pE, *psi, recovery);
 
 		inSitu_.init(*psi,geometry.numberOfSites());
@@ -474,6 +474,8 @@ obtain ordered
 		int lastSign = 1;
 
 		for (SizeType i = indexOfFirstFiniteLoop; i < loopsTotal; ++i)  {
+
+			stepCurrent_ = recovery.stepCurrent(stepCurrent_);
 			lastSign = (parameters_.finiteLoop[i].stepLength < 0) ? -1 : 1;
 			PsimagLite::OstringStream msg;
 			msg<<"Finite loop number "<<i;
@@ -491,12 +493,12 @@ obtain ordered
 				}
 			}
 
-			finiteStep(S, E, pS, pE, i, psi, recovery);
+			finiteStep(pS, pE, i, psi, recovery);
 
 			if (psi.end()) break;
 
 			if (recovery.byLoop(i))
-				recovery.write(psi, sitesIndices_[stepCurrent_], lastSign, ioOut_);
+				recovery.write(psi, stepCurrent_, lastSign, ioOut_);
 		}
 
 		if (!saveData_) return;
@@ -507,9 +509,7 @@ obtain ordered
 		ioOut_.write(lastSign, "LastLoopSign");
 	}
 
-	void finiteStep(BlockType const &,
-	                BlockType const &,
-	                MyBasisWithOperators &pS,
+	void finiteStep(MyBasisWithOperators &pS,
 	                MyBasisWithOperators &pE,
 	                SizeType loopIndex,
 	                TargetingType& target,
@@ -532,11 +532,12 @@ obtain ordered
 		int stepLengthCorrected = int((stepLength+1-sitesPerBlock)/sitesPerBlock);
 		if (stepLength<0)
 			stepLengthCorrected = int((stepLength+sitesPerBlock-1)/sitesPerBlock);
-		int stepFinal = stepCurrent_+stepLengthCorrected;
+		int stepFinal = stepCurrent_ + stepLengthCorrected;
 
 		while (true) {
-			if (SizeType(stepCurrent_)>=sitesIndices_.size())
-				throw PsimagLite::RuntimeError("stepCurrent_ too large!\n");
+
+			if (static_cast<SizeType>(stepCurrent_) >= sitesIndices_.size())
+				err("stepCurrent_ too large!\n");
 
 			RealType time = target.time();
 			printerInDetail.print(std::cout, "finite");
@@ -573,18 +574,17 @@ obtain ordered
 
 			changeTruncateAndSerialize(pS,pE,target,keptStates,direction,loopIndex);
 
-			if (finalStep(stepLength,stepFinal)) break;
-			if (stepCurrent_<0) {
-				PsimagLite::String msg("DmrgSolver::finiteStep()");
-				throw PsimagLite::RuntimeError(msg + " currentStep_ is negative\n");
-			}
+			if (finalStep(stepLength, stepFinal)) break;
+
+			if (stepCurrent_ < 0)
+				err("DmrgSolver::finiteStep() currentStep_ is negative\n");
 
 			progress_.printMemoryUsage();
 
 			if (target.end()) break;
 			if (recovery.byTime()) {
 				int lastSign = (parameters_.finiteLoop[loopIndex].stepLength < 0) ? -1 : 1;
-				recovery.write(target, sitesIndices_[stepCurrent_], lastSign, ioOut_);
+				recovery.write(target, stepCurrent_, lastSign, ioOut_);
 			}
 		}
 

@@ -157,6 +157,7 @@ struct ParametersDmrgSolver {
 	SizeType dumperEnd;
 	SizeType precision;
 	int useReflectionSymmetry;
+	bool autoRestart;
 	PairRealSizeType truncationControl;
 	PsimagLite::String filename;
 	PsimagLite::String version;
@@ -221,6 +222,7 @@ struct ParametersDmrgSolver {
 	      dumperBegin(0),
 	      dumperEnd(0),
 	      precision(6),
+	      autoRestart(false),
 	      recoverySave(""),
 	      degeneracyMax(1e-12),
 	      denseSparseThreshold(0.2)
@@ -364,8 +366,7 @@ struct ParametersDmrgSolver {
 			} catch (std::exception&) {}
 		}
 
-		hasRestart = Recovery<ThisType, FakeTargeting>::autoRestart(*this,
-		                                                            hasRestart);
+		Recovery<ThisType, FakeTargeting>::autoRestart(*this);
 
 		if (hasRestart) {
 			try {

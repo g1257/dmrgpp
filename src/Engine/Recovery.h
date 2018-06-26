@@ -102,6 +102,16 @@ class Recovery  {
 		SizeType value;
 	};
 
+	struct OpaqueRestart {
+
+		OpaqueRestart() : type(DISABLED), loopIndex(0), stepCurrent(0)
+		{}
+
+		OptionEnum type;
+		SizeType loopIndex;
+		SizeType stepCurrent;
+	};
+
 public:
 
 	enum {SYSTEM = ProgramGlobals::SYSTEM, ENVIRON = ProgramGlobals::ENVIRON};
@@ -114,12 +124,16 @@ public:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename CheckpointType::MemoryStackType MemoryStackType;
 	typedef typename CheckpointType::DiskStackType DiskStackType;
+	typedef PsimagLite::Vector<VectorSizeType>::Type VectorBlockType;
 
-	Recovery(const CheckpointType& checkpoint,
+	Recovery(const VectorBlockType& siteIndices,
+	         typename IoType::Out& ioOut,
+	         const CheckpointType& checkpoint,
 	         const WaveFunctionTransfType& wft,
 	         const BasisWithOperatorsType& pS,
 	         const BasisWithOperatorsType& pE)
 	    : progress_("Recovery"),
+	      siteIndices_(siteIndices),
 	      checkpoint_(checkpoint),
 	      wft_(wft),
 	      pS_(pS),
@@ -128,8 +142,15 @@ public:
 	      counter_(0)
 	{
 		procOptions();
-		// if in read mode then copy checkpoint_.filename ==> params.filename
-		// needs to do something about runForinput.cout FIXME
+		if (!checkpoint_.parameters().autoRestart) return;
+
+		readRecovery();
+
+		assert(ioOut.filename() == checkpoint_.parameters().filename);
+		ioOut.close();
+		copyFile(checkpoint_.parameters().filename,
+		         checkpoint_.parameters().checkpoint.filename);
+		ioOut.open(checkpoint_.parameters().filename, IoType::ACC_RDW);
 	}
 
 	~Recovery()
@@ -143,25 +164,31 @@ public:
 
 	SizeType indexOfFirstFiniteLoop() const
 	{
-		return 0; // FIXME TODO
+		return opaqueRestart_.loopIndex;
 	}
 
-	static bool autoRestart(ParametersType& params, bool hasRestart)
+	SizeType stepCurrent(int stepCurrent) const
+	{
+		return (opaqueRestart_.type == BY_DELTATIME) ? opaqueRestart_.stepCurrent :
+		                                               stepCurrent;
+	}
+
+	static void autoRestart(ParametersType& params)
 	{
 		if (params.recoverySave == "no")
-			return hasRestart;
+			return;
 
 		// params.filename must have been corrected already if necessary
 		PsimagLite::String recoveryFile = getRecoveryFile(params.filename);
 		if (recoveryFile == "")
-			return hasRestart;
+			return;
 
 		// *  add the line RestartFilename= pointing to the data file of the
 		// run to be restarted.
 		params.checkpoint.filename = recoveryFile;
 		params.checkRestart(params.filename, recoveryFile, params.options, "INTERNAL=");
 
-		return true;
+		params.autoRestart = true;
 	}
 
 	bool byLoop(SizeType loopIndex) const
@@ -182,7 +209,7 @@ public:
 	}
 
 	void write(const TargetingType& psi,
-	           const VectorSizeType& v,
+	           SizeType stepCurrent,
 	           int lastSign,
 	           typename IoType::Out& ioOutCurrent) const
 	{
@@ -192,18 +219,16 @@ public:
 		files_.push_back(savedName);
 		ioOutCurrent.flush();
 
-		std::ifstream source(ioOutCurrent.filename().c_str(), std::ios::binary);
-		std::ofstream dest(savedName.c_str(), std::ios::binary);
-		dest << source.rdbuf();
-	    source.close();
-	    dest.close();
+		copyFile(savedName.c_str(), ioOutCurrent.filename());
 
 		typename IoType::Out ioOut(savedName, IoType::ACC_RDW);
+
+		writeRecovery(ioOut);
 
 		// taken from end of finiteDmrgLoops
 		checkpoint_.write(pS_, pE_, ioOut);
 		ioOut.createGroup("FinalPsi");
-		psi.write(v, ioOut, "FinalPsi");
+		psi.write(siteIndices_[stepCurrent], ioOut, "FinalPsi");
 		ioOut.write(lastSign, "LastLoopSign");
 
 		// wft dtor
@@ -316,20 +341,88 @@ private:
 		DIR* dir = 0;
 		dirent* ent = 0;
 		if ((dir = opendir(path.c_str())) != 0) {
-		  while ((ent = readdir(dir)) != 0) {
-			  files.push_back(ent->d_name);
-		  }
+			while ((ent = readdir(dir)) != 0) {
+				files.push_back(ent->d_name);
+			}
 
-		  closedir(dir);
-		  return;
+			closedir(dir);
+			return;
 		}
 
 		/* could not open directory */
 		perror("");
 	}
 
+	static void copyFile(PsimagLite::String destName, PsimagLite::String sourceName)
+	{
+		std::ifstream source(sourceName.c_str(), std::ios::binary);
+		std::ofstream dest(destName.c_str(), std::ios::binary);
+		dest << source.rdbuf();
+		source.close();
+		dest.close();
+	}
+
+	void writeRecovery(typename IoType::Out& ioOut) const
+	{
+		char c = opaqueTypeToChar(opaqueRestart_.type);
+		ioOut.createGroup("Recovery");
+		ioOut.write(c, "Recovery/OpaqueType");
+		ioOut.write(opaqueRestart_.loopIndex, "Recovery/loopIndex")	;
+		ioOut.write(opaqueRestart_.stepCurrent, "Recovery/stepCurrent");
+	}
+
+	void readRecovery()
+	{
+		typename IoType::In ioIn2(checkpoint_.parameters().checkpoint.filename);
+		char c  = 'd';
+		ioIn2.read(c, "Recovery/OpaqueType");
+		if (c == 'd') {
+			ioIn2.close();
+			return;
+		}
+
+		opaqueRestart_.type = opaqueCharToType(c);
+
+		ioIn2.read(opaqueRestart_.loopIndex, "Recovery/loopIndex");
+
+		if (opaqueRestart_.type == BY_DELTATIME)
+			ioIn2.read(opaqueRestart_.stepCurrent, "Recovery/stepCurrent");
+
+		ioIn2.close();
+	}
+
+	static OptionEnum opaqueCharToType(char c)
+	{
+		switch (c) {
+		case 'd':
+			return DISABLED;
+		case 'l':
+			return BY_LOOP;
+		case 't':
+			return BY_DELTATIME;
+		}
+
+		throw PsimagLite::RuntimeError("opaqueCharToType failed\n");
+	}
+
+	static char opaqueTypeToChar(OptionEnum type)
+	{
+		switch (type) {
+		case DISABLED:
+			return 'd';
+		case BY_LOOP:
+			return 'l';
+		case BY_DELTATIME:
+			return 't';
+		}
+
+		throw PsimagLite::RuntimeError("opaqueTypeToChar failed\n");
+	}
+
 	PsimagLite::ProgressIndicator progress_;
 	OptionSpec optionSpec_;
+	OpaqueRestart opaqueRestart_;
+	const VectorBlockType& siteIndices_;
 	const CheckpointType& checkpoint_;
 	const WaveFunctionTransfType& wft_;
 	const BasisWithOperatorsType& pS_;

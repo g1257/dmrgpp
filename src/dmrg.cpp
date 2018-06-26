@@ -339,7 +339,9 @@ to the main dmrg driver are the following.
 	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, false);
 
 	if (!options.enabled && options.label != "-") {
-		GlobalCoutStream.open(options.label.c_str());
+		GlobalCoutStream.open(options.label.c_str(),
+		                      (dmrgSolverParams.autoRestart) ? std::ofstream::app :
+		                                                       std::ofstream::out);
 		if (!GlobalCoutStream || GlobalCoutStream.bad()
 		        || !GlobalCoutStream.good()) {
 			PsimagLite::String str(application.name());
