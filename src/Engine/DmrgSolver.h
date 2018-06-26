@@ -282,7 +282,8 @@ public:
 			infiniteDmrgLoop(S,X,Y,E,pS,pE,*psi);
 		}
 
-		finiteDmrgLoops(S,E,pS,pE,*psi);
+		RecoveryType recovery(checkpoint_, wft_, pS, pE);
+		finiteDmrgLoops(S, E, pS, pE, *psi, recovery);
 
 		inSitu_.init(*psi,geometry.numberOfSites());
 
@@ -423,41 +424,48 @@ obtain ordered
 	                     BlockType const &E,
 	                     MyBasisWithOperators &pS,
 	                     MyBasisWithOperators &pE,
-	                     TargetingType& psi)
+	                     TargetingType& psi,
+	                     RecoveryType& recovery)
 	{
-		if (parameters_.options.find("nofiniteloops")!=PsimagLite::String::npos) return;
+		if (parameters_.options.find("nofiniteloops") != PsimagLite::String::npos)
+			return;
 
-		if (parameters_.finiteLoop.size()==0) {
+		SizeType loopsTotal = parameters_.finiteLoop.size();
+		if (loopsTotal == 0) {
 			PsimagLite::String msg("finiteDmrgLoops(...): there are no finite loops!");
 			throw PsimagLite::RuntimeError(msg + " (and nofiniteloops is not set)\n");
 		}
 
-		RecoveryType recovery(checkpoint_,wft_,pS,pE);
+		SizeType indexOfFirstFiniteLoop = recovery.indexOfFirstFiniteLoop();
 
 		// set initial site to add to either system or environment:
 		// this is a bit tricky and has been a source of endless bugs
 		// basically we have pS on the left and pE on the right,
 		// and we need to determine which site is to be added
 		// let us set the initial direction first:
-		ProgramGlobals::DirectionEnum direction = (parameters_.finiteLoop[0].stepLength<0) ?
+		assert(indexOfFirstFiniteLoop < parameters_.finiteLoop.size());
+		ProgramGlobals::DirectionEnum direction =
+		        (parameters_.finiteLoop[indexOfFirstFiniteLoop].stepLength < 0) ?
 		            ProgramGlobals::EXPAND_ENVIRON :  ProgramGlobals::EXPAND_SYSTEM;
 
 		// all right, now we can get the actual site to add:
 		SizeType sitesPerBlock = parameters_.sitesPerBlock;
 		VectorSizeType siteToAdd(sitesPerBlock);
 		// left-most site of pE
-		for (SizeType j=0;j<siteToAdd.size();j++)
+		for (SizeType j = 0; j < sitesPerBlock; ++j)
 			siteToAdd[j] = pE.block()[j];
 
 		if (direction == ProgramGlobals::EXPAND_ENVIRON) {
 			// right-most site of pS
-			for (SizeType j=0;j<siteToAdd.size();j++)
-				siteToAdd[j] = pS.block()[pS.block().size()-1-j];
+			for (SizeType j = 0; j < sitesPerBlock; ++j)
+				siteToAdd[j] = pS.block()[pS.block().size() - 1 - j];
 		}
+
 		// now stepCurrent_ is such that sitesIndices_[stepCurrent_] = siteToAdd
 		// so:
-		int sc = PsimagLite::isInVector(sitesIndices_,siteToAdd);
-		if (sc<0) {
+		int sc = PsimagLite::isInVector(sitesIndices_, siteToAdd);
+
+		if (sc < 0) {
 			PsimagLite::String msg("finiteDmrgLoops(...): internal error: ");
 			throw PsimagLite::RuntimeError(msg + "siteIndices_\n");
 		}
@@ -465,7 +473,7 @@ obtain ordered
 		stepCurrent_ = sc; // phew!!, that's all folks, now bugs, go away!!
 		int lastSign = 1;
 
-		for (SizeType i=0;i<parameters_.finiteLoop.size();i++)  {
+		for (SizeType i = indexOfFirstFiniteLoop; i < loopsTotal; ++i)  {
 			lastSign = (parameters_.finiteLoop[i].stepLength < 0) ? -1 : 1;
 			PsimagLite::OstringStream msg;
 			msg<<"Finite loop number "<<i;
@@ -474,7 +482,7 @@ obtain ordered
 			msg<<". "<<(parameters_.finiteLoop.size()-i)<<" more loops to go.";
 			progress_.printline(msg,std::cout);
 
-			if (i>0) {
+			if (i > 0) {
 				int sign = parameters_.finiteLoop[i].stepLength*
 				        parameters_.finiteLoop[i-1].stepLength;
 				if (sign>0) {
@@ -484,7 +492,9 @@ obtain ordered
 			}
 
 			finiteStep(S, E, pS, pE, i, psi, recovery);
+
 			if (psi.end()) break;
+
 			if (recovery.byLoop(i))
 				recovery.write(psi, sitesIndices_[stepCurrent_], lastSign, ioOut_);
 		}

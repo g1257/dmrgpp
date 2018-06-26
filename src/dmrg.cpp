@@ -13,6 +13,18 @@ using namespace Dmrg;
 std::streambuf *GlobalCoutBuffer = 0;
 std::ofstream GlobalCoutStream;
 
+typedef PsimagLite::Concurrency ConcurrencyType;
+
+void printLicense(PsimagLite::String name, const OperatorOptions& options)
+{
+	if (!ConcurrencyType::root() || options.enabled) return;
+
+	std::cout<<ProgramGlobals::license;
+	Provenance provenance;
+	std::cout<<provenance;
+	std::cout<<Provenance::logo(name)<<"\n";
+}
+
 void usageOperator()
 {
 	std::cerr<<"USAGE is operator -f filename -e canonical_operator_expression\n";
@@ -188,7 +200,6 @@ void mainLoop0(InputNgType::Readable& io,
 int main(int argc, char *argv[])
 {
 	PsimagLite::PsiApp application("DMRG++",&argc,&argv,1);
-	typedef PsimagLite::Concurrency ConcurrencyType;
 	InputCheck inputCheck;
 	PsimagLite::String filename="";
 	int opt = 0;
@@ -314,13 +325,26 @@ to the main dmrg driver are the following.
 				return 0;
 			}
 		}
+	}
 
+	// print license
+	if (versionOnly) {
+		printLicense(application.name(), options);
+		return 0;
+	}
+
+	InputNgType::Writeable ioWriteable(filename,inputCheck);
+	InputNgType::Readable io(ioWriteable);
+
+	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, false);
+
+	if (!options.enabled && options.label != "-") {
 		GlobalCoutStream.open(options.label.c_str());
 		if (!GlobalCoutStream || GlobalCoutStream.bad()
 		        || !GlobalCoutStream.good()) {
 			PsimagLite::String str(application.name());
 			str += ": Could not redirect std::cout to " + options.label + "\n";
-			throw PsimagLite::RuntimeError(str);
+			err(str);
 		}
 
 		std::cerr<<Provenance::logo(application.name());
@@ -332,20 +356,7 @@ to the main dmrg driver are the following.
 		atexit(restoreCoutBuffer);
 	}
 
-	// print license
-	if (ConcurrencyType::root() && !options.enabled) {
-		std::cout<<ProgramGlobals::license;
-		Provenance provenance;
-		std::cout<<provenance;
-		std::cout<<Provenance::logo(application.name())<<"\n";
-	}
-
-	if (versionOnly) return 0;
-
-	InputNgType::Writeable ioWriteable(filename,inputCheck);
-	InputNgType::Readable io(ioWriteable);
-
-	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, false);
+	printLicense(application.name(), options);
 
 	if (insitu!="") dmrgSolverParams.insitu = insitu;
 	if (dmrgSolverParams.options.find("minimizeDisk") != PsimagLite::String::npos)
@@ -360,8 +371,8 @@ to the main dmrg driver are the following.
 	} catch (std::exception&) {}
 
 	PsimagLite::CodeSectionParams codeSection(dmrgSolverParams.nthreads,
-	                                    setAffinities,
-	                                    threadsStackSize);
+	                                          setAffinities,
+	                                          threadsStackSize);
 	ConcurrencyType::setOptions(codeSection);
 
 	registerSignals();

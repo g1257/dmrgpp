@@ -128,6 +128,8 @@ public:
 	      counter_(0)
 	{
 		procOptions();
+		// if in read mode then copy checkpoint_.filename ==> params.filename
+		// needs to do something about runForinput.cout FIXME
 	}
 
 	~Recovery()
@@ -139,22 +141,26 @@ public:
 			unlink(files_[i].c_str());
 	}
 
-	static bool fakeArestartIfNeeded(ParametersType& params)
+	SizeType indexOfFirstFiniteLoop() const
+	{
+		return 0; // FIXME TODO
+	}
+
+	static bool autoRestart(ParametersType& params, bool hasRestart)
 	{
 		if (params.recoverySave == "no")
-			return false;
+			return hasRestart;
 
 		// params.filename must have been corrected already if necessary
 		PsimagLite::String recoveryFile = getRecoveryFile(params.filename);
 		if (recoveryFile == "")
-			return false;
+			return hasRestart;
 
-		// *  add the line RestartFilename= pointing to the data file of the run to be restarted.
+		// *  add the line RestartFilename= pointing to the data file of the
+		// run to be restarted.
 		params.checkpoint.filename = recoveryFile;
 		params.checkRestart(params.filename, recoveryFile, params.options, "INTERNAL=");
 
-		// * Then change the number of FiniteLoops to something like
-		err("change the number of FiniteLoops unimplemented\n");
 		return true;
 	}
 
@@ -268,7 +274,7 @@ private:
 			if (parts.size() != 3 || parts[0] != prefix || parts[2] != filename)
 				continue;
 			SizeType counter = atoi(parts[1].c_str());
-			if (counter > max) {
+			if (counter >= max) {
 				max = counter;
 				saved = files[i];
 			}

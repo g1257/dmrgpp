@@ -364,8 +364,8 @@ struct ParametersDmrgSolver {
 			} catch (std::exception&) {}
 		}
 
-		if (!hasRestart)
-			hasRestart = Recovery<ThisType, FakeTargeting>::fakeArestartIfNeeded(*this);
+		hasRestart = Recovery<ThisType, FakeTargeting>::autoRestart(*this,
+		                                                            hasRestart);
 
 		if (hasRestart) {
 			try {
