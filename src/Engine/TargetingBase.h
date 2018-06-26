@@ -108,8 +108,10 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename BasisType::BlockType BlockType;
+	typedef typename ModelType::ParametersType DmrgSolverParamsType;
 	typedef WaveFunctionTransfFactory<LeftRightSuperType,
-	VectorWithOffsetType> WaveFunctionTransfType;
+	VectorWithOffsetType,
+	DmrgSolverParamsType> WaveFunctionTransfType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
 	typedef TargetParamsBase<ModelType> TargetParamsType;

@@ -271,7 +271,7 @@ public:
 		MyBasisWithOperators pS("BasisWithOperators.System");
 		MyBasisWithOperators pE("BasisWithOperators.Environ");
 
-		if (checkpoint_()) {
+		if (checkpoint_.isRestart()) {
 			checkpoint_.read(pS, pE, *psi, false, "FinalPsi");
 		} else { // move this block elsewhere:
 
@@ -279,11 +279,11 @@ public:
 			pE.setVarious(E, model_, time);
 			pS.setVarious(S, model_, time);
 
-			infiniteDmrgLoop(S,X,Y,E,pS,pE,*psi);
+			infiniteDmrgLoop(X,Y,E,pS,pE,*psi);
 		}
 
 		RecoveryType recovery(sitesIndices_, ioOut_, checkpoint_, wft_, pS, pE);
-		finiteDmrgLoops(S, E, pS, pE, *psi, recovery);
+		finiteDmrgLoops(pS, pE, *psi, recovery);
 
 		inSitu_.init(*psi,geometry.numberOfSites());
 
@@ -349,14 +349,12 @@ obtain ordered
 		and similarly for the environment, increase step by one,
 		and continue with the growth phase of the algorithm.
 		*/
-	void infiniteDmrgLoop(
-	        BlockType const &,
-	        const VectorBlockType& X,
-	        const VectorBlockType& Y,
-	        BlockType const &E,
-	        MyBasisWithOperators &pS,
-	        MyBasisWithOperators &pE,
-	        TargetingType& psi)
+	void infiniteDmrgLoop(const VectorBlockType& X,
+	                      const VectorBlockType& Y,
+	                      BlockType const &E,
+	                      MyBasisWithOperators &pS,
+	                      MyBasisWithOperators &pE,
+	                      TargetingType& psi)
 	{
 		bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=
 		        PsimagLite::String::npos);
@@ -420,9 +418,7 @@ obtain ordered
 		constant allowing for a formulation
 		of DMRG as a variational method in a basis of matrix product states.
   */
-	void finiteDmrgLoops(BlockType const &S,
-	                     BlockType const &E,
-	                     MyBasisWithOperators &pS,
+	void finiteDmrgLoops(MyBasisWithOperators &pS,
 	                     MyBasisWithOperators &pE,
 	                     TargetingType& psi,
 	                     RecoveryType& recovery)
@@ -438,44 +434,18 @@ obtain ordered
 
 		SizeType indexOfFirstFiniteLoop = recovery.indexOfFirstFiniteLoop();
 
-		// set initial site to add to either system or environment:
-		// this is a bit tricky and has been a source of endless bugs
-		// basically we have pS on the left and pE on the right,
-		// and we need to determine which site is to be added
 		// let us set the initial direction first:
 		assert(indexOfFirstFiniteLoop < parameters_.finiteLoop.size());
 		ProgramGlobals::DirectionEnum direction =
 		        (parameters_.finiteLoop[indexOfFirstFiniteLoop].stepLength < 0) ?
 		            ProgramGlobals::EXPAND_ENVIRON :  ProgramGlobals::EXPAND_SYSTEM;
 
-		// all right, now we can get the actual site to add:
-		SizeType sitesPerBlock = parameters_.sitesPerBlock;
-		VectorSizeType siteToAdd(sitesPerBlock);
-		// left-most site of pE
-		for (SizeType j = 0; j < sitesPerBlock; ++j)
-			siteToAdd[j] = pE.block()[j];
-
-		if (direction == ProgramGlobals::EXPAND_ENVIRON) {
-			// right-most site of pS
-			for (SizeType j = 0; j < sitesPerBlock; ++j)
-				siteToAdd[j] = pS.block()[pS.block().size() - 1 - j];
-		}
-
-		// now stepCurrent_ is such that sitesIndices_[stepCurrent_] = siteToAdd
-		// so:
-		int sc = PsimagLite::isInVector(sitesIndices_, siteToAdd);
-
-		if (sc < 0) {
-			PsimagLite::String msg("finiteDmrgLoops(...): internal error: ");
-			throw PsimagLite::RuntimeError(msg + "siteIndices_\n");
-		}
-
-		stepCurrent_ = sc; // phew!!, that's all folks, now bugs, go away!!
 		int lastSign = 1;
+
+		stepCurrent_ = recovery.stepCurrent(direction);
 
 		for (SizeType i = indexOfFirstFiniteLoop; i < loopsTotal; ++i)  {
 
-			stepCurrent_ = recovery.stepCurrent(stepCurrent_);
 			lastSign = (parameters_.finiteLoop[i].stepLength < 0) ? -1 : 1;
 			PsimagLite::OstringStream msg;
 			msg<<"Finite loop number "<<i;
@@ -498,15 +468,21 @@ obtain ordered
 			if (psi.end()) break;
 
 			if (recovery.byLoop(i))
-				recovery.write(psi, stepCurrent_, lastSign, ioOut_);
+				recovery.write(psi, i + 1, stepCurrent_, lastSign, ioOut_);
 		}
 
 		if (!saveData_) return;
 
-		checkpoint_.write(pS, pE, ioOut_);
-		ioOut_.createGroup("FinalPsi");
+		PsimagLite::IoSelector::Out::Serializer::WriteMode overwriteOrNot =
+		        (parameters_.autoRestart) ?
+		            PsimagLite::IoSelector::Out::Serializer::ALLOW_OVERWRITE :
+		            PsimagLite::IoSelector::Out::Serializer::NO_OVERWRITE;
+
+		checkpoint_.write(pS, pE, ioOut_, overwriteOrNot);
+
+		if (!parameters_.autoRestart) ioOut_.createGroup("FinalPsi");
 		psi.write(sitesIndices_[stepCurrent_], ioOut_, "FinalPsi");
-		ioOut_.write(lastSign, "LastLoopSign");
+		ioOut_.write(lastSign, "LastLoopSign", overwriteOrNot);
 	}
 
 	void finiteStep(MyBasisWithOperators &pS,
@@ -584,7 +560,7 @@ obtain ordered
 			if (target.end()) break;
 			if (recovery.byTime()) {
 				int lastSign = (parameters_.finiteLoop[loopIndex].stepLength < 0) ? -1 : 1;
-				recovery.write(target, stepCurrent_, lastSign, ioOut_);
+				recovery.write(target, loopIndex, stepCurrent_, lastSign, ioOut_);
 			}
 		}
 
@@ -699,6 +675,16 @@ obtain ordered
 	{
 		if (!saveData_) return;
 		static SizeType counter = 0;
+		if (counter == 0) {
+			try {
+				PsimagLite::IoSelector::In ioIn(ioOut_.filename());
+				SizeType x = 0;
+				ioIn.read(x, "Energy/Size");
+				ioIn.close();
+				counter = x;
+			} catch (...) {}
+		}
+
 		ioOut_.writeVectorEntry(energy, "Energy", counter++);
 	}
 

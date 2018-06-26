@@ -253,18 +253,21 @@ public:
 		io.read(jvals_, label + "su2Jvals");
 	}
 
-	void write(PsimagLite::IoSelector::Out& io, PsimagLite::String prefix) const
+	void write(PsimagLite::IoSelector::Out& io,
+	           PsimagLite::String prefix,
+	           PsimagLite::IoSelector::Out::Serializer::WriteMode mode) const
 	{
-		io.createGroup(prefix + "SymmSu2");
+		if (mode == PsimagLite::IoSelector::Out::Serializer::NO_OVERWRITE)
+			io.createGroup(prefix + "SymmSu2");
 		prefix += "SymmSu2/";
 
-		jmValues_.write(io, prefix);
-		io.write(flavors_, prefix + "su2flavors");
-		io.write(flavorsMax_, prefix + "su2FlavorsMax");
-		io.write(electronsMax_, prefix + "su2ElectronsMax");
-		io.write(jMax_, prefix + "su2JMax");
-		io.write(statesReduced_, prefix + "su2StatesReduced");
-		io.write(jvals_, prefix + "su2Jvals");
+		jmValues_.write(io, prefix, mode);
+		io.write(flavors_, prefix + "su2flavors", mode);
+		io.write(flavorsMax_, prefix + "su2FlavorsMax", mode);
+		io.write(electronsMax_, prefix + "su2ElectronsMax", mode);
+		io.write(jMax_, prefix + "su2JMax", mode);
+		io.write(statesReduced_, prefix + "su2StatesReduced", mode);
+		io.write(jvals_, prefix + "su2Jvals", mode);
 	}
 
 	SizeType flavor2Index(SizeType f1,

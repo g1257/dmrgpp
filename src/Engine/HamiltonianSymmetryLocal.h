@@ -132,9 +132,11 @@ public:
 	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{}
 
-	void write(PsimagLite::IoSelector::Out& io, PsimagLite::String label) const
+	void write(PsimagLite::IoSelector::Out& io,
+	           PsimagLite::String label,
+	           PsimagLite::IoSelector::Out::Serializer::WriteMode mode) const
 	{
-		io.write(0, label + "FACTORSSIZE");
+		io.write(0, label + "FACTORSSIZE", mode);
 	}
 }; //class HamiltonianSymmetryLocal
 } // namespace Dmrg

@@ -90,7 +90,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Random48.h"
 
 namespace Dmrg {
-template<typename LeftRightSuperType,typename VectorWithOffsetType_>
+template<typename LeftRightSuperType,
+         typename VectorWithOffsetType_,
+         typename ParametersType>
 class WaveFunctionTransfFactory {
 
 	typedef PsimagLite::IoSelector IoType;
@@ -118,8 +120,7 @@ public:
 	typedef typename WaveFunctionTransfBaseType::WftOptions WftOptionsType;
 	typedef typename PsimagLite::Stack<BlockDiagonalMatrixType>::Type WftStackType;
 
-	template<typename SomeParametersType>
-	WaveFunctionTransfFactory(SomeParametersType& params)
+	WaveFunctionTransfFactory(const ParametersType& params)
 	    : isEnabled_(!(params.options.find("nowft")!=PsimagLite::String::npos)),
 	      wftOptions_(ProgramGlobals::INFINITE,
 	                  params.options,
@@ -134,11 +135,13 @@ public:
 	      wftImpl_(0),
 	      rng_(3433117),
 	      noLoad_(false),
-	      save_(params.options.find("noSaveWft") == PsimagLite::String::npos)
+	      save_(params.options.find("noSaveWft") == PsimagLite::String::npos),
+	      params_(params)
 	{
 		if (!isEnabled_) return;
 
-		bool b = (params.options.find("restart")!=PsimagLite::String::npos);
+		bool b = (params.options.find("restart")!=PsimagLite::String::npos ||
+		        params.autoRestart);
 
 		if (b) {
 			if (params.options.find("noloadwft")!=PsimagLite::String::npos)
@@ -162,7 +165,8 @@ public:
 	{
 		if (!isEnabled_) return;
 		IoType::Out ioOut(filenameOut_, IoType::ACC_RDW);
-		write(ioOut);
+		write(ioOut, (params_.autoRestart) ? IoType::Out::Serializer::ALLOW_OVERWRITE :
+		                                     IoType::Out::Serializer::NO_OVERWRITE);
 		delete wftImpl_;
 	}
 
@@ -361,38 +365,42 @@ public:
 		files.push_back(utils::pathPrepend(WFT_STRING,rootName));
 	}
 
-	void write(PsimagLite::IoSelector::Out& ioMain)
+	void write(PsimagLite::IoSelector::Out& ioMain,
+	           typename PsimagLite::IoSelector::Out::Serializer::WriteMode overWriteOrNot)
 	{
-		writePartial(ioMain);
+		writePartial(ioMain, overWriteOrNot);
 
 		PsimagLite::String label = "Wft";
-		ioMain.write(wsStack_, label + "/wsStack");
-		ioMain.write(weStack_, label + "/weStack");
+		ioMain.write(wsStack_, label + "/wsStack", overWriteOrNot);
+		ioMain.write(weStack_, label + "/weStack", overWriteOrNot);
 	}
 
-	void write(PsimagLite::IoSelector::Out& ioMain) const
+	void write(PsimagLite::IoSelector::Out& ioMain,
+	           typename PsimagLite::IoSelector::Out::Serializer::WriteMode overWriteOrNot) const
 	{
-		writePartial(ioMain);
+		writePartial(ioMain, overWriteOrNot);
 
 		PsimagLite::String label = "Wft";
 		WftStackType wsStack = wsStack_;
-		ioMain.write(wsStack, label + "/wsStack");
+		ioMain.write(wsStack, label + "/wsStack", overWriteOrNot);
 
 		WftStackType weStack = weStack_;
-		ioMain.write(weStack, label + "/weStack");
+		ioMain.write(weStack, label + "/weStack", overWriteOrNot);
 	}
 
 private:
 
-	void writePartial(PsimagLite::IoSelector::Out& ioMain) const
+	void writePartial(PsimagLite::IoSelector::Out& ioMain,
+	                  typename PsimagLite::IoSelector::Out::Serializer::WriteMode overWrite) const
 	{
 		if (!isEnabled_) return;
 		if (!save_) return;
 		PsimagLite::String label = "Wft";
-		ioMain.createGroup(label);
-		ioMain.write(isEnabled_, label + "/isEnabled");
-		wftOptions_.write(ioMain, label + "/WftOptions");
-		dmrgWaveStruct_.write(ioMain, label + "/DmrgWaveStruct");
+		if (overWrite == PsimagLite::IoSelector::Out::Serializer::NO_OVERWRITE)
+			ioMain.createGroup(label);
+		ioMain.write(isEnabled_, label + "/isEnabled", overWrite);
+		wftOptions_.write(ioMain, label + "/WftOptions", overWrite);
+		dmrgWaveStruct_.write(ioMain, label + "/DmrgWaveStruct", overWrite);
 	}
 
 	void read()
@@ -536,6 +544,7 @@ private:
 	bool noLoad_;
 	const bool save_;
 	VectorSizeType sitesSeen_;
+	const ParametersType& params_;
 }; // class WaveFunctionTransformation
 } // namespace Dmrg
 

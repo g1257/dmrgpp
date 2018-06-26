@@ -126,6 +126,8 @@ public:
 	    energyFromFile_(0.0),
 	    dummyBwo_("dummy")
 	{
+		if (parameters_.autoRestart) isRestart_ = true;
+
 		SizeType site = 0; // FIXME for Immm model, find max of hilbert(site) over site
 		SizeType hilbertOneSite = model.hilbertSize(site);
 		if (parameters_.keptStatesInfinite < hilbertOneSite) {
@@ -194,18 +196,19 @@ public:
 	// Not related to stacks
 	void write(const BasisWithOperatorsType &pS,
 	           const BasisWithOperatorsType &pE,
-	           typename IoType::Out& io) const
+	           typename IoType::Out& io,
+	           IoType::Out::Serializer::WriteMode overWriteOrNot) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving pS and pE...";
 		progress_.printline(msg,std::cout);
 		pS.write(io,
 		         "CHKPOINTSYSTEM",
-		         IoType::Out::Serializer::NO_OVERWRITE,
+		         overWriteOrNot,
 		         BasisWithOperatorsType::SAVE_ALL);
 		pE.write(io,
 		         "CHKPOINTENVIRON",
-		         IoType::Out::Serializer::NO_OVERWRITE,
+		         overWriteOrNot,
 		         BasisWithOperatorsType::SAVE_ALL);
 	}
 
@@ -245,7 +248,7 @@ public:
 		else return shrink(systemStack_,target);
 	}
 
-	bool operator()() const { return isRestart_; }
+	bool isRestart() const { return isRestart_; }
 
 	SizeType stackSize(SizeType what) const
 	{
@@ -309,7 +312,9 @@ private:
 
 		ParametersType::readFiniteLoops(ioIn,vfl);
 
-		checkFiniteLoops(vfl,totalSites,lastSite,prevDeltaSign,checkPoint);
+		if (!parameters_.autoRestart)
+			checkFiniteLoops(vfl,totalSites,lastSite,prevDeltaSign,checkPoint);
+
 		checkMvalues(vfl, hilbertOneSite);
 	}
 

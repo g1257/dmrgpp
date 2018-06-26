@@ -481,21 +481,23 @@ public:
 	           bool minimizeWrite) const
 	{
 		PsimagLite::String label = ss + "/";
-		io.createGroup(ss);
-		io.write(useSu2Symmetry_, label + "useSu2Symmetry");
-		io.write(block_, label + "BLOCK");
+		if (mode == SomeIoType::Serializer::NO_OVERWRITE)
+			io.createGroup(ss);
+
+		io.write(useSu2Symmetry_, label + "useSu2Symmetry", mode);
+		io.write(block_, label + "BLOCK", mode);
 
 		if (!minimizeWrite) {
-			io.write(electrons_, label + "ELECTRONS");
-			io.write(signsOld_, label + "SignsOld");
+			io.write(electrons_, label + "ELECTRONS", mode);
+			io.write(signsOld_, label + "SignsOld", mode);
 		}
 
-		io.write(partition_, label + "PARTITION");
-		io.write(permInverse_, label + "PERMUTATIONINVERSE");
-		io.write(qns_, label + "QNShrink");
+		io.write(partition_, label + "PARTITION", mode);
+		io.write(permInverse_, label + "PERMUTATIONINVERSE", mode);
+		io.write(qns_, label + "QNShrink", mode);
 
-		if (useSu2Symmetry_) symmSu2_.write(io, label);
-		else symmLocal_.write(io, label);
+		if (useSu2Symmetry_) symmSu2_.write(io, label, mode);
+		else symmLocal_.write(io, label, mode);
 	}
 
 	//! saves this basis to disk

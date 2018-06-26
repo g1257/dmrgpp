@@ -358,6 +358,11 @@ to the main dmrg driver are the following.
 		atexit(restoreCoutBuffer);
 	}
 
+	if (dmrgSolverParams.autoRestart) {
+		std::cout<<"\nAutoRestart possible\n";
+		std::cerr<<"AutoRestart possible\n";
+	}
+
 	printLicense(application.name(), options);
 
 	if (insitu!="") dmrgSolverParams.insitu = insitu;

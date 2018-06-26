@@ -91,13 +91,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<typename ModelHelperType_,
-         typename ParametersType,
+         typename ParametersType_,
          typename InputValidatorType_,
          typename GeometryType_>
 class ModelBase  {
 
 public:
 
+	typedef ParametersType_ ParametersType;
 	typedef InputValidatorType_ InputValidatorType;
 	typedef typename PsimagLite::Vector<unsigned int long>::Type HilbertBasisType;
 	typedef ModelHelperType_ ModelHelperType;

@@ -104,10 +104,9 @@ class Recovery  {
 
 	struct OpaqueRestart {
 
-		OpaqueRestart() : type(DISABLED), loopIndex(0), stepCurrent(0)
+		OpaqueRestart() : loopIndex(0), stepCurrent(0)
 		{}
 
-		OptionEnum type;
 		SizeType loopIndex;
 		SizeType stepCurrent;
 	};
@@ -151,6 +150,10 @@ public:
 		copyFile(checkpoint_.parameters().filename,
 		         checkpoint_.parameters().checkpoint.filename);
 		ioOut.open(checkpoint_.parameters().filename, IoType::ACC_RDW);
+
+		VectorStringType parts;
+		makeThreeParts(parts, checkpoint_.parameters().checkpoint.filename);
+		if (parts.size() == 3) counter_ = 1 + atoi(parts[1].c_str());
 	}
 
 	~Recovery()
@@ -167,12 +170,13 @@ public:
 		return opaqueRestart_.loopIndex;
 	}
 
-	SizeType stepCurrent(int stepCurrent) const
+	SizeType stepCurrent(ProgramGlobals::DirectionEnum direction) const
 	{
-		return (opaqueRestart_.type == BY_DELTATIME) ? opaqueRestart_.stepCurrent :
-		                                               stepCurrent;
+		return (checkpoint_.parameters().autoRestart) ? opaqueRestart_.stepCurrent :
+		                                                nonRecoveryStepCurrent(direction);
 	}
 
+	// this function is called before the ctor
 	static void autoRestart(ParametersType& params)
 	{
 		if (params.recoverySave == "no")
@@ -209,6 +213,7 @@ public:
 	}
 
 	void write(const TargetingType& psi,
+	           SizeType loopIndex,
 	           SizeType stepCurrent,
 	           int lastSign,
 	           typename IoType::Out& ioOutCurrent) const
@@ -223,16 +228,22 @@ public:
 
 		typename IoType::Out ioOut(savedName, IoType::ACC_RDW);
 
-		writeRecovery(ioOut);
+		bool overWrite = checkpoint_.parameters().autoRestart;
+		typename IoType::Out::Serializer::WriteMode overWriteOrNot =
+		        (overWrite) ? IoType::Out::Serializer::ALLOW_OVERWRITE :
+		                      IoType::Out::Serializer::NO_OVERWRITE;
+
+		writeRecovery(ioOut, loopIndex, stepCurrent, overWriteOrNot);
 
 		// taken from end of finiteDmrgLoops
-		checkpoint_.write(pS_, pE_, ioOut);
-		ioOut.createGroup("FinalPsi");
+		checkpoint_.write(pS_, pE_, ioOut, overWriteOrNot);
+		if (!overWrite) ioOut.createGroup("FinalPsi");
 		psi.write(siteIndices_[stepCurrent], ioOut, "FinalPsi");
-		ioOut.write(lastSign, "LastLoopSign");
+
+		ioOut.write(lastSign, "LastLoopSign", overWriteOrNot);
 
 		// wft dtor
-		wft_.write(ioOut);
+		wft_.write(ioOut, overWriteOrNot);
 
 		ioOut.close();
 		// checkpoint stacks
@@ -362,61 +373,58 @@ private:
 		dest.close();
 	}
 
-	void writeRecovery(typename IoType::Out& ioOut) const
+	void writeRecovery(typename IoType::Out& ioOut,
+	                   SizeType loopIndex,
+	                   SizeType stepCurrent,
+	                   bool overWrite) const
 	{
-		char c = opaqueTypeToChar(opaqueRestart_.type);
-		ioOut.createGroup("Recovery");
-		ioOut.write(c, "Recovery/OpaqueType");
-		ioOut.write(opaqueRestart_.loopIndex, "Recovery/loopIndex")	;
-		ioOut.write(opaqueRestart_.stepCurrent, "Recovery/stepCurrent");
+		if (!overWrite)
+			ioOut.createGroup("Recovery");
+
+		typename IoType::Out::Serializer::WriteMode overWriteOrNot =
+		        (overWrite) ? IoType::Out::Serializer::ALLOW_OVERWRITE :
+		                      IoType::Out::Serializer::NO_OVERWRITE;
+
+		ioOut.write(loopIndex, "Recovery/loopIndex", overWriteOrNot)	;
+		ioOut.write(stepCurrent, "Recovery/stepCurrent", overWriteOrNot);
 	}
 
 	void readRecovery()
 	{
 		typename IoType::In ioIn2(checkpoint_.parameters().checkpoint.filename);
-		char c  = 'd';
-		ioIn2.read(c, "Recovery/OpaqueType");
-		if (c == 'd') {
-			ioIn2.close();
-			return;
-		}
-
-		opaqueRestart_.type = opaqueCharToType(c);
 
 		ioIn2.read(opaqueRestart_.loopIndex, "Recovery/loopIndex");
-
-		if (opaqueRestart_.type == BY_DELTATIME)
-			ioIn2.read(opaqueRestart_.stepCurrent, "Recovery/stepCurrent");
-
+		ioIn2.read(opaqueRestart_.stepCurrent, "Recovery/stepCurrent");
 		ioIn2.close();
 	}
 
-	static OptionEnum opaqueCharToType(char c)
+	// set initial site to add to either system or environment:
+	// this is a bit tricky and has been a source of endless bugs
+	// basically we have pS on the left and pE on the right,
+	// and we need to determine which site is to be added
+	int nonRecoveryStepCurrent(ProgramGlobals::DirectionEnum direction) const
 	{
-		switch (c) {
-		case 'd':
-			return DISABLED;
-		case 'l':
-			return BY_LOOP;
-		case 't':
-			return BY_DELTATIME;
+		// all right, now we can get the actual site to add:
+		SizeType sitesPerBlock = checkpoint_.parameters().sitesPerBlock;
+		VectorSizeType siteToAdd(sitesPerBlock);
+		// left-most site of pE
+		for (SizeType j = 0; j < sitesPerBlock; ++j)
+			siteToAdd[j] = pE_.block()[j];
+
+		if (direction == ProgramGlobals::EXPAND_ENVIRON) {
+			// right-most site of pS
+			for (SizeType j = 0; j < sitesPerBlock; ++j)
+				siteToAdd[j] = pS_.block()[pS_.block().size() - 1 - j];
 		}
 
-		throw PsimagLite::RuntimeError("opaqueCharToType failed\n");
-	}
+		// now stepCurrent_ is such that sitesIndices_[stepCurrent_] = siteToAdd
+		// so:
+		int sc = PsimagLite::isInVector(siteIndices_, siteToAdd);
 
-	static char opaqueTypeToChar(OptionEnum type)
-	{
-		switch (type) {
-		case DISABLED:
-			return 'd';
-		case BY_LOOP:
-			return 'l';
-		case BY_DELTATIME:
-			return 't';
-		}
+		if (sc < 0)
+			err("nonRecoveryStepCurrent(...): step current error\n");
 
-		throw PsimagLite::RuntimeError("opaqueTypeToChar failed\n");
+		return sc; // phew!!, that's all folks, now bugs, go away!!
 	}
 
 	PsimagLite::ProgressIndicator progress_;

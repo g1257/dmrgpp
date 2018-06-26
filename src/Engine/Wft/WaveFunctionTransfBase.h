@@ -127,16 +127,19 @@ public:
 			io.read(denseSparseThreshold, label + "/denseSparseThreshold");
 		}
 
-		void write(PsimagLite::IoSelector::Out& io, PsimagLite::String label) const
+		void write(PsimagLite::IoSelector::Out& io,
+		           PsimagLite::String label,
+		           PsimagLite::IoSelector::Out::Serializer::WriteMode overWrite) const
 		{
-			io.createGroup(label);
-			io.write(dir, label + "/dir");
-			io.write(twoSiteDmrg, label + "/twoSiteDmrg");
-			io.write(accel, label + "/accel");
-			io.write(kronLoadBalance, label + "/kronLoadBalance");
-			io.write(firstCall, label + "/firstCall");
-			io.write(counter, label + "/counter");
-			io.write(denseSparseThreshold, label + "/denseSparseThreshold");
+			if (overWrite == PsimagLite::IoSelector::Out::Serializer::NO_OVERWRITE)
+				io.createGroup(label);
+			io.write(dir, label + "/dir", overWrite);
+			io.write(twoSiteDmrg, label + "/twoSiteDmrg", overWrite);
+			io.write(accel, label + "/accel", overWrite);
+			io.write(kronLoadBalance, label + "/kronLoadBalance", overWrite);
+			io.write(firstCall, label + "/firstCall", overWrite);
+			io.write(counter, label + "/counter", overWrite);
+			io.write(denseSparseThreshold, label + "/denseSparseThreshold", overWrite);
 		}
 
 		ProgramGlobals::DirectionEnum dir;
