@@ -14,6 +14,8 @@ class IoNgSerializer {
 
 	typedef std::vector<unsigned char> VectorOfBoolInternalType;
 
+	static const unsigned char CANARY_VALUE = 170;
+
 public:
 
 	/*
@@ -28,16 +30,20 @@ public:
 	enum WriteMode {NO_OVERWRITE, ALLOW_OVERWRITE};
 
 	IoNgSerializer(String filename, unsigned int mode)
-	    : hdf5file_(new H5::H5File(filename, mode)), filename_(filename)
+	    : hdf5file_(new H5::H5File(filename, mode)), filename_(filename), mode_(mode)
 	{
 #ifdef NDEBUG
-			H5::Exception::dontPrint();
+		H5::Exception::dontPrint();
 #endif
-			if (mode == H5F_ACC_TRUNC) createGroup("");
+		if (mode == H5F_ACC_TRUNC) createGroup("");
+		if (mode == H5F_ACC_RDONLY) readCanary();
 	}
 
 	~IoNgSerializer()
 	{
+		if (hdf5file_ && mode_ != H5F_ACC_RDONLY)
+			writeCanary();
+
 		filename_ = "";
 		delete hdf5file_;
 		hdf5file_ = 0;
@@ -46,14 +52,20 @@ public:
 	void open(String filename,
 	          unsigned int mode)
 	{
-		if (hdf5file_) delete hdf5file_;
+		if (hdf5file_)
+			throw RuntimeError("IoNgSerializer::open(): object already open\n");
 
 		filename_ = filename;
 		hdf5file_ = new H5::H5File(filename, mode);
+		if (hdf5file_ && mode_ != H5F_ACC_RDONLY)
+			writeCanary();
 	}
 
 	void close()
 	{
+		if (hdf5file_ && mode_ != H5F_ACC_RDONLY)
+			writeCanary();
+
 		hdf5file_->close();
 		delete hdf5file_;
 		hdf5file_ = 0;
@@ -62,6 +74,9 @@ public:
 
 	void flush()
 	{
+		if (hdf5file_ && mode_ != H5F_ACC_RDONLY)
+			writeCanary();
+
 		hdf5file_->flush(H5F_SCOPE_GLOBAL);
 	}
 
@@ -511,6 +526,56 @@ private:
 		delete dataspace;
 	}
 
+	void writeCanary()
+	{
+		hsize_t dims[1];
+		dims[0] = 1;
+		static const String name = "/Def/Canary";
+		H5::DataSpace *dataspace = new H5::DataSpace(1, dims); // create new dspace
+		H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
+		H5::DataSet* dataset = 0;
+
+		try {
+			dataset = new H5::DataSet(hdf5file_->openDataSet(name));
+		} catch (H5::Exception&) {
+			dataset = new H5::DataSet(hdf5file_->createDataSet(name,
+			                                                   typeToH5<unsigned char>(),
+			                                                   *dataspace,
+			                                                   dsCreatPlist));
+		}
+
+		unsigned char c = CANARY_VALUE;
+		dataset->write(&c, typeToH5<unsigned char>());
+		delete dataset;
+		delete dataspace;
+	}
+
+	void readCanary()
+	{
+		static const String name = "/Def/Canary";
+
+		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet(name));
+		const H5::DataSpace& dspace = dataset->getSpace();
+		const int ndims = dspace.getSimpleExtentNdims();
+		if (ndims != 1)
+			throw RuntimeError("IoNgSerializer: problem reading vector<arith> (ndims)\n");
+
+		hsize_t* dims = new hsize_t[ndims];
+		dspace.getSimpleExtentDims(dims);
+
+		if (dims[0] == 0)
+			throw RuntimeError("IoNgSerializer: problem reading vector<arith> (dims)\n");
+
+		unsigned char c = 0;
+		void* ptr = static_cast<void *>(&c);
+		dataset->read(ptr, typeToH5<unsigned char>());
+		delete[] dims;
+		delete dataset;
+
+		if (c != CANARY_VALUE)
+			throw RuntimeError("File " + filename_ + " is not valid (dead canary)\n");
+	}
+
 	static VectorOfBoolInternalType convertFromBoolean(const std::vector<bool>& src)
 	{
 		typedef VectorOfBoolInternalType::value_type ValueType;
@@ -620,6 +685,7 @@ private:
 
 	H5::H5File* hdf5file_;
 	String filename_;
+	unsigned int mode_;
 	static const SizeType booleanEncodedSize_ = 4;
 	static const SizeType booleanEncodedStart_ = 4;
 };
