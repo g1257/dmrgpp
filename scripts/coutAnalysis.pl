@@ -38,18 +38,18 @@ sub loadData
 		my $dt = $t - $prevt;
 		$prevt = $t;
 		next if ($dt < $cutoff);
-		
+
 		if (defined($h->{$name})) {
 			my $ptr = $h->{$name};
 			if (scalar(@$ptr) != 2) {
 				print STDERR "$0: Error with $name\n";
 				last;
 			}
- 
-			my @temp = ($ptr->[0] + $dt, $ptr->[1] + 1);			
+
+			my @temp = ($ptr->[0] + $dt, $ptr->[1] + 1);
 			$h->{$name} = \@temp;
 		} else {
-			my @temp = ($dt, 0);
+			my @temp = ($dt, 1);
 			$h->{$name} = \@temp
 		}
 	}
