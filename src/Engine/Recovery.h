@@ -95,6 +95,8 @@ class Recovery  {
 
 	typedef Recovery<ParametersType,int> RecoveryStaticType;
 
+	static const SizeType MAX_RECOVERY_FILES = 10;
+
 	enum OptionEnum {DISABLED, BY_DELTATIME, BY_LOOP};
 
 	struct OptionSpec {
@@ -152,12 +154,6 @@ public:
 
 		readRecovery();
 
-		//		assert(ioOut.filename() == checkpoint_.parameters().filename);
-		//		ioOut.close();
-		//		copyFile(checkpoint_.parameters().filename,
-		//		         checkpoint_.parameters().checkpoint.filename);
-		//		ioOut.open(checkpoint_.parameters().filename, IoType::ACC_RDW);
-
 		VectorStringType parts;
 		RecoveryStaticType::makeThreeParts(parts,
 		                                   checkpoint_.parameters().checkpoint.filename);
@@ -166,10 +162,12 @@ public:
 
 	~Recovery()
 	{
-		// NEEDS TO CLEAN ALL Recovery + digit + filename files
-		// FIXME TODO
-		for (SizeType i = 0; i < files_.size(); ++i)
-			unlink(files_[i].c_str());
+		for (SizeType i = 0; i < MAX_RECOVERY_FILES; ++i) {
+			PsimagLite::String prefix(RecoveryStaticType::recoveryFilePrefix());
+			prefix += ttos(i);
+			PsimagLite::String savedName(prefix + checkpoint_.parameters().filename);
+			unlink(savedName.c_str());
+		}
 	}
 
 	SizeType indexOfFirstFiniteLoop() const
@@ -209,7 +207,6 @@ public:
 		PsimagLite::String prefix(RecoveryStaticType::recoveryFilePrefix());
 		prefix += ttos(counter_++);
 		PsimagLite::String savedName(prefix + checkpoint_.parameters().filename);
-		files_.push_back(savedName);
 		ioOutCurrent.flush();
 
 		//copyFile(savedName.c_str(), ioOutCurrent.filename());
@@ -234,8 +231,8 @@ public:
 		// checkpoint stacks
 		checkpoint_.checkpointStacks(savedName);
 
-		if (counter_ >= checkpoint_.parameters().recoveryMaxFiles)
-			counter_ = 0;
+		if (counter_ >= checkpoint_.parameters().recoveryMaxFiles ||
+		        counter_ >= MAX_RECOVERY_FILES) counter_ = 0;
 	}
 
 private:
@@ -370,8 +367,7 @@ private:
 	const BasisWithOperatorsType& pE_;
 	mutable SizeType savedTime_;
 	mutable SizeType counter_;
-	mutable VectorStringType files_;
-};     //class Recovery
+}; //class Recovery
 
 template<typename ParametersType>
 class Recovery<ParametersType, int>  {
