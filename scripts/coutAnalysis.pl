@@ -38,10 +38,19 @@ sub loadData
 		my $dt = $t - $prevt;
 		$prevt = $t;
 		next if ($dt < $cutoff);
+		
 		if (defined($h->{$name})) {
-			$h->{$name} += $dt;
+			my $ptr = $h->{$name};
+			if (scalar(@$ptr) != 2) {
+				print STDERR "$0: Error with $name\n";
+				last;
+			}
+ 
+			my @temp = ($ptr->[0] + $dt, $ptr->[1] + 1);			
+			$h->{$name} = \@temp;
 		} else {
-			$h->{$name} = $dt;
+			my @temp = ($dt, 0);
+			$h->{$name} = \@temp
 		}
 	}
 
@@ -55,9 +64,16 @@ sub printData
 	my ($hptr) = @_;
 	my %h = %$hptr;
 	my $tot = 0;
-	foreach my $k (sort {$h{$b} <=> $h{$a}} keys %h) {
-		my $t = $hptr->{$k};
-		print "$k $t\n";
+	foreach my $k (sort {$h{$b}->[0] <=> $h{$a}->[0]} keys %h) {
+		my $ptr = $hptr->{$k};
+		if (scalar(@$ptr) != 2) {
+			print STDERR "$0: Error with $k\n";
+			last;
+		}
+
+		my $t = $ptr->[0];
+		my $numberOfTimes = $ptr->[1];
+		print "$k\t $t\t $numberOfTimes\n";
 		$tot += $t;
 	}
 
