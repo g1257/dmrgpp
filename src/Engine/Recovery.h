@@ -239,15 +239,18 @@ public:
 		checkpoint_.write(pS_, pE_, ioOut);
 		ioOut.createGroup("FinalPsi");
 		psi.write(siteIndices_[stepCurrent], ioOut, "FinalPsi");
-
 		ioOut.write(lastSign, "LastLoopSign");
 
 		// wft dtor
 		wft_.write(ioOut);
 
 		ioOut.close();
+
 		// checkpoint stacks
 		checkpoint_.checkpointStacks(savedName);
+
+		if (counter_ >= checkpoint_.parameters().recoveryMaxFiles)
+			counter_ = 0;
 	}
 
 private:
@@ -425,6 +428,7 @@ private:
 	                   PsimagLite::String file) const
 	{
 		PsimagLite::String energyLabel = checkpoint_.parameters().checkpoint.labelForEnergy;
+		ioOut.flush();
 		typename IoType::In ioIn(file);
 		SizeType total = 0;
 		ioIn.read(total, energyLabel + "/Size");

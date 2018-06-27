@@ -200,6 +200,7 @@ public:
 		knownLabels_.push_back("GeometryValueModifier");
 		knownLabels_.push_back("ThreadsStackSize");
 		knownLabels_.push_back("RecoverySave");
+		knownLabels_.push_back("RecoveryMaxFiles");
 	}
 
 	~InputCheck()
