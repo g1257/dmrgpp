@@ -86,11 +86,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <fstream>
 #include <sys/types.h>
 #include <dirent.h>
+#include "Io/IoNg.h"
 
 namespace Dmrg {
 
 template<typename ParametersType,typename CheckpointType>
 class Recovery  {
+
+	typedef Recovery<ParametersType,int> RecoveryStaticType;
 
 	enum OptionEnum {DISABLED, BY_DELTATIME, BY_LOOP};
 
@@ -149,14 +152,15 @@ public:
 
 		readRecovery();
 
-//		assert(ioOut.filename() == checkpoint_.parameters().filename);
-//		ioOut.close();
-//		copyFile(checkpoint_.parameters().filename,
-//		         checkpoint_.parameters().checkpoint.filename);
-//		ioOut.open(checkpoint_.parameters().filename, IoType::ACC_RDW);
+		//		assert(ioOut.filename() == checkpoint_.parameters().filename);
+		//		ioOut.close();
+		//		copyFile(checkpoint_.parameters().filename,
+		//		         checkpoint_.parameters().checkpoint.filename);
+		//		ioOut.open(checkpoint_.parameters().filename, IoType::ACC_RDW);
 
 		VectorStringType parts;
-		makeThreeParts(parts, checkpoint_.parameters().checkpoint.filename);
+		RecoveryStaticType::makeThreeParts(parts,
+		                                   checkpoint_.parameters().checkpoint.filename);
 		if (parts.size() == 3) counter_ = 1 + atoi(parts[1].c_str());
 	}
 
@@ -177,25 +181,6 @@ public:
 	{
 		return (checkpoint_.parameters().autoRestart) ? opaqueRestart_.stepCurrent :
 		                                                nonRecoveryStepCurrent(direction);
-	}
-
-	// this function is called before the ctor
-	static void autoRestart(ParametersType& params)
-	{
-		if (params.options.find("recoveryEnableRead") == PsimagLite::String::npos)
-			return;
-
-		// params.filename must have been corrected already if necessary
-		PsimagLite::String recoveryFile = getRecoveryFile(params.filename);
-		if (recoveryFile == "")
-			return;
-
-		// *  add the line RestartFilename= pointing to the data file of the
-		// run to be restarted.
-		params.checkpoint.filename = recoveryFile;
-		//params.checkRestart(params.filename, recoveryFile, params.options, "INTERNAL=");
-
-		params.autoRestart = true;
 	}
 
 	bool byLoop(SizeType loopIndex) const
@@ -221,7 +206,7 @@ public:
 	           int lastSign,
 	           typename IoType::Out& ioOutCurrent) const
 	{
-		PsimagLite::String prefix(recoveryFilePrefix());
+		PsimagLite::String prefix(RecoveryStaticType::recoveryFilePrefix());
 		prefix += ttos(counter_++);
 		PsimagLite::String savedName(prefix + checkpoint_.parameters().filename);
 		files_.push_back(savedName);
@@ -254,8 +239,6 @@ public:
 	}
 
 private:
-
-	static PsimagLite::String recoveryFilePrefix() { return "Recovery"; }
 
 	void procOptions()
 	{
@@ -294,77 +277,6 @@ private:
 	void dieWithError(PsimagLite::String str) const
 	{
 		err("Syntax error for RecoverySave expression " + str + "\n");
-	}
-
-	static PsimagLite::String getRecoveryFile(PsimagLite::String filename)
-	{
-		const PsimagLite::String prefix = recoveryFilePrefix();
-		std::vector<PsimagLite::String> files;
-		listFilesInDirectory(files, ".");
-
-		if (files.size() == 0) return "";
-
-		PsimagLite::String saved("");
-		SizeType max = 0;
-
-		for (SizeType i = 0; i < files.size(); ++i) {
-			std::vector<PsimagLite::String> parts;
-			makeThreeParts(parts, files[i]);
-			if (parts.size() != 3 || parts[0] != prefix || parts[2] != filename)
-				continue;
-			SizeType counter = atoi(parts[1].c_str());
-			if (counter >= max) {
-				max = counter;
-				saved = files[i];
-			}
-		}
-
-		return saved;
-	}
-
-	static void makeThreeParts(std::vector<PsimagLite::String>& parts,
-	                           PsimagLite::String filename)
-	{
-		const PsimagLite::String prefix = recoveryFilePrefix();
-		const SizeType len = prefix.length();
-		if (filename.substr(0, len) != prefix) return;
-		parts.push_back(prefix);
-
-		PsimagLite::String buffer("");
-		for (SizeType i = len; i < filename.length(); ++i) {
-			if (isAdigit(filename[i])) buffer += filename[i];
-			break;
-		}
-
-		if (buffer == "") return;
-
-		parts.push_back(buffer);
-
-		SizeType lastPartLen = filename.length() - buffer.length() - len;
-		parts.push_back(filename.substr(len + buffer.length(), lastPartLen));
-	}
-
-	static bool isAdigit(char c)
-	{
-		return (c > 47 && c < 58);
-	}
-
-	static void listFilesInDirectory(std::vector<PsimagLite::String>& files,
-	                                 PsimagLite::String path)
-	{
-		DIR* dir = 0;
-		dirent* ent = 0;
-		if ((dir = opendir(path.c_str())) != 0) {
-			while ((ent = readdir(dir)) != 0) {
-				files.push_back(ent->d_name);
-			}
-
-			closedir(dir);
-			return;
-		}
-
-		/* could not open directory */
-		perror("");
 	}
 
 	static void copyFile(PsimagLite::String destName, PsimagLite::String sourceName)
@@ -461,6 +373,116 @@ private:
 	mutable VectorStringType files_;
 };     //class Recovery
 
+template<typename ParametersType>
+class Recovery<ParametersType, int>  {
+
+public:
+
+	static PsimagLite::String recoveryFilePrefix() { return "Recovery"; }
+
+	// this function is called before the ctor
+	static void autoRestart(ParametersType& params)
+	{
+		if (params.options.find("recoveryEnableRead") == PsimagLite::String::npos)
+			return;
+
+		// params.filename must have been corrected already if necessary
+		PsimagLite::String recoveryFile = getRecoveryFile(params.filename);
+		if (recoveryFile == "")
+			return;
+
+		// *  add the line RestartFilename= pointing to the data file of the
+		// run to be restarted.
+		params.checkpoint.filename = recoveryFile;
+		//params.checkRestart(params.filename, recoveryFile, params.options, "INTERNAL=");
+
+		params.autoRestart = true;
+	}
+
+	static void makeThreeParts(std::vector<PsimagLite::String>& parts,
+	                           PsimagLite::String filename)
+	{
+		const PsimagLite::String prefix = recoveryFilePrefix();
+		const SizeType len = prefix.length();
+		if (filename.substr(0, len) != prefix) return;
+		parts.push_back(prefix);
+
+		PsimagLite::String buffer("");
+		for (SizeType i = len; i < filename.length(); ++i) {
+			if (isAdigit(filename[i])) buffer += filename[i];
+			break;
+		}
+
+		if (buffer == "") return;
+
+		parts.push_back(buffer);
+
+		SizeType lastPartLen = filename.length() - buffer.length() - len;
+		parts.push_back(filename.substr(len + buffer.length(), lastPartLen));
+	}
+
+private:
+
+	static bool isAdigit(char c)
+	{
+		return (c > 47 && c < 58);
+	}
+
+	static void listFilesInDirectory(std::vector<PsimagLite::String>& files,
+	                                 PsimagLite::String path)
+	{
+		DIR* dir = 0;
+		dirent* ent = 0;
+		if ((dir = opendir(path.c_str())) != 0) {
+			while ((ent = readdir(dir)) != 0) {
+				files.push_back(ent->d_name);
+			}
+
+			closedir(dir);
+			return;
+		}
+
+		/* could not open directory */
+		perror("");
+	}
+
+	static PsimagLite::String getRecoveryFile(PsimagLite::String filename)
+	{
+		const PsimagLite::String prefix = recoveryFilePrefix();
+		std::vector<PsimagLite::String> files;
+		listFilesInDirectory(files, ".");
+
+		if (files.size() == 0) return "";
+
+		PsimagLite::String saved("");
+		SizeType max = 0;
+
+		for (SizeType i = 0; i < files.size(); ++i) {
+			std::vector<PsimagLite::String> parts;
+			makeThreeParts(parts, files[i]);
+			if (parts.size() != 3 || parts[0] != prefix || parts[2] != filename)
+				continue;
+			SizeType counter = atoi(parts[1].c_str());
+			if (counter >= max && isValidFile(files[i])) {
+				max = counter;
+				saved = files[i];
+			}
+		}
+
+		return saved;
+	}
+
+	static bool isValidFile(PsimagLite::String file)
+	{
+		try {
+			PsimagLite::IoNg::In ioIn(file);
+			ioIn.close();
+			return true;
+		} catch (...) {}
+
+		return false;
+	}
+};
 } // namespace Dmrg
 /*@}*/
 #endif

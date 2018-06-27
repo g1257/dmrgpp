@@ -131,15 +131,6 @@ See the below for more information and examples on Finite Loops.
 template<typename FieldType,typename InputValidatorType>
 struct ParametersDmrgSolver {
 
-	struct FakeTargeting {
-		typedef int BasisWithOperatorsType;
-		typedef int WaveFunctionTransfType;
-		struct IoType { typedef int Out; };
-		typedef int TargetingType;
-		typedef int MemoryStackType;
-		typedef int DiskStackType;
-	};
-
 	typedef ParametersDmrgSolver<FieldType, InputValidatorType> ThisType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorFieldType;
@@ -373,7 +364,7 @@ struct ParametersDmrgSolver {
 			} catch (std::exception&) {}
 		}
 
-		Recovery<ThisType, FakeTargeting>::autoRestart(*this);
+		Recovery<ThisType, int>::autoRestart(*this);
 
 		if (hasRestart) {
 			try {
