@@ -174,7 +174,7 @@ public:
 			if (counter == 0) createGroup(str);
 
 			ioNgSerializer_.write(str + "/" + ttos(counter), x);
-			ioNgSerializer_.write(str + "/Size", counter, (counter == 0) ?
+			ioNgSerializer_.write(str + "/Size", counter + 1, (counter == 0) ?
 			                          IoNgSerializer::NO_OVERWRITE :
 			                          IoNgSerializer::ALLOW_OVERWRITE);
 		}
