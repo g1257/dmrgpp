@@ -141,13 +141,17 @@ public:
 
 		if (!isRestart_) return;
 
-		IoType::In ioIn2(parameters_.checkpoint.filename);
-		ioIn2.readLastVectorEntry(energyFromFile_,
-		                          parameters_.checkpoint.labelForEnergy);
-
 		VectorSizeType v;
-		ioIn2.read(v, "CHKPOINTSYSTEM/OperatorPerSite");
-		if (v.size() == 0) return;
+
+		{
+			IoType::In ioIn2(parameters_.checkpoint.filename);
+			ioIn2.readLastVectorEntry(energyFromFile_,
+			                          parameters_.checkpoint.labelForEnergy);
+
+			ioIn2.read(v, "CHKPOINTSYSTEM/OperatorPerSite");
+			if (v.size() == 0) return;
+			ioIn2.close();
+		}
 
 		SizeType operatorsPerSite = v[0];
 
@@ -160,8 +164,6 @@ public:
 			msg += " restart one model from a different one or different variant\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
-
-		ioIn2.close();
 
 		loadStacksDiskToMemory();
 	}
@@ -196,19 +198,18 @@ public:
 	// Not related to stacks
 	void write(const BasisWithOperatorsType &pS,
 	           const BasisWithOperatorsType &pE,
-	           typename IoType::Out& io,
-	           IoType::Out::Serializer::WriteMode overWriteOrNot) const
+	           typename IoType::Out& io) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Saving pS and pE...";
 		progress_.printline(msg,std::cout);
 		pS.write(io,
 		         "CHKPOINTSYSTEM",
-		         overWriteOrNot,
+		         IoType::Out::Serializer::NO_OVERWRITE,
 		         BasisWithOperatorsType::SAVE_ALL);
 		pE.write(io,
 		         "CHKPOINTENVIRON",
-		         overWriteOrNot,
+		         IoType::Out::Serializer::NO_OVERWRITE,
 		         BasisWithOperatorsType::SAVE_ALL);
 	}
 

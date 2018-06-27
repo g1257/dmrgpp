@@ -473,16 +473,11 @@ obtain ordered
 
 		if (!saveData_) return;
 
-		PsimagLite::IoSelector::Out::Serializer::WriteMode overwriteOrNot =
-		        (parameters_.autoRestart) ?
-		            PsimagLite::IoSelector::Out::Serializer::ALLOW_OVERWRITE :
-		            PsimagLite::IoSelector::Out::Serializer::NO_OVERWRITE;
+		checkpoint_.write(pS, pE, ioOut_);
 
-		checkpoint_.write(pS, pE, ioOut_, overwriteOrNot);
-
-		if (!parameters_.autoRestart) ioOut_.createGroup("FinalPsi");
+		ioOut_.createGroup("FinalPsi");
 		psi.write(sitesIndices_[stepCurrent_], ioOut_, "FinalPsi");
-		ioOut_.write(lastSign, "LastLoopSign", overwriteOrNot);
+		ioOut_.write(lastSign, "LastLoopSign");
 	}
 
 	void finiteStep(MyBasisWithOperators &pS,

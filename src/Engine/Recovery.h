@@ -149,11 +149,11 @@ public:
 
 		readRecovery();
 
-		assert(ioOut.filename() == checkpoint_.parameters().filename);
-		ioOut.close();
-		copyFile(checkpoint_.parameters().filename,
-		         checkpoint_.parameters().checkpoint.filename);
-		ioOut.open(checkpoint_.parameters().filename, IoType::ACC_RDW);
+//		assert(ioOut.filename() == checkpoint_.parameters().filename);
+//		ioOut.close();
+//		copyFile(checkpoint_.parameters().filename,
+//		         checkpoint_.parameters().checkpoint.filename);
+//		ioOut.open(checkpoint_.parameters().filename, IoType::ACC_RDW);
 
 		VectorStringType parts;
 		makeThreeParts(parts, checkpoint_.parameters().checkpoint.filename);
@@ -193,7 +193,7 @@ public:
 		// *  add the line RestartFilename= pointing to the data file of the
 		// run to be restarted.
 		params.checkpoint.filename = recoveryFile;
-		params.checkRestart(params.filename, recoveryFile, params.options, "INTERNAL=");
+		//params.checkRestart(params.filename, recoveryFile, params.options, "INTERNAL=");
 
 		params.autoRestart = true;
 	}
@@ -227,26 +227,23 @@ public:
 		files_.push_back(savedName);
 		ioOutCurrent.flush();
 
-		copyFile(savedName.c_str(), ioOutCurrent.filename());
+		//copyFile(savedName.c_str(), ioOutCurrent.filename());
 
-		typename IoType::Out ioOut(savedName, IoType::ACC_RDW);
+		typename IoType::Out ioOut(savedName, IoType::ACC_TRUNC);
 
-		bool overWrite = checkpoint_.parameters().autoRestart;
-		typename IoType::Out::Serializer::WriteMode overWriteOrNot =
-		        (overWrite) ? IoType::Out::Serializer::ALLOW_OVERWRITE :
-		                      IoType::Out::Serializer::NO_OVERWRITE;
+		writeEnergies(ioOut, ioOutCurrent.filename());
 
-		writeRecovery(ioOut, loopIndex, stepCurrent, overWriteOrNot);
+		writeRecovery(ioOut, loopIndex, stepCurrent);
 
 		// taken from end of finiteDmrgLoops
-		checkpoint_.write(pS_, pE_, ioOut, overWriteOrNot);
-		if (!overWrite) ioOut.createGroup("FinalPsi");
+		checkpoint_.write(pS_, pE_, ioOut);
+		ioOut.createGroup("FinalPsi");
 		psi.write(siteIndices_[stepCurrent], ioOut, "FinalPsi");
 
-		ioOut.write(lastSign, "LastLoopSign", overWriteOrNot);
+		ioOut.write(lastSign, "LastLoopSign");
 
 		// wft dtor
-		wft_.write(ioOut, overWriteOrNot);
+		wft_.write(ioOut);
 
 		ioOut.close();
 		// checkpoint stacks
@@ -378,18 +375,12 @@ private:
 
 	void writeRecovery(typename IoType::Out& ioOut,
 	                   SizeType loopIndex,
-	                   SizeType stepCurrent,
-	                   bool overWrite) const
+	                   SizeType stepCurrent) const
 	{
-		if (!overWrite)
-			ioOut.createGroup("Recovery");
+		ioOut.createGroup("Recovery");
 
-		typename IoType::Out::Serializer::WriteMode overWriteOrNot =
-		        (overWrite) ? IoType::Out::Serializer::ALLOW_OVERWRITE :
-		                      IoType::Out::Serializer::NO_OVERWRITE;
-
-		ioOut.write(loopIndex, "Recovery/loopIndex", overWriteOrNot)	;
-		ioOut.write(stepCurrent, "Recovery/stepCurrent", overWriteOrNot);
+		ioOut.write(loopIndex, "Recovery/loopIndex")	;
+		ioOut.write(stepCurrent, "Recovery/stepCurrent");
 	}
 
 	void readRecovery()
@@ -428,6 +419,29 @@ private:
 			err("nonRecoveryStepCurrent(...): step current error\n");
 
 		return sc; // phew!!, that's all folks, now bugs, go away!!
+	}
+
+	void writeEnergies(typename IoType::Out& ioOut,
+	                   PsimagLite::String file) const
+	{
+		PsimagLite::String energyLabel = checkpoint_.parameters().checkpoint.labelForEnergy;
+		typename IoType::In ioIn(file);
+		SizeType total = 0;
+		ioIn.read(total, energyLabel + "/Size");
+		if (total == 0)
+			err("writeEnergies: no energies?\n");
+
+		ioOut.createGroup(energyLabel);
+
+		ioOut.write(total, energyLabel + "/Size");
+
+		for (SizeType i = 0; i < total; ++i) {
+			typename CheckpointType::RealType x = 0.0;
+			ioIn.read(x, energyLabel + "/" + ttos(i));
+			ioOut.write(x, energyLabel + "/" + ttos(i));
+		}
+
+		ioIn.close();
 	}
 
 	PsimagLite::ProgressIndicator progress_;
