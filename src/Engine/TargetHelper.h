@@ -121,6 +121,11 @@ public:
 
 	const WaveFunctionTransfType& wft() const  { return wft_; }
 
+	bool withLegacyBugs() const
+	{
+		return (model_.params().options.find("fixLegacyBugs") == PsimagLite::String::npos);
+	}
+
 private:
 
 	const LeftRightSuperType& lrs_;

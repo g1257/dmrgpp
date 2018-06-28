@@ -168,7 +168,8 @@ private:
 	                           SizeType threadId)
 	{
 		if (src1.sectors() == 0 || src2.sectors() == 0) return 0.0;
-		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(threadId));
+		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(threadId),
+		                                helper_.withLegacyBugs());
 		VectorWithOffsetType dest;
 		applyOpLocal1(dest,
 		              src1,
@@ -201,7 +202,8 @@ private:
 	                                      SizeType threadId)
 	{
 
-		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(threadId));
+		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(threadId),
+		                                helper_.withLegacyBugs());
 		VectorWithOffsetType dest;
 		applyOpLocal1.hookForZero(dest,
 		                          src1,

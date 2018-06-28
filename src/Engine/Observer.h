@@ -135,9 +135,14 @@ public:
 	         SizeType trail,
 	         bool hasTimeEvolution,
 	         const ModelType& model,
-	         bool verbose=false)
-	    : helper_(io,nf,trail,model.params().nthreads,hasTimeEvolution,verbose),
-	      verbose_(verbose),
+	         bool verbose = false)
+	    : helper_(io,
+	              nf,
+	              trail,
+	              model.params().nthreads,
+	              hasTimeEvolution,
+	              verbose,
+	              (model.params().options.find("fixLegacyBugs") == PsimagLite::String::npos)),
 	      onepoint_(helper_),
 	      skeleton_(helper_,model,verbose),
 	      twopoint_(helper_,skeleton_),
@@ -550,7 +555,6 @@ private:
 	}
 
 	ObserverHelperType helper_;
-	bool verbose_;
 	OnePointCorrelationsType onepoint_;
 	CorrelationsSkeletonType skeleton_;
 	TwoPointCorrelationsType twopoint_;

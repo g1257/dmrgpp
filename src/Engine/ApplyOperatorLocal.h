@@ -89,23 +89,23 @@ template<typename LeftRightSuperType, typename VectorWithOffsetType_>
 class ApplyOperatorLocal {
 
 	typedef typename VectorWithOffsetType_::VectorType TargetVectorType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType
-	BasisWithOperatorsType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
+	typedef typename BasisWithOperatorsType::ComplexOrRealType ComplexOrRealType;
 	typedef PsimagLite::PackIndices PackIndicesType;
 
 public:
 
 	enum BorderEnum {BORDER_NO = false, BORDER_YES = true};
 
-	enum {MIDDLE,LEFT_CORNER,RIGHT_CORNER};
+	enum {MIDDLE, LEFT_CORNER, RIGHT_CORNER};
 
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 
-	ApplyOperatorLocal(const LeftRightSuperType& lrs)
-	    : lrs_(lrs)
+	ApplyOperatorLocal(const LeftRightSuperType& lrs, bool withLegacyBug)
+	    : lrs_(lrs), withLegacyBug_(withLegacyBug)
 	{}
 
 	//! FIXME: we need to make a fast version for when we're just
@@ -124,6 +124,7 @@ public:
 				applyLocalOpEnviron(dest,src,A);
 			return;
 		}
+
 		applyLocalOpCorner(dest,src,A,fermionSign);
 	}
 
@@ -139,7 +140,7 @@ public:
 
 		TargetVectorType dest2(lrs_.super().size(),0.0);
 
-		for (SizeType ii=0;ii<src.sectors();ii++) {
+		for (SizeType ii = 0; ii < src.sectors(); ++ii) {
 			SizeType i = src.sector(ii);
 			hookForZeroSystem(dest2,src,A,fermionSign,i);
 		}
@@ -147,7 +148,7 @@ public:
 		dest.fromFull(dest2,lrs_.super());
 	}
 
-	// dest2 = transpose(A) * src
+	// dest2 = transpose(A) * src; corrected if !withLegacyBug
 	void hookForZeroSystem(TargetVectorType& dest2,
 	                       const VectorWithOffsetType& src,
 	                       const OperatorType& A,
@@ -158,25 +159,28 @@ public:
 		SizeType final = offset + src.effectiveSize(i0);
 		SizeType ns = lrs_.left().permutationVector().size();
 		SizeType nx = ns/A.data.rows();
-		if (src.size()!=lrs_.super().permutationVector().size())
-			throw PsimagLite::RuntimeError("applyLocalOpSystem SE\n");
+		if (src.size() != lrs_.super().permutationVector().size())
+			err("applyLocalOpSystem SE\n");
 
 		PackIndicesType pack1(ns);
 		PackIndicesType pack2(nx);
-		for (SizeType i=offset;i<final;i++) {
-			SizeType x=0,y=0;
+		for (SizeType i = offset; i < final; ++i) {
+			SizeType x = 0;
+			SizeType y  = 0;
 			pack1.unpack(x,y,lrs_.super().permutation(i));
 
-			SizeType x0=0,x1=0;
+			SizeType x0 = 0;
+			SizeType x1 = 0;
 			assert(x<lrs_.left().permutationVector().size());
 			pack2.unpack(x0,x1,lrs_.left().permutation(x));
 
-			RealType sign = 1.0; //fermionSign(x0,A.fermionSign);
-			for (int k=A.data.getRowPtr(x0);k<A.data.getRowPtr(x0+1);k++) {
+			SizeType start = A.data.getRowPtr(x0);
+			SizeType end = A.data.getRowPtr(x0 + 1);
+			for (SizeType k = start; k < end; ++k) {
 				SizeType x0prime = A.data.getCol(k);
 				SizeType xprime = lrs_.left().permutationInverse(x0prime+x1*nx);
 				SizeType j = lrs_.super().permutationInverse(xprime+y*ns);
-				dest2[j] += src.slowAccess(i)*A.data.getValue(k)*sign;
+				correctOrNotLegacyBug(dest2, src, A.data.getValue(k), i, j);
 			}
 		}
 	}
@@ -207,7 +211,7 @@ private:
 		dest.fromFull(dest2,lrs_.super());
 	}
 
-	// dest2 = transpose(A) * src
+	// dest2 = transpose(A) * src; corrected if !withLegacyBug
 	void applyLocalOpSystem(TargetVectorType& dest2,
 	                        const VectorWithOffsetType& src,
 	                        const OperatorType& A,
@@ -216,28 +220,31 @@ private:
 	{
 		SizeType offset = src.offset(i0);
 		SizeType final = offset + src.effectiveSize(i0);
-		//SizeType counter=0;
 		SizeType ns = lrs_.left().permutationVector().size();
 		SizeType nx = ns/A.data.rows();
-		if (src.size()!=lrs_.super().permutationVector().size())
-			throw PsimagLite::RuntimeError("applyLocalOpSystem SE\n");
+		if (src.size() != lrs_.super().permutationVector().size())
+			err("applyLocalOpSystem SE\n");
 
 		PackIndicesType pack1(ns);
 		PackIndicesType pack2(nx);
-		for (SizeType i=offset;i<final;i++) {
-			SizeType x=0,y=0;
+		for (SizeType i = offset; i < final; ++i) {
+			SizeType x = 0;
+			SizeType y = 0;
 			pack1.unpack(x,y,lrs_.super().permutation(i));
 
-			SizeType x0=0,x1=0;
+			SizeType x0 = 0;
+			SizeType x1 = 0;
 			assert(x<lrs_.left().permutationVector().size());
 			pack2.unpack(x0,x1,lrs_.left().permutation(x));
 
 			RealType sign = fermionSign(x0,A.fermionSign);
-			for (int k=A.data.getRowPtr(x1);k<A.data.getRowPtr(x1+1);k++) {
+			SizeType start = A.data.getRowPtr(x1);
+			SizeType end = A.data.getRowPtr(x1 + 1);
+			for (SizeType k = start; k < end; ++k) {
 				SizeType x1prime = A.data.getCol(k);
 				SizeType xprime = lrs_.left().permutationInverse(x0+x1prime*nx);
 				SizeType j = lrs_.super().permutationInverse(xprime+y*ns);
-				dest2[j] += src.slowAccess(i)*A.data.getValue(k)*sign;
+				correctOrNotLegacyBug(dest2, src, A.data.getValue(k)*sign, i, j);
 			}
 		}
 	}
@@ -259,13 +266,14 @@ private:
 				applyLocalOpLeftCorner(dest2,src,A,i);
 				break;
 			case RIGHT_CORNER:
-				throw PsimagLite::RuntimeError("applyLocalOpEnviron: internal error\n");
+				err("applyLocalOpEnviron: internal error\n");
 			}
 		}
+
 		dest.fromFull(dest2,lrs_.super());
 	}
 
-	// dest2 = transpose(A) * src
+	// dest2 = transpose(A) * src; corrected if !withLegacyBug
 	void applyLocalOpEnviron(TargetVectorType& dest2,
 	                         const VectorWithOffsetType& src,
 	                         const OperatorType& A,
@@ -279,22 +287,26 @@ private:
 		PackIndicesType pack1(ns);
 		PackIndicesType pack2(nx);
 
-		for (SizeType i=offset;i<final;i++) {
-			SizeType x=0,y=0;
+		for (SizeType i = offset; i < final; ++i) {
+			SizeType x = 0;
+			SizeType y = 0;
 			pack1.unpack(x,y,lrs_.super().permutation(i));
-			SizeType y0=0,y1=0;
+			SizeType y0 = 0;
+			SizeType y1 = 0;
 			pack2.unpack(y0,y1,lrs_.right().permutation(y));
 			RealType sign = lrs_.left().fermionicSign(x,A.fermionSign);
-			for (int k=A.data.getRowPtr(y0);k<A.data.getRowPtr(y0+1);k++) {
+			SizeType start = A.data.getRowPtr(y0);
+			SizeType end = A.data.getRowPtr(y0 + 1);
+			for (SizeType k = start; k < end; ++k) {
 				SizeType y0prime = A.data.getCol(k);
 				SizeType yprime = lrs_.right().permutationInverse(y0prime+y1*nx);
 				SizeType j = lrs_.super().permutationInverse(x+yprime*ns);
-				dest2[j] += src.slowAccess(i)*A.data.getValue(k)*sign;
+				correctOrNotLegacyBug(dest2, src, A.data.getValue(k)*sign, i, j);
 			}
 		}
 	}
 
-	// dest2 = transpose(A) * src
+	// dest2 = transpose(A) * src; corrected if !withLegacyBug
 	void applyLocalOpLeftCorner(TargetVectorType& dest2,
 	                            const VectorWithOffsetType& src,
 	                            const OperatorType& A,
@@ -306,19 +318,22 @@ private:
 		SizeType ns = lrs_.left().size();
 		PackIndicesType pack(ns);
 
-		for (SizeType i=offset;i<final;i++) {
-			SizeType x=0,y=0;
+		for (SizeType i = offset; i < final; ++i) {
+			SizeType x = 0;
+			SizeType y = 0;
 			pack.unpack(x,y,lrs_.super().permutation(i));
 
-			for (int k=A.data.getRowPtr(x);k<A.data.getRowPtr(x+1);k++) {
+			SizeType start = A.data.getRowPtr(x);
+			SizeType end = A.data.getRowPtr(x + 1);
+			for (SizeType k = start; k < end; ++k) {
 				SizeType xprime = A.data.getCol(k);
 				SizeType j = lrs_.super().permutationInverse(xprime+y*ns);
-				dest2[j] += src.slowAccess(i)*A.data.getValue(k);
+				correctOrNotLegacyBug(dest2, src, A.data.getValue(k), i, j);
 			}
 		}
 	}
 
-	// dest2 = transpose(A) * src
+	// dest2 = transpose(A) * src; corrected if !withLegacyBug
 	void applyLocalOpRightCorner(TargetVectorType& dest2,
 	                             const VectorWithOffsetType& src,
 	                             const OperatorType& A,
@@ -327,22 +342,25 @@ private:
 		SizeType offset = src.offset(i0);
 		SizeType final = offset + src.effectiveSize(i0);
 		SizeType ns = lrs_.left().permutationVector().size();
-		if (src.size()!=lrs_.super().permutationVector().size())
-			throw PsimagLite::RuntimeError("applyLocalOpSystem SE\n");
+		if (src.size() != lrs_.super().permutationVector().size())
+			err("applyLocalOpSystem SE\n");
 
 		PackIndicesType pack(ns);
 
-		for (SizeType i=offset;i<final;i++) {
-			SizeType x=0,y=0;
+		for (SizeType i = offset; i < final; ++i) {
+			SizeType x = 0;
+			SizeType y = 0;
 			pack.unpack(x,y,lrs_.super().permutation(i));
 
-			if (x>=lrs_.left().permutationVector().size())
-				throw PsimagLite::RuntimeError("applyLocalOpSystem S\n");
+			if (x >= lrs_.left().permutationVector().size())
+				err("applyLocalOpSystem S\n");
 			RealType sign = lrs_.left().fermionicSign(x,A.fermionSign);
-			for (int k=A.data.getRowPtr(y);k<A.data.getRowPtr(y+1);k++) {
+			SizeType start = A.data.getRowPtr(y);
+			SizeType end = A.data.getRowPtr(y + 1);
+			for (SizeType k = start; k < end; ++k) {
 				SizeType yprime = A.data.getCol(k);
 				SizeType j = lrs_.super().permutationInverse(x+yprime*ns);
-				dest2[j] += src.slowAccess(i)*A.data.getValue(k)*sign;
+				correctOrNotLegacyBug(dest2, src, A.data.getValue(k)*sign, i, j);
 			}
 		}
 	}
@@ -361,7 +379,20 @@ private:
 		applyLocalOpEnviron(dest,src,A,LEFT_CORNER);
 	}
 
+	void correctOrNotLegacyBug(TargetVectorType& dest2,
+	                           const VectorWithOffsetType& src,
+	                           const ComplexOrRealType& aTimesSign,
+	                           SizeType i,
+	                           SizeType j) const
+	{
+		if (withLegacyBug_)
+			dest2[j] += src.slowAccess(i)*aTimesSign;
+		else
+			dest2[i] += src.slowAccess(j)*aTimesSign;
+	}
+
 	const LeftRightSuperType& lrs_;
+	bool withLegacyBug_;
 }; // class ApplyOperatorLocal
 } // namespace Dmrg
 

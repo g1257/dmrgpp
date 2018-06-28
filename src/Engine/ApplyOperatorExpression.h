@@ -124,7 +124,7 @@ public:
 	      E0_(0.0),
 	      currentTime_(0.0),
 	      indexNoAdvance_(indexNoAdvance),
-	      applyOpLocal_(targetHelper.lrs()),
+	      applyOpLocal_(targetHelper.lrs(), targetHelper.withLegacyBugs()),
 	      targetVectors_(0),
 	      timeVectorsBase_(0)
 	{}

@@ -118,10 +118,12 @@ public:
 	               SizeType trail,
 	               SizeType numberOfPthreads,
 	               bool hasTimeEvolution,
-	               bool verbose)
+	               bool verbose,
+	               bool withLegacyBugs)
 	    : io_(io),
 	      currentPos_(numberOfPthreads),
 	      verbose_(verbose),
+	      withLegacyBugs_(withLegacyBugs),
 	      bracket_(2,0),
 	      noMoreData_(false)
 	{
@@ -258,6 +260,10 @@ public:
 		return timeSerializerV_[currentPos_[threadId]].vector(braketId);
 	}
 
+	bool withLegacyBugs() const
+	{
+		return withLegacyBugs_;
+	}
 
 	friend std::ostream& operator<<(std::ostream& os, ObserverHelper& p)
 	{
@@ -399,6 +405,7 @@ private:
 	typename PsimagLite::Vector<TimeSerializerType>::Type timeSerializerV_;
 	typename PsimagLite::Vector<SizeType>::Type currentPos_; // it's a vector: one per pthread
 	bool verbose_;
+	bool withLegacyBugs_;
 	typename PsimagLite::Vector<SizeType>::Type bracket_;
 	bool noMoreData_;
 };  //ObserverHelper
