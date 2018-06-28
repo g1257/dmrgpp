@@ -1,3 +1,24 @@
+2018-06-28 Version 5.22
+
+* VectorWithOffsets reads only non-zero sectors
+
+* IoSimple no longer used in DMRG++
+
+* operator driver now prints JMVALUES 2 jtilde mtilde
+
+* ci: 5802 added (JzSymmetry)
+
+* ci: bug fixes
+
+* kompile rig to compile with various setups
+
+* DiskStack now has better implementation
+
+* recovery feature implemented but needs tests and docs
+
+* coutAnalysis counts number of times each item appears
+
+
 2018-06-19 Version 5.20
 
 * ci: ./dmrg -f input.inp 'n$.txt' feature
