@@ -2,7 +2,7 @@
 
 void test1()
 {
-	PsimagLite::IoNg::Out ioOut("hello.hdf5");
+	PsimagLite::IoNg::Out ioOut("hello.hdf5", PsimagLite::IoNg::ACC_TRUNC);
 
 	std::vector<double> v(10, 42.0);
 	ioOut.write(v, "MyVector");
