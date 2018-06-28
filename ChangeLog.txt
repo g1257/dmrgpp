@@ -1,3 +1,20 @@
+2018-06-28 Version 2.22
+
+* USE_IO_NG deleted, USE_IO_SIMPLE added
+
+* ProgressIndicator::time() added
+
+* IoSimple and IoNg cleanup
+
+* IoNg holds filename and mode
+
+* IoNg improvements
+
+* IoNg: bug fixed in writeVectorEntry
+
+* IoNg: has canary, but can be improved
+
+
 2018-06-19 Version 2.20
 
 * myApp01.cpp sample PsimagLite app
