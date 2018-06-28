@@ -273,18 +273,18 @@ public:
 
 		// restarting NGST --> NGST isn't supported yet FIXME TODO
 
-//		setAllStagesTo(WFT_NOADVANCE);
+		//		setAllStagesTo(WFT_NOADVANCE);
 
-//		SomeSerializerType ts(io, lastInstance, prefix);
+		//		SomeSerializerType ts(io, lastInstance, prefix);
 
-//		if (targetVectors().size() != ts.size())
-//			err(PsimagLite::String(__FILE__) +
-//			    ": Trying to set TVs but different sizes\n");
+		//		if (targetVectors().size() != ts.size())
+		//			err(PsimagLite::String(__FILE__) +
+		//			    ": Trying to set TVs but different sizes\n");
 
-//		for (SizeType i=0;i<targetVectors().size();i++)
-//			targetVectors(i) = ts.vector(i);
+		//		for (SizeType i=0;i<targetVectors().size();i++)
+		//			targetVectors(i) = ts.vector(i);
 
-//		applyOpExpression_.setTime(ts.time());
+		//		applyOpExpression_.setTime(ts.time());
 	}
 
 	bool allStages(SizeType x) const
@@ -559,6 +559,7 @@ public:
 		}
 
 		BorderEnumType border = ApplyOperatorType::BORDER_NO;
+		// v1 == bra; v2 = ket
 		test(v1,v2,direction,braket.toString(),site,braket.op(0),border);
 
 		SizeType numberOfSites = targetHelper_.model().geometry().numberOfSites();
@@ -567,6 +568,7 @@ public:
 
 		if (site2 >= 0) {
 			border = ApplyOperatorType::BORDER_YES;
+			// v1 == bra; v2 = ket
 			test(v1,v2,direction,braket.toString(),site2,braket.op(0),border);
 		}
 
@@ -723,13 +725,27 @@ private:
 		std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
 	}
 
-	// returns <src2|A|src1>
+	// returns <src2|A|src1>; but if !withLegacyBugs returns <src1|A|src2>
 	ComplexOrRealType test_(const VectorWithOffsetType& src1,
 	                        const VectorWithOffsetType& src2,
 	                        SizeType systemOrEnviron,
 	                        SizeType site,
 	                        const OperatorType& A,
 	                        BorderEnumType border) const
+	{
+		if (targetHelper_.withLegacyBugs())
+			return testRealWork(src1, src2, systemOrEnviron, site, A, border);
+		else
+			return testRealWork(src2, src1, systemOrEnviron, site, A, border);
+	}
+
+	// returns <src2|A|src1>
+	ComplexOrRealType testRealWork(const VectorWithOffsetType& src1,
+	                               const VectorWithOffsetType& src2,
+	                               SizeType systemOrEnviron,
+	                               SizeType site,
+	                               const OperatorType& A,
+	                               BorderEnumType border) const
 	{
 		typename PsimagLite::Vector<SizeType>::Type electrons;
 		targetHelper_.model().findElectronsOfOneSite(electrons,site);
