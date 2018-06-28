@@ -337,6 +337,7 @@ public:
 			\item [BatchedGemm] Only meaningful with MatrixVectorKron. Enables
 								batched gemm and might need plugin sc
 			\item [KrylovAbridge] TBW
+			\item [fixLegacyBugs] TBW
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,
@@ -395,6 +396,7 @@ public:
 		registerOpts.push_back("wftNoAccel");
 		registerOpts.push_back("BatchedGemm");
 		registerOpts.push_back("KrylovAbridge");
+		registerOpts.push_back("fixLegacyBugs");
 
 		PsimagLite::Options::Writeable optWriteable(registerOpts,
 		                                            PsimagLite::Options::Writeable::PERMISSIVE);
