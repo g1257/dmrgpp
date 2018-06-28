@@ -364,6 +364,9 @@ public:
 
 	void write(PsimagLite::IoSelector::Out& ioMain)
 	{
+		if (!isEnabled_) return;
+		if (!save_) return;
+
 		writePartial(ioMain);
 
 		PsimagLite::String label = "Wft";
@@ -373,6 +376,9 @@ public:
 
 	void write(PsimagLite::IoSelector::Out& ioMain) const
 	{
+		if (!isEnabled_) return;
+		if (!save_) return;
+
 		writePartial(ioMain);
 
 		PsimagLite::String label = "Wft";
@@ -387,8 +393,9 @@ private:
 
 	void writePartial(PsimagLite::IoSelector::Out& ioMain) const
 	{
-		if (!isEnabled_) return;
-		if (!save_) return;
+		assert(isEnabled_);
+		assert(save_);
+
 		PsimagLite::String label = "Wft";
 		ioMain.createGroup(label);
 		ioMain.write(isEnabled_, label + "/isEnabled");
