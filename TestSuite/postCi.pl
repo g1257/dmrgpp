@@ -212,7 +212,7 @@ sub procMemcheck
 			$mode = "uninitialized";
 			last;
 		}
-		
+
 		if (/([^ ]+) lost: ([^ ]+) bytes/) {
 			my $val = $2;
 			my $name = $1;
@@ -256,7 +256,7 @@ sub checkEnergyAncillaInSitu
 	for (my $i = 0; $i < $whatN; ++$i) {
 		my $file = "runForinput$n.cout";
 		if (!(-r "$file")) {
-			print STDERR "|$n|: WARNING: $file not readable\n";
+			print STDERR "|$n|: WARNING: $file not readable ".__LINE__."\n";
 		}
 
 		my $file1 = "$workdir/energyAncillaInSitu${n}_$i.txt";
@@ -273,11 +273,6 @@ sub checkTimeInSituObs
 	my ($n, $what, $workdir, $golddir) = @_;
 	my $whatN = scalar(@$what);
 	for (my $i = 0; $i < $whatN; ++$i) {
-		my $file = "runForinput$n.cout";
-		if (!(-r "$file")) {
-			print STDERR "|$n|: WARNING: $file not readable\n";
-		}
-
 		my $file1 = "$workdir/timeObservablesInSitu${n}_$i.txt";
 		my $file2 = "$golddir/timeObservablesInSitu${n}_$i.txt";
 		print "Comparing $file1 $file2\n";
@@ -314,7 +309,7 @@ sub checkCollectBrakets
 	for (my $i = 0; $i < $whatN; ++$i) {
 		my $file = "runForinput$n.cout";
 		if (!(-r "$file")) {
-			print STDERR "|$n|: WARNING: $file not readable\n";
+			print STDERR "|$n|: WARNING: $file not readable ".__LINE__."\n";
 		}
 
 		my $file1 = "$workdir/CollectBrakets${n}_$i.txt";
@@ -359,7 +354,7 @@ sub checkObserve
 	my ($n, $ignored, $workdir, $golddir) = @_;
 	my $file1 = "$workdir/observe$n.txt";
 	my $file2 = "$golddir/observe$n.txt";
-	print "$0: Checking $file1 against $file2\n";
+	print "$0: Checking $file1 $file2\n";
 	my @m1 = loadObserveData($file1);
 	my @m2 = loadObserveData($file2);
 	compareObserveData(\@m1, \@m2);
@@ -475,7 +470,7 @@ sub readNextMatrix
 	}
 
 	my @temp = split;
-	
+
 	if (scalar(@temp) != 2) {
 		return "not a matrix";
 	}
@@ -516,6 +511,3 @@ sub compareHashes
 
 	print "Maximum Error $max\n";
 }
-
-
-			

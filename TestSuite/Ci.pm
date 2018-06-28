@@ -194,7 +194,7 @@ sub getCiAnnotations
 		if (/^\#ci ([^ ]+) (.*$)/) {
 			my $key = $1;
 			my $args = $2;
-			my @a;			
+			my @a;
 			push @a, "$2";
 			push @a, "$key";
 			$h[$counter++] = \@a;
@@ -203,7 +203,52 @@ sub getCiAnnotations
 	}
 
 	close(FILE);
-	return @h;
+
+	my @hh;
+	my $newcounter = 0;
+	for (my $i = 0; $i < $counter; ++$i) {
+		my $ptr = $h[$i];
+		my $n = scalar(@$ptr);
+		die "getCiAnnotations\n" if (scalar($n == 0));
+		my $key = $ptr->[$n - 1];
+		next if ($key eq "INVALID");
+		my @indicesWithThisKey = getIndicesWithThisKey($key, \@h, $i);
+		my $nn = scalar(@indicesWithThisKey);
+		my @a;
+		for (my $j = 0; $j < $nn; ++$j) {
+			my $jj = $indicesWithThisKey[$j];
+			my $pptr = $h[$jj];
+			my $pn = scalar(@$pptr);
+			die "getCiAnnotations\n" if (scalar($pn == 0));
+			for (my $k = 0; $k < $pn - 1; ++$k) {
+				push @a, $pptr->[$k];
+			}
+
+			$h[$jj] = [0, "INVALID"];
+		}
+
+		push @a, $key;
+		$hh[$newcounter++] = \@a;
+	}
+
+
+	return @hh;
+}
+
+sub getIndicesWithThisKey
+{
+	my ($key, $h, $start) = @_;
+	my @indices;
+	my $total = scalar(@$h);
+	for (my $i = $start; $i < $total; ++$i) {
+		my $ptr = $h->[$i];
+		my $n = scalar(@$ptr);
+		die "getIndicesWithThisKey\n" if (scalar($n == 0));
+		next if ($ptr->[$n - 1] ne $key);
+		push @indices, $i;
+	}
+
+	return @indices;
 }
 
 sub readAnnotationFromIndex
