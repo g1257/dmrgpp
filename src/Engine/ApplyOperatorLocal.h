@@ -93,6 +93,44 @@ class ApplyOperatorLocal {
 	typedef typename BasisWithOperatorsType::RealType RealType;
 	typedef typename BasisWithOperatorsType::ComplexOrRealType ComplexOrRealType;
 	typedef PsimagLite::PackIndices PackIndicesType;
+	typedef typename BasisWithOperatorsType::OperatorType OperatorType_;
+
+	class LegacyBug {
+
+	public:
+
+		LegacyBug(bool withLegacyBug, const OperatorType_& A)
+		    : withLegacyBug_(withLegacyBug),
+		      Aptr_((withLegacyBug) ? const_cast<OperatorType_*>(&A ):
+		                              new OperatorType_)
+		{
+			if (withLegacyBug_) return;
+
+			// copy A
+			*Aptr_ = A;
+
+			// transpose Aptr_->data
+			transposeConjugate(Aptr_->data, A.data);
+		}
+
+		~LegacyBug()
+		{
+			if (withLegacyBug_) return;
+			delete Aptr_;
+			Aptr_ = 0;
+		}
+
+		const OperatorType_& operator()() const
+		{
+			assert(Aptr_);
+			return *Aptr_;
+		}
+
+	private:
+
+		bool withLegacyBug_;
+		OperatorType_* Aptr_;
+	}; // class LegacyBug
 
 public:
 
@@ -102,7 +140,7 @@ public:
 
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
-	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
+	typedef OperatorType_ OperatorType;
 
 	ApplyOperatorLocal(const LeftRightSuperType& lrs, bool withLegacyBug)
 	    : lrs_(lrs), withLegacyBug_(withLegacyBug)
@@ -112,11 +150,14 @@ public:
 	//! figuring out where the (non-zero) partition is
 	void operator()(VectorWithOffsetType& dest,
 	                const VectorWithOffsetType& src,
-	                const OperatorType& A,
+	                const OperatorType& AA,
 	                const FermionSign& fermionSign,
 	                SizeType systemOrEnviron,
 	                BorderEnum corner) const
 	{
+		LegacyBug legacyBug(withLegacyBug_, AA);
+		const OperatorType& A = legacyBug();
+
 		if (corner == BORDER_NO) {
 			if (systemOrEnviron == ProgramGlobals::EXPAND_SYSTEM)
 				applyLocalOpSystem(dest,src,A,fermionSign);
@@ -132,10 +173,13 @@ public:
 	//! figuring out where the (non-zero) partition is
 	void hookForZero(VectorWithOffsetType& dest,
 	                 const VectorWithOffsetType& src,
-	                 const OperatorType& A,
+	                 const OperatorType& AA,
 	                 const FermionSign& fermionSign,
 	                 SizeType systemOrEnviron) const
 	{
+		LegacyBug legacyBug(withLegacyBug_, AA);
+		const OperatorType& A = legacyBug();
+
 		assert(systemOrEnviron == ProgramGlobals::EXPAND_SYSTEM);
 
 		TargetVectorType dest2(lrs_.super().size(),0.0);
@@ -151,10 +195,13 @@ public:
 	// dest2 = transpose(A) * src; corrected if !withLegacyBug
 	void hookForZeroSystem(TargetVectorType& dest2,
 	                       const VectorWithOffsetType& src,
-	                       const OperatorType& A,
+	                       const OperatorType& AA,
 	                       const FermionSign&,
 	                       SizeType i0) const
 	{
+		LegacyBug legacyBug(withLegacyBug_, AA);
+		const OperatorType& A = legacyBug();
+
 		SizeType offset = src.offset(i0);
 		SizeType final = offset + src.effectiveSize(i0);
 		SizeType ns = lrs_.left().permutationVector().size();
@@ -180,12 +227,16 @@ public:
 				SizeType x0prime = A.data.getCol(k);
 				SizeType xprime = lrs_.left().permutationInverse(x0prime+x1*nx);
 				SizeType j = lrs_.super().permutationInverse(xprime+y*ns);
-				correctOrNotLegacyBug(dest2, src, A.data.getValue(k), i, j);
+				dest2[j] += src.slowAccess(i)*A.data.getValue(k);
 			}
 		}
 	}
 
 private:
+
+	ApplyOperatorLocal(const ApplyOperatorLocal&);
+
+	ApplyOperatorLocal& operator=(const ApplyOperatorLocal&);
 
 	void applyLocalOpSystem(VectorWithOffsetType& dest,
 	                        const VectorWithOffsetType& src,
@@ -208,6 +259,7 @@ private:
 				break;
 			}
 		}
+
 		dest.fromFull(dest2,lrs_.super());
 	}
 
@@ -244,7 +296,7 @@ private:
 				SizeType x1prime = A.data.getCol(k);
 				SizeType xprime = lrs_.left().permutationInverse(x0+x1prime*nx);
 				SizeType j = lrs_.super().permutationInverse(xprime+y*ns);
-				correctOrNotLegacyBug(dest2, src, A.data.getValue(k)*sign, i, j);
+				dest2[j] += src.slowAccess(i)*A.data.getValue(k)*sign;
 			}
 		}
 	}
@@ -301,7 +353,7 @@ private:
 				SizeType y0prime = A.data.getCol(k);
 				SizeType yprime = lrs_.right().permutationInverse(y0prime+y1*nx);
 				SizeType j = lrs_.super().permutationInverse(x+yprime*ns);
-				correctOrNotLegacyBug(dest2, src, A.data.getValue(k)*sign, i, j);
+				dest2[j] += src.slowAccess(i)*A.data.getValue(k)*sign;
 			}
 		}
 	}
@@ -328,7 +380,7 @@ private:
 			for (SizeType k = start; k < end; ++k) {
 				SizeType xprime = A.data.getCol(k);
 				SizeType j = lrs_.super().permutationInverse(xprime+y*ns);
-				correctOrNotLegacyBug(dest2, src, A.data.getValue(k), i, j);
+				dest2[j] += src.slowAccess(i)*A.data.getValue(k);
 			}
 		}
 	}
@@ -360,7 +412,7 @@ private:
 			for (SizeType k = start; k < end; ++k) {
 				SizeType yprime = A.data.getCol(k);
 				SizeType j = lrs_.super().permutationInverse(x+yprime*ns);
-				correctOrNotLegacyBug(dest2, src, A.data.getValue(k)*sign, i, j);
+				dest2[j] += src.slowAccess(i)*A.data.getValue(k)*sign;
 			}
 		}
 	}
@@ -377,18 +429,6 @@ private:
 		}
 
 		applyLocalOpEnviron(dest,src,A,LEFT_CORNER);
-	}
-
-	void correctOrNotLegacyBug(TargetVectorType& dest2,
-	                           const VectorWithOffsetType& src,
-	                           const ComplexOrRealType& aTimesSign,
-	                           SizeType i,
-	                           SizeType j) const
-	{
-		if (withLegacyBug_)
-			dest2[j] += src.slowAccess(i)*aTimesSign;
-		else
-			dest2[i] += src.slowAccess(j)*aTimesSign;
 	}
 
 	const LeftRightSuperType& lrs_;
