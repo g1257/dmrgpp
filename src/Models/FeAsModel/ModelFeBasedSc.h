@@ -387,7 +387,7 @@ public:
 			for (SizeType x = 0; x < allowed.size(); ++x) allowed[x] = x;
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			VectorOperatorType cm = creationMatrix_;
-			cm[orbital + spin*modelParameters_.orbitals].conjugate();
+			cm[orbital + spin*modelParameters_.orbitals].dagger();
 			return cm[orbital + spin*modelParameters_.orbitals];
 		}
 

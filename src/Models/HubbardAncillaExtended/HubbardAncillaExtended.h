@@ -287,7 +287,7 @@ public:
 
 		if (what == "sminus") { // S^-
 			SizeType offset = (!hot_) ? 4 : 6;
-			creationMatrix[offset+dof].conjugate();
+			creationMatrix[offset+dof].dagger();
 			return creationMatrix[offset+dof];
 		}
 

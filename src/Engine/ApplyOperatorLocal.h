@@ -113,7 +113,7 @@ class ApplyOperatorLocal {
 			transposeConjugate(Aptr_->data, A.data);
 
 			// conjugate again to end up transposing only
-			Aptr_->conjugate();
+			Aptr_->data.conjugate();
 		}
 
 		~LegacyBug()
@@ -176,13 +176,10 @@ public:
 	//! figuring out where the (non-zero) partition is
 	void hookForZero(VectorWithOffsetType& dest,
 	                 const VectorWithOffsetType& src,
-	                 const OperatorType& AA,
+	                 const OperatorType& A,
 	                 const FermionSign& fermionSign,
 	                 SizeType systemOrEnviron) const
 	{
-		LegacyBug legacyBug(withLegacyBug_, AA);
-		const OperatorType& A = legacyBug();
-
 		assert(systemOrEnviron == ProgramGlobals::EXPAND_SYSTEM);
 
 		TargetVectorType dest2(lrs_.super().size(),0.0);

@@ -246,7 +246,7 @@ struct Operator {
 		return total;
 	}
 
-	void conjugate()
+	void dagger()
 	{
 		StorageType data2 = data;
 		transposeConjugate(data,data2);

@@ -99,7 +99,7 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 		std::cerr<<" dof="<<obsOptions.dof<<"\n";
 	}
 
-	if (obsOptions.transpose) opC.conjugate();
+	if (obsOptions.transpose) opC.dagger();
 
 	opC.write(std::cout);
 }

@@ -297,7 +297,7 @@ public:
 		}
 
 		if (what=="c") {
-			creationMatrix[orbital + spin*orbitals].conjugate();
+			creationMatrix[orbital + spin*orbitals].dagger();
 			return creationMatrix[orbital + spin*orbitals];
 		}
 

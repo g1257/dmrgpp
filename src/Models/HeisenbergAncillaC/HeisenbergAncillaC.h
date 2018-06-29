@@ -293,7 +293,7 @@ public:
 		if (what=="sminus") { // S^-
 			if (!hot_) dof = 0;
 			assert(dof < creationMatrix.size());
-			creationMatrix[dof].conjugate();
+			creationMatrix[dof].dagger();
 			return creationMatrix[dof];
 		}
 

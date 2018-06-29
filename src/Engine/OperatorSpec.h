@@ -77,7 +77,7 @@ public:
 			NaturalOpStruct nos(opLabel);
 			nup = model_.naturalOperator(nos.label,site,nos.dof);
 			if (nos.transpose)
-				nup.conjugate();
+				nup.dagger();
 		}
 
 		SizeType foundSize = nup.data.rows();

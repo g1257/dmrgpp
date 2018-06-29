@@ -279,7 +279,7 @@ public:
 		}
 
 		if (what=="sminus") { // S^-
-			creationMatrix[0].conjugate();
+			creationMatrix[0].dagger();
 			return creationMatrix[0];
 		}
 

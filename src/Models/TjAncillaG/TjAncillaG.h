@@ -267,7 +267,7 @@ public:
 		}
 
 		if (what == "sminus") {
-			creationMatrix[2].conjugate();
+			creationMatrix[2].dagger();
 			return creationMatrix[2];
 		}
 
@@ -286,7 +286,7 @@ public:
 
 		if (what=="nup") {
 			OperatorType tmp = naturalOperator("c",site,SPIN_UP);
-			tmp.conjugate();
+			tmp.dagger();
 			SparseMatrixType c = tmp.data;
 			SparseMatrixType tmp3(multiplyTc(c,c));
 			typename OperatorType::Su2RelatedType su2Related;
@@ -299,7 +299,7 @@ public:
 
 		if (what=="ndown") {
 			OperatorType tmp = naturalOperator("c",site,SPIN_DOWN);
-			tmp.conjugate();
+			tmp.dagger();
 			SparseMatrixType c = tmp.data;
 			SparseMatrixType tmp3(multiplyTc(c,c));
 			typename OperatorType::Su2RelatedType su2Related;

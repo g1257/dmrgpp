@@ -220,7 +220,7 @@ public:
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			SizeType x = 2*orbitals_;
-			creationMatrix[x].conjugate();
+			creationMatrix[x].dagger();
 			return creationMatrix[x];
 		}
 

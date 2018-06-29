@@ -213,7 +213,7 @@ public:
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			assert(dof < orbitals);
 			OperatorType cm = creationMatrix_[2*orbitals+dof];
-			cm.conjugate();
+			cm.dagger();
 			return cm;
 		}
 
@@ -246,7 +246,7 @@ public:
 			for (SizeType i = 0; i < allowed.size(); ++i) allowed[i] = i;
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			OperatorType cup = naturalOperator("c",site,dof+SPIN_UP*orbitals);
-			cup.conjugate();
+			cup.dagger();
 			SparseMatrixType nup(multiplyTc(cup.data,cup.data));
 			if (orbitals>1) nup = findNMatrices(dof+SPIN_UP*orbitals);
 			typename OperatorType::Su2RelatedType su2Related;
@@ -262,7 +262,7 @@ public:
 			for (SizeType i = 0; i < allowed.size(); ++i) allowed[i] = i;
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			OperatorType cdown = naturalOperator("c",site,dof+SPIN_DOWN*orbitals);
-			cdown.conjugate();
+			cdown.dagger();
 			SparseMatrixType ndown(multiplyTc(cdown.data,cdown.data));
 			if (orbitals>1) ndown = findNMatrices(dof+SPIN_DOWN*orbitals);
 			typename OperatorType::Su2RelatedType su2Related;

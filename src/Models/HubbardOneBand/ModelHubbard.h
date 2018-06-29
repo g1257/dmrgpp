@@ -354,7 +354,7 @@ public:
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			OperatorType cup = naturalOperator("c",site,SPIN_UP);
-			cup.conjugate();
+			cup.dagger();
 			SparseMatrixType tmp3(multiplyTc(cup.data,cup.data));
 			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp3,
@@ -368,7 +368,7 @@ public:
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			OperatorType cdown = naturalOperator("c",site,SPIN_DOWN);
-			cdown.conjugate();
+			cdown.dagger();
 			SparseMatrixType tmp3(multiplyTc(cdown.data,cdown.data));
 			typename OperatorType::Su2RelatedType su2Related;
 			return OperatorType(tmp3,
