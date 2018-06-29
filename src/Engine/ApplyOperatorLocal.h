@@ -109,8 +109,11 @@ class ApplyOperatorLocal {
 			// copy A
 			*Aptr_ = A;
 
-			// transpose Aptr_->data
+			// transpose conjugate Aptr_->data
 			transposeConjugate(Aptr_->data, A.data);
+
+			// conjugate again to end up transposing only
+			Aptr_->conjugate();
 		}
 
 		~LegacyBug()
