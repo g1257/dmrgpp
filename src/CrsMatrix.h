@@ -426,6 +426,13 @@ public:
 
 	const T& getValue(SizeType i) const { assert(i<values_.size()); return values_[i]; }
 
+	void conjugate()
+	{
+		SizeType n = values_.size();
+		for (SizeType i = 0; i < n; ++i)
+			values_[i] = PsimagLite::conj(values_[i]);
+	}
+
 	Matrix<T> toDense() const
 	{
 		Matrix<T> m;
