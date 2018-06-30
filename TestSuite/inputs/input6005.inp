@@ -1,0 +1,56 @@
+TotalNumberOfSites=20
+NumberOfTerms=3
+
+DegreesOfFreedom=1
+GeometryKind=Honeycomb
+GeometryOptions=ConstantValues
+Connectors    1        0.0
+Connectors    1        0.0
+Connectors    1        0.0
+HoneycombLy=4
+IsPeriodicY=1
+
+DegreesOfFreedom=1
+GeometryKind=Honeycomb
+GeometryOptions=ConstantValues
+Connectors    1        0.0
+Connectors    1        0.0
+Connectors    1        0.0
+HoneycombLy=4
+IsPeriodicY=1
+
+DegreesOfFreedom=1
+GeometryKind=Honeycomb
+GeometryOptions=ConstantValues
+Connectors    1        0.0
+Connectors    1        0.0
+Connectors    1        0.0
+HoneycombLy=4
+IsPeriodicY=1
+
+MagneticFieldY 20
+10 10 10 10 10 10 10 10 10 10
+10 10 10 10 10 10 10 10 10 10
+
+MagneticFieldX 20
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+
+MagneticFieldZ 20
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+
+
+Model=Kitaev
+SolverOptions=useComplex,twositedmrg,useSvd,fixLegacyBugs
+Version=version
+OutputFile=data6005
+InfiniteLoopKeptStates=32
+FiniteLoops 3 9 150 0
+-18 150 0 18 150 1
+
+TruncationTolerance=1e-6
+
+#ci dmrg arguments="sy?0"
+#ci CollectBrakets 0
+#ci observe arguments="<gs|sy?0|gs>"
