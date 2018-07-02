@@ -246,7 +246,6 @@ sub createConfigMake
 		return;
 	}
 
-	my $blasLapack = " -llapack -lblas ";
 	while (<FILE>) {
 		next if (/ConfigBase\.make/);
 		print FOUT;
