@@ -19,6 +19,7 @@ Please see full open source license included in file LICENSE.
 #ifndef LANCZOS_GEOMETRY_DCA_H
 #define LANCZOS_GEOMETRY_DCA_H
 #include "Vector.h"
+#include "Io/IoNg.h"
 
 namespace PsimagLite {
 
@@ -48,6 +49,14 @@ public:
 	{
 		if (!enabled_) printErrorAndDie("kSustract");
 		return (k1^k2);
+	}
+
+	void write(String label1, IoNg::Out::Serializer& io) const
+	{
+		String label = label1 + "/GeometryDca";
+		io.createGroup(label);
+		io.write(label + "/enabled_", enabled_);
+		io.write(label + "/message_", message_);
 	}
 
 private:
