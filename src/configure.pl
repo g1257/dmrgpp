@@ -40,6 +40,11 @@ if (defined($generateSources)) {
 
 defined($su2enabled) or $su2enabled = 0;
 
+my %args;
+$args{"CPPFLAGS"} = $lto;
+$args{"LDFLAGS"} = $lto;
+Make::createConfigMake($flavor, \%args);
+
 system("cd KronUtil; perl configure.pl $gccdash");
 
 my %provenanceDriver = (name => 'Provenance', aux => 1);
@@ -87,10 +92,6 @@ sub createMakefile
 {
 	my ($flavor, $lto) = @_;
 	Make::backupMakefile();
-	my %args;
-	$args{"CPPFLAGS"} = $lto;
-	$args{"LDFLAGS"} = $lto;
-	Make::createConfigMake($flavor, \%args);
 
 	my $fh;
 	open($fh, ">", "Makefile") or die "Cannot open Makefile for writing: $!\n";
@@ -126,7 +127,7 @@ sub procFlavor
 {
 	my ($flavor) = @_;
 	if (!defined($flavor)) {
-		$flavor = "production";
+		$flavor = "";
 		print STDERR "$0: No flavor given, assuming production\n";
 		print STDERR "\t say $0 help for a list of options\n";
 	}
@@ -142,17 +143,9 @@ sub procFlavor
 
 	my $dir = "../TestSuite/inputs";
 	if ($flavor eq "production") {
-		$flavor = "Config.make";
-	} elsif ($flavor eq "debug") {
-		$flavor = "ConfigDebug.make";
-	} elsif ($flavor eq "callgrind") {
-		$flavor = "ConfigCallgrind.make";
-	} elsif ($flavor eq "helgrind" or $flavor eq "drd") {
-		$flavor = "ConfigHelgrind.make";
-	} else {
-		return $flavor;
-	}
-
-	return "$dir/$flavor";
+		$flavor = "";
+	} 
+		
+	return "$dir/Config".capitalize($flavor).".make";
 }
 
