@@ -126,6 +126,18 @@ struct ParametersHubbardMultiBand {
 		return 0;
 	}
 
+	void write(PsimagLite::String label1,
+	           PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		PsimagLite::String label = label1 + "/ParametersHubbardMultiBand";
+		io.createGroup(label);
+		targetQuantum.write(label, io);
+		io.write(label + "/orbitals", orbitals);
+		io.write(label + "/hubbardU", hubbardU);
+		io.write(label + "/potentialV", potentialV);
+		io.write(label + "/hopOnSite", hopOnSite);
+	}
+
 	TargetQuantumElectrons<RealType> targetQuantum;
 	SizeType orbitals;
 	VectorRealType hubbardU;

@@ -114,6 +114,17 @@ struct ParametersModelHeisenberg {
 		return 0;
 	}
 
+	void write(PsimagLite::String label1,
+	           PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		PsimagLite::String label = label1 + "/ParametersModelHeisenberg";
+		io.createGroup(label);
+		targetQuantum.write(label, io);
+		io.write(label + "/twiceTheSpin", twiceTheSpin);
+		io.write(label + "/magneticField", magneticField);
+		io.write(label + "/anisotropy", anisotropy);
+	}
+
 	//serializr start class ParametersModelHeisenberg
 	TargetQuantumElectrons<RealType> targetQuantum;
 	//serializr normal twiceTheSpin

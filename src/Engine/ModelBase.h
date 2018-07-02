@@ -135,6 +135,9 @@ public:
 		delete modelCommon_;
 	}
 
+	virtual void write(PsimagLite::String,
+	                   PsimagLite::IoNg::Out::Serializer&) const = 0;
+
 	virtual OperatorType naturalOperator(const PsimagLite::String& what,
 	                                     SizeType site,
 	                                     SizeType dof) const = 0;
@@ -142,8 +145,6 @@ public:
 	virtual void findElectrons(VectorSizeType& electrons,
 	                           const HilbertBasisType& basis,
 	                           SizeType site) const = 0;
-
-	virtual void print(std::ostream& os) const = 0;
 
 	virtual SizeType hilbertSize(SizeType site) const = 0;
 
@@ -345,20 +346,6 @@ private:
 	ModelCommonBaseType* modelCommon_;
 
 };     //class ModelBase
-
-template<typename ModelHelperType,
-         typename ParametersType,
-         typename InputValidatorType,
-         typename GeometryType>
-std::ostream& operator<<(std::ostream& os,
-                         const ModelBase<ModelHelperType,
-                         ParametersType,
-                         InputValidatorType,
-                         GeometryType>& model)
-{
-	model.print(os);
-	return os;
-}
 } // namespace Dmrg
 /*@}*/
 #endif

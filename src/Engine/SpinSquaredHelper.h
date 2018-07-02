@@ -130,6 +130,10 @@ public:
 
 	void clear() { data_=0; }
 
+	void write(PsimagLite::String,
+	           PsimagLite::IoNg::Out::Serializer&) const
+	{}
+
 private:
 
 	int perfectSquareOrCrash(const FieldType& t) const

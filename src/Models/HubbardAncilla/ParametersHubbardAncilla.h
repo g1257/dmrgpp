@@ -99,6 +99,14 @@ struct ParametersHubbardAncilla : ParametersModelFeAs<RealType> {
 	{
 		return 0;
 	}
+
+	void write(PsimagLite::String label1,
+	           PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		PsimagLite::String label = label1 + "/ParametersHubbardAncilla";
+		io.createGroup(label);
+		BaseType::write(label, io);
+	}
 };
 
 } // namespace Dmrg

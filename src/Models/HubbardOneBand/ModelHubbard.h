@@ -415,9 +415,15 @@ public:
 		}
 	}
 
-	void print(std::ostream& os) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
-		os<<modelParameters_;
+		io.createGroup(label1);
+		PsimagLite::String label = label1 + "/" + this->params().model;
+		io.createGroup(label);
+		modelParameters_.write(label, io);
+		io.write(label + "/offset_", offset_);
+		spinSquaredHelper_.write(label, io);
+		spinSquared_.write(label, io);
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,

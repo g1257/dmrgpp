@@ -215,6 +215,10 @@ public:
 		return sum*0.5;
 	}
 
+	void write(PsimagLite::String,
+	           PsimagLite::IoNg::Out::Serializer&) const
+	{}
+
 private:
 
 	int c(Word& ket,SizeType i,SizeType gamma,SizeType spin,int ret=0) const

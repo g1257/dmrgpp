@@ -184,6 +184,19 @@ struct TargetQuantumElectrons {
 		return 0;
 	}
 
+	void write(PsimagLite::String label1,
+	           PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		PsimagLite::String label = label1 + "/TargetQuantumElectrons";
+		io.createGroup(label);
+		io.write(label + "/isSu2", isSu2);
+		io.write(label + "/totalNumberOfSites", totalNumberOfSites);
+		io.write(label + "/totalElectrons", totalElectrons);
+		io.write(label + "/other", other);
+		io.write(label + "/twiceJ", twiceJ);
+		io.write(label + "/isCanonical", isCanonical);
+	}
+
 	bool isSu2;
 	SizeType totalNumberOfSites;
 	SizeType totalElectrons;

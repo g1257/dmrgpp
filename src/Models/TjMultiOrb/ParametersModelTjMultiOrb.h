@@ -112,6 +112,17 @@ struct ParametersModelTjMultiOrb {
 		return 0;
 	}
 
+	void write(PsimagLite::String label1,
+	           PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		PsimagLite::String label = label1 + "/ParametersModelTjMultiOrb";
+		io.createGroup(label);
+		targetQuantum.write(label, io);
+		io.write(label + "/potentialV", potentialV);
+		io.write(label + "/orbitals", orbitals);
+		io.write(label + "/reinterpretAndTruncate", reinterpretAndTruncate);
+	}
+
 	// Do not include here connection parameters
 
 	TargetQuantumElectrons<RealType> targetQuantum;

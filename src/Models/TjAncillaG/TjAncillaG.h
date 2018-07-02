@@ -328,9 +328,16 @@ public:
 		return modelParameters_.targetQuantum;
 	}
 
-	void print(std::ostream& os) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
-		os<<modelParameters_;
+		io.createGroup(label1);
+		PsimagLite::String label = label1 + "/" + this->params().model;
+		io.createGroup(label);
+		modelParameters_.write(label, io);
+		TjMultiOrb_.write(label, io);
+		io.write(label + "/offset_", offset_);
+		spinSquaredHelper_.write(label, io);
+		spinSquared_.write(label, io);
 	}
 
 	//! find all states in the natural basis for a block of n sites

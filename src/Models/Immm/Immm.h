@@ -216,7 +216,17 @@ public:
 		return (atom == ATOM_OXYGEN) ? statesOxygen_ : statesCopper_;
 	}
 
-	void print(std::ostream& os) const { operator<<(os,modelParameters_); }
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		io.createGroup(label1);
+		PsimagLite::String label = label1 + "/" + this->params().model;
+		io.createGroup(label);
+		modelParameters_.write(label, io);
+		io.write(label + "/copperEach_", copperEach_);
+		hilbertSpace_.write(label, io);
+		io.write(label + "/statesCopper_", statesCopper_);
+		io.write(label + "/statesOxygen_", statesOxygen_);
+	}
 
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(typename PsimagLite::Vector<OperatorType>::Type& creationMatrix,

@@ -263,7 +263,23 @@ struct ParametersModelFeAs {
 		return 0;
 	}
 
-	//serializr start class ParametersModelFeAs
+	void write(PsimagLite::String label1,
+	           PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		PsimagLite::String label = label1 + "/ParametersModelFeAs";
+		io.createGroup(label);
+		targetQuantum.write(label, io);
+		io.write(label + "/orbitals", orbitals);
+		io.write(label + "/minElectronsPerSite", minElectronsPerSite);
+		io.write(label + "/hubbardU", hubbardU);
+		io.write(label + "/potentialV", potentialV);
+		io.write(label + "/potentialT", potentialT);
+		io.write(label + "/feAsMode", feAsMode);
+		io.write(label + "/coulombV", coulombV);
+		magneticField.write(label + "/magneticField", io);
+		spinOrbit.write(label + "/spinOrbit", io);
+		io.write(label + "/jzSymmetry", jzSymmetry);
+	}
 
 	TargetQuantumElectrons<RealType> targetQuantum;
 

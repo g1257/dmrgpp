@@ -288,7 +288,25 @@ public:
 		return statesPerSite_;
 	}
 
-	void print(std::ostream& os) const { operator<<(os,modelParameters_); }
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		io.createGroup(label1);
+		PsimagLite::String label = label1 + "/" + this->params().model;
+		io.createGroup(label);
+		io.write(label + "/reinterpretX_", reinterpretX_);
+		io.write(label + "/reinterpretY_", reinterpretY_);
+		modelParameters_.write(label, io);
+		geometryDca_.write(label, io);
+		spinSquaredHelper_.write(label, io);
+		spinSquared_.write(label, io);
+		io.write(label + "/reinterpret_", reinterpret_);
+		io.write(label + "/statesPerSite_", statesPerSite_);
+		io.write(label + "/basis_", basis_);
+		qq_.write(label, io);
+		io.write(label + "/q_", q_);
+		io.write(label + "/creationMatrix_", creationMatrix_);
+		feAsJzSymmetry_.write(label, io);
+	}
 
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,

@@ -175,7 +175,15 @@ public:
 
 	SizeType hilbertSize(SizeType site) const { return modelFeAs_.hilbertSize(site); }
 
-	void print(std::ostream& os) const { modelFeAs_.print(os); }
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		io.createGroup(label1);
+		PsimagLite::String label = label1 + "/" + this->params().model;
+		io.createGroup(label);
+		modelParameters_.write(label, io);
+		modelFeAs_.write(label, io);
+		io.write(label + "/orbitals_", orbitals_);
+	}
 
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,

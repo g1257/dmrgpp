@@ -207,6 +207,7 @@ public:
 		PsimagLite::PsiBase64::Encode base64encode(ioIn.data());
 		ioOut_.write(base64encode, "InputBase64Encoded");
 		ioOut_.write(parameters_, "PARAMETERS");
+		ioOut_.write(model_, "MODEL");
 
 		if (parameters_.options.find("verbose")!=PsimagLite::String::npos)
 			verbose_=true;

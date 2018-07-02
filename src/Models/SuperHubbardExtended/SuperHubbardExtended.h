@@ -174,9 +174,13 @@ public:
 		extendedHubbard_.findElectrons(electrons,basis,site);
 	}
 
-	void print(std::ostream& os) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
-		extendedHubbard_.print(os);
+		io.createGroup(label1);
+		PsimagLite::String label = label1 + "/" + this->params().model;
+		io.createGroup(label);
+		modelParameters_.write(label, io);
+		extendedHubbard_.write(label, io);
 	}
 
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,

@@ -40,6 +40,9 @@ public:
 
 	bool isSet() const { return false; }
 
+	void write(PsimagLite::String,
+	           PsimagLite::IoNg::Out::Serializer&) const
+	{}
 };
 
 template<typename HilbertBasisType, typename VectorOperatorType>
@@ -159,6 +162,23 @@ public:
 	bool isEnabled() const { return isEnabled_; }
 
 	bool isSet() const { return isSet_; }
+
+	void write(PsimagLite::String label1,
+	           PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		io.createGroup(label1);
+		PsimagLite::String label = label1 + "/FeAsJzSymmetry";
+		io.createGroup(label);
+		io.write(label + "/isEnabled_", isEnabled_);
+		if (!isEnabled_) return;
+		io.write(label + "/isSet_", isSet_);
+		if (!isSet_) return;
+		u_.write(label + "/u_", io);
+		utranspose_.write(label + "/utranspose_", io);
+		Hamil_onsite_.write(label + "/Hamil_onsite_", io);
+		io.write(label + "/jzModifiedEigs_", jzModifiedEigs_);
+		io.write(label + "/electrons_", electrons_);
+	}
 
 private:
 

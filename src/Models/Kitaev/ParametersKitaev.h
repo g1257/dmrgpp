@@ -129,8 +129,21 @@ struct ParametersKitaev {
 		return 0;
 	}
 
+	void write(PsimagLite::String label1,
+	           PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		PsimagLite::String label = label1 + "/ParametersKitaev";
+		io.createGroup(label);
+		targetQuantum.write(label, io);
+		io.write(label + "/magneticFieldX", magneticFieldX);
+		io.write(label + "/magneticFieldY", magneticFieldY);
+		io.write(label + "/magneticFieldZ", magneticFieldZ);
+	}
+
 	TargetQuantumElectrons<RealType> targetQuantum;
-	VectorRealType magneticFieldZ,magneticFieldX,magneticFieldY;
+	VectorRealType magneticFieldX;
+	VectorRealType magneticFieldY;
+	VectorRealType magneticFieldZ;
 };
 
 //! Function that prints model parameters to stream os

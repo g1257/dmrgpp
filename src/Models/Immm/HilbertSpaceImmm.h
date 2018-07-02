@@ -231,6 +231,14 @@ public:
 		return getNofDigits(m,sector);
 	}
 
+	void write(PsimagLite::String label,
+	           PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		PsimagLite::String label2 = label + "/HilbertSpaceImmm";
+		io.createGroup(label2);
+		io.write(label2 + "/maxOrbitals_", maxOrbitals_);
+	}
+
 private:
 
 	SizeType degreesOfFreedomUpTo(SizeType j) const

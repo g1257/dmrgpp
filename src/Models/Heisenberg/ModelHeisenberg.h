@@ -214,7 +214,15 @@ public:
 		return total;
 	}
 
-	void print(std::ostream& os) const { os<<modelParameters_; }
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		io.createGroup(label1);
+		PsimagLite::String label = label1 + "/" + this->params().model;
+		io.createGroup(label);
+		modelParameters_.write(label, io);
+		spinSquaredHelper_.write(label, io);
+		spinSquared_.write(label, io);
+	}
 
 	SizeType hilbertSize(SizeType) const
 	{

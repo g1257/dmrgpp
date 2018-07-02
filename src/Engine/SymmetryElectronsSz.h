@@ -110,6 +110,17 @@ public:
 		return *(std::max_element(electrons.begin(),electrons.end()));
 	}
 
+	void write(PsimagLite::String label1,
+	           PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		PsimagLite::String label = label1 + "/SymmetryElectronsSz";
+		io.createGroup(label);
+		io.write(label + "/electrons", electrons);
+		io.write(label + "/other", other);
+		io.write(label + "/jmValues", jmValues);
+		io.write(label + "/flavors", flavors);
+	}
+
 	VectorSizeType electrons;
 	VectorSizeType other;
 	VectorPairSizeType jmValues;

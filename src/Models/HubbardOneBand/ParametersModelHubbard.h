@@ -136,6 +136,17 @@ struct ParametersModelHubbard {
 		return 0;
 	}
 
+	void write(PsimagLite::String label1,
+	           PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		PsimagLite::String label = label1 + "/ParametersModelHubbard";
+		io.createGroup(label);
+		targetQuantum.write(label, io);
+		io.write(label + "/hubbardU", hubbardU);
+		io.write(label + "/potentialV", potentialV);
+		io.write(label + "/anisotropy", anisotropy);
+	}
+
 	// Do not include here connection parameters
 	// those are handled by the Geometry
 

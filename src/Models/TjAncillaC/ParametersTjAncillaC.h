@@ -101,6 +101,15 @@ struct ParametersTjAncillaC {
 		return 0;
 	}
 
+	void write(PsimagLite::String label1,
+	           PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		PsimagLite::String label = label1 + "/ParametersTjAncillaC";
+		io.createGroup(label);
+		targetQuantum.write(label, io);
+		io.write(label + "/potentialV", potentialV);
+	}
+
 	// Do not include here connection parameters
 
 	TargetQuantumElectrons<RealType> targetQuantum;

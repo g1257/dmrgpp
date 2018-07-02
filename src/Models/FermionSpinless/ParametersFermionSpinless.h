@@ -124,6 +124,18 @@ struct ParametersFermionSpinless {
 		return 0;
 	}
 
+	void write(PsimagLite::String label1,
+	           PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		PsimagLite::String label = label1 + "/ParametersFermionSpinless";
+		io.createGroup(label);
+		targetQuantum.write(label, io);
+		io.write(label + "/potentialV", potentialV);
+		io.write(label + "/potentialT", potentialT);
+		io.write(label + "/omega", omega);
+		io.write(label + "/phase", phase);
+	}
+
 	// Do not include here connection parameters
 	// those are handled by the Geometry
 	TargetQuantumElectrons<RealType> targetQuantum;

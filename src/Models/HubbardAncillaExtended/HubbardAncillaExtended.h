@@ -167,7 +167,14 @@ public:
 		return (1<<(2*ORBITALS));
 	}
 
-	void print(std::ostream& os) const { operator<<(os,modelParameters_); }
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		io.createGroup(label1);
+		PsimagLite::String label = label1 + "/" + this->params().model;
+		io.createGroup(label);
+		modelParameters_.write(label, io);
+		io.write(label + "/hot_", hot_);
+	}
 
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,

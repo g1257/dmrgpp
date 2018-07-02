@@ -118,6 +118,17 @@ struct ParametersImmm {
 		return total;
 	}
 
+	void write(PsimagLite::String label1,
+	           PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		PsimagLite::String label = label1 + "/ParametersImmm";
+		io.createGroup(label);
+		targetQuantum.write(label, io);
+		io.write(label + "/hubbardU", hubbardU);
+		io.write(label + "/potentialV", potentialV);
+		io.write(label + "/minOxygenElectrons", minOxygenElectrons);
+	}
+
 	//serializr start class ParametersImmm
 	TargetQuantumElectrons<RealType> targetQuantum;
 
