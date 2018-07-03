@@ -90,6 +90,20 @@ public:
 		hdf5file_->createGroup("Def/" + group);
 	}
 
+	bool doesGroupExist(String groupName)
+	{
+		groupName = "Def/" + groupName;
+
+		try         {
+			H5::Group group = hdf5file_->openGroup(groupName.c_str());
+			group.close();
+		} catch (...) {
+			return false;
+		}
+
+		return true;
+	}
+
 	/* write functions START */
 
 	template<typename T>
