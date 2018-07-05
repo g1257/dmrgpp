@@ -41,7 +41,7 @@ sub main
 	my $allExecutables = combineAllDrivers($drivers,"");
 	my $allCpps = combineAllDrivers($drivers,".cpp");
 
-	my $configContent = getConfigContent($args->{"configFile"}, $args->{"flavor"});
+	my $configContent = getConfigContent($args->{"configFiles"}, $args->{"flavor"});
 
 print FH<<EOF;
 # DO NOT EDIT!!! Changes will be lost. Use the PsiTag system to configure instead
@@ -132,9 +132,13 @@ sub backupMakefile
 
 sub getConfigContent
 {
-	my ($file, $flavor) = @_;
+	my ($files, $flavor) = @_;
 	my %tags;
-	PsiTag::main(\%tags, $file);
+	my $n = scalar(@$files);
+	for (my $i = 0; $i < $n; ++$i) {
+		PsiTag::main(\%tags, $files->[$i]);
+	}
+
 	flavorHelp(\%tags) if ($flavor eq "help");
 	my $ptr = $tags{"flavor $flavor"};
 	defined($ptr) or die "$0: No tag named $flavor\n";
