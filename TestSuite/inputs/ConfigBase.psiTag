@@ -1,26 +1,5 @@
-# Syntax: tagging  mode content
-# content can appear multiline if scope is block
-# block is between ( ) multiline
-# tagging and mode must appear in the same line
-# automatic tagging is possible with .= content
-# Mode is either
-#             add definition and overwrite if it exits =
-#             add definition and append to it if it exits +=
-#             add definition or ignore if it exits =? 
-#             add definition or fail if it exits =!
-#             delete definition or ignore if it doesn't exist -=
-#             delete definition or fail if it exits -=!
-#             output definition <
-# tagging must not contain any of = + ? ! - < & *
-
-# Content is subject to interpretation as follows.
-# First non-whitespace character after mode, if it is a ( in the same line
-# Last  non-whitespace character in a line, if it is a )
-# First non-whitespace character in a line, if it is a <
-#    and what follows until newline is considered the tagging
-# First non-whitespace character after mode, if it is a < in the same line
-#    and what follows until newline is considered the tagging
 #
+# Format of psiTag files is described in PsimagLite/scripts/PsiTag.pm
 #
 # PsimagLite support is needed by DMRG++
 dependency PsimagLite = (
