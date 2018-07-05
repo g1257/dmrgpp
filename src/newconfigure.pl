@@ -27,7 +27,7 @@ use DmrgDriver;
 use PsiTag;
 
 my ($flavor, $generateSources, $su2enabled, $lto, $config) = ("production" , 0, 0, 0, "");
-my $usage = "USAGE: $0 [-f flavor] [-s] [-su2] [-c config]\n";
+my $usage = "USAGE: $0 [-f flavor] [-s] [-su2] [-lto] [-c config]\n";
 
 GetOptions('f=s' => \$flavor,
            's' => \$generateSources,
@@ -43,7 +43,9 @@ if ($lto == 1) {
 
 defined($su2enabled) or $su2enabled = 0;
 
-system("cd KronUtil; perl configure.pl $gccdash");
+$config = "../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag" if ($config eq "");
+
+system("cd KronUtil; perl newconfigure.pl ../$config $flavor $gccdash");
 
 my %provenanceDriver = (name => 'Provenance', aux => 1);
 my %progGlobalsDriver = (name => 'ProgramGlobals', aux => 1);
@@ -84,24 +86,22 @@ my %dmrgMain = (name => 'dmrg', dotos => "$dotos", libs => "kronutil");
 
 push @drivers,\%dmrgMain;
 
-createMakefile($flavor, $lto);
+createMakefile($config, $flavor, $lto);
 
 sub createMakefile
 {
-	my ($flavor, $lto) = @_;
+	my ($config, $flavor, $lto) = @_;
 	NewMake::backupMakefile();
 	my %args;
 	$args{"CPPFLAGS"} = $lto;
 	$args{"LDFLAGS"} = $lto;
 	$args{"code"} = "DMRG++";
 	$args{"additional3"} = "operator";
-	$args{"configFile"} = "../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag";
+	$args{"configFile"} = $config;
 	$args{"flavor"} = $flavor;
 
 	my $fh;
 	open($fh, ">", "Makefile") or die "Cannot open Makefile for writing: $!\n";
-
-	my %additionals;
 	
 	NewMake::main($fh, \%args, \@drivers);
 	local *FH = $fh;
