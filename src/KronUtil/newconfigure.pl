@@ -25,7 +25,7 @@ use PsiTag;
 
 my ($cfiles, $flavor, $gccdash) = @ARGV;
 defined($cfiles) or $cfiles = "../../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag";
-defined($flavor) or $flavor = "production";
+defined($flavor) or $flavor = NewMake::noFlavor();
 defined($gccdash) or $gccdash = "";
 
 my @names = ("KronUtil", "util", "utilComplex", "csc_nnz");

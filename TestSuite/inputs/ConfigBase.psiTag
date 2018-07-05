@@ -142,3 +142,5 @@ LDFLAGS += -lpthread
 CPPFLAGS += -DUSE_PTHREADS
 )
 
+default flavor = production
+

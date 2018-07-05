@@ -26,8 +26,9 @@ use lib ".";
 use DmrgDriver;
 use PsiTag;
 
-my ($flavor, $generateSources, $su2enabled, $lto, $config) = ("production" , 0, 0, 0, "");
+my ($flavor, $generateSources, $su2enabled, $lto) = (NewMake::noFlavor() , 0, 0, 0);
 my $usage = "USAGE: $0 [-f flavor] [-s] [-su2] [-lto] [-c config]\n";
+my $config;
 
 GetOptions('f=s' => \$flavor,
            's' => \$generateSources,
@@ -44,7 +45,7 @@ if ($lto == 1) {
 defined($su2enabled) or $su2enabled = 0;
 
 my @configFiles = ("../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag");
-push @configFiles, $config if ($config ne "");
+push @configFiles, $config if (defined($config));
 push @configFiles, "../../dmrgpp/TestSuite/inputs/BasicFlavors.psiTag";
 
 system("cd KronUtil; perl newconfigure.pl \"@configFiles\" $flavor $gccdash");
@@ -104,7 +105,7 @@ sub createMakefile
 
 	my $fh;
 	open($fh, ">", "Makefile") or die "Cannot open Makefile for writing: $!\n";
-	
+
 	NewMake::main($fh, \%args, \@drivers);
 	local *FH = $fh;
 print FH<<EOF;
@@ -128,5 +129,4 @@ EOF
 	close($fh);
 	print STDERR "$0: File Makefile has been written\n";
 }
-
 
