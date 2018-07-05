@@ -159,6 +159,7 @@ sub isEmptyLine
 sub canonicalTagName
 {
 	my ($name) = @_;
+	$name =~ s/\n/ /g;
 	$name =~ s/^[ \t]*//;
 	$name =~ s/[ \t]*$//;
 	while ($name =~ s/[ \t][ \t]/ /) {}

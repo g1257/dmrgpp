@@ -140,11 +140,17 @@ sub getConfigContent
 	}
 
 	flavorHelp(\%tags) if ($flavor eq "help");
+	$flavor = PsiTag::canonicalTagName($tags{"default flavor"}->{"content"}) if ($flavor eq noFlavor());
 	my $ptr = $tags{"flavor $flavor"};
-	defined($ptr) or die "$0: No tag named $flavor\n";
+	defined($ptr) or die "$0: No flavor named $flavor\n";
 	my $configContent = $ptr->{"content"};
 	defined($configContent) or die "$0: No configContent for tag $flavor\n";
 	return $configContent;
+}
+
+sub noFlavor
+{
+	return "UNDEFINED";
 }
 
 sub flavorHelp
