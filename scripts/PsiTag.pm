@@ -113,7 +113,7 @@ sub readTags
 sub addTag
 {
 	my ($tags, $tag, $mode, $content) = @_;
-	print STDERR "$0: Adding $tag, ignoring $mode\n";
+	#print STDERR "$0: Adding $tag, ignoring $mode\n";
 	$tags->{"$tag"} = {"content" => $content};
 }
 

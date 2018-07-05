@@ -41,13 +41,7 @@ sub main
 	my $allExecutables = combineAllDrivers($drivers,"");
 	my $allCpps = combineAllDrivers($drivers,".cpp");
 
-	my $flavor = $args->{"flavor"};
-	my %tags;
-	PsiTag::main(\%tags, $args->{"configFile"});
-	my $ptr = $tags{"flavor $flavor"};
-	defined($ptr) or die "$0: No tag named $flavor\n";
-	my $configContent = $ptr->{"content"};
-	defined($configContent) or die "$0: No configContent for tag $flavor\n";
+	my $configContent = getConfigContent($args->{"configFile"}, $args->{"flavor"});
 
 print FH<<EOF;
 # DO NOT EDIT!!! Changes will be lost. Use the PsiTag system to configure instead
@@ -134,6 +128,31 @@ sub backupMakefile
 	$dir = "." unless defined($dir);
 	system("cp $dir/Makefile $dir/Makefile.bak") if (-r "$dir/Makefile");
 	print STDERR "$0: Backup of $dir/Makefile in $dir/Makefile.bak\n";
+}
+
+sub getConfigContent
+{
+	my ($file, $flavor) = @_;
+	my %tags;
+	PsiTag::main(\%tags, $file);
+	flavorHelp(\%tags) if ($flavor eq "help");
+	my $ptr = $tags{"flavor $flavor"};
+	defined($ptr) or die "$0: No tag named $flavor\n";
+	my $configContent = $ptr->{"content"};
+	defined($configContent) or die "$0: No configContent for tag $flavor\n";
+	return $configContent;
+}
+
+sub flavorHelp
+{
+	my ($tags) = @_;
+	print "$0: Available flavors are: ";
+	foreach my $key (keys %$tags) {
+		print "$1 " if ($key =~ /^flavor (.+)$/);
+	}
+
+	print "\n";
+	exit(1);
 }
 
 1;
