@@ -24,10 +24,10 @@ package NewMake;
 sub main
 {
 	local *FH = shift;
-	my ($flavor, $args, $drivers, $additionals) = @_;
-	die "newMake: needs additionals as 3rd argument\n" if (!defined($additionals));
+	my ($args, $drivers) = @_;
+	die "NewMake::main(): needs drivers as 3rd argument\n" if (!defined($drivers));
 
-	my %a = %$additionals;
+	my %a = %$args;
 	my $additional = $a{"additional"};
 	my $additional2 = $a{"additional2"};
 	my $additional3 = $a{"additional3"};
@@ -41,10 +41,20 @@ sub main
 	my $allExecutables = combineAllDrivers($drivers,"");
 	my $allCpps = combineAllDrivers($drivers,".cpp");
 
+	my $flavor = $args->{"flavor"};
+	my %tags;
+	PsiTag::main(\%tags, $args->{"configFile"});
+	my $ptr = $tags{"flavor $flavor"};
+	defined($ptr) or die "$0: No tag named $flavor\n";
+	my $configContent = $ptr->{"content"};
+	defined($configContent) or die "$0: No configContent for tag $flavor\n";
+
 print FH<<EOF;
-# DO NOT EDIT!!! Changes will be lost. Modify Config.make instead
+# DO NOT EDIT!!! Changes will be lost. Use the PsiTag system to configure instead
 # This Makefile was written by $0
 # $code
+
+$configContent
 
 CPPFLAGS += -I$path../../PsimagLite -I$path../../PsimagLite/src -I${path}Engine
 all: $allExecutables $additional3

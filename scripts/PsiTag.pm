@@ -8,13 +8,13 @@ package PsiTag;
 
 sub main
 {
-	my ($file) = @_;
+	my ($tags, $file) = @_;
 
 	my @lines;
 	readLines(\@lines, $file);
 
 	my %tags;
-	readTags(\%tags, \@lines);
+	readTags($tags, \@lines);
 }
 
 sub readLines
@@ -55,7 +55,8 @@ sub readTags
 					--$thisLineParens;
 				}
 
-				my $content = $rest;
+				my $content = $rest."\n";
+				$content =~ s/^[ \t]+//;
 				if ($rest =~ /^[ \t]*\<(.*$)/) {
 					my $existingTag = $1;
 					$existingTag = canonicalTagName($existingTag);
@@ -80,9 +81,10 @@ sub readTags
 				syntaxError($line, $i + 1);
 			}
 		} else { # in block scope
-			my $content = $line;
+			my $content = $line."\n";
 			my $closeScope = 0;
 
+			$content =~ s/^[ \t]+//;
 			if ($content =~ s/\)[ \t]*$//) {
 				$closeScope = 1;
 			}
@@ -96,14 +98,14 @@ sub readTags
 				defined($content) or die "$0: No content for $existingTag\n";
 			}
 
+			$multilineContent .= $content;
+
 			if ($closeScope) {
 				$blockScope = 0;
 				addTag($tags, $multilineTag, $multilineMode, $multilineContent);
 				$multilineTag = $multilineMode = $multilineContent = "";
 				next;
 			}
-
-			$multilineContent .= $content;
 		}
 	}
 }
