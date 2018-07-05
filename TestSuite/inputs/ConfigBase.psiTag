@@ -94,7 +94,7 @@ STRIP_COMMAND = true
 )
 
 Misc StripFalse = (
-STRIP_COMMAND = false
+STRIP_COMMAND = strip
 )
 
 #Enable SU(2)

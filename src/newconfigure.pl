@@ -24,26 +24,21 @@ use lib "../../PsimagLite/scripts";
 use NewMake;
 use lib ".";
 use DmrgDriver;
+use PsiTag;
 
-my ($flavor, $generateSources, $su2enabled, $config) = ("production" , 0, 0, "");
+my ($flavor, $generateSources, $su2enabled, $lto, $config) = ("production" , 0, 0, 0, "");
 my $usage = "USAGE: $0 [-f flavor] [-s] [-su2] [-c config]\n";
 
 GetOptions('f=s' => \$flavor,
            's' => \$generateSources,
            'su2' => \$su2enabled,
+           'lto' => \$lto,
            'c=s' => \$config) or die "$usage\n";
 
-$flavor = procFlavor($flavor);
 my $gccdash = "";
-my $lto = "";
-if (defined($generateSources)) {
-	if ($generateSources eq "lto") {
-		$gccdash = "gcc-";
-		$lto = "-flto";
-		$generateSources = 0;
-	}
-} else {
-	$generateSources = 0;
+if ($lto == 1) {
+	$gccdash = "gcc-";
+	$lto = "-flto";
 }
 
 defined($su2enabled) or $su2enabled = 0;
@@ -98,14 +93,17 @@ sub createMakefile
 	my %args;
 	$args{"CPPFLAGS"} = $lto;
 	$args{"LDFLAGS"} = $lto;
+	$args{"code"} = "DMRG++";
+	$args{"additional3"} = "operator";
+	$args{"configFile"} = "../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag";
+	$args{"flavor"} = $flavor;
 
 	my $fh;
 	open($fh, ">", "Makefile") or die "Cannot open Makefile for writing: $!\n";
 
 	my %additionals;
-	$additionals{"code"} = "DMRG++";
-	$additionals{"additional3"} = "operator";
-	NewMake::main($fh, $flavor, \%args, \@drivers,\%additionals);
+	
+	NewMake::main($fh, \%args, \@drivers);
 	local *FH = $fh;
 print FH<<EOF;
 
@@ -129,37 +127,4 @@ EOF
 	print STDERR "$0: File Makefile has been written\n";
 }
 
-sub procFlavor
-{
-	my ($flavor) = @_;
-	if (!defined($flavor)) {
-		$flavor = "production";
-		print STDERR "$0: No flavor given, assuming production\n";
-		print STDERR "\t say $0 help for a list of options\n";
-	}
-
-	my $hasPath = ($flavor =~ /^\.\./ or $flavor =~ /^\//);
-	return $flavor if ($hasPath);
-
-	if ($flavor eq "help") {
-		print "USAGE: $0 [production | debug | callgrind";
-		print " | helgrind | drd] [generate sources] [enable SU(2)]\n";
-		exit(0);
-	}
-
-	my $dir = "../TestSuite/inputs";
-	if ($flavor eq "production") {
-		$flavor = "Config.make";
-	} elsif ($flavor eq "debug") {
-		$flavor = "ConfigDebug.make";
-	} elsif ($flavor eq "callgrind") {
-		$flavor = "ConfigCallgrind.make";
-	} elsif ($flavor eq "helgrind" or $flavor eq "drd") {
-		$flavor = "ConfigHelgrind.make";
-	} else {
-		return $flavor;
-	}
-
-	return "$dir/$flavor";
-}
 
