@@ -23,8 +23,8 @@ use lib "../../../PsimagLite/scripts";
 use NewMake;
 use PsiTag;
 
-my ($configFile, $flavor, $gccdash) = @ARGV;
-defined($configFile) or $configFile = "../../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag";
+my ($cfiles, $flavor, $gccdash) = @ARGV;
+defined($cfiles) or $cfiles = "../../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag";
 defined($flavor) or $flavor = "production";
 defined($gccdash) or $gccdash = "";
 
@@ -40,11 +40,11 @@ for (my $i = 0; $i < $total; ++$i) {
 	$dotos .= " $name.o ";
 }
 
-createMakefile($gccdash, $configFile, $flavor);
+createMakefile($cfiles, $flavor, $gccdash);
 
 sub createMakefile
 {
-	my ($gccdash, $configFile, $flavor) = @_;
+	my ($cfiles, $flavor, $gccdash) = @_;
 	NewMake::backupMakefile();
 
 	my $fh;
@@ -54,7 +54,7 @@ sub createMakefile
 	$args{"code"} = "KronUtil";
 	$args{"additional3"} = "libkronutil.a test1 test2";
 	$args{"path"} = "../";
-	$args{"configFile"} = $configFile;
+	$args{"configFiles"} = getConfigFiles($cfiles);
 	$args{"flavor"} = $flavor;
 	NewMake::main($fh, \%args, \@drivers);
 
@@ -75,5 +75,18 @@ EOF
 
 	close($fh);
 	print STDERR "$0: File Makefile has been written\n";
+}
+
+sub getConfigFiles
+{
+	my ($list) = @_;
+	my @temp = split/ /, $list;
+	my $n = scalar(@temp);
+	for (my $i = 0; $i < $n; ++$i) {
+		next if ($temp[$i] =~ /^\//);
+		$temp[$i] = "../$temp[$i]";
+	}
+
+	return \@temp;
 }
 

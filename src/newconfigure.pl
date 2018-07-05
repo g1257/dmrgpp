@@ -43,9 +43,11 @@ if ($lto == 1) {
 
 defined($su2enabled) or $su2enabled = 0;
 
-$config = "../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag" if ($config eq "");
+my @configFiles = ("../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag");
+push @configFiles, $config if ($config ne "");
+push @configFiles, "../../dmrgpp/TestSuite/inputs/BasicFlavors.psiTag";
 
-system("cd KronUtil; perl newconfigure.pl ../$config $flavor $gccdash");
+system("cd KronUtil; perl newconfigure.pl \"@configFiles\" $flavor $gccdash");
 
 my %provenanceDriver = (name => 'Provenance', aux => 1);
 my %progGlobalsDriver = (name => 'ProgramGlobals', aux => 1);
@@ -86,18 +88,18 @@ my %dmrgMain = (name => 'dmrg', dotos => "$dotos", libs => "kronutil");
 
 push @drivers,\%dmrgMain;
 
-createMakefile($config, $flavor, $lto);
+createMakefile(\@configFiles, $flavor, $lto);
 
 sub createMakefile
 {
-	my ($config, $flavor, $lto) = @_;
+	my ($configFiles, $flavor, $lto) = @_;
 	NewMake::backupMakefile();
 	my %args;
 	$args{"CPPFLAGS"} = $lto;
 	$args{"LDFLAGS"} = $lto;
 	$args{"code"} = "DMRG++";
 	$args{"additional3"} = "operator";
-	$args{"configFile"} = $config;
+	$args{"configFiles"} = $configFiles;
 	$args{"flavor"} = $flavor;
 
 	my $fh;
