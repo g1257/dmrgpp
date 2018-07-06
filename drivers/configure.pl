@@ -19,75 +19,44 @@ Please see full open source license included in file LICENSE.
 use warnings;
 use strict;
 
+use Getopt::Long qw(:config no_ignore_case);
 use lib "../../PsimagLite/scripts";
-use Make;
+use NewMake;
+use PsiTag;
 
-my @drivers = ();
+my $flavor = NewMake::noFlavor();
+my $usage = "USAGE: $0 [-f flavor]\n";
+my $config;
 
-createMakefile();
+GetOptions('f=s' => \$flavor,
+           'c=s' => \$config) or die "$usage\n";
+
+my @configFiles = ("../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag");
+push @configFiles, $config if (defined($config));
+push @configFiles, "../../dmrgpp/TestSuite/inputs/BasicFlavors.psiTag";
+
+createMakefile(\@configFiles, $flavor);
 
 sub createMakefile
 {
-	Make::backupMakefile();
-	if (!(-r "Config.make")) {
-		my $cmd = "cp Config.make.sample Config.make";
-		system($cmd);
-		print STDERR "$0: Executed $cmd\n";
-	}
-
-	my $fh;
-	open($fh, ">", "Makefile") or die "Cannot open Makefile for writing: $!\n";
-
-	local *FH = $fh;
-	my @units = qw(integrator sparseSolverTest testCRSMatrix combineContinuedFraction
+	my ($configFiles, $flavor) = @_;
+	
+	my @drivers = qw(integrator sparseSolverTest testCRSMatrix combineContinuedFraction
 	continuedFractionCollection range kernelPolynomial
 	linearPrediction options randomTest svd testLapack threads loadImbalance testIsClass
 	testMemResolv1 sumDecomposition calculator closuresTest base64test checkRunId
 	testLanczos nested testIoNg);
-	my $combinedUnits = combine("",\@units,".o ");
-	my $combinedUnits2 = combine("./",\@units,".cpp ");
 
-	print FH<<EOF;
-include Config.make
-all: @units
-EOF
+	my %args;
+	$args{"code"} = "PsimagLite/drivers";
+	$args{"configFiles"} = $configFiles;
+	$args{"flavor"} = $flavor;
 
-	foreach my $unit (@units) {
-		my $doth = "../src/".ucfirst($unit).".h";
-		my $tmp = (-r "$doth") ? "$doth" : "";
-		print FH<<EOF;
-$unit.o: ./$unit.cpp $tmp Makefile Makefile.dep
-\t\$(CXX) \$(CPPFLAGS) -c -I../src -I..  ./$unit.cpp
+	NewMake::backupMakefile();
+	my $fh;
+	open($fh, ">", "Makefile") or die "Cannot open Makefile for writing: $!\n";
 
-$unit: $unit.o $tmp Makefile Makefile.dep
-\t\$(CXX) -o $unit $unit.o \$(LDFLAGS)
-EOF
-	}
-
-print FH<<EOF;
-Makefile.dep: $combinedUnits2
-\t\$(CXX) \$(CPPFLAGS) -I../src -I.. -MM  $combinedUnits2  > Makefile.dep
-
-clean: Makefile.dep
-\trm -f core* *.o *.dep *.a @units
-
-include Makefile.dep
-
-EOF
-
-	close($fh);
-	print STDERR "File Makefile has been written\n";
+	NewMake::main($fh, \%args, \@drivers);
 }
 
-sub combine
-{
-	my ($pre,$a,$post) = @_;
-	my $n = scalar(@$a);
-	my $buffer = "";
-	for (my $i = 0; $i < $n; ++$i) {
-		$buffer .= $pre.$a->[$i].$post;
-	}
-
-	return $buffer;
-}
 
