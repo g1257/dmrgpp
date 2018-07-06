@@ -92,6 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "NoPthreads.h"
 #include "Sort.h"
 #include "Profiling.h"
+#include "HamiltonianAbstract.h"
 
 namespace Dmrg {
 
@@ -126,7 +127,8 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	ModelCommon(const SolverParamsType& params,const GeometryType& geometry)
-	    : ModelCommonBaseType(params,geometry),progress_("ModelCommon")
+	    : ModelCommonBaseType(params,geometry),
+	      progress_("ModelCommon")
 	{
 		if (LinkProductType::terms() > this->geometry().terms()) {
 			PsimagLite::String str("ModelCommon: NumberOfTerms must be ");
@@ -500,7 +502,6 @@ private:
 	void addHamiltonianConnection(VerySparseMatrix<SparseElementType>& matrix,
 	                              const ModelHelperType& modelHelper) const
 	{
-		SizeType n=modelHelper.leftRightSuper().sites();
 		SizeType matrixRank = matrix.rows();
 		VerySparseMatrixType matrix2(matrixRank, matrixRank);
 		typedef HamiltonianConnection<
@@ -509,15 +510,25 @@ private:
 		        LinkProductType> SomeHamiltonianConnectionType;
 		SomeHamiltonianConnectionType hc(this->geometry(),modelHelper);
 
+		const VectorSizeType& superBlock = modelHelper.leftRightSuper().super().block();
+
+		HamiltonianAbstract hamiltonianAbstract(superBlock);
+
 		SizeType total = 0;
-		for (SizeType i=0;i<n;i++) {
-			for (SizeType j=0;j<n;j++) {
+		SizeType nitems = hamiltonianAbstract.items();
+		for (SizeType ind = 0; ind < nitems; ++ind) {
+				const VectorSizeType& hItems = hamiltonianAbstract.item(ind);
+				if (hItems.size() != 2)
+					err("addHamiltonianConnection(): only two-point in H for now\n");
+				SizeType i = indexOfItem(superBlock, hItems[0]);
+				SizeType j = indexOfItem(superBlock, hItems[1]);
+
 				SparseMatrixType matrixBlock(matrixRank,matrixRank);
 				if (!hc.compute(i,j,&matrixBlock,0,total)) continue;
 				VerySparseMatrixType vsm(matrixBlock);
 				matrix2+=vsm;
-			}
 		}
+
 		matrix += matrix2;
 	}
 
@@ -529,6 +540,15 @@ private:
 			return Ac;
 		}
 		return A;
+	}
+
+	static SizeType indexOfItem(const VectorSizeType& v, SizeType x)
+	{
+		SizeType n = v.size();
+		for (SizeType i = 0; i < n; ++i)
+			if (v[i] == x) return i;
+
+		throw PsimagLite::RuntimeError("indexOfItem(): item not found " + ttos(x) + "\n");
 	}
 
 	PsimagLite::ProgressIndicator progress_;
