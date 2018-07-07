@@ -80,12 +80,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define LINK_PRODUCT_IMMM_H
 #include <cassert>
 #include "ProgramGlobals.h"
+#include "LinkProductBase.h"
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProductImmm {
+class LinkProductImmm : LinkProductBase<ModelHelperType> {
 
+	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -117,13 +120,17 @@ public:
 		return (type1==type2) ? 8 : 4;
 	}
 
-	//! has only dependence on orbital
+	// has only dependence on orbital
 	template<typename SomeStructType>
-	static PairType connectorDofs(SizeType term,
+	static void connectorDofs(const VectorSizeType& edofs,
+	                          SizeType term,
 	                              SizeType dofs,
 	                              const SomeStructType& additionalData)
 	{
-		if (term==W_TERM) return PairType(0,0); // Upd
+		if (term==W_TERM) {
+			edofs[0] = edofs[1] = 0;
+			return;
+		}; // Upd
 
 		SizeType type1 = additionalData.type1;
 		SizeType type2 = additionalData.type2;
@@ -136,12 +143,21 @@ public:
 			xtmp = dofs - xtmp;
 			SizeType orb1 = xtmp/2;
 			SizeType orb2 = (xtmp & 1);
-			return PairType(orb1,orb2); // has only dependence on orbital
+			edofs[0] = orb1;
+			edofs[1] = orb2;
+ 			return; // has only dependence on orbital
 		}
+
 		//! TYPE_C and TYPE_O:
 		SizeType spin = dofs/2;
 		SizeType xtmp = (spin==0) ? 0 : 2;
-		return (type1==additionalData.TYPE_C) ? PairType(0,dofs-xtmp) : PairType(dofs-xtmp,0);
+		if (type1==additionalData.TYPE_C) {
+			edofs[0] = 0;
+			edofs[1] = dofs - xtmp;
+		} else {
+			edofs[0] = dofs - xtmp;
+			edofs[1] = 0;
+		}
 	}
 
 	template<typename AdditionalDataType>

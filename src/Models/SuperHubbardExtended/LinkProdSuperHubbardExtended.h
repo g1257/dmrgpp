@@ -82,12 +82,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "../Models/Heisenberg/LinkProductHeisenberg.h"
 #include "../Models/ExtendedHubbard1Orb/LinkProdExtendedHubbard1Orb.h"
+#include "LinkProductBase.h"
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProdSuperHubbardExtended {
+class LinkProdSuperHubbardExtended : LinkProductBase<ModelHelperType> {
 
+	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	enum {TERM_HOPPING=0 ,TERM_NINJ=1, TERM_SUPER = 2};
@@ -168,8 +171,10 @@ public:
 		return LinkProductHeisenberg<ModelHelperType>::dofs(0,additional);
 	}
 
+	// has only dependence on orbital
 	template<typename SomeStructType>
-	static PairType connectorDofs(SizeType term,
+	static void connectorDofs(const VectorSizeType& edofs,
+	                          SizeType term,
 	                              SizeType dofs,
 	                              const SomeStructType& additional)
 	{

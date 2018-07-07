@@ -80,12 +80,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_LINK_PROD_FERMION_SPINLESS_H
 #define DMRG_LINK_PROD_FERMION_SPINLESS_H
 #include "ProgramGlobals.h"
+#include "LinkProductBase.h"
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProductFermionSpinless {
+class LinkProductFermionSpinless : LinkProductBase<ModelHelperType> {
 
+	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
 
@@ -130,14 +133,6 @@ public:
 	// up up is the only connections possible for this model
 	template<typename SomeStructType>
 	static SizeType dofs(SizeType,const SomeStructType&) { return 1; }
-
-	template<typename SomeStructType>
-	static std::pair<SizeType,SizeType> connectorDofs(SizeType,
-	                                                  SizeType,
-	                                                  const SomeStructType&)
-	{
-		return PairType(0,0); // no orbital and no dependence on spin
-	}
 
 	static SizeType terms() { return 2; }
 }; // class LinkProductFermionSpinless

@@ -264,7 +264,7 @@ private:
 		SizeType nitems = hamiltonianAbstract.items();
 		for (SizeType x = 0; x < nitems; ++x) {
 			SizeType totalOne = 0;
-			hc.compute(hamiltonianAbstract, x, 0, &lpsOne, totalOne);
+			hc.compute(x, 0, &lpsOne, totalOne);
 			if (!lps.sealed)
 				lps.push(lpsOne,totalOne);
 			else
@@ -329,7 +329,7 @@ private:
 		SizeType nitems = hamiltonianAbstract.items();
 		for (SizeType x = 0; x < nitems; ++x) {
 			SizeType totalOne = 0;
-			hc.compute(hamiltonianAbstract, x, 0, &lpsOne, totalOne);
+			hc.compute(x, 0, &lpsOne, totalOne);
 			if (!lps.sealed)
 				lps.push(lpsOne,totalOne);
 			else
@@ -367,7 +367,7 @@ private:
 		SparseElementType tmp = 0.0;
 		AdditionalDataType additionalData;
 		hc.prepare(ix,xx,type,tmp,term,dofs,additionalData);
-		LinkType link2 = hc.getKron(A,B,i,j,type,tmp,term,dofs,additionalData);
+		LinkType link2 = hc.getKron(A,B,xx,type,tmp,term,dofs,additionalData);
 		return link2;
 	}
 

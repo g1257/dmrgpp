@@ -79,11 +79,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_LINK_PROD_TJ_ANCILLAC2_H
 #define DMRG_LINK_PROD_TJ_ANCILLAC2_H
 #include "ProgramGlobals.h"
+#include "LinkProductBase.h"
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProductTjAncillaC2 {
+class LinkProductTjAncillaC2 : LinkProductBase<ModelHelperType> {
+
+	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
 
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -211,12 +215,18 @@ public:
 		return 0; // bogus
 	}
 
+	// has only dependence on orbital
 	template<typename SomeStructType>
-	static std::pair<SizeType,SizeType> connectorDofs(SizeType term,
+	static void connectorDofs(const VectorSizeType& edofs,
+	                          SizeType term,
 	                                                  SizeType dofs,
 	                                                  const SomeStructType&)
 	{
-		if (term==TERM_DIDJ) return PairType(0,0);
+		if (term==TERM_DIDJ) {
+			edofs[0] = edofs[1] = 0;
+			return;
+		}
+
 		SizeType orbitals = (hot_) ? 2 : 1;
 		SizeType orbitalsSquared = orbitals*orbitals;
 		SizeType spin = dofs/orbitalsSquared;
@@ -224,7 +234,8 @@ public:
 		xtmp = dofs - xtmp;
 		SizeType orb1 = xtmp/orbitals;
 		SizeType orb2 = xtmp % orbitals;
-		return PairType(orb1,orb2); //  orbital dependence, no spin dependence
+		edofs[0] = orb1;
+		edofs[1] = orb2; //  orbital dependence, no spin dependence
 	}
 
 	static SizeType terms() { return 5; }

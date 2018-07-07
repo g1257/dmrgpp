@@ -79,12 +79,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINKPROD_EXTENDED_HUBBARD_1ORB_H
 #define LINKPROD_EXTENDED_HUBBARD_1ORB_H
 #include "ProgramGlobals.h"
+#include "LinkProductBase.h"
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProdExtendedHubbard1Orb {
+class LinkProdExtendedHubbard1Orb : LinkProductBase<ModelHelperType> {
 
+	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	enum {TERM_HOPPING=0,TERM_NINJ=1};
@@ -129,12 +132,6 @@ public:
 	static SizeType dofs(SizeType term,const SomeStructType&)
 	{
 		return (term==TERM_NINJ) ? 1 : 2;
-	}
-
-	template<typename SomeStructType>
-	static PairType connectorDofs(SizeType,SizeType,const SomeStructType&)
-	{
-		return PairType(0,0); // no orbital and no dependence on spin
 	}
 
 	static SizeType terms() { return 2; }

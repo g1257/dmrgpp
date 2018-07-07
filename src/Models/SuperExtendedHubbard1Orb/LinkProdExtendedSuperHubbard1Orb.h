@@ -78,12 +78,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINKPROD_EXTENDED_SUPER_HUBBARD_1ORB_H
 #define LINKPROD_EXTENDED_SUPER_HUBBARD_1ORB_H
 #include "ProgramGlobals.h"
+#include "LinkProductBase.h"
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProdExtendedSuperHubbard1Orb {
+class LinkProdExtendedSuperHubbard1Orb : LinkProductBase<ModelHelperType> {
 
+	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
 
@@ -201,20 +204,26 @@ public:
 		return (hasSpinOrbit_) ? 4 : 2;
 	}
 
+	// has only dependence on orbital
 	template<typename SomeStructType>
-	static PairType connectorDofs(SizeType term,
+	static void connectorDofs(const VectorSizeType& edofs,
+	                          SizeType term,
 	                              SizeType dofs,
 	                              const SomeStructType&)
 	{
 		// no orbital and no dependence on spin
-		if (term != TERM_HOPPING || !hasSpinOrbit_) return PairType(0,0);
+		if (term != TERM_HOPPING || !hasSpinOrbit_)  {
+			edofs[0] = edofs[1] = 0;
+			return;
+		}
 
 		SizeType spin1 = (dofs & 1);
 		SizeType spin2 = (dofs & 2);
 		spin2 >>= 1;
 
 		// spin dependence of the hopping parameter (spin orbit)
-		return PairType(spin1,spin2);
+		edofs[0] = spin1;
+		edofs[1] = spin2;
 	}
 
 	static SizeType terms() { return 5; }

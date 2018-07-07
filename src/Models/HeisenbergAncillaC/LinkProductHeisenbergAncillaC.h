@@ -79,10 +79,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_LINK_PROD_HEISENBERG_ANCILLAC_H
 #define DMRG_LINK_PROD_HEISENBERG_ANCILLAC_H
 #include "ProgramGlobals.h"
+#include "LinkProductBase.h"
 
 namespace Dmrg {
 template<typename ModelHelperType>
-class LinkProductHeisenbergAncillaC {
+class LinkProductHeisenbergAncillaC : LinkProductBase<ModelHelperType> {
+
+	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
 
 public:
 
@@ -143,11 +147,17 @@ public:
 		return 2;
 	}
 
+	// has only dependence on orbital
 	template<typename SomeStructType>
-	static PairType connectorDofs(SizeType term,SizeType dofs,const SomeStructType&)
+	static void connectorDofs(const VectorSizeType& edofs,
+	                          SizeType term,
+	                          SizeType dofs,
+	                          const SomeStructType&)
 	{
-		if (!hot_ || term == TERM_ANCILLA) return PairType(0,0);
-		return PairType(dofs,dofs);
+		if (!hot_ || term == TERM_ANCILLA)
+			edofs[0] = edofs[1] = 0;
+		else
+			edofs[0] = edofs[1] = dofs;
 	}
 
 	//! Splus Sminus and

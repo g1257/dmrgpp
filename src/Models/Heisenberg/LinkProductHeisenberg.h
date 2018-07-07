@@ -82,7 +82,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 template<typename ModelHelperType>
-class LinkProductHeisenberg {
+class LinkProductHeisenberg : LinkProductBase<ModelHelperType> {
+
+	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
 
 	static SizeType terms_;
 
@@ -142,12 +145,6 @@ public:
 
 	template<typename SomeStructType>
 	static SizeType dofs(SizeType,const SomeStructType&) { return 1; }
-
-	template<typename SomeStructType>
-	static PairType connectorDofs(SizeType,SizeType,const SomeStructType&)
-	{
-		return PairType(0,0); // no orbital
-	}
 
 	//! For TERM_J there are 3 terms:
 	//! Splus Sminus and

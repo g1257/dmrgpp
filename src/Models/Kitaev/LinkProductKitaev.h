@@ -79,10 +79,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINK_PRODUCT_KITAEV_H
 #define LINK_PRODUCT_KITAEV_H
 #include "ProgramGlobals.h"
+#include "LinkProductBase.h"
 
 namespace Dmrg {
 template<typename ModelHelperType>
-class LinkProductKitaev {
+class LinkProductKitaev : LinkProductBase<ModelHelperType> {
+
+	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
 
 	static const SizeType terms_ = 3;
 
@@ -123,12 +127,6 @@ public:
 
 	template<typename SomeStructType>
 	static SizeType dofs(SizeType,const SomeStructType&) { return 1; }
-
-	template<typename SomeStructType>
-	static PairType connectorDofs(SizeType,SizeType,const SomeStructType&)
-	{
-		return PairType(0,0); // no orbital
-	}
 
 	//! Sx Sx
 	//! Sy Sy

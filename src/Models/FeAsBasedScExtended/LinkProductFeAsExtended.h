@@ -86,8 +86,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProductFeAsExtended {
+class LinkProductFeAsExtended : LinkProductBase<ModelHelperType> {
 
+	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -112,16 +114,19 @@ public:
 		            LinkProductFeAsType::dofs(term,additional);
 	}
 
+	static SizeType connectorDofs() { return 2; }
+
 	// has only dependence on orbital
 	template<typename SomeStructType>
-	static PairType connectorDofs(SizeType term,
-	                              SizeType dofs,
-	                              const SomeStructType& additional)
+	static void connectorDofs(const VectorSizeType& edofs,
+	                          SizeType term,
+	                          SizeType dofs,
+	                          const SomeStructType& additional)
 	{
 		if (term==TERM_HOPPING)
-			return LinkProductFeAsType::connectorDofs(term,dofs,additional);
+			return LinkProductFeAsType::connectorDofs(edofs, term,dofs,additional);
 
-		return LinkProductHeisenbergType::connectorDofs(term,dofs,additional);
+		return LinkProductHeisenbergType::connectorDofs(edofs, term, dofs, additional);
 	}
 
 	template<typename SomeStructType>

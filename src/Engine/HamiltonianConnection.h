@@ -130,6 +130,8 @@ public:
 		}
 	}
 
+	SizeType items() const { return hamAbstract_.items(); }
+
 	bool compute(SizeType x,
 	             SparseMatrixType* matrixBlock,
 	             LinkProductStructType* lps,
@@ -148,7 +150,7 @@ public:
 		SparseMatrixType mBlock;
 
 		AdditionalDataType additionalData;
-		VectorSizeType edofs(LinkProductType::edofs());
+		VectorSizeType edofs(LinkProductType::connectorDofs());
 
 		for (SizeType term = 0; term < geometry_.terms(); ++term) {
 			geometry_.fillAdditionalData(additionalData, term, hItems);
@@ -260,7 +262,7 @@ public:
 		tmp=lps_.tmpsaved[ix];
 		geometry_.fillAdditionalData(additionalData,
 		                             term,
-		                             lps_.hamiltonianAbstract().items(x));
+		                             hamAbstract_.item(x));
 	}
 
 	LinkType getKron(const SparseMatrixType** A,
@@ -272,6 +274,13 @@ public:
 	                 SizeType dofs,
 	                 const AdditionalDataType& additionalData) const
 	{
+		const VectorSizeType& hItems = hamAbstract_.item(xx);
+		if (hItems.size() != 2)
+			err("getKron(): No Chemical H supported for now\n");
+
+		SizeType i = indexOfItem(modelHelper_.leftRightSuper().super().block(), hItems[0]);
+		SizeType j = indexOfItem(modelHelper_.leftRightSuper().super().block(), hItems[1]);
+
 		int offset = modelHelper_.leftRightSuper().left().block().size();
 		PairType ops;
 		std::pair<char,char> mods('N','C');

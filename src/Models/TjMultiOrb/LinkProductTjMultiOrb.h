@@ -79,11 +79,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINK_PROD_TJ_MULTIORB_H
 #define LINK_PROD_TJ_MULTIORB_H
 #include "ProgramGlobals.h"
+#include "LinkProductBase.h"
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProductTjMultiOrb {
+class LinkProductTjMultiOrb : LinkProductBase<ModelHelperType> {
+
+	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
 
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -206,8 +210,10 @@ public:
 		return 0; // bogus
 	}
 
+	// has only dependence on orbital
 	template<typename SomeStructType>
-	static std::pair<SizeType,SizeType> connectorDofs(SizeType term,
+	static void connectorDofs(const VectorSizeType& edofs,
+	                          SizeType term,
 	                                                  SizeType dofs,
 	                                                  const SomeStructType&)
 	{
@@ -217,7 +223,8 @@ public:
 		xtmp = dofs - xtmp;
 		SizeType orb1 = xtmp/orbitals_;
 		SizeType orb2 = xtmp % orbitals_;
-		return PairType(orb1,orb2); //  orbital dependence, no spin dependence
+		edofs[0] = orb1;
+		edofs[1] = orb2; //  orbital dependence, no spin dependence
 	}
 
 	static SizeType terms() { return 4; }

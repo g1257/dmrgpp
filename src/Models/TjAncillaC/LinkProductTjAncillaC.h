@@ -79,11 +79,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_LINK_PROD_TJ_ANCILLAC_H
 #define DMRG_LINK_PROD_TJ_ANCILLAC_H
 #include "ProgramGlobals.h"
+#include "LinkProductBase.h"
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProductTjAncillaC {
+class LinkProductTjAncillaC : LinkProductBase<ModelHelperType> {
+
+	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
 
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -202,13 +206,6 @@ public:
 		if (term==TERM_DIDJ) return 1; // dijd
 		assert(false);
 		return 0; // bogus
-	}
-
-	template<typename SomeStructType>
-	static std::pair<SizeType,SizeType> connectorDofs(SizeType,SizeType,
-	                                                  const SomeStructType&)
-	{
-		return PairType(0,0); // no orbital and no dependence on spin
 	}
 
 	static SizeType terms() { return 5; }

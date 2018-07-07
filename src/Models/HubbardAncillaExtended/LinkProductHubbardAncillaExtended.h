@@ -81,11 +81,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_LINKPROD_HUBBARD_ANCILLA_EXTENDED_H
 #include "../Models/FeAsModel/LinkProductFeAs.h"
 #include "ProgramGlobals.h"
+#include "LinkProductBase.h"
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProductHubbardAncillaExtended {
+class LinkProductHubbardAncillaExtended : LinkProductBase<ModelHelperType> {
+
+	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
 
 public:
 
@@ -114,19 +118,23 @@ public:
 
 	// has only dependence on orbital
 	template<typename SomeStructType>
-	static PairType connectorDofs(SizeType term,
-	                              SizeType dofs,
-	                              const SomeStructType&)
+	static void connectorDofs(const VectorSizeType& edofs,
+	                          SizeType term,
+	                          SizeType dofs,
+	                          const SomeStructType&)
 	{
-		if (!hot_ || term == TERM_LAMBDA)
-			return PairType(0,0);
+		if (!hot_ || term == TERM_LAMBDA) {
+			edofs[0] = edofs[1] = 0;
+			return;
+		}
 
 		if (term == TERM_HOPPING) {
 			SizeType orb = dofs/2;
-			return PairType(orb,orb);
+			edofs[0] = edofs[1] = orb;
+			return;
 		}
 
-		return PairType(dofs,dofs);
+		edofs[0] = edofs[1] = dofs;
 	}
 
 	template<typename SomeStructType>

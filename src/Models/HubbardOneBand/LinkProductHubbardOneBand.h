@@ -80,12 +80,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINK_PRODUCT_HubbardOneBand_H
 #define LINK_PRODUCT_HubbardOneBand_H
 #include "ProgramGlobals.h"
+#include "LinkProductBase.h"
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProductHubbardOneBand {
+class LinkProductHubbardOneBand : LinkProductBase<ModelHelperType> {
 
+	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
 
@@ -127,14 +130,6 @@ public:
 	// up up and down down are the only connections possible for this model
 	template<typename SomeStructType>
 	static SizeType dofs(SizeType,const SomeStructType&) { return 2; }
-
-	template<typename SomeStructType>
-	static std::pair<SizeType,SizeType> connectorDofs(SizeType,
-	                                                  SizeType,
-	                                                  const SomeStructType&)
-	{
-		return PairType(0,0); // no orbital and no dependence on spin
-	}
 
 	static SizeType terms() { return TERMS_; }
 }; // class LinkProductHubbardOneBand

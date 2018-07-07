@@ -79,12 +79,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINK_PRODUCT_H
 #define LINK_PRODUCT_H
 #include "ProgramGlobals.h"
+#include "LinkProductBase.h"
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProductFeAs {
+class LinkProductFeAs : LinkProductBase<ModelHelperType> {
 
+	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -110,11 +113,14 @@ public:
 		return 2*orbitals_*orbitals_;
 	}
 
+	static SizeType connectorDofs() { return 2; }
+
 	// has only dependence on orbital
 	template<typename SomeStructType>
-	static PairType connectorDofs(SizeType,
-	                              SizeType dofs,
-	                              const SomeStructType&)
+	static void connectorDofs(const VectorSizeType& edofs,
+	                          SizeType,
+	                          SizeType dofs,
+	                          const SomeStructType&)
 	{
 		SizeType orbitalsSquared = orbitals_*orbitals_;
 		SizeType spin = dofs/orbitalsSquared;
@@ -122,7 +128,8 @@ public:
 		xtmp = dofs - xtmp;
 		SizeType orb1 = xtmp/orbitals_;
 		SizeType orb2 = xtmp % orbitals_;
-		return PairType(orb1,orb2); // has only dependence on orbital
+		edofs[0] = orb1;
+		edofs[1] = orb2;
 	}
 
 	template<typename SomeStructType>

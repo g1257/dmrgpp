@@ -81,12 +81,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_LINKPROD_HUBBARD_ANCILLA_H
 #include "../Models/FeAsModel/LinkProductFeAs.h"
 #include "ProgramGlobals.h"
+#include "LinkProductBase.h"
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProductHubbardAncilla {
+class LinkProductHubbardAncilla : LinkProductBase<ModelHelperType> {
 
+	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -105,15 +108,6 @@ public:
 	static SizeType dofs(SizeType,const SomeStructType&)
 	{
 		return 2;
-	}
-
-	// has only dependence on orbital
-	template<typename SomeStructType>
-	static PairType connectorDofs(SizeType,
-	                              SizeType,
-	                              const SomeStructType&)
-	{
-		return PairType(0,0);
 	}
 
 	template<typename SomeStructType>
