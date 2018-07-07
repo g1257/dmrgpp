@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2012, UT-Battelle, LLC
+Copyright (c) 2009-2012-2018, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 5.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -67,7 +67,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
 /** \ingroup DMRG */
 /*@{*/
@@ -92,7 +91,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "NoPthreads.h"
 #include "Sort.h"
 #include "Profiling.h"
-#include "HamiltonianAbstract.h"
 
 namespace Dmrg {
 
@@ -117,14 +115,16 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelHelperType::BasisType MyBasis;
 	typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef HamiltonianConnection<GeometryType,ModelHelperType,LinkProductType> HamiltonianConnectionType;
+	typedef HamiltonianConnection<GeometryType,ModelHelperType,LinkProductType>
+	HamiltonianConnectionType;
 	typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename PsimagLite::Vector<LinkProductStructType>::Type VectorLinkProductStructType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename HamiltonianConnectionType::VectorSizeType VectorSizeType;
+	typedef typename HamiltonianConnectionType::HamiltonianAbstractType HamiltonianAbstractType;
 
 	ModelCommon(const SolverParamsType& params,const GeometryType& geometry)
 	    : ModelCommonBaseType(params,geometry),
@@ -258,18 +258,18 @@ private:
 		LinkProductStructType lpsOne(ProgramGlobals::MAX_LPS);
 		HamiltonianConnectionType hc(this->geometry(),modelHelper,&lps,&x,&y);
 
-		SizeType n=modelHelper.leftRightSuper().super().block().size();
+		HamiltonianAbstractType hamiltonianAbstract(modelHelper.leftRightSuper().super().block());
+
 		SizeType total = 0;
-		for (SizeType i=0;i<n;i++) {
-			for (SizeType j=0;j<n;j++) {
-				SizeType totalOne = 0;
-				hc.compute(i,j,0,&lpsOne,totalOne);
-				if (!lps.sealed)
-					lps.push(lpsOne,totalOne);
-				else
-					lps.copy(lpsOne,totalOne,total);
-				total += totalOne;
-			}
+		SizeType nitems = hamiltonianAbstract.items();
+		for (SizeType x = 0; x < nitems; ++x) {
+			SizeType totalOne = 0;
+			hc.compute(hamiltonianAbstract, x, 0, &lpsOne, totalOne);
+			if (!lps.sealed)
+				lps.push(lpsOne,totalOne);
+			else
+				lps.copy(lpsOne,totalOne,total);
+			total += totalOne;
 		}
 
 		hc.tasks(total + 2);
@@ -323,18 +323,18 @@ private:
 		LinkProductStructType lpsOne(ProgramGlobals::MAX_LPS);
 		HamiltonianConnectionType hc(this->geometry(),modelHelper,&lps,&x,&y);
 
-		SizeType n=modelHelper.leftRightSuper().super().block().size();
+		HamiltonianAbstractType hamiltonianAbstract(modelHelper.leftRightSuper().super().block());
+
 		SizeType total = 0;
-		for (SizeType i=0;i<n;i++) {
-			for (SizeType j=0;j<n;j++) {
-				SizeType totalOne = 0;
-				hc.compute(i,j,0,&lpsOne,totalOne);
-				if (!lps.sealed)
-					lps.push(lpsOne,totalOne);
-				else
-					lps.copy(lpsOne,totalOne,total);
-				total += totalOne;
-			}
+		SizeType nitems = hamiltonianAbstract.items();
+		for (SizeType x = 0; x < nitems; ++x) {
+			SizeType totalOne = 0;
+			hc.compute(hamiltonianAbstract, x, 0, &lpsOne, totalOne);
+			if (!lps.sealed)
+				lps.push(lpsOne,totalOne);
+			else
+				lps.copy(lpsOne,totalOne,total);
+			total += totalOne;
 		}
 
 		if (lps.typesaved.size() != total) {
@@ -512,21 +512,16 @@ private:
 
 		const VectorSizeType& superBlock = modelHelper.leftRightSuper().super().block();
 
-		HamiltonianAbstract hamiltonianAbstract(superBlock);
+		HamiltonianAbstractType hamiltonianAbstract(superBlock);
 
 		SizeType total = 0;
 		SizeType nitems = hamiltonianAbstract.items();
-		for (SizeType ind = 0; ind < nitems; ++ind) {
-				const VectorSizeType& hItems = hamiltonianAbstract.item(ind);
-				if (hItems.size() != 2)
-					err("addHamiltonianConnection(): only two-point in H for now\n");
-				SizeType i = indexOfItem(superBlock, hItems[0]);
-				SizeType j = indexOfItem(superBlock, hItems[1]);
-
-				SparseMatrixType matrixBlock(matrixRank,matrixRank);
-				if (!hc.compute(i,j,&matrixBlock,0,total)) continue;
-				VerySparseMatrixType vsm(matrixBlock);
-				matrix2+=vsm;
+		for (SizeType x = 0; x < nitems; ++x) {
+			SparseMatrixType matrixBlock(matrixRank, matrixRank);
+			if (!hc.compute(hamiltonianAbstract, x, &matrixBlock, 0, total))
+				continue;
+			VerySparseMatrixType vsm(matrixBlock);
+			matrix2+=vsm;
 		}
 
 		matrix += matrix2;
@@ -540,15 +535,6 @@ private:
 			return Ac;
 		}
 		return A;
-	}
-
-	static SizeType indexOfItem(const VectorSizeType& v, SizeType x)
-	{
-		SizeType n = v.size();
-		for (SizeType i = 0; i < n; ++i)
-			if (v[i] == x) return i;
-
-		throw PsimagLite::RuntimeError("indexOfItem(): item not found " + ttos(x) + "\n");
 	}
 
 	PsimagLite::ProgressIndicator progress_;

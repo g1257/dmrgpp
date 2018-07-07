@@ -13,7 +13,7 @@ class HamiltonianAbstract {
 public:
 
 	HamiltonianAbstract(const VectorSizeType& block)
-	    : data_(block.size()*block.size())
+	    : block_(block), data_(block.size()*block.size())
 	{
 		VectorSizeType v(2, 0);
 		SizeType n = block.size();
@@ -37,8 +37,11 @@ public:
 		return data_[ind];
 	}
 
+	const VectorSizeType& block() const { return block_; }
+
 private:
 
+	const VectorSizeType& block_;
 	VectorVectorSizeType data_;
 };
 }

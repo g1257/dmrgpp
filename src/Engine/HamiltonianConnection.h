@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include <cassert>
 #include "ProgramGlobals.h"
+#include "HamiltonianAbstract.h"
 
 namespace Dmrg {
 
@@ -100,6 +101,8 @@ public:
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
 	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
 	typedef typename PsimagLite::Concurrency ConcurrencyType;
+	typedef HamiltonianAbstract HamiltonianAbstractType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	HamiltonianConnection(const GeometryType& geometry,
 	                      const ModelHelperType& modelHelper,
@@ -117,15 +120,31 @@ public:
 	      total_(0)
 	{}
 
-	bool compute(SizeType i,
-	             SizeType j,
+	~HamiltonianConnection()
+	{
+		SizeType n = garbage_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			delete garbage_[i];
+			garbage_[i] = 0;
+		}
+	}
+
+	bool compute(const HamiltonianAbstractType& hamiltonianAbstract,
+	             SizeType x,
 	             SparseMatrixType* matrixBlock,
 	             LinkProductStructType* lps,
 	             SizeType& total) const
 	{
-		bool flag=false;
-		SizeType ind = modelHelper_.leftRightSuper().super().block()[i];
-		SizeType jnd = modelHelper_.leftRightSuper().super().block()[j];
+		const VectorSizeType& hItems = hamiltonianAbstract.item(x);
+		if (hItems.size() != 2)
+			err("addHamiltonianConnection(): only two-point in H for now\n");
+
+		bool flag = false;
+
+		SizeType ind = hItems[0];
+		SizeType jnd = hItems[1];
+		SizeType i = indexOfItem(hamiltonianAbstract.block(), ind);
+		SizeType j = indexOfItem(hamiltonianAbstract.block(), jnd);
 
 		if (!geometry_.connected(smax_,emin_,ind,jnd)) return flag;
 		ProgramGlobals::ConnectionEnum type = geometry_.connectionKind(smax_,ind,jnd);
@@ -285,27 +304,28 @@ public:
 		               value,
 		               dofs,
 		               fermionOrBoson,
-		               ops,mods,
+		               ops,
+		               mods,
 		               angularMomentum,
 		               angularFactor,
 		               category);
 		SizeType sysOrEnv = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ?
-		            ModelHelperType::System : ModelHelperType::Environ;
+		            ProgramGlobals::SYSTEM : ProgramGlobals::ENVIRON;
 		SizeType envOrSys = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ?
-		            ModelHelperType::Environ : ModelHelperType::System;
+		            ProgramGlobals::ENVIRON : ProgramGlobals::SYSTEM;
 		SizeType site1Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ?
 		            link2.site1 : link2.site1-offset;
 		SizeType site2Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ?
 		            link2.site2-offset : link2.site2;
 
-		*A = &modelHelper_.getReducedOperator(link2.mods.first,
-		                                      site1Corrected,
-		                                      link2.ops.first,
-		                                      sysOrEnv);
-		*B = &modelHelper_.getReducedOperator(link2.mods.second,
-		                                      site2Corrected,
-		                                      link2.ops.second,
-		                                      envOrSys);
+		*A = &reducedOperator(link2.mods.first,
+		                      site1Corrected,
+		                      link2.ops.first,
+		                      sysOrEnv);
+		*B = &reducedOperator(link2.mods.second,
+		                      site2Corrected,
+		                      link2.ops.second,
+		                      envOrSys);
 
 		assert(isNonZeroMatrix(**A));
 		assert(isNonZeroMatrix(**B));
@@ -320,6 +340,68 @@ public:
 	}
 
 private:
+
+	const SparseMatrixType& reducedOperator(char modifier,
+	                                        SizeType i,
+	                                        SizeType sigma,
+	                                        SizeType type) const
+	{
+		if (!ModelHelperType::BasisType::useSu2Symmetry())
+			return reducedOperatorLocal(modifier, i, sigma, type);
+		else
+			return reducedOperatorSu2(modifier, i, sigma, type);
+	}
+
+	const SparseMatrixType& reducedOperatorLocal(char modifier,
+	                                             SizeType i,
+	                                             SizeType sigma,
+	                                             SizeType type) const
+	{
+		const SparseMatrixType* m = 0;
+		if (type == ProgramGlobals::SYSTEM) {
+			PairType ii = modelHelper_.leftRightSuper().left().getOperatorIndices(i,sigma);
+			m = &(modelHelper_.leftRightSuper().left().getOperatorByIndex(ii.first).data);
+		} else {
+			assert(type == ProgramGlobals::ENVIRON);
+			PairType ii =modelHelper_.leftRightSuper().right().getOperatorIndices(i,sigma);
+			m =&(modelHelper_.leftRightSuper().right().getOperatorByIndex(ii.first).data);
+		}
+
+		if (modifier == 'N') return *m;
+
+		SizeType typeIndex = (type == ProgramGlobals::SYSTEM) ? 0 : 1;
+		SizeType dummySite = 0; // FIXME for Immm
+		SizeType opsPerSiteMax = modelHelper_.leftRightSuper().left().operatorsPerSite(dummySite);
+		SizeType packed = sigma + typeIndex*opsPerSiteMax + i*2*opsPerSiteMax;
+		int seen = indexOfItem(seen_, packed);
+		if (seen >= 0)
+			return *(garbage_[seen]);
+
+		SparseMatrixType* mc = new SparseMatrixType;
+		transposeConjugate(*mc, *m);
+		garbage_.push_back(mc);
+		seen_.push_back(packed);
+		return *mc;
+	}
+
+	const SparseMatrixType& reducedOperatorSu2(char modifier,
+	                                           SizeType i,
+	                                           SizeType sigma,
+	                                           SizeType type) const
+	{
+		if (type == ProgramGlobals::SYSTEM) {
+			PairType ii = modelHelper_.leftRightSuper().left().getOperatorIndices(i,
+			                                                                      sigma);
+			return modelHelper_.leftRightSuper().left().getReducedOperatorByIndex(modifier,
+			                                                                      ii).data;
+		}
+
+		assert(type == ProgramGlobals::ENVIRON);
+		PairType ii =modelHelper_.leftRightSuper().right().getOperatorIndices(i,
+		                                                                      sigma);
+		return modelHelper_.leftRightSuper().right().getReducedOperatorByIndex(modifier,
+		                                                                       ii).data;
+	}
 
 	//! Adds a connector between system and environment
 	SizeType calcBond(SparseMatrixType &matrixBlock,
@@ -362,6 +444,15 @@ private:
 		return false;
 	}
 
+	static SizeType indexOfItem(const VectorSizeType& v, SizeType x)
+	{
+		SizeType n = v.size();
+		for (SizeType i = 0; i < n; ++i)
+			if (v[i] == x) return i;
+
+		throw PsimagLite::RuntimeError("indexOfItem(): item not found " + ttos(x) + "\n");
+	}
+
 	const GeometryType& geometry_;
 	const ModelHelperType& modelHelper_;
 	const LinkProductStructType& lps_;
@@ -372,6 +463,8 @@ private:
 	SizeType smax_,emin_;
 	VectorVectorType xtemp_;
 	SizeType total_;
+	mutable typename PsimagLite::Vector<SparseMatrixType*>::Type garbage_;
+	mutable VectorSizeType seen_;
 }; // class HamiltonianConnection
 } // namespace Dmrg
 

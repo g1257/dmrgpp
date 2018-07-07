@@ -125,13 +125,9 @@ public:
 	      targetTime_(targetTime),
 	      threadId_(threadId),
 	      buffer_(lrs_.left().size()),
-	      basis2tc_(lrs_.left().numberOfOperators()),
-	      basis3tc_(lrs_.right().numberOfOperators()),
 	      kroneckerDumper_(pKroneckerDumper,lrs_,m_)
 	{
 		createBuffer();
-		createTcOperators(basis2tc_,lrs_.left());
-		createTcOperators(basis3tc_,lrs_.right());
 		createAlphaAndBeta();
 	}
 
@@ -140,23 +136,6 @@ public:
 	const RealType& time() const { return targetTime_; }
 
 	static bool isSu2() { return false; }
-
-	const SparseMatrixType& getReducedOperator(char modifier,
-	                                           SizeType i,
-	                                           SizeType sigma,
-	                                           SizeType type) const
-	{
-		if (modifier=='N') {
-			if (type==System) {
-				PairType ii =lrs_.left().getOperatorIndices(i,sigma);
-				return lrs_.left().getOperatorByIndex(ii.first).data;
-			} else {
-				PairType ii =lrs_.right().getOperatorIndices(i,sigma);
-				return lrs_.right().getOperatorByIndex(ii.first).data;
-			}
-		}
-		return getTcOperator(i,sigma,type);
-	}
 
 	int size() const
 	{
@@ -427,18 +406,6 @@ public:
 
 private:
 
-	const SparseMatrixType& getTcOperator(int i,SizeType sigma,SizeType type) const
-	{
-		if (type==System) {
-			PairType ii =lrs_.left().getOperatorIndices(i,sigma);
-			assert(ii.first<basis2tc_.size());
-			return basis2tc_[ii.first];
-		}
-		PairType ii =lrs_.right().getOperatorIndices(i,sigma);
-		assert(ii.first<basis3tc_.size());
-		return basis3tc_[ii.first];
-	}
-
 	void createBuffer()
 	{
 		SizeType ns=lrs_.left().size();
@@ -457,36 +424,36 @@ private:
 		}
 	}
 
-	void createTcOperators(VectorSparseMatrixType& basistc,
-	                       const BasisWithOperatorsType& basis)
-	{
-		if (basistc.size()==0) return;
-		SizeType n=basis.getOperatorByIndex(0).data.rows();
-		bool b = true;
-		for (SizeType i=0;i<basistc.size();i++) {
-			if (basis.getOperatorByIndex(i).data.rows()!=n) {
-				b=false;
-				break;
-			}
-		}
-		if (b) createTcOperatorsCached(basistc,basis);
-		else createTcOperatorsSimple(basistc,basis);
-	}
+//	void createTcOperators(VectorSparseMatrixType& basistc,
+//	                       const BasisWithOperatorsType& basis)
+//	{
+//		if (basistc.size()==0) return;
+//		SizeType n=basis.getOperatorByIndex(0).data.rows();
+//		bool b = true;
+//		for (SizeType i=0;i<basistc.size();i++) {
+//			if (basis.getOperatorByIndex(i).data.rows()!=n) {
+//				b=false;
+//				break;
+//			}
+//		}
+//		if (b) createTcOperatorsCached(basistc,basis);
+//		else createTcOperatorsSimple(basistc,basis);
+//	}
 
-	void createTcOperatorsSimple(VectorSparseMatrixType& basistc,
-	                             const BasisWithOperatorsType& basis)
-	{
-		for (SizeType i=0;i<basistc.size();i++)
-			transposeConjugate(basistc[i],basis.getOperatorByIndex(i).data);
-	}
+//	void createTcOperatorsSimple(VectorSparseMatrixType& basistc,
+//	                             const BasisWithOperatorsType& basis)
+//	{
+//		for (SizeType i=0;i<basistc.size();i++)
+//			transposeConjugate(basistc[i],basis.getOperatorByIndex(i).data);
+//	}
 
-	void createTcOperatorsCached(VectorSparseMatrixType& basistc,
-	                             const BasisWithOperatorsType& basis)
-	{
-		SizeType n = basistc.size();
-		for (SizeType i = 0; i < n; ++i)
-			transposeConjugate(basistc[i], basis.getOperatorByIndex(i).data);
-	}
+//	void createTcOperatorsCached(VectorSparseMatrixType& basistc,
+//	                             const BasisWithOperatorsType& basis)
+//	{
+//		SizeType n = basistc.size();
+//		for (SizeType i = 0; i < n; ++i)
+//			transposeConjugate(basistc[i], basis.getOperatorByIndex(i).data);
+//	}
 
 	void createAlphaAndBeta()
 	{
@@ -511,7 +478,6 @@ private:
 	RealType targetTime_;
 	SizeType threadId_;
 	typename PsimagLite::Vector<PsimagLite::Vector<int>::Type>::Type buffer_;
-	VectorSparseMatrixType basis2tc_,basis3tc_;
 	typename PsimagLite::Vector<SizeType>::Type alpha_,beta_;
 	typename PsimagLite::Vector<bool>::Type fermionSigns_;
 	mutable KroneckerDumperType kroneckerDumper_;

@@ -140,19 +140,6 @@ public:
 		return lrs_.super().qnEx(m_);
 	}
 
-	const SparseMatrixType& getReducedOperator(char modifier,
-	                                           SizeType i,
-	                                           SizeType sigma,
-	                                           SizeType type) const
-	{
-		if (type==System) {
-			PairType ii =lrs_.left().getOperatorIndices(i,sigma);
-			return lrs_.left().getReducedOperatorByIndex(modifier,ii).data;
-		}
-		PairType ii =lrs_.right().getOperatorIndices(i,sigma);
-		return lrs_.right().getReducedOperatorByIndex(modifier,ii).data;
-	}
-
 	// Does matrixBlock= (AB), A belongs to pSprime and B
 	// belongs to pEprime or viceversa (inter)
 	void fastOpProdInter(SparseMatrixType const &A,
