@@ -117,7 +117,8 @@ public:
 	      smax_(*std::max_element(systemBlock_.begin(),systemBlock_.end())),
 	      emin_(*std::min_element(envBlock_.begin(),envBlock_.end())),
 	      xtemp_(ConcurrencyType::storageSize(ConcurrencyType::codeSectionParams.npthreads)),
-	      total_(0)
+	      total_(0),
+	      hamAbstract_(modelHelper_.leftRightSuper().super().block())
 	{}
 
 	~HamiltonianConnection()
@@ -129,69 +130,67 @@ public:
 		}
 	}
 
-	bool compute(const HamiltonianAbstractType& hamiltonianAbstract,
-	             SizeType x,
+	bool compute(SizeType x,
 	             SparseMatrixType* matrixBlock,
 	             LinkProductStructType* lps,
 	             SizeType& total) const
 	{
-		const VectorSizeType& hItems = hamiltonianAbstract.item(x);
-		if (hItems.size() != 2)
-			err("addHamiltonianConnection(): only two-point in H for now\n");
-
 		bool flag = false;
 
-		SizeType ind = hItems[0];
-		SizeType jnd = hItems[1];
-		SizeType i = indexOfItem(hamiltonianAbstract.block(), ind);
-		SizeType j = indexOfItem(hamiltonianAbstract.block(), jnd);
+		const VectorSizeType& hItems = hamAbstract_.item(x);
+		if (!geometry_.connected(smax_, emin_, hItems)) return flag;
 
-		if (!geometry_.connected(smax_,emin_,ind,jnd)) return flag;
-		ProgramGlobals::ConnectionEnum type = geometry_.connectionKind(smax_,ind,jnd);
+		ProgramGlobals::ConnectionEnum type = geometry_.connectionKind(smax_, hItems);
 
-		if (type==ProgramGlobals::SYSTEM_SYSTEM ||
-		        type==ProgramGlobals::ENVIRON_ENVIRON) return flag;
+		if (type == ProgramGlobals::SYSTEM_SYSTEM ||
+		        type == ProgramGlobals::ENVIRON_ENVIRON) return flag;
 
 		SparseMatrixType mBlock;
 
 		AdditionalDataType additionalData;
+		VectorSizeType edofs(LinkProductType::edofs());
 
-		for (SizeType term=0;term<geometry_.terms();term++) {
-			geometry_.fillAdditionalData(additionalData,term,ind,jnd);
-			SizeType dofsTotal = LinkProductType::dofs(term,additionalData);
-			for (SizeType dofs=0;dofs<dofsTotal;dofs++) {
-				std::pair<SizeType,SizeType> edofs = LinkProductType::connectorDofs(term,
-				                                                                    dofs,
-				                                                                    additionalData);
+		for (SizeType term = 0; term < geometry_.terms(); ++term) {
+			geometry_.fillAdditionalData(additionalData, term, hItems);
+			SizeType dofsTotal = LinkProductType::dofs(term, additionalData);
+			for (SizeType dofs = 0; dofs < dofsTotal; ++dofs) {
+				LinkProductType::connectorDofs(edofs,
+				                               term,
+				                               dofs,
+				                               additionalData);
 				SparseElementType tmp = geometry_(smax_,
 				                                  emin_,
-				                                  ind,
-				                                  edofs.first,
-				                                  jnd,
-				                                  edofs.second,
+				                                  hItems,
+				                                  edofs,
 				                                  term);
 
-				if (tmp==static_cast<RealType>(0.0)) continue;
+				if (tmp == static_cast<RealType>(0.0)) continue;
 
-				tmp = geometry_.vModifier(term,tmp,modelHelper_.time());
+				tmp = geometry_.vModifier(term, tmp, modelHelper_.time());
 
 				flag = true;
 
 				if (lps!=0) {
 					assert(lps->typesaved.size() > total);
-					lps->isaved[total]=i;
-					lps->jsaved[total]=j;
+					lps->xsaved[total] = x;
 					lps->typesaved[total]=type;
 					lps->tmpsaved[total]=tmp;
 					lps->termsaved[total]=term;
 					lps->dofssaved[total]=dofs;
 					total++;
 				} else {
-					calcBond(mBlock,i,j,type,tmp,term,dofs,additionalData);
+					calcBond(mBlock,
+					         x,
+					         type,
+					         tmp,
+					         term,
+					         dofs,
+					         additionalData);
 					*matrixBlock += mBlock;
 				}
 			}
 		}
+
 		return flag;
 	}
 
@@ -215,14 +214,13 @@ public:
 		assert(taskNumber > 1);
 		taskNumber -= 2;
 		AdditionalDataType additionalData;
-		SizeType i = 0;
-		SizeType j = 0;
+		SizeType xx = 0;
 		ProgramGlobals::ConnectionEnum type;
 		SizeType term = 0;
 		SizeType dofs =0;
-		prepare(taskNumber,i,j,type,tmp,term,dofs,additionalData);
+		prepare(taskNumber,xx,type,tmp,term,dofs,additionalData);
 
-		linkProduct(xtemp_[threadNum],y_,i,j,type,tmp,term,dofs,additionalData);
+		linkProduct(xtemp_[threadNum],y_,xx,type,tmp,term,dofs,additionalData);
 	}
 
 	void tasks(SizeType total) { total_ = total; }
@@ -248,29 +246,26 @@ public:
 	}
 
 	void prepare(SizeType ix,
-	             SizeType& i,
-	             SizeType& j,
+	             SizeType& x,
 	             ProgramGlobals::ConnectionEnum& type,
 	             SparseElementType& tmp,
 	             SizeType& term,
 	             SizeType& dofs,
 	             AdditionalDataType& additionalData) const
 	{
-		i=lps_.isaved[ix];
-		j=lps_.jsaved[ix];
+		x = lps_.xsaved[ix];
 		type=lps_.typesaved[ix];
 		term = lps_.termsaved[ix];
 		dofs = lps_.dofssaved[ix];
 		tmp=lps_.tmpsaved[ix];
-		SizeType ind = modelHelper_.leftRightSuper().super().block()[i];
-		SizeType jnd = modelHelper_.leftRightSuper().super().block()[j];
-		geometry_.fillAdditionalData(additionalData,term,ind,jnd);
+		geometry_.fillAdditionalData(additionalData,
+		                             term,
+		                             lps_.hamiltonianAbstract().items(x));
 	}
 
 	LinkType getKron(const SparseMatrixType** A,
 	                 const SparseMatrixType** B,
-	                 SizeType i,
-	                 SizeType j,
+	                 SizeType xx,
 	                 ProgramGlobals::ConnectionEnum type,
 	                 const SparseElementType& valuec,
 	                 SizeType term,
@@ -405,8 +400,7 @@ private:
 
 	//! Adds a connector between system and environment
 	SizeType calcBond(SparseMatrixType &matrixBlock,
-	                  SizeType i,
-	                  SizeType j,
+	                  SizeType xx,
 	                  ProgramGlobals::ConnectionEnum type,
 	                  const SparseElementType& valuec,
 	                  SizeType term,
@@ -415,7 +409,14 @@ private:
 	{
 		SparseMatrixType const* A = 0;
 		SparseMatrixType const* B = 0;
-		LinkType link2 = getKron(&A,&B,i,j,type,valuec,term,dofs,additionalData);
+		LinkType link2 = getKron(&A,
+		                         &B,
+		                         xx,
+		                         type,
+		                         valuec,
+		                         term,
+		                         dofs,
+		                         additionalData);
 		modelHelper_.fastOpProdInter(*A,*B,matrixBlock,link2);
 
 		return matrixBlock.nonZeros();
@@ -424,8 +425,7 @@ private:
 	//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment
 	void linkProduct(typename PsimagLite::Vector<SparseElementType>::Type& x,
 	                 const typename PsimagLite::Vector<SparseElementType>::Type& y,
-	                 SizeType i,
-	                 SizeType j,
+	                 SizeType xx,
 	                 ProgramGlobals::ConnectionEnum type,
 	                 const SparseElementType &valuec,
 	                 SizeType term,
@@ -434,7 +434,7 @@ private:
 	{
 		SparseMatrixType const* A = 0;
 		SparseMatrixType const* B = 0;
-		LinkType link2 = getKron(&A,&B,i,j,type,valuec,term,dofs,additionalData);
+		LinkType link2 = getKron(&A,&B,xx,type,valuec,term,dofs,additionalData);
 		modelHelper_.fastOpProdInter(x,y,*A,*B,link2);
 	}
 
@@ -458,11 +458,12 @@ private:
 	const LinkProductStructType& lps_;
 	typename PsimagLite::Vector<SparseElementType>::Type& x_;
 	const typename PsimagLite::Vector<SparseElementType>::Type& y_;
-	const typename GeometryType::BlockType& systemBlock_;
-	const typename GeometryType::BlockType& envBlock_;
+	const VectorSizeType& systemBlock_;
+	const VectorSizeType& envBlock_;
 	SizeType smax_,emin_;
 	VectorVectorType xtemp_;
 	SizeType total_;
+	HamiltonianAbstractType hamAbstract_;
 	mutable typename PsimagLite::Vector<SparseMatrixType*>::Type garbage_;
 	mutable VectorSizeType seen_;
 }; // class HamiltonianConnection

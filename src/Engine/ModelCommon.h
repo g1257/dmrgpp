@@ -360,14 +360,13 @@ private:
 		const LinkProductStructType& lps = modelHelper.lps();
 		typename PsimagLite::Vector<SparseElementType>::Type x,y; // bogus
 		HamiltonianConnectionType hc(this->geometry(),modelHelper,&lps,&x,&y);
-		SizeType i = 0;
-		SizeType j = 0;
+		SizeType xx = 0;
 		ProgramGlobals::ConnectionEnum type;
 		SizeType term = 0;
 		SizeType dofs = 0;
 		SparseElementType tmp = 0.0;
 		AdditionalDataType additionalData;
-		hc.prepare(ix,i,j,type,tmp,term,dofs,additionalData);
+		hc.prepare(ix,xx,type,tmp,term,dofs,additionalData);
 		LinkType link2 = hc.getKron(A,B,i,j,type,tmp,term,dofs,additionalData);
 		return link2;
 	}
@@ -403,98 +402,8 @@ private:
 	                                  bool sysEnvOnly,
 	                                  RealType time) const
 	{
-		SizeType n = block.size();
-		for (SizeType i=0;i<n;i++) {
-			for (SizeType j=0;j<n;j++) {
-				addConnectionsInNaturalBasis(hmatrix,i,j,cm,block,sysEnvOnly,time);
-			}
-		}
-	}
-
-	void addConnectionsInNaturalBasis(SparseMatrixType& hmatrix,
-	                                  SizeType i,
-	                                  SizeType j,
-	                                  const VectorOperatorType& cm,
-	                                  const Block& block,
-	                                  bool sysEnvOnly,
-	                                  RealType time) const
-	{
-		SizeType middle = static_cast<SizeType>(block.size()/2);
-		if (middle == 0 && sysEnvOnly) return;
-
-		assert(middle < block.size());
-		middle = block[middle];
-
-		SizeType ind = block[i];
-		SizeType jnd = block[j];
-
-		if (!this->geometry().connected(0,1,ind,jnd)) return;
-		if (sysEnvOnly && ind < middle && jnd < middle) return;
-		if (sysEnvOnly && ind >= middle && jnd >= middle) return;
-
-		ProgramGlobals::ConnectionEnum type = ProgramGlobals::SYSTEM_SYSTEM;
-		SizeType offset = cm.size()/block.size();
-
-		AdditionalDataType additionalData;
-
-		for (SizeType term=0;term<this->geometry().terms();term++) {
-			this->geometry().fillAdditionalData(additionalData,term,ind,jnd);
-			SizeType dofsTotal = LinkProductType::dofs(term,additionalData);
-			for (SizeType dofs=0;dofs<dofsTotal;dofs++) {
-				std::pair<SizeType,SizeType> edofs = LinkProductType::connectorDofs(term,
-				                                                                    dofs,
-				                                                                    additionalData);
-				SparseElementType tmp = this->geometry()(ind,
-				                                         edofs.first,
-				                                         jnd,
-				                                         edofs.second,
-				                                         term);
-
-				if (tmp==static_cast<RealType>(0.0)) continue;
-
-				tmp = this->geometry().vModifier(term,tmp,time);
-
-				std::pair<SizeType,SizeType> ops;
-				std::pair<char,char> mods('N','C');
-				ProgramGlobals::FermionOrBosonEnum fermionOrBoson=ProgramGlobals::FERMION;
-				SizeType angularMomentum=0;
-				SizeType category=0;
-				RealType angularFactor=0;
-				bool isSu2 = ModelHelperType::isSu2();
-				SparseElementType value = tmp;
-				LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData);
-				LinkProductType::setLinkData(term,
-				                             dofs,
-				                             isSu2,
-				                             fermionOrBoson,
-				                             ops,
-				                             mods,
-				                             angularMomentum,
-				                             angularFactor,
-				                             category,
-				                             additionalData);
-				typename ModelHelperType::LinkType link2(i,
-				                                         j,
-				                                         type,
-				                                         value,
-				                                         dofs,
-				                                         fermionOrBoson,
-				                                         ops,
-				                                         mods,
-				                                         angularMomentum,
-				                                         angularFactor,
-				                                         category);
-
-				const SparseMatrixType& A = cm[link2.ops.first+i*offset].data;
-
-				const SparseMatrixType& B = cm[link2.ops.second+j*offset].data;
-
-				if (ind > jnd) tmp = PsimagLite::conj(tmp);
-
-				hmatrix += tmp*transposeOrNot(B,link2.mods.second)
-				        *transposeOrNot(A,link2.mods.first);
-			}
-		}
+		if (block.size() != 2)
+			err("addConnectionsInNaturalBasis(): unimplemented\n");
 	}
 
 	// Add Hamiltonian connection between basis2 and basis3
@@ -510,15 +419,11 @@ private:
 		        LinkProductType> SomeHamiltonianConnectionType;
 		SomeHamiltonianConnectionType hc(this->geometry(),modelHelper);
 
-		const VectorSizeType& superBlock = modelHelper.leftRightSuper().super().block();
-
-		HamiltonianAbstractType hamiltonianAbstract(superBlock);
-
 		SizeType total = 0;
-		SizeType nitems = hamiltonianAbstract.items();
+		SizeType nitems = hc.items();
 		for (SizeType x = 0; x < nitems; ++x) {
 			SparseMatrixType matrixBlock(matrixRank, matrixRank);
-			if (!hc.compute(hamiltonianAbstract, x, &matrixBlock, 0, total))
+			if (!hc.compute(x, &matrixBlock, 0, total))
 				continue;
 			VerySparseMatrixType vsm(matrixBlock);
 			matrix2+=vsm;
