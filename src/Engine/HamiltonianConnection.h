@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "ProgramGlobals.h"
 #include "HamiltonianAbstract.h"
+#include "SuperGeometry.h"
 
 namespace Dmrg {
 
@@ -91,6 +92,7 @@ class HamiltonianConnection {
 
 public:
 
+	typedef SuperGeometry<GeometryType> SuperGeometryType;
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
@@ -109,7 +111,7 @@ public:
 	                      const LinkProductStructType* lps = 0,
 	                      typename PsimagLite::Vector<SparseElementType>::Type* x = 0,
 	                      const typename PsimagLite::Vector<SparseElementType>::Type* y = 0)
-	    : geometry_(geometry),
+	    : superGeometry_(geometry),
 	      modelHelper_(modelHelper),
 	      lps_(*lps),x_(*x),y_(*y),
 	      systemBlock_(modelHelper.leftRightSuper().left().block()),
@@ -140,9 +142,9 @@ public:
 		bool flag = false;
 
 		const VectorSizeType& hItems = hamAbstract_.item(x);
-		if (!geometry_.connected(smax_, emin_, hItems)) return flag;
+		if (!superGeometry_.connected(smax_, emin_, hItems)) return flag;
 
-		ProgramGlobals::ConnectionEnum type = geometry_.connectionKind(smax_, hItems);
+		ProgramGlobals::ConnectionEnum type = superGeometry_.connectionKind(smax_, hItems);
 
 		if (type == ProgramGlobals::SYSTEM_SYSTEM ||
 		        type == ProgramGlobals::ENVIRON_ENVIRON) return flag;
@@ -152,23 +154,23 @@ public:
 		AdditionalDataType additionalData;
 		VectorSizeType edofs(LinkProductType::connectorDofs());
 
-		for (SizeType term = 0; term < geometry_.terms(); ++term) {
-			geometry_.fillAdditionalData(additionalData, term, hItems);
+		for (SizeType term = 0; term < superGeometry_.geometry().terms(); ++term) {
+			superGeometry_.fillAdditionalData(additionalData, term, hItems);
 			SizeType dofsTotal = LinkProductType::dofs(term, additionalData);
 			for (SizeType dofs = 0; dofs < dofsTotal; ++dofs) {
 				LinkProductType::connectorDofs(edofs,
 				                               term,
 				                               dofs,
 				                               additionalData);
-				SparseElementType tmp = geometry_(smax_,
-				                                  emin_,
-				                                  hItems,
-				                                  edofs,
-				                                  term);
+				SparseElementType tmp = superGeometry_(smax_,
+				                                       emin_,
+				                                       hItems,
+				                                       edofs,
+				                                       term);
 
 				if (tmp == static_cast<RealType>(0.0)) continue;
 
-				tmp = geometry_.vModifier(term, tmp, modelHelper_.time());
+				tmp = superGeometry_.geometry().vModifier(term, tmp, modelHelper_.time());
 
 				flag = true;
 
@@ -260,9 +262,9 @@ public:
 		term = lps_.termsaved[ix];
 		dofs = lps_.dofssaved[ix];
 		tmp=lps_.tmpsaved[ix];
-		geometry_.fillAdditionalData(additionalData,
-		                             term,
-		                             hamAbstract_.item(x));
+		superGeometry_.fillAdditionalData(additionalData,
+		                                  term,
+		                                  hamAbstract_.item(x));
 	}
 
 	LinkType getKron(const SparseMatrixType** A,
@@ -462,7 +464,7 @@ private:
 		throw PsimagLite::RuntimeError("indexOfItem(): item not found " + ttos(x) + "\n");
 	}
 
-	const GeometryType& geometry_;
+	SuperGeometryType superGeometry_;
 	const ModelHelperType& modelHelper_;
 	const LinkProductStructType& lps_;
 	typename PsimagLite::Vector<SparseElementType>::Type& x_;
