@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProdSuperHubbardExtended : LinkProductBase<ModelHelperType> {
+class LinkProdSuperHubbardExtended : public LinkProductBase<ModelHelperType> {
 
 	typedef LinkProductBase<ModelHelperType> BaseType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
@@ -173,17 +173,19 @@ public:
 
 	// has only dependence on orbital
 	template<typename SomeStructType>
-	static void connectorDofs(const VectorSizeType& edofs,
+	static void connectorDofs(VectorSizeType& edofs,
 	                          SizeType term,
-	                              SizeType dofs,
-	                              const SomeStructType& additional)
+	                          SizeType dofs,
+	                          const SomeStructType& additional)
 	{
 		if (term == TERM_HOPPING || term == TERM_NINJ)
-			return LinkProdExtendedHubbard1Orb<ModelHelperType>::connectorDofs(term,
+			return LinkProdExtendedHubbard1Orb<ModelHelperType>::connectorDofs(edofs,
+			                                                                   term,
 			                                                                   dofs,
 			                                                                   additional);
 
-		return LinkProductHeisenberg<ModelHelperType>::connectorDofs(0,
+		return LinkProductHeisenberg<ModelHelperType>::connectorDofs(edofs,
+		                                                             0,
 		                                                             dofs,
 		                                                             additional);
 	}

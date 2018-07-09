@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 template<typename ModelHelperType>
-class LinkProductHeisenberg : LinkProductBase<ModelHelperType> {
+class LinkProductHeisenberg : public LinkProductBase<ModelHelperType> {
 
 	typedef LinkProductBase<ModelHelperType> BaseType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;

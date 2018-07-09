@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProductHubbardOneBand : LinkProductBase<ModelHelperType> {
+class LinkProductHubbardOneBand : public LinkProductBase<ModelHelperType> {
 
 	typedef LinkProductBase<ModelHelperType> BaseType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;

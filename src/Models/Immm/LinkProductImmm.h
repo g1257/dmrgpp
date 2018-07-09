@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProductImmm : LinkProductBase<ModelHelperType> {
+class LinkProductImmm : public LinkProductBase<ModelHelperType> {
 
 	typedef LinkProductBase<ModelHelperType> BaseType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
@@ -122,7 +122,7 @@ public:
 
 	// has only dependence on orbital
 	template<typename SomeStructType>
-	static void connectorDofs(const VectorSizeType& edofs,
+	static void connectorDofs(VectorSizeType& edofs,
 	                          SizeType term,
 	                              SizeType dofs,
 	                              const SomeStructType& additionalData)

@@ -43,7 +43,7 @@ public:
 	{
 		checkVectorHasTwoEntries(hItems);
 
-		return geometry_.connected(smax, hItems[0], hItems[1]);
+		return geometry_.connectionKind(smax, hItems[0], hItems[1]);
 	}
 
 	void fillAdditionalData(AdditionalDataType& additionalData,
@@ -51,7 +51,7 @@ public:
 	                        const VectorSizeType& hItems) const
 	{
 		checkVectorHasTwoEntries(hItems);
-		return geometry_.fillAdditionaldata(additionalData, term, hItems[0], hItems[1]);
+		return geometry_.fillAdditionalData(additionalData, term, hItems[0], hItems[1]);
 	}
 
 private:

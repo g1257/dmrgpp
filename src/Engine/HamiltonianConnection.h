@@ -152,7 +152,7 @@ public:
 		SparseMatrixType mBlock;
 
 		AdditionalDataType additionalData;
-		VectorSizeType edofs(LinkProductType::connectorDofs());
+		VectorSizeType edofs(LinkProductType::dofsAllocationSize());
 
 		for (SizeType term = 0; term < superGeometry_.geometry().terms(); ++term) {
 			superGeometry_.fillAdditionalData(additionalData, term, hItems);

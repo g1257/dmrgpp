@@ -554,15 +554,13 @@ private:
 		SizeType smax = blockLeft[blockLeft.size()-1];
 		SizeType emin = blockRight[0];
 
-		VectorSizeType indjnd(2);
 		for (SizeType i = 0; i < blockLeft.size(); ++i) {
 			SizeType ind = blockLeft[i];
 			for (SizeType j=0; j < blockRight.size(); ++j) {
 				SizeType jnd = blockRight[j];
 				assert(ind != jnd);
-				indjnd[0] = ind;
-				indjnd[1] = jnd;
-				if (!model_.geometry().connected(smax, emin, indjnd)) continue;
+				if (!model_.geometry().connected(smax, emin, ind, jnd))
+					continue;
 				block.push_back(ind);
 				block.push_back(jnd);
 			}
