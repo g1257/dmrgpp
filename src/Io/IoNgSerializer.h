@@ -30,13 +30,41 @@ public:
 	enum WriteMode {NO_OVERWRITE, ALLOW_OVERWRITE};
 
 	IoNgSerializer(String filename, unsigned int mode)
-	    : hdf5file_(new H5::H5File(filename, mode)), filename_(filename), mode_(mode)
+	    : hdf5file_(0), filename_(filename), mode_(mode)
 	{
 #ifdef NDEBUG
 		H5::Exception::dontPrint();
 #endif
-		if (mode == H5F_ACC_TRUNC) createGroup("");
-		if (mode == H5F_ACC_RDONLY) readCanary();
+
+		try {
+			hdf5file_ = new H5::H5File(filename, mode);
+		} catch(H5::Exception& e) {
+			delete hdf5file_;
+			hdf5file_ = 0;
+			throw e;
+		}
+
+		if (mode == H5F_ACC_TRUNC) {
+			try {
+				createGroup("");
+			} catch(H5::Exception& e) {
+				filename_ = "";
+				delete hdf5file_;
+				hdf5file_ = 0;
+				throw e;
+			}
+		}
+
+		if (mode == H5F_ACC_RDONLY) {
+			try {
+				readCanary();
+			} catch(H5::Exception& e) {
+				filename_ = "";
+				delete hdf5file_;
+				hdf5file_ = 0;
+				throw e;
+			}
+		}
 	}
 
 	~IoNgSerializer()
