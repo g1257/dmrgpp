@@ -114,8 +114,6 @@ public:
 		            LinkProductFeAsType::dofs(term,additional);
 	}
 
-	static SizeType connectorDofs() { return 2; }
-
 	// has only dependence on orbital
 	template<typename SomeStructType>
 	static void connectorDofs(VectorSizeType& edofs,

@@ -137,14 +137,6 @@ public:
 		ops = PairType(dofs + offset1,dofs + offset1);
 	}
 
-	template<typename SomeStructType>
-	static void valueModifier(SparseElementType&,
-	                          SizeType,
-	                          SizeType,
-	                          bool,
-	                          const SomeStructType&)
-	{}
-
 	static SizeType terms() { return 2; }
 }; // class LinkProductHubbardAncilla
 } // namespace Dmrg

@@ -119,14 +119,6 @@ public:
 		category = dofs;
 	}
 
-	template<typename SomeStructType>
-	static void valueModifier(SparseElementType&,
-	                          SizeType,
-	                          SizeType,
-	                          bool,
-	                          const SomeStructType&)
-	{}
-
 	// up up and down down are the only connections possible for this model
 	template<typename SomeStructType>
 	static SizeType dofs(SizeType,const SomeStructType&) { return 2; }

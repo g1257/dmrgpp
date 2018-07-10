@@ -4,12 +4,14 @@
 
 namespace Dmrg {
 
-template<typename ModelHelperBase>
+template<typename ModelHelperType>
 class LinkProductBase {
 
 public:
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type SparseElementType;
 
 	template<typename SomeStructType>
 	static void connectorDofs(VectorSizeType& edofs,
@@ -21,6 +23,15 @@ public:
 	}
 
 	static SizeType dofsAllocationSize() { return 2; }
+
+	template<typename SomeStructType>
+	static void valueModifier(SparseElementType&,
+	                          SizeType,
+	                          SizeType,
+	                          bool,
+	                          const SomeStructType&)
+	{}
+
 
 };
 }

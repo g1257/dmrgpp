@@ -120,15 +120,6 @@ public:
 	}
 
 	template<typename SomeStructType>
-	static void valueModifier(SparseElementType&,
-	                          SizeType,
-	                          SizeType,
-	                          bool,
-	                          const SomeStructType&)
-	{
-	}
-
-	template<typename SomeStructType>
 	static SizeType dofs(SizeType term,const SomeStructType&)
 	{
 		return (term==TERM_NINJ) ? 1 : 2;

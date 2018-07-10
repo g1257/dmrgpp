@@ -150,14 +150,6 @@ public:
 		category = spin;
 	}
 
-	template<typename SomeStructType>
-	static void valueModifier(SparseElementType&,
-	                          SizeType,
-	                          SizeType,
-	                          bool,
-	                          const SomeStructType&)
-	{}
-
 	static SizeType terms() { return 1; }
 
 private:
