@@ -125,6 +125,27 @@ public:
 	      su2reduced_(m,lrs)
 	{}
 
+	const SparseMatrixType& reducedOperator(char modifier,
+	                                        SizeType i,
+	                                        SizeType sigma,
+	                                        SizeType type) const
+	{
+		assert(BasisType::useSu2Symmetry());
+
+		if (type == ProgramGlobals::SYSTEM) {
+			PairType ii = lrs_.left().getOperatorIndices(i,
+			                                             sigma);
+			return lrs_.left().getReducedOperatorByIndex(modifier,
+			                                             ii).data;
+		}
+
+		assert(type == ProgramGlobals::ENVIRON);
+		PairType ii = lrs_.right().getOperatorIndices(i,
+		                                              sigma);
+		return lrs_.right().getReducedOperatorByIndex(modifier,
+		                                              ii).data;
+	}
+
 	static bool isSu2() { return true; }
 
 	const RealType& time() const { return targetTime_; }

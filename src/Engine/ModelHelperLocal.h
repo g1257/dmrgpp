@@ -74,6 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Link.h"
 #include "LinkProductStruct.h"
 #include "Concurrency.h"
+#include "IndexOfItem.h"
 
 /** \ingroup DMRG */
 /*@{*/
@@ -113,8 +114,6 @@ public:
 	typedef typename BasisType::EffectiveQnType EffectiveQnType;
 	typedef typename EffectiveQnType::QnType QnType;
 
-	enum { System=0,Environ=1 };
-
 	ModelHelperLocal(SizeType m,
 	                 const LeftRightSuperType& lrs,
 	                 RealType targetTime,
@@ -129,6 +128,54 @@ public:
 	{
 		createBuffer();
 		createAlphaAndBeta();
+	}
+
+	~ModelHelperLocal()
+	{
+		SizeType n = garbage_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			delete garbage_[i];
+			garbage_[i] = 0;
+		}
+	}
+
+	const SparseMatrixType& reducedOperator(char modifier,
+	                                        SizeType i,
+	                                        SizeType sigma,
+	                                        SizeType type) const
+	{
+
+		assert(!BasisType::useSu2Symmetry());
+
+		const SparseMatrixType* m = 0;
+		PairType ii;
+		if (type == ProgramGlobals::SYSTEM) {
+			ii = lrs_.left().getOperatorIndices(i,sigma);
+			m = &(lrs_.left().getOperatorByIndex(ii.first).data);
+		} else {
+			assert(type == ProgramGlobals::ENVIRON);
+			ii = lrs_.right().getOperatorIndices(i,sigma);
+			m =&(lrs_.right().getOperatorByIndex(ii.first).data);
+		}
+
+		m->checkValidity();
+		if (modifier == 'N') return *m;
+
+		assert(modifier == 'C');
+		SizeType typeIndex = (type == ProgramGlobals::SYSTEM) ? 0 : 1;
+		SizeType packed = typeIndex + ii.first*2;
+		int indexOfSeen = PsimagLite::indexOfItemOrMinusOne(seen_, packed);
+		if (indexOfSeen >= 0) {
+			assert(static_cast<SizeType>(indexOfSeen) < garbage_.size());
+			return *(garbage_[indexOfSeen]);
+		}
+
+		SparseMatrixType* mc = new SparseMatrixType;
+		transposeConjugate(*mc, *m);
+		garbage_.push_back(mc);
+		seen_.push_back(packed);
+		mc->checkValidity();
+		return *mc;
 	}
 
 	SizeType m() const { return m_; }
@@ -424,37 +471,6 @@ private:
 		}
 	}
 
-//	void createTcOperators(VectorSparseMatrixType& basistc,
-//	                       const BasisWithOperatorsType& basis)
-//	{
-//		if (basistc.size()==0) return;
-//		SizeType n=basis.getOperatorByIndex(0).data.rows();
-//		bool b = true;
-//		for (SizeType i=0;i<basistc.size();i++) {
-//			if (basis.getOperatorByIndex(i).data.rows()!=n) {
-//				b=false;
-//				break;
-//			}
-//		}
-//		if (b) createTcOperatorsCached(basistc,basis);
-//		else createTcOperatorsSimple(basistc,basis);
-//	}
-
-//	void createTcOperatorsSimple(VectorSparseMatrixType& basistc,
-//	                             const BasisWithOperatorsType& basis)
-//	{
-//		for (SizeType i=0;i<basistc.size();i++)
-//			transposeConjugate(basistc[i],basis.getOperatorByIndex(i).data);
-//	}
-
-//	void createTcOperatorsCached(VectorSparseMatrixType& basistc,
-//	                             const BasisWithOperatorsType& basis)
-//	{
-//		SizeType n = basistc.size();
-//		for (SizeType i = 0; i < n; ++i)
-//			transposeConjugate(basistc[i], basis.getOperatorByIndex(i).data);
-//	}
-
 	void createAlphaAndBeta()
 	{
 		SizeType ns=lrs_.left().size();
@@ -482,6 +498,8 @@ private:
 	typename PsimagLite::Vector<bool>::Type fermionSigns_;
 	mutable KroneckerDumperType kroneckerDumper_;
 	mutable LinkProductStructType lps_;
+	mutable typename PsimagLite::Vector<SparseMatrixType*>::Type garbage_;
+	mutable BlockType seen_;
 }; // class ModelHelperLocal
 } // namespace Dmrg
 /*@}*/

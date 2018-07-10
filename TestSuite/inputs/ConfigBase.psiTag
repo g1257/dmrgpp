@@ -68,11 +68,11 @@ LDFLAGS += -LKronUtil
 )
 
 # Specify the strip command to use (or use true to disable)
-Misc StripTrue = (
+Misc StripNo = (
 STRIP_COMMAND = true
 )
 
-Misc StripFalse = (
+Misc StripYes = (
 STRIP_COMMAND = strip
 )
 

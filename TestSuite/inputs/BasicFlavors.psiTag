@@ -5,7 +5,7 @@ flavor production = (
 < compilerCPP GNU
 < compilerCPPOptions ansi
 < linkerOptions KronUtil
-< Misc StripTrue
+< Misc StripYes
 < dependency HDF5
 < compilerCPPOptions NDEBUG
 < compilerCPPOptions Optimize3
@@ -20,7 +20,7 @@ flavor debug = (
 < compilerCPP GNU
 < compilerCPPOptions ansi
 < linkerOptions KronUtil
-< Misc StripFalse
+< Misc StripNo
 < dependency HDF5
 < compilerCPPOptions Symbols3
 < compilerCPPOptions Werror
@@ -34,7 +34,7 @@ flavor drd = (
 < compilerCPP GNU
 < compilerCPPOptions ansi
 < linkerOptions KronUtil
-< Misc StripFalse
+< Misc StripNo
 < dependency HDF5
 < compilerCPPOptions NDEBUG
 < compilerCPPOptions Optimize3

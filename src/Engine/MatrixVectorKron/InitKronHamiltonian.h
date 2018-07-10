@@ -257,10 +257,15 @@ private:
 				link3.type = ProgramGlobals::SYSTEM_ENVIRON;
 				if (link3.fermionOrBoson == ProgramGlobals::FERMION)
 					link3.value *= -1.0;
+
+				assert(A);
+				assert(B);
 				BaseType::addOneConnection(*B,*A,link3);
 				continue;
 			}
 
+			assert(A);
+			assert(B);
 			BaseType::addOneConnection(*A,*B,link2);
 		}
 	}

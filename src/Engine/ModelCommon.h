@@ -124,7 +124,6 @@ public:
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename PsimagLite::Vector<LinkProductStructType>::Type VectorLinkProductStructType;
 	typedef typename HamiltonianConnectionType::VectorSizeType VectorSizeType;
-	typedef typename HamiltonianConnectionType::HamiltonianAbstractType HamiltonianAbstractType;
 
 	ModelCommon(const SolverParamsType& params,const GeometryType& geometry)
 	    : ModelCommonBaseType(params,geometry),
@@ -258,10 +257,8 @@ private:
 		LinkProductStructType lpsOne(ProgramGlobals::MAX_LPS);
 		HamiltonianConnectionType hc(this->geometry(),modelHelper,&lps,&x,&y);
 
-		HamiltonianAbstractType hamiltonianAbstract(modelHelper.leftRightSuper().super().block());
-
 		SizeType total = 0;
-		SizeType nitems = hamiltonianAbstract.items();
+		SizeType nitems = hc.items();
 		for (SizeType x = 0; x < nitems; ++x) {
 			SizeType totalOne = 0;
 			hc.compute(x, 0, &lpsOne, totalOne);
@@ -323,10 +320,8 @@ private:
 		LinkProductStructType lpsOne(ProgramGlobals::MAX_LPS);
 		HamiltonianConnectionType hc(this->geometry(),modelHelper,&lps,&x,&y);
 
-		HamiltonianAbstractType hamiltonianAbstract(modelHelper.leftRightSuper().super().block());
-
 		SizeType total = 0;
-		SizeType nitems = hamiltonianAbstract.items();
+		SizeType nitems = hc.items();
 		for (SizeType x = 0; x < nitems; ++x) {
 			SizeType totalOne = 0;
 			hc.compute(x, 0, &lpsOne, totalOne);
@@ -402,7 +397,7 @@ private:
 	                                  bool sysEnvOnly,
 	                                  RealType time) const
 	{
-		if (block.size() != 2)
+		if (block.size() != 1)
 			err("addConnectionsInNaturalBasis(): unimplemented\n");
 	}
 
