@@ -93,7 +93,7 @@ public:
 	typedef ComplexOrRealType_ ComplexOrRealType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
 	typedef GeometryTerm<ComplexOrRealType,InputType> GeometryTermType;
-	typedef typename Vector<SizeType>::Type BlockType;
+	typedef typename Vector<SizeType>::Type VectorSizeType;
 	typedef typename GeometryTermType::AdditionalDataType AdditionalDataType;
 	typedef GeometryEx<typename Real<ComplexOrRealType_>::Type,InputType> GeometryExType;
 
@@ -225,10 +225,10 @@ public:
 	}
 
 	void split(SizeType sitesPerBlock,
-	           BlockType& S,
-	           typename Vector<BlockType>::Type& X,
-	           typename Vector<BlockType>::Type& Y,
-	           BlockType& E,
+	           VectorSizeType& S,
+	           typename Vector<VectorSizeType>::Type& X,
+	           typename Vector<VectorSizeType>::Type& Y,
+	           VectorSizeType& E,
 	           bool allInSystem = false) const
 	{
 		SizeType middle = linSize_/2;

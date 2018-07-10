@@ -450,6 +450,7 @@ public:
 		assert(nrow_>0 && ncol_>0);
 		typename Vector<SizeType>::Type p(ncol_,0);
 		for (SizeType i=0;i<n;i++) {
+			assert(rowptr_[i] <= rowptr_[i + 1]);
 			for (int k=rowptr_[i];k<rowptr_[i+1];k++) {
 				SizeType col = colind_[k];
 				assert(col < p.size());

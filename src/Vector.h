@@ -35,6 +35,16 @@ Please see full open source license included in file LICENSE.
 
 namespace PsimagLite {
 
+template<typename T1, typename T2>
+struct TypesEqual {
+	enum {True = false};
+};
+
+template<typename T>
+struct TypesEqual<T, T> {
+	enum {True = true};
+};
+
 template<typename T>
 struct IsInputLike {
 	enum {True = false};
