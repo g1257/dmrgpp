@@ -84,12 +84,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "HamiltonianAbstract.h"
 #include "SuperGeometry.h"
-#include "ModelHelperLocal.h"
 #include "IndexOfItem.h"
+#include "VerySparseMatrix.h"
+#include "ProgressIndicator.h"
 
 namespace Dmrg {
 
-template<typename GeometryType,typename ModelHelperType,typename LinkProductType>
+// Keep this class independent of x and y in x = H*y
+// For things that depend on x and y use ParallelHamiltonianConnection.h
+template<typename GeometryType,typename ModelHelperType>
 class HamiltonianConnection {
 
 	typedef SuperGeometry<GeometryType> SuperGeometryType;
@@ -99,173 +102,133 @@ public:
 
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef LinkProductStruct<SparseElementType> LinkProductStructType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef VerySparseMatrix<ComplexOrRealType> VerySparseMatrixType;
+	typedef LinkProductStruct<ComplexOrRealType> LinkProductStructType;
 	typedef typename ModelHelperType::LinkType LinkType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
-	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
 	typedef typename PsimagLite::Concurrency ConcurrencyType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
+	template<typename LinkProductType>
 	HamiltonianConnection(const GeometryType& geometry,
-	                      const ModelHelperType& modelHelper,
-	                      const LinkProductStructType* lps = 0,
-	                      typename PsimagLite::Vector<SparseElementType>::Type* x = 0,
-	                      const typename PsimagLite::Vector<SparseElementType>::Type* y = 0)
-	    : superGeometry_(geometry),
+	                      const ModelHelperType& modelHelper)
+	    : progress_("HamiltonianConnection"),
+	      superGeometry_(geometry),
+	      lps_(ProgramGlobals::MAX_LPS),
 	      modelHelper_(modelHelper),
-	      lps_(*lps),x_(*x),y_(*y),
 	      systemBlock_(modelHelper.leftRightSuper().left().block()),
 	      envBlock_(modelHelper.leftRightSuper().right().block()),
 	      smax_(*std::max_element(systemBlock_.begin(),systemBlock_.end())),
 	      emin_(*std::min_element(envBlock_.begin(),envBlock_.end())),
-	      xtemp_(ConcurrencyType::storageSize(ConcurrencyType::codeSectionParams.npthreads)),
 	      total_(0),
-	      hamAbstract_(superGeometry_, smax_, emin_, modelHelper_.leftRightSuper().super().block())
-	{}
-
-	SizeType items() const { return hamAbstract_.items(); }
-
-	bool compute(SizeType x,
-	             SparseMatrixType* matrixBlock,
-	             LinkProductStructType* lps,
-	             SizeType& total) const
+	      hamAbstract_(superGeometry_, smax_, emin_, modelHelper_.leftRightSuper().super().block()),
+	      totalOnes_(hamAbstract_.items())
 	{
-		bool flag = false;
+		SizeType nitems = totalOnes_.size();
+		for (SizeType x = 0; x < nitems; ++x)
+			totalOnes_[x] = compute<LinkProductType>(x, lps_, total_);
 
-		const VectorSizeType& hItems = hamAbstract_.item(x);
-		assert (superGeometry_.connected(smax_, emin_, hItems));
-
-		ProgramGlobals::ConnectionEnum type = superGeometry_.connectionKind(smax_, hItems);
-
-		assert(type != ProgramGlobals::SYSTEM_SYSTEM &&
-		        type != ProgramGlobals::ENVIRON_ENVIRON);
-
-		SparseMatrixType mBlock;
-
-		AdditionalDataType additionalData;
-		VectorSizeType edofs(LinkProductType::dofsAllocationSize());
-
-		for (SizeType term = 0; term < superGeometry_.geometry().terms(); ++term) {
-			superGeometry_.fillAdditionalData(additionalData, term, hItems);
-			SizeType dofsTotal = LinkProductType::dofs(term, additionalData);
-			for (SizeType dofs = 0; dofs < dofsTotal; ++dofs) {
-				LinkProductType::connectorDofs(edofs,
-				                               term,
-				                               dofs,
-				                               additionalData);
-				SparseElementType tmp = superGeometry_(smax_,
-				                                       emin_,
-				                                       hItems,
-				                                       edofs,
-				                                       term);
-
-				if (tmp == static_cast<RealType>(0.0)) continue;
-
-				tmp = superGeometry_.geometry().vModifier(term, tmp, modelHelper_.time());
-
-				flag = true;
-
-				if (lps!=0) {
-					assert(lps->typesaved.size() > total);
-					lps->xsaved[total] = x;
-					lps->typesaved[total]=type;
-					lps->tmpsaved[total]=tmp;
-					lps->termsaved[total]=term;
-					lps->dofssaved[total]=dofs;
-					total++;
-				} else {
-					calcBond(mBlock,
-					         x,
-					         type,
-					         tmp,
-					         term,
-					         dofs,
-					         additionalData);
-					*matrixBlock += mBlock;
-				}
-			}
+		if (lps_.typesaved.size() != total_) {
+			err("getLinkProductStruct: InternalError\n");
 		}
 
-		return flag;
+		total_ += 2;
+
+		PsimagLite::OstringStream msg;
+		msg<<"LinkProductStructSize="<<(total_ - 2);
+		progress_.printline(msg,std::cout);
+
+		PsimagLite::OstringStream msg2;
+		// add left and right contributions
+		msg2<<"PthreadsTheoreticalLimitForThisPart="<<total_;
+
+		// The theoretical maximum number of pthreads that are useful
+		// is equal to C + 2, where
+		// C = number of connection = 2*G*M
+		// where G = geometry factor
+		// and   M = model factor
+		// G = 1 for a chain
+		// G = leg for a ladder with leg legs. (For instance, G=2 for a 2-leg ladder).
+		// M = 2 for the Hubbard model
+		//
+		// In general, M = \sum_{term=0}^{terms} dof(term)
+		// where terms and dof(term) is model dependent.
+		// To find M for a model, go to the Model directory and see LinkProduct*.h file.
+		// the return of function terms() for terms.
+		// For dof(term) see function dof(SizeType term,...).
+		// For example, for the HubbardModelOneBand, one must look at
+		// src/Model/HubbardOneBand/LinkProductHubbardOneBand.h
+		// In that file, terms() returns 1, so that terms=1
+		// Therefore there is only one term: term = 0.
+		// And dof(0,...) = 2, as you can see in  LinkProductHubbardOneBand.h.
+		// Then M = 2.
+		progress_.printline(msg2,std::cout);
 	}
 
-	void doTask(SizeType taskNumber ,SizeType threadNum)
+	void matrixBond(SparseMatrixType& matrix)
 	{
-		if (xtemp_[threadNum].size() != x_.size())
-			xtemp_[threadNum].resize(x_.size(),0.0);
+		SizeType matrixRank = matrix.rows();
+		VerySparseMatrixType matrix2(matrixRank, matrixRank);
 
-		SparseElementType tmp = 0.0;
-
-		if (taskNumber == 0) {
-			modelHelper_.hamiltonianLeftProduct(xtemp_[threadNum],y_);
-			return;
-		}
-
-		if (taskNumber == 1) {
-			modelHelper_.hamiltonianRightProduct(xtemp_[threadNum],y_);
-			return;
-		}
-
-		assert(taskNumber > 1);
-		taskNumber -= 2;
-		AdditionalDataType additionalData;
-		SizeType xx = 0;
-		ProgramGlobals::ConnectionEnum type;
+		SizeType x = 0;
+		ProgramGlobals::ConnectionEnum type = ProgramGlobals::SYSTEM_ENVIRON;
+		ComplexOrRealType tmp = 0.0;
 		SizeType term = 0;
-		SizeType dofs =0;
-		prepare(taskNumber,xx,type,tmp,term,dofs,additionalData);
+		SizeType dofs = 0;
+		AdditionalDataType additionalData;
 
-		linkProduct(xtemp_[threadNum],y_,xx,type,tmp,term,dofs,additionalData);
-	}
-
-	void tasks(SizeType total) { total_ = total; }
-
-	SizeType tasks() const { return total_; }
-
-	void sync()
-	{
+		SizeType nitems = totalOnes_.size();
 		SizeType total = 0;
-		for (SizeType threadNum = 0; threadNum < xtemp_.size(); threadNum++)
-			if (xtemp_[threadNum].size() == x_.size()) total++;
+		for (SizeType xx = 0; xx < nitems; ++xx) {
+			SparseMatrixType matrixBlock(matrixRank, matrixRank);
+			for (SizeType i = 0; i < totalOnes_[xx]; ++i) {
+				SparseMatrixType mBlock;
+				prepare(x, type, tmp, term, dofs, additionalData, total++);
+				calcBond(mBlock,
+				         x,
+				         type,
+				         tmp,
+				         term,
+				         dofs,
+				         additionalData);
+				matrixBlock += mBlock;
+			}
 
-		typename PsimagLite::Vector<SparseElementType>::Type x(x_.size(),0);
-		for (SizeType threadNum = 0; threadNum < total; threadNum++)
-			for (SizeType i=0;i<x_.size();i++)
-				x[i]+=xtemp_[threadNum][i];
+			VerySparseMatrixType vsm(matrixBlock);
+			matrix2+=vsm;
+		}
 
-		if (!ConcurrencyType::isMpiDisabled("HamiltonianConnection"))
-			PsimagLite::MPI::allReduce(x);
-
-		for (SizeType i=0;i<x_.size();i++)
-			x_[i] += x[i];
+		matrix += matrix2;
 	}
 
-	void prepare(SizeType ix,
-	             SizeType& x,
+	void prepare(SizeType& x,
 	             ProgramGlobals::ConnectionEnum& type,
-	             SparseElementType& tmp,
+	             ComplexOrRealType& tmp,
 	             SizeType& term,
 	             SizeType& dofs,
-	             AdditionalDataType& additionalData) const
+	             AdditionalDataType& additionalData,
+	             SizeType ix) const
 	{
 		x = lps_.xsaved[ix];
-		type=lps_.typesaved[ix];
+		type = lps_.typesaved[ix];
 		term = lps_.termsaved[ix];
 		dofs = lps_.dofssaved[ix];
-		tmp=lps_.tmpsaved[ix];
+		tmp = lps_.tmpsaved[ix];
 		superGeometry_.fillAdditionalData(additionalData,
 		                                  term,
 		                                  hamAbstract_.item(x));
 	}
 
+	template<typename LinkProductType>
 	LinkType getKron(const SparseMatrixType** A,
 	                 const SparseMatrixType** B,
 	                 SizeType xx,
 	                 ProgramGlobals::ConnectionEnum type,
-	                 const SparseElementType& valuec,
+	                 const ComplexOrRealType& valuec,
 	                 SizeType term,
 	                 SizeType dofs,
 	                 const AdditionalDataType& additionalData) const
@@ -287,7 +250,7 @@ public:
 		SizeType category=0;
 		RealType angularFactor=0;
 		bool isSu2 = modelHelper_.isSu2();
-		SparseElementType value = valuec;
+		ComplexOrRealType value = valuec;
 		LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData);
 
 		LinkProductType::setLinkData(term,
@@ -338,19 +301,64 @@ public:
 		return link2;
 	}
 
-	template<typename SomeConcurrencyType,typename SomeOtherConcurrencyType>
-	void sync(SomeConcurrencyType& conc,SomeOtherConcurrencyType& conc2)
-	{
-		conc.reduce(x_,conc2);
-	}
+	const ModelHelperType& modelHelper() const { return modelHelper_; }
 
 private:
+
+	template<typename LinkProductType>
+	SizeType compute(LinkProductStructType& lps,
+	                 SizeType x,
+	                 SizeType& total) const
+	{
+		const VectorSizeType& hItems = hamAbstract_.item(x);
+		assert (superGeometry_.connected(smax_, emin_, hItems));
+
+		ProgramGlobals::ConnectionEnum type = superGeometry_.connectionKind(smax_, hItems);
+
+		assert(type != ProgramGlobals::SYSTEM_SYSTEM &&
+		        type != ProgramGlobals::ENVIRON_ENVIRON);
+
+		AdditionalDataType additionalData;
+		VectorSizeType edofs(LinkProductType::dofsAllocationSize());
+
+		SizeType totalOne = 0;
+		for (SizeType term = 0; term < superGeometry_.geometry().terms(); ++term) {
+			superGeometry_.fillAdditionalData(additionalData, term, hItems);
+			SizeType dofsTotal = LinkProductType::dofs(term, additionalData);
+			for (SizeType dofs = 0; dofs < dofsTotal; ++dofs) {
+				LinkProductType::connectorDofs(edofs,
+				                               term,
+				                               dofs,
+				                               additionalData);
+				ComplexOrRealType tmp = superGeometry_(smax_,
+				                                       emin_,
+				                                       hItems,
+				                                       edofs,
+				                                       term);
+
+				if (tmp == static_cast<RealType>(0.0)) continue;
+
+				tmp = superGeometry_.geometry().vModifier(term, tmp, modelHelper_.time());
+
+				++totalOne;
+				assert(lps.typesaved.size() > total);
+				lps.xsaved[total] = x;
+				lps.typesaved[total]=type;
+				lps.tmpsaved[total]=tmp;
+				lps.termsaved[total]=term;
+				lps.dofssaved[total]=dofs;
+				++total;
+			}
+		}
+
+		return totalOne;
+	}
 
 	//! Adds a connector between system and environment
 	SizeType calcBond(SparseMatrixType &matrixBlock,
 	                  SizeType xx,
 	                  ProgramGlobals::ConnectionEnum type,
-	                  const SparseElementType& valuec,
+	                  const ComplexOrRealType& valuec,
 	                  SizeType term,
 	                  SizeType dofs,
 	                  const AdditionalDataType& additionalData) const
@@ -370,39 +378,23 @@ private:
 		return matrixBlock.nonZeros();
 	}
 
-	//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment
-	void linkProduct(typename PsimagLite::Vector<SparseElementType>::Type& x,
-	                 const typename PsimagLite::Vector<SparseElementType>::Type& y,
-	                 SizeType xx,
-	                 ProgramGlobals::ConnectionEnum type,
-	                 const SparseElementType &valuec,
-	                 SizeType term,
-	                 SizeType dofs,
-	                 const AdditionalDataType& additionalData) const
-	{
-		SparseMatrixType const* A = 0;
-		SparseMatrixType const* B = 0;
-		LinkType link2 = getKron(&A,&B,xx,type,valuec,term,dofs,additionalData);
-		modelHelper_.fastOpProdInter(x,y,*A,*B,link2);
-	}
-
 	bool isNonZeroMatrix(const SparseMatrixType& m) const
 	{
 		if (m.rows() > 0 && m.cols() > 0) return true;
 		return false;
 	}
 
+	PsimagLite::ProgressIndicator progress_;
 	SuperGeometryType superGeometry_;
+	LinkProductStructType lps_;
 	const ModelHelperType& modelHelper_;
-	const LinkProductStructType& lps_;
-	typename PsimagLite::Vector<SparseElementType>::Type& x_;
-	const typename PsimagLite::Vector<SparseElementType>::Type& y_;
 	const VectorSizeType& systemBlock_;
 	const VectorSizeType& envBlock_;
-	SizeType smax_,emin_;
-	VectorVectorType xtemp_;
+	SizeType smax_;
+	SizeType emin_;
 	SizeType total_;
 	HamiltonianAbstractType hamAbstract_;
+	VectorSizeType totalOnes_;
 }; // class HamiltonianConnection
 } // namespace Dmrg
 

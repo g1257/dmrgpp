@@ -83,10 +83,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ModelHelperType>
-class LinkProdExtendedHubbard1Orb : public LinkProductBase<ModelHelperType> {
+template<typename ModelHelperType, typename GeometryType>
+class LinkProdExtendedHubbard1Orb : public LinkProductBase<ModelHelperType, GeometryType> {
 
 	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -97,16 +98,16 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
-	template<typename SomeStructType>
-	static void setLinkData(SizeType term,
-	                        SizeType dofs,
-	                        bool,
-	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
-	                        PairType& ops,
-	                        std::pair<char,char>&,
-	                        SizeType& angularMomentum,
-	                        RealType& angularFactor,
-	                        SizeType& category,const SomeStructType&)
+	void setLinkData(SizeType term,
+	                 SizeType dofs,
+	                 bool,
+	                 ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
+	                 PairType& ops,
+	                 std::pair<char,char>&,
+	                 SizeType& angularMomentum,
+	                 RealType& angularFactor,
+	                 SizeType& category,
+	                 const AdditionalDataType&)
 	{
 		if (term==TERM_NINJ) fermionOrBoson = ProgramGlobals::BOSON;
 		else fermionOrBoson = ProgramGlobals::FERMION;
@@ -119,14 +120,12 @@ public:
 		category = dofs;
 	}
 
-	template<typename SomeStructType>
-	static SizeType dofs(SizeType term,const SomeStructType&)
+	SizeType dofs(SizeType term, const AdditionalDataType&)
 	{
 		return (term==TERM_NINJ) ? 1 : 2;
 	}
 
-	static SizeType terms() { return 2; }
-
+	SizeType terms() { return 2; }
 }; // class LinkProdExtendedHubbard1Orb
 } // namespace Dmrg
 /*@}*/

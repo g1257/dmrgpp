@@ -82,8 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define MODEL_COMMON_H
 #include <iostream>
 
-#include "VerySparseMatrix.h"
-#include "HamiltonianConnection.h"
 #include "Su2SymmetryGlobals.h"
 #include "InputNg.h"
 #include "InputCheck.h"
@@ -95,17 +93,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 
-template<typename ModelBaseType,typename LinkProductType>
+template<typename ModelBaseType, typename LinkProductType>
 class ModelCommon : public ModelBaseType::ModelCommonBaseType {
 
+	typedef typename ModelBaseType::ModelCommonBaseType BaseType;
 	typedef typename ModelBaseType::ModelCommonBaseType ModelCommonBaseType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelBaseType::GeometryType GeometryType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef VerySparseMatrix<SparseElementType> VerySparseMatrixType;
 	typedef typename ModelHelperType::LinkType LinkType;
 	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
+	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
 
 public:
 
@@ -115,8 +114,7 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelHelperType::BasisType MyBasis;
 	typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef HamiltonianConnection<GeometryType,ModelHelperType,LinkProductType>
-	HamiltonianConnectionType;
+	typedef typename BaseType::HamiltonianConnectionType HamiltonianConnectionType;
 	typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename OperatorsType::OperatorType OperatorType;
@@ -124,6 +122,7 @@ public:
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename PsimagLite::Vector<LinkProductStructType>::Type VectorLinkProductStructType;
 	typedef typename HamiltonianConnectionType::VectorSizeType VectorSizeType;
+	typedef typename HamiltonianConnectionType::VerySparseMatrixType VerySparseMatrixType;
 
 	ModelCommon(const SolverParamsType& params,const GeometryType& geometry)
 	    : ModelCommonBaseType(params,geometry),
@@ -147,18 +146,15 @@ public:
 		 * This function
 		 * has a default implementation.
 		 */
-	void matrixVectorProduct(typename PsimagLite::Vector<SparseElementType>::Type& x,
-	                         const typename PsimagLite::Vector<SparseElementType>::Type& y,
-	                         ModelHelperType const &modelHelper) const
+	void matrixVectorProduct(VectorType& x,
+	                         const VectorType& y,
+	                         const HamiltonianConnectionType& hc) const
 	{
-		//! contribution to Hamiltonian from connection system-environment
-		hamiltonianConnectionProduct(x,y,modelHelper);
+		typedef PsimagLite::Parallelizer<HamiltonianConnectionType> ParallelizerType;
+		ParallelizerType parallelConnections(PsimagLite::Concurrency::codeSectionParams);
+		parallelConnections.loopCreate(hc);
 
-		// parts below were move to include them in the parallelization
-		//! contribution to Hamiltonian from current system moved to HamiltonianConnection
-		// modelHelper.hamiltonianLeftProduct(x,y);
-		//! contribution to Hamiltonian from current environ moved to HamiltonianConnection
-		// modelHelper.hamiltonianRightProduct(x,y);
+		hc.sync();
 	}
 
 	/**
@@ -190,7 +186,9 @@ public:
 			VerySparseMatrixType& vsm = *(vvsm[m]);
 			SizeType threadId = 0;
 			ModelHelperType modelHelper(m, lrs, currentTime, threadId);
-			addHamiltonianConnection(vsm, modelHelper);
+			HamiltonianConnectionType hc(BaseType::geometry(), modelHelper);
+
+			hc.matrixBond(vsm);
 			nzs[m] = vsm.nonZeros();
 			if (nzs[m] > 0) continue;
 			delete vvsm[m];
@@ -229,7 +227,7 @@ public:
 		vectorOfCrs.push_back(&matrix);
 		SizeType effectiveTotal = vectorOfCrs.size();
 
-		typename PsimagLite::Vector<SparseElementType>::Type ones(effectiveTotal, 1.0);
+		VectorType ones(effectiveTotal, 1.0);
 		SparseMatrixType sumCrs;
 		sum(sumCrs, vectorOfCrs, ones);
 		vectorOfCrs.pop_back();
@@ -244,124 +242,26 @@ public:
 
 private:
 
-	/**
-		Let $H_m$ be the Hamiltonian connection between basis2 and basis3 in
-		the orderof basis1 for block $m$. Then this function does $x+= H_m *y$
-		*/
-	void hamiltonianConnectionProduct(typename PsimagLite::Vector<SparseElementType>::Type& x,
-	                                  const typename PsimagLite::Vector<SparseElementType>::Type& y,
-	                                  const ModelHelperType& modelHelper) const
-	{
-		const LinkProductStructType& lpsConst = modelHelper.lps();
-		LinkProductStructType& lps = const_cast<LinkProductStructType&>(lpsConst);
-		LinkProductStructType lpsOne(ProgramGlobals::MAX_LPS);
-		HamiltonianConnectionType hc(this->geometry(),modelHelper,&lps,&x,&y);
 
-		SizeType total = 0;
-		SizeType nitems = hc.items();
-		for (SizeType x = 0; x < nitems; ++x) {
-			SizeType totalOne = 0;
-			hc.compute(x, 0, &lpsOne, totalOne);
-			if (!lps.sealed)
-				lps.push(lpsOne,totalOne);
-			else
-				lps.copy(lpsOne,totalOne,total);
-			total += totalOne;
-		}
+//	SizeType getLinkProductStruct(const ModelHelperType& modelHelper) const
+//	{
+//		HamiltonianConnectionType hc(BaseType::geometry(), modelHelper, lps_);
 
-		hc.tasks(total + 2);
-		assert(lps.typesaved.size() == total);
-		if (!lps.sealed) {
-			PsimagLite::OstringStream msg;
-			msg<<"LinkProductStructSize="<<total;
-			progress_.printline(msg,std::cout);
-			lps.sealed = true;
-
-			PsimagLite::OstringStream msg2;
-			// add left and right contributions
-			msg2<<"PthreadsTheoreticalLimitForThisPart="<<(total+2);
-
-			// The theoretical maximum number of pthreads that are useful
-			// is equal to C + 2, where
-			// C = number of connection = 2*G*M
-			// where G = geometry factor
-			// and   M = model factor
-			// G = 1 for a chain
-			// G = leg for a ladder with leg legs. (For instance, G=2 for a 2-leg ladder).
-			// M = 2 for the Hubbard model
-			//
-			// In general, M = \sum_{term=0}^{terms} dof(term)
-			// where terms and dof(term) is model dependent.
-			// To find M for a model, go to the Model directory and see LinkProduct*.h file.
-			// the return of function terms() for terms.
-			// For dof(term) see function dof(SizeType term,...).
-			// For example, for the HubbardModelOneBand, one must look at
-			// src/Model/HubbardOneBand/LinkProductHubbardOneBand.h
-			// In that file, terms() returns 1, so that terms=1
-			// Therefore there is only one term: term = 0.
-			// And dof(0,...) = 2, as you can see in  LinkProductHubbardOneBand.h.
-			// Then M = 2.
-			progress_.printline(msg2,std::cout);
-		}
-
-		typedef PsimagLite::Parallelizer<HamiltonianConnectionType> ParallelizerType;
-		ParallelizerType parallelConnections(PsimagLite::Concurrency::codeSectionParams);
-		parallelConnections.loopCreate(hc);
-
-		hc.sync();
-	}
-
-	SizeType getLinkProductStruct(const ModelHelperType& modelHelper) const
-	{
-		typename PsimagLite::Vector<SparseElementType>::Type x,y; // bogus
-
-		const LinkProductStructType& lpsConst = modelHelper.lps();
-		LinkProductStructType& lps = const_cast<LinkProductStructType&>(lpsConst);
-		LinkProductStructType lpsOne(ProgramGlobals::MAX_LPS);
-		HamiltonianConnectionType hc(this->geometry(),modelHelper,&lps,&x,&y);
-
-		SizeType total = 0;
-		SizeType nitems = hc.items();
-		for (SizeType x = 0; x < nitems; ++x) {
-			SizeType totalOne = 0;
-			hc.compute(x, 0, &lpsOne, totalOne);
-			if (!lps.sealed)
-				lps.push(lpsOne,totalOne);
-			else
-				lps.copy(lpsOne,totalOne,total);
-			total += totalOne;
-		}
-
-		if (lps.typesaved.size() != total) {
-			PsimagLite::String str("getLinkProductStruct: InternalError\n");
-			throw PsimagLite::RuntimeError(str);
-		}
-
-		if (!lps.sealed) {
-			PsimagLite::OstringStream msg;
-			msg<<"LinkProductStructSize="<<total;
-			progress_.printline(msg,std::cout);
-			lps.sealed = true;
-		}
-
-		return total;
-	}
+//		return hc.tasks();
+//	}
 
 	LinkType getConnection(const SparseMatrixType** A,
 	                       const SparseMatrixType** B,
 	                       SizeType ix,
-	                       const ModelHelperType& modelHelper) const
+	                       const HamiltonianConnectionType& hc) const
 	{
-		const LinkProductStructType& lps = modelHelper.lps();
-		typename PsimagLite::Vector<SparseElementType>::Type x,y; // bogus
-		HamiltonianConnectionType hc(this->geometry(),modelHelper,&lps,&x,&y);
 		SizeType xx = 0;
 		ProgramGlobals::ConnectionEnum type;
 		SizeType term = 0;
 		SizeType dofs = 0;
 		SparseElementType tmp = 0.0;
 		AdditionalDataType additionalData;
-		hc.prepare(ix,xx,type,tmp,term,dofs,additionalData);
+		hc.prepare(xx,type,tmp,term,dofs,additionalData,ix);
 		LinkType link2 = hc.getKron(A,B,xx,type,tmp,term,dofs,additionalData);
 		return link2;
 	}
@@ -371,22 +271,23 @@ private:
 		$m$ consisting of the external product of basis2$\otimes$basis3
 		Note: Used only for debugging purposes
 		*/
-	void fullHamiltonian(SparseMatrixType& matrix,const ModelHelperType& modelHelper) const
+	void fullHamiltonian(SparseMatrixType& matrix,
+	                     const HamiltonianConnectionType& hc) const
 	{
 		SparseMatrixType matrixBlock;
 
 		//! contribution to Hamiltonian from current system
-		modelHelper.calcHamiltonianPart(matrixBlock,true);
+		hc.modelHelper().calcHamiltonianPart(matrixBlock,true);
 		matrix = matrixBlock;
 
 		//! contribution to Hamiltonian from current envirnoment
-		modelHelper.calcHamiltonianPart(matrixBlock,false);
+		hc.modelHelper().calcHamiltonianPart(matrixBlock,false);
 		matrix += matrixBlock;
 
 		matrixBlock.clear();
 
 		VerySparseMatrixType vsm(matrix);
-		addHamiltonianConnection(vsm,modelHelper);
+		hc.matrixBond(vsm);
 
 		matrix = vsm;
 	}
@@ -401,44 +302,18 @@ private:
 			err("addConnectionsInNaturalBasis(): unimplemented\n");
 	}
 
-	// Add Hamiltonian connection between basis2 and basis3
-	// in the orderof basis1 for symmetry block m
-	void addHamiltonianConnection(VerySparseMatrix<SparseElementType>& matrix,
-	                              const ModelHelperType& modelHelper) const
-	{
-		SizeType matrixRank = matrix.rows();
-		VerySparseMatrixType matrix2(matrixRank, matrixRank);
-		typedef HamiltonianConnection<
-		        GeometryType,
-		        ModelHelperType,
-		        LinkProductType> SomeHamiltonianConnectionType;
-		SomeHamiltonianConnectionType hc(this->geometry(),modelHelper);
-
-		SizeType total = 0;
-		SizeType nitems = hc.items();
-		for (SizeType x = 0; x < nitems; ++x) {
-			SparseMatrixType matrixBlock(matrixRank, matrixRank);
-			if (!hc.compute(x, &matrixBlock, 0, total))
-				continue;
-			VerySparseMatrixType vsm(matrixBlock);
-			matrix2+=vsm;
-		}
-
-		matrix += matrix2;
-	}
-
-	SparseMatrixType transposeOrNot(const SparseMatrixType& A,char mod) const
-	{
-		if (mod == 'C' || mod == 'c') {
-			SparseMatrixType Ac;
-			transposeConjugate(Ac,A);
-			return Ac;
-		}
-		return A;
-	}
+//	SparseMatrixType transposeOrNot(const SparseMatrixType& A,char mod) const
+//	{
+//		if (mod == 'C' || mod == 'c') {
+//			SparseMatrixType Ac;
+//			transposeConjugate(Ac,A);
+//			return Ac;
+//		}
+//		return A;
+//	}
 
 	PsimagLite::ProgressIndicator progress_;
-};     //class ModelCommon
+}; //class ModelCommon
 } // namespace Dmrg
 /*@}*/
 #endif

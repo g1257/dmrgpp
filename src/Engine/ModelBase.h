@@ -118,6 +118,7 @@ public:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::SparseElementType ComplexOrRealType;
 	typedef ModelCommonBase<ModelHelperType,ParametersType,GeometryType> ModelCommonBaseType;
+	typedef typename ModelCommonBaseType::HamiltonianConnectionType HamiltonianConnectionType;
 	typedef typename ModelCommonBaseType::LinkProductStructType LinkProductStructType;
 	typedef typename ModelCommonBaseType::VectorType VectorType;
 	typedef ParametersType SolverParamsType;
@@ -198,9 +199,9 @@ public:
 	}
 
 	virtual void fullHamiltonian(SparseMatrixType& matrix,
-	                             const ModelHelperType& modelHelper) const
+	                             const HamiltonianConnectionType& hc) const
 	{
-		return modelCommon_->fullHamiltonian(matrix,modelHelper);
+		return modelCommon_->fullHamiltonian(matrix, hc);
 	}
 
 	virtual SizeType getLinkProductStruct(const ModelHelperType& modelHelper) const

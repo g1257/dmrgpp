@@ -4,7 +4,7 @@
 
 namespace Dmrg {
 
-template<typename ModelHelperType>
+template<typename ModelHelperType, typename GeometryType>
 class LinkProductBase {
 
 public:
@@ -12,27 +12,24 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
 
-	template<typename SomeStructType>
-	static void connectorDofs(VectorSizeType& edofs,
+	virtual void connectorDofs(VectorSizeType& edofs,
 	                          SizeType,
 	                          SizeType,
-	                          const SomeStructType&)
+	                          const AdditionalDataType&)
 	{
 		edofs[0] = edofs[1] = 0;
 	}
 
-	static SizeType dofsAllocationSize() { return 2; }
+	virtual SizeType dofsAllocationSize() { return 2; }
 
-	template<typename SomeStructType>
-	static void valueModifier(SparseElementType&,
+	virtual void valueModifier(SparseElementType&,
 	                          SizeType,
 	                          SizeType,
 	                          bool,
-	                          const SomeStructType&)
+	                          const AdditionalDataType&)
 	{}
-
-
 };
 }
 #endif // LINKPRODUCTBASE_H

@@ -72,7 +72,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "PackIndices.h" // in PsimagLite
 #include "Link.h"
-#include "LinkProductStruct.h"
 #include "Concurrency.h"
 #include "IndexOfItem.h"
 
@@ -105,7 +104,6 @@ public:
 	typedef typename BasisType::RealType RealType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef Link<SparseElementType> LinkType;
-	typedef LinkProductStruct<SparseElementType> LinkProductStructType;
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorSparseElementType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
 	typedef typename LeftRightSuperType::KroneckerDumperType KroneckerDumperType;
@@ -449,8 +447,6 @@ public:
 
 	SizeType threadId() const { return threadId_; }
 
-	const LinkProductStructType& lps() const { return lps_; }
-
 private:
 
 	void createBuffer()
@@ -497,7 +493,6 @@ private:
 	typename PsimagLite::Vector<SizeType>::Type alpha_,beta_;
 	typename PsimagLite::Vector<bool>::Type fermionSigns_;
 	mutable KroneckerDumperType kroneckerDumper_;
-	mutable LinkProductStructType lps_;
 	mutable typename PsimagLite::Vector<SparseMatrixType*>::Type garbage_;
 	mutable BlockType seen_;
 }; // class ModelHelperLocal

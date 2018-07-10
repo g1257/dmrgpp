@@ -74,7 +74,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ClebschGordanCached.h"
 #include "Su2Reduced.h"
 #include "Link.h"
-#include "LinkProductStruct.h"
 
 /** \ingroup DMRG */
 /*@{*/
@@ -108,7 +107,6 @@ public:
 	typedef typename BasisType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef Link<SparseElementType> LinkType;
-	typedef LinkProductStruct<SparseElementType> LinkProductStructType;
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorSparseElementType;
 	typedef typename LeftRightSuperType::ParamsForKroneckerDumperType
 	ParamsForKroneckerDumperType;
@@ -480,8 +478,6 @@ public:
 
 	SizeType threadId() const { return threadId_; }
 
-	const LinkProductStructType& lps() const { return lps_; }
-
 private:
 
 	int m_;
@@ -489,7 +485,6 @@ private:
 	RealType targetTime_;
 	SizeType threadId_;
 	Su2Reduced<LeftRightSuperType> su2reduced_;
-	LinkProductStructType lps_;
 };
 } // namespace Dmrg
 /*@}*/

@@ -103,6 +103,7 @@ public:
 	typedef typename TargetingType::RealType RealType;
 	typedef typename BasisType::EffectiveQnType EffectiveQnType;
 	typedef typename ModelType::OperatorsType OperatorsType;
+	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
 	typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -110,6 +111,7 @@ public:
 	typedef typename ModelHelperType::ParamsForKroneckerDumperType
 	ParamsForKroneckerDumperType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
+	typedef typename ModelType::LinkProductType LinkProductType;
 	typedef typename TargetingType::MatrixVectorType MatrixVectorType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
@@ -385,11 +387,12 @@ private:
 			paramsKrDumperPtr = &paramsKrDumper;
 
 		ModelHelperType modelHelper(i,lrs,targetTime,threadId, paramsKrDumperPtr);
+		HamiltonianConnectionType hc(model_.geometry(), modelHelper);
 
 		if (options.find("debugmatrix")!=PsimagLite::String::npos && !(saveOption & 4) ) {
 			SparseMatrixType fullm;
 
-			model_.fullHamiltonian(fullm,modelHelper);
+			model_.fullHamiltonian(fullm, hc);
 
 			PsimagLite::Matrix<typename SparseMatrixType::value_type> fullm2;
 			crsMatrixToFullMatrix(fullm2,fullm);

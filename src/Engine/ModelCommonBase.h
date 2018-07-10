@@ -82,15 +82,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MODEL_COMMONBASE_H
 #define MODEL_COMMONBASE_H
 #include <iostream>
-
-#include "LinkProductStruct.h"
+#include "HamiltonianConnection.h"
+#include "Vector.h"
 
 namespace Dmrg {
 
 
-template<typename ModelHelperType,typename SolverParamsType,typename GeometryType>
+template<typename ModelHelperType,
+         typename SolverParamsType,
+         typename GeometryType>
 class ModelCommonBase  {
-
 
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
@@ -104,9 +105,11 @@ class ModelCommonBase  {
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 
+
 public:
 
-	typedef LinkProductStruct<SparseElementType> LinkProductStructType;
+	typedef HamiltonianConnection<GeometryType, ModelHelperType> HamiltonianConnectionType;
+	typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
 
 	ModelCommonBase(const SolverParamsType& params,const GeometryType& geometry)
@@ -115,20 +118,17 @@ public:
 
 	virtual ~ModelCommonBase() {}
 
-	virtual void matrixVectorProduct(VectorType &x,
-	                                 const VectorType &y,
-	                                 ModelHelperType const &modelHelper) const = 0;
+	virtual void matrixVectorProduct(VectorType &,
+	                                 const VectorType&,
+	                                 const HamiltonianConnectionType&) const = 0;
 
 	virtual void addHamiltonianConnection(SparseMatrixType &matrix,
 	                                      const LeftRightSuperType& lrs,
 	                                      RealType currentTime) const = 0;
 
 
-	virtual void hamiltonianConnectionProduct(VectorType& x,
-	                                  const VectorType& y,
-	                                  ModelHelperType const &modelHelper) const = 0;
-
-	virtual void fullHamiltonian(SparseMatrixType& matrix,const ModelHelperType& modelHelper) const = 0;
+	virtual void fullHamiltonian(SparseMatrixType&,
+	                             const HamiltonianConnectionType&) const = 0;
 
 
 	virtual void addConnectionsInNaturalBasis(SparseMatrixType& hmatrix,
@@ -137,12 +137,12 @@ public:
 	                                          bool sysEnvOnly,
 	                                          RealType time) const = 0;
 
-	virtual SizeType getLinkProductStruct(const ModelHelperType& modelHelper) const = 0;
+	//virtual SizeType getLinkProductStruct(const ModelHelperType& modelHelper) const = 0;
 
 	virtual LinkType getConnection(const SparseMatrixType** A,
-	                       const SparseMatrixType** B,
-	                       SizeType ix,
-	                       const ModelHelperType& modelHelper) const = 0;
+	                               const SparseMatrixType** B,
+	                               SizeType ix,
+	                               const HamiltonianConnectionType& modelHelper) const = 0;
 
 	const SolverParamsType& params() const {return params_; }
 
