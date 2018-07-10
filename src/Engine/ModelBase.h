@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define MODEL_BASE_H
 
 #include "ReflectionOperatorEmpty.h"
-#include "ModelCommonBase.h"
 #include "Vector.h"
 #include "Sort.h"
 #include "MemResolv.h"
@@ -126,15 +125,9 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
-	ModelBase(InputValidatorType&,
-	          ModelCommonBaseType* modelCommon)
-	    : modelCommon_(modelCommon)
+	ModelBase(ParametersType& params, const GeometryType_& geometry)
+	    : modelCommon_(params, geometry)
 	{}
-
-	virtual ~ModelBase()
-	{
-		delete modelCommon_;
-	}
 
 	virtual void write(PsimagLite::String,
 	                   PsimagLite::IoNg::Out::Serializer&) const = 0;
@@ -344,7 +337,7 @@ private:
 		symmetryBlock.clear();
 	}
 
-	ModelCommonBaseType* modelCommon_;
+	ModelCommonBaseType modelCommon_;
 
 };     //class ModelBase
 } // namespace Dmrg

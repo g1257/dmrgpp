@@ -88,6 +88,7 @@ template<typename ModelHelperType>
 class LinkProductFermionSpinless : public LinkProductBase<ModelHelperType> {
 
 	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -99,16 +100,15 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
-	template<typename SomeStructType>
-	static void setLinkData(SizeType term,
-	                        SizeType dofs,
-	                        bool,
-	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
-	                        PairType& ops,
-	                        std::pair<char,char>&,
-	                        SizeType& angularMomentum,
-	                        RealType& angularFactor,
-	                        SizeType& category,const SomeStructType&)
+	void setLinkData(SizeType term,
+	                 SizeType dofs,
+	                 bool,
+	                 ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
+	                 PairType& ops,
+	                 std::pair<char,char>&,
+	                 SizeType& angularMomentum,
+	                 RealType& angularFactor,
+	                 SizeType& category,const AdditionalDataType&)
 	{
 		assert(dofs == 0);
 		if (term==TERM_NINJ) fermionOrBoson = ProgramGlobals::BOSON;
@@ -123,12 +123,10 @@ public:
 	}
 
 	// up up is the only connections possible for this model
-	template<typename SomeStructType>
-	static SizeType dofs(SizeType,const SomeStructType&) { return 1; }
+	SizeType dofs(SizeType,const AdditionalDataType&) { return 1; }
 
-	static SizeType terms() { return 2; }
+	SizeType terms() { return 2; }
 }; // class LinkProductFermionSpinless
-
 } // namespace Dmrg
 /*@}*/
 #endif

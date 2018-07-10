@@ -88,6 +88,7 @@ template<typename ModelHelperType>
 class LinkProductHubbardAncillaExtended : public LinkProductBase<ModelHelperType> {
 
 	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 
 public:
@@ -99,9 +100,7 @@ public:
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename ModelHelperType::RealType RealType;
 
-
-	template<typename SomeStructType>
-	static SizeType dofs(SizeType term,const SomeStructType&)
+	SizeType dofs(SizeType term,const SomeStructType&)
 	{
 		if (!hot_) {
 			if (term == TERM_HOPPING || term == TERM_LAMBDA)
@@ -116,11 +115,10 @@ public:
 	}
 
 	// has only dependence on orbital
-	template<typename SomeStructType>
-	static void connectorDofs(VectorSizeType& edofs,
-	                          SizeType term,
-	                          SizeType dofs,
-	                          const SomeStructType&)
+	void connectorDofs(VectorSizeType& edofs,
+	                   SizeType term,
+	                   SizeType dofs,
+	                   const SomeStructType&)
 	{
 		if (!hot_ || term == TERM_LAMBDA) {
 			edofs[0] = edofs[1] = 0;
@@ -136,17 +134,16 @@ public:
 		edofs[0] = edofs[1] = dofs;
 	}
 
-	template<typename SomeStructType>
-	static void setLinkData(SizeType term,
-	                        SizeType dofs,
-	                        bool,
-	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
-	                        PairType& ops,
-	                        std::pair<char,char>&,
-	                        SizeType& angularMomentum,
-	                        RealType& angularFactor,
-	                        SizeType& category,
-	                        const SomeStructType&)
+	void setLinkData(SizeType term,
+	                 SizeType dofs,
+	                 bool,
+	                 ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
+	                 PairType& ops,
+	                 std::pair<char,char>&,
+	                 SizeType& angularMomentum,
+	                 RealType& angularFactor,
+	                 SizeType& category,
+	                 const SomeStructType&)
 	{
 		if (term==TERM_HOPPING) {
 			fermionOrBoson = ProgramGlobals::FERMION;
@@ -207,12 +204,11 @@ public:
 		}
 	}
 
-	template<typename SomeStructType>
-	static void valueModifier(SparseElementType& value,
-	                          SizeType term,
-	                          SizeType,
-	                          bool isSu2,
-	                          const SomeStructType&)
+	void valueModifier(SparseElementType& value,
+	                   SizeType term,
+	                   SizeType,
+	                   bool isSu2,
+	                   const SomeStructType&)
 	{
 		if (term == TERM_HOPPING || term == TERM_LAMBDA)
 			return;
@@ -233,17 +229,8 @@ public:
 		value *= 0.5;
 	}
 
-	static SizeType terms() { return 6; }
-
-	static bool setHot(bool hot) { return hot_ = hot; }
-
-private:
-
-	static bool hot_;
+	SizeType terms() { return 6; }
 }; // class LinkProductHubbardAncillaExtended
-
-template<typename ModelHelperType>
-bool LinkProductHubbardAncillaExtended<ModelHelperType>::hot_ = false;
 } // namespace Dmrg
 /*@}*/
 #endif //DMRG_LINKPROD_HUBBARD_ANCILLA_EXTENDED_H

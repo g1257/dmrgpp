@@ -88,6 +88,7 @@ template<typename ModelHelperType>
 class LinkProductImmm : public LinkProductBase<ModelHelperType> {
 
 	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
@@ -104,8 +105,7 @@ public:
 	//! i.e. gamma sigma gamma' sigma = 2x2x2 = 8
 	//! if sites are TYPE_O and TYPE_C the returns 4, i.e. gamma sigma d sigma =  2x2
 	//! The term=1 is for Upd
-	template<typename SomeStructType>
-	static SizeType dofs(SizeType term,const SomeStructType& additionalData)
+	SizeType dofs(SizeType term,const AdditionalDataType& additionalData)
 	{
 		if (term==W_TERM) {
 			// No Upd allowed between Oxygens
@@ -121,11 +121,10 @@ public:
 	}
 
 	// has only dependence on orbital
-	template<typename SomeStructType>
-	static void connectorDofs(VectorSizeType& edofs,
-	                          SizeType term,
-	                              SizeType dofs,
-	                              const SomeStructType& additionalData)
+	void connectorDofs(VectorSizeType& edofs,
+	                   SizeType term,
+	                   SizeType dofs,
+	                   const AdditionalDataType& additionalData)
 	{
 		if (term==W_TERM) {
 			edofs[0] = edofs[1] = 0;
@@ -145,7 +144,7 @@ public:
 			SizeType orb2 = (xtmp & 1);
 			edofs[0] = orb1;
 			edofs[1] = orb2;
- 			return; // has only dependence on orbital
+			return; // has only dependence on orbital
 		}
 
 		//! TYPE_C and TYPE_O:
@@ -160,17 +159,16 @@ public:
 		}
 	}
 
-	template<typename AdditionalDataType>
-	static void setLinkData(SizeType term,
-	                        SizeType dofs,
-	                        bool,
-	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
-	                        PairType& ops,
-	                        std::pair<char,char>&,
-	                        SizeType& angularMomentum,
-	                        RealType& angularFactor,
-	                        SizeType& category,
-	                        const AdditionalDataType& additionalData)
+	void setLinkData(SizeType term,
+	                 SizeType dofs,
+	                 bool,
+	                 ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
+	                 PairType& ops,
+	                 std::pair<char,char>&,
+	                 SizeType& angularMomentum,
+	                 RealType& angularFactor,
+	                 SizeType& category,
+	                 const AdditionalDataType& additionalData)
 	{
 		if (term==W_TERM) {
 			fermionOrBoson = ProgramGlobals::BOSON;
@@ -197,12 +195,11 @@ public:
 		category = spin;
 	}
 
-	template<typename AdditionalDataType>
-	static void valueModifier(SparseElementType& value,
-	                          SizeType term,
-	                          SizeType,
-	                          bool,
-	                          const AdditionalDataType&)
+	void valueModifier(SparseElementType& value,
+	                   SizeType term,
+	                   SizeType,
+	                   bool,
+	                   const AdditionalDataType&)
 	{
 		if (term==W_TERM) {
 			value *= 0.5;
@@ -212,14 +209,13 @@ public:
 		value *= (-1.0);
 	}
 
-	static SizeType terms() { return 2; }
+	SizeType terms() { return 2; }
 
 private:
 
 	// spin is diagonal
-	template<typename AdditionalDataType>
-	static std::pair<SizeType,SizeType> operatorDofs(SizeType dofs,
-	                                                 const AdditionalDataType& additionalData)
+	std::pair<SizeType,SizeType> operatorDofs(SizeType dofs,
+	                                          const AdditionalDataType& additionalData)
 	{
 		SizeType type1 = additionalData.type1;
 		SizeType type2 = additionalData.type2;
@@ -249,8 +245,7 @@ private:
 		return (type1==additionalData.TYPE_C) ? PairType(op1,op2) : PairType(op2,op1);
 	}
 
-	template<typename AdditionalDataType>
-	static SizeType getSpin(SizeType dofs,const AdditionalDataType& additionalData)
+	SizeType getSpin(SizeType dofs,const AdditionalDataType& additionalData)
 	{
 		SizeType type1 = additionalData.type1;
 		SizeType type2 = additionalData.type2;
@@ -259,7 +254,6 @@ private:
 
 		return (type1==type2) ? dofs/4 : dofs/2;
 	}
-
 }; // class LinkProductImmm
 } // namespace Dmrg
 /*@}*/

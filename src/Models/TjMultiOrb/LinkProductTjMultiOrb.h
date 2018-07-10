@@ -87,36 +87,28 @@ template<typename ModelHelperType>
 class LinkProductTjMultiOrb : public LinkProductBase<ModelHelperType> {
 
 	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
-
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
 
 	enum {TERM_CICJ, TERM_SPSM, TERM_SZSZ, TERM_NINJ};
-
-	static SizeType orbitals_;
 
 public:
 
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
-	static void setOrbitals(SizeType orbitals)
-	{
-		orbitals_=orbitals;
-	}
-
-	template<typename SomeStructType>
-	static void setLinkData(SizeType term,
-	                        SizeType dofs,
-	                        bool,
-	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
-	                        PairType& ops,
-	                        std::pair<char,char>& mods,
-	                        SizeType& angularMomentum,
-	                        RealType& angularFactor,
-	                        SizeType& category,
-	                        const SomeStructType&)
+	void setLinkData(SizeType term,
+	                 SizeType dofs,
+	                 bool,
+	                 ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
+	                 PairType& ops,
+	                 std::pair<char,char>& mods,
+	                 SizeType& angularMomentum,
+	                 RealType& angularFactor,
+	                 SizeType& category,
+	                 const AdditionalDataType&)
 	{
 		char tmp = mods.first;
 		if (term==TERM_CICJ) {
@@ -174,12 +166,11 @@ public:
 		assert(false);
 	}
 
-	template<typename SomeStructType>
-	static void valueModifier(SparseElementType& value,
-	                          SizeType term,
-	                          SizeType,
-	                          bool isSu2,
-	                          const SomeStructType&)
+	void valueModifier(SparseElementType& value,
+	                   SizeType term,
+	                   SizeType,
+	                   bool isSu2,
+	                   const AdditionalDataType&)
 	{
 		if (term==TERM_CICJ) return;
 
@@ -199,30 +190,28 @@ public:
 	// up up and down down
 	// S+ S- and S- S+
 	// Sz Sz
-	template<typename SomeStructType>
-	static SizeType dofs(SizeType term,const SomeStructType&)
+	SizeType dofs(SizeType term, const AdditionalDataType&)
 	{
-		if (term==TERM_CICJ) return 2*orbitals_*orbitals_; // c^\dagger c
-		if (term==TERM_SPSM) return 2*orbitals_*orbitals_; // S+ S- and S- S+
-		if (term==TERM_SZSZ) return 1*orbitals_*orbitals_; // Sz Sz
-		if (term==TERM_NINJ) return 1*orbitals_*orbitals_; // ninj
+		if (term==TERM_CICJ) return 2*BaseType::orbitals()*BaseType::orbitals(); // c^\dagger c
+		if (term==TERM_SPSM) return 2*BaseType::orbitals()*BaseType::orbitals(); // S+ S- and S- S+
+		if (term==TERM_SZSZ) return 1*BaseType::orbitals()*BaseType::orbitals(); // Sz Sz
+		if (term==TERM_NINJ) return 1*BaseType::orbitals()*BaseType::orbitals(); // ninj
 		assert(false);
 		return 0; // bogus
 	}
 
 	// has only dependence on orbital
-	template<typename SomeStructType>
-	static void connectorDofs(VectorSizeType& edofs,
-	                          SizeType term,
-	                                                  SizeType dofs,
-	                                                  const SomeStructType&)
+	void connectorDofs(VectorSizeType& edofs,
+	                   SizeType term,
+	                   SizeType dofs,
+	                   const AdditionalDataType&)
 	{
-		SizeType orbitalsSquared = orbitals_*orbitals_;
+		SizeType orbitalsSquared = BaseType::orbitals()*BaseType::orbitals();
 		SizeType spin = dofs/orbitalsSquared;
 		SizeType xtmp = (spin==0) ? 0 : orbitalsSquared;
 		xtmp = dofs - xtmp;
-		SizeType orb1 = xtmp/orbitals_;
-		SizeType orb2 = xtmp % orbitals_;
+		SizeType orb1 = xtmp/BaseType::orbitals();
+		SizeType orb2 = xtmp % BaseType::orbitals();
 		edofs[0] = orb1;
 		edofs[1] = orb2; //  orbital dependence, no spin dependence
 	}
@@ -232,36 +221,33 @@ public:
 private:
 
 	// spin is diagonal
-	static std::pair<SizeType,SizeType> operatorDofs(SizeType dofs, SizeType term)
+	std::pair<SizeType,SizeType> operatorDofs(SizeType dofs, SizeType term)
 	{
-		SizeType orbitalsSquared = orbitals_*orbitals_;
+		SizeType orbitalsSquared = BaseType::orbitals()*BaseType::orbitals();
 		SizeType spin = dofs/orbitalsSquared;
 		SizeType xtmp = (spin==0) ? 0 : orbitalsSquared;
 		xtmp = dofs - xtmp;
-		SizeType orb1 = xtmp/orbitals_;
-		SizeType orb2 = xtmp % orbitals_;
+		SizeType orb1 = xtmp/BaseType::orbitals();
+		SizeType orb2 = xtmp % BaseType::orbitals();
 		if (term == TERM_SPSM) spin = 0;
-		SizeType op1 = orb1 + spin*orbitals_;
-		SizeType op2 = orb2 + spin*orbitals_;
+		SizeType op1 = orb1 + spin*BaseType::orbitals();
+		SizeType op2 = orb2 + spin*BaseType::orbitals();
 
 		SizeType offset = 0;
-// Need to look at the crationMatrices order to get the offset correct!
-		if (term == TERM_SPSM) offset = 2*orbitals_;
-		if (term == TERM_SZSZ) offset = 3*orbitals_;
-		if (term == TERM_NINJ) offset = 4*orbitals_;
+		// Need to look at the crationMatrices order to get the offset correct!
+		if (term == TERM_SPSM) offset = 2*BaseType::orbitals();
+		if (term == TERM_SZSZ) offset = 3*BaseType::orbitals();
+		if (term == TERM_NINJ) offset = 4*BaseType::orbitals();
 
 		return std::pair<SizeType,SizeType>(op1+offset,op2+offset);
 	}
 
-	static SizeType getSpin(SizeType dofs)
+	SizeType getSpin(SizeType dofs)
 	{
-		SizeType orbitalsSquared = orbitals_*orbitals_;
+		SizeType orbitalsSquared = BaseType::orbitals()*BaseType::orbitals();
 		return dofs/orbitalsSquared;
 	}
 }; // class LinkProductTjMultiOrb
-
-template<typename ModelHelperType>
-SizeType LinkProductTjMultiOrb<ModelHelperType>::orbitals_ = 1;
 } // namespace Dmrg
 /*@}*/
 #endif

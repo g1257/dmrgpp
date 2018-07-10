@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define EXTENDED_HUBBARD_1ORB_H
 #include "../Models/HubbardOneBand/ModelHubbard.h"
 #include "LinkProdExtendedHubbard1Orb.h"
-#include "ModelCommon.h"
 
 namespace Dmrg {
 //! Extended Hubbard for DMRG solver, uses ModelHubbard by containment
@@ -102,9 +101,8 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelBaseType::TargetQuantumElectronsType TargetQuantumElectronsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef LinkProdExtendedHubbard1Orb<ModelHelperType> LinkProductType;
-	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
@@ -121,7 +119,7 @@ public:
 	ExtendedHubbard1Orb(const SolverParamsType& solverParams,
 	                    InputValidatorType& io,
 	                    GeometryType const &geometry)
-	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
+	    : ModelBaseType(solverParams, geometry),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      modelHubbard_(solverParams,io,geometry)
@@ -189,7 +187,7 @@ public:
 		if (what=="n") {
 			VectorSizeType allowed(1,0);
 			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			PsimagLite::Matrix<SparseElementType> tmp;
+			PsimagLite::Matrix<ComplexOrRealType> tmp;
 			return creationMatrix[2];
 		} else {
 			return modelHubbard_.naturalOperator(what,site,dof);

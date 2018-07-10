@@ -88,7 +88,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include "LinkProductHubbardAncillaExtended.h"
 #include "ProgramGlobals.h"
-#include "ModelCommon.h"
 #include "Geometry/GeometryDca.h"
 #include <cstdlib>
 
@@ -111,18 +110,14 @@ public:
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
 	typedef typename HilbertBasisType::value_type HilbertState;
 	typedef  HilbertSpaceFeAs<HilbertState> HilbertSpaceFeAsType;
-
-
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef LinkProductHubbardAncillaExtended<ModelHelperType> LinkProductType;
-	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
-
 	typedef typename ModelBaseType::VectorType VectorType;
 	typedef	 typename ModelBaseType::MyBasis MyBasis;
 	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
@@ -141,7 +136,7 @@ public:
 	HubbardAncillaExtended(const SolverParamsType& solverParams,
 	                       InputValidatorType& io,
 	                       GeometryType const &geometry)
-	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
+	    : ModelBaseType(solverParams, geometry),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      hot_(geometry_.orbitals(0,0) > 1)

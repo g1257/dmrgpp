@@ -89,7 +89,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquaredHelper.h"
 #include "SpinSquared.h"
 #include "ProgramGlobals.h"
-#include "ModelCommon.h"
 #include "Utils.h"
 
 namespace Dmrg {
@@ -118,7 +117,6 @@ private:
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef unsigned int long WordType;
 	typedef LinkProductHeisenberg<ModelHelperType> LinkProductType;
-	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -141,7 +139,7 @@ public:
 	                InputValidatorType& io,
 	                const GeometryType& geometry,
 	                PsimagLite::String additional)
-	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
+	    : ModelBaseType(solverParams, geometry),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)

@@ -87,7 +87,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include "../Models/FeAsModel/LinkProductFeAs.h"
 #include "ProgramGlobals.h"
-#include "ModelCommon.h"
 
 namespace Dmrg {
 template<typename ModelBaseType>
@@ -115,7 +114,6 @@ public:
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
 	typedef LinkProductFeAs<ModelHelperType> LinkProductType;
-	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef	 typename ModelBaseType::MyBasis MyBasis;
 	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
@@ -131,7 +129,7 @@ public:
 	ModelHubbardMultiBand(const SolverParamsType& solverParams,
 	                      InputValidatorType& io,
 	                      GeometryType const &geometry)
-	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
+	    : ModelBaseType(solverParams, geometry),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      spinSquared_(spinSquaredHelper_,

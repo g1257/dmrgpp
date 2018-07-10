@@ -89,7 +89,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquared.h"
 #include "VerySparseMatrix.h"
 #include "ProgramGlobals.h"
-#include "ModelCommon.h"
 
 namespace Dmrg {
 //! Model Hubbard for DMRG solver, inherits from ModelBase and implements its interface:
@@ -130,7 +129,6 @@ public:
 	typedef typename HilbertSpaceType::HilbertState HilbertState;
 	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
 	typedef LinkProductFermionSpinless<ModelHelperType> LinkProductType;
-	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
@@ -140,7 +138,7 @@ public:
 	                InputValidatorType& io,
 	                GeometryType const &geometry,
 	                SizeType offset = DEGREES_OF_FREEDOM)
-	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
+	    : ModelBaseType(solverParams, geometry),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      offset_(offset),

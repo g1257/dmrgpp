@@ -87,6 +87,7 @@ template<typename ModelHelperType>
 class LinkProductTjAncillaG : public LinkProductBase<ModelHelperType> {
 
 	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -98,17 +99,16 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
-	template<typename SomeStructType>
-	static void setLinkData(SizeType term,
-							SizeType dofs,
-							bool isSu2,
-							ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
-							PairType& ops,
-							std::pair<char,char>& mods,
-							SizeType& angularMomentum,
-							RealType& angularFactor,
-							SizeType& category,
-							const SomeStructType&)
+	void setLinkData(SizeType term,
+	                 SizeType dofs,
+	                 bool isSu2,
+	                 ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
+	                 PairType& ops,
+	                 std::pair<char,char>& mods,
+	                 SizeType& angularMomentum,
+	                 RealType& angularFactor,
+	                 SizeType& category,
+	                 const AdditionalDataType&)
 	{
 		char tmp = mods.first;
 		if (term==TERM_CICJ) {
@@ -196,12 +196,11 @@ public:
 		assert(false);
 	}
 
-	template<typename SomeStructType>
-	static void valueModifier(SparseElementType& value,
-	                          SizeType term,
-	                          SizeType,
-	                          bool isSu2,
-	                          const SomeStructType&)
+	void valueModifier(SparseElementType& value,
+	                   SizeType term,
+	                   SizeType,
+	                   bool isSu2,
+	                   const AdditionalDataType&)
 	{
 		if (term==TERM_CICJ) return;
 
@@ -225,8 +224,7 @@ public:
 	// up up and down down
 	// S+ S- and S- S+
 	// Sz Sz
-	template<typename SomeStructType>
-	static SizeType dofs(SizeType term,const SomeStructType&)
+	SizeType dofs(SizeType term,const SomeStructType&)
 	{
 		if (term==TERM_CICJ) return 2; // c^\dagger c
 		if (term==TERM_SPSM) return 2; // S+ S- and S- S+
@@ -237,17 +235,16 @@ public:
 		return 0; // bogus
 	}
 
-	static SizeType terms() { return 5; }
+	SizeType terms() { return 5; }
 
 private:
 
 	// only for TERM_SISJ
-	static PairType operatorSz(bool isSu2)
+	PairType operatorSz(bool isSu2)
 	{
 		SizeType x = (isSu2) ? 2 : 3;
 		return PairType(x,x);
 	}
-
 }; // class LinkProductTjAncillaG
 } // namespace Dmrg
 /*@}*/

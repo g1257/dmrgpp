@@ -89,17 +89,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "NoPthreads.h"
 #include "Sort.h"
 #include "Profiling.h"
+:#include "LinkProductBase.h"
 
 namespace Dmrg {
 
+template<typename ParametersType, typename GeometryType, typename ModelHelperType>
+class ModelCommon  {
 
-template<typename ModelBaseType, typename LinkProductType>
-class ModelCommon : public ModelBaseType::ModelCommonBaseType {
-
-	typedef typename ModelBaseType::ModelCommonBaseType BaseType;
-	typedef typename ModelBaseType::ModelCommonBaseType ModelCommonBaseType;
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename ModelHelperType::LinkType LinkType;
@@ -108,6 +104,7 @@ class ModelCommon : public ModelBaseType::ModelCommonBaseType {
 
 public:
 
+	typedef LinkProductBase<ModelHelperType, GeometryType> LinkProductBaseType;
 	typedef PsimagLite::InputNg<InputCheck>::Readable InputValidatorType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename ModelHelperType::BlockType Block;
@@ -125,7 +122,8 @@ public:
 	typedef typename HamiltonianConnectionType::VerySparseMatrixType VerySparseMatrixType;
 
 	ModelCommon(const SolverParamsType& params,const GeometryType& geometry)
-	    : ModelCommonBaseType(params,geometry),
+	    : params_(params),
+	      geometry_(geometry),
 	      progress_("ModelCommon")
 	{
 		if (LinkProductType::terms() > this->geometry().terms()) {
@@ -312,6 +310,8 @@ private:
 //		return A;
 //	}
 
+	const SolverParamsType& params_;
+	const GeometryType& geometry_;
 	PsimagLite::ProgressIndicator progress_;
 }; //class ModelCommon
 } // namespace Dmrg

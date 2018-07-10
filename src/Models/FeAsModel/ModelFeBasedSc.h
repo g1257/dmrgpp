@@ -89,7 +89,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include "LinkProductFeAs.h"
 #include "ProgramGlobals.h"
-#include "ModelCommon.h"
 #include "Geometry/GeometryDca.h"
 #include "FeAsJzSymmetry.h"
 
@@ -119,7 +118,6 @@ public:
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
 	typedef LinkProductFeAs<ModelHelperType> LinkProductType;
-	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef	 typename ModelBaseType::MyBasis MyBasis;
 	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
@@ -138,7 +136,7 @@ public:
 	ModelFeBasedSc(const SolverParamsType& solverParams,
 	               InputValidatorType& io,
 	               GeometryType const &geometry)
-	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
+	    : ModelBaseType(solverParams, geometry),
 	      reinterpretX_(6),
 	      reinterpretY_(9),
 	      modelParameters_(io),

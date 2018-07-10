@@ -86,6 +86,7 @@ template<typename ModelHelperType>
 class LinkProductHeisenbergAncillaC : public LinkProductBase<ModelHelperType> {
 
 	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 
 public:
@@ -97,8 +98,7 @@ public:
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename ModelHelperType::RealType RealType;
 
-	template<typename SomeStructType>
-	static void setLinkData(SizeType term,
+	void setLinkData(SizeType term,
 	                        SizeType dofs,
 	                        bool isSu2,
 	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
@@ -107,7 +107,7 @@ public:
 	                        SizeType& angularMomentum,
 	                        RealType& angularFactor,
 	                        SizeType& category,
-	                        const SomeStructType&)
+	                        const AdditionalDataType&)
 	{
 		fermionOrBoson = ProgramGlobals::BOSON;
 		ops = (hot_) ? operatorDofsHot(term,dofs,isSu2) : operatorDofs(term,isSu2);
@@ -128,31 +128,28 @@ public:
 		}
 	}
 
-	template<typename SomeStructType>
-	static void valueModifier(SparseElementType& value,
+	void valueModifier(SparseElementType& value,
 	                          SizeType term,
 	                          SizeType,
 	                          bool isSu2,
-	                          const SomeStructType&)
+	                          const AdditionalDataType&)
 	{
 		if (term == TERM_ANCILLA) return;
 		if (isSu2) value = -value;
 		value *= 0.5;
 	}
 
-	template<typename SomeStructType>
-	static SizeType dofs(SizeType term,const SomeStructType&)
+	SizeType dofs(SizeType term,const AdditionalDataType&)
 	{
 		if (!hot_ || term == TERM_ANCILLA) return 1;
 		return 2;
 	}
 
 	// has only dependence on orbital
-	template<typename SomeStructType>
-	static void connectorDofs(VectorSizeType& edofs,
+	void connectorDofs(VectorSizeType& edofs,
 	                          SizeType term,
 	                          SizeType dofs,
-	                          const SomeStructType&)
+	                          const AdditionalDataType&)
 	{
 		if (!hot_ || term == TERM_ANCILLA)
 			edofs[0] = edofs[1] = 0;
@@ -163,13 +160,11 @@ public:
 	//! Splus Sminus and
 	//! Sz Sz
 	//! delta^\dagger delta
-	static SizeType terms() { return 3; }
-
-	static bool setHot(bool hot) { return hot_ = hot; }
+	SizeType terms() { return 3; }
 
 private:
 
-	static PairType operatorDofs(SizeType term,bool isSu2)
+	PairType operatorDofs(SizeType term,bool isSu2)
 	{
 		if (term == TERM_SPLUSSMINUS || term == TERM_ANCILLA)
 			return PairType(term,term);
@@ -177,19 +172,14 @@ private:
 		return PairType(x,x);
 	}
 
-	static PairType operatorDofsHot(SizeType term,SizeType dofs,bool)
+	PairType operatorDofsHot(SizeType term,SizeType dofs,bool)
 	{
 		if (term == TERM_ANCILLA) return PairType(4,4);
 		assert(term == TERM_SPLUSSMINUS || term == TERM_SZSZ);
 		SizeType offset = (term == TERM_SPLUSSMINUS) ? 0 : 2;
 		return PairType(dofs+offset,dofs+offset);
 	}
-
-	static bool hot_;
 }; // class LinkProductHeisenbergAncillaC
-
-template<typename ModelHelperType>
-bool LinkProductHeisenbergAncillaC<ModelHelperType>::hot_ = false;
 } // namespace Dmrg
 /*@}*/
 #endif

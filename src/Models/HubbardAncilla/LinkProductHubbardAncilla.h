@@ -89,6 +89,7 @@ template<typename ModelHelperType>
 class LinkProductHubbardAncilla : public LinkProductBase<ModelHelperType> {
 
 	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
@@ -104,23 +105,21 @@ public:
 
 	typedef typename ModelHelperType::RealType RealType;
 
-	template<typename SomeStructType>
-	static SizeType dofs(SizeType,const SomeStructType&)
+	SizeType dofs(SizeType,const AdditionalDataType&)
 	{
 		return 2;
 	}
 
-	template<typename SomeStructType>
-	static void setLinkData(SizeType term,
-	                        SizeType dofs,
-	                        bool,
-	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
-	                        PairType& ops,
-	                        std::pair<char,char>&,
-	                        SizeType& angularMomentum,
-	                        RealType& angularFactor,
-	                        SizeType& category,
-	                        const SomeStructType&)
+	void setLinkData(SizeType term,
+	                 SizeType dofs,
+	                 bool,
+	                 ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
+	                 PairType& ops,
+	                 std::pair<char,char>&,
+	                 SizeType& angularMomentum,
+	                 RealType& angularFactor,
+	                 SizeType& category,
+	                 const AdditionalDataType&)
 	{
 		if (term==TERM_HOPPING) {
 			fermionOrBoson = ProgramGlobals::FERMION;
@@ -137,7 +136,7 @@ public:
 		ops = PairType(dofs + offset1,dofs + offset1);
 	}
 
-	static SizeType terms() { return 2; }
+	SizeType terms() { return 2; }
 }; // class LinkProductHubbardAncilla
 } // namespace Dmrg
 /*@}*/

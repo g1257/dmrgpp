@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define FEAS_BASED_SC_EX
 #include "../Models/FeAsModel/ModelFeBasedSc.h"
 #include "LinkProductFeAsExtended.h"
-#include "ModelCommon.h"
 
 namespace Dmrg {
 
@@ -111,9 +110,8 @@ public:
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
 	typedef LinkProductFeAsExtended<ModelHelperType> LinkProductType;
-	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
-	typedef	 typename ModelBaseType::MyBasis MyBasis;
-	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
+	typedef	typename ModelBaseType::MyBasis MyBasis;
+	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename MyBasis::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
@@ -125,8 +123,8 @@ public:
 
 	FeAsBasedScExtended(const SolverParamsType& solverParams,
 	                    InputValidatorType& io,
-	                    GeometryType const &geometry)
-	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
+	                    const GeometryType& geometry)
+	    : ModelBaseType(solverParams, geometry),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      modelFeAs_(solverParams,io,geometry),

@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/TjMultiOrb/LinkProductTjMultiOrb.h"
 #include "../Models/TjMultiOrb/ParametersModelTjMultiOrb.h"
 #include "../Models/FeAsModel/HilbertSpaceFeAs.h"
-#include "ModelCommon.h"
 #include "ProgramGlobals.h"
 
 namespace Dmrg {
@@ -108,7 +107,6 @@ public:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef LinkProductTjMultiOrb<ModelHelperType> LinkProductType;
-	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisFeAsType;
 	typedef typename HilbertBasisFeAsType::value_type HilbertStateFeAs;
 	typedef  HilbertSpaceFeAs<HilbertStateFeAs> HilbertSpaceFeAsType;
@@ -137,7 +135,7 @@ public:
 	TjMultiOrb(const SolverParamsType& solverParams,
 	           InputValidatorType& io,
 	           GeometryType const &geometry)
-	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
+	    : ModelBaseType(solverParams, geometry),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      offset_(5*modelParameters_.orbitals), // c^\dagger_up, c^\dagger_down, S+, Sz, n

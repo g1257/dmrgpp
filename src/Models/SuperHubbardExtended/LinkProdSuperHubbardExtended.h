@@ -90,6 +90,7 @@ template<typename ModelHelperType>
 class LinkProdSuperHubbardExtended : public LinkProductBase<ModelHelperType> {
 
 	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -100,17 +101,16 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
-	template<typename SomeStructType>
-	static void setLinkData(SizeType term,
-	                        SizeType dofs,
-	                        bool isSu2,
-	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
-	                        PairType& ops,
-	                        std::pair<char,char>& mods,
-	                        SizeType& angularMomentum,
-	                        RealType& angularFactor,
-	                        SizeType& category,
-	                        const SomeStructType& additional)
+	void setLinkData(SizeType term,
+	                 SizeType dofs,
+	                 bool isSu2,
+	                 ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
+	                 PairType& ops,
+	                 std::pair<char,char>& mods,
+	                 SizeType& angularMomentum,
+	                 RealType& angularFactor,
+	                 SizeType& category,
+	                 const AdditionalDataType& additional)
 	{
 		if (term == TERM_HOPPING || term == TERM_NINJ) {
 			return LinkProdExtendedHubbard1Orb<ModelHelperType>::setLinkData(term,
@@ -141,12 +141,11 @@ public:
 		ops.second += 3;
 	}
 
-	template<typename SomeStructType>
-	static void valueModifier(SparseElementType& value,
-	                          SizeType term,
-	                          SizeType dofs,
-	                          bool isSu2,
-	                          const SomeStructType& additional)
+	void valueModifier(SparseElementType& value,
+	                   SizeType term,
+	                   SizeType dofs,
+	                   bool isSu2,
+	                   const AdditionalDataType& additional)
 	{
 		if (term == TERM_HOPPING || term == TERM_NINJ)
 			return LinkProdExtendedHubbard1Orb<ModelHelperType>::valueModifier(value,
@@ -162,8 +161,7 @@ public:
 		                                                             additional);
 	}
 
-	template<typename SomeStructType>
-	static SizeType dofs(SizeType term,const SomeStructType& additional)
+	SizeType dofs(SizeType term,const AdditionalDataType& additional)
 	{
 		if (term == TERM_HOPPING || term == TERM_NINJ)
 			return LinkProdExtendedHubbard1Orb<ModelHelperType>::dofs(term,additional);
@@ -172,11 +170,10 @@ public:
 	}
 
 	// has only dependence on orbital
-	template<typename SomeStructType>
-	static void connectorDofs(VectorSizeType& edofs,
-	                          SizeType term,
-	                          SizeType dofs,
-	                          const SomeStructType& additional)
+	void connectorDofs(VectorSizeType& edofs,
+	                   SizeType term,
+	                   SizeType dofs,
+	                   const AdditionalDataType& additional)
 	{
 		if (term == TERM_HOPPING || term == TERM_NINJ)
 			return LinkProdExtendedHubbard1Orb<ModelHelperType>::connectorDofs(edofs,
@@ -190,8 +187,7 @@ public:
 		                                                             additional);
 	}
 
-	static SizeType terms() { return 3; }
-
+	SizeType terms() { return 3; }
 }; // class LinkProdSuperHubbardExtended
 } // namespace Dmrg
 /*@}*/

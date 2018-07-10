@@ -92,14 +92,16 @@ namespace Dmrg {
 
 // Keep this class independent of x and y in x = H*y
 // For things that depend on x and y use ParallelHamiltonianConnection.h
-template<typename GeometryType,typename ModelHelperType>
+template<typename LinkProductType>
 class HamiltonianConnection {
 
-	typedef SuperGeometry<GeometryType> SuperGeometryType;
-	typedef HamiltonianAbstract<SuperGeometryType> HamiltonianAbstractType;
+	typedef SuperGeometry<LinkProductType::GeometryType> SuperGeometryType;
+	typedef HamiltonianAbstract<LinkProductType::SuperGeometryType> HamiltonianAbstractType;
 
 public:
 
+	typedef LinkProductType::GeometryType GeometryType;
+	typedef LinkProductType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;

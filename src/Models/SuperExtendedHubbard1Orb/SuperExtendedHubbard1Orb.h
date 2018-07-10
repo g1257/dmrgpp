@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define EXTENDED_SUPER_HUBBARD_1ORB_H
 #include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
 #include "LinkProdExtendedSuperHubbard1Orb.h"
-#include "ModelCommon.h"
 
 namespace Dmrg {
 //! Super Extended Hubbard for DMRG solver, uses ModelHubbard by containment
@@ -104,7 +103,6 @@ public:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef LinkProdExtendedSuperHubbard1Orb<ModelHelperType> LinkProductType;
-	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
@@ -123,7 +121,7 @@ public:
 	ExtendedSuperHubbard1Orb(const SolverParamsType& solverParams,
 	                         InputValidatorType& io,
 	                         GeometryType const &geometry)
-	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
+	    : ModelBaseType(solverParams, geometry),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      extendedHubbard_(solverParams,io,geometry)

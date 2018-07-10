@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LinkProductImmm.h"
 #include "ProgramGlobals.h"
 #include <cassert>
-#include "ModelCommon.h"
 
 namespace Dmrg {
 template<typename ModelBaseType>
@@ -111,7 +110,6 @@ public:
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
 	typedef LinkProductImmm<ModelHelperType> LinkProductType;
-	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef  HilbertSpaceImmm<WordType> HilbertSpaceImmmType;
 	typedef typename HilbertSpaceImmmType::HilbertState HilbertState;
 	typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
@@ -132,7 +130,7 @@ public:
 	Immm(const SolverParamsType& solverParams,
 	     InputValidatorType& io,
 	     GeometryType const &geometry)
-	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
+	    : ModelBaseType(solverParams, geometry),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      copperEach_(4),

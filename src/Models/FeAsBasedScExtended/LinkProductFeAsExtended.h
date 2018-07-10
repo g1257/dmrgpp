@@ -89,6 +89,7 @@ template<typename ModelHelperType>
 class LinkProductFeAsExtended : public LinkProductBase<ModelHelperType> {
 
 	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
@@ -104,10 +105,7 @@ class LinkProductFeAsExtended : public LinkProductBase<ModelHelperType> {
 
 public:
 
-	typedef typename ModelHelperType::RealType RealType;
-
-	template<typename SomeStructType>
-	static SizeType dofs(SizeType term,const SomeStructType& additional)
+	SizeType dofs(SizeType term,const AdditionalDataType& additional)
 	{
 		return (term == TERM_JPLUS || term == TERM_JZ) ?
 		            LinkProductHeisenbergType::dofs(term,additional) :
@@ -115,11 +113,10 @@ public:
 	}
 
 	// has only dependence on orbital
-	template<typename SomeStructType>
-	static void connectorDofs(VectorSizeType& edofs,
+	void connectorDofs(VectorSizeType& edofs,
 	                          SizeType term,
 	                          SizeType dofs,
-	                          const SomeStructType& additional)
+	                          const AdditionalDataType& additional)
 	{
 		if (term==TERM_HOPPING)
 			return LinkProductFeAsType::connectorDofs(edofs, term,dofs,additional);
@@ -127,8 +124,7 @@ public:
 		return LinkProductHeisenbergType::connectorDofs(edofs, term, dofs, additional);
 	}
 
-	template<typename SomeStructType>
-	static void setLinkData(SizeType term,
+	void setLinkData(SizeType term,
 	                        SizeType dofs,
 	                        bool isSu2,
 	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
@@ -136,7 +132,7 @@ public:
 	                        std::pair<char,char>& mods,
 	                        SizeType& angularMomentum,
 	                        RealType& angularFactor,
-	                        SizeType& category,const SomeStructType& additional)
+	                        SizeType& category,const AdditionalDataType& additional)
 	{
 		if (term==TERM_HOPPING)
 			return LinkProductFeAsType::setLinkData(
@@ -152,10 +148,9 @@ public:
 		ops.second += offset1;
 	}
 
-	template<typename SomeStructType>
-	static void valueModifier(SparseElementType& value,
+	void valueModifier(SparseElementType& value,
 	                          SizeType term,
-	                          SizeType dofs,bool isSu2,const SomeStructType& additional)
+	                          SizeType dofs,bool isSu2,const AdditionalDataType& additional)
 	{
 		if (term==TERM_HOPPING) return LinkProductFeAsType::valueModifier(value,
 		                                                                  term,
@@ -167,7 +162,7 @@ public:
 		LinkProductHeisenbergType::valueModifier(value,term-1,dofs,isSu2,additional);
 	}
 
-	static SizeType terms() { return 3; }
+	SizeType terms() { return 3; }
 }; // class LinkProductFeAsExtended
 } // namespace Dmrg
 /*@}*/

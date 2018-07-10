@@ -88,6 +88,7 @@ template<typename ModelHelperType>
 class LinkProductHubbardOneBand : public LinkProductBase<ModelHelperType> {
 
 	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -97,18 +98,16 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
-	static SizeType TERMS_;
-
-	template<typename SomeStructType>
-	static void setLinkData(SizeType,
-	                        SizeType dofs,
-	                        bool,
-	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
-	                        PairType& ops,
-	                        std::pair<char,char>&,
-	                        SizeType& angularMomentum,
-	                        RealType& angularFactor,
-	                        SizeType& category,const SomeStructType&)
+	void setLinkData(SizeType,
+	                 SizeType dofs,
+	                 bool,
+	                 ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
+	                 PairType& ops,
+	                 std::pair<char,char>&,
+	                 SizeType& angularMomentum,
+	                 RealType& angularFactor,
+	                 SizeType& category,
+	                 const AdditionalDataType&)
 	{
 		fermionOrBoson = ProgramGlobals::FERMION;
 
@@ -120,15 +119,10 @@ public:
 	}
 
 	// up up and down down are the only connections possible for this model
-	template<typename SomeStructType>
-	static SizeType dofs(SizeType,const SomeStructType&) { return 2; }
+	SizeType dofs(SizeType,const AdditionalDataType&) { return 2; }
 
-	static SizeType terms() { return TERMS_; }
+	SizeType terms() { return TERMS_; }
 }; // class LinkProductHubbardOneBand
-
-template<typename ModelHelperType>
-SizeType LinkProductHubbardOneBand<ModelHelperType>::TERMS_ = 1;
-
 } // namespace Dmrg
 /*@}*/
 #endif

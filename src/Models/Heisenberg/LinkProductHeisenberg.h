@@ -85,9 +85,8 @@ template<typename ModelHelperType>
 class LinkProductHeisenberg : public LinkProductBase<ModelHelperType> {
 
 	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
-
-	static SizeType terms_;
 
 public:
 
@@ -96,22 +95,16 @@ public:
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename ModelHelperType::RealType RealType;
 
-	static void setAnisotropic()
-	{
-		terms_ = 3;
-	}
-
-	template<typename SomeStructType>
-	static void setLinkData(SizeType term,
-	                        SizeType,
-	                        bool isSu2,
-	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
-	                        std::pair<SizeType,SizeType>& ops,
-	                        std::pair<char,char>&,
-	                        SizeType& angularMomentum,
-	                        RealType& angularFactor,
-	                        SizeType& category,
-	                        const SomeStructType&)
+	void setLinkData(SizeType term,
+	                 SizeType,
+	                 bool isSu2,
+	                 ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
+	                 std::pair<SizeType,SizeType>& ops,
+	                 std::pair<char,char>&,
+	                 SizeType& angularMomentum,
+	                 RealType& angularFactor,
+	                 SizeType& category,
+	                 const AdditionalDataType&)
 	{
 		fermionOrBoson = ProgramGlobals::BOSON;
 		ops = operatorDofs(term,isSu2);
@@ -132,29 +125,27 @@ public:
 		}
 	}
 
-	template<typename SomeStructType>
-	static void valueModifier(SparseElementType& value,
-	                          SizeType,
-	                          SizeType,
-	                          bool isSu2,
-	                          const SomeStructType&)
+	void valueModifier(SparseElementType& value,
+	                   SizeType,
+	                   SizeType,
+	                   bool isSu2,
+	                   const AdditionalDataType&)
 	{
 		if (isSu2) value = -value;
 		value *= 0.5;
 	}
 
-	template<typename SomeStructType>
-	static SizeType dofs(SizeType,const SomeStructType&) { return 1; }
+	SizeType dofs(SizeType,const AdditionalDataType&) { return 1; }
 
 	//! For TERM_J there are 3 terms:
 	//! Splus Sminus and
 	//! Sz Sz
 	//! Sx Sx
-	static SizeType terms() { return terms_; }
+	SizeType terms() { return terms_; }
 
 private:
 
-	static PairType operatorDofs(SizeType term,bool isSu2)
+	PairType operatorDofs(SizeType term, bool isSu2)
 	{
 		if (term<1) return PairType(0,0);
 		if (term==2) return PairType(2,2);
@@ -162,9 +153,6 @@ private:
 		return PairType(x,x);
 	}
 }; // class LinkProductHeisenberg
-
-template<typename ModelHelperType>
-SizeType LinkProductHeisenberg<ModelHelperType>::terms_ = 2;
 } // namespace Dmrg
 /*@}*/
 #endif

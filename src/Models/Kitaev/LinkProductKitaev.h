@@ -86,6 +86,7 @@ template<typename ModelHelperType>
 class LinkProductKitaev : public LinkProductBase<ModelHelperType> {
 
 	typedef LinkProductBase<ModelHelperType> BaseType;
+	typedef BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 
 	static const SizeType terms_ = 3;
@@ -97,8 +98,7 @@ public:
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename ModelHelperType::RealType RealType;
 
-	template<typename SomeStructType>
-	static void setLinkData(SizeType term,
+	void setLinkData(SizeType term,
 	                        SizeType,
 	                        bool isSu2,
 	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
@@ -107,31 +107,29 @@ public:
 	                        SizeType&,// angularMomentum,
 	                        RealType&,// angularFactor,
 	                        SizeType&,// category,
-	                        const SomeStructType&)
+	                        const AdditionalDataType&)
 	{
 		assert(!isSu2);
 		fermionOrBoson = ProgramGlobals::BOSON;
 		ops = PairType(term, term);
 	}
 
-	template<typename SomeStructType>
-	static void valueModifier(SparseElementType& value,
+	void valueModifier(SparseElementType& value,
 	                          SizeType,
 	                          SizeType,
 	                          bool isSu2,
-	                          const SomeStructType&)
+	                          const AdditionalDataType&)
 	{
 		assert(!isSu2);
 		value *= 0.5;
 	}
 
-	template<typename SomeStructType>
-	static SizeType dofs(SizeType,const SomeStructType&) { return 1; }
+	SizeType dofs(SizeType,const AdditionalDataType&) { return 1; }
 
 	//! Sx Sx
 	//! Sy Sy
 	//! Sz Sz
-	static SizeType terms() { return terms_; }
+	SizeType terms() { return terms_; }
 }; // class LinkProductKitaev
 } // namespace Dmrg
 /*@}*/

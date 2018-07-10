@@ -91,12 +91,12 @@ class LinkProdExtendedHubbard1Orb : public LinkProductBase<ModelHelperType, Geom
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
-	enum {TERM_HOPPING=0,TERM_NINJ=1};
+	enum {TERM_HOPPING = 0, TERM_NINJ = 1};
 
 public:
 
 	typedef typename ModelHelperType::RealType RealType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 
 	void setLinkData(SizeType term,
 	                 SizeType dofs,
