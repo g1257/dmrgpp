@@ -166,7 +166,6 @@ public:
 	void write(PsimagLite::String label1,
 	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
-		io.createGroup(label1);
 		PsimagLite::String label = label1 + "/FeAsJzSymmetry";
 		io.createGroup(label);
 		io.write(label + "/isEnabled_", isEnabled_);
