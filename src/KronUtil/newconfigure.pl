@@ -61,14 +61,14 @@ sub createMakefile
 	local *FH = $fh;
 print FH<<EOF;
 
-libkronutil.a: $dotos ../Config.make Makefile
+libkronutil.a: $dotos Makefile
 	${gccdash}ar rc libkronutil.a $dotos
 	${gccdash}ranlib libkronutil.a
 
-test1: libkronutil.a test1.o $dotos ../Config.make
+test1: libkronutil.a test1.o $dotos
 	\$(CXX) \$(CFLAGS) -o test1 test1.o libkronutil.a \$(LDFLAGS)
 
-test2: libkronutil.a test2.o ../Config.make
+test2: libkronutil.a test2.o
 	\$(CXX) \$(CFLAGS) -o test2 test2.o libkronutil.a \$(LDFLAGS)
 
 EOF

@@ -4,49 +4,39 @@ use strict;
 use warnings;
 use utf8;
 
-use lib ".";
-use Combinatorial;
-
-my @levels;
-my $counter = 0;
-$levels[$counter++] = ["", "CPPFLAGS += -DUSE_FLOAT"];
-$levels[$counter++] = ["", "CXX = clang++ -mtune=native"];
-
 my ($makeJ) = @ARGV;
 defined($makeJ) or die "USAGE: $0 makeJ\n";
 
-Combinatorial::main(\@levels, \&myCallback);
+main(4, $makeJ);
 
-sub myCallback
+sub main
 {
-	my ($items) = @_;
-	
-	print flattenWithNewLines($items);
+	my ($items, $makeJ) = @_;
 
-	kompileRig($items);
+	for (my $i = 0; $i < $items; ++$i) {
+		kompileRig($i, $makeJ);
+	}
 
 	print "---------------------\n";
 }
 
 sub kompileRig
 {
-	my ($items) = @_;
-	my $textToAppend = flattenWithNewLines($items);
+	my ($ind, $makeJ) = @_;
 	my $command = "make clean; make -j $makeJ";
 	my @paths = ("../../PsimagLite/lib", "../../PsimagLite/drivers", "../src");
 	my $n = scalar(@paths);
 	for (my $i = 0; $i < $n; ++$i) {
-		kompileRigEach($paths[$i], $command, $textToAppend);
+		kompileRigEach($ind, $paths[$i], $command);
 	}
 }
 
 sub kompileRigEach
 {
-	my ($path, $command, $textToAppend) = @_;
-	unlink($path."/Config.make");
-	my $cmd = "cd $path; echo Y | perl configure.pl";
+	my ($ind, $path, $command) = @_;
+	my $psiTag = "../../dmrgpp/TestSuite/inputs/KompileRig.psiTag";
+	my $cmd = "cd $path; perl newconfigure.pl -f KompileRig$ind -c $psiTag";
 	executeAndDieIfNotSuccess($cmd);
-	appendToFile($path."/Config.make", $textToAppend);
 	$cmd = "cd $path; $command";
 	executeAndDieIfNotSuccess($cmd);
 }
