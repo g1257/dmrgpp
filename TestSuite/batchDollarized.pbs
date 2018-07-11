@@ -1,0 +1,11 @@
+#!/bin/sh
+#PBS -N ci$$ind
+#PBS -q batch
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=24:00:00
+cd $PBS_O_WORKDIR
+date
+hostname
+$$cmd
+date
+

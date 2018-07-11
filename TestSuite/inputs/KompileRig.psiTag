@@ -1,0 +1,22 @@
+
+flavor KompileRig0 = (
+< flavor production
+)
+
+flavor KompileRig1 = (
+< flavor production
+CPPFLAGS += -DUSE_FLOAT
+)
+
+flavor KompileRig2 = (
+< flavor production
+< compilerCPP CLANG
+)
+
+flavor KompileRig3 = (
+< flavor production
+< compilerCPP CLANG
+CPPFLAGS += -DUSE_FLOAT
+)
+
+

@@ -44,7 +44,16 @@ if (defined($help)) {
 
 defined($submit{"command"}) or $submit{"command"} = "";
 $submit{"PBS_O_WORKDIR"} = ($submit{"command"} eq "qsub") ? 1 : 0;
-defined($submit{"delay"}) or $submit{"delay"} = 5;
+if (!defined($submit{"delay"})) {
+	die "$0: Needs -delay value\n" if ($submit{"command"} eq "qsub");
+	$submit{"delay"} = 5;
+}
+
+die "$0: delay must be numeric\n" unless ($submit{"delay"} =~ /^\d+$/);
+
+if ($submit{"delay"} < 5 and $submit{"command"} eq "qsub") {
+	die "$0: Delay for qsub must be at least 5 seconds\n";
+}
 
 defined($noSu2) or $noSu2 = 0;
 defined($sOptions) or $sOptions = "";
