@@ -65,7 +65,7 @@ foreach my $ptr (@$drivers) {
 	$dotos = "$what.o" if (!defined($dotos));
 
 	print FH<<EOF;
-$what.o: $what.cpp  Makefile $additional ${path}Config.make
+$what.o: $what.cpp  Makefile $additional
 	\$(CXX) \$(CPPFLAGS) -c $what.cpp
 
 EOF
