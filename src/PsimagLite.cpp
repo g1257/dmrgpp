@@ -57,6 +57,22 @@ String basename(const String& path)
 	              path.end());
 }
 
+SizeType indexOfItemOrMinusOne(const Vector<SizeType>::Type& v, SizeType x)
+{
+	SizeType n = v.size();
+	for (SizeType i = 0; i < n; ++i)
+		if (v[i] == x) return i;
+
+	return -1;
+}
+
+SizeType indexOfItem(const Vector<SizeType>::Type& v, SizeType x)
+{
+	int y = indexOfItemOrMinusOne(v, x);
+	if (y >= 0) return y;
+
+	throw RuntimeError("indexOfItem(): item not found " + typeToString(x) + "\n");
+}
 const int PsiApp::libSizeOfSizeType_ = sizeof(SizeType);
 
 } // namespace PsimagLite

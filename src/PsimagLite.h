@@ -5,6 +5,7 @@
 #include <utility>
 #include "Concurrency.h"
 #include "AnsiColors.h"
+#include "TypeToString.h"
 
 namespace PsimagLite {
 
