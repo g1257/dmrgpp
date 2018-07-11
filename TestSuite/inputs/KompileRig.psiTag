@@ -1,22 +1,26 @@
 
 flavor KompileRig0 = (
 < flavor production
+CPPFLAGS += -Werror
 )
 
 flavor KompileRig1 = (
 < flavor production
 CPPFLAGS += -DUSE_FLOAT
+CPPFLAGS += -Werror
 )
 
 flavor KompileRig2 = (
 < flavor production
 < compilerCPP CLANG
+CPPFLAGS += -Werror
 )
 
 flavor KompileRig3 = (
 < flavor production
 < compilerCPP CLANG
 CPPFLAGS += -DUSE_FLOAT
+CPPFLAGS += -Werror
 )
 
 
