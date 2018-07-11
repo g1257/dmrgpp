@@ -140,8 +140,9 @@ public:
 	ModelHubbard(const SolverParamsType& solverParams,
 	             InputValidatorType& io,
 	             GeometryType const &geometry,
-	             SizeType offset = DEGREES_OF_FREEDOM)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType),
+	             SizeType offset,
+	             SizeType terms)
+	    : ModelBaseType(solverParams, geometry, new LinkProductType(terms)),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      offset_(offset),

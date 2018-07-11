@@ -121,16 +121,14 @@ public:
 	ExtendedSuperHubbard1Orb(const SolverParamsType& solverParams,
 	                         InputValidatorType& io,
 	                         GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType),
+	    : ModelBaseType(solverParams,
+	                    geometry,
+	                    new LinkProductType((geometry_.orbitals(LinkProductType::TERM_HOPPING,
+	                                                           0) == 2))),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      extendedHubbard_(solverParams,io,geometry)
-	{
-		SizeType site = 0;
-		bool useSpinOrbit = (geometry_.orbitals(LinkProductType::TERM_HOPPING, site) == 2);
-
-		LinkProductType::setSpinOrbit(useSpinOrbit);
-	}
+	{}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
 	                   SizeType,

@@ -129,7 +129,7 @@ public:
 	ModelHubbardMultiBand(const SolverParamsType& solverParams,
 	                      InputValidatorType& io,
 	                      GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType(io)),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      spinSquared_(spinSquaredHelper_,
@@ -148,7 +148,6 @@ public:
 			throw PsimagLite::RuntimeError(str.c_str());
 		}
 
-		LinkProductType::setOrbitals(modelParameters_.orbitals);
 		HilbertSpaceFeAsType::setOrbitals(modelParameters_.orbitals);
 
 		VectorSizeType block(1,0);

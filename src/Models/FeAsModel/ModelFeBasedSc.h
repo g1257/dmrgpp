@@ -136,12 +136,12 @@ public:
 	ModelFeBasedSc(const SolverParamsType& solverParams,
 	               InputValidatorType& io,
 	               GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType(io)),
 	      reinterpretX_(6),
 	      reinterpretY_(9),
 	      modelParameters_(io),
 	      geometry_(geometry),
-	      geometryDca_(geometry,modelParameters_.orbitals),
+	      geometryDca_(geometry, modelParameters_.orbitals),
 	      spinSquared_(spinSquaredHelper_,
 	                   modelParameters_.orbitals,
 	                   2*modelParameters_.orbitals),
@@ -168,7 +168,6 @@ public:
 			throw PsimagLite::RuntimeError(str.c_str());
 		}
 
-		LinkProductType::setOrbitals(modelParameters_.orbitals);
 		HilbertSpaceFeAsType::setOrbitals(modelParameters_.orbitals);
 		statesPerSite_ = (1 << (modelParameters_.orbitals*2));
 

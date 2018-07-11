@@ -319,6 +319,8 @@ public:
 
 	const ModelHelperType& modelHelper() const { return modelHelper_; }
 
+	SizeType tasks() const {return total_; }
+
 private:
 
 	SizeType compute(LinkProductStructType& lps,

@@ -91,6 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Profiling.h"
 #include "LinkProductBase.h"
 #include "HamiltonianConnection.h"
+#include "ParallelHamiltonianConnection.h"
 
 namespace Dmrg {
 
@@ -120,6 +121,7 @@ public:
 	typedef typename PsimagLite::Vector<LinkProductStructType>::Type VectorLinkProductStructType;
 	typedef typename HamiltonianConnectionType::VectorSizeType VectorSizeType;
 	typedef typename HamiltonianConnectionType::VerySparseMatrixType VerySparseMatrixType;
+	typedef ParallelHamiltonianConnection<HamiltonianConnectionType> ParallelHamConnectionType;
 
 	ModelCommon(const ParametersType& params,
 	            const GeometryType& geometry,
@@ -166,11 +168,13 @@ public:
 	                         const VectorType& y,
 	                         const HamiltonianConnectionType& hc) const
 	{
-		typedef PsimagLite::Parallelizer<HamiltonianConnectionType> ParallelizerType;
+		typedef PsimagLite::Parallelizer<ParallelHamConnectionType> ParallelizerType;
 		ParallelizerType parallelConnections(PsimagLite::Concurrency::codeSectionParams);
-		parallelConnections.loopCreate(hc);
 
-		hc.sync();
+		ParallelHamConnectionType phc(x, y, hc);
+		parallelConnections.loopCreate(phc);
+
+		phc.sync();
 	}
 
 	/**

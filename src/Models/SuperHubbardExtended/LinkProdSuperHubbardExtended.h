@@ -94,12 +94,22 @@ class LinkProdSuperHubbardExtended : public LinkProductBase<ModelHelperType, Geo
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
+	typedef LinkProdExtendedHubbard1Orb<ModelHelperType,
+	GeometryType> LinkProdExtendedHubbard1OrbType;
+	typedef LinkProductHeisenberg<ModelHelperType, GeometryType> LinkProductHeisenbergType;
+
 	enum {TERM_HOPPING=0 ,TERM_NINJ=1, TERM_SUPER = 2};
+
+	static const bool ANISOTROPIC_IS_FALSE = false;
 
 public:
 
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
+
+	LinkProdSuperHubbardExtended()
+	    : lHeis_(ANISOTROPIC_IS_FALSE), lExtHubb_()
+	{}
 
 	void setLinkData(SizeType term,
 	                 SizeType dofs,
@@ -112,32 +122,31 @@ public:
 	                 SizeType& category,
 	                 const AdditionalDataType& additional) const
 	{
-		typedef LinkProdExtendedHubbard1Orb<ModelHelperType, GeometryType> SomeLinkProdType;
 		if (term == TERM_HOPPING || term == TERM_NINJ) {
-			return SomeLinkProdType::setLinkData(term,
-			                                     dofs,
-			                                     isSu2,
-			                                     fermionOrBoson,
-			                                     ops,
-			                                     mods,
-			                                     angularMomentum,
-			                                     angularFactor,
-			                                     category,
-			                                     additional);
+			return lExtHubb_.setLinkData(term,
+			                             dofs,
+			                             isSu2,
+			                             fermionOrBoson,
+			                             ops,
+			                             mods,
+			                             angularMomentum,
+			                             angularFactor,
+			                             category,
+			                             additional);
 		}
 
 		assert(term == TERM_SUPER);
 
-		LinkProductHeisenberg<ModelHelperType, GeometryType>::setLinkData(0,
-		                                                                  dofs,
-		                                                                  isSu2,
-		                                                                  fermionOrBoson,
-		                                                                  ops,
-		                                                                  mods,
-		                                                                  angularMomentum,
-		                                                                  angularFactor,
-		                                                                  category,
-		                                                                  additional);
+		lHeis_.setLinkData(0,
+		                   dofs,
+		                   isSu2,
+		                   fermionOrBoson,
+		                   ops,
+		                   mods,
+		                   angularMomentum,
+		                   angularFactor,
+		                   category,
+		                   additional);
 		ops.first += 3;
 		ops.second += 3;
 	}
@@ -148,28 +157,27 @@ public:
 	                   bool isSu2,
 	                   const AdditionalDataType& additional) const
 	{
-		typedef LinkProdExtendedHubbard1Orb<ModelHelperType, GeometryType> SomeLinkProdType;
 		if (term == TERM_HOPPING || term == TERM_NINJ)
-			return SomeLinkProdType::valueModifier(value,
-			                                       term,
-			                                       dofs,
-			                                       isSu2,
-			                                       additional);
+			return lExtHubb_.valueModifier(value,
+			                               term,
+			                               dofs,
+			                               isSu2,
+			                               additional);
 
-		return LinkProductHeisenberg<ModelHelperType, GeometryType>::valueModifier(value,
-		                                                                           0,
-		                                                                           dofs,
-		                                                                           isSu2,
-		                                                                           additional);
+		return lHeis_.valueModifier(value,
+		                            0,
+		                            dofs,
+		                            isSu2,
+		                            additional);
 	}
 
 	SizeType dofs(SizeType term,const AdditionalDataType& additional) const
 	{
 		if (term == TERM_HOPPING || term == TERM_NINJ)
-			return LinkProdExtendedHubbard1Orb<ModelHelperType, GeometryType>::dofs(term,
-			                                                                        additional);
+			return lExtHubb_.dofs(term,
+			                      additional);
 
-		return LinkProductHeisenberg<ModelHelperType, GeometryType>::dofs(0,additional);
+		return lHeis_.dofs(0,additional);
 	}
 
 	// has only dependence on orbital
@@ -178,20 +186,24 @@ public:
 	                   SizeType dofs,
 	                   const AdditionalDataType& additional) const
 	{
-		typedef LinkProdExtendedHubbard1Orb<ModelHelperType, GeometryType> SomeLinkProdType;
 		if (term == TERM_HOPPING || term == TERM_NINJ)
-			return SomeLinkProdType::connectorDofs(edofs,
-			                                       term,
-			                                       dofs,
-			                                       additional);
+			return lExtHubb_.connectorDofs(edofs,
+			                               term,
+			                               dofs,
+			                               additional);
 
-		return LinkProductHeisenberg<ModelHelperType, GeometryType>::connectorDofs(edofs,
-		                                                                           0,
-		                                                                           dofs,
-		                                                                           additional);
+		return lHeis_.connectorDofs(edofs,
+		                            0,
+		                            dofs,
+		                            additional);
 	}
 
 	SizeType terms() const { return 3; }
+
+private:
+
+	LinkProductHeisenbergType lHeis_;
+	LinkProdExtendedHubbard1OrbType lExtHubb_;
 }; // class LinkProdSuperHubbardExtended
 } // namespace Dmrg
 /*@}*/

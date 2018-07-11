@@ -103,13 +103,20 @@ class LinkProductFeAsExtended : public LinkProductBase<ModelHelperType, Geometry
 
 	static const SizeType DEGREES_OF_FREEDOM = 4;
 
+	static const bool ANISOTROPIC_IS_FALSE = false;
+
 public:
+
+	template<typename SomeInputType>
+	LinkProductFeAsExtended(SomeInputType& io)
+	    : lFeAs_(io), lHeis_(ANISOTROPIC_IS_FALSE)
+	{}
 
 	SizeType dofs(SizeType term,const AdditionalDataType& additional) const
 	{
 		return (term == TERM_JPLUS || term == TERM_JZ) ?
-		            LinkProductHeisenbergType::dofs(term,additional) :
-		            LinkProductFeAsType::dofs(term,additional);
+		            lHeis_.dofs(term,additional) :
+		            lFeAs_.dofs(term,additional);
 	}
 
 	// has only dependence on orbital
@@ -119,9 +126,9 @@ public:
 	                   const AdditionalDataType& additional) const
 	{
 		if (term==TERM_HOPPING)
-			return LinkProductFeAsType::connectorDofs(edofs, term,dofs,additional);
+			return lFeAs_.connectorDofs(edofs, term,dofs,additional);
 
-		return LinkProductHeisenbergType::connectorDofs(edofs, term, dofs, additional);
+		return lHeis_.connectorDofs(edofs, term, dofs, additional);
 	}
 
 	void setLinkData(SizeType term,
@@ -135,12 +142,12 @@ public:
 	                 SizeType& category,const AdditionalDataType& additional) const
 	{
 		if (term==TERM_HOPPING)
-			return LinkProductFeAsType::setLinkData(
+			return lFeAs_.setLinkData(
 			            term,dofs,isSu2,fermionOrBoson,ops,mods,
 			            angularMomentum,angularFactor,category,additional);
 
 		assert(term > 0);
-		LinkProductHeisenbergType::setLinkData(
+		lHeis_.setLinkData(
 		            term-1,dofs,isSu2,fermionOrBoson,ops,mods,
 		            angularMomentum,angularFactor,category,additional);
 		SizeType offset1 = DEGREES_OF_FREEDOM;
@@ -154,17 +161,22 @@ public:
 	                   bool isSu2,
 	                   const AdditionalDataType& additional) const
 	{
-		if (term==TERM_HOPPING) return LinkProductFeAsType::valueModifier(value,
-		                                                                  term,
-		                                                                  dofs,
-		                                                                  isSu2,
-		                                                                  additional);
+		if (term==TERM_HOPPING) return lFeAs_.valueModifier(value,
+		                                                    term,
+		                                                    dofs,
+		                                                    isSu2,
+		                                                    additional);
 
 		assert(term > 0);
-		LinkProductHeisenbergType::valueModifier(value,term-1,dofs,isSu2,additional);
+		lHeis_.valueModifier(value,term-1,dofs,isSu2,additional);
 	}
 
 	SizeType terms() const { return 3; }
+
+private:
+
+	LinkProductFeAsType lFeAs_;
+	LinkProductHeisenbergType lHeis_;
 }; // class LinkProductFeAsExtended
 } // namespace Dmrg
 /*@}*/

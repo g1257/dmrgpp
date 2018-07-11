@@ -141,12 +141,13 @@ public:
 	HeisenbergAncillaC(const SolverParamsType& solverParams,
 	                   InputValidatorType& io,
 	                   GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType),
+	    : ModelBaseType(solverParams,
+	                    geometry,
+	                    new LinkProductType(geometry_.orbitals(0,0) > 1)),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      hot_(geometry_.orbitals(0,0) > 1)
 	{
-		LinkProductType::setHot(hot_);
 		SizeType n = geometry_.numberOfSites();
 		SizeType m = modelParameters_.magneticField.size();
 		if (m > 0 && m != n) {

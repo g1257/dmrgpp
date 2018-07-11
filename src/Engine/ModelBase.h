@@ -184,9 +184,9 @@ public:
 
 	virtual void matrixVectorProduct(VectorType& x,
 	                                 const VectorType& y,
-	                                 ModelHelperType const &modelHelper) const
+	                                 const HamiltonianConnectionType& hc) const
 	{
-		return modelCommon_.matrixVectorProduct(x,y,modelHelper);
+		return modelCommon_.matrixVectorProduct(x, y, hc);
 	}
 
 	virtual void addHamiltonianConnection(SparseMatrixType &matrix,
@@ -194,13 +194,6 @@ public:
 	                                      RealType currentTime) const
 	{
 		return modelCommon_.addHamiltonianConnection(matrix,lrs,currentTime);
-	}
-
-	virtual void hamiltonianConnectionProduct(VectorType& x,
-	                                          const VectorType& y,
-	                                          ModelHelperType const &modelHelper) const
-	{
-		return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
 	}
 
 	virtual void fullHamiltonian(SparseMatrixType& matrix,

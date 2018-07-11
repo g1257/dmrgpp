@@ -97,13 +97,19 @@ public:
 
 	typedef typename ModelHelperType::RealType RealType;
 
+	template<typename SomeInputType>
+	LinkProductFeAs(SomeInputType& io) : orbitals_(0)
+	{
+		io.readline(orbitals_, "Orbitals=");
+	}
+
 	//! There are orbitals*orbitals different orbitals
 	//! and 2 spins. Spin is diagonal so we end up with 2*orbitals*orbitals possiblities
 	//! a up a up, a up b up, b up a up, b up, b up, etc
 	//! and similarly for spin down.
 	SizeType dofs(SizeType, const AdditionalDataType&) const
 	{
-		return 2*BaseType::orbitals()*BaseType::orbitals();
+		return 2*orbitals_*orbitals_;
 	}
 
 	// has only dependence on orbital
@@ -112,12 +118,12 @@ public:
 	                   SizeType dofs,
 	                   const AdditionalDataType&) const
 	{
-		SizeType orbitalsSquared = BaseType::orbitals()*BaseType::orbitals();
+		SizeType orbitalsSquared = orbitals_*orbitals_;
 		SizeType spin = dofs/orbitalsSquared;
 		SizeType xtmp = (spin==0) ? 0 : orbitalsSquared;
 		xtmp = dofs - xtmp;
-		SizeType orb1 = xtmp/BaseType::orbitals();
-		SizeType orb2 = xtmp % BaseType::orbitals();
+		SizeType orb1 = xtmp/orbitals_;
+		SizeType orb2 = xtmp % orbitals_;
 		edofs[0] = orb1;
 		edofs[1] = orb2;
 	}
@@ -147,24 +153,28 @@ public:
 private:
 
 	// spin is diagonal
-	std::pair<SizeType,SizeType> operatorDofs(SizeType dofs)
+	std::pair<SizeType,SizeType> operatorDofs(SizeType dofs) const
 	{
-		SizeType orbitalsSquared = BaseType::orbitals()*BaseType::orbitals();
+		SizeType orbitalsSquared = orbitals_*orbitals_;
 		SizeType spin = dofs/orbitalsSquared;
 		SizeType xtmp = (spin==0) ? 0 : orbitalsSquared;
 		xtmp = dofs - xtmp;
-		SizeType orb1 = xtmp/BaseType::orbitals();
-		SizeType orb2 = xtmp % BaseType::orbitals();
-		SizeType op1 = orb1 + spin*BaseType::orbitals();
-		SizeType op2 = orb2 + spin*BaseType::orbitals();
+		SizeType orb1 = xtmp/orbitals_;
+		SizeType orb2 = xtmp % orbitals_;
+		SizeType op1 = orb1 + spin*orbitals_;
+		SizeType op2 = orb2 + spin*orbitals_;
 		return std::pair<SizeType,SizeType>(op1,op2);
 	}
 
-	SizeType getSpin(SizeType dofs)
+	SizeType getSpin(SizeType dofs) const
 	{
-		SizeType orbitalsSquared = BaseType::orbitals()*BaseType::orbitals();
+		SizeType orbitalsSquared = orbitals_*orbitals_;
 		return dofs/orbitalsSquared;
 	}
+
+private:
+
+	SizeType orbitals_;
 }; // class LinkPRoductFeAs
 } // namespace Dmrg
 /*@}*/

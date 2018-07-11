@@ -99,6 +99,10 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
+	LinkProductTjAncillaC2(bool hot)
+	    : hot_(hot)
+	{}
+
 	void setLinkData(SizeType term,
 	                 SizeType dofs,
 	                 bool isSu2,
@@ -112,7 +116,7 @@ public:
 	{
 		assert(!isSu2);
 		char tmp = mods.first;
-		SizeType orbitals = (BaseType::hot()) ? 2 : 1;
+		SizeType orbitals = (hot_) ? 2 : 1;
 		if (term==TERM_CICJ) {
 			fermionOrBoson = ProgramGlobals::FERMION;
 			SizeType spin = getSpin(dofs);
@@ -202,7 +206,7 @@ public:
 	// Sz Sz
 	SizeType dofs(SizeType term, const AdditionalDataType&) const
 	{
-		SizeType orbitals = (BaseType::hot()) ? 2 : 1;
+		SizeType orbitals = (hot_) ? 2 : 1;
 		if (term==TERM_CICJ) return 2*orbitals*orbitals; // c^\dagger c
 		if (term==TERM_SPSM) return 2*orbitals*orbitals; // S+ S- and S- S+
 		if (term==TERM_SZSZ) return orbitals*orbitals; // Sz Sz
@@ -223,7 +227,7 @@ public:
 			return;
 		}
 
-		SizeType orbitals = (BaseType::hot()) ? 2 : 1;
+		SizeType orbitals = (hot_) ? 2 : 1;
 		SizeType orbitalsSquared = orbitals*orbitals;
 		SizeType spin = dofs/orbitalsSquared;
 		SizeType xtmp = (spin==0) ? 0 : orbitalsSquared;
@@ -239,9 +243,9 @@ public:
 private:
 
 	// spin is diagonal
-	std::pair<SizeType,SizeType> operatorDofs(SizeType dofs, SizeType term)
+	std::pair<SizeType,SizeType> operatorDofs(SizeType dofs, SizeType term) const
 	{
-		SizeType orbitals = (BaseType::hot()) ? 2 : 1;
+		SizeType orbitals = (hot_) ? 2 : 1;
 		SizeType orbitalsSquared = orbitals*orbitals;
 		SizeType spin = dofs/orbitalsSquared;
 		SizeType xtmp = (spin==0) ? 0 : orbitalsSquared;
@@ -261,12 +265,16 @@ private:
 		return std::pair<SizeType,SizeType>(op1+offset,op2+offset);
 	}
 
-	SizeType getSpin(SizeType dofs)
+	SizeType getSpin(SizeType dofs) const
 	{
-		SizeType orbitals = (BaseType::hot()) ? 2 : 1;
+		SizeType orbitals = (hot_) ? 2 : 1;
 		SizeType orbitalsSquared = orbitals*orbitals;
 		return dofs/orbitalsSquared;
 	}
+
+private:
+
+	bool hot_;
 }; // class LinkProductTjAncillaC3
 } // namespace Dmrg
 /*@}*/

@@ -1,14 +1,30 @@
 #ifndef PARALLELHAMILTONIANCONNECTION_H
 #define PARALLELHAMILTONIANCONNECTION_H
+#include "Concurrency.h"
+#include "Vector.h"
 
 namespace Dmrg {
 
-class Loop {
+template<typename HamiltonianConnectionType>
+class ParallelHamiltonianConnection {
+
+	typedef typename HamiltonianConnectionType::ModelHelperType ModelHelperType;
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename HamiltonianConnectionType::GeometryType GeometryType;
+	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
+	typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef typename HamiltonianConnectionType::VectorType VectorType;
+	typedef typename HamiltonianConnectionType::LinkType LinkType;
 
 public:
 
-	Loop()
-	    :
+	ParallelHamiltonianConnection(VectorType& x,
+	                              const VectorType& y,
+	                              const HamiltonianConnectionType& hc)
+	    : x_(x),
+	      y_(y),
+	      hc_(hc),
 	      xtemp_(ConcurrencyType::storageSize(ConcurrencyType::codeSectionParams.npthreads))
 	{}
 
@@ -20,12 +36,12 @@ public:
 		ComplexOrRealType tmp = 0.0;
 
 		if (taskNumber == 0) {
-			modelHelper_.hamiltonianLeftProduct(xtemp_[threadNum],y_);
+			hc_.modelHelper().hamiltonianLeftProduct(xtemp_[threadNum],y_);
 			return;
 		}
 
 		if (taskNumber == 1) {
-			modelHelper_.hamiltonianRightProduct(xtemp_[threadNum],y_);
+			hc_.modelHelper().hamiltonianRightProduct(xtemp_[threadNum],y_);
 			return;
 		}
 
@@ -36,12 +52,12 @@ public:
 		ProgramGlobals::ConnectionEnum type;
 		SizeType term = 0;
 		SizeType dofs =0;
-		prepare(xx,type,tmp,term,dofs,additionalData,taskNumber);
+		hc_.prepare(xx,type,tmp,term,dofs,additionalData,taskNumber);
 
 		linkProduct(xtemp_[threadNum],y_,xx,type,tmp,term,dofs,additionalData);
 	}
 
-	SizeType tasks() const { return total_; }
+	SizeType tasks() const { return hc_.tasks(); }
 
 	void sync()
 	{
@@ -82,13 +98,14 @@ private:
 	{
 		SparseMatrixType const* A = 0;
 		SparseMatrixType const* B = 0;
-		LinkType link2 = getKron(&A,&B,xx,type,valuec,term,dofs,additionalData);
-		modelHelper_.fastOpProdInter(x,y,*A,*B,link2);
+		LinkType link2 = hc_.getKron(&A,&B,xx,type,valuec,term,dofs,additionalData);
+		hc_.modelHelper().fastOpProdInter(x,y,*A,*B,link2);
 	}
 
 	VectorType& x_;
 	const VectorType& y_;
-	VectorVectorType xtemp_;
+	const HamiltonianConnectionType& hc_;
+	typename PsimagLite::Vector<VectorType>::Type xtemp_;
 };
 }
 #endif // PARALLELHAMILTONIANCONNECTION_H

@@ -100,9 +100,12 @@ public:
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename ModelHelperType::RealType RealType;
 
+	LinkProductHubbardAncillaExtended(bool hot)
+	    : hot_(hot) {}
+
 	SizeType dofs(SizeType term,const AdditionalDataType&) const
 	{
-		if (!BaseType::hot()) {
+		if (!hot_) {
 			if (term == TERM_HOPPING || term == TERM_LAMBDA)
 				return 2;
 
@@ -120,7 +123,7 @@ public:
 	                   SizeType dofs,
 	                   const AdditionalDataType&) const
 	{
-		if (!BaseType::hot() || term == TERM_LAMBDA) {
+		if (!hot_ || term == TERM_LAMBDA) {
 			edofs[0] = edofs[1] = 0;
 			return;
 		}
@@ -158,14 +161,14 @@ public:
 
 		if (term==TERM_LAMBDA) {
 			fermionOrBoson = ProgramGlobals::BOSON;
-			SizeType offset1 = (!BaseType::hot()) ? 2 : 4;
+			SizeType offset1 = (!hot_) ? 2 : 4;
 			ops = PairType(dofs + offset1,dofs + offset1);
 			return;
 		}
 
 		if (term==TERM_SPLUS) {
 			fermionOrBoson = ProgramGlobals::BOSON;
-			SizeType offset1 = (!BaseType::hot()) ? 4 : 6;
+			SizeType offset1 = (!hot_) ? 4 : 6;
 			// S+ S- which includes also S- S+
 			angularFactor = -1;
 			category = 2;
@@ -176,7 +179,7 @@ public:
 
 		if (term==TERM_SZ) {
 			fermionOrBoson = ProgramGlobals::BOSON;
-			SizeType offset1 = (!BaseType::hot()) ? 5 : 8;
+			SizeType offset1 = (!hot_) ? 5 : 8;
 			angularFactor = 0.5;
 			category = 1;
 			angularMomentum = 2;
@@ -185,7 +188,7 @@ public:
 
 		if (term==TERM_PAIR) {
 			fermionOrBoson = ProgramGlobals::BOSON;
-			SizeType offset1 = (!BaseType::hot()) ? 6 : 10;
+			SizeType offset1 = (!hot_) ? 6 : 10;
 			angularFactor = 1;
 			category = 2;
 			angularMomentum = 2;
@@ -195,7 +198,7 @@ public:
 
 		if (term==TERM_NINJ) {
 			fermionOrBoson = ProgramGlobals::BOSON;
-			SizeType offset1 = (!BaseType::hot()) ? 7 : 12;
+			SizeType offset1 = (!hot_) ? 7 : 12;
 			angularFactor = 1;
 			angularMomentum = 0;
 			category = 0;
@@ -230,6 +233,10 @@ public:
 	}
 
 	SizeType terms() const { return 6; }
+
+private:
+
+	bool hot_;
 }; // class LinkProductHubbardAncillaExtended
 } // namespace Dmrg
 /*@}*/

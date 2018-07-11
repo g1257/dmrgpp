@@ -135,13 +135,12 @@ public:
 	TjMultiOrb(const SolverParamsType& solverParams,
 	           InputValidatorType& io,
 	           GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType(io)),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      offset_(5*modelParameters_.orbitals), // c^\dagger_up, c^\dagger_down, S+, Sz, n
 	      spinSquared_(spinSquaredHelper_,modelParameters_.orbitals,2*modelParameters_.orbitals)
 	{
-		LinkProductType::setOrbitals(modelParameters_.orbitals);
 		if (modelParameters_.orbitals > 1) {
 			PsimagLite::String str("TjMultiOrb with more than 1 orbital is EXPERIMENTAL\n");
 			std::cerr<<str<<"\n";

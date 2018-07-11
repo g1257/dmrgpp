@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINK_PRODUCT_HEIS_ONE_HALF_H
 #define LINK_PRODUCT_HEIS_ONE_HALF_H
 #include "ProgramGlobals.h"
+#include "LinkProductBase.h"
 
 namespace Dmrg {
 template<typename ModelHelperType, typename GeometryType>
@@ -94,6 +95,10 @@ public:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename ModelHelperType::RealType RealType;
+
+	LinkProductHeisenberg(bool anisotropic)
+	    : anisotropic_(anisotropic)
+	{}
 
 	void setLinkData(SizeType term,
 	                 SizeType,
@@ -141,7 +146,7 @@ public:
 	//! Splus Sminus and
 	//! Sz Sz
 	//! Sx Sx
-	SizeType terms() const { return 2; }
+	SizeType terms() const { return (anisotropic_) ? 3 : 2; }
 
 private:
 
@@ -152,6 +157,10 @@ private:
 		SizeType x = (isSu2) ? 0 : 1;
 		return PairType(x,x);
 	}
+
+private:
+
+	bool anisotropic_;
 }; // class LinkProductHeisenberg
 } // namespace Dmrg
 /*@}*/

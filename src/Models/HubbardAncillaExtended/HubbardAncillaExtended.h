@@ -136,18 +136,19 @@ public:
 	HubbardAncillaExtended(const SolverParamsType& solverParams,
 	                       InputValidatorType& io,
 	                       GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType),
+	    : ModelBaseType(solverParams,
+	                    geometry,
+	                    new LinkProductType((geometry_.orbitals(0,0) > 1))),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      hot_(geometry_.orbitals(0,0) > 1)
 	{
-		LinkProductType::setHot(hot_);
-		if (hot_) {
-			PsimagLite::String msg("HubbardAncillaExtended: Hot ancilla mode is on");
-			msg += " (EXPERIMENTAL feature)\n";
-			std::cout<<msg;
-			std::cerr<<msg;
-		}
+		if (!hot_) return;
+
+		PsimagLite::String msg("HubbardAncillaExtended: Hot ancilla mode is on");
+		msg += " (EXPERIMENTAL feature)\n";
+		std::cout<<msg;
+		std::cerr<<msg;
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
@@ -165,7 +166,7 @@ public:
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
-		        io.createGroup(label1);
+			io.createGroup(label1);
 
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);

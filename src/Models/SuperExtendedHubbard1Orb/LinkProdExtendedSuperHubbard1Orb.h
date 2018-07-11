@@ -98,6 +98,10 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
+	LinkProdExtendedSuperHubbard1Orb(bool useSpinOrbit)
+	    : useSpinOrbit_(useSpinOrbit)
+	{}
+
 	void setLinkData(SizeType term,
 	                 SizeType dofs,
 	                 bool,
@@ -114,7 +118,7 @@ public:
 			SizeType spin1 = (dofs & 1);
 			SizeType spin2 = (dofs & 2);
 			spin2 >>= 1;
-			if (!BaseType::hasSpinOrbit())
+			if (!useSpinOrbit_)
 				spin1 = spin2 = dofs;
 			ops = PairType(spin1,spin2);
 			angularFactor = 1;
@@ -192,7 +196,7 @@ public:
 	{
 		if (term != TERM_HOPPING) return 1;
 		assert(term == TERM_HOPPING);
-		return (BaseType::hasSpinOrbit()) ? 4 : 2;
+		return (useSpinOrbit_) ? 4 : 2;
 	}
 
 	// has only dependence on orbital
@@ -202,7 +206,7 @@ public:
 	                   const AdditionalDataType&) const
 	{
 		// no orbital and no dependence on spin
-		if (term != TERM_HOPPING || !BaseType::hasSpinOrbit())  {
+		if (term != TERM_HOPPING || !useSpinOrbit_)  {
 			edofs[0] = edofs[1] = 0;
 			return;
 		}
@@ -217,6 +221,10 @@ public:
 	}
 
 	SizeType terms() const { return 5; }
+
+private:
+
+	bool useSpinOrbit_;
 }; // class LinkProdExtendedSuperHubbard1Orb
 } // namespace Dmrg
 /*@}*/

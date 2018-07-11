@@ -139,14 +139,15 @@ public:
 	                InputValidatorType& io,
 	                const GeometryType& geometry,
 	                PsimagLite::String additional)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType),
+	    : ModelBaseType(solverParams,
+	                    geometry,
+	                    new LinkProductType((additional == "Anisotropic"))),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 	{
-		if (additional == "Anisotropic") {
-			setAnisotropic(solverParams);
-		}
+		if (additional == "Anisotropic")
+			checkAnisotropic(solverParams);
 
 		SizeType n = geometry_.numberOfSites();
 		SizeType m = modelParameters_.magneticField.size();
@@ -262,7 +263,7 @@ public:
 			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
 			operatorMatrices.push_back(myOp2);
 
-			if (LinkProductType::terms() == 2) continue;
+			if (ModelBaseType::linkProduct().terms() == 2) continue;
 			// Set the operators S^x_i in the natural basis
 			tmpMatrix = findSxMatrices(i,natBasis);
 			typename OperatorType::Su2RelatedType su2related3;
@@ -360,9 +361,8 @@ public:
 
 private:
 
-	void setAnisotropic(const SolverParamsType& solverParams)
+	void checkAnisotropic(const SolverParamsType& solverParams) const
 	{
-		LinkProductType::setAnisotropic();
 		bool isCanonical = (modelParameters_.targetQuantum.isCanonical);
 		bool useTheForce = (solverParams.options.find("useTheForce") !=
 		        PsimagLite::String::npos);

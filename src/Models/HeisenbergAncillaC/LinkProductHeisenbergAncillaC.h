@@ -98,6 +98,10 @@ public:
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename ModelHelperType::RealType RealType;
 
+	LinkProductHeisenbergAncillaC(bool hot)
+	    : hot_(hot)
+	{}
+
 	void setLinkData(SizeType term,
 	                        SizeType dofs,
 	                        bool isSu2,
@@ -110,7 +114,7 @@ public:
 	                        const AdditionalDataType&) const
 	{
 		fermionOrBoson = ProgramGlobals::BOSON;
-		ops = (BaseType::hot()) ? operatorDofsHot(term,dofs,isSu2) : operatorDofs(term,isSu2);
+		ops = (hot_) ? operatorDofsHot(term,dofs,isSu2) : operatorDofs(term,isSu2);
 		angularMomentum = 2;
 		switch (term) {
 		case 0:
@@ -141,7 +145,7 @@ public:
 
 	SizeType dofs(SizeType term,const AdditionalDataType&) const
 	{
-		if (!BaseType::hot() || term == TERM_ANCILLA) return 1;
+		if (!hot_ || term == TERM_ANCILLA) return 1;
 		return 2;
 	}
 
@@ -151,7 +155,7 @@ public:
 	                          SizeType dofs,
 	                          const AdditionalDataType&) const
 	{
-		if (!BaseType::hot() || term == TERM_ANCILLA)
+		if (!hot_ || term == TERM_ANCILLA)
 			edofs[0] = edofs[1] = 0;
 		else
 			edofs[0] = edofs[1] = dofs;
@@ -179,6 +183,8 @@ private:
 		SizeType offset = (term == TERM_SPLUSSMINUS) ? 0 : 2;
 		return PairType(dofs+offset,dofs+offset);
 	}
+
+	bool hot_;
 }; // class LinkProductHeisenbergAncillaC
 } // namespace Dmrg
 /*@}*/

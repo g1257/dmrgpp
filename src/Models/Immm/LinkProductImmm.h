@@ -215,7 +215,7 @@ private:
 
 	// spin is diagonal
 	std::pair<SizeType,SizeType> operatorDofs(SizeType dofs,
-	                                          const AdditionalDataType& additionalData)
+	                                          const AdditionalDataType& additionalData) const
 	{
 		SizeType type1 = additionalData.type1;
 		SizeType type2 = additionalData.type2;
@@ -245,7 +245,7 @@ private:
 		return (type1==additionalData.TYPE_C) ? PairType(op1,op2) : PairType(op2,op1);
 	}
 
-	SizeType getSpin(SizeType dofs,const AdditionalDataType& additionalData)
+	SizeType getSpin(SizeType dofs,const AdditionalDataType& additionalData) const
 	{
 		SizeType type1 = additionalData.type1;
 		SizeType type2 = additionalData.type2;

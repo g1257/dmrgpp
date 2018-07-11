@@ -99,6 +99,12 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
+	template<typename SomeInputType>
+	LinkProductTjMultiOrb(SomeInputType& io) : orbitals_(0)
+	{
+		io.readline(orbitals_, "Orbitals=");
+	}
+
 	void setLinkData(SizeType term,
 	                 SizeType dofs,
 	                 bool,
@@ -192,10 +198,10 @@ public:
 	// Sz Sz
 	SizeType dofs(SizeType term, const AdditionalDataType&) const
 	{
-		if (term==TERM_CICJ) return 2*BaseType::orbitals()*BaseType::orbitals(); // c^\dagger c
-		if (term==TERM_SPSM) return 2*BaseType::orbitals()*BaseType::orbitals(); // S+ S- and S- S+
-		if (term==TERM_SZSZ) return 1*BaseType::orbitals()*BaseType::orbitals(); // Sz Sz
-		if (term==TERM_NINJ) return 1*BaseType::orbitals()*BaseType::orbitals(); // ninj
+		if (term==TERM_CICJ) return 2*orbitals_*orbitals_; // c^\dagger c
+		if (term==TERM_SPSM) return 2*orbitals_*orbitals_; // S+ S- and S- S+
+		if (term==TERM_SZSZ) return 1*orbitals_*orbitals_; // Sz Sz
+		if (term==TERM_NINJ) return 1*orbitals_*orbitals_; // ninj
 		assert(false);
 		return 0; // bogus
 	}
@@ -206,12 +212,12 @@ public:
 	                   SizeType dofs,
 	                   const AdditionalDataType&) const
 	{
-		SizeType orbitalsSquared = BaseType::orbitals()*BaseType::orbitals();
+		SizeType orbitalsSquared = orbitals_*orbitals_;
 		SizeType spin = dofs/orbitalsSquared;
 		SizeType xtmp = (spin==0) ? 0 : orbitalsSquared;
 		xtmp = dofs - xtmp;
-		SizeType orb1 = xtmp/BaseType::orbitals();
-		SizeType orb2 = xtmp % BaseType::orbitals();
+		SizeType orb1 = xtmp/orbitals_;
+		SizeType orb2 = xtmp % orbitals_;
 		edofs[0] = orb1;
 		edofs[1] = orb2; //  orbital dependence, no spin dependence
 	}
@@ -221,32 +227,36 @@ public:
 private:
 
 	// spin is diagonal
-	std::pair<SizeType,SizeType> operatorDofs(SizeType dofs, SizeType term)
+	std::pair<SizeType,SizeType> operatorDofs(SizeType dofs, SizeType term) const
 	{
-		SizeType orbitalsSquared = BaseType::orbitals()*BaseType::orbitals();
+		SizeType orbitalsSquared = orbitals_*orbitals_;
 		SizeType spin = dofs/orbitalsSquared;
 		SizeType xtmp = (spin==0) ? 0 : orbitalsSquared;
 		xtmp = dofs - xtmp;
-		SizeType orb1 = xtmp/BaseType::orbitals();
-		SizeType orb2 = xtmp % BaseType::orbitals();
+		SizeType orb1 = xtmp/orbitals_;
+		SizeType orb2 = xtmp % orbitals_;
 		if (term == TERM_SPSM) spin = 0;
-		SizeType op1 = orb1 + spin*BaseType::orbitals();
-		SizeType op2 = orb2 + spin*BaseType::orbitals();
+		SizeType op1 = orb1 + spin*orbitals_;
+		SizeType op2 = orb2 + spin*orbitals_;
 
 		SizeType offset = 0;
 		// Need to look at the crationMatrices order to get the offset correct!
-		if (term == TERM_SPSM) offset = 2*BaseType::orbitals();
-		if (term == TERM_SZSZ) offset = 3*BaseType::orbitals();
-		if (term == TERM_NINJ) offset = 4*BaseType::orbitals();
+		if (term == TERM_SPSM) offset = 2*orbitals_;
+		if (term == TERM_SZSZ) offset = 3*orbitals_;
+		if (term == TERM_NINJ) offset = 4*orbitals_;
 
 		return std::pair<SizeType,SizeType>(op1+offset,op2+offset);
 	}
 
-	SizeType getSpin(SizeType dofs)
+	SizeType getSpin(SizeType dofs) const
 	{
-		SizeType orbitalsSquared = BaseType::orbitals()*BaseType::orbitals();
+		SizeType orbitalsSquared = orbitals_*orbitals_;
 		return dofs/orbitalsSquared;
 	}
+
+private:
+
+	SizeType orbitals_;
 }; // class LinkProductTjMultiOrb
 } // namespace Dmrg
 /*@}*/

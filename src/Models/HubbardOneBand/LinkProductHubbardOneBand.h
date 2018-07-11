@@ -98,6 +98,10 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
+	LinkProductHubbardOneBand(SizeType terms)
+	    : terms_(terms)
+	{}
+
 	void setLinkData(SizeType,
 	                 SizeType dofs,
 	                 bool,
@@ -121,7 +125,11 @@ public:
 	// up up and down down are the only connections possible for this model
 	SizeType dofs(SizeType, const AdditionalDataType&) const { return 2; }
 
-	SizeType terms() const { return 1; }
+	SizeType terms() const { return terms_; }
+
+private:
+
+	SizeType terms_;
 }; // class LinkProductHubbardOneBand
 } // namespace Dmrg
 /*@}*/

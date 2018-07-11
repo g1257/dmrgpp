@@ -124,7 +124,7 @@ public:
 	FeAsBasedScExtended(const SolverParamsType& solverParams,
 	                    InputValidatorType& io,
 	                    const GeometryType& geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType(io)),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      modelFeAs_(solverParams,io,geometry),
