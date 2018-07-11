@@ -100,20 +100,21 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
+	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
 
-	MatrixVectorOnTheFly(ModelType const *model,
-	                     ModelHelperType const *modelHelper,
+	MatrixVectorOnTheFly(const ModelType& model,
+	                     const HamiltonianConnectionType& hc,
 	                     ReflectionSymmetryType* = 0)
-	    : model_(model), modelHelper_(modelHelper)
+	    : model_(model), hc_(hc)
 	{
-		int maxMatrixRankStored = model->params().maxMatrixRankStored;
-		if (modelHelper->size() > maxMatrixRankStored) return;
+		int maxMatrixRankStored = model.params().maxMatrixRankStored;
+		if (hc.modelHelper().size() > maxMatrixRankStored) return;
 
-		model->fullHamiltonian(matrixStored_,*modelHelper);
+		model.fullHamiltonian(matrixStored_, hc);
 		assert(isHermitian(matrixStored_,true));
 	}
 
-	SizeType rows() const { return modelHelper_->size(); }
+	SizeType rows() const { return hc_.modelHelper().size(); }
 
 	template<typename SomeVectorType>
 	void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y) const
@@ -121,12 +122,12 @@ public:
 		if (matrixStored_.rows() > 0)
 			matrixStored_.matrixVectorProduct(x,y);
 		else
-			model_->matrixVectorProduct(x,y,*modelHelper_);
+			model_.matrixVectorProduct(x, y, hc_);
 	}
 
 	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const
 	{
-		int mrs = model_->params().maxMatrixRankStored;
+		int mrs = model_.params().maxMatrixRankStored;
 		if (mrs < static_cast<int>(rows())) {
 			std::cerr<<"Full diag will likely fail, it would need ";
 			std::cerr<<rows()<<" but you gave only "<<mrs<<"\n";
@@ -137,8 +138,8 @@ public:
 
 private:
 
-	ModelType const *model_;
-	ModelHelperType const *modelHelper_;
+	const ModelType& model_;
+	const HamiltonianConnectionType& hc_;
 	SparseMatrixType matrixStored_;
 }; // class MatrixVectorOnTheFly
 } // namespace Dmrg

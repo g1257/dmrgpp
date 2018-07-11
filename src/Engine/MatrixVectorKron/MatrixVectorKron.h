@@ -97,6 +97,7 @@ public:
 
 	typedef ModelType_ ModelType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
+	typedef typename ModelType::ParametersType ParametersType;
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef InitKronHamiltonian<ModelType> InitKronType;
@@ -107,18 +108,19 @@ public:
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
 	typedef typename SparseMatrixType::value_type value_type;
+	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
 
-	MatrixVectorKron(ModelType const *model,
-	                 ModelHelperType const *modelHelper,
+	MatrixVectorKron(const ModelType& model,
+	                 const HamiltonianConnectionType& hc,
 	                 ReflectionSymmetryType* = 0)
-	    : model_(model),
-	      initKron_(*model,*modelHelper),
+	    : params_(model.params()),
+	      initKron_(model, hc),
 	      kronMatrix_(initKron_, "Hamiltonian")
 	{
-		int maxMatrixRankStored = model->params().maxMatrixRankStored;
-		if (modelHelper->size() > maxMatrixRankStored) return;
+		int maxMatrixRankStored = model.params().maxMatrixRankStored;
+		if (hc.modelHelper().size() > maxMatrixRankStored) return;
 
-		model->fullHamiltonian(matrixStored_,*modelHelper);
+		model.fullHamiltonian(matrixStored_, hc);
 		assert(isHermitian(matrixStored_,true));
 
 		checkKron();
@@ -137,7 +139,7 @@ public:
 
 	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const
 	{
-		BaseType::fullDiag(eigs,fm,matrixStored_,model_->params().maxMatrixRankStored);
+		BaseType::fullDiag(eigs, fm, matrixStored_, params_.maxMatrixRankStored);
 	}
 
 private:
@@ -171,7 +173,7 @@ private:
 		std::cout<<matrixStored_;
 	}
 
-	const ModelType* model_;
+	const ParametersType& params_;
 	InitKronType initKron_;
 	KronMatrixType kronMatrix_;
 	SparseMatrixType matrixStored_;

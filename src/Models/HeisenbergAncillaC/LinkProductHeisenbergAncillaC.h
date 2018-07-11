@@ -164,7 +164,7 @@ public:
 
 private:
 
-	PairType operatorDofs(SizeType term,bool isSu2)
+	PairType operatorDofs(SizeType term,bool isSu2) const
 	{
 		if (term == TERM_SPLUSSMINUS || term == TERM_ANCILLA)
 			return PairType(term,term);
@@ -172,7 +172,7 @@ private:
 		return PairType(x,x);
 	}
 
-	PairType operatorDofsHot(SizeType term,SizeType dofs,bool)
+	PairType operatorDofsHot(SizeType term,SizeType dofs,bool) const
 	{
 		if (term == TERM_ANCILLA) return PairType(4,4);
 		assert(term == TERM_SPLUSSMINUS || term == TERM_SZSZ);

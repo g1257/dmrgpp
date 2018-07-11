@@ -101,21 +101,21 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
+	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
 
-	MatrixVectorStored(ModelType const *model,
-	                   ModelHelperType const *modelHelper,
+	MatrixVectorStored(const ModelType& model,
+	                   const HamiltonianConnectionType& hc,
 	                   const ReflectionSymmetryType* rs=0)
-	    :  model_(model),
-	      modelHelper_(modelHelper),
+	    : model_(model),
 	      matrixStored_(2),
 	      pointer_(0),
 	      progress_("MatrixVectorStored")
 	{
-		PsimagLite::String options = model->params().options;
+		PsimagLite::String options = model.params().options;
 		bool debugMatrix = (options.find("debugmatrix") != PsimagLite::String::npos);
 		if (!rs) {
 			matrixStored_[0].clear();
-			model->fullHamiltonian(matrixStored_[0],*modelHelper);
+			model.fullHamiltonian(matrixStored_[0], hc);
 			assert(isHermitian(matrixStored_[0],true));
 			PsimagLite::OstringStream msg;
 			msg<<"fullHamiltonian has rank="<<matrixStored_[0].rows();
@@ -127,7 +127,7 @@ public:
 		}
 
 		SparseMatrixType matrix2;
-		model->fullHamiltonian(matrix2,*modelHelper);
+		model.fullHamiltonian(matrix2, hc);
 		rs->transform(matrixStored_[0],matrixStored_[1],matrix2);
 		PsimagLite::OstringStream msg;
 		msg<<" sector="<<matrixStored_[0].rows()<<" and sector="<<matrixStored_[1].rows();
@@ -156,12 +156,12 @@ public:
 		BaseType::fullDiag(eigs,
 		                   fm,
 		                   matrixStored_[pointer_],
-		                   model_->params().maxMatrixRankStored);
+		                   model_.params().maxMatrixRankStored);
 	}
 
 private:
-	ModelType const *model_;
-	ModelHelperType const *modelHelper_;
+
+	const ModelType& model_;
 	typename PsimagLite::Vector<SparseMatrixType>::Type matrixStored_;
 	SizeType pointer_;
 	PsimagLite::ProgressIndicator progress_;

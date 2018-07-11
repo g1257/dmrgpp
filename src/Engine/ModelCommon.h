@@ -295,28 +295,7 @@ public:
 
 private:
 
-//	SizeType getLinkProductStruct(const ModelHelperType& modelHelper) const
-//	{
-//		HamiltonianConnectionType hc(BaseType::geometry(), modelHelper, lps_);
 
-//		return hc.tasks();
-//	}
-
-	LinkType getConnection(const SparseMatrixType** A,
-	                       const SparseMatrixType** B,
-	                       SizeType ix,
-	                       const HamiltonianConnectionType& hc) const
-	{
-		SizeType xx = 0;
-		ProgramGlobals::ConnectionEnum type;
-		SizeType term = 0;
-		SizeType dofs = 0;
-		ComplexOrRealType tmp = 0.0;
-		AdditionalDataType additionalData;
-		hc.prepare(xx,type,tmp,term,dofs,additionalData,ix);
-		LinkType link2 = hc.getKron(A,B,xx,type,tmp,term,dofs,additionalData);
-		return link2;
-	}
 
 //	SparseMatrixType transposeOrNot(const SparseMatrixType& A,char mod) const
 //	{

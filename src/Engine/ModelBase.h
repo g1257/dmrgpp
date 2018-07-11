@@ -209,19 +209,6 @@ public:
 		return modelCommon_.fullHamiltonian(matrix, hc);
 	}
 
-	virtual SizeType getLinkProductStruct(const ModelHelperType& modelHelper) const
-	{
-		return modelCommon_.getLinkProductStruct(modelHelper);
-	}
-
-	virtual LinkType getConnection(const SparseMatrixType** A,
-	                               const SparseMatrixType** B,
-	                               SizeType ix,
-	                               const ModelHelperType& modelHelper) const
-	{
-		return modelCommon_.getConnection(A,B,ix,modelHelper);
-	}
-
 	//! Full hamiltonian from creation matrices cm
 	virtual void calcHamiltonian(SparseMatrixType &hmatrix,
 	                             const VectorOperatorType& cm,

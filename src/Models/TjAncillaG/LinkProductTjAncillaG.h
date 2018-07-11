@@ -240,7 +240,7 @@ public:
 private:
 
 	// only for TERM_SISJ
-	PairType operatorSz(bool isSu2)
+	PairType operatorSz(bool isSu2) const
 	{
 		SizeType x = (isSu2) ? 2 : 3;
 		return PairType(x,x);

@@ -824,8 +824,11 @@ private:
 		                                                this->lrs(),
 		                                                this->common().currentTime(),
 		                                                threadId);
-		typename LanczosSolverType::LanczosMatrixType lanczosHelper(&this->model(),
-		                                                            &modelHelper);
+		typename ModelType::HamiltonianConnectionType hc(BaseType::model().geometry(),
+		                                                 modelHelper,
+		                                                 BaseType::model().linkProduct());
+		typename LanczosSolverType::LanczosMatrixType lanczosHelper(BaseType::model(),
+		                                                            hc);
 
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);

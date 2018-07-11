@@ -171,7 +171,7 @@ public:
 		progress_.printline(msg2,std::cout);
 	}
 
-	void matrixBond(VerySparseMatrixType& matrix)
+	void matrixBond(VerySparseMatrixType& matrix) const
 	{
 		SizeType matrixRank = matrix.rows();
 		VerySparseMatrixType matrix2(matrixRank, matrixRank);
@@ -252,18 +252,18 @@ public:
 		RealType angularFactor=0;
 		bool isSu2 = modelHelper_.isSu2();
 		ComplexOrRealType value = valuec;
-		LinkProductBaseType::valueModifier(value,term,dofs,isSu2,additionalData);
+		lpb_.valueModifier(value,term,dofs,isSu2,additionalData);
 
-		LinkProductBaseType::setLinkData(term,
-		                             dofs,
-		                             isSu2,
-		                             fermionOrBoson,
-		                             ops,
-		                             mods,
-		                             angularMomentum,
-		                             angularFactor,
-		                             category,
-		                             additionalData);
+		lpb_.setLinkData(term,
+		                 dofs,
+		                 isSu2,
+		                 fermionOrBoson,
+		                 ops,
+		                 mods,
+		                 angularMomentum,
+		                 angularFactor,
+		                 category,
+		                 additionalData);
 		LinkType link2(i,
 		               j,
 		               type,
@@ -302,6 +302,21 @@ public:
 		return link2;
 	}
 
+	LinkType getConnection(const SparseMatrixType** A,
+	                       const SparseMatrixType** B,
+	                       SizeType ix) const
+	{
+		SizeType xx = 0;
+		ProgramGlobals::ConnectionEnum type;
+		SizeType term = 0;
+		SizeType dofs = 0;
+		ComplexOrRealType tmp = 0.0;
+		AdditionalDataType additionalData;
+		prepare(xx,type,tmp,term,dofs,additionalData,ix);
+		LinkType link2 = getKron(A,B,xx,type,tmp,term,dofs,additionalData);
+		return link2;
+	}
+
 	const ModelHelperType& modelHelper() const { return modelHelper_; }
 
 private:
@@ -319,17 +334,17 @@ private:
 		        type != ProgramGlobals::ENVIRON_ENVIRON);
 
 		AdditionalDataType additionalData;
-		VectorSizeType edofs(LinkProductBaseType::dofsAllocationSize());
+		VectorSizeType edofs(lpb_.dofsAllocationSize());
 
 		SizeType totalOne = 0;
 		for (SizeType term = 0; term < superGeometry_.geometry().terms(); ++term) {
 			superGeometry_.fillAdditionalData(additionalData, term, hItems);
-			SizeType dofsTotal = LinkProductBaseType::dofs(term, additionalData);
+			SizeType dofsTotal = lpb_.dofs(term, additionalData);
 			for (SizeType dofs = 0; dofs < dofsTotal; ++dofs) {
-				LinkProductBaseType::connectorDofs(edofs,
-				                               term,
-				                               dofs,
-				                               additionalData);
+				lpb_.connectorDofs(edofs,
+				                   term,
+				                   dofs,
+				                   additionalData);
 				ComplexOrRealType tmp = superGeometry_(smax_,
 				                                       emin_,
 				                                       hItems,

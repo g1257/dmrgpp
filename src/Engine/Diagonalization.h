@@ -425,25 +425,25 @@ private:
 		PsimagLite::OstringStream msg;
 		msg<<"I will now diagonalize a matrix of size="<<modelHelper.size();
 		progress_.printline(msg,std::cout);
-		diagonaliseOneBlock(i,tmpVec,energyTmp,modelHelper,initialVector,saveOption);
+		diagonaliseOneBlock(i,tmpVec,energyTmp,hc,initialVector,saveOption);
 	}
 
 	void diagonaliseOneBlock(int i,
 	                         TargetVectorType &tmpVec,
 	                         RealType &energyTmp,
-	                         ModelHelperType& modelHelper,
+	                         HamiltonianConnectionType& hc,
 	                         const TargetVectorType& initialVector,
 	                         SizeType saveOption)
 	{
-		int n = modelHelper.size();
+		int n = hc.modelHelper().size();
 		if (verbose_)
 			std::cerr<<"Lanczos: About to do block number="<<i<<" of size="<<n<<"\n";
 
 		ReflectionSymmetryType *rs = 0;
 		if (reflectionOperator_.isEnabled()) rs = &reflectionOperator_;
 
-		typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(&model_,
-		                                                             &modelHelper,
+		typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(model_,
+		                                                             hc,
 		                                                             rs);
 
 		if ((saveOption & 4)>0) {

@@ -145,7 +145,7 @@ public:
 
 private:
 
-	PairType operatorDofs(SizeType term, bool isSu2)
+	PairType operatorDofs(SizeType term, bool isSu2) const
 	{
 		if (term<1) return PairType(0,0);
 		if (term==2) return PairType(2,2);

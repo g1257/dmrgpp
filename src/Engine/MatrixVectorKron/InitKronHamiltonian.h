@@ -91,6 +91,7 @@ class InitKronHamiltonian : public InitKronBase<typename ModelType_::LeftRightSu
 public:
 
 	typedef ModelType_ ModelType;
+	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisType BasisType;
@@ -106,13 +107,13 @@ public:
 	typedef typename ArrayOfMatStructType::VectorSizeType VectorSizeType;
 
 	InitKronHamiltonian(const ModelType& model,
-	                    const ModelHelperType& modelHelper)
-	    : BaseType(modelHelper.leftRightSuper(),
-	               modelHelper.m(),
-	               modelHelper.quantumNumber(),
+	                    const HamiltonianConnectionType& hc)
+	    : BaseType(hc.modelHelper().leftRightSuper(),
+	               hc.modelHelper().m(),
+	               hc.modelHelper().quantumNumber(),
 	               model.params().denseSparseThreshold),
 	      model_(model),
-	      modelHelper_(modelHelper),
+	      hc_(hc),
 	      vstart_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1),
 	      offsetForPatches_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1)
 	{
@@ -222,8 +223,8 @@ private:
 	void addHlAndHr()
 	{
 		const RealType value = 1.0;
-		const SparseMatrixType& aL = modelHelper_.leftRightSuper().left().hamiltonian();
-		const SparseMatrixType& aR = modelHelper_.leftRightSuper().right().hamiltonian();
+		const SparseMatrixType& aL = hc_.modelHelper().leftRightSuper().left().hamiltonian();
+		const SparseMatrixType& aR = hc_.modelHelper().leftRightSuper().right().hamiltonian();
 		identityL_.makeDiagonal(aL.rows(), value);
 		identityR_.makeDiagonal(aR.rows(), value);
 		std::pair<SizeType, SizeType> ops(0,0);
@@ -245,13 +246,13 @@ private:
 
 	void convertXcYcArrays()
 	{
-		SizeType total = model_.getLinkProductStruct(modelHelper_);
+		SizeType total = hc_.tasks();
 
 		for (SizeType ix=0;ix<total;ix++) {
 			SparseMatrixType const* A = 0;
 			SparseMatrixType const* B = 0;
 
-			LinkType link2 = model_.getConnection(&A,&B,ix,modelHelper_);
+			LinkType link2 = hc_.getConnection(&A, &B, ix);
 			if (link2.type==ProgramGlobals::ENVIRON_SYSTEM)  {
 				LinkType link3 = link2;
 				link3.type = ProgramGlobals::SYSTEM_ENVIRON;
@@ -275,7 +276,7 @@ private:
 	InitKronHamiltonian& operator=(const InitKronHamiltonian&);
 
 	const ModelType& model_;
-	const ModelHelperType& modelHelper_;
+	const HamiltonianConnectionType& hc_;
 	SparseMatrixType identityL_;
 	SparseMatrixType identityR_;
 	VectorSizeType vstart_;

@@ -294,8 +294,11 @@ private:
 		SizeType threadId = 0;
 		RealType fakeTime = 0;
 		typename ModelType::ModelHelperType modelHelper(p,this->lrs(),fakeTime,threadId);
+		typename ModelType::HamiltonianConnectionType hc(BaseType::model().geometry(),
+		                                                 modelHelper,
+		                                                 BaseType::model().linkProduct());
 		typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
-		LanczosMatrixType h(&this->model(),&modelHelper);
+		LanczosMatrixType h(BaseType::model(), hc);
 		LanczosSolverType lanczosSolver(h,paramsForSolver_);
 
 		RealType a=0,b=0;

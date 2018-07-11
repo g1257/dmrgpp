@@ -272,7 +272,10 @@ private:
 		                                                this->lrs(),
 		                                                fakeTime,
 		                                                threadId);
-		typename LanczosSolverType::LanczosMatrixType h(&this->model(),&modelHelper);
+		typename ModelType::HamiltonianConnectionType hc(BaseType::model().geometry(),
+		                                                 modelHelper,
+		                                                 BaseType::model().linkProduct());
+		typename LanczosSolverType::LanczosMatrixType h(BaseType::model(), hc);
 		paramsForSolver_.lotaMemory = true;
 		LanczosSolverType lanczosSolver(h,paramsForSolver_);
 

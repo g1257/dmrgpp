@@ -331,7 +331,10 @@ public:
 		SizeType threadId = 0;
 		RealType fakeTime = 0;
 		typename ModelType::ModelHelperType modelHelper(p,lrs_,fakeTime,threadId);
-		LanczosMatrixType h(&model_,&modelHelper);
+		typename ModelType::HamiltonianConnectionType hc(model_.geometry(),
+		                                                 modelHelper,
+		                                                 model_.linkProduct());
+		LanczosMatrixType h(model_, hc);
 		RealType E0 = energy_;
 		CorrectionVectorFunctionType cvft(h,tstStruct_,E0);
 

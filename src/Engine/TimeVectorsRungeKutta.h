@@ -184,7 +184,8 @@ private:
 		      timeDirection_(timeDirection),
 			  p_(lrs.super().findPartitionNumber(phi.offset(i0))),
 			  modelHelper_(p_,lrs,currentTime,0),
-			  lanczosHelper_(&model,&modelHelper_)
+		      hc_(model.geometry(), modelHelper_, model.linkProduct()),
+			  lanczosHelper_(model, hc_)
 		{
 		}
 
@@ -206,6 +207,7 @@ private:
 		RealType timeDirection_;
 		SizeType p_;
 		typename ModelType::ModelHelperType modelHelper_;
+		typename ModelType::HamiltonianConnectionType hc_;
 		typename LanczosSolverType::LanczosMatrixType lanczosHelper_;
 	}; // FunctionForRungeKutta
 

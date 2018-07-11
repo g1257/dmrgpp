@@ -137,7 +137,10 @@ private:
 	{
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelType::ModelHelperType modelHelper(p,lrs_,currentTime_,threadNum);
-		typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
+		typename ModelType::HamiltonianConnectionType hc(model_.geometry(),
+		                                                 modelHelper,
+		                                                 model_.linkProduct());
+		typename LanczosSolverType::LanczosMatrixType lanczosHelper(model_, hc);
 
 		typename LanczosSolverType::ParametersSolverType params(io_,"Tridiag");
 		params.lotaMemory = true;
