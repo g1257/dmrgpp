@@ -134,19 +134,17 @@ public:
 		for (SizeType x = 0; x < nitems; ++x)
 			totalOnes_[x] = compute(lps_, x, total_);
 
-		if (lps_.typesaved.size() != total_) {
+		if (lps_.typesaved.size() < total_) {
 			err("getLinkProductStruct: InternalError\n");
 		}
 
-		total_ += 2;
-
 		PsimagLite::OstringStream msg;
-		msg<<"LinkProductStructSize="<<(total_ - 2);
+		msg<<"LinkProductStructSize="<<total_;
 		progress_.printline(msg,std::cout);
 
 		PsimagLite::OstringStream msg2;
 		// add left and right contributions
-		msg2<<"PthreadsTheoreticalLimitForThisPart="<<total_;
+		msg2<<"PthreadsTheoreticalLimitForThisPart="<<(total_ + 2);
 
 		// The theoretical maximum number of pthreads that are useful
 		// is equal to C + 2, where
@@ -234,6 +232,9 @@ public:
 	                 SizeType dofs,
 	                 const AdditionalDataType& additionalData) const
 	{
+		assert(type == ProgramGlobals::SYSTEM_ENVIRON ||
+		       type == ProgramGlobals::ENVIRON_SYSTEM);
+
 		const VectorSizeType& hItems = hamAbstract_.item(xx);
 		if (hItems.size() != 2)
 			err("getKron(): No Chemical H supported for now\n");

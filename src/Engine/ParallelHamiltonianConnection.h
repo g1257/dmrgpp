@@ -57,7 +57,7 @@ public:
 		linkProduct(xtemp_[threadNum],y_,xx,type,tmp,term,dofs,additionalData);
 	}
 
-	SizeType tasks() const { return hc_.tasks(); }
+	SizeType tasks() const { return hc_.tasks() + 2; }
 
 	void sync()
 	{
