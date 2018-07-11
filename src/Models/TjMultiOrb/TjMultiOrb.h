@@ -106,7 +106,7 @@ public:
 	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef LinkProductTjMultiOrb<ModelHelperType> LinkProductType;
+	typedef LinkProductTjMultiOrb<ModelHelperType, GeometryType> LinkProductType;
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisFeAsType;
 	typedef typename HilbertBasisFeAsType::value_type HilbertStateFeAs;
 	typedef  HilbertSpaceFeAs<HilbertStateFeAs> HilbertSpaceFeAsType;
@@ -135,7 +135,7 @@ public:
 	TjMultiOrb(const SolverParamsType& solverParams,
 	           InputValidatorType& io,
 	           GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      offset_(5*modelParameters_.orbitals), // c^\dagger_up, c^\dagger_down, S+, Sz, n

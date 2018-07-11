@@ -86,8 +86,8 @@ namespace Dmrg {
 template<typename ModelHelperType, typename GeometryType>
 class LinkProdExtendedHubbard1Orb : public LinkProductBase<ModelHelperType, GeometryType> {
 
-	typedef LinkProductBase<ModelHelperType> BaseType;
-	typedef BaseType::AdditionalDataType AdditionalDataType;
+	typedef LinkProductBase<ModelHelperType, GeometryType> BaseType;
+	typedef typename BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -107,7 +107,7 @@ public:
 	                 SizeType& angularMomentum,
 	                 RealType& angularFactor,
 	                 SizeType& category,
-	                 const AdditionalDataType&)
+	                 const AdditionalDataType&) const
 	{
 		if (term==TERM_NINJ) fermionOrBoson = ProgramGlobals::BOSON;
 		else fermionOrBoson = ProgramGlobals::FERMION;
@@ -120,12 +120,12 @@ public:
 		category = dofs;
 	}
 
-	SizeType dofs(SizeType term, const AdditionalDataType&)
+	SizeType dofs(SizeType term, const AdditionalDataType&) const
 	{
 		return (term==TERM_NINJ) ? 1 : 2;
 	}
 
-	SizeType terms() { return 2; }
+	SizeType terms() const { return 2; }
 }; // class LinkProdExtendedHubbard1Orb
 } // namespace Dmrg
 /*@}*/

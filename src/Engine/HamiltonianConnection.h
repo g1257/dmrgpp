@@ -92,16 +92,15 @@ namespace Dmrg {
 
 // Keep this class independent of x and y in x = H*y
 // For things that depend on x and y use ParallelHamiltonianConnection.h
-template<typename LinkProductType>
+template<typename LinkProductBaseType>
 class HamiltonianConnection {
-
-	typedef SuperGeometry<LinkProductType::GeometryType> SuperGeometryType;
-	typedef HamiltonianAbstract<LinkProductType::SuperGeometryType> HamiltonianAbstractType;
 
 public:
 
-	typedef LinkProductType::GeometryType GeometryType;
-	typedef LinkProductType::ModelHelperType ModelHelperType;
+	typedef typename LinkProductBaseType::GeometryType GeometryType;
+	typedef SuperGeometry<GeometryType> SuperGeometryType;
+	typedef HamiltonianAbstract<SuperGeometryType> HamiltonianAbstractType;
+	typedef typename LinkProductBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -115,13 +114,14 @@ public:
 	typedef typename PsimagLite::Concurrency ConcurrencyType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-	template<typename LinkProductType>
 	HamiltonianConnection(const GeometryType& geometry,
-	                      const ModelHelperType& modelHelper)
-	    : progress_("HamiltonianConnection"),
-	      superGeometry_(geometry),
-	      lps_(ProgramGlobals::MAX_LPS),
+	                      const ModelHelperType& modelHelper,
+	                      const LinkProductBaseType& lpb)
+	    : superGeometry_(geometry),
 	      modelHelper_(modelHelper),
+	      lpb_(lpb),
+	      progress_("HamiltonianConnection"),
+	      lps_(ProgramGlobals::MAX_LPS),
 	      systemBlock_(modelHelper.leftRightSuper().left().block()),
 	      envBlock_(modelHelper.leftRightSuper().right().block()),
 	      smax_(*std::max_element(systemBlock_.begin(),systemBlock_.end())),
@@ -132,7 +132,7 @@ public:
 	{
 		SizeType nitems = totalOnes_.size();
 		for (SizeType x = 0; x < nitems; ++x)
-			totalOnes_[x] = compute<LinkProductType>(x, lps_, total_);
+			totalOnes_[x] = compute(lps_, x, total_);
 
 		if (lps_.typesaved.size() != total_) {
 			err("getLinkProductStruct: InternalError\n");
@@ -171,7 +171,7 @@ public:
 		progress_.printline(msg2,std::cout);
 	}
 
-	void matrixBond(SparseMatrixType& matrix)
+	void matrixBond(VerySparseMatrixType& matrix)
 	{
 		SizeType matrixRank = matrix.rows();
 		VerySparseMatrixType matrix2(matrixRank, matrixRank);
@@ -225,7 +225,6 @@ public:
 		                                  hamAbstract_.item(x));
 	}
 
-	template<typename LinkProductType>
 	LinkType getKron(const SparseMatrixType** A,
 	                 const SparseMatrixType** B,
 	                 SizeType xx,
@@ -253,9 +252,9 @@ public:
 		RealType angularFactor=0;
 		bool isSu2 = modelHelper_.isSu2();
 		ComplexOrRealType value = valuec;
-		LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData);
+		LinkProductBaseType::valueModifier(value,term,dofs,isSu2,additionalData);
 
-		LinkProductType::setLinkData(term,
+		LinkProductBaseType::setLinkData(term,
 		                             dofs,
 		                             isSu2,
 		                             fermionOrBoson,
@@ -307,7 +306,6 @@ public:
 
 private:
 
-	template<typename LinkProductType>
 	SizeType compute(LinkProductStructType& lps,
 	                 SizeType x,
 	                 SizeType& total) const
@@ -321,14 +319,14 @@ private:
 		        type != ProgramGlobals::ENVIRON_ENVIRON);
 
 		AdditionalDataType additionalData;
-		VectorSizeType edofs(LinkProductType::dofsAllocationSize());
+		VectorSizeType edofs(LinkProductBaseType::dofsAllocationSize());
 
 		SizeType totalOne = 0;
 		for (SizeType term = 0; term < superGeometry_.geometry().terms(); ++term) {
 			superGeometry_.fillAdditionalData(additionalData, term, hItems);
-			SizeType dofsTotal = LinkProductType::dofs(term, additionalData);
+			SizeType dofsTotal = LinkProductBaseType::dofs(term, additionalData);
 			for (SizeType dofs = 0; dofs < dofsTotal; ++dofs) {
-				LinkProductType::connectorDofs(edofs,
+				LinkProductBaseType::connectorDofs(edofs,
 				                               term,
 				                               dofs,
 				                               additionalData);
@@ -386,10 +384,11 @@ private:
 		return false;
 	}
 
-	PsimagLite::ProgressIndicator progress_;
 	SuperGeometryType superGeometry_;
-	LinkProductStructType lps_;
 	const ModelHelperType& modelHelper_;
+	const LinkProductBaseType& lpb_;
+	PsimagLite::ProgressIndicator progress_;
+	LinkProductStructType lps_;
 	const VectorSizeType& systemBlock_;
 	const VectorSizeType& envBlock_;
 	SizeType smax_;

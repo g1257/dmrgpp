@@ -120,7 +120,7 @@ private:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef unsigned int long WordType;
-	typedef LinkProductHeisenbergAncillaC<ModelHelperType> LinkProductType;
+	typedef LinkProductHeisenbergAncillaC<ModelHelperType, GeometryType> LinkProductType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -141,7 +141,7 @@ public:
 	HeisenbergAncillaC(const SolverParamsType& solverParams,
 	                   InputValidatorType& io,
 	                   GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      hot_(geometry_.orbitals(0,0) > 1)

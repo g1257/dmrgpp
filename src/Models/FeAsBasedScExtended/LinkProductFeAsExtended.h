@@ -85,17 +85,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ModelHelperType>
-class LinkProductFeAsExtended : public LinkProductBase<ModelHelperType> {
+template<typename ModelHelperType, typename GeometryType>
+class LinkProductFeAsExtended : public LinkProductBase<ModelHelperType, GeometryType> {
 
-	typedef LinkProductBase<ModelHelperType> BaseType;
-	typedef BaseType::AdditionalDataType AdditionalDataType;
+	typedef LinkProductBase<ModelHelperType, GeometryType> BaseType;
+	typedef typename BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef std::pair<SizeType,SizeType> PairType;
-	typedef LinkProductFeAs<ModelHelperType> LinkProductFeAsType;
-	typedef LinkProductHeisenberg<ModelHelperType> LinkProductHeisenbergType;
+	typedef LinkProductFeAs<ModelHelperType, GeometryType> LinkProductFeAsType;
+	typedef LinkProductHeisenberg<ModelHelperType, GeometryType> LinkProductHeisenbergType;
 	typedef typename ModelHelperType::BasisType BasisType;
 	typedef typename ModelHelperType::OperatorType OperatorType;
 
@@ -105,7 +105,7 @@ class LinkProductFeAsExtended : public LinkProductBase<ModelHelperType> {
 
 public:
 
-	SizeType dofs(SizeType term,const AdditionalDataType& additional)
+	SizeType dofs(SizeType term,const AdditionalDataType& additional) const
 	{
 		return (term == TERM_JPLUS || term == TERM_JZ) ?
 		            LinkProductHeisenbergType::dofs(term,additional) :
@@ -114,9 +114,9 @@ public:
 
 	// has only dependence on orbital
 	void connectorDofs(VectorSizeType& edofs,
-	                          SizeType term,
-	                          SizeType dofs,
-	                          const AdditionalDataType& additional)
+	                   SizeType term,
+	                   SizeType dofs,
+	                   const AdditionalDataType& additional) const
 	{
 		if (term==TERM_HOPPING)
 			return LinkProductFeAsType::connectorDofs(edofs, term,dofs,additional);
@@ -125,14 +125,14 @@ public:
 	}
 
 	void setLinkData(SizeType term,
-	                        SizeType dofs,
-	                        bool isSu2,
-	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
-	                        PairType& ops,
-	                        std::pair<char,char>& mods,
-	                        SizeType& angularMomentum,
-	                        RealType& angularFactor,
-	                        SizeType& category,const AdditionalDataType& additional)
+	                 SizeType dofs,
+	                 bool isSu2,
+	                 ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
+	                 PairType& ops,
+	                 std::pair<char,char>& mods,
+	                 SizeType& angularMomentum,
+	                 typename BaseType::RealType& angularFactor,
+	                 SizeType& category,const AdditionalDataType& additional) const
 	{
 		if (term==TERM_HOPPING)
 			return LinkProductFeAsType::setLinkData(
@@ -149,8 +149,10 @@ public:
 	}
 
 	void valueModifier(SparseElementType& value,
-	                          SizeType term,
-	                          SizeType dofs,bool isSu2,const AdditionalDataType& additional)
+	                   SizeType term,
+	                   SizeType dofs,
+	                   bool isSu2,
+	                   const AdditionalDataType& additional) const
 	{
 		if (term==TERM_HOPPING) return LinkProductFeAsType::valueModifier(value,
 		                                                                  term,
@@ -162,7 +164,7 @@ public:
 		LinkProductHeisenbergType::valueModifier(value,term-1,dofs,isSu2,additional);
 	}
 
-	SizeType terms() { return 3; }
+	SizeType terms() const { return 3; }
 }; // class LinkProductFeAsExtended
 } // namespace Dmrg
 /*@}*/

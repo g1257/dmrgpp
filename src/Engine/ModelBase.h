@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MemResolv.h"
 #include "TargetQuantumElectrons.h"
 #include "Io/IoSerializerStub.h"
+#include "ModelCommon.h"
 
 namespace Dmrg {
 
@@ -116,18 +117,29 @@ public:
 	typedef typename MyBasis::EffectiveQnType EffectiveQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::SparseElementType ComplexOrRealType;
-	typedef ModelCommonBase<ModelHelperType,ParametersType,GeometryType> ModelCommonBaseType;
-	typedef typename ModelCommonBaseType::HamiltonianConnectionType HamiltonianConnectionType;
-	typedef typename ModelCommonBaseType::LinkProductStructType LinkProductStructType;
-	typedef typename ModelCommonBaseType::VectorType VectorType;
+	typedef ModelCommon<ParametersType, GeometryType, ModelHelperType> ModelCommonType;
+	typedef typename ModelCommonType::HamiltonianConnectionType HamiltonianConnectionType;
+	typedef typename ModelCommonType::LinkProductStructType LinkProductStructType;
+	typedef typename ModelCommonType::LinkProductBaseType LinkProductBaseType;
+	typedef typename ModelCommonType::VectorType VectorType;
 	typedef ParametersType SolverParamsType;
 	typedef typename ModelHelperType::LinkType LinkType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
-	ModelBase(ParametersType& params, const GeometryType_& geometry)
-	    : modelCommon_(params, geometry)
+	ModelBase(const ParametersType& params,
+	          const GeometryType_& geometry,
+	          const LinkProductBaseType* lpb)
+	    : modelCommon_(params, geometry, lpb)
 	{}
+
+	virtual ~ModelBase()
+	{}
+
+	virtual const LinkProductBaseType& linkProduct() const
+	{
+		return modelCommon_.linkProduct();
+	}
 
 	virtual void write(PsimagLite::String,
 	                   PsimagLite::IoNg::Out::Serializer&) const = 0;
@@ -174,32 +186,32 @@ public:
 	                                 const VectorType& y,
 	                                 ModelHelperType const &modelHelper) const
 	{
-		return modelCommon_->matrixVectorProduct(x,y,modelHelper);
+		return modelCommon_.matrixVectorProduct(x,y,modelHelper);
 	}
 
 	virtual void addHamiltonianConnection(SparseMatrixType &matrix,
 	                                      const LeftRightSuperType& lrs,
 	                                      RealType currentTime) const
 	{
-		return modelCommon_->addHamiltonianConnection(matrix,lrs,currentTime);
+		return modelCommon_.addHamiltonianConnection(matrix,lrs,currentTime);
 	}
 
 	virtual void hamiltonianConnectionProduct(VectorType& x,
 	                                          const VectorType& y,
 	                                          ModelHelperType const &modelHelper) const
 	{
-		return modelCommon_->hamiltonianConnectionProduct(x,y,modelHelper);
+		return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
 	}
 
 	virtual void fullHamiltonian(SparseMatrixType& matrix,
 	                             const HamiltonianConnectionType& hc) const
 	{
-		return modelCommon_->fullHamiltonian(matrix, hc);
+		return modelCommon_.fullHamiltonian(matrix, hc);
 	}
 
 	virtual SizeType getLinkProductStruct(const ModelHelperType& modelHelper) const
 	{
-		return modelCommon_->getLinkProductStruct(modelHelper);
+		return modelCommon_.getLinkProductStruct(modelHelper);
 	}
 
 	virtual LinkType getConnection(const SparseMatrixType** A,
@@ -207,7 +219,7 @@ public:
 	                               SizeType ix,
 	                               const ModelHelperType& modelHelper) const
 	{
-		return modelCommon_->getConnection(A,B,ix,modelHelper);
+		return modelCommon_.getConnection(A,B,ix,modelHelper);
 	}
 
 	//! Full hamiltonian from creation matrices cm
@@ -220,7 +232,7 @@ public:
 	{
 		hmatrix.makeDiagonal(cm[0].data.rows());
 
-		modelCommon_->addConnectionsInNaturalBasis(hmatrix,cm,block,sysEnvOnly,time);
+		modelCommon_.addConnectionsInNaturalBasis(hmatrix,cm,block,sysEnvOnly,time);
 
 		addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
 	}
@@ -232,7 +244,7 @@ public:
 		SizeType maxElectrons = static_cast<SizeType>(tmp/2);
 		if (tmp & 1) maxElectrons++;
 
-		return maxElectrons*modelCommon_->geometry().numberOfSites() + 1;
+		return maxElectrons*modelCommon_.geometry().numberOfSites() + 1;
 	}
 
 	virtual void setBasis(HilbertBasisType& basis,
@@ -252,9 +264,9 @@ public:
 		std::cout<<"quantumNumbs="<<q;
 	}
 
-	const GeometryType& geometry() const { return modelCommon_->geometry(); }
+	const GeometryType& geometry() const { return modelCommon_.geometry(); }
 
-	const ParametersType& params() const { return modelCommon_->params(); }
+	const ParametersType& params() const { return modelCommon_.params(); }
 
 	virtual const TargetQuantumElectronsType& targetQuantum() const = 0;
 
@@ -337,8 +349,7 @@ private:
 		symmetryBlock.clear();
 	}
 
-	ModelCommonBaseType modelCommon_;
-
+	ModelCommonType modelCommon_;
 };     //class ModelBase
 } // namespace Dmrg
 /*@}*/

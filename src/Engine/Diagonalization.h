@@ -111,7 +111,7 @@ public:
 	typedef typename ModelHelperType::ParamsForKroneckerDumperType
 	ParamsForKroneckerDumperType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
-	typedef typename ModelType::LinkProductType LinkProductType;
+	typedef typename ModelType::LinkProductBaseType LinkProductType;
 	typedef typename TargetingType::MatrixVectorType MatrixVectorType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
@@ -387,7 +387,7 @@ private:
 			paramsKrDumperPtr = &paramsKrDumper;
 
 		ModelHelperType modelHelper(i,lrs,targetTime,threadId, paramsKrDumperPtr);
-		HamiltonianConnectionType hc(model_.geometry(), modelHelper);
+		HamiltonianConnectionType hc(model_.geometry(), modelHelper, model_.linkProduct());
 
 		if (options.find("debugmatrix")!=PsimagLite::String::npos && !(saveOption & 4) ) {
 			SparseMatrixType fullm;

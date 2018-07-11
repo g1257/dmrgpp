@@ -84,11 +84,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ModelHelperType>
-class LinkProductHubbardOneBand : public LinkProductBase<ModelHelperType> {
+template<typename ModelHelperType, typename GeometryType>
+class LinkProductHubbardOneBand : public LinkProductBase<ModelHelperType, GeometryType> {
 
-	typedef LinkProductBase<ModelHelperType> BaseType;
-	typedef BaseType::AdditionalDataType AdditionalDataType;
+	typedef LinkProductBase<ModelHelperType, GeometryType> BaseType;
+	typedef typename BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -107,7 +107,7 @@ public:
 	                 SizeType& angularMomentum,
 	                 RealType& angularFactor,
 	                 SizeType& category,
-	                 const AdditionalDataType&)
+	                 const AdditionalDataType&) const
 	{
 		fermionOrBoson = ProgramGlobals::FERMION;
 
@@ -119,9 +119,9 @@ public:
 	}
 
 	// up up and down down are the only connections possible for this model
-	SizeType dofs(SizeType,const AdditionalDataType&) { return 2; }
+	SizeType dofs(SizeType, const AdditionalDataType&) const { return 2; }
 
-	SizeType terms() { return TERMS_; }
+	SizeType terms() const { return 1; }
 }; // class LinkProductHubbardOneBand
 } // namespace Dmrg
 /*@}*/

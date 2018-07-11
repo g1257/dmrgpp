@@ -116,7 +116,7 @@ private:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef unsigned int long WordType;
-	typedef LinkProductHeisenberg<ModelHelperType> LinkProductType;
+	typedef LinkProductHeisenberg<ModelHelperType, GeometryType> LinkProductType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -139,7 +139,7 @@ public:
 	                InputValidatorType& io,
 	                const GeometryType& geometry,
 	                PsimagLite::String additional)
-	    : ModelBaseType(solverParams, geometry),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)

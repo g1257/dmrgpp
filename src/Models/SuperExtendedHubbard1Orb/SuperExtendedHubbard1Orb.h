@@ -102,7 +102,7 @@ public:
 	typedef typename ModelBaseType::TargetQuantumElectronsType TargetQuantumElectronsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef LinkProdExtendedSuperHubbard1Orb<ModelHelperType> LinkProductType;
+	typedef LinkProdExtendedSuperHubbard1Orb<ModelHelperType, GeometryType> LinkProductType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
@@ -121,7 +121,7 @@ public:
 	ExtendedSuperHubbard1Orb(const SolverParamsType& solverParams,
 	                         InputValidatorType& io,
 	                         GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      extendedHubbard_(solverParams,io,geometry)

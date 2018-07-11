@@ -82,11 +82,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ModelHelperType>
-class LinkProdExtendedSuperHubbard1Orb : public LinkProductBase<ModelHelperType> {
+template<typename ModelHelperType, typename GeometryType>
+class LinkProdExtendedSuperHubbard1Orb : public LinkProductBase<ModelHelperType, GeometryType> {
 
-	typedef LinkProductBase<ModelHelperType> BaseType;
-	typedef BaseType::AdditionalDataType AdditionalDataType;
+	typedef LinkProductBase<ModelHelperType, GeometryType> BaseType;
+	typedef typename BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -107,14 +107,14 @@ public:
 	                 SizeType& angularMomentum,
 	                 RealType& angularFactor,
 	                 SizeType& category,
-	                 const AdditionalDataType&)
+	                 const AdditionalDataType&) const
 	{
 		if (term==TERM_HOPPING) {
 			fermionOrBoson = ProgramGlobals::FERMION;
 			SizeType spin1 = (dofs & 1);
 			SizeType spin2 = (dofs & 2);
 			spin2 >>= 1;
-			if (!hasSpinOrbit_)
+			if (!BaseType::hasSpinOrbit())
 				spin1 = spin2 = dofs;
 			ops = PairType(spin1,spin2);
 			angularFactor = 1;
@@ -171,7 +171,7 @@ public:
 	                   SizeType term,
 	                   SizeType,
 	                   bool isSu2,
-	                   const AdditionalDataType&)
+	                   const AdditionalDataType&) const
 	{
 
 		if (term==TERM_HOPPING || term == TERM_PAIRIPAIRJ)
@@ -188,21 +188,21 @@ public:
 		value *= 0.5;
 	}
 
-	SizeType dofs(SizeType term,const AdditionalDataType&)
+	SizeType dofs(SizeType term,const AdditionalDataType&) const
 	{
 		if (term != TERM_HOPPING) return 1;
 		assert(term == TERM_HOPPING);
-		return (hasSpinOrbit_) ? 4 : 2;
+		return (BaseType::hasSpinOrbit()) ? 4 : 2;
 	}
 
 	// has only dependence on orbital
 	void connectorDofs(VectorSizeType& edofs,
 	                   SizeType term,
 	                   SizeType dofs,
-	                   const AdditionalDataType&)
+	                   const AdditionalDataType&) const
 	{
 		// no orbital and no dependence on spin
-		if (term != TERM_HOPPING || !hasSpinOrbit_)  {
+		if (term != TERM_HOPPING || !BaseType::hasSpinOrbit())  {
 			edofs[0] = edofs[1] = 0;
 			return;
 		}
@@ -216,7 +216,7 @@ public:
 		edofs[1] = spin2;
 	}
 
-	SizeType terms() { return 5; }
+	SizeType terms() const { return 5; }
 }; // class LinkProdExtendedSuperHubbard1Orb
 } // namespace Dmrg
 /*@}*/

@@ -83,11 +83,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ModelHelperType>
-class LinkProductTjAncillaC2 : public LinkProductBase<ModelHelperType> {
+template<typename ModelHelperType, typename GeometryType>
+class LinkProductTjAncillaC2 : public LinkProductBase<ModelHelperType, GeometryType> {
 
-	typedef LinkProductBase<ModelHelperType> BaseType;
-	typedef BaseType::AdditionalDataType AdditionalDataType;
+	typedef LinkProductBase<ModelHelperType, GeometryType> BaseType;
+	typedef typename BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -108,7 +108,7 @@ public:
 	                 SizeType& angularMomentum,
 	                 RealType& angularFactor,
 	                 SizeType& category,
-	                 const AdditionalDataType&)
+	                 const AdditionalDataType&) const
 	{
 		assert(!isSu2);
 		char tmp = mods.first;
@@ -179,7 +179,7 @@ public:
 	                   SizeType term,
 	                   SizeType,
 	                   bool isSu2,
-	                   const AdditionalDataType&)
+	                   const AdditionalDataType&) const
 	{
 		assert(!isSu2);
 		if (term==TERM_CICJ) return;
@@ -200,7 +200,7 @@ public:
 	// up up and down down
 	// S+ S- and S- S+
 	// Sz Sz
-	SizeType dofs(SizeType term,const AdditionalDataType&)
+	SizeType dofs(SizeType term, const AdditionalDataType&) const
 	{
 		SizeType orbitals = (BaseType::hot()) ? 2 : 1;
 		if (term==TERM_CICJ) return 2*orbitals*orbitals; // c^\dagger c
@@ -216,7 +216,7 @@ public:
 	void connectorDofs(VectorSizeType& edofs,
 	                   SizeType term,
 	                   SizeType dofs,
-	                   const AdditionalDataType&)
+	                   const AdditionalDataType&) const
 	{
 		if (term==TERM_DIDJ) {
 			edofs[0] = edofs[1] = 0;
@@ -234,7 +234,7 @@ public:
 		edofs[1] = orb2; //  orbital dependence, no spin dependence
 	}
 
-	SizeType terms() { return 5; }
+	SizeType terms() const { return 5; }
 
 private:
 
@@ -267,8 +267,6 @@ private:
 		SizeType orbitalsSquared = orbitals*orbitals;
 		return dofs/orbitalsSquared;
 	}
-
-	static bool BaseType::hot();
 }; // class LinkProductTjAncillaC3
 } // namespace Dmrg
 /*@}*/

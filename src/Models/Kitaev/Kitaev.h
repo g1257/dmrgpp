@@ -117,7 +117,7 @@ private:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef unsigned int long WordType;
-	typedef LinkProductKitaev<ModelHelperType> LinkProductType;
+	typedef LinkProductKitaev<ModelHelperType, GeometryType> LinkProductType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -140,7 +140,7 @@ public:
 	Kitaev(const SolverParamsType& solverParams,
 	       InputValidatorType& io,
 	       const GeometryType& geometry)
-	    : ModelBaseType(solverParams, geometry),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType),
 	      modelParameters_(io),
 	      geometry_(geometry)
 	{

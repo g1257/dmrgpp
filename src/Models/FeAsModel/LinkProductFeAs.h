@@ -83,11 +83,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ModelHelperType>
-class LinkProductFeAs : public LinkProductBase<ModelHelperType> {
+template<typename ModelHelperType, typename GeometryType>
+class LinkProductFeAs : public LinkProductBase<ModelHelperType, GeometryType> {
 
-	typedef LinkProductBase<ModelHelperType> BaseType;
-	typedef BaseType::AdditionalDataType AdditionalDataType;
+	typedef LinkProductBase<ModelHelperType, GeometryType> BaseType;
+	typedef typename BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
@@ -101,7 +101,7 @@ public:
 	//! and 2 spins. Spin is diagonal so we end up with 2*orbitals*orbitals possiblities
 	//! a up a up, a up b up, b up a up, b up, b up, etc
 	//! and similarly for spin down.
-	SizeType dofs(SizeType, const AdditionalDataType&)
+	SizeType dofs(SizeType, const AdditionalDataType&) const
 	{
 		return 2*BaseType::orbitals()*BaseType::orbitals();
 	}
@@ -110,7 +110,7 @@ public:
 	void connectorDofs(VectorSizeType& edofs,
 	                   SizeType,
 	                   SizeType dofs,
-	                   const AdditionalDataType&)
+	                   const AdditionalDataType&) const
 	{
 		SizeType orbitalsSquared = BaseType::orbitals()*BaseType::orbitals();
 		SizeType spin = dofs/orbitalsSquared;
@@ -131,7 +131,7 @@ public:
 	                 SizeType& angularMomentum,
 	                 RealType& angularFactor,
 	                 SizeType& category,
-	                 const AdditionalDataType&)
+	                 const AdditionalDataType&) const
 	{
 		fermionOrBoson = ProgramGlobals::FERMION;
 		SizeType spin = getSpin(dofs);
@@ -142,7 +142,7 @@ public:
 		category = spin;
 	}
 
-	SizeType terms() { return 1; }
+	SizeType terms() const { return 1; }
 
 private:
 

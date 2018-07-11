@@ -83,11 +83,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ModelHelperType>
-class LinkProductTjMultiOrb : public LinkProductBase<ModelHelperType> {
+template<typename ModelHelperType, typename GeometryType>
+class LinkProductTjMultiOrb : public LinkProductBase<ModelHelperType, GeometryType> {
 
-	typedef LinkProductBase<ModelHelperType> BaseType;
-	typedef BaseType::AdditionalDataType AdditionalDataType;
+	typedef LinkProductBase<ModelHelperType, GeometryType> BaseType;
+	typedef typename BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -108,7 +108,7 @@ public:
 	                 SizeType& angularMomentum,
 	                 RealType& angularFactor,
 	                 SizeType& category,
-	                 const AdditionalDataType&)
+	                 const AdditionalDataType&) const
 	{
 		char tmp = mods.first;
 		if (term==TERM_CICJ) {
@@ -170,7 +170,7 @@ public:
 	                   SizeType term,
 	                   SizeType,
 	                   bool isSu2,
-	                   const AdditionalDataType&)
+	                   const AdditionalDataType&) const
 	{
 		if (term==TERM_CICJ) return;
 
@@ -190,7 +190,7 @@ public:
 	// up up and down down
 	// S+ S- and S- S+
 	// Sz Sz
-	SizeType dofs(SizeType term, const AdditionalDataType&)
+	SizeType dofs(SizeType term, const AdditionalDataType&) const
 	{
 		if (term==TERM_CICJ) return 2*BaseType::orbitals()*BaseType::orbitals(); // c^\dagger c
 		if (term==TERM_SPSM) return 2*BaseType::orbitals()*BaseType::orbitals(); // S+ S- and S- S+
@@ -204,7 +204,7 @@ public:
 	void connectorDofs(VectorSizeType& edofs,
 	                   SizeType term,
 	                   SizeType dofs,
-	                   const AdditionalDataType&)
+	                   const AdditionalDataType&) const
 	{
 		SizeType orbitalsSquared = BaseType::orbitals()*BaseType::orbitals();
 		SizeType spin = dofs/orbitalsSquared;
@@ -216,7 +216,7 @@ public:
 		edofs[1] = orb2; //  orbital dependence, no spin dependence
 	}
 
-	static SizeType terms() { return 4; }
+	SizeType terms() const { return 4; }
 
 private:
 

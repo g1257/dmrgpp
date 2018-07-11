@@ -109,7 +109,7 @@ public:
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
-	typedef LinkProductImmm<ModelHelperType> LinkProductType;
+	typedef LinkProductImmm<ModelHelperType, GeometryType> LinkProductType;
 	typedef  HilbertSpaceImmm<WordType> HilbertSpaceImmmType;
 	typedef typename HilbertSpaceImmmType::HilbertState HilbertState;
 	typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
@@ -130,7 +130,7 @@ public:
 	Immm(const SolverParamsType& solverParams,
 	     InputValidatorType& io,
 	     GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      copperEach_(4),

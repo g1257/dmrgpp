@@ -114,7 +114,7 @@ public:
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef LinkProductHubbardAncillaExtended<ModelHelperType> LinkProductType;
+	typedef LinkProductHubbardAncillaExtended<ModelHelperType, GeometryType> LinkProductType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
@@ -136,7 +136,7 @@ public:
 	HubbardAncillaExtended(const SolverParamsType& solverParams,
 	                       InputValidatorType& io,
 	                       GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      hot_(geometry_.orbitals(0,0) > 1)

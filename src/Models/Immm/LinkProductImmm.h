@@ -84,11 +84,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ModelHelperType>
-class LinkProductImmm : public LinkProductBase<ModelHelperType> {
+template<typename ModelHelperType, typename GeometryType>
+class LinkProductImmm : public LinkProductBase<ModelHelperType, GeometryType> {
 
-	typedef LinkProductBase<ModelHelperType> BaseType;
-	typedef BaseType::AdditionalDataType AdditionalDataType;
+	typedef LinkProductBase<ModelHelperType, GeometryType> BaseType;
+	typedef typename BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
@@ -105,7 +105,7 @@ public:
 	//! i.e. gamma sigma gamma' sigma = 2x2x2 = 8
 	//! if sites are TYPE_O and TYPE_C the returns 4, i.e. gamma sigma d sigma =  2x2
 	//! The term=1 is for Upd
-	SizeType dofs(SizeType term,const AdditionalDataType& additionalData)
+	SizeType dofs(SizeType term, const AdditionalDataType& additionalData) const
 	{
 		if (term==W_TERM) {
 			// No Upd allowed between Oxygens
@@ -124,7 +124,7 @@ public:
 	void connectorDofs(VectorSizeType& edofs,
 	                   SizeType term,
 	                   SizeType dofs,
-	                   const AdditionalDataType& additionalData)
+	                   const AdditionalDataType& additionalData) const
 	{
 		if (term==W_TERM) {
 			edofs[0] = edofs[1] = 0;
@@ -168,7 +168,7 @@ public:
 	                 SizeType& angularMomentum,
 	                 RealType& angularFactor,
 	                 SizeType& category,
-	                 const AdditionalDataType& additionalData)
+	                 const AdditionalDataType& additionalData) const
 	{
 		if (term==W_TERM) {
 			fermionOrBoson = ProgramGlobals::BOSON;
@@ -199,7 +199,7 @@ public:
 	                   SizeType term,
 	                   SizeType,
 	                   bool,
-	                   const AdditionalDataType&)
+	                   const AdditionalDataType&) const
 	{
 		if (term==W_TERM) {
 			value *= 0.5;
@@ -209,7 +209,7 @@ public:
 		value *= (-1.0);
 	}
 
-	SizeType terms() { return 2; }
+	SizeType terms() const { return 2; }
 
 private:
 

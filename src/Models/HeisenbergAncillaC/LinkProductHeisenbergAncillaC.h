@@ -82,11 +82,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LinkProductBase.h"
 
 namespace Dmrg {
-template<typename ModelHelperType>
-class LinkProductHeisenbergAncillaC : public LinkProductBase<ModelHelperType> {
+template<typename ModelHelperType, typename GeometryType>
+class LinkProductHeisenbergAncillaC : public LinkProductBase<ModelHelperType, GeometryType> {
 
-	typedef LinkProductBase<ModelHelperType> BaseType;
-	typedef BaseType::AdditionalDataType AdditionalDataType;
+	typedef LinkProductBase<ModelHelperType, GeometryType> BaseType;
+	typedef typename BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 
 public:
@@ -107,10 +107,10 @@ public:
 	                        SizeType& angularMomentum,
 	                        RealType& angularFactor,
 	                        SizeType& category,
-	                        const AdditionalDataType&)
+	                        const AdditionalDataType&) const
 	{
 		fermionOrBoson = ProgramGlobals::BOSON;
-		ops = (hot_) ? operatorDofsHot(term,dofs,isSu2) : operatorDofs(term,isSu2);
+		ops = (BaseType::hot()) ? operatorDofsHot(term,dofs,isSu2) : operatorDofs(term,isSu2);
 		angularMomentum = 2;
 		switch (term) {
 		case 0:
@@ -132,16 +132,16 @@ public:
 	                          SizeType term,
 	                          SizeType,
 	                          bool isSu2,
-	                          const AdditionalDataType&)
+	                          const AdditionalDataType&) const
 	{
 		if (term == TERM_ANCILLA) return;
 		if (isSu2) value = -value;
 		value *= 0.5;
 	}
 
-	SizeType dofs(SizeType term,const AdditionalDataType&)
+	SizeType dofs(SizeType term,const AdditionalDataType&) const
 	{
-		if (!hot_ || term == TERM_ANCILLA) return 1;
+		if (!BaseType::hot() || term == TERM_ANCILLA) return 1;
 		return 2;
 	}
 
@@ -149,9 +149,9 @@ public:
 	void connectorDofs(VectorSizeType& edofs,
 	                          SizeType term,
 	                          SizeType dofs,
-	                          const AdditionalDataType&)
+	                          const AdditionalDataType&) const
 	{
-		if (!hot_ || term == TERM_ANCILLA)
+		if (!BaseType::hot() || term == TERM_ANCILLA)
 			edofs[0] = edofs[1] = 0;
 		else
 			edofs[0] = edofs[1] = dofs;
@@ -160,7 +160,7 @@ public:
 	//! Splus Sminus and
 	//! Sz Sz
 	//! delta^\dagger delta
-	SizeType terms() { return 3; }
+	SizeType terms() const { return 3; }
 
 private:
 

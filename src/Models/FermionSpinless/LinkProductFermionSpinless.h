@@ -84,11 +84,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ModelHelperType>
-class LinkProductFermionSpinless : public LinkProductBase<ModelHelperType> {
+template<typename ModelHelperType, typename GeometryType>
+class LinkProductFermionSpinless : public LinkProductBase<ModelHelperType, GeometryType> {
 
-	typedef LinkProductBase<ModelHelperType> BaseType;
-	typedef BaseType::AdditionalDataType AdditionalDataType;
+	typedef LinkProductBase<ModelHelperType, GeometryType> BaseType;
+	typedef typename BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -108,7 +108,7 @@ public:
 	                 std::pair<char,char>&,
 	                 SizeType& angularMomentum,
 	                 RealType& angularFactor,
-	                 SizeType& category,const AdditionalDataType&)
+	                 SizeType& category,const AdditionalDataType&) const
 	{
 		assert(dofs == 0);
 		if (term==TERM_NINJ) fermionOrBoson = ProgramGlobals::BOSON;
@@ -123,9 +123,9 @@ public:
 	}
 
 	// up up is the only connections possible for this model
-	SizeType dofs(SizeType,const AdditionalDataType&) { return 1; }
+	SizeType dofs(SizeType,const AdditionalDataType&) const { return 1; }
 
-	SizeType terms() { return 2; }
+	SizeType terms() const { return 2; }
 }; // class LinkProductFermionSpinless
 } // namespace Dmrg
 /*@}*/

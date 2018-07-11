@@ -82,11 +82,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LinkProductBase.h"
 
 namespace Dmrg {
-template<typename ModelHelperType>
-class LinkProductKitaev : public LinkProductBase<ModelHelperType> {
+template<typename ModelHelperType, typename GeometryType>
+class LinkProductKitaev : public LinkProductBase<ModelHelperType, GeometryType> {
 
-	typedef LinkProductBase<ModelHelperType> BaseType;
-	typedef BaseType::AdditionalDataType AdditionalDataType;
+	typedef LinkProductBase<ModelHelperType, GeometryType> BaseType;
+	typedef typename BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 
 	static const SizeType terms_ = 3;
@@ -107,7 +107,7 @@ public:
 	                        SizeType&,// angularMomentum,
 	                        RealType&,// angularFactor,
 	                        SizeType&,// category,
-	                        const AdditionalDataType&)
+	                        const AdditionalDataType&) const
 	{
 		assert(!isSu2);
 		fermionOrBoson = ProgramGlobals::BOSON;
@@ -118,18 +118,18 @@ public:
 	                          SizeType,
 	                          SizeType,
 	                          bool isSu2,
-	                          const AdditionalDataType&)
+	                          const AdditionalDataType&) const
 	{
 		assert(!isSu2);
 		value *= 0.5;
 	}
 
-	SizeType dofs(SizeType,const AdditionalDataType&) { return 1; }
+	SizeType dofs(SizeType,const AdditionalDataType&) const { return 1; }
 
 	//! Sx Sx
 	//! Sy Sy
 	//! Sz Sz
-	SizeType terms() { return terms_; }
+	SizeType terms() const { return terms_; }
 }; // class LinkProductKitaev
 } // namespace Dmrg
 /*@}*/

@@ -86,11 +86,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ModelHelperType>
-class LinkProdSuperHubbardExtended : public LinkProductBase<ModelHelperType> {
+template<typename ModelHelperType, typename GeometryType>
+class LinkProdSuperHubbardExtended : public LinkProductBase<ModelHelperType, GeometryType> {
 
-	typedef LinkProductBase<ModelHelperType> BaseType;
-	typedef BaseType::AdditionalDataType AdditionalDataType;
+	typedef LinkProductBase<ModelHelperType, GeometryType> BaseType;
+	typedef typename BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -110,33 +110,34 @@ public:
 	                 SizeType& angularMomentum,
 	                 RealType& angularFactor,
 	                 SizeType& category,
-	                 const AdditionalDataType& additional)
+	                 const AdditionalDataType& additional) const
 	{
+		typedef LinkProdExtendedHubbard1Orb<ModelHelperType, GeometryType> SomeLinkProdType;
 		if (term == TERM_HOPPING || term == TERM_NINJ) {
-			return LinkProdExtendedHubbard1Orb<ModelHelperType>::setLinkData(term,
-			                                                                 dofs,
-			                                                                 isSu2,
-			                                                                 fermionOrBoson,
-			                                                                 ops,
-			                                                                 mods,
-			                                                                 angularMomentum,
-			                                                                 angularFactor,
-			                                                                 category,
-			                                                                 additional);
+			return SomeLinkProdType::setLinkData(term,
+			                                     dofs,
+			                                     isSu2,
+			                                     fermionOrBoson,
+			                                     ops,
+			                                     mods,
+			                                     angularMomentum,
+			                                     angularFactor,
+			                                     category,
+			                                     additional);
 		}
 
 		assert(term == TERM_SUPER);
 
-		LinkProductHeisenberg<ModelHelperType>::setLinkData(0,
-		                                                    dofs,
-		                                                    isSu2,
-		                                                    fermionOrBoson,
-		                                                    ops,
-		                                                    mods,
-		                                                    angularMomentum,
-		                                                    angularFactor,
-		                                                    category,
-		                                                    additional);
+		LinkProductHeisenberg<ModelHelperType, GeometryType>::setLinkData(0,
+		                                                                  dofs,
+		                                                                  isSu2,
+		                                                                  fermionOrBoson,
+		                                                                  ops,
+		                                                                  mods,
+		                                                                  angularMomentum,
+		                                                                  angularFactor,
+		                                                                  category,
+		                                                                  additional);
 		ops.first += 3;
 		ops.second += 3;
 	}
@@ -145,49 +146,52 @@ public:
 	                   SizeType term,
 	                   SizeType dofs,
 	                   bool isSu2,
-	                   const AdditionalDataType& additional)
+	                   const AdditionalDataType& additional) const
 	{
+		typedef LinkProdExtendedHubbard1Orb<ModelHelperType, GeometryType> SomeLinkProdType;
 		if (term == TERM_HOPPING || term == TERM_NINJ)
-			return LinkProdExtendedHubbard1Orb<ModelHelperType>::valueModifier(value,
-			                                                                   term,
-			                                                                   dofs,
-			                                                                   isSu2,
-			                                                                   additional);
+			return SomeLinkProdType::valueModifier(value,
+			                                       term,
+			                                       dofs,
+			                                       isSu2,
+			                                       additional);
 
-		return LinkProductHeisenberg<ModelHelperType>::valueModifier(value,
-		                                                             0,
-		                                                             dofs,
-		                                                             isSu2,
-		                                                             additional);
+		return LinkProductHeisenberg<ModelHelperType, GeometryType>::valueModifier(value,
+		                                                                           0,
+		                                                                           dofs,
+		                                                                           isSu2,
+		                                                                           additional);
 	}
 
-	SizeType dofs(SizeType term,const AdditionalDataType& additional)
+	SizeType dofs(SizeType term,const AdditionalDataType& additional) const
 	{
 		if (term == TERM_HOPPING || term == TERM_NINJ)
-			return LinkProdExtendedHubbard1Orb<ModelHelperType>::dofs(term,additional);
+			return LinkProdExtendedHubbard1Orb<ModelHelperType, GeometryType>::dofs(term,
+			                                                                        additional);
 
-		return LinkProductHeisenberg<ModelHelperType>::dofs(0,additional);
+		return LinkProductHeisenberg<ModelHelperType, GeometryType>::dofs(0,additional);
 	}
 
 	// has only dependence on orbital
 	void connectorDofs(VectorSizeType& edofs,
 	                   SizeType term,
 	                   SizeType dofs,
-	                   const AdditionalDataType& additional)
+	                   const AdditionalDataType& additional) const
 	{
+		typedef LinkProdExtendedHubbard1Orb<ModelHelperType, GeometryType> SomeLinkProdType;
 		if (term == TERM_HOPPING || term == TERM_NINJ)
-			return LinkProdExtendedHubbard1Orb<ModelHelperType>::connectorDofs(edofs,
-			                                                                   term,
-			                                                                   dofs,
-			                                                                   additional);
+			return SomeLinkProdType::connectorDofs(edofs,
+			                                       term,
+			                                       dofs,
+			                                       additional);
 
-		return LinkProductHeisenberg<ModelHelperType>::connectorDofs(edofs,
-		                                                             0,
-		                                                             dofs,
-		                                                             additional);
+		return LinkProductHeisenberg<ModelHelperType, GeometryType>::connectorDofs(edofs,
+		                                                                           0,
+		                                                                           dofs,
+		                                                                           additional);
 	}
 
-	SizeType terms() { return 3; }
+	SizeType terms() const { return 3; }
 }; // class LinkProdSuperHubbardExtended
 } // namespace Dmrg
 /*@}*/

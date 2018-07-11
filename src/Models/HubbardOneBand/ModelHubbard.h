@@ -131,7 +131,7 @@ private:
 public:
 
 	typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
-	typedef LinkProductHubbardOneBand<ModelHelperType> LinkProductType;
+	typedef LinkProductHubbardOneBand<ModelHelperType, GeometryType> LinkProductType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
@@ -141,7 +141,7 @@ public:
 	             InputValidatorType& io,
 	             GeometryType const &geometry,
 	             SizeType offset = DEGREES_OF_FREEDOM)
-	    : ModelBaseType(solverParams, geometry),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      offset_(offset),

@@ -89,7 +89,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "NoPthreads.h"
 #include "Sort.h"
 #include "Profiling.h"
-:#include "LinkProductBase.h"
+#include "LinkProductBase.h"
+#include "HamiltonianConnection.h"
 
 namespace Dmrg {
 
@@ -97,13 +98,13 @@ template<typename ParametersType, typename GeometryType, typename ModelHelperTyp
 class ModelCommon  {
 
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelHelperType::LinkType LinkType;
 	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
-	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
 
 public:
 
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef LinkProductBase<ModelHelperType, GeometryType> LinkProductBaseType;
 	typedef PsimagLite::InputNg<InputCheck>::Readable InputValidatorType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -111,30 +112,47 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelHelperType::BasisType MyBasis;
 	typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BaseType::HamiltonianConnectionType HamiltonianConnectionType;
+	typedef HamiltonianConnection<LinkProductBaseType> HamiltonianConnectionType;
 	typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename PsimagLite::Vector<LinkProductStructType>::Type VectorLinkProductStructType;
 	typedef typename HamiltonianConnectionType::VectorSizeType VectorSizeType;
 	typedef typename HamiltonianConnectionType::VerySparseMatrixType VerySparseMatrixType;
 
-	ModelCommon(const SolverParamsType& params,const GeometryType& geometry)
+	ModelCommon(const ParametersType& params,
+	            const GeometryType& geometry,
+	            const LinkProductBaseType* lpb)
 	    : params_(params),
 	      geometry_(geometry),
+	      lpb_(lpb),
 	      progress_("ModelCommon")
 	{
-		if (LinkProductType::terms() > this->geometry().terms()) {
+		if (lpb->terms() > geometry.terms()) {
 			PsimagLite::String str("ModelCommon: NumberOfTerms must be ");
-			str += ttos(LinkProductType::terms()) + " in input file for this model\n";
-			throw PsimagLite::RuntimeError(str);
+			err( str + ttos(lpb->terms()) + " in input file for this model\n");
 		}
 
 		Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 		MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
 	}
+
+	~ModelCommon()
+	{
+		delete lpb_;
+		lpb_ = 0;
+	}
+
+	const LinkProductBaseType& linkProduct() const
+	{
+		assert(lpb_);
+		return *lpb_;
+	}
+
+	const ParametersType& params() const { return params_; }
+
+	const GeometryType& geometry() const { return geometry_; }
 
 	/** Let H be the hamiltonian of the  model for basis1 and partition m
 	 * consisting of the external product
@@ -184,7 +202,7 @@ public:
 			VerySparseMatrixType& vsm = *(vvsm[m]);
 			SizeType threadId = 0;
 			ModelHelperType modelHelper(m, lrs, currentTime, threadId);
-			HamiltonianConnectionType hc(BaseType::geometry(), modelHelper);
+			HamiltonianConnectionType hc(geometry_, modelHelper, *lpb_);
 
 			hc.matrixBond(vsm);
 			nzs[m] = vsm.nonZeros();
@@ -238,31 +256,16 @@ public:
 		matrix.swap(sumCrs);
 	}
 
-private:
-
-
-//	SizeType getLinkProductStruct(const ModelHelperType& modelHelper) const
-//	{
-//		HamiltonianConnectionType hc(BaseType::geometry(), modelHelper, lps_);
-
-//		return hc.tasks();
-//	}
-
-	LinkType getConnection(const SparseMatrixType** A,
-	                       const SparseMatrixType** B,
-	                       SizeType ix,
-	                       const HamiltonianConnectionType& hc) const
+	void addConnectionsInNaturalBasis(SparseMatrixType& hmatrix,
+	                                  const VectorOperatorType& cm,
+	                                  const Block& block,
+	                                  bool sysEnvOnly,
+	                                  RealType time) const
 	{
-		SizeType xx = 0;
-		ProgramGlobals::ConnectionEnum type;
-		SizeType term = 0;
-		SizeType dofs = 0;
-		SparseElementType tmp = 0.0;
-		AdditionalDataType additionalData;
-		hc.prepare(xx,type,tmp,term,dofs,additionalData,ix);
-		LinkType link2 = hc.getKron(A,B,xx,type,tmp,term,dofs,additionalData);
-		return link2;
+		if (block.size() != 1)
+			err("addConnectionsInNaturalBasis(): unimplemented\n");
 	}
+
 
 	/**
 		Returns H, the hamiltonian for basis1 and partition
@@ -290,14 +293,29 @@ private:
 		matrix = vsm;
 	}
 
-	void addConnectionsInNaturalBasis(SparseMatrixType& hmatrix,
-	                                  const VectorOperatorType& cm,
-	                                  const Block& block,
-	                                  bool sysEnvOnly,
-	                                  RealType time) const
+private:
+
+//	SizeType getLinkProductStruct(const ModelHelperType& modelHelper) const
+//	{
+//		HamiltonianConnectionType hc(BaseType::geometry(), modelHelper, lps_);
+
+//		return hc.tasks();
+//	}
+
+	LinkType getConnection(const SparseMatrixType** A,
+	                       const SparseMatrixType** B,
+	                       SizeType ix,
+	                       const HamiltonianConnectionType& hc) const
 	{
-		if (block.size() != 1)
-			err("addConnectionsInNaturalBasis(): unimplemented\n");
+		SizeType xx = 0;
+		ProgramGlobals::ConnectionEnum type;
+		SizeType term = 0;
+		SizeType dofs = 0;
+		ComplexOrRealType tmp = 0.0;
+		AdditionalDataType additionalData;
+		hc.prepare(xx,type,tmp,term,dofs,additionalData,ix);
+		LinkType link2 = hc.getKron(A,B,xx,type,tmp,term,dofs,additionalData);
+		return link2;
 	}
 
 //	SparseMatrixType transposeOrNot(const SparseMatrixType& A,char mod) const
@@ -310,8 +328,9 @@ private:
 //		return A;
 //	}
 
-	const SolverParamsType& params_;
+	const ParametersType& params_;
 	const GeometryType& geometry_;
+	const LinkProductBaseType* lpb_;
 	PsimagLite::ProgressIndicator progress_;
 }; //class ModelCommon
 } // namespace Dmrg

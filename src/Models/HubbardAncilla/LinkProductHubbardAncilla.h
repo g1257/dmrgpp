@@ -85,17 +85,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ModelHelperType>
-class LinkProductHubbardAncilla : public LinkProductBase<ModelHelperType> {
+template<typename ModelHelperType, typename GeometryType>
+class LinkProductHubbardAncilla : public LinkProductBase<ModelHelperType, GeometryType> {
 
-	typedef LinkProductBase<ModelHelperType> BaseType;
-	typedef BaseType::AdditionalDataType AdditionalDataType;
+	typedef LinkProductBase<ModelHelperType, GeometryType> BaseType;
+	typedef typename BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef std::pair<SizeType,SizeType> PairType;
-	typedef LinkProductFeAs<ModelHelperType> LinkProductFeAsType;
-	typedef LinkProductHeisenberg<ModelHelperType> LinkProductHeisenbergType;
+	typedef LinkProductFeAs<ModelHelperType, GeometryType> LinkProductFeAsType;
+	typedef LinkProductHeisenberg<ModelHelperType, GeometryType> LinkProductHeisenbergType;
 	typedef typename ModelHelperType::BasisType BasisType;
 	typedef typename ModelHelperType::OperatorType OperatorType;
 
@@ -105,7 +105,7 @@ public:
 
 	typedef typename ModelHelperType::RealType RealType;
 
-	SizeType dofs(SizeType,const AdditionalDataType&)
+	SizeType dofs(SizeType,const AdditionalDataType&) const
 	{
 		return 2;
 	}
@@ -119,7 +119,7 @@ public:
 	                 SizeType& angularMomentum,
 	                 RealType& angularFactor,
 	                 SizeType& category,
-	                 const AdditionalDataType&)
+	                 const AdditionalDataType&) const
 	{
 		if (term==TERM_HOPPING) {
 			fermionOrBoson = ProgramGlobals::FERMION;
@@ -136,7 +136,7 @@ public:
 		ops = PairType(dofs + offset1,dofs + offset1);
 	}
 
-	SizeType terms() { return 2; }
+	SizeType terms() const { return 2; }
 }; // class LinkProductHubbardAncilla
 } // namespace Dmrg
 /*@}*/
