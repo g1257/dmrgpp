@@ -123,7 +123,7 @@ public:
 	                         GeometryType const &geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType((geometry_.orbitals(LinkProductType::TERM_HOPPING,
+	                    new LinkProductType((geometry.orbitals(LinkProductType::TERM_HOPPING,
 	                                                           0) == 2))),
 	      modelParameters_(io),
 	      geometry_(geometry),
