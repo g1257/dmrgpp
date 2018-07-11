@@ -299,18 +299,6 @@ public:
 
 private:
 
-
-
-//	SparseMatrixType transposeOrNot(const SparseMatrixType& A,char mod) const
-//	{
-//		if (mod == 'C' || mod == 'c') {
-//			SparseMatrixType Ac;
-//			transposeConjugate(Ac,A);
-//			return Ac;
-//		}
-//		return A;
-//	}
-
 	const ParametersType& params_;
 	const GeometryType& geometry_;
 	const LinkProductBaseType* lpb_;

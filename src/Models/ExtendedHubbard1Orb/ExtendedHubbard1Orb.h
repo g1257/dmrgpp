@@ -122,7 +122,7 @@ public:
 	    : ModelBaseType(solverParams, geometry, new LinkProductType),
 	      modelParameters_(io),
 	      geometry_(geometry),
-	      modelHubbard_(solverParams,io,geometry, 2, 1)
+	      modelHubbard_(solverParams,io,geometry, 1)
 	{}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,

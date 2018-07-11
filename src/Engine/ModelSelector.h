@@ -119,7 +119,7 @@ public:
 		if (model_) return *model_;
 
 		if (name_ == "HubbardOneBand") {
-			model_ = new ModelHubbardType(solverParams, io, geometry, 2, 1);
+			model_ = new ModelHubbardType(solverParams, io, geometry, 1);
 		} else if (name_ == "Heisenberg") {
 			model_ = new ModelHeisenbergType(solverParams,io,geometry,"");
 		} else if (name_ == "HeisenbergAnisotropic") {
@@ -147,7 +147,7 @@ public:
 		} else if (name_ == "SuperHubbardExtended") {
 			model_ = new SuperHubbardExtendedType(solverParams,io,geometry);
 		} else if (name_ == "KaneMeleHubbard") {
-			model_ = new ModelHubbardType(solverParams,io,geometry,2,2);
+			model_ = new ModelHubbardType(solverParams,io,geometry, 2);
 		} else if (name_ == "HubbardAncilla") {
 			model_ = new HubbardAncillaType(solverParams,io,geometry);
 		} else if (name_ == "HubbardAncillaExtended") {

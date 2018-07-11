@@ -140,12 +140,10 @@ public:
 	ModelHubbard(const SolverParamsType& solverParams,
 	             InputValidatorType& io,
 	             GeometryType const &geometry,
-	             SizeType offset,
 	             SizeType terms)
 	    : ModelBaseType(solverParams, geometry, new LinkProductType(terms)),
 	      modelParameters_(io),
 	      geometry_(geometry),
-	      offset_(offset),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 	{
 		SizeType usize = modelParameters_.hubbardU.size();
@@ -165,49 +163,11 @@ public:
 		}
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv& mres,
+	SizeType memResolv(PsimagLite::MemResolv&,
 	                   SizeType,
 	                   PsimagLite::String msg = "") const
 	{
-		PsimagLite::String str = msg;
-		str += "ModelHubbard";
-
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&modelParameters_);
-		SizeType total = end - start;
-		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
-		          total,
-		          start,
-		          msg + " ModelHubbard vptr");
-
-		start = end;
-		end = start + sizeof(modelParameters_);
-		total += mres.memResolv(&modelParameters_, end-start, str + " modelParameters");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&offset_);
-		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
-		          PsimagLite::MemResolv::SIZEOF_HEAPREF,
-		          start,
-		          str + " ref to geometry");
-
-		mres.memResolv(&geometry_, 0, str + " geometry");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&spinSquaredHelper_);
-		total += mres.memResolv(&offset_, end-start, str + " offset");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&spinSquared_);
-		total += mres.memResolv(&spinSquaredHelper_,
-		                        end-start,
-		                        str + " spinSquaredHelper");
-
-		assert(sizeof(*this) > total);
-		total += mres.memResolv(&spinSquared_,
-		                        sizeof(*this) - total, str + " spinSquared");
-
-		return total;
+		return 0;
 	}
 
 	/** \cppFunction{!PTEX_THISFUNCTION} returns the size of the one-site Hilbert space. */
@@ -237,8 +197,8 @@ public:
 				if (sigma>0) asign= 1;
 				typename OperatorType::Su2RelatedType su2related;
 				if (sigma==0) {
-					su2related.source.push_back(i*offset_);
-					su2related.source.push_back(i*offset_+1);
+					su2related.source.push_back(i*DEGREES_OF_FREEDOM);
+					su2related.source.push_back(i*DEGREES_OF_FREEDOM+1);
 					su2related.transpose.push_back(-1);
 					su2related.transpose.push_back(-1);
 					su2related.offset = NUMBER_OF_ORBITALS;
@@ -422,7 +382,6 @@ public:
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
 		modelParameters_.write(label, io);
-		io.write(label + "/offset_", offset_);
 		spinSquaredHelper_.write(label, io);
 		spinSquared_.write(label, io);
 	}
@@ -441,12 +400,12 @@ public:
 			// onsite U hubbard
 			//n_i up
 			SizeType sigma =0; // up sector
-			transposeConjugate(tmpMatrix,cm[sigma+i*offset_].data);
-			multiply(niup,tmpMatrix,cm[sigma+i*offset_].data);
+			transposeConjugate(tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data);
+			multiply(niup,tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data);
 			//n_i down
 			sigma =1; // down sector
-			transposeConjugate(tmpMatrix,cm[sigma+i*offset_].data);
-			multiply(nidown,tmpMatrix,cm[sigma+i*offset_].data);
+			transposeConjugate(tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data);
+			multiply(nidown,tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data);
 
 			multiply(tmpMatrix,niup,nidown);
 			RealType tmp = modelParameters_.hubbardU[block[i]]*factorForDiagonals;
@@ -611,17 +570,9 @@ private:
 		return jm;
 	}
 
-	//serializr start class ModelHubbard
-	//serializr vptr
-	//serializr normal modelParameters_
 	ParametersModelHubbard<RealType>  modelParameters_;
-	//serializr ref geometry_
 	const GeometryType &geometry_;
-	//serializr normal offset_
-	SizeType offset_;
-	//serializr normal spinSquaredHelper_
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
-	//serializr normal spinSquared_
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
 };	//class ModelHubbard
 
