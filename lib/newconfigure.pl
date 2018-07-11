@@ -33,6 +33,7 @@ GetOptions('f=s' => \$flavor,
            'c=s' => \$config) or die "$usage\n";
 
 my @configFiles = ("../TestSuite/inputs/ConfigBase.psiTag");
+push @configFiles, "../TestSuite/inputs/BasicFlavors.psiTag";
 push @configFiles, $config if ($config ne "");
 push @configFiles, "../TestSuite/inputs/BasicFlavors.psiTag";
 

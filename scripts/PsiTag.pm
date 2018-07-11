@@ -72,8 +72,14 @@ sub readTags
 	my $multilineContent;
 	my $multilineTag;
 	my $multilineMode;
+	my $parensBalance = 0;
+
 	for (my $i = 0; $i < $n; ++$i) {
 		my $line = $lines->[$i];
+		if ($line =~ /^[ \t]*\}[ \t]*$/) {
+			print STDERR "$0: Warning Closing brace on its own in line $i\n";
+		}
+
 		if (!$blockScope) {
 			next if ($line =~ /^\#/ or isEmptyLine($line));
 			if ($line =~ /^([^\=\+\?\!\-\<\&\*]+)([\=\+\?\!\-\<\&\*][^ \t]*)(.*)$/) {
@@ -84,10 +90,14 @@ sub readTags
 				my $thisLineParens = 0;
 				if ($rest =~ s/^[ \t]*\(//) { # (1)
 					++$thisLineParens;
+					++$parensBalance;
+					die "$0: FATAL: (line scope) Nested parens not allowed, line=$line\n" if ($parensBalance > 1);
 				}
 
 				if ($rest =~ s/\)[ \t]*$//) { # (2) in line scope
 					--$thisLineParens;
+					--$parensBalance;
+					die "$0: FATAL: Closing parens but context closed already, line=$line\n" if ($parensBalance < 0);
 				}
 
 				my $content = $rest."\n";
@@ -127,12 +137,15 @@ sub readTags
 			$content =~ s/^[ \t]+//;
 			if ($content =~ s/\)[ \t]*$//) { # (2) in block scope
 				$closeScope = 1;
+				--$parensBalance;
+				die "$0: FATAL: (block scope) Nested parens not allowed, line=$line\n" if ($parensBalance > 1);
 			}
 
 			if ($content =~ /^[ \t]*\<(.*$)/) { # (3) in block scope
 				my $existingTag = $1;
 				$existingTag = canonicalTagName($existingTag);
 				my $ptr = $tags->{"$existingTag"};
+				defined($ptr) or die "$0: Tag $existingTag doesn't exist\n";
 				(ref($ptr) eq "HASH") or die "$0: Tag $existingTag not hash ref but ".ref($ptr)."\n";
 				$content = $ptr->{"content"};
 				defined($content) or die "$0: No content for $existingTag\n";
