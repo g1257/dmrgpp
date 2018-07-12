@@ -6,7 +6,7 @@ use Getopt::Long qw(:config no_ignore_case);
 use lib ".";
 use Ci;
 
-my ($valgrind,$workdir,$ranges,$noSu2,$info,$sOptions,$help);
+my ($valgrind,$workdir,$ranges,$su2,$info,$sOptions,$help);
 my %submit;
 GetOptions(
 'S=s' => \$submit{"command"},
@@ -16,7 +16,7 @@ GetOptions(
 'n=s' => \$ranges,
 'i=i' => \$info,
 'o=s' => \$sOptions,
-'nosu2' => \$noSu2,
+'su2' => \$su2,
 'h' => \$help) or die "$0: Error in command line args, run with -h to display help\n";
 
 if (defined($help)) {
@@ -37,7 +37,7 @@ if (defined($help)) {
 	print "\t\tRun with valgrind using tool tool\n";
 	print "\t-i number\n";
 	print "\t\tPrint info for test number number\n";
-	print Ci::helpFor("-nosu2");
+	print Ci::helpFor("-su2");
 	print Ci::helpFor("-h");
 	exit(0);
 }
@@ -52,7 +52,7 @@ if ($submit{"delay"} < 5 and $submit{"command"} eq "qsub") {
 	die "$0: Delay for qsub must be at least 5 seconds\n";
 }
 
-defined($noSu2) or $noSu2 = 0;
+defined($su2) or $su2 = 0;
 defined($sOptions) or $sOptions = "";
 
 defined($valgrind) or $valgrind = "";
@@ -96,10 +96,10 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	}
 
 	my $isSu2 = Ci::isSu2("../inputs/input$n.inp",$n);
-	if ($isSu2 and $noSu2) {
+	if ($isSu2 and !$su2) {
 		print STDERR "$0: WARNING: Ignored test $n ";
 		print STDERR "because it's NOT an SU(2) test and ";
-		print STDERR "you specified -nosu2\n";
+		print STDERR "you did not specify -su2\n";
 		next;
 	}
 

@@ -146,9 +146,9 @@ sub helpFor
 		$h .= "\t-w workdir\n";
 		$h .= "\t\tUse workdir as working directory not the default of tests/\n";
 		return $h;
-	} elsif ($label eq "-nosu2") {
-		$h .= "\t-nosu2\n";
-		$h .= "\t\tDo not postprocess SU(2) tests\n";
+	} elsif ($label eq "-su2") {
+		$h .= "\t-su2\n";
+		$h .= "\t\t[Post]process SU(2) tests\n";
 		return $h;
 	} elsif ($label eq "-h") {
 		$h .= "\t-h\n";

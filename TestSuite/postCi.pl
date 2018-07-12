@@ -9,12 +9,12 @@ use lib "../scripts";
 use timeObservablesInSitu;
 use Metts;
 
-my ($memory,$failed,$noSu2,$help,$workdir,$golddir,$ranges,$info);
+my ($memory,$failed,$su2,$help,$workdir,$golddir,$ranges,$info);
 GetOptions(
 'n=s' => \$ranges,
 'memory=i' => \$memory,
 'f' => \$failed,
-'nosu2' => \$noSu2,
+'su2' => \$su2,
 'i=i' => \$info,
 'h' => \$help,
 'g=s' => \$golddir,
@@ -32,7 +32,7 @@ if (defined($help)) {
 	print "\t\tIgnore files larger than mem\n";
 	print "\t-f\n";
 	print "\t\tPrint info only about failed tests\n";
-	print Ci::helpFor("-nosu2");
+	print Ci::helpFor("-su2");
 	print "\t-i number\n";
 	print "\t\tPrint info for test number number\n";
 	print Ci::helpFor("-h");
@@ -41,7 +41,7 @@ if (defined($help)) {
 
 defined($memory) or $memory = 50000000;
 defined($failed) or $failed = 0;
-defined($noSu2) or $noSu2 = 0;
+defined($su2) or $su2 = 0;
 defined($workdir) or $workdir = "tests";
 defined($golddir) or $golddir = "oldTests";
 
@@ -68,10 +68,10 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	}
 
 	my $isSu2 = Ci::isSu2("inputs/input$n.inp",$n);
-	if ($isSu2 and $noSu2) {
+	if ($isSu2 and !$su2) {
 		print STDERR "$0: WARNING: Ignored test $n ";
 		print STDERR "because it's NOT an SU(2) test and ";
-		print STDERR "you specified -nosu2\n";
+		print STDERR "you did not specify -su2\n";
 		next;
         }
 
