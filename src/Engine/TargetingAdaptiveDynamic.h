@@ -291,12 +291,13 @@ private:
 	                       SizeType,
 	                       const VectorWithOffsetType& phiNew)
 	{
-		SizeType threadId = 0;
 		RealType fakeTime = 0;
-		typename ModelType::ModelHelperType modelHelper(p,this->lrs(),fakeTime,threadId);
-		typename ModelType::HamiltonianConnectionType hc(BaseType::model().geometry(),
-		                                                 modelHelper,
-		                                                 BaseType::model().linkProduct());
+		typename ModelType::HamiltonianConnectionType hc(p,
+		                                                 BaseType::lrs(),
+		                                                 BaseType::model().geometry(),
+		                                                 BaseType::model().linkProduct(),
+		                                                 fakeTime,
+		                                                 0);
 		typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
 		LanczosMatrixType h(BaseType::model(), hc);
 		LanczosSolverType lanczosSolver(h,paramsForSolver_);

@@ -108,8 +108,7 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelHelperType::ParamsForKroneckerDumperType
-	ParamsForKroneckerDumperType;
+	typedef typename LeftRightSuperType::ParamsForKroneckerDumperType ParamsForKroneckerDumperType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename ModelType::LinkProductBaseType LinkProductType;
 	typedef typename TargetingType::MatrixVectorType MatrixVectorType;
@@ -373,8 +372,6 @@ private:
 	                         SizeType saveOption)
 	{
 		PsimagLite::String options = parameters_.options;
-		SizeType threadId = 0;
-
 		SizeType nOfQns = model_.targetQuantum().other.size() + 1;
 		bool dumperEnabled = (options.find("KroneckerDumper") != PsimagLite::String::npos);
 		ParamsForKroneckerDumperType paramsKrDumper(dumperEnabled,
@@ -386,8 +383,12 @@ private:
 		if (lrs.super().block().size() == model_.geometry().numberOfSites())
 			paramsKrDumperPtr = &paramsKrDumper;
 
-		ModelHelperType modelHelper(i,lrs,targetTime,threadId, paramsKrDumperPtr);
-		HamiltonianConnectionType hc(model_.geometry(), modelHelper, model_.linkProduct());
+		HamiltonianConnectionType hc(i,
+		                             lrs,
+		                             model_.geometry(),
+		                             model_.linkProduct(),
+		                             targetTime,
+		                             paramsKrDumperPtr);
 
 		if (options.find("debugmatrix")!=PsimagLite::String::npos && !(saveOption & 4) ) {
 			SparseMatrixType fullm;
@@ -423,7 +424,7 @@ private:
 		}
 
 		PsimagLite::OstringStream msg;
-		msg<<"I will now diagonalize a matrix of size="<<modelHelper.size();
+		msg<<"I will now diagonalize a matrix of size="<<hc.modelHelper().size();
 		progress_.printline(msg,std::cout);
 		diagonaliseOneBlock(i,tmpVec,energyTmp,hc,initialVector,saveOption);
 	}

@@ -106,23 +106,13 @@ public:
 	typedef Link<SparseElementType> LinkType;
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorSparseElementType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
-	typedef typename LeftRightSuperType::KroneckerDumperType KroneckerDumperType;
-	typedef typename LeftRightSuperType::ParamsForKroneckerDumperType
-	ParamsForKroneckerDumperType;
 	typedef typename BasisType::EffectiveQnType EffectiveQnType;
 	typedef typename EffectiveQnType::QnType QnType;
 
-	ModelHelperLocal(SizeType m,
-	                 const LeftRightSuperType& lrs,
-	                 RealType targetTime,
-	                 SizeType threadId,
-	                 const ParamsForKroneckerDumperType* pKroneckerDumper = 0)
+	ModelHelperLocal(SizeType m, const LeftRightSuperType& lrs)
 	    : m_(m),
 	      lrs_(lrs),
-	      targetTime_(targetTime),
-	      threadId_(threadId),
-	      buffer_(lrs_.left().size()),
-	      kroneckerDumper_(pKroneckerDumper,lrs_,m_)
+	      buffer_(lrs_.left().size())
 	{
 		createBuffer();
 		createAlphaAndBeta();
@@ -177,8 +167,6 @@ public:
 	}
 
 	SizeType m() const { return m_; }
-
-	const RealType& time() const { return targetTime_; }
 
 	static bool isSu2() { return false; }
 
@@ -310,8 +298,6 @@ public:
 
 			x[i] += sum;
 		}
-
-		kroneckerDumper_.push(A,B,link.value,link.fermionOrBoson,y);
 	}
 
 	// Let H_{alpha,beta; alpha',beta'} =
@@ -346,8 +332,6 @@ public:
 			x[i] += sum;
 			sum = 0.0;
 		}
-
-		kroneckerDumper_.push(true,hamiltonian,y);
 	}
 
 	// Let  H_{alpha,beta; alpha',beta'} =
@@ -380,8 +364,6 @@ public:
 			x[i] += sum;
 			sum = 0.0;
 		}
-
-		kroneckerDumper_.push(false,hamiltonian,y);
 	}
 
 	// if option==true let H_{alpha,beta; alpha',beta'} =
@@ -445,8 +427,6 @@ public:
 		return lrs_;
 	}
 
-	SizeType threadId() const { return threadId_; }
-
 private:
 
 	void createBuffer()
@@ -487,12 +467,9 @@ private:
 
 	int m_;
 	const LeftRightSuperType& lrs_;
-	RealType targetTime_;
-	SizeType threadId_;
 	typename PsimagLite::Vector<PsimagLite::Vector<int>::Type>::Type buffer_;
 	typename PsimagLite::Vector<SizeType>::Type alpha_,beta_;
 	typename PsimagLite::Vector<bool>::Type fermionSigns_;
-	mutable KroneckerDumperType kroneckerDumper_;
 	mutable typename PsimagLite::Vector<SparseMatrixType*>::Type garbage_;
 	mutable BlockType seen_;
 }; // class ModelHelperLocal

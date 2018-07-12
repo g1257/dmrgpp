@@ -36,12 +36,18 @@ public:
 		ComplexOrRealType tmp = 0.0;
 
 		if (taskNumber == 0) {
-			hc_.modelHelper().hamiltonianLeftProduct(xtemp_[threadNum],y_);
+			hc_.modelHelper().hamiltonianLeftProduct(xtemp_[threadNum], y_);
+			const SparseMatrixType& hamiltonian = hc_.modelHelper().leftRightSuper().
+			        left().hamiltonian();
+			hc_.kroneckerDumper().push(true, hamiltonian, y_);
 			return;
 		}
 
 		if (taskNumber == 1) {
 			hc_.modelHelper().hamiltonianRightProduct(xtemp_[threadNum],y_);
+			const SparseMatrixType& hamiltonian = hc_.modelHelper().leftRightSuper().
+			        right().hamiltonian();
+			hc_.kroneckerDumper().push(false, hamiltonian, y_);
 			return;
 		}
 
@@ -99,7 +105,8 @@ private:
 		SparseMatrixType const* A = 0;
 		SparseMatrixType const* B = 0;
 		LinkType link2 = hc_.getKron(&A,&B,xx,type,valuec,term,dofs,additionalData);
-		hc_.modelHelper().fastOpProdInter(x,y,*A,*B,link2);
+		hc_.modelHelper().fastOpProdInter(x, y, *A, *B, link2);
+		hc_.kroneckerDumper().push(*A, *B, link2.value, link2.fermionOrBoson, y);
 	}
 
 	VectorType& x_;

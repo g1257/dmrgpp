@@ -136,10 +136,12 @@ private:
 	                 SizeType threadNum)
 	{
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
-		typename ModelType::ModelHelperType modelHelper(p,lrs_,currentTime_,threadNum);
-		typename ModelType::HamiltonianConnectionType hc(model_.geometry(),
-		                                                 modelHelper,
-		                                                 model_.linkProduct());
+		typename ModelType::HamiltonianConnectionType hc(p,
+		                                                 lrs_,
+		                                                 model_.geometry(),
+		                                                 model_.linkProduct(),
+		                                                 currentTime_,
+		                                                 0);
 		typename LanczosSolverType::LanczosMatrixType lanczosHelper(model_, hc);
 
 		typename LanczosSolverType::ParametersSolverType params(io_,"Tridiag");

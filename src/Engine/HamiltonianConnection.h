@@ -77,7 +77,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef HAMILTONIAN_CONNECTION_H
 #define HAMILTONIAN_CONNECTION_H
 
-#include "LinkProductStruct.h"
+#include "CachedHamiltonianLinks.h"
 #include "CrsMatrix.h"
 #include "Concurrency.h"
 #include <cassert>
@@ -105,7 +105,7 @@ public:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef VerySparseMatrix<ComplexOrRealType> VerySparseMatrixType;
-	typedef LinkProductStruct<ComplexOrRealType> LinkProductStructType;
+	typedef CachedHamiltonianLinks<ComplexOrRealType> CachedHamiltonianLinksType;
 	typedef typename ModelHelperType::LinkType LinkType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
@@ -113,17 +113,25 @@ public:
 	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
 	typedef typename PsimagLite::Concurrency ConcurrencyType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef typename LeftRightSuperType::ParamsForKroneckerDumperType ParamsForKroneckerDumperType;
+	typedef typename LeftRightSuperType::KroneckerDumperType KroneckerDumperType;
 
-	HamiltonianConnection(const GeometryType& geometry,
-	                      const ModelHelperType& modelHelper,
-	                      const LinkProductBaseType& lpb)
-	    : superGeometry_(geometry),
-	      modelHelper_(modelHelper),
+	HamiltonianConnection(SizeType m,
+	                      const LeftRightSuperType& lrs,
+	                      const GeometryType& geometry,
+	                      const LinkProductBaseType& lpb,
+	                      RealType targetTime,
+	                      const ParamsForKroneckerDumperType* pKroneckerDumper)
+	    : modelHelper_(m, lrs),
+	      superGeometry_(geometry),
 	      lpb_(lpb),
+	      targetTime_(targetTime),
+	      kroneckerDumper_(pKroneckerDumper,lrs,m),
 	      progress_("HamiltonianConnection"),
 	      lps_(ProgramGlobals::MAX_LPS),
-	      systemBlock_(modelHelper.leftRightSuper().left().block()),
-	      envBlock_(modelHelper.leftRightSuper().right().block()),
+	      systemBlock_(modelHelper_.leftRightSuper().left().block()),
+	      envBlock_(modelHelper_.leftRightSuper().right().block()),
 	      smax_(*std::max_element(systemBlock_.begin(),systemBlock_.end())),
 	      emin_(*std::min_element(envBlock_.begin(),envBlock_.end())),
 	      total_(0),
@@ -132,7 +140,7 @@ public:
 	{
 		SizeType nitems = totalOnes_.size();
 		for (SizeType x = 0; x < nitems; ++x)
-			totalOnes_[x] = compute(lps_, x, total_);
+			totalOnes_[x] = cacheConnections(lps_, x, total_);
 
 		if (lps_.typesaved.size() < total_) {
 			err("getLinkProductStruct: InternalError\n");
@@ -318,18 +326,23 @@ public:
 		return link2;
 	}
 
+	KroneckerDumperType& kroneckerDumper() const
+	{
+		return kroneckerDumper_;
+	}
+
 	const ModelHelperType& modelHelper() const { return modelHelper_; }
 
 	SizeType tasks() const {return total_; }
 
 private:
 
-	SizeType compute(LinkProductStructType& lps,
-	                 SizeType x,
-	                 SizeType& total) const
+	SizeType cacheConnections(CachedHamiltonianLinksType& lps,
+	                          SizeType x,
+	                          SizeType& total) const
 	{
 		const VectorSizeType& hItems = hamAbstract_.item(x);
-		assert (superGeometry_.connected(smax_, emin_, hItems));
+		assert(superGeometry_.connected(smax_, emin_, hItems));
 
 		ProgramGlobals::ConnectionEnum type = superGeometry_.connectionKind(smax_, hItems);
 
@@ -356,7 +369,7 @@ private:
 
 				if (tmp == static_cast<RealType>(0.0)) continue;
 
-				tmp = superGeometry_.geometry().vModifier(term, tmp, modelHelper_.time());
+				tmp = superGeometry_.geometry().vModifier(term, tmp, targetTime_);
 
 				++totalOne;
 				assert(lps.typesaved.size() > total);
@@ -391,7 +404,7 @@ private:
 		                         term,
 		                         dofs,
 		                         additionalData);
-		modelHelper_.fastOpProdInter(*A,*B,matrixBlock,link2);
+		modelHelper_.fastOpProdInter(*A, *B, matrixBlock, link2);
 
 		return matrixBlock.nonZeros();
 	}
@@ -402,11 +415,13 @@ private:
 		return false;
 	}
 
+	const ModelHelperType modelHelper_;
 	SuperGeometryType superGeometry_;
-	const ModelHelperType& modelHelper_;
 	const LinkProductBaseType& lpb_;
+	RealType targetTime_;
+	mutable KroneckerDumperType kroneckerDumper_;
 	PsimagLite::ProgressIndicator progress_;
-	LinkProductStructType lps_;
+	CachedHamiltonianLinksType lps_;
 	const VectorSizeType& systemBlock_;
 	const VectorSizeType& envBlock_;
 	SizeType smax_;

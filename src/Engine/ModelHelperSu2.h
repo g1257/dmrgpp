@@ -111,15 +111,9 @@ public:
 	typedef typename LeftRightSuperType::ParamsForKroneckerDumperType
 	ParamsForKroneckerDumperType;
 
-	ModelHelperSu2(int m,
-	               const LeftRightSuperType& lrs,
-	               RealType targetTime,
-	               SizeType threadId,
-	               const ParamsForKroneckerDumperType* = 0)
+	ModelHelperSu2(int m, const LeftRightSuperType& lrs)
 	    : m_(m),
 	      lrs_(lrs),
-	      targetTime_(targetTime),
-	      threadId_(threadId),
 	      su2reduced_(m,lrs)
 	{}
 
@@ -145,8 +139,6 @@ public:
 	}
 
 	static bool isSu2() { return true; }
-
-	const RealType& time() const { return targetTime_; }
 
 	int size() const
 	{
@@ -476,14 +468,10 @@ public:
 		return lrs_;
 	}
 
-	SizeType threadId() const { return threadId_; }
-
 private:
 
 	int m_;
 	const LeftRightSuperType&  lrs_;
-	RealType targetTime_;
-	SizeType threadId_;
 	Su2Reduced<LeftRightSuperType> su2reduced_;
 };
 } // namespace Dmrg

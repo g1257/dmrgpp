@@ -819,14 +819,12 @@ private:
 	                   SizeType i0) const
 	{
 		SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
-		SizeType threadId = 0;
-		typename ModelType::ModelHelperType modelHelper(p,
-		                                                this->lrs(),
-		                                                this->common().currentTime(),
-		                                                threadId);
-		typename ModelType::HamiltonianConnectionType hc(BaseType::model().geometry(),
-		                                                 modelHelper,
-		                                                 BaseType::model().linkProduct());
+		typename ModelType::HamiltonianConnectionType hc(p,
+		                                                 BaseType::lrs(),
+		                                                 BaseType::model().geometry(),
+		                                                 BaseType::model().linkProduct(),
+		                                                 this->common().currentTime(),
+		                                                 0);
 		typename LanczosSolverType::LanczosMatrixType lanczosHelper(BaseType::model(),
 		                                                            hc);
 

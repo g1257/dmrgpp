@@ -114,11 +114,13 @@ public:
 	typedef typename ModelHelperType::BasisType MyBasis;
 	typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef HamiltonianConnection<LinkProductBaseType> HamiltonianConnectionType;
-	typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
+	typedef typename HamiltonianConnectionType::CachedHamiltonianLinksType
+	CachedHamiltonianLinksType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename PsimagLite::Vector<LinkProductStructType>::Type VectorLinkProductStructType;
+	typedef typename PsimagLite::Vector<CachedHamiltonianLinksType>::Type
+	VectorLinkProductStructType;
 	typedef typename HamiltonianConnectionType::VectorSizeType VectorSizeType;
 	typedef typename HamiltonianConnectionType::VerySparseMatrixType VerySparseMatrixType;
 	typedef ParallelHamiltonianConnection<HamiltonianConnectionType> ParallelHamConnectionType;
@@ -204,9 +206,7 @@ public:
 
 			vvsm[m] = new VerySparseMatrixType(bs, bs);
 			VerySparseMatrixType& vsm = *(vvsm[m]);
-			SizeType threadId = 0;
-			ModelHelperType modelHelper(m, lrs, currentTime, threadId);
-			HamiltonianConnectionType hc(geometry_, modelHelper, *lpb_);
+			HamiltonianConnectionType hc(m, lrs, geometry_, *lpb_, currentTime, 0);
 
 			hc.matrixBond(vsm);
 			nzs[m] = vsm.nonZeros();
