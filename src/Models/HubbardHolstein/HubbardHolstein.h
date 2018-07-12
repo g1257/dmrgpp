@@ -321,6 +321,7 @@ public:
 		// reorder the natural basis (needed for MULTIPLE BANDS)
 		setSymmetryRelated(qq, basisTmp, block[0]);
 		ModelBaseType::orderBasis(basis, basisTmp, qq);
+		setSymmetryRelated(qq, basis, block[0]);
 	}
 
 	void findElectrons(VectorSizeType& electrons,
