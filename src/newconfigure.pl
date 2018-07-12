@@ -45,9 +45,7 @@ if ($lto == 1) {
 defined($su2enabled) or $su2enabled = 0;
 
 my @configFiles = ("../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag");
-push @configFiles, "../../dmrgpp/TestSuite/inputs/BasicFlavors.psiTag";
 push @configFiles, $config if (defined($config));
-push @configFiles, "../../dmrgpp/TestSuite/inputs/BasicFlavors.psiTag";
 
 system("cd KronUtil; perl newconfigure.pl \"@configFiles\" $flavor $gccdash");
 
