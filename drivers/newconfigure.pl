@@ -32,9 +32,7 @@ GetOptions('f=s' => \$flavor,
            'c=s' => \$config) or die "$usage\n";
 
 my @configFiles = ("../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag");
-push @configFiles, "../../dmrgpp/TestSuite/inputs/BasicFlavors.psiTag";
 push @configFiles, $config if (defined($config));
-push @configFiles, "../../dmrgpp/TestSuite/inputs/BasicFlavors.psiTag";
 
 createMakefile(\@configFiles, $flavor);
 

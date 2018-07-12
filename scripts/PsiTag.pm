@@ -103,17 +103,6 @@ sub readTags
 				my $content = $rest."\n";
 				$content =~ s/^[ \t]+//;
 				
-
-				if ($rest =~ /^[ \t]*\<(.*$)/) { # (3) in line scope
-					my $existingTag = $1;
-					$existingTag = canonicalTagName($existingTag);
-					$content = $tags->{"$existingTag"}->{"content"};
-					defined($content) or die "$0: No content for $existingTag\n";
-				} else {
-					$content =~ s/^[ \t]*\\//; # (4) in line scope
-					$content =~ s/\\([ \t]*)$/$1/; # (5) in line scope
-				}
-
 				if ($thisLineParens < 0) {
 					print STDERR "$0: ) found but not in block scope\n";
 					syntaxError($line, $i + 1);
@@ -139,19 +128,6 @@ sub readTags
 				$closeScope = 1;
 				--$parensBalance;
 				die "$0: FATAL: (block scope) Nested parens not allowed, line=$line\n" if ($parensBalance > 1);
-			}
-
-			if ($content =~ /^[ \t]*\<(.*$)/) { # (3) in block scope
-				my $existingTag = $1;
-				$existingTag = canonicalTagName($existingTag);
-				my $ptr = $tags->{"$existingTag"};
-				defined($ptr) or die "$0: Tag $existingTag doesn't exist\n";
-				(ref($ptr) eq "HASH") or die "$0: Tag $existingTag not hash ref but ".ref($ptr)."\n";
-				$content = $ptr->{"content"};
-				defined($content) or die "$0: No content for $existingTag\n";
-			} else {
-				$content =~ s/^[ \t]*\\//; # (4) in block scope
-				$content =~ s/\\([ \t]*)$/$1/; # (5) in block scope
 			}
 
 			$multilineContent .= $content;
@@ -195,6 +171,36 @@ sub canonicalTagName
 	$name =~ s/[ \t]*$//;
 	while ($name =~ s/[ \t][ \t]/ /) {}
 	return $name;
+}
+
+sub unWrap
+{
+	my ($tags, $text) = @_;
+	my @lines = split/\n/, $text;
+	my $n = scalar(@lines);
+	my $result = "";
+
+	for (my $i = 0; $i < $n; ++$i) {
+		my $line = $lines[$i];
+		my $content = $line;
+		if ($line =~ /^[ \t]*\<(.*$)/) { # (3) in block scope
+			my $existingTag = $1;
+			$existingTag = canonicalTagName($existingTag);
+			my $ptr = $tags->{"$existingTag"};
+			defined($ptr) or die "$0: Tag $existingTag doesn't exist\n";
+			(ref($ptr) eq "HASH") or die "$0: Tag $existingTag not hash ref but ".ref($ptr)."\n";
+			$content = $ptr->{"content"};
+			defined($content) or die "$0: No content for $existingTag\n";
+			$content = unWrap($tags, $content);
+		}
+		
+		$content =~ s/^[ \t]*\\//; # (4)
+		$content =~ s/\\([ \t]*)$/$1/; # (5)
+		
+		$result .= $content."\n";
+	}
+
+	return $result;
 }
 
 1;

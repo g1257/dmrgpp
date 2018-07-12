@@ -145,7 +145,7 @@ sub getConfigContent
 	defined($ptr) or die "$0: No flavor named $flavor\n";
 	my $configContent = $ptr->{"content"};
 	defined($configContent) or die "$0: No configContent for tag $flavor\n";
-	return $configContent;
+	return PsiTag::unWrap(\%tags, $configContent);
 }
 
 sub noFlavor
