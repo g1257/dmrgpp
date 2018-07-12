@@ -1,3 +1,19 @@
+2018-07-12 Version 2.24
+
+* prints GEOMETRY with IoNg
+
+* IoNgSerializer doesGroupExist
+
+* IoNgSerializer ctor can be inside try/catch block
+
+* PsiTag
+
+* new build system
+
+* TypesEqual and IndexOfItem added
+
+* CrsMatrix::conjugate() added
+
 2018-06-28 Version 2.22
 
 * USE_IO_NG deleted, USE_IO_SIMPLE added
