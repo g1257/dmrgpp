@@ -261,6 +261,29 @@ private:
 			                      this->common().targetVectors(i),
 			                      label);
 		}
+
+		if (this->common().targetVectors().size() < 4) return;
+
+		this->common().cocoon(direction,
+		                      site,
+		                      this->common().targetVectors(2),
+		                      "P2",
+		                      this->common().targetVectors(2),
+		                      "P2");
+
+		this->common().cocoon(direction,
+		                      site,
+		                      this->common().targetVectors(3),
+		                      "P3",
+		                      this->common().targetVectors(3),
+		                      "P3");
+
+		this->common().cocoon(direction,
+		                      site,
+		                      this->common().targetVectors(2),
+		                      "P2",
+		                      this->common().targetVectors(3),
+		                      "P3");
 	}
 
 	void setWeights()

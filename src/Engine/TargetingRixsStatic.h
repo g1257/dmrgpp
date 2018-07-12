@@ -165,7 +165,8 @@ public:
 	      gsWeight_(1.0),
 	      paramsForSolver_(ioIn,"DynamicDmrg"),
 	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().energy()),
-	      applied_(false)
+	      applied_(false),
+	      appliedFirst_(false)
 	{
 		this->common().init(&tstStruct_,6);
 		if (!wft.isEnabled())
@@ -184,6 +185,9 @@ public:
 
 	SizeType size() const
 	{
+		if (!applied_ && appliedFirst_) {
+			return 4;
+		}
 		return (applied_) ? 6 : 3;
 	}
 
@@ -230,9 +234,11 @@ public:
 		if (n != 4)
 			err("TargetingRixsStatic: number of TVs must be 4\n");
 
-		for (SizeType site = 0; site < 3; ++site)
+		for (SizeType site = 0; site < 3; ++site) {
 			this->common().targetVectors(site) = ts.vector(site+1);
+		}
 	}
+
 
 private:
 
@@ -249,7 +255,6 @@ private:
 	            SizeType loopNumber)
 	{
 		if (direction == ProgramGlobals::INFINITE) return;
-		SizeType indexOfOperator = 0;
 
 		// see if operator at sitep has been applied and result put into targetVectors[3]
 		// if no apply operator at site and add into targetVectors[3]
@@ -257,21 +262,66 @@ private:
 
 		this->common().wftAll(site);
 
+		SizeType max = tstStruct_.sites();
+
+		if (max>2)
+			throw PsimagLite::RuntimeError("You cannot apply more than 2 operators (only SUM is allowed)\n");
+
 		if (!applied_) {
-			if (site == tstStruct_.sites(0)) {
-				VectorWithOffsetType tmpV1;
-				this->common().applyOneOperator(loopNumber,
-				                                indexOfOperator,
-				                                site,
-				                                tmpV1,
-				                                this->common().psi(),
-				                                direction);
-				if (tmpV1.size() > 0) {
-					this->common().targetVectors(3) = tmpV1;
-					applied_ = true;
-					PsimagLite::OstringStream msg;
-					msg<<"Applied operator";
-					progress_.printline(msg, std::cout);
+			if (max==1) {
+				if (site == tstStruct_.sites(0)) {
+					VectorWithOffsetType tmpV1;
+					SizeType indexOfOperator = 0;
+					this->common().applyOneOperator(loopNumber,
+					                                indexOfOperator,
+					                                site,
+					                                tmpV1,
+					                                this->common().psi(),
+					                                direction);
+					if (tmpV1.size() > 0) {
+						this->common().targetVectors(3) = tmpV1;
+						applied_ = true;
+						PsimagLite::OstringStream msg;
+						msg<<"Applied operator";
+						progress_.printline(msg, std::cout);
+					}
+				}
+			}
+			if (max==2) {
+				if (site == tstStruct_.sites(0)) {
+					VectorWithOffsetType tmpV1;
+					SizeType indexOfOperator = 0;
+					this->common().applyOneOperator(loopNumber,
+					                                indexOfOperator,
+					                                site,
+					                                tmpV1,
+					                                this->common().psi(),
+					                                direction);
+					if (tmpV1.size() > 0) {
+						this->common().targetVectors(3) = tmpV1;
+						applied_ = false;
+						appliedFirst_ = true;
+						PsimagLite::OstringStream msg;
+						msg<<"Applied first operator";
+						progress_.printline(msg, std::cout);
+					}
+				}
+				if (site == tstStruct_.sites(1)) {
+					VectorWithOffsetType tmpV2;
+					SizeType indexOfOperator = 1;
+					this->common().applyOneOperator(loopNumber,
+					                                indexOfOperator,
+					                                site,
+					                                tmpV2,
+					                                this->common().psi(),
+					                                direction);
+					if (tmpV2.size() > 0) {
+						this->common().targetVectors(3) += tmpV2;
+						applied_ = true;
+						PsimagLite::OstringStream msg;
+						msg<<"Applied second operator";
+						progress_.printline(msg, std::cout);
+					}
 				}
 			}
 		}
@@ -300,6 +350,12 @@ private:
 
 	void doCorrectionVector()
 	{
+
+		if (!applied_ && appliedFirst_) {
+			setWeights(4);
+			return;
+		}
+
 		if (!applied_) {
 			setWeights(3);
 			return;
@@ -338,6 +394,7 @@ private:
 	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
 	CorrectionVectorSkeletonType skeleton_;
 	bool applied_;
+	bool appliedFirst_;
 }; // class TargetingRixsStatic
 } // namespace
 /*@}*/
