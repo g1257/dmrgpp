@@ -139,7 +139,7 @@ public:
 	                PsimagLite::String additional)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType(additional == "SSH", modelParameters_.numberphonons)),
+	                    new LinkProductType(additional == "SSH", io)),
 	      modelParameters_(io),
 	      geometry_(geometry)
 	{

@@ -101,9 +101,12 @@ public:
 
 	typedef typename ModelHelperType::RealType RealType;
 
-	LinkProductHubbardHolstein(bool isSsh, SizeType numberphonons)
-	    : isSsh_(isSsh), numberphonons_(numberphonons)
-	{}
+	template<typename SomeInputType>
+	LinkProductHubbardHolstein(bool isSsh, SomeInputType& io)
+	    : isSsh_(isSsh), numberphonons_(0)
+	{
+		io.readline(numberphonons_,"NumberPhonons=");
+	}
 
 	SizeType dofs(SizeType term, const AdditionalDataType&) const
 	{

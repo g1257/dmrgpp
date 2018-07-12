@@ -162,6 +162,8 @@ public:
 			model_ = new ModelHubbardMultiBandType(solverParams,io,geometry);
 		} else if (name_ == "HubbardHolstein") {
 			model_ = new HubbardHolsteinType(solverParams, io, geometry, "");
+		} else if (name_ == "HubbardHolsteinSSH") {
+			model_ = new HubbardHolsteinType(solverParams, io, geometry, "SSH");
 		} else {
 			PsimagLite::String s(__FILE__);
 			s += " Unknown model " + name_ + "\n";
