@@ -68,6 +68,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/FermionSpinless/FermionSpinless.h"
 #include "../Models/Kitaev/Kitaev.h"
 #include "../Models/HubbardMultiBand/ModelHubbardMultiBand.h"
+#include "../Models/HubbardHolstein/HubbardHolstein.h"
 
 namespace Dmrg {
 
@@ -99,6 +100,7 @@ class ModelSelector {
 	typedef FermionSpinless<ModelBaseType> FermionSpinlessType;
 	typedef Kitaev<ModelBaseType> KitaevType;
 	typedef ModelHubbardMultiBand<ModelBaseType> ModelHubbardMultiBandType;
+	typedef HubbardHolstein<ModelBaseType> HubbardHolsteinType;
 	// end models
 
 public:
@@ -158,6 +160,8 @@ public:
 			model_ = new KitaevType(solverParams,io,geometry);
 		} else if (name_ == "ModelHubbardMultiBand") {
 			model_ = new ModelHubbardMultiBandType(solverParams,io,geometry);
+		} else if (name_ == "HubbardHolstein") {
+			model_ = new HubbardHolsteinType(solverParams, io, geometry, "");
 		} else {
 			PsimagLite::String s(__FILE__);
 			s += " Unknown model " + name_ + "\n";

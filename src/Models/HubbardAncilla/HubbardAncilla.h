@@ -155,7 +155,7 @@ public:
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
-		        io.createGroup(label1);
+			io.createGroup(label1);
 
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
@@ -304,8 +304,8 @@ public:
 
 	//! find all states in the natural basis for a block of n sites
 	void setBasis(HilbertBasisType& basis,
-	                            SymmetryElectronsSzType& qq,
-	                            const VectorSizeType& block) const
+	              SymmetryElectronsSzType& qq,
+	              const VectorSizeType& block) const
 	{
 		SizeType n = block.size();
 		HilbertState total = hilbertSize(0);
