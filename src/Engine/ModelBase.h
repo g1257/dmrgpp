@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetQuantumElectrons.h"
 #include "Io/IoSerializerStub.h"
 #include "ModelCommon.h"
+#include "IndexOfItem.h"
 
 namespace Dmrg {
 
@@ -106,15 +107,16 @@ public:
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
 	typedef typename ModelHelperType::BasisType MyBasis;
 	typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef ReflectionOperatorEmpty<LeftRightSuperType> ReflectionSymmetryType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename MyBasis::EffectiveQnType EffectiveQnType;
+	typedef typename EffectiveQnType::QnType QnType;
+	typedef TargetQuantumElectrons<RealType, QnType> TargetQuantumElectronsType;
+	typedef typename PsimagLite::Vector<QnType>::Type VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::SparseElementType ComplexOrRealType;
 	typedef ModelCommon<ParametersType, GeometryType, ModelHelperType> ModelCommonType;
@@ -167,7 +169,7 @@ public:
 	{
 		typename PsimagLite::Vector<SizeType>::Type block(1, site);
 		HilbertBasisType basis;
-		SymmetryElectronsSzType qq;
+		VectorQnType qq;
 		setBasis(basis, qq, block);
 		findElectrons(electrons, basis, site);
 	}
@@ -228,20 +230,18 @@ public:
 	}
 
 	virtual void setBasis(HilbertBasisType& basis,
-	                      SymmetryElectronsSzType& qq,
+	                      VectorQnType& qq,
 	                      const VectorSizeType& block) const = 0;
 
 	void printBasis(SizeType site) const
 	{
 		BlockType block(1, site);
 		HilbertBasisType natBasis;
-		SymmetryElectronsSzType qq;
+		VectorQnType qq;
 		setBasis(natBasis, qq, block);
-		VectorSizeType q;
-		EffectiveQnType::findQuantumNumbers(q, qq, MyBasis::useSu2Symmetry());
 		std::cout<<"block="<<block;
 		std::cout<<"natBasis="<<natBasis;
-		std::cout<<"quantumNumbs="<<q;
+		std::cout<<"quantumNumbs="<<qq;
 	}
 
 	const GeometryType& geometry() const { return modelCommon_.geometry(); }
@@ -274,11 +274,32 @@ protected:
 
 	void orderBasis(HilbertBasisType& basis,
 	                const HilbertBasisType& basisUnordered,
-	                const SymmetryElectronsSzType& qq) const
+	                VectorQnType& qns) const
 	{
-		VectorSizeType q;
-		EffectiveQnType::findQuantumNumbers(q, qq, MyBasis::useSu2Symmetry());
-		orderBasis(basis, q, basisUnordered);
+		SizeType n = basis.size();
+		VectorQnType qnVector;
+		PsimagLite::Vector<HilbertBasisType>::Type bucket;
+		for (SizeType i = 0; i < n; ++i) {
+			int x = PsimagLite::indexOfItemOrMinusOne(qnVector, qns[i]);
+			if (x < 0) {
+				qnVector.push_back(qns[i]);
+				bucket[qnVector.size() - 1].push_back(basisUnordered[i]);
+			} else {
+				bucket[x].push_back(basisUnordered[i]);
+			}
+		}
+
+		SizeType buckets = bucket.size();
+		SizeType counter = 0;
+		for (SizeType i = 0; i < buckets; ++i) {
+			SizeType sizeOfThisBucket = bucket[i].size();
+			for (SizeType j = 0; j < sizeOfThisBucket; ++j) {
+				assert(counter < basis.size());
+				basis[counter++] = bucket[i][j];
+			}
+		}
+
+		assert(counter == basis.size());
 	}
 
 private:

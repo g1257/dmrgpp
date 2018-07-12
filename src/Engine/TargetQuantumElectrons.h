@@ -82,25 +82,25 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 //! Hubbard Model Parameters
-template<typename RealType>
+template<typename RealType, typename QnType>
 struct TargetQuantumElectrons {
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef QnType::PairType PairSizeType;
 
 	template<typename IoInputType>
 	TargetQuantumElectrons(IoInputType& io, bool allowUpDown = true)
-	    : isSu2(false),
-	      totalNumberOfSites(0),
-	      totalElectrons(0),
-	      twiceJ(0),
-	      isCanonical(true)
+	    : totalNumberOfSites(0),
+	      isSu2(false),
+	      isCanonical(true),
+	      qn(0, VectorSizeType(), PairSizeType(0, 0), 0)
 	{
 		io.readline(totalNumberOfSites, "TotalNumberOfSites=");
 
 		PsimagLite::String  msg("TargetQuantumElectrons: ");
 		bool hasTwiceJ = false;
 		try {
-			io.readline(twiceJ,"TargetSpinTimesTwo=");
+			io.readline(qn.jmPair.first, "TargetSpinTimesTwo=");
 			hasTwiceJ = true;
 		} catch (std::exception&) {}
 
@@ -111,14 +111,14 @@ struct TargetQuantumElectrons {
 			try {
 				io.readline(electronsUp,"TargetElectronsUp=");
 				io.readline(electronsDown,"TargetElectronsDown=");
-				totalElectrons = electronsUp + electronsDown;
-				other.push_back(electronsUp);
+				qn.electrons = electronsUp + electronsDown;
+				qn.other.push_back(electronsUp);
 				ready=2;
 			} catch (std::exception&) {}
 		}
 
 		try {
-			io.readline(totalElectrons,"TargetElectronsTotal=");
+			io.readline(qn.electrons, "TargetElectronsTotal=");
 			ready++;
 		} catch (std::exception&) {}
 
@@ -126,7 +126,7 @@ struct TargetQuantumElectrons {
 		try {
 			SizeType szPlusConst = 0;
 			io.readline(szPlusConst,"TargetSzPlusConst=");
-			other.push_back(szPlusConst);
+			qn.other.push_back(szPlusConst);
 			hasSzPlusConst = true;
 		} catch (std::exception&) {}
 
@@ -135,12 +135,12 @@ struct TargetQuantumElectrons {
 			throw PsimagLite::RuntimeError(msg);
 		}
 
-		if (other.size() > 0) hasSzPlusConst = true;
+		if (qn.other.size() > 0) hasSzPlusConst = true;
 
 		if (!hasSzPlusConst) {
 			std::cout<<"TargetQuantumElectrons: Grand Canonical\n";
-			assert(other.size() == 0);
-			other.resize(1,0);
+			assert(qn.other.size() == 0);
+			qn.other.resize(1,0);
 			isCanonical = false;
 		}
 
@@ -150,7 +150,7 @@ struct TargetQuantumElectrons {
 				io.readline(extra,"TargetExtra=");
 				if (!hasSzPlusConst)
 					std::cout<<"WARNING: TargetExtra= with grand canonical ???\n";
-				other.push_back(extra);
+				qn.other.push_back(extra);
 			} catch (std::exception&) {
 				break;
 			}
@@ -172,8 +172,8 @@ struct TargetQuantumElectrons {
 			throw PsimagLite::RuntimeError
 		        ("WARNING: SU(2) with grand canonical ???\n");
 
-		if (isSu2 && totalElectrons == 0)
-			totalElectrons = totalNumberOfSites;
+		if (isSu2 && qn.electrons == 0)
+			qn.electrons = totalNumberOfSites;
 	}
 
 	template<typename SomeMemResolvType>
@@ -189,33 +189,28 @@ struct TargetQuantumElectrons {
 	{
 		PsimagLite::String label = label1 + "/TargetQuantumElectrons";
 		io.createGroup(label);
+		io.write(label + "/TotalNumberOfSites", TotalNumberOfSites);
 		io.write(label + "/isSu2", isSu2);
-		io.write(label + "/totalNumberOfSites", totalNumberOfSites);
-		io.write(label + "/totalElectrons", totalElectrons);
-		io.write(label + "/other", other);
-		io.write(label + "/twiceJ", twiceJ);
 		io.write(label + "/isCanonical", isCanonical);
+		qn.write(label + "/qn", io);
 	}
 
-	bool isSu2;
-	SizeType totalNumberOfSites;
-	SizeType totalElectrons;
-	VectorSizeType other;
-	SizeType twiceJ;
-	bool isCanonical;
-};
+	//! Function that prints model parameters to stream os
+	friend std::ostream& operator<<(std::ostream &os,
+	                                const TargetQuantumElectrons& p)
+	{
+		os<<"TargetElectronsTotal="<<p.totalElectrons<<"\n";
+		os<<"TargetOther="<<p.other<<"\n";
+		if (p.isSu2)
+			os<<"TargetSpinTimesTwo="<<p.twiceJ<<"\n";
+		return os;
+	}
 
-//! Function that prints model parameters to stream os
-template<typename RealTypeType>
-std::ostream& operator<<(std::ostream &os,
-                         const TargetQuantumElectrons<RealTypeType>& p)
-{
-	os<<"TargetElectronsTotal="<<p.totalElectrons<<"\n";
-	os<<"TargetOther="<<p.other<<"\n";
-	if (p.isSu2)
-		os<<"TargetSpinTimesTwo="<<p.twiceJ<<"\n";
-	return os;
-}
+	SizeType totalNumberOfSites;
+	bool isSu2;
+	bool isCanonical;
+	QnType qn;
+};
 } // namespace Dmrg
 
 /*@}*/

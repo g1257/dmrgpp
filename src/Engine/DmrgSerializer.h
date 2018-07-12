@@ -97,6 +97,7 @@ class DmrgSerializer {
 public:
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
+	typedef typename BasisType::VectorQnType VectorQnType;
 	typedef FermionSign FermionSignType;
 	typedef typename BasisType::RealType RealType;
 

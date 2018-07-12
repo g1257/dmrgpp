@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 //! Heisenberg Model Parameters
-template<typename RealType>
+template<typename RealType, typename QnType>
 struct ParametersModelHeisenberg {
 
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
@@ -125,25 +125,24 @@ struct ParametersModelHeisenberg {
 		io.write(label + "/anisotropy", anisotropy);
 	}
 
+	//! Function that prints model parameters to stream os
+	friend std::ostream& operator<<(std::ostream &os,
+	                                const ParametersModelHeisenberg& parameters)
+	{
+		os<<"MagneticField="<<parameters.magneticField<<"\n";
+		os<<"AnisotropyD="<<parameters.anisotropy<<"\n";
+		os<<"HeisenbergTwiceS="<<parameters.twiceTheSpin<<"\n";
+		os<<parameters.targetQuantum;
+		return os;
+	}
+
 	//serializr start class ParametersModelHeisenberg
-	TargetQuantumElectrons<RealType> targetQuantum;
+	TargetQuantumElectrons<RealType, QnType> targetQuantum;
 	//serializr normal twiceTheSpin
 	SizeType twiceTheSpin;
 	VectorRealType magneticField;
 	VectorRealType anisotropy;
 };
-
-//! Function that prints model parameters to stream os
-template<typename RealTypeType>
-std::ostream& operator<<(std::ostream &os,
-                         const ParametersModelHeisenberg<RealTypeType>& parameters)
-{
-	os<<"MagneticField="<<parameters.magneticField<<"\n";
-	os<<"AnisotropyD="<<parameters.anisotropy<<"\n";
-	os<<"HeisenbergTwiceS="<<parameters.twiceTheSpin<<"\n";
-	os<<parameters.targetQuantum;
-	return os;
-}
 } // namespace Dmrg
 
 /*@}*/

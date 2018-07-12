@@ -102,7 +102,6 @@ public:
 	typedef typename PsimagLite::IoSelector IoType;
 	typedef typename TargetingType::ModelType ModelType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename ModelType::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename PsimagLite::Stack<BasisWithOperatorsType>::Type MemoryStackType;

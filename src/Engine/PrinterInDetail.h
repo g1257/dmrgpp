@@ -12,8 +12,8 @@ class PrinterInDetail {
 
 public:
 
-	PrinterInDetail(const LeftRightSuperType& lrs, SizeType mode, bool extended)
-	    : lrs_(lrs), mode_(mode), extended_(extended)
+	PrinterInDetail(const LeftRightSuperType& lrs, bool extended)
+	    : lrs_(lrs), extended_(extended)
 	{}
 
 	void print(std::ostream& os, PsimagLite::String msg) const
@@ -43,8 +43,7 @@ private:
 		for (SizeType i = 0; i < n - 1; ++i) {
 			SizeType s = basis.partition(i + 1) - basis.partition(i);
 			const typename BasisWithOperatorsType::QnType& j = basis.qnEx(i);
-			PsimagLite::String q = EffectiveQnType::qnPrint(j, mode_ + 1);
-			os<<q<<" "<<s<<"\n";
+			os<<j<<" "<<s<<"\n";
 		}
 
 		assert(sites > 0);
@@ -65,7 +64,6 @@ private:
 	}
 
 	const LeftRightSuperType& lrs_;
-	SizeType mode_;
 	bool extended_;
 }; // class PrinterInDetail
 }

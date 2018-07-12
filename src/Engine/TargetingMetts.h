@@ -479,13 +479,7 @@ private:
 	void updateStochastics(const VectorSizeType& block1,
 	                       const VectorSizeType& block2)
 	{
-		SizeType linSize = model_.geometry().numberOfSites();
-		const QnType& qn = EffectiveQnType::getQuantumSector(model_.targetQuantum(),
-		                                                     linSize,
-		                                                     linSize,
-		                                                     ProgramGlobals::INFINITE,
-		                                                     0,
-		                                                     BasisType::useSu2Symmetry());
+		const QnType& qn = model_.targetQuantum().qn;
 		mettsStochastics_.update(qn,block1,block2,mettsStruct_.rngSeed);
 	}
 
@@ -690,7 +684,6 @@ private:
 	void setFromInfinite(VectorWithOffsetType& phi,
 	                     const LeftRightSuperType& lrs) const
 	{
-		SizeType mode = model_.targetQuantum().other.size();
 		phi.populateSectors(lrs.super());
 		for (SizeType ii=0;ii<phi.sectors();ii++) {
 			SizeType i0 = phi.sector(ii);
@@ -700,9 +693,9 @@ private:
 			if (fabs(tmpNorm-1.0)<1e-6) {
 				const QnType& j = lrs.super().qnEx(i0);
 				std::cerr<<"setFromInfinite: qns= ";
-				std::cerr<<EffectiveQnType::qnPrint(j, mode+1);
-				std::cerr<<"\n";
+				std::cerr<<j<<"\n";
 			}
+
 			phi.setDataInSector(v,i0);
 		}
 		phi.collapseSectors();

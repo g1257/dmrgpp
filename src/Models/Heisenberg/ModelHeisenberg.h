@@ -107,6 +107,8 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelBaseType::TargetQuantumElectronsType TargetQuantumElectronsType;
 	typedef	typename ModelBaseType::VectorType VectorType;
+	typedef typename ModelBaseType::QnType QnType;
+	typedef typename ModelBaseType::VectorQnType VectorQnType;
 
 private:
 
@@ -236,7 +238,7 @@ public:
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
 
-		SymmetryElectronsSzType qq;
+		VectorQnType qq;
 		setBasis(natBasis, qq, block);
 
 		operatorMatrices.clear();
@@ -347,7 +349,7 @@ public:
 
 	//! find all states in the natural basis for a block of n sites
 	void setBasis(HilbertBasisType& basis,
-	              SymmetryElectronsSzType& qq,
+	              VectorQnType& qq,
 	              const VectorSizeType& block) const
 	{
 		SizeType total = utils::powUint(modelParameters_.twiceTheSpin + 1,block.size());
@@ -479,7 +481,7 @@ private:
 		return Sx;
 	}
 
-	void setSymmetryRelated(SymmetryElectronsSzType& q,
+	void setSymmetryRelated(VectorQnType& qns,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
@@ -488,15 +490,8 @@ private:
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
-		typename PsimagLite::Vector<PairType>::Type jmvalues;
-		VectorSizeType flavors;
-		PairType jmSaved;
-		jmSaved.first = modelParameters_.twiceTheSpin;
-		jmSaved.second = basis[0];
-		jmSaved.first++;
-		jmSaved.second++;
 
-		SizeType totalElectrons = modelParameters_.targetQuantum.totalElectrons;
+		SizeType totalElectrons = modelParameters_.targetQuantum.qn.electrons;
 		if (!modelParameters_.targetQuantum.isSu2 && totalElectrons > 0) {
 			PsimagLite::String msg("Please delete the line ");
 			msg += "TargetElectronsTotal= in the input file\n";
@@ -504,20 +499,16 @@ private:
 		}
 
 		bool isCanonical = (modelParameters_.targetQuantum.isCanonical);
-		VectorSizeType szPlusConst(basis.size());
-		VectorSizeType electrons(basis.size());
-		for (SizeType i=0;i<basis.size();i++) {
-			PairType jmpair;
-			jmpair.first = modelParameters_.twiceTheSpin;
-			jmpair.second = basis[i];
-			jmvalues.push_back(jmpair);
-			szPlusConst[i] = (isCanonical) ? getSzPlusConst(basis[i],n) : 0;
-			electrons[i] = (modelParameters_.targetQuantum.isSu2) ? 1 : 0;
-			flavors.push_back(1);
-			jmSaved = jmpair;
+		VectorQnType qns(basis.size());
+		VectorSizeType other(1);
+		qns.resize(basis.size());
+		for (SizeType i = 0; i < basis.size(); ++i) {
+			PairType jmpair(modelParameters_.twiceTheSpin, basis[i]);
+			other[0] = (isCanonical) ? getSzPlusConst(basis[i],n) : 0;
+			SizeType electrons = (modelParameters_.targetQuantum.isSu2) ? 1 : 0;
+			SizeType flavor = 1;
+			qns[i] = QnType(electrons, other, jmpair, flavor);
 		}
-
-		q.set(jmvalues,flavors,electrons,szPlusConst);
 	}
 
 	SizeType getSzPlusConst(SizeType ket, SizeType n) const
@@ -541,7 +532,7 @@ private:
 	//serializr start class ModelHeisenberg
 	//serializr vptr
 	//serializr normal modelParameters_
-	ParametersModelHeisenberg<RealType>  modelParameters_;
+	ParametersModelHeisenberg<RealType, QnType>  modelParameters_;
 	//serializr ref geometry_ start
 	GeometryType const &geometry_;
 	//serializr normal spinSquaredHelper_

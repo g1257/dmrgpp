@@ -298,7 +298,7 @@ public:
 	                RealType time)
 	{
 		typename SomeModelType::HilbertBasisType basis;
-		SymmetryElectronsSzType qm;
+		typename BaseType::VectorQnType qm;
 		model.setBasis(basis, qm, block);
 
 		BaseType::set(block);

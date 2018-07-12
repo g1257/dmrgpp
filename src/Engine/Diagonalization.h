@@ -186,7 +186,7 @@ private:
 	{
 		SizeType total = lrs.super().partition()-1;
 		for (SizeType i=0;i<total;i++) {
-			if (!lrs.super().pseudoQnEqual(i, quantumSector_)) continue;
+			if (lrs.super().pseudoQn(i) != quantumSector_) continue;
 			mVector.push_back(i);
 		}
 	}
@@ -235,13 +235,10 @@ private:
 
 		SizeType counter=0;
 		SizeType weightsTotal = 0;
-		SizeType mode = model_.targetQuantum().other.size();
 		for (SizeType i=0;i<total;i++) {
 			SizeType bs = lrs.super().partition(i+1)-lrs.super().partition(i);
-			if (verbose_) {
-				const QnType& j = lrs.super().qnEx(i);
-				std::cerr<<EffectiveQnType::qnPrint(j,mode+1);
-			}
+			if (verbose_)
+				std::cerr<<lrs.super().qnEx(i);
 
 			weights[i]=bs;
 
@@ -270,8 +267,7 @@ private:
 			if (weights[i]==0) continue;
 			PsimagLite::OstringStream msg;
 			msg<<"About to diag. sector with quantum numbs. ";
-			const QnType& j = lrs.super().qnEx(i);
-			msg<<EffectiveQnType::qnPrint(j, mode + 1);
+			msg<<lrs.super().qnEx(i);
 			//msg<<" pseudo="<<lrs.super().pseudoQn(i);
 			msg<<" quantumSector="<<quantumSector_;
 
@@ -342,7 +338,7 @@ private:
 			PsimagLite::OstringStream msg2;
 			msg2<<"Norm of vector is "<<PsimagLite::norm(vecSaved[i]);
 			msg2<<" and quantum numbers are ";
-			msg2<<EffectiveQnType::qnPrint(j, mode + 1);
+			msg2<<j;
 			progress_.printline(msg2,std::cout);
 			counter++;
 		}
@@ -372,13 +368,11 @@ private:
 	                         SizeType saveOption)
 	{
 		PsimagLite::String options = parameters_.options;
-		SizeType nOfQns = model_.targetQuantum().other.size() + 1;
 		bool dumperEnabled = (options.find("KroneckerDumper") != PsimagLite::String::npos);
 		ParamsForKroneckerDumperType paramsKrDumper(dumperEnabled,
 		                                            parameters_.dumperBegin,
 		                                            parameters_.dumperEnd,
-		                                            parameters_.precision,
-		                                            nOfQns);
+		                                            parameters_.precision);
 		ParamsForKroneckerDumperType* paramsKrDumperPtr = 0;
 		if (lrs.super().block().size() == model_.geometry().numberOfSites())
 			paramsKrDumperPtr = &paramsKrDumper;

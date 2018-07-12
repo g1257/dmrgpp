@@ -50,8 +50,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include "ProgramGlobals.h"
 #include "Utils.h"
-#include "../Models/HubbardOneBand/ModelHubbard.h"
+#ifndef ALL_MODELs
 #include "../Models/Heisenberg/ModelHeisenberg.h"
+#else
+#include "../Models/Heisenberg/ModelHeisenberg.h"
+#include "../Models/HubbardOneBand/ModelHubbard.h"
 #include "../Models/HeisenbergAncillaC/HeisenbergAncillaC.h"
 #include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
 #include "../Models/SuperExtendedHubbard1Orb/SuperExtendedHubbard1Orb.h"
@@ -69,6 +72,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/Kitaev/Kitaev.h"
 #include "../Models/HubbardMultiBand/ModelHubbardMultiBand.h"
 #include "../Models/HubbardHolstein/HubbardHolstein.h"
+#endif
 
 namespace Dmrg {
 
@@ -82,9 +86,12 @@ class ModelSelector {
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 
 	// start models here:
+#ifndef ALL_MODELS
+	typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
+#else
+	typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
 	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
 	typedef HeisenbergAncillaC<ModelBaseType> HeisenbergAncillaCType;
-	typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
 	typedef ExtendedHubbard1Orb<ModelBaseType> ModelHubbardExtType;
 	typedef ExtendedSuperHubbard1Orb<ModelBaseType> ModelHubbardExtSuperType;
 	typedef ModelFeBasedSc<ModelBaseType> FeBasedScType;
@@ -101,6 +108,7 @@ class ModelSelector {
 	typedef Kitaev<ModelBaseType> KitaevType;
 	typedef ModelHubbardMultiBand<ModelBaseType> ModelHubbardMultiBandType;
 	typedef HubbardHolstein<ModelBaseType> HubbardHolsteinType;
+#endif
 	// end models
 
 public:
@@ -120,14 +128,19 @@ public:
 	{
 		if (model_) return *model_;
 
-		if (name_ == "HubbardOneBand") {
-			model_ = new ModelHubbardType(solverParams, io, geometry, 1);
-		} else if (name_ == "Heisenberg") {
+#ifndef ALL_MODELS
+		if (name_ == "Heisenberg") {
+			model_ = new ModelHeisenbergType(solverParams,io,geometry,"");
+		}
+#else
+		if (name_ == "Heisenberg") {
 			model_ = new ModelHeisenbergType(solverParams,io,geometry,"");
 		} else if (name_ == "HeisenbergAnisotropic") {
 			model_ = new ModelHeisenbergType(solverParams,io,geometry,"Anisotropic");
 		} else if (name_ == "HeisenbergAncillaC") {
 			model_ = new HeisenbergAncillaCType(solverParams,io,geometry);
+		} else if (name_ == "HubbardOneBand") {
+			model_ = new ModelHubbardType(solverParams, io, geometry, 1);
 		} else if (name_ == "HubbardOneBandExtended") {
 			model_ = new ModelHubbardExtType(solverParams,io,geometry);
 		} else if (name_ == "HubbardOneBandExtendedSuper") {
@@ -164,7 +177,9 @@ public:
 			model_ = new HubbardHolsteinType(solverParams, io, geometry, "");
 		} else if (name_ == "HubbardHolsteinSSH") {
 			model_ = new HubbardHolsteinType(solverParams, io, geometry, "SSH");
-		} else {
+		}
+#endif
+		else {
 			PsimagLite::String s(__FILE__);
 			s += " Unknown model " + name_ + "\n";
 			throw PsimagLite::RuntimeError(s.c_str());

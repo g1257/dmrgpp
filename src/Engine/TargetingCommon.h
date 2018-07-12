@@ -118,8 +118,7 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisWithOperatorsType::SymmetryElectronsSzType
-	SymmetryElectronsSzType;
+	typedef typename BasisWithOperatorsType::VectorQnType VectorQnType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
@@ -137,6 +136,7 @@ public:
 	typedef typename ApplyOperatorExpressionType::PairType PairType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef Braket<ModelType> BraketType;
+	typedef typename ApplyOperatorType::FermionSignType FermionSignType;
 
 	static const SizeType SUM = TargetParamsType::SUM;
 
@@ -316,15 +316,20 @@ public:
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		targetHelper_.model().setOperatorMatrices(creationMatrix, block1);
 
-		SymmetryElectronsSzType q;
+		VectorQnType q;
 		typename ModelType::HilbertBasisType basis;
 		targetHelper_.model().setBasis(basis, q, block1);
 
-		FermionSign fs(targetHelper_.lrs().left(), q.electrons);
+		VectorSizeType electrons(basis.size());
+		for (SizeType i = 0; i < basis.size(); ++i) electrons[i] = q[i].electrons;
+
+		FermionSignType fs(targetHelper_.lrs().left(), electrons);
 		for (SizeType j=0;j<creationMatrix.size();j++) {
 			VectorWithOffsetType phiTemp;
 			applyOpExpression_.applyOpLocal()(phiTemp,psi,creationMatrix[j],
-			                                  fs,direction,ApplyOperatorType::BORDER_NO);
+			                                  fs,
+			                                  direction,
+			                                  ApplyOperatorType::BORDER_NO);
 			if (j==0) v = phiTemp;
 			else v += phiTemp;
 		}
@@ -581,8 +586,12 @@ public:
 	                             SizeType index2,
 	                             bool needsShift) const
 	{
-
 		const ModelType& model = targetHelper_.model();
+		SizeType h = model.hilbertSize(site);
+		typename OperatorType::Su2RelatedType su2Related1;
+		SparseMatrixType idSparse;
+		idSparse.makeDiagonal(h, 1.0);
+		OperatorType id(idSparse, 1, PairType(0, 0), 1.0, su2Related1);
 		ComplexOrRealType value = 0.0;
 		VectorStringType vecStr = getOperatorLabels();
 		if (vecStr.size() == 0) return value;
@@ -606,7 +615,6 @@ public:
 				OperatorType A = Braket.op(0);
 				value = test_(v1,v2,direction,site,A,border);
 			} else {
-				OperatorType id = model.naturalOperator("identity",site,0);
 				value = test_(v1,v2,direction,site,id,border);
 			}
 		}
@@ -749,7 +757,7 @@ private:
 	{
 		typename PsimagLite::Vector<SizeType>::Type electrons;
 		targetHelper_.model().findElectronsOfOneSite(electrons,site);
-		FermionSign fs(targetHelper_.lrs().left(),electrons);
+		FermionSignType fs(targetHelper_.lrs().left(),electrons);
 		VectorWithOffsetType dest;
 		applyOpExpression_.applyOpLocal()(dest,src1,A,fs,systemOrEnviron,border);
 

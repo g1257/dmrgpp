@@ -127,12 +127,20 @@ public:
 
 	PairType jmValue(SizeType i) const { return jmValues_[i]; }
 
-	void set(const SymmetryElectronsSzType& basisData)
+	void set(const VectorQnType& basisData)
 	{
-		jmValues_ = basisData.jmValues;
-		flavors_ = basisData.flavors;
+		SizeType n = basisData.size();
+		jmValues_.resize(n);
+		flavors_.resize(n);
+		VectorSizeType electrons(n);
+		for (SizeType i = 0; i < n; ++i) {
+			jmValues_[i] = basisData[i].jmPair;
+			flavors_[i] = basisData[i].flavors;
+			electrons[i] = basisData[i].electrons;
+		}
+
 		flavorsMax_= *(std::max_element(flavors_.begin(),flavors_.end()));
-		electronsMax_ = basisData.electronsMax();
+		electronsMax_ = *(std::max_element(electrons.begin(),electrons.end()));
 		jMax_=0;
 		jmValues_.maxFirst<std::greater<SizeType> >(jMax_);
 		jMax_++;
@@ -145,7 +153,7 @@ public:
 	                  const VectorSizeType& electrons1,
 	                  const VectorSizeType& electrons2,
 	                  VectorSizeType& electrons,
-	                  VectorSizeType& quantumNumbers)
+	                  VectorQnType& quantumNumbers)
 	{
 		SizeType ns = symm1.jmValues_.size();
 		SizeType ne = symm2.jmValues_.size();
@@ -162,7 +170,7 @@ public:
 		jMax_++;
 		calcReducedBasis();
 		normalizeFlavors();
-		EffectiveQnType::qnToElectrons(electrons,quantumNumbers,3);
+		EffectiveQnType::qnToElectrons(electrons, quantumNumbers);
 		electronsMax_ = *(std::max_element(electrons.begin(),electrons.end()));
 	}
 
@@ -303,7 +311,7 @@ public:
 private:
 
 	template<typename JmSubspaceType>
-	SizeType setFlavors(VectorSizeType& quantumNumbers,
+	SizeType setFlavors(VectorQnType& quantumNumbers,
 	                    JmSubspaceType& jmSubspace,
 	                    SizeType offset)
 	{
@@ -314,11 +322,14 @@ private:
 			jmValues_.clear();
 			flavors_.clear();
 		}
+
+		quantumNumbers.resize(flavors);
+		flavors_.resize(flavors);
 		for (SizeType i = 0; i < flavors; ++i) {
 			PairType jm = jmSubspace.getJmValue();
-			quantumNumbers.push_back(EffectiveQnType::neJmToIndex(jmSubspace.getNe(),jm));
+			quantumNumbers[i] = QnType(jmSubspace.getNe(), VectorSizeType(), jm, 0);
 			jmValues_.push(jm, i + offset);
-			flavors_.push_back(jmSubspace.getFlavor(i));
+			flavors_[i] = jmSubspace.getFlavor(i);
 		}
 
 		offset += flavors;
@@ -352,7 +363,7 @@ private:
 
 	}
 
-	void setFlavors(VectorSizeType& quantumNumbers)
+	void setFlavors(VectorQnType& quantumNumbers)
 	{
 		SizeType offset=0;
 		for (SizeType i=0;i<jmSubspaces_.size();i++) {
@@ -399,15 +410,15 @@ private:
 				SizeType nelectrons=jmSubspaces_[i].getNe();
 				std::cerr<<" nelectrons="<<nelectrons;
 				PairType jm = jmSubspaces_[i].getJmValue();
-				std::cerr<<" pseudo=";
-				std::cerr<<EffectiveQnType::pseudoEffectiveNumber(nelectrons,jm.first);
 
 				std::cerr<<" jm=("<<jm.first<<","<<jm.second<<")\n";
 				std::cerr<<" heavy="<<jmSubspaces_[i].heavy()<<"\n";
 				std::cerr<<"--------------------------------------------\n";
 			}
+
 			throw PsimagLite::RuntimeError("HSSU2.h::createFactors(): factors are empty\n");
 		}
+
 		factors.sort();
 		factors_ = factors;
 	}
@@ -440,7 +451,7 @@ private:
 			if (tmp>j) continue;
 			PairType jm(j,m);
 			int heavy=1;
-			const QnType& pseudo = EffectiveQnType::pseudoEffectiveNumber(nelectrons, jm.first);
+			QnType pseudo(nelectrons, VectorSizeType(), PairType(jm.first, 0), 0);
 			if (pseudoQn && pseudo != *pseudoQn)
 				heavy=0;
 
@@ -565,7 +576,8 @@ private:
 	}
 
 	JmPairsType jmValues_;
-	VectorSizeType flavors_,flavorsOld_;
+	VectorSizeType flavors_;
+	VectorSizeType flavorsOld_;
 	SizeType flavorsMax_,electronsMax_,jMax_;
 	FactorsType factors_;
 	typename PsimagLite::Vector<JmSubspaceType>::Type jmSubspaces_;

@@ -361,7 +361,7 @@ obtain ordered
 		        PsimagLite::String::npos);
 		bool extendedPrint = (parameters_.options.find("extendedPrint") !=
 		        PsimagLite::String::npos);
-		SizeType mode = model_.targetQuantum().other.size();
+		SizeType mode = model_.targetQuantum().qn.other.size();
 		PrinterInDetailType printerInDetail(lrs_, mode, extendedPrint);
 
 		lrs_.left(pS);
@@ -489,7 +489,7 @@ obtain ordered
 	{
 		bool extendedPrint = (parameters_.options.find("extendedPrint") !=
 		        PsimagLite::String::npos);
-		SizeType mode = model_.targetQuantum().other.size();
+		SizeType mode = model_.targetQuantum().qn.other.size();
 		PrinterInDetailType printerInDetail(lrs_, mode, extendedPrint);
 		int stepLength = parameters_.finiteLoop[loopIndex].stepLength;
 		SizeType keptStates = parameters_.finiteLoop[loopIndex].keptStates;
@@ -649,22 +649,13 @@ obtain ordered
 		SizeType maxSites = model_.geometry().numberOfSites();
 		if (direction == ProgramGlobals::INFINITE &&
 		        sites < maxSites &&
-		        parameters_.adjustQuantumNumbers.size()>0) {
-			quantumSector_ = EffectiveQnType::adjustQn(parameters_.adjustQuantumNumbers,
-			                                           direction,
-			                                           ioOut_,
-			                                           MyBasis::useSu2Symmetry(),
-			                                           step,
-			                                           model_.targetQuantum().other.size());
+		        parameters_.adjustQuantumNumbers.size() > step) {
+			quantumSector_ = parameters_.adjustQuantumNumbers[step];
 			return;
 		}
 
-		quantumSector_ = EffectiveQnType::getQuantumSector(model_.targetQuantum(),
-		                                                   sites,
-		                                                   model_.geometry().numberOfSites(),
-		                                                   direction,
-		                                                   &ioOut_,
-		                                                   MyBasis::useSu2Symmetry());
+		quantumSector_ = model_.targetQuantum().qn.scale(sites,
+		                                                 model_.geometry().numberOfSites());
 	}
 
 	void printEnergy(RealType energy)

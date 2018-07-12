@@ -172,7 +172,7 @@ public:
 	{
 		block_.clear();
 		utils::blockUnion(block_,basis1.block_,basis2.block_);
-		VectorSizeType qns;
+		VectorQnType qns;
 
 		if (useSu2Symmetry_) {
 			std::cout<<"Basis: SU(2) Symmetry is in use\n";
@@ -214,8 +214,7 @@ public:
 						     j < basis1.partition_[ps + 1];
 						     ++j) {
 							qns[counter] = EffectiveQnType::tensorProduct(basis2.qns_[pe],
-							                                              basis1.qns_[ps]).
-							        toInteger();
+							                                              basis1.qns_[ps]);
 							electrons_[counter++] = basis1.electrons_[j] +
 							        basis2.electrons_[i];
 						}
@@ -326,7 +325,7 @@ public:
 		msg2<<"Truncating indices...";
 		progress_.printline(msg2,std::cout);
 
-		VectorSizeType qns;
+		VectorQnType qns;
 		unShrinkVector(qns, qns_, partition_);
 		truncate(qns, removedIndices);
 
@@ -451,11 +450,6 @@ public:
 
 	const PsimagLite::String& symmName() const { return symm_.name(); }
 
-	bool pseudoQnEqual(SizeType i, const QnType& qn) const
-	{
-		return (pseudoQn(i) == qn);
-	}
-
 	PsimagLite::String pseudoQnToString(SizeType i) const
 	{
 		return "unimplemented";
@@ -466,8 +460,10 @@ public:
 		if (useSu2Symmetry_) {
 			assert(i < partition_.size());
 			SizeType ind = partition_[i];
-			return EffectiveQnType::pseudoEffectiveNumber(electrons_[ind],
-			                                              symmSu2_.jmValue(ind).first);
+			PairType jmPair(symmSu2_.jmValue(ind).first, 0);
+			assert(ind < electrons_.size());
+			QnType q(electrons_[ind], VectorSizeType(), jmPair, 0);
+			return q;
 		} else {
 			return qnEx(i);
 		}
@@ -538,15 +534,18 @@ public:
 protected:
 
 	//! Sets symmetry information for this basis, see SymmetryElectronsSz.h for more
-	void setSymmetryRelated(const SymmetryElectronsSzType& basisData)
+	void setSymmetryRelated(const VectorQnType& basisData)
 	{
 		if (useSu2Symmetry_) symmSu2_.set(basisData);
-		electrons_ = basisData.electrons;
-		VectorSizeType qns;
-		EffectiveQnType::findQuantumNumbers(qns, basisData, useSu2Symmetry_);
-		findPermutationAndPartition(qns, true);
+
+		SizeType n = basisData.size();
+		electrons_.resize(n);
+		for (SizeType i = 0; i < n; ++i)
+			electrons_[i] = basisData[i].electrons;
+
+		findPermutationAndPartition(basisData, true);
 		electronsToSigns(electrons_);
-		shrinkVector(qns_, qns, partition_);
+		shrinkVector(qns_, basisData, partition_);
 	}
 
 private:
@@ -554,7 +553,7 @@ private:
 	//! Finds a partition of the basis given the effecitve quantum numbers
 	//! Find a partition of the basis given the effecitve quantum numbers
 	//! (see section about Symmetries in paper)
-	void findPartition(const VectorSizeType& qns)
+	void findPartition(const VectorQnType& qns)
 	{
 		SizeType n = qns.size();
 		assert(n > 0);
@@ -603,7 +602,7 @@ private:
 	}
 
 	void shrinkVector(VectorQnType& dest,
-	                  const VectorSizeType& src,
+	                  const VectorQnType& src,
 	                  const VectorSizeType& partition) const
 	{
 		SizeType n = partition.size();
@@ -613,24 +612,24 @@ private:
 			assert(i < partition.size());
 			assert(partition[i] < src.size());
 			assert(i < dest.size());
-			dest[i] = EffectiveQnType::fromInteger(src[partition[i]]);
+			dest[i] = src[partition[i]];
 		}
 	}
 
-	void unShrinkVector(VectorSizeType& dest,
+	void unShrinkVector(VectorQnType& dest,
 	                    const VectorQnType& src,
 	                    const VectorSizeType& partition) const
 	{
 		SizeType n = partition.size();
 		assert(n > 0);
 		assert(src.size() == n -1);
-		dest.resize(partition[n - 1], 0);
+		dest.resize(partition[n - 1]);
 		for (SizeType i = 0; i < n - 1; ++i) {
 			SizeType start = partition[i];
 			SizeType end = partition[i + 1];
 			assert(end < 1 + dest.size());
 			for (SizeType j = start; j < end; ++j)
-				dest[j] = src[i].toInteger();
+				dest[j] = src[i];
 		}
 	}
 
@@ -643,7 +642,7 @@ private:
 		return 1.0-sum;
 	}
 
-	void truncate(VectorSizeType& qns, const VectorSizeType& removedIndices)
+	void truncate(VectorQnType& qns, const VectorSizeType& removedIndices)
 	{
 		utils::truncateVector(qns, removedIndices);
 		utils::truncateVector(electrons_,removedIndices);
@@ -656,17 +655,16 @@ private:
 		if (useSu2Symmetry_) symmSu2_.reorder(permutationVector_);
 	}
 
-	void findPermutationAndPartition(VectorSizeType& qns,
+	void findPermutationAndPartition(const VectorQnType& qns,
 	                                 bool changePermutation)
 	{
 		if (changePermutation) {
 			permutationVector_.resize(qns.size());
 			if (useSu2Symmetry_) 	{
-				//symmSu2_.orderFlavors(permutationVector_,partition_);
 				for (SizeType i=0;i<permutationVector_.size();i++)
 					permutationVector_[i]=i;
 			} else {
-				 EffectiveQnType::sort(qns, permutationVector_);
+				 EffectiveQnType::notReallySort(qns, permutationVector_);
 			}
 		}
 
