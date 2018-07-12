@@ -314,8 +314,75 @@ sub checkCollectBrakets
 
 		my $file1 = "$workdir/CollectBrakets${n}_$i.txt";
 		my $file2 = "$golddir/CollectBrakets${n}_$i.txt";
-		print "WARNING unimplemented: Comparing $file1 $file2\n";
+		my @brakets1 = readBrakets($file1);
+		my @brakets2 = readBrakets($file2);
+		compareBrakets(\@brakets1, \@brakets2);
 	}
+}
+
+sub compareBrakets
+{
+	my ($b1, $b2) = @_;
+	my $n1 = scalar(@$b1);
+	my $n2 = scalar(@$b2);
+	if ($n1 != $n2) {
+		print "WARNING: Braket size differs $n1 != $n2\n";
+	}
+
+	my $n = ($n1 < $n2) ? $n1 : $n2;
+	for (my $i = 0; $i < $n; ++$i) {
+		compareBraket($b1->[$i], $b2->[$i]);
+	}
+}
+
+sub compareBraket
+{
+	my ($h1, $h2) = @_;
+	
+	my @items = ("value", "time", "label", "norm");
+	foreach my $item (@items) {
+		if (compareItem($item, $h1, $h2) > 1) {
+			 print "$0 $item undefined either old or new\n";
+		}
+	}
+	
+}
+
+sub compareItem
+{
+	my ($item, $h1, $h2) = @_;
+	my $i1 = $h1->{"$item"};
+	my $i2 = $h2->{"$item"};
+	return 0 if (!defined($i1) and !defined($i2));
+	defined($i1) or return 2;
+	defined($i2) or return 3;
+	if ($i1 ne $i2) {
+		print "$0 $item differs in value $i1 != $i2\n";
+	}
+
+	return ($i1 eq $i2) ? 0 : 1;
+}
+
+sub readBrakets
+{
+	my ($file) = @_;
+	my @brakets;
+	if (!open(FILE, "<", $file)) {
+		print "$0: Could not open $file : $!\n";
+		return @brakets;
+	}
+
+	while (<FILE>) {
+		my @temp = split;
+		next if (scalar(@temp) != 5);
+		my $site = $temp[0];
+		next unless ($site =~ /^\d+$/);
+		my $hptr = {"value" => $temp[1], "time" => $temp[2], "label" => $temp[3], "norm" => $temp[4]};
+		$brakets[$site] = $hptr;	
+	}
+
+	close(FILE);
+	return @brakets;
 }
 
 sub checkVectorsEqual
