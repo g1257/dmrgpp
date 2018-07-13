@@ -271,52 +271,6 @@ public:
 
 private:
 
-	void orderBasis(HilbertBasisType& basis,
-	                VectorSizeType& q,
-	                const HilbertBasisType& basisTmp) const
-	{
-		// reorder the natural basis
-		VectorSizeType iperm(q.size());
-		PsimagLite::Sort<VectorSizeType> sort;
-		sort.sort(q,iperm);
-
-		SizeType total = basisTmp.size();
-		VectorSizeType basis2(total);
-		for (SizeType a=0;a<total;a++)
-			basis2[a] = basisTmp[iperm[a]];
-
-		// Ensure deterministic order for the natural basis
-		SizeType offset = 0;
-		VectorSizeType symmetryBlock;
-
-		basis.resize(total);
-		for (SizeType a=0;a<total;a++) {
-			if (a>0 && q[a] != q[a-1]) {
-				iperm.resize(symmetryBlock.size());
-				sort.sort(symmetryBlock,iperm);
-
-				for (SizeType k = 0; k < symmetryBlock.size(); ++k)
-					basis[k + offset] = symmetryBlock[k];
-
-				offset += symmetryBlock.size();
-				symmetryBlock.clear();
-			}
-
-			symmetryBlock.push_back(basis2[a]);
-		}
-
-		if (symmetryBlock.size() == 0) return;
-
-		iperm.resize(symmetryBlock.size());
-		sort.sort(symmetryBlock,iperm);
-
-		for (SizeType k = 0; k < symmetryBlock.size(); ++k)
-			basis[k + offset] = symmetryBlock[k];
-
-		offset += symmetryBlock.size();
-		symmetryBlock.clear();
-	}
-
 	ModelCommonType modelCommon_;
 };     //class ModelBase
 } // namespace Dmrg

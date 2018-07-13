@@ -265,9 +265,7 @@ private:
 		for (SizeType i=0;i<total;i++) {
 			if (weights[i]==0) continue;
 			PsimagLite::OstringStream msg;
-			msg<<"About to diag. sector with quantum numbs. ";
-			msg<<lrs.super().qnEx(i);
-			//msg<<" pseudo="<<lrs.super().pseudoQn(i);
+			msg<<"About to diag. sector with";
 			msg<<" quantumSector="<<quantumSector_;
 
 			if (verbose_ && PsimagLite::Concurrency::root()) {

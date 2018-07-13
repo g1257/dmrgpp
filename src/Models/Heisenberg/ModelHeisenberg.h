@@ -356,8 +356,9 @@ public:
 		HilbertBasisType basisTmp(total);
 		for (SizeType i = 0; i < total; ++i) basisTmp[i] = i;
 		setSymmetryRelated(qq, basisTmp, block.size());
-		VectorQnType qqConst = qq;
-		QnType::notReallySort(basis, qq, basisTmp, qqConst);
+		VectorQnType qqNonConst = qq;
+		VectorSizeType permutation;
+		QnType::notReallySort(basis, qqNonConst, permutation, basisTmp, qq);
 	}
 
 private:
@@ -505,10 +506,13 @@ private:
 		qns.resize(basis.size(), zeroQn);
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(modelParameters_.twiceTheSpin, basis[i]);
-			other[0] = (isCanonical) ? getSzPlusConst(basis[i],n) : 0;
-			SizeType electrons = (modelParameters_.targetQuantum.isSu2) ? 1 : 0;
+			other[0] = (isCanonical) ? getSzPlusConst(basis[i], n) : 0;
+			SizeType electrons = 1;
 			SizeType flavor = 1;
-			qns[i] = QnType(electrons, other, jmpair, flavor);
+			if (modelParameters_.targetQuantum.isSu2)
+				qns[i] = QnType(electrons, other, jmpair, flavor);
+			else
+				qns[i] = QnType(0, other, PairType(0, 0), 0);
 		}
 	}
 

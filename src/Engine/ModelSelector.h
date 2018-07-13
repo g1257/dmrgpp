@@ -47,10 +47,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MODEL_SELECTOR_H
 #define MODEL_SELECTOR_H
 
+//#define ALL_MODELS 1
 #include <stdexcept>
 #include "ProgramGlobals.h"
 #include "Utils.h"
-#ifndef ALL_MODELs
+#ifndef ALL_MODELS
 #include "../Models/Heisenberg/ModelHeisenberg.h"
 #else
 #include "../Models/Heisenberg/ModelHeisenberg.h"

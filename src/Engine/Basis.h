@@ -221,10 +221,9 @@ public:
 		}
 
 		// order quantum numbers of combined basis:
-		findPermutationAndPartition(qns, true);
+		findPermutationAndPartitionAndQns(qns, true);
 		reorder();
 		electronsToSigns(electrons_);
-		shrinkVector(qns_, qns, partition_);
 	}
 
 	//! returns the effective quantum number of basis state i
@@ -328,8 +327,7 @@ public:
 
 		// N.B.: false below means that we don't truncate the permutation vectors
 		//	because they're needed for the WFT
-		findPermutationAndPartition(qns, false);
-		shrinkVector(qns_, qns, partition_);
+		findPermutationAndPartitionAndQns(qns, false);
 
 		PsimagLite::OstringStream msg;
 		msg<<"Done with changeBasis";
@@ -538,31 +536,11 @@ protected:
 		for (SizeType i = 0; i < n; ++i)
 			electrons_[i] = basisData[i].electrons;
 
-		findPermutationAndPartition(basisData, true);
+		findPermutationAndPartitionAndQns(basisData, true);
 		electronsToSigns(electrons_);
-		shrinkVector(qns_, basisData, partition_);
 	}
 
 private:
-
-	//! Finds a partition of the basis given the effecitve quantum numbers
-	//! Find a partition of the basis given the effecitve quantum numbers
-	//! (see section about Symmetries in paper)
-	void findPartition(const VectorQnType& qns)
-	{
-		SizeType n = qns.size();
-		assert(n > 0);
-		QnType qtmp = qns[0];
-		partition_.clear();
-		for (SizeType i = 0; i < n; ++i) {
-			if (i == 0 || qns[i] != qtmp) {
-				partition_.push_back(i);
-				qtmp = qns[i];
-			}
-		}
-
-		partition_.push_back(n);
-	}
 
 	template<typename IoInputter>
 	void loadInternal(IoInputter& io,
@@ -659,26 +637,18 @@ private:
 		if (useSu2Symmetry_) symmSu2_.reorder(permutationVector_);
 	}
 
-	void findPermutationAndPartition(const VectorQnType& qns,
-	                                 bool changePermutation)
+	void findPermutationAndPartitionAndQns(const VectorQnType& qns,
+	                                       bool changePermutation)
 	{
-		if (changePermutation) {
-			VectorQnType qnsNonConst;
-			SizeType n = qns.size();
-			permutationVector_.resize(n);
-			if (useSu2Symmetry_) 	{
-				for (SizeType i = 0; i < n; ++i)
-					permutationVector_[i] = i;
-			} else {
-				VectorSizeType numbers(n);
-				for (SizeType i = 0; i < n; ++i) numbers[i] = i;
-				QnType::notReallySort(permutationVector_, qnsNonConst, numbers, qns);
-			}
-		}
+		SizeType n = qns.size();
 
-		findPartition(qns);
+		VectorSizeType numbers(n);
+		for (SizeType i = 0; i < n; ++i) numbers[i] = i;
+		VectorSizeType permutationVector;
+		QnType::notReallySort(permutationVector, qns_, partition_, numbers, qns);
 
 		if (changePermutation) {
+			permutationVector_ = (useSu2Symmetry_) ? numbers : permutationVector;
 			permInverse_.resize(permutationVector_.size());
 			for (SizeType i=0;i<permInverse_.size();i++)
 				permInverse_[permutationVector_[i]]=i;
