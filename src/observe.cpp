@@ -48,14 +48,14 @@ void mainLoop1(GeometryType& geometry,
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;
-	typedef EffectiveQuantumNumber<RealType> EffectiveQnType;
+	typedef Qn QnType;
 
 	if (params.options.find("vectorwithoffsets")!=PsimagLite::String::npos) {
-		typedef VectorWithOffsets<ComplexOrRealType, EffectiveQnType> VectorWithOffsetType;
+		typedef VectorWithOffsets<ComplexOrRealType, QnType> VectorWithOffsetType;
 		mainLoop<GeometryType,ModelHelperType,VectorWithOffsetType>
 		        (geometry,targeting,io,params, list);
 	} else {
-		typedef VectorWithOffset<ComplexOrRealType, EffectiveQnType> VectorWithOffsetType;
+		typedef VectorWithOffset<ComplexOrRealType, QnType> VectorWithOffsetType;
 		mainLoop<GeometryType,ModelHelperType,VectorWithOffsetType>
 		        (geometry,targeting,io,params, list);
 	}

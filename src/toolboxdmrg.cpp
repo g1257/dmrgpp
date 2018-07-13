@@ -5,6 +5,7 @@
 #include "ParametersDmrgSolver.h"
 #include "ToolBox.h"
 #include "PsimagLite.h"
+#include "Qn.h"
 
 #ifndef USE_FLOAT
 typedef double RealType;
@@ -12,7 +13,7 @@ typedef double RealType;
 typedef float RealType;
 #endif
 typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
-typedef Dmrg::ParametersDmrgSolver<RealType,InputNgType::Readable>
+typedef Dmrg::ParametersDmrgSolver<RealType,InputNgType::Readable, Dmrg::Qn>
 ParametersDmrgSolverType;
 typedef PsimagLite::Concurrency ConcurrencyType;
 

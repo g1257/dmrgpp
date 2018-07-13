@@ -44,7 +44,7 @@ typedef  PsimagLite::CrsMatrix<ComplexType> MySparseMatrixComplex;
 typedef  PsimagLite::CrsMatrix<RealType> MySparseMatrixReal;
 
 typedef PsimagLite::InputNg<InputCheck> InputNgType;
-typedef ParametersDmrgSolver<RealType,InputNgType::Readable> ParametersDmrgSolverType;
+typedef ParametersDmrgSolver<RealType,InputNgType::Readable, Dmrg::Qn> ParametersDmrgSolverType;
 
 template<typename VectorWithOffsetType, typename ModelType>
 bool observeOneFullSweep(IoInputType& io,

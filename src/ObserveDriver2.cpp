@@ -2,9 +2,9 @@
 
 namespace Dmrg {
 
-typedef EffectiveQuantumNumber<RealType> EffectiveQnType;
-typedef VectorWithOffset<ComplexType, EffectiveQnType> VectorWithOffset2Type;
-typedef VectorWithOffsets<ComplexType, EffectiveQnType> VectorWithOffset4Type;
+typedef Qn QnType;
+typedef VectorWithOffset<ComplexType, QnType> VectorWithOffset2Type;
+typedef VectorWithOffsets<ComplexType, QnType> VectorWithOffset4Type;
 
 typedef PsimagLite::Geometry<RealType,
 InputNgType::Readable,

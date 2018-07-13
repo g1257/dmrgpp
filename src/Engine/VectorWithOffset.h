@@ -97,17 +97,24 @@ public:
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef std::pair<SizeType, QnType> PairQnType;
+	typedef typename QnType::PairSizeType PairSizeType;
 
 	static const ComplexOrRealType zero_;
 
 	VectorWithOffset()
-	    : progress_("VectorWithOffset"), size_(0), offset_(0)
+	    : progress_("VectorWithOffset"),
+	      size_(0),
+	      offset_(0),
+	      mAndq_(PairQnType(0, QnType(0, VectorSizeType(), PairSizeType(0, 0), 0)))
 	{}
 
 	template<typename SomeBasisType>
 	VectorWithOffset(const VectorSizeType& weights,
 	                 const SomeBasisType& someBasis)
-	    : progress_("VectorWithOffset"),size_(someBasis.size())
+	    : progress_("VectorWithOffset"),
+	      size_(someBasis.size()),
+	      offset_(0),
+	      mAndq_(PairQnType(0, QnType(0, VectorSizeType(), PairSizeType(0, 0), 0)))
 	{
 		bool found = false;
 		for (SizeType i=0;i<weights.size();i++) {
