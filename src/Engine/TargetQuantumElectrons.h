@@ -86,7 +86,7 @@ template<typename RealType, typename QnType>
 struct TargetQuantumElectrons {
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef QnType::PairType PairSizeType;
+	typedef typename QnType::PairType PairSizeType;
 
 	template<typename IoInputType>
 	TargetQuantumElectrons(IoInputType& io, bool allowUpDown = true)
@@ -189,7 +189,7 @@ struct TargetQuantumElectrons {
 	{
 		PsimagLite::String label = label1 + "/TargetQuantumElectrons";
 		io.createGroup(label);
-		io.write(label + "/TotalNumberOfSites", TotalNumberOfSites);
+		io.write(label + "/TotalNumberOfSites", totalNumberOfSites);
 		io.write(label + "/isSu2", isSu2);
 		io.write(label + "/isCanonical", isCanonical);
 		qn.write(label + "/qn", io);

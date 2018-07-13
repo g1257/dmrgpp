@@ -23,7 +23,6 @@
 #include "CrsMatrix.h"
 #include "OperatorSpec.h"
 #include "CanonicalExpression.h"
-#include "EffectiveQuantumNumber.h"
 
 #ifndef USE_FLOAT
 typedef double RealType;

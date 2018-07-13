@@ -74,17 +74,17 @@ void mainLoop2(typename MatrixVectorType::ModelType::GeometryType& geometry,
                PsimagLite::String targeting)
 {
 	typedef typename MatrixVectorType::ComplexOrRealType ComplexOrRealType;
-	typedef typename MatrixVectorType::ModelType::EffectiveQnType EffectiveQnType;
+	typedef typename MatrixVectorType::ModelType::QnType QnType;
 
 	if (dmrgSolverParams.options.find("vectorwithoffsets")!=PsimagLite::String::npos) {
-		typedef VectorWithOffsets<ComplexOrRealType, EffectiveQnType> VectorWithOffsetType;
+		typedef VectorWithOffsets<ComplexOrRealType, QnType> VectorWithOffsetType;
 		mainLoop3<MatrixVectorType,VectorWithOffsetType>(geometry,
 		                                                 dmrgSolverParams,
 		                                                 io,
 		                                                 opOptions,
 		                                                 targeting);
 	} else {
-		typedef VectorWithOffset<ComplexOrRealType, EffectiveQnType> VectorWithOffsetType;
+		typedef VectorWithOffset<ComplexOrRealType, QnType> VectorWithOffsetType;
 		mainLoop3<MatrixVectorType,VectorWithOffsetType>(geometry,
 		                                                 dmrgSolverParams,
 		                                                 io,

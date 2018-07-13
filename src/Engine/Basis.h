@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "HamiltonianSymmetryLocal.h"
 #include "HamiltonianSymmetrySu2.h"
 #include "ProgressIndicator.h"
-#include "EffectiveQuantumNumber.h"
+#include "Qn.h"
 
 namespace Dmrg {
 // A class to represent in a light way a Dmrg basis (used only to implement symmetries).
@@ -105,14 +105,11 @@ public:
 	typedef SparseMatrixType_ SparseMatrixType;
 	typedef RealType_ RealType;
 	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
-	typedef EffectiveQuantumNumber<RealType> EffectiveQnType;
-	typedef HamiltonianSymmetrySu2<SparseMatrixType_,
-	EffectiveQnType> HamiltonianSymmetrySu2Type;
+	typedef Qn QnType;
+	typedef HamiltonianSymmetrySu2<SparseMatrixType_, QnType> HamiltonianSymmetrySu2Type;
 	typedef typename HamiltonianSymmetrySu2Type::FactorsType FactorsType;
 	typedef typename HamiltonianSymmetrySu2Type::PairType PairType;
-	typedef typename EffectiveQnType::SymmetryElectronsSzType SymmetryElectronsSzType;
-	typedef typename EffectiveQnType::QnType QnType;
-	typedef typename EffectiveQnType::VectorQnType VectorQnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 
 	enum {SAVE_ALL, SAVE_PARTIAL};
 
@@ -213,10 +210,8 @@ public:
 						for (SizeType j = basis1.partition_[ps];
 						     j < basis1.partition_[ps + 1];
 						     ++j) {
-							qns[counter] = EffectiveQnType::tensorProduct(basis2.qns_[pe],
-							                                              basis1.qns_[ps]);
-							electrons_[counter++] = basis1.electrons_[j] +
-							        basis2.electrons_[i];
+							qns[counter] = QnType(basis2.qns_[pe], basis1.qns_[ps]);
+							electrons_[counter++] = basis1.electrons_[j] + basis2.electrons_[i];
 						}
 					}
 				}
@@ -448,8 +443,6 @@ public:
 		return symmSu2_.jMax();
 	}
 
-	const PsimagLite::String& symmName() const { return symm_.name(); }
-
 	PsimagLite::String pseudoQnToString(SizeType i) const
 	{
 		return "unimplemented";
@@ -557,7 +550,7 @@ private:
 	{
 		SizeType n = qns.size();
 		assert(n > 0);
-		SizeType qtmp = qns[0] + 1;
+		QnType qtmp = qns[0];
 		partition_.clear();
 		for (SizeType i = 0; i < n; ++i) {
 			if (i == 0 || qns[i] != qtmp) {
@@ -664,7 +657,7 @@ private:
 				for (SizeType i=0;i<permutationVector_.size();i++)
 					permutationVector_[i]=i;
 			} else {
-				 EffectiveQnType::notReallySort(qns, permutationVector_);
+				QnType::notReallySort(qns, permutationVector_);
 			}
 		}
 
@@ -765,7 +758,6 @@ these numbers are
 	BlockType block_;
 	bool dmrgTransformed_;
 	PsimagLite::String name_;
-	EffectiveQnType symm_;
 	PsimagLite::ProgressIndicator progress_;
 	static bool useSu2Symmetry_;
 

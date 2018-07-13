@@ -499,7 +499,6 @@ private:
 		}
 
 		bool isCanonical = (modelParameters_.targetQuantum.isCanonical);
-		VectorQnType qns(basis.size());
 		VectorSizeType other(1);
 		qns.resize(basis.size());
 		for (SizeType i = 0; i < basis.size(); ++i) {

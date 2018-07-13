@@ -106,8 +106,7 @@ public:
 	typedef Link<SparseElementType> LinkType;
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorSparseElementType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
-	typedef typename BasisType::EffectiveQnType EffectiveQnType;
-	typedef typename EffectiveQnType::QnType QnType;
+	typedef typename BasisType::QnType QnType;
 
 	ModelHelperLocal(SizeType m, const LeftRightSuperType& lrs)
 	    : m_(m),

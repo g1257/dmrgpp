@@ -129,7 +129,6 @@ public:
 	typedef typename BasisType::BlockType BlockType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef BasisWithOperators<OperatorsType> ThisType;
-	typedef typename BasisType::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;

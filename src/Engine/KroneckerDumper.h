@@ -21,8 +21,7 @@ class KroneckerDumper {
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename BasisType::EffectiveQnType EffectiveQnType;
-	typedef typename EffectiveQnType::QnType QnType;
+	typedef typename BasisType::QnType QnType;
 	typedef std::pair<SizeType,SizeType> PairSizeType;
 
 public:
@@ -177,13 +176,10 @@ private:
 		fout_<<basis.electronsVector();
 	}
 
-	PairSizeType getNupNdown(SizeType q, SizeType nOfQns) const
+	PairSizeType getNupNdown(QnType q) const
 	{
-		VectorSizeType qns = EffectiveQnType::decodeQuantumNumber(q,nOfQns);
-		SizeType electrons = qns[1];
-		SizeType electronsUp = qns[0];
-		SizeType electronsDown = electrons - qns[0];
-		return PairSizeType(electronsUp,electronsDown);
+		assert(q.other.size() >= 1);
+		return PairSizeType(q.other[0], q.electrons - q.other[0]);
 	}
 
 	void cacheSigns(const VectorSizeType& electrons)

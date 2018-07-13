@@ -113,10 +113,9 @@ public:
 	typedef ReflectionOperatorEmpty<LeftRightSuperType> ReflectionSymmetryType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename MyBasis::EffectiveQnType EffectiveQnType;
-	typedef typename EffectiveQnType::QnType QnType;
+	typedef typename MyBasis::QnType QnType;
 	typedef TargetQuantumElectrons<RealType, QnType> TargetQuantumElectronsType;
-	typedef typename PsimagLite::Vector<QnType>::Type VectorQnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::SparseElementType ComplexOrRealType;
 	typedef ModelCommon<ParametersType, GeometryType, ModelHelperType> ModelCommonType;

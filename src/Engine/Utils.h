@@ -135,14 +135,15 @@ void blockUnion(Block &A,Block const &B,Block const &C)
 template<typename SomeVectorType>
 typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True,void>::Type
 truncateVector(SomeVectorType& v,
-               const SomeVectorType& removedIndices)
+               const PsimagLite::Vector<SizeType>::Type& removedIndices)
 {
 	SomeVectorType tmpVector;
 	for (SizeType i=0;i<v.size();i++) {
-		if (PsimagLite::isInVector(removedIndices,i)>=0) continue;
+		if (PsimagLite::isInVector(removedIndices,i) >= 0) continue;
 		tmpVector.push_back(v[i]);
 	}
-	v=tmpVector;
+
+	v = tmpVector;
 }
 
 template<typename SomeVectorType>

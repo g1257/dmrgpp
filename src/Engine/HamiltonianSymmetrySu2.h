@@ -90,7 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename SparseMatrixType, typename EffectiveQnType>
+template<typename SparseMatrixType, typename QnType>
 class HamiltonianSymmetrySu2 {
 public:
 
@@ -103,12 +103,10 @@ private:
 
 	typedef JmPairs<PairType> JmPairsType;
 	typedef VerySparseMatrix<RealType> VerySparseMatrixType;
-	typedef HamiltonianSymmetrySu2<SparseMatrixType, EffectiveQnType> ThisType;
+	typedef HamiltonianSymmetrySu2<SparseMatrixType, QnType> ThisType;
 	typedef JmSubspace<VerySparseMatrixType,ThisType> JmSubspaceType;
 	typedef typename JmSubspaceType::FlavorType FlavorType;
-	typedef typename EffectiveQnType::VectorQnType VectorQnType;
-	typedef typename EffectiveQnType::QnType QnType;
-	typedef typename EffectiveQnType::SymmetryElectronsSzType SymmetryElectronsSzType;
+	typedef typename QnType::VectorQnType VectorQnType;
 
 public:
 
@@ -170,7 +168,7 @@ public:
 		jMax_++;
 		calcReducedBasis();
 		normalizeFlavors();
-		EffectiveQnType::qnToElectrons(electrons, quantumNumbers);
+		QnType::qnToElectrons(electrons, quantumNumbers);
 		electronsMax_ = *(std::max_element(electrons.begin(),electrons.end()));
 	}
 

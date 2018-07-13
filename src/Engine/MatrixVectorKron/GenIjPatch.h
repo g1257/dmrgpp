@@ -93,8 +93,7 @@ public:
 
 	typedef LeftRightSuperType_ LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisType BasisType;
-	typedef typename BasisType::EffectiveQnType EffectiveQnType;
-	typedef typename EffectiveQnType::QnType QnType;
+	typedef typename BasisType::QnType QnType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	enum LeftOrRightEnumType {LEFT=0,RIGHT=1};
@@ -105,8 +104,7 @@ public:
 		for (SizeType i=0;i<lrs.left().partition()-1;i++) {
 			for (SizeType j=0;j<lrs.right().partition()-1;++j) {
 
-				if (EffectiveQnType::tensorProduct(lrs.left().qnEx(i),
-				                                   lrs.right().qnEx(j)) != target)
+				if (QnType(lrs.left().qnEx(i), lrs.right().qnEx(j)) != target)
 					continue;
 
 				patchesLeft_.push_back(i);
