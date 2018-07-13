@@ -577,7 +577,9 @@ private:
 	JmPairsType jmValues_;
 	VectorSizeType flavors_;
 	VectorSizeType flavorsOld_;
-	SizeType flavorsMax_,electronsMax_,jMax_;
+	SizeType flavorsMax_;
+	SizeType electronsMax_;
+	SizeType jMax_;
 	FactorsType factors_;
 	typename PsimagLite::Vector<JmSubspaceType>::Type jmSubspaces_;
 	// reduced:
