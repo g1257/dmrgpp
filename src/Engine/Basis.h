@@ -167,6 +167,8 @@ public:
 	                  const ThisType& basis2,
 	                  const QnType* pseudoQn = 0)
 	{
+		const QnType zeroQn(0, VectorSizeType(), PairType(0, 0), 0);
+
 		block_.clear();
 		utils::blockUnion(block_,basis1.block_,basis2.block_);
 		VectorQnType qns;
@@ -201,7 +203,7 @@ public:
 			SizeType nps = basis1.partition_.size();
 			if (nps > 0) --nps;
 
-			qns.resize(basis1.size() * basis2.size());
+			qns.resize(basis1.size() * basis2.size(), zeroQn);
 			electrons_.resize(qns.size());
 			SizeType counter = 0;
 			for (SizeType pe = 0; pe < npe; ++pe) {
@@ -585,7 +587,13 @@ private:
 		for (SizeType i=0;i<permInverse_.size();i++)
 			permutationVector_[permInverse_[i]]=i;
 
-		io.read(qns_, prefix + "QNShrink");
+		SizeType aSize = 0;
+		io.read(aSize, prefix + "QNShrink/Size");
+		const QnType zeroQn(0, VectorSizeType(), PairType(0, 0), 0);
+
+		qns_.resize(aSize, zeroQn);
+		for (SizeType i = 0; i < aSize; ++i)
+			qns_[i].read(prefix + "QNShrink/" + ttos(i), io);
 
 		dmrgTransformed_=false;
 		if (useSu2Symmetry_)
@@ -600,7 +608,8 @@ private:
 	{
 		SizeType n = partition.size();
 		assert(n > 0);
-		dest.resize(n - 1);
+		const QnType zeroQn(0, VectorSizeType(), PairType(0, 0), 0);
+		dest.resize(n - 1, zeroQn);
 		for (SizeType i = 0; i < n - 1; ++i) {
 			assert(i < partition.size());
 			assert(partition[i] < src.size());
@@ -616,7 +625,9 @@ private:
 		SizeType n = partition.size();
 		assert(n > 0);
 		assert(src.size() == n -1);
-		dest.resize(partition[n - 1]);
+		const QnType zeroQn(0, VectorSizeType(), PairType(0, 0), 0);
+
+		dest.resize(partition[n - 1], zeroQn);
 		for (SizeType i = 0; i < n - 1; ++i) {
 			SizeType start = partition[i];
 			SizeType end = partition[i + 1];
@@ -652,12 +663,16 @@ private:
 	                                 bool changePermutation)
 	{
 		if (changePermutation) {
-			permutationVector_.resize(qns.size());
+			VectorQnType qnsNonConst;
+			SizeType n = qns.size();
+			permutationVector_.resize(n);
 			if (useSu2Symmetry_) 	{
-				for (SizeType i=0;i<permutationVector_.size();i++)
-					permutationVector_[i]=i;
+				for (SizeType i = 0; i < n; ++i)
+					permutationVector_[i] = i;
 			} else {
-				QnType::notReallySort(qns, permutationVector_);
+				VectorSizeType numbers(n);
+				for (SizeType i = 0; i < n; ++i) numbers[i] = i;
+				QnType::notReallySort(permutationVector_, qnsNonConst, numbers, qns);
 			}
 		}
 

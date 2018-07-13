@@ -136,7 +136,6 @@ public:
 	typedef typename ApplyOperatorExpressionType::PairType PairType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef Braket<ModelType> BraketType;
-	typedef typename ApplyOperatorType::FermionSignType FermionSignType;
 
 	static const SizeType SUM = TargetParamsType::SUM;
 
@@ -323,7 +322,7 @@ public:
 		VectorSizeType electrons(basis.size());
 		for (SizeType i = 0; i < basis.size(); ++i) electrons[i] = q[i].electrons;
 
-		FermionSignType fs(targetHelper_.lrs().left(), electrons);
+		FermionSign fs(targetHelper_.lrs().left(), electrons);
 		for (SizeType j=0;j<creationMatrix.size();j++) {
 			VectorWithOffsetType phiTemp;
 			applyOpExpression_.applyOpLocal()(phiTemp,psi,creationMatrix[j],
@@ -757,7 +756,7 @@ private:
 	{
 		typename PsimagLite::Vector<SizeType>::Type electrons;
 		targetHelper_.model().findElectronsOfOneSite(electrons,site);
-		FermionSignType fs(targetHelper_.lrs().left(),electrons);
+		FermionSign fs(targetHelper_.lrs().left(),electrons);
 		VectorWithOffsetType dest;
 		applyOpExpression_.applyOpLocal()(dest,src1,A,fs,systemOrEnviron,border);
 

@@ -67,7 +67,6 @@ sub printInstance
 {
 	my ($counter,$target,$lanczos,$matrixVector,$modelHelper,$vecWithOffset,$complexOrNot,
 	$values) = @_;
-	my $Eff = "Dmrg::EffectiveQuantumNumber<RealType> ";
 	my $sparseMatrix = "SparseMatrixInstance${counter}Type";
 	my $ops = "Dmrg::Operators<Dmrg::Basis<$sparseMatrix> > ";
 	my $basisWith = "Dmrg::BasisWithOperators<$ops >";
@@ -79,7 +78,7 @@ sub printInstance
 	my $lrs = "Dmrg::LeftRightSuper<$basisWith,$basisSuperBlock >";
 	my $lanczosType = "LanczosSolver${counter}Type";
 	my $matrixVectorType = "MatrixVector${counter}Type";
-	my $vecWithOffsetType = "Dmrg::VectorWithOffset${vecWithOffset}<$complexOrNot, $Eff> ";
+	my $vecWithOffsetType = "Dmrg::VectorWithOffset${vecWithOffset}<$complexOrNot, Dmrg::Qn> ";
 	print FOUT<<EOF;
 
 typedef PsimagLite::CrsMatrix<$complexOrNot> $sparseMatrix;

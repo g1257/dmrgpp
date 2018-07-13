@@ -321,7 +321,8 @@ private:
 			flavors_.clear();
 		}
 
-		quantumNumbers.resize(flavors);
+		const QnType zeroQn(0, VectorSizeType(), PairType(0, 0), 0);
+		quantumNumbers.resize(flavors, zeroQn);
 		flavors_.resize(flavors);
 		for (SizeType i = 0; i < flavors; ++i) {
 			PairType jm = jmSubspace.getJmValue();

@@ -89,17 +89,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 // FIXME: a more generic solution is needed instead of tying
 // the non-zero structure to basis
 namespace Dmrg {
-template<typename ComplexOrRealType, typename EffectiveQnType>
+template<typename ComplexOrRealType, typename QnType_>
 class VectorWithOffsets {
 
-	typedef VectorWithOffsets<ComplexOrRealType, EffectiveQnType> ThisType;
+	typedef VectorWithOffsets<ComplexOrRealType, QnType_> ThisType;
+	typedef typename QnType_::VectorSizeType VectorSizeType;
+	typedef typename QnType_::PairSizeType PairSizeType;
+
 	static ComplexOrRealType const zero_;
 
 public:
 
+	typedef QnType_ QnType;
 	typedef ComplexOrRealType value_type;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename EffectiveQnType::QnType QnType;
 	typedef std::pair<SizeType, QnType> PairQnType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 
@@ -387,7 +390,14 @@ public:
 		if (!flag) err("VectorWithOffsets: all sectors in data_ are empty (FATAL)\n");
 
 		io.read(offsets_, label + "/offsets_");
-		io.read(nzMsAndQns_, label + "/nzMsAndQns_");
+		SizeType aSize = 0;
+		io.read(aSize, label + "/nzMsAndQns_/Size");
+		const QnType zeroQn(0, VectorSizeType(), PairSizeType(0, 0), 0);
+		nzMsAndQns_.resize(aSize, PairQnType(0, zeroQn));
+		for (SizeType i = 0; i < aSize; ++i) {
+			io.read(nzMsAndQns_[i].first, "/nzMsAndQns_/" + ttos(i) + "/0");
+			nzMsAndQns_[i].second.read("/nzMsAndQns_/" + ttos(i) + "/1", io);
+		}
 	}
 
 	template<typename SomeIoOutputType>

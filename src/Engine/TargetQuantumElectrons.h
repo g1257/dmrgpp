@@ -86,7 +86,7 @@ template<typename RealType, typename QnType>
 struct TargetQuantumElectrons {
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename QnType::PairType PairSizeType;
+	typedef typename QnType::PairSizeType PairSizeType;
 
 	template<typename IoInputType>
 	TargetQuantumElectrons(IoInputType& io, bool allowUpDown = true)

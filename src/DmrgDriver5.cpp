@@ -1,6 +1,6 @@
-// Created automatically by configure.pl
+// Created automatically by ./newconfigure.pl
 // DO NOT EDIT because file will be overwritten each
-// time you run configure.pl with the second argument set to 1
+// time you run ./newconfigure.pl with the second argument set to 1
 // This file should be commited
 #include "DmrgDriver1.h"
 
@@ -22,7 +22,7 @@ typedef Dmrg::MatrixVectorStored<
 typedef PsimagLite::LanczosSolver<PsimagLite::ParametersForSolver<GeometryInstance10Type::RealType>,
 	MatrixVector10Type, MatrixVector10Type::VectorType> LanczosSolver10Type;
 
-template void mainLoop4<LanczosSolver10Type,Dmrg::VectorWithOffsets<RealType, Dmrg::EffectiveQuantumNumber<RealType> > >
+template void mainLoop4<LanczosSolver10Type,Dmrg::VectorWithOffsets<RealType, Dmrg::Qn> >
 (LanczosSolver10Type::LanczosMatrixType::ModelType::GeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
@@ -47,7 +47,7 @@ typedef Dmrg::MatrixVectorKron<
 typedef PsimagLite::LanczosSolver<PsimagLite::ParametersForSolver<GeometryInstance11Type::RealType>,
 	MatrixVector11Type, MatrixVector11Type::VectorType> LanczosSolver11Type;
 
-template void mainLoop4<LanczosSolver11Type,Dmrg::VectorWithOffsets<RealType, Dmrg::EffectiveQuantumNumber<RealType> > >
+template void mainLoop4<LanczosSolver11Type,Dmrg::VectorWithOffsets<RealType, Dmrg::Qn> >
 (LanczosSolver11Type::LanczosMatrixType::ModelType::GeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,

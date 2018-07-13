@@ -103,8 +103,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 	typedef typename PsimagLite::Vector<GenIjPatchType*>::Type VectorGenIjPatchType;
 	typedef std::pair<SizeType, SizeType> PairSizeType;
 	typedef typename BaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename BasisType::EffectiveQnType EffectiveQnType;
-	typedef typename EffectiveQnType::QnType QnType;
+	typedef typename BasisType::QnType QnType;
 
 	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 

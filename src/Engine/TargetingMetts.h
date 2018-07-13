@@ -120,7 +120,6 @@ public:
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisType::EffectiveQnType EffectiveQnType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;

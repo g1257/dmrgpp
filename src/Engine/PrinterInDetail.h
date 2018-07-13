@@ -8,7 +8,7 @@ template<typename LeftRightSuperType>
 class PrinterInDetail {
 
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::EffectiveQnType EffectiveQnType;
+	typedef typename BasisWithOperatorsType::QnType QnType;
 
 public:
 

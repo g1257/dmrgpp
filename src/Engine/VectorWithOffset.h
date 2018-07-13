@@ -85,16 +85,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <typeinfo>
 
 namespace Dmrg {
-template<typename ComplexOrRealType, typename EffectiveQnType>
+template<typename ComplexOrRealType, typename QnType_>
 class VectorWithOffset {
 
 public:
 
+	typedef QnType_ QnType;
+	typedef VectorWithOffset<ComplexOrRealType, QnType> ThisType;
 	typedef ComplexOrRealType value_type;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename EffectiveQnType::QnType QnType;
 	typedef std::pair<SizeType, QnType> PairQnType;
 
 	static const ComplexOrRealType zero_;
@@ -274,8 +275,7 @@ public:
 
 	SizeType offset() const { return offset_; }
 
-	VectorWithOffset<ComplexOrRealType,
-	EffectiveQnType> operator+=(const VectorWithOffset<ComplexOrRealType, EffectiveQnType>& v)
+	ThisType operator+=(const ThisType& v)
 	{
 		if (size_ == 0 && offset_ == 0 && mAndq_.first == 0) {
 			data_ = v.data_;
@@ -330,9 +330,7 @@ public:
 		return (v1.data_ * v2.data_);
 	}
 
-	friend VectorWithOffset<ComplexOrRealType,
-	EffectiveQnType> operator*(const ComplexOrRealType& value,
-	                           const VectorWithOffset& v)
+	friend ThisType operator*(const ComplexOrRealType& value, const VectorWithOffset& v)
 	{
 		VectorWithOffset w = v;
 		w.data_ *= value;

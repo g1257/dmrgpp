@@ -101,7 +101,7 @@ public:
 	typedef typename TargetingType::BlockType BlockType;
 	typedef typename TargetingType::TargetVectorType TargetVectorType;
 	typedef typename TargetingType::RealType RealType;
-	typedef typename BasisType::EffectiveQnType EffectiveQnType;
+	typedef typename BasisType::QnType QnType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
 	typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
@@ -125,7 +125,6 @@ public:
 	typedef PsimagLite::LanczosSolver<ParametersForSolverType,
 	MatrixVectorType,
 	TargetVectorType> LanczosSolverType;
-	typedef typename EffectiveQnType::QnType QnType;
 
 	Diagonalization(const ParametersType& parameters,
 	                const ModelType& model,

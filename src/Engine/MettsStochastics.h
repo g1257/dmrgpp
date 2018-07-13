@@ -95,8 +95,8 @@ public:
 
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef ModelType_ ModelType;
-	typedef typename ModelType::EffectiveQnType::QnType QnType;
-	typedef typename ModelType::EffectiveQnType::VectorQnType VectorQnType;
+	typedef typename ModelType::QnType QnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelType::HilbertBasisType HilbertBasisType;
@@ -162,7 +162,9 @@ public:
 			addedSites_.push_back(block1[i]);
 		for (SizeType i=0;i<block2.size();i++)
 			addedSites_.push_back(block2[i]);
-		qnVsSize_.resize(addedSites_.size() + 1);
+		const QnType zeroQn(0, VectorSizeType(), PairType(0, 0), 0);
+
+		qnVsSize_.resize(addedSites_.size() + 1, zeroQn);
 		qnVsSize_[addedSites_.size()]=qn;
 	}
 

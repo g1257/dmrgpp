@@ -101,7 +101,6 @@ public:
 
 	typedef ParametersType_ ParametersType;
 	typedef InputValidatorType_ InputValidatorType;
-	typedef typename PsimagLite::Vector<unsigned int long>::Type HilbertBasisType;
 	typedef ModelHelperType_ ModelHelperType;
 	typedef GeometryType_ GeometryType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -126,6 +125,7 @@ public:
 	typedef ParametersType SolverParamsType;
 	typedef typename ModelHelperType::LinkType LinkType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef VectorSizeType HilbertBasisType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	ModelBase(const ParametersType& params,
@@ -268,38 +268,6 @@ public:
 	}
 
 	virtual PsimagLite::String symmName() const { return "undefined"; }
-
-protected:
-
-	void orderBasis(HilbertBasisType& basis,
-	                const HilbertBasisType& basisUnordered,
-	                VectorQnType& qns) const
-	{
-		SizeType n = basis.size();
-		VectorQnType qnVector;
-		PsimagLite::Vector<HilbertBasisType>::Type bucket;
-		for (SizeType i = 0; i < n; ++i) {
-			int x = PsimagLite::indexOfItemOrMinusOne(qnVector, qns[i]);
-			if (x < 0) {
-				qnVector.push_back(qns[i]);
-				bucket[qnVector.size() - 1].push_back(basisUnordered[i]);
-			} else {
-				bucket[x].push_back(basisUnordered[i]);
-			}
-		}
-
-		SizeType buckets = bucket.size();
-		SizeType counter = 0;
-		for (SizeType i = 0; i < buckets; ++i) {
-			SizeType sizeOfThisBucket = bucket[i].size();
-			for (SizeType j = 0; j < sizeOfThisBucket; ++j) {
-				assert(counter < basis.size());
-				basis[counter++] = bucket[i][j];
-			}
-		}
-
-		assert(counter == basis.size());
-	}
 
 private:
 

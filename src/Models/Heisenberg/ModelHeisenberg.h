@@ -128,13 +128,12 @@ private:
 
 public:
 
-	typedef typename PsimagLite::Vector<unsigned int long>::Type HilbertBasisType;
+	typedef typename PsimagLite::Vector<SizeType>::Type HilbertBasisType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::PairType PairType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 
 	ModelHeisenberg(const SolverParamsType& solverParams,
 	                InputValidatorType& io,
@@ -357,7 +356,8 @@ public:
 		HilbertBasisType basisTmp(total);
 		for (SizeType i = 0; i < total; ++i) basisTmp[i] = i;
 		setSymmetryRelated(qq, basisTmp, block.size());
-		ModelBaseType::orderBasis(basis, basisTmp, qq);
+		VectorQnType qqConst = qq;
+		QnType::notReallySort(basis, qq, basisTmp, qqConst);
 	}
 
 private:
@@ -500,7 +500,9 @@ private:
 
 		bool isCanonical = (modelParameters_.targetQuantum.isCanonical);
 		VectorSizeType other(1);
-		qns.resize(basis.size());
+		const QnType zeroQn(0, VectorSizeType(), PairType(0, 0), 0);
+
+		qns.resize(basis.size(), zeroQn);
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(modelParameters_.twiceTheSpin, basis[i]);
 			other[0] = (isCanonical) ? getSzPlusConst(basis[i],n) : 0;

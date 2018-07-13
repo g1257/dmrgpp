@@ -128,10 +128,11 @@ See the below for more information and examples on Finite Loops.
 
 \end{itemize}
 */
-template<typename FieldType,typename InputValidatorType>
+template<typename FieldType,typename InputValidatorType, typename QnType>
 struct ParametersDmrgSolver {
 
-	typedef ParametersDmrgSolver<FieldType, InputValidatorType> ThisType;
+	typedef ParametersDmrgSolver<FieldType, InputValidatorType, QnType> ThisType;
+	typedef typename QnType::PairSizeType PairSizeType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorFieldType;
 	typedef PsimagLite::Matrix<FieldType> MatrixFieldType;
@@ -159,7 +160,7 @@ struct ParametersDmrgSolver {
 	PsimagLite::String fileForDensityMatrixEigs;
 	PsimagLite::String recoverySave;
 	RestartStruct checkpoint;
-	VectorSizeType adjustQuantumNumbers;
+	typename QnType::VectorQnType adjustQuantumNumbers;
 	VectorFiniteLoopType finiteLoop;
 	FieldType degeneracyMax;
 	FieldType denseSparseThreshold;
@@ -218,6 +219,7 @@ struct ParametersDmrgSolver {
 	      recoveryMaxFiles(3),
 	      autoRestart(false),
 	      recoverySave("no"),
+	      adjustQuantumNumbers(0, QnType(0, VectorSizeType(), PairSizeType(0, 0), 0)),
 	      degeneracyMax(1e-12),
 	      denseSparseThreshold(0.2)
 	{
@@ -251,7 +253,9 @@ struct ParametersDmrgSolver {
 		}
 
 		try {
-			io.read(adjustQuantumNumbers,"AdjustQuantumNumbers");
+			VectorSizeType tmpVector;
+			io.read(tmpVector,"AdjustQuantumNumbers");
+			QnType::adjustQns(adjustQuantumNumbers, tmpVector);
 		} catch (std::exception&) {}
 
 		truncationControl = PairRealSizeType(-1.0,keptStatesInfinite);
@@ -490,6 +494,50 @@ struct ParametersDmrgSolver {
 		checkTwoSiteDmrg(filename2,options);
 	}
 
+	// print dmrg parameters
+	friend std::ostream& operator<<(std::ostream& os,
+	                                const ParametersDmrgSolver& p)
+	{
+		os<<"This is DMRG++\n";
+		Provenance provenance;
+		os<<provenance;
+		os<<"parameters.version="<<p.version<<"\n";
+		os<<"parameters.model="<<p.model<<"\n";
+		os<<"parameters.filename="<<p.filename<<"\n";
+		os<<"parameters.options="<<p.options<<"\n";
+		if (p.options.find("KroneckerDumper") != PsimagLite::String::npos) {
+			os<<"parameters.dumperBegin="<<p.dumperBegin<<"\n";
+			os<<"parameters.dumperEnd="<<p.dumperEnd<<"\n";
+		}
+
+		os<<"parameters.precision="<<p.precision<<"\n";
+		os<<"parameters.keptStatesInfinite="<<p.keptStatesInfinite<<"\n";
+		os<<"FiniteLoops ";
+		os<<p.finiteLoop;
+
+		os<<"RecoverySave="<<p.recoverySave<<"\n";
+		os<<"RecoveryMaxFiles="<<p.recoveryMaxFiles<<"\n";
+
+		if (p.truncationControl.first > 0) {
+			os<<"parameters.tolerance="<<p.truncationControl.first<<",";
+			os<<p.truncationControl.second<<"\n";
+		}
+
+		os<<"parameters.degeneracyMax="<<p.degeneracyMax<<"\n";
+		os<<"parameters.denseSparseThreshold="<<p.denseSparseThreshold<<"\n";
+		os<<"parameters.nthreads="<<p.nthreads<<"\n";
+		os<<"parameters.useReflectionSymmetry="<<p.useReflectionSymmetry<<"\n";
+		os<<p.checkpoint;
+
+		if (p.fileForDensityMatrixEigs!="")
+			os<<"parameters.fileForDensityMatrixEigs="<<p.fileForDensityMatrixEigs<<"\n";
+
+		if (p.options.find("MatrixVectorStored")==PsimagLite::String::npos)
+			os<<"MaxMatrixRankStored="<<p.maxMatrixRankStored<<"\n";
+
+		return os;
+	}
+
 private:
 
 	static void warnIfFiniteMlessThanMin(const VectorFiniteLoopType& vfl, SizeType minM)
@@ -554,51 +602,6 @@ private:
 		return f;
 	}
 };
-
-// print dmrg parameters
-template<typename FieldType,typename InputValidatorType>
-std::ostream &operator<<(std::ostream &os,
-                         const ParametersDmrgSolver<FieldType,InputValidatorType> & p)
-{
-	os<<"This is DMRG++\n";
-	Provenance provenance;
-	os<<provenance;
-	os<<"parameters.version="<<p.version<<"\n";
-	os<<"parameters.model="<<p.model<<"\n";
-	os<<"parameters.filename="<<p.filename<<"\n";
-	os<<"parameters.options="<<p.options<<"\n";
-	if (p.options.find("KroneckerDumper") != PsimagLite::String::npos) {
-		os<<"parameters.dumperBegin="<<p.dumperBegin<<"\n";
-		os<<"parameters.dumperEnd="<<p.dumperEnd<<"\n";
-	}
-
-	os<<"parameters.precision="<<p.precision<<"\n";
-	os<<"parameters.keptStatesInfinite="<<p.keptStatesInfinite<<"\n";
-	os<<"FiniteLoops ";
-	os<<p.finiteLoop;
-
-	os<<"RecoverySave="<<p.recoverySave<<"\n";
-	os<<"RecoveryMaxFiles="<<p.recoveryMaxFiles<<"\n";
-
-	if (p.truncationControl.first > 0) {
-		os<<"parameters.tolerance="<<p.truncationControl.first<<",";
-		os<<p.truncationControl.second<<"\n";
-	}
-
-	os<<"parameters.degeneracyMax="<<p.degeneracyMax<<"\n";
-	os<<"parameters.denseSparseThreshold="<<p.denseSparseThreshold<<"\n";
-	os<<"parameters.nthreads="<<p.nthreads<<"\n";
-	os<<"parameters.useReflectionSymmetry="<<p.useReflectionSymmetry<<"\n";
-	os<<p.checkpoint;
-
-	if (p.fileForDensityMatrixEigs!="")
-		os<<"parameters.fileForDensityMatrixEigs="<<p.fileForDensityMatrixEigs<<"\n";
-
-	if (p.options.find("MatrixVectorStored")==PsimagLite::String::npos)
-		os<<"MaxMatrixRankStored="<<p.maxMatrixRankStored<<"\n";
-
-	return os;
-}
 } // namespace Dmrg
 /*@}*/
 

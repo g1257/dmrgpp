@@ -126,7 +126,6 @@ public:
 	typedef typename MyBasis::BlockType BlockType;
 	typedef typename ModelType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelType::ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename TargetingType::TargetVectorType TargetVectorType;
 	typedef typename TargetVectorType::value_type DensityMatrixElementType;
 	typedef typename TargetingType::TargetParamsType TargetParamsType;
@@ -160,8 +159,8 @@ public:
 	typedef PrinterInDetail<LeftRightSuperType> PrinterInDetailType;
 	typedef typename DiagonalizationType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename BasisWithOperatorsType::EffectiveQnType EffectiveQnType;
-	typedef typename EffectiveQnType::QnType QnType;
+	typedef typename BasisWithOperatorsType::QnType QnType;
+	typedef typename QnType::PairSizeType PairSizeType;
 
 	enum {SAVE_ALL=MyBasis::SAVE_ALL, SAVE_PARTIAL=MyBasis::SAVE_PARTIAL};
 
@@ -175,6 +174,7 @@ public:
 	      lrs_("pSprime", "pEprime", "pSE"),
 	      ioOut_(parameters_.filename, PsimagLite::IoSelector::ACC_TRUNC),
 	      progress_("DmrgSolver"),
+	      quantumSector_(0, VectorSizeType(), PairSizeType(0, 0), 0),
 	      stepCurrent_(0),
 	      checkpoint_(parameters_, ioIn, model, false),
 	      wft_(parameters_),
@@ -361,8 +361,7 @@ obtain ordered
 		        PsimagLite::String::npos);
 		bool extendedPrint = (parameters_.options.find("extendedPrint") !=
 		        PsimagLite::String::npos);
-		SizeType mode = model_.targetQuantum().qn.other.size();
-		PrinterInDetailType printerInDetail(lrs_, mode, extendedPrint);
+		PrinterInDetailType printerInDetail(lrs_, extendedPrint);
 
 		lrs_.left(pS);
 		lrs_.right(pE);
@@ -489,8 +488,7 @@ obtain ordered
 	{
 		bool extendedPrint = (parameters_.options.find("extendedPrint") !=
 		        PsimagLite::String::npos);
-		SizeType mode = model_.targetQuantum().qn.other.size();
-		PrinterInDetailType printerInDetail(lrs_, mode, extendedPrint);
+		PrinterInDetailType printerInDetail(lrs_, extendedPrint);
 		int stepLength = parameters_.finiteLoop[loopIndex].stepLength;
 		SizeType keptStates = parameters_.finiteLoop[loopIndex].keptStates;
 		int saveOption = parameters_.finiteLoop[loopIndex].saveOption;
@@ -654,8 +652,11 @@ obtain ordered
 			return;
 		}
 
-		quantumSector_ = model_.targetQuantum().qn.scale(sites,
-		                                                 model_.geometry().numberOfSites());
+		quantumSector_ = model_.targetQuantum().qn;
+		quantumSector_.scale(sites,
+		                     model_.geometry().numberOfSites(),
+		                     direction,
+		                     MyBasis::useSu2Symmetry());
 	}
 
 	void printEnergy(RealType energy)
