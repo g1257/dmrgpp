@@ -141,9 +141,8 @@ public:
 	template<typename IoInputter>
 	BasisWithOperators(IoInputter& io,
 	                   const PsimagLite::String& ss,
-	                   SizeType counter,
 	                   bool isObserveCode)
-	    : BasisType(io, ss, counter),
+	    : BasisType(io, ss, false),
 	      operators_(io, ss + "/", 0, this, isObserveCode)
 	{
 		const PsimagLite::String prefix = ss + "/";

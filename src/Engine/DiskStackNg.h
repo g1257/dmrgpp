@@ -168,12 +168,10 @@ public:
 			err("DiskStack::top() called with ioIn_ as nullptr\n");
 
 		assert(total_ > 0);
-		const SizeType dummy = 0;
 		delete dt_;
 		dt_ = 0;
 		dt_ = new DataType(*ioIn_,
 		                   label_ + "/" + ttos(total_ - 1),
-		                   dummy,
 		                   isObserveCode_);
 		return *dt_;
 	}

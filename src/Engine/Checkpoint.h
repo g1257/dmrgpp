@@ -221,10 +221,10 @@ public:
 	{
 		typename IoType::In ioTmp(parameters_.checkpoint.filename);
 
-		BasisWithOperatorsType pS1(ioTmp, "CHKPOINTSYSTEM", 0, isObserveCode);
+		BasisWithOperatorsType pS1(ioTmp, "CHKPOINTSYSTEM", isObserveCode);
 
 		pS = pS1;
-		BasisWithOperatorsType pE1(ioTmp, "CHKPOINTENVIRON", 0, isObserveCode);
+		BasisWithOperatorsType pE1(ioTmp, "CHKPOINTENVIRON", isObserveCode);
 		pE = pE1;
 		PsimagLite::IoSelector::In io(parameters_.checkpoint.filename);
 		psi.read(io, prefix);

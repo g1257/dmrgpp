@@ -114,7 +114,6 @@ public:
 	    : progress_("LeftRightSuper"),
 	      left_(0),right_(0),super_(0),refCounter_(0)
 	{
-		// watch out: same order as save here:
 		bool minimizeRead = isObserveCode;
 
 		prefix += "/LRS";
@@ -128,9 +127,9 @@ public:
 		PsimagLite::String nameRight;
 		io.read(nameRight, prefix + "/NameEnviron");
 
-		super_ = new SuperBlockType(io, prefix + "/" + nameSuper, 0, false, minimizeRead);
-		left_ = new BasisWithOperatorsType(io, prefix + "/" + nameLeft, 0, true);
-		right_ = new BasisWithOperatorsType(io, prefix + "/" + nameRight, 0, true);
+		super_ = new SuperBlockType(io, prefix + "/" + nameSuper, minimizeRead);
+		left_ = new BasisWithOperatorsType(io, prefix + "/" + nameLeft, true);
+		right_ = new BasisWithOperatorsType(io, prefix + "/" + nameRight, true);
 	}
 
 	LeftRightSuper(const PsimagLite::String& slabel,

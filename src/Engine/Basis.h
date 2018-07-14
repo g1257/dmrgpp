@@ -122,9 +122,7 @@ public:
 	template<typename IoInputter>
 	Basis(IoInputter& io,
 	      const PsimagLite::String& ss,
-	      SizeType counter=0,
-	      bool = false,
-	      bool minimizeRead = false)
+	      bool minimizeRead)
 	    : dmrgTransformed_(false), name_(ss), progress_(ss)
 	{
 		correctNameIfNeeded();
