@@ -82,18 +82,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PARAMETERSMODELHEISENBERG_H
 #define PARAMETERSMODELHEISENBERG_H
 #include "Vector.h"
-#include "TargetQuantumElectrons.h"
+#include "ParametersModelBase.h"
 
 namespace Dmrg {
 //! Heisenberg Model Parameters
 template<typename RealType, typename QnType>
-struct ParametersModelHeisenberg {
+struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> {
 
+	typedef ParametersModelBase<RealType, QnType> BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	// no connectors here, connectors are handled by the geometry
 	template<typename IoInputType>
 	ParametersModelHeisenberg(IoInputType& io)
-	    : targetQuantum(io,false)
+	    : BaseType(io, false)
 	{
 		io.readline(twiceTheSpin,"HeisenbergTwiceS=");
 
@@ -119,7 +120,7 @@ struct ParametersModelHeisenberg {
 	{
 		PsimagLite::String label = label1 + "/ParametersModelHeisenberg";
 		io.createGroup(label);
-		targetQuantum.write(label, io);
+		BaseType::write(label, io);
 		io.write(label + "/twiceTheSpin", twiceTheSpin);
 		io.write(label + "/magneticField", magneticField);
 		io.write(label + "/anisotropy", anisotropy);
@@ -136,9 +137,6 @@ struct ParametersModelHeisenberg {
 		return os;
 	}
 
-	//serializr start class ParametersModelHeisenberg
-	TargetQuantumElectrons<RealType, QnType> targetQuantum;
-	//serializr normal twiceTheSpin
 	SizeType twiceTheSpin;
 	VectorRealType magneticField;
 	VectorRealType anisotropy;

@@ -89,7 +89,7 @@ struct TargetQuantumElectrons {
 	typedef typename QnType::PairSizeType PairSizeType;
 
 	template<typename IoInputType>
-	TargetQuantumElectrons(IoInputType& io, bool allowUpDown = true)
+	TargetQuantumElectrons(IoInputType& io, bool allowUpDown)
 	    : totalNumberOfSites(0),
 	      isSu2(false),
 	      isCanonical(true),

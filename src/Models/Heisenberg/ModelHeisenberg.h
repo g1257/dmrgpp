@@ -343,7 +343,7 @@ public:
 
 	virtual const TargetQuantumElectronsType& targetQuantum() const
 	{
-		return modelParameters_.targetQuantum;
+		return modelParameters_.targetQuantum();
 	}
 
 	//! find all states in the natural basis for a block of n sites
@@ -365,7 +365,7 @@ private:
 
 	void checkAnisotropic(const SolverParamsType& solverParams) const
 	{
-		bool isCanonical = (modelParameters_.targetQuantum.isCanonical);
+		bool isCanonical = (modelParameters_.targetQuantum().isCanonical);
 		bool useTheForce = (solverParams.options.find("useTheForce") !=
 		        PsimagLite::String::npos);
 		if (!isCanonical) return;
@@ -492,14 +492,14 @@ private:
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
 
-		SizeType totalElectrons = modelParameters_.targetQuantum.qn.electrons;
-		if (!modelParameters_.targetQuantum.isSu2 && totalElectrons > 0) {
+		SizeType totalElectrons = modelParameters_.targetQuantum().qn.electrons;
+		if (!modelParameters_.targetQuantum().isSu2 && totalElectrons > 0) {
 			PsimagLite::String msg("Please delete the line ");
 			msg += "TargetElectronsTotal= in the input file\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
 
-		bool isCanonical = (modelParameters_.targetQuantum.isCanonical);
+		bool isCanonical = (modelParameters_.targetQuantum().isCanonical);
 		VectorSizeType other(1);
 		const QnType zeroQn(0, VectorSizeType(), PairType(0, 0), 0);
 
@@ -509,7 +509,7 @@ private:
 			other[0] = (isCanonical) ? getSzPlusConst(basis[i], n) : 0;
 			SizeType electrons = 1;
 			SizeType flavor = 1;
-			if (modelParameters_.targetQuantum.isSu2)
+			if (modelParameters_.targetQuantum().isSu2)
 				qns[i] = QnType(electrons, other, jmpair, flavor);
 			else
 				qns[i] = QnType(0, other, PairType(0, 0), 0);
