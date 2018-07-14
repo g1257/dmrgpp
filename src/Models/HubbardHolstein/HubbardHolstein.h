@@ -105,7 +105,8 @@ public:
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
+	typedef typename ModelBaseType::QnType QnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
@@ -119,11 +120,10 @@ public:
 	typedef LinkProductHubbardHolstein<ModelHelperType, GeometryType> LinkProductType;
 	typedef	 typename ModelBaseType::MyBasis MyBasis;
 	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
-	typedef ParametersHubbardHolstein<RealType> ParametersHubbardHolsteinType;
+	typedef ParametersHubbardHolstein<RealType, QnType> ParametersHubbardHolsteinType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename PsimagLite::Vector<PairType>::Type VectorPairType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
@@ -166,21 +166,13 @@ public:
 
 	void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
-	void setQuantumNumbers(SymmetryElectronsSzType& q, const BlockType& block) const
-	{
-		VectorSizeType qns;
-		HilbertBasisType basis;
-		setNaturalBasis(basis, qns, block);
-		setSymmetryRelated(q, basis, block.size());
-	}
-
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
+	                         VectorQnType& qns,
 	                         const BlockType& block) const
 	{
 		HilbertBasisType natBasis;
-		SymmetryElectronsSzType qq;
-		setBasis(natBasis, qq, block);
+		setBasis(natBasis, qns, block);
 
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 		creationMatrix.clear();
@@ -305,41 +297,6 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
-
-	//! find all states in the natural basis for a block of n sites
-	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setBasis(HilbertBasisType& basis,
-	              SymmetryElectronsSzType& qq,
-	              const VectorSizeType& block) const
-	{
-		SizeType n = block.size();
-		HilbertState total = hilbertSize(0);
-		total = pow(total,n);
-
-		HilbertBasisType basisTmp;
-		for (HilbertState a=0;a<total;a++) basisTmp.push_back(a);
-		// reorder the natural basis (needed for MULTIPLE BANDS)
-		setSymmetryRelated(qq, basisTmp, block[0]);
-		ModelBaseType::orderBasis(basis, basisTmp, qq);
-		setSymmetryRelated(qq, basis, block[0]);
-	}
-
-	void findElectrons(VectorSizeType& electrons,
-	                   const HilbertBasisType& basis,
-	                   SizeType) const
-	{
-		electrons.resize(basis.size());
-		for (SizeType i=0;i<basis.size();i++) {
-			// nup
-			SizeType nup = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin(basis[i],
-			                                                                       SPIN_UP);
-			// ndown
-			SizeType ndown = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin(basis[i],
-			                                                                         SPIN_DOWN);
-			electrons[i] = nup + ndown;
-		}
-	}
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType&,
 	                                const BlockType& block,
@@ -348,7 +305,7 @@ public:
 	{
 		SizeType n=block.size();
 		HilbertBasisType natBasis;
-		SymmetryElectronsSzType qq;
+		VectorQnType qq;
 		setBasis(natBasis, qq, block);
 		for (SizeType i=0;i<n;i++) {
 			VectorSparseMatrixType cm;
@@ -369,11 +326,6 @@ public:
 		}
 	}
 
-	virtual const TargetQuantumElectronsType& targetQuantum() const
-	{
-		return modelParameters_.targetQuantum;
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -386,6 +338,22 @@ public:
 
 private:
 
+	//! find all states in the natural basis for a block of n sites
+	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
+	void setBasis(HilbertBasisType& basis,
+	              VectorQnType& qq,
+	              const VectorSizeType& block) const
+	{
+		SizeType n = block.size();
+		HilbertState total = hilbertSize(0);
+		total = pow(total,n);
+
+		basis.resize(total);
+		for (HilbertState a = 0; a < total; ++a) basis[a] = a;
+		// reorder the natural basis (needed for MULTIPLE BANDS)
+		setSymmetryRelated(qq, basis, block[0]);
+	}
+
 	//! Find a^+_site in the natural basis natBasis
 	SparseMatrixType findPhononadaggerMatrix(SizeType site,
 	                                         const HilbertBasisType& natBasis) const
@@ -397,7 +365,8 @@ private:
 			bra=ket=natBasis[ii];
 			if (HilbertSpaceHubbardHolsteinType::isNonZeroP(ket,site)) {
 				SizeType nphon = SizeType(HilbertSpaceHubbardHolsteinType::getP(ket,site));
-				if (modelParameters_.numberphonons<=1 || nphon >= modelParameters_.numberphonons) continue;
+				if (modelParameters_.numberphonons<=1 || nphon >= modelParameters_.numberphonons)
+					continue;
 				HilbertSpaceHubbardHolsteinType::createP(bra,site);
 				int jj = PsimagLite::isInVector(natBasis,bra);
 				RealType x = int(HilbertSpaceHubbardHolsteinType::getP(bra,site));
@@ -499,7 +468,7 @@ private:
 		vm.push_back(m);
 	}
 
-	void setSymmetryRelated(SymmetryElectronsSzType& q,
+	void setSymmetryRelated(VectorQnType& q,
 	                        const HilbertBasisType& basis,
 	                        int) const
 	{
@@ -523,7 +492,8 @@ private:
 			// nup
 			electronsUp[i] = HilbertSpaceHubbardHolsteinType::getNofDigits(basis[i],SPIN_UP);
 			// ndown
-			electrons[i] = electronsUp[i] + HilbertSpaceHubbardHolsteinType::getNofDigits(basis[i],SPIN_DOWN);
+			electrons[i] = electronsUp[i] + HilbertSpaceHubbardHolsteinType::
+			        getNofDigits(basis[i],SPIN_DOWN);
 
 			flavors.push_back(electrons[i]);
 			jmSaved = jmpair;
@@ -612,9 +582,15 @@ private:
 		hmatrix += factorForDiagonals*modelParameters_.lambdaFP[actualSite]*tmpMatrix;
 	}
 
-	//serializr normal modelParameters_
-	ParametersHubbardHolsteinType  modelParameters_;
-	//serializr ref geometry_ start
+	void setQuantumNumbers(VectorQnType& q, const BlockType& block) const
+	{
+		VectorSizeType qns;
+		HilbertBasisType basis;
+		setNaturalBasis(basis, qns, block);
+		setSymmetryRelated(q, basis, block.size());
+	}
+
+	ParametersHubbardHolsteinType modelParameters_;
 	const GeometryType& geometry_;
 }; //class HubbardHolstein
 } // namespace Dmrg

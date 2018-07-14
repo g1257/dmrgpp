@@ -82,16 +82,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 #include "Matrix.h"
-#include "TargetQuantumElectrons.h"
+#include "ParametersModelBase.h"
 
 namespace Dmrg {
+
 //! FeAs Model Parameters
-template<typename ComplexOrRealType>
-struct ParametersModelFeAs {
+template<typename ComplexOrRealType, typename QnType>
+struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnType> {
 	// no connections here please!!
 	// connections are handled by the geometry
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	typedef ParametersModelBase<ComplexOrRealType, QnType> BaseType;
 
 	enum IntEnum {INT_PAPER33,
 		          INT_V,
@@ -147,7 +149,7 @@ struct ParametersModelFeAs {
 
 	template<typename IoInputType>
 	ParametersModelFeAs(IoInputType& io)
-	    : targetQuantum(io),
+	    : BaseType(io, false),
 	      minElectronsPerSite(0),
 	      potentialT(0),
 	      feAsMode(INT_PAPER33),
@@ -268,7 +270,7 @@ struct ParametersModelFeAs {
 	{
 		PsimagLite::String label = label1 + "/ParametersModelFeAs";
 		io.createGroup(label);
-		targetQuantum.write(label, io);
+		BaseType::write(label, io);
 		io.write(label + "/orbitals", orbitals);
 		io.write(label + "/minElectronsPerSite", minElectronsPerSite);
 		io.write(label + "/hubbardU", hubbardU);
@@ -281,7 +283,42 @@ struct ParametersModelFeAs {
 		io.write(label + "/jzSymmetry", jzSymmetry);
 	}
 
-	TargetQuantumElectrons<RealType> targetQuantum;
+	//! Function that prints model parameters to stream os
+	friend std::ostream& operator<<(std::ostream &os,
+	                                const ParametersModelFeAs& parameters)
+	{
+		os<<"Orbitals="<<parameters.orbitals<<"\n";
+		os<<"hubbardU\n";
+		os<<parameters.hubbardU;
+		os<<"potentialV\n";
+		os<<parameters.potentialV;
+		if (parameters.magneticField.rows()>0) {
+			os<<"magneticField\n";
+			os<<parameters.magneticField;
+		}
+		if (parameters.spinOrbit.rows()>0) {
+			os<<"SpinOrbit\n";
+			os<<parameters.spinOrbit;
+		}
+
+		if (parameters.jzSymmetry>0) {
+			os<<"using jzSymmetry, works only for 3 orbitals \n";
+			os<<parameters.jzSymmetry;
+		}
+		os<<"FeAsMode=";
+		os<<ParametersModelFeAs<RealType, QnType>::modeString(parameters.feAsMode)<<"\n";
+		if (parameters.feAsMode == ParametersModelFeAs<RealType, QnType>::INT_V)
+			os<<"CoulombV="<<parameters.coulombV<<"\n";
+
+		if (parameters.potentialT.size()>0) {
+			os<<"potentialT\n";
+			os<<parameters.potentialT;
+		}
+
+		os<<"MinElectronsPerSite="<<parameters.minElectronsPerSite<<"\n";
+
+		return os;
+	}
 
 	//serializr normal orbitals
 	SizeType orbitals;
@@ -304,45 +341,6 @@ struct ParametersModelFeAs {
 	PsimagLite::Matrix<ComplexOrRealType> spinOrbit;
 	SizeType jzSymmetry;
 };
-
-//! Function that prints model parameters to stream os
-template<typename RealType>
-std::ostream& operator<<(std::ostream &os,
-                         const ParametersModelFeAs<RealType>& parameters)
-{
-	os<<parameters.targetQuantum;
-	os<<"Orbitals="<<parameters.orbitals<<"\n";
-	os<<"hubbardU\n";
-	os<<parameters.hubbardU;
-	os<<"potentialV\n";
-	os<<parameters.potentialV;
-	if (parameters.magneticField.rows()>0) {
-		os<<"magneticField\n";
-		os<<parameters.magneticField;
-	}
-	if (parameters.spinOrbit.rows()>0) {
-		os<<"SpinOrbit\n";
-		os<<parameters.spinOrbit;
-	}
-
-	if (parameters.jzSymmetry>0) {
-		os<<"using jzSymmetry, works only for 3 orbitals \n";
-		os<<parameters.jzSymmetry;
-	}
-	os<<"FeAsMode=";
-	os<<ParametersModelFeAs<RealType>::modeString(parameters.feAsMode)<<"\n";
-	if (parameters.feAsMode == ParametersModelFeAs<RealType>::INT_V)
-		os<<"CoulombV="<<parameters.coulombV<<"\n";
-
-	if (parameters.potentialT.size()>0) {
-		os<<"potentialT\n";
-		os<<parameters.potentialT;
-	}
-
-	os<<"MinElectronsPerSite="<<parameters.minElectronsPerSite<<"\n";
-
-	return os;
-}
 } // namespace Dmrg
 
 /*@}*/

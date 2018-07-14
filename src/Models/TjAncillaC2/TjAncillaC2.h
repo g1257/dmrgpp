@@ -100,13 +100,13 @@ public:
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
+	typedef typename ModelBaseType::QnType QnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef LinkProductTjAncillaC2<ModelHelperType, GeometryType> LinkProductType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename ModelFeAsType::HilbertState HilbertStateType;
 	typedef typename ModelFeAsType::HilbertBasisType HilbertBasisType;
 	typedef typename ModelHelperType::BlockType BlockType;
@@ -149,13 +149,13 @@ public:
 
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
+	                         VectorQnType& qns,
 	                         const BlockType& block) const
 	{
 		SizeType orbitals = (hot_) ? 2 : 1;
 		VectorHilbertStateType natBasis;
 		SparseMatrixType tmpMatrix;
-		SymmetryElectronsSzType qq;
-		setBasis(natBasis, qq, block);
+		setBasis(natBasis, qns, block);
 
 		// Set the operators c^\daggger_{i\sigma} in the natural basis
 		creationMatrix.clear();
@@ -222,7 +222,8 @@ public:
 		block.resize(1);
 		block[0]=site;
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		setOperatorMatrices(creationMatrix,block);
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
 		assert(creationMatrix.size()>0);
 		SizeType nrow = creationMatrix[0].data.rows();
 
@@ -299,29 +300,10 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	//! find total number of electrons for each state in the basis
-	void findElectrons(typename PsimagLite::Vector<SizeType> ::Type&electrons,
-	                   const VectorHilbertStateType& basis,
-	                   SizeType) const
-	{
-		int nup,ndown;
-		electrons.clear();
-		for (SizeType i=0;i<basis.size();i++) {
-			nup = HilbertSpaceType::getNofDigits(basis[i],0);
-			ndown = HilbertSpaceType::getNofDigits(basis[i],1);
-			electrons.push_back(nup+ndown);
-		}
-	}
-
-	virtual const TargetQuantumElectronsType& targetQuantum() const
-	{
-		return modelParameters_.targetQuantum;
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
-		        io.createGroup(label1);
+			io.createGroup(label1);
 
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
@@ -329,27 +311,25 @@ public:
 		io.write(label + "/hot_", hot_);
 	}
 
+private:
+
 	//! find all states in the natural basis for a block of n sites
 	void setBasis(HilbertBasisType& basis,
-	              SymmetryElectronsSzType& qq,
+	              VectorQnType& qns,
 	              const VectorSizeType& block) const
 	{
 		assert(block.size()==1);
 		int sitesTimesDof = 2*NUMBER_OF_ORBITALS;
 		HilbertStateType total = (1<<sitesTimesDof);
 
-		HilbertBasisType basisTmp;
 		for (HilbertStateType a = 0; a < total; ++a) {
 			if (!isAllowed(a)) continue;
-			basisTmp.push_back(a);
+			basis.push_back(a);
 		}
 
-		assert(basisTmp.size() == pow(3,NUMBER_OF_ORBITALS));
-		setSymmetryRelated(qq, basisTmp, block[0]);
-		ModelBaseType::orderBasis(basis, basisTmp, qq);
+		assert(basis.size() == pow(3,NUMBER_OF_ORBITALS));
+		setSymmetryRelated(qns, basis, block[0]);
 	}
-
-private:
 
 	bool isAllowed(HilbertStateType a) const
 	{
@@ -560,7 +540,7 @@ private:
 		}
 	}
 
-	void setSymmetryRelated(SymmetryElectronsSzType& q,
+	void setSymmetryRelated(VectorQnType& q,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
@@ -610,11 +590,7 @@ private:
 		return PairType(0,0);
 	}
 
-	//serializr start class TjAncillaC2
-	//serializr vptr
-	//serializr normal modelParameters_
-	ParametersTjAncillaC<RealType>  modelParameters_;
-	//serializr ref geometry_ end
+	ParametersTjAncillaC<RealType, QnType>  modelParameters_;
 	const GeometryType &geometry_;
 	bool hot_;
 };	//class TjAncillaC2

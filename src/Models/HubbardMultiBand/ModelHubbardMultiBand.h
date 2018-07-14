@@ -103,7 +103,8 @@ public:
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
+	typedef typename ModelBaseType::QnType QnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
@@ -115,11 +116,10 @@ public:
 	typedef LinkProductFeAs<ModelHelperType, GeometryType> LinkProductType;
 	typedef	 typename ModelBaseType::MyBasis MyBasis;
 	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef ParametersHubbardMultiBand<ComplexOrRealType> ParamsModelType;
+	typedef ParametersHubbardMultiBand<ComplexOrRealType, QnType> ParamsModelType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
@@ -196,9 +196,11 @@ public:
 
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
+	                         VectorQnType& qns,
 	                         const BlockType&) const
 	{
 		creationMatrix = creationMatrix_;
+		qns = qq_;
 	}
 
 	OperatorType naturalOperator(const PsimagLite::String& what,
@@ -316,32 +318,6 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	//! find all states in the natural basis for a block of n sites
-	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setBasis(HilbertBasisType& basis,
-	              SymmetryElectronsSzType& qq,
-	              const VectorSizeType&) const
-	{
-		basis = basis_;
-		qq = qq_;
-	}
-
-	void findElectrons(VectorSizeType& electrons,
-	                   const HilbertBasisType& basis,
-	                   SizeType) const
-	{
-		electrons.resize(basis.size());
-		for (SizeType i=0;i<basis.size();i++) {
-			// nup
-			SizeType nup = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			                                                            SPIN_UP);
-			// ndown
-			SizeType ndown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			                                                              SPIN_DOWN);
-			electrons[i] = nup + ndown;
-		}
-	}
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
@@ -366,12 +342,17 @@ public:
 		}
 	}
 
-	virtual const TargetQuantumElectronsType& targetQuantum() const
-	{
-		return modelParameters_.targetQuantum;
-	}
-
 private:
+
+	//! find all states in the natural basis for a block of n sites
+	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
+	void setBasis(HilbertBasisType& basis,
+	              VectorQnType& qq,
+	              const VectorSizeType&) const
+	{
+		basis = basis_;
+		qq = qq_;
+	}
 
 	void setOperatorMatricesInternal(VectorOperatorType& creationMatrix,
 	                                 const BlockType& block) const
@@ -479,7 +460,7 @@ private:
 		transposeConjugate(creationMatrix,temp);
 	}
 
-	void setSymmetryRelatedInternal(SymmetryElectronsSzType& q,
+	void setSymmetryRelatedInternal(VectorQnType& q,
 	                                const HilbertBasisType& basis,
 	                                int n) const
 	{
@@ -725,7 +706,7 @@ private:
 	SpinSquaredHelper<RealType,HilbertState> spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType,HilbertState> > spinSquared_;
 	HilbertBasisType basis_;
-	SymmetryElectronsSzType qq_;
+	VectorQnType qq_;
 	VectorSizeType q_;
 	VectorOperatorType creationMatrix_;
 	SparseMatrixType qx_;

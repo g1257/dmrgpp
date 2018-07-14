@@ -102,13 +102,13 @@ public:
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
+	typedef typename ModelBaseType::QnType QnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef LinkProductTjAncillaG<ModelHelperType, GeometryType> LinkProductType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename ModelHubbardType::HilbertState HilbertStateType;
 	typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
 	typedef typename ModelHelperType::BlockType BlockType;
@@ -156,12 +156,12 @@ public:
 
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType&creationMatrix,
+	                         VectorQnType& qns,
 	                         const BlockType& block) const
 	{
 		VectorHilbertStateType natBasis;
 		SparseMatrixType tmpMatrix;
-		SymmetryElectronsSzType qq;
-		setBasis(natBasis, qq, block);
+		setBasis(natBasis, qns, block);
 
 		// Set the operators c^\daggger_{i\sigma} in the natural basis
 		creationMatrix.clear();
@@ -244,7 +244,8 @@ public:
 		block.resize(1);
 		block[0]=site;
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		setOperatorMatrices(creationMatrix,block);
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
 		assert(creationMatrix.size()>0);
 		SizeType nrow = creationMatrix[0].data.rows();
 
@@ -312,19 +313,6 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	//! find total number of electrons for each state in the basis
-	void findElectrons(VectorSizeType& electrons,
-	                   const VectorHilbertStateType& basis,
-	                   SizeType other) const
-	{
-		TjMultiOrb_.findElectrons(electrons,basis,other);
-	}
-
-	virtual const TargetQuantumElectronsType& targetQuantum() const
-	{
-		return modelParameters_.targetQuantum;
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -339,9 +327,11 @@ public:
 		spinSquared_.write(label, io);
 	}
 
+private:
+
 	//! find all states in the natural basis for a block of n sites
 	void setBasis(HilbertBasisType& basis,
-	              SymmetryElectronsSzType& qq,
+	              VectorQnType& qq,
 	              const VectorSizeType& block) const
 	{
 		assert(block.size() == 1);
@@ -356,8 +346,6 @@ public:
 
 		ModelBaseType::orderBasis(basis, basisTmp, qq);
 	}
-
-private:
 
 	SparseMatrixType findSplusMatrices(int i,
 	                                   const VectorHilbertStateType& natBasis) const
@@ -436,7 +424,7 @@ private:
 		return creationMatrix;
 	}
 
-	void setSymmetryRelated(SymmetryElectronsSzType& q,
+	void setSymmetryRelated(VectorQnType& q,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
@@ -501,7 +489,7 @@ private:
 	//serializr start class TjAncillaG
 	//serializr vptr
 	//serializr normal modelParameters_
-	ParametersModelTjMultiOrb<RealType>  modelParameters_;
+	ParametersModelTjMultiOrb<RealType, QnType>  modelParameters_;
 	//serializr ref geometry_ end
 	const GeometryType &geometry_;
 	TjMultiOrbType TjMultiOrb_;

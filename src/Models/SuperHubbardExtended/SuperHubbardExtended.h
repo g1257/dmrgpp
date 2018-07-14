@@ -97,13 +97,13 @@ public:
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
+	typedef typename ModelBaseType::QnType QnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef LinkProdSuperHubbardExtended<ModelHelperType, GeometryType> LinkProductType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
@@ -138,9 +138,10 @@ public:
 
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
+	                         VectorQnType& qns,
 	                         const BlockType& block) const
 	{
-		extendedHubbard_.setOperatorMatrices(creationMatrix,block);
+		extendedHubbard_.setOperatorMatrices(creationMatrix, qns, block);
 		// add S+ and Sz to creationMatrix
 		setSpinMatrices(creationMatrix,block);
 	}
@@ -158,17 +159,9 @@ public:
 		block.resize(1);
 		block[0]=site;
 		VectorOperatorType creationMatrix;
-		setSpinMatrices(creationMatrix,block);
+		setSpinMatrices(creationMatrix, block);
 		assert(creationMatrix.size() > 2);
 		return creationMatrix[matrixIndex-3];
-	}
-
-	//! find total number of electrons for each state in the basis
-	void findElectrons(VectorSizeTypeType& electrons,
-	                   const VectorHilbertStateType& basis,
-	                   SizeType site) const
-	{
-		extendedHubbard_.findElectrons(electrons,basis,site);
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -195,19 +188,14 @@ public:
 		                                            factorForDiagonals);
 	}
 
-	virtual const TargetQuantumElectronsType& targetQuantum() const
-	{
-		return modelParameters_.targetQuantum;
-	}
+private:
 
 	void setBasis(HilbertBasisType& basis,
-	              SymmetryElectronsSzType& qq,
+	              VectorQnType& qq,
 	              const VectorSizeType& block) const
 	{
 		extendedHubbard_.setBasis(basis, qq, block);
 	}
-
-private:
 
 	SizeType findMatrixIndex(const PsimagLite::String& what) const
 	{
@@ -244,7 +232,7 @@ private:
 		creationMatrix.push_back(szOp);
 	}
 
-	ParametersModelHubbard<RealType>  modelParameters_;
+	ParametersModelHubbard<RealType, QnType>  modelParameters_;
 	const GeometryType &geometry_;
 	ModelHubbardType extendedHubbard_;
 };	//class SuperHubbardExtended

@@ -104,14 +104,14 @@ public:
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
+	typedef typename ModelBaseType::QnType QnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
 	typedef LinkProductFeAsExtended<ModelHelperType, GeometryType> LinkProductType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename MyBasis::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
@@ -132,43 +132,7 @@ public:
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,
 	                   SizeType,
-	                   PsimagLite::String msg = "") const
-	{
-		PsimagLite::String str = msg;
-		str += "FeAsBasedScExtended";
-
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&modelParameters_);
-		SizeType total = end - start;
-		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
-		          total,
-		          start,
-		          msg + " FeAsBasedScExtended vptr");
-
-		start = end;
-		end = start + PsimagLite::MemResolv::SIZEOF_HEAPPTR;
-		total += mres.memResolv(&modelParameters_, end-start, str + " modelParameters");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&modelFeAs_);
-		total += (end - start);
-		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
-		          PsimagLite::MemResolv::SIZEOF_HEAPREF,
-		          start,
-		          str + " ref to geometry");
-
-		mres.memResolv(&geometry_, 0, str + " geometry");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&orbitals_);
-		total += mres.memResolv(&modelFeAs_, end-start, str + " modelFeAs");
-
-		total += mres.memResolv(&orbitals_,
-		                        sizeof(*this) - total,
-		                        str + " orbitals");
-
-		return total;
-	}
+	                   PsimagLite::String msg = "") const { return 0; }
 
 	SizeType hilbertSize(SizeType site) const { return modelFeAs_.hilbertSize(site); }
 
@@ -186,11 +150,12 @@ public:
 
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
+	                         VectorQnType& qns,
 	                         const BlockType& block) const
 	{
 		blockIsSize1OrThrow(block);
 
-		modelFeAs_.setOperatorMatrices(creationMatrix,block);
+		modelFeAs_.setOperatorMatrices(creationMatrix, qns, block);
 
 		// add S^+_i to creationMatrix
 		setSplus(creationMatrix,block);
@@ -207,7 +172,8 @@ public:
 		block.resize(1);
 		block[0]=site;
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		setOperatorMatrices(creationMatrix,block);
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
 
 		if (what=="naturalSz") {
 			VectorSizeType allowed(1,0);
@@ -234,13 +200,6 @@ public:
 		return modelFeAs_.naturalOperator(what,site,dof);
 	}
 
-	void findElectrons(typename PsimagLite::Vector<SizeType>::Type& electrons,
-	                   const typename PsimagLite::Vector<HilbertState>::Type& basis,
-	                   SizeType site) const
-	{
-		modelFeAs_.findElectrons(electrons,basis,site);
-	}
-
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                        const VectorOperatorType& cm,
 	                                        const BlockType& block,
@@ -250,19 +209,14 @@ public:
 		modelFeAs_.addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
 	}
 
-	virtual const TargetQuantumElectronsType& targetQuantum() const
-	{
-		return modelFeAs_.targetQuantum();
-	}
+private:
 
 	void setBasis(HilbertBasisType& basis,
-	              SymmetryElectronsSzType& qq,
+	              VectorQnType& qq,
 	              const VectorSizeType& block) const
 	{
 		modelFeAs_.setBasis(basis, qq, block);
 	}
-
-private:
 
 	// add S^+_i to creationMatrix
 	void setSplus(
@@ -348,15 +302,9 @@ private:
 		throw PsimagLite::RuntimeError("FeAsBasedExtended:: blocks must be of size 1\n");
 	}
 
-	//serializr start class FeAsBasedScExtended
-	//serializr vptr
-	//serializr normal modelParameters_
-	ParametersModelFeAs<RealType>  modelParameters_;
-	//serializr ref geometry_ start
+	ParametersModelFeAs<RealType, QnType>  modelParameters_;
 	const GeometryType& geometry_;
-	//serializr normal modelFeAs_
 	ModelFeAsType modelFeAs_;
-	//serializr normal orbitals_
 	SizeType orbitals_;
 }; //class FeAsBasedScExtended
 

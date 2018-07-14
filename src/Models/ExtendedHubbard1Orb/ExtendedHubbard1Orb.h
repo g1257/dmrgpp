@@ -98,13 +98,13 @@ public:
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelBaseType::TargetQuantumElectronsType TargetQuantumElectronsType;
+	typedef typename ModelBaseType::QnType QnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef LinkProdExtendedHubbard1Orb<ModelHelperType, GeometryType> LinkProductType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
@@ -124,40 +124,9 @@ public:
 	      modelHubbard_(solverParams,io,geometry, 1)
 	{}
 
-	SizeType memResolv(PsimagLite::MemResolv& mres,
+	SizeType memResolv(PsimagLite::MemResolv&,
 	                   SizeType,
-	                   PsimagLite::String msg = "") const
-	{
-		PsimagLite::String str = msg;
-		str += "ExtendedHubbard1Orb";
-
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&modelParameters_);
-		SizeType total = end - start;
-		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
-		          total,
-		          start,
-		          msg + " ExtendedHubbard1Orb vptr");
-
-		start = end;
-		end = start + PsimagLite::MemResolv::SIZEOF_HEAPPTR;
-		total += mres.memResolv(&modelParameters_, end-start, str + " modelParameters");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&modelHubbard_);
-		total += (end - start);
-		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
-		          PsimagLite::MemResolv::SIZEOF_HEAPREF,
-		          start,
-		          str + " ref to geometry");
-
-		mres.memResolv(&geometry_, 0, str + " geometry");
-
-		total += mres.memResolv(&modelHubbard_,
-		                        sizeof(*this) - total, str + " modelHubbard");
-
-		return total;
-	}
+	                   PsimagLite::String = "") const { return 0; }
 
 	SizeType hilbertSize(SizeType site) const
 	{
@@ -166,11 +135,12 @@ public:
 
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType&creationMatrix,
+	                         VectorQnType& qns,
 	                         const BlockType& block) const
 	{
-		modelHubbard_.setOperatorMatrices(creationMatrix,block);
+		modelHubbard_.setOperatorMatrices(creationMatrix, qns, block);
 		// add ni to creationMatrix
-		setNi(creationMatrix,block);
+		setNi(creationMatrix, block);
 	}
 
 	OperatorType naturalOperator(const PsimagLite::String& what,
@@ -181,7 +151,8 @@ public:
 		block.resize(1);
 		block[0]=site;
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		setOperatorMatrices(creationMatrix,block);
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix,qns, block);
 
 		if (what=="n") {
 			VectorSizeType allowed(1,0);
@@ -191,14 +162,6 @@ public:
 		} else {
 			return modelHubbard_.naturalOperator(what,site,dof);
 		}
-	}
-
-	//! find total number of electrons for each state in the basis
-	void findElectrons(typename PsimagLite::Vector<SizeType> ::Type&electrons,
-	                   const VectorHilbertStateType& basis,
-	                   SizeType site) const
-	{
-		modelHubbard_.findElectrons(electrons,basis,site);
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -235,21 +198,16 @@ public:
 		                                         factorForDiagonals);
 	}
 
-	virtual const TargetQuantumElectronsType& targetQuantum() const
-	{
-		return modelHubbard_.targetQuantum();
-	}
+private:
 
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 	void setBasis(HilbertBasisType  &basis,
-	              SymmetryElectronsSzType& qq,
+	              VectorQnType& qq,
 	              const VectorSizeType& block) const
 	{
 		modelHubbard_.setBasis(basis, qq, block);
 	}
-
-private:
 
 	//! Find n_i in the natural basis natBasis
 	SparseMatrixType findOperatorMatrices(int i,
@@ -278,7 +236,7 @@ private:
 		VectorOperatorType creationMatrix2 = creationMatrix;
 		creationMatrix.clear();
 		VectorHilbertStateType natBasis;
-		SymmetryElectronsSzType qq;
+		VectorQnType qq;
 		modelHubbard_.setBasis(natBasis, qq, block);
 		SizeType operatorsPerSite = utils::exactDivision(creationMatrix2.size(),
 		                                                 block.size());
@@ -305,7 +263,7 @@ private:
 	//serializr start class ExtendedHubbard1Orb
 	//serializr vptr
 	//serializr normal modelParameters_
-	ParametersModelHubbard<RealType>  modelParameters_;
+	ParametersModelHubbard<RealType, QnType>  modelParameters_;
 	//serializr ref geometry_ start
 	const GeometryType &geometry_;
 	//serializr normal modelHubbard_

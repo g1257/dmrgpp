@@ -108,9 +108,10 @@ public:
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
 	typedef	typename ModelBaseType::VectorType VectorType;
 	typedef	typename std::pair<SizeType,SizeType> PairSizeType;
+	typedef typename ModelBaseType::QnType QnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 
 private:
 
@@ -135,7 +136,6 @@ public:
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 
 	HeisenbergAncillaC(const SolverParamsType& solverParams,
 	                   InputValidatorType& io,
@@ -181,6 +181,7 @@ public:
 	{
 		return 0;
 	}
+
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -199,6 +200,7 @@ public:
 
 	//! set operator matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& operatorMatrices,
+	                         VectorQnType& qns,
 	                         const BlockType& block) const
 	{
 		if (block.size() != 1) {
@@ -210,8 +212,7 @@ public:
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
 
-		SymmetryElectronsSzType qq;
-		setBasis(natBasis, qq, block);
+		setBasis(natBasis, qns, block);
 
 		operatorMatrices.clear();
 		for (SizeType i=0;i<block.size();i++) {
@@ -276,7 +277,8 @@ public:
 		block.resize(1);
 		block[0]=site;
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		setOperatorMatrices(creationMatrix,block);
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
 		assert(creationMatrix.size()>0);
 		SizeType nrow = creationMatrix[0].data.rows();
 
@@ -321,16 +323,6 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	//! Dummy since this model has no fermion sign
-	void findElectrons(VectorSizeType& electrons,
-	                   const HilbertBasisType& basis,
-	                   SizeType) const
-	{
-		electrons.resize(basis.size());
-		for (SizeType i=0;i<electrons.size();i++)
-			electrons[i] = 0;
-	}
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
@@ -350,14 +342,11 @@ public:
 		}
 	}
 
-	virtual const TargetQuantumElectronsType& targetQuantum() const
-	{
-		return modelParameters_.targetQuantum;
-	}
+private:
 
 	//! find all states in the natural basis for a block of n sites
 	void setBasis(HilbertBasisType& basis,
-	              SymmetryElectronsSzType& qq,
+	              VectorQnType& qq,
 	              const VectorSizeType& block) const
 	{
 		assert(block.size()==1);
@@ -368,8 +357,6 @@ public:
 		setSymmetryRelated(qq, basisTmp, block.size());
 		ModelBaseType::orderBasis(basis, basisTmp, qq);
 	}
-
-private:
 
 	//! Find S^+_i a in the natural basis natBasis
 	SparseMatrixType findSplusMatrices(int,
@@ -451,7 +438,7 @@ private:
 		return operatorMatrix;
 	}
 
-	void setSymmetryRelated(SymmetryElectronsSzType& q,
+	void setSymmetryRelated(VectorQnType& q,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
@@ -505,7 +492,7 @@ private:
 	//serializr start class HeisenbergAncillaC
 	//serializr vptr
 	//serializr normal modelParameters_
-	ParametersHeisenbergAncillaC<RealType>  modelParameters_;
+	ParametersHeisenbergAncillaC<RealType, QnType>  modelParameters_;
 	//serializr ref geometry_ start
 	GeometryType const &geometry_;
 	bool hot_;

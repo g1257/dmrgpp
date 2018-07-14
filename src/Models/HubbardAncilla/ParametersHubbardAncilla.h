@@ -78,15 +78,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef ParametersHubbardAncilla_H
 #define ParametersHubbardAncilla_H
-#include "TargetQuantumElectrons.h"
+#include "ParametersModelBase.h"
 #include "../FeAsModel/ParametersModelFeAs.h"
 
 namespace Dmrg {
 //! Hubbard Model Parameters
-template<typename RealType>
-struct ParametersHubbardAncilla : ParametersModelFeAs<RealType> {
+template<typename RealType, typename QnType>
+struct ParametersHubbardAncilla : ParametersModelFeAs<RealType, QnType> {
 
-	typedef ParametersModelFeAs<RealType> BaseType;
+	typedef ParametersModelFeAs<RealType, QnType> BaseType;
 
 	template<typename IoInputType>
 	ParametersHubbardAncilla(IoInputType& io) : BaseType(io)

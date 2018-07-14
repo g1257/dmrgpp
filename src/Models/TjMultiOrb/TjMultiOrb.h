@@ -102,7 +102,8 @@ public:
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
+	typedef typename ModelBaseType::QnType QnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef LinkProductTjMultiOrb<ModelHelperType, GeometryType> LinkProductType;
@@ -111,7 +112,6 @@ public:
 	typedef  HilbertSpaceFeAs<HilbertStateFeAs> HilbertSpaceFeAsType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename ModelHubbardType::HilbertState HilbertStateType;
 	typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
 	typedef typename ModelHelperType::BlockType BlockType;
@@ -274,39 +274,6 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	//! find total number of electrons for each state in the basis
-	void findElectrons(typename PsimagLite::Vector<SizeType> ::Type&electrons,
-	                   const VectorHilbertStateType& basis,
-	                   SizeType) const
-	{
-		SizeType numberOfDofs = 2*modelParameters_.orbitals;
-		electrons.clear();
-		for (SizeType i=0;i<basis.size();i++) {
-			SizeType sum = 0;
-			for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
-				HilbertStateType mask = (1<<dof);
-				if (mask & basis[i]) sum++;
-			}
-
-			electrons.push_back(sum);
-		}
-	}
-
-	//! find all states in the natural basis for a block of n sites
-	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setBasis(HilbertBasisType  &basis,
-	              SymmetryElectronsSzType& qq,
-	              const VectorSizeType&) const
-	{
-		basis = basis_;
-		qq = qq_;
-	}
-
-	virtual const TargetQuantumElectronsType& targetQuantum() const
-	{
-		return modelParameters_.targetQuantum;
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -366,6 +333,16 @@ public:
 	}
 
 private:
+
+	//! find all states in the natural basis for a block of n sites
+	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
+	void setBasis(HilbertBasisType  &basis,
+	              VectorQnType& qq,
+	              const VectorSizeType&) const
+	{
+		basis = basis_;
+		qq = qq_;
+	}
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
 	SparseMatrixType findCreationMatrices(int i,
@@ -784,7 +761,7 @@ private:
 		weedOutBasis(basisTmp,truncated);
 
 		// reorder the natural basis (needed for MULTIPLE BANDS)
-		SymmetryElectronsSzType qq;
+		VectorQnType qq;
 		setSymmetryRelated(qq, basisTmp, 1);
 		ModelBaseType::orderBasis(basis, basisTmp, qq);
 	}
@@ -826,7 +803,7 @@ private:
 		basis = basisTmp;
 	}
 
-	void setSymmetryRelated(SymmetryElectronsSzType& q,
+	void setSymmetryRelated(VectorQnType& q,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
@@ -901,20 +878,14 @@ private:
 		return jm;
 	}
 
-	//serializr start class TjMultiOrb
-	//serializr vptr
-	//serializr normal modelParameters_
-	ParametersModelTjMultiOrb<RealType>  modelParameters_;
-	//serializr ref geometry_ end
+
+	ParametersModelTjMultiOrb<RealType, QnType>  modelParameters_;
 	const GeometryType &geometry_;
-	//serializr normal offset_
 	SizeType offset_;
-	//serializr normal spinSquaredHelper_
 	SpinSquaredHelper<RealType,HilbertStateType> spinSquaredHelper_;
-	//serializr normal spinSquared_
 	SpinSquared<SpinSquaredHelper<RealType,HilbertStateType> > spinSquared_;
 	HilbertBasisType basis_;
-	SymmetryElectronsSzType qq_;
+	VectorQnType qq_;
 	VectorSizeType q_;
 	VectorOperatorType creationMatrix_;
 };	//class TjMultiOrb

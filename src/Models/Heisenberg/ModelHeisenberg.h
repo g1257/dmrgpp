@@ -105,7 +105,6 @@ public:
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelBaseType::TargetQuantumElectronsType TargetQuantumElectronsType;
 	typedef	typename ModelBaseType::VectorType VectorType;
 	typedef typename ModelBaseType::QnType QnType;
 	typedef typename ModelBaseType::VectorQnType VectorQnType;

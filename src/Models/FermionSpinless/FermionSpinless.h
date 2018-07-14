@@ -104,13 +104,13 @@ public:
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
+	typedef typename ModelBaseType::QnType QnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelBaseType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::SparseElementType SparseElementType;
 	typedef unsigned int long WordType;
 	typedef  HilbertSpaceFermionSpinless<WordType> HilbertSpaceType;
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
-	typedef typename ModelBaseType::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 
 private:
@@ -169,12 +169,12 @@ public:
 		 For example, for the Hubbard model these operators are the
 		 creation operators for sites in block */
 	virtual void setOperatorMatrices(VectorOperatorType& creationMatrix,
+	                                 VectorQnType& qns,
 	                                 const BlockType& block) const
 	{
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
-		SymmetryElectronsSzType qq;
-		setBasis(natBasis, qq, block);
+		setBasis(natBasis, qns, block);
 
 		//! Set the operators c^\daggger_{i\sigma} in the natural basis
 		creationMatrix.clear();
@@ -215,7 +215,8 @@ public:
 		block.resize(1);
 		block[0]=site;
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		setOperatorMatrices(creationMatrix,block);
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
 		assert(creationMatrix.size()>0);
 		SizeType nrow = creationMatrix[0].data.rows();
 
@@ -243,19 +244,6 @@ public:
 		PsimagLite::String str("FermionSpinless: naturalOperator: no label ");
 		str += what + "\n";
 		throw PsimagLite::RuntimeError(str);
-	}
-
-	/** \cppFunction{!PTEX_THISFUNCTION} Sets electrons to the total number of
-		electrons for each state in the basis*/
-	void findElectrons(typename PsimagLite::Vector<SizeType> ::Type&electrons,
-	                   const typename PsimagLite::Vector<HilbertState>::Type& basis,
-	                   SizeType) const
-	{
-		electrons.clear();
-		for (SizeType i=0;i<basis.size();i++) {
-			int nup = HilbertSpaceType::getNofDigits(basis[i],0);
-			electrons.push_back(nup);
-		}
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -296,13 +284,10 @@ public:
 		}
 	}
 
-	virtual const TargetQuantumElectronsType& targetQuantum() const
-	{
-		return modelParameters_.targetQuantum;
-	}
+private:
 
 	void setBasis(HilbertBasisType& basis,
-	              SymmetryElectronsSzType& qq,
+	              VectorQnType& qq,
 	              const VectorSizeType& block) const
 	{
 		int sitesTimesDof=DEGREES_OF_FREEDOM*block.size();
@@ -315,8 +300,6 @@ public:
 
 		ModelBaseType::orderBasis(basis, basisTmp, qq);
 	}
-
-private:
 
 	// Calculate fermionic sign when applying operator
 	// c^\dagger_{i\sigma} to basis state ket
@@ -357,7 +340,7 @@ private:
 		return creationMatrix;
 	}
 
-	void setSymmetryRelated(SymmetryElectronsSzType& q,
+	void setSymmetryRelated(VectorQnType& q,
 	                        HilbertBasisType  const &basis,int) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
@@ -413,7 +396,7 @@ private:
 		VectorOperatorType creationMatrix2 = creationMatrix;
 		creationMatrix.clear();
 		VectorHilbertStateType natBasis;
-		SymmetryElectronsSzType qq;
+		VectorQnType qq;
 		setBasis(natBasis, qq, block);
 		SizeType operatorsPerSite = utils::exactDivision(creationMatrix2.size(),
 		                                                 block.size());
@@ -457,17 +440,10 @@ private:
 		return jm;
 	}
 
-	//serializr start class FermionSpinless
-	//serializr vptr
-	//serializr normal modelParameters_
-	ParametersFermionSpinless<RealType>  modelParameters_;
-	//serializr ref geometry_
+	ParametersFermionSpinless<RealType, QnType>  modelParameters_;
 	const GeometryType &geometry_;
-	//serializr normal offset_
 	SizeType offset_;
-	//serializr normal spinSquaredHelper_
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
-	//serializr normal spinSquared_
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
 };	//class FermionSpinless
 

@@ -79,17 +79,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PARAMETERSMODELHUBBARD_H
 #define PARAMETERSMODELHUBBARD_H
-#include "TargetQuantumElectrons.h"
+#include "ParametersModelBase.h"
 
 namespace Dmrg {
 //! Hubbard Model Parameters
-template<typename RealType>
-struct ParametersModelHubbard {
+template<typename RealType, typename QnType>
+struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
+
+	typedef ParametersModelBase<RealType, QnType> BaseType;
 
 	template<typename IoInputType>
-	ParametersModelHubbard(IoInputType& io) : targetQuantum(io)
+	ParametersModelHubbard(IoInputType& io) : BaseType(io, false)
 	{
-		SizeType nsites = targetQuantum.totalNumberOfSites;
+		SizeType nsites = BaseType::targetQuantum().totalNumberOfSites;
 		hubbardU.resize(nsites, 0.0);
 		potentialV.resize(2*nsites, 0.0);
 		io.read(hubbardU,"hubbardU");
@@ -141,48 +143,39 @@ struct ParametersModelHubbard {
 	{
 		PsimagLite::String label = label1 + "/ParametersModelHubbard";
 		io.createGroup(label);
-		targetQuantum.write(label, io);
+		BaseType::write(label, io);
 		io.write(label + "/hubbardU", hubbardU);
 		io.write(label + "/potentialV", potentialV);
 		io.write(label + "/anisotropy", anisotropy);
 	}
 
-	// Do not include here connection parameters
-	// those are handled by the Geometry
+	//! Function that prints model parameters to stream os
+	friend std::ostream& operator<<(std::ostream &os,
+	                                const ParametersModelHubbard& parameters)
+	{
+		os<<parameters.targetQuantum;
+		os<<"hubbardU\n";
+		os<<parameters.hubbardU;
+		os<<"potentialV\n";
+		os<<parameters.potentialV;
+		if (parameters.potentialT.size()==0) return os;
 
-	TargetQuantumElectrons<RealType> targetQuantum;
+		// time-dependent stuff
+		os<<"potentialT\n";
+		os<<parameters.potentialT;
+		os<<"omega="<<parameters.omega<<"\n";
+		os<<"phase="<<parameters.phase<<"\n";
+		return os;
+	}
 
-	// Hubbard U values (one for each site)
 	typename PsimagLite::Vector<RealType>::Type hubbardU;
-	// Onsite potential values, one for each site
 	typename PsimagLite::Vector<RealType>::Type potentialV;
 	typename PsimagLite::Vector<RealType>::Type anisotropy;
-
 	// for time-dependent H:
 	typename PsimagLite::Vector<RealType>::Type potentialT;
 	RealType omega;
 	RealType phase;
 };
-
-//! Function that prints model parameters to stream os
-template<typename RealTypeType>
-std::ostream& operator<<(std::ostream &os,
-                         const ParametersModelHubbard<RealTypeType>& parameters)
-{
-	os<<parameters.targetQuantum;
-	os<<"hubbardU\n";
-	os<<parameters.hubbardU;
-	os<<"potentialV\n";
-	os<<parameters.potentialV;
-	if (parameters.potentialT.size()==0) return os;
-
-	// time-dependent stuff
-	os<<"potentialT\n";
-	os<<parameters.potentialT;
-	os<<"omega="<<parameters.omega<<"\n";
-	os<<"phase="<<parameters.phase<<"\n";
-	return os;
-}
 } // namespace Dmrg
 
 /*@}*/

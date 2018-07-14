@@ -78,16 +78,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PARAMETERS_IMMM_H
 #define PARAMETERS_IMMM_H
-#include "TargetQuantumElectrons.h"
+#include "ParametersModelBase.h"
 
 namespace Dmrg {
-template<typename RealType>
-struct ParametersImmm {
+template<typename RealType, typename QnType>
+struct ParametersImmm : public ParametersModelBase<RealType, QnType> {
 	// no connections here please!!
 	// connections are handled by the geometry
 
+	typedef ParametersModelBase<RealType, QnType> BaseType;
+
 	template<typename IoInputType>
-	ParametersImmm(IoInputType& io) : targetQuantum(io)
+	ParametersImmm(IoInputType& io) : BaseType(io, false)
 	{
 
 		io.read(hubbardU,"hubbardU");
@@ -123,38 +125,29 @@ struct ParametersImmm {
 	{
 		PsimagLite::String label = label1 + "/ParametersImmm";
 		io.createGroup(label);
-		targetQuantum.write(label, io);
+		BaseType::write(label, io);
 		io.write(label + "/hubbardU", hubbardU);
 		io.write(label + "/potentialV", potentialV);
 		io.write(label + "/minOxygenElectrons", minOxygenElectrons);
 	}
 
-	//serializr start class ParametersImmm
-	TargetQuantumElectrons<RealType> targetQuantum;
 
-	// Hubbard U values (one for each site)
-	//serializr normal hubbardU
+	//! Function that prints model parameters to stream os
+	friend std::ostream& operator<<(std::ostream &os,
+	                                const ParametersImmm& parameters)
+	{
+		os<<"hubbardU\n";
+		os<<parameters.hubbardU;
+		os<<"potentialV\n";
+		os<<parameters.potentialV;
+		os<<"MinOxygenElectrons="<<parameters.minOxygenElectrons<<"\n";
+		return os;
+	}
+
 	typename PsimagLite::Vector<RealType>::Type hubbardU;
-	// Onsite potential values, one for each site
-	//serializr normal potentialV
 	typename PsimagLite::Vector<RealType>::Type potentialV;
-	// target number of electrons  in the system
-	//serializr normal minOxygenElectrons
 	SizeType minOxygenElectrons;
 };
-
-//! Function that prints model parameters to stream os
-template<typename RealTypeType>
-std::ostream& operator<<(std::ostream &os,const ParametersImmm<RealTypeType>& parameters)
-{
-	os<<parameters.targetQuantum;
-	os<<"hubbardU\n";
-	os<<parameters.hubbardU;
-	os<<"potentialV\n";
-	os<<parameters.potentialV;
-	os<<"MinOxygenElectrons="<<parameters.minOxygenElectrons<<"\n";
-	return os;
-}
 } // namespace Dmrg
 
 /*@}*/

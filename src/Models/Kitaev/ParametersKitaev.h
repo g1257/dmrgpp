@@ -81,20 +81,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PARAMETERS_KITAEV_H
 #define PARAMETERS_KITAEV_H
 #include "Vector.h"
-#include "TargetQuantumElectrons.h"
+#include "ParametersModelBase.h"
 
 namespace Dmrg {
 //! Kitaev Model Parameters
-template<typename RealType>
-struct ParametersKitaev {
+// no connectors here, connectors are handled by the geometry
+template<typename RealType, typename QnType>
+struct ParametersKitaev : public ParametersModelBase<RealType, QnType> {
 
+	typedef ParametersModelBase<RealType, QnType> BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	// no connectors here, connectors are handled by the geometry
+
 	template<typename IoInputType>
 	ParametersKitaev(IoInputType& io)
-	    : targetQuantum(io,false)
+	    : BaseType(io,false)
 	{
-		SizeType nsites = targetQuantum.totalNumberOfSites;
+		SizeType nsites = BaseType::targetQuantum().totalNumberOfSites;
 		try {
 			magneticFieldX.resize(nsites, 0.0);
 			io.read(magneticFieldX,"MagneticFieldX");
@@ -134,29 +136,28 @@ struct ParametersKitaev {
 	{
 		PsimagLite::String label = label1 + "/ParametersKitaev";
 		io.createGroup(label);
-		targetQuantum.write(label, io);
+		BaseType::write(label, io);
 		io.write(label + "/magneticFieldX", magneticFieldX);
 		io.write(label + "/magneticFieldY", magneticFieldY);
 		io.write(label + "/magneticFieldZ", magneticFieldZ);
 	}
 
-	TargetQuantumElectrons<RealType> targetQuantum;
+
+	//! Function that prints model parameters to stream os
+	friend std::ostream& operator<<(std::ostream &os,
+	                                const ParametersKitaev& parameters)
+	{
+		os<<"MagneticFieldX="<<parameters.magneticFieldX<<"\n";
+		os<<"MagneticFieldY="<<parameters.magneticFieldY<<"\n";
+		os<<"MagneticFieldZ="<<parameters.magneticFieldZ<<"\n";
+		os<<parameters.targetQuantum;
+		return os;
+	}
+
 	VectorRealType magneticFieldX;
 	VectorRealType magneticFieldY;
 	VectorRealType magneticFieldZ;
 };
-
-//! Function that prints model parameters to stream os
-template<typename RealTypeType>
-std::ostream& operator<<(std::ostream &os,
-                         const ParametersKitaev<RealTypeType>& parameters)
-{
-	os<<"MagneticFieldX="<<parameters.magneticFieldX<<"\n";
-	os<<"MagneticFieldY="<<parameters.magneticFieldY<<"\n";
-	os<<"MagneticFieldZ="<<parameters.magneticFieldZ<<"\n";
-	os<<parameters.targetQuantum;
-	return os;
-}
 } // namespace Dmrg
 
 /*@}*/

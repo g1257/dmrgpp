@@ -79,15 +79,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_PARAMS_FERMIONSPINLESS_H
 #define DMRG_PARAMS_FERMIONSPINLESS_H
-#include "TargetQuantumElectrons.h"
+#include "ParametersModelBase.h"
 
 namespace Dmrg {
 //! Hubbard Model Parameters
-template<typename RealType>
-struct ParametersFermionSpinless {
+template<typename RealType, typename QnType>
+struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> {
+
+	typedef ParametersModelBase<RealType, QnType> BaseType;
 
 	template<typename IoInputType>
-	ParametersFermionSpinless(IoInputType& io) : targetQuantum(io)
+	ParametersFermionSpinless(IoInputType& io) : BaseType(io, false)
 	{
 		io.read(potentialV,"potentialV");
 
@@ -129,41 +131,36 @@ struct ParametersFermionSpinless {
 	{
 		PsimagLite::String label = label1 + "/ParametersFermionSpinless";
 		io.createGroup(label);
-		targetQuantum.write(label, io);
+		BaseType::write(label, io);
 		io.write(label + "/potentialV", potentialV);
 		io.write(label + "/potentialT", potentialT);
 		io.write(label + "/omega", omega);
 		io.write(label + "/phase", phase);
 	}
 
-	// Do not include here connection parameters
-	// those are handled by the Geometry
-	TargetQuantumElectrons<RealType> targetQuantum;
-	// Onsite potential values, one for each site
+	//! Function that prints model parameters to stream os
+	friend std::ostream& operator<<(std::ostream &os,
+	                                const ParametersFermionSpinless& parameters)
+	{
+		os<<parameters.targetQuantum;
+		os<<"potentialV\n";
+		os<<parameters.potentialV;
+		if (parameters.potentialT.size()==0) return os;
+
+		// time-dependent stuff
+		os<<"potentialT\n";
+		os<<parameters.potentialT;
+		os<<"omega="<<parameters.omega<<"\n";
+		os<<"phase="<<parameters.phase<<"\n";
+		return os;
+	}
+
 	typename PsimagLite::Vector<RealType>::Type potentialV;
 	// for time-dependent H:
 	typename PsimagLite::Vector<RealType>::Type potentialT;
 	RealType omega;
 	RealType phase;
 };
-
-//! Function that prints model parameters to stream os
-template<typename RealTypeType>
-std::ostream& operator<<(std::ostream &os,
-                         const ParametersFermionSpinless<RealTypeType>& parameters)
-{
-	os<<parameters.targetQuantum;
-	os<<"potentialV\n";
-	os<<parameters.potentialV;
-	if (parameters.potentialT.size()==0) return os;
-
-	// time-dependent stuff
-	os<<"potentialT\n";
-	os<<parameters.potentialT;
-	os<<"omega="<<parameters.omega<<"\n";
-	os<<"phase="<<parameters.phase<<"\n";
-	return os;
-}
 } // namespace Dmrg
 
 /*@}*/

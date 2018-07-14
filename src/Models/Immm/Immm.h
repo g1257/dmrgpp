@@ -101,7 +101,8 @@ public:
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
+	typedef typename ModelBaseType::QnType QnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
@@ -114,7 +115,6 @@ public:
 	typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
 	typedef	 typename ModelBaseType::MyBasis MyBasis;
 	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 
 	static const int FERMION_SIGN = -1;
@@ -158,54 +158,9 @@ public:
 		}
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv& mres,
+	SizeType memResolv(PsimagLite::MemResolv&,
 	                   SizeType,
-	                   PsimagLite::String msg = "") const
-	{
-		PsimagLite::String str = msg;
-		str += "Immm";
-
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&modelParameters_);
-		SizeType total = end - start;
-		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
-		          total,
-		          start,
-		          msg + " Immm vptr");
-
-		start = end;
-		end = start + PsimagLite::MemResolv::SIZEOF_HEAPPTR;
-		total += mres.memResolv(&modelParameters_, end-start, str + " modelParameters");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&copperEach_);
-		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
-		          PsimagLite::MemResolv::SIZEOF_HEAPREF,
-		          start,
-		          str + " ref to geometry");
-		total += (end -start);
-
-		mres.memResolv(&geometry_, 0, str + " geometry");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&hilbertSpace_);
-		total += mres.memResolv(&copperEach_, end-start, str + " copperEach");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&statesCopper_);
-		total += mres.memResolv(&hilbertSpace_, end-start, str + " hilbertSpace");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&statesOxygen_);
-		total += mres.memResolv(&statesCopper_, end-start, str + " statesCopper");
-
-		total += mres.memResolv(&statesOxygen_,
-		                        sizeof(*this) - total,
-		                        str + " statesOxygen");
-
-		return total;
-	}
-
+	                   PsimagLite::String = "") const { return 0; }
 
 	SizeType hilbertSize(SizeType site) const
 	{
@@ -229,13 +184,13 @@ public:
 
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(typename PsimagLite::Vector<OperatorType>::Type& creationMatrix,
+	                         VectorQnType& qns,
 	                         const BlockType& block) const
 	{
 		assert(block.size()==1);
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
-		SymmetryElectronsSzType qq;
-		setBasis(natBasis, qq, block);
+		setBasis(natBasis, qns, block);
 
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 		creationMatrix.clear();
@@ -272,7 +227,8 @@ public:
 		block.resize(1);
 		block[0]=site;
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		setOperatorMatrices(creationMatrix,block);
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
 		SizeType orbitals = orbitalsAtSite(site);
 		SizeType orbital = dof % orbitals;
 		SizeType spin = dof / orbitals;
@@ -339,32 +295,15 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	void findElectrons(typename PsimagLite::Vector<SizeType>::Type& electrons,
-	                   const HilbertBasisType& basis,
-	                   SizeType site) const
-	{
-		electrons.resize(basis.size());
-		for (SizeType i=0;i<basis.size();i++) {
-			// nup
-			SizeType nup = hilbertSpace_.electronsWithGivenSpin(basis[i],site,SPIN_UP);
-			// ndown
-			SizeType ndown = hilbertSpace_.electronsWithGivenSpin(basis[i],site,SPIN_DOWN);
-			electrons[i] = nup + ndown;
-		}
-	}
-
 	virtual SizeType maxElectronsOneSpin() const
 	{
 		return NUMBER_OF_SPINS * ORBITALS_OXYGEN * geometry_.numberOfSites() + 1;
 	}
 
-	virtual const TargetQuantumElectronsType& targetQuantum() const
-	{
-		return modelParameters_.targetQuantum;
-	}
+private:
 
 	void setBasis(HilbertBasisType& basis,
-	              SymmetryElectronsSzType& qq,
+	              VectorQnType& qq,
 	              const VectorSizeType& block) const
 	{
 		assert(block.size()==1);
@@ -380,8 +319,6 @@ public:
 		setSymmetryRelated(qq, basisTmp, block[0]);
 		ModelBaseType::orderBasis(basis, basisTmp, qq);
 	}
-
-private:
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
@@ -450,7 +387,7 @@ private:
 		transposeConjugate(creationMatrix,temp);
 	}
 
-	void setSymmetryRelated(SymmetryElectronsSzType& q,
+	void setSymmetryRelated(VectorQnType& q,
 	                        const HilbertBasisType& basis,
 	                        SizeType site) const
 	{
@@ -642,19 +579,11 @@ private:
 		return (atomAtSite(site) == ATOM_COPPER) ? ORBITALS_COPPER : ORBITALS_OXYGEN;
 	}
 
-	//serializr start class Immm
-	//serializr vptr
-	//serializr normal modelParameters_
-	ParametersImmm<RealType>  modelParameters_;
-	//serializr ref geometry_ end
+	ParametersImmm<RealType, QnType> modelParameters_;
 	const GeometryType& geometry_;
-	//serializr normal copperEach_
 	SizeType copperEach_;
-	//serializr normal hilbertSpace_
 	HilbertSpaceImmmType hilbertSpace_;
-	//serializr normal statesCopper_
 	SizeType statesCopper_;
-	//serializr normal statesOxygen_
 	SizeType statesOxygen_;
 }; //class Immm
 

@@ -81,18 +81,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_PARAMS_HEISENBERG_ANCILLAC_H
 #define DMRG_PARAMS_HEISENBERG_ANCILLAC_H
 #include "Vector.h"
-#include "TargetQuantumElectrons.h"
+#include "ParametersModelBase.h"
 
 namespace Dmrg {
 //! Heisenberg Model Parameters
-template<typename RealType>
-struct ParametersHeisenbergAncillaC {
+template<typename RealType, typename QnType>
+struct ParametersHeisenbergAncillaC : public ParametersModelBase<RealType, QnType> {
 
+	typedef ParametersModelBase<RealType, QnType> BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+
 	// no connectors here, connectors are handled by the geometry
 	template<typename IoInputType>
 	ParametersHeisenbergAncillaC(IoInputType& io)
-	    : targetQuantum(io,false)
+	    : BaseType(io,false)
 	{
 		io.readline(twiceTheSpin,"HeisenbergTwiceS=");
 
@@ -115,28 +117,23 @@ struct ParametersHeisenbergAncillaC {
 	{
 		PsimagLite::String label = label1 + "/ParametersHeisenbergAncillaC";
 		io.createGroup(label);
-		targetQuantum.write(label, io);
+		BaseType::write(label, io);
 		io.write(label + "/twiceTheSpin", twiceTheSpin);
 		io.write(label + "/magneticField", magneticField);
 	}
 
-	//serializr start class ParametersHeisenbergAncillaC
-	TargetQuantumElectrons<RealType> targetQuantum;
-	//serializr normal twiceTheSpin
+	//! Function that prints model parameters to stream os
+	friend std::ostream& operator<<(std::ostream &os,
+	                                const ParametersHeisenbergAncillaC& parameters)
+	{
+		os<<"MagneticField="<<parameters.magneticField<<"\n";
+		os<<"HeisenbergTwiceS="<<parameters.twiceTheSpin<<"\n";
+		return os;
+	}
+
 	SizeType twiceTheSpin;
 	VectorRealType magneticField;
 };
-
-//! Function that prints model parameters to stream os
-template<typename RealTypeType>
-std::ostream& operator<<(std::ostream &os,
-                         const ParametersHeisenbergAncillaC<RealTypeType>& parameters)
-{
-	os<<"MagneticField="<<parameters.magneticField<<"\n";
-	os<<"HeisenbergTwiceS="<<parameters.twiceTheSpin<<"\n";
-	os<<parameters.targetQuantum;
-	return os;
-}
 } // namespace Dmrg
 
 /*@}*/

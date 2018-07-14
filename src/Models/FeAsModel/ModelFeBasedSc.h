@@ -107,7 +107,8 @@ public:
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
+	typedef typename ModelBaseType::QnType QnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
@@ -119,11 +120,10 @@ public:
 	typedef LinkProductFeAs<ModelHelperType, GeometryType> LinkProductType;
 	typedef	 typename ModelBaseType::MyBasis MyBasis;
 	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef ParametersModelFeAs<ComplexOrRealType> ParamsModelFeAsType;
+	typedef ParametersModelFeAs<ComplexOrRealType, QnType> ParamsModelFeAsType;
 	typedef FeAsJzSymmetry<HilbertBasisType,
 	VectorOperatorType,
 	PsimagLite::IsComplexNumber<ComplexOrRealType>::True> FeAsJzSymmetryType;
@@ -227,57 +227,9 @@ public:
 		ModelBaseType::orderBasis(basis_, basisTmp, qq_);
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv& mres,
+	SizeType memResolv(PsimagLite::MemResolv&,
 	                   SizeType,
-	                   PsimagLite::String msg = "") const
-	{
-		PsimagLite::String str = msg;
-		str += "ModelFeBasedSc";
-
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&reinterpretX_);
-		SizeType total = end - start;
-		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
-		          total,
-		          start,
-		          msg + " ModelFeBasedSc vptr");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&reinterpretY_);
-		total += mres.memResolv(&reinterpretX_, end-start, str + " reinterpretX");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&modelParameters_);
-		total += mres.memResolv(&reinterpretY_, end-start, str + " reinterpretY");
-
-		start = end;
-		end = start + sizeof(modelParameters_);
-		total += mres.memResolv(&modelParameters_, end-start, str + " modelParameters");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&spinSquaredHelper_);
-		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
-		          PsimagLite::MemResolv::SIZEOF_HEAPREF,
-		          start,
-		          str + " ref to geometry");
-		total += (end - start);
-		mres.memResolv(&geometry_, 0, str + " geometry");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&spinSquared_);
-		total += mres.memResolv(&spinSquaredHelper_, end-start, str + " spinSquaredHelper");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&statesPerSite_);
-		total += mres.memResolv(&spinSquared_, end-start, str + " spinSquared");
-
-		assert(sizeof(*this) > total);
-		total += mres.memResolv(&statesPerSite_,
-		                        sizeof(*this) - total,
-		                        str + " statesPerSite");
-
-		return total;
-	}
+	                   PsimagLite::String = "") const { return 0; }
 
 	SizeType hilbertSize(SizeType) const
 	{
@@ -308,9 +260,11 @@ public:
 
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
+	                         VectorQnType& qns,
 	                         const BlockType&) const
 	{
 		creationMatrix = creationMatrix_;
+		qns = qq_;
 	}
 
 	OperatorType naturalOperator(const PsimagLite::String& what,
@@ -427,36 +381,7 @@ public:
 		PsimagLite::String str("ModelFeBasedSc: naturalOperator: no label ");
 		str += what + "\n";
 		throw PsimagLite::RuntimeError(str);
-	}
-
-	//! find all states in the natural basis for a block of n sites
-	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setBasis(HilbertBasisType& basis,
-	              SymmetryElectronsSzType& qq,
-	              const VectorSizeType&) const
-	{
-		basis = basis_;
-		qq = qq_;
-	}
-
-	void findElectrons(VectorSizeType& electrons,
-	                   const HilbertBasisType& basis,
-	                   SizeType site) const
-	{
-		if (modelParameters_.jzSymmetry)
-			return feAsJzSymmetry_.findElectrons(electrons,basis,site);
-
-		electrons.resize(basis.size());
-		for (SizeType i=0;i<basis.size();i++) {
-			// nup
-			SizeType nup = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			                                                            SPIN_UP);
-			// ndown
-			SizeType ndown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			                                                              SPIN_DOWN);
-			electrons[i] = nup + ndown;
-		}
-	}
+	}	
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
@@ -489,12 +414,17 @@ public:
 		}
 	}
 
-	virtual const TargetQuantumElectronsType& targetQuantum() const
-	{
-		return modelParameters_.targetQuantum;
-	}
-
 private:
+
+	//! find all states in the natural basis for a block of n sites
+	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
+	void setBasis(HilbertBasisType& basis,
+	              VectorQnType& qq,
+	              const VectorSizeType&) const
+	{
+		basis = basis_;
+		qq = qq_;
+	}
 
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
 	                         const BlockType& block,
@@ -606,7 +536,7 @@ private:
 		transposeConjugate(creationMatrix,temp);
 	}
 
-	void setSymmetryRelatedInternal(SymmetryElectronsSzType& q,
+	void setSymmetryRelatedInternal(VectorQnType& q,
 	                                const HilbertBasisType& basis,
 	                                int n,
 	                                bool jzReinterpret) const
@@ -1395,7 +1325,7 @@ private:
 	//serializr normal statesPerSite_
 	SizeType statesPerSite_;
 	HilbertBasisType basis_;
-	SymmetryElectronsSzType qq_;
+	VectorQnType qq_;
 	VectorSizeType q_;
 	VectorOperatorType creationMatrix_;
 	FeAsJzSymmetryType feAsJzSymmetry_;

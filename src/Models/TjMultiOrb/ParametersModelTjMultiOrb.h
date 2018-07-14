@@ -79,16 +79,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_PARAMS_TJMULTIORB_H
 #define DMRG_PARAMS_TJMULTIORB_H
-#include "TargetQuantumElectrons.h"
+#include "ParametersModelBase.h"
 
 namespace Dmrg {
-//! Hubbard Model Parameters
-template<typename RealType>
-struct ParametersModelTjMultiOrb {
+//! ModelTjMultiOrb Parameters
+template<typename RealType, typename QnType>
+struct ParametersModelTjMultiOrb : public ParametersModelBase<RealType, QnType> {
+
+	typedef ParametersModelBase<RealType, QnType> BaseType;
 
 	template<typename IoInputType>
 	ParametersModelTjMultiOrb(IoInputType& io)
-	    : targetQuantum(io),reinterpretAndTruncate(0)
+	    : BaseType(io, false),reinterpretAndTruncate(0)
 	{
 		io.read(potentialV,"potentialV");
 		io.readline(orbitals,"Orbitals=");
@@ -117,35 +119,28 @@ struct ParametersModelTjMultiOrb {
 	{
 		PsimagLite::String label = label1 + "/ParametersModelTjMultiOrb";
 		io.createGroup(label);
-		targetQuantum.write(label, io);
+		BaseType::write(label, io);
 		io.write(label + "/potentialV", potentialV);
 		io.write(label + "/orbitals", orbitals);
 		io.write(label + "/reinterpretAndTruncate", reinterpretAndTruncate);
 	}
 
-	// Do not include here connection parameters
+	//! Function that prints model parameters to stream os
+	friend std::ostream& operator<<(std::ostream &os,
+	                                const ParametersModelTjMultiOrb& parameters)
+	{
+		os<<"potentialV\n";
+		os<<parameters.potentialV;
+		os<<"orbitals="<<parameters.orbitals<<"\n";
+		os<<"JHundInfinity="<<parameters.reinterpretAndTruncate<<"\n";
+		return os;
+	}
 
-	TargetQuantumElectrons<RealType> targetQuantum;
-	// potential V, size=twice the number of sites: for spin up and then for spin down
-	//serializr start class ParametersModelTjMultiOrb
-	//serializr normal potentialV
+	// Do not include here connection parameters
 	typename PsimagLite::Vector<RealType>::Type potentialV;
 	SizeType orbitals;
 	SizeType reinterpretAndTruncate;
 };
-
-//! Function that prints model parameters to stream os
-template<typename RealTypeType>
-std::ostream& operator<<(std::ostream &os,
-                         const ParametersModelTjMultiOrb<RealTypeType>& parameters)
-{
-	os<<parameters.targetQuantum;
-	os<<"potentialV\n";
-	os<<parameters.potentialV;
-	os<<"orbitals="<<parameters.orbitals<<"\n";
-	os<<"JHundInfinity="<<parameters.reinterpretAndTruncate<<"\n";
-	return os;
-}
 } // namespace Dmrg
 
 /*@}*/

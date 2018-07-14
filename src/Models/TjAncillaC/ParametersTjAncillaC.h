@@ -79,16 +79,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_PARAMS_TJ_ANCILLAC_H
 #define DMRG_PARAMS_TJ_ANCILLAC_H
-#include "TargetQuantumElectrons.h"
+#include "ParametersModelBase.h"
 
 namespace Dmrg {
-//! Hubbard Model Parameters
-template<typename RealType>
-struct ParametersTjAncillaC {
+//! TjAncillaC Model Parameters
+// no connectors here, connectors are handled by the geometry
+template<typename RealType, typename QnType>
+struct ParametersTjAncillaC : public ParametersModelBase<RealType, QnType>{
+
+	typedef ParametersModelBase<RealType, QnType> BaseType;
 
 	template<typename IoInputType>
 	ParametersTjAncillaC(IoInputType& io)
-	    : targetQuantum(io)
+	    : BaseType(io, false)
 	{
 		io.read(potentialV,"potentialV");
 	}
@@ -106,29 +109,22 @@ struct ParametersTjAncillaC {
 	{
 		PsimagLite::String label = label1 + "/ParametersTjAncillaC";
 		io.createGroup(label);
-		targetQuantum.write(label, io);
+		BaseType::write(label, io);
 		io.write(label + "/potentialV", potentialV);
 	}
 
-	// Do not include here connection parameters
+	//! Function that prints model parameters to stream os
+	friend std::ostream& operator<<(std::ostream &os,
+	                                const ParametersTjAncillaC& parameters)
+	{
+		os<<"potentialV\n";
+		os<<parameters.potentialV;
+		return os;
+	}
 
-	TargetQuantumElectrons<RealType> targetQuantum;
-	// potential V, size=twice the number of sites: for spin up and then for spin down
-	//serializr start class ParametersTjAncillaC
-	//serializr normal potentialV
+	// Do not include here connection parameters
 	typename PsimagLite::Vector<RealType>::Type potentialV;
 };
-
-//! Function that prints model parameters to stream os
-template<typename RealTypeType>
-std::ostream& operator<<(std::ostream &os,
-                         const ParametersTjAncillaC<RealTypeType>& parameters)
-{
-	os<<parameters.targetQuantum;
-	os<<"potentialV\n";
-	os<<parameters.potentialV;
-	return os;
-}
 } // namespace Dmrg
 
 /*@}*/

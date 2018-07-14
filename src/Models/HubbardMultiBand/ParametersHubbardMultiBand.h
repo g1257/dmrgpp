@@ -81,22 +81,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 #include "Matrix.h"
-#include "TargetQuantumElectrons.h"
+#include "ParametersModelBase.h"
 
 namespace Dmrg {
 //! FeAs Model Parameters
-template<typename ComplexOrRealType>
-struct ParametersHubbardMultiBand {
+template<typename ComplexOrRealType, typename QnType>
+struct ParametersHubbardMultiBand : public ParametersModelBase<ComplexOrRealType, QnType> {
 	// no connections here please!!
 	// connections are handled by the geometry
 
+	typedef ParametersModelBase<ComplexOrRealType, QnType> BaseType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename PsimagLite::Vector<PsimagLite::Matrix<ComplexOrRealType> >::Type VectorType;
 
 	template<typename IoInputType>
 	ParametersHubbardMultiBand(IoInputType& io)
-	    : targetQuantum(io)
+	    : BaseType(io, false)
 	{
 		io.readline(orbitals,"Orbitals=");
 		io.read(hubbardU,"hubbardU");
@@ -131,35 +132,32 @@ struct ParametersHubbardMultiBand {
 	{
 		PsimagLite::String label = label1 + "/ParametersHubbardMultiBand";
 		io.createGroup(label);
-		targetQuantum.write(label, io);
+		BaseType::write(label, io);
 		io.write(label + "/orbitals", orbitals);
 		io.write(label + "/hubbardU", hubbardU);
 		io.write(label + "/potentialV", potentialV);
 		io.write(label + "/hopOnSite", hopOnSite);
 	}
 
-	TargetQuantumElectrons<RealType> targetQuantum;
+	//! Function that prints model parameters to stream os
+	friend std::ostream& operator<<(std::ostream &os,
+	                         const ParametersHubbardMultiBand& parameters)
+	{
+		os<<"Orbitals="<<parameters.orbitals<<"\n";
+		os<<"hubbardU\n";
+		os<<parameters.hubbardU;
+		os<<"potentialV\n";
+		os<<parameters.potentialV;
+
+		return os;
+	}
+
 	SizeType orbitals;
 	VectorRealType hubbardU;
 	// Onsite potential values, one for each site
 	VectorRealType potentialV;
 	VectorType hopOnSite;
 };
-
-//! Function that prints model parameters to stream os
-template<typename RealType>
-std::ostream& operator<<(std::ostream &os,
-                         const ParametersHubbardMultiBand<RealType>& parameters)
-{
-	os<<parameters.targetQuantum;
-	os<<"Orbitals="<<parameters.orbitals<<"\n";
-	os<<"hubbardU\n";
-	os<<parameters.hubbardU;
-	os<<"potentialV\n";
-	os<<parameters.potentialV;
-
-	return os;
-}
 } // namespace Dmrg
 
 /*@}*/

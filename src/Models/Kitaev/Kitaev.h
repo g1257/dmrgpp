@@ -106,7 +106,8 @@ public:
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelBaseType::TargetQuantumElectronsType TargetQuantumElectronsType;
+	typedef typename ModelBaseType::QnType QnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 	typedef	typename ModelBaseType::VectorType VectorType;
 
 private:
@@ -134,7 +135,6 @@ public:
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 
 	Kitaev(const SolverParamsType& solverParams,
 	       InputValidatorType& io,
@@ -153,7 +153,8 @@ public:
 		if (mx != my || my != mz || mz != mx ) {
 			PsimagLite::String msg("Kitaev: If provided, ");
 			msg += " MagneticField must be a vector of " + ttos(n) + " entries.\n";
-			msg += " MagneticFieldX, MagneticFieldY, MagneticFieldZ must be a provided in all 3 (x,y,z) directions.\n";
+			msg += " MagneticFieldX, MagneticFieldY, MagneticFieldZ must be ";
+			msg += "provided in all 3 (x,y,z) directions.\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
 
@@ -190,13 +191,13 @@ public:
 
 	//! set operator matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& operatorMatrices,
+	                         VectorQnType& qns,
 	                         const BlockType& block) const
 	{
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
 
-		SymmetryElectronsSzType qq;
-		setBasis(natBasis, qq, block);
+		setBasis(natBasis, qns, block);
 
 		typename MatrixType::value_type dummy = 0.0;
 
@@ -230,7 +231,8 @@ public:
 		block.resize(1);
 		block[0]=site;
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		setOperatorMatrices(creationMatrix,block);
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
 		assert(creationMatrix.size()>0);
 
 		if (what == "sx") // S^x
@@ -245,15 +247,6 @@ public:
 		PsimagLite::String str("Kitaev: naturalOperator: no label ");
 		str += what + "\n";
 		throw PsimagLite::RuntimeError(str);
-	}
-
-	//! Dummy since this model has no fermion sign
-	void findElectrons(VectorSizeType& electrons,
-	                   const HilbertBasisType& basis,
-	                   SizeType) const
-	{
-		electrons.resize(basis.size());
-		std::fill(electrons.begin(), electrons.end(), 0);
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
@@ -286,14 +279,11 @@ public:
 		}
 	}
 
-	virtual const TargetQuantumElectronsType& targetQuantum() const
-	{
-		return modelParameters_.targetQuantum;
-	}
+private:
 
 	//! find all states in the natural basis for a block of n sites
 	void setBasis(HilbertBasisType& basis,
-	              SymmetryElectronsSzType& qq,
+	              VectorQnType& qq,
 	              const VectorSizeType& block) const
 	{
 		SizeType total = utils::powUint(TWICE_THE_SPIN + 1, block.size());
@@ -304,8 +294,6 @@ public:
 		setSymmetryRelated(qq, basisTmp, block.size());
 		ModelBaseType::orderBasis(basis, basisTmp, qq);
 	}
-
-private:
 
 	SizeType logBase2(SizeType x) const
 	{
@@ -354,7 +342,7 @@ private:
 		return operatorMatrix;
 	}
 
-	void setSymmetryRelated(SymmetryElectronsSzType& q,
+	void setSymmetryRelated(VectorQnType& q,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
@@ -374,7 +362,7 @@ private:
 		q.set(jmvalues,flavors,electrons,szPlusConst);
 	}
 
-	ParametersKitaev<RealType>  modelParameters_;
+	ParametersKitaev<RealType, QnType>  modelParameters_;
 	const GeometryType& geometry_;
 }; // class Kitaev
 

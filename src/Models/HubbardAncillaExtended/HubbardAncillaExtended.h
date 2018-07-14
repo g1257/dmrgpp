@@ -105,7 +105,8 @@ public:
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
+	typedef typename ModelBaseType::QnType QnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
 	typedef typename HilbertBasisType::value_type HilbertState;
 	typedef  HilbertSpaceFeAs<HilbertState> HilbertSpaceFeAsType;
@@ -120,9 +121,8 @@ public:
 	typedef typename ModelBaseType::VectorType VectorType;
 	typedef	 typename ModelBaseType::MyBasis MyBasis;
 	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
-	typedef ParametersHubbardAncilla<RealType> ParametersHubbardAncillaType;
+	typedef ParametersHubbardAncilla<RealType, QnType> ParametersHubbardAncillaType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename PsimagLite::Vector<PairType>::Type VectorPairType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
@@ -175,11 +175,11 @@ public:
 
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
+	                         VectorQnType& qns,
 	                         const BlockType& block) const
 	{
 		HilbertBasisType natBasis;
-		SymmetryElectronsSzType qq;
-		setBasis(natBasis, qq, block);
+		setBasis(natBasis, qns, block);
 
 		//! Set the operators c^\dagger_{i\gamma\sigma} in the natural basis
 		creationMatrix.clear();
@@ -241,7 +241,8 @@ public:
 		block.resize(1);
 		block[0]=site;
 		VectorOperatorType creationMatrix;
-		setOperatorMatrices(creationMatrix,block);
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
 		assert(creationMatrix.size()>0);
 		SizeType nrow = creationMatrix[0].data.rows();
 		PsimagLite::String what2 = what;
@@ -315,22 +316,6 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	void findElectrons(VectorSizeType& electrons,
-	                   const HilbertBasisType& basis,
-	                   SizeType) const
-	{
-		electrons.resize(basis.size());
-		for (SizeType i=0;i<basis.size();i++) {
-			// nup
-			SizeType nup = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			                                                            SPIN_UP);
-			// ndown
-			SizeType ndown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			                                                              SPIN_DOWN);
-			electrons[i] = nup + ndown;
-		}
-	}
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType&,
 	                                const BlockType& block,
@@ -339,7 +324,7 @@ public:
 	{
 		SizeType n=block.size();
 		HilbertBasisType natBasis;
-		SymmetryElectronsSzType qq;
+		VectorQnType qq;
 		setBasis(natBasis, qq, block);
 
 		for (SizeType i=0;i<n;i++) {
@@ -355,15 +340,12 @@ public:
 		}
 	}
 
-	virtual const TargetQuantumElectronsType& targetQuantum() const
-	{
-		return modelParameters_.targetQuantum;
-	}
+private:
 
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 	void setBasis(HilbertBasisType& basis,
-	              SymmetryElectronsSzType& qq,
+	              VectorQnType& qq,
 	              const VectorSizeType& block) const
 	{
 		SizeType n = block.size();
@@ -375,8 +357,6 @@ public:
 		setSymmetryRelated(qq, basisTmp, block[0]);
 		ModelBaseType::orderBasis(basis, basisTmp, qq);
 	}
-
-private:
 
 	//! set creation matrices for sites in block
 	void setLambdaMatrices(VectorOperatorType& cm,
@@ -628,7 +608,7 @@ private:
 		}
 	}
 
-	void setSymmetryRelated(SymmetryElectronsSzType& q,
+	void setSymmetryRelated(VectorQnType& q,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{

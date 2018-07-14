@@ -105,14 +105,14 @@ public:
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
 	typedef typename ModelBaseType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::SparseElementType SparseElementType;
 	typedef unsigned int long WordType;
 	typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
-	typedef typename ModelBaseType::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
+	typedef typename ModelBaseType::QnType QnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 
 private:
 
@@ -180,12 +180,12 @@ public:
 		 For example, for the Hubbard model these operators are the
 		 creation operators for sites in block */
 	virtual void setOperatorMatrices(VectorOperatorType& creationMatrix,
+	                                 VectorQnType& qns,
 	                                 const BlockType& block) const
 	{
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
-		SymmetryElectronsSzType qq;
-		setBasis(natBasis, qq, block);
+		setBasis(natBasis, qns, block);
 
 		//! Set the operators c^\daggger_{i\sigma} in the natural basis
 		creationMatrix.clear();
@@ -445,13 +445,10 @@ public:
 		}
 	}
 
-	virtual const TargetQuantumElectronsType& targetQuantum() const
-	{
-		return modelParameters_.targetQuantum;
-	}
+private:
 
 	void setBasis(HilbertBasisType& basis,
-	              SymmetryElectronsSzType& qq,
+	              VectorQnType& qq,
 	              const VectorSizeType& block) const
 	{
 		int sitesTimesDof = DEGREES_OF_FREEDOM*block.size();
@@ -463,8 +460,6 @@ public:
 		setSymmetryRelated(qq, basisTmp, block.size());
 		ModelBaseType::orderBasis(basis, basisTmp, qq);
 	}
-
-private:
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
 	RealType sign(typename HilbertSpaceHubbardType::HilbertState const &ket,
@@ -514,7 +509,9 @@ private:
 		return creationMatrix;
 	}
 
-	void setSymmetryRelated(SymmetryElectronsSzType& q,HilbertBasisType  const &basis,int) const
+	void setSymmetryRelated(VectorQnType& q,
+	                        const HilbertBasisType& basis,
+	                        int) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -569,7 +566,7 @@ private:
 		return jm;
 	}
 
-	ParametersModelHubbard<RealType>  modelParameters_;
+	ParametersModelHubbard<RealType, QnType>  modelParameters_;
 	const GeometryType &geometry_;
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;

@@ -81,22 +81,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 #include "Matrix.h"
-#include "TargetQuantumElectrons.h"
+#include "ParametersModelBase.h"
 
 namespace Dmrg {
 //! FeAs Model Parameters
-template<typename ComplexOrRealType>
-struct ParametersHubbardHolstein {
+template<typename ComplexOrRealType, typename QnType>
+struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType, QnType> {
 	// no connections here please!!
 	// connections are handled by the geometry
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	typedef ParametersModelBase<ComplexOrRealType, QnType> BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename PsimagLite::Vector<PsimagLite::Matrix<ComplexOrRealType> >::Type VectorType;
 
 	template<typename IoInputType>
 	ParametersHubbardHolstein(IoInputType& io)
-	    : targetQuantum(io)
+	    : BaseType(io, false)
 	{
 
 		SizeType nsites = 0;
@@ -111,7 +112,7 @@ struct ParametersHubbardHolstein {
 		io.read(potentialFV,"potentialFV");
 		io.read(potentialPV,"potentialPV");
 
-/*
+		/*
 		for (SizeType i = 0; i < h; ++i) {
 			PsimagLite::Matrix<ComplexOrRealType> m;
 			io.read(m, "hopOnSite");
@@ -133,7 +134,7 @@ struct ParametersHubbardHolstein {
 	{
 		PsimagLite::String label = label1 + "/ParametersHubbardHolstein";
 		io.createGroup(label);
-		targetQuantum.write(label, io);
+		BaseType::write(label, io);
 		io.write(label + "/numberphonons", numberphonons);
 		io.write(label + "/hubbardFU", hubbardFU);
 		io.write(label + "/lambdaFP", lambdaFP);
@@ -141,7 +142,24 @@ struct ParametersHubbardHolstein {
 		io.write(label + "/potentialPV", potentialPV);
 	}
 
-	TargetQuantumElectrons<RealType> targetQuantum;
+	//! Function that prints model parameters to stream os
+	friend std::ostream& operator<<(std::ostream &os,
+	                                const ParametersHubbardHolstein& parameters)
+	{
+		os<<"NumberPhonons="<<parameters.numberphonons<<"\n";
+
+		os<<"hubbardFU\n";
+		os<<parameters.hubbardFU;
+		os<<"lambdaFP\n";
+		os<<parameters.lambdaFP;
+
+		os<<"potentialFV\n";
+		os<<parameters.potentialFV;
+		os<<"potentialPV\n";
+		os<<parameters.potentialPV;
+		return os;
+	}
+
 	SizeType numberphonons;
 	VectorRealType hubbardFU;
 	VectorRealType lambdaFP;
@@ -149,26 +167,6 @@ struct ParametersHubbardHolstein {
 	VectorRealType potentialFV;
 	VectorRealType potentialPV;
 };
-
-//! Function that prints model parameters to stream os
-template<typename RealType>
-std::ostream& operator<<(std::ostream &os,
-                         const ParametersHubbardHolstein<RealType>& parameters)
-{
-	os<<parameters.targetQuantum;
-	os<<"NumberPhonons="<<parameters.numberphonons<<"\n";
-
-	os<<"hubbardFU\n";
-	os<<parameters.hubbardFU;
-	os<<"lambdaFP\n";
-	os<<parameters.lambdaFP;
-
-	os<<"potentialFV\n";
-	os<<parameters.potentialFV;
-	os<<"potentialPV\n";
-	os<<parameters.potentialPV;
-	return os;
-}
 } // namespace Dmrg
 
 /*@}*/
