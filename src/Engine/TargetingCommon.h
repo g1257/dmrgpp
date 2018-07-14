@@ -313,14 +313,11 @@ public:
 
 		// operators in the one-site basis:
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		targetHelper_.model().setOperatorMatrices(creationMatrix, block1);
-
 		VectorQnType q;
-		typename ModelType::HilbertBasisType basis;
-		targetHelper_.model().setBasis(basis, q, block1);
+		targetHelper_.model().setOperatorMatrices(creationMatrix, q, block1);
 
-		VectorSizeType electrons(basis.size());
-		for (SizeType i = 0; i < basis.size(); ++i) electrons[i] = q[i].electrons;
+		VectorSizeType electrons(q.size());
+		for (SizeType i = 0; i < q.size(); ++i) electrons[i] = q[i].electrons;
 
 		FermionSign fs(targetHelper_.lrs().left(), electrons);
 		for (SizeType j=0;j<creationMatrix.size();j++) {

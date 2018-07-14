@@ -141,7 +141,8 @@ public:
 	                PsimagLite::String additional)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType((additional == "Anisotropic"))),
+	                    new LinkProductType((additional == "Anisotropic")),
+	                    modelParameters_.targetQuantum()),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
@@ -172,45 +173,11 @@ public:
 		}
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv& mres,
+	SizeType memResolv(PsimagLite::MemResolv&,
 	                   SizeType,
-	                   PsimagLite::String msg = "") const
+	                   PsimagLite::String = "") const
 	{
-		PsimagLite::String str = msg;
-		str += "ModelHeisenberg";
-
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&modelParameters_);
-		SizeType total = end - start;
-		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
-		          total,
-		          start,
-		          msg + " ModelHeisenberg vptr");
-
-		start = end;
-		end = start + PsimagLite::MemResolv::SIZEOF_HEAPPTR;
-		total += mres.memResolv(&modelParameters_, end-start, str + " modelParameters");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&spinSquaredHelper_);
-		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
-		          PsimagLite::MemResolv::SIZEOF_HEAPREF,
-		          start,
-		          str + " ref to geometry");
-		total += (end - start);
-		mres.memResolv(&geometry_, 0, str + " geometry");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&spinSquared_);
-		total += mres.memResolv(&spinSquaredHelper_,
-		                        end-start,
-		                        str + " spinSquaredHelper");
-
-		total += mres.memResolv(&spinSquared_,
-		                        sizeof(*this) - total,
-		                        str + " spinSquared");
-
-		return total;
+		return 0;
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -232,18 +199,19 @@ public:
 
 	//! set operator matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& operatorMatrices,
+	                         VectorQnType& qns,
 	                         const BlockType& block) const
 	{
-		HilbertBasisType natBasis;
-		SparseMatrixType tmpMatrix;
+		SizeType total = utils::powUint(modelParameters_.twiceTheSpin + 1, block.size());
+		HilbertBasisType natBasis(total);
+		for (SizeType i = 0; i < total; ++i) natBasis[i] = i;
 
-		VectorQnType qq;
-		setBasis(natBasis, qq, block);
+		setSymmetryRelated(qns, natBasis, block.size());
 
 		operatorMatrices.clear();
 		for (SizeType i=0;i<block.size();i++) {
 			// Set the operators S^+_i in the natural basis
-			tmpMatrix=findSplusMatrices(i,natBasis);
+			SparseMatrixType tmpMatrix = findSplusMatrices(i,natBasis);
 
 			typename OperatorType::Su2RelatedType su2related;
 			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
@@ -280,7 +248,8 @@ public:
 		block.resize(1);
 		block[0]=site;
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		setOperatorMatrices(creationMatrix,block);
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
 		assert(creationMatrix.size()>0);
 
 		if (what=="splus") { // S^+
@@ -301,21 +270,11 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	//! Dummy since this model has no fermion sign
-	void findElectrons(VectorSizeType& electrons,
-	                   const HilbertBasisType& basis,
-	                   SizeType) const
-	{
-		electrons.resize(basis.size());
-		for (SizeType i=0;i<electrons.size();i++)
-			electrons[i] = 0;
-	}
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
 	                                RealType,
-	                                RealType factorForDiagonals=1.0)  const
+	                                RealType factorForDiagonals)  const
 	{
 		SizeType linSize = geometry_.numberOfSites();
 		SizeType n = block.size();
@@ -338,27 +297,6 @@ public:
 			multiply(Szsquare,cm[1+i*2].data,cm[1+i*2].data);
 			hmatrix += tmp*Szsquare;
 		}
-
-	}
-
-	virtual const TargetQuantumElectronsType& targetQuantum() const
-	{
-		return modelParameters_.targetQuantum();
-	}
-
-	//! find all states in the natural basis for a block of n sites
-	void setBasis(HilbertBasisType& basis,
-	              VectorQnType& qq,
-	              const VectorSizeType& block) const
-	{
-		SizeType total = utils::powUint(modelParameters_.twiceTheSpin + 1,block.size());
-
-		HilbertBasisType basisTmp(total);
-		for (SizeType i = 0; i < total; ++i) basisTmp[i] = i;
-		setSymmetryRelated(qq, basisTmp, block.size());
-		VectorQnType qqNonConst = qq;
-		VectorSizeType permutation;
-		QnType::notReallySort(basis, qqNonConst, permutation, basisTmp, qq);
 	}
 
 private:

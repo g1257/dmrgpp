@@ -130,17 +130,18 @@ public:
 
 	ModelBase(const ParametersType& params,
 	          const GeometryType_& geometry,
-	          const LinkProductBaseType* lpb)
-	    : modelCommon_(params, geometry, lpb)
+	          const LinkProductBaseType* lpb,
+	          const TargetQuantumElectronsType& targetQuantum)
+	    : modelCommon_(params, geometry, lpb), targetQuantum_(targetQuantum)
 	{}
 
-	virtual ~ModelBase()
-	{}
+	virtual ~ModelBase() {}
 
-	virtual const LinkProductBaseType& linkProduct() const
-	{
-		return modelCommon_.linkProduct();
-	}
+	// START Functions that each model needs to implement
+
+	virtual SizeType memResolv(PsimagLite::MemResolv&,
+	                           SizeType,
+	                           PsimagLite::String = "") const = 0;
 
 	virtual void write(PsimagLite::String,
 	                   PsimagLite::IoNg::Out::Serializer&) const = 0;
@@ -149,13 +150,10 @@ public:
 	                                     SizeType site,
 	                                     SizeType dof) const = 0;
 
-	virtual void findElectrons(VectorSizeType& electrons,
-	                           const HilbertBasisType& basis,
-	                           SizeType site) const = 0;
-
 	virtual SizeType hilbertSize(SizeType site) const = 0;
 
 	virtual void setOperatorMatrices(VectorOperatorType& creationMatrix,
+	                                 VectorQnType& qns,
 	                                 const BlockType& block) const = 0;
 
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
@@ -164,13 +162,23 @@ public:
 	                                        RealType time,
 	                                        RealType factorForDiagonals=1.0)  const = 0;
 
+	// END ^^^^^^^^^^^Functions that each model needs to implement
+
+	virtual const LinkProductBaseType& linkProduct() const
+	{
+		return modelCommon_.linkProduct();
+	}
+
 	virtual void findElectronsOfOneSite(BlockType& electrons,SizeType site) const
 	{
 		typename PsimagLite::Vector<SizeType>::Type block(1, site);
-		HilbertBasisType basis;
+		typename PsimagLite::Vector<OperatorType>::Type cm;
 		VectorQnType qq;
-		setBasis(basis, qq, block);
-		findElectrons(electrons, basis, site);
+		setOperatorMatrices(cm, qq, block);
+		SizeType n = qq.size();
+		electrons.resize(n);
+		for (SizeType i = 0; i < n; ++i)
+			electrons[i] = qq[i].electrons;
 	}
 
 	virtual void hamiltonianOnLink(SparseMatrixType& hmatrix,
@@ -179,7 +187,8 @@ public:
 	                               RealType factorForDiagonals) const
 	{
 		typename PsimagLite::Vector<OperatorType>::Type cm;
-		setOperatorMatrices(cm,block);
+		VectorQnType qq;
+		setOperatorMatrices(cm, qq, block);
 		calcHamiltonian(hmatrix,cm,block,time,factorForDiagonals,true);
 	}
 
@@ -208,8 +217,8 @@ public:
 	                             const VectorOperatorType& cm,
 	                             const BlockType& block,
 	                             RealType time,
-	                             RealType factorForDiagonals=1.0,
-	                             bool sysEnvOnly=false)  const
+	                             RealType factorForDiagonals = 1,
+	                             bool sysEnvOnly = false)  const
 	{
 		hmatrix.makeDiagonal(cm[0].data.rows());
 
@@ -228,30 +237,25 @@ public:
 		return maxElectrons*modelCommon_.geometry().numberOfSites() + 1;
 	}
 
-	virtual void setBasis(HilbertBasisType& basis,
-	                      VectorQnType& qq,
-	                      const VectorSizeType& block) const = 0;
-
 	void printBasis(SizeType site) const
 	{
 		BlockType block(1, site);
-		HilbertBasisType natBasis;
+		typename PsimagLite::Vector<OperatorType>::Type cm;
 		VectorQnType qq;
-		setBasis(natBasis, qq, block);
+		setOperatorMatrices(cm, qq, block);
 		std::cout<<"block="<<block;
-		std::cout<<"natBasis="<<natBasis;
-		std::cout<<"quantumNumbs="<<qq;
+		std::cout<<"qq="<<qq;
+
+		SizeType n = cm.size();
+		for (SizeType i = 0; i < n; ++i) {
+			std::cout<<"Matrix "<<i<<"\n";
+			std::cout<<cm[i];
+		}
 	}
 
 	const GeometryType& geometry() const { return modelCommon_.geometry(); }
 
 	const ParametersType& params() const { return modelCommon_.params(); }
-
-	virtual const TargetQuantumElectronsType& targetQuantum() const = 0;
-
-	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
-	                           SizeType x,
-	                           PsimagLite::String msg = "") const = 0;
 
 	static void checkNaturalOperatorDof(SizeType dof,
 	                                    PsimagLite::String label,
@@ -269,9 +273,15 @@ public:
 
 	virtual PsimagLite::String symmName() const { return "undefined"; }
 
+	const TargetQuantumElectronsType& targetQuantum() const
+	{
+		return targetQuantum_;
+	}
+
 private:
 
 	ModelCommonType modelCommon_;
+	const TargetQuantumElectronsType& targetQuantum_;
 };     //class ModelBase
 } // namespace Dmrg
 /*@}*/

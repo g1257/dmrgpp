@@ -210,6 +210,12 @@ struct TargetQuantumElectrons {
 	bool isSu2;
 	bool isCanonical;
 	QnType qn;
+
+private:
+
+	TargetQuantumElectrons(const TargetQuantumElectrons&);
+
+	TargetQuantumElectrons& operator=(const TargetQuantumElectrons&);
 };
 } // namespace Dmrg
 

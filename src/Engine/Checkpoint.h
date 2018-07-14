@@ -105,6 +105,8 @@ public:
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename PsimagLite::Stack<BasisWithOperatorsType>::Type MemoryStackType;
+	typedef typename BasisWithOperatorsType::QnType QnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 	typedef DiskStack<BasisWithOperatorsType>  DiskStackType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -156,7 +158,8 @@ public:
 
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		VectorSizeType test(1,0);
-		model.setOperatorMatrices(creationMatrix, test);
+		VectorQnType qq;
+		model.setOperatorMatrices(creationMatrix, qq, test);
 
 		if (creationMatrix.size() != operatorsPerSite) {
 			PsimagLite::String msg("CheckPoint: FATAL: Perhaps trying to");

@@ -295,17 +295,15 @@ public:
 	                const SomeModelType& model,
 	                RealType time)
 	{
-		typename SomeModelType::HilbertBasisType basis;
 		typename BaseType::VectorQnType qm;
-		model.setBasis(basis, qm, block);
 
 		BaseType::set(block);
-		BaseType::setSymmetryRelated(qm);
-
 		typename PsimagLite::Vector<OperatorType>::Type ops;
 		SparseMatrixType h;
 
-		model.setOperatorMatrices(ops, block);
+		model.setOperatorMatrices(ops, qm, block);
+		BaseType::setSymmetryRelated(qm);
+
 		model.calcHamiltonian(h, ops, block, time);
 
 		setHamiltonian(h);
