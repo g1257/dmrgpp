@@ -440,7 +440,7 @@ private:
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(modelParameters_.twiceTheSpin, basis[i]);
 			other[0] = (isCanonical) ? getSzPlusConst(basis[i], n) : 0;
-			SizeType electrons = 1;
+			SizeType electrons = (BasisType::useSu2Symmetry()) ? 1 : 0;
 			SizeType flavor = 1;
 			qns[i] = QnType(electrons, other, jmpair, flavor);
 		}
