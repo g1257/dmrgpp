@@ -91,7 +91,8 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 	template<typename IoInputType>
 	ParametersModelHubbard(IoInputType& io) : BaseType(io, false)
 	{
-		SizeType nsites = BaseType::targetQuantum().totalNumberOfSites;
+		SizeType nsites = 0;
+		io.readline(nsites, "TotalNumberOfSites=");
 		hubbardU.resize(nsites, 0.0);
 		potentialV.resize(2*nsites, 0.0);
 		io.read(hubbardU,"hubbardU");

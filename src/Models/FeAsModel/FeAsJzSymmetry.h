@@ -27,8 +27,9 @@ public:
 	void init(HilbertBasisType&,
 	          VectorOperatorType&) {}
 
-	void setElectronsAndJz(VectorSizeType& ,
-	                       VectorSizeType& ) const {}
+	void setElectronsAndJz(SizeType& electrons,
+	                       SizeType& electronsUp,
+	                       SizeType ind) const {}
 
 	void findElectrons(VectorSizeType& ,
 	                   const HilbertBasisType& ,
@@ -131,13 +132,16 @@ public:
 		isSet_ = true;
 	}
 
-	void setElectronsAndJz(VectorSizeType& electrons,
-	                       VectorSizeType& electronsUp) const
+	void setElectronsAndJz(SizeType& electrons,
+	                       SizeType& electronsUp,
+	                       SizeType ind) const
 	{
 		if (!isEnabled_) return;
 		assert(isSet_);
-		electrons = electrons_;
-		electronsUp = jzModifiedEigs_;
+		assert(ind < electrons_.size());
+		electrons = electrons_[ind];
+		assert(ind < jzModifiedEigs_.size());
+		electronsUp = jzModifiedEigs_[ind];
 	}
 
 	void findElectrons(VectorSizeType& electrons,

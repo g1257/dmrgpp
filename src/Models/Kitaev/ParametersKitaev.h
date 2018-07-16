@@ -96,7 +96,8 @@ struct ParametersKitaev : public ParametersModelBase<RealType, QnType> {
 	ParametersKitaev(IoInputType& io)
 	    : BaseType(io,false)
 	{
-		SizeType nsites = BaseType::targetQuantum().totalNumberOfSites;
+		SizeType nsites = 0;
+		io.readline(nsites, "TotalNumberOfSites=");
 		try {
 			magneticFieldX.resize(nsites, 0.0);
 			io.read(magneticFieldX,"MagneticFieldX");

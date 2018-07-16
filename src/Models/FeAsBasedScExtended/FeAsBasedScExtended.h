@@ -123,7 +123,7 @@ public:
 	FeAsBasedScExtended(const SolverParamsType& solverParams,
 	                    InputValidatorType& io,
 	                    const GeometryType& geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType(io)),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType(io), io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      modelFeAs_(solverParams,io,geometry),
@@ -139,7 +139,7 @@ public:
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
-		        io.createGroup(label1);
+			io.createGroup(label1);
 
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
@@ -211,17 +211,9 @@ public:
 
 private:
 
-	void setBasis(HilbertBasisType& basis,
-	              VectorQnType& qq,
-	              const VectorSizeType& block) const
-	{
-		modelFeAs_.setBasis(basis, qq, block);
-	}
-
 	// add S^+_i to creationMatrix
-	void setSplus(
-	        typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
-	        const BlockType& block) const
+	void setSplus(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
+	              const BlockType& block) const
 	{
 		SparseMatrixType m;
 		cDaggerC(m,creationMatrix,block,1.0,SPIN_UP,SPIN_DOWN);
@@ -241,9 +233,8 @@ private:
 	}
 
 	// add S^z_i to creationMatrix
-	void setSz(
-	        typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
-	        const BlockType& block) const
+	void setSz(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
+	           const BlockType& block) const
 	{
 		SparseMatrixType m1,m2;
 		cDaggerC(m1,creationMatrix,block,0.5,SPIN_UP,SPIN_UP);
@@ -257,13 +248,12 @@ private:
 	}
 
 	// add S^+_i to creationMatrix
-	void cDaggerC(
-	        SparseMatrixType& sum,
-	        const typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
-	        const BlockType&,
-	        RealType value,
-	        SizeType spin1,
-	        SizeType spin2) const
+	void cDaggerC(SparseMatrixType& sum,
+	              const typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
+	              const BlockType&,
+	              RealType value,
+	              SizeType spin1,
+	              SizeType spin2) const
 	{
 		SparseMatrixType tmpMatrix,tmpMatrix2;
 		for (SizeType orbital=0;orbital<orbitals_;orbital++) {
@@ -279,19 +269,17 @@ private:
 	}
 
 	// add J_{ij} S^+_i S^-_j + S^-_i S^+_j to Hamiltonia
-	void addSplusSminus(
-	        SparseMatrixType &,
-	        const typename PsimagLite::Vector<OperatorType> ::Type&,
-	        const BlockType&) const
+	void addSplusSminus(SparseMatrixType &,
+	                    const typename PsimagLite::Vector<OperatorType> ::Type&,
+	                    const BlockType&) const
 	{
 		// nothing if block.size == 1
 	}
 
 	// add J_{ij} S^z_i S^z_j to Hamiltonian
-	void addSzSz(
-	        SparseMatrixType&,
-	        const typename PsimagLite::Vector<OperatorType> ::Type&,
-	        const BlockType&) const
+	void addSzSz(SparseMatrixType&,
+	             const typename PsimagLite::Vector<OperatorType> ::Type&,
+	             const BlockType&) const
 	{
 		// nothing if block.size == 1
 	}

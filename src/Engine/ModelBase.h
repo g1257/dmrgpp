@@ -127,12 +127,15 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef VectorSizeType HilbertBasisType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename QnType::PairSizeType PairSizeType;
 
 	ModelBase(const ParametersType& params,
 	          const GeometryType_& geometry,
 	          const LinkProductBaseType* lpb,
-	          const TargetQuantumElectronsType& targetQuantum)
-	    : modelCommon_(params, geometry, lpb), targetQuantum_(targetQuantum)
+	          InputValidatorType& io)
+	    : modelCommon_(params, geometry, lpb),
+	      targetQuantum_(io),
+	      QN_ZERO(0, VectorSizeType(), PairSizeType(0, 0), 0)
 	{}
 
 	virtual ~ModelBase() {}
@@ -281,7 +284,11 @@ public:
 private:
 
 	ModelCommonType modelCommon_;
-	const TargetQuantumElectronsType& targetQuantum_;
+	TargetQuantumElectronsType targetQuantum_;
+
+public:
+
+	QnType QN_ZERO;
 };     //class ModelBase
 } // namespace Dmrg
 /*@}*/

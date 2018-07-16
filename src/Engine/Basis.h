@@ -534,7 +534,10 @@ protected:
 		for (SizeType i = 0; i < n; ++i)
 			electrons_[i] = basisData[i].electrons;
 
-		findPermutationAndPartitionAndQns(basisData, true);
+		VectorQnType basisData2 = basisData;
+		if (!useSu2Symmetry()) flattenQns(basisData2);
+
+		findPermutationAndPartitionAndQns(basisData2, true);
 		electronsToSigns(electrons_);
 	}
 
@@ -578,19 +581,12 @@ private:
 			symmLocal_.read(io,prefix, minimizeRead);
 	}
 
-	void shrinkVector(VectorQnType& dest,
-	                  const VectorQnType& src,
-	                  const VectorSizeType& partition) const
+	static void flattenQns(VectorQnType& qns)
 	{
-		SizeType n = partition.size();
-		assert(n > 0);
-		const QnType zeroQn(0, VectorSizeType(), PairType(0, 0), 0);
-		dest.resize(n - 1, zeroQn);
-		for (SizeType i = 0; i < n - 1; ++i) {
-			assert(i < partition.size());
-			assert(partition[i] < src.size());
-			assert(i < dest.size());
-			dest[i] = src[partition[i]];
+		SizeType n = qns.size();
+		for (SizeType i = 0; i < n; ++i) {
+			qns[i].flavors = 0;
+			qns[i].jmPair.first = qns[i].jmPair.second = 0;
 		}
 	}
 

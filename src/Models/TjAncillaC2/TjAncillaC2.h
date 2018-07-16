@@ -129,7 +129,8 @@ public:
 	            GeometryType const &geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType((geometry.orbitals(0,0) > 1))),
+	                    new LinkProductType((geometry.orbitals(0,0) > 1)),
+	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      hot_(geometry_.orbitals(0,0) > 1)
@@ -322,6 +323,7 @@ private:
 		int sitesTimesDof = 2*NUMBER_OF_ORBITALS;
 		HilbertStateType total = (1<<sitesTimesDof);
 
+		basis.clear();
 		for (HilbertStateType a = 0; a < total; ++a) {
 			if (!isAllowed(a)) continue;
 			basis.push_back(a);
@@ -540,7 +542,7 @@ private:
 		}
 	}
 
-	void setSymmetryRelated(VectorQnType& q,
+	void setSymmetryRelated(VectorQnType& qns,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
@@ -551,33 +553,26 @@ private:
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
-		typename PsimagLite::Vector<PairType>::Type jmvalues;
-		VectorSizeType flavors;
-		PairType jmSaved = calcJmvalue<PairType>(basis[0]);
-		jmSaved.first++;
-		jmSaved.second++;
 
 		SizeType basisSize = basis.size();
-		VectorSizeType other(3*basisSize);
-		for (SizeType i=0;i<basisSize;i++) {
+		VectorSizeType other(3, 0);
+		qns.resize(basisSize, ModelBaseType::QN_ZERO);
+		for (SizeType i = 0; i < basisSize; ++i) {
 			PairType jmpair = calcJmvalue<PairType>(basis[i]);
 
-			jmvalues.push_back(jmpair);
 			// nup
-			other[i] = HilbertSpaceType::electronsWithGivenSpin(basis[i],SPIN_UP);
+			other[0] = HilbertSpaceType::electronsWithGivenSpin(basis[i],SPIN_UP);
 			// ndown
 			SizeType ndown = HilbertSpaceType::electronsWithGivenSpin(basis[i],SPIN_DOWN);
 
-			other[i + basisSize] =  HilbertSpaceType::calcNofElectrons(basis[i],
-			                                                           0);
-			other[i + 2*basisSize] = HilbertSpaceType::calcNofElectrons(basis[i],
-			                                                            NUMBER_OF_ORBITALS);
+			other[1] =  HilbertSpaceType::calcNofElectrons(basis[i],
+			                                               0);
+			other[2] = HilbertSpaceType::calcNofElectrons(basis[i],
+			                                              NUMBER_OF_ORBITALS);
 
-			flavors.push_back(other[i]+ndown);
-			jmSaved = jmpair;
+			SizeType flavor = other[0] + ndown;
+			qns[i] = QnType(flavor, other, jmpair, flavor);
 		}
-
-		q.set(jmvalues,flavors,flavors,other);
 	}
 
 	// note: we use 2j instead of j

@@ -99,6 +99,8 @@ namespace Dmrg {
 template<typename ModelBaseType>
 class HeisenbergAncillaC : public ModelBaseType {
 
+	static const int NUMBER_OF_ORBITALS=2;
+
 public:
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
@@ -112,9 +114,6 @@ public:
 	typedef	typename std::pair<SizeType,SizeType> PairSizeType;
 	typedef typename ModelBaseType::QnType QnType;
 	typedef typename QnType::VectorQnType VectorQnType;
-
-private:
-
 	typedef typename ModelBaseType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
@@ -125,11 +124,6 @@ private:
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelBaseType::VectorRealType VectorRealType;
-
-	static const int NUMBER_OF_ORBITALS=2;
-
-public:
-
 	typedef typename PsimagLite::Vector<unsigned int long>::Type HilbertBasisType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::PairType PairType;
@@ -142,7 +136,8 @@ public:
 	                   GeometryType const &geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType(geometry.orbitals(0,0) > 1)),
+	                    new LinkProductType(geometry.orbitals(0,0) > 1),
+	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      hot_(geometry_.orbitals(0,0) > 1)
@@ -351,11 +346,10 @@ private:
 	{
 		assert(block.size()==1);
 		SizeType total = hilbertSize(block[0]);
-		HilbertBasisType basisTmp(total);
 
-		for (SizeType i = 0; i < total; ++i) basisTmp[i] = i;
-		setSymmetryRelated(qq, basisTmp, block.size());
-		ModelBaseType::orderBasis(basis, basisTmp, qq);
+		basis.resize(total);
+		for (SizeType i = 0; i < total; ++i) basis[i] = i;
+		setSymmetryRelated(qq, basis, block.size());
 	}
 
 	//! Find S^+_i a in the natural basis natBasis
@@ -438,7 +432,7 @@ private:
 		return operatorMatrix;
 	}
 
-	void setSymmetryRelated(VectorQnType& q,
+	void setSymmetryRelated(VectorQnType& qns,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
@@ -450,29 +444,18 @@ private:
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
-		typename PsimagLite::Vector<PairType>::Type jmvalues;
-		VectorSizeType flavors;
-		PairType jmSaved;
-		jmSaved.first = modelParameters_.twiceTheSpin;
-		jmSaved.second = basis[0];
-		jmSaved.first++;
-		jmSaved.second++;
 
-		VectorSizeType szPlusConst(basis.size());
-		VectorSizeType electrons(basis.size());
-		for (SizeType i=0;i<basis.size();i++) {
+		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
+		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair;
 			jmpair.first = modelParameters_.twiceTheSpin;
 			jmpair.second = basis[i];
-			jmvalues.push_back(jmpair);
 			PairSizeType ket = getOneOrbital(basis[i]);
-			szPlusConst[i] = ket.first + ket.second;
-			electrons[i] = ket.first;
-			flavors.push_back(1);
-			jmSaved = jmpair;
+			SizeType szPlusConst = ket.first + ket.second;
+			SizeType electrons = ket.first;
+			SizeType flavor = 1;
+			qns[i] = QnType(electrons, VectorSizeType(1, szPlusConst), jmpair, flavor);
 		}
-
-		q.set(jmvalues,flavors,electrons,szPlusConst);
 	}
 
 	PairSizeType getOneOrbital(SizeType state) const

@@ -118,7 +118,7 @@ public:
 	SuperHubbardExtended(const SolverParamsType& solverParams,
 	                     InputValidatorType& io,
 	                     GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType, io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      extendedHubbard_(solverParams,io,geometry)
@@ -189,13 +189,6 @@ public:
 	}
 
 private:
-
-	void setBasis(HilbertBasisType& basis,
-	              VectorQnType& qq,
-	              const VectorSizeType& block) const
-	{
-		extendedHubbard_.setBasis(basis, qq, block);
-	}
 
 	SizeType findMatrixIndex(const PsimagLite::String& what) const
 	{

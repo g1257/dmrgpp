@@ -135,7 +135,7 @@ public:
 	ModelFeBasedSc(const SolverParamsType& solverParams,
 	               InputValidatorType& io,
 	               GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType(io)),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType(io), io),
 	      reinterpretX_(6),
 	      reinterpretY_(9),
 	      modelParameters_(io),
@@ -212,19 +212,14 @@ public:
 			basis_.push_back(a);
 		}
 
-		HilbertBasisType basisTmp = basis_;
-		setSymmetryRelatedInternal(qq_,basis_,1,false);
-
-		ModelBaseType::orderBasis(basis_, basisTmp, qq_);
+		setSymmetryRelatedInternal(qq_, basis_ ,1, false);
 
 		setOperatorMatrices(creationMatrix_, block, false);
 		if (feAsJzSymmetry_.isEnabled() && !feAsJzSymmetry_.isSet())
 			feAsJzSymmetry_.init(basis_, creationMatrix_);
 
-		basisTmp = basis_;
-		// reorder the natural basis (needed for MULTIPLE BANDS)
 		setSymmetryRelatedInternal(qq_,basis_,1,true);
-		ModelBaseType::orderBasis(basis_, basisTmp, qq_);
+
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
@@ -252,8 +247,7 @@ public:
 		io.write(label + "/reinterpret_", reinterpret_);
 		io.write(label + "/statesPerSite_", statesPerSite_);
 		io.write(label + "/basis_", basis_);
-		qq_.write(label, io);
-		io.write(label + "/q_", q_);
+		io.write(label + "/qq_", qq_);
 		io.write(label + "/creationMatrix_", creationMatrix_);
 		feAsJzSymmetry_.write(label, io);
 	}
@@ -536,7 +530,7 @@ private:
 		transposeConjugate(creationMatrix,temp);
 	}
 
-	void setSymmetryRelatedInternal(VectorQnType& q,
+	void setSymmetryRelatedInternal(VectorQnType& qns,
 	                                const HilbertBasisType& basis,
 	                                int n,
 	                                bool jzReinterpret) const
@@ -558,8 +552,6 @@ private:
 			PairType jmpair(0,0);
 			if (n == 1) jmpair = calcJmvalue<PairType>(basis[i]);
 
-			jmvalues.push_back(jmpair);
-
 			SizeType na = HilbertSpaceFeAsType::calcNofElectrons(basis[i],0) +
 			        HilbertSpaceFeAsType::calcNofElectrons(basis[i],0+2);
 			SizeType nb = HilbertSpaceFeAsType::calcNofElectrons(basis[i],1) +
@@ -567,27 +559,24 @@ private:
 
 			SizeType flavor = na  + 3*nb;
 
-			flavors.push_back(flavor);
 			jmSaved = jmpair;
 
 			// nup
-			electronsUp[i] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
+			SizeType electronsUp = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
 			                                                              SPIN_UP);
 			// ndown
 			SizeType electronsDown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
 			                                                                      SPIN_DOWN);
-			electrons[i] = electronsDown + electronsUp[i];
-			if (modelParameters_.spinOrbit.rows() == 0) continue;
-			if (!modelParameters_.jzSymmetry) {
-				electronsUp[i] = 0;
-				continue;
-			}
+			SizeType electrons = electronsDown + electronsUp;
+
+			if (modelParameters_.spinOrbit.rows() > 0 && !modelParameters_.jzSymmetry)
+				electronsUp = 0;
+
+			if (jzReinterpret)
+				feAsJzSymmetry_.setElectronsAndJz(electrons, electronsUp, i);
+
+			qns[i] = QnType(electrons, VectorSizeType(1, electronsUp), jmpair, flavor);
 		}
-
-		if (jzReinterpret)
-			feAsJzSymmetry_.setElectronsAndJz(electrons,electronsUp);
-
-		q.set(jmvalues,flavors,electrons,electronsUp);
 	}
 
 	// note: we use 2j instead of j
@@ -1326,7 +1315,6 @@ private:
 	SizeType statesPerSite_;
 	HilbertBasisType basis_;
 	VectorQnType qq_;
-	VectorSizeType q_;
 	VectorOperatorType creationMatrix_;
 	FeAsJzSymmetryType feAsJzSymmetry_;
 }; //class ModelFeBasedSc

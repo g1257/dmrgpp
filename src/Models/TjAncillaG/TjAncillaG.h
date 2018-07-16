@@ -130,7 +130,7 @@ public:
 	TjAncillaG(const SolverParamsType& solverParams,
 	           InputValidatorType& io,
 	           GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType, io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      TjMultiOrb_(solverParams,io,geometry),
@@ -339,12 +339,10 @@ private:
 		HilbertStateType total = (1<<sitesTimesDof);
 		--total;
 
-		HilbertBasisType basisTmp(total);
-		for (HilbertStateType a = 0; a < total; ++a) basisTmp[a] = a;
+		basis.resize(total);
+		for (HilbertStateType a = 0; a < total; ++a) basis[a] = a;
 
-		setSymmetryRelated(qq, basisTmp, block[0]);
-
-		ModelBaseType::orderBasis(basis, basisTmp, qq);
+		setSymmetryRelated(qq, basis, block[0]);
 	}
 
 	SparseMatrixType findSplusMatrices(int i,
@@ -424,7 +422,7 @@ private:
 		return creationMatrix;
 	}
 
-	void setSymmetryRelated(VectorQnType& q,
+	void setSymmetryRelated(VectorQnType& qns,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
@@ -435,25 +433,14 @@ private:
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
-		typename PsimagLite::Vector<PairType>::Type jmvalues;
-		VectorSizeType flavors;
-		PairType jmSaved = calcJmvalue<PairType>(basis[0]);
-		jmSaved.first++;
-		jmSaved.second++;
 
-		VectorSizeType szPlusConst(basis.size());
-		VectorSizeType bogus(basis.size(),0);
-		for (SizeType i=0;i<basis.size();i++) {
+		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
+		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair = calcJmvalue<PairType>(basis[i]);
+			SizeType szPlusConst = (basis[i] == 2) ? 0 : basis[i] + 1;
 
-			jmvalues.push_back(jmpair);
-
-			flavors.push_back(0);
-			jmSaved = jmpair;
-			szPlusConst[i] = (basis[i] == 2) ? 0 : basis[i] + 1;
+			qns[i] = QnType(0, VectorSizeType(1, szPlusConst), jmpair, 0);
 		}
-
-		q.set(jmvalues,flavors,bogus,szPlusConst);
 	}
 
 	// note: we use 2j instead of j

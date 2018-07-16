@@ -118,7 +118,10 @@ public:
 	ExtendedHubbard1Orb(const SolverParamsType& solverParams,
 	                    InputValidatorType& io,
 	                    GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType),
+	    : ModelBaseType(solverParams,
+	                    geometry,
+	                    new LinkProductType,
+	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      modelHubbard_(solverParams,io,geometry, 1)
@@ -200,15 +203,6 @@ public:
 
 private:
 
-	//! find all states in the natural basis for a block of n sites
-	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setBasis(HilbertBasisType  &basis,
-	              VectorQnType& qq,
-	              const VectorSizeType& block) const
-	{
-		modelHubbard_.setBasis(basis, qq, block);
-	}
-
 	//! Find n_i in the natural basis natBasis
 	SparseMatrixType findOperatorMatrices(int i,
 	                                      const VectorHilbertStateType& natBasis) const
@@ -224,8 +218,7 @@ private:
 				if (HilbertSpaceHubbardType::isNonZero(ket,i,sigma))
 					cm(ii,ii) += 1.0;
 		}
-		// 			std::cout<<cm;
-		// 			std::cout<<"******************************\n";
+
 		SparseMatrixType creationMatrix(cm);
 		return creationMatrix;
 	}
@@ -260,13 +253,8 @@ private:
 		}
 	}
 
-	//serializr start class ExtendedHubbard1Orb
-	//serializr vptr
-	//serializr normal modelParameters_
 	ParametersModelHubbard<RealType, QnType>  modelParameters_;
-	//serializr ref geometry_ start
 	const GeometryType &geometry_;
-	//serializr normal modelHubbard_
 	ModelHubbardType modelHubbard_;
 };	//class ExtendedHubbard1Orb
 

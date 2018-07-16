@@ -112,13 +112,13 @@ public:
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
 	typedef typename HilbertBasisType::value_type HilbertState;
-	typedef  HilbertSpaceFeAs<HilbertState> HilbertSpaceFeAsType;
+	typedef HilbertSpaceFeAs<HilbertState> HilbertSpaceFeAsType;
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
 	typedef LinkProductHubbardAncilla<ModelHelperType, GeometryType> LinkProductType;
-	typedef	 typename ModelBaseType::MyBasis MyBasis;
-	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
+	typedef	typename ModelBaseType::MyBasis MyBasis;
+	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
@@ -135,7 +135,7 @@ public:
 	HubbardAncilla(const SolverParamsType& solverParams,
 	               InputValidatorType& io,
 	               GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType, io),
 	      modelParameters_(io),
 	      geometry_(geometry)
 	{}
@@ -293,10 +293,9 @@ private:
 		HilbertState total = hilbertSize(0);
 		total = pow(total,n);
 
-		HilbertBasisType basisTmp(total);
-		for (HilbertState a = 0; a < total; ++a) basisTmp[a] = a;
-		setSymmetryRelated(qq, basisTmp, block[0]);
-		ModelBaseType::orderBasis(basis, basisTmp, qq);
+		basis.resize(total);
+		for (HilbertState a = 0; a < total; ++a) basis[a] = a;
+		setSymmetryRelated(qq, basis, block[0]);
 	}
 
 	//! set creation matrices for sites in block
@@ -437,7 +436,7 @@ private:
 		}
 	}
 
-	void setSymmetryRelated(VectorQnType& q,
+	void setSymmetryRelated(VectorQnType& qns,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
@@ -445,15 +444,11 @@ private:
 		// note: we use 2j instead of j
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
-		VectorSizeType flavors;
-		VectorSizeType electrons(basis.size());
-		VectorPairType jmvalues;
-		VectorSizeType other(3*basis.size());
+		VectorSizeType other(3, 0);
 		SizeType offset = basis.size();
-		for (SizeType i=0;i<basis.size();i++) {
+		qns.resize(offset, ModelBaseType::QN_ZERO);
+		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair = PairType(0,0);
-
-			jmvalues.push_back(jmpair);
 
 			SizeType naUp = HilbertSpaceFeAsType::calcNofElectrons(basis[i],
 			                                                       ORBITALS*SPIN_UP);
@@ -462,24 +457,22 @@ private:
 
 			SizeType flavor = 0;
 
-			flavors.push_back(flavor);
-
 			// nup
-			other[i] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
+			other[0] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
 			                                                        SPIN_UP);
 			// ntotal
-			electrons[i] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
+			SizeType electrons = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
 			                                                            SPIN_DOWN) +
-			        other[i];
+			        other[0];
 
 			// up ancilla
-			other[i+offset] = naUp;
+			other[1] = naUp;
 
 			// down ancilla
-			other[i+2*offset] = naDown;
-		}
+			other[2] = naDown;
 
-		q.set(jmvalues,flavors,electrons,other);
+			qns[i] = QnType(electrons, other, jmpair, flavor);
+		}
 	}
 
 	void addPotentialV(SparseMatrixType &hmatrix,

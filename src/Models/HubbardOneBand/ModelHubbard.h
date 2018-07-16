@@ -92,6 +92,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MemResolv.h"
 
 namespace Dmrg {
+template<typename ModelBaseType> class ExtendedHubbard1Orb;
+
 //! Model Hubbard for DMRG solver, inherits from ModelBase and implements its interface:
 template<typename ModelBaseType>
 class ModelHubbard : public ModelBaseType {
@@ -140,7 +142,10 @@ public:
 	             InputValidatorType& io,
 	             GeometryType const &geometry,
 	             SizeType terms)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType(terms)),
+	    : ModelBaseType(solverParams,
+	                    geometry,
+	                    new LinkProductType(terms),
+	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
@@ -219,11 +224,10 @@ public:
 	                             SizeType site,
 	                             SizeType dof) const
 	{
-		BlockType block;
-		block.resize(1);
-		block[0]=site;
+		BlockType block(1, site);
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		setOperatorMatrices(creationMatrix,block);
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
 		SizeType iup = SPIN_UP;
 		SizeType idown = SPIN_DOWN;
 		assert(creationMatrix.size()>0);
@@ -358,21 +362,6 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	/** \cppFunction{!PTEX_THISFUNCTION} Sets electrons to the total number of
-		electrons for each state in the basis*/
-	void findElectrons(typename PsimagLite::Vector<SizeType> ::Type&electrons,
-	                   const typename PsimagLite::Vector<HilbertState>::Type& basis,
-	                   SizeType) const
-	{
-		int nup,ndown;
-		electrons.clear();
-		for (SizeType i=0;i<basis.size();i++) {
-			nup = HilbertSpaceHubbardType::getNofDigits(basis[i],0);
-			ndown = HilbertSpaceHubbardType::getNofDigits(basis[i],1);
-			electrons.push_back(nup+ndown);
-		}
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -445,6 +434,8 @@ public:
 		}
 	}
 
+	friend class ExtendedHubbard1Orb<ModelBaseType>;
+
 private:
 
 	void setBasis(HilbertBasisType& basis,
@@ -454,11 +445,10 @@ private:
 		int sitesTimesDof = DEGREES_OF_FREEDOM*block.size();
 		HilbertState total = (1<<sitesTimesDof);
 
-		HilbertBasisType basisTmp(total);
-		for (HilbertState a = 0; a < total; ++a) basisTmp[a] = a;
+		basis.resize(total);
+		for (HilbertState a = 0; a < total; ++a) basis[a] = a;
 
-		setSymmetryRelated(qq, basisTmp, block.size());
-		ModelBaseType::orderBasis(basis, basisTmp, qq);
+		setSymmetryRelated(qq, basis, block.size());
 	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
@@ -509,7 +499,7 @@ private:
 		return creationMatrix;
 	}
 
-	void setSymmetryRelated(VectorQnType& q,
+	void setSymmetryRelated(VectorQnType& qns,
 	                        const HilbertBasisType& basis,
 	                        int) const
 	{
@@ -518,31 +508,23 @@ private:
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
-		typename PsimagLite::Vector<PairType>::Type jmvalues;
-		typename PsimagLite::Vector<SizeType>::Type flavors;
-		PairType jmSaved = calcJmValue<PairType>(basis[0]);
-		jmSaved.first++;
-		jmSaved.second++;
 
-		bool isCanonical = (modelParameters_.targetQuantum.isCanonical);
+		bool isCanonical = (ModelBaseType::targetQuantum().isCanonical);
 
-		typename PsimagLite::Vector<SizeType>::Type electrons(basis.size());
-		typename PsimagLite::Vector<SizeType>::Type electronsUp(basis.size());
-		for (SizeType i=0;i<basis.size();i++) {
+		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
+		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair = calcJmValue<PairType>(basis[i]);
-
-			jmvalues.push_back(jmpair);
 			// nup
-			electronsUp[i] = HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_UP);
+			SizeType electronsUp = HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_UP);
 			// ndown
-			electrons[i] = electronsUp[i] + HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_DOWN);
+			SizeType electronsDown = HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_DOWN);
 
-			flavors.push_back(electrons[i]);
-			jmSaved = jmpair;
-			if (!isCanonical) electronsUp[i] = 0;
+			SizeType electrons = electronsUp + electronsDown;
+
+			if (!isCanonical) electronsUp = 0;
+
+			qns[i] = QnType(electrons, VectorSizeType(1, electronsUp), jmpair, electrons);
 		}
-
-		q.set(jmvalues,flavors,electrons,electronsUp);
 	}
 
 	// note: we use 2j instead of j

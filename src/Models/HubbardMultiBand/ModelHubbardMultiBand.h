@@ -109,13 +109,13 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
 	typedef typename HilbertBasisType::value_type HilbertState;
-	typedef  HilbertSpaceFeAs<HilbertState> HilbertSpaceFeAsType;
+	typedef HilbertSpaceFeAs<HilbertState> HilbertSpaceFeAsType;
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
 	typedef LinkProductFeAs<ModelHelperType, GeometryType> LinkProductType;
-	typedef	 typename ModelBaseType::MyBasis MyBasis;
-	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
+	typedef	typename ModelBaseType::MyBasis MyBasis;
+	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
@@ -128,7 +128,7 @@ public:
 	ModelHubbardMultiBand(const SolverParamsType& solverParams,
 	                      InputValidatorType& io,
 	                      GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType(io)),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType(io), io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      spinSquared_(spinSquaredHelper_,
@@ -156,9 +156,7 @@ public:
 		for (HilbertState a = 0; a < total; ++a)
 			basis_[a] = a;
 
-		HilbertBasisType basisTmp = basis_;
 		setSymmetryRelatedInternal(qq_, basis_, 1);
-		ModelBaseType::orderBasis(basis_, basisTmp, qq_);
 
 		setOperatorMatricesInternal(creationMatrix_, block);
 
@@ -188,8 +186,7 @@ public:
 		spinSquaredHelper_.write(label, io);
 		spinSquared_.write(label, io);
 		io.write(label + "/basis_", basis_);
-		qq_.write(label, io);
-		io.write(label + "/q_", q_);
+		io.write(label + "/qq_", qq_);
 		io.write(label + "/creationMatrix_", creationMatrix_);
 		qx_.write(label + "/qx_", io);
 	}
@@ -344,16 +341,6 @@ public:
 
 private:
 
-	//! find all states in the natural basis for a block of n sites
-	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setBasis(HilbertBasisType& basis,
-	              VectorQnType& qq,
-	              const VectorSizeType&) const
-	{
-		basis = basis_;
-		qq = qq_;
-	}
-
 	void setOperatorMatricesInternal(VectorOperatorType& creationMatrix,
 	                                 const BlockType& block) const
 	{
@@ -460,7 +447,7 @@ private:
 		transposeConjugate(creationMatrix,temp);
 	}
 
-	void setSymmetryRelatedInternal(VectorQnType& q,
+	void setSymmetryRelatedInternal(VectorQnType& qns,
 	                                const HilbertBasisType& basis,
 	                                int n) const
 	{
@@ -469,28 +456,21 @@ private:
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
-		typename PsimagLite::Vector<PairType>::Type jmvalues;
-		VectorSizeType flavors;
 
-		VectorSizeType electronsUp(basis.size());
-		VectorSizeType electrons(basis.size());
-		for (SizeType i=0;i<basis.size();i++) {
+		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
+		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(0,0);
 
-			jmvalues.push_back(jmpair);
-
-			flavors.push_back(0.0);
-
 			// nup
-			electronsUp[i] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
+			SizeType electronsUp = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
 			                                                              SPIN_UP);
 			// ndown
 			SizeType electronsDown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
 			                                                                      SPIN_DOWN);
-			electrons[i] = electronsDown + electronsUp[i];
-		}
+			SizeType electrons = electronsDown + electronsUp;
 
-		q.set(jmvalues,flavors,electrons,electronsUp);
+			qns[i] = QnType(electrons, VectorSizeType(1, electronsUp), jmpair, 0);
+		}
 	}
 
 	// note: we use 2j instead of j
@@ -707,7 +687,6 @@ private:
 	SpinSquared<SpinSquaredHelper<RealType,HilbertState> > spinSquared_;
 	HilbertBasisType basis_;
 	VectorQnType qq_;
-	VectorSizeType q_;
 	VectorOperatorType creationMatrix_;
 	SparseMatrixType qx_;
 }; //class ModelHubbardMultiBand

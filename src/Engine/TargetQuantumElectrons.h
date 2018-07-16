@@ -89,12 +89,13 @@ struct TargetQuantumElectrons {
 	typedef typename QnType::PairSizeType PairSizeType;
 
 	template<typename IoInputType>
-	TargetQuantumElectrons(IoInputType& io, bool allowUpDown)
+	TargetQuantumElectrons(IoInputType& io)
 	    : totalNumberOfSites(0),
 	      isSu2(false),
 	      isCanonical(true),
 	      qn(0, VectorSizeType(), PairSizeType(0, 0), 0)
 	{
+		const bool allowUpDown = true;
 		io.readline(totalNumberOfSites, "TotalNumberOfSites=");
 
 		PsimagLite::String  msg("TargetQuantumElectrons: ");

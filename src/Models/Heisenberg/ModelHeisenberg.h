@@ -108,9 +108,6 @@ public:
 	typedef	typename ModelBaseType::VectorType VectorType;
 	typedef typename ModelBaseType::QnType QnType;
 	typedef typename ModelBaseType::VectorQnType VectorQnType;
-
-private:
-
 	typedef typename ModelBaseType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
@@ -141,7 +138,7 @@ public:
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    new LinkProductType((additional == "Anisotropic")),
-	                    modelParameters_.targetQuantum()),
+	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
@@ -302,7 +299,7 @@ private:
 
 	void checkAnisotropic(const SolverParamsType& solverParams) const
 	{
-		bool isCanonical = (modelParameters_.targetQuantum().isCanonical);
+		bool isCanonical = (ModelBaseType::targetQuantum().isCanonical);
 		bool useTheForce = (solverParams.options.find("useTheForce") !=
 		        PsimagLite::String::npos);
 		if (!isCanonical) return;
@@ -429,27 +426,23 @@ private:
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
 
-		SizeType totalElectrons = modelParameters_.targetQuantum().qn.electrons;
-		if (!modelParameters_.targetQuantum().isSu2 && totalElectrons > 0) {
+		SizeType totalElectrons = ModelBaseType::targetQuantum().qn.electrons;
+		if (!ModelBaseType::targetQuantum().isSu2 && totalElectrons > 0) {
 			PsimagLite::String msg("Please delete the line ");
 			msg += "TargetElectronsTotal= in the input file\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
 
-		bool isCanonical = (modelParameters_.targetQuantum().isCanonical);
+		bool isCanonical = (ModelBaseType::targetQuantum().isCanonical);
 		VectorSizeType other(1);
-		const QnType zeroQn(0, VectorSizeType(), PairType(0, 0), 0);
 
-		qns.resize(basis.size(), zeroQn);
+		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(modelParameters_.twiceTheSpin, basis[i]);
 			other[0] = (isCanonical) ? getSzPlusConst(basis[i], n) : 0;
 			SizeType electrons = 1;
 			SizeType flavor = 1;
-			if (modelParameters_.targetQuantum().isSu2)
-				qns[i] = QnType(electrons, other, jmpair, flavor);
-			else
-				qns[i] = QnType(0, other, PairType(0, 0), 0);
+			qns[i] = QnType(electrons, other, jmpair, flavor);
 		}
 	}
 
@@ -471,15 +464,9 @@ private:
 		return sum;
 	}
 
-	//serializr start class ModelHeisenberg
-	//serializr vptr
-	//serializr normal modelParameters_
 	ParametersModelHeisenberg<RealType, QnType>  modelParameters_;
-	//serializr ref geometry_ start
 	GeometryType const &geometry_;
-	//serializr normal spinSquaredHelper_
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
-	//serializr normal spinSquared_
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
 }; // class ModelHeisenberg
 

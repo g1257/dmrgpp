@@ -123,7 +123,8 @@ public:
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    new LinkProductType((geometry.orbitals(LinkProductType::TERM_HOPPING,
-	                                                           0) == 2))),
+	                                                           0) == 2)),
+	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      extendedHubbard_(solverParams,io,geometry)
@@ -208,21 +209,10 @@ public:
 
 private:
 
-	void setBasis(HilbertBasisType& basis,
-	              VectorQnType& qq,
-	              const VectorSizeType& block) const
-	{
-		extendedHubbard_.setBasis(basis, qq, block);
-	}
-
 	void addAditionalOperatorMatrices(VectorOperatorType& creationMatrix,
 	                                  const BlockType& block) const
 	{
-		HilbertBasisType natBasis;
-		VectorQnType qq;
-		extendedHubbard_.setBasis(natBasis, qq, block);
-
-		for (SizeType i=0;i<block.size();i++) {
+		for (SizeType i = 0; i < block.size(); ++i) {
 			setSplusi(creationMatrix,i);
 			setSzi(creationMatrix,i);
 			setPairi(creationMatrix,i);

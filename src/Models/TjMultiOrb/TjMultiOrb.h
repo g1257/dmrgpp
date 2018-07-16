@@ -109,7 +109,7 @@ public:
 	typedef LinkProductTjMultiOrb<ModelHelperType, GeometryType> LinkProductType;
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisFeAsType;
 	typedef typename HilbertBasisFeAsType::value_type HilbertStateFeAs;
-	typedef  HilbertSpaceFeAs<HilbertStateFeAs> HilbertSpaceFeAsType;
+	typedef HilbertSpaceFeAs<HilbertStateFeAs> HilbertSpaceFeAsType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelHubbardType::HilbertState HilbertStateType;
@@ -134,7 +134,7 @@ public:
 	TjMultiOrb(const SolverParamsType& solverParams,
 	           InputValidatorType& io,
 	           GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType(io)),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType(io) ,io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      offset_(5*modelParameters_.orbitals), // c^\dagger_up, c^\dagger_down, S+, Sz, n
@@ -153,10 +153,8 @@ public:
 		// fill caches
 		ProgramGlobals::init(modelParameters_.orbitals*geometry_.numberOfSites() + 1);
 		BlockType block(1,0);
-		setNaturalBasis(basis_,q_,block,true);
-		setOperatorMatrices(creationMatrix_,block);
-		//! Set symmetry related
-		setSymmetryRelated(qq_,basis_,block.size());
+		setNaturalBasis(basis_, block, true);
+		setOperatorMatrices(creationMatrix_, qq_, block);
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
@@ -286,8 +284,7 @@ public:
 		spinSquaredHelper_.write(label, io);
 		spinSquared_.write(label, io);
 		io.write(label + "/basis_", basis_);
-		qq_.write(label, io);
-		io.write(label + "/q_", q_);
+		io.write(label + "/qq_", qq_);
 		io.write(label + "/creationMatrix_", creationMatrix_);
 	}
 
@@ -408,9 +405,8 @@ private:
 	{
 		assert(sigma<2*modelParameters_.orbitals);
 		VectorHilbertStateType natBasis;
-		VectorSizeType quantumNumbs;
 		BlockType block(1,0);
-		setNaturalBasis(natBasis,quantumNumbs,block,false);
+		setNaturalBasis(natBasis, block, false);
 		SizeType n = natBasis.size();
 		MatrixType cm(n,n);
 
@@ -566,12 +562,13 @@ private:
 
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
+	                         VectorQnType& qns,
 	                         const BlockType& block) const
 	{
 		VectorHilbertStateType natBasis;
 		SparseMatrixType tmpMatrix;
-		VectorSizeType quantumNumbs;
-		setNaturalBasis(natBasis,quantumNumbs,block,false);
+		setNaturalBasis(natBasis, block, false);
+		setSymmetryRelated(qns, natBasis, block.size());
 
 		SizeType dof = 2*modelParameters_.orbitals;
 		// Set the operators c^\daggger_{i\sigma} in the natural basis
@@ -748,22 +745,15 @@ private:
 	}
 
 	void setNaturalBasis(HilbertBasisType& basis,
-	                     VectorSizeType& q,
 	                     const VectorSizeType& block,
 	                     bool truncated) const
 	{
 		assert(block.size()==1);
-		HilbertStateType a=0;
 		HilbertStateType total = (1 << 2*modelParameters_.orbitals);
 
-		HilbertBasisType basisTmp;
-		for (a=0;a<total;a++) basisTmp.push_back(a);
-		weedOutBasis(basisTmp,truncated);
-
-		// reorder the natural basis (needed for MULTIPLE BANDS)
-		VectorQnType qq;
-		setSymmetryRelated(qq, basisTmp, 1);
-		ModelBaseType::orderBasis(basis, basisTmp, qq);
+		basis.resize(total);
+		for (SizeType a = 0; a< total; ++a) basis[a] = a;
+		weedOutBasis(basis, truncated);
 	}
 
 	void weedOutBasis(VectorHilbertStateType& basis, bool truncated) const
@@ -803,7 +793,7 @@ private:
 		basis = basisTmp;
 	}
 
-	void setSymmetryRelated(VectorQnType& q,
+	void setSymmetryRelated(VectorQnType& qns,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
@@ -814,38 +804,28 @@ private:
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
-		typename PsimagLite::Vector<PairType>::Type jmvalues;
-		VectorSizeType flavors;
-		PairType jmSaved = calcJmvalue<PairType>(basis[0]);
-		jmSaved.first++;
-		jmSaved.second++;
 		SizeType orbitals = modelParameters_.orbitals;
-		VectorSizeType electronsUp(basis.size());
-		VectorSizeType electrons(basis.size());
-		for (SizeType i=0;i<basis.size();i++) {
+
+		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
+		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(0,0);
 
-			if(orbitals==1) {
+			if(orbitals==1)
 				jmpair = calcJmvalue<PairType>(basis[i]);
-			}
 			
-			jmvalues.push_back(jmpair);
 			// nup
-			electronsUp[i] = 0;
+			SizeType electronsUp = 0;
 			SizeType electronsDown  = 0;
 			for (SizeType dof = 0; dof < orbitals; ++dof) {
 				HilbertStateType mask = (1<<dof);
-				if (mask & basis[i]) electronsUp[i]++;
+				if (mask & basis[i]) electronsUp++;
 				mask = (1<<(dof+orbitals));
 				if (mask & basis[i]) electronsDown++;
 			}
 
-			electrons[i] = electronsDown + electronsUp[i];
-			flavors.push_back(electrons[i]);
-			jmSaved = jmpair;
+			SizeType electrons = electronsDown + electronsUp;
+			qns[i] = QnType(electrons, VectorSizeType(1, electronsUp), jmpair, electrons);
 		}
-
-		q.set(jmvalues,flavors,electrons,electronsUp);
 	}
 
 	// note: we use 2j instead of j
@@ -886,7 +866,6 @@ private:
 	SpinSquared<SpinSquaredHelper<RealType,HilbertStateType> > spinSquared_;
 	HilbertBasisType basis_;
 	VectorQnType qq_;
-	VectorSizeType q_;
 	VectorOperatorType creationMatrix_;
 };	//class TjMultiOrb
 

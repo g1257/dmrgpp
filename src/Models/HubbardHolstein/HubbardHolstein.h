@@ -112,14 +112,14 @@ public:
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
 	typedef typename HilbertBasisType::value_type HilbertState;
 	typedef unsigned int long WordType;
-	typedef  HilbertSpaceHubbardHolstein<WordType> HilbertSpaceHubbardHolsteinWordType;
-	typedef  HilbertSpaceHubbardHolstein<HilbertState> HilbertSpaceHubbardHolsteinType;
+	typedef HilbertSpaceHubbardHolstein<WordType> HilbertSpaceHubbardHolsteinWordType;
+	typedef HilbertSpaceHubbardHolstein<HilbertState> HilbertSpaceHubbardHolsteinType;
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
 	typedef LinkProductHubbardHolstein<ModelHelperType, GeometryType> LinkProductType;
-	typedef	 typename ModelBaseType::MyBasis MyBasis;
-	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
+	typedef	typename ModelBaseType::MyBasis MyBasis;
+	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
@@ -139,7 +139,8 @@ public:
 	                PsimagLite::String additional)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType(additional == "SSH", io)),
+	                    new LinkProductType(additional == "SSH", io),
+	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry)
 	{
@@ -248,7 +249,8 @@ public:
 		block.resize(1);
 		block[0]=site;
 		VectorOperatorType creationMatrix;
-		setOperatorMatrices(creationMatrix,block);
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
 		assert(creationMatrix.size()>0);
 		SizeType nrow = creationMatrix[0].data.rows();
 		PsimagLite::String what2 = what;
@@ -468,7 +470,7 @@ private:
 		vm.push_back(m);
 	}
 
-	void setSymmetryRelated(VectorQnType& q,
+	void setSymmetryRelated(VectorQnType& qns,
 	                        const HilbertBasisType& basis,
 	                        int) const
 	{
@@ -477,29 +479,22 @@ private:
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
-		typename PsimagLite::Vector<PairType>::Type jmvalues;
-		typename PsimagLite::Vector<SizeType>::Type flavors;
-		PairType jmSaved = PairType(0,0);
-		jmSaved.first++;
-		jmSaved.second++;
 
-		typename PsimagLite::Vector<SizeType>::Type electrons(basis.size());
-		typename PsimagLite::Vector<SizeType>::Type electronsUp(basis.size());
-		for (SizeType i=0;i<basis.size();i++) {
+		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
+		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair = PairType(0,0);
 
-			jmvalues.push_back(jmpair);
 			// nup
-			electronsUp[i] = HilbertSpaceHubbardHolsteinType::getNofDigits(basis[i],SPIN_UP);
+			SizeType electronsUp = HilbertSpaceHubbardHolsteinType::getNofDigits(basis[i],
+			                                                                     SPIN_UP);
 			// ndown
-			electrons[i] = electronsUp[i] + HilbertSpaceHubbardHolsteinType::
-			        getNofDigits(basis[i],SPIN_DOWN);
+			SizeType electronsDown = HilbertSpaceHubbardHolsteinType::getNofDigits(basis[i],
+			                                                                       SPIN_DOWN);
 
-			flavors.push_back(electrons[i]);
-			jmSaved = jmpair;
+			SizeType electrons = electronsUp + electronsDown;
+
+			qns[i] = QnType(electrons, VectorSizeType(1, electronsUp), jmpair, electrons);
 		}
-
-		q.set(jmvalues,flavors,electrons,electronsUp);
 	}
 
 	void addPotentialFV(SparseMatrixType &hmatrix,

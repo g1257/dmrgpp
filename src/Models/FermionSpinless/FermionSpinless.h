@@ -137,7 +137,7 @@ public:
 	                InputValidatorType& io,
 	                GeometryType const &geometry,
 	                SizeType offset = DEGREES_OF_FREEDOM)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType, io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      offset_(offset),
@@ -292,13 +292,12 @@ private:
 	{
 		int sitesTimesDof=DEGREES_OF_FREEDOM*block.size();
 		HilbertState total = (1<<sitesTimesDof);
-		HilbertBasisType basisTmp(total);
+
+		basis.resize(total);
 		for (HilbertState a = 0; a < total; ++a)
-			basisTmp[a] = a;
+			basis[a] = a;
 
-		setSymmetryRelated(qq, basisTmp, block[0]);
-
-		ModelBaseType::orderBasis(basis, basisTmp, qq);
+		setSymmetryRelated(qq, basis);
 	}
 
 	// Calculate fermionic sign when applying operator
@@ -340,34 +339,22 @@ private:
 		return creationMatrix;
 	}
 
-	void setSymmetryRelated(VectorQnType& q,
-	                        HilbertBasisType  const &basis,int) const
+	void setSymmetryRelated(VectorQnType& qns,
+	                        const HilbertBasisType& basis) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
-		typename PsimagLite::Vector<PairType>::Type jmvalues;
-		typename PsimagLite::Vector<SizeType>::Type flavors;
-		PairType jmSaved = calcJmValue<PairType>(basis[0]);
-		jmSaved.first++;
-		jmSaved.second++;
-
-		typename PsimagLite::Vector<SizeType>::Type electronsUp(basis.size());
-		typename PsimagLite::Vector<SizeType>::Type zero(basis.size(),0);
-		for (SizeType i=0;i<basis.size();i++) {
+		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
+		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair = calcJmValue<PairType>(basis[i]);
+			SizeType electrons = HilbertSpaceType::getNofDigits(basis[i],0);
+			SizeType flavor = electrons;
 
-			jmvalues.push_back(jmpair);
-			// nup
-			electronsUp[i] = HilbertSpaceType::getNofDigits(basis[i],0);
-
-			flavors.push_back(electronsUp[i]);
-			jmSaved = jmpair;
+			qns[i] = QnType(electrons, VectorSizeType(), jmpair, flavor);
 		}
-
-		q.set(jmvalues,flavors,electronsUp,zero);
 	}
 
 	//! Find n_i in the natural basis natBasis

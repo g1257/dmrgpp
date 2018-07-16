@@ -139,7 +139,7 @@ public:
 	Kitaev(const SolverParamsType& solverParams,
 	       InputValidatorType& io,
 	       const GeometryType& geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType, io),
 	      modelParameters_(io),
 	      geometry_(geometry)
 	{
@@ -288,11 +288,10 @@ private:
 	{
 		SizeType total = utils::powUint(TWICE_THE_SPIN + 1, block.size());
 
-		HilbertBasisType basisTmp(total);
-		for (SizeType i = 0; i < total; ++i) basisTmp[i] = i;
+		basis.resize(total);
+		for (SizeType i = 0; i < total; ++i) basis[i] = i;
 
-		setSymmetryRelated(qq, basisTmp, block.size());
-		ModelBaseType::orderBasis(basis, basisTmp, qq);
+		setSymmetryRelated(qq, basis, block.size());
 	}
 
 	SizeType logBase2(SizeType x) const
@@ -342,7 +341,7 @@ private:
 		return operatorMatrix;
 	}
 
-	void setSymmetryRelated(VectorQnType& q,
+	void setSymmetryRelated(VectorQnType& qns,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
@@ -351,15 +350,9 @@ private:
 		// note: we use 2j instead of j
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
-		typedef std::pair<SizeType,SizeType> PairType;
 		SizeType nbasis = basis.size();
-		typename PsimagLite::Vector<PairType>::Type jmvalues(nbasis, PairType(0, 0));
-		VectorSizeType flavors(nbasis, 1);
 
-		VectorSizeType szPlusConst(nbasis, 0);
-		VectorSizeType electrons(basis.size(), 0);
-
-		q.set(jmvalues,flavors,electrons,szPlusConst);
+		qns.resize(nbasis, ModelBaseType::QN_ZERO);
 	}
 
 	ParametersKitaev<RealType, QnType>  modelParameters_;

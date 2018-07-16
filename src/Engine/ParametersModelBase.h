@@ -1,6 +1,6 @@
 #ifndef PARAMETERSMODELBASE_H
 #define PARAMETERSMODELBASE_H
-#include "TargetQuantumElectrons.h"
+#include "Io/IoNg.h"
 
 namespace Dmrg {
 
@@ -10,24 +10,11 @@ class ParametersModelBase {
 public:
 
 	template<typename IoInputType>
-	ParametersModelBase(IoInputType& io, bool allowUpDown)
-	    : targetQuantum_(io, allowUpDown)
+	ParametersModelBase(IoInputType&, bool)
 	{}
 
-	const TargetQuantumElectrons<RealType, QnType>& targetQuantum() const
-	{
-		return targetQuantum_;
-	}
-
-	void write(PsimagLite::String label,
-	           PsimagLite::IoNg::Out::Serializer& io) const
-	{
-		targetQuantum_.write(label, io);
-	}
-
-private:
-
-	TargetQuantumElectrons<RealType, QnType> targetQuantum_;
+	void write(PsimagLite::String,
+	           PsimagLite::IoNg::Out::Serializer&) const {}
 };
 }
 #endif // PARAMETERSMODELBASE_H

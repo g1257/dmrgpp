@@ -127,7 +127,7 @@ public:
 	TjAncillaC(const SolverParamsType& solverParams,
 	           InputValidatorType& io,
 	           GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType, io),
 	      modelParameters_(io),
 	      geometry_(geometry)
 	{}
@@ -285,7 +285,7 @@ public:
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
-		        io.createGroup(label1);
+			io.createGroup(label1);
 
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
@@ -303,14 +303,13 @@ private:
 		int sitesTimesDof = 2*NUMBER_OF_ORBITALS;
 		HilbertStateType total = (1<<sitesTimesDof);
 
-		HilbertBasisType basisTmp;
 		for (HilbertStateType a = 0; a < total; ++a) {
 			if (!isAllowed(a)) continue;
-			basisTmp.push_back(a);
+			basis.push_back(a);
 		}
 
-		assert(basisTmp.size() == pow(3,NUMBER_OF_ORBITALS));
-		setSymmetryRelated(qq, basisTmp, block[0]);
+		assert(basis.size() == pow(3,NUMBER_OF_ORBITALS));
+		setSymmetryRelated(qq, basis, block[0]);
 	}
 
 	bool isAllowed(HilbertStateType a) const
@@ -529,7 +528,7 @@ private:
 		}
 	}
 
-	void setSymmetryRelated(VectorQnType& q,
+	void setSymmetryRelated(VectorQnType& qns,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
@@ -540,32 +539,23 @@ private:
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
-		typename PsimagLite::Vector<PairType>::Type jmvalues;
-		VectorSizeType flavors;
-		PairType jmSaved = calcJmvalue<PairType>(basis[0]);
-		jmSaved.first++;
-		jmSaved.second++;
 
 		SizeType basisSize = basis.size();
-		VectorSizeType other(2*basisSize);
-		for (SizeType i=0;i<basisSize;i++) {
+		VectorSizeType other(2, 0);
+		qns.resize(basisSize, ModelBaseType::QN_ZERO);
+		for (SizeType i = 0; i < basisSize; ++i) {
 			PairType jmpair = calcJmvalue<PairType>(basis[i]);
 
-			jmvalues.push_back(jmpair);
 			// nup
-			other[i] = HilbertSpaceType::electronsWithGivenSpin(basis[i],SPIN_UP);
+			other[0] = HilbertSpaceType::electronsWithGivenSpin(basis[i],SPIN_UP);
 			// ndown
 			SizeType ndown = HilbertSpaceType::electronsWithGivenSpin(basis[i],SPIN_DOWN);
 
-			other[i + basisSize] =  HilbertSpaceType::calcNofElectrons(basis[i],
-			                                                           0);
-			other[i + basisSize] +=
-			        HilbertSpaceType::calcNofElectrons(basis[i],NUMBER_OF_ORBITALS);
-			flavors.push_back(other[i]+ndown);
-			jmSaved = jmpair;
+			other[1] =  HilbertSpaceType::calcNofElectrons(basis[i], 0);
+			other[1] += HilbertSpaceType::calcNofElectrons(basis[i],NUMBER_OF_ORBITALS);
+			SizeType flavor = other[0] + ndown;
+			qns[i] = QnType(flavor, other, jmpair, flavor);
 		}
-
-		q.set(jmvalues,flavors,flavors,other);
 	}
 
 	// note: we use 2j instead of j

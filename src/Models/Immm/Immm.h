@@ -129,7 +129,7 @@ public:
 	Immm(const SolverParamsType& solverParams,
 	     InputValidatorType& io,
 	     GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType, io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      copperEach_(4),
@@ -310,14 +310,13 @@ private:
 		SizeType dof =  NUMBER_OF_SPINS * orbitalsAtSite(0);
 		HilbertState total = (1<<dof);
 
-		HilbertBasisType basisTmp;
+		basis.clear();
 		for (HilbertState a = 0; a < total; ++a) {
 			if (!isAllowedThisDof(a,block[0])) continue;
-			basisTmp.push_back(a);
+			basis.push_back(a);
 		}
 
-		setSymmetryRelated(qq, basisTmp, block[0]);
-		ModelBaseType::orderBasis(basis, basisTmp, qq);
+		setSymmetryRelated(qq, basis, block[0]);
 	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
@@ -387,7 +386,7 @@ private:
 		transposeConjugate(creationMatrix,temp);
 	}
 
-	void setSymmetryRelated(VectorQnType& q,
+	void setSymmetryRelated(VectorQnType& qns,
 	                        const HilbertBasisType& basis,
 	                        SizeType site) const
 	{
@@ -396,32 +395,18 @@ private:
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
-		typename PsimagLite::Vector<PairType>::Type jmvalues;
-		typename PsimagLite::Vector<SizeType>::Type flavors;
-		PairType jmSaved = calcJmvalue<PairType>(basis[0]);
-		jmSaved.first++;
-		jmSaved.second++;
 
-		typename PsimagLite::Vector<SizeType>::Type electronsUp(basis.size());
-		typename PsimagLite::Vector<SizeType>::Type electrons(basis.size());
-		for (SizeType i=0;i<basis.size();i++) {
+		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
+		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair = calcJmvalue<PairType>(basis[i]);
-
-			jmvalues.push_back(jmpair);
-
 			SizeType flavor = 0; // na  + 3*nb;
-
-			flavors.push_back(flavor);
-			jmSaved = jmpair;
-
 			// nup
-			electronsUp[i] = hilbertSpace_.electronsWithGivenSpin(basis[i],site,SPIN_UP);
+			SizeType electronsUp = hilbertSpace_.electronsWithGivenSpin(basis[i],site,SPIN_UP);
 			// ndown
 			SizeType electronsDown = hilbertSpace_.electronsWithGivenSpin(basis[i],site,SPIN_DOWN);
-			electrons[i] = electronsDown + electronsUp[i];
+			SizeType electrons = electronsDown + electronsUp;
+			qns[i] = QnType(electrons, VectorSizeType(1, electronsUp), jmpair, flavor);
 		}
-
-		q.set(jmvalues,flavors,electrons,electronsUp);
 	}
 
 	//! Not implemented, su(2) symmetry won't work
@@ -505,7 +490,8 @@ private:
 		SizeType site = block[0];
 		SizeType norb = orbitalsAtSite(site);
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		setOperatorMatrices(creationMatrix,block);
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
 		assert(creationMatrix.size()>0);
 		SizeType rank = creationMatrix[0].data.rows();
 		MatrixType tmp(rank,rank);
