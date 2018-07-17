@@ -395,8 +395,8 @@ public:
 		const QnType zeroQn(0, VectorSizeType(), PairSizeType(0, 0), 0);
 		nzMsAndQns_.resize(aSize, PairQnType(0, zeroQn));
 		for (SizeType i = 0; i < aSize; ++i) {
-			io.read(nzMsAndQns_[i].first, "/nzMsAndQns_/" + ttos(i) + "/0");
-			nzMsAndQns_[i].second.read("/nzMsAndQns_/" + ttos(i) + "/1", io);
+			io.read(nzMsAndQns_[i].first, label + "/nzMsAndQns_/" + ttos(i) + "/0");
+			nzMsAndQns_[i].second.read(label + "/nzMsAndQns_/" + ttos(i) + "/1", io);
 		}
 	}
 

@@ -540,15 +540,9 @@ private:
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
-		typename PsimagLite::Vector<PairType>::Type jmvalues;
-		VectorSizeType flavors;
-		PairType jmSaved = calcJmvalue<PairType>(basis[0]);
-		jmSaved.first++;
-		jmSaved.second++;
 
-		VectorSizeType electronsUp(basis.size());
-		VectorSizeType electrons(basis.size());
-		for (SizeType i=0;i<basis.size();i++) {
+		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
+		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(0,0);
 			if (n == 1) jmpair = calcJmvalue<PairType>(basis[i]);
 
@@ -558,8 +552,6 @@ private:
 			        HilbertSpaceFeAsType::calcNofElectrons(basis[i],1+2);
 
 			SizeType flavor = na  + 3*nb;
-
-			jmSaved = jmpair;
 
 			// nup
 			SizeType electronsUp = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],

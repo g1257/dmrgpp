@@ -316,6 +316,7 @@ sub checkCollectBrakets
 		my $file2 = "$golddir/CollectBrakets${n}_$i.txt";
 		my @brakets1 = readBrakets($file1);
 		my @brakets2 = readBrakets($file2);
+		print "$0: kompare $file1 $file2\n";
 		compareBrakets(\@brakets1, \@brakets2);
 	}
 }
@@ -338,14 +339,14 @@ sub compareBrakets
 sub compareBraket
 {
 	my ($h1, $h2) = @_;
-	
-	my @items = ("value", "time", "label", "norm");
+
+	my @items = ("label", "time", "value", "norm");
 	foreach my $item (@items) {
 		if (compareItem($item, $h1, $h2) > 1) {
 			 print "$0 $item undefined either old or new\n";
+			 return;
 		}
 	}
-	
 }
 
 sub compareItem
@@ -357,7 +358,7 @@ sub compareItem
 	defined($i1) or return 2;
 	defined($i2) or return 3;
 	if ($i1 ne $i2) {
-		print "$0 $item differs in value $i1 != $i2\n";
+		print "$0 $item differs in $item $i1 != $i2\n";
 	}
 
 	return ($i1 eq $i2) ? 0 : 1;

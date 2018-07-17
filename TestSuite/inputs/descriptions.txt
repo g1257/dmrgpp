@@ -192,7 +192,7 @@ Page* where more or less this feature is used: 245130-2
 #1900 to 1950 for Hubbard Ancilla Tests
 1950) Ancilla entangler, fig 4 of paper
 1951) Ancilla real H, fig 4 of paper
-#1951 to 1999 for Ancilla tests
+#1952 to 1999 for Ancilla tests
 #2000) First Suzuki-Trotter test. The gs is time-evolved.
 #2001) Tests time evolution with 3 operators, which is more than the holon-doublon case, and
 #hence non-trivial. (Suzuki-Trotter)

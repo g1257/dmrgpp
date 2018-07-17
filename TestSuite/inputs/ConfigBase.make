@@ -5,8 +5,8 @@ LDFLAGS = -L../../PsimagLite/lib -L../../../PsimagLite/lib -lpsimaglite
 # Note that -mtune=native -march=native should not be
 # used if you intend your executable to run in machines
 # other than the one your are compiling on
-CXX = g++ -frecord-gcc-switches -mtune=native -march=native
-#CXX = clang++ -mtune=native
+CXX = g++ -frecord-gcc-switches
+#CXX = clang++
 
 # We're using ansi C++
 CPPFLAGS += -pedantic -std=c++98

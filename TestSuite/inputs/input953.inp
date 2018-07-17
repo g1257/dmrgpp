@@ -33,7 +33,7 @@ TargetElectronsDown=4
 GsWeight=0.1
 DynamicDmrgType=3
 DynamicDmrgAdvanceEach=4
-TSPSites 2 3 2  
+TSPSites 2 3 2
 TSPLoops 2 0 0
 
 TSPOperator=raw 
