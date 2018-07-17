@@ -331,16 +331,6 @@ public:
 
 private:
 
-	//! find all states in the natural basis for a block of n sites
-	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setBasis(HilbertBasisType  &basis,
-	              VectorQnType& qq,
-	              const VectorSizeType&) const
-	{
-		basis = basis_;
-		qq = qq_;
-	}
-
 	//! Find c^\dagger_isigma in the natural basis natBasis
 	SparseMatrixType findCreationMatrices(int i,
 	                                      int sigma,
@@ -754,7 +744,7 @@ private:
 		basis.resize(total);
 		for (SizeType a = 0; a< total; ++a) basis[a] = a;
 		weedOutBasis(basis, truncated);
-		if (modelParameters_.orbitals == 1 && basis.size() == 2) {
+		if (modelParameters_.orbitals == 1 && basis.size() == 3) {
 			basis[0] = 0;
 			basis[1] = 2;
 			basis[2] = 1;
