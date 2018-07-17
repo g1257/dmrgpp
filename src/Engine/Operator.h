@@ -176,6 +176,10 @@ struct Operator {
 			io.read(m, prefix + "RAW_MATRIX");
 			if (checkNonZero) checkNotZeroMatrix(m);
 			fullMatrixToCrsMatrix(data,m);
+			PsimagLite::String msg = "WARNING: RAW_MATRIX read, order of basis subject ";
+			msg += "to change with DMRG++ version!\n";
+			std::cerr<<msg;
+			std::cout<<msg;
 		} else if (s == "expression") {
 			io.readline(s,prefix + "OperatorExpression=");
 			int site = 0;
