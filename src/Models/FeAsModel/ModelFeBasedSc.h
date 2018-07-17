@@ -195,6 +195,7 @@ public:
 			basis_[15] = 15;
 		}
 
+
 		if (basis_.size() == 64) {
 			SizeType counter = 0;
 			basis_[counter++] = 0;
@@ -206,17 +207,17 @@ public:
 			basis_[counter++] = 4;
 			basis_[counter++] = 24;
 			basis_[counter++] = 40;
-			basis_[counter++] = 9;
-			basis_[counter++] = 10;
-			basis_[counter++] = 48;
+			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 9 : 48;
+			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 10 : 9;
+			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 48 : 10;
 			basis_[counter++] = 12;
 			basis_[counter++] = 17;
 			basis_[counter++] = 18;
 			basis_[counter++] = 20; // 15
 			basis_[counter++] = 33;
-			basis_[counter++] = 3;
-			basis_[counter++] = 34;
-			basis_[counter++] = 36;
+			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 3 : 34;
+			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 34 : 36;
+			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 36 : 3;
 			basis_[counter++] = 5;
 			basis_[counter++] = 6;
 			basis_[counter++] = 56;
@@ -241,17 +242,17 @@ public:
 			basis_[counter++] = 7;
 			basis_[counter++] = 57;
 			basis_[counter++] = 58;
-			basis_[counter++] = 27;
-			basis_[counter++] = 29;
-			basis_[counter++] = 60;
+			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 27 : 60;
+			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 29 : 27;
+			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 60 : 29;
 			basis_[counter++] = 30; // 47
 			basis_[counter++] = 43;
 			basis_[counter++] = 45;
 			basis_[counter++] = 46;
 			basis_[counter++] = 51;
-			basis_[counter++] = 15;
-			basis_[counter++] = 53;
-			basis_[counter++] = 54;
+			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 15 : 53;
+			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 53 : 54;
+			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 54 : 15;
 			basis_[counter++] = 23;
 			basis_[counter++] = 39;
 			basis_[counter++] = 59;
@@ -277,7 +278,6 @@ public:
 			feAsJzSymmetry_.init(basis_, creationMatrix_);
 
 		setSymmetryRelatedInternal(qq_,basis_,1,true);
-
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
