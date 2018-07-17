@@ -255,7 +255,7 @@ struct ParametersDmrgSolver {
 		try {
 			VectorSizeType tmpVector;
 			io.read(tmpVector,"AdjustQuantumNumbers");
-			QnType::adjustQns(adjustQuantumNumbers, tmpVector);
+			QnType::adjustQns(adjustQuantumNumbers, tmpVector, modeFromModel(model));
 		} catch (std::exception&) {}
 
 		truncationControl = PairRealSizeType(-1.0,keptStatesInfinite);
@@ -539,6 +539,14 @@ struct ParametersDmrgSolver {
 	}
 
 private:
+
+	static SizeType modeFromModel(PsimagLite::String model)
+	{
+		if (model == "HubbardAncilla") return 3;
+		if (model == "FeAsBasedSc") return 2;
+		err("Not supported modeFromModel for model= " + model + "\n");
+		return 0;
+	}
 
 	static void warnIfFiniteMlessThanMin(const VectorFiniteLoopType& vfl, SizeType minM)
 	{

@@ -74,11 +74,15 @@ public:
 		assert(!isSu2 || mode == 1);
 
 		if (direction == ProgramGlobals::INFINITE) {
-			electrons = static_cast<SizeType>(round(original.electrons*sites/totalSites));
-			for (SizeType x = 0; x < mode; ++x)
-				other[x] = static_cast<SizeType>(round(original.other[x]*sites/totalSites));
+			double flp = original.electrons*sites;
+			electrons = static_cast<SizeType>(round(flp/totalSites));
+			for (SizeType x = 0; x < mode; ++x) {
+				flp = original.other[x]*sites;
+				other[x] = static_cast<SizeType>(round(flp/totalSites));
+			}
 
-			jmPair.first =  static_cast<SizeType>(round(original.jmPair.first*sites/totalSites));
+			flp = original.jmPair.first*sites;
+			jmPair.first =  static_cast<SizeType>(round(flp/totalSites));
 		}
 
 		if (!isSu2) return;
@@ -107,16 +111,27 @@ public:
 		jmPair.first = tmp;
 	}
 
-	static void adjustQns(VectorQnType& outQns, const VectorSizeType& ints)
+	static void adjustQns(VectorQnType& outQns,
+	                      const VectorSizeType& ints,
+	                      SizeType mode)
 	{
 		SizeType n = ints.size();
-		assert(n > 0);
-		outQns.resize(n, Qn(0, VectorSizeType(), PairSizeType(0, 0), 0));
-		const SizeType mode = 2;
+		if (n == 0)
+			err("adjustQns failed with n == 0\n");
+
+		if (n % (mode + 1) != 0)
+			err("adjustQns failed, n does not divide mode + 1\n");
+		n /= (mode + 1);
+		outQns.resize(n, Qn(0, VectorSizeType(mode), PairSizeType(0, 0), 0));
 		for (SizeType i = 0; i < n; ++i) {
-			outQns[i].electrons = ints[0 + i*mode];
-			outQns[i].other.resize(1);
-			outQns[i].other[0] = ints[1 + i*mode];
+			assert(1 + i*(mode + 1) < ints.size());
+			outQns[i].electrons = ints[1 + i*(mode + 1)];
+			for (SizeType j = 0; j < mode; ++j) {
+				SizeType k = (j == 0) ? 0 : j + 1;
+				assert(k + i*mode < ints.size());
+				assert(j < outQns[i].other.size());
+				outQns[i].other[j] = ints[k + i*(mode + 1)];
+			}
 		}
 	}
 

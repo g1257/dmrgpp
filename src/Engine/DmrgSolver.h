@@ -645,14 +645,16 @@ obtain ordered
 	                         SizeType step)
 	{
 		SizeType maxSites = model_.geometry().numberOfSites();
+
 		if (direction == ProgramGlobals::INFINITE &&
 		        sites < maxSites &&
 		        parameters_.adjustQuantumNumbers.size() > step) {
 			quantumSector_ = parameters_.adjustQuantumNumbers[step];
-			return;
+		} else {
+			quantumSector_ = model_.targetQuantum().qn;
 		}
 
-		quantumSector_ = model_.targetQuantum().qn;
+
 		quantumSector_.scale(sites,
 		                     model_.geometry().numberOfSites(),
 		                     direction,
