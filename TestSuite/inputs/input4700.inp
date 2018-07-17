@@ -1,0 +1,36 @@
+TotalNumberOfSites=4
+
+NumberOfTerms=2
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 -1.0
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 -1.0
+
+hubbardFU 4 10 10 10 10
+potentialFV 8 20 20 20 20
+              20 20 20 20
+
+
+NumberPhonons=4
+
+lambdaFP 4 0.2 0.2 0.2 0.2
+
+potentialPV 4 0.4 0.4 0.4 0.4
+
+Model=HubbardHolstein
+SolverOptions=MatrixProductStored
+Version=version
+OutputFile=data4700
+InfiniteLoopKeptStates=100
+FiniteLoops 3
+1 100 0 -2 100 0
+2 100 0
+TargetElectronsUp=2
+TargetElectronsDown=2
+

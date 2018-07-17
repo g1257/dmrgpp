@@ -289,6 +289,7 @@ Figure* (if any):
 Page* where more or less this feature is used: Will be given when published
 [* Refers to published version.]
 
+4700) Hubbard Holstein
 
 #5000 TOO BIG Hubbard model 1 orbital on a 32x2 ladder with m up to 800.
 It has 14 electrons up and 14 electrons down (or 2+2 "holes", 16+16 being
