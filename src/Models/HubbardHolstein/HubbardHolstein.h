@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "Geometry/GeometryDca.h"
 #include <cstdlib>
+#include <numeric>
 
 namespace Dmrg {
 template<typename ModelBaseType>
@@ -353,7 +354,19 @@ private:
 		total = pow(total,n);
 
 		basis.resize(total);
-		for (HilbertState a = 0; a < total; ++a) basis[a] = a;
+		SizeType counter = 0;
+		SizeType npPlusOne = modelParameters_.numberphonons + 1;
+		for (SizeType i = 0; i < 4; ++i) {
+			for (SizeType b = 0; b < npPlusOne; ++b) {
+				basis[counter++] = b*4 + i;
+			}
+		}
+
+		SizeType sum = std::accumulate(basis.begin(), basis.end(), 0);
+		if (sum != total*(total-1)/2)
+			err("Could not set up basis\n");
+
+		assert(counter == total);
 	}
 
 	//! Find a^+_site in the natural basis natBasis

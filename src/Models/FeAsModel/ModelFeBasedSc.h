@@ -90,6 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "Geometry/GeometryDca.h"
 #include "FeAsJzSymmetry.h"
+#include <numeric>
 
 namespace Dmrg {
 template<typename ModelBaseType>
