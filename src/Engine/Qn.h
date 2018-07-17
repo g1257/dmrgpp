@@ -77,7 +77,7 @@ public:
 			err("Qn::scale() expects mode==1 for SU(2)\n");
 
 		if (direction == ProgramGlobals::INFINITE) {
-			double flp = original.electrons*sites;
+			SizeType flp = original.electrons*sites;
 			electrons = static_cast<SizeType>(round(flp/totalSites));
 			for (SizeType x = 0; x < mode; ++x) {
 				flp = original.other[x]*sites;
