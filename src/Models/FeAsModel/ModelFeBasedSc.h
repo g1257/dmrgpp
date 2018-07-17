@@ -195,7 +195,6 @@ public:
 			basis_[15] = 15;
 		}
 
-
 		if (basis_.size() == 64) {
 			SizeType counter = 0;
 			basis_[counter++] = 0;
@@ -207,17 +206,17 @@ public:
 			basis_[counter++] = 4;
 			basis_[counter++] = 24;
 			basis_[counter++] = 40;
-			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 9 : 48;
-			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 10 : 9;
-			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 48 : 10;
+			basis_[counter++] = 48;
+			basis_[counter++] = 9;
+			basis_[counter++] = 10;
 			basis_[counter++] = 12;
 			basis_[counter++] = 17;
 			basis_[counter++] = 18;
 			basis_[counter++] = 20; // 15
 			basis_[counter++] = 33;
-			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 3 : 34;
-			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 34 : 36;
-			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 36 : 3;
+			basis_[counter++] = 34;
+			basis_[counter++] = 36;
+			basis_[counter++] = 3;
 			basis_[counter++] = 5;
 			basis_[counter++] = 6;
 			basis_[counter++] = 56;
@@ -242,17 +241,17 @@ public:
 			basis_[counter++] = 7;
 			basis_[counter++] = 57;
 			basis_[counter++] = 58;
-			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 27 : 60;
-			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 29 : 27;
-			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 60 : 29;
+			basis_[counter++] = 60;
+			basis_[counter++] = 27;
+			basis_[counter++] = 29;
 			basis_[counter++] = 30; // 47
 			basis_[counter++] = 43;
 			basis_[counter++] = 45;
 			basis_[counter++] = 46;
 			basis_[counter++] = 51;
-			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 15 : 53;
-			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 53 : 54;
-			basis_[counter++] = (feAsJzSymmetry_.isEnabled()) ? 54 : 15;
+			basis_[counter++] = 53;
+			basis_[counter++] = 54;
+			basis_[counter++] = 15;
 			basis_[counter++] = 23;
 			basis_[counter++] = 39;
 			basis_[counter++] = 59;
@@ -271,13 +270,29 @@ public:
 		if (sum != n*(n-1)/2)
 			err("ModelFeBasedSc: basis set up wrong\n");
 
-		setSymmetryRelatedInternal(qq_, basis_ ,1, false);
-
-		setOperatorMatrices(creationMatrix_, block, false);
+		setOperatorMatrices(creationMatrix_, block);
 		if (feAsJzSymmetry_.isEnabled() && !feAsJzSymmetry_.isSet())
 			feAsJzSymmetry_.init(basis_, creationMatrix_);
 
-		setSymmetryRelatedInternal(qq_,basis_,1,true);
+		setSymmetryRelatedInternal(qq_,basis_,1);
+
+		if (feAsJzSymmetry_.isEnabled()) {
+			basis_[9] = 9;
+			basis_[10] = 10;
+			basis_[11] = 48;
+
+			basis_[17] = 3;
+			basis_[18] = 34;
+			basis_[19] = 36;
+
+			basis_[41] = 27;
+			basis_[42] = 29;
+			basis_[43] = 60;
+
+			basis_[52] = 15;
+			basis_[53] = 53;
+			basis_[54] = 54;
+		}
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
@@ -292,7 +307,7 @@ public:
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
-		        io.createGroup(label1);
+			io.createGroup(label1);
 
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
@@ -433,7 +448,7 @@ public:
 		PsimagLite::String str("ModelFeBasedSc: naturalOperator: no label ");
 		str += what + "\n";
 		throw PsimagLite::RuntimeError(str);
-	}	
+	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
@@ -468,19 +483,8 @@ public:
 
 private:
 
-	//! find all states in the natural basis for a block of n sites
-	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setBasis(HilbertBasisType& basis,
-	              VectorQnType& qq,
-	              const VectorSizeType&) const
-	{
-		basis = basis_;
-		qq = qq_;
-	}
-
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                         const BlockType& block,
-	                         bool reinterpretJz) const
+	                         const BlockType& block) const
 	{
 		const HilbertBasisType& natBasis = basis_;
 		SparseMatrixType tmpMatrix;
@@ -490,7 +494,7 @@ private:
 		SizeType dofs = 2*modelParameters_.orbitals;
 		for (SizeType i=0;i<block.size();i++) {
 			for (SizeType sigma=0;sigma<dofs;sigma++) {
-				findOperatorMatrices(tmpMatrix,i,sigma,natBasis,reinterpretJz);
+				findOperatorMatrices(tmpMatrix,i,sigma,natBasis);
 
 				SizeType m=0;
 				int asign=1;
@@ -555,8 +559,7 @@ private:
 	void findOperatorMatrices(SparseMatrixType& creationMatrix,
 	                          int i,
 	                          int sigma,
-	                          const HilbertBasisType& natBasis,
-	                          bool reinterpretJz) const
+	                          const HilbertBasisType& natBasis) const
 	{
 		HilbertState bra,ket;
 		int n = natBasis.size();
@@ -581,7 +584,6 @@ private:
 		}
 
 		reinterpret(cm,natBasis);
-		if (reinterpretJz) feAsJzSymmetry_.jzReinterpret(cm);
 
 		SparseMatrixType temp;
 		fullMatrixToCrsMatrix(temp,cm);
@@ -590,8 +592,7 @@ private:
 
 	void setSymmetryRelatedInternal(VectorQnType& qns,
 	                                const HilbertBasisType& basis,
-	                                int n,
-	                                bool jzReinterpret) const
+	                                int n) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -613,7 +614,7 @@ private:
 
 			// nup
 			SizeType electronsUp = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			                                                              SPIN_UP);
+			                                                                    SPIN_UP);
 			// ndown
 			SizeType electronsDown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
 			                                                                      SPIN_DOWN);
@@ -622,8 +623,7 @@ private:
 			if (modelParameters_.spinOrbit.rows() > 0 && !modelParameters_.jzSymmetry)
 				electronsUp = 0;
 
-			if (jzReinterpret)
-				feAsJzSymmetry_.setElectronsAndJz(electrons, electronsUp, i);
+			feAsJzSymmetry_.setElectronsAndJz(electrons, electronsUp, i);
 
 			qns[i] = QnType(electrons, VectorSizeType(1, electronsUp), jmpair, flavor);
 		}

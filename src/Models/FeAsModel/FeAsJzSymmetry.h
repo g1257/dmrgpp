@@ -31,8 +31,6 @@ public:
 	                       SizeType& electronsUp,
 	                       SizeType ind) const {}
 
-	void jzReinterpret(MatrixType& ) const {}
-
 	bool isEnabled() const { return false; }
 
 	bool isSet() const { return false; }
@@ -74,9 +72,6 @@ public:
 		// write operator Jz in first basis
 		MatrixType Jz_opr = Jz_opr_original_basis(creationMatrix);
 
-
-
-
 		// reorder Jz so that it is block diagonal in n and find P,
 		// and determine the electrons_ and save it --> permutation
 		VectorRealType blockOffsets;
@@ -86,41 +81,17 @@ public:
 		Get_P_and_Blocks_and_electrons(natBasis,blockOffsets,P);
 		transposeConjugate(P_dagg,P);
 
-
-
 		//Rotate(P,Jz_opr);
-
-
-
 		// diagonalize each block --> U, jzEigs
 		VectorRealType jzEigs;
 		jzEigs.resize(natBasis.size());
 
-
-
-		//       Hamil_onsite_=Calculate_onsite_Hamiltonian(creationMatrix);
-
-
-		//       MatrixType HJ = Hamil_onsite_*Jz_opr;
-		//       MatrixType JH = Jz_opr*Hamil_onsite_;
-		//       MatrixType HJ_JH(natBasis.size(),natBasis.size());
-		//       HJ_JH += HJ;
-		//       HJ_JH += -1.0*JH;
-
-		//       std::cout<<"HJ_JH before"<<std::endl;
-		//      HJ_JH.print(std::cout,0.0000002);
-
-
-
 		DiagonalizeBlocks_GetU(Jz_opr, blockOffsets, jzEigs);
-
 
 		convertJzEigs(jzModifiedEigs_,jzEigs);
 
 		MatrixType UP(natBasis.size(),natBasis.size());
 		UP=P_dagg*u_;
-
-
 
 		//rotate all operators
 		Rotate_all(u_,creationMatrix);
@@ -138,14 +109,6 @@ public:
 		electrons = electrons_[ind];
 		assert(ind < jzModifiedEigs_.size());
 		electronsUp = jzModifiedEigs_[ind];
-	}
-
-	void jzReinterpret(MatrixType& cm) const
-	{
-		if (!isEnabled_) return;
-		assert(isSet_);
-		MatrixType tmp = utranspose_*cm;
-		cm = tmp*u_;
 	}
 
 	bool isEnabled() const { return isEnabled_; }
@@ -188,8 +151,6 @@ private:
 		//        //nyz_up-nyz_dn
 		tmp += -0.5*(multiplyTc(creationMatrix[5].data,creationMatrix[5].data)) ;
 		tmp += 0.5*(multiplyTc(creationMatrix[2].data,creationMatrix[2].data)) ;
-
-
 
 		//i(czx_dn_dagg*cyz_dn) + hc (first with i, sec with -i,
 		ComplexOrRealType sqrtMinus1(0,1);
@@ -274,14 +235,12 @@ private:
 			tmp4 = tmp2*tmp3;
 
 			tmp += (_Up - _J*(0.5))*tmp4;
-
-
 		}
 
 
 
 		//SzSz Hunds term
-		if(true){
+		if (true){
 			//Sz_xy*Sz_xz
 			tmp2 = (multiplyTc(creationMatrix[0].data,creationMatrix[0].data));
 			tmp2 += (-1.0)*(multiplyTc(creationMatrix[3].data,creationMatrix[3].data));
@@ -310,10 +269,7 @@ private:
 			tmp4 = tmp2*tmp3;
 
 			tmp += (0.25)*(-2*_J)*tmp4;
-
 		}
-
-
 
 		//S+S- + S-S+ term
 
@@ -351,17 +307,11 @@ private:
 			tmp3 = multiplyTc(creationMatrix[5].data,creationMatrix[2].data);
 			tmp4 = tmp2*tmp3;
 			tmp += (-_J)*tmp4;
-
-
-
-
-
-
 		}
 
 		//Pair hopping term
 
-		if(true){
+		if (true){
 			//P_xy_dagg P_xz + P_xz_dagg P_xy , gamma=xy,gamma_p=xz
 
 			tmp2= (multiplyTc(creationMatrix[0].data,creationMatrix[4].data));
@@ -397,11 +347,6 @@ private:
 
 		}
 
-
-
-
-
-
 		return tmp;
 	}
 
@@ -414,9 +359,9 @@ private:
 
 		//Works only for 3 orbital model
 		SizeType j=0;
-		for(SizeType ne=0;ne<7;ne++){
-			for(SizeType i=0;i<natBasis.size();i++){
-				if(no_of_electrons(natBasis[i])==ne){
+		for (SizeType ne=0;ne<7;ne++){
+			for (SizeType i=0;i<natBasis.size();i++){
+				if (no_of_electrons(natBasis[i])==ne){
 					//newBasis.pushback(natBasis[i]);
 					P(j,i)=1;
 					electrons_[j]=ne;
@@ -427,8 +372,6 @@ private:
 			blockOffsets.push_back(j);
 		}
 	}
-
-
 
 	void DiagonalizeBlocks_GetU(const MatrixType& Jz_opr,
 	                            const VectorRealType& blockOffsets,
@@ -453,12 +396,7 @@ private:
 				}
 			}
 
-
-
-
-
 			diag(Jz_block,Jz_block_eigs,'V');
-
 
 			for(SizeType ir=0;ir<nrow_b;ir++){
 				jzEigs[r_+ir]=Jz_block_eigs[ir];
@@ -469,14 +407,8 @@ private:
 				}
 			}
 
-
-
-
-
 			r_=blockOffsets[i];
 		}
-
-
 	}
 
 	SizeType no_of_electrons(WordType basis_i)
@@ -516,16 +448,6 @@ private:
 
 
 		}
-	}
-
-	void Rotate(const MatrixType& R, MatrixType& O)
-	{
-		SizeType nrow = R.n_row();
-		MatrixType tmp(nrow,nrow);
-		tmp = O*R;
-		MatrixType R_dagg(nrow,nrow);
-		R_dagg=transposeConjugate(R);
-		O = R_dagg*tmp;
 	}
 
 	void convertJzEigs(VectorSizeType& electronselectronsUp,

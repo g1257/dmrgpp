@@ -178,7 +178,7 @@ public:
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
-		        io.createGroup(label1);
+			io.createGroup(label1);
 
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
@@ -318,7 +318,7 @@ public:
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
-	                                RealType time,
+	                                RealType,
 	                                RealType factorForDiagonals=1.0) const
 	{
 		SizeType n=block.size();
@@ -463,7 +463,7 @@ private:
 
 			// nup
 			SizeType electronsUp = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			                                                              SPIN_UP);
+			                                                                    SPIN_UP);
 			// ndown
 			SizeType electronsDown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
 			                                                                      SPIN_DOWN);
@@ -546,16 +546,17 @@ private:
 			err("getOnSiteHopping");
 		if (v.size() > 1 && actualSite >= v.size())
 			err("getOnSiteHopping too small\n");
-		return (v.size() == 1) ? v[0](orb1, orb2) : v[actualSite](orb1, orb2);
-		}
+		const SizeType ind = (v.size() == 1) ? 0 : actualSite;
+		return v[ind](orb1, orb2);
+	}
 
-		void addPotentialV(SparseMatrixType &hmatrix,
-		const VectorOperatorType& cm,
-		SizeType i,
-		SizeType actualIndexOfSite,
-		RealType factorForDiagonals,
-		const typename PsimagLite::Vector<RealType>::Type& V) const
-		{
+	void addPotentialV(SparseMatrixType &hmatrix,
+	                   const VectorOperatorType& cm,
+	                   SizeType i,
+	                   SizeType actualIndexOfSite,
+	                   RealType factorForDiagonals,
+	                   const typename PsimagLite::Vector<RealType>::Type& V) const
+	{
 		SizeType v1 = 2*modelParameters_.orbitals*geometry_.numberOfSites();
 		SizeType v2 = v1*modelParameters_.orbitals;
 		if (V.size() != v1 && V.size() != v2) {

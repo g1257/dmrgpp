@@ -538,6 +538,7 @@ protected:
 		if (!useSu2Symmetry()) flattenQns(basisData2);
 
 		findPermutationAndPartitionAndQns(basisData2, true);
+		reorder();
 		electronsToSigns(electrons_);
 	}
 

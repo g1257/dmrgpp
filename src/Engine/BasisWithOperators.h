@@ -248,7 +248,7 @@ public:
 		                                          basis2.reducedHamiltonian(),
 		                                          basis3.reducedHamiltonian());
 		//! re-order operators and hamiltonian
-		operators_.reorder(this->permutationVector());
+		operators_.reorder(BaseType::permutationVector());
 
 		SizeType offset1 = basis2.operatorsPerSite_.size();
 		operatorsPerSite_.resize(offset1+basis3.operatorsPerSite_.size());
@@ -306,8 +306,11 @@ public:
 
 		model.calcHamiltonian(h, ops, block, time);
 
-		setHamiltonian(h);
+		operators_.setHamiltonian(h);
 		operators_.setOperators(ops);
+		//! re-order operators and hamiltonian
+		operators_.reorder(BaseType::permutationVector());
+
 		operatorsPerSite_.clear();
 		for (SizeType i=0;i<block.size();i++)
 			operatorsPerSite_.push_back(SizeType(ops.size()/block.size()));

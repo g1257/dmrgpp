@@ -184,17 +184,6 @@ public:
 			electrons[i] = qq[i].electrons;
 	}
 
-	virtual void hamiltonianOnLink(SparseMatrixType& hmatrix,
-	                               const BlockType& block,
-	                               RealType time,
-	                               RealType factorForDiagonals) const
-	{
-		typename PsimagLite::Vector<OperatorType>::Type cm;
-		VectorQnType qq;
-		setOperatorMatrices(cm, qq, block);
-		calcHamiltonian(hmatrix,cm,block,time,factorForDiagonals,true);
-	}
-
 	virtual void matrixVectorProduct(VectorType& x,
 	                                 const VectorType& y,
 	                                 const HamiltonianConnectionType& hc) const

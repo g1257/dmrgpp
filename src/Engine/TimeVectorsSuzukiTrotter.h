@@ -534,7 +534,9 @@ private:
 				msg<<block[i]<<" ";
 			progress_.printline(msg,std::cout);
 		}
-		model_.hamiltonianOnLink(hmatrix,block,currentTime_,factorForDiagonals);
+
+		err("ST not supported\n");
+		// model_.hamiltonianOnLink(hmatrix,block,currentTime_,factorForDiagonals);
 		crsMatrixToFullMatrix(m,hmatrix);
 		assert(isHermitian(m));
 		m *= (-time);

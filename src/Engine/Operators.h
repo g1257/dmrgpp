@@ -304,7 +304,7 @@ public:
 		reducedOpImpl_.changeBasisHamiltonian(hamiltonian_,ftransform);
 	}
 
-	void reorder(const   VectorSizeType& permutation)
+	void reorder(const VectorSizeType& permutation)
 	{
 		for (SizeType k=0;k<numberOfOperators();k++) {
 			if (!useSu2Symmetry_) reorder(operators_[k].data,permutation);

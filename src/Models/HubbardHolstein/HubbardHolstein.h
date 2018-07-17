@@ -354,6 +354,7 @@ private:
 		total = pow(total,n);
 
 		basis.resize(total);
+
 		SizeType counter = 0;
 		SizeType npPlusOne = modelParameters_.numberphonons + 1;
 		for (SizeType i = 0; i < 4; ++i) {
@@ -362,11 +363,11 @@ private:
 			}
 		}
 
+		assert(counter == total);
+
 		SizeType sum = std::accumulate(basis.begin(), basis.end(), 0);
 		if (sum != total*(total-1)/2)
 			err("Could not set up basis\n");
-
-		assert(counter == total);
 	}
 
 	//! Find a^+_site in the natural basis natBasis
