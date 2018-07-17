@@ -201,6 +201,8 @@ public:
 				creationMatrix.push_back(myOp);
 			}
 
+			if (modelParameters_.numberphonons == 0) continue;
+
 			tmpMatrix=findPhononadaggerMatrix(i,natBasis);
 
 			typename OperatorType::Su2RelatedType su2related2;
@@ -352,7 +354,6 @@ private:
 
 		basis.resize(total);
 		for (HilbertState a = 0; a < total; ++a) basis[a] = a;
-		// reorder the natural basis (needed for MULTIPLE BANDS)
 	}
 
 	//! Find a^+_site in the natural basis natBasis
@@ -465,6 +466,8 @@ private:
 			SparseMatrixType m = findOperatorMatrices(i,sigma,natBasis);
 			vm.push_back(m);
 		}
+
+		if (modelParameters_.numberphonons == 0) return;
 		SparseMatrixType m = findPhononadaggerMatrix(i,natBasis);
 		vm.push_back(m);
 	}
@@ -517,6 +520,8 @@ private:
 	                         SizeType actualIndexOfSite,
 	                         RealType factorForDiagonals) const
 	{
+		if (modelParameters_.numberphonons == 0) return;
+		assert(2 < cm.size());
 		SparseMatrixType nphon = n(cm[2]);
 		SizeType iUp = actualIndexOfSite;
 		assert(iUp < modelParameters_.potentialPV.size());
@@ -563,10 +568,12 @@ private:
 	                           RealType factorForDiagonals,
 	                           SizeType actualSite) const
 	{
+		if (modelParameters_.numberphonons == 0) return;
 		SparseMatrixType tmpMatrix;
 		SparseMatrixType m=n(cm[SPIN_UP]);
 		SparseMatrixType m2=n(cm[SPIN_DOWN]);
 		m+=m2;
+		assert(2 < cm.size());
 		SparseMatrixType x = displacementOp(cm[2]);
 
 		multiply(tmpMatrix,m,x);

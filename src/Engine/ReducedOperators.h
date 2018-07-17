@@ -309,7 +309,7 @@ public:
 	void changeBasisHamiltonian(SparseMatrixType& hamiltonian,
 	                            const BlockDiagonalMatrixType& transform)
 	{
-		
+		hamiltonian.checkValidity();
 		ChangeOfBasisType::changeBasis(hamiltonian,transform);
 		if (useSu2Symmetry_)
 			changeBasis(reducedHamiltonian_);

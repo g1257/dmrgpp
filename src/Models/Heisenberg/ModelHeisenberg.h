@@ -434,12 +434,14 @@ private:
 		}
 
 		bool isCanonical = (ModelBaseType::targetQuantum().isCanonical);
-		VectorSizeType other(1);
+		VectorSizeType other;
+		if (isCanonical) other.resize(1, 0);
 
 		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(modelParameters_.twiceTheSpin, basis[i]);
-			other[0] = (isCanonical) ? getSzPlusConst(basis[i], n) : 0;
+			if (isCanonical)
+				other[0] = getSzPlusConst(basis[i], n);
 			SizeType electrons = (BasisType::useSu2Symmetry()) ? 1 : 0;
 			SizeType flavor = 1;
 			qns[i] = QnType(electrons, other, jmpair, flavor);
