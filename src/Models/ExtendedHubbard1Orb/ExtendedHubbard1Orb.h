@@ -229,8 +229,7 @@ private:
 		VectorOperatorType creationMatrix2 = creationMatrix;
 		creationMatrix.clear();
 		VectorHilbertStateType natBasis;
-		VectorQnType qq;
-		modelHubbard_.setBasis(natBasis, qq, block);
+		modelHubbard_.setBasis(natBasis, block);
 		SizeType operatorsPerSite = utils::exactDivision(creationMatrix2.size(),
 		                                                 block.size());
 		SizeType k = 0;

@@ -173,7 +173,8 @@ public:
 	                         const BlockType& block) const
 	{
 		HilbertBasisType natBasis;
-		setBasis(natBasis, qns, block);
+		setBasis(natBasis, block);
+		setSymmetryRelated(qns, natBasis);
 
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 		creationMatrix.clear();
@@ -307,8 +308,8 @@ public:
 	{
 		SizeType n=block.size();
 		HilbertBasisType natBasis;
-		VectorQnType qq;
-		setBasis(natBasis, qq, block);
+		setBasis(natBasis, block);
+
 		for (SizeType i=0;i<n;i++) {
 			VectorSparseMatrixType cm;
 			findAllMatrices(cm,i,natBasis);
@@ -343,7 +344,6 @@ private:
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 	void setBasis(HilbertBasisType& basis,
-	              VectorQnType& qq,
 	              const VectorSizeType& block) const
 	{
 		SizeType n = block.size();
@@ -353,7 +353,6 @@ private:
 		basis.resize(total);
 		for (HilbertState a = 0; a < total; ++a) basis[a] = a;
 		// reorder the natural basis (needed for MULTIPLE BANDS)
-		setSymmetryRelated(qq, basis, block[0]);
 	}
 
 	//! Find a^+_site in the natural basis natBasis
@@ -471,8 +470,7 @@ private:
 	}
 
 	void setSymmetryRelated(VectorQnType& qns,
-	                        const HilbertBasisType& basis,
-	                        int) const
+	                        const HilbertBasisType& basis) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -575,14 +573,6 @@ private:
 		tmpMatrix.checkValidity();
 		assert(actualSite < modelParameters_.lambdaFP.size());
 		hmatrix += factorForDiagonals*modelParameters_.lambdaFP[actualSite]*tmpMatrix;
-	}
-
-	void setQuantumNumbers(VectorQnType& q, const BlockType& block) const
-	{
-		VectorSizeType qns;
-		HilbertBasisType basis;
-		setNaturalBasis(basis, qns, block);
-		setSymmetryRelated(q, basis, block.size());
 	}
 
 	ParametersHubbardHolsteinType modelParameters_;

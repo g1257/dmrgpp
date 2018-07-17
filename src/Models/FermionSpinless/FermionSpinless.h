@@ -174,7 +174,8 @@ public:
 	{
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
-		setBasis(natBasis, qns, block);
+		setBasis(natBasis, block);
+		setSymmetryRelated(qns, natBasis);
 
 		//! Set the operators c^\daggger_{i\sigma} in the natural basis
 		creationMatrix.clear();
@@ -287,7 +288,6 @@ public:
 private:
 
 	void setBasis(HilbertBasisType& basis,
-	              VectorQnType& qq,
 	              const VectorSizeType& block) const
 	{
 		int sitesTimesDof=DEGREES_OF_FREEDOM*block.size();
@@ -296,8 +296,6 @@ private:
 		basis.resize(total);
 		for (HilbertState a = 0; a < total; ++a)
 			basis[a] = a;
-
-		setSymmetryRelated(qq, basis);
 	}
 
 	// Calculate fermionic sign when applying operator
@@ -383,8 +381,7 @@ private:
 		VectorOperatorType creationMatrix2 = creationMatrix;
 		creationMatrix.clear();
 		VectorHilbertStateType natBasis;
-		VectorQnType qq;
-		setBasis(natBasis, qq, block);
+		setBasis(natBasis, block);
 		SizeType operatorsPerSite = utils::exactDivision(creationMatrix2.size(),
 		                                                 block.size());
 		SizeType k = 0;

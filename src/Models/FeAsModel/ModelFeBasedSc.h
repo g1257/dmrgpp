@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2018, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 5.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -66,7 +66,6 @@ INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
 DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
-
 
 */
 /** \ingroup DMRG */
@@ -170,47 +169,105 @@ public:
 		HilbertSpaceFeAsType::setOrbitals(modelParameters_.orbitals);
 		statesPerSite_ = (1 << (modelParameters_.orbitals*2));
 
-		switch (modelParameters_.minElectronsPerSite) {
-		case 0:
-			break;
-		case 1:
-			statesPerSite_--;
-			break;
-		case 2:
-			statesPerSite_ -= 11;
-			break;
-		case 3:
-			statesPerSite_ -= 56;
-			break;
-		case 4:
-			statesPerSite_ -= 176;
-			break;
-		case 5:
-			statesPerSite_ -= 386;
-			break;
-		case 6:
-			statesPerSite_ -= 638;
-			break;
-		case 7:
-			statesPerSite_ -= 848;
-			break;
-		case 8:
-			statesPerSite_ -= 968;
-			break;
-		case 9:
-			statesPerSite_ -= 1013;
-			break;
-		default:
-			throw PsimagLite::RuntimeError("ModelFeBasedSc: invalid param minElectronsPerSite");
-		}
-
 		VectorSizeType block(1,0);
 		int sitesTimesDof = 2*modelParameters_.orbitals;
 		HilbertState total = (1<<sitesTimesDof);
-		for (HilbertState a = 0; a < total; ++a) {
-			if (!isAllowedThisDof(a)) continue;
-			basis_.push_back(a);
+		basis_.resize(total);
+		for (HilbertState a = 0; a < total; ++a) basis_[a] = a;
+
+		if (basis_.size() == 16) {
+			basis_[0] = 0;
+			basis_[1] = 4;
+			basis_[2] = 8;
+			basis_[3] = 1;
+			basis_[4] = 2;
+			basis_[5] = 12;
+			basis_[6] = 5;
+			basis_[7] = 6;
+			basis_[8] = 9;
+			basis_[9] = 10;
+			basis_[10] = 3;
+			basis_[11] = 13;
+			basis_[12] = 14;
+			basis_[13] = 7;
+			basis_[14] = 11;
+			basis_[15] = 15;
 		}
+
+		if (basis_.size() == 64) {
+			SizeType counter = 0;
+			basis_[counter++] = 0;
+			basis_[counter++] = 8;
+			basis_[counter++] = 16;
+			basis_[counter++] = 32;
+			basis_[counter++] = 1;
+			basis_[counter++] = 2;
+			basis_[counter++] = 4;
+			basis_[counter++] = 24;
+			basis_[counter++] = 40;
+			basis_[counter++] = 48;
+			basis_[counter++] = 9;
+			basis_[counter++] = 10;
+			basis_[counter++] = 12;
+			basis_[counter++] = 17;
+			basis_[counter++] = 18;
+			basis_[counter++] = 20; // 15
+			basis_[counter++] = 33;
+			basis_[counter++] = 34;
+			basis_[counter++] = 36;
+			basis_[counter++] = 3;
+			basis_[counter++] = 5;
+			basis_[counter++] = 6;
+			basis_[counter++] = 56;
+			basis_[counter++] = 25;
+			basis_[counter++] = 26;
+			basis_[counter++] = 28;
+			basis_[counter++] = 41;
+			basis_[counter++] = 42;
+			basis_[counter++] = 44;
+			basis_[counter++] = 49;
+			basis_[counter++] = 50;
+			basis_[counter++] = 52; // 31
+			basis_[counter++] = 11;
+			basis_[counter++] = 13;
+			basis_[counter++] = 14;
+			basis_[counter++] = 19;
+			basis_[counter++] = 21;
+			basis_[counter++] = 22;
+			basis_[counter++] = 35;
+			basis_[counter++] = 36;
+			basis_[counter++] = 38;
+			basis_[counter++] = 7;
+			basis_[counter++] = 57;
+			basis_[counter++] = 58;
+			basis_[counter++] = 60;
+			basis_[counter++] = 27;
+			basis_[counter++] = 29;
+			basis_[counter++] = 30; // 47
+			basis_[counter++] = 43;
+			basis_[counter++] = 45;
+			basis_[counter++] = 46;
+			basis_[counter++] = 51;
+			basis_[counter++] = 53;
+			basis_[counter++] = 54;
+			basis_[counter++] = 15;
+			basis_[counter++] = 23;
+			basis_[counter++] = 39;
+			basis_[counter++] = 59;
+			basis_[counter++] = 61;
+			basis_[counter++] = 62;
+			basis_[counter++] = 31;
+			basis_[counter++] = 47;
+			basis_[counter++] = 55;
+			basis_[counter++] = 63;
+
+			assert(counter == 64);
+		}
+
+		SizeType sum = std::accumulate(basis_.begin(), basis_.end(), 0);
+		SizeType n = basis_.size();
+		if (sum != n*(n-1)/2)
+			err("ModelFeBasedSc: basis set up wrong\n");
 
 		setSymmetryRelatedInternal(qq_, basis_ ,1, false);
 
@@ -424,7 +481,7 @@ private:
 	                         const BlockType& block,
 	                         bool reinterpretJz) const
 	{
-		HilbertBasisType natBasis = basis_;
+		const HilbertBasisType& natBasis = basis_;
 		SparseMatrixType tmpMatrix;
 
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
@@ -1267,13 +1324,6 @@ private:
 		multiply(tmpMatrix,n(m1),n(m2));
 		assert(actualSite < modelParameters_.hubbardU.size());
 		hmatrix += factorForDiagonals*modelParameters_.hubbardU[actualSite]*tmpMatrix;
-	}
-
-	bool isAllowedThisDof(SizeType alpha) const
-	{
-		SizeType electrons = HilbertSpaceFeAsType::electrons(alpha);
-
-		return (electrons >= modelParameters_.minElectronsPerSite);
 	}
 
 	void diagTest(const SparseMatrixType& fullm,const PsimagLite::String& str) const

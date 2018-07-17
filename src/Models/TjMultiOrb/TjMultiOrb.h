@@ -754,6 +754,11 @@ private:
 		basis.resize(total);
 		for (SizeType a = 0; a< total; ++a) basis[a] = a;
 		weedOutBasis(basis, truncated);
+		if (modelParameters_.orbitals == 1 && basis.size() == 2) {
+			basis[0] = 0;
+			basis[1] = 2;
+			basis[2] = 1;
+		}
 	}
 
 	void weedOutBasis(VectorHilbertStateType& basis, bool truncated) const

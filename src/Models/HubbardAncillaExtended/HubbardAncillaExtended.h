@@ -180,7 +180,8 @@ public:
 	                         const BlockType& block) const
 	{
 		HilbertBasisType natBasis;
-		setBasis(natBasis, qns, block);
+		setBasis(natBasis, block);
+		setSymmetryRelated(qns, natBasis);
 
 		//! Set the operators c^\dagger_{i\gamma\sigma} in the natural basis
 		creationMatrix.clear();
@@ -325,8 +326,7 @@ public:
 	{
 		SizeType n=block.size();
 		HilbertBasisType natBasis;
-		VectorQnType qq;
-		setBasis(natBasis, qq, block);
+		setBasis(natBasis, block);
 
 		for (SizeType i=0;i<n;i++) {
 			VectorSparseMatrixType cm;
@@ -346,7 +346,6 @@ private:
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 	void setBasis(HilbertBasisType& basis,
-	              VectorQnType& qq,
 	              const VectorSizeType& block) const
 	{
 		SizeType n = block.size();
@@ -355,7 +354,6 @@ private:
 
 		basis.resize(total);
 		for (HilbertState a = 0; a < total; ++a) basis[a] = a;
-		setSymmetryRelated(qq, basis);
 	}
 
 	//! set creation matrices for sites in block

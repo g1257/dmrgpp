@@ -150,7 +150,6 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 	template<typename IoInputType>
 	ParametersModelFeAs(IoInputType& io)
 	    : BaseType(io, false),
-	      minElectronsPerSite(0),
 	      potentialT(0),
 	      feAsMode(INT_PAPER33),
 	      coulombV(0),
@@ -235,10 +234,6 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 			throw PsimagLite::RuntimeError("MagneticField: Expecting columns == sites\n");
 
 		try {
-			io.readline(minElectronsPerSite,"MinElectronsPerSite=");
-		} catch (std::exception& e) {}
-
-		try {
 			io.readline(jzSymmetry,"JzSymmetry=");
 		} catch (std::exception&) {}
 
@@ -272,7 +267,6 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 		io.createGroup(label);
 		BaseType::write(label, io);
 		io.write(label + "/orbitals", orbitals);
-		io.write(label + "/minElectronsPerSite", minElectronsPerSite);
 		io.write(label + "/hubbardU", hubbardU);
 		io.write(label + "/potentialV", potentialV);
 		io.write(label + "/potentialT", potentialT);
@@ -315,28 +309,15 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 			os<<parameters.potentialT;
 		}
 
-		os<<"MinElectronsPerSite="<<parameters.minElectronsPerSite<<"\n";
-
 		return os;
 	}
 
-	//serializr normal orbitals
 	SizeType orbitals;
-	//serializr normal minElectronsPerSite
-	SizeType minElectronsPerSite;
-	// Hubbard U values (one for each site)
-	//serializr normal hubbardU
 	typename PsimagLite::Vector<RealType>::Type hubbardU;
-	// Onsite potential values, one for each site
-	//serializr normal potentialV
 	typename PsimagLite::Vector<RealType>::Type potentialV;
-	//serializr normal potentialT
 	typename PsimagLite::Vector<RealType>::Type potentialT;
-	//serializr normal feAsMode
 	IntEnum feAsMode;
-	//serializr normal coulombV
 	RealType coulombV;
-	//serializr normal magneticField
 	PsimagLite::Matrix<RealType> magneticField;
 	PsimagLite::Matrix<ComplexOrRealType> spinOrbit;
 	SizeType jzSymmetry;

@@ -190,7 +190,8 @@ public:
 		assert(block.size()==1);
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
-		setBasis(natBasis, qns, block);
+		setBasis(natBasis, block);
+		setSymmetryRelated(qns, natBasis, block[0]);
 
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 		creationMatrix.clear();
@@ -303,7 +304,6 @@ public:
 private:
 
 	void setBasis(HilbertBasisType& basis,
-	              VectorQnType& qq,
 	              const VectorSizeType& block) const
 	{
 		assert(block.size()==1);
@@ -315,8 +315,6 @@ private:
 			if (!isAllowedThisDof(a,block[0])) continue;
 			basis.push_back(a);
 		}
-
-		setSymmetryRelated(qq, basis, block[0]);
 	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket

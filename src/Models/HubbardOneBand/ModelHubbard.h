@@ -190,7 +190,8 @@ public:
 	{
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
-		setBasis(natBasis, qns, block);
+		setBasis(natBasis, block);
+		setSymmetryRelated(qns, natBasis, block.size());
 
 		//! Set the operators c^\daggger_{i\sigma} in the natural basis
 		creationMatrix.clear();
@@ -439,7 +440,6 @@ public:
 private:
 
 	void setBasis(HilbertBasisType& basis,
-	              VectorQnType& qq,
 	              const VectorSizeType& block) const
 	{
 		int sitesTimesDof = DEGREES_OF_FREEDOM*block.size();
@@ -447,8 +447,12 @@ private:
 
 		basis.resize(total);
 		for (HilbertState a = 0; a < total; ++a) basis[a] = a;
-
-		setSymmetryRelated(qq, basis, block.size());
+		if (basis.size() == 4) {
+			basis[0] = 0;
+			basis[1] = 2;
+			basis[2] = 1;
+			basis[3] = 3;
+ 		}
 	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket

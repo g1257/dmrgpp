@@ -207,7 +207,8 @@ public:
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
 
-		setBasis(natBasis, qns, block);
+		setBasis(natBasis, block);
+		setSymmetryRelated(qns, natBasis, block.size());
 
 		operatorMatrices.clear();
 		for (SizeType i=0;i<block.size();i++) {
@@ -341,7 +342,6 @@ private:
 
 	//! find all states in the natural basis for a block of n sites
 	void setBasis(HilbertBasisType& basis,
-	              VectorQnType& qq,
 	              const VectorSizeType& block) const
 	{
 		assert(block.size()==1);
@@ -349,7 +349,6 @@ private:
 
 		basis.resize(total);
 		for (SizeType i = 0; i < total; ++i) basis[i] = i;
-		setSymmetryRelated(qq, basis, block.size());
 	}
 
 	//! Find S^+_i a in the natural basis natBasis

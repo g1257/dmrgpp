@@ -156,7 +156,8 @@ public:
 		SizeType orbitals = (hot_) ? 2 : 1;
 		VectorHilbertStateType natBasis;
 		SparseMatrixType tmpMatrix;
-		setBasis(natBasis, qns, block);
+		setBasis(natBasis, block);
+		setSymmetryRelated(qns, natBasis, block.size());
 
 		// Set the operators c^\daggger_{i\sigma} in the natural basis
 		creationMatrix.clear();
@@ -316,7 +317,6 @@ private:
 
 	//! find all states in the natural basis for a block of n sites
 	void setBasis(HilbertBasisType& basis,
-	              VectorQnType& qns,
 	              const VectorSizeType& block) const
 	{
 		assert(block.size()==1);
@@ -330,7 +330,6 @@ private:
 		}
 
 		assert(basis.size() == pow(3,NUMBER_OF_ORBITALS));
-		setSymmetryRelated(qns, basis, block[0]);
 	}
 
 	bool isAllowed(HilbertStateType a) const

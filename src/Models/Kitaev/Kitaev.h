@@ -197,7 +197,8 @@ public:
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
 
-		setBasis(natBasis, qns, block);
+		setBasis(natBasis, block);
+		setSymmetryRelated(qns, natBasis, block.size());
 
 		typename MatrixType::value_type dummy = 0.0;
 
@@ -283,15 +284,12 @@ private:
 
 	//! find all states in the natural basis for a block of n sites
 	void setBasis(HilbertBasisType& basis,
-	              VectorQnType& qq,
 	              const VectorSizeType& block) const
 	{
 		SizeType total = utils::powUint(TWICE_THE_SPIN + 1, block.size());
 
 		basis.resize(total);
 		for (SizeType i = 0; i < total; ++i) basis[i] = i;
-
-		setSymmetryRelated(qq, basis, block.size());
 	}
 
 	SizeType logBase2(SizeType x) const
