@@ -141,7 +141,6 @@ struct TargetQuantumElectrons {
 		if (!hasSzPlusConst) {
 			std::cout<<"TargetQuantumElectrons: Grand Canonical\n";
 			assert(qn.other.size() == 0);
-			qn.other.resize(1,0);
 			isCanonical = false;
 		}
 

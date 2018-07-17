@@ -70,8 +70,8 @@ public:
 	{
 		Qn original = *this;
 		SizeType mode = other.size();
-		assert(mode > 0);
-		assert(!isSu2 || mode == 1);
+		if (isSu2 && mode != 1)
+			err("Qn::scale() expects mode==1 for SU(2)\n");
 
 		if (direction == ProgramGlobals::INFINITE) {
 			double flp = original.electrons*sites;
