@@ -36,7 +36,10 @@ public:
 	void read(PsimagLite::String str, SomeInputType& io)
 	{
 		io.read(electrons, str + "/electrons");
-		io.read(other, str + "/other");
+		try {
+			io.read(other, str + "/other");
+		} catch (...) {}
+
 		io.read(jmPair, str + "/jmPair");
 		io.read(flavors, str + "/flavors");
 	}
