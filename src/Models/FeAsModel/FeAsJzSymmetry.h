@@ -31,10 +31,6 @@ public:
 	                       SizeType& electronsUp,
 	                       SizeType ind) const {}
 
-	void findElectrons(VectorSizeType& ,
-	                   const HilbertBasisType& ,
-	                   SizeType) const {}
-
 	void jzReinterpret(MatrixType& ) const {}
 
 	bool isEnabled() const { return false; }
@@ -144,17 +140,6 @@ public:
 		electronsUp = jzModifiedEigs_[ind];
 	}
 
-	void findElectrons(VectorSizeType& electrons,
-	                   const HilbertBasisType& basis,
-	                   SizeType) const
-	{
-		if (!isEnabled_) return;
-		assert(isSet_);
-		if (basis.size() != electrons_.size())
-			throw PsimagLite::RuntimeError("FeAsJzSymmetry: findElectrons");
-		electrons = electrons_;
-	}
-
 	void jzReinterpret(MatrixType& cm) const
 	{
 		if (!isEnabled_) return;
@@ -189,7 +174,6 @@ private:
 	{
 		SizeType nrow = creationMatrix[0].data.rows();
 		MatrixType tmp(nrow,nrow);
-		MatrixType tmp2(nrow,nrow);
 		//Works only for 3 orbital model
 		//xy=0,zx=1,yz=2
 		//nxy_up-nxy_dn
