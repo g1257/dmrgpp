@@ -263,13 +263,11 @@ public:
 	void addConnectionsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                  const VectorOperatorType& cm,
 	                                  const Block& block,
-	                                  bool sysEnvOnly,
 	                                  RealType time) const
 	{
 		if (block.size() != 1)
 			err("addConnectionsInNaturalBasis(): unimplemented\n");
 	}
-
 
 	/**
 		Returns H, the hamiltonian for basis1 and partition

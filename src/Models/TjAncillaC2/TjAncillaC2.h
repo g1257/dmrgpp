@@ -136,13 +136,6 @@ public:
 	      hot_(geometry_.orbitals(0,0) > 1)
 	{}
 
-	SizeType memResolv(PsimagLite::MemResolv&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
-	{
-		return 0;
-	}
-
 	SizeType hilbertSize(SizeType) const
 	{
 		return pow(3,NUMBER_OF_ORBITALS);
@@ -520,8 +513,7 @@ private:
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType&,
 	                                const BlockType& block,
-	                                RealType,
-	                                RealType factorForDiagonals=1.0) const
+	                                RealType) const
 	{
 		SizeType n=block.size();
 
@@ -536,7 +528,7 @@ private:
 			assert(index<modelParameters_.potentialV.size());
 			m *= modelParameters_.potentialV[block[i] + orb*linSize];
 			m += modelParameters_.potentialV[index]*ndown;
-			hmatrix += factorForDiagonals * m;
+			hmatrix += m;
 
 		}
 	}

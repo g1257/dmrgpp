@@ -157,13 +157,6 @@ public:
 		setOperatorMatrices(creationMatrix_, qq_, block);
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
-	{
-		return 0;
-	}
-
 	SizeType hilbertSize(SizeType) const
 	{
 		assert(0 < creationMatrix_.size());
@@ -714,8 +707,7 @@ private:
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType&,
 	                                const BlockType& block,
-	                                RealType,
-	                                RealType factorForDiagonals=1.0) const
+	                                RealType) const
 	{
 		SizeType n=block.size();
 		SizeType orbitals = modelParameters_.orbitals;
@@ -729,7 +721,7 @@ private:
 				assert(block[i]+linSize*orb+linSize*orbitals<modelParameters_.potentialV.size());
 				m *= modelParameters_.potentialV[block[i]+linSize*orb];
 				m += modelParameters_.potentialV[block[i]+linSize*orb+linSize*orbitals]*ndown;
-				hmatrix += factorForDiagonals * m;
+				hmatrix += m;
 			}
 		}
 	}

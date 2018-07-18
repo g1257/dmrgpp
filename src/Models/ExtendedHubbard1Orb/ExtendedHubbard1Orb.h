@@ -127,10 +127,6 @@ public:
 	      modelHubbard_(solverParams,io,geometry, 1)
 	{}
 
-	SizeType memResolv(PsimagLite::MemResolv&,
-	                   SizeType,
-	                   PsimagLite::String = "") const { return 0; }
-
 	SizeType hilbertSize(SizeType site) const
 	{
 		return modelHubbard_.hilbertSize(site);
@@ -181,8 +177,7 @@ public:
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                        const VectorOperatorType& cm,
 	                                        const BlockType& block,
-	                                        RealType time,
-	                                        RealType factorForDiagonals=1.0)  const
+	                                        RealType time)  const
 	{
 		// remove the n matrices before sending to Hubbard
 		VectorOperatorType cmCorrected;
@@ -197,8 +192,7 @@ public:
 		modelHubbard_.addDiagonalsInNaturalBasis(hmatrix,
 		                                         cmCorrected,
 		                                         block,
-		                                         time,
-		                                         factorForDiagonals);
+		                                         time);
 	}
 
 private:

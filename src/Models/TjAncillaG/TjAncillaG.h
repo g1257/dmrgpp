@@ -142,13 +142,6 @@ public:
 		}
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
-	{
-		return 0;
-	}
-
 	SizeType hilbertSize(SizeType site) const
 	{
 		return TjMultiOrb_.hilbertSize(site);
@@ -217,8 +210,7 @@ public:
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const VectorOperatorType&,
 	                                const BlockType& block,
-	                                RealType,
-	                                RealType factorForDiagonals=1.0) const
+	                                RealType) const
 	{
 		SizeType n=block.size();
 
@@ -231,7 +223,7 @@ public:
 			assert(block[i]+linSize<modelParameters_.potentialV.size());
 			m *= modelParameters_.potentialV[block[i]];
 			m += modelParameters_.potentialV[block[i]+linSize]*ndown;
-			hmatrix += factorForDiagonals * m;
+			hmatrix += m;
 		}
 	}
 

@@ -151,13 +151,6 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
-	{
-		return 0;
-	}
-
 	/** returns the size of the one-site Hilbert space. */
 	SizeType hilbertSize(SizeType) const
 	{
@@ -263,8 +256,7 @@ public:
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
-	                                RealType time,
-	                                RealType factorForDiagonals=1.0)  const
+	                                RealType time)  const
 	{
 		SizeType n=block.size();
 		SparseMatrixType niup = cm[1].data;
@@ -272,14 +264,14 @@ public:
 		for (SizeType i=0;i<n;i++) {
 
 			// V_iup term
-			RealType tmp = modelParameters_.potentialV[block[i]]*factorForDiagonals;
+			RealType tmp = modelParameters_.potentialV[block[i]];
 			hmatrix += tmp*niup;
 
 			if (modelParameters_.potentialT.size()==0) continue;
 			RealType cosarg = cos(time*modelParameters_.omega +
 			                      modelParameters_.phase);
 			// VT_iup term
-			tmp = modelParameters_.potentialT[block[i]]*factorForDiagonals;
+			tmp = modelParameters_.potentialT[block[i]];
 			tmp *= cosarg;
 			hmatrix += tmp*niup;
 		}

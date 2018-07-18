@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2018, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 5.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -66,7 +66,6 @@ INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
 DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
-
 
 */
 /** \ingroup DMRG */
@@ -140,30 +139,48 @@ public:
 
 	virtual ~ModelBase() {}
 
-	// START Functions that each model needs to implement
+	// START Functions that each model MUST implement
 
-	virtual SizeType memResolv(PsimagLite::MemResolv&,
-	                           SizeType,
-	                           PsimagLite::String = "") const = 0;
-
+	// For information purposes only. Write model parameters
+	// String contains the group
+	// Serializer object is second argument
 	virtual void write(PsimagLite::String,
 	                   PsimagLite::IoNg::Out::Serializer&) const = 0;
 
+	// Given an operator what with degree of freedom dof
+	// create the one-site matrix for this operator
+	// and create a OperatorType object from it and return it
+	// site MUST be ignored unless your model has a site-dependent
+	// Hilbert space (SDHS)
 	virtual OperatorType naturalOperator(const PsimagLite::String& what,
 	                                     SizeType site,
 	                                     SizeType dof) const = 0;
 
+	// Return the size of the one-site Hilbert space basis for this model
+	// site MUST be ignored unless your model has a site-dependent
+	// Hilbert space (SDHS)
 	virtual SizeType hilbertSize(SizeType site) const = 0;
 
-	virtual void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                                 VectorQnType& qns,
+	// Fill the VectorOperatorType with operators that need to be kept
+	// track by the DMRG++ Engine.
+	// Fill VectorQnType with the qns of the one site basis in the order
+	// you chose to give the operators
+	// You can check that block.size() == 1 or throw otherwise
+	// The contents of block MUST be ignored unless your model has a site-dependent
+	// Hilbert space (SDHS)
+	virtual void setOperatorMatrices(VectorOperatorType&,
+	                                 VectorQnType&,
 	                                 const BlockType& block) const = 0;
 
-	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                        const VectorOperatorType& cm,
+	// Fill SparseMatrixType with the on-site Hamiltonian terms in the on-site basis
+	// Give SparseMatrixType in the order you chose to give the
+	// operators in setOperatorMatrices
+	// The RealType contain the physical time in case your onsite terms
+	// depend on it
+	virtual void addDiagonalsInNaturalBasis(SparseMatrixType&,
+	                                        const VectorOperatorType&,
 	                                        const BlockType& block,
-	                                        RealType time,
-	                                        RealType factorForDiagonals=1.0)  const = 0;
+	                                        RealType)  const = 0;
 
 	// END ^^^^^^^^^^^Functions that each model needs to implement
 
@@ -208,15 +225,13 @@ public:
 	virtual void calcHamiltonian(SparseMatrixType &hmatrix,
 	                             const VectorOperatorType& cm,
 	                             const BlockType& block,
-	                             RealType time,
-	                             RealType factorForDiagonals = 1,
-	                             bool sysEnvOnly = false)  const
+	                             RealType time)  const
 	{
 		hmatrix.makeDiagonal(cm[0].data.rows());
 
-		modelCommon_.addConnectionsInNaturalBasis(hmatrix,cm,block,sysEnvOnly,time);
+		modelCommon_.addConnectionsInNaturalBasis(hmatrix,cm,block,time);
 
-		addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
+		addDiagonalsInNaturalBasis(hmatrix,cm,block,time);
 	}
 
 	virtual SizeType maxElectronsOneSpin() const

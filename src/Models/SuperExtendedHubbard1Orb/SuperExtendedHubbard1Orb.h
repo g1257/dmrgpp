@@ -130,13 +130,6 @@ public:
 	      extendedHubbard_(solverParams,io,geometry)
 	{}
 
-	SizeType memResolv(PsimagLite::MemResolv&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
-	{
-		return 0;
-	}
-
 	SizeType hilbertSize(SizeType) const
 	{
 		return (1<<2);
@@ -185,8 +178,7 @@ public:
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                        const VectorOperatorType& cm,
 	                                        const BlockType& block,
-	                                        RealType time,
-	                                        RealType factorForDiagonals=1.0)  const
+	                                        RealType time)  const
 	{
 		// remove the other matrices before sending to Hubbard
 		VectorOperatorType cmCorrected;
@@ -203,8 +195,7 @@ public:
 		extendedHubbard_.addDiagonalsInNaturalBasis(hmatrix,
 		                                            cmCorrected,
 		                                            block,
-		                                            time,
-		                                            factorForDiagonals);
+		                                            time);
 	}
 
 private:

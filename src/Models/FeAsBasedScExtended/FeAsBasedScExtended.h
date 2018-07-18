@@ -130,10 +130,6 @@ public:
 	      orbitals_(modelParameters_.orbitals)
 	{}
 
-	SizeType memResolv(PsimagLite::MemResolv& mres,
-	                   SizeType,
-	                   PsimagLite::String msg = "") const { return 0; }
-
 	SizeType hilbertSize(SizeType site) const { return modelFeAs_.hilbertSize(site); }
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -203,10 +199,9 @@ public:
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                        const VectorOperatorType& cm,
 	                                        const BlockType& block,
-	                                        RealType time,
-	                                        RealType factorForDiagonals=1.0)  const
+	                                        RealType time)  const
 	{
-		modelFeAs_.addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
+		modelFeAs_.addDiagonalsInNaturalBasis(hmatrix,cm,block,time);
 	}
 
 private:

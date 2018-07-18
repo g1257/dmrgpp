@@ -21,37 +21,60 @@ public:
 
 	virtual ~LinkProductBase() {}
 
+	// List of function LinkProduct*.h of each model MUST implement
+
+	// You MUST return the number of Hamiltonian terms your model has
+	// term are connections from one site to other site or sites
 	virtual SizeType terms() const = 0;
 
+	// For term given in first argument, return how many dofs this term has
+	// dofs are sub-terms inside a term
+	// You MUST ignore the last argument unless your model has a
+	// site dependent Hilbert space (SDHS)
 	virtual SizeType dofs(SizeType, const AdditionalDataType&) const = 0;
 
-	virtual void setLinkData(SizeType,
-	                         SizeType,
-	                         bool,
-	                         ProgramGlobals::FermionOrBosonEnum&,
-	                         PairSizeType&,
-	                         std::pair<char,char>&,
-	                         SizeType&,
-	                         RealType&,
-	                         SizeType&,
-	                         const AdditionalDataType&) const = 0;
+	// Fill 3 outputs and 3 more if you want to support SU(2)
+	// Assumes you are connecting two operators A_i x B_j
+	// FERMION or BOSON: Say FERMION if both operators A and B are FERMIONS, BOSON otherwise
+	// PairSizeType: give indices of A and B in the Model one-site operator storage
+	//  std::pair<char,char>: char must be either N or C to indicate whether
+	//                         A or B needs transpose conjugate
+	// You don't need to fill AngularMomentum AngularFactor Category
+	// but then your model will not support SU(2) symmetry
+	virtual void setLinkData(SizeType, // term (INPUT)
+	                         SizeType, // dof for term (INPUT)
+	                         bool, // isSU2 (INPUT)
+	                         ProgramGlobals::FermionOrBosonEnum&, // FERMION or BOSON (OUTPUT)
+	                         PairSizeType&, // Pair of operator indices (OUTPUT)
+	                         std::pair<char,char>&, // Modifier for each operator (OUTPUT)
+	                         SizeType&, // AngularMomentum for SU(2) (OUTPUT)
+	                         RealType&, // AngularFactor for SU(2) (OUTPUT)
+	                         SizeType&, // Category for SU(2) (OUTPUT)
+	                         const AdditionalDataType&) const = 0; // For SDHS (INPUT)
 
-	virtual void connectorDofs(VectorSizeType& edofs,
-	                           SizeType,
-	                           SizeType,
-	                           const AdditionalDataType&) const
+	// List of function LinkProduct*.h of each model MAY override
+
+	// Assumes you are connecting two operators A_{i, alpha} x B_{j, beta}
+	// You MUST set edofs[0] = alpha and edofs[1] = beta
+	virtual void connectorDofs(VectorSizeType& edofs, // (OUTPUT)
+	                           SizeType, // TERM (INPUT)
+	                           SizeType, // DOF (INPUT)
+	                           const AdditionalDataType&) const // For SDHS (INPUT)
 	{
 		edofs[0] = edofs[1] = 0;
 	}
 
-	virtual SizeType dofsAllocationSize() const { return 2; }
-
-	virtual void valueModifier(ComplexOrRealType&,
-	                           SizeType,
-	                           SizeType,
-	                           bool,
-	                           const AdditionalDataType&) const
+	// Assumes your are connecting two operators value * A_{i, alpha} x B_{j, beta}
+	// You MAY add an extra multiplier value, by setting the first argument
+	virtual void valueModifier(ComplexOrRealType&, // value (OUTPUT)
+	                           SizeType, // TERM (INPUT)
+	                           SizeType, // DOF (INPUT)
+	                           bool, // isSU2 (INPUT)
+	                           const AdditionalDataType&) const // For SDHS (INPUT)
 	{}
+
+	// You MUSTN'T override this function for now
+	virtual SizeType dofsAllocationSize() const { return 2; }
 };
 }
 #endif // LINKPRODUCTBASE_H

@@ -163,13 +163,6 @@ public:
 		cacheInteractionOp();
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
-	{
-		return 0;
-	}
-
 	SizeType hilbertSize(SizeType) const
 	{
 		return basis_.size();
@@ -318,24 +311,21 @@ public:
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
-	                                RealType,
-	                                RealType factorForDiagonals=1.0) const
+	                                RealType) const
 	{
 		SizeType n=block.size();
 
 		for (SizeType i = 0; i < n; ++i) {
 
-			addHoppingOnSite(hmatrix,cm,i,factorForDiagonals,block[i]);
+			addHoppingOnSite(hmatrix, cm, i, block[i]);
 
-			addInteraction(hmatrix,cm,i,factorForDiagonals,block[i]);
+			addInteraction(hmatrix, cm, i, block[i]);
 
 			addPotentialV(hmatrix,
 			              cm,
 			              i,
 			              block[i],
-			              factorForDiagonals,
 			              modelParameters_.potentialV);
-
 		}
 	}
 
@@ -495,17 +485,15 @@ private:
 	void addInteraction(SparseMatrixType &hmatrix,
 	                    const VectorOperatorType&,
 	                    SizeType,
-	                    RealType factorForDiagonals,
 	                    SizeType actualSite) const
 	{
 		assert(actualSite < modelParameters_.hubbardU.size());
-		hmatrix += factorForDiagonals*modelParameters_.hubbardU[actualSite]*qx_;
+		hmatrix += modelParameters_.hubbardU[actualSite]*qx_;
 	}
 
 	void addHoppingOnSite(SparseMatrixType& hmatrix,
 	                      const VectorOperatorType& cm,
 	                      SizeType i,
-	                      RealType factorForDiagonals,
 	                      SizeType actualSite) const
 	{
 		const RealType zero = 0.0;
@@ -535,7 +523,7 @@ private:
 			}
 		}
 
-		hmatrix += factorForDiagonals*tmp;
+		hmatrix += tmp;
 	}
 
 	ComplexOrRealType getOnSiteHopping(SizeType actualSite, SizeType orb1, SizeType orb2) const
@@ -554,7 +542,6 @@ private:
 	                   const VectorOperatorType& cm,
 	                   SizeType i,
 	                   SizeType actualIndexOfSite,
-	                   RealType factorForDiagonals,
 	                   const typename PsimagLite::Vector<RealType>::Type& V) const
 	{
 		SizeType v1 = 2*modelParameters_.orbitals*geometry_.numberOfSites();
@@ -569,13 +556,13 @@ private:
 
 		if (V.size() == v1) {
 			for (SizeType orb=0;orb<modelParameters_.orbitals;orb++)
-				addPotentialV(hmatrix,cm,i,actualIndexOfSite,orb,factorForDiagonals,V);
+				addPotentialV(hmatrix, cm, i, actualIndexOfSite, orb, V);
 		}
 
 		if (V.size() == v2) {
 			for (SizeType orb=0;orb<modelParameters_.orbitals;orb++) {
 				for (SizeType orb2=0;orb2<modelParameters_.orbitals;orb2++) {
-					addPotentialV(hmatrix,cm,i,actualIndexOfSite,orb,orb2,factorForDiagonals,V);
+					addPotentialV(hmatrix, cm, i, actualIndexOfSite, orb, orb2, V);
 				}
 			}
 
@@ -588,7 +575,6 @@ private:
 	                   SizeType i,
 	                   SizeType actualIndexOfSite,
 	                   SizeType orbital,
-	                   RealType factorForDiagonals,
 	                   const typename PsimagLite::Vector<RealType>::Type& V) const
 	{
 		int dof = 2*modelParameters_.orbitals;
@@ -598,9 +584,9 @@ private:
 		SizeType linSize = geometry_.numberOfSites();
 
 		SizeType iUp = actualIndexOfSite + (orbital + 0*modelParameters_.orbitals)*linSize;
-		hmatrix += factorForDiagonals * V[iUp] * nup;
+		hmatrix +=  V[iUp] * nup;
 		SizeType iDown = actualIndexOfSite + (orbital + 1*modelParameters_.orbitals)*linSize;
-		hmatrix += factorForDiagonals * V[iDown] * ndown;
+		hmatrix += V[iDown] * ndown;
 	}
 
 	void addPotentialV(SparseMatrixType &hmatrix,
@@ -609,7 +595,6 @@ private:
 	                   SizeType actualIndexOfSite,
 	                   SizeType orb,
 	                   SizeType orb2,
-	                   RealType factorForDiagonals,
 	                   const typename PsimagLite::Vector<RealType>::Type& V) const
 	{
 		int dof=2*modelParameters_.orbitals;
@@ -624,10 +609,10 @@ private:
 
 		SizeType iUp = actualIndexOfSite + (orb + orb2*modelParameters_.orbitals +
 		                                    0*orbitalsSquared)*linSize;
-		hmatrix += factorForDiagonals * V[iUp] * nup;
+		hmatrix += V[iUp] * nup;
 		SizeType iDown = actualIndexOfSite + (orb + orb2*modelParameters_.orbitals +
 		                                      1*orbitalsSquared)*linSize;
-		hmatrix += factorForDiagonals * V[iDown] * ndown;
+		hmatrix += V[iDown] * ndown;
 	}
 
 	SparseMatrixType n(const SparseMatrixType& c) const

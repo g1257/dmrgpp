@@ -169,13 +169,6 @@ public:
 		}
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
-	{
-		return 0;
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -269,8 +262,7 @@ public:
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
-	                                RealType,
-	                                RealType factorForDiagonals)  const
+	                                RealType)  const
 	{
 		SizeType linSize = geometry_.numberOfSites();
 		SizeType n = block.size();
@@ -278,7 +270,7 @@ public:
 		if (modelParameters_.magneticField.size() == linSize) {
 			for (SizeType i = 0; i < n; ++i) {
 				// magnetic field
-				RealType tmp = modelParameters_.magneticField[block[i*2]]*factorForDiagonals;
+				RealType tmp = modelParameters_.magneticField[block[i*2]];
 				hmatrix += tmp*cm[1+i*2].data;
 			}
 		}
@@ -289,7 +281,7 @@ public:
 		SparseMatrixType Szsquare;
 		for (SizeType i = 0; i < n; ++i) {
 			// anisotropy
-			RealType tmp = modelParameters_.anisotropy[block[i*2]]*factorForDiagonals;
+			RealType tmp = modelParameters_.anisotropy[block[i*2]];
 			multiply(Szsquare,cm[1+i*2].data,cm[1+i*2].data);
 			hmatrix += tmp*Szsquare;
 		}

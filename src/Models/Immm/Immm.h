@@ -158,10 +158,6 @@ public:
 		}
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv&,
-	                   SizeType,
-	                   PsimagLite::String = "") const { return 0; }
-
 	SizeType hilbertSize(SizeType site) const
 	{
 		AtomEnum atom = atomAtSite(site);
@@ -418,8 +414,7 @@ private:
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
-	                                RealType,
-	                                RealType factorForDiagonals=1.0) const
+	                                RealType) const
 	{
 		// on-site potential:
 		SizeType site = block[0];
@@ -440,13 +435,13 @@ private:
 			assert(index<modelParameters_.potentialV.size());
 			SparseElementType value = modelParameters_.potentialV[index];
 			SparseMatrixType tmpMatrix =value * n(cm[dof].data);
-			hmatrix += factorForDiagonals * tmpMatrix;
+			hmatrix += tmpMatrix;
 		}
 
 		// on-site U only for Cu sites, for now:
 		if (total != NUMBER_OF_SPINS) return;
-		SparseElementType tmp = factorForDiagonals * modelParameters_.hubbardU[site];
-		hmatrix +=  tmp * nbar(cm[0].data) * nbar(cm[1].data);
+
+		hmatrix +=  modelParameters_.hubbardU[site] * nbar(cm[0].data) * nbar(cm[1].data);
 	}
 
 	SparseMatrixType n(const SparseMatrixType& c) const

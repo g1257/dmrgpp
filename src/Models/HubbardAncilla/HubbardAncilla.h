@@ -140,13 +140,6 @@ public:
 	      geometry_(geometry)
 	{}
 
-	SizeType memResolv(PsimagLite::MemResolv&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
-	{
-		return 0;
-	}
-
 	SizeType hilbertSize(SizeType) const
 	{
 		return (1<<(2*ORBITALS));
@@ -262,8 +255,7 @@ public:
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType&,
 	                                const BlockType& block,
-	                                RealType,
-	                                RealType factorForDiagonals=1.0) const
+	                                RealType) const
 	{
 		SizeType n=block.size();
 		HilbertBasisType natBasis;
@@ -272,13 +264,9 @@ public:
 		for (SizeType i=0;i<n;i++) {
 			VectorSparseMatrixType cm;
 			findAllMatrices(cm,i,natBasis);
-			addInteraction(hmatrix,cm,factorForDiagonals,block[i]);
+			addInteraction(hmatrix, cm, block[i]);
 
-			addPotentialV(hmatrix,
-			              cm,
-			              block[i],
-			              factorForDiagonals);
-
+			addPotentialV(hmatrix, cm, block[i]);
 		}
 	}
 
@@ -473,8 +461,7 @@ private:
 
 	void addPotentialV(SparseMatrixType &hmatrix,
 	                   const VectorSparseMatrixType& cm,
-	                   SizeType actualIndexOfSite,
-	                   RealType factorForDiagonals) const
+	                   SizeType actualIndexOfSite) const
 	{
 		SizeType orbital = 0;
 		SparseMatrixType nup = n(cm[orbital+SPIN_UP*ORBITALS]);
@@ -484,10 +471,10 @@ private:
 
 		SizeType iUp = actualIndexOfSite + (orbital + 0*ORBITALS)*linSize;
 		assert(iUp < modelParameters_.potentialV.size());
-		hmatrix += factorForDiagonals*modelParameters_.potentialV[iUp] * nup;
+		hmatrix += modelParameters_.potentialV[iUp] * nup;
 		SizeType iDown = actualIndexOfSite + (orbital + 1*ORBITALS)*linSize;
 		assert(iDown < modelParameters_.potentialV.size());
-		hmatrix += factorForDiagonals*modelParameters_.potentialV[iDown] * ndown;
+		hmatrix += modelParameters_.potentialV[iDown] * ndown;
 	}
 
 	SparseMatrixType n(const SparseMatrixType& c) const
@@ -503,7 +490,6 @@ private:
 	//! Term is U[0]\sum_{\alpha}n_{i\alpha UP} n_{i\alpha DOWN}
 	void addInteraction(SparseMatrixType &hmatrix,
 	                    const VectorSparseMatrixType& cm,
-	                    RealType factorForDiagonals,
 	                    SizeType actualSite) const
 	{
 		SparseMatrixType tmpMatrix;
@@ -514,7 +500,7 @@ private:
 
 		multiply(tmpMatrix,n(m1),n(m2));
 		assert(actualSite < modelParameters_.hubbardU.size());
-		hmatrix += factorForDiagonals*modelParameters_.hubbardU[actualSite]*tmpMatrix;
+		hmatrix += modelParameters_.hubbardU[actualSite]*tmpMatrix;
 	}
 
 	//serializr normal modelParameters_

@@ -170,13 +170,6 @@ public:
 		}
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
-	{
-		return 0;
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -322,18 +315,16 @@ public:
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
-	                                RealType,
-	                                RealType factorForDiagonals=1.0)  const
+	                                RealType)  const
 	{
-		SizeType linSize = geometry_.numberOfSites();
-		if (modelParameters_.magneticField.size() != linSize) return;
+		if (modelParameters_.magneticField.size() != geometry_.numberOfSites())
+			return;
 
-		SizeType n=block.size();
-		SparseMatrixType tmpMatrix;
+		SizeType n = block.size();
 
 		for (SizeType i=0;i<n;i++) {
 			// magnetic field
-			RealType tmp = modelParameters_.magneticField[block[i]]*factorForDiagonals;
+			RealType tmp = modelParameters_.magneticField[block[i]];
 			hmatrix += tmp * cm[1+i*2].data;
 		}
 	}

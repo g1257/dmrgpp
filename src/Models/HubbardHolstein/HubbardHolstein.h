@@ -154,13 +154,6 @@ public:
 		}
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
-	{
-		return 0;
-	}
-
 	SizeType hilbertSize(SizeType) const
 	{
 		return (4*(modelParameters_.numberphonons+1));
@@ -306,8 +299,7 @@ public:
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType&,
 	                                const BlockType& block,
-	                                RealType,
-	                                RealType factorForDiagonals=1.0) const
+	                                RealType) const
 	{
 		SizeType n=block.size();
 		HilbertBasisType natBasis;
@@ -316,18 +308,14 @@ public:
 		for (SizeType i=0;i<n;i++) {
 			VectorSparseMatrixType cm;
 			findAllMatrices(cm,i,natBasis);
-			addInteractionFU(hmatrix,cm,factorForDiagonals,block[i]);
-			addInteractionFPhonon(hmatrix,cm,factorForDiagonals,block[i]);
 
-			addPotentialFV(hmatrix,
-			               cm,
-			               block[i],
-			               factorForDiagonals);
+			addInteractionFU(hmatrix, cm, block[i]);
 
-			addPotentialPhononV(hmatrix,
-			                    cm,
-			                    block[i],
-			                    factorForDiagonals);
+			addInteractionFPhonon(hmatrix, cm, block[i]);
+
+			addPotentialFV(hmatrix, cm, block[i]);
+
+			addPotentialPhononV(hmatrix, cm, block[i]);
 
 		}
 	}
@@ -514,8 +502,7 @@ private:
 
 	void addPotentialFV(SparseMatrixType &hmatrix,
 	                    const VectorSparseMatrixType& cm,
-	                    SizeType actualIndexOfSite,
-	                    RealType factorForDiagonals) const
+	                    SizeType actualIndexOfSite) const
 	{
 		SparseMatrixType nup = n(cm[SPIN_UP]);
 		SparseMatrixType ndown = n(cm[SPIN_DOWN]);
@@ -523,23 +510,22 @@ private:
 		SizeType linSize = geometry_.numberOfSites();
 		SizeType iUp = actualIndexOfSite;
 		assert(iUp < modelParameters_.potentialFV.size());
-		hmatrix += factorForDiagonals*modelParameters_.potentialFV[iUp] * nup;
+		hmatrix += modelParameters_.potentialFV[iUp] * nup;
 		SizeType iDown = actualIndexOfSite + linSize;
 		assert(iDown < modelParameters_.potentialFV.size());
-		hmatrix += factorForDiagonals*modelParameters_.potentialFV[iDown] * ndown;
+		hmatrix += modelParameters_.potentialFV[iDown] * ndown;
 	}
 
 	void addPotentialPhononV(SparseMatrixType &hmatrix,
 	                         const VectorSparseMatrixType& cm,
-	                         SizeType actualIndexOfSite,
-	                         RealType factorForDiagonals) const
+	                         SizeType actualIndexOfSite) const
 	{
 		if (modelParameters_.numberphonons == 0) return;
 		assert(2 < cm.size());
 		SparseMatrixType nphon = n(cm[2]);
 		SizeType iUp = actualIndexOfSite;
 		assert(iUp < modelParameters_.potentialPV.size());
-		hmatrix += factorForDiagonals*modelParameters_.potentialPV[iUp] * nphon;
+		hmatrix += modelParameters_.potentialPV[iUp] * nphon;
 	}
 
 	SparseMatrixType n(const SparseMatrixType& c) const
@@ -564,7 +550,6 @@ private:
 	//! Term is U \sum_{\alpha}n_{i\alpha UP} n_{i\alpha DOWN}
 	void addInteractionFU(SparseMatrixType &hmatrix,
 	                      const VectorSparseMatrixType& cm,
-	                      RealType factorForDiagonals,
 	                      SizeType actualSite) const
 	{
 		SparseMatrixType tmpMatrix;
@@ -573,13 +558,12 @@ private:
 
 		multiply(tmpMatrix,n(m1),n(m2));
 		assert(actualSite < modelParameters_.hubbardFU.size());
-		hmatrix += factorForDiagonals*modelParameters_.hubbardFU[actualSite]*tmpMatrix;
+		hmatrix += modelParameters_.hubbardFU[actualSite]*tmpMatrix;
 	}
 
 	//! Term is lambda\sum_{\alpha} (n_{i\alpha} -1) x_{i}
 	void addInteractionFPhonon(SparseMatrixType &hmatrix,
 	                           const VectorSparseMatrixType& cm,
-	                           RealType factorForDiagonals,
 	                           SizeType actualSite) const
 	{
 		if (modelParameters_.numberphonons == 0) return;
@@ -593,7 +577,7 @@ private:
 		multiply(tmpMatrix,m,x);
 		tmpMatrix.checkValidity();
 		assert(actualSite < modelParameters_.lambdaFP.size());
-		hmatrix += factorForDiagonals*modelParameters_.lambdaFP[actualSite]*tmpMatrix;
+		hmatrix += modelParameters_.lambdaFP[actualSite]*tmpMatrix;
 	}
 
 	ParametersHubbardHolsteinType modelParameters_;

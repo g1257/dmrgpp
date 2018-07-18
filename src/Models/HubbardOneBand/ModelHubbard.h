@@ -167,13 +167,6 @@ public:
 		}
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv&,
-	                   SizeType,
-	                   PsimagLite::String msg = "") const
-	{
-		return 0;
-	}
-
 	/** \cppFunction{!PTEX_THISFUNCTION} returns the size of the one-site Hilbert space. */
 	SizeType hilbertSize(SizeType) const
 	{
@@ -378,8 +371,7 @@ public:
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
-	                                RealType time,
-	                                RealType factorForDiagonals=1.0)  const
+	                                RealType time)  const
 	{
 		SizeType n=block.size();
 		SparseMatrixType tmpMatrix,niup,nidown,Szsquare,Szi;
@@ -397,15 +389,15 @@ public:
 			multiply(nidown,tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data);
 
 			multiply(tmpMatrix,niup,nidown);
-			RealType tmp = modelParameters_.hubbardU[block[i]]*factorForDiagonals;
+			RealType tmp = modelParameters_.hubbardU[block[i]];
 			hmatrix += tmp*tmpMatrix;
 
 			// V_iup term
-			tmp = modelParameters_.potentialV[block[i]+0*linSize]*factorForDiagonals;
+			tmp = modelParameters_.potentialV[block[i]+0*linSize];
 			hmatrix += tmp*niup;
 
 			// V_idown term
-			tmp = modelParameters_.potentialV[block[i]+1*linSize]*factorForDiagonals;
+			tmp = modelParameters_.potentialV[block[i]+1*linSize];
 			hmatrix += tmp*nidown;
 
 			// anisotropy
@@ -424,12 +416,12 @@ public:
 			RealType cosarg = cos(time*modelParameters_.omega +
 			                      modelParameters_.phase);
 			// VT_iup term
-			tmp = modelParameters_.potentialT[block[i]]*factorForDiagonals;
+			tmp = modelParameters_.potentialT[block[i]];
 			tmp *= cosarg;
 			hmatrix += tmp*niup;
 
 			// VT_idown term
-			tmp = modelParameters_.potentialT[block[i]]*factorForDiagonals;
+			tmp = modelParameters_.potentialT[block[i]];
 			tmp *= cosarg;
 			hmatrix += tmp*nidown;
 		}
