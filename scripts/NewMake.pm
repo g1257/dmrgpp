@@ -31,11 +31,16 @@ sub main
 	my $additional = $a{"additional"};
 	my $additional2 = $a{"additional2"};
 	my $additional3 = $a{"additional3"};
+	my $ldflagsAdditionals = $a{"LDFLAGS"};
+	my $cppflagsAdditionals = $a{"CPPFLAGS"};
 	my $path = $a{"path"};
 	my $code = $a{"code"};
+
 	$additional = " " unless defined($additional);
 	$additional2 = " " unless defined($additional2);
 	$additional3 = "" unless defined($additional3);
+	$ldflagsAdditionals = "" unless defined($ldflagsAdditionals);
+	$cppflagsAdditionals = "" unless defined($cppflagsAdditionals);
 	$path = " " unless defined($path);
 
 	my $allExecutables = combineAllDrivers($drivers,"");
@@ -51,6 +56,8 @@ print FH<<EOF;
 $configContent
 
 CPPFLAGS += -I$path../../PsimagLite -I$path../../PsimagLite/src -I${path}Engine
+CPPFLAGS += $cppflagsAdditionals
+LDFLAGS += $ldflagsAdditionals
 all: $allExecutables $additional3
 
 EOF
