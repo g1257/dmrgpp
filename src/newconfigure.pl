@@ -40,9 +40,9 @@ my $gccdash = "";
 if ($lto == 1) {
 	$gccdash = "gcc-";
 	$lto = "-flto";
+} else {
+	$lto = "";
 }
-
-defined($su2enabled) or $su2enabled = 0;
 
 my @configFiles = ("../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag");
 push @configFiles, $config if (defined($config));
@@ -88,24 +88,27 @@ my %dmrgMain = (name => 'dmrg', dotos => "$dotos", libs => "kronutil");
 
 push @drivers,\%dmrgMain;
 
-createMakefile(\@configFiles, $flavor, $lto);
+my $su2flags = ($su2enabled) ? " -DENABLE_SU2 " : "";
+
+my %args;
+$args{"CPPFLAGS"} = $lto.$su2flags;
+$args{"LDFLAGS"} = $lto;
+$args{"flavor"} = $flavor;
+$args{"code"} = "DMRG++";
+$args{"configFiles"} = \@configFiles;
+
+createMakefile(\@drivers, \%args);
 
 sub createMakefile
 {
-	my ($configFiles, $flavor, $lto) = @_;
+	my ($drivers, $args) = @_;
 	NewMake::backupMakefile();
-	my %args;
-	$args{"CPPFLAGS"} = $lto;
-	$args{"LDFLAGS"} = $lto;
-	$args{"code"} = "DMRG++";
-	$args{"additional3"} = "operator";
-	$args{"configFiles"} = $configFiles;
-	$args{"flavor"} = $flavor;
+	$args->{"additional3"} = "operator";
 
 	my $fh;
 	open($fh, ">", "Makefile") or die "Cannot open Makefile for writing: $!\n";
 
-	NewMake::main($fh, \%args, \@drivers);
+	NewMake::main($fh, $args, $drivers);
 	local *FH = $fh;
 print FH<<EOF;
 
