@@ -228,6 +228,8 @@ public:
 		VectorQnType qns;
 		setOperatorMatrices(creationMatrix, qns, block);
 		assert(creationMatrix.size()>0);
+                SizeType nrow = creationMatrix[0].data.rows();
+
 
 		if (what == "sx") // S^x
 			return creationMatrix[0];
@@ -237,6 +239,17 @@ public:
 
 		if (what == "sz") // S^z
 			return creationMatrix[2];
+
+               if (what == "i" || what=="identity") {
+                        SparseMatrixType tmp(nrow,nrow);
+                        tmp.makeDiagonal(nrow,1.0);
+                        typename OperatorType::Su2RelatedType su2Related;
+                        return OperatorType(tmp,
+                                            1.0,
+                                            typename OperatorType::PairType(0,0),
+                                            1.0,
+                                            su2Related);
+                }
 
 		PsimagLite::String str("Kitaev: naturalOperator: no label ");
 		str += what + "\n";

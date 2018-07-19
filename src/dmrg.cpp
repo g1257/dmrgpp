@@ -184,7 +184,9 @@ void mainLoop0(InputNgType::Readable& io,
 	        targeting != "TargetingCorrelations" &&
 	        targeting != "CorrectionTargeting" &&
 	        targeting != "CorrectionVectorTargeting" &&
-	        targeting != "TargetingInSitu") {
+                targeting != "TargetingInSitu" &&
+                targeting != "TargetingRixsStatic" &&
+                targeting != "TargetingRixsDynamic") {
 		PsimagLite::String str("SolverOptions=useComplex not allowed for ");
 		str += targeting + "\n";
 		throw PsimagLite::RuntimeError(str);
