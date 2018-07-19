@@ -98,10 +98,8 @@ public:
 	typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-
-private:
-
 	typedef JmPairs<PairType> JmPairsType;
+	typedef JmPairsType::VectorPairType VectorPairType;
 	typedef VerySparseMatrix<RealType> VerySparseMatrixType;
 	typedef HamiltonianSymmetrySu2<SparseMatrixType, QnType> ThisType;
 	typedef JmSubspace<VerySparseMatrixType,ThisType> JmSubspaceType;
@@ -128,14 +126,16 @@ public:
 	void set(const VectorQnType& basisData)
 	{
 		SizeType n = basisData.size();
-		jmValues_.resize(n);
+		VectorPairType jmValues(n);
 		flavors_.resize(n);
 		VectorSizeType electrons(n);
 		for (SizeType i = 0; i < n; ++i) {
-			jmValues_[i] = basisData[i].jmPair;
+			jmValues[i] = basisData[i].jmPair;
 			flavors_[i] = basisData[i].flavors;
 			electrons[i] = basisData[i].electrons;
 		}
+
+		jmValues_ = jmValues;
 
 		flavorsMax_= *(std::max_element(flavors_.begin(),flavors_.end()));
 		electronsMax_ = *(std::max_element(electrons.begin(),electrons.end()));
@@ -153,6 +153,8 @@ public:
 	                  VectorSizeType& electrons,
 	                  VectorQnType& quantumNumbers)
 	{
+		const QnType zeroQn(0, VectorSizeType(), PairType(0, 0), 0);
+
 		SizeType ns = symm1.jmValues_.size();
 		SizeType ne = symm2.jmValues_.size();
 
@@ -160,8 +162,8 @@ public:
 
 		findAllowedJm(symm1,symm2,electrons1,electrons2,pseudoQn);;
 		createFactors(ns,ne);
+		quantumNumbers.resize(ns*ne, zeroQn);
 		setFlavors(quantumNumbers);
-		assert(quantumNumbers.size()==(ns*ne));
 
 		jMax_=0;
 		jmValues_.maxFirst<std::greater<SizeType> >(jMax_);
@@ -308,32 +310,27 @@ public:
 
 private:
 
-	template<typename JmSubspaceType>
-	SizeType setFlavors(VectorQnType& quantumNumbers,
-	                    JmSubspaceType& jmSubspace,
-	                    SizeType offset)
+	void setFlavors(VectorQnType& quantumNumbers)
 	{
-		// order is important here, electrons must be set after quantumNumbers
-		SizeType flavors = jmSubspace.numberOfFlavors();
-		if (offset == 0) {
-			quantumNumbers.clear();
-			jmValues_.clear();
-			flavors_.clear();
+		SizeType n = quantumNumbers.size();
+		flavors_.resize(n);
+		SizeType counter = 0;
+		SizeType offset = 0;
+		for (SizeType i=0;i<jmSubspaces_.size();i++) {
+			SizeType flavors = jmSubspaces_[i].numberOfFlavors();
+			PairType jm = jmSubspaces_[i].getJmValue();
+			QnType q(jmSubspaces_[i].getNe(), VectorSizeType(), jm, 0);
+			for (SizeType j = 0; j < flavors; ++j) {
+				quantumNumbers[counter]  = q;
+				jmValues_.push(jm, j + offset);
+				flavors_[counter++] = jmSubspaces_[i].getFlavor(j);
+			}
+
+			offset += flavors;
+			jmSubspaces_[i].clear();
 		}
 
-		const QnType zeroQn(0, VectorSizeType(), PairType(0, 0), 0);
-		quantumNumbers.resize(flavors, zeroQn);
-		flavors_.resize(flavors);
-		for (SizeType i = 0; i < flavors; ++i) {
-			PairType jm = jmSubspace.getJmValue();
-			quantumNumbers[i] = QnType(jmSubspace.getNe(), VectorSizeType(), jm, 0);
-			jmValues_.push(jm, i + offset);
-			flavors_[i] = jmSubspace.getFlavor(i);
-		}
-
-		offset += flavors;
-
-		return offset;
+		assert(counter == n);
 	}
 
 	void normalizeFlavors()
@@ -360,15 +357,6 @@ private:
 
 		flavorsMax_=counter+1;
 
-	}
-
-	void setFlavors(VectorQnType& quantumNumbers)
-	{
-		SizeType offset=0;
-		for (SizeType i=0;i<jmSubspaces_.size();i++) {
-			offset = setFlavors(quantumNumbers,jmSubspaces_[i],offset);
-			jmSubspaces_[i].clear();
-		}
 	}
 
 	// note: j is actually 2j and m is actually m+j

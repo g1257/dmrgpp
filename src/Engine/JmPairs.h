@@ -97,26 +97,7 @@ public:
 
 	typedef PairType_ PairType;
 	typedef PairType value_type;
-
-	PairType operator[](SizeType alpha) const
-	{
-		return jmPairs_[indices_[alpha]];
-	}
-
-	JmPairs<PairType>& operator=(const typename PsimagLite::Vector<PairType>::Type& jmpairs)
-	{
-		jmPairs_.clear();
-		indices_.clear();
-		for (SizeType i=0;i<jmpairs.size();i++) {
-			int x = PsimagLite::isInVector(jmPairs_,jmpairs[i]);
-			if (x<0) {
-				jmPairs_.push_back(jmpairs[i]);
-				x=jmPairs_.size()-1;
-			}
-			indices_.push_back(x);
-		}
-		return *this;
-	}
+	typedef typename PsimagLite::Vector<PairType>::Type VectorPairType;
 
 	//! indices_[alpha] = jm
 	void push(const PairType& jm,SizeType)
@@ -129,6 +110,31 @@ public:
 		}
 
 		indices_.push_back(x);
+	}
+
+	const PairType& operator[](SizeType alpha) const
+	{
+		assert(alpha < indices_.size());
+		assert(indices_[alpha] < jmPairs_.size());
+		return jmPairs_[indices_[alpha]];
+	}
+
+	JmPairs<PairType>& operator=(const VectorPairType& jmpairs)
+	{
+		SizeType n = jmpairs.size();
+		jmPairs_.clear();
+		indices_.resize(n);
+		for (SizeType i = 0; i < n; ++i) {
+			int x = PsimagLite::isInVector(jmPairs_, jmpairs[i]);
+			if (x<0) {
+				jmPairs_.push_back(jmpairs[i]);
+				x=jmPairs_.size()-1;
+			}
+
+			indices_[i] = x;
+		}
+
+		return *this;
 	}
 
 	void clear()
@@ -162,8 +168,6 @@ public:
 	}
 
 	SizeType size() const { return indices_.size(); }
-
-	void resize(SizeType) { } // does nothing, safely
 
 	template<typename IoOutputter>
 	void write(IoOutputter& io,
@@ -205,7 +209,7 @@ private:
 	{
 		SizeType counter=0;
 		VectorSizeType neworder(jmPairs_.size());
-		typename PsimagLite::Vector<PairType>::Type tmpVector(jmPairs_.size() -
+		VectorPairType tmpVector(jmPairs_.size() -
 		                                                      unusedPairs.size());
 
 		for (SizeType i=0;i<jmPairs_.size();i++) {
@@ -229,7 +233,7 @@ private:
 		return true;
 	}
 
-	typename PsimagLite::Vector<PairType>::Type jmPairs_;
+	VectorPairType jmPairs_;
 	VectorSizeType indices_;
 }; // JmPairs
 } // namespace Dmrg

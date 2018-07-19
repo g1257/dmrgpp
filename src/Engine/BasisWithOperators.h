@@ -386,9 +386,6 @@ public:
 
 private:
 
-	OperatorsType operators_;
-	PsimagLite::Vector<SizeType>::Type operatorsPerSite_;
-
 	void setMomentumOfOperators(const ThisType& basis)
 	{
 		PsimagLite::Vector<SizeType>::Type momentum;
@@ -400,6 +397,9 @@ private:
 		}
 		operators_.setMomentumOfOperators(momentum);
 	}
+
+	OperatorsType operators_;
+	PsimagLite::Vector<SizeType>::Type operatorsPerSite_;
 }; // class BasisWithOperators
 
 template<typename OperatorsType>
