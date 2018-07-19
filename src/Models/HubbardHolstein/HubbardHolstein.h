@@ -305,9 +305,10 @@ public:
 		HilbertBasisType natBasis;
 		setBasis(natBasis, block);
 
+		VectorSparseMatrixType cm;
+		findAllMatrices(cm,0,natBasis);
+
 		for (SizeType i=0;i<n;i++) {
-			VectorSparseMatrixType cm;
-			findAllMatrices(cm,i,natBasis);
 
 			addInteractionFU(hmatrix, cm, block[i]);
 
@@ -393,6 +394,9 @@ private:
 		//		std::cerr<<cm;
 
 		SparseMatrixType operatorMatrix(cm);
+		SparseMatrixType temp;
+		fullMatrixToCrsMatrix(temp,cm);
+		transposeConjugate(operatorMatrix,temp);
 		return operatorMatrix;
 	}
 
@@ -444,6 +448,10 @@ private:
 		//		std::cerr<<cm;
 
 		SparseMatrixType creationMatrix(cm);
+		SparseMatrixType temp;
+		fullMatrixToCrsMatrix(temp,cm);
+		transposeConjugate(creationMatrix,temp);
+
 		return creationMatrix;
 	}
 
