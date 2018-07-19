@@ -99,6 +99,7 @@ class LinkProductHubbardHolstein : public LinkProductBase<ModelHelperType, Geome
 
 public:
 
+	typedef std::pair<char,char> PairCharType;
 	typedef typename ModelHelperType::RealType RealType;
 
 	template<typename SomeInputType>
@@ -110,58 +111,68 @@ public:
 
 	SizeType dofs(SizeType term, const AdditionalDataType&) const
 	{
-		if (term==TERM_HOPPINGF) return 2;
-		if (term==TERM_HOPPINGP) return 1;
+		if (term == TERM_HOPPINGF) return 2;
+		if (term == TERM_HOPPINGP) return 1;
+		assert(term == TERM_HOPPINGSSH);
 		return 4;
 	}
 
 	void setLinkData(SizeType term,
-	                 SizeType dofs,
+	                 SizeType dof,
 	                 bool,
 	                 ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
 	                 PairType& ops,
-	                 std::pair<char,char>&,
+	                 PairCharType& mods,
 	                 SizeType& angularMomentum,
 	                 RealType& angularFactor,
 	                 SizeType& category,
 	                 const AdditionalDataType&) const
 	{
+		mods = PairCharType('C', 'N');
+
 		if (term==TERM_HOPPINGF) {
+			assert(dof == 0 || dof == 1);
 			fermionOrBoson = ProgramGlobals::FERMION;
-			ops = PairType(dofs,dofs);
+			ops = PairType(dof, dof);
 			angularFactor = 1;
-			if (dofs == 1) angularFactor = -1;
+			if (dof == 1) angularFactor = -1;
 			angularMomentum = 1;
-			category = dofs;
+			category = dof;
 		}
 
 		if (term==TERM_HOPPINGP) {
+			assert(dof == 0);
 			fermionOrBoson = ProgramGlobals::BOSON;
 			SizeType offset1 = 2;
-			ops = PairType(dofs + offset1,dofs + offset1);
+			ops = PairType(dof + offset1, dof + offset1);
 		}
 
 		if (term==TERM_HOPPINGSSH) {
+			mods = PairCharType('C', 'N');
 			fermionOrBoson = ProgramGlobals::FERMION;
 			SizeType offset2 = 3;
-			switch (dofs) {
+			assert(dof >= 0 && dof <= 3);
+			switch (dof) {
 			case 0:
 				ops = PairType(0,offset2);
+				//mods = PairCharType('N', 'C');
 				break;
 			case 1:
 				ops = PairType(offset2,0);
 				break;
 			case 2:
 				ops = PairType(1,offset2+1);
+				//mods = PairCharType('N', 'C');
 				break;
 			case 3:
 				ops = PairType(offset2+1,1);
 				break;
 			}
+
 			angularFactor = 1;
-			if (dofs == 1) angularFactor = -1;
+			if (dof == 1) angularFactor = -1;
 			angularMomentum = 1;
-			category = dofs;
+			category = dof;
 		}
 	}
 
@@ -173,7 +184,9 @@ public:
 	{
 		if (term==TERM_HOPPINGF || term==TERM_HOPPINGP) return;
 
-		if (dof & 1) value*=(-1.0);
+		assert(term == TERM_HOPPINGSSH);
+		assert(dof >= 0 && dof <= 4);
+		if (dof & 1) value *= (-1.0);
 	}
 
 	SizeType terms() const { return (isSsh_) ? 3 : 2; }

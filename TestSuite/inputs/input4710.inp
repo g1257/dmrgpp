@@ -1,0 +1,40 @@
+TotalNumberOfSites=4
+
+NumberOfTerms=3
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 -1.0
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 0.0
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 0.35
+
+hubbardFU 4 10 10 10 10
+potentialFV 8 0 0 0 0 0 0 0 0
+
+NumberPhonons=1
+
+lambdaFP 4 0 0 0 0
+
+potentialPV 4 3 3 3 3
+
+Model=HubbardHolsteinSSH
+SolverOptions=none
+Version=5.25
+OutputFile=data4710
+InfiniteLoopKeptStates=100
+FiniteLoops 3
+1 200 0 -2 200 0
+2 200 0
+
+TargetElectronsUp=1
+TargetElectronsDown=1
+

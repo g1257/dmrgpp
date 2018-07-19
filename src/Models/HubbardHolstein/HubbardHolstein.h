@@ -234,7 +234,6 @@ public:
 
 				creationMatrix.push_back(myOp3);
 			}
-
 		}
 	}
 
