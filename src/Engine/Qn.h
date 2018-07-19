@@ -140,7 +140,7 @@ public:
 
 	static void notReallySort(VectorSizeType& outNumber,
 	                          VectorQnType& outQns,
-	                          VectorSizeType& partition,
+	                          VectorSizeType& offset,
 	                          const VectorSizeType& inNumbers,
 	                          const VectorQnType& inQns)
 	{
@@ -148,34 +148,37 @@ public:
 		assert(n == inQns.size());
 
 		outQns.clear();
-		PsimagLite::Vector<VectorSizeType>::Type bucket;
-		bucket.reserve(n);
-		outQns.reserve(n);
+		VectorSizeType count;
+		count.reserve(n);
+
+		// 1^st pass over data
 		for (SizeType i = 0; i < n; ++i) {
 			int x = PsimagLite::indexOfItemOrMinusOne(outQns, inQns[i]);
 			if (x < 0) {
 				outQns.push_back(inQns[i]);
-				bucket.push_back(VectorSizeType(1, inNumbers[i]));
+				count.push_back(1);
 			} else {
-				bucket[x].push_back(inNumbers[i]);
+				++count[x];
 			}
 		}
 
-		SizeType buckets = bucket.size();
-		SizeType counter = 0;
+		// perform prefix sum
+		SizeType numberOfPatches = count.size();
+		offset.resize(numberOfPatches + 1);
+		offset[0] = 0;
+		for (SizeType ipatch = 0; ipatch < numberOfPatches; ++ipatch)
+		     offset[ipatch + 1] = offset[ipatch] + count[ipatch];
+
+		// 2^nd pass over data
 		outNumber.resize(n);
-		partition.resize(buckets + 1);
-		for (SizeType i = 0; i < buckets; ++i) {
-			SizeType sizeOfThisBucket = bucket[i].size();
-			partition[i] = counter;
-			for (SizeType j = 0; j < sizeOfThisBucket; ++j) {
-				assert(counter < outNumber.size());
-				outNumber[counter++] = bucket[i][j];
-			}
+		std::fill(count.begin(), count.end(), 0);
+		for (SizeType i = 0; i < n; ++i) {
+			int x = PsimagLite::indexOfItemOrMinusOne(outQns, inQns[i]);
+			assert(x >= 0);
+			SizeType outIndex = offset[x] + count[x];
+			outNumber[outIndex] = inNumbers[i];
+			++count[x];
 		}
-
-		partition[buckets] = counter;
-		assert(counter == outNumber.size());
 	}
 
 	static void qnToElectrons(VectorSizeType& electrons, const VectorQnType& qns)
