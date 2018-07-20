@@ -389,7 +389,7 @@ private:
 		for(SizeType i=0;i<7;i++){
 			SizeType nrow_b=blockOffsets[i]-r_;
 
-			Jz_block.reset(nrow_b,nrow_b);
+			Jz_block.resize(nrow_b, nrow_b);
 			for(SizeType ir=0;ir<nrow_b;ir++){
 				for(SizeType ic=0;ic<nrow_b;ic++){
 					Jz_block(ir,ic)=Jz_opr(r_+ir,r_+ic);

@@ -629,7 +629,8 @@ private:
 		}
 	}
 
-	void ppupupdndn(MatrixType& m, MatrixType& m2,
+	void ppupupdndn(MatrixType& m,
+	                MatrixType& m2,
 	                SizeType orb1,
 	                SizeType orb2,
 	                SizeType orb3,
@@ -647,8 +648,7 @@ private:
 		VectorSizeType gammas(1,1+sign);
 		SizeType orbitals = 2;
 		SizeType bigSize = rows*orbitals*rows*orbitals*2;
-		m.reset(bigSize,bigSize);
-		m.setTo(0.0);
+		m.resize(bigSize, bigSize, static_cast<typename MatrixType::value_type>(0.0));
 
 		SizeType offset = (string=="four") ? orbitals : 1;
 		SizeType jmax = (string=="four") ? cols-1 : cols;
@@ -1107,8 +1107,7 @@ private:
 		VectorSizeType gammas(1,1+sign);
 		SizeType orbitals = 2;
 		SizeType bigSize = rows*orbitals*rows*orbitals*2;
-		m.reset(bigSize,bigSize);
-		m.setTo(0.0);
+		m.resize(bigSize, bigSize, static_cast<typename MatrixType::value_type>(0.0));
 
 		SizeType offset = (string=="four") ? orbitals : 1;
 		SizeType jmax = (string=="four") ? cols-1 : cols;

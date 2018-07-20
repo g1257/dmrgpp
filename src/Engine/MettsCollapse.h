@@ -520,9 +520,10 @@ private:
 			if (i == 0) {
 				m = aux1;
 			} else {
-				m.reset(0,0);
+				m.resize(0,0);
 				outerProduct(m,mold,aux1);
 			}
+
 			mold = m;
 		}
 	}

@@ -492,10 +492,7 @@ private:
 			if (f>fMax) fMax=f;
 		}
 		fMax++;
-		reducedMapping_.reset(thisBasis_->jMax(),fMax);
-		for (SizeType i=0;i<reducedMapping_.rows();i++)
-			for (SizeType j=0;j<reducedMapping_.cols();j++)
-				reducedMapping_(i,j)= -1;
+		reducedMapping_.resize(thisBasis_->jMax(), fMax, -1);
 		for (SizeType i=0;i<thisBasis_->reducedSize();i++) {
 			SizeType ii = thisBasis_->reducedIndex(i);
 			SizeType j = thisBasis_->jmValue(ii).first;
@@ -872,7 +869,7 @@ private:
 
 	void cacheFlavorIndex(const BasisType& basis2,const BasisType& basis3)
 	{
-		flavorIndexCached_.reset(basis2.reducedSize(),basis3.reducedSize());
+		flavorIndexCached_.resize(basis2.reducedSize(), basis3.reducedSize());
 		for (SizeType i1=0;i1<basis2.reducedSize();i1++) {
 			SizeType ii1 = basis2.reducedIndex(i1);
 			SizeType ne1 = basis2.electrons(ii1);

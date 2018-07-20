@@ -95,10 +95,10 @@ class DensityMatrixSu2 : public DensityMatrixBase<TargetingType> {
 	typedef typename TargetingType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType  BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename TargetingType::TargetVectorType::value_type DensityMatrixElementType;
+	typedef typename TargetingType::TargetVectorType::value_type ComplexOrRealType;
 	typedef typename BaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename BasisType::FactorsType FactorsType;
-	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename DensityMatrixBase<TargetingType>::Params ParamsType;
 
 public:
@@ -134,7 +134,7 @@ public:
 
 			SizeType bs = pBasis_.partition(m+1)-pBasis_.partition(m);
 
-			matrixBlock.reset(bs,bs);
+			matrixBlock.resize(bs, bs, static_cast<ComplexOrRealType>(0.0));
 
 			for (SizeType i=pBasis_.partition(m);i<pBasis_.partition(m+1);i++) {
 				for (SizeType j=pBasis_.partition(m);j<pBasis_.partition(m+1);j++) {
@@ -255,14 +255,14 @@ private:
 		return true;
 	}
 
-	DensityMatrixElementType densityMatrixAux(SizeType alpha1,
+	ComplexOrRealType densityMatrixAux(SizeType alpha1,
 	                                          SizeType alpha2,
 	                                          const TargetingType& target,
 	                                          const BasisWithOperatorsType& pBasisSummed,
 	                                          const BasisType& pSE,
 	                                          ProgramGlobals::DirectionEnum direction)
 	{
-		DensityMatrixElementType sum=0;
+		ComplexOrRealType sum=0;
 		// The g.s. has to be treated separately because it's
 		// usually a vector of RealType, whereas
 		// the other targets might be complex,
@@ -287,7 +287,7 @@ private:
 	}
 
 	template<typename TargetVectorType>
-	DensityMatrixElementType densityMatrixHasFactors(SizeType alpha1,
+	ComplexOrRealType densityMatrixHasFactors(SizeType alpha1,
 	                                                 SizeType alpha2,
 	                                                 const TargetVectorType& v,
 	                                                 const BasisWithOperatorsType& pBasisSummed,
@@ -302,7 +302,7 @@ private:
 			ne=pSE.size()/ns;
 		}
 
-		DensityMatrixElementType sum=0;
+		ComplexOrRealType sum=0;
 
 		// Make sure we don't copy just get the reference here!!
 		const FactorsType* fptr = pSE.getFactors();
@@ -325,7 +325,7 @@ private:
 					int eta2 =  factors.getCol(k2);
 					int jj = pSE.permutationInverse(eta2);
 
-					DensityMatrixElementType tmp3= v.slowAccess(ii)*
+					ComplexOrRealType tmp3= v.slowAccess(ii)*
 					        PsimagLite::conj(v.slowAccess(jj)) *
 					        factors.getValue(k1) * factors.getValue(k2);
 					sum += tmp3;
@@ -376,9 +376,9 @@ private:
 	            SizeType p2,
 	            const BuildingBlockType& bp2)
 	{
-		DensityMatrixElementType alpha=1.0,beta=0.0;
+		ComplexOrRealType alpha=1.0,beta=0.0;
 		int n =bp1.cols();
-		PsimagLite::Matrix<DensityMatrixElementType> result(n,n);
+		PsimagLite::Matrix<ComplexOrRealType> result(n,n);
 		psimag::BLAS::GEMM('C',
 		                   'N',
 		                   n,
