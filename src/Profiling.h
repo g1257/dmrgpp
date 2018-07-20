@@ -36,34 +36,34 @@ class  Profiling {
 
 public:
 
-	Profiling(String caller, std::ostream& os)
+	Profiling(String caller, String additional, std::ostream& os)
 	    : progressIndicator_(caller),
 	      memoryUsage_("/proc/self/stat"),
 	      isDead_(false),
 	      os_(os)
 	{
 		OstringStream msg;
-		msg << "starting clock";
+		msg << "starting clock " << additional;
 		progressIndicator_.printline(msg, os);
 	}
 
 	~Profiling()
 	{
-		killIt();
+		killIt("");
 	}
 
-	void end()
+	void end(String message)
 	{
-		killIt();
+		killIt(message);
 	}
 
 private:
 
-	void killIt()
+	void killIt(String message)
 	{
 		if (isDead_) return;
 		OstringStream msg;
-		msg << "stopping clock";
+		msg << "stopping clock " << message;
 		progressIndicator_.printline(msg, os_);
 		isDead_ = true;
 	}
