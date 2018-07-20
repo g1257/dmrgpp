@@ -465,7 +465,7 @@ void randomizeVector(typename Vector<typename RandomType::value_type>::Type& v,
 }
 
 template<typename X,typename Y,typename A>
-int isInVector(const std::vector<X,A>& natBasis,Y const &v)
+int indexOrMinusOne(const std::vector<X,A>& natBasis,Y const &v)
 {
 	typename std::vector<X,A>::const_iterator x = find(natBasis.begin(),natBasis.end(),v);
 	if (x==natBasis.end()) return -1;
