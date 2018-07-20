@@ -684,13 +684,12 @@ void bcast(CrsMatrix<S>& m)
 template<typename T>
 void crsMatrixToFullMatrix(Matrix<T>& m,const CrsMatrix<T>& crsMatrix)
 {
-	m.reset(crsMatrix.rows(),crsMatrix.cols());
+	m.resize(crsMatrix.rows(), crsMatrix.cols(), 0);
 	for (SizeType i = 0; i < crsMatrix.rows() ; i++) {
 		for (SizeType k=0;k<crsMatrix.cols();k++) m(i,k)=0;
 		for (int k=crsMatrix.getRowPtr(i);k<crsMatrix.getRowPtr(i+1);k++)
 			m(i,crsMatrix.getCol(k))=crsMatrix.getValue(k);
 	}
-
 }
 
 //! Transforms a full matrix into a Compressed-Row-Storage (CRS) Matrix

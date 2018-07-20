@@ -97,7 +97,9 @@ public:
 	{}
 
 	Matrix(SizeType nrow,SizeType ncol)
-	    : nrow_(nrow),ncol_(ncol),data_(nrow*ncol, 0)
+	    : nrow_(nrow),
+	      ncol_(ncol),
+	      data_(nrow*ncol, 0) // the 0 should not be here, FIXME TODO
 	{}
 
 	Matrix(const typename Vector<T>::Type& data,
@@ -259,19 +261,22 @@ public:
 		        data_ == other.data_);
 	}
 
-	void resize(SizeType nrow,SizeType ncol)
+	void resize(SizeType nrow, SizeType ncol, const T& val)
 	{
-		if (nrow == nrow_ && ncol == ncol_) return;
-
-		if (nrow_!=0 || ncol_!=0) throw
-			RuntimeError("Matrix::resize(...): only applies when Matrix is empty\n");
-		reset(nrow,ncol);
+		nrow_ = nrow;
+		ncol_ = ncol;
+		data_.resize(nrow*ncol, val);
 	}
 
-	void reset(SizeType nrow,SizeType ncol)
+	void resize(SizeType nrow, SizeType ncol)
 	{
-		nrow_=nrow; ncol_=ncol;
-		data_.resize(nrow*ncol, 0);
+		// this throw should not be here, FIXME TODO
+		if (nrow_ != 0 || ncol_ != 0) throw
+			RuntimeError("Matrix::resize(...): only applies when Matrix is empty\n");
+
+		nrow_ = nrow;
+		ncol_ = ncol;
+		data_.resize(nrow*ncol, 0); // the 0 should not be here, FIXME TODO
 	}
 
 	Matrix<T>& operator+=(const Matrix<T>& other)
