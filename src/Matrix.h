@@ -653,16 +653,16 @@ std::istream& operator>>(std::istream& is, Matrix<T>& A)
 	is >> ncol;
 
 	if (is) {
-		A.reset(nrow,ncol);
-		for (SizeType j=0; j<A.rows(); j++) for (SizeType i=0; i<A.cols(); i++) {
-			is >> A(j,i);
-		}
-	}
-	if (!is) {
+		A.resize(nrow, ncol);
+		for (SizeType j=0; j<A.rows(); j++)
+			for (SizeType i=0; i<A.cols(); i++)
+				is >> A(j,i);
+	} else {
 		String str("ERROR istream& operator >> ");
 		str += "(std::istream&, Matrix<T>&): read past end stream";
 		throw RangeError(str);
 	}
+
 	return is;
 }
 
