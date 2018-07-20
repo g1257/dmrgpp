@@ -142,9 +142,19 @@ public:
 		for (SizeType x = 0; x < nitems; ++x)
 			totalOnes_[x] = cacheConnections(lps_, x, total_);
 
-		if (lps_.typesaved.size() < total_) {
+		if (lps_.typesaved.size() < total_)
 			err("getLinkProductStruct: InternalError\n");
-		}
+
+		SizeType last = lrs.super().block().size();
+		assert(last > 0);
+		--last;
+		SizeType numberOfSites = geometry.numberOfSites();
+		assert(numberOfSites > 0);
+		bool superIsReallySuper = (lrs.super().block()[0] == 0 &&
+		        lrs.super().block()[last] == numberOfSites - 1);
+
+		if (!superIsReallySuper)
+			return; // <-- CONDITIONAL EARLY EXIT HERE
 
 		PsimagLite::OstringStream msg;
 		msg<<"LinkProductStructSize="<<total_;

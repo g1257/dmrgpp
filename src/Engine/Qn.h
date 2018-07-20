@@ -3,6 +3,7 @@
 #include "Vector.h"
 #include "ProgramGlobals.h"
 #include "IndexOfItem.h"
+#include "Profiling.h"
 
 namespace Dmrg {
 
@@ -142,10 +143,14 @@ public:
 	                          VectorQnType& outQns,
 	                          VectorSizeType& offset,
 	                          const VectorSizeType& inNumbers,
-	                          const VectorQnType& inQns)
+	                          const VectorQnType& inQns,
+	                          ProgramGlobals::VerboseEnum verbose)
 	{
 		SizeType n = inNumbers.size();
 		assert(n == inQns.size());
+		PsimagLite::Profiling* profiling = (verbose) ? new PsimagLite::Profiling("notReallySort",
+		                                                                         "n= " + ttos(n),
+		                                                                         std::cout) : 0;
 
 		outQns.clear();
 		VectorSizeType count;
@@ -167,7 +172,7 @@ public:
 		offset.resize(numberOfPatches + 1);
 		offset[0] = 0;
 		for (SizeType ipatch = 0; ipatch < numberOfPatches; ++ipatch)
-		     offset[ipatch + 1] = offset[ipatch] + count[ipatch];
+			offset[ipatch + 1] = offset[ipatch] + count[ipatch];
 
 		// 2^nd pass over data
 		outNumber.resize(n);
@@ -178,6 +183,12 @@ public:
 			SizeType outIndex = offset[x] + count[x];
 			outNumber[outIndex] = inNumbers[i];
 			++count[x];
+		}
+
+		if (profiling) {
+			profiling->end("patches= " + ttos(numberOfPatches));
+			delete profiling;
+			profiling = 0;
 		}
 	}
 

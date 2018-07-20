@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2018, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 5.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -66,7 +66,6 @@ INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
 DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
-
 
 */
 
@@ -218,8 +217,12 @@ public:
 			}
 		}
 
+		bool notSuper = (basis1.block().size() == 1 || basis2.block().size() == 1);
+		ProgramGlobals::VerboseEnum verbose = (notSuper) ? ProgramGlobals::VERBOSE_NO :
+		                                                   ProgramGlobals::VERBOSE_YES;
+
 		// order quantum numbers of combined basis:
-		findPermutationAndPartitionAndQns(qns, true);
+		findPermutationAndPartitionAndQns(qns, true, verbose);
 		reorder();
 		electronsToSigns(electrons_);
 	}
@@ -325,7 +328,7 @@ public:
 
 		// N.B.: false below means that we don't truncate the permutation vectors
 		//	because they're needed for the WFT
-		findPermutationAndPartitionAndQns(qns, false);
+		findPermutationAndPartitionAndQns(qns, false, ProgramGlobals::VERBOSE_NO);
 
 		PsimagLite::OstringStream msg;
 		msg<<"Done with changeBasis";
@@ -537,7 +540,7 @@ protected:
 		VectorQnType basisData2 = basisData;
 		if (!useSu2Symmetry()) flattenQns(basisData2);
 
-		findPermutationAndPartitionAndQns(basisData2, true);
+		findPermutationAndPartitionAndQns(basisData2, true, ProgramGlobals::VERBOSE_NO);
 		reorder();
 		electronsToSigns(electrons_);
 	}
@@ -633,14 +636,15 @@ private:
 	}
 
 	void findPermutationAndPartitionAndQns(const VectorQnType& qns,
-	                                       bool changePermutation)
+	                                       bool changePermutation,
+	                                       ProgramGlobals::VerboseEnum verbose)
 	{
 		SizeType n = qns.size();
 
 		VectorSizeType numbers(n);
 		for (SizeType i = 0; i < n; ++i) numbers[i] = i;
 		VectorSizeType permutationVector;
-		QnType::notReallySort(permutationVector, qns_, partition_, numbers, qns);
+		QnType::notReallySort(permutationVector, qns_, partition_, numbers, qns, verbose);
 
 		if (changePermutation) {
 			permutationVector_ = (useSu2Symmetry_) ? numbers : permutationVector;

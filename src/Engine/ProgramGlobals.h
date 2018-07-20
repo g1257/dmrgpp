@@ -101,6 +101,8 @@ struct ProgramGlobals {
 
 	enum FermionOrBosonEnum {FERMION,BOSON};
 
+	enum VerboseEnum {VERBOSE_NO, VERBOSE_YES};
+
 	static void init(SizeType maxElectronsOneSpin_)
 	{
 		if (maxElectronsOneSpin == maxElectronsOneSpin_) return;
