@@ -73,7 +73,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PackIndices.h" // in PsimagLite
 #include "Link.h"
 #include "Concurrency.h"
-#include "IndexOfItem.h"
+#include "Vector.h"
 
 /** \ingroup DMRG */
 /*@{*/
@@ -151,7 +151,7 @@ public:
 		assert(modifier == 'C');
 		SizeType typeIndex = (type == ProgramGlobals::SYSTEM) ? 0 : 1;
 		SizeType packed = typeIndex + ii.first*2;
-		int indexOfSeen = PsimagLite::indexOfItemOrMinusOne(seen_, packed);
+		int indexOfSeen = PsimagLite::indexOrMinusOne(seen_, packed);
 		if (indexOfSeen >= 0) {
 			assert(static_cast<SizeType>(indexOfSeen) < garbage_.size());
 			return *(garbage_[indexOfSeen]);

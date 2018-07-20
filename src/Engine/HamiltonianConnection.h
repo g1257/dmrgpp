@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "HamiltonianAbstract.h"
 #include "SuperGeometry.h"
-#include "IndexOfItem.h"
+#include "Vector.h"
 #include "VerySparseMatrix.h"
 #include "ProgressIndicator.h"
 
@@ -257,10 +257,10 @@ public:
 		if (hItems.size() != 2)
 			err("getKron(): No Chemical H supported for now\n");
 
-		SizeType i = PsimagLite::indexOfItem(modelHelper_.leftRightSuper().super().block(),
-		                                     hItems[0]);
-		SizeType j = PsimagLite::indexOfItem(modelHelper_.leftRightSuper().super().block(),
-		                                     hItems[1]);
+		SizeType i = PsimagLite::indexOrMinusOne(modelHelper_.leftRightSuper().super().block(),
+		                                         hItems[0]);
+		SizeType j = PsimagLite::indexOrMinusOne(modelHelper_.leftRightSuper().super().block(),
+		                                         hItems[1]);
 
 		int offset = modelHelper_.leftRightSuper().left().block().size();
 		PairType ops;

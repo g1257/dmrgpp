@@ -86,7 +86,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetQuantumElectrons.h"
 #include "Io/IoSerializerStub.h"
 #include "ModelCommon.h"
-#include "IndexOfItem.h"
 
 namespace Dmrg {
 

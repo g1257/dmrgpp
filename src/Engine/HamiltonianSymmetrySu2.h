@@ -456,8 +456,8 @@ private:
 		std::pair<PairType,SizeType> triplet;
 		triplet.first=jm;
 		triplet.second=nelectrons;
-		int x = PsimagLite::isInVector(jmSubspaces_,triplet);
-		if (x<0) { // add new jmSubspace
+		int x = PsimagLite::indexOrMinusOne(jmSubspaces_,triplet);
+		if (x < 0) { // add new jmSubspace
 			JmSubspace<VerySparseMatrixType,ThisType> jmSubspace(jm,
 			                                                     index,
 			                                                     jm1,
@@ -479,7 +479,7 @@ private:
 		for (SizeType i=0;i<permInverse.size();i++) permInverse[perm[i]]=i;
 
 		for (SizeType i=0;i<target;i++) {
-			if (PsimagLite::isInVector(removedIndices,perm[i])>=0) continue;
+			if (PsimagLite::indexOrMinusOne(removedIndices,perm[i]) >= 0) continue;
 			removedIndices.push_back(perm[i]);
 		}
 
@@ -488,7 +488,7 @@ private:
 
 				if (flavors_[j]==flavors_[perm[i]] &&
 				        jmValues_[j].first==jmValues_[perm[i]].first) {
-					int x = PsimagLite::isInVector(removedIndices,j);
+					int x = PsimagLite::indexOrMinusOne(removedIndices,j);
 					if (x<0) {
 						VectorSizeType::iterator p1 =
 						        find(removedIndices.begin(),removedIndices.end(),perm[i]);
@@ -522,14 +522,14 @@ private:
 
 		for (SizeType i=0;i<target;i++) {
 			if (removedIndices.size()>=target) break;
-			if (PsimagLite::isInVector(removedIndices,perm[i])>=0) continue;
+			if (PsimagLite::indexOrMinusOne(removedIndices, perm[i]) >= 0) continue;
 			removedIndices.push_back(perm[i]);
 
 			for (SizeType j=0;j<eigs.size();j++) {
 
 				if (flavors_[j]==flavors_[perm[i]] &&
 				        jmValues_[j].first==jmValues_[perm[i]].first) {
-					int x = PsimagLite::isInVector(removedIndices,j);
+					int x = PsimagLite::indexOrMinusOne(removedIndices, j);
 					if (x<0) {
 						removedIndices.push_back(j);
 						if (fabs(eigs[permInverse[j]]-eigs[i])>1e-6) {
@@ -557,8 +557,8 @@ private:
 			PairType jm1 = jmValues_[i1];
 			if (jm1.first!=jm1.second) continue;
 			statesReduced_.push_back(i1);
-			int x = PsimagLite::isInVector(jvals_,jm1.first);
-			if (x<0) jvals_.push_back(jm1.first);
+			int x = PsimagLite::indexOrMinusOne(jvals_, jm1.first);
+			if (x < 0) jvals_.push_back(jm1.first);
 		}
 	}
 

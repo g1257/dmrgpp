@@ -102,9 +102,9 @@ public:
 	//! indices_[alpha] = jm
 	void push(const PairType& jm,SizeType)
 	{
-		int x = PsimagLite::isInVector(jmPairs_,jm);
+		int x = PsimagLite::indexOrMinusOne(jmPairs_,jm);
 
-		if (x<0) {
+		if (x < 0) {
 			jmPairs_.push_back(jm);
 			x=jmPairs_.size()-1;
 		}
@@ -125,8 +125,8 @@ public:
 		jmPairs_.clear();
 		indices_.resize(n);
 		for (SizeType i = 0; i < n; ++i) {
-			int x = PsimagLite::isInVector(jmPairs_, jmpairs[i]);
-			if (x<0) {
+			int x = PsimagLite::indexOrMinusOne(jmPairs_, jmpairs[i]);
+			if (x < 0) {
 				jmPairs_.push_back(jmpairs[i]);
 				x=jmPairs_.size()-1;
 			}
@@ -213,7 +213,7 @@ private:
 		                                                      unusedPairs.size());
 
 		for (SizeType i=0;i<jmPairs_.size();i++) {
-			if (PsimagLite::isInVector(unusedPairs,i)>=0) continue;
+			if (PsimagLite::indexOrMinusOne(unusedPairs,i) >= 0) continue;
 			tmpVector[counter]=jmPairs_[i];
 			neworder[i]=counter;
 			counter++;

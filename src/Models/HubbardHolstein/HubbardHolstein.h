@@ -372,7 +372,7 @@ private:
 				if (modelParameters_.numberphonons<=1 || nphon >= modelParameters_.numberphonons)
 					continue;
 				HilbertSpaceHubbardHolsteinType::createP(bra,site);
-				int jj = PsimagLite::isInVector(natBasis,bra);
+				int jj = PsimagLite::indexOrMinusOne(natBasis,bra);
 				RealType x = int(HilbertSpaceHubbardHolsteinType::getP(bra,site));
 				assert(x>=0);
 				if (jj<0)
@@ -380,7 +380,7 @@ private:
 				cm(ii,jj) = sqrt(x);
 			} else {
 				HilbertSpaceHubbardHolsteinType::createP(bra,site);
-				int jj = PsimagLite::isInVector(natBasis,bra);
+				int jj = PsimagLite::indexOrMinusOne(natBasis,bra);
 				RealType x = 1;
 				assert(x>=0);
 				if (jj<0)
@@ -436,7 +436,7 @@ private:
 
 			} else {
 				HilbertSpaceHubbardHolsteinType::createF(bra,i,sigma);
-				int jj = PsimagLite::isInVector(natBasis,bra);
+				int jj = PsimagLite::indexOrMinusOne(natBasis,bra);
 				if (jj<0)
 					throw PsimagLite::RuntimeError("findOperatorMatrices\n");
 				cm(ii,jj) =sign(ket,i,sigma);

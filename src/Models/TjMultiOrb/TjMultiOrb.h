@@ -342,7 +342,7 @@ private:
 			HilbertStateType mask = (1<<(sigma+i*2*orbitals));
 			if (ket & mask) continue;
 			bra = (ket ^ mask);
-			int jj = PsimagLite::isInVector(natBasis,bra);
+			int jj = PsimagLite::indexOrMinusOne(natBasis,bra);
 			if (jj<0) continue;
 			cm(ii,jj) = sign(ket,i,sigma);
 
@@ -432,7 +432,7 @@ private:
 			if ((ket & masklp) > 0 && (ket & masklm) == 0) {
 				bra = ket ^ (masklp | masklm);
 
-				int jj = PsimagLite::isInVector(natBasis,bra);
+				int jj = PsimagLite::indexOrMinusOne(natBasis,bra);
 				assert(jj>=0);
 				cm(ii,jj) = 1.0;
 			}

@@ -139,7 +139,7 @@ truncateVector(SomeVectorType& v,
 {
 	SomeVectorType tmpVector;
 	for (SizeType i=0;i<v.size();i++) {
-		if (PsimagLite::isInVector(removedIndices,i) >= 0) continue;
+		if (PsimagLite::indexOrMinusOne(removedIndices,i) >= 0) continue;
 		tmpVector.push_back(v[i]);
 	}
 

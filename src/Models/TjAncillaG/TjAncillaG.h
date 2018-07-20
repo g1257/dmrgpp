@@ -353,7 +353,7 @@ private:
 				if ((ket & masklp) > 0 && (ket & masklm) == 0) {
 					bra = ket ^ (masklp | masklm);
 
-					int jj = PsimagLite::isInVector(natBasis,bra);
+					int jj = PsimagLite::indexOrMinusOne(natBasis,bra);
 					assert(jj>=0);
 					cm(ii,jj) = 1.0;
 				}

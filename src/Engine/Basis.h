@@ -618,8 +618,8 @@ private:
 	{
 		RealType sum=static_cast<RealType>(0.0);
 		for (SizeType i=0;i<eigs.size();i++)
-			if (PsimagLite::isInVector(removedIndices,i)<0) sum+=eigs[i];
-		return 1.0-sum;
+			if (PsimagLite::indexOrMinusOne(removedIndices,i) < 0) sum += eigs[i];
+		return 1.0 - sum;
 	}
 
 	void truncate(VectorQnType& qns, const VectorSizeType& removedIndices)

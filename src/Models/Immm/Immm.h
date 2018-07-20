@@ -367,7 +367,7 @@ private:
 
 			} else {
 				hilbertSpace_.create(bra,0,sigma);
-				int jj = PsimagLite::isInVector(natBasis,bra);
+				int jj = PsimagLite::indexOrMinusOne(natBasis,bra);
 				assert(jj>=0);
 				assert(ii!=SizeType(jj));
 				cm(ii,jj) =sign(ket,0,sigma);

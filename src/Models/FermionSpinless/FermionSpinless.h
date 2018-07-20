@@ -319,7 +319,7 @@ private:
 
 			} else {
 				HilbertSpaceType::create(bra,i,sigma);
-				int jj = PsimagLite::isInVector(natBasis,bra);
+				int jj = PsimagLite::indexOrMinusOne(natBasis,bra);
 				assert(jj >= 0);
 				cm(ii,jj) =sign(ket,i,sigma);
 			}

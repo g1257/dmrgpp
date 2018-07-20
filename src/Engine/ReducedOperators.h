@@ -336,9 +336,10 @@ public:
 			basisB = &basis2;
 		}
 
-		int ki = PsimagLite::isInVector(momentumOfOperators_,angularMomentum);
-		if (ki<0)
-			throw PsimagLite::RuntimeError("Operator has unknown momentum\n");
+		int ki = PsimagLite::indexOrMinusOne(momentumOfOperators_, angularMomentum);
+		if (ki < 0)
+			err("Operator has unknown momentum\n");
+
 		PsimagLite::Matrix<SparseElementType> B(n,n);
 		externalProd_(B,basisA,basisB,A,ki,order,fermionSign);
 		fullMatrixToCrsMatrix(reducedOperators_[ind].data,B);

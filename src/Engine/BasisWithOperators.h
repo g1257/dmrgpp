@@ -390,9 +390,9 @@ private:
 	{
 		PsimagLite::Vector<SizeType>::Type momentum;
 		for (SizeType i=0;i<basis.numberOfOperators();i++) {
-			int x = PsimagLite::isInVector(
-			            momentum,basis.getReducedOperatorByIndex(i).jm.first);
-			if (x<0)
+			int x = PsimagLite::indexOrMinusOne(momentum,
+			                                    basis.getReducedOperatorByIndex(i).jm.first);
+			if (x < 0)
 				momentum.push_back(basis.getReducedOperatorByIndex(i).jm.first);
 		}
 		operators_.setMomentumOfOperators(momentum);

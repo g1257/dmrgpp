@@ -565,7 +565,7 @@ private:
 
 			} else {
 				HilbertSpaceFeAsType::create(bra,i,sigma);
-				int jj = PsimagLite::isInVector(natBasis,bra);
+				int jj = PsimagLite::indexOrMinusOne(natBasis,bra);
 				if (jj<0)
 					throw PsimagLite::RuntimeError("findOperatorMatrices: internal error\n");
 				if (ii==SizeType(jj)) {
@@ -675,8 +675,8 @@ private:
 
 		MatrixType cmCopy(n,n);
 		int i,j;
-		int x=PsimagLite::isInVector(basis,reinterpretX_);
-		int y=PsimagLite::isInVector(basis,reinterpretY_);
+		int x=PsimagLite::indexOrMinusOne(basis,reinterpretX_);
+		int y=PsimagLite::indexOrMinusOne(basis,reinterpretY_);
 
 		RealType factor = 0.7071067811865475244;
 		for (i=0;i<n;i++) {

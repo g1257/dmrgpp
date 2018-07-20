@@ -325,7 +325,7 @@ private:
 
 		// now stepCurrent_ is such that sitesIndices_[stepCurrent_] = siteToAdd
 		// so:
-		int sc = PsimagLite::isInVector(siteIndices_, siteToAdd);
+		int sc = PsimagLite::indexOrMinusOne(siteIndices_, siteToAdd);
 
 		if (sc < 0)
 			err("nonRecoveryStepCurrent(...): step current error\n");

@@ -119,7 +119,7 @@ public:
 		removedIndices.clear();
 		for (SizeType i=0;i<target;i++) {
 			if (removedIndices.size()>=target) break;
-			if (PsimagLite::isInVector(removedIndices,perm[i])>=0) continue;
+			if (PsimagLite::indexOrMinusOne(removedIndices,perm[i])>=0) continue;
 			removedIndices.push_back(perm[i]);
 		}
 	}

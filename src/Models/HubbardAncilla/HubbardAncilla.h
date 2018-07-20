@@ -394,7 +394,7 @@ private:
 
 			} else {
 				HilbertSpaceFeAsType::create(bra,i,sigma);
-				int jj = PsimagLite::isInVector(natBasis,bra);
+				int jj = PsimagLite::indexOrMinusOne(natBasis,bra);
 				if (jj<0)
 					throw PsimagLite::RuntimeError("findOperatorMatrices: error\n");
 				if (ii==SizeType(jj)) {

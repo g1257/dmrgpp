@@ -152,7 +152,7 @@ public:
 	ComplexOrRealType& operator()(SizeType row, SizeType col)
 	{
 		std::pair<SizeType,SizeType> coordinate(row,col);
-		int x=PsimagLite::isInVector(coordinates_,coordinate);
+		int x=PsimagLite::indexOrMinusOne(coordinates_,coordinate);
 		if (x<0) {
 			coordinates_.push_back(coordinate);
 			values_.push_back(0);

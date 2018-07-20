@@ -2,7 +2,6 @@
 #define QN_H
 #include "Vector.h"
 #include "ProgramGlobals.h"
-#include "IndexOfItem.h"
 #include "Profiling.h"
 
 namespace Dmrg {
@@ -155,15 +154,18 @@ public:
 		outQns.clear();
 		VectorSizeType count;
 		count.reserve(n);
+		VectorSizeType reverse(n);
 
 		// 1^st pass over data
 		for (SizeType i = 0; i < n; ++i) {
-			int x = PsimagLite::indexOfItemOrMinusOne(outQns, inQns[i]);
+			int x = PsimagLite::indexOrMinusOne(outQns, inQns[i]);
 			if (x < 0) {
 				outQns.push_back(inQns[i]);
 				count.push_back(1);
+				reverse[i] = count.size() - 1;
 			} else {
 				++count[x];
+				reverse[i] = x;
 			}
 		}
 
@@ -178,8 +180,8 @@ public:
 		outNumber.resize(n);
 		std::fill(count.begin(), count.end(), 0);
 		for (SizeType i = 0; i < n; ++i) {
-			int x = PsimagLite::indexOfItemOrMinusOne(outQns, inQns[i]);
-			assert(x >= 0);
+			SizeType x = reverse[i];
+			assert(x < offset.size() && x < count.size());
 			SizeType outIndex = offset[x] + count[x];
 			outNumber[outIndex] = inNumbers[i];
 			++count[x];

@@ -404,7 +404,7 @@ private:
 
 			} else {
 				HilbertSpaceType::create(bra,i,sigma);
-				int jj = PsimagLite::isInVector(natBasis,bra);
+				int jj = PsimagLite::indexOrMinusOne(natBasis,bra);
 				if (jj<0) continue;
 				if (ii==SizeType(jj)) {
 					std::cerr<<"ii="<<i<<" ket="<<ket<<" bra="<<bra;
@@ -434,7 +434,7 @@ private:
 				// it is a down electron, then flip it:
 				HilbertSpaceType::destroy(bra,i,sigma1);
 				HilbertSpaceType::create(bra,i,sigma2);
-				int jj = PsimagLite::isInVector(natBasis,bra);
+				int jj = PsimagLite::indexOrMinusOne(natBasis,bra);
 				assert(jj>=0);
 				cm(ii,jj)=1.0;
 			}

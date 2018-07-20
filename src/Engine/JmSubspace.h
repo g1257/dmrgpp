@@ -207,9 +207,10 @@ public:
 	SizeType findFreeRow(SizeType counter,SizeType total)
 	{
 		for (SizeType i=counter;i<total;i++) {
-			int x=PsimagLite::isInVector(indices_,i);
-			if (x<0) return i;
+			int x = PsimagLite::indexOrMinusOne(indices_,i);
+			if (x < 0) return i;
 		}
+
 		throw PsimagLite::RuntimeError("findfreerow: no free rows\n");
 	}
 
