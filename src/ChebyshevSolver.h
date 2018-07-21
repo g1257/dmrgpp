@@ -179,24 +179,25 @@ public:
 	void decomposition(const VectorType& initVector,
 	                   TridiagonalMatrixType& ab)
 	{
-		VectorType x(initVector.size(),0.0);
+		VectorType x(initVector.size(), 0.0);
 		VectorType y = initVector;
-		VectorVectorType lv;
 
-		lanczosVectors_.prepareOverlap(lanczosVectors_.cols());
-		ab.resize(2*params_.steps,0);
-		for (SizeType j=0; j < lanczosVectors_.cols(); j++) {
+		lanczosVectors_.prepareMemory(y.size(), lanczosVectors_.cols());
+		ab.resize(2*params_.steps, 0);
+		SizeType cols = lanczosVectors_.cols();
+		for (SizeType j = 0; j < cols; ++j) {
 			if (lanczosVectors_.lotaMemory())
-				lv.push_back(y);
+				lanczosVectors_.saveVector(y, j);
 
 			RealType atmp = 0;
 			RealType btmp = 0;
-			oneStepDec(x,y,atmp,btmp,j);
-			ab[2*j] = 2*atmp-ab[0];
-			ab[2*j+1] = 2*btmp-ab[1];
+			oneStepDec(x, y, atmp, btmp, j);
+			ab[2*j] =     2*atmp - ab[0];
+			ab[2*j + 1] = 2*btmp - ab[1];
 		}
 
-		lanczosVectors_.setVectors(lv);
+		// lanczosVectors_.resize(cols); <--- not needed because all steps are performed
+		//                                    and there is no early exit here
 	}
 
 	//! atmp = < phi_n | phi_n>

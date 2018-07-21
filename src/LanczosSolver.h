@@ -289,11 +289,10 @@ public:
 		lanczosVectors_.saveInitialVector(y);
 		typename Vector<RealType>::Type nullVector;
 		groundAllocations(max_nstep + 2,false);
-		VectorVectorType lv;
-		lanczosVectors_.prepareOverlap(max_nstep);
-		for (; j < max_nstep; j++) {
+		lanczosVectors_.prepareMemory(y.size(), max_nstep);
+		for (; j < max_nstep; ++j) {
 			if (lanczosVectors_.lotaMemory())
-				lv.push_back(y);
+				lanczosVectors_.saveVector(y, j);
 
 			RealType btmp = 0;
 			oneStepDec(x, y, atmp, btmp, j);
@@ -315,7 +314,7 @@ public:
 			ab.resize(max_nstep);
 		}
 
-		lanczosVectors_.setVectors(lv);
+		lanczosVectors_.resize(max_nstep);
 
 		OstringStream msg;
 		msg<<"Decomposition done for mat.rank="<<mat_.rows();

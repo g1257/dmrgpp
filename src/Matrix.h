@@ -270,13 +270,9 @@ public:
 
 	void resize(SizeType nrow, SizeType ncol)
 	{
-		// this throw should not be here, FIXME TODO
-		if (nrow_ != 0 || ncol_ != 0) throw
-			RuntimeError("Matrix::resize(...): only applies when Matrix is empty\n");
-
 		nrow_ = nrow;
 		ncol_ = ncol;
-		data_.resize(nrow*ncol, 0); // the 0 should not be here, FIXME TODO
+		data_.resize(nrow*ncol);
 	}
 
 	Matrix<T>& operator+=(const Matrix<T>& other)

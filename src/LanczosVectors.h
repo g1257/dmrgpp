@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009-2013-2018, UT-Battelle, LLC
 All rights reserved
 
-[PsimagLite, Version 1.0.0]
+[PsimagLite, Version 5.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -137,28 +137,31 @@ public:
 		data_ = 0;
 	}
 
-	void setVectors(const VectorVectorType& lv)
+	void saveVector(const VectorType& y, SizeType j)
 	{
 		if (!lotaMemory_) return;
-		SizeType cols = lv.size();
-		SizeType rows = lv[0].size();
-		dealWithStorageOfV(rows, cols);
-		if (data_->rows() == 0 && data_->cols() == 0) return;
-		for (SizeType j = 0; j < cols; ++j) {
-			for (SizeType i = 0; i < rows; ++i) {
-				assert(i < lv[j].size());
-				data_->operator()(i, j) = lv[j][i];
-			}
-		}
+
+		SizeType rows = data_->rows();
+		for (SizeType i = 0; i < rows; ++i)
+			data_->operator()(i, j) = y[i];
 	}
 
-	void prepareOverlap(SizeType steps)
+	void prepareMemory(SizeType rows, SizeType steps)
 	{
 		if (!lotaMemory_) return;
+
+		dealWithStorageOfV(rows, steps);
+
 		if (overlap_)
 			overlap_->resize(steps, 0);
 		else
 			overlap_ = new VectorType(steps, 0);
+	}
+
+	void resize(SizeType x)
+	{
+		SizeType rows = data_->rows();
+		data_->resize(rows, x);
 	}
 
 	const DenseMatrixType* data() const
