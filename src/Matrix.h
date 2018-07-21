@@ -102,6 +102,12 @@ public:
 	      data_(nrow*ncol, 0) // the 0 should not be here, FIXME TODO
 	{}
 
+	Matrix(SizeType nrow, SizeType ncol, const T& value)
+	    : nrow_(nrow),
+	      ncol_(ncol),
+	      data_(nrow*ncol, value)
+	{}
+
 	Matrix(const typename Vector<T>::Type& data,
 	       SizeType nrow,
 	       SizeType ncol)
@@ -270,6 +276,9 @@ public:
 
 	void resize(SizeType nrow, SizeType ncol)
 	{
+		if (nrow_ > 0 && nrow_ != nrow)
+			throw RuntimeError("Matrix::resize: not allowed to change rows from non-zero\n");
+
 		nrow_ = nrow;
 		ncol_ = ncol;
 		data_.resize(nrow*ncol);
