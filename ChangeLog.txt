@@ -1,3 +1,31 @@
+2018-07-24 Version 5.26
+
+* ci/postci: -su2 instead of -nosu2
+
+* ci: for Holstein and HolsteinSSH
+
+* Changes due to changes to PsimagLite indexOrMinusOne
+and Matrix interface
+
+* build system: improvements due to PsiTag improvements
+
+* ModelHelper now inside HamiltonianConnection
+
+* RIXS changes by Alberto
+
+* HubbardHolstein model added by Alberto
+
+* LinkProductStruct now called CachedHamiltoniansLinks
+
+* Qn improvements, no more full sort, only equal/unequal
+operator between Qn objects
+
+* Model Interface changed, basis of one-site no longer exposed
+basis of one site no longer needs ordering
+But backward compatibility order preserved for most models
+
+* LinkProduct* interface changed with virtual base LinkProductBase
+
 2018-07-12 Version 5.24
 
 * ci: 6005 for Kitaev
