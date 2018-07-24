@@ -1,3 +1,18 @@
+2018-07-24 Version 2.26
+
+* PsiTag: recursive behavior
+
+* indexOrMinusOne
+
+* NewMake improvments
+
+* Profiling takes message strings
+
+* Matrix::reset gone, Matrix::resize changed
+Matrix ctor added. Thanks to Ed for suggestions
+
+* LanczosVectors changes to matrix allocation
+
 2018-07-12 Version 2.24
 
 * prints GEOMETRY with IoNg
