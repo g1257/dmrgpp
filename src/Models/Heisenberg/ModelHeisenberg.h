@@ -312,17 +312,6 @@ private:
 		err("You may useTheForce in SolverOptions to run it anyway\n");
 	}
 
-	SizeType logBase2(SizeType x) const
-	{
-		SizeType counter = 0;
-		while (x > 0) {
-			x >>= 1;
-			counter++;
-		}
-
-		return (counter == 0) ? counter : counter - 1;
-	}
-
 	//! Find S^+_site in the natural basis natBasis
 	SparseMatrixType findSplusMatrices(SizeType site,
 	                                   const HilbertBasisType& natBasis) const
@@ -331,7 +320,7 @@ private:
 		MatrixType cm(total,total);
 		RealType j = 0.5*modelParameters_.twiceTheSpin;
 		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
-		SizeType bits = 1 + logBase2(modelParameters_.twiceTheSpin);
+		SizeType bits = 1 + ProgramGlobals::logBase2(modelParameters_.twiceTheSpin);
 		SizeType mask = 1;
 		mask <<= bits; // mask = 2^bits
 		assert(mask > 0);
@@ -373,7 +362,7 @@ private:
 		MatrixType cm(total,total);
 		RealType j = 0.5*modelParameters_.twiceTheSpin;
 		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
-		SizeType bits = logBase2(modelParameters_.twiceTheSpin) + 1;
+		SizeType bits = ProgramGlobals::logBase2(modelParameters_.twiceTheSpin) + 1;
 		SizeType mask = 1;
 		mask <<= bits; // mask = 2^bits
 		assert(mask > 0);

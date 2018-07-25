@@ -55,10 +55,17 @@ public:
 	// For information purposes only. Write model parameters
 	// String contains the group
 	// Serializer object is second argument
-	void write(PsimagLite::String,
-	           PsimagLite::IoNg::Out::Serializer&) const
+	void write(PsimagLite::String label1,
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
-		err("write unimplemented\n");
+		if (!io.doesGroupExist(label1))
+			io.createGroup(label1);
+
+		PsimagLite::String label = label1 + "/" + this->params().model;
+		io.createGroup(label);
+		modelParams_.write(label, io);
+		io.write(label + "/basis_", basis_);
+		io.write(label + "/ops_", ops_);
 	}
 
 	// Given an operator what with degree of freedom dof
@@ -111,12 +118,47 @@ public:
 	// operators in setOperatorMatrices
 	// The RealType contain the physical time in case your onsite terms
 	// depend on it
-	void addDiagonalsInNaturalBasis(SparseMatrixType&,
-	                                const VectorOperatorType&,
+	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
+	                                const VectorOperatorType& ops,
 	                                const VectorSizeType& block,
 	                                RealType)  const
 	{
-		err("addDiagonalsInNaturalBasis unimplemented\n");
+		SizeType n = block.size();
+		SizeType linSize = geometry_.numberOfSites();
+		SparseMatrixType tmpMatrix;
+		SparseMatrixType niup;
+		SparseMatrixType nidown;
+
+		for (SizeType i = 0; i < n; ++i) {
+			SizeType ind = block[i];
+			assert(ops_.size() > 1 + i*4);
+			// onsite U hubbard
+			//n_i up
+			SizeType sigma =0; // up sector
+			transposeConjugate(tmpMatrix, ops[sigma + i*4].data);
+			multiply(niup, tmpMatrix, ops[sigma + i*4].data);
+			//n_i down
+			sigma = 1; // down sector
+			transposeConjugate(tmpMatrix, ops[sigma + i*4].data);
+			multiply(nidown,tmpMatrix, ops[sigma + i*4].data);
+
+			multiply(tmpMatrix,niup,nidown);
+			assert(ind < modelParams_.hubbardU.size());
+			RealType tmp = modelParams_.hubbardU[ind];
+			hmatrix += tmp*tmpMatrix;
+
+			// V_iup term
+			assert(ind + 1*linSize < modelParams_.potentialV.size());
+			tmp = modelParams_.potentialV[ind + 0*linSize];
+			hmatrix += tmp*niup;
+
+			// V_idown term
+			tmp = modelParams_.potentialV[ind + 1*linSize];
+			hmatrix += tmp*nidown;
+
+			// Kondo term
+			std::cerr<<"KONDO TERM NOT ADDED YET\n";
+		}
 	}
 
 	// END ^^^^^^^^^^^Functions that each model needs to implement
@@ -168,6 +210,23 @@ private:
 			ops_.push_back(myOp);
 		}
 
+		// now the S+ and Sz for local spins
+		SparseMatrixType m = findSplusMatrix(basis_);
+		OperatorType sp(m,
+		                1,
+		                typename OperatorType::PairType(0, 0),
+		                1,
+		                su2related);
+		ops_.push_back(sp);
+
+		m = findSzMatrix(basis_);
+		OperatorType sz(m,
+		                1,
+		                typename OperatorType::PairType(0, 0),
+		                1,
+		                su2related);
+		ops_.push_back(sz);
+
 	}
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
@@ -175,7 +234,8 @@ private:
 	                             const VectorSizeType& basis) const
 	{
 		SizeType n = basis.size();
-		MatrixType cm(n, n, static_cast<ComplexOrRealType>(0.0));
+		const ComplexOrRealType zero = 0.0;
+		MatrixType cm(n, n, zero);
 		SizeType mask = (1 << sigma);
 
 		for (SizeType i = 0; i < n; ++i) {
@@ -200,6 +260,76 @@ private:
 	RealType sign(const SizeType& ket, SizeType sigma) const
 	{
 		return (sigma == 1 && (ket & 1)) ? -1 : 1;
+	}
+
+	//! Find S^+ in the natural basis natBasis
+	SparseMatrixType findSplusMatrix(const VectorSizeType& basis) const
+	{
+		SizeType site = 0;
+		SizeType total = basis.size();
+		MatrixType cm(total, total, 0);
+		RealType j = 0.5*modelParams_.twiceTheSpin;
+		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParams_.twiceTheSpin);
+		SizeType bits = 1 + ProgramGlobals::logBase2(modelParams_.twiceTheSpin);
+		SizeType mask = 1;
+		mask <<= bits; // mask = 2^bits
+		assert(mask > 0);
+		mask--;
+
+		for (SizeType i = 0; i < total; ++i) {
+			SizeType ket = basis[i];
+
+			SizeType ketsite = ket & mask;
+			ketsite >>= (site*bitsForOneSite);
+
+			assert(ketsite == ket);
+			SizeType brasite = ketsite + 1;
+			if (brasite >= modelParams_.twiceTheSpin + 1) continue;
+
+			SizeType bra = ket & (~mask);
+			assert(bra == 0);
+			brasite <<= (site*bitsForOneSite);
+			bra |= brasite;
+			assert(bra == brasite);
+
+			RealType m = ketsite - j;
+			RealType x = j*(j+1)-m*(m+1);
+			assert(x>=0);
+
+			cm(ket, bra) = sqrt(x);
+		}
+
+		SparseMatrixType operatorMatrix(cm);
+		return operatorMatrix;
+	}
+
+	//! Find S^z_i in the natural basis natBasis
+	SparseMatrixType findSzMatrix(const VectorSizeType& basis) const
+	{
+		SizeType site = 0;
+		SizeType total = basis.size();
+		MatrixType cm(total, total, 0);
+		RealType j = 0.5*modelParams_.twiceTheSpin;
+		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParams_.twiceTheSpin);
+		SizeType bits = ProgramGlobals::logBase2(modelParams_.twiceTheSpin) + 1;
+		SizeType mask = 1;
+		mask <<= bits; // mask = 2^bits
+		assert(mask > 0);
+		mask--;
+		mask <<= (site*bitsForOneSite);
+
+		for (SizeType i = 0; i < total; ++i) {
+			SizeType ket = basis[i];
+
+			SizeType ketsite = ket & mask;
+			ketsite >>= (site*bitsForOneSite);
+			assert(ketsite == ket);
+			RealType m = ketsite - j;
+			cm(ket,ket) = m;
+		}
+
+		SparseMatrixType operatorMatrix(cm);
+		return operatorMatrix;
 	}
 
 	const SolverParamsType& solverParams_;

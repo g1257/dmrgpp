@@ -178,6 +178,8 @@ Page* where more or less this feature is used: 245130-2
 [* Refers to published version.]
 
 #1550) Same as 1500 with Suzuki-Trotter
+1601) Kondo example
+#1601 to 1699 reserved for Kondo
 1800) Ancilla: Entangler Hamiltonian Heisenberg 6 sites
 1801) Ancilla: Real      Hamiltonian Heisenberg 6 sites
 1810) Ancilla: Entangler Hamiltonian Heisenberg 6 sites Canonical

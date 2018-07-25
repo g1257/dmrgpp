@@ -148,6 +148,17 @@ struct ProgramGlobals {
 		return "runFor" + rootname + ".cout";
 	}
 
+	static SizeType logBase2(SizeType x)
+	{
+		SizeType counter = 0;
+		while (x > 0) {
+			x >>= 1;
+			counter++;
+		}
+
+		return (counter == 0) ? counter : counter - 1;
+	}
+
 	friend std::istream& operator>>(std::istream& is, DirectionEnum& direction)
 	{
 		int x = -1;
