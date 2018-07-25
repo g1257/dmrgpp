@@ -448,7 +448,9 @@ private:
 		typedef std::pair<SizeType,SizeType> PairType;
 
 		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
-		VectorSizeType other(2, 0);
+		SizeType mode = ModelBaseType::targetQuantum().qn.other.size();
+		assert(mode == 1 || mode == 2); // either Sz or Sz and k-symmetry
+		VectorSizeType other(mode, 0);
 		QnType::modalStruct.resize(2);
 		QnType::modalStruct[1].modalEnum = QnType::MODAL_MODULO;
 		QnType::modalStruct[1].extra = modelParameters_.orbitals;
@@ -464,7 +466,7 @@ private:
 			SizeType electrons = electronsDown + electronsUp;
 
 			other[0] = electronsUp;
-			other[1] = findMvalue(basis[i]);
+			if (mode == 2) other[1] = findMvalue(basis[i]);
 			qns[i] = QnType(electrons, other, jmpair, 0);
 		}
 	}
