@@ -19,27 +19,28 @@ Please see full open source license included in file LICENSE.
 use warnings;
 use strict;
 
+use Getopt::Long qw(:config no_ignore_case);
 use lib "../../PsimagLite/scripts";
-use Make;
+use NewMake;
+use PsiTag;
 
 my @drivers = ();
 
-my ($flavor) = @ARGV;
+my ($flavor, $config) = ("production", "");
+my $usage = "USAGE: $0 [-f flavor] [-c config]\n";
 
-$flavor = procFlavor($flavor);
-createMakefile($flavor);
+GetOptions('f=s' => \$flavor,
+           'c=s' => \$config) or die "$usage\n";
+
+my @configFiles = ("../TestSuite/inputs/ConfigBase.psiTag");
+push @configFiles, $config if ($config ne "");
+
+createMakefile(\@configFiles, $flavor);
 
 sub createMakefile
 {
-	my ($flavor) = @_;
-	Make::backupMakefile();
-	Make::createConfigMake($flavor);
-
-	if (!(-r "Config.make")) {
-		my $cmd = "cp Config.make.sample Config.make";
-		system($cmd);
-		print STDERR "$0: Executed $cmd\n";
-	}
+	my ($configFiles, $flavor) = @_;
+	NewMake::backupMakefile();
 
 	my $fh;
 	open($fh, ">", "Makefile") or die "Cannot open Makefile for writing: $!\n";
@@ -52,9 +53,15 @@ sub createMakefile
 	my $combinedUnitsModif = $combinedUnits;
 	$combinedUnitsModif =~ s/Io\///;
 	my $combinedUnits2 = combine("../src/",\@units,".cpp ");
+	my $configContent = NewMake::getConfigContent($configFiles, $flavor);
 
 	print FH<<EOF;
-include Config.make
+# DO NOT EDIT!!! Changes will be lost. Use the PsiTag system to configure instead
+# This Makefile was written by $0
+# PsimagLite/lib
+
+$configContent
+
 all: libpsimaglite.a
 libpsimaglite.a: Makefile $combinedUnits AinurSpirit.o AinurState.o
 \tar rcs libpsimaglite.a $combinedUnitsModif AinurSpirit.o AinurState.o
@@ -100,37 +107,4 @@ sub combine
 	return $buffer;
 }
 
-sub procFlavor
-{
-	my ($flavor) = @_;
-	if (!defined($flavor)) {
-		$flavor = "production";
-		print STDERR "$0: No flavor given, assuming production\n";
-		print STDERR "\t say $0 help for a list of options\n";
-	}
-
-	my $hasPath = ($flavor =~ /^\.\./ or $flavor =~ /^\//);
-	return $flavor if ($hasPath);
-
-	if ($flavor eq "help") {
-		print "USAGE: $0 [production | debug | callgrind";
-		print " | helgrind | drd]\n";
-		exit(0);
-	}
-
-	my $dir = "../TestSuite/inputs";
-	if ($flavor eq "production") {
-		$flavor = "Config.make";
-	} elsif ($flavor eq "debug") {
-		$flavor = "ConfigDebug.make";
-	} elsif ($flavor eq "callgrind") {
-		$flavor = "ConfigCallgrind.make";
-	} elsif ($flavor eq "helgrind" or $flavor eq "drd") {
-		$flavor = "ConfigHelgrind.make";
-	} else {
-		return $flavor;
-	}
-
-	return "$dir/$flavor";
-}
 
