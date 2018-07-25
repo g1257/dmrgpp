@@ -54,10 +54,11 @@ my %progGlobalsDriver = (name => 'ProgramGlobals', aux => 1);
 my %restartDriver = (name => 'RestartStruct', aux => 1);
 my %finiteLoopDriver = (name => 'FiniteLoop', aux => 1);
 my %utilsDriver = (name => 'Utils', aux => 1);
+my %qnDriver = (name => 'Qn', aux => 1);
 my %su2RelatedDriver = (name => 'Su2Related', aux => 1);
 my %toolboxDriver = (name => 'toolboxdmrg',
-                     dotos => 'toolboxdmrg.o ProgramGlobals.o Provenance.o Utils.o');
-my $dotos = "observe.o ProgramGlobals.o Provenance.o Utils.o Su2Related.o";
+                     dotos => 'toolboxdmrg.o ProgramGlobals.o Provenance.o Utils.o Qn.o');
+my $dotos = "observe.o ProgramGlobals.o Provenance.o Utils.o Su2Related.o Qn.o ";
 $dotos .= " ObserveDriver0.o ObserveDriver1.o ObserveDriver2.o ";
 my %observeDriver = (name => 'observe', dotos => $dotos);
 
@@ -67,10 +68,10 @@ my %observeDriver2 = (name => 'ObserveDriver2', aux => 1);
 
 my @drivers = (\%provenanceDriver,\%su2RelatedDriver,
 \%progGlobalsDriver,\%restartDriver,\%finiteLoopDriver,\%utilsDriver,
-\%observeDriver,\%toolboxDriver,
+\%qnDriver, \%observeDriver,\%toolboxDriver,
 \%observeDriver0,\%observeDriver1,\%observeDriver2);
 
-$dotos = "dmrg.o Provenance.o RestartStruct.o FiniteLoop.o Utils.o ";
+$dotos = "dmrg.o Provenance.o RestartStruct.o FiniteLoop.o Utils.o Qn.o ";
 $dotos .= " ProgramGlobals.o Su2Related.o";
 
 my @su2files = DmrgDriver::createTemplates($generateSources);

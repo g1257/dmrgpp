@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Utils.h"
 
 namespace Dmrg {
+
 struct ProgramGlobals {
 
 	static SizeType maxElectronsOneSpin;

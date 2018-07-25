@@ -17,6 +17,5 @@ std::ostream &operator<<(std::ostream& os,const FiniteLoop& fl)
 	os<<fl.saveOption;
 	return os;
 }
-
 } // namespace Dmrg
 

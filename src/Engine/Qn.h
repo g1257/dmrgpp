@@ -10,22 +10,55 @@ class Qn {
 
 public:
 
+	enum ModalEnum { MODAL_SUM, MODAL_MODULO};
+
+	struct ModalStruct {
+
+		ModalStruct() : modalEnum(MODAL_SUM), extra(0) {}
+
+		template<typename SomeInputType>
+		void read(PsimagLite::String str, SomeInputType& io)
+		{
+			io.read(modalEnum, str + "/modalEnum");
+			io.read(extra, str + "/extra");
+		}
+
+		void write(PsimagLite::String str, PsimagLite::IoNgSerializer& io) const
+		{
+			io.write(str+ "/modalEnum", modalEnum);
+			io.write(str + "/extra", extra);
+		}
+
+		ModalEnum modalEnum;
+		short unsigned int extra;
+	};
+
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef std::pair<SizeType, SizeType> PairSizeType;
 	typedef PsimagLite::Vector<Qn>::Type VectorQnType;
+	typedef PsimagLite::Vector<ModalStruct>::Type VectorModalStructType;
 
 	Qn(SizeType e, VectorSizeType szPlusConst, PairSizeType j, SizeType flavor)
 	    : electrons(e), other(szPlusConst), jmPair(j), flavors(flavor)
-	{}
+	{
+		if (modalStruct.size() != szPlusConst.size())
+			modalStruct.resize(szPlusConst.size());
+	}
 
 	Qn(const Qn& q1, const Qn& q2)
 	{
 		electrons = q1.electrons + q2.electrons;
 		SizeType n = q1.other.size();
 		assert(q2.other.size() == n);
+		if (modalStruct.size() != n)
+			modalStruct.resize(n);
+
 		other.resize(n);
-		for (SizeType i = 0; i < n; ++i)
+		for (SizeType i = 0; i < n; ++i) {
 			other[i] = q1.other[i] + q2.other[i];
+			if (modalStruct[i].modalEnum == MODAL_MODULO)
+				other[i] %= modalStruct[i].extra;
+		}
 
 		jmPair.first = q1.jmPair.first + q2.jmPair.first;
 		jmPair.second = q1.jmPair.second + q2.jmPair.second;
@@ -56,7 +89,7 @@ public:
 	bool operator==(const Qn& a) const
 	{
 		return (a.electrons == electrons &&
-		        vectorEqual(a.other) &&
+		        vectorEqualMaybeModal(a.other) &&
 		        pairEqual(a.jmPair) &&
 		        flavors == a.flavors);
 	}
@@ -211,6 +244,7 @@ public:
 		return os;
 	}
 
+	static VectorModalStructType modalStruct;
 	SizeType electrons;
 	VectorSizeType other;
 	PairSizeType jmPair;
@@ -218,12 +252,22 @@ public:
 
 private:
 
-	bool vectorEqual(const VectorSizeType& otherOther) const
+	bool vectorEqualMaybeModal(const VectorSizeType& otherOther) const
 	{
 		SizeType n = otherOther.size();
 		if (n != other.size()) return false;
-		for (SizeType i = 0; i < n; ++i)
-			if (otherOther[i] != other[i]) return false;
+		for (SizeType i = 0; i < n; ++i) {
+			if (modalStruct[i].modalEnum == MODAL_SUM) {
+				if (otherOther[i] != other[i]) return false;
+			} else {
+				assert(modalStruct[i].modalEnum == MODAL_MODULO);
+				assert(modalStruct[i].extra > 0);
+				SizeType x = (otherOther[i] > other[i]) ? otherOther[i] - other[i] :
+				                                          other[i] - otherOther[i];
+				if ((x % modalStruct[i].extra) != 0) return false;
+			}
+		}
+
 		return true;
 	}
 
@@ -233,6 +277,5 @@ private:
 		        otherJm.second == jmPair.second);
 	}
 };
-
 }
 #endif // QN_H
