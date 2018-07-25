@@ -44,7 +44,7 @@ RepeatFiniteLoopsTimes=202
 
 TargetElectronsUp=4
 TargetElectronsDown=4
-TargetExtra=4
+TargetExtra 1        4
 
 RestartFilename=data1850.txt
 

@@ -448,6 +448,10 @@ private:
 		typedef std::pair<SizeType,SizeType> PairType;
 
 		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
+		VectorSizeType other(2, 0);
+		QnType::modalStruct.resize(2);
+		QnType::modalStruct[1].modalEnum = QnType::MODAL_MODULO;
+		QnType::modalStruct[1].extra = modelParameters_.orbitals;
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(0,0);
 
@@ -459,8 +463,23 @@ private:
 			                                                                      SPIN_DOWN);
 			SizeType electrons = electronsDown + electronsUp;
 
-			qns[i] = QnType(electrons, VectorSizeType(1, electronsUp), jmpair, 0);
+			other[0] = electronsUp;
+			other[1] = findMvalue(basis[i]);
+			qns[i] = QnType(electrons, other, jmpair, 0);
 		}
+	}
+
+	SizeType findMvalue(SizeType ket) const
+	{
+		SizeType dofs = 2*modelParameters_.orbitals;
+		SizeType sum = 0;
+		for (SizeType sigma = 0; sigma < dofs; ++sigma) {
+			if (!HilbertSpaceFeAsType::isNonZero(ket, 0, sigma)) continue;
+			SizeType orbital = sigma % modelParameters_.orbitals;
+			sum += orbital;
+		}
+
+		return sum % modelParameters_.orbitals;
 	}
 
 	// note: we use 2j instead of j

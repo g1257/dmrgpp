@@ -26,4 +26,5 @@ FiniteLoops 2  2 100 0
 TargetElectronsUp=6
 TargetElectronsDown=6
 Orbitals=2
+TargetExtra 1 0
 

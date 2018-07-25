@@ -44,5 +44,4 @@ FiniteLoops 4
 
 TargetElectronsUp=4
 TargetElectronsDown=4
-TargetExtra=2
-TargetExtra=2
+TargetExtra 2            2 2

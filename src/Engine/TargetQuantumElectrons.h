@@ -144,17 +144,23 @@ struct TargetQuantumElectrons {
 			isCanonical = false;
 		}
 
-		while (true) {
-			try {
-				SizeType extra = 0;
-				io.readline(extra,"TargetExtra=");
-				if (!hasSzPlusConst)
-					std::cout<<"WARNING: TargetExtra= with grand canonical ???\n";
-				qn.other.push_back(extra);
-			} catch (std::exception&) {
-				break;
-			}
-		}
+		bool flag = false;
+		try {
+			int dummy = 0;
+			io.readline(dummy, "TargetExtra=");
+			flag = true;
+		} catch (std::exception&) {}
+
+		if (flag) err("Instead of TargetExtra= please use a vector\n");
+
+		try {
+			VectorSizeType extra;
+			io.read(extra,"TargetExtra");
+			if (!hasSzPlusConst)
+				std::cout<<"WARNING: TargetExtra= with grand canonical ???\n";
+			for (SizeType i = 0; i < extra.size(); ++i)
+				qn.other.push_back(extra[i]);
+		} catch (std::exception&) {}
 
 		int tmp = 0;
 		try {

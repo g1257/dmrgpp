@@ -32,8 +32,7 @@ FiniteLoops 4  2 100 0 -2 100 0 -2 100 0 2 100 0
 AdjustQuantumNumbers 4      2 4 1 1
 TargetElectronsTotal=8
 TargetSzPlusConst=4
-TargetExtra=2
-TargetExtra=2
+TargetExtra 2    2 2
 Orbitals=2
 FeAsMode=INT_ORBITAL0
 
