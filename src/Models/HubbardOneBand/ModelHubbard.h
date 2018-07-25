@@ -177,7 +177,7 @@ public:
 		 construct the Hamiltonian.
 		 For example, for the Hubbard model these operators are the
 		 creation operators for sites in block */
-	virtual void setOperatorMatrices(VectorOperatorType& creationMatrix,
+	void setOperatorMatrices(VectorOperatorType& creationMatrix,
 	                                 VectorQnType& qns,
 	                                 const BlockType& block) const
 	{

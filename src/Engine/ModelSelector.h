@@ -73,6 +73,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/Kitaev/Kitaev.h"
 #include "../Models/HubbardMultiBand/ModelHubbardMultiBand.h"
 #include "../Models/HubbardHolstein/HubbardHolstein.h"
+#include "../Models/Kondo/Kondo.h"
 #endif
 
 namespace Dmrg {
@@ -109,6 +110,7 @@ class ModelSelector {
 	typedef Kitaev<ModelBaseType> KitaevType;
 	typedef ModelHubbardMultiBand<ModelBaseType> ModelHubbardMultiBandType;
 	typedef HubbardHolstein<ModelBaseType> HubbardHolsteinType;
+	typedef Kondo<ModelBaseType> KondoType;
 #endif
 	// end models
 
@@ -178,6 +180,8 @@ public:
 			model_ = new HubbardHolsteinType(solverParams, io, geometry, "");
 		} else if (name_ == "HubbardHolsteinSSH") {
 			model_ = new HubbardHolsteinType(solverParams, io, geometry, "SSH");
+		} else if (name_ == "Kondo") {
+			model_ = new KondoType(solverParams, io, geometry);
 		}
 #endif
 		else {
