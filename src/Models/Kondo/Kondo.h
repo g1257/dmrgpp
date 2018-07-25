@@ -227,6 +227,14 @@ private:
 		                su2related);
 		ops_.push_back(sz);
 
+		m = findNmatrix(basis_);
+		OperatorType nm(m,
+		                1,
+		                typename OperatorType::PairType(0, 0),
+		                1,
+		                su2related);
+		ops_.push_back(nm);
+
 	}
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
@@ -278,6 +286,9 @@ private:
 
 		for (SizeType i = 0; i < total; ++i) {
 			SizeType ket = basis[i];
+			// save and discard electronic part
+			SizeType electronic = ket & 3;
+			ket >>= 2;
 
 			SizeType ketsite = ket & mask;
 			ketsite >>= (site*bitsForOneSite);
@@ -296,7 +307,10 @@ private:
 			RealType x = j*(j+1)-m*(m+1);
 			assert(x>=0);
 
-			cm(ket, bra) = sqrt(x);
+			// restore electronic part to bra
+			bra <<= 2;
+			bra |= electronic;
+			cm(basis[i], bra) = sqrt(x);
 		}
 
 		SparseMatrixType operatorMatrix(cm);
@@ -320,16 +334,39 @@ private:
 
 		for (SizeType i = 0; i < total; ++i) {
 			SizeType ket = basis[i];
+			// discard electronic part
+			ket >>= 2;
 
 			SizeType ketsite = ket & mask;
 			ketsite >>= (site*bitsForOneSite);
 			assert(ketsite == ket);
 			RealType m = ketsite - j;
-			cm(ket,ket) = m;
+
+			cm(basis[i], basis[i]) = m;
 		}
 
 		SparseMatrixType operatorMatrix(cm);
 		return operatorMatrix;
+	}
+
+	//! Find n in the natural basis natBasis
+	SparseMatrixType findNmatrix(const VectorSizeType& basis) const
+	{
+		const ComplexOrRealType zero = 0.0;
+		SizeType n = basis.size();
+		MatrixType cm(n, n, zero);
+		VectorSizeType mask(2, 0);
+		mask[0] = 1;
+		mask[1] = 2;
+		for (SizeType i = 0; i < n; ++i) {
+			SizeType ket = basis[i];
+			for (SizeType sigma = 0; sigma < 2; ++sigma) {
+				if (ket & mask[sigma]) cm(i, i) += 1.0;
+			}
+		}
+
+		SparseMatrixType creationMatrix(cm);
+		return creationMatrix;
 	}
 
 	const SolverParamsType& solverParams_;

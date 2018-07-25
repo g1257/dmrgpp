@@ -81,6 +81,7 @@ public:
 			fOrB = ProgramGlobals::BOSON;
 			assert(dof == 0);
 			ops = PairSizeType(4, 4);
+			break;
 		default:
 			err("Invalid term\n");
 			break;
