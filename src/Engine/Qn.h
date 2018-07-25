@@ -41,7 +41,7 @@ public:
 	Qn(SizeType e, VectorSizeType szPlusConst, PairSizeType j, SizeType flavor)
 	    : electrons(e), other(szPlusConst), jmPair(j), flavors(flavor)
 	{
-		if (modalStruct.size() != szPlusConst.size())
+		if (szPlusConst.size() > 0 && modalStruct.size() != szPlusConst.size())
 			modalStruct.resize(szPlusConst.size());
 	}
 
@@ -50,8 +50,7 @@ public:
 		electrons = q1.electrons + q2.electrons;
 		SizeType n = q1.other.size();
 		assert(q2.other.size() == n);
-		if (modalStruct.size() != n)
-			modalStruct.resize(n);
+		assert(modalStruct.size() == n);
 
 		other.resize(n);
 		for (SizeType i = 0; i < n; ++i) {
