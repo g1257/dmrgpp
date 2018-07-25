@@ -124,6 +124,7 @@ public:
 	                                RealType)  const
 	{
 		SizeType n = block.size();
+		assert(n == 1);
 		SizeType linSize = geometry_.numberOfSites();
 		SparseMatrixType tmpMatrix;
 		SparseMatrixType niup;
@@ -157,7 +158,8 @@ public:
 			hmatrix += tmp*nidown;
 
 			// Kondo term
-			std::cerr<<"KONDO TERM NOT ADDED YET\n";
+			assert(ind < modelParams_.kondoJ.size());
+			hmatrix += modelParams_.kondoJ[ind] * kondoOnSite(ops, niup, nidown);
 		}
 	}
 
@@ -186,7 +188,8 @@ private:
 
 			SizeType electrons = electronsDown + electronsUp;
 
-			SizeType bosonicSz = (basis[i] & 4) ? 1 : 0;
+			SizeType bosonicSz = basis[i];
+			bosonicSz >>= 2; // delete electronic part
 
 			other[0] = electronsUp + bosonicSz;
 
@@ -369,6 +372,46 @@ private:
 		return creationMatrix;
 	}
 
+	SparseMatrixType kondoOnSite(const VectorOperatorType& ops,
+	                             const SparseMatrixType& niup,
+	                             const SparseMatrixType& nidown) const
+	{
+		const SparseMatrixType& cdu = ops[0].data;
+		const SparseMatrixType& cdd = ops[1].data;
+		const SparseMatrixType& Sp = ops[2].data;
+		const SparseMatrixType& Sz = ops[3].data;
+
+		SparseMatrixType Sm;
+		transposeConjugate(Sm, Sp);
+
+		SparseMatrixType sz = niup;
+		sz += (-1.0)*nidown;
+		sz *= 0.5;
+
+		SparseMatrixType cu;
+		transposeConjugate(cu, cdu);
+
+		SparseMatrixType cd;
+		transposeConjugate(cd, cdd);
+
+		SparseMatrixType sp;
+		multiply(sp, cdu, cd);
+
+		SparseMatrixType sm;
+		transposeConjugate(sm, sp);
+#ifndef NDEBUG
+		SparseMatrixType smtest;
+		multiply(smtest, cdd, cu);
+		assert(smtest == sm);
+#endif
+
+		SparseMatrixType m = sp*Sm;
+		m += sm*Sp;
+		m *= 0.5;
+		m += sz*Sz;
+		return m;
+	}
+
 	const SolverParamsType& solverParams_;
 	const GeometryType& geometry_;
 	ParametersKondoType modelParams_;
@@ -377,6 +420,5 @@ private:
 	VectorOperatorType ops_;
 };
 }
-
 
 #endif

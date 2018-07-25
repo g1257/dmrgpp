@@ -19,8 +19,11 @@ struct ParametersKondo : public ParametersModelBase<RealType, QnType> {
 		if (twiceTheSpin != 1)
 			err("ParametersKondo accepts only HeisenbergTwiceS=1 for now\n");
 		io.read(potentialV, "potentialV");
+		checkVector(potentialV, "potentialV", 2*nsites);
 		io.read(hubbardU, "hubbardU");
+		checkVector(hubbardU, "hubbardU", nsites);
 		io.read(kondoJ, "kondoJ");
+		checkVector(kondoJ, "kondoJ", nsites);
 	}
 
 	void write(PsimagLite::String label1,
@@ -39,6 +42,14 @@ struct ParametersKondo : public ParametersModelBase<RealType, QnType> {
 	VectorRealType potentialV;
 	VectorRealType hubbardU;
 	VectorRealType kondoJ;
+
+private:
+
+	void checkVector(const VectorRealType& v, PsimagLite::String str, SizeType n)
+	{
+		if (v.size() == n) return;
+		err("Vector " + str + " should be of size " + ttos(n) + "\n");
+	}
 };
 }
 #endif // PARAMETERSKONDO_H
