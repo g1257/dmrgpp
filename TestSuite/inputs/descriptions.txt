@@ -178,7 +178,8 @@ Page* where more or less this feature is used: 245130-2
 [* Refers to published version.]
 
 #1550) Same as 1500 with Suzuki-Trotter
-1601) Kondo example
+1600) Kondo example with U=0 V=0 KondoJ = 0 SuperExchange=0 and hopping=1
+1601) Kondo example with U=0 V=0 KondoJ = 0 SuperExchange=1 and hopping=0
 #1601 to 1699 reserved for Kondo
 1800) Ancilla: Entangler Hamiltonian Heisenberg 6 sites
 1801) Ancilla: Real      Hamiltonian Heisenberg 6 sites

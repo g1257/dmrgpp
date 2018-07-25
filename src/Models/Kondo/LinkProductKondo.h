@@ -11,18 +11,19 @@ class LinkProductKondo : public LinkProductBase<ModelHelperType, GeometryType> {
 	typedef LinkProductBase<ModelHelperType, GeometryType> BaseType;
 	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::RealType RealType;
+	typedef typename BaseType::ComplexOrRealType ComplexOrRealType;
 
 public:
 
 	typedef typename BaseType::PairSizeType PairSizeType;
 
-	enum TermEnum {TERM_HOPPING, TERM_SS, TERM_DENSITY};
+	enum TermEnum {TERM_HOPPING, TERM_SPSM, TERM_SZSZ, TERM_DENSITY};
 
 	// List of function LinkProduct*.h of each model MUST implement
 
 	// You MUST return the number of Hamiltonian terms your model has
 	// term are connections from one site to other site or sites
-	SizeType terms() const { return 3; } // see TermEnum above for each of the 3
+	SizeType terms() const { return 4; } // see TermEnum above for each of the terms
 
 	// For term given in first argument, return how many dofs this term has
 	// dofs are sub-terms inside a term
@@ -30,20 +31,7 @@ public:
 	// site dependent Hilbert space (SDHS)
 	SizeType dofs(SizeType term, const AdditionalDataType&) const
 	{
-		switch (term) {
-		case TERM_HOPPING:
-			return 2; // up-up and down-down
-			break;
-		case TERM_SS:
-			return 2; // spsm and szsz
-			break;
-		case TERM_DENSITY:
-			return 1; // n n
-		default:
-			break;
-		}
-
-		throw PsimagLite::RuntimeError("dofs(): Invalid term\n");
+		return (term == TERM_HOPPING) ? 2 : 1;
 	}
 
 	// Fill 3 outputs and 3 more if you want to support SU(2)
@@ -72,10 +60,15 @@ public:
 			assert(dof < 2);
 			ops = PairSizeType(dof, dof);
 			break;
-		case TERM_SS:
+		case TERM_SPSM:
 			fOrB = ProgramGlobals::BOSON;
-			assert(dof < 2);
-			ops = PairSizeType(dof + 2, dof + 2);
+			assert(dof == 0);
+			ops = PairSizeType(2, 2);
+			break;
+		case TERM_SZSZ:
+			fOrB = ProgramGlobals::BOSON;
+			assert(dof == 0);
+			ops = PairSizeType(3, 3);
 			break;
 		case TERM_DENSITY:
 			fOrB = ProgramGlobals::BOSON;
@@ -86,6 +79,17 @@ public:
 			err("Invalid term\n");
 			break;
 		}
+	}
+
+	void valueModifier(ComplexOrRealType& value,
+	                   SizeType term,
+	                   SizeType,
+	                   bool isSu2,
+	                   const AdditionalDataType&) const
+	{
+		assert(!isSu2);
+		if (term == TERM_SPSM || term == TERM_SZSZ)
+			value *= 0.5;
 	}
 };
 }
