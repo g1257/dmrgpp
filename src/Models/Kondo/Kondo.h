@@ -74,19 +74,40 @@ public:
 	// site MUST be ignored unless your model has a site-dependent
 	// Hilbert space (SDHS)
 	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType site,
+	                             SizeType,
 	                             SizeType dof) const
 	{
-		err("Unimplemented naturalOperator\n");
 		SizeType h = qn_.size();
 		SparseMatrixType m(h, h);
 		m.makeDiagonal(h, 1.0);
 		typename OperatorType::Su2RelatedType su2Related;
-		return OperatorType(m,
-		                    1.0,
-		                    typename OperatorType::PairType(0,0),
-		                    1.0,
-		                    su2Related);
+		if (what == "i")
+			return OperatorType(m,
+			                    1.0,
+			                    typename OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
+		if (what == "c") {
+			if (dof > 1) err("naturalOperator: dof too big for c\n");
+			return ops_[dof];
+		}
+
+		if (what == "Sp") {
+			if (dof > 0) err("naturalOperator: dof too big for Sp\n");
+			return ops_[2];
+		}
+
+		if (what == "Sz") {
+			if (dof > 0) err("naturalOperator: dof too big for Sz\n");
+			return ops_[3];
+		}
+
+		if (what == "n") {
+			if (dof > 0) err("naturalOperator: dof too big for n\n");
+			return ops_[4];
+		}
+
+		throw PsimagLite::RuntimeError("naturalOperator: unknown label " + what + "\n");
 	}
 
 	// Return the size of the one-site Hilbert space basis for this model
