@@ -67,15 +67,6 @@ linkerOptions KronUtil = (
 LDFLAGS += -LKronUtil
 )
 
-# Specify the strip command to use (or use true to disable)
-Misc StripNo = (
-STRIP_COMMAND = true
-)
-
-Misc StripYes = (
-STRIP_COMMAND = strip
-)
-
 #Enable SU(2)
 #You will also need to run perl configure.pl production 0 1
 #to rebuild the Makefile
@@ -144,49 +135,39 @@ CPPFLAGS += -DUSE_PTHREADS
 
 default flavor = production
 
-
-flavor production = (
-
+group basics = (
 < dependency PsimagLite
 < compilerCPP GNU
 < compilerCPPOptions ansi
 < linkerOptions KronUtil
-< Misc StripYes
 < dependency HDF5
-< compilerCPPOptions NDEBUG
-< compilerCPPOptions Optimize3
 < dependency LAPACK
 < dependency BLAS
+STRIP_COMMAND = strip
+)
+
+flavor production = (
+< group basics
 < dependency pthreads
+< compilerCPPOptions Optimize3
+< compilerCPPOptions NDEBUG
 )
 
 flavor debug = (
-
-< dependency PsimagLite
-< compilerCPP GNU
-< compilerCPPOptions ansi
-< linkerOptions KronUtil
-< Misc StripNo
-< dependency HDF5
+< group basics
+STRIP_COMMAND = true
 < compilerCPPOptions Symbols3
 < compilerCPPOptions Werror
-< dependency LAPACK
-< dependency BLAS
+)
+
+flavor callgrind = (
+< flavor debug
+< compilerCPPOptions Optimize3
+< compilerCPPOptions NDEBUG
 )
 
 flavor drd = (
-
-< dependency PsimagLite
-< compilerCPP GNU
-< compilerCPPOptions ansi
-< linkerOptions KronUtil
-< Misc StripNo
-< dependency HDF5
-< compilerCPPOptions NDEBUG
-< compilerCPPOptions Optimize3
-< compilerCPPOptions Symbols3
-< dependency LAPACK
-< dependency BLAS
+< flavor debug
 < dependency pthreads
 )
 

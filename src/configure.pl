@@ -47,7 +47,7 @@ if ($lto == 1) {
 my @configFiles = ("../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag");
 push @configFiles, $config if (defined($config));
 
-system("cd KronUtil; perl newconfigure.pl \"@configFiles\" $flavor $gccdash");
+system("cd KronUtil; perl configure.pl \"@configFiles\" $flavor $gccdash");
 
 my %provenanceDriver = (name => 'Provenance', aux => 1);
 my %progGlobalsDriver = (name => 'ProgramGlobals', aux => 1);
