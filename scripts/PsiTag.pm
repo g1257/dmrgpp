@@ -13,19 +13,19 @@ automatic tagging is possible with .= content
 Mode is either
              add definition and overwrite if it exits =
              add definition and append to it if it exits +=
-             add definition or ignore if it exits =? 
+             add definition or ignore if it exits =?
              add definition or fail if it exits =!
              delete definition or ignore if it doesn't exist -=
              delete definition or fail if it exits -=!
- 
+
 tagging must not contain any of = + ? ! - < & *
 
 Content is subject to interpretation as follows.
-   
+
    (1) First non-whitespace character after mode in the same line, if it is a (
 
    (2) Last non-whitespace character in a line, if it is a )
- 
+
    (3) First non-whitespace character in a line or after mode, if it is a <
        and what follows until newline is considered the tagging
 
@@ -102,12 +102,13 @@ sub readTags
 
 				my $content = $rest."\n";
 				$content =~ s/^[ \t]+//;
-				
+
 				if ($thisLineParens < 0) {
 					print STDERR "$0: ) found but not in block scope\n";
 					syntaxError($line, $i + 1);
 				}
 
+				($tag) or die "$0: tag does not exist in line scope $line\n";
 				if ($thisLineParens > 0) {
 					$blockScope = 1;
 					$multilineContent = "";
@@ -185,6 +186,7 @@ sub unWrap
 		my $content = $line;
 		if ($line =~ /^[ \t]*\<(.*$)/) { # (3) in block scope
 			my $existingTag = $1;
+			($existingTag) or die "$0: Tag does not exist in unWrap: $line\n";
 			$existingTag = canonicalTagName($existingTag);
 			my $ptr = $tags->{"$existingTag"};
 			defined($ptr) or die "$0: Tag $existingTag doesn't exist\n";
@@ -193,10 +195,10 @@ sub unWrap
 			defined($content) or die "$0: No content for $existingTag\n";
 			$content = unWrap($tags, $content);
 		}
-		
+
 		$content =~ s/^[ \t]*\\//; # (4)
 		$content =~ s/\\([ \t]*)$/$1/; # (5)
-		
+
 		$result .= $content."\n";
 	}
 
