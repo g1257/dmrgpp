@@ -125,7 +125,9 @@ public:
 	      verbose_(verbose),
 	      withLegacyBugs_(withLegacyBugs),
 	      bracket_(2,0),
-	      noMoreData_(false)
+	      noMoreData_(false),
+	      dSsize_(0),
+	      timeSsize_(0)
 	{
 		if (nf > 0)
 			if (!init(hasTimeEvolution,nf,SAVE_YES))
@@ -138,15 +140,18 @@ public:
 
 	~ObserverHelper()
 	{
-		for (SizeType i=0;i<dSerializerV_.size();i++) {
+		for (SizeType i=0;i<dSsize_;i++) {
 			DmrgSerializerType* p = dSerializerV_[i];
 			delete p;
 		}
+
+		dSerializerV_.clear();
+		dSsize_ = 0;
 	}
 
 	bool endOfData() const { return noMoreData_; }
 
-	void setPointer(SizeType threadId,SizeType pos)
+	void setPointer(SizeType threadId, SizeType pos)
 	{
 		assert(threadId<currentPos_.size());
 		currentPos_[threadId]=pos;
@@ -196,8 +201,6 @@ public:
 
 	const LeftRightSuperType& leftRightSuper(SizeType threadId) const
 	{
-		if (!checkPos(threadId))
-			err("No more data\n");
 		return dSerializerV_[currentPos_[threadId]]->leftRightSuper();
 	}
 
@@ -215,7 +218,7 @@ public:
 
 	RealType time(SizeType threadId) const
 	{
-		if (timeSerializerV_.size() == 0) return 0.0;
+		if (timeSsize_ == 0) return 0.0;
 		assert(checkPos(threadId));
 		return timeSerializerV_[currentPos_[threadId]].time();
 	}
@@ -223,14 +226,14 @@ public:
 	SizeType site(SizeType threadId) const
 	{
 		assert(checkPos(threadId));
-		return  (timeSerializerV_.size()==0) ?
+		return  (timeSsize_==0) ?
 		            dSerializerV_[currentPos_[threadId]]->site()
 		        : timeSerializerV_[currentPos_[threadId]].site();
 		}
 
 		SizeType size() const
 		{
-		return dSerializerV_.size(); //-1;
+		return dSsize_; //-1;
 	}
 
 	SizeType marker(SizeType threadId) const
@@ -311,42 +314,10 @@ private:
 			std::cerr<<__FILE__<<" read "<<i<<" out of "<<total<<"\n";
 		}
 
+		dSsize_ = dSerializerV_.size();
+		timeSsize_ = timeSerializerV_.size();
 		noMoreData_ = true;
-		return (dSerializerV_.size() > 0);
-	}
-
-	void integrityChecks()
-	{
-		if (dSerializerV_.size()!=timeSerializerV_.size())
-			throw PsimagLite::RuntimeError("Error 1\n");
-		if (dSerializerV_.size()==0) return;
-		for (SizeType x=0;x<dSerializerV_.size()-1;x++) {
-			SizeType n = dSerializerV_[x]->leftRightSuper().super().size();
-			if (n==0) continue;
-			if (n!=timeSerializerV_[x].size())
-				throw PsimagLite::RuntimeError("Error 2\n");
-		}
-
-	}
-
-	void getTransform(MatrixType& transform,int ns)
-	{
-		io_.read(transform, "TRANSFORM_sites",ns);
-		io_.rewind();
-	}
-
-	void getWaveFunction(VectorType& wavefunction,SizeType ns)
-	{
-		VectorWithOffsetType tmpV;
-		tmpV.read(io_,"WAVEFUNCTION_sites=",ns);
-		tmpV.toSparse(wavefunction);
-		io_.rewind();
-	}
-
-	void getDirection(int& x,int ns)
-	{
-		io_.readline(x,"DIRECTION=",ns);
-		io_.rewind();
+		return (dSsize_ > 0);
 	}
 
 	bool checkPos(SizeType threadId) const
@@ -356,13 +327,13 @@ private:
 
 		SizeType pos = currentPos_[threadId];
 
-		if (pos>=dSerializerV_.size())
+		if (pos>=dSsize_)
 			return checkFailed1(threadId,pos);
 
-		bool hasTimeE = (timeSerializerV_.size()>0);
+		bool hasTimeE = (timeSsize_>0);
 
 		if (!hasTimeE) return true;
-		if (pos>=timeSerializerV_.size())
+		if (pos>=timeSsize_)
 			return checkFailed2(threadId,pos);
 		return true;
 	}
@@ -383,7 +354,7 @@ private:
 		PsimagLite::String str(__FILE__);
 		str += " " + ttos(__LINE__) + "\n";
 		str += " thread=" + ttos(threadId) + " currentPos=" + ttos(pos);
-		str += " >= serializer.size=" + ttos(dSerializerV_.size());
+		str += " >= serializer.size=" + ttos(dSsize_);
 		str += "\n";
 		std::cerr<<str;
 		return false;
@@ -394,7 +365,7 @@ private:
 		PsimagLite::String str(__FILE__);
 		str += " " + ttos(__LINE__) + "\n";
 		str += " thread=" + ttos(threadId) + " currentPos=" + ttos(pos);
-		str += " >= time serializer.size=" + ttos(timeSerializerV_.size());
+		str += " >= time serializer.size=" + ttos(timeSsize_);
 		str += "\n";
 		std::cerr<<str;
 		return false;
@@ -408,6 +379,8 @@ private:
 	bool withLegacyBugs_;
 	typename PsimagLite::Vector<SizeType>::Type bracket_;
 	bool noMoreData_;
+	SizeType dSsize_;
+	SizeType timeSsize_;
 };  //ObserverHelper
 } // namespace Dmrg
 
