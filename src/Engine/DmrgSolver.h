@@ -599,9 +599,8 @@ obtain ordered
 		if (!(saveOption & 1)) return;
 		if (!saveData_) return;
 
-		SparseMatrixType transform;
-		truncate_.transform(direction).toSparse(transform);
-		DmrgSerializerType ds(fsS,fsE,lrs_,target.gs(),transform,direction);
+		const BlockDiagonalMatrixType& transform = truncate_.transform(direction);
+		DmrgSerializerType ds(fsS,fsE,lrs_,target.gs(),transform, direction);
 
 		SizeType saveOption2 = (saveOption & 4) ? SAVE_ALL : SAVE_PARTIAL;
 		SizeType numberOfSites = model_.geometry().numberOfSites();

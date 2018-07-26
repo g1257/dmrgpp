@@ -170,10 +170,10 @@ public:
 		return dSerializerV_[currentPos_[threadId]]->transform(ret,O2);
 	}
 
-	SizeType columns(SizeType threadId) const
+	SizeType cols(SizeType threadId) const
 	{
 		assert(checkPos(threadId));
-		return dSerializerV_[currentPos_[threadId]]->columns();
+		return dSerializerV_[currentPos_[threadId]]->cols();
 	}
 
 	SizeType rows(SizeType threadId) const

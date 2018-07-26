@@ -452,7 +452,7 @@ private:
 			helper_.setPointer(threadId,s);
 			int growOption = GROW_RIGHT;
 
-			SparseMatrixType Onew(helper_.columns(threadId),helper_.columns(threadId));
+			SparseMatrixType Onew(helper_.cols(threadId), helper_.cols(threadId));
 			skeleton_.fluffUp(Onew,Odest,fermionicSign,growOption,true,threadId);
 			Odest = Onew;
 

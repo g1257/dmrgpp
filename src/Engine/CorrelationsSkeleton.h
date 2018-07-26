@@ -167,7 +167,7 @@ public:
 		for (SizeType s=nt;s<ns;s++) {
 			helper_.setPointer(threadId,s);
 			SizeType growOption = growthDirection(s,nt,i,threadId);
-			SparseMatrixType Onew(helper_.columns(threadId),helper_.columns(threadId));
+			SparseMatrixType Onew(helper_.cols(threadId),helper_.cols(threadId));
 
 			fluffUp(Onew,Odest,fermionicSign,growOption,false,threadId);
 			if (!transform && s == ns-1) {

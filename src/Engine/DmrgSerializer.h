@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2012, UT-Battelle, LLC
+Copyright (c) 2009-2012-2018, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 5.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -67,7 +67,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
 /** \ingroup DMRG */
 /*@{*/
@@ -83,6 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Io/IoSelector.h"
 #include "FermionSign.h"
 #include "ProgramGlobals.h"
+#include "BlockDiagonalMatrix.h"
+#include "BlockOffDiagMatrix.h"
 
 namespace Dmrg {
 // Move also checkpointing from DmrgSolver to here (FIXME)
@@ -95,17 +96,21 @@ class DmrgSerializer {
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 
 public:
+
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisType::VectorQnType VectorQnType;
+	typedef typename BasisType::VectorSizeType VectorSizeType;
 	typedef FermionSign FermionSignType;
 	typedef typename BasisType::RealType RealType;
+	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
+	typedef BlockOffDiagMatrix<MatrixType> BlockOffDiagMatrixType;
 
 	DmrgSerializer(const FermionSignType& fS,
 	               const FermionSignType& fE,
 	               const LeftRightSuperType& lrs,
 	               const VectorType& wf,
-	               const SparseMatrixType& transform,
+	               const BlockDiagonalMatrixType& transform,
 	               ProgramGlobals::DirectionEnum direction)
 	    : fS_(fS),
 	      fE_(fE),
@@ -113,9 +118,7 @@ public:
 	      wavefunction_(wf),
 	      transform_(transform),
 	      direction_(direction)
-	{
-		transposeConjugate(transformC_,transform_);
-	}
+	{}
 
 	// used only by IoNg:
 	template<typename IoInputType>
@@ -127,13 +130,12 @@ public:
 	               PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
 	    : fS_(io, prefix + "/fS", bogus),
 	      fE_(io, prefix + "/fE", bogus),
-	      lrs_(io, prefix, isObserveCode)
+	      lrs_(io, prefix, isObserveCode),
+	      transform_(io, prefix + "/transform")
 	{
 		if (bogus) return;
 
 		wavefunction_.read(io, prefix + "/WaveFunction");
-		io.read(transform_, prefix + "/transform");
-		transposeConjugate(transformC_,transform_);
 		io.read(direction_, prefix + "/direction");
 	}
 
@@ -163,7 +165,7 @@ public:
 
 		wavefunction_.write(io, prefix + "/WaveFunction");
 
-		io.write(transform_, prefix + "/transform");
+		transform_.write(prefix + "/transform", io);
 		io.write(direction_, prefix + "/direction");
 	}
 
@@ -184,9 +186,15 @@ public:
 
 	const VectorType& wavefunction() const { return wavefunction_; }
 
-	SizeType columns() const { return transform_.cols(); }
+	SizeType cols() const
+	{
+		return transform_.cols();
+	}
 
-	SizeType rows() const { return transform_.rows(); }
+	SizeType rows() const
+	{
+		return transform_.rows();
+	}
 
 	ProgramGlobals::DirectionEnum direction() const { return direction_; }
 
@@ -196,25 +204,34 @@ public:
 		else return lrs_.right().block()[0];
 	}
 
-	void transform(SparseMatrixType& ret,const SparseMatrixType& O) const
+	void transform(SparseMatrixType& ret, const SparseMatrixType& O) const
 	{
-		SparseMatrixType ret2;
-		multiply(ret2,transformC_,O);
-		multiply(ret,ret2,transform_);
+		BlockOffDiagMatrixType m(O, transform_.offsetsRows());
+		m.transform(transform_);
+		m.toSparse(ret);
 	}
 
 private:
 
+	void fillOffsets(VectorSizeType& v, const BasisType& basis) const
+	{
+		SizeType n = basis.partition();
+		if (n == 0) return;
+		v.resize(n);
+		for (SizeType i = 0; i < n; ++i)
+			v[i] = basis.partition(i);
+	}
+
 	// Disallowing copy and assignment here:
 	DmrgSerializer(const ThisType& ds);
+
 	ThisType& operator=(const ThisType& ds);
 
-
-	FermionSignType fS_,fE_;
+	FermionSignType fS_;
+	FermionSignType fE_;
 	LeftRightSuperType lrs_;
 	VectorType wavefunction_;
-	SparseMatrixType transform_;
-	SparseMatrixType transformC_;
+	BlockDiagonalMatrixType transform_;
 	ProgramGlobals::DirectionEnum direction_;
 }; // class DmrgSerializer
 } // namespace Dmrg 

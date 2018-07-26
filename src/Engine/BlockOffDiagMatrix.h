@@ -215,6 +215,11 @@ public:
 		return cols_;
 	}
 
+	const VectorSizeType& offsets(bool option) const
+	{
+		return (option) ? offsetRows_ : offsetCols_;
+	}
+
 private:
 
 	static void fillIndexToPart(VectorSizeType& indexToPart,

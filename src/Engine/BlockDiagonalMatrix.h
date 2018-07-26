@@ -117,6 +117,14 @@ public:
 	    : isSquare_(true)
 	{}
 
+	BlockDiagonalMatrix(IoInType& io, PsimagLite::String label)
+	{
+		io.read(isSquare_, label + "/isSquare_");
+		io.read(offsetsRows_, label + "/offsetRows_");
+		io.read(offsetsCols_, label + "/offsetCols_");
+		io.read(data_, label + "/data_");
+	}
+
 	template<typename SomeBasisType>
 	BlockDiagonalMatrix(const SomeBasisType& basis,
 	                    typename PsimagLite::EnableIf<
@@ -130,6 +138,16 @@ public:
 		assert(n == offsetsCols_.size());
 		for (SizeType i = 0; i < n; ++i)
 			offsetsRows_[i] = offsetsCols_[i] = basis.partition(i);
+	}
+
+	template<typename IoOutputType>
+	void write(PsimagLite::String label1, IoOutputType& io) const
+	{
+		io.createGroup(label1);
+		io.write(isSquare_, label1 + "/isSquare_");
+		io.write(offsetsRows_, label1 + "/offsetRows_");
+		io.write(offsetsCols_, label1 + "/offsetCols_");
+		io.write(data_, label1 + "/data_");
 	}
 
 	void setTo(ComplexOrRealType value)
