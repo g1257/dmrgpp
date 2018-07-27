@@ -139,7 +139,7 @@ public:
 	Kitaev(const SolverParamsType& solverParams,
 	       InputValidatorType& io,
 	       const GeometryType& geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType, io),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType(io), io),
 	      modelParameters_(io),
 	      geometry_(geometry)
 	{

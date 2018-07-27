@@ -137,7 +137,7 @@ public:
 	                InputValidatorType& io,
 	                GeometryType const &geometry,
 	                SizeType offset = DEGREES_OF_FREEDOM)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType, io),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType(io), io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      offset_(offset),

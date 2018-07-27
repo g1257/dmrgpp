@@ -100,6 +100,11 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
+	template<typename SomeInputType>
+	LinkProductFermionSpinless(SomeInputType& io)
+	    : BaseType(io, "Hopping NiNj")
+	{}
+
 	void setLinkData(SizeType term,
 	                 SizeType dofs,
 	                 bool,

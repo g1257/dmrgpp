@@ -98,8 +98,9 @@ public:
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename ModelHelperType::RealType RealType;
 
-	LinkProductHeisenbergAncillaC(bool hot)
-	    : hot_(hot)
+	template<typename SomeInputType>
+	LinkProductHeisenbergAncillaC(SomeInputType& io, bool hot)
+	    : BaseType(io, "SplusiSminusj SziSzj Ancilla"), hot_(hot)
 	{}
 
 	void setLinkData(SizeType term,

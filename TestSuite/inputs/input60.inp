@@ -1,22 +1,25 @@
 TotalNumberOfSites=32
 NumberOfTerms=4
 
+Term0=Hopping
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
 Connectors  1 1
 
+Term1=SplusiSminusj
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
 Connectors  1 1
 
-
+Term2=SziSzj
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
 Connectors  1 1
 
+Term3=NiNj
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
@@ -33,8 +36,6 @@ InfiniteLoopKeptStates=60
 FiniteLoops 4  15 100 0 -15 100 0 -15 100 0 15 100 1 
 TargetElectronsUp=16
 TargetElectronsDown=16
-TargetSpinTimesTwo=0
-
 Orbitals=1
 Threads=2
 MaxMatrixRankStored=1024

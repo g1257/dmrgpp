@@ -89,14 +89,17 @@ class LinkProductKitaev : public LinkProductBase<ModelHelperType, GeometryType> 
 	typedef typename BaseType::AdditionalDataType AdditionalDataType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 
-	static const SizeType terms_ = 3;
-
 public:
 
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename ModelHelperType::RealType RealType;
+
+	template<typename SomeInputType>
+	LinkProductKitaev(SomeInputType& io)
+	    : BaseType(io, "SxiSxj SyiSyj SziSzj")
+	{}
 
 	void setLinkData(SizeType term,
 	                        SizeType,
@@ -129,7 +132,7 @@ public:
 	//! Sx Sx
 	//! Sy Sy
 	//! Sz Sz
-	SizeType terms() const { return terms_; }
+	SizeType terms() const { return 3; }
 }; // class LinkProductKitaev
 } // namespace Dmrg
 /*@}*/

@@ -98,7 +98,7 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 
 	template<typename SomeInputType>
-	LinkProductFeAs(SomeInputType& io) : orbitals_(0)
+	LinkProductFeAs(SomeInputType& io) : BaseType(io, "Hopping"), orbitals_(0)
 	{
 		io.readline(orbitals_, "Orbitals=");
 	}

@@ -141,10 +141,10 @@ public:
 	ModelHubbard(const SolverParamsType& solverParams,
 	             InputValidatorType& io,
 	             GeometryType const &geometry,
-	             SizeType terms)
+	             PsimagLite::String terms)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType(terms),
+	                    new LinkProductType(io, terms),
 	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),

@@ -2,6 +2,7 @@
 #define LINKPRODUCTBASE_H
 #include "Vector.h"
 #include "ProgramGlobals.h"
+#include "PsimagLite.h"
 
 namespace Dmrg {
 
@@ -18,6 +19,31 @@ public:
 	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
 	typedef typename ModelHelperType::RealType RealType;
 	typedef std::pair<SizeType, SizeType> PairSizeType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+
+	template<typename SomeInputType>
+	LinkProductBase(SomeInputType& io, PsimagLite::String terms)
+	{
+		PsimagLite::split(termNames_, terms);
+		SizeType n = termNames_.size();
+
+		for (SizeType i = 0; i < n; ++i) {
+			PsimagLite::String label = "Term" + ttos(i);
+			PsimagLite::String str("");
+
+			try {
+				io.readline(str, label + "=");
+			} catch(std::exception&) {
+				std::cout<<"You should add a " + label + "=" + termNames_[i];
+				std::cout<<" for this term to your input\n";
+				continue;
+			}
+
+			if (str == termNames_[i]) continue;
+			PsimagLite::String msg = label + " expected to be " + termNames_[i];
+			err(msg + " but " + str + " found instead\n");
+		}
+	}
 
 	virtual ~LinkProductBase() {}
 
@@ -75,6 +101,14 @@ public:
 
 	// You MUSTN'T override this function for now
 	virtual SizeType dofsAllocationSize() const { return 2; }
+
+protected:
+
+	const VectorStringType& termNames() const { return termNames_; }
+
+private:
+
+	VectorStringType termNames_;
 };
 }
 #endif // LINKPRODUCTBASE_H

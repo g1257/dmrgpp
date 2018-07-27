@@ -99,8 +99,10 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
-	LinkProductTjAncillaC2(bool hot)
-	    : hot_(hot)
+	template<typename SomeInputType>
+	LinkProductTjAncillaC2(SomeInputType& io, bool hot)
+	    : BaseType(io, "Hopping SplusiSminusj SziSzj NiNj DiDj"),
+	      hot_(hot)
 	{}
 
 	void setLinkData(SizeType term,

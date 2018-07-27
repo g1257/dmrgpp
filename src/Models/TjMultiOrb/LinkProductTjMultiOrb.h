@@ -100,7 +100,9 @@ public:
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
 	template<typename SomeInputType>
-	LinkProductTjMultiOrb(SomeInputType& io) : orbitals_(0)
+	LinkProductTjMultiOrb(SomeInputType& io) :
+	    BaseType(io, "Hopping SplusiSminusj SziSzj NiNj"),
+	    orbitals_(0)
 	{
 		io.readline(orbitals_, "Orbitals=");
 	}

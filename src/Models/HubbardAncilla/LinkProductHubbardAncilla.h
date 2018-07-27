@@ -105,6 +105,11 @@ public:
 
 	typedef typename ModelHelperType::RealType RealType;
 
+	template<typename SomeInputType>
+	LinkProductHubbardAncilla(SomeInputType& io)
+	    : BaseType(io, "Hopping Lambda")
+	{}
+
 	SizeType dofs(SizeType,const AdditionalDataType&) const
 	{
 		return 2;

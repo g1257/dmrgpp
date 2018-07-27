@@ -100,8 +100,11 @@ public:
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename ModelHelperType::RealType RealType;
 
-	LinkProductHubbardAncillaExtended(bool hot)
-	    : hot_(hot) {}
+	template<typename SomeInputType>
+	LinkProductHubbardAncillaExtended(SomeInputType& io, bool hot)
+	    : BaseType(io, "Hopping Lambda SplusiSminusj SziSzj PairiPairj NiNj"),
+	      hot_(hot)
+	{}
 
 	SizeType dofs(SizeType term,const AdditionalDataType&) const
 	{

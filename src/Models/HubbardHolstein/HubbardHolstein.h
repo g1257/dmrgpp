@@ -140,7 +140,7 @@ public:
 	                PsimagLite::String additional)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType(additional == "SSH", io),
+	                    new LinkProductType(io, additional == "SSH"),
 	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry)

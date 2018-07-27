@@ -103,8 +103,11 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 
 	template<typename SomeInputType>
-	LinkProductHubbardHolstein(bool isSsh, SomeInputType& io)
-	    : isSsh_(isSsh), numberphonons_(0)
+	LinkProductHubbardHolstein(SomeInputType& io, bool isSsh)
+	    : BaseType(io, (isSsh) ? "HoppingFermionic HoppingBosonic" :
+	                             "HoppingFermionic HoppingBosonic HoppingSSH"),
+	      isSsh_(isSsh),
+	      numberphonons_(0)
 	{
 		io.readline(numberphonons_,"NumberPhonons=");
 	}

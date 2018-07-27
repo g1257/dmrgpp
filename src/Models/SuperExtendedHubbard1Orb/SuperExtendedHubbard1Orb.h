@@ -122,8 +122,8 @@ public:
 	                         GeometryType const &geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType((geometry.orbitals(LinkProductType::TERM_HOPPING,
-	                                                           0) == 2)),
+	                    new LinkProductType(io, (geometry.orbitals(LinkProductType::TERM_HOPPING,
+	                                                               0) == 2)),
 	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),
@@ -167,7 +167,7 @@ public:
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
-		        io.createGroup(label1);
+			io.createGroup(label1);
 
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);

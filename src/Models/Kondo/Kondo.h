@@ -33,7 +33,7 @@ public:
 	      GeometryType const &geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType,
+	                    new LinkProductType(io),
 	                    io),
 	      solverParams_(solverParams),
 	      geometry_(geometry),

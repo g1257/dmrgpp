@@ -96,8 +96,11 @@ public:
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename ModelHelperType::RealType RealType;
 
-	LinkProductHeisenberg(bool anisotropic)
-	    : anisotropic_(anisotropic)
+	template<typename SomeInputType>
+	LinkProductHeisenberg(SomeInputType& io, bool anisotropic)
+	    : BaseType(io, (anisotropic) ? "SplusiSminusj SziSzj SxiSxj" :
+	                                   "SplusiSminusj SziSzj"),
+	      anisotropic_(anisotropic)
 	{}
 
 	void setLinkData(SizeType term,

@@ -143,7 +143,7 @@ public:
 		} else if (name_ == "HeisenbergAncillaC") {
 			model_ = new HeisenbergAncillaCType(solverParams,io,geometry);
 		} else if (name_ == "HubbardOneBand") {
-			model_ = new ModelHubbardType(solverParams, io, geometry, 1);
+			model_ = new ModelHubbardType(solverParams, io, geometry, "Hopping");
 		} else if (name_ == "HubbardOneBandExtended") {
 			model_ = new ModelHubbardExtType(solverParams,io,geometry);
 		} else if (name_ == "HubbardOneBandExtendedSuper") {
@@ -165,7 +165,7 @@ public:
 		} else if (name_ == "SuperHubbardExtended") {
 			model_ = new SuperHubbardExtendedType(solverParams,io,geometry);
 		} else if (name_ == "KaneMeleHubbard") {
-			model_ = new ModelHubbardType(solverParams,io,geometry, 2);
+			model_ = new ModelHubbardType(solverParams,io,geometry, "Hopping Unknown");
 		} else if (name_ == "HubbardAncilla") {
 			model_ = new HubbardAncillaType(solverParams,io,geometry);
 		} else if (name_ == "HubbardAncillaExtended") {

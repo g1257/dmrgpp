@@ -137,7 +137,7 @@ public:
 	                PsimagLite::String additional)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType((additional == "Anisotropic")),
+	                    new LinkProductType(io, (additional == "Anisotropic")),
 	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),

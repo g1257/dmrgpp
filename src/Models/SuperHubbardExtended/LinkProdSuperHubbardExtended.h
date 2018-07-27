@@ -107,8 +107,11 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
-	LinkProdSuperHubbardExtended()
-	    : lHeis_(ANISOTROPIC_IS_FALSE), lExtHubb_()
+	template<typename SomeInputType>
+	LinkProdSuperHubbardExtended(SomeInputType& io)
+	    : BaseType(io, "Hopping NiNj Super"),
+	      lHeis_(io, ANISOTROPIC_IS_FALSE),
+	      lExtHubb_(io)
 	{}
 
 	void setLinkData(SizeType term,

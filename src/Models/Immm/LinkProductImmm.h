@@ -94,11 +94,16 @@ class LinkProductImmm : public LinkProductBase<ModelHelperType, GeometryType> {
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef std::pair<SizeType,SizeType> PairType;
 
-	enum {HOPPING_TERM,W_TERM}; // W_TERM is a term of the form Upd n_i n_j
+	enum {HOPPING_TERM, W_TERM}; // W_TERM is a term of the form Upd n_i n_j
 
 public:
 
 	typedef typename ModelHelperType::RealType RealType;
+
+	template<typename SomeInputType>
+	LinkProductImmm(SomeInputType& io)
+	    : BaseType(io, "Hopping W")
+	{}
 
 	//! The term=0 is for hoppings:
 	//! if sites are both TYPE_O then return 8, 2 orbitals, 2 spins,

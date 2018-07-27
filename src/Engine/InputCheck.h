@@ -201,6 +201,8 @@ public:
 		knownLabels_.push_back("ThreadsStackSize");
 		knownLabels_.push_back("RecoverySave");
 		knownLabels_.push_back("RecoveryMaxFiles");
+		for (SizeType i = 0; i < 10; ++i)
+			knownLabels_.push_back("Term" + ttos(i));
 	}
 
 	~InputCheck()

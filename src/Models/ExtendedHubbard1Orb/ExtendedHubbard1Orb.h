@@ -120,11 +120,11 @@ public:
 	                    GeometryType const &geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType,
+	                    new LinkProductType(io),
 	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),
-	      modelHubbard_(solverParams,io,geometry, 1)
+	      modelHubbard_(solverParams, io, geometry, "Hopping")
 	{}
 
 	SizeType hilbertSize(SizeType site) const

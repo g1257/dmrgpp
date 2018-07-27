@@ -129,7 +129,7 @@ public:
 	            GeometryType const &geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType((geometry.orbitals(0,0) > 1)),
+	                    new LinkProductType(io, (geometry.orbitals(0,0) > 1)),
 	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),

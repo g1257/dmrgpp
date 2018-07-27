@@ -127,7 +127,7 @@ public:
 	TjAncillaC(const SolverParamsType& solverParams,
 	           InputValidatorType& io,
 	           GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType, io),
+	    : ModelBaseType(solverParams, geometry, new LinkProductType(io), io),
 	      modelParameters_(io),
 	      geometry_(geometry)
 	{}

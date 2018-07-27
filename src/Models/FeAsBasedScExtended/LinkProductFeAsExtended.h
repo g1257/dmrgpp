@@ -109,7 +109,9 @@ public:
 
 	template<typename SomeInputType>
 	LinkProductFeAsExtended(SomeInputType& io)
-	    : lFeAs_(io), lHeis_(ANISOTROPIC_IS_FALSE)
+	    : BaseType(io, "Hopping SplusiSminuj, SziSzj"),
+	      lFeAs_(io),
+	      lHeis_(io, ANISOTROPIC_IS_FALSE)
 	{}
 
 	SizeType dofs(SizeType term,const AdditionalDataType& additional) const

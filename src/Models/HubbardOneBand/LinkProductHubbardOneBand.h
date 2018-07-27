@@ -98,8 +98,9 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
-	LinkProductHubbardOneBand(SizeType terms)
-	    : terms_(terms)
+	template<typename SomeInputType>
+	LinkProductHubbardOneBand(SomeInputType& io, PsimagLite::String terms)
+	    : BaseType(io, terms), terms_(BaseType::termNames().size())
 	{}
 
 	void setLinkData(SizeType,

@@ -17,7 +17,12 @@ public:
 
 	typedef typename BaseType::PairSizeType PairSizeType;
 
-	enum TermEnum {TERM_HOPPING, TERM_SPSM, TERM_SZSZ, TERM_DENSITY};
+	enum TermEnum {TERM_HOPPING, TERM_SPSM, TERM_SZSZ, TERM_NN};
+
+	template<typename SomeInputType>
+	LinkProductKondo(SomeInputType& io)
+	    : BaseType(io, "Hopping SplusiSminusj SziSzj ninj")
+	{}
 
 	// List of function LinkProduct*.h of each model MUST implement
 
@@ -70,7 +75,7 @@ public:
 			assert(dof == 0);
 			ops = PairSizeType(3, 3);
 			break;
-		case TERM_DENSITY:
+		case TERM_NN:
 			fOrB = ProgramGlobals::BOSON;
 			assert(dof == 0);
 			ops = PairSizeType(4, 4);

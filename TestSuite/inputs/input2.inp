@@ -1,5 +1,7 @@
 TotalNumberOfSites=16
 NumberOfTerms=1
+
+Term0=Hopping
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues

@@ -98,8 +98,10 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
-	LinkProdExtendedSuperHubbard1Orb(bool useSpinOrbit)
-	    : useSpinOrbit_(useSpinOrbit)
+	template<typename SomeInputType>
+	LinkProdExtendedSuperHubbard1Orb(SomeInputType& io, bool useSpinOrbit)
+	    : BaseType(io, "Hopping NiNj SplusiSminusj SziSzj PairiPairj"),
+	      useSpinOrbit_(useSpinOrbit)
 	{}
 
 	void setLinkData(SizeType term,
