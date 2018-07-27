@@ -415,44 +415,64 @@ private:
 	                   bool transform,
 	                   SizeType threadId)
 	{
-		MatrixType Odense;
-		crsMatrixToFullMatrix(Odense, O);
 		SizeType n = helper_.leftRightSuper(threadId).left().size();
-		SizeType nn = O.rows();
-		SizeType m = helper_.leftRightSuper(threadId).left().size()/nn;
-		MatrixType ret(n,n);
-		ret.setTo(0.0);
+		SizeType orows = O.rows();
+		SizeType ktotal = n/orows;
+		SparseMatrixType ret(n, n, ktotal*O.nonZeros());
 
-		for (SizeType e = 0; e < n; ++e) {
-			SizeType permE =helper_.leftRightSuper(threadId).left().permutation(e);
-			SizeType eOverN = permE/nn;
-			SizeType eModM = permE % m;
-			for (SizeType e2 = 0; e2 < n; ++e2) {
-				SizeType permE2 = helper_.leftRightSuper(threadId).left().permutation(e2);
-				if (growOption == GROW_RIGHT) {
-					if (eOverN != permE2/nn)
-						continue;
-				} else {
-					if (eModM != permE2 % m)
-						continue;
+		if (growOption==GROW_RIGHT) {
+
+			SizeType counter = 0;
+			for (SizeType k = 0; k < ktotal; ++k) {
+				for (SizeType i = 0; i < orows; ++i) {
+					ret.setRow(i + k*orows, counter);
+					for (int kj = O.getRowPtr(i); kj < O.getRowPtr(i + 1); ++kj) {
+						// Sperm[e0] = i + k*n
+						// Sperm[e1] = j + k*n
+
+						SizeType col = helper_.leftRightSuper(threadId).left().
+						        permutationInverse(O.getCol(kj) + k*orows);
+
+						ret.setCol(counter, col);
+						ret.setValues(counter++, O.getValue(kj));
+					}
 				}
-
-				ret(e,e2) = fluffUpSystem_(Odense,
-				                           permE,
-				                           permE2,
-				                           fermionicSign,
-				                           growOption,
-				                           threadId);
 			}
+
+			ret.setRow(n, counter);
+			ret.checkValidity();
+		} else {
+
+			SizeType counter = 0;
+			for (SizeType i = 0; i < orows; ++i) {
+				for (SizeType k = 0; k < ktotal; ++k) {
+					ret.setRow(k + i*ktotal, counter);
+					RealType sign = helper_.fermionicSignLeft(threadId)(k, fermionicSign);
+
+					for (int kj = O.getRowPtr(i); kj < O.getRowPtr(i + 1); ++kj) {
+						// Sperm[e0] = k + i*m
+						// Sperm[e1] = k + j*m
+
+						SizeType col = helper_.leftRightSuper(threadId).left().
+						        permutationInverse(k + O.getCol(kj)*ktotal);
+
+						ret.setCol(counter, col);
+						ret.setValues(counter++, O.getValue(kj)*sign);
+					}
+				}
+			}
+
+			ret.setRow(n, counter);
+			ret.checkValidity();
 		}
 
+		reorderRowsCrs(ret, helper_.leftRightSuper(threadId).left());
 		if (transform) {
-			SparseMatrixType ret3(ret);
-			helper_.transform(ret2,ret3,threadId);
+			helper_.transform(ret2, ret, threadId);
 			return;
 		}
 
-		fullMatrixToCrsMatrix(ret2,ret);
+		ret2 = ret;
 	}
 
 	// Perfomance critical:
@@ -479,39 +499,6 @@ private:
 		}
 
 		fullMatrixToCrsMatrix(ret2,ret);
-	}
-
-	// Perfomance critical:
-	FieldType fluffUpSystem_(const MatrixType& Odense,
-	                         SizeType permE,
-	                         SizeType permE2,
-	                         int fermionicSign,
-	                         int growOption,
-	                         SizeType threadId)
-	{
-		SizeType n = Odense.rows();
-		SizeType m = SizeType(helper_.leftRightSuper(threadId).left().size()/n);
-		RealType sign = static_cast<RealType>(1.0);
-
-		// Sperm[e] = i +k*n or e= k + i*m
-		// Sperm[e2] = j+k*n or e2=k+j*m
-		SizeType i,j,k,k2;
-		if (growOption==GROW_RIGHT) {
-			assert(permE/n == permE2/n);
-
-			PackIndicesType pack(n);
-			pack.unpack(i, k, permE);
-			pack.unpack(j, k2, permE2);
-		} else {
-			assert(permE % m == permE2 % m);
-
-			PackIndicesType pack(m);
-			pack.unpack(k, i, permE);
-			pack.unpack(k2,j, permE2);
-			sign = helper_.fermionicSignLeft(threadId)(k, fermionicSign);
-		}
-
-		return (k != k2) ? 0 : Odense(i,j)*sign;
 	}
 
 	// Perfomance critical:
@@ -543,6 +530,29 @@ private:
 		}
 
 		return (k != k2) ? 0 : Odense(i,j)*sign;
+	}
+
+	static void reorderRowsCrs(SparseMatrixType& matrix, const BasisType& basis)
+	{
+		SizeType nrows = matrix.rows();
+		SizeType ncols = matrix.cols();
+		SparseMatrixType matrix2(nrows, ncols, matrix.nonZeros());
+
+		SizeType counter = 0;
+		for (SizeType row = 0; row < nrows; ++row) {
+			matrix2.setRow(row, counter);
+			SizeType r = basis.permutation(row);
+			SizeType start = matrix.getRowPtr(r);
+			SizeType end = matrix.getRowPtr(r + 1);
+			for (SizeType k = start; k < end; ++k) {
+				matrix2.setCol(counter, matrix.getCol(k));
+				matrix2.setValues(counter++, matrix.getValue(k));
+			}
+		}
+
+		matrix2.setRow(nrows, counter);
+		matrix2.checkValidity();
+		matrix = matrix2;
 	}
 
 	FieldType bracket_(const SparseMatrixType& A,
