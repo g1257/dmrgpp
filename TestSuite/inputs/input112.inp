@@ -1,0 +1,27 @@
+TotalNumberOfSites=16
+NumberOfTerms=1
+
+Term0=Hopping
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+	1
+	1.0
+
+hubbardU	16 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+potentialV	 32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+	0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+Model=HubbardOneBand
+SolverOptions=none
+Version=53725d9b8f22615ccccc782082f4cd6f51a4e374
+OutputFile=data112.txt
+InfiniteLoopKeptStates=100
+FiniteLoops 4
+  7 100 0
+-14 100 0
+ 14 100 0
+-14 100 1 
+TargetElectronsUp=8
+TargetElectronsDown=8
+#ci observe arguments="<gs|c';c|gs>,<gs|z;z|gs>,<gs|n;n|gs>"
