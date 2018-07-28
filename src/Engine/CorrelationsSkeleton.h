@@ -199,11 +199,17 @@ public:
 	             bool transform,
 	             SizeType threadId)
 	{
-		if (helper_.direction(threadId)==EXPAND_SYSTEM) {
-			fluffUpSystem(ret2,O,fermionicSign,growOption,transform,threadId);
-			return;
-		}
-		fluffUpEnviron(ret2,O,fermionicSign,growOption,transform,threadId);
+		ProgramGlobals::DirectionEnum dir = helper_.direction(threadId);
+
+		fluffUpSystemOrEnviron(ret2,
+		                       O,
+		                       fermionicSign,
+		                       growOption,
+		                       transform,
+		                       (dir == EXPAND_SYSTEM) ? helper_.leftRightSuper(threadId).left() :
+		                                                helper_.leftRightSuper(threadId).right(),
+		                       dir,
+		                       threadId);
 	}
 
 	void dmrgMultiply(SparseMatrixType& result,
@@ -408,19 +414,24 @@ private:
 	}
 
 	// Perfomance critical:
-	void fluffUpSystem(SparseMatrixType& ret2,
-	                   const SparseMatrixType& O,
-	                   int fermionicSign,
-	                   int growOption,
-	                   bool transform,
-	                   SizeType threadId)
+	void fluffUpSystemOrEnviron(SparseMatrixType& ret2,
+	                            const SparseMatrixType& O,
+	                            int fermionicSign,
+	                            int growOption,
+	                            bool transform,
+	                            const BasisType& basis,
+	                            ProgramGlobals::DirectionEnum sysOrEnv,
+	                            SizeType threadId)
 	{
-		SizeType n = helper_.leftRightSuper(threadId).left().size();
+		SizeType n = basis.size();
 		SizeType orows = O.rows();
 		SizeType ktotal = n/orows;
 		SparseMatrixType ret(n, n, ktotal*O.nonZeros());
 
 		if (growOption==GROW_RIGHT) {
+			RealType sign = (sysOrEnv == ProgramGlobals::EXPAND_ENVIRON)
+			        ? fermionSignBasis(fermionicSign, helper_.leftRightSuper(threadId).left()) :
+			          1;
 
 			SizeType counter = 0;
 			for (SizeType k = 0; k < ktotal; ++k) {
@@ -430,11 +441,11 @@ private:
 						// Sperm[e0] = i + k*n
 						// Sperm[e1] = j + k*n
 
-						SizeType col = helper_.leftRightSuper(threadId).left().
+						SizeType col = basis.
 						        permutationInverse(O.getCol(kj) + k*orows);
 
 						ret.setCol(counter, col);
-						ret.setValues(counter++, O.getValue(kj));
+						ret.setValues(counter++, O.getValue(kj)*sign);
 					}
 				}
 			}
@@ -447,13 +458,16 @@ private:
 			for (SizeType i = 0; i < orows; ++i) {
 				for (SizeType k = 0; k < ktotal; ++k) {
 					ret.setRow(k + i*ktotal, counter);
-					RealType sign = helper_.fermionicSignLeft(threadId)(k, fermionicSign);
+					RealType sign = (sysOrEnv == ProgramGlobals::EXPAND_ENVIRON) ?
+					            fermionSignBasis(fermionicSign,
+					                             helper_.leftRightSuper(threadId).super()) :
+					            helper_.fermionicSignLeft(threadId)(k, fermionicSign);
 
 					for (int kj = O.getRowPtr(i); kj < O.getRowPtr(i + 1); ++kj) {
 						// Sperm[e0] = k + i*m
 						// Sperm[e1] = k + j*m
 
-						SizeType col = helper_.leftRightSuper(threadId).left().
+						SizeType col = basis.
 						        permutationInverse(k + O.getCol(kj)*ktotal);
 
 						ret.setCol(counter, col);
@@ -466,70 +480,13 @@ private:
 			ret.checkValidity();
 		}
 
-		reorderRowsCrs(ret, helper_.leftRightSuper(threadId).left());
+		reorderRowsCrs(ret, basis);
 		if (transform) {
 			helper_.transform(ret2, ret, threadId);
 			return;
 		}
 
 		ret2 = ret;
-	}
-
-	// Perfomance critical:
-	void fluffUpEnviron(SparseMatrixType& ret2,
-	                    const SparseMatrixType& O,
-	                    int fermionicSign,
-	                    int growOption,
-	                    bool transform,
-	                    SizeType threadId)
-	{
-		SizeType n =helper_.leftRightSuper(threadId).right().size();
-		MatrixType Odense;
-		crsMatrixToFullMatrix(Odense, O);
-		MatrixType ret(n,n);
-		for (SizeType e=0;e<n;e++) {
-			for (SizeType e2=0;e2<n;e2++) {
-				ret(e,e2) = fluffUpEnviron_(Odense,e,e2,fermionicSign,growOption,threadId);
-			}
-		}
-		if (transform) {
-			SparseMatrixType ret3(ret);
-			helper_.transform(ret2,ret3,threadId);
-			return;
-		}
-
-		fullMatrixToCrsMatrix(ret2,ret);
-	}
-
-	// Perfomance critical:
-	FieldType fluffUpEnviron_(const MatrixType& Odense,
-	                          SizeType e,SizeType e2,
-	                          int fermionicSign,
-	                          int growOption,
-	                          SizeType threadId)
-	{
-		SizeType n = Odense.rows();
-		SizeType m = SizeType(helper_.leftRightSuper(threadId).right().size()/n);
-		RealType sign = 1;
-
-		// Eperm[e] = i +k*n or e= k + i*m
-		// Eperm[e2] = j+k*n or e2=k+j*m
-
-		SizeType i,j,k,k2;
-
-		if (growOption==GROW_RIGHT) {
-			PackIndicesType pack(n);
-			pack.unpack(i,k,helper_.leftRightSuper(threadId).right().permutation(e));
-			pack.unpack(j,k2,helper_.leftRightSuper(threadId).right().permutation(e2));
-			sign = fermionSignBasis(fermionicSign, helper_.leftRightSuper(threadId).left());
-		} else {
-			PackIndicesType pack(m);
-			pack.unpack(k,i,helper_.leftRightSuper(threadId).right().permutation(e));
-			pack.unpack(k2,j,helper_.leftRightSuper(threadId).right().permutation(e2));
-			sign = fermionSignBasis(fermionicSign,  helper_.leftRightSuper(threadId).super());
-		}
-
-		return (k != k2) ? 0 : Odense(i,j)*sign;
 	}
 
 	static void reorderRowsCrs(SparseMatrixType& matrix, const BasisType& basis)
