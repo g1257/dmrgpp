@@ -215,6 +215,11 @@ public:
 
 	~DmrgSolver()
 	{
+		SizeType site = 0; // FIXME FOR IMMM
+		VectorSizeType electrons;
+		model_.findElectronsOfOneSite(electrons, site);
+		ioOut_.write(electrons, "ElectronsOneSite");
+
 		appInfo_.finalize();
 		ioOut_.write(appInfo_, "ApplicationInfo");
 		ioOut_.close();
