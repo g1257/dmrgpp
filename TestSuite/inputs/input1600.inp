@@ -1,0 +1,48 @@
+TotalNumberOfSites=8
+NumberOfTerms=4
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+	1
+	1.0
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+        1
+        0.0
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+        1
+        0.0
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+        1
+        0.0
+
+kondoJ 8 0 0 0 0 0 0 0 0
+hubbardU 8 0 0 0 0 0 0 0 0
+potentialV	 16     0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+			0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+Model=Kondo
+HeisenbergTwiceS=1
+SolverOptions=none
+Version=5.27
+OutputFile=data1600
+InfiniteLoopKeptStates=100
+FiniteLoops 3
+ 3 100 0
+-6 100 0 6 100 0
+TargetElectronsTotal=8
+TargetSzPlusConst=8
+
+
