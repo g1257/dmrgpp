@@ -240,10 +240,14 @@ public:
 			for (SizeType i = 0; i < orows; ++i) {
 				for (SizeType k = 0; k < ktotal; ++k) {
 					ret.setRow(k + i*ktotal, counter);
-					RealType sign = (dir == ProgramGlobals::EXPAND_ENVIRON) ?
-					            fermionSignBasis(fermionicSign,
-					                             helper_.leftRightSuper(threadId).left()) :
-					            helper_.fermionicSignLeft(threadId)(k, fermionicSign);
+					RealType sign = 1;
+					if (dir == ProgramGlobals::EXPAND_ENVIRON) {
+						sign = (fermionicSign > 0) ? 1 : fermionSignBasis(fermionicSign,
+						                        helper_.leftRightSuper(threadId).left())*
+						        helper_.signsOneSite(k);
+					} else {
+						sign = helper_.fermionicSignLeft(threadId)(k, fermionicSign);
+					}
 
 					for (int kj = O.getRowPtr(i); kj < O.getRowPtr(i + 1); ++kj) {
 						// Sperm[e0] = k + i*m
@@ -590,9 +594,9 @@ private:
 	                              const VectorWithOffsetType& vec2,
 	                              SizeType threadId)
 	{
-		if (helper_.direction(threadId)==EXPAND_SYSTEM)
-			return brRghtCrnrSystem_(A,B,fermionSign,vec1,vec2,threadId);
-		return brLftCrnrEnviron_(A,B,fermionSign,vec1,vec2,threadId);
+		return (helper_.direction(threadId) == EXPAND_SYSTEM) ?
+		            brRghtCrnrSystem_(A,B,fermionSign,vec1,vec2,threadId) :
+		            brLftCrnrEnviron_(A,B,fermionSign,vec1,vec2,threadId);
 	}
 
 	SizeType superElectrons(SizeType t, SizeType threadId) const
@@ -606,6 +610,15 @@ private:
 		        helper_.leftRightSuper(threadId).left().electrons(mydiv.rem);
 #endif
 
+	}
+
+	SizeType superElectrons(SizeType threadId) const
+	{
+		SizeType n = helper_.leftRightSuper(threadId).super().size();
+		SizeType sum = 0;
+		for (SizeType i = 0; i < n; ++i)
+			sum += helper_.leftRightSuper(threadId).super().electrons(i);
+		return sum;
 	}
 
 	FieldType brRghtCrnrSystem_(const SparseMatrixType& Acrs,
@@ -623,11 +636,12 @@ private:
 		SizeType ni = helper_.leftRightSuper(threadId).left().size()/Bcrs.rows();
 
 		// some sanity checks:
-		if (vec1.size()!=vec2.size() || vec1.size()!=
-		        helper_.leftRightSuper(threadId).super().size())
-			throw PsimagLite::RuntimeError("Observe::brRghtCrnrSystem_(...)\n");
-		if (ni!=Acrs.rows())
-			throw PsimagLite::RuntimeError("Observe::brRghtCrnrSystem_(...)\n");
+		if (vec1.size() != vec2.size() ||
+		        vec1.size() != helper_.leftRightSuper(threadId).super().size())
+			err("Observe::brRghtCrnrSystem_(...)\n");
+
+		if (ni != Acrs.rows())
+			err("Observe::brRghtCrnrSystem_(...)\n");
 
 		// ok, we're ready for the main course:
 		PackIndicesType pack1(helper_.leftRightSuper(threadId).left().size());
@@ -679,16 +693,18 @@ private:
 		if (verbose_)
 			std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";
 
-		FieldType sum=0;
+		int signRight = fermionSignBasis(fermionSign,
+		                                 helper_.leftRightSuper(threadId).right());
+		FieldType sum = 0;
 		SizeType ni = Bcrs.rows();
 		SizeType leftSize = helper_.leftRightSuper(threadId).left().size();
 
 		// some sanity checks:
-		if (vec1.size()!=vec2.size() ||
+		if (vec1.size() != vec2.size() ||
 		        vec1.size()!=helper_.leftRightSuper(threadId).super().size())
-			throw PsimagLite::RuntimeError("Observe::brLftCrnrEnviron_(...)\n");
-		if (helper_.leftRightSuper(threadId).right().size()/Bcrs.rows()!=Acrs.rows())
-			throw PsimagLite::RuntimeError("Observe::bracketRightCorner_(...)\n");
+			err("Observe::brLftCrnrEnviron_(...)\n");
+		if (helper_.leftRightSuper(threadId).right().size()/Bcrs.rows() != Acrs.rows())
+			err("Observe::brLftCrnrEnviron_(...)\n");
 
 		// ok, we're ready for the main course:
 		PackIndicesType pack1(helper_.leftRightSuper(threadId).left().size());
@@ -705,8 +721,7 @@ private:
 				             permutation(t));
 				SizeType r0,r1;
 				pack2.unpack(r0,r1,helper_.leftRightSuper(threadId).right().permutation(r));
-				SizeType electrons = helper_.leftRightSuper(threadId).left().electrons(eta);
-				RealType sign = (electrons & 1) ? fermionSign : 1.0;
+				RealType sign = (fermionSign > 0) ? 1 : helper_.signsOneSite(r0) * signRight;
 
 				for (int k=Acrs.getRowPtr(r1);k<Acrs.getRowPtr(r1+1);k++) {
 					SizeType r1prime = Acrs.getCol(k);
