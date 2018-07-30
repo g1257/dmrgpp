@@ -136,6 +136,7 @@ public:
 
 	enum {LEFT_BRAKET=ObserverHelperType::LEFT_BRAKET,
 		  RIGHT_BRAKET=ObserverHelperType::RIGHT_BRAKET};
+
 	static const SizeType EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
 	static const SizeType EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
 
@@ -201,15 +202,73 @@ public:
 	{
 		ProgramGlobals::DirectionEnum dir = helper_.direction(threadId);
 
-		fluffUpSystemOrEnviron(ret2,
-		                       O,
-		                       fermionicSign,
-		                       growOption,
-		                       transform,
-		                       (dir == EXPAND_SYSTEM) ? helper_.leftRightSuper(threadId).left() :
-		                                                helper_.leftRightSuper(threadId).right(),
-		                       dir,
-		                       threadId);
+		const BasisType& basis = (dir == EXPAND_SYSTEM) ? helper_.leftRightSuper(threadId).left() :
+		                                                  helper_.leftRightSuper(threadId).right();
+
+		SizeType n = basis.size();
+		SizeType orows = O.rows();
+		SizeType ktotal = n/orows;
+		SparseMatrixType ret(n, n, ktotal*O.nonZeros());
+
+		if (growOption==GROW_RIGHT) {
+			RealType sign = (dir == ProgramGlobals::EXPAND_ENVIRON)
+			        ? fermionSignBasis(fermionicSign, helper_.leftRightSuper(threadId).left()) :
+			          1;
+
+			SizeType counter = 0;
+			for (SizeType k = 0; k < ktotal; ++k) {
+				for (SizeType i = 0; i < orows; ++i) {
+					ret.setRow(i + k*orows, counter);
+					for (int kj = O.getRowPtr(i); kj < O.getRowPtr(i + 1); ++kj) {
+						// Sperm[e0] = i + k*n
+						// Sperm[e1] = j + k*n
+
+						SizeType col = basis.
+						        permutationInverse(O.getCol(kj) + k*orows);
+
+						ret.setCol(counter, col);
+						ret.setValues(counter++, O.getValue(kj)*sign);
+					}
+				}
+			}
+
+			ret.setRow(n, counter);
+			ret.checkValidity();
+		} else {
+
+			SizeType counter = 0;
+			for (SizeType i = 0; i < orows; ++i) {
+				for (SizeType k = 0; k < ktotal; ++k) {
+					ret.setRow(k + i*ktotal, counter);
+					RealType sign = (dir == ProgramGlobals::EXPAND_ENVIRON) ?
+					            fermionSignBasis(fermionicSign,
+					                             helper_.leftRightSuper(threadId).left()) :
+					            helper_.fermionicSignLeft(threadId)(k, fermionicSign);
+
+					for (int kj = O.getRowPtr(i); kj < O.getRowPtr(i + 1); ++kj) {
+						// Sperm[e0] = k + i*m
+						// Sperm[e1] = k + j*m
+
+						SizeType col = basis.
+						        permutationInverse(k + O.getCol(kj)*ktotal);
+
+						ret.setCol(counter, col);
+						ret.setValues(counter++, O.getValue(kj)*sign);
+					}
+				}
+			}
+
+			ret.setRow(n, counter);
+			ret.checkValidity();
+		}
+
+		reorderRowsCrs(ret, basis);
+		if (transform) {
+			helper_.transform(ret2, ret, threadId);
+			return;
+		}
+
+		ret2 = ret;
 	}
 
 	void dmrgMultiply(SparseMatrixType& result,
@@ -219,11 +278,9 @@ public:
 	                  SizeType ns,
 	                  SizeType threadId)
 	{
-		if (helper_.direction(threadId)==EXPAND_SYSTEM) {
-			dmrgMultiplySystem(result,O1,O2,fermionicSign,ns,threadId);
-			return;
-		}
-		dmrgMultiplyEnviron(result,O1,O2,fermionicSign,ns,threadId);
+		return (helper_.direction(threadId) == EXPAND_SYSTEM) ?
+		            dmrgMultiplySystem(result,O1,O2,fermionicSign,ns,threadId) :
+		            dmrgMultiplyEnviron(result,O1,O2,fermionicSign,ns,threadId);
 	}
 
 	void createWithModification(SparseMatrixType& Om,const SparseMatrixType& O,char mod)
@@ -362,7 +419,7 @@ private:
 	                         SizeType threadId)
 	{
 		RealType f = fermionSignBasis(fermionicSign,
-		                              helper_.leftRightSuper(threadId).right());
+		                              helper_.leftRightSuper(threadId).left());
 		SizeType nj=O2.rows();
 
 		helper_.setPointer(threadId,ns);
@@ -383,19 +440,21 @@ private:
 		SizeType counter = 0;
 		for (SizeType r=0;r<eprime;r++) {
 			result.setRow(r,counter);
-			SizeType e,u;
-
+			SizeType e = 0;
+			SizeType u = 0;
 			pack.unpack(e,u,helper_.leftRightSuper(threadId).right().permutation(r));
+			RealType sign = (fermionicSign > 0) ? 1 : f*helper_.signsOneSite(e);
 
 			for (int k=O2.getRowPtr(e);k<O2.getRowPtr(e+1);k++) {
 				SizeType e2 = O2.getCol(k);
+
 				for (int k2=O1.getRowPtr(u);k2<O1.getRowPtr(u+1);k2++) {
 					SizeType u2 = O1.getCol(k2);
 					SizeType r2 = helper_.leftRightSuper(threadId).right().
 					        permutationInverse(e2 + u2*nj);
 					assert(r2<eprime);
 					col[r2] = 1;
-					value[r2] += O2.getValue(k)*O1.getValue(k2)*f;
+					value[r2] += O2.getValue(k)*O1.getValue(k2)*sign;
 				}
 			}
 
@@ -411,82 +470,6 @@ private:
 
 		result.setRow(result.rows(),counter);
 		result.checkValidity();
-	}
-
-	// Perfomance critical:
-	void fluffUpSystemOrEnviron(SparseMatrixType& ret2,
-	                            const SparseMatrixType& O,
-	                            int fermionicSign,
-	                            int growOption,
-	                            bool transform,
-	                            const BasisType& basis,
-	                            ProgramGlobals::DirectionEnum sysOrEnv,
-	                            SizeType threadId)
-	{
-		SizeType n = basis.size();
-		SizeType orows = O.rows();
-		SizeType ktotal = n/orows;
-		SparseMatrixType ret(n, n, ktotal*O.nonZeros());
-
-		if (growOption==GROW_RIGHT) {
-			RealType sign = (sysOrEnv == ProgramGlobals::EXPAND_ENVIRON)
-			        ? fermionSignBasis(fermionicSign, helper_.leftRightSuper(threadId).left()) :
-			          1;
-
-			SizeType counter = 0;
-			for (SizeType k = 0; k < ktotal; ++k) {
-				for (SizeType i = 0; i < orows; ++i) {
-					ret.setRow(i + k*orows, counter);
-					for (int kj = O.getRowPtr(i); kj < O.getRowPtr(i + 1); ++kj) {
-						// Sperm[e0] = i + k*n
-						// Sperm[e1] = j + k*n
-
-						SizeType col = basis.
-						        permutationInverse(O.getCol(kj) + k*orows);
-
-						ret.setCol(counter, col);
-						ret.setValues(counter++, O.getValue(kj)*sign);
-					}
-				}
-			}
-
-			ret.setRow(n, counter);
-			ret.checkValidity();
-		} else {
-
-			SizeType counter = 0;
-			for (SizeType i = 0; i < orows; ++i) {
-				for (SizeType k = 0; k < ktotal; ++k) {
-					ret.setRow(k + i*ktotal, counter);
-					RealType sign = (sysOrEnv == ProgramGlobals::EXPAND_ENVIRON) ?
-					            fermionSignBasis(fermionicSign,
-					                             helper_.leftRightSuper(threadId).super()) :
-					            helper_.fermionicSignLeft(threadId)(k, fermionicSign);
-
-					for (int kj = O.getRowPtr(i); kj < O.getRowPtr(i + 1); ++kj) {
-						// Sperm[e0] = k + i*m
-						// Sperm[e1] = k + j*m
-
-						SizeType col = basis.
-						        permutationInverse(k + O.getCol(kj)*ktotal);
-
-						ret.setCol(counter, col);
-						ret.setValues(counter++, O.getValue(kj)*sign);
-					}
-				}
-			}
-
-			ret.setRow(n, counter);
-			ret.checkValidity();
-		}
-
-		reorderRowsCrs(ret, basis);
-		if (transform) {
-			helper_.transform(ret2, ret, threadId);
-			return;
-		}
-
-		ret2 = ret;
 	}
 
 	static void reorderRowsCrs(SparseMatrixType& matrix, const BasisType& basis)

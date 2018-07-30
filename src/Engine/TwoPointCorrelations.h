@@ -173,21 +173,12 @@ public:
 
 private:
 
-	SparseMatrixType add(const SparseMatrixType& O1,const SparseMatrixType& O2)
-	{
-		SizeType n=O1.n_row();
-		SparseMatrixType ret(n,n);
-		for (SizeType s=0;s<n;s++) for (SizeType t=0;t<n;t++)
-			ret(s,t) += O1(s,t)+O2(s,t);
-		return ret;
-	}
 
-	FieldType calcDiagonalCorrelation(
-	        SizeType i,
-	        const SparseMatrixType& O1,
-	        const SparseMatrixType& O2,
-	        int,
-	        SizeType threadId)
+	FieldType calcDiagonalCorrelation(SizeType i,
+	                                  const SparseMatrixType& O1,
+	                                  const SparseMatrixType& O2,
+	                                  int,
+	                                  SizeType threadId)
 	{
 		SizeType n = O1.rows();
 		SparseMatrixType O1new=identity(n);
@@ -205,8 +196,9 @@ private:
 	                           SizeType threadId)
 	{
 
-		if (i>=j) throw PsimagLite::RuntimeError(
-		            "Observer::calcCorrelation_(...): i must be smaller than j\n");
+		if (i >= j)
+			err("Observer::calcCorrelation_(...): i must be smaller than j\n");
+
 		SparseMatrixType O1m,O2m;
 		skeleton_.createWithModification(O1m,O1,'n');
 		skeleton_.createWithModification(O2m,O2,'n');
@@ -234,7 +226,7 @@ private:
 		skeleton_.growDirectly(O1g,O1m,i,fermionicSign,ns,true,threadId);
 		skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns,threadId);
 
-		return skeleton_.bracket(O2g,fermionicSign,threadId);
+		return skeleton_.bracket(O2g,1,threadId);
 	}
 
 	SparseMatrixType identity(SizeType n)
@@ -242,26 +234,6 @@ private:
 		SparseMatrixType ret(n,n);
 		ret.makeDiagonal(n,1.0);
 		return ret;
-	}
-
-	//! i can be zero here!!
-	void growRecursive(SparseMatrixType& Odest,
-	                   const SparseMatrixType& Osrc,
-	                   size_t i,
-	                   int fermionicSign,
-	                   size_t s,
-	                   size_t threadId)
-	{
-		// from 0 --> i
-		int nt=i-1;
-		if (nt<0) nt=0;
-
-		helper_.setPointer(threadId,s);
-		SizeType growOption = skeleton_.growthDirection(s,nt,i,threadId);
-
-		SparseMatrixType Onew(helper_.columns(threadId),helper_.columns(threadId));
-		Odest = Onew;
-		skeleton_.fluffUp(Odest,Osrc,fermionicSign,growOption,true,threadId);
 	}
 
 	ObserverHelperType& helper_;

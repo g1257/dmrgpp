@@ -229,7 +229,6 @@ private:
 	                     const PsimagLite::String& ket)
 	{
 		SizeType threadId = preOperator.threadId();
-		printMarker(threadId);
 		VectorFieldType density;
 
 		for (SizeType i0 = 0;i0<observe_.size();i0++) {
@@ -1331,7 +1330,6 @@ private:
 	{
 		const PsimagLite::String& modelName = model_.params().model;
 		SizeType threadId = preOperator.threadId();
-		printMarker(threadId);
 		VectorFieldType density;
 
 		for (SizeType i0 = 0;i0<observe_.size();i0++) {
@@ -1455,7 +1453,6 @@ private:
 
 	void printSites(SizeType threadId)
 	{
-		printMarker(threadId);
 		std::cout<<"Sites=";
 		observe_.setPointer(threadId,0);
 		if (observe_.site(threadId)==1) std::cout<<"0 ";
@@ -1473,22 +1470,6 @@ private:
 		}
 
 		std::cout<<"\n";
-	}
-
-	void printMarker(SizeType threadId) const
-	{
-		if (!hasTimeEvolution_) return;
-		SizeType marker = observe_.marker(threadId);
-		PsimagLite::String s = "INVALID MARKER";
-		switch (marker) {
-		case 0:
-			s=" NOT ALL OPERATORS APPLIED YET";
-			break;
-		case 1:
-			s=" ALL OPERATORS HAVE BEEN APPLIED";
-		}
-
-		std::cout<<s<<"\n";
 	}
 
 	SizeType numberOfSites_;

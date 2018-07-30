@@ -155,8 +155,6 @@ public:
 
 	SizeType site(SizeType threadId) const { return helper_.site(threadId); }
 
-	SizeType marker(SizeType threadId) const { return helper_.marker(threadId); }
-
 	void setPointer(SizeType threadId,SizeType x) { helper_.setPointer(threadId,x); }
 
 	bool endOfData() const { return helper_.endOfData(); }

@@ -86,22 +86,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffset.h" // to include norm
 
 namespace Dmrg {
-template<
-        typename IoInputType_,
-        typename MatrixType_,
-        typename VectorType_,
-        typename VectorWithOffsetType_,
-        typename LeftRightSuperType>
+template<typename IoInputType_,
+         typename MatrixType_,
+         typename VectorType_,
+         typename VectorWithOffsetType_,
+         typename LeftRightSuperType>
 class ObserverHelper {
+
 public:
+
 	typedef IoInputType_ IoInputType;
 	typedef MatrixType_ MatrixType;
 	typedef VectorType_ VectorType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef SizeType IndexType;
 	typedef typename VectorType::value_type FieldType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType
-	BasisWithOperatorsType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
@@ -109,6 +109,8 @@ public:
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> DmrgSerializerType;
 	typedef typename DmrgSerializerType::FermionSignType FermionSignType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef PsimagLite::Vector<short int>::Type VectorShortIntType;
 
 	enum {LEFT_BRAKET=0,RIGHT_BRAKET=1};
 	enum SaveEnum {SAVE_YES, SAVE_NO};
@@ -129,6 +131,13 @@ public:
 	      dSsize_(0),
 	      timeSsize_(0)
 	{
+		VectorSizeType electronsOneSite;
+		io_.read(electronsOneSite, "ElectronsOneSite");
+		SizeType n = electronsOneSite.size();
+		signsOneSite_.resize(n);
+		for (SizeType i = 0; i < n; ++i)
+			signsOneSite_[i] = (electronsOneSite[i] & 1) ? -1 : 1;
+
 		if (nf > 0)
 			if (!init(hasTimeEvolution,nf,SAVE_YES))
 				return;
@@ -187,6 +196,12 @@ public:
 		return dSerializerV_[currentPos_[threadId]]->rows();
 	}
 
+	short int signsOneSite(SizeType site) const
+	{
+		assert(site < signsOneSite_.size());
+		return signsOneSite_[site];
+	}
+
 	const FermionSignType& fermionicSignLeft(SizeType threadId) const
 	{
 		assert(checkPos(threadId));
@@ -234,12 +249,6 @@ public:
 		SizeType size() const
 		{
 		return dSsize_; //-1;
-	}
-
-	SizeType marker(SizeType threadId) const
-	{
-		assert(checkPos(threadId));
-		return timeSerializerV_[currentPos_[threadId]].marker();
 	}
 
 	const VectorWithOffsetType& getVectorFromBracketId(SizeType leftOrRight,
@@ -374,13 +383,14 @@ private:
 	IoInputType& io_;
 	typename PsimagLite::Vector<DmrgSerializerType*>::Type dSerializerV_;
 	typename PsimagLite::Vector<TimeSerializerType>::Type timeSerializerV_;
-	typename PsimagLite::Vector<SizeType>::Type currentPos_; // it's a vector: one per pthread
+	VectorSizeType currentPos_; // it's a vector: one per pthread
 	bool verbose_;
 	bool withLegacyBugs_;
-	typename PsimagLite::Vector<SizeType>::Type bracket_;
+	VectorSizeType bracket_;
 	bool noMoreData_;
 	SizeType dSsize_;
 	SizeType timeSsize_;
+	VectorShortIntType signsOneSite_;
 };  //ObserverHelper
 } // namespace Dmrg
 
