@@ -314,37 +314,61 @@ sub checkCollectBrakets
 
 		my $file1 = "$workdir/CollectBrakets${n}_$i.txt";
 		my $file2 = "$golddir/CollectBrakets${n}_$i.txt";
-		my @brakets1 = readBrakets($file1);
-		my @brakets2 = readBrakets($file2);
+		my %brakets1 = readBrakets($file1);
+		my %brakets2 = readBrakets($file2);
 		print "$0: kompare $file1 $file2\n";
-		compareBrakets(\@brakets1, \@brakets2);
+		compareBrakets(\%brakets1, \%brakets2);
 	}
 }
 
 sub compareBrakets
 {
 	my ($b1, $b2) = @_;
-	my $n1 = scalar(@$b1);
-	my $n2 = scalar(@$b2);
+	my $n1 = scalar(keys %$b1);
+	my $n2 = scalar(keys %$b2);
 	if ($n1 != $n2) {
-		print "WARNING: Braket size differs $n1 != $n2\n";
+		print "WARNING: Braket n. of labels differs $n1 != $n2\n";
 	}
 
-	my $n = ($n1 < $n2) ? $n1 : $n2;
-	for (my $i = 0; $i < $n; ++$i) {
-		compareBraket($b1->[$i], $b2->[$i]);
+	my @ks = ($n1 < $n2) ? keys %$b2 : keys %$b1;
+	foreach my $label (@ks) {
+		my $a1 = $b1->{"$label"};
+		my $a2 = $b2->{"$label"};
+		if (!defined($a1)) {
+			print "Warning, Braket with label $label not in working dir\n";
+			next;
+		}
+
+		if (!defined($a2)) {
+			print "Warning, Braket with label $label not in gold dir\n";
+			next;
+		}
+
+		compareBraketGivenLabel($a1, $a2, $label);
 	}
 }
 
-sub compareBraket
+sub compareBraketGivenLabel
 {
-	my ($h1, $h2) = @_;
+	my ($a1, $a2, $label) = @_;
+	my $n1 = scalar(@$a1);
+	my $n2 = scalar(@$a2);
+	if ($n1 != $n2) {
+		print "WARNING: Braket $label n. of sites differs $n1 != $n2\n";
+	}
 
-	my @items = ("label", "time", "value", "norm");
-	foreach my $item (@items) {
-		if (compareItem($item, $h1, $h2) > 1) {
-			 print "$0 $item undefined either old or new\n";
-			 return;
+	my @items = ("time", "value", "norm");
+	my $n = ($n1 < $n2) ? $n1 : $n2;
+	for (my $site = 0; $site < $n; ++$site) {
+		my $h1 = $a1->[$site];
+		my $h2 = $a2->[$site];
+		defined($h1) or next;
+		defined($h2) or next;
+		foreach my $item (@items) {
+			if (compareItem($item, $h1, $h2) > 1) {
+				 print "$0 $item undefined either old or new\n";
+				 return;
+			}
 		}
 	}
 }
@@ -357,6 +381,19 @@ sub compareItem
 	return 0 if (!defined($i1) and !defined($i2));
 	defined($i1) or return 2;
 	defined($i2) or return 3;
+	my $f1 = isFloat($i1);
+	my $f2 = isFloat($i2);
+	
+	if ($f1 and $f2) {
+		return (abs($f1 - $f2) < 1e-6) ? 0 : 1;
+	}
+
+	my ($re1, $im1) = getReImag($i1);
+	my ($re2, $im2) = getReImag($i2);
+	if ($re1 and $re2) {
+		return (abs($re1 - $re2) < 1e-6 and abs($im1 - $im2) < 1e-6) ? 0 : 1;
+	}
+
 	if ($i1 ne $i2) {
 		print "$0 $item differs in $item $i1 != $i2\n";
 	}
@@ -364,13 +401,23 @@ sub compareItem
 	return ($i1 eq $i2) ? 0 : 1;
 }
 
+sub getReImag
+{
+	my ($val) = @_;
+	if ($val =~ /^\(([^\,]+)\,([^\)]+)\)$/) {
+		return ($1, $2);
+	}
+
+	return ("", "");
+}
+
 sub readBrakets
 {
 	my ($file) = @_;
-	my @brakets;
+	my %brakets;
 	if (!open(FILE, "<", $file)) {
 		print "$0: Could not open $file : $!\n";
-		return @brakets;
+		return %brakets;
 	}
 
 	while (<FILE>) {
@@ -378,12 +425,20 @@ sub readBrakets
 		next if (scalar(@temp) != 5);
 		my $site = $temp[0];
 		next unless ($site =~ /^\d+$/);
-		my $hptr = {"value" => $temp[1], "time" => $temp[2], "label" => $temp[3], "norm" => $temp[4]};
-		$brakets[$site] = $hptr;	
+		my $label = $temp[3];
+		my $hptr = {"value" => $temp[1], "time" => $temp[2], "norm" => $temp[4]};
+		my $aptr = $brakets{"$label"};
+		if (defined($aptr)) {
+			$brakets{"$label"}->[$site] = $hptr;
+		} else {
+			my @aOfSites;
+			$aOfSites[$site] = $hptr;
+			$brakets{"$label"} = \@aOfSites;
+		}
 	}
 
 	close(FILE);
-	return @brakets;
+	return %brakets;
 }
 
 sub checkVectorsEqual
@@ -579,3 +634,11 @@ sub compareHashes
 
 	print "Maximum Error $max\n";
 }
+
+sub isFloat
+{
+	my ($x) = @_;
+	$_ = $x;
+	return (/^[+-]?(?=\.?\d)\d*\.?\d*(?:e[+-]?\d+)?\z/i);
+}
+
