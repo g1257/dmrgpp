@@ -405,8 +405,10 @@ private:
 		transposeConjugate(Sm, Sp);
 
 		SparseMatrixType sz = niup;
-		sz += (-1.0)*nidown;
-		sz *= 0.5;
+		const RealType minusOne = -1.0;
+		const RealType zeroPointFive = 0.5;
+		sz += minusOne*nidown;
+		sz *= zeroPointFive;
 
 		SparseMatrixType cu;
 		transposeConjugate(cu, cdu);
@@ -427,7 +429,7 @@ private:
 
 		SparseMatrixType m = sp*Sm;
 		m += sm*Sp;
-		m *= 0.5;
+		m *= zeroPointFive;
 		m += sz*Sz;
 		return m;
 	}

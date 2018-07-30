@@ -35,7 +35,7 @@ sub kompileRigEach
 {
 	my ($ind, $path, $command) = @_;
 	my $psiTag = "../../dmrgpp/TestSuite/inputs/KompileRig.psiTag";
-	my $cmd = "cd $path; perl newconfigure.pl -f KompileRig$ind -c $psiTag";
+	my $cmd = "cd $path; perl configure.pl -f KompileRig$ind -c $psiTag";
 	executeAndDieIfNotSuccess($cmd);
 	$cmd = "cd $path; $command";
 	executeAndDieIfNotSuccess($cmd);
