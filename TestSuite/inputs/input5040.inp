@@ -20,7 +20,7 @@ potentialV	64  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
                      0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
                      0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 Model=HubbardOneBand
-SolverOptions=useSvd
+SolverOptions=none
 Version=version
 OutputFile=data5040.txt
 InfiniteLoopKeptStates=200

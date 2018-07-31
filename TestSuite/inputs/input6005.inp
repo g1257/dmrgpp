@@ -42,7 +42,7 @@ MagneticFieldZ 20
 
 
 Model=Kitaev
-SolverOptions=useComplex,twositedmrg,useSvd,fixLegacyBugs
+SolverOptions=useComplex,twositedmrg,fixLegacyBugs
 Version=version
 OutputFile=data6005
 InfiniteLoopKeptStates=32

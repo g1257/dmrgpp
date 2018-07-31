@@ -28,7 +28,7 @@ TargetSzPlusConst=4
 TargetSpinTimesTwo=0
 
 Threads=1
-SolverOptions=twositedmrg,useSvd
+SolverOptions=twositedmrg
 Version=version
 TruncationTolerance=1e-7
 LanczosEps=1e-7

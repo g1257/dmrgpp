@@ -19,7 +19,7 @@ potentialV 48
 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8
 CorrectionA=0.005
-SolverOptions=CorrectionTargeting,vectorwithoffsets,useSvd
+SolverOptions=CorrectionTargeting,vectorwithoffsets
 Version=version
 OutputFile=data5810.txt
 InfiniteLoopKeptStates=70

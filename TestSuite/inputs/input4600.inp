@@ -55,7 +55,7 @@ FiniteLoops 7
 TargetElectronsUp=2
 TargetElectronsDown=2
 Threads=1
-SolverOptions=twositedmrg,useSvd
+SolverOptions=twositedmrg
 Version=version
 TruncationTolerance=1e-7
 LanczosEps=1e-7

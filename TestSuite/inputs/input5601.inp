@@ -18,7 +18,7 @@ FiniteLoops 4
 -14 200 2 14 200 2
 TargetElectronsUp=7
 TargetElectronsDown=7
-SolverOptions=CorrectionVectorTargeting,twositedmrg,restart,useSvd,minimizeDisk
+SolverOptions=CorrectionVectorTargeting,twositedmrg,restart,minimizeDisk
 CorrectionA=0
 Version=version
 RestartFilename=data5600

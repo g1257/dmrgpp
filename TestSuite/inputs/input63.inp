@@ -35,7 +35,7 @@ TargetElectronsUp=3
 TargetElectronsDown=3
 Threads=1
 
-SolverOptions=CorrectionVectorTargeting,twositedmrg,restart,useSvd
+SolverOptions=CorrectionVectorTargeting,twositedmrg,restart
 CorrectionA=0
 Version=version
 RestartFilename=data62.txt
