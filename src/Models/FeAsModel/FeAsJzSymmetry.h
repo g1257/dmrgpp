@@ -382,14 +382,12 @@ private:
 		u_.resize(nrow,nrow);
 		utranspose_.resize(nrow,nrow);
 
-		MatrixType Jz_block;
 		VectorRealType Jz_block_eigs;
-		Jz_block.resize(0,0);
 		SizeType r_=0;
 		for(SizeType i=0;i<7;i++){
 			SizeType nrow_b=blockOffsets[i]-r_;
 
-			Jz_block.resize(nrow_b, nrow_b);
+			MatrixType Jz_block(nrow_b, nrow_b);
 			for(SizeType ir=0;ir<nrow_b;ir++){
 				for(SizeType ic=0;ic<nrow_b;ic++){
 					Jz_block(ir,ic)=Jz_opr(r_+ir,r_+ic);
