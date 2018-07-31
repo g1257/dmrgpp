@@ -29,7 +29,7 @@ JzSymmetry=1
 CorrectionA=0.005
 SolverOptions=CorrectionTargeting,useComplex,vectorwithoffsets,useSvd
 Version=version
-OutputFile=data.txt
+OutputFile=data5800.txt
 AdjustQuantumNumbers 4 22 15 34 22
 InfiniteLoopKeptStates=70
 FiniteLoops 3

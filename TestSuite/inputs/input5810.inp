@@ -21,7 +21,7 @@ potentialV 48
 CorrectionA=0.005
 SolverOptions=CorrectionTargeting,vectorwithoffsets,useSvd
 Version=version
-OutputFile=data.txt
+OutputFile=data5810.txt
 InfiniteLoopKeptStates=70
 FiniteLoops 3
 3 70 0 -6 70 0 6 70 0
