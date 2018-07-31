@@ -1,3 +1,35 @@
+2018-07-31 Version 5.28
+
+* modulo symmetry or k-symmetry
+now supported in Engine
+
+* TargetExtra now a vector
+
+* HubbardModelMultiBand uses modulo symmetry and
+simulates a ladder as a chain with orbitals
+
+* Kondo Model added
+
+* configure.pl uses PsiTag
+
+* DmrgSerializer saves transform as a BlockDiagonalMatrix
+
+* DmrgSolver saves electrons of one site
+
+* observe: fixed fermionic operators when growing environ
+
+* observe: performance improved
+
+* Term labels can be added to input file.
+They must be in order with Term0= as the first one,
+Term1= as the second one, etc.
+
+* ci: 112 added like 2 but observe when growing environ
+
+* ci: 1600-1601 trivial tests for Kondo
+
+* postCi: CollectBrakets improved
+
 2018-07-24 Version 5.26
 
 * ci/postci: -su2 instead of -nosu2
