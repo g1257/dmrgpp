@@ -332,7 +332,8 @@ public:
 			ignore value set in TargetElectronsUp or TargetSzPlusConst
 			\item [KroneckerDumper] TBW
 			\item [extendedPrint] TBW
-			\item [useSvd] TBW
+			\item [truncationNoSvd] Do not use SVD for truncation;
+		                               use density matrix instead
 			\item [KronNoLoadBalance] Disable load balancing for MatrixVectorKron
 			\item [setAffinities] TBW
 			\item [wftNoAccel] Disable WFT acceleration (but not the WFT itself)
@@ -392,7 +393,7 @@ public:
 		registerOpts.push_back("KroneckerDumper");
 		registerOpts.push_back("doNotCheckTwoSiteDmrg");
 		registerOpts.push_back("extendedPrint");
-		registerOpts.push_back("useSvd");
+		registerOpts.push_back("truncationNoSvd");
 		registerOpts.push_back("KronNoLoadBalance");
 		registerOpts.push_back("setAffinities");
 		registerOpts.push_back("wftNoAccel");

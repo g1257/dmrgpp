@@ -205,7 +205,7 @@ private:
 		            lrs_.left() : lrs_.right();
 
 		bool debug = false;
-		bool useSvd = (parameters_.options.find("useSvd") != PsimagLite::String::npos);
+		bool useSvd = (parameters_.options.find("truncationNoSvd") == PsimagLite::String::npos);
 		ParamsDensityMatrixType p(useSvd, direction, verbose_, debug);
 		TruncationCache& cache = (direction == ProgramGlobals::EXPAND_SYSTEM) ?
 		            leftCache_ : rightCache_;
@@ -213,7 +213,8 @@ private:
 
 		if (BasisType::useSu2Symmetry()) {
 			if (p.useSvd) {
-				err("useSvd not supported while SU(2) is in use\n");
+				std::cerr<<"WARNING: SVD for truncation NOT supported with SU(2)\n";
+				p.useSvd = false;
 			}
 
 			dmS = new DensityMatrixSu2Type(target,lrs_,p);
