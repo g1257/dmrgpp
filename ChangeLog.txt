@@ -1,3 +1,7 @@
+2018-07-31 Version 2.28
+
+* configure.pl uses PsiTag
+
 2018-07-24 Version 2.26
 
 * PsiTag: recursive behavior
