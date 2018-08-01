@@ -50,11 +50,26 @@ printVector(\@eigs);
 sub readDataSet
 {
 	my ($file, $label) = @_;
-	die "$0: File $file not readable\n" unless (-r "$file");
-	die "$0: Label $label is invalid\n" unless isValidLabel($label);
 
+	if ($label =~ /(^[a-zA-Z0-9\/]+)/) {
+		$label = $1;
+	} else {
+		die "$0: Invalid label $label\n";
+	}
+
+	if ($file =~ /(^[a-zA-Z0-9\.\/]+)/) {
+		$file = $1;
+	} else {
+		die "$0: Invalid file $file\n";
+	}
+
+	die "$0: File $file not readable\n" unless (-r "$file");
+
+	$ENV{"PATH"} = "";
+	$ENV{"ENV"} = "";
+	$ENV{"BASH_ENV"} = "";
 	my $value = "";
-	open (PIPE, "h5dump -d \"$label\" \"$file\" |") or die "$0: Cannot open pipe : $!\n";
+	open (PIPE, "/usr/bin/h5dump -d \"$label\" \"$file\" |") or die "$0: Cannot open pipe : $!\n";
 	while (<PIPE>) {
 		chomp;
 		if (/\([0-9]+\)\: +(.+$)/) {
@@ -68,24 +83,6 @@ sub readDataSet
 	my @a = split/,/, $value;
 	trimSpacesVector(\@a);
 	return (scalar(@a) == 1) ? $a[0] : @a;
-}
-
-sub isValidLabel
-{
-	my ($label) = @_;
-	my @a = split/\//, $label;
-	my $n = scalar(@a);
-	for (my $i = 0; $i < $n; ++$i) {
-		return 0 unless isValidSubLabel($a[$i]);
-	}
-
-	return 1;
-}
-
-sub isValidSubLabel
-{
-	my ($slabel) = @_;
-	return ($slabel eq "" or $slabel =~ /^[a-zA-Z0-9]+$/) ? 1 : 0;
 }
 
 sub trimSpacesVector
