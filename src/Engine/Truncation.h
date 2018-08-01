@@ -342,18 +342,22 @@ private:
 		PsimagLite::OstringStream msg;
 		if (newKeptStates != keptStates) {
 			// we report that the "m" value has been changed and...
-			msg<<"Reducing kept states to "<<newKeptStates<<" from "<<keptStates<<"\n";
+			msg<<"Reducing kept states to "<<newKeptStates<<" from "<<keptStates;
 			// ... we change it:
 			keptStates = newKeptStates;
 		} else {
 			// we report that the "m" value remains the same
-			msg<<"Not changing kept states="<<keptStates<<"\n";
+			msg<<"Not changing kept states="<<keptStates;
 		}
 
-		error_ = discWeight;
-		// we report the discarded weight
-		msg<<"Discarded weight (Truncation error): "<< discWeight;
 		progress_.printline(msg,std::cout);
+
+		error_ = discWeight;
+
+		// we report the discarded weight
+		PsimagLite::OstringStream msg2;
+		msg2<<"Discarded weight (Truncation error): "<< discWeight;
+		progress_.printline(msg2,std::cout);
 
 		calcAndPrintEntropies(eigs);
 	}
