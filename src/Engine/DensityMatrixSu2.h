@@ -112,10 +112,9 @@ public:
 	      data_(pBasis_),
 	      mMaximal_(data_.blocks()),
 	      direction_(p.direction),
-	      debug_(p.debug),
-	      verbose_(p.verbose)
+	      debug_(p.debug)
 	{
-		check(p.direction);
+		check();
 		BuildingBlockType matrixBlock;
 
 		const BasisWithOperatorsType& pBasisSummed =
@@ -148,13 +147,6 @@ public:
 			data_.setBlock(m,pBasis_.partition(m),matrixBlock);
 		}
 
-		if (verbose_) {
-			std::cerr<<"DENSITYMATRIXPRINT option="<<p.direction<<"\n";
-			std::cerr<<(*this);
-			std::cerr<<"***********\n";
-			std::cerr<<"Calling ae from init()...\n";
-		}
-
 		if (debug_) areAllMsEqual(pBasis_);
 	}
 
@@ -178,11 +170,9 @@ public:
 			data_.setBlock(m,data_.offsetsRows(m),data_(p));
 		}
 
-		if (verbose_) std::cerr<<"After diagonalise\n";
-
 		if (debug_) areAllMsEqual(pBasis_);
 
-		check2(direction_);
+		check2();
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
@@ -203,12 +193,10 @@ public:
 
 private:
 
-	void check(int direction)
+	void check()
 	{
 		if (!debug_) return;
 
-		if (verbose_)
-			std::cerr<<"CHECKING DENSITY-MATRIX WITH OPTION="<<direction<<"\n";
 		for (SizeType m = 0; m < data_.blocks(); ++m) {
 			// Definition: Given partition p with (j m)
 			// findMaximalPartition(p) returns the partition p' (with j,j)
@@ -219,11 +207,9 @@ private:
 		}
 	}
 
-	void check2(int direction)
+	void check2()
 	{
 		if (!debug_) return;
-		if (verbose_)
-			std::cerr<<"CHECKING DMRG-TRANFORM WITH OPTION="<<direction<<"\n";
 		for (SizeType m = 0; m < data_.blocks(); ++m) {
 			// Definition: Given partition p with (j m)
 			// findMaximalPartition(p) returns the partition p' (with j,j)
@@ -404,7 +390,6 @@ private:
 	typename PsimagLite::Vector<SizeType>::Type mMaximal_;
 	ProgramGlobals::DirectionEnum direction_;
 	bool debug_;
-	bool verbose_;
 }; // class DensityMatrixSu2
 } // namespace Dmrg
 

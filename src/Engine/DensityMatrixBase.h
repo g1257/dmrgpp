@@ -101,13 +101,12 @@ public:
 
 	struct Params {
 
-		Params(bool u, ProgramGlobals::DirectionEnum d, bool v, bool de)
-		    : useSvd(u), direction(d), verbose(v), debug(de)
+		Params(bool u, ProgramGlobals::DirectionEnum d, bool de)
+		    : useSvd(u), direction(d), debug(de)
 		{}
 
 		bool useSvd;
 		ProgramGlobals::DirectionEnum direction;
-		bool verbose;
 		bool debug;
 	};
 

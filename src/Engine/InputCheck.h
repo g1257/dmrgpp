@@ -341,6 +341,8 @@ public:
 								batched gemm and might need plugin sc
 			\item [KrylovAbridge] TBW
 			\item [fixLegacyBugs] TBW
+			\item [saveDensityMatrixEigenvalues] Save DensityMatrixEigenvalues
+			                                     to the data file.
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,
@@ -400,6 +402,7 @@ public:
 		registerOpts.push_back("BatchedGemm");
 		registerOpts.push_back("KrylovAbridge");
 		registerOpts.push_back("fixLegacyBugs");
+		registerOpts.push_back("saveDensityMatrixEigenvalues");
 
 		PsimagLite::Options::Writeable optWriteable(registerOpts,
 		                                            PsimagLite::Options::Writeable::PERMISSIVE);

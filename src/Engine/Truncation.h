@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DensityMatrixSu2.h"
 #include "Sort.h"
 #include "Concurrency.h"
+#include "Io/IoNg.h"
 
 namespace Dmrg {
 
@@ -94,6 +95,7 @@ class Truncation  {
 	typedef typename TargetingType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
+	typedef typename BasisType::BlockType VectorSizeType;
 	typedef typename BasisWithOperatorsType::PairSizeSizeType PairSizeSizeType;
 	typedef typename LeftRightSuperType::ProgressIndicatorType ProgressIndicatorType;
 	typedef typename TargetingType::SparseMatrixType SparseMatrixType;
@@ -105,6 +107,7 @@ class Truncation  {
 	typedef DensityMatrixBase<TargetingType> DensityMatrixBaseType;
 	typedef typename DensityMatrixBaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename TargetingType::ModelType ModelType;
+	typedef typename ModelType::GeometryType GeometryType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
@@ -112,24 +115,27 @@ public:
 
 	typedef typename DensityMatrixBaseType::Params ParamsDensityMatrixType;
 	typedef BlockDiagonalMatrixType TransformType;
+	typedef PsimagLite::IoNg::Out IoOutType;
 
 	struct TruncationCache {
+
 		BlockDiagonalMatrixType transform;
 		VectorRealType eigs;
 		typename PsimagLite::Vector<SizeType>::Type removedIndices;
+
 	}; // TruncationCache
 
 	Truncation(ReflectionSymmetryType& reflectionOperator,
 	           WaveFunctionTransfType& waveFunctionTransformation,
 	           const ParametersType& parameters,
-	           SizeType maxConnections,
-	           bool verbose)
+	           const GeometryType& geometry,
+	           IoOutType& ioOut)
 	    : reflectionOperator_(reflectionOperator),
 	      lrs_(reflectionOperator_.leftRightSuper()),
 	      waveFunctionTransformation_(waveFunctionTransformation),
 	      parameters_(parameters),
-	      maxConnections_(maxConnections),
-	      verbose_(verbose),
+	      geometry_(geometry),
+	      ioOut_(ioOut),
 	      progress_("Truncation"),
 	      error_(0.0)
 	{
@@ -206,7 +212,7 @@ private:
 
 		bool debug = false;
 		bool useSvd = (parameters_.options.find("truncationNoSvd") == PsimagLite::String::npos);
-		ParamsDensityMatrixType p(useSvd, direction, verbose_, debug);
+		ParamsDensityMatrixType p(useSvd, direction, debug);
 		TruncationCache& cache = (direction == ProgramGlobals::EXPAND_SYSTEM) ?
 		            leftCache_ : rightCache_;
 		DensityMatrixBaseType* dmS = 0;
@@ -255,7 +261,7 @@ private:
 	                         const BasisWithOperatorsType& eBasis)
 	{
 		SizeType site = 0; // FIXME for model Immm
-		size_t mostRecent = lrs_.left().operatorsPerSite(site)*maxConnections_;
+		size_t mostRecent = lrs_.left().operatorsPerSite(site)*geometry_.maxConnections();
 		size_t numOfOp = lrs_.left().numberOfOperators();
 		PairSizeSizeType startEnd(0,numOfOp);
 		if (startEnd.second > mostRecent)
@@ -292,7 +298,7 @@ private:
 	                          const BasisWithOperatorsType& sBasis)
 	{
 		SizeType site = 0; // FIXME for model Immm
-		SizeType mostRecent = lrs_.left().operatorsPerSite(site)*maxConnections_;
+		SizeType mostRecent = lrs_.left().operatorsPerSite(site)*geometry_.maxConnections();
 		size_t numOfOp = lrs_.right().numberOfOperators();
 		PairSizeSizeType startEnd(0,numOfOp);
 		if (startEnd.second > mostRecent)
@@ -459,22 +465,53 @@ private:
 		return discWeight;
 	}
 
-	void dumpEigs(const VectorRealType&) const
+	void dumpEigs(const VectorRealType& eigs)
 	{
-		if (parameters_.fileForDensityMatrixEigs=="") return;
-		err("dumpEigs feature not implemented\n");
+		if (parameters_.options.find("saveDensityMatrixEigenvalues") == PsimagLite::String::npos)
+			return;
+
+		PsimagLite::String label("DensityMatrixEigenvalues");
+
+		static bool firstCall = true;
+		if (firstCall) {
+			ioOut_.createGroup(label);
+			SizeType n = geometry_.numberOfSites();
+			counterVector_.resize(n, 0);
+			ioOut_.write(n, label + "/Size");
+			for (SizeType i = 0; i < n; ++i)
+				ioOut_.createGroup(label + "/" + ttos(i));
+			firstCall = false;
+		}
+
+		SizeType last = lrs_.left().block().size();
+		assert(lrs_.left().block().size() > 0);
+		SizeType index = lrs_.left().block()[last - 1];
+
+		assert(index < counterVector_.size());
+		SizeType counter = counterVector_[index];
+
+		ioOut_.write(eigs, label + "/" + ttos(index) + "/" + ttos(counter));
+
+
+		ioOut_.write(counter + 1,
+		             label + "/" + ttos(index) + "/Size",
+		             (counter == 0) ?  IoOutType::Serializer::NO_OVERWRITE :
+		                               IoOutType::Serializer::ALLOW_OVERWRITE);
+
+		++counterVector_[index];
 	}
 
 	ReflectionSymmetryType& reflectionOperator_;
 	const LeftRightSuperType& lrs_;
 	WaveFunctionTransfType& waveFunctionTransformation_;
 	const ParametersType& parameters_;
-	SizeType maxConnections_;
-	bool verbose_;
+	const GeometryType& geometry_;
+	IoOutType& ioOut_;
 	ProgressIndicatorType progress_;
 	RealType error_;
 	TruncationCache leftCache_;
 	TruncationCache rightCache_;
+	VectorSizeType counterVector_;
 }; // class Truncation
 
 } // namespace

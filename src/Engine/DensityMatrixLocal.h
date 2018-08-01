@@ -117,8 +117,7 @@ public:
 	      progress_("DensityMatrixLocal"),
 	      data_((p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.left() : lrs.right()),
 	      direction_(p.direction),
-	      debug_(p.debug),
-	      verbose_(p.verbose)
+	      debug_(p.debug)
 	{
 		{
 			PsimagLite::OstringStream msg;
@@ -225,7 +224,6 @@ private:
 	BlockDiagonalMatrixType data_;
 	ProgramGlobals::DirectionEnum direction_;
 	bool debug_;
-	bool verbose_;
 }; // class DensityMatrixLocal
 
 } // namespace Dmrg

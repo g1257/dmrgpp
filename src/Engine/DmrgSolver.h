@@ -193,8 +193,8 @@ public:
 	      truncate_(reflectionOperator_,
 	                wft_,
 	                parameters_,
-	                model.geometry().maxConnections(),
-	                verbose_),
+	                model.geometry(),
+	                ioOut_),
 	      energy_(0.0),
 	      saveData_(parameters_.options.find("noSaveData") == PsimagLite::String::npos)
 	{
