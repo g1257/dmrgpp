@@ -264,6 +264,7 @@ private:
 	                 SizeType threadNum,
 	                 SizeType cores) const
 	{
+#ifndef __APPLE__
 		cpu_set_t* cpuset = new cpu_set_t;
 		int cpu = threadNum % cores;
 		CPU_ZERO(cpuset);
@@ -274,6 +275,7 @@ private:
 		// clean up
 		delete cpuset;
 		cpuset = 0;
+#endif
 	}
 
 	void checkForError(int ret) const
