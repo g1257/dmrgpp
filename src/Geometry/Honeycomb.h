@@ -218,7 +218,7 @@ private:
 
 	void getCoordinates(SizeType& x, SizeType& y, SizeType i) const
 	{
-		div_t q = std::div(i, ly_);
+		div_t q = PsimagLite::div(i, ly_);
 		x = q.quot;
 		y = q.rem;
 	}

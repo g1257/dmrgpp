@@ -103,7 +103,7 @@ public:
 		assert(enabled_);
 		int k1 = k;
 		int m = meshLength_;
-		div_t q = std::div(k1, m);
+		div_t q = PsimagLite::div(k1, m);
 		kvector[0] = -M_PI + q.quot*meshStep_;
 		kvector[1] = -M_PI + q.rem*meshStep_;
 	}

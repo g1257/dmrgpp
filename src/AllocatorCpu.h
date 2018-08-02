@@ -48,6 +48,8 @@ struct IsEnum {
 	enum {True = __is_enum(T)};
 };
 
+inline div_t div(int a, int b) { return std::div(a, b); }
+
 #ifdef USE_CUSTOM_ALLOCATOR
 template<typename T,int templateParamFlags> class AllocatorCpu : public std::allocator<T> {
 	typedef typename std::allocator<T> BaseType;
