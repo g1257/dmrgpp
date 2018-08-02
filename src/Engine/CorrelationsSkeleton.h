@@ -605,7 +605,7 @@ private:
 		return helper_.leftRightSuper(threadId).super().electrons(t);
 #else
 		SizeType tmp = helper_.leftRightSuper(threadId).super().permutation(t);
-		div_t mydiv = std::div(tmp,helper_.leftRightSuper(threadId).left().size());
+		div_t mydiv = PsimagLite::div(tmp,helper_.leftRightSuper(threadId).left().size());
 		return helper_.leftRightSuper(threadId).right().electrons(mydiv.quot) +
 		        helper_.leftRightSuper(threadId).left().electrons(mydiv.rem);
 #endif
