@@ -135,9 +135,10 @@ CPPFLAGS += -DUSE_PTHREADS
 
 default flavor = production
 
+default compiler = < compilerCPP GNU
 group basics = (
 < dependency PsimagLite
-< compilerCPP GNU
+< default compiler
 < compilerCPPOptions ansi
 < linkerOptions KronUtil
 < dependency HDF5
