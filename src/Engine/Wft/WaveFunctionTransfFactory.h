@@ -469,9 +469,13 @@ private:
 	                  const LeftRightSuperType& lrs,
 	                  const VectorSizeType& nk) const
 	{
-		wftImpl_->transformVector(psiDest, psiSrc, lrs, nk);
 
 		RealType norm1 = norm(psiSrc);
+		if (norm1 < 1e-5)
+			 err("WFT Factory: norm1 = " + ttos(norm1) + " < 1e-5\n");
+
+		wftImpl_->transformVector(psiDest, psiSrc, lrs, nk);
+
 		RealType norm2 = norm(psiDest);
 		PsimagLite::OstringStream msg;
 		msg<<"Transformation completed ";

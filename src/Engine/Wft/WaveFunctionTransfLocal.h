@@ -191,7 +191,7 @@ private:
 	                             SizeType iNew,
 	                             const VectorSizeType& nk,
 	                             typename ProgramGlobals::DirectionEnum dir) const
-	{		
+	{
 		if (wftOptions_.accel == WftOptions::ACCEL_PATCHES) {
 			SizeType iOld = findIold(psiSrc, psiDest.qn(iNew));
 			return wftAccelPatches_(psiDest, iNew, psiSrc, iOld, lrs, nk, dir);

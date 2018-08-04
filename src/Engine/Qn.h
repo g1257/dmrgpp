@@ -25,6 +25,7 @@ public:
 
 		void write(PsimagLite::String str, PsimagLite::IoNgSerializer& io) const
 		{
+			io.createGroup(str);
 			io.write(str+ "/modalEnum", modalEnum);
 			io.write(str + "/extra", extra);
 		}
@@ -74,10 +75,19 @@ public:
 
 		io.read(jmPair, str + "/jmPair");
 		io.read(flavors, str + "/flavors");
+
+		if (modalStruct.size() == 0)
+			io.read(modalStruct, "modalStruct");
 	}
 
 	void write(PsimagLite::String str, PsimagLite::IoNgSerializer& io) const
 	{
+		static bool firstcall = true;
+		if (firstcall) {
+			io.write("modalStruct", modalStruct);
+			firstcall = false;
+		}
+
 		io.createGroup(str);
 		io.write(str + "/electrons", electrons);
 		io.write(str + "/other", other);
@@ -255,6 +265,7 @@ private:
 	{
 		SizeType n = otherOther.size();
 		if (n != other.size()) return false;
+		assert(n == modalStruct.size());
 		for (SizeType i = 0; i < n; ++i) {
 			if (modalStruct[i].modalEnum == MODAL_SUM) {
 				if (otherOther[i] != other[i]) return false;
