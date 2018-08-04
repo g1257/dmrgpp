@@ -34,8 +34,8 @@ public:
 			try {
 				io.readline(str, label + "=");
 			} catch(std::exception&) {
-				std::cout<<"You should add a " + label + "=" + termNames_[i];
-				std::cout<<" for this term to your input\n";
+				std::cerr<<"You should add a " + label + "=" + termNames_[i];
+				std::cerr<<" for this term to your input\n";
 				continue;
 			}
 
