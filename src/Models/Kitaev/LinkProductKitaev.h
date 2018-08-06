@@ -97,31 +97,44 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 
 	template<typename SomeInputType>
-	LinkProductKitaev(SomeInputType& io)
-	    : BaseType(io, "SxiSxj SyiSyj SziSzj")
+	LinkProductKitaev(SomeInputType& io, bool extended)
+	    : BaseType(io, (extended) ? "SxiSxj SyiSyj SziSzj SxiSyj SyiSxj"
+	                              : "SxiSxj SyiSyj SziSzj"),
+	      extended_(extended)
 	{}
 
 	void setLinkData(SizeType term,
-	                        SizeType,
-	                        bool isSu2,
-	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
-	                        std::pair<SizeType,SizeType>& ops,
-	                        std::pair<char,char>&,
-	                        SizeType&,// angularMomentum,
-	                        RealType&,// angularFactor,
-	                        SizeType&,// category,
-	                        const AdditionalDataType&) const
+	                 SizeType,
+	                 bool isSu2,
+	                 ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
+	                 std::pair<SizeType,SizeType>& ops,
+	                 std::pair<char,char>&,
+	                 SizeType&,// angularMomentum,
+	                 RealType&,// angularFactor,
+	                 SizeType&,// category,
+	                 const AdditionalDataType&) const
 	{
 		assert(!isSu2);
 		fermionOrBoson = ProgramGlobals::BOSON;
-		ops = PairType(term, term);
+		if (term<3) {
+			ops = PairType(term, term);
+		} else {
+			switch (term) {
+			case 3: // SxSy
+				ops = PairType(0, 1);
+				break;
+			case 4: // SySx
+				ops = PairType(1, 0);
+				break;
+			}
+		}
 	}
 
 	void valueModifier(SparseElementType& value,
-	                          SizeType,
-	                          SizeType,
-	                          bool isSu2,
-	                          const AdditionalDataType&) const
+	                   SizeType,
+	                   SizeType,
+	                   bool isSu2,
+	                   const AdditionalDataType&) const
 	{
 		assert(!isSu2);
 		value *= 0.5;
@@ -132,7 +145,11 @@ public:
 	//! Sx Sx
 	//! Sy Sy
 	//! Sz Sz
-	SizeType terms() const { return 3; }
+	SizeType terms() const { return (extended_) ? 5 : 3; } //! allows for SxSy and SySx
+
+private:
+
+	bool extended_;
 }; // class LinkProductKitaev
 } // namespace Dmrg
 /*@}*/

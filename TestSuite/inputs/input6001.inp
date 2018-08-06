@@ -1,0 +1,43 @@
+TotalNumberOfSites=8
+NumberOfTerms=5
+
+Term0=SxiSxj
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors    1        1.0
+
+Term1=SyiSyj
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors    1        1.0
+
+Term2=SziSzj
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors    1        1.0
+
+Term3=SxiSyj
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors    1        1.0
+
+Term4=SyiSxj
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors    1        1.0
+
+
+Model=KitaevExtended
+SolverOptions=useComplex,twositedmrg
+Version=version
+OutputFile=data6001
+InfiniteLoopKeptStates=60
+FiniteLoops 3
+3 100 0
+-6 100 0 6 100 0
+

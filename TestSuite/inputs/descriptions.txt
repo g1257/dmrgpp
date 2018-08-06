@@ -318,6 +318,7 @@ the "half filled" case). U=2
 5802) SOC test
 5810) 3-orbital Hubbard model Ground State, using "fat site"
 6000) Kitaev Model Test
+6001) Kitaev Model Extended test
 6005) Kitaev with magnetic field and fixLegacyBugs
 6500) Hybrid space-k ladders
 #TAGEND DO NOT REMOVE THIS TAG

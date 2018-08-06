@@ -138,11 +138,18 @@ public:
 
 	Kitaev(const SolverParamsType& solverParams,
 	       InputValidatorType& io,
-	       const GeometryType& geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType(io), io),
+	       const GeometryType& geometry,
+	       PsimagLite::String additional)
+	    : ModelBaseType(solverParams,
+	                    geometry,
+	                    new LinkProductType(io,(additional == "Extended")),
+	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry)
 	{
+
+		if (additional == "Extended")
+			checkExtended(solverParams);
 
 		SizeType n = geometry_.numberOfSites();
 		SizeType mx = modelParameters_.magneticFieldX.size();
@@ -173,7 +180,7 @@ public:
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
-		        io.createGroup(label1);
+			io.createGroup(label1);
 
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
@@ -228,7 +235,7 @@ public:
 		VectorQnType qns;
 		setOperatorMatrices(creationMatrix, qns, block);
 		assert(creationMatrix.size()>0);
-                SizeType nrow = creationMatrix[0].data.rows();
+		SizeType nrow = creationMatrix[0].data.rows();
 
 
 		if (what == "sx") // S^x
@@ -240,16 +247,16 @@ public:
 		if (what == "sz") // S^z
 			return creationMatrix[2];
 
-               if (what == "i" || what=="identity") {
-                        SparseMatrixType tmp(nrow,nrow);
-                        tmp.makeDiagonal(nrow,1.0);
-                        typename OperatorType::Su2RelatedType su2Related;
-                        return OperatorType(tmp,
-                                            1.0,
-                                            typename OperatorType::PairType(0,0),
-                                            1.0,
-                                            su2Related);
-                }
+		if (what == "i" || what=="identity") {
+			SparseMatrixType tmp(nrow,nrow);
+			tmp.makeDiagonal(nrow,1.0);
+			typename OperatorType::Su2RelatedType su2Related;
+			return OperatorType(tmp,
+			                    1.0,
+			                    typename OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related);
+		}
 
 		PsimagLite::String str("Kitaev: naturalOperator: no label ");
 		str += what + "\n";
@@ -286,6 +293,33 @@ public:
 	}
 
 private:
+
+	void checkExtended(const SolverParamsType& solverParams) const
+	{
+		bool isCanonical = (ModelBaseType::targetQuantum().isCanonical);
+		PsimagLite::String warning1("KitaevExtended: ");
+		warning1 += "Testing needed!\n";
+		std::cerr<<"WARNING: "<<warning1;
+		bool useTheForce = (solverParams.options.find("useTheForce") !=
+		        PsimagLite::String::npos);
+
+		if (!isCanonical) return;
+
+		PsimagLite::String warning("KitaevExtended: ");
+		warning += "canonical mode in use. ";
+		warning += "Results will likely be WRONG.\n";
+		warning += "Please delete the TargetSzPlusConst= ";
+		warning += "line in the input file.\n";
+
+		if (useTheForce) {
+			std::cerr<<"WARNING: "<<warning;
+			std::cout<<"WARNING: "<<warning;
+			return;
+		}
+		std::cerr<<"FATAL: "<<warning;
+		err("You may useTheForce in SolverOptions to run it anyway\n");
+	}
+
 
 	//! find all states in the natural basis for a block of n sites
 	void setBasis(HilbertBasisType& basis,

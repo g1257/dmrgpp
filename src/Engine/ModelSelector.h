@@ -173,7 +173,9 @@ public:
 		} else if (name_ == "FermionSpinless") {
 			model_ = new FermionSpinlessType(solverParams,io,geometry);
 		} else if (name_ == "Kitaev") {
-			model_ = new KitaevType(solverParams,io,geometry);
+			model_ = new KitaevType(solverParams,io,geometry,"");
+		} else if (name_ == "KitaevExtended") {
+			model_ = new KitaevType(solverParams,io,geometry,"Extended");
 		} else if (name_ == "ModelHubbardMultiBand") {
 			model_ = new ModelHubbardMultiBandType(solverParams,io,geometry);
 		} else if (name_ == "HubbardHolstein") {
