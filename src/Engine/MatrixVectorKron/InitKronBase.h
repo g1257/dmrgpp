@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ArrayOfMatStruct.h"
 #include "Vector.h"
 #include "Link.h"
+#include "ProgressIndicator.h"
 
 namespace Dmrg {
 
@@ -109,31 +110,24 @@ public:
 	InitKronBase(const LeftRightSuperType& lrs,
 	             SizeType m,
 	             const QnType& qn,
-	             RealType denseSparseThreshold)
-	    : mOld_(m),
+	             RealType denseSparseThreshold,
+	             bool useLowerPart)
+	    : progress_("InitKronBase"),
+	      mOld_(m),
 	      mNew_(m),
 	      denseSparseThreshold_(denseSparseThreshold),
+	      useLowerPart_(useLowerPart),
 	      ijpatchesOld_(lrs, qn),
 	      ijpatchesNew_(&ijpatchesOld_),
 	      wftMode_(false)
 	{
-		cacheSigns(signsNew_, lrs.left().electronsVector());
-	}
+		PsimagLite::OstringStream msg;
+		msg<<"::ctor (for H), ";
+		msg<<"denseSparseThreshold= "<<denseSparseThreshold;
+		msg<<", useLowerPart= "<<useLowerPart;
+		progress_.printline(msg, std::cout);
 
-	InitKronBase(const LeftRightSuperType& lrsOld,
-	             SizeType mOld,
-	             const LeftRightSuperType& lrsNew,
-	             SizeType mNew,
-	             SizeType qn,
-	             RealType denseSparseThreshold)
-	    : mOld_(mOld),
-	      mNew_(mNew),
-	      denseSparseThreshold_(denseSparseThreshold),
-	      ijpatchesOld_(lrsOld, qn),
-	      ijpatchesNew_(new GenIjPatchType(lrsNew, qn)),
-	      wftMode_(true)
-	{
-		cacheSigns(signsNew_, lrsNew.left().electronsVector());
+		cacheSigns(signsNew_, lrs.left().electronsVector());
 	}
 
 	~InitKronBase()
@@ -146,7 +140,9 @@ public:
 		}
 	}
 
-	const RealType denseFlopDiscount() const { return denseSparseThreshold_; }
+	const RealType& denseFlopDiscount() const { return denseSparseThreshold_; }
+
+	bool useLowerPart() const { return useLowerPart_; }
 
 	const LeftRightSuperType& lrs(WhatBasisEnum what) const
 	{
@@ -261,7 +257,8 @@ protected:
 		                                                    ijpatchesOld_,
 		                                                    *ijpatchesNew_,
 		                                                    GenIjPatchType::LEFT,
-		                                                    denseSparseThreshold_);
+		                                                    denseSparseThreshold_,
+		                                                    useLowerPart_);
 
 		xc_.push_back(x1);
 
@@ -269,7 +266,8 @@ protected:
 		                                                    ijpatchesOld_,
 		                                                    *ijpatchesNew_,
 		                                                    GenIjPatchType::RIGHT,
-		                                                    denseSparseThreshold_);
+		                                                    denseSparseThreshold_,
+		                                                    useLowerPart_);
 		yc_.push_back(y1);
 	}
 
@@ -434,9 +432,11 @@ private:
 
 	InitKronBase& operator=(const InitKronBase&);
 
+	PsimagLite::ProgressIndicator progress_;
 	SizeType mOld_;
 	SizeType mNew_;
 	const RealType denseSparseThreshold_;
+	const bool useLowerPart_;
 	GenIjPatchType ijpatchesOld_;
 	GenIjPatchType* ijpatchesNew_;
 	VectorSizeType weightsOfPatches_;

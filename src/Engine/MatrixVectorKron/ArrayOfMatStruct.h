@@ -102,7 +102,8 @@ public:
 	                 const GenIjPatchType& patchOld,
 	                 const GenIjPatchType& patchNew,
 	                 typename GenIjPatchType::LeftOrRightEnumType leftOrRight,
-	                 RealType threshold)
+	                 RealType threshold,
+	                 bool useLowerPart)
 	    : data_(patchNew(leftOrRight).size(), patchOld(leftOrRight).size())
 	{
 		const BasisType& basisOld = (leftOrRight == GenIjPatchType::LEFT) ?
@@ -138,7 +139,9 @@ public:
 
 				tmp.setRow(i2-i1,counter);
 				tmp.checkValidity();
-				data_(ipatch,jpatch) = new MatrixDenseOrSparseType(tmp, threshold);
+				data_(ipatch,jpatch) = (useLowerPart && (ipatch < jpatch)) ?
+				            0 :
+				            new MatrixDenseOrSparseType(tmp, threshold);
 			}
 		}
 	}
