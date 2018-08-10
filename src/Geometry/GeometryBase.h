@@ -92,19 +92,18 @@ class GeometryBase {
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef Matrix<ComplexOrRealType> MatrixType;
 
-	struct AdditionalData {
-		AdditionalData() : type1(0),type2(0),TYPE_C(GeometryBase::TYPE_C) {}
+	struct LocalData {
+		LocalData(SizeType s1, SizeType s2)
+		    : site1(s1), site2(s2)
+		{}
 
-		SizeType type1;
-		SizeType type2;
-		SizeType TYPE_C;
+		SizeType site1;
+		SizeType site2;
 	};
 
 public:
 
-	enum {TYPE_O,TYPE_C};
-
-	typedef AdditionalData AdditionalDataType;
+	typedef LocalData AdditionalDataType;
 
 	virtual ~GeometryBase()
 	{}
@@ -148,11 +147,6 @@ public:
 		throw RuntimeError("GeometryBase::set() unimplemented for derived class\n");
 	}
 
-	virtual void fillAdditionalData(AdditionalDataType&,
-	                                SizeType,
-	                                SizeType) const
-	{}
-
 	virtual int index(SizeType i1,SizeType edof1,SizeType edofTotal) const
 	{
 		assert(edof1 < edofTotal);
@@ -167,6 +161,11 @@ public:
 	virtual int signChange(SizeType, SizeType) const
 	{
 		return 1;
+	}
+
+	virtual SizeType orbitals(SizeType orbs, SizeType) const
+	{
+		return orbs;
 	}
 
 protected:

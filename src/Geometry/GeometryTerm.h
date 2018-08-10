@@ -411,10 +411,7 @@ public:
 
 	SizeType orbitals(SizeType site) const
 	{
-		if (geometryBase_->label() != "KTwoNiFFour") return orbitals_;
-		AdditionalDataType additionalData;
-		geometryBase_->fillAdditionalData(additionalData,site,0);
-		return (additionalData.type1 == additionalData.TYPE_C) ? 1 : orbitals_;
+		return geometryBase_->orbitals(orbitals_, site);
 	}
 
 private:

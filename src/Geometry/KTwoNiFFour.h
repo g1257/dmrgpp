@@ -86,17 +86,17 @@ namespace PsimagLite {
 template<typename ComplexOrRealType, typename InputType>
 class KTwoNiFFour : public GeometryBase<ComplexOrRealType, InputType> {
 
-	typedef std::pair<int,int> PairType;
-	typedef GeometryBase<ComplexOrRealType, InputType> GeometryBaseType;
-	typedef typename GeometryBaseType::AdditionalDataType AdditionalDataType;
-
-	enum {TYPE_O = GeometryBaseType::TYPE_O, TYPE_C = GeometryBaseType::TYPE_C};
-
-	enum {SUBTYPE_X,SUBTYPE_Y};
+	enum SubtypeEnum {SUBTYPE_X,SUBTYPE_Y};
 
 	enum {DIR_X,DIR_Y,DIR_XPY,DIR_XMY};
 
 public:
+
+	enum TypeEnum {TYPE_O, TYPE_C};
+
+	typedef std::pair<TypeEnum, SubtypeEnum> PairType;
+	typedef GeometryBase<ComplexOrRealType, InputType> GeometryBaseType;
+	typedef typename GeometryBaseType::AdditionalDataType AdditionalDataType;
 
 	KTwoNiFFour() {}
 
@@ -269,15 +269,6 @@ public:
 		throw RuntimeError("findReflection: unimplemented (sorry)\n");
 	}
 
-	void fillAdditionalData(AdditionalDataType& additionalData,
-	                        SizeType ind,
-	                        SizeType jnd) const
-	{
-		additionalData.type1 = findTypeOfSite(ind).first;
-		additionalData.type2 = findTypeOfSite(jnd).first;
-		additionalData.TYPE_C = TYPE_C;
-	}
-
 	SizeType matrixRank(SizeType,SizeType) const
 	{
 		SizeType sites = linSize_;
@@ -321,20 +312,26 @@ public:
 		return sign1;
 	}
 
-private:
+	SizeType orbitals(SizeType orbs, SizeType site) const
+	{
+		PairType type1 = findTypeOfSite(site);
+		return (type1.first == TYPE_C) ? 1 : orbs;
+	}
 
 	//! Given as a pair, first number is the type,
 	//! If first number == TYPE_C then second number is bogus
 	//! If first number == TYPE_O then second number is the subtype
-	PairType findTypeOfSite(SizeType site) const
+	static PairType findTypeOfSite(SizeType site)
 	{
 		SizeType sitePlusOne = site + 1;
 		SizeType r = sitePlusOne%4;
-		if (r==0) return PairType(TYPE_C,0);
+		if (r==0) return PairType(TYPE_C, SUBTYPE_X);
 
-		if (r==1) return PairType(TYPE_O,SUBTYPE_X);
-		return PairType(TYPE_O,SUBTYPE_Y);
+		return (r == 1) ? PairType(TYPE_O, SUBTYPE_X) :
+		                  PairType(TYPE_O, SUBTYPE_Y);
 	}
+
+private:
 
 	bool isInverted(SizeType i) const
 	{

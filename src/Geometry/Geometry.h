@@ -85,12 +85,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template<typename ComplexOrRealType_,typename InputType,typename ProgramGlobalsType>
-class Geometry : public GeometryEx<typename Real<ComplexOrRealType_>::Type,InputType> {
+template<typename ComplexOrRealType_,typename InputType_, typename ProgramGlobalsType>
+class Geometry : public GeometryEx<typename Real<ComplexOrRealType_>::Type, InputType_> {
 
 public:
 
 	typedef ComplexOrRealType_ ComplexOrRealType;
+	typedef InputType_ InputType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
 	typedef GeometryTerm<ComplexOrRealType,InputType> GeometryTermType;
 	typedef typename Vector<SizeType>::Type VectorSizeType;
