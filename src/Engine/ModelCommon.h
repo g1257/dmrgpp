@@ -114,13 +114,11 @@ public:
 	typedef typename ModelHelperType::BasisType MyBasis;
 	typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef HamiltonianConnection<LinkProductBaseType> HamiltonianConnectionType;
-	typedef typename HamiltonianConnectionType::CachedHamiltonianLinksType
-	CachedHamiltonianLinksType;
+	typedef typename HamiltonianConnectionType::VectorLinkType VectorLinkType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename PsimagLite::Vector<CachedHamiltonianLinksType>::Type
-	VectorLinkProductStructType;
+	typedef typename PsimagLite::Vector<VectorLinkType>::Type VectorVectorLinkType;
 	typedef typename HamiltonianConnectionType::VectorSizeType VectorSizeType;
 	typedef typename HamiltonianConnectionType::VerySparseMatrixType VerySparseMatrixType;
 	typedef ParallelHamiltonianConnection<HamiltonianConnectionType> ParallelHamConnectionType;

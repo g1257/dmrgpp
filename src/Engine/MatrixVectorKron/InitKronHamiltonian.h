@@ -234,7 +234,6 @@ private:
 		              0,
 		              ProgramGlobals::SYSTEM_SYSTEM,
 		              value,
-		              0,
 		              ProgramGlobals::BOSON,
 		              ops,
 		              mods,
@@ -253,7 +252,7 @@ private:
 			SparseMatrixType const* A = 0;
 			SparseMatrixType const* B = 0;
 
-			LinkType link2 = hc_.getConnection(&A, &B, ix);
+			LinkType link2 = hc_.getKron(&A, &B, ix);
 			if (link2.type==ProgramGlobals::ENVIRON_SYSTEM)  {
 				LinkType link3 = link2;
 				link3.type = ProgramGlobals::SYSTEM_ENVIRON;

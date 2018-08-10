@@ -77,7 +77,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef HAMILTONIAN_CONNECTION_H
 #define HAMILTONIAN_CONNECTION_H
 
-#include "CachedHamiltonianLinks.h"
 #include "CrsMatrix.h"
 #include "Concurrency.h"
 #include <cassert>
@@ -105,7 +104,6 @@ public:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef VerySparseMatrix<ComplexOrRealType> VerySparseMatrixType;
-	typedef CachedHamiltonianLinks<ComplexOrRealType> CachedHamiltonianLinksType;
 	typedef typename ModelHelperType::LinkType LinkType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
@@ -116,6 +114,7 @@ public:
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::ParamsForKroneckerDumperType ParamsForKroneckerDumperType;
 	typedef typename LeftRightSuperType::KroneckerDumperType KroneckerDumperType;
+	typedef typename PsimagLite::Vector<LinkType>::Type VectorLinkType;
 
 	HamiltonianConnection(SizeType m,
 	                      const LeftRightSuperType& lrs,
@@ -129,21 +128,17 @@ public:
 	      targetTime_(targetTime),
 	      kroneckerDumper_(pKroneckerDumper,lrs,m),
 	      progress_("HamiltonianConnection"),
-	      lps_(ProgramGlobals::MAX_LPS),
 	      systemBlock_(modelHelper_.leftRightSuper().left().block()),
 	      envBlock_(modelHelper_.leftRightSuper().right().block()),
 	      smax_(*std::max_element(systemBlock_.begin(),systemBlock_.end())),
 	      emin_(*std::min_element(envBlock_.begin(),envBlock_.end())),
-	      total_(0),
 	      hamAbstract_(superGeometry_, smax_, emin_, modelHelper_.leftRightSuper().super().block()),
 	      totalOnes_(hamAbstract_.items())
 	{
-		SizeType nitems = totalOnes_.size();
+		lps_.reserve(ProgramGlobals::MAX_LPS);
+		SizeType nitems = hamAbstract_.items();
 		for (SizeType x = 0; x < nitems; ++x)
-			totalOnes_[x] = cacheConnections(lps_, x, total_);
-
-		if (lps_.typesaved.size() < total_)
-			err("getLinkProductStruct: InternalError\n");
+			totalOnes_[x] = cacheConnections(x);
 
 		SizeType last = lrs.super().block().size();
 		assert(last > 0);
@@ -157,12 +152,12 @@ public:
 			return; // <-- CONDITIONAL EARLY EXIT HERE
 
 		PsimagLite::OstringStream msg;
-		msg<<"LinkProductStructSize="<<total_;
+		msg<<"LinkProductStructSize="<<lps_.size();
 		progress_.printline(msg,std::cout);
 
 		PsimagLite::OstringStream msg2;
 		// add left and right contributions
-		msg2<<"PthreadsTheoreticalLimitForThisPart="<<(total_ + 2);
+		msg2<<"PthreadsTheoreticalLimitForThisPart="<<(lps_.size() + 2);
 
 		// The theoretical maximum number of pthreads that are useful
 		// is equal to C + 2, where
@@ -191,26 +186,14 @@ public:
 	{
 		SizeType matrixRank = matrix.rows();
 		VerySparseMatrixType matrix2(matrixRank, matrixRank);
+		SizeType nitems = totalOnes_.size();
 
 		SizeType x = 0;
-		ProgramGlobals::ConnectionEnum type = ProgramGlobals::SYSTEM_ENVIRON;
-		ComplexOrRealType tmp = 0.0;
-		SizeType term = 0;
-		SizeType dofs = 0;
-
-		SizeType nitems = totalOnes_.size();
-		SizeType total = 0;
 		for (SizeType xx = 0; xx < nitems; ++xx) {
 			SparseMatrixType matrixBlock(matrixRank, matrixRank);
 			for (SizeType i = 0; i < totalOnes_[xx]; ++i) {
 				SparseMatrixType mBlock;
-				prepare(x, type, tmp, term, dofs, total++);
-				calcBond(mBlock,
-				         x,
-				         type,
-				         tmp,
-				         term,
-				         dofs);
+				calcBond(mBlock, x++);
 				matrixBlock += mBlock;
 			}
 
@@ -221,82 +204,30 @@ public:
 		matrix += matrix2;
 	}
 
-	void prepare(SizeType& x,
-	             ProgramGlobals::ConnectionEnum& type,
-	             ComplexOrRealType& tmp,
-	             SizeType& term,
-	             SizeType& dofs,
-	             SizeType ix) const
+	const LinkType& getKron(const SparseMatrixType** A,
+	                        const SparseMatrixType** B,
+	                        SizeType xx) const
 	{
-		x = lps_.xsaved[ix];
-		type = lps_.typesaved[ix];
-		term = lps_.termsaved[ix];
-		dofs = lps_.dofssaved[ix];
-		tmp = lps_.tmpsaved[ix];
-	}
+		assert(xx < lps_.size());
+		const LinkType& link2 = lps_[xx];
 
-	LinkType getKron(const SparseMatrixType** A,
-	                 const SparseMatrixType** B,
-	                 SizeType xx,
-	                 ProgramGlobals::ConnectionEnum type,
-	                 const ComplexOrRealType& valuec,
-	                 SizeType term,
-	                 SizeType dofs) const
-	{
-		assert(type == ProgramGlobals::SYSTEM_ENVIRON ||
-		       type == ProgramGlobals::ENVIRON_SYSTEM);
+		assert(link2.type == ProgramGlobals::SYSTEM_ENVIRON ||
+		       link2.type == ProgramGlobals::ENVIRON_SYSTEM);
 
-		const VectorSizeType& hItems = hamAbstract_.item(xx);
-		if (hItems.size() != 2)
-			err("getKron(): No Chemical H supported for now\n");
-
-		AdditionalDataType additionalData(hItems[0], hItems[1]);
-
-		SizeType i = PsimagLite::indexOrMinusOne(modelHelper_.leftRightSuper().super().block(),
-		                                         hItems[0]);
-		SizeType j = PsimagLite::indexOrMinusOne(modelHelper_.leftRightSuper().super().block(),
-		                                         hItems[1]);
-
-		int offset = modelHelper_.leftRightSuper().left().block().size();
-		PairType ops;
-		std::pair<char,char> mods('N','C');
-		ProgramGlobals::FermionOrBosonEnum fermionOrBoson=ProgramGlobals::FERMION;
-		SizeType angularMomentum=0;
-		SizeType category=0;
-		RealType angularFactor=0;
-		bool isSu2 = modelHelper_.isSu2();
-		ComplexOrRealType value = valuec;
-		lpb_.valueModifier(value,term,dofs,isSu2,additionalData);
-
-		lpb_.setLinkData(term,
-		                 dofs,
-		                 isSu2,
-		                 fermionOrBoson,
-		                 ops,
-		                 mods,
-		                 angularMomentum,
-		                 angularFactor,
-		                 category,
-		                 additionalData);
-		LinkType link2(i,
-		               j,
-		               type,
-		               value,
-		               dofs,
-		               fermionOrBoson,
-		               ops,
-		               mods,
-		               angularMomentum,
-		               angularFactor,
-		               category);
 		SizeType sysOrEnv = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ?
 		            ProgramGlobals::SYSTEM : ProgramGlobals::ENVIRON;
 		SizeType envOrSys = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ?
 		            ProgramGlobals::ENVIRON : ProgramGlobals::SYSTEM;
-		SizeType site1Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ?
-		            link2.site1 : link2.site1-offset;
-		SizeType site2Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ?
-		            link2.site2-offset : link2.site2;
+
+		SizeType i = PsimagLite::indexOrMinusOne(modelHelper_.leftRightSuper().super().block(),
+		                                         link2.site1);
+		SizeType j = PsimagLite::indexOrMinusOne(modelHelper_.leftRightSuper().super().block(),
+		                                         link2.site2);
+
+		int offset = modelHelper_.leftRightSuper().left().block().size();
+
+		SizeType site1Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? i : i - offset;
+		SizeType site2Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? j - offset : j;
 
 		*A = &modelHelper_.reducedOperator(link2.mods.first,
 		                                   site1Corrected,
@@ -316,21 +247,6 @@ public:
 		return link2;
 	}
 
-	LinkType getConnection(const SparseMatrixType** A,
-	                       const SparseMatrixType** B,
-	                       SizeType ix) const
-	{
-		SizeType xx = 0;
-		ProgramGlobals::ConnectionEnum type;
-		SizeType term = 0;
-		SizeType dofs = 0;
-		ComplexOrRealType tmp = 0.0;
-
-		prepare(xx,type,tmp,term,dofs,ix);
-
-		return getKron(A,B,xx,type,tmp,term,dofs);
-	}
-
 	KroneckerDumperType& kroneckerDumper() const
 	{
 		return kroneckerDumper_;
@@ -338,13 +254,11 @@ public:
 
 	const ModelHelperType& modelHelper() const { return modelHelper_; }
 
-	SizeType tasks() const {return total_; }
+	SizeType tasks() const {return lps_.size(); }
 
 private:
 
-	SizeType cacheConnections(CachedHamiltonianLinksType& lps,
-	                          SizeType x,
-	                          SizeType& total) const
+	SizeType cacheConnections(SizeType x)
 	{
 		const VectorSizeType& hItems = hamAbstract_.item(x);
 		assert(superGeometry_.connected(smax_, emin_, hItems));
@@ -357,6 +271,7 @@ private:
 		assert(hItems.size() == 2);
 		AdditionalDataType additionalData(hItems[0], hItems[1]);
 		VectorSizeType edofs(lpb_.dofsAllocationSize());
+		bool isSu2 = modelHelper_.isSu2();
 
 		SizeType totalOne = 0;
 		for (SizeType term = 0; term < superGeometry_.geometry().terms(); ++term) {
@@ -376,14 +291,38 @@ private:
 
 				tmp = superGeometry_.geometry().vModifier(term, tmp, targetTime_);
 
+
 				++totalOne;
-				assert(lps.typesaved.size() > total);
-				lps.xsaved[total] = x;
-				lps.typesaved[total]=type;
-				lps.tmpsaved[total]=tmp;
-				lps.termsaved[total]=term;
-				lps.dofssaved[total]=dofs;
-				++total;
+
+				PairType ops;
+				std::pair<char,char> mods('N','C');
+				ProgramGlobals::FermionOrBosonEnum fermionOrBoson=ProgramGlobals::FERMION;
+				SizeType angularMomentum=0;
+				SizeType category=0;
+				RealType angularFactor=0;
+				lpb_.valueModifier(tmp,term,dofs,isSu2,additionalData);
+
+				lpb_.setLinkData(term,
+				                 dofs,
+				                 isSu2,
+				                 fermionOrBoson,
+				                 ops,
+				                 mods,
+				                 angularMomentum,
+				                 angularFactor,
+				                 category,
+				                 additionalData);
+				LinkType link2(additionalData.site1,
+				               additionalData.site2,
+				               type,
+				               tmp,
+				               fermionOrBoson,
+				               ops,
+				               mods,
+				               angularMomentum,
+				               angularFactor,
+				               category);
+				lps_.push_back(link2);
 			}
 		}
 
@@ -392,21 +331,11 @@ private:
 
 	//! Adds a connector between system and environment
 	SizeType calcBond(SparseMatrixType &matrixBlock,
-	                  SizeType xx,
-	                  ProgramGlobals::ConnectionEnum type,
-	                  const ComplexOrRealType& valuec,
-	                  SizeType term,
-	                  SizeType dofs) const
+	                  SizeType xx) const
 	{
 		SparseMatrixType const* A = 0;
 		SparseMatrixType const* B = 0;
-		LinkType link2 = getKron(&A,
-		                         &B,
-		                         xx,
-		                         type,
-		                         valuec,
-		                         term,
-		                         dofs);
+		LinkType link2 = getKron(&A, &B, xx);
 		modelHelper_.fastOpProdInter(*A, *B, matrixBlock, link2);
 
 		return matrixBlock.nonZeros();
@@ -424,12 +353,11 @@ private:
 	RealType targetTime_;
 	mutable KroneckerDumperType kroneckerDumper_;
 	PsimagLite::ProgressIndicator progress_;
-	CachedHamiltonianLinksType lps_;
+	VectorLinkType lps_;
 	const VectorSizeType& systemBlock_;
 	const VectorSizeType& envBlock_;
 	SizeType smax_;
 	SizeType emin_;
-	SizeType total_;
 	HamiltonianAbstractType hamAbstract_;
 	VectorSizeType totalOnes_;
 }; // class HamiltonianConnection

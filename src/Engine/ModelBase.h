@@ -117,7 +117,7 @@ public:
 	typedef typename ModelHelperType::SparseElementType ComplexOrRealType;
 	typedef ModelCommon<ParametersType, GeometryType, ModelHelperType> ModelCommonType;
 	typedef typename ModelCommonType::HamiltonianConnectionType HamiltonianConnectionType;
-	typedef typename ModelCommonType::CachedHamiltonianLinksType CachedHamiltonianLinksType;
+	typedef typename ModelCommonType::VectorLinkType VectorLinkType;
 	typedef typename ModelCommonType::LinkProductBaseType LinkProductBaseType;
 	typedef typename ModelCommonType::VectorType VectorType;
 	typedef ParametersType SolverParamsType;
