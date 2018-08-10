@@ -146,6 +146,11 @@ public:
 		lpb_ = 0;
 	}
 
+	void postCtor(const VectorOperatorType& cm)
+	{
+		lpb_->postCtor(cm);
+	}
+
 	const LinkProductBaseType& linkProduct() const
 	{
 		assert(lpb_);

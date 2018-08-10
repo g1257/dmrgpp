@@ -11,6 +11,8 @@ class LinkProductBase {
 
 public:
 
+	enum HermitianEnum { HERMIT_NEITHER, HERMIT_PLUS, HERMIT_MINUS};
+
 	typedef ModelHelperType_ ModelHelperType;
 	typedef GeometryType_ GeometryType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -20,6 +22,9 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef std::pair<SizeType, SizeType> PairSizeType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef typename ModelHelperType::OperatorType OperatorType;
+	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
+	typedef typename PsimagLite::Vector<HermitianEnum>::Type VectorHermitianEnum;
 
 	template<typename SomeInputType>
 	LinkProductBase(SomeInputType& io, PsimagLite::String terms)
@@ -46,6 +51,21 @@ public:
 	}
 
 	virtual ~LinkProductBase() {}
+
+	void postCtor(const VectorOperatorType& cm) const
+	{
+		SizeType n = cm.size();
+		if (n == 0) return;
+		hermit_.resize(n);
+		for (SizeType i = 0; i < n; ++i)
+			hermit_[i] = getHermitianProperty(cm[i].data);
+	}
+
+	HermitianEnum getHermitianProperty(SizeType opsIndex, SizeType) const
+	{
+		assert(opsIndex < hermit_.size());
+		return hermit_[opsIndex];
+	}
 
 	// List of function LinkProduct*.h of each model MUST implement
 
@@ -108,7 +128,14 @@ protected:
 
 private:
 
+	static HermitianEnum getHermitianProperty(const SparseMatrixType& m)
+	{
+		if (isHermitian(m)) return HERMIT_PLUS;
+		return (isAntiHermitian(m)) ? HERMIT_MINUS : HERMIT_NEITHER;
+	}
+
 	VectorStringType termNames_;
+	mutable VectorHermitianEnum hermit_;
 };
 }
 #endif // LINKPRODUCTBASE_H

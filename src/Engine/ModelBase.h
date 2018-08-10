@@ -136,6 +136,15 @@ public:
 	      QN_ZERO(0, VectorSizeType(), PairSizeType(0, 0), 0)
 	{}
 
+	void postCtor()
+	{
+		VectorOperatorType cm;
+		VectorQnType qns;
+		BlockType block(1, 0);
+		setOperatorMatrices(cm, qns, block);
+		modelCommon_.postCtor(cm);
+	}
+
 	virtual ~ModelBase() {}
 
 	// START Functions that each model MUST implement

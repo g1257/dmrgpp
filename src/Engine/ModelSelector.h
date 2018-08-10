@@ -194,6 +194,8 @@ public:
 
 		ProgramGlobals::init(model_->maxElectronsOneSpin());
 
+		model_->postCtor();
+
 		return *model_;
 	}
 

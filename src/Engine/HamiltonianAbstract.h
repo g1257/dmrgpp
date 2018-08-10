@@ -25,7 +25,7 @@ public:
 		SizeType n = block.size();
 		SizeType counter = 0;
 		for (SizeType i = 0; i < n; ++i) {
-			for (SizeType j = 0; j < n; ++j) {
+			for (SizeType j = i + 1; j < n; ++j) {
 				v[0] = block[i];
 				v[1] = block[j];
 				if (!superGeometry.connected(smax, emin, v)) continue;
