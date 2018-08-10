@@ -81,6 +81,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "ProgramGlobals.h"
 #include "LinkProductBase.h"
+#include "Geometry/KTwoNiFFour.h"
+#include "InputNg.h"
 
 namespace Dmrg {
 
@@ -93,6 +95,8 @@ class LinkProductImmm : public LinkProductBase<ModelHelperType, GeometryType> {
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef std::pair<SizeType,SizeType> PairType;
+	typedef PsimagLite::KTwoNiFFour<typename GeometryType::ComplexOrRealType,
+	typename GeometryType::InputType> KTwoNiFFourType;
 
 	enum {HOPPING_TERM, W_TERM}; // W_TERM is a term of the form Upd n_i n_j
 
@@ -112,17 +116,19 @@ public:
 	//! The term=1 is for Upd
 	SizeType dofs(SizeType term, const AdditionalDataType& additionalData) const
 	{
+		typename KTwoNiFFourType::TypeEnum type1 =
+		        KTwoNiFFourType::findTypeOfSite(additionalData.site1).first;
+		typename KTwoNiFFourType::TypeEnum type2 =
+		        KTwoNiFFourType::findTypeOfSite(additionalData.site2).first;
+
 		if (term==W_TERM) {
 			// No Upd allowed between Oxygens
-			if (additionalData.type1==additionalData.type2)
-				return 0;
-			return 1; // Upd n_o n_Cu
+			return (type1 == type2) ? 0 : 1;
 		}
-		SizeType type1 = additionalData.type1;
-		SizeType type2 = additionalData.type2;
+
 		//! both cannot be TYPE_C
-		assert(type1!=type2 || type1!=additionalData.TYPE_C);
-		return (type1==type2) ? 8 : 4;
+		assert(type1 != type2 || type1 != KTwoNiFFourType::TYPE_C);
+		return (type1 == type2) ? 8 : 4;
 	}
 
 	// has only dependence on orbital
@@ -136,10 +142,13 @@ public:
 			return;
 		}; // Upd
 
-		SizeType type1 = additionalData.type1;
-		SizeType type2 = additionalData.type2;
+		typename KTwoNiFFourType::TypeEnum type1 =
+		        KTwoNiFFourType::findTypeOfSite(additionalData.site1).first;
+		typename KTwoNiFFourType::TypeEnum type2 =
+		        KTwoNiFFourType::findTypeOfSite(additionalData.site2).first;
+
 		//! both cannot be TYPE_C
-		assert(type1!=type2 || type1!=additionalData.TYPE_C);
+		assert(type1 != type2 || type1 != KTwoNiFFourType::TYPE_C);
 		//! both TYPE_O:
 		if (type1==type2) {
 			SizeType spin = dofs/4;
@@ -155,7 +164,7 @@ public:
 		//! TYPE_C and TYPE_O:
 		SizeType spin = dofs/2;
 		SizeType xtmp = (spin==0) ? 0 : 2;
-		if (type1==additionalData.TYPE_C) {
+		if (type1 == KTwoNiFFourType::TYPE_C) {
 			edofs[0] = 0;
 			edofs[1] = dofs - xtmp;
 		} else {
@@ -175,10 +184,13 @@ public:
 	                 SizeType& category,
 	                 const AdditionalDataType& additionalData) const
 	{
+		typename KTwoNiFFourType::TypeEnum type1 =
+		        KTwoNiFFourType::findTypeOfSite(additionalData.site1).first;
+
 		if (term==W_TERM) {
 			fermionOrBoson = ProgramGlobals::BOSON;
 			assert(dofs==0);
-			if (additionalData.type1==additionalData.TYPE_C) {
+			if (type1 == KTwoNiFFourType::TYPE_C) {
 				ops.first = 2;
 				ops.second = 4;
 			} else {
@@ -222,12 +234,15 @@ private:
 	std::pair<SizeType,SizeType> operatorDofs(SizeType dofs,
 	                                          const AdditionalDataType& additionalData) const
 	{
-		SizeType type1 = additionalData.type1;
-		SizeType type2 = additionalData.type2;
+		typename KTwoNiFFourType::TypeEnum type1 =
+		        KTwoNiFFourType::findTypeOfSite(additionalData.site1).first;
+		typename KTwoNiFFourType::TypeEnum type2 =
+		        KTwoNiFFourType::findTypeOfSite(additionalData.site2).first;
+
 		//! both cannot be TYPE_C
-		assert(type1!=type2 || type1!=additionalData.TYPE_C);
+		assert(type1 != type2 || type1 != KTwoNiFFourType::TYPE_C);
 		//! both TYPE_O:
-		if (type1==type2) {
+		if (type1 == type2) {
 			SizeType spin = dofs/4;
 			SizeType xtmp = (spin==0) ? 0 : 4;
 			xtmp = dofs - xtmp;
@@ -247,15 +262,18 @@ private:
 		SizeType op1 = spin;
 		SizeType op2 = xtmp + spin*2;
 		assert(op1<2 && op2<4);
-		return (type1==additionalData.TYPE_C) ? PairType(op1,op2) : PairType(op2,op1);
+		return (type1 == KTwoNiFFourType::TYPE_C) ? PairType(op1,op2) : PairType(op2,op1);
 	}
 
 	SizeType getSpin(SizeType dofs,const AdditionalDataType& additionalData) const
 	{
-		SizeType type1 = additionalData.type1;
-		SizeType type2 = additionalData.type2;
+		typename KTwoNiFFourType::TypeEnum type1 =
+		        KTwoNiFFourType::findTypeOfSite(additionalData.site1).first;
+		typename KTwoNiFFourType::TypeEnum type2 =
+		        KTwoNiFFourType::findTypeOfSite(additionalData.site2).first;
+
 		//! both cannot be TYPE_C
-		assert(type1!=type2 || type1!=additionalData.TYPE_C);
+		assert(type1 != type2 || type1 != KTwoNiFFourType::TYPE_C);
 
 		return (type1==type2) ? dofs/4 : dofs/2;
 	}

@@ -197,7 +197,6 @@ public:
 		ComplexOrRealType tmp = 0.0;
 		SizeType term = 0;
 		SizeType dofs = 0;
-		AdditionalDataType additionalData;
 
 		SizeType nitems = totalOnes_.size();
 		SizeType total = 0;
@@ -205,14 +204,13 @@ public:
 			SparseMatrixType matrixBlock(matrixRank, matrixRank);
 			for (SizeType i = 0; i < totalOnes_[xx]; ++i) {
 				SparseMatrixType mBlock;
-				prepare(x, type, tmp, term, dofs, additionalData, total++);
+				prepare(x, type, tmp, term, dofs, total++);
 				calcBond(mBlock,
 				         x,
 				         type,
 				         tmp,
 				         term,
-				         dofs,
-				         additionalData);
+				         dofs);
 				matrixBlock += mBlock;
 			}
 
@@ -228,7 +226,6 @@ public:
 	             ComplexOrRealType& tmp,
 	             SizeType& term,
 	             SizeType& dofs,
-	             AdditionalDataType& additionalData,
 	             SizeType ix) const
 	{
 		x = lps_.xsaved[ix];
@@ -236,9 +233,6 @@ public:
 		term = lps_.termsaved[ix];
 		dofs = lps_.dofssaved[ix];
 		tmp = lps_.tmpsaved[ix];
-		superGeometry_.fillAdditionalData(additionalData,
-		                                  term,
-		                                  hamAbstract_.item(x));
 	}
 
 	LinkType getKron(const SparseMatrixType** A,
@@ -247,8 +241,7 @@ public:
 	                 ProgramGlobals::ConnectionEnum type,
 	                 const ComplexOrRealType& valuec,
 	                 SizeType term,
-	                 SizeType dofs,
-	                 const AdditionalDataType& additionalData) const
+	                 SizeType dofs) const
 	{
 		assert(type == ProgramGlobals::SYSTEM_ENVIRON ||
 		       type == ProgramGlobals::ENVIRON_SYSTEM);
@@ -256,6 +249,8 @@ public:
 		const VectorSizeType& hItems = hamAbstract_.item(xx);
 		if (hItems.size() != 2)
 			err("getKron(): No Chemical H supported for now\n");
+
+		AdditionalDataType additionalData(hItems[0], hItems[1]);
 
 		SizeType i = PsimagLite::indexOrMinusOne(modelHelper_.leftRightSuper().super().block(),
 		                                         hItems[0]);
@@ -330,10 +325,10 @@ public:
 		SizeType term = 0;
 		SizeType dofs = 0;
 		ComplexOrRealType tmp = 0.0;
-		AdditionalDataType additionalData;
-		prepare(xx,type,tmp,term,dofs,additionalData,ix);
-		LinkType link2 = getKron(A,B,xx,type,tmp,term,dofs,additionalData);
-		return link2;
+
+		prepare(xx,type,tmp,term,dofs,ix);
+
+		return getKron(A,B,xx,type,tmp,term,dofs);
 	}
 
 	KroneckerDumperType& kroneckerDumper() const
@@ -359,12 +354,12 @@ private:
 		assert(type != ProgramGlobals::SYSTEM_SYSTEM &&
 		        type != ProgramGlobals::ENVIRON_ENVIRON);
 
-		AdditionalDataType additionalData;
+		assert(hItems.size() == 2);
+		AdditionalDataType additionalData(hItems[0], hItems[1]);
 		VectorSizeType edofs(lpb_.dofsAllocationSize());
 
 		SizeType totalOne = 0;
 		for (SizeType term = 0; term < superGeometry_.geometry().terms(); ++term) {
-			superGeometry_.fillAdditionalData(additionalData, term, hItems);
 			SizeType dofsTotal = lpb_.dofs(term, additionalData);
 			for (SizeType dofs = 0; dofs < dofsTotal; ++dofs) {
 				lpb_.connectorDofs(edofs,
@@ -401,8 +396,7 @@ private:
 	                  ProgramGlobals::ConnectionEnum type,
 	                  const ComplexOrRealType& valuec,
 	                  SizeType term,
-	                  SizeType dofs,
-	                  const AdditionalDataType& additionalData) const
+	                  SizeType dofs) const
 	{
 		SparseMatrixType const* A = 0;
 		SparseMatrixType const* B = 0;
@@ -412,8 +406,7 @@ private:
 		                         type,
 		                         valuec,
 		                         term,
-		                         dofs,
-		                         additionalData);
+		                         dofs);
 		modelHelper_.fastOpProdInter(*A, *B, matrixBlock, link2);
 
 		return matrixBlock.nonZeros();

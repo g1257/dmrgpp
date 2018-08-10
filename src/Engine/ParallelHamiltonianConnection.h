@@ -28,7 +28,7 @@ public:
 	      xtemp_(ConcurrencyType::storageSize(ConcurrencyType::codeSectionParams.npthreads))
 	{}
 
-	      void doTask(SizeType taskNumber ,SizeType threadNum)
+	void doTask(SizeType taskNumber ,SizeType threadNum)
 	{
 		if (xtemp_[threadNum].size() != x_.size())
 			xtemp_[threadNum].resize(x_.size(),0.0);
@@ -53,14 +53,13 @@ public:
 
 		assert(taskNumber > 1);
 		taskNumber -= 2;
-		AdditionalDataType additionalData;
 		SizeType xx = 0;
 		ProgramGlobals::ConnectionEnum type;
 		SizeType term = 0;
 		SizeType dofs =0;
-		hc_.prepare(xx,type,tmp,term,dofs,additionalData,taskNumber);
+		hc_.prepare(xx,type,tmp,term,dofs,taskNumber);
 
-		linkProduct(xtemp_[threadNum],y_,xx,type,tmp,term,dofs,additionalData);
+		linkProduct(xtemp_[threadNum],y_,xx,type,tmp,term,dofs);
 	}
 
 	SizeType tasks() const { return hc_.tasks() + 2; }
@@ -99,12 +98,11 @@ private:
 	                 ProgramGlobals::ConnectionEnum type,
 	                 const ComplexOrRealType &valuec,
 	                 SizeType term,
-	                 SizeType dofs,
-	                 const AdditionalDataType& additionalData) const
+	                 SizeType dofs) const
 	{
 		SparseMatrixType const* A = 0;
 		SparseMatrixType const* B = 0;
-		LinkType link2 = hc_.getKron(&A,&B,xx,type,valuec,term,dofs,additionalData);
+		LinkType link2 = hc_.getKron(&A,&B,xx,type,valuec,term,dofs);
 		hc_.modelHelper().fastOpProdInter(x, y, *A, *B, link2);
 		hc_.kroneckerDumper().push(*A, *B, link2.value, link2.fermionOrBoson, y);
 	}
