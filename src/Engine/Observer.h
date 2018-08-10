@@ -131,12 +131,14 @@ public:
 	typedef Parallel4PointDs<ModelType,FourPointCorrelationsType> Parallel4PointDsType;
 
 	Observer(IoInputType& io,
+	         SizeType start,
 	         SizeType nf,
 	         SizeType trail,
 	         bool hasTimeEvolution,
 	         const ModelType& model,
 	         bool verbose = false)
 	    : helper_(io,
+	              start,
 	              nf,
 	              trail,
 	              model.params().nthreads,

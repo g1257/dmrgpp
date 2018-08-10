@@ -16,6 +16,8 @@ bool observeOneFullSweep(IoInputType& io,
 	typedef Observer<VectorWithOffsetType,ModelType,IoInputType> ObserverType;
 	typedef ObservableLibrary<ObserverType> ObservableLibraryType;
 
+	static SizeType start = 0;
+
 	const GeometryType& geometry = model.geometry();
 	bool verbose = false;
 	SizeType n  = geometry.numberOfSites();
@@ -23,6 +25,7 @@ bool observeOneFullSweep(IoInputType& io,
 	SizeType cols = n;
 	SizeType nf = n - 2;
 	SizeType trail = 0;
+	SizeType end = start + nf;
 
 	PsimagLite::Vector<PsimagLite::String>::Type vecOptions;
 	PsimagLite::split(vecOptions, list, ",");
@@ -71,6 +74,7 @@ bool observeOneFullSweep(IoInputType& io,
 	                                  n,
 	                                  hasTimeEvolution,
 	                                  model,
+	                                  start,
 	                                  nf,
 	                                  trail,
 	                                  verbose);
@@ -86,6 +90,7 @@ bool observeOneFullSweep(IoInputType& io,
 			observerLib.interpret(item,rows,cols);
 	}
 
+	start = end;
 	return observerLib.endOfData();
 }
 }

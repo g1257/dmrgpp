@@ -116,13 +116,14 @@ public:
 	                  SizeType numberOfSites,
 	                  bool hasTimeEvolution,
 	                  const ModelType& model,
+	                  SizeType start,
 	                  SizeType nf,
 	                  SizeType trail,
 	                  bool verbose)
 	    : numberOfSites_(numberOfSites),
 	      hasTimeEvolution_(hasTimeEvolution),
 	      model_(model),
-	      observe_(io,nf,trail,hasTimeEvolution,model,verbose)
+	      observe_(io, start, nf, trail, hasTimeEvolution, model, verbose)
 	{
 		PsimagLite::String modelName = model.params().model;
 		bool hubbardLike = (modelName == "HubbardOneBand" ||

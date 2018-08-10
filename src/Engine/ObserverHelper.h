@@ -116,6 +116,7 @@ public:
 	enum SaveEnum {SAVE_YES, SAVE_NO};
 
 	ObserverHelper(IoInputType& io,
+	               SizeType start,
 	               SizeType nf,
 	               SizeType trail,
 	               SizeType numberOfPthreads,
@@ -139,11 +140,11 @@ public:
 			signsOneSite_[i] = (electronsOneSite[i] & 1) ? -1 : 1;
 
 		if (nf > 0)
-			if (!init(hasTimeEvolution,nf,SAVE_YES))
+			if (!init(hasTimeEvolution, start, start + nf, SAVE_YES))
 				return;
 
 		if (trail > 0)
-			if (!init(hasTimeEvolution,trail,SAVE_NO))
+			if (!init(hasTimeEvolution, start, start + trail, SAVE_NO))
 				return;
 	}
 
@@ -297,14 +298,16 @@ public:
 private:
 
 	bool init(bool hasTimeEvolution,
-	          SizeType nf,
+	          SizeType start,
+	          SizeType end,
 	          SaveEnum saveOrNot)
 	{
 		PsimagLite::String prefix = "Serializer";
 		SizeType total = 0;
 		io_.read(total, prefix + "/Size");
-		for (SizeType i = 0; i < total; ++i) {
-			if (nf > 0 && i == nf) break;
+		if (start >= end || start >= total || end > total) return false;
+
+		for (SizeType i = start; i < end; ++i) {
 
 			DmrgSerializerType* dSerializer = new DmrgSerializerType(io_,
 			                                                         prefix + "/" + ttos(i),
@@ -325,7 +328,7 @@ private:
 
 		dSsize_ = dSerializerV_.size();
 		timeSsize_ = timeSerializerV_.size();
-		noMoreData_ = true;
+		noMoreData_ = (end == total);
 		return (dSsize_ > 0);
 	}
 
