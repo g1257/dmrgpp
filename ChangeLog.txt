@@ -1,3 +1,37 @@
+2018-08-09 Version 5.30
+
+Bug fixes:
+
+* FeAsJzSymmetry: matrix resize fixed
+
+* FeAs model adjustQns fixed (Nitin)
+
+* Truncation: cout printing fixed (Nirav)
+
+* Qn.h saves modal at least once
+
+New features:
+
+* option KronUseLowerPart added (Ed)
+
+* Model=KitaevExtended added (Alberto)
+
+* option saveDensityMatrixEigenvalues added (Nirav)
+
+New defaults:
+
+* option useSvd deleted, option truncationNoSvd added
+
+Build system:
+
+* ConfigBase.psiTag: can override default compiler
+
+* Compiles on a MAC
+
+TestSuite:
+
+* ci: fixed 5800 and 5810 data file
+
 2018-07-31 Version 5.28
 
 * modulo symmetry or k-symmetry
