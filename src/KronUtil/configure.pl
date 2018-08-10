@@ -46,6 +46,7 @@ sub createMakefile
 {
 	my ($cfiles, $flavor, $gccdash) = @_;
 	NewMake::backupMakefile();
+	unlink("Makefile.dep");
 
 	my $fh;
 	open($fh, ">", "Makefile") or die "Cannot open Makefile for writing: $!\n";

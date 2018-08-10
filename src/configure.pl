@@ -103,6 +103,7 @@ createMakefile(\@drivers, \%args);
 sub createMakefile
 {
 	my ($drivers, $args) = @_;
+	unlink("Makefile.dep");
 	NewMake::backupMakefile();
 	$args->{"additional3"} = "operator";
 
