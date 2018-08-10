@@ -9,16 +9,17 @@ use lib "../scripts";
 use timeObservablesInSitu;
 use Metts;
 
-my ($memory,$failed,$su2,$help,$workdir,$golddir,$ranges,$info);
+my ($failed,$su2,$help,$workdir,$golddir,$ranges,$info);
 GetOptions(
 'n=s' => \$ranges,
-'memory=i' => \$memory,
 'f' => \$failed,
 'su2' => \$su2,
 'i=i' => \$info,
 'h' => \$help,
 'g=s' => \$golddir,
 'w=s' => \$workdir);
+
+my $defaultGold = "../../OraclesDmrgpp/oracles/tests";
 
 if (defined($help)) {
 	print "USAGE: $0 [options]\n";
@@ -27,9 +28,7 @@ if (defined($help)) {
 	print Ci::helpFor("-w");
 	print "\t-g golddir\n";
 	print "\t\tUse golddir for oracles directory instead of the ";
-	print "default of oldTests/\n";
-	print "\t--memory mem\n";
-	print "\t\tIgnore files larger than mem\n";
+	print "default of $defaultGold\n";
 	print "\t-f\n";
 	print "\t\tPrint info only about failed tests\n";
 	print Ci::helpFor("-su2");
@@ -39,11 +38,10 @@ if (defined($help)) {
 	exit(0);
 }
 
-defined($memory) or $memory = 50000000;
 defined($failed) or $failed = 0;
 defined($su2) or $su2 = 0;
 defined($workdir) or $workdir = "tests";
-defined($golddir) or $golddir = "oldTests";
+defined($golddir) or $golddir = $defaultGold;
 
 my @tests = Ci::getTests("inputs/descriptions.txt");
 my %allowedTests = Ci::getAllowedTests(\@tests);
