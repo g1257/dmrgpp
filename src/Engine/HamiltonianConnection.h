@@ -193,7 +193,11 @@ public:
 			SparseMatrixType matrixBlock(matrixRank, matrixRank);
 			for (SizeType i = 0; i < totalOnes_[xx]; ++i) {
 				SparseMatrixType mBlock;
-				calcBond(mBlock, x++);
+				SparseMatrixType const* A = 0;
+				SparseMatrixType const* B = 0;
+				const LinkType& link2 = getKron(&A, &B, x++);
+				modelHelper_.fastOpProdInter(*A, *B, mBlock, link2);
+
 				matrixBlock += mBlock;
 			}
 
@@ -291,7 +295,6 @@ private:
 
 				tmp = superGeometry_.geometry().vModifier(term, tmp, targetTime_);
 
-
 				++totalOne;
 
 				PairType ops;
@@ -327,18 +330,6 @@ private:
 		}
 
 		return totalOne;
-	}
-
-	//! Adds a connector between system and environment
-	SizeType calcBond(SparseMatrixType &matrixBlock,
-	                  SizeType xx) const
-	{
-		SparseMatrixType const* A = 0;
-		SparseMatrixType const* B = 0;
-		LinkType link2 = getKron(&A, &B, xx);
-		modelHelper_.fastOpProdInter(*A, *B, matrixBlock, link2);
-
-		return matrixBlock.nonZeros();
 	}
 
 	bool isNonZeroMatrix(const SparseMatrixType& m) const

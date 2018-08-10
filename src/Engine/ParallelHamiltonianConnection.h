@@ -52,7 +52,11 @@ public:
 		assert(taskNumber > 1);
 		taskNumber -= 2;
 
-		linkProduct(xtemp_[threadNum], y_, taskNumber);
+		SparseMatrixType const* A = 0;
+		SparseMatrixType const* B = 0;
+		const LinkType& link2 = hc_.getKron(&A, &B, taskNumber);
+		hc_.modelHelper().fastOpProdInter(xtemp_[threadNum], y_, *A, *B, link2);
+		hc_.kroneckerDumper().push(*A, *B, link2.value, link2.fermionOrBoson, y_);
 	}
 
 	SizeType tasks() const { return hc_.tasks() + 2; }
@@ -83,18 +87,6 @@ public:
 	}
 
 private:
-
-	//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment
-	void linkProduct(typename PsimagLite::Vector<ComplexOrRealType>::Type& x,
-	                 const typename PsimagLite::Vector<ComplexOrRealType>::Type& y,
-	                 SizeType xx) const
-	{
-		SparseMatrixType const* A = 0;
-		SparseMatrixType const* B = 0;
-		const LinkType& link2 = hc_.getKron(&A, &B, xx);
-		hc_.modelHelper().fastOpProdInter(x, y, *A, *B, link2);
-		hc_.kroneckerDumper().push(*A, *B, link2.value, link2.fermionOrBoson, y);
-	}
 
 	VectorType& x_;
 	const VectorType& y_;
