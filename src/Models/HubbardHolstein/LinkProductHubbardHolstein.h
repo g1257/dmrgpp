@@ -117,7 +117,7 @@ public:
 		if (term == TERM_HOPPINGF) return 2;
 		if (term == TERM_HOPPINGP) return 1;
 		assert(term == TERM_HOPPINGSSH);
-		return 4;
+		return 8;
 	}
 
 	void setLinkData(SizeType term,
@@ -154,21 +154,35 @@ public:
 			mods = PairCharType('C', 'N');
 			fermionOrBoson = ProgramGlobals::FERMION;
 			SizeType offset2 = 3;
-			assert(dof >= 0 && dof <= 3);
+			assert(dof >= 0 && dof < 8);
 			switch (dof) {
-			case 0:
-				ops = PairType(0,offset2);
-				//mods = PairCharType('N', 'C');
+			case 0: // old 0
+				ops = PairType(0, offset2);
 				break;
-			case 1:
-				ops = PairType(offset2,0);
+			case 1: // old 0
+				ops = PairType(0, offset2);
+				mods = PairCharType('N', 'C');
 				break;
-			case 2:
-				ops = PairType(1,offset2+1);
-				//mods = PairCharType('N', 'C');
+			case 2: // old 1
+				ops = PairType(offset2, 0);
 				break;
-			case 3:
-				ops = PairType(offset2+1,1);
+			case 3: // old 1
+				ops = PairType(offset2, 0);
+				mods = PairCharType('N', 'C');
+				break;
+			case 4: // old 2
+				ops = PairType(1, offset2 + 1);
+				break;
+			case 5: // old 2
+				ops = PairType(1, offset2 + 1);
+				mods = PairCharType('N', 'C');
+				break;
+			case 6: // old 3
+				ops = PairType(offset2 + 1, 1);
+				break;
+			case 7: // old 3
+				ops = PairType(offset2 + 1, 1);
+				mods = PairCharType('N', 'C');
 				break;
 			}
 
@@ -188,8 +202,9 @@ public:
 		if (term==TERM_HOPPINGF || term==TERM_HOPPINGP) return;
 
 		assert(term == TERM_HOPPINGSSH);
-		assert(dof >= 0 && dof <= 4);
-		if (dof & 1) value *= (-1.0);
+		assert(dof >= 0 && dof < 8);
+		if (dof & 1) value = PsimagLite::conj(value);
+		if (dof == 6 || dof == 5 || dof == 2 || dof == 1) value *= (-1.0);
 	}
 
 	SizeType terms() const { return (isSsh_) ? 3 : 2; }
