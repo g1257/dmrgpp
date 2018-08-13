@@ -691,6 +691,29 @@ bool isHermitian(Matrix<T> const &A,bool verbose=false)
 }
 
 template<typename T>
+bool isAntiHermitian(const Matrix<T>& A, bool verbose=false)
+{
+	SizeType n = A.rows();
+	double eps = 1e-6;
+	if (n != A.cols())
+		throw RuntimeError("isHermitian called on a non-square matrix.\n");
+	for (SizeType i = 0; i < n; ++i) {
+		for (SizeType j = 0; j < n; ++j) {
+			if (PsimagLite::norm(A(i, j) + PsimagLite::conj(A(j, i))) > eps) {
+				if (verbose) {
+					std::cerr<<"A("<<i<<","<<j<<")="<<A(i,j);
+					std::cerr<<" A("<<j<<","<<i<<")="<<A(j,i)<<"\n";
+				}
+
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+template<typename T>
 bool isTheIdentity(Matrix<T> const &a)
 {
 

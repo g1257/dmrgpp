@@ -1396,6 +1396,15 @@ bool isHermitian(const CrsMatrix<T>& A,bool=false)
 }
 
 template<typename T>
+bool isAntiHermitian(const CrsMatrix<T>& A)
+{
+	if (A.rows() != A.cols()) return false;
+	Matrix<T> dense;
+	crsMatrixToFullMatrix(dense, A);
+	return isAntiHermitian(dense);
+}
+
+template<typename T>
 void fromBlockToFull(CrsMatrix<T>& Bfull,
                      const CrsMatrix<T>& B,
                      SizeType offset)
