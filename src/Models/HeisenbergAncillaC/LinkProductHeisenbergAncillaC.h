@@ -141,13 +141,11 @@ public:
 	{
 		if (term == TERM_ANCILLA) return;
 		if (isSu2) value = -value;
-		value *= 0.5;
 	}
 
 	SizeType dofs(SizeType term,const AdditionalDataType&) const
 	{
-		if (!hot_ || term == TERM_ANCILLA) return 1;
-		return 2;
+		return (!hot_ || term == TERM_ANCILLA) ? 1 : 2;
 	}
 
 	// has only dependence on orbital

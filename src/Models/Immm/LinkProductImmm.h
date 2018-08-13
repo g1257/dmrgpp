@@ -218,10 +218,7 @@ public:
 	                   bool,
 	                   const AdditionalDataType&) const
 	{
-		if (term==W_TERM) {
-			value *= 0.5;
-			return;
-		}
+		if (term == W_TERM) return;
 
 		value *= (-1.0);
 	}

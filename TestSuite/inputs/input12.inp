@@ -10,8 +10,8 @@ DegreesOfFreedom=1
 GeometryKind=ladder
 GeometryOptions=ConstantValues
 LadderLeg=2
-Connectors 1 3.0
-Connectors 1 3.0
+Connectors 1 6
+Connectors 1 6
 hubbardU	12 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
 0.0 0.0 0.0 0.0 
 potentialV 24 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0

@@ -118,7 +118,6 @@ public:
 	                 SizeType& category,
 	                 const AdditionalDataType&) const
 	{
-		char tmp = mods.first;
 		if (term==TERM_CICJ) {
 			fermionOrBoson = ProgramGlobals::FERMION;
 			SizeType spin = getSpin(dofs);
@@ -132,24 +131,11 @@ public:
 
 		if (term==TERM_SPSM) {
 			fermionOrBoson = ProgramGlobals::BOSON;
-			SizeType spin = getSpin(dofs);
-			switch (spin) {
-			case 0: // S+ S-
-				angularFactor = -1;
-				category = 2;
-				angularMomentum = 2;
-				ops = operatorDofs(dofs,term);
-				break;
-			case 1: // S- S+
-				angularFactor = -1;
-				category = 0;
-				mods.first = mods.second;
-				mods.second = tmp;
-				angularMomentum = 2;
-				ops = operatorDofs(dofs,term);
-				break;
-			}
-
+			// S+ S-
+			angularFactor = -1;
+			category = 2;
+			angularMomentum = 2;
+			ops = operatorDofs(dofs,term);
 			return;
 		}
 
@@ -180,28 +166,20 @@ public:
 	                   bool isSu2,
 	                   const AdditionalDataType&) const
 	{
-		if (term==TERM_CICJ) return;
-
-		if (term==TERM_NINJ) {
-			value *= 0.5;
-			return;
-		}
-
-		assert(term==TERM_SPSM || term == TERM_SZSZ);
-
-		if (isSu2) value = -value;
 		if (term == TERM_SPSM) value *= 0.5;
-		value *= 0.5;
+
+		if (isSu2 && (term == TERM_SPSM || term == TERM_SZSZ))
+			value = -value;
 	}
 
 	// connections are:
 	// up up and down down
-	// S+ S- and S- S+
+	// S+ S-
 	// Sz Sz
 	SizeType dofs(SizeType term, const AdditionalDataType&) const
 	{
-		if (term==TERM_CICJ) return 2*orbitals_*orbitals_; // c^\dagger c
-		if (term==TERM_SPSM) return 2*orbitals_*orbitals_; // S+ S- and S- S+
+		if (term==TERM_CICJ) return 2*orbitals_*orbitals_; // c^\dagger c up up and down down
+		if (term==TERM_SPSM) return 1*orbitals_*orbitals_; // S+ S-
 		if (term==TERM_SZSZ) return 1*orbitals_*orbitals_; // Sz Sz
 		if (term==TERM_NINJ) return 1*orbitals_*orbitals_; // ninj
 		assert(false);

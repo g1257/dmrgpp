@@ -207,22 +207,10 @@ public:
 	                   bool isSu2,
 	                   const AdditionalDataType&) const
 	{
-		if (term==TERM_CICJ) return;
-
-		if (term==TERM_NINJ) {
-			value *= 0.5;
-			return;
-		}
-
-		if (term == TERM_ANCILLA) {
-			return;
-		}
-
-		assert(term==TERM_SPSM || term == TERM_SZSZ);
-
-		if (isSu2) value = -value;
 		if (term == TERM_SPSM) value *= 0.5;
-		value *= 0.5;
+
+		if (isSu2 && (term == TERM_SPSM || term == TERM_SZSZ))
+			value = -value;
 	}
 
 	// connections are:

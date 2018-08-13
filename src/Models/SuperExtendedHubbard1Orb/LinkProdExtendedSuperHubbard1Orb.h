@@ -179,19 +179,10 @@ public:
 	                   bool isSu2,
 	                   const AdditionalDataType&) const
 	{
+		if (term == TERM_SPLUSISMINUSJ) value *= 0.5;
 
-		if (term==TERM_HOPPING || term == TERM_PAIRIPAIRJ)
-			return;
-
-		if (term==TERM_NINJ) {
-			value *= 0.5;
-			return;
-		}
-
-		assert(term==TERM_SPLUSISMINUSJ || term == TERM_SZISZJ);
-
-		if (isSu2) value = -value;
-		value *= 0.5;
+		if (isSu2 && (term == TERM_SPLUSISMINUSJ || term == TERM_SZISZJ))
+			value = -value;
 	}
 
 	SizeType dofs(SizeType term,const AdditionalDataType&) const

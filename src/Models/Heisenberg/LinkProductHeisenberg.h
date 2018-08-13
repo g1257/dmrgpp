@@ -134,13 +134,14 @@ public:
 	}
 
 	void valueModifier(SparseElementType& value,
-	                   SizeType,
+	                   SizeType term,
 	                   SizeType,
 	                   bool isSu2,
 	                   const AdditionalDataType&) const
 	{
+		if (term == 0) value *= 0.5;
+
 		if (isSu2) value = -value;
-		value *= 0.5;
 	}
 
 	SizeType dofs(SizeType,const AdditionalDataType&) const { return 1; }

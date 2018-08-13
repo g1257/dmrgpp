@@ -93,8 +93,8 @@ public:
 	                   const AdditionalDataType&) const
 	{
 		assert(!isSu2);
-		if (term == TERM_SPSM || term == TERM_SZSZ)
-			value *= 0.5;
+
+		if (term == TERM_SPSM) value *= 0.5;
 	}
 };
 }

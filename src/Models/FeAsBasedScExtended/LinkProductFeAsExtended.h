@@ -109,7 +109,7 @@ public:
 
 	template<typename SomeInputType>
 	LinkProductFeAsExtended(SomeInputType& io)
-	    : BaseType(io, "Hopping SplusiSminuj, SziSzj"),
+	    : BaseType(io, "Hopping SplusiSminuj SziSzj"),
 	      lFeAs_(io),
 	      lHeis_(io, ANISOTROPIC_IS_FALSE)
 	{}
@@ -117,8 +117,8 @@ public:
 	SizeType dofs(SizeType term,const AdditionalDataType& additional) const
 	{
 		return (term == TERM_JPLUS || term == TERM_JZ) ?
-		            lHeis_.dofs(term,additional) :
-		            lFeAs_.dofs(term,additional);
+		            lHeis_.dofs(term - 1,additional) :
+		            lFeAs_.dofs(term - 1,additional);
 	}
 
 	// has only dependence on orbital
@@ -130,7 +130,7 @@ public:
 		if (term==TERM_HOPPING)
 			return lFeAs_.connectorDofs(edofs, term,dofs,additional);
 
-		return lHeis_.connectorDofs(edofs, term, dofs, additional);
+		return lHeis_.connectorDofs(edofs, term - 1, dofs, additional);
 	}
 
 	void setLinkData(SizeType term,
@@ -144,14 +144,29 @@ public:
 	                 SizeType& category,const AdditionalDataType& additional) const
 	{
 		if (term==TERM_HOPPING)
-			return lFeAs_.setLinkData(
-			            term,dofs,isSu2,fermionOrBoson,ops,mods,
-			            angularMomentum,angularFactor,category,additional);
+			return lFeAs_.setLinkData(term,
+			                          dofs,
+			                          isSu2,
+			                          fermionOrBoson,
+			                          ops,
+			                          mods,
+			                          angularMomentum,
+			                          angularFactor,
+			                          category,
+			                          additional);
 
 		assert(term > 0);
-		lHeis_.setLinkData(
-		            term-1,dofs,isSu2,fermionOrBoson,ops,mods,
-		            angularMomentum,angularFactor,category,additional);
+		lHeis_.setLinkData(term - 1,
+		                   dofs,
+		                   isSu2,
+		                   fermionOrBoson,
+		                   ops,
+		                   mods,
+		                   angularMomentum,
+		                   angularFactor,
+		                   category,
+		                   additional);
+
 		SizeType offset1 = DEGREES_OF_FREEDOM;
 		ops.first += offset1;
 		ops.second += offset1;

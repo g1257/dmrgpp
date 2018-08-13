@@ -181,18 +181,7 @@ public:
 	                   const AdditionalDataType&) const
 	{
 		assert(!isSu2);
-		if (term==TERM_CICJ) return;
-
-		if (term==TERM_NINJ) {
-			value *= 0.5;
-			return;
-		}
-
-		if (term == TERM_SPSM || term == TERM_SZSZ) {
-			if (term == TERM_SPSM) value *= 0.5;
-			value *= 0.5;
-			return;
-		}
+		if (term == TERM_SPSM) value *= 0.5;
 	}
 
 	// connections are:

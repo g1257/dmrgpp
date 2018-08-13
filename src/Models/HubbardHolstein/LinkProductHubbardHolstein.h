@@ -159,30 +159,14 @@ public:
 			case 0: // old 0
 				ops = PairType(0, offset2);
 				break;
-			case 1: // old 0
-				ops = PairType(0, offset2);
-				mods = PairCharType('N', 'C');
-				break;
-			case 2: // old 1
+			case 1: // old 1
 				ops = PairType(offset2, 0);
 				break;
-			case 3: // old 1
-				ops = PairType(offset2, 0);
-				mods = PairCharType('N', 'C');
-				break;
-			case 4: // old 2
+			case 2: // old 2
 				ops = PairType(1, offset2 + 1);
 				break;
-			case 5: // old 2
-				ops = PairType(1, offset2 + 1);
-				mods = PairCharType('N', 'C');
-				break;
-			case 6: // old 3
+			case 3: // old 3
 				ops = PairType(offset2 + 1, 1);
-				break;
-			case 7: // old 3
-				ops = PairType(offset2 + 1, 1);
-				mods = PairCharType('N', 'C');
 				break;
 			}
 
@@ -191,20 +175,6 @@ public:
 			angularMomentum = 1;
 			category = dof;
 		}
-	}
-
-	void valueModifier(SparseElementType& value,
-	                   SizeType term,
-	                   SizeType dof,
-	                   bool,
-	                   const AdditionalDataType&) const
-	{
-		if (term==TERM_HOPPINGF || term==TERM_HOPPINGP) return;
-
-		assert(term == TERM_HOPPINGSSH);
-		assert(dof >= 0 && dof < 8);
-		if (dof & 1) value = PsimagLite::conj(value);
-		if (dof == 6 || dof == 5 || dof == 2 || dof == 1) value *= (-1.0);
 	}
 
 	SizeType terms() const { return (isSsh_) ? 3 : 2; }

@@ -216,13 +216,7 @@ public:
 	                   bool isSu2,
 	                   const AdditionalDataType&) const
 	{
-		if (term == TERM_HOPPING || term == TERM_LAMBDA)
-			return;
-
-		if (term==TERM_NINJ) {
-			value *= 0.5;
-			return;
-		}
+		if (term == TERM_HOPPING || term == TERM_LAMBDA || term == TERM_NINJ)
 
 		if (term == TERM_PAIR) {
 			value *= -1.0;
@@ -230,9 +224,7 @@ public:
 		}
 
 		assert(term==TERM_SPLUS || term == TERM_SZ);
-
 		if (isSu2) value = -value;
-		value *= 0.5;
 	}
 
 	SizeType terms() const { return 6; }
