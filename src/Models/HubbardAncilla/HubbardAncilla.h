@@ -430,7 +430,7 @@ private:
 		// This assures us that both j and m are SizeType
 		VectorSizeType other(3, 0);
 		SizeType offset = basis.size();
-		qns.resize(offset, ModelBaseType::QN_ZERO);
+		qns.resize(offset, QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair = PairType(0,0);
 

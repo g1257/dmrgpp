@@ -164,8 +164,6 @@ public:
 	                  const ThisType& basis2,
 	                  const QnType* pseudoQn = 0)
 	{
-		const QnType zeroQn(0, QnType::noInitOther(), PairType(0, 0), 0);
-
 		block_.clear();
 		utils::blockUnion(block_,basis1.block_,basis2.block_);
 		VectorQnType qns;
@@ -200,7 +198,7 @@ public:
 			SizeType nps = basis1.partition_.size();
 			if (nps > 0) --nps;
 
-			qns.resize(basis1.size() * basis2.size(), zeroQn);
+			qns.resize(basis1.size() * basis2.size(), QnType::zero());
 			electrons_.resize(qns.size());
 			SizeType counter = 0;
 			for (SizeType pe = 0; pe < npe; ++pe) {
@@ -572,9 +570,8 @@ private:
 
 		SizeType aSize = 0;
 		io.read(aSize, prefix + "QNShrink/Size");
-		const QnType zeroQn(0, QnType::noInitOther(), PairType(0, 0), 0);
 
-		qns_.resize(aSize, zeroQn);
+		qns_.resize(aSize, QnType::zero());
 		for (SizeType i = 0; i < aSize; ++i)
 			qns_[i].read(prefix + "QNShrink/" + ttos(i), io);
 
@@ -601,9 +598,8 @@ private:
 		SizeType n = partition.size();
 		assert(n > 0);
 		assert(src.size() == n -1);
-		const QnType zeroQn(0, QnType::noInitOther(), PairType(0, 0), 0);
 
-		dest.resize(partition[n - 1], zeroQn);
+		dest.resize(partition[n - 1], QnType::zero());
 		for (SizeType i = 0; i < n - 1; ++i) {
 			SizeType start = partition[i];
 			SizeType end = partition[i + 1];

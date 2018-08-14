@@ -533,7 +533,7 @@ private:
 
 		SizeType basisSize = basis.size();
 		VectorSizeType other(2, 0);
-		qns.resize(basisSize, ModelBaseType::QN_ZERO);
+		qns.resize(basisSize, QnType::zero());
 		for (SizeType i = 0; i < basisSize; ++i) {
 			PairType jmpair = calcJmvalue<PairType>(basis[i]);
 

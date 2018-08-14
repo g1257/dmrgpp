@@ -191,7 +191,7 @@ private:
 	void setSymmetryRelatedInternal(VectorQnType& qns,
 	                                const VectorSizeType& basis) const
 	{
-		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
+		qns.resize(basis.size(), QnType::zero());
 		assert(1 == ModelBaseType::targetQuantum().qn.other.size());
 		VectorSizeType other(1, 0);
 

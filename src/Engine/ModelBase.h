@@ -132,8 +132,7 @@ public:
 	          const LinkProductBaseType* lpb,
 	          InputValidatorType& io)
 	    : modelCommon_(params, geometry, lpb),
-	      targetQuantum_(io),
-	      QN_ZERO(0, VectorSizeType(), PairSizeType(0, 0), 0)
+	      targetQuantum_(io)
 	{}
 
 	void postCtor()
@@ -297,10 +296,6 @@ private:
 
 	ModelCommonType modelCommon_;
 	TargetQuantumElectronsType targetQuantum_;
-
-public:
-
-	QnType QN_ZERO;
 };     //class ModelBase
 } // namespace Dmrg
 /*@}*/

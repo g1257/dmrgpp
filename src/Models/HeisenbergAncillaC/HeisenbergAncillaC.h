@@ -435,7 +435,7 @@ private:
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
 
-		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
+		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair;
 			jmpair.first = modelParameters_.twiceTheSpin;

@@ -507,7 +507,7 @@ private:
 
 		bool isCanonical = (ModelBaseType::targetQuantum().isCanonical);
 
-		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
+		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair = calcJmValue<PairType>(basis[i]);
 			// nup

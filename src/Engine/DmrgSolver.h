@@ -174,7 +174,7 @@ public:
 	      lrs_("pSprime", "pEprime", "pSE"),
 	      ioOut_(parameters_.filename, PsimagLite::IoSelector::ACC_TRUNC),
 	      progress_("DmrgSolver"),
-	      quantumSector_(0, QnType::noInitOther(), PairSizeType(0, 0), 0),
+	      quantumSector_(QnType::zero()),
 	      stepCurrent_(0),
 	      checkpoint_(parameters_, ioIn, model, false),
 	      wft_(parameters_),

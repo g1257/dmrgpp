@@ -264,12 +264,12 @@ public:
 			electrons[i] = qns[i].electrons;
 	}
 
-	static VectorSizeType noInitOther()
+	static Qn zero()
 	{
 		SizeType value = 1;
 		SizeType total = sizeof(value)*8 - 1;
 		value <<= total;
-		return VectorSizeType(modalStruct.size(), value);
+		return Qn(0, VectorSizeType(modalStruct.size(), value), PairSizeType(0, 0), 0);
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const Qn& qn)

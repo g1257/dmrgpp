@@ -793,7 +793,7 @@ private:
 		typedef std::pair<SizeType,SizeType> PairType;
 		SizeType orbitals = modelParameters_.orbitals;
 
-		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
+		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(0,0);
 

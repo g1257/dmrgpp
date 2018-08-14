@@ -447,7 +447,7 @@ private:
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
 
-		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
+		qns.resize(basis.size(), QnType::zero());
 		SizeType mode = ModelBaseType::targetQuantum().qn.other.size();
 		assert(mode == 1 || mode == 2); // either Sz or Sz and k-symmetry
 		VectorSizeType other(mode, 0);

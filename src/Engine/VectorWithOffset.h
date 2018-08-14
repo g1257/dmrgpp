@@ -105,7 +105,7 @@ public:
 	    : progress_("VectorWithOffset"),
 	      size_(0),
 	      offset_(0),
-	      mAndq_(PairQnType(0, QnType(0, QnType::noInitOther(), PairSizeType(0, 0), 0)))
+	      mAndq_(PairQnType(0, QnType::zero()))
 	{}
 
 	template<typename SomeBasisType>
@@ -114,7 +114,7 @@ public:
 	    : progress_("VectorWithOffset"),
 	      size_(someBasis.size()),
 	      offset_(0),
-	      mAndq_(PairQnType(0, QnType(0, QnType::noInitOther(), PairSizeType(0, 0), 0)))
+	      mAndq_(PairQnType(0, QnType::zero()))
 	{
 		bool found = false;
 		for (SizeType i=0;i<weights.size();i++) {

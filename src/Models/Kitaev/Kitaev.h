@@ -389,7 +389,7 @@ private:
 		// This assures us that both j and m are SizeType
 		SizeType nbasis = basis.size();
 
-		qns.resize(nbasis, ModelBaseType::QN_ZERO);
+		qns.resize(nbasis, QnType::zero());
 	}
 
 	ParametersKitaev<RealType, QnType>  modelParameters_;

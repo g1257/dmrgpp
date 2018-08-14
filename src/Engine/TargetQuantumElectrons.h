@@ -93,7 +93,7 @@ struct TargetQuantumElectrons {
 	    : totalNumberOfSites(0),
 	      isSu2(false),
 	      isCanonical(true),
-	      qn(0, VectorSizeType(), PairSizeType(0, 0), 0)
+	      qn(QnType::zero())
 	{
 		const bool allowUpDown = true;
 		io.readline(totalNumberOfSites, "TotalNumberOfSites=");

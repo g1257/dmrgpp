@@ -424,7 +424,7 @@ private:
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
 
-		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
+		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair = calcJmvalue<PairType>(basis[i]);
 			SizeType szPlusConst = (basis[i] == 2) ? 0 : basis[i] + 1;

@@ -418,7 +418,7 @@ private:
 		VectorSizeType other;
 		if (isCanonical) other.resize(1, 0);
 
-		qns.resize(basis.size(), ModelBaseType::QN_ZERO);
+		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(modelParameters_.twiceTheSpin, basis[i]);
 			if (isCanonical)
