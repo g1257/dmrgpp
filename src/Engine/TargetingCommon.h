@@ -196,6 +196,7 @@ public:
 	RealType normSquared(SizeType i) const
 	{
 		const VectorWithOffsetType& v = applyOpExpression_.targetVectors()[i];
+		if (v.size() == 0) return 0;
 		// call to mult will conjugate one of the vector
 		return PsimagLite::real(v*v);
 	}

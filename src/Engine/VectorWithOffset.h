@@ -105,7 +105,7 @@ public:
 	    : progress_("VectorWithOffset"),
 	      size_(0),
 	      offset_(0),
-	      mAndq_(PairQnType(0, QnType(0, VectorSizeType(), PairSizeType(0, 0), 0)))
+	      mAndq_(PairQnType(0, QnType(0, QnType::noInitOther(), PairSizeType(0, 0), 0)))
 	{}
 
 	template<typename SomeBasisType>
@@ -114,7 +114,7 @@ public:
 	    : progress_("VectorWithOffset"),
 	      size_(someBasis.size()),
 	      offset_(0),
-	      mAndq_(PairQnType(0, QnType(0, VectorSizeType(), PairSizeType(0, 0), 0)))
+	      mAndq_(PairQnType(0, QnType(0, QnType::noInitOther(), PairSizeType(0, 0), 0)))
 	{
 		bool found = false;
 		for (SizeType i=0;i<weights.size();i++) {
@@ -135,9 +135,9 @@ public:
 		}
 	}
 
-	void resize(SizeType x)
+	void clear()
 	{
-		size_ = x;
+		size_ = 0;
 		data_.clear();
 		offset_=0;
 	}
@@ -200,6 +200,7 @@ public:
 	void setDataInSector(const VectorType& v,SizeType)
 	{
 		data_=v;
+		assert(mAndq_.second.isDefinedOther());
 	}
 
 	void extract(VectorType& v, SizeType = 0) const

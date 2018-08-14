@@ -42,8 +42,14 @@ public:
 	Qn(SizeType e, VectorSizeType szPlusConst, PairSizeType j, SizeType flavor)
 	    : electrons(e), other(szPlusConst), jmPair(j), flavors(flavor)
 	{
-		if (szPlusConst.size() > 0 && modalStruct.size() != szPlusConst.size())
+		if (modalStruct.size() == szPlusConst.size())
+			return;
+
+		if (szPlusConst.size() > 0)
 			modalStruct.resize(szPlusConst.size());
+
+		if (szPlusConst.size() == 0)
+			err("Qn\n");
 	}
 
 	Qn(const Qn& q1, const Qn& q2)
@@ -78,6 +84,9 @@ public:
 
 		if (modalStruct.size() == 0)
 			io.read(modalStruct, "modalStruct");
+
+		if (modalStruct.size() != other.size())
+			err("Qn::read\n");
 	}
 
 	void write(PsimagLite::String str, PsimagLite::IoNgSerializer& io) const
@@ -180,6 +189,18 @@ public:
 		}
 	}
 
+	bool isDefinedOther() const
+	{
+		SizeType n = other.size();
+		SizeType value = 1;
+		SizeType total = sizeof(value)*8 - 1;
+		value <<= total;
+		for (SizeType i = 0; i < n; ++i)
+			if (other[i] == value) return false;
+
+		return true;
+	}
+
 	static void notReallySort(VectorSizeType& outNumber,
 	                          VectorQnType& outQns,
 	                          VectorSizeType& offset,
@@ -243,6 +264,14 @@ public:
 			electrons[i] = qns[i].electrons;
 	}
 
+	static VectorSizeType noInitOther()
+	{
+		SizeType value = 1;
+		SizeType total = sizeof(value)*8 - 1;
+		value <<= total;
+		return VectorSizeType(modalStruct.size(), value);
+	}
+
 	friend std::ostream& operator<<(std::ostream& os, const Qn& qn)
 	{
 		os<<"electrons="<<qn.electrons<<" ";
@@ -266,6 +295,9 @@ private:
 		SizeType n = otherOther.size();
 		if (n != other.size()) return false;
 		assert(n == modalStruct.size());
+
+		assert(isDefinedOther());
+
 		for (SizeType i = 0; i < n; ++i) {
 			if (modalStruct[i].modalEnum == MODAL_SUM) {
 				if (otherOther[i] != other[i]) return false;

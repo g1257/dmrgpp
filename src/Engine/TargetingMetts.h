@@ -307,7 +307,7 @@ public:
 		        (this->common().targetVectors());
 		if (mettsStruct_.beta > this->common().currentTime()) {
 			for (SizeType i = 0; i < this->common().targetVectors().size(); ++i)
-				tv[i].resize(0);
+				tv[i].clear();
 		}
 
 		this->common().writeNGSTs(io, block, prefix);
@@ -421,7 +421,7 @@ private:
 			this->common().setAllStagesTo(COLLAPSE);
 			sitesCollapsed_.clear();
 			SizeType n1 = mettsStruct_.timeSteps();
-			this->common().targetVectors(n1).resize(0);
+			this->common().targetVectors(n1).clear();
 			timesWithoutAdvancement = 0;
 			printAdvancement(timesWithoutAdvancement);
 			return;

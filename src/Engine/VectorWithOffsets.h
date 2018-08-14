@@ -133,10 +133,10 @@ public:
 		setIndex2Sector();
 	}
 
-	void resize(SizeType x)
+	void clear()
 	{
-		size_ = x;
-		index2Sector_.resize(x);
+		size_ = 0;
+		index2Sector_.clear();
 		data_.clear();
 		offsets_.clear();
 		nzMsAndQns_.clear();

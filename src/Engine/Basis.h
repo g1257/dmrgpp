@@ -164,7 +164,7 @@ public:
 	                  const ThisType& basis2,
 	                  const QnType* pseudoQn = 0)
 	{
-		const QnType zeroQn(0, VectorSizeType(), PairType(0, 0), 0);
+		const QnType zeroQn(0, QnType::noInitOther(), PairType(0, 0), 0);
 
 		block_.clear();
 		utils::blockUnion(block_,basis1.block_,basis2.block_);
@@ -572,7 +572,7 @@ private:
 
 		SizeType aSize = 0;
 		io.read(aSize, prefix + "QNShrink/Size");
-		const QnType zeroQn(0, VectorSizeType(), PairType(0, 0), 0);
+		const QnType zeroQn(0, QnType::noInitOther(), PairType(0, 0), 0);
 
 		qns_.resize(aSize, zeroQn);
 		for (SizeType i = 0; i < aSize; ++i)
@@ -601,7 +601,7 @@ private:
 		SizeType n = partition.size();
 		assert(n > 0);
 		assert(src.size() == n -1);
-		const QnType zeroQn(0, VectorSizeType(), PairType(0, 0), 0);
+		const QnType zeroQn(0, QnType::noInitOther(), PairType(0, 0), 0);
 
 		dest.resize(partition[n - 1], zeroQn);
 		for (SizeType i = 0; i < n - 1; ++i) {
