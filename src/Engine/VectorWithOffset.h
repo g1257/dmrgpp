@@ -334,6 +334,7 @@ public:
 	friend ComplexOrRealType operator*(const VectorWithOffset& v1,
 	                                   const VectorWithOffset& v2)
 	{
+		if (v1.size() == 0 || v2.size() == 0) return 0.0;
 		if (v1.mAndq_ != v2.mAndq_) return 0.0;
 		return (v1.data_ * v2.data_);
 	}
