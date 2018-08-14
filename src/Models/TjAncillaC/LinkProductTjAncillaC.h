@@ -127,25 +127,12 @@ public:
 		}
 
 		if (term==TERM_SPSM) {
-			char tmp = mods.first;
 			fermionOrBoson = ProgramGlobals::BOSON;
-			switch (dofs) {
-			case 0: // S+ S-
-				angularFactor = -1;
-				category = 2;
-				angularMomentum = 2;
-				ops = PairType(2,2);
-				break;
-			case 1: // S- S+
-				angularFactor = -1;
-				category = 0;
-				mods.first = mods.second;
-				mods.second = tmp;
-				angularMomentum = 2;
-				ops = PairType(2,2);
-				break;
-			}
-
+			assert(dofs == 0);
+			angularFactor = -1;
+			category = 2;
+			angularMomentum = 2;
+			ops = PairType(2, 2);
 			return;
 		}
 
@@ -191,7 +178,7 @@ public:
 	SizeType dofs(SizeType term,const AdditionalDataType&) const
 	{
 		if (term==TERM_CICJ) return 2; // c^\dagger c
-		if (term==TERM_SPSM) return 2; // S+ S- and S- S+
+		if (term==TERM_SPSM) return 1; // S+ S-
 		if (term==TERM_SZSZ) return 1; // Sz Sz
 		if (term==TERM_NINJ) return 1; // ninj
 		if (term==TERM_DIDJ) return 1; // dijd

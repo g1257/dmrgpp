@@ -104,15 +104,15 @@ public:
 	{}
 
 	void setLinkData(SizeType term,
-	                        SizeType dofs,
-	                        bool isSu2,
-	                        ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
-	                        std::pair<SizeType,SizeType>& ops,
-	                        std::pair<char,char>&,
-	                        SizeType& angularMomentum,
-	                        RealType& angularFactor,
-	                        SizeType& category,
-	                        const AdditionalDataType&) const
+	                 SizeType dofs,
+	                 bool isSu2,
+	                 ProgramGlobals::FermionOrBosonEnum& fermionOrBoson,
+	                 std::pair<SizeType,SizeType>& ops,
+	                 std::pair<char,char>&,
+	                 SizeType& angularMomentum,
+	                 RealType& angularFactor,
+	                 SizeType& category,
+	                 const AdditionalDataType&) const
 	{
 		fermionOrBoson = ProgramGlobals::BOSON;
 		ops = (hot_) ? operatorDofsHot(term,dofs,isSu2) : operatorDofs(term,isSu2);
@@ -134,13 +134,15 @@ public:
 	}
 
 	void valueModifier(SparseElementType& value,
-	                          SizeType term,
-	                          SizeType,
-	                          bool isSu2,
-	                          const AdditionalDataType&) const
+	                   SizeType term,
+	                   SizeType,
+	                   bool isSu2,
+	                   const AdditionalDataType&) const
 	{
-		if (term == TERM_ANCILLA) return;
-		if (isSu2) value = -value;
+		if (term == 0) value *= 0.5;
+
+		if (isSu2 && term != TERM_ANCILLA)
+			value = -value;
 	}
 
 	SizeType dofs(SizeType term,const AdditionalDataType&) const
@@ -150,9 +152,9 @@ public:
 
 	// has only dependence on orbital
 	void connectorDofs(VectorSizeType& edofs,
-	                          SizeType term,
-	                          SizeType dofs,
-	                          const AdditionalDataType&) const
+	                   SizeType term,
+	                   SizeType dofs,
+	                   const AdditionalDataType&) const
 	{
 		if (!hot_ || term == TERM_ANCILLA)
 			edofs[0] = edofs[1] = 0;

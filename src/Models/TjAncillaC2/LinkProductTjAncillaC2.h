@@ -117,7 +117,6 @@ public:
 	                 const AdditionalDataType&) const
 	{
 		assert(!isSu2);
-		char tmp = mods.first;
 		SizeType orbitals = (hot_) ? 2 : 1;
 		if (term==TERM_CICJ) {
 			fermionOrBoson = ProgramGlobals::FERMION;
@@ -132,24 +131,11 @@ public:
 
 		if (term==TERM_SPSM) {
 			fermionOrBoson = ProgramGlobals::BOSON;
-			SizeType spin = getSpin(dofs);
-			switch (spin) {
-			case 0: // S+ S-
-				angularFactor = -1;
-				category = 2;
-				angularMomentum = 2;
-				ops = operatorDofs(dofs,term);
-				break;
-			case 1: // S- S+
-				angularFactor = -1;
-				category = 0;
-				mods.first = mods.second;
-				mods.second = tmp;
-				angularMomentum = 2;
-				ops = operatorDofs(dofs,term);
-				break;
-			}
-
+			// S+ S-
+			angularFactor = -1;
+			category = 2;
+			angularMomentum = 2;
+			ops = operatorDofs(dofs,term);
 			return;
 		}
 
@@ -198,8 +184,8 @@ public:
 	SizeType dofs(SizeType term, const AdditionalDataType&) const
 	{
 		SizeType orbitals = (hot_) ? 2 : 1;
-		if (term==TERM_CICJ) return 2*orbitals*orbitals; // c^\dagger c
-		if (term==TERM_SPSM) return 2*orbitals*orbitals; // S+ S- and S- S+
+		if (term==TERM_CICJ) return 2*orbitals*orbitals; // c^\dagger c up up and down down
+		if (term==TERM_SPSM) return orbitals*orbitals; // S+ S-
 		if (term==TERM_SZSZ) return orbitals*orbitals; // Sz Sz
 		if (term==TERM_NINJ) return orbitals*orbitals; // ninj
 		if (term==TERM_DIDJ) return 2; // dijd

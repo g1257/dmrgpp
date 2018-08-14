@@ -217,6 +217,7 @@ public:
 	                   const AdditionalDataType&) const
 	{
 		if (term == TERM_HOPPING || term == TERM_LAMBDA || term == TERM_NINJ)
+			return;
 
 		if (term == TERM_PAIR) {
 			value *= -1.0;
@@ -224,6 +225,9 @@ public:
 		}
 
 		assert(term==TERM_SPLUS || term == TERM_SZ);
+
+		if (term == TERM_SPLUS) value *= 0.5;
+
 		if (isSu2) value = -value;
 	}
 
