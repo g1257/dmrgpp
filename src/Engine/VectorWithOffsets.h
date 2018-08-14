@@ -392,8 +392,7 @@ public:
 		io.read(offsets_, label + "/offsets_");
 		SizeType aSize = 0;
 		io.read(aSize, label + "/nzMsAndQns_/Size");
-		const QnType zeroQn(0, VectorSizeType(), PairSizeType(0, 0), 0);
-		nzMsAndQns_.resize(aSize, PairQnType(0, zeroQn));
+		nzMsAndQns_.resize(aSize, PairQnType(0, QnType::zero()));
 		for (SizeType i = 0; i < aSize; ++i) {
 			io.read(nzMsAndQns_[i].first, label + "/nzMsAndQns_/" + ttos(i) + "/0");
 			nzMsAndQns_[i].second.read(label + "/nzMsAndQns_/" + ttos(i) + "/1", io);
