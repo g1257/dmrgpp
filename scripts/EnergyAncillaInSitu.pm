@@ -34,8 +34,7 @@ sub main
 		if (/Hamiltonian average at $betaLabel\=([^ ]+) for target\=0 /) {
 			next unless ($1==$beta);
 			next unless ($meas>$minMeas);
-			#next unless ($site==$minSite);
-	 		if (/\<phi\(t\)\|H\|phi\(t\)>=/) {
+			if (/\<phi\(t\)\|H\|phi\(t\)>=/) {
 				my @temp = split;
 				my $tempSize = scalar(@temp);
 				$tempSize > 1 or die "$0: Wrong line $_\n";
@@ -61,6 +60,7 @@ sub main
 
 	$sum /= ($counter);
 	print $fout "#Energy=$sum $counter\n";
+	print $fout "#".$betaLabel."=$beta\n";
 	return "";
 }
 

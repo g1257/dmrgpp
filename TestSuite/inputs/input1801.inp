@@ -38,7 +38,7 @@ TSPAlgorithm=Krylov
 TSPSites 1 6 
 TSPLoops 1 6 
 TSPProductOrSum=sum
-GsWeight=0.0
+GsWeight=0.1
 
 TSPOperator=expression
 OperatorExpression=identity
