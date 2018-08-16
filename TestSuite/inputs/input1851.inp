@@ -35,12 +35,12 @@ Version=version
 OutputFile=data1851.txt
 
 InfiniteLoopKeptStates=64
-FiniteLoops 4
+FiniteLoops 3 
+2 800 0
+-4 800 0 4 800 0
 
-5 800 0 -5 800 0 -5 800 0  5 800 0
-
-RepeatFiniteLoopsFrom=0
-RepeatFiniteLoopsTimes=202
+RepeatFiniteLoopsFrom=1
+RepeatFiniteLoopsTimes=20
 
 TargetElectronsUp=4
 TargetElectronsDown=4
