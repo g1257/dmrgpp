@@ -132,7 +132,7 @@ public:
 		for (SizeType i = 0; i < n; ++i) {
 			jmValues[i] = basisData[i].jmPair;
 			flavors_[i] = basisData[i].flavors;
-			electrons[i] = basisData[i].electrons;
+			electrons[i] = basisData[i].su2ElectronsBridge();
 		}
 
 		jmValues_ = jmValues;
@@ -148,11 +148,18 @@ public:
 	void setToProduct(const HamiltonianSymmetrySu2& symm1,
 	                  const HamiltonianSymmetrySu2& symm2,
 	                  const QnType* pseudoQn,
-	                  const VectorSizeType& electrons1,
-	                  const VectorSizeType& electrons2,
-	                  VectorSizeType& electrons,
+	                  const VectorQnType& qns1,
+	                  const VectorQnType& qns2,
+	                  VectorQnType& qns,
 	                  VectorQnType& quantumNumbers)
 	{
+		VectorSizeType electrons1;
+		QnType::su2ElectronsBridge(electrons1, qns1);
+		VectorSizeType electrons2;
+		QnType::su2ElectronsBridge(electrons2, qns2);
+		VectorSizeType electrons;
+		QnType::su2ElectronsBridge(electrons, qns);
+
 		const QnType zeroQn(0, VectorSizeType(), PairType(0, 0), 0);
 
 		SizeType ns = symm1.jmValues_.size();
@@ -170,7 +177,7 @@ public:
 		jMax_++;
 		calcReducedBasis();
 		normalizeFlavors();
-		QnType::qnToElectrons(electrons, quantumNumbers);
+		QnType::su2ElectronsBridge(electrons, quantumNumbers);
 		electronsMax_ = *(std::max_element(electrons.begin(),electrons.end()));
 	}
 

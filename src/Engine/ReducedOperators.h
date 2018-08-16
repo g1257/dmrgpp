@@ -762,6 +762,10 @@ private:
 		const typename PsimagLite::Vector<VectorSizeType>::Type* fastBasis =
 		        &fastBasisLeft_;
 		if (!order) fastBasis = &fastBasisRight_;
+
+		VectorSizeType basisBElectrons;
+		basisB->su2ElectronsBridge(basisBElectrons);
+
 		for (SizeType i0=0;i0<fastBasis->size();i0++) {
 			const PsimagLite::Vector<SizeType>::Type& twopairs = (*fastBasis)[i0];
 			SizeType i = twopairs[0];
@@ -774,7 +778,8 @@ private:
 
 			SizeType ii2 = basisB->reducedIndex(i2);
 			SizeType j2 = basisB->jmValue(ii2).first;
-			SizeType ne2 = basisB->electrons(ii2);
+			assert(ii2 < basisBElectrons.size());
+			SizeType ne2 = basisBElectrons[ii2];
 
 			SizeType jProd = thisBasis_->jVals(i);
 			SizeType jProdPrime = thisBasis_->jVals(iprime);
@@ -826,6 +831,12 @@ private:
 			basisA = &basis3;
 			basisB = &basis2;
 		}
+
+		VectorSizeType basisAElectrons;
+		basisA->su2ElectronsBridge(basisAElectrons);
+		VectorSizeType basisBElectrons;
+		basisB->su2ElectronsBridge(basisBElectrons);
+
 		fastBasis.clear();
 		PsimagLite::Vector<SizeType>::Type twopairs(5);
 		for (SizeType i=0;i<thisBasis_->jVals();i++) {
@@ -836,7 +847,8 @@ private:
 				for (SizeType i1=0;i1<basisA->reducedSize();i1++) {
 					twopairs[2]=i1;
 					SizeType ii1 = basisA->reducedIndex(i1);
-					SizeType ne1 = basisA->electrons(ii1);
+					assert(ii1 < basisAElectrons.size());
+					SizeType ne1 = basisAElectrons[ii1];
 					SizeType j1 = basisA->jmValue(ii1).first;
 					SizeType f1 = basisA->getFlavor(ii1);
 
@@ -844,7 +856,8 @@ private:
 
 						twopairs[3]=i2;
 						SizeType ii2 = basisB->reducedIndex(i2);
-						SizeType ne2 = basisB->electrons(ii2);
+						assert(ii2 < basisBElectrons.size());
+						SizeType ne2 = basisBElectrons[ii2];
 						SizeType j2 = basisB->jmValue(ii2).first;
 						SizeType f2 = basisB->getFlavor(ii2);
 						if (jProd>j1+j2) continue;
@@ -869,17 +882,24 @@ private:
 
 	void cacheFlavorIndex(const BasisType& basis2,const BasisType& basis3)
 	{
+		VectorSizeType basis2Electrons;
+		basis2.su2ElectronsBridge(basis2Electrons);
+		VectorSizeType basis3Electrons;
+		basis2.su2ElectronsBridge(basis3Electrons);
+
 		flavorIndexCached_.resize(basis2.reducedSize(), basis3.reducedSize());
 		for (SizeType i1=0;i1<basis2.reducedSize();i1++) {
 			SizeType ii1 = basis2.reducedIndex(i1);
-			SizeType ne1 = basis2.electrons(ii1);
+			assert(ii1 < basis2Electrons.size());
+			SizeType ne1 = basis2Electrons[ii1];
 			SizeType j1 = basis2.jmValue(ii1).first;
 			SizeType f1 = basis2.getFlavor(ii1);
 			for (SizeType i2=0;i2<basis3.reducedSize();i2++) {
 				SizeType ii2 = basis3.reducedIndex(i2);
 				SizeType j2  = basis3.jmValue(ii2).first;
 				SizeType f2 = basis3.getFlavor(ii2);
-				SizeType ne2 = basis3.electrons(ii2);
+				assert(ii2 < basis3Electrons.size());
+				SizeType ne2 = basis3Electrons[ii2];
 				flavorIndexCached_(i1,i2)=thisBasis_->flavor2Index(f1,f2,ne1,ne2,j1,j2);
 			}
 		}

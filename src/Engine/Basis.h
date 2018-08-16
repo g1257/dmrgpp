@@ -176,9 +176,9 @@ public:
 			symmSu2_.setToProduct(basis1.symmSu2_,
 			                      basis2.symmSu2_,
 			                      pseudoQn,
-			                      basis1.signs_,
-			                      basis2.signs_,
-			                      signs_,
+			                      basis1.qns_,
+			                      basis2.qns_,
+			                      qns_,
 			                      qns);
 		} else {
 			SizeType ns = basis2.size();
@@ -343,13 +343,6 @@ public:
 		return (useSu2Symmetry_) ? &(symmSu2_.getFactors()) : 0;
 	}
 
-	//! returns the number of electrons for state i of this basis
-//	SizeType electrons(SizeType i) const
-//	{
-//		assert(i < electrons_.size() || electrons_.size() == 0);
-//		return (i < electrons_.size()) ? electrons_[i] : 0;
-//	}
-
 	//! returns the flavor of state i of this basis
 	SizeType getFlavor(SizeType i) const
 	{
@@ -461,6 +454,11 @@ public:
 		} else {
 			return qnEx(i);
 		}
+	}
+
+	void su2ElectronsBridge(VectorSizeType &v) const
+	{
+		QnType::su2ElectronsBridge(v, qns_);
 	}
 
 	//! saves this basis to disk
@@ -624,7 +622,9 @@ private:
 	{
 		utils::truncateVector(qns, removedIndices);
 		utils::truncateVector(signs_,removedIndices);
-		if (useSu2Symmetry_) symmSu2_.truncate(removedIndices, signs_);
+		VectorSizeType electrons;
+		QnType::su2ElectronsBridge(electrons, qns);
+		if (useSu2Symmetry_) symmSu2_.truncate(removedIndices, electrons);
 	}
 
 	void reorder()

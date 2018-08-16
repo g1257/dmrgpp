@@ -100,6 +100,7 @@ class DensityMatrixSu2 : public DensityMatrixBase<TargetingType> {
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename DensityMatrixBase<TargetingType>::Params ParamsType;
+	typedef typename BasisType::BlockType VectorSizeType;
 
 public:
 
@@ -223,16 +224,18 @@ private:
 
 	SizeType findMaximalPartition(SizeType p, const BasisWithOperatorsType& pBasis)
 	{
+		VectorSizeType pBasisElectrons;
+		pBasis.su2ElectronsBridge(pBasisElectrons);
 		std::pair<SizeType,SizeType> jm2 = pBasis.jmValue(pBasis.partition(p));
-		SizeType ne2 = pBasis.electrons(pBasis.partition(p));
+		SizeType ne2 = pBasisElectrons[pBasis.partition(p)];
 		if (jm2.first==jm2.second) return p;
 		for (SizeType m=0;m<pBasis.partition()-1;m++) {
 			std::pair<SizeType,SizeType> jm1 = pBasis.jmValue(pBasis.partition(m));
-			SizeType ne1 = pBasis.electrons(pBasis.partition(m));
+			SizeType ne1 = pBasisElectrons[pBasis.partition(m)];
 			if (jm1.first==jm2.first && jm1.first==jm1.second && ne1==ne2) return m;
 		}
 
-		throw PsimagLite::RuntimeError("	findMaximalPartition : none found\n");
+		throw PsimagLite::RuntimeError("findMaximalPartition : none found\n");
 	}
 
 	//! only used for debugging
@@ -387,7 +390,7 @@ private:
 
 	const BasisWithOperatorsType& pBasis_;
 	BlockDiagonalMatrixType data_;
-	typename PsimagLite::Vector<SizeType>::Type mMaximal_;
+	VectorSizeType mMaximal_;
 	ProgramGlobals::DirectionEnum direction_;
 	bool debug_;
 }; // class DensityMatrixSu2

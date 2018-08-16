@@ -257,12 +257,20 @@ public:
 		}
 	}
 
-//	static void qnToElectrons(VectorSizeType& electrons, const VectorQnType& qns)
-//	{
-//		electrons.resize(qns.size());
-//		for (SizeType i=0;i<qns.size();i++)
-//			electrons[i] = qns[i].electrons;
-//	}
+	SizeType su2ElectronsBridge() const
+	{
+		assert(other.size() > 0);
+		return other[0];
+	}
+
+	static void su2ElectronsBridge(VectorSizeType& v,
+	                               const VectorQnType& qns)
+	{
+		SizeType n = qns.size();
+		v.resize(n);
+		for (SizeType i = 0; i < n; ++i)
+			v[i] = qns[i].su2ElectronsBridge();
+	}
 
 	static Qn zero()
 	{
