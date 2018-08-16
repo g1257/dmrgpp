@@ -57,7 +57,7 @@ TSPLoops 1 6
 TSPProductOrSum=sum
 TSPEnergyForExp=-3
 TSPUseQns=1
-GsWeight=0.0
+GsWeight=0.1
 
 TSPOperator=expression
 OperatorExpression=identity
