@@ -113,14 +113,19 @@ struct TargetQuantumElectrons {
 			try {
 				io.readline(electronsUp,"TargetElectronsUp=");
 				io.readline(electronsDown,"TargetElectronsDown=");
-				qn.electrons = electronsUp + electronsDown;
+				SizeType tmp = electronsUp + electronsDown;
+				qn.oddElectrons = (tmp & 1);
+				qn.other.push_back(tmp);
 				qn.other.push_back(electronsUp);
-				ready=2;
+				ready = 2;
 			} catch (std::exception&) {}
 		}
 
 		try {
-			io.readline(qn.electrons, "TargetElectronsTotal=");
+			SizeType tmp = 0;
+			io.readline(tmp, "TargetElectronsTotal=");
+			qn.oddElectrons = (tmp & 1);
+			qn.other.push_back(tmp);
 			ready++;
 		} catch (std::exception&) {}
 
@@ -179,8 +184,8 @@ struct TargetQuantumElectrons {
 			throw PsimagLite::RuntimeError
 		        ("WARNING: SU(2) with grand canonical ???\n");
 
-		if (isSu2 && qn.electrons == 0)
-			qn.electrons = totalNumberOfSites;
+		if (isSu2)
+			qn.oddElectrons = (totalNumberOfSites & 1);
 	}
 
 	template<typename SomeMemResolvType>

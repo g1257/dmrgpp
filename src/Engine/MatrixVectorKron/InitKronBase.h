@@ -127,7 +127,7 @@ public:
 		msg<<", useLowerPart= "<<useLowerPart;
 		progress_.printline(msg, std::cout);
 
-		cacheSigns(signsNew_, lrs.left().electronsVector());
+		signsNew_ = lrs.left().signs();
 	}
 
 	~InitKronBase()

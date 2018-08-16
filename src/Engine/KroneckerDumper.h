@@ -78,7 +78,7 @@ public:
 		QnType qtarget = lrs.super().qnEx(m);
 		fout_<<qtarget<<"\n";
 
-		cacheSigns(lrs.left().electronsVector());
+		signs_ = lrs.left().signs();
 		counter_++;
 	}
 
@@ -172,21 +172,14 @@ private:
 		for (SizeType i = 0; i < npart; ++i)
 			fout_<<basis.pseudoQnToString(i)<<"\n";
 
-		fout_<<"Electrons\n";
-		fout_<<basis.electronsVector();
+		fout_<<"Signs\n";
+		fout_<<basis.signs();
 	}
 
 	PairSizeType getNupNdown(QnType q) const
 	{
 		assert(q.other.size() >= 1);
 		return PairSizeType(q.other[0], q.electrons - q.other[0]);
-	}
-
-	void cacheSigns(const VectorSizeType& electrons)
-	{
-		signs_.resize(electrons.size(), false);
-		for (SizeType i = 0; i < electrons.size(); ++i)
-			signs_[i] = (electrons[i] & 1) ? true : false;
 	}
 
 	// Ahat(ia,ja) = (-1)^e_L(ia) A(ia,ja)*value

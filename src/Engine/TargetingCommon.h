@@ -317,10 +317,10 @@ public:
 		VectorQnType q;
 		targetHelper_.model().setOperatorMatrices(creationMatrix, q, block1);
 
-		VectorSizeType electrons(q.size());
-		for (SizeType i = 0; i < q.size(); ++i) electrons[i] = q[i].electrons;
+		typename BasisWithOperatorsType::VectorBoolType signs(q.size());
+		for (SizeType i = 0; i < q.size(); ++i) signs[i] = q[i].oddElectrons;
 
-		FermionSign fs(targetHelper_.lrs().left(), electrons);
+		FermionSign fs(targetHelper_.lrs().left(), signs);
 		for (SizeType j=0;j<creationMatrix.size();j++) {
 			VectorWithOffsetType phiTemp;
 			applyOpExpression_.applyOpLocal()(phiTemp,psi,creationMatrix[j],
@@ -752,9 +752,9 @@ private:
 	                               const OperatorType& A,
 	                               BorderEnumType border) const
 	{
-		typename PsimagLite::Vector<SizeType>::Type electrons;
-		targetHelper_.model().findElectronsOfOneSite(electrons,site);
-		FermionSign fs(targetHelper_.lrs().left(),electrons);
+		typename PsimagLite::Vector<bool>::Type oddElectrons;
+		targetHelper_.model().findOddElectronsOfOneSite(oddElectrons,site);
+		FermionSign fs(targetHelper_.lrs().left(), oddElectrons);
 		VectorWithOffsetType dest;
 		applyOpExpression_.applyOpLocal()(dest,src1,A,fs,systemOrEnviron,border);
 

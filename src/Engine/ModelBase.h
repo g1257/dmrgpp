@@ -126,6 +126,7 @@ public:
 	typedef VectorSizeType HilbertBasisType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename QnType::PairSizeType PairSizeType;
+	typedef typename BasisWithOperatorsType::VectorBoolType VectorBoolType;
 
 	ModelBase(const ParametersType& params,
 	          const GeometryType_& geometry,
@@ -196,16 +197,17 @@ public:
 		return modelCommon_.linkProduct();
 	}
 
-	virtual void findElectronsOfOneSite(BlockType& electrons,SizeType site) const
+	virtual void findOddElectronsOfOneSite(VectorBoolType& oddElectrons,
+	                                       SizeType site) const
 	{
 		typename PsimagLite::Vector<SizeType>::Type block(1, site);
 		typename PsimagLite::Vector<OperatorType>::Type cm;
 		VectorQnType qq;
 		setOperatorMatrices(cm, qq, block);
 		SizeType n = qq.size();
-		electrons.resize(n);
+		oddElectrons.resize(n);
 		for (SizeType i = 0; i < n; ++i)
-			electrons[i] = qq[i].electrons;
+			oddElectrons[i] = qq[i].oddElectrons;
 	}
 
 	virtual void matrixVectorProduct(VectorType& x,

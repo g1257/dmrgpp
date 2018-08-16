@@ -380,9 +380,9 @@ public:
 		PsimagLite::OstringStream msg;
 		msg<<"I'm applying a local operator now";
 		progress_.printline(msg,std::cout);
-		typename PsimagLite::Vector<SizeType>::Type electrons;
-		targetHelper_.model().findElectronsOfOneSite(electrons,site);
-		FermionSign fs(targetHelper_.lrs().left(),electrons);
+		typename PsimagLite::Vector<bool>::Type signs;
+		targetHelper_.model().findOddElectronsOfOneSite(signs, site);
+		FermionSign fs(targetHelper_.lrs().left(), signs);
 		applyOpLocal_(phiNew,phiOld,targetHelper_.tstStruct().aOperators()[indexOfOperator],
 		              fs,systemOrEnviron,corner);
 
@@ -543,9 +543,9 @@ private:
 			PsimagLite::OstringStream msg;
 			msg<<"I'm applying a local operator now";
 			progress_.printline(msg,std::cout);
-			typename PsimagLite::Vector<SizeType>::Type electrons;
-			targetHelper_.model().findElectronsOfOneSite(electrons,site);
-			FermionSign fs(targetHelper_.lrs().left(),electrons);
+			typename PsimagLite::Vector<bool>::Type signs;
+			targetHelper_.model().findOddElectronsOfOneSite(signs,site);
+			FermionSign fs(targetHelper_.lrs().left(), signs);
 			applyOpLocal_(phiNew,phiOld,targetHelper_.tstStruct().aOperators()[i],
 			              fs,systemOrEnviron,corner);
 			RealType norma = norm(phiNew);

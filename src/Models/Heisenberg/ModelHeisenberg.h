@@ -407,13 +407,6 @@ private:
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
 
-		SizeType totalElectrons = ModelBaseType::targetQuantum().qn.electrons;
-		if (!ModelBaseType::targetQuantum().isSu2 && totalElectrons > 0) {
-			PsimagLite::String msg("Please delete the line ");
-			msg += "TargetElectronsTotal= in the input file\n";
-			throw PsimagLite::RuntimeError(msg);
-		}
-
 		bool isCanonical = (ModelBaseType::targetQuantum().isCanonical);
 		VectorSizeType other;
 		if (isCanonical) other.resize(1, 0);

@@ -39,8 +39,8 @@ public:
 	typedef PsimagLite::Vector<Qn>::Type VectorQnType;
 	typedef PsimagLite::Vector<ModalStruct>::Type VectorModalStructType;
 
-	Qn(SizeType e, VectorSizeType szPlusConst, PairSizeType j, SizeType flavor)
-	    : electrons(e), other(szPlusConst), jmPair(j), flavors(flavor)
+	Qn(bool odd, VectorSizeType szPlusConst, PairSizeType j, SizeType flavor)
+	    : oddElectrons(odd), other(szPlusConst), jmPair(j), flavors(flavor)
 	{
 		if (modalStruct.size() == szPlusConst.size())
 			return;
@@ -54,7 +54,7 @@ public:
 
 	Qn(const Qn& q1, const Qn& q2)
 	{
-		electrons = q1.electrons + q2.electrons;
+		oddElectrons = (q1.oddElectrons ^ q2.oddElectrons);
 		SizeType n = q1.other.size();
 		assert(q2.other.size() == n);
 		assert(modalStruct.size() == n);
@@ -74,7 +74,7 @@ public:
 	template<typename SomeInputType>
 	void read(PsimagLite::String str, SomeInputType& io)
 	{
-		io.read(electrons, str + "/electrons");
+		io.read(oddElectrons, str + "/oddElectrons");
 		try {
 			io.read(other, str + "/other");
 		} catch (...) {}
@@ -98,7 +98,7 @@ public:
 		}
 
 		io.createGroup(str);
-		io.write(str + "/electrons", electrons);
+		io.write(str + "/oddElectrons", oddElectrons);
 		io.write(str + "/other", other);
 		io.write(str + "/jmPair", jmPair);
 		io.write(str + "/flavors", flavors);
@@ -106,7 +106,7 @@ public:
 
 	bool operator==(const Qn& a) const
 	{
-		return (a.electrons == electrons &&
+		return (a.oddElectrons == oddElectrons &&
 		        vectorEqualMaybeModal(a.other) &&
 		        pairEqual(a.jmPair) &&
 		        flavors == a.flavors);
@@ -128,14 +128,12 @@ public:
 			err("Qn::scale() expects mode==1 for SU(2)\n");
 
 		if (direction == ProgramGlobals::INFINITE) {
-			SizeType flp = original.electrons*sites;
-			electrons = static_cast<SizeType>(round(flp/totalSites));
 			for (SizeType x = 0; x < mode; ++x) {
-				flp = original.other[x]*sites;
+				SizeType flp = original.other[x]*sites;
 				other[x] = static_cast<SizeType>(round(flp/totalSites));
 			}
 
-			flp = original.jmPair.first*sites;
+			SizeType flp = original.jmPair.first*sites;
 			jmPair.first =  static_cast<SizeType>(round(flp/totalSites));
 		}
 
@@ -144,17 +142,17 @@ public:
 		SizeType tmp =jmPair.first;
 		PsimagLite::String str("SymmetryElectronsSz: FATAL: Impossible parameters ");
 		bool flag = false;
-		if (original.electrons & 1) {
+		if (original.oddElectrons) {
 			if (!(tmp & 1)) {
 				flag = true;
-				str += "electrons= " + ttos(original.electrons) + " is odd ";
+				str += "oddElectrons= " + ttos(original.oddElectrons) + " is odd ";
 				str += "and 2j= " +  ttos(tmp) + " is even.";
 				tmp++;
 			}
 		} else {
 			if (tmp & 1) {
 				flag = true;
-				str += "electrons= " + ttos(original.electrons) + " is even ";
+				str += "oddElectrons= " + ttos(original.oddElectrons) + " is even ";
 				str += "and 2j= " +  ttos(tmp) + " is odd.";
 				tmp++;
 			}
@@ -179,7 +177,9 @@ public:
 		outQns.resize(n, Qn(0, VectorSizeType(mode), PairSizeType(0, 0), 0));
 		for (SizeType i = 0; i < n; ++i) {
 			assert(1 + i*(mode + 1) < ints.size());
-			outQns[i].electrons = ints[1 + i*(mode + 1)];
+			SizeType tmp = ints[1 + i*(mode + 1)];
+			if (tmp > 1) err("adjustQns: oddElectrons must be 0 or 1\n");
+			outQns[i].oddElectrons = (tmp == 1);
 			for (SizeType j = 0; j < mode; ++j) {
 				SizeType k = (j == 0) ? 0 : j + 1;
 				assert(k + i*mode < ints.size());
@@ -257,12 +257,12 @@ public:
 		}
 	}
 
-	static void qnToElectrons(VectorSizeType& electrons, const VectorQnType& qns)
-	{
-		electrons.resize(qns.size());
-		for (SizeType i=0;i<qns.size();i++)
-			electrons[i] = qns[i].electrons;
-	}
+//	static void qnToElectrons(VectorSizeType& electrons, const VectorQnType& qns)
+//	{
+//		electrons.resize(qns.size());
+//		for (SizeType i=0;i<qns.size();i++)
+//			electrons[i] = qns[i].electrons;
+//	}
 
 	static Qn zero()
 	{
@@ -274,7 +274,7 @@ public:
 
 	friend std::ostream& operator<<(std::ostream& os, const Qn& qn)
 	{
-		os<<"electrons="<<qn.electrons<<" ";
+		os<<"oddElectrons="<<qn.oddElectrons<<" ";
 		os<<"other=";
 		for (SizeType i = 0; i < qn.other.size(); ++i)
 			os<<qn.other[i]<<",";
@@ -283,7 +283,7 @@ public:
 	}
 
 	static VectorModalStructType modalStruct;
-	SizeType electrons;
+	bool oddElectrons;
 	VectorSizeType other;
 	PairSizeType jmPair;
 	SizeType flavors;

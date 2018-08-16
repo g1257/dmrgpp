@@ -140,6 +140,8 @@ public:
 	//! Returns the name of this basis
 	const PsimagLite::String& name() const { return name_; }
 
+	const VectorBoolType& signs() const { return signs_; }
+
 	//! Sets the block of sites for this basis
 	void set(BlockType const &B) { block_ = B; }
 
@@ -174,9 +176,9 @@ public:
 			symmSu2_.setToProduct(basis1.symmSu2_,
 			                      basis2.symmSu2_,
 			                      pseudoQn,
-			                      basis1.electrons_,
-			                      basis2.electrons_,
-			                      electrons_,
+			                      basis1.signs_,
+			                      basis2.signs_,
+			                      signs_,
 			                      qns);
 		} else {
 			SizeType ns = basis2.size();
@@ -199,7 +201,7 @@ public:
 			if (nps > 0) --nps;
 
 			qns.resize(basis1.size() * basis2.size(), QnType::zero());
-			electrons_.resize(qns.size());
+			signs_.resize(qns.size());
 			SizeType counter = 0;
 			for (SizeType pe = 0; pe < npe; ++pe) {
 				for (SizeType i = basis2.partition_[pe]; i < basis2.partition_[pe + 1]; ++i) {
@@ -208,7 +210,7 @@ public:
 						     j < basis1.partition_[ps + 1];
 						     ++j) {
 							qns[counter] = QnType(basis2.qns_[pe], basis1.qns_[ps]);
-							electrons_[counter++] = basis1.electrons_[j] + basis2.electrons_[i];
+							signs_[counter++] = (basis1.signs_[j] ^ basis2.signs_[i]);
 						}
 					}
 				}
@@ -222,7 +224,7 @@ public:
 		// order quantum numbers of combined basis:
 		findPermutationAndPartitionAndQns(qns, true, verbose);
 		reorder();
-		electronsToSigns(electrons_);
+		signsOld_ = signs_;
 	}
 
 	//! returns the effective quantum number of basis state i
@@ -342,11 +344,11 @@ public:
 	}
 
 	//! returns the number of electrons for state i of this basis
-	SizeType electrons(SizeType i) const
-	{
-		assert(i < electrons_.size() || electrons_.size() == 0);
-		return (i < electrons_.size()) ? electrons_[i] : 0;
-	}
+//	SizeType electrons(SizeType i) const
+//	{
+//		assert(i < electrons_.size() || electrons_.size() == 0);
+//		return (i < electrons_.size()) ? electrons_[i] : 0;
+//	}
 
 	//! returns the flavor of state i of this basis
 	SizeType getFlavor(SizeType i) const
@@ -380,15 +382,15 @@ public:
 	}
 
 	//! Returns the vector of electrons for this basis
-	const VectorSizeType& electronsVector() const { return electrons_; }
+//	const VectorSizeType& electronsVector() const { return electrons_; }
 
 	const VectorBoolType& oldSigns() const { return signsOld_; }
 
 	//! Returns the fermionic sign for state i
-	int fermionicSign(SizeType i,int f) const
+	int fermionicSign(SizeType i, int f) const
 	{
-		assert(i < electrons_.size());
-		return (electrons_[i] & 1) ? f : 1;
+		assert(i < signs_.size());
+		return (signs_[i]) ? f : 1;
 	}
 
 	//! Returns the (j,m) for state i of this basis
@@ -453,8 +455,8 @@ public:
 			assert(i < partition_.size());
 			SizeType ind = partition_[i];
 			PairType jmPair(symmSu2_.jmValue(ind).first, 0);
-			assert(ind < electrons_.size());
-			QnType q(electrons_[ind], VectorSizeType(), jmPair, 0);
+			assert(ind < signs_.size());
+			QnType q(signs_[ind], VectorSizeType(), jmPair, 0);
 			return q;
 		} else {
 			return qnEx(i);
@@ -474,7 +476,7 @@ public:
 		io.write(block_, label + "BLOCK");
 
 		if (!minimizeWrite) {
-			io.write(electrons_, label + "ELECTRONS");
+			io.write(signs_, label + "signs_");
 			io.write(signsOld_, label + "SignsOld");
 		}
 
@@ -531,16 +533,16 @@ protected:
 		if (useSu2Symmetry_) symmSu2_.set(basisData);
 
 		SizeType n = basisData.size();
-		electrons_.resize(n);
+		signs_.resize(n);
 		for (SizeType i = 0; i < n; ++i)
-			electrons_[i] = basisData[i].electrons;
+			signs_[i] = basisData[i].oddElectrons;
 
 		VectorQnType basisData2 = basisData;
 		if (!useSu2Symmetry()) flattenQns(basisData2);
 
 		findPermutationAndPartitionAndQns(basisData2, true, ProgramGlobals::VERBOSE_NO);
 		reorder();
-		electronsToSigns(electrons_);
+		signsOld_ = signs_;
 	}
 
 private:
@@ -558,7 +560,7 @@ private:
 		io.read(block_, prefix + "BLOCK");
 
 		if (!minimizeRead) {
-			io.read(electrons_, prefix + "ELECTRONS");
+			io.read(signs_, prefix + "signs_");
 			io.read(signsOld_, prefix + "SignsOld");
 		}
 
@@ -621,13 +623,13 @@ private:
 	void truncate(VectorQnType& qns, const VectorSizeType& removedIndices)
 	{
 		utils::truncateVector(qns, removedIndices);
-		utils::truncateVector(electrons_,removedIndices);
-		if (useSu2Symmetry_) symmSu2_.truncate(removedIndices, electrons_);
+		utils::truncateVector(signs_,removedIndices);
+		if (useSu2Symmetry_) symmSu2_.truncate(removedIndices, signs_);
 	}
 
 	void reorder()
 	{
-		utils::reorder(electrons_,permutationVector_);
+		utils::reorder(signs_,permutationVector_);
 		if (useSu2Symmetry_) symmSu2_.reorder(permutationVector_);
 	}
 
@@ -648,19 +650,6 @@ private:
 			for (SizeType i=0;i<permInverse_.size();i++)
 				permInverse_[permutationVector_[i]]=i;
 		}
-	}
-
-	void electronsToSigns(const VectorSizeType& electrons)
-	{
-		SizeType n = electrons.size();
-		if (n == 0) {
-			signsOld_.clear();
-			return;
-		}
-
-		signsOld_.resize(n);
-		for (SizeType i = 0; i < n; ++i)
-			signsOld_[i] = (electrons[i] & 1);
 	}
 
 	void correctNameIfNeeded()
@@ -701,7 +690,7 @@ these numbers are
 		systems of correlated electrons.)
 		*/
 	VectorQnType qns_;
-	VectorSizeType electrons_;
+	VectorBoolType signs_;
 	VectorBoolType signsOld_;
 
 	/* PSIDOC BasisPartition

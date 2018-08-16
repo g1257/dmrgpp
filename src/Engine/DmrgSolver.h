@@ -216,9 +216,9 @@ public:
 	~DmrgSolver()
 	{
 		SizeType site = 0; // FIXME FOR IMMM
-		VectorSizeType electrons;
-		model_.findElectronsOfOneSite(electrons, site);
-		ioOut_.write(electrons, "ElectronsOneSite");
+		typename BasisWithOperatorsType::VectorBoolType oddElectrons;
+		model_.findOddElectronsOfOneSite(oddElectrons, site);
+		ioOut_.write(oddElectrons, "OddElectronsOneSite");
 
 		appInfo_.finalize();
 		ioOut_.write(appInfo_, "ApplicationInfo");
@@ -577,11 +577,9 @@ obtain ordered
 	                                SizeType loopIndex)
 	{
 		bool twoSiteDmrg = (parameters_.options.find("twositedmrg") != PsimagLite::String::npos);
-		const VectorSizeType& eS = pS.electronsVector();
-		FermionSignType fsS(eS);
+		FermionSignType fsS(pS.signs());
 
-		const VectorSizeType& eE = pS.electronsVector();
-		FermionSignType fsE(eE);
+		FermionSignType fsE(pE.signs());
 
 		truncate_(pS,pE,target,keptStates,direction);
 

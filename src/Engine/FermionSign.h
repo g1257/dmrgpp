@@ -91,29 +91,27 @@ class FermionSign {
 
 public:
 
-	FermionSign(const PsimagLite::Vector<SizeType>::Type& electrons)
-	    : signs_(electrons.size())
-	{
-		init(electrons);
-	}
+	FermionSign(const VectorBoolType& signs)
+	    : signs_(signs)
+	{}
 
 	template<typename SomeBasisType>
-	FermionSign(const SomeBasisType& basis,const VectorSizeType& electrons)
+	FermionSign(const SomeBasisType& basis,const VectorBoolType& signs)
 	{
 		if (basis.oldSigns().size() != basis.permutationInverse().size())
 			err("FermionSign: Problem\n");
 
 		SizeType n = basis.oldSigns().size();
-		SizeType nx = basis.oldSigns().size()/electrons.size();
+		SizeType nx = basis.oldSigns().size()/signs.size();
 		PackIndicesType pack(nx);
 		signs_.resize(nx);
 		for (SizeType x = 0; x < n; ++x) {
 			SizeType x0 = 0;
 			SizeType x1 = 0;
 			pack.unpack(x0, x1, basis.permutation(x));
-			assert(x1 < electrons.size());
+			assert(x1 < signs.size());
 			bool parity1 = basis.oldSigns()[x];
-			bool parity2 = (electrons[x1] & 1);
+			bool parity2 = signs[x1];
 			assert(x0 < signs_.size());
 			signs_[x0] = (parity1 != parity2);
 		}
@@ -148,13 +146,6 @@ public:
 	SizeType size() const { return signs_.size(); }
 
 private:
-
-	void init(const VectorSizeType& electrons)
-	{
-		signs_.resize(electrons.size());
-		for (SizeType i=0;i<signs_.size();i++)
-			signs_[i] = (electrons[i] & 1);
-	}
 
 	VectorBoolType signs_;
 }; // class FermionSign
