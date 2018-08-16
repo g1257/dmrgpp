@@ -127,6 +127,27 @@ public:
 			return ops_[4];
 		}
 
+		if (what == "sz") {
+			if (dof > 0) err("naturalOperator: dof too big for sz\n");
+			SparseMatrixType mup = ops_[0].data;
+			SparseMatrixType mupT;
+			transposeConjugate(mupT, mup);
+			SparseMatrixType mdown = ops_[1].data;
+			SparseMatrixType mdownT;
+			transposeConjugate(mdownT, mdown);
+			SparseMatrixType szMatrix = mdownT*mdown;
+			szMatrix *= (-1.0);
+			szMatrix += mupT*mup;
+			szMatrix *= 0.5;
+
+			typename OperatorType::Su2RelatedType su2Related;
+			return OperatorType(szMatrix,
+			                    1,
+			                    PairSizeType(0,0),
+			                    1,
+			                    su2Related);
+		}
+
 		throw PsimagLite::RuntimeError("naturalOperator: unknown label " + what + "\n");
 	}
 
