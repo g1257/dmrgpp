@@ -160,7 +160,7 @@ public:
 		VectorSizeType electrons;
 		QnType::su2ElectronsBridge(electrons, qns);
 
-		const QnType zeroQn(0, VectorSizeType(), PairType(0, 0), 0);
+		const QnType zeroQn(false, VectorSizeType(), PairType(0, 0), 0);
 
 		SizeType ns = symm1.jmValues_.size();
 		SizeType ne = symm2.jmValues_.size();
@@ -326,7 +326,9 @@ private:
 		for (SizeType i=0;i<jmSubspaces_.size();i++) {
 			SizeType flavors = jmSubspaces_[i].numberOfFlavors();
 			PairType jm = jmSubspaces_[i].getJmValue();
-			QnType q(jmSubspaces_[i].getNe(), VectorSizeType(), jm, 0);
+			SizeType ne = jmSubspaces_[i].getNe();
+			bool sign = ne & 1;
+			QnType q(sign, VectorSizeType(1, ne), jm, 0);
 			for (SizeType j = 0; j < flavors; ++j) {
 				quantumNumbers[counter]  = q;
 				jmValues_.push(jm, j + offset);
@@ -445,7 +447,11 @@ private:
 			if (tmp>j) continue;
 			PairType jm(j,m);
 			int heavy=1;
-			QnType pseudo(nelectrons, VectorSizeType(), PairType(jm.first, 0), 0);
+			bool sign = nelectrons & 1;
+			QnType pseudo(sign,
+			              VectorSizeType(1, nelectrons),
+			              PairType(jm.first, 0),
+			              0);
 			if (pseudoQn && pseudo != *pseudoQn)
 				heavy=0;
 

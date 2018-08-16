@@ -162,7 +162,7 @@ public:
 			addedSites_.push_back(block1[i]);
 		for (SizeType i=0;i<block2.size();i++)
 			addedSites_.push_back(block2[i]);
-		const QnType zeroQn(0, VectorSizeType(), PairType(0, 0), 0);
+		const QnType zeroQn(false, VectorSizeType(), PairType(0, 0), 0);
 
 		qnVsSize_.resize(addedSites_.size() + 1, zeroQn);
 		qnVsSize_[addedSites_.size()]=qn;

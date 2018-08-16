@@ -603,7 +603,7 @@ private:
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 
-		VectorSizeType other(3, 0);
+		VectorSizeType other(4, 0);
 		SizeType offset = basis.size();
 		qns.resize(offset, QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
@@ -617,20 +617,20 @@ private:
 			SizeType flavor = 0;
 
 			// nup
-			other[0] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
+			other[1] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
 			                                                        SPIN_UP);
 			// ntotal
-			SizeType electrons = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			                                                                  SPIN_DOWN) +
-			        other[i];
+			other[0] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
+			                                                        SPIN_DOWN) + other[1];
 
 			// up ancilla
-			other[1] = naUp;
+			other[2] = naUp;
 
 			// down ancilla
-			other[2] = naDown;
+			other[3] = naDown;
 
-			qns[i] = QnType(electrons, other, jmpair, flavor);
+			bool sign = other[0] & 1;
+			qns[i] = QnType(sign, other, jmpair, flavor);
 		}
 	}
 

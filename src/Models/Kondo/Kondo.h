@@ -234,7 +234,7 @@ private:
 	{
 		qns.resize(basis.size(), QnType::zero());
 		assert(1 == ModelBaseType::targetQuantum().qn.other.size());
-		VectorSizeType other(1, 0);
+		VectorSizeType other(2, 0);
 
 		// bit 0 <--- up electron
 		// bit 1 <--- down electron
@@ -252,9 +252,11 @@ private:
 			SizeType bosonicSz = basis[i];
 			bosonicSz >>= 2; // delete electronic part
 
-			other[0] = electronsUp + bosonicSz;
+			other[0] = electrons;
+			other[1] = electronsUp + bosonicSz;
 
-			qns[i] = QnType(electrons, other, jmpair, 0);
+			bool sign = electrons & 1;
+			qns[i] = QnType(sign, other, jmpair, 0);
 		}
 	}
 

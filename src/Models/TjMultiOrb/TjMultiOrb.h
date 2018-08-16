@@ -792,7 +792,7 @@ private:
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
 		SizeType orbitals = modelParameters_.orbitals;
-
+		VectorSizeType other(2, 0);
 		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(0,0);
@@ -811,7 +811,10 @@ private:
 			}
 
 			SizeType electrons = electronsDown + electronsUp;
-			qns[i] = QnType(electrons, VectorSizeType(1, electronsUp), jmpair, electrons);
+			other[0] = electrons;
+			other[1] = electronsUp;
+			bool sign = electrons & 1;
+			qns[i] = QnType(sign, other, jmpair, electrons);
 		}
 	}
 

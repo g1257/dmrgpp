@@ -174,7 +174,7 @@ public:
 		if (n % (mode + 1) != 0)
 			err("adjustQns failed, n does not divide mode + 1\n");
 		n /= (mode + 1);
-		outQns.resize(n, Qn(0, VectorSizeType(mode), PairSizeType(0, 0), 0));
+		outQns.resize(n, Qn(false, VectorSizeType(mode + 1), PairSizeType(0, 0), 0));
 		for (SizeType i = 0; i < n; ++i) {
 			assert(1 + i*(mode + 1) < ints.size());
 			SizeType tmp = ints[1 + i*(mode + 1)];
@@ -277,7 +277,7 @@ public:
 		SizeType value = 1;
 		SizeType total = sizeof(value)*8 - 1;
 		value <<= total;
-		return Qn(0, VectorSizeType(modalStruct.size(), value), PairSizeType(0, 0), 0);
+		return Qn(false, VectorSizeType(modalStruct.size(), value), PairSizeType(0, 0), 0);
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const Qn& qn)
@@ -326,6 +326,8 @@ private:
 		return (otherJm.first == jmPair.first &&
 		        otherJm.second == jmPair.second);
 	}
+
+	Qn(SizeType odd, VectorSizeType szPlusConst, PairSizeType j, SizeType flavor);
 };
 }
 #endif // QN_H

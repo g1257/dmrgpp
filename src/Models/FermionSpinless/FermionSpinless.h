@@ -343,7 +343,8 @@ private:
 			SizeType electrons = HilbertSpaceType::getNofDigits(basis[i],0);
 			SizeType flavor = electrons;
 
-			qns[i] = QnType(electrons, VectorSizeType(), jmpair, flavor);
+			bool sign = electrons & 1;
+			qns[i] = QnType(sign, VectorSizeType(1, electrons), jmpair, flavor);
 		}
 	}
 

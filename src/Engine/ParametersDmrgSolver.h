@@ -219,7 +219,7 @@ struct ParametersDmrgSolver {
 	      recoveryMaxFiles(3),
 	      autoRestart(false),
 	      recoverySave("no"),
-	      adjustQuantumNumbers(0, QnType(0, VectorSizeType(), PairSizeType(0, 0), 0)),
+	      adjustQuantumNumbers(0, QnType(false, VectorSizeType(), PairSizeType(0, 0), 0)),
 	      degeneracyMax(1e-12),
 	      denseSparseThreshold(0.2)
 	{

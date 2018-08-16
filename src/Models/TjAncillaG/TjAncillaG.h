@@ -429,7 +429,7 @@ private:
 			PairType jmpair = calcJmvalue<PairType>(basis[i]);
 			SizeType szPlusConst = (basis[i] == 2) ? 0 : basis[i] + 1;
 
-			qns[i] = QnType(0, VectorSizeType(1, szPlusConst), jmpair, 0);
+			qns[i] = QnType(false, VectorSizeType(1, szPlusConst), jmpair, 0);
 		}
 	}
 

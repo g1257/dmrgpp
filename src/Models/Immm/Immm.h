@@ -389,17 +389,18 @@ private:
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
-
+		VectorSizeType other(2, 0);
 		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair = calcJmvalue<PairType>(basis[i]);
 			SizeType flavor = 0; // na  + 3*nb;
 			// nup
-			SizeType electronsUp = hilbertSpace_.electronsWithGivenSpin(basis[i],site,SPIN_UP);
+			other[1] = hilbertSpace_.electronsWithGivenSpin(basis[i],site,SPIN_UP);
 			// ndown
 			SizeType electronsDown = hilbertSpace_.electronsWithGivenSpin(basis[i],site,SPIN_DOWN);
-			SizeType electrons = electronsDown + electronsUp;
-			qns[i] = QnType(electrons, VectorSizeType(1, electronsUp), jmpair, flavor);
+			other[0] = electronsDown + other[1];
+			bool sign = other[0] & 1;
+			qns[i] = QnType(sign, other, jmpair, flavor);
 		}
 	}
 

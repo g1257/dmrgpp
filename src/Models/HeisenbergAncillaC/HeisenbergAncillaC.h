@@ -434,17 +434,18 @@ private:
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
-
+		VectorSizeType other(2, 0);
 		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair;
 			jmpair.first = modelParameters_.twiceTheSpin;
 			jmpair.second = basis[i];
 			PairSizeType ket = getOneOrbital(basis[i]);
-			SizeType szPlusConst = ket.first + ket.second;
-			SizeType electrons = ket.first;
+			other[1] = ket.first + ket.second;
+			other[0] = ket.first;
 			SizeType flavor = 1;
-			qns[i] = QnType(electrons, VectorSizeType(1, szPlusConst), jmpair, flavor);
+			bool sign = other[0] & 1;
+			qns[i] = QnType(sign, other, jmpair, flavor);
 		}
 	}
 

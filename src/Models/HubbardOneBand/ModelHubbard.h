@@ -508,6 +508,7 @@ private:
 		bool isCanonical = (ModelBaseType::targetQuantum().isCanonical);
 
 		qns.resize(basis.size(), QnType::zero());
+		VectorSizeType other((isCanonical) ? 2 : 1, 0);
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair = calcJmValue<PairType>(basis[i]);
 			// nup
@@ -515,11 +516,12 @@ private:
 			// ndown
 			SizeType electronsDown = HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_DOWN);
 
-			SizeType electrons = electronsUp + electronsDown;
+			other[0] = electronsUp + electronsDown;
 
-			if (!isCanonical) electronsUp = 0;
+			if (isCanonical) other[1] = electronsUp;
 
-			qns[i] = QnType(electrons, VectorSizeType(1, electronsUp), jmpair, electrons);
+			bool sign = other[0] & 1;
+			qns[i] = QnType(sign, other, jmpair, other[0]);
 		}
 	}
 

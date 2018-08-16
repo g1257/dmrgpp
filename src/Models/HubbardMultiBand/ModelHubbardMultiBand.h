@@ -450,10 +450,13 @@ private:
 		qns.resize(basis.size(), QnType::zero());
 		SizeType mode = ModelBaseType::targetQuantum().qn.other.size();
 		assert(mode == 1 || mode == 2); // either Sz or Sz and k-symmetry
-		VectorSizeType other(mode, 0);
-		QnType::modalStruct.resize(2);
-		QnType::modalStruct[1].modalEnum = QnType::MODAL_MODULO;
-		QnType::modalStruct[1].extra = modelParameters_.orbitals;
+		VectorSizeType other(mode + 1, 0);
+		QnType::modalStruct.resize(mode + 1);
+		if (mode == 2) {
+			QnType::modalStruct[2].modalEnum = QnType::MODAL_MODULO;
+			QnType::modalStruct[2].extra = modelParameters_.orbitals;
+		}
+
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(0,0);
 
@@ -465,9 +468,11 @@ private:
 			                                                                      SPIN_DOWN);
 			SizeType electrons = electronsDown + electronsUp;
 
-			other[0] = electronsUp;
-			if (mode == 2) other[1] = findMvalue(basis[i]);
-			qns[i] = QnType(electrons, other, jmpair, 0);
+			other[0] = electrons;
+			other[1] = electronsUp;
+			if (mode == 2) other[2] = findMvalue(basis[i]);
+			bool sign = electrons & 1;
+			qns[i] = QnType(sign, other, jmpair, 0);
 		}
 	}
 

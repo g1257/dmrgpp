@@ -546,23 +546,24 @@ private:
 		typedef std::pair<SizeType,SizeType> PairType;
 
 		SizeType basisSize = basis.size();
-		VectorSizeType other(3, 0);
+		VectorSizeType other(4, 0);
 		qns.resize(basisSize, QnType::zero());
 		for (SizeType i = 0; i < basisSize; ++i) {
 			PairType jmpair = calcJmvalue<PairType>(basis[i]);
 
 			// nup
-			other[0] = HilbertSpaceType::electronsWithGivenSpin(basis[i],SPIN_UP);
+			other[1] = HilbertSpaceType::electronsWithGivenSpin(basis[i],SPIN_UP);
 			// ndown
 			SizeType ndown = HilbertSpaceType::electronsWithGivenSpin(basis[i],SPIN_DOWN);
 
-			other[1] =  HilbertSpaceType::calcNofElectrons(basis[i],
+			other[2] =  HilbertSpaceType::calcNofElectrons(basis[i],
 			                                               0);
-			other[2] = HilbertSpaceType::calcNofElectrons(basis[i],
+			other[3] = HilbertSpaceType::calcNofElectrons(basis[i],
 			                                              NUMBER_OF_ORBITALS);
 
-			SizeType flavor = other[0] + ndown;
-			qns[i] = QnType(flavor, other, jmpair, flavor);
+			other[0] = other[1] + ndown;
+			bool sign = other[0] & 1;
+			qns[i] = QnType(sign, other, jmpair, other[0]);
 		}
 	}
 

@@ -594,6 +594,7 @@ private:
 		typedef std::pair<SizeType,SizeType> PairType;
 
 		qns.resize(basis.size(), QnType::zero());
+		VectorSizeType other(2, 0);
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(0,0);
 			if (n == 1) jmpair = calcJmvalue<PairType>(basis[i]);
@@ -618,7 +619,10 @@ private:
 
 			feAsJzSymmetry_.setElectronsAndJz(electrons, electronsUp, i);
 
-			qns[i] = QnType(electrons, VectorSizeType(1, electronsUp), jmpair, flavor);
+			other[0] = electrons;
+			other[1] = electronsUp;
+			bool sign = electrons & 1;
+			qns[i] = QnType(sign, other, jmpair, flavor);
 		}
 	}
 
