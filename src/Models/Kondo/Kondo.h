@@ -47,6 +47,26 @@ public:
 
 		setSymmetryRelatedInternal(qn_, basis_);
 
+		VectorSizeType newBasis;
+		VectorSizeType partition;
+		VectorQnType qns;
+		QnType::notReallySort(newBasis,
+		                      qns,
+		                      partition,
+		                      basis_,
+		                      qn_,
+		                      ProgramGlobals::VERBOSE_NO);
+
+		SizeType n = partition.size();
+		assert(n > 0);
+		--n;
+		assert(n == qns.size());
+		for (SizeType i = 0; i < n; ++i)
+			for (SizeType j = partition[i]; j < partition[i + 1]; ++j)
+				qn_[j] = qns[i];
+
+		basis_ = newBasis;
+
 		setOperatorMatricesInternal();
 	}
 
@@ -333,7 +353,10 @@ private:
 			// restore electronic part to bra
 			bra <<= 2;
 			bra |= electronic;
-			cm(basis[i], bra) = sqrt(x);
+			int j = PsimagLite::indexOrMinusOne(basis, bra);
+			if (j < 0)
+				err("findCmatrix\n");
+			cm(i, j) = sqrt(x);
 		}
 
 		SparseMatrixType operatorMatrix(cm);
@@ -365,7 +388,7 @@ private:
 			assert(ketsite == ket);
 			RealType m = ketsite - j;
 
-			cm(basis[i], basis[i]) = m;
+			cm(i, i) = m;
 		}
 
 		SparseMatrixType operatorMatrix(cm);
