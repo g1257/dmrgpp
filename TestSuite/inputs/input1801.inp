@@ -38,10 +38,11 @@ TSPAlgorithm=Krylov
 TSPSites 1 6 
 TSPLoops 1 6 
 TSPProductOrSum=sum
-GsWeight=0.1
+GsWeight=0.0
 
 TSPOperator=expression
 OperatorExpression=identity
 
+#ci getEnergyAncilla 0.5 time
 #ci getEnergyAncilla 1 time
-#ci getEnergyAncilla 10 time
+#ci getEnergyAncilla 1.5 time

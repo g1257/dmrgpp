@@ -9,27 +9,28 @@ Connectors 1 -1
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
-Connectors 1 0
+Connectors 1 0 
 
 Model=HubbardAncilla
-hubbardU	6  10.0 10.0 10.0 10.0 10.0 10.0 
-potentialV	24 0.0 0.0 0.0 0.0 0.0 0.0
-                   0.0 0.0 0.0 0.0 0.0 0.0
-                   0.0 0.0 0.0 0.0 0.0 0.0
-                   0.0 0.0 0.0 0.0 0.0 0.0
+hubbardU	6  10.0 10.0 10.0 10.0 10.0 10.0  
+potentialV	24 0.0 0.0 0.0 0.0 0.0 0.0 
+                   0.0 0.0 0.0 0.0 0.0 0.0 
+                   0.0 0.0 0.0 0.0 0.0 0.0 
+                   0.0 0.0 0.0 0.0 0.0 0.0 
 
 SolverOptions=twositedmrg,restart,TargetingAncilla
 Version=version
 OutputFile=data1951.txt
 InfiniteLoopKeptStates=100
-FiniteLoops 12
-2 150 0 -2 150 0 -2 150 0 2 150 0
-2 150 0 -2 150 0 -2 150 0 2 150 0
-2 150 0 -2 150 0 -2 150 0 2 150 0
+FiniteLoops 4
+2 150 0 -2 150 0 -2 150 0 2 150 0 
+
+RepeatFiniteLoopsFrom=0
+RepeatFiniteLoopsTimes=10
 
 TargetElectronsTotal=8
 TargetSzPlusConst=4
-TargetExtra 2     2 2
+TargetExtra 2 2 2
 AdjustQuantumNumbers 4    2 4 1 1
 Orbitals=2
 FeAsMode=INT_ORBITAL0
@@ -40,13 +41,16 @@ RestartFilename=data1950.txt
 
 TSPTau=0.1
 TSPTimeSteps=5
-TSPAdvanceEach=1000
+TSPAdvanceEach=4
 TSPAlgorithm=Krylov
-TSPSites 1 3
-TSPLoops 1 0
+TSPSites 1 3 
+TSPLoops 1 0 
 TSPProductOrSum=product
 
 TSPOperator=expression
 OperatorExpression=identity
+
+#ci getEnergyAncilla 0.5 time
 #ci getEnergyAncilla 1 time
+#ci getEnergyAncilla 1.5 time
 
