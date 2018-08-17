@@ -124,17 +124,18 @@ public:
 	{
 		Qn original = *this;
 		SizeType mode = other.size();
-		if (isSu2 && mode != 1)
+		if (isSu2 && mode != 2)
 			err("Qn::scale() expects mode==1 for SU(2)\n");
 
 		if (direction == ProgramGlobals::INFINITE) {
+			double ts = totalSites;
 			for (SizeType x = 0; x < mode; ++x) {
-				SizeType flp = original.other[x]*sites;
-				other[x] = static_cast<SizeType>(round(flp/totalSites));
+				double flp = original.other[x]*sites;
+				other[x] = static_cast<SizeType>(round(flp/ts));
 			}
 
-			SizeType flp = original.jmPair.first*sites;
-			jmPair.first =  static_cast<SizeType>(round(flp/totalSites));
+			double flp = original.jmPair.first*sites;
+			jmPair.first =  static_cast<SizeType>(round(flp/ts));
 		}
 
 		if (ifPresentOther0IsElectrons && other.size() > 0)
@@ -181,15 +182,15 @@ public:
 			err("adjustQns failed, n does not divide mode + 1\n");
 		n /= modePlusOne;
 		outQns.resize(n, Qn(false, VectorSizeType(modePlusOne), PairSizeType(0, 0), 0));
+
 		for (SizeType i = 0; i < n; ++i) {
 			assert(1 + i*modePlusOne < ints.size());
 			SizeType tmp = ints[1 + i*modePlusOne];
-			if (tmp > 1) err("adjustQns: oddElectrons must be 0 or 1\n");
-			outQns[i].oddElectrons = (tmp == 1);
-			for (SizeType j = 0; j < modePlusOne; ++j) {
-				SizeType k = j;
-				if (j == 0) k = 1;
-				if (j == 1) k = 0;
+			assert(outQns[i].other.size() > 0);
+			outQns[i].other[0] = tmp;
+			outQns[i].oddElectrons = (tmp & 1);
+			for (SizeType j = 1; j < modePlusOne; ++j) {
+				SizeType k = (j == 1) ? 0 : j;
 				assert(k + i*modePlusOne < ints.size());
 				assert(j < outQns[i].other.size());
 				outQns[i].other[j] = ints[k + i*modePlusOne];

@@ -652,6 +652,7 @@ obtain ordered
 		        sites < maxSites &&
 		        parameters_.adjustQuantumNumbers.size() > step) {
 			quantumSector_ = parameters_.adjustQuantumNumbers[step];
+			return;
 		} else {
 			quantumSector_ = model_.targetQuantum().qn;
 		}

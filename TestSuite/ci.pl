@@ -98,7 +98,7 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	my $isSu2 = Ci::isSu2("../inputs/input$n.inp",$n);
 	if ($isSu2 and !$su2) {
 		print STDERR "$0: WARNING: Ignored test $n ";
-		print STDERR "because it's NOT an SU(2) test and ";
+		print STDERR "because it's an SU(2) test and ";
 		print STDERR "you did not specify -su2\n";
 		next;
 	}

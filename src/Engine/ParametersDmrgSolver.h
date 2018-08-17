@@ -252,11 +252,15 @@ struct ParametersDmrgSolver {
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 
+		tmpVector.clear();
 		try {
-			VectorSizeType tmpVector;
 			io.read(tmpVector,"AdjustQuantumNumbers");
-			QnType::adjustQns(adjustQuantumNumbers, tmpVector, modeFromModel(model));
 		} catch (std::exception&) {}
+
+		if (tmpVector.size() > 0)
+			QnType::adjustQns(adjustQuantumNumbers,
+			                  tmpVector,
+			                  modeFromModel(model));
 
 		truncationControl = PairRealSizeType(-1.0,keptStatesInfinite);
 		try {

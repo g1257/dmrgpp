@@ -475,7 +475,7 @@ sub checkObserve
 	my ($n, $ignored, $workdir, $golddir) = @_;
 	my $file1 = "$workdir/observe$n.txt";
 	my $file2 = "$golddir/observe$n.txt";
-	print "$0: Checking $file1 $file2\n";
+	print "$0: kompare $file1 $file2\n";
 	my @m1 = loadObserveData($file1);
 	my @m2 = loadObserveData($file2);
 	compareObserveData(\@m1, \@m2);
