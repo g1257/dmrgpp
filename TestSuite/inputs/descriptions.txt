@@ -187,8 +187,8 @@ Page* where more or less this feature is used: 245130-2
 1801) Ancilla: Real      Hamiltonian Heisenberg 6 sites
 1810) Ancilla: Entangler Hamiltonian Heisenberg 6 sites Canonical
 1811) Ancilla: Real Hamiltonian Heisenberg 6 sites Canonical
-#1850 Ancilla canonical: Entangler Hamiltonian t-J 6 sites --> TOO BIG DISABLED
-#1851 Ancilla canonical: Real      Hamiltonian t-J 6 sites --> Restart from previous
+1850) Ancilla canonical: Entangler Hamiltonian t-J 6 sites 
+1851) Ancilla canonical: Real      Hamiltonian t-J 6 sites --> Restart from previous
 1860) Ancilla canonical: Entangler Hamiltonian t-J 6 sites Canonical
 1861) Ancilla canonical: Real      Hamiltonian t-J 6 sites Canonical
 1880) Ancilla grand canonical Hamiltonian t-J 6x2 sites: Entangler
