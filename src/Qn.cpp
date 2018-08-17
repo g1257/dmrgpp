@@ -3,6 +3,6 @@
 namespace Dmrg {
 
 Qn::VectorModalStructType Qn::modalStruct;
-bool Qn::other0ifPresentIsElectrons = true;
+bool Qn::ifPresentOther0IsElectrons = true;
 
 }

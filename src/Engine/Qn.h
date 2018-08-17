@@ -137,12 +137,12 @@ public:
 			jmPair.first =  static_cast<SizeType>(round(flp/totalSites));
 		}
 
-		if (other0ifPresentIsElectrons && other.size() > 0)
+		if (ifPresentOther0IsElectrons && other.size() > 0)
 			oddElectrons = (other[0] & 1);
 
 		if (!isSu2) return;
 
-		assert(other0ifPresentIsElectrons && other.size() > 0);
+		assert(ifPresentOther0IsElectrons && other.size() > 0);
 
 		SizeType tmp =jmPair.first;
 		PsimagLite::String str("SymmetryElectronsSz: FATAL: Impossible parameters ");
@@ -267,7 +267,7 @@ public:
 
 	SizeType su2ElectronsBridge() const
 	{
-		assert(other0ifPresentIsElectrons);
+		assert(ifPresentOther0IsElectrons);
 		assert(other.size() > 0);
 		return other[0];
 	}
@@ -300,7 +300,7 @@ public:
 	}
 
 	static VectorModalStructType modalStruct;
-	static bool other0ifPresentIsElectrons;
+	static bool ifPresentOther0IsElectrons;
 	bool oddElectrons;
 	VectorSizeType other;
 	PairSizeType jmPair;
@@ -337,7 +337,8 @@ private:
 		        otherJm.second == jmPair.second);
 	}
 
-	Qn(SizeType odd, VectorSizeType szPlusConst, PairSizeType j, SizeType flavor);
+	// disable implicit conversion for 1st argument of ctor
+	Qn(SizeType, VectorSizeType, PairSizeType, SizeType);
 };
 }
 #endif // QN_H

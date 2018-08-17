@@ -409,17 +409,15 @@ private:
 
 		bool isCanonical = (ModelBaseType::targetQuantum().isCanonical);
 		VectorSizeType other;
-		if (isCanonical) other.resize((isCanonical) ? 2 : 1, 0);
-
+		if (isCanonical) other.resize(1, 0);
+		QnType::ifPresentOther0IsElectrons = false;
 		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(modelParameters_.twiceTheSpin, basis[i]);
 			if (isCanonical)
-				other[1] = getSzPlusConst(basis[i], n);
-			other[0] = (BasisType::useSu2Symmetry()) ? 1 : 0;
+				other[0] = getSzPlusConst(basis[i], n);
 			SizeType flavor = 1;
-			bool sign = other[0] & 1;
-			qns[i] = QnType(sign, other, jmpair, flavor);
+			qns[i] = QnType(false, other, jmpair, flavor);
 		}
 	}
 

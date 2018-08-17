@@ -374,9 +374,6 @@ public:
 		return symmSu2_.flavorsOld();
 	}
 
-	//! Returns the vector of electrons for this basis
-//	const VectorSizeType& electronsVector() const { return electrons_; }
-
 	const VectorBoolType& oldSigns() const { return signsOld_; }
 
 	//! Returns the fermionic sign for state i
@@ -622,9 +619,11 @@ private:
 	{
 		utils::truncateVector(qns, removedIndices);
 		utils::truncateVector(signs_,removedIndices);
-		VectorSizeType electrons;
-		QnType::su2ElectronsBridge(electrons, qns);
-		if (useSu2Symmetry_) symmSu2_.truncate(removedIndices, electrons);
+		if (useSu2Symmetry_) {
+			VectorSizeType electrons;
+			QnType::su2ElectronsBridge(electrons, qns);
+			symmSu2_.truncate(removedIndices, electrons);
+		}
 	}
 
 	void reorder()
