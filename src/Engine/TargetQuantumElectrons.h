@@ -99,7 +99,7 @@ struct TargetQuantumElectrons {
 		const bool allowUpDown = true;
 		io.readline(totalNumberOfSites, "TotalNumberOfSites=");
 
-		PsimagLite::String  msg("TargetQuantumElectrons: ");
+		PsimagLite::String msg("TargetQuantumElectrons: ");
 		bool hasTwiceJ = false;
 		try {
 			io.readline(qn.jmPair.first, "TargetSpinTimesTwo=");

@@ -137,7 +137,12 @@ public:
 			jmPair.first =  static_cast<SizeType>(round(flp/totalSites));
 		}
 
+		if (other0ifPresentIsElectrons && other.size() > 0)
+			oddElectrons = (other[0] & 1);
+
 		if (!isSu2) return;
+
+		assert(other0ifPresentIsElectrons && other.size() > 0);
 
 		SizeType tmp =jmPair.first;
 		PsimagLite::String str("SymmetryElectronsSz: FATAL: Impossible parameters ");
@@ -167,24 +172,27 @@ public:
 	                      const VectorSizeType& ints,
 	                      SizeType mode)
 	{
+		SizeType modePlusOne = mode + 1;
 		SizeType n = ints.size();
 		if (n == 0)
 			err("adjustQns failed with n == 0\n");
 
-		if (n % (mode + 1) != 0)
+		if (n % modePlusOne != 0)
 			err("adjustQns failed, n does not divide mode + 1\n");
-		n /= (mode + 1);
-		outQns.resize(n, Qn(false, VectorSizeType(mode + 1), PairSizeType(0, 0), 0));
+		n /= modePlusOne;
+		outQns.resize(n, Qn(false, VectorSizeType(modePlusOne), PairSizeType(0, 0), 0));
 		for (SizeType i = 0; i < n; ++i) {
-			assert(1 + i*(mode + 1) < ints.size());
-			SizeType tmp = ints[1 + i*(mode + 1)];
+			assert(1 + i*modePlusOne < ints.size());
+			SizeType tmp = ints[1 + i*modePlusOne];
 			if (tmp > 1) err("adjustQns: oddElectrons must be 0 or 1\n");
 			outQns[i].oddElectrons = (tmp == 1);
-			for (SizeType j = 0; j < mode; ++j) {
-				SizeType k = (j == 0) ? 0 : j + 1;
-				assert(k + i*mode < ints.size());
+			for (SizeType j = 0; j < modePlusOne; ++j) {
+				SizeType k = j;
+				if (j == 0) k = 1;
+				if (j == 1) k = 0;
+				assert(k + i*modePlusOne < ints.size());
 				assert(j < outQns[i].other.size());
-				outQns[i].other[j] = ints[k + i*(mode + 1)];
+				outQns[i].other[j] = ints[k + i*modePlusOne];
 			}
 		}
 	}
@@ -259,6 +267,7 @@ public:
 
 	SizeType su2ElectronsBridge() const
 	{
+		assert(other0ifPresentIsElectrons);
 		assert(other.size() > 0);
 		return other[0];
 	}
@@ -291,6 +300,7 @@ public:
 	}
 
 	static VectorModalStructType modalStruct;
+	static bool other0ifPresentIsElectrons;
 	bool oddElectrons;
 	VectorSizeType other;
 	PairSizeType jmPair;

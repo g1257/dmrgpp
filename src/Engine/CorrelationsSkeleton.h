@@ -605,25 +605,12 @@ private:
 
 	bool superOddElectrons(SizeType t, SizeType threadId) const
 	{
-#if 0
-		return helper_.leftRightSuper(threadId).super().electrons(t);
-#else
+		// return helper_.leftRightSuper(threadId).super().electrons(t);
 		SizeType tmp = helper_.leftRightSuper(threadId).super().permutation(t);
 		div_t mydiv = PsimagLite::div(tmp,helper_.leftRightSuper(threadId).left().size());
 		return helper_.leftRightSuper(threadId).right().signs()[mydiv.quot] ^
 		        helper_.leftRightSuper(threadId).left().signs()[mydiv.rem];
-#endif
-
 	}
-
-//	SizeType superElectrons(SizeType threadId) const
-//	{
-//		SizeType n = helper_.leftRightSuper(threadId).super().size();
-//		SizeType sum = 0;
-//		for (SizeType i = 0; i < n; ++i)
-//			sum += helper_.leftRightSuper(threadId).super().electrons(i);
-//		return sum;
-//	}
 
 	FieldType brRghtCrnrSystem_(const SparseMatrixType& Acrs,
 	                            const SparseMatrixType& Bcrs,
