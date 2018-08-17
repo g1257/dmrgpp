@@ -132,12 +132,12 @@ public:
 	      dSsize_(0),
 	      timeSsize_(0)
 	{
-		VectorSizeType electronsOneSite;
-		io_.read(electronsOneSite, "ElectronsOneSite");
-		SizeType n = electronsOneSite.size();
+		typename BasisWithOperatorsType::VectorBoolType odds;
+		io_.read(odds, "OddElectronsOneSite");
+		SizeType n = odds.size();
 		signsOneSite_.resize(n);
 		for (SizeType i = 0; i < n; ++i)
-			signsOneSite_[i] = (electronsOneSite[i] & 1) ? -1 : 1;
+			signsOneSite_[i] = (odds[i]) ? -1 : 1;
 
 		if (nf > 0)
 			if (!init(hasTimeEvolution, start, start + nf, SAVE_YES))

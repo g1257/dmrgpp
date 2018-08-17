@@ -177,6 +177,8 @@ public:
 
 		matrixBlock.resize(total,total);
 
+		BlockType lElectrons;
+		lrs_.left().su2ElectronsBridge(lElectrons);
 		SizeType counter=0;
 		for (SizeType i=0;i<su2reduced_.reducedEffectiveSize();i++) {
 			int ix = su2reduced_.flavorMapping(i)-offset;
@@ -187,7 +189,8 @@ public:
 			SizeType i2=su2reduced_.reducedEffective(i).second;
 			PairType jm1 = lrs_.left().jmValue(lrs_.left().reducedIndex(i1));
 
-			SizeType n1=lrs_.left().electrons(lrs_.left().reducedIndex(i1));
+			assert(lrs_.left().reducedIndex(i1) < lElectrons.size());
+			SizeType n1 = lElectrons[lrs_.left().reducedIndex(i1)];
 			RealType fsign=1;
 			if (n1>0 && n1%2!=0) fsign= fermionSign;
 
@@ -251,6 +254,8 @@ public:
 		//! work only on partition m
 		int m = m_;
 		int offset = lrs_.super().partition(m);
+		BlockType lElectrons;
+		lrs_.left().su2ElectronsBridge(lElectrons);
 
 		for (SizeType i=0;i<su2reduced_.reducedEffectiveSize();i++) {
 			int ix = su2reduced_.flavorMapping(i)-offset;
@@ -259,7 +264,8 @@ public:
 			SizeType i1=su2reduced_.reducedEffective(i).first;
 			SizeType i2=su2reduced_.reducedEffective(i).second;
 			PairType jm1 = lrs_.left().jmValue(lrs_.left().reducedIndex(i1));
-			SizeType n1=lrs_.left().electrons(lrs_.left().reducedIndex(i1));
+			assert(lrs_.left().reducedIndex(i1) < lElectrons.size());
+			SizeType n1= lElectrons[lrs_.left().reducedIndex(i1)];
 			RealType fsign=1;
 
 			if (n1>0 && n1%2!=0) fsign= fermionSign;

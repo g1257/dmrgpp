@@ -93,6 +93,7 @@ class Su2Reduced {
 	typedef typename LeftRightSuperType::BasisWithOperatorsType
 	BasisWithOperatorsType;
 	typedef typename LeftRightSuperType::BasisType BasisType;
+	typedef typename BasisType::BlockType VectorSizeType;
 	typedef typename BasisType::RealType RealType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename OperatorsType::OperatorType OperatorType;
@@ -100,7 +101,6 @@ class Su2Reduced {
 	typedef typename Su2SymmetryGlobalsType::ClebschGordanType ClebschGordanType;
 
 	static const SizeType System=0,Environ=1;
-	//static const BasisType* basis1Ptr_;
 
 public:
 	Su2Reduced(int m,
@@ -345,16 +345,26 @@ private:
 
 	void calcEffectiveStates(typename PsimagLite::Vector<PairType>::Type jsEffective)
 	{
-		int offset = lrs_.super().partition(m_);
+		SizeType offset = lrs_.super().partition(m_);
 		PairType jm=lrs_.super().jmValue(offset);
 		reducedEffective_.clear();
 		reducedInverse_.resize(lrs_.left().reducedSize(),lrs_.right().reducedSize());
-		SizeType electrons = lrs_.super().electrons(offset);
+		VectorSizeType sElectrons;
+		lrs_.super().su2ElectronsBridge(sElectrons);
+		VectorSizeType lElectrons;
+		lrs_.left().su2ElectronsBridge(lElectrons);
+		VectorSizeType rElectrons;
+		lrs_.right().su2ElectronsBridge(rElectrons);
+
+		assert(offset < sElectrons.size());
+		SizeType electrons = sElectrons[offset];
 		for (SizeType i=0;i<jsEffective.size();i++) {
 			for (SizeType i1=0;i1<lrs_.left().reducedSize();i1++) {
+				assert(lrs_.left().reducedIndex(i1) < lElectrons.size());
+				SizeType le1 = lElectrons[lrs_.left().reducedIndex(i1)];
 				for (SizeType i2=0;i2<lrs_.right().reducedSize();i2++) {
-					if (electrons!=lrs_.left().electrons(lrs_.left().reducedIndex(i1))+
-					        lrs_.right().electrons(lrs_.right().reducedIndex(i2)))
+					assert(lrs_.right().reducedIndex(i2) < rElectrons.size());
+					if (electrons != le1 + rElectrons[lrs_.right().reducedIndex(i2)])
 						continue;
 					PairType jj(lrs_.left().jmValue(lrs_.left().reducedIndex(i1)).first,
 					            lrs_.right().jmValue(lrs_.right().reducedIndex(i2)).first);
@@ -426,15 +436,22 @@ private:
 		lrs_.super().flavor2Index(flavorsOldInverse,jm);
 		flavorsOldInverse_.resize(reducedEffective_.size());
 
+		VectorSizeType lElectrons;
+		lrs_.left().su2ElectronsBridge(lElectrons);
+		VectorSizeType rElectrons;
+		lrs_.right().su2ElectronsBridge(rElectrons);
+
 		for (SizeType i=0;i<reducedEffective_.size();i++) {
 			SizeType i1= lrs_.left().reducedIndex(reducedEffective_[i].first);
 			SizeType f1= lrs_.left().getFlavor(i1);
-			SizeType ne1= lrs_.left().electrons(i1);
+			assert(i1 < lElectrons.size());
+			SizeType ne1= lElectrons[i1];
 			SizeType j1= lrs_.left().jmValue(i1).first;
 
 			SizeType i2= lrs_.right().reducedIndex(reducedEffective_[i].second);
 			SizeType f2= lrs_.right().getFlavor(i2);
-			SizeType ne2= lrs_.right().electrons(i2);
+			assert(i2 < rElectrons.size());
+			SizeType ne2 = rElectrons[i2];
 			SizeType j2= lrs_.right().jmValue(i2).first;
 
 			SizeType f=lrs_.super().flavor2Index(f1,f2,ne1,ne2,j1,j2);

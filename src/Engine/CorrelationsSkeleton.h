@@ -357,9 +357,13 @@ private:
 
 	int fermionSignBasis(int fermionicSign, const BasisType& basis) const
 	{
-		const VectorSizeType& v = basis.electronsVector();
-		SizeType nx0 = std::accumulate(v.begin(), v.end(), 0);
-		return (nx0 & 1) ? fermionicSign : 1;
+		const typename BasisWithOperatorsType::VectorBoolType& v = basis.signs();
+		SizeType n = v.size();
+		if (n == 0) return 1;
+		bool nx0 = v[0];
+		for (SizeType i = 1; i < n; ++i)
+			nx0 ^= v[i];
+		return (nx0) ? fermionicSign : 1;
 	}
 
 	void dmrgMultiplySystem(SparseMatrixType& result,
@@ -599,27 +603,27 @@ private:
 		            brLftCrnrEnviron_(A,B,fermionSign,vec1,vec2,threadId);
 	}
 
-	SizeType superElectrons(SizeType t, SizeType threadId) const
+	bool superOddElectrons(SizeType t, SizeType threadId) const
 	{
 #if 0
 		return helper_.leftRightSuper(threadId).super().electrons(t);
 #else
 		SizeType tmp = helper_.leftRightSuper(threadId).super().permutation(t);
 		div_t mydiv = PsimagLite::div(tmp,helper_.leftRightSuper(threadId).left().size());
-		return helper_.leftRightSuper(threadId).right().electrons(mydiv.quot) +
-		        helper_.leftRightSuper(threadId).left().electrons(mydiv.rem);
+		return helper_.leftRightSuper(threadId).right().signs()[mydiv.quot] ^
+		        helper_.leftRightSuper(threadId).left().signs()[mydiv.rem];
 #endif
 
 	}
 
-	SizeType superElectrons(SizeType threadId) const
-	{
-		SizeType n = helper_.leftRightSuper(threadId).super().size();
-		SizeType sum = 0;
-		for (SizeType i = 0; i < n; ++i)
-			sum += helper_.leftRightSuper(threadId).super().electrons(i);
-		return sum;
-	}
+//	SizeType superElectrons(SizeType threadId) const
+//	{
+//		SizeType n = helper_.leftRightSuper(threadId).super().size();
+//		SizeType sum = 0;
+//		for (SizeType i = 0; i < n; ++i)
+//			sum += helper_.leftRightSuper(threadId).super().electrons(i);
+//		return sum;
+//	}
 
 	FieldType brRghtCrnrSystem_(const SparseMatrixType& Acrs,
 	                            const SparseMatrixType& Bcrs,
@@ -658,9 +662,9 @@ private:
 				SizeType r0,r1;
 				pack2.unpack(r0,r1,helper_.leftRightSuper(threadId).left().
 				             permutation(r));
-				SizeType electrons = superElectrons(t,threadId);
-				electrons -= helper_.leftRightSuper(threadId).right().electrons(eta);
-				RealType sign = (electrons & 1) ? fermionSign : 1.0;
+				bool odd = superOddElectrons(t,threadId);
+				odd ^= helper_.leftRightSuper(threadId).right().signs()[eta];
+				RealType sign = (odd) ? fermionSign : 1.0;
 
 				for (int k=Acrs.getRowPtr(r0);k<Acrs.getRowPtr(r0+1);k++) {
 					SizeType r0prime = Acrs.getCol(k);
