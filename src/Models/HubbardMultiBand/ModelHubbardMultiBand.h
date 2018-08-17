@@ -449,10 +449,10 @@ private:
 
 		qns.resize(basis.size(), QnType::zero());
 		SizeType mode = ModelBaseType::targetQuantum().qn.other.size();
-		assert(mode == 1 || mode == 2); // either Sz or Sz and k-symmetry
-		VectorSizeType other(mode + 1, 0);
-		QnType::modalStruct.resize(mode + 1);
-		if (mode == 2) {
+		assert(mode == 2 || mode == 3); // either Sz or Sz and k-symmetry
+		VectorSizeType other(mode, 0);
+		QnType::modalStruct.resize(mode);
+		if (mode == 3) {
 			QnType::modalStruct[2].modalEnum = QnType::MODAL_MODULO;
 			QnType::modalStruct[2].extra = modelParameters_.orbitals;
 		}
