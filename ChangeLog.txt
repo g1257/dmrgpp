@@ -1,3 +1,32 @@
+2018-08-21 Version 5.32
+
+Bug fixes:
+
+* HubbardHolsteinSSH bug fix
+
+* Kondo bug fix
+
+* AdjustQuantumNumbers bug fix
+
+Refactor:
+
+* Geometry AdditionalData simplified
+
+* Hamiltonian Connections restricted to i < j
+
+New features:
+
+* observe can measure multiple data sets
+
+* Engine supports fermion models not conserving
+Ne
+
+TestSuite:
+
+* postCi: default gold directory
+
+* ci 113: like 2 but measures 2 data sets
+
 2018-08-09 Version 5.30
 
 Bug fixes:
