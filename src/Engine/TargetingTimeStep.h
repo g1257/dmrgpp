@@ -193,37 +193,23 @@ public:
 	            const BlockType&,
 	            SizeType loopNumber)
 	{
-		if (direction == ProgramGlobals::INFINITE) return;
-		VectorWithOffsetType phiNew;
-		this->common().getPhi(phiNew,Eg,direction,block1[0],loopNumber);
+		assert(block1.size() > 0);
+		SizeType site = block1[0];
+		evolveInternal(Eg,direction,block1,loopNumber);
+		SizeType numberOfSites = this->lrs().super().block().size();
 
-		PairType startEnd(0,times_.size());
-		bool allOperatorsApplied = (this->common().noStageIs(DISABLED) &&
-		                            this->common().noStageIs(OPERATOR));
-
-		this->common().calcTimeVectors(startEnd,
-		                               Eg,
-		                               phiNew,
-		                               direction,
-		                               allOperatorsApplied,
-		                               block1);
-
-		cocoon(direction,block1); // in-situ
-
-		printEnergies(); // in-situ
-
+		// corner case only for TargetingAncilla
 		PsimagLite::String options = this->model().params().options;
-		bool normalizeTimeVectors =
-		        (options.find("normalizeTimeVectors") != std::string::npos);
-		if (options.find("TargetingAncilla") != std::string::npos)
-			normalizeTimeVectors = true;
-		if (options.find("neverNormalizeVectors") != std::string::npos)
-			normalizeTimeVectors = false;
+		if (options.find("TargetingAncilla") == std::string::npos)
+			return;
+		if (site > 1 && site < numberOfSites-2)
+			return;
+		if (site == 1 && direction == ProgramGlobals::EXPAND_SYSTEM)
+			return;
 
-		if (normalizeTimeVectors)
-			this->common().normalizeTimeVectors();
-
-		printNormsAndWeights();
+		SizeType x = (site == 1) ? 0 : numberOfSites-1;
+		BlockType block(1,x);
+		evolveInternal(Eg,direction,block,loopNumber);
 	}
 
 	bool end() const
@@ -260,6 +246,45 @@ public:
 
 
 private:
+
+
+	void evolveInternal(RealType Eg,
+	                    ProgramGlobals::DirectionEnum direction,
+	                    const BlockType& block1,
+	                    SizeType loopNumber)
+	{
+		if (direction == ProgramGlobals::INFINITE) return;
+		VectorWithOffsetType phiNew;
+		this->common().getPhi(phiNew,Eg,direction,block1[0],loopNumber);
+
+		PairType startEnd(0,times_.size());
+		bool allOperatorsApplied = (this->common().noStageIs(DISABLED) &&
+		                            this->common().noStageIs(OPERATOR));
+
+		this->common().calcTimeVectors(startEnd,
+		                               Eg,
+		                               phiNew,
+		                               direction,
+		                               allOperatorsApplied,
+		                               block1);
+
+		cocoon(direction,block1); // in-situ
+
+		printEnergies(); // in-situ
+
+		PsimagLite::String options = this->model().params().options;
+		bool normalizeTimeVectors =
+		        (options.find("normalizeTimeVectors") != std::string::npos);
+		if (options.find("TargetingAncilla") != std::string::npos)
+			normalizeTimeVectors = true;
+		if (options.find("neverNormalizeVectors") != std::string::npos)
+			normalizeTimeVectors = false;
+
+		if (normalizeTimeVectors)
+			this->common().normalizeTimeVectors();
+
+		printNormsAndWeights();
+	}
 
 	void printNormsAndWeights() const
 	{
