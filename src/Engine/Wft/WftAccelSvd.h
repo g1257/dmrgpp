@@ -256,6 +256,7 @@ private:
 		SizeType n = v.size();
 		for (SizeType i = 0; i < n; ++i)
 			if (std::abs(v[i]) < epsilon) return i;
+		return n;
 	}
 }; // class WftAccelSvd
 }
