@@ -1,6 +1,8 @@
 #ifndef WFT_ACCEL_SVD_H
 #define WFT_ACCEL_SVD_H
 #include "Vector.h"
+#include "BLAS.h"
+#include <limits>
 
 namespace Dmrg {
 
@@ -23,6 +25,70 @@ class WftAccelSvd {
 	typedef typename BlockDiagonalMatrixType::BuildingBlockType MatrixType;
 	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
 	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+
+	class LoopOne {
+
+	public:
+
+		LoopOne(const MatrixType& u,
+		        const MatrixType& vPrime,
+		        const VectorQnType& q,
+		        const MatrixType& uTildePrime,
+		        const MatrixType& vTildePrimePrime,
+		        const VectorQnType& qTilde)
+		    : u_(u),
+		      vPrime_(vPrime),
+		      q_(q),
+		      uTildePrime_(uTildePrime),
+		      vTildePrimePrime_(vTildePrimePrime),
+		      qTilde_(qTilde),
+		      npatches_(std::max(u_.size(), uTildePrime_.size())),
+		      uFinal_(std::min(u_.size(), uTildePrime_.size())),
+		      vTildePrimePrime_(std::min(u_.size(), uTildePrime_.size()))
+		{
+			assert(u.size() == vPrime.size());
+			assert(u.size() == q.size());
+			assert(uTildePrime.size() == vTildePrimePrime.size());
+			asserT(uTildePrime.size() == qTilde.size());
+		}
+
+		SizeType tasks() const { return npatches_; }
+
+		void doTask(SizeType patchBig, SizeType)
+		{
+			const VectorQnType& qSmall = (q_.size() > qTilde_.size()) ? qTilde_ : q_;
+			const VectorQnType& qBig = (q_.size() > qTilde_.size()) ? q_ : qTilde_;
+			const QnType& q1 =  qBig[patchBig];
+			int patchSmall = indexOrMinusOne(qSmall, q1);
+			if (patchSmall < 0) return;
+
+			SizeType patch = (q_.size() > qTilde_.size()) ? patchBig : patchSmall;
+			SizeType patchTilde = (q_.size() > qTilde_.size()) ?  patchSmall : patchBig;
+
+			uFinal_[patchSmall] = uTildePrime_[patchTilde]*u_[patch];
+			vPrimeFinal_[patchSmall] = vPrime_[patchTilde]*vTildePrimePrime_[patch];
+		}
+
+		const VectorMatrixType& uFinal() const { return uFinal_; }
+
+		const VectorMatrixType& vPrimeFinal() const { return vPrimeFinal_; }
+
+		const VectorQnType& qns() const { return (q_.size() > qTilde_.size()) ? qTilde_ : q_; }
+
+	private:
+
+		const VectorMatrixType& u_;
+		const VectorMatrixType& vPrime_;
+		const VectorQnType& q_;
+		const VectorMatrixType& uTildePrime_;
+		const VectorMatrixType& vTildePrimePrime_;
+		const VectorQnType& qTilde_;
+		SizeType npatches_;
+		VectorMatrixType uFinal_;
+		VectorMatrixType vPrimeFinal_;
+	}; // class LoopOne
 
 	class LoopTwo {
 
@@ -90,68 +156,6 @@ class WftAccelSvd {
 		VectorMatrixType result_;
 	}; // class LoopTwo
 
-	class LoopOne {
-
-	public:
-
-		LoopOne(const MatrixType& u,
-		        const MatrixType& vPrime,
-		        const VectorQnType& q,
-		        const MatrixType& uTildePrime,
-		        const MatrixType& vTildePrimePrime,
-		        const VectorQnType& qTilde)
-		    : u_(u),
-		      vPrime_(vPrime),
-		      q_(q),
-		      uTildePrime_(uTildePrime),
-		      vTildePrimePrime_(vTildePrimePrime),
-		      qTilde_(qTilde),
-		      npatches_(std::max(u_.size(), uTildePrime_.size())),
-		      uFinal_(std::min(u_.size(), uTildePrime_.size())),
-		      vTildePrimePrime_(std::min(u_.size(), uTildePrime_.size()))
-		{
-			assert(u.size() == vPrime.size());
-			assert(u.size() == q.size());
-			assert(uTildePrime.size() == vTildePrimePrime.size());
-			asserT(uTildePrime.size() == qTilde.size());
-		}
-
-		SizeType tasks() const { return npatches_; }
-
-		void doTask(SizeType patchBig, SizeType)
-		{
-			const VectorQnType& qSmall = (q_.size() > qTilde_.size()) ? qTilde_ : q_;
-			const VectorQnType& qBig = (q_.size() > qTilde_.size()) ? q_ : qTilde_;
-			const QnType& q1 =  qBig[patchBig];
-			int patchSmall = indexOrMinusOne(qSmall, q1);
-			if (patchSmall < 0) return;
-
-			SizeType patch = (q_.size() > qTilde_.size()) ? patchBig : patchSmall;
-			SizeType patchTilde = (q_.size() > qTilde_.size()) ?  patchSmall : patchBig;
-
-			uFinal_[patchSmall] = uTildePrime_[patchTilde]*u_[patch];
-			vPrimeFinal_[patchSmall] = vPrime_[patchTilde]*vTildePrimePrime_[patch];
-		}
-
-		const VectorMatrixType& uFinal() const { return uFinal_; }
-
-		const VectorMatrixType& vPrimeFinal() const { return vPrimeFinal_; }
-
-		const VectorQnType& qns() const { return (q_.size() > qTilde_.size()) ? qTilde_ : q_; }
-
-	private:
-
-		const VectorMatrixType& u_;
-		const VectorMatrixType& vPrime_;
-		const VectorQnType& q_;
-		const VectorMatrixType& uTildePrime_;
-		const VectorMatrixType& vTildePrimePrime_;
-		const VectorQnType& qTilde_;
-		SizeType npatches_;
-		VectorMatrixType uFinal_;
-		VectorMatrixType vPrimeFinal_;
-	}; // class LoopOne
-
 public:
 
 	WftAccelSvd(const DmrgWaveStructType& dmrgWaveStruct,
@@ -195,6 +199,63 @@ public:
 		                qnsPrevious);
 		ParallelizerTwoType threadTwo(codeSectionParams);
 		threadTwo.loopCreate(loopTwo);
+	}
+
+private:
+
+	static void pinv(VectorMatrixType& dest, const VectorMatrixType& src)
+	{
+		SizeType n = src.size();
+		dest.resize(n);
+		for (SizeType i = 0; i < n; ++i)
+			pinvOne(dest[i], src[i]);
+	}
+
+	static void pinvOne(MatrixType& dest, const MatrixType& src)
+	{
+		dest = src;
+		VectorRealType s;
+		MatrixType vt;
+		svd('A', dest, s, vt);
+		SizeType rows = dest.rows();
+		SizeType cols = vt.cols();
+		RealType epsilon = *std::max_element(s.begin(), s.end())*
+		        std::max(rows, cols)*std::numeric_limits<RealType>::epsilon();
+
+		SizeType n = biggerThanEpsilon(s, epsilon);
+
+		MatrixType uoneTranspose(n, rows);
+		MatrixType voneTimeStoTheMinusOne(cols, n);
+		for (SizeType i = 0; i < n; ++i) {
+			for (SizeType r = 0; r < rows; ++r)
+				uoneTranspose(i, r) = dest(r, i);
+			for (SizeType c = 0; c < cols; ++c)
+				voneTimeStoTheMinusOne(c, i) = vt(i, c)/s[i];
+		}
+
+		dest.resize(cols, rows);
+		ComplexOrRealType alpha = 1;
+		ComplexOrRealType beta = 0;
+		psimag::BLAS::GEMM('N',
+		                   'N',
+		                   cols,
+		                   rows,
+		                   n,
+		                   alpha,
+		                   &(voneTimeStoTheMinusOne(0,0)),
+		                   cols,
+		                   &(uoneTranspose(0,0)),
+		                   n,
+		                   beta,
+		                   dest,
+		                   cols);
+	}
+
+	static SizeType biggerThanEpsilon(const VectorRealType& v, RealType epsilon)
+	{
+		SizeType n = v.size();
+		for (SizeType i = 0; i < n; ++i)
+			if (std::abs(v[i]) < epsilon) return i;
 	}
 }; // class WftAccelSvd
 }
