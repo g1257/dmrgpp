@@ -242,9 +242,9 @@ private:
 		typedef PsimagLite::Parallelizer<WftSparseTwoSiteType> ParallelizerType;
 
 		SparseMatrixType ws;
-		dmrgWaveStruct_.ws.toSparse(ws);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).toSparse(ws);
 		SparseMatrixType we;
-		dmrgWaveStruct_.we.toSparse(we);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).toSparse(we);
 		SparseMatrixType weT;
 		transposeConjugate(weT,we);
 
@@ -291,13 +291,13 @@ private:
 		msg<<" Destination sectors "<<psiDest.sectors();
 		msg<<" Source sectors "<<psiSrc.sectors();
 		progress_.printline(msg,std::cout);
-		assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
+		assert(dmrgWaveStruct_.lrs().super().permutationInverse().size() == psiSrc.size());
 		bool inBlocks = (lrs.right().block().size() > 1 &&
 		                 wftOptions_.accel == WftOptions::ACCEL_BLOCKS);
 		SparseMatrixType we;
-		dmrgWaveStruct_.we.toSparse(we);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).toSparse(we);
 		SparseMatrixType ws;
-		dmrgWaveStruct_.ws.toSparse(ws);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).toSparse(ws);
 		SparseMatrixType wsT;
 		transposeConjugate(wsT,ws);
 		VectorType psiV;
@@ -345,7 +345,7 @@ private:
 	                            const VectorSizeType& nk) const
 	{
 		SparseMatrixType ws;
-		dmrgWaveStruct_.ws.toSparse(ws);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).toSparse(ws);
 		MatrixOrIdentityType wsRef(wftOptions_.twoSiteDmrg, ws);
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
@@ -360,23 +360,24 @@ private:
 	                    const VectorSizeType& nk,
 	                    const MatrixOrIdentityType& wsRef) const
 	{
-		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
+		SizeType volumeOfNk = ProgramGlobals::volumeOf(nk);
 		SizeType nip = lrs.super().permutationInverse().size()/
 		        lrs.right().permutationInverse().size();
 		PsimagLite::OstringStream msg;
 		msg<<" We're bouncing on the right, so buckle up!";
 		progress_.printline(msg,std::cout);
 
-		assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
+		assert(dmrgWaveStruct_.lrs().super().permutationInverse().size() == psiSrc.size());
 
 		SizeType start = psiDest.offset(i0);
 		SizeType total = psiDest.effectiveSize(i0);
 
-		SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
+		SizeType nalpha=dmrgWaveStruct_.lrs().left().permutationInverse().size();
 		PackIndicesType pack1(nip);
 		PackIndicesType pack2(volumeOfNk);
 
-		SizeType nip2 = (wftOptions_.twoSiteDmrg) ? dmrgWaveStruct_.ws.cols() : nip;
+		SizeType nip2 = (wftOptions_.twoSiteDmrg) ?
+		            dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).cols() : nip;
 
 		for (SizeType x=0;x<total;x++) {
 			psiDest.fastAccess(i0,x) = 0.0;
@@ -386,8 +387,8 @@ private:
 				int ip2 = wsRef.getColOrExit(k);
 				if (ip2 < 0) continue;
 				pack2.unpack(kp,jp,(SizeType)lrs.right().permutation(beta));
-				SizeType ipkp = dmrgWaveStruct_.lrs.left().permutationInverse(ip2 + kp*nip2);
-				SizeType y = dmrgWaveStruct_.lrs.super().permutationInverse(ipkp + jp*nalpha);
+				SizeType ipkp = dmrgWaveStruct_.lrs().left().permutationInverse(ip2 + kp*nip2);
+				SizeType y = dmrgWaveStruct_.lrs().super().permutationInverse(ipkp + jp*nalpha);
 				psiDest.fastAccess(i0,x) += psiSrc.slowAccess(y)*wsRef.getValue(k);
 			}
 		}
@@ -399,7 +400,7 @@ private:
 	                            const VectorSizeType& nk) const
 	{
 		SparseMatrixType we;
-		dmrgWaveStruct_.we.toSparse(we);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).toSparse(we);
 		MatrixOrIdentityType weRef(wftOptions_.twoSiteDmrg, we);
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
@@ -414,7 +415,7 @@ private:
 	                    const VectorSizeType& nk,
 	                    const MatrixOrIdentityType& weRef) const
 	{
-		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
+		SizeType volumeOfNk = ProgramGlobals::volumeOf(nk);
 		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
 		SizeType nalpha = lrs.left().permutationInverse().size();
 
@@ -422,7 +423,7 @@ private:
 		msg<<" We're bouncing on the left, so buckle up!";
 		progress_.printline(msg,std::cout);
 
-		assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
+		assert(dmrgWaveStruct_.lrs().super().permutationInverse().size()==psiSrc.size());
 
 		SizeType start = psiDest.offset(i0);
 		SizeType total = psiDest.effectiveSize(i0);
@@ -439,10 +440,10 @@ private:
 			for (SizeType k=weRef.getRowPtr(jp);k<weRef.getRowPtr(jp+1);k++) {
 				int jp2 = weRef.getColOrExit(k);
 				if (jp2 < 0) continue;
-				SizeType kpjp = dmrgWaveStruct_.lrs.right().
+				SizeType kpjp = dmrgWaveStruct_.lrs().right().
 				        permutationInverse(kp + jp2*volumeOfNk);
 
-				SizeType y = dmrgWaveStruct_.lrs.super().
+				SizeType y = dmrgWaveStruct_.lrs().super().
 				        permutationInverse(ip + kpjp*nip);
 				psiDest.fastAccess(i0,x) += psiSrc.slowAccess(y) * weRef.getValue(k);
 			}

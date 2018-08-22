@@ -78,7 +78,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_WAVE_H
 #define DMRG_WAVE_H
-
+#include "ProgramGlobals.h"
+#include "Vector.h"
 
 namespace Dmrg {
 
@@ -94,20 +95,35 @@ struct DmrgWaveStruct {
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-	BlockDiagonalMatrixType ws;
-	BlockDiagonalMatrixType we;
-	LeftRightSuperType lrs;
-
 	DmrgWaveStruct()
-	    : lrs("pSE", "pSprime", "pEprime") {}
+	    : lrs_("pSE", "pSprime", "pEprime") {}
 
-	static SizeType volumeOf(const VectorSizeType& v)
+	void setLrs(const LeftRightSuperType& lrs)
 	{
-		assert(v.size()>0);
-		SizeType ret = v[0];
-		for (SizeType i=1;i<v.size();i++) ret *= v[i];
-		return ret;
+		lrs_.dontCopyOperators(lrs);
 	}
+
+	void setTransform(const BlockDiagonalMatrixType& m, SizeType what)
+	{
+		if (what == ProgramGlobals::SYSTEM) {
+			ws_ = m;
+			return;
+		}
+
+		assert(what == ProgramGlobals::ENVIRON);
+		we_ = m;
+	}
+
+	const BlockDiagonalMatrixType& getTransform(SizeType what) const
+	{
+		if (what == ProgramGlobals::SYSTEM)
+			return ws_;
+
+		assert(what == ProgramGlobals::ENVIRON);
+		return we_;
+	}
+
+	const LeftRightSuperType& lrs() const { return lrs_; }
 
 	template<typename IoInputType>
 	void read(IoInputType& io,
@@ -115,9 +131,9 @@ struct DmrgWaveStruct {
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
 	{
-		io.read(ws, prefix + "/Ws");
-		io.read(we, prefix + "/We");
-		lrs.read(io, prefix);
+		io.read(ws_, prefix + "/Ws");
+		io.read(we_, prefix + "/We");
+		lrs_.read(io, prefix);
 	}
 
 	template<typename IoOutputType>
@@ -127,11 +143,16 @@ struct DmrgWaveStruct {
 	           PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
 	{
 		io.createGroup(prefix);
-		io.write(ws, prefix + "/Ws");
-		io.write(we, prefix + "/We");
-		lrs.write(io, prefix, LeftRightSuperType::SAVE_ALL, false);
+		io.write(ws_, prefix + "/Ws");
+		io.write(we_, prefix + "/We");
+		lrs_.write(io, prefix, LeftRightSuperType::SAVE_ALL, false);
 	}
 
+private:
+
+	BlockDiagonalMatrixType ws_;
+	BlockDiagonalMatrixType we_;
+	LeftRightSuperType lrs_;
 }; // struct DmrgWaveStruct
 
 } // namespace Dmrg 

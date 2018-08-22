@@ -170,11 +170,12 @@ public:
 		super_=rls.super_;
 	}
 
-	// deep copy
-	ThisType& operator=(const ThisType& lrs)
+	void dontCopyOperators(const ThisType& rls)
 	{
-		deepCopy(lrs);
-		return *this;
+		left_->dontCopyOperators(*(rls.left_));
+		right_->dontCopyOperators(*(rls.right_));
+		*super_ = *rls.super_;
+		if (refCounter_>0) refCounter_--;
 	}
 
 	template<typename SomeModelType>
@@ -286,16 +287,6 @@ public:
 
 private:
 
-	LeftRightSuper(ThisType& rls);
-
-	void deepCopy(const ThisType& rls)
-	{
-		*left_=*rls.left_;
-		*right_=*rls.right_;
-		*super_=*rls.super_;
-		if (refCounter_>0) refCounter_--;
-	}
-
 	//! add block X to basis pS and put the result in left_:
 	/* PSIDOC LeftRightSuperGrow
 		Local operators are set for the basis in question with a call to
@@ -343,6 +334,10 @@ private:
 		delete lrs;
 		leftOrRight.setHamiltonian(matrix);
 	}
+
+	LeftRightSuper(LeftRightSuper& rls);
+
+	LeftRightSuper& operator=(const LeftRightSuper&);
 
 	ProgressIndicatorType progress_;
 	BasisWithOperatorsType* left_;

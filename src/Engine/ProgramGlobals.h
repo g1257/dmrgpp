@@ -159,6 +159,14 @@ struct ProgramGlobals {
 		return (counter == 0) ? counter : counter - 1;
 	}
 
+	static SizeType volumeOf(const PsimagLite::Vector<SizeType>::Type& v)
+	{
+		assert(v.size()>0);
+		SizeType ret = v[0];
+		for (SizeType i=1;i<v.size();i++) ret *= v[i];
+		return ret;
+	}
+
 	friend std::istream& operator>>(std::istream& is, DirectionEnum& direction)
 	{
 		int x = -1;

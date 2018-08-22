@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "Concurrency.h"
 #include "PackIndices.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -117,23 +118,23 @@ public:
 	      pack1_(0),
 	      pack2_(0)
 	{
-		dmrgWaveStruct_.we.toSparse(we_);
-        dmrgWaveStruct_.ws.toSparse(ws_);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).toSparse(we_);
+        dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).toSparse(ws_);
 		transposeConjugate(wsT_,ws_);
 		transposeConjugate(weT_,we_);
-		SizeType vOfNk = DmrgWaveStructType::volumeOf(nk);
+		SizeType vOfNk = ProgramGlobals::volumeOf(nk);
 		if (dir_ == ProgramGlobals::EXPAND_SYSTEM) {
-			assert(dmrgWaveStruct_.lrs.right().permutationInverse().size()==
-			       dmrgWaveStruct_.we.rows());
+			assert(dmrgWaveStruct_.lrs().right().permutationInverse().size() ==
+			       dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).rows());
 			assert(lrs_.left().permutationInverse().size()/vOfNk==
-			       dmrgWaveStruct_.ws.cols());
+			       dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).cols());
 			pack1_ = new PackIndicesType(lrs.left().permutationInverse().size());
 			pack2_ = new PackIndicesType(lrs.left().permutationInverse().size()/vOfNk);
 		} else {
-			assert(dmrgWaveStruct_.lrs.left().permutationInverse().size()==
-			       dmrgWaveStruct_.ws.rows());
+			assert(dmrgWaveStruct_.lrs().left().permutationInverse().size() ==
+			       dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).rows());
 			assert(lrs_.right().permutationInverse().size()/vOfNk==
-			       dmrgWaveStruct_.we.cols());
+			       dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).cols());
 			pack1_ = new PackIndicesType(lrs.super().permutationInverse().size()/
 			                             lrs.right().permutationInverse().size());
 			pack2_ = new PackIndicesType(vOfNk);
@@ -189,12 +190,12 @@ private:
 	                              const SparseMatrixType& we,
 	                              const VectorSizeType& nk) const
 	{
-		SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
+		SizeType nalpha=dmrgWaveStruct_.lrs().left().permutationInverse().size();
 		assert(nalpha==wsT.cols());
 
 		SparseElementType sum=0;
-		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
-		SizeType beta = dmrgWaveStruct_.lrs.right().permutationInverse(kp+jp*volumeOfNk);
+		SizeType volumeOfNk = ProgramGlobals::volumeOf(nk);
+		SizeType beta = dmrgWaveStruct_.lrs().right().permutationInverse(kp+jp*volumeOfNk);
 
 		for (int k=wsT.getRowPtr(ip);k<wsT.getRowPtr(ip+1);k++) {
 			SizeType alpha = wsT.getCol(k);
@@ -202,7 +203,7 @@ private:
 			SizeType endk = we.getRowPtr(beta+1);
 			for (SizeType k2=begink;k2<endk;++k2) {
 				SizeType j = we.getCol(k2);
-				SizeType x = dmrgWaveStruct_.lrs.super().
+				SizeType x = dmrgWaveStruct_.lrs().super().
 				        permutationInverse(alpha+j*nalpha);
 				sum += wsT.getValue(k)*we.getValue(k2)*psiSrc.slowAccess(x);
 			}
@@ -220,10 +221,10 @@ private:
 	                              const SparseMatrixType& weT,
 	                              const typename PsimagLite::Vector<SizeType>::Type& nk) const
 	{
-		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
-		SizeType ni=dmrgWaveStruct_.ws.cols();
-		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
-		SizeType alpha = dmrgWaveStruct_.lrs.left().permutationInverse(ip+kp*nip);
+		SizeType volumeOfNk = ProgramGlobals::volumeOf(nk);
+		SizeType ni= dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).cols();
+		SizeType nip = dmrgWaveStruct_.lrs().left().permutationInverse().size()/volumeOfNk;
+		SizeType alpha = dmrgWaveStruct_.lrs().left().permutationInverse(ip+kp*nip);
 
 		SparseElementType sum=0;
 
@@ -231,7 +232,7 @@ private:
 			SizeType i = ws.getCol(k);
 			for (int k2=weT.getRowPtr(jp);k2<weT.getRowPtr(jp+1);k2++) {
 				SizeType j = weT.getCol(k2);
-				SizeType x = dmrgWaveStruct_.lrs.super().permutationInverse(i+j*ni);
+				SizeType x = dmrgWaveStruct_.lrs().super().permutationInverse(i+j*ni);
 				sum += ws.getValue(k)*weT.getValue(k2)*psiSrc.slowAccess(x);
 			}
 		}

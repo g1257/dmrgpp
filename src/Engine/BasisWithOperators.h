@@ -149,6 +149,10 @@ public:
 		io.read(operatorsPerSite_, prefix + "OperatorPerSite");
 	}
 
+	BasisWithOperators(const BaseType& b, const BlockType& opsPerSite)
+	    : BaseType(b), operators_(&b), operatorsPerSite_(opsPerSite)
+	{}
+
 	template<typename IoInputter>
 	void read(IoInputter& io,
 	          PsimagLite::String prefix,
@@ -158,6 +162,12 @@ public:
 		BasisType::read(io, prefix); // parent loads
 		operators_.read(io, prefix);
 		io.read(operatorsPerSite_, prefix + "/OperatorPerSite");
+	}
+
+	void dontCopyOperators(BasisWithOperators& other)
+	{
+		BaseType base = static_cast<BaseType>(other);
+		*this = BasisWithOperators(base, other.operatorsPerSite_);
 	}
 
 	// set this basis to the outer product of

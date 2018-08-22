@@ -184,12 +184,12 @@ public:
 		if (lrs.left().block().size() < 2)
 			err("Bounce!?\n");
 
-		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
+		SizeType volumeOfNk = ProgramGlobals::volumeOf(nk);
 		MatrixType ws;
-		dmrgWaveStruct_.ws.toDense(ws);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).toDense(ws);
 
 		MatrixType we;
-		dmrgWaveStruct_.we.toDense(we);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).toDense(we);
 
 		SizeType i2psize = ws.cols();
 		SizeType jp2size = we.rows();
@@ -232,12 +232,12 @@ public:
 		if (lrs.right().block().size() < 2)
 			err("Bounce!?\n");
 
-		SizeType volumeOfNk = DmrgWaveStructType::volumeOf(nk);
+		SizeType volumeOfNk = ProgramGlobals::volumeOf(nk);
 		MatrixType ws;
-		dmrgWaveStruct_.ws.toDense(ws);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).toDense(ws);
 
 		MatrixType we;
-		dmrgWaveStruct_.we.toDense(we);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).toDense(we);
 
 		SizeType ipSize = ws.rows();
 		SizeType jprSize = we.cols();
@@ -279,16 +279,16 @@ private:
 	{
 		SizeType total = psiSrc.effectiveSize(i0src);
 		SizeType offset = psiSrc.offset(i0src);
-		PackIndicesType packSuper(dmrgWaveStruct_.lrs.left().size());
-		PackIndicesType packLeft(dmrgWaveStruct_.lrs.left().size()/volumeOfNk);
+		PackIndicesType packSuper(dmrgWaveStruct_.lrs().left().size());
+		PackIndicesType packLeft(dmrgWaveStruct_.lrs().left().size()/volumeOfNk);
 
 		for (SizeType x = 0; x < total; ++x) {
 			SizeType alpha = 0;
 			SizeType jp2 = 0;
-			packSuper.unpack(alpha, jp2, dmrgWaveStruct_.lrs.super().permutation(x + offset));
+			packSuper.unpack(alpha, jp2, dmrgWaveStruct_.lrs().super().permutation(x + offset));
 			SizeType ip2 = 0;
 			SizeType kp = 0;
-			packLeft.unpack(ip2, kp, dmrgWaveStruct_.lrs.left().permutation(alpha));
+			packLeft.unpack(ip2, kp, dmrgWaveStruct_.lrs().left().permutation(alpha));
 			psi[kp](ip2, jp2) += psiSrc.fastAccess(i0src, x);
 		}
 	}
@@ -324,16 +324,16 @@ private:
 	{
 		SizeType total = psiSrc.effectiveSize(i0src);
 		SizeType offset = psiSrc.offset(i0src);
-		PackIndicesType packSuper(dmrgWaveStruct_.lrs.left().size());
+		PackIndicesType packSuper(dmrgWaveStruct_.lrs().left().size());
 		PackIndicesType packRight(volumeOfNk);
 
 		for (SizeType y = 0; y < total; ++y) {
 			SizeType ip = 0;
 			SizeType jp = 0;
-			packSuper.unpack(ip, jp, dmrgWaveStruct_.lrs.super().permutation(y + offset));
+			packSuper.unpack(ip, jp, dmrgWaveStruct_.lrs().super().permutation(y + offset));
 			SizeType jpl = 0;
 			SizeType jpr = 0;
-			packRight.unpack(jpl, jpr, dmrgWaveStruct_.lrs.right().permutation(jp));
+			packRight.unpack(jpl, jpr, dmrgWaveStruct_.lrs().right().permutation(jp));
 			psi[jpl](ip, jpr) = psiSrc.fastAccess(i0src, y);
 		}
 	}

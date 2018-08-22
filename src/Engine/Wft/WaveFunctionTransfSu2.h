@@ -221,9 +221,9 @@ private:
 	                                  const VectorSizeType& nk) const
 	{
 		SparseMatrixType ws;
-		dmrgWaveStruct_.ws.toSparse(ws);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).toSparse(ws);
 		SparseMatrixType we;
-		dmrgWaveStruct_.we.toSparse(we);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).toSparse(we);
 		SparseMatrixType weT;
 		transposeConjugate(weT,we);
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
@@ -245,9 +245,11 @@ private:
 		SizeType nip = lrs.super().permutationInverse().size()/
 		        lrs.right().permutationInverse().size();
 
-		assert(lrs.left().permutationInverse().size()==volumeOfNk ||
-		       lrs.left().permutationInverse().size()==dmrgWaveStruct_.ws.rows());
-		assert(lrs.right().permutationInverse().size()/volumeOfNk==dmrgWaveStruct_.we.cols());
+		assert(lrs.left().permutationInverse().size() == volumeOfNk ||
+		       lrs.left().permutationInverse().size() == dmrgWaveStruct_.
+		       getTransform(ProgramGlobals::SYSTEM).rows());
+		assert(lrs.right().permutationInverse().size()/volumeOfNk == dmrgWaveStruct_.
+		       getTransform(ProgramGlobals::ENVIRON).cols());
 
 		SizeType start = psiDest.offset(i0);
 		SizeType total = psiDest.effectiveSize(i0);
@@ -295,15 +297,15 @@ private:
 	                                          const VectorSizeType& nk) const
 	{
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
-		SizeType ni=dmrgWaveStruct_.ws.cols();
-		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
+		SizeType ni=dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).cols();
+		SizeType nip = dmrgWaveStruct_.lrs().left().permutationInverse().size()/volumeOfNk;
 		MatrixOrIdentityType wsRef2(wftOptions_.twoSiteDmrg && nip>volumeOfNk,ws);
 
-		const FactorsType* fptrS = dmrgWaveStruct_.lrs.left().getFactors();
+		const FactorsType* fptrS = dmrgWaveStruct_.lrs().left().getFactors();
 		assert(fptrS);
 		const FactorsType& factorsS = *fptrS;
 
-		const FactorsType* fptrSE = dmrgWaveStruct_.lrs.super().getFactors();
+		const FactorsType* fptrSE = dmrgWaveStruct_.lrs().super().getFactors();
 		assert(fptrSE);
 		const FactorsType& factorsSE = *fptrSE;
 
@@ -340,13 +342,13 @@ private:
 		msg<<" Destination sectors "<<psiDest.sectors();
 		msg<<" Source sectors "<<psiSrc.sectors();
 		progress_.printline(msg,std::cout);
-		const LeftRightSuperType& lrsOld = dmrgWaveStruct_.lrs;
+		const LeftRightSuperType& lrsOld = dmrgWaveStruct_.lrs();
 		assert(lrsOld.super().permutationInverse().size() == psiSrc.size());
 
 		SparseMatrixType we;
-		dmrgWaveStruct_.we.toSparse(we);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).toSparse(we);
 		SparseMatrixType ws;
-		dmrgWaveStruct_.ws.toSparse(ws);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).toSparse(ws);
 		SparseMatrixType wsT;
 		transposeConjugate(wsT,ws);
 
@@ -384,7 +386,7 @@ private:
 		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
 		SizeType nalpha = lrs.left().permutationInverse().size();
 
-		assert(nip==dmrgWaveStruct_.ws.cols());
+		assert(nip==dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).cols());
 
 		const FactorsType* fptrS = lrs.left().getFactors();
 		assert(fptrS);
@@ -430,16 +432,16 @@ private:
 	                                          const SparseMatrixType& we,
 	                                          const VectorSizeType& nk) const
 	{
-		SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
+		SizeType nalpha = dmrgWaveStruct_.lrs().left().permutationInverse().size();
 		SparseElementType sum=0;
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
-		SizeType ni = dmrgWaveStruct_.lrs.right().size()/volumeOfNk;
+		SizeType ni = dmrgWaveStruct_.lrs().right().size()/volumeOfNk;
 
-		const FactorsType* fptrSE = dmrgWaveStruct_.lrs.super().getFactors();
+		const FactorsType* fptrSE = dmrgWaveStruct_.lrs().super().getFactors();
 		assert(fptrSE);
 		const FactorsType& factorsSE = *fptrSE;
 
-		const FactorsType* fptrE = dmrgWaveStruct_.lrs.right().getFactors();
+		const FactorsType* fptrE = dmrgWaveStruct_.lrs().right().getFactors();
 		assert(fptrE);
 		const FactorsType& factorsE = *fptrE;
 
@@ -478,7 +480,7 @@ private:
 	                            const VectorSizeType& nk) const
 	{
 		SparseMatrixType ws;
-		dmrgWaveStruct_.ws.toSparse(ws);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).toSparse(ws);
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
 			transformVector1bounce(psiDest,psiSrc,lrs,i0,nk,ws);
@@ -498,7 +500,7 @@ private:
 		SizeType nip = lrs.super().permutationInverse().size()/
 		        lrs.right().permutationInverse().size();
 
-		assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
+		assert(dmrgWaveStruct_.lrs().super().permutationInverse().size() == psiSrc.size());
 
 		SizeType start = psiDest.offset(i0);
 		SizeType total = psiDest.effectiveSize(i0);
@@ -545,14 +547,14 @@ private:
 	                                            const VectorSizeType& nk) const
 	{
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
-		SizeType ni=dmrgWaveStruct_.ws.cols();
-		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
+		SizeType ni=dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).cols();
+		SizeType nip = dmrgWaveStruct_.lrs().left().permutationInverse().size()/volumeOfNk;
 		MatrixOrIdentityType wsRef2(wftOptions_.twoSiteDmrg && nip>volumeOfNk,ws);
-		const FactorsType* fptrS = dmrgWaveStruct_.lrs.left().getFactors();
+		const FactorsType* fptrS = dmrgWaveStruct_.lrs().left().getFactors();
 		assert(fptrS);
 		const FactorsType& factorsS = *fptrS;
 
-		const FactorsType* fptrSE = dmrgWaveStruct_.lrs.super().getFactors();
+		const FactorsType* fptrSE = dmrgWaveStruct_.lrs().super().getFactors();
 		assert(fptrSE);
 		const FactorsType& factorsSE = *fptrSE;
 
@@ -584,7 +586,7 @@ private:
 	                            const VectorSizeType& nk) const
 	{
 		SparseMatrixType we;
-		dmrgWaveStruct_.we.toSparse(we);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).toSparse(we);
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
 			transformVector2bounce(psiDest,psiSrc,lrs,i0,nk,we);
@@ -603,7 +605,7 @@ private:
 		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
 		SizeType nalpha = lrs.left().permutationInverse().size();
 
-		assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
+		assert(dmrgWaveStruct_.lrs().super().permutationInverse().size() == psiSrc.size());
 
 		const FactorsType* fptrS = lrs.left().getFactors();
 		assert(fptrS);
@@ -650,15 +652,15 @@ private:
 	                                            const SparseMatrixType& we,
 	                                            const VectorSizeType& nk) const
 	{
-		SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
+		SizeType nalpha=dmrgWaveStruct_.lrs().left().permutationInverse().size();
 		SparseElementType sum=0;
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
-		SizeType ni = dmrgWaveStruct_.lrs.right().size()/volumeOfNk;
-		const FactorsType* fptrE = dmrgWaveStruct_.lrs.right().getFactors();
+		SizeType ni = dmrgWaveStruct_.lrs().right().size()/volumeOfNk;
+		const FactorsType* fptrE = dmrgWaveStruct_.lrs().right().getFactors();
 		assert(fptrE);
 		const FactorsType& factorsE = *fptrE;
 
-		const FactorsType* fptrSE = dmrgWaveStruct_.lrs.super().getFactors();
+		const FactorsType* fptrSE = dmrgWaveStruct_.lrs().super().getFactors();
 		assert(fptrSE);
 		const FactorsType& factorsSE = *fptrSE;
 

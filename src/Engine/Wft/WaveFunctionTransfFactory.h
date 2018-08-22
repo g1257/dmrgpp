@@ -302,29 +302,29 @@ public:
 		case ProgramGlobals::INFINITE:
 			if (direction == ProgramGlobals::EXPAND_SYSTEM) {
 				wsStack_.push(transform);
-				dmrgWaveStruct_.ws=transform;
+				dmrgWaveStruct_.setTransform(transform, ProgramGlobals::SYSTEM);
 			} else {
 				weStack_.push(transform);
-				dmrgWaveStruct_.we=transform;
+				dmrgWaveStruct_.setTransform(transform, ProgramGlobals::ENVIRON);
 			}
 			break;
 		case ProgramGlobals::EXPAND_ENVIRON:
 			if (direction != ProgramGlobals::EXPAND_ENVIRON)
 				throw std::logic_error("EXPAND_ENVIRON but option==0\n");
-			dmrgWaveStruct_.we=transform;
-			dmrgWaveStruct_.ws=transform;
+			dmrgWaveStruct_.setTransform(transform, ProgramGlobals::SYSTEM);
+			dmrgWaveStruct_.setTransform(transform, ProgramGlobals::ENVIRON);
 			weStack_.push(transform);
 			break;
 		case ProgramGlobals::EXPAND_SYSTEM:
 			if (direction != ProgramGlobals::EXPAND_SYSTEM)
 				throw std::logic_error("EXPAND_SYSTEM but option==1\n");
-			dmrgWaveStruct_.ws=transform;
-			dmrgWaveStruct_.we=transform;
+			dmrgWaveStruct_.setTransform(transform, ProgramGlobals::SYSTEM);
+			dmrgWaveStruct_.setTransform(transform, ProgramGlobals::ENVIRON);
 			wsStack_.push(transform);
 			break;
 		}
 
-		dmrgWaveStruct_.lrs=lrs;
+		dmrgWaveStruct_.setLrs(lrs);
 		PsimagLite::OstringStream msg;
 		msg<<"OK, pushing option="<<direction<<" and stage="<<wftOptions_.dir;
 		progress_.printline(msg,std::cout);
@@ -337,16 +337,16 @@ public:
 
 	const BlockDiagonalMatrixType& transform(SizeType what) const
 	{
-		return (what==ProgramGlobals::SYSTEM) ? dmrgWaveStruct_.ws : dmrgWaveStruct_.we;
+		return dmrgWaveStruct_.getTransform(what);
 	}
 
 	const BlockDiagonalMatrixType& stackTransform(SizeType what) const
 	{
 		if (what==ProgramGlobals::SYSTEM) {
-			if (wsStack_.size()==0) return dmrgWaveStruct_.ws;
+			if (wsStack_.size()==0) return dmrgWaveStruct_.getTransform(what);
 			return wsStack_.top();
 		} else {
-			if (weStack_.size()==0) return dmrgWaveStruct_.we;
+			if (weStack_.size()==0) return dmrgWaveStruct_.getTransform(what);
 			return weStack_.top();
 		}
 	}
@@ -432,10 +432,10 @@ private:
 	{
 		if (wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) {
 			if (wsStack_.size()>=1) {
-				dmrgWaveStruct_.ws=wsStack_.top();
+				dmrgWaveStruct_.setTransform(wsStack_.top(), ProgramGlobals::SYSTEM);
 				wsStack_.pop();
 				if (wftOptions_.twoSiteDmrg && wsStack_.size()>0)
-					dmrgWaveStruct_.ws=wsStack_.top();
+					dmrgWaveStruct_.setTransform(wsStack_.top(), ProgramGlobals::SYSTEM);
 			} else {
 				throw PsimagLite::RuntimeError("System Stack is empty\n");
 			}
@@ -443,23 +443,24 @@ private:
 
 		if (wftOptions_.dir == ProgramGlobals::EXPAND_SYSTEM) {
 			if (weStack_.size()>=1) {
-				dmrgWaveStruct_.we=weStack_.top();
+				dmrgWaveStruct_.setTransform(weStack_.top(), ProgramGlobals::ENVIRON);
 				weStack_.pop();
 				if (wftOptions_.twoSiteDmrg && weStack_.size()>0)
-					dmrgWaveStruct_.we=weStack_.top();
+					dmrgWaveStruct_.setTransform(weStack_.top(), ProgramGlobals::ENVIRON);
 			} else {
 				throw PsimagLite::RuntimeError("Environ Stack is empty\n");
 			}
 		}
+
 		if (wftOptions_.counter == 0 && wftOptions_.dir == ProgramGlobals::EXPAND_SYSTEM) {
 			if (weStack_.size()>=1) {
-				dmrgWaveStruct_.we=weStack_.top();
+				dmrgWaveStruct_.setTransform(weStack_.top(), ProgramGlobals::ENVIRON);
 			}
 		}
 
 		if (wftOptions_.counter == 0 && wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) {
 			if (wsStack_.size()>=1) {
-				dmrgWaveStruct_.ws=wsStack_.top();
+				dmrgWaveStruct_.setTransform(wsStack_.top(), ProgramGlobals::SYSTEM);
 			}
 		}
 	}
@@ -491,7 +492,7 @@ private:
 
 	void afterWft(const LeftRightSuperType& lrs)
 	{
-		dmrgWaveStruct_.lrs = lrs;
+		dmrgWaveStruct_.setLrs(lrs);
 		wftOptions_.firstCall = false;
 		wftOptions_.counter++;
 	}

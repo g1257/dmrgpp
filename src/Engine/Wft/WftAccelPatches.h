@@ -43,13 +43,14 @@ public:
 	{
 		char charLeft = (dir == ProgramGlobals::EXPAND_SYSTEM) ? 'C' : 'N';
 		char charRight = (dir == ProgramGlobals::EXPAND_SYSTEM) ? 'T' : 'N';
-		const BlockDiagonalMatrixType& transformLeft = dmrgWaveStruct_.ws;
-		const BlockDiagonalMatrixType& transformRight = dmrgWaveStruct_.we;
 		BlockDiagWfType psi(psiSrc,
 		                    iOld,
-		                    dmrgWaveStruct_.lrs);
+		                    dmrgWaveStruct_.lrs());
 
-		psi.transform(charLeft, charRight, transformLeft, transformRight);
+		psi.transform(charLeft,
+		              charRight,
+		              dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM),
+		              dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON));
 		psi.toVectorWithOffsets(psiDest, iNew, lrs, nk, dir);
 	}
 
