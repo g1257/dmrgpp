@@ -157,7 +157,6 @@ public:
 	WftAccelSvd(const DmrgWaveStructType& dmrgWaveStruct,
 	            const WftOptionsType& wftOptions)
 	{
-		err("WftAccelSvd: Not ready yet\n");
 	}
 
 	void operator()(const VectorMatrixType& uVeryOld,
@@ -168,6 +167,8 @@ public:
 	                const VectorQnType& qnsPrevious,
 	                const VectorVectorType& sPrevious)
 	{
+
+		err("WftAccelSvd: Not ready yet\n");
 		VectorMatrixType uPreviousPinv;
 		pinv(uPreviousPinv, uPrevious);
 
