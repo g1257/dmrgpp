@@ -91,6 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "WftAccelBlocks.h"
 #include "WftAccelPatches.h"
 #include "WftSparseTwoSite.h"
+#include "WftAccelSvd.h"
 
 namespace Dmrg {
 
@@ -123,6 +124,7 @@ public:
 	typedef WftAccelBlocks<BaseType> WftAccelBlocksType;
 	typedef WftAccelPatches<BaseType> WftAccelPatchesType;
 	typedef WftSparseTwoSite<BaseType, MatrixOrIdentityType> WftSparseTwoSiteType;
+	typedef WftAccelSvd<BaseType> WftAccelSvdType;
 
 	WaveFunctionTransfLocal(const DmrgWaveStructType& dmrgWaveStruct,
 	                        const WftOptions& wftOptions)
@@ -130,6 +132,7 @@ public:
 	      wftOptions_(wftOptions),
 	      wftAccelBlocks_(dmrgWaveStruct, wftOptions),
 	      wftAccelPatches_(dmrgWaveStruct, wftOptions),
+	      wftAccelSvd_(dmrgWaveStruct, wftOptions),
 	      progress_("WaveFunctionTransfLocal")
 	{
 		PsimagLite::OstringStream msg;
@@ -462,6 +465,7 @@ private:
 	const WftOptions& wftOptions_;
 	WftAccelBlocksType wftAccelBlocks_;
 	WftAccelPatchesType wftAccelPatches_;
+	WftAccelSvdType wftAccelSvd_;
 	PsimagLite::ProgressIndicator progress_;
 }; // class WaveFunctionTransfLocal
 } // namespace Dmrg

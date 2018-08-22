@@ -354,7 +354,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 		ParallelSvd(BlockDiagonalMatrixType& blockDiagonalMatrix,
 		            GroupsStructType& allTargets,
 		            VectorRealType& eigs)
-		    :  blockDiagonalMatrix_(blockDiagonalMatrix),
+		    : blockDiagonalMatrix_(blockDiagonalMatrix),
 		      allTargets_(allTargets),
 		      eigs_(eigs)
 		{
