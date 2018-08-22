@@ -61,5 +61,6 @@ GsWeight=0.1
 
 TSPOperator=expression
 OperatorExpression=identity
-#ci getEnergyAncilla 1 time
-
+#ci getEnergyAncilla 0.5 time
+#ci getEnergyAncilla 1.0 time
+#ci getEnergyAncilla 1.5 time
