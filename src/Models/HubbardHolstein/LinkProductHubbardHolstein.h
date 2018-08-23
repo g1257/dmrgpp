@@ -90,7 +90,7 @@ class LinkProductHubbardHolstein : public LinkProductBase<ModelHelperType, Geome
 	typedef LinkProductBase<ModelHelperType, GeometryType> BaseType;
 	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename ModelHelperType::BasisType BasisType;
 	typedef typename ModelHelperType::OperatorType OperatorType;
@@ -117,7 +117,7 @@ public:
 		if (term == TERM_HOPPINGF) return 2;
 		if (term == TERM_HOPPINGP) return 1;
 		assert(term == TERM_HOPPINGSSH);
-		return 2;
+		return 4;
 	}
 
 	void setLinkData(SizeType term,
@@ -154,13 +154,19 @@ public:
 			mods = PairCharType('C', 'N');
 			fermionOrBoson = ProgramGlobals::FERMION;
 			SizeType offset2 = 3;
-			assert(dof == 0 || dof ==  1);
+			assert(dof >= 0 && dof < 8);
 			switch (dof) {
-			case 0:
+			case 0: // old 0
 				ops = PairType(0, offset2);
 				break;
-			case 1:
+			case 1: // old 1
+				ops = PairType(offset2, 0);
+				break;
+			case 2: // old 2
 				ops = PairType(1, offset2 + 1);
+				break;
+			case 3: // old 3
+				ops = PairType(offset2 + 1, 1);
 				break;
 			}
 
@@ -172,6 +178,19 @@ public:
 	}
 
 	SizeType terms() const { return (isSsh_) ? 3 : 2; }
+
+	// Assumes your are connecting two operators value * A_{i, alpha} x B_{j, beta}
+	// You MAY add an extra multiplier value, by setting the first argument
+	virtual void valueModifier(ComplexOrRealType& value, // value (OUTPUT)
+	                           SizeType term, // TERM (INPUT)
+	                           SizeType dof, // DOF (INPUT)
+	                           bool isSu2, // isSU2 (INPUT)
+	                           const AdditionalDataType&) const // For SDHS (INPUT)
+	{
+		assert(!isSu2);
+		if (term != TERM_HOPPINGSSH) return;
+		if (dof & 1) value *= (-1.0);
+	}
 
 private:
 
