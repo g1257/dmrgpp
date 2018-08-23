@@ -134,6 +134,12 @@ sub procCout
 			push(@energies, $1);
 			next;
 		}
+
+		if (/Current virtual memory is/) {
+			if (/maximum was (.+)$/) {
+				$values->{"maxRAM"} = $1;
+			}		
+		}
 	}
 
 	close(FILE);
@@ -152,6 +158,9 @@ sub compareValues
 	print "|$n|: New Version $v1, Old Version $v2\n";
 	my $maxEdiff = maxEnergyDiff($newValues->{"energies"}, $oldValues->{"energies"});
 	print "|$n|: MaxEnergyDiff = $maxEdiff\n";
+	my $ram1 = $newValues->{"maxRAM"};
+	my $ram2 = $oldValues->{"maxRAM"};
+	print "|$n|: NewMaxRAM $ram1      OldMaxRAM $ram2\n" if ($ram1 and $ram2); 
 }
 
 sub maxEnergyDiff
@@ -170,7 +179,6 @@ sub maxEnergyDiff
 
 	return "$maxEdiff [out of $n]";
 }
-
 
 sub procMemcheck
 {
