@@ -152,15 +152,22 @@ public:
 	                SizeType keptStates,
 	                ProgramGlobals::DirectionEnum direction)
 	{
+		DensityMatrixBaseType* dmS = 0;
+
 		if (direction == ProgramGlobals::EXPAND_SYSTEM) {
 			progress_.print("for Environment\n",std::cout);
-			changeBasis(pS,target,keptStates,direction);
-			truncateBasisSystem(pS,lrs_.right());
+			changeBasis(pS,target,keptStates,direction, &dmS);
+			assert(dmS);
+			truncateBasisSystem(pS,lrs_.right(), *dmS);
 		} else {
 			progress_.print("for System\n",std::cout);
-			changeBasis(pE,target,keptStates,direction);
-			truncateBasisEnviron(pE,lrs_.left());
+			changeBasis(pE,target,keptStates,direction, &dmS);
+			assert(dmS);
+			truncateBasisEnviron(pE,lrs_.left(), *dmS);
 		}
+
+		delete dmS;
+		dmS = 0;
 	}
 
 	const TransformType& transform(ProgramGlobals::DirectionEnum direction) const
@@ -176,11 +183,19 @@ public:
 	                 const TargetingType& target,
 	                 SizeType keptStates)
 	{
-		changeBasis(sBasis,target, keptStates, ProgramGlobals::EXPAND_SYSTEM);
-		changeBasis(eBasis,target, keptStates, ProgramGlobals::EXPAND_ENVIRON);
+		DensityMatrixBaseType* dmS = 0;
+		changeBasis(sBasis,target, keptStates, ProgramGlobals::EXPAND_SYSTEM, &dmS);
+		assert(dmS);
+		truncateBasisSystem(sBasis,lrs_.right(), *dmS);
+		delete dmS;
+		dmS = 0;
 
-		truncateBasisSystem(sBasis,lrs_.right());
-		truncateBasisEnviron(eBasis,lrs_.left());
+		DensityMatrixBaseType* dmE = 0;
+		changeBasis(eBasis,target, keptStates, ProgramGlobals::EXPAND_ENVIRON, &dmE);
+		assert(dmE);
+		truncateBasisEnviron(eBasis,lrs_.left(), *dmE);
+		delete dmE;
+		dmE = 0;
 	}
 
 private:
@@ -188,7 +203,8 @@ private:
 	void changeBasis(BasisWithOperatorsType& rSprime,
 	                 const TargetingType& target,
 	                 SizeType keptStates,
-	                 ProgramGlobals::DirectionEnum direction)
+	                 ProgramGlobals::DirectionEnum direction,
+	                 DensityMatrixBaseType** dm)
 	{
 		/* PSIDOC Truncation
 			Let us define the density matrices for system:
@@ -215,7 +231,6 @@ private:
 		ParamsDensityMatrixType p(useSvd, direction, debug);
 		TruncationCache& cache = (direction == ProgramGlobals::EXPAND_SYSTEM) ? leftCache_ :
 		                                                                        rightCache_;
-		DensityMatrixBaseType* dmS = 0;
 
 		if (BasisType::useSu2Symmetry()) {
 			if (p.useSvd) {
@@ -223,20 +238,20 @@ private:
 				p.useSvd = false;
 			}
 
-			dmS = new DensityMatrixSu2Type(target,lrs_,p);
+			*dm = new DensityMatrixSu2Type(target,lrs_,p);
 		} else if (p.useSvd) {
-			dmS = new DensityMatrixSvdType(target,lrs_,p);
+			*dm = new DensityMatrixSvdType(target,lrs_,p);
 		} else {
-			dmS = new DensityMatrixLocalType(target,lrs_,p);
+			*dm = new DensityMatrixLocalType(target,lrs_,p);
 		}
 
-		/* PSIDOC DiagOfDensityMatrix
-
-		*/
+		assert(*dm);
+		DensityMatrixBaseType* dmS = *dm;
+		assert(dmS);
 
 		dmS->diag(cache.eigs,'V');
 
-		updateKeptStates(keptStates,cache.eigs);
+		updateKeptStates(keptStates, cache.eigs);
 
 		cache.transform = dmS->operator()();
 		if (parameters_.options.find("nodmrgtransform") != PsimagLite::String::npos) {
@@ -252,13 +267,11 @@ private:
 		PsimagLite::OstringStream msg2;
 		msg2<<"done with entanglement";
 		progress_.printline(msg2,std::cout);
-
-		delete dmS;
-		dmS = 0;
 	}
 
 	void truncateBasisSystem(BasisWithOperatorsType& rSprime,
-	                         const BasisWithOperatorsType& eBasis)
+	                         const BasisWithOperatorsType& eBasis,
+	                         const DensityMatrixBaseType& dms)
 	{
 		SizeType site = 0; // FIXME for model Immm
 		size_t mostRecent = lrs_.left().operatorsPerSite(site)*geometry_.maxConnections();
@@ -286,7 +299,10 @@ private:
 		const LeftRightSuperType& lrsForWft = (twoSiteDmrg || wftInPatches) ? lrs_ : lrs;
 		waveFunctionTransformation_.push(cache.transform,
 		                                 ProgramGlobals::EXPAND_SYSTEM,
-		                                 lrsForWft);
+		                                 lrsForWft,
+		                                 dms.vts(),
+		                                 dms.s(),
+		                                 dms.qns());
 
 		msg<<"new size of basis="<<rSprime.size();
 		msg<<" transform is "<<cache.transform.rows()<<" x "<<cache.transform.cols();
@@ -295,7 +311,8 @@ private:
 	}
 
 	void truncateBasisEnviron(BasisWithOperatorsType& rEprime,
-	                          const BasisWithOperatorsType& sBasis)
+	                          const BasisWithOperatorsType& sBasis,
+	                          const DensityMatrixBaseType& dms)
 	{
 		SizeType site = 0; // FIXME for model Immm
 		SizeType mostRecent = lrs_.left().operatorsPerSite(site)*geometry_.maxConnections();
@@ -324,7 +341,10 @@ private:
 		const LeftRightSuperType& lrsForWft = (twoSiteDmrg || wftInPatches) ? lrs_ : lrs;
 		waveFunctionTransformation_.push(cache.transform,
 		                                 ProgramGlobals::EXPAND_ENVIRON,
-		                                 lrsForWft);
+		                                 lrsForWft,
+		                                 dms.vts(),
+		                                 dms.s(),
+		                                 dms.qns());
 		msg<<"new size of basis="<<rEprime.size();
 		msg<<" transform is "<<cache.transform.rows()<<" x "<<cache.transform.cols();
 		msg<<" with "<<cache.transform.blocks()<<" blocks";

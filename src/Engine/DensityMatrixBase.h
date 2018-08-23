@@ -96,6 +96,7 @@ class DensityMatrixBase {
 
 public:
 
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef PsimagLite::Matrix<DensityMatrixElementType> MatrixType;
 	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
 
@@ -118,6 +119,28 @@ public:
 	virtual const BlockDiagonalMatrixType& operator()()=0;
 
 	virtual void diag(typename PsimagLite::Vector<RealType>::Type&, char) = 0;
+
+	virtual const typename PsimagLite::Vector<MatrixType>::Type& vts() const
+	{
+		return vtsEmpty_;
+	}
+
+	virtual const typename PsimagLite::Vector<VectorRealType>::Type& s() const
+	{
+		return sEmpty_;
+	}
+
+	virtual const typename BasisWithOperatorsType::VectorQnType& qns() const
+	{
+		return qnsEmpty_;
+	}
+
+private:
+
+	typename PsimagLite::Vector<MatrixType>::Type vtsEmpty_;
+	typename PsimagLite::Vector<VectorRealType>::Type sEmpty_;
+	typename BasisWithOperatorsType::VectorQnType qnsEmpty_;
+
 }; // class DensityMatrixBase
 } // namespace Dmrg
 

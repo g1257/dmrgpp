@@ -108,6 +108,9 @@ public:
 	typedef typename BasisWithOperatorsType::RealType RealType;
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef DmrgWaveStruct<LeftRightSuperType> DmrgWaveStructType;
+	typedef typename DmrgWaveStructType::VectorVectorRealType VectorVectorRealType;
+	typedef typename DmrgWaveStructType::VectorMatrixType VectorMatrixType;
+	typedef typename DmrgWaveStructType::VectorQnType VectorQnType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType>
 	WaveFunctionTransfBaseType;
@@ -294,7 +297,10 @@ public:
 
 	void push(const BlockDiagonalMatrixType& transform,
 	          ProgramGlobals::DirectionEnum direction,
-	          const LeftRightSuperType& lrs)
+	          const LeftRightSuperType& lrs,
+	          const VectorMatrixType& vts,
+	          const VectorVectorRealType& s,
+	          const VectorQnType& qns)
 	{
 		if (!isEnabled_) return;
 
@@ -325,6 +331,7 @@ public:
 		}
 
 		dmrgWaveStruct_.setLrs(lrs);
+		dmrgWaveStruct_.setAdditional(vts, s, qns);
 		PsimagLite::OstringStream msg;
 		msg<<"OK, pushing option="<<direction<<" and stage="<<wftOptions_.dir;
 		progress_.printline(msg,std::cout);

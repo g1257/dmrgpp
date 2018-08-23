@@ -94,6 +94,12 @@ struct DmrgWaveStruct {
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename BasisWithOperatorsType::RealType RealType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
+	typedef typename PsimagLite::Matrix<SparseElementType> MatrixType;
+	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
+	typedef typename BasisWithOperatorsType::VectorQnType VectorQnType;
 
 	DmrgWaveStruct()
 	    : lrs_("pSE", "pSprime", "pEprime") {}
@@ -101,6 +107,14 @@ struct DmrgWaveStruct {
 	void setLrs(const LeftRightSuperType& lrs)
 	{
 		lrs_.dontCopyOperators(lrs);
+	}
+	void setAdditional(const VectorMatrixType& vts,
+	                  const VectorVectorRealType& s,
+	                  const VectorQnType& qns)
+	{
+		vts_ = vts;
+		s_ = s;
+		qns_ = qns;
 	}
 
 	void setTransform(const BlockDiagonalMatrixType& m, SizeType what)
@@ -153,6 +167,9 @@ private:
 	BlockDiagonalMatrixType ws_;
 	BlockDiagonalMatrixType we_;
 	LeftRightSuperType lrs_;
+	VectorMatrixType vts_;
+    VectorVectorRealType s_;
+    VectorQnType qns_;
 }; // struct DmrgWaveStruct
 
 } // namespace Dmrg 

@@ -76,6 +76,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "NoPthreads.h"
 #include "Concurrency.h"
 #include "MatrixVectorKron/GenIjPatch.h"
+#include "PersistentSvd.h"
 
 namespace Dmrg {
 
@@ -99,11 +100,13 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 	typedef typename BaseType::Params ParamsType;
 	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
 	typedef typename GenIjPatchType::VectorSizeType VectorSizeType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename BaseType::VectorRealType VectorRealType;
 	typedef typename PsimagLite::Vector<GenIjPatchType*>::Type VectorGenIjPatchType;
 	typedef std::pair<SizeType, SizeType> PairSizeType;
 	typedef typename BaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename BasisType::QnType QnType;
+	typedef typename BasisWithOperatorsType::VectorQnType VectorQnType;
+	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 
 	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
@@ -351,12 +354,19 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 
 	public:
 
+		typedef PersistentSvd<typename PsimagLite::Vector<MatrixType>::Type,
+		VectorVectorRealType,
+		VectorQnType,
+		false> PersistentSvdType;
+
 		ParallelSvd(BlockDiagonalMatrixType& blockDiagonalMatrix,
 		            GroupsStructType& allTargets,
-		            VectorRealType& eigs)
+		            VectorRealType& eigs,
+		            PersistentSvdType& additionalStorage)
 		    : blockDiagonalMatrix_(blockDiagonalMatrix),
 		      allTargets_(allTargets),
-		      eigs_(eigs)
+		      eigs_(eigs),
+		      persistentSvd_(additionalStorage)
 		{
 			SizeType oneSide = allTargets.basis().size();
 			eigs_.resize(oneSide);
@@ -367,11 +377,13 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 		{
 			SizeType igroup = allTargets_.groupFromIndex(ipatch);
 			MatrixType& m = allTargets_.matrix(igroup);
-			MatrixType vt;
-			VectorRealType eigsOnePatch;
+
+			MatrixType& vt = persistentSvd_.vts(igroup);
+			VectorRealType& eigsOnePatch = persistentSvd_.s(igroup);
 
 			svd('A', m, eigsOnePatch, vt);
 
+			persistentSvd_.qns(igroup) = allTargets_.basis().qnEx(igroup);
 			const BasisType& basis = allTargets_.basis();
 			SizeType offset = basis.partition(igroup);
 			SizeType partSize = basis.partition(igroup + 1) - offset;
@@ -390,11 +402,15 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 			return allTargets_.size();
 		}
 
+		// needed for WFT
+		const PersistentSvdType& additionalStorage() const { return persistentSvd_; }
+
 	private:
 
 		BlockDiagonalMatrixType& blockDiagonalMatrix_;
 		GroupsStructType& allTargets_;
 		VectorRealType& eigs_;
+		PersistentSvdType persistentSvd_;
 	};
 
 public:
@@ -440,6 +456,7 @@ public:
 		}
 
 		allTargets_.finalize();
+		persistentSvd_.resize(allTargets_.size());
 
 		{
 			PsimagLite::OstringStream msg;
@@ -468,7 +485,8 @@ public:
 		ParallelizerType threaded(PsimagLite::Concurrency::codeSectionParams);
 		ParallelSvd parallelSvd(data_,
 		                        allTargets_,
-		                        eigs);
+		                        eigs,
+		                        persistentSvd_);
 		threaded.loopCreate(parallelSvd);
 		for (SizeType i = 0; i < data_.blocks(); ++i) {
 			SizeType n = data_(i).rows();
@@ -483,6 +501,24 @@ public:
 		}
 
 		data_.enforcePhase();
+	}
+
+	// needed for WFT
+	const typename PsimagLite::Vector<MatrixType>::Type& vts() const
+	{
+		return persistentSvd_.vts();
+	}
+
+	// needed for WFT
+	const VectorVectorRealType& s() const
+	{
+		return persistentSvd_.s();
+	}
+
+	// needed for WFT
+	const VectorQnType& qns() const
+	{
+		return persistentSvd_.qns();
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
@@ -541,6 +577,7 @@ private:
 	const ParamsType& params_;
 	GroupsStructType allTargets_;
 	BlockDiagonalMatrixType data_;
+	typename ParallelSvd::PersistentSvdType persistentSvd_;
 }; // class DensityMatrixSvd
 
 } // namespace Dmrg
