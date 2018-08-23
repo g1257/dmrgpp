@@ -233,7 +233,6 @@ private:
 	                                const VectorSizeType& basis) const
 	{
 		qns.resize(basis.size(), QnType::zero());
-		assert(1 == ModelBaseType::targetQuantum().qn.other.size());
 		VectorSizeType other(2, 0);
 
 		// bit 0 <--- up electron
