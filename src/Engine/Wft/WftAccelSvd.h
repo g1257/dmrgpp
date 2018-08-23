@@ -45,8 +45,7 @@ class WftAccelSvd {
 		      vTildePrimePrime_(vTildePrimePrime),
 		      qTilde_(qTilde),
 		      npatches_(std::max(u_.size(), uTildePrime_.size())),
-		      uFinal_(std::min(u_.size(), uTildePrime_.size())),
-		      vTildePrimePrime_(std::min(u_.size(), uTildePrime_.size()))
+		      uFinal_(std::min(u_.size(), uTildePrime_.size()))
 		{
 			assert(u.size() == vPrime.size());
 			assert(u.size() == q.size());
