@@ -4,54 +4,9 @@
 
 namespace Dmrg {
 
-template<typename VectorMatrixType, typename VectorVectorRealType, typename VectorQnType, bool>
-class PersistentSvd {
-
-public:
-
-	typedef typename VectorMatrixType::value_type MatrixType;
-	typedef typename VectorVectorRealType::value_type VectorRealType;
-	typedef typename VectorQnType::value_type QnType;
-
-	PersistentSvd() : qns_(QnType::zero()) {}
-
-	void resize(SizeType) {}
-
-	MatrixType& vts(SizeType)
-	{
-		vt_.clear();
-		return vt_;
-	}
-
-	VectorRealType& s(SizeType)
-	{
-		return s_;
-	}
-
-	QnType& qns(SizeType)
-	{
-		return qns_;
-	}
-
-	const VectorMatrixType& vts() const { return vts_; }
-
-	const VectorVectorRealType& s() const { return sv_; }
-
-	const VectorQnType& qns() const { return qnsv_; }
-
-private:
-
-	MatrixType vt_;
-	VectorRealType s_;
-	QnType qns_;
-	VectorMatrixType vts_;
-	VectorVectorRealType sv_;
-	VectorQnType qnsv_;
-};
-
 // needef for WFT
 template<typename VectorMatrixType, typename VectorVectorRealType, typename VectorQnType>
-class PersistentSvd<VectorMatrixType, VectorVectorRealType, VectorQnType, true> {
+class PersistentSvd {
 
 public:
 
@@ -64,6 +19,13 @@ public:
 		vts_.resize(n);
 		s_.resize(n);
 		qns_.resize(n, QnType::zero());
+	}
+
+	void clear()
+	{
+		vts_.clear();
+		s_.clear();
+		qns_.clear();
 	}
 
 	MatrixType& vts(SizeType igroup)

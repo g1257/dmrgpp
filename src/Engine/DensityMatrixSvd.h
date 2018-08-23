@@ -356,8 +356,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 
 		typedef PersistentSvd<typename PsimagLite::Vector<MatrixType>::Type,
 		VectorVectorRealType,
-		VectorQnType,
-		false> PersistentSvdType;
+		VectorQnType> PersistentSvdType;
 
 		ParallelSvd(BlockDiagonalMatrixType& blockDiagonalMatrix,
 		            GroupsStructType& allTargets,
@@ -501,6 +500,8 @@ public:
 		}
 
 		data_.enforcePhase();
+		if (!params_.enablePersistentSvd)
+			persistentSvd_.clear();
 	}
 
 	// needed for WFT

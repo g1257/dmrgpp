@@ -102,13 +102,14 @@ public:
 
 	struct Params {
 
-		Params(bool u, ProgramGlobals::DirectionEnum d, bool de)
-		    : useSvd(u), direction(d), debug(de)
+		Params(bool u, ProgramGlobals::DirectionEnum d, bool de, bool enablePersistentSvd_)
+		    : useSvd(u), direction(d), debug(de), enablePersistentSvd(enablePersistentSvd_)
 		{}
 
 		bool useSvd;
 		ProgramGlobals::DirectionEnum direction;
 		bool debug;
+		bool enablePersistentSvd;
 	};
 
 	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;

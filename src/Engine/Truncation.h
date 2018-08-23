@@ -228,7 +228,9 @@ private:
 
 		bool debug = false;
 		bool useSvd = (parameters_.options.find("truncationNoSvd") == PsimagLite::String::npos);
-		ParamsDensityMatrixType p(useSvd, direction, debug);
+		bool enablePersistentSvd = (parameters_.options.find("EnablePersistentSvd") !=
+		        PsimagLite::String::npos);
+		ParamsDensityMatrixType p(useSvd, direction, debug, enablePersistentSvd);
 		TruncationCache& cache = (direction == ProgramGlobals::EXPAND_SYSTEM) ? leftCache_ :
 		                                                                        rightCache_;
 
