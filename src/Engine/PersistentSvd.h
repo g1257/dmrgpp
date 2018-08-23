@@ -14,12 +14,9 @@ public:
 	typedef typename VectorVectorRealType::value_type VectorRealType;
 	typedef typename VectorQnType::value_type QnType;
 
-	void resize(SizeType n)
-	{
-		vts_.resize(n);
-		s_.resize(n);
-		qns_.resize(n, QnType::zero());
-	}
+	PersistentSvd(SizeType n)
+	    : vts_(n), s_(n), qns_(n, QnType::zero())
+	{}
 
 	void clear()
 	{

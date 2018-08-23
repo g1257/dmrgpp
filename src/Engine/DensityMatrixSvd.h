@@ -422,7 +422,8 @@ public:
 	      lrs_(lrs),
 	      params_(p),
 	      allTargets_(lrs, p.direction),
-	      data_(allTargets_.basis())
+	      data_(allTargets_.basis()),
+	      persistentSvd_(data_.blocks())
 	{
 		SizeType oneOrZero = (target.includeGroundStage()) ? 1 : 0;
 		SizeType targets = oneOrZero + target.size(); // Number of targets;
@@ -455,7 +456,6 @@ public:
 		}
 
 		allTargets_.finalize();
-		persistentSvd_.resize(allTargets_.size());
 
 		{
 			PsimagLite::OstringStream msg;
