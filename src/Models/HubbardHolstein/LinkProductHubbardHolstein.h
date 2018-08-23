@@ -117,7 +117,7 @@ public:
 		if (term == TERM_HOPPINGF) return 2;
 		if (term == TERM_HOPPINGP) return 1;
 		assert(term == TERM_HOPPINGSSH);
-		return 8;
+		return 2;
 	}
 
 	void setLinkData(SizeType term,
@@ -154,19 +154,13 @@ public:
 			mods = PairCharType('C', 'N');
 			fermionOrBoson = ProgramGlobals::FERMION;
 			SizeType offset2 = 3;
-			assert(dof >= 0 && dof < 8);
+			assert(dof == 0 || dof ==  1);
 			switch (dof) {
-			case 0: // old 0
+			case 0:
 				ops = PairType(0, offset2);
 				break;
-			case 1: // old 1
-				ops = PairType(offset2, 0);
-				break;
-			case 2: // old 2
+			case 1:
 				ops = PairType(1, offset2 + 1);
-				break;
-			case 3: // old 3
-				ops = PairType(offset2 + 1, 1);
 				break;
 			}
 

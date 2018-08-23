@@ -213,8 +213,8 @@ private:
 		bool debug = false;
 		bool useSvd = (parameters_.options.find("truncationNoSvd") == PsimagLite::String::npos);
 		ParamsDensityMatrixType p(useSvd, direction, debug);
-		TruncationCache& cache = (direction == ProgramGlobals::EXPAND_SYSTEM) ?
-		            leftCache_ : rightCache_;
+		TruncationCache& cache = (direction == ProgramGlobals::EXPAND_SYSTEM) ? leftCache_ :
+		                                                                        rightCache_;
 		DensityMatrixBaseType* dmS = 0;
 
 		if (BasisType::useSu2Symmetry()) {
