@@ -211,6 +211,7 @@ int main(int argc, char *argv[])
 	strUsage += " -f filename [-k] [-p precision] [-o solverOptions] [-V] [whatToMeasure]";
 	PsimagLite::String sOptions("");
 	int precision = 6;
+	bool forceSerial = false;
 	bool versionOnly = false;
 	/* PSIDOC DmrgDriver
 There is a single input file that is passed as the
@@ -233,6 +234,8 @@ to the main dmrg driver are the following.
 	  This option with the string ``-'' writes std::cout to terminal.
 	  In other cases, string is the name of the file to redirect std::cout to.
 	 \item[-k] [Optional] Keep untar files
+	 \item[-S] [Optional] Ignore the Threads= line if present in the input, and run with
+	 Threads=1
 	 \item[-V] [Optional] Print version and exit
 	  \end{itemize}
 	 */
@@ -271,7 +274,7 @@ to the main dmrg driver are the following.
 	\begin{verbatim}./operator -l c -t -f input.inp\end{verbatim}
 	\end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:s:l:d:p:e:o:tkV")) != -1) {
+	while ((opt = getopt(argc, argv,"f:s:l:d:p:e:o:tkSV")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -299,6 +302,9 @@ to the main dmrg driver are the following.
 			break;
 		case 'o':
 			sOptions += optarg;
+			break;
+		case 'S':
+			forceSerial = true;
 			break;
 		case 'V':
 			versionOnly = true;
@@ -339,6 +345,8 @@ to the main dmrg driver are the following.
 	InputNgType::Readable io(ioWriteable);
 
 	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, false);
+
+	if (forceSerial) dmrgSolverParams.nthreads = 1;
 
 	if (!options.enabled && options.label != "-") {
 		GlobalCoutStream.open(options.label.c_str(),

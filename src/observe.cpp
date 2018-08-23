@@ -127,6 +127,8 @@ Braket specifications can be bare or dressed, and are explained elsewhere.
 \item[-p] [Optional, Integer] Digits of precision for printing.
 \item[-o] {[}Optional, String{]} Extra options for SolverOptions
 \item[-F] [Optional, string] TBW
+\item[-S] [Optional] Ignore the Threads= line if present in the input, and run with
+Threads=1
 \item[-V] [Optional] Print version and exit
 \end{itemize}
   */
@@ -138,9 +140,11 @@ int main(int argc,char **argv)
 	PsimagLite::String filesOption;
 	int opt = 0;
 	int precision = 6;
+	bool forceSerial = false;
 	bool versionOnly = false;
 	PsimagLite::String sOptions("");
-	while ((opt = getopt(argc, argv,"f:p:o:F:V")) != -1) {
+
+	while ((opt = getopt(argc, argv,"f:p:o:F:SV")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -155,6 +159,9 @@ int main(int argc,char **argv)
 			break;
 		case 'F':
 			filesOption = optarg;
+			break;
+		case 'S':
+			forceSerial = true;
 			break;
 		case 'V':
 			versionOnly = true;
@@ -195,6 +202,8 @@ int main(int argc,char **argv)
 	InputNgType::Readable io(ioWriteable);
 
 	ParametersDmrgSolverType dmrgSolverParams(io,sOptions,false,true);
+
+	if (forceSerial) dmrgSolverParams.nthreads = 1;
 
 	bool setAffinities = (dmrgSolverParams.options.find("setAffinities")
 	                      != PsimagLite::String::npos);

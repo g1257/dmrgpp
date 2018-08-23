@@ -154,7 +154,7 @@ public:
 			mods = PairCharType('C', 'N');
 			fermionOrBoson = ProgramGlobals::FERMION;
 			SizeType offset2 = 3;
-			assert(dof >= 0 && dof < 8);
+			assert(dof >= 0 && dof < 4);
 			switch (dof) {
 			case 0: // old 0
 				ops = PairType(0, offset2);
