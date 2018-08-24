@@ -219,6 +219,13 @@ public:
 
 	// default assigment operator is fine
 
+	void conjugate()
+	{
+		SizeType n = data_.size();
+		for (SizeType i = 0; i < n; ++i)
+			data_[i] = PsimagLite::conj(data_[i]);
+	}
+
 	SizeType nonZeros() const
 	{
 		const T zval = 0.0;
