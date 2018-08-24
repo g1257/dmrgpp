@@ -30,6 +30,14 @@ public:
 			crsMatrixToFullMatrix(denseMatrix_, sparse);
 	}
 
+	void conjugate()
+	{
+		SparseMatrixType& nonconst = const_cast<SparseMatrixType&>(sparseMatrix_);
+		nonconst.conjugate();
+		if (isDense_)
+			denseMatrix_.conjugate();
+	}
+
 	bool isDense() const { return isDense_; }
 
 	SizeType rows() const

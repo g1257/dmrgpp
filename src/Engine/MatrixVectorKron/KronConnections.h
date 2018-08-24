@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Matrix.h"
 #include "Concurrency.h"
+#include "DeepCopyOrNot.h" // in PsimagLite/src
 
 namespace Dmrg {
 
@@ -91,7 +92,6 @@ class KronConnections {
 
 	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
@@ -133,15 +133,29 @@ public:
 
 				const bool performTranspose = (initKron_.useLowerPart() &&
 				                               (outPatch < inPatch));
-				const MatrixDenseOrSparseType& Amat =  performTranspose ?
-				            xiStruct(inPatch,outPatch):
-				            xiStruct(outPatch,inPatch);
 
-				const MatrixDenseOrSparseType& Bmat =  performTranspose ?
-				            yiStruct(inPatch,outPatch) :
-				            yiStruct(outPatch,inPatch);
+				const MatrixDenseOrSparseType& AmatHandle =  performTranspose ?
+				            xiStruct(inPatch,outPatch): xiStruct(outPatch,inPatch);
+
+				const MatrixDenseOrSparseType& BmatHandle =  performTranspose ?
+				            yiStruct(inPatch,outPatch) : yiStruct(outPatch,inPatch);
+#ifndef FIX_KRON_USE_LOWER_PART
+				const bool deepCopy = false;
+#else
+				const bool deepCopy = performTranspose;
+#endif
+				PsimagLite::DeepCopyOrNot<MatrixDenseOrSparseType> deepCopyOrNot(deepCopy);
+				const MatrixDenseOrSparseType& Amat = deepCopyOrNot(AmatHandle);
+				const MatrixDenseOrSparseType& Bmat = deepCopyOrNot(BmatHandle);
+
 				if (!performTranspose)
 					initKron_.checks(Amat, Bmat, outPatch, inPatch);
+
+				if (deepCopy) {
+					const_cast<MatrixDenseOrSparseType&>(Amat).conjugate();
+					const_cast<MatrixDenseOrSparseType&>(Bmat).conjugate();
+				}
+
 				kronMult(x_,
 				         offsetX,
 				         y_,
@@ -158,6 +172,12 @@ public:
 	void sync() {}
 
 private:
+
+	// disable copy ctor
+	KronConnections(const KronConnections&);
+
+	// disable assigment operator
+	KronConnections& operator=(const KronConnections&);
 
 	const InitKronType& initKron_;
 	VectorType& x_;
