@@ -67,6 +67,13 @@ public:
 		multiply(v,ftransformT,tmp);
 	}
 
+	void clear()
+	{
+		transform_.clear();
+		oldT_.clear();
+		oldTtranspose_.clear();
+	}
+
 private:
 
 	BlockDiagonalMatrixType transform_;

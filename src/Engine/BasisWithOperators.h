@@ -126,7 +126,7 @@ public:
 	typedef typename OperatorsType::PairSizeSizeType PairSizeSizeType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorsType::BasisType BasisType;
-	typedef typename BasisType::BlockType BlockType;
+	typedef typename BasisType::BlockType VectorSizeType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef BasisWithOperators<OperatorsType> ThisType;
 	typedef typename BasisType::FactorsType FactorsType;
@@ -149,10 +149,6 @@ public:
 		io.read(operatorsPerSite_, prefix + "OperatorPerSite");
 	}
 
-	BasisWithOperators(const BaseType& b, const BlockType& opsPerSite)
-	    : BaseType(b), operators_(&b), operatorsPerSite_(opsPerSite)
-	{}
-
 	template<typename IoInputter>
 	void read(IoInputter& io,
 	          PsimagLite::String prefix,
@@ -164,10 +160,13 @@ public:
 		io.read(operatorsPerSite_, prefix + "/OperatorPerSite");
 	}
 
-	void dontCopyOperators(BasisWithOperators& other)
+	void dontCopyOperators(const BasisWithOperators& b)
 	{
-		BaseType base = static_cast<BaseType>(other);
-		*this = BasisWithOperators(base, other.operatorsPerSite_);
+		BaseType& base = *this;
+		const BaseType& b1 = static_cast<BaseType>(b);
+		base = b1;
+		operatorsPerSite_ = b.operatorsPerSite_;
+		operators_.clear();
 	}
 
 	// set this basis to the outer product of
@@ -267,13 +266,14 @@ public:
 
 		for (SizeType i=0;i<basis3.operatorsPerSite_.size();i++)
 			operatorsPerSite_[i+offset1] =  basis3.operatorsPerSite_[i];
+		assert(operatorsPerSite_.size() > 0);
 	}
 
 	//! transform this basis by transform
 	//! note: basis change must conserve total number of electrons and all quantum numbers
 	RealType truncateBasis(const BlockDiagonalMatrixType& ftransform,
 	                       const typename PsimagLite::Vector<RealType>::Type& eigs,
-	                       const typename PsimagLite::Vector<SizeType>::Type& removedIndices,
+	                       const VectorSizeType& removedIndices,
 	                       const PairSizeSizeType& startEnd)
 	{
 		BasisType &parent = *this;
@@ -301,7 +301,7 @@ public:
 	}
 
 	template<typename SomeModelType>
-	void setVarious(const BlockType& block,
+	void setVarious(const VectorSizeType& block,
 	                const SomeModelType& model,
 	                RealType time)
 	{
@@ -324,6 +324,7 @@ public:
 		operatorsPerSite_.clear();
 		for (SizeType i=0;i<block.size();i++)
 			operatorsPerSite_.push_back(SizeType(ops.size()/block.size()));
+		assert(operatorsPerSite_.size() > 0);
 	}
 
 	PairType getOperatorIndices(SizeType i,SizeType sigma) const
@@ -368,21 +369,6 @@ public:
 		return parent.fermionicSign(i,fsign);
 	}
 
-	template<typename SomeIoType>
-	void write(SomeIoType& io,
-	           const PsimagLite::String& s,
-	           typename SomeIoType::Serializer::WriteMode mode,
-	           SizeType option,
-	           typename PsimagLite::EnableIf<
-	           PsimagLite::IsOutputLike<SomeIoType>::True, int>::Type = 0) const
-	{
-		BasisType::write(io, s, mode, false); // parent saves
-		if (option == BasisType::SAVE_ALL)
-			operators_.write(io, s, mode);
-
-		io.write(operatorsPerSite_, s + "/OperatorPerSite", mode);
-	}
-
 	template<typename SomeOutputType>
 	void write(SomeOutputType& io,
 	           typename SomeOutputType::Serializer::WriteMode mode,
@@ -392,6 +378,22 @@ public:
 	           PsimagLite::IsOutputLike<SomeOutputType>::True, int>::Type = 0) const
 	{
 		write(io, prefix + "/" + this->name(), mode, option);
+	}
+
+	template<typename SomeOutputType>
+	void write(SomeOutputType& io,
+	           const PsimagLite::String& s,
+	           typename SomeOutputType::Serializer::WriteMode mode,
+	           SizeType option,
+	           typename PsimagLite::EnableIf<
+	           PsimagLite::IsOutputLike<SomeOutputType>::True, int>::Type = 0) const
+	{
+		BasisType::write(io, s, mode, false); // parent saves
+		if (option == BasisType::SAVE_ALL)
+			operators_.write(io, s, mode);
+
+		assert(operatorsPerSite_.size() > 0);
+		io.write(operatorsPerSite_, s + "/OperatorPerSite", mode);
 	}
 
 private:

@@ -145,14 +145,17 @@ public:
 
 	~LeftRightSuper()
 	{
-		if (refCounter_>0) {
-			refCounter_--;
+		if (refCounter_ > 0) {
+			--refCounter_;
 			return;
 		}
 
 		delete left_;
+		left_ = 0;
 		delete right_;
+		right_ = 0;
 		delete super_;
+		super_ = 0;
 	}
 
 	LeftRightSuper(BasisWithOperatorsType& left,
@@ -165,17 +168,21 @@ public:
 	LeftRightSuper(const ThisType& rls)
 	    : progress_("LeftRightSuper"),refCounter_(1)
 	{
-		left_=rls.left_;
-		right_=rls.right_;
-		super_=rls.super_;
+		left_ = rls.left_;
+		right_ = rls.right_;
+		super_ = rls.super_;
 	}
 
 	void dontCopyOperators(const ThisType& rls)
 	{
-		left_->dontCopyOperators(*(rls.left_));
-		right_->dontCopyOperators(*(rls.right_));
+		assert(left_);
+		left_->dontCopyOperators(rls.left());
+		assert(right_);
+		right_->dontCopyOperators(rls.right());
+		assert(super_);
+		assert(rls.super_);
 		*super_ = *rls.super_;
-		if (refCounter_>0) refCounter_--;
+		if (refCounter_ > 0) --refCounter_;
 	}
 
 	template<typename SomeModelType>
@@ -184,6 +191,7 @@ public:
 	                   BlockType const &X,
 	                   RealType time)
 	{
+		assert(left_);
 		grow(*left_,model,pS,X,ProgramGlobals::EXPAND_SYSTEM,time);
 	}
 
@@ -193,11 +201,15 @@ public:
 	                    BlockType const &X,
 	                    RealType time)
 	{
+		assert(right_);
 		grow(*right_,model,pE,X,ProgramGlobals::EXPAND_ENVIRON,time);
 	}
 
 	void printSizes(const PsimagLite::String& label,std::ostream& os) const
 	{
+		assert(left_);
+		assert(right_);
+
 		PsimagLite::OstringStream msg;
 		msg<<label<<": left-block basis="<<left_->size();
 		msg<<", right-block basis="<<right_->size();
@@ -208,12 +220,17 @@ public:
 
 	SizeType sites() const
 	{
+		assert(left_);
+		assert(right_);
 		return left_->block().size() + right_->block().size();
 	}
 
 	/*!PTEX_LABEL{setToProductLrs} */
 	void setToProduct(QnType quantumSector)
 	{
+		assert(left_);
+		assert(right_);
+		assert(super_);
 		super_->setToProduct(*left_, *right_, &quantumSector);
 	}
 
@@ -232,36 +249,59 @@ public:
 		io.write(left_->name(), prefix + "/NameSystem");
 		io.write(right_->name(), prefix + "/NameEnviron");
 
+		assert(left_);
+		assert(right_);
+		assert(super_);
+
 		bool minimizeWrite = (super_->block().size() == numberOfSites);
 		super_->write(io, IoOutputType::Serializer::NO_OVERWRITE, prefix, minimizeWrite);
 		left_->write(io, IoOutputType::Serializer::NO_OVERWRITE, prefix, option);
 		right_->write(io, IoOutputType::Serializer::NO_OVERWRITE, prefix, option);
 	}
 
-	const BasisWithOperatorsType& left()  const { return *left_; }
+	const BasisWithOperatorsType& left()  const
+	{
+		assert(left_);
+		return *left_;
+	}
 
-	const BasisWithOperatorsType& right() const { return *right_; }
+	const BasisWithOperatorsType& right() const
+	{
+		assert(right_);
+		return *right_;
+	}
 
-	BasisWithOperatorsType& leftNonConst()  { return *left_; }
+	BasisWithOperatorsType& leftNonConst()
+	{
+		assert(left_);
+		return *left_;
+	}
 
-	BasisWithOperatorsType& rightNonConst() { return *right_; }
+	BasisWithOperatorsType& rightNonConst()
+	{
+		assert(right_);
+		return *right_;
+	}
 
 	const SuperBlockType& super() const
 	{
+		assert(super_);
 		return *super_;
 	}
 
 	void left(const BasisWithOperatorsType& left)
 	{
-		if (refCounter_>0)
-			throw PsimagLite::RuntimeError("LeftRightSuper::left(...): not the owner\n");
+		if (refCounter_ > 0)
+			err("LeftRightSuper::left(...): not the owner\n");
+		assert(left_);
 		*left_=left; // deep copy
 	}
 
 	void right(const BasisWithOperatorsType& right)
 	{
-		if (refCounter_>0)
-			throw PsimagLite::RuntimeError("LeftRightSuper::right(...): not the owner\n");
+		if (refCounter_ > 0)
+			err("LeftRightSuper::right(...): not the owner\n");
+		assert(right_);
 		*right_=right; // deep copy
 	}
 
@@ -335,7 +375,7 @@ private:
 		leftOrRight.setHamiltonian(matrix);
 	}
 
-	LeftRightSuper(LeftRightSuper& rls);
+	LeftRightSuper(LeftRightSuper&);
 
 	LeftRightSuper& operator=(const LeftRightSuper&);
 

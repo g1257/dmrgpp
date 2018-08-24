@@ -451,17 +451,14 @@ public:
 		io.write(hamiltonian_, s + "/Hamiltonian");
 	}
 
-	template<typename IoOutputter>
-	void saveEmpty(IoOutputter& io,const PsimagLite::String& s) const
-	{
-		PsimagLite::Vector<SizeType>::Type tmp;
-		if (!useSu2Symmetry_) io.write(tmp,"Operators");
-		else reducedOpImpl_.saveEmpty(io,s);
-		PsimagLite::Matrix<SizeType> tmp2(0,0);
-		io.write(tmp2, "Hamiltonian");
-	}
-
 	SizeType size() const { return operators_.size(); }
+
+	void clear()
+	{
+		reducedOpImpl_.clear();
+		operators_.clear();
+		hamiltonian_.clear();
+	}
 
 private:
 

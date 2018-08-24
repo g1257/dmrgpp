@@ -411,13 +411,6 @@ public:
 		io.write(reducedOperators_,"Operators");
 	}
 
-	template<typename IoOutputter>
-	void saveEmpty(IoOutputter& io,const PsimagLite::String&) const
-	{
-		PsimagLite::Vector<SizeType>::Type tmp;
-		io.write(tmp,"Operators");
-	}
-
 	void changeBasis(SparseMatrixType &v)
 	{
 		if (!useSu2Symmetry_)
@@ -426,6 +419,25 @@ public:
 		SparseMatrixType tmp;
 		multiply(tmp,v,su2Transform_);
 		multiply(v,su2TransformT_,tmp);
+	}
+
+	void clear()
+	{
+		momentumOfOperators_.clear();
+		basisrinverse_.clear();
+		reducedOperators_.clear();
+		reducedHamiltonian_.clear();
+		lfactorLeft_.clear();
+		lfactorRight_.clear();
+		lfactorHamLeft_.clear();
+		lfactorHamRight_.clear();
+		reducedMapping_.clear();
+		fastBasisLeft_.clear();
+		fastBasisRight_.clear();
+		flavorIndexCached_.clear();
+		changeOfBasis_.clear();
+		su2Transform_.clear();
+		su2TransformT_.clear();
 	}
 
 private:

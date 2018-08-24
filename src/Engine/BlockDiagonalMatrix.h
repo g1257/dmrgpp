@@ -297,6 +297,13 @@ public:
 		return data_[i];
 	}
 
+	void clear()
+	{
+		offsetsRows_.clear();
+		offsetsCols_.clear();
+		data_.clear();
+	}
+
 	void read(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer)
 	{
 		ioSerializer.read(isSquare_, label + "/isSquare");
