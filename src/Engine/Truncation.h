@@ -146,11 +146,11 @@ public:
 		progress_.printline(msg,std::cout);
 	}
 
-	void operator()(BasisWithOperatorsType& pS,
-	                BasisWithOperatorsType& pE,
-	                const TargetingType& target,
-	                SizeType keptStates,
-	                ProgramGlobals::DirectionEnum direction)
+	void changeBasisFinite(BasisWithOperatorsType& pS,
+	                       BasisWithOperatorsType& pE,
+	                       const TargetingType& target,
+	                       SizeType keptStates,
+	                       ProgramGlobals::DirectionEnum direction)
 	{
 		DensityMatrixBaseType* dmS = 0;
 
@@ -158,12 +158,12 @@ public:
 			progress_.print("for Environment\n",std::cout);
 			changeBasis(pS,target,keptStates,direction, &dmS);
 			assert(dmS);
-			truncateBasisSystem(pS,lrs_.right(), *dmS);
+			truncateBasis(pS,lrs_.right(), *dmS, direction);
 		} else {
 			progress_.print("for System\n",std::cout);
 			changeBasis(pE,target,keptStates,direction, &dmS);
 			assert(dmS);
-			truncateBasisEnviron(pE,lrs_.left(), *dmS);
+			truncateBasis(pE,lrs_.left(), *dmS, direction);
 		}
 
 		delete dmS;
@@ -178,22 +178,22 @@ public:
 
 	const RealType& error() const { return error_; }
 
-	void changeBasis(BasisWithOperatorsType& sBasis,
-	                 BasisWithOperatorsType& eBasis,
-	                 const TargetingType& target,
-	                 SizeType keptStates)
+	void changeBasisInfinite(BasisWithOperatorsType& sBasis,
+	                         BasisWithOperatorsType& eBasis,
+	                         const TargetingType& target,
+	                         SizeType keptStates)
 	{
 		DensityMatrixBaseType* dmS = 0;
 		changeBasis(sBasis,target, keptStates, ProgramGlobals::EXPAND_SYSTEM, &dmS);
 		assert(dmS);
-		truncateBasisSystem(sBasis,lrs_.right(), *dmS);
+		truncateBasis(sBasis, lrs_.right(), *dmS, ProgramGlobals::EXPAND_SYSTEM);
 		delete dmS;
 		dmS = 0;
 
 		DensityMatrixBaseType* dmE = 0;
 		changeBasis(eBasis,target, keptStates, ProgramGlobals::EXPAND_ENVIRON, &dmE);
 		assert(dmE);
-		truncateBasisEnviron(eBasis,lrs_.left(), *dmE);
+		truncateBasis(eBasis, lrs_.left(), *dmE, ProgramGlobals::EXPAND_ENVIRON);
 		delete dmE;
 		dmE = 0;
 	}
@@ -271,86 +271,63 @@ private:
 		progress_.printline(msg2,std::cout);
 	}
 
-	void truncateBasisSystem(BasisWithOperatorsType& rSprime,
-	                         const BasisWithOperatorsType& eBasis,
-	                         const DensityMatrixBaseType& dms)
+	void truncateBasis(BasisWithOperatorsType& rPrime,
+	                   const BasisWithOperatorsType& oppoBasis,
+	                   const DensityMatrixBaseType& dms,
+	                   ProgramGlobals::DirectionEnum direction)
 	{
+		bool expandSys = (direction == ProgramGlobals::EXPAND_SYSTEM);
+		const BasisWithOperatorsType& basis = (expandSys) ? lrs_.left() : lrs_.right();
+		lrs_.right();
 		SizeType site = 0; // FIXME for model Immm
 		size_t mostRecent = lrs_.left().operatorsPerSite(site)*geometry_.maxConnections();
-		size_t numOfOp = lrs_.left().numberOfOperators();
-		PairSizeSizeType startEnd(0,numOfOp);
-		if (startEnd.second > mostRecent)
-			startEnd.first = startEnd.second - mostRecent;
+		size_t numOfOp = basis.numberOfOperators();
+		PairSizeSizeType startEnd(0, numOfOp);
+		if (startEnd.second > mostRecent) {
+			if (expandSys) startEnd.first = startEnd.second - mostRecent;
+			else startEnd.second = mostRecent;
+		}
 
 		PsimagLite::OstringStream msg;
-		TruncationCache& cache = leftCache_;
+		TruncationCache& cache = (expandSys) ? leftCache_ : rightCache_;
 
+		const PsimagLite::String str = (expandSys) ? "system" : "environ";
 		PsimagLite::OstringStream msg0;
-		msg0<<"Truncating transform...";
+		msg0<<"Truncating transform for "<<str<<" ...";
 		cache.transform.truncate(cache.removedIndices);
-		progress_.printline(msg0,std::cout);
-		rSprime.truncateBasis(cache.transform,
-		                      cache.eigs,
-		                      cache.removedIndices,
-		                      startEnd);
-		LeftRightSuperType lrs(rSprime,(BasisWithOperatorsType&) eBasis,
-		                       (BasisType&)lrs_.super());
+		progress_.printline(msg0, std::cout);
+		rPrime.truncateBasis(cache.transform,
+		                     cache.eigs,
+		                     cache.removedIndices,
+		                     startEnd);
+		LeftRightSuperType* lrs = 0;
+		if (expandSys)
+			lrs = new LeftRightSuperType(rPrime,
+			                             const_cast<BasisWithOperatorsType&>(oppoBasis),
+			                             const_cast<BasisType&>(lrs_.super()));
+		else
+			lrs = new LeftRightSuperType(const_cast<BasisWithOperatorsType&>(oppoBasis),
+			                             rPrime,
+			                             const_cast<BasisType&>(lrs_.super()));
+
 		bool twoSiteDmrg = waveFunctionTransformation_.options().twoSiteDmrg;
 		bool wftInPatches = (waveFunctionTransformation_.options().accel ==
 		                     WaveFunctionTransfType::WftOptionsType::ACCEL_PATCHES);
-		const LeftRightSuperType& lrsForWft = (twoSiteDmrg || wftInPatches) ? lrs_ : lrs;
+		const LeftRightSuperType& lrsForWft = (twoSiteDmrg || wftInPatches) ? lrs_ : *lrs;
 		waveFunctionTransformation_.push(cache.transform,
-		                                 ProgramGlobals::EXPAND_SYSTEM,
+		                                 direction,
 		                                 lrsForWft,
 		                                 dms.vts(),
 		                                 dms.s(),
 		                                 dms.qns());
 
-		msg<<"new size of basis="<<rSprime.size();
+		msg<<"new size of basis="<<rPrime.size();
 		msg<<" transform is "<<cache.transform.rows()<<" x "<<cache.transform.cols();
 		msg<<" with "<<cache.transform.blocks()<<" symmetry blocks";
 		progress_.printline(msg,std::cout);
-	}
 
-	void truncateBasisEnviron(BasisWithOperatorsType& rEprime,
-	                          const BasisWithOperatorsType& sBasis,
-	                          const DensityMatrixBaseType& dms)
-	{
-		SizeType site = 0; // FIXME for model Immm
-		SizeType mostRecent = lrs_.left().operatorsPerSite(site)*geometry_.maxConnections();
-		size_t numOfOp = lrs_.right().numberOfOperators();
-		PairSizeSizeType startEnd(0,numOfOp);
-		if (startEnd.second > mostRecent)
-			startEnd.second = mostRecent;
-
-		PsimagLite::OstringStream msg;
-		TruncationCache& cache = rightCache_;
-
-		PsimagLite::OstringStream msg0;
-		msg0<<"Truncating transform...";
-		cache.transform.truncate(cache.removedIndices);
-		progress_.printline(msg0,std::cout);
-
-		rEprime.truncateBasis(cache.transform,
-		                      cache.eigs,
-		                      cache.removedIndices,
-		                      startEnd);
-		LeftRightSuperType lrs((BasisWithOperatorsType&) sBasis,
-		                       rEprime,(BasisType&)lrs_.super());
-		bool twoSiteDmrg = waveFunctionTransformation_.options().twoSiteDmrg;
-		bool wftInPatches = (waveFunctionTransformation_.options().accel ==
-		                     WaveFunctionTransfType::WftOptionsType::ACCEL_PATCHES);
-		const LeftRightSuperType& lrsForWft = (twoSiteDmrg || wftInPatches) ? lrs_ : lrs;
-		waveFunctionTransformation_.push(cache.transform,
-		                                 ProgramGlobals::EXPAND_ENVIRON,
-		                                 lrsForWft,
-		                                 dms.vts(),
-		                                 dms.s(),
-		                                 dms.qns());
-		msg<<"new size of basis="<<rEprime.size();
-		msg<<" transform is "<<cache.transform.rows()<<" x "<<cache.transform.cols();
-		msg<<" with "<<cache.transform.blocks()<<" blocks";
-		progress_.printline(msg,std::cout);
+		delete lrs;
+		lrs = 0;
 	}
 
 	void updateKeptStates(SizeType& keptStates,

@@ -398,7 +398,7 @@ obtain ordered
 			energy_ = diagonalization_(psi,ProgramGlobals::INFINITE,X[step],ystep);
 			printEnergy(energy_);
 
-			truncate_.changeBasis(pS,pE,psi,parameters_.keptStatesInfinite);
+			truncate_.changeBasisInfinite(pS, pE, psi, parameters_.keptStatesInfinite);
 
 			if (needsRightPush) {
 				if (!twoSiteDmrg) checkpoint_.push(pS,pE);
@@ -581,7 +581,7 @@ obtain ordered
 
 		FermionSignType fsE(pE.signs());
 
-		truncate_(pS,pE,target,keptStates,direction);
+		truncate_.changeBasisFinite(pS, pE, target, keptStates, direction);
 
 		if (direction == ProgramGlobals::EXPAND_SYSTEM)
 			checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS, ProgramGlobals::SYSTEM);
