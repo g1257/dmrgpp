@@ -117,9 +117,7 @@ public:
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
 	typedef MatrixOrIdentity<SparseMatrixType> MatrixOrIdentityType;
-	typedef ParallelWftOne<VectorWithOffsetType,
-	DmrgWaveStructType,
-	LeftRightSuperType> ParallelWftType;
+	typedef ParallelWftOne<VectorWithOffsetType, DmrgWaveStructType> ParallelWftType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef WftAccelBlocks<BaseType> WftAccelBlocksType;
 	typedef WftAccelPatches<BaseType> WftAccelPatchesType;

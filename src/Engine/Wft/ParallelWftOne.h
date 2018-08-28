@@ -83,9 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename VectorWithOffsetType,
-         typename DmrgWaveStructType,
-         typename LeftRightSuperType>
+template<typename VectorWithOffsetType, typename DmrgWaveStructType>
 class ParallelWftOne {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
@@ -95,6 +93,7 @@ class ParallelWftOne {
 	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
 
 public:
 
@@ -175,11 +174,9 @@ public:
 private:
 
 	// This class has pointers, disallow copy ctor and assignment
-	template<typename T1, typename T2, typename T3>
-	ParallelWftOne(const ParallelWftOne<T1,T2,T3>&);
+	ParallelWftOne(const ParallelWftOne&);
 
-	template<typename T1, typename T2, typename T3>
-	ParallelWftOne& operator=(const ParallelWftOne<T1,T2,T3>&);
+	ParallelWftOne& operator=(const ParallelWftOne&);
 
 	template<typename SomeVectorType>
 	SparseElementType createAux2b(const SomeVectorType& psiSrc,

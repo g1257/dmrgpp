@@ -513,7 +513,8 @@ private:
 			msg<<" site="<<block2[i]<<" is "<<betaFixed[i];
 		progress_.printline(msg,std::cerr);
 
-		const BlockDiagonalMatrixType& transformSystem =  wft_.transform(ProgramGlobals::SYSTEM);
+		const BlockDiagonalMatrixType& transformSystem = wft_.getTransform(ProgramGlobals::SYSTEM);
+
 		TargetVectorType newVector1(transformSystem.rows(),0);
 
 		VectorSizeType nk1;
@@ -529,7 +530,7 @@ private:
 		           block1);
 		pureVectors_.first = newVector1;
 
-		const BlockDiagonalMatrixType& transformEnviron = wft_.transform(ProgramGlobals::ENVIRON);
+		const BlockDiagonalMatrixType& transformEnviron = wft_.getTransform(ProgramGlobals::ENVIRON);
 		TargetVectorType newVector2(transformEnviron.rows(),0);
 
 		VectorSizeType nk2;

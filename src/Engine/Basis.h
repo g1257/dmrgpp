@@ -565,12 +565,7 @@ private:
 		for (SizeType i=0;i<permInverse_.size();i++)
 			permutationVector_[permInverse_[i]]=i;
 
-		SizeType aSize = 0;
-		io.read(aSize, prefix + "QNShrink/Size");
-
-		qns_.resize(aSize, QnType::zero());
-		for (SizeType i = 0; i < aSize; ++i)
-			qns_[i].read(prefix + "QNShrink/" + ttos(i), io);
+		QnType::readVector(qns_, prefix + "QNShrink", io);
 
 		dmrgTransformed_=false;
 		if (useSu2Symmetry_)

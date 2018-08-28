@@ -72,19 +72,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file WaveStructPrevious.h
+/*! \file WaveStructSvd.h
  *
  *  DOC NEEDED FIXME (This file should go in Wft/ directory perhaps)
  */
-#ifndef DMRG_WAVE_H
-#define DMRG_WAVE_H
+#ifndef WAVE_STRUCT_SVD_H
+#define WAVE_STRUCT_SVD_H
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
 namespace Dmrg {
 
 template<typename LeftRightSuperType_>
-struct WaveStructPrevious {
+struct WaveStructSvd {
 
 	typedef LeftRightSuperType_ LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
@@ -93,6 +93,7 @@ struct WaveStructPrevious {
 	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
+	typedef typename BasisType::QnType QnType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
@@ -101,44 +102,16 @@ struct WaveStructPrevious {
 	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
 	typedef typename BasisWithOperatorsType::VectorQnType VectorQnType;
 
-	WaveStructPrevious()
-	    : lrs_("pSE", "pSprime", "pEprime") {}
+	WaveStructSvd() {}
 
-	void setLrs(const LeftRightSuperType& lrs)
-	{
-		lrs_.dontCopyOperators(lrs);
-	}
+	WaveStructSvd(const BlockDiagonalMatrixType& u,
+	                   const VectorMatrixType& vts,
+	                   const VectorVectorRealType& s,
+	                   const VectorQnType& qns)
+	    : u_(u), vts_(vts), s_(s), qns_(qns)
+	{}
 
-	void setAdditional(const VectorMatrixType& vts,
-	                  const VectorVectorRealType& s,
-	                  const VectorQnType& qns)
-	{
-		vts_ = vts;
-		s_ = s;
-		qns_ = qns;
-	}
-
-	void setTransform(const BlockDiagonalMatrixType& m, SizeType what)
-	{
-		if (what == ProgramGlobals::SYSTEM) {
-			ws_ = m;
-			return;
-		}
-
-		assert(what == ProgramGlobals::ENVIRON);
-		we_ = m;
-	}
-
-	const BlockDiagonalMatrixType& getTransform(SizeType what) const
-	{
-		if (what == ProgramGlobals::SYSTEM)
-			return ws_;
-
-		assert(what == ProgramGlobals::ENVIRON);
-		return we_;
-	}
-
-	const LeftRightSuperType& lrs() const { return lrs_; }
+	const BlockDiagonalMatrixType& u() const { return u_; }
 
 	const VectorMatrixType& vts() const { return vts_; }
 
@@ -146,40 +119,54 @@ struct WaveStructPrevious {
 
 	const VectorQnType& qns() const { return qns_; }
 
-	template<typename IoInputType>
-	void read(IoInputType& io,
-	          PsimagLite::String prefix,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
+	void read(PsimagLite::IoNg::In& io, PsimagLite::String prefix)
 	{
-		io.read(ws_, prefix + "/Ws");
-		io.read(we_, prefix + "/We");
-		lrs_.read(io, prefix);
+		io.read(*this, prefix);
 	}
 
-	template<typename IoOutputType>
-	void write(IoOutputType& io,
-	           PsimagLite::String prefix,
-	           typename PsimagLite::EnableIf<
-	           PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
+	void read(PsimagLite::String prefix, PsimagLite::IoNgSerializer& io)
+	{
+		u_.read(prefix + "/u", io);
+		io.read(vts_, prefix + "/vts");
+		io.read(s_, prefix + "/s");
+		QnType::readVector(qns_, prefix + "/qns", io);
+	}
+
+	void write(PsimagLite::IoNg::Out& io, PsimagLite::String prefix) const
 	{
 		io.createGroup(prefix);
-		io.write(ws_, prefix + "/Ws");
-		io.write(we_, prefix + "/We");
-		lrs_.write(io, prefix, LeftRightSuperType::SAVE_ALL, false);
+		io.write(u_, prefix + "/u");
+		io.write(vts_, prefix + "/vts");
+		io.write(s_, prefix + "/s");
+		io.write(qns_, prefix + "/qns");
+	}
+
+	void write(PsimagLite::String prefix, PsimagLite::IoNgSerializer& io) const
+	{
+		io.createGroup(prefix);
+		u_.write(prefix + "/u", io);
+		io.write(prefix + "/vts", vts_);
+		io.write(prefix + "/s", s_);
+		io.write(prefix + "/qns", qns_);
+	}
+
+	void clear()
+	{
+		u_.clear();
+		vts_.clear();
+		s_.clear();
+		qns_.clear();
 	}
 
 private:
 
-	BlockDiagonalMatrixType ws_;
-	BlockDiagonalMatrixType we_;
-	LeftRightSuperType lrs_;
+	BlockDiagonalMatrixType u_;
 	VectorMatrixType vts_;
     VectorVectorRealType s_;
     VectorQnType qns_;
-}; // struct WaveStructPrevious
+}; // struct WaveStructSvd
 
 } // namespace Dmrg 
 
 /*@}*/
-#endif // DMRG_WAVE_H
+#endif // WAVE_STRUCT_SVD_H

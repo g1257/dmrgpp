@@ -3,6 +3,7 @@
 #include "Vector.h"
 #include "ProgramGlobals.h"
 #include "Profiling.h"
+#include "Io/IoNg.h"
 
 namespace Dmrg {
 
@@ -167,6 +168,19 @@ public:
 		if (flag && sites == totalSites) throw PsimagLite::RuntimeError(str);
 
 		jmPair.first = tmp;
+	}
+
+	template<typename SomeIoInType>
+	static void readVector(VectorQnType& vqns,
+	                       PsimagLite::String prefix,
+	                       SomeIoInType& io)
+	{
+		SizeType aSize = 0;
+		io.read(aSize, prefix + "/Size");
+
+		vqns.resize(aSize, zero());
+		for (SizeType i = 0; i < aSize; ++i)
+			vqns[i].read(prefix + "/" + ttos(i), io);
 	}
 
 	static void adjustQns(VectorQnType& outQns,

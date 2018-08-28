@@ -200,7 +200,7 @@ private:
 		PsimagLite::String options = parameters_.options;
 		bool findSymmetrySector = (options.find("findSymmetrySector") != PsimagLite::String::npos);
 		const LeftRightSuperType& lrs= target.lrs();
-		wft_.triggerOn(lrs);
+		wft_.triggerOn();
 
 		RealType gsEnergy = 0;
 

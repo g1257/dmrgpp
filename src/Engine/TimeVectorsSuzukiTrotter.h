@@ -209,12 +209,12 @@ public:
 		}
 
 		SparseMatrixType transformS;
-		wft_.stackTransform(ProgramGlobals::SYSTEM).toSparse(transformS);
+		wft_.getTransform(ProgramGlobals::SYSTEM).toSparse(transformS);
 		SparseMatrixType transformST;
 		transposeConjugate(transformST,transformS);
 
 		SparseMatrixType transformE;
-		wft_.stackTransform(ProgramGlobals::ENVIRON).toSparse(transformE);
+		wft_.getTransform(ProgramGlobals::ENVIRON).toSparse(transformE);
 		SparseMatrixType transformET;
 		transposeConjugate(transformET,transformE);
 

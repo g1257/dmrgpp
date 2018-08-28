@@ -98,7 +98,7 @@ struct ProgramGlobals {
 
 	enum ConnectionEnum {SYSTEM_SYSTEM,SYSTEM_ENVIRON,ENVIRON_SYSTEM,ENVIRON_ENVIRON};
 
-	enum {SYSTEM, ENVIRON};
+	enum SysOrEnvEnum {SYSTEM, ENVIRON};
 
 	enum FermionOrBosonEnum {FERMION,BOSON};
 

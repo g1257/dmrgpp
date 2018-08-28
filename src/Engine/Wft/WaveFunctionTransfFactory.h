@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "WaveFunctionTransfLocal.h"
 #include "WaveFunctionTransfSu2.h"
-#include "WaveStructPrevious.h"
+#include "WaveStructCombined.h"
 #include "Io/IoSelector.h"
 #include "Random48.h"
 
@@ -107,19 +107,20 @@ public:
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
 	typedef typename BasisType::FactorsType FactorsType;
-	typedef WaveStructPrevious<LeftRightSuperType> WaveStructPreviousType;
-	typedef typename WaveStructPreviousType::VectorVectorRealType VectorVectorRealType;
-	typedef typename WaveStructPreviousType::VectorMatrixType VectorMatrixType;
-	typedef typename WaveStructPreviousType::VectorQnType VectorQnType;
+	typedef WaveStructCombined<LeftRightSuperType> WaveStructCombinedType;
+	typedef typename WaveStructCombinedType::VectorVectorRealType VectorVectorRealType;
+	typedef typename WaveStructCombinedType::VectorMatrixType VectorMatrixType;
+	typedef typename WaveStructCombinedType::VectorQnType VectorQnType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
-	typedef WaveFunctionTransfBase<WaveStructPreviousType,VectorWithOffsetType>
+	typedef WaveFunctionTransfBase<WaveStructCombinedType,VectorWithOffsetType>
 	WaveFunctionTransfBaseType;
-	typedef WaveFunctionTransfLocal<WaveStructPreviousType,VectorWithOffsetType>
+	typedef WaveFunctionTransfLocal<WaveStructCombinedType,VectorWithOffsetType>
 	WaveFunctionTransfLocalType;
-	typedef WaveFunctionTransfSu2<WaveStructPreviousType,VectorWithOffsetType>
+	typedef WaveFunctionTransfSu2<WaveStructCombinedType,VectorWithOffsetType>
 	WaveFunctionTransfSu2Type;
 	typedef typename WaveFunctionTransfBaseType::WftOptions WftOptionsType;
-	typedef typename PsimagLite::Stack<BlockDiagonalMatrixType>::Type WftStackType;
+	typedef typename WaveStructCombinedType::WaveStructSvdType WaveStructSvdType;
+	typedef typename PsimagLite::Stack<WaveStructSvdType>::Type WftStackType;
 
 	template<typename SomeParametersType>
 	WaveFunctionTransfFactory(SomeParametersType& params)
@@ -133,7 +134,6 @@ public:
 	      filenameIn_(params.checkpoint.filename),
 	      filenameOut_(params.filename),
 	      WFT_STRING(ProgramGlobals::WFT_STRING),
-	      waveStructPrevious_(),
 	      wftImpl_(0),
 	      rng_(3433117),
 	      noLoad_(false),
@@ -157,9 +157,11 @@ public:
 		}
 
 		if (BasisType::useSu2Symmetry())
-			wftImpl_=new WaveFunctionTransfSu2Type(waveStructPrevious_, wftOptions_);
+			wftImpl_=new WaveFunctionTransfSu2Type(waveStructCombined_,
+			                                       wftOptions_);
 		else
-			wftImpl_=new WaveFunctionTransfLocalType(waveStructPrevious_, wftOptions_);
+			wftImpl_=new WaveFunctionTransfLocalType(waveStructCombined_,
+			                                         wftOptions_);
 	}
 
 	~WaveFunctionTransfFactory()
@@ -177,26 +179,26 @@ public:
 		wftOptions_.counter = 0;
 	}
 
-	void triggerOn(const LeftRightSuperType& lrs)
+	void triggerOn()
 	{
-		bool allow=false;
+		bool allow = false;
 		switch (wftOptions_.dir) {
 		case ProgramGlobals::INFINITE:
-			allow=false;
+			allow = false;
 			break;
 		case ProgramGlobals::EXPAND_SYSTEM:
-			allow=true;
-
 		case ProgramGlobals::EXPAND_ENVIRON:
-			allow=true;
+			allow = true;
 		}
+
 		// FIXME: Must check the below change when using SU(2)!!
 		//if (m<0) allow = false; // isEnabled_=false;
 
 		if (noLoad_) allow = false;
 
 		if (!isEnabled_ || !allow) return;
-		beforeWft(lrs);
+
+		beforeWft();
 		PsimagLite::OstringStream msg;
 		msg<<"Window open, ready to transform vectors";
 		progress_.printline(msg,std::cout);
@@ -304,34 +306,36 @@ public:
 	{
 		if (!isEnabled_) return;
 
+		WaveStructSvdType wave(transform, vts, s, qns);
+
 		switch (wftOptions_.dir) {
 		case ProgramGlobals::INFINITE:
 			if (direction == ProgramGlobals::EXPAND_SYSTEM) {
-				wsStack_.push(transform);
-				waveStructPrevious_.setTransform(transform, ProgramGlobals::SYSTEM);
+				wsStack_.push(wave);
+				waveStructCombined_.setWave(wave, ProgramGlobals::SYSTEM);
 			} else {
-				weStack_.push(transform);
-				waveStructPrevious_.setTransform(transform, ProgramGlobals::ENVIRON);
+				weStack_.push(wave);
+				waveStructCombined_.setWave(wave, ProgramGlobals::ENVIRON);
 			}
+
 			break;
 		case ProgramGlobals::EXPAND_ENVIRON:
 			if (direction != ProgramGlobals::EXPAND_ENVIRON)
-				throw std::logic_error("EXPAND_ENVIRON but option==0\n");
-			waveStructPrevious_.setTransform(transform, ProgramGlobals::SYSTEM);
-			waveStructPrevious_.setTransform(transform, ProgramGlobals::ENVIRON);
-			weStack_.push(transform);
+				err("EXPAND_ENVIRON but option==0\n");
+			waveStructCombined_.setWave(wave, ProgramGlobals::SYSTEM);
+			waveStructCombined_.setWave(wave, ProgramGlobals::ENVIRON);
+			weStack_.push(wave);
 			break;
 		case ProgramGlobals::EXPAND_SYSTEM:
 			if (direction != ProgramGlobals::EXPAND_SYSTEM)
-				throw std::logic_error("EXPAND_SYSTEM but option==1\n");
-			waveStructPrevious_.setTransform(transform, ProgramGlobals::SYSTEM);
-			waveStructPrevious_.setTransform(transform, ProgramGlobals::ENVIRON);
-			wsStack_.push(transform);
+				err("EXPAND_SYSTEM but option==1\n");
+			waveStructCombined_.setWave(wave, ProgramGlobals::SYSTEM);
+			waveStructCombined_.setWave(wave, ProgramGlobals::ENVIRON);
+			wsStack_.push(wave);
 			break;
 		}
 
-		waveStructPrevious_.setLrs(lrs);
-		waveStructPrevious_.setAdditional(vts, s, qns);
+		waveStructCombined_.setLrs(lrs);
 		PsimagLite::OstringStream msg;
 		msg<<"OK, pushing option="<<direction<<" and stage="<<wftOptions_.dir;
 		progress_.printline(msg,std::cout);
@@ -342,32 +346,14 @@ public:
 		}
 	}
 
-	const BlockDiagonalMatrixType& transform(SizeType what) const
+	const BlockDiagonalMatrixType& getTransform(SizeType dir) const
 	{
-		return waveStructPrevious_.getTransform(what);
+		return waveStructCombined_.getTransform(dir);
 	}
-
-	const BlockDiagonalMatrixType& stackTransform(SizeType what) const
-	{
-		if (what==ProgramGlobals::SYSTEM) {
-			if (wsStack_.size()==0) return waveStructPrevious_.getTransform(what);
-			return wsStack_.top();
-		} else {
-			if (weStack_.size()==0) return waveStructPrevious_.getTransform(what);
-			return weStack_.top();
-		}
-	}
-
-	const LeftRightSuperType& lrs() const { return waveStructPrevious_.lrs; }
 
 	bool isEnabled() const { return isEnabled_; }
 
 	const WftOptionsType options() const { return wftOptions_; }
-
-	void appendFileList(VectorStringType& files, PsimagLite::String rootName) const
-	{
-		files.push_back(utils::pathPrepend(WFT_STRING,rootName));
-	}
 
 	void write(PsimagLite::IoSelector::Out& ioMain)
 	{
@@ -407,7 +393,7 @@ private:
 		ioMain.createGroup(label);
 		ioMain.write(isEnabled_, label + "/isEnabled");
 		wftOptions_.write(ioMain, label + "/WftOptions");
-		waveStructPrevious_.write(ioMain, label + "/WaveStructPrevious");
+		waveStructCombined_.write(ioMain, label + "/WaveStructPrevious");
 	}
 
 	void read()
@@ -419,7 +405,7 @@ private:
 		PsimagLite::String label = "Wft";
 		ioMain.read(isEnabled_, label + "/isEnabled");
 		wftOptions_.read(ioMain, label + "/WftOptions");
-		waveStructPrevious_.read(ioMain, label + "/WaveStructPrevious");
+		waveStructCombined_.read(ioMain, label + "/WaveStructPrevious");
 		ioMain.read(wsStack_, label + "/wsStack");
 		ioMain.read(weStack_, label + "/weStack");
 		ioMain.close();
@@ -435,41 +421,35 @@ private:
 		value = rng_() - 0.5;
 	}
 
-	void beforeWft(const LeftRightSuperType&)
+	void beforeWft()
 	{
-		if (wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) {
-			if (wsStack_.size()>=1) {
-				waveStructPrevious_.setTransform(wsStack_.top(), ProgramGlobals::SYSTEM);
-				wsStack_.pop();
-				if (wftOptions_.twoSiteDmrg && wsStack_.size()>0)
-					waveStructPrevious_.setTransform(wsStack_.top(), ProgramGlobals::SYSTEM);
-			} else {
-				throw PsimagLite::RuntimeError("System Stack is empty\n");
-			}
+		WftStackType& stack = (wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) ? wsStack_ :
+		                                                                            weStack_;
+		const PsimagLite::String label = (wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) ?
+		            "system" : "environ";
+
+		ProgramGlobals::SysOrEnvEnum sysOrEnv = (wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) ?
+		            ProgramGlobals::SYSTEM : ProgramGlobals::ENVIRON;
+
+		if (stack.size() > 0) {
+			waveStructCombined_.setWave(stack.top(), sysOrEnv);
+			stack.pop();
+			if (wftOptions_.twoSiteDmrg && stack.size() > 0)
+				waveStructCombined_.setWave(stack.top(), sysOrEnv);
+		} else {
+			err("Stack for " + label + " is empty\n");
 		}
 
-		if (wftOptions_.dir == ProgramGlobals::EXPAND_SYSTEM) {
-			if (weStack_.size()>=1) {
-				waveStructPrevious_.setTransform(weStack_.top(), ProgramGlobals::ENVIRON);
-				weStack_.pop();
-				if (wftOptions_.twoSiteDmrg && weStack_.size()>0)
-					waveStructPrevious_.setTransform(weStack_.top(), ProgramGlobals::ENVIRON);
-			} else {
-				throw PsimagLite::RuntimeError("Environ Stack is empty\n");
-			}
-		}
+		if (stack.size() > 0)
+			waveStructCombined_.setWave(stack.top(), sysOrEnv);
+	}
 
-		if (wftOptions_.counter == 0 && wftOptions_.dir == ProgramGlobals::EXPAND_SYSTEM) {
-			if (weStack_.size()>=1) {
-				waveStructPrevious_.setTransform(weStack_.top(), ProgramGlobals::ENVIRON);
-			}
-		}
-
-		if (wftOptions_.counter == 0 && wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) {
-			if (wsStack_.size()>=1) {
-				waveStructPrevious_.setTransform(wsStack_.top(), ProgramGlobals::SYSTEM);
-			}
-		}
+	void afterWft(const LeftRightSuperType& lrs)
+	{
+		waveStructCombined_.clear();
+		waveStructCombined_.setLrs(lrs);
+		wftOptions_.firstCall = false;
+		wftOptions_.counter++;
 	}
 
 	void createVector(VectorWithOffsetType& psiDest,
@@ -480,7 +460,7 @@ private:
 
 		RealType norm1 = norm(psiSrc);
 		if (norm1 < 1e-5)
-			 err("WFT Factory: norm1 = " + ttos(norm1) + " < 1e-5\n");
+			err("WFT Factory: norm1 = " + ttos(norm1) + " < 1e-5\n");
 
 		wftImpl_->transformVector(psiDest, psiSrc, lrs, nk);
 
@@ -495,13 +475,6 @@ private:
 			err("WFT Factory: norm2 = " + ttos(norm2) + " < 1e-5\n");
 
 		progress_.printline(msg,std::cout);
-	}
-
-	void afterWft(const LeftRightSuperType& lrs)
-	{
-		waveStructPrevious_.setLrs(lrs);
-		wftOptions_.firstCall = false;
-		wftOptions_.counter++;
 	}
 
 	SizeType computeCenter(const LeftRightSuperType& lrs,
@@ -548,7 +521,7 @@ private:
 	PsimagLite::String filenameIn_;
 	PsimagLite::String filenameOut_;
 	const PsimagLite::String WFT_STRING;
-	WaveStructPreviousType waveStructPrevious_;
+	WaveStructCombinedType waveStructCombined_;
 	WftStackType wsStack_;
 	WftStackType weStack_;
 	WaveFunctionTransfBaseType* wftImpl_;

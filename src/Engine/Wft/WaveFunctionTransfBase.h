@@ -94,7 +94,7 @@ public:
 	typedef PsimagLite::PackIndices PackIndicesType;
 
 	struct WftOptions {
-		typedef typename DmrgWaveStructType::SparseElementType ComplexOrRealType;
+		typedef typename VectorWithOffsetType_::value_type ComplexOrRealType;
 		typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
 		enum AccelEnum {ACCEL_NONE, ACCEL_PATCHES, ACCEL_BLOCKS, ACCEL_SVD};
