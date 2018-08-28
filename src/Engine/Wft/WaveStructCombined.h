@@ -25,21 +25,19 @@ public:
 	    : lrs_("pSE", "pSprime", "pEprime")
 	{}
 
-	void read(PsimagLite::IoNg::In& io, PsimagLite::String prefix2)
+	void read(PsimagLite::IoNg::In& io, PsimagLite::String prefix)
 	{
-		PsimagLite::String prefix = prefix2 + "/WaveStructCombined";
 		lrs_.read(io, prefix);
-		left_.read(io, prefix);
-		right_.read(io, prefix);
+		left_.read(io, prefix + "/left");
+		right_.read(io, prefix + "/right");
 	}
 
-	void write(PsimagLite::IoNg::Out& io, PsimagLite::String prefix2) const
+	void write(PsimagLite::IoNg::Out& io, PsimagLite::String prefix) const
 	{
-		io.createGroup(prefix2);
-		PsimagLite::String prefix = prefix2 + "/WaveStructCombined";
+		io.createGroup(prefix);
 		lrs_.write(io, prefix, LeftRightSuperType::SAVE_ALL, false);
-		left_.write(io, prefix);
-		right_.write(io, prefix);
+		left_.write(io, prefix + "/left");
+		right_.write(io, prefix + "/right");
 	}
 
 	void setLrs(const LeftRightSuperType& lrs)
@@ -47,16 +45,11 @@ public:
 		lrs_.dontCopyOperators(lrs);
 	}
 
-	void clear()
-	{
-		left_.clear();
-		right_.clear();
-	}
-
 	void setWave(const WaveStructSvdType& wave,
 	             ProgramGlobals::SysOrEnvEnum sysOrEnv)
 	{
-		(sysOrEnv == ProgramGlobals::SYSTEM) ? left_ : right_ = wave;
+		if (sysOrEnv == ProgramGlobals::SYSTEM) left_  = wave;
+		else right_ = wave;
 	}
 
 	const WaveStructSvdType& getWave(ProgramGlobals::SysOrEnvEnum sysOrEnv) const

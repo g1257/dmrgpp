@@ -393,7 +393,7 @@ private:
 		ioMain.createGroup(label);
 		ioMain.write(isEnabled_, label + "/isEnabled");
 		wftOptions_.write(ioMain, label + "/WftOptions");
-		waveStructCombined_.write(ioMain, label + "/WaveStructPrevious");
+		waveStructCombined_.write(ioMain, label + "/WaveStructCombined");
 	}
 
 	void read()
@@ -405,7 +405,7 @@ private:
 		PsimagLite::String label = "Wft";
 		ioMain.read(isEnabled_, label + "/isEnabled");
 		wftOptions_.read(ioMain, label + "/WftOptions");
-		waveStructCombined_.read(ioMain, label + "/WaveStructPrevious");
+		waveStructCombined_.read(ioMain, label + "/WaveStructCombined");
 		ioMain.read(wsStack_, label + "/wsStack");
 		ioMain.read(weStack_, label + "/weStack");
 		ioMain.close();
@@ -440,13 +440,12 @@ private:
 			err("Stack for " + label + " is empty\n");
 		}
 
-		if (stack.size() > 0)
+		if (stack.size() > 0 && wftOptions_.counter == 0)
 			waveStructCombined_.setWave(stack.top(), sysOrEnv);
 	}
 
 	void afterWft(const LeftRightSuperType& lrs)
 	{
-		waveStructCombined_.clear();
 		waveStructCombined_.setLrs(lrs);
 		wftOptions_.firstCall = false;
 		wftOptions_.counter++;
@@ -522,8 +521,8 @@ private:
 	PsimagLite::String filenameOut_;
 	const PsimagLite::String WFT_STRING;
 	WaveStructCombinedType waveStructCombined_;
-	WftStackType wsStack_;
-	WftStackType weStack_;
+	WftStackType wsStack_; // move into WaveStructCombinedType
+	WftStackType weStack_; // move into WaveStructCombinedType
 	WaveFunctionTransfBaseType* wftImpl_;
 	PsimagLite::Random48<RealType> rng_;
 	bool noLoad_;
