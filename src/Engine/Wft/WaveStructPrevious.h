@@ -72,7 +72,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file DmrgWaveStruct.h
+/*! \file WaveStructPrevious.h
  *
  *  DOC NEEDED FIXME (This file should go in Wft/ directory perhaps)
  */
@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<typename LeftRightSuperType_>
-struct DmrgWaveStruct {
+struct WaveStructPrevious {
 
 	typedef LeftRightSuperType_ LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
@@ -101,13 +101,14 @@ struct DmrgWaveStruct {
 	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
 	typedef typename BasisWithOperatorsType::VectorQnType VectorQnType;
 
-	DmrgWaveStruct()
+	WaveStructPrevious()
 	    : lrs_("pSE", "pSprime", "pEprime") {}
 
 	void setLrs(const LeftRightSuperType& lrs)
 	{
 		lrs_.dontCopyOperators(lrs);
 	}
+
 	void setAdditional(const VectorMatrixType& vts,
 	                  const VectorVectorRealType& s,
 	                  const VectorQnType& qns)
@@ -138,6 +139,12 @@ struct DmrgWaveStruct {
 	}
 
 	const LeftRightSuperType& lrs() const { return lrs_; }
+
+	const VectorMatrixType& vts() const { return vts_; }
+
+	const VectorVectorRealType& s() const { return s_; }
+
+	const VectorQnType& qns() const { return qns_; }
 
 	template<typename IoInputType>
 	void read(IoInputType& io,
@@ -170,7 +177,7 @@ private:
 	VectorMatrixType vts_;
     VectorVectorRealType s_;
     VectorQnType qns_;
-}; // struct DmrgWaveStruct
+}; // struct WaveStructPrevious
 
 } // namespace Dmrg 
 

@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "WaveFunctionTransfLocal.h"
 #include "WaveFunctionTransfSu2.h"
-#include "DmrgWaveStruct.h"
+#include "WaveStructPrevious.h"
 #include "Io/IoSelector.h"
 #include "Random48.h"
 
@@ -107,16 +107,16 @@ public:
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
 	typedef typename BasisType::FactorsType FactorsType;
-	typedef DmrgWaveStruct<LeftRightSuperType> DmrgWaveStructType;
-	typedef typename DmrgWaveStructType::VectorVectorRealType VectorVectorRealType;
-	typedef typename DmrgWaveStructType::VectorMatrixType VectorMatrixType;
-	typedef typename DmrgWaveStructType::VectorQnType VectorQnType;
+	typedef WaveStructPrevious<LeftRightSuperType> WaveStructPreviousType;
+	typedef typename WaveStructPreviousType::VectorVectorRealType VectorVectorRealType;
+	typedef typename WaveStructPreviousType::VectorMatrixType VectorMatrixType;
+	typedef typename WaveStructPreviousType::VectorQnType VectorQnType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
-	typedef WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType>
+	typedef WaveFunctionTransfBase<WaveStructPreviousType,VectorWithOffsetType>
 	WaveFunctionTransfBaseType;
-	typedef WaveFunctionTransfLocal<DmrgWaveStructType,VectorWithOffsetType>
+	typedef WaveFunctionTransfLocal<WaveStructPreviousType,VectorWithOffsetType>
 	WaveFunctionTransfLocalType;
-	typedef WaveFunctionTransfSu2<DmrgWaveStructType,VectorWithOffsetType>
+	typedef WaveFunctionTransfSu2<WaveStructPreviousType,VectorWithOffsetType>
 	WaveFunctionTransfSu2Type;
 	typedef typename WaveFunctionTransfBaseType::WftOptions WftOptionsType;
 	typedef typename PsimagLite::Stack<BlockDiagonalMatrixType>::Type WftStackType;
@@ -133,7 +133,7 @@ public:
 	      filenameIn_(params.checkpoint.filename),
 	      filenameOut_(params.filename),
 	      WFT_STRING(ProgramGlobals::WFT_STRING),
-	      dmrgWaveStruct_(),
+	      waveStructPrevious_(),
 	      wftImpl_(0),
 	      rng_(3433117),
 	      noLoad_(false),
@@ -157,9 +157,9 @@ public:
 		}
 
 		if (BasisType::useSu2Symmetry())
-			wftImpl_=new WaveFunctionTransfSu2Type(dmrgWaveStruct_, wftOptions_);
+			wftImpl_=new WaveFunctionTransfSu2Type(waveStructPrevious_, wftOptions_);
 		else
-			wftImpl_=new WaveFunctionTransfLocalType(dmrgWaveStruct_, wftOptions_);
+			wftImpl_=new WaveFunctionTransfLocalType(waveStructPrevious_, wftOptions_);
 	}
 
 	~WaveFunctionTransfFactory()
@@ -308,30 +308,30 @@ public:
 		case ProgramGlobals::INFINITE:
 			if (direction == ProgramGlobals::EXPAND_SYSTEM) {
 				wsStack_.push(transform);
-				dmrgWaveStruct_.setTransform(transform, ProgramGlobals::SYSTEM);
+				waveStructPrevious_.setTransform(transform, ProgramGlobals::SYSTEM);
 			} else {
 				weStack_.push(transform);
-				dmrgWaveStruct_.setTransform(transform, ProgramGlobals::ENVIRON);
+				waveStructPrevious_.setTransform(transform, ProgramGlobals::ENVIRON);
 			}
 			break;
 		case ProgramGlobals::EXPAND_ENVIRON:
 			if (direction != ProgramGlobals::EXPAND_ENVIRON)
 				throw std::logic_error("EXPAND_ENVIRON but option==0\n");
-			dmrgWaveStruct_.setTransform(transform, ProgramGlobals::SYSTEM);
-			dmrgWaveStruct_.setTransform(transform, ProgramGlobals::ENVIRON);
+			waveStructPrevious_.setTransform(transform, ProgramGlobals::SYSTEM);
+			waveStructPrevious_.setTransform(transform, ProgramGlobals::ENVIRON);
 			weStack_.push(transform);
 			break;
 		case ProgramGlobals::EXPAND_SYSTEM:
 			if (direction != ProgramGlobals::EXPAND_SYSTEM)
 				throw std::logic_error("EXPAND_SYSTEM but option==1\n");
-			dmrgWaveStruct_.setTransform(transform, ProgramGlobals::SYSTEM);
-			dmrgWaveStruct_.setTransform(transform, ProgramGlobals::ENVIRON);
+			waveStructPrevious_.setTransform(transform, ProgramGlobals::SYSTEM);
+			waveStructPrevious_.setTransform(transform, ProgramGlobals::ENVIRON);
 			wsStack_.push(transform);
 			break;
 		}
 
-		dmrgWaveStruct_.setLrs(lrs);
-		dmrgWaveStruct_.setAdditional(vts, s, qns);
+		waveStructPrevious_.setLrs(lrs);
+		waveStructPrevious_.setAdditional(vts, s, qns);
 		PsimagLite::OstringStream msg;
 		msg<<"OK, pushing option="<<direction<<" and stage="<<wftOptions_.dir;
 		progress_.printline(msg,std::cout);
@@ -344,21 +344,21 @@ public:
 
 	const BlockDiagonalMatrixType& transform(SizeType what) const
 	{
-		return dmrgWaveStruct_.getTransform(what);
+		return waveStructPrevious_.getTransform(what);
 	}
 
 	const BlockDiagonalMatrixType& stackTransform(SizeType what) const
 	{
 		if (what==ProgramGlobals::SYSTEM) {
-			if (wsStack_.size()==0) return dmrgWaveStruct_.getTransform(what);
+			if (wsStack_.size()==0) return waveStructPrevious_.getTransform(what);
 			return wsStack_.top();
 		} else {
-			if (weStack_.size()==0) return dmrgWaveStruct_.getTransform(what);
+			if (weStack_.size()==0) return waveStructPrevious_.getTransform(what);
 			return weStack_.top();
 		}
 	}
 
-	const LeftRightSuperType& lrs() const { return dmrgWaveStruct_.lrs; }
+	const LeftRightSuperType& lrs() const { return waveStructPrevious_.lrs; }
 
 	bool isEnabled() const { return isEnabled_; }
 
@@ -407,7 +407,7 @@ private:
 		ioMain.createGroup(label);
 		ioMain.write(isEnabled_, label + "/isEnabled");
 		wftOptions_.write(ioMain, label + "/WftOptions");
-		dmrgWaveStruct_.write(ioMain, label + "/DmrgWaveStruct");
+		waveStructPrevious_.write(ioMain, label + "/WaveStructPrevious");
 	}
 
 	void read()
@@ -419,7 +419,7 @@ private:
 		PsimagLite::String label = "Wft";
 		ioMain.read(isEnabled_, label + "/isEnabled");
 		wftOptions_.read(ioMain, label + "/WftOptions");
-		dmrgWaveStruct_.read(ioMain, label + "/DmrgWaveStruct");
+		waveStructPrevious_.read(ioMain, label + "/WaveStructPrevious");
 		ioMain.read(wsStack_, label + "/wsStack");
 		ioMain.read(weStack_, label + "/weStack");
 		ioMain.close();
@@ -439,10 +439,10 @@ private:
 	{
 		if (wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) {
 			if (wsStack_.size()>=1) {
-				dmrgWaveStruct_.setTransform(wsStack_.top(), ProgramGlobals::SYSTEM);
+				waveStructPrevious_.setTransform(wsStack_.top(), ProgramGlobals::SYSTEM);
 				wsStack_.pop();
 				if (wftOptions_.twoSiteDmrg && wsStack_.size()>0)
-					dmrgWaveStruct_.setTransform(wsStack_.top(), ProgramGlobals::SYSTEM);
+					waveStructPrevious_.setTransform(wsStack_.top(), ProgramGlobals::SYSTEM);
 			} else {
 				throw PsimagLite::RuntimeError("System Stack is empty\n");
 			}
@@ -450,10 +450,10 @@ private:
 
 		if (wftOptions_.dir == ProgramGlobals::EXPAND_SYSTEM) {
 			if (weStack_.size()>=1) {
-				dmrgWaveStruct_.setTransform(weStack_.top(), ProgramGlobals::ENVIRON);
+				waveStructPrevious_.setTransform(weStack_.top(), ProgramGlobals::ENVIRON);
 				weStack_.pop();
 				if (wftOptions_.twoSiteDmrg && weStack_.size()>0)
-					dmrgWaveStruct_.setTransform(weStack_.top(), ProgramGlobals::ENVIRON);
+					waveStructPrevious_.setTransform(weStack_.top(), ProgramGlobals::ENVIRON);
 			} else {
 				throw PsimagLite::RuntimeError("Environ Stack is empty\n");
 			}
@@ -461,13 +461,13 @@ private:
 
 		if (wftOptions_.counter == 0 && wftOptions_.dir == ProgramGlobals::EXPAND_SYSTEM) {
 			if (weStack_.size()>=1) {
-				dmrgWaveStruct_.setTransform(weStack_.top(), ProgramGlobals::ENVIRON);
+				waveStructPrevious_.setTransform(weStack_.top(), ProgramGlobals::ENVIRON);
 			}
 		}
 
 		if (wftOptions_.counter == 0 && wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) {
 			if (wsStack_.size()>=1) {
-				dmrgWaveStruct_.setTransform(wsStack_.top(), ProgramGlobals::SYSTEM);
+				waveStructPrevious_.setTransform(wsStack_.top(), ProgramGlobals::SYSTEM);
 			}
 		}
 	}
@@ -499,7 +499,7 @@ private:
 
 	void afterWft(const LeftRightSuperType& lrs)
 	{
-		dmrgWaveStruct_.setLrs(lrs);
+		waveStructPrevious_.setLrs(lrs);
 		wftOptions_.firstCall = false;
 		wftOptions_.counter++;
 	}
@@ -548,7 +548,7 @@ private:
 	PsimagLite::String filenameIn_;
 	PsimagLite::String filenameOut_;
 	const PsimagLite::String WFT_STRING;
-	DmrgWaveStructType dmrgWaveStruct_;
+	WaveStructPreviousType waveStructPrevious_;
 	WftStackType wsStack_;
 	WftStackType weStack_;
 	WaveFunctionTransfBaseType* wftImpl_;

@@ -159,10 +159,33 @@ public:
 
 	WftAccelSvd(const DmrgWaveStructType& dmrgWaveStruct,
 	            const WftOptionsType& wftOptions)
+	    : dmrgWaveStruct_(dmrgWaveStruct), wftOptions_(wftOptions)
 	{
 	}
 
-	void operator()(const VectorMatrixType& uVeryOld,
+	void operator()(VectorWithOffsetType& psiDest,
+	                SizeType iNew,
+	                const VectorWithOffsetType& psiSrc,
+	                SizeType iOld,
+	                const LeftRightSuperType& lrs,
+	                const VectorSizeType& nk,
+	                typename ProgramGlobals::DirectionEnum dir) const
+	{
+//		const VectorMatrixType& uVeryOld = dmrgWaveStruct_.u(); // use BlockDiagonalMatrixType
+//		const VectorMatrixType& vPrimeVeryOld = dmrgWaveStruct_.vts();
+//		const VectorQnType& qnsVeryOld = dmrgWaveStruct_.qns();
+//		internal(uVeryOld,
+//		         vPrimeVeryOld,
+//		         qnsVeryOld,
+//		         uPrevious,
+//		         vPrimePrevious,
+//		         qnsPrevious,
+//		         sPrevious);
+	}
+
+private:
+
+	void internal(const VectorMatrixType& uVeryOld,
 	                const VectorMatrixType& vPrimeVeryOld,
 	                const VectorQnType& qnsVeryOld,
 	                const VectorMatrixType& uPrevious,
@@ -199,8 +222,6 @@ public:
 		ParallelizerTwoType threadTwo(codeSectionParams);
 		threadTwo.loopCreate(loopTwo);
 	}
-
-private:
 
 	static void pinv(VectorMatrixType& dest, const VectorMatrixType& src)
 	{
@@ -257,6 +278,9 @@ private:
 			if (std::abs(v[i]) < epsilon) return i;
 		return n;
 	}
+
+	const DmrgWaveStructType& dmrgWaveStruct_;
+	const WftOptionsType& wftOptions_;
 }; // class WftAccelSvd
 }
 #endif // WFT_ACCEL_SVD_H

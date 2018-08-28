@@ -97,7 +97,7 @@ public:
 		typedef typename DmrgWaveStructType::SparseElementType ComplexOrRealType;
 		typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
-		enum AccelEnum {ACCEL_NONE, ACCEL_PATCHES, ACCEL_BLOCKS};
+		enum AccelEnum {ACCEL_NONE, ACCEL_PATCHES, ACCEL_BLOCKS, ACCEL_SVD};
 
 		WftOptions(ProgramGlobals::DirectionEnum dir1,
 		           PsimagLite::String options,
@@ -112,8 +112,14 @@ public:
 		      counter(c),
 		      denseSparseThreshold(d)
 		{
+			if (options.find("wftAccelSvd") != PsimagLite::String::npos)
+				accel = ACCEL_SVD;
+
 			if (options.find("wftNoAccel") != PsimagLite::String::npos)
 				accel = ACCEL_NONE;
+
+			if (accel == ACCEL_SVD && twoSiteDmrg)
+				err("wftAccelSvd not yet supported with twositedmrg\n");
 		}
 
 		void read(PsimagLite::IoSelector::In& io, PsimagLite::String label)
