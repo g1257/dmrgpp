@@ -284,6 +284,8 @@ public:
 			what.read(name, ioNgSerializer_);
 		}
 
+		IoNgSerializer& serializer() { return ioNgSerializer_; }
+
 	private:
 
 		In(const In&);
