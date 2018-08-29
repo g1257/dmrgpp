@@ -111,15 +111,6 @@ struct WaveStructSvd {
 	    : u_(u), vts_(vts), s_(s), qns_(qns)
 	{}
 
-	WaveStructSvd& operator=(const WaveStructSvd& other)
-	{
-		u_ = other.u_;
-		vts_ = other.vts_;
-		s_ = other.s_;
-		qns_ = other.qns_;
-		return *this;
-	}
-
 	const BlockDiagonalMatrixType& u() const { return u_; }
 
 	const VectorMatrixType& vts() const { return vts_; }
@@ -157,14 +148,6 @@ struct WaveStructSvd {
 		io.write(prefix + "/vts", vts_);
 		io.write(prefix + "/s", s_);
 		io.write(prefix + "/qns", qns_);
-	}
-
-	void clear()
-	{
-		u_.clear();
-		vts_.clear();
-		s_.clear();
-		qns_.clear();
 	}
 
 private:
