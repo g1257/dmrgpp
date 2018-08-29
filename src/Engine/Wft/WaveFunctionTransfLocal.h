@@ -193,12 +193,15 @@ private:
 	                             const VectorSizeType& nk,
 	                             typename ProgramGlobals::DirectionEnum dir) const
 	{
-		SizeType iOld = findIold(psiSrc, psiDest.qn(iNew));
-		if (wftOptions_.accel == WftOptions::ACCEL_PATCHES)
+		if (wftOptions_.accel == WftOptions::ACCEL_PATCHES) {
+			SizeType iOld = findIold(psiSrc, psiDest.qn(iNew));
 			return wftAccelPatches_(psiDest, iNew, psiSrc, iOld, lrs, nk, dir);
+		}
 
-		if (wftOptions_.accel == WftOptions::ACCEL_SVD)
+		if (wftOptions_.accel == WftOptions::ACCEL_SVD) {
+			SizeType iOld = findIold(psiSrc, psiDest.qn(iNew));
 			return wftAccelSvd_(psiDest, iNew, psiSrc, iOld, lrs, nk, dir);
+		}
 
 		SizeType i0 = psiDest.sector(iNew);
 		typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
