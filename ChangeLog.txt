@@ -1,3 +1,30 @@
+2018-08-30 Version 5.34
+
+Bug fixes:
+
+* bug fix for 1801
+
+* bug fix for HubbardHolsteinSSH
+
+* bug fix for METTS
+
+* discovered bug in restart for signs which
+was fixed in PsimagLite 2.34
+
+Refactor:
+
+* WFT: in preparation for SVD use
+
+* Truncation: in preparation for SVD use in WFT
+
+New features
+
+* Option -S for both dmrg and observe
+
+TestSuite:
+
+* postCi compares RAM usage
+
 2018-08-21 Version 5.32
 
 Bug fixes:
