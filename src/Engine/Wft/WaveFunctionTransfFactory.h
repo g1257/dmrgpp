@@ -120,7 +120,6 @@ public:
 	WaveFunctionTransfSu2Type;
 	typedef typename WaveFunctionTransfBaseType::WftOptions WftOptionsType;
 	typedef typename WaveStructCombinedType::WaveStructSvdType WaveStructSvdType;
-	typedef typename PsimagLite::Stack<WaveStructSvdType>::Type WftStackType;
 
 	template<typename SomeParametersType>
 	WaveFunctionTransfFactory(SomeParametersType& params)
@@ -133,7 +132,6 @@ public:
 	      progress_("WaveFunctionTransf"),
 	      filenameIn_(params.checkpoint.filename),
 	      filenameOut_(params.filename),
-	      WFT_STRING(ProgramGlobals::WFT_STRING),
 	      wftImpl_(0),
 	      rng_(3433117),
 	      noLoad_(false),
@@ -198,7 +196,9 @@ public:
 
 		if (!isEnabled_ || !allow) return;
 
-		beforeWft();
+		waveStructCombined_.beforeWft(wftOptions_.dir,
+		                              wftOptions_.twoSiteDmrg,
+		                              wftOptions_.counter);
 		PsimagLite::OstringStream msg;
 		msg<<"Window open, ready to transform vectors";
 		progress_.printline(msg,std::cout);
@@ -306,35 +306,7 @@ public:
 	{
 		if (!isEnabled_) return;
 
-		WaveStructSvdType wave(transform, vts, s, qns);
-
-		switch (wftOptions_.dir) {
-		case ProgramGlobals::INFINITE:
-			if (direction == ProgramGlobals::EXPAND_SYSTEM) {
-				wsStack_.push(wave);
-				waveStructCombined_.setWave(wave, ProgramGlobals::SYSTEM);
-			} else {
-				weStack_.push(wave);
-				waveStructCombined_.setWave(wave, ProgramGlobals::ENVIRON);
-			}
-
-			break;
-		case ProgramGlobals::EXPAND_ENVIRON:
-			if (direction != ProgramGlobals::EXPAND_ENVIRON)
-				err("EXPAND_ENVIRON but option==0\n");
-			waveStructCombined_.setWave(wave, ProgramGlobals::SYSTEM);
-			waveStructCombined_.setWave(wave, ProgramGlobals::ENVIRON);
-			weStack_.push(wave);
-			break;
-		case ProgramGlobals::EXPAND_SYSTEM:
-			if (direction != ProgramGlobals::EXPAND_SYSTEM)
-				err("EXPAND_SYSTEM but option==1\n");
-			waveStructCombined_.setWave(wave, ProgramGlobals::SYSTEM);
-			waveStructCombined_.setWave(wave, ProgramGlobals::ENVIRON);
-			wsStack_.push(wave);
-			break;
-		}
-
+		waveStructCombined_.push(transform, direction, vts, s, qns, wftOptions_.dir);
 		waveStructCombined_.setLrs(lrs);
 		PsimagLite::OstringStream msg;
 		msg<<"OK, pushing option="<<direction<<" and stage="<<wftOptions_.dir;
@@ -346,7 +318,7 @@ public:
 		}
 	}
 
-	const BlockDiagonalMatrixType& getTransform(SizeType dir) const
+	const BlockDiagonalMatrixType& getTransform(ProgramGlobals::SysOrEnvEnum dir) const
 	{
 		return waveStructCombined_.getTransform(dir);
 	}
@@ -360,11 +332,9 @@ public:
 		if (!isEnabled_) return;
 		if (!save_) return;
 
-		writePartial(ioMain);
-
 		PsimagLite::String label = "Wft";
-		ioMain.write(wsStack_, label + "/wsStack");
-		ioMain.write(weStack_, label + "/weStack");
+		writePartial(ioMain, label);
+		waveStructCombined_.write(ioMain, label + "/WaveStructCombined");
 	}
 
 	void write(PsimagLite::IoSelector::Out& ioMain) const
@@ -372,28 +342,22 @@ public:
 		if (!isEnabled_) return;
 		if (!save_) return;
 
-		writePartial(ioMain);
-
 		PsimagLite::String label = "Wft";
-		WftStackType wsStack = wsStack_;
-		ioMain.write(wsStack, label + "/wsStack");
-
-		WftStackType weStack = weStack_;
-		ioMain.write(weStack, label + "/weStack");
+		writePartial(ioMain, label);
+		waveStructCombined_.write(ioMain, label + "/WaveStructCombined");
 	}
 
 private:
 
-	void writePartial(PsimagLite::IoSelector::Out& ioMain) const
+	void writePartial(PsimagLite::IoSelector::Out& ioMain,
+	                  PsimagLite::String prefix) const
 	{
 		assert(isEnabled_);
 		assert(save_);
 
-		PsimagLite::String label = "Wft";
-		ioMain.createGroup(label);
-		ioMain.write(isEnabled_, label + "/isEnabled");
-		wftOptions_.write(ioMain, label + "/WftOptions");
-		waveStructCombined_.write(ioMain, label + "/WaveStructCombined");
+		ioMain.createGroup(prefix);
+		ioMain.write(isEnabled_, prefix + "/isEnabled");
+		wftOptions_.write(ioMain, prefix + "/WftOptions");
 	}
 
 	void read()
@@ -406,8 +370,6 @@ private:
 		ioMain.read(isEnabled_, label + "/isEnabled");
 		wftOptions_.read(ioMain, label + "/WftOptions");
 		waveStructCombined_.read(ioMain, label + "/WaveStructCombined");
-		ioMain.read(wsStack_, label + "/wsStack");
-		ioMain.read(weStack_, label + "/weStack");
 		ioMain.close();
 	}
 
@@ -421,32 +383,10 @@ private:
 		value = rng_() - 0.5;
 	}
 
-	void beforeWft()
-	{
-		WftStackType& stack = (wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) ? wsStack_ :
-		                                                                            weStack_;
-		const PsimagLite::String label = (wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) ?
-		            "system" : "environ";
-
-		ProgramGlobals::SysOrEnvEnum sysOrEnv = (wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) ?
-		            ProgramGlobals::SYSTEM : ProgramGlobals::ENVIRON;
-
-		if (stack.size() > 0) {
-			waveStructCombined_.setWave(stack.top(), sysOrEnv);
-			stack.pop();
-			if (wftOptions_.twoSiteDmrg && stack.size() > 0)
-				waveStructCombined_.setWave(stack.top(), sysOrEnv);
-		} else {
-			err("Stack for " + label + " is empty\n");
-		}
-
-		if (stack.size() > 0 && wftOptions_.counter == 0)
-			waveStructCombined_.setWave(stack.top(), sysOrEnv);
-	}
-
 	void afterWft(const LeftRightSuperType& lrs)
 	{
 		waveStructCombined_.setLrs(lrs);
+		waveStructCombined_.afterWft(wftOptions_.dir);
 		wftOptions_.firstCall = false;
 		wftOptions_.counter++;
 	}
@@ -519,10 +459,7 @@ private:
 	PsimagLite::ProgressIndicator progress_;
 	PsimagLite::String filenameIn_;
 	PsimagLite::String filenameOut_;
-	const PsimagLite::String WFT_STRING;
 	WaveStructCombinedType waveStructCombined_;
-	WftStackType wsStack_; // move into WaveStructCombinedType
-	WftStackType weStack_; // move into WaveStructCombinedType
 	WaveFunctionTransfBaseType* wftImpl_;
 	PsimagLite::Random48<RealType> rng_;
 	bool noLoad_;
