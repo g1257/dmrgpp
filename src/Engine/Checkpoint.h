@@ -98,6 +98,7 @@ public:
 	typedef typename TargetingType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef typename TargetingType::RealType  RealType;
 	typedef typename TargetingType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::ComplexOrRealType ComplexOrRealType;
 	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
 	typedef typename PsimagLite::IoSelector IoType;
 	typedef typename TargetingType::ModelType ModelType;
@@ -151,7 +152,12 @@ public:
 
 			ioIn2.read(v, "CHKPOINTSYSTEM/OperatorPerSite");
 			if (v.size() == 0) return;
+
+			bool iscomplex = false;
+			ioIn2.read(iscomplex, "IsComplex");
 			ioIn2.close();
+			if (iscomplex != PsimagLite::IsComplexNumber<ComplexOrRealType>::True)
+				err("Previous run was complex and this one is not (or viceversa)\n");
 		}
 
 		SizeType operatorsPerSite = v[0];

@@ -567,7 +567,7 @@ private:
 			permutationVector_[permInverse_[i]]=i;
 
 		QnType::readVector(qns_, prefix + "QNShrink", io);
-		checkSigns();
+		if (!minimizeRead) checkSigns();
 		dmrgTransformed_=false;
 		if (useSu2Symmetry_)
 			symmSu2_.read(io,prefix, minimizeRead);

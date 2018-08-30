@@ -11,6 +11,8 @@ void mainLoop(GeometryType& geometry,
               const ParametersDmrgSolverType& params,
               const PsimagLite::String& list)
 {
+	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
+
 	typedef ModelBase<ModelHelperType,
 	        ParametersDmrgSolverType,
 	        InputNgType::Readable,
@@ -28,6 +30,12 @@ void mainLoop(GeometryType& geometry,
 	IoInputType dataIo(datafile);
 	bool hasTimeEvolution = (targeting != "GroundStateTargeting" &&
 	        targeting != "CorrectionTargeting");
+
+	bool iscomplex = false;
+	dataIo.read(iscomplex, "IsComplex");
+
+	if (iscomplex != PsimagLite::IsComplexNumber<ComplexOrRealType>::True)
+		err("Previous run was complex and this one is not (or viceversa)\n");
 
 	while (!observeOneFullSweep<VectorWithOffsetType,ModelBaseType>
 	       (dataIo,model,list,hasTimeEvolution,orbitals));

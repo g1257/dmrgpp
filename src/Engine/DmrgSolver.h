@@ -127,7 +127,7 @@ public:
 	typedef typename ModelType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelType::ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename TargetingType::TargetVectorType TargetVectorType;
-	typedef typename TargetVectorType::value_type DensityMatrixElementType;
+	typedef typename TargetVectorType::value_type ComplexOrRealType;
 	typedef typename TargetingType::TargetParamsType TargetParamsType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename ModelType::SolverParamsType ParametersType;
@@ -208,7 +208,7 @@ public:
 		ioOut_.write(base64encode, "InputBase64Encoded");
 		ioOut_.write(parameters_, "PARAMETERS");
 		ioOut_.write(model_, "MODEL");
-
+		ioOut_.write(PsimagLite::IsComplexNumber<ComplexOrRealType>::True, "IsComplex");
 		if (parameters_.options.find("verbose")!=PsimagLite::String::npos)
 			verbose_=true;
 	}
@@ -297,7 +297,7 @@ public:
 		psi = 0;
 	}
 
-	const DensityMatrixElementType& inSitu(SizeType i) const
+	const ComplexOrRealType& inSitu(SizeType i) const
 	{
 		return inSitu_(i);
 	}
