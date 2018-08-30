@@ -1,3 +1,13 @@
+2018-08-30 Version 2.34
+
+* IMPORTANT: BUG FIX in saving and reading booleans with IoNgSerializer
+
+* IoNg::In can return serializer object
+
+* testIoNgBoolean driver added
+
+* DeepCopyOrNot helper class added
+
 2018-08-21 Version 2.32
 
 * Geometry::AdditionalData simplified
