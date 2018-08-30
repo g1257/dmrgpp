@@ -26,6 +26,7 @@
 #include "den_is_eye.cpp"
 #include "den_is_zeros.cpp"
 #include "den_kron_form.cpp"
+#include "den_kron_form_general.cpp"
 
 #ifndef USE_FLOAT
 typedef double RealType;
@@ -294,6 +295,18 @@ void den_kron_form<RealType>(const int nrow_A,
                     const PsimagLite::Matrix<RealType>& b_,
                     PsimagLite::Matrix<RealType>& c_);
 
+
+template
+void den_kron_form_general<RealType>(
+		    const char transA,
+		    const char transB,
+		    const int nrow_A,
+                    const int ncol_A,
+                    const PsimagLite::Matrix<RealType>& a_,
+                    const int nrow_B,
+                    const int ncol_B,
+                    const PsimagLite::Matrix<RealType>& b_,
+                    PsimagLite::Matrix<RealType>& c_);
 
 template
 void den_submatrix<RealType>(const int nrow_A,

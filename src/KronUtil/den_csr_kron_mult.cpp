@@ -11,18 +11,24 @@ void den_csr_kron_mult_method(const int imethod,
                               typename PsimagLite::Vector<ComplexOrRealType>::Type& xout_,
                               SizeType offsetX)
 {
+	const bool is_complex = std::is_same<ComplexOrRealType,std::complex<double> >::value ||
+		                std::is_same<ComplexOrRealType,std::complex<float>  >::value;
+
 	const int isTransA = (transA == 'T') || (transA == 't');
 	const int isTransB = (transB == 'T') || (transB == 't');
+
+	const int isConjTransA = (transA == 'C') || (transA == 'c');
+	const int isConjTransB = (transB == 'C') || (transB == 'c');
 
 	const int nrow_A = a_.rows();
 	const int ncol_A = a_.cols();
 	const int nrow_B = b.rows();
 	const int ncol_B = b.cols();
 
-	const int nrow_1 = (isTransA) ? ncol_A : nrow_A;
-	const int ncol_1 = (isTransA) ? nrow_A : ncol_A;
-	const int nrow_2 = (isTransB) ? ncol_B : nrow_B;
-	const int ncol_2 = (isTransB) ? nrow_B : ncol_B;
+	const int nrow_1 = (isTransA || isConjTransA) ? ncol_A : nrow_A;
+	const int ncol_1 = (isTransA || isConjTransA) ? nrow_A : ncol_A;
+	const int nrow_2 = (isTransB || isConjTransB) ? ncol_B : nrow_B;
+	const int ncol_2 = (isTransB || isConjTransB) ? nrow_B : ncol_B;
 
 	const int nrow_X = nrow_2;
 	const int ncol_X = nrow_1;
@@ -40,7 +46,7 @@ void den_csr_kron_mult_method(const int imethod,
 	if (no_work) {
 		return;
 	};
-	/*
+/*
  *   -------------------------------------------------------------
  *   A in dense matrix storage format
  *   B in compressed sparse ROW format
@@ -86,7 +92,7 @@ void den_csr_kron_mult_method(const int imethod,
 
 	if (imethod == 1) {
 
-		/*
+	/*
 	 *  --------------------------------------------
 	 *  BY(ib,ja) = (B(ib,jb))*Y(jb,ja)
 	 *
@@ -100,7 +106,7 @@ void den_csr_kron_mult_method(const int imethod,
 		PsimagLite::MatrixNonOwned<ComplexOrRealType> byRef(by_);
 		PsimagLite::MatrixNonOwned<const ComplexOrRealType> byConstRef(by_);
 
-		/*
+	/*
 	 * ---------------
 	 * setup BY(nrow_BY,ncol_BY)
 	 * ---------------
@@ -126,7 +132,8 @@ void den_csr_kron_mult_method(const int imethod,
 	 * BY(ib,ja)  = B(ib,jb)*Y(jb,ja)
 	 * ------------------------------
 	 */
-			const char trans = (isTransB) ? 'T' : 'N';
+			// const char trans = (isTransB) ? 'T' : 'N';
+			const char trans = transB;
 			csr_matmul_pre(  trans,
 			                 b,
 
@@ -141,14 +148,45 @@ void den_csr_kron_mult_method(const int imethod,
 		}
 
 		{
-			/*
+	/*
 	 * -------------------------------------------
 	 * X(ib,ia) += BY(ib,ja) * transpose(A(ia,ja))
 	 * -------------------------------------------
 	 */
-			const char trans = (isTransA) ? 'N' : 'T';
+			const char trans = (isTransA || isConjTransA) ? 'N' : 'T';
+			if (is_complex && isConjTransA) {
+				// -----------------------------------------
+				// transpose( conj(transpose(A) ) is conj(A)
+				// perform  conj operation
+				// -----------------------------------------
+                              PsimagLite::Matrix<ComplexOrRealType> a_conj(nrow_A,ncol_A);
 
-			den_matmul_post(
+			      for(int ja=0; ja < ncol_A; ja++) {
+			      for(int ia=0; ia < nrow_A; ia++) {
+				     a_conj(ia,ja) = PsimagLite::conj( a_(ia,ja) );
+			      };
+			      };
+
+
+			      den_matmul_post(
+			            trans,
+			            nrow_A,
+			            ncol_A,
+			            a_conj,
+
+			            nrow_BY,
+			            ncol_BY,
+			            byConstRef,
+
+			            nrow_X,
+			            ncol_X,
+			            xout);
+
+
+			}
+			else {
+
+			     den_matmul_post(
 			            trans,
 			            nrow_A,
 			            ncol_A,
@@ -161,6 +199,8 @@ void den_csr_kron_mult_method(const int imethod,
 			            nrow_X,
 			            ncol_X,
 			            xout);
+			};
+
 
 		}
 	}
@@ -204,11 +244,36 @@ void den_csr_kron_mult_method(const int imethod,
 	  * YAt(jb,ia) = Y(jb,ja) * tranpose(A(ia,ja)
 	  * ---------------------
 	  */
-			const char transa = (isTransA) ? 'N' : 'T';
+			const char transa = (isTransA || isConjTransA) ? 'N' : 'T';
+			if (is_complex && isConjTransA) {
+				// -----------------------------------------
+				// transpose( conj(transpose(A) ) is conj(A)
+				// perform in-place conj operation
+				// -----------------------------------------
+                              PsimagLite::Matrix<ComplexOrRealType> a_conj(nrow_A,ncol_A);
+			      for(int ja=0; ja < ncol_A; ja++) {
+                              for(int ia=0; ia < nrow_A; ia++) {
+				      a_conj(ia,ja) = PsimagLite::conj( a_(ia,ja) );
+			      };
+			      };
 
+			      den_matmul_post( transa,
+			                 nrow_A,
+			                 ncol_A,
+			                 a_conj,
 
+			                 nrow_Y,
+			                 ncol_Y,
+			                 yin,
 
-			den_matmul_post( transa,
+			                 nrow_YAt,
+			                 ncol_YAt,
+			                 yatRef);
+
+			}
+			else {
+
+			      den_matmul_post( transa,
 			                 nrow_A,
 			                 ncol_A,
 			                 a_,
@@ -220,19 +285,23 @@ void den_csr_kron_mult_method(const int imethod,
 			                 nrow_YAt,
 			                 ncol_YAt,
 			                 yatRef);
+			};
+
+
 		}
 
 
 
 
 		{
-			/*
+	/*
 	 * ------------
 	 * X(ib,ia) += B(ib,jb) * YAt(jb,ia)
 	 * ------------
 	 */
 
-			const char trans = (isTransB) ? 'T' : 'N';
+			// const char trans = (isTransB) ? 'T' : 'N';
+			const char trans = transB;
 			csr_matmul_pre( trans,
 			                b,
 
@@ -247,7 +316,7 @@ void den_csr_kron_mult_method(const int imethod,
 		}
 	}
 	else if (imethod == 3) {
-		/*
+	/*
 	* ---------------------------------------------
 	* C = kron(A,B)
 	* C([ib,ia], [jb,ja]) = A(ia,ja)*B(ib,jb)
@@ -257,7 +326,7 @@ void den_csr_kron_mult_method(const int imethod,
 		const bool use_inner_sparse = false;
 
 		if (use_inner_sparse) {
-			/*
+	/*
 	* -----------------------------
 	* sparse matrix B in inner loop
 	* -----------------------------
@@ -267,6 +336,9 @@ void den_csr_kron_mult_method(const int imethod,
 			for(ia=0; ia < nrow_A; ia++) {
 				for(ja=0; ja < ncol_A; ja++) {
 					ComplexOrRealType aij = a_(ia,ja);
+					if (is_complex && isConjTransA) {
+						aij = PsimagLite::conj( aij );
+					};
 
 					int ib = 0;
 					for(ib=0; ib < nrow_B; ib++) {
@@ -277,12 +349,16 @@ void den_csr_kron_mult_method(const int imethod,
 						for(kb=istartb; kb < iendb; kb++) {
 							int jb = b.getCol(kb);
 							ComplexOrRealType bij = b.getValue(kb);
+							if (is_complex && isConjTransB) {
+								bij = PsimagLite::conj( bij );
+							};
+
 							ComplexOrRealType cij = aij * bij;
 
-							int ix = (isTransB) ? jb : ib;
-							int jx = (isTransA) ? ja : ia;
-							int iy = (isTransB) ? ib : jb;
-							int jy = (isTransA) ? ia : ja;
+							int ix = (isTransB || isConjTransB) ? jb : ib;
+							int jx = (isTransA || isConjTransA) ? ja : ia;
+							int iy = (isTransB || isConjTransB) ? ib : jb;
+							int jy = (isTransA || isConjTransA) ? ia : ja;
 
 							xout(ix,jx) +=  (cij * yin(iy,jy));
 						};
@@ -292,7 +368,7 @@ void den_csr_kron_mult_method(const int imethod,
 
 		}
 		else {
-			/*
+	/*
 	* -----------------------------
 	* sparse matrix B in outer loop
 	* -----------------------------
@@ -307,6 +383,9 @@ void den_csr_kron_mult_method(const int imethod,
 				for(kb=istartb; kb < iendb; kb++) {
 					int jb = b.getCol(kb);
 					ComplexOrRealType bij = b.getValue(kb);
+					if (is_complex && isConjTransB) {
+						bij = PsimagLite::conj( bij );
+					};
 
 					int ia = 0;
 					int ja = 0;
@@ -315,12 +394,16 @@ void den_csr_kron_mult_method(const int imethod,
 						for(ja=0; ja < ncol_A; ja++) {
 
 							ComplexOrRealType aij = a_(ia,ja);
+							if (is_complex && isConjTransA) {
+								aij = PsimagLite::conj( aij );
+							};
+
 							ComplexOrRealType cij = aij * bij;
 
-							int ix = (isTransB) ? jb : ib;
-							int jx = (isTransA) ? ja : ia;
-							int iy = (isTransB) ? ib : jb;
-							int jy = (isTransA) ? ia : ja;
+							int ix = (isTransB || isConjTransB) ? jb : ib;
+							int jx = (isTransA || isConjTransA) ? ja : ia;
+							int iy = (isTransB || isConjTransB) ? ib : jb;
+							int jy = (isTransA || isConjTransA) ? ia : ja;
 
 							xout(ix,jx) +=  (cij * yin(iy,jy));
 						};
@@ -345,8 +428,10 @@ void den_csr_kron_mult(const char transA,
                        const typename PsimagLite::Real<ComplexOrRealType>::Type denseFlopDiscount)
 
 {
+	const bool is_complex = std::is_same<ComplexOrRealType,std::complex<double> >::value ||
+		                std::is_same<ComplexOrRealType,std::complex<float>  >::value;
 	const int idebug = 0;
-	/*
+/*
  *   -------------------------------------------------------------
  *   A in dense matrix format
  *   B in compressed sparse ROW format
@@ -397,6 +482,9 @@ void den_csr_kron_mult(const char transA,
 	const int isTransA = (transA == 'T') || (transA == 't');
 	const int isTransB = (transB == 'T') || (transB == 't');
 
+	const int isConjTransA = (transA == 'C') || (transA == 'c');
+	const int isConjTransB = (transB == 'C') || (transB == 'c');
+
 	/*
   * --------------------------
   * check for special case
@@ -410,27 +498,48 @@ void den_csr_kron_mult(const char transA,
 
 		};
 
-		/*
+	/*
 	----------------------
 	X +=  ( op(B) ) Y * transpose( op(A) )
 	----------------------
 	*/
-		const int nrow_Y = (isTransB) ? nrow_B : ncol_B;
-		const int ncol_Y = (isTransA) ? nrow_A : ncol_A;
+		const int nrow_Y = (isTransB || isConjTransB) ? nrow_B : ncol_B;
+		const int ncol_Y = (isTransA || isConjTransA) ? nrow_A : ncol_A;
 
-		const int nrow_X = (isTransB) ? ncol_B : nrow_B;
-		const int ncol_X = (isTransA) ? ncol_A : nrow_A;
+		const int nrow_X = (isTransB || isConjTransB) ? ncol_B : nrow_B;
+		const int ncol_X = (isTransA || isConjTransA) ? ncol_A : nrow_A;
 
 		PsimagLite::MatrixNonOwned<const ComplexOrRealType> yin(nrow_Y, ncol_Y, yin_, offsetY);
 		PsimagLite::MatrixNonOwned<ComplexOrRealType> xout(nrow_X, ncol_X, xout_, offsetX);
 
 
 
-		const char  trans1 =  (isTransA) ? 'N' : 'T';
-		den_matmul_post(  trans1,
+		const char  trans1 =  (isTransA || isConjTransA) ? 'N' : 'T';
+		if (is_complex && isConjTransA) {
+			// ---------------------------------------
+			// transpose( conj(transpose(A)) is conj(A)
+			// perform in-place conj operation
+			// ---------------------------------------
+                        PsimagLite::Matrix<ComplexOrRealType> a_conj(nrow_A,ncol_A);
+
+			for(int ja=0; ja < ncol_A; ja++) {
+			for(int ia=0; ia < nrow_A; ia++) {
+				a_conj(ia,ja) = PsimagLite::conj( a_(ia,ja) );
+			};
+			};
+
+		        den_matmul_post(  trans1,
+		                  nrow_A, ncol_A, a_conj,
+		                  nrow_Y, ncol_Y, yin,
+		                  nrow_X, ncol_X, xout );
+		}
+		else {
+
+		        den_matmul_post(  trans1,
 		                  nrow_A, ncol_A, a_,
 		                  nrow_Y, ncol_Y, yin,
 		                  nrow_X, ncol_X, xout );
+		};
 
 
 		return;
@@ -441,11 +550,11 @@ void den_csr_kron_mult(const char transA,
 	int imethod = 1;
 
 
-	const int nrow_1 = (isTransA) ? ncol_A : nrow_A;
-	const int ncol_1 = (isTransA) ? nrow_A : ncol_A;
+	const int nrow_1 = (isTransA || isConjTransA) ? ncol_A : nrow_A;
+	const int ncol_1 = (isTransA || isConjTransA) ? nrow_A : ncol_A;
 
-	const int nrow_2 = (isTransB) ? ncol_B : nrow_B;
-	const int ncol_2 = (isTransB) ? nrow_B : ncol_B;
+	const int nrow_2 = (isTransB || isConjTransB) ? ncol_B : nrow_B;
+	const int ncol_2 = (isTransB || isConjTransB) ? nrow_B : ncol_B;
 
 
 	estimate_kron_cost( nrow_1,ncol_1,nnz_A, nrow_2,ncol_2,nnz_B,

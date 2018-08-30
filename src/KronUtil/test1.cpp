@@ -27,23 +27,27 @@ int main()
   for(nrow_A=1; nrow_A <= 10; nrow_A += 3 ) {
   for(ncol_B=1; ncol_B <= 10; ncol_B += 3 ) {
   for(nrow_B=1; nrow_B <= 10; nrow_B += 3 ) {
-  for(itransA=0; itransA <= 1; itransA++) {
-  for(itransB=0; itransB <= 1; itransB++) {
-     char transA = (itransA == 1) ? 'T' : 'N';
-     char transB = (itransB == 1) ? 'T' : 'N';
+  for(itransA=0; itransA <= 2; itransA++) {
+  for(itransB=0; itransB <= 2; itransB++) {
+     char transA = (itransA == 1) ? 'T' : ((itransA == 2) ? 'C' : 'N');
+     char transB = (itransB == 1) ? 'T' : ((itransB == 2) ? 'C' : 'N');
 
 
      int imethod = 0;
 
-     int isTransA = (itransA != 0);
-     int isTransB = (itransB != 0);
+     int isTransA = (transA == 'T');
+     int isTransB = (transB == 'T');
+     int isConjTransA = (transA == 'C');
+     int isConjTransB = (transB == 'C');
 
-     int nrow_1 = (isTransA) ? ncol_A : nrow_A;
-     int ncol_1 = (isTransA) ? nrow_A : ncol_A;
+     int nrow_1 = (isTransA || isConjTransA) ? ncol_A : nrow_A;
+     int ncol_1 = (isTransA || isConjTransA) ? nrow_A : ncol_A;
       
-     int nrow_2 = (isTransB) ? ncol_B : nrow_B;
-     int ncol_2 = (isTransB) ? nrow_B : ncol_B;
+     int nrow_2 = (isTransB || isConjTransB) ? ncol_B : nrow_B;
+     int ncol_2 = (isTransB || isConjTransB) ? nrow_B : ncol_B;
      
+     int nrow_C = nrow_1 * nrow_2;
+     int ncol_C = ncol_1 * ncol_2;
 
      int nrow_X = nrow_2;
      int ncol_X = nrow_1;
@@ -51,8 +55,11 @@ int main()
      int nrow_Y = ncol_2;
      int ncol_Y = ncol_1;
 
+
+
      PsimagLite::Matrix<RealType> a_(nrow_A, ncol_A);
      PsimagLite::Matrix<RealType> b_(nrow_B, ncol_B);
+
      PsimagLite::Matrix<RealType> y_(nrow_Y, ncol_Y);
 	PsimagLite::MatrixNonOwned<const RealType> yRef(y_);
 
@@ -62,6 +69,8 @@ int main()
 	 PsimagLite::MatrixNonOwned<RealType> x2Ref(x2_);
      PsimagLite::Matrix<RealType> x3_(nrow_X, ncol_X);
 	PsimagLite::MatrixNonOwned<RealType> x3Ref(x3_);
+     PsimagLite::Matrix<RealType> x4_(nrow_X, ncol_X);
+	PsimagLite::MatrixNonOwned<RealType> x4Ref(x4_);
 
      PsimagLite::Matrix<RealType> sx1_(nrow_X, ncol_X);
 	  PsimagLite::MatrixNonOwned<RealType> sx1Ref(sx1_);
@@ -69,6 +78,8 @@ int main()
 	 PsimagLite::MatrixNonOwned<RealType> sx2Ref(sx2_);
      PsimagLite::Matrix<RealType> sx3_(nrow_X, ncol_X);
 	 PsimagLite::MatrixNonOwned<RealType> sx3Ref(sx3_);
+     PsimagLite::Matrix<RealType> sx4_(nrow_X, ncol_X);
+	 PsimagLite::MatrixNonOwned<RealType> sx4Ref(sx4_);
 
      if (thresholdA == 0) {
       if (nrow_A == ncol_A) {
@@ -172,6 +183,48 @@ int main()
 	                       0,
                            x3Ref.getVector(),
 	                       0);
+     // ------------------
+     // form C = kron(A,B)
+     // ------------------
+     PsimagLite::Matrix<RealType> c_(nrow_C, ncol_C);
+
+     den_kron_form_general( 
+		   transA, transB,
+		   nrow_A, ncol_A, a_,
+		   nrow_B, ncol_B, b_,
+		   c_ );
+
+     // -----------------------
+     // perform matrix-multiply
+     // -----------------------
+     {
+	     const char trans1 = 'N';
+	     const char trans2 = 'N';
+	     const RealType alpha = 1.0;
+	     const RealType beta = 0.0;
+
+	     // ------------------------------
+	     // reshape X, Y as column vectors
+	     // ------------------------------
+	     const int mm = nrow_X*ncol_X;
+	     const int nn = 1;
+	     const int kk = ncol_C;
+
+
+	     const int ld1 = nrow_C;
+	     const int ld2 = nrow_Y*ncol_Y;
+	     const int ld3 = nrow_X*ncol_X;
+
+	     const RealType * const pA = &(c_(0,0));
+	     const RealType * const pB = &(yRef.getVector()[0]);
+	     RealType *pC = &(x4Ref.getVector()[0]);
+             psimag::BLAS::GEMM( trans1, trans2, mm,nn,kk,
+			 alpha, pA, ld1,  pB, ld2,
+			 beta,  pC, ld3 );
+     };
+
+
+
 
      int ix = 0;
      int jx = 0;
@@ -181,16 +234,18 @@ int main()
         RealType diff12 = std::abs( x1_(ix,jx) - x2_(ix,jx) );
         RealType diff23 = std::abs( x2_(ix,jx) - x3_(ix,jx) );
         RealType diff31 = std::abs( x3_(ix,jx) - x1_(ix,jx) );
-        RealType diffmax = std::max( diff12, std::max( diff23, diff31) );
+        RealType diff41 = std::abs( x4_(ix,jx) - x1_(ix,jx) );
+        RealType diffmax = std::max( diff41,
+				     std::max( diff12, std::max( diff23, diff31) ) );
         const RealType tol = 1.0/(1000.0*1000.0*1000.0);
 
         int isok = (diffmax <= tol);
         if (!isok) {
            nerrors += 1;
-           printf("den: itransA %d itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
-                   itransA, itransB,    nrow_A,ncol_A,   nrow_B, ncol_B );
-           printf("ix %d, jx %d, diff12 %f, diff23 %f, diff31 %f \n",
-                   ix,jx,  diff12, diff23, diff31 );
+           printf("den: transA=%c, itransA %d transB=%c, itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
+                   transA,itransA, transB,itransB,    nrow_A,ncol_A,   nrow_B, ncol_B );
+           printf("ix %d, jx %d, diff12 %f, diff23 %f, diff31 %f diff41 %f \n",
+                   ix,    jx,    diff12,    diff23,    diff31,   diff41 );
            };
         };
         };

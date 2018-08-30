@@ -44,6 +44,7 @@ den_gen_matrix:		generate a random matrix based, accept entries based on a thres
 den_copymat:		copy 2 dense matrices
 den_zero:		zero out a dense matrix
 den_kron_form:		explicit form the large dense kronecker product
+den_kron_form_general:	explicit form the large dense kronecker product with options for transA, transB
 den_submatrix:		extract a submatrix, B = A( rindex(:), cindex(:) )
 den_matmul_pre:		perform  X + op(A) * Y, op(A) can be A or transpose(A)
 den_nnz:		number of nonzeros in matrix

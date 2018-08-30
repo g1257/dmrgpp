@@ -12,12 +12,15 @@ void den_matmul_post(const char trans_A,
                      const int ncol_X,
                      PsimagLite::MatrixNonOwned<ComplexOrRealType>& xout)
 {
-	/*
+	const bool is_complex = std::is_same<ComplexOrRealType,std::complex<double> >::value ||
+		                std::is_same<ComplexOrRealType,std::complex<float> >::value;
+/*
  * -------------------------------------------------------
  * A in dense matrix format
  *
  * compute   X +=  Y * op(A)
  * where op(A) is transpose(A)   if trans_A = 'T' or 't'
+ *       op(A) is conj(transpose(A)) if trans_A = 'C' or 'c'
  *       op(A) is A              otherwise
  *
  * if need transpose(A) then
@@ -31,11 +34,12 @@ void den_matmul_post(const char trans_A,
  */
 
 	int isTranspose = (trans_A == 'T') || (trans_A == 't');
+	int isConjTranspose = (trans_A == 'C') || (trans_A == 'c');
 
 	const bool use_blas = true;
 
-	if (isTranspose) {
-		/*
+	if (isTranspose || isConjTranspose) {
+	/*
 	*   ----------------------------------------------------------
 	*   X(nrow_X,ncol_X) +=  Y(nrow_Y,ncol_Y) * transpose(A(nrow_A,ncol_A))
 	*   X(ix,jx) +=  Y(iy,jy) * transpose( A(ia,ja) )
@@ -46,14 +50,17 @@ void den_matmul_post(const char trans_A,
 		assert((nrow_X == nrow_Y) && (ncol_Y == ncol_A) && (ncol_X == nrow_A));
 
 		if (use_blas) {
-			/*
+		/*
 		 * ------------------------
 		 * X = Y * transpose(A) + X
 		 * X(ix,jx) += sum( Y(ix,ja) * A(ia,ja), over ja)
 		 * ------------------------
 		 */
 			char trans1 = 'N';
-			char trans2 = 'T';
+			char trans2 = trans_A;
+
+
+
 			int mm = nrow_X;
 			int nn = ncol_X;
 			int kk = ncol_Y;
@@ -68,6 +75,7 @@ void den_matmul_post(const char trans_A,
 			                      alpha,  &(yin(0,0)), ld1,
 			                      &(a_(0,0)), ld2,
 			                      beta,   &(xout(0,0)), ld3);
+
 		}
 		else {
 
@@ -83,6 +91,10 @@ void den_matmul_post(const char trans_A,
 						int ia = jx;
 						ComplexOrRealType aij = a_(ia,ja);
 						ComplexOrRealType atji = aij;
+						if (is_complex && isConjTranspose) {
+							atji = PsimagLite::conj( atji );
+						};
+
 						dsum += (yin(iy,jy) * atji);
 					};
 					xout(ix,jx) += dsum;
@@ -94,7 +106,7 @@ void den_matmul_post(const char trans_A,
 
 	}
 	else  {
-		/*
+	/*
 	* ---------------------------------------------
 	* X(nrow_X,ncol_X) += Y(nrow_Y,ncol_Y) * A(nrow_A,ncol_A)
 	* X(ix,jx) += sum( Y(iy,ia) * A(ia,ja), over ia )
@@ -103,7 +115,7 @@ void den_matmul_post(const char trans_A,
 		assert((nrow_X == nrow_Y) && (ncol_Y == nrow_A) && (ncol_X == ncol_A));
 
 		if (use_blas) {
-			/*
+		/*
 		 * -------------
 		 * X = Y * A + X
 		 * -------------

@@ -1,3 +1,4 @@
+#include <complex>
 #include "estimate_kron_cost.cpp"
 #include "csr_den_kron_mult.cpp"
 #include "csr_kron_mult.cpp"
@@ -26,7 +27,7 @@
 #include "den_is_eye.cpp"
 #include "den_is_zeros.cpp"
 #include "den_kron_form.cpp"
-#include <complex>
+#include "den_kron_form_general.cpp"
 
 #ifndef USE_FLOAT
 typedef double RealType;
@@ -296,6 +297,18 @@ void den_kron_form<std::complex<RealType> >(const int nrow_A,
                     const PsimagLite::Matrix<std::complex<RealType> >& b_,
                     PsimagLite::Matrix<std::complex<RealType> >& c_);
 
+
+template
+void den_kron_form_general<std::complex<RealType> >(
+		    const char transA,
+		    const char transB,
+		    const int nrow_A,
+                    const int ncol_A,
+                    const PsimagLite::Matrix<std::complex<RealType> >& a_,
+                    const int nrow_B,
+                    const int ncol_B,
+                    const PsimagLite::Matrix<std::complex<RealType> >& b_,
+                    PsimagLite::Matrix<std::complex<RealType> >& c_);
 
 template
 void den_submatrix<std::complex<RealType> >(const int nrow_A,

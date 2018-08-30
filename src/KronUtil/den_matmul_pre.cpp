@@ -1,7 +1,7 @@
 #include "util.h"
 
 template<typename ComplexOrRealType>
-void den_matmul_pre( const char trans_A, 
+void den_matmul_pre( const char trans_A,
                      const int nrow_A,
                      const int ncol_A,
                      const PsimagLite::Matrix<ComplexOrRealType>& a_,
@@ -12,7 +12,7 @@ void den_matmul_pre( const char trans_A,
                      const int ncol_X,
                      PsimagLite::MatrixNonOwned<ComplexOrRealType>& xout)
 {
-	/*
+/*
  * -------------------------------------------------------
  * A in dense matrix format
  *
@@ -29,13 +29,16 @@ void den_matmul_pre( const char trans_A,
  *  requires  nrow_X == nrow_A, ncol_A == nrow_Y, ncol_X == ncol_Y
  * -------------------------------------------------------
  */
+	const bool is_complex = std::is_same<ComplexOrRealType,std::complex<double> >::value ||
+		                std::is_same<ComplexOrRealType,std::complex<float>  >::value;
 	bool use_blas =  true;
 	int isTranspose = (trans_A == 'T') || (trans_A == 't');
+	int isConjTranspose = (trans_A == 'C') || (trans_A == 'c');
 
 
 
-	if (isTranspose) {
-		/*
+	if (isTranspose || isConjTranspose) {
+	/*
 	*   ----------------------------------------------------------
 	*   X(nrow_X,ncol_X) +=  tranpose(A(nrow_A,ncol_A))*Y(nrow_Y,ncol_Y)
 	*   X(ix,jx) +=  transpose( A(ia,ja) ) * Y(iy,jy)
@@ -51,7 +54,8 @@ void den_matmul_pre( const char trans_A,
 		 * X  = transpose(A)*Y + X
 		 * ---------------------
 		 */
-			char trans1 = 'T';
+			// char trans1 = 'T';
+			char trans1 = trans_A;
 			char trans2 = 'N';
 			int mm = nrow_X;
 			int nn = ncol_X;
@@ -86,6 +90,10 @@ void den_matmul_pre( const char trans_A,
 						int iy = ia;
 						ComplexOrRealType aij = a_(ia,ja);
 						ComplexOrRealType atji = aij;
+						if (is_complex && isConjTranspose) {
+							atji = PsimagLite::conj( atji );
+						};
+
 						dsum +=  (atji * yin(iy,jy));
 					};
 					xout(ix,jx) += dsum;
@@ -95,7 +103,7 @@ void den_matmul_pre( const char trans_A,
 
 	}
 	else  {
-		/*
+	/*
 	* ---------------------------------------------
 	* X(nrow_X,ncol_X) += A(nrow_A,ncol_A) * Y(nrow_Y,ncol_Y)
 	* X(ia,jy) += sum( A(ia,ja)*Y(ja,jy), over ja )
@@ -128,7 +136,7 @@ void den_matmul_pre( const char trans_A,
 			                      beta,   &(xout(0,0)), ld3);
 		}
 		else {
-			/*
+		/*
 		* ----------------------------------------------
 		* X(ix,jx) += sum( A(ia,ja) * Y(ja,jy), over ja)
 		* ----------------------------------------------

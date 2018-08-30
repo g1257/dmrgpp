@@ -27,10 +27,14 @@ void csr_matmul_post(char trans_A,
  *  requires  (nrow_X == nrow_Y) && ( ncol_Y == nrow_A) && (ncol_X == ncol_A)
  * -------------------------------------------------------
  */
+	const bool is_complex = std::is_same<ComplexOrRealType,std::complex<double> >::value ||
+		                std::is_same<ComplexOrRealType,std::complex<float>  >::value;
 	const int nrow_A = a.rows();
 	int isTranspose = (trans_A == 'T') || (trans_A == 't');
+	int isConjTranspose = (trans_A == 'C') || (trans_A == 'c');
+	int isConj = (trans_A == 'Z') || (trans_A == 'z');
 
-	if (isTranspose) {
+	if (isTranspose || isConjTranspose) {
 	/*
 	 *   ----------------------------------------------------------
 	 *   X(nrow_X,ncol_X) +=  Y(nrow_Y,ncol_Y) * transpose(A(nrow_A,ncol_A))
@@ -51,6 +55,9 @@ void csr_matmul_post(char trans_A,
 				int ja = a.getCol(k);
 				ComplexOrRealType aij = a.getValue(k);
 				ComplexOrRealType atji = aij;
+				if (is_complex && isConjTranspose) {
+					atji = PsimagLite::conj( atji );
+				};
 
 				int iy = 0;
 				for(iy=0; iy < nrow_Y; iy++) {
@@ -79,6 +86,10 @@ void csr_matmul_post(char trans_A,
 			for(k=istart; k < iend; k++) {
 				int ja = a.getCol(k);
 				ComplexOrRealType aij = a.getValue(k);
+				if (is_complex && isConj) {
+					aij = PsimagLite::conj( aij );
+				};
+
 				int iy = 0;
 				for(iy = 0; iy < nrow_Y; iy++) {
 					int ix = iy;

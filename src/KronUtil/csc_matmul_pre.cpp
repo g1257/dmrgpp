@@ -14,7 +14,7 @@ void csc_matmul_pre(char trans_A,
                     const int ncol_X,
                     PsimagLite::Matrix<ComplexOrRealType>& xout )
 {
-	/*
+/*
  * -------------------------------------------------------
  * A in compressed sparse COLUMN format
  *
@@ -32,12 +32,15 @@ void csc_matmul_pre(char trans_A,
  * -------------------------------------------------------
  */
 
+	const bool is_complex = std::is_same<ComplexOrRealType,std::complex<double> >::value ||
+		                std::is_same<ComplexOrRealType,std::complex<float>  >::value;
 	int isTranspose = (trans_A == 'T') || (trans_A == 't');
+	int isConjTranspose = (trans_A == 'C') || (trans_A == 'c');
 
 
 
-	if (isTranspose) {
-		/*
+	if (isTranspose || isConjTranspose) {
+	/*
 	*   ----------------------------------------------------------
 	*   X(nrow_X,ncol_X) +=  tranpose(A(nrow_A,ncol_A))*Y(nrow_Y,ncol_Y)
 	*   X(ix,jx) +=  transpose( A(ia,ja) ) * Y(iy,jy)
@@ -58,6 +61,10 @@ void csc_matmul_pre(char trans_A,
 
 				ComplexOrRealType aij = aval[k];
 				ComplexOrRealType atji = aij;
+				if (is_complex && isConjTranspose) {
+					atji = PsimagLite::conj( atji );
+				};
+
 				int jy = 0;
 				for(jy=0; jy < ncol_Y; jy++) {
 					int ix = ja;
@@ -68,7 +75,7 @@ void csc_matmul_pre(char trans_A,
 		};
 	}
 	else  {
-		/*
+	/*
 	* ---------------------------------------------
 	* X(nrow_X,ncol_X) += A(nrow_A,ncol_A) * Y(nrow_Y,ncol_Y)
 	* X(ia,jy) += sum( A(ia,ja)*Y(ja,jy), over ja )

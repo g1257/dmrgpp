@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <type_traits>
+#include "Complex.h"
 #include "KronUtil.h"
 #include "MatrixNonOwned.h"
 
@@ -273,6 +275,18 @@ bool den_is_zeros(const PsimagLite::Matrix<ComplexOrRealType>&);
 
 template<typename ComplexOrRealType>
 void den_kron_form( const int nrow_A,
+                    const int ncol_A,
+                    const PsimagLite::Matrix<ComplexOrRealType>& a_,
+                    const int nrow_B,
+                    const int ncol_B,
+                    const PsimagLite::Matrix<ComplexOrRealType>& b_,
+                    PsimagLite::Matrix<ComplexOrRealType>& c_);
+
+template<typename ComplexOrRealType>
+void den_kron_form_general(
+	            const char transA,
+		    const char transB,
+		    const int nrow_A,
                     const int ncol_A,
                     const PsimagLite::Matrix<ComplexOrRealType>& a_,
                     const int nrow_B,
