@@ -29,8 +29,7 @@ void den_matmul_pre( const char trans_A,
  *  requires  nrow_X == nrow_A, ncol_A == nrow_Y, ncol_X == ncol_Y
  * -------------------------------------------------------
  */
-	const bool is_complex = std::is_same<ComplexOrRealType,std::complex<double> >::value ||
-		                std::is_same<ComplexOrRealType,std::complex<float>  >::value;
+	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 	bool use_blas =  true;
 	int isTranspose = (trans_A == 'T') || (trans_A == 't');
 	int isConjTranspose = (trans_A == 'C') || (trans_A == 'c');

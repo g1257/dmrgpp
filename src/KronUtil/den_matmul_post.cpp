@@ -12,8 +12,7 @@ void den_matmul_post(const char trans_A,
                      const int ncol_X,
                      PsimagLite::MatrixNonOwned<ComplexOrRealType>& xout)
 {
-	const bool is_complex = std::is_same<ComplexOrRealType,std::complex<double> >::value ||
-		                std::is_same<ComplexOrRealType,std::complex<float> >::value;
+	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 /*
  * -------------------------------------------------------
  * A in dense matrix format

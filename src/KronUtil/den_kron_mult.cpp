@@ -11,8 +11,7 @@ void den_kron_mult_method(const int imethod,
                           typename PsimagLite::Vector<ComplexOrRealType>::Type& xout_,
                           SizeType offsetX)
 {
-	const bool is_complex = std::is_same<ComplexOrRealType,std::complex<double> >::value ||
-		                std::is_same<ComplexOrRealType,std::complex<float>  >::value;
+	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 	const int nrow_A = a_.n_row();
 	const int ncol_A = a_.n_col();
 	const int nrow_B = b_.n_row();

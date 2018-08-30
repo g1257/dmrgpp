@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include <type_traits>
 #include "Complex.h"
 #include "KronUtil.h"
 #include "MatrixNonOwned.h"

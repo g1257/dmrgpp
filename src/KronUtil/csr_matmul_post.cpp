@@ -27,8 +27,7 @@ void csr_matmul_post(char trans_A,
  *  requires  (nrow_X == nrow_Y) && ( ncol_Y == nrow_A) && (ncol_X == ncol_A)
  * -------------------------------------------------------
  */
-	const bool is_complex = std::is_same<ComplexOrRealType,std::complex<double> >::value ||
-		                std::is_same<ComplexOrRealType,std::complex<float>  >::value;
+	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 	const int nrow_A = a.rows();
 	int isTranspose = (trans_A == 'T') || (trans_A == 't');
 	int isConjTranspose = (trans_A == 'C') || (trans_A == 'c');

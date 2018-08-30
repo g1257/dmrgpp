@@ -11,8 +11,7 @@ void csr_den_kron_mult_method(const int imethod,
                               typename PsimagLite::Vector<ComplexOrRealType>::Type& xout_,
                               SizeType offsetX)
 {
-	const bool is_complex = std::is_same<ComplexOrRealType,std::complex<double> >::value ||
-		                std::is_same<ComplexOrRealType,std::complex<float>  >::value;
+	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 	const int isTransA = (transA == 'T') || (transA == 't');
 	const int isConjTransA = (transA == 'C') || (transA == 'c');
 	const int isTransB = (transB == 'T') || (transB == 't');

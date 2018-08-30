@@ -28,8 +28,7 @@ void csr_matmul_pre( char trans_A,
  * -------------------------------------------------------
  */
 
-	const bool is_complex = std::is_same<ComplexOrRealType,std::complex<double> >::value ||
-		                std::is_same<ComplexOrRealType,std::complex<float>  >::value;
+	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 	const int nrow_A = a.rows();
 	int isTranspose = (trans_A == 'T') || (trans_A == 't');
 	int isConjTranspose = (trans_A == 'C') || (trans_A == 'c');

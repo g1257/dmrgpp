@@ -41,8 +41,7 @@ void csr_kron_mult_method(const int imethod,
                           const PsimagLite::MatrixNonOwned<const ComplexOrRealType>& yin,
                           PsimagLite::MatrixNonOwned<ComplexOrRealType>& xout)
 {
-	const bool is_complex = std::is_same<ComplexOrRealType,std::complex<double> >::value ||
-		                std::is_same<ComplexOrRealType,std::complex<float>  >::value;
+	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 	const int isTransA = (transA == 'T') || (transA == 't');
 	const int isTransB = (transB == 'T') || (transB == 't');
 	const int isConjTransA = (transA == 'C') || (transA == 'c');

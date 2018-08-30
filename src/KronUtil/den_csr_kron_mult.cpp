@@ -11,8 +11,7 @@ void den_csr_kron_mult_method(const int imethod,
                               typename PsimagLite::Vector<ComplexOrRealType>::Type& xout_,
                               SizeType offsetX)
 {
-	const bool is_complex = std::is_same<ComplexOrRealType,std::complex<double> >::value ||
-		                std::is_same<ComplexOrRealType,std::complex<float>  >::value;
+	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 
 	const int isTransA = (transA == 'T') || (transA == 't');
 	const int isTransB = (transB == 'T') || (transB == 't');
@@ -428,8 +427,7 @@ void den_csr_kron_mult(const char transA,
                        const typename PsimagLite::Real<ComplexOrRealType>::Type denseFlopDiscount)
 
 {
-	const bool is_complex = std::is_same<ComplexOrRealType,std::complex<double> >::value ||
-		                std::is_same<ComplexOrRealType,std::complex<float>  >::value;
+	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 	const int idebug = 0;
 /*
  *   -------------------------------------------------------------

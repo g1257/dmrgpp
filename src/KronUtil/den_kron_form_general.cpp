@@ -21,8 +21,7 @@ void den_kron_form_general(
  * ---------------------------------------
  */
 	const int idebug = 0;
-	const bool is_complex = std::is_same<ComplexOrRealType,std::complex<double> >::value ||
-		                std::is_same<ComplexOrRealType,std::complex<float> >::value;
+	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 
 	const bool istransA = (transA == 'T') || (transA == 't');
 	const bool istransB = (transB == 'T') || (transB == 't');
