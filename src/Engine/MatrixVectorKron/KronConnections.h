@@ -118,6 +118,8 @@ public:
 
 	void doTask(SizeType outPatch, SizeType)
 	{
+		const bool isComplex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
+
 		SizeType nC = initKron_.connections();
 		SizeType total = initKron_.numberOfPatches(InitKronType::OLD);
 		SizeType offsetX = initKron_.offsetForPatches(InitKronType::NEW, outPatch);
@@ -143,12 +145,13 @@ public:
 				if (!performTranspose)
 					initKron_.checks(Amat, Bmat, outPatch, inPatch);
 
+				const char opt = performTranspose ? (isComplex ? 'c': 't') : 'n';
 				kronMult(x_,
 				         offsetX,
 				         y_,
 				         offsetY,
-				         performTranspose ? 'T' : 'N',
-				         performTranspose ? 'T' : 'N',
+				         opt,
+				         opt,
 				         Amat,
 				         Bmat,
 				         initKron_.denseFlopDiscount());
