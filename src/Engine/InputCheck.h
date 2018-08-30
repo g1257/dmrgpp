@@ -343,7 +343,8 @@ public:
 			\item [fixLegacyBugs] TBW
 			\item [saveDensityMatrixEigenvalues] Save DensityMatrixEigenvalues
 			                                     to the data file.
-			\item [KronUseLowerPart] Use lower part of Kron matrix instead of recomputing it
+			\item [KronNoUseLowerPart] Don't Use lower part of Kron matrix but
+ recompute it instead.
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,
@@ -404,7 +405,7 @@ public:
 		registerOpts.push_back("KrylovAbridge");
 		registerOpts.push_back("fixLegacyBugs");
 		registerOpts.push_back("saveDensityMatrixEigenvalues");
-		registerOpts.push_back("KronUseLowerPart");
+		registerOpts.push_back("KronNoUseLowerPart");
 
 		PsimagLite::Options::Writeable optWriteable(registerOpts,
 		                                            PsimagLite::Options::Writeable::PERMISSIVE);

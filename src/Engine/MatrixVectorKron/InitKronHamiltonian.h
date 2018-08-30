@@ -112,7 +112,7 @@ public:
 	               hc.modelHelper().m(),
 	               hc.modelHelper().quantumNumber(),
 	               model.params().denseSparseThreshold,
-	               model.params().options.find("KronUseLowerPart") != PsimagLite::String::npos),
+	               model.params().options.find("KronNoUseLowerPart") == PsimagLite::String::npos),
 	      model_(model),
 	      hc_(hc),
 	      vstart_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1),
