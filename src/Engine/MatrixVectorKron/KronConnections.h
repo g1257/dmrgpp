@@ -134,34 +134,21 @@ public:
 				const bool performTranspose = (initKron_.useLowerPart() &&
 				                               (outPatch < inPatch));
 
-				const MatrixDenseOrSparseType& AmatHandle =  performTranspose ?
+				const MatrixDenseOrSparseType& Amat =  performTranspose ?
 				            xiStruct(inPatch,outPatch): xiStruct(outPatch,inPatch);
 
-				const MatrixDenseOrSparseType& BmatHandle =  performTranspose ?
+				const MatrixDenseOrSparseType& Bmat =  performTranspose ?
 				            yiStruct(inPatch,outPatch) : yiStruct(outPatch,inPatch);
-#ifndef FIX_KRON_USE_LOWER_PART
-				const bool deepCopy = false;
-#else
-				const bool deepCopy = performTranspose;
-#endif
-				PsimagLite::DeepCopyOrNot<MatrixDenseOrSparseType> deepCopyOrNot(deepCopy);
-				const MatrixDenseOrSparseType& Amat = deepCopyOrNot(AmatHandle);
-				const MatrixDenseOrSparseType& Bmat = deepCopyOrNot(BmatHandle);
 
 				if (!performTranspose)
 					initKron_.checks(Amat, Bmat, outPatch, inPatch);
-
-				if (deepCopy) {
-					const_cast<MatrixDenseOrSparseType&>(Amat).conjugate();
-					const_cast<MatrixDenseOrSparseType&>(Bmat).conjugate();
-				}
 
 				kronMult(x_,
 				         offsetX,
 				         y_,
 				         offsetY,
-				         performTranspose ? 't' : 'n',
-				         performTranspose ? 't' : 'n',
+				         performTranspose ? 'T' : 'N',
+				         performTranspose ? 'T' : 'N',
 				         Amat,
 				         Bmat,
 				         initKron_.denseFlopDiscount());
