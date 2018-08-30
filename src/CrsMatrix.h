@@ -530,6 +530,7 @@ public:
 
 	void write(String label, IoSerializer& ioSerializer) const
 	{
+		if (nrow_ > 0) checkValidity();
 		ioSerializer.createGroup(label);
 		ioSerializer.write(label + "/nrow_",  nrow_);
 		ioSerializer.write(label + "/ncol_",  ncol_);
@@ -552,6 +553,7 @@ public:
 		if (rowptr_[nrow_] == 0) return;
 		ioSerializer.read(colind_, label + "/colind_");
 		ioSerializer.read(values_, label + "/values_");
+		checkValidity();
 	}
 
 	friend bool isZero(const CrsMatrix& A, double eps = 0.0)
@@ -1387,12 +1389,12 @@ void sum(CrsMatrix<T>& A,
 }
 
 template<typename T>
-bool isHermitian(const CrsMatrix<T>& A,bool=false)
+bool isHermitian(const CrsMatrix<T>& A,bool verbose=false)
 {
 	if (A.rows() != A.cols()) return false;
 	Matrix<T> dense;
 	crsMatrixToFullMatrix(dense, A);
-	return isHermitian(dense);
+	return isHermitian(dense, verbose);
 }
 
 template<typename T>
