@@ -169,7 +169,7 @@ public:
 		hsize_t dims[1];
 		dims[0] = 1;
 		unsigned char tmp[1];
-		tmp[0] = (b) ? '1' : '0';
+		tmp[0] = (b) ? 1 : 0;
 		const void* ptr = static_cast<const void*>(tmp);
 		internalWrite<unsigned char>(name, ptr, dims, 1);
 	}
@@ -361,12 +361,12 @@ public:
 	void read(bool& value, String name)
 	{
 		unsigned char tmp[1];
-		tmp[0] = ' ';
+		tmp[0] = 0;
 		void* ptr = static_cast<void *>(tmp);
 		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet("Def/" + name));
 		dataset->read(ptr, typeToH5<unsigned char>());
 		delete dataset;
-		value = (tmp[0] == '1');
+		value = (tmp[0] & 1);
 	}
 
 	template<typename T1, typename T2>
