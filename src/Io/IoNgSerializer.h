@@ -638,9 +638,10 @@ private:
 		SizeType bytes = 0;
 		for (SizeType i = 0; i < total; ++i) {
 			assert(j < c.size());
+			assert(mask > 0);
 			if (src[i]) c[j] |= mask;
 			mask <<= 1;
-			if (i > 0 && (i % 8 == 0)) ++bytes;
+			if (i > 0 && ((i + 1) % 8 == 0)) ++bytes;
 			if (bytes == blockSize) {
 				bytes = 0;
 				++j;
@@ -670,9 +671,10 @@ private:
 		SizeType bytes = 0;
 		for (SizeType i = 0; i < numberOfBits; ++i) {
 			assert(j < x.size());
+			assert(mask > 0);
 			dest[i] = (x[j] & mask);
 			mask <<= 1;
-			if (i > 0 && (i % 8 == 0)) ++bytes;
+			if (i > 0 && ((i + 1) % 8 == 0)) ++bytes;
 			if (bytes == blockSize) {
 				bytes = 0;
 				++j;
