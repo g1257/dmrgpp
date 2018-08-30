@@ -66,7 +66,7 @@ void csc_kron_mult_method(const int imethod,
 
 	if (imethod == 1) {
 
-		/*
+	/*
 	 *  --------------------------------------------
 	 *  BY(ib,ja) = B(ib,jb)*Y(jb,ja)
 	 *
@@ -76,7 +76,7 @@ void csc_kron_mult_method(const int imethod,
 
 
 
-		/*
+	/*
 	 * ---------------
 	 * setup BY(ib,ja)
 	 * ---------------
@@ -238,7 +238,7 @@ void csc_kron_mult_method(const int imethod,
 		}
 	}
 	else if (imethod == 3) {
-		/*
+	/*
 	* ---------------------------------------------
 	* C = kron(A,B)
 	* C([ib,ia], [jb,ja]) = A(ia,ja)*B(ib,jb)
@@ -290,7 +290,7 @@ void csc_kron_mult( const int nrow_A,
                     const typename PsimagLite::Real<ComplexOrRealType>::Type denseFlopDiscount)
 
 {
-	/*
+/*
  *   -------------------------------------------------------------
  *   A and B are in compressed sparse COLUMN format
  *
