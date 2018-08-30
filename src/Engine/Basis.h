@@ -465,6 +465,7 @@ public:
 	           typename SomeIoType::Serializer::WriteMode mode,
 	           bool minimizeWrite) const
 	{
+		checkSigns();
 		PsimagLite::String label = ss + "/";
 		io.createGroup(ss);
 		io.write(useSu2Symmetry_, label + "useSu2Symmetry");
@@ -566,12 +567,35 @@ private:
 			permutationVector_[permInverse_[i]]=i;
 
 		QnType::readVector(qns_, prefix + "QNShrink", io);
-
+		checkSigns();
 		dmrgTransformed_=false;
 		if (useSu2Symmetry_)
 			symmSu2_.read(io,prefix, minimizeRead);
 		else
 			symmLocal_.read(io,prefix, minimizeRead);
+	}
+
+
+	void checkSigns() const
+	{
+#ifndef NDEBUG
+		if (!Qn::ifPresentOther0IsElectrons || Qn::modalStruct.size() == 0)
+			return;
+
+		SizeType n = partition_.size();
+		assert(n > 0);
+		--n;
+		assert(partition_[n] == signs_.size());
+		for (SizeType p = 0; p < n; ++p) {
+			SizeType start = partition_[p];
+			SizeType end = partition_[p + 1];
+			SizeType expected = (qns_[p].other[0] & 1);
+			for (SizeType i = start; i < end; ++i) {
+				if (signs_[i] != expected)
+					err("Unexpected sign\n");
+			}
+		}
+#endif
 	}
 
 	static void flattenQns(VectorQnType& qns)
