@@ -108,7 +108,10 @@ struct WaveStructSvd {
 	                   const VectorMatrixType& vts,
 	                   const VectorVectorRealType& s,
 	                   const VectorQnType& qns)
-	    : u_(u), vts_(vts), s_(s), qns_(qns)
+	    : u_(u),
+	      vts_(vts), // Not yet used, will be used by WftAccelSvd
+	      s_(s),     // Not yet used, will be used by WftAccelSvd
+	      qns_(qns)
 	{}
 
 	const BlockDiagonalMatrixType& u() const { return u_; }
