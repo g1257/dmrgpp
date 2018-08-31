@@ -45,7 +45,7 @@ int main(int argc,char *argv[])
 
 	double e1 = 0;
 	VectorComplexType z1(n, 0.0);
-	lanczosSolver.computeExcitedState(e1, z1, excited);
+	lanczosSolver.computeExcitedState(e1, z1, initialV, excited);
 	std::cout<<"energy1="<<e1<<"\n";
 	std::cout<<z1<<"\n";
 
