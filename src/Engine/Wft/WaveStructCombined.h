@@ -71,7 +71,7 @@ public:
 		}
 
 		assert(!twoSiteDmrg);
-		if (stack.size() > 0 && counter == 0)
+		if (stack.size() > 1 && counter == 0)
 			stack.pop();
 		else
 			needsPop_ = true;
