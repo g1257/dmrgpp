@@ -126,7 +126,7 @@ sub procCout
 	while (<FILE>) {
 		chomp;
 		if (/DMRG\+\+ version (.*$)/) {
-			$values->{"version"} = $1;
+			$values->{"Version"} = $1;
 			next;
 		}
 
@@ -135,32 +135,37 @@ sub procCout
 			next;
 		}
 
+		if (/DmrgSolver \[(\d+)\]\: Turning off the engine/) {
+			$values->{"UserTime"} = $1;
+		}
+
 		if (/Current virtual memory is/) {
 			if (/maximum was (.+)$/) {
-				$values->{"maxRAM"} = $1;
+				$values->{"MaxRAM"} = $1;
 			}		
 		}
 	}
 
 	close(FILE);
-	$values->{"energies"} = \@energies;
-	$values->{"version"} = "UNDEFINED" unless (defined($values->{"version"}));
-
+	$values->{"Energies"} = \@energies;
 }
 
 sub compareValues
 {
 	my ($newValues, $oldValues, $n) = @_;
-	my $v1 = $newValues->{"version"};
-	my $v2 = $oldValues->{"version"};
-	defined($v1) or $v1 = "UNDEFINED";
-	defined($v2) or $v2 = "UNDEFINED";
-	print "|$n|: New Version $v1, Old Version $v2\n";
-	my $maxEdiff = maxEnergyDiff($newValues->{"energies"}, $oldValues->{"energies"});
-	print "|$n|: MaxEnergyDiff = $maxEdiff\n";
-	my $ram1 = $newValues->{"maxRAM"};
-	my $ram2 = $oldValues->{"maxRAM"};
-	print "|$n|: NewMaxRAM $ram1      OldMaxRAM $ram2\n" if ($ram1 and $ram2); 
+	foreach my $key (sort keys %$oldValues) {
+		my $v1 = $newValues->{"$key"};
+		my $v2 = $oldValues->{"$key"};
+		defined($v1) or $v1 = "UNDEFINED";
+		defined($v2) or $v2 = "UNDEFINED";
+		if ($key ne "Energies") {
+			print "|$n|: $key: $v1 $v2\n";
+			next;
+		}
+
+		my $maxEdiff = maxEnergyDiff($newValues->{$key}, $oldValues->{$key});
+		print "|$n|: MaxEnergyDiff = $maxEdiff\n";
+	}
 }
 
 sub maxEnergyDiff
@@ -197,7 +202,7 @@ sub procMemcheck
 		}
 
 		if (/terminate called after throwing/) {
-			$mode = "throw";
+			$mode = uc("throw");
 			while (<FILE>) {
 				if (/what\(\)/) {
 					$extra = $_;
@@ -210,12 +215,12 @@ sub procMemcheck
 		}
 		next unless (/^==/);
 		if (/invalid/i) {
-			$mode = "invalid";
+			$mode = uc("invalid");
 			last;
 		}
 
 		if (/uninitial/i) {
-			$mode = "uninitialized";
+			$mode = uc("uninitialized");
 			last;
 		}
 
@@ -230,20 +235,16 @@ sub procMemcheck
 
 	close(FILE);
 
-	if ($mode eq "FATAL" || $mode eq "throw") {
-		print "$0: ATTENTION TEST $n couldn't run because of $extra\n";
+	if ($mode eq "FATAL" || $mode eq uc("throw")) {
+		print "|$n|: ".uc($mode)." couldn't run because of $extra\n";
 		return;
 	}
 
 	foreach my $key (keys %lost) {
 		my $val = $lost{"$key"};
 		next if ($val == 0);
-		print "$0: ATTENTION TEST $n $key lost ".$lost{"$key"}." bytes\n";
+		print "|$n|: WARNING: $key lost ".$lost{"$key"}." bytes\n";
 	}
-
-	return if ($mode eq "OK" and $failed);
-
-	print "|$n|: output mode $mode\n";
 }
 
 sub fileSize
