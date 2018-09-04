@@ -127,7 +127,7 @@ public:
 	      wftOptions_(ProgramGlobals::INFINITE,
 	                  params.options,
 	                  true,
-	                  0,
+	                  true,
 	                  params.denseSparseThreshold),
 	      progress_("WaveFunctionTransf"),
 	      filenameIn_(params.checkpoint.filename),
@@ -174,7 +174,7 @@ public:
 	{
 		if (stage == wftOptions_.dir) return;
 		wftOptions_.dir = stage;
-		wftOptions_.counter = 0;
+		wftOptions_.bounce = true;
 	}
 
 	void triggerOn()
@@ -198,7 +198,7 @@ public:
 
 		waveStructCombined_.beforeWft(wftOptions_.dir,
 		                              wftOptions_.twoSiteDmrg,
-		                              wftOptions_.counter);
+		                              wftOptions_.bounce);
 		PsimagLite::OstringStream msg;
 		msg<<"Window open, ready to transform vectors";
 		progress_.printline(msg,std::cout);
@@ -388,7 +388,7 @@ private:
 		waveStructCombined_.setLrs(lrs);
 		waveStructCombined_.afterWft(wftOptions_.dir);
 		wftOptions_.firstCall = false;
-		wftOptions_.counter++;
+		wftOptions_.bounce = false;
 	}
 
 	void createVector(VectorWithOffsetType& psiDest,

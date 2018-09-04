@@ -15,14 +15,14 @@ struct WftOptions {
 	WftOptions(ProgramGlobals::DirectionEnum dir1,
 	           PsimagLite::String options,
 	           bool f,
-	           SizeType c,
+	           bool b,
 	           RealType d)
-	    : dir(dir1),
-	      twoSiteDmrg(options.find("twositedmrg") != PsimagLite::String::npos),
-	      accel((twoSiteDmrg) ? ACCEL_BLOCKS : ACCEL_PATCHES),
+	    : twoSiteDmrg(options.find("twositedmrg") != PsimagLite::String::npos),
 	      kronLoadBalance(options.find("KronLoadBalance") != PsimagLite::String::npos),
 	      firstCall(f),
-	      counter(c),
+	      bounce(b),
+	      dir(dir1),
+	      accel((twoSiteDmrg) ? ACCEL_BLOCKS : ACCEL_PATCHES),
 	      denseSparseThreshold(d)
 	{
 		if (options.find("wftAccelSvd") != PsimagLite::String::npos)
@@ -42,7 +42,7 @@ struct WftOptions {
 		io.read(accel, label + "/accel");
 		io.read(kronLoadBalance, label + "/kronLoadBalance");
 		io.read(firstCall, label + "/firstCall");
-		io.read(counter, label + "/counter");
+		io.read(bounce, label + "/bounce");
 		io.read(denseSparseThreshold, label + "/denseSparseThreshold");
 	}
 
@@ -54,16 +54,16 @@ struct WftOptions {
 		io.write(accel, label + "/accel");
 		io.write(kronLoadBalance, label + "/kronLoadBalance");
 		io.write(firstCall, label + "/firstCall");
-		io.write(counter, label + "/counter");
+		io.write(bounce, label + "/bounce");
 		io.write(denseSparseThreshold, label + "/denseSparseThreshold");
 	}
 
-	ProgramGlobals::DirectionEnum dir;
 	bool twoSiteDmrg;
-	AccelEnum accel;
 	bool kronLoadBalance;
 	bool firstCall;
-	SizeType counter;
+	bool bounce;
+	ProgramGlobals::DirectionEnum dir;
+	AccelEnum accel;
 	RealType denseSparseThreshold;
 
 private:

@@ -147,7 +147,7 @@ public:
 		if (wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) {
 			if (wftOptions_.firstCall) {
 				transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
-			} else if (wftOptions_.counter == 0) {
+			} else if (wftOptions_.bounce) {
 				transformVector1bounce(psiDest,psiSrc,lrs,nk);
 			} else {
 				transformVector1(psiDest,psiSrc,lrs,nk);
@@ -159,7 +159,7 @@ public:
 		if (wftOptions_.dir == ProgramGlobals::EXPAND_SYSTEM) {
 			if (wftOptions_.firstCall)
 				transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
-			else if (wftOptions_.counter == 0)
+			else if (wftOptions_.bounce)
 				transformVector2bounce(psiDest,psiSrc,lrs,nk);
 			else
 				transformVector2(psiDest,psiSrc,lrs,nk);

@@ -51,7 +51,7 @@ public:
 
 	void beforeWft(ProgramGlobals::DirectionEnum dir,
 	               bool twoSiteDmrg,
-	               SizeType counter)
+	               bool bounce)
 	{
 		WftStackType& stack = (dir == ProgramGlobals::EXPAND_ENVIRON) ? wsStack_ :
 		                                                                weStack_;
@@ -71,7 +71,7 @@ public:
 		}
 
 		assert(!twoSiteDmrg);
-		if (stack.size() > 1 && counter == 0)
+		if (stack.size() > 1 && bounce)
 			stack.pop();
 		else
 			needsPop_ = true;
