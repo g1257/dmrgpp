@@ -9,7 +9,7 @@ int main(int argc,char *argv[])
 	typedef std::complex<double> ComplexType;
 	typedef PsimagLite::ParametersForSolver<double> SolverParametersType;
 	typedef PsimagLite::Vector<ComplexType>::Type VectorComplexType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	if (argc!=2) {
 		std::cout<<"USAGE: "<<argv[0]<<" excited\n";

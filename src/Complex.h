@@ -40,13 +40,13 @@ public:
 template<typename T>
 class IsComplexNumber {
 public:
-	enum { True = false};
+	enum OpaqueEnum { True = false};
 };
 
 template<typename T>
 class IsComplexNumber<std::complex<T> > {
 public:
-	enum { True = Loki::TypeTraits<T>::isArith };
+	enum OpaqueEnum { True = Loki::TypeTraits<T>::isArith };
 };
 
 
