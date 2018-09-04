@@ -12,7 +12,7 @@ class WftAccelSvd {
 
 	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType DmrgWaveStructType;
 	typedef typename DmrgWaveStructType::WaveStructSvdType WaveStructSvdType;
-	typedef typename WaveFunctionTransfBaseType::WftOptions WftOptionsType;
+	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
 	typedef typename WaveFunctionTransfBaseType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename WaveFunctionTransfBaseType::VectorSizeType VectorSizeType;
 	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;

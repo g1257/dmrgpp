@@ -106,7 +106,7 @@ class WaveFunctionTransfLocal : public
 
 public:
 
-	typedef typename BaseType::WftOptions WftOptions;
+	typedef typename BaseType::WftOptionsType WftOptionsType;
 	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
@@ -125,7 +125,7 @@ public:
 	typedef WftAccelSvd<BaseType> WftAccelSvdType;
 
 	WaveFunctionTransfLocal(const DmrgWaveStructType& dmrgWaveStruct,
-	                        const WftOptions& wftOptions)
+	                        const WftOptionsType& wftOptions)
 	    : dmrgWaveStruct_(dmrgWaveStruct),
 	      wftOptions_(wftOptions),
 	      wftAccelBlocks_(dmrgWaveStruct, wftOptions),
@@ -193,12 +193,12 @@ private:
 	                             const VectorSizeType& nk,
 	                             typename ProgramGlobals::DirectionEnum dir) const
 	{
-		if (wftOptions_.accel == WftOptions::ACCEL_PATCHES) {
+		if (wftOptions_.accel == WftOptionsType::ACCEL_PATCHES) {
 			SizeType iOld = findIold(psiSrc, psiDest.qn(iNew));
 			return wftAccelPatches_(psiDest, iNew, psiSrc, iOld, lrs, nk, dir);
 		}
 
-		if (wftOptions_.accel == WftOptions::ACCEL_SVD) {
+		if (wftOptions_.accel == WftOptionsType::ACCEL_SVD) {
 			SizeType iOld = findIold(psiSrc, psiDest.qn(iNew));
 			return wftAccelSvd_(psiDest, iNew, psiSrc, iOld, lrs, nk, dir);
 		}
@@ -238,7 +238,7 @@ private:
 	                          const LeftRightSuperType& lrs,
 	                          const VectorSizeType& nk) const
 	{
-		if (wftOptions_.accel == WftOptions::ACCEL_BLOCKS &&
+		if (wftOptions_.accel == WftOptionsType::ACCEL_BLOCKS &&
 		        lrs.left().block().size() > 1)
 			return wftAccelBlocks_.environFromInfinite(psiDest, i0, psiSrc, iOld, lrs, nk);
 
@@ -296,7 +296,7 @@ private:
 		progress_.printline(msg,std::cout);
 		assert(dmrgWaveStruct_.lrs().super().permutationInverse().size() == psiSrc.size());
 		bool inBlocks = (lrs.right().block().size() > 1 &&
-		                 wftOptions_.accel == WftOptions::ACCEL_BLOCKS);
+		                 wftOptions_.accel == WftOptionsType::ACCEL_BLOCKS);
 		SparseMatrixType we;
 		dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).toSparse(we);
 		SparseMatrixType ws;
@@ -466,7 +466,7 @@ private:
 	}
 
 	const DmrgWaveStructType& dmrgWaveStruct_;
-	const WftOptions& wftOptions_;
+	const WftOptionsType& wftOptions_;
 	WftAccelBlocksType wftAccelBlocks_;
 	WftAccelPatchesType wftAccelPatches_;
 	WftAccelSvdType wftAccelSvd_;

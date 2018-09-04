@@ -10,7 +10,7 @@ template<typename WaveFunctionTransfBaseType, typename MatrixOrIdentityType>
 class WftSparseTwoSite {
 
 	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType DmrgWaveStructType;
-	typedef typename WaveFunctionTransfBaseType::WftOptions WftOptionsType;
+	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
 	typedef typename WaveFunctionTransfBaseType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename WaveFunctionTransfBaseType::VectorSizeType VectorSizeType;
 	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;

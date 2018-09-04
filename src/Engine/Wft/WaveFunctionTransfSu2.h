@@ -102,7 +102,7 @@ class WaveFunctionTransfSu2  : public
 
 public:
 
-	typedef typename BaseType::WftOptions WftOptions;
+	typedef typename BaseType::WftOptionsType WftOptionsType;
 	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
@@ -117,7 +117,7 @@ public:
 	typedef MatrixOrIdentity<SparseMatrixType> MatrixOrIdentityType;
 
 	WaveFunctionTransfSu2(const DmrgWaveStructType& dmrgWaveStruct,
-	                      const WftOptions& wftOptions)
+	                      const WftOptionsType& wftOptions)
 	    : dmrgWaveStruct_(dmrgWaveStruct),
 	      wftOptions_(wftOptions),
 	      progress_("WaveFunctionTransfLocal")
@@ -686,9 +686,8 @@ private:
 	}
 
 	const DmrgWaveStructType& dmrgWaveStruct_;
-	const WftOptions& wftOptions_;
+	const WftOptionsType& wftOptions_;
 	PsimagLite::ProgressIndicator progress_;
-
 }; // class WaveFunctionTransfSu2
 } // namespace Dmrg
 

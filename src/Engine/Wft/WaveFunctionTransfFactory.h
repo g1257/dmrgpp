@@ -118,7 +118,7 @@ public:
 	WaveFunctionTransfLocalType;
 	typedef WaveFunctionTransfSu2<WaveStructCombinedType,VectorWithOffsetType>
 	WaveFunctionTransfSu2Type;
-	typedef typename WaveFunctionTransfBaseType::WftOptions WftOptionsType;
+	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
 	typedef typename WaveStructCombinedType::WaveStructSvdType WaveStructSvdType;
 
 	template<typename SomeParametersType>
