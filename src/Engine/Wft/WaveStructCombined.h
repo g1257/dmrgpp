@@ -148,6 +148,11 @@ public:
 		return getWave(dir).u();
 	}
 
+	SizeType size(ProgramGlobals::SysOrEnvEnum sysOrEnv) const
+	{
+		return (sysOrEnv == ProgramGlobals::SYSTEM) ? wsStack_.size() : weStack_.size();
+	}
+
 private:
 
 	void writePartial(PsimagLite::IoSelector::Out& io, PsimagLite::String prefix) const

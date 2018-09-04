@@ -323,6 +323,11 @@ public:
 		return waveStructCombined_.getTransform(dir);
 	}
 
+	SizeType size(ProgramGlobals::SysOrEnvEnum sysOrEnv) const
+	{
+		return waveStructCombined_.size(sysOrEnv);
+	}
+
 	bool isEnabled() const { return isEnabled_; }
 
 	const WftOptionsType options() const { return wftOptions_; }

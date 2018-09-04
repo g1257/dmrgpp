@@ -154,6 +154,8 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
 	typedef typename BasisType::QnType QnType;
+	typedef typename PsimagLite::Vector<BlockDiagonalMatrixType*>::Type
+	VectorBlockDiagonalMatrixType;
 
 	enum {DISABLED,WFT_NOADVANCE,WFT_ADVANCE,COLLAPSE};
 
@@ -198,6 +200,15 @@ public:
 		assert(fabs(sum-1.0)<1e-5);
 
 		this->common().initTimeVectors(betas_,ioIn);
+	}
+
+	~TargetingMetts()
+	{
+		SizeType n = garbage_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			delete garbage_[i];
+			garbage_[i] = 0;
+		}
 	}
 
 	RealType weight(SizeType i) const
@@ -513,7 +524,7 @@ private:
 			msg<<" site="<<block2[i]<<" is "<<betaFixed[i];
 		progress_.printline(msg,std::cerr);
 
-		const BlockDiagonalMatrixType& transformSystem = wft_.getTransform(ProgramGlobals::SYSTEM);
+		const BlockDiagonalMatrixType& transformSystem = getTransform(ProgramGlobals::SYSTEM);
 
 		TargetVectorType newVector1(transformSystem.rows(),0);
 
@@ -530,7 +541,7 @@ private:
 		           block1);
 		pureVectors_.first = newVector1;
 
-		const BlockDiagonalMatrixType& transformEnviron = wft_.getTransform(ProgramGlobals::ENVIRON);
+		const BlockDiagonalMatrixType& transformEnviron = getTransform(ProgramGlobals::ENVIRON);
 		TargetVectorType newVector2(transformEnviron.rows(),0);
 
 		VectorSizeType nk2;
@@ -541,7 +552,8 @@ private:
 		           ProgramGlobals::ENVIRON,
 		           betaFixedVolume,
 		           lrs_.right(),
-		           transformEnviron,block2);
+		           transformEnviron,
+		           block2);
 		pureVectors_.second = newVector2;
 		setFromInfinite(this->common().targetVectors(0),lrs_);
 		assert(norm(this->common().targetVectors()[0])>1e-6);
@@ -837,6 +849,18 @@ private:
 		progress_.printline(msg,std::cout);
 	}
 
+	const BlockDiagonalMatrixType& getTransform(ProgramGlobals::SysOrEnvEnum sysOrEnv)
+	{
+		const SizeType stackSize = wft_.size(sysOrEnv);
+
+		if (stackSize > 0) return wft_.getTransform(sysOrEnv);
+
+		BlockDiagonalMatrixType* m = new BlockDiagonalMatrixType;
+		garbage_.push_back(m);
+
+		return *m;
+	}
+
 	const ModelType& model_;
 	const LeftRightSuperType& lrs_;
 	TargetParamsType mettsStruct_;
@@ -853,6 +877,7 @@ private:
 	MettsPrev environPrev_;
 	std::pair<TargetVectorType,TargetVectorType> pureVectors_;
 	VectorSizeType sitesCollapsed_;
+	VectorBlockDiagonalMatrixType garbage_;
 };     //class TargetingMetts
 } // namespace Dmrg
 
