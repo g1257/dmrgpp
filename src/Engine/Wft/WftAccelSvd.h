@@ -3,6 +3,7 @@
 #include "Vector.h"
 #include "BLAS.h"
 #include <limits>
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -10,6 +11,7 @@ template<typename WaveFunctionTransfBaseType>
 class WftAccelSvd {
 
 	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType DmrgWaveStructType;
+	typedef typename DmrgWaveStructType::WaveStructSvdType WaveStructSvdType;
 	typedef typename WaveFunctionTransfBaseType::WftOptions WftOptionsType;
 	typedef typename WaveFunctionTransfBaseType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename WaveFunctionTransfBaseType::VectorSizeType VectorSizeType;
@@ -171,27 +173,32 @@ public:
 	                const VectorSizeType& nk,
 	                typename ProgramGlobals::DirectionEnum dir) const
 	{
-//		const VectorMatrixType& uVeryOld = dmrgWaveStruct_.u(); // use BlockDiagonalMatrixType
-//		const VectorMatrixType& vPrimeVeryOld = dmrgWaveStruct_.vts();
-//		const VectorQnType& qnsVeryOld = dmrgWaveStruct_.qns();
-//		internal(uVeryOld,
-//		         vPrimeVeryOld,
-//		         qnsVeryOld,
-//		         uPrevious,
-//		         vPrimePrevious,
-//		         qnsPrevious,
-//		         sPrevious);
+//		typename ProgramGlobals::SysOrEnvEnum prevPart = (dir == ProgramGlobals::EXPAND_SYSTEM) ?
+//		            ProgramGlobals::SYSTEM : ProgramGlobals::ENVIRON;
+//		const WaveStructSvdType& wavePrev = dmrgWaveStruct_.getWave(prevPart);
+
+//		typename ProgramGlobals::SysOrEnvEnum oppoPart = (dir == ProgramGlobals::EXPAND_SYSTEM) ?
+//		            ProgramGlobals::ENVIRON : ProgramGlobals::SYSTEM;
+//		const WaveStructSvdType& waveOld = dmrgWaveStruct_.getWave(oppoPart);
+
+//		internal(waveOld.u(),
+//		         waveOld.vts(),
+//		         waveOld.qns(),
+//		         wavePrev.u(),
+//		         wavePrev.vts(),
+//		         wavePrev.qns(),
+//		         wavePrev.s());
 	}
 
 private:
 
 	void internal(const VectorMatrixType& uVeryOld,
-	                const VectorMatrixType& vPrimeVeryOld,
-	                const VectorQnType& qnsVeryOld,
-	                const VectorMatrixType& uPrevious,
-	                const VectorMatrixType& vPrimePrevious,
-	                const VectorQnType& qnsPrevious,
-	                const VectorVectorType& sPrevious)
+	              const VectorMatrixType& vPrimeVeryOld,
+	              const VectorQnType& qnsVeryOld,
+	              const VectorMatrixType& uPrevious,
+	              const VectorMatrixType& vPrimePrevious,
+	              const VectorQnType& qnsPrevious,
+	              const VectorVectorType& sPrevious)
 	{
 
 		err("WftAccelSvd: Not ready yet\n");
