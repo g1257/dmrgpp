@@ -4,17 +4,17 @@ use strict;
 use warnings;
 use utf8;
 
-my ($makeJ) = @ARGV;
+my $makeJ = shift @ARGV;
 defined($makeJ) or die "USAGE: $0 makeJ\n";
 
-main(4, $makeJ);
+main(4, $makeJ, \@ARGV);
 
 sub main
 {
-	my ($items, $makeJ) = @_;
+	my ($items, $makeJ, $codes) = @_;
 
 	for (my $i = 0; $i < $items; ++$i) {
-		kompileRig($i, $makeJ);
+		kompileRig($i, $makeJ, $codes);
 	}
 
 	print "---------------------\n";
@@ -22,9 +22,10 @@ sub main
 
 sub kompileRig
 {
-	my ($ind, $makeJ) = @_;
+	my ($ind, $makeJ, $codes) = @_;
 	my $command = "make clean; make -j $makeJ";
-	my @paths = ("../../PsimagLite/lib", "../../PsimagLite/drivers", "../src");
+	my @paths = qw!../../PsimagLite/lib !;
+	addCodes(\@paths, $codes);
 	my $n = scalar(@paths);
 	for (my $i = 0; $i < $n; ++$i) {
 		kompileRigEach($ind, $paths[$i], $command);
@@ -39,6 +40,38 @@ sub kompileRigEach
 	executeAndDieIfNotSuccess($cmd);
 	$cmd = "cd $path; $command";
 	executeAndDieIfNotSuccess($cmd);
+}
+
+sub addCodes
+{
+	my ($paths, $codes) = @_;
+	addAll($codes);
+	my $n = scalar(@$codes);
+	for (my $i = 0; $i < $n; ++$i) {
+		my $code = $codes->[$i];
+		if ($code eq "dmrgpp") {
+			push @$paths, "../src";
+		} elsif ($code eq "LanczosPlusPlus") {
+			push @$paths, "../../LanczosPlusPlus/src";
+		} elsif ($code eq "BetheAnsatz") {
+			push @$paths, "../../BetheAnsatz/src";
+		} elsif ($code eq "FreeFermions") {
+			push @$paths, "../../FreeFermions/examples";
+		} elsif ($code eq "merapp") {
+			push @$paths, "../../merapp/src";
+		} elsif ($code eq "PsimagLite") {
+			push @$paths, " ../../PsimagLite/drivers";
+		} else {
+			die "$0: Unknown code $code\n";
+		}
+	}
+}
+
+sub addAll
+{
+	my ($codes) = @_;
+	return if (scalar(@$codes) > 0);
+	@$codes = qw/PsimagLite dmrgpp  LanczosPlusPlus/; # BetheAnsatz  FreeFermions merapp/;
 }
 
 sub flattenWithNewLines

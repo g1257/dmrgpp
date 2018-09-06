@@ -224,6 +224,15 @@ public:
 		return true;
 	}
 
+	// There exits objects Qn that have operator= (comparison)
+	// notReallySort takes a vector of Qn objects as INPUT.1: inQns of size big
+	// It also takes a vector of non-negative integers of size big as INPUT.2 : inNumbers
+	// Let P be a permutation that "not really sorts" inQns, P is of size big
+	// Let tmpQns be P applied to inQns; tmpQns[i] = inQns[P[i]], tmpQns is of size big
+	// notReallySort fills the following vectors
+	// OUTPUT.1: outNumber is P applied to inNumbers; outNumber[i] = inNumber[P[i]], of size big
+	// OUTPUT.2: outQns[x] is the x-th unique tmpQns, of size small
+	// OUTPUT.3: offset[x] = min {y; such that tmpQns[y] = outQns[x]}, of size small
 	static void notReallySort(VectorSizeType& outNumber,
 	                          VectorQnType& outQns,
 	                          VectorSizeType& offset,
