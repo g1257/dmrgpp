@@ -101,6 +101,7 @@ public:
 	typedef typename TargetingType::BlockType BlockType;
 	typedef typename TargetingType::TargetVectorType TargetVectorType;
 	typedef typename TargetingType::RealType RealType;
+	typedef typename TargetingType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename BasisType::QnType QnType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
@@ -203,7 +204,6 @@ private:
 		wft_.triggerOn();
 
 		RealType gsEnergy = 0;
-
 		SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
 		checkSaveOption(saveOption);
 
@@ -223,31 +223,23 @@ private:
 		msg0<<"Setting up Hamiltonian basis of size="<<lrs.super().size();
 		progress_.printline(msg0,std::cout);
 
-		typename PsimagLite::Vector<TargetVectorType>::Type vecSaved;
-		typename PsimagLite::Vector<RealType>::Type energySaved;
-
 		SizeType total = lrs.super().partition()-1;
-
-		energySaved.resize(total);
-		vecSaved.resize(total);
-		VectorSizeType weights(total);
-
-		SizeType counter=0;
 		SizeType weightsTotal = 0;
-		for (SizeType i=0;i<total;i++) {
+		VectorSizeType weights(total);
+		VectorSizeType sectors;
+		for (SizeType i = 0; i < total; ++i) {
 			SizeType bs = lrs.super().partition(i+1)-lrs.super().partition(i);
 			if (verbose_)
 				std::cerr<<lrs.super().qnEx(i);
 
-			weights[i]=bs;
-
 			// Do only one sector unless doing su(2) with j>0, then do all m's
 			if (lrs.super().pseudoQn(i) != quantumSector_ && !findSymmetrySector)
-				weights[i]=0;
+				bs = 0;
+			else
+				sectors.push_back(i);
 
-			weightsTotal += weights[i];
-			counter+=bs;
-			vecSaved[i].resize(weights[i]);
+			weightsTotal += bs;
+			weights[i] = bs;
 		}
 
 		if (weightsTotal == 0) {
@@ -256,35 +248,40 @@ private:
 			throw PsimagLite::RuntimeError(msg);
 		}
 
-		typedef typename TargetingType::VectorWithOffsetType
-		        VectorWithOffsetType;
-		VectorWithOffsetType initialVector(weights,lrs.super());
+		SizeType totalSectors = sectors.size();
+		VectorWithOffsetType initialVector(weights, lrs.super());
 
 		target.initialGuess(initialVector, block, noguess);
 
-		for (SizeType i=0;i<total;i++) {
-			if (weights[i]==0) continue;
+		typename PsimagLite::Vector<RealType>::Type energySaved(totalSectors);
+		typename PsimagLite::Vector<TargetVectorType>::Type vecSaved(totalSectors);
+
+		for (SizeType j = 0; j < totalSectors; ++j) {
+			SizeType i = sectors[j];
+			SizeType bs = lrs.super().partition(i + 1) - lrs.super().partition(i);
 			PsimagLite::OstringStream msg;
 			msg<<"About to diag. sector with";
 			msg<<" quantumSector="<<quantumSector_;
 
 			if (verbose_ && PsimagLite::Concurrency::root()) {
 				msg<<" diagonaliseOneBlock, i="<<i;
-				msg<<" and weight="<<weights[i];
+				msg<<" and weight="<<bs;
 			}
+
 			progress_.printline(msg,std::cout);
 			TargetVectorType initialVectorBySector(weights[i]);
 			initialVector.extract(initialVectorBySector,i);
 			RealType norma = PsimagLite::norm(initialVectorBySector);
-			if (fabs(norma)<1e-12) {
-				PsimagLite::String str("Norm of initial vector is zero\n");
-				if (onlyWft) throw PsimagLite::RuntimeError("FATAL " + str);
+
+			if (fabs(norma) < 1e-12) {
+				if (onlyWft)
+					err("FATAL Norm of initial vector is zero\n");
 			} else {
 				initialVectorBySector /= norma;
 			}
 
 			if (onlyWft) {
-				vecSaved[i]=initialVectorBySector;
+				vecSaved[j] = initialVectorBySector;
 				gsEnergy = oldEnergy_;
 				PsimagLite::OstringStream msg;
 				msg<<"Early exit due to user requesting (fast) WFT only, ";
@@ -292,7 +289,7 @@ private:
 				progress_.printline(msg,std::cout);
 			} else {
 				diagonaliseOneBlock(i,
-				                    vecSaved[i],
+				                    vecSaved[j],
 				                    gsEnergy,
 				                    lrs,
 				                    target.time(),
@@ -300,17 +297,15 @@ private:
 				                    saveOption);
 			}
 
-			energySaved[i]=gsEnergy;
+			energySaved[j] = gsEnergy;
 		}
 
 		// calc gs energy
 		if (verbose_ && PsimagLite::Concurrency::root())
 			std::cerr<<"About to calc gs energy\n";
 		gsEnergy=1e6;
-		for (SizeType i=0;i<total;i++) {
-			if (weights[i]==0) continue;
-			if (energySaved[i] < gsEnergy) gsEnergy=energySaved[i];
-		}
+		for (SizeType i = 0; i < totalSectors; ++i)
+			if (energySaved[i] < gsEnergy) gsEnergy = energySaved[i];
 
 		PsimagLite::OstringStream msg3;
 		msg3<<"Ground state energy= "<<gsEnergy;
@@ -319,36 +314,35 @@ private:
 		if (verbose_ && PsimagLite::Concurrency::root())
 			std::cerr<<"About to calc gs vector\n";
 
-		counter=0;
+		SizeType counter = 0;
 		RealType degeneracyMax = parameters_.degeneracyMax;
-		for (SizeType i=0;i<total;i++) {
-			if (findSymmetrySector && fabs(energySaved[i] - gsEnergy) > degeneracyMax)
-				weights[i] = 0;
-			if (weights[i]==0) continue;
+		for (SizeType j = 0; j < totalSectors; ++j) {
+			if (findSymmetrySector && fabs(energySaved[j] - gsEnergy) > degeneracyMax)
+				continue;
 
-			const QnType& j = lrs.super().qnEx(i);
+			SizeType i = sectors[j];
+			SizeType bs = lrs.super().partition(i + 1) - lrs.super().partition(i);
+
+			const QnType& q = lrs.super().qnEx(i);
 			PsimagLite::OstringStream msg;
-			msg<<"Found targetted symmetry sector in partition "<<i;
-			msg<<" of size="<<vecSaved[i].size();
-			progress_.printline(msg,std::cout);
+			msg<<"Found targetted symmetry sector in partition "<<sectors[i];
+			msg<<" of size="<<bs;
+			progress_.printline(msg, std::cout);
 
 			PsimagLite::OstringStream msg2;
-			msg2<<"Norm of vector is "<<PsimagLite::norm(vecSaved[i]);
+			msg2<<"Norm of vector is "<<PsimagLite::norm(vecSaved[j]);
 			msg2<<" and quantum numbers are ";
-			msg2<<j;
-			progress_.printline(msg2,std::cout);
-			counter++;
+			msg2<<q;
+			progress_.printline(msg2, std::cout);
+			++counter;
 		}
 
 		PsimagLite::OstringStream msg4;
 		msg4<<"Number of Sectors found "<<counter;
-		progress_.printline(msg4,std::cout);
+		progress_.printline(msg4, std::cout);
 
-		target.setGs(vecSaved,lrs.super());
-
-		if (PsimagLite::Concurrency::root()) {
-			oldEnergy_=gsEnergy;
-		}
+		if (PsimagLite::Concurrency::root())
+			oldEnergy_ = gsEnergy;
 
 		return gsEnergy;
 	}
@@ -356,9 +350,9 @@ private:
 	/** Diagonalise the i-th block of the matrix, return its eigenvectors
 			in tmpVec and its eigenvalues in energyTmp
 		!PTEX_LABEL{diagonaliseOneBlock} */
-	void diagonaliseOneBlock(int i,
-	                         TargetVectorType &tmpVec,
-	                         RealType &energyTmp,
+	void diagonaliseOneBlock(SizeType partitionIndex,
+	                         TargetVectorType& tmpVec,
+	                         RealType& energyTmp,
 	                         const LeftRightSuperType& lrs,
 	                         RealType targetTime,
 	                         const TargetVectorType& initialVector,
@@ -374,7 +368,7 @@ private:
 		if (lrs.super().block().size() == model_.geometry().numberOfSites())
 			paramsKrDumperPtr = &paramsKrDumper;
 
-		HamiltonianConnectionType hc(i,
+		HamiltonianConnectionType hc(partitionIndex,
 		                             lrs,
 		                             model_.geometry(),
 		                             model_.linkProduct(),
@@ -417,11 +411,16 @@ private:
 		PsimagLite::OstringStream msg;
 		msg<<"I will now diagonalize a matrix of size="<<hc.modelHelper().size();
 		progress_.printline(msg,std::cout);
-		diagonaliseOneBlock(i,tmpVec,energyTmp,hc,initialVector,saveOption);
+		diagonaliseOneBlock(partitionIndex,
+		                    tmpVec,
+		                    energyTmp,
+		                    hc,
+		                    initialVector,
+		                    saveOption);
 	}
 
-	void diagonaliseOneBlock(int i,
-	                         TargetVectorType &tmpVec,
+	void diagonaliseOneBlock(SizeType partitionIndex,
+	                         TargetVectorType& tmpVec,
 	                         RealType &energyTmp,
 	                         HamiltonianConnectionType& hc,
 	                         const TargetVectorType& initialVector,
@@ -429,7 +428,7 @@ private:
 	{
 		int n = hc.modelHelper().size();
 		if (verbose_)
-			std::cerr<<"Lanczos: About to do block number="<<i<<" of size="<<n<<"\n";
+			std::cerr<<"Lanczos: About to do block number="<<partitionIndex<<" of size="<<n<<"\n";
 
 		ReflectionSymmetryType *rs = 0;
 		if (reflectionOperator_.isEnabled()) rs = &reflectionOperator_;
@@ -439,7 +438,7 @@ private:
 		                                                             rs);
 
 		if ((saveOption & 4)>0) {
-			energyTmp = slowWft(lanczosHelper,tmpVec,initialVector);
+			energyTmp = slowWft(lanczosHelper, tmpVec, initialVector);
 			PsimagLite::OstringStream msg;
 			msg<<"Early exit due to user requesting (slow) WFT, energy= "<<energyTmp;
 			progress_.printline(msg,std::cout);
@@ -452,9 +451,9 @@ private:
 		bool useDavidson = (parameters_.options.find("useDavidson") !=
 		        PsimagLite::String::npos);
 		if (useDavidson) {
-			lanczosOrDavidson = new DavidsonSolverType(lanczosHelper,params);
+			lanczosOrDavidson = new DavidsonSolverType(lanczosHelper, params);
 		} else {
-			lanczosOrDavidson = new LanczosSolverType(lanczosHelper,params);
+			lanczosOrDavidson = new LanczosSolverType(lanczosHelper, params);
 		}
 
 		if (lanczosHelper.rows()==0) {
@@ -467,78 +466,58 @@ private:
 			return;
 		}
 
-		if (!reflectionOperator_.isEnabled()) {
-			tmpVec.resize(lanczosHelper.rows());
-			try {
-				energyTmp = computeLevel(*lanczosOrDavidson,tmpVec,initialVector);
-			} catch (std::exception& e) {
-				PsimagLite::OstringStream msg0;
-				msg0<<e.what()<<"\n";
-				msg0<<"Lanczos or Davidson solver failed, ";
-				msg0<<"trying with exact diagonalization...";
-				progress_.printline(msg0,std::cout);
-				progress_.printline(msg0,std::cerr);
+		if (reflectionOperator_.isEnabled())
+			err("ReflectionOperator enabled is not longer supported\n");
 
-				VectorRealType eigs(lanczosHelper.rows());
-				PsimagLite::Matrix<ComplexOrRealType> fm;
-				lanczosHelper.fullDiag(eigs,fm);
-				for (SizeType j = 0; j < eigs.size(); ++j)
-					tmpVec[j] = fm(j,0);
-				energyTmp = eigs[0];
 
-				PsimagLite::OstringStream msg1;
-				msg1<<"Found lowest eigenvalue= "<<energyTmp<<" ";
-				progress_.printline(msg1,std::cout);
-			}
+		try {
+			energyTmp = computeLevel(*lanczosOrDavidson,tmpVec,initialVector);
+		} catch (std::exception& e) {
+			PsimagLite::OstringStream msg0;
+			msg0<<e.what()<<"\n";
+			msg0<<"Lanczos or Davidson solver failed, ";
+			msg0<<"trying with exact diagonalization...";
+			progress_.printline(msg0,std::cout);
+			progress_.printline(msg0,std::cerr);
 
-			if (lanczosOrDavidson) delete lanczosOrDavidson;
-			return;
+			VectorRealType eigs(lanczosHelper.rows());
+			PsimagLite::Matrix<ComplexOrRealType> fm;
+			lanczosHelper.fullDiag(eigs,fm);
+			for (SizeType j = 0; j < eigs.size(); ++j)
+				tmpVec[j] = fm(j, 0);
+			energyTmp = eigs[0];
+
+			PsimagLite::OstringStream msg1;
+			msg1<<"Found lowest eigenvalue= "<<energyTmp<<" ";
+			progress_.printline(msg1,std::cout);
 		}
-
-		TargetVectorType initialVector1,initialVector2;
-		reflectionOperator_.setInitState(initialVector,initialVector1,initialVector2);
-		tmpVec.resize(initialVector1.size());
-		energyTmp = computeLevel(*lanczosOrDavidson,tmpVec,initialVector1);
-
-		RealType gsEnergy1 = energyTmp;
-		TargetVectorType gsVector1 = tmpVec;
-
-		lanczosHelper.reflectionSector(1);
-		TargetVectorType gsVector2(initialVector2.size());
-		RealType gsEnergy2 = computeLevel(*lanczosOrDavidson,gsVector2,initialVector2);
-
-		energyTmp=reflectionOperator_.setGroundState(tmpVec,
-		                                             gsEnergy1,
-		                                             gsVector1,
-		                                             gsEnergy2,
-		                                             gsVector2);
 
 		if (lanczosOrDavidson) delete lanczosOrDavidson;
 	}
 
 	RealType computeLevel(LanczosOrDavidsonBaseType& object,
-	                      TargetVectorType &gsVector,
-	                      const TargetVectorType &initialVector) const
+	                      TargetVectorType& gsVector,
+	                      const TargetVectorType& initialVector) const
 	{
 		SizeType excited = parameters_.excited;
 		RealType norma = PsimagLite::norm(initialVector);
 		RealType gsEnergy = 0;
-		if (fabs(norma)<1e-12) {
+		if (fabs(norma) < 1e-12) {
 			PsimagLite::OstringStream msg;
 			msg<<"WARNING: diagonaliseOneBlock: Norm of guess vector is zero, ";
 			msg<<"ignoring guess\n";
-			progress_.printline(msg,std::cout);
-			object.computeExcitedState(gsEnergy,gsVector,excited);
+			progress_.printline(msg, std::cout);
+			object.computeExcitedState(gsEnergy, gsVector, excited);
 		} else {
-			object.computeExcitedState(gsEnergy,gsVector,initialVector,excited);
+			object.computeExcitedState(gsEnergy, gsVector, initialVector, excited);
 		}
 
 		return gsEnergy;
 	}
 
 	RealType slowWft(const typename LanczosOrDavidsonBaseType::MatrixType& object,
-	                 TargetVectorType &gsVector,
-	                 const TargetVectorType &initialVector) const
+	                 TargetVectorType& gsVector,
+	                 const TargetVectorType& initialVector) const
 	{
 		SizeType excited = parameters_.excited;
 		if (excited > 0) {
@@ -548,23 +527,17 @@ private:
 		}
 
 		RealType norma = PsimagLite::norm(initialVector);
-		if (fabs(norma)<1e-12) {
-			PsimagLite::OstringStream msg;
-			msg<<"FATAL: slowWft: Norm of guess vector is zero\n";
-			throw PsimagLite::RuntimeError(msg.str());
-		}
+		if (fabs(norma) < 1e-12)
+			err("FATAL: slowWft: Norm of guess vector is zero\n");
 
-		TargetVectorType x(initialVector.size(),0.0);
-		object.matrixVectorProduct(x,initialVector);
-		RealType gsEnergy = PsimagLite::real(initialVector*x);
+		object.matrixVectorProduct(gsVector, initialVector);
+		RealType gsEnergy = PsimagLite::real(initialVector*gsVector);
 		gsVector = initialVector;
 		PsimagLite::String options = parameters_.options;
 		bool debugmatrix = (options.find("debugmatrix") != PsimagLite::String::npos);
 
-		if (debugmatrix) {
-			std::cout<<"VECTOR\n";
-			std::cout<<initialVector;
-		}
+		if (debugmatrix)
+			std::cout<<"VECTOR: Printing of BlockOffDiagMatrix not supported\n";
 
 		return gsEnergy;
 	}
