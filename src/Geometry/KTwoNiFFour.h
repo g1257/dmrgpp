@@ -107,14 +107,6 @@ public:
 		std::cout<<"KTwoNiFFour: SIGN CHANGE="<<signChange_<<"\n";
 	}
 
-	template<class Archive>
-	void write(Archive & ar, const unsigned int)
-	{
-		ar & boost::serialization::base_object<GeometryBase<ComplexOrRealType, InputType> >(*this);
-		ar & linSize_;
-		ar & signChange_;
-	}
-
 	SizeType memResolv(MemResolv& mres,
 	                   SizeType,
 	                   String msg) const

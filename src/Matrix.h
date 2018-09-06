@@ -909,6 +909,12 @@ T norm2(const Matrix<std::complex<T> >& m)
 }
 
 template<typename T>
+T scalarProduct(const Matrix<T>& A, const Matrix<T>& B)
+{
+	return A.data_ * B.data_;
+}
+
+template<typename T>
 void outerProduct(Matrix<T>& A,const Matrix<T>& B,const Matrix<T>& C)
 {
 	SizeType ni = B.rows();
