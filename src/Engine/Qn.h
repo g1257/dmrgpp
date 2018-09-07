@@ -63,8 +63,10 @@ public:
 		other.resize(n);
 		for (SizeType i = 0; i < n; ++i) {
 			other[i] = q1.other[i] + q2.other[i];
-			if (modalStruct[i].modalEnum == MODAL_MODULO)
+			if (modalStruct[i].modalEnum == MODAL_MODULO) {
 				other[i] %= modalStruct[i].extra;
+				canCompareFast_ = false;
+			}
 		}
 
 		jmPair.first = q1.jmPair.first + q2.jmPair.first;
@@ -83,8 +85,13 @@ public:
 		io.read(jmPair, str + "/jmPair");
 		io.read(flavors, str + "/flavors");
 
-		if (modalStruct.size() == 0)
+		if (modalStruct.size() == 0) {
 			io.read(modalStruct, "modalStruct");
+			SizeType n = modalStruct.size();
+			for (SizeType i = 0; i < n; ++i)
+				if (modalStruct[i].modalEnum == MODAL_MODULO)
+					canCompareFast_ = false;
+		}
 
 		if (modalStruct.size() != other.size())
 			err("Qn::read\n");
@@ -107,10 +114,15 @@ public:
 
 	bool operator==(const Qn& a) const
 	{
-		return (a.oddElectrons == oddElectrons &&
-		        vectorEqualMaybeModal(a.other) &&
+		return (vectorEqualMaybeModal(a.other) &&
+		        a.oddElectrons == oddElectrons
+#ifndef ENABLE_SU2
+		        );
+#else
+		        &&
 		        pairEqual(a.jmPair) &&
 		        flavors == a.flavors);
+#endif
 	}
 
 	bool operator!=(const Qn& a) const
@@ -324,6 +336,7 @@ public:
 	}
 
 	static VectorModalStructType modalStruct;
+	static bool canCompareFast_;
 	static bool ifPresentOther0IsElectrons;
 	bool oddElectrons;
 	VectorSizeType other;
@@ -334,11 +347,24 @@ private:
 
 	bool vectorEqualMaybeModal(const VectorSizeType& otherOther) const
 	{
-		SizeType n = otherOther.size();
-		if (n != other.size()) return false;
-		assert(n == modalStruct.size());
+		return (canCompareFast_) ? fastCompare(otherOther) : slowCompare(otherOther);
+	}
 
-		assert(isDefinedOther());
+	bool fastCompare(const VectorSizeType& otherOther) const
+	{
+		SizeType n = otherOther.size();
+		runChecks(n);
+
+		for (SizeType i = 0; i < n; ++i)
+			if (otherOther[i] != other[i]) return false;
+
+		return true;
+	}
+
+	bool slowCompare(const VectorSizeType& otherOther) const
+	{
+		SizeType n = otherOther.size();
+		runChecks(n);
 
 		for (SizeType i = 0; i < n; ++i) {
 			if (modalStruct[i].modalEnum == MODAL_SUM) {
@@ -353,6 +379,13 @@ private:
 		}
 
 		return true;
+	}
+
+	void runChecks(SizeType n) const
+	{
+		assert(n == other.size());
+		assert(n == modalStruct.size());
+		assert(isDefinedOther());
 	}
 
 	bool pairEqual(const PairSizeType& otherJm) const
