@@ -36,7 +36,9 @@ class  Profiling {
 
 public:
 
-	Profiling(String caller, String additional, std::ostream& os)
+	Profiling(String caller,
+	          String additional,
+	          std::ostream& os)
 	    : progressIndicator_(caller),
 	      memoryUsage_("/proc/self/stat"),
 	      isDead_(false),

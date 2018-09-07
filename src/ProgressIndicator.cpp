@@ -81,6 +81,7 @@ namespace PsimagLite {
 MemoryUsage ProgressIndicator::musage_;
 OstringStream ProgressIndicator::buffer_;
 bool ProgressIndicator::bufferActive_ = false;
+bool ProgressIndicator::withUseconds_ = false;
 
 } // namespace PsimagLite
 

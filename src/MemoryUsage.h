@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define MEMORY_USAGE_H
 #include <iostream>
 #include <fstream>
-#include <time.h>
+#include <sys/time.h>
 
 namespace PsimagLite {
 
@@ -108,6 +108,8 @@ public:
 		}
 
 		SizeType seconds() const { return startTime_.tv_sec; }
+
+		SizeType useconds() const { return startTime_.tv_usec; }
 
 	private:
 
