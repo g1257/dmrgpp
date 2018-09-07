@@ -320,8 +320,11 @@ private:
 	{
 		if (!lotaMemory_) return;
 
-		if (data_)
-			throw RuntimeError("LanczosVectors: data has already been set!\n");
+		if (data_) {
+			if (rows != data_->rows() || cols != data_->cols())
+				throw RuntimeError("LanczosVectors: data has already been set!\n");
+			return;
+		}
 
 		data_ = new DenseMatrixType(rows, cols);
 		needsDelete_ = true;
