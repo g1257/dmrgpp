@@ -91,6 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "FiniteLoop.h"
 #include "Io/IoSerializerStub.h"
 #include "Recovery.h"
+#include "ProgressIndicator.h"
 
 namespace Dmrg {
 
@@ -229,6 +230,9 @@ struct ParametersDmrgSolver {
 		io.readline(version,"Version=");
 		io.readline(filename,"OutputFile=");
 		filename = filenameFromRootname(filename);
+
+		if (options.find("ProgressInUseconds") != PsimagLite::String::npos)
+			PsimagLite::ProgressIndicator::withUseconds(true);
 
 		if (earlyExit) return;
 
