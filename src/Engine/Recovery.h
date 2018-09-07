@@ -142,7 +142,6 @@ public:
 	      wft_(wft),
 	      pS_(pS),
 	      pE_(pE),
-	      savedTime_(0),
 	      counter_(0)
 	{
 		procOptions();
@@ -191,11 +190,15 @@ public:
 	{
 		if (optionSpec_.optionEnum != BY_DELTATIME) return false;
 
-		bool firstCall = (savedTime_ == 0);
-		SizeType time = PsimagLite::ProgressIndicator::time();
-		SizeType deltaTime = time - savedTime_;
+		static bool firstCall = true;
+		PsimagLite::MemoryUsage::TimeHandle time = PsimagLite::ProgressIndicator::time();
+		PsimagLite::MemoryUsage::TimeHandle deltaTime = time - savedTime_;
 		savedTime_ = time;
-		return (!firstCall && deltaTime > optionSpec_.value);
+		if (!firstCall)
+			return (deltaTime.seconds() > optionSpec_.value);
+
+		firstCall = false;
+		return false;
 	}
 
 	void write(const TargetingType& psi,
@@ -365,7 +368,7 @@ private:
 	const WaveFunctionTransfType& wft_;
 	const BasisWithOperatorsType& pS_;
 	const BasisWithOperatorsType& pE_;
-	mutable SizeType savedTime_;
+	mutable PsimagLite::MemoryUsage::TimeHandle savedTime_;
 	mutable SizeType counter_;
 }; //class Recovery
 
