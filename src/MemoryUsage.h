@@ -1,7 +1,8 @@
-/* Copyright (c) 2009-2013, UT-Battelle, LLC
+/*
+Copyright (c) 2009-2013-2018, UT-Battelle, LLC
 All rights reserved
 
-[PsimagLite, Version 1.0.0]
+[PsimagLite, Version 2.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -81,16 +82,42 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <time.h>
 
 namespace PsimagLite {
+
 class MemoryUsage {
 
 	static const SizeType MY_MAX_LINE = 40240;
 
 public:
 
-	MemoryUsage(const String& myself="")
-	    : data_(""),myself_(myself),startTime_(::time(0))
+	class TimeHandle {
+
+	public:
+
+		TimeHandle()
+		{
+			startTime_.tv_sec = 0;
+			startTime_.tv_usec = 0;
+			gettimeofday(&startTime_, 0);
+		}
+
+		TimeHandle& operator-(const TimeHandle& other)
+		{
+			startTime_.tv_sec -= other.startTime_.tv_sec;
+			startTime_.tv_usec -= other.startTime_.tv_usec;
+			return *this;
+		}
+
+		SizeType seconds() const { return startTime_.tv_sec; }
+
+	private:
+
+		timeval startTime_;
+	};
+
+	MemoryUsage(const String& myself = "")
+	    : data_(""), myself_(myself)
 	{
-		if (myself_=="") myself_="/proc/self/status";
+		if (myself_ == "") myself_ = "/proc/self/status";
 		update();
 	}
 
@@ -101,7 +128,7 @@ public:
 		char tmp[MY_MAX_LINE];
 		data_ = "";
 		while (!ifp.eof()) {
-			ifp.getline(tmp,MY_MAX_LINE);
+			ifp.getline(tmp, MY_MAX_LINE);
 			data_ += String(tmp);
 			data_ += String("\n");
 		}
@@ -112,34 +139,40 @@ public:
 	String findEntry(const String& label)
 	{
 		long unsigned int x = data_.find(label);
-		if (x==String::npos) {
+		if (x == String::npos)
 			return "NOT_FOUND";
-		}
+
 		x += label.length();
-		long unsigned int y = data_.find("\n",x);
-		SizeType len = y-x;
-		if (y==String::npos) len = data_.length()-x;
-		String s2 = data_.substr(x,len);
+		long unsigned int y = data_.find("\n", x);
+		SizeType len = y - x;
+		if (y == String::npos) len = data_.length() - x;
+		String s2 = data_.substr(x, len);
 		x = 0;
-		for (SizeType i=0;i<s2.length();i++) {
-			x++;
-			if (s2.at(i)==' ' || s2.at(i)=='\t') continue;
-			else break;
+		const SizeType n = s2.length();
+		for (SizeType i = 0; i < n; ++i) {
+			++x;
+			if (s2.at(i) == ' ' || s2.at(i) == '\t')
+				continue;
+			else
+				break;
 		}
-		if (x>0) x--;
-		len = s2.length()-x;
-		return s2.substr(x,len);
+
+		if (x > 0) --x;
+		len = s2.length() - x;
+		return s2.substr(x, len);
 	}
 
-	double time() const
+	TimeHandle time() const
 	{
-		return ::time(0)-startTime_;
+		TimeHandle nowtime;
+		return nowtime - startTime_;
 	}
 
 private:
 
-	String data_,myself_;
-	time_t startTime_;
+	String data_;
+	String myself_;
+	TimeHandle startTime_;
 }; // class MemoryUsage
 
 } // namespace PsimagLite

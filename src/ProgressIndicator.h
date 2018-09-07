@@ -185,14 +185,14 @@ public:
 		printline(buffer_,std::cout);
 	}
 
-	static double time() { return musage_.time(); }
+	static MemoryUsage::TimeHandle time() { return musage_.time(); }
 
 private:
 
 	template<typename SomeOutputStreamType>
 	void prefix(SomeOutputStreamType& os) const
 	{
-		os<<caller_<<" "<<"["<<musage_.time()<<"]: ";
+		os<<caller_<<" "<<"["<<musage_.time().seconds()<<"]: ";
 	}
 
 	String caller_;
