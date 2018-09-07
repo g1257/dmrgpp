@@ -144,23 +144,32 @@ public:
 
 	template<typename SomeBasisType>
 	void set(const typename PsimagLite::Vector<VectorType>::Type& v,
+	         const VectorSizeType& sectors,
 	         const SomeBasisType& someBasis)
 	{
 		size_ = someBasis.size();
 		nzMsAndQns_.clear();
 		data_.clear();
-		data_.resize(v.size());
-		offsets_.resize(v.size()+1);
-		for (SizeType i=0;i<v.size();i++) {
-			data_[i] = v[i];
+		assert(someBasis.partition() > 0);
+		SizeType n = someBasis.partition() - 1;
+		data_.resize(n);
+		offsets_.resize(n + 1);
+		for (SizeType i = 0; i < n; ++i)
 			offsets_[i] = someBasis.partition(i);
-			if (v[i].size()>0) {
-				QnType qn = someBasis.pseudoQn(i);
-				nzMsAndQns_.push_back(PairQnType(i, qn));
-			}
+
+		SizeType m = sectors.size();
+		if (m != v.size())
+			err("FATAL: VectorWithOffsets::");
+
+		for (SizeType j = 0; j < m; ++j) {
+			SizeType i = sectors[j];
+			data_[i] = v[j];
+			QnType qn = someBasis.pseudoQn(i);
+			nzMsAndQns_.push_back(PairQnType(i, qn));
+
 		}
 
-		offsets_[v.size()]=size_;
+		offsets_[n] = size_;
 		setIndex2Sector();
 	}
 
@@ -401,7 +410,7 @@ public:
 
 	template<typename SomeIoOutputType>
 	void write(SomeIoOutputType& io,
-	          const PsimagLite::String& label) const
+	           const PsimagLite::String& label) const
 	{
 		io.createGroup(label);
 		io.write(size_, label + "/size_");

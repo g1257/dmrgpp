@@ -29,7 +29,7 @@ sub loadData
 	my $prevt = 0;
 	my ($t0, $t1);
 	while (<FILE>) {
-		my $x = /^(.+) *\[(\d+)\]\:/;
+		my $x = /^(.+) *\[([\d\.]+)\]\:/;
 		next unless ($x);
 		my $name = $1;
 		my $t = $2;
@@ -71,7 +71,7 @@ sub printData
 			last;
 		}
 
-		my $t = $ptr->[0];
+		my $t = int($ptr->[0]);
 		my $numberOfTimes = $ptr->[1];
 		print "$k\t $t\t $numberOfTimes\n";
 		$tot += $t;

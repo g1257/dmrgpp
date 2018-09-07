@@ -191,11 +191,9 @@ public:
 
 	const ModelType& model() const { return model_; }
 
-	template<typename SomeBasisType>
-	void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,
-	           const SomeBasisType& someBasis)
+	VectorWithOffsetType& gs()
 	{
-		commonTargeting_.setGs(v,someBasis);
+		return commonTargeting_.psi();
 	}
 
 	const VectorWithOffsetType& gs() const

@@ -144,28 +144,23 @@ public:
 
 	template<typename SomeBasisType>
 	void set(const typename PsimagLite::Vector<VectorType>::Type& v,
+	         const VectorSizeType& sectors,
 	         const SomeBasisType& someBasis)
 	{
-		bool found = false;
 		size_ = someBasis.size();
-		for (SizeType i=0;i<v.size();i++) {
-			if (v[i].size()>0) {
-				if (found) {
-					PsimagLite::String msg("FATAL: VectorWithOffset::");
-					msg += " more than one non-zero sector found. ";
-					msg += " Maybe you should be using VectorWithOffsets instead?\n";
-					throw PsimagLite::RuntimeError(msg);
-				}
-
-				data_ = v[i];
-				offset_ = someBasis.partition(i);
-				const QnType& qn = someBasis.pseudoQn(i);
-				mAndq_ = PairQnType(i, qn);
-				found = true;
-			}
+		assert(someBasis.partition() > 0);
+		SizeType m = v.size();
+		if (sectors.size() != m || m != 1) {
+			PsimagLite::String msg("FATAL: VectorWithOffset::");
+			msg += " more than one non-zero sector found. ";
+			err (msg + " Maybe you should be using VectorWithOffsets instead?\n");
 		}
 
-		if (!found) throw PsimagLite::RuntimeError("Set failed\n");
+		const SizeType i = sectors[0];
+		data_ = v[0];
+		offset_ = someBasis.partition(i);
+		const QnType& qn = someBasis.pseudoQn(i);
+		mAndq_ = PairQnType(i, qn);
 	}
 
 	template<typename SomeBasisType>

@@ -288,6 +288,7 @@ private:
 				msg<<"(non updated) energy= "<<gsEnergy;
 				progress_.printline(msg,std::cout);
 			} else {
+				vecSaved[j].resize(initialVectorBySector.size());
 				diagonaliseOneBlock(i,
 				                    vecSaved[j],
 				                    gsEnergy,
@@ -325,7 +326,7 @@ private:
 
 			const QnType& q = lrs.super().qnEx(i);
 			PsimagLite::OstringStream msg;
-			msg<<"Found targetted symmetry sector in partition "<<sectors[i];
+			msg<<"Found targetted symmetry sector in partition "<<i;
 			msg<<" of size="<<bs;
 			progress_.printline(msg, std::cout);
 
@@ -340,6 +341,8 @@ private:
 		PsimagLite::OstringStream msg4;
 		msg4<<"Number of Sectors found "<<counter;
 		progress_.printline(msg4, std::cout);
+
+		target.gs().set(vecSaved, sectors, lrs.super());
 
 		if (PsimagLite::Concurrency::root())
 			oldEnergy_ = gsEnergy;

@@ -184,14 +184,12 @@ public:
 		return applyOpExpression_.psi();
 	}
 
-	const TargetParamsType& tstStruct() const { return targetHelper_.tstStruct(); }
-
-	template<typename SomeBasisType>
-	void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,
-	           const SomeBasisType& someBasis)
+	VectorWithOffsetType& psi()
 	{
-		applyOpExpression_.psi().set(v,someBasis);
+		return applyOpExpression_.psi();
 	}
+
+	const TargetParamsType& tstStruct() const { return targetHelper_.tstStruct(); }
 
 	RealType normSquared(SizeType i) const
 	{
