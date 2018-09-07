@@ -117,6 +117,9 @@ print FH<<EOF;
 operator: dmrg
 	cp dmrg operator
 
+testQn: testQn.o Qn.o
+	\$(CXX) Qn.o testQn.o \$(LDFLAGS) -o testQn
+
 libkronutil.a:
 	\$(MAKE) -C KronUtil
 
