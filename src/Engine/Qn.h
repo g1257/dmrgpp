@@ -258,23 +258,11 @@ public:
 		                                                                         "n= " + ttos(n),
 		                                                                         std::cout) : 0;
 
-		outQns.clear();
 		VectorSizeType count;
-		count.reserve(n);
-		VectorSizeType reverse(n);
+		VectorSizeType reverse;
 
 		// 1^st pass over data
-		for (SizeType i = 0; i < n; ++i) {
-			int x = PsimagLite::indexOrMinusOne(outQns, inQns[i]);
-			if (x < 0) {
-				outQns.push_back(inQns[i]);
-				count.push_back(1);
-				reverse[i] = count.size() - 1;
-			} else {
-				++count[x];
-				reverse[i] = x;
-			}
-		}
+		nrsFirstPass(outQns, count, reverse, inQns);
 
 		// perform prefix sum
 		SizeType numberOfPatches = count.size();
@@ -392,6 +380,30 @@ private:
 	{
 		return (otherJm.first == jmPair.first &&
 		        otherJm.second == jmPair.second);
+	}
+
+	static void nrsFirstPass(VectorQnType& outQns,
+	                         VectorSizeType& count,
+	                         VectorSizeType& reverse,
+	                         const VectorQnType& inQns)
+	{
+		SizeType n = inQns.size();
+		outQns.clear();
+		count.reserve(n);
+		reverse.resize(n);
+
+		// 1^st pass over data
+		for (SizeType i = 0; i < n; ++i) {
+			int x = PsimagLite::indexOrMinusOne(outQns, inQns[i]);
+			if (x < 0) {
+				outQns.push_back(inQns[i]);
+				count.push_back(1);
+				reverse[i] = count.size() - 1;
+			} else {
+				++count[x];
+				reverse[i] = x;
+			}
+		}
 	}
 
 	// disable implicit conversion for 1st argument of ctor
