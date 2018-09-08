@@ -116,7 +116,7 @@ public:
 	{
 		return (vectorEqualMaybeModal(a.other) &&
 		        a.oddElectrons == oddElectrons
-#ifndef ENABLE_SU2
+        #ifndef ENABLE_SU2
 		        );
 #else
 		        &&
@@ -236,59 +236,6 @@ public:
 		return true;
 	}
 
-	// There exits objects Qn that have operator= (comparison)
-	// notReallySort takes a vector of Qn objects as INPUT.1: inQns of size big
-	// It also takes a vector of non-negative integers of size big as INPUT.2 : inNumbers
-	// Let P be a permutation that "not really sorts" inQns, P is of size big
-	// Let tmpQns be P applied to inQns; tmpQns[i] = inQns[P[i]], tmpQns is of size big
-	// notReallySort fills the following vectors
-	// OUTPUT.1: outNumber is P applied to inNumbers; outNumber[i] = inNumber[P[i]], of size big
-	// OUTPUT.2: outQns[x] is the x-th unique tmpQns, of size small
-	// OUTPUT.3: offset[x] = min {y; such that tmpQns[y] = outQns[x]}, of size small
-	static void notReallySort(VectorSizeType& outNumber,
-	                          VectorQnType& outQns,
-	                          VectorSizeType& offset,
-	                          const VectorSizeType& inNumbers,
-	                          const VectorQnType& inQns,
-	                          ProgramGlobals::VerboseEnum verbose)
-	{
-		SizeType n = inNumbers.size();
-		assert(n == inQns.size());
-		PsimagLite::Profiling* profiling = (verbose) ? new PsimagLite::Profiling("notReallySort",
-		                                                                         "n= " + ttos(n),
-		                                                                         std::cout) : 0;
-
-		VectorSizeType count;
-		VectorSizeType reverse;
-
-		// 1^st pass over data
-		nrsFirstPass(outQns, count, reverse, inQns);
-
-		// perform prefix sum
-		SizeType numberOfPatches = count.size();
-		offset.resize(numberOfPatches + 1);
-		offset[0] = 0;
-		for (SizeType ipatch = 0; ipatch < numberOfPatches; ++ipatch)
-			offset[ipatch + 1] = offset[ipatch] + count[ipatch];
-
-		// 2^nd pass over data
-		outNumber.resize(n);
-		std::fill(count.begin(), count.end(), 0);
-		for (SizeType i = 0; i < n; ++i) {
-			SizeType x = reverse[i];
-			assert(x < offset.size() && x < count.size());
-			SizeType outIndex = offset[x] + count[x];
-			outNumber[outIndex] = inNumbers[i];
-			++count[x];
-		}
-
-		if (profiling) {
-			profiling->end("patches= " + ttos(numberOfPatches));
-			delete profiling;
-			profiling = 0;
-		}
-	}
-
 	SizeType su2ElectronsBridge() const
 	{
 		assert(ifPresentOther0IsElectrons);
@@ -380,30 +327,6 @@ private:
 	{
 		return (otherJm.first == jmPair.first &&
 		        otherJm.second == jmPair.second);
-	}
-
-	static void nrsFirstPass(VectorQnType& outQns,
-	                         VectorSizeType& count,
-	                         VectorSizeType& reverse,
-	                         const VectorQnType& inQns)
-	{
-		SizeType n = inQns.size();
-		outQns.clear();
-		count.reserve(n);
-		reverse.resize(n);
-
-		// 1^st pass over data
-		for (SizeType i = 0; i < n; ++i) {
-			int x = PsimagLite::indexOrMinusOne(outQns, inQns[i]);
-			if (x < 0) {
-				outQns.push_back(inQns[i]);
-				count.push_back(1);
-				reverse[i] = count.size() - 1;
-			} else {
-				++count[x];
-				reverse[i] = x;
-			}
-		}
 	}
 
 	// disable implicit conversion for 1st argument of ctor

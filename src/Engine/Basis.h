@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "HamiltonianSymmetrySu2.h"
 #include "ProgressIndicator.h"
 #include "Qn.h"
+#include "NotReallySort.h"
 
 namespace Dmrg {
 // A class to represent in a light way a Dmrg basis (used only to implement symmetries).
@@ -660,7 +661,8 @@ private:
 		VectorSizeType numbers(n);
 		for (SizeType i = 0; i < n; ++i) numbers[i] = i;
 		VectorSizeType permutationVector;
-		QnType::notReallySort(permutationVector, qns_, partition_, numbers, qns, verbose);
+		NotReallySort notReallySort;
+		notReallySort(permutationVector, qns_, partition_, numbers, qns, verbose);
 
 		if (changePermutation) {
 			permutationVector_ = (useSu2Symmetry_) ? numbers : permutationVector;

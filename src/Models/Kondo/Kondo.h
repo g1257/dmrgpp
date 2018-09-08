@@ -2,6 +2,7 @@
 #define DMRGPP_MODEL_KONDO_H
 #include "ParametersKondo.h"
 #include "LinkProductKondo.h"
+#include "NotReallySort.h"
 
 namespace Dmrg {
 
@@ -50,12 +51,13 @@ public:
 		VectorSizeType newBasis;
 		VectorSizeType partition;
 		VectorQnType qns;
-		QnType::notReallySort(newBasis,
-		                      qns,
-		                      partition,
-		                      basis_,
-		                      qn_,
-		                      ProgramGlobals::VERBOSE_NO);
+		NotReallySort notReallySort;
+		notReallySort(newBasis,
+		              qns,
+		              partition,
+		              basis_,
+		              qn_,
+		              ProgramGlobals::VERBOSE_NO);
 
 		SizeType n = partition.size();
 		assert(n > 0);
