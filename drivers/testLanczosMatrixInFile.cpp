@@ -46,8 +46,9 @@ int main(int argc, char **argv)
 
 	VectorType z(n, 0.0);
 	VectorRealType e(n);
-	for (SizeType excited = 0; excited < n; ++excited)
-		lanczosSolver.computeExcitedState(e[excited], z, excited);
+	lanczosSolver.computeExcitedState(e[0], z, 0); // calculate only ground-state
+//	for (SizeType excited = 0; excited < n; ++excited)
+//		lanczosSolver.computeExcitedState(e[excited], z, excited);
 
 	VectorRealType eigs(n);
 	PsimagLite::diag(m, eigs, 'V');
@@ -56,8 +57,25 @@ int main(int argc, char **argv)
 		std::cout<<eigs[excited]<<" ";
 	std::cout<<"\n";
 
-	std::cout<<"LANCZOS: ";
-	for (SizeType excited = 0; excited < n; ++excited)
-		std::cout<<e[excited]<<" ";
+	std::cout<<"LANCZ: ";
+	for (SizeType excited = 0; excited < n; ++excited) {
+		RealType eval = 0.0;
+		VectorType z1(n, 0.0);
+		lanczosSolver.computeAnyState(eval,z1,excited);
+		std::cout<< eval <<" ";
+	}
+	std::cout << std::endl << std::endl;
+
+	std::cout<<"LANCZOS: \n";
+	for (SizeType excited = 0; excited < n; ++excited) {
+		RealType eval = 0.0;
+		VectorType z1(n, 0.0);
+		lanczosSolver.computeAnyState(eval,z1,excited);
+
+		RealType avgH = lanczosSolver.ExpectationH(z1);
+
+		std::cout<< "<E>_" << excited << " = " << avgH <<"  \n";
+	}
+
 	std::cout<<"\n";
 }

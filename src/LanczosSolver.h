@@ -204,13 +204,58 @@ public:
 			y[i]=rng_()-0.5;
 			atmp += PsimagLite::real(y[i]*PsimagLite::conj(y[i]));
 		}
+
 		if (mode_ & DEBUG) {
 			computeExcitedStateTest(gsEnergy,z,y,0);
 			return;
 		}
+
 		atmp = 1.0 / sqrt (atmp);
 		for (SizeType i = 0; i < n; i++) y[i] *= atmp;
 		computeExcitedState(gsEnergy,z,y,excited);
+	}
+
+	/* calculate states in the original basis given
+	 * (1) the eigen-vectors (triEigenVec_) of the tridiagonal Matrix
+	 * (2) basis states of Lanczos algorithm
+	 * \Psi_0(h) = lanczosVectors_(h,m) triEigenVec_(m,0)
+	*/
+	virtual void computeAnyState(RealType& eval, VectorType& z, SizeType& excited)
+	{
+		OstringStream msg1;
+		msg1 << " WARNING: Must perform decomposition first!!!! \n";
+		SizeType nn=mat_.rows();
+		SizeType max_iter = triEigenVec_.rows();
+		assert(max_iter==triEigenVec_.cols());
+
+		if (max_iter<2) {
+			String msg("WARNING: Must perform decomposition first!!!! \n");
+			msg += " I need eigen-vectors of the tridiagonal matrix \n ";
+			throw RuntimeError(msg);
+		}
+
+		z.resize(nn);
+		for (SizeType h=0; h<nn; h++) {
+			for (SizeType m=0; m<max_iter; m++) {
+				VectorElementType tmp = lanczosVectors_.data(h,m);
+				z[h] += tmp*triEigenVec_(m,excited);
+			}
+		}
+		eval = eigs_[excited];
+	}
+
+	RealType ExpectationH(VectorType& z1) {
+		SizeType nn = z1.size();
+		VectorType z2(nn,0.0);
+
+		mat_.matrixVectorProduct(z2, z1); // z2 = H |z1>
+
+		VectorElementType out=0.0;
+		for (SizeType h = 0; h < nn; h++) {
+				out += z2[h]*PsimagLite::conj(z1[h]); // <z1|z2>
+		}
+
+		return PsimagLite::real(out);
 	}
 
 	virtual void computeExcitedState(RealType &gsEnergy,
@@ -238,6 +283,11 @@ public:
 		ab.buildDenseMatrix(T);
 	}
 
+	RealType eigs(int i)
+	{
+		return eigs_[i];
+	}
+
 	void push(TridiagonalMatrixType& ab,const RealType& a,const RealType& b) const
 	{
 		ab.push(a,b);
@@ -259,55 +309,87 @@ public:
 	                   TridiagonalMatrixType& ab)
 	{
 		SizeType& max_nstep = steps_;
+		SizeType matsize=mat_.rows();
+		assert(matsize==mat_.cols());
 
-		if (initVector.size()!=mat_.rows()) {
+		if (initVector.size()!=matsize) {
 			String msg("decomposition: vector size ");
 			msg += ttos(initVector.size()) + " but matrix size ";
-			msg += ttos(mat_.rows()) + "\n";
+			msg += ttos(matsize) + "\n";
 			throw RuntimeError(msg);
 		}
 
-		VectorType x(mat_.rows());
-		VectorType y = initVector;
+		VectorType V2(matsize);  // v2
+		VectorType V1(matsize);  // v1
+		VectorType V0 = initVector;  // v0
+
 		RealType atmp = 0;
-		for (SizeType i = 0; i < mat_.rows(); i++) {
-			x[i] = 0;
-			atmp += PsimagLite::real(y[i]*PsimagLite::conj(y[i]));
+		for (SizeType i = 0; i < matsize; i++) {
+			V2[i] = 0;
+			V1[i] = 0;
+			atmp += PsimagLite::real(V0[i]*PsimagLite::conj(V0[i]));
 		}
 
-		for (SizeType i = 0; i < y.size(); i++) y[i] /= sqrt(atmp);
+		for (SizeType i = 0; i < matsize; i++) V0[i] /= sqrt(atmp);
 
-		if (max_nstep > mat_.rows()) max_nstep = mat_.rows();
+		if (max_nstep > matsize) max_nstep = matsize;
 		ab.resize(max_nstep,0);
 
-		if (mode_ & ALLOWS_ZERO && lanczosVectors_.isHyZero(y,ab)) return;
+		if (mode_ & ALLOWS_ZERO && lanczosVectors_.isHyZero(V0,ab)) return;
 
 		RealType eold = 100.;
 		bool exitFlag=false;
 		SizeType j = 0;
 		RealType enew = 0;
-		lanczosVectors_.saveInitialVector(y);
+		lanczosVectors_.saveInitialVector(V0);
 		typename Vector<RealType>::Type nullVector;
 		groundAllocations(max_nstep + 2,false);
-		lanczosVectors_.prepareMemory(y.size(), max_nstep);
-		for (; j < max_nstep; ++j) {
+		lanczosVectors_.prepareMemory(matsize, max_nstep);
+
+		// -- 1st step --
+		ab.b(0) = 0.0;							// beta_0 = 0 always
+		if (lanczosVectors_.lotaMemory()) lanczosVectors_.saveVector(V0, 0);
+		for (SizeType i = 0; i < matsize; i++) V1[i] = 0.0;
+		mat_.matrixVectorProduct(V1, V0); // V1 = H|V0>
+		atmp = 0.0;
+		for (SizeType i = 0; i < matsize; i++)
+			atmp += PsimagLite::real(V1[i]*PsimagLite::conj(V0[i])); // alpha = <V0|V1>
+		ab.a(0) = atmp;
+
+		RealType btmp = 0.0;
+		for (SizeType i = 0; i < matsize; i++) {
+			V1[i] = V1[i] - atmp*V0[i];								// V1 = V1 - alpha*V0
+			btmp += PsimagLite::real(V1[i]*PsimagLite::conj(V1[i]));
+		}
+		btmp = sqrt(btmp);
+		ab.b(1) = btmp;			// beta = sqrt(V1*V1)
+
+		for (SizeType i = 0; i < matsize; i++) V1[i] = V1[i]/btmp;		// normalize V1
+		if (lanczosVectors_.lotaMemory()) lanczosVectors_.saveVector(V1, 1);
+
+		// ---- Starting the loop -------
+		for (j=1; j < max_nstep; ++j) {
+
+			lanczosVectors_.oneStepDecomposition(V0,V1,V2,ab,j);
+			enew = TriDiag('N', ab, j+1); // only need eigen-values here
+			if (fabs (enew - eold) < params_.tolerance) exitFlag=true;
+			if (j == max_nstep-1) exitFlag=true;
+			if (exitFlag && mat_.rows()<=4) break;
+			if (exitFlag && j >= params_.minSteps) break;
+
 			if (lanczosVectors_.lotaMemory())
-				lanczosVectors_.saveVector(y, j);
+				lanczosVectors_.saveVector(V2, j+1);
 
-			RealType btmp = 0;
-			oneStepDec(x, y, atmp, btmp, j);
-			ab.a(j) = atmp;
-			ab.b(j) = btmp;
-
-			if (params_.tolerance>0) {
-				ground(enew,j+1, ab,nullVector);
-				if (fabs (enew - eold) < params_.tolerance) exitFlag=true;
-				if (exitFlag && mat_.rows()<=4) break;
-				if (exitFlag && j >= params_.minSteps) break;
+			for (SizeType i = 0; i < matsize; i++) {
+				V0[i] = V1[i];
+				V1[i] = V2[i];
 			}
 
 			eold = enew;
 		}
+
+		// -- calculate the eigen-vectors of Tridiag Matrix
+		enew = TriDiag('V', ab, j+1);
 
 		if (j < max_nstep) {
 			max_nstep = j + 1;
@@ -331,13 +413,38 @@ public:
 		}
 	}
 
+	double TriDiag(char jobz, TridiagonalMatrixType& ab, int n){
+
+		int lda=n;
+		eigs_.resize(n);
+
+		triEigenVec_.resize(n,lda,0.0);
+		for (int i=0;i<n;i++){
+			for (int j=0;j<n;j++){
+				triEigenVec_(i,j) = 0.0;
+			}
+		}
+
+		for (int i=0;i<n-1;i++){
+			triEigenVec_(i,i) = ab.a(i);
+			triEigenVec_(i,i+1) = ab.b(i+1);
+			triEigenVec_(i+1,i) = PsimagLite::conj(ab.b(i+1));
+		}
+		triEigenVec_(n-1,n-1) = ab.a(n-1);
+
+		diag(triEigenVec_,eigs_,jobz);
+
+		return eigs_[0];
+	}
+
 	void oneStepDec(VectorType& x,
 	                VectorType& y,
 	                RealType& atmp,
 	                RealType& btmp,
+	                RealType& b0,
 	                SizeType it) const
 	{
-		lanczosVectors_.oneStepDecomposition(x,y,atmp,btmp, it);
+		lanczosVectors_.oneStepDecomposition(x,y,atmp,btmp,b0,it);
 	}
 
 	SizeType steps() const {return steps_; }
@@ -536,12 +643,14 @@ private:
 	}
 
 	ProgressIndicator progress_;
+	DenseMatrixRealType triEigenVec_;
 	MatrixType const& mat_;
 	const SolverParametersType& params_;
 	SizeType steps_;
 	SizeType mode_;
 	Random48<RealType> rng_;
 	LanczosVectorsType lanczosVectors_;
+	typename Vector<RealType>::Type eigs_;
 	VectorRealType groundD_;
 	VectorRealType groundE_;
 	VectorRealType groundV_;

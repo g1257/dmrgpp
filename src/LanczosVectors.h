@@ -174,6 +174,11 @@ public:
 		return data_;
 	}
 
+	VectorElementType data(SizeType i, SizeType j)
+	{
+		return data_->operator()(i, j);
+	}
+
 	SizeType cols() const { return data_->cols(); }
 
 	SizeType rows() const { return data_->rows(); }
@@ -187,10 +192,11 @@ public:
 
 	void hookForZ(VectorType& z,
 	              const typename Vector<RealType>::Type& c,
-	              const TridiagonalMatrixType&)
+	              TridiagonalMatrixType& ab)
 	{
 		if (!lotaMemory_) {
 			VectorType x(z.size(),0.0);
+			VectorType x0(z.size(),0.0);
 			VectorType y = ysaved_;
 			for (SizeType i = 0; i < z.size(); i++)
 				z[i] = 0.0;
@@ -200,7 +206,7 @@ public:
 				for (SizeType i = 0; i < y.size(); i++)
 					z[i] += ctmp * y[i];
 				RealType btmp = 0;
-				oneStepDecomposition(x,y,atmp,btmp, j);
+				oneStepDecomposition(x0,x,y,ab, j);
 			}
 
 			return;
@@ -244,76 +250,65 @@ public:
 		return true;
 	}
 
-	void oneStepDecomposition(VectorType& x,
-	                          VectorType& y,
-	                          RealType& atmp,
-	                          RealType& btmp,
-	                          SizeType it) const
+
+	void oneStepDecomposition(VectorType& V0,
+	                          VectorType& V1,
+	                          VectorType& V2,
+	                          TridiagonalMatrixType& ab,
+	                          SizeType iter) const
 	{
-		mat_.matrixVectorProduct (x, y); // x+= Hy
+		SizeType nn = V1.size();
+		for (SizeType h = 0; h < nn; h++) V2[h] = 0.0;
+		mat_.matrixVectorProduct(V2, V1); // V2 = H|V1>
 
-		atmp = 0.0;
-		for (SizeType i = 0; i < mat_.rows(); i++)
-			atmp += PsimagLite::real(y[i]*PsimagLite::conj(x[i]));
-		btmp = 0.0;
-		for (SizeType i = 0; i < mat_.rows(); i++) {
-			x[i] -= atmp * y[i];
-			btmp += PsimagLite::real(x[i]*PsimagLite::conj(x[i]));
+		RealType atmp = 0.0;
+		for (SizeType h = 0; h < nn; h++)
+				atmp += PsimagLite::real(V2[h]*PsimagLite::conj(V1[h])); // <V1|V2>
+				ab.a(iter) = atmp;
+
+		RealType btmp = 0.0;
+		for (SizeType h = 0; h < nn; h++) {
+			V2[h] = V2[h] - ab.a(iter)*V1[h] - ab.b(iter)*V0[h];  // V2 = V2 - alpha*V1 - beta*V0;
+			btmp += PsimagLite::real(V2[h]*PsimagLite::conj(V2[h]));
 		}
+		btmp = sqrt(btmp);
+		ab.b(iter+1) = btmp;	// beta = sqrt(V2*V2)
 
-		btmp = sqrt (btmp);
+		for (SizeType i = 0; i < nn; i++) V2[i] = V2[i]/btmp;		// normalize V2
 
-		if (fabs(btmp)<1e-10) {
-			for (SizeType i = 0; i < mat_.rows(); i++) {
-				VectorElementType tmp = y[i];
-				y[i] = x[i];
-				x[i] = -btmp * tmp;
-			}
-			return;
-		}
-
-		assert(btmp >= 1e-12);
-		RealType inverseBtmp = 1.0/btmp;
-		for (SizeType i = 0; i < mat_.rows(); i++) {
-			//lanczosVectors(i,j) = y[i];
-			VectorElementType tmp = y[i];
-			y[i] = x[i] * inverseBtmp;
-			x[i] = -btmp * tmp;
-		}
-
-		reorthoIfNecessary(x, it);
+		reorthoIfNecessary(V2, iter);
 	}
+
+
+
 
 private:
 
-	void reorthoIfNecessary(VectorType& x, SizeType it) const
+	void reorthoIfNecessary(VectorType& V2, SizeType iter) const
 	{
 		if (!isReorthoEnabled_) return;
 
-		if (!overlap_ || overlap_->size() <= it)
+		if (!overlap_ || overlap_->size() <= iter)
 			throw RuntimeError("reorthoIfNecessary failed\n");
 
-		for (SizeType j = 0; j < it; ++j) {
-			overlap_->operator[](j) = 0;
-			for (SizeType i = 0; i < x.size(); ++i)
-				overlap_->operator[](j) += PsimagLite::conj(data_->operator()(i, j))*x[i];
+		SizeType nn = V2.size();
+		//cout << "  Re-orthogonalization " << endl;
+		for(SizeType i=0; i<iter+1; i++) {
+
+			VectorElementType rij=0.0;
+			for(SizeType h=0; h<nn; h++)
+				rij += PsimagLite::conj(data_->operator()(h,i))*V2[h];
+
+			// V2 = V2 - <Vi|V2> Vi -- gram-schmid
+			for (SizeType h=0; h<nn; h++)
+				V2[h] = V2[h] - data_->operator()(h,i)*rij;
 		}
 
-		RealType oldNorm = 0;
-		RealType newNorm = 0;
-		for (SizeType i = 0; i < x.size(); ++i) {
-			ComplexOrRealType sum = 0.0;
-			for (SizeType j = 0; j < it; ++j)
-				sum -= overlap_->operator[](j)*data_->operator()(i, j);
-			ComplexOrRealType tmp = x[i];
-			oldNorm += PsimagLite::real(tmp*PsimagLite::conj(tmp));
-			tmp += sum;
-			x[i] = tmp;
-			newNorm += PsimagLite::real(tmp*PsimagLite::conj(tmp));
-		}
+		RealType ntmp = 0.0;
+		for (SizeType h=0;h<nn;h++)
+			ntmp += PsimagLite::real(V2[h]*PsimagLite::conj(V2[h]));
 
-		RealType factor = oldNorm/newNorm;
-		for (SizeType i = 0; i < x.size(); ++i) x[i] *= factor;
+		for (SizeType h=0; h<nn; h++) V2[h] = V2[h]/sqrt(ntmp);
 	}
 
 	void dealWithStorageOfV(SizeType rows, SizeType cols)
