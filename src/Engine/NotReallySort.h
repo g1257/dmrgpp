@@ -11,15 +11,15 @@ class NotReallySort {
 	typedef Qn::VectorQnType VectorQnType;
 	typedef Qn::VectorSizeType VectorSizeType;
 
-	class NrsFirstPassHelper {
+	class FirstPassHelper {
 
 		typedef PsimagLite::Vector<VectorQnType>::Type VectorVectorQnType;
 		typedef PsimagLite::Vector<VectorSizeType>::Type VectorVectorSizeType;
 
 	public:
 
-		NrsFirstPassHelper(const VectorQnType& inQns, SizeType threads)
-		    : inQns_(inQns), count_(threads), outQns_(threads)
+		FirstPassHelper(const VectorQnType& inQns, SizeType threads)
+		    : inQns_(inQns), count_(threads), outQns_(threads), reverse_(inQns.size())
 		{}
 
 		void doTask(SizeType taskNumber, SizeType threadNum)
@@ -28,8 +28,10 @@ class NotReallySort {
 			if (x < 0) {
 				outQns_[threadNum].push_back(inQns_[taskNumber]);
 				count_[threadNum].push_back(1);
+				reverse_[taskNumber] = count_[threadNum].size() - 1;
 			} else {
 				++count_[threadNum][x];
+				reverse_[taskNumber] = x;
 			}
 		}
 
@@ -51,23 +53,13 @@ class NotReallySort {
 			for (SizeType t = 0; t < threads; ++t) {
 				SizeType m = count_[t].size();
 				for (SizeType i = 0; i < m; ++i) {
-					count[x] = count_[t][i];
+					countReduced[x] = count_[t][i];
 					inQnsReduced[x++] = outQns_[t][i];
 				}
-
-				count_[t].clear();
-				outQns_[t].clear();
 			}
 
-			count_.clear();
-			outQns_.clear();
-
-			outQns.clear();
 			count.reserve(nreduced);
-			SizeType n = inQns_.size();
-			reverse.resize(n);
 
-			SizeType bigI = 0;
 			for (SizeType ii = 0; ii < nreduced; ++ii) {
 				int x = PsimagLite::indexOrMinusOne(outQns, inQnsReduced[ii]);
 				SizeType c = countReduced[ii];
@@ -78,10 +70,9 @@ class NotReallySort {
 				} else {
 					count[x] += c;
 				}
-
-				for (SizeType j = 0; j < c; ++j)
-					reverse[bigI++] = x;
 			}
+
+			reverse = reverse_; // <--- THIS IS WRONG!
 		}
 
 	private:
@@ -89,6 +80,7 @@ class NotReallySort {
 		const VectorQnType& inQns_;
 		VectorVectorSizeType count_;
 		VectorVectorQnType outQns_;
+		VectorSizeType reverse_;
 	};
 
 public:
@@ -119,7 +111,7 @@ public:
 		VectorSizeType reverse;
 
 		// 1^st pass over data
-		nrsFirstPass(outQns, count, reverse, inQns);
+		firstPass(outQns, count, reverse, inQns);
 
 		// perform prefix sum
 		SizeType numberOfPatches = count.size();
@@ -148,27 +140,55 @@ public:
 
 private:
 
-	static void nrsFirstPass(VectorQnType& outQns,
-	                         VectorSizeType& count,
-	                         VectorSizeType& reverse,
-	                         const VectorQnType& inQns)
+	static void firstPass(VectorQnType& outQns,
+	                      VectorSizeType& count,
+	                      VectorSizeType& reverse,
+	                      const VectorQnType& inQns)
 	{
-#ifndef USE_PTHREADS
-		return nrsFirstPassSerial(outQns, count, reverse, inQns);
-#endif
+		return firstPassSerial(outQns, count, reverse, inQns);
 
-		SizeType threads = PsimagLite::Concurrency::codeSectionParams.npthreads;
-		NrsFirstPassHelper helper(inQns, threads);
+		/* SizeType threads = PsimagLite::Concurrency::codeSectionParams.npthreads;
+		FirstPassHelper helper(inQns, threads);
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
-		PsimagLite::Parallelizer<NrsFirstPassHelper> parallelizer(codeSectionParams);
+		PsimagLite::Parallelizer<FirstPassHelper> parallelizer(codeSectionParams);
 		parallelizer.loopCreate(helper);
-		helper.sync(outQns, count, reverse);
+		helper.sync(outQns, count, reverse);*/
 	}
 
-	static void nrsFirstPassSerial(VectorQnType& outQns,
-	                               VectorSizeType& count,
-	                               VectorSizeType& reverse,
-	                               const VectorQnType& inQns)
+	/*static void firstPass(VectorQnType& outQns,
+	                      VectorSizeType& count,
+	                      VectorSizeType& reverse,
+	                      const VectorQnType& inQns)
+	{
+		VectorQnType outQns2;
+		VectorSizeType  count2;
+		VectorSizeType reverse2;
+		firstPassSerial(outQns2, count2, reverse2, inQns);
+
+		SizeType threads = PsimagLite::Concurrency::codeSectionParams.npthreads;
+		FirstPassHelper helper(inQns, threads);
+		PsimagLite::CodeSectionParams codeSectionParams(threads);
+		PsimagLite::Parallelizer<FirstPassHelper> parallelizer(codeSectionParams);
+		parallelizer.loopCreate(helper);
+		helper.sync(outQns, count, reverse);
+		assert(compare(outQns, outQns2));
+		assert(compare(count, count2));
+		assert(compare(reverse, reverse2));
+	}
+
+	template<typename T>
+	static bool compare(const T& v1, const T& v2)
+	{
+		if (v1.size() != v2.size()) return false;
+		for (SizeType i = 0; i < v1.size(); ++i)
+			if (v1[i] != v2[i]) return false;
+		return true;
+	}*/
+
+	static void firstPassSerial(VectorQnType& outQns,
+	                            VectorSizeType& count,
+	                            VectorSizeType& reverse,
+	                            const VectorQnType& inQns)
 	{
 		SizeType n = inQns.size();
 		outQns.clear();
