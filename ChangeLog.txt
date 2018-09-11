@@ -1,3 +1,28 @@
+2018-09-11 Version 5.36
+
+Bug fixes:
+
+* TargetingMetts bug fix
+
+Performance
+
+* Qn::operator== improved
+
+* KronUseLowerPart now default except for BatchedGemm
+this should decrease RAM usage
+
+Refactor:
+
+* WFT uses directly the stacks
+
+* NotReallySort: work started to parallelize it
+
+New features:
+
+* Now checks restart consistency for useComplex
+
+* ProgressInUseconds SolverOptions
+
 2018-08-30 Version 5.34
 
 Bug fixes:
