@@ -1,6 +1,7 @@
-#include "Qn.h"
+#include "NotReallySort.h"
 #include <cstdlib>
 #include "ProgramGlobals.h"
+#include <tr1/unordered_map>
 
 typedef Dmrg::Qn QnType;
 typedef QnType::VectorQnType VectorQnType;
@@ -44,7 +45,8 @@ int main(int argc, char **argv)
 	VectorSizeType inNumbers(n, 0);
 	for (SizeType i = 0; i < n; ++i) inNumbers[i] = i;
 
-	 Dmrg::Qn::notReallySort(outNumber, outQns, offset, inNumbers, qns, Dmrg::ProgramGlobals::VERBOSE_YES);
+	 Dmrg::NotReallySort notReallySort;
+	 notReallySort(outNumber, outQns, offset, inNumbers, qns, Dmrg::ProgramGlobals::VERBOSE_YES);
 }
 
 
