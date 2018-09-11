@@ -1,3 +1,11 @@
+2018-09-11 Version 2.36
+
+* IoNgSerializer: bug fix in reading/writing a single boolean
+
+* added test drivers for Lanczos
+
+* MemoryUsage and ProgressIndicator can track time in microseconds
+
 2018-08-30 Version 2.34
 
 * IMPORTANT: BUG FIX in saving and reading booleans with IoNgSerializer
