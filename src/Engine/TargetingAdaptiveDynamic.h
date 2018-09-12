@@ -145,6 +145,7 @@ public:
 	      weightForContinuedFraction_(0),
 	      paramsForSolver_(io,"DynamicDmrg")
 	{
+		err("TargetingAdaptiveDynamic no longer supported\n");
 		this->common().init(&tstStruct_,2);
 		if (!wft.isEnabled()) throw PsimagLite::RuntimeError(" DynamicTargeting "
 		                                                     "needs an enabled wft\n");
@@ -298,11 +299,10 @@ private:
 		                                                 BaseType::model().linkProduct(),
 		                                                 fakeTime,
 		                                                 0);
-		typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
+		typedef typename LanczosSolverType::MatrixType LanczosMatrixType;
 		LanczosMatrixType h(BaseType::model(), hc);
 		LanczosSolverType lanczosSolver(h,paramsForSolver_);
 
-		RealType a=0,b=0;
 		VectorType x(sv.size(),0.0);
 		VectorType y = sv;
 		if (lastLanczosVector_>0) {
@@ -312,41 +312,19 @@ private:
 
 		if (lastLanczosVector_==0) normalize(y);
 
-		lanczosSolver.oneStepDec(x,y,a,b,lastLanczosVector_);
+		lanczosSolver.decomposition(y, ab_);
 
 		if (lastLanczosVector_<2) lastLanczosVector_++;
 
 		//f0 is wft'd, do nothing
 		//f1 is wft'd, do nothing
-		RealType norm1 = PsimagLite::norm(x);
-		if (norm1<1e-6) {
-			lanczosSolver.push(ab_,a,b);
-			h.matrixVectorProduct(x,y);
-			a = PsimagLite::real(x*y);
-			lanczosSolver.push(ab_,a,b);
-			done_=true;
-			return;
-		}
+
 		dynCounter_++;
 		if (lastLanczosVector_>1 && (dynCounter_%tstStruct_.advanceEach()) != 0)
 			return;
 		this->common().targetVectors(0).setDataInSector(x,i0);
 		this->common().targetVectors(1).setDataInSector(y,i0);
 		if ((dynCounter_%tstStruct_.advanceEach()) != 0) return;
-		if (ab_.size()>0) {
-			lanczosSolver.push(ab_,a,b);
-			return;
-		}
-		// first push:
-		VectorType xx(sv.size(),0.0);
-		VectorType yy;
-		phiNew.extract(yy,i0);
-		normalize(yy);
-		RealType a1=0,b1=0;
-		lanczosSolver.oneStepDec(xx,yy,a1,b1,lastLanczosVector_);
-		lanczosSolver.push(ab_,a1,b1);
-		if (tstStruct_.advanceEach()<=1) return;
-		lanczosSolver.push(ab_,a,b);
 	}
 
 	void setWeights()

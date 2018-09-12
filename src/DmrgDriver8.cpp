@@ -1,6 +1,6 @@
-// Created automatically by ./newconfigure.pl
+// Created automatically by ./configure.pl
 // DO NOT EDIT because file will be overwritten each
-// time you run ./newconfigure.pl with the second argument set to 1
+// time you run ./configure.pl with the second argument set to 1
 // This file should be commited
 #include "DmrgDriver1.h"
 
@@ -23,7 +23,7 @@ typedef PsimagLite::ChebyshevSolver<PsimagLite::ParametersForSolver<GeometryInst
 	MatrixVector16Type, MatrixVector16Type::VectorType> LanczosSolver16Type;
 
 template void mainLoop4<LanczosSolver16Type,Dmrg::VectorWithOffsets<RealType, Dmrg::Qn> >
-(LanczosSolver16Type::LanczosMatrixType::ModelType::GeometryType&,
+(LanczosSolver16Type::MatrixType::ModelType::GeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
 const OperatorOptions&,
@@ -48,7 +48,7 @@ typedef PsimagLite::ChebyshevSolver<PsimagLite::ParametersForSolver<GeometryInst
 	MatrixVector17Type, MatrixVector17Type::VectorType> LanczosSolver17Type;
 
 template void mainLoop4<LanczosSolver17Type,Dmrg::VectorWithOffsets<RealType, Dmrg::Qn> >
-(LanczosSolver17Type::LanczosMatrixType::ModelType::GeometryType&,
+(LanczosSolver17Type::MatrixType::ModelType::GeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
 const OperatorOptions&,

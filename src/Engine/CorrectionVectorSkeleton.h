@@ -103,7 +103,7 @@ class CorrectionVectorSkeleton {
 
 	class CalcR {
 
-		typedef typename LanczosSolverType::LanczosMatrixType::ModelType ModelType;
+		typedef typename LanczosSolverType::MatrixType::ModelType ModelType;
 		typedef typename ModelType::RealType RealType;
 		typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
@@ -216,7 +216,7 @@ public:
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
-	typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
+	typedef typename LanczosSolverType::MatrixType LanczosMatrixType;
 	typedef CorrectionVectorFunction<LanczosMatrixType,
 	TargetParamsType> CorrectionVectorFunctionType;
 	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>

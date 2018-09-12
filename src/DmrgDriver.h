@@ -106,7 +106,7 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 }
 
 template<typename SolverType, typename VectorWithOffsetType>
-void mainLoop4(typename SolverType::LanczosMatrixType::ModelType::GeometryType&,
+void mainLoop4(typename SolverType::MatrixType::ModelType::GeometryType&,
                const ParametersDmrgSolverType&,
                InputNgType::Readable&,
                const OperatorOptions&,

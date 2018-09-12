@@ -96,7 +96,7 @@ public:
 
 	typedef LanczosSolverType_ LanczosSolverType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
-	typedef typename LanczosSolverType::LanczosMatrixType MatrixVectorType;
+	typedef typename LanczosSolverType::MatrixType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;

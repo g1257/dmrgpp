@@ -142,7 +142,7 @@ private:
 		                                                 model_.linkProduct(),
 		                                                 currentTime_,
 		                                                 0);
-		typename LanczosSolverType::LanczosMatrixType lanczosHelper(model_, hc);
+		typename LanczosSolverType::MatrixType lanczosHelper(model_, hc);
 
 		typename LanczosSolverType::ParametersSolverType params(io_,"Tridiag");
 		params.lotaMemory = true;
@@ -155,7 +155,7 @@ private:
 		TargetVectorType phi2(total);
 		phi.extract(phi2,i0);
 		lanczosSolver.decomposition(phi2,ab);
-		lanczosSolver.buildDenseMatrix(T,ab);
+		ab.buildDenseMatrix(T);
 
 		V = lanczosSolver.lanczosVectors();
 

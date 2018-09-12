@@ -99,7 +99,7 @@ typedef PsimagLite::$lanczos<PsimagLite::ParametersForSolver<${geometry}::RealTy
 	$matrixVectorType, ${matrixVectorType}::VectorType> $lanczosType;
 
 template void mainLoop4<$lanczosType,$vecWithOffsetType>
-(${lanczosType}::LanczosMatrixType::ModelType::GeometryType&,
+(${lanczosType}::MatrixType::ModelType::GeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
 const OperatorOptions&,

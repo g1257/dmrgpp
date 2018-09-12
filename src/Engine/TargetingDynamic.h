@@ -273,7 +273,7 @@ private:
 		                                                 BaseType::model().linkProduct(),
 		                                                 fakeTime,
 		                                                 0);
-		typename LanczosSolverType::LanczosMatrixType h(BaseType::model(), hc);
+		typename LanczosSolverType::MatrixType h(BaseType::model(), hc);
 		paramsForSolver_.lotaMemory = true;
 		LanczosSolverType lanczosSolver(h,paramsForSolver_);
 

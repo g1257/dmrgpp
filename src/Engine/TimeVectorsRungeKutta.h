@@ -205,7 +205,7 @@ private:
 		RealType timeDirection_;
 		SizeType p_;
 		typename ModelType::HamiltonianConnectionType hc_;
-		typename LanczosSolverType::LanczosMatrixType lanczosHelper_;
+		typename LanczosSolverType::MatrixType lanczosHelper_;
 	}; // FunctionForRungeKutta
 
 	void calcTimeVectors(const PairType& startEnd,

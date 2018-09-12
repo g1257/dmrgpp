@@ -830,8 +830,8 @@ private:
 		                                                 BaseType::model().linkProduct(),
 		                                                 this->common().currentTime(),
 		                                                 0);
-		typename LanczosSolverType::LanczosMatrixType lanczosHelper(BaseType::model(),
-		                                                            hc);
+		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
+		                                                     hc);
 
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);

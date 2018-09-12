@@ -4,13 +4,13 @@
 #include "DmrgDriver.h"
 
 template<typename SolverType, typename VectorWithOffsetType>
-void mainLoop4(typename SolverType::LanczosMatrixType::ModelType::GeometryType& geometry,
+void mainLoop4(typename SolverType::MatrixType::ModelType::GeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io,
                const OperatorOptions& opOptions,
                PsimagLite::String targeting)
 {
-	typedef typename SolverType::LanczosMatrixType::ModelType ModelBaseType;
+	typedef typename SolverType::MatrixType::ModelType ModelBaseType;
 
 	//! Setup the Model
 	Dmrg::ModelSelector<ModelBaseType> modelSelector(dmrgSolverParams.model);

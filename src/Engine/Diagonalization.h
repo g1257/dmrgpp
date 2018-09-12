@@ -510,9 +510,11 @@ private:
 			msg<<"WARNING: diagonaliseOneBlock: Norm of guess vector is zero, ";
 			msg<<"ignoring guess\n";
 			progress_.printline(msg, std::cout);
-			object.computeExcitedState(gsEnergy, gsVector, excited);
+			TargetVectorType init(initialVector.size());
+			PsimagLite::fillRandom(init);
+			object.computeOneState(gsEnergy, gsVector, init, excited);
 		} else {
-			object.computeExcitedState(gsEnergy, gsVector, initialVector, excited);
+			object.computeOneState(gsEnergy, gsVector, initialVector, excited);
 		}
 
 		return gsEnergy;

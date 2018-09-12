@@ -133,7 +133,7 @@ public:
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
-	typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
+	typedef typename LanczosSolverType::MatrixType LanczosMatrixType;
 	typedef CorrectionVectorFunction<LanczosMatrixType,TargetParamsType>
 	CorrectionVectorFunctionType;
 	typedef ParallelTriDiag<ModelType,LanczosSolverType,VectorWithOffsetType>
