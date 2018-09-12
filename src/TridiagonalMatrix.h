@@ -86,10 +86,10 @@ class TridiagonalMatrix {
 
 	typedef typename Vector<FieldType>::Type VectorType;
 	typedef typename Real<FieldType>::Type RealType;
-	typedef typename Vector<RealType>::Type VectorRealType;
 
 public:
 
+	typedef typename Vector<RealType>::Type VectorRealType;
 	typedef FieldType value_type;
 
 	TridiagonalMatrix()  { }

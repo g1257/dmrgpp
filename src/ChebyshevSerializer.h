@@ -82,6 +82,7 @@ public:
 	typedef ParametersForSolver<RealType> ParametersType;
 	typedef KernelPolynomialParameters<RealType> KernelParametersType;
 	typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
+	typedef typename TridiagonalMatrixType::VectorRealType VectorRealType;
 
 	ChebyshevSerializer(const TridiagonalMatrixType& ab,
 	                    const ParametersType& params)
@@ -94,7 +95,13 @@ public:
 	ChebyshevSerializer(IoInputType& io)
 	    : progress_("ChebyshevSerializer"),params_(io,"#Chebyshev")
 	{
-		io.read(moments_,"#ChebyshevMoments");
+		VectorRealType tmp;
+		io.read(tmp,"#ChebyshevMoments");
+		SizeType n = tmp.size()/2;
+		for (SizeType i = 0; i < n; ++i) {
+			moments_.a(i) = tmp[2*i];
+			moments_.b(i) = tmp[2*i + 1];
+		}
 	}
 
 	template<typename SomeIoOutputType>
@@ -122,10 +129,10 @@ public:
 	{
 		SizeType cutoff = kernelParams.cutoff;
 		if (cutoff==0 || moments_.size()<cutoff) cutoff = moments_.size();
-		typename Vector<RealType>::Type gn(cutoff,1.0);
+		VectorRealType gn(cutoff,1.0);
 		initKernel(gn,kernelParams);
 
-		typename Vector<RealType>::Type gnmun(gn.size());
+		VectorRealType gnmun(gn.size());
 		computeGnMuN(gnmun,gn);
 
 		SizeType counter = 0;
@@ -161,20 +168,24 @@ public:
 private:
 
 	RealType calcF(const RealType& x,
-	               const typename Vector<RealType>::Type& gnmn) const
+	               const VectorRealType& gnmn) const
 	{
 		RealType sum = 0.5*gnmn[0];
 		for (SizeType i=1;i<gnmn.size();i++) sum += gnmn[i]*chebyshev_(i,x);
 		return 2.0*sum;
 	}
 
-	void computeGnMuN(typename Vector<RealType>::Type& gnmn,
-	                  typename Vector<RealType>::Type& gn) const
+	void computeGnMuN(VectorRealType& gnmn,
+	                  VectorRealType& gn) const
 	{
-		for (SizeType i=0;i<gnmn.size();i++) gnmn[i] = moments_[i] * gn[i];
+		for (SizeType i = 0; i < gnmn.size(); ++i) {
+			const SizeType j = (i & 1) ? (i - 1)/2 : i/2;
+			const RealType& tmp = (i & 1) ? moments_.b(j) : moments_.a(j);
+			gnmn[i] = tmp * gn[i];
+		}
 	}
 
-	void initKernel(typename Vector<RealType>::Type& gn,
+	void initKernel(VectorRealType& gn,
 	                const KernelParametersType& kernelParams) const
 	{
 		switch (kernelParams.type) {
@@ -191,7 +202,7 @@ private:
 		}
 	}
 
-	void initKernelJackson(typename Vector<RealType>::Type& gn) const
+	void initKernelJackson(VectorRealType& gn) const
 	{
 		SizeType nPlus1 = gn.size()+1;
 		RealType cot1 = 1.0/tan(M_PI/nPlus1);
@@ -201,7 +212,7 @@ private:
 		}
 	}
 
-	void initKernelLorentz(typename Vector<RealType>::Type& gn,
+	void initKernelLorentz(VectorRealType& gn,
 	                       const RealType& lambda) const
 	{
 		RealType nreal = gn.size();
