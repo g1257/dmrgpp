@@ -1,7 +1,9 @@
 #include "LanczosSolver.h"
+#include "LanczosExtras.h"
 #include "Matrix.h"
 #include "CrsMatrix.h"
 #include <fstream>
+#include "PsimagLite.h"
 
 int main(int argc, char **argv)
 {
@@ -41,14 +43,15 @@ int main(int argc, char **argv)
 	params.tolerance = -1;
 	params.options = "reortho";
 
-	PsimagLite::LanczosSolver<SolverParametersType,
-	        PsimagLite::CrsMatrix<ComplexType>,VectorType> lanczosSolver(msparse, params);
+	typedef PsimagLite::LanczosSolver<SolverParametersType,
+	        PsimagLite::CrsMatrix<ComplexType>,VectorType> LanczosSolverType;
 
-	VectorType z(n, 0.0);
-	VectorRealType e(n);
-	lanczosSolver.computeExcitedState(e[0], z, 0); // calculate only ground-state
-//	for (SizeType excited = 0; excited < n; ++excited)
-//		lanczosSolver.computeExcitedState(e[excited], z, excited);
+	LanczosSolverType lanczosSolver(msparse, params);
+
+	PsimagLite::LanczosExtras<LanczosSolverType> lanczosExtras(lanczosSolver);
+
+	VectorType initial(n);
+	PsimagLite::fillRandom(initial);
 
 	VectorRealType eigs(n);
 	PsimagLite::diag(m, eigs, 'V');
@@ -58,23 +61,12 @@ int main(int argc, char **argv)
 	std::cout<<"\n";
 
 	std::cout<<"LANCZ: ";
-	for (SizeType excited = 0; excited < n; ++excited) {
-		RealType eval = 0.0;
-		VectorType z1(n, 0.0);
-		lanczosSolver.computeAnyState(eval,z1,excited);
-		std::cout<< eval <<" ";
-	}
-	std::cout << std::endl << std::endl;
+	LanczosSolverType::VectorVectorType zz;
+	lanczosExtras.computeAllStatesBelow(eigs, zz, initial, n);
 
 	std::cout<<"LANCZOS: \n";
 	for (SizeType excited = 0; excited < n; ++excited) {
-		RealType eval = 0.0;
-		VectorType z1(n, 0.0);
-		lanczosSolver.computeAnyState(eval,z1,excited);
-
-		RealType avgH = lanczosSolver.ExpectationH(z1);
-
-		std::cout<< "<E>_" << excited << " = " << avgH <<"  \n";
+		std::cout<< "<E>_" << excited << " = " << eigs[excited] <<"  \n";
 	}
 
 	std::cout<<"\n";

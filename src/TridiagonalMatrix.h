@@ -86,6 +86,7 @@ class TridiagonalMatrix {
 
 	typedef typename Vector<FieldType>::Type VectorType;
 	typedef typename Real<FieldType>::Type RealType;
+	typedef typename Vector<RealType>::Type VectorRealType;
 
 public:
 
@@ -128,17 +129,24 @@ public:
 	const FieldType& b(SizeType i) const { return b_[i]; }
 
 	template<typename SomeMatrixType>
-	void buildDenseMatrix(SomeMatrixType& m) const
+	void buildDenseMatrix(SomeMatrixType& m, SizeType n = 0) const
 	{
-		m.resize(a_.size(),a_.size());
-		for (SizeType i=0;i<m.rows();i++)
-			for (SizeType j=0;j<m.cols();j++)
-				m(i,j)=0;
-
-		for (SizeType i=0;i<a_.size();i++) {
-			m(i,i) = a_[i];
-			if (i>0) m(i,i-1) = m(i-1,i) = b_[i-1];
+		if (n == 0) n = a_.size();
+		m.resize(n, n, 0);
+		for (SizeType i = 0; i < n - 1; ++i) {
+			m(i, i) = a_[i];
+			m(i, i + 1) = b_[i + 1];
+			m(i + 1, i) = PsimagLite::conj(b_[i + 1]);
 		}
+
+		m(n - 1, n - 1) = a_[n-1];
+	}
+
+	void diag(VectorRealType& eigs, SizeType n) const
+	{
+		Matrix<FieldType> ritz;
+		buildDenseMatrix(ritz, n);
+		PsimagLite::diag(ritz, eigs, 'N');
 	}
 
 	void push(const FieldType& a,const FieldType& b)
@@ -149,27 +157,8 @@ public:
 
 	SizeType size() const { return a_.size(); }
 
-	template<typename SomeVectorType>
-	FieldType excited(SomeVectorType &z, SizeType level) const
-	{
-		if (a_.size() > 4900)
-			throw RuntimeError("TridiagonalMatrix::excited: too big\n");
-
-		typedef typename SomeVectorType::value_type ElementType;
-		Matrix<ElementType> m;
-		buildDenseMatrix(m);
-		SizeType n = m.rows();
-		assert(m.cols() == n);
-		typename Vector<RealType>::Type eigs(n);
-		diag(m,eigs,'V');
-		assert(level < n);
-		for (SizeType i = 0; i < n; ++i)
-			z[i] = m(i,level);
-
-		return eigs[level];
-	}
-
 private:
+
 	VectorType a_,b_;
 }; // class TridiagonalMatrix
 } // namespace PsimagLite

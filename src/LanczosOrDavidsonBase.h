@@ -92,21 +92,6 @@ public:
 
 	typedef MatrixType_ MatrixType;
 
-	enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
-
-	virtual void computeGroundState(RealType& gsEnergy,VectorType& z)=0;
-
-	virtual void computeGroundState(RealType &gsEnergy,
-	                                VectorType &z,
-	                                const VectorType& initialVector)=0;
-
-	virtual void computeExcitedState(RealType& gsEnergy,VectorType& z,SizeType)=0;
-
-	virtual void computeExcitedState(RealType &gsEnergy,
-	                                 VectorType &z,
-	                                 const VectorType& initialVector,
-	                                 SizeType)=0;
-
 	// To avoid compiler warnings
 	virtual ~LanczosOrDavidsonBase() { }
 

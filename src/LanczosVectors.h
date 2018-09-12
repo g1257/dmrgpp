@@ -123,6 +123,9 @@ public:
 	      data_(0),
 	      overlap_(0)
 	{
+		if (!lotaMemory)
+			throw RuntimeError("LanczosVectors: support for lotaMemory=false has been removed\n");
+
 		dealWithOverlapStorage(steps);
 	}
 
@@ -190,66 +193,16 @@ public:
 		ysaved_ = y;
 	}
 
-	void hookForZ(VectorType& z,
-	              const typename Vector<RealType>::Type& c,
-	              TridiagonalMatrixType& ab)
+	void excitedVector(VectorType& z, const DenseMatrixType& ritz, SizeType excited) const
 	{
-		if (!lotaMemory_) {
-			VectorType x(z.size(),0.0);
-			VectorType x0(z.size(),0.0);
-			VectorType y = ysaved_;
-			for (SizeType i = 0; i < z.size(); i++)
-				z[i] = 0.0;
-			RealType atmp = 0.0;
-			for (SizeType j=0; j < c.size(); j++) {
-				RealType ctmp = c[j];
-				for (SizeType i = 0; i < y.size(); i++)
-					z[i] += ctmp * y[i];
-				RealType btmp = 0;
-				oneStepDecomposition(x0,x,y,ab, j);
-			}
-
-			return;
+		SizeType small = data_->cols();
+		SizeType big = data_->rows();
+		for (SizeType j = 0; j <small; j++) {
+			ComplexOrRealType ctmp = ritz(j, excited);
+			for (SizeType i = 0; i < big; i++)
+				z[i] += ctmp * data_->operator()(i, j);
 		}
-
-		for (SizeType j = 0; j < data_->cols(); j++) {
-			RealType ctmp = c[j];
-			for (SizeType i = 0; i < data_->rows(); i++) {
-				z[i] += ctmp * data_->operator()(i,j);
-			}
-		}
-
 	}
-
-	// provides a gracious way to exit if Ay == 0 (we assume that then A=0)
-	bool isHyZero(const VectorType& y,
-	              TridiagonalMatrixType& ab)
-	{
-		if (!lotaMemory_) return false;
-
-		OstringStream msg;
-		msg<<"Testing whether matrix is zero...";
-		progress_.printline(msg,std::cout);
-
-		VectorType x(mat_.rows());
-
-		for (SizeType i = 0; i < x.size(); i++) x[i] = 0.0;
-
-		mat_.matrixVectorProduct (x, y); // x+= Hy
-
-		for (SizeType i = 0; i < x.size(); i++)
-			if (PsimagLite::real(x[i]*PsimagLite::conj(x[i]))!=0) return false;
-
-		for (SizeType j=0; j < data_->cols(); j++) {
-			for (SizeType i = 0; i < mat_.rows(); i++) {
-				data_->operator()(i,j) = (i==j) ? 0.0 : 1.1;
-			}
-			ab.a(j) = 0.0;
-			ab.b(j) = 0.0;
-		}
-		return true;
-	}
-
 
 	void oneStepDecomposition(VectorType& V0,
 	                          VectorType& V1,
@@ -263,24 +216,23 @@ public:
 
 		RealType atmp = 0.0;
 		for (SizeType h = 0; h < nn; h++)
-				atmp += PsimagLite::real(V2[h]*PsimagLite::conj(V1[h])); // <V1|V2>
-				ab.a(iter) = atmp;
+			atmp += PsimagLite::real(V2[h]*PsimagLite::conj(V1[h])); // <V1|V2>
+		ab.a(iter) = atmp;
 
 		RealType btmp = 0.0;
 		for (SizeType h = 0; h < nn; h++) {
 			V2[h] = V2[h] - ab.a(iter)*V1[h] - ab.b(iter)*V0[h];  // V2 = V2 - alpha*V1 - beta*V0;
 			btmp += PsimagLite::real(V2[h]*PsimagLite::conj(V2[h]));
 		}
+
 		btmp = sqrt(btmp);
-		ab.b(iter+1) = btmp;	// beta = sqrt(V2*V2)
+		if (iter + 1 < ab.size())
+			ab.b(iter+1) = btmp;	// beta = sqrt(V2*V2)
 
 		for (SizeType i = 0; i < nn; i++) V2[i] = V2[i]/btmp;		// normalize V2
 
 		reorthoIfNecessary(V2, iter);
 	}
-
-
-
 
 private:
 

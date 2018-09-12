@@ -36,7 +36,7 @@ public:
 		srand48(seed);
 		Vector<LongType>::Type vOfSeeds(nprocs);
 		for (SizeType i=0;i<vOfSeeds.size();i++)
-			vOfSeeds[i] = static_cast<LongType>(10000.0*random());
+			vOfSeeds[i] = static_cast<LongType>(10000.0*drand48());
 		seed_=vOfSeeds[rank];
 		srand48(seed_);
 	}

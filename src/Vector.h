@@ -104,7 +104,6 @@ vector<T2,A> operator*(const vector<vector<T1,A>,AA>& v1,
 	}
 	return v3;
 }
-
 // closure
 
 struct ClosureOperations {

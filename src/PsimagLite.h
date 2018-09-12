@@ -6,6 +6,8 @@
 #include "Concurrency.h"
 #include "AnsiColors.h"
 #include "TypeToString.h"
+#include "Vector.h"
+#include "Random48.h"
 
 namespace PsimagLite {
 
@@ -23,6 +25,18 @@ struct MatchPathSeparator {
         return (ch == '/');
     }
 };
+
+template<typename X,typename A>
+void fillRandom(std::vector<X, A>& v)
+{
+	SizeType n = v.size();
+	if (n == 0)
+		throw std::runtime_error("fillRandom must be called with size > 0\n");
+
+	Random48<X> myrng(time(0));
+	for (SizeType i = 0; i < n; ++i)
+		v[i] = myrng() - 0.5;
+}
 
 void split(Vector<String>::Type& tokens, String str, String delimiters = " ");
 
