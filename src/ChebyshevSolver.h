@@ -105,12 +105,12 @@ namespace PsimagLite {
 	 * ParametersForSolver class, if you want.
 	 *
 	 */
-template<typename SolverParametersType,typename MatrixType,typename VectorType>
+template<typename SolverParametersType,typename MatrixType_,typename VectorType>
 class ChebyshevSolver  {
 
-	typedef LanczosOrDavidsonBase<SolverParametersType,MatrixType,VectorType> NotBaseType;
+	typedef LanczosOrDavidsonBase<SolverParametersType,MatrixType_,VectorType> NotBaseType;
 	typedef typename SolverParametersType::RealType RealType;
-	typedef LanczosVectors<MatrixType,VectorType> LanczosVectorsType;
+	typedef LanczosVectors<MatrixType_,VectorType> LanczosVectorsType;
 	typedef typename LanczosVectorsType::DenseMatrixType DenseMatrixType;
 	typedef typename LanczosVectorsType::DenseMatrixRealType DenseMatrixRealType;
 	typedef typename LanczosVectorsType::VectorVectorType VectorVectorType;
@@ -118,8 +118,8 @@ class ChebyshevSolver  {
 public:
 
 	typedef SolverParametersType ParametersSolverType;
-	typedef MatrixType LanczosMatrixType;
-	typedef typename Vector<RealType>::Type TridiagonalMatrixType;
+	typedef MatrixType_ MatrixType;
+	typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
 	typedef typename VectorType::value_type VectorElementType;
 	typedef ChebyshevSerializer<TridiagonalMatrixType> PostProcType;
 	typedef PsimagLite::Random48<RealType> RngType;
@@ -192,8 +192,8 @@ public:
 			RealType atmp = 0;
 			RealType btmp = 0;
 			oneStepDec(x, y, atmp, btmp, j);
-			ab[2*j] =     2*atmp - ab[0];
-			ab[2*j + 1] = 2*btmp - ab[1];
+			ab.a(j) =     2*atmp - ab.a(0);
+			ab.b(j) = 2*btmp - ab.b(0);
 		}
 
 		// lanczosVectors_.resize(cols); <--- not needed because all steps are performed
@@ -322,13 +322,15 @@ private:
 		        lanczosSolver2(mat2,params);
 
 		VectorType z2(mat_.rows(),0);
-		lanczosSolver2.computeGroundState(eMax,z2);
+		VectorType init(z2.size());
+		PsimagLite::fillRandom(init);
+		lanczosSolver2.computeOneState(eMax, z2, init, 0);
 
 		VectorType z(mat_.rows(),0);
 		LanczosSolver<SolverParametersType,MatrixType,VectorType>
 		        lanczosSolver(mat_,params);
 		RealType eMin = 0;
-		lanczosSolver.computeGroundState(eMin,z);
+		lanczosSolver.computeOneState(eMin, z, init, 0);
 
 		eMax = -eMax;
 		eMax *= 3;

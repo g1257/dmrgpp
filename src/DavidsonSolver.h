@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "Matrix.h"
 #include "Random48.h"
+#include "LanczosOrDavidsonBase.h"
 
 namespace PsimagLite {
 
@@ -96,8 +97,10 @@ template<typename SolverParametersType,typename MatrixType,typename VectorType>
 class DavidsonSolver : public LanczosOrDavidsonBase<SolverParametersType,MatrixType,VectorType> {
 
 	typedef typename SolverParametersType::RealType RealType;
-	typedef LanczosOrDavidsonBase<SolverParametersType,MatrixType,VectorType> ParentType;
+	typedef LanczosOrDavidsonBase<SolverParametersType,MatrixType,VectorType> BaseType;
 	typedef typename VectorType::value_type ComplexOrRealType;
+	typedef typename BaseType::VectorRealType VectorRealType;
+	typedef typename BaseType::VectorVectorType VectorVectorType;
 
 public:
 
@@ -106,83 +109,32 @@ public:
 	    : progress_("DavidsonSolver",params.threadId),
 	      mat_(mat),
 	      steps_(params.steps),
-	      eps_(params.tolerance),
-	      mode_(ParentType::WITH_INFO),
-	      rng_(343311)
+	      eps_(params.tolerance)
 	{
-		setMode(params.options);
 		OstringStream msg;
 		msg<<"Constructing... mat.rank="<<mat_.rows();
 		msg<<" steps="<<steps_<<" eps="<<eps_;
 		progress_.printline(msg,std::cout);
 	}
 
-	virtual void computeGroundState(RealType& gsEnergy,VectorType& z)
-	{
-		SizeType n =mat_.rows();
-		RealType atmp=0.0;
-		VectorType y(n);
-
-		for (SizeType i=0;i<n;i++) {
-			y[i]=rng_()-0.5;
-			atmp += PsimagLite::real(y[i]*PsimagLite::conj(y[i]));
-		}
-		if (mode_ & ParentType::DEBUG) {
-			computeGroundStateTest(gsEnergy,z,y);
-			return;
-		}
-		atmp = 1.0 / sqrt (atmp);
-		for (SizeType i = 0; i < n; i++) y[i] *= atmp;
-		computeGroundState(gsEnergy,z,y);
-	}
-
-	virtual void computeGroundState(RealType&,
-	                                VectorType&,
-	                                const VectorType&)
+	void computeOneState(RealType&, VectorType&, const VectorType&, SizeType)
 	{
 		String s(__FILE__);
 		s += " Unimplemented\n";
 		throw RuntimeError(s.c_str());
 	}
 
-	virtual void computeExcitedState(RealType&,
-	                                 VectorType&,
-	                                 SizeType)
+	void computeAllStatesBelow(VectorRealType&,
+	                           VectorVectorType&,
+	                           const VectorType&,
+	                           SizeType)
 	{
 		String s(__FILE__);
-		s += " computeExcitedState Unimplemented\n";
-		throw RuntimeError(s.c_str());
-	}
-
-	virtual void computeExcitedState(RealType&,
-	                                 VectorType&,
-	                                 const VectorType&,
-	                                 SizeType)
-	{
-		String s(__FILE__);
-		s += " computeExcitedState Unimplemented\n";
+		s += " Unimplemented\n";
 		throw RuntimeError(s.c_str());
 	}
 
 private:
-
-	void setMode(const String& options)
-	{
-		if (options.find("lanczosdebug")!=String::npos)
-			mode_ |=  ParentType::DEBUG;
-		if (options.find("lanczosAllowsZero")!=String::npos)
-			mode_ |= ParentType::ALLOWS_ZERO;
-	}
-
-	//! only for debugging:
-	void computeGroundStateTest(RealType&,
-	                            VectorType&,
-	                            const VectorType&)
-	{
-		String s(__FILE__);
-		s += " Unimplemented\n";
-		throw RuntimeError(s.c_str());
-	}
 
 	void algorithm4_14(VectorType& t,const typename Vector<VectorType>::Type& v)
 	{
@@ -219,11 +171,9 @@ private:
 	}
 
 	ProgressIndicator progress_;
-	MatrixType const& mat_;
+	const MatrixType& mat_;
 	SizeType steps_;
 	RealType eps_;
-	SizeType mode_;
-	Random48<RealType> rng_;
 }; // class DavidsonSolver
 } // namespace PsimagLite
 

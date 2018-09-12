@@ -44,6 +44,7 @@ Please see full open source license included in file LICENSE.
 #include "Io/IoSelector.h"
 #include "Io/IoSimple.h"
 #include <typeinfo>
+#include "TridiagonalMatrix.h"
 
 namespace PsimagLite {
 
@@ -80,8 +81,9 @@ public:
 	typedef PlotParams<RealType> PlotParamsType;
 	typedef ParametersForSolver<RealType> ParametersType;
 	typedef KernelPolynomialParameters<RealType> KernelParametersType;
+	typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
 
-	ChebyshevSerializer(const VectorType& ab,
+	ChebyshevSerializer(const TridiagonalMatrixType& ab,
 	                    const ParametersType& params)
 	    : progress_("ChebyshevSerializer"),
 	      moments_(ab),
@@ -210,7 +212,7 @@ private:
 	}
 
 	ProgressIndicator progress_;
-	typename Vector<RealType>::Type moments_;
+	TridiagonalMatrixType moments_;
 	ParametersType params_;
 	ChebyshevFunction<RealType> chebyshev_;
 }; // class ChebyshevSerializer

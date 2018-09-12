@@ -1,5 +1,4 @@
 #include "LanczosSolver.h"
-#include "LanczosExtras.h"
 #include "Matrix.h"
 #include "CrsMatrix.h"
 #include <fstream>
@@ -48,8 +47,6 @@ int main(int argc, char **argv)
 
 	LanczosSolverType lanczosSolver(msparse, params);
 
-	PsimagLite::LanczosExtras<LanczosSolverType> lanczosExtras(lanczosSolver);
-
 	VectorType initial(n);
 	PsimagLite::fillRandom(initial);
 
@@ -62,7 +59,7 @@ int main(int argc, char **argv)
 
 	std::cout<<"LANCZ: ";
 	LanczosSolverType::VectorVectorType zz;
-	lanczosExtras.computeAllStatesBelow(eigs, zz, initial, n);
+	lanczosSolver.computeAllStatesBelow(eigs, zz, initial, n);
 
 	std::cout<<"LANCZOS: \n";
 	for (SizeType excited = 0; excited < n; ++excited) {

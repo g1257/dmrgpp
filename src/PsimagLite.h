@@ -26,16 +26,22 @@ struct MatchPathSeparator {
     }
 };
 
-template<typename X,typename A>
-void fillRandom(std::vector<X, A>& v)
+template<typename T>
+void fillRandom(T& v, typename EnableIf<IsVectorLike<T>::True, int>::Type = 0)
 {
 	SizeType n = v.size();
 	if (n == 0)
 		throw std::runtime_error("fillRandom must be called with size > 0\n");
 
-	Random48<X> myrng(time(0));
-	for (SizeType i = 0; i < n; ++i)
+	Random48<typename T::value_type> myrng(time(0));
+	typename PsimagLite::Real<typename T::value_type>::Type sum = 0;
+	for (SizeType i = 0; i < n; ++i) {
 		v[i] = myrng() - 0.5;
+		sum += PsimagLite::real(v[i]*PsimagLite::conj(v[i]));
+	}
+
+	sum = 1.0/sqrt(sum);
+	for (SizeType i = 0; i < n; ++i) v[i] *= sum;
 }
 
 void split(Vector<String>::Type& tokens, String str, String delimiters = " ");

@@ -1,6 +1,7 @@
 #include "LanczosSolver.h"
 #include "Matrix.h"
 #include "CrsMatrix.h"
+#include "PsimagLite.h"
 
 int main()
 {
@@ -26,7 +27,9 @@ int main()
 
 	double e = 0;
 	VectorType z(n, 0.0);
-	lanczosSolver.computeGroundState(e, z);
+	VectorType initial(n);
+	PsimagLite::fillRandom(initial);
+	lanczosSolver.computeOneState(e, z, initial, 0);
 
 	std::cout<<"energy="<<e<<"\n";
 	std::cout<<z<<"\n";

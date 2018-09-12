@@ -23,6 +23,7 @@ Please see full open source license included in file LICENSE.
 #include "CrsMatrix.h"
 #include "Random48.h"
 #include "ParametersForSolver.h"
+#include "PsimagLite.h"
 
 using namespace PsimagLite;
 
@@ -129,7 +130,10 @@ int main(int argc,char *argv[])
 	// diagonalize matrix
 	RealType gsEnergy = 0;
 	VectorType gsVector(n);
-	solver->computeGroundState(gsEnergy,gsVector);
+
+	VectorType initial(n);
+	PsimagLite::fillRandom(initial);
+	solver->computeOneState(gsEnergy, gsVector, initial, 0);
 
 	std::cout<<"Energy="<<gsEnergy<<"\n";
 }

@@ -86,14 +86,22 @@ namespace PsimagLite {
 template<typename SolverParametersType,typename MatrixType_,typename VectorType>
 class LanczosOrDavidsonBase {
 
-	typedef typename SolverParametersType::RealType RealType;
-
 public:
 
+	typedef typename SolverParametersType::RealType RealType;
+	typedef typename Vector<RealType>::Type VectorRealType;
+	typedef typename Vector<VectorType>::Type VectorVectorType;
 	typedef MatrixType_ MatrixType;
 
 	// To avoid compiler warnings
 	virtual ~LanczosOrDavidsonBase() { }
+
+	virtual void computeOneState(RealType&, VectorType&, const VectorType&, SizeType) = 0;
+
+	virtual void computeAllStatesBelow(VectorRealType&,
+	                                   VectorVectorType&,
+	                                   const VectorType&,
+	                                   SizeType) = 0;
 
 	static bool isReorthoEnabled(const SolverParametersType& params)
 	{
