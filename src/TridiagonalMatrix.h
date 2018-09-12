@@ -84,11 +84,11 @@ namespace PsimagLite {
 template<typename FieldType>
 class TridiagonalMatrix {
 
-	typedef typename Vector<FieldType>::Type VectorType;
 	typedef typename Real<FieldType>::Type RealType;
 
 public:
 
+	typedef typename Vector<FieldType>::Type VectorType;
 	typedef typename Vector<RealType>::Type VectorRealType;
 	typedef FieldType value_type;
 
@@ -142,12 +142,7 @@ public:
 		m(n - 1, n - 1) = a_[n-1];
 	}
 
-	void diag(VectorRealType& eigs, SizeType n) const
-	{
-		Matrix<FieldType> ritz;
-		buildDenseMatrix(ritz, n);
-		PsimagLite::diag(ritz, eigs, 'N');
-	}
+	void diag(VectorRealType&, SizeType) const;
 
 	void push(const FieldType& a,const FieldType& b)
 	{
@@ -159,7 +154,8 @@ public:
 
 private:
 
-	VectorType a_,b_;
+	VectorRealType a_;
+	VectorRealType b_;
 }; // class TridiagonalMatrix
 } // namespace PsimagLite
 

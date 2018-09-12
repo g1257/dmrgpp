@@ -205,7 +205,7 @@ public:
 
 		VectorRealType tmpEigs(ab.size(), 0);
 		// ---- Starting the loop -------
-		for (j=1; j < max_nstep; ++j) {
+		for (j = 1; j < max_nstep; ++j) {
 
 			lanczosVectors_.oneStepDecomposition(V0,V1,V2,ab,j);
 			ab.diag(tmpEigs, j + 1);

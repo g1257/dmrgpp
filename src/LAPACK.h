@@ -171,6 +171,58 @@ extern "C" int  cgesvd_(char* jobz,
 
 extern "C" void ilaver_(int*, int*, int*);
 
+extern "C" void dstedc_(char*,
+                        int*,
+                        double*,
+                        double*,
+                        double*,
+                        int*,
+                        double*,
+                        int*,
+                        int*,
+                        int*,
+                        int*);
+
+extern "C" void sstedc_(char*,
+                        int*,
+                        float*,
+                        float*,
+                        float*,
+                        int*,
+                        float*,
+                        int*,
+                        int*,
+                        int*,
+                        int*);
+
+extern "C" void zstedc_(char*,
+                        int*,
+                        double*,
+                        double*,
+                        std::complex<double>*,
+                        int*,
+                        std::complex<double>*,
+                        int*,
+                        double*,
+                        int*,
+                        int*,
+                        int*,
+                        int*);
+
+extern "C" void cstedc_(char*,
+                        int*,
+                        float*,
+                        float*,
+                        std::complex<float>*,
+                        int*,
+                        std::complex<float>*,
+                        int*,
+                        float*,
+                        int*,
+                        int*,
+                        int*,
+                        int*);
+
 // ============================================================================
 inline void GESV(int ma,
                  int mb,
