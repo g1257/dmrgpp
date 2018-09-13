@@ -4,6 +4,8 @@
 #include "Vector.h"
 #include <numeric>
 #include "Sort.h"
+#include "Concurrency.h"
+#include "Parallelizer.h"
 
 namespace Dmrg {
 
@@ -70,6 +72,46 @@ public:
 
 private:
 
+	class HashHelper {
+
+	public:
+
+		HashHelper(VectorSizeType& hash,
+		           const VectorQnType& inQns,
+		           const VectorSizeType& sizes,
+		           bool addOdd)
+		    : hash_(hash), inQns_(inQns), sizes_(sizes), addOdd_(addOdd)
+		{}
+
+		void doTask(SizeType taskNumber, SizeType)
+		{
+			hash_[taskNumber] = computeHash(inQns_[taskNumber], sizes_, addOdd_);
+		}
+
+		SizeType tasks() const { return inQns_.size(); }
+
+	private:
+
+		static SizeType computeHash(const Qn& qn, const VectorSizeType& sizes, bool addOdd)
+		{
+			SizeType n = qn.other.size(); // small number
+			SizeType key = (addOdd && qn.oddElectrons) ? 1 : 0;
+			SizeType scale = (addOdd) ? 2 : 1;
+
+			for (SizeType i = 0; i < n; ++i) {
+				key += qn.other[i]*scale;
+				scale *= sizes[i];
+			}
+
+			return key;
+		}
+
+		VectorSizeType& hash_;
+		const VectorQnType& inQns_;
+		const VectorSizeType& sizes_;
+		bool addOdd_;
+	};
+
 	static void firstPass(VectorQnType& outQns,
 	                      VectorSizeType& count,
 	                      VectorSizeType& reverse,
@@ -97,8 +139,11 @@ private:
 
 		bool addOddToHash = (!noNeedForOdd && hasAtLeastOneOdd);
 
-		for (SizeType i = 0; i < n; ++i)
-			hash[i] = computeHash(inQns[i], sizes, addOddToHash);
+		SizeType threads = std::min(PsimagLite::Concurrency::codeSectionParams.npthreads, n);
+		HashHelper helper(hash, inQns, sizes, addOddToHash);
+		PsimagLite::CodeSectionParams codeSectionParams(threads);
+		PsimagLite::Parallelizer<HashHelper> parallelizer(codeSectionParams);
+		parallelizer.loopCreate(helper);
 
 		PsimagLite::Sort<VectorSizeType> sort;
 		VectorSizeType perm(n);
@@ -132,20 +177,6 @@ private:
 
 		//checkSum(count, n);
 		//checkReverse(inQns, reverse, outQns);
-	}
-
-	static SizeType computeHash(const Qn& qn, const VectorSizeType& sizes, bool addOdd)
-	{
-		SizeType n = qn.other.size(); // small number
-		SizeType key = (addOdd && qn.oddElectrons) ? 1 : 0;
-		SizeType scale = (addOdd) ? 2 : 1;
-
-		for (SizeType i = 0; i < n; ++i) {
-			key += qn.other[i]*scale;
-			scale *= sizes[i];
-		}
-
-		return key;
 	}
 
 	static void computeSizes(VectorSizeType& sizes, const VectorQnType& inQns)
