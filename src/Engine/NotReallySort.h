@@ -3,6 +3,7 @@
 #include "Qn.h"
 #include "Vector.h"
 #include <numeric>
+#include "Sort.h"
 
 namespace Dmrg {
 
