@@ -67,10 +67,8 @@ public:
 		other.resize(n);
 		for (SizeType i = 0; i < n; ++i) {
 			other[i] = q1.other[i] + q2.other[i];
-			if (modalStruct[i].modalEnum == MODAL_MODULO) {
+			if (modalStruct[i].modalEnum == MODAL_MODULO)
 				other[i] %= modalStruct[i].extra;
-				canCompareFast_ = false;
-			}
 		}
 
 		jmPair.first = q1.jmPair.first + q2.jmPair.first;
@@ -89,13 +87,8 @@ public:
 		io.read(jmPair, str + "/jmPair");
 		io.read(flavors, str + "/flavors");
 
-		if (modalStruct.size() == 0) {
+		if (modalStruct.size() == 0)
 			io.read(modalStruct, "modalStruct");
-			SizeType n = modalStruct.size();
-			for (SizeType i = 0; i < n; ++i)
-				if (modalStruct[i].modalEnum == MODAL_MODULO)
-					canCompareFast_ = false;
-		}
 
 		if (modalStruct.size() != other.size())
 			err("Qn::read\n");
@@ -118,9 +111,9 @@ public:
 
 	bool operator==(const Qn& a) const
 	{
-		return (vectorEqualMaybeModal(a.other) &&
+		return (compare(a.other) &&
 		        a.oddElectrons == oddElectrons
-        #ifndef ENABLE_SU2
+#ifndef ENABLE_SU2
 		        );
 #else
 		        &&
@@ -275,7 +268,6 @@ public:
 	}
 
 	static VectorModalStructType modalStruct;
-	static bool canCompareFast_;
 	static bool ifPresentOther0IsElectrons;
 	bool oddElectrons;
 	VectorSizeType other;
@@ -284,38 +276,14 @@ public:
 
 private:
 
-	bool vectorEqualMaybeModal(const VectorSizeType& otherOther) const
-	{
-		return (canCompareFast_) ? fastCompare(otherOther) : slowCompare(otherOther);
-	}
-
-	bool fastCompare(const VectorSizeType& otherOther) const
+	// assumes modulo already applied as needed
+	bool compare(const VectorSizeType& otherOther) const
 	{
 		SizeType n = otherOther.size();
 		runChecks(n);
 
 		for (SizeType i = 0; i < n; ++i)
 			if (otherOther[i] != other[i]) return false;
-
-		return true;
-	}
-
-	bool slowCompare(const VectorSizeType& otherOther) const
-	{
-		SizeType n = otherOther.size();
-		runChecks(n);
-
-		for (SizeType i = 0; i < n; ++i) {
-			if (modalStruct[i].modalEnum == MODAL_SUM) {
-				if (otherOther[i] != other[i]) return false;
-			} else {
-				assert(modalStruct[i].modalEnum == MODAL_MODULO);
-				assert(modalStruct[i].extra > 0);
-				SizeType x = (otherOther[i] > other[i]) ? otherOther[i] - other[i] :
-				                                          other[i] - otherOther[i];
-				if ((x % modalStruct[i].extra) != 0) return false;
-			}
-		}
 
 		return true;
 	}

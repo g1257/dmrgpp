@@ -82,8 +82,20 @@ private:
 		VectorSizeType hash(n);
 		VectorSizeType sizes;
 		computeSizes(sizes, inQns);
+
+		bool noNeedForOdd = (Qn::ifPresentOther0IsElectrons && Qn::modalStruct.size() > 0);
+		bool hasAtLeastOneOdd = false;
+		if (!noNeedForOdd) {
+			for (SizeType i = 0; i < n; ++i) {
+				hasAtLeastOneOdd = inQns[i].oddElectrons;
+				if (hasAtLeastOneOdd) break;
+			}
+		}
+
+		bool addOddToHash = (!noNeedForOdd && hasAtLeastOneOdd);
+
 		for (SizeType i = 0; i < n; ++i)
-			hash[i] = computeHash(inQns[i], sizes);
+			hash[i] = computeHash(inQns[i], sizes, addOddToHash);
 
 		PsimagLite::Sort<VectorSizeType> sort;
 		VectorSizeType perm(n);
@@ -109,17 +121,16 @@ private:
 			}
 		}
 
-#ifndef NDEBUG
 		//checkSum(count, n);
 		//checkReverse(inQns, reverse, outQns);
-#endif
 	}
 
-	static SizeType computeHash(const Qn& qn, const VectorSizeType& sizes)
+	static SizeType computeHash(const Qn& qn, const VectorSizeType& sizes, bool addOdd)
 	{
 		SizeType n = qn.other.size(); // small number
-		SizeType key = 0;
-		SizeType scale = 1;
+		SizeType key = (addOdd && qn.oddElectrons) ? 1 : 0;
+		SizeType scale = (addOdd) ? 2 : 1;
+
 		for (SizeType i = 0; i < n; ++i) {
 			key += qn.other[i]*scale;
 			scale *= sizes[i];
@@ -149,26 +160,6 @@ private:
 		}
 
 		return max + 2;
-	}
-
-	// only for debugging
-	static void checkSum(const VectorSizeType& v, SizeType shouldBe)
-	{
-		SizeType sum = std::accumulate(v.begin(), v.end(), 0);
-		assert(sum == shouldBe);
-	}
-
-	// only for debugging
-	static void checkReverse(const VectorQnType& big,
-	                         const VectorSizeType& reverse,
-	                         const VectorQnType& small)
-	{
-		SizeType n = big.size();
-		assert(n == reverse.size());
-		for (SizeType i = 0; i < n; ++i) {
-			assert(reverse[i] < small.size());
-			assert(big[i] == small[reverse[i]]);
-		}
 	}
 };
 }
