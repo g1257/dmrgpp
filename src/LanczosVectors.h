@@ -260,7 +260,8 @@ private:
 		for (SizeType h=0;h<nn;h++)
 			ntmp += PsimagLite::real(V2[h]*PsimagLite::conj(V2[h]));
 
-		for (SizeType h=0; h<nn; h++) V2[h] = V2[h]/sqrt(ntmp);
+		ntmp = 1.0/sqrt(ntmp);
+		for (SizeType h=0; h<nn; h++) V2[h] = V2[h]*ntmp;
 	}
 
 	void dealWithStorageOfV(SizeType rows, SizeType cols)

@@ -35,8 +35,9 @@ void fillRandom(T& v, typename EnableIf<IsVectorLike<T>::True, int>::Type = 0)
 
 	Random48<typename T::value_type> myrng(time(0));
 	typename PsimagLite::Real<typename T::value_type>::Type sum = 0;
+	const typename T::value_type zeroPointFive = 0.5;
 	for (SizeType i = 0; i < n; ++i) {
-		v[i] = myrng() - 0.5;
+		v[i] = myrng() - zeroPointFive;
 		sum += PsimagLite::real(v[i]*PsimagLite::conj(v[i]));
 	}
 
