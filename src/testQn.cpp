@@ -31,11 +31,13 @@ void randomQn(VectorQnType& qn, VectorSizeType& szPlusConst)
 
 int main(int argc, char **argv)
 {
-	if (argc != 2) {
+	if (argc < 2) {
 		std::cerr<<"Needs number of qns\n";
 		return 1;
 	}
 
+	if (argc == 3)
+		PsimagLite::Concurrency::codeSectionParams.npthreads = atoi(argv[2]);
 	SizeType n = atoi(argv[1]);
 	VectorSizeType szPlusConst(2, 0);
 	VectorQnType qns(n, QnType(false, szPlusConst, PairSizeType(0,0), 0));
