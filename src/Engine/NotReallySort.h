@@ -2,89 +2,16 @@
 #define NOT_REALLY_SORT_H
 #include "Qn.h"
 #include "Vector.h"
-#include "Concurrency.h"
 #include <numeric>
 
 namespace Dmrg {
 
 class NotReallySort {
 
+public:
+
 	typedef Qn::VectorQnType VectorQnType;
 	typedef Qn::VectorSizeType VectorSizeType;
-
-	class FirstPassHelper {
-
-		typedef PsimagLite::Vector<VectorQnType>::Type VectorVectorQnType;
-		typedef PsimagLite::Vector<VectorSizeType>::Type VectorVectorSizeType;
-
-	public:
-
-		FirstPassHelper(const VectorQnType& inQns, SizeType threads)
-		    : inQns_(inQns), count_(threads), outQns_(threads), reverse_(inQns.size())
-		{}
-
-		void doTask(SizeType taskNumber, SizeType threadNum)
-		{
-			int x = PsimagLite::indexOrMinusOne(outQns_[threadNum], inQns_[taskNumber]);
-			if (x < 0) {
-				outQns_[threadNum].push_back(inQns_[taskNumber]);
-				count_[threadNum].push_back(1);
-				reverse_[taskNumber] = count_[threadNum].size() - 1;
-			} else {
-				++count_[threadNum][x];
-				reverse_[taskNumber] = x;
-			}
-		}
-
-		SizeType tasks() const { return inQns_.size(); }
-
-		void sync(VectorQnType& outQns,
-		          VectorSizeType& count,
-		          VectorSizeType& reverse)
-		{
-			SizeType threads = count_.size();
-			SizeType nreduced = 0;
-			for (SizeType t = 0; t < threads; ++t)
-				nreduced += count_[t].size();
-
-			VectorSizeType countReduced(nreduced);
-			VectorQnType inQnsReduced(nreduced, Qn::zero());
-
-			SizeType x = 0;
-			for (SizeType t = 0; t < threads; ++t) {
-				SizeType m = count_[t].size();
-				for (SizeType i = 0; i < m; ++i) {
-					countReduced[x] = count_[t][i];
-					inQnsReduced[x++] = outQns_[t][i];
-				}
-			}
-
-			count.reserve(nreduced);
-
-			for (SizeType ii = 0; ii < nreduced; ++ii) {
-				int x = PsimagLite::indexOrMinusOne(outQns, inQnsReduced[ii]);
-				SizeType c = countReduced[ii];
-				if (x < 0) {
-					outQns.push_back(inQnsReduced[ii]);
-					count.push_back(c);
-					x = count.size() - 1;
-				} else {
-					count[x] += c;
-				}
-			}
-
-			reverse = reverse_; // <--- THIS IS WRONG!
-		}
-
-	private:
-
-		const VectorQnType& inQns_;
-		VectorVectorSizeType count_;
-		VectorVectorQnType outQns_;
-		VectorSizeType reverse_;
-	};
-
-public:
 
 	// There exits objects Qn that have operator= (comparison)
 	// notReallySort takes a vector of Qn objects as INPUT.1: inQns of size big
@@ -146,51 +73,6 @@ private:
 	                      VectorSizeType& reverse,
 	                      const VectorQnType& inQns)
 	{
-		return firstPassSerial(outQns, count, reverse, inQns);
-
-		/* SizeType threads = PsimagLite::Concurrency::codeSectionParams.npthreads;
-		FirstPassHelper helper(inQns, threads);
-		PsimagLite::CodeSectionParams codeSectionParams(threads);
-		PsimagLite::Parallelizer<FirstPassHelper> parallelizer(codeSectionParams);
-		parallelizer.loopCreate(helper);
-		helper.sync(outQns, count, reverse);*/
-	}
-
-	/*static void firstPass(VectorQnType& outQns,
-	                      VectorSizeType& count,
-	                      VectorSizeType& reverse,
-	                      const VectorQnType& inQns)
-	{
-		VectorQnType outQns2;
-		VectorSizeType  count2;
-		VectorSizeType reverse2;
-		firstPassSerial(outQns2, count2, reverse2, inQns);
-
-		SizeType threads = PsimagLite::Concurrency::codeSectionParams.npthreads;
-		FirstPassHelper helper(inQns, threads);
-		PsimagLite::CodeSectionParams codeSectionParams(threads);
-		PsimagLite::Parallelizer<FirstPassHelper> parallelizer(codeSectionParams);
-		parallelizer.loopCreate(helper);
-		helper.sync(outQns, count, reverse);
-		assert(compare(outQns, outQns2));
-		assert(compare(count, count2));
-		assert(compare(reverse, reverse2));
-	}
-
-	template<typename T>
-	static bool compare(const T& v1, const T& v2)
-	{
-		if (v1.size() != v2.size()) return false;
-		for (SizeType i = 0; i < v1.size(); ++i)
-			if (v1[i] != v2[i]) return false;
-		return true;
-	}*/
-
-	static void firstPassSerial(VectorQnType& outQns,
-	                            VectorSizeType& count,
-	                            VectorSizeType& reverse,
-	                            const VectorQnType& inQns)
-	{
 		SizeType n = inQns.size();
 		outQns.clear();
 		if (n == 0) return;
@@ -221,15 +103,15 @@ private:
 				outQns.push_back(inQns[iperm]);
 				count.push_back(1);
 				++j;
-				assert(j == count.size() - 1);
-				assert(count.size() == outQns.size());
+				// assert(j == count.size() - 1);
+				// assert(count.size() == outQns.size());
 				reverse[iperm] = j;
 			}
 		}
 
 #ifndef NDEBUG
-		checkSum(count, n);
-		checkReverse(inQns, reverse, outQns);
+		//checkSum(count, n);
+		//checkReverse(inQns, reverse, outQns);
 #endif
 	}
 
@@ -269,12 +151,14 @@ private:
 		return max + 2;
 	}
 
+	// only for debugging
 	static void checkSum(const VectorSizeType& v, SizeType shouldBe)
 	{
 		SizeType sum = std::accumulate(v.begin(), v.end(), 0);
 		assert(sum == shouldBe);
 	}
 
+	// only for debugging
 	static void checkReverse(const VectorQnType& big,
 	                         const VectorSizeType& reverse,
 	                         const VectorQnType& small)
