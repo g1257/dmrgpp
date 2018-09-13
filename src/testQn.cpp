@@ -1,3 +1,4 @@
+#define USE_PTHREADS_OR_NOT_NG
 #include "NotReallySort.h"
 #include <cstdlib>
 #include "ProgramGlobals.h"

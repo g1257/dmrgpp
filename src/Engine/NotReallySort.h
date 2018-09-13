@@ -1,5 +1,6 @@
 #ifndef NOT_REALLY_SORT_H
 #define NOT_REALLY_SORT_H
+#define USE_PTHREADS_OR_NOT_NG
 #include "Qn.h"
 #include "Vector.h"
 #include <numeric>
@@ -179,6 +180,54 @@ private:
 		//checkReverse(inQns, reverse, outQns);
 	}
 
+	class SizesHelper {
+
+		typedef PsimagLite::Vector<VectorSizeType>::Type VectorVectorSizeType;
+
+	public:
+
+		SizesHelper(VectorSizeType& sizes, const VectorQnType& inQns, SizeType nthreads)
+		    : sizes_(sizes), inQns_(inQns), otherSize_(Qn::modalStruct.size()), tmp_(nthreads)
+		{
+			for (SizeType thread = 0; thread < nthreads; ++thread)
+				tmp_[thread].resize(otherSize_);
+		}
+
+		void doTask(SizeType taskNumber, SizeType thread)
+		{
+			for (SizeType index = 0; index < otherSize_ - 1; ++index) {
+
+				const SizeType val = inQns_[taskNumber].other[index] + 2;
+
+				// conditional assignment
+				tmp_[thread][index] = (tmp_[thread][index] < val) ? val :
+				                                                    tmp_[thread][index];
+			}
+		}
+
+		SizeType tasks() const { return inQns_.size(); }
+
+		void sync()
+		{
+			SizeType nthreads = tmp_.size();
+			for (SizeType index = 0; index < otherSize_ - 1; ++index) {
+				for (SizeType thread = 0; thread < nthreads; ++thread) {
+					const SizeType val = tmp_[thread][index];
+					sizes_[index] = (sizes_[index] < val) ? val : sizes_[index];
+				}
+			}
+
+			sizes_[otherSize_ - 1] = 0; // should be unused
+		}
+
+	private:
+
+		VectorSizeType& sizes_;
+		const VectorQnType& inQns_;
+		SizeType otherSize_;
+		VectorVectorSizeType tmp_;
+	};
+
 	static void computeSizes(VectorSizeType& sizes, const VectorQnType& inQns)
 	{
 		const SizeType otherSize = Qn::modalStruct.size();
@@ -186,18 +235,12 @@ private:
 		SizeType n = inQns.size();
 		sizes.resize(otherSize, 0);
 
-		for (SizeType i = 0; i < n; ++i) {
-			for (SizeType index = 0; index < otherSize - 1; ++index) {
-
-				const SizeType val = inQns[i].other[index] + 2;
-
-				// conditional assignment
-				sizes[index] = (sizes[index] < val) ? val : sizes[index];
-
-			}
-		}
-
-		sizes[otherSize - 1] = 0; // should be unused
+		SizeType threads = std::min(PsimagLite::Concurrency::codeSectionParams.npthreads, n);
+		SizesHelper helper(sizes, inQns, threads);
+		PsimagLite::CodeSectionParams codeSectionParams(threads);
+		PsimagLite::Parallelizer<SizesHelper> parallelizer(codeSectionParams);
+		parallelizer.loopCreate(helper);
+		helper.sync();
 	}
 };
 }
