@@ -43,11 +43,15 @@ public:
 	Qn(bool odd, VectorSizeType szPlusConst, PairSizeType j, SizeType flavor)
 	    : oddElectrons(odd), other(szPlusConst), jmPair(j), flavors(flavor)
 	{
-		if (modalStruct.size() == szPlusConst.size())
+		if (modalStruct.size() == szPlusConst.size()) {
+			modularize();
 			return;
+		}
 
-		if (szPlusConst.size() > 0)
+		if (szPlusConst.size() > 0) {
 			modalStruct.resize(szPlusConst.size());
+			modularize();
+		}
 
 		if (szPlusConst.size() == 0)
 			err("Qn\n");
@@ -327,6 +331,15 @@ private:
 	{
 		return (otherJm.first == jmPair.first &&
 		        otherJm.second == jmPair.second);
+	}
+
+	void modularize()
+	{
+		SizeType n = other.size();
+		for (SizeType i = 0; i < n; ++i) {
+			if (modalStruct[i].modalEnum == MODAL_MODULO)
+				other[i] %= modalStruct[i].extra;
+		}
 	}
 
 	// disable implicit conversion for 1st argument of ctor

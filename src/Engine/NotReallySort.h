@@ -3,6 +3,7 @@
 #include "Qn.h"
 #include "Vector.h"
 #include "Concurrency.h"
+#include <numeric>
 
 namespace Dmrg {
 
@@ -192,22 +193,100 @@ private:
 	{
 		SizeType n = inQns.size();
 		outQns.clear();
+		if (n == 0) return;
 		count.reserve(n);
 		reverse.resize(n);
 
-		// 1^st pass over data
-		for (SizeType i = 0; i < n; ++i) {
-			int x = PsimagLite::indexOrMinusOne(outQns, inQns[i]);
-			if (x < 0) {
-				outQns.push_back(inQns[i]);
-				count.push_back(1);
-				reverse[i] = count.size() - 1;
+		VectorSizeType hash(n);
+		VectorSizeType sizes;
+		computeSizes(sizes, inQns);
+		for (SizeType i = 0; i < n; ++i)
+			hash[i] = computeHash(inQns[i], sizes);
+
+		PsimagLite::Sort<VectorSizeType> sort;
+		VectorSizeType perm(n);
+		sort.sort(hash, perm);
+		SizeType j = 0;
+
+		assert(n > 0);
+		outQns.push_back(inQns[perm[0]]);
+		count.push_back(1);
+		reverse[perm[0]] = 0;
+		for (SizeType i = 1; i < n; ++i) {
+			const SizeType iperm = perm[i];
+			if (hash[i - 1] == hash[i]) {
+				++count[j];
+				reverse[iperm] = j;
 			} else {
-				++count[x];
-				reverse[i] = x;
+				outQns.push_back(inQns[iperm]);
+				count.push_back(1);
+				++j;
+				assert(j == count.size() - 1);
+				assert(count.size() == outQns.size());
+				reverse[iperm] = j;
 			}
+		}
+
+#ifndef NDEBUG
+		checkSum(count, n);
+		checkReverse(inQns, reverse, outQns);
+#endif
+	}
+
+	static SizeType computeHash(const Qn& qn, const VectorSizeType& sizes)
+	{
+		SizeType n = qn.other.size(); // small number
+		SizeType key = 0;
+		SizeType scale = 1;
+		for (SizeType i = 0; i < n; ++i) {
+			key += qn.other[i]*scale;
+			scale *= sizes[i];
+		}
+
+		return key;
+	}
+
+	static void computeSizes(VectorSizeType& sizes, const VectorQnType& inQns)
+	{
+		SizeType n = Qn::modalStruct.size(); // small number
+		if (n == 0) return;
+		sizes.resize(n);
+		for (SizeType i = 0; i < n - 1; ++i)
+			sizes[i] = findMaximum(inQns, i);
+		sizes[n - 1] = 0; // should be unused
+	}
+
+	static SizeType findMaximum(const VectorQnType& inQns, SizeType index)
+	{
+		SizeType n = inQns.size(); // == very large number
+		if (n == 0) return 1;
+		SizeType max =  inQns[0].other[index];
+		for (SizeType i = 1; i < n; ++i) {
+			const SizeType val = inQns[i].other[index];
+			if (val > max) max = val;
+		}
+
+		return max + 2;
+	}
+
+	static void checkSum(const VectorSizeType& v, SizeType shouldBe)
+	{
+		SizeType sum = std::accumulate(v.begin(), v.end(), 0);
+		assert(sum == shouldBe);
+	}
+
+	static void checkReverse(const VectorQnType& big,
+	                         const VectorSizeType& reverse,
+	                         const VectorQnType& small)
+	{
+		SizeType n = big.size();
+		assert(n == reverse.size());
+		for (SizeType i = 0; i < n; ++i) {
+			assert(reverse[i] < small.size());
+			assert(big[i] == small[reverse[i]]);
 		}
 	}
 };
 }
 #endif // NOT_REALLY_SORT_H
+
