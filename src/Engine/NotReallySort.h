@@ -150,25 +150,23 @@ private:
 
 	static void computeSizes(VectorSizeType& sizes, const VectorQnType& inQns)
 	{
-		SizeType n = Qn::modalStruct.size(); // small number
-		if (n == 0) return;
-		sizes.resize(n);
-		for (SizeType i = 0; i < n - 1; ++i)
-			sizes[i] = findMaximum(inQns, i);
-		sizes[n - 1] = 0; // should be unused
-	}
+		const SizeType otherSize = Qn::modalStruct.size();
+		if (otherSize == 0) return;
+		SizeType n = inQns.size();
+		sizes.resize(otherSize, 0);
 
-	static SizeType findMaximum(const VectorQnType& inQns, SizeType index)
-	{
-		SizeType n = inQns.size(); // == very large number
-		if (n == 0) return 1;
-		SizeType max =  inQns[0].other[index];
-		for (SizeType i = 1; i < n; ++i) {
-			const SizeType val = inQns[i].other[index];
-			if (val > max) max = val;
+		for (SizeType i = 0; i < n; ++i) {
+			for (SizeType index = 0; index < otherSize - 1; ++index) {
+
+				const SizeType val = inQns[i].other[index] + 2;
+
+				// conditional assignment
+				sizes[index] = (sizes[index] < val) ? val : sizes[index];
+
+			}
 		}
 
-		return max + 2;
+		sizes[otherSize - 1] = 0; // should be unused
 	}
 };
 }
