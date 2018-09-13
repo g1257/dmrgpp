@@ -227,9 +227,12 @@ public:
 
 		btmp = sqrt(btmp);
 		if (iter + 1 < ab.size())
-			ab.b(iter+1) = btmp;	// beta = sqrt(V2*V2)
+			ab.b(iter + 1) = btmp;	// beta = sqrt(V2*V2)
 
-		for (SizeType i = 0; i < nn; i++) V2[i] = V2[i]/btmp;		// normalize V2
+		if (btmp > 0) {
+			btmp = 1.0/btmp;
+			for (SizeType i = 0; i < nn; i++) V2[i] *= btmp; // normalize V2
+		}
 
 		reorthoIfNecessary(V2, iter);
 	}

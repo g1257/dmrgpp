@@ -159,24 +159,22 @@ public:
 			throw RuntimeError(msg);
 		}
 
-		VectorType V2(matsize);  // v2
-		VectorType V1(matsize);  // v1
+		VectorType V2(matsize, 0);  // v2
+		VectorType V1(matsize, 0);  // v1
 		VectorType V0 = initVector;  // v0
 
 		RealType atmp = 0;
-		for (SizeType i = 0; i < matsize; i++) {
-			V2[i] = 0;
-			V1[i] = 0;
+		for (SizeType i = 0; i < matsize; ++i)
 			atmp += PsimagLite::real(V0[i]*PsimagLite::conj(V0[i]));
-		}
 
-		for (SizeType i = 0; i < matsize; i++) V0[i] /= sqrt(atmp);
+		atmp = 1.0/sqrt(atmp);
+		for (SizeType i = 0; i < matsize; ++i) V0[i] *= atmp;
 
 		if (max_nstep > matsize) max_nstep = matsize;
 		ab.resize(max_nstep,0);
 
 		RealType eold = 100.;
-		bool exitFlag=false;
+		bool exitFlag = false;
 		SizeType j = 0;
 		RealType enew = 0;
 		lanczosVectors_.saveInitialVector(V0);
@@ -185,22 +183,27 @@ public:
 		// -- 1st step --
 		ab.b(0) = 0.0;							// beta_0 = 0 always
 		if (lanczosVectors_.lotaMemory()) lanczosVectors_.saveVector(V0, 0);
-		for (SizeType i = 0; i < matsize; i++) V1[i] = 0.0;
+		for (SizeType i = 0; i < matsize; ++i) V1[i] = 0.0;
 		mat_.matrixVectorProduct(V1, V0); // V1 = H|V0>
 		atmp = 0.0;
-		for (SizeType i = 0; i < matsize; i++)
+		for (SizeType i = 0; i < matsize; ++i)
 			atmp += PsimagLite::real(V1[i]*PsimagLite::conj(V0[i])); // alpha = <V0|V1>
 		ab.a(0) = atmp;
 
 		RealType btmp = 0.0;
-		for (SizeType i = 0; i < matsize; i++) {
-			V1[i] = V1[i] - atmp*V0[i];								// V1 = V1 - alpha*V0
+		for (SizeType i = 0; i < matsize; ++i) {
+			V1[i] -= atmp*V0[i];								// V1 = V1 - alpha*V0
 			btmp += PsimagLite::real(V1[i]*PsimagLite::conj(V1[i]));
 		}
+
 		btmp = sqrt(btmp);
 		ab.b(1) = btmp;			// beta = sqrt(V1*V1)
 
-		for (SizeType i = 0; i < matsize; i++) V1[i] = V1[i]/btmp;		// normalize V1
+		if (btmp > 0) {
+			btmp = 1.0/btmp;
+			for (SizeType i = 0; i < matsize; ++i) V1[i] *= btmp;		// normalize V1
+		}
+
 		if (lanczosVectors_.lotaMemory()) lanczosVectors_.saveVector(V1, 1);
 
 		VectorRealType tmpEigs(ab.size(), 0);
@@ -216,9 +219,9 @@ public:
 			if (exitFlag && j >= params_.minSteps) break;
 
 			if (lanczosVectors_.lotaMemory())
-				lanczosVectors_.saveVector(V2, j+1);
+				lanczosVectors_.saveVector(V2, j + 1);
 
-			for (SizeType i = 0; i < matsize; i++) {
+			for (SizeType i = 0; i < matsize; ++i) {
 				V0[i] = V1[i];
 				V1[i] = V2[i];
 			}
