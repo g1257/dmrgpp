@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetQuantumElectrons.h"
 #include "Io/IoSerializerStub.h"
 #include "ModelCommon.h"
+#include "NotReallySort.h"
 
 namespace Dmrg {
 
@@ -292,6 +293,31 @@ public:
 	const TargetQuantumElectronsType& targetQuantum() const
 	{
 		return targetQuantum_;
+	}
+
+	static void orderByQuantum(VectorSizeType& basis, VectorQnType& qn)
+	{
+		VectorSizeType newBasis;
+		VectorSizeType partition;
+		VectorQnType qns;
+		NotReallySort notReallySort;
+		notReallySort(newBasis,
+		              qns,
+		              partition,
+		              basis,
+		              qn,
+		              false,
+		              ProgramGlobals::VERBOSE_NO);
+
+		SizeType n = partition.size();
+		assert(n > 0);
+		--n;
+		assert(n == qns.size());
+		for (SizeType i = 0; i < n; ++i)
+			for (SizeType j = partition[i]; j < partition[i + 1]; ++j)
+				qn[j] = qns[i];
+
+		basis = newBasis;
 	}
 
 private:

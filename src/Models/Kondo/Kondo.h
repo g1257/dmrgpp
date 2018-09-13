@@ -2,7 +2,6 @@
 #define DMRGPP_MODEL_KONDO_H
 #include "ParametersKondo.h"
 #include "LinkProductKondo.h"
-#include "NotReallySort.h"
 
 namespace Dmrg {
 
@@ -48,26 +47,7 @@ public:
 
 		setSymmetryRelatedInternal(qn_, basis_);
 
-		VectorSizeType newBasis;
-		VectorSizeType partition;
-		VectorQnType qns;
-		NotReallySort notReallySort;
-		notReallySort(newBasis,
-		              qns,
-		              partition,
-		              basis_,
-		              qn_,
-		              ProgramGlobals::VERBOSE_NO);
-
-		SizeType n = partition.size();
-		assert(n > 0);
-		--n;
-		assert(n == qns.size());
-		for (SizeType i = 0; i < n; ++i)
-			for (SizeType j = partition[i]; j < partition[i + 1]; ++j)
-				qn_[j] = qns[i];
-
-		basis_ = newBasis;
+		ModelBaseType::orderByQuantum(basis_, qn_);
 
 		setOperatorMatricesInternal();
 	}

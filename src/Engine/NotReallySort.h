@@ -27,6 +27,7 @@ public:
 	                VectorSizeType& offset,
 	                const VectorSizeType& inNumbers,
 	                const VectorQnType& inQns,
+	                bool doNotSort,
 	                ProgramGlobals::VerboseEnum verbose)
 	{
 		SizeType n = inNumbers.size();
@@ -39,7 +40,7 @@ public:
 		VectorSizeType reverse;
 
 		// 1^st pass over data
-		firstPass(outQns, count, reverse, inQns);
+		firstPass(outQns, count, reverse, inQns, doNotSort);
 
 		// perform prefix sum
 		SizeType numberOfPatches = count.size();
@@ -71,7 +72,8 @@ private:
 	static void firstPass(VectorQnType& outQns,
 	                      VectorSizeType& count,
 	                      VectorSizeType& reverse,
-	                      const VectorQnType& inQns)
+	                      const VectorQnType& inQns,
+	                      bool doNotSort)
 	{
 		SizeType n = inQns.size();
 		outQns.clear();
@@ -99,7 +101,13 @@ private:
 
 		PsimagLite::Sort<VectorSizeType> sort;
 		VectorSizeType perm(n);
-		sort.sort(hash, perm);
+
+		if (doNotSort) {
+			for (SizeType i = 0; i < n; ++i) perm[i] = i;
+		} else {
+			sort.sort(hash, perm);
+		}
+
 		SizeType j = 0;
 
 		assert(n > 0);

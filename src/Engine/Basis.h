@@ -223,7 +223,7 @@ public:
 		                                                   ProgramGlobals::VERBOSE_YES;
 
 		// order quantum numbers of combined basis:
-		findPermutationAndPartitionAndQns(qns, true, verbose);
+		findPermutationAndPartitionAndQns(qns, true, false, verbose);
 		reorder();
 		signsOld_ = signs_;
 	}
@@ -329,7 +329,7 @@ public:
 
 		// N.B.: false below means that we don't truncate the permutation vectors
 		//	because they're needed for the WFT
-		findPermutationAndPartitionAndQns(qns, false, ProgramGlobals::VERBOSE_NO);
+		findPermutationAndPartitionAndQns(qns, false, false, ProgramGlobals::VERBOSE_NO);
 
 		PsimagLite::OstringStream msg;
 		msg<<"Done with changeBasis";
@@ -537,7 +537,10 @@ protected:
 		VectorQnType basisData2 = basisData;
 		if (!useSu2Symmetry()) flattenQns(basisData2);
 
-		findPermutationAndPartitionAndQns(basisData2, true, ProgramGlobals::VERBOSE_NO);
+		findPermutationAndPartitionAndQns(basisData2,
+		                                  true,
+		                                  true,
+		                                  ProgramGlobals::VERBOSE_NO);
 		reorder();
 		signsOld_ = signs_;
 	}
@@ -654,6 +657,7 @@ private:
 
 	void findPermutationAndPartitionAndQns(const VectorQnType& qns,
 	                                       bool changePermutation,
+	                                       bool doNotSort,
 	                                       ProgramGlobals::VerboseEnum verbose)
 	{
 		SizeType n = qns.size();
@@ -662,7 +666,13 @@ private:
 		for (SizeType i = 0; i < n; ++i) numbers[i] = i;
 		VectorSizeType permutationVector;
 		NotReallySort notReallySort;
-		notReallySort(permutationVector, qns_, partition_, numbers, qns, verbose);
+		notReallySort(permutationVector,
+		              qns_,
+		              partition_,
+		              numbers,
+		              qns,
+		              doNotSort,
+		              verbose);
 
 		if (changePermutation) {
 			permutationVector_ = (useSu2Symmetry_) ? numbers : permutationVector;
