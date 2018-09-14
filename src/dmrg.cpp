@@ -394,6 +394,9 @@ to the main dmrg driver are the following.
 
 	registerSignals();
 
+	if (dmrgSolverParams.options.find("notReallySortCustom") != PsimagLite::String::npos)
+		ProgramGlobals::notReallySortAlgo = "custom";
+
 	PsimagLite::String targeting = inputCheck.getTargeting(dmrgSolverParams.options);
 	bool isComplex = (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos);
 	if (targeting=="TimeStepTargeting") isComplex = true;

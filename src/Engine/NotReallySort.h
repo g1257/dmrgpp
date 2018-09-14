@@ -7,6 +7,57 @@
 #include "Sort.h"
 #include "Concurrency.h"
 #include "Parallelizer.h"
+#include <tr1/unordered_map>
+
+namespace std {
+
+namespace tr1 {
+
+template<>
+class hash<Dmrg::Qn> {
+
+	typedef Dmrg::Qn::VectorQnType VectorQnType;
+	typedef Dmrg::Qn::VectorSizeType VectorSizeType;
+
+public:
+
+	hash(VectorSizeType& hash,
+	     const VectorQnType& inQns,
+	     const VectorSizeType& sizes,
+	     bool addOdd)
+	    : hash_(hash), inQns_(inQns), sizes_(sizes), addOdd_(addOdd)
+	{}
+
+	void doTask(SizeType taskNumber, SizeType)
+	{
+		hash_[taskNumber] = operator()(inQns_[taskNumber]);
+	}
+
+	SizeType tasks() const { return inQns_.size(); }
+
+	SizeType operator()(const Dmrg::Qn& qn) const
+	{
+		SizeType n = qn.other.size(); // small number
+		SizeType key = (addOdd_ && qn.oddElectrons) ? 1 : 0;
+		SizeType scale = (addOdd_) ? 2 : 1;
+
+		for (SizeType i = 0; i < n; ++i) {
+			key += qn.other[i]*scale;
+			scale *= sizes_[i];
+		}
+
+		return key;
+	}
+
+private:
+
+	VectorSizeType& hash_;
+	const VectorQnType& inQns_;
+	const VectorSizeType& sizes_;
+	bool addOdd_;
+};
+}
+}
 
 namespace Dmrg {
 
@@ -16,6 +67,16 @@ public:
 
 	typedef Qn::VectorQnType VectorQnType;
 	typedef Qn::VectorSizeType VectorSizeType;
+
+	enum AlgoEnum {ALGO_UMAP, ALGO_CUSTOM};
+
+	NotReallySort()
+	{
+		if (ProgramGlobals::notReallySortAlgo == "custom")
+			algo_ = ALGO_CUSTOM;
+		else
+			algo_ = ALGO_UMAP;
+	}
 
 	// There exits objects Qn that have operator= (comparison)
 	// notReallySort takes a vector of Qn objects as INPUT.1: inQns of size big
@@ -44,7 +105,10 @@ public:
 		VectorSizeType reverse;
 
 		// 1^st pass over data
-		firstPass(outQns, count, reverse, inQns, doNotSort);
+		if (algo_ == ALGO_CUSTOM)
+			firstPass(outQns, count, reverse, inQns, doNotSort);
+		else
+			firstPass2(outQns, count, reverse, inQns, doNotSort);
 
 		// perform prefix sum
 		SizeType numberOfPatches = count.size();
@@ -65,7 +129,8 @@ public:
 		}
 
 		if (profiling) {
-			profiling->end("patches= " + ttos(numberOfPatches));
+			profiling->end("patches= " + ttos(numberOfPatches) +
+			               " algo=" + ProgramGlobals::notReallySortAlgo);
 			delete profiling;
 			profiling = 0;
 		}
@@ -73,51 +138,11 @@ public:
 
 private:
 
-	class HashHelper {
-
-	public:
-
-		HashHelper(VectorSizeType& hash,
-		           const VectorQnType& inQns,
-		           const VectorSizeType& sizes,
-		           bool addOdd)
-		    : hash_(hash), inQns_(inQns), sizes_(sizes), addOdd_(addOdd)
-		{}
-
-		void doTask(SizeType taskNumber, SizeType)
-		{
-			hash_[taskNumber] = computeHash(inQns_[taskNumber], sizes_, addOdd_);
-		}
-
-		SizeType tasks() const { return inQns_.size(); }
-
-	private:
-
-		static SizeType computeHash(const Qn& qn, const VectorSizeType& sizes, bool addOdd)
-		{
-			SizeType n = qn.other.size(); // small number
-			SizeType key = (addOdd && qn.oddElectrons) ? 1 : 0;
-			SizeType scale = (addOdd) ? 2 : 1;
-
-			for (SizeType i = 0; i < n; ++i) {
-				key += qn.other[i]*scale;
-				scale *= sizes[i];
-			}
-
-			return key;
-		}
-
-		VectorSizeType& hash_;
-		const VectorQnType& inQns_;
-		const VectorSizeType& sizes_;
-		bool addOdd_;
-	};
-
-	static void firstPass(VectorQnType& outQns,
-	                      VectorSizeType& count,
-	                      VectorSizeType& reverse,
-	                      const VectorQnType& inQns,
-	                      bool doNotSort)
+	void firstPass(VectorQnType& outQns,
+	               VectorSizeType& count,
+	               VectorSizeType& reverse,
+	               const VectorQnType& inQns,
+	               bool doNotSort)
 	{
 		SizeType n = inQns.size();
 		outQns.clear();
@@ -141,9 +166,9 @@ private:
 		bool addOddToHash = (!noNeedForOdd && hasAtLeastOneOdd);
 
 		SizeType threads = std::min(PsimagLite::Concurrency::codeSectionParams.npthreads, n);
-		HashHelper helper(hash, inQns, sizes, addOddToHash);
+		std::tr1::hash<Qn> helper(hash, inQns, sizes, addOddToHash);
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
-		PsimagLite::Parallelizer<HashHelper> parallelizer(codeSectionParams);
+		PsimagLite::Parallelizer<std::tr1::hash<Qn> > parallelizer(codeSectionParams);
 		parallelizer.loopCreate(helper);
 
 		PsimagLite::Sort<VectorSizeType> sort;
@@ -228,7 +253,7 @@ private:
 		VectorVectorSizeType tmp_;
 	};
 
-	static void computeSizes(VectorSizeType& sizes, const VectorQnType& inQns)
+	void computeSizes(VectorSizeType& sizes, const VectorQnType& inQns)
 	{
 		const SizeType otherSize = Qn::modalStruct.size();
 		if (otherSize == 0) return;
@@ -242,6 +267,57 @@ private:
 		parallelizer.loopCreate(helper);
 		helper.sync();
 	}
+
+	void firstPass2(VectorQnType& outQns,
+	                VectorSizeType& count,
+	                VectorSizeType& reverse,
+	                const VectorQnType& inQns,
+	                bool doNotSort)
+	{
+		if (doNotSort)
+			return firstPass(outQns, count, reverse, inQns, doNotSort);
+
+		SizeType n = inQns.size();
+		outQns.clear();
+		if (n == 0) return;
+		count.reserve(n);
+		reverse.resize(n);
+
+		VectorSizeType hash(1);
+		VectorSizeType sizes;
+		computeSizes(sizes, inQns);
+
+		bool noNeedForOdd = (Qn::ifPresentOther0IsElectrons && Qn::modalStruct.size() > 0);
+		bool hasAtLeastOneOdd = false;
+		if (!noNeedForOdd) {
+			for (SizeType i = 0; i < n; ++i) {
+				hasAtLeastOneOdd = inQns[i].oddElectrons;
+				if (hasAtLeastOneOdd) break;
+			}
+		}
+
+		bool addOddToHash = (!noNeedForOdd && hasAtLeastOneOdd);
+
+		std::tr1::hash<Qn> helper(hash, inQns, sizes, addOddToHash);
+		std::tr1::unordered_map<Qn, SizeType> umap(10, helper);
+
+		for (SizeType i = 0; i < n; ++i) {
+			const  bool isSeenBefore =  (umap.count(inQns[i]) > 0);
+
+			if (!isSeenBefore) {
+				outQns.push_back(inQns[i]);
+				count.push_back(1);
+				reverse[i] = count.size() - 1;
+				umap[inQns[i]] = reverse[i];
+			} else {
+				const SizeType x = umap[inQns[i]];
+				++count[x];
+				reverse[i] = x;
+			}
+		}
+	}
+
+	AlgoEnum algo_;
 };
 }
 #endif // NOT_REALLY_SORT_H

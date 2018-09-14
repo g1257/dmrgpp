@@ -94,6 +94,8 @@ struct ProgramGlobals {
 
 	static const SizeType MAX_LPS = 1000;
 
+	static PsimagLite::String notReallySortAlgo;
+
 	enum DirectionEnum {INFINITE=0,EXPAND_ENVIRON=1,EXPAND_SYSTEM=2};
 
 	enum ConnectionEnum {SYSTEM_SYSTEM,SYSTEM_ENVIRON,ENVIRON_SYSTEM,ENVIRON_ENVIRON};
@@ -184,7 +186,6 @@ struct ProgramGlobals {
 		return is;
 	}
 
-	static PsimagLite::String WFT_STRING;
 	static PsimagLite::String SYSTEM_STACK_STRING;
 	static PsimagLite::String ENVIRON_STACK_STRING;
 }; // ProgramGlobals
