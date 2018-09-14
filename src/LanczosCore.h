@@ -147,7 +147,8 @@ public:
 	  *            |               .     .  b[j-2]  a[j-1] |
 	  */
 	void decomposition(const VectorType& initVector,
-	                   TridiagonalMatrixType& ab)
+	                   TridiagonalMatrixType& ab,
+	                   SizeType excitedForStop = 0)
 	{
 		SizeType& max_nstep = steps_;
 		SizeType matsize = mat_.rows();
@@ -212,7 +213,7 @@ public:
 
 			lanczosVectors_.oneStepDecomposition(V0,V1,V2,ab,j);
 			ab.diag(tmpEigs, j + 1);
-			enew = tmpEigs[0]; // only need eigen-values here
+			enew = tmpEigs[excitedForStop]; // only need eigen-values here
 			if (fabs (enew - eold) < params_.tolerance) exitFlag=true;
 			if (j == max_nstep-1) exitFlag=true;
 			if (exitFlag && mat_.rows()<=4) break;

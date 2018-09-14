@@ -36,7 +36,7 @@ public:
 	                     SizeType excited)
 	{
 		TridiagonalMatrixType ab;
-		ls_.decomposition(initialVector, ab);
+		ls_.decomposition(initialVector, ab, excited);
 
 		VectorRealType eigs(ab.size());
 		typename LanczosCoreType::DenseMatrixType ritz;
@@ -60,7 +60,7 @@ public:
 	                           SizeType excited)
 	{
 		TridiagonalMatrixType ab;
-		ls_.decomposition(initialVector, ab);
+		ls_.decomposition(initialVector, ab, excited);
 
 		if (excited > ab.size())
 			throw RuntimeError("Excited too big\n");
