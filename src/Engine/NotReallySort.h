@@ -175,6 +175,7 @@ private:
 		VectorSizeType perm(n);
 
 		if (doNotSort) {
+			checkThatHashIsNotReallySorted(hash);
 			for (SizeType i = 0; i < n; ++i) perm[i] = i;
 		} else {
 			sort.sort(hash, perm);
@@ -266,6 +267,27 @@ private:
 		PsimagLite::Parallelizer<SizesHelper> parallelizer(codeSectionParams);
 		parallelizer.loopCreate(helper);
 		helper.sync();
+	}
+
+	// only for debugging
+	static void checkThatHashIsNotReallySorted(const VectorSizeType& h)
+	{
+#ifdef NDEBUG
+		return;
+#endif
+
+		SizeType n = h.size();
+		if (n == 0) return;
+
+		VectorSizeType seen(1, h[0]);
+		for (SizeType i = 1; i < n; ++i) {
+			if (h[i] == h[i - 1])
+				continue;
+
+			int x = PsimagLite::indexOrMinusOne(seen, h[i]);
+			assert(x < 0);
+			seen.push_back(h[i]);
+		}
 	}
 
 	void firstPass2(VectorQnType& outQns,
