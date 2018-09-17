@@ -23,9 +23,8 @@ public:
 
 	hash(VectorSizeType& hash,
 	     const VectorQnType& inQns,
-	     const VectorSizeType& sizes,
 	     bool addOdd)
-	    : hash_(hash), inQns_(inQns), sizes_(sizes), addOdd_(addOdd)
+	    : hash_(hash), inQns_(inQns), addOdd_(addOdd)
 	{}
 
 	void doTask(SizeType taskNumber, SizeType)
@@ -37,13 +36,16 @@ public:
 
 	SizeType operator()(const Dmrg::Qn& qn) const
 	{
-		SizeType n = qn.other.size(); // small number
+		const SizeType offset = 8; // 8 bits
+		const SizeType n = qn.other.size(); // small number
 		SizeType key = (addOdd_ && qn.oddElectrons) ? 1 : 0;
-		SizeType scale = (addOdd_) ? 2 : 1;
+		SizeType bits = (addOdd_) ? 1 : 0;
 
 		for (SizeType i = 0; i < n; ++i) {
-			key += qn.other[i]*scale;
-			scale *= sizes_[i];
+			SizeType val = qn.other[i];
+			val <<= bits;
+			key += val;
+			bits += offset;
 		}
 
 		return key;
@@ -53,7 +55,6 @@ private:
 
 	VectorSizeType& hash_;
 	const VectorQnType& inQns_;
-	const VectorSizeType& sizes_;
 	bool addOdd_;
 };
 }
@@ -130,7 +131,7 @@ public:
 
 		if (profiling) {
 			profiling->end("patches= " + ttos(numberOfPatches) +
-			               " algo=" + ProgramGlobals::notReallySortAlgo);
+			               " bitwise key, algo=" + ProgramGlobals::notReallySortAlgo);
 			delete profiling;
 			profiling = 0;
 		}
@@ -151,8 +152,6 @@ private:
 		reverse.resize(n);
 
 		VectorSizeType hash(n);
-		VectorSizeType sizes;
-		computeSizes(sizes, inQns);
 
 		bool noNeedForOdd = (Qn::ifPresentOther0IsElectrons && Qn::modalStruct.size() > 0);
 		bool hasAtLeastOneOdd = false;
@@ -166,7 +165,7 @@ private:
 		bool addOddToHash = (!noNeedForOdd && hasAtLeastOneOdd);
 
 		SizeType threads = std::min(PsimagLite::Concurrency::codeSectionParams.npthreads, n);
-		std::tr1::hash<Qn> helper(hash, inQns, sizes, addOddToHash);
+		std::tr1::hash<Qn> helper(hash, inQns, addOddToHash);
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
 		PsimagLite::Parallelizer<std::tr1::hash<Qn> > parallelizer(codeSectionParams);
 		parallelizer.loopCreate(helper);
@@ -254,19 +253,14 @@ private:
 		VectorVectorSizeType tmp_;
 	};
 
-	void computeSizes(VectorSizeType& sizes, const VectorQnType& inQns)
+	void computeSizes(VectorSizeType& sizes)
 	{
 		const SizeType otherSize = Qn::modalStruct.size();
 		if (otherSize == 0) return;
-		SizeType n = inQns.size();
-		sizes.resize(otherSize, 0);
-
-		SizeType threads = std::min(PsimagLite::Concurrency::codeSectionParams.npthreads, n);
-		SizesHelper helper(sizes, inQns, threads);
-		PsimagLite::CodeSectionParams codeSectionParams(threads);
-		PsimagLite::Parallelizer<SizesHelper> parallelizer(codeSectionParams);
-		parallelizer.loopCreate(helper);
-		helper.sync();
+		const short unsigned int bits = sizeof(otherSize)*8;
+		const unsigned long int max = (1UL << bits) - 1;
+		const SizeType value = std::pow(max, 1.0/otherSize);
+		sizes.resize(otherSize, value);
 	}
 
 	// only for debugging
@@ -303,11 +297,9 @@ private:
 		outQns.clear();
 		if (n == 0) return;
 		count.reserve(n);
-		reverse.resize(n);
+		reverse.reserve(n);
 
 		VectorSizeType hash(1);
-		VectorSizeType sizes;
-		computeSizes(sizes, inQns);
 
 		bool noNeedForOdd = (Qn::ifPresentOther0IsElectrons && Qn::modalStruct.size() > 0);
 		bool hasAtLeastOneOdd = false;
@@ -320,7 +312,7 @@ private:
 
 		bool addOddToHash = (!noNeedForOdd && hasAtLeastOneOdd);
 
-		std::tr1::hash<Qn> helper(hash, inQns, sizes, addOddToHash);
+		std::tr1::hash<Qn> helper(hash, inQns, addOddToHash);
 		std::tr1::unordered_map<Qn, SizeType> umap(10, helper);
 
 		for (SizeType i = 0; i < n; ++i) {
@@ -329,12 +321,12 @@ private:
 			if (!isSeenBefore) {
 				outQns.push_back(inQns[i]);
 				count.push_back(1);
-				reverse[i] = count.size() - 1;
+				reverse.push_back(count.size() - 1);
 				umap[inQns[i]] = reverse[i];
 			} else {
 				const SizeType x = umap[inQns[i]];
 				++count[x];
-				reverse[i] = x;
+				reverse.push_back(x);
 			}
 		}
 	}
