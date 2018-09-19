@@ -268,7 +268,7 @@ private:
 	{
 #ifdef NDEBUG
 		return;
-#endif
+#else
 
 		SizeType n = h.size();
 		if (n == 0) return;
@@ -278,10 +278,10 @@ private:
 			if (h[i] == h[i - 1])
 				continue;
 
-			int x = PsimagLite::indexOrMinusOne(seen, h[i]);
-			assert(x < 0);
+			assert(PsimagLite::indexOrMinusOne(seen, h[i]) < 0);
 			seen.push_back(h[i]);
 		}
+#endif
 	}
 
 	void firstPass2(VectorQnType& outQns,

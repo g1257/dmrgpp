@@ -94,6 +94,7 @@ template<typename ParametersType,typename CheckpointType>
 class Recovery  {
 
 	typedef Recovery<ParametersType,int> RecoveryStaticType;
+	typedef typename CheckpointType::ComplexOrRealType ComplexOrRealType;
 
 	static const SizeType MAX_RECOVERY_FILES = 10;
 
@@ -225,7 +226,7 @@ public:
 		ioOut.createGroup("FinalPsi");
 		psi.write(siteIndices_[stepCurrent], ioOut, "FinalPsi");
 		ioOut.write(lastSign, "LastLoopSign");
-
+		ioOut.write(PsimagLite::IsComplexNumber<ComplexOrRealType>::True, "IsComplex");
 		// wft dtor
 		wft_.write(ioOut);
 
