@@ -6,6 +6,7 @@
 #include <iostream>
 #include "AnsiColors.h"
 #include <sstream>
+#include "../GitRevision.h"
 
 class Provenance {
 

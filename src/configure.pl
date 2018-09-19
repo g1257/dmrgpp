@@ -97,6 +97,10 @@ $args{"LDFLAGS"} = $lto;
 $args{"flavor"} = $flavor;
 $args{"code"} = "DMRG++";
 $args{"configFiles"} = \@configFiles;
+$args{"additional3"} = "GitRevision.h";
+$args{"additional4"} = $args{"additional3"};
+
+system("./createGitRevision.pl GitRevision.h");
 
 createMakefile(\@drivers, \%args);
 
@@ -113,6 +117,11 @@ sub createMakefile
 	NewMake::main($fh, $args, $drivers);
 	local *FH = $fh;
 print FH<<EOF;
+
+.PHONY: GitRevision.h
+
+GitRevision.h:
+	./createGitRevision.pl GitRevision.h
 
 operator: dmrg
 	cp dmrg operator
