@@ -31,6 +31,7 @@ sub main
 	my $additional = $a{"additional"};
 	my $additional2 = $a{"additional2"};
 	my $additional3 = $a{"additional3"};
+	my $additional4 = $a{"additional4"};
 	my $ldflagsAdditionals = $a{"LDFLAGS"};
 	my $cppflagsAdditionals = $a{"CPPFLAGS"};
 	my $path = $a{"path"};
@@ -39,6 +40,7 @@ sub main
 	$additional = " " unless defined($additional);
 	$additional2 = " " unless defined($additional2);
 	$additional3 = "" unless defined($additional3);
+	$additional4 = "" unless defined($additional4);
 	$ldflagsAdditionals = "" unless defined($ldflagsAdditionals);
 	$cppflagsAdditionals = "" unless defined($cppflagsAdditionals);
 	$path = " " unless defined($path);
@@ -58,7 +60,7 @@ $configContent
 CPPFLAGS += -I$path../../PsimagLite -I$path../../PsimagLite/src -I${path}Engine
 CPPFLAGS += $cppflagsAdditionals
 LDFLAGS += $ldflagsAdditionals
-all: $allExecutables $additional3
+all: $additional4 $allExecutables $additional3
 
 EOF
 
