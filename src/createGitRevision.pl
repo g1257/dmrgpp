@@ -11,6 +11,8 @@ my $hashPsimagLite = getGitHash("../../PsimagLite");
 my $hashDmrgpp = getGitHash("..");
 
 open(FOUT, ">", $file) or exit(2);
+print FOUT "// DO NOT EDIT. It will be overwritten\n";
+print FOUT "// Created by $0\n";
 print FOUT "#define PSIMAGLITE_GIT_REV \"$hashPsimagLite\"\n";
 print FOUT "#define DMRGPP_GIT_REV \"$hashDmrgpp\"\n";
 close(FOUT);
@@ -37,11 +39,10 @@ sub getGitHash
 	chomp($value);
 
 	my $code = system("cd $dir; git diff --quiet");
-	($code) or $code = 0;	
+	($code) or $code = 0;
 	$code >>= 8;
 	$value .= " +M" if ($code != 0);
 
 	return $value;
 }
 
-	

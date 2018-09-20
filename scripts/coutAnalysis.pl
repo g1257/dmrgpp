@@ -17,6 +17,9 @@ defined($cutoff) or $cutoff = 0;
 my %h;
 my $totalTime = loadData(\%h, $file, $cutoff);
 
+my $warning = "ATTENTION! ATTENTION! TIMES given by $0 are mostly WRONG!";
+print STDERR "$warning\n";
+print "$warning\n";
 print STDERR "#cutoff=$cutoff\n";
 print STDERR "#Elements=".scalar(keys %h)."\n";
 printData(\%h);

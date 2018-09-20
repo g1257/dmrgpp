@@ -231,9 +231,6 @@ struct ParametersDmrgSolver {
 		io.readline(filename,"OutputFile=");
 		filename = filenameFromRootname(filename);
 
-		if (options.find("ProgressInUseconds") != PsimagLite::String::npos)
-			PsimagLite::ProgressIndicator::withUseconds(true);
-
 		if (earlyExit) return;
 
 		io.readline(keptStatesInfinite,"InfiniteLoopKeptStates=");
