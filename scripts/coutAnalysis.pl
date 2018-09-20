@@ -150,20 +150,35 @@ sub printData
 sub toFixedLength
 {
 	my ($what, $n, $alignment) = @_;
-	my $x = "$what";
+	my $x = correctDecimalPointIfNeeded($what);
 	my $l = length($x);
-	return $what if ($l >= $n);
+	return $x if ($l >= $n);
 	my $spaces = multiChar(" ", $n - $l);
 	if ($alignment eq "after") {
-		return "$what$spaces";
+		return "$x$spaces";
 	} elsif ($alignment eq "before") {
-		return "$spaces$what";
+		return "$spaces$x";
 	}
 
 	my $nml = $n - $l;
 	++$nml if ($nml & 1);
 	my $h = multiChar(" ", int($nml/2));
-	return "$h$what$h";
+	return "$h$x$h";
+}
+
+sub correctDecimalPointIfNeeded
+{
+	my ($x) = @_;
+	if ($x =~ /(^\d+)\.(\d*$)/) {
+		my $a = $1;
+		my $b = $2;
+		my $l = length($b);
+		return "$x" if ($l >= 2);
+		my $paddingLength = 2 - $l;
+		return ($paddingLength == 2) ? "$x"."00" : "$x"."0";
+	}
+	
+	return "$x";	
 }
 
 sub multiChar
