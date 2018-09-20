@@ -49,6 +49,18 @@ public:
 		progressIndicator_.printline(msg, os);
 	}
 
+	Profiling(String caller,
+	          std::ostream& os)
+	    : progressIndicator_(caller),
+	      memoryUsage_("/proc/self/stat"),
+	      isDead_(false),
+	      os_(os)
+	{
+		OstringStream msg;
+		msg << "starting clock";;
+		progressIndicator_.printline(msg, os);
+	}
+
 	~Profiling()
 	{
 		killIt("");

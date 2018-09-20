@@ -1,7 +1,7 @@
 #ifndef PSI_LANCZOS_SOLVER_H
 #define PSI_LANCZOS_SOLVER_H
 #include "Vector.h"
-#include "ProgressIndicator.h"
+#include "Profiling.h"
 #include "LanczosCore.h"
 #include "LanczosOrDavidsonBase.h"
 
@@ -25,9 +25,7 @@ public:
 
 	LanczosSolver(const MatrixType& mat,
 	              const SolverParametersType& params)
-	    : ls_(mat, params, BaseType::isReorthoEnabled(params)),
-	      withInfo_(true),
-	      progress_("LanczosSolver")
+	    : ls_(mat, params, BaseType::isReorthoEnabled(params))
 	{}
 
 	void computeOneState(RealType& energy,
@@ -35,6 +33,8 @@ public:
 	                     const VectorType& initialVector,
 	                     SizeType excited)
 	{
+		Profiling profiling("LanczosSolver", std::cout);
+
 		TridiagonalMatrixType ab;
 		ls_.decomposition(initialVector, ab, excited);
 
@@ -50,9 +50,20 @@ public:
 		if (norm(z)<1e-6)
 			throw RuntimeError(str + " norm is zero\n");
 
-		if (withInfo_) info(energy, initialVector, 0, std::cout);
-	}
+		const RealType norma = norm(initialVector);
+		const SizeType iter = ls_.steps();
 
+		if (norma<1e-5 || norma>100)
+			std::cerr<<"norma="<<norma<<"\n";
+
+		OstringStream msg;
+		msg.precision(std::cout.precision());
+		String what = "lowest";
+		if (excited > 0) what = ttos(excited) + " excited";
+		msg<<"Found "<<what<<" eigenvalue= "<<energy<<" after "<<iter;
+		msg<<" iterations, "<<" orig. norm="<<norma<<" excited="<<excited;
+		profiling.end(msg.str());
+	}
 
 	void computeAllStatesBelow(VectorRealType& eigs,
 	                           VectorVectorType& z,
@@ -90,32 +101,7 @@ public:
 
 private:
 
-	void info(RealType energyTmp,
-	          const VectorType& x,
-	          SizeType excited,
-	          std::ostream& os)
-	{
-		const RealType norma = norm(x);
-		const SizeType iter = ls_.steps();
-
-		if (norma<1e-5 || norma>100) {
-			std::cerr<<"norma="<<norma<<"\n";
-		}
-
-		OstringStream msg;
-		msg.precision(os.precision());
-		String what = "lowest";
-		if (excited > 0) what = ttos(excited) + " excited";
-		msg<<"Found "<<what<<" eigenvalue= "<<energyTmp<<" after "<<iter;
-		msg<<" iterations, "<<" orig. norm="<<norma;
-		if (excited > 0)
-			msg<<"\nLanczosSolver: EXPERIMENTAL feature excited > 0 is in use";
-		progress_.printline(msg,os);
-	}
-
 	LanczosCoreType ls_;
-	bool withInfo_;
-	ProgressIndicator progress_;
 };
 }
 #endif // PSI_LANCZOS_SOLVER_H
