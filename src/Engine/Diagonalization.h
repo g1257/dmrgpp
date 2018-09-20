@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DavidsonSolver.h"
 #include "ParametersForSolver.h"
 #include "Concurrency.h"
+#include "Profiling.h"
 
 namespace Dmrg {
 
@@ -152,6 +153,7 @@ public:
 	                    const BlockType& blockLeft,
 	                    const BlockType& blockRight)
 	{
+		PsimagLite::Profiling profiling("Diagonalization", std::cout);
 		assert(direction == ProgramGlobals::INFINITE);
 		SizeType loopIndex = 0;
 		VectorSizeType sectors;
@@ -170,6 +172,7 @@ public:
 	                    SizeType loopIndex,
 	                    bool)
 	{
+		PsimagLite::Profiling profiling("Diagonalization", std::cout);
 		assert(direction != ProgramGlobals::INFINITE);
 
 		RealType gsEnergy = internalMain_(target,direction,loopIndex,false,block);
@@ -258,16 +261,9 @@ private:
 
 		for (SizeType j = 0; j < totalSectors; ++j) {
 			SizeType i = sectors[j];
-			SizeType bs = lrs.super().partition(i + 1) - lrs.super().partition(i);
 			PsimagLite::OstringStream msg;
 			msg<<"About to diag. sector with";
 			msg<<" quantumSector="<<quantumSector_;
-
-			if (verbose_ && PsimagLite::Concurrency::root()) {
-				msg<<" diagonaliseOneBlock, i="<<i;
-				msg<<" and weight="<<bs;
-			}
-
 			progress_.printline(msg,std::cout);
 			TargetVectorType initialVectorBySector(weights[i]);
 			initialVector.extract(initialVectorBySector,i);
@@ -428,11 +424,7 @@ private:
 	                         HamiltonianConnectionType& hc,
 	                         const TargetVectorType& initialVector,
 	                         SizeType saveOption)
-	{
-		int n = hc.modelHelper().size();
-		if (verbose_)
-			std::cerr<<"Lanczos: About to do block number="<<partitionIndex<<" of size="<<n<<"\n";
-
+	{	
 		ReflectionSymmetryType *rs = 0;
 		if (reflectionOperator_.isEnabled()) rs = &reflectionOperator_;
 

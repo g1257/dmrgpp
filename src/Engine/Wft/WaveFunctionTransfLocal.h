@@ -92,6 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "WftAccelPatches.h"
 #include "WftSparseTwoSite.h"
 #include "WftAccelSvd.h"
+#include "Profiling.h"
 
 namespace Dmrg {
 
@@ -130,13 +131,8 @@ public:
 	      wftOptions_(wftOptions),
 	      wftAccelBlocks_(dmrgWaveStruct, wftOptions),
 	      wftAccelPatches_(dmrgWaveStruct, wftOptions),
-	      wftAccelSvd_(dmrgWaveStruct, wftOptions),
-	      progress_("WaveFunctionTransfLocal")
-	{
-		PsimagLite::OstringStream msg;
-		msg<<"Constructing Local";
-		progress_.printline(msg,std::cout);
-	}
+	      wftAccelSvd_(dmrgWaveStruct, wftOptions)
+	{}
 
 	virtual void transformVector(VectorWithOffsetType& psiDest,
 	                             const VectorWithOffsetType& psiSrc,
@@ -144,6 +140,8 @@ public:
 	                             const VectorSizeType& nk) const
 
 	{
+		PsimagLite::Profiling profiling("WFT", std::cout);
+
 		if (wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) {
 			if (wftOptions_.firstCall) {
 				transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
@@ -290,11 +288,8 @@ private:
 	{
 		typedef PsimagLite::Parallelizer<WftSparseTwoSiteType> ParallelizerType;
 
-		PsimagLite::OstringStream msg;
-		msg<<" Destination sectors "<<psiDest.sectors();
-		msg<<" Source sectors "<<psiSrc.sectors();
-		progress_.printline(msg,std::cout);
 		assert(dmrgWaveStruct_.lrs().super().permutationInverse().size() == psiSrc.size());
+
 		bool inBlocks = (lrs.right().block().size() > 1 &&
 		                 wftOptions_.accel == WftOptionsType::ACCEL_BLOCKS);
 		SparseMatrixType we;
@@ -366,9 +361,6 @@ private:
 		SizeType volumeOfNk = ProgramGlobals::volumeOf(nk);
 		SizeType nip = lrs.super().permutationInverse().size()/
 		        lrs.right().permutationInverse().size();
-		PsimagLite::OstringStream msg;
-		msg<<" We're bouncing on the right, so buckle up!";
-		progress_.printline(msg,std::cout);
 
 		assert(dmrgWaveStruct_.lrs().super().permutationInverse().size() == psiSrc.size());
 
@@ -422,10 +414,6 @@ private:
 		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
 		SizeType nalpha = lrs.left().permutationInverse().size();
 
-		PsimagLite::OstringStream msg;
-		msg<<" We're bouncing on the left, so buckle up!";
-		progress_.printline(msg,std::cout);
-
 		assert(dmrgWaveStruct_.lrs().super().permutationInverse().size()==psiSrc.size());
 
 		SizeType start = psiDest.offset(i0);
@@ -470,7 +458,6 @@ private:
 	WftAccelBlocksType wftAccelBlocks_;
 	WftAccelPatchesType wftAccelPatches_;
 	WftAccelSvdType wftAccelSvd_;
-	PsimagLite::ProgressIndicator progress_;
 }; // class WaveFunctionTransfLocal
 } // namespace Dmrg
 

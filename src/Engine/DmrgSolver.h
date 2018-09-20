@@ -410,6 +410,7 @@ obtain ordered
 
 			progress_.printMemoryUsage();
 		}
+
 		progress_.print("Infinite dmrg loop has been done!\n",std::cout);
 	}
 
@@ -525,15 +526,6 @@ obtain ordered
 			}
 
 			lrs_.printSizes("finite",std::cout);
-			if (verbose_) {
-				PsimagLite::OstringStream msg;
-				msg<<" stackS="<<checkpoint_.stackSize(ProgramGlobals::SYSTEM);
-				msg<<" stackE="<<checkpoint_.stackSize(ProgramGlobals::ENVIRON);
-				msg<< " step="<<stepCurrent_;
-				msg<<" loopIndex="<<loopIndex<<" length="<<stepLength;
-				msg<<" StepFinal="<<stepFinal;
-				progress_.printline(msg,std::cout);
-			}
 
 			updateQuantumSector(lrs_.sites(),direction,stepCurrent_);
 

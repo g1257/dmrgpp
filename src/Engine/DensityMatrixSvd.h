@@ -70,7 +70,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef DENSITY_MATRIX_SVD_H
 #define DENSITY_MATRIX_SVD_H
-#include "ProgressIndicator.h"
+#include "Profiling.h"
 #include "TypeToString.h"
 #include "DensityMatrixBase.h"
 #include "NoPthreads.h"
@@ -417,14 +417,13 @@ public:
 	DensityMatrixSvd(const TargetingType& target,
 	                 const LeftRightSuperType& lrs,
 	                 const ParamsType& p)
-	    :
-	      progress_("DensityMatrixSvd"),
-	      lrs_(lrs),
+	    : lrs_(lrs),
 	      params_(p),
 	      allTargets_(lrs, p.direction),
 	      data_(allTargets_.basis()),
 	      persistentSvd_(data_.blocks())
 	{
+		PsimagLite::Profiling profiling("DensityMatrixSvdCtor", std::cout);
 		SizeType oneOrZero = (target.includeGroundStage()) ? 1 : 0;
 		SizeType targets = oneOrZero + target.size(); // Number of targets;
 		typename GenIjPatchType::LeftOrRightEnumType dir1 =
@@ -457,20 +456,12 @@ public:
 
 		allTargets_.finalize();
 
-		{
-			PsimagLite::OstringStream msg;
-			msg<<"Found "<<allTargets_.size()<<" groups on left or right";
-			progress_.printline(msg,std::cout);
-		}
-
 		for (SizeType x = 0; x < targets; ++x)
 			addThisTarget(x, target);
 
-		{
-			PsimagLite::OstringStream msg;
-			msg<<"Done with init partition";
-			progress_.printline(msg,std::cout);
-		}
+		PsimagLite::OstringStream msg;
+		msg<<"Found "<<allTargets_.size()<<" groups on left or right";
+		profiling.end(msg.str());
 	}
 
 	virtual const BlockDiagonalMatrixType& operator()()
@@ -478,8 +469,9 @@ public:
 		return data_;
 	}
 
-	void diag(VectorRealType& eigs,char jobz)
+	void diag(VectorRealType& eigs, char jobz)
 	{
+		PsimagLite::Profiling profiling("DensityMatrixSvdDiag", std::cout);
 		typedef PsimagLite::Parallelizer<ParallelSvd> ParallelizerType;
 		ParallelizerType threaded(PsimagLite::Concurrency::codeSectionParams);
 		ParallelSvd parallelSvd(data_,
@@ -573,7 +565,6 @@ private:
 		}
 	}
 
-	ProgressIndicatorType progress_;
 	const LeftRightSuperType& lrs_;
 	const ParamsType& params_;
 	GroupsStructType allTargets_;

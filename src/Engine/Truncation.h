@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2014, UT-Battelle, LLC
+Copyright (c) 2009-2014-2018, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 5.]
@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h"
 #include "Concurrency.h"
 #include "Io/IoNg.h"
+#include "Profiling.h"
 
 namespace Dmrg {
 
@@ -152,15 +153,14 @@ public:
 	                       SizeType keptStates,
 	                       ProgramGlobals::DirectionEnum direction)
 	{
+		PsimagLite::Profiling profiling("TruncationChangeBasis", std::cout);
 		DensityMatrixBaseType* dmS = 0;
 
 		if (direction == ProgramGlobals::EXPAND_SYSTEM) {
-			progress_.print("for Environment\n",std::cout);
 			changeBasis(pS,target,keptStates,direction, &dmS);
 			assert(dmS);
 			truncateBasis(pS,lrs_.right(), *dmS, direction);
 		} else {
-			progress_.print("for System\n",std::cout);
 			changeBasis(pE,target,keptStates,direction, &dmS);
 			assert(dmS);
 			truncateBasis(pE,lrs_.left(), *dmS, direction);
@@ -183,6 +183,8 @@ public:
 	                         const TargetingType& target,
 	                         SizeType keptStates)
 	{
+		PsimagLite::Profiling profiling("TruncationChangeBasis", std::cout);
+
 		DensityMatrixBaseType* dmS = 0;
 		changeBasis(sBasis,target, keptStates, ProgramGlobals::EXPAND_SYSTEM, &dmS);
 		assert(dmS);
@@ -265,10 +267,6 @@ private:
 
 		rSprime = pBasis;
 		rSprime.changeBasis(cache.removedIndices,cache.eigs,keptStates,parameters_);
-
-		PsimagLite::OstringStream msg2;
-		msg2<<"done with entanglement";
-		progress_.printline(msg2,std::cout);
 	}
 
 	void truncateBasis(BasisWithOperatorsType& rPrime,
@@ -291,11 +289,7 @@ private:
 		PsimagLite::OstringStream msg;
 		TruncationCache& cache = (expandSys) ? leftCache_ : rightCache_;
 
-		const PsimagLite::String str = (expandSys) ? "system" : "environ";
-		PsimagLite::OstringStream msg0;
-		msg0<<"Truncating transform for "<<str<<" ...";
 		cache.transform.truncate(cache.removedIndices);
-		progress_.printline(msg0, std::cout);
 		rPrime.truncateBasis(cache.transform,
 		                     cache.eigs,
 		                     cache.removedIndices,
@@ -364,7 +358,8 @@ private:
 		msg2<<"Discarded weight (Truncation error): "<< discWeight;
 		progress_.printline(msg2,std::cout);
 
-		calcAndPrintEntropies(eigs);
+		if (parameters_.options.find("calcAndPrintEntropies") != PsimagLite::String::npos)
+			calcAndPrintEntropies(eigs);
 	}
 
 	void calcAndPrintEntropies(const VectorRealType& eigs)

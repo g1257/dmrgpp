@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 =pod
-USAGE is coutAnalysis.pl runForinput.cout [cutoff]
+USAGE is coutAnalysis.pl runForinput.cout
 OUTPUT is 2 columns
 Module TimeSpent
 =cut
@@ -10,55 +10,78 @@ use warnings;
 use strict;
 use utf8;
 
-my ($file, $cutoff) = @ARGV;
+my ($file) = @ARGV;
 defined($file) or die "USAGE: $0 file\n";
-defined($cutoff) or $cutoff = 0;
 
 my %h;
-my $totalTime = loadData(\%h, $file, $cutoff);
+my $totalTime = loadData(\%h, $file);
 
-my $warning = "ATTENTION! ATTENTION! TIMES given by $0 are mostly WRONG!";
-print STDERR "$warning\n";
-print "$warning\n";
-print STDERR "#cutoff=$cutoff\n";
 print STDERR "#Elements=".scalar(keys %h)."\n";
 printData(\%h);
 print STDERR "#TotalForRun=$totalTime\n";
 
 sub loadData
 {
-	my ($h, $file, $cutoff) = @_;
+	my ($h, $file) = @_;
 	open(FILE, "<", $file) or die "$0: Cannot open $file : $!\n";
-	my $prevt = 0;
-	my ($t0, $t1);
+
+	my ($firstT, $lastT);
 	while (<FILE>) {
-		my $x = /^(.+) *\[([\d\.]+)\]\:/;
-		next unless ($x);
+		#LanczosSolver [7.714]: starting clock
+		next unless (/^([^ ]+) \[([\d\.]+)\]\: ([^ ]+) clock/);
 		my $name = $1;
 		my $t = $2;
-		$t0 = $t if (!defined($t0));
-		$t1 = $t;
-		my $dt = $t - $prevt;
-		$prevt = $t;
-		next if ($dt < $cutoff);
+		my $what = $3;
+		(($name) and ($t) and ($what)) or next;
+		next if ($what ne "starting" and $what ne "stopping");
+
+		$firstT = $t if (!defined($firstT));
+		$lastT = $t;
 
 		if (defined($h->{$name})) {
 			my $ptr = $h->{$name};
-			if (scalar(@$ptr) != 2) {
+			if (scalar(@$ptr) != 3) {
 				print STDERR "$0: Error with $name\n";
-				last;
+				next;
 			}
 
-			my @temp = ($ptr->[0] + $dt, $ptr->[1] + 1);
+			my $value = $ptr->[1];
+			my $dt = 0;
+			if ($what eq "starting") {
+				if ($value != 0) {
+					print STDERR "$0: $name starting without stopping at line $.\n";
+					next;
+				}
+
+				$value = $t;
+			} elsif ($what eq "stopping") {
+				if ($value > $t) {
+					print STDERR "$0: $name has time skew\n";
+					next;
+				}
+
+				$dt = $t - $value;
+				$value = 0;
+			} else {
+				print STDERR "$0: expecting starting or stopping not $what\n";
+				next;
+			}
+				
+			my @temp = ($ptr->[0] + $dt, $value, $ptr->[2] + 1);
 			$h->{$name} = \@temp;
 		} else {
-			my @temp = ($dt, 1);
+			if ($what ne "starting") {
+				print STDERR "$0: expecting starting not $what\n";
+				next;
+			}
+
+			my @temp = (0, $t, 1);
 			$h->{$name} = \@temp
 		}
 	}
 
 	close(FILE);
-	return $t1 - $t0;
+	return $lastT - $firstT;
 }
 
 
@@ -69,18 +92,52 @@ sub printData
 	my $tot = 0;
 	foreach my $k (sort {$h{$b}->[0] <=> $h{$a}->[0]} keys %h) {
 		my $ptr = $hptr->{$k};
-		if (scalar(@$ptr) != 2) {
+		if (scalar(@$ptr) != 3) {
 			print STDERR "$0: Error with $k\n";
-			last;
+			next;
 		}
 
-		my $t = int($ptr->[0]);
-		my $numberOfTimes = $ptr->[1];
-		print "$k\t $t\t $numberOfTimes\n";
+		my $name = toFixedLength($k, 25, "after");
+		my $sep = multiChar(" ",4);
+		my $t = int($ptr->[0]*100)/100;
+		my $time = toFixedLength($t, 6, "before");
+		my $shouldBeZero = $ptr->[1];
+		if ($shouldBeZero != 0) {
+			print STDERR "$0: Error with $k, expecting 0, got $shouldBeZero\n";
+			next;
+		}
+
+		my $numberOfTimes = toFixedLength($ptr->[2], 4, "before");
+		print "$name$sep$time$sep$numberOfTimes\n";
 		$tot += $t;
 	}
 
 	print STDERR "--------------------\n";
-	print STDERR "TotalForModules: $tot\n";
+	print STDERR "TotalForObserved: $tot\n";
+}
+
+sub toFixedLength
+{
+	my ($what, $n, $spaceBeforeOrAfter) = @_;
+	my $x = "$what";
+	my $l = length($x);
+	return $what if ($l >= $n);
+	my $spaces = multiChar(" ", $n - $l);
+	if ($spaceBeforeOrAfter eq "after") {
+		return "$what$spaces";
+	}
+	
+	return "$spaces$what";
+}
+
+sub multiChar
+{
+	my ($c, $n) = @_;
+	my $sum = "";
+	for (my $i = 0; $i < $n; ++$i) {
+		$sum .= "$c";
+	}
+
+	return $sum;
 }
 
