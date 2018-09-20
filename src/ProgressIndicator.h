@@ -95,7 +95,6 @@ class ProgressIndicator {
 	static MemoryUsage musage_;
 	static OstringStream buffer_;
 	static bool bufferActive_;
-	static bool withUseconds_;
 
 public:
 
@@ -186,10 +185,6 @@ public:
 		printline(buffer_,std::cout);
 	}
 
-	static bool withUseconds() { return withUseconds_; }
-
-	static void withUseconds(bool value) { withUseconds_ = value; }
-
 	static MemoryUsage::TimeHandle time() { return musage_.time(); }
 
 private:
@@ -197,14 +192,12 @@ private:
 	template<typename SomeOutputStreamType>
 	void prefix(SomeOutputStreamType& os) const
 	{
-		MemoryUsage::TimeHandle t = musage_.time();
-		SizeType tmp = t.seconds();
-		if (withUseconds_) {
-			tmp *= 1000000;
-			tmp += t.useconds();
-		}
-
-		os<<caller_<<" "<<"["<<tmp<<"]: ";
+		const MemoryUsage::TimeHandle t = musage_.time();
+		const double millis = t.useconds()/1000. + t.seconds()*1000.;
+		const double seconds = millis/1000.;
+		const SizeType prec = os.precision(3);
+		os<<caller_<<" "<<"["<<std::fixed<<seconds<<"]: ";
+		os.precision(prec);
 	}
 
 	String caller_;

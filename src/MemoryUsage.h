@@ -107,9 +107,9 @@ public:
 			return *this;
 		}
 
-		SizeType seconds() const { return startTime_.tv_sec; }
+		time_t seconds() const { return startTime_.tv_sec; }
 
-		SizeType useconds() const { return startTime_.tv_usec; }
+		suseconds_t useconds() const { return startTime_.tv_usec; }
 
 	private:
 
