@@ -66,14 +66,15 @@ sub loadData
 
 				$dt = $t - $value;
 				# Increase otherness by dt for all labels that are in open mode
-				otherNess($h, $dt);
 				$value = 0;
-				
+
 				if ($dt < $otherness) {
-					die "$0: Otherness $otherness greater than $dt for $name\n";
+					die "$0: Otherness $otherness greater than $dt for $name line $.\n";
 				}
-	
+
 				$dt -= $otherness;
+
+				otherNess($h, $dt);
 				$otherness = 0;
 				$observed += $dt;
 			} else {
@@ -83,7 +84,7 @@ sub loadData
 
 			my @temp = ($ptr->[0] + $dt, $value, $ptr->[2] + 1, $otherness);
 			$h->{$name} = \@temp;
-			
+
 		} else {
 			if ($what ne "starting") {
 				print STDERR "$0: expecting starting not $what\n";
@@ -96,7 +97,7 @@ sub loadData
 	}
 
 	close(FILE);
-	
+
 	my $total = $lastT - $firstT;
 	if ($total < $observed) {
 		print STDERR "total $total is less than observed $observed\n";
@@ -153,7 +154,8 @@ sub printData
 
 		my $perCent = int($t*1000/$totalTime)/10;
 		$c->{"percent"} += $perCent;
-		my $perCentPrint = toFixedLength($perCent." %", $ls[2], "before", 1);
+		$_ = correctDecimalPointIfNeeded($perCent, 1);
+		my $perCentPrint = toFixedLength($_." %", $ls[2], "before", 1);
 		my $numberOfTimes = toFixedLength($ptr->[2], $ls[2], "before");
 		print "$name$sep$time$sep2$perCentPrint$sep2$numberOfTimes\n";
 	}
@@ -162,7 +164,7 @@ sub printData
 	my $name = toFixedLength("Totals", $ls[0], "after");
 	my $time = toFixedLength($t, $ls[1], "before", 3);
 	my $perCentPrint = toFixedLength($perCent." %", $ls[2], "before", 1);
-	print  "--------------------\n";
+	print  "----------------------------------------------\n";
 	print "$name$sep$time$sep2$perCentPrint\n";
 }
 
@@ -197,8 +199,13 @@ sub correctDecimalPointIfNeeded
 		my $pad = multiChar("0", $paddingLength);
 		return "$x"."$pad";
 	}
-	
-	return "$x";	
+
+	if ($x =~ /(^\d+$)/ and defined($prec)) {
+		my $pad = multiChar("0", $prec);
+		return "$x"."."."$pad";
+	}
+
+	return "$x";
 }
 
 sub multiChar

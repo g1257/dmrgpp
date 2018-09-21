@@ -424,7 +424,7 @@ private:
 	                         HamiltonianConnectionType& hc,
 	                         const TargetVectorType& initialVector,
 	                         SizeType saveOption)
-	{	
+	{
 		ReflectionSymmetryType *rs = 0;
 		if (reflectionOperator_.isEnabled()) rs = &reflectionOperator_;
 

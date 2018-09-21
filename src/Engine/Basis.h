@@ -172,7 +172,6 @@ public:
 		                                std::cout);
 		block_.clear();
 		utils::blockUnion(block_,basis1.block_,basis2.block_);
-		VectorQnType qns;
 
 		if (useSu2Symmetry_) {
 			std::cout<<"Basis: SU(2) Symmetry is in use\n";
@@ -183,7 +182,7 @@ public:
 			                      basis1.qns_,
 			                      basis2.qns_,
 			                      qns_,
-			                      qns);
+			                      qnsBig_);
 		} else {
 			SizeType ns = basis2.size();
 			SizeType ne = basis1.size();
@@ -205,7 +204,8 @@ public:
 			if (nps > 0) --nps;
 
 			SizeType total = basis1.size() * basis2.size();
-			qns.reserve(total);
+			qnsBig_.clear(); // reserve isn't affected
+			qnsBig_.reserve(total);
 			signs_.clear(); // reserve isn't affected
 			signs_.reserve(total);
 			for (SizeType pe = 0; pe < npe; ++pe) {
@@ -214,7 +214,7 @@ public:
 						for (SizeType j = basis1.partition_[ps];
 						     j < basis1.partition_[ps + 1];
 						     ++j) {
-							qns.push_back(QnType(basis2.qns_[pe], basis1.qns_[ps]));
+							qnsBig_.push_back(QnType(basis2.qns_[pe], basis1.qns_[ps]));
 							signs_.push_back(basis1.signs_[j] ^ basis2.signs_[i]);
 						}
 					}
@@ -227,7 +227,7 @@ public:
 		                                                   ProgramGlobals::VERBOSE_YES;
 
 		// order quantum numbers of combined basis:
-		findPermutationAndPartitionAndQns(qns, true, false, verbose);
+		findPermutationAndPartitionAndQns(qnsBig_, true, false, verbose);
 		reorder();
 		signsOld_ = signs_;
 	}
@@ -719,6 +719,7 @@ these numbers are
 		order of hundreds for usual symmetries, making this implementation very practical for
 		systems of correlated electrons.)
 		*/
+	VectorQnType qnsBig_;
 	VectorQnType qns_;
 	VectorBoolType signs_;
 	VectorBoolType signsOld_;

@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "InitKronBase.h"
 #include "Vector.h"
+#include "Profiling.h"
 
 namespace Dmrg {
 
@@ -120,7 +121,13 @@ public:
 	      offsetForPatches_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1)
 	{
 		addHlAndHr();
-		convertXcYcArrays();
+
+		{
+			PsimagLite::Profiling profiling("convertXcYcArrays", std::cout);
+
+			convertXcYcArrays();
+		}
+
 		BaseType::setUpVstart(vstart_, BaseType::NEW);
 		assert(vstart_.size() > 0);
 		SizeType nsize = vstart_[vstart_.size() - 1];
