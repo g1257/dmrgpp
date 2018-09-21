@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h" // in PsimagLite
 #include "HamiltonianSymmetryLocal.h"
 #include "HamiltonianSymmetrySu2.h"
-#include "ProgressIndicator.h"
+#include "Profiling.h"
 #include "Qn.h"
 #include "NotReallySort.h"
 
@@ -115,7 +115,7 @@ public:
 
 	//! Constructor, s=name of this basis
 	Basis(const PsimagLite::String& s)
-	    : dmrgTransformed_(false), name_(s), progress_(s)
+	    : dmrgTransformed_(false), name_(s)
 	{}
 
 	//! Loads this basis from memory or disk
@@ -123,7 +123,7 @@ public:
 	Basis(IoInputter& io,
 	      const PsimagLite::String& ss,
 	      bool minimizeRead)
-	    : dmrgTransformed_(false), name_(ss), progress_(ss)
+	    : dmrgTransformed_(false), name_(ss)
 	{
 		correctNameIfNeeded();
 		PsimagLite::String prefix =  ss + "/";
@@ -167,6 +167,9 @@ public:
 	                  const ThisType& basis2,
 	                  const QnType* pseudoQn = 0)
 	{
+		PsimagLite::Profiling profiling("setToProduct",
+		                                ttos(basis1.size()) + "x" + ttos(basis2.size()),
+		                                std::cout);
 		block_.clear();
 		utils::blockUnion(block_,basis1.block_,basis2.block_);
 		VectorQnType qns;
@@ -320,10 +323,6 @@ public:
 
 		if (removedIndices.size()==0) return 0;
 
-		PsimagLite::OstringStream msg2;
-		msg2<<"Truncating indices...";
-		progress_.printline(msg2,std::cout);
-
 		VectorQnType qns;
 		unShrinkVector(qns, qns_, partition_);
 		truncate(qns, removedIndices);
@@ -332,9 +331,6 @@ public:
 		//	because they're needed for the WFT
 		findPermutationAndPartitionAndQns(qns, false, false, ProgramGlobals::VERBOSE_NO);
 
-		PsimagLite::OstringStream msg;
-		msg<<"Done with changeBasis";
-		progress_.printline(msg,std::cout);
 		return calcError(eigs,removedIndices);
 	}
 
@@ -661,6 +657,9 @@ private:
 	                                       bool doNotSort,
 	                                       ProgramGlobals::VerboseEnum verbose)
 	{
+		PsimagLite::Profiling profiling("findPermutationEtc",
+		                                ttos(qns.size()),
+		                                std::cout);
 		SizeType n = qns.size();
 
 		VectorSizeType numbers(n);
@@ -758,7 +757,6 @@ these numbers are
 	BlockType block_;
 	bool dmrgTransformed_;
 	PsimagLite::String name_;
-	PsimagLite::ProgressIndicator progress_;
 	static bool useSu2Symmetry_;
 
 }; // class Basis

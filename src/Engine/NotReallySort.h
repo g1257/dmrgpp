@@ -205,64 +205,6 @@ private:
 		//checkReverse(inQns, reverse, outQns);
 	}
 
-	class SizesHelper {
-
-		typedef PsimagLite::Vector<VectorSizeType>::Type VectorVectorSizeType;
-
-	public:
-
-		SizesHelper(VectorSizeType& sizes, const VectorQnType& inQns, SizeType nthreads)
-		    : sizes_(sizes), inQns_(inQns), otherSize_(Qn::modalStruct.size()), tmp_(nthreads)
-		{
-			for (SizeType thread = 0; thread < nthreads; ++thread)
-				tmp_[thread].resize(otherSize_);
-		}
-
-		void doTask(SizeType taskNumber, SizeType thread)
-		{
-			for (SizeType index = 0; index < otherSize_ - 1; ++index) {
-
-				const SizeType val = inQns_[taskNumber].other[index] + 2;
-
-				// conditional assignment
-				tmp_[thread][index] = (tmp_[thread][index] < val) ? val :
-				                                                    tmp_[thread][index];
-			}
-		}
-
-		SizeType tasks() const { return inQns_.size(); }
-
-		void sync()
-		{
-			SizeType nthreads = tmp_.size();
-			for (SizeType index = 0; index < otherSize_ - 1; ++index) {
-				for (SizeType thread = 0; thread < nthreads; ++thread) {
-					const SizeType val = tmp_[thread][index];
-					sizes_[index] = (sizes_[index] < val) ? val : sizes_[index];
-				}
-			}
-
-			sizes_[otherSize_ - 1] = 0; // should be unused
-		}
-
-	private:
-
-		VectorSizeType& sizes_;
-		const VectorQnType& inQns_;
-		SizeType otherSize_;
-		VectorVectorSizeType tmp_;
-	};
-
-	void computeSizes(VectorSizeType& sizes)
-	{
-		const SizeType otherSize = Qn::modalStruct.size();
-		if (otherSize == 0) return;
-		const short unsigned int bits = sizeof(otherSize)*8;
-		const unsigned long int max = (1UL << bits) - 1;
-		const SizeType value = std::pow(max, 1.0/otherSize);
-		sizes.resize(otherSize, value);
-	}
-
 	// only for debugging
 	static void checkThatHashIsNotReallySorted(const VectorSizeType& h)
 	{
