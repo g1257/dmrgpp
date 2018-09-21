@@ -201,17 +201,18 @@ public:
 			SizeType nps = basis1.partition_.size();
 			if (nps > 0) --nps;
 
-			qns.resize(basis1.size() * basis2.size(), QnType::zero());
-			signs_.resize(qns.size());
-			SizeType counter = 0;
+			SizeType total = basis1.size() * basis2.size();
+			qns.reserve(total);
+			signs_.clear(); // reserve isn't affected
+			signs_.reserve(total);
 			for (SizeType pe = 0; pe < npe; ++pe) {
 				for (SizeType i = basis2.partition_[pe]; i < basis2.partition_[pe + 1]; ++i) {
 					for (SizeType ps = 0; ps < nps; ++ps) {
 						for (SizeType j = basis1.partition_[ps];
 						     j < basis1.partition_[ps + 1];
 						     ++j) {
-							qns[counter] = QnType(basis2.qns_[pe], basis1.qns_[ps]);
-							signs_[counter++] = (basis1.signs_[j] ^ basis2.signs_[i]);
+							qns.push_back(QnType(basis2.qns_[pe], basis1.qns_[ps]));
+							signs_.push_back(basis1.signs_[j] ^ basis2.signs_[i]);
 						}
 					}
 				}

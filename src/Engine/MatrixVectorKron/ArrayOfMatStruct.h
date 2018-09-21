@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "GenIjPatch.h"
 #include "CrsMatrix.h"
 #include "../KronUtil/MatrixDenseOrSparse.h"
+#include "Profiling.h"
 
 namespace Dmrg {
 
@@ -106,12 +107,17 @@ public:
 	                 bool useLowerPart)
 	    : data_(patchNew(leftOrRight).size(), patchOld(leftOrRight).size())
 	{
+		PsimagLite::Profiling profiling("ArrayOfMatStruct",
+		                                ttos(data_.rows()) + " " + ttos(data_.cols()),
+		                                std::cout);
+
 		const BasisType& basisOld = (leftOrRight == GenIjPatchType::LEFT) ?
 		            patchOld.lrs().left() : patchOld.lrs().right();
 		const BasisType& basisNew = (leftOrRight == GenIjPatchType::LEFT) ?
 		            patchNew.lrs().left() : patchNew.lrs().right();
 		SizeType npatchOld = patchOld(leftOrRight).size();
 		SizeType npatchNew = patchNew(leftOrRight).size();
+
 		for (SizeType jpatch=0; jpatch < npatchOld; ++jpatch) {
 			SizeType jgroup = patchOld(leftOrRight)[jpatch];
 			SizeType j1 = basisOld.partition(jgroup);
