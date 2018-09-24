@@ -556,16 +556,8 @@ public:
 		checkValidity();
 	}
 
-	friend bool isZero(const CrsMatrix& A, double eps = 0.0)
-	{
-		SizeType n = A.values_.size();
-		for (SizeType i = 0; i < n; ++i) {
-			if (std::abs(A.values_[i]) > eps)
-				return false;
-		}
-
-		return true;
-	}
+	template<typename S>
+	friend bool isZero(const CrsMatrix<S>&, double);
 
 	template<typename S>
 	friend typename Real<S>::Type norm2(const CrsMatrix<S>& m);
@@ -1480,6 +1472,18 @@ Matrix<T> multiplyTc(const CrsMatrix<T>& a,const CrsMatrix<T>& b)
 	Matrix<T> cc;
 	crsMatrixToFullMatrix(cc,c);
 	return cc;
+}
+
+template<typename T>
+bool isZero(const CrsMatrix<T>& A, double eps = 0)
+{
+	SizeType n = A.values_.size();
+	for (SizeType i = 0; i < n; ++i) {
+		if (std::abs(A.values_[i]) > eps)
+			return false;
+	}
+
+	return true;
 }
 
 } // namespace PsimagLite
