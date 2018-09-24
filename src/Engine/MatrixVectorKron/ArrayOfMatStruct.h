@@ -171,9 +171,8 @@ public:
 			const SizeType igroup = patchNew(leftOrRight)[ipatch];
 			const SizeType i1 = basisNew.partition(igroup);
 			const SizeType i2 = basisNew.partition(igroup+1);
-			const bool is_valid = (0 <= i1) && (i1 <= i2) &&
-			        (i2 <= index_to_ipatch.size());
-			assert( is_valid );
+			assert( (0 <= i1) && (i1 <= i2) &&
+			        (i2 <= index_to_ipatch.size()) );
 
 
 			offset_ipatch[ ipatch ] = i1;
@@ -195,9 +194,8 @@ public:
 			const SizeType j1 = basisOld.partition(jgroup);
 			const SizeType j2 = basisOld.partition(jgroup+1);
 
-			const bool is_valid = (0 <= j1) && (j1 <= j2) &&
-			        (j2 <= index_to_jpatch.size());
-			assert( is_valid );
+			assert( (0 <= j1) && (j1 <= j2) &&
+			        (j2 <= index_to_jpatch.size()) );
 
 			offset_jpatch[ jpatch ] = j1;
 
@@ -277,8 +275,7 @@ public:
 				const SizeType i1 = offset_ipatch[ ipatch ];
 
 				const SizeType  local_irow = (irow - i1 );
-				bool is_valid = (0 <= local_irow) && (local_irow < ipatch_Size[ ipatch ]);
-				assert( is_valid );
+				assert( (0 <= local_irow) && (local_irow < ipatch_Size[ ipatch ]) );
 
 				(*rowPtr2D[indx])[local_irow]++;
 				total_nz[ indx ]++;
