@@ -135,7 +135,7 @@ sub procCout
 			next;
 		}
 
-		if (/DmrgSolver \[(\d+)\]\: Turning off the engine/) {
+		if (/DmrgSolver \[([\d\.]+)\]\: Turning off the engine/) {
 			$values->{"UserTime"} = $1;
 		}
 
