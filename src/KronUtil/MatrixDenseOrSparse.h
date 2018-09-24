@@ -3,6 +3,7 @@
 #include "Vector.h"
 #include "KronUtilWrapper.h"
 #include "Matrix.h"
+#include "CrsMatrix.h"
 
 namespace Dmrg {
 
@@ -83,8 +84,8 @@ public:
 
 	bool isZero() const
 	{
-		return (isDense_) ? denseMatrix_.isZero()  :
-		                    sparseMatrix_.isZero();
+		return (isDense_) ? PsimagLite::isZero(denseMatrix_)  :
+		                    PsimagLite::isZero(sparseMatrix_);
 	}
 
 	SparseMatrixType toSparse() const
