@@ -86,6 +86,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Profiling.h"
 #include "Qn.h"
 #include "NotReallySort.h"
+#include "Array.h"
+#include "PairOfQns.h"
 
 namespace Dmrg {
 // A class to represent in a light way a Dmrg basis (used only to implement symmetries).
@@ -170,19 +172,28 @@ public:
 		PsimagLite::Profiling profiling("setToProduct",
 		                                ttos(basis1.size()) + "x" + ttos(basis2.size()),
 		                                std::cout);
+
+		bool notSuper = (basis1.block().size() == 1 || basis2.block().size() == 1);
+		ProgramGlobals::VerboseEnum verbose = (notSuper) ? ProgramGlobals::VERBOSE_NO :
+		                                                   ProgramGlobals::VERBOSE_YES;
+
 		block_.clear();
 		utils::blockUnion(block_,basis1.block_,basis2.block_);
 
 		if (useSu2Symmetry_) {
 			std::cout<<"Basis: SU(2) Symmetry is in use\n";
 
+			VectorQnType qnsBig;
 			symmSu2_.setToProduct(basis1.symmSu2_,
 			                      basis2.symmSu2_,
 			                      pseudoQn,
 			                      basis1.qns_,
 			                      basis2.qns_,
 			                      qns_,
-			                      qnsBig_);
+			                      qnsBig);
+
+			// order quantum numbers of combined basis:
+			findPermutationAndPartitionAndQns(qnsBig, true, false, verbose);
 		} else {
 			SizeType ns = basis2.size();
 			SizeType ne = basis1.size();
@@ -204,30 +215,27 @@ public:
 			if (nps > 0) --nps;
 
 			SizeType total = basis1.size() * basis2.size();
-			qnsBig_.clear(); // reserve isn't affected
-			qnsBig_.reserve(total);
+			qnsBig_.resize(total);
 			signs_.clear(); // reserve isn't affected
 			signs_.reserve(total);
+			SizeType counter = 0;
 			for (SizeType pe = 0; pe < npe; ++pe) {
 				for (SizeType i = basis2.partition_[pe]; i < basis2.partition_[pe + 1]; ++i) {
 					for (SizeType ps = 0; ps < nps; ++ps) {
 						for (SizeType j = basis1.partition_[ps];
 						     j < basis1.partition_[ps + 1];
 						     ++j) {
-							qnsBig_.push_back(QnType(basis2.qns_[pe], basis1.qns_[ps]));
+							qnsBig_[counter++] = PairOfQns(basis2.qns_[pe], basis1.qns_[ps]);
 							signs_.push_back(basis1.signs_[j] ^ basis2.signs_[i]);
 						}
 					}
 				}
 			}
+
+			// order quantum numbers of combined basis:
+			findPermutationAndPartitionAndQns(qnsBig_, true, false, verbose);
 		}
 
-		bool notSuper = (basis1.block().size() == 1 || basis2.block().size() == 1);
-		ProgramGlobals::VerboseEnum verbose = (notSuper) ? ProgramGlobals::VERBOSE_NO :
-		                                                   ProgramGlobals::VERBOSE_YES;
-
-		// order quantum numbers of combined basis:
-		findPermutationAndPartitionAndQns(qnsBig_, true, false, verbose);
 		reorder();
 		signsOld_ = signs_;
 	}
@@ -652,7 +660,8 @@ private:
 		if (useSu2Symmetry_) symmSu2_.reorder(permutationVector_);
 	}
 
-	void findPermutationAndPartitionAndQns(const VectorQnType& qns,
+	template<typename SomeVectorLikeQnType>
+	void findPermutationAndPartitionAndQns(const SomeVectorLikeQnType& qns,
 	                                       bool changePermutation,
 	                                       bool doNotSort,
 	                                       ProgramGlobals::VerboseEnum verbose)
@@ -719,7 +728,7 @@ these numbers are
 		order of hundreds for usual symmetries, making this implementation very practical for
 		systems of correlated electrons.)
 		*/
-	VectorQnType qnsBig_;
+	Array<PairOfQns> qnsBig_;
 	VectorQnType qns_;
 	VectorBoolType signs_;
 	VectorBoolType signsOld_;

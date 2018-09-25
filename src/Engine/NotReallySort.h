@@ -8,6 +8,8 @@
 #include "Concurrency.h"
 #include "Parallelizer.h"
 #include <tr1/unordered_map>
+#include "PairOfQns.h"
+#include "Array.h"
 
 namespace std {
 
@@ -17,6 +19,7 @@ template<>
 class hash<Dmrg::Qn> {
 
 	typedef Dmrg::Qn::VectorQnType VectorQnType;
+	typedef Dmrg::Array<Dmrg::PairOfQns> VectorLikeQnType;
 	typedef Dmrg::Qn::VectorSizeType VectorSizeType;
 
 public:
@@ -24,15 +27,30 @@ public:
 	hash(VectorSizeType& hash,
 	     const VectorQnType& inQns,
 	     bool addOdd)
-	    : hash_(hash), inQns_(inQns), addOdd_(addOdd)
+	    : hash_(hash), inQns_(&inQns), inQns2_(0), addOdd_(addOdd)
+	{}
+
+	hash(VectorSizeType& hash,
+	     const VectorLikeQnType& inQns,
+	     bool addOdd)
+	    : hash_(hash), inQns_(0), inQns2_(&inQns), addOdd_(addOdd)
 	{}
 
 	void doTask(SizeType taskNumber, SizeType)
 	{
-		hash_[taskNumber] = operator()(inQns_[taskNumber]);
+		hash_[taskNumber] = (inQns2_) ? operator()((*inQns2_)[taskNumber]) :
+		                                operator()((*inQns_)[taskNumber]);
 	}
 
-	SizeType tasks() const { return inQns_.size(); }
+	SizeType tasks() const
+	{
+		return (inQns2_) ? inQns2_->size() : inQns_->size();
+	}
+
+	SizeType operator()(const Dmrg::PairOfQns& qnPair) const
+	{
+		return operator()(qnPair.make());
+	}
 
 	SizeType operator()(const Dmrg::Qn& qn) const
 	{
@@ -54,7 +72,8 @@ public:
 private:
 
 	VectorSizeType& hash_;
-	const VectorQnType& inQns_;
+	const VectorQnType* inQns_;
+	const VectorLikeQnType* inQns2_;
 	bool addOdd_;
 };
 }
@@ -88,11 +107,12 @@ public:
 	// OUTPUT.1: outNumber is P applied to inNumbers; outNumber[i] = inNumber[P[i]], of size big
 	// OUTPUT.2: outQns[x] is the x-th unique tmpQns, of size small
 	// OUTPUT.3: offset[x] = min {y; such that tmpQns[y] = outQns[x]}, of size small
+	template<typename SomeVectorLikeQnType>
 	void operator()(VectorSizeType& outNumber,
 	                VectorQnType& outQns,
 	                VectorSizeType& offset,
 	                const VectorSizeType& inNumbers,
-	                const VectorQnType& inQns,
+	                const SomeVectorLikeQnType& inQns,
 	                bool doNotSort,
 	                ProgramGlobals::VerboseEnum verbose)
 	{
@@ -139,10 +159,11 @@ public:
 
 private:
 
+	template<typename SomeVectorLikeQnType>
 	void firstPass(VectorQnType& outQns,
 	               VectorSizeType& count,
 	               VectorSizeType& reverse,
-	               const VectorQnType& inQns,
+	               const SomeVectorLikeQnType& inQns,
 	               bool doNotSort)
 	{
 		SizeType n = inQns.size();
@@ -157,7 +178,7 @@ private:
 		bool hasAtLeastOneOdd = false;
 		if (!noNeedForOdd) {
 			for (SizeType i = 0; i < n; ++i) {
-				hasAtLeastOneOdd = inQns[i].oddElectrons;
+				hasAtLeastOneOdd = makeQnIfNeeded(inQns[i]).oddElectrons;
 				if (hasAtLeastOneOdd) break;
 			}
 		}
@@ -183,7 +204,7 @@ private:
 		SizeType j = 0;
 
 		assert(n > 0);
-		outQns.push_back(inQns[perm[0]]);
+		outQns.push_back(makeQnIfNeeded(inQns[perm[0]]));
 		count.push_back(1);
 		reverse[perm[0]] = 0;
 		for (SizeType i = 1; i < n; ++i) {
@@ -192,7 +213,7 @@ private:
 				++count[j];
 				reverse[iperm] = j;
 			} else {
-				outQns.push_back(inQns[iperm]);
+				outQns.push_back(makeQnIfNeeded(inQns[iperm]));
 				count.push_back(1);
 				++j;
 				// assert(j == count.size() - 1);
@@ -226,10 +247,11 @@ private:
 #endif
 	}
 
+	template<typename SomeVectorLikeQnType>
 	void firstPass2(VectorQnType& outQns,
 	                VectorSizeType& count,
 	                VectorSizeType& reverse,
-	                const VectorQnType& inQns,
+	                const SomeVectorLikeQnType& inQns,
 	                bool doNotSort)
 	{
 		if (doNotSort)
@@ -247,7 +269,7 @@ private:
 		bool hasAtLeastOneOdd = false;
 		if (!noNeedForOdd) {
 			for (SizeType i = 0; i < n; ++i) {
-				hasAtLeastOneOdd = inQns[i].oddElectrons;
+				hasAtLeastOneOdd = makeQnIfNeeded(inQns[i]).oddElectrons;
 				if (hasAtLeastOneOdd) break;
 			}
 		}
@@ -258,19 +280,30 @@ private:
 		std::tr1::unordered_map<Qn, SizeType> umap(10, helper);
 
 		for (SizeType i = 0; i < n; ++i) {
-			const  bool isSeenBefore =  (umap.count(inQns[i]) > 0);
+			const Qn qn = makeQnIfNeeded((inQns[i]));
+			const  bool isSeenBefore =  (umap.count(qn) > 0);
 
 			if (!isSeenBefore) {
-				outQns.push_back(inQns[i]);
+				outQns.push_back(qn);
 				count.push_back(1);
 				reverse.push_back(count.size() - 1);
-				umap[inQns[i]] = reverse[i];
+				umap[qn] = reverse[i];
 			} else {
-				const SizeType x = umap[inQns[i]];
+				const SizeType x = umap[qn];
 				++count[x];
 				reverse.push_back(x);
 			}
 		}
+	}
+
+	static Qn makeQnIfNeeded(const Qn& qn)
+	{
+		return qn;
+	}
+
+	static Qn makeQnIfNeeded(const PairOfQns& qnPair)
+	{
+		return qnPair.make();
 	}
 
 	AlgoEnum algo_;
