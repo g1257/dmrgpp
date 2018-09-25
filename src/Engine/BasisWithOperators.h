@@ -173,100 +173,13 @@ public:
 	// basis2 and basis3 or basis3 and basis2  depending on dir
 	void setToProduct(const ThisType& basis2,
 	                  const ThisType& basis3,
-	                  ProgramGlobals::DirectionEnum dir)
+	                  ProgramGlobals::DirectionEnum dir,
+	                  SizeType initialSizeOfHashTable)
 	{
 		if (dir == ProgramGlobals::EXPAND_SYSTEM)
-			setToProduct(basis2,basis3);
+			setToProduct(basis2, basis3, initialSizeOfHashTable);
 		else
-			setToProduct(basis3,basis2);
-	}
-
-	//! set this basis to the outer product of   basis2 and basis3
-	//!PTEX_LABEL{setToProductOps}
-	void setToProduct(const ThisType& basis2, const ThisType& basis3)
-	{
-		BasisType &parent = *this;
-		// reorder the basis
-		parent.setToProduct(basis2, basis3);
-
-		typename PsimagLite::Vector<RealType>::Type fermionicSigns;
-		SizeType x = basis2.numberOfOperators()+basis3.numberOfOperators();
-
-		if (this->useSu2Symmetry()) setMomentumOfOperators(basis2);
-		operators_.setToProduct(basis2,basis3,x,this);
-		ApplyFactors<FactorsType> apply(this->getFactors(),this->useSu2Symmetry());
-		int savedSign = 0;
-
-		for (SizeType i=0;i<this->numberOfOperators();i++) {
-			if (i<basis2.numberOfOperators()) {
-				if (!this->useSu2Symmetry()) {
-					const OperatorType& myOp =  basis2.getOperatorByIndex(i);
-					if (savedSign != myOp.fermionSign) {
-						utils::fillFermionicSigns(fermionicSigns,
-						                          basis2.signs(),
-						                          myOp.fermionSign);
-						savedSign = myOp.fermionSign;
-					}
-					operators_.externalProduct(i,
-					                           myOp,
-					                           basis3.size(),
-					                           fermionicSigns,
-					                           true,
-					                           apply);
-				} else {
-					operators_.externalProductReduced(i,
-					                                  basis2,
-					                                  basis3,
-					                                  true,
-					                                  basis2.getReducedOperatorByIndex(i));
-				}
-			} else {
-				if (!this->useSu2Symmetry()) {
-					const OperatorType& myOp = basis3.
-					        getOperatorByIndex(i - basis2.numberOfOperators());
-
-					if (savedSign != myOp.fermionSign) {
-						utils::fillFermionicSigns(fermionicSigns,
-						                          basis2.signs(),
-						                          myOp.fermionSign);
-						savedSign = myOp.fermionSign;
-					}
-					operators_.externalProduct(i,
-					                           myOp,
-					                           basis2.size(),
-					                           fermionicSigns,
-					                           false,
-					                           apply);
-				} else {
-					operators_.externalProductReduced(i,
-					                                  basis2,
-					                                  basis3,
-					                                  false,
-					                                  basis3.getReducedOperatorByIndex(
-					                                      i-basis2.numberOfOperators()));
-				}
-			}
-		}
-
-		//! Calc. hamiltonian
-		operators_.outerProductHamiltonian(basis2.hamiltonian(),
-		                                   basis3.hamiltonian(),
-		                                   apply);
-		operators_.outerProductHamiltonianReduced(basis2,
-		                                          basis3,
-		                                          basis2.reducedHamiltonian(),
-		                                          basis3.reducedHamiltonian());
-		//! re-order operators and hamiltonian
-		operators_.reorder(BaseType::permutationVector());
-
-		SizeType offset1 = basis2.operatorsPerSite_.size();
-		operatorsPerSite_.resize(offset1+basis3.operatorsPerSite_.size());
-		for (SizeType i=0;i<offset1;i++)
-			operatorsPerSite_[i] =  basis2.operatorsPerSite_[i];
-
-		for (SizeType i=0;i<basis3.operatorsPerSite_.size();i++)
-			operatorsPerSite_[i+offset1] =  basis3.operatorsPerSite_[i];
-		assert(operatorsPerSite_.size() > 0);
+			setToProduct(basis3, basis2, initialSizeOfHashTable);
 	}
 
 	//! transform this basis by transform
@@ -274,10 +187,11 @@ public:
 	RealType truncateBasis(const BlockDiagonalMatrixType& ftransform,
 	                       const typename PsimagLite::Vector<RealType>::Type& eigs,
 	                       const VectorSizeType& removedIndices,
-	                       const PairSizeSizeType& startEnd)
+	                       const PairSizeSizeType& startEnd,
+	                       SizeType initialSizeOfHashTable)
 	{
 		BasisType &parent = *this;
-		RealType error = parent.truncateBasis(eigs,removedIndices);
+		RealType error = parent.truncateBasis(eigs,removedIndices, initialSizeOfHashTable);
 
 		operators_.changeBasis(ftransform,this,startEnd);
 
@@ -397,6 +311,96 @@ public:
 	}
 
 private:
+
+	//! set this basis to the outer product of   basis2 and basis3
+	//!PTEX_LABEL{setToProductOps}
+	void setToProduct(const ThisType& basis2,
+	                  const ThisType& basis3,
+	                  SizeType initialSizeOfHashTable)
+	{
+		BasisType &parent = *this;
+		// reorder the basis
+		parent.setToProduct(basis2, basis3, 0, initialSizeOfHashTable);
+
+		typename PsimagLite::Vector<RealType>::Type fermionicSigns;
+		SizeType x = basis2.numberOfOperators()+basis3.numberOfOperators();
+
+		if (this->useSu2Symmetry()) setMomentumOfOperators(basis2);
+		operators_.setToProduct(basis2,basis3,x,this);
+		ApplyFactors<FactorsType> apply(this->getFactors(),this->useSu2Symmetry());
+		int savedSign = 0;
+
+		for (SizeType i=0;i<this->numberOfOperators();i++) {
+			if (i<basis2.numberOfOperators()) {
+				if (!this->useSu2Symmetry()) {
+					const OperatorType& myOp =  basis2.getOperatorByIndex(i);
+					if (savedSign != myOp.fermionSign) {
+						utils::fillFermionicSigns(fermionicSigns,
+						                          basis2.signs(),
+						                          myOp.fermionSign);
+						savedSign = myOp.fermionSign;
+					}
+					operators_.externalProduct(i,
+					                           myOp,
+					                           basis3.size(),
+					                           fermionicSigns,
+					                           true,
+					                           apply);
+				} else {
+					operators_.externalProductReduced(i,
+					                                  basis2,
+					                                  basis3,
+					                                  true,
+					                                  basis2.getReducedOperatorByIndex(i));
+				}
+			} else {
+				if (!this->useSu2Symmetry()) {
+					const OperatorType& myOp = basis3.
+					        getOperatorByIndex(i - basis2.numberOfOperators());
+
+					if (savedSign != myOp.fermionSign) {
+						utils::fillFermionicSigns(fermionicSigns,
+						                          basis2.signs(),
+						                          myOp.fermionSign);
+						savedSign = myOp.fermionSign;
+					}
+					operators_.externalProduct(i,
+					                           myOp,
+					                           basis2.size(),
+					                           fermionicSigns,
+					                           false,
+					                           apply);
+				} else {
+					operators_.externalProductReduced(i,
+					                                  basis2,
+					                                  basis3,
+					                                  false,
+					                                  basis3.getReducedOperatorByIndex(
+					                                      i-basis2.numberOfOperators()));
+				}
+			}
+		}
+
+		//! Calc. hamiltonian
+		operators_.outerProductHamiltonian(basis2.hamiltonian(),
+		                                   basis3.hamiltonian(),
+		                                   apply);
+		operators_.outerProductHamiltonianReduced(basis2,
+		                                          basis3,
+		                                          basis2.reducedHamiltonian(),
+		                                          basis3.reducedHamiltonian());
+		//! re-order operators and hamiltonian
+		operators_.reorder(BaseType::permutationVector());
+
+		SizeType offset1 = basis2.operatorsPerSite_.size();
+		operatorsPerSite_.resize(offset1+basis3.operatorsPerSite_.size());
+		for (SizeType i=0;i<offset1;i++)
+			operatorsPerSite_[i] =  basis2.operatorsPerSite_[i];
+
+		for (SizeType i=0;i<basis3.operatorsPerSite_.size();i++)
+			operatorsPerSite_[i+offset1] =  basis3.operatorsPerSite_[i];
+		assert(operatorsPerSite_.size() > 0);
+	}
 
 	void setMomentumOfOperators(const ThisType& basis)
 	{

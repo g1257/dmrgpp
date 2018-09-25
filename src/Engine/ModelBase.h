@@ -307,6 +307,7 @@ public:
 		              basis,
 		              qn,
 		              false,
+		              10,
 		              ProgramGlobals::VERBOSE_NO);
 
 		SizeType n = partition.size();

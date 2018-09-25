@@ -167,7 +167,8 @@ public:
 		*/
 	void setToProduct(const ThisType& basis1,
 	                  const ThisType& basis2,
-	                  const QnType* pseudoQn = 0)
+	                  const QnType* pseudoQn,
+	                  SizeType initialSizeOfHashTable)
 	{
 		PsimagLite::Profiling profiling("setToProduct",
 		                                ttos(basis1.size()) + "x" + ttos(basis2.size()),
@@ -193,7 +194,7 @@ public:
 			                      qnsBig);
 
 			// order quantum numbers of combined basis:
-			findPermutationAndPartitionAndQns(qnsBig, true, false, verbose);
+			findPermutationAndPartitionAndQns(qnsBig, true, false, 10, verbose);
 		} else {
 			SizeType ns = basis2.size();
 			SizeType ne = basis1.size();
@@ -233,7 +234,11 @@ public:
 			}
 
 			// order quantum numbers of combined basis:
-			findPermutationAndPartitionAndQns(qnsBig_, true, false, verbose);
+			findPermutationAndPartitionAndQns(qnsBig_,
+			                                  true,
+			                                  false,
+			                                  initialSizeOfHashTable,
+			                                  verbose);
 		}
 
 		reorder();
@@ -325,7 +330,8 @@ public:
 	}
 
 	RealType truncateBasis(const typename PsimagLite::Vector<RealType>::Type& eigs,
-	                       const VectorSizeType& removedIndices)
+	                       const VectorSizeType& removedIndices,
+	                       SizeType initialSizeOfHashTable)
 	{
 		dmrgTransformed_=true;
 
@@ -337,7 +343,11 @@ public:
 
 		// N.B.: false below means that we don't truncate the permutation vectors
 		//	because they're needed for the WFT
-		findPermutationAndPartitionAndQns(qns, false, false, ProgramGlobals::VERBOSE_NO);
+		findPermutationAndPartitionAndQns(qns,
+		                                  false,
+		                                  false,
+		                                  initialSizeOfHashTable,
+		                                  ProgramGlobals::VERBOSE_NO);
 
 		return calcError(eigs,removedIndices);
 	}
@@ -545,6 +555,7 @@ protected:
 		findPermutationAndPartitionAndQns(basisData2,
 		                                  true,
 		                                  true,
+		                                  10,
 		                                  ProgramGlobals::VERBOSE_NO);
 		reorder();
 		signsOld_ = signs_;
@@ -664,6 +675,7 @@ private:
 	void findPermutationAndPartitionAndQns(const SomeVectorLikeQnType& qns,
 	                                       bool changePermutation,
 	                                       bool doNotSort,
+	                                       SizeType initialSizeOfHashTable,
 	                                       ProgramGlobals::VerboseEnum verbose)
 	{
 		PsimagLite::Profiling profiling("findPermutationEtc",
@@ -681,6 +693,7 @@ private:
 		              numbers,
 		              qns,
 		              doNotSort,
+		              initialSizeOfHashTable,
 		              verbose);
 
 		if (changePermutation) {

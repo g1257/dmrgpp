@@ -372,6 +372,9 @@ obtain ordered
 		lrs_.right(pE);
 		checkpoint_.push(pS,pE);
 
+		const SizeType ten = 10;
+		const SizeType initialSizeOfHashTable = std::max(ten, parameters_.keptStatesInfinite);
+
 		RealType time = 0; // no time advancement possible in the infiniteDmrgLoop
 		for (SizeType step=0;step<X.size();step++) {
 			PsimagLite::OstringStream msg;
@@ -380,10 +383,18 @@ obtain ordered
 			progress_.printline(msg,std::cout);
 			printerInDetail.print(std::cout, "infinite");
 
-			lrs_.growLeftBlock(model_,pS,X[step],time); // grow system
+			lrs_.growLeftBlock(model_,
+			                   pS,
+			                   X[step],
+			                   time,
+			                   initialSizeOfHashTable); // grow system
 			bool needsRightPush = false;
 			if (step < Y.size()) {
-				lrs_.growRightBlock(model_,pE,Y[step],time); // grow environment
+				lrs_.growRightBlock(model_,
+				                    pE,
+				                    Y[step],
+				                    time,
+				                    initialSizeOfHashTable); // grow environment
 				needsRightPush = true;
 			}
 
@@ -392,7 +403,7 @@ obtain ordered
 
 			updateQuantumSector(lrs_.sites(),ProgramGlobals::INFINITE,step);
 
-			lrs_.setToProduct(quantumSector_);
+			lrs_.setToProduct(quantumSector_, initialSizeOfHashTable);
 
 			const BlockType& ystep = findRightBlock(Y,step,E);
 			energy_ = diagonalization_(psi,ProgramGlobals::INFINITE,X[step],ystep);
@@ -499,6 +510,9 @@ obtain ordered
 		SizeType keptStates = parameters_.finiteLoop[loopIndex].keptStates;
 		int saveOption = parameters_.finiteLoop[loopIndex].saveOption;
 
+		const SizeType ten = 10;
+		const SizeType initialSizeOfHashTable = std::max(ten, keptStates);
+
 		ProgramGlobals::DirectionEnum direction = (stepLength < 0) ?
 		            ProgramGlobals::EXPAND_ENVIRON : ProgramGlobals::EXPAND_SYSTEM;
 
@@ -518,10 +532,18 @@ obtain ordered
 			RealType time = target.time();
 			printerInDetail.print(std::cout, "finite");
 			if (direction == ProgramGlobals::EXPAND_SYSTEM) {
-				lrs_.growLeftBlock(model_,pS,sitesIndices_[stepCurrent_],time);
+				lrs_.growLeftBlock(model_,
+				                   pS,
+				                   sitesIndices_[stepCurrent_],
+				                   time,
+				                   initialSizeOfHashTable);
 				lrs_.right(checkpoint_.shrink(ProgramGlobals::ENVIRON,target));
 			} else {
-				lrs_.growRightBlock(model_,pE,sitesIndices_[stepCurrent_],time);
+				lrs_.growRightBlock(model_,
+				                    pE,
+				                    sitesIndices_[stepCurrent_],
+				                    time,
+				                    initialSizeOfHashTable);
 				lrs_.left(checkpoint_.shrink(ProgramGlobals::SYSTEM,target));
 			}
 
@@ -529,7 +551,7 @@ obtain ordered
 
 			updateQuantumSector(lrs_.sites(),direction,stepCurrent_);
 
-			lrs_.setToProduct(quantumSector_);
+			lrs_.setToProduct(quantumSector_, initialSizeOfHashTable);
 
 			bool needsPrinting = (saveOption & 1);
 			energy_ = diagonalization_(target,

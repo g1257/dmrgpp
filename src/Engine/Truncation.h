@@ -159,11 +159,11 @@ public:
 		if (direction == ProgramGlobals::EXPAND_SYSTEM) {
 			changeBasis(pS,target,keptStates,direction, &dmS);
 			assert(dmS);
-			truncateBasis(pS,lrs_.right(), *dmS, direction);
+			truncateBasis(pS,lrs_.right(), *dmS, direction, keptStates);
 		} else {
 			changeBasis(pE,target,keptStates,direction, &dmS);
 			assert(dmS);
-			truncateBasis(pE,lrs_.left(), *dmS, direction);
+			truncateBasis(pE,lrs_.left(), *dmS, direction, keptStates);
 		}
 
 		delete dmS;
@@ -188,14 +188,14 @@ public:
 		DensityMatrixBaseType* dmS = 0;
 		changeBasis(sBasis,target, keptStates, ProgramGlobals::EXPAND_SYSTEM, &dmS);
 		assert(dmS);
-		truncateBasis(sBasis, lrs_.right(), *dmS, ProgramGlobals::EXPAND_SYSTEM);
+		truncateBasis(sBasis, lrs_.right(), *dmS, ProgramGlobals::EXPAND_SYSTEM, keptStates);
 		delete dmS;
 		dmS = 0;
 
 		DensityMatrixBaseType* dmE = 0;
 		changeBasis(eBasis,target, keptStates, ProgramGlobals::EXPAND_ENVIRON, &dmE);
 		assert(dmE);
-		truncateBasis(eBasis, lrs_.left(), *dmE, ProgramGlobals::EXPAND_ENVIRON);
+		truncateBasis(eBasis, lrs_.left(), *dmE, ProgramGlobals::EXPAND_ENVIRON, keptStates);
 		delete dmE;
 		dmE = 0;
 	}
@@ -272,7 +272,8 @@ private:
 	void truncateBasis(BasisWithOperatorsType& rPrime,
 	                   const BasisWithOperatorsType& oppoBasis,
 	                   const DensityMatrixBaseType& dms,
-	                   ProgramGlobals::DirectionEnum direction)
+	                   ProgramGlobals::DirectionEnum direction,
+	                   SizeType keptStates)
 	{
 		bool expandSys = (direction == ProgramGlobals::EXPAND_SYSTEM);
 		const BasisWithOperatorsType& basis = (expandSys) ? lrs_.left() : lrs_.right();
@@ -290,10 +291,15 @@ private:
 		TruncationCache& cache = (expandSys) ? leftCache_ : rightCache_;
 
 		cache.transform.truncate(cache.removedIndices);
+
+		const SizeType ten = 10;
+		const SizeType initialSizeOfHashTable = std::max(ten, keptStates);
+
 		rPrime.truncateBasis(cache.transform,
 		                     cache.eigs,
 		                     cache.removedIndices,
-		                     startEnd);
+		                     startEnd,
+		                     initialSizeOfHashTable);
 		LeftRightSuperType* lrs = 0;
 		if (expandSys)
 			lrs = new LeftRightSuperType(rPrime,

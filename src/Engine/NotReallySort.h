@@ -115,6 +115,7 @@ public:
 	                const VectorSizeType& inNumbers,
 	                const SomeVectorLikeQnType& inQns,
 	                bool doNotSort,
+	                SizeType initialSizeOfHashTable,
 	                ProgramGlobals::VerboseEnum verbose)
 	{
 		SizeType n = inNumbers.size();
@@ -130,7 +131,7 @@ public:
 		if (algo_ == ALGO_CUSTOM)
 			firstPass(outQns, count, reverse, inQns, doNotSort);
 		else
-			firstPass2(outQns, count, reverse, inQns, doNotSort);
+			firstPass2(outQns, count, reverse, inQns, doNotSort, initialSizeOfHashTable);
 
 		// perform prefix sum
 		SizeType numberOfPatches = count.size();
@@ -253,7 +254,8 @@ private:
 	                VectorSizeType& count,
 	                VectorSizeType& reverse,
 	                const SomeVectorLikeQnType& inQns,
-	                bool doNotSort)
+	                bool doNotSort,
+	                SizeType initialSizeOfHashTable)
 	{
 		if (doNotSort)
 			return firstPass(outQns, count, reverse, inQns, doNotSort);
@@ -278,7 +280,7 @@ private:
 		bool addOddToHash = (!noNeedForOdd && hasAtLeastOneOdd);
 
 		std::tr1::hash<Qn> helper(hash, inQns, addOddToHash);
-		std::tr1::unordered_map<Qn, SizeType> umap(10, helper);
+		std::tr1::unordered_map<Qn, SizeType> umap(initialSizeOfHashTable, helper);
 
 		for (SizeType i = 0; i < n; ++i) {
 			const Qn qn = makeQnIfNeeded((inQns[i]));

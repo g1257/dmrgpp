@@ -189,20 +189,34 @@ public:
 	void growLeftBlock(const SomeModelType& model,
 	                   BasisWithOperatorsType &pS,
 	                   BlockType const &X,
-	                   RealType time)
+	                   RealType time,
+	                   SizeType initialSizeOfHashTable)
 	{
 		assert(left_);
-		grow(*left_,model,pS,X,ProgramGlobals::EXPAND_SYSTEM,time);
+		grow(*left_,
+		     model,
+		     pS,
+		     X,
+		     ProgramGlobals::EXPAND_SYSTEM,
+		     time,
+		     initialSizeOfHashTable);
 	}
 
 	template<typename SomeModelType>
 	void growRightBlock(const SomeModelType& model,
 	                    BasisWithOperatorsType &pE,
 	                    BlockType const &X,
-	                    RealType time)
+	                    RealType time,
+	                    SizeType initialSizeOfHashTable)
 	{
 		assert(right_);
-		grow(*right_,model,pE,X,ProgramGlobals::EXPAND_ENVIRON,time);
+		grow(*right_,
+		     model,
+		     pE,
+		     X,
+		     ProgramGlobals::EXPAND_ENVIRON,
+		     time,
+		     initialSizeOfHashTable);
 	}
 
 	void printSizes(const PsimagLite::String& label,std::ostream& os) const
@@ -226,12 +240,12 @@ public:
 	}
 
 	/*!PTEX_LABEL{setToProductLrs} */
-	void setToProduct(QnType quantumSector)
+	void setToProduct(QnType quantumSector, SizeType initialSizeOfHashTable)
 	{
 		assert(left_);
 		assert(right_);
 		assert(super_);
-		super_->setToProduct(*left_, *right_, &quantumSector);
+		super_->setToProduct(*left_, *right_, &quantumSector, initialSizeOfHashTable);
 	}
 
 	template<typename IoOutputType>
@@ -353,12 +367,13 @@ private:
 	          BasisWithOperatorsType &pS,
 	          const BlockType& X,
 	          ProgramGlobals::DirectionEnum dir,
-	          RealType time)
+	          RealType time,
+	          SizeType initialSizeOfHashTable)
 	{
 		BasisWithOperatorsType Xbasis("Xbasis");
 
 		Xbasis.setVarious(X, model, time);
-		leftOrRight.setToProduct(pS,Xbasis,dir);
+		leftOrRight.setToProduct(pS, Xbasis, dir, initialSizeOfHashTable);
 
 		SparseMatrixType matrix=leftOrRight.hamiltonian();
 
