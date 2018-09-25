@@ -217,8 +217,8 @@ public:
 
 			SizeType total = basis1.size() * basis2.size();
 			qnsBig_.resize(total);
-			signs_.clear(); // reserve isn't affected
-			signs_.reserve(total);
+			signs_.clear();
+			signs_.resize(total);
 			SizeType counter = 0;
 			for (SizeType pe = 0; pe < npe; ++pe) {
 				for (SizeType i = basis2.partition_[pe]; i < basis2.partition_[pe + 1]; ++i) {
@@ -226,8 +226,8 @@ public:
 						for (SizeType j = basis1.partition_[ps];
 						     j < basis1.partition_[ps + 1];
 						     ++j) {
-							qnsBig_[counter++] = PairOfQnsType(basis2.qns_[pe], basis1.qns_[ps]);
-							signs_.push_back(basis1.signs_[j] ^ basis2.signs_[i]);
+							qnsBig_[counter] = PairOfQnsType(basis2.qns_[pe], basis1.qns_[ps]);
+							signs_[counter++] = (basis1.signs_[j] ^ basis2.signs_[i]);
 						}
 					}
 				}

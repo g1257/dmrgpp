@@ -170,7 +170,7 @@ public:
 		findAllowedJm(symm1,symm2,electrons1,electrons2,pseudoQn);;
 		createFactors(ns,ne);
 		quantumNumbers.clear();
-		quantumNumbers.reserve(ns*ne);
+		quantumNumbers.resize(ns*ne, QnType::zero());
 		setFlavors(quantumNumbers);
 
 		jMax_=0;
@@ -331,7 +331,7 @@ private:
 			bool sign = ne & 1;
 			QnType q(sign, VectorSizeType(1, ne), jm, 0);
 			for (SizeType j = 0; j < flavors; ++j) {
-				quantumNumbers.push_back(q);
+				quantumNumbers[counter] = q;
 				jmValues_.push(jm, j + offset);
 				flavors_[counter++] = jmSubspaces_[i].getFlavor(j);
 			}

@@ -264,7 +264,7 @@ private:
 		outQns.clear();
 		if (n == 0) return;
 		count.reserve(n);
-		reverse.reserve(n);
+		reverse.resize(n);
 
 		VectorSizeType hash(1);
 
@@ -289,12 +289,12 @@ private:
 			if (!isSeenBefore) {
 				outQns.push_back(qn);
 				count.push_back(1);
-				reverse.push_back(count.size() - 1);
+				reverse[i] = count.size() - 1;
 				umap[qn] = reverse[i];
 			} else {
 				const SizeType x = umap[qn];
 				++count[x];
-				reverse.push_back(x);
+				reverse[i] = x;
 			}
 		}
 	}
