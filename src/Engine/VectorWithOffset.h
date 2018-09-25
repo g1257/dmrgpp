@@ -143,7 +143,7 @@ public:
 	}
 
 	template<typename SomeBasisType>
-	void set(const typename PsimagLite::Vector<VectorType>::Type& v,
+	void set(typename PsimagLite::Vector<VectorType>::Type& v,
 	         const VectorSizeType& sectors,
 	         const SomeBasisType& someBasis)
 	{
@@ -157,7 +157,7 @@ public:
 		}
 
 		const SizeType i = sectors[0];
-		data_ = v[0];
+		data_.swap(v[0]);
 		offset_ = someBasis.partition(i);
 		const QnType& qn = someBasis.pseudoQn(i);
 		mAndq_ = PairQnType(i, qn);

@@ -143,7 +143,7 @@ public:
 	}
 
 	template<typename SomeBasisType>
-	void set(const typename PsimagLite::Vector<VectorType>::Type& v,
+	void set(typename PsimagLite::Vector<VectorType>::Type& v,
 	         const VectorSizeType& sectors,
 	         const SomeBasisType& someBasis)
 	{
@@ -163,7 +163,7 @@ public:
 
 		for (SizeType j = 0; j < m; ++j) {
 			SizeType i = sectors[j];
-			data_[i] = v[j];
+			data_[i].swap(v[j]);
 			QnType qn = someBasis.pseudoQn(i);
 			nzMsAndQns_.push_back(PairQnType(i, qn));
 
