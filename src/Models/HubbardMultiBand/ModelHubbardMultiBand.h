@@ -158,6 +158,8 @@ public:
 
 		setSymmetryRelatedInternal(qq_, basis_, 1);
 
+		ModelBaseType::orderByQuantum(basis_, qq_);
+
 		setOperatorMatricesInternal(creationMatrix_, block);
 
 		cacheInteractionOp();
