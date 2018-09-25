@@ -9,6 +9,8 @@ class Array {
 
 public:
 
+	typedef T value_type;
+
 	Array() : size_(0), data_(0) {}
 
 	Array(SizeType n) : size_(0), data_(0)

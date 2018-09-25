@@ -240,9 +240,8 @@ public:
 		return other[0];
 	}
 
-	template<typename SomeVectorLikeQnType>
 	static void su2ElectronsBridge(VectorSizeType& v,
-	                               const SomeVectorLikeQnType& qns)
+	                               const VectorQnType& qns)
 	{
 		SizeType n = qns.size();
 		v.resize(n);

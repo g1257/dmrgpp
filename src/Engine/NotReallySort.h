@@ -18,11 +18,11 @@ namespace tr1 {
 template<>
 class hash<Dmrg::Qn> {
 
+public:
+
 	typedef Dmrg::Qn::VectorQnType VectorQnType;
 	typedef Dmrg::Array<Dmrg::PairOfQns> VectorLikeQnType;
 	typedef Dmrg::Qn::VectorSizeType VectorSizeType;
-
-public:
 
 	hash(VectorSizeType& hash,
 	     const VectorQnType& inQns,
@@ -87,6 +87,7 @@ public:
 
 	typedef Qn::VectorQnType VectorQnType;
 	typedef Qn::VectorSizeType VectorSizeType;
+	typedef typename std::tr1::hash<Dmrg::Qn>::VectorLikeQnType VectorLikeQnType;
 
 	enum AlgoEnum {ALGO_UMAP, ALGO_CUSTOM};
 

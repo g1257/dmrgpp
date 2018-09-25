@@ -86,8 +86,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Profiling.h"
 #include "Qn.h"
 #include "NotReallySort.h"
-#include "Array.h"
-#include "PairOfQns.h"
 
 namespace Dmrg {
 // A class to represent in a light way a Dmrg basis (used only to implement symmetries).
@@ -112,6 +110,8 @@ public:
 	typedef typename HamiltonianSymmetrySu2Type::FactorsType FactorsType;
 	typedef typename HamiltonianSymmetrySu2Type::PairType PairType;
 	typedef typename QnType::VectorQnType VectorQnType;
+	typedef NotReallySort::VectorLikeQnType VectorLikeQnType;
+	typedef typename VectorLikeQnType::value_type PairOfQnsType;
 
 	enum {SAVE_ALL, SAVE_PARTIAL};
 
@@ -225,7 +225,7 @@ public:
 						for (SizeType j = basis1.partition_[ps];
 						     j < basis1.partition_[ps + 1];
 						     ++j) {
-							qnsBig_[counter++] = PairOfQns(basis2.qns_[pe], basis1.qns_[ps]);
+							qnsBig_[counter++] = PairOfQnsType(basis2.qns_[pe], basis1.qns_[ps]);
 							signs_.push_back(basis1.signs_[j] ^ basis2.signs_[i]);
 						}
 					}
@@ -728,7 +728,7 @@ these numbers are
 		order of hundreds for usual symmetries, making this implementation very practical for
 		systems of correlated electrons.)
 		*/
-	Array<PairOfQns> qnsBig_;
+	VectorLikeQnType qnsBig_;
 	VectorQnType qns_;
 	VectorBoolType signs_;
 	VectorBoolType signsOld_;

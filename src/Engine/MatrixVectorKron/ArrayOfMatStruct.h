@@ -109,10 +109,6 @@ public:
 	                 bool useLowerPart)
 	    : data_(patchNew(leftOrRight).size(), patchOld(leftOrRight).size())
 	{
-		PsimagLite::Profiling profiling("ArrayOfMatStruct",
-		                                ttos(data_.rows()) + " " + ttos(data_.cols()),
-		                                std::cout);
-
 		const BasisType& basisOld = (leftOrRight == GenIjPatchType::LEFT) ?
 		            patchOld.lrs().left() : patchOld.lrs().right();
 		const BasisType& basisNew = (leftOrRight == GenIjPatchType::LEFT) ?
