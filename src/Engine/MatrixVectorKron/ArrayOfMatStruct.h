@@ -144,7 +144,6 @@ public:
 		// ----------------------------------
 		// setup mapping from index to ipatch
 		// ----------------------------------
-		const SizeType nrows = sparse.rows();
 		const SizeType ncols = sparse.cols();
 
 		const SizeType invalid_jpatch_number = jpatchSize + 1;
@@ -161,7 +160,7 @@ public:
 			const SizeType i1 = basisNew.partition(igroup);
 			const SizeType i2 = basisNew.partition(igroup+1);
 			assert( (0 <= i1) && (i1 <= i2) &&
-			        (i2 <= nrows));
+			        (i2 <= sparse.rows()));
 
 
 			offset_ipatch[ ipatch ] = i1;
@@ -205,7 +204,7 @@ public:
    		    for(SizeType ipatch=0; ipatch < ipatchSize; ipatch++) {
    			sum_ipatch_Size += ipatch_Size[ ipatch ];
    		    };
-   		    assert( (0 <= sum_ipatch_Size) && (sum_ipatch_Size <= nrows) );
+   		    assert( (0 <= sum_ipatch_Size) && (sum_ipatch_Size <= sparse.rows()) );
    
    		    SizeType sum_jpatch_Size = 0;
    		    for(SizeType jpatch=0; jpatch < jpatchSize; jpatch++) {
