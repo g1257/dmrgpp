@@ -125,15 +125,30 @@ public:
 		                                                                         std::cout) : 0;
 
 		VectorSizeType count;
-		VectorSizeType reverse;
 
-		// 1^st pass over data
-		if (algo_ == ALGO_CUSTOM)
-			firstPass(outQns, count, reverse, inQns, doNotSort);
-		else
-			firstPass2(outQns, count, reverse, inQns, doNotSort, initialSizeOfHashTable);
+		if (algo_ == ALGO_CUSTOM || doNotSort) {
+			VectorSizeType reverse;
+			firstPassCustom(outQns, count, reverse, inQns, doNotSort);
+			secondPassCustom(outNumber, offset, count, reverse, inNumbers, inQns);
+		} else {
+			VectorSizeType hash(1);
 
-		secondPass(outNumber, offset, count, reverse, inNumbers, inQns);
+			bool noNeedForOdd = (Qn::ifPresentOther0IsElectrons && Qn::modalStruct.size() > 0);
+			bool hasAtLeastOneOdd = false;
+			if (!noNeedForOdd) {
+				for (SizeType i = 0; i < n; ++i) {
+					hasAtLeastOneOdd = makeQnIfNeeded(inQns[i]).oddElectrons;
+					if (hasAtLeastOneOdd) break;
+				}
+			}
+
+			bool addOddToHash = (!noNeedForOdd && hasAtLeastOneOdd);
+
+			std::tr1::hash<Qn> helper(hash, inQns, addOddToHash);
+			std::tr1::unordered_map<Qn, SizeType> umap(initialSizeOfHashTable, helper);
+			firstPassUmap(outQns, count, umap, inQns);
+			secondPassUmap(outNumber, offset, count, umap, inNumbers, inQns);
+		}
 
 		SizeType numberOfPatches = count.size();
 
@@ -148,41 +163,11 @@ public:
 private:
 
 	template<typename SomeVectorLikeQnType>
-	void secondPass(VectorSizeType& outNumber,
-	                VectorSizeType& offset,
-	                VectorSizeType& count,
-	                const VectorSizeType& reverse,
-	                const VectorSizeType& inNumbers,
-	                const SomeVectorLikeQnType& inQns)
-	{
-		SizeType n = inNumbers.size();
-		assert(n == inQns.size());
-
-		// perform prefix sum
-		SizeType numberOfPatches = count.size();
-		offset.resize(numberOfPatches + 1);
-		offset[0] = 0;
-		for (SizeType ipatch = 0; ipatch < numberOfPatches; ++ipatch)
-			offset[ipatch + 1] = offset[ipatch] + count[ipatch];
-
-		// 2^nd pass over data
-		outNumber.resize(n);
-		std::fill(count.begin(), count.end(), 0);
-		for (SizeType i = 0; i < n; ++i) {
-			SizeType x = reverse[i];
-			assert(x < offset.size() && x < count.size());
-			SizeType outIndex = offset[x] + count[x];
-			outNumber[outIndex] = inNumbers[i];
-			++count[x];
-		}
-	}
-
-	template<typename SomeVectorLikeQnType>
-	void firstPass(VectorQnType& outQns,
-	               VectorSizeType& count,
-	               VectorSizeType& reverse,
-	               const SomeVectorLikeQnType& inQns,
-	               bool doNotSort)
+	void firstPassCustom(VectorQnType& outQns,
+	                     VectorSizeType& count,
+	                     VectorSizeType& reverse,
+	                     const SomeVectorLikeQnType& inQns,
+	                     bool doNotSort)
 	{
 		SizeType n = inQns.size();
 		outQns.clear();
@@ -244,6 +229,36 @@ private:
 		//checkReverse(inQns, reverse, outQns);
 	}
 
+	template<typename SomeVectorLikeQnType>
+	void secondPassCustom(VectorSizeType& outNumber,
+	                      VectorSizeType& offset,
+	                      VectorSizeType& count,
+	                      const VectorSizeType& reverse,
+	                      const VectorSizeType& inNumbers,
+	                      const SomeVectorLikeQnType& inQns)
+	{
+		SizeType n = inNumbers.size();
+		assert(n == inQns.size());
+
+		// perform prefix sum
+		SizeType numberOfPatches = count.size();
+		offset.resize(numberOfPatches + 1);
+		offset[0] = 0;
+		for (SizeType ipatch = 0; ipatch < numberOfPatches; ++ipatch)
+			offset[ipatch + 1] = offset[ipatch] + count[ipatch];
+
+		// 2^nd pass over data
+		outNumber.resize(n);
+		std::fill(count.begin(), count.end(), 0);
+		for (SizeType i = 0; i < n; ++i) {
+			SizeType x = reverse[i];
+			assert(x < offset.size() && x < count.size());
+			SizeType outIndex = offset[x] + count[x];
+			outNumber[outIndex] = inNumbers[i];
+			++count[x];
+		}
+	}
+
 	// only for debugging
 	static void checkThatHashIsNotReallySorted(const VectorSizeType& h)
 	{
@@ -266,37 +281,15 @@ private:
 	}
 
 	template<typename SomeVectorLikeQnType>
-	void firstPass2(VectorQnType& outQns,
-	                VectorSizeType& count,
-	                VectorSizeType& reverse,
-	                const SomeVectorLikeQnType& inQns,
-	                bool doNotSort,
-	                SizeType initialSizeOfHashTable)
+	void firstPassUmap(VectorQnType& outQns,
+	                   VectorSizeType& count,
+	                   std::tr1::unordered_map<Qn, SizeType>& umap,
+	                   const SomeVectorLikeQnType& inQns)
 	{
-		if (doNotSort)
-			return firstPass(outQns, count, reverse, inQns, doNotSort);
-
 		SizeType n = inQns.size();
 		outQns.clear();
 		if (n == 0) return;
 		count.reserve(n);
-		reverse.resize(n);
-
-		VectorSizeType hash(1);
-
-		bool noNeedForOdd = (Qn::ifPresentOther0IsElectrons && Qn::modalStruct.size() > 0);
-		bool hasAtLeastOneOdd = false;
-		if (!noNeedForOdd) {
-			for (SizeType i = 0; i < n; ++i) {
-				hasAtLeastOneOdd = makeQnIfNeeded(inQns[i]).oddElectrons;
-				if (hasAtLeastOneOdd) break;
-			}
-		}
-
-		bool addOddToHash = (!noNeedForOdd && hasAtLeastOneOdd);
-
-		std::tr1::hash<Qn> helper(hash, inQns, addOddToHash);
-		std::tr1::unordered_map<Qn, SizeType> umap(initialSizeOfHashTable, helper);
 
 		for (SizeType i = 0; i < n; ++i) {
 			const Qn qn = makeQnIfNeeded((inQns[i]));
@@ -305,13 +298,41 @@ private:
 			if (!isSeenBefore) {
 				outQns.push_back(qn);
 				count.push_back(1);
-				reverse[i] = count.size() - 1;
-				umap[qn] = reverse[i];
+				umap[qn] = count.size() - 1;
 			} else {
 				const SizeType x = umap[qn];
 				++count[x];
-				reverse[i] = x;
 			}
+		}
+	}
+
+	template<typename SomeVectorLikeQnType>
+	void secondPassUmap(VectorSizeType& outNumber,
+	                      VectorSizeType& offset,
+	                      VectorSizeType& count,
+	                      std::tr1::unordered_map<Qn, SizeType>& umap,
+	                      const VectorSizeType& inNumbers,
+	                      const SomeVectorLikeQnType& inQns)
+	{
+		SizeType n = inNumbers.size();
+		assert(n == inQns.size());
+
+		// perform prefix sum
+		SizeType numberOfPatches = count.size();
+		offset.resize(numberOfPatches + 1);
+		offset[0] = 0;
+		for (SizeType ipatch = 0; ipatch < numberOfPatches; ++ipatch)
+			offset[ipatch + 1] = offset[ipatch] + count[ipatch];
+
+		// 2^nd pass over data
+		outNumber.resize(n);
+		std::fill(count.begin(), count.end(), 0);
+		for (SizeType i = 0; i < n; ++i) {
+			SizeType x = umap[makeQnIfNeeded(inQns[i])];
+			assert(x < offset.size() && x < count.size());
+			SizeType outIndex = offset[x] + count[x];
+			outNumber[outIndex] = inNumbers[i];
+			++count[x];
 		}
 	}
 
