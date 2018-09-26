@@ -133,6 +133,31 @@ public:
 		else
 			firstPass2(outQns, count, reverse, inQns, doNotSort, initialSizeOfHashTable);
 
+		secondPass(outNumber, offset, count, reverse, inNumbers, inQns);
+
+		SizeType numberOfPatches = count.size();
+
+		if (profiling) {
+			profiling->end("patches= " + ttos(numberOfPatches) +
+			               " bitwise key, algo=" + ProgramGlobals::notReallySortAlgo);
+			delete profiling;
+			profiling = 0;
+		}
+	}
+
+private:
+
+	template<typename SomeVectorLikeQnType>
+	void secondPass(VectorSizeType& outNumber,
+	                VectorSizeType& offset,
+	                VectorSizeType& count,
+	                const VectorSizeType& reverse,
+	                const VectorSizeType& inNumbers,
+	                const SomeVectorLikeQnType& inQns)
+	{
+		SizeType n = inNumbers.size();
+		assert(n == inQns.size());
+
 		// perform prefix sum
 		SizeType numberOfPatches = count.size();
 		offset.resize(numberOfPatches + 1);
@@ -150,16 +175,7 @@ public:
 			outNumber[outIndex] = inNumbers[i];
 			++count[x];
 		}
-
-		if (profiling) {
-			profiling->end("patches= " + ttos(numberOfPatches) +
-			               " bitwise key, algo=" + ProgramGlobals::notReallySortAlgo);
-			delete profiling;
-			profiling = 0;
-		}
 	}
-
-private:
 
 	template<typename SomeVectorLikeQnType>
 	void firstPass(VectorQnType& outQns,
