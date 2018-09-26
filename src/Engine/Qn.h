@@ -4,6 +4,7 @@
 #include "ProgramGlobals.h"
 #include "Profiling.h"
 #include "Io/IoNg.h"
+#include "Array.h"
 
 namespace Dmrg {
 
@@ -81,7 +82,9 @@ public:
 	{
 		io.read(oddElectrons, str + "/oddElectrons");
 		try {
-			io.read(other, str + "/other");
+			VectorSizeType otherVector;
+			io.read(otherVector, str + "/other");
+			other.fromStdVector(otherVector);
 		} catch (...) {}
 
 		io.read(jmPair, str + "/jmPair");
@@ -104,7 +107,9 @@ public:
 
 		io.createGroup(str);
 		io.write(str + "/oddElectrons", oddElectrons);
-		io.write(str + "/other", other);
+		VectorSizeType otherVector;
+		other.toStdVector(otherVector);
+		io.write(str + "/other", otherVector);
 		io.write(str + "/jmPair", jmPair);
 		io.write(str + "/flavors", flavors);
 	}
@@ -270,14 +275,14 @@ public:
 	static VectorModalStructType modalStruct;
 	static bool ifPresentOther0IsElectrons;
 	bool oddElectrons;
-	VectorSizeType other;
+	Array<SizeType> other;
 	PairSizeType jmPair;
 	SizeType flavors;
 
 private:
 
 	// assumes modulo already applied as needed
-	bool compare(const VectorSizeType& otherOther) const
+	bool compare(const Array<SizeType>& otherOther) const
 	{
 		SizeType n = otherOther.size();
 		runChecks(n);

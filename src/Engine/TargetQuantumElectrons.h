@@ -95,7 +95,7 @@ struct TargetQuantumElectrons {
 	      isCanonical(true),
 	      qn(QnType::zero())
 	{
-		qn.other.clear();
+		VectorSizeType qnOther;
 		const bool allowUpDown = true;
 		io.readline(totalNumberOfSites, "TotalNumberOfSites=");
 
@@ -115,8 +115,8 @@ struct TargetQuantumElectrons {
 				io.readline(electronsDown,"TargetElectronsDown=");
 				SizeType tmp = electronsUp + electronsDown;
 				qn.oddElectrons = (tmp & 1);
-				qn.other.push_back(tmp);
-				qn.other.push_back(electronsUp);
+				qnOther.push_back(tmp);
+				qnOther.push_back(electronsUp);
 				ready = 2;
 			} catch (std::exception&) {}
 		}
@@ -125,7 +125,7 @@ struct TargetQuantumElectrons {
 			SizeType tmp = 0;
 			io.readline(tmp, "TargetElectronsTotal=");
 			qn.oddElectrons = (tmp & 1);
-			qn.other.push_back(tmp);
+			qnOther.push_back(tmp);
 			ready++;
 		} catch (std::exception&) {}
 
@@ -133,7 +133,7 @@ struct TargetQuantumElectrons {
 		try {
 			SizeType szPlusConst = 0;
 			io.readline(szPlusConst,"TargetSzPlusConst=");
-			qn.other.push_back(szPlusConst);
+			qnOther.push_back(szPlusConst);
 			hasSzPlusConst = true;
 		} catch (std::exception&) {}
 
@@ -142,11 +142,11 @@ struct TargetQuantumElectrons {
 			throw PsimagLite::RuntimeError(msg);
 		}
 
-		if (qn.other.size() > 0) hasSzPlusConst = true;
+		if (qnOther.size() > 0) hasSzPlusConst = true;
 
 		if (!hasSzPlusConst) {
 			std::cerr<<"TargetQuantumElectrons: Grand Canonical\n";
-			assert(qn.other.size() == 0);
+			assert(qnOther.size() == 0);
 			isCanonical = false;
 		}
 
@@ -165,8 +165,10 @@ struct TargetQuantumElectrons {
 			if (!hasSzPlusConst)
 				std::cout<<"WARNING: TargetExtra= with grand canonical ???\n";
 			for (SizeType i = 0; i < extra.size(); ++i)
-				qn.other.push_back(extra[i]);
+				qnOther.push_back(extra[i]);
 		} catch (std::exception&) {}
+
+		qn.other.fromStdVector(qnOther);
 
 		int tmp = 0;
 		try {
