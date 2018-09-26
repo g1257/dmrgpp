@@ -119,21 +119,16 @@ public:
 		const SizeType ipatchSize = npatchNew;
 		const SizeType jpatchSize = npatchOld;
 
+#ifdef NDEBUG
+                const int idebug = 0;
+#else
+                // ---------------------------
+                // turn on more debug checking
+                // ---------------------------
+                const int idebug = 1;
+#endif
 
-		// --------------------
-		// setup counter arrays
-		// --------------------
 
-		std::vector<   std::vector<SizeType>* > rowPtr2D( ipatchSize * jpatchSize );
-
-		std::vector<SizeType> total_nz( ipatchSize * jpatchSize);
-
-		for(SizeType jpatch = 0; jpatch < jpatchSize; jpatch++) {
-			for(SizeType ipatch = 0; ipatch < ipatchSize; ipatch++) {
-				SizeType indx = indx2( ipatch,jpatch,ipatchSize,jpatchSize);
-				total_nz[ indx ] = 0;
-			};
-		};
 
 		// ---------------------------------
 		// precompute the size of each patch
@@ -152,12 +147,10 @@ public:
 		const SizeType nrows = sparse.rows();
 		const SizeType ncols = sparse.cols();
 
-		const SizeType invalid_ipatch_number = ipatchSize + 1;
 		const SizeType invalid_jpatch_number = jpatchSize + 1;
 		// ----------------------------------------
 		// initiall fill array with invalid values
 		// ----------------------------------------
-		std::vector<SizeType> index_to_ipatch(nrows,  invalid_ipatch_number);
 		std::vector<SizeType> index_to_jpatch(ncols,  invalid_jpatch_number);
 
 		std::vector<SizeType> offset_ipatch(ipatchSize);
@@ -168,7 +161,7 @@ public:
 			const SizeType i1 = basisNew.partition(igroup);
 			const SizeType i2 = basisNew.partition(igroup+1);
 			assert( (0 <= i1) && (i1 <= i2) &&
-			        (i2 <= index_to_ipatch.size()) );
+			        (i2 <= nrows));
 
 
 			offset_ipatch[ ipatch ] = i1;
@@ -178,9 +171,6 @@ public:
 			ipatch_Size[ ipatch ] = isize;
 			assert( ipatch_Size[ ipatch ] >= 1 );
 
-			for(SizeType i=i1; i < i2; i++) {
-				index_to_ipatch[ i ] = ipatch;
-			};
 		};
 
 
@@ -191,7 +181,7 @@ public:
 			const SizeType j2 = basisOld.partition(jgroup+1);
 
 			assert( (0 <= j1) && (j1 <= j2) &&
-			        (j2 <= index_to_jpatch.size()) );
+			        (j2 <= ncols) );
 
 			offset_jpatch[ jpatch ] = j1;
 
@@ -209,52 +199,76 @@ public:
 		// ------------
 		// double check
 		// ------------
-		SizeType sum_ipatch_Size = 0;
-		for(SizeType ipatch=0; ipatch < ipatchSize; ipatch++) {
-			sum_ipatch_Size += ipatch_Size[ ipatch ];
-		};
-		assert( (0 <= sum_ipatch_Size) && (sum_ipatch_Size <= nrows) );
+                if (idebug >= 1) {
 
-		SizeType sum_jpatch_Size = 0;
-		for(SizeType jpatch=0; jpatch < jpatchSize; jpatch++) {
-			sum_jpatch_Size += jpatch_Size[ jpatch ];
-		};
-		assert( (0 <= sum_jpatch_Size) && (sum_jpatch_Size <= ncols) );
+                    SizeType sum_ipatch_Size = 0;
+   		    for(SizeType ipatch=0; ipatch < ipatchSize; ipatch++) {
+   			sum_ipatch_Size += ipatch_Size[ ipatch ];
+   		    };
+   		    assert( (0 <= sum_ipatch_Size) && (sum_ipatch_Size <= nrows) );
+   
+   		    SizeType sum_jpatch_Size = 0;
+   		    for(SizeType jpatch=0; jpatch < jpatchSize; jpatch++) {
+   			    sum_jpatch_Size += jpatch_Size[ jpatch ];
+   		    };
+   		    assert( (0 <= sum_jpatch_Size) && (sum_jpatch_Size <= ncols) );
+
+                };
+
+
+                // -----------------------------------------
+                // allocate data structure outside main loop
+                // to avoid repeated allocation and deallocation
+                // -----------------------------------------
+                SizeType max_ipatchSize = 0;
+                for(SizeType ipatch=0; ipatch < ipatchSize; ipatch++) {
+                        max_ipatchSize = (ipatch_Size[ ipatch ] > max_ipatchSize) ?
+                                          ipatch_Size[ ipatch ] :
+                                          max_ipatchSize;
+                };
+
+
+
+                std::vector<   std::vector<SizeType> > rowPtr1D(jpatchSize);
+                for(SizeType jpatch=0; jpatch < jpatchSize; jpatch++) {
+                        rowPtr1D[jpatch].reserve( max_ipatchSize );
+                };
+
+                std::vector< SizeType > total_nz(jpatchSize,0);
+                std::vector<bool> is_dense1D( jpatchSize, false );
+
+            for(SizeType ipatch=0; ipatch < ipatchSize; ipatch++) {
 
 		// ------------------------------------------------------
 		// initialize  data structure to count number of nonzeros
 		// per row in sparse matrix of  data_(ipatch,jpatch)
 		// ------------------------------------------------------
-		for(SizeType jpatch=0; jpatch < jpatchSize; ++jpatch) {
-			for( SizeType ipatch=0; ipatch < ipatchSize; ++ipatch) {
-				const SizeType local_nrows = ipatch_Size[ipatch];
-				const SizeType indx = indx2(ipatch,jpatch,ipatchSize,jpatchSize);
+                for(SizeType jpatch=0; jpatch < jpatchSize; jpatch++) {
+                        is_dense1D[ jpatch ] = false;
+                };
 
-				std::vector<SizeType> *pvec = new std::vector<SizeType>(local_nrows + 1);
-				assert( pvec != 0 );
-
-				for(SizeType local_irow = 0; local_irow < local_nrows; local_irow++) {
-					(*pvec)[ local_irow ] = 0;
-				};
-				(*pvec)[ local_nrows ] = 0;
+                for(SizeType jpatch=0; jpatch < jpatchSize; jpatch++) {
+                        total_nz[ jpatch ] = 0;
+                };
 
 
-				rowPtr2D[ indx ] = pvec;
+                const SizeType local_nrows = ipatch_Size[ipatch];
+                for(SizeType jpatch=0; jpatch < jpatchSize; jpatch++) {
+                        rowPtr1D[ jpatch ].clear();
+                        rowPtr1D[ jpatch ].resize( local_nrows,0 );
+                };
 
-
-			};
-		};
 
 		// --------------------------------------
 		// first pass to count number of nonzeros
 		// --------------------------------------
-		for(SizeType irow=0; irow < nrows; irow++) {
+                SizeType i1 = offset_ipatch[ ipatch ];
+                SizeType i2 = i1 +  ipatch_Size[ipatch];
+
+		for(SizeType irow=i1; irow < i2; irow++) {
 			const SizeType istart = sparse.getRowPtr(irow);
 			const SizeType iend = sparse.getRowPtr(irow+1);
-			const SizeType ipatch = index_to_ipatch[ irow ];
 
-			bool is_valid_ipatch = (0 <= ipatch) && (ipatch < ipatchSize);
-			if (!is_valid_ipatch) continue;
 
 			for(SizeType k=istart; k < iend; k++) {
 				const SizeType jcol = sparse.getCol(k);
@@ -266,14 +280,14 @@ public:
 
 				if (useLowerPart && (ipatch < jpatch))  continue;
 
-				const SizeType indx = indx2(ipatch,jpatch,ipatchSize,jpatchSize);
+				const SizeType indx = jpatch;
 
 				const SizeType i1 = offset_ipatch[ ipatch ];
 
 				const SizeType  local_irow = (irow - i1 );
 				assert( (0 <= local_irow) && (local_irow < ipatch_Size[ ipatch ]) );
 
-				(*rowPtr2D[indx])[local_irow]++;
+				(rowPtr1D[indx])[local_irow]++;
 				total_nz[ indx ]++;
 			};
 		};
@@ -281,27 +295,16 @@ public:
 		// ---------------------
 		// setup sparse matrices
 		// ---------------------
-#ifdef USE_DATA2D
-		// ----------------------------------------------------------------------------------
-		// The option USE_DATA2D  creates a sparse matrix for each non-trivial (ipatch,jpatch)
-		// then makes a copy into data_(ipatch,jpatch)
-		// This uses *MORE MEMORY* but uses the old constructor interface of data_(ipatch,jpatch)
-		// ----------------------------------------------------------------------------------
-		std::vector<   SparseMatrixType * > data2D( ipatchSize * jpatchSize  );
-#else
 		// ------------------------------------------------------
 		// This option tries to directly use data_(ipatch,jpatch)
 		// but requires some changes to the interface to explicitly
 		// construct a fully dense or sparse matrix and extract back out
 		// the dense matrix or sparse matrix
 		// ------------------------------------------------------
-		std::vector<bool> is_dense2D( ipatchSize * jpatchSize, false );
-#endif
 
 
 
-		for(SizeType jpatch=0; jpatch < jpatchSize; ++jpatch) {
-			for(SizeType ipatch=0; ipatch < ipatchSize; ++ipatch) {
+		     for(SizeType jpatch=0; jpatch < jpatchSize; ++jpatch) {
 
 				data_(ipatch,jpatch) = 0;
 				if (useLowerPart && (ipatch < jpatch))  continue;
@@ -309,35 +312,15 @@ public:
 				const SizeType lnrows = ipatch_Size[ipatch];
 				const SizeType lncols = jpatch_Size[jpatch];
 
-				const SizeType indx = indx2( ipatch, jpatch, ipatchSize, jpatchSize );
+				const SizeType indx = jpatch;
 				const SizeType nnz = total_nz[ indx ];
 
-#ifdef USE_DATA2D
-				// -----------------------------------------------------------------
-				// Note: always create a sparse matrix, even if there are no entries
-				// -----------------------------------------------------------------
-				SparseMatrixType *pmat = new SparseMatrixType(lnrows,lncols,nnz);
-				assert( pmat != 0);
-
-				data2D[ indx ] = pmat;
-
-				SizeType ip = 0;
-				for(SizeType irow = 0; irow < lnrows; irow++) {
-					SizeType icount = (*rowPtr2D[ indx ])[irow];
-					(*rowPtr2D[ indx ])[irow] = ip;
-
-					(*pmat).setRow( irow, ip );
-
-					ip += icount;
-				};
-				(*pmat).setRow( lnrows, ip );
-#else
 
 
 				const bool isDense = (nnz   >= threshold * lnrows * lncols);
 				assert( nnz <= lnrows * lncols );
 
-				is_dense2D[ indx ] = isDense;
+				is_dense1D[ indx ] = isDense;
 
 
 				MatrixDenseOrSparseType *pmat = new MatrixDenseOrSparseType(lnrows,lncols,isDense);
@@ -353,10 +336,14 @@ public:
 					assert( dense_mat.rows() == lnrows );
 					assert( dense_mat.cols() == lncols );
 
-					for( SizeType j=0; j < lncols; j++) {
+                                        bool const need_zero_out = true;
+                                        if (need_zero_out) {
+
+					    for( SizeType j=0; j < lncols; j++) {
 						for( SizeType i=0; i < lnrows; i++) {
 							dense_mat(i,j) = 0;
 						};
+                                            };
 					};
 				}
 				else {
@@ -374,8 +361,8 @@ public:
 
 					SizeType ip = 0;
 					for(SizeType irow = 0; irow < lnrows; irow++) {
-						SizeType icount = (*rowPtr2D[ indx ])[irow];
-						(*rowPtr2D[ indx ])[irow] = ip;
+						SizeType icount = (rowPtr1D[ indx ])[irow];
+						(rowPtr1D[ indx ])[irow] = ip;
 
 						sparse_mat.setRow( irow, ip );
 
@@ -384,21 +371,16 @@ public:
 					sparse_mat.setRow( lnrows, ip );
 				};
 
-#endif
-			}; // for ipatch
-		}; // for jpatch
+		      }; // for jpatch
 
 		// ---------------------------------------
 		// second pass to fill in numerical values
 		// ---------------------------------------
 
-		for(SizeType irow=0; irow < nrows; irow++) {
+		for(SizeType irow=i1; irow < i2; irow++) {
 			const SizeType istart = sparse.getRowPtr(irow);
 			const SizeType iend = sparse.getRowPtr(irow+1);
-			const SizeType ipatch = index_to_ipatch[ irow ];
 
-			const bool is_valid_ipatch = (0 <= ipatch) && (ipatch < ipatchSize);
-			if (!is_valid_ipatch) continue;
 
 			for(SizeType k=istart; k < iend; k++) {
 				const SizeType jcol = sparse.getCol(k);
@@ -410,7 +392,7 @@ public:
 
 				if (useLowerPart && (ipatch < jpatch))  continue;
 
-				const SizeType indx = indx2(ipatch,jpatch,ipatchSize,jpatchSize);
+				const SizeType indx = jpatch;
 
 				const SizeType i1 = offset_ipatch[ ipatch ];
 				const SizeType local_irow = (irow - i1 );
@@ -419,18 +401,8 @@ public:
 				const SizeType local_jcol = (jcol - j1);
 
 				const ComplexOrRealType aij = sparse.getValue(k);
-#ifdef USE_DATA2D
-				SparseMatrixType *pmat = data2D[ indx ];
-				assert( pmat != 0);
-				const SizeType ip = (*rowPtr2D[ indx ])[ local_irow ];
 
-				(*pmat).setCol( ip, local_jcol);
-				(*pmat).setValues(ip, aij );
-
-				(*rowPtr2D[ indx ])[ local_irow ]++;
-
-#else
-				if (is_dense2D[ indx ]) {
+				if (is_dense1D[ indx ]) {
 
 					MatrixType& dense_mat = data_(ipatch,jpatch)->getDense();
 					dense_mat(local_irow,local_jcol) = aij;
@@ -438,69 +410,36 @@ public:
 				else {
 					SparseMatrixType& sparse_mat = data_(ipatch,jpatch)->getSparse();
 
-					const SizeType ip = (*rowPtr2D[ indx ])[ local_irow ];
+					const SizeType ip = (rowPtr1D[ indx ])[ local_irow ];
 
 					sparse_mat.setCol( ip, local_jcol );
 					sparse_mat.setValues(ip, aij );
 
-					(*rowPtr2D[ indx ])[ local_irow ]++;
+					(rowPtr1D[ indx ])[ local_irow ]++;
 				};
-#endif
 			};
 		}; // for irow
 
 		// --------------------------------
 		// check data_(ipatch,jpatch)
 		// --------------------------------
-		for(SizeType jpatch=0; jpatch < jpatchSize; ++jpatch) {
-			for(SizeType ipatch=0; ipatch < ipatchSize; ++ipatch) {
+                if (idebug >= 1) {
+		    for(SizeType jpatch=0; jpatch < jpatchSize; ++jpatch) {
 
 				if (useLowerPart && (ipatch < jpatch))  continue;
 
-				SizeType indx = indx2( ipatch, jpatch, ipatchSize, jpatchSize );
+				SizeType indx = jpatch;
 
-#ifdef USE_DATA2D
-				SparseMatrixType *pmat = data2D[ indx ];
-				if (pmat != 0) {
-					(*pmat).checkValidity();
-					data_(ipatch,jpatch) = new MatrixDenseOrSparseType( (*pmat), threshold);
-				};
-#else
-				if (is_dense2D[ indx ]) continue;
+				if (is_dense1D[ indx ]) continue;
 
 				if (data_(ipatch,jpatch) != 0) {
 					(data_(ipatch,jpatch)->getSparse()).checkValidity();
 				};
-#endif
 			};
-		};
+                };
 
+            }; // for ipatch
 
-		// ----------------
-		// clean up storage
-		// ----------------
-		for(SizeType jpatch=0; jpatch < jpatchSize; jpatch++) {
-			for(SizeType ipatch=0; ipatch < ipatchSize; ipatch++) {
-				SizeType indx = indx2(ipatch,jpatch,ipatchSize,jpatchSize);
-				if (rowPtr2D[ indx ] != 0) {
-					(*rowPtr2D[indx]).clear();
-					delete rowPtr2D[ indx ];
-					rowPtr2D[ indx ]= 0;
-				};
-			};
-		};
-#ifdef USE_DATA2D
-		for(SizeType jpatch=0; jpatch < jpatchSize; jpatch++) {
-			for(SizeType ipatch=0; ipatch < ipatchSize; ipatch++) {
-				SizeType indx = indx2(ipatch,jpatch,ipatchSize,jpatchSize);
-				if (data2D[ indx ] != 0) {
-					(*data2D[indx]).clear();
-					delete data2D[ indx ];
-					data2D[ indx ]= 0;
-				};
-			};
-		};
-#endif
 	}
 
 	const MatrixDenseOrSparseType& operator()(SizeType i,SizeType j)  const
@@ -519,18 +458,6 @@ public:
 
 private:
 
-	// --------------------------
-	// compute index for 2D array
-	// --------------------------
-	static SizeType indx2(SizeType ipatch,
-	                      SizeType jpatch,
-	                      SizeType ipatchSize,
-	                      SizeType jpatchSize)
-	{
-		assert( (0 <= ipatch) && (ipatch < ipatchSize) );
-		assert( (0 <= jpatch) && (jpatch < jpatchSize) );
-		return(  ipatch + jpatch * ipatchSize );
-	}
 
 	ArrayOfMatStruct(const ArrayOfMatStruct&);
 
