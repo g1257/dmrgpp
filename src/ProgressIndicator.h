@@ -193,8 +193,7 @@ private:
 	void prefix(SomeOutputStreamType& os) const
 	{
 		const MemoryUsage::TimeHandle t = musage_.time();
-		const double millis = t.useconds()/1000. + t.seconds()*1000.;
-		const double seconds = millis/1000.;
+		const double seconds = t.millis();
 		const SizeType prec = os.precision(3);
 		os<<caller_<<" "<<"["<<std::fixed<<seconds<<"]: ";
 		os.precision(prec);

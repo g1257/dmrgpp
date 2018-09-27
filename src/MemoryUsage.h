@@ -100,16 +100,35 @@ public:
 			gettimeofday(&startTime_, 0);
 		}
 
-		TimeHandle& operator-(const TimeHandle& other)
+		TimeHandle(time_t s, suseconds_t u)
 		{
-			startTime_.tv_sec -= other.startTime_.tv_sec;
-			startTime_.tv_usec -= other.startTime_.tv_usec;
+			startTime_.tv_sec = s;
+			startTime_.tv_usec = u;
+		}
+
+		TimeHandle operator-(const TimeHandle& other) const
+		{
+			time_t s = startTime_.tv_sec - other.startTime_.tv_sec;
+			suseconds_t u = startTime_.tv_usec - other.startTime_.tv_usec;
+			return TimeHandle(s, u);
+		}
+
+		TimeHandle& operator+=(const TimeHandle& other)
+		{
+			startTime_.tv_sec += other.startTime_.tv_sec;
+			startTime_.tv_usec += other.startTime_.tv_usec;
 			return *this;
 		}
 
 		time_t seconds() const { return startTime_.tv_sec; }
 
 		suseconds_t useconds() const { return startTime_.tv_usec; }
+
+		double millis() const
+		{
+			const double tmp = startTime_.tv_usec/1000. + startTime_.tv_sec*1000.;
+			return tmp/1000.;
+		}
 
 	private:
 
