@@ -21,35 +21,23 @@ class hash<Dmrg::Qn> {
 public:
 
 	typedef Dmrg::Qn::VectorQnType VectorQnType;
-	typedef Dmrg::Array<Dmrg::PairOfQns> VectorLikeQnType;
 	typedef Dmrg::Qn::VectorSizeType VectorSizeType;
 
 	hash(VectorSizeType& hash,
 	     const VectorQnType& inQns,
 	     bool addOdd)
-	    : hash_(hash), inQns_(&inQns), inQns2_(0), addOdd_(addOdd)
-	{}
-
-	hash(VectorSizeType& hash,
-	     const VectorLikeQnType& inQns,
-	     bool addOdd)
-	    : hash_(hash), inQns_(0), inQns2_(&inQns), addOdd_(addOdd)
+	    : hash_(hash), inQns_(inQns), addOdd_(addOdd)
 	{}
 
 	void doTask(SizeType taskNumber, SizeType)
 	{
-		hash_[taskNumber] = (inQns2_) ? operator()((*inQns2_)[taskNumber]) :
-		                                operator()((*inQns_)[taskNumber]);
+		assert(inQns_.size() > taskNumber);
+		hash_[taskNumber] = operator()(inQns_[taskNumber]);
 	}
 
 	SizeType tasks() const
 	{
-		return (inQns2_) ? inQns2_->size() : inQns_->size();
-	}
-
-	SizeType operator()(const Dmrg::PairOfQns& qnPair) const
-	{
-		return operator()(qnPair.make());
+		return inQns_.size();
 	}
 
 	SizeType operator()(const Dmrg::Qn& qn) const
@@ -72,8 +60,45 @@ public:
 private:
 
 	VectorSizeType& hash_;
-	const VectorQnType* inQns_;
-	const VectorLikeQnType* inQns2_;
+	const VectorQnType& inQns_;
+	bool addOdd_;
+};
+
+template<>
+class hash<Dmrg::PairOfQns> {
+
+public:
+
+	typedef Dmrg::Array<Dmrg::PairOfQns> VectorLikeQnType;
+	typedef Dmrg::Qn::VectorSizeType VectorSizeType;
+
+
+	hash(VectorSizeType& hash,
+	     const VectorLikeQnType& inQns,
+	     bool addOdd)
+	    : hash_(hash), inQns_(inQns), addOdd_(addOdd)
+	{}
+
+	SizeType operator()(const Dmrg::PairOfQns& qnPair) const
+	{
+		return qnPair.hash(addOdd_);
+	}
+
+	void doTask(SizeType taskNumber, SizeType)
+	{
+		assert(inQns_.size() > taskNumber);
+		hash_[taskNumber] = operator()(inQns_[taskNumber]);
+	}
+
+	SizeType tasks() const
+	{
+		return inQns_.size();
+	}
+
+private:
+
+	VectorSizeType& hash_;
+	const VectorLikeQnType& inQns_;
 	bool addOdd_;
 };
 }
@@ -87,7 +112,7 @@ public:
 
 	typedef Qn::VectorQnType VectorQnType;
 	typedef Qn::VectorSizeType VectorSizeType;
-	typedef typename std::tr1::hash<Dmrg::Qn>::VectorLikeQnType VectorLikeQnType;
+	typedef typename std::tr1::hash<Dmrg::PairOfQns>::VectorLikeQnType VectorLikeQnType;
 
 	enum AlgoEnum {ALGO_UMAP, ALGO_CUSTOM};
 
@@ -118,6 +143,8 @@ public:
 	                SizeType initialSizeOfHashTable,
 	                ProgramGlobals::VerboseEnum verbose)
 	{
+		typedef typename SomeVectorLikeQnType::value_type PairOfQnsOrJustQnType;
+
 		SizeType n = inNumbers.size();
 		assert(n == inQns.size());
 		PsimagLite::Profiling* profiling = (verbose) ? new PsimagLite::Profiling("notReallySort",
@@ -133,19 +160,14 @@ public:
 		} else {
 			VectorSizeType hash(1);
 
-			bool noNeedForOdd = (Qn::ifPresentOther0IsElectrons && Qn::modalStruct.size() > 0);
-			bool hasAtLeastOneOdd = false;
-			if (!noNeedForOdd) {
-				for (SizeType i = 0; i < n; ++i) {
-					hasAtLeastOneOdd = makeQnIfNeeded(inQns[i]).oddElectrons;
-					if (hasAtLeastOneOdd) break;
-				}
-			}
+			const bool noNeedForOdd = (Qn::ifPresentOther0IsElectrons &&
+			                           Qn::modalStruct.size() > 0);
+			const bool hasAtLeastOneOdd = (noNeedForOdd) ? false : getOddElectrons(inQns);
+			const bool addOddToHash = (!noNeedForOdd && hasAtLeastOneOdd);
 
-			bool addOddToHash = (!noNeedForOdd && hasAtLeastOneOdd);
-
-			std::tr1::hash<Qn> helper(hash, inQns, addOddToHash);
-			std::tr1::unordered_map<Qn, SizeType> umap(initialSizeOfHashTable, helper);
+			std::tr1::hash<PairOfQnsOrJustQnType> helper(hash, inQns, addOddToHash);
+			std::tr1::unordered_map<PairOfQnsOrJustQnType, SizeType> umap(initialSizeOfHashTable,
+			                                                              helper);
 			firstPassUmap(outQns, count, umap, inQns);
 			secondPassUmap(outNumber, offset, count, umap, inNumbers, inQns);
 		}
@@ -169,6 +191,8 @@ private:
 	                     const SomeVectorLikeQnType& inQns,
 	                     bool doNotSort)
 	{
+		typedef typename SomeVectorLikeQnType::value_type PairOfQnsOrJustQnType;
+
 		SizeType n = inQns.size();
 		outQns.clear();
 		if (n == 0) return;
@@ -177,21 +201,16 @@ private:
 
 		VectorSizeType hash(n);
 
-		bool noNeedForOdd = (Qn::ifPresentOther0IsElectrons && Qn::modalStruct.size() > 0);
-		bool hasAtLeastOneOdd = false;
-		if (!noNeedForOdd) {
-			for (SizeType i = 0; i < n; ++i) {
-				hasAtLeastOneOdd = makeQnIfNeeded(inQns[i]).oddElectrons;
-				if (hasAtLeastOneOdd) break;
-			}
-		}
-
-		bool addOddToHash = (!noNeedForOdd && hasAtLeastOneOdd);
+		const bool noNeedForOdd = (Qn::ifPresentOther0IsElectrons &&
+		                           Qn::modalStruct.size() > 0);
+		const bool hasAtLeastOneOdd = (noNeedForOdd) ? false : getOddElectrons(inQns);
+		const bool addOddToHash = (!noNeedForOdd && hasAtLeastOneOdd);
 
 		SizeType threads = std::min(PsimagLite::Concurrency::codeSectionParams.npthreads, n);
-		std::tr1::hash<Qn> helper(hash, inQns, addOddToHash);
+		std::tr1::hash<PairOfQnsOrJustQnType> helper(hash, inQns, addOddToHash);
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
-		PsimagLite::Parallelizer<std::tr1::hash<Qn> > parallelizer(codeSectionParams);
+		PsimagLite::Parallelizer<std::tr1::hash<PairOfQnsOrJustQnType> >
+		        parallelizer(codeSectionParams);
 		parallelizer.loopCreate(helper);
 
 		PsimagLite::Sort<VectorSizeType> sort;
@@ -283,20 +302,23 @@ private:
 	template<typename SomeVectorLikeQnType>
 	void firstPassUmap(VectorQnType& outQns,
 	                   VectorSizeType& count,
-	                   std::tr1::unordered_map<Qn, SizeType>& umap,
+	                   std::tr1::unordered_map<typename SomeVectorLikeQnType::value_type,
+	                   SizeType>& umap,
 	                   const SomeVectorLikeQnType& inQns)
 	{
+		typedef typename SomeVectorLikeQnType::value_type PairOfQnsOrJustQnType;
+
 		SizeType n = inQns.size();
 		outQns.clear();
 		if (n == 0) return;
 		count.reserve(n);
 
 		for (SizeType i = 0; i < n; ++i) {
-			const Qn qn = makeQnIfNeeded((inQns[i]));
-			const  bool isSeenBefore =  (umap.count(qn) > 0);
+			const PairOfQnsOrJustQnType& qn = inQns[i];
+			const bool isSeenBefore =  (umap.count(qn) > 0);
 
 			if (!isSeenBefore) {
-				outQns.push_back(qn);
+				outQns.push_back(makeQnIfNeeded(qn));
 				count.push_back(1);
 				umap[qn] = count.size() - 1;
 			} else {
@@ -308,11 +330,12 @@ private:
 
 	template<typename SomeVectorLikeQnType>
 	void secondPassUmap(VectorSizeType& outNumber,
-	                      VectorSizeType& offset,
-	                      VectorSizeType& count,
-	                      std::tr1::unordered_map<Qn, SizeType>& umap,
-	                      const VectorSizeType& inNumbers,
-	                      const SomeVectorLikeQnType& inQns)
+	                    VectorSizeType& offset,
+	                    VectorSizeType& count,
+	                    std::tr1::unordered_map<typename SomeVectorLikeQnType::value_type,
+	                    SizeType>& umap,
+	                    const VectorSizeType& inNumbers,
+	                    const SomeVectorLikeQnType& inQns)
 	{
 		SizeType n = inNumbers.size();
 		assert(n == inQns.size());
@@ -328,7 +351,7 @@ private:
 		outNumber.resize(n);
 		std::fill(count.begin(), count.end(), 0);
 		for (SizeType i = 0; i < n; ++i) {
-			SizeType x = umap[makeQnIfNeeded(inQns[i])];
+			SizeType x = umap[inQns[i]];
 			assert(x < offset.size() && x < count.size());
 			SizeType outIndex = offset[x] + count[x];
 			outNumber[outIndex] = inNumbers[i];
@@ -336,15 +359,33 @@ private:
 		}
 	}
 
-	static Qn makeQnIfNeeded(const Qn& qn)
+	static bool getOddElectrons(const VectorQnType& inQns)
 	{
-		return qn;
+		bool hasAtLeastOneOdd = false;
+		SizeType n = inQns.size();
+		for (SizeType i = 0; i < n; ++i) {
+			hasAtLeastOneOdd = inQns[i].oddElectrons;
+			if (hasAtLeastOneOdd) break;
+		}
+
+		return hasAtLeastOneOdd;
 	}
 
-	static Qn makeQnIfNeeded(const PairOfQns& qnPair)
+	static bool getOddElectrons(const Array<PairOfQns>& inQns)
 	{
-		return qnPair.make();
+		bool hasAtLeastOneOdd = false;
+		SizeType n = inQns.size();
+		for (SizeType i = 0; i < n; ++i) {
+			hasAtLeastOneOdd = inQns[i].oddElectrons();
+			if (hasAtLeastOneOdd) break;
+		}
+
+		return hasAtLeastOneOdd;
 	}
+
+	static const Qn& makeQnIfNeeded(const Qn& qn) { return qn; }
+
+	static Qn makeQnIfNeeded(const PairOfQns& qn) { return qn.make(); }
 
 	AlgoEnum algo_;
 };
