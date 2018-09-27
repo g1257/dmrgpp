@@ -14,21 +14,32 @@ my ($file) = @ARGV;
 defined($file) or die "USAGE: $0 file\n";
 
 my %h;
-my $totalTime = loadData(\%h, $file);
+my %deltas;
+my $totalTime = loadData(\%h, \%deltas, $file);
 
 print STDERR "#ElementsObserved=".scalar(keys %h)."\n";
 printData(\%h, $totalTime);
 print STDERR "#TotalForRun=$totalTime\n";
+printDeltas(\%deltas);
 
 sub loadData
 {
-	my ($h, $file) = @_;
+	my ($h, $deltas, $file) = @_;
 	open(FILE, "<", $file) or die "$0: Cannot open $file : $!\n";
 
 	my ($firstT, $lastT);
 
 	my $observed = 0;
 	while (<FILE>) {
+		#DeltaClock matrixVectorProduct 0.051095
+		if (/^DeltaClock ([^ ]+) ([^ ]+)/) {
+			my $name = $1;
+			my $dt = $2;
+			next unless $dt =~ /^[\d\.]+$/;
+			$deltas->{"$name"} += $dt;
+			next;
+		}
+
 		#LanczosSolver [7.714]: starting clock
 		next unless (/^([^ ]+) \[([\d\.]+)\]\: ([^ ]+) clock/);
 		my $name = $1;
@@ -166,6 +177,15 @@ sub printData
 	my $perCentPrint = toFixedLength($perCent." %", $ls[2], "before", 1);
 	print  "----------------------------------------------\n";
 	print "$name$sep$time$sep2$perCentPrint\n";
+}
+
+sub printDeltas
+{
+	my ($deltas) = @_;
+	print "\nDeltaName\tDeltaTime\n";
+	foreach my $name (sort keys %$deltas) {
+		print "$name\t".$deltas->{"$name"}."\n";
+	}
 }
 
 sub toFixedLength

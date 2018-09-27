@@ -115,7 +115,8 @@ public:
 	                 ReflectionSymmetryType* = 0)
 	    : params_(model.params()),
 	      initKron_(model, hc),
-	      kronMatrix_(initKron_, "Hamiltonian")
+	      kronMatrix_(initKron_, "Hamiltonian"),
+	      time_(0, 0)
 	{
 		int maxMatrixRankStored = model.params().maxMatrixRankStored;
 		if (hc.modelHelper().size() > maxMatrixRankStored) return;
@@ -126,15 +127,26 @@ public:
 		checkKron();
 	}
 
+	~MatrixVectorKron()
+	{
+		std::cout<<"DeltaClock matrixVectorProduct "<<time_.millis()<<"\n";
+	}
+
 	SizeType rows() const { return initKron_.size(InitKronType::NEW); }
 
 	template<typename SomeVectorType>
 	void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y) const
 	{
+		const PsimagLite::MemoryUsage::TimeHandle time1 = PsimagLite::ProgressIndicator::time();
+
 		if (matrixStored_.rows() > 0)
 			matrixStored_.matrixVectorProduct(x,y);
 		else
 			kronMatrix_.matrixVectorProduct(x,y);
+
+		const PsimagLite::MemoryUsage::TimeHandle time2 = PsimagLite::ProgressIndicator::time();
+		const PsimagLite::MemoryUsage::TimeHandle deltaTime = time2 - time1;
+		time_ += deltaTime;
 	}
 
 	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const
@@ -177,6 +189,7 @@ private:
 	InitKronType initKron_;
 	KronMatrixType kronMatrix_;
 	SparseMatrixType matrixStored_;
+	mutable PsimagLite::MemoryUsage::TimeHandle time_;
 }; // class MatrixVectorKron
 } // namespace Dmrg
 
