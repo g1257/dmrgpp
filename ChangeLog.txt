@@ -1,3 +1,30 @@
+2018-09-27 Version 5.38
+
+Bug fixes:
+
+* Recovery: bug fixed. Recovery granularity is N-2
+
+* ModelHubbardMultiBand needed sorting of one-site basis
+
+Performance:
+
+* ArrayOfMatStruct performance work by Ed
+
+* NotReallySort with unordered_map
+
+* NotReallySort with on-the-fly for tensor product of Qns
+
+* Using Array instead of std::vector in some cases to
+avoid fill overhead
+
+* Basis::setToProduct performance work
+
+New features:
+
+* Git revision printed if available
+
+* coutAnalysis corrected improved
+
 2018-09-11 Version 5.36
 
 Bug fixes:
