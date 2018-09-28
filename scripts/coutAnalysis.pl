@@ -22,7 +22,7 @@ print STDERR "#ElementsObserved=".scalar(keys %h)."\n";
 printData(\%h, $totalTime);
 print STDERR "#TotalForRun=$totalTime\n";
 printHash(\%deltas, "DeltaName", "DeltaTime") if (scalar(keys %deltas) > 0);
-printHash(\%various, "ItemName", "ItemValue") if (scalar(keys %deltas) > 0);
+printHash(\%various, "ItemName", "ItemValue") if (scalar(keys %various) > 0);
 
 sub loadData
 {
@@ -199,7 +199,12 @@ sub printHash
 	my ($deltas, $h1, $h2) = @_;
 	print "\n$h1\t$h2\n";
 	foreach my $name (sort keys %$deltas) {
-		print "$name\t".$deltas->{"$name"}."\n";
+		my $val = $deltas->{"$name"};
+		if ($h1 eq "DeltaName") {
+			$val = int($val*1000)/1000;
+		}
+
+		print "$name\t$val\n";
 	}
 }
 
