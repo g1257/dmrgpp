@@ -15,22 +15,34 @@ defined($file) or die "USAGE: $0 file\n";
 
 my %h;
 my %deltas;
-my $totalTime = loadData(\%h, \%deltas, $file);
+my %various;
+my $totalTime = loadData(\%h, \%deltas, \%various, $file);
 
 print STDERR "#ElementsObserved=".scalar(keys %h)."\n";
 printData(\%h, $totalTime);
 print STDERR "#TotalForRun=$totalTime\n";
-printDeltas(\%deltas);
+printHash(\%deltas, "DeltaName", "DeltaTime") if (scalar(keys %deltas) > 0);
+printHash(\%various, "ItemName", "ItemValue") if (scalar(keys %deltas) > 0);
 
 sub loadData
 {
-	my ($h, $deltas, $file) = @_;
+	my ($h, $deltas, $various, $file) = @_;
 	open(FILE, "<", $file) or die "$0: Cannot open $file : $!\n";
 
 	my ($firstT, $lastT);
 
 	my $observed = 0;
+	my ($lastE, $lanczosSteps);
 	while (<FILE>) {
+		# lowest eigenvalue= -6.13004
+		if (/lowest eigenvalue= ([^ ]+)/) {
+			$lastE = $1;
+		}
+
+		if (/after (\d+) steps/) {
+			$lanczosSteps += $1;
+		}
+
 		#DeltaClock matrixVectorProduct 0.051095
 		if (/^DeltaClock ([^ ]+) ([^ ]+)/) {
 			my $name = $1;
@@ -109,6 +121,9 @@ sub loadData
 
 	close(FILE);
 
+	$various{"lastE"} = $lastE if (defined($lastE));
+	$various{"lanczosSteps"} = $lanczosSteps if (defined($lanczosSteps));
+
 	my $total = $lastT - $firstT;
 	if ($total < $observed) {
 		print STDERR "total $total is less than observed $observed\n";
@@ -179,10 +194,10 @@ sub printData
 	print "$name$sep$time$sep2$perCentPrint\n";
 }
 
-sub printDeltas
+sub printHash
 {
-	my ($deltas) = @_;
-	print "\nDeltaName\tDeltaTime\n";
+	my ($deltas, $h1, $h2) = @_;
+	print "\n$h1\t$h2\n";
 	foreach my $name (sort keys %$deltas) {
 		print "$name\t".$deltas->{"$name"}."\n";
 	}
