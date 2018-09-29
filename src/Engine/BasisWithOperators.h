@@ -173,13 +173,12 @@ public:
 	// basis2 and basis3 or basis3 and basis2  depending on dir
 	void setToProduct(const ThisType& basis2,
 	                  const ThisType& basis3,
-	                  ProgramGlobals::DirectionEnum dir,
-	                  SizeType initialSizeOfHashTable)
+	                  ProgramGlobals::DirectionEnum dir)
 	{
 		if (dir == ProgramGlobals::EXPAND_SYSTEM)
-			setToProduct(basis2, basis3, initialSizeOfHashTable);
+			setToProduct(basis2, basis3);
 		else
-			setToProduct(basis3, basis2, initialSizeOfHashTable);
+			setToProduct(basis3, basis2);
 	}
 
 	//! transform this basis by transform
@@ -315,12 +314,11 @@ private:
 	//! set this basis to the outer product of   basis2 and basis3
 	//!PTEX_LABEL{setToProductOps}
 	void setToProduct(const ThisType& basis2,
-	                  const ThisType& basis3,
-	                  SizeType initialSizeOfHashTable)
+	                  const ThisType& basis3)
 	{
 		BasisType &parent = *this;
 		// reorder the basis
-		parent.setToProduct(basis2, basis3, 0, initialSizeOfHashTable);
+		parent.setToProduct(basis2, basis3);
 
 		typename PsimagLite::Vector<RealType>::Type fermionicSigns;
 		SizeType x = basis2.numberOfOperators()+basis3.numberOfOperators();

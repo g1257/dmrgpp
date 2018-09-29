@@ -102,8 +102,8 @@ public:
 	typedef typename KroneckerDumperType::ParamsForKroneckerDumper ParamsForKroneckerDumperType;
 	typedef typename BasisType::QnType QnType;
 
-	enum {SAVE_ALL = SuperBlockType::SAVE_ALL,
-		  SAVE_PARTIAL = SuperBlockType::SAVE_PARTIAL};
+	enum {SAVE_ALL = BasisType::SAVE_ALL,
+		  SAVE_PARTIAL = BasisType::SAVE_PARTIAL};
 
 	template<typename IoInputter>
 	LeftRightSuper(IoInputter& io,
@@ -189,8 +189,7 @@ public:
 	void growLeftBlock(const SomeModelType& model,
 	                   BasisWithOperatorsType &pS,
 	                   BlockType const &X,
-	                   RealType time,
-	                   SizeType initialSizeOfHashTable)
+	                   RealType time)
 	{
 		assert(left_);
 		grow(*left_,
@@ -198,16 +197,14 @@ public:
 		     pS,
 		     X,
 		     ProgramGlobals::EXPAND_SYSTEM,
-		     time,
-		     initialSizeOfHashTable);
+		     time);
 	}
 
 	template<typename SomeModelType>
 	void growRightBlock(const SomeModelType& model,
 	                    BasisWithOperatorsType &pE,
 	                    BlockType const &X,
-	                    RealType time,
-	                    SizeType initialSizeOfHashTable)
+	                    RealType time)
 	{
 		assert(right_);
 		grow(*right_,
@@ -215,8 +212,7 @@ public:
 		     pE,
 		     X,
 		     ProgramGlobals::EXPAND_ENVIRON,
-		     time,
-		     initialSizeOfHashTable);
+		     time);
 	}
 
 	void printSizes(const PsimagLite::String& label,std::ostream& os) const
@@ -367,22 +363,21 @@ private:
 	          BasisWithOperatorsType &pS,
 	          const BlockType& X,
 	          ProgramGlobals::DirectionEnum dir,
-	          RealType time,
-	          SizeType initialSizeOfHashTable)
+	          RealType time)
 	{
 		BasisWithOperatorsType Xbasis("Xbasis");
-
+		typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuper2Type;
 		Xbasis.setVarious(X, model, time);
-		leftOrRight.setToProduct(pS, Xbasis, dir, initialSizeOfHashTable);
+		leftOrRight.setToProduct(pS, Xbasis, dir);
 
 		SparseMatrixType matrix=leftOrRight.hamiltonian();
 
-		ThisType* lrs;
+		LeftRightSuper2Type* lrs;
 		BasisType* leftOrRightL =  &leftOrRight;
 		if (dir == ProgramGlobals::EXPAND_SYSTEM) {
-			lrs = new ThisType(pS,Xbasis,*leftOrRightL);
+			lrs = new LeftRightSuper2Type(pS,Xbasis,*leftOrRightL);
 		} else {
-			lrs = new  ThisType(Xbasis,pS,*leftOrRightL);
+			lrs = new  LeftRightSuper2Type(Xbasis,pS,*leftOrRightL);
 		}
 		//!PTEX_LABEL{295}
 		model.addHamiltonianConnection(matrix,*lrs,time);

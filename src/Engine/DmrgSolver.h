@@ -383,18 +383,10 @@ obtain ordered
 			progress_.printline(msg,std::cout);
 			printerInDetail.print(std::cout, "infinite");
 
-			lrs_.growLeftBlock(model_,
-			                   pS,
-			                   X[step],
-			                   time,
-			                   initialSizeOfHashTable); // grow system
+			lrs_.growLeftBlock(model_, pS, X[step], time); // grow system
 			bool needsRightPush = false;
 			if (step < Y.size()) {
-				lrs_.growRightBlock(model_,
-				                    pE,
-				                    Y[step],
-				                    time,
-				                    initialSizeOfHashTable); // grow environment
+				lrs_.growRightBlock(model_, pE, Y[step], time); // grow environment
 				needsRightPush = true;
 			}
 
@@ -532,18 +524,10 @@ obtain ordered
 			RealType time = target.time();
 			printerInDetail.print(std::cout, "finite");
 			if (direction == ProgramGlobals::EXPAND_SYSTEM) {
-				lrs_.growLeftBlock(model_,
-				                   pS,
-				                   sitesIndices_[stepCurrent_],
-				                   time,
-				                   initialSizeOfHashTable);
+				lrs_.growLeftBlock(model_, pS, sitesIndices_[stepCurrent_], time);
 				lrs_.right(checkpoint_.shrink(ProgramGlobals::ENVIRON,target));
 			} else {
-				lrs_.growRightBlock(model_,
-				                    pE,
-				                    sitesIndices_[stepCurrent_],
-				                    time,
-				                    initialSizeOfHashTable);
+				lrs_.growRightBlock(model_, pE, sitesIndices_[stepCurrent_], time);
 				lrs_.left(checkpoint_.shrink(ProgramGlobals::SYSTEM,target));
 			}
 

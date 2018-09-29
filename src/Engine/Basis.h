@@ -167,8 +167,8 @@ public:
 		*/
 	void setToProduct(const ThisType& basis1,
 	                  const ThisType& basis2,
-	                  const QnType* pseudoQn,
-	                  SizeType initialSizeOfHashTable)
+	                  const QnType* pseudoQn = 0,
+	                  SizeType initialSizeOfHashTable = 10)
 	{
 		PsimagLite::Profiling profiling("setToProduct",
 		                                ttos(basis1.size()) + "x" + ttos(basis2.size()),
