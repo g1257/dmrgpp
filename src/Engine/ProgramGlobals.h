@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PsimagLite.h"
 #include "Vector.h"
 #include "Utils.h"
+#include "../../src/Version.h"
 
 namespace Dmrg {
 
