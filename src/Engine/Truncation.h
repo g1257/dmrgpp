@@ -277,7 +277,6 @@ private:
 	{
 		bool expandSys = (direction == ProgramGlobals::EXPAND_SYSTEM);
 		const BasisWithOperatorsType& basis = (expandSys) ? lrs_.left() : lrs_.right();
-		lrs_.right();
 		SizeType site = 0; // FIXME for model Immm
 		size_t mostRecent = lrs_.left().operatorsPerSite(site)*geometry_.maxConnections();
 		size_t numOfOp = basis.numberOfOperators();

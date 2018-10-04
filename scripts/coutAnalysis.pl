@@ -175,7 +175,6 @@ sub printData
 		my $shouldBeZero = $ptr->[1];
 		if ($shouldBeZero != 0) {
 			print STDERR "$0: Error with $k, expecting 0, got $shouldBeZero\n";
-			next;
 		}
 
 		my $perCent = int($t*1000/$totalTime)/10;

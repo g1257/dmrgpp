@@ -412,6 +412,10 @@ private:
 		operators_.setMomentumOfOperators(momentum);
 	}
 
+	// BasisWithOperators(const BasisWithOperators&);
+
+	// BasisWithOperators& operator=(const BasisWithOperators&);
+
 	OperatorsType operators_;
 	PsimagLite::Vector<SizeType>::Type operatorsPerSite_;
 }; // class BasisWithOperators
