@@ -183,7 +183,7 @@ public:
 		void write(std::stack<T>& what,
 		           String name2,
 		           IoNgSerializer::WriteMode mode = IoNgSerializer::NO_OVERWRITE,
-		           typename EnableIf<!IsRootUnDelegated<T>::True, int>::Type = 0)
+		           typename EnableIf<!IsRootUnDelegated<T>::True, int*>::Type = 0)
 		{
 			ioNgSerializer_.write(name2, what, mode);
 		}
@@ -192,7 +192,7 @@ public:
 		void write(const T& what,
 		           String name2,
 		           IoNgSerializer::WriteMode mode = IoNgSerializer::NO_OVERWRITE,
-		           typename EnableIf<IsRootUnDelegated<T>::True, int>::Type = 0)
+		           typename EnableIf<IsRootUnDelegated<T>::True, int*>::Type = 0)
 		{
 			ioNgSerializer_.write(name2, what, mode);
 		}
@@ -200,9 +200,25 @@ public:
 		template<typename T>
 		void write(const T& what,
 		           String name2,
-		           typename EnableIf<!IsRootUnDelegated<T>::True, int>::Type = 0)
+		           typename EnableIf<!IsRootUnDelegated<T>::True, int*>::Type = 0)
 		{
 			what.write(name2, ioNgSerializer_);
+		}
+
+		template<typename T>
+		void overwrite(const T& what,
+		               String name2,
+		               typename EnableIf<IsRootUnDelegated<T>::True, int*>::Type = 0)
+		{
+			ioNgSerializer_.overwrite(name2, what);
+		}
+
+		template<typename T>
+		void overwrite(const T& what,
+		               String name2,
+		               typename EnableIf<!IsRootUnDelegated<T>::True, int*>::Type = 0)
+		{
+			what.overwrite(name2, ioNgSerializer_);
 		}
 
 	private:
@@ -271,7 +287,7 @@ public:
 		template<typename T>
 		void read(T& what,
 		          String name,
-		          typename EnableIf<IsRootUnDelegated<T>::True, int>::Type = 0)
+		          typename EnableIf<IsRootUnDelegated<T>::True, int*>::Type = 0)
 		{
 			ioNgSerializer_.read(what, name);
 		}
@@ -279,7 +295,7 @@ public:
 		template<typename T>
 		void read(T& what,
 		          String name,
-		          typename EnableIf<!IsRootUnDelegated<T>::True, int>::Type = 0)
+		          typename EnableIf<!IsRootUnDelegated<T>::True, int*>::Type = 0)
 		{
 			what.read(name, ioNgSerializer_);
 		}

@@ -528,21 +528,28 @@ public:
 		MPI::recv(values_,root,tag+4,mpiComm);
 	}
 
-	void write(String label, IoSerializer& ioSerializer) const
+	void write(String label,
+	           IoSerializer& ioSerializer,
+	           IoSerializer::WriteMode mode = IoSerializer::NO_OVERWRITE) const
 	{
 		if (nrow_ > 0) checkValidity();
-		ioSerializer.createGroup(label);
-		ioSerializer.write(label + "/nrow_",  nrow_);
-		ioSerializer.write(label + "/ncol_",  ncol_);
+		if (mode != IoSerializer::ALLOW_OVERWRITE)
+			ioSerializer.createGroup(label);
+		ioSerializer.write(label + "/nrow_",  nrow_, mode);
+		ioSerializer.write(label + "/ncol_",  ncol_, mode);
 		if (nrow_ == 0 || ncol_ == 0) return;
-		ioSerializer.write(label + "/rowptr_",  rowptr_);
+		ioSerializer.write(label + "/rowptr_",  rowptr_, mode);
 		assert(rowptr_.size() == nrow_ + 1);
 		if (rowptr_[nrow_] == 0) return;
-		ioSerializer.write(label + "/colind_",  colind_);
-		ioSerializer.write(label + "/values_",  values_);
-
+		ioSerializer.write(label + "/colind_",  colind_, mode);
+		ioSerializer.write(label + "/values_",  values_, mode);
 	}
 
+	void overwrite(String label,
+	               IoSerializer& ioSerializer) const
+	{
+		write(label, ioSerializer, IoSerializer::ALLOW_OVERWRITE);
+	}
 	void read(String label, IoSerializer& ioSerializer)
 	{
 		ioSerializer.read(nrow_, label + "/nrow_");
