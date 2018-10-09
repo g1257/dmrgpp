@@ -395,12 +395,19 @@ public:
 		bool krylovAbridge = (model_.params().options.find("KrylovAbridge") !=
 		        PsimagLite::String::npos);
 		SizeType n3 = (krylovAbridge) ? 1 : n2;
+		// ---------------------------------------------------
+		// precompute values of calcVTimesPhi(kprime,v,phi,i0)
+		// ---------------------------------------------------
+		VectorType calcVTimesPhiArray(n3);
+		for(SizeType kprime = 0; kprime < n3; ++kprime)
+			calcVTimesPhiArray[kprime] = calcVTimesPhi(kprime, V, phi, i0);
+
 		ComplexOrRealType sum2 = 0.0;
 		for (SizeType k = 0; k < n2; ++k) {
 			ComplexOrRealType sum = 0.0;
 			for (SizeType kprime = 0; kprime < n3; ++kprime) {
 				ComplexOrRealType tmp = PsimagLite::conj(T(kprime,k))*
-				        calcVTimesPhi(kprime,V,phi,i0);
+				        calcVTimesPhiArray[kprime];
 				sum += tmp;
 				if (kprime > 0) sum2 += tmp;
 			}
