@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ProgressIndicator.h"
 #include "KroneckerDumper.h"
+#include "Io/IoNg.h"
 
 namespace Dmrg {
 
@@ -244,13 +245,10 @@ public:
 		super_->setToProduct(*left_, *right_, &quantumSector, initialSizeOfHashTable);
 	}
 
-	template<typename IoOutputType>
-	void write(IoOutputType& io,
+	void write(PsimagLite::IoNg::Out& io,
 	           PsimagLite::String prefix,
 	           SizeType option,
-	           SizeType numberOfSites,
-	           typename PsimagLite::EnableIf<
-	           PsimagLite::IsOutputLike<IoOutputType>::True, int>::Type = 0) const
+	           bool minimizeWrite) const
 	{
 		prefix += "/LRS";
 		io.createGroup(prefix);
@@ -263,10 +261,9 @@ public:
 		assert(right_);
 		assert(super_);
 
-		bool minimizeWrite = (super_->block().size() == numberOfSites);
-		super_->write(io, IoOutputType::Serializer::NO_OVERWRITE, prefix, minimizeWrite);
-		left_->write(io, IoOutputType::Serializer::NO_OVERWRITE, prefix, option);
-		right_->write(io, IoOutputType::Serializer::NO_OVERWRITE, prefix, option);
+		super_->write(io, PsimagLite::IoSerializer::NO_OVERWRITE, prefix, minimizeWrite);
+		left_->write(io, PsimagLite::IoSerializer::NO_OVERWRITE, prefix, option);
+		right_->write(io, PsimagLite::IoSerializer::NO_OVERWRITE, prefix, option);
 	}
 
 	const BasisWithOperatorsType& left()  const

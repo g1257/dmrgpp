@@ -161,7 +161,8 @@ public:
 
 		fS_.write(io, prefix + "/fS");
 		fE_.write(io, prefix + "/fE");
-		lrs_.write(io, prefix, option, numberOfSites);
+		bool minimizeWrite = (lrs_.super().block().size() == numberOfSites);
+		lrs_.write(io, prefix, option, minimizeWrite);
 
 		wavefunction_.write(io, prefix + "/WaveFunction");
 

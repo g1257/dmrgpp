@@ -345,6 +345,7 @@ public:
 			                                     to the data file.
 			\item [KronNoUseLowerPart] Don't Use lower part of Kron matrix but
  recompute it instead.
+			\item [shrinkStacksOnDisk] Store shrink stacks on disk instead of in memory
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,
@@ -406,6 +407,7 @@ public:
 		registerOpts.push_back("fixLegacyBugs");
 		registerOpts.push_back("saveDensityMatrixEigenvalues");
 		registerOpts.push_back("KronNoUseLowerPart");
+		registerOpts.push_back("shrinkStacksOnDisk");
 
 		PsimagLite::Options::Writeable optWriteable(registerOpts,
 		                                            PsimagLite::Options::Writeable::PERMISSIVE);
