@@ -405,10 +405,11 @@ public:
 			Dmrg::bcast(reducedOperators_[i]);
 	}
 
-	template<typename IoOutputter>
-	void write(IoOutputter& io,const PsimagLite::String&) const
+	void write(PsimagLite::IoNg::Out& io,
+	           const PsimagLite::String&,
+	           PsimagLite::IoNgSerializer::WriteMode mode) const
 	{
-		io.write(reducedOperators_,"Operators");
+		io.write(reducedOperators_, "Operators", mode);
 	}
 
 	void changeBasis(SparseMatrixType &v)

@@ -288,7 +288,7 @@ public:
 	           PsimagLite::String prefix,
 	           SizeType option,
 	           typename PsimagLite::EnableIf<
-	           PsimagLite::IsOutputLike<SomeOutputType>::True, int>::Type = 0) const
+	           PsimagLite::IsOutputLike<SomeOutputType>::True, int*>::Type = 0) const
 	{
 		write(io, prefix + "/" + this->name(), mode, option);
 	}
@@ -299,7 +299,7 @@ public:
 	           typename SomeOutputType::Serializer::WriteMode mode,
 	           SizeType option,
 	           typename PsimagLite::EnableIf<
-	           PsimagLite::IsOutputLike<SomeOutputType>::True, int>::Type = 0) const
+	           PsimagLite::IsOutputLike<SomeOutputType>::True, int*>::Type = 0) const
 	{
 		BasisType::write(io, s, mode, false); // parent saves
 		if (option == BasisType::SAVE_ALL)

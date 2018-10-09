@@ -84,14 +84,17 @@ struct FiniteLoop {
 	{}
 
 	void write(PsimagLite::String label,
-	               PsimagLite::IoSerializer& ioSerializer) const
+	           PsimagLite::IoSerializer& ioSerializer,
+	           PsimagLite::IoNgSerializer::WriteMode mode =
+	        PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
 		PsimagLite::String root = label;
 
-		ioSerializer.createGroup(root);
-		ioSerializer.write(root + "/stepLength", stepLength);
-		ioSerializer.write(root + "/keptStates", keptStates);
-		ioSerializer.write(root + "/saveOption", saveOption);
+		if (mode != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
+			ioSerializer.createGroup(root);
+		ioSerializer.write(root + "/stepLength", stepLength, mode);
+		ioSerializer.write(root + "/keptStates", keptStates, mode);
+		ioSerializer.write(root + "/saveOption", saveOption, mode);
 	}
 
 	template<typename SomeMemResolvType>

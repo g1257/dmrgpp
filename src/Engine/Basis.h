@@ -475,29 +475,32 @@ public:
 	}
 
 	//! saves this basis to disk
-	template<typename SomeIoType>
-	void write(SomeIoType& io,
+	void write(PsimagLite::IoNg::Out& io,
 	           const PsimagLite::String& ss,
-	           typename SomeIoType::Serializer::WriteMode mode,
+	           PsimagLite::IoNgSerializer::WriteMode mode,
 	           bool minimizeWrite) const
 	{
 		checkSigns();
 		PsimagLite::String label = ss + "/";
-		io.createGroup(ss);
-		io.write(useSu2Symmetry_, label + "useSu2Symmetry");
-		io.write(block_, label + "BLOCK");
+		if (mode != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
+			io.createGroup(ss);
+		io.write(useSu2Symmetry_, label + "useSu2Symmetry", mode);
+		io.write(block_, label + "BLOCK", mode);
 
 		if (!minimizeWrite) {
-			io.write(signs_, label + "signs_");
-			io.write(signsOld_, label + "SignsOld");
+			io.write(signs_, label + "signs_", mode);
+			io.write(signsOld_, label + "SignsOld", mode);
 		}
 
-		io.write(partition_, label + "PARTITION");
-		io.write(permInverse_, label + "PERMUTATIONINVERSE");
-		io.write(qns_, label + "QNShrink");
+		io.write(partition_, label + "PARTITION", mode);
+		io.write(permInverse_, label + "PERMUTATIONINVERSE", mode);
+		if (mode == PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
+			io.overwrite(qns_, label + "QNShrink");
+		else
+			io.write(qns_, label + "QNShrink");
 
-		if (useSu2Symmetry_) symmSu2_.write(io, label);
-		else symmLocal_.write(io, label);
+		if (useSu2Symmetry_) symmSu2_.write(io, label, mode);
+		else symmLocal_.write(io, label, mode);
 	}
 
 	//! saves this basis to disk

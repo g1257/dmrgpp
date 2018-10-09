@@ -433,22 +433,30 @@ public:
 	void overwrite(SomeIoOutType& io,
 	               const PsimagLite::String& s,
 	               typename PsimagLite::EnableIf<
-	               PsimagLite::IsOutputLike<SomeIoOutType>::True, int>::Type = 0) const
+	               PsimagLite::IsOutputLike<SomeIoOutType>::True, int*>::Type = 0) const
 	{
 		if (!useSu2Symmetry_) io.overwrite(operators_, s + "/Operators");
 		else reducedOpImpl_.overwrite(io,s);
 		io.overwrite(hamiltonian_, s + "/Hamiltonian");
 	}
 
-	template<typename SomeIoOutType>
-	void write(SomeIoOutType& io,
+	void write(PsimagLite::IoNg::Out& io,
 	           const PsimagLite::String& s,
-	           typename PsimagLite::EnableIf<
-	           PsimagLite::IsOutputLike<SomeIoOutType>::True, int>::Type = 0) const
+	           PsimagLite::IoNgSerializer::WriteMode mode) const
 	{
-		if (!useSu2Symmetry_) io.write(operators_,s + "/Operators");
-		else reducedOpImpl_.write(io,s);
-		io.write(hamiltonian_, s + "/Hamiltonian");
+		if (!useSu2Symmetry_) {
+			if (mode == PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
+				io.overwrite(operators_, s + "/Operators");
+			else
+				io.write(operators_, s + "/Operators");
+		} else {
+			reducedOpImpl_.write(io, s, mode);
+		}
+
+		if (mode == PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
+			io.overwrite(hamiltonian_, s + "/Hamiltonian");
+		else
+			io.write(hamiltonian_, s + "/Hamiltonian");
 	}
 
 	SizeType size() const { return operators_.size(); }

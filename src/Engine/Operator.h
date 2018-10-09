@@ -257,15 +257,24 @@ struct Operator {
 	}
 
 	void write(PsimagLite::String label,
-	           PsimagLite::IoSerializer& ioSerializer) const
+	           PsimagLite::IoSerializer& ioSerializer,
+	           PsimagLite::IoSerializer::WriteMode mode =
+	        PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
-		ioSerializer.createGroup(label);
+		if (mode != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
+			ioSerializer.createGroup(label);
 
-		data.write(label + "/data", ioSerializer);
-		ioSerializer.write(label + "/fermionSign", fermionSign);
-		ioSerializer.write(label + "/jm", jm);
-		ioSerializer.write(label + "/angularFactor", angularFactor);
+		data.write(label + "/data", ioSerializer, mode);
+		ioSerializer.write(label + "/fermionSign", fermionSign, mode);
+		ioSerializer.write(label + "/jm", jm, mode);
+		ioSerializer.write(label + "/angularFactor", angularFactor, mode);
 		// su2Related.write(label + "/su2Related", ioSerializer);
+	}
+
+	void overwrite(PsimagLite::String label,
+	               PsimagLite::IoSerializer& ioSerializer) const
+	{
+		write(label, ioSerializer, PsimagLite::IoNgSerializer::ALLOW_OVERWRITE);
 	}
 
 	void read(PsimagLite::String label,

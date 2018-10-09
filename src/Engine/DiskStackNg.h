@@ -141,7 +141,7 @@ public:
 			        DataType::SAVE_ALL);
 		} catch (...) {
 			d.write(*ioOut_,
-			        "/" + ttos(total_),
+			        label_ + "/" + ttos(total_),
 			        IoOutType::Serializer::ALLOW_OVERWRITE,
 			        DataType::SAVE_ALL);
 		}

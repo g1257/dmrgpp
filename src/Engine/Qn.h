@@ -114,6 +114,18 @@ public:
 		io.write(str + "/flavors", flavors);
 	}
 
+	void overwrite(PsimagLite::String str, PsimagLite::IoNgSerializer& io) const
+	{
+		const PsimagLite::IoNgSerializer::WriteMode mode =
+		        PsimagLite::IoNgSerializer::ALLOW_OVERWRITE;
+		io.write(str + "/oddElectrons", oddElectrons, mode);
+		VectorSizeType otherVector;
+		other.toStdVector(otherVector);
+		io.write(str + "/other", otherVector, mode);
+		io.write(str + "/jmPair", jmPair, mode);
+		io.write(str + "/flavors", flavors, mode);
+	}
+
 	bool operator==(const Qn& a) const
 	{
 		return (compare(a.other) &&
