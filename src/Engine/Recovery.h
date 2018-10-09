@@ -127,7 +127,7 @@ public:
 	typedef typename CheckpointType::IoType IoType;
 	typedef typename CheckpointType::TargetingType TargetingType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename CheckpointType::MemoryStackType MemoryStackType;
+	typedef typename CheckpointType::DiskOrMemoryStackType DiskOrMemoryStackType;
 	typedef typename CheckpointType::DiskStackType DiskStackType;
 	typedef PsimagLite::Vector<VectorSizeType>::Type VectorBlockType;
 

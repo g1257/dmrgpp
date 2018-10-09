@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "ProgramGlobals.h"
 #include "Io/IoSelector.h"
+#include "DiskOrMemoryStack.h"
 
 namespace Dmrg {
 
@@ -105,7 +106,7 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
-	typedef typename PsimagLite::Stack<BasisWithOperatorsType>::Type MemoryStackType;
+	typedef DiskOrMemoryStack<BasisWithOperatorsType> DiskOrMemoryStackType;
 	typedef typename BasisWithOperatorsType::QnType QnType;
 	typedef typename QnType::VectorQnType VectorQnType;
 	typedef DiskStack<BasisWithOperatorsType>  DiskStackType;
@@ -193,12 +194,12 @@ public:
 
 		const bool needsToRead = false;
 
-		MemoryStackType systemStackCopy = systemStack_;
+		DiskOrMemoryStackType systemStackCopy = systemStack_;
 		DiskStackType systemDisk(filename, needsToRead, "system", isObserveCode_);
 
 		loadStack(systemDisk, systemStackCopy);
 
-		MemoryStackType envStackCopy = envStack_;
+		DiskOrMemoryStackType envStackCopy = envStack_;
 		DiskStackType environDisk(filename, needsToRead, "environ", isObserveCode_);
 		loadStack(environDisk, envStackCopy);
 	}
@@ -265,7 +266,7 @@ public:
 		return systemStack_.size();
 	}
 
-	const MemoryStackType& memoryStack(SizeType option) const
+	const DiskOrMemoryStackType& memoryStack(SizeType option) const
 	{
 		return (option == ProgramGlobals::SYSTEM) ? systemStack_ : envStack_;
 	}
@@ -395,7 +396,7 @@ private:
 	}
 
 	//! shrink  (we don't really shrink, we just undo the growth)
-	const BasisWithOperatorsType& shrink(MemoryStackType& thisStack,
+	const BasisWithOperatorsType& shrink(DiskOrMemoryStackType& thisStack,
 	                                     const TargetingType& target)
 	{
 		assert(thisStack.size() > 0);
@@ -459,8 +460,8 @@ private:
 	const ParametersType& parameters_;
 	bool isObserveCode_;
 	bool isRestart_;
-	MemoryStackType systemStack_;
-	MemoryStackType envStack_;
+	DiskOrMemoryStackType systemStack_;
+	DiskOrMemoryStackType envStack_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType energyFromFile_;
 	BasisWithOperatorsType dummyBwo_;
