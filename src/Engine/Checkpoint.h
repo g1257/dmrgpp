@@ -113,18 +113,21 @@ public:
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-	const PsimagLite::String SYSTEM_STACK_STRING;
-	const PsimagLite::String ENVIRON_STACK_STRING;
-
 	Checkpoint(const ParametersType& parameters,
 	           InputValidatorType& ioIn,
 	           const ModelType& model,
 	           bool isObserveCode) :
-	    SYSTEM_STACK_STRING(ProgramGlobals::SYSTEM_STACK_STRING),
-	    ENVIRON_STACK_STRING(ProgramGlobals::ENVIRON_STACK_STRING),
 	    parameters_(parameters),
 	    isObserveCode_(isObserveCode),
-	    isRestart_(parameters_.options.find("restart")!=PsimagLite::String::npos),
+	    isRestart_(parameters_.options.find("restart") != PsimagLite::String::npos),
+	    systemStack_(parameters_.options.find("shrinkStacksOnDisk") != PsimagLite::String::npos,
+	                 parameters_.filename,
+	                 "System",
+	                 isObserveCode),
+	    envStack_(systemStack_.onDisk(),
+	              parameters_.filename,
+                  "Environ",
+                  isObserveCode),
 	    progress_("Checkpoint"),
 	    energyFromFile_(0.0),
 	    dummyBwo_("dummy")
@@ -194,14 +197,11 @@ public:
 
 		const bool needsToRead = false;
 
-		DiskOrMemoryStackType systemStackCopy = systemStack_;
 		DiskStackType systemDisk(filename, needsToRead, "system", isObserveCode_);
+		systemStack_.toDisk(systemDisk);
 
-		loadStack(systemDisk, systemStackCopy);
-
-		DiskOrMemoryStackType envStackCopy = envStack_;
 		DiskStackType environDisk(filename, needsToRead, "environ", isObserveCode_);
-		loadStack(environDisk, envStackCopy);
+		envStack_.toDisk(environDisk);
 	}
 
 	// Not related to stacks
@@ -269,21 +269,6 @@ public:
 	const DiskOrMemoryStackType& memoryStack(SizeType option) const
 	{
 		return (option == ProgramGlobals::SYSTEM) ? systemStack_ : envStack_;
-	}
-
-	template<typename StackType1,typename StackType2>
-	static void loadStack(StackType1& stackInMemory,StackType2& stackInDisk)
-	{
-		while (stackInDisk.size()>0) {
-			BasisWithOperatorsType b = stackInDisk.top();
-			stackInMemory.push(b);
-			stackInDisk.pop();
-		}
-	}
-
-	static void loadStack(DiskStackType& stackInMemory,DiskStackType& stackInDisk)
-	{
-		copyDiskToDisk(stackInMemory, stackInDisk);
 	}
 
 	const ParametersType& parameters() const { return parameters_; }
@@ -422,8 +407,8 @@ private:
 		msg<<"Loading sys. and env. stacks from disk...";
 		progress_.printline(msg,std::cout);
 
-		loadStack(systemStack_, systemDisk);
-		loadStack(envStack_, envDisk);
+		DiskOrMemoryStackType::loadStack(systemStack_, systemDisk);
+		DiskOrMemoryStackType::loadStack(envStack_, envDisk);
 	}
 
 	void loadStacksMemoryToDisk()
@@ -440,8 +425,8 @@ private:
 		PsimagLite::OstringStream msg;
 		msg<<"Writing sys. and env. stacks to disk...";
 		progress_.printline(msg,std::cout);
-		loadStack(systemDisk, systemStack_);
-		loadStack(envDisk, envStack_);
+		DiskOrMemoryStackType::loadStack(systemDisk, systemStack_);
+		DiskOrMemoryStackType::loadStack(envDisk, envStack_);
 	}
 
 	//! Move elsewhere

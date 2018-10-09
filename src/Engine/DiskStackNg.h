@@ -122,6 +122,12 @@ public:
 		ioOut_ = 0;
 	}
 
+	void flush()
+	{
+		assert(ioOut_);
+		ioOut_->flush();
+	}
+
 	bool inDisk() const { return true; }
 
 	void push(const DataType& d)
@@ -133,7 +139,7 @@ public:
 			        label_ + "/" + ttos(total_),
 			        IoOutType::Serializer::NO_OVERWRITE,
 			        DataType::SAVE_ALL);
-		} catch (std::exception&) {
+		} catch (...) {
 			d.write(*ioOut_,
 			        "/" + ttos(total_),
 			        IoOutType::Serializer::ALLOW_OVERWRITE,
@@ -155,6 +161,16 @@ public:
 
 		--total_;
 
+		if (!ioOut_) return;
+
+		ioOut_->write(total_,
+		              label_ + "/Size",
+		              IoOutType::Serializer::ALLOW_OVERWRITE);
+	}
+
+	void restore(SizeType total)
+	{
+		total_ = total;
 		if (!ioOut_) return;
 
 		ioOut_->write(total_,
