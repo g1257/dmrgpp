@@ -380,6 +380,18 @@ public:
 
 	static PsimagLite::String recoveryFilePrefix() { return "Recovery"; }
 
+	static void checkOptions(PsimagLite::String recoverySave,
+	                         PsimagLite::String options)
+	{
+		if (recoverySave == "" || recoverySave == "no")
+			return;
+
+		if (options.find("minimizeDisk") == PsimagLite::String::npos)
+			return;
+
+		err("minimizeDisk cannot be used with RecoverySave\n");
+	}
+
 	// this function is called before the ctor
 	static void autoRestart(ParametersType& params)
 	{

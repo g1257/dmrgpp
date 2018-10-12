@@ -373,6 +373,7 @@ struct ParametersDmrgSolver {
 			} catch (std::exception&) {}
 		}
 
+		Recovery<ThisType, int>::checkOptions(recoverySave, options);
 		Recovery<ThisType, int>::autoRestart(*this);
 
 		if (hasRestart) {
