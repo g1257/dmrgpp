@@ -259,12 +259,14 @@ public:
 	{
 		if (what.size() == 0) return;
 
-		overwriteNotSupported(allowOverwrite);
-		String name = "Def/" + name2;
-		hsize_t dims[1];
-		dims[0] = 2*what.size();
 		assert(0 < what.size());
 		const void* ptr = static_cast<const void*>(&what[0]);
+		String name = "Def/" + name2;
+		if (allowOverwrite == ALLOW_OVERWRITE)
+			return overwrite<T>(name, ptr);
+
+		hsize_t dims[1];
+		dims[0] = 2*what.size();
 		internalWrite<T>(name, ptr, dims, 1);
 	}
 
