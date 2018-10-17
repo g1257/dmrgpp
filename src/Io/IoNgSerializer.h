@@ -142,14 +142,13 @@ public:
 	{
 		String name = "Def/" + name2;
 		const void* ptr = static_cast<const T*>(&what);
+		hsize_t dims[1];
+		dims[0] = 1;
 
-		if (allowOverwrite) {
-			overwrite<T>(name, ptr);
-		} else {
-			hsize_t dims[1];
-			dims[0] = 1;
+		if (allowOverwrite)
+			overwrite<T>(name, ptr, dims, 1);
+		else
 			internalWrite<T>(name, ptr, dims, 1);
-		}
 	}
 
 	void write(String name2, String what, WriteMode allowOverwrite = NO_OVERWRITE)
@@ -170,14 +169,13 @@ public:
 		tmp[0] = (b) ? 1 : 0;
 		const void* ptr = static_cast<const void*>(tmp);
 
-		if (allowOverwrite == ALLOW_OVERWRITE) {
-			overwrite<unsigned char>(name, ptr);
-			return;
-		}
-
 		hsize_t dims[1];
 		dims[0] = 1;
-		internalWrite<unsigned char>(name, ptr, dims, 1);
+
+		if (allowOverwrite == ALLOW_OVERWRITE)
+			overwrite<unsigned char>(name, ptr, dims, 1);
+		else
+			internalWrite<unsigned char>(name, ptr, dims, 1);
 	}
 
 	template<typename T1, typename T2>
@@ -246,7 +244,7 @@ public:
 		assert(0 < what.size());
 		const void* ptr = static_cast<const void*>(&what[0]);
 		if (allowOverwrite == ALLOW_OVERWRITE)
-			overwrite<T>(name, ptr);
+			overwrite<T>(name, ptr, dims, 1);
 		else
 			internalWrite<T>(name, ptr, dims, 1);
 	}
@@ -262,12 +260,13 @@ public:
 		assert(0 < what.size());
 		const void* ptr = static_cast<const void*>(&what[0]);
 		String name = "Def/" + name2;
-		if (allowOverwrite == ALLOW_OVERWRITE)
-			return overwrite<T>(name, ptr);
-
 		hsize_t dims[1];
 		dims[0] = 2*what.size();
-		internalWrite<T>(name, ptr, dims, 1);
+
+		if (allowOverwrite == ALLOW_OVERWRITE)
+			overwrite<T>(name, ptr, dims, 1);
+		else
+			internalWrite<T>(name, ptr, dims, 1);
 	}
 
 	template<typename T>
@@ -322,9 +321,17 @@ public:
 	               && !IsPairLike<T>::True, int*>::Type = 0)
 	{
 		SizeType n = what.size();
+		SizeType oldN = 0;
+		read(oldN, name2 + "/Size");
+		SizeType min = std::min(oldN, n);
 		write(name2 + "/Size", n, ALLOW_OVERWRITE);
-		for (SizeType i = 0; i < n; ++i)
+		for (SizeType i = 0; i < min; ++i)
 			what[i].overwrite(name2 + "/" + typeToString(i), *this);
+
+		if (n <= oldN) return;
+
+		for (SizeType i = min; i < n; ++i)
+			what[i].write(name2 + "/" + typeToString(i), *this);
 	}
 
 	template<typename T>
@@ -567,11 +574,10 @@ private:
 	}
 
 	template<typename SomeType>
-	void overwrite(String name, const void* ptr)
+	void overwrite(String name, const void* ptr, hsize_t dims[], SizeType ndims)
 	{
-		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet(name));
-		dataset->write(ptr, typeToH5<SomeType>());
-		delete dataset;
+		hdf5file_->unlink(name);
+		internalWrite<SomeType>(name, ptr, dims, ndims);
 	}
 
 	template<typename SomeType>
