@@ -37,13 +37,16 @@ GetOptions('f=s' => \$templateInput,
 
 (defined($templateInput) and defined($isPeriodic)) or die "$usage\n";
 
-my $geometry;
 my $sites;
 my $eta;
-my $hptr = {"GeometryKind" => \$geometry,
+my $geometryName;
+my $geometryLeg = 1;
+my $hptr = {"GeometryKind" => \$geometryName,
+            "LadderLeg" => \$geometryLeg,
 	    "TotalNumberOfSites" => \$sites,
             "CorrectionVectorEta" => \$eta};
 OmegaUtils::getLabels($hptr,$templateInput);
+die "$0 doesn't support LadderLeg=$geometryLeg\n" if ($geometryLeg > 2);
 
 my ($fmString, $fpString) = @ARGV;
 defined($fmString) or die "$usage\n";
@@ -68,6 +71,7 @@ for (my $i = 0; $i < scalar(@filesPlus); ++$i) {
 my %specFull;
 addSpectrum(\%specFull, \%specMinus);
 addSpectrum(\%specFull, \%specPlus) if (defined($fpString));
+my $geometry = {"name" => $geometryName, "leg" => $geometryLeg};
 OmegaUtils::printGnuplot(\%specFull, $geometry,  $isPeriodic, $zeroAtCenter);
 OmegaUtils::printOffsetPlots("offset", \%specFull, $geometry,  $isPeriodic, $zeroAtCenter);
 
@@ -76,7 +80,7 @@ exit(0) if (!defined($fpString));
 my @nkx0;
 my $norm = sumOverOmega(\@nkx0, \%specMinus, 0);
 print "Norm=$norm\n";
-if ($geometry eq "ladder") {
+if ($geometry->{"name"} eq "ladder") {
 	my @nkxpi;
 	$norm += sumOverOmega(\@nkxpi, \%specMinus, 1);
 	printVsQ("outnkxpi.dat", \@nkxpi, $norm*$eta);
@@ -85,7 +89,7 @@ if ($geometry eq "ladder") {
 print "Norm=$norm\n";
 printVsQ("outnkx0.dat", \@nkx0, $norm*$eta);
 
-my $totalMy = ($geometry eq "ladder") ? 2 : 1;
+my $totalMy = ($geometry->{"name"} eq "ladder") ? 2 : 1;
 
 my %fullVsOmega;
 for (my $mp = 0; $mp < 2; ++$mp) { #mp = 0 is -, mp=1 is +
@@ -168,18 +172,7 @@ sub printVsOmega
 sub sumOverKx
 {
 	my ($v, $ptr, $my) = @_;
-	my $factor = 0;
-	my @fileIndices=(0);
-	if ($geometry eq "chain") {
-		$factor = 0.5;
-		die "$0: Chain does not have ky != 0\n" if ($my != 0)
-	} elsif ($geometry eq "ladder") {
-		$factor = 0.25;
-		@fileIndices=(0,1);
-	} else {
-		die "$0: Unknown geometry $geometry\n";
-	}
-
+	my ($factor, $fileIndices, $leg) = getGeometryDetails($geometry, $my);
 	my $fileIndex = $my;
 
 	for my $omega (sort {$a <=> $b} keys %$ptr) {
@@ -221,17 +214,7 @@ sub printVsQ
 sub sumOverOmega
 {
 	my ($v, $ptr, $my) = @_;
-	my $factor = 0;
-	my @fileIndices=(0);
-	if ($geometry eq "chain") {
-		$factor = 0.5;
-		die "$0: Chain does not have ky != 0\n" if ($my != 0)
-	} elsif ($geometry eq "ladder") {
-		$factor = 0.25;
-		@fileIndices=(0,1);
-	} else {
-		die "$0: Unknown geometry $geometry\n";
-	}
+	my ($factor, $fileIndices, $leg) = getGeometryDetails($geometry, $my);
 
 	my $fileIndex = $my;
 	my $norm = 0;

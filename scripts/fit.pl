@@ -32,13 +32,17 @@ GetOptions('f=s' => \$templateInput,
 my $x = (defined($kx) & defined($mu));
 ($x and defined($templateInput) and defined($isPeriodic)) or die "$usage\n";
 
-my $geometry;
 my $sites;
 my $eta;
-my $hptr = {"GeometryKind" => \$geometry,
+my $geometryName;
+my $geometryLeg = 1;
+my $hptr = {"GeometryKind" => \$geometryName,
+            "LadderLeg" => \$geometryLeg,
 	    "TotalNumberOfSites" => \$sites,
             "CorrectionVectorEta" => \$eta};
 OmegaUtils::getLabels($hptr,$templateInput);
+die "$0 doesn't support LadderLeg=$geometryLeg\n" if ($geometryLeg > 2);
+
 my ($file) = @ARGV;
 
 defined($file) or die "$usage\n";
@@ -53,6 +57,8 @@ my $numberOfKs;
 my @omegas;
 findOmegas(\@omegas, \$numberOfKs, $file);
 createSpectrum(\%spec, \@omegas, $numberOfKs);
+
+my $geometry = {"name" => $geometryName, "leg" => $geometryLeg};
 OmegaUtils::printOffsetPlots("fit", \%spec, $geometry,  $isPeriodic, $zeroAtCenter);
 
 sub findOmegas

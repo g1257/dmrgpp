@@ -101,12 +101,13 @@ sub printOffsetPlots
 
 sub getGeometryDetails
 {
-	my ($geometry) = @_;
+	my ($geometry, $my) = @_;
 	my $factor = 0;
 	my @fileIndices=(0);
 	my $leg = 1;
 	if ($geometry->{"name"} eq "chain") {
 		$factor = 0.5;
+		die "$0: Chain does not have ky != 0\n" if (defined($my) and $my != 0)
 	} elsif ($geometry->{"name"} eq "ladder") {
 		$leg = $geometry->{"leg"};
 		$factor = 0.5/$leg;
