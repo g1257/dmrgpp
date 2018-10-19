@@ -41,7 +41,7 @@ sub createMakefile
 	my ($configFiles, $flavor) = @_;
 
 	my @drivers = qw(integrator sparseSolverTest testCRSMatrix combineContinuedFraction
-	continuedFractionCollection range kernelPolynomial
+	continuedFractionCollection range kernelPolynomial fit
 	linearPrediction options randomTest svd testLapack threads loadImbalance testIsClass
 	testMemResolv1 sumDecomposition calculator closuresTest base64test checkRunId
 	testLanczos testExcitedLanczos testLanczosMatrixInFile nested testIoNg testIoNgBoolean);
