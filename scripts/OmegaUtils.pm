@@ -34,18 +34,9 @@ sub printGnuplot
 {
 	my ($ptr, $geometry, $isPeriodic, $zeroAtCenter) = @_;
 
-	my $factor = 0;
-	my @fileIndices=(0);
-	if ($geometry eq "chain") {
-		$factor = 0.5;
-	} elsif ($geometry eq "ladder") {
-		$factor = 0.25;
-		@fileIndices=(0,1);
-	} else {
-		die "$0: Unknown geometry $geometry\n";
-	}
+	my ($factor, $fileIndices, $leg) = getGeometryDetails($geometry);
 
-	foreach my $fileIndex (@fileIndices) {
+	foreach my $fileIndex (@$fileIndices) {
 		my $outFile = "outSpectrum$fileIndex.gnuplot";
 		open(FOUT, ">", "$outFile") or die "$0: Cannot write to $outFile : $!\n";
 
@@ -75,18 +66,9 @@ sub printOffsetPlots
 {
 	my ($ext, $ptr, $geometry, $isPeriodic, $zeroAtCenter) = @_;
 
-	my $factor = 0;
-	my @fileIndices=(0);
-	if ($geometry eq "chain") {
-		$factor = 0.5;
-	} elsif ($geometry eq "ladder") {
-		$factor = 0.25;
-		@fileIndices=(0,1);
-	} else {
-		die "$0: Unknown geometry $geometry\n";
-	}
+	my ($factor, $fileIndices, $leg) = getGeometryDetails($geometry);
 
-	foreach my $fileIndex (@fileIndices) {
+	foreach my $fileIndex (@$fileIndices) {
 		my $offset = 0.7*findMaxVertical($ptr, $factor, $fileIndex);
 		my $outFile = "outSpectrum$fileIndex.$ext";
 		open(FOUT, ">", "$outFile") or die "$0: Cannot write to $outFile : $!\n";
@@ -116,6 +98,27 @@ sub printOffsetPlots
 		print "$0: Written $outFile\n";
 	}
 }
+
+sub getGeometryDetails
+{
+	my ($geometry) = @_;
+	my $factor = 0;
+	my @fileIndices=(0);
+	my $leg = 1;
+	if ($geometry->{"name"} eq "chain") {
+		$factor = 0.5;
+	} elsif ($geometry->{"name"} eq "ladder") {
+		$leg = $geometry->{"leg"};
+		$factor = 0.5/$leg;
+		@fileIndices=(0, 1);
+	} else {
+		die "$0: Unknown geometry ".$geometry->{"name"}."\n";
+	}
+
+	return ($factor, \@fileIndices, $leg);
+}
+
+
 
 sub findMaxVertical
 {

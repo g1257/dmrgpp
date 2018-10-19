@@ -24,11 +24,13 @@ GetOptions('f=s' => \$templateInput,
 (defined($templateInput) and defined($isPeriodic)) or die "$0: USAGE: $usage\n";
 
 my ($omega0,$total,$omegaStep,$centralSite);
+my $ladderLeg = 1;
 my $hptr = {"#OmegaBegin" => \$omega0,
             "#OmegaTotal" => \$total,
             "#OmegaStep" => \$omegaStep,
             "TSPSites 1" => \$centralSite,
             "GeometryKind" =>\$geometry,
+            "LadderLeg" => \$ladderLeg,
             "TotalNumberOfSites" => \$GlobalNumberOfSites};
 
 OmegaUtils::getLabels($hptr,$templateInput);

@@ -23,8 +23,10 @@ GetOptions('f=s' => \$templateInput,
 
 (defined($templateInput) and defined($isPeriodic)) or die "$0: USAGE: $usage\n";
 
-my $geometry;
-my $hptr = {"GeometryKind" => \$geometry};
+my $geometryName;
+my $geometryLeg = 1;
+my $hptr = {"GeometryKind" => \$geometryName,
+            "LadderLeg" => \$geometryLeg};
 OmegaUtils::getLabels($hptr,$templateInput);
 
 my $numberKs;
@@ -35,6 +37,7 @@ foreach my $file (@ARGV) {
 }
 
 #printSpectrum($outSpectrum, \%a);
+my $geometry = {"name" => $geometryName, "leg" => $geometryLeg};
 OmegaUtils::printGnuplot(\%a, $geometry,  $isPeriodic, $zeroAtCenter);
 
 sub printSpectrum
