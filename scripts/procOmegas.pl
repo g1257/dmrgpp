@@ -9,7 +9,7 @@ use Getopt::Long qw(:config no_ignore_case);
 
 my $usage = "-f dollarizedInput [-M mForQ] [-S site] [-p] [-r] [-z]\n";
 
-my ($templateInput,$site,$m,$geometry,$GlobalNumberOfSites);
+my ($templateInput,$site,$m,$GlobalNumberOfSites);
 my ($siteForSpectrum,$mForQ,$isPeriodic,$mMax,$wantsRealPart);
 my $zeroAtCenter = 0;
 
@@ -24,13 +24,14 @@ GetOptions('f=s' => \$templateInput,
 (defined($templateInput) and defined($isPeriodic)) or die "$0: USAGE: $usage\n";
 
 my ($omega0,$total,$omegaStep,$centralSite);
-my $ladderLeg = 1;
+my $geometryName;
+my $geometryLeg = 1;
 my $hptr = {"#OmegaBegin" => \$omega0,
             "#OmegaTotal" => \$total,
             "#OmegaStep" => \$omegaStep,
+            "GeometryKind" => \$geometryName,
+            "LadderLeg" => \$geometryLeg,
             "TSPSites 1" => \$centralSite,
-            "GeometryKind" =>\$geometry,
-            "LadderLeg" => \$ladderLeg,
             "TotalNumberOfSites" => \$GlobalNumberOfSites};
 
 OmegaUtils::getLabels($hptr,$templateInput);
@@ -46,6 +47,8 @@ if ($omegaStep < 0) {
 	$omega0 = $omegaStep = 2.0*pi/$beta;
 }
 
+my $geometry = {"name" => $geometryName, "leg" => $geometryLeg};
+
 my $outSpectrum = "out.spectrum";
 open(FOUTSPECTRUM, ">", "$outSpectrum") or die "$0: Cannot write to $outSpectrum : $!\n";
 for (my $i = 0; $i < $total; ++$i) {
@@ -55,12 +58,12 @@ for (my $i = 0; $i < $total; ++$i) {
 	print LOGFILEOUT "$0: About to proc for omega = $omega\n";
 
 	if (defined($mForQ)) {
-		procThisOmegaKspace($i,$omega,$centralSite,$mForQ);
+		procThisOmegaKspace($i, $omega, $centralSite, $mForQ, $geometry);
 	} elsif (defined($siteForSpectrum)) {
-		procThisOmegaSpace($i,$omega,$centralSite,$siteForSpectrum);
+		procThisOmegaSpace($i, $omega, $centralSite, $siteForSpectrum, $geometry);
 	} else {
 		my @array;
-		procAllQs(\@array,$i,$omega,$centralSite);
+		procAllQs(\@array, $i, $omega, $centralSite, $geometry);
 
 		printSpectrum(\@array);
 	}
@@ -72,6 +75,7 @@ close(FOUTSPECTRUM);
 print STDERR "$0: Spectrum written to $outSpectrum\n";
 my $wantsRealOrImag = (defined($wantsRealPart)) ? "real" : "imag";
 my $omegaMax = $omega0 + $omegaStep * $total;
+
 printSpectrumToColor($outSpectrum,$wantsRealOrImag,$geometry,$omegaMax);
 printGnuplot($outSpectrum, $geometry);
 
@@ -81,19 +85,24 @@ print STDERR "$0: Log written to $logFile\n";
 sub printGnuplot
 {
 	my ($inFile, $geometry) = @_;
-
+	my $hasPrinted = 0;
 	open(FIN, "<", "$inFile") or die "$0: Cannot open $inFile : $!\n";
 
 	my %h;
 	while (<FIN>) {
 		my @temp = split;
-		if (scalar(@temp) < 1) {
+		my $n = scalar(@temp);
+		if ($n < 1) {
 			print STDERR "$0: line $. in $inFile is empty, skipping\n";
 			next;
 		}
 
+		print STDERR "$0: Columns $n in $inFile\n" if (!$hasPrinted);
+		$hasPrinted = 1;
+
 		my $omega = $temp[0];
 		$h{$omega} = \@temp;
+	
 	}
 
 	close(FIN);
@@ -104,15 +113,9 @@ sub printGnuplot
 sub printSpectrumToColor
 {
 	my ($inFile,$what,$geometry,$omegaMax) = @_;
-	my @fileIndices=(0);
-	if ($geometry eq "chain") {
-	} elsif ($geometry eq "ladder") {
-		@fileIndices=(0,1);
-	} else {
-		die "$0: Unknown geometry $geometry\n";
-	}
+	my ($factor, $fileIndices, $leg) = OmegaUtils::getGeometryDetails($geometry);
 
-	foreach my $fileIndex (@fileIndices) {
+	foreach my $fileIndex (@$fileIndices) {
 		my $outSpectrum = "outSpectrum$fileIndex.color";
 		my @colorData;
 		my ($counter,$size) = spectrumToColor(\@colorData,
@@ -157,7 +160,7 @@ sub printSpectrum
 
 sub procCommon
 {
-	my ($ind,$omega,$centralSite) = @_;
+	my ($ind, $omega, $centralSite, $geometry) = @_;
 	my $n = $GlobalNumberOfSites;
 	my $inputRoot = "input";
 	my $prefix = "runFor$inputRoot$ind";
@@ -276,8 +279,8 @@ sub readSpace
 
 sub procThisOmegaKspace
 {
-	my ($ind,$omega,$centralSite,$mForQ) = @_;
-	procCommon($ind,$omega,$centralSite);
+	my ($ind, $omega, $centralSite, $mForQ, $geometry) = @_;
+	procCommon($ind, $omega, $centralSite, $geometry);
 	my $inputRoot = "input";
 	my $prefix = "runFor$inputRoot$ind";
 	my $inFile = "$prefix.sq";
@@ -286,8 +289,8 @@ sub procThisOmegaKspace
 
 sub procThisOmegaSpace
 {
-	my ($ind,$omega,$centralSite,$siteForSpectrum) = @_;
-	procCommon($ind,$omega,$centralSite);
+	my ($ind, $omega, $centralSite, $siteForSpectrum) = @_;
+	procCommon($ind, $omega, $centralSite, $geometry);
 	my $inputRoot = "input";
 	my $prefix = "runFor$inputRoot$ind";
 	my $inFile = "$prefix.space";
@@ -296,8 +299,8 @@ sub procThisOmegaSpace
 
 sub procAllQs
 {
-	my ($array,$ind,$omega,$centralSite) = @_;
-	procCommon($ind,$omega,$centralSite);
+	my ($array, $ind, $omega, $centralSite, $geometry) = @_;
+	procCommon($ind,$omega,$centralSite, $geometry);
 	readAllQs($array,$ind);
 	die "procAllQs: array is empty\n" if (scalar(@$array) == 0);
 }
@@ -329,16 +332,16 @@ sub execThis
 
 sub printFourier
 {
-	my ($outFile,$f,$geometry) = @_;
-	if ($geometry eq "chain") {
+	my ($outFile, $f, $geometry) = @_;
+	if ($geometry->{"name"} eq "chain") {
 		return printFourierChain($outFile,$f);
 	}
 
-	if ($geometry eq "ladder") {
-		return printFourierLadder($outFile,$f);
+	if ($geometry->{"name"} eq "ladder") {
+		return printFourierLadder($outFile, $f);
 	}
 
-	die "$0: printFourier: undefined geometry $geometry\n";
+	die "$0: printFourier: undefined geometry ".$geometry->{"name"}."\n";
 }
 
 sub printFourierChain
@@ -360,7 +363,7 @@ sub printFourierChain
 
 sub printFourierLadder
 {
-	my ($outFile,$f) = @_;
+	my ($outFile, $f) = @_;
 
 	open(FOUT, ">", "$outFile") or die "$0: Cannot write to $outFile : $!\n";
 
@@ -378,20 +381,20 @@ sub fourier
 {
 	my ($f,$v,$geometry) = @_;
 
-	if ($geometry eq "chain") {
-		return fourierChain($f,$v);
+	if ($geometry->{"name"} eq "chain") {
+		return fourierChain($f, $v);
 	}
 
-	if ($geometry eq "ladder") {
-		return fourierLadder($f,$v);
+	if ($geometry->{"name"} eq "ladder") {
+		return fourierLadder($f, $v, $geometry->{"leg"});
 	}
 
-	die "$0: ft: undefined geometry $geometry\n";
+	die "$0: ft: undefined geometry ".$geometry->{"name"}."\n";
 }
 
 sub fourierChain
 {
-	my ($f,$v) = @_;
+	my ($f, $v) = @_;
 	my $n = scalar(@$v);
 	my $numberOfQs = (defined($mMax)) ? $mMax : $n;
 	for (my $m = 0; $m < $numberOfQs; ++$m) {
@@ -414,52 +417,46 @@ sub fourierChain
 
 sub fourierLadder
 {
-	my ($f,$v) = @_;
+	my ($f, $v, $leg) = @_;
 	my $n = scalar(@$v);
-	my $numberOfQs = (defined($mMax)) ? $mMax : int(0.5*$n);
+	my $numberOfQs = (defined($mMax)) ? $mMax : int($n/$leg);
 	for (my $m = 0; $m < $numberOfQs; ++$m) {
 		my $q = OmegaUtils::getQ($m, $numberOfQs, $isPeriodic);
-		my @f0 = fourierF0($v,$q);
-		my @f1 = fourierF1($v,$q);
-		for (my $x = 0; $x < 2; ++$x) {
+		
+		my @fPerLeg;
+		my @sumKy0 = (0, 0);
+		for (my $ll = 0; $ll < $leg; ++$ll) {
+			my @f = fourierF($v, $q, $ll, $leg);
+			$fPerLeg[$ll] = \@f;
+			$sumKy0[0] += $f[0];
+			$sumKy0[1] += $f[1];
+		}
+
+		$f->[$m] = \@sumKy0;
+
+		next if ($leg != 2);
+
+		for (my $x = 1; $x < 2; ++$x) {
 			my $sign = 1-2*$x;
-			my $realPart = $f0[0] + $sign*$f1[0];
-			my $imagPart = $f0[1] + $sign*$f1[1];
+			my $realPart = $fPerLeg[0]->[0] + $sign*$fPerLeg[1]->[0];
+			my $imagPart = $fPerLeg[0]->[1] + $sign*$fPerLeg[1]->[1];
 			my @sum = ($realPart,$imagPart);
 			$f->[$m+$numberOfQs*$x] = \@sum;
 		}
 	}
 }
 
-sub fourierF0
+sub fourierF
 {
-	my ($v,$q) = @_;
+	my ($v, $q, $ll, $leg) = @_;
 	my $n = scalar(@$v);
 	my @sum;
-	for (my $i = 0; $i < $n; $i+=2) {
+	for (my $i = $ll; $i < $n; $i += $leg) {
 		my $ptr = $v->[$i];
 		my @temp = @$ptr;
-		my $arg = $q*($i-$centralSite)*0.5;
+		my $arg = $q*distanceLadder($i, $centralSite, $ll, $leg);
 		# FIXME THINK ABOUT OPEN BC
 		my $carg = cos($arg);
-		$sum[0] += $temp[0]*$carg;
-		$sum[1] += $temp[1]*$carg;
-	}
-
-	return @sum;
-}
-
-sub fourierF1
-{
-	my ($v,$q) = @_;
-	my $n = scalar(@$v);
-	my @sum;
-	for (my $i = 1; $i < $n; $i+=2) {
-		my $ptr = $v->[$i];
-		my @temp = @$ptr;
-		my $arg = $q*distanceLadder($i,$centralSite);
-		my $carg = cos($arg);
-		# FIXME THINK ABOUT OPEN BC
 		$sum[0] += $temp[0]*$carg;
 		$sum[1] += $temp[1]*$carg;
 	}
@@ -469,10 +466,8 @@ sub fourierF1
 
 sub distanceLadder
 {
-	my ($ind, $jnd) = @_;
-	my $first = ($ind-1)/2;
-	my $second = $jnd/2;
-	return $first - $second;
+	my ($ind, $jnd, $ll, $leg) = @_;
+	return ($ind - $ll - $jnd)/$leg;
 }
 
 sub extractValue
@@ -586,8 +581,9 @@ sub getRealOrImagData
 	my @temp;
 	my $n = scalar(@$d);
 	my $start = 1;
-	if ($geometry eq "ladder") {
-		$n = int($n*0.5);
+	if ($geometry->{"name"} eq "ladder") {
+		my $leg = $geometry->{"leg"};
+		$n = int($n/$leg);
 		$start += $qyIndex*$n;
 		$n *= (1+$qyIndex);
 	}
