@@ -26,15 +26,20 @@ GetOptions('f=s' => \$templateInput,
 my ($omega0,$total,$omegaStep,$centralSite);
 my $geometryName;
 my $geometryLeg = 1;
+my $orbitals = 1;
 my $hptr = {"#OmegaBegin" => \$omega0,
             "#OmegaTotal" => \$total,
             "#OmegaStep" => \$omegaStep,
             "GeometryKind" => \$geometryName,
             "LadderLeg" => \$geometryLeg,
+            "Orbitals" => \$orbitals,
             "TSPSites 1" => \$centralSite,
             "TotalNumberOfSites" => \$GlobalNumberOfSites};
 
 OmegaUtils::getLabels($hptr,$templateInput);
+$hptr->{"isPeriodic"} = $isPeriodic;
+$hptr->{"mMax"} = $mMax;
+$hptr->{"centralSite"} = $centralSite;
 
 my $logFile = "Log$templateInput";
 $logFile =~ s/\..*$//;
@@ -179,7 +184,7 @@ sub procCommon
 	my @spaceValues;
 	readSpace(\@spaceValues,$inFile);
 	my @qValues;
-	fourier(\@qValues,\@spaceValues,$geometry);
+	OmegaUtils::fourier(\@qValues,\@spaceValues,$geometry,$hptr);
 	printFourier($outFile,\@qValues,$geometry);
 }
 
@@ -375,99 +380,6 @@ sub printFourierLadder
 	}
 
 	close(FOUT);
-}
-
-sub fourier
-{
-	my ($f,$v,$geometry) = @_;
-
-	if ($geometry->{"name"} eq "chain") {
-		return fourierChain($f, $v);
-	}
-
-	if ($geometry->{"name"} eq "ladder") {
-		return fourierLadder($f, $v, $geometry->{"leg"});
-	}
-
-	die "$0: ft: undefined geometry ".$geometry->{"name"}."\n";
-}
-
-sub fourierChain
-{
-	my ($f, $v) = @_;
-	my $n = scalar(@$v);
-	my $numberOfQs = (defined($mMax)) ? $mMax : $n;
-	for (my $m = 0; $m < $numberOfQs; ++$m) {
-		my @sum = (0,0);
-		my $q = OmegaUtils::getQ($m, $numberOfQs, $isPeriodic);
-		for (my $i = 0; $i < $n; $i++) {
-			my $ptr = $v->[$i];
-			my @temp = @$ptr;
-			my $arg = $q*($i-$centralSite);
-			my $carg = cos($arg);
-			my $sarg = sin($q*($i + 1));
-			my $cOrSarg = ($isPeriodic) ? $carg : $sarg;
-			$sum[0] += $temp[0]*$cOrSarg;
-			$sum[1] += $temp[1]*$cOrSarg;
-		}
-
-		$f->[$m] = \@sum;
-	}
-}
-
-sub fourierLadder
-{
-	my ($f, $v, $leg) = @_;
-	my $n = scalar(@$v);
-	my $numberOfQs = (defined($mMax)) ? $mMax : int($n/$leg);
-	for (my $m = 0; $m < $numberOfQs; ++$m) {
-		my $q = OmegaUtils::getQ($m, $numberOfQs, $isPeriodic);
-		
-		my @fPerLeg;
-		my @sumKy0 = (0, 0);
-		for (my $ll = 0; $ll < $leg; ++$ll) {
-			my @f = fourierF($v, $q, $ll, $leg);
-			$fPerLeg[$ll] = \@f;
-			$sumKy0[0] += $f[0];
-			$sumKy0[1] += $f[1];
-		}
-
-		$f->[$m] = \@sumKy0;
-
-		next if ($leg != 2);
-
-		for (my $x = 1; $x < 2; ++$x) {
-			my $sign = 1-2*$x;
-			my $realPart = $fPerLeg[0]->[0] + $sign*$fPerLeg[1]->[0];
-			my $imagPart = $fPerLeg[0]->[1] + $sign*$fPerLeg[1]->[1];
-			my @sum = ($realPart,$imagPart);
-			$f->[$m+$numberOfQs*$x] = \@sum;
-		}
-	}
-}
-
-sub fourierF
-{
-	my ($v, $q, $ll, $leg) = @_;
-	my $n = scalar(@$v);
-	my @sum;
-	for (my $i = $ll; $i < $n; $i += $leg) {
-		my $ptr = $v->[$i];
-		my @temp = @$ptr;
-		my $arg = $q*distanceLadder($i, $centralSite, $ll, $leg);
-		# FIXME THINK ABOUT OPEN BC
-		my $carg = cos($arg);
-		$sum[0] += $temp[0]*$carg;
-		$sum[1] += $temp[1]*$carg;
-	}
-
-	return @sum;
-}
-
-sub distanceLadder
-{
-	my ($ind, $jnd, $ll, $leg) = @_;
-	return ($ind - $ll - $jnd)/$leg;
 }
 
 sub extractValue

@@ -139,6 +139,253 @@ sub findMaxVertical
 	return $max;
 }
 
+sub fourier
+{
+	my ($f, $v, $geometry, $hptr) = @_;
+
+	if ($geometry->{"name"} eq "chain") {
+		return fourierChain($f, $v, $hptr);
+	}
+
+	if ($geometry->{"name"} eq "ladder") {
+		return fourierLadder($f, $v, $geometry->{"leg"}, $hptr);
+	}
+
+ 	if ($geometry->{"name"} eq "LongRange") {
+
+		my $orbitals = $hptr->{"Orbitals"};
+	        
+		if ($geometry->{"subname"} eq "chain") {
+			if ($orbitals == 1) {
+        	        	return fourierChain($f, $v, $hptr);
+			} elsif ($orbitals == 2) {
+                                return fourierChain2orb($f, $v, $hptr);				
+			}
+        	}
+
+        	if ($geometry->{"subname"} eq "ladder") {
+                        if ($orbitals == 1) {
+                                return fourierLadder($f, $v, $geometry->{"leg"}, $hptr);
+                        } elsif ($orbitals == 2) {
+                                return fourierLadder2orb($f, $v, $hptr);
+                        }
+        	}
+        }
+
+	die "$0: ft: undefined geometry ".$geometry->{"name"}."\n";
+}
+
+sub fourierChain
+{
+	my ($f, $v, $hptr) = @_;
+	my $n = scalar(@$v);
+	my $mMax = $hptr->{"mMax"};
+	my $isPeriodic = $hptr->{"isPeriodic"};
+	my $centralSite = $hptr->{"centralSite"};
+	my $numberOfQs = (defined($mMax)) ? $mMax : $n;
+	for (my $m = 0; $m < $numberOfQs; ++$m) {
+		my @sum = (0,0);
+		my $q = getQ($m, $numberOfQs, $isPeriodic);
+		for (my $i = 0; $i < $n; $i++) {
+			my $ptr = $v->[$i];
+			my @temp = @$ptr;
+			my $arg = $q*($i-$centralSite);
+			my $carg = cos($arg);
+			my $sarg = sin($q*($i + 1));
+			my $cOrSarg = ($isPeriodic) ? $carg : $sarg;
+			$sum[0] += $temp[0]*$cOrSarg;
+			$sum[1] += $temp[1]*$cOrSarg;
+		}
+
+		$f->[$m] = \@sum;
+	}
+}
+
+sub fourierLadder
+{
+	my ($f, $v, $leg, $hptr) = @_;
+	my $n = scalar(@$v);
+	my $mMax = $hptr->{"mMax"};
+	my $isPeriodic = $hptr->{"isPeriodic"};
+	my $centralSite = $hptr->{"centralSite"};
+	my $numberOfQs = (defined($mMax)) ? $mMax : int($n/$leg);
+	for (my $m = 0; $m < $numberOfQs; ++$m) {
+		my $q = getQ($m, $numberOfQs, $isPeriodic);
+		
+		my @fPerLeg;
+		my @sumKy0 = (0, 0);
+		for (my $ll = 0; $ll < $leg; ++$ll) {
+			my @f = fourierF($v, $q, $ll, $leg, $centralSite);
+			$fPerLeg[$ll] = \@f;
+			$sumKy0[0] += $f[0];
+			$sumKy0[1] += $f[1];
+		}
+
+		$f->[$m] = \@sumKy0;
+
+		next if ($leg != 2);
+
+		for (my $x = 1; $x < 2; ++$x) {
+			my $sign = 1-2*$x;
+			my $realPart = $fPerLeg[0]->[0] + $sign*$fPerLeg[1]->[0];
+			my $imagPart = $fPerLeg[0]->[1] + $sign*$fPerLeg[1]->[1];
+			my @sum = ($realPart,$imagPart);
+			$f->[$m+$numberOfQs*$x] = \@sum;
+		}
+	}
+}
+
+sub fourierF
+{
+	my ($v, $q, $ll, $leg, $centralSite) = @_;
+	my $n = scalar(@$v);
+	my @sum;
+	for (my $i = $ll; $i < $n; $i += $leg) {
+		my $ptr = $v->[$i];
+		my @temp = @$ptr;
+		my $arg = $q*distanceLadder($i, $centralSite, $ll, $leg);
+		# FIXME THINK ABOUT OPEN BC
+		my $carg = cos($arg);
+		$sum[0] += $temp[0]*$carg;
+		$sum[1] += $temp[1]*$carg;
+	}
+
+	return @sum;
+}
+
+sub distanceLadder
+{
+	my ($ind, $jnd, $ll, $leg) = @_;
+	return ($ind - $ll - $jnd)/$leg;
+}
+
+sub fourierChain2orb
+{
+        my ($f, $v, $hptr) = @_;
+	my $mMax = $hptr->{"mMax"};
+	my $isPeriodic = $hptr->{"isPeriodic"};
+        my $n = int(0.25*scalar(@$v));
+        my $numberOfQs = (defined($mMax)) ? $mMax : $n;
+	my $cSite = $n/2-1;
+        for (my $m = 0; $m < $numberOfQs; ++$m) {
+                my @sum = (0,0);
+                my $q = getQ($m, $numberOfQs, $isPeriodic);
+
+# orb A
+               	for (my $i = 0; $i < $n; $i++) {
+                        	my @temp = ($v->[4*$i],$v->[4*$i+1]);
+                        	my $arg = $q*($i-$cSite);
+                        	my $carg = cos($arg); 
+                        	$sum[0] += $temp[0]*$carg;
+                        	$sum[1] += $temp[1]*$carg;
+               	}
+# orb B
+               	for (my $i = 0; $i < $n; $i++) {
+                        	my @temp = ($v->[4*$i+2],$v->[4*$i+3]);
+                        	my $arg = $q*($i-$cSite);
+                        	my $carg = cos($arg);
+                        	$sum[0] += $temp[0]*$carg;
+                        	$sum[1] += $temp[1]*$carg;
+               	}
+
+                $f->[$m] = \@sum;
+        }
+}
+
+sub fourierLadder2orb
+{
+        my ($f, $v, $leg, $hptr) = @_;
+	my $mMax = $hptr->{"mMax"};
+	my $isPeriodic = $hptr->{"isPeriodic"};
+	my $centralSite = $hptr->{"centralSite"};
+        my $n = int(0.125*scalar(@$v));
+        my $numberOfQs = (defined($mMax)) ? $mMax : $n;
+        for (my $m = 0; $m < $numberOfQs; ++$m) {
+                my $q = getQ($m,$numberOfQs,$isPeriodic);
+                my @f0 = fourierF0test($v, $q, $centralSite);
+                my @f1 = fourierF1test($v, $q, $centralSite);
+                for (my $x = 0; $x < 2; ++$x) {
+                        my $sign = 1-2*$x;
+                        my $realPart = $f0[0] + $sign*$f1[0];
+                        my $imagPart = $f0[1] + $sign*$f1[1];
+                        my @sum = ($realPart,$imagPart);
+                        $f->[$m+$numberOfQs*$x] = \@sum;
+                }
+        }
+}
+
+
+sub fourierF0test
+{
+        my ($v,$q) = @_;
+        my $n = int(0.25*scalar(@$v));
+	my $cSite = $n/2-2;
+        my @sum;
+# orb A
+        for (my $i = 0; $i < $n; $i+=2) {
+                my @temp = ($v->[4*$i],$v->[4*$i+1]);
+                my $arg = $q*($i-$cSite)*0.5;
+                my $carg = cos($arg);
+                $sum[0] += $temp[0]*$carg;
+                $sum[1] += $temp[1]*$carg;
+        }
+
+# orb B
+        for (my $i = 0; $i < $n; $i+=2) {
+                my @temp = ($v->[4*$i+2],$v->[4*$i+3]);
+                my $arg = $q*($i-$cSite)*0.5;
+                my $carg = cos($arg);
+                $sum[0] += $temp[0]*$carg;
+                $sum[1] += $temp[1]*$carg;
+        }
+
+        return @sum;
+}
+
+
+sub fourierF1
+{
+	my ($v, $q, $centralSite) = @_;
+	my $n = int(0.5*scalar(@$v));
+	my @sum;
+	for (my $i = 1; $i < $n; $i+=2) {
+		my @temp = ($v->[2*$i],$v->[2*$i+1]);
+		my $arg = $q*distanceLadder($i,$centralSite,0,2);
+		my $carg = cos($arg);
+		$sum[0] += $temp[0]*$carg;
+		$sum[1] += $temp[1]*$carg;
+	}
+
+	return @sum;
+}
+
+sub fourierF1test
+{
+        my ($v,$q) = @_;
+        my $n = int(0.25*scalar(@$v));
+        my @sum;
+        my $cSite = $n/2-2;
+# orb A
+        for (my $i = 1; $i < $n; $i+=2) {
+                my @temp = ($v->[4*$i],$v->[4*$i+1]);
+                my $arg = $q*distanceLadder($i,$cSite,0,2);
+                my $carg = cos($arg);
+                $sum[0] += $temp[0]*$carg;
+                $sum[1] += $temp[1]*$carg;
+        }
+# orb B
+        for (my $i = 1; $i < $n; $i+=2) {
+                my @temp = ($v->[4*$i+2],$v->[4*$i+3]);
+                my $arg = $q*distanceLadder($i,$cSite,0,2);
+                my $carg = cos($arg);
+                $sum[0] += $temp[0]*$carg;
+                $sum[1] += $temp[1]*$carg;
+        }
+
+        return @sum;
+}
+
+
 sub getQ
 {
 	my ($m, $n, $isPeriodic) = @_;
