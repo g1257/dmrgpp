@@ -44,7 +44,6 @@ sub printGnuplot
 			my $aptr = $ptr->{$omega};
 			my $nks = scalar(@$aptr) - 1;
 			my $numberOfQs = int($factor*$nks);
-			print STDERR "$fileIndex $numberOfQs $nks $factor\n";
 			my $centerShift = ($numberOfQs & 1) ? ($numberOfQs - 1)/2 : $numberOfQs/2;
 			$centerShift = 0 unless ($zeroAtCenter);
 			for (my $m2 = 0; $m2 < $numberOfQs; ++$m2) {

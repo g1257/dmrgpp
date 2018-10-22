@@ -102,7 +102,7 @@ sub printGnuplot
 
 		my $omega = $temp[0];
 		$h{$omega} = \@temp;
-	
+
 	}
 
 	close(FIN);
