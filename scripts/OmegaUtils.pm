@@ -108,10 +108,10 @@ sub getGeometryDetails
 	if ($geometry->{"name"} eq "chain") {
 		$factor = 0.5;
 		die "$0: Chain does not have ky != 0\n" if (defined($my) and $my != 0)
-	} elsif ($geometry->{"name"} eq "ladder") {
+	} elsif ($geometry->{"name"} eq "ladder" || $geometry->{"name"} eq "ladderx") {
 		$leg = $geometry->{"leg"};
 		$factor = 0.25;
-		@fileIndices=(0, 1) if ($leg == 2);
+		@fileIndices=(0, 1) if ($leg == 2 || $geometry->{"subname"} eq "average");
 	} else {
 		die "$0: Unknown geometry ".$geometry->{"name"}."\n";
 	}
@@ -149,6 +149,12 @@ sub fourier
 
 	if ($geometry->{"name"} eq "ladder") {
 		return fourierLadder($f, $v, $geometry->{"leg"}, $hptr);
+	}
+
+	if ($geometry->{"name"} eq "ladderx") {
+		if ($geometry->{"subname"} eq "average") {
+			return fourierLadderAverage($f, $v, $geometry->{"leg"}, $hptr);
+		}
 	}
 
  	if ($geometry->{"name"} eq "LongRange") {
@@ -385,6 +391,43 @@ sub fourierF1test
         return @sum;
 }
 
+sub fourierLadderAverage
+{
+	my ($f, $v, $leg, $hptr) = @_;
+	my $n = scalar(@$v);
+	my $lx = int($n/$leg);
+	my $legSmall = 2;
+	my $total = int($leg/$legSmall);
+	my $centralSite = $hptr->{"centralSite"};
+	my $ll = ($centralSite == int($n/2)) ? 0 : 1;
+	die "$0: Wrong central site\n" if ($centralSite != int($n/2) + $ll*2);
+
+	# prepare partialV
+	
+	my @partialV = fourierLadderAverageInput($v, $ll, $leg, $hptr);
+	print STDERR "$0: partialV for ll=$ll with ".scalar(@partialV)." entries\n";
+	my %modifiedHptr = %$hptr;
+	$modifiedHptr{"centralSite"} = $lx;
+	my @partialF;
+	fourierLadder($f, \@partialV, 2, \%modifiedHptr);
+}
+
+sub fourierLadderAverageInput
+{
+	my ($v, $ll, $leg, $hptr) = @_;
+	my $n = scalar(@$v);
+	my $lx = int($n/$leg);
+	my $legSmall = 2;
+	my @partialV;
+	for (my $x = 0; $x < $lx; ++$x) {
+		for (my $y = 0; $y < $legSmall; ++$y) {
+			my $oldY = $y + 2*$ll;
+			$partialV[$y + $x*$legSmall] = $v->[$oldY + $x*$leg];
+		}
+	}
+
+	return @partialV;
+}
 
 sub getQ
 {
