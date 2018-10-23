@@ -205,7 +205,8 @@ public:
 			for (SizeType i = 0; i < matsize; ++i) V1[i] *= btmp;		// normalize V1
 		}
 
-		if (lanczosVectors_.lotaMemory()) lanczosVectors_.saveVector(V1, 1);
+		if (lanczosVectors_.lotaMemory() && 1 < max_nstep)
+			lanczosVectors_.saveVector(V1, 1);
 
 		VectorRealType tmpEigs(ab.size(), 0);
 		// ---- Starting the loop -------
