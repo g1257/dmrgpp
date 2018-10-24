@@ -339,7 +339,7 @@ public:
 			\item [wftNoAccel] Disable WFT acceleration (but not the WFT itself)
 			\item [BatchedGemm] Only meaningful with MatrixVectorKron. Enables
 								batched gemm and might need plugin sc
-			\item [KrylovAbridge] TBW
+			\item [KrylovNoAbridge] TBW
 			\item [fixLegacyBugs] TBW
 			\item [saveDensityMatrixEigenvalues] Save DensityMatrixEigenvalues
 			                                     to the data file.
@@ -403,7 +403,7 @@ public:
 		registerOpts.push_back("setAffinities");
 		registerOpts.push_back("wftNoAccel");
 		registerOpts.push_back("BatchedGemm");
-		registerOpts.push_back("KrylovAbridge");
+		registerOpts.push_back("KrylovNoAbridge");
 		registerOpts.push_back("fixLegacyBugs");
 		registerOpts.push_back("saveDensityMatrixEigenvalues");
 		registerOpts.push_back("KronNoUseLowerPart");

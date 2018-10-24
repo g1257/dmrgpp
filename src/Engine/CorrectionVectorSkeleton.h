@@ -392,7 +392,7 @@ public:
 	           SizeType n2,
 	           SizeType i0)
 	{
-		bool krylovAbridge = (model_.params().options.find("KrylovAbridge") !=
+		bool krylovAbridge = (model_.params().options.find("KrylovNoAbridge") ==
 		        PsimagLite::String::npos);
 		SizeType n3 = (krylovAbridge) ? 1 : n2;
 		// ---------------------------------------------------
