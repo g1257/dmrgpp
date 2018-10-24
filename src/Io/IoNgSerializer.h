@@ -330,8 +330,13 @@ public:
 
 		if (n <= oldN) return;
 
-		for (SizeType i = min; i < n; ++i)
+		for (SizeType i = min; i < n; ++i) {
+			try {
 			what[i].write(name2 + "/" + typeToString(i), *this);
+			} catch(...) {
+				what[i].overwrite(name2 + "/" + typeToString(i), *this);
+			}
+		}
 	}
 
 	template<typename T>
