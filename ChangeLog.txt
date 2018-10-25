@@ -1,3 +1,17 @@
+2018-10-25 Version 2.40
+
+Bug fixes
+
+* LanczosCore can now handle matrices of rows = cols = 1
+
+New features:
+
+* IoNg: more overwrites possible
+
+Refactoring:
+
+* TimeHandle class
+
 2018-09-27 Version 2.38
 
 * new LanczosSolver by Nirav
