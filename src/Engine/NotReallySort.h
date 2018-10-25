@@ -112,7 +112,7 @@ public:
 
 	typedef Qn::VectorQnType VectorQnType;
 	typedef Qn::VectorSizeType VectorSizeType;
-	typedef typename std::tr1::hash<Dmrg::PairOfQns>::VectorLikeQnType VectorLikeQnType;
+	typedef std::tr1::hash<Dmrg::PairOfQns>::VectorLikeQnType VectorLikeQnType;
 
 	enum AlgoEnum {ALGO_UMAP, ALGO_CUSTOM};
 
