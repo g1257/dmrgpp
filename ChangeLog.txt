@@ -1,3 +1,29 @@
+2018-10-25 Version 5.40
+
+Bug fixes:
+
+* minimizeDisk is incompatible with RecoverySave
+(reported by Wael)
+
+Performance:
+
+* CorrectionVectorSkeleton: better calR (contributed by Ed)
+
+* coutAnalysis improvements
+
+* timing matrixVectorKron
+
+New defaults:
+
+* KrylovNoAbridge SolverOptions added (KrylovAbridge now the default)
+
+New features:
+
+* shinkStacksOnDisk SolverOptions feature to reduce RAM usage
+(requested by Nivav)
+
+* deltaEnergies script added to help convergence studies
+
 2018-09-27 Version 5.38
 
 Bug fixes:
