@@ -292,6 +292,8 @@ public:
 		return ind;
 	}
 
+	bool isPeriodicY() const { return isPeriodicY_; }
+
 private:
 
 	SizeType translateInternal(SizeType c,SizeType l,SizeType amount) const

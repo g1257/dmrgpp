@@ -176,7 +176,10 @@ protected:
 		throw RuntimeError(str2);
 	}
 
-	bool neighbors(SizeType i1,SizeType i2,bool periodic = false,SizeType period = 1) const
+	bool neighbors(SizeType i1,
+	               SizeType i2,
+	               bool periodic,
+	               SizeType period) const
 	{
 		SizeType imin = (i1<i2) ? i1 : i2;
 		SizeType imax = (i1>i2) ? i1 : i2;

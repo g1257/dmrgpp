@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009-2013-2018, UT-Battelle, LLC
 All rights reserved
 
-[PsimagLite, Version 1.0.0]
+[PsimagLite, Version 2.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -97,7 +97,7 @@ public:
 
 	LadderX() {}
 
-	LadderX(SizeType linSize,InputType& io)
+	LadderX(SizeType linSize, InputType& io)
 	    : ladder_(linSize,io),linSize_(linSize),leg_(ladder_.leg())
 	{}
 
@@ -119,24 +119,37 @@ public:
 	{
 		switch (dirId) {
 		case DIRECTION_XPY:
-			return linSize_ - linSize_/leg_;
+			return linSize_ - leg_;
 		case DIRECTION_XMY:
-			return linSize_ - linSize_/leg_;
+			return linSize_ - leg_;
 		}
+
 		return ladder_.getVectorSize(dirId);
 	}
 
 	bool connected(SizeType i1,SizeType i2) const
 	{
-		if (i1==i2) return false;
-		if (ladder_.connected(i1,i2)) return true;
+		if (i1 == i2)
+			return false;
+
+		if (ladder_.connected(i1,i2))
+			return true;
+
+		SizeType lx = linSize_/leg_;
+		bool isPeriodicY = ladder_.isPeriodicY();
 		SizeType c1 = i1/leg_;
 		SizeType c2 = i2/leg_;
 		SizeType r1 = i1%leg_;
 		SizeType r2 = i2%leg_;
-		if (c1==c2) return this->neighbors(r1,r2);
-		if (r1==r2) return this->neighbors(c1,c2);
-		return (this->neighbors(r1,r2) && this->neighbors(c1,c2));
+
+		if (c1 == c2)
+			return this->neighbors(r1, r2, isPeriodicY, leg_);
+
+		if (r1 == r2)
+			return this->neighbors(c1, c2, false, 0);
+
+		return (this->neighbors(r1, r2, isPeriodicY, leg_) &&
+		        this->neighbors(c1, c2, isPeriodicY, lx));
 	}
 
 	// assumes i1 and i2 are connected
@@ -193,37 +206,11 @@ public:
 		throw RuntimeError("findReflection: unimplemented (sorry)\n");
 	}
 
-	template<class Archive>
-	void write(Archive & ar, const unsigned int)
-	{
-		ar & boost::serialization::base_object<GeometryBase<ComplexOrRealType, InputType> >(*this);
-		ar & ladder_;
-		ar & linSize_;
-		ar & leg_;
-	}
-
-	SizeType memResolv(MemResolv& mres,
+	SizeType memResolv(MemResolv&,
 	                   SizeType,
-	                   String msg) const
+	                   String) const
 	{
-		String str = msg;
-		str += "LadderBath";
-		const char* start = (const char *)this;
-		const char* end = (const char*)&ladder_;
-		SizeType total = end - start;
-		mres.push(MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
-
-		start = end;
-		end = (const char*)&linSize_;
-		total += mres.memResolv(&ladder_,end-start,str + " ladder");
-
-		start = end;
-		end = (const char*)&leg_;
-		total += mres.memResolv(&linSize_,end-start,str + " linSize");
-
-		mres.memResolv(&leg_,sizeof(*this)-total, str + " leg");
-
-		return sizeof(*this);
+		return 0;
 	}
 
 private:
