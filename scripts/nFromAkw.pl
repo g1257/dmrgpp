@@ -172,7 +172,7 @@ sub printVsOmega
 sub sumOverKx
 {
 	my ($v, $ptr, $my) = @_;
-	my ($factor, $fileIndices, $leg) = getGeometryDetails($geometry, $my);
+	my ($factor, $fileIndices, $leg) = OmegaUtils::getGeometryDetails($geometry, $my);
 	my $fileIndex = $my;
 
 	for my $omega (sort {$a <=> $b} keys %$ptr) {
@@ -214,7 +214,7 @@ sub printVsQ
 sub sumOverOmega
 {
 	my ($v, $ptr, $my) = @_;
-	my ($factor, $fileIndices, $leg) = getGeometryDetails($geometry, $my);
+	my ($factor, $fileIndices, $leg) = OmegaUtils::getGeometryDetails($geometry, $my);
 
 	my $fileIndex = $my;
 	my $norm = 0;
