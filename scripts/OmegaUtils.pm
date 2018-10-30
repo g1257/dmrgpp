@@ -38,7 +38,9 @@ sub printGnuplot
 
 	foreach my $fileIndex (@$fileIndices) {
 		my $outFile = "outSpectrum$fileIndex.gnuplot";
+		my $outFile2 = "outSpectrum$fileIndex.pgfplots";
 		open(FOUT, ">", "$outFile") or die "$0: Cannot write to $outFile : $!\n";
+		open(FOUT2, ">", "$outFile2") or die "$0: Cannot write to $outFile2 : $!\n";
 
 		for my $omega (sort {$a <=> $b} keys %$ptr) {
 			my $aptr = $ptr->{$omega};
@@ -54,11 +56,16 @@ sub printGnuplot
 				my $realPart = $aptr->[2*$m+1+2*$fileIndex*$numberOfQs];
 				my $imagPart = $aptr->[2*$m+2+2*$fileIndex*$numberOfQs];
 				print FOUT "$q $omega $realPart $imagPart\n";
+				print FOUT2 "$q $omega $imagPart\n";
 			}
+
+			print FOUT2 "\n";
 		}
 
 		close(FOUT);
+		close(FOUT2);
 		print "$0: Written $outFile\n";
+		print "$0: Written $outFile2\n";
 	}
 }
 

@@ -5,13 +5,11 @@ use v6;
 sub MAIN($file, $lx)
 {
 	my $input = open($file, :r);
-	my $counter = 0;
-	my $tomegas = 10;
 	my ($x, $y) = (0, 0);
 	while (my $line = $input.get) {
-		++$counter;
 		my @temp = split(/\s/, $line);
-		print "$x $y " ~ @temp[3] ~ "\n";
+		#print "$x $y " ~ @temp[3] ~ "\n";
+		printThisLine(@temp, $lx);
 		++$x;
 		if ($x == $lx) {
 			$x = 0;
@@ -19,8 +17,6 @@ sub MAIN($file, $lx)
 			print "\n";
 		}
 
-		#printThisLine(@temp, $lx);
-		#last if ($counter == 10*32);
 	}
 
 	$input.close;
