@@ -112,15 +112,17 @@ sub getGeometryDetails
 	my $factor = 0;
 	my @fileIndices=(0);
 	my $leg = 1;
-	if ($geometry->{"name"} eq "chain") {
+	my $name = $geometry->{"name"};
+	my $subname = $geometry->{"subname"};
+	if ($name eq "chain") {
 		$factor = 0.5;
 		die "$0: Chain does not have ky != 0\n" if (defined($my) and $my != 0)
-	} elsif ($geometry->{"name"} eq "ladder" || $geometry->{"name"} eq "ladderx") {
+	} elsif ($name eq "ladder" || $subname eq "average") {
 		$leg = $geometry->{"leg"};
 		$factor = 0.25;
-		@fileIndices=(0, 1) if ($leg == 2 || $geometry->{"subname"} eq "average");
+		@fileIndices=(0, 1) if ($leg == 2 || $subname eq "average");
 	} else {
-		die "$0: Unknown geometry ".$geometry->{"name"}."\n";
+		die "$0: Unknown geometry $name\n";
 	}
 
 	return ($factor, \@fileIndices, $leg);
@@ -150,6 +152,12 @@ sub fourier
 {
 	my ($f, $v, $geometry, $hptr) = @_;
 
+	my $subname = $geometry->{"subname"};
+
+	if ($subname eq "average") {
+		return fourierLadderAverage($f, $v, $geometry->{"leg"}, $hptr);
+	}
+
 	if ($geometry->{"name"} eq "chain") {
 		return fourierChain($f, $v, $hptr);
 	}
@@ -158,31 +166,25 @@ sub fourier
 		return fourierLadder($f, $v, $geometry->{"leg"}, $hptr);
 	}
 
-	if ($geometry->{"name"} eq "ladderx") {
-		if ($geometry->{"subname"} eq "average") {
-			return fourierLadderAverage($f, $v, $geometry->{"leg"}, $hptr);
-		}
-	}
-
- 	if ($geometry->{"name"} eq "LongRange") {
+	if ($geometry->{"name"} eq "LongRange") {
 
 		my $orbitals = $hptr->{"Orbitals"};
-	        
+
 		if ($geometry->{"subname"} eq "chain") {
 			if ($orbitals == 1) {
-        	        	return fourierChain($f, $v, $hptr);
+				return fourierChain($f, $v, $hptr);
 			} elsif ($orbitals == 2) {
-                                return fourierChain2orb($f, $v, $hptr);				
+                                return fourierChain2orb($f, $v, $hptr);
 			}
-        	}
+	}
 
-        	if ($geometry->{"subname"} eq "ladder") {
+	if ($geometry->{"subname"} eq "ladder") {
                         if ($orbitals == 1) {
                                 return fourierLadder($f, $v, $geometry->{"leg"}, $hptr);
                         } elsif ($orbitals == 2) {
                                 return fourierLadder2orb($f, $v, $hptr);
                         }
-        	}
+		}
         }
 
 	die "$0: ft: undefined geometry ".$geometry->{"name"}."\n";
@@ -224,7 +226,7 @@ sub fourierLadder
 	my $numberOfQs = (defined($mMax)) ? $mMax : int($n/$leg);
 	for (my $m = 0; $m < $numberOfQs; ++$m) {
 		my $q = getQ($m, $numberOfQs, $isPeriodic);
-		
+
 		my @fPerLeg;
 		my @sumKy0 = (0, 0);
 		for (my $ll = 0; $ll < $leg; ++$ll) {
@@ -285,24 +287,24 @@ sub fourierChain2orb
                 my $q = getQ($m, $numberOfQs, $isPeriodic);
 
 # orb A
-               	for (my $i = 0; $i < $n; $i++) {
-                        	my @temp = ($v->[4*$i],$v->[4*$i+1]);
-                        	my $arg = $q*($i-$cSite);
-                        	my $carg = cos($arg); 
-                        	$sum[0] += $temp[0]*$carg;
-                        	$sum[1] += $temp[1]*$carg;
-               	}
+		for (my $i = 0; $i < $n; $i++) {
+			my @temp = ($v->[4*$i],$v->[4*$i+1]);
+			my $arg = $q*($i-$cSite);
+			my $carg = cos($arg); 
+			$sum[0] += $temp[0]*$carg;
+			$sum[1] += $temp[1]*$carg;
+		}
 # orb B
-               	for (my $i = 0; $i < $n; $i++) {
-                        	my @temp = ($v->[4*$i+2],$v->[4*$i+3]);
-                        	my $arg = $q*($i-$cSite);
-                        	my $carg = cos($arg);
-                        	$sum[0] += $temp[0]*$carg;
-                        	$sum[1] += $temp[1]*$carg;
-               	}
+		for (my $i = 0; $i < $n; $i++) {
+			my @temp = ($v->[4*$i+2],$v->[4*$i+3]);
+			my $arg = $q*($i-$cSite);
+			my $carg = cos($arg);
+			$sum[0] += $temp[0]*$carg;
+			$sum[1] += $temp[1]*$carg;
+		}
 
-                $f->[$m] = \@sum;
-        }
+		$f->[$m] = \@sum;
+	}
 }
 
 sub fourierLadder2orb
@@ -410,7 +412,7 @@ sub fourierLadderAverage
 	die "$0: Wrong central site\n" if ($centralSite != int($n/2) + $ll*2);
 
 	# prepare partialV
-	
+
 	my @partialV = fourierLadderAverageInput($v, $ll, $leg, $hptr);
 	print STDERR "$0: partialV for ll=$ll with ".scalar(@partialV)." entries\n";
 	my %modifiedHptr = %$hptr;

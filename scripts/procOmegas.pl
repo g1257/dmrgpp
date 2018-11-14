@@ -25,12 +25,17 @@ GetOptions('f=s' => \$templateInput,
 
 my ($omega0,$total,$omegaStep,$centralSite);
 my $geometryName;
+my $geometrySubName = "NONE";
 my $geometryLeg = 1;
 my $orbitals = 1;
+my $omegaOffset = 0;
+
 my $hptr = {"#OmegaBegin" => \$omega0,
             "#OmegaTotal" => \$total,
             "#OmegaStep" => \$omegaStep,
+	    "#OmegaOffset" => \$omegaOffset,
             "GeometryKind" => \$geometryName,
+	    "GeometrySubKind" => \$geometrySubName,
             "LadderLeg" => \$geometryLeg,
             "Orbitals" => \$orbitals,
             "TSPSites 1" => \$centralSite,
@@ -52,11 +57,11 @@ if ($omegaStep < 0) {
 	$omega0 = $omegaStep = 2.0*pi/$beta;
 }
 
-my $geometry = {"name" => $geometryName, "leg" => $geometryLeg};
+my $geometry = {"name" => $geometryName, "leg" => $geometryLeg, "subname" => $geometrySubName};
 
 my $outSpectrum = "out.spectrum";
 open(FOUTSPECTRUM, ">", "$outSpectrum") or die "$0: Cannot write to $outSpectrum : $!\n";
-for (my $i = 0; $i < $total; ++$i) {
+for (my $i = $omegaOffset; $i < $total; ++$i) {
 
 	my $omega = $omega0 + $omegaStep * $i;
 	print FOUTSPECTRUM "$omega ";
@@ -338,11 +343,13 @@ sub execThis
 sub printFourier
 {
 	my ($outFile, $f, $geometry) = @_;
+	my $subname = $geometry->{"subname"};
+
 	if ($geometry->{"name"} eq "chain") {
 		return printFourierChain($outFile,$f);
 	}
 
-	if ($geometry->{"name"} eq "ladder") {
+	if ($geometry->{"name"} eq "ladder" || $subname eq "average") {
 		return printFourierLadder($outFile, $f);
 	}
 
