@@ -44,8 +44,8 @@ if ($lto == 1) {
 	$lto = "";
 }
 
-my @configFiles = ("../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag");
-push @configFiles, $config if (defined($config));
+my $basicConfig = "../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag";
+my @configFiles = NewMake::configFilesList($basicConfig, $config);
 
 system("cd KronUtil; perl configure.pl \"@configFiles\" $flavor $gccdash");
 
