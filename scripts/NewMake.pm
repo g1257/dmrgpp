@@ -50,7 +50,7 @@ sub main
 
 	my $configContent = getConfigContent($args->{"configFiles"}, $args->{"flavor"});
 
-print FH<<EOF;
+	print FH<<EOF;
 # DO NOT EDIT!!! Changes will be lost. Use the PsiTag system to configure instead
 # This Makefile was written by $0
 # $code
@@ -64,41 +64,41 @@ all: $additional4 $allExecutables $additional3
 
 EOF
 
-foreach my $ptr (@$drivers) {
-	my $refptr = ref($ptr);
-	my $oldmode = ($refptr eq "");
-	my $what = ($oldmode) ? $ptr : $ptr->{"name"};
-	my $aux = ($oldmode) ? 0 : $ptr->{"aux"};
-	$aux = 0 if (!defined($aux));
-	my $dotos = ($oldmode) ? "$what.o" : $ptr->{"dotos"};
-	$dotos = "$what.o" if (!defined($dotos));
+	foreach my $ptr (@$drivers) {
+		my $refptr = ref($ptr);
+		my $oldmode = ($refptr eq "");
+		my $what = ($oldmode) ? $ptr : $ptr->{"name"};
+		my $aux = ($oldmode) ? 0 : $ptr->{"aux"};
+		$aux = 0 if (!defined($aux));
+		my $dotos = ($oldmode) ? "$what.o" : $ptr->{"dotos"};
+		$dotos = "$what.o" if (!defined($dotos));
 
-	print FH<<EOF;
+		print FH<<EOF;
 $what.o: $what.cpp  Makefile $additional
 	\$(CXX) \$(CPPFLAGS) -c $what.cpp
 
 EOF
 
-	if (!$aux) {
-		# FIXME: Support many libs separated by commas here
-		my $libs = ($oldmode) ? "" : $ptr->{"libs"};
-		my $libs1 = "";
-		my $libs2 = "";
-		if (defined($libs) and $libs ne "") {
-			$libs1 = "lib$libs.a";
-			$libs2 = "-l$libs";
-		}
+		if (!$aux) {
+			# FIXME: Support many libs separated by commas here
+			my $libs = ($oldmode) ? "" : $ptr->{"libs"};
+			my $libs1 = "";
+			my $libs2 = "";
+			if (defined($libs) and $libs ne "") {
+				$libs1 = "lib$libs.a";
+				$libs2 = "-l$libs";
+			}
 
-		print FH<<EOF;
+			print FH<<EOF;
 $what: $dotos $libs1
 	\$(CXX) -o  $what $dotos \$(LDFLAGS) $libs2 \$(CPPFLAGS)
 	\$(STRIP_COMMAND) $what
 
 EOF
+		}
 	}
-}
 
-print FH<<EOF;
+	print FH<<EOF;
 
 $path../../PsimagLite/lib/libpsimaglite.a:
 	\$(MAKE) -f Makefile -C $path../../PsimagLite/lib/
@@ -111,6 +111,22 @@ clean::
 
 include Makefile.dep
 EOF
+}
+
+sub configFilesList
+{
+	my ($basic, $optional) = @_;
+	my @list = ($basic);
+	if (defined($optional)) {
+		push @list, $optional;
+		print "$0: Info: Using @list\n";
+		return @list;
+	}
+
+	$optional = $ENV{"PSITAG_CONFIG_USER"};
+	push @list, $optional if $optional;
+	print "$0: Info: Using @list\n";
+	return @list;
 }
 
 sub combineAllDrivers
