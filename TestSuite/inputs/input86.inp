@@ -1,0 +1,24 @@
+TotalNumberOfSites=6
+NumberOfTerms=2
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1  1.0
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1  1.0 
+
+Model=Heisenberg
+HeisenbergTwiceS=2
+
+SolverOptions=none
+Version=version
+OutputFile=data86
+InfiniteLoopKeptStates=100
+FiniteLoops 4  2 200 0 -2 200 0 -2 200 0 2 200 0
+AnisotropyE 6  2.7 2.7 2.7 2.7 2.7 2.7
+AnisotropyD 6  3.1 3.1 3.1 3.1 3.1 3.1
+

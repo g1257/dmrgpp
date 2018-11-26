@@ -117,8 +117,12 @@ Table* (if any): 1, column 7
 Page* where more or less this feature is used: 2230
 [* Refers to published version.]
 
-80) Heisenberg spin 1 with 4 sites
-#81 to 99 are reserved for Heisenberg spin 1
+80) Heisenberg spin 1 with 6 sites
+82) Heisenberg spin 1 with 6 sites AnistropyD=4
+84) Heisenberg spin 1 with 6 sites J = 0 AnistropyE=4
+85) Heisenberg spin 1 with 6 sites J = 0 AnistropyD=AnistropyE=4
+86) Heisenberg spin 1 with 6 sites AnistropyD=2.7 AnistropyE=3.1
+#87 to 99 are reserved for Heisenberg spin 1
 100) same as 0 but without su(2) symmetry
 101) same as 1 but without su(2) symmetry
 #102) same as 2 but without su(2) symmetry <-- DISABLED DUE TO BUG (SEE GITHUBISSUES)
