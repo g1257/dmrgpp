@@ -199,7 +199,7 @@ void mainLoop0(InputNgType::Readable& io,
 	                                                        targeting);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
 	PsimagLite::PsiApp application("DMRG++",&argc,&argv,1);
 	InputCheck inputCheck;
@@ -368,12 +368,15 @@ to the main dmrg driver are the following.
 		atexit(restoreCoutBuffer);
 	}
 
+
 	if (dmrgSolverParams.autoRestart) {
 		std::cout<<"\nAutoRestart possible\n";
 		std::cerr<<"AutoRestart possible\n";
 	}
 
 	printLicense(application.name(), options);
+
+	application.printCmdLine(std::cout);
 
 	if (insitu!="") dmrgSolverParams.insitu = insitu;
 	if (dmrgSolverParams.options.find("minimizeDisk") != PsimagLite::String::npos)

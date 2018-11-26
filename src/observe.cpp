@@ -201,6 +201,8 @@ int main(int argc,char **argv)
 
 	if (versionOnly) return 0;
 
+	application.printCmdLine(std::cout);
+
 	//Setup the Geometry
 	InputCheck inputCheck;
 	InputNgType::Writeable ioWriteable(filename,
