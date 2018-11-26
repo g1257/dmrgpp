@@ -341,13 +341,14 @@ to the main dmrg driver are the following.
 		return 0;
 	}
 
-	InputNgType::Writeable ioWriteable(filename,inputCheck);
+	InputNgType::Writeable ioWriteable(filename, inputCheck);
 	InputNgType::Readable io(ioWriteable);
 
 	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, false);
 
 	if (forceSerial) dmrgSolverParams.nthreads = 1;
 
+	bool echoInput = false;
 	if (!options.enabled && options.label != "-") {
 		GlobalCoutStream.open(options.label.c_str(),
 		                      (dmrgSolverParams.autoRestart) ? std::ofstream::app :
@@ -358,6 +359,8 @@ to the main dmrg driver are the following.
 			str += ": Could not redirect std::cout to " + options.label + "\n";
 			err(str);
 		}
+
+		echoInput = true;
 
 		std::cerr<<Provenance::logo(application.name());
 		std::cerr<<"Standard output sent to ";
@@ -377,6 +380,7 @@ to the main dmrg driver are the following.
 	printLicense(application.name(), options);
 
 	application.printCmdLine(std::cout);
+	if (echoInput) application.echoBase64(std::cout, filename);
 
 	if (insitu!="") dmrgSolverParams.insitu = insitu;
 	if (dmrgSolverParams.options.find("minimizeDisk") != PsimagLite::String::npos)
