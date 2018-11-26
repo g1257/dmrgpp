@@ -53,12 +53,22 @@ class PsiApp {
 public:
 
 	PsiApp(String appName, int* argc, char*** argv, int nthreads)
-	    : concurrency_(argc,argv,nthreads), appName_(basename(appName))
+	    : concurrency_(argc, argv, nthreads), appName_(basename(appName))
 	{
 		chekSizeType();
+
+		SizeType n = *argc;
+		char** temp = *argv;
+		for (SizeType i = 0; i < n; ++i)
+			cmdLine_ += String(temp[i]) + " ";
 	}
 
 	const String& name() const { return appName_; }
+
+	void printCmdLine(std::ostream& os) const
+	{
+		os<<"PsiApp: CmdLine: "<<cmdLine_<<"\n";
+	}
 
 private:
 
@@ -74,6 +84,7 @@ private:
 
 	Concurrency concurrency_;
 	String appName_;
+	String cmdLine_;
 };
 } // namespace PsimagLite
 
