@@ -8,6 +8,9 @@
 #include "TypeToString.h"
 #include "Vector.h"
 #include "Random48.h"
+#include "PsiBase64.h"
+#include <fstream>
+#include <sstream>
 
 namespace PsimagLite {
 
@@ -68,6 +71,21 @@ public:
 	void printCmdLine(std::ostream& os) const
 	{
 		os<<"PsiApp: CmdLine: "<<cmdLine_<<"\n";
+	}
+
+	static void echoBase64(std::ostream& os, String filename)
+	{
+		os<<"PsiApp::echoBase64: Echo of "<<filename<<" in base64\n";
+		PsiBase64::Encode base64(slurp(filename));
+		os<<base64()<<"\n";
+	}
+
+	static String slurp(String filename)
+	{
+		std::ifstream fin(filename.c_str());
+		std::stringstream sstr;
+	    sstr << fin.rdbuf();
+	    return sstr.str();
 	}
 
 private:
