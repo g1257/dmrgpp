@@ -148,7 +148,8 @@ public:
 
 		SizeType n = geometry_.numberOfSites();
 		SizeType m = modelParameters_.magneticField.size();
-		SizeType md = modelParameters_.anisotropy.size();
+		SizeType md = modelParameters_.anisotropyD.size();
+		SizeType me = modelParameters_.anisotropyE.size();
 
 		if (m > 0 && m != n) {
 			PsimagLite::String msg("ModelHeisenberg: If provided, ");
@@ -158,7 +159,13 @@ public:
 
 		if (md > 0 && md != n) {
 			PsimagLite::String msg("ModelHeisenberg: If provided, ");
-			msg += " Anisotropy must be a vector of " + ttos(n) + " entries.\n";
+			msg += " AnisotropyD must be a vector of " + ttos(n) + " entries.\n";
+			throw PsimagLite::RuntimeError(msg);
+		}
+
+		if (me > 0 && me != n) {
+			PsimagLite::String msg("ModelHeisenberg: If provided, ");
+			msg += " AnisotropyE must be a vector of " + ttos(n) + " entries.\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
 
@@ -172,7 +179,7 @@ public:
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
-		        io.createGroup(label1);
+			io.createGroup(label1);
 
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
@@ -275,15 +282,32 @@ public:
 			}
 		}
 
-		if (modelParameters_.anisotropy.size() != linSize)
-			return; // <--- PLEASE NOTE EARLY EXIT HERE
+		if (modelParameters_.anisotropyD.size() == linSize) {
 
-		SparseMatrixType Szsquare;
-		for (SizeType i = 0; i < n; ++i) {
-			// anisotropy
-			RealType tmp = modelParameters_.anisotropy[block[i*2]];
-			multiply(Szsquare,cm[1+i*2].data,cm[1+i*2].data);
-			hmatrix += tmp*Szsquare;
+			for (SizeType i = 0; i < n; ++i) {
+				SparseMatrixType Szsquare;
+
+				// anisotropy
+				RealType tmp = modelParameters_.anisotropyD[block[i*2]];
+				multiply(Szsquare,cm[1+i*2].data,cm[1+i*2].data);
+				hmatrix += tmp*Szsquare;
+			}
+		}
+
+		if (modelParameters_.anisotropyE.size() == linSize) {
+
+			for (SizeType i = 0; i < n; ++i) {
+				SparseMatrixType splus;
+
+				// anisotropy
+				RealType tmp = 0.5*modelParameters_.anisotropyE[block[i*2]];
+				multiply(splus, cm[0+i*2].data, cm[0+i*2].data);
+				hmatrix += tmp*splus;
+
+				SparseMatrixType sminus;
+				transposeConjugate(sminus, splus);
+				hmatrix += tmp*sminus;
+			}
 		}
 	}
 

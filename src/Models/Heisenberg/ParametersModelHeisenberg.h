@@ -103,7 +103,11 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 		} catch (std::exception&) {}
 
 		try {
-			io.read(anisotropy,"AnisotropyD");
+			io.read(anisotropyD,"AnisotropyD");
+		} catch (std::exception&) {}
+
+		try {
+			io.read(anisotropyE,"AnisotropyE");
 		} catch (std::exception&) {}
 	}
 
@@ -123,7 +127,8 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 		BaseType::write(label, io);
 		io.write(label + "/twiceTheSpin", twiceTheSpin);
 		io.write(label + "/magneticField", magneticField);
-		io.write(label + "/anisotropy", anisotropy);
+		io.write(label + "/anisotropyD", anisotropyD);
+		io.write(label + "/anisotropyE", anisotropyE);
 	}
 
 	//! Function that prints model parameters to stream os
@@ -139,7 +144,8 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 
 	SizeType twiceTheSpin;
 	VectorRealType magneticField;
-	VectorRealType anisotropy;
+	VectorRealType anisotropyD;
+	VectorRealType anisotropyE;
 };
 } // namespace Dmrg
 
