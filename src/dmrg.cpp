@@ -211,6 +211,7 @@ int main(int argc, char **argv)
 	strUsage += " -f filename [-k] [-p precision] [-o solverOptions] [-V] [whatToMeasure]";
 	PsimagLite::String sOptions("");
 	int precision = 6;
+	bool unbuffered = false;
 	bool forceSerial = false;
 	bool versionOnly = false;
 	/* PSIDOC DmrgDriver
@@ -234,6 +235,7 @@ to the main dmrg driver are the following.
 	  This option with the string ``-'' writes std::cout to terminal.
 	  In other cases, string is the name of the file to redirect std::cout to.
 	 \item[-k] [Optional] Keep untar files
+	 \item[-U] [Optional] Make cout output unbuffered
 	 \item[-S] [Optional] Ignore the Threads= line if present in the input, and run with
 	 Threads=1
 	 \item[-V] [Optional] Print version and exit
@@ -274,7 +276,7 @@ to the main dmrg driver are the following.
 	\begin{verbatim}./operator -l c -t -f input.inp\end{verbatim}
 	\end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:s:l:d:p:e:o:tkSV")) != -1) {
+	while ((opt = getopt(argc, argv,"f:s:l:d:p:e:o:tkUSV")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -302,6 +304,9 @@ to the main dmrg driver are the following.
 			break;
 		case 'o':
 			sOptions += optarg;
+			break;
+		case 'U':
+			unbuffered = true;
 			break;
 		case 'S':
 			forceSerial = true;
@@ -368,6 +373,11 @@ to the main dmrg driver are the following.
 		std::cerr.flush();
 		GlobalCoutBuffer = std::cout.rdbuf(); //save old buf
 		std::cout.rdbuf(GlobalCoutStream.rdbuf()); //redirect std::cout to file
+		if (unbuffered) {
+			std::cout.setf(std::ios::unitbuf);
+			GlobalCoutStream.setf(std::ios::unitbuf);
+		}
+
 		atexit(restoreCoutBuffer);
 	}
 

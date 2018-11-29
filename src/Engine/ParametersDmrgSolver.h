@@ -100,8 +100,6 @@ namespace Dmrg {
 \item[Model=string]
 A string indicating the model, be it HubbardOneBand Heisenberg, etc.
 
-PSIDOCCOPY dmrgSolverOptions
-
 \item[version=string]  A mandatory string that is read and ignored. Usually contains the
 result
 of doing \verb!git rev-parse HEAD!.
