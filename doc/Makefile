@@ -4,11 +4,11 @@ CXX = g++
 
 all: manual.pdf
 
-manual.tex: manual.ptex 
+manual.tex: manual.ptex ../README.md 
 	find ../src -iname "*.h" -or -iname "*.cpp" |\
               perl ../../PsimagLite/scripts/doc.pl manual.ptex
 
-manual.pdf: manual.tex 
+manual.pdf: manual.tex ../README.md
 	pdflatex manual.tex
 	bibtex manual.aux
 	pdflatex manual.tex
@@ -16,6 +16,6 @@ manual.pdf: manual.tex
 
 clean:
 	rm -f ../README.tex
-	rm -f manual.pdf
+	rm -f manual.tex manual.pdf
 
 
