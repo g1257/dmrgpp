@@ -464,11 +464,16 @@ obtain ordered
 			progress_.printline(msg,std::cout);
 
 			if (i > 0) {
-				int sign = parameters_.finiteLoop[i].stepLength*
-				        parameters_.finiteLoop[i-1].stepLength;
-				if (sign>0) {
-					if (parameters_.finiteLoop[i].stepLength>0) stepCurrent_++;
-					if (parameters_.finiteLoop[i].stepLength<0) stepCurrent_--;
+				int signPrev = parameters_.finiteLoop[i - 1].stepLength;
+				int signThis = parameters_.finiteLoop[i].stepLength;
+				int sign = signPrev*signThis;
+				if (sign > 0) {
+					if (parameters_.finiteLoop[i].stepLength > 0) stepCurrent_++;
+					if (parameters_.finiteLoop[i].stepLength < 0) stepCurrent_--;
+				} else { // has bounced
+					checkForWft((signThis > 0) ? ProgramGlobals::SYSTEM :
+					                             ProgramGlobals::ENVIRON,
+					            pS);
 				}
 			}
 
@@ -487,6 +492,30 @@ obtain ordered
 		ioOut_.createGroup("FinalPsi");
 		psi.write(sitesIndices_[stepCurrent_], ioOut_, "FinalPsi");
 		ioOut_.write(lastSign, "LastLoopSign");
+	}
+
+	void checkForWft(ProgramGlobals::SysOrEnvEnum what,
+	                 const MyBasis& pS) const
+	{
+		SizeType numberOfSites = model_.geometry().numberOfSites();
+		assert(numberOfSites > 2);
+		SizeType last = pS.block().size();
+		assert(last > 0);
+		SizeType lastSiteOfSystem = pS.block()[--last];
+		PsimagLite::String lOrR = "";
+
+		if (what == ProgramGlobals::SYSTEM && lastSiteOfSystem != 1)
+			lOrR = "right";
+
+		if (what == ProgramGlobals::ENVIRON && lastSiteOfSystem != numberOfSites - 2)
+			lOrR = "left";
+
+		if (lOrR == "") return;
+
+		PsimagLite::String msg = "WARNING: To-the-" + lOrR;
+		msg += " movement from middle of lattice not supported\n";
+		std::cout<<msg;
+		std::cerr<<msg;
 	}
 
 	void finiteStep(MyBasisWithOperators &pS,
