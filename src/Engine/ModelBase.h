@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Io/IoSerializerStub.h"
 #include "ModelCommon.h"
 #include "NotReallySort.h"
+#include "LabeledOperators.h"
 
 namespace Dmrg {
 
