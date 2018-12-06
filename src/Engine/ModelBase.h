@@ -263,12 +263,6 @@ public:
 		return false;
 	}
 
-	virtual bool instrospect(PsimagLite::String) const
-	{
-		std::cerr<<"Instrospection not available for this model\n";
-		return false;
-	}
-
 	void printBasis(SizeType site) const
 	{
 		BlockType block(1, site);

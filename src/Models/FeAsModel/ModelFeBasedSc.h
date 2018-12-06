@@ -305,12 +305,6 @@ public:
 		return true;
 	}
 
-	virtual bool instrospect(PsimagLite::String name) const
-	{
-		labeledOperators_.instrospect(name);
-		return true;
-	}
-
 	SizeType hilbertSize(SizeType) const
 	{
 		return statesPerSite_;

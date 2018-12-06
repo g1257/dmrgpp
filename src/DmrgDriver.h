@@ -96,11 +96,6 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 			return;
 		}
 
-		if (obsOptions.label == "?") {
-			model.instrospect(obsOptions.label);
-			return;
-		}
-
 		opC = model.naturalOperator(obsOptions.label,
 		                            obsOptions.site,
 		                            obsOptions.dof);
