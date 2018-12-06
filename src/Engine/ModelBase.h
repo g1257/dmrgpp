@@ -255,6 +255,20 @@ public:
 		return maxElectrons*modelCommon_.geometry().numberOfSites() + 1;
 	}
 
+	virtual PsimagLite::String symmName() const { return "undefined"; }
+
+	virtual bool instrospect() const
+	{
+		std::cerr<<"Instrospection not available for this model\n";
+		return false;
+	}
+
+	virtual bool instrospect(PsimagLite::String) const
+	{
+		std::cerr<<"Instrospection not available for this model\n";
+		return false;
+	}
+
 	void printBasis(SizeType site) const
 	{
 		BlockType block(1, site);
@@ -288,8 +302,6 @@ public:
 		str += "\n";
 		throw PsimagLite::RuntimeError(str);
 	}
-
-	virtual PsimagLite::String symmName() const { return "undefined"; }
 
 	const TargetQuantumElectronsType& targetQuantum() const
 	{

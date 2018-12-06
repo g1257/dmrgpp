@@ -295,6 +295,20 @@ public:
 			basis_[53] = 53;
 			basis_[54] = 54;
 		}
+
+		fillLabeledOperators();
+	}
+
+	virtual bool instrospect() const
+	{
+		labeledOperators_.instrospect();
+		return true;
+	}
+
+	virtual bool instrospect(PsimagLite::String name) const
+	{
+		labeledOperators_.instrospect(name);
+		return true;
 	}
 
 	SizeType hilbertSize(SizeType) const
@@ -1210,7 +1224,7 @@ private:
 		assert(creationMatrix_.size()>0);
 		SizeType nrow = creationMatrix_[0].data.rows();
 
-		typename LabeledOperatorsType::Label& splus = labeledOperators_.createLabel("splus");
+		typename LabeledOperatorsType::LabelType& splus = labeledOperators_.createLabel("splus");
 		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
 			MatrixType tmp(nrow,nrow);
 			tmp += multiplyTc(creationMatrix_[dof].data,
@@ -1218,13 +1232,13 @@ private:
 			SparseMatrixType tmp2(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			splus.push(OperatorType(tmp2,
-			                             1.0,
-			                             typename OperatorType::PairType(0,0),
-			                             1.0,
-			                             su2Related));
+			                        1.0,
+			                        typename OperatorType::PairType(0,0),
+			                        1.0,
+			                        su2Related));
 		}
 
-		typename LabeledOperatorsType::Label& sminus = labeledOperators_.createLabel("sminus");
+		typename LabeledOperatorsType::LabelType& sminus = labeledOperators_.createLabel("sminus");
 		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
 			MatrixType tmp(nrow,nrow);
 			tmp += multiplyTc(creationMatrix_[dof+modelParameters_.orbitals].data,
@@ -1232,13 +1246,13 @@ private:
 			SparseMatrixType tmp2(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			sminus.push(OperatorType(tmp2,
-			                              1.0,
-			                              typename OperatorType::PairType(0,0),
-			                              1.0,
-			                              su2Related));
+			                         1.0,
+			                         typename OperatorType::PairType(0,0),
+			                         1.0,
+			                         su2Related));
 		}
 
-		typename LabeledOperatorsType::Label& sz = labeledOperators_.createLabel("sminus");
+		typename LabeledOperatorsType::LabelType& sz = labeledOperators_.createLabel("sminus");
 		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
 			MatrixType tmp(nrow,nrow);
 			MatrixType tmp2(nrow,nrow);
@@ -1251,46 +1265,46 @@ private:
 			SparseMatrixType tmp3(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			sz.push(OperatorType(tmp3,
-			                          1.0,
-			                          typename OperatorType::PairType(0,0),
-			                          1.0,
-			                          su2Related));
+			                     1.0,
+			                     typename OperatorType::PairType(0,0),
+			                     1.0,
+			                     su2Related));
 		}
 
-		typename LabeledOperatorsType::Label& nop = labeledOperators_.createLabel("n");
+		typename LabeledOperatorsType::LabelType& nop = labeledOperators_.createLabel("n");
 		for (SizeType dof = 0; dof < 2*modelParameters_.orbitals; ++dof) {
 			MatrixType tmp =
 			        multiplyTc(creationMatrix_[dof].data,creationMatrix_[dof].data);
 			SparseMatrixType tmp2(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			nop.push(OperatorType(tmp2,
-			                           1.0,
-			                           typename OperatorType::PairType(0,0),
-			                           1.0,
-			                           su2Related));
+			                      1.0,
+			                      typename OperatorType::PairType(0,0),
+			                      1.0,
+			                      su2Related));
 		}
 
-		typename LabeledOperatorsType::Label& c = labeledOperators_.createLabel("c");
+		typename LabeledOperatorsType::LabelType& c = labeledOperators_.createLabel("c");
 		for (SizeType dof = 0; dof < 2*modelParameters_.orbitals; ++dof) {
 			VectorOperatorType cm = creationMatrix_;
 			cm[dof].dagger();
 			c.push(cm[dof]);
 		}
 
-		typename LabeledOperatorsType::Label& d = labeledOperators_.createLabel("d");
+		typename LabeledOperatorsType::LabelType& d = labeledOperators_.createLabel("d");
 		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
 			SizeType orbital = dof % modelParameters_.orbitals;
 			//SizeType spin = dof/modelParameters_.orbitals;
 			SparseMatrixType atmp;
 			multiply(atmp,
-			         creationMatrix_[orbital+orbital+modelParameters_.orbitals].data,
+			         creationMatrix_[orbital + modelParameters_.orbitals].data,
 			        creationMatrix_[orbital].data);
 			typename OperatorType::Su2RelatedType su2Related;
 			d.push(OperatorType(atmp,
-			                         1.0,
-			                         typename OperatorType::PairType(0,0),
-			                         1.0,
-			                         su2Related));
+			                    1.0,
+			                    typename OperatorType::PairType(0,0),
+			                    1.0,
+			                    su2Related));
 		}
 	}
 

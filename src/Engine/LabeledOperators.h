@@ -43,6 +43,11 @@ class LabeledOperators {
 			ops_.push_back(op);
 		}
 
+		void instrospect() const
+		{
+			std::cout<<"Label "<<name_<<" with "<<ops_.size()<<" dofs.\n";
+		}
+
 		friend class LabeledOperators;
 
 	private:
@@ -69,12 +74,22 @@ class LabeledOperators {
 		PsimagLite::String value_;
 
 	};
+
 public:
 
 	typedef Label LabelType;
 
 	LabeledOperators(PsimagLite::String model) : model_(model)
 	{}
+
+	~LabeledOperators()
+	{
+		SizeType n = labels_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			delete labels_[i];
+			labels_[i] = 0;
+		}
+	}
 
 	Label& createLabel(PsimagLite::String name)
 	{
@@ -98,7 +113,32 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
+	void instrospect() const
+	{
+		SizeType n = labels_.size();
+		std::cout<<"There are "<<n<<" labels available for this model\n";
+		for (SizeType i = 0; i < n; ++i)
+			labels_[i]->instrospect();
+	}
+
+	void instrospect(PsimagLite::String what) const
+	{
+		typename VectorLabelType::const_iterator x = std::find_if(labels_.begin(),
+		                                                          labels_.end(),
+		                                                          IsValue(what));
+		if (x != labels_.end())
+			return labels_[x - labels_.begin()]->instrospect();
+
+		PsimagLite::String str("LabeledOperators: model=" + model_);
+		str += " label=" + what + " not found\n";
+		throw PsimagLite::RuntimeError(str);
+	}
+
 private:
+
+	LabeledOperators(const LabeledOperators&);
+
+	LabeledOperators& operator=(const LabeledOperators&);
 
 	PsimagLite::String model_;
 	VectorLabelType labels_;
