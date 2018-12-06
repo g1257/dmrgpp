@@ -118,6 +118,7 @@ public:
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename PsimagLite::Vector<HilbertStateType>::Type VectorHilbertStateType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
 	static const int NUMBER_OF_ORBITALS = 2;
 	static const int FERMION_SIGN = -1;
@@ -193,89 +194,6 @@ public:
 		}
 	}
 
-	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
-	 *unmangled (natural) basis of one-site */
-	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType site,
-	                             SizeType dof) const
-	{
-		BlockType block;
-		block.resize(1);
-		block[0]=site;
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
-		assert(creationMatrix.size()>0);
-		SizeType nrow = creationMatrix[0].data.rows();
-
-		if (what == "i" || what=="identity") {
-			SparseMatrixType tmp(nrow,nrow);
-			tmp.makeDiagonal(nrow,1.0);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		if (what == "splus") {
-			return creationMatrix[2];
-		}
-
-		if (what == "sminus") {
-			creationMatrix[2].dagger();
-			return creationMatrix[2];
-		}
-
-		if (what == "z" || what == "sz") { // S^z
-			return creationMatrix[3];
-		}
-
-		if (what=="c") {
-			assert(dof<2);
-			return creationMatrix[dof];
-		}
-
-		if (what=="n") {
-			return creationMatrix[4];
-		}
-
-		if (what=="d") {
-			return creationMatrix[5];
-		}
-
-		if (what=="nup") {
-			OperatorType tmp = naturalOperator("c",site,SPIN_UP);
-			tmp.dagger();
-			SparseMatrixType c = tmp.data;
-			SparseMatrixType tmp3(multiplyTc(c,c));
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp3,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		if (what=="ndown") {
-			OperatorType tmp = naturalOperator("c",site,SPIN_DOWN);
-			tmp.dagger();
-			SparseMatrixType c = tmp.data;
-			SparseMatrixType tmp3(multiplyTc(c,c));
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp3,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		PsimagLite::String str("TjAncillaC: naturalOperator: no label ");
-		str += what + "\n";
-		throw PsimagLite::RuntimeError(str);
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -284,6 +202,60 @@ public:
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
 		modelParameters_.write(label, io);
+	}
+
+protected:
+
+	void fillLabeledOperators()
+	{
+		SizeType site = 0;
+		BlockType block(1, site);
+		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
+		assert(creationMatrix.size() >= 6);
+
+		this->createOpsLabel("splus").push(creationMatrix[2]);
+
+		creationMatrix[2].dagger();
+		this->createOpsLabel("sminus").push(creationMatrix[2]);
+		creationMatrix[2].dagger();
+
+		this->createOpsLabel("sz").push(creationMatrix[3]);
+
+		OpsLabelType& c = this->createOpsLabel("c");
+		for (SizeType dof = 0; dof < 2; ++dof)
+			c.push(creationMatrix[dof]);
+
+		this->createOpsLabel("n").push(creationMatrix[4]);
+
+		this->createOpsLabel("d").push(creationMatrix[5]);
+
+		{
+			OperatorType tmp = creationMatrix[0];
+			tmp.dagger();
+			SparseMatrixType c = tmp.data;
+			SparseMatrixType tmp3(multiplyTc(c,c));
+			typename OperatorType::Su2RelatedType su2Related;
+			this->createOpsLabel("nup").push(OperatorType(tmp3,
+			                                              1.0,
+			                                              typename OperatorType::PairType(0,0),
+			                                              1.0,
+			                                              su2Related));
+		}
+
+		{
+			OperatorType tmp = creationMatrix[1];
+			tmp.dagger();
+			SparseMatrixType c = tmp.data;
+			SparseMatrixType tmp3(multiplyTc(c,c));
+			typename OperatorType::Su2RelatedType su2Related;
+			this->createOpsLabel("ndown").push(OperatorType(tmp3,
+			                                                1.0,
+			                                                typename OperatorType::PairType(0,0),
+			                                                1.0,
+			                                                su2Related));
+		}
 	}
 
 private:
@@ -507,8 +479,8 @@ private:
 		for (SizeType i=0;i<n;i++) {
 			SizeType orb = 0;
 			// potentialV
-			SparseMatrixType nup(naturalOperator("nup",i,orb).data);
-			SparseMatrixType ndown(naturalOperator("ndown",i,orb).data);
+			SparseMatrixType nup(this->naturalOperator("nup",i,orb).data);
+			SparseMatrixType ndown(this->naturalOperator("ndown",i,orb).data);
 			SparseMatrixType m = nup;
 			SizeType index = block[i]+orb*linSize;
 			assert(index<modelParameters_.potentialV.size());

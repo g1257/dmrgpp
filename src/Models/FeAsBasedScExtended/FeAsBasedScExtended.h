@@ -116,6 +116,7 @@ public:
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
+	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
 	static const SizeType SPIN_UP = ModelFeAsType::SPIN_UP;
 	static const SizeType SPIN_DOWN = ModelFeAsType::SPIN_DOWN;
@@ -160,48 +161,43 @@ public:
 		setSz(creationMatrix,block);
 	}
 
-	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType site,
-	                             SizeType dof) const
-	{
-		BlockType block;
-		block.resize(1);
-		block[0]=site;
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
-
-		if (what=="naturalSz") {
-			VectorSizeType allowed(1,0);
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			SizeType x = 2*orbitals_+1;
-			return creationMatrix[x];
-		}
-
-		if (what=="naturalSplus") {
-			VectorSizeType allowed(1,0);
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			SizeType x = 2*orbitals_;
-			return creationMatrix[x];
-		}
-
-		if (what=="naturalSminus") { // delta = c^\dagger * c^dagger
-			VectorSizeType allowed(1,0);
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			SizeType x = 2*orbitals_;
-			creationMatrix[x].dagger();
-			return creationMatrix[x];
-		}
-
-		return modelFeAs_.naturalOperator(what,site,dof);
-	}
-
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                        const VectorOperatorType& cm,
 	                                        const BlockType& block,
 	                                        RealType time)  const
 	{
 		modelFeAs_.addDiagonalsInNaturalBasis(hmatrix,cm,block,time);
+	}
+
+protected:
+
+	void fillLabeledOperators()
+	{
+		modelFeAs_.fillLabeledOperators();
+		SizeType site = 0;
+		BlockType block(1, site);
+		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
+
+		OpsLabelType& sz = this->createOpsLabel("naturalSz");
+		SizeType x = 2*orbitals_ + 1;
+		assert(x < creationMatrix.size());
+		sz.push(creationMatrix[x]);
+
+		OpsLabelType& splus = this->createOpsLabel("naturalSplus");
+		x = 2*orbitals_;
+		assert(x < creationMatrix.size());
+		splus.push(creationMatrix[x]);
+
+		OpsLabelType& sminus = this->createOpsLabel("naturalSminus");
+		x = 2*orbitals_;
+		assert(x < creationMatrix.size());
+		creationMatrix[x].dagger();
+		sminus.push(creationMatrix[x]);
+		creationMatrix[x].dagger();
+
+		// do not call derived class here
 	}
 
 private:

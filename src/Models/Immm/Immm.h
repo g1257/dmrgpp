@@ -116,6 +116,7 @@ public:
 	typedef	 typename ModelBaseType::MyBasis MyBasis;
 	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
+	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceImmmType::SPIN_UP;
@@ -154,7 +155,7 @@ public:
 			statesOxygen_ = 1;
 			break;
 		default:
-			throw PsimagLite::RuntimeError("Immm: invalid param minOxygenElectrons\n");
+			err("Immm: invalid param minOxygenElectrons\n");
 		}
 	}
 
@@ -167,7 +168,7 @@ public:
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
-		        io.createGroup(label1);
+			io.createGroup(label1);
 
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
@@ -216,29 +217,32 @@ public:
 		creationMatrix.push_back(nOp);
 	}
 
-	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType site,
-	                             SizeType dof) const
+	virtual SizeType maxElectronsOneSpin() const
 	{
-		BlockType block;
-		block.resize(1);
-		block[0]=site;
+		return NUMBER_OF_SPINS * ORBITALS_OXYGEN * geometry_.numberOfSites() + 1;
+	}
+
+protected:
+
+	void fillLabeledOperators()
+	{
+		SizeType site = 0; // FIXME for Immm SDHS
+		BlockType block(1, site);
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		VectorQnType qns;
 		setOperatorMatrices(creationMatrix, qns, block);
-		SizeType orbitals = orbitalsAtSite(site);
-		SizeType orbital = dof % orbitals;
-		SizeType spin = dof / orbitals;
+		//		SizeType orbitals = orbitalsAtSite(site);
+		//		SizeType orbital = dof % orbitals;
+		//		SizeType spin = dof / orbitals;
 
-		if (what == "splus") {
-			return cDaggerCi(block,SPIN_UP,SPIN_DOWN);
-		}
+		SizeType total = creationMatrix.size();
+		std::cerr<<"Immm FIXME fillLabeledOperators SHDS\n";
 
-		if (what == "sminus") {
-			return cDaggerCi(block,SPIN_DOWN,SPIN_UP);
-		}
+		this->createOpsLabel("splus").push(cDaggerCi(block,SPIN_UP,SPIN_DOWN));
 
-		if (what == "z" || what == "sz") { // S^z
+		this->createOpsLabel("sminus").push(cDaggerCi(block,SPIN_DOWN,SPIN_UP));
+
+		{ // S^z
 			MatrixType tmp1;
 			crsMatrixToFullMatrix(tmp1,nUpOrDown(block,SPIN_UP).data);
 			MatrixType tmp2;
@@ -246,55 +250,39 @@ public:
 			tmp1 -= tmp2;
 			SparseMatrixType tmp(tmp1);
 			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
+			this->createOpsLabel("sz").push(OperatorType(tmp,
+			                                             1.0,
+			                                             typename OperatorType::PairType(0,0),
+			                                             1.0,
+			                                             su2Related));
 		}
 
-		if (what=="n") {
-			assert(creationMatrix.size() > 0);
-			return creationMatrix[creationMatrix.size()-1];
+		assert(creationMatrix.size() > 0);
+		this->createOpsLabel("sz").push(creationMatrix[creationMatrix.size()-1]);
+
+		OpsLabelType& c = this->createOpsLabel("c");
+		for (SizeType dof = 0; dof < total; ++dof) {
+			creationMatrix[dof].dagger();
+			c.push(creationMatrix[dof]);
+			creationMatrix[dof].dagger();
 		}
 
-		if (what=="c") {
-			creationMatrix[orbital + spin*orbitals].dagger();
-			return creationMatrix[orbital + spin*orbitals];
-		}
+		this->createOpsLabel("nup").push(nUpOrDown(block,SPIN_UP));
 
-		if (what=="nup") {
-			return nUpOrDown(block,SPIN_UP);
-		}
+		this->createOpsLabel("ndown").push(nUpOrDown(block,SPIN_DOWN));
 
-		if (what=="ndown") {
-			return nUpOrDown(block,SPIN_DOWN);
-		}
-
-		if (what == "o") {
+		OpsLabelType& o = this->createOpsLabel("o");
+		for (SizeType dof = 0; dof < total; ++dof) {
 			SparseMatrixType tmp2;
-			transposeConjugate(tmp2,creationMatrix[orbital + spin*orbitals].data);
-			SparseMatrixType tmp3 = creationMatrix[orbital + spin*orbitals].data * tmp2;
+			transposeConjugate(tmp2,creationMatrix[dof].data);
+			SparseMatrixType tmp3 = creationMatrix[dof].data * tmp2;
 			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp3,
+			o.push(OperatorType(tmp3,
 			                    1.0,
 			                    typename OperatorType::PairType(0,0),
 			                    1.0,
-			                    su2Related);
+			                    su2Related));
 		}
-
-		if (what=="d") { // delta = c^\dagger * c^dagger
-			throw PsimagLite::RuntimeError("delta unimplemented for this model\n");
-		}
-
-		PsimagLite::String str("Immm: naturalOperator: no label ");
-		str += what + "\n";
-		throw PsimagLite::RuntimeError(str);
-	}
-
-	virtual SizeType maxElectronsOneSpin() const
-	{
-		return NUMBER_OF_SPINS * ORBITALS_OXYGEN * geometry_.numberOfSites() + 1;
 	}
 
 private:

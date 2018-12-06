@@ -114,6 +114,7 @@ public:
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
 	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
+	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
 	ExtendedHubbard1Orb(const SolverParamsType& solverParams,
 	                    InputValidatorType& io,
@@ -133,34 +134,13 @@ public:
 	}
 
 	//! set creation matrices for sites in block
-	void setOperatorMatrices(VectorOperatorType&creationMatrix,
+	void setOperatorMatrices(VectorOperatorType& creationMatrix,
 	                         VectorQnType& qns,
 	                         const BlockType& block) const
 	{
 		modelHubbard_.setOperatorMatrices(creationMatrix, qns, block);
 		// add ni to creationMatrix
 		setNi(creationMatrix, block);
-	}
-
-	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType site,
-	                             SizeType dof) const
-	{
-		BlockType block;
-		block.resize(1);
-		block[0]=site;
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix,qns, block);
-
-		if (what=="n") {
-			VectorSizeType allowed(1,0);
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			PsimagLite::Matrix<ComplexOrRealType> tmp;
-			return creationMatrix[2];
-		} else {
-			return modelHubbard_.naturalOperator(what,site,dof);
-		}
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -193,6 +173,21 @@ public:
 		                                         cmCorrected,
 		                                         block,
 		                                         time);
+	}
+
+protected:
+
+	void fillLabeledOperators()
+	{
+		modelHubbard_.fillLabeledOperators();
+		SizeType site = 0; // FIXME for Immm SDHS
+		BlockType block(1, site);
+		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix,qns, block);
+
+		OpsLabelType& nop = this->createOpsLabel("n");
+		nop.push(creationMatrix[2]);
 	}
 
 private:

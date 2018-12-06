@@ -112,6 +112,7 @@ public:
 	typedef  HilbertSpaceFermionSpinless<WordType> HilbertSpaceType;
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
+	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
 private:
 
@@ -199,47 +200,6 @@ public:
 		setNi(creationMatrix,block);
 	}
 
-	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
-	 * unmangled (natural) basis of one-site */
-	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType site,
-	                             SizeType) const
-	{
-		BlockType block;
-		block.resize(1);
-		block[0]=site;
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
-		assert(creationMatrix.size()>0);
-		SizeType nrow = creationMatrix[0].data.rows();
-
-		if (what == "i" || what=="identity") {
-			SparseMatrixType tmp(nrow,nrow);
-			tmp.makeDiagonal(nrow,1.0);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		if (what=="n") {
-			assert(1<creationMatrix.size());
-			return creationMatrix[1];
-		}
-
-		if (what=="c") {
-			assert(0<creationMatrix.size());
-			return creationMatrix[0];
-		}
-
-		PsimagLite::String str("FermionSpinless: naturalOperator: no label ");
-		str += what + "\n";
-		throw PsimagLite::RuntimeError(str);
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -275,6 +235,21 @@ public:
 			tmp *= cosarg;
 			hmatrix += tmp*niup;
 		}
+	}
+
+protected:
+
+	void fillLabeledOperators()
+	{
+		SizeType site = 0;
+		BlockType block(1, site);
+		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
+		assert(creationMatrix.size() >= 2);
+
+		this->createOpsLabel("c").push(creationMatrix[0]);
+		this->createOpsLabel("n").push(creationMatrix[1]);
 	}
 
 private:

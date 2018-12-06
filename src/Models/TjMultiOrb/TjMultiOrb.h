@@ -122,6 +122,7 @@ public:
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename PsimagLite::Vector<HilbertStateType>::Type VectorHilbertStateType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
 	static const int FERMION_SIGN = -1;
 
@@ -163,124 +164,6 @@ public:
 		return creationMatrix_[0].data.rows();
 	}
 
-	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
-	 *unmangled (natural) basis of one-site */
-	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType site,
-	                             SizeType dof) const
-	{
-		assert(creationMatrix_.size()>0);
-		SizeType nrow = creationMatrix_[0].data.rows();
-		SizeType orbitals = modelParameters_.orbitals;
-
-		if (what == "i" || what=="identity") {
-			VectorSizeType allowed(1,0);
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			SparseMatrixType tmp(nrow,nrow);
-			tmp.makeDiagonal(nrow,1.0);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		if (what == "splus") {
-			VectorSizeType allowed(orbitals,0);
-			for (SizeType i = 0; i < allowed.size(); ++i) allowed[i] = i;
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			assert(dof < orbitals);
-			return creationMatrix_[2*orbitals+dof];
-		}
-
-		if (what == "sminus") {
-			VectorSizeType allowed(orbitals,0);
-			for (SizeType i = 0; i < allowed.size(); ++i) allowed[i] = i;
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			assert(dof < orbitals);
-			OperatorType cm = creationMatrix_[2*orbitals+dof];
-			cm.dagger();
-			return cm;
-		}
-
-		if (what == "z" || what == "sz") { // S^z
-			VectorSizeType allowed(orbitals,0);
-			for (SizeType i = 0; i < allowed.size(); ++i) allowed[i] = i;
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			assert(dof < orbitals);
-			return creationMatrix_[3*orbitals+dof];
-		}
-
-		if (what=="c") {
-			VectorSizeType allowed(2*orbitals,0);
-			for (SizeType i = 0; i < allowed.size(); ++i) allowed[i] = i;
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			assert(dof < 2*orbitals && creationMatrix_.size() > dof);
-			return creationMatrix_[dof];
-		}
-
-		if (what=="n") {
-			VectorSizeType allowed(orbitals,0);
-			for (SizeType i = 0; i < allowed.size(); ++i) allowed[i] = i;
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			assert(dof < orbitals);
-			return creationMatrix_[4*orbitals+dof];
-		}
-
-		if (what=="nup") {
-			VectorSizeType allowed(orbitals,0);
-			for (SizeType i = 0; i < allowed.size(); ++i) allowed[i] = i;
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			OperatorType cup = naturalOperator("c",site,dof+SPIN_UP*orbitals);
-			cup.dagger();
-			SparseMatrixType nup(multiplyTc(cup.data,cup.data));
-			if (orbitals>1) nup = findNMatrices(dof+SPIN_UP*orbitals);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(nup,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		if (what=="ndown") {
-			VectorSizeType allowed(orbitals,0);
-			for (SizeType i = 0; i < allowed.size(); ++i) allowed[i] = i;
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			OperatorType cdown = naturalOperator("c",site,dof+SPIN_DOWN*orbitals);
-			cdown.dagger();
-			SparseMatrixType ndown(multiplyTc(cdown.data,cdown.data));
-			if (orbitals>1) ndown = findNMatrices(dof+SPIN_DOWN*orbitals);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(ndown,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		PsimagLite::String str("TjMultiOrb: naturalOperator: no label ");
-		str += what + "\n";
-		throw PsimagLite::RuntimeError(str);
-	}
-
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
-	{
-		if (!io.doesGroupExist(label1))
-		        io.createGroup(label1);
-
-		PsimagLite::String label = label1 + "/" + this->params().model;
-		io.createGroup(label);
-		modelParameters_.write(label, io);
-		io.write(label + "/offset_", offset_);
-		spinSquaredHelper_.write(label, io);
-		spinSquared_.write(label, io);
-		io.write(label + "/basis_", basis_);
-		io.write(label + "/qq_", qq_);
-		io.write(label + "/creationMatrix_", creationMatrix_);
-	}
-
 	//! Find c^\dagger_isigma in the natural basis natBasis
 	SparseMatrixType findCreationMatrices(int,
 	                                      SizeType sigma,
@@ -317,9 +200,102 @@ public:
 		return creationMatrix_[3*modelParameters_.orbitals + orb].data;
 	}
 
-	virtual SizeType maxElectronsOneSpin() const
+	SizeType maxElectronsOneSpin() const
 	{
 		return modelParameters_.orbitals*geometry_.numberOfSites() + 1;
+	}
+
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		if (!io.doesGroupExist(label1))
+			io.createGroup(label1);
+
+		PsimagLite::String label = label1 + "/" + this->params().model;
+		io.createGroup(label);
+		modelParameters_.write(label, io);
+		io.write(label + "/offset_", offset_);
+		spinSquaredHelper_.write(label, io);
+		spinSquared_.write(label, io);
+		io.write(label + "/basis_", basis_);
+		io.write(label + "/qq_", qq_);
+		io.write(label + "/creationMatrix_", creationMatrix_);
+	}
+
+protected:
+
+	void fillLabeledOperators()
+	{
+		SizeType orbitals = modelParameters_.orbitals;
+
+		OpsLabelType& splus = this->createOpsLabel("splus");
+		for (SizeType dof = 0; dof < orbitals; ++dof) {
+			SizeType x = 2*orbitals + dof;
+			assert(x < creationMatrix_.size());
+			splus.push(creationMatrix_[x]);
+		}
+
+		OpsLabelType& sminus = this->createOpsLabel("sminus");
+		for (SizeType dof = 0; dof < orbitals; ++dof) {
+			SizeType x = 2*orbitals + dof;
+			assert(x < creationMatrix_.size());
+			OperatorType cm = creationMatrix_[x];
+			cm.dagger();
+			sminus.push(cm);
+		}
+
+		OpsLabelType& sz = this->createOpsLabel("sz");
+		for (SizeType dof = 0; dof < orbitals; ++dof) {
+			SizeType x = 3*orbitals + dof;
+			assert(x < creationMatrix_.size());
+			sz.push(creationMatrix_[x]);
+		}
+
+		OpsLabelType& c = this->createOpsLabel("c");
+		for (SizeType dof = 0; dof < 2*orbitals; ++dof) {
+			assert(dof < creationMatrix_.size());
+			c.push(creationMatrix_[dof]);
+		}
+
+		OpsLabelType& nop = this->createOpsLabel("n");
+		for (SizeType dof = 0; dof < orbitals; ++dof) {
+			SizeType x = 4*orbitals + dof;
+			assert(x < creationMatrix_.size());
+			nop.push(creationMatrix_[x]);
+		}
+
+		OpsLabelType& nupop = this->createOpsLabel("nup");
+		for (SizeType dof = 0; dof < orbitals; ++dof) {
+			SizeType x = dof + SPIN_UP*orbitals;
+			assert(x < creationMatrix_.size());
+			OperatorType cup = creationMatrix_[x];
+			cup.dagger();
+			SparseMatrixType nup(multiplyTc(cup.data,cup.data));
+			if (orbitals > 1)
+				nup = findNMatrices(dof + SPIN_UP*orbitals);
+			typename OperatorType::Su2RelatedType su2Related;
+			nupop.push(OperatorType(nup,
+			                        1.0,
+			                        typename OperatorType::PairType(0,0),
+			                        1.0,
+			                        su2Related));
+		}
+
+		OpsLabelType& ndownpop = this->createOpsLabel("ndown");
+		for (SizeType dof = 0; dof < orbitals; ++dof) {
+			SizeType x = dof + SPIN_DOWN*orbitals;
+			assert(x < creationMatrix_.size());
+			OperatorType cdown = creationMatrix_[x];
+			cdown.dagger();
+			SparseMatrixType ndown(multiplyTc(cdown.data,cdown.data));
+			if (orbitals > 1)
+				ndown = findNMatrices(dof + SPIN_DOWN*orbitals);
+			typename OperatorType::Su2RelatedType su2Related;
+			ndownpop.push(OperatorType(ndown,
+			                           1.0,
+			                           typename OperatorType::PairType(0,0),
+			                           1.0,
+			                           su2Related));
+		}
 	}
 
 private:
@@ -715,8 +691,8 @@ private:
 		for (SizeType i=0;i<n;i++) {
 			for (SizeType orb = 0; orb < orbitals; ++orb) {
 				// potentialV
-				SparseMatrixType nup(naturalOperator("nup",i,orb).data);
-				SparseMatrixType ndown(naturalOperator("ndown",i,orb).data);
+				SparseMatrixType nup(this->naturalOperator("nup",i,orb).data);
+				SparseMatrixType ndown(this->naturalOperator("ndown",i,orb).data);
 				SparseMatrixType m = nup;
 				assert(block[i]+linSize*orb+linSize*orbitals<modelParameters_.potentialV.size());
 				m *= modelParameters_.potentialV[block[i]+linSize*orb];

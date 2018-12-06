@@ -135,6 +135,7 @@ public:
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
+	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
 	Kitaev(const SolverParamsType& solverParams,
 	       InputValidatorType& io,
@@ -171,10 +172,8 @@ public:
 			throw PsimagLite::RuntimeError(msg);
 		}
 
-		if (BasisType::useSu2Symmetry()) {
-			PsimagLite::String msg("Kitaev does not have SU(2) symmetry\n");
-			throw PsimagLite::RuntimeError(msg);
-		}
+		if (BasisType::useSu2Symmetry())
+			err("Kitaev does not have SU(2) symmetry\n");
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -224,45 +223,6 @@ public:
 		}
 	}
 
-	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType site,
-	                             SizeType) const
-	{
-		BlockType block;
-		block.resize(1);
-		block[0]=site;
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
-		assert(creationMatrix.size()>0);
-		SizeType nrow = creationMatrix[0].data.rows();
-
-
-		if (what == "sx") // S^x
-			return creationMatrix[0];
-
-		if (what == "sy") // S^y
-			return creationMatrix[1];
-
-		if (what == "sz") // S^z
-			return creationMatrix[2];
-
-		if (what == "i" || what=="identity") {
-			SparseMatrixType tmp(nrow,nrow);
-			tmp.makeDiagonal(nrow,1.0);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		PsimagLite::String str("Kitaev: naturalOperator: no label ");
-		str += what + "\n";
-		throw PsimagLite::RuntimeError(str);
-	}
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
@@ -290,6 +250,21 @@ public:
 			tmp = modelParameters_.magneticFieldZ[block[i*2]];
 			hmatrix += tmp*cm[2+i*2].data;
 		}
+	}
+
+protected:
+
+	void fillLabeledOperators()
+	{
+		SizeType site = 0; // FIXME for Immm SDHS
+		BlockType block(1, site);
+		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
+		assert(creationMatrix.size() >= 3);
+		this->createOpsLabel("sz").push(creationMatrix[0]);
+		this->createOpsLabel("sy").push(creationMatrix[1]);
+		this->createOpsLabel("sz").push(creationMatrix[2]);
 	}
 
 private:

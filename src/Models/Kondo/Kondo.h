@@ -25,6 +25,7 @@ class Kondo : public ModelBaseType {
 	typedef LinkProductKondo<ModelHelperType, GeometryType> LinkProductType;
 	typedef typename LinkProductType::PairSizeType PairSizeType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
 public:
 
@@ -68,69 +69,6 @@ public:
 		modelParams_.write(label, io);
 		io.write(label + "/basis_", basis_);
 		io.write(label + "/ops_", ops_);
-	}
-
-	// Given an operator what with degree of freedom dof
-	// create the one-site matrix for this operator
-	// and create a OperatorType object from it and return it
-	// site MUST be ignored unless your model has a site-dependent
-	// Hilbert space (SDHS)
-	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType,
-	                             SizeType dof) const
-	{
-		SizeType h = qn_.size();
-		SparseMatrixType m(h, h);
-		m.makeDiagonal(h, 1.0);
-		typename OperatorType::Su2RelatedType su2Related;
-		if (what == "i")
-			return OperatorType(m,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		if (what == "c") {
-			if (dof > 1) err("naturalOperator: dof too big for c\n");
-			return ops_[dof];
-		}
-
-		if (what == "Sp") {
-			if (dof > 0) err("naturalOperator: dof too big for Sp\n");
-			return ops_[2];
-		}
-
-		if (what == "Sz") {
-			if (dof > 0) err("naturalOperator: dof too big for Sz\n");
-			return ops_[3];
-		}
-
-		if (what == "n") {
-			if (dof > 0) err("naturalOperator: dof too big for n\n");
-			return ops_[4];
-		}
-
-		if (what == "sz") {
-			if (dof > 0) err("naturalOperator: dof too big for sz\n");
-			SparseMatrixType mup = ops_[0].data;
-			SparseMatrixType mupT;
-			transposeConjugate(mupT, mup);
-			SparseMatrixType mdown = ops_[1].data;
-			SparseMatrixType mdownT;
-			transposeConjugate(mdownT, mdown);
-			SparseMatrixType szMatrix = mdownT*mdown;
-			szMatrix *= (-1.0);
-			szMatrix += mupT*mup;
-			szMatrix *= 0.5;
-
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(szMatrix,
-			                    1,
-			                    PairSizeType(0,0),
-			                    1,
-			                    su2Related);
-		}
-
-		throw PsimagLite::RuntimeError("naturalOperator: unknown label " + what + "\n");
 	}
 
 	// Return the size of the one-site Hilbert space basis for this model
@@ -204,6 +142,40 @@ public:
 			// Kondo term
 			assert(ind < modelParams_.kondoJ.size());
 			hmatrix += modelParams_.kondoJ[ind] * kondoOnSite(ops, niup, nidown);
+		}
+	}
+
+protected:
+
+	void fillLabeledOperators()
+	{
+		assert(ops_.size() >= 6);
+		OpsLabelType& c = this->createOpsLabel("c");
+		for (SizeType sigma = 0; sigma < 2; ++sigma)
+			c.push(ops_[sigma]);
+
+		this->createOpsLabel("splus").push(ops_[2]);
+		this->createOpsLabel("Sz").push(ops_[3]);
+		this->createOpsLabel("n").push(ops_[4]);
+
+		{
+			SparseMatrixType mup = ops_[0].data;
+			SparseMatrixType mupT;
+			transposeConjugate(mupT, mup);
+			SparseMatrixType mdown = ops_[1].data;
+			SparseMatrixType mdownT;
+			transposeConjugate(mdownT, mdown);
+			SparseMatrixType szMatrix = mdownT*mdown;
+			szMatrix *= (-1.0);
+			szMatrix += mupT*mup;
+			szMatrix *= 0.5;
+
+			typename OperatorType::Su2RelatedType su2Related;
+			this->createOpsLabel("sz").push(OperatorType(szMatrix,
+			                                             1,
+			                                             PairSizeType(0,0),
+			                                             1,
+			                                             su2Related));
 		}
 	}
 

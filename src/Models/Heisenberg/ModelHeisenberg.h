@@ -130,6 +130,7 @@ public:
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
+	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
 	ModelHeisenberg(const SolverParamsType& solverParams,
 	                InputValidatorType& io,
@@ -236,36 +237,6 @@ public:
 		}
 	}
 
-	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType site,
-	                             SizeType) const
-	{
-		BlockType block;
-		block.resize(1);
-		block[0]=site;
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
-		assert(creationMatrix.size()>0);
-
-		if (what=="splus") { // S^+
-			return creationMatrix[0];
-		}
-
-		if (what=="sminus") { // S^-
-			creationMatrix[0].dagger();
-			return creationMatrix[0];
-		}
-
-		if (what == "z" || what == "sz") { // S^z
-			return creationMatrix[1];
-		}
-
-		PsimagLite::String str("ModelHeisenberg: naturalOperator: no label ");
-		str += what + "\n";
-		throw PsimagLite::RuntimeError(str);
-	}
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
@@ -309,6 +280,26 @@ public:
 				hmatrix += tmp*sminus;
 			}
 		}
+	}
+
+protected:
+
+	void fillLabeledOperators()
+	{
+		SizeType site = 0; // FIXME for Immm SDHS
+		BlockType block(1, site);
+		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
+		assert(creationMatrix.size() >= 2);
+
+		this->createOpsLabel("splus").push(creationMatrix[0]);
+
+		creationMatrix[0].dagger();
+		this->createOpsLabel("sminus").push(creationMatrix[0]);
+		creationMatrix[0].dagger();
+
+		this->createOpsLabel("sz").push(creationMatrix[1]);
 	}
 
 private:

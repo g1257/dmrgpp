@@ -118,6 +118,7 @@ public:
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename PsimagLite::Vector<HilbertStateType>::Type VectorHilbertStateType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
 	static const int NUMBER_OF_ORBITALS = 2;
 	static const int FERMION_SIGN = -1;
@@ -206,95 +207,6 @@ public:
 		}
 	}
 
-	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
-	 *unmangled (natural) basis of one-site */
-	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType site,
-	                             SizeType dof) const
-	{
-		SizeType orbitals = (hot_) ? 2 : 1;
-		BlockType block;
-		block.resize(1);
-		block[0]=site;
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
-		assert(creationMatrix.size()>0);
-		SizeType nrow = creationMatrix[0].data.rows();
-
-		if (what == "i" || what=="identity") {
-			SparseMatrixType tmp(nrow,nrow);
-			tmp.makeDiagonal(nrow,1.0);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		if (what == "splus") {
-			assert(dof < 2);
-			return creationMatrix[(hot_) ? 4 + dof : 2];
-		}
-
-		if (what == "sminus") {
-			assert(dof < 2);
-			creationMatrix[(hot_) ? 4 + dof : 2].dagger();
-			return creationMatrix[(hot_) ? 4 + dof : 2];
-		}
-
-		if (what == "z" || what == "sz") { // S^z
-			assert(dof < 2);
-			return creationMatrix[(hot_) ? 6 + dof : 3];
-		}
-
-		if (what=="c") {
-			assert(dof<4);
-			return creationMatrix[dof];
-		}
-
-		if (what=="n") {
-			assert(dof<2);
-			return creationMatrix[(hot_) ? 8 + dof : 4];
-		}
-
-		if (what=="d") {
-			assert(creationMatrix.size() > 5*orbitals + dof);
-			return creationMatrix[5*orbitals + dof];
-		}
-
-		if (what=="nup") {
-			OperatorType tmp = naturalOperator("c",site,SPIN_UP);
-			tmp.dagger();
-			SparseMatrixType c = tmp.data;
-			SparseMatrixType tmp3(multiplyTc(c,c));
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp3,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		if (what=="ndown") {
-			OperatorType tmp = naturalOperator("c",site,SPIN_DOWN);
-			tmp.dagger();
-			SparseMatrixType c = tmp.data;
-			SparseMatrixType tmp3(multiplyTc(c,c));
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp3,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		PsimagLite::String str("TjAncillaC2: naturalOperator: no label ");
-		str += what + "\n";
-		throw PsimagLite::RuntimeError(str);
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -304,6 +216,71 @@ public:
 		io.createGroup(label);
 		modelParameters_.write(label, io);
 		io.write(label + "/hot_", hot_);
+	}
+
+protected:
+
+	void fillLabeledOperators()
+	{
+		SizeType site = 0;
+		BlockType block(1, site);
+
+		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
+
+		OpsLabelType& splus = this->createOpsLabel("splus");
+		OpsLabelType& sminus = this->createOpsLabel("sminus");
+		OpsLabelType& sz = this->createOpsLabel("sz");
+		OpsLabelType& nop = this->createOpsLabel("n");
+		SizeType offsetSpSm = (hot_) ? 4 : 2;
+		SizeType offsetSz = (hot_) ? 6 : 3;
+		SizeType offsetN = (hot_) ? 8 : 4;
+		SizeType orbitals = (hot_) ? 2 : 1;
+		assert(5*orbitals + 2 <= creationMatrix.size());
+		for (SizeType dof = 0; dof < orbitals; ++dof) {
+			splus.push(creationMatrix[offsetSpSm + dof]);
+			creationMatrix[offsetSpSm + dof].dagger();
+			sminus.push(creationMatrix[offsetSpSm + dof]);
+			creationMatrix[offsetSpSm + dof].dagger();
+			sz.push(creationMatrix[offsetSz + dof]);
+			nop.push(creationMatrix[offsetN + dof]);
+		}
+
+		SizeType total = 2*orbitals;
+		OpsLabelType& c = this->createOpsLabel("c");
+		for (SizeType dof = 0; dof < total; ++dof)
+			c.push(creationMatrix[dof]);
+
+		OpsLabelType& d = this->createOpsLabel("d");
+		for (SizeType sigma = 0; sigma < 2; ++sigma)
+			d.push(creationMatrix[5*orbitals + sigma]);
+
+		{
+			OperatorType tmp = creationMatrix[0];
+			tmp.dagger();
+			SparseMatrixType c = tmp.data;
+			SparseMatrixType tmp3(multiplyTc(c,c));
+			typename OperatorType::Su2RelatedType su2Related;
+			this->createOpsLabel("nup").push(OperatorType(tmp3,
+			                                              1.0,
+			                                              typename OperatorType::PairType(0,0),
+			                                              1.0,
+			                                              su2Related));
+		}
+
+		{
+			OperatorType tmp = creationMatrix[1];
+			tmp.dagger();
+			SparseMatrixType c = tmp.data;
+			SparseMatrixType tmp3(multiplyTc(c,c));
+			typename OperatorType::Su2RelatedType su2Related;
+			this->createOpsLabel("ndown").push(OperatorType(tmp3,
+			                                                1.0,
+			                                                typename OperatorType::PairType(0,0),
+			                                                1.0,
+			                                                su2Related));
+		}
 	}
 
 private:
@@ -521,8 +498,8 @@ private:
 		for (SizeType i=0;i<n;i++) {
 			SizeType orb = 0;
 			// potentialV
-			SparseMatrixType nup(naturalOperator("nup",i,orb).data);
-			SparseMatrixType ndown(naturalOperator("ndown",i,orb).data);
+			SparseMatrixType nup(this->naturalOperator("nup",i,orb).data);
+			SparseMatrixType ndown(this->naturalOperator("ndown",i,orb).data);
 			SparseMatrixType m = nup;
 			SizeType index = block[i]+orb*linSize;
 			assert(index<modelParameters_.potentialV.size());

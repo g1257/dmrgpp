@@ -137,6 +137,7 @@ public:
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
+	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
 	ModelHubbard(const SolverParamsType& solverParams,
 	             InputValidatorType& io,
@@ -178,8 +179,8 @@ public:
 		 For example, for the Hubbard model these operators are the
 		 creation operators for sites in block */
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                                 VectorQnType& qns,
-	                                 const BlockType& block) const
+	                         VectorQnType& qns,
+	                         const BlockType& block) const
 	{
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
@@ -212,12 +213,11 @@ public:
 		}
 	}
 
-	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
-	 * unmangled (natural) basis of one-site */
-	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType site,
-	                             SizeType dof) const
+protected:
+
+	void fillLabeledOperators()
 	{
+		SizeType site = 0;
 		BlockType block(1, site);
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		VectorQnType qns;
@@ -225,50 +225,31 @@ public:
 		SizeType iup = SPIN_UP;
 		SizeType idown = SPIN_DOWN;
 		assert(creationMatrix.size()>0);
-		SizeType nrow = creationMatrix[0].data.rows();
 
-		if (what == "i" || what=="identity") {
-			SparseMatrixType tmp(nrow,nrow);
-			tmp.makeDiagonal(nrow,1.0);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
+		{
+			OpsLabelType& splus = this->createOpsLabel("splus");
+			OpsLabelType& sminus = this->createOpsLabel("sminus");
 
-		if (what == "splus") {
-			VectorSizeType allowed(1,0);
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
 			PsimagLite::Matrix<SparseElementType> tmp =
 			        multiplyTc(creationMatrix[iup].data,creationMatrix[idown].data);
 			SparseMatrixType tmp2(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp2,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
+			splus.push(OperatorType(tmp2,
+			                        1.0,
+			                        typename OperatorType::PairType(0,0),
+			                        1.0,
+			                        su2Related));
+			SparseMatrixType tmp3;
+			transposeConjugate(tmp3, tmp2);
+			sminus.push(OperatorType(tmp3,
+			                         1.0,
+			                         typename OperatorType::PairType(0,0),
+			                         1.0,
+			                         su2Related));
 		}
 
-		if (what == "sminus") {
-			VectorSizeType allowed(1,0);
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			PsimagLite::Matrix<SparseElementType> tmp =
-			        multiplyTc(creationMatrix[idown].data,creationMatrix[iup].data);
-			SparseMatrixType tmp2(tmp);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp2,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		if (what == "z" || what == "sz") { // S^z
-			VectorSizeType allowed(1,0);
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
+		{
+			OpsLabelType& sz = this->createOpsLabel("sz");
 			PsimagLite::Matrix<SparseElementType> tmp =
 			        multiplyTc(creationMatrix[iup].data,creationMatrix[iup].data);
 			PsimagLite::Matrix<SparseElementType> tmp2 =
@@ -276,90 +257,88 @@ public:
 			tmp = tmp-tmp2;
 			SparseMatrixType tmp3(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp3,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
+			sz.push(OperatorType(tmp3,
+			                     1.0,
+			                     typename OperatorType::PairType(0,0),
+			                     1.0,
+			                     su2Related));
 		}
 
-		if (what == "n") {
-			PsimagLite::Matrix<SparseElementType> dense1;
-			crsMatrixToFullMatrix(dense1,naturalOperator("nup",site,0).data);
-			PsimagLite::Matrix<SparseElementType> dense2;
-			crsMatrixToFullMatrix(dense2,naturalOperator("ndown",site,0).data);
-			dense1 += dense2;
-			SparseMatrixType tmp(dense1);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
+
+		{
+			OpsLabelType& c = this->createOpsLabel("c");
+			for (SizeType dof = 0; dof < 2; ++dof) {
+				assert(dof < creationMatrix.size());
+				c.push(creationMatrix[dof]);
+			}
 		}
 
-		if (what == "c") {
-			VectorSizeType allowed(2,0);
-			allowed[1] = 1;
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			assert(dof<creationMatrix.size());
-			return creationMatrix[dof];
-		}
-
-		if (what == "nup") {
-			VectorSizeType allowed(1,0);
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			OperatorType cup = naturalOperator("c",site,SPIN_UP);
+		PsimagLite::Matrix<SparseElementType> dense1;
+		{
+			OpsLabelType& nupop = this->createOpsLabel("nup");
+			OperatorType cup = creationMatrix[SPIN_UP];
 			cup.dagger();
 			SparseMatrixType tmp3(multiplyTc(cup.data,cup.data));
 			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp3,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
+			nupop.push(OperatorType(tmp3,
+			                        1.0,
+			                        typename OperatorType::PairType(0,0),
+			                        1.0,
+			                        su2Related));
+			crsMatrixToFullMatrix(dense1, tmp3);
 		}
 
-		if (what == "ndown") {
-			VectorSizeType allowed(1,0);
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			OperatorType cdown = naturalOperator("c",site,SPIN_DOWN);
+
+		PsimagLite::Matrix<SparseElementType> dense2;
+		{
+			OpsLabelType& ndownop = this->createOpsLabel("ndown");
+
+			OperatorType cdown = creationMatrix[SPIN_DOWN];
 			cdown.dagger();
 			SparseMatrixType tmp3(multiplyTc(cdown.data,cdown.data));
 			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp3,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
+			ndownop.push(OperatorType(tmp3,
+			                          1.0,
+			                          typename OperatorType::PairType(0,0),
+			                          1.0,
+			                          su2Related));
+			crsMatrixToFullMatrix(dense2, tmp3);
+
 		}
 
-		if (what == "d") {
-			VectorSizeType allowed(1,0);
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
+		{
+			OpsLabelType& nop = this->createOpsLabel("n");
+			dense1 += dense2;
+			SparseMatrixType tmp(dense1);
+			typename OperatorType::Su2RelatedType su2Related;
+			nop.push(OperatorType(tmp,
+			                      1.0,
+			                      typename OperatorType::PairType(0,0),
+			                      1.0,
+			                      su2Related));
+		}
+
+		{
+			OpsLabelType& d = this->createOpsLabel("d");
 			PsimagLite::Matrix<SparseElementType> cup;
-			crsMatrixToFullMatrix(cup,naturalOperator("c",site,SPIN_UP).data);
+			crsMatrixToFullMatrix(cup,creationMatrix[SPIN_UP].data);
 			PsimagLite::Matrix<SparseElementType> cdown;
-			crsMatrixToFullMatrix(cdown,naturalOperator("c",site,SPIN_DOWN).data);
+			crsMatrixToFullMatrix(cdown,creationMatrix[SPIN_DOWN].data);
 			cup = (cup*cdown);
 			SparseMatrixType tmp3(cup);
 			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp3,
+			d.push(OperatorType(tmp3,
 			                    1.0,
 			                    typename OperatorType::PairType(0,0),
 			                    1.0,
-			                    su2Related);
+			                    su2Related));
 		}
-
-		PsimagLite::String str("ModelHubbard: naturalOperator: no label ");
-		str += what + "\n";
-		throw PsimagLite::RuntimeError(str);
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
-		        io.createGroup(label1);
+			io.createGroup(label1);
 
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
@@ -444,7 +423,7 @@ private:
 			basis[1] = 2;
 			basis[2] = 1;
 			basis[3] = 3;
- 		}
+		}
 	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket

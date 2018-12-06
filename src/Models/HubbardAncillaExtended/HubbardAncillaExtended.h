@@ -126,6 +126,7 @@ public:
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename PsimagLite::Vector<PairType>::Type VectorPairType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
+	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
@@ -228,89 +229,6 @@ public:
 			assert(creationMatrix.size() == 8);
 	}
 
-	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType site,
-	                             SizeType dof) const
-	{
-		BlockType block;
-		block.resize(1);
-		block[0]=site;
-		VectorOperatorType creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
-		assert(creationMatrix.size()>0);
-		SizeType nrow = creationMatrix[0].data.rows();
-		PsimagLite::String what2 = what;
-
-		if (what2 == "i" || what2=="identity") {
-			SparseMatrixType tmp(nrow,nrow);
-			tmp.makeDiagonal(nrow,1.0);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		if (what2 == "0") {
-			SparseMatrixType tmp(nrow,nrow);
-			tmp.makeDiagonal(nrow,0.0);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		if (what == "c") {
-			if (dof >= creationMatrix.size()) {
-				PsimagLite::String str("naturalOperator: dof too big ");
-				str += "maximum is " + ttos(creationMatrix.size());
-				str += " given is " + ttos(dof) + "\n";
-				throw PsimagLite::RuntimeError(str);
-			}
-			return creationMatrix[dof];
-		}
-
-		if (what=="d") { // \Delta
-			SizeType offset = (!hot_) ? 2 : 4;
-			assert(offset < creationMatrix.size());
-			return creationMatrix[offset+dof];
-		}
-
-		if (what == "splus") { // S^+
-			SizeType offset = (!hot_) ? 4 : 6;
-			return creationMatrix[offset+dof];
-		}
-
-		if (what == "sminus") { // S^-
-			SizeType offset = (!hot_) ? 4 : 6;
-			creationMatrix[offset+dof].dagger();
-			return creationMatrix[offset+dof];
-		}
-
-		if (what == "z" || what == "sz") { // S^z
-			SizeType offset = (!hot_) ? 5 : 8;
-			return creationMatrix[offset+dof];
-		}
-
-		if (what=="p") { // Pair
-			SizeType offset = (!hot_) ? 6 : 10;
-			return creationMatrix[offset+dof];
-		}
-
-		if (what=="n") { // N
-			SizeType offset = (!hot_) ? 7 : 12;
-			return creationMatrix[offset+dof];
-		}
-
-		PsimagLite::String str("HubbardAncillaExtended: naturalOperator: no label ");
-		str += what + "\n";
-		throw PsimagLite::RuntimeError(str);
-	}
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType&,
 	                                const BlockType& block,
@@ -327,6 +245,50 @@ public:
 
 			addPotentialV(hmatrix, cm, block[i]);
 
+		}
+	}
+
+protected:
+
+	void fillLabeledOperators()
+	{
+		SizeType site = 0;
+		BlockType block(1, site);
+		VectorOperatorType creationMatrix;
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
+
+		SizeType dofs = (hot_) ? 4 : 2;
+		OpsLabelType& c = this->createOpsLabel("c");
+		for (SizeType dof = 0; dof < dofs; ++dof) {
+			c.push(creationMatrix[dof]);
+		}
+
+		SizeType offsetDelta = (hot_) ? 4 : 2;
+		OpsLabelType& d = this->createOpsLabel("d");
+		for (SizeType dof = 0; dof < 2; ++dof) {
+			d.push(creationMatrix[offsetDelta + dof]);
+		}
+
+		SizeType total = (hot_) ? 2 : 1;
+		OpsLabelType& splus = this->createOpsLabel("splus");
+		OpsLabelType& sminus = this->createOpsLabel("sminus");
+		OpsLabelType& sz = this->createOpsLabel("sz");
+		OpsLabelType& p = this->createOpsLabel("p");
+		OpsLabelType& nop = this->createOpsLabel("n");
+
+		SizeType offsetSplus = (hot_) ? 6 : 4;
+		SizeType offsetSz = (hot_) ? 8 : 5;
+		SizeType offsetP = (hot_) ? 10 : 6;
+		SizeType offsetN= (!hot_) ? 12 : 7;
+		for (SizeType dof = 0; dof < total; ++dof) {
+			splus.push(creationMatrix[offsetSplus + dof]);
+			creationMatrix[offsetSplus + dof].dagger();
+			sminus.push(creationMatrix[offsetSplus + dof]);
+			creationMatrix[offsetSplus + dof].dagger();
+			sz.push(creationMatrix[offsetSz + dof]);
+			p.push(creationMatrix[offsetP + dof]);
+			nop.push(creationMatrix[offsetN + dof]);
 		}
 	}
 

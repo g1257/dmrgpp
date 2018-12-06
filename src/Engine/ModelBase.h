@@ -129,13 +129,16 @@ public:
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename QnType::PairSizeType PairSizeType;
 	typedef typename BasisWithOperatorsType::VectorBoolType VectorBoolType;
+	typedef LabeledOperators<OperatorType> LabeledOperatorsType;
+	typedef typename LabeledOperatorsType::LabelType OpsLabelType;
 
 	ModelBase(const ParametersType& params,
 	          const GeometryType_& geometry,
 	          const LinkProductBaseType* lpb,
 	          InputValidatorType& io)
 	    : modelCommon_(params, geometry, lpb),
-	      targetQuantum_(io)
+	      targetQuantum_(io),
+	      labeledOperators_(params.model)
 	{}
 
 	void postCtor()
@@ -144,6 +147,9 @@ public:
 		VectorQnType qns;
 		BlockType block(1, 0);
 		setOperatorMatrices(cm, qns, block);
+		assert(cm.size() > 0);
+		labeledOperators_.postCtor(cm[0].data.rows());
+		fillLabeledOperators();
 		modelCommon_.postCtor(cm);
 	}
 
@@ -156,15 +162,6 @@ public:
 	// Serializer object is second argument
 	virtual void write(PsimagLite::String,
 	                   PsimagLite::IoNg::Out::Serializer&) const = 0;
-
-	// Given an operator what with degree of freedom dof
-	// create the one-site matrix for this operator
-	// and create a OperatorType object from it and return it
-	// site MUST be ignored unless your model has a site-dependent
-	// Hilbert space (SDHS)
-	virtual OperatorType naturalOperator(const PsimagLite::String& what,
-	                                     SizeType site,
-	                                     SizeType dof) const = 0;
 
 	// Return the size of the one-site Hilbert space basis for this model
 	// site MUST be ignored unless your model has a site-dependent
@@ -245,6 +242,8 @@ public:
 		addDiagonalsInNaturalBasis(hmatrix,cm,block,time);
 	}
 
+	virtual void fillLabeledOperators() = 0;
+
 	virtual SizeType maxElectronsOneSpin() const
 	{
 		SizeType tmp = hilbertSize(0);
@@ -255,12 +254,17 @@ public:
 		return maxElectrons*modelCommon_.geometry().numberOfSites() + 1;
 	}
 
-	virtual PsimagLite::String symmName() const { return "undefined"; }
-
-	virtual bool instrospect() const
+	OperatorType naturalOperator(const PsimagLite::String& what,
+	                             SizeType site,
+	                             SizeType dof) const
 	{
-		std::cerr<<"Instrospection not available for this model\n";
-		return false;
+		return labeledOperators_(what, site, dof);
+	}
+
+	bool instrospect() const
+	{
+		labeledOperators_.instrospect();
+		return true;
 	}
 
 	void printBasis(SizeType site) const
@@ -282,20 +286,6 @@ public:
 	const GeometryType& geometry() const { return modelCommon_.geometry(); }
 
 	const ParametersType& params() const { return modelCommon_.params(); }
-
-	static void checkNaturalOperatorDof(SizeType dof,
-	                                    PsimagLite::String label,
-	                                    const VectorSizeType& allowed)
-	{
-		if (std::find(allowed.begin(),allowed.end(),dof) != allowed.end()) return;
-		PsimagLite::String str("For this model and label=");
-		str += label + " dof=" + ttos(dof) + " is not allowed\n";
-		str += "Allowed dofs are ";
-		for (SizeType i = 0; i < allowed.size(); ++i)
-			str += ttos(i) + " ";
-		str += "\n";
-		throw PsimagLite::RuntimeError(str);
-	}
 
 	const TargetQuantumElectronsType& targetQuantum() const
 	{
@@ -328,10 +318,18 @@ public:
 		basis = newBasis;
 	}
 
+protected:
+
+	OpsLabelType& createOpsLabel(PsimagLite::String name)
+	{
+		return labeledOperators_.createLabel(name);
+	}
+
 private:
 
 	ModelCommonType modelCommon_;
 	TargetQuantumElectronsType targetQuantum_;
+	LabeledOperatorsType labeledOperators_;
 };     //class ModelBase
 } // namespace Dmrg
 /*@}*/

@@ -130,6 +130,7 @@ public:
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
+	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
 	HeisenbergAncillaC(const SolverParamsType& solverParams,
 	                   InputValidatorType& io,
@@ -173,7 +174,7 @@ public:
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
-		        io.createGroup(label1);
+			io.createGroup(label1);
 
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
@@ -258,60 +259,6 @@ public:
 		}
 	}
 
-	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType site,
-	                             SizeType dof) const
-	{
-		BlockType block;
-		block.resize(1);
-		block[0]=site;
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
-		assert(creationMatrix.size()>0);
-		SizeType nrow = creationMatrix[0].data.rows();
-
-		if (what == "i" || what=="identity") {
-			SparseMatrixType tmp(nrow,nrow);
-			tmp.makeDiagonal(nrow,1.0);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		if (what=="splus") { // S^+
-			if (!hot_) dof = 0;
-			return creationMatrix[dof];
-		}
-
-		if (what=="sminus") { // S^-
-			if (!hot_) dof = 0;
-			assert(dof < creationMatrix.size());
-			creationMatrix[dof].dagger();
-			return creationMatrix[dof];
-		}
-
-		if (what == "z" || what == "sz") { // S^z
-			if (!hot_) dof = 0;
-			SizeType offset = (hot_) ? 2 : 1;
-			assert(offset + dof < creationMatrix.size());
-			return creationMatrix[offset+dof];
-		}
-
-		if (what=="d") { // \Delta
-			SizeType offset = (hot_) ? 4 : 2;
-			assert(offset < creationMatrix.size());
-			return creationMatrix[offset];
-		}
-
-		PsimagLite::String str("HeisenbergAncillaC: naturalOperator: no label ");
-		str += what + "\n";
-		throw PsimagLite::RuntimeError(str);
-	}
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
@@ -327,6 +274,36 @@ public:
 			RealType tmp = modelParameters_.magneticField[block[i]];
 			hmatrix += tmp * cm[1+i*2].data;
 		}
+	}
+
+protected:
+
+	void fillLabeledOperators()
+	{
+		SizeType site = 0;
+		BlockType block(1, site);
+		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
+
+		OpsLabelType& splus = this->createOpsLabel("splus");
+		OpsLabelType& sminus = this->createOpsLabel("sminus");
+		OpsLabelType& sz = this->createOpsLabel("sz");
+		SizeType total = (hot_) ? 2 : 1;
+		SizeType offsetZ = (hot_) ? 2 : 1;
+		assert(total + offsetZ <= creationMatrix.size());
+		for (SizeType dof = 0; dof < total; ++dof) {
+			splus.push(creationMatrix[dof]);
+			creationMatrix[dof].dagger();
+			sminus.push(creationMatrix[dof]);
+			creationMatrix[dof].dagger();
+			sz.push(creationMatrix[offsetZ + dof]);
+		}
+
+		OpsLabelType& d = this->createOpsLabel("d");
+		SizeType offsetD = (hot_) ? 4 : 2;
+		assert(offsetD < creationMatrix.size());
+		d.push(creationMatrix[offsetD]);
 	}
 
 private:
@@ -466,9 +443,9 @@ private:
 	//serializr start class HeisenbergAncillaC
 	//serializr vptr
 	//serializr normal modelParameters_
-	ParametersHeisenbergAncillaC<RealType, QnType>  modelParameters_;
+	ParametersHeisenbergAncillaC<RealType, QnType> modelParameters_;
 	//serializr ref geometry_ start
-	GeometryType const &geometry_;
+	const GeometryType& geometry_;
 	bool hot_;
 }; // class HeisenbergAncillaC
 

@@ -114,6 +114,7 @@ public:
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
 	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeTypeType;
+	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
 	SuperHubbardExtended(const SolverParamsType& solverParams,
 	                     InputValidatorType& io,
@@ -146,24 +147,6 @@ public:
 		setSpinMatrices(creationMatrix,block);
 	}
 
-	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType site,
-	                             SizeType dof) const
-	{
-		SizeType matrixIndex = findMatrixIndex(what);
-
-		if (matrixIndex < 3)
-			return extendedHubbard_.naturalOperator(what,site,dof);
-
-		BlockType block;
-		block.resize(1);
-		block[0]=site;
-		VectorOperatorType creationMatrix;
-		setSpinMatrices(creationMatrix, block);
-		assert(creationMatrix.size() > 2);
-		return creationMatrix[matrixIndex-3];
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -186,14 +169,21 @@ public:
 		                                            time);
 	}
 
-private:
+protected:
 
-	SizeType findMatrixIndex(const PsimagLite::String& what) const
+	void fillLabeledOperators()
 	{
-		if (what == "+") return 3;
-		if (what == "z") return 4;
-		return 0;
+		SizeType site = 0; // FIXME for Immm SDHS
+		BlockType block(1, site);
+
+		VectorOperatorType creationMatrix;
+		setSpinMatrices(creationMatrix, block);
+		assert(creationMatrix.size() == 2);
+		this->createOpsLabel("splus").push(creationMatrix[0]);
+		this->createOpsLabel("sz").push(creationMatrix[1]);
 	}
+
+private:
 
 	//! Full hamiltonian from creation matrices cm
 	void addSiSj(SparseMatrixType &,
@@ -210,14 +200,14 @@ private:
 	{
 		assert(block.size()==1);
 
-		SparseMatrixType sPlus = extendedHubbard_.naturalOperator("+",0,0).data;
+		SparseMatrixType sPlus = extendedHubbard_.naturalOperator("splus",0,0).data;
 		RealType angularFactor= 1;
 		typename OperatorType::Su2RelatedType su2related;
 		su2related.offset = 1; //check FIXME
 		OperatorType sPlusOp(sPlus,1,typename OperatorType::PairType(0,0),angularFactor,su2related);
 		creationMatrix.push_back(sPlusOp);
 
-		SparseMatrixType sz = extendedHubbard_.naturalOperator("z",0,0).data;
+		SparseMatrixType sz = extendedHubbard_.naturalOperator("sz",0,0).data;
 		sz *= 0.5;
 		OperatorType szOp(sz,1,typename OperatorType::PairType(0,0),angularFactor,su2related);
 		creationMatrix.push_back(szOp);

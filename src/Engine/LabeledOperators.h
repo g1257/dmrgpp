@@ -32,6 +32,13 @@ class LabeledOperators {
 			return (name == name_);
 		}
 
+		SizeType rows() const
+		{
+			if (ops_.size() == 0)
+				err("FATAL: LabeledOperators::Label::rows(): Internal Error\n");
+			return ops_[0].data.rows();
+		}
+
 		Label(const Label&);
 
 		Label& operator=(const Label&);
@@ -91,10 +98,18 @@ public:
 		}
 	}
 
+	void postCtor(SizeType h)
+	{
+		Label* labeli = new Label("i");
+		labels_.push_back(labeli);
+		pushIdentity(*labeli, h);
+	}
+
 	Label& createLabel(PsimagLite::String name)
 	{
 		Label* label = new Label(name);
 		labels_.push_back(label);
+
 		return *label;
 	}
 
@@ -135,6 +150,19 @@ public:
 	}
 
 private:
+
+	void pushIdentity(LabelType& label, SizeType nrow)
+	{
+		typename OperatorType::StorageType tmp(nrow, nrow);
+		tmp.makeDiagonal(nrow, 1.0);
+		typename OperatorType::Su2RelatedType su2Related;
+		label.push(OperatorType(tmp,
+		                  1.0,
+		                  typename OperatorType::PairType(0,0),
+		                  1.0,
+		                  su2Related));
+
+	}
 
 	LabeledOperators(const LabeledOperators&);
 

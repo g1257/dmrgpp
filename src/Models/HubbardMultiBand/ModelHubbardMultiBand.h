@@ -120,6 +120,7 @@ public:
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef ParametersHubbardMultiBand<ComplexOrRealType, QnType> ParamsModelType;
+	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
@@ -195,121 +196,6 @@ public:
 		qns = qq_;
 	}
 
-	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType site,
-	                             SizeType dof) const
-	{
-		BlockType block;
-		block.resize(1);
-		block[0]=site;
-		SizeType orbital = dof % modelParameters_.orbitals;
-		SizeType spin = dof/modelParameters_.orbitals;
-		assert(creationMatrix_.size()>0);
-		SizeType nrow = creationMatrix_[0].data.rows();
-		PsimagLite::String what2 = what;
-
-		if (what2 == "splus") {
-			VectorSizeType allowed(modelParameters_.orbitals,0);
-			for (SizeType x = 0; x < modelParameters_.orbitals; ++x)
-				allowed[x] = x;
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			MatrixType tmp(nrow,nrow);
-			tmp += multiplyTc(creationMatrix_[dof].data,
-			                  creationMatrix_[dof+modelParameters_.orbitals].data);
-			SparseMatrixType tmp2(tmp);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp2,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		if (what2 == "sminus") {
-			VectorSizeType allowed(modelParameters_.orbitals,0);
-			for (SizeType x = 0; x < modelParameters_.orbitals; ++x)
-				allowed[x] = x;
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			MatrixType tmp(nrow,nrow);
-			tmp += multiplyTc(creationMatrix_[dof+modelParameters_.orbitals].data,
-			        creationMatrix_[dof].data);
-			SparseMatrixType tmp2(tmp);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp2,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		if (what2 == "z" || what2 == "sz") { // S^z
-			VectorSizeType allowed(modelParameters_.orbitals,0);
-			for (SizeType x = 0; x < modelParameters_.orbitals; ++x)
-				allowed[x] = x;
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			MatrixType tmp(nrow,nrow);
-			MatrixType tmp2(nrow,nrow);
-
-			tmp += multiplyTc(creationMatrix_[dof].data,creationMatrix_[dof].data);
-			tmp2 += multiplyTc(creationMatrix_[dof+modelParameters_.orbitals].data,
-			        creationMatrix_[dof+modelParameters_.orbitals].data);
-
-			tmp = 0.5*(tmp-tmp2);
-			SparseMatrixType tmp3(tmp);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp3,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-		if (what2=="n") {
-			VectorSizeType allowed(2*modelParameters_.orbitals,0);
-			for (SizeType x = 0; x < allowed.size(); ++x)
-				allowed[x] = x;
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			MatrixType tmp =
-			        multiplyTc(creationMatrix_[dof].data,creationMatrix_[dof].data);
-			SparseMatrixType tmp2(tmp);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp2,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		if (what2=="c") {
-			VectorSizeType allowed(2*modelParameters_.orbitals,0);
-			for (SizeType x = 0; x < allowed.size(); ++x) allowed[x] = x;
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			VectorOperatorType cm = creationMatrix_;
-			cm[orbital + spin*modelParameters_.orbitals].dagger();
-			return cm[orbital + spin*modelParameters_.orbitals];
-		}
-
-		if (what2=="d") { // delta = c^\dagger * c^dagger
-			VectorSizeType allowed(modelParameters_.orbitals,0);
-			for (SizeType x = 0; x < allowed.size(); ++x)
-				allowed[x] = x;
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			SparseMatrixType atmp;
-			multiply(atmp,
-			         creationMatrix_[orbital+orbital+modelParameters_.orbitals].data,
-			        creationMatrix_[orbital].data);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(atmp,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		PsimagLite::String str("ModelHubbardMultiBand: naturalOperator: no label ");
-		str += what + "\n";
-		throw PsimagLite::RuntimeError(str);
-	}
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
@@ -328,6 +214,96 @@ public:
 			              i,
 			              block[i],
 			              modelParameters_.potentialV);
+		}
+	}
+
+protected:
+
+	void fillLabeledOperators()
+	{
+		assert(creationMatrix_.size()>0);
+		SizeType nrow = creationMatrix_[0].data.rows();
+
+		OpsLabelType& splus = this->createOpsLabel("splus");
+		OpsLabelType& sminus = this->createOpsLabel("sminus");
+		OpsLabelType& sz = this->createOpsLabel("sz");
+		OpsLabelType& d = this->createOpsLabel("d");
+
+		for (SizeType orbital = 0; orbital < modelParameters_.orbitals; ++orbital) {
+			{
+				MatrixType tmp(nrow,nrow);
+				tmp += multiplyTc(creationMatrix_[orbital].data,
+				                  creationMatrix_[orbital + modelParameters_.orbitals].data);
+				SparseMatrixType tmp2(tmp);
+				typename OperatorType::Su2RelatedType su2Related;
+				splus.push(OperatorType(tmp2,
+				                        1.0,
+				                        typename OperatorType::PairType(0,0),
+				                        1.0,
+				                        su2Related));
+				SparseMatrixType tmp3;
+				transposeConjugate(tmp3, tmp2);
+				sminus.push(OperatorType(tmp3,
+				                         1.0,
+				                         typename OperatorType::PairType(0,0),
+				                         1.0,
+				                         su2Related));
+			}
+
+			{ // S^z
+				MatrixType tmp(nrow,nrow);
+				MatrixType tmp2(nrow,nrow);
+
+				tmp += multiplyTc(creationMatrix_[orbital].data,
+				                  creationMatrix_[orbital].data);
+				tmp2 += multiplyTc(creationMatrix_[orbital + modelParameters_.orbitals].data,
+				        creationMatrix_[orbital + modelParameters_.orbitals].data);
+
+				tmp = 0.5*(tmp-tmp2);
+				SparseMatrixType tmp3(tmp);
+				typename OperatorType::Su2RelatedType su2Related;
+				sz.push(OperatorType(tmp3,
+				                     1.0,
+				                     typename OperatorType::PairType(0,0),
+				                     1.0,
+				                     su2Related));
+			}
+
+			{ // delta = c^\dagger * c^dagger
+				SparseMatrixType atmp;
+				multiply(atmp,
+				         creationMatrix_[orbital + modelParameters_.orbitals].data,
+				        creationMatrix_[orbital].data);
+				typename OperatorType::Su2RelatedType su2Related;
+				d.push(OperatorType(atmp,
+				                    1.0,
+				                    typename OperatorType::PairType(0,0),
+				                    1.0,
+				                    su2Related));
+			}
+		}
+
+		OpsLabelType& nop = this->createOpsLabel("n");
+		OpsLabelType& c = this->createOpsLabel("c");
+		SizeType dofs = 2*modelParameters_.orbitals;
+		for (SizeType dof = 0; dof < dofs; ++dof) {
+			{
+				MatrixType tmp =
+				        multiplyTc(creationMatrix_[dof].data,creationMatrix_[dof].data);
+				SparseMatrixType tmp2(tmp);
+				typename OperatorType::Su2RelatedType su2Related;
+				nop.push(OperatorType(tmp2,
+				                      1.0,
+				                      typename OperatorType::PairType(0,0),
+				                      1.0,
+				                      su2Related));
+			}
+
+			{
+				VectorOperatorType cm = creationMatrix_;
+				cm[dof].dagger();
+				c.push(cm[dof]);
+			}
 		}
 	}
 

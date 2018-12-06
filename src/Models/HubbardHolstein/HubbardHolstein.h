@@ -128,6 +128,7 @@ public:
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename PsimagLite::Vector<PairType>::Type VectorPairType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
+	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceHubbardHolsteinWordType::SPIN_UP;
@@ -237,64 +238,6 @@ public:
 		}
 	}
 
-	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType site,
-	                             SizeType dof) const
-	{
-		BlockType block;
-		block.resize(1);
-		block[0]=site;
-		VectorOperatorType creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
-		assert(creationMatrix.size()>0);
-		SizeType nrow = creationMatrix[0].data.rows();
-		PsimagLite::String what2 = what;
-
-		if (what2 == "i" || what2=="identity") {
-			SparseMatrixType tmp(nrow,nrow);
-			tmp.makeDiagonal(nrow,1.0);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		if (what2 == "0") {
-			SparseMatrixType tmp(nrow,nrow);
-			tmp.makeDiagonal(nrow,0.0);
-			typename OperatorType::Su2RelatedType su2Related;
-			return OperatorType(tmp,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related);
-		}
-
-		if (what == "c") {
-			if (dof >= creationMatrix.size()) {
-				PsimagLite::String str("naturalOperator: dof too big ");
-				str += "maximum is " + ttos(creationMatrix.size());
-				str += " given is " + ttos(dof) + "\n";
-				throw PsimagLite::RuntimeError(str);
-			}
-
-			return creationMatrix[dof];
-		}
-
-		if (what=="a") { // a_dagger
-			SizeType offset = 2;
-			assert(offset < creationMatrix.size());
-			return creationMatrix[offset+dof];
-		}
-
-		PsimagLite::String str("HubbardHolstein: naturalOperator: no label ");
-		str += what + "\n";
-		throw PsimagLite::RuntimeError(str);
-	}
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType&,
 	                                const BlockType& block,
@@ -328,6 +271,24 @@ public:
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
 		modelParameters_.write(label, io);
+	}
+
+protected:
+
+	void fillLabeledOperators()
+	{
+		SizeType site = 0;
+		BlockType block(1, site);
+		VectorOperatorType creationMatrix;
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
+		assert(creationMatrix.size() >= 3);
+
+		OpsLabelType& c = this->createOpsLabel("c");
+		for (SizeType sigma = 0; sigma < 2; ++sigma)
+			c.push(creationMatrix[sigma]);
+
+		this->createOpsLabel("a").push(creationMatrix[2]);
 	}
 
 private:

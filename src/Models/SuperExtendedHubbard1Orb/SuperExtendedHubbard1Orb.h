@@ -116,6 +116,7 @@ public:
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
 	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
+	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
 	ExtendedSuperHubbard1Orb(const SolverParamsType& solverParams,
 	                         InputValidatorType& io,
@@ -142,26 +143,6 @@ public:
 		extendedHubbard_.setOperatorMatrices(creationMatrix, qns, block);
 		addAditionalOperatorMatrices(creationMatrix,block);
 		assert(creationMatrix.size() == 6);
-	}
-
-	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType site,
-	                             SizeType dof) const
-	{
-		BlockType block;
-		block.resize(1);
-		block[0]=site;
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
-
-		if (what=="n") {
-			VectorSizeType allowed(1,0);
-			ModelBaseType::checkNaturalOperatorDof(dof,what,allowed);
-			return creationMatrix[2];
-		}
-
-		return extendedHubbard_.naturalOperator(what,site,dof);
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -196,6 +177,19 @@ public:
 		                                            cmCorrected,
 		                                            block,
 		                                            time);
+	}
+
+protected:
+
+	void fillLabeledOperators()
+	{
+		SizeType site = 0; // FIXME for Immm SDHS
+		BlockType block(1, site);
+		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
+		VectorQnType qns;
+		setOperatorMatrices(creationMatrix, qns, block);
+		assert(creationMatrix.size() >= 3);
+		this->createOpsLabel("n").push(creationMatrix[2]);
 	}
 
 private:
