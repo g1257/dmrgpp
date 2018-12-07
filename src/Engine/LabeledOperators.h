@@ -131,7 +131,7 @@ public:
 	void instrospect() const
 	{
 		SizeType n = labels_.size();
-		std::cout<<"There are "<<n<<" labels available for this model\n";
+		std::cout<<"There are "<<n<<" labels available for the "<<model_<<" model\n";
 		for (SizeType i = 0; i < n; ++i)
 			labels_[i]->instrospect();
 	}
