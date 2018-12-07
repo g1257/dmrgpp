@@ -13,6 +13,8 @@ int main()
 	std::cout<<"A\n";
 	std::cout<<a;
 
+	MatrixType m(a);
+
 	PsimagLite::Vector<double>::Type s;
 	MatrixType vt;
 
@@ -21,6 +23,14 @@ int main()
 
 	std::cout<<"U\n";
 	std::cout<<a;
+	std::cout<<"S\n";
+	std::cout<<s;
+
+	std::cout<<"\n\nFallback\n";
+	PsimagLite::Svd<double> svdFallback("gesvd");
+	svdFallback('A', m, s, vt);
+	std::cout<<"U\n";
+	std::cout<<m;
 	std::cout<<"S\n";
 	std::cout<<s;
 }
