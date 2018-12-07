@@ -262,6 +262,8 @@ to the main dmrg driver are the following.
 	./operator -l c -f input.inp\end{verbatim}
 	See the function naturalOperator for each Model.
 
+	\item[-B] [Optional] Prints the basis
+
 	\item[-d] [Optional, Integer] \emph{Deprecated. Use -e.}
 	Degree of freedom (spin, orbital or
 	combination of both) to use. This is model dependent. For example to
@@ -276,7 +278,7 @@ to the main dmrg driver are the following.
 	\begin{verbatim}./operator -l c -t -f input.inp\end{verbatim}
 	\end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:s:l:d:p:e:o:tkUSV")) != -1) {
+	while ((opt = getopt(argc, argv,"f:s:l:d:p:e:o:tkBUSV")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -304,6 +306,9 @@ to the main dmrg driver are the following.
 			break;
 		case 'o':
 			sOptions += optarg;
+			break;
+		case 'B':
+			options.label = "B";
 			break;
 		case 'U':
 			unbuffered = true;

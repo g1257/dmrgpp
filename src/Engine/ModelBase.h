@@ -279,7 +279,7 @@ public:
 		SizeType n = cm.size();
 		for (SizeType i = 0; i < n; ++i) {
 			std::cout<<"Matrix "<<i<<"\n";
-			std::cout<<cm[i];
+			cm[i].write(std::cout);
 		}
 	}
 

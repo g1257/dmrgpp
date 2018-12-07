@@ -74,10 +74,8 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 	}
 
 	if (!obsOptions.hasOperatorExpression && obsOptions.label == "") {
-		if (model.instrospect()) {
-			model.printBasis(obsOptions.site);
+		if (model.instrospect())
 			return;
-		}
 
 		std::cerr<<"You must provide exactly one option: -l or -e;";
 		std::cerr<<" none were given\n";
