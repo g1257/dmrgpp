@@ -77,6 +77,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "MatrixVectorKron/GenIjPatch.h"
 #include "PersistentSvd.h"
+#include "Svd.h"
 
 namespace Dmrg {
 
@@ -380,6 +381,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 			MatrixType& vt = persistentSvd_.vts(igroup);
 			VectorRealType& eigsOnePatch = persistentSvd_.s(igroup);
 
+			PsimagLite::Svd<ComplexOrRealType> svd;
 			svd('A', m, eigsOnePatch, vt);
 
 			persistentSvd_.qns(igroup) = allTargets_.basis().qnEx(igroup);
