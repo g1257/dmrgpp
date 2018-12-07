@@ -333,7 +333,7 @@ void svd(char jobz,
 
 		std::cerr<<str;
 		std::cerr<<"Will try with fallback...\n";
-		svd(jobz, a, s, vt, psimag::LAPACK::dgesvd_, 1);
+		svd(jobz, a, s, vt, psimag::LAPACK::dgesdd_, 1);
 	}
 
 	a = u;
@@ -424,7 +424,7 @@ void svd(char jobz,
 
 		std::cerr<<str;
 		std::cerr<<"Will try with fallback...\n";
-		svd(jobz, a, s, vt, psimag::LAPACK::sgesvd_, 1);
+		svd(jobz, a, s, vt, psimag::LAPACK::sgesdd_, 1);
 	}
 
 	a = u;
@@ -519,7 +519,7 @@ void svd(char jobz,
 
 		std::cerr<<str;
 		std::cerr<<"Will try with fallback...\n";
-		svd(jobz, a, s, vt, psimag::LAPACK::zgesvd_, 1);
+		svd(jobz, a, s, vt, psimag::LAPACK::zgesdd_, 1);
 	}
 
 	a = u;
@@ -614,7 +614,7 @@ void svd(char jobz,
 
 		std::cerr<<str;
 		std::cerr<<"Will try with fallback...\n";
-		svd(jobz, a, s, vt, psimag::LAPACK::cgesvd_, 1);
+		svd(jobz, a, s, vt, psimag::LAPACK::cgesdd_, 1);
 	}
 
 	a = u;
