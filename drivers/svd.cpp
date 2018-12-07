@@ -1,5 +1,6 @@
 #include "Matrix.h"
 #include "Vector.h"
+#include "Svd.h"
 
 int main()
 {
@@ -15,7 +16,8 @@ int main()
 	PsimagLite::Vector<double>::Type s;
 	MatrixType vt;
 
-	svd('A',a,s,vt);
+	PsimagLite::Svd<double> svd;
+	svd('A', a, s, vt);
 
 	std::cout<<"U\n";
 	std::cout<<a;

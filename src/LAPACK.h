@@ -108,6 +108,7 @@ extern "C" int  cgesdd_(char* jobz,
                         int* info);
 
 extern "C" int  dgesvd_(char* jobz,
+                        char*,
                         int* m,
                         int* n,
                         double* a,
@@ -119,10 +120,10 @@ extern "C" int  dgesvd_(char* jobz,
                         int* ldvt,
                         double* work,
                         int* lwork,
-                        int* iwork,
                         int* info);
 
 extern "C" int  sgesvd_(char* jobz,
+                        char*,
                         int* m,
                         int* n,
                         float* a,
@@ -134,10 +135,10 @@ extern "C" int  sgesvd_(char* jobz,
                         int* ldvt,
                         float* work,
                         int* lwork,
-                        int* iwork,
                         int* info);
 
 extern "C" int  zgesvd_(char* jobz,
+                        char*,
                         int* m,
                         int* n,
                         std::complex<double>* a,
@@ -150,10 +151,10 @@ extern "C" int  zgesvd_(char* jobz,
                         std::complex<double>* work,
                         int* lwork,
                         double* rwork,
-                        int* iwork,
                         int* info);
 
 extern "C" int  cgesvd_(char* jobz,
+                        char*,
                         int* m,
                         int* n,
                         std::complex<float>* a,
@@ -166,7 +167,6 @@ extern "C" int  cgesvd_(char* jobz,
                         std::complex<float>* work,
                         int* lwork,
                         float* rwork,
-                        int* iwork,
                         int* info);
 
 extern "C" void ilaver_(int*, int*, int*);
@@ -302,6 +302,160 @@ inline void GETRI(int na,
                   int& info)
 {
 	zgetri_(&na,a,&lda,pivot,work,&lwork,&info);
+}
+
+inline void GESDD(char* jobz,
+                  int* m,
+                  int* n,
+                  double* a, // T*,
+                  int* lda,
+                  double* s,
+                  double* u, //T*,
+                  int* ldu,
+                  double* vt, // T*,
+                  int* ldvt,
+                  double* work, // T*,
+                  int* lwork,
+                  double*, // nothing
+                  int* iwork,
+                  int *info)
+{
+	dgesdd_(jobz, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, iwork, info);
+}
+
+inline void GESDD(char* jobz,
+                  int* m,
+                  int* n,
+                  float* a, // T*,
+                  int* lda,
+                  float* s,
+                  float* u, //T*,
+                  int* ldu,
+                  float* vt, // T*,
+                  int* ldvt,
+                  float* work, // T*,
+                  int* lwork,
+                  float*, // nothing
+                  int* iwork,
+                  int *info)
+{
+	sgesdd_(jobz, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, iwork, info);
+}
+
+inline void GESDD(char* jobz,
+                  int* m,
+                  int* n,
+                  std::complex<double>* a, // T*,
+                  int* lda,
+                  double* s,
+                  std::complex<double>* u, //T*,
+                  int* ldu,
+                  std::complex<double>* vt, // T*,
+                  int* ldvt,
+                  std::complex<double>* work, // T*,
+                  int* lwork,
+                  double* rwork, // nothing
+                  int* iwork,
+                  int *info)
+{
+	zgesdd_(jobz, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, rwork, iwork, info);
+}
+
+
+inline void GESDD(char* jobz,
+                  int* m,
+                  int* n,
+                  std::complex<float>* a, // T*,
+                  int* lda,
+                  float* s,
+                  std::complex<float>* u, //T*,
+                  int* ldu,
+                  std::complex<float>* vt, // T*,
+                  int* ldvt,
+                  std::complex<float>* work, // T*,
+                  int* lwork,
+                  float* rwork, // nothing
+                  int* iwork,
+                  int *info)
+{
+	cgesdd_(jobz, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, rwork, iwork, info);
+}
+
+inline void GESVD(char* jobz,
+                  char *jobvt,
+                  int* m,
+                  int* n,
+                  double* a, // T*,
+                  int* lda,
+                  double* s,
+                  double* u, //T*,
+                  int* ldu,
+                  double* vt, // T*,
+                  int* ldvt,
+                  double* work, // T*,
+                  int* lwork,
+                  double*, // nothing
+                  int *info)
+{
+	dgesvd_(jobz, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, info);
+}
+
+inline void GESVD(char* jobz,
+                  char *jobvt,
+                  int* m,
+                  int* n,
+                  float* a, // T*,
+                  int* lda,
+                  float* s,
+                  float* u, //T*,
+                  int* ldu,
+                  float* vt, // T*,
+                  int* ldvt,
+                  float* work, // T*,
+                  int* lwork,
+                  float*, // nothing
+                  int *info)
+{
+	sgesvd_(jobz, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, info);
+}
+
+inline void GESVD(char* jobz,
+                  char *jobvt,
+                  int* m,
+                  int* n,
+                  std::complex<double>* a, // T*,
+                  int* lda,
+                  double* s,
+                  std::complex<double>* u, //T*,
+                  int* ldu,
+                  std::complex<double>* vt, // T*,
+                  int* ldvt,
+                  std::complex<double>* work, // T*,
+                  int* lwork,
+                  double* rwork, // nothing
+                  int *info)
+{
+	zgesvd_(jobz, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, rwork, info);
+}
+
+
+inline void GESVD(char* jobz,
+                  char *jobvt,
+                  int* m,
+                  int* n,
+                  std::complex<float>* a, // T*,
+                  int* lda,
+                  float* s,
+                  std::complex<float>* u, //T*,
+                  int* ldu,
+                  std::complex<float>* vt, // T*,
+                  int* ldvt,
+                  std::complex<float>* work, // T*,
+                  int* lwork,
+                  float* rwork, // nothing
+                  int *info)
+{
+	cgesvd_(jobz, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, rwork, info);
 }
 
 inline bool isThreadSafe()
