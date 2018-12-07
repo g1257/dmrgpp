@@ -386,7 +386,7 @@ public:
 			                         su2Related));
 		}
 
-		OpsLabelType& sz = this->createOpsLabel("sminus");
+		OpsLabelType& sz = this->createOpsLabel("sz");
 		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
 			MatrixType tmp(nrow,nrow);
 			MatrixType tmp2(nrow,nrow);

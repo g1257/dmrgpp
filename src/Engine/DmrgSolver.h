@@ -504,7 +504,7 @@ obtain ordered
 		SizeType lastSiteOfSystem = pS.block()[--last];
 		PsimagLite::String lOrR = "";
 
-		if (what == ProgramGlobals::SYSTEM && lastSiteOfSystem != 1)
+		if (what == ProgramGlobals::SYSTEM && lastSiteOfSystem != 0)
 			lOrR = "right";
 
 		if (what == ProgramGlobals::ENVIRON && lastSiteOfSystem != numberOfSites - 2)

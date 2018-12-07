@@ -14,11 +14,11 @@ class LabeledOperators {
 
 		Label(PsimagLite::String name) : name_(name) {}
 
-		const OperatorType& operator()(SizeType site,
+		const OperatorType& operator()(SizeType,
 		                               SizeType dof) const
 		{
-			if (site != 0)
-				std::cerr<<"WARNING: LabeledOperators::Label does not support site ! = 0\n";
+			//if (site != 0)
+			//	std::cerr<<"WARNING: LabeledOperators::Label does not support site ! = 0\n";
 			if (dof < ops_.size())
 				return ops_[dof];
 

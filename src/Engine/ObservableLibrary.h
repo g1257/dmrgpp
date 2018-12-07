@@ -307,8 +307,6 @@ private:
 	             SizeType cols,
 	             SizeType orbitals)
 	{
-		PsimagLite::String modelName = model_.params().model;
-
 		// FIXME: No support for site varying operators
 		if (label=="cc") {
 			BraketType braket(model_,"<gs|c?0-;c'?0-|gs>");
@@ -343,7 +341,7 @@ private:
 			SizeType counter = 0;
 			for (SizeType i = 0; i < orbitals; ++i) {
 				for (SizeType j = i; j < orbitals; ++j) {
-					PsimagLite::String str = "<gs|z?" + ttos(i) + ";z?" + ttos(j) + "|gs>";
+					PsimagLite::String str = "<gs|sz?" + ttos(i) + ";sz?" + ttos(j) + "|gs>";
 					BraketType braket(model_,str);
 					manyPoint(&szsz_[counter],braket,rows,cols);
 					MatrixType tSzThis = szsz_[counter];
