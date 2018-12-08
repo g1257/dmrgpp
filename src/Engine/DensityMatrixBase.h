@@ -102,23 +102,14 @@ public:
 
 	struct Params {
 
-		Params(bool u,
-		       ProgramGlobals::DirectionEnum d,
-		       bool de,
-		       bool enablePersistentSvd_,
-		       bool ignoreConvergenceFailure_)
-		    : useSvd(u),
-		      direction(d),
-		      debug(de),
-		      enablePersistentSvd(enablePersistentSvd_),
-		      ignoreConvergenceFailure(ignoreConvergenceFailure_)
+		Params(bool u, ProgramGlobals::DirectionEnum d, bool de, bool enablePersistentSvd_)
+		    : useSvd(u), direction(d), debug(de), enablePersistentSvd(enablePersistentSvd_)
 		{}
 
 		bool useSvd;
 		ProgramGlobals::DirectionEnum direction;
 		bool debug;
 		bool enablePersistentSvd;
-		bool ignoreConvergenceFailure;
 	};
 
 	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;

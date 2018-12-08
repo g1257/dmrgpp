@@ -362,13 +362,11 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 		ParallelSvd(BlockDiagonalMatrixType& blockDiagonalMatrix,
 		            GroupsStructType& allTargets,
 		            VectorRealType& eigs,
-		            PersistentSvdType& additionalStorage,
-		            PsimagLite::Svd<ComplexOrRealType>& svd)
+		            PersistentSvdType& additionalStorage)
 		    : blockDiagonalMatrix_(blockDiagonalMatrix),
 		      allTargets_(allTargets),
 		      eigs_(eigs),
-		      persistentSvd_(additionalStorage),
-		      svd_(svd)
+		      persistentSvd_(additionalStorage)
 		{
 			SizeType oneSide = allTargets.basis().size();
 			eigs_.resize(oneSide);
@@ -383,7 +381,8 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 			MatrixType& vt = persistentSvd_.vts(igroup);
 			VectorRealType& eigsOnePatch = persistentSvd_.s(igroup);
 
-			svd_('A', m, eigsOnePatch, vt);
+			PsimagLite::Svd<ComplexOrRealType> svd;
+			svd('A', m, eigsOnePatch, vt);
 
 			persistentSvd_.qns(igroup) = allTargets_.basis().qnEx(igroup);
 			const BasisType& basis = allTargets_.basis();
@@ -413,7 +412,6 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 		GroupsStructType& allTargets_;
 		VectorRealType& eigs_;
 		PersistentSvdType persistentSvd_;
-		PsimagLite::Svd<ComplexOrRealType>& svd_;
 	};
 
 public:
@@ -478,12 +476,10 @@ public:
 		PsimagLite::Profiling profiling("DensityMatrixSvdDiag", std::cout);
 		typedef PsimagLite::Parallelizer<ParallelSvd> ParallelizerType;
 		ParallelizerType threaded(PsimagLite::Concurrency::codeSectionParams);
-		PsimagLite::Svd<ComplexOrRealType> svd("gesdd", params_.ignoreConvergenceFailure);
 		ParallelSvd parallelSvd(data_,
 		                        allTargets_,
 		                        eigs,
-		                        persistentSvd_,
-		                        svd);
+		                        persistentSvd_);
 		threaded.loopCreate(parallelSvd);
 		for (SizeType i = 0; i < data_.blocks(); ++i) {
 			SizeType n = data_(i).rows();

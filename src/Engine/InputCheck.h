@@ -346,7 +346,6 @@ public:
 			\item [KronNoUseLowerPart] Don't Use lower part of Kron matrix but
  recompute it instead.
 			\item [shrinkStacksOnDisk] Store shrink stacks on disk instead of in memory
-			\item [svdIgnoreConvergenceFailure] Ignore convergence failure in SVD backend
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,
@@ -409,7 +408,6 @@ public:
 		registerOpts.push_back("saveDensityMatrixEigenvalues");
 		registerOpts.push_back("KronNoUseLowerPart");
 		registerOpts.push_back("shrinkStacksOnDisk");
-		registerOpts.push_back("svdIgnoreConvergenceFailure");
 
 		PsimagLite::Options::Writeable optWriteable(registerOpts,
 		                                            PsimagLite::Options::Writeable::PERMISSIVE);
