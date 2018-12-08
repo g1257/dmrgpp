@@ -1,6 +1,9 @@
 #ifndef SVD_H
 #define SVD_H
 #include "Matrix.h"
+#include <sys/types.h>
+#include <unistd.h>
+#include <fstream>
 
 namespace PsimagLite {
 
@@ -96,10 +99,20 @@ public:
 		        &(iwork[0]),
 		        &info);
 		if (info != 0) {
+			pid_t pid = getpid();
+			PsimagLite::String dumpFile = "SvdFailedForThisMatrix" + ttos(pid) + ".txt";
+
 			String str(__FILE__);
 			str += " " + ttos(__LINE__);
 			str += " svd(...) failed with info=" + ttos(info);
-			str += " matrix is " + ttos(a.rows()) + " " + ttos(a.cols()) + "\n";
+			str += " matrix is " + ttos(a.rows()) + " " + ttos(a.cols());
+			str += " and dumped to file " + dumpFile + "\n";
+
+			std::ofstream fout(dumpFile.c_str());
+			fout<<a<<"\n";
+			fout.close();
+			sleep(2);
+
 			if (info < 0 || !canTryAgain())
 				throw RuntimeError(str);
 
