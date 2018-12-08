@@ -11,8 +11,7 @@ public:
 
 	typedef typename Real<ComplexOrRealType>::Type RealType;
 
-	Svd(String name = "gesdd", bool ignoreNonConvergence = false)
-	    : name_(name), ignoreNonConvergence_(ignoreNonConvergence)
+	Svd(String name = "gesdd") : name_(name)
 	{}
 
 	bool canTryAgain() const
@@ -101,18 +100,8 @@ public:
 			str += " " + ttos(__LINE__);
 			str += " svd(...) failed with info=" + ttos(info);
 			str += " matrix is " + ttos(a.rows()) + " " + ttos(a.cols()) + "\n";
-			if (info < 0)
-				throw RuntimeError(str + "Info < 0 so there is nothing we can do.\n");
-
-			if (!canTryAgain()) {
-				if (!ignoreNonConvergence_) {
-					throw RuntimeError(str + "Info > 0 but cannot try again\n");
-				} else {
-					std::cerr<<str<<"Info > 0, ignoring convergence failure\n";
-					std::cout<<str<<"Info > 0, ignoring convergence failure\n";
-					return;
-				}
-			}
+			if (info < 0 || !canTryAgain())
+				throw RuntimeError(str);
 
 			std::cerr<<str;
 			std::cerr<<"Will try with fallback...\n";
@@ -183,7 +172,6 @@ private:
 	Svd& operator=(const Svd&);
 
 	String name_;
-	bool ignoreNonConvergence_;
 };
 
 }
