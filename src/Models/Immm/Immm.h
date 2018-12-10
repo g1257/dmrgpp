@@ -222,66 +222,69 @@ public:
 		return NUMBER_OF_SPINS * ORBITALS_OXYGEN * geometry_.numberOfSites() + 1;
 	}
 
+	SizeType differentTypesOfAtoms() const { return 2; }
+
 protected:
 
 	void fillLabeledOperators()
 	{
-		SizeType site = 0; // FIXME for Immm SDHS
-		BlockType block(1, site);
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
-		//		SizeType orbitals = orbitalsAtSite(site);
-		//		SizeType orbital = dof % orbitals;
-		//		SizeType spin = dof / orbitals;
+		for (SizeType site = 0; site < differentTypesOfAtoms(); ++site) {
+			BlockType block(1, site);
+			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
+			VectorQnType qns;
+			setOperatorMatrices(creationMatrix, qns, block);
+			//		SizeType orbitals = orbitalsAtSite(site);
+			//		SizeType orbital = dof % orbitals;
+			//		SizeType spin = dof / orbitals;
 
-		SizeType total = creationMatrix.size();
-		std::cerr<<"Immm FIXME fillLabeledOperators SHDS\n";
+			SizeType total = creationMatrix.size();
 
-		this->createOpsLabel("splus").push(cDaggerCi(block,SPIN_UP,SPIN_DOWN));
+			this->createOpsLabel("splus", site).push(cDaggerCi(block,SPIN_UP,SPIN_DOWN));
 
-		this->createOpsLabel("sminus").push(cDaggerCi(block,SPIN_DOWN,SPIN_UP));
+			this->createOpsLabel("sminus", site).push(cDaggerCi(block,SPIN_DOWN,SPIN_UP));
 
-		{ // S^z
-			MatrixType tmp1;
-			crsMatrixToFullMatrix(tmp1,nUpOrDown(block,SPIN_UP).data);
-			MatrixType tmp2;
-			crsMatrixToFullMatrix(tmp2,nUpOrDown(block,SPIN_DOWN).data);
-			tmp1 -= tmp2;
-			SparseMatrixType tmp(tmp1);
-			typename OperatorType::Su2RelatedType su2Related;
-			this->createOpsLabel("sz").push(OperatorType(tmp,
-			                                             1.0,
-			                                             typename OperatorType::PairType(0,0),
-			                                             1.0,
-			                                             su2Related));
-		}
+			{ // S^z
+				MatrixType tmp1;
+				crsMatrixToFullMatrix(tmp1,nUpOrDown(block,SPIN_UP).data);
+				MatrixType tmp2;
+				crsMatrixToFullMatrix(tmp2,nUpOrDown(block,SPIN_DOWN).data);
+				tmp1 -= tmp2;
+				SparseMatrixType tmp(tmp1);
+				typename OperatorType::Su2RelatedType su2Related;
+				typename OperatorType::PairType pairZero(0, 0);
+				this->createOpsLabel("sz", site).push(OperatorType(tmp,
+				                                                   1.0,
+				                                                   pairZero,
+				                                                   1.0,
+				                                                   su2Related));
+			}
 
-		assert(creationMatrix.size() > 0);
-		this->createOpsLabel("sz").push(creationMatrix[creationMatrix.size()-1]);
+			assert(creationMatrix.size() > 0);
+			this->createOpsLabel("sz").push(creationMatrix[creationMatrix.size()-1]);
 
-		OpsLabelType& c = this->createOpsLabel("c");
-		for (SizeType dof = 0; dof < total; ++dof) {
-			creationMatrix[dof].dagger();
-			c.push(creationMatrix[dof]);
-			creationMatrix[dof].dagger();
-		}
+			OpsLabelType& c = this->createOpsLabel("c", site);
+			for (SizeType dof = 0; dof < total; ++dof) {
+				creationMatrix[dof].dagger();
+				c.push(creationMatrix[dof]);
+				creationMatrix[dof].dagger();
+			}
 
-		this->createOpsLabel("nup").push(nUpOrDown(block,SPIN_UP));
+			this->createOpsLabel("nup", site).push(nUpOrDown(block,SPIN_UP));
 
-		this->createOpsLabel("ndown").push(nUpOrDown(block,SPIN_DOWN));
+			this->createOpsLabel("ndown", site).push(nUpOrDown(block,SPIN_DOWN));
 
-		OpsLabelType& o = this->createOpsLabel("o");
-		for (SizeType dof = 0; dof < total; ++dof) {
-			SparseMatrixType tmp2;
-			transposeConjugate(tmp2,creationMatrix[dof].data);
-			SparseMatrixType tmp3 = creationMatrix[dof].data * tmp2;
-			typename OperatorType::Su2RelatedType su2Related;
-			o.push(OperatorType(tmp3,
-			                    1.0,
-			                    typename OperatorType::PairType(0,0),
-			                    1.0,
-			                    su2Related));
+			OpsLabelType& o = this->createOpsLabel("o", site);
+			for (SizeType dof = 0; dof < total; ++dof) {
+				SparseMatrixType tmp2;
+				transposeConjugate(tmp2,creationMatrix[dof].data);
+				SparseMatrixType tmp3 = creationMatrix[dof].data * tmp2;
+				typename OperatorType::Su2RelatedType su2Related;
+				o.push(OperatorType(tmp3,
+				                    1.0,
+				                    typename OperatorType::PairType(0,0),
+				                    1.0,
+				                    su2Related));
+			}
 		}
 	}
 

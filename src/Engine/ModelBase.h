@@ -143,12 +143,20 @@ public:
 
 	void postCtor()
 	{
+		SizeType sites = differentTypesOfAtoms();
+		VectorSizeType h;
 		VectorOperatorType cm;
 		VectorQnType qns;
-		BlockType block(1, 0);
-		setOperatorMatrices(cm, qns, block);
-		assert(cm.size() > 0);
-		labeledOperators_.postCtor(cm[0].data.rows());
+		SizeType lastIndex = 0;
+		for (SizeType site = 0; site < sites; ++site) {
+			BlockType block(1, site);
+			setOperatorMatrices(cm, qns, block);
+			assert(cm.size() > lastIndex);
+			h.push_back(cm[lastIndex].data.rows());
+			lastIndex = cm.size();
+		}
+
+		labeledOperators_.postCtor(h);
 		fillLabeledOperators();
 		modelCommon_.postCtor(cm);
 	}
@@ -254,6 +262,8 @@ public:
 		return maxElectrons*modelCommon_.geometry().numberOfSites() + 1;
 	}
 
+	virtual SizeType differentTypesOfAtoms() const { return 1; }
+
 	OperatorType naturalOperator(const PsimagLite::String& what,
 	                             SizeType site,
 	                             SizeType dof) const
@@ -320,9 +330,9 @@ public:
 
 protected:
 
-	OpsLabelType& createOpsLabel(PsimagLite::String name)
+	OpsLabelType& createOpsLabel(PsimagLite::String name, SizeType site = 0)
 	{
-		return labeledOperators_.createLabel(name);
+		return labeledOperators_.createLabel(name, site);
 	}
 
 private:
