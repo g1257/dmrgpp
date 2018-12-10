@@ -1,3 +1,31 @@
+2018-12-10 Version 5.42
+
+Bug fixes:
+
+* WARNs about unsupported movements
+
+Features
+
+* Echoes input file in base64 and cmd line
+
+* ModelHeisenberg: anisotropyE added
+
+* Model instrospection via operator executable
+
+Docs
+
+* documentation updated
+
+Scripts
+
+* getInSitu.pl script added
+
+* OmegaUtils: prints also pgfplots
+
+Build System
+
+* configure.pl: can use default config via env
+
 2018-10-25 Version 5.40
 
 Bug fixes:
