@@ -263,10 +263,10 @@ public:
 	}
 
 	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType site,
+	                             SizeType,
 	                             SizeType dof) const
 	{
-		return labeledOperators_(what, site, dof);
+		return labeledOperators_(what, 0, dof);
 	}
 
 	bool instrospect() const

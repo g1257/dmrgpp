@@ -132,6 +132,13 @@ public:
 	Label& createLabel(PsimagLite::String name,
 	                   SizeType site)
 	{
+		typename VectorLabelType::const_iterator x = std::find_if(labels_.begin(),
+		                                                          labels_.end(),
+		                                                          IsValue(name, site));
+
+		if (x != labels_.end())
+			err("Repeated label " + name + " site=" + ttos(site) + "\n");
+
 		Label* label = new Label(name, site);
 		labels_.push_back(label);
 		if (site + 1 > sites_) sites_ = site + 1;
