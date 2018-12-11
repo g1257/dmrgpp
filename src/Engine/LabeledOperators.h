@@ -11,14 +11,13 @@ class LabeledOperators {
 	class Label {
 
 		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-		typedef std::pair<PsimagLite::String, SizeType> PairStringSizeType;
 
 	public:
 
-		enum TrackableEnum {TRACKABLE_YES, TRACKABLE_NO};
+		typedef std::pair<PsimagLite::String, SizeType> PairStringSizeType;
 
-		Label(TrackableEnum t, PsimagLite::String name, SizeType site)
-		    : trackable_(t), name_(name), site_(site) {}
+		Label(PsimagLite::String name, SizeType site)
+		    : name_(name), site_(site) {}
 
 		const OperatorType& operator()(SizeType dof) const
 		{
@@ -62,7 +61,6 @@ class LabeledOperators {
 
 		Label& operator=(const Label&);
 
-		TrackableEnum trackable_;
 		PsimagLite::String name_;
 		SizeType site_;
 		VectorOperatorType ops_;
@@ -93,6 +91,8 @@ public:
 	typedef Label LabelType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
+	typedef typename PsimagLite::Vector<typename LabelType::PairStringSizeType>::Type
+	VectorPairStringSizeType;
 
 	LabeledOperators(PsimagLite::String model) : model_(model), sites_(0)
 	{}
@@ -109,15 +109,16 @@ public:
 	void postCtor(VectorOperatorType& cm)
 	{
 		VectorSizeType h(sites_);
-		SizeType n = labels_.size();
+		SizeType n = trackables_.size();
 		for (SizeType i = 0; i < n; ++i) {
-			if (!labels_[i].isTrackable()) continue;
-			SizeType dofs = labels_[i].dofs();
-			SizeType site = labels_[i].site();
+			typename Label::PairStringSizeType nameAndSite = trackables_[i];
+			const LabelType& ll = findLabel(nameAndSite.first, nameAndSite.second);
+			SizeType dofs = ll.dofs();
+
 			for (SizeType j = 0; j < dofs; ++j) {
-				cm.push_back(labels_[i](j));
-				assert(site < sites_);
-				h[site] = labels_[i](j).data.rows();
+				cm.push_back(ll(j));
+				assert(nameAndSite.second < sites_);
+				h[nameAndSite.second] = ll(j).data.rows();
 			}
 		}
 
@@ -128,7 +129,8 @@ public:
 		}
 	}
 
-	Label& createLabel(PsimagLite::String name, SizeType site)
+	Label& createLabel(PsimagLite::String name,
+	                   SizeType site)
 	{
 		Label* label = new Label(name, site);
 		labels_.push_back(label);
@@ -136,15 +138,28 @@ public:
 		return *label;
 	}
 
+	void makeTrackableOrderMatters(PsimagLite::String what, SizeType site)
+	{
+		typename Label::PairStringSizeType p(what, site);
+		if (std::find(trackables_.begin(), trackables_.end(), p) != trackables_.end())
+			err("makeTrackableOrderMatters: repeated entry " + what + "\n");
+		trackables_.push_back(p);
+	}
+
 	const OperatorType& operator()(PsimagLite::String what,
 	                               SizeType site,
 	                               SizeType dof) const
+	{
+		return findLabel(what, site)(dof);
+	}
+
+	const LabelType& findLabel(PsimagLite::String what, SizeType site) const
 	{
 		typename VectorLabelType::const_iterator x = std::find_if(labels_.begin(),
 		                                                          labels_.end(),
 		                                                          IsValue(what, site));
 		if (x != labels_.end())
-			return labels_[x - labels_.begin()]->operator()(dof);
+			return *(labels_[x - labels_.begin()]);
 
 		PsimagLite::String str("LabeledOperators: model=" + model_);
 		str += " label=" + what + " not found\n";
@@ -194,6 +209,7 @@ private:
 	PsimagLite::String model_;
 	SizeType sites_;
 	VectorLabelType labels_;
+	VectorPairStringSizeType trackables_;
 };
 }
 #endif // LABELEDOPERATORS_H

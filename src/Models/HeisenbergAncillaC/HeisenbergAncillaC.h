@@ -182,11 +182,6 @@ public:
 		io.write(label + "/hot_", hot_);
 	}
 
-	SizeType hilbertSize(SizeType) const
-	{
-		return pow(modelParameters_.twiceTheSpin + 1, NUMBER_OF_ORBITALS);
-	}
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
@@ -216,10 +211,14 @@ protected:
 		setBasis(natBasis, block);
 		setSymmetryRelated(qns, natBasis, block.size());
 
-		OpsLabelType& splus = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "splus");
-		OpsLabelType& sminus = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "sminus");
-		OpsLabelType& sz = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "sz");
-		OpsLabelType& d = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "d");
+		OpsLabelType& splus = this->createOpsLabel("splus");
+		OpsLabelType& sminus = this->createOpsLabel("sminus");
+		OpsLabelType& sz = this->createOpsLabel("sz");
+		OpsLabelType& d = this->createOpsLabel("d");
+
+		this->makeTrackableOrderMatters("splus");
+		this->makeTrackableOrderMatters("sz");
+		this->makeTrackableOrderMatters("d");
 
 		for (SizeType i=0;i<block.size();i++) {
 			// Set the operators S^+_i for orbital a in the natural basis
@@ -285,7 +284,7 @@ private:
 	              const VectorSizeType& block) const
 	{
 		assert(block.size()==1);
-		SizeType total = hilbertSize(block[0]);
+		SizeType total = pow(modelParameters_.twiceTheSpin + 1, NUMBER_OF_ORBITALS);
 
 		basis.resize(total);
 		for (SizeType i = 0; i < total; ++i) basis[i] = i;

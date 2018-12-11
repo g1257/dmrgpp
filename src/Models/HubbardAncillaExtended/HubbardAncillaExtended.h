@@ -152,11 +152,6 @@ public:
 		std::cerr<<msg;
 	}
 
-	SizeType hilbertSize(SizeType) const
-	{
-		return (1<<(2*ORBITALS));
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -199,13 +194,20 @@ protected:
 
 		//! Set the operators c^\dagger_{i\gamma\sigma} in the natural basis
 		SizeType dofs = 2*ORBITALS;
+		OpsLabelType& c = this->createOpsLabel("c");
+		OpsLabelType& d = this->createOpsLabel("d");
 		OpsLabelType& splus = this->createOpsLabel("splus");
 		OpsLabelType& sminus = this->createOpsLabel("sminus");
 		OpsLabelType& sz = this->createOpsLabel("sz");
 		OpsLabelType& p = this->createOpsLabel("p");
 		OpsLabelType& nop = this->createOpsLabel("n");
-		OpsLabelType& c = this->createOpsLabel("c");
-		OpsLabelType& d = this->createOpsLabel("d");
+
+		this->makeTrackableOrderMatters("c");
+		this->makeTrackableOrderMatters("d");
+		this->makeTrackableOrderMatters("splus");
+		this->makeTrackableOrderMatters("sz");
+		this->makeTrackableOrderMatters("p");
+		this->makeTrackableOrderMatters("n");
 
 		for (SizeType i=0;i<block.size();i++) {
 			for (SizeType sigma2=0;sigma2<dofs;++sigma2) {
@@ -264,7 +266,7 @@ private:
 	              const VectorSizeType& block) const
 	{
 		SizeType n = block.size();
-		HilbertState total = hilbertSize(0);
+		HilbertState total = (1<<(2*ORBITALS));
 		total = pow(total,n);
 
 		basis.resize(total);

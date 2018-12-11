@@ -271,7 +271,7 @@ public:
 		if (sum != n*(n-1)/2)
 			err("ModelFeBasedSc: basis set up wrong\n");
 
-		setOperatorMatrices(creationMatrix_, block);
+		setOperatorMatricesInternal(creationMatrix_, block);
 		if (feAsJzSymmetry_.isEnabled() && !feAsJzSymmetry_.isSet())
 			feAsJzSymmetry_.init(basis_, creationMatrix_);
 
@@ -294,11 +294,6 @@ public:
 			basis_[53] = 53;
 			basis_[54] = 54;
 		}
-	}
-
-	SizeType hilbertSize(SizeType) const
-	{
-		return statesPerSite_;
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -356,8 +351,8 @@ public:
 		assert(creationMatrix_.size()>0);
 		SizeType nrow = creationMatrix_[0].data.rows();
 
-		OpsLabelType& splus = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "splus");
-		OpsLabelType& sminus = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "sminus");
+		OpsLabelType& splus = this->createOpsLabel("splus");
+		OpsLabelType& sminus = this->createOpsLabel("sminus");
 		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
 			MatrixType tmp(nrow,nrow);
 			tmp += multiplyTc(creationMatrix_[dof].data,
@@ -378,7 +373,7 @@ public:
 			                         su2Related));
 		}
 
-		OpsLabelType& sz = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "sz");
+		OpsLabelType& sz = this->createOpsLabel("sz");
 		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
 			MatrixType tmp(nrow,nrow);
 			MatrixType tmp2(nrow,nrow);
@@ -397,7 +392,7 @@ public:
 			                     su2Related));
 		}
 
-		OpsLabelType& nop = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "n");
+		OpsLabelType& nop = this->createOpsLabel("n");
 		for (SizeType dof = 0; dof < 2*modelParameters_.orbitals; ++dof) {
 			MatrixType tmp =
 			        multiplyTc(creationMatrix_[dof].data,creationMatrix_[dof].data);
@@ -410,14 +405,16 @@ public:
 			                      su2Related));
 		}
 
-		OpsLabelType& c = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "c");
+		OpsLabelType& c = this->createOpsLabel("c");
+		OpsLabelType& cc = this->createOpsLabel("C");
 		for (SizeType dof = 0; dof < 2*modelParameters_.orbitals; ++dof) {
 			VectorOperatorType cm = creationMatrix_;
+			c.push(creationMatrix_[dof]);
 			cm[dof].dagger();
-			c.push(cm[dof]);
+			cc.push(cm[dof]);
 		}
 
-		OpsLabelType& d = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "d");
+		OpsLabelType& d = this->createOpsLabel("d");
 		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
 			SizeType orbital = dof % modelParameters_.orbitals;
 			SparseMatrixType atmp;
@@ -431,12 +428,17 @@ public:
 			                    1.0,
 			                    su2Related));
 		}
+
+		this->makeTrackableOrderMatters("c");
 	}
 
-private:
+	void setQns(VectorQnType& qns) const
+	{
+		qns = qq_;
+	}
 
-	void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                         const BlockType& block) const
+	void setOperatorMatricesInternal(VectorOperatorType& creationMatrix,
+	                                 const BlockType& block) const
 	{
 		const HilbertBasisType& natBasis = basis_;
 		SparseMatrixType tmpMatrix;
@@ -472,6 +474,8 @@ private:
 			}
 		}
 	}
+
+private:
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to
 	//! basis state ket

@@ -128,11 +128,6 @@ public:
 	      modelHubbard_(solverParams, io, geometry, "Hopping")
 	{}
 
-	SizeType hilbertSize(SizeType site) const
-	{
-		return modelHubbard_.hilbertSize(site);
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -182,8 +177,10 @@ public:
 		                  angularFactor,
 		                  su2related);
 
-		OpsLabelType& nop = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "n");
+		OpsLabelType& nop = this->createOpsLabel("n");
 		nop.push(myOp);
+
+		this->makeTrackableOrderMatters("n");
 	}
 
 private:

@@ -155,11 +155,6 @@ public:
 		}
 	}
 
-	SizeType hilbertSize(SizeType) const
-	{
-		return (4*(modelParameters_.numberphonons+1));
-	}
-
 	void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
@@ -204,9 +199,16 @@ protected:
 		SizeType site = 0;
 		BlockType block(1, site);
 
-		OpsLabelType& c = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "c");
-		OpsLabelType& a = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "a");
-		OpsLabelType& cx = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "cx");
+		OpsLabelType& c = this->createOpsLabel("c");
+		OpsLabelType& a = this->createOpsLabel("a");
+		OpsLabelType& cx = this->createOpsLabel("cx");
+		this->makeTrackableOrderMatters("c");
+		if (modelParameters_.numberphonons > 0) {
+			this->makeTrackableOrderMatters("a");
+			if (ModelBaseType::linkProduct().terms() > 2)
+				this->makeTrackableOrderMatters("cx");
+		}
+
 		HilbertBasisType natBasis;
 		setBasis(natBasis, block);
 		setSymmetryRelated(qns, natBasis);
@@ -287,7 +289,7 @@ private:
 	              const VectorSizeType& block) const
 	{
 		SizeType n = block.size();
-		HilbertState total = hilbertSize(0);
+		HilbertState total = 4*(modelParameters_.numberphonons + 1);
 		total = pow(total,n);
 
 		basis.resize(total);

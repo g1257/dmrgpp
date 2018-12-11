@@ -189,11 +189,6 @@ public:
 		spinSquared_.write(label, io);
 	}
 
-	SizeType hilbertSize(SizeType) const
-	{
-		return modelParameters_.twiceTheSpin + 1;
-	}
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
@@ -265,23 +260,26 @@ protected:
 			su2related.offset = NUMBER_OF_ORBITALS;
 
 			OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
-			this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "splus").push(myOp);
+			this->createOpsLabel("splus").push(myOp);
+			this->makeTrackableOrderMatters("splus");
 
 			myOp.dagger();
-			this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "sminus").push(myOp);
+			this->createOpsLabel("sminus").push(myOp);
 
 			// Set the operators S^z_i in the natural basis
 			tmpMatrix = findSzMatrices(i,natBasis);
 			typename OperatorType::Su2RelatedType su2related2;
 			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
-			this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "sz").push(myOp2);
+			this->createOpsLabel("sz").push(myOp2);
+			this->makeTrackableOrderMatters("sz");
 
 			if (ModelBaseType::linkProduct().terms() == 2) continue;
 			// Set the operators S^x_i in the natural basis
 			tmpMatrix = findSxMatrices(i,natBasis);
 			typename OperatorType::Su2RelatedType su2related3;
 			OperatorType myOp3(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related3);
-			this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "sx").push(myOp3);
+			this->createOpsLabel("sx").push(myOp3);
+			this->makeTrackableOrderMatters("sx");
 		}
 	}
 

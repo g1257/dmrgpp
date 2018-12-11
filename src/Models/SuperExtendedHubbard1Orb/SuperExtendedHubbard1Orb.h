@@ -131,11 +131,6 @@ public:
 	      extendedHubbard_(solverParams,io,geometry)
 	{}
 
-	SizeType hilbertSize(SizeType) const
-	{
-		return (1<<2);
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -183,16 +178,20 @@ protected:
 
 		cm[2] = this->naturalOperator("n", site, 0);
 
-		OpsLabelType& splus = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "splus");
-		OpsLabelType& sminus = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "sminus");
-		OpsLabelType& sz = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "sz");
-		OpsLabelType& p = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "pair");
+		OpsLabelType& splus = this->createOpsLabel("splus");
+		OpsLabelType& sminus = this->createOpsLabel("sminus");
+		OpsLabelType& sz = this->createOpsLabel("sz");
+		OpsLabelType& p = this->createOpsLabel("pair");
 
 		for (SizeType i = 0; i < block.size(); ++i) {
 			setSplusi(splus, sminus, cm, i);
 			setSzi(sz, cm, i);
 			setPairi(p, cm, i);
 		}
+
+		this->makeTrackableOrderMatters("splus");
+		this->makeTrackableOrderMatters("sz");
+		this->makeTrackableOrderMatters("pair");
 	}
 
 private:

@@ -142,71 +142,6 @@ public:
 			err("TjAncillaG: SU(2) not supported\n");
 	}
 
-	SizeType hilbertSize(SizeType site) const
-	{
-		return TjMultiOrb_.hilbertSize(site);
-	}
-
-	//! set creation matrices for sites in block
-	void setOperatorMatrices(VectorOperatorType&creationMatrix,
-	                         VectorQnType& qns,
-	                         const BlockType& block) const
-	{
-		VectorHilbertStateType natBasis;
-		SparseMatrixType tmpMatrix;
-		setBasis(natBasis, block);
-		setSymmetryRelated(qns, natBasis, block.size());
-
-		// Set the operators c^\daggger_{i\sigma} in the natural basis
-		creationMatrix.clear();
-		for (SizeType i=0;i<block.size();i++) {
-			for (int sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++) {
-				tmpMatrix = TjMultiOrb_.findCreationMatrices(i,sigma,natBasis);
-				int asign= 1;
-				if (sigma>0) asign= 1;
-				typename OperatorType::Su2RelatedType su2related;
-				if (sigma==0) {
-					su2related.source.push_back(i*offset_);
-					su2related.source.push_back(i*offset_+1);
-					su2related.transpose.push_back(-1);
-					su2related.transpose.push_back(-1);
-					su2related.offset = NUMBER_OF_ORBITALS;
-				}
-				OperatorType myOp(tmpMatrix,-1,PairType(1,1-sigma),asign,su2related);
-
-				creationMatrix.push_back(myOp);
-			}
-
-			// Set the operators S^+_i in the natural basis
-			tmpMatrix=findSplusMatrices(i,natBasis);
-
-			typename OperatorType::Su2RelatedType su2related;
-			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
-			su2related.source.push_back(i*DEGREES_OF_FREEDOM+NUMBER_OF_ORBITALS);
-			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
-			su2related.transpose.push_back(-1);
-			su2related.transpose.push_back(-1);
-			su2related.transpose.push_back(1);
-			su2related.offset = NUMBER_OF_ORBITALS;
-
-			OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
-			creationMatrix.push_back(myOp);
-			// Set the operators S^z_i in the natural basis
-			tmpMatrix = findSzMatrices(i,natBasis);
-			typename OperatorType::Su2RelatedType su2related2;
-			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
-			creationMatrix.push_back(myOp2);
-			// Set ni matrices:
-			SparseMatrixType tmpMatrix = findNiMatrices(0,natBasis);
-			RealType angularFactor= 1;
-			typename OperatorType::Su2RelatedType su2related3;
-			su2related3.offset = 1; //check FIXME
-			OperatorType myOp3(tmpMatrix,1,PairType(0,0),angularFactor,su2related3);
-
-			creationMatrix.push_back(myOp3);
-		}
-	}
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const VectorOperatorType&,
 	                                const BlockType& block,
@@ -243,36 +178,87 @@ public:
 
 protected:
 
-	void fillLabeledOperators()
+	void fillLabeledOperators(VectorQnType& qns)
 	{
 		SizeType site = 0;
 		BlockType block(1, site);
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
-		assert(creationMatrix.size() >= 5);
-
-		this->createOpsLabel("splus").push(creationMatrix[2]);
-
-		creationMatrix[2].dagger();
-		this->createOpsLabel("sminus").push(creationMatrix[2]);
-		creationMatrix[2].dagger();
-
-		this->createOpsLabel("sz").push(creationMatrix[3]);
-
-		this->createOpsLabel("n").push(creationMatrix[4]);
+		VectorHilbertStateType natBasis;
+		SparseMatrixType tmpMatrix;
+		setBasis(natBasis, block);
+		setSymmetryRelated(qns, natBasis, block.size());
 
 		OpsLabelType& c = this->createOpsLabel("c");
-		for (SizeType sigma = 0; sigma < 2; ++sigma)
-			c.push(creationMatrix[sigma]);
+		OpsLabelType& splus = this->createOpsLabel("splus");
+		OpsLabelType& sz = this->createOpsLabel("sz");
+		OpsLabelType& nop = this->createOpsLabel("n");
+		OpsLabelType& sminus = this->createOpsLabel("sminus");
+
+		this->makeTrackableOrderMatters("c");
+		this->makeTrackableOrderMatters("splus");
+		this->makeTrackableOrderMatters("sz");
+		this->makeTrackableOrderMatters("n");
+
+		// Set the operators c^\daggger_{i\sigma} in the natural basis
+		for (SizeType i=0;i<block.size();i++) {
+			for (int sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++) {
+				tmpMatrix = TjMultiOrb_.findCreationMatrices(i,sigma,natBasis);
+				int asign= 1;
+				if (sigma>0) asign= 1;
+				typename OperatorType::Su2RelatedType su2related;
+				if (sigma==0) {
+					su2related.source.push_back(i*offset_);
+					su2related.source.push_back(i*offset_+1);
+					su2related.transpose.push_back(-1);
+					su2related.transpose.push_back(-1);
+					su2related.offset = NUMBER_OF_ORBITALS;
+				}
+
+				OperatorType myOp(tmpMatrix,-1,PairType(1,1-sigma),asign,su2related);
+
+				c.push(myOp);
+			}
+
+			// Set the operators S^+_i in the natural basis
+			tmpMatrix=findSplusMatrices(i,natBasis);
+
+			typename OperatorType::Su2RelatedType su2related;
+			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
+			su2related.source.push_back(i*DEGREES_OF_FREEDOM+NUMBER_OF_ORBITALS);
+			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
+			su2related.transpose.push_back(-1);
+			su2related.transpose.push_back(-1);
+			su2related.transpose.push_back(1);
+			su2related.offset = NUMBER_OF_ORBITALS;
+
+			OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
+			splus.push(myOp);
+			myOp.dagger();
+			sminus.push(myOp);
+
+			// Set the operators S^z_i in the natural basis
+			tmpMatrix = findSzMatrices(i,natBasis);
+			typename OperatorType::Su2RelatedType su2related2;
+			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
+			sz.push(myOp2);
+
+			// Set ni matrices:
+			SparseMatrixType tmpMatrix = findNiMatrices(0,natBasis);
+			RealType angularFactor= 1;
+			typename OperatorType::Su2RelatedType su2related3;
+			su2related3.offset = 1; //check FIXME
+			OperatorType myOp3(tmpMatrix,1,PairType(0,0),angularFactor,su2related3);
+
+			nop.push(myOp3);
+		}
 
 		{
-			OperatorType tmp = creationMatrix[0];
+			OpsLabelType& nupop = this->createOpsLabel("nup");
+			OperatorType tmp = this->naturalOperator("c", site, 0);
 			tmp.dagger();
 			SparseMatrixType c = tmp.data;
 			SparseMatrixType tmp3(multiplyTc(c,c));
 			typename OperatorType::Su2RelatedType su2Related;
-			this->createOpsLabel("nup").push(OperatorType(tmp3,
+			nupop.push(OperatorType(tmp3,
 			                                              1.0,
 			                                              typename OperatorType::PairType(0,0),
 			                                              1.0,
@@ -280,7 +266,7 @@ protected:
 		}
 
 		{
-			OperatorType tmp = creationMatrix[1];
+			OperatorType tmp = this->naturalOperator("c", site, 1);
 			tmp.dagger();
 			SparseMatrixType c = tmp.data;
 			SparseMatrixType tmp3(multiplyTc(c,c));

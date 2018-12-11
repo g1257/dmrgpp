@@ -155,13 +155,6 @@ public:
 		ProgramGlobals::init(modelParameters_.orbitals*geometry_.numberOfSites() + 1);
 		BlockType block(1,0);
 		setNaturalBasis(basis_, block, true);
-		setOperatorMatrices(creationMatrix_, qq_, block);
-	}
-
-	SizeType hilbertSize(SizeType) const
-	{
-		assert(0 < creationMatrix_.size());
-		return creationMatrix_[0].data.rows();
 	}
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
@@ -223,55 +216,105 @@ public:
 
 protected:
 
-	void fillLabeledOperators()
+	void fillLabeledOperators(VectorQnType& qns)
 	{
-		SizeType orbitals = modelParameters_.orbitals;
+		SizeType site = 0;
+		VectorSizeType block(1, site);
+		VectorHilbertStateType natBasis;
+		SparseMatrixType tmpMatrix;
+		setNaturalBasis(natBasis, block, false);
+		setSymmetryRelated(qns, natBasis, block.size());
 
-		OpsLabelType& splus = this->createOpsLabel("splus");
-		for (SizeType dof = 0; dof < orbitals; ++dof) {
-			SizeType x = 2*orbitals + dof;
-			assert(x < creationMatrix_.size());
-			splus.push(creationMatrix_[x]);
-		}
-
-		OpsLabelType& sminus = this->createOpsLabel("sminus");
-		for (SizeType dof = 0; dof < orbitals; ++dof) {
-			SizeType x = 2*orbitals + dof;
-			assert(x < creationMatrix_.size());
-			OperatorType cm = creationMatrix_[x];
-			cm.dagger();
-			sminus.push(cm);
-		}
-
-		OpsLabelType& sz = this->createOpsLabel("sz");
-		for (SizeType dof = 0; dof < orbitals; ++dof) {
-			SizeType x = 3*orbitals + dof;
-			assert(x < creationMatrix_.size());
-			sz.push(creationMatrix_[x]);
-		}
-
+		SizeType dof = 2*modelParameters_.orbitals;
 		OpsLabelType& c = this->createOpsLabel("c");
-		for (SizeType dof = 0; dof < 2*orbitals; ++dof) {
-			assert(dof < creationMatrix_.size());
-			c.push(creationMatrix_[dof]);
-		}
-
+		OpsLabelType& splus = this->createOpsLabel("splus");
+		OpsLabelType& sz = this->createOpsLabel("sz");
 		OpsLabelType& nop = this->createOpsLabel("n");
-		for (SizeType dof = 0; dof < orbitals; ++dof) {
-			SizeType x = 4*orbitals + dof;
-			assert(x < creationMatrix_.size());
-			nop.push(creationMatrix_[x]);
+		OpsLabelType& sminus = this->createOpsLabel("sminus");
+
+		this->makeTrackableOrderMatters("c");
+		this->makeTrackableOrderMatters("splus");
+		this->makeTrackableOrderMatters("sz");
+		this->makeTrackableOrderMatters("n");
+
+		// Set the operators c^\daggger_{i\sigma} in the natural basis
+
+		SizeType n = natBasis.size();
+		MatrixType rotation(n,n);
+		MatrixType rotationR(n,n);
+		computeRotation(rotation,rotationR,natBasis);
+		for (SizeType i=0;i<block.size();i++) {
+			for (SizeType sigma=0;sigma<dof;sigma++) {
+				// orbital changes first
+				tmpMatrix = findCreationMatrices(i,sigma,natBasis,&rotation,&rotationR);
+				int asign= 1;
+				if (sigma>0) asign= 1;
+				typename OperatorType::Su2RelatedType su2related;
+				if (sigma==0) {
+					su2related.source.push_back(i*offset_);
+					su2related.source.push_back(i*offset_+1);
+					su2related.transpose.push_back(-1);
+					su2related.transpose.push_back(-1);
+					su2related.offset = modelParameters_.orbitals;
+				}
+
+				OperatorType myOp(tmpMatrix,-1,PairType(1,1-sigma),asign,su2related);
+
+				c.push(myOp);
+			}
+
+			// Set the operators S^+_i in the natural basis
+			for (SizeType i=0;i<block.size();i++) {
+				for (SizeType orb=0;orb<modelParameters_.orbitals;orb++) {
+					tmpMatrix = findSplusMatrices(i,orb,natBasis,&rotation,&rotationR);
+
+					typename OperatorType::Su2RelatedType su2related;
+					su2related.source.push_back(i*modelParameters_.orbitals*2);
+					su2related.source.push_back(i*modelParameters_.orbitals*2 +
+					                            modelParameters_.orbitals);
+					su2related.source.push_back(i*modelParameters_.orbitals*2);
+					su2related.transpose.push_back(-1);
+					su2related.transpose.push_back(-1);
+					su2related.transpose.push_back(1);
+					su2related.offset = modelParameters_.orbitals;
+
+					OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
+					splus.push(myOp);
+					myOp.dagger();
+					sminus.push(myOp);
+				}
+			}
+			// Set the operators S^z_i in the natural basis
+			for (SizeType i=0;i<block.size();i++) {
+				for (SizeType orb=0;orb<modelParameters_.orbitals;orb++) {
+
+					tmpMatrix = findSzMatrices(i,orb,natBasis,&rotation,&rotationR);
+					typename OperatorType::Su2RelatedType su2related2;
+					OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
+					sz.push(myOp2);
+				}
+			}
+			// Set ni matrices
+			for (SizeType i=0;i<block.size();i++) {
+				for (SizeType orb=0;orb<modelParameters_.orbitals;orb++) {
+					tmpMatrix = findNiMatrices(0,orb,natBasis,&rotation,&rotationR);
+					RealType angularFactor= 1;
+					typename OperatorType::Su2RelatedType su2related3;
+					su2related3.offset = 1; //check FIXME
+					OperatorType myOp3(tmpMatrix,1,PairType(0,0),angularFactor,su2related3);
+					nop.push(myOp3);
+				}
+			}
 		}
 
 		OpsLabelType& nupop = this->createOpsLabel("nup");
-		for (SizeType dof = 0; dof < orbitals; ++dof) {
-			SizeType x = dof + SPIN_UP*orbitals;
-			assert(x < creationMatrix_.size());
-			OperatorType cup = creationMatrix_[x];
+		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
+			SizeType x = dof + SPIN_UP*modelParameters_.orbitals;
+			OperatorType cup = this->naturalOperator("c", site, x);
 			cup.dagger();
 			SparseMatrixType nup(multiplyTc(cup.data,cup.data));
-			if (orbitals > 1)
-				nup = findNMatrices(dof + SPIN_UP*orbitals);
+			if (modelParameters_.orbitals > 1)
+				nup = findNMatrices(dof + SPIN_UP*modelParameters_.orbitals);
 			typename OperatorType::Su2RelatedType su2Related;
 			nupop.push(OperatorType(nup,
 			                        1.0,
@@ -281,14 +324,14 @@ protected:
 		}
 
 		OpsLabelType& ndownpop = this->createOpsLabel("ndown");
-		for (SizeType dof = 0; dof < orbitals; ++dof) {
-			SizeType x = dof + SPIN_DOWN*orbitals;
+		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
+			SizeType x = dof + SPIN_DOWN*modelParameters_.orbitals;
 			assert(x < creationMatrix_.size());
-			OperatorType cdown = creationMatrix_[x];
+			OperatorType cdown = this->naturalOperator("c", site, x);
 			cdown.dagger();
 			SparseMatrixType ndown(multiplyTc(cdown.data,cdown.data));
-			if (orbitals > 1)
-				ndown = findNMatrices(dof + SPIN_DOWN*orbitals);
+			if (modelParameters_.orbitals > 1)
+				ndown = findNMatrices(dof + SPIN_DOWN*modelParameters_.orbitals);
 			typename OperatorType::Su2RelatedType su2Related;
 			ndownpop.push(OperatorType(ndown,
 			                           1.0,
@@ -517,87 +560,6 @@ private:
 		}
 
 		cm = cm2;
-	}
-
-	//! set creation matrices for sites in block
-	void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                         VectorQnType& qns,
-	                         const BlockType& block) const
-	{
-		VectorHilbertStateType natBasis;
-		SparseMatrixType tmpMatrix;
-		setNaturalBasis(natBasis, block, false);
-		setSymmetryRelated(qns, natBasis, block.size());
-
-		SizeType dof = 2*modelParameters_.orbitals;
-		// Set the operators c^\daggger_{i\sigma} in the natural basis
-		creationMatrix.clear();
-
-		SizeType n = natBasis.size();
-		MatrixType rotation(n,n);
-		MatrixType rotationR(n,n);
-		computeRotation(rotation,rotationR,natBasis);
-		for (SizeType i=0;i<block.size();i++) {
-			for (SizeType sigma=0;sigma<dof;sigma++) {
-				// orbital changes first
-				tmpMatrix = findCreationMatrices(i,sigma,natBasis,&rotation,&rotationR);
-				int asign= 1;
-				if (sigma>0) asign= 1;
-				typename OperatorType::Su2RelatedType su2related;
-				if (sigma==0) {
-					su2related.source.push_back(i*offset_);
-					su2related.source.push_back(i*offset_+1);
-					su2related.transpose.push_back(-1);
-					su2related.transpose.push_back(-1);
-					su2related.offset = modelParameters_.orbitals;
-				}
-
-				OperatorType myOp(tmpMatrix,-1,PairType(1,1-sigma),asign,su2related);
-
-				creationMatrix.push_back(myOp);
-			}
-
-			// Set the operators S^+_i in the natural basis
-			for (SizeType i=0;i<block.size();i++) {
-				for (SizeType orb=0;orb<modelParameters_.orbitals;orb++) {
-					tmpMatrix = findSplusMatrices(i,orb,natBasis,&rotation,&rotationR);
-
-					typename OperatorType::Su2RelatedType su2related;
-					su2related.source.push_back(i*modelParameters_.orbitals*2);
-					su2related.source.push_back(i*modelParameters_.orbitals*2+modelParameters_.orbitals);
-					su2related.source.push_back(i*modelParameters_.orbitals*2);
-					su2related.transpose.push_back(-1);
-					su2related.transpose.push_back(-1);
-					su2related.transpose.push_back(1);
-					su2related.offset = modelParameters_.orbitals;
-
-					OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
-					creationMatrix.push_back(myOp);
-				}
-			}
-			// Set the operators S^z_i in the natural basis
-			for (SizeType i=0;i<block.size();i++) {
-				for (SizeType orb=0;orb<modelParameters_.orbitals;orb++) {
-
-					tmpMatrix = findSzMatrices(i,orb,natBasis,&rotation,&rotationR);
-					typename OperatorType::Su2RelatedType su2related2;
-					OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
-					creationMatrix.push_back(myOp2);
-				}
-			}
-			// Set ni matrices
-			for (SizeType i=0;i<block.size();i++) {
-				for (SizeType orb=0;orb<modelParameters_.orbitals;orb++) {
-					tmpMatrix = findNiMatrices(0,orb,natBasis,&rotation,&rotationR);
-					RealType angularFactor= 1;
-					typename OperatorType::Su2RelatedType su2related3;
-					su2related3.offset = 1; //check FIXME
-					OperatorType myOp3(tmpMatrix,1,PairType(0,0),angularFactor,su2related3);
-					creationMatrix.push_back(myOp3);
-				}
-			}
-
-		}
 	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma}

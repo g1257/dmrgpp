@@ -166,11 +166,6 @@ public:
 		cacheInteractionOp();
 	}
 
-	SizeType hilbertSize(SizeType) const
-	{
-		return basis_.size();
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -215,10 +210,10 @@ protected:
 		assert(creationMatrix_.size()>0);
 		SizeType nrow = creationMatrix_[0].data.rows();
 
-		OpsLabelType& splus = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "splus");
-		OpsLabelType& sminus = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "sminus");
-		OpsLabelType& sz = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "sz");
-		OpsLabelType& d = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "d");
+		OpsLabelType& splus = this->createOpsLabel("splus");
+		OpsLabelType& sminus = this->createOpsLabel("sminus");
+		OpsLabelType& sz = this->createOpsLabel("sz");
+		OpsLabelType& d = this->createOpsLabel("d");
 
 		for (SizeType orbital = 0; orbital < modelParameters_.orbitals; ++orbital) {
 			{
@@ -274,8 +269,9 @@ protected:
 			}
 		}
 
-		OpsLabelType& nop = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "n");
-		OpsLabelType& c = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "c");
+		OpsLabelType& nop = this->createOpsLabel("n");
+		OpsLabelType& c = this->createOpsLabel("c");
+		this->makeTrackableOrderMatters("c");
 		SizeType dofs = 2*modelParameters_.orbitals;
 		for (SizeType dof = 0; dof < dofs; ++dof) {
 			{

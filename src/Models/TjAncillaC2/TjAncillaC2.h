@@ -137,11 +137,6 @@ public:
 	      hot_(geometry_.orbitals(0,0) > 1)
 	{}
 
-	SizeType hilbertSize(SizeType) const
-	{
-		return pow(3,NUMBER_OF_ORBITALS);
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -166,15 +161,20 @@ protected:
 		setBasis(natBasis, block);
 		setSymmetryRelated(qns, natBasis, block.size());
 
-		OpsLabelType& c = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "c");
-		OpsLabelType& splus = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "splus");
-		OpsLabelType& sminus = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "sminus");
-		OpsLabelType& sz = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "sz");
-		OpsLabelType& nop = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "n");
-		OpsLabelType& d = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "d");
+		OpsLabelType& c = this->createOpsLabel("c");
+		OpsLabelType& splus = this->createOpsLabel("splus");
+		OpsLabelType& sminus = this->createOpsLabel("sminus");
+		OpsLabelType& sz = this->createOpsLabel("sz");
+		OpsLabelType& nop = this->createOpsLabel("n");
+		OpsLabelType& d = this->createOpsLabel("d");
+
+		this->makeTrackableOrderMatters("c");
+		this->makeTrackableOrderMatters("splus");
+		this->makeTrackableOrderMatters("sz");
+		this->makeTrackableOrderMatters("n");
+		this->makeTrackableOrderMatters("d");
 
 		// Set the operators c^\daggger_{i\sigma} in the natural basis
-		creationMatrix.clear();
 		for (SizeType i=0;i<block.size();i++) {
 			for (int sigma=0;sigma<2;sigma++) {
 				for (SizeType orb = 0; orb < orbitals; ++orb) {

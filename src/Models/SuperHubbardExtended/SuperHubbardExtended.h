@@ -125,18 +125,6 @@ public:
 	      extendedHubbard_(solverParams,io,geometry)
 	{}
 
-	SizeType memResolv(PsimagLite::MemResolv&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
-	{
-		return 0;
-	}
-
-	SizeType hilbertSize(SizeType site) const
-	{
-		return extendedHubbard_.hilbertSize(site);
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -166,8 +154,12 @@ protected:
 		SizeType site = 0;
 
 		extendedHubbard_.fillLabeledOperators(qns);
-		OpsLabelType& splusopop = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "splus");
-		OpsLabelType& szopop = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "sz");
+
+		OpsLabelType& splusopop = this->createOpsLabel("splus");
+		OpsLabelType& szopop = this->createOpsLabel("sz");
+
+		this->makeTrackableOrderMatters("splus");
+		this->makeTrackableOrderMatters("sz");
 
 		SparseMatrixType sPlus = extendedHubbard_.naturalOperator("splus", site, 0).data;
 		RealType angularFactor= 1;
@@ -178,7 +170,7 @@ protected:
 		                     typename OperatorType::PairType(0,0),
 		                     angularFactor,
 		                     su2related);
-		splusopop.push_back(sPlusOp);
+		splusopop.push(sPlusOp);
 
 		SparseMatrixType sz = extendedHubbard_.naturalOperator("sz", site, 0).data;
 		sz *= 0.5;
@@ -187,7 +179,7 @@ protected:
 		                  typename OperatorType::PairType(0,0),
 		                  angularFactor,
 		                  su2related);
-		szopop.push_back(szOp);
+		szopop.push(szOp);
 	}
 
 private:

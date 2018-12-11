@@ -186,8 +186,6 @@ public:
 		modelParameters_.write(label, io);
 	}
 
-	SizeType hilbertSize(SizeType) const { return TWICE_THE_SPIN + 1; }
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
@@ -229,9 +227,12 @@ protected:
 		setBasis(natBasis, block);
 		setSymmetryRelated(qns, natBasis, block.size());
 
-		OpsLabelType& sx = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "sx");
-		OpsLabelType& sy = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "sy");
-		OpsLabelType& sz = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "sz");
+		OpsLabelType& sx = this->createOpsLabel("sx");
+		OpsLabelType& sy = this->createOpsLabel("sy");
+		OpsLabelType& sz = this->createOpsLabel("sz");
+		this->makeTrackableOrderMatters("sx");
+		this->makeTrackableOrderMatters("sy");
+		this->makeTrackableOrderMatters("sz");
 
 		typename MatrixType::value_type dummy = 0.0;
 

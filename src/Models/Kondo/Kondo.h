@@ -71,14 +71,6 @@ public:
 		io.write(label + "/ops_", ops_);
 	}
 
-	// Return the size of the one-site Hilbert space basis for this model
-	// site MUST be ignored unless your model has a site-dependent
-	// Hilbert space (SDHS)
-	SizeType hilbertSize(SizeType site) const
-	{
-		return qn_.size();
-	}
-
 	// Fill SparseMatrixType with the on-site Hamiltonian terms in the on-site basis
 	// Give SparseMatrixType in the order you chose to give the
 	// operators in setOperatorMatrices
@@ -135,13 +127,18 @@ protected:
 	{
 		qns = qn_;
 		assert(ops_.size() >= 6);
-		OpsLabelType& c = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "c");
+		OpsLabelType& c = this->createOpsLabel("c");
 		for (SizeType sigma = 0; sigma < 2; ++sigma)
 			c.push(ops_[sigma]);
 
-		this->createOpsLabel("splus").push(OpsLabelType::TRACKABLE_YES, ops_[2]);
-		this->createOpsLabel("Sz").push(OpsLabelType::TRACKABLE_YES, ops_[3]);
-		this->createOpsLabel("n").push(OpsLabelType::TRACKABLE_YES, ops_[4]);
+		this->createOpsLabel("Splus").push(ops_[2]);
+		this->createOpsLabel("Sz").push(ops_[3]);
+		this->createOpsLabel("n").push(ops_[4]);
+
+		this->makeTrackableOrderMatters("c");
+		this->makeTrackableOrderMatters("Splus");
+		this->makeTrackableOrderMatters("Sz");
+		this->makeTrackableOrderMatters("n");
 
 		{
 			SparseMatrixType mup = ops_[0].data;
@@ -157,11 +154,11 @@ protected:
 
 			PairSizeType zeroPair(0, 0);
 			typename OperatorType::Su2RelatedType su2Related;
-			this->createOpsLabel(OpsLabelType::TRACKABLE_NO,"sz").push(OperatorType(szMatrix,
-			                                                                        1,
-			                                                                        zeroPair,
-			                                                                        1,
-			                                                                        su2Related));
+			this->createOpsLabel("sz").push(OperatorType(szMatrix,
+			                                             1,
+			                                             zeroPair,
+			                                             1,
+			                                             su2Related));
 		}
 	}
 

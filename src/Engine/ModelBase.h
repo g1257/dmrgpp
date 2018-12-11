@@ -131,7 +131,7 @@ public:
 	typedef typename BasisWithOperatorsType::VectorBoolType VectorBoolType;
 	typedef LabeledOperators<OperatorType> LabeledOperatorsType;
 	typedef typename LabeledOperatorsType::LabelType OpsLabelType;
-	typedef typename OpsLabelType::TrackableEnum TrackableEnum;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	ModelBase(const ParametersType& params,
 	          const GeometryType_& geometry,
@@ -158,11 +158,6 @@ public:
 	// Serializer object is second argument
 	virtual void write(PsimagLite::String,
 	                   PsimagLite::IoNg::Out::Serializer&) const = 0;
-
-	// Return the size of the one-site Hilbert space basis for this model
-	// site MUST be ignored unless your model has a site-dependent
-	// Hilbert space (SDHS)
-	virtual SizeType hilbertSize(SizeType site) const = 0;
 
 	// Fill SparseMatrixType with the on-site Hamiltonian terms in the on-site basis
 	// Give SparseMatrixType in the order you chose to give the
@@ -240,6 +235,15 @@ public:
 	}
 
 	virtual SizeType differentTypesOfAtoms() const { return 1; }
+
+	// Return the size of the one-site Hilbert space basis for this model
+	// site MUST be ignored unless your model has a site-dependent
+	// Hilbert space (SDHS)
+	SizeType hilbertSize(SizeType) const
+	{
+		assert(cm_.size() > 0);
+		return cm_[0].data.rows();
+	}
 
 	// Fill the VectorOperatorType with operators that need to be kept
 	// track by the DMRG++ Engine.
@@ -323,11 +327,22 @@ public:
 
 protected:
 
-	OpsLabelType& createOpsLabel(TrackableEnum isTrackable,
-	                             PsimagLite::String name,
+	OpsLabelType& createOpsLabel(PsimagLite::String name,
 	                             SizeType site = 0)
 	{
-		return labeledOperators_.createLabel(isTrackable, name, site);
+		return labeledOperators_.createLabel(name, site);
+	}
+
+	void makeTrackableOrderMatters(PsimagLite::String name, SizeType site = 0)
+	{
+		labeledOperators_.makeTrackableOrderMatters(name, site);
+	}
+
+	void makeTrackableOrderMatters(VectorStringType vname, SizeType site = 0)
+	{
+		SizeType n = vname.size();
+		for (SizeType i = 0; i < n; ++i)
+			labeledOperators_.makeTrackableOrderMatters(vname[i], site);
 	}
 
 private:

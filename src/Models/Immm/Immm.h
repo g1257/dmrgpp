@@ -159,12 +159,6 @@ public:
 		}
 	}
 
-	SizeType hilbertSize(SizeType site) const
-	{
-		AtomEnum atom = atomAtSite(site);
-		return (atom == ATOM_OXYGEN) ? statesOxygen_ : statesCopper_;
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -191,14 +185,17 @@ protected:
 	void fillLabeledOperators(VectorQnType& qns)
 	{
 		for (SizeType site = 0; site < differentTypesOfAtoms(); ++site) {
-			OpsLabelType& c = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "c", site);
-			OpsLabelType& nop = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "nop", site);
-			OpsLabelType& splus = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "splus", site);
-			OpsLabelType& sminus = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "sminus", site);
-			OpsLabelType& sz = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "sz", site);
-			OpsLabelType& o = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "o", site);
-			OpsLabelType& nup = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "nup", site);
-			OpsLabelType& ndown = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "ndown", site);
+			OpsLabelType& c = this->createOpsLabel("c", site);
+			OpsLabelType& nop = this->createOpsLabel("nop", site);
+			OpsLabelType& splus = this->createOpsLabel("splus", site);
+			OpsLabelType& sminus = this->createOpsLabel("sminus", site);
+			OpsLabelType& sz = this->createOpsLabel("sz", site);
+			OpsLabelType& o = this->createOpsLabel("o", site);
+			OpsLabelType& nup = this->createOpsLabel("nup", site);
+			OpsLabelType& ndown = this->createOpsLabel("ndown", site);
+
+			this->makeTrackableOrderMatters("c", site);
+			this->makeTrackableOrderMatters("nop", site);
 
 			BlockType block(1, site);
 			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;

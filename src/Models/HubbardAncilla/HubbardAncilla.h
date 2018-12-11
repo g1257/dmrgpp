@@ -141,11 +141,6 @@ public:
 	      geometry_(geometry)
 	{}
 
-	SizeType hilbertSize(SizeType) const
-	{
-		return (1<<(2*ORBITALS));
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -185,7 +180,12 @@ protected:
 		setSymmetryRelated(qns, natBasis);
 
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
-		OpsLabelType& c = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "c");
+		OpsLabelType& c = this->createOpsLabel("c");
+		OpsLabelType& ll = this->createOpsLabel("l");
+
+		this->makeTrackableOrderMatters("c");
+		this->makeTrackableOrderMatters("l");
+
 		SizeType dofs = 2*ORBITALS;
 		for (SizeType i=0;i<block.size();i++) {
 			for (SizeType sigma=0;sigma<dofs;sigma+=2) {
@@ -216,7 +216,7 @@ protected:
 				c.push(myOp);
 			}
 
-			setLambdaMatrices(i, natBasis);
+			setLambdaMatrices(ll, i, natBasis);
 		}
 	}
 
@@ -227,19 +227,19 @@ private:
 	              const VectorSizeType& block) const
 	{
 		SizeType n = block.size();
-		HilbertState total = hilbertSize(0);
+		HilbertState total = (1<<(2*ORBITALS));
 		total = pow(total,n);
 		basis.resize(total);
 		for (HilbertState a = 0; a < total; ++a) basis[a] = a;
 	}
 
 	//! set creation matrices for sites in block
-	void setLambdaMatrices(SizeType i,
+	void setLambdaMatrices(OpsLabelType& ll,
+	                       SizeType i,
 	                       const HilbertBasisType& natBasis) const
 	{
 		VectorSparseMatrixType vm;
 		findAllMatrices(vm,i,natBasis);
-		OpsLabelType& ll = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "l");
 
 		typename OperatorType::Su2RelatedType su2related;
 		for (SizeType spin1 = 0; spin1 < 2; ++spin1) {

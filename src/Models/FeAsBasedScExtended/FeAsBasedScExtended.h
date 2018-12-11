@@ -131,8 +131,6 @@ public:
 	      orbitals_(modelParameters_.orbitals)
 	{}
 
-	SizeType hilbertSize(SizeType site) const { return modelFeAs_.hilbertSize(site); }
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -163,24 +161,25 @@ protected:
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		setOperatorMatricesInternal(creationMatrix, qns, block);
 
-		OpsLabelType& splus = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "naturalSplus");
+		OpsLabelType& splus = this->createOpsLabel("naturalSplus");
 		SizeType x = 2*orbitals_;
 		assert(x < creationMatrix.size());
 		splus.push(creationMatrix[x]);
 
-		OpsLabelType& sminus = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "naturalSminus");
+		OpsLabelType& sminus = this->createOpsLabel("naturalSminus");
 		x = 2*orbitals_;
 		assert(x < creationMatrix.size());
 		creationMatrix[x].dagger();
 		sminus.push(creationMatrix[x]);
 		creationMatrix[x].dagger();
 
-		OpsLabelType& sz = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "naturalSz");
+		OpsLabelType& sz = this->createOpsLabel("naturalSz");
 		x = 2*orbitals_ + 1;
 		assert(x < creationMatrix.size());
 		sz.push(creationMatrix[x]);
 
-		// do not call derived class here
+		this->makeTrackableOrderMatters("naturalSplus");
+		this->makeTrackableOrderMatters("naturalSz");
 	}
 
 private:
@@ -192,7 +191,8 @@ private:
 	{
 		blockIsSize1OrThrow(block);
 
-		modelFeAs_.setOperatorMatricesInternal(creationMatrix, qns, block);
+		modelFeAs_.setQns(qns);
+		modelFeAs_.setOperatorMatricesInternal(creationMatrix, block);
 
 		// add S^+_i to creationMatrix
 		setSplus(creationMatrix,block);

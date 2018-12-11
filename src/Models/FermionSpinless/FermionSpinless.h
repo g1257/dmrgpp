@@ -152,12 +152,6 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	/** returns the size of the one-site Hilbert space. */
-	SizeType hilbertSize(SizeType) const
-	{
-		return (SizeType)pow(2,NUMBER_OF_ORBITALS);
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -227,7 +221,7 @@ protected:
 				                  asign,
 				                  su2related);
 
-				this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "c").push(myOp);
+				this->createOpsLabel("c").push(myOp);
 			}
 
 			tmpMatrix = findOperatorMatrices(i,natBasis);
@@ -240,8 +234,11 @@ protected:
 			                  angularFactor,
 			                  su2related);
 
-			this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "n").push(myOp);
+			this->createOpsLabel("n").push(myOp);
 		}
+
+		this->makeTrackableOrderMatters("c");
+		this->makeTrackableOrderMatters("n");
 	}
 
 	void setBasis(HilbertBasisType& basis,

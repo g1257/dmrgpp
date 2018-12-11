@@ -168,12 +168,6 @@ public:
 		}
 	}
 
-	/** \cppFunction{!PTEX_THISFUNCTION} returns the size of the one-site Hilbert space. */
-	SizeType hilbertSize(SizeType) const
-	{
-		return (SizeType)pow(2,2*NUMBER_OF_ORBITALS);
-	}
-
 protected:
 
 	void fillLabeledOperators(VectorQnType& qns)
@@ -185,7 +179,9 @@ protected:
 		setBasis(natBasis, block);
 		setSymmetryRelated(qns, natBasis, block.size());
 
-		OpsLabelType& c = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "c");
+		OpsLabelType& c = this->createOpsLabel("c");
+		this->makeTrackableOrderMatters("c");
+
 		VectorOperatorType creationMatrix(DEGREES_OF_FREEDOM);
 		//! Set the operators c^\daggger_{i\sigma} in the natural basis
 		SizeType ind = 0;
@@ -216,8 +212,8 @@ protected:
 		SizeType idown = SPIN_DOWN;
 
 		{
-			OpsLabelType& splus = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "splus");
-			OpsLabelType& sminus = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "sminus");
+			OpsLabelType& splus = this->createOpsLabel("splus");
+			OpsLabelType& sminus = this->createOpsLabel("sminus");
 
 			PsimagLite::Matrix<SparseElementType> tmp =
 			        multiplyTc(creationMatrix[iup].data,creationMatrix[idown].data);
@@ -238,7 +234,7 @@ protected:
 		}
 
 		{
-			OpsLabelType& sz = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "sz");
+			OpsLabelType& sz = this->createOpsLabel("sz");
 			PsimagLite::Matrix<SparseElementType> tmp =
 			        multiplyTc(creationMatrix[iup].data,creationMatrix[iup].data);
 			PsimagLite::Matrix<SparseElementType> tmp2 =
@@ -256,7 +252,7 @@ protected:
 
 		PsimagLite::Matrix<SparseElementType> dense1;
 		{
-			OpsLabelType& nupop = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "nup");
+			OpsLabelType& nupop = this->createOpsLabel("nup");
 			OperatorType cup = creationMatrix[SPIN_UP];
 			cup.dagger();
 			SparseMatrixType tmp3(multiplyTc(cup.data,cup.data));
@@ -272,7 +268,7 @@ protected:
 
 		PsimagLite::Matrix<SparseElementType> dense2;
 		{
-			OpsLabelType& ndownop = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "ndown");
+			OpsLabelType& ndownop = this->createOpsLabel("ndown");
 
 			OperatorType cdown = creationMatrix[SPIN_DOWN];
 			cdown.dagger();
@@ -288,7 +284,7 @@ protected:
 		}
 
 		{
-			OpsLabelType& nop = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "n");
+			OpsLabelType& nop = this->createOpsLabel("n");
 			dense1 += dense2;
 			SparseMatrixType tmp(dense1);
 			typename OperatorType::Su2RelatedType su2Related;
@@ -300,7 +296,7 @@ protected:
 		}
 
 		{
-			OpsLabelType& d = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "d");
+			OpsLabelType& d = this->createOpsLabel("d");
 			PsimagLite::Matrix<SparseElementType> cup;
 			crsMatrixToFullMatrix(cup,creationMatrix[SPIN_UP].data);
 			PsimagLite::Matrix<SparseElementType> cdown;
