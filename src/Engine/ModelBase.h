@@ -131,6 +131,7 @@ public:
 	typedef typename BasisWithOperatorsType::VectorBoolType VectorBoolType;
 	typedef LabeledOperators<OperatorType> LabeledOperatorsType;
 	typedef typename LabeledOperatorsType::LabelType OpsLabelType;
+	typedef typename OpsLabelType::TrackableEnum TrackableEnum;
 
 	ModelBase(const ParametersType& params,
 	          const GeometryType_& geometry,
@@ -322,9 +323,11 @@ public:
 
 protected:
 
-	OpsLabelType& createOpsLabel(PsimagLite::String name, SizeType site = 0)
+	OpsLabelType& createOpsLabel(TrackableEnum isTrackable,
+	                             PsimagLite::String name,
+	                             SizeType site = 0)
 	{
-		return labeledOperators_.createLabel(name, site);
+		return labeledOperators_.createLabel(isTrackable, name, site);
 	}
 
 private:

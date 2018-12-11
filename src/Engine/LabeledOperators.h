@@ -13,6 +13,8 @@ class LabeledOperators {
 		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 		typedef std::pair<PsimagLite::String, SizeType> PairStringSizeType;
 
+	public:
+
 		enum TrackableEnum {TRACKABLE_YES, TRACKABLE_NO};
 
 		Label(TrackableEnum t, PsimagLite::String name, SizeType site)
@@ -40,12 +42,6 @@ class LabeledOperators {
 			return ops_[0].data.rows();
 		}
 
-		Label(const Label&);
-
-		Label& operator=(const Label&);
-
-	public:
-
 		void push(const OperatorType& op)
 		{
 			ops_.push_back(op);
@@ -61,6 +57,10 @@ class LabeledOperators {
 		SizeType site() const { return site_; }
 
 	private:
+
+		Label(const Label&);
+
+		Label& operator=(const Label&);
 
 		TrackableEnum trackable_;
 		PsimagLite::String name_;

@@ -188,41 +188,6 @@ public:
 
 	SizeType hilbertSize(SizeType) const { return TWICE_THE_SPIN + 1; }
 
-	//! set operator matrices for sites in block
-	void setOperatorMatrices(VectorOperatorType& operatorMatrices,
-	                         VectorQnType& qns,
-	                         const BlockType& block) const
-	{
-		HilbertBasisType natBasis;
-		SparseMatrixType tmpMatrix;
-
-		setBasis(natBasis, block);
-		setSymmetryRelated(qns, natBasis, block.size());
-
-		typename MatrixType::value_type dummy = 0.0;
-
-		operatorMatrices.clear();
-		for (SizeType i=0;i<block.size();i++) {
-
-			typename OperatorType::Su2RelatedType su2related;
-
-			// Set the operators S^x_i in the natural basis
-			tmpMatrix = findSdirMatrices(i, natBasis, DIR_X, dummy);
-			OperatorType myOp(tmpMatrix, 1, PairType(0, 0), 1.0, su2related);
-			operatorMatrices.push_back(myOp);
-
-			// Set the operators S^y_i in the natural basis
-			tmpMatrix = findSdirMatrices(i, natBasis, DIR_Y, dummy);
-			OperatorType myOp2(tmpMatrix, 1, PairType(0, 0), 1.0, su2related);
-			operatorMatrices.push_back(myOp2);
-
-			// Set the operators S^z_i in the natural basis
-			tmpMatrix = findSdirMatrices(i, natBasis, DIR_Z, dummy);
-			OperatorType myOp3(tmpMatrix, 1, PairType(0, 0), 1.0, su2related);
-			operatorMatrices.push_back(myOp3);
-		}
-	}
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
@@ -254,17 +219,41 @@ public:
 
 protected:
 
-	void fillLabeledOperators()
+	void fillLabeledOperators(VectorQnType& qns)
 	{
-		SizeType site = 0; // FIXME for Immm SDHS
+		SizeType site = 0;
 		BlockType block(1, site);
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
-		assert(creationMatrix.size() >= 3);
-		this->createOpsLabel("sz").push(creationMatrix[0]);
-		this->createOpsLabel("sy").push(creationMatrix[1]);
-		this->createOpsLabel("sz").push(creationMatrix[2]);
+		HilbertBasisType natBasis;
+		SparseMatrixType tmpMatrix;
+
+		setBasis(natBasis, block);
+		setSymmetryRelated(qns, natBasis, block.size());
+
+		OpsLabelType& sx = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "sx");
+		OpsLabelType& sy = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "sy");
+		OpsLabelType& sz = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "sz");
+
+		typename MatrixType::value_type dummy = 0.0;
+
+		for (SizeType i=0;i<block.size();i++) {
+
+			typename OperatorType::Su2RelatedType su2related;
+
+			// Set the operators S^x_i in the natural basis
+			tmpMatrix = findSdirMatrices(i, natBasis, DIR_X, dummy);
+			OperatorType myOp(tmpMatrix, 1, PairType(0, 0), 1.0, su2related);
+			sx.push(myOp);
+
+			// Set the operators S^y_i in the natural basis
+			tmpMatrix = findSdirMatrices(i, natBasis, DIR_Y, dummy);
+			OperatorType myOp2(tmpMatrix, 1, PairType(0, 0), 1.0, su2related);
+			sy.push(myOp2);
+
+			// Set the operators S^z_i in the natural basis
+			tmpMatrix = findSdirMatrices(i, natBasis, DIR_Z, dummy);
+			OperatorType myOp3(tmpMatrix, 1, PairType(0, 0), 1.0, su2related);
+			sz.push(myOp3);
+		}
 	}
 
 private:

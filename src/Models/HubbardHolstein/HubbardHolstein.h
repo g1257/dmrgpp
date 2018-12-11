@@ -162,82 +162,6 @@ public:
 
 	void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
-	//! set creation matrices for sites in block
-	void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                         VectorQnType& qns,
-	                         const BlockType& block) const
-	{
-		HilbertBasisType natBasis;
-		setBasis(natBasis, block);
-		setSymmetryRelated(qns, natBasis);
-
-		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
-		creationMatrix.clear();
-		SparseMatrixType tmpMatrix;
-		for (SizeType i=0;i<block.size();i++) {
-			for (int sigma=0;sigma<2;sigma++) {
-				tmpMatrix = findOperatorMatrices(i,sigma,natBasis);
-				int asign= 1;
-				if (sigma>0) asign= 1;
-				typename OperatorType::Su2RelatedType su2related;
-				if (sigma==0) {
-					su2related.source.push_back(i);
-					su2related.source.push_back(i+1);
-					su2related.transpose.push_back(-1);
-					su2related.transpose.push_back(-1);
-					su2related.offset = 1;
-				}
-				OperatorType myOp(tmpMatrix,
-				                  -1,
-				                  typename OperatorType::PairType(1,1-sigma),
-				                  asign,
-				                  su2related);
-
-				creationMatrix.push_back(myOp);
-			}
-
-			if (modelParameters_.numberphonons == 0) continue;
-
-			tmpMatrix=findPhononadaggerMatrix(i,natBasis);
-
-			typename OperatorType::Su2RelatedType su2related2;
-			su2related2.source.push_back(i*2);
-			su2related2.source.push_back(i*2+1);
-			su2related2.source.push_back(i*2);
-			su2related2.transpose.push_back(-1);
-			su2related2.transpose.push_back(-1);
-			su2related2.transpose.push_back(1);
-			su2related2.offset = 1;
-			OperatorType myOp2(tmpMatrix,1,PairType(2,2),-1,su2related2);
-			creationMatrix.push_back(myOp2);
-
-			if (ModelBaseType::linkProduct().terms() == 2) continue;
-
-			// Set the operators c_(i,sigma} * x_i in the natural basis
-
-			for (int sigma=0;sigma<2;sigma++) {
-				tmpMatrix = findSSHMatrices(i,sigma,natBasis);
-				int asign= 1;
-				if (sigma>0) asign= 1;
-				typename OperatorType::Su2RelatedType su2related3;
-				if (sigma==0) {
-					su2related3.source.push_back(i);
-					su2related3.source.push_back(i+1);
-					su2related3.transpose.push_back(-1);
-					su2related3.transpose.push_back(-1);
-					su2related3.offset = 1;
-				}
-				OperatorType myOp3(tmpMatrix,
-				                   -1,
-				                   typename OperatorType::PairType(1,1-sigma),
-				                   asign,
-				                   su2related3);
-
-				creationMatrix.push_back(myOp3);
-			}
-		}
-	}
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType&,
 	                                const BlockType& block,
@@ -275,20 +199,84 @@ public:
 
 protected:
 
-	void fillLabeledOperators()
+	void fillLabeledOperators(VectorQnType& qns)
 	{
 		SizeType site = 0;
 		BlockType block(1, site);
-		VectorOperatorType creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
-		assert(creationMatrix.size() >= 3);
 
-		OpsLabelType& c = this->createOpsLabel("c");
-		for (SizeType sigma = 0; sigma < 2; ++sigma)
-			c.push(creationMatrix[sigma]);
+		OpsLabelType& c = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "c");
+		OpsLabelType& a = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "a");
+		OpsLabelType& cx = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "cx");
+		HilbertBasisType natBasis;
+		setBasis(natBasis, block);
+		setSymmetryRelated(qns, natBasis);
 
-		this->createOpsLabel("a").push(creationMatrix[2]);
+		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
+		SparseMatrixType tmpMatrix;
+		for (SizeType i=0;i<block.size();i++) {
+			for (int sigma=0;sigma<2;sigma++) {
+				tmpMatrix = findOperatorMatrices(i,sigma,natBasis);
+				int asign= 1;
+				if (sigma>0) asign= 1;
+				typename OperatorType::Su2RelatedType su2related;
+				if (sigma==0) {
+					su2related.source.push_back(i);
+					su2related.source.push_back(i+1);
+					su2related.transpose.push_back(-1);
+					su2related.transpose.push_back(-1);
+					su2related.offset = 1;
+				}
+
+				OperatorType myOp(tmpMatrix,
+				                  -1,
+				                  typename OperatorType::PairType(1,1-sigma),
+				                  asign,
+				                  su2related);
+
+				c.push(myOp);
+			}
+
+			if (modelParameters_.numberphonons == 0) continue;
+
+			tmpMatrix=findPhononadaggerMatrix(i,natBasis);
+
+			typename OperatorType::Su2RelatedType su2related2;
+			su2related2.source.push_back(i*2);
+			su2related2.source.push_back(i*2+1);
+			su2related2.source.push_back(i*2);
+			su2related2.transpose.push_back(-1);
+			su2related2.transpose.push_back(-1);
+			su2related2.transpose.push_back(1);
+			su2related2.offset = 1;
+			OperatorType myOp2(tmpMatrix,1,PairType(2,2),-1,su2related2);
+			a.push(myOp2);
+
+			if (ModelBaseType::linkProduct().terms() == 2) continue;
+
+			// Set the operators c_(i,sigma} * x_i in the natural basis
+
+			for (int sigma=0;sigma<2;sigma++) {
+				tmpMatrix = findSSHMatrices(i,sigma,natBasis);
+				int asign= 1;
+				if (sigma>0) asign= 1;
+				typename OperatorType::Su2RelatedType su2related3;
+				if (sigma==0) {
+					su2related3.source.push_back(i);
+					su2related3.source.push_back(i+1);
+					su2related3.transpose.push_back(-1);
+					su2related3.transpose.push_back(-1);
+					su2related3.offset = 1;
+				}
+
+				OperatorType myOp3(tmpMatrix,
+				                   -1,
+				                   typename OperatorType::PairType(1,1-sigma),
+				                   asign,
+				                   su2related3);
+
+				cx.push(myOp3);
+			}
+		}
 	}
 
 private:

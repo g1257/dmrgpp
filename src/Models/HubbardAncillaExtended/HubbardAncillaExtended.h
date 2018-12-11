@@ -246,8 +246,8 @@ protected:
 			if (hot_) setSz(sz,i,1,natBasis);
 			setPair(p,i,0,natBasis);
 			if (hot_) setPair(p,i,1,natBasis);
-			setN(n,i,0,natBasis);
-			if (hot_) setN(n,i,1,natBasis);
+			setN(nop,i,0,natBasis);
+			if (hot_) setN(nop,i,1,natBasis);
 		}
 
 //		if (hot_)

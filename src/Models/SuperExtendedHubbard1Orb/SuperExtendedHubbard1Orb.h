@@ -136,15 +136,6 @@ public:
 		return (1<<2);
 	}
 
-	void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                         VectorQnType& qns,
-	                         const BlockType& block) const
-	{
-		extendedHubbard_.setOperatorMatrices(creationMatrix, qns, block);
-		addAditionalOperatorMatrices(creationMatrix,block);
-		assert(creationMatrix.size() == 6);
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -181,32 +172,34 @@ public:
 
 protected:
 
-	void fillLabeledOperators()
+	void fillLabeledOperators(VectorQnType& qns)
 	{
-		SizeType site = 0; // FIXME for Immm SDHS
+		SizeType site = 0;
 		BlockType block(1, site);
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
-		assert(creationMatrix.size() >= 3);
-		this->createOpsLabel("n").push(creationMatrix[2]);
+		extendedHubbard_.fillLabeledOperators(qns);
+		VectorOperatorType cm(3);
+		for (SizeType dof = 0; dof < 2; ++dof)
+			cm[dof] = this->naturalOperator("c", site, dof);
+
+		cm[2] = this->naturalOperator("n", site, 0);
+
+		OpsLabelType& splus = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "splus");
+		OpsLabelType& sminus = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "sminus");
+		OpsLabelType& sz = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "sz");
+		OpsLabelType& p = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "pair");
+
+		for (SizeType i = 0; i < block.size(); ++i) {
+			setSplusi(splus, sminus, cm, i);
+			setSzi(sz, cm, i);
+			setPairi(p, cm, i);
+		}
 	}
 
 private:
 
-	void addAditionalOperatorMatrices(VectorOperatorType& creationMatrix,
-	                                  const BlockType& block) const
-	{
-		for (SizeType i = 0; i < block.size(); ++i) {
-			setSplusi(creationMatrix,i);
-			setSzi(creationMatrix,i);
-			setPairi(creationMatrix,i);
-		}
-
-		assert(creationMatrix.size() == 6);
-	}
-
-	void setSplusi(VectorOperatorType& cm,
+	void setSplusi(OpsLabelType& splusop,
+	               OpsLabelType& sminus,
+	               const VectorOperatorType& cm,
 	               SizeType) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
@@ -220,10 +213,13 @@ private:
 		                  typename OperatorType::PairType(0,0),
 		                  -1,
 		                  su2related);
-		cm.push_back(myOp);
+		splusop.push(myOp);
+		myOp.dagger();
+		sminus.push(myOp);
 	}
 
-	void setSzi(VectorOperatorType& cm,
+	void setSzi(OpsLabelType& szop,
+	            const VectorOperatorType& cm,
 	            SizeType) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
@@ -248,10 +244,11 @@ private:
 		                1,
 		                su2related);
 
-		cm.push_back(sz);
+		szop.push(sz);
 	}
 
-	void setPairi(VectorOperatorType& cm,
+	void setPairi(OpsLabelType& p,
+	              const VectorOperatorType& cm,
 	              SizeType) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
@@ -263,7 +260,7 @@ private:
 		                  typename OperatorType::PairType(0,0),
 		                  1,
 		                  su2related);
-		cm.push_back(myOp);
+		p.push(myOp);
 	}
 
 	SparseMatrixType n(const SparseMatrixType& c) const

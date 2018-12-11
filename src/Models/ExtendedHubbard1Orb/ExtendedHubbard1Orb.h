@@ -165,8 +165,6 @@ public:
 		                                         time);
 	}
 
-protected:
-
 	void fillLabeledOperators(VectorQnType& qns)
 	{
 		modelHubbard_.fillLabeledOperators(qns);
@@ -184,8 +182,8 @@ protected:
 		                  angularFactor,
 		                  su2related);
 
-		OpsLabelType& nop = this->createOpsLabel("n");
-		nop.push(OpsLabelType::TRACKABLE_YES, myOp);
+		OpsLabelType& nop = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "n");
+		nop.push(myOp);
 	}
 
 private:

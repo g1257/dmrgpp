@@ -137,16 +137,6 @@ public:
 		return extendedHubbard_.hilbertSize(site);
 	}
 
-	//! set creation matrices for sites in block
-	void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                         VectorQnType& qns,
-	                         const BlockType& block) const
-	{
-		extendedHubbard_.setOperatorMatrices(creationMatrix, qns, block);
-		// add S+ and Sz to creationMatrix
-		setSpinMatrices(creationMatrix,block);
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -171,16 +161,33 @@ public:
 
 protected:
 
-	void fillLabeledOperators()
+	void fillLabeledOperators(VectorQnType& qns)
 	{
-		SizeType site = 0; // FIXME for Immm SDHS
-		BlockType block(1, site);
+		SizeType site = 0;
 
-		VectorOperatorType creationMatrix;
-		setSpinMatrices(creationMatrix, block);
-		assert(creationMatrix.size() == 2);
-		this->createOpsLabel("splus").push(creationMatrix[0]);
-		this->createOpsLabel("sz").push(creationMatrix[1]);
+		extendedHubbard_.fillLabeledOperators(qns);
+		OpsLabelType& splusopop = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "splus");
+		OpsLabelType& szopop = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "sz");
+
+		SparseMatrixType sPlus = extendedHubbard_.naturalOperator("splus", site, 0).data;
+		RealType angularFactor= 1;
+		typename OperatorType::Su2RelatedType su2related;
+		su2related.offset = 1; //check FIXME
+		OperatorType sPlusOp(sPlus,
+		                     1,
+		                     typename OperatorType::PairType(0,0),
+		                     angularFactor,
+		                     su2related);
+		splusopop.push_back(sPlusOp);
+
+		SparseMatrixType sz = extendedHubbard_.naturalOperator("sz", site, 0).data;
+		sz *= 0.5;
+		OperatorType szOp(sz,
+		                  1,
+		                  typename OperatorType::PairType(0,0),
+		                  angularFactor,
+		                  su2related);
+		szopop.push_back(szOp);
 	}
 
 private:
@@ -193,24 +200,6 @@ private:
 		// Assume block.size()==1 and then problem solved!!
 		// there are no connection if there's only one site ;-)
 		assert(block.size()==1);
-	}
-
-	void setSpinMatrices(VectorOperatorType& creationMatrix,
-	                     const BlockType& block) const
-	{
-		assert(block.size()==1);
-
-		SparseMatrixType sPlus = extendedHubbard_.naturalOperator("splus",0,0).data;
-		RealType angularFactor= 1;
-		typename OperatorType::Su2RelatedType su2related;
-		su2related.offset = 1; //check FIXME
-		OperatorType sPlusOp(sPlus,1,typename OperatorType::PairType(0,0),angularFactor,su2related);
-		creationMatrix.push_back(sPlusOp);
-
-		SparseMatrixType sz = extendedHubbard_.naturalOperator("sz",0,0).data;
-		sz *= 0.5;
-		OperatorType szOp(sz,1,typename OperatorType::PairType(0,0),angularFactor,su2related);
-		creationMatrix.push_back(szOp);
 	}
 
 	ParametersModelHubbard<RealType, QnType>  modelParameters_;

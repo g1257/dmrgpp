@@ -79,22 +79,6 @@ public:
 		return qn_.size();
 	}
 
-	// Fill the VectorOperatorType with operators that need to be kept
-	// track by the DMRG++ Engine.
-	// Fill VectorQnType with the qns of the one site basis in the order
-	// you chose to give the operators
-	// You can check that block.size() == 1 or throw otherwise
-	// The contents of block MUST be ignored unless your model has a site-dependent
-	// Hilbert space (SDHS)
-	void setOperatorMatrices(VectorOperatorType& ops,
-	                         VectorQnType& qn,
-	                         const VectorSizeType& block) const
-	{
-		assert(block.size() == 1);
-		ops = ops_;
-		qn = qn_;
-	}
-
 	// Fill SparseMatrixType with the on-site Hamiltonian terms in the on-site basis
 	// Give SparseMatrixType in the order you chose to give the
 	// operators in setOperatorMatrices
@@ -147,16 +131,17 @@ public:
 
 protected:
 
-	void fillLabeledOperators()
+	void fillLabeledOperators(VectorQnType& qns)
 	{
+		qns = qn_;
 		assert(ops_.size() >= 6);
-		OpsLabelType& c = this->createOpsLabel("c");
+		OpsLabelType& c = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "c");
 		for (SizeType sigma = 0; sigma < 2; ++sigma)
 			c.push(ops_[sigma]);
 
-		this->createOpsLabel("splus").push(ops_[2]);
-		this->createOpsLabel("Sz").push(ops_[3]);
-		this->createOpsLabel("n").push(ops_[4]);
+		this->createOpsLabel("splus").push(OpsLabelType::TRACKABLE_YES, ops_[2]);
+		this->createOpsLabel("Sz").push(OpsLabelType::TRACKABLE_YES, ops_[3]);
+		this->createOpsLabel("n").push(OpsLabelType::TRACKABLE_YES, ops_[4]);
 
 		{
 			SparseMatrixType mup = ops_[0].data;
@@ -170,12 +155,13 @@ protected:
 			szMatrix += mupT*mup;
 			szMatrix *= 0.5;
 
+			PairSizeType zeroPair(0, 0);
 			typename OperatorType::Su2RelatedType su2Related;
-			this->createOpsLabel("sz").push(OperatorType(szMatrix,
-			                                             1,
-			                                             PairSizeType(0,0),
-			                                             1,
-			                                             su2Related));
+			this->createOpsLabel(OpsLabelType::TRACKABLE_NO,"sz").push(OperatorType(szMatrix,
+			                                                                        1,
+			                                                                        zeroPair,
+			                                                                        1,
+			                                                                        su2Related));
 		}
 	}
 
