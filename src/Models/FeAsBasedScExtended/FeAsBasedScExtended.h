@@ -145,22 +145,6 @@ public:
 		io.write(label + "/orbitals_", orbitals_);
 	}
 
-	//! set creation matrices for sites in block
-	void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                         VectorQnType& qns,
-	                         const BlockType& block) const
-	{
-		blockIsSize1OrThrow(block);
-
-		modelFeAs_.setOperatorMatrices(creationMatrix, qns, block);
-
-		// add S^+_i to creationMatrix
-		setSplus(creationMatrix,block);
-
-		// add S^z_i to creationMatrix
-		setSz(creationMatrix,block);
-	}
-
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                        const VectorOperatorType& cm,
 	                                        const BlockType& block,
@@ -171,36 +155,51 @@ public:
 
 protected:
 
-	void fillLabeledOperators()
+	void fillLabeledOperators(VectorQnType& qns)
 	{
-		modelFeAs_.fillLabeledOperators();
+		modelFeAs_.fillLabeledOperators(qns);
 		SizeType site = 0;
 		BlockType block(1, site);
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
+		setOperatorMatricesInternal(creationMatrix, qns, block);
 
-		OpsLabelType& sz = this->createOpsLabel("naturalSz");
-		SizeType x = 2*orbitals_ + 1;
-		assert(x < creationMatrix.size());
-		sz.push(creationMatrix[x]);
-
-		OpsLabelType& splus = this->createOpsLabel("naturalSplus");
-		x = 2*orbitals_;
+		OpsLabelType& splus = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "naturalSplus");
+		SizeType x = 2*orbitals_;
 		assert(x < creationMatrix.size());
 		splus.push(creationMatrix[x]);
 
-		OpsLabelType& sminus = this->createOpsLabel("naturalSminus");
+		OpsLabelType& sminus = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "naturalSminus");
 		x = 2*orbitals_;
 		assert(x < creationMatrix.size());
 		creationMatrix[x].dagger();
 		sminus.push(creationMatrix[x]);
 		creationMatrix[x].dagger();
 
+		OpsLabelType& sz = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "naturalSz");
+		x = 2*orbitals_ + 1;
+		assert(x < creationMatrix.size());
+		sz.push(creationMatrix[x]);
+
 		// do not call derived class here
 	}
 
 private:
+
+	//! set creation matrices for sites in block
+	void setOperatorMatricesInternal(VectorOperatorType& creationMatrix,
+	                                VectorQnType& qns,
+	                                const BlockType& block) const
+	{
+		blockIsSize1OrThrow(block);
+
+		modelFeAs_.setOperatorMatricesInternal(creationMatrix, qns, block);
+
+		// add S^+_i to creationMatrix
+		setSplus(creationMatrix,block);
+
+		// add S^z_i to creationMatrix
+		setSz(creationMatrix,block);
+	}
 
 	// add S^+_i to creationMatrix
 	void setSplus(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,

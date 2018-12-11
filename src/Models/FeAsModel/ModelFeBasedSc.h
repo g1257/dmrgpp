@@ -322,15 +322,6 @@ public:
 		feAsJzSymmetry_.write(label, io);
 	}
 
-	//! set creation matrices for sites in block
-	void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                         VectorQnType& qns,
-	                         const BlockType&) const
-	{
-		creationMatrix = creationMatrix_;
-		qns = qq_;
-	}
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
@@ -359,13 +350,14 @@ public:
 		}
 	}
 
-	void fillLabeledOperators()
+	void fillLabeledOperators(VectorQnType& qns)
 	{
+		qns = qq_;
 		assert(creationMatrix_.size()>0);
 		SizeType nrow = creationMatrix_[0].data.rows();
 
-		OpsLabelType& splus = this->createOpsLabel("splus");
-		OpsLabelType& sminus = this->createOpsLabel("sminus");
+		OpsLabelType& splus = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "splus");
+		OpsLabelType& sminus = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "sminus");
 		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
 			MatrixType tmp(nrow,nrow);
 			tmp += multiplyTc(creationMatrix_[dof].data,
@@ -386,7 +378,7 @@ public:
 			                         su2Related));
 		}
 
-		OpsLabelType& sz = this->createOpsLabel("sz");
+		OpsLabelType& sz = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "sz");
 		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
 			MatrixType tmp(nrow,nrow);
 			MatrixType tmp2(nrow,nrow);
@@ -405,7 +397,7 @@ public:
 			                     su2Related));
 		}
 
-		OpsLabelType& nop = this->createOpsLabel("n");
+		OpsLabelType& nop = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "n");
 		for (SizeType dof = 0; dof < 2*modelParameters_.orbitals; ++dof) {
 			MatrixType tmp =
 			        multiplyTc(creationMatrix_[dof].data,creationMatrix_[dof].data);
@@ -418,14 +410,14 @@ public:
 			                      su2Related));
 		}
 
-		OpsLabelType& c = this->createOpsLabel("c");
+		OpsLabelType& c = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "c");
 		for (SizeType dof = 0; dof < 2*modelParameters_.orbitals; ++dof) {
 			VectorOperatorType cm = creationMatrix_;
 			cm[dof].dagger();
 			c.push(cm[dof]);
 		}
 
-		OpsLabelType& d = this->createOpsLabel("d");
+		OpsLabelType& d = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "d");
 		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
 			SizeType orbital = dof % modelParameters_.orbitals;
 			SparseMatrixType atmp;

@@ -168,18 +168,45 @@ public:
 		io.write(label + "/hot_", hot_);
 	}
 
-	//! set creation matrices for sites in block
-	void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                         VectorQnType& qns,
-	                         const BlockType& block) const
+	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
+	                                const VectorOperatorType&,
+	                                const BlockType& block,
+	                                RealType) const
 	{
+		SizeType n=block.size();
+		HilbertBasisType natBasis;
+		setBasis(natBasis, block);
+
+		for (SizeType i=0;i<n;i++) {
+			VectorSparseMatrixType cm;
+			findAllMatrices(cm,i,natBasis);
+			addInteraction(hmatrix, cm, block[i]);
+
+			addPotentialV(hmatrix, cm, block[i]);
+
+		}
+	}
+
+protected:
+
+	void fillLabeledOperators(VectorQnType& qns)
+	{
+		SizeType site = 0;
+		BlockType block(1, site);
 		HilbertBasisType natBasis;
 		setBasis(natBasis, block);
 		setSymmetryRelated(qns, natBasis);
 
 		//! Set the operators c^\dagger_{i\gamma\sigma} in the natural basis
-		creationMatrix.clear();
 		SizeType dofs = 2*ORBITALS;
+		OpsLabelType& splus = this->createOpsLabel("splus");
+		OpsLabelType& sminus = this->createOpsLabel("sminus");
+		OpsLabelType& sz = this->createOpsLabel("sz");
+		OpsLabelType& p = this->createOpsLabel("p");
+		OpsLabelType& nop = this->createOpsLabel("n");
+		OpsLabelType& c = this->createOpsLabel("c");
+		OpsLabelType& d = this->createOpsLabel("d");
+
 		for (SizeType i=0;i<block.size();i++) {
 			for (SizeType sigma2=0;sigma2<dofs;++sigma2) {
 				SizeType sigma = (hot_) ? 2*sigma2 : sigma2;
@@ -209,87 +236,24 @@ public:
 				                  typename OperatorType::PairType(1,m),
 				                  asign,
 				                  su2related);
-				creationMatrix.push_back(myOp);
+				c.push(myOp);
 			}
 
-			setLambdaMatrices(creationMatrix,i,natBasis);
-			setSplus(creationMatrix,i,0,natBasis);
-			if (hot_) setSplus(creationMatrix,i,1,natBasis);
-			setSz(creationMatrix,i,0,natBasis);
-			if (hot_) setSz(creationMatrix,i,1,natBasis);
-			setPair(creationMatrix,i,0,natBasis);
-			if (hot_) setPair(creationMatrix,i,1,natBasis);
-			setN(creationMatrix,i,0,natBasis);
-			if (hot_) setN(creationMatrix,i,1,natBasis);
+			setLambdaMatrices(d,i,natBasis);
+			setSplus(splus, sminus, i,0,natBasis);
+			if (hot_) setSplus(splus, sminus, i,1,natBasis);
+			setSz(sz,i,0,natBasis);
+			if (hot_) setSz(sz,i,1,natBasis);
+			setPair(p,i,0,natBasis);
+			if (hot_) setPair(p,i,1,natBasis);
+			setN(n,i,0,natBasis);
+			if (hot_) setN(n,i,1,natBasis);
 		}
 
-		if (hot_)
-			assert(creationMatrix.size() == 14);
-		else
-			assert(creationMatrix.size() == 8);
-	}
-
-	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                const VectorOperatorType&,
-	                                const BlockType& block,
-	                                RealType) const
-	{
-		SizeType n=block.size();
-		HilbertBasisType natBasis;
-		setBasis(natBasis, block);
-
-		for (SizeType i=0;i<n;i++) {
-			VectorSparseMatrixType cm;
-			findAllMatrices(cm,i,natBasis);
-			addInteraction(hmatrix, cm, block[i]);
-
-			addPotentialV(hmatrix, cm, block[i]);
-
-		}
-	}
-
-protected:
-
-	void fillLabeledOperators()
-	{
-		SizeType site = 0;
-		BlockType block(1, site);
-		VectorOperatorType creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
-
-		SizeType dofs = (hot_) ? 4 : 2;
-		OpsLabelType& c = this->createOpsLabel("c");
-		for (SizeType dof = 0; dof < dofs; ++dof) {
-			c.push(creationMatrix[dof]);
-		}
-
-		SizeType offsetDelta = (hot_) ? 4 : 2;
-		OpsLabelType& d = this->createOpsLabel("d");
-		for (SizeType dof = 0; dof < 2; ++dof) {
-			d.push(creationMatrix[offsetDelta + dof]);
-		}
-
-		SizeType total = (hot_) ? 2 : 1;
-		OpsLabelType& splus = this->createOpsLabel("splus");
-		OpsLabelType& sminus = this->createOpsLabel("sminus");
-		OpsLabelType& sz = this->createOpsLabel("sz");
-		OpsLabelType& p = this->createOpsLabel("p");
-		OpsLabelType& nop = this->createOpsLabel("n");
-
-		SizeType offsetSplus = (hot_) ? 6 : 4;
-		SizeType offsetSz = (hot_) ? 8 : 5;
-		SizeType offsetP = (hot_) ? 10 : 6;
-		SizeType offsetN= (!hot_) ? 12 : 7;
-		for (SizeType dof = 0; dof < total; ++dof) {
-			splus.push(creationMatrix[offsetSplus + dof]);
-			creationMatrix[offsetSplus + dof].dagger();
-			sminus.push(creationMatrix[offsetSplus + dof]);
-			creationMatrix[offsetSplus + dof].dagger();
-			sz.push(creationMatrix[offsetSz + dof]);
-			p.push(creationMatrix[offsetP + dof]);
-			nop.push(creationMatrix[offsetN + dof]);
-		}
+//		if (hot_)
+//			assert(creationMatrix.size() == 14);
+//		else
+//			assert(creationMatrix.size() == 8);
 	}
 
 private:
@@ -308,7 +272,7 @@ private:
 	}
 
 	//! set creation matrices for sites in block
-	void setLambdaMatrices(VectorOperatorType& cm,
+	void setLambdaMatrices(OpsLabelType& d,
 	                       SizeType i,
 	                       const HilbertBasisType& natBasis) const
 	{
@@ -330,7 +294,7 @@ private:
 			                  typename OperatorType::PairType(0,0),
 			                  1,
 			                  su2related);
-			cm.push_back(myOp);
+			d.push(myOp);
 		}
 	}
 
@@ -367,7 +331,8 @@ private:
 			corrector(i,i) = std::abs(dn1(i,i) + dn2(i,i) + f1);
 	}
 
-	void setSplus(VectorOperatorType& cm,
+	void setSplus(OpsLabelType& splusop,
+	              OpsLabelType& sminus,
 	              SizeType i,
 	              SizeType orbital,
 	              const HilbertBasisType& natBasis) const
@@ -387,10 +352,13 @@ private:
 		                  typename OperatorType::PairType(0,0),
 		                  -1,
 		                  su2related);
-		cm.push_back(myOp);
+		splusop.push(myOp);
+
+		myOp.dagger();
+		sminus.push(myOp);
 	}
 
-	void setSz(VectorOperatorType& cm,
+	void setSz(OpsLabelType& szop,
 	           SizeType i,
 	           SizeType orbital,
 	           const HilbertBasisType& natBasis) const
@@ -422,10 +390,10 @@ private:
 		                1,
 		                su2related);
 
-		cm.push_back(sz);
+		szop.push(sz);
 	}
 
-	void setPair(VectorOperatorType& cm,
+	void setPair(OpsLabelType& p,
 	             SizeType i,
 	             SizeType orbital,
 	             const HilbertBasisType& natBasis) const
@@ -441,10 +409,10 @@ private:
 		                  typename OperatorType::PairType(0,0),
 		                  1,
 		                  su2related);
-		cm.push_back(myOp);
+		p.push(myOp);
 	}
 
-	void setN(VectorOperatorType& cm,
+	void setN(OpsLabelType& nopop,
 	          SizeType i,
 	          SizeType orbital,
 	          const HilbertBasisType& natBasis) const
@@ -476,7 +444,7 @@ private:
 		                 1,
 		                 su2related);
 
-		cm.push_back(nop);
+		nopop.push(nop);
 	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to

@@ -156,17 +156,36 @@ public:
 		modelParameters_.write(label, io);
 	}
 
-	//! set creation matrices for sites in block
-	void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                         VectorQnType& qns,
-	                         const BlockType& block) const
+	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
+	                                const VectorOperatorType&,
+	                                const BlockType& block,
+	                                RealType) const
 	{
+		SizeType n=block.size();
+		HilbertBasisType natBasis;
+		setBasis(natBasis, block);
+
+		for (SizeType i=0;i<n;i++) {
+			VectorSparseMatrixType cm;
+			findAllMatrices(cm,i,natBasis);
+			addInteraction(hmatrix, cm, block[i]);
+
+			addPotentialV(hmatrix, cm, block[i]);
+		}
+	}
+
+protected:
+
+	void fillLabeledOperators(VectorQnType& qns)
+	{
+		SizeType site = 0; // FIXME for Immm SDHS
+		BlockType block(1, site);
 		HilbertBasisType natBasis;
 		setBasis(natBasis, block);
 		setSymmetryRelated(qns, natBasis);
 
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
-		creationMatrix.clear();
+		OpsLabelType& c = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "c");
 		SizeType dofs = 2*ORBITALS;
 		for (SizeType i=0;i<block.size();i++) {
 			for (SizeType sigma=0;sigma<dofs;sigma+=2) {
@@ -194,45 +213,11 @@ public:
 				                  typename OperatorType::PairType(1,m),
 				                  asign,
 				                  su2related);
-				creationMatrix.push_back(myOp);
+				c.push(myOp);
 			}
 
-			setLambdaMatrices(creationMatrix,i,natBasis);
+			setLambdaMatrices(i, natBasis);
 		}
-	}
-
-	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                const VectorOperatorType&,
-	                                const BlockType& block,
-	                                RealType) const
-	{
-		SizeType n=block.size();
-		HilbertBasisType natBasis;
-		setBasis(natBasis, block);
-
-		for (SizeType i=0;i<n;i++) {
-			VectorSparseMatrixType cm;
-			findAllMatrices(cm,i,natBasis);
-			addInteraction(hmatrix, cm, block[i]);
-
-			addPotentialV(hmatrix, cm, block[i]);
-		}
-	}
-
-protected:
-
-	void fillLabeledOperators()
-	{
-		SizeType site = 0; // FIXME for Immm SDHS
-		BlockType block(1, site);
-		VectorOperatorType creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
-
-		assert(2 <= creationMatrix.size());
-		OpsLabelType& c = this->createOpsLabel("c");
-		for (SizeType dof = 0; dof < 2; ++dof)
-			c.push(creationMatrix[dof]);
 	}
 
 private:
@@ -249,12 +234,12 @@ private:
 	}
 
 	//! set creation matrices for sites in block
-	void setLambdaMatrices(VectorOperatorType& cm,
-	                       SizeType i,
+	void setLambdaMatrices(SizeType i,
 	                       const HilbertBasisType& natBasis) const
 	{
 		VectorSparseMatrixType vm;
 		findAllMatrices(vm,i,natBasis);
+		OpsLabelType& ll = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "l");
 
 		typename OperatorType::Su2RelatedType su2related;
 		for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
@@ -271,7 +256,7 @@ private:
 			                  typename OperatorType::PairType(0,0),
 			                  1,
 			                  su2related);
-			cm.push_back(myOp);
+			ll.push(myOp);
 		}
 	}
 

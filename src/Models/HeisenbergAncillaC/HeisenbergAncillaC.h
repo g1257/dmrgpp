@@ -187,78 +187,6 @@ public:
 		return pow(modelParameters_.twiceTheSpin + 1, NUMBER_OF_ORBITALS);
 	}
 
-	//! set operator matrices for sites in block
-	void setOperatorMatrices(VectorOperatorType& operatorMatrices,
-	                         VectorQnType& qns,
-	                         const BlockType& block) const
-	{
-		if (block.size() != 1) {
-			PsimagLite::String msg("HeisenbergAncillaC: only blocks");
-			msg += " of size 1 can be added for now.\n";
-			throw PsimagLite::RuntimeError(msg);
-		}
-
-		HilbertBasisType natBasis;
-		SparseMatrixType tmpMatrix;
-
-		setBasis(natBasis, block);
-		setSymmetryRelated(qns, natBasis, block.size());
-
-		operatorMatrices.clear();
-		for (SizeType i=0;i<block.size();i++) {
-			// Set the operators S^+_i for orbital a in the natural basis
-			tmpMatrix=findSplusMatrices(i,0,natBasis);
-
-			typename OperatorType::Su2RelatedType su2related;
-			su2related.source.push_back(i*2);
-			su2related.source.push_back(i*2+NUMBER_OF_ORBITALS);
-			su2related.source.push_back(i*2);
-			su2related.transpose.push_back(-1);
-			su2related.transpose.push_back(-1);
-			su2related.transpose.push_back(1);
-			su2related.offset = NUMBER_OF_ORBITALS;
-
-			OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
-			operatorMatrices.push_back(myOp);
-
-			if (hot_) {
-				// Set the operators S^+_i for orbital b in the natural basis
-				tmpMatrix=findSplusMatrices(i,1,natBasis);
-
-				typename OperatorType::Su2RelatedType su2related;
-				su2related.source.push_back(i*2);
-				su2related.source.push_back(i*2+NUMBER_OF_ORBITALS);
-				su2related.source.push_back(i*2);
-				su2related.transpose.push_back(-1);
-				su2related.transpose.push_back(-1);
-				su2related.transpose.push_back(1);
-				su2related.offset = NUMBER_OF_ORBITALS;
-
-				OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
-				operatorMatrices.push_back(myOp);
-			}
-
-			// Set the operators S^z_i orbital a in the natural basis
-			tmpMatrix = findSzMatrices(i,0,natBasis);
-			typename OperatorType::Su2RelatedType su2related2;
-			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
-			operatorMatrices.push_back(myOp2);
-			if (hot_) {
-				// Set the operators S^z_i orbital b in the natural basis
-				tmpMatrix = findSzMatrices(i,1,natBasis);
-				typename OperatorType::Su2RelatedType su2related2;
-				OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
-				operatorMatrices.push_back(myOp2);
-			}
-
-			// Set the operators \Delta_i in the natural basis
-			tmpMatrix = findDeltaMatrices(i,natBasis);
-			typename OperatorType::Su2RelatedType su2related3;
-			OperatorType myOp3(tmpMatrix,1,PairType(0,0),1.0,su2related3);
-			operatorMatrices.push_back(myOp3);
-		}
-	}
-
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
@@ -278,32 +206,76 @@ public:
 
 protected:
 
-	void fillLabeledOperators()
+	void fillLabeledOperators(VectorQnType& qns)
 	{
 		SizeType site = 0;
 		BlockType block(1, site);
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
+		HilbertBasisType natBasis;
+		SparseMatrixType tmpMatrix;
 
-		OpsLabelType& splus = this->createOpsLabel("splus");
-		OpsLabelType& sminus = this->createOpsLabel("sminus");
-		OpsLabelType& sz = this->createOpsLabel("sz");
-		SizeType total = (hot_) ? 2 : 1;
-		SizeType offsetZ = (hot_) ? 2 : 1;
-		assert(total + offsetZ <= creationMatrix.size());
-		for (SizeType dof = 0; dof < total; ++dof) {
-			splus.push(creationMatrix[dof]);
-			creationMatrix[dof].dagger();
-			sminus.push(creationMatrix[dof]);
-			creationMatrix[dof].dagger();
-			sz.push(creationMatrix[offsetZ + dof]);
+		setBasis(natBasis, block);
+		setSymmetryRelated(qns, natBasis, block.size());
+
+		OpsLabelType& splus = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "splus");
+		OpsLabelType& sminus = this->createOpsLabel(OpsLabelType::TRACKABLE_NO, "sminus");
+		OpsLabelType& sz = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "sz");
+		OpsLabelType& d = this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "d");
+
+		for (SizeType i=0;i<block.size();i++) {
+			// Set the operators S^+_i for orbital a in the natural basis
+			tmpMatrix=findSplusMatrices(i,0,natBasis);
+
+			typename OperatorType::Su2RelatedType su2related;
+			su2related.source.push_back(i*2);
+			su2related.source.push_back(i*2+NUMBER_OF_ORBITALS);
+			su2related.source.push_back(i*2);
+			su2related.transpose.push_back(-1);
+			su2related.transpose.push_back(-1);
+			su2related.transpose.push_back(1);
+			su2related.offset = NUMBER_OF_ORBITALS;
+
+			OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
+			splus.push(myOp);
+
+			myOp.dagger();
+			sminus.push(myOp);
+
+			if (hot_) {
+				// Set the operators S^+_i for orbital b in the natural basis
+				tmpMatrix=findSplusMatrices(i,1,natBasis);
+
+				typename OperatorType::Su2RelatedType su2related;
+				su2related.source.push_back(i*2);
+				su2related.source.push_back(i*2+NUMBER_OF_ORBITALS);
+				su2related.source.push_back(i*2);
+				su2related.transpose.push_back(-1);
+				su2related.transpose.push_back(-1);
+				su2related.transpose.push_back(1);
+				su2related.offset = NUMBER_OF_ORBITALS;
+
+				OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
+				splus.push(myOp);
+			}
+
+			// Set the operators S^z_i orbital a in the natural basis
+			tmpMatrix = findSzMatrices(i,0,natBasis);
+			typename OperatorType::Su2RelatedType su2related2;
+			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
+			sz.push(myOp2);
+			if (hot_) {
+				// Set the operators S^z_i orbital b in the natural basis
+				tmpMatrix = findSzMatrices(i,1,natBasis);
+				typename OperatorType::Su2RelatedType su2related2;
+				OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
+				sz.push(myOp2);
+			}
+
+			// Set the operators \Delta_i in the natural basis
+			tmpMatrix = findDeltaMatrices(i,natBasis);
+			typename OperatorType::Su2RelatedType su2related3;
+			OperatorType myOp3(tmpMatrix,1,PairType(0,0),1.0,su2related3);
+			d.push(myOp3);
 		}
-
-		OpsLabelType& d = this->createOpsLabel("d");
-		SizeType offsetD = (hot_) ? 4 : 2;
-		assert(offsetD < creationMatrix.size());
-		d.push(creationMatrix[offsetD]);
 	}
 
 private:

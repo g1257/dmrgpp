@@ -158,52 +158,10 @@ public:
 		return (SizeType)pow(2,NUMBER_OF_ORBITALS);
 	}
 
-	/** \cppFunction{!PTEX_THISFUNCTION} sets local operators needed to
-		 construct the Hamiltonian.
-		 For example, for the Hubbard model these operators are the
-		 creation operators for sites in block */
-	virtual void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                                 VectorQnType& qns,
-	                                 const BlockType& block) const
-	{
-		HilbertBasisType natBasis;
-		SparseMatrixType tmpMatrix;
-		setBasis(natBasis, block);
-		setSymmetryRelated(qns, natBasis);
-
-		//! Set the operators c^\daggger_{i\sigma} in the natural basis
-		creationMatrix.clear();
-		for (SizeType i=0;i<block.size();i++) {
-			for (int sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++) {
-				tmpMatrix = findOperatorMatrices(i,sigma,natBasis);
-				int asign= 1;
-				if (sigma>0) asign= 1;
-				typename OperatorType::Su2RelatedType su2related;
-				if (sigma==0) {
-					su2related.source.push_back(i*offset_);
-					su2related.source.push_back(i*offset_+1);
-					su2related.transpose.push_back(-1);
-					su2related.transpose.push_back(-1);
-					su2related.offset = NUMBER_OF_ORBITALS;
-				}
-				OperatorType myOp(tmpMatrix,
-				                  -1,
-				                  typename OperatorType::PairType(1,1-sigma),
-				                  asign,
-				                  su2related);
-
-				creationMatrix.push_back(myOp);
-			}
-		}
-
-		// add ni to creationMatrix
-		setNi(creationMatrix,block);
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
-		        io.createGroup(label1);
+			io.createGroup(label1);
 
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
@@ -239,20 +197,52 @@ public:
 
 protected:
 
-	void fillLabeledOperators()
+	void fillLabeledOperators(VectorQnType& qns)
 	{
 		SizeType site = 0;
 		BlockType block(1, site);
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix, qns, block);
-		assert(creationMatrix.size() >= 2);
+		HilbertBasisType natBasis;
+		SparseMatrixType tmpMatrix;
+		setBasis(natBasis, block);
+		setSymmetryRelated(qns, natBasis);
 
-		this->createOpsLabel("c").push(creationMatrix[0]);
-		this->createOpsLabel("n").push(creationMatrix[1]);
+		//! Set the operators c^\daggger_{i\sigma} in the natural basis
+		for (SizeType i=0;i<block.size();i++) {
+			for (int sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++) {
+				tmpMatrix = findOperatorMatrices(i,sigma,natBasis);
+				int asign= 1;
+				if (sigma>0) asign= 1;
+				typename OperatorType::Su2RelatedType su2related;
+				if (sigma==0) {
+					su2related.source.push_back(i*offset_);
+					su2related.source.push_back(i*offset_+1);
+					su2related.transpose.push_back(-1);
+					su2related.transpose.push_back(-1);
+					su2related.offset = NUMBER_OF_ORBITALS;
+				}
+
+				OperatorType myOp(tmpMatrix,
+				                  -1,
+				                  typename OperatorType::PairType(1,1-sigma),
+				                  asign,
+				                  su2related);
+
+				this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "c").push(myOp);
+			}
+
+			tmpMatrix = findOperatorMatrices(i,natBasis);
+			RealType angularFactor= 1;
+			typename OperatorType::Su2RelatedType su2related;
+			su2related.offset = 1; //check FIXME
+			OperatorType myOp(tmpMatrix,
+			                  1,
+			                  typename OperatorType::PairType(0,0),
+			                  angularFactor,
+			                  su2related);
+
+			this->createOpsLabel(OpsLabelType::TRACKABLE_YES, "n").push(myOp);
+		}
 	}
-
-private:
 
 	void setBasis(HilbertBasisType& basis,
 	              const VectorSizeType& block) const
@@ -341,35 +331,6 @@ private:
 
 		SparseMatrixType creationMatrix(cm);
 		return creationMatrix;
-	}
-
-	void setNi(VectorOperatorType& creationMatrix,
-	           const BlockType& block) const
-	{
-		VectorOperatorType creationMatrix2 = creationMatrix;
-		creationMatrix.clear();
-		VectorHilbertStateType natBasis;
-		setBasis(natBasis, block);
-		SizeType operatorsPerSite = utils::exactDivision(creationMatrix2.size(),
-		                                                 block.size());
-		SizeType k = 0;
-
-		for (SizeType i = 0; i < block.size(); ++i) {
-			SparseMatrixType tmpMatrix = findOperatorMatrices(i,natBasis);
-			RealType angularFactor= 1;
-			typename OperatorType::Su2RelatedType su2related;
-			su2related.offset = 1; //check FIXME
-			OperatorType myOp(tmpMatrix,
-			                  1,
-			                  typename OperatorType::PairType(0,0),
-			                  angularFactor,
-			                  su2related);
-
-			for (SizeType j = 0; j < operatorsPerSite; ++j)
-				creationMatrix.push_back(creationMatrix2[k++]);
-
-			creationMatrix.push_back(myOp);
-		}
 	}
 
 	// note: we use 2j instead of j

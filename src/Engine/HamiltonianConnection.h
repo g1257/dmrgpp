@@ -133,7 +133,10 @@ public:
 	      envBlock_(modelHelper_.leftRightSuper().right().block()),
 	      smax_(*std::max_element(systemBlock_.begin(),systemBlock_.end())),
 	      emin_(*std::min_element(envBlock_.begin(),envBlock_.end())),
-	      hamAbstract_(superGeometry_, smax_, emin_, modelHelper_.leftRightSuper().super().block()),
+	      hamAbstract_(superGeometry_,
+	                   smax_,
+	                   emin_,
+	                   modelHelper_.leftRightSuper().super().block()),
 	      totalOnes_(hamAbstract_.items())
 	{
 		lps_.reserve(ProgramGlobals::MAX_LPS);

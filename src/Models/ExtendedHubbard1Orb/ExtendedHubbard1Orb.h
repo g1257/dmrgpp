@@ -133,20 +133,10 @@ public:
 		return modelHubbard_.hilbertSize(site);
 	}
 
-	//! set creation matrices for sites in block
-	void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                         VectorQnType& qns,
-	                         const BlockType& block) const
-	{
-		modelHubbard_.setOperatorMatrices(creationMatrix, qns, block);
-		// add ni to creationMatrix
-		setNi(creationMatrix, block);
-	}
-
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
-		        io.createGroup(label1);
+			io.createGroup(label1);
 
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
@@ -177,17 +167,25 @@ public:
 
 protected:
 
-	void fillLabeledOperators()
+	void fillLabeledOperators(VectorQnType& qns)
 	{
-		modelHubbard_.fillLabeledOperators();
-		SizeType site = 0; // FIXME for Immm SDHS
-		BlockType block(1, site);
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType qns;
-		setOperatorMatrices(creationMatrix,qns, block);
+		modelHubbard_.fillLabeledOperators(qns);
+		VectorHilbertStateType natBasis;
+		VectorSizeType block(1, 0);
+		modelHubbard_.setBasis(natBasis, block);
+
+		SparseMatrixType tmpMatrix = findOperatorMatrices(0, natBasis);
+		RealType angularFactor= 1;
+		typename OperatorType::Su2RelatedType su2related;
+		su2related.offset = 1; //check FIXME
+		OperatorType myOp(tmpMatrix,
+		                  1,
+		                  typename OperatorType::PairType(0,0),
+		                  angularFactor,
+		                  su2related);
 
 		OpsLabelType& nop = this->createOpsLabel("n");
-		nop.push(creationMatrix[2]);
+		nop.push(OpsLabelType::TRACKABLE_YES, myOp);
 	}
 
 private:
@@ -210,35 +208,6 @@ private:
 
 		SparseMatrixType creationMatrix(cm);
 		return creationMatrix;
-	}
-
-	void setNi(VectorOperatorType& creationMatrix,
-	           const BlockType& block) const
-	{
-		VectorOperatorType creationMatrix2 = creationMatrix;
-		creationMatrix.clear();
-		VectorHilbertStateType natBasis;
-		modelHubbard_.setBasis(natBasis, block);
-		SizeType operatorsPerSite = utils::exactDivision(creationMatrix2.size(),
-		                                                 block.size());
-		SizeType k = 0;
-
-		for (SizeType i = 0; i < block.size(); ++i) {
-			SparseMatrixType tmpMatrix = findOperatorMatrices(i,natBasis);
-			RealType angularFactor= 1;
-			typename OperatorType::Su2RelatedType su2related;
-			su2related.offset = 1; //check FIXME
-			OperatorType myOp(tmpMatrix,
-			                  1,
-			                  typename OperatorType::PairType(0,0),
-			                  angularFactor,
-			                  su2related);
-
-			for (SizeType j = 0; j < operatorsPerSite; ++j)
-				creationMatrix.push_back(creationMatrix2[k++]);
-
-			creationMatrix.push_back(myOp);
-		}
 	}
 
 	ParametersModelHubbard<RealType, QnType>  modelParameters_;

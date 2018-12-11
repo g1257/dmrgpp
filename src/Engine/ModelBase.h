@@ -143,22 +143,9 @@ public:
 
 	void postCtor()
 	{
-		SizeType sites = differentTypesOfAtoms();
-		VectorSizeType h;
-		VectorOperatorType cm;
-		VectorQnType qns;
-		SizeType lastIndex = 0;
-		for (SizeType site = 0; site < sites; ++site) {
-			BlockType block(1, site);
-			setOperatorMatrices(cm, qns, block);
-			assert(cm.size() > lastIndex);
-			h.push_back(cm[lastIndex].data.rows());
-			lastIndex = cm.size();
-		}
-
-		labeledOperators_.postCtor(h);
-		fillLabeledOperators();
-		modelCommon_.postCtor(cm);
+		fillLabeledOperators(qns_); // fills qns_ and labeledOperators_
+		labeledOperators_.postCtor(cm_); // fills cm_
+		modelCommon_.postCtor(cm_);
 	}
 
 	virtual ~ModelBase() {}
@@ -176,17 +163,6 @@ public:
 	// Hilbert space (SDHS)
 	virtual SizeType hilbertSize(SizeType site) const = 0;
 
-	// Fill the VectorOperatorType with operators that need to be kept
-	// track by the DMRG++ Engine.
-	// Fill VectorQnType with the qns of the one site basis in the order
-	// you chose to give the operators
-	// You can check that block.size() == 1 or throw otherwise
-	// The contents of block MUST be ignored unless your model has a site-dependent
-	// Hilbert space (SDHS)
-	virtual void setOperatorMatrices(VectorOperatorType&,
-	                                 VectorQnType&,
-	                                 const BlockType& block) const = 0;
-
 	// Fill SparseMatrixType with the on-site Hamiltonian terms in the on-site basis
 	// Give SparseMatrixType in the order you chose to give the
 	// operators in setOperatorMatrices
@@ -196,6 +172,8 @@ public:
 	                                        const VectorOperatorType&,
 	                                        const BlockType& block,
 	                                        RealType)  const = 0;
+
+	virtual void fillLabeledOperators(VectorQnType&) = 0;
 
 	// END ^^^^^^^^^^^Functions that each model needs to implement
 
@@ -250,8 +228,6 @@ public:
 		addDiagonalsInNaturalBasis(hmatrix,cm,block,time);
 	}
 
-	virtual void fillLabeledOperators() = 0;
-
 	virtual SizeType maxElectronsOneSpin() const
 	{
 		SizeType tmp = hilbertSize(0);
@@ -263,6 +239,22 @@ public:
 	}
 
 	virtual SizeType differentTypesOfAtoms() const { return 1; }
+
+	// Fill the VectorOperatorType with operators that need to be kept
+	// track by the DMRG++ Engine.
+	// Fill VectorQnType with the qns of the one site basis in the order
+	// you chose to give the operators
+	// You can check that block.size() == 1 or throw otherwise
+	// The contents of block MUST be ignored unless your model has a site-dependent
+	// Hilbert space (SDHS)
+	void setOperatorMatrices(VectorOperatorType& cm,
+	                         VectorQnType& qns,
+	                         const BlockType& block) const
+	{
+		assert(block.size() == 1);
+		cm = cm_;
+		qns = qns_;
+	}
 
 	OperatorType naturalOperator(const PsimagLite::String& what,
 	                             SizeType site,
@@ -340,6 +332,8 @@ private:
 	ModelCommonType modelCommon_;
 	TargetQuantumElectronsType targetQuantum_;
 	LabeledOperatorsType labeledOperators_;
+	VectorQnType qns_;
+	VectorOperatorType cm_;
 };     //class ModelBase
 } // namespace Dmrg
 /*@}*/

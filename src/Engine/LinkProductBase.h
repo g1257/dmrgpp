@@ -61,6 +61,7 @@ public:
 			hermit_[i] = getHermitianProperty(cm[i].data);
 	}
 
+	// FIXME: For Immm and SDHS
 	HermitianEnum getHermitianProperty(SizeType opsIndex, SizeType) const
 	{
 		assert(opsIndex < hermit_.size());
