@@ -192,8 +192,6 @@ public:
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 
-		ProgramGlobals::init(model_->maxElectronsOneSpin());
-
 		model_->postCtor();
 
 		return *model_;

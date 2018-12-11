@@ -146,6 +146,7 @@ public:
 	{
 		fillLabeledOperators(qns_); // fills qns_ and labeledOperators_
 		labeledOperators_.postCtor(cm_); // fills cm_
+		ProgramGlobals::init(maxElectronsOneSpin());
 		modelCommon_.postCtor(cm_);
 	}
 
