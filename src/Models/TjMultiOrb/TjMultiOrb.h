@@ -326,7 +326,6 @@ protected:
 		OpsLabelType& ndownpop = this->createOpsLabel("ndown");
 		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
 			SizeType x = dof + SPIN_DOWN*modelParameters_.orbitals;
-			assert(x < creationMatrix_.size());
 			OperatorType cdown = this->naturalOperator("c", site, x);
 			cdown.dagger();
 			SparseMatrixType ndown(multiplyTc(cdown.data,cdown.data));

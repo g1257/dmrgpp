@@ -38,12 +38,12 @@ Threads=1
 SolverOptions=CorrectionVectorTargeting,twositedmrg,restart
 CorrectionA=0
 Version=version
-RestartFilename=data62.txt
+RestartFilename=data62
 LanczosEps=1e-7
 TridiagonalEps=1e-7
 TruncationTolerance=1e-7
 
-OutputFile=data63.txt
+OutputFile=data63
 CorrectionVectorOmega=0.2
 
 
@@ -61,7 +61,7 @@ TSPSites 1 3
 TSPLoops 1 1
 
 TSPOperator=expression
-OperatorExpression=z
+OperatorExpression=sz
 
 #ci dmrg arguments= -p 12 "sz"
 #ci CollectBrakets 0

@@ -24,11 +24,11 @@ Connectors 1 -0.125
 Model=TjMultiOrb
 
 potentialV 16
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 
 InfiniteLoopKeptStates=100
 FiniteLoops 5
- 3 200 0  
+ 3 200 0
 -6 200 0 6 200 0
 -6 200 0 6 200 0
 
@@ -39,6 +39,6 @@ LanczosEps=1e-12
 TruncationTolerance=1e-12
 SolverOptions=twositedmrg
 Version=version
-OutputFile=data62.txt
+OutputFile=data62
 Orbitals=1
 

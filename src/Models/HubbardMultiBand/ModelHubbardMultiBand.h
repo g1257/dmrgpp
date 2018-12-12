@@ -207,6 +207,7 @@ protected:
 
 	void fillLabeledOperators(VectorQnType& qns)
 	{
+		qns = qq_;
 		assert(creationMatrix_.size()>0);
 		SizeType nrow = creationMatrix_[0].data.rows();
 
