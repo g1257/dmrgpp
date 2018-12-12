@@ -74,6 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "ApplyOperatorLocal.h"
 #include "TimeVectorsKrylov.h"
+#include "TimeVectorsChebyshev.h"
 #include "TimeVectorsRungeKutta.h"
 #include "TimeVectorsSuzukiTrotter.h"
 #include "Io/IoSelector.h"
@@ -97,6 +98,8 @@ class ApplyOperatorExpression {
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsBaseType;
 	typedef TimeVectorsKrylov<TargetParamsType,ModelType,WaveFunctionTransfType,
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsKrylovType;
+	typedef TimeVectorsChebyshev<TargetParamsType,ModelType,WaveFunctionTransfType,
+	LanczosSolverType,VectorWithOffsetType> TimeVectorsChebyshevType;
 	typedef TimeVectorsRungeKutta<TargetParamsType,ModelType,WaveFunctionTransfType,
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsRungeKuttaType;
 	typedef TimeVectorsSuzukiTrotter<TargetParamsType,ModelType,WaveFunctionTransfType,
@@ -283,6 +286,17 @@ public:
 		switch (tstStruct.algorithm()) {
 		case TargetParamsType::KRYLOV:
 			timeVectorsBase_ = new TimeVectorsKrylovType(currentTime_,
+			                                             tstStruct,
+			                                             times,
+			                                             targetVectors_,
+			                                             model,
+			                                             wft,
+			                                             lrs,
+			                                             E0_,
+			                                             ioIn);
+			break;
+		case TargetParamsType::CHEBYSHEV:
+			timeVectorsBase_ = new TimeVectorsChebyshevType(currentTime_,
 			                                             tstStruct,
 			                                             times,
 			                                             targetVectors_,

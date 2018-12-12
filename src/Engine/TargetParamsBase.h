@@ -101,7 +101,7 @@ public:
 
 	enum ConcatEnum {PRODUCT, SUM};
 
-	enum {KRYLOV,RUNGE_KUTTA,SUZUKI_TROTTER};
+	enum {KRYLOV,CHEBYSHEV,RUNGE_KUTTA,SUZUKI_TROTTER};
 
 	virtual ~TargetParamsBase() {}
 

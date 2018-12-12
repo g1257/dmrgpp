@@ -94,6 +94,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingAdaptiveDynamic.h"
 #include "TargetingCorrection.h"
 #include "TargetingCorrectionVector.h"
+#include "TargetingChebyshev.h"
 #include "TargetingMetts.h"
 #include "TargetingCorrelations.h"
 #include "TargetingInSitu.h"
@@ -145,6 +146,7 @@ public:
 	typedef typename TargetingType::LanczosSolverType LanczosSolverType;
 	typedef TargetingGroundState<LanczosSolverType,VectorWithOffsetType> TargetingGroundStateType;
 	typedef TargetingTimeStep<LanczosSolverType,VectorWithOffsetType> TargetingTimeStepType;
+	typedef TargetingChebyshev<LanczosSolverType,VectorWithOffsetType> TargetingChebyshevType;
 	typedef TargetingDynamic<LanczosSolverType,VectorWithOffsetType> TargetingDynamicType;
 	typedef TargetingAdaptiveDynamic<LanczosSolverType,VectorWithOffsetType>
 	TargetingAdaptiveDynamicType;
@@ -254,6 +256,8 @@ public:
 			psi = new TargetingAdaptiveDynamicType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting=="CorrectionVectorTargeting") {
 			psi = new TargetingCorrectionVectorType(lrs_,model_,wft_,quantumSector_,ioIn_);
+		} else if (targeting=="ChebyshevTargeting") {
+			psi = new TargetingChebyshevType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting=="CorrectionTargeting") {
 			psi = new TargetingCorrectionType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting == "GroundStateTargeting") {

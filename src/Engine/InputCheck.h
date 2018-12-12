@@ -377,6 +377,7 @@ public:
 		registerOpts.push_back("AdaptiveDynamicTargeting");
 		registerOpts.push_back("CorrectionVectorTargeting");
 		registerOpts.push_back("CorrectionTargeting");
+		registerOpts.push_back("ChebyshevTargeting");
 		registerOpts.push_back("TargetingInSitu");
 		registerOpts.push_back("TargetingRixsStatic");
 		registerOpts.push_back("TargetingRixsDynamic");
