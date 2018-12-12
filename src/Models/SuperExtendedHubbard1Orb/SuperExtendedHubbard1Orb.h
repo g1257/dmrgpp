@@ -178,16 +178,10 @@ protected:
 
 		cm[2] = this->naturalOperator("n", site, 0);
 
-		OpsLabelType& splus = this->createOpsLabel("splus");
-		OpsLabelType& sminus = this->createOpsLabel("sminus");
-		OpsLabelType& sz = this->createOpsLabel("sz");
 		OpsLabelType& p = this->createOpsLabel("pair");
 
-		for (SizeType i = 0; i < block.size(); ++i) {
-			setSplusi(splus, sminus, cm, i);
-			setSzi(sz, cm, i);
+		for (SizeType i = 0; i < block.size(); ++i)
 			setPairi(p, cm, i);
-		}
 
 		this->makeTrackableOrderMatters("splus");
 		this->makeTrackableOrderMatters("sz");
@@ -195,56 +189,6 @@ protected:
 	}
 
 private:
-
-	void setSplusi(OpsLabelType& splusop,
-	               OpsLabelType& sminus,
-	               const VectorOperatorType& cm,
-	               SizeType) const
-	{
-		typename OperatorType::Su2RelatedType su2related;
-		SparseMatrixType m;
-		transposeConjugate(m,cm[1].data);
-		SparseMatrixType splus;
-		multiply(splus,cm[0].data,m);
-
-		OperatorType myOp(splus,
-		                  1,
-		                  typename OperatorType::PairType(0,0),
-		                  -1,
-		                  su2related);
-		splusop.push(myOp);
-		myOp.dagger();
-		sminus.push(myOp);
-	}
-
-	void setSzi(OpsLabelType& szop,
-	            const VectorOperatorType& cm,
-	            SizeType) const
-	{
-		typename OperatorType::Su2RelatedType su2related;
-
-		SparseMatrixType n1 = n(cm[0].data);
-		SparseMatrixType n2 = n(cm[1].data);
-		MatrixType dn1;
-		MatrixType dn2;
-		crsMatrixToFullMatrix(dn1,n1);
-		crsMatrixToFullMatrix(dn2,n2);
-
-		SizeType n = dn1.rows();
-		MatrixType szmatrix(n,n);
-
-
-		for (SizeType i = 0; i < n; ++i)
-			szmatrix(i,i) = static_cast<RealType>(0.5)*(dn1(i,i) - dn2(i,i));
-
-		OperatorType sz(SparseMatrixType(szmatrix),
-		                1,
-		                typename OperatorType::PairType(0,0),
-		                1,
-		                su2related);
-
-		szop.push(sz);
-	}
 
 	void setPairi(OpsLabelType& p,
 	              const VectorOperatorType& cm,
@@ -260,16 +204,6 @@ private:
 		                  1,
 		                  su2related);
 		p.push(myOp);
-	}
-
-	SparseMatrixType n(const SparseMatrixType& c) const
-	{
-		SparseMatrixType tmpMatrix;
-		SparseMatrixType cdagger;
-		transposeConjugate(cdagger,c);
-		multiply(tmpMatrix,c,cdagger);
-
-		return tmpMatrix;
 	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket

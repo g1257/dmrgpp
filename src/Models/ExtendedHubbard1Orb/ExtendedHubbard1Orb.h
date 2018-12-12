@@ -163,22 +163,6 @@ public:
 	void fillLabeledOperators(VectorQnType& qns)
 	{
 		modelHubbard_.fillLabeledOperators(qns);
-		VectorHilbertStateType natBasis;
-		VectorSizeType block(1, 0);
-		modelHubbard_.setBasis(natBasis, block);
-
-		SparseMatrixType tmpMatrix = findOperatorMatrices(0, natBasis);
-		RealType angularFactor= 1;
-		typename OperatorType::Su2RelatedType su2related;
-		su2related.offset = 1; //check FIXME
-		OperatorType myOp(tmpMatrix,
-		                  1,
-		                  typename OperatorType::PairType(0,0),
-		                  angularFactor,
-		                  su2related);
-
-		OpsLabelType& nop = this->createOpsLabel("n");
-		nop.push(myOp);
 
 		this->makeTrackableOrderMatters("n");
 	}

@@ -63,5 +63,5 @@ TSPLoops 1 1
 TSPOperator=expression
 OperatorExpression=z
 
-#ci dmrg arguments= -p 12 "z"
+#ci dmrg arguments= -p 12 "sz"
 #ci CollectBrakets 0

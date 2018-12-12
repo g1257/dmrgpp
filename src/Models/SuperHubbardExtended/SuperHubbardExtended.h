@@ -151,35 +151,10 @@ protected:
 
 	void fillLabeledOperators(VectorQnType& qns)
 	{
-		SizeType site = 0;
-
 		extendedHubbard_.fillLabeledOperators(qns);
-
-		OpsLabelType& splusopop = this->createOpsLabel("splus");
-		OpsLabelType& szopop = this->createOpsLabel("sz");
 
 		this->makeTrackableOrderMatters("splus");
 		this->makeTrackableOrderMatters("sz");
-
-		SparseMatrixType sPlus = extendedHubbard_.naturalOperator("splus", site, 0).data;
-		RealType angularFactor= 1;
-		typename OperatorType::Su2RelatedType su2related;
-		su2related.offset = 1; //check FIXME
-		OperatorType sPlusOp(sPlus,
-		                     1,
-		                     typename OperatorType::PairType(0,0),
-		                     angularFactor,
-		                     su2related);
-		splusopop.push(sPlusOp);
-
-		SparseMatrixType sz = extendedHubbard_.naturalOperator("sz", site, 0).data;
-		sz *= 0.5;
-		OperatorType szOp(sz,
-		                  1,
-		                  typename OperatorType::PairType(0,0),
-		                  angularFactor,
-		                  su2related);
-		szopop.push(szOp);
 	}
 
 private:

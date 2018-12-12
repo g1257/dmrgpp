@@ -138,9 +138,10 @@ public:
 	          const LinkProductBaseType* lpb,
 	          InputValidatorType& io)
 	    : modelCommon_(params, geometry, lpb),
-	      targetQuantum_(io),
-	      labeledOperators_(params.model)
-	{}
+	      targetQuantum_(io)
+	{
+		labeledOperators_.setModelName(params.model);
+	}
 
 	void postCtor()
 	{
@@ -174,11 +175,6 @@ public:
 
 	// END ^^^^^^^^^^^Functions that each model needs to implement
 
-	virtual const LinkProductBaseType& linkProduct() const
-	{
-		return modelCommon_.linkProduct();
-	}
-
 	virtual void findOddElectronsOfOneSite(VectorBoolType& oddElectrons,
 	                                       SizeType site) const
 	{
@@ -190,26 +186,6 @@ public:
 		oddElectrons.resize(n);
 		for (SizeType i = 0; i < n; ++i)
 			oddElectrons[i] = qq[i].oddElectrons;
-	}
-
-	virtual void matrixVectorProduct(VectorType& x,
-	                                 const VectorType& y,
-	                                 const HamiltonianConnectionType& hc) const
-	{
-		return modelCommon_.matrixVectorProduct(x, y, hc);
-	}
-
-	virtual void addHamiltonianConnection(SparseMatrixType &matrix,
-	                                      const LeftRightSuperType& lrs,
-	                                      RealType currentTime) const
-	{
-		return modelCommon_.addHamiltonianConnection(matrix,lrs,currentTime);
-	}
-
-	virtual void fullHamiltonian(SparseMatrixType& matrix,
-	                             const HamiltonianConnectionType& hc) const
-	{
-		return modelCommon_.fullHamiltonian(matrix, hc);
 	}
 
 	//! Full hamiltonian from creation matrices cm
@@ -237,9 +213,35 @@ public:
 
 	virtual SizeType differentTypesOfAtoms() const { return 1; }
 
+	const LinkProductBaseType& linkProduct() const
+	{
+		return modelCommon_.linkProduct();
+	}
+
+	void matrixVectorProduct(VectorType& x,
+	                         const VectorType& y,
+	                         const HamiltonianConnectionType& hc) const
+	{
+		return modelCommon_.matrixVectorProduct(x, y, hc);
+	}
+
+	void addHamiltonianConnection(SparseMatrixType &matrix,
+	                              const LeftRightSuperType& lrs,
+	                              RealType currentTime) const
+	{
+		return modelCommon_.addHamiltonianConnection(matrix,lrs,currentTime);
+	}
+
+	void fullHamiltonian(SparseMatrixType& matrix,
+	                     const HamiltonianConnectionType& hc) const
+	{
+		return modelCommon_.fullHamiltonian(matrix, hc);
+	}
+
 	// Return the size of the one-site Hilbert space basis for this model
 	// site MUST be ignored unless your model has a site-dependent
 	// Hilbert space (SDHS)
+	// should be static
 	SizeType hilbertSize(SizeType) const
 	{
 		assert(cm_.size() > 0);
@@ -253,6 +255,7 @@ public:
 	// You can check that block.size() == 1 or throw otherwise
 	// The contents of block MUST be ignored unless your model has a site-dependent
 	// Hilbert space (SDHS)
+	// should be static
 	void setOperatorMatrices(VectorOperatorType& cm,
 	                         VectorQnType& qns,
 	                         const BlockType& block) const
@@ -262,6 +265,7 @@ public:
 		qns = qns_;
 	}
 
+	// should be static
 	OperatorType naturalOperator(const PsimagLite::String& what,
 	                             SizeType,
 	                             SizeType dof) const
@@ -269,12 +273,14 @@ public:
 		return labeledOperators_(what, 0, dof);
 	}
 
+	// should be static
 	bool instrospect() const
 	{
 		labeledOperators_.instrospect();
 		return true;
 	}
 
+	// should be static
 	void printBasis(SizeType site) const
 	{
 		BlockType block(1, site);
@@ -328,18 +334,18 @@ public:
 
 protected:
 
-	OpsLabelType& createOpsLabel(PsimagLite::String name,
-	                             SizeType site = 0)
+	static OpsLabelType& createOpsLabel(PsimagLite::String name,
+	                                    SizeType site = 0)
 	{
 		return labeledOperators_.createLabel(name, site);
 	}
 
-	void makeTrackableOrderMatters(PsimagLite::String name, SizeType site = 0)
+	static void makeTrackableOrderMatters(PsimagLite::String name, SizeType site = 0)
 	{
 		labeledOperators_.makeTrackableOrderMatters(name, site);
 	}
 
-	void makeTrackableOrderMatters(VectorStringType vname, SizeType site = 0)
+	static void makeTrackableOrderMatters(VectorStringType vname, SizeType site = 0)
 	{
 		SizeType n = vname.size();
 		for (SizeType i = 0; i < n; ++i)
@@ -350,10 +356,21 @@ private:
 
 	ModelCommonType modelCommon_;
 	TargetQuantumElectronsType targetQuantum_;
-	LabeledOperatorsType labeledOperators_;
-	VectorQnType qns_;
-	VectorOperatorType cm_;
+	static LabeledOperatorsType labeledOperators_;
+	static VectorQnType qns_;
+	static VectorOperatorType cm_;
 };     //class ModelBase
+
+template<typename T1, typename T2, typename T3, typename T4>
+typename ModelBase<T1, T2, T3, T4>::LabeledOperatorsType
+ModelBase<T1, T2, T3, T4>::labeledOperators_;
+
+template<typename T1, typename T2, typename T3, typename T4>
+typename ModelBase<T1, T2, T3, T4>::VectorQnType ModelBase<T1, T2, T3, T4>::qns_;
+
+template<typename T1, typename T2, typename T3, typename T4>
+typename ModelBase<T1, T2, T3, T4>::VectorOperatorType ModelBase<T1, T2, T3, T4>::cm_;
+
 } // namespace Dmrg
 /*@}*/
 #endif

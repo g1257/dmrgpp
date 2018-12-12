@@ -94,7 +94,7 @@ public:
 	typedef typename PsimagLite::Vector<typename LabelType::PairStringSizeType>::Type
 	VectorPairStringSizeType;
 
-	LabeledOperators(PsimagLite::String model) : model_(model), sites_(0)
+	LabeledOperators(PsimagLite::String model = "") : model_(model), sites_(0)
 	{}
 
 	~LabeledOperators()
@@ -104,6 +104,11 @@ public:
 			delete labels_[i];
 			labels_[i] = 0;
 		}
+	}
+
+	void setModelName(PsimagLite::String model)
+	{
+		model_ = model;
 	}
 
 	void postCtor(VectorOperatorType& cm)

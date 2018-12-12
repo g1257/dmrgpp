@@ -268,7 +268,7 @@ sub checkEnergyAncillaInSitu
 
 		my $file1 = "$workdir/energyAncillaInSitu${n}_$i.txt";
 		my $file2 = "$golddir/energyAncillaInSitu${n}_$i.txt";
-		print "Comparing $file1 $file2\n";
+		print "kompare $file1 $file2\n";
 		my %vals1 = Metts::load($file1);
 		my %vals2 = Metts::load($file2);
 		compareHashes(\%vals1, \%vals2);
@@ -282,7 +282,7 @@ sub checkTimeInSituObs
 	for (my $i = 0; $i < $whatN; ++$i) {
 		my $file1 = "$workdir/timeObservablesInSitu${n}_$i.txt";
 		my $file2 = "$golddir/timeObservablesInSitu${n}_$i.txt";
-		print "Comparing $file1 $file2\n";
+		print "kompare $file1 $file2\n";
 		my %m1 = timeObservablesInSitu::load($file1);
 		my %m2 = timeObservablesInSitu::load($file2);
 		if (keys %m1 != 4 or keys %m2 != 4) {
