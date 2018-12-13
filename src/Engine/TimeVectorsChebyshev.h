@@ -401,10 +401,10 @@ private:
 			RealType epsilon = tstStruct_.chebyEpsilon();
 			TargetVectorType tmp;
 			matx_.matrixVectorProduct(tmp,y);
-			RealType Wp = 1.0-0.5*epsilon;
-			RealType oneovera = 2.0*Wp/Wstar;
+			RealType b = E0_+Wstar*0.5;
+			RealType oneovera = (2.0-epsilon)/Wstar;
 			x += oneovera*tmp;
-			x += (-oneovera*(E0_+Wp))*y;
+			x += (-oneovera*b)*y;
 		}
 
 	private:
