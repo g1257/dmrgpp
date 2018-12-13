@@ -409,9 +409,9 @@ public:
 		OpsLabelType& cc = this->createOpsLabel("C");
 		for (SizeType dof = 0; dof < 2*modelParameters_.orbitals; ++dof) {
 			VectorOperatorType cm = creationMatrix_;
-			c.push(creationMatrix_[dof]);
+			cc.push(creationMatrix_[dof]);
 			cm[dof].dagger();
-			cc.push(cm[dof]);
+			c.push(cm[dof]);
 		}
 
 		OpsLabelType& d = this->createOpsLabel("d");
@@ -429,7 +429,7 @@ public:
 			                    su2Related));
 		}
 
-		this->makeTrackableOrderMatters("c");
+		this->makeTrackableOrderMatters("C");
 	}
 
 	void setQns(VectorQnType& qns) const
