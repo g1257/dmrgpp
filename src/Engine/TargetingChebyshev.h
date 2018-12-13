@@ -78,6 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetParamsTimeStep.h"
 #include "ProgramGlobals.h"
 #include "ParametersForSolver.h"
+#include "TimeVectorsChebyshev.h"
 #include "BlockDiagonalMatrix.h"
 
 namespace Dmrg {

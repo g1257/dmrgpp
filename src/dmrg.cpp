@@ -180,6 +180,7 @@ void mainLoop0(InputNgType::Readable& io,
 
 	if (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos &&
 	        targeting != "TimeStepTargeting" &&
+                targeting != "ChebyshevTargeting" &&		
 	        targeting != "GroundStateTargeting" &&
 	        targeting != "TargetingCorrelations" &&
 	        targeting != "CorrectionTargeting" &&

@@ -121,6 +121,8 @@ public:
 		knownLabels_.push_back("TSPTau");
 		knownLabels_.push_back("TSPTimeSteps");
 		knownLabels_.push_back("TSPAdvanceEach");
+		knownLabels_.push_back("ChebyshevEpsilon");
+		knownLabels_.push_back("ChebyshevWstar");
 		knownLabels_.push_back("TSPAlgorithm");
 		knownLabels_.push_back("TSPSites");
 		knownLabels_.push_back("TSPLoops");
