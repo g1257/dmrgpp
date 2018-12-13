@@ -24,4 +24,4 @@ FiniteLoops 4
 -14 100 1 
 TargetElectronsUp=8
 TargetElectronsDown=8
-#ci observe arguments="<gs|c';c|gs>,<gs|sz;sz|gs>,<gs|n;n|gs>"
+#ci observe arguments="<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>"

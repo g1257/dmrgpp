@@ -239,7 +239,7 @@ protected:
 			        multiplyTc(creationMatrix[iup].data,creationMatrix[iup].data);
 			PsimagLite::Matrix<SparseElementType> tmp2 =
 			        multiplyTc(creationMatrix[idown].data,creationMatrix[idown].data);
-			tmp = tmp-tmp2;
+			tmp = 0.5*(tmp - tmp2);
 			SparseMatrixType tmp3(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			sz.push(OperatorType(tmp3,
