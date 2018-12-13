@@ -100,7 +100,9 @@ public:
 	      advanceEach_(0),
 	      algorithm_(BaseType::KRYLOV),
 	      tau_(0),
-	      timeDirection_(1.0)
+	      timeDirection_(1.0),
+	      chebyEpsilon_(0.025),
+	      chebyWstar_(10.0)
 	{
 		/*PSIDOC TargetParamsTimeVectors
 		\item[TSPTau] [RealType], $\tau$ for the Krylov,
@@ -113,6 +115,12 @@ public:
 		\verb!Krylov! or \verb!RungeKutta! or \verb!SuzukiTrotter!\\
 		Note that SuzukiTrotter is currently very experimental and unsupported.
 		*/
+
+		if (algorithm_ == BaseType::CHEBYSHEV) {
+			io.readline(chebyEpsilon_, "ChebyshevEpsilon=");
+			io.readline(chebyWstar_, "ChebyshevWstar=");
+		}
+
 		io.readline(tau_,"TSPTau=");
 		io.readline(timeSteps_,"TSPTimeSteps=");
 		io.readline(advanceEach_,"TSPAdvanceEach=");
@@ -163,6 +171,16 @@ public:
 		return timeDirection_;
 	}
 
+	virtual RealType chebyEpsilon() const
+	{
+		return chebyEpsilon_;
+	}
+
+	virtual RealType chebyWstar() const
+	{
+		return chebyWstar_;
+	}
+
 private:
 
 	SizeType timeSteps_;
@@ -170,7 +188,8 @@ private:
 	SizeType algorithm_;
 	RealType tau_;
 	RealType timeDirection_;
-
+	RealType chebyEpsilon_;
+	RealType chebyWstar_;
 }; // class TargetParamsTimeVectors
 
 template<typename ModelType>

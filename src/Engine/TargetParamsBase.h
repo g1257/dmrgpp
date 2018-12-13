@@ -128,6 +128,18 @@ public:
 		throw PsimagLite::RuntimeError(s);
 	}
 
+	virtual RealType chebyEpsilon() const
+	{
+		PsimagLite::String s = "TargetParamsBase: unimplemented chebyEpsilon\n";
+		throw PsimagLite::RuntimeError(s);
+	}
+
+	virtual RealType chebyWstar() const
+	{
+		PsimagLite::String s = "TargetParamsBase: unimplemented chebyWstar\n";
+		throw PsimagLite::RuntimeError(s);
+	}
+
 	virtual SizeType concatenation() const
 	{
 		return unimplementedInt("concatenation");

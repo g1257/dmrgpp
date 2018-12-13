@@ -261,7 +261,7 @@ private:
 		if (max>2)
 			throw PsimagLite::RuntimeError("You cannot apply more than 2 operators (only SUM is allowed)\n");
 
-		this->common().wftAll(site);
+		this->common().wftSome(site, 0, this->common().targetVectors().size());
 
 		if (!applied_) {
 			if (max==1) {

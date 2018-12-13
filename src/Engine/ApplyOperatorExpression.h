@@ -297,14 +297,14 @@ public:
 			break;
 		case TargetParamsType::CHEBYSHEV:
 			timeVectorsBase_ = new TimeVectorsChebyshevType(currentTime_,
-			                                             tstStruct,
-			                                             times,
-			                                             targetVectors_,
-			                                             model,
-			                                             wft,
-			                                             lrs,
-			                                             E0_,
-			                                             ioIn);
+			                                                tstStruct,
+			                                                times,
+			                                                targetVectors_,
+			                                                model,
+			                                                wft,
+			                                                lrs,
+			                                                E0_,
+			                                                ioIn);
 			break;
 		case TargetParamsType::RUNGE_KUTTA:
 			timeVectorsBase_ = new TimeVectorsRungeKuttaType(currentTime_,
@@ -408,9 +408,9 @@ public:
 		}
 	}
 
-	void wftAll(SizeType site)
+	void wftSome(SizeType site, SizeType begin, SizeType end)
 	{
-		for (SizeType index = 0; index < targetVectors_.size(); ++index) {
+		for (SizeType index = begin; index < end; ++index) {
 			const VectorWithOffsetType& src = targetVectors_[index];
 			if (src.size() == 0) continue;
 			VectorWithOffsetType phiNew;
@@ -503,7 +503,7 @@ private:
 
 		PsimagLite::String options = targetHelper_.model().params().options;
 		bool advanceOnlyAtBorder = (options.find("advanceUnrestricted") ==
-		        PsimagLite::String::npos);
+		                            PsimagLite::String::npos);
 		SizeType sites = targetHelper_.model().geometry().numberOfSites();
 		bool weAreAtBorder = (site < 2 || site >= sites-2);
 		bool dontAdvance = (advanceOnlyAtBorder & !weAreAtBorder);

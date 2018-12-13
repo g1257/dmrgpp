@@ -436,9 +436,9 @@ public:
 		}
 	}
 
-	void wftAll(SizeType site)
+	void wftSome(SizeType site, SizeType begin, SizeType end)
 	{
-		applyOpExpression_.wftAll(site);
+		applyOpExpression_.wftSome(site, begin, end);
 	}
 
 	void cocoon(const BlockType& block,

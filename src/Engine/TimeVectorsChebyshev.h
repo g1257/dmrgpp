@@ -108,7 +108,7 @@ class TimeVectorsChebyshev : public  TimeVectorsBase<
 	typedef typename BaseType::PairType PairType;
 	typedef typename TargetParamsType::RealType RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-//	typedef typename PsimagLite::Matrix<RealType>::Type MatrixRealType;
+	//	typedef typename PsimagLite::Matrix<RealType>::Type MatrixRealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType
@@ -165,9 +165,9 @@ public:
 			return;
 		}
 
-		assert(0 < targetVectors_.size());
-		targetVectors_[0] = phi;
-		targetVectors_[1] = phi;
+		targetVectors_[0]=phi;
+		if (targetVectors_[1].size()==0)
+			targetVectors_[1]=phi;
 
 		if (times_.size() == 1 && fabs(times_[0])<1e-10) return;
 
@@ -315,9 +315,9 @@ private:
 		                                                 currentTime_,
 		                                                 0);
 		MatrixLanczosType lanczosHelper(model_,
-		                                                     hc);
+		                                hc);
 
-		InternalMatrix lanczosHelper2(lanczosHelper); // defining Hprime matrix
+		InternalMatrix lanczosHelper2(lanczosHelper, tstStruct_, E0_); // defining Hprime matrix
 
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
@@ -389,25 +389,28 @@ private:
 
 	class InternalMatrix {
 	public:
-		InternalMatrix(const MatrixLanczosType& mat)
-		    : matx_(mat)
+		InternalMatrix(const MatrixLanczosType& mat, const TargetParamsType& tstStruct, const RealType& E0)
+		    : matx_(mat), tstStruct_(tstStruct), E0_(E0)
 		{}
 
 		SizeType rows() const { return matx_.rows(); }
 
-		void matrixVectorProduct (VectorRealType &x,const VectorRealType &y) const
+		void matrixVectorProduct (TargetVectorType &x,const TargetVectorType &y) const
 		{
-			RealType Wstar = tstStruct_.Wstar();
-			RealType epsilon = tstStruct_.epsilon();
-			VectorRealType tmp;
+			RealType Wstar = tstStruct_.chebyWstar();
+			RealType epsilon = tstStruct_.chebyEpsilon();
+			TargetVectorType tmp;
 			matx_.matrixVectorProduct(tmp,y);
 			RealType Wp = 1.0-0.5*epsilon;
 			RealType oneovera = 2.0*Wp/Wstar;
-			x += oneovera*tmp + (-oneovera*(E0_+Wp))*y;
+			x += oneovera*tmp;
+			x += (-oneovera*(E0_+Wp))*y;
 		}
 
 	private:
 		const MatrixLanczosType& matx_;
+		const TargetParamsType& tstStruct_;
+		const RealType& E0_;
 	}; // class InternalMatrix
 
 	const RealType& currentTime_;

@@ -75,7 +75,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "BLAS.h"
 #include "TimeSerializer.h"
-#include "TargetParamsChebyshev.h"
+#include "TargetParamsTimeStep.h"
 #include "ProgramGlobals.h"
 #include "ParametersForSolver.h"
 #include "BlockDiagonalMatrix.h"
@@ -255,6 +255,9 @@ private:
 		PairType startEnd(0,times_.size());
 		bool allOperatorsApplied = (this->common().noStageIs(DISABLED) &&
 		                            this->common().noStageIs(OPERATOR));
+
+		assert(0 < block1.size());
+		this->common().wftSome(block1[0], 1, 2);
 
 		this->common().calcTimeVectors(startEnd,
 		                               Eg,

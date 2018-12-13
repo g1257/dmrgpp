@@ -260,7 +260,7 @@ private:
 		// if no apply operator at site and add into targetVectors[3]
 		// also wft everything
 
-		this->common().wftAll(site);
+		this->common().wftSome(site, 0, this->common().targetVectors().size());
 
 		SizeType max = tstStruct_.sites();
 
