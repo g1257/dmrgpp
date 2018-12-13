@@ -736,9 +736,7 @@ symmetry blocking can be used.
 
 \section{Model Interface}\label{subsec:models}
 \subsection{Abstract Interface}
-%\ptexPaste{ModelBase}
-% \ptexInterface{ModelBase}
-% \ptexInterface{ModelHubbard}
+\ptexPaste{ModelInterface}
 
 \subsection{Heisenberg Model}
 \subsection{One-Orbital Hubbard Model}

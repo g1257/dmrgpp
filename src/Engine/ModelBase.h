@@ -153,24 +153,77 @@ public:
 
 	virtual ~ModelBase() {}
 
-	// START Functions that each model MUST implement
+	/* PSIDOC ModelInterface
+	These are the functions that each model must implement.
 
-	// For information purposes only. Write model parameters
-	// String contains the group
-	// Serializer object is second argument
+		PSIDOCCOPY ModelBaseWrite
+
+		PSIDOCCOPY addDiagonalsInNaturalBasis
+
+		PSIDOCCOPY fillLabeledOperators
+	*/
+
+	/* PSIDOC ModelBaseWrite
+	{\bf write}
+	For information purposes only. Write model parameters.
+	String contains the group.
+	Serializer object is second argument
+	*/
 	virtual void write(PsimagLite::String,
 	                   PsimagLite::IoNg::Out::Serializer&) const = 0;
 
-	// Fill SparseMatrixType with the on-site Hamiltonian terms in the on-site basis
-	// Give SparseMatrixType in the order you chose to give the
-	// operators in setOperatorMatrices
-	// The RealType contain the physical time in case your onsite terms
-	// depend on it
+
+	/* PSIDOC addDiagonalsInNaturalBasis
+	{\bf addDiagonalsInNaturalBasis}
+	Fill SparseMatrixType with the on-site Hamiltonian terms in the on-site basis.
+	Give SparseMatrixType in the order you chose to give the
+	operators in setOperatorMatrices, given here as second argument.
+	FIXME: Remove second argument.
+	The RealType contain the physical time in case your onsite terms
+	depend on it
+	*/
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType&,
 	                                        const VectorOperatorType&,
 	                                        const BlockType& block,
 	                                        RealType)  const = 0;
 
+	/* PSIDOC fillLabeledOperators
+	{\bf fillLabeledOperators}
+	  The only argument given to this function is the qns that you must fill.
+	  This is a vector of \texttt{Qn} objects.
+	  You need to loop over the one-site Hilbert space, something like
+\begin{lstlisting}
+for (SizeType i = 0; i < numberOfStates; ++i) {
+  ...
+  qns[i] = QnType(sign, other, jmpair, flavor);
+}
+	   \end{lstlisting}
+	   where sign is true is state i has odd number of fermions and false
+	   otherwise, other is a vector of conserved quantities evaluated on state i,
+	   jmpair is the 2j and j+m of this state, and flavor is the flavor of state i.
+	   You may set jmpair to PairSizeType(0,0) and flavor to 0, in which case
+	   your model won't support SU(2) symmetry.
+
+	   After setting qns, you need to create all one-site labeled operators for this
+	   model. These are the operators that the engine must keep track, and, optionally,
+	   other labeled operators to be used in operator specifications.
+	   You create labeled operators with the following syntax.
+\begin{lstlisting}
+OpsLabelType& myoperator = this->createOperatorLabel("myoperator");
+myoperator.makeTrackableOrderMatters(); // only if needs tracking
+\end{lstlisting}
+	   then you fill it with
+\begin{lstlisting}
+for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
+  ...
+  OperatorType someOperator(sparseMatrix, fermionSign, ...);
+  myoperator.push(someOperator);
+}
+\end{lstlisting}
+		And you must mark the operators that need tracking as shown above.
+		The first operator you make trackable will be assigned number 0, the next number 1,
+		and so on, which is important to remember for the \verb!LinkProduct*! class.
+	*/
 	virtual void fillLabeledOperators(VectorQnType&) = 0;
 
 	// END ^^^^^^^^^^^Functions that each model needs to implement
