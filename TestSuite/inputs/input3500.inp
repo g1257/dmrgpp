@@ -1,0 +1,43 @@
+TotalNumberOfSites=8
+NumberOfTerms=1
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 1.0
+
+hubbardU 8 0 0 0 0 0 0 0 0
+potentialV 16 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+
+Model=HubbardOneBand
+
+TargetElectronsUp=4
+TargetElectronsDown=4
+
+SolverOptions=twositedmrg,ChebyshevTargeting
+Version=version
+OutputFile=data3500
+InfiniteLoopKeptStates=100
+FiniteLoops 4
+3 100 0 -6 100 0
+6 100 0 -6 100 0
+
+GsWeight=0.1
+TSPTau=1.0
+TSPTimeSteps=4
+ChebyshevEpsilon=0.025
+ChebyshevWstar=10.0
+TSPAdvanceEach=100
+TSPSites 1 3
+TSPLoops 1 2
+TSPProductOrSum=sum
+TSPOperator=raw
+RAW_MATRIX
+4 4
+0 0 0 0 
+0 0.5 0 0 
+0 0 -0.5 0 
+0 0 0 0 
+FERMIONSIGN=1
+JMVALUES 2 0 0
+AngularFactor=1
+
