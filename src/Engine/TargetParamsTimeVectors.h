@@ -116,29 +116,20 @@ public:
 		Note that SuzukiTrotter is currently very experimental and unsupported.
 		*/
 
-		if (algorithm_ == BaseType::CHEBYSHEV) {
-			io.readline(chebyEpsilon_, "ChebyshevEpsilon=");
-			io.readline(chebyWstar_, "ChebyshevWstar=");
-		}
-
 		io.readline(tau_,"TSPTau=");
 		io.readline(timeSteps_,"TSPTimeSteps=");
 		io.readline(advanceEach_,"TSPAdvanceEach=");
 		PsimagLite::String s="";
 
-		try {
-			io.readline(s,"TSPAlgorithm=");
-			if (s=="RungeKutta" || s=="rungeKutta" || s=="rungekutta")
-				algorithm_ = BaseType::RUNGE_KUTTA;
-			if (s=="SuzukiTrotter" || s=="suzukiTrotter" || s=="suzukitrotter")
-				algorithm_ = BaseType::SUZUKI_TROTTER;
-		} catch (std::exception&) {
-			PsimagLite::String s(__FILE__);
-			s += "\n FATAL: TSPAlgorithm not found in input file.\n";
-			s += "Please add either TSPAlgorithm=Krylov or TSPAlgorithm=RungeKutta";
-			s += " or TSPAlgorithm=SuzukiTrotter just below the TSPAdvanceEach= ";
-			s += " line in the input file.\n";
-			throw PsimagLite::RuntimeError(s.c_str());
+		io.readline(s, "TSPAlgorithm=");
+		if (s=="RungeKutta" || s=="rungeKutta" || s=="rungekutta")
+			algorithm_ = BaseType::RUNGE_KUTTA;
+		if (s=="SuzukiTrotter" || s=="suzukiTrotter" || s=="suzukitrotter")
+			algorithm_ = BaseType::SUZUKI_TROTTER;
+		if (s=="Chebyshev") {
+			algorithm_ = BaseType::CHEBYSHEV;
+			io.readline(chebyEpsilon_, "ChebyshevEpsilon=");
+			io.readline(chebyWstar_, "ChebyshevWstar=");
 		}
 
 		try {

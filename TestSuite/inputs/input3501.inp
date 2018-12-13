@@ -13,18 +13,19 @@ Model=HubbardOneBand
 TargetElectronsUp=4
 TargetElectronsDown=4
 
-SolverOptions=twositedmrg,ChebyshevTargeting,restart
+SolverOptions=twositedmrg,TargetingChebyshev,restart
 Version=version
 OutputFile=data3501
 RestartFilename=data3500
 InfiniteLoopKeptStates=100
 FiniteLoops 3
--6 100 2
-6 100  2 -6 100 2
+6 100 2
+-6 100  2 6 100 2
 
 GsWeight=0.1
 TSPTau=1.0
 TSPTimeSteps=4
+TSPAlgorithm=Chebyshev
 ChebyshevEpsilon=0.025
 ChebyshevWstar=10.0
 TSPAdvanceEach=100

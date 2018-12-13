@@ -249,16 +249,30 @@ private:
 	                    const BlockType& block1,
 	                    SizeType loopNumber)
 	{
+		static bool firstCall = true;
 		if (direction == ProgramGlobals::INFINITE) return;
 		VectorWithOffsetType phiNew;
 		this->common().getPhi(phiNew,Eg,direction,block1[0],loopNumber);
+
+		if (phiNew.size() == 0) return;
 
 		PairType startEnd(0,times_.size());
 		bool allOperatorsApplied = (this->common().noStageIs(DISABLED) &&
 		                            this->common().noStageIs(OPERATOR));
 
 		assert(0 < block1.size());
-		this->common().wftSome(block1[0], 1, 3);
+
+		if (times_[0] == 0) {
+			VectorWithOffsetType& tv1 =
+			        const_cast<VectorWithOffsetType&>(this->common().targetVectors()[1]);
+			tv1  = phiNew;
+			if (!firstCall)
+				this->common().wftSome(block1[0], 2, 3);
+		} else {
+			this->common().wftSome(block1[0], 1, 3);
+		}
+
+		firstCall = false;
 
 		this->common().calcTimeVectors(startEnd,
 		                               Eg,

@@ -256,7 +256,7 @@ public:
 			psi = new TargetingAdaptiveDynamicType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting=="CorrectionVectorTargeting") {
 			psi = new TargetingCorrectionVectorType(lrs_,model_,wft_,quantumSector_,ioIn_);
-		} else if (targeting=="ChebyshevTargeting") {
+		} else if (targeting=="TargetingChebyshev") {
 			psi = new TargetingChebyshevType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting=="CorrectionTargeting") {
 			psi = new TargetingCorrectionType(lrs_,model_,wft_,quantumSector_,ioIn_);

@@ -149,7 +149,7 @@ public:
 	      lrs_(lrs),
 	      E0_(E0),
 	      ioIn_(ioIn),
-	      timeHasAdvanced_(true)
+	      timeHasAdvanced_(false)
 	{}
 
 	virtual void calcTimeVectors(const PairType& startEnd,
@@ -165,9 +165,7 @@ public:
 			return;
 		}
 
-		targetVectors_[0]=phi;
-		if (times_[0]==0)
-			targetVectors_[1]=phi;
+		targetVectors_[0] = phi;
 
 		if (times_.size() == 1 && fabs(times_[0])<1e-10) return;
 
@@ -189,6 +187,7 @@ public:
 				targetVectors_[i] = targetVectors_[i+1];
 			}
 		}
+
 		calcTargetVectors(startEnd,phi,Eg,steps,systemOrEnviron);
 
 		//checkNorms();
@@ -261,7 +260,6 @@ private:
 	                      SizeType timeIndex,
 	                      typename PsimagLite::Vector<SizeType>::Type steps)
 	{
-		v = phi;
 		for (SizeType ii=0;ii<phi.sectors();ii++) {
 			SizeType i0 = phi.sector(ii);
 			TargetVectorType r;
@@ -321,7 +319,7 @@ private:
 
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
-
+		r.resize(total);
 		if (fabs(times_[0])<1e-10) {
 			phi.extract(phi2,i0);
 			lanczosHelper2.matrixVectorProduct(r,phi2); // applying Hprime
@@ -399,8 +397,8 @@ private:
 		{
 			RealType Wstar = tstStruct_.chebyWstar();
 			RealType epsilon = tstStruct_.chebyEpsilon();
-			TargetVectorType tmp;
-			matx_.matrixVectorProduct(tmp,y);
+			TargetVectorType tmp(y.size());
+			matx_.matrixVectorProduct(tmp, y);
 			RealType b = E0_+Wstar*0.5;
 			RealType oneovera = (2.0-epsilon)/Wstar;
 			x += oneovera*tmp;

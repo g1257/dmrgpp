@@ -453,9 +453,10 @@ public:
 		                       "TargetingCorrelations",
 		                       "TargetingInSitu",
 		                       "TargetingRixsStatic",
-		                       "TargetingRixsDynamic"};
+		                       "TargetingRixsDynamic",
+		                       "TargetingChebyshev"};
 
-		SizeType totalTargets = 12;
+		SizeType totalTargets = 13;
 
 		SizeType count = 0;
 		for (SizeType i = 0;i<totalTargets;++i) {
