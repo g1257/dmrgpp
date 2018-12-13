@@ -249,7 +249,6 @@ private:
 	                    const BlockType& block1,
 	                    SizeType loopNumber)
 	{
-		static bool firstCall = true;
 		if (direction == ProgramGlobals::INFINITE) return;
 		VectorWithOffsetType phiNew;
 		this->common().getPhi(phiNew,Eg,direction,block1[0],loopNumber);
@@ -266,13 +265,9 @@ private:
 			VectorWithOffsetType& tv1 =
 			        const_cast<VectorWithOffsetType&>(this->common().targetVectors()[1]);
 			tv1  = phiNew;
-			if (!firstCall)
-				this->common().wftSome(block1[0], 2, 3);
 		} else {
 			this->common().wftSome(block1[0], 1, 3);
 		}
-
-		firstCall = false;
 
 		this->common().calcTimeVectors(startEnd,
 		                               Eg,
