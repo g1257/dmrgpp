@@ -166,7 +166,7 @@ public:
 		}
 
 		targetVectors_[0]=phi;
-		if (targetVectors_[1].size()==0)
+		if (times_[0]==0)
 			targetVectors_[1]=phi;
 
 		if (times_.size() == 1 && fabs(times_[0])<1e-10) return;
@@ -184,7 +184,7 @@ public:
 
 		//		calcTargetVectors(startEnd,phi,T,V,Eg,eigs,steps,systemOrEnviron);
 		if (timeHasAdvanced_) {
-			SizeType numberOfVectorsMinusOne = targetVectors_.size() - 1;
+			SizeType numberOfVectorsMinusOne = targetVectors_.size() - 2;
 			for (SizeType i = 0; i < numberOfVectorsMinusOne; ++i) {
 				targetVectors_[i] = targetVectors_[i+1];
 			}

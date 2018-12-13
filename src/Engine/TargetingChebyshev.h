@@ -257,7 +257,7 @@ private:
 		                            this->common().noStageIs(OPERATOR));
 
 		assert(0 < block1.size());
-		this->common().wftSome(block1[0], 1, 2);
+		this->common().wftSome(block1[0], 1, 3);
 
 		this->common().calcTimeVectors(startEnd,
 		                               Eg,
