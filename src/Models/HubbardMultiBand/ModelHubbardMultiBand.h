@@ -183,13 +183,15 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
 	                                RealType) const
 	{
-		SizeType n=block.size();
+		SizeType n = block.size();
 
 		for (SizeType i = 0; i < n; ++i) {
+
+			SizeType site = block[i];
+			const VectorOperatorType& cm = ModelBaseType::trackableOps(site);
 
 			addHoppingOnSite(hmatrix, cm, i, block[i]);
 

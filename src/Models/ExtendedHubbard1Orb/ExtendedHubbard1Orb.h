@@ -140,22 +140,10 @@ public:
 	}
 
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                        const VectorOperatorType& cm,
 	                                        const BlockType& block,
 	                                        RealType time)  const
 	{
-		// remove the n matrices before sending to Hubbard
-		VectorOperatorType cmCorrected;
-		SizeType k = 0;
-		for (SizeType i = 0; i < block.size(); ++i) {
-			for (SizeType j = 0; j < 2; ++j) {
-				cmCorrected.push_back(cm[k++]);
-			}
-			k++;
-		}
-
 		modelHubbard_.addDiagonalsInNaturalBasis(hmatrix,
-		                                         cmCorrected,
 		                                         block,
 		                                         time);
 	}

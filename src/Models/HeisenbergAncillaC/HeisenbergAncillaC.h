@@ -183,7 +183,6 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
 	                                RealType)  const
 	{
@@ -192,7 +191,9 @@ public:
 
 		SizeType n = block.size();
 
-		for (SizeType i=0;i<n;i++) {
+		for (SizeType i = 0; i < n; ++i) {
+			SizeType site = block[i];
+			const VectorOperatorType& cm = ModelBaseType::trackableOps(site);
 			// magnetic field
 			RealType tmp = modelParameters_.magneticField[block[i]];
 			hmatrix += tmp * cm[1+i*2].data;

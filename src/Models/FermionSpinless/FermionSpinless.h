@@ -166,14 +166,15 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
 	                                RealType time)  const
 	{
 		SizeType n=block.size();
-		SparseMatrixType niup = cm[1].data;
 
-		for (SizeType i=0;i<n;i++) {
+		for (SizeType i = 0; i < n; ++i) {
+			SizeType site = block[i];
+			const VectorOperatorType& cm = ModelBaseType::trackableOps(site);
+			SparseMatrixType niup = cm[1].data;
 
 			// V_iup term
 			RealType tmp = modelParameters_.potentialV[block[i]];

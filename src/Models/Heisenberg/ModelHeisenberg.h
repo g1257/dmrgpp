@@ -190,39 +190,36 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
 	                                RealType)  const
 	{
 		SizeType linSize = geometry_.numberOfSites();
 		SizeType n = block.size();
 
-		if (modelParameters_.magneticField.size() == linSize) {
-			for (SizeType i = 0; i < n; ++i) {
-				// magnetic field
+		for (SizeType i = 0; i < n; ++i) {
+			SizeType site = block[i];
+			const VectorOperatorType& cm = ModelBaseType::trackableOps(site);
+
+			// magnetic field
+			if (modelParameters_.magneticField.size() == linSize) {
 				RealType tmp = modelParameters_.magneticField[block[i*2]];
 				hmatrix += tmp*cm[1+i*2].data;
+
 			}
-		}
 
-		if (modelParameters_.anisotropyD.size() == linSize) {
-
-			for (SizeType i = 0; i < n; ++i) {
+			// anisotropyD
+			if (modelParameters_.anisotropyD.size() == linSize) {
 				SparseMatrixType Szsquare;
-
-				// anisotropy
 				RealType tmp = modelParameters_.anisotropyD[block[i*2]];
 				multiply(Szsquare,cm[1+i*2].data,cm[1+i*2].data);
 				hmatrix += tmp*Szsquare;
+
 			}
-		}
 
-		if (modelParameters_.anisotropyE.size() == linSize) {
-
-			for (SizeType i = 0; i < n; ++i) {
+			// anisotropyE
+			if (modelParameters_.anisotropyE.size() == linSize) {
 				SparseMatrixType splus;
 
-				// anisotropy
 				RealType tmp = 0.5*modelParameters_.anisotropyE[block[i*2]];
 				multiply(splus, cm[0+i*2].data, cm[0+i*2].data);
 				hmatrix += tmp*splus;

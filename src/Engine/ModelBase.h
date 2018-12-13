@@ -176,14 +176,10 @@ public:
 	/* PSIDOC addDiagonalsInNaturalBasis
 	{\bf addDiagonalsInNaturalBasis}
 	Fill SparseMatrixType with the on-site Hamiltonian terms in the on-site basis.
-	Give SparseMatrixType in the order you chose to give the
-	operators in setOperatorMatrices, given here as second argument.
-	FIXME: Remove second argument.
 	The RealType contain the physical time in case your onsite terms
 	depend on it
 	*/
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType&,
-	                                        const VectorOperatorType&,
 	                                        const BlockType& block,
 	                                        RealType)  const = 0;
 
@@ -251,7 +247,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 		modelCommon_.addConnectionsInNaturalBasis(hmatrix,cm,block,time);
 
-		addDiagonalsInNaturalBasis(hmatrix,cm,block,time);
+		addDiagonalsInNaturalBasis(hmatrix, block, time);
 	}
 
 	virtual SizeType maxElectronsOneSpin() const
@@ -386,6 +382,10 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	}
 
 protected:
+
+	// care about site here SDHS
+	// care about models that contain other models SDHS
+	static const VectorOperatorType& trackableOps(SizeType) { return cm_; }
 
 	static OpsLabelType& createOpsLabel(PsimagLite::String name,
 	                                    SizeType site = 0)

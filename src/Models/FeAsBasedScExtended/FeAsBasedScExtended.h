@@ -144,11 +144,10 @@ public:
 	}
 
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                        const VectorOperatorType& cm,
 	                                        const BlockType& block,
 	                                        RealType time)  const
 	{
-		modelFeAs_.addDiagonalsInNaturalBasis(hmatrix,cm,block,time);
+		modelFeAs_.addDiagonalsInNaturalBasis(hmatrix, block, time);
 	}
 
 protected:

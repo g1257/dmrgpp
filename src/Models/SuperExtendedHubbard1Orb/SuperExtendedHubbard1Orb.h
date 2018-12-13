@@ -143,26 +143,10 @@ public:
 	}
 
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                        const VectorOperatorType& cm,
 	                                        const BlockType& block,
 	                                        RealType time)  const
 	{
-		// remove the other matrices before sending to Hubbard
-		VectorOperatorType cmCorrected;
-		SizeType k = 0;
-		for (SizeType i = 0; i < block.size(); ++i) {
-			for (SizeType j = 0; j < 2; ++j) {
-				cmCorrected.push_back(cm[k++]);
-			}
-
-			cmCorrected.push_back(cm[k++]);
-			k += 3;
-		}
-
-		extendedHubbard_.addDiagonalsInNaturalBasis(hmatrix,
-		                                            cmCorrected,
-		                                            block,
-		                                            time);
+		extendedHubbard_.addDiagonalsInNaturalBasis(hmatrix, block, time);
 	}
 
 protected:

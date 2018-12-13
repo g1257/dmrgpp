@@ -404,12 +404,12 @@ private:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
 	                                RealType) const
 	{
 		// on-site potential:
 		SizeType site = block[0];
+		const VectorOperatorType& cm = ModelBaseType::trackableOps(site);
 		SizeType linSize = geometry_.numberOfSites();
 
 		SizeType siteCorrected  = 0;

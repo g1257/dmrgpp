@@ -137,14 +137,10 @@ public:
 	}
 
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                        const VectorOperatorType& cm,
 	                                        const BlockType& block,
 	                                        RealType time)  const
 	{
-		extendedHubbard_.addDiagonalsInNaturalBasis(hmatrix,
-		                                            cm,
-		                                            block,
-		                                            time);
+		extendedHubbard_.addDiagonalsInNaturalBasis(hmatrix, block, time);
 	}
 
 protected:

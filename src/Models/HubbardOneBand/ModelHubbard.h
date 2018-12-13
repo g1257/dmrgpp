@@ -325,7 +325,6 @@ protected:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
 	                                RealType time)  const
 	{
@@ -333,16 +332,19 @@ protected:
 		SparseMatrixType tmpMatrix,niup,nidown,Szsquare,Szi;
 		SizeType linSize = geometry_.numberOfSites();
 
-		for (SizeType i=0;i<n;i++) {
+		for (SizeType i = 0; i < n; ++i) {
+			SizeType site = block[i];
+			const VectorOperatorType& cm = ModelBaseType::trackableOps(site);
+
 			// onsite U hubbard
 			//n_i up
 			SizeType sigma =0; // up sector
-			transposeConjugate(tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data);
-			multiply(niup,tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data);
+			transposeConjugate(tmpMatrix,cm[sigma].data);
+			multiply(niup,tmpMatrix,cm[sigma].data);
 			//n_i down
 			sigma =1; // down sector
-			transposeConjugate(tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data);
-			multiply(nidown,tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data);
+			transposeConjugate(tmpMatrix,cm[sigma].data);
+			multiply(nidown,tmpMatrix,cm[sigma].data);
 
 			multiply(tmpMatrix,niup,nidown);
 			RealType tmp = modelParameters_.hubbardU[block[i]];

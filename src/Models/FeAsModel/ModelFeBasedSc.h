@@ -318,13 +318,14 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
 	                                RealType time) const
 	{
 		SizeType n=block.size();
 
-		for (SizeType i=0;i<n;i++) {
+		for (SizeType i = 0; i < n; ++i) {
+			SizeType site = block[i];
+			const VectorOperatorType& cm = ModelBaseType::trackableOps(site);
 			addInteraction(hmatrix,cm,i,block[i]);
 			addMagneticField(hmatrix,cm,i,block[i]);
 			addSpinOrbit(hmatrix,cm,i);

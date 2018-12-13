@@ -642,7 +642,6 @@ private:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                const VectorOperatorType&,
 	                                const BlockType& block,
 	                                RealType) const
 	{

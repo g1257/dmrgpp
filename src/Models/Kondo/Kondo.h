@@ -77,7 +77,6 @@ public:
 	// The RealType contain the physical time in case your onsite terms
 	// depend on it
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	                                const VectorOperatorType& ops,
 	                                const VectorSizeType& block,
 	                                RealType)  const
 	{
@@ -90,6 +89,7 @@ public:
 
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType ind = block[i];
+			const VectorOperatorType& ops = ModelBaseType::trackableOps(ind);
 			assert(ops_.size() > 1 + i*4);
 			// onsite U hubbard
 			//n_i up

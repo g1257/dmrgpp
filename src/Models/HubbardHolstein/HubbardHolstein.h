@@ -158,7 +158,6 @@ public:
 	void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                const VectorOperatorType&,
 	                                const BlockType& block,
 	                                RealType) const
 	{
