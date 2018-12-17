@@ -97,39 +97,36 @@ CPPFLAGS += -DUSE_PTHREADS
 # Format of psiTag files is described in PsimagLite/scripts/PsiTag.pm
 
 default compiler = < compilerCPP GNU
-flavor production = (
 
+flavor basic = (
 < default compiler 
 < compilerCPPOptions ansi
 < dependency HDF5
-< compilerCPPOptions NDEBUG
-< compilerCPPOptions Optimize3
 < dependency LAPACK
 < dependency BLAS
+< dependency Boost
+)
+
+flavor production = (
+
+< flavor basic
+< compilerCPPOptions NDEBUG
+< compilerCPPOptions Optimize3
 < dependency pthreads
 )
 
 flavor debug = (
 
-< default compiler 
-< compilerCPPOptions ansi
-< dependency HDF5
+< flavor basic
 < compilerCPPOptions Symbols3
 < compilerCPPOptions Werror
-< dependency LAPACK
-< dependency BLAS
 )
 
 flavor drd = (
 
-< default compiler 
-< compilerCPPOptions ansi
-< dependency HDF5
+< flavor debug
 < compilerCPPOptions NDEBUG
 < compilerCPPOptions Optimize3
-< compilerCPPOptions Symbols3
-< dependency LAPACK
-< dependency BLAS
 < dependency pthreads
 )
 

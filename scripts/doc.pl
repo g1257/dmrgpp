@@ -122,7 +122,7 @@ sub procFile
 	close(FILE);
 	my $n = scalar(%labels);
 	print STDERR "$0: File $f proc'ed ($n labels found so far)\n";
-	
+
 	%$a = %labels;
 }
 

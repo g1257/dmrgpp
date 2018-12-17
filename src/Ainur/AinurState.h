@@ -4,6 +4,7 @@
 #include <cassert>
 #include "../PsimagLite.h"
 #include <numeric>
+#include "../Matrix.h"
 
 namespace PsimagLite {
 
