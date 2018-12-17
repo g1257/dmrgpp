@@ -206,13 +206,14 @@ have a whatToMeasure argument as follows.
 Braket specifications come in two forms: bare and dressed.
 
 \section{Bare braket specification}
-A bare braket specification is a semicolon-separated list of at least one opspecs:
-\verb!braket spec=opspec; opspec; opspec; ...!
-If just one opspec is given (no semicolon), then the bare braket is referred to as 
+A bare braket specification is a semicolon-separated list of at least one 
+operator expressions (opExpr)
+\verb!braket spec=opExpr; opExpr; opExpr; ...!
+If just one opExpr is given (no semicolon), then the bare braket is referred to as 
 ``local'' or one-point;
-if two opspecs are given (one semicolon), then the bare braket is refererred to as a
+if two opExpr are given (one semicolon), then the bare braket is refererred to as a
 two-point correlation; and so on.
-Bare brakets cannot be computed directly by DMRG++, but must instead be
+Bare brakets cannot be computed directly by DMRG++, but must first be
 dressed with a bra and a ket. What bra and ket is chosen is Targeting and context dependent.
 
 For GroundStateTargeting, bra and ket are both equal to the current target, usually the ground state,
@@ -238,7 +239,51 @@ where bra is the GroundStateTargeting vector, and
 ket the first time vector. The same is true for
 CorrectionVectorTargeting, where ket is the correction vector.
 
+\section{Operator Expressions}
+
+{\textsc An operator expression} is an algebraic expression involving
+floating point numbers and operator specifications or \texttt{opSpec}s.
+For example, 
+\begin{verbatim}
+3*nup + ndown*(1.5*:sz.txt - 3.5*(c?1'*c?1 + I)).
+\end{verbatim}
+A \emph{canonical operator expression} is an operator expression composed of one or
+more canonical operator terms separated by the plus $+$ sign.
+A \emph{canonical operator term} is a string that starts with an 
+optional canonical scalar,
+followed by a star $*$, followed by one or more \texttt{opSpec}s concatenated
+by starts $*$.
+
+A canonical scalar is of one the following 
+forms.
+\begin{enumerate}
+\item One or more digits, followed by an optional dot $.$, followed by zero or
+more digits. For example, $3.5$, $3.$, $3$.
+\item A dot $.$ followed by one or more digits. For example, $.5$.
+\item A parenthesis followed by an optional minus sign $-$, 
+followed by a scalar prefix of form (1) or (2) above, and ending in a
+parenthesis.
+For example, $(-3.5)$ $(3)$ $(.5)$ $-(.5)$ $(3.)$ $(-3.)$.
+\end{enumerate}
+Note that these scalars are \emph{not} canonical: $+3.5$, $(+3.5)$, $-3.5$.
+The sample expression above in canonical form is
+\begin{verbatim}
+3*nup + 1.5*ndown*:sz.txt + (-3.5)*ndown*c?1'*c?1 + 3.5*ndown*I.
+\end{verbatim}
+
+\textsc{A} \texttt{opExpr} can be used in the following cases.
+(1) In a bare braket spec:
+ \texttt{braketSpec = opExpr;opExpr;...}
+(2) In a dressed braket spec:
+ \texttt{braketSpec =} \texttt{<bra|opExpr;opExpr;...|ket>}.
+(3) After the input label \texttt{OperatorExpression=} when
+ \texttt{TSPOperator=expression} is specified.
+And (4) after the option \verb!-e! in the operator driver.
+
+\emph{Only canonical operator expression have been implemented so far.}
+
 \section{Operator specifications}
+
 There are two kinds of operator specifications: by label and by file.
 
 By label, it is given by \verb!name[site]?dof'!
@@ -272,7 +317,7 @@ following items, in order.
 \end{itemize}
 
 \section{Dressed braket specification}
-Note: This is an experimental feature.
+
 Operators in braket specifications may be dressed, as follows.
 \begin{verbatim}
 ./dmrg -f input.inp '<bra|bare braket|ket>,<bra|bare braket|ket>,...'
