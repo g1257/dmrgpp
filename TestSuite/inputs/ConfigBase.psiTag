@@ -144,6 +144,7 @@ group basics = (
 < dependency HDF5
 < dependency LAPACK
 < dependency BLAS
+< dependency Boost
 STRIP_COMMAND = strip
 )
 
