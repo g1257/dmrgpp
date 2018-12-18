@@ -3,6 +3,7 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
+#include "AinurDoubleOrFloat.h"
 
 namespace PsimagLite {
 
@@ -14,11 +15,11 @@ ruleRows();
 
 template<>
 boost::spirit::qi::rule<std::string::iterator,
-std::vector<double>(),
+std::vector<DoubleOrFloatType>(),
 boost::spirit::qi::space_type>
-ruleRows<double>()
+ruleRows<DoubleOrFloatType>()
 {
-	return "[" >> -(boost::spirit::double_ % ",") >> "]";
+	return "[" >> -(boost::spirit::DoubleOrFloatUnderscore % ",") >> "]";
 }
 
 template<>
@@ -39,11 +40,11 @@ ruleElipsis();
 
 template<>
 boost::spirit::qi::rule<std::string::iterator,
-double(),
+DoubleOrFloatType(),
 boost::spirit::qi::space_type>
-ruleElipsis<double>()
+ruleElipsis<DoubleOrFloatType>()
 {
-	return  "[" >> boost::spirit::double_  >> "," >> "..." >> "]";
+	return  "[" >> boost::spirit::DoubleOrFloatUnderscore  >> "," >> "..." >> "]";
 }
 
 template<>
@@ -125,13 +126,13 @@ AinurState::Action<T>::operator()(A& attr,
 }
 
 template <typename A, typename ContextType>
-typename EnableIf<TypesEqual<A, double>::True, void>::Type
+typename EnableIf<TypesEqual<A, DoubleOrFloatType>::True, void>::Type
 AinurState::ActionCmplx::operator()(A& attr,
                                          ContextType&,
                                          bool&) const
 {
 	if (name_ == "rows2")
-		t_.push_back(std::complex<double>(0.0, attr));
+		t_.push_back(std::complex<DoubleOrFloatType>(0.0, attr));
 	else if (name_ == "rows3")
 		t_.push_back(attr);
 	else
@@ -139,13 +140,13 @@ AinurState::ActionCmplx::operator()(A& attr,
 }
 
 template <typename A, typename ContextType>
-typename EnableIf<!TypesEqual<A, double>::True, void>::Type
+typename EnableIf<!TypesEqual<A, DoubleOrFloatType>::True, void>::Type
 AinurState::ActionCmplx::operator()(A& attr,
                                          ContextType&,
                                          bool&) const
 {
 	if (name_ == "rows1") {
-		t_.push_back(std::complex<double>(
+		t_.push_back(std::complex<DoubleOrFloatType>(
 		                 boost::fusion::at_c<0>(attr),
 		                 boost::fusion::at_c<1>(attr)));
 	} else {
@@ -224,13 +225,13 @@ void AinurState::convertInternal(std::vector<std::complex<T> >& t,
 	ActionCmplx actionRows1("rows1", t);
 	ActionCmplx actionRows2("rows2", t);
 	ActionCmplx actionRows3("rows3", t);
-#define MY_COMPLEX (qi::double_ >> qi::double_ >>  "i") [actionRows1] | (qi::double_ >> "i") [actionRows2] | qi::double_ [actionRows3]
+
+#define MY_COMPLEX (qi::DoubleOrFloatUnderscore >> qi::DoubleOrFloatUnderscore >>  "i") [actionRows1] | (qi::DoubleOrFloatUnderscore >> "i") [actionRows2] | qi::DoubleOrFloatUnderscore [actionRows3]
 
 	typedef BOOST_TYPEOF(MY_COMPLEX) OneType;
 	typedef std::string::iterator IteratorType;
 
 	IteratorType it = value.begin();
-
 
 	OneType cmplxN =  MY_COMPLEX;
 #define MY_V_OF_COMPLEX "[" >> -(cmplxN  % ",") >> "]"
@@ -255,11 +256,12 @@ void AinurState::convertInternal(std::vector<std::complex<T> >& t,
 		std::cerr << "vector parsing: unmatched part exists\n";
 }
 
-template void AinurState::convertInternal(Matrix<double>&,String, int) const;
+template void AinurState::convertInternal(Matrix<DoubleOrFloatType>&,String, int) const;
 
-template void AinurState::convertInternal(std::vector<double>&, String, int) const;
+template void AinurState::convertInternal(std::vector<DoubleOrFloatType>&, String, int) const;
+
 template void AinurState::convertInternal(std::vector<SizeType>&, String, int) const;
 
-template void AinurState::convertInternal(std::vector<std::complex<double> >&,
+template void AinurState::convertInternal(std::vector<std::complex<DoubleOrFloatType> >&,
 String, int) const;
 } // namespace PsimagLite

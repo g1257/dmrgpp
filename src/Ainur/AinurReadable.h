@@ -1,6 +1,7 @@
 #ifndef AINURREADABLE_H
 #define AINURREADABLE_H
 #include "AinurStore.h"
+#include "AinurDoubleOrFloat.h"
 
 namespace PsimagLite {
 
@@ -12,7 +13,7 @@ public:
 	typedef Vector<StoreType>::Type VectorStoreType;
 	typedef StoreType::AinurLexicalType AinurLexicalType;
 	typedef AinurLexicalType::VectorStringType VectorStringType;
-	typedef double RealType;
+	typedef DoubleOrFloatType RealType;
 	typedef std::complex<RealType> ComplexType;
 
 	AinurReadable(const VectorStringType& names,

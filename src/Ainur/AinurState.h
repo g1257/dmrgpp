@@ -5,6 +5,7 @@
 #include "../PsimagLite.h"
 #include <numeric>
 #include "../Matrix.h"
+#include "AinurDoubleOrFloat.h"
 
 namespace PsimagLite {
 
@@ -12,7 +13,7 @@ class AinurState {
 
 	typedef Vector<SizeType>::Type VectorSizeType;
 	typedef Vector<String>::Type VectorStringType;
-	typedef std::complex<double> ComplexType;
+	typedef std::complex<DoubleOrFloatType> ComplexType;
 
 	struct myprint
 	{
@@ -30,13 +31,13 @@ class AinurState {
 		{}
 
 		template <typename A, typename ContextType>
-		typename EnableIf<TypesEqual<A, double>::True, void>::Type
+		typename EnableIf<TypesEqual<A, DoubleOrFloatType>::True, void>::Type
 		operator()(A& attr,
 		           ContextType&,
 		           bool&) const;
 
 		template <typename A, typename ContextType>
-		typename EnableIf<!TypesEqual<A, double>::True, void>::Type
+		typename EnableIf<!TypesEqual<A, DoubleOrFloatType>::True, void>::Type
 		operator()(A& attr,
 		           ContextType&,
 		           bool&) const;
