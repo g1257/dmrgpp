@@ -107,6 +107,7 @@ public:
 
 	typedef typename GeometryBaseType::AdditionalDataType AdditionalDataType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
+	typedef typename GeometryDirectionType::InternalDofEnum InternalDofEnum;
 
 	struct Auxiliary {
 
@@ -141,16 +142,23 @@ public:
 	*/
 	GeometryTerm(InputType& io,
 	             const Auxiliary& aux)
-	    : aux_(aux),geometryBase_(0),gOptions_("none")
+	    : aux_(aux), orbitals_(1), geometryBase_(0), gOptions_("none")
 	{
 		String savedPrefix = io.prefix();
 		io.prefix() += (aux.numberOfTerms > 1) ? "gt" + ttos(aux.termId) + ":" : "";
 
-		int x = -1;
-		io.readline(x,   "DegreesOfFreedom=");
-		if (x<=0) throw RuntimeError("DegreesOfFreedom<=0 is an error\n");
+		InternalDofEnum idof = GeometryDirectionType::SPECIFIC;
 
-		SizeType edof = (x > 1);
+		// legacy input files:
+		SizeType x = orbitals_;
+		try {
+			io.readline(x,   "DegreesOfFreedom=");
+			orbitals_ = x;
+		} catch (std::exception&) {}
+
+		if (orbitals_  == 0)
+			throw RuntimeError("DegreesOfFreedom=0 not allowed\n");
+
 		String s;
 		io.readline(s,  "GeometryKind=");
 
@@ -171,9 +179,9 @@ public:
 			geometryBase_ = new KTwoNiFFour<ComplexOrRealType, InputType>(aux.linSize,io);
 		} else if (s=="star") {
 			geometryBase_ = new Star<ComplexOrRealType, InputType>(aux.linSize,io);
-		} else if (s=="LongRange") {
+		} else if (s == "LongRange" || s == "General") {
 			geometryBase_ = new LongRange<ComplexOrRealType, InputType>(aux.linSize,io);
-			edof |= 2;
+			idof = GeometryDirectionType::GENERAL;
 		} else if (s == "Honeycomb") {
 			geometryBase_ = new Honeycomb<ComplexOrRealType, InputType>(aux.linSize,io);
 		} else {
@@ -181,7 +189,7 @@ public:
 		}
 
 		for (SizeType i=0;i<geometryBase_->dirs();i++) {
-			typename GeometryDirectionType::Auxiliary aux(constantValues, i, edof);
+			typename GeometryDirectionType::Auxiliary aux(constantValues, i, idof, orbitals_);
 
 			directions_.push_back(GeometryDirectionType(io, aux, geometryBase_));
 		}
@@ -190,7 +198,6 @@ public:
 			io.readline(vModifier_,  "GeometryValueModifier=");
 		} catch (std::exception&) {}
 
-		orbitals_ = findOrbitals();
 		cacheValues();
 
 		io.prefix() = savedPrefix;
@@ -436,25 +443,6 @@ private:
 				}
 			}
 		}
-	}
-
-	SizeType findOrbitals() const
-	{
-		if (directions_.size() == 0) {
-			String str("GeometryTerm: ");
-			str += "No directions found for this term.\n";
-			throw RuntimeError(str);
-		}
-
-		SizeType orbitals = directions_[0].orbitals();
-		for (SizeType dir=1;dir<directions_.size();dir++) {
-			if (orbitals == directions_[dir].orbitals()) continue;
-			String str("GeometryTerm: All directions must have");
-			str += " connector matrices of the same rank\n";
-			throw RuntimeError(str);
-		}
-
-		return orbitals;
 	}
 
 	ComplexOrRealType calcValue(SizeType i1,

@@ -690,10 +690,13 @@ public:
 			MapStringVectorIteratorType it =  findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
-			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 ||
-			        atoi(it->second[1].c_str())<=0) {
+			bool b1 = (it->second.size() < 2);
+			bool b2 = (atoi(it->second[0].c_str()) <= 0);
+			bool b3 = (atoi(it->second[1].c_str()) <= 0);
+			if (b1 || b2 || b3) {
 				String s(__FILE__);
-				s += " reading a matrix: \n";
+				s += " reading a matrix: " + it->second[0];
+				s += " " + it->second[1] + "\n";
 				throw RuntimeError(s.c_str());
 			}
 

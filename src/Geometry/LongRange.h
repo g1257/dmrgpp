@@ -101,10 +101,11 @@ public:
 		} catch (std::exception&) {}
 	}
 
-	virtual void set(MatrixType& m, SizeType& orbitals) const
+	virtual void set(MatrixType& m, SizeType orbitals) const
 	{
 		m = matrix_;
-		orbitals = orbitals_;
+		if (orbitals != orbitals_)
+			throw RuntimeError("General geometry connectors: wrong size\n");
 	}
 
 	virtual SizeType maxConnections() const

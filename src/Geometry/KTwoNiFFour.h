@@ -274,6 +274,7 @@ public:
 		return 2*no+nc;
 	}
 
+	// FIXME: GENERALIZE by using orbitals per type of site
 	int index(SizeType i,SizeType orb,SizeType) const
 	{
 		SizeType type1 = findTypeOfSite(i).first;

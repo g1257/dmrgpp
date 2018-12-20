@@ -91,10 +91,12 @@ class GeometryDirection {
 
 public:
 
+	enum InternalDofEnum {GENERAL, SPECIFIC};
+
 	struct Auxiliary {
 
-		Auxiliary(bool c, SizeType d, SizeType e)
-		    : constantValues(c), dirId(d), edof(e)
+		Auxiliary(bool c, SizeType d, InternalDofEnum idof_, SizeType orbitals_)
+		    : constantValues(c), dirId(d), idof(idof_), orbitals(orbitals_)
 		{}
 
 		void write(PsimagLite::String label, IoSerializer& ioSerializer) const
@@ -102,12 +104,13 @@ public:
 			ioSerializer.createGroup(label);
 			ioSerializer.write(label + "/constantValues", constantValues);
 			ioSerializer.write(label + "/dirId", dirId);
-			ioSerializer.write(label + "/edof", edof);
+			ioSerializer.write(label + "/edof", idof);
 		}
 
 		bool constantValues;
 		SizeType dirId;
-		SizeType edof;
+		InternalDofEnum idof;
+		SizeType orbitals;
 	}; // struct Auxiliary
 
 	template<typename IoInputter>
@@ -117,28 +120,30 @@ public:
 	    : aux_(aux),
 	      geometryBase_(geometryFactory)
 	{
-		SizeType n = (aux.edof & 2) ? 0 : getVectorSize();
-		dataType_ = aux.edof;
-		orbitals_ = 1;
+		SizeType n = (aux.idof == GENERAL) ? 0 : getVectorSize();
 
-		if (aux.edof & 2) {
-			geometryBase_->set(rawHoppings_, orbitals_);
+		if (aux.idof == GENERAL) {
+			geometryBase_->set(rawHoppings_, aux.orbitals);
 			return;
 		}
+
+		assert(aux.idof == SPECIFIC);
 
 		String connectors = "Connectors";
 		String savedPrefix = io.prefix();
 		io.prefix() += "dir" + ttos(aux.dirId) + ":";
 
-		if (aux.edof & 1) {
+
+		if (aux.orbitals > 1) {
 			if (n == 0) n = 1;
 			for (SizeType i=0;i<n;i++) {
 				MatrixType m;
 				String extraString =  (n > 1 && io.version() > 2) ? ttos(i) : "";
 				io.read(m, connectors + extraString);
 				dataMatrices_.push_back(m);
-				if (orbitals_ < m.rows()) orbitals_ = m.rows();
-				if (orbitals_ < m.cols()) orbitals_ = m.cols();
+				if (aux.orbitals != m.rows() || aux.orbitals != m.cols())
+					throw RuntimeError("Connectors must be matrices of rows=cols= "
+				                       + ttos(aux.orbitals) + "\n");
 			}
 		} else {
 			io.read(dataNumbers_, connectors);
@@ -156,8 +161,6 @@ public:
 	{
 		ioSerializer.createGroup(label);
 		aux_.write(label + "/aux_", ioSerializer);
-		ioSerializer.write(label + "/dataType_", dataType_);
-		ioSerializer.write(label + "/orbitals_", orbitals_);
 		// geometryBase_
 		ioSerializer.write(label + "/dataNumbers_", dataNumbers_);
 		ioSerializer.write(label + "/dataMatrices_", dataMatrices_);
@@ -177,16 +180,18 @@ public:
 	                             SizeType j,
 	                             SizeType edof2) const
 	{
-		SizeType ii = edof1 + i*orbitals_;
-		SizeType jj = edof2 + j*orbitals_;
-		if (dataType_ & 2) {
-			assert((dataType_&1) || (edof1 == 0 && edof2 == 0));
+		SizeType ii = edof1 + i*aux_.orbitals;
+		SizeType jj = edof2 + j*aux_.orbitals;
+		if (aux_.idof == GENERAL) {
+			assert(edof1 < aux_.orbitals && edof2 < aux_.orbitals);
 			return rawHoppings_(ii,jj);
 		}
 
+		assert(aux_.idof == SPECIFIC);
+
 		SizeType h = (constantValues()) ? 0 : geometryBase_->handle(i,j);
 
-		bool isMatrix = (dataType_&1);
+		bool isMatrix = (aux_.orbitals > 1);
 		if (!isMatrix) {
 			assert(dataNumbers_.size()>h);
 			return dataNumbers_[h];
@@ -208,8 +213,6 @@ public:
 		return tmp * static_cast<RealType>(signChange);
 	}
 
-	SizeType orbitals() const { return orbitals_; }
-
 	bool constantValues() const
 	{
 		return aux_.constantValues;
@@ -219,7 +222,7 @@ public:
 	{
 		os<<"constantValues="<<a.constantValues<<"\n";
 		os<<"dirId="<<a.dirId<<"\n";
-		os<<"edof="<<a.edof<<"\n";
+		os<<"edof="<<a.idof<<"\n";
 
 		return os;
 	}
@@ -229,7 +232,9 @@ public:
 	{
 		os<<"#GeometryDirectionAuxiliary\n";
 		os<<gd.aux_;
-		bool isMatrix = (gd.dataType_&1);
+
+		bool isMatrix = (gd.aux_.orbitals > 1 || gd.aux_.idof == SPECIFIC);
+
 		if (!isMatrix) {
 			os<<"#GeometryNumbersSize="<<gd.dataNumbers_.size()<<"\n";
 			os<<"#GeometryNumbers=";
@@ -253,8 +258,6 @@ private:
 	}
 
 	Auxiliary aux_;
-	SizeType dataType_;
-	SizeType orbitals_;
 	const GeometryBaseType* geometryBase_;
 	typename Vector<ComplexOrRealType>::Type dataNumbers_;
 	typename Vector<MatrixType>::Type dataMatrices_;
