@@ -1,3 +1,27 @@
+2018-12-19 Version 5.44
+
+Developer's interface:
+
+* Changes to Model interface; see the manual for details
+
+User visible:
+
+* Hubbard and related models: sz has correct 0.5 factor now
+
+New features:
+
+* ChebyshevTargeting added but not yet ready (Alberto)
+
+Documentation:
+
+* Operator Expressions now documented in manual
+(only canonical ones supported for now)
+
+Build system:
+
+* boost-devel is now a dependency. Only header
+files are used; the boost runtime(s) aren't used
+
 2018-12-10 Version 5.42
 
 Bug fixes:

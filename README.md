@@ -110,7 +110,8 @@ Keys at https://g1257.github.com/keys.html
 
 \item (required) PsimagLite. See below for details.
 
-\item (optional) boost-devel (boost-spirit) for Ainur
+\item (required) boost-devel (boost-spirit) for Ainur
+Only headers files are used; boost runtime is not used.
 
 \item (optional) GSL (GNU Scientific library)
 
