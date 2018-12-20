@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ModelCommon.h"
 #include "NotReallySort.h"
 #include "LabeledOperators.h"
+#include "ParallelHamiltonianConnection.h"
 
 namespace Dmrg {
 
@@ -132,15 +133,29 @@ public:
 	typedef LabeledOperators<OperatorType> LabeledOperatorsType;
 	typedef typename LabeledOperatorsType::LabelType OpsLabelType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef typename ModelCommonType::VerySparseMatrixType VerySparseMatrixType;
+	typedef ParallelHamiltonianConnection<HamiltonianConnectionType> ParallelHamConnectionType;
 
 	ModelBase(const ParametersType& params,
 	          const GeometryType_& geometry,
 	          const LinkProductBaseType* lpb,
 	          InputValidatorType& io)
-	    : modelCommon_(params, geometry, lpb),
+	    : modelCommon_(params, geometry),
+	      lpb_(lpb),
 	      targetQuantum_(io)
 	{
+		if (lpb->terms() > geometry.terms()) {
+			PsimagLite::String str("ModelCommon: NumberOfTerms must be ");
+			err( str + ttos(lpb->terms()) + " in input file for this model\n");
+		}
+
 		labeledOperators_.setModelName(params.model);
+	}
+
+	virtual ~ModelBase()
+	{
+		delete lpb_;
+		lpb_ = 0;
 	}
 
 	void postCtor()
@@ -148,10 +163,8 @@ public:
 		fillLabeledOperators(qns_); // fills qns_ and labeledOperators_
 		labeledOperators_.postCtor(cm_); // fills cm_
 		ProgramGlobals::init(maxElectronsOneSpin());
-		modelCommon_.postCtor(cm_);
+		lpb_->postCtor(cm_);
 	}
-
-	virtual ~ModelBase() {}
 
 	/* PSIDOC ModelInterface
 	These are the functions that each model must implement.
@@ -262,29 +275,126 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 	virtual SizeType differentTypesOfAtoms() const { return 1; }
 
-	const LinkProductBaseType& linkProduct() const
-	{
-		return modelCommon_.linkProduct();
-	}
-
-	void matrixVectorProduct(VectorType& x,
-	                         const VectorType& y,
-	                         const HamiltonianConnectionType& hc) const
-	{
-		return modelCommon_.matrixVectorProduct(x, y, hc);
-	}
-
+	/**
+		The function \cppFunction{addHamiltonianConnection} implements
+		the Hamiltonian connection (e.g. tight-binding links in the case of the Hubbard Model
+		or products $S_i\cdot S_j$ in the case of the Heisenberg model) between
+		two basis, $basis2$ and $basis3$, in the order of the outer product,
+		$basis1={\rm SymmetryOrdering}(basis2\otimes basis3)$. This was
+		explained before in Section~\ref{subsec:dmrgBasisWithOperators}.
+		This function has a default implementation.
+		*/
 	void addHamiltonianConnection(SparseMatrixType &matrix,
 	                              const LeftRightSuperType& lrs,
 	                              RealType currentTime) const
 	{
-		return modelCommon_.addHamiltonianConnection(matrix,lrs,currentTime);
+		PsimagLite::Profiling profiling("addHamiltonianConnection",
+		                                "",
+		                                std::cout);
+
+		assert(lrs.super().partition() > 0);
+		SizeType total = lrs.super().partition()-1;
+
+		typename PsimagLite::Vector<VerySparseMatrixType*>::Type vvsm(total, 0);
+		VectorSizeType nzs(total, 0);
+
+		for (SizeType m = 0; m < total; ++m) {
+			SizeType offset = lrs.super().partition(m);
+			assert(lrs.super().partition(m + 1) >= offset);
+			SizeType bs = lrs.super().partition(m + 1) - offset;
+
+			vvsm[m] = new VerySparseMatrixType(bs, bs);
+			VerySparseMatrixType& vsm = *(vvsm[m]);
+			HamiltonianConnectionType hc(m,
+			                             lrs,
+			                             modelCommon_.geometry(),
+			                             *lpb_,
+			                             currentTime,
+			                             0);
+
+			hc.matrixBond(vsm);
+			nzs[m] = vsm.nonZeros();
+			if (nzs[m] > 0) continue;
+			delete vvsm[m];
+			vvsm[m] = 0;
+		}
+
+		PsimagLite::Sort<VectorSizeType> sort;
+		VectorSizeType permutation(total, 0);
+		sort.sort(nzs, permutation);
+
+		typename PsimagLite::Vector<const SparseMatrixType*>::Type vectorOfCrs;
+
+		assert(total == permutation.size());
+		for (SizeType i = 0; i < total; ++i) { // loop over new order
+
+			SizeType m = permutation[i]; // get old index from new index
+
+			if (vvsm[m] == 0) continue;
+
+			const VerySparseMatrixType& vsm = *(vvsm[m]);
+			SparseMatrixType matrixBlock2;
+			matrixBlock2 = vsm;
+			delete vvsm[m];
+			vvsm[m] = 0;
+
+			SizeType offset = lrs.super().partition(m);
+			SparseMatrixType* full = new SparseMatrixType(matrix.rows(),
+			                                              matrix.cols(),
+			                                              matrixBlock2.nonZeros());
+			fromBlockToFull(*full, matrixBlock2, offset);
+			vectorOfCrs.push_back(full);
+		}
+
+		if (vectorOfCrs.size() == 0) return;
+
+		vectorOfCrs.push_back(&matrix);
+		SizeType effectiveTotal = vectorOfCrs.size();
+
+		VectorType ones(effectiveTotal, 1.0);
+		SparseMatrixType sumCrs;
+		sum(sumCrs, vectorOfCrs, ones);
+		vectorOfCrs.pop_back();
+		effectiveTotal = vectorOfCrs.size();
+		for (SizeType i = 0; i < effectiveTotal; ++i) {
+			delete vectorOfCrs[i];
+			vectorOfCrs[i] = 0;
+		}
+
+		matrix.swap(sumCrs);
+	}
+
+	/** Let H be the hamiltonian of the  model for basis1 and partition m
+	 * consisting of the external product
+		 * of basis2 \otimes basis3
+		 * This function does x += H*y
+		 * The \cppFunction{matrixVectorProduct} function implements the operation $x+=Hy$.
+		 * This function
+		 * has a default implementation.
+		 */
+	void matrixVectorProduct(VectorType& x,
+	                         const VectorType& y,
+	                         const HamiltonianConnectionType& hc) const
+	{
+		typedef PsimagLite::Parallelizer<ParallelHamConnectionType> ParallelizerType;
+		ParallelizerType parallelConnections(PsimagLite::Concurrency::codeSectionParams);
+
+		ParallelHamConnectionType phc(x, y, hc);
+		parallelConnections.loopCreate(phc);
+
+		phc.sync();
 	}
 
 	void fullHamiltonian(SparseMatrixType& matrix,
 	                     const HamiltonianConnectionType& hc) const
 	{
 		return modelCommon_.fullHamiltonian(matrix, hc);
+	}
+
+	const LinkProductBaseType& linkProduct() const
+	{
+		assert(lpb_);
+		return *lpb_;
 	}
 
 	// Return the size of the one-site Hilbert space basis for this model
@@ -408,6 +518,7 @@ protected:
 private:
 
 	ModelCommonType modelCommon_;
+	const LinkProductBaseType* lpb_;
 	TargetQuantumElectronsType targetQuantum_;
 	static LabeledOperatorsType labeledOperators_;
 	static VectorQnType qns_;

@@ -91,7 +91,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Profiling.h"
 #include "LinkProductBase.h"
 #include "HamiltonianConnection.h"
-#include "ParallelHamiltonianConnection.h"
 
 namespace Dmrg {
 
@@ -121,150 +120,20 @@ public:
 	typedef typename PsimagLite::Vector<VectorLinkType>::Type VectorVectorLinkType;
 	typedef typename HamiltonianConnectionType::VectorSizeType VectorSizeType;
 	typedef typename HamiltonianConnectionType::VerySparseMatrixType VerySparseMatrixType;
-	typedef ParallelHamiltonianConnection<HamiltonianConnectionType> ParallelHamConnectionType;
 
 	ModelCommon(const ParametersType& params,
-	            const GeometryType& geometry,
-	            const LinkProductBaseType* lpb)
+	            const GeometryType& geometry)
 	    : params_(params),
 	      geometry_(geometry),
-	      lpb_(lpb),
 	      progress_("ModelCommon")
 	{
-		if (lpb->terms() > geometry.terms()) {
-			PsimagLite::String str("ModelCommon: NumberOfTerms must be ");
-			err( str + ttos(lpb->terms()) + " in input file for this model\n");
-		}
-
 		Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 		MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
-	}
-
-	~ModelCommon()
-	{
-		delete lpb_;
-		lpb_ = 0;
-	}
-
-	void postCtor(const VectorOperatorType& cm)
-	{
-		lpb_->postCtor(cm);
-	}
-
-	const LinkProductBaseType& linkProduct() const
-	{
-		assert(lpb_);
-		return *lpb_;
 	}
 
 	const ParametersType& params() const { return params_; }
 
 	const GeometryType& geometry() const { return geometry_; }
-
-	/** Let H be the hamiltonian of the  model for basis1 and partition m
-	 * consisting of the external product
-		 * of basis2 \otimes basis3
-		 * This function does x += H*y
-		 * The \cppFunction{matrixVectorProduct} function implements the operation $x+=Hy$.
-		 * This function
-		 * has a default implementation.
-		 */
-	void matrixVectorProduct(VectorType& x,
-	                         const VectorType& y,
-	                         const HamiltonianConnectionType& hc) const
-	{
-		typedef PsimagLite::Parallelizer<ParallelHamConnectionType> ParallelizerType;
-		ParallelizerType parallelConnections(PsimagLite::Concurrency::codeSectionParams);
-
-		ParallelHamConnectionType phc(x, y, hc);
-		parallelConnections.loopCreate(phc);
-
-		phc.sync();
-	}
-
-	/**
-		The function \cppFunction{addHamiltonianConnection} implements
-		the Hamiltonian connection (e.g. tight-binding links in the case of the Hubbard Model
-		or products $S_i\cdot S_j$ in the case of the Heisenberg model) between
-		two basis, $basis2$ and $basis3$, in the order of the outer product,
-		$basis1={\rm SymmetryOrdering}(basis2\otimes basis3)$. This was
-		explained before in Section~\ref{subsec:dmrgBasisWithOperators}.
-		This function has a default implementation.
-		*/
-	void addHamiltonianConnection(SparseMatrixType &matrix,
-	                              const LeftRightSuperType& lrs,
-	                              RealType currentTime) const
-	{
-		PsimagLite::Profiling profiling("addHamiltonianConnection",
-		                                "",
-		                                std::cout);
-
-		assert(lrs.super().partition() > 0);
-		SizeType total = lrs.super().partition()-1;
-
-		typename PsimagLite::Vector<VerySparseMatrixType*>::Type vvsm(total, 0);
-		VectorSizeType nzs(total, 0);
-
-		for (SizeType m = 0; m < total; ++m) {
-			SizeType offset = lrs.super().partition(m);
-			assert(lrs.super().partition(m + 1) >= offset);
-			SizeType bs = lrs.super().partition(m + 1) - offset;
-
-			vvsm[m] = new VerySparseMatrixType(bs, bs);
-			VerySparseMatrixType& vsm = *(vvsm[m]);
-			HamiltonianConnectionType hc(m, lrs, geometry_, *lpb_, currentTime, 0);
-
-			hc.matrixBond(vsm);
-			nzs[m] = vsm.nonZeros();
-			if (nzs[m] > 0) continue;
-			delete vvsm[m];
-			vvsm[m] = 0;
-		}
-
-		PsimagLite::Sort<VectorSizeType> sort;
-		VectorSizeType permutation(total, 0);
-		sort.sort(nzs, permutation);
-
-		typename PsimagLite::Vector<const SparseMatrixType*>::Type vectorOfCrs;
-
-		assert(total == permutation.size());
-		for (SizeType i = 0; i < total; ++i) { // loop over new order
-
-			SizeType m = permutation[i]; // get old index from new index
-
-			if (vvsm[m] == 0) continue;
-
-			const VerySparseMatrixType& vsm = *(vvsm[m]);
-			SparseMatrixType matrixBlock2;
-			matrixBlock2 = vsm;
-			delete vvsm[m];
-			vvsm[m] = 0;
-
-			SizeType offset = lrs.super().partition(m);
-			SparseMatrixType* full = new SparseMatrixType(matrix.rows(),
-			                                              matrix.cols(),
-			                                              matrixBlock2.nonZeros());
-			fromBlockToFull(*full, matrixBlock2, offset);
-			vectorOfCrs.push_back(full);
-		}
-
-		if (vectorOfCrs.size() == 0) return;
-
-		vectorOfCrs.push_back(&matrix);
-		SizeType effectiveTotal = vectorOfCrs.size();
-
-		VectorType ones(effectiveTotal, 1.0);
-		SparseMatrixType sumCrs;
-		sum(sumCrs, vectorOfCrs, ones);
-		vectorOfCrs.pop_back();
-		effectiveTotal = vectorOfCrs.size();
-		for (SizeType i = 0; i < effectiveTotal; ++i) {
-			delete vectorOfCrs[i];
-			vectorOfCrs[i] = 0;
-		}
-
-		matrix.swap(sumCrs);
-	}
 
 	void addConnectionsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                  const VectorOperatorType& cm,
@@ -305,7 +174,6 @@ private:
 
 	const ParametersType& params_;
 	const GeometryType& geometry_;
-	const LinkProductBaseType* lpb_;
 	PsimagLite::ProgressIndicator progress_;
 }; //class ModelCommon
 } // namespace Dmrg
