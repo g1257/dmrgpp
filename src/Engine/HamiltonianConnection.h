@@ -277,18 +277,17 @@ private:
 		        type != ProgramGlobals::ENVIRON_ENVIRON);
 
 		assert(hItems.size() == 2);
-		AdditionalDataType additionalData(hItems[0], hItems[1]);
 		VectorSizeType edofs(lpb_.dofsAllocationSize());
 		bool isSu2 = modelHelper_.isSu2();
 
 		SizeType totalOne = 0;
 		for (SizeType term = 0; term < superGeometry_.geometry().terms(); ++term) {
-			SizeType dofsTotal = lpb_.dofs(term, additionalData);
+			SizeType dofsTotal = lpb_.dofs(term, hItems);
 			for (SizeType dofs = 0; dofs < dofsTotal; ++dofs) {
 				lpb_.connectorDofs(edofs,
 				                   term,
 				                   dofs,
-				                   additionalData);
+				                   hItems);
 				ComplexOrRealType tmp = superGeometry_(smax_,
 				                                       emin_,
 				                                       hItems,
@@ -305,7 +304,7 @@ private:
 				SizeType angularMomentum=0;
 				SizeType category=0;
 				RealType angularFactor=0;
-				lpb_.valueModifier(tmp,term,dofs,isSu2,additionalData);
+				lpb_.valueModifier(tmp, term, dofs, isSu2, hItems);
 
 				lpb_.setLinkData(term,
 				                 dofs,
@@ -316,9 +315,9 @@ private:
 				                 angularMomentum,
 				                 angularFactor,
 				                 category,
-				                 additionalData);
-				LinkType link2(additionalData.site1,
-				               additionalData.site2,
+				                 hItems);
+				LinkType link2(hItems[0],
+				               hItems[1],
 				               type,
 				               tmp,
 				               fermionOrBoson,

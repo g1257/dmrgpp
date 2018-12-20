@@ -116,10 +116,11 @@ public:
 	//! The term=1 is for Upd
 	SizeType dofs(SizeType term, const AdditionalDataType& additionalData) const
 	{
+		assert(additionalData.size() == 2);
 		typename KTwoNiFFourType::TypeEnum type1 =
-		        KTwoNiFFourType::findTypeOfSite(additionalData.site1).first;
+		        KTwoNiFFourType::findTypeOfSite(additionalData[0]).first;
 		typename KTwoNiFFourType::TypeEnum type2 =
-		        KTwoNiFFourType::findTypeOfSite(additionalData.site2).first;
+		        KTwoNiFFourType::findTypeOfSite(additionalData[1]).first;
 
 		if (term==W_TERM) {
 			// No Upd allowed between Oxygens
@@ -142,10 +143,11 @@ public:
 			return;
 		}; // Upd
 
+		assert(additionalData.size() == 2);
 		typename KTwoNiFFourType::TypeEnum type1 =
-		        KTwoNiFFourType::findTypeOfSite(additionalData.site1).first;
+		        KTwoNiFFourType::findTypeOfSite(additionalData[0]).first;
 		typename KTwoNiFFourType::TypeEnum type2 =
-		        KTwoNiFFourType::findTypeOfSite(additionalData.site2).first;
+		        KTwoNiFFourType::findTypeOfSite(additionalData[1]).first;
 
 		//! both cannot be TYPE_C
 		assert(type1 != type2 || type1 != KTwoNiFFourType::TYPE_C);
@@ -184,8 +186,9 @@ public:
 	                 SizeType& category,
 	                 const AdditionalDataType& additionalData) const
 	{
+		assert(additionalData.size() > 0);
 		typename KTwoNiFFourType::TypeEnum type1 =
-		        KTwoNiFFourType::findTypeOfSite(additionalData.site1).first;
+		        KTwoNiFFourType::findTypeOfSite(additionalData[0]).first;
 
 		if (term==W_TERM) {
 			fermionOrBoson = ProgramGlobals::BOSON;
@@ -231,10 +234,11 @@ private:
 	std::pair<SizeType,SizeType> operatorDofs(SizeType dofs,
 	                                          const AdditionalDataType& additionalData) const
 	{
+		assert(additionalData.size() == 2);
 		typename KTwoNiFFourType::TypeEnum type1 =
-		        KTwoNiFFourType::findTypeOfSite(additionalData.site1).first;
+		        KTwoNiFFourType::findTypeOfSite(additionalData[0]).first;
 		typename KTwoNiFFourType::TypeEnum type2 =
-		        KTwoNiFFourType::findTypeOfSite(additionalData.site2).first;
+		        KTwoNiFFourType::findTypeOfSite(additionalData[1]).first;
 
 		//! both cannot be TYPE_C
 		assert(type1 != type2 || type1 != KTwoNiFFourType::TYPE_C);
@@ -264,10 +268,11 @@ private:
 
 	SizeType getSpin(SizeType dofs,const AdditionalDataType& additionalData) const
 	{
+		assert(additionalData.size() == 2);
 		typename KTwoNiFFourType::TypeEnum type1 =
-		        KTwoNiFFourType::findTypeOfSite(additionalData.site1).first;
+		        KTwoNiFFourType::findTypeOfSite(additionalData[0]).first;
 		typename KTwoNiFFourType::TypeEnum type2 =
-		        KTwoNiFFourType::findTypeOfSite(additionalData.site2).first;
+		        KTwoNiFFourType::findTypeOfSite(additionalData[1]).first;
 
 		//! both cannot be TYPE_C
 		assert(type1 != type2 || type1 != KTwoNiFFourType::TYPE_C);

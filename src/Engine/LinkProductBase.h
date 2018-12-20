@@ -9,6 +9,10 @@ namespace Dmrg {
 template<typename ModelHelperType_, typename GeometryType_>
 class LinkProductBase {
 
+//	class Term {
+
+//	};
+
 public:
 
 	enum HermitianEnum { HERMIT_NEITHER, HERMIT_PLUS, HERMIT_MINUS};
