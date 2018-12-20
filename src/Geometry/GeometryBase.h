@@ -92,18 +92,9 @@ class GeometryBase {
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef Matrix<ComplexOrRealType> MatrixType;
 
-	struct LocalData {
-		LocalData(SizeType s1, SizeType s2)
-		    : site1(s1), site2(s2)
-		{}
-
-		SizeType site1;
-		SizeType site2;
-	};
-
 public:
 
-	typedef LocalData AdditionalDataType;
+	typedef Vector<SizeType>::Type AdditionalDataType;
 
 	virtual ~GeometryBase()
 	{}
