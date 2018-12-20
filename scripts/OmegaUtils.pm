@@ -158,15 +158,16 @@ sub fourier
 		return fourierLadderAverage($f, $v, $geometry->{"leg"}, $hptr);
 	}
 
-	if ($geometry->{"name"} eq "chain") {
+	my $name = ($geometry->{"name"};
+	if ($name eq "chain") {
 		return fourierChain($f, $v, $hptr);
 	}
 
-	if ($geometry->{"name"} eq "ladder") {
+	if ($name eq "ladder") {
 		return fourierLadder($f, $v, $geometry->{"leg"}, $hptr);
 	}
 
-	if ($geometry->{"name"} eq "LongRange") {
+	if ($name eq "LongRange" || $name eq "General") {
 
 		my $orbitals = $hptr->{"Orbitals"};
 
