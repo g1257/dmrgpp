@@ -51,8 +51,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include "ProgramGlobals.h"
 #include "Utils.h"
-#if ALL_MODELS
 #include "../Models/Heisenberg/ModelHeisenberg.h"
+#if ALL_MODELS
 #include "../Models/HubbardOneBand/ModelHubbard.h"
 #include "../Models/HeisenbergAncillaC/HeisenbergAncillaC.h"
 #include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
@@ -72,8 +72,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/HubbardMultiBand/ModelHubbardMultiBand.h"
 #include "../Models/HubbardHolstein/HubbardHolstein.h"
 #include "../Models/Kondo/Kondo.h"
-#else
-#include "../Models/Heisenberg/ModelHeisenberg.h"
 #endif
 
 namespace Dmrg {
@@ -88,8 +86,8 @@ class ModelSelector {
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 
 	// start models here:
-#if ALL_MODELS
 	typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
+#if ALL_MODELS
 	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
 	typedef HeisenbergAncillaC<ModelBaseType> HeisenbergAncillaCType;
 	typedef ExtendedHubbard1Orb<ModelBaseType> ModelHubbardExtType;
@@ -109,8 +107,6 @@ class ModelSelector {
 	typedef ModelHubbardMultiBand<ModelBaseType> ModelHubbardMultiBandType;
 	typedef HubbardHolstein<ModelBaseType> HubbardHolsteinType;
 	typedef Kondo<ModelBaseType> KondoType;
-#else
-	typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
 #endif
 	// end models
 
@@ -131,12 +127,13 @@ public:
 	{
 		if (model_) return *model_;
 
-#if ALL_MODELS
 		if (name_ == "Heisenberg") {
 			model_ = new ModelHeisenbergType(solverParams,io,geometry,"");
 		} else if (name_ == "HeisenbergAnisotropic") {
 			model_ = new ModelHeisenbergType(solverParams,io,geometry,"Anisotropic");
-		} else if (name_ == "HeisenbergAncillaC") {
+		}
+#if ALL_MODELS
+		else if (name_ == "HeisenbergAncillaC") {
 			model_ = new HeisenbergAncillaCType(solverParams,io,geometry);
 		} else if (name_ == "HubbardOneBand") {
 			model_ = new ModelHubbardType(solverParams, io, geometry, "Hopping");
@@ -180,10 +177,6 @@ public:
 			model_ = new HubbardHolsteinType(solverParams, io, geometry, "SSH");
 		} else if (name_ == "Kondo") {
 			model_ = new KondoType(solverParams, io, geometry);
-		}
-#else
-		if (name_ == "Heisenberg") {
-			model_ = new ModelHeisenbergType(solverParams,io,geometry,"");
 		}
 #endif
 		else {
