@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <algorithm>
 #include "ModelBase.h"
 #include "ParametersModelHeisenberg.h"
-#include "LinkProductHeisenberg.h"
 #include "CrsMatrix.h"
 #include "VerySparseMatrix.h"
 #include "SpinSquaredHelper.h"
@@ -113,7 +112,6 @@ public:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef unsigned int long WordType;
-	typedef LinkProductHeisenberg<ModelHelperType, GeometryType> LinkProductType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -138,7 +136,6 @@ public:
 	                PsimagLite::String additional)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType(io, (additional == "Anisotropic")),
 	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),

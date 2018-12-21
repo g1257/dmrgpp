@@ -138,32 +138,20 @@ public:
 
 	ModelBase(const ParametersType& params,
 	          const GeometryType_& geometry,
-	          const LinkProductBaseType* lpb,
 	          InputValidatorType& io)
 	    : modelCommon_(params, geometry),
-	      lpb_(lpb),
 	      targetQuantum_(io)
 	{
-		if (lpb->terms() > geometry.terms()) {
-			PsimagLite::String str("ModelCommon: NumberOfTerms must be ");
-			err( str + ttos(lpb->terms()) + " in input file for this model\n");
-		}
-
 		labeledOperators_.setModelName(params.model);
-	}
-
-	virtual ~ModelBase()
-	{
-		delete lpb_;
-		lpb_ = 0;
 	}
 
 	void postCtor()
 	{
 		fillLabeledOperators(qns_); // fills qns_ and labeledOperators_
-		labeledOperators_.postCtor(cm_); // fills cm_
+		fillModelLinks(); // fills modelLinks_
+		modelLinks_.postCtor(labeledOperators_, modelCommon_.geometry().terms());
+
 		ProgramGlobals::init(maxElectronsOneSpin());
-		lpb_->postCtor(cm_);
 	}
 
 	/* PSIDOC ModelInterface
@@ -174,6 +162,8 @@ public:
 		PSIDOCCOPY addDiagonalsInNaturalBasis
 
 		PSIDOCCOPY fillLabeledOperators
+
+		PSIDOCCOPY fillModelLinks
 	*/
 
 	/* PSIDOC ModelBaseWrite
@@ -234,6 +224,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		and so on, which is important to remember for the \verb!LinkProduct*! class.
 	*/
 	virtual void fillLabeledOperators(VectorQnType&) = 0;
+
+	virtual void fillModelLinks() = 0;
 
 	// END ^^^^^^^^^^^Functions that each model needs to implement
 
@@ -308,7 +300,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 			HamiltonianConnectionType hc(m,
 			                             lrs,
 			                             modelCommon_.geometry(),
-			                             *lpb_,
+			                             modelLinks_,
 			                             currentTime,
 			                             0);
 
@@ -518,11 +510,10 @@ protected:
 private:
 
 	ModelCommonType modelCommon_;
-	const LinkProductBaseType* lpb_;
 	TargetQuantumElectronsType targetQuantum_;
 	static LabeledOperatorsType labeledOperators_;
+	static LinkProductBaseType modelLinks_;
 	static VectorQnType qns_;
-	static VectorOperatorType cm_;
 };     //class ModelBase
 
 template<typename T1, typename T2, typename T3, typename T4>
@@ -533,7 +524,7 @@ template<typename T1, typename T2, typename T3, typename T4>
 typename ModelBase<T1, T2, T3, T4>::VectorQnType ModelBase<T1, T2, T3, T4>::qns_;
 
 template<typename T1, typename T2, typename T3, typename T4>
-typename ModelBase<T1, T2, T3, T4>::VectorOperatorType ModelBase<T1, T2, T3, T4>::cm_;
+typename ModelBase<T1, T2, T3, T4>::LinkProductBaseType ModelBase<T1, T2, T3, T4>::modelLinks_;
 
 } // namespace Dmrg
 /*@}*/

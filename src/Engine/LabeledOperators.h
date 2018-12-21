@@ -16,6 +16,7 @@ class LabeledOperators {
 
 		typedef std::pair<PsimagLite::String, SizeType> PairStringSizeType;
 
+		// site should actually be kind of site
 		Label(PsimagLite::String name, SizeType site)
 		    : name_(name), site_(site) {}
 
@@ -111,7 +112,7 @@ public:
 		model_ = model;
 	}
 
-	void postCtor(VectorOperatorType& cm)
+	void postCtor()
 	{
 		VectorSizeType h(sites_);
 		SizeType n = trackables_.size();
@@ -121,7 +122,6 @@ public:
 			SizeType dofs = ll.dofs();
 
 			for (SizeType j = 0; j < dofs; ++j) {
-				cm.push_back(ll(j));
 				assert(nameAndSite.second < sites_);
 				h[nameAndSite.second] = ll(j).data.rows();
 			}
@@ -176,6 +176,14 @@ public:
 		PsimagLite::String str("LabeledOperators: model=" + model_);
 		str += " label=" + what + " not found\n";
 		throw PsimagLite::RuntimeError(str);
+	}
+
+	SizeType trackables() const { return trackables_.size(); }
+
+	SizeType trackables(SizeType ind) const
+	{
+		assert(ind < trackables_.size());
+		return trackables_[ind];
 	}
 
 	void instrospect() const

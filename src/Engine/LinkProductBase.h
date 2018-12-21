@@ -6,63 +6,168 @@
 
 namespace Dmrg {
 
-template<typename ModelHelperType_, typename GeometryType_>
+template<typename LabeledOperatorsType, typename GeometryType_>
 class LinkProductBase {
 
-//	class Term {
+	typedef std::pair<SizeType, SizeType> PairSizeType;
+	typedef std::pair<PsimagLite::String, PsimagLite::String> PairStringType;
+	typedef std::pair<PsimagLite::String, SizeType> PairStringSizeType;
+	typedef typename LabeledOperatorsType::RealType RealType_;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename LabeledOperatorsType::LabelType LabelType;
 
-//	};
+	class OneLink {
+
+	public:
+
+		typedef std::pair<char, char> PairCharType;
+
+		OneLink(SizeType index1,
+		        SizeType index2,
+		        ProgramGlobals::FermionOrBosonEnum fermionOrBoson_,
+		        char mod1,
+		        char mod2,
+		        SizeType angularMomentum_,
+		        RealType_ angularFactor_,
+		        SizeType category_)
+		    : indices(PairSizeType(index1, index2)),
+		      fermionOrBoson(fermionOrBoson_),
+		      mods(PairCharType(mod1, mod2)),
+		      angularMomentum(angularMomentum_),
+		      angularFactor(angularFactor_),
+		      category(category_)
+		{}
+
+		PairSizeType indices;
+		ProgramGlobals::FermionOrBosonEnum fermionOrBoson;
+		PairCharType mods;
+		SizeType angularMomentum;
+		RealType_ angularFactor;
+		SizeType category;
+	}; // OneLink
+
+	class Term {
+
+		typedef typename PsimagLite::Vector<OneLink>::Type VectorOneLinkType;
+
+	public:
+
+		// pair of sites should actually be pair of kinds of sites
+		Term(PsimagLite::String name, // name of term, not name of operator
+		     PairSizeType sites = PairSizeType(0,0))
+		    : name_(name), sites_(sites)
+		{}
+
+		void push(PsimagLite::String name1,
+		          PsimagLite::String name2,
+		          ProgramGlobals::FermionOrBosonEnum fermionOrBoson,
+		          char mod1 = 'N',
+		          char mod2 = 'C',
+		          SizeType angularMomentum = 1,
+		          RealType_ angularFactor = 1.0,
+		          SizeType category = 0)
+		{
+			SizeType index1 = findIndexOfOp(name1);
+			SizeType index2 = findIndexOfOp(name2);
+
+			links_.push_back(OneLink(index1,
+			                         index2,
+			                         fermionOrBoson,
+			                         mod1,
+			                         mod2,
+			                         angularMomentum,
+			                         angularFactor,
+			                         category));
+		}
+
+	private:
+
+		//		SizeType findIndexOfOp(PsimagLite::String) const
+		//		{
+
+		//		}
+
+		Term(const Term&);
+
+		Term& operator=(const Term&);
+
+		PsimagLite::String name_; // name of term, not name of operator
+		PairSizeType sites_;
+		VectorOneLinkType links_;
+	};
+
+	class IsValue {
+
+	public:
+
+		IsValue(PsimagLite::String name, VectorSizeType sites)
+		    : name_(name), sites_(sites)
+		{}
+
+		bool operator()(const Term& term) const
+		{
+			return (term.name() == name_ && sites_ == term.sites());
+		}
+
+	private:
+
+		PsimagLite::String name_;
+		VectorSizeType sites_;
+	};
 
 public:
 
 	enum HermitianEnum { HERMIT_NEITHER, HERMIT_PLUS, HERMIT_MINUS};
 
-	typedef ModelHelperType_ ModelHelperType;
 	typedef GeometryType_ GeometryType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename LabeledOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef std::pair<SizeType, SizeType> PairSizeType;
+	typedef typename LabeledOperatorsType::RealType RealType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-	typedef typename ModelHelperType::OperatorType OperatorType;
+	typedef typename LabeledOperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename PsimagLite::Vector<HermitianEnum>::Type VectorHermitianEnum;
+	typedef typename PsimagLite::Vector<Term>::Type VectorTermType;
 
-	template<typename SomeInputType>
-	LinkProductBase(SomeInputType& io, PsimagLite::String terms)
+	void postCtor(const LabeledOperatorsType& labeledOps,
+	              SizeType geometryTerms)
 	{
-		PsimagLite::split(termNames_, terms);
-		SizeType n = termNames_.size();
-
-		for (SizeType i = 0; i < n; ++i) {
-			PsimagLite::String label = "Term" + ttos(i);
-			PsimagLite::String str("");
-
-			try {
-				io.readline(str, label + "=");
-			} catch(std::exception&) {
-				std::cerr<<"You should add a " + label + "=" + termNames_[i];
-				std::cerr<<" for this term to your input\n";
-				continue;
-			}
-
-			if (str == termNames_[i]) continue;
-			PsimagLite::String msg = label + " expected to be " + termNames_[i];
-			err(msg + " but " + str + " found instead\n");
+		if (terms_.size() > geometryTerms) {
+			PsimagLite::String str("ModelBase: NumberOfTerms must be ");
+			err(str + ttos(terms_.size()) + " in input file for this model\n");
 		}
+
+		SizeType n = labeledOps.trackables();
+		for (SizeType i = 0; i < n; ++i) {
+			typename LabelType::PairStringSizeType nameAndSite = labeledOps.trackables(i);
+			const LabelType& ll = labeledOps.findLabel(nameAndSite.first,
+			                                           nameAndSite.second);
+			SizeType dofs = ll.dofs();
+
+			for (SizeType j = 0; j < dofs; ++j)
+				cm_.push_back(ll(j));
+		}
+
+		SizeType m = cm_.size();
+		if (m == 0) return;
+		hermit_.resize(m);
+		for (SizeType i = 0; i < m; ++i)
+			hermit_[i] = getHermitianProperty(cm_[i].data);
 	}
 
-	virtual ~LinkProductBase() {}
-
-	void postCtor(const VectorOperatorType& cm) const
+	Term& createTerm(PsimagLite::String name,
+	                 VectorSizeType sites)
 	{
-		SizeType n = cm.size();
-		if (n == 0) return;
-		hermit_.resize(n);
-		for (SizeType i = 0; i < n; ++i)
-			hermit_[i] = getHermitianProperty(cm[i].data);
+		typename VectorTermType::const_iterator x = std::find_if(terms_.begin(),
+		                                                         terms_.end(),
+		                                                         IsValue(name, sites));
+
+		if (x != terms_.end())
+			err("Repeated term " + name + " sites=NOT DISPLAYED\n");
+
+		terms_.push_back(Term(name, sites));
+		return terms_[terms_.size() - 1];
 	}
 
 	// FIXME: For Immm and SDHS
@@ -72,65 +177,6 @@ public:
 		return hermit_[opsIndex];
 	}
 
-	// List of function LinkProduct*.h of each model MUST implement
-
-	// You MUST return the number of Hamiltonian terms your model has
-	// term are connections from one site to other site or sites
-	virtual SizeType terms() const = 0;
-
-	// For term given in first argument, return how many dofs this term has
-	// dofs are sub-terms inside a term
-	// You MUST ignore the last argument unless your model has a
-	// site dependent Hilbert space (SDHS)
-	virtual SizeType dofs(SizeType, const AdditionalDataType&) const = 0;
-
-	// Fill 3 outputs and 3 more if you want to support SU(2)
-	// Assumes you are connecting two operators A_i x B_j
-	// FERMION or BOSON: Say FERMION if both operators A and B are FERMIONS, BOSON otherwise
-	// PairSizeType: give indices of A and B in the Model one-site operator storage
-	//  std::pair<char,char>: char must be either N or C to indicate whether
-	//                         A or B needs transpose conjugate
-	// You don't need to fill AngularMomentum AngularFactor Category
-	// but then your model will not support SU(2) symmetry
-	virtual void setLinkData(SizeType, // term (INPUT)
-	                         SizeType, // dof for term (INPUT)
-	                         bool, // isSU2 (INPUT)
-	                         ProgramGlobals::FermionOrBosonEnum&, // FERMION or BOSON (OUTPUT)
-	                         PairSizeType&, // Pair of operator indices (OUTPUT)
-	                         std::pair<char,char>&, // Modifier for each operator (OUTPUT)
-	                         SizeType&, // AngularMomentum for SU(2) (OUTPUT)
-	                         RealType&, // AngularFactor for SU(2) (OUTPUT)
-	                         SizeType&, // Category for SU(2) (OUTPUT)
-	                         const AdditionalDataType&) const = 0; // For SDHS (INPUT)
-
-	// List of function LinkProduct*.h of each model MAY override
-
-	// Assumes you are connecting two operators A_{i, alpha} x B_{j, beta}
-	// You MUST set edofs[0] = alpha and edofs[1] = beta
-	virtual void connectorDofs(VectorSizeType& edofs, // (OUTPUT)
-	                           SizeType, // TERM (INPUT)
-	                           SizeType, // DOF (INPUT)
-	                           const AdditionalDataType&) const // For SDHS (INPUT)
-	{
-		edofs[0] = edofs[1] = 0;
-	}
-
-	// Assumes your are connecting two operators value * A_{i, alpha} x B_{j, beta}
-	// You MAY add an extra multiplier value, by setting the first argument
-	virtual void valueModifier(ComplexOrRealType&, // value (OUTPUT)
-	                           SizeType, // TERM (INPUT)
-	                           SizeType, // DOF (INPUT)
-	                           bool, // isSU2 (INPUT)
-	                           const AdditionalDataType&) const // For SDHS (INPUT)
-	{}
-
-	// You MUSTN'T override this function for now
-	virtual SizeType dofsAllocationSize() const { return 2; }
-
-protected:
-
-	const VectorStringType& termNames() const { return termNames_; }
-
 private:
 
 	static HermitianEnum getHermitianProperty(const SparseMatrixType& m)
@@ -139,8 +185,9 @@ private:
 		return (isAntiHermitian(m)) ? HERMIT_MINUS : HERMIT_NEITHER;
 	}
 
-	VectorStringType termNames_;
-	mutable VectorHermitianEnum hermit_;
+	VectorTermType terms_;
+	VectorOperatorType cm_;
+	VectorHermitianEnum hermit_;
 };
 }
 #endif // LINKPRODUCTBASE_H
