@@ -296,7 +296,7 @@ private:
 		typename ModelType::HamiltonianConnectionType hc(p,
 		                                                 BaseType::lrs(),
 		                                                 BaseType::model().geometry(),
-		                                                 BaseType::model().linkProduct(),
+		                                                 ModelType::modelLinks(),
 		                                                 fakeTime,
 		                                                 0);
 		typedef typename LanczosSolverType::MatrixType LanczosMatrixType;

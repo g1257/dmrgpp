@@ -23,6 +23,7 @@
 #include "CrsMatrix.h"
 #include "OperatorSpec.h"
 #include "CanonicalExpression.h"
+#include "ModelBase.h"
 
 #ifndef USE_FLOAT
 typedef double RealType;

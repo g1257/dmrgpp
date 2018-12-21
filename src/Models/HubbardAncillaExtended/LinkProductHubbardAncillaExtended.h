@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_LINKPROD_HUBBARD_ANCILLA_EXTENDED_H
 #define DMRG_LINKPROD_HUBBARD_ANCILLA_EXTENDED_H
 #include "ProgramGlobals.h"
-#include "LinkProductBase.h"
+#include "ModelLinks.h"
 
 namespace Dmrg {
 

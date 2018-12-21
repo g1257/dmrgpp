@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINKPROD_EXTENDED_HUBBARD_1ORB_H
 #define LINKPROD_EXTENDED_HUBBARD_1ORB_H
 #include "ProgramGlobals.h"
-#include "LinkProductBase.h"
+#include "ModelLinks.h"
 
 namespace Dmrg {
 

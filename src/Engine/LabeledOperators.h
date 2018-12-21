@@ -5,12 +5,12 @@
 
 namespace Dmrg {
 
-template<typename OperatorType>
+template<typename OperatorType_>
 class LabeledOperators {
 
 	class Label {
 
-		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
+		typedef typename PsimagLite::Vector<OperatorType_>::Type VectorOperatorType;
 
 	public:
 
@@ -20,7 +20,7 @@ class LabeledOperators {
 		Label(PsimagLite::String name, SizeType site)
 		    : name_(name), site_(site) {}
 
-		const OperatorType& operator()(SizeType dof) const
+		const OperatorType_& operator()(SizeType dof) const
 		{
 			if (dof < ops_.size())
 				return ops_[dof];
@@ -42,7 +42,7 @@ class LabeledOperators {
 			return ops_[0].data.rows();
 		}
 
-		void push(const OperatorType& op)
+		void push(const OperatorType_& op)
 		{
 			ops_.push_back(op);
 		}
@@ -89,6 +89,7 @@ class LabeledOperators {
 
 public:
 
+	typedef OperatorType_ OperatorType;
 	typedef Label LabelType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
@@ -178,9 +179,9 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	SizeType trackables() const { return trackables_.size(); }
+	SizeType trackables() const  { return trackables_.size(); }
 
-	SizeType trackables(SizeType ind) const
+	const typename LabelType::PairStringSizeType& trackables(SizeType ind) const
 	{
 		assert(ind < trackables_.size());
 		return trackables_[ind];

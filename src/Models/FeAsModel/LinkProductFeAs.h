@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINK_PRODUCT_H
 #define LINK_PRODUCT_H
 #include "ProgramGlobals.h"
-#include "LinkProductBase.h"
+#include "ModelLinks.h"
 
 namespace Dmrg {
 

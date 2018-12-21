@@ -91,15 +91,14 @@ namespace Dmrg {
 
 // Keep this class independent of x and y in x = H*y
 // For things that depend on x and y use ParallelHamiltonianConnection.h
-template<typename LinkProductBaseType>
+template<typename ModelLinksType, typename ModelHelperType>
 class HamiltonianConnection {
 
 public:
 
-	typedef typename LinkProductBaseType::GeometryType GeometryType;
+	typedef typename ModelLinksType::GeometryType GeometryType;
 	typedef SuperGeometry<GeometryType> SuperGeometryType;
 	typedef HamiltonianAbstract<SuperGeometryType> HamiltonianAbstractType;
-	typedef typename LinkProductBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -115,12 +114,12 @@ public:
 	typedef typename LeftRightSuperType::ParamsForKroneckerDumperType ParamsForKroneckerDumperType;
 	typedef typename LeftRightSuperType::KroneckerDumperType KroneckerDumperType;
 	typedef typename PsimagLite::Vector<LinkType>::Type VectorLinkType;
-	typedef typename LinkProductBaseType::HermitianEnum HermitianEnum;
+	typedef typename ModelLinksType::HermitianEnum HermitianEnum;
 
 	HamiltonianConnection(SizeType m,
 	                      const LeftRightSuperType& lrs,
 	                      const GeometryType& geometry,
-	                      const LinkProductBaseType& lpb,
+	                      const ModelLinksType& lpb,
 	                      RealType targetTime,
 	                      const ParamsForKroneckerDumperType* pKroneckerDumper)
 	    : modelHelper_(m, lrs),
@@ -277,55 +276,38 @@ private:
 		        type != ProgramGlobals::ENVIRON_ENVIRON);
 
 		assert(hItems.size() == 2);
-		VectorSizeType edofs(lpb_.dofsAllocationSize());
-		bool isSu2 = modelHelper_.isSu2();
 
 		SizeType totalOne = 0;
-		for (SizeType term = 0; term < superGeometry_.geometry().terms(); ++term) {
-			SizeType dofsTotal = lpb_.dofs(term, hItems);
+		SizeType geometryTerms = superGeometry_.geometry().terms();
+		for (SizeType termIndex = 0; termIndex < geometryTerms; ++termIndex) {
+			const typename ModelLinksType::TermType& term = lpb_.term(termIndex);
+			SizeType dofsTotal = term.size();
 			for (SizeType dofs = 0; dofs < dofsTotal; ++dofs) {
-				lpb_.connectorDofs(edofs,
-				                   term,
-				                   dofs,
-				                   hItems);
+
+				const typename ModelLinksType::TermType::OneLinkType& oneLink = term(dofs);
 				ComplexOrRealType tmp = superGeometry_(smax_,
 				                                       emin_,
 				                                       hItems,
-				                                       edofs,
-				                                       term);
+				                                       oneLink.idofs,
+				                                       termIndex);
 
 				if (tmp == static_cast<RealType>(0.0)) continue;
 
-				tmp = superGeometry_.geometry().vModifier(term, tmp, targetTime_);
+				tmp = superGeometry_.geometry().vModifier(termIndex, tmp, targetTime_);
 
-				PairType ops;
-				std::pair<char,char> mods('N','C');
-				ProgramGlobals::FermionOrBosonEnum fermionOrBoson=ProgramGlobals::FERMION;
-				SizeType angularMomentum=0;
-				SizeType category=0;
-				RealType angularFactor=0;
-				lpb_.valueModifier(tmp, term, dofs, isSu2, hItems);
 
-				lpb_.setLinkData(term,
-				                 dofs,
-				                 isSu2,
-				                 fermionOrBoson,
-				                 ops,
-				                 mods,
-				                 angularMomentum,
-				                 angularFactor,
-				                 category,
-				                 hItems);
+				tmp *= oneLink.vModifier;
+
 				LinkType link2(hItems[0],
 				               hItems[1],
 				               type,
 				               tmp,
-				               fermionOrBoson,
-				               ops,
-				               mods,
-				               angularMomentum,
-				               angularFactor,
-				               category);
+				               oneLink.fermionOrBoson,
+				               oneLink.indices,
+				               oneLink.mods,
+				               oneLink.angularMomentum,
+				               oneLink.angularFactor,
+				               oneLink.category);
 
 				++totalOne;
 				lps_.push_back(link2);
@@ -335,10 +317,10 @@ private:
 
 				link2.value = PsimagLite::conj(tmp);
 
-				if (fermionOrBoson == ProgramGlobals::FERMION) link2.value *= (-1.0);
+				if (oneLink.fermionOrBoson == ProgramGlobals::FERMION) link2.value *= (-1.0);
 
-				char saved = mods.first;
-				link2.mods.first = mods.second;
+				char saved = oneLink.mods.first;
+				link2.mods.first = oneLink.mods.second;
 				link2.mods.second = saved;
 
 				++totalOne;
@@ -369,10 +351,10 @@ private:
 		HermitianEnum h1 = lpb_.getHermitianProperty(link.ops.first, link.site1);
 		HermitianEnum h2 = lpb_.getHermitianProperty(link.ops.second, link.site2);
 
-		bool isHermit1 = (h1 == LinkProductBaseType::HERMIT_PLUS);
-		bool isHermit2 = (h2 == LinkProductBaseType::HERMIT_PLUS);
-		bool isAnti1 = (h1 == LinkProductBaseType::HERMIT_MINUS);
-		bool isAnti2 = (h2 == LinkProductBaseType::HERMIT_MINUS);
+		bool isHermit1 = (h1 == ModelLinksType::HERMIT_PLUS);
+		bool isHermit2 = (h2 == ModelLinksType::HERMIT_PLUS);
+		bool isAnti1 = (h1 == ModelLinksType::HERMIT_MINUS);
+		bool isAnti2 = (h2 == ModelLinksType::HERMIT_MINUS);
 		bool b1 = (isHermit1 && isAnti2);
 		bool b2 = (isAnti1 && isHermit2);
 		return (b1 || b2);
@@ -385,15 +367,15 @@ private:
 		HermitianEnum h1 = lpb_.getHermitianProperty(link.ops.first, link.site1);
 		HermitianEnum h2 = lpb_.getHermitianProperty(link.ops.second, link.site2);
 
-		bool isHermit1 = (h1 == LinkProductBaseType::HERMIT_PLUS);
-		bool isHermit2 = (h2 == LinkProductBaseType::HERMIT_PLUS);
+		bool isHermit1 = (h1 == ModelLinksType::HERMIT_PLUS);
+		bool isHermit2 = (h2 == ModelLinksType::HERMIT_PLUS);
 
 		return (isHermit1 && isHermit2);
 	}
 
 	const ModelHelperType modelHelper_;
 	SuperGeometryType superGeometry_;
-	const LinkProductBaseType& lpb_;
+	const ModelLinksType& lpb_;
 	RealType targetTime_;
 	mutable KroneckerDumperType kroneckerDumper_;
 	PsimagLite::ProgressIndicator progress_;

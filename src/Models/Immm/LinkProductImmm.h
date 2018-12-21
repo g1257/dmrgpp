@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define LINK_PRODUCT_IMMM_H
 #include <cassert>
 #include "ProgramGlobals.h"
-#include "LinkProductBase.h"
+#include "ModelLinks.h"
 #include "Geometry/KTwoNiFFour.h"
 #include "InputNg.h"
 

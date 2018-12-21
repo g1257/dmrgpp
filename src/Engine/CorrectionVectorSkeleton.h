@@ -332,7 +332,7 @@ public:
 		typename ModelType::HamiltonianConnectionType hc(p,
 		                                                 lrs_,
 		                                                 model_.geometry(),
-		                                                 model_.linkProduct(),
+		                                                 ModelType::modelLinks(),
 		                                                 fakeTime,
 		                                                 0);
 		LanczosMatrixType h(model_, hc);

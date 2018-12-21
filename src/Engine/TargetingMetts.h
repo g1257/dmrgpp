@@ -827,7 +827,7 @@ private:
 		typename ModelType::HamiltonianConnectionType hc(p,
 		                                                 BaseType::lrs(),
 		                                                 BaseType::model().geometry(),
-		                                                 BaseType::model().linkProduct(),
+		                                                 BaseType::ModelType::modelLinks(),
 		                                                 this->common().currentTime(),
 		                                                 0);
 		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),

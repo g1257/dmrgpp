@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_LINK_PROD_TJ_ANCILLAC2_H
 #define DMRG_LINK_PROD_TJ_ANCILLAC2_H
 #include "ProgramGlobals.h"
-#include "LinkProductBase.h"
+#include "ModelLinks.h"
 
 namespace Dmrg {
 

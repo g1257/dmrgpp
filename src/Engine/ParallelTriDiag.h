@@ -139,7 +139,7 @@ private:
 		typename ModelType::HamiltonianConnectionType hc(p,
 		                                                 lrs_,
 		                                                 model_.geometry(),
-		                                                 model_.linkProduct(),
+		                                                 ModelType::modelLinks(),
 		                                                 currentTime_,
 		                                                 0);
 		typename LanczosSolverType::MatrixType lanczosHelper(model_, hc);

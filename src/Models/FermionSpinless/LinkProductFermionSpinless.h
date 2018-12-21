@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_LINK_PROD_FERMION_SPINLESS_H
 #define DMRG_LINK_PROD_FERMION_SPINLESS_H
 #include "ProgramGlobals.h"
-#include "LinkProductBase.h"
+#include "ModelLinks.h"
 
 namespace Dmrg {
 

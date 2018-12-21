@@ -89,8 +89,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "NoPthreads.h"
 #include "Sort.h"
 #include "Profiling.h"
-#include "LinkProductBase.h"
+#include "ModelLinks.h"
 #include "HamiltonianConnection.h"
+#include "LabeledOperators.h"
 
 namespace Dmrg {
 
@@ -105,17 +106,18 @@ class ModelCommon  {
 public:
 
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef LinkProductBase<ModelHelperType, GeometryType> LinkProductBaseType;
 	typedef PsimagLite::InputNg<InputCheck>::Readable InputValidatorType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
+	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename ModelHelperType::BlockType Block;
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelHelperType::BasisType MyBasis;
 	typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef HamiltonianConnection<LinkProductBaseType> HamiltonianConnectionType;
+	typedef LabeledOperators<OperatorType> LabeledOperatorsType;
+	typedef ModelLinks<LabeledOperatorsType, GeometryType> ModelLinksType;
+	typedef HamiltonianConnection<ModelLinksType, ModelHelperType> HamiltonianConnectionType;
 	typedef typename HamiltonianConnectionType::VectorLinkType VectorLinkType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename PsimagLite::Vector<VectorLinkType>::Type VectorVectorLinkType;
 	typedef typename HamiltonianConnectionType::VectorSizeType VectorSizeType;

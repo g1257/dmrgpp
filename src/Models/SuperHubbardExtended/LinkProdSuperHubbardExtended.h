@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "../Models/Heisenberg/LinkProductHeisenberg.h"
 #include "../Models/ExtendedHubbard1Orb/LinkProdExtendedHubbard1Orb.h"
-#include "LinkProductBase.h"
+#include "ModelLinks.h"
 
 namespace Dmrg {
 

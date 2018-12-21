@@ -109,7 +109,10 @@ class TimeVectorsRungeKutta : public  TimeVectorsBase<
 		LanczosSolverType,
 		VectorWithOffsetType> {
 
-	typedef TimeVectorsBase<TargetParamsType,ModelType,WaveFunctionTransfType,LanczosSolverType,VectorWithOffsetType> BaseType;
+	typedef TimeVectorsBase<TargetParamsType,
+	ModelType,WaveFunctionTransfType,
+	LanczosSolverType,
+	VectorWithOffsetType> BaseType;
 	typedef typename BaseType::PairType PairType;
 	typedef typename TargetParamsType::RealType RealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -183,7 +186,7 @@ private:
 			: E0_(E0),
 		      timeDirection_(timeDirection),
 			  p_(lrs.super().findPartitionNumber(phi.offset(i0))),
-		      hc_(p_, lrs, model.geometry(), model.linkProduct(), currentTime, 0),
+		      hc_(p_, lrs, model.geometry(), ModelType::modelLinks(), currentTime, 0),
 			  lanczosHelper_(model, hc_)
 		{}
 

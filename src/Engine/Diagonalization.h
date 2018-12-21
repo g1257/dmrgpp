@@ -112,7 +112,6 @@ public:
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::ParamsForKroneckerDumperType ParamsForKroneckerDumperType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
-	typedef typename ModelType::LinkProductBaseType LinkProductType;
 	typedef typename TargetingType::MatrixVectorType MatrixVectorType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
@@ -370,7 +369,7 @@ private:
 		HamiltonianConnectionType hc(partitionIndex,
 		                             lrs,
 		                             model_.geometry(),
-		                             model_.linkProduct(),
+		                             ModelType::modelLinks(),
 		                             targetTime,
 		                             paramsKrDumperPtr);
 

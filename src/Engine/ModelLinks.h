@@ -1,5 +1,5 @@
-#ifndef LINKPRODUCTBASE_H
-#define LINKPRODUCTBASE_H
+#ifndef MODEL_LINKS_H
+#define MODEL_LINKS_H
 #include "Vector.h"
 #include "ProgramGlobals.h"
 #include "PsimagLite.h"
@@ -7,12 +7,12 @@
 namespace Dmrg {
 
 template<typename LabeledOperatorsType, typename GeometryType_>
-class LinkProductBase {
+class ModelLinks {
 
 	typedef std::pair<SizeType, SizeType> PairSizeType;
 	typedef std::pair<PsimagLite::String, PsimagLite::String> PairStringType;
 	typedef std::pair<PsimagLite::String, SizeType> PairStringSizeType;
-	typedef typename LabeledOperatorsType::RealType RealType_;
+	typedef typename LabeledOperatorsType::OperatorType::RealType RealType_;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename LabeledOperatorsType::LabelType LabelType;
 
@@ -29,13 +29,15 @@ class LinkProductBase {
 		        char mod2,
 		        SizeType angularMomentum_,
 		        RealType_ angularFactor_,
-		        SizeType category_)
+		        SizeType category_,
+		        RealType_ vModifier_)
 		    : indices(PairSizeType(index1, index2)),
 		      fermionOrBoson(fermionOrBoson_),
 		      mods(PairCharType(mod1, mod2)),
 		      angularMomentum(angularMomentum_),
 		      angularFactor(angularFactor_),
-		      category(category_)
+		      category(category_),
+		      vModifier(vModifier_)
 		{}
 
 		PairSizeType indices;
@@ -44,6 +46,7 @@ class LinkProductBase {
 		SizeType angularMomentum;
 		RealType_ angularFactor;
 		SizeType category;
+		RealType_ vModifier;
 	}; // OneLink
 
 	class Term {
@@ -52,9 +55,11 @@ class LinkProductBase {
 
 	public:
 
+		typedef OneLink OneLinkType;
+
 		// pair of sites should actually be pair of kinds of sites
 		Term(PsimagLite::String name, // name of term, not name of operator
-		     PairSizeType sites = PairSizeType(0,0))
+		     const VectorSizeType& sites)
 		    : name_(name), sites_(sites)
 		{}
 
@@ -65,7 +70,8 @@ class LinkProductBase {
 		          char mod2 = 'C',
 		          SizeType angularMomentum = 1,
 		          RealType_ angularFactor = 1.0,
-		          SizeType category = 0)
+		          SizeType category = 0,
+		          RealType_ vModifier = 1.0)
 		{
 			SizeType index1 = findIndexOfOp(name1);
 			SizeType index2 = findIndexOfOp(name2);
@@ -77,22 +83,36 @@ class LinkProductBase {
 			                         mod2,
 			                         angularMomentum,
 			                         angularFactor,
-			                         category));
+			                         category,
+			                         vModifier));
 		}
+
+		SizeType size() const { return links_.size(); }
+
+		const OneLinkType& operator()(SizeType dof) const
+		{
+			assert(dof < links_.size());
+			return links_[dof];
+		}
+
+		const VectorSizeType& sites() const { return sites_; }
+
+		const PsimagLite::String& name() const { return name_; }
 
 	private:
 
-		//		SizeType findIndexOfOp(PsimagLite::String) const
-		//		{
-
-		//		}
+		SizeType findIndexOfOp(PsimagLite::String) const
+		{
+			err("Wrong\n");
+			return 0;
+		}
 
 		Term(const Term&);
 
 		Term& operator=(const Term&);
 
 		PsimagLite::String name_; // name of term, not name of operator
-		PairSizeType sites_;
+		VectorSizeType sites_;
 		VectorOneLinkType links_;
 	};
 
@@ -104,9 +124,9 @@ class LinkProductBase {
 		    : name_(name), sites_(sites)
 		{}
 
-		bool operator()(const Term& term) const
+		bool operator()(const Term* term) const
 		{
-			return (term.name() == name_ && sites_ == term.sites());
+			return (term->name() == name_ && sites_ == term->sites());
 		}
 
 	private:
@@ -120,15 +140,27 @@ public:
 	enum HermitianEnum { HERMIT_NEITHER, HERMIT_PLUS, HERMIT_MINUS};
 
 	typedef GeometryType_ GeometryType;
-	typedef typename LabeledOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
-	typedef typename LabeledOperatorsType::RealType RealType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename LabeledOperatorsType::OperatorType OperatorType;
+	typedef typename OperatorType::RealType RealType;
+	typedef typename OperatorType::StorageType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename PsimagLite::Vector<HermitianEnum>::Type VectorHermitianEnum;
-	typedef typename PsimagLite::Vector<Term>::Type VectorTermType;
+	typedef typename PsimagLite::Vector<Term*>::Type VectorTermType;
+	typedef Term TermType;
+
+	ModelLinks() : maxDofs_(0) {}
+
+	~ModelLinks()
+	{
+		SizeType n = terms_.size();
+		for (SizeType i = 0; i < n; ++i)
+			delete terms_[i];
+
+		terms_.clear();
+	}
 
 	void postCtor(const LabeledOperatorsType& labeledOps,
 	              SizeType geometryTerms)
@@ -140,7 +172,7 @@ public:
 
 		SizeType n = labeledOps.trackables();
 		for (SizeType i = 0; i < n; ++i) {
-			typename LabelType::PairStringSizeType nameAndSite = labeledOps.trackables(i);
+			const typename LabelType::PairStringSizeType& nameAndSite = labeledOps.trackables(i);
 			const LabelType& ll = labeledOps.findLabel(nameAndSite.first,
 			                                           nameAndSite.second);
 			SizeType dofs = ll.dofs();
@@ -154,6 +186,12 @@ public:
 		hermit_.resize(m);
 		for (SizeType i = 0; i < m; ++i)
 			hermit_[i] = getHermitianProperty(cm_[i].data);
+
+		SizeType t = terms_.size();
+		for (SizeType i = 0; i < t; ++i) {
+			SizeType dof = terms_[i]->size();
+			if (dof > maxDofs_) maxDofs_ = dof;
+		}
 	}
 
 	Term& createTerm(PsimagLite::String name,
@@ -166,8 +204,9 @@ public:
 		if (x != terms_.end())
 			err("Repeated term " + name + " sites=NOT DISPLAYED\n");
 
-		terms_.push_back(Term(name, sites));
-		return terms_[terms_.size() - 1];
+		Term* term = new Term(name, sites);
+		terms_.push_back(term);
+		return *term;
 	}
 
 	// FIXME: For Immm and SDHS
@@ -175,6 +214,31 @@ public:
 	{
 		assert(opsIndex < hermit_.size());
 		return hermit_[opsIndex];
+	}
+
+	SizeType hilbertSize(SizeType) const
+	{
+		assert(cm_.size() > 0);
+		return cm_[0].data.rows();
+	}
+
+	void setOperatorMatrices(VectorOperatorType& cm) const
+	{
+		cm = cm_;
+	}
+
+	SizeType dofsAllocationSize() const { return maxDofs_; }
+
+	const TermType& term(SizeType term) const
+	{
+		assert(term < terms_.size());
+		return *(terms_[term]);
+	}
+
+	const VectorOperatorType& trackableOps(SizeType) const
+	{
+		assert(cm_.size() > 0);
+		return cm_;
 	}
 
 private:
@@ -188,6 +252,7 @@ private:
 	VectorTermType terms_;
 	VectorOperatorType cm_;
 	VectorHermitianEnum hermit_;
+	SizeType maxDofs_;
 };
 }
-#endif // LINKPRODUCTBASE_H
+#endif // MODEL_LINKS_H

@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_LINKPROD_HUBBARD_ANCILLA_H
 #include "../Models/FeAsModel/LinkProductFeAs.h"
 #include "ProgramGlobals.h"
-#include "LinkProductBase.h"
+#include "ModelLinks.h"
 
 namespace Dmrg {
 

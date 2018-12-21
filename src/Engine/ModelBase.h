@@ -87,7 +87,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Io/IoSerializerStub.h"
 #include "ModelCommon.h"
 #include "NotReallySort.h"
-#include "LabeledOperators.h"
 #include "ParallelHamiltonianConnection.h"
 
 namespace Dmrg {
@@ -121,7 +120,6 @@ public:
 	typedef ModelCommon<ParametersType, GeometryType, ModelHelperType> ModelCommonType;
 	typedef typename ModelCommonType::HamiltonianConnectionType HamiltonianConnectionType;
 	typedef typename ModelCommonType::VectorLinkType VectorLinkType;
-	typedef typename ModelCommonType::LinkProductBaseType LinkProductBaseType;
 	typedef typename ModelCommonType::VectorType VectorType;
 	typedef ParametersType SolverParamsType;
 	typedef typename ModelHelperType::LinkType LinkType;
@@ -130,11 +128,13 @@ public:
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename QnType::PairSizeType PairSizeType;
 	typedef typename BasisWithOperatorsType::VectorBoolType VectorBoolType;
-	typedef LabeledOperators<OperatorType> LabeledOperatorsType;
+	typedef typename ModelCommonType::LabeledOperatorsType LabeledOperatorsType;
+	typedef typename ModelCommonType::ModelLinksType ModelLinksType;
 	typedef typename LabeledOperatorsType::LabelType OpsLabelType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename ModelCommonType::VerySparseMatrixType VerySparseMatrixType;
 	typedef ParallelHamiltonianConnection<HamiltonianConnectionType> ParallelHamConnectionType;
+	typedef typename ModelLinksType::TermType ModelTermType;
 
 	ModelBase(const ParametersType& params,
 	          const GeometryType_& geometry,
@@ -153,6 +153,8 @@ public:
 
 		ProgramGlobals::init(maxElectronsOneSpin());
 	}
+
+	virtual ~ModelBase() {}
 
 	/* PSIDOC ModelInterface
 	These are the functions that each model must implement.
@@ -383,20 +385,13 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		return modelCommon_.fullHamiltonian(matrix, hc);
 	}
 
-	const LinkProductBaseType& linkProduct() const
-	{
-		assert(lpb_);
-		return *lpb_;
-	}
-
 	// Return the size of the one-site Hilbert space basis for this model
 	// site MUST be ignored unless your model has a site-dependent
 	// Hilbert space (SDHS)
 	// should be static
-	SizeType hilbertSize(SizeType) const
+	SizeType hilbertSize(SizeType site) const
 	{
-		assert(cm_.size() > 0);
-		return cm_[0].data.rows();
+		return modelLinks_.hilbertSize(site);
 	}
 
 	// Fill the VectorOperatorType with operators that need to be kept
@@ -412,8 +407,13 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	                         const BlockType& block) const
 	{
 		assert(block.size() == 1);
-		cm = cm_;
+		modelLinks_.setOperatorMatrices(cm);
 		qns = qns_;
+	}
+
+	static const ModelLinksType& modelLinks()
+	{
+		return modelLinks_;
 	}
 
 	// should be static
@@ -487,7 +487,7 @@ protected:
 
 	// care about site here SDHS
 	// care about models that contain other models SDHS
-	static const VectorOperatorType& trackableOps(SizeType) { return cm_; }
+	// static const VectorOperatorType& trackableOps(SizeType) { return cm_; }
 
 	static OpsLabelType& createOpsLabel(PsimagLite::String name,
 	                                    SizeType site = 0)
@@ -507,12 +507,24 @@ protected:
 			labeledOperators_.makeTrackableOrderMatters(vname[i], site);
 	}
 
+	static ModelTermType& createTerm(PsimagLite::String name,
+	                                                     VectorSizeType sites)
+	{
+		return modelLinks_.createTerm(name, sites);
+	}
+
+	static ModelTermType& createTerm(PsimagLite::String name)
+	{
+		VectorSizeType sites(2, 0);
+		return modelLinks_.createTerm(name, sites);
+	}
+
 private:
 
 	ModelCommonType modelCommon_;
 	TargetQuantumElectronsType targetQuantum_;
 	static LabeledOperatorsType labeledOperators_;
-	static LinkProductBaseType modelLinks_;
+	static ModelLinksType modelLinks_;
 	static VectorQnType qns_;
 };     //class ModelBase
 
@@ -524,7 +536,7 @@ template<typename T1, typename T2, typename T3, typename T4>
 typename ModelBase<T1, T2, T3, T4>::VectorQnType ModelBase<T1, T2, T3, T4>::qns_;
 
 template<typename T1, typename T2, typename T3, typename T4>
-typename ModelBase<T1, T2, T3, T4>::LinkProductBaseType ModelBase<T1, T2, T3, T4>::modelLinks_;
+typename ModelBase<T1, T2, T3, T4>::ModelLinksType ModelBase<T1, T2, T3, T4>::modelLinks_;
 
 } // namespace Dmrg
 /*@}*/

@@ -1,6 +1,6 @@
 #ifndef LINKPRODUCTKONDO_H
 #define LINKPRODUCTKONDO_H
-#include "LinkProductBase.h"
+#include "ModelLinks.h"
 #include "ProgramGlobals.h"
 
 namespace Dmrg {

@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_MODEL_HEISENBERG_HEADER_H
 
 #include <algorithm>
-#include "ModelBase.h"
 #include "ParametersModelHeisenberg.h"
 #include "CrsMatrix.h"
 #include "VerySparseMatrix.h"
@@ -116,6 +115,7 @@ public:
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelBaseType::VectorRealType VectorRealType;
+	typedef typename ModelBaseType::ModelTermType ModelTermType;
 
 	static const int NUMBER_OF_ORBITALS=1;
 	static const int DEGREES_OF_FREEDOM=2; // spin up and down
@@ -139,6 +139,7 @@ public:
 	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),
+	      additional_(additional),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 	{
 		if (additional == "Anisotropic")
@@ -193,9 +194,11 @@ public:
 		SizeType linSize = geometry_.numberOfSites();
 		SizeType n = block.size();
 
+		const typename ModelBaseType::ModelLinksType& modelLinks = ModelBaseType::modelLinks();
+
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType site = block[i];
-			const VectorOperatorType& cm = ModelBaseType::trackableOps(site);
+			const VectorOperatorType& cm = modelLinks.trackableOps(site);
 
 			// magnetic field
 			if (modelParameters_.magneticField.size() == linSize) {
@@ -267,7 +270,8 @@ protected:
 			this->createOpsLabel("sz").push(myOp2);
 			this->makeTrackableOrderMatters("sz");
 
-			if (ModelBaseType::linkProduct().terms() == 2) continue;
+			if (additional_ != "Anisotropic") continue; // <--- LOOP SKIP
+
 			// Set the operators S^x_i in the natural basis
 			tmpMatrix = findSxMatrices(i,natBasis);
 			typename OperatorType::Su2RelatedType su2related3;
@@ -275,6 +279,31 @@ protected:
 			this->createOpsLabel("sx").push(myOp3);
 			this->makeTrackableOrderMatters("sx");
 		}
+	}
+
+	void fillModelLinks()
+	{
+		bool isSu2 = BasisType::useSu2Symmetry();
+
+		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
+
+		spsm.push("splus", "splus", ProgramGlobals::BOSON, 'N', 'C', 2, -1, 2,
+		          (!isSu2) ? 0.5 : -0.5);
+
+		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
+
+		if (!isSu2)
+			szsz.push("sz", "sz", ProgramGlobals::BOSON, 'N', 'N', 2, 0.5,
+			          1);
+		else
+			spsm.push("splus", "splus", ProgramGlobals::BOSON, 'N', 'C', 2, -1, 2,
+			          -1.0);
+
+		if (additional_ != "Anisotropic") return; // <--- EARLY EXIT HERE
+
+		ModelTermType& sxsx = ModelBaseType::createTerm("sxsx");
+
+		sxsx.push("sx", "sx", ProgramGlobals::BOSON, 'N', 'N', 2, 1, 0);
 	}
 
 private:
@@ -432,6 +461,7 @@ private:
 	ParametersModelHeisenberg<RealType, QnType>  modelParameters_;
 	GeometryType const &geometry_;
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
+	PsimagLite::String additional_;
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
 }; // class ModelHeisenberg
 
