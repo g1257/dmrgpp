@@ -77,7 +77,7 @@ class ModelLinks {
 
 		static void init(const LabeledOperatorsType& l,
 		                 const VectorOperatorType& cm,
-		                 const VectorSizeType offsets)
+		                 const VectorSizeType& offsets)
 		{
 			labeledOps_ = &l;
 			cm_ = &cm;
