@@ -95,6 +95,7 @@ public:
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename PsimagLite::Vector<typename LabelType::PairStringSizeType>::Type
 	VectorPairStringSizeType;
+	typedef typename OperatorType::value_type ComplexOrRealType;
 
 	LabeledOperators(PsimagLite::String model = "") : model_(model), sites_(0)
 	{}

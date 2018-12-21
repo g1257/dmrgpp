@@ -109,10 +109,10 @@ public:
 	typedef typename ModelBaseType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef unsigned int long WordType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelBaseType::VectorRealType VectorRealType;
 	typedef typename ModelBaseType::ModelTermType ModelTermType;
@@ -281,6 +281,16 @@ protected:
 		}
 	}
 
+	struct ModifierStruct {
+
+		ModifierStruct(ComplexOrRealType& value_, bool isSu2_)
+		    : value(value_), isSu2(isSu2_)
+		{}
+
+		ComplexOrRealType value;
+		bool isSu2;
+	};
+
 	void fillModelLinks()
 	{
 		bool isSu2 = BasisType::useSu2Symmetry();
@@ -288,16 +298,15 @@ protected:
 		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
 
 		spsm.push("splus", "splus", ProgramGlobals::BOSON, 'N', 'C', 2, -1, 2,
-		          (!isSu2) ? 0.5 : -0.5);
+		          valueModifierTerm0, &isSu2);
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 
 		if (!isSu2)
-			szsz.push("sz", "sz", ProgramGlobals::BOSON, 'N', 'N', 2, 0.5,
-			          1);
+			szsz.push("sz", "sz", ProgramGlobals::BOSON, 'N', 'N', 2, 0.5);
 		else
 			spsm.push("splus", "splus", ProgramGlobals::BOSON, 'N', 'C', 2, -1, 2,
-			          -1.0);
+			          valueModifierTermOther, &isSu2);
 
 		if (additional_ != "Anisotropic") return; // <--- EARLY EXIT HERE
 
@@ -307,6 +316,22 @@ protected:
 	}
 
 private:
+
+	static void valueModifierTerm0(ComplexOrRealType& value, void* p)
+	{
+		bool* isSu2 = static_cast<bool*>(p);
+
+		value *= 0.5;
+
+		if (*isSu2) value = -value;
+	}
+
+	static void valueModifierTermOther(ComplexOrRealType& value, void* p)
+	{
+		bool* isSu2 = static_cast<bool*>(p);
+
+		if (*isSu2) value = -value;
+	}
 
 	void checkAnisotropic(const SolverParamsType& solverParams) const
 	{

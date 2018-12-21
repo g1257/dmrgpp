@@ -15,12 +15,16 @@ class ModelLinks {
 	typedef typename LabeledOperatorsType::OperatorType::RealType RealType_;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename LabeledOperatorsType::LabelType LabelType;
+	typedef typename LabeledOperatorsType::ComplexOrRealType ComplexOrRealType;
 
 	class OneLink {
 
 	public:
 
+		static void nullModifier(ComplexOrRealType&, void*) {}
+
 		typedef std::pair<char, char> PairCharType;
+		typedef void (*ModifierType)(ComplexOrRealType&, void*);
 
 		OneLink(SizeType index1,
 		        SizeType index2,
@@ -30,14 +34,16 @@ class ModelLinks {
 		        SizeType angularMomentum_,
 		        RealType_ angularFactor_,
 		        SizeType category_,
-		        RealType_ vModifier_)
+		        ModifierType vModifier_,
+		        void* modifierData_)
 		    : indices(PairSizeType(index1, index2)),
 		      fermionOrBoson(fermionOrBoson_),
 		      mods(PairCharType(mod1, mod2)),
 		      angularMomentum(angularMomentum_),
 		      angularFactor(angularFactor_),
 		      category(category_),
-		      vModifier(vModifier_)
+		      modifier(vModifier_),
+		      modifierData(modifierData_)
 		{}
 
 		PairSizeType indices;
@@ -46,7 +52,8 @@ class ModelLinks {
 		SizeType angularMomentum;
 		RealType_ angularFactor;
 		SizeType category;
-		RealType_ vModifier;
+		ModifierType modifier;
+		void* modifierData;
 	}; // OneLink
 
 	class Term {
@@ -71,7 +78,8 @@ class ModelLinks {
 		          SizeType angularMomentum = 1,
 		          RealType_ angularFactor = 1.0,
 		          SizeType category = 0,
-		          RealType_ vModifier = 1.0)
+		          typename OneLinkType::ModifierType vModifier = OneLink::nullModifier,
+		          void* modifierData = 0)
 		{
 			SizeType index1 = findIndexOfOp(name1);
 			SizeType index2 = findIndexOfOp(name2);
@@ -84,7 +92,8 @@ class ModelLinks {
 			                         angularMomentum,
 			                         angularFactor,
 			                         category,
-			                         vModifier));
+			                         vModifier,
+			                         modifierData));
 		}
 
 		SizeType size() const { return links_.size(); }
@@ -145,7 +154,6 @@ public:
 	typedef typename LabeledOperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::RealType RealType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename PsimagLite::Vector<HermitianEnum>::Type VectorHermitianEnum;
 	typedef typename PsimagLite::Vector<Term*>::Type VectorTermType;

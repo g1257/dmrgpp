@@ -296,7 +296,7 @@ private:
 				tmp = superGeometry_.geometry().vModifier(termIndex, tmp, targetTime_);
 
 
-				tmp *= oneLink.vModifier;
+				oneLink.modifier(tmp, oneLink.modifierData);
 
 				LinkType link2(hItems[0],
 				               hItems[1],
