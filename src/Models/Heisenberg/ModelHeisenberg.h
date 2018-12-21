@@ -94,6 +94,9 @@ namespace Dmrg {
 template<typename ModelBaseType>
 class ModelHeisenberg : public ModelBaseType {
 
+	static const int NUMBER_OF_ORBITALS=1;
+	static const int DEGREES_OF_FREEDOM=2; // spin up and down
+
 public:
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
@@ -116,12 +119,6 @@ public:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelBaseType::VectorRealType VectorRealType;
 	typedef typename ModelBaseType::ModelTermType ModelTermType;
-
-	static const int NUMBER_OF_ORBITALS=1;
-	static const int DEGREES_OF_FREEDOM=2; // spin up and down
-
-public:
-
 	typedef typename PsimagLite::Vector<SizeType>::Type HilbertBasisType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::PairType PairType;
@@ -129,6 +126,7 @@ public:
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 
 	ModelHeisenberg(const SolverParamsType& solverParams,
 	                InputValidatorType& io,
@@ -297,22 +295,26 @@ protected:
 
 		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
 
-		spsm.push("splus", "splus", 0, 0, 'N', 'C', 2, -1, 2,
-		          valueModifierTerm0, &isSu2);
+		OpForLinkType splus("splus");
+
+		spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModifierTerm0, &isSu2);
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 
-		if (!isSu2)
-			szsz.push("sz", "sz", 0, 0, 'N', 'N', 2, 0.5);
-		else
-			spsm.push("splus", "splus", 0, 0, 'N', 'C', 2, -1, 2,
-			          valueModifierTermOther, &isSu2);
+		if (!isSu2) {
+			OpForLinkType sz("splus");
+			szsz.push(sz, 'N', sz, 'N', 2, 0.5);
+		} else {
+			spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModifierTermOther, &isSu2);
+		}
 
 		if (additional_ != "Anisotropic") return; // <--- EARLY EXIT HERE
 
 		ModelTermType& sxsx = ModelBaseType::createTerm("sxsx");
 
-		sxsx.push("sx", "sx", 0, 0, 'N', 'N', 2, 1, 0);
+		OpForLinkType sx("splus");
+
+		sxsx.push(sx, 'N', sx, 'N', 2, 1, 0);
 	}
 
 private:

@@ -97,6 +97,19 @@ template<typename ModelBaseType> class ExtendedHubbard1Orb;
 template<typename ModelBaseType>
 class ModelHubbard : public ModelBaseType {
 
+	typedef unsigned int long WordType;
+	typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
+	typedef typename ModelBaseType::BlockType BlockType;
+	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
+	typedef typename ModelBaseType::VectorType VectorType;
+
+	static const int FERMION_SIGN = -1;
+	static const int DEGREES_OF_FREEDOM=2;
+	static const int NUMBER_OF_ORBITALS=1;
+
+	enum {SPIN_UP = HilbertSpaceHubbardType::SPIN_UP,
+		  SPIN_DOWN = HilbertSpaceHubbardType::SPIN_DOWN};
+
 public:
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
@@ -108,34 +121,17 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelBaseType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::SparseElementType SparseElementType;
-	typedef unsigned int long WordType;
-	typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelBaseType::QnType QnType;
 	typedef typename QnType::VectorQnType VectorQnType;
-	typedef typename ModelBaseType::ModelTermType ModelTermType;
-
-private:
-
-	static const int FERMION_SIGN = -1;
-	static const int DEGREES_OF_FREEDOM=2;
-	static const int NUMBER_OF_ORBITALS=1;
-
-	enum {SPIN_UP = HilbertSpaceHubbardType::SPIN_UP,
-		  SPIN_DOWN = HilbertSpaceHubbardType::SPIN_DOWN};
-
-	typedef typename ModelBaseType::BlockType BlockType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelBaseType::VectorType VectorType;
-
-public:
-
 	typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
+	typedef typename ModelBaseType::ModelTermType ModelTermType;
+	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
 	ModelHubbard(const SolverParamsType& solverParams,
@@ -312,8 +308,12 @@ protected:
 	void fillModelLinks()
 	{
 		ModelTermType& hop = ModelBaseType::createTerm("hopping");
-		hop.push("c", "c", 0, 0, 'N', 'C', 1, 1, 0);
-		hop.push("c", "c", 1, 1, 'N', 'C', 1, -1, 1);
+
+		OpForLinkType cup("c", 0);
+		hop.push(cup, 'N', cup, 'C', 1, 1, 0);
+
+		OpForLinkType cdown("c", 1);
+		hop.push(cdown, 'N', cdown, 'C', 1, -1, 1);
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const

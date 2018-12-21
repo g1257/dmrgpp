@@ -135,6 +135,7 @@ public:
 	typedef typename ModelCommonType::VerySparseMatrixType VerySparseMatrixType;
 	typedef ParallelHamiltonianConnection<HamiltonianConnectionType> ParallelHamConnectionType;
 	typedef typename ModelLinksType::TermType ModelTermType;
+	typedef typename ModelLinksType::OpaqueOp OpForLinkType;
 
 	ModelBase(const ParametersType& params,
 	          const GeometryType_& geometry,

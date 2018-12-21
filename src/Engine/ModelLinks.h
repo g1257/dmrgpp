@@ -22,6 +22,19 @@ class ModelLinks {
 	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 
+public:
+
+	struct OpaqueOp {
+
+		OpaqueOp(PsimagLite::String name_, SizeType dof_ = 0, SizeType edof_ = 0)
+		    : name(name_), dof(dof_), edof(edof_)
+		{}
+
+		PsimagLite::String name;
+		SizeType dof;
+		SizeType edof;
+	};
+
 	class OneLink {
 
 	public:
@@ -84,12 +97,10 @@ class ModelLinks {
 			offsets_ = &offsets;
 		}
 
-		void push(PsimagLite::String name1,
-		          PsimagLite::String name2,
-		          SizeType dof1 = 0,
-		          SizeType dof2 = 0,
-		          char mod1 = 'N',
-		          char mod2 = 'C',
+		void push(const OpaqueOp& op1,
+		          char mod1,
+		          const OpaqueOp& op2,
+		          char mod2,
 		          SizeType angularMomentum = 0,
 		          RealType_ angularFactor = 1.0,
 		          SizeType category = 0,
@@ -97,8 +108,8 @@ class ModelLinks {
 		          void* modifierData = 0)
 		{
 			assert(sites_.size() == 2);
-			SizeType index1 = findIndexOfOp(name1, sites_[0], dof1);
-			SizeType index2 = findIndexOfOp(name2, sites_[1], dof2);
+			SizeType index1 = findIndexOfOp(op1.name, sites_[0], op1.dof);
+			SizeType index2 = findIndexOfOp(op2.name, sites_[1], op2.dof);
 
 			assert(cm_);
 			const VectorOperatorType& cm = *cm_;
@@ -108,7 +119,7 @@ class ModelLinks {
 				fermionOrBoson = ProgramGlobals::FERMION;
 
 			links_.push_back(OneLink(PairSizeType(index1, index2),
-			                         PairSizeType(dof1, dof2),
+			                         PairSizeType(op1.edof, op2.edof),
 			                         fermionOrBoson,
 			                         PairCharType(mod1, mod2),
 			                         angularMomentum,
@@ -183,8 +194,6 @@ class ModelLinks {
 		PsimagLite::String name_;
 		VectorSizeType sites_;
 	};
-
-public:
 
 	enum HermitianEnum { HERMIT_NEITHER, HERMIT_PLUS, HERMIT_MINUS};
 
