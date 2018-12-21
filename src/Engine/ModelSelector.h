@@ -52,8 +52,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "Utils.h"
 #include "../Models/Heisenberg/ModelHeisenberg.h"
-#if ALL_MODELS
 #include "../Models/HubbardOneBand/ModelHubbard.h"
+#if ALL_MODELS
 #include "../Models/HeisenbergAncillaC/HeisenbergAncillaC.h"
 #include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
 #include "../Models/SuperExtendedHubbard1Orb/SuperExtendedHubbard1Orb.h"
@@ -87,8 +87,8 @@ class ModelSelector {
 
 	// start models here:
 	typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
-#if ALL_MODELS
 	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
+#if ALL_MODELS
 	typedef HeisenbergAncillaC<ModelBaseType> HeisenbergAncillaCType;
 	typedef ExtendedHubbard1Orb<ModelBaseType> ModelHubbardExtType;
 	typedef ExtendedSuperHubbard1Orb<ModelBaseType> ModelHubbardExtSuperType;
@@ -132,11 +132,13 @@ public:
 		} else if (name_ == "HeisenbergAnisotropic") {
 			model_ = new ModelHeisenbergType(solverParams,io,geometry,"Anisotropic");
 		}
+		else if (name_ == "HubbardOneBand") {
+			model_ = new ModelHubbardType(solverParams, io, geometry);
+		}
 #if ALL_MODELS
+
 		else if (name_ == "HeisenbergAncillaC") {
 			model_ = new HeisenbergAncillaCType(solverParams,io,geometry);
-		} else if (name_ == "HubbardOneBand") {
-			model_ = new ModelHubbardType(solverParams, io, geometry, "Hopping");
 		} else if (name_ == "HubbardOneBandExtended") {
 			model_ = new ModelHubbardExtType(solverParams,io,geometry);
 		} else if (name_ == "HubbardOneBandExtendedSuper") {

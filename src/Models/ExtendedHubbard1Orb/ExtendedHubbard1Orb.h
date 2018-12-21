@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef EXTENDED_HUBBARD_1ORB_H
 #define EXTENDED_HUBBARD_1ORB_H
 #include "../Models/HubbardOneBand/ModelHubbard.h"
-#include "LinkProdExtendedHubbard1Orb.h"
 
 namespace Dmrg {
 //! Extended Hubbard for DMRG solver, uses ModelHubbard by containment
@@ -115,6 +114,7 @@ public:
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
 	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
+	typedef typename ModelBaseType::ModelTermType ModelTermType;
 
 	ExtendedHubbard1Orb(const SolverParamsType& solverParams,
 	                    InputValidatorType& io,
@@ -153,6 +153,14 @@ public:
 		modelHubbard_.fillLabeledOperators(qns);
 
 		this->makeTrackableOrderMatters("n");
+	}
+
+	void fillModelLinks()
+	{
+		modelHubbard_.fillModelLinks();
+
+		ModelTermType& ninj = ModelBaseType::createTerm("ninj");
+		ninj.push("n", "n", 0, 0, 'N', 'N');
 	}
 
 private:

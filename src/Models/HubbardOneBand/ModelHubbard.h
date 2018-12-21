@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h" // in PsimagLite
 #include "ParametersModelHubbard.h"
 #include "HilbertSpaceHubbard.h"
-#include "LinkProductHubbardOneBand.h"
 #include "CrsMatrix.h"
 #include "SpinSquaredHelper.h"
 #include "SpinSquared.h"
@@ -115,6 +114,7 @@ public:
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelBaseType::QnType QnType;
 	typedef typename QnType::VectorQnType VectorQnType;
+	typedef typename ModelBaseType::ModelTermType ModelTermType;
 
 private:
 
@@ -132,7 +132,6 @@ private:
 public:
 
 	typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
-	typedef LinkProductHubbardOneBand<ModelHelperType, GeometryType> LinkProductType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
@@ -141,11 +140,9 @@ public:
 
 	ModelHubbard(const SolverParamsType& solverParams,
 	             InputValidatorType& io,
-	             GeometryType const &geometry,
-	             PsimagLite::String terms)
+	             GeometryType const &geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType(io, terms),
 	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),
@@ -312,6 +309,13 @@ protected:
 		}
 	}
 
+	void fillModelLinks()
+	{
+		ModelTermType& hop = ModelBaseType::createTerm("hopping");
+		hop.push("c", "c", 0, 0, 'N', 'C', 1, 1, 0);
+		hop.push("c", "c", 1, 1, 'N', 'C', 1, -1, 1);
+	}
+
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
@@ -332,9 +336,11 @@ protected:
 		SparseMatrixType tmpMatrix,niup,nidown,Szsquare,Szi;
 		SizeType linSize = geometry_.numberOfSites();
 
+		const typename ModelBaseType::ModelLinksType& modelLinks = ModelBaseType::modelLinks();
+
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType site = block[i];
-			const VectorOperatorType& cm = ModelBaseType::trackableOps(site);
+			const VectorOperatorType& cm = modelLinks.trackableOps(site);
 
 			// onsite U hubbard
 			//n_i up

@@ -90,7 +90,7 @@ class ModelLinks {
 		          SizeType dof2 = 0,
 		          char mod1 = 'N',
 		          char mod2 = 'C',
-		          SizeType angularMomentum = 1,
+		          SizeType angularMomentum = 0,
 		          RealType_ angularFactor = 1.0,
 		          SizeType category = 0,
 		          typename OneLinkType::ModifierType vModifier = OneLink::nullModifier,
