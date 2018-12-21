@@ -91,11 +91,12 @@ namespace Dmrg {
 
 // Keep this class independent of x and y in x = H*y
 // For things that depend on x and y use ParallelHamiltonianConnection.h
-template<typename ModelLinksType, typename ModelHelperType>
+template<typename ModelLinksType, typename ModelHelperType_>
 class HamiltonianConnection {
 
 public:
 
+	typedef ModelHelperType_ ModelHelperType;
 	typedef typename ModelLinksType::GeometryType GeometryType;
 	typedef SuperGeometry<GeometryType> SuperGeometryType;
 	typedef HamiltonianAbstract<SuperGeometryType> HamiltonianAbstractType;
@@ -277,6 +278,7 @@ private:
 
 		assert(hItems.size() == 2);
 
+		VectorSizeType edofs(2, 0);
 		SizeType totalOne = 0;
 		SizeType geometryTerms = superGeometry_.geometry().terms();
 		for (SizeType termIndex = 0; termIndex < geometryTerms; ++termIndex) {
@@ -285,10 +287,13 @@ private:
 			for (SizeType dofs = 0; dofs < dofsTotal; ++dofs) {
 
 				const typename ModelLinksType::TermType::OneLinkType& oneLink = term(dofs);
-				ComplexOrRealType tmp = superGeometry_(smax_,
+
+				edofs[0] = oneLink.orbs.first;
+				edofs[1] = oneLink.orbs.second;
+ 				ComplexOrRealType tmp = superGeometry_(smax_,
 				                                       emin_,
 				                                       hItems,
-				                                       oneLink.idofs,
+				                                       edofs,
 				                                       termIndex);
 
 				if (tmp == static_cast<RealType>(0.0)) continue;

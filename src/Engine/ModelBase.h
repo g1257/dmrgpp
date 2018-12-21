@@ -148,8 +148,9 @@ public:
 	void postCtor()
 	{
 		fillLabeledOperators(qns_); // fills qns_ and labeledOperators_
+		modelLinks_.postCtor1(labeledOperators_, modelCommon_.geometry().terms());
 		fillModelLinks(); // fills modelLinks_
-		modelLinks_.postCtor(labeledOperators_, modelCommon_.geometry().terms());
+		modelLinks_.postCtor2();
 
 		ProgramGlobals::init(maxElectronsOneSpin());
 	}

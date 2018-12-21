@@ -297,22 +297,22 @@ protected:
 
 		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
 
-		spsm.push("splus", "splus", ProgramGlobals::BOSON, 'N', 'C', 2, -1, 2,
+		spsm.push("splus", "splus", 0, 0, 'N', 'C', 2, -1, 2,
 		          valueModifierTerm0, &isSu2);
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 
 		if (!isSu2)
-			szsz.push("sz", "sz", ProgramGlobals::BOSON, 'N', 'N', 2, 0.5);
+			szsz.push("sz", "sz", 0, 0, 'N', 'N', 2, 0.5);
 		else
-			spsm.push("splus", "splus", ProgramGlobals::BOSON, 'N', 'C', 2, -1, 2,
+			spsm.push("splus", "splus", 0, 0, 'N', 'C', 2, -1, 2,
 			          valueModifierTermOther, &isSu2);
 
 		if (additional_ != "Anisotropic") return; // <--- EARLY EXIT HERE
 
 		ModelTermType& sxsx = ModelBaseType::createTerm("sxsx");
 
-		sxsx.push("sx", "sx", ProgramGlobals::BOSON, 'N', 'N', 2, 1, 0);
+		sxsx.push("sx", "sx", 0, 0, 'N', 'N', 2, 1, 0);
 	}
 
 private:

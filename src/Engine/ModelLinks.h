@@ -10,12 +10,17 @@ template<typename LabeledOperatorsType, typename GeometryType_>
 class ModelLinks {
 
 	typedef std::pair<SizeType, SizeType> PairSizeType;
+	typedef std::pair<char, char> PairCharType;
 	typedef std::pair<PsimagLite::String, PsimagLite::String> PairStringType;
 	typedef std::pair<PsimagLite::String, SizeType> PairStringSizeType;
 	typedef typename LabeledOperatorsType::OperatorType::RealType RealType_;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename LabeledOperatorsType::LabelType LabelType;
 	typedef typename LabeledOperatorsType::ComplexOrRealType ComplexOrRealType;
+	typedef typename LabeledOperatorsType::OperatorType OperatorType;
+	typedef typename OperatorType::RealType RealType;
+	typedef typename OperatorType::StorageType SparseMatrixType;
+	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 
 	class OneLink {
 
@@ -23,22 +28,21 @@ class ModelLinks {
 
 		static void nullModifier(ComplexOrRealType&, void*) {}
 
-		typedef std::pair<char, char> PairCharType;
 		typedef void (*ModifierType)(ComplexOrRealType&, void*);
 
-		OneLink(SizeType index1,
-		        SizeType index2,
+		OneLink(PairSizeType indices_,
+		        PairSizeType orbs_,
 		        ProgramGlobals::FermionOrBosonEnum fermionOrBoson_,
-		        char mod1,
-		        char mod2,
+		        PairCharType mods_,
 		        SizeType angularMomentum_,
 		        RealType_ angularFactor_,
 		        SizeType category_,
 		        ModifierType vModifier_,
 		        void* modifierData_)
-		    : indices(PairSizeType(index1, index2)),
+		    : indices(indices_),
+		      orbs(orbs_),
 		      fermionOrBoson(fermionOrBoson_),
-		      mods(PairCharType(mod1, mod2)),
+		      mods(mods_),
 		      angularMomentum(angularMomentum_),
 		      angularFactor(angularFactor_),
 		      category(category_),
@@ -47,6 +51,7 @@ class ModelLinks {
 		{}
 
 		PairSizeType indices;
+		PairSizeType orbs;
 		ProgramGlobals::FermionOrBosonEnum fermionOrBoson;
 		PairCharType mods;
 		SizeType angularMomentum;
@@ -70,9 +75,19 @@ class ModelLinks {
 		    : name_(name), sites_(sites)
 		{}
 
+		static void init(const LabeledOperatorsType& l,
+		                 const VectorOperatorType& cm,
+		                 const VectorSizeType offsets)
+		{
+			labeledOps_ = &l;
+			cm_ = &cm;
+			offsets_ = &offsets;
+		}
+
 		void push(PsimagLite::String name1,
 		          PsimagLite::String name2,
-		          ProgramGlobals::FermionOrBosonEnum fermionOrBoson,
+		          SizeType dof1 = 0,
+		          SizeType dof2 = 0,
 		          char mod1 = 'N',
 		          char mod2 = 'C',
 		          SizeType angularMomentum = 1,
@@ -81,14 +96,21 @@ class ModelLinks {
 		          typename OneLinkType::ModifierType vModifier = OneLink::nullModifier,
 		          void* modifierData = 0)
 		{
-			SizeType index1 = findIndexOfOp(name1);
-			SizeType index2 = findIndexOfOp(name2);
+			assert(sites_.size() == 2);
+			SizeType index1 = findIndexOfOp(name1, sites_[0], dof1);
+			SizeType index2 = findIndexOfOp(name2, sites_[1], dof2);
 
-			links_.push_back(OneLink(index1,
-			                         index2,
+			assert(cm_);
+			const VectorOperatorType& cm = *cm_;
+			assert(index1 < cm.size() && index2 < cm.size());
+			ProgramGlobals::FermionOrBosonEnum fermionOrBoson = ProgramGlobals::BOSON;
+			if (cm[index1].fermionSign < 0 && cm[index2].fermionSign < 0)
+				fermionOrBoson = ProgramGlobals::FERMION;
+
+			links_.push_back(OneLink(PairSizeType(index1, index2),
+			                         PairSizeType(dof1, dof2),
 			                         fermionOrBoson,
-			                         mod1,
-			                         mod2,
+			                         PairCharType(mod1, mod2),
 			                         angularMomentum,
 			                         angularFactor,
 			                         category,
@@ -110,10 +132,25 @@ class ModelLinks {
 
 	private:
 
-		SizeType findIndexOfOp(PsimagLite::String) const
+		SizeType findIndexOfOp(PsimagLite::String name,
+		                       SizeType site,
+		                       SizeType dof) const
 		{
-			err("Wrong\n");
-			return 0;
+			assert(labeledOps_);
+			assert(offsets_);
+			const VectorSizeType& offsets = *offsets_;
+			SizeType n = offsets.size();
+			for (SizeType i = 0; i < n; ++i) {
+				const typename LabelType::PairStringSizeType& nameAndSite =
+				        labeledOps_->trackables(i);
+
+				if (nameAndSite.first == name && nameAndSite.second == site)
+					return offsets[i] + dof;
+			}
+
+			throw PsimagLite::RuntimeError("Cannot find TRACKABLE operator " +
+			                               name + " with dof " + ttos(dof) +
+			                               " and site " + ttos(site) + "\n");
 		}
 
 		Term(const Term&);
@@ -123,6 +160,9 @@ class ModelLinks {
 		PsimagLite::String name_; // name of term, not name of operator
 		VectorSizeType sites_;
 		VectorOneLinkType links_;
+		static const LabeledOperatorsType* labeledOps_;
+		static const VectorSizeType* offsets_;
+		static const VectorOperatorType* cm_;
 	};
 
 	class IsValue {
@@ -151,10 +191,6 @@ public:
 	typedef GeometryType_ GeometryType;
 	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-	typedef typename LabeledOperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::RealType RealType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename PsimagLite::Vector<HermitianEnum>::Type VectorHermitianEnum;
 	typedef typename PsimagLite::Vector<Term*>::Type VectorTermType;
 	typedef Term TermType;
@@ -170,8 +206,8 @@ public:
 		terms_.clear();
 	}
 
-	void postCtor(const LabeledOperatorsType& labeledOps,
-	              SizeType geometryTerms)
+	void postCtor1(const LabeledOperatorsType& labeledOps,
+	               SizeType geometryTerms)
 	{
 		if (terms_.size() > geometryTerms) {
 			PsimagLite::String str("ModelBase: NumberOfTerms must be ");
@@ -179,11 +215,14 @@ public:
 		}
 
 		SizeType n = labeledOps.trackables();
+		offsets_.resize(n, 0);
 		for (SizeType i = 0; i < n; ++i) {
 			const typename LabelType::PairStringSizeType& nameAndSite = labeledOps.trackables(i);
 			const LabelType& ll = labeledOps.findLabel(nameAndSite.first,
 			                                           nameAndSite.second);
 			SizeType dofs = ll.dofs();
+
+			offsets_[i] = (i == 0) ? 0 : offsets_[i - 1] + ll.dofs();
 
 			for (SizeType j = 0; j < dofs; ++j)
 				cm_.push_back(ll(j));
@@ -195,6 +234,11 @@ public:
 		for (SizeType i = 0; i < m; ++i)
 			hermit_[i] = getHermitianProperty(cm_[i].data);
 
+		Term::init(labeledOps, cm_, offsets_);
+	}
+
+	void postCtor2()
+	{
 		SizeType t = terms_.size();
 		for (SizeType i = 0; i < t; ++i) {
 			SizeType dof = terms_[i]->size();
@@ -259,8 +303,18 @@ private:
 
 	VectorTermType terms_;
 	VectorOperatorType cm_;
+	VectorSizeType offsets_;
 	VectorHermitianEnum hermit_;
 	SizeType maxDofs_;
 };
+
+template<typename T1, typename T2>
+const T1* ModelLinks<T1, T2>::Term::labeledOps_ = 0;
+
+template<typename T1, typename T2>
+const typename ModelLinks<T1, T2>::VectorSizeType* ModelLinks<T1, T2>::Term::offsets_ = 0;
+
+template<typename T1, typename T2>
+const typename ModelLinks<T1, T2>::VectorOperatorType* ModelLinks<T1, T2>::Term::cm_ = 0;
 }
 #endif // MODEL_LINKS_H
