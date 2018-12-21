@@ -499,7 +499,7 @@ protected:
 
 	static void makeTrackableOrderMatters(PsimagLite::String name, SizeType site = 0)
 	{
-		labeledOperators_.makeTrackableOrderMatters(name, site);
+		modelLinks_.makeTrackableOrderMatters(name, site);
 	}
 
 	static void makeTrackableOrderMatters(VectorStringType vname, SizeType site = 0)

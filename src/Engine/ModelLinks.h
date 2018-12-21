@@ -21,6 +21,8 @@ class ModelLinks {
 	typedef typename OperatorType::RealType RealType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
+	typedef typename PsimagLite::Vector<typename LabelType::PairStringSizeType>::Type
+	VectorPairStringSizeType;
 
 public:
 
@@ -88,13 +90,9 @@ public:
 		    : name_(name), sites_(sites)
 		{}
 
-		static void init(const LabeledOperatorsType& l,
-		                 const VectorOperatorType& cm,
-		                 const VectorSizeType& offsets)
+		static void init(const LabeledOperatorsType& l)
 		{
 			labeledOps_ = &l;
-			cm_ = &cm;
-			offsets_ = &offsets;
 		}
 
 		void push(const OpaqueOp& op1,
@@ -111,12 +109,12 @@ public:
 			SizeType index1 = findIndexOfOp(op1.name, sites_[0], op1.dof);
 			SizeType index2 = findIndexOfOp(op2.name, sites_[1], op2.dof);
 
-			assert(cm_);
-			const VectorOperatorType& cm = *cm_;
-			assert(index1 < cm.size() && index2 < cm.size());
+
+			assert(index1 < cm_.size() && index2 < cm_.size());
 			ProgramGlobals::FermionOrBosonEnum fermionOrBoson = ProgramGlobals::BOSON;
-			if (cm[index1].fermionSign < 0 && cm[index2].fermionSign < 0)
+			if (cm_[index1].fermionSign < 0 && cm_[index2].fermionSign < 0)
 				fermionOrBoson = ProgramGlobals::FERMION;
+			// can we also infer angularMomentum, angularFactor, and category? FIXME TODO
 
 			links_.push_back(OneLink(PairSizeType(index1, index2),
 			                         PairSizeType(op1.edof, op2.edof),
@@ -148,15 +146,12 @@ public:
 		                       SizeType dof) const
 		{
 			assert(labeledOps_);
-			assert(offsets_);
-			const VectorSizeType& offsets = *offsets_;
-			SizeType n = offsets.size();
+			SizeType n = offsets_.size();
 			for (SizeType i = 0; i < n; ++i) {
-				const typename LabelType::PairStringSizeType& nameAndSite =
-				        labeledOps_->trackables(i);
+				const typename LabelType::PairStringSizeType& nameAndSite = trackables_[i];
 
 				if (nameAndSite.first == name && nameAndSite.second == site)
-					return offsets[i] + dof;
+					return offsets_[i] + dof;
 			}
 
 			throw PsimagLite::RuntimeError("Cannot find TRACKABLE operator " +
@@ -172,8 +167,6 @@ public:
 		VectorSizeType sites_;
 		VectorOneLinkType links_;
 		static const LabeledOperatorsType* labeledOps_;
-		static const VectorSizeType* offsets_;
-		static const VectorOperatorType* cm_;
 	};
 
 	class IsValue {
@@ -223,10 +216,10 @@ public:
 			err(str + ttos(terms_.size()) + " in input file for this model\n");
 		}
 
-		SizeType n = labeledOps.trackables();
+		SizeType n = trackables_.size();
 		offsets_.resize(n, 0);
 		for (SizeType i = 0; i < n; ++i) {
-			const typename LabelType::PairStringSizeType& nameAndSite = labeledOps.trackables(i);
+			const typename LabelType::PairStringSizeType& nameAndSite = trackables_[i];
 			const LabelType& ll = labeledOps.findLabel(nameAndSite.first,
 			                                           nameAndSite.second);
 			SizeType dofs = ll.dofs();
@@ -243,7 +236,7 @@ public:
 		for (SizeType i = 0; i < m; ++i)
 			hermit_[i] = getHermitianProperty(cm_[i].data);
 
-		Term::init(labeledOps, cm_, offsets_);
+		Term::init(labeledOps);
 	}
 
 	void postCtor2()
@@ -253,6 +246,14 @@ public:
 			SizeType dof = terms_[i]->size();
 			if (dof > maxDofs_) maxDofs_ = dof;
 		}
+	}
+
+	void makeTrackableOrderMatters(PsimagLite::String what, SizeType site)
+	{
+		typename LabelType::PairStringSizeType p(what, site);
+		if (std::find(trackables_.begin(), trackables_.end(), p) != trackables_.end())
+			err("makeTrackableOrderMatters: repeated entry " + what + "\n");
+		trackables_.push_back(p);
 	}
 
 	Term& createTerm(PsimagLite::String name,
@@ -311,19 +312,23 @@ private:
 	}
 
 	VectorTermType terms_;
-	VectorOperatorType cm_;
-	VectorSizeType offsets_;
 	VectorHermitianEnum hermit_;
 	SizeType maxDofs_;
+	static VectorOperatorType cm_;
+	static VectorSizeType offsets_;
+	static VectorPairStringSizeType trackables_;
 };
 
 template<typename T1, typename T2>
 const T1* ModelLinks<T1, T2>::Term::labeledOps_ = 0;
 
 template<typename T1, typename T2>
-const typename ModelLinks<T1, T2>::VectorSizeType* ModelLinks<T1, T2>::Term::offsets_ = 0;
+typename ModelLinks<T1, T2>::VectorSizeType ModelLinks<T1, T2>::offsets_;
 
 template<typename T1, typename T2>
-const typename ModelLinks<T1, T2>::VectorOperatorType* ModelLinks<T1, T2>::Term::cm_ = 0;
+typename ModelLinks<T1, T2>::VectorOperatorType ModelLinks<T1, T2>::cm_;
+
+template<typename T1, typename T2>
+typename ModelLinks<T1, T2>::VectorPairStringSizeType ModelLinks<T1, T2>::trackables_;
 }
 #endif // MODEL_LINKS_H

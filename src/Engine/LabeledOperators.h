@@ -93,8 +93,6 @@ public:
 	typedef Label LabelType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename PsimagLite::Vector<typename LabelType::PairStringSizeType>::Type
-	VectorPairStringSizeType;
 	typedef typename OperatorType::value_type ComplexOrRealType;
 
 	LabeledOperators(PsimagLite::String model = "") : model_(model), sites_(0)
@@ -116,24 +114,12 @@ public:
 
 	void postCtor()
 	{
-		VectorSizeType h(sites_);
-		SizeType n = trackables_.size();
-		for (SizeType i = 0; i < n; ++i) {
-			typename Label::PairStringSizeType nameAndSite = trackables_[i];
-			const LabelType& ll = findLabel(nameAndSite.first, nameAndSite.second);
-			SizeType dofs = ll.dofs();
-
-			for (SizeType j = 0; j < dofs; ++j) {
-				assert(nameAndSite.second < sites_);
-				h[nameAndSite.second] = ll(j).data.rows();
-			}
-		}
-
-		for (SizeType site = 0; site < sites_; ++site) {
-			Label* labeli = new Label("i", site);
-			labels_.push_back(labeli);
-			pushIdentity(*labeli, h[site]);
-		}
+		SizeType site = 0; // fixme for Immm
+		assert(0 < labels_.size());
+		SizeType h = labels_[0].data.rows();
+		Label* labeli = new Label("i", site);
+		labels_.push_back(labeli);
+		pushIdentity(*labeli, h);
 	}
 
 	Label& createLabel(PsimagLite::String name,
@@ -150,14 +136,6 @@ public:
 		labels_.push_back(label);
 		if (site + 1 > sites_) sites_ = site + 1;
 		return *label;
-	}
-
-	void makeTrackableOrderMatters(PsimagLite::String what, SizeType site)
-	{
-		typename Label::PairStringSizeType p(what, site);
-		if (std::find(trackables_.begin(), trackables_.end(), p) != trackables_.end())
-			err("makeTrackableOrderMatters: repeated entry " + what + "\n");
-		trackables_.push_back(p);
 	}
 
 	const OperatorType& operator()(PsimagLite::String what,
@@ -178,14 +156,6 @@ public:
 		PsimagLite::String str("LabeledOperators: model=" + model_);
 		str += " label=" + what + " not found\n";
 		throw PsimagLite::RuntimeError(str);
-	}
-
-	SizeType trackables() const  { return trackables_.size(); }
-
-	const typename LabelType::PairStringSizeType& trackables(SizeType ind) const
-	{
-		assert(ind < trackables_.size());
-		return trackables_[ind];
 	}
 
 	void instrospect() const
@@ -231,7 +201,6 @@ private:
 	PsimagLite::String model_;
 	SizeType sites_;
 	VectorLabelType labels_;
-	VectorPairStringSizeType trackables_;
 };
 }
 #endif // LABELEDOPERATORS_H
