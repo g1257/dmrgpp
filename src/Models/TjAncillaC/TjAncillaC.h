@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_TJ_ANCILLAC_H
 #define DMRG_TJ_ANCILLAC_H
 #include "../Models/FeAsModel/ModelFeBasedSc.h"
-#include "../Models/TjAncillaC/LinkProductTjAncillaC.h"
 #include "../Models/TjAncillaC/ParametersTjAncillaC.h"
 
 namespace Dmrg {
@@ -103,9 +102,8 @@ public:
 	typedef typename ModelBaseType::QnType QnType;
 	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef LinkProductTjAncillaC<ModelHelperType, GeometryType> LinkProductType;
-	typedef	typename ModelBaseType::MyBasis MyBasis;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef	typename ModelBaseType::MyBasis BasisType;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelFeAsType::HilbertState HilbertStateType;
 	typedef typename ModelFeAsType::HilbertBasisType HilbertBasisType;
@@ -115,7 +113,7 @@ public:
 	typedef typename ModelFeAsType::HilbertSpaceFeAsType HilbertSpaceType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef typename OperatorType::PairType PairType;
-	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename PsimagLite::Vector<HilbertStateType>::Type VectorHilbertStateType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
@@ -130,7 +128,7 @@ public:
 	TjAncillaC(const SolverParamsType& solverParams,
 	           InputValidatorType& io,
 	           GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType(io), io),
+	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
 	      geometry_(geometry)
 	{}
@@ -239,6 +237,63 @@ protected:
 		}
 	}
 
+	void fillModelLinks()
+	{
+		//! There are orbitals*orbitals different orbitals
+		//! and 2 spins. Spin is diagonal so we end up with 2*orbitals*orbitals possiblities
+		//! a up a up, a up b up, b up a up, b up, b up, etc
+		//! and similarly for spin down.
+
+		const SizeType orbitals = 1; // like C2 but without hot
+		const bool isSu2 = BasisType::useSu2Symmetry();
+		ModelTermType& hop = ModelBaseType::createTerm("hopping");
+		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
+		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
+		ModelTermType& ninj = ModelBaseType::createTerm("ninj");
+		ModelTermType& dd = ModelBaseType::createTerm("didj");
+
+		for (SizeType spin = 0; spin < 2; ++spin) {
+			for (SizeType orb1 = 0; orb1 < orbitals; ++orb1) {
+				OpForLinkType c1("c", orb1 + spin*orbitals, orb1);
+				for (SizeType orb2 = 0; orb2 < orbitals; ++orb2) {
+					OpForLinkType c2("c", orb2 + spin*orbitals, orb2);
+
+					hop.push(c1, 'N', c2, 'C', 1, (spin == 1) ? -1 : 1, spin);
+				}
+			}
+
+		}
+
+		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
+		{ value *= (isSu2) ? -0.5 : 0.5;};
+		auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
+		{ if (isSu2) value = -value;};
+
+		for (SizeType orb1 = 0; orb1 < orbitals; ++orb1) {
+			OpForLinkType splus1("splus", orb1, orb1);
+			OpForLinkType sz1("sz", orb1, orb1);
+			OpForLinkType n1("n", orb1, orb1);
+
+			for (SizeType orb2 = 0; orb2 < orbitals; ++orb2) {
+				OpForLinkType splus2("splus", orb2, orb2);
+				OpForLinkType sz2("sz", orb2, orb2);
+				OpForLinkType n2("n", orb2, orb2);
+
+				spsm.push(splus1, 'N', splus2, 'C', 2, -1, 2, valueModiferTerm0);
+
+				if (!isSu2)
+					szsz.push(sz1, 'N', sz2, 'N', 2, 0.5);
+				else
+					spsm.push(splus1, 'N', splus2, 'C', 2, -1, 2, valueModifierTermOther);
+
+				ninj.push(n1, 'N', n2, 'N');
+			}
+		}
+
+		OpForLinkType d("d");
+		dd.push(d, 'N', d, 'C');
+	}
+
 private:
 
 	//! find all states in the natural basis for a block of n sites
@@ -313,7 +368,7 @@ private:
 	                          const HilbertBasisType& natBasis) const
 	{
 		int n = natBasis.size();
-		PsimagLite::Matrix<SparseElementType> cm(n,n);
+		PsimagLite::Matrix<ComplexOrRealType> cm(n,n);
 		findCreationDense(cm,i,sigma,natBasis);
 		SparseMatrixType temp;
 		fullMatrixToCrsMatrix(temp,cm);
@@ -322,7 +377,7 @@ private:
 	}
 	//! Find c^\dagger_i\gamma\sigma in the natural basis natBasis
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void findCreationDense(PsimagLite::Matrix<SparseElementType>& cm,
+	void findCreationDense(PsimagLite::Matrix<ComplexOrRealType>& cm,
 	                       int i,
 	                       int sigma,
 	                       const HilbertBasisType& natBasis) const
@@ -426,24 +481,24 @@ private:
 		assert(NUMBER_OF_ORBITALS == 2);
 		int n = natBasis.size();
 
-		PsimagLite::Matrix<SparseElementType> cru(n,n);
+		PsimagLite::Matrix<ComplexOrRealType> cru(n,n);
 		findCreationDense(cru,i,SPIN_UP*NUMBER_OF_ORBITALS,natBasis);
 
-		PsimagLite::Matrix<SparseElementType> cad(n,n);
+		PsimagLite::Matrix<ComplexOrRealType> cad(n,n);
 		findCreationDense(cad,i,1 + SPIN_DOWN*NUMBER_OF_ORBITALS,natBasis);
 
-		PsimagLite::Matrix<SparseElementType> crd(n,n);
+		PsimagLite::Matrix<ComplexOrRealType> crd(n,n);
 		findCreationDense(crd,i,SPIN_DOWN*NUMBER_OF_ORBITALS,natBasis);
 
-		PsimagLite::Matrix<SparseElementType> cau(n,n);
+		PsimagLite::Matrix<ComplexOrRealType> cau(n,n);
 		findCreationDense(cau,i,1 + SPIN_UP*NUMBER_OF_ORBITALS,natBasis);
 
-		PsimagLite::Matrix<SparseElementType> part1 = cru*cad;
+		PsimagLite::Matrix<ComplexOrRealType> part1 = cru*cad;
 		const RealType f1 = (-1.0);
-		PsimagLite::Matrix<SparseElementType> part2 = f1*crd*cau;
+		PsimagLite::Matrix<ComplexOrRealType> part2 = f1*crd*cau;
 
 		RealType oneOverSqrt2 = 1.0/sqrt(2.0);
-		PsimagLite::Matrix<SparseElementType> final = oneOverSqrt2*(part1 + part2);
+		PsimagLite::Matrix<ComplexOrRealType> final = oneOverSqrt2*(part1 + part2);
 		SparseMatrixType temp;
 		fullMatrixToCrsMatrix(temp,final);
 		return temp;

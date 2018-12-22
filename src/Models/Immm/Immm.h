@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquaredHelper.h"
 #include "SpinSquared.h"
 #include "VerySparseMatrix.h"
-#include "LinkProductImmm.h"
 #include "ProgramGlobals.h"
 #include <cassert>
 
@@ -109,7 +108,6 @@ public:
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
-	typedef LinkProductImmm<ModelHelperType, GeometryType> LinkProductType;
 	typedef  HilbertSpaceImmm<WordType> HilbertSpaceImmmType;
 	typedef typename HilbertSpaceImmmType::HilbertState HilbertState;
 	typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
@@ -132,7 +130,7 @@ public:
 	Immm(const SolverParamsType& solverParams,
 	     InputValidatorType& io,
 	     GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType(io), io),
+	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      copperEach_(4),
@@ -250,6 +248,11 @@ protected:
 				                    su2Related));
 			}
 		}
+	}
+
+	void fillModelLinks()
+	{
+		err("Immm is broken\n");
 	}
 
 private:

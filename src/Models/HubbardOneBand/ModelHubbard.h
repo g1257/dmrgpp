@@ -97,8 +97,6 @@ template<typename ModelBaseType> class ExtendedHubbard1Orb;
 template<typename ModelBaseType>
 class ModelHubbard : public ModelBaseType {
 
-	typedef unsigned int long WordType;
-	typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
 	typedef typename ModelBaseType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
@@ -107,11 +105,10 @@ class ModelHubbard : public ModelBaseType {
 	static const int DEGREES_OF_FREEDOM=2;
 	static const int NUMBER_OF_ORBITALS=1;
 
-	enum {SPIN_UP = HilbertSpaceHubbardType::SPIN_UP,
-		  SPIN_DOWN = HilbertSpaceHubbardType::SPIN_DOWN};
-
 public:
 
+	typedef unsigned int long WordType;
+	typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelBaseType::GeometryType GeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
@@ -133,6 +130,9 @@ public:
 	typedef typename ModelBaseType::ModelTermType ModelTermType;
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
+
+	enum {SPIN_UP = HilbertSpaceHubbardType::SPIN_UP,
+		  SPIN_DOWN = HilbertSpaceHubbardType::SPIN_DOWN};
 
 	ModelHubbard(const SolverParamsType& solverParams,
 	             InputValidatorType& io,

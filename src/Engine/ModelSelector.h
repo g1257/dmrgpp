@@ -58,12 +58,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/SuperExtendedHubbard1Orb/SuperExtendedHubbard1Orb.h"
 #include "../Models/FeAsModel/ModelFeBasedSc.h"
 #include "../Models/FeAsBasedScExtended/FeAsBasedScExtended.h"
-#if ALL_MODELS
 #include "../Models/Immm/Immm.h"
 #include "../Models/TjMultiOrb/TjMultiOrb.h"
 #include "../Models/TjAncillaC2/TjAncillaC2.h"
 #include "../Models/TjAncillaC/TjAncillaC.h"
 #include "../Models/TjAncillaG/TjAncillaG.h"
+#if ALL_MODELS
 #include "../Models/SuperHubbardExtended/SuperHubbardExtended.h"
 #include "../Models/HubbardAncilla/HubbardAncilla.h"
 #include "../Models/HubbardAncillaExtended/HubbardAncillaExtended.h"
@@ -93,12 +93,12 @@ class ModelSelector {
 	typedef ExtendedSuperHubbard1Orb<ModelBaseType> ModelHubbardExtSuperType;
 	typedef ModelFeBasedSc<ModelBaseType> FeBasedScType;
 	typedef FeAsBasedScExtended<ModelBaseType> FeBasedScExtType;
-#if ALL_MODELS
 	typedef Immm<ModelBaseType> ImmmType;
 	typedef TjMultiOrb<ModelBaseType> TjMultiOrbType;
 	typedef TjAncillaC2<ModelBaseType> TjAncillaC2Type;
 	typedef TjAncillaC<ModelBaseType> TjAncillaCType;
 	typedef TjAncillaG<ModelBaseType> TjAncillaGType;
+#if ALL_MODELS
 	typedef SuperHubbardExtended<ModelBaseType> SuperHubbardExtendedType;
 	typedef HubbardAncilla<ModelBaseType> HubbardAncillaType;
 	typedef HubbardAncillaExtended<ModelBaseType> HubbardAncillaExtendedType;
@@ -144,9 +144,7 @@ public:
 			model_ = new FeBasedScType(solverParams,io,geometry);
 		} else if (name_ == "FeAsBasedScExtended") {
 			model_ = new FeBasedScExtType(solverParams,io,geometry);
-		}
-#if ALL_MODELS
-		else if (name_ == "Immm") {
+		} else if (name_ == "Immm") {
 			model_ = new ImmmType(solverParams,io,geometry);
 		} else if (name_ == "TjMultiOrb") {
 			model_ = new TjMultiOrbType(solverParams,io,geometry);
@@ -156,7 +154,9 @@ public:
 			model_ = new TjAncillaCType(solverParams,io,geometry);
 		} else if (name_ == "TjAncillaG") {
 			model_ = new TjAncillaGType(solverParams,io,geometry);
-		} else if (name_ == "SuperHubbardExtended") {
+		}
+#if ALL_MODELS
+		else if (name_ == "SuperHubbardExtended") {
 			model_ = new SuperHubbardExtendedType(solverParams,io,geometry);
 		} else if (name_ == "KaneMeleHubbard") {
 			model_ = new ModelHubbardType(solverParams,io,geometry, "Hopping Unknown");

@@ -279,7 +279,7 @@ protected:
 
 	void fillModelLinks()
 	{
-		bool isSu2 = BasisType::useSu2Symmetry();
+		const bool isSu2 = BasisType::useSu2Symmetry();
 
 		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
 		OpForLinkType splus0("splus");

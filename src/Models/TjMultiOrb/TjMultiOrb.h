@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_TJ_MULTIORB_H
 #define DMRG_TJ_MULTIORB_H
 #include "../Models/HubbardOneBand/ModelHubbard.h"
-#include "../Models/TjMultiOrb/LinkProductTjMultiOrb.h"
 #include "../Models/TjMultiOrb/ParametersModelTjMultiOrb.h"
 #include "../Models/FeAsModel/HilbertSpaceFeAs.h"
 #include "ProgramGlobals.h"
@@ -105,12 +104,11 @@ public:
 	typedef typename ModelBaseType::QnType QnType;
 	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef LinkProductTjMultiOrb<ModelHelperType, GeometryType> LinkProductType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisFeAsType;
 	typedef typename HilbertBasisFeAsType::value_type HilbertStateFeAs;
 	typedef HilbertSpaceFeAs<HilbertStateFeAs> HilbertSpaceFeAsType;
-	typedef	typename ModelBaseType::MyBasis MyBasis;
+	typedef	typename ModelBaseType::MyBasis BasisType;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelHubbardType::HilbertState HilbertStateType;
 	typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
@@ -119,7 +117,7 @@ public:
 	typedef typename ModelBaseType::VectorType VectorType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef typename OperatorType::PairType PairType;
-	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename PsimagLite::Vector<HilbertStateType>::Type VectorHilbertStateType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
@@ -137,7 +135,7 @@ public:
 	TjMultiOrb(const SolverParamsType& solverParams,
 	           InputValidatorType& io,
 	           GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType(io) ,io),
+	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      offset_(5*modelParameters_.orbitals), // c^\dagger_up, c^\dagger_down, S+, Sz, n
@@ -342,6 +340,59 @@ protected:
 		}
 	}
 
+	void fillModelLinks()
+	{
+		//! There are orbitals*orbitals different orbitals
+		//! and 2 spins. Spin is diagonal so we end up with 2*orbitals*orbitals possiblities
+		//! a up a up, a up b up, b up a up, b up, b up, etc
+		//! and similarly for spin down.
+
+		const SizeType orbitals = modelParameters_.orbitals;
+		ModelTermType& hop = ModelBaseType::createTerm("hopping");
+		bool isSu2 = BasisType::useSu2Symmetry();
+		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
+		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
+		ModelTermType& ninj = ModelBaseType::createTerm("ninj");
+
+		for (SizeType spin = 0; spin < 2; ++spin) {
+			for (SizeType orb1 = 0; orb1 < orbitals; ++orb1) {
+				OpForLinkType c1("c", orb1 + spin*orbitals, orb1);
+				for (SizeType orb2 = 0; orb2 < orbitals; ++orb2) {
+					OpForLinkType c2("c", orb2 + spin*orbitals, orb2);
+
+					hop.push(c1, 'N', c2, 'C', 1, (spin == 1) ? -1 : 1, spin);
+				}
+			}
+
+		}
+
+		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
+		{ value *= (isSu2) ? -0.5 : 0.5;};
+		auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
+		{ if (isSu2) value = -value;};
+
+		for (SizeType orb1 = 0; orb1 < orbitals; ++orb1) {
+			OpForLinkType splus1("splus", orb1, orb1);
+			OpForLinkType sz1("sz", orb1, orb1);
+			OpForLinkType n1("n", orb1, orb1);
+
+			for (SizeType orb2 = 0; orb2 < orbitals; ++orb2) {
+				OpForLinkType splus2("splus", orb2, orb2);
+				OpForLinkType sz2("sz", orb2, orb2);
+				OpForLinkType n2("n", orb2, orb2);
+
+				spsm.push(splus1, 'N', splus2, 'C', 2, -1, 2, valueModiferTerm0);
+
+				if (!isSu2)
+					szsz.push(sz1, 'N', sz2, 'N', 2, 0.5);
+				else
+					spsm.push(splus1, 'N', splus2, 'C', 2, -1, 2, valueModifierTermOther);
+
+				ninj.push(n1, 'N', n2, 'N');
+			}
+		}
+	}
+
 private:
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
@@ -512,8 +563,8 @@ private:
 		}
 
 		MatrixType corrector(n,n);
-		SparseElementType f1 = (-1.0);
-		SparseElementType f2 = 0.5;
+		ComplexOrRealType f1 = (-1.0);
+		ComplexOrRealType f2 = 0.5;
 		for (SizeType i = 0; i < n; ++i)
 			corrector(i,i) = f2 * dens(i,i) * std::abs(dens(i,i) + f1);
 
@@ -737,7 +788,7 @@ private:
 
 			if(orbitals==1)
 				jmpair = calcJmvalue<PairType>(basis[i]);
-			
+
 			// nup
 			SizeType electronsUp = 0;
 			SizeType electronsDown  = 0;

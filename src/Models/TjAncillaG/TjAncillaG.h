@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_TJ_ANCILLAG_H
 #include "../Models/HubbardOneBand/ModelHubbard.h"
 #include "../Models/TjMultiOrb/TjMultiOrb.h"
-#include "../Models/TjAncillaG/LinkProductTjAncillaG.h"
 #include "../Models/TjMultiOrb/ParametersModelTjMultiOrb.h"
 
 namespace Dmrg {
@@ -105,9 +104,8 @@ public:
 	typedef typename ModelBaseType::QnType QnType;
 	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef LinkProductTjAncillaG<ModelHelperType, GeometryType> LinkProductType;
-	typedef	typename ModelBaseType::MyBasis MyBasis;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef	typename ModelBaseType::MyBasis BasisType;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelHubbardType::HilbertState HilbertStateType;
 	typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
@@ -117,7 +115,7 @@ public:
 	typedef typename ModelHubbardType::HilbertSpaceHubbardType HilbertSpaceHubbardType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef typename OperatorType::PairType PairType;
-	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename PsimagLite::Vector<HilbertStateType>::Type VectorHilbertStateType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
@@ -133,14 +131,14 @@ public:
 	TjAncillaG(const SolverParamsType& solverParams,
 	           InputValidatorType& io,
 	           GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType(io), io),
+	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      TjMultiOrb_(solverParams,io,geometry),
 	      offset_(DEGREES_OF_FREEDOM+3), // c^\dagger_up, c^\dagger_down, S+, Sz, n
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 	{
-		if (MyBasis::useSu2Symmetry())
+		if (BasisType::useSu2Symmetry())
 			err("TjAncillaG: SU(2) not supported\n");
 	}
 
@@ -278,6 +276,28 @@ protected:
 			                                                1.0,
 			                                                su2Related));
 		}
+	}
+
+	void fillModelLinks()
+	{
+		const bool isSu2 = BasisType::useSu2Symmetry();
+
+		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
+		OpForLinkType splus0("splus");
+
+		auto modifierTerm0 = [isSu2](ComplexOrRealType& value) { value *= (isSu2) ? -0.5 : 0.5;};
+		spsm.push(splus0, 'N', splus0, 'C', 2, -1, 2, modifierTerm0);
+
+		auto modifierTerm1 = [isSu2](ComplexOrRealType& value) {if (isSu2) value = -value;};
+
+		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
+		OpForLinkType sz0("sz");
+
+		szsz.push(sz0, 'N', sz0, 'C', 2, 0.5, 1, modifierTerm1);
+
+		ModelTermType& ancilla = ModelBaseType::createTerm("ancilla");
+		OpForLinkType d("d");
+		ancilla.push(d, 'N', d, 'C', 2, 1, 0);
 	}
 
 private:
