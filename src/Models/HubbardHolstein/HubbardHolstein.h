@@ -85,7 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquaredHelper.h"
 #include "SpinSquared.h"
 #include "VerySparseMatrix.h"
-#include "LinkProductHubbardHolstein.h"
 #include "ProgramGlobals.h"
 #include "Geometry/GeometryDca.h"
 #include <cstdlib>
@@ -109,7 +108,7 @@ public:
 	typedef typename ModelBaseType::QnType QnType;
 	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
 	typedef typename HilbertBasisType::value_type HilbertState;
 	typedef unsigned int long WordType;
@@ -118,12 +117,11 @@ public:
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
-	typedef LinkProductHubbardHolstein<ModelHelperType, GeometryType> LinkProductType;
-	typedef	typename ModelBaseType::MyBasis MyBasis;
+	typedef	typename ModelBaseType::MyBasis BasisType;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
-	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef ParametersHubbardHolstein<RealType, QnType> ParametersHubbardHolsteinType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename PsimagLite::Vector<PairType>::Type VectorPairType;
@@ -143,13 +141,13 @@ public:
 	                PsimagLite::String additional)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType(io, additional == "SSH"),
 	                    io),
 	      modelParameters_(io),
-	      geometry_(geometry)
+	      geometry_(geometry),
+	      isSsh_(additional == "SSH")
 	{
 		HilbertSpaceHubbardHolsteinType::setBitPhonons(modelParameters_.numberphonons);
-		if (additional == "SSH") {
+		if (isSsh_) {
 			PsimagLite::String warning("HubbardHolstein: ");
 			warning += "SSH term in use.\n";
 			std::cout<<warning;
@@ -206,7 +204,7 @@ protected:
 		this->makeTrackableOrderMatters("c");
 		if (modelParameters_.numberphonons > 0) {
 			this->makeTrackableOrderMatters("a");
-			if (ModelBaseType::linkProduct().terms() > 2)
+			if (isSsh_)
 				this->makeTrackableOrderMatters("cx");
 		}
 
@@ -254,7 +252,7 @@ protected:
 			OperatorType myOp2(tmpMatrix,1,PairType(2,2),-1,su2related2);
 			a.push(myOp2);
 
-			if (ModelBaseType::linkProduct().terms() == 2) continue;
+			if (!isSsh_) continue; //<<--- EARLY BREAK FROM LOOP
 
 			// Set the operators c_(i,sigma} * x_i in the natural basis
 
@@ -280,6 +278,42 @@ protected:
 				cx.push(myOp3);
 			}
 		}
+	}
+
+	void fillModelLinks()
+	{
+		ModelTermType& hopf = ModelBaseType::createTerm("HoppingFermionic");
+
+		OpForLinkType cup("c", 0);
+		hopf.push(cup, 'C', cup, 'N', 1, 1, 0);
+
+		OpForLinkType cdown("c", 1);
+		hopf.push(cdown, 'C', cdown, 'N', 1, -1, 1);
+
+		if (modelParameters_.numberphonons > 0) {
+			ModelTermType& hopb = ModelBaseType::createTerm("HoppingBosonic");
+
+			OpForLinkType a("a");
+			hopb.push(a, 'C', a, 'N', 1, 1, 0);
+		}
+
+		if (!isSsh_) return; // <---- EARLY EXIT HERE
+
+		ModelTermType& hopSsh = ModelBaseType::createTerm("HoppingSSH");
+
+		OpForLinkType cx0("cx", 0);
+		OpForLinkType cx1("cx", 1);
+
+		auto modifier = [](ComplexOrRealType& value) { value *= (-1.0);};
+
+		hopSsh.push(cup, 'C', cx0, 'N', 1, 1, 0);
+
+		hopSsh.push(cx0, 'C', cup, 'N', 1, -1, 1, modifier);
+
+		hopSsh.push(cdown, 'C', cx1, 'N', 1, 1, 2);
+
+		hopSsh.push(cx1, 'C', cdown, 'N', 1, 1, 3, modifier);
+
 	}
 
 private:
@@ -543,6 +577,7 @@ private:
 
 	ParametersHubbardHolsteinType modelParameters_;
 	const GeometryType& geometry_;
+	bool isSsh_;
 }; //class HubbardHolstein
 } // namespace Dmrg
 /*@}*/

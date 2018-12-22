@@ -85,7 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquaredHelper.h"
 #include "SpinSquared.h"
 #include "VerySparseMatrix.h"
-#include "../Models/FeAsModel/LinkProductFeAs.h"
 #include "ProgramGlobals.h"
 
 namespace Dmrg {
@@ -113,8 +112,7 @@ public:
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
-	typedef LinkProductFeAs<ModelHelperType, GeometryType> LinkProductType;
-	typedef	typename ModelBaseType::MyBasis MyBasis;
+	typedef	typename ModelBaseType::MyBasis BasisType;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
@@ -131,7 +129,7 @@ public:
 	ModelHubbardMultiBand(const SolverParamsType& solverParams,
 	                      InputValidatorType& io,
 	                      GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType(io), io),
+	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      spinSquared_(spinSquaredHelper_,
@@ -293,6 +291,28 @@ protected:
 
 			{
 				c.push(creationMatrix_[dof]);
+			}
+		}
+	}
+
+	void fillModelLinks()
+	{
+
+		//! There are orbitals*orbitals different orbitals
+		//! and 2 spins. Spin is diagonal so we end up with 2*orbitals*orbitals possiblities
+		//! a up a up, a up b up, b up a up, b up, b up, etc
+		//! and similarly for spin down.
+
+		const SizeType orbitals = modelParameters_.orbitals;
+		ModelTermType& hop = ModelBaseType::createTerm("hopping");
+		for (SizeType spin = 0; spin < 2; ++spin) {
+			for (SizeType orb1 = 0; orb1 < orbitals; ++orb1) {
+				OpForLinkType c1("c", orb1 + spin*orbitals, orb1);
+				for (SizeType orb2 = 0; orb2 < orbitals; ++orb2) {
+					OpForLinkType c2("c", orb2 + spin*orbitals, orb2);
+
+					hop.push(c1, 'N', c2, 'C', 1, (spin == 1) ? -1 : 1, spin);
+				}
 			}
 		}
 	}

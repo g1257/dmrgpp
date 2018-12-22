@@ -47,11 +47,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MODEL_SELECTOR_H
 #define MODEL_SELECTOR_H
 
-#define ALL_MODELS 0
+#define ALL_MODELS 1
 #include <stdexcept>
 #include "ProgramGlobals.h"
 #include "Utils.h"
 #include "../Models/Heisenberg/ModelHeisenberg.h"
+#if ALL_MODELS
 #include "../Models/HubbardOneBand/ModelHubbard.h"
 #include "../Models/HeisenbergAncillaC/HeisenbergAncillaC.h"
 #include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
@@ -67,8 +68,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/HubbardAncilla/HubbardAncilla.h"
 #include "../Models/HubbardAncillaExtended/HubbardAncillaExtended.h"
 #include "../Models/FermionSpinless/FermionSpinless.h"
-#if ALL_MODELS
-
 #include "../Models/Kitaev/Kitaev.h"
 #include "../Models/HubbardMultiBand/ModelHubbardMultiBand.h"
 #include "../Models/HubbardHolstein/HubbardHolstein.h"
@@ -88,6 +87,7 @@ class ModelSelector {
 
 	// start models here:
 	typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
+#if ALL_MODELS
 	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
 	typedef HeisenbergAncillaC<ModelBaseType> HeisenbergAncillaCType;
 	typedef ExtendedHubbard1Orb<ModelBaseType> ModelHubbardExtType;
@@ -103,7 +103,6 @@ class ModelSelector {
 	typedef HubbardAncilla<ModelBaseType> HubbardAncillaType;
 	typedef HubbardAncillaExtended<ModelBaseType> HubbardAncillaExtendedType;
 	typedef FermionSpinless<ModelBaseType> FermionSpinlessType;
-#if ALL_MODELS
 	typedef Kitaev<ModelBaseType> KitaevType;
 	typedef ModelHubbardMultiBand<ModelBaseType> ModelHubbardMultiBandType;
 	typedef HubbardHolstein<ModelBaseType> HubbardHolsteinType;
@@ -133,6 +132,7 @@ public:
 		} else if (name_ == "HeisenbergAnisotropic") {
 			model_ = new ModelHeisenbergType(solverParams,io,geometry,"Anisotropic");
 		}
+#if ALL_MODELS
 		else if (name_ == "HubbardOneBand") {
 			model_ = new ModelHubbardType(solverParams, io, geometry);
 		} else if (name_ == "HeisenbergAncillaC") {
@@ -165,10 +165,7 @@ public:
 			model_ = new HubbardAncillaExtendedType(solverParams,io,geometry);
 		} else if (name_ == "FermionSpinless") {
 			model_ = new FermionSpinlessType(solverParams,io,geometry);
-		}
-#if ALL_MODELS
-
-		else if (name_ == "Kitaev") {
+		} else if (name_ == "Kitaev") {
 			model_ = new KitaevType(solverParams,io,geometry,"");
 		} else if (name_ == "KitaevExtended") {
 			model_ = new KitaevType(solverParams,io,geometry,"Extended");

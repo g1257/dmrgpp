@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <algorithm>
 #include "ModelBase.h"
 #include "ParametersKitaev.h"
-#include "LinkProductKitaev.h"
 #include "CrsMatrix.h"
 #include "VerySparseMatrix.h"
 #include "SpinSquaredHelper.h"
@@ -116,22 +115,21 @@ public:
 	typedef typename ModelBaseType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef unsigned int long WordType;
-	typedef LinkProductKitaev<ModelHelperType, GeometryType> LinkProductType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelBaseType::VectorRealType VectorRealType;
 	typedef typename PsimagLite::Vector<unsigned int long>::Type HilbertBasisType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::PairType PairType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 	typedef typename ModelBaseType::ModelTermType ModelTermType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	Kitaev(const SolverParamsType& solverParams,
 	       InputValidatorType& io,
@@ -139,13 +137,13 @@ public:
 	       PsimagLite::String additional)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType(io,(additional == "Extended")),
 	                    io),
 	      modelParameters_(io),
-	      geometry_(geometry)
+	      geometry_(geometry),
+	      extended_(additional == "Extended")
 	{
 
-		if (additional == "Extended")
+		if (extended_)
 			checkExtended(solverParams);
 
 		SizeType n = geometry_.numberOfSites();
@@ -255,6 +253,25 @@ protected:
 		}
 	}
 
+	void fillModelLinks()
+	{
+		VectorStringType labels = {"sx", "sy", "sz"};
+
+		for (SizeType i = 0; i < labels.size(); ++i) {
+			OpForLinkType smu(labels[i]);
+			ModelBaseType::createTerm(labels[i] + labels[i]).push(smu, 'N', smu, 'N');
+		}
+
+		if (!extended_) return; // <<---- EARLY EXIT HERE
+
+		OpForLinkType sx("sx");
+		OpForLinkType sy("sy");
+
+		ModelBaseType::createTerm("sxsy").push(sx, 'N', sy, 'N');
+
+		ModelBaseType::createTerm("sysx").push(sy, 'N', sx, 'N');
+	}
+
 private:
 
 	void checkExtended(const SolverParamsType& solverParams) const
@@ -357,6 +374,7 @@ private:
 
 	ParametersKitaev<RealType, QnType>  modelParameters_;
 	const GeometryType& geometry_;
+	bool extended_;
 }; // class Kitaev
 
 } // namespace Dmrg

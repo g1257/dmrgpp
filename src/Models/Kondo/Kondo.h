@@ -1,7 +1,6 @@
 #ifndef DMRGPP_MODEL_KONDO_H
 #define DMRGPP_MODEL_KONDO_H
 #include "ParametersKondo.h"
-#include "LinkProductKondo.h"
 
 namespace Dmrg {
 
@@ -18,26 +17,23 @@ class Kondo : public ModelBaseType {
 	typedef typename ModelBaseType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelBaseType::QnType QnType;
+	typedef typename ModelHelperType::BasisType BasisType;
 	typedef ParametersKondo<RealType, QnType> ParametersKondoType;
 	typedef typename ModelBaseType::GeometryType GeometryType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef LinkProductKondo<ModelHelperType, GeometryType> LinkProductType;
-	typedef typename LinkProductType::PairSizeType PairSizeType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 	typedef typename ModelBaseType::ModelTermType ModelTermType;
+	typedef std::pair<SizeType, SizeType> PairSizeType;
 
 public:
 
 	Kondo(const SolverParamsType& solverParams,
 	      InputValidatorType& io,
 	      GeometryType const &geometry)
-	    : ModelBaseType(solverParams,
-	                    geometry,
-	                    new LinkProductType(io),
-	                    io),
+	    : ModelBaseType(solverParams, geometry, io),
 	      solverParams_(solverParams),
 	      geometry_(geometry),
 	      modelParams_(io)
@@ -54,8 +50,6 @@ public:
 
 		setOperatorMatricesInternal();
 	}
-
-	// START Functions that each model MUST implement
 
 	// For information purposes only. Write model parameters
 	// String contains the group
@@ -164,7 +158,38 @@ protected:
 		}
 	}
 
-	// END ^^^^^^^^^^^Functions that each model needs to implement
+	void fillModelLinks()
+	{
+		const bool isSu2 = BasisType::useSu2Symmetry();
+		ModelTermType& hop = ModelBaseType::createTerm("hopping");
+		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
+		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
+		ModelTermType& ninj = ModelBaseType::createTerm("ninj");
+
+		for (SizeType spin = 0; spin < 2; ++spin) {
+			OpForLinkType c("c", spin);
+			hop.push(c, 'N', c, 'C', 1, (spin == 1) ? -1 : 1, spin);
+		}
+
+		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
+		{ value *= (isSu2) ? -0.5 : 0.5;};
+		auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
+		{ if (isSu2) value = -value;};
+
+		OpForLinkType splus("splus");
+		OpForLinkType sz("sz");
+		OpForLinkType n("n");
+
+		spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModiferTerm0);
+
+		if (!isSu2)
+			szsz.push(sz, 'N', sz, 'N', 2, 0.5);
+		else
+			spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModifierTermOther);
+
+		ninj.push(n, 'N', n, 'N');
+
+	}
 
 private:
 
