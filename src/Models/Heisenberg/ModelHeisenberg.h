@@ -295,7 +295,7 @@ protected:
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 
 		if (!isSu2) {
-			OpForLinkType sz("splus");
+			OpForLinkType sz("sz");
 			szsz.push(sz, 'N', sz, 'N', 2, 0.5);
 		} else {
 			auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
@@ -307,7 +307,7 @@ protected:
 
 		ModelTermType& sxsx = ModelBaseType::createTerm("sxsx");
 
-		OpForLinkType sx("splus");
+		OpForLinkType sx("sx");
 
 		sxsx.push(sx, 'N', sx, 'N', 2, 1, 0);
 	}
