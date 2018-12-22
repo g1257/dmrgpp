@@ -79,7 +79,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef SUPER_HUBBARD_EXTENDED_H
 #define SUPER_HUBBARD_EXTENDED_H
 #include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
-#include "LinkProdSuperHubbardExtended.h"
 
 namespace Dmrg {
 //! Extended Hubbard for DMRG solver, uses ExtendedHubbard1Orb by containment
@@ -100,9 +99,8 @@ public:
 	typedef typename ModelBaseType::QnType QnType;
 	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef LinkProdSuperHubbardExtended<ModelHelperType, GeometryType> LinkProductType;
-	typedef	typename ModelBaseType::MyBasis MyBasis;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef	typename ModelBaseType::MyBasis BasisType;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
 	typedef typename ModelHelperType::BlockType BlockType;
@@ -112,6 +110,7 @@ public:
 	typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
+	typedef typename ModelBaseType::ModelTermType ModelTermType;
 	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeTypeType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
@@ -120,7 +119,7 @@ public:
 	SuperHubbardExtended(const SolverParamsType& solverParams,
 	                     InputValidatorType& io,
 	                     GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType(io), io),
+	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      extendedHubbard_(solverParams,io,geometry)
@@ -152,6 +151,33 @@ protected:
 
 		this->makeTrackableOrderMatters("splus");
 		this->makeTrackableOrderMatters("sz");
+	}
+
+	void fillModelLinks()
+	{
+		extendedHubbard_.fillModelLinks();
+
+		const bool isSu2 = BasisType::useSu2Symmetry();
+
+		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
+
+		OpForLinkType splus("splus");
+
+		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
+		{ value *= (isSu2) ? -0.5 : 0.5;};
+
+		spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModiferTerm0);
+
+		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
+
+		if (!isSu2) {
+			OpForLinkType sz("sz");
+			szsz.push(sz, 'N', sz, 'N', 2, 0.5);
+		} else {
+			auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
+			{ if (isSu2) value = -value;};
+			spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModifierTermOther);
+		}
 	}
 
 private:

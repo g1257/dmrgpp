@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h" // in PsimagLite
 #include "ParametersFermionSpinless.h"
 #include "HilbertSpaceFermionSpinless.h"
-#include "LinkProductFermionSpinless.h"
 #include "CrsMatrix.h"
 #include "SpinSquaredHelper.h"
 #include "SpinSquared.h"
@@ -111,7 +110,7 @@ public:
 	typedef typename ModelBaseType::QnType QnType;
 	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelBaseType::SparseMatrixType SparseMatrixType;
-	typedef typename ModelHelperType::SparseElementType SparseElementType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef unsigned int long WordType;
 	typedef  HilbertSpaceFermionSpinless<WordType> HilbertSpaceType;
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
@@ -122,9 +121,8 @@ public:
 	typedef typename ModelBaseType::VectorType VectorType;
 	typedef typename HilbertSpaceType::HilbertState HilbertState;
 	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
-	typedef LinkProductFermionSpinless<ModelHelperType, GeometryType> LinkProductType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef	typename ModelBaseType::MyBasis MyBasis;
+	typedef	typename ModelBaseType::MyBasis BasisType;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
@@ -134,7 +132,7 @@ public:
 	                InputValidatorType& io,
 	                GeometryType const &geometry,
 	                SizeType offset = DEGREES_OF_FREEDOM)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType(io), io),
+	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      offset_(offset),
@@ -236,6 +234,21 @@ protected:
 
 		this->makeTrackableOrderMatters("c");
 		this->makeTrackableOrderMatters("n");
+	}
+
+	void fillModelLinks()
+	{
+		ModelTermType& hop = ModelBaseType::createTerm("hopping");
+		ModelTermType& ninj = ModelBaseType::createTerm("ninj");
+
+		OpForLinkType cup("c", 0);
+		hop.push(cup, 'N', cup, 'C', 1, 1, 0);
+
+		OpForLinkType cdown("c", 1);
+		hop.push(cdown, 'N', cdown, 'C', 1, -1, 1);
+
+		OpForLinkType n("n");
+		ninj.push(n, 'N', n, 'N');
 	}
 
 	void setBasis(HilbertBasisType& basis,
@@ -348,7 +361,7 @@ protected:
 	}
 
 	ParametersFermionSpinless<RealType, QnType>  modelParameters_;
-	const GeometryType &geometry_;
+	const GeometryType& geometry_;
 	SizeType offset_;
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;

@@ -86,7 +86,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquaredHelper.h"
 #include "SpinSquared.h"
 #include "VerySparseMatrix.h"
-#include "LinkProductHubbardAncillaExtended.h"
 #include "ProgramGlobals.h"
 #include "Geometry/GeometryDca.h"
 #include <cstdlib>
@@ -113,13 +112,12 @@ public:
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef LinkProductHubbardAncillaExtended<ModelHelperType, GeometryType> LinkProductType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelBaseType::VectorType VectorType;
-	typedef	typename ModelBaseType::MyBasis MyBasis;
+	typedef	typename ModelBaseType::MyBasis BasisType;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef ParametersHubbardAncilla<RealType, QnType> ParametersHubbardAncillaType;
@@ -140,7 +138,6 @@ public:
 	                       GeometryType const &geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType(io, (geometry.orbitals(0,0) > 1)),
 	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),
@@ -253,10 +250,58 @@ protected:
 			if (hot_) setN(nop,i,1,natBasis);
 		}
 
-//		if (hot_)
-//			assert(creationMatrix.size() == 14);
-//		else
-//			assert(creationMatrix.size() == 8);
+		//		if (hot_)
+		//			assert(creationMatrix.size() == 14);
+		//		else
+		//			assert(creationMatrix.size() == 8);
+	}
+
+	void fillModelLinks()
+	{
+		const SizeType orbitals = (hot_) ? 2 : 1;
+		const bool isSu2 = BasisType::useSu2Symmetry();
+		ModelTermType& hop = ModelBaseType::createTerm("hopping"); // diagonal in orbital
+		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
+		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
+		ModelTermType& ninj = ModelBaseType::createTerm("ninj");
+		ModelTermType& ll = ModelBaseType::createTerm("LambdaLambda");
+		ModelTermType& pp = ModelBaseType::createTerm("PairPair");
+
+		for (SizeType spin = 0; spin < 2; ++spin) {
+			for (SizeType orb = 0; orb < orbitals; ++orb) {
+				OpForLinkType c("c", orb + spin*orbitals, orb);
+
+				hop.push(c, 'N', c, 'C', 1, (spin == 1) ? -1 : 1, spin);
+			}
+
+			OpForLinkType d("d", spin);
+
+			ll.push(d, 'N', d, 'C');
+		}
+
+		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
+		{ value *= (isSu2) ? -0.5 : 0.5;};
+		auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
+		{ if (isSu2) value = -value;};
+
+		for (SizeType orb = 0; orb < orbitals; ++orb) {
+			OpForLinkType splus("splus", orb, orb);
+			OpForLinkType sz("sz", orb, orb);
+			OpForLinkType n("n", orb, orb);
+			OpForLinkType pair("p", orb, orb);
+
+			spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModiferTerm0);
+
+			if (!isSu2)
+				szsz.push(sz, 'N', sz, 'N', 2, 0.5);
+			else
+				spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModifierTermOther);
+
+			ninj.push(n, 'N', n, 'N');
+
+			pp.push(pair, 'N', pair, 'C', 1, 1, 0,
+			        [](ComplexOrRealType& value) {value *= (-1.0);});
+		}
 	}
 
 private:
@@ -329,7 +374,7 @@ private:
 		crsMatrixToFullMatrix(dn2,n2);
 
 		SizeType n = corrector.rows();
-		SparseElementType f1 = (-1.0);
+		ComplexOrRealType f1 = (-1.0);
 		for (SizeType i = 0; i < n; ++i)
 			corrector(i,i) = std::abs(dn1(i,i) + dn2(i,i) + f1);
 	}

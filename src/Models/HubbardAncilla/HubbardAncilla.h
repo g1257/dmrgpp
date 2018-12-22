@@ -86,7 +86,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquaredHelper.h"
 #include "SpinSquared.h"
 #include "VerySparseMatrix.h"
-#include "LinkProductHubbardAncilla.h"
 #include "ProgramGlobals.h"
 #include "Geometry/GeometryDca.h"
 #include <cstdlib>
@@ -109,19 +108,18 @@ public:
 	typedef typename ModelBaseType::QnType QnType;
 	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
 	typedef typename HilbertBasisType::value_type HilbertState;
 	typedef HilbertSpaceFeAs<HilbertState> HilbertSpaceFeAsType;
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
-	typedef LinkProductHubbardAncilla<ModelHelperType, GeometryType> LinkProductType;
-	typedef	typename ModelBaseType::MyBasis MyBasis;
+	typedef	typename ModelBaseType::MyBasis BasisType;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
-	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef ParametersHubbardAncilla<RealType, QnType> ParametersHubbardAncillaType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename PsimagLite::Vector<PairType>::Type VectorPairType;
@@ -138,7 +136,7 @@ public:
 	HubbardAncilla(const SolverParamsType& solverParams,
 	               InputValidatorType& io,
 	               GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType(io), io),
+	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
 	      geometry_(geometry)
 	{}
@@ -221,6 +219,22 @@ protected:
 		}
 	}
 
+	void fillModelLinks()
+	{
+		ModelTermType& hop = ModelBaseType::createTerm("hopping");
+		ModelTermType& ll = ModelBaseType::createTerm("LambdaLambda");
+
+		for (SizeType spin = 0; spin < 2; ++spin) {
+			OpForLinkType c("c", spin);
+
+			hop.push(c, 'N', c, 'C', 1, (spin == 1) ? -1 : 1, spin);
+
+			OpForLinkType l("l", spin);
+
+			ll.push(l, 'N', l, 'C');
+		}
+	}
+
 private:
 
 	//! find all states in the natural basis for a block of n sites
@@ -289,7 +303,7 @@ private:
 		crsMatrixToFullMatrix(dn2,n2);
 
 		SizeType n = corrector.rows();
-		SparseElementType f1 = (-1.0);
+		ComplexOrRealType f1 = (-1.0);
 		for (SizeType i = 0; i < n; ++i)
 			corrector(i,i) = std::abs(dn1(i,i) + dn2(i,i) + f1);
 	}
