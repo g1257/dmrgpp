@@ -279,16 +279,6 @@ protected:
 		}
 	}
 
-	struct ModifierStruct {
-
-		ModifierStruct(ComplexOrRealType& value_, bool isSu2_)
-		    : value(value_), isSu2(isSu2_)
-		{}
-
-		ComplexOrRealType value;
-		bool isSu2;
-	};
-
 	void fillModelLinks()
 	{
 		bool isSu2 = BasisType::useSu2Symmetry();
@@ -297,7 +287,10 @@ protected:
 
 		OpForLinkType splus("splus");
 
-		spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModifierTerm0, &isSu2);
+		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
+		{ value *= (isSu2) ? -0.5 : 0.5;};
+
+		spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModiferTerm0);
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 
@@ -305,7 +298,9 @@ protected:
 			OpForLinkType sz("splus");
 			szsz.push(sz, 'N', sz, 'N', 2, 0.5);
 		} else {
-			spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModifierTermOther, &isSu2);
+			auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
+			{ if (isSu2) value = -value;};
+			spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModifierTermOther);
 		}
 
 		if (additional_ != "Anisotropic") return; // <--- EARLY EXIT HERE
@@ -318,22 +313,6 @@ protected:
 	}
 
 private:
-
-	static void valueModifierTerm0(ComplexOrRealType& value, void* p)
-	{
-		bool* isSu2 = static_cast<bool*>(p);
-
-		value *= 0.5;
-
-		if (*isSu2) value = -value;
-	}
-
-	static void valueModifierTermOther(ComplexOrRealType& value, void* p)
-	{
-		bool* isSu2 = static_cast<bool*>(p);
-
-		if (*isSu2) value = -value;
-	}
 
 	void checkAnisotropic(const SolverParamsType& solverParams) const
 	{

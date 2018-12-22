@@ -41,9 +41,7 @@ public:
 
 	public:
 
-		static void nullModifier(ComplexOrRealType&, void*) {}
-
-		typedef void (*ModifierType)(ComplexOrRealType&, void*);
+		typedef std::function<void(ComplexOrRealType&)> LambdaType;
 
 		OneLink(PairSizeType indices_,
 		        PairSizeType orbs_,
@@ -52,18 +50,17 @@ public:
 		        SizeType angularMomentum_,
 		        RealType_ angularFactor_,
 		        SizeType category_,
-		        ModifierType vModifier_,
-		        void* modifierData_)
+		        LambdaType vModifier_)
 		    : indices(indices_),
 		      orbs(orbs_),
 		      fermionOrBoson(fermionOrBoson_),
 		      mods(mods_),
 		      angularMomentum(angularMomentum_),
 		      angularFactor(angularFactor_),
-		      category(category_),
-		      modifier(vModifier_),
-		      modifierData(modifierData_)
-		{}
+		      category(category_)
+		{
+			modifier = std::move(vModifier_);
+		}
 
 		PairSizeType indices;
 		PairSizeType orbs;
@@ -72,8 +69,7 @@ public:
 		SizeType angularMomentum;
 		RealType_ angularFactor;
 		SizeType category;
-		ModifierType modifier;
-		void* modifierData;
+		LambdaType modifier;
 	}; // OneLink
 
 	class Term {
@@ -83,6 +79,7 @@ public:
 	public:
 
 		typedef OneLink OneLinkType;
+		typedef typename OneLinkType::LambdaType LambdaType;
 
 		// pair of sites should actually be pair of kinds of sites
 		Term(PsimagLite::String name, // name of term, not name of operator
@@ -102,8 +99,7 @@ public:
 		          SizeType angularMomentum = 0,
 		          RealType_ angularFactor = 1.0,
 		          SizeType category = 0,
-		          typename OneLinkType::ModifierType vModifier = OneLink::nullModifier,
-		          void* modifierData = 0)
+		          LambdaType vModifier = [](ComplexOrRealType&) {})
 		{
 			assert(sites_.size() == 2);
 			SizeType index1 = findIndexOfOp(op1.name, sites_[0], op1.dof);
@@ -123,8 +119,7 @@ public:
 			                         angularMomentum,
 			                         angularFactor,
 			                         category,
-			                         vModifier,
-			                         modifierData));
+			                         vModifier));
 		}
 
 		SizeType size() const { return links_.size(); }

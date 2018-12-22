@@ -300,8 +300,7 @@ private:
 
 				tmp = superGeometry_.geometry().vModifier(termIndex, tmp, targetTime_);
 
-
-				oneLink.modifier(tmp, oneLink.modifierData);
+				oneLink.modifier(tmp);
 
 				LinkType link2(hItems[0],
 				               hItems[1],
