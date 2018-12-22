@@ -95,6 +95,10 @@ namespace Dmrg {
 template<typename ModelBaseType>
 class FermionSpinless : public ModelBaseType {
 
+	static const int FERMION_SIGN = -1;
+	static const int DEGREES_OF_FREEDOM=1;
+	static const int NUMBER_OF_ORBITALS=1;
+
 public:
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
@@ -113,19 +117,9 @@ public:
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
-
-private:
-
-	static const int FERMION_SIGN = -1;
-	static const int DEGREES_OF_FREEDOM=1;
-	static const int NUMBER_OF_ORBITALS=1;
-
 	typedef typename ModelBaseType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
-
-public:
-
 	typedef typename HilbertSpaceType::HilbertState HilbertState;
 	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
 	typedef LinkProductFermionSpinless<ModelHelperType, GeometryType> LinkProductType;
@@ -133,6 +127,8 @@ public:
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
+	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType ModelTermType;
 
 	FermionSpinless(const SolverParamsType& solverParams,
 	                InputValidatorType& io,

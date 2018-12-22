@@ -123,6 +123,8 @@ public:
 	typedef typename PsimagLite::Vector<HilbertStateType>::Type VectorHilbertStateType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType ModelTermType;
 
 	static const int FERMION_SIGN = -1;
 

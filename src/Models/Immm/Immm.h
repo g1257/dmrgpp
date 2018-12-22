@@ -117,6 +117,8 @@ public:
 	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType ModelTermType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceImmmType::SPIN_UP;

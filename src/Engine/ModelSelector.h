@@ -53,12 +53,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Utils.h"
 #include "../Models/Heisenberg/ModelHeisenberg.h"
 #include "../Models/HubbardOneBand/ModelHubbard.h"
-#if ALL_MODELS
 #include "../Models/HeisenbergAncillaC/HeisenbergAncillaC.h"
 #include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
 #include "../Models/SuperExtendedHubbard1Orb/SuperExtendedHubbard1Orb.h"
 #include "../Models/FeAsModel/ModelFeBasedSc.h"
 #include "../Models/FeAsBasedScExtended/FeAsBasedScExtended.h"
+#if ALL_MODELS
 #include "../Models/Immm/Immm.h"
 #include "../Models/TjMultiOrb/TjMultiOrb.h"
 #include "../Models/TjAncillaC2/TjAncillaC2.h"
@@ -88,12 +88,12 @@ class ModelSelector {
 	// start models here:
 	typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
 	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
-#if ALL_MODELS
 	typedef HeisenbergAncillaC<ModelBaseType> HeisenbergAncillaCType;
 	typedef ExtendedHubbard1Orb<ModelBaseType> ModelHubbardExtType;
 	typedef ExtendedSuperHubbard1Orb<ModelBaseType> ModelHubbardExtSuperType;
 	typedef ModelFeBasedSc<ModelBaseType> FeBasedScType;
 	typedef FeAsBasedScExtended<ModelBaseType> FeBasedScExtType;
+#if ALL_MODELS
 	typedef Immm<ModelBaseType> ImmmType;
 	typedef TjMultiOrb<ModelBaseType> TjMultiOrbType;
 	typedef TjAncillaC2<ModelBaseType> TjAncillaC2Type;
@@ -134,10 +134,7 @@ public:
 		}
 		else if (name_ == "HubbardOneBand") {
 			model_ = new ModelHubbardType(solverParams, io, geometry);
-		}
-#if ALL_MODELS
-
-		else if (name_ == "HeisenbergAncillaC") {
+		} else if (name_ == "HeisenbergAncillaC") {
 			model_ = new HeisenbergAncillaCType(solverParams,io,geometry);
 		} else if (name_ == "HubbardOneBandExtended") {
 			model_ = new ModelHubbardExtType(solverParams,io,geometry);
@@ -147,7 +144,9 @@ public:
 			model_ = new FeBasedScType(solverParams,io,geometry);
 		} else if (name_ == "FeAsBasedScExtended") {
 			model_ = new FeBasedScExtType(solverParams,io,geometry);
-		} else if (name_ == "Immm") {
+		}
+#if ALL_MODELS
+		else if (name_ == "Immm") {
 			model_ = new ImmmType(solverParams,io,geometry);
 		} else if (name_ == "TjMultiOrb") {
 			model_ = new TjMultiOrbType(solverParams,io,geometry);

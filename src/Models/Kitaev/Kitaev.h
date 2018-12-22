@@ -97,6 +97,10 @@ namespace Dmrg {
 template<typename ModelBaseType>
 class Kitaev : public ModelBaseType {
 
+	static const int TWICE_THE_SPIN = 1;
+
+	enum InternalDir {DIR_X, DIR_Y, DIR_Z};
+
 public:
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
@@ -109,9 +113,6 @@ public:
 	typedef typename ModelBaseType::QnType QnType;
 	typedef typename QnType::VectorQnType VectorQnType;
 	typedef	typename ModelBaseType::VectorType VectorType;
-
-private:
-
 	typedef typename ModelBaseType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
@@ -122,13 +123,6 @@ private:
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelBaseType::VectorRealType VectorRealType;
-
-	static const int TWICE_THE_SPIN = 1;
-
-	enum InternalDir {DIR_X, DIR_Y, DIR_Z};
-
-public:
-
 	typedef typename PsimagLite::Vector<unsigned int long>::Type HilbertBasisType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::PairType PairType;
@@ -136,6 +130,8 @@ public:
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType ModelTermType;
 
 	Kitaev(const SolverParamsType& solverParams,
 	       InputValidatorType& io,

@@ -489,7 +489,10 @@ protected:
 
 	// care about site here SDHS
 	// care about models that contain other models SDHS
-	// static const VectorOperatorType& trackableOps(SizeType) { return cm_; }
+	static const VectorOperatorType& trackableOps(SizeType site)
+	{
+		return modelLinks_.trackableOps(site);
+	}
 
 	static OpsLabelType& createOpsLabel(PsimagLite::String name,
 	                                    SizeType site = 0)

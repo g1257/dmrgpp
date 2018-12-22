@@ -26,6 +26,8 @@ class Kondo : public ModelBaseType {
 	typedef typename LinkProductType::PairSizeType PairSizeType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType ModelTermType;
 
 public:
 

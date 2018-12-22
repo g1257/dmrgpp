@@ -121,6 +121,8 @@ public:
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef ParametersHubbardMultiBand<ComplexOrRealType, QnType> ParamsModelType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType ModelTermType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;

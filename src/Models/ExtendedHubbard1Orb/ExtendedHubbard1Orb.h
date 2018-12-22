@@ -101,7 +101,6 @@ public:
 	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef LinkProdExtendedHubbard1Orb<ModelHelperType, GeometryType> LinkProductType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
@@ -115,17 +114,17 @@ public:
 	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 	typedef typename ModelBaseType::ModelTermType ModelTermType;
+	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 
 	ExtendedHubbard1Orb(const SolverParamsType& solverParams,
 	                    InputValidatorType& io,
 	                    GeometryType const &geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType(io),
 	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),
-	      modelHubbard_(solverParams, io, geometry, "Hopping")
+	      modelHubbard_(solverParams, io, geometry)
 	{}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -160,7 +159,9 @@ public:
 		modelHubbard_.fillModelLinks();
 
 		ModelTermType& ninj = ModelBaseType::createTerm("ninj");
-		ninj.push("n", "n", 0, 0, 'N', 'N');
+		OpForLinkType n("n");
+
+		ninj.push(n, 'N', n, 'N');
 	}
 
 private:

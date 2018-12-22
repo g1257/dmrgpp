@@ -106,6 +106,7 @@ public:
 
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename ModelBaseType::ModelTermType ModelTermType;
 
 	template<typename SomeInputType>
 	LinkProdSuperHubbardExtended(SomeInputType& io)

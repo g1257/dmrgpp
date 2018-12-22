@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <algorithm>
 #include "ModelBase.h"
 #include "ParametersHeisenbergAncillaC.h"
-#include "LinkProductHeisenbergAncillaC.h"
 #include "CrsMatrix.h"
 #include "VerySparseMatrix.h"
 #include "SpinSquaredHelper.h"
@@ -119,7 +118,6 @@ public:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef unsigned int long WordType;
-	typedef LinkProductHeisenbergAncillaC<ModelHelperType, GeometryType> LinkProductType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -131,13 +129,14 @@ public:
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType ModelTermType;
 
 	HeisenbergAncillaC(const SolverParamsType& solverParams,
 	                   InputValidatorType& io,
 	                   GeometryType const &geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType(io, geometry.orbitals(0,0) > 1),
 	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),
@@ -276,6 +275,41 @@ protected:
 			OperatorType myOp3(tmpMatrix,1,PairType(0,0),1.0,su2related3);
 			d.push(myOp3);
 		}
+	}
+
+	void fillModelLinks()
+	{
+		bool isSu2 = BasisType::useSu2Symmetry();
+
+		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
+		OpForLinkType splus0("splus");
+
+		auto modifierTerm0 = [isSu2](SparseElementType& value) { value *= (isSu2) ? -0.5 : 0.5;};
+		spsm.push(splus0, 'N', splus0, 'C', 2, -1, 2, modifierTerm0);
+
+		OpForLinkType splus1("splus", 1, 1);
+
+		if (hot_)
+			spsm.push(splus1, 'N', splus1, 'C', 2, -1, 2, modifierTerm0);
+
+		auto modifierTerm1 = [isSu2](SparseElementType& value) {if (isSu2) value = -value;};
+
+		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
+		OpForLinkType sz0("sz");
+
+		szsz.push(sz0, 'N', sz0, 'C', 2, 0.5, 1, modifierTerm1);
+
+		if (hot_) {
+			OpForLinkType sz1("sz", 1, 1);
+			if (isSu2)
+				szsz.push(splus1, 'N', splus1, 'C', 2, 0.5, 1, modifierTerm1);
+			else
+				szsz.push(sz1, 'N', sz1, 'C', 2, 0.5, 1);
+		}
+
+		ModelTermType& ancilla = ModelBaseType::createTerm("ancilla");
+		OpForLinkType d("d");
+		ancilla.push(d, 'N', d, 'C', 2, 1, 0);
 	}
 
 private:

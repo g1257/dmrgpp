@@ -57,10 +57,9 @@ public:
 		      mods(mods_),
 		      angularMomentum(angularMomentum_),
 		      angularFactor(angularFactor_),
-		      category(category_)
-		{
-			modifier = std::move(vModifier_);
-		}
+		      category(category_),
+		      modifier(vModifier_)
+		{}
 
 		PairSizeType indices;
 		PairSizeType orbs;

@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef FEAS_BASED_SC_EX
 #define FEAS_BASED_SC_EX
 #include "../Models/FeAsModel/ModelFeBasedSc.h"
-#include "LinkProductFeAsExtended.h"
 
 namespace Dmrg {
 
@@ -107,16 +106,17 @@ public:
 	typedef typename ModelBaseType::QnType QnType;
 	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
-	typedef LinkProductFeAsExtended<ModelHelperType, GeometryType> LinkProductType;
-	typedef	typename ModelBaseType::MyBasis MyBasis;
+	typedef	typename ModelBaseType::MyBasis BasisType;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::BlockType BlockType;
+	typedef typename BasisType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType ModelTermType;
 
 	static const SizeType SPIN_UP = ModelFeAsType::SPIN_UP;
 	static const SizeType SPIN_DOWN = ModelFeAsType::SPIN_DOWN;
@@ -124,7 +124,7 @@ public:
 	FeAsBasedScExtended(const SolverParamsType& solverParams,
 	                    InputValidatorType& io,
 	                    const GeometryType& geometry)
-	    : ModelBaseType(solverParams, geometry, new LinkProductType(io), io),
+	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      modelFeAs_(solverParams,io,geometry),
@@ -179,6 +179,33 @@ protected:
 
 		this->makeTrackableOrderMatters("naturalSplus");
 		this->makeTrackableOrderMatters("naturalSz");
+	}
+
+	void fillModelLinks()
+	{
+		modelFeAs_.fillModelLinks();
+
+		bool isSu2 = BasisType::useSu2Symmetry();
+
+		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
+
+		OpForLinkType splus("naturalSplus");
+
+		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
+		{ value *= (isSu2) ? -0.5 : 0.5;};
+
+		spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModiferTerm0);
+
+		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
+
+		if (!isSu2) {
+			OpForLinkType sz("naturalSz");
+			szsz.push(sz, 'N', sz, 'N', 2, 0.5);
+		} else {
+			auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
+			{ if (isSu2) value = -value;};
+			spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModifierTermOther);
+		}
 	}
 
 private:

@@ -115,6 +115,7 @@ public:
 	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeTypeType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 
 	SuperHubbardExtended(const SolverParamsType& solverParams,
 	                     InputValidatorType& io,

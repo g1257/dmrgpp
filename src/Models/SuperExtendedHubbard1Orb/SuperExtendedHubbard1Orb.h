@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef EXTENDED_SUPER_HUBBARD_1ORB_H
 #define EXTENDED_SUPER_HUBBARD_1ORB_H
 #include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
-#include "LinkProdExtendedSuperHubbard1Orb.h"
 
 namespace Dmrg {
 //! Super Extended Hubbard for DMRG solver, uses ModelHubbard by containment
@@ -102,8 +101,7 @@ public:
 	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef LinkProdExtendedSuperHubbard1Orb<ModelHelperType, GeometryType> LinkProductType;
-	typedef	typename ModelBaseType::MyBasis MyBasis;
+	typedef	typename ModelBaseType::MyBasis BasisType;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ExtendedHubbard1OrbType::HilbertBasisType HilbertBasisType;
 	typedef typename ModelHelperType::BlockType BlockType;
@@ -117,14 +115,14 @@ public:
 	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType ModelTermType;
 
 	ExtendedSuperHubbard1Orb(const SolverParamsType& solverParams,
 	                         InputValidatorType& io,
 	                         GeometryType const &geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
-	                    new LinkProductType(io, (geometry.orbitals(LinkProductType::TERM_HOPPING,
-	                                                               0) == 2)),
 	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),
@@ -153,7 +151,7 @@ protected:
 
 	void fillLabeledOperators(VectorQnType& qns)
 	{
-		SizeType site = 0;
+		const SizeType site = 0;
 		BlockType block(1, site);
 		extendedHubbard_.fillLabeledOperators(qns);
 		VectorOperatorType cm(3);
@@ -170,6 +168,44 @@ protected:
 		this->makeTrackableOrderMatters("splus");
 		this->makeTrackableOrderMatters("sz");
 		this->makeTrackableOrderMatters("pair");
+	}
+
+	void fillModelLinks()
+	{
+		extendedHubbard_.fillModelLinks();
+
+		const bool spinOrbit = (geometry_.orbitals(0, 0) == 2);
+		if (spinOrbit) {
+			ModelTermType& so = ModelBaseType::createTerm("SpinOrbit");
+			// spin dependence of the hopping parameter (spin orbit)
+			OpForLinkType cup("c", 0, 0);
+			OpForLinkType cdown("c", 1, 1);
+
+			// spin1 = 1 spin2 = 0
+			so.push(cdown, 'N', cup, 'C', 1, -1, 1);
+
+			// spin1 = 0 spin2 = 1
+			so.push(cup, 'N', cdown, 'C', 1, 1, 0);
+		}
+
+		const bool isSu2 = BasisType::useSu2Symmetry();
+
+		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
+		OpForLinkType splus("splus");
+
+		spsm.push(splus, 'N', splus, 'C', 2, -1, 2,
+		          [isSu2](SparseElementType& value) { value *= (isSu2) ? -0.5 : 0.5;});
+
+		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
+		OpForLinkType sz("sz");
+
+		szsz.push(sz, 'N', sz, 'N', 2, 0.5, 1,
+		          [isSu2](SparseElementType& value) { if (isSu2) value = -value; });
+
+		ModelTermType& pp = ModelBaseType::createTerm("PairPair");
+		OpForLinkType pair("pair");
+
+		pp.push(pair, 'N', pair, 'C', 2, 1, 2);
 	}
 
 private:
