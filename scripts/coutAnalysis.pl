@@ -9,14 +9,16 @@ Module TimeSpent
 use warnings;
 use strict;
 use utf8;
+use MIME::Base64;
 
-my ($file) = @ARGV;
-defined($file) or die "USAGE: $0 file\n";
+my ($file, $additional) = @ARGV;
+defined($file) or die "USAGE: $0 file [additional]\n";
 
 my %h;
 my %deltas;
 my %various;
-my $totalTime = loadData(\%h, \%deltas, \%various, $file);
+my $input;
+my $totalTime = loadData(\%h, \%deltas, \%various, \$input, $file);
 
 print STDERR "#ElementsObserved=".scalar(keys %h)."\n";
 printData(\%h, $totalTime);
@@ -24,9 +26,13 @@ print STDERR "#TotalForRun=$totalTime\n";
 printHash(\%deltas, "DeltaName", "DeltaTime") if (scalar(keys %deltas) > 0);
 printHash(\%various, "ItemName", "ItemValue") if (scalar(keys %various) > 0);
 
+if (defined($input) and defined($additional) and $additional eq "i") {
+	print "------\n\n$input\n---------\n";
+}
+
 sub loadData
 {
-	my ($h, $deltas, $various, $file) = @_;
+	my ($h, $deltas, $various, $input, $file) = @_;
 	open(FILE, "<", $file) or die "$0: Cannot open $file : $!\n";
 
 	my ($firstT, $lastT);
@@ -34,6 +40,14 @@ sub loadData
 	my $observed = 0;
 	my ($lastE, $lanczosSteps);
 	while (<FILE>) {
+
+		if (/PsiApp::echoBase64: Echo of ([^ ]+) /) {
+			$_ = <FILE>;
+			chomp;
+			$$input = decode_base64($_);
+			next;
+		}
+
 		# lowest eigenvalue= -6.13004
 		if (/lowest eigenvalue= ([^ ]+)/) {
 			$lastE = $1;
@@ -257,4 +271,5 @@ sub multiChar
 
 	return $sum;
 }
+
 
