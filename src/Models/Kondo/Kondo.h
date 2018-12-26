@@ -122,7 +122,7 @@ protected:
 	void fillLabeledOperators(VectorQnType& qns)
 	{
 		qns = qn_;
-		assert(ops_.size() >= 6);
+		assert(ops_.size() >= 5);
 		OpsLabelType& c = this->createOpsLabel("c");
 		for (SizeType sigma = 0; sigma < 2; ++sigma)
 			c.push(ops_[sigma]);
@@ -163,7 +163,7 @@ protected:
 		const bool isSu2 = BasisType::useSu2Symmetry();
 		ModelTermType& hop = ModelBaseType::createTerm("hopping");
 		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
-		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
+		ModelTermType& szsz = ModelBaseType::createTerm("SzSz");
 		ModelTermType& ninj = ModelBaseType::createTerm("ninj");
 
 		for (SizeType spin = 0; spin < 2; ++spin) {
@@ -176,8 +176,8 @@ protected:
 		auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
 		{ if (isSu2) value = -value;};
 
-		OpForLinkType splus("splus");
-		OpForLinkType sz("sz");
+		OpForLinkType splus("Splus");
+		OpForLinkType sz("Sz");
 		OpForLinkType n("n");
 
 		spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModiferTerm0);
