@@ -212,13 +212,15 @@ public:
 
 		SizeType n = trackables_.size();
 		offsets_.resize(n, 0);
+		SizeType dofs = 0;
 		for (SizeType i = 0; i < n; ++i) {
 			const typename LabelType::PairStringSizeType& nameAndSite = trackables_[i];
 			const LabelType& ll = labeledOps.findLabel(nameAndSite.first,
 			                                           nameAndSite.second);
-			SizeType dofs = ll.dofs();
 
-			offsets_[i] = (i == 0) ? 0 : offsets_[i - 1] + ll.dofs();
+			offsets_[i] = (i == 0) ? 0 : offsets_[i - 1] + dofs;
+
+			dofs = ll.dofs();
 
 			for (SizeType j = 0; j < dofs; ++j)
 				cm_.push_back(ll(j));
