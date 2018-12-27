@@ -17,18 +17,22 @@ my %labels;
 
 loadFiles(\%labels, $file);
 
-loadLabels(\%labels);
+my @lines;
+loadLines(\@lines);
+
+loadLabels(\%labels, \@lines);
 
 recursiveExpand(\%labels);
 
 replaceLabels($file, \%labels);
 
-sub loadLabels
+sub loadLines
 {
+	my ($lines) = @_;
 	while (<STDIN>) {
 		chomp;
 		my $f = $_;
-		procFile(\%labels, $f);
+		loadLinesThisFile($lines, $f);
 	}
 }
 
@@ -84,46 +88,103 @@ sub loadFiles
 	%$a = %labels;
 }
 
-sub procFile
+sub loadLinesThisFile
 {
-	my ($a, $f) = @_;
-	my %labels = %$a;
-	my $label = "!DISABLED";
-	my $buffer = "";
+	my ($lines, $f) = @_;
 
 	open(FILE, "<", $f) or die "$0: Cannot open $f : $!\n";
 	while (<FILE>) {
-		if (/\/\/ PSIDOC_CODE_START +([^ ]+)/ or /\/\* *PSIDOC +([^ ]+)/) {
-			$label = $1;
-			chomp($label) if ($label=~/\n$/);
+		chomp;
+		push @$lines, $_;
+	}
+
+	close(FILE);
+}
+
+sub loadLabels
+{
+	my ($a, $lines) = @_;
+	my %labels = %$a;
+	my $label = "!DISABLED";
+	my $additional = "";
+	my $buffer = "";
+	my $nlines = scalar(@$lines);
+
+	for (my $i = 0; $i < $nlines; ++$i) {
+		$_ = $lines->[$i];
+		if (/\/\* *PSIDOC +(.+$)/) {
+			my $rest = $1;
+			chomp($rest);
+			($label, $additional) = procPsidocName($rest);
 			my $txt = $labels{"$label"};
 			if (defined($txt)) {
-				die "$0: ERROR: Label $label in file $f is duplicate\n";
+				die "$0: ERROR: Label $label is duplicate\n";
 			}
 
 			next;
 		}
 
-		if (/\*\// or /\/\/ PSIDOC_CODE_END/) {
+		if (/\*\//) {
 			if ($label ne "!DISABLED") {
+				my $inlabel = $label."::";
+				$buffer =~ s/PSIDOCCOPY \$/PSIDOCCOPY ${inlabel}/g;
 				my @temp = ($buffer);
 				$labels{"$label"} = \@temp;
+				my $proto = captureFirstProtoBelow($i + 1, \@lines);
+				if ($proto) {
+					my @temp = ($proto);
+					my $name = $inlabel."FirstProtoBelow";
+					$labels{"$name"} = \@temp;
+				}
 			}
 
 			$buffer = "";
 			$label = "!DISABLED";
+			$additional = "";
 		}
 
 		if ($label ne "!DISABLED") {
-			$buffer .= $_;
+			$buffer .= $_."\n";
 		}
 	}
 
-	close(FILE);
 	my $n = scalar(%labels);
-	print STDERR "$0: File $f proc'ed ($n labels found so far)\n";
+	print STDERR "$0: $n labels found\n";
 
 	%$a = %labels;
+}
+
+sub procPsidocName
+{
+	my ($nameLike) = @_;
+	my @temp = split/[ \t]/,$nameLike;
+	my $n = scalar(@temp);
+	die "$0: procPsidocName empty\n" if ($n == 0);
+	return $nameLike if ($n == 1);
+	die "$0: procPsidocName more than one additional\n" if ($n > 2);
+	return @temp;
+}
+
+sub captureFirstProtoBelow
+{
+	my ($ind, $lines) = @_;
+	my $nlines = scalar(@$lines);
+	my $buffer = "";
+	for (my $i = $ind; $i < $nlines; ++$i) {
+		$_ = $lines->[$i];
+		last if (/\/\*/);
+		next if (/^ *\/\//);
+		$buffer .= $_."\n";
+		last if (/\;/);
+	}
+
+	return $buffer if ($buffer eq "");
+
+	$buffer =~ s/\t/  /g;
+	$buffer = "\\begin{lstlisting}\n$buffer\n";
+	$buffer .= "\\end{lstlisting}\n";
+
+	return $buffer;
 }
 
 sub replaceLabels
