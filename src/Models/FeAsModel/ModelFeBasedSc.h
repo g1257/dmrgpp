@@ -433,21 +433,37 @@ public:
 		this->makeTrackableOrderMatters("C");
 	}
 
+	/* PSIDOC FeAs::fillModelLinks
+	OK, let's discuss a more complicated example: the case of the ModelFeBasedSc.
+	Here we have as many connections as  2*orbitals*orbitals:
+	a up a up, a up b up, b up a up, b up, b up, etc
+	and similarly for spin down.
+	We'll do all of this in one single therm, named ``hopping'' and put in a C++ variable
+	called \verb!hop!. So we'll do 2*orbitals*orbitals push into that variable.
+	Each push does the pair c1 with normal 'N', and c2 with transpose conjugate 'C'.
+	(We shall not discuss the SU(2) related numbers.)
+	We observe that c1 is a ``C'' trackable operator with degree of freedom
+	orb1 + spin*orbitals; likewise c2 is a ``C'' trackable operator with orb2 + spin*orbitals.
+	The orbitals are different but the spin is the same, as expected.
+	We see however that lines (B) and (C) have a 3rd number for each operator.
+	This indicates the connector dependence, which is not on spin but only on orbital.
+	That is why the 3rd number in (B) is orb1 and not orb1 + spin*orbitals, because
+	the hoppings in the input file do not depend on orbital.
+	This is very important to note and could be a cause of confusion.
+	By default this 3rd number (which can be omitted) is 0, and indicates no
+	dependence of the connector on things other than site. The site dependence
+	is handled by the geometry and must not be specified here.
+	PSIDOCCOPY $FirstFunctionBelow
+	 */
 	void fillModelLinks()
 	{
-
-		//! There are orbitals*orbitals different orbitals
-		//! and 2 spins. Spin is diagonal so we end up with 2*orbitals*orbitals possiblities
-		//! a up a up, a up b up, b up a up, b up, b up, etc
-		//! and similarly for spin down.
-
 		const SizeType orbitals = modelParameters_.orbitals;
-		ModelTermType& hop = ModelBaseType::createTerm("hopping");
+		ModelTermType& hop = ModelBaseType::createTerm("hopping");//(A)
 		for (SizeType spin = 0; spin < 2; ++spin) {
 			for (SizeType orb1 = 0; orb1 < orbitals; ++orb1) {
-				OpForLinkType c1("C", orb1 + spin*orbitals, orb1);
+				OpForLinkType c1("C", orb1 + spin*orbitals, orb1); // (B)
 				for (SizeType orb2 = 0; orb2 < orbitals; ++orb2) {
-					OpForLinkType c2("C", orb2 + spin*orbitals, orb2);
+					OpForLinkType c2("C", orb2 + spin*orbitals, orb2); // (C)
 
 					hop.push(c1, 'N', c2, 'C', 1, (spin == 1) ? -1 : 1, spin);
 				}

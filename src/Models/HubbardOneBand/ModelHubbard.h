@@ -305,15 +305,36 @@ protected:
 		}
 	}
 
+	/* PSIDOC Hubbard::fillModelLinks
+	We'll go first though the simpler example of the Hubbard model
+	that has one one term, the hopping,
+	and within this term it has two connections: up-up and down-down.
+	First, define the term, and name it whatever you like; see line (A) below.
+	In this case the variable is called \verb!hop! and the name is ``hopping''.
+	Create then a special type of opaque object, an OpForLinkType, to represent
+	the operators you need to connect. In this case, we need to connect $c^\dagger_\uparrow$
+	with $c_\uparrow$. Because $c^\dagger_\uparrow$ is not tracked in this model, we
+	must use $c_\uparrow$ only. This is created in line (B) below.
+	The variable is called \verb!cup! and the label name is ``c'' with
+	degree of freedom 0 indicating spin up. Note that (``c'', 0) must be
+	a trackable operator; see \verb!fillLabeledOperators! above.
+	We now push to the variable \verb!hop! the connection as seen in (C) below.
+	Here we must supply
+	\emph{two} operators: in this case they are cup with 'N' and cup with 'C' to
+	indicate whtat we want $c^\dagger c$. The last three numbers are SU(2) related.
+	Note that the operators are the same, but the second one is transpose conjugated.
+	Finally we create cdown in (D) and add the connection to \verb!hop! in (E)
+	PSIDOCCOPY $FirstFunctionBelow
+	*/
 	void fillModelLinks()
 	{
-		ModelTermType& hop = ModelBaseType::createTerm("hopping");
+		ModelTermType& hop = ModelBaseType::createTerm("hopping");//(A)
 
-		OpForLinkType cup("c", 0);
-		hop.push(cup, 'N', cup, 'C', 1, 1, 0);
+		OpForLinkType cup("c", 0); // (B)
+		hop.push(cup, 'N', cup, 'C', 1, 1, 0); // (C)
 
-		OpForLinkType cdown("c", 1);
-		hop.push(cdown, 'N', cdown, 'C', 1, -1, 1);
+		OpForLinkType cdown("c", 1); // (D)
+		hop.push(cdown, 'N', cdown, 'C', 1, -1, 1); // (E)
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const

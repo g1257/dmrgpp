@@ -242,7 +242,10 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 	/* PSIDOC fillModelLinks
 	PSIDOCCOPY $FirstProtoBelow
-	TBW
+	Give the Hamiltonian connections that this model has.
+	These are the terms in the Hamiltonian that connect \emph{different} sites.
+	// PSIDOCCOPY Hubbard::fillModelLinks
+	// PSIDOCCOPY FeAs::fillModelLinks
 	 */
 	virtual void fillModelLinks() = 0;
 
