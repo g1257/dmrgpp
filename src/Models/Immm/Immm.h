@@ -194,8 +194,8 @@ protected:
 			OpsLabelType& nup = this->createOpsLabel("nup", site);
 			OpsLabelType& ndown = this->createOpsLabel("ndown", site);
 
-			this->makeTrackableOrderMatters("c", site);
-			this->makeTrackableOrderMatters("nop", site);
+			this->makeTrackable("c", site);
+			this->makeTrackable("nop", site);
 
 			BlockType block(1, site);
 			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;

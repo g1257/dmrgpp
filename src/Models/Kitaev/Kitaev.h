@@ -226,9 +226,9 @@ protected:
 		OpsLabelType& sx = this->createOpsLabel("sx");
 		OpsLabelType& sy = this->createOpsLabel("sy");
 		OpsLabelType& sz = this->createOpsLabel("sz");
-		this->makeTrackableOrderMatters("sx");
-		this->makeTrackableOrderMatters("sy");
-		this->makeTrackableOrderMatters("sz");
+		this->makeTrackable("sx");
+		this->makeTrackable("sy");
+		this->makeTrackable("sz");
 
 		typename MatrixType::value_type dummy = 0.0;
 

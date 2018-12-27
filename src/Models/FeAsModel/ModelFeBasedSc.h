@@ -430,7 +430,7 @@ public:
 			                    su2Related));
 		}
 
-		this->makeTrackableOrderMatters("C");
+		this->makeTrackable("C");
 	}
 
 	/* PSIDOC FeAs::fillModelLinks

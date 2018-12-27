@@ -165,9 +165,9 @@ protected:
 		for (SizeType i = 0; i < block.size(); ++i)
 			setPairi(p, cm, i);
 
-		this->makeTrackableOrderMatters("splus");
-		this->makeTrackableOrderMatters("sz");
-		this->makeTrackableOrderMatters("pair");
+		this->makeTrackable("splus");
+		this->makeTrackable("sz");
+		this->makeTrackable("pair");
 	}
 
 	void fillModelLinks()

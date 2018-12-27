@@ -200,12 +200,12 @@ protected:
 		OpsLabelType& p = this->createOpsLabel("p");
 		OpsLabelType& nop = this->createOpsLabel("n");
 
-		this->makeTrackableOrderMatters("c");
-		this->makeTrackableOrderMatters("d");
-		this->makeTrackableOrderMatters("splus");
-		this->makeTrackableOrderMatters("sz");
-		this->makeTrackableOrderMatters("p");
-		this->makeTrackableOrderMatters("n");
+		this->makeTrackable("c");
+		this->makeTrackable("d");
+		this->makeTrackable("splus");
+		this->makeTrackable("sz");
+		this->makeTrackable("p");
+		this->makeTrackable("n");
 
 		for (SizeType i=0;i<block.size();i++) {
 			for (SizeType sigma2=0;sigma2<dofs;++sigma2) {

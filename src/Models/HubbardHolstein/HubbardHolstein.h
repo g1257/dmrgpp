@@ -201,11 +201,11 @@ protected:
 		OpsLabelType& c = this->createOpsLabel("c");
 		OpsLabelType& a = this->createOpsLabel("a");
 		OpsLabelType& cx = this->createOpsLabel("cx");
-		this->makeTrackableOrderMatters("c");
+		this->makeTrackable("c");
 		if (modelParameters_.numberphonons > 0) {
-			this->makeTrackableOrderMatters("a");
+			this->makeTrackable("a");
 			if (isSsh_)
-				this->makeTrackableOrderMatters("cx");
+				this->makeTrackable("cx");
 		}
 
 		HilbertBasisType natBasis;

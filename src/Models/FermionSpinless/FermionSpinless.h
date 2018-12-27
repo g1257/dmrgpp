@@ -232,8 +232,8 @@ protected:
 			this->createOpsLabel("n").push(myOp);
 		}
 
-		this->makeTrackableOrderMatters("c");
-		this->makeTrackableOrderMatters("n");
+		this->makeTrackable("c");
+		this->makeTrackable("n");
 	}
 
 	void fillModelLinks()

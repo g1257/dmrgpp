@@ -167,11 +167,11 @@ protected:
 		OpsLabelType& nop = this->createOpsLabel("n");
 		OpsLabelType& d = this->createOpsLabel("d");
 
-		this->makeTrackableOrderMatters("c");
-		this->makeTrackableOrderMatters("splus");
-		this->makeTrackableOrderMatters("sz");
-		this->makeTrackableOrderMatters("n");
-		this->makeTrackableOrderMatters("d");
+		this->makeTrackable("c");
+		this->makeTrackable("splus");
+		this->makeTrackable("sz");
+		this->makeTrackable("n");
+		this->makeTrackable("d");
 
 		// Set the operators c^\daggger_{i\sigma} in the natural basis
 		for (SizeType i=0;i<block.size();i++) {

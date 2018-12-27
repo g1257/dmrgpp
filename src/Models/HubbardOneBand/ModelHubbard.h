@@ -173,7 +173,7 @@ protected:
 		setSymmetryRelated(qns, natBasis, block.size());
 
 		OpsLabelType& c = this->createOpsLabel("c");
-		this->makeTrackableOrderMatters("c");
+		this->makeTrackable("c");
 
 		VectorOperatorType creationMatrix(DEGREES_OF_FREEDOM);
 		//! Set the operators c^\daggger_{i\sigma} in the natural basis

@@ -216,9 +216,9 @@ protected:
 		OpsLabelType& sz = this->createOpsLabel("sz");
 		OpsLabelType& d = this->createOpsLabel("d");
 
-		this->makeTrackableOrderMatters("splus");
-		this->makeTrackableOrderMatters("sz");
-		this->makeTrackableOrderMatters("d");
+		this->makeTrackable("splus");
+		this->makeTrackable("sz");
+		this->makeTrackable("d");
 
 		for (SizeType i=0;i<block.size();i++) {
 			// Set the operators S^+_i for orbital a in the natural basis

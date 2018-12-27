@@ -244,11 +244,11 @@ public:
 		}
 	}
 
-	void makeTrackableOrderMatters(PsimagLite::String what, SizeType site)
+	void makeTrackable(PsimagLite::String what, SizeType site)
 	{
 		typename LabelType::PairStringSizeType p(what, site);
 		if (std::find(trackables_.begin(), trackables_.end(), p) != trackables_.end())
-			err("makeTrackableOrderMatters: repeated entry " + what + "\n");
+			err("makeTrackable: repeated entry " + what + "\n");
 		trackables_.push_back(p);
 	}
 

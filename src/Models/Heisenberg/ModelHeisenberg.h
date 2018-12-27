@@ -256,7 +256,7 @@ protected:
 
 			OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
 			this->createOpsLabel("splus").push(myOp);
-			this->makeTrackableOrderMatters("splus");
+			this->makeTrackable("splus");
 
 			myOp.dagger();
 			this->createOpsLabel("sminus").push(myOp);
@@ -266,7 +266,7 @@ protected:
 			typename OperatorType::Su2RelatedType su2related2;
 			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
 			this->createOpsLabel("sz").push(myOp2);
-			this->makeTrackableOrderMatters("sz");
+			this->makeTrackable("sz");
 
 			if (additional_ != "Anisotropic") continue; // <--- LOOP SKIP
 
@@ -275,7 +275,7 @@ protected:
 			typename OperatorType::Su2RelatedType su2related3;
 			OperatorType myOp3(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related3);
 			this->createOpsLabel("sx").push(myOp3);
-			this->makeTrackableOrderMatters("sx");
+			this->makeTrackable("sx");
 		}
 	}
 

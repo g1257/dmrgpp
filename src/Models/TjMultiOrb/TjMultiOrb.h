@@ -232,10 +232,10 @@ protected:
 		OpsLabelType& nop = this->createOpsLabel("n");
 		OpsLabelType& sminus = this->createOpsLabel("sminus");
 
-		this->makeTrackableOrderMatters("c");
-		this->makeTrackableOrderMatters("splus");
-		this->makeTrackableOrderMatters("sz");
-		this->makeTrackableOrderMatters("n");
+		this->makeTrackable("c");
+		this->makeTrackable("splus");
+		this->makeTrackable("sz");
+		this->makeTrackable("n");
 
 		// Set the operators c^\daggger_{i\sigma} in the natural basis
 

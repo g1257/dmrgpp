@@ -177,8 +177,8 @@ protected:
 		assert(x < creationMatrix.size());
 		sz.push(creationMatrix[x]);
 
-		this->makeTrackableOrderMatters("naturalSplus");
-		this->makeTrackableOrderMatters("naturalSz");
+		this->makeTrackable("naturalSplus");
+		this->makeTrackable("naturalSz");
 	}
 
 	void fillModelLinks()

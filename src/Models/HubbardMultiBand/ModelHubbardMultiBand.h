@@ -274,7 +274,7 @@ protected:
 
 		OpsLabelType& nop = this->createOpsLabel("n");
 		OpsLabelType& c = this->createOpsLabel("c");
-		this->makeTrackableOrderMatters("c");
+		this->makeTrackable("c");
 		SizeType dofs = 2*modelParameters_.orbitals;
 		for (SizeType dof = 0; dof < dofs; ++dof) {
 			{

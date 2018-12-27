@@ -149,8 +149,8 @@ protected:
 	{
 		extendedHubbard_.fillLabeledOperators(qns);
 
-		this->makeTrackableOrderMatters("splus");
-		this->makeTrackableOrderMatters("sz");
+		this->makeTrackable("splus");
+		this->makeTrackable("sz");
 	}
 
 	void fillModelLinks()

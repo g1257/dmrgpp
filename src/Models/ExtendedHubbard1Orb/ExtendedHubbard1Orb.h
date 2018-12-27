@@ -151,7 +151,7 @@ public:
 	{
 		modelHubbard_.fillLabeledOperators(qns);
 
-		this->makeTrackableOrderMatters("n");
+		this->makeTrackable("n");
 	}
 
 	void fillModelLinks()

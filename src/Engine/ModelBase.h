@@ -224,7 +224,7 @@ for (SizeType i = 0; i < numberOfStates; ++i) {
 	   You create labeled operators with the following syntax.
 \begin{lstlisting}
 OpsLabelType& myoperator = this->createOperatorLabel("myoperator");
-myoperator.makeTrackableOrderMatters(); // only if needs tracking
+myoperator.makeTrackable(); // only if needs tracking
 \end{lstlisting}
 	   then you fill it with
 \begin{lstlisting}
@@ -235,8 +235,6 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 }
 \end{lstlisting}
 		And you must mark the operators that need tracking as shown above.
-		The first operator you make trackable will be assigned number 0, the next number 1,
-		and so on, which is important to remember for the \verb!LinkProduct*! class.
 	*/
 	virtual void fillLabeledOperators(VectorQnType&) = 0;
 
@@ -518,9 +516,9 @@ protected:
 		return labeledOperators_.createLabel(name, site);
 	}
 
-	static void makeTrackableOrderMatters(PsimagLite::String name, SizeType site = 0)
+	static void makeTrackable(PsimagLite::String name, SizeType site = 0)
 	{
-		modelLinks_.makeTrackableOrderMatters(name, site);
+		modelLinks_.makeTrackable(name, site);
 	}
 
 	static void makeTrackableOrderMatters(VectorStringType vname, SizeType site = 0)

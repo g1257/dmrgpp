@@ -182,8 +182,8 @@ protected:
 		OpsLabelType& c = this->createOpsLabel("c");
 		OpsLabelType& ll = this->createOpsLabel("l");
 
-		this->makeTrackableOrderMatters("c");
-		this->makeTrackableOrderMatters("l");
+		this->makeTrackable("c");
+		this->makeTrackable("l");
 
 		SizeType dofs = 2*ORBITALS;
 		for (SizeType i=0;i<block.size();i++) {

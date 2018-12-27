@@ -131,10 +131,10 @@ protected:
 		this->createOpsLabel("Sz").push(ops_[3]);
 		this->createOpsLabel("n").push(ops_[4]);
 
-		this->makeTrackableOrderMatters("c");
-		this->makeTrackableOrderMatters("Splus");
-		this->makeTrackableOrderMatters("Sz");
-		this->makeTrackableOrderMatters("n");
+		this->makeTrackable("c");
+		this->makeTrackable("Splus");
+		this->makeTrackable("Sz");
+		this->makeTrackable("n");
 
 		{
 			SparseMatrixType mup = ops_[0].data;
