@@ -163,35 +163,46 @@ public:
 
 		PSIDOCCOPY ModelBaseWrite
 
+\noindent\dotfill\\
+
 		PSIDOCCOPY addDiagonalsInNaturalBasis
 
+\noindent\dotfill\\
+
 		PSIDOCCOPY fillLabeledOperators
+
+\noindent\dotfill\\
 
 		PSIDOCCOPY fillModelLinks
 	*/
 
-	/* PSIDOC ModelBaseWrite
-	{\bf write}
+	/* PSIDOC ModelBaseWrite FirstProtoBelow
+	PSIDOCCOPY $FirstProtoBelow
 	For information purposes only. Write model parameters.
-	String contains the group.
-	Serializer object is second argument
+	String is the first argument and contains the group.
+	Serializer object is second argument.
 	*/
 	virtual void write(PsimagLite::String,
 	                   PsimagLite::IoNg::Out::Serializer&) const = 0;
 
 
 	/* PSIDOC addDiagonalsInNaturalBasis
-	{\bf addDiagonalsInNaturalBasis}
-	Fill SparseMatrixType with the on-site Hamiltonian terms in the on-site basis.
-	The RealType contain the physical time in case your onsite terms
-	depend on it
+	PSIDOCCOPY $FirstProtoBelow
+	Takes 3 arguments: the first one is output, the last two are input.
+	The first argument is a CRS matrix that you need to
+	fill with the on-site Hamiltonian terms in the on-site basis.
+	The second argument is a vector of sites containing only one site; this
+	argument is an input, and
+	you can ignore it unless your model needs SDHS. The last argument is
+	the current physical time; it's an input, and is given in case your
+	model has time-dependent on-site terms.
 	*/
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType&,
 	                                        const BlockType& block,
 	                                        RealType)  const = 0;
 
 	/* PSIDOC fillLabeledOperators
-	{\bf fillLabeledOperators}
+	PSIDOCCOPY $FirstProtoBelow
 	  The only argument given to this function is the qns that you must fill.
 	  This is a vector of \texttt{Qn} objects.
 	  You need to loop over the one-site Hilbert space, something like
@@ -229,6 +240,10 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	*/
 	virtual void fillLabeledOperators(VectorQnType&) = 0;
 
+	/* PSIDOC fillModelLinks
+	PSIDOCCOPY $FirstProtoBelow
+	TBW
+	 */
 	virtual void fillModelLinks() = 0;
 
 	// END ^^^^^^^^^^^Functions that each model needs to implement
