@@ -136,6 +136,14 @@ sub loadLabels
 					my $name = $inlabel."FirstProtoBelow";
 					$labels{"$name"} = \@temp;
 				}
+
+				my $debug = 0;
+				my $func = captureFirstFunctionBelow($i + 1, \@lines, $debug);
+				if ($func) {
+					my @temp = ($func);
+					my $name = $inlabel."FirstFunctionBelow";
+					$labels{"$name"} = \@temp;
+				}
 			}
 
 			$buffer = "";
@@ -178,6 +186,36 @@ sub captureFirstProtoBelow
 		last if (/\;/);
 	}
 
+	return $buffer if ($buffer eq "");
+
+	$buffer =~ s/\t/  /g;
+	$buffer = "\\begin{lstlisting}\n$buffer\n";
+	$buffer .= "\\end{lstlisting}\n";
+
+	return $buffer;
+}
+
+sub captureFirstFunctionBelow
+{
+	my ($ind, $lines, $debug) = @_;
+	my $nlines = scalar(@$lines);
+	my $buffer = "";
+	my $level = 0;
+	for (my $i = $ind; $i < $nlines; ++$i) {
+		my $line = $lines->[$i];
+		last if ($line =~ /\/\*/);
+		next if ($line =~ /^ *\/\//);
+		$buffer .= "$line\n";
+		
+		my $plus = () = $line =~ /\{/g;
+		my $minus = () = $line =~ /\}/g;
+		$level += $plus;
+		$level -= $minus;
+		print "$line **$level**\n" if ($debug);
+		last if ($line =~ /\}[^\{\}]*$/ and $level == 0);
+	}
+
+	$buffer = "" unless ($level == 0);
 	return $buffer if ($buffer eq "");
 
 	$buffer =~ s/\t/  /g;
