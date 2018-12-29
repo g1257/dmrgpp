@@ -196,8 +196,7 @@ public:
 	The first argument is a CRS matrix that you need to
 	fill with the on-site Hamiltonian terms in the on-site basis.
 	The second argument is a vector of sites containing only one site; this
-	argument is an input, and
-	you can ignore it unless your model needs SDHS. The last argument is
+	argument is an input. The last argument is
 	the current physical time; it's an input, and is given in case your
 	model has time-dependent on-site terms. We briefly discuss the
 	addition of a magnetic field Zeeman term to the Heisenberg model.
@@ -447,9 +446,9 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	}
 
 	// should be static
-	OperatorType naturalOperator(const PsimagLite::String& what,
-	                             SizeType,
-	                             SizeType dof) const
+	const OperatorType& naturalOperator(const PsimagLite::String& what,
+	                                    SizeType,
+	                                    SizeType dof) const
 	{
 		return labeledOperators_(what, 0, dof);
 	}
@@ -515,13 +514,6 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 protected:
 
-	// care about site here SDHS
-	// care about models that contain other models SDHS
-	static const VectorOperatorType& trackableOps(SizeType site)
-	{
-		return modelLinks_.trackableOps(site);
-	}
-
 	static OpsLabelType& createOpsLabel(PsimagLite::String name,
 	                                    SizeType site = 0)
 	{
@@ -541,7 +533,7 @@ protected:
 	}
 
 	static ModelTermType& createTerm(PsimagLite::String name,
-	                                                     VectorSizeType sites)
+	                                 VectorSizeType sites)
 	{
 		return modelLinks_.createTerm(name, sites);
 	}

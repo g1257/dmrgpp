@@ -193,10 +193,12 @@ public:
 void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
                                 const BlockType& block,
                                 RealType) const {
-  const VectorOperatorType& cm = modelLinks.trackableOps(0);
   if (modelParameters_.magneticField.size() == linSize) {
+    const OperatorType& sz = ModelBaseType::naturalOperator("sz",
+                                                            site,
+                                                            0);
     RealType tmp = modelParameters_.magneticField[block[0]];
-    hmatrix += tmp*cm[1].data;
+    hmatrix += tmp*sz.data;
   }
 }
 	 \end{lstlisting}
@@ -208,39 +210,38 @@ void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 		SizeType linSize = geometry_.numberOfSites();
 		SizeType n = block.size();
 
-		const typename ModelBaseType::ModelLinksType& modelLinks = ModelBaseType::modelLinks();
-
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType site = block[i];
-			const VectorOperatorType& cm = modelLinks.trackableOps(site);
+			const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
 
 			// magnetic field
 			if (modelParameters_.magneticField.size() == linSize) {
-				RealType tmp = modelParameters_.magneticField[block[i*2]];
-				hmatrix += tmp*cm[1+i*2].data;
+				RealType tmp = modelParameters_.magneticField[site];
+				hmatrix += tmp*sz.data;
 
 			}
 
 			// anisotropyD
 			if (modelParameters_.anisotropyD.size() == linSize) {
 				SparseMatrixType Szsquare;
-				RealType tmp = modelParameters_.anisotropyD[block[i*2]];
-				multiply(Szsquare,cm[1+i*2].data,cm[1+i*2].data);
+				RealType tmp = modelParameters_.anisotropyD[site];
+				multiply(Szsquare, sz.data, sz.data);
 				hmatrix += tmp*Szsquare;
 
 			}
 
 			// anisotropyE
 			if (modelParameters_.anisotropyE.size() == linSize) {
-				SparseMatrixType splus;
+				const OperatorType& splus = ModelBaseType::naturalOperator("splus", site, 0);
+				SparseMatrixType splusSquared;
 
-				RealType tmp = 0.5*modelParameters_.anisotropyE[block[i*2]];
-				multiply(splus, cm[0+i*2].data, cm[0+i*2].data);
-				hmatrix += tmp*splus;
+				RealType tmp = 0.5*modelParameters_.anisotropyE[site];
+				multiply(splusSquared, splus.data, splus.data);
+				hmatrix += tmp*splusSquared;
 
-				SparseMatrixType sminus;
-				transposeConjugate(sminus, splus);
-				hmatrix += tmp*sminus;
+				SparseMatrixType sminusSquared;
+				transposeConjugate(sminusSquared, splusSquared);
+				hmatrix += tmp*sminusSquared;
 			}
 		}
 	}

@@ -191,14 +191,13 @@ public:
 		for (SizeType i = 0; i < n; ++i) {
 
 			SizeType site = block[i];
-			const VectorOperatorType& cm = ModelBaseType::trackableOps(site);
 
-			addHoppingOnSite(hmatrix, cm, i, block[i]);
+			addHoppingOnSite(hmatrix, i, block[i]);
 
-			addInteraction(hmatrix, cm, i, block[i]);
+			assert(site < modelParameters_.hubbardU.size());
+			hmatrix += modelParameters_.hubbardU[site]*qx_;
 
 			addPotentialV(hmatrix,
-			              cm,
 			              i,
 			              block[i],
 			              modelParameters_.potentialV);
@@ -496,17 +495,7 @@ private:
 		return jm;
 	}
 
-	void addInteraction(SparseMatrixType &hmatrix,
-	                    const VectorOperatorType&,
-	                    SizeType,
-	                    SizeType actualSite) const
-	{
-		assert(actualSite < modelParameters_.hubbardU.size());
-		hmatrix += modelParameters_.hubbardU[actualSite]*qx_;
-	}
-
 	void addHoppingOnSite(SparseMatrixType& hmatrix,
-	                      const VectorOperatorType& cm,
 	                      SizeType i,
 	                      SizeType actualSite) const
 	{
@@ -515,6 +504,7 @@ private:
 		SizeType dof = 2*orbitals;
 		SparseMatrixType tmpMatrix;
 		SparseMatrixType tmp;
+		const VectorOperatorType& cm = creationMatrix_;
 		for (SizeType orb1 = 0; orb1 < orbitals; ++orb1) {
 			const SparseMatrixType& m1up = cm[orb1 + SPIN_UP*orbitals + i*dof].data;
 			const SparseMatrixType& m1down = cm[orb1 + SPIN_DOWN*orbitals + i*dof].data;
@@ -552,14 +542,14 @@ private:
 		return v[ind](orb1, orb2);
 	}
 
-	void addPotentialV(SparseMatrixType &hmatrix,
-	                   const VectorOperatorType& cm,
+	void addPotentialV(SparseMatrixType& hmatrix,
 	                   SizeType i,
 	                   SizeType actualIndexOfSite,
 	                   const typename PsimagLite::Vector<RealType>::Type& V) const
 	{
 		SizeType v1 = 2*modelParameters_.orbitals*geometry_.numberOfSites();
 		SizeType v2 = v1*modelParameters_.orbitals;
+
 		if (V.size() != v1 && V.size() != v2) {
 			PsimagLite::String str(__FILE__);
 			str += " " + ttos(__LINE__) + "\n";
@@ -570,13 +560,13 @@ private:
 
 		if (V.size() == v1) {
 			for (SizeType orb=0;orb<modelParameters_.orbitals;orb++)
-				addPotentialV(hmatrix, cm, i, actualIndexOfSite, orb, V);
+				addPotentialV(hmatrix, i, actualIndexOfSite, orb, V);
 		}
 
 		if (V.size() == v2) {
 			for (SizeType orb=0;orb<modelParameters_.orbitals;orb++) {
 				for (SizeType orb2=0;orb2<modelParameters_.orbitals;orb2++) {
-					addPotentialV(hmatrix, cm, i, actualIndexOfSite, orb, orb2, V);
+					addPotentialV(hmatrix, i, actualIndexOfSite, orb, orb2, V);
 				}
 			}
 
@@ -584,14 +574,14 @@ private:
 		}
 	}
 
-	void addPotentialV(SparseMatrixType &hmatrix,
-	                   const VectorOperatorType& cm,
+	void addPotentialV(SparseMatrixType& hmatrix,
 	                   SizeType i,
 	                   SizeType actualIndexOfSite,
 	                   SizeType orbital,
 	                   const typename PsimagLite::Vector<RealType>::Type& V) const
 	{
 		int dof = 2*modelParameters_.orbitals;
+		const VectorOperatorType& cm = creationMatrix_;
 		SparseMatrixType nup = n(cm[orbital+SPIN_UP*modelParameters_.orbitals+i*dof].data);
 		SparseMatrixType ndown = n(cm[orbital+SPIN_DOWN*modelParameters_.orbitals+i*dof].data);
 
@@ -604,7 +594,6 @@ private:
 	}
 
 	void addPotentialV(SparseMatrixType &hmatrix,
-	                   const VectorOperatorType& cm,
 	                   SizeType i,
 	                   SizeType actualIndexOfSite,
 	                   SizeType orb,
@@ -612,6 +601,7 @@ private:
 	                   const typename PsimagLite::Vector<RealType>::Type& V) const
 	{
 		int dof=2*modelParameters_.orbitals;
+		const VectorOperatorType& cm = creationMatrix_;
 		SizeType orbitalsSquared = modelParameters_.orbitals*modelParameters_.orbitals;
 
 		SparseMatrixType nup = nEx(cm[orb+SPIN_UP*modelParameters_.orbitals+i*dof].data,

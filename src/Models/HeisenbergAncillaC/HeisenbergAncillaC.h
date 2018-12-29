@@ -192,10 +192,10 @@ public:
 
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType site = block[i];
-			const VectorOperatorType& cm = ModelBaseType::trackableOps(site);
+			const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
 			// magnetic field
-			RealType tmp = modelParameters_.magneticField[block[i]];
-			hmatrix += tmp * cm[1+i*2].data;
+			RealType tmp = modelParameters_.magneticField[site];
+			hmatrix += tmp * sz.data;
 		}
 	}
 

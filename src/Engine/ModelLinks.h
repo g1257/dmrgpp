@@ -293,12 +293,6 @@ public:
 		return *(terms_[term]);
 	}
 
-	const VectorOperatorType& trackableOps(SizeType) const
-	{
-		assert(cm_.size() > 0);
-		return cm_;
-	}
-
 private:
 
 	static HermitianEnum getHermitianProperty(const SparseMatrixType& m)

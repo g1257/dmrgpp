@@ -167,8 +167,8 @@ public:
 
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType site = block[i];
-			const VectorOperatorType& cm = ModelBaseType::trackableOps(site);
-			SparseMatrixType niup = cm[1].data;
+			const OperatorType& niupop = ModelBaseType::naturalOperator("n", site, 0);
+			const SparseMatrixType& niup = niupop.data;
 
 			// V_iup term
 			RealType tmp = modelParameters_.potentialV[block[i]];

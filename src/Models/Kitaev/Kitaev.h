@@ -195,19 +195,21 @@ public:
 		SizeType n=block.size();
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType site = block[i];
-			const VectorOperatorType& cm = ModelBaseType::trackableOps(site);
 
 			// magnetic field x
-			RealType tmp = modelParameters_.magneticFieldX[block[i*2]];
-			hmatrix += tmp*cm[0+i*2].data;
+			const OperatorType& sx = ModelBaseType::naturalOperator("sx", site, 0);
+			RealType tmp = modelParameters_.magneticFieldX[block[0]];
+			hmatrix += tmp*sx.data;
 
 			// magnetic field y
-			tmp = modelParameters_.magneticFieldY[block[i*2]];
-			hmatrix += tmp*cm[1+i*2].data;
+			const OperatorType& sy = ModelBaseType::naturalOperator("sy", site, 0);
+			tmp = modelParameters_.magneticFieldY[block[0]];
+			hmatrix += tmp*sy.data;
 
 			// magnetic field z
-			tmp = modelParameters_.magneticFieldZ[block[i*2]];
-			hmatrix += tmp*cm[2+i*2].data;
+			const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
+			tmp = modelParameters_.magneticFieldZ[block[0]];
+			hmatrix += tmp*sz.data;
 		}
 	}
 

@@ -375,32 +375,29 @@ protected:
 		SparseMatrixType tmpMatrix,niup,nidown,Szsquare,Szi;
 		SizeType linSize = geometry_.numberOfSites();
 
-		const typename ModelBaseType::ModelLinksType& modelLinks = ModelBaseType::modelLinks();
-
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType site = block[i];
-			const VectorOperatorType& cm = modelLinks.trackableOps(site);
 
 			// onsite U hubbard
 			//n_i up
-			SizeType sigma =0; // up sector
-			transposeConjugate(tmpMatrix,cm[sigma].data);
-			multiply(niup,tmpMatrix,cm[sigma].data);
+			const OperatorType& cup = ModelBaseType::naturalOperator("c", site, 0);
+			transposeConjugate(tmpMatrix, cup.data);
+			multiply(niup,tmpMatrix, cup.data);
 			//n_i down
-			sigma =1; // down sector
-			transposeConjugate(tmpMatrix,cm[sigma].data);
-			multiply(nidown,tmpMatrix,cm[sigma].data);
+			const OperatorType& cdown = ModelBaseType::naturalOperator("c", site, 1);
+			transposeConjugate(tmpMatrix, cdown.data);
+			multiply(nidown,tmpMatrix, cdown.data);
 
-			multiply(tmpMatrix,niup,nidown);
+			multiply(tmpMatrix, niup, nidown);
 			RealType tmp = modelParameters_.hubbardU[block[i]];
 			hmatrix += tmp*tmpMatrix;
 
 			// V_iup term
-			tmp = modelParameters_.potentialV[block[i]+0*linSize];
+			tmp = modelParameters_.potentialV[site + 0*linSize];
 			hmatrix += tmp*niup;
 
 			// V_idown term
-			tmp = modelParameters_.potentialV[block[i]+1*linSize];
+			tmp = modelParameters_.potentialV[site + 1*linSize];
 			hmatrix += tmp*nidown;
 
 			// anisotropy

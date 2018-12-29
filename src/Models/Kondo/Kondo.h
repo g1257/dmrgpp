@@ -85,17 +85,18 @@ public:
 
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType ind = block[i];
-			const VectorOperatorType& ops = ModelBaseType::trackableOps(ind);
+			const OperatorType& cup = ModelBaseType::naturalOperator("c", ind, 0);
+			const OperatorType& cdown = ModelBaseType::naturalOperator("c", ind, 1);
 			assert(ops_.size() > 1 + i*4);
+
 			// onsite U hubbard
 			//n_i up
-			SizeType sigma =0; // up sector
-			transposeConjugate(tmpMatrix, ops[sigma + i*4].data);
-			multiply(niup, tmpMatrix, ops[sigma + i*4].data);
+			transposeConjugate(tmpMatrix, cup.data);
+			multiply(niup, tmpMatrix, cup.data);
+
 			//n_i down
-			sigma = 1; // down sector
-			transposeConjugate(tmpMatrix, ops[sigma + i*4].data);
-			multiply(nidown,tmpMatrix, ops[sigma + i*4].data);
+			transposeConjugate(tmpMatrix, cdown.data);
+			multiply(nidown, tmpMatrix, cdown.data);
 
 			multiply(tmpMatrix,niup,nidown);
 			assert(ind < modelParams_.hubbardU.size());
@@ -113,7 +114,7 @@ public:
 
 			// Kondo term
 			assert(ind < modelParams_.kondoJ.size());
-			hmatrix += modelParams_.kondoJ[ind] * kondoOnSite(ops, niup, nidown);
+			hmatrix += modelParams_.kondoJ[ind] * kondoOnSite(ind, niup, nidown);
 		}
 	}
 
@@ -401,14 +402,15 @@ private:
 		return creationMatrix;
 	}
 
-	SparseMatrixType kondoOnSite(const VectorOperatorType& ops,
+	SparseMatrixType kondoOnSite(SizeType,
 	                             const SparseMatrixType& niup,
 	                             const SparseMatrixType& nidown) const
 	{
-		const SparseMatrixType& cdu = ops[0].data;
-		const SparseMatrixType& cdd = ops[1].data;
-		const SparseMatrixType& Sp = ops[2].data;
-		const SparseMatrixType& Sz = ops[3].data;
+		// cdu[d] is actually cu[d] not cu[d] dagger.
+		const SparseMatrixType& cdu = ops_[0].data;
+		const SparseMatrixType& cdd = ops_[1].data;
+		const SparseMatrixType& Sp = ops_[2].data;
+		const SparseMatrixType& Sz = ops_[3].data;
 
 		SparseMatrixType Sm;
 		transposeConjugate(Sm, Sp);

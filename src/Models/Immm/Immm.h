@@ -414,7 +414,6 @@ private:
 	{
 		// on-site potential:
 		SizeType site = block[0];
-		const VectorOperatorType& cm = ModelBaseType::trackableOps(site);
 		SizeType linSize = geometry_.numberOfSites();
 
 		SizeType siteCorrected  = 0;
@@ -424,6 +423,8 @@ private:
 
 		SizeType total = NUMBER_OF_SPINS * orbitalsAtSite(site);
 		for (SizeType dof=0;dof<total;dof++) {
+			const OperatorType& cmop = ModelBaseType::naturalOperator("c", site, dof);
+			const SparseMatrixType& cm = cmop.data;
 			SizeType norb = orbitalsAtSite(site);
 			assert(norb==1 || norb==2);
 			SizeType orb = dof % norb;
@@ -431,14 +432,16 @@ private:
 			SizeType index = siteCorrected2+orb*linSize;
 			assert(index<modelParameters_.potentialV.size());
 			SparseElementType value = modelParameters_.potentialV[index];
-			SparseMatrixType tmpMatrix =value * n(cm[dof].data);
+			SparseMatrixType tmpMatrix =value * n(cm);
 			hmatrix += tmpMatrix;
 		}
 
 		// on-site U only for Cu sites, for now:
 		if (total != NUMBER_OF_SPINS) return;
 
-		hmatrix +=  modelParameters_.hubbardU[site] * nbar(cm[0].data) * nbar(cm[1].data);
+		const OperatorType& cup = ModelBaseType::naturalOperator("c", site, 0);
+		const OperatorType& cdown = ModelBaseType::naturalOperator("c", site, 1);
+		hmatrix +=  modelParameters_.hubbardU[site] * nbar(cup.data) * nbar(cdown.data);
 	}
 
 	SparseMatrixType n(const SparseMatrixType& c) const
