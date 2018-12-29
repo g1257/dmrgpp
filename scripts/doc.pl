@@ -138,10 +138,13 @@ sub loadLabels
 				}
 
 				my $debug = 0;
-				my $func = captureFirstFunctionBelow($i + 1, \@lines, $debug);
-				if ($func) {
+				my $hashMark = captureFirstFunctionBelow($i + 1, \@lines, $debug);
+				foreach my $key (%$hashMark) {
+					my $func = $hashMark->{"$key"};
+					next unless ($func);
 					my @temp = ($func);
 					my $name = $inlabel."FirstFunctionBelow";
+					$name .= "::$key" unless ($key eq " ");
 					$labels{"$name"} = \@temp;
 				}
 			}
@@ -201,12 +204,29 @@ sub captureFirstFunctionBelow
 	my $nlines = scalar(@$lines);
 	my $buffer = "";
 	my $level = 0;
+	my $markName = "";
+	my $markContent = "";
+	my %markHash;
 	for (my $i = $ind; $i < $nlines; ++$i) {
 		my $line = $lines->[$i];
+		if ($line =~ /^[ \t]*\/\/ *PSIDOCMARK\_BEGIN +(.+$)/) {
+			die "$0: PSIDOCMARK_BEGIN $1 cannot be nested\n" if ($markName ne "");
+			$markName = $1;
+			next;
+		}
+
+		if ($line =~ /^[ \t]*\/\/ *PSIDOCMARK\_END/) {
+			die "$0: PSIDOCMARK_END found but no mark open\n" if ($markName eq "");
+			$markHash{"$markName"} = dressCode($markContent);
+			$markName = $markContent = "";
+			next;
+		}
+
 		last if ($line =~ /\/\*/);
 		next if ($line =~ /^ *\/\//);
 		$buffer .= "$line\n";
 		
+		$markContent .= "$line\n" if ($markName ne "");
 		my $plus = () = $line =~ /\{/g;
 		my $minus = () = $line =~ /\}/g;
 		$level += $plus;
@@ -215,14 +235,23 @@ sub captureFirstFunctionBelow
 		last if ($line =~ /\}[^\{\}]*$/ and $level == 0);
 	}
 
+	die "$0: PSIDOCMARK_BEGIN $1 was never ended\n" if ($markName ne "");
+
 	$buffer = "" unless ($level == 0);
-	return $buffer if ($buffer eq "");
+	$markHash{" "} = $buffer;
+	return \%markHash if ($buffer eq "");
 
-	$buffer =~ s/\t/  /g;
-	$buffer = "\\begin{lstlisting}\n$buffer\n";
-	$buffer .= "\\end{lstlisting}\n";
+	$markHash{" "} = dressCode($buffer);
+	return \%markHash;
+}
 
-	return $buffer;
+sub dressCode
+{
+	my ($code) = @_;
+	$code =~ s/\t/  /g;
+	$code = "\\begin{lstlisting}\n$code\n";
+	$code .= "\\end{lstlisting}\n";
+	return $code;
 }
 
 sub replaceLabels
@@ -313,8 +342,8 @@ sub expandIfNeeded
 			chomp($label) if ($label=~/\n$/);
 			my $txt = getTextFromLabel($label,$a);
 			if (!defined($txt)) {
-				print STDERR "$0: ERROR: line $_, $label not found\n";
-				$txt = notFoundLabel($label);
+				die "$0: ERROR: line $_, $label not found\n";
+				$txt = labelNotFound($label);
 			}
 
 			$buffer .= $txt;
