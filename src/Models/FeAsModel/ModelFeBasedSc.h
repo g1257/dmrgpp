@@ -1204,7 +1204,7 @@ private:
 	{
 		SizeType iOfSite = 0;
 		assert(block.size() > iOfSite);
-		if (block[0] > 0) return;
+		if (block[iOfSite] > 0) return;
 
 		addInteractionU1(hmatrix);
 		addInteractionImp2(hmatrix);

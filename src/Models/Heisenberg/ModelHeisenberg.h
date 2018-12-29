@@ -189,19 +189,7 @@ public:
 	 We describe only the addition of a Zeeman term to the Heisenberg model here; note
 	 that this function is more complicated.
 	 Please look carefully at the following C++ lines:
-	 \begin{lstlisting}
-void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-                                const BlockType& block,
-                                RealType) const {
-  if (modelParameters_.magneticField.size() == linSize) {
-    const OperatorType& sz = ModelBaseType::naturalOperator("sz",
-                                                            site,
-                                                            0);
-    RealType tmp = modelParameters_.magneticField[block[0]];
-    hmatrix += tmp*sz.data;
-  }
-}
-	 \end{lstlisting}
+	 PSIDOCCOPY $FirstFunctionBelow::MagneticField
 	 */
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const BlockType& block,
@@ -211,15 +199,20 @@ void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 		SizeType n = block.size();
 
 		for (SizeType i = 0; i < n; ++i) {
-			SizeType site = block[i];
-			const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
 
-			// magnetic field
+			// PSIDOCMARK_BEGIN MagneticField
+			SizeType site = block[i];
+			const OperatorType& sz = ModelBaseType::naturalOperator("sz",
+			                                                        site,
+			                                                        0);
+
 			if (modelParameters_.magneticField.size() == linSize) {
 				RealType tmp = modelParameters_.magneticField[site];
 				hmatrix += tmp*sz.data;
 
 			}
+
+			// PSIDOCMARK_END
 
 			// anisotropyD
 			if (modelParameters_.anisotropyD.size() == linSize) {
