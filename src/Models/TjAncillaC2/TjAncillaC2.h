@@ -279,6 +279,8 @@ protected:
 				}
 			}
 
+			OpForLinkType d("d", spin);
+			dd.push(d, 'N', d, 'C');
 		}
 
 		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
@@ -306,9 +308,6 @@ protected:
 				ninj.push(n1, 'N', n2, 'N');
 			}
 		}
-
-		OpForLinkType d("d");
-		dd.push(d, 'N', d, 'C');
 	}
 
 private:
