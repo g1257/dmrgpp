@@ -306,24 +306,24 @@ protected:
 	}
 
 	/* PSIDOC Hubbard::fillModelLinks
-	We'll go first though the simpler example of the Hubbard model
-	that has one one term, the hopping,
+	The Hubbard model has one one term, the hopping,
 	and within this term it has two connections: up-up and down-down.
 	First, define the term, and name it whatever you like; see line (A) below.
 	In this case the variable is called \verb!hop! and the name is ``hopping''.
 	Create then a special type of opaque object, an OpForLinkType, to represent
 	the operators you need to connect. In this case, we need to connect $c^\dagger_\uparrow$
-	with $c_\uparrow$. Because $c^\dagger_\uparrow$ is not tracked in this model, we
-	must use $c_\uparrow$ only. This is created in line (B) below.
-	The variable is called \verb!cup! and the label name is ``c'' with
+	with $c_\uparrow$. Because $c_\uparrow$ is not tracked in this model, we
+	must use $c^\dagger_\uparrow$ only, and transpose conjugate it as needed.
+	In line (B) below, we create a C++ variable \verb!cup! and the label name is ``c'' with
 	degree of freedom 0 indicating spin up. Note that (``c'', 0) must be
 	a trackable operator; see \verb!fillLabeledOperators! above.
 	We now push to the variable \verb!hop! the connection as seen in (C) below.
 	Here we must supply
 	\emph{two} operators: in this case they are cup with 'N' and cup with 'C' to
-	indicate whtat we want $c^\dagger c$. The last three numbers are SU(2) related.
+	indicate that we want $c^\dagger c$. The last three numbers are SU(2) related; just
+	use \verb!1, 1, 0! if unsure.
 	Note that the operators are the same, but the second one is transpose conjugated.
-	Finally we create cdown in (D) and add the connection to \verb!hop! in (E)
+	Likewise, we create cdown in (D) and add the connection to \verb!hop! in (E)
 	PSIDOCCOPY $FirstFunctionBelow
 	*/
 	void fillModelLinks()
@@ -337,14 +337,32 @@ protected:
 		hop.push(cdown, 'N', cdown, 'C', 1, -1, 1); // (E)
 	}
 
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	/* PSIDOC Hubbard::write
+	 We are passed a label in \verb!label1! (the first argument),
+	and something like a file handle in \verb!io! (the second argument).
+	We must interpret the label as a directory within the file.
+	We then first create a top directory if it doesn't exist in lines (A) and (B) below.
+	Oh, and then create another directory with this model's name in (C).
+	Hmmm, maybe this two-step process ought to be simplified\ldots.
+	Anyway, we go ahead and start writing things into directory \verb!label! being
+	\verb!label1/model!,
+	where label1 is the label passed as first argument to this function,
+	and model is this model's name. What things \emph{need to} be written here?
+	Probably nothing needs to be written (yeah, big FIXME TODO on the ``Probably'', sorry).
+	Typically though, you'd like to write all data members for this class.
+	For most models, it's the model parameters like in (D) below,
+	and that's that. Here we write also some SU(2) auxiliary members in the last two lines.
+	PSIDOCCOPY $FirstFunctionBelow
+	 */
+	void write(PsimagLite::String label1,
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
-		if (!io.doesGroupExist(label1))
-			io.createGroup(label1);
+		if (!io.doesGroupExist(label1))    // (A)
+			io.createGroup(label1);          // (B)
 
 		PsimagLite::String label = label1 + "/" + this->params().model;
-		io.createGroup(label);
-		modelParameters_.write(label, io);
+		io.createGroup(label);             // (C)
+		modelParameters_.write(label, io); // (D)
 		spinSquaredHelper_.write(label, io);
 		spinSquared_.write(label, io);
 	}

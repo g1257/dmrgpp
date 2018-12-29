@@ -434,26 +434,37 @@ public:
 	}
 
 	/* PSIDOC FeAs::fillModelLinks
-	OK, let's discuss a more complicated example: the case of the ModelFeBasedSc.
 	Here we have as many connections as  2*orbitals*orbitals:
 	a up a up, a up b up, b up a up, b up, b up, etc
 	and similarly for spin down.
-	We'll do all of this in one single therm, named ``hopping'' and put in a C++ variable
-	called \verb!hop!. So we'll do 2*orbitals*orbitals push into that variable.
+	We'll do all of this in one single term, named ``hopping'' and put it in a C++ variable
+	called \verb!hop!. So we'll do 2*orbitals*orbitals pushes into that \verb!hop!.
 	Each push does the pair c1 with normal 'N', and c2 with transpose conjugate 'C'.
 	(We shall not discuss the SU(2) related numbers.)
 	We observe that c1 is a ``C'' trackable operator with degree of freedom
 	orb1 + spin*orbitals; likewise c2 is a ``C'' trackable operator with orb2 + spin*orbitals.
 	The orbitals are different but the spin is the same, as expected.
-	We see however that lines (B) and (C) have a 3rd number for each operator.
-	This indicates the connector dependence, which is not on spin but only on orbital.
+	In addition, lines (B) and (C) have a 3rd number for each operator.
+	This 3rd number indicates the connector dependence, which is not on spin but only on orbital.
 	That is why the 3rd number in (B) is orb1 and not orb1 + spin*orbitals, because
-	the hoppings in the input file do not depend on orbital.
+	the hoppings in the input file do not depend on spin.
 	This is very important to note and could be a cause of confusion.
 	By default this 3rd number (which can be omitted) is 0, and indicates no
 	dependence of the connector on things other than site. The site dependence
 	is handled by the geometry and must not be specified here.
 	PSIDOCCOPY $FirstFunctionBelow
+
+	In formulas, we can explain the distinction between the 2nd number and the 3rd number
+	by writing
+	\[
+	t(orb1, orb2)\,\, c^\dagger_{orb1, spin1} (site1)\,\, c_{orb2, spin2} (site2)
+	\]
+	The first operator has label $orb1, spin1$
+	that gets packed into $orb1 + spin1*orbitals$ and must be given as the 2nd argument
+	for the first operator, and similarly for the second operator.
+	In contrast, the indices orb1 and orb2 are in the connector dependence
+	$t(orb1, orb2)$, and must be as
+	3rd number of each operator, respectively.
 	 */
 	void fillModelLinks()
 	{

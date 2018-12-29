@@ -178,9 +178,13 @@ public:
 
 	/* PSIDOC ModelBaseWrite FirstProtoBelow
 	PSIDOCCOPY $FirstProtoBelow
-	For information purposes only. Write model parameters.
+	For information purposes only.
 	String is the first argument and contains the group.
 	Serializer object is second argument.
+	As an example, we describe the write() virtual memeber function
+	for the Hubbard model.
+
+	PSIDOCCOPY Hubbard::write
 	*/
 	virtual void write(PsimagLite::String,
 	                   PsimagLite::IoNg::Out::Serializer&) const = 0;
@@ -195,7 +199,10 @@ public:
 	argument is an input, and
 	you can ignore it unless your model needs SDHS. The last argument is
 	the current physical time; it's an input, and is given in case your
-	model has time-dependent on-site terms.
+	model has time-dependent on-site terms. We briefly discuss the
+	addition of a magnetic field Zeeman term to the Heisenberg model.
+
+	PSIDOCCOPY Heisenberg::addDiagonalsInNaturalBasis
 	*/
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType&,
 	                                        const BlockType& block,
@@ -242,8 +249,13 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	PSIDOCCOPY $FirstProtoBelow
 	Give the Hamiltonian connections that this model has.
 	These are the terms in the Hamiltonian that connect \emph{different} sites.
-	// PSIDOCCOPY Hubbard::fillModelLinks
-	// PSIDOCCOPY FeAs::fillModelLinks
+	We'll go first though the simpler example of the Hubbard model.
+
+	PSIDOCCOPY Hubbard::fillModelLinks
+	\vspace{1em}
+
+	OK, let's discuss a more complicated example: the case of the FeAs model.
+	PSIDOCCOPY FeAs::fillModelLinks
 	 */
 	virtual void fillModelLinks() = 0;
 

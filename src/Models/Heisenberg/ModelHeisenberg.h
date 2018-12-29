@@ -185,9 +185,25 @@ public:
 		spinSquared_.write(label, io);
 	}
 
+	/* PSIDOC Heisenberg::addDiagonalsInNaturalBasis
+	 We describe only the addition of a Zeeman term to the Heisenberg model here; note
+	 that this function is more complicated.
+	 Please look carefully at the following C++ lines:
+	 \begin{lstlisting}
+void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
+                                const BlockType& block,
+                                RealType) const {
+  const VectorOperatorType& cm = modelLinks.trackableOps(0);
+  if (modelParameters_.magneticField.size() == linSize) {
+    RealType tmp = modelParameters_.magneticField[block[0]];
+    hmatrix += tmp*cm[1].data;
+  }
+}
+	 \end{lstlisting}
+	 */
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const BlockType& block,
-	                                RealType)  const
+	                                RealType) const
 	{
 		SizeType linSize = geometry_.numberOfSites();
 		SizeType n = block.size();
