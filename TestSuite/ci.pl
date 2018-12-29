@@ -6,7 +6,7 @@ use Getopt::Long qw(:config no_ignore_case);
 use lib ".";
 use Ci;
 
-my ($valgrind,$workdir,$ranges,$su2,$info,$sOptions,$help);
+my ($valgrind,$workdir,$ranges,$regex,$su2,$info,$sOptions,$help);
 my %submit;
 GetOptions(
 'S=s' => \$submit{"command"},
@@ -14,6 +14,7 @@ GetOptions(
 'valgrind=s' => \$valgrind,
 'w=s' => \$workdir,
 'n=s' => \$ranges,
+'e=s' => \$regex,
 'i=i' => \$info,
 'o=s' => \$sOptions,
 'su2' => \$su2,
@@ -32,6 +33,8 @@ if (defined($help)) {
 	print "\t\tDelay in seconds between subsequent submissions.\n";
 	print "\t-n n\n";
 	print Ci::helpFor("-n");
+	print "\t-e regex\n";
+	print "Only consider input files that match regex\n";
 	print Ci::helpFor("-w");
 	print "\t--valgrind tool\n";
 	print "\t\tRun with valgrind using tool tool\n";
@@ -103,8 +106,11 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 		next;
 	}
 
-	my $from = getRestartFrom("../inputs/input$n.inp",$n);
-	my @ciAnnotations = Ci::getCiAnnotations("../inputs/input$n.inp",$n);
+	my $thisInput = "../inputs/input$n.inp";
+	next unless matchesRegex($thisInput, $regex);
+
+	my $from = getRestartFrom("$thisInput",$n);
+	my @ciAnnotations = Ci::getCiAnnotations("$thisInput",$n);
 	my $totalAnnotations = scalar(@ciAnnotations);
 
 	my $whatDmrg = Ci::readAnnotationFromKey(\@ciAnnotations, "dmrg");
@@ -194,6 +200,23 @@ sub runObserveOne
 	my $cmd = "./observe -f ../inputs/input$n.inp $sOptions $args >> $output";
 	print "|$n|: postTest $cmd\n";
 	return $cmd;
+}
+
+sub matchesRegex
+{
+	my ($thisInput, $regex) = @_;
+	defined($regex) or return 1;
+	open(FILE, "<", "$thisInput") or return 1;
+	my $flag = 0;
+	while (<FILE>) {
+		if (/$regex/) {
+			$flag = 1;
+			last;
+		}
+	}
+
+	close(FILE);
+	return $flag;
 }
 
 sub getRestartFrom
