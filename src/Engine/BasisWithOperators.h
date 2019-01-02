@@ -326,18 +326,21 @@ private:
 		if (this->useSu2Symmetry()) setMomentumOfOperators(basis2);
 		operators_.setToProduct(basis2,basis3,x,this);
 		ApplyFactors<FactorsType> apply(this->getFactors(),this->useSu2Symmetry());
-		ProgramGlobals::FermionOrBosonEnum savedSign = ProgramGlobals::BOSON;
+		ProgramGlobals::FermionOrBosonEnum savedSign = ProgramGlobals::FermionOrBosonEnum::BOSON;
 
 		for (SizeType i=0;i<this->numberOfOperators();i++) {
 			if (i<basis2.numberOfOperators()) {
 				if (!this->useSu2Symmetry()) {
 					const OperatorType& myOp =  basis2.getOperatorByIndex(i);
+					bool isFermion = (myOp.fermionOrBoson ==
+					                  ProgramGlobals::FermionOrBosonEnum::FERMION);
 					if (savedSign != myOp.fermionOrBoson) {
 						utils::fillFermionicSigns(fermionicSigns,
 						                          basis2.signs(),
-						                          myOp.fermionOrBoson);
+						                          (isFermion) ? -1 : 1);
 						savedSign = myOp.fermionOrBoson;
 					}
+
 					operators_.externalProduct(i,
 					                           myOp,
 					                           basis3.size(),
@@ -355,11 +358,12 @@ private:
 				if (!this->useSu2Symmetry()) {
 					const OperatorType& myOp = basis3.
 					        getOperatorByIndex(i - basis2.numberOfOperators());
-
+					bool isFermion = (myOp.fermionOrBoson ==
+					                  ProgramGlobals::FermionOrBosonEnum::FERMION);
 					if (savedSign != myOp.fermionOrBoson) {
 						utils::fillFermionicSigns(fermionicSigns,
 						                          basis2.signs(),
-						                          myOp.fermionOrBoson);
+						                          (isFermion) ? -1 : 1);
 						savedSign = myOp.fermionOrBoson;
 					}
 					operators_.externalProduct(i,

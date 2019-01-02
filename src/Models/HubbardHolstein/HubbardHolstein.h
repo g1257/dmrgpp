@@ -229,7 +229,7 @@ protected:
 				}
 
 				OperatorType myOp(tmpMatrix,
-				                  ProgramGlobals::FERMION,
+				                  ProgramGlobals::FermionOrBosonEnum::FERMION,
 				                  typename OperatorType::PairType(1,1-sigma),
 				                  asign,
 				                  su2related);
@@ -250,7 +250,7 @@ protected:
 			su2related2.transpose.push_back(1);
 			su2related2.offset = 1;
 			OperatorType myOp2(tmpMatrix,
-			                   ProgramGlobals::BOSON,
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                   PairType(2, 2),
 			                   -1,
 			                   su2related2);
@@ -274,7 +274,7 @@ protected:
 				}
 
 				OperatorType myOp3(tmpMatrix,
-				                   ProgramGlobals::FERMION,
+				                   ProgramGlobals::FermionOrBosonEnum::FERMION,
 				                   typename OperatorType::PairType(1,1-sigma),
 				                   asign,
 				                   su2related3);

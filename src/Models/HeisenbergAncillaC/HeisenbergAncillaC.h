@@ -234,7 +234,7 @@ protected:
 			su2related.offset = NUMBER_OF_ORBITALS;
 
 			OperatorType myOp(tmpMatrix,
-			                  ProgramGlobals::BOSON,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                  PairType(2, 2),
 			                  -1,
 			                  su2related);
@@ -257,7 +257,7 @@ protected:
 				su2related.offset = NUMBER_OF_ORBITALS;
 
 				OperatorType myOp(tmpMatrix,
-				                  ProgramGlobals::BOSON,
+				                  ProgramGlobals::FermionOrBosonEnum::BOSON,
 				                  PairType(2, 2),
 				                  -1,
 				                  su2related);
@@ -268,7 +268,7 @@ protected:
 			tmpMatrix = findSzMatrices(i,0,natBasis);
 			typename OperatorType::Su2RelatedType su2related2;
 			OperatorType myOp2(tmpMatrix,
-			                   ProgramGlobals::BOSON,
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                   PairType(2, 1),
 			                   1.0/sqrt(2.0),
 			                   su2related2);
@@ -278,7 +278,7 @@ protected:
 				tmpMatrix = findSzMatrices(i,1,natBasis);
 				typename OperatorType::Su2RelatedType su2related2;
 				OperatorType myOp2(tmpMatrix,
-				                   ProgramGlobals::BOSON,
+				                   ProgramGlobals::FermionOrBosonEnum::BOSON,
 				                   PairType(2, 1),
 				                   1.0/sqrt(2.0),
 				                   su2related2);
@@ -289,7 +289,7 @@ protected:
 			tmpMatrix = findDeltaMatrices(i,natBasis);
 			typename OperatorType::Su2RelatedType su2related3;
 			OperatorType myOp3(tmpMatrix,
-			                   ProgramGlobals::BOSON,
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                   PairType(0, 0),
 			                   1.0,
 			                   su2related3);

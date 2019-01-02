@@ -321,7 +321,7 @@ private:
 
 				link2.value = PsimagLite::conj(tmp);
 
-				if (oneLink.fermionOrBoson == ProgramGlobals::FERMION) link2.value *= (-1.0);
+				if (oneLink.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) link2.value *= (-1.0);
 
 				char saved = oneLink.mods.first;
 				link2.mods.first = oneLink.mods.second;
@@ -344,13 +344,13 @@ private:
 
 	bool connectionIsHermitian(const LinkType& link) const
 	{
-		return (link.fermionOrBoson == ProgramGlobals::FERMION) ? linkIsHermitianFermion(link) :
+		return (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? linkIsHermitianFermion(link) :
 		                                                          linkIsHermitianBoson(link);
 	}
 
 	bool linkIsHermitianFermion(const LinkType& link) const
 	{
-		assert(link.fermionOrBoson == ProgramGlobals::FERMION);
+		assert(link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION);
 
 		HermitianEnum h1 = lpb_.getHermitianProperty(link.ops.first, link.site1);
 		HermitianEnum h2 = lpb_.getHermitianProperty(link.ops.second, link.site2);
@@ -366,7 +366,7 @@ private:
 
 	bool linkIsHermitianBoson(const LinkType& link) const
 	{
-		assert(link.fermionOrBoson == ProgramGlobals::BOSON);
+		assert(link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::BOSON);
 
 		HermitianEnum h1 = lpb_.getHermitianProperty(link.ops.first, link.site1);
 		HermitianEnum h2 = lpb_.getHermitianProperty(link.ops.second, link.site2);

@@ -222,7 +222,7 @@ public:
 
 		OperatorType myOp;
 		myOp.data = hamiltonian;
-		myOp.fermionOrBoson = ProgramGlobals::BOSON;
+		myOp.fermionOrBoson = ProgramGlobals::FermionOrBosonEnum::BOSON;
 		myOp.jm=typename OperatorType::PairType(0,0);
 		myOp.angularFactor = 1.0;
 		opSrc[0]=&myOp;
@@ -341,7 +341,8 @@ public:
 			err("Operator has unknown momentum\n");
 
 		PsimagLite::Matrix<SparseElementType> B(n,n);
-		externalProd_(B, basisA, basisB, A, ki, order, fermionOrBoson);
+		const int fs = (fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
+		externalProd_(B, basisA, basisB, A, ki, order, fs);
 		fullMatrixToCrsMatrix(reducedOperators_[ind].data,B);
 		reducedOperators_[ind].fermionOrBoson = fermionOrBoson;
 		reducedOperators_[ind].jm = myOp.jm;

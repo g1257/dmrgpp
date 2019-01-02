@@ -205,7 +205,7 @@ public:
 		params.Eg = this->common().energy();
 		params.weight = s2*weightForContinuedFraction_*s3;
 		params.isign = s;
-		if (tstStruct_.aOperators()[0].fermionOrBoson == ProgramGlobals::BOSON)
+		if (tstStruct_.aOperators()[0].fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::BOSON)
 			s2 *= s;
 
 		PostProcType cf(ab_,params);

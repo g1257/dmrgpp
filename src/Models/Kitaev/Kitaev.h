@@ -241,7 +241,7 @@ protected:
 			// Set the operators S^x_i in the natural basis
 			tmpMatrix = findSdirMatrices(i, natBasis, DIR_X, dummy);
 			OperatorType myOp(tmpMatrix,
-			                  ProgramGlobals::BOSON,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                  PairType(0, 0),
 			                  1.0,
 			                  su2related);
@@ -250,7 +250,7 @@ protected:
 			// Set the operators S^y_i in the natural basis
 			tmpMatrix = findSdirMatrices(i, natBasis, DIR_Y, dummy);
 			OperatorType myOp2(tmpMatrix,
-			                   ProgramGlobals::BOSON,
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                   PairType(0, 0),
 			                   1.0,
 			                   su2related);
@@ -259,7 +259,7 @@ protected:
 			// Set the operators S^z_i in the natural basis
 			tmpMatrix = findSdirMatrices(i, natBasis, DIR_Z, dummy);
 			OperatorType myOp3(tmpMatrix,
-			                   ProgramGlobals::BOSON,
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                   PairType(0, 0),
 			                   1.0,
 			                   su2related);

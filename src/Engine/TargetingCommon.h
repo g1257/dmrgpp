@@ -330,11 +330,11 @@ public:
 		}
 	}
 
-	ProgramGlobals::FermionOrBosonEnum findFermionSignOfTheOperators() const
+	int findFermionSignOfTheOperators() const
 	{
 		const VectorOperatorType& myoperator = targetHelper_.tstStruct().aOperators();
 		bool wereSumming = (targetHelper_.tstStruct().concatenation() == SUM);
-		ProgramGlobals::FermionOrBosonEnum forB = ProgramGlobals::BOSON;
+		ProgramGlobals::FermionOrBosonEnum forB = ProgramGlobals::FermionOrBosonEnum::BOSON;
 
 		for (SizeType i = 0; i < myoperator.size(); ++i) {
 
@@ -356,7 +356,7 @@ public:
 
 		}
 
-		return forB;
+		return (forB == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
 	}
 
 	void setAllStagesTo(SizeType x)
@@ -587,7 +587,7 @@ public:
 		SparseMatrixType idSparse;
 		idSparse.makeDiagonal(h, 1.0);
 		OperatorType id(idSparse,
-		                ProgramGlobals::BOSON,
+		                ProgramGlobals::FermionOrBosonEnum::BOSON,
 		                PairType(0, 0),
 		                1.0,
 		                su2Related1);

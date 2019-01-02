@@ -106,7 +106,7 @@ struct Operator {
 	typedef Su2Related Su2RelatedType;
 	typedef PsimagLite::Matrix<value_type> DenseMatrixType;
 
-	Operator() : fermionOrBoson(ProgramGlobals::BOSON), angularFactor(1) {}
+	Operator() : fermionOrBoson(ProgramGlobals::FermionOrBosonEnum::BOSON), angularFactor(1) {}
 
 	Operator(const StorageType& data1,
 	         ProgramGlobals::FermionOrBosonEnum fermionSign1,
@@ -204,7 +204,7 @@ struct Operator {
 
 		int fs = 0;
 		io.readline(fs,prefix + "FERMIONSIGN=");
-		fermionOrBoson = (fs < 0) ? ProgramGlobals::FERMION : ProgramGlobals::BOSON;
+		fermionOrBoson = (fs < 0) ? ProgramGlobals::FermionOrBosonEnum::FERMION : ProgramGlobals::FermionOrBosonEnum::BOSON;
 
 		jm.first = jm.second = 0;
 		angularFactor = 1;
@@ -274,7 +274,7 @@ struct Operator {
 		DenseMatrixType m;
 		crsMatrixToFullMatrix(m,data);
 		os<<m;
-		int fs = (fermionOrBoson == ProgramGlobals::FERMION) ? -1 : 1;
+		int fs = (fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
 		os<<"FERMIONSIGN="<<fs <<"\n";
 		os<<"JMVALUES 2 "<<jm.first<<" "<<jm.second<<"\n";
 		os<<"AngularFactor="<<angularFactor<<"\n";
@@ -283,7 +283,7 @@ struct Operator {
 	void send(int root,int tag,PsimagLite::MPI::CommType mpiComm)
 	{
 		data.send(root,tag,mpiComm);
-		int fs = (fermionOrBoson == ProgramGlobals::FERMION) ? -1 : 1;
+		int fs = (fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
 		PsimagLite::MPI::send(fs,root,tag+1,mpiComm);
 		PsimagLite::MPI::send(jm,root,tag+2,mpiComm);
 		PsimagLite::MPI::send(angularFactor,root,tag+3,mpiComm);
@@ -295,7 +295,7 @@ struct Operator {
 		data.recv(root,tag,mpiComm);
 		int fs = 0;
 		PsimagLite::MPI::recv(fs,root,tag+1,mpiComm);
-		fermionOrBoson = (fs < 0) ? ProgramGlobals::FERMION : ProgramGlobals::BOSON;
+		fermionOrBoson = (fs < 0) ? ProgramGlobals::FermionOrBosonEnum::FERMION : ProgramGlobals::FermionOrBosonEnum::BOSON;
 		PsimagLite::MPI::recv(jm,root,tag+2,mpiComm);
 		PsimagLite::MPI::recv(angularFactor,root,tag+3,mpiComm);
 		Dmrg::recv(su2Related,root,tag+4,mpiComm);
@@ -309,7 +309,7 @@ struct Operator {
 
 	Operator& operator*=(const Operator& other)
 	{
-		int fSaved = (fermionOrBoson == ProgramGlobals::FERMION) ? -1 : 1;
+		int fSaved = (fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
 		fermionOrBoson = other.fermionOrBoson;
 		if (metaDiff(other) > 0)
 			err("operator+= failed for Operator: metas not equal\n");
@@ -318,9 +318,9 @@ struct Operator {
 		multiply(crs, data, other.data);
 		data = crs;
 
-		int fsOther = (other.fermionOrBoson == ProgramGlobals::FERMION) ? -1 : 1;
+		int fsOther = (other.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
 		int fs = fSaved * fsOther;
-		fermionOrBoson = (fs < 0) ? ProgramGlobals::FERMION : ProgramGlobals::BOSON;
+		fermionOrBoson = (fs < 0) ? ProgramGlobals::FermionOrBosonEnum::FERMION : ProgramGlobals::FermionOrBosonEnum::BOSON;
 
 		return *this;
 	}

@@ -289,9 +289,11 @@ private:
 			assert(x<lrs_.left().permutationVector().size());
 			pack2.unpack(x0,x1,lrs_.left().permutation(x));
 
-			RealType sign = fermionSign(x0, A.fermionOrBoson);
-			SizeType start = A.data.getRowPtr(x1);
-			SizeType end = A.data.getRowPtr(x1 + 1);
+			const bool isFermion = (A.fermionOrBoson ==
+			                        ProgramGlobals::FermionOrBosonEnum::FERMION);
+			const RealType sign = fermionSign(x0, (isFermion) ? -1 : 1);
+			const SizeType start = A.data.getRowPtr(x1);
+			const SizeType end = A.data.getRowPtr(x1 + 1);
 			for (SizeType k = start; k < end; ++k) {
 				SizeType x1prime = A.data.getCol(k);
 				SizeType xprime = lrs_.left().permutationInverse(x0+x1prime*nx);
@@ -346,9 +348,11 @@ private:
 			SizeType y0 = 0;
 			SizeType y1 = 0;
 			pack2.unpack(y0,y1,lrs_.right().permutation(y));
-			RealType sign = lrs_.left().fermionicSign(x, A.fermionOrBoson);
-			SizeType start = A.data.getRowPtr(y0);
-			SizeType end = A.data.getRowPtr(y0 + 1);
+			const bool isFermion = (A.fermionOrBoson ==
+			                        ProgramGlobals::FermionOrBosonEnum::FERMION);
+			const RealType sign = lrs_.left().fermionicSign(x, (isFermion) ? -1 : 1);
+			const SizeType start = A.data.getRowPtr(y0);
+			const SizeType end = A.data.getRowPtr(y0 + 1);
 			for (SizeType k = start; k < end; ++k) {
 				SizeType y0prime = A.data.getCol(k);
 				SizeType yprime = lrs_.right().permutationInverse(y0prime+y1*nx);
@@ -375,8 +379,8 @@ private:
 			SizeType y = 0;
 			pack.unpack(x,y,lrs_.super().permutation(i));
 
-			SizeType start = A.data.getRowPtr(x);
-			SizeType end = A.data.getRowPtr(x + 1);
+			const SizeType start = A.data.getRowPtr(x);
+			const SizeType end = A.data.getRowPtr(x + 1);
 			for (SizeType k = start; k < end; ++k) {
 				SizeType xprime = A.data.getCol(k);
 				SizeType j = lrs_.super().permutationInverse(xprime+y*ns);
@@ -406,9 +410,12 @@ private:
 
 			if (x >= lrs_.left().permutationVector().size())
 				err("applyLocalOpSystem S\n");
-			RealType sign = lrs_.left().fermionicSign(x, A.fermionOrBoson);
-			SizeType start = A.data.getRowPtr(y);
-			SizeType end = A.data.getRowPtr(y + 1);
+
+			const bool isFermion = (A.fermionOrBoson ==
+			                        ProgramGlobals::FermionOrBosonEnum::FERMION);
+			const RealType sign = lrs_.left().fermionicSign(x, (isFermion) ? -1 : 1);
+			const SizeType start = A.data.getRowPtr(y);
+			const SizeType end = A.data.getRowPtr(y + 1);
 			for (SizeType k = start; k < end; ++k) {
 				SizeType yprime = A.data.getCol(k);
 				SizeType j = lrs_.super().permutationInverse(x+yprime*ns);

@@ -213,7 +213,7 @@ protected:
 				}
 
 				OperatorType myOp(tmpMatrix,
-				                  ProgramGlobals::FERMION,
+				                  ProgramGlobals::FermionOrBosonEnum::FERMION,
 				                  PairType(1, 1 - sigma),
 				                  asign,
 				                  su2related);
@@ -234,7 +234,7 @@ protected:
 			su2related.offset = NUMBER_OF_ORBITALS;
 
 			OperatorType myOp(tmpMatrix,
-			                  ProgramGlobals::BOSON,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                  PairType(2, 2),
 			                  -1,
 			                  su2related);
@@ -246,7 +246,7 @@ protected:
 			tmpMatrix = findSzMatrices(i,natBasis);
 			typename OperatorType::Su2RelatedType su2related2;
 			OperatorType myOp2(tmpMatrix,
-			                   ProgramGlobals::BOSON,
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                   PairType(2, 1),
 			                   1.0/sqrt(2.0),
 			                   su2related2);
@@ -258,7 +258,7 @@ protected:
 			typename OperatorType::Su2RelatedType su2related3;
 			su2related3.offset = 1; //check FIXME
 			OperatorType myOp3(tmpMatrix,
-			                   ProgramGlobals::BOSON,
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                   PairType(0, 0),
 			                   angularFactor,
 			                   su2related3);
@@ -274,7 +274,7 @@ protected:
 			SparseMatrixType tmp3(multiplyTc(c,c));
 			typename OperatorType::Su2RelatedType su2Related;
 			nupop.push(OperatorType(tmp3,
-			                        ProgramGlobals::BOSON,
+			                        ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                        typename OperatorType::PairType(0,0),
 			                        1.0,
 			                        su2Related));
@@ -287,7 +287,7 @@ protected:
 			SparseMatrixType tmp3(multiplyTc(c,c));
 			typename OperatorType::Su2RelatedType su2Related;
 			this->createOpsLabel("ndown").push(OperatorType(tmp3,
-			                                                ProgramGlobals::BOSON,
+			                                                ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                                                typename OperatorType::PairType(0,0),
 			                                                1.0,
 			                                                su2Related));

@@ -242,7 +242,7 @@ private:
 		              0,
 		              ProgramGlobals::SYSTEM_SYSTEM,
 		              value,
-		              ProgramGlobals::BOSON,
+		              ProgramGlobals::FermionOrBosonEnum::BOSON,
 		              ops,
 		              mods,
 		              1,
@@ -264,7 +264,7 @@ private:
 			if (link2.type==ProgramGlobals::ENVIRON_SYSTEM)  {
 				LinkType link3 = link2;
 				link3.type = ProgramGlobals::SYSTEM_ENVIRON;
-				if (link3.fermionOrBoson == ProgramGlobals::FERMION)
+				if (link3.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
 					link3.value *= -1.0;
 
 				assert(A);

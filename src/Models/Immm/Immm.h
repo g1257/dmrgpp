@@ -220,7 +220,7 @@ protected:
 				typename OperatorType::Su2RelatedType su2Related;
 				typename OperatorType::PairType pairZero(0, 0);
 				sz.push(OperatorType(tmp,
-				                     ProgramGlobals::BOSON,
+				                     ProgramGlobals::FermionOrBosonEnum::BOSON,
 				                     pairZero,
 				                     1.0,
 				                     su2Related));
@@ -242,7 +242,7 @@ protected:
 				SparseMatrixType tmp3 = creationMatrix[dof].data * tmp2;
 				typename OperatorType::Su2RelatedType su2Related;
 				o.push(OperatorType(tmp3,
-				                    ProgramGlobals::BOSON,
+				                    ProgramGlobals::FermionOrBosonEnum::BOSON,
 				                    typename OperatorType::PairType(0,0),
 				                    1.0,
 				                    su2Related));
@@ -280,7 +280,7 @@ private:
 			typename OperatorType::Su2RelatedType su2related;
 
 			OperatorType myOp(tmpMatrix,
-			                  ProgramGlobals::FERMION,
+			                  ProgramGlobals::FermionOrBosonEnum::FERMION,
 			                  typename OperatorType::PairType(0, 0),
 			                  1,
 			                  su2related);
@@ -292,7 +292,7 @@ private:
 		// add n_i
 		typename OperatorType::Su2RelatedType su2related2;
 		OperatorType nOp(SparseMatrixType(nmatrix),
-		                 ProgramGlobals::BOSON,
+		                 ProgramGlobals::FermionOrBosonEnum::BOSON,
 		                 typename OperatorType::PairType(0,0),
 		                 1
 		                 ,su2related2);
@@ -501,7 +501,7 @@ private:
 
 		typename OperatorType::Su2RelatedType su2Related;
 		return OperatorType(SparseMatrixType(tmp),
-		                    ProgramGlobals::BOSON,
+		                    ProgramGlobals::FermionOrBosonEnum::BOSON,
 		                    typename OperatorType::PairType(0,0),
 		                    1.0,
 		                    su2Related);

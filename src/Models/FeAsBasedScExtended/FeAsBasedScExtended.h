@@ -244,7 +244,7 @@ private:
 		su2related.offset = 1;
 
 		OperatorType sPlus(m,
-		                   ProgramGlobals::BOSON,
+		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
 		                   typename OperatorType::PairType(2, 2),
 		                   -1,
 		                   su2related);
@@ -262,7 +262,7 @@ private:
 		SparseMatrixType m = m1;
 		m += m2;
 		OperatorType sz(m,
-		                ProgramGlobals::BOSON,
+		                ProgramGlobals::FermionOrBosonEnum::BOSON,
 		                typename OperatorType::PairType(2 ,1),
 		                1.0/sqrt(2.0),
 		                su2related2);

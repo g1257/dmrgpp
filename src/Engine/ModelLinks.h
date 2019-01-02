@@ -106,10 +106,10 @@ public:
 
 
 			assert(index1 < cm_.size() && index2 < cm_.size());
-			ProgramGlobals::FermionOrBosonEnum fermionOrBoson = ProgramGlobals::BOSON;
-			if (cm_[index1].fermionOrBoson == ProgramGlobals::FERMION &&
-			cm_[index2].fermionSign == ProgramGlobals::FERMION)
-				fermionOrBoson = ProgramGlobals::FERMION;
+			ProgramGlobals::FermionOrBosonEnum fermionOrBoson = ProgramGlobals::FermionOrBosonEnum::BOSON;
+			if (cm_[index1].fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION &&
+			cm_[index2].fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
+				fermionOrBoson = ProgramGlobals::FermionOrBosonEnum::FERMION;
 			// can we also infer angularMomentum, angularFactor, and category? FIXME TODO
 
 			links_.push_back(OneLink(PairSizeType(index1, index2),

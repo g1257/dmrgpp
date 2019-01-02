@@ -208,17 +208,17 @@ public:
 		assert(block.size()==1);
 
 		SizeType type = tstStruct_.type();
-		int fermionSign = this->common().findFermionSignOfTheOperators();
-		int s = (type&1) ? -1 : 1;
+		const int fermionSign = this->common().findFermionSignOfTheOperators();
+		const int s = (type&1) ? -1 : 1;
 		int s2 = (type>1) ? -1 : 1;
-		int s3 = (type&1) ? -fermionSign : 1;
+		const int s3 = (type&1) ? -fermionSign : 1;
 
 		if (ab_.size()<2) return;
 		typename PostProcType::ParametersType params = paramsForSolver_;
 		params.Eg = this->common().energy();
 		params.weight = s2*weightForContinuedFraction_*s3;
 		params.isign = s;
-		if (tstStruct_.aOperators()[0].fermionOrBoson == ProgramGlobals::BOSON)
+		if (tstStruct_.aOperators()[0].fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::BOSON)
 			s2 *= s;
 
 		PostProcType cf(ab_, params);

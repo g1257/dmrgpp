@@ -160,7 +160,7 @@ public:
 	                     bool flip=false) const
 	{
 		//int const SystemEnviron=1,EnvironSystem=2;
-		RealType fermionSign = (link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
+		RealType fermionSign = (link.fermionOrBoson==ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
 
 		if (link.type==ProgramGlobals::ENVIRON_SYSTEM)  {
 			LinkType link2 = link;
@@ -241,7 +241,7 @@ public:
 	                     bool flipped=false) const
 	{
 		//int const SystemEnviron=1,EnvironSystem=2;
-		RealType fermionSign =  (link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
+		RealType fermionSign =  (link.fermionOrBoson==ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
 
 		if (link.type == ProgramGlobals::ENVIRON_SYSTEM)  {
 			LinkType link2 = link;

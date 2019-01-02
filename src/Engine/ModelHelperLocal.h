@@ -187,7 +187,7 @@ public:
 	                     SparseMatrixType &matrixBlock,
 	                     const LinkType& link) const
 	{
-		RealType fermionSign =(link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
+		RealType fermionSign =(link.fermionOrBoson==ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
 
 		//! work only on partition m
 		if (link.type==ProgramGlobals::ENVIRON_SYSTEM)  {
@@ -246,7 +246,7 @@ public:
 	                     const SparseMatrixType& B,
 	                     const LinkType& link) const
 	{
-		RealType fermionSign =  (link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
+		RealType fermionSign =  (link.fermionOrBoson==ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
 
 		if (link.type==ProgramGlobals::ENVIRON_SYSTEM)  {
 			LinkType link2 = link;

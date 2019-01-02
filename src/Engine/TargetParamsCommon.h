@@ -332,7 +332,7 @@ private:
 	{
 		if (aOperators_.size()!=1) return false;
 		return (isTheIdentity(aOperators_[0].data)
-		        && aOperators_[0].fermionOrBoson == ProgramGlobals::BOSON);
+		        && aOperators_[0].fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::BOSON);
 	}
 
 	void checkSizesOfOperators() const

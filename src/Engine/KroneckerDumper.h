@@ -192,7 +192,7 @@ private:
 		SizeType rows = Ahat.rows();
 		SizeType counter = 0;
 		for (SizeType i = 0; i < rows; ++i) {
-			RealType sign = (bosonOrFermion == ProgramGlobals::FERMION &&
+			RealType sign = (bosonOrFermion == ProgramGlobals::FermionOrBosonEnum::FERMION &&
 			                 signs_[i]) ? -1.0 : 1.0;
 			for (int k = Ahat.getRowPtr(i); k < Ahat.getRowPtr(i+1); ++k) {
 				ComplexOrRealType tmp = Ahat.getValue(k)*sign*val;
