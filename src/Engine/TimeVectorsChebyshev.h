@@ -235,7 +235,6 @@ private:
 		}
 	}
 
-
 	void calcTargetVector(VectorWithOffsetType& v,
 	                      const VectorWithOffsetType& phi,
 	                      const VectorMatrixFieldType& T,
@@ -297,13 +296,12 @@ private:
 		psimag::BLAS::GEMV('N',n,n2,zone,&(V(0,0)),n,&(tmp[0]),1,zzero,&(r[0]),1);
 	}
 
-	void calcTargetVector(
-	        TargetVectorType& r,
-	        const VectorWithOffsetType& phi,
-	        RealType,
-	        SizeType timeIndex,
-	        SizeType,
-	        SizeType i0)
+	void calcTargetVector(TargetVectorType& r,
+	                      const VectorWithOffsetType& phi,
+	                      RealType,
+	                      SizeType timeIndex,
+	                      SizeType,
+	                      SizeType i0)
 	{
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelType::HamiltonianConnectionType hc(p,
@@ -385,30 +383,43 @@ private:
 		threadedTriDiag.loopCreate(helperTriDiag);
 	}
 
+	// H' = c*H + d
+	// c = oneovera = (2.0-epsilon)/Wstar
+	// d = -oneovera*b = (2.0-epsilon)*(E0_+Wstar*0.5)/Wstar
 	class InternalMatrix {
 	public:
-		InternalMatrix(const MatrixLanczosType& mat, const TargetParamsType& tstStruct, const RealType& E0)
-		    : matx_(mat), tstStruct_(tstStruct), E0_(E0)
-		{}
+		InternalMatrix(const MatrixLanczosType& mat,
+		               const TargetParamsType& tstStruct,
+		               const RealType& E0)
+		    : matx_(mat),
+		      tstStruct_(tstStruct),
+		      E0_(E0),
+		      c_((2.0 - tstStruct_.chebyEpsilon())/tstStruct_.chebyWstar()),
+		      d_(-c_*(E0_ + tstStruct_.chebyWstar()*0.5))
+		{
+			PsimagLite::ProgressIndicator progress("InternalMatrix");
+			PsimagLite::OstringStream msg;
+			msg<<"H'="<<c_<<"*H "<<d_;
+			progress.printline(msg, std::cout);
+		}
 
 		SizeType rows() const { return matx_.rows(); }
 
 		void matrixVectorProduct (TargetVectorType &x,const TargetVectorType &y) const
 		{
-			RealType Wstar = tstStruct_.chebyWstar();
-			RealType epsilon = tstStruct_.chebyEpsilon();
 			TargetVectorType tmp(y.size());
 			matx_.matrixVectorProduct(tmp, y);
-			RealType b = E0_+Wstar*0.5;
-			RealType oneovera = (2.0-epsilon)/Wstar;
-			x += oneovera*tmp;
-			x += (-oneovera*b)*y;
+			x += c_*tmp;
+			x += d_*y;
 		}
 
 	private:
+
 		const MatrixLanczosType& matx_;
 		const TargetParamsType& tstStruct_;
 		const RealType& E0_;
+		RealType c_;
+		RealType d_;
 	}; // class InternalMatrix
 
 	const RealType& currentTime_;

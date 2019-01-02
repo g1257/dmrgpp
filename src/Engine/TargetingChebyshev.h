@@ -243,7 +243,6 @@ public:
 
 private:
 
-
 	void evolveInternal(RealType Eg,
 	                    ProgramGlobals::DirectionEnum direction,
 	                    const BlockType& block1,
