@@ -330,11 +330,11 @@ public:
 		}
 	}
 
-	int findFermionSignOfTheOperators() const
+	ProgramGlobals::FermionOrBosonEnum findFermionSignOfTheOperators() const
 	{
 		const VectorOperatorType& myoperator = targetHelper_.tstStruct().aOperators();
 		bool wereSumming = (targetHelper_.tstStruct().concatenation() == SUM);
-		int f = 0;
+		ProgramGlobals::FermionOrBosonEnum forB = ProgramGlobals::BOSON;
 
 		for (SizeType i = 0; i < myoperator.size(); ++i) {
 
@@ -343,12 +343,12 @@ public:
 			if (norma==0 && wereSumming) continue;
 			if (isTheIdentity(myoperator[i].data) && !wereSumming) continue;
 
-			if (f == 0) {
-				f = myoperator[i].fermionSign;
+			if (i == 0) {
+				forB = myoperator[i].fermionOrBoson;
 				continue;
 			}
 
-			if (f == myoperator[i].fermionSign) continue;
+			if (forB == myoperator[i].fermionOrBoson) continue;
 
 			PsimagLite::String str("CorrectionVectorTargeting: ");
 			str += "inconsistent sign for operators\n";
@@ -356,7 +356,7 @@ public:
 
 		}
 
-		return f;
+		return forB;
 	}
 
 	void setAllStagesTo(SizeType x)
@@ -468,7 +468,7 @@ public:
 				for (SizeType i = 0; i < max; ++i)
 					cocoon(direction,block[0],psi(),"PSI",tv[i],"P"+ttos(i));
 			}
-		} catch (std::exception& e) {
+		} catch (std::exception&) {
 			noCocoon("unsupported by the model");
 		}
 	}
@@ -493,7 +493,7 @@ public:
 
 		SparseMatrixType tmpC3 = (nup.data * ndown.data);
 		OperatorType doubleOcc(tmpC3,
-		                       nup.fermionSign,
+		                       nup.fermionOrBoson,
 		                       nup.jm,
 		                       nup.angularFactor,
 		                       nup.su2Related);
@@ -586,7 +586,11 @@ public:
 		typename OperatorType::Su2RelatedType su2Related1;
 		SparseMatrixType idSparse;
 		idSparse.makeDiagonal(h, 1.0);
-		OperatorType id(idSparse, 1, PairType(0, 0), 1.0, su2Related1);
+		OperatorType id(idSparse,
+		                ProgramGlobals::BOSON,
+		                PairType(0, 0),
+		                1.0,
+		                su2Related1);
 		ComplexOrRealType value = 0.0;
 		VectorStringType vecStr = getOperatorLabels();
 		if (vecStr.size() == 0) return value;

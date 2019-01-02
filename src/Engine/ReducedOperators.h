@@ -178,8 +178,8 @@ public:
 				if (tr>=0) {
 					transposeConjugate(myOp[transposeCounter].data,
 					                   ops[ops[i].su2Related.source[m]].data);
-					myOp[transposeCounter].fermionSign=
-					        ops[ops[i].su2Related.source[m]].fermionSign;
+					myOp[transposeCounter].fermionOrBoson =
+					        ops[ops[i].su2Related.source[m]].fermionOrBoson;
 					myOp[transposeCounter].jm=typename OperatorType::PairType(
 					            angularMomentum,
 					            angularMomentum-ops[ops[i].su2Related.source[m]].jm.second);
@@ -193,7 +193,7 @@ public:
 			}
 
 			createReducedOperator(reducedOperators_[i].data,opSrc);
-			reducedOperators_[i].fermionSign=opSrc[0]->fermionSign;
+			reducedOperators_[i].fermionOrBoson=opSrc[0]->fermionOrBoson;
 			reducedOperators_[i].jm=opSrc[0]->jm;
 			reducedOperators_[i].angularFactor=opSrc[0]->angularFactor;
 
@@ -202,7 +202,7 @@ public:
 			createReducedConj(angularMomentum,
 			                  reducedOperators_[i1].data,
 			                  reducedOperators_[i].data);
-			reducedOperators_[i1].fermionSign=opSrc[0]->fermionSign;
+			reducedOperators_[i1].fermionOrBoson=opSrc[0]->fermionOrBoson;
 			reducedOperators_[i1].jm=opSrc[0]->jm;
 			reducedOperators_[i1].angularFactor=opSrc[0]->angularFactor;
 		}
@@ -222,7 +222,7 @@ public:
 
 		OperatorType myOp;
 		myOp.data = hamiltonian;
-		myOp.fermionSign=1;
+		myOp.fermionOrBoson = ProgramGlobals::BOSON;
 		myOp.jm=typename OperatorType::PairType(0,0);
 		myOp.angularFactor = 1.0;
 		opSrc[0]=&myOp;
@@ -327,7 +327,7 @@ public:
 		const BasisType* basisA = &basis2;
 		const BasisType* basisB = &basis3;
 		SizeType angularMomentum = myOp.jm.first;
-		int fermionSign = myOp.fermionSign;
+		ProgramGlobals::FermionOrBosonEnum fermionOrBoson = myOp.fermionOrBoson;
 		const SparseMatrixType& A = myOp.data;
 		PsimagLite::Vector<SizeType>::Type jvals;
 
@@ -341,9 +341,9 @@ public:
 			err("Operator has unknown momentum\n");
 
 		PsimagLite::Matrix<SparseElementType> B(n,n);
-		externalProd_(B,basisA,basisB,A,ki,order,fermionSign);
+		externalProd_(B, basisA, basisB, A, ki, order, fermionOrBoson);
 		fullMatrixToCrsMatrix(reducedOperators_[ind].data,B);
-		reducedOperators_[ind].fermionSign = fermionSign;
+		reducedOperators_[ind].fermionOrBoson = fermionOrBoson;
 		reducedOperators_[ind].jm = myOp.jm;
 		reducedOperators_[ind].angularFactor = myOp.angularFactor;
 		reducedOperators_[ind].su2Related = myOp.su2Related;

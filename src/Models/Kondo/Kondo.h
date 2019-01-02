@@ -1,6 +1,7 @@
 #ifndef DMRGPP_MODEL_KONDO_H
 #define DMRGPP_MODEL_KONDO_H
 #include "ParametersKondo.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -152,7 +153,7 @@ protected:
 			PairSizeType zeroPair(0, 0);
 			typename OperatorType::Su2RelatedType su2Related;
 			this->createOpsLabel("sz").push(OperatorType(szMatrix,
-			                                             1,
+			                                             ProgramGlobals::BOSON,
 			                                             zeroPair,
 			                                             1,
 			                                             su2Related));
@@ -232,7 +233,7 @@ private:
 			SparseMatrixType tmpMatrix = findCmatrix(sigma, basis_);
 
 			OperatorType myOp(tmpMatrix,
-			                  -1,
+			                  ProgramGlobals::FERMION,
 			                  typename OperatorType::PairType(0, 0),
 			                  1,
 			                  su2related);
@@ -243,7 +244,7 @@ private:
 		// now the S+ and Sz for local spins
 		SparseMatrixType m = findSplusMatrix(basis_);
 		OperatorType sp(m,
-		                1,
+		                ProgramGlobals::BOSON,
 		                typename OperatorType::PairType(0, 0),
 		                1,
 		                su2related);
@@ -251,7 +252,7 @@ private:
 
 		m = findSzMatrix(basis_);
 		OperatorType sz(m,
-		                1,
+		                ProgramGlobals::BOSON,
 		                typename OperatorType::PairType(0, 0),
 		                1,
 		                su2related);
@@ -259,7 +260,7 @@ private:
 
 		m = findNmatrix(basis_);
 		OperatorType nm(m,
-		                1,
+		                ProgramGlobals::BOSON,
 		                typename OperatorType::PairType(0, 0),
 		                1,
 		                su2related);

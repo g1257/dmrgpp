@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "InputCheck.h"
 #include "CanonicalExpression.h"
 #include "Io/IoSerializerStub.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -105,15 +106,15 @@ struct Operator {
 	typedef Su2Related Su2RelatedType;
 	typedef PsimagLite::Matrix<value_type> DenseMatrixType;
 
-	Operator() : fermionSign(1), angularFactor(1) {}
+	Operator() : fermionOrBoson(ProgramGlobals::BOSON), angularFactor(1) {}
 
 	Operator(const StorageType& data1,
-	         int fermionSign1,
+	         ProgramGlobals::FermionOrBosonEnum fermionSign1,
 	         const PairType& jm1,
 	         RealType angularFactor1,
 	         const Su2RelatedType& su2Related1)
 	    : data(data1),
-	      fermionSign(fermionSign1),
+	      fermionOrBoson(fermionSign1),
 	      jm(jm1),
 	      angularFactor(angularFactor1),
 	      su2Related(su2Related1)
@@ -188,7 +189,7 @@ struct Operator {
 			PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(opSpec);
 			Operator p = canonicalExpression(s, site);
 			data = p.data;
-			fermionSign = p.fermionSign;
+			fermionOrBoson = p.fermionOrBoson;
 			jm = p.jm;
 			angularFactor = p.angularFactor;
 			// TODO FIXME: deprecate cooked
@@ -201,7 +202,9 @@ struct Operator {
 			throw PsimagLite::RuntimeError(str.c_str());
 		}
 
-		io.readline(fermionSign,prefix + "FERMIONSIGN=");
+		int fs = 0;
+		io.readline(fs,prefix + "FERMIONSIGN=");
+		fermionOrBoson = (fs < 0) ? ProgramGlobals::FERMION : ProgramGlobals::BOSON;
 
 		jm.first = jm.second = 0;
 		angularFactor = 1;
@@ -220,34 +223,11 @@ struct Operator {
 	}
 
 	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
+	SizeType memResolv(SomeMemResolvType&,
 	                   SizeType,
-	                   PsimagLite::String msg = "") const
+	                   PsimagLite::String = "") const
 	{
-		PsimagLite::String str = msg;
-		str += "Operator";
-
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&fermionSign);
-		SizeType total = mres.memResolv(&data, end-start, str + " data");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&jm);
-		total += mres.memResolv(&fermionSign, end-start, str + " fermionSign");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&angularFactor);
-		total += mres.memResolv(&jm, end-start, str + " jm");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&su2Related);
-		total += mres.memResolv(&angularFactor, end-start, str + " angularFactor");
-
-		total += mres.memResolv(&su2Related,
-		                        sizeof(*this) - total,
-		                        str + " su2Related");
-
-		return total;
+		return 0;
 	}
 
 	void dagger()
@@ -265,7 +245,7 @@ struct Operator {
 			ioSerializer.createGroup(label);
 
 		data.write(label + "/data", ioSerializer, mode);
-		ioSerializer.write(label + "/fermionSign", fermionSign, mode);
+		ioSerializer.write(label + "/fermionOrBoson", fermionOrBoson, mode);
 		ioSerializer.write(label + "/jm", jm, mode);
 		ioSerializer.write(label + "/angularFactor", angularFactor, mode);
 		// su2Related.write(label + "/su2Related", ioSerializer);
@@ -281,7 +261,7 @@ struct Operator {
 	          PsimagLite::IoSerializer& ioSerializer)
 	{
 		data.read(label + "/data", ioSerializer);
-		ioSerializer.read(fermionSign, label + "/fermionSign");
+		ioSerializer.read(fermionOrBoson, label + "/fermionOrBoson");
 		ioSerializer.read(jm, label + "/jm");
 		ioSerializer.read(angularFactor, label + "/angularFactor");
 		// su2Related.read(label + "/su2Related", ioSerializer);
@@ -294,7 +274,8 @@ struct Operator {
 		DenseMatrixType m;
 		crsMatrixToFullMatrix(m,data);
 		os<<m;
-		os<<"FERMIONSIGN="<<fermionSign<<"\n";
+		int fs = (fermionOrBoson == ProgramGlobals::FERMION) ? -1 : 1;
+		os<<"FERMIONSIGN="<<fs <<"\n";
 		os<<"JMVALUES 2 "<<jm.first<<" "<<jm.second<<"\n";
 		os<<"AngularFactor="<<angularFactor<<"\n";
 	}
@@ -302,7 +283,8 @@ struct Operator {
 	void send(int root,int tag,PsimagLite::MPI::CommType mpiComm)
 	{
 		data.send(root,tag,mpiComm);
-		PsimagLite::MPI::send(fermionSign,root,tag+1,mpiComm);
+		int fs = (fermionOrBoson == ProgramGlobals::FERMION) ? -1 : 1;
+		PsimagLite::MPI::send(fs,root,tag+1,mpiComm);
 		PsimagLite::MPI::send(jm,root,tag+2,mpiComm);
 		PsimagLite::MPI::send(angularFactor,root,tag+3,mpiComm);
 		Dmrg::send(su2Related,root,tag+4,mpiComm);
@@ -311,7 +293,9 @@ struct Operator {
 	void recv(int root,int tag,PsimagLite::MPI::CommType mpiComm)
 	{
 		data.recv(root,tag,mpiComm);
-		PsimagLite::MPI::recv(fermionSign,root,tag+1,mpiComm);
+		int fs = 0;
+		PsimagLite::MPI::recv(fs,root,tag+1,mpiComm);
+		fermionOrBoson = (fs < 0) ? ProgramGlobals::FERMION : ProgramGlobals::BOSON;
 		PsimagLite::MPI::recv(jm,root,tag+2,mpiComm);
 		PsimagLite::MPI::recv(angularFactor,root,tag+3,mpiComm);
 		Dmrg::recv(su2Related,root,tag+4,mpiComm);
@@ -325,8 +309,8 @@ struct Operator {
 
 	Operator& operator*=(const Operator& other)
 	{
-		int fSaved = fermionSign;
-		fermionSign = other.fermionSign;
+		int fSaved = (fermionOrBoson == ProgramGlobals::FERMION) ? -1 : 1;
+		fermionOrBoson = other.fermionOrBoson;
 		if (metaDiff(other) > 0)
 			err("operator+= failed for Operator: metas not equal\n");
 
@@ -334,7 +318,9 @@ struct Operator {
 		multiply(crs, data, other.data);
 		data = crs;
 
-		fermionSign = fSaved * other.fermionSign;
+		int fsOther = (other.fermionOrBoson == ProgramGlobals::FERMION) ? -1 : 1;
+		int fs = fSaved * fsOther;
+		fermionOrBoson = (fs < 0) ? ProgramGlobals::FERMION : ProgramGlobals::BOSON;
 
 		return *this;
 	}
@@ -354,7 +340,7 @@ struct Operator {
 		SizeType code = 0;
 		PsimagLite::Vector<bool>::Type b(4, false);
 
-		b[0] = (op1.fermionSign != op2.fermionSign);
+		b[0] = (op1.fermionOrBoson != op2.fermionOrBoson);
 		b[1] = (op1.angularFactor != op2.angularFactor);
 		b[2] = (op1.jm != op2.jm);
 		//b[3] = (op1.su2Related != op2.su2Related);
@@ -371,7 +357,7 @@ struct Operator {
 	StorageType data;
 	// does this operator commute or anticommute with others of the
 	// same class on different sites
-	int fermionSign;
+	ProgramGlobals::FermionOrBosonEnum fermionOrBoson;
 	PairType  jm; // angular momentum of this operator
 	RealType angularFactor;
 	Su2RelatedType su2Related;
@@ -396,7 +382,7 @@ template<typename SparseMatrixType>
 void bcast(Operator<SparseMatrixType>& op)
 {
 	PsimagLite::bcast(op.data);
-	PsimagLite::MPI::bcast(op.fermionSign);
+	PsimagLite::MPI::bcast(op.fermionOrBoson);
 	PsimagLite::MPI::bcast(op.jm);
 	PsimagLite::MPI::bcast(op.angularFactor);
 	bcast(op.su2Related);

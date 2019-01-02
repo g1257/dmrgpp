@@ -208,7 +208,7 @@ protected:
 				}
 
 				OperatorType myOp(tmpMatrix,
-				                  -1,
+				                  ProgramGlobals::FERMION,
 				                  typename OperatorType::PairType(1,m),
 				                  asign,
 				                  su2related);
@@ -267,7 +267,7 @@ private:
 			correctLambda(dlambda,spin1,vm);
 
 			OperatorType myOp(SparseMatrixType(dlambda),
-			                  1,
+			                  ProgramGlobals::BOSON,
 			                  typename OperatorType::PairType(0,0),
 			                  1,
 			                  su2related);

@@ -107,7 +107,8 @@ public:
 
 			assert(index1 < cm_.size() && index2 < cm_.size());
 			ProgramGlobals::FermionOrBosonEnum fermionOrBoson = ProgramGlobals::BOSON;
-			if (cm_[index1].fermionSign < 0 && cm_[index2].fermionSign < 0)
+			if (cm_[index1].fermionOrBoson == ProgramGlobals::FERMION &&
+			cm_[index2].fermionSign == ProgramGlobals::FERMION)
 				fermionOrBoson = ProgramGlobals::FERMION;
 			// can we also infer angularMomentum, angularFactor, and category? FIXME TODO
 

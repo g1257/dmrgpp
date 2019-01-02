@@ -181,7 +181,11 @@ protected:
 					int asign= 1;
 					typename OperatorType::Su2RelatedType su2related;
 
-					OperatorType myOp(tmpMatrix,-1,PairType(0,0),asign,su2related);
+					OperatorType myOp(tmpMatrix,
+					                  ProgramGlobals::FERMION,
+					                  PairType(0, 0),
+					                  asign,
+					                  su2related);
 
 					c.push(myOp);
 				}
@@ -193,7 +197,11 @@ protected:
 
 				typename OperatorType::Su2RelatedType su2related;
 
-				OperatorType myOp(tmpMatrix,1,PairType(0,0),1.0,su2related);
+				OperatorType myOp(tmpMatrix,
+				                  ProgramGlobals::BOSON,
+				                  PairType(0, 0),
+				                  1.0,
+				                  su2related);
 				splus.push(myOp);
 				myOp.dagger();
 				sminus.push(myOp);
@@ -203,7 +211,11 @@ protected:
 				// Set the operators S^z_i in the natural basis
 				tmpMatrix = findSzMatrices(i,orbital,natBasis);
 				typename OperatorType::Su2RelatedType su2related2;
-				OperatorType myOp2(tmpMatrix,1,PairType(0,0),1.0,su2related2);
+				OperatorType myOp2(tmpMatrix,
+				                   ProgramGlobals::BOSON,
+				                   PairType(0, 0),
+				                   1.0,
+				                   su2related2);
 				sz.push(myOp2);
 			}
 
@@ -213,7 +225,11 @@ protected:
 				RealType angularFactor= 1;
 				typename OperatorType::Su2RelatedType su2related3;
 				su2related3.offset = 1; //check FIXME
-				OperatorType myOp3(tmpMatrix,1,PairType(0,0),angularFactor,su2related3);
+				OperatorType myOp3(tmpMatrix,
+				                   ProgramGlobals::BOSON,
+				                   PairType(0, 0),
+				                   angularFactor,
+				                   su2related3);
 				nop.push(myOp3);
 			}
 
@@ -222,7 +238,11 @@ protected:
 				tmpMatrix = findDeltaIMatrices(i,natBasis,sigma);
 				RealType angularFactor= 1;
 				typename OperatorType::Su2RelatedType su2related4;
-				OperatorType myOp4(tmpMatrix,1,PairType(0,0),angularFactor,su2related4);
+				OperatorType myOp4(tmpMatrix,
+				                   ProgramGlobals::BOSON,
+				                   PairType(0, 0),
+				                   angularFactor,
+				                   su2related4);
 				d.push(myOp4);
 			}
 		}
@@ -234,7 +254,7 @@ protected:
 			SparseMatrixType tmp3(multiplyTc(c,c));
 			typename OperatorType::Su2RelatedType su2Related;
 			this->createOpsLabel("nup").push(OperatorType(tmp3,
-			                                              1.0,
+			                                              ProgramGlobals::BOSON,
 			                                              typename OperatorType::PairType(0,0),
 			                                              1.0,
 			                                              su2Related));
@@ -247,7 +267,7 @@ protected:
 			SparseMatrixType tmp3(multiplyTc(c,c));
 			typename OperatorType::Su2RelatedType su2Related;
 			this->createOpsLabel("ndown").push(OperatorType(tmp3,
-			                                                1.0,
+			                                                ProgramGlobals::BOSON,
 			                                                typename OperatorType::PairType(0,0),
 			                                                1.0,
 			                                                su2Related));

@@ -357,14 +357,14 @@ public:
 			SparseMatrixType tmp2(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			splus.push(OperatorType(tmp2,
-			                        1.0,
+			                        ProgramGlobals::BOSON,
 			                        typename OperatorType::PairType(0,0),
 			                        1.0,
 			                        su2Related));
 			SparseMatrixType tmp3;
 			transposeConjugate(tmp3, tmp2);
 			sminus.push(OperatorType(tmp3,
-			                         1.0,
+			                         ProgramGlobals::BOSON,
 			                         typename OperatorType::PairType(0,0),
 			                         1.0,
 			                         su2Related));
@@ -383,7 +383,7 @@ public:
 			SparseMatrixType tmp3(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			sz.push(OperatorType(tmp3,
-			                     1.0,
+			                     ProgramGlobals::BOSON,
 			                     typename OperatorType::PairType(0,0),
 			                     1.0,
 			                     su2Related));
@@ -396,7 +396,7 @@ public:
 			SparseMatrixType tmp2(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			nop.push(OperatorType(tmp2,
-			                      1.0,
+			                      ProgramGlobals::BOSON,
 			                      typename OperatorType::PairType(0,0),
 			                      1.0,
 			                      su2Related));
@@ -420,7 +420,7 @@ public:
 			        creationMatrix_[orbital].data);
 			typename OperatorType::Su2RelatedType su2Related;
 			d.push(OperatorType(atmp,
-			                    1.0,
+			                    ProgramGlobals::BOSON,
 			                    typename OperatorType::PairType(0,0),
 			                    1.0,
 			                    su2Related));
@@ -512,7 +512,7 @@ public:
 				}
 
 				OperatorType myOp(tmpMatrix,
-				                  -1,
+				                  ProgramGlobals::FERMION,
 				                  typename OperatorType::PairType(1,m),
 				                  asign,
 				                  su2related);

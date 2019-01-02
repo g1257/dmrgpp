@@ -326,17 +326,17 @@ private:
 		if (this->useSu2Symmetry()) setMomentumOfOperators(basis2);
 		operators_.setToProduct(basis2,basis3,x,this);
 		ApplyFactors<FactorsType> apply(this->getFactors(),this->useSu2Symmetry());
-		int savedSign = 0;
+		ProgramGlobals::FermionOrBosonEnum savedSign = ProgramGlobals::BOSON;
 
 		for (SizeType i=0;i<this->numberOfOperators();i++) {
 			if (i<basis2.numberOfOperators()) {
 				if (!this->useSu2Symmetry()) {
 					const OperatorType& myOp =  basis2.getOperatorByIndex(i);
-					if (savedSign != myOp.fermionSign) {
+					if (savedSign != myOp.fermionOrBoson) {
 						utils::fillFermionicSigns(fermionicSigns,
 						                          basis2.signs(),
-						                          myOp.fermionSign);
-						savedSign = myOp.fermionSign;
+						                          myOp.fermionOrBoson);
+						savedSign = myOp.fermionOrBoson;
 					}
 					operators_.externalProduct(i,
 					                           myOp,
@@ -356,11 +356,11 @@ private:
 					const OperatorType& myOp = basis3.
 					        getOperatorByIndex(i - basis2.numberOfOperators());
 
-					if (savedSign != myOp.fermionSign) {
+					if (savedSign != myOp.fermionOrBoson) {
 						utils::fillFermionicSigns(fermionicSigns,
 						                          basis2.signs(),
-						                          myOp.fermionSign);
-						savedSign = myOp.fermionSign;
+						                          myOp.fermionOrBoson);
+						savedSign = myOp.fermionOrBoson;
 					}
 					operators_.externalProduct(i,
 					                           myOp,

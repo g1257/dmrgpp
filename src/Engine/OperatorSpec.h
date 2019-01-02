@@ -66,6 +66,12 @@ public:
 			return specialOperator(site, 0.0);
 
 		OperatorType nup;
+
+//		if (opLabel == "H") {
+//			nup.fermionSign = 2;
+//			return nup;
+//		}
+
 		try {
 			nup = findOperator(opLabel, site);
 		} catch (std::exception& e) {
@@ -112,7 +118,7 @@ private:
 		tmp.makeDiagonal(rows, value);
 		typename OperatorType::Su2RelatedType su2Related;
 		return OperatorType(tmp,
-		                    1.0,
+		                    ProgramGlobals::FermionOrBosonEnum::BOSON,
 		                    typename OperatorType::PairType(0,0),
 		                    1.0,
 		                    su2Related);

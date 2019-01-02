@@ -103,7 +103,7 @@ struct ProgramGlobals {
 
 	enum SysOrEnvEnum {SYSTEM, ENVIRON};
 
-	enum FermionOrBosonEnum {FERMION,BOSON};
+	enum class FermionOrBosonEnum {FERMION,BOSON};
 
 	enum VerboseEnum {VERBOSE_NO, VERBOSE_YES};
 

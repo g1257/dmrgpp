@@ -289,7 +289,7 @@ private:
 			assert(x<lrs_.left().permutationVector().size());
 			pack2.unpack(x0,x1,lrs_.left().permutation(x));
 
-			RealType sign = fermionSign(x0,A.fermionSign);
+			RealType sign = fermionSign(x0, A.fermionOrBoson);
 			SizeType start = A.data.getRowPtr(x1);
 			SizeType end = A.data.getRowPtr(x1 + 1);
 			for (SizeType k = start; k < end; ++k) {
@@ -346,7 +346,7 @@ private:
 			SizeType y0 = 0;
 			SizeType y1 = 0;
 			pack2.unpack(y0,y1,lrs_.right().permutation(y));
-			RealType sign = lrs_.left().fermionicSign(x,A.fermionSign);
+			RealType sign = lrs_.left().fermionicSign(x, A.fermionOrBoson);
 			SizeType start = A.data.getRowPtr(y0);
 			SizeType end = A.data.getRowPtr(y0 + 1);
 			for (SizeType k = start; k < end; ++k) {
@@ -406,7 +406,7 @@ private:
 
 			if (x >= lrs_.left().permutationVector().size())
 				err("applyLocalOpSystem S\n");
-			RealType sign = lrs_.left().fermionicSign(x,A.fermionSign);
+			RealType sign = lrs_.left().fermionicSign(x, A.fermionOrBoson);
 			SizeType start = A.data.getRowPtr(y);
 			SizeType end = A.data.getRowPtr(y + 1);
 			for (SizeType k = start; k < end; ++k) {

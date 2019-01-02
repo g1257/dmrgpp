@@ -264,7 +264,11 @@ protected:
 			su2related.transpose.push_back(1);
 			su2related.offset = NUMBER_OF_ORBITALS;
 
-			OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
+			OperatorType myOp(tmpMatrix,
+			                  ProgramGlobals::BOSON,
+			                  PairType(2, 2),
+			                  -1,
+			                  su2related);
 			this->createOpsLabel("splus").push(myOp);
 			this->makeTrackable("splus");
 
@@ -274,7 +278,11 @@ protected:
 			// Set the operators S^z_i in the natural basis
 			tmpMatrix = findSzMatrices(i,natBasis);
 			typename OperatorType::Su2RelatedType su2related2;
-			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
+			OperatorType myOp2(tmpMatrix,
+			                   ProgramGlobals::BOSON,
+			                   PairType(2, 1),
+			                   1.0/sqrt(2.0),
+			                   su2related2);
 			this->createOpsLabel("sz").push(myOp2);
 			this->makeTrackable("sz");
 
@@ -283,7 +291,11 @@ protected:
 			// Set the operators S^x_i in the natural basis
 			tmpMatrix = findSxMatrices(i,natBasis);
 			typename OperatorType::Su2RelatedType su2related3;
-			OperatorType myOp3(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related3);
+			OperatorType myOp3(tmpMatrix,
+			                   ProgramGlobals::BOSON,
+			                   PairType(2, 1),
+			                   1.0/sqrt(2.0),
+			                   su2related3);
 			this->createOpsLabel("sx").push(myOp3);
 			this->makeTrackable("sx");
 		}

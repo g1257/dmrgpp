@@ -243,7 +243,10 @@ private:
 		su2related.transpose.push_back(1);
 		su2related.offset = 1;
 
-		OperatorType sPlus(m,1,typename OperatorType::PairType(2,2),-1,
+		OperatorType sPlus(m,
+		                   ProgramGlobals::BOSON,
+		                   typename OperatorType::PairType(2, 2),
+		                   -1,
 		                   su2related);
 		creationMatrix.push_back(sPlus);
 	}
@@ -258,8 +261,11 @@ private:
 		Su2RelatedType su2related2;
 		SparseMatrixType m = m1;
 		m += m2;
-		OperatorType sz(m,1,typename OperatorType::PairType(2,1),
-		                1.0/sqrt(2.0),su2related2);
+		OperatorType sz(m,
+		                ProgramGlobals::BOSON,
+		                typename OperatorType::PairType(2 ,1),
+		                1.0/sqrt(2.0),
+		                su2related2);
 		creationMatrix.push_back(sz);
 	}
 

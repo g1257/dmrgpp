@@ -233,7 +233,11 @@ protected:
 			su2related.transpose.push_back(1);
 			su2related.offset = NUMBER_OF_ORBITALS;
 
-			OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
+			OperatorType myOp(tmpMatrix,
+			                  ProgramGlobals::BOSON,
+			                  PairType(2, 2),
+			                  -1,
+			                  su2related);
 			splus.push(myOp);
 
 			myOp.dagger();
@@ -252,27 +256,43 @@ protected:
 				su2related.transpose.push_back(1);
 				su2related.offset = NUMBER_OF_ORBITALS;
 
-				OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
+				OperatorType myOp(tmpMatrix,
+				                  ProgramGlobals::BOSON,
+				                  PairType(2, 2),
+				                  -1,
+				                  su2related);
 				splus.push(myOp);
 			}
 
 			// Set the operators S^z_i orbital a in the natural basis
 			tmpMatrix = findSzMatrices(i,0,natBasis);
 			typename OperatorType::Su2RelatedType su2related2;
-			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
+			OperatorType myOp2(tmpMatrix,
+			                   ProgramGlobals::BOSON,
+			                   PairType(2, 1),
+			                   1.0/sqrt(2.0),
+			                   su2related2);
 			sz.push(myOp2);
 			if (hot_) {
 				// Set the operators S^z_i orbital b in the natural basis
 				tmpMatrix = findSzMatrices(i,1,natBasis);
 				typename OperatorType::Su2RelatedType su2related2;
-				OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
+				OperatorType myOp2(tmpMatrix,
+				                   ProgramGlobals::BOSON,
+				                   PairType(2, 1),
+				                   1.0/sqrt(2.0),
+				                   su2related2);
 				sz.push(myOp2);
 			}
 
 			// Set the operators \Delta_i in the natural basis
 			tmpMatrix = findDeltaMatrices(i,natBasis);
 			typename OperatorType::Su2RelatedType su2related3;
-			OperatorType myOp3(tmpMatrix,1,PairType(0,0),1.0,su2related3);
+			OperatorType myOp3(tmpMatrix,
+			                   ProgramGlobals::BOSON,
+			                   PairType(0, 0),
+			                   1.0,
+			                   su2related3);
 			d.push(myOp3);
 		}
 	}

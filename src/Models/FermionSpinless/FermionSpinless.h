@@ -211,7 +211,7 @@ protected:
 				}
 
 				OperatorType myOp(tmpMatrix,
-				                  -1,
+				                  ProgramGlobals::FERMION,
 				                  typename OperatorType::PairType(1,1-sigma),
 				                  asign,
 				                  su2related);
@@ -224,7 +224,7 @@ protected:
 			typename OperatorType::Su2RelatedType su2related;
 			su2related.offset = 1; //check FIXME
 			OperatorType myOp(tmpMatrix,
-			                  1,
+			                  ProgramGlobals::BOSON,
 			                  typename OperatorType::PairType(0,0),
 			                  angularFactor,
 			                  su2related);

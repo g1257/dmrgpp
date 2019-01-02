@@ -363,7 +363,7 @@ public:
 		assert(!useSu2Symmetry_);
 		PsimagLite::externalProduct(operators_[i].data,m.data,x,fermionicSigns,option);
 		// don't forget to set fermion sign and j:
-		operators_[i].fermionSign=m.fermionSign;
+		operators_[i].fermionOrBoson=m.fermionOrBoson;
 		operators_[i].jm=m.jm;
 		operators_[i].angularFactor=m.angularFactor;
 		apply(operators_[i].data);

@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include "TargetParamsBase.h"
 #include "Io/IoSerializerStub.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
@@ -330,7 +331,8 @@ private:
 	bool isNoOperator() const
 	{
 		if (aOperators_.size()!=1) return false;
-		return (isTheIdentity(aOperators_[0].data) && aOperators_[0].fermionSign);
+		return (isTheIdentity(aOperators_[0].data)
+		        && aOperators_[0].fermionOrBoson == ProgramGlobals::BOSON);
 	}
 
 	void checkSizesOfOperators() const

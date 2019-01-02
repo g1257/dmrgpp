@@ -219,7 +219,8 @@ public:
 		params.Eg = this->common().energy();
 		params.weight = s2*weightForContinuedFraction_*s3;
 		params.isign = s;
-		if (tstStruct_.aOperators()[0].fermionSign>0) s2 *= s;
+		if (tstStruct_.aOperators()[0].fermionOrBoson == ProgramGlobals::BOSON)
+			s2 *= s;
 
 		PostProcType cf(ab_, params);
 		this->common().writeNGSTs(io, block, prefix, cf);

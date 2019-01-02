@@ -229,7 +229,7 @@ protected:
 				}
 
 				OperatorType myOp(tmpMatrix,
-				                  -1,
+				                  ProgramGlobals::FERMION,
 				                  typename OperatorType::PairType(1,1-sigma),
 				                  asign,
 				                  su2related);
@@ -249,7 +249,11 @@ protected:
 			su2related2.transpose.push_back(-1);
 			su2related2.transpose.push_back(1);
 			su2related2.offset = 1;
-			OperatorType myOp2(tmpMatrix,1,PairType(2,2),-1,su2related2);
+			OperatorType myOp2(tmpMatrix,
+			                   ProgramGlobals::BOSON,
+			                   PairType(2, 2),
+			                   -1,
+			                   su2related2);
 			a.push(myOp2);
 
 			if (!isSsh_) continue; //<<--- EARLY BREAK FROM LOOP
@@ -270,7 +274,7 @@ protected:
 				}
 
 				OperatorType myOp3(tmpMatrix,
-				                   -1,
+				                   ProgramGlobals::FERMION,
 				                   typename OperatorType::PairType(1,1-sigma),
 				                   asign,
 				                   su2related3);

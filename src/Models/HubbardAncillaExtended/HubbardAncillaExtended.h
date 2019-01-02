@@ -232,7 +232,7 @@ protected:
 				}
 
 				OperatorType myOp(tmpMatrix,
-				                  -1,
+				                  ProgramGlobals::FERMION,
 				                  typename OperatorType::PairType(1,m),
 				                  asign,
 				                  su2related);
@@ -338,7 +338,7 @@ private:
 			correctLambda(dlambda,spin1,vm);
 
 			OperatorType myOp(SparseMatrixType(dlambda),
-			                  1,
+			                  ProgramGlobals::BOSON,
 			                  typename OperatorType::PairType(0,0),
 			                  1,
 			                  su2related);
@@ -396,7 +396,7 @@ private:
 		multiply(splus,vm[0+orbital],m);
 
 		OperatorType myOp(splus,
-		                  1,
+		                  ProgramGlobals::BOSON,
 		                  typename OperatorType::PairType(0,0),
 		                  -1,
 		                  su2related);
@@ -433,7 +433,7 @@ private:
 			szmatrix(i,i) = static_cast<RealType>(0.5)*(dn1(i,i) - dn2(i,i));
 
 		OperatorType sz(SparseMatrixType(szmatrix),
-		                1,
+		                ProgramGlobals::BOSON,
 		                typename OperatorType::PairType(0,0),
 		                1,
 		                su2related);
@@ -453,7 +453,7 @@ private:
 		multiply(pair,vm[0+orbital],vm[2+orbital]);
 
 		OperatorType myOp(pair,
-		                  1,
+		                  ProgramGlobals::BOSON,
 		                  typename OperatorType::PairType(0,0),
 		                  1,
 		                  su2related);
@@ -487,7 +487,7 @@ private:
 		}
 
 		OperatorType nop(SparseMatrixType(nmatrix),
-		                 1,
+		                 ProgramGlobals::BOSON,
 		                 typename OperatorType::PairType(0,0),
 		                 1,
 		                 su2related);

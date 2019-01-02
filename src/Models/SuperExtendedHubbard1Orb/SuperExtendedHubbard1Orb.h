@@ -219,7 +219,7 @@ private:
 		multiply(pair,cm[0].data,cm[1].data);
 
 		OperatorType myOp(pair,
-		                  1,
+		                  ProgramGlobals::BOSON,
 		                  typename OperatorType::PairType(0,0),
 		                  1,
 		                  su2related);
