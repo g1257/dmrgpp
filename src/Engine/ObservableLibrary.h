@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PreOperatorSiteIndependent.h"
 #include "Concurrency.h"
 #include "Vector.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -315,7 +316,6 @@ private:
 			manyPoint(0,braket2,rows,cols); // c_{0,0} spin down
 		} else if (label=="nn") {
 			MatrixType out(rows,cols);
-			int fermionicSign = 1;
 			SizeType site = 1;
 			for (SizeType i = 0; i < orbitals*2; ++i) {
 				for (SizeType j = i; j < orbitals*2; ++j) {
@@ -329,7 +329,10 @@ private:
 					multiply(n2,O4,O3); // c_j^{\dagger}.c_j
 
 					PsimagLite::String str = "<gs|n?" + ttos(i) + ";n?" + ttos(j) + "|gs>";
-					observe_.twoPoint(out,n1,n2,fermionicSign);
+					observe_.twoPoint(out,
+					                  n1,
+					                  n2,
+					                  ProgramGlobals::FermionOrBosonEnum::BOSON);
 					std::cout << str << std::endl;
 					std::cout << out;
 				}
@@ -561,14 +564,12 @@ private:
 
 	void ppTwo(MatrixType& m,MatrixType& m2, SizeType flag)
 	{
-		int fermionicSign = 1; //bosons
 		SizeType site = 1;
 		SizeType orbitals = logBase2(model_.hilbertSize(site));
 		assert(!(orbitals & 1));
 		orbitals /= 2;
 
 		if (flag==0) {
-			fermionicSign = 1; //bosons
 			SizeType spin0 = 0; // up
 			SizeType spin1 = 1; // down
 
@@ -580,7 +581,7 @@ private:
 			SparseMatrixType A,B;
 			multiply(B,O1,O2); // c_dn,0 . c_up,0.
 			transposeConjugate(A,B);
-			observe_.twoPoint(m,A,B,fermionicSign);
+			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON);
 			//std::cout << m;
 			std::cout << "PairPair Correlations S^{l}_{on}" << std::endl;
 			SliceOrbital(m,0,0);
@@ -813,7 +814,6 @@ private:
 
 	void ddOrbitalsTwo(MatrixType& m, SizeType flag)
 	{
-		int fermionicSign = 1;
 		SizeType site = 1;
 		SizeType orbitals = logBase2(model_.hilbertSize(site));
 		assert(!(orbitals & 1));
@@ -831,7 +831,7 @@ private:
 			SparseMatrixType A,B;
 			multiply(B,O1,O2); // c_dn,0 . c_up,0.
 			transposeConjugate(A,B);
-			observe_.twoPoint(m,A,B,fermionicSign);
+			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON);
 
 			std::cout << m;
 		} else if (flag==1) {
@@ -845,7 +845,7 @@ private:
 			SparseMatrixType A,B;
 			multiply(B,O1,O2); // c_dn,0 . c_up,0.
 			transposeConjugate(A,B);
-			observe_.twoPoint(m,A,B,fermionicSign);
+			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON);
 			std::cout << m;
 		} else if (flag==2) {
 			SizeType spin0 = 0; // up
@@ -863,7 +863,7 @@ private:
 			mult1 = 1.0; mult2 = -1.0;
 			operatorPlus(B,tmp1,mult1,tmp2,mult2); // B = 1.0*tmp1 + (-1.0)*tmp2 = Singlet
 			transposeConjugate(A,B); // A = transpose(B)
-			observe_.twoPoint(m,A,B,fermionicSign);
+			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON);
 			std::cout << m;
 		} else if (flag==3) {
 			SizeType spin0 = 0; // up
@@ -881,7 +881,7 @@ private:
 			mult1 = 1.0; mult2 = 1.0;
 			operatorPlus(B,tmp1,mult1,tmp2,mult2); // B = 1.0*tmp1 + (1.0)*tmp2 = Triplet
 			transposeConjugate(A,B); // A = transpose(B)
-			observe_.twoPoint(m,A,B,fermionicSign);
+			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON);
 			std::cout << m;
 		} else if (flag==4) {
 			SizeType orb0 = 0;  // lower orbital
@@ -894,7 +894,7 @@ private:
 			SparseMatrixType A,B;
 			multiply(B,O1,O2);      // c_up,0 . c_up,1
 			transposeConjugate(A,B);
-			observe_.twoPoint(m,A,B,fermionicSign);
+			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON);
 			std::cout << m;
 		} else if (flag==5) {
 			SizeType orb0 = 0;  // lower orbital
@@ -907,7 +907,7 @@ private:
 			SparseMatrixType A,B;
 			multiply(B,O1,O2);      // c_dn,0 . c_dn,1
 			transposeConjugate(A,B);
-			observe_.twoPoint(m,A,B,fermionicSign);
+			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON);
 			std::cout << m;
 		} else if (flag==6) {
 			SizeType spin0 = 0; // up
@@ -926,7 +926,7 @@ private:
 			// B = 1.0*tmp1 + (1.0)*tmp2 = Triplet = up*up + dn*dn
 			operatorPlus(B,tmp1,mult1,tmp2,mult2);
 			transposeConjugate(A,B); // A = transpose(B)
-			observe_.twoPoint(m,A,B,fermionicSign);
+			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON);
 			std::cout << m;
 		} else {
 			PsimagLite::String s = "Unknown flag: " + ttos(flag);
@@ -1188,8 +1188,6 @@ private:
 		SizeType thini2 = i2*2 + orb2;
 		SizeType thinj1 = j1*2 + orb3;
 		SizeType thinj2 = j2*2 + orb4;
-
-		int fermionicSign = -1;
 		SizeType threadId = 0;
 		FieldType sum = 0.0;
 		SizeType site = 0;
@@ -1219,7 +1217,7 @@ private:
 				                                      'C',
 				                                      thinj2,
 				                                      O4,
-				                                      fermionicSign,
+				                                      ProgramGlobals::FermionOrBosonEnum::FERMION,
 				                                      threadId);
 			}
 		}
@@ -1282,7 +1280,11 @@ private:
 		if (label=="superDensity") {
 			A.makeDiagonal(model_.hilbertSize(observe_.site(threadId)),1.0);
 			std::pair<SizeType,SizeType> zeroZero(0,0);
-			OperatorType opIdentity(A,1,zeroZero,1,su2Related1);
+			OperatorType opIdentity(A,
+			                        ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                        zeroZero,
+			                        1,
+			                        su2Related1);
 			observe_.setBrakets("time","time");
 			FieldType superDensity = observe_.template
 			        onePoint<ApplyOperatorType>(0,
@@ -1292,20 +1294,32 @@ private:
 			           superDensity<<"\n";
 		} else if (label=="nupNdown") {
 			multiply(A,matrixNup_.data,matrixNdown_.data);
-			OperatorType opA(A,1,std::pair<SizeType,SizeType>(0,0),1,su2Related1);
+			OperatorType opA(A,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 std::pair<SizeType,SizeType>(0, 0),
+			                 1,
+			                 su2Related1);
 			PreOperatorSiteIndependentType preOperator(opA,"nupNdown",threadId);
 			measureOnePoint(preOperator);
 		} else if (label=="nup+ndown") {
 			A = matrixNup_.data;
 			A += matrixNdown_.data;
-			OperatorType opA(A,1,std::pair<SizeType,SizeType>(0,0),1,su2Related1);
+			OperatorType opA(A,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 std::pair<SizeType,SizeType>(0, 0),
+			                 1,
+			                 su2Related1);
 			PreOperatorSiteIndependentType preOperator(opA,"nup+ndown",threadId);
 			measureOnePoint(preOperator);
 		} else if (label=="sz") {
 			A = matrixNup_.data;
 			const FieldType f1 = (-1.0);
 			A += f1*matrixNdown_.data;
-			OperatorType opA(A,1,std::pair<SizeType,SizeType>(0,0),1,su2Related1);
+			OperatorType opA(A,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 std::pair<SizeType,SizeType>(0, 0),
+			                 1,
+			                 su2Related1);
 			PreOperatorSiteIndependentType preOperator(opA,"sz",threadId);
 			measureOnePoint(preOperator);
 		} else {

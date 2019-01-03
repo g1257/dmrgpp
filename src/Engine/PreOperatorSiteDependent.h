@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include "Matrix.h"
 #include "PreOperatorBase.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -113,7 +114,11 @@ public:
 		transposeConjugate(opCupTranspose,opCup);
 		SparseMatrixType A = opCupTranspose * opCdown; //<--- FIXME CHECK
 		Su2RelatedType su2Related1;
-		OperatorType opA(A,1,std::pair<SizeType,SizeType>(0,0),1,su2Related1);
+		OperatorType opA(A,
+		                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                 std::pair<SizeType,SizeType>(0, 0),
+		                 1,
+		                 su2Related1);
 
 		return opA;
 	}

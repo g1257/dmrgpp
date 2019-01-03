@@ -196,7 +196,7 @@ public:
 
 		SparseMatrixType m0 = braket.op(0).data;
 		SparseMatrixType m1 = braket.op(1).data;
-		int fermionSign = braket.op(0).fermionSign;
+		ProgramGlobals::FermionOrBosonEnum fermionSign = braket.op(0).fermionOrBoson;
 
 		SizeType threadId = 0;
 		SizeType site1 = 0;
@@ -205,7 +205,7 @@ public:
 
 		switch (flag) {
 		case 0: // no sites given
-			return twopoint_(storage,m0,m1,fermionSign);
+			return twopoint_(storage, m0, m1, fermionSign);
 		case 1: //first site given
 			for (site1 = 0; site1 < sites; ++site1)
 				storage(braket.site(0),site1) = twopoint_.calcCorrelation(braket.site(0),
@@ -232,7 +232,7 @@ public:
 	void twoPoint(MatrixType& m,
 	              const SparseMatrixType& O1,
 	              const SparseMatrixType& O2,
-	              int fermionicSign)
+	              ProgramGlobals::FermionOrBosonEnum fermionicSign)
 	{
 		twopoint_(m, O1, O2, fermionicSign);
 	}

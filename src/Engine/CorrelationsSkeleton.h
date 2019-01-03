@@ -155,7 +155,7 @@ public:
 	void growDirectly(SparseMatrixType& Odest,
 	                  const SparseMatrixType& Osrc,
 	                  SizeType i,
-	                  int fermionicSign,
+	                  ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	                  SizeType ns,
 	                  bool transform,
 	                  SizeType threadId)
@@ -195,12 +195,13 @@ public:
 	// Perfomance critical:
 	void fluffUp(SparseMatrixType& ret2,
 	             const SparseMatrixType& O,
-	             int fermionicSign,
+	             ProgramGlobals::FermionOrBosonEnum fOrB,
 	             int growOption,
 	             bool transform,
 	             SizeType threadId)
 	{
-		ProgramGlobals::DirectionEnum dir = helper_.direction(threadId);
+		const int fermionicSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
+		const ProgramGlobals::DirectionEnum dir = helper_.direction(threadId);
 
 		const BasisType& basis = (dir == EXPAND_SYSTEM) ? helper_.leftRightSuper(threadId).left() :
 		                                                  helper_.leftRightSuper(threadId).right();
@@ -242,9 +243,10 @@ public:
 					ret.setRow(k + i*ktotal, counter);
 					RealType sign = 1;
 					if (dir == ProgramGlobals::EXPAND_ENVIRON) {
-						sign = (fermionicSign > 0) ? 1 : fermionSignBasis(fermionicSign,
-						                        helper_.leftRightSuper(threadId).left())*
-						        helper_.signsOneSite(k);
+						sign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON)
+						        ? 1 : fermionSignBasis(fermionicSign,
+						                               helper_.leftRightSuper(threadId).left())*
+						          helper_.signsOneSite(k);
 					} else {
 						sign = helper_.fermionicSignLeft(threadId)(k, fermionicSign);
 					}
@@ -278,7 +280,7 @@ public:
 	void dmrgMultiply(SparseMatrixType& result,
 	                  const SparseMatrixType& O1,
 	                  const SparseMatrixType& O2,
-	                  int fermionicSign,
+	                  ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	                  SizeType ns,
 	                  SizeType threadId)
 	{
@@ -297,7 +299,9 @@ public:
 		transposeConjugate(Om,O);
 	}
 
-	FieldType bracket(const SparseMatrixType& A,int fermionicSign,SizeType threadId)
+	FieldType bracket(const SparseMatrixType& A,
+	                  ProgramGlobals::FermionOrBosonEnum fermionicSign,
+	                  SizeType threadId)
 	{
 		try {
 			const VectorWithOffsetType& src1 =
@@ -316,7 +320,7 @@ public:
 
 	FieldType bracketRightCorner(const SparseMatrixType& A,
 	                             const SparseMatrixType& B,
-	                             int fermionSign,
+	                             ProgramGlobals::FermionOrBosonEnum fermionSign,
 	                             SizeType threadId)
 	{
 		try {
@@ -336,7 +340,7 @@ public:
 	FieldType bracketRightCorner(const SparseMatrixType& A,
 	                             const SparseMatrixType& B,
 	                             const SparseMatrixType& C,
-	                             int fermionSign,
+	                             ProgramGlobals::FermionOrBosonEnum fermionSign,
 	                             SizeType threadId)
 	{
 		try {
@@ -369,10 +373,11 @@ private:
 	void dmrgMultiplySystem(SparseMatrixType& result,
 	                        const SparseMatrixType& O1,
 	                        const SparseMatrixType& O2,
-	                        int fermionicSign, // fermion sign of O2
+	                        ProgramGlobals::FermionOrBosonEnum fOrB, // for O2
 	                        SizeType ns,
 	                        SizeType threadId)
 	{
+		const int fermionicSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 		SizeType ni=O1.rows();
 
 		helper_.setPointer(threadId,ns);
@@ -422,11 +427,12 @@ private:
 	void dmrgMultiplyEnviron(SparseMatrixType& result,
 	                         const SparseMatrixType& O1,
 	                         const SparseMatrixType& O2,
-	                         int fermionicSign,
+	                         ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	                         SizeType ns,
 	                         SizeType threadId)
 	{
-		RealType f = fermionSignBasis(fermionicSign,
+		int fs = (fermionicSign == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
+		RealType f = fermionSignBasis(fs,
 		                              helper_.leftRightSuper(threadId).left());
 		SizeType nj=O2.rows();
 
@@ -451,7 +457,8 @@ private:
 			SizeType e = 0;
 			SizeType u = 0;
 			pack.unpack(e,u,helper_.leftRightSuper(threadId).right().permutation(r));
-			RealType sign = (fermionicSign > 0) ? 1 : f*helper_.signsOneSite(e);
+			const RealType sign = (fermionicSign == ProgramGlobals::FermionOrBosonEnum::BOSON)
+			        ? 1 : f*helper_.signsOneSite(e);
 
 			for (int k=O2.getRowPtr(e);k<O2.getRowPtr(e+1);k++) {
 				SizeType e2 = O2.getCol(k);
@@ -506,7 +513,7 @@ private:
 	FieldType bracket_(const SparseMatrixType& A,
 	                   const VectorWithOffsetType& vec1,
 	                   const VectorWithOffsetType& vec2,
-	                   int fermionicSign,
+	                   ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	                   SizeType threadId)
 	{
 		if (verbose_)
@@ -556,9 +563,11 @@ private:
 	FieldType bracketEnviron_(const SparseMatrixType& A,
 	                          const VectorWithOffsetType& vec1,
 	                          const VectorWithOffsetType& vec2,
-	                          int fermionicSign,
+	                          ProgramGlobals::FermionOrBosonEnum fOrB,
 	                          SizeType threadId)
 	{
+		const int fermionicSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
+
 		RealType sign = fermionSignBasis(fermionicSign,
 		                                 helper_.leftRightSuper(threadId).left());
 
@@ -593,7 +602,7 @@ private:
 
 	FieldType bracketRightCorner_(const SparseMatrixType& A,
 	                              const SparseMatrixType& B,
-	                              int fermionSign,
+	                              ProgramGlobals::FermionOrBosonEnum fermionSign,
 	                              const VectorWithOffsetType& vec1,
 	                              const VectorWithOffsetType& vec2,
 	                              SizeType threadId)
@@ -614,7 +623,7 @@ private:
 
 	FieldType brRghtCrnrSystem_(const SparseMatrixType& Acrs,
 	                            const SparseMatrixType& Bcrs,
-	                            int fermionSign,
+	                            ProgramGlobals::FermionOrBosonEnum fermionSign,
 	                            const VectorWithOffsetType& vec1,
 	                            const VectorWithOffsetType& vec2,
 	                            SizeType threadId)
@@ -651,7 +660,9 @@ private:
 				             permutation(r));
 				bool odd = superOddElectrons(t,threadId);
 				odd ^= helper_.leftRightSuper(threadId).right().signs()[eta];
-				RealType sign = (odd) ? fermionSign : 1.0;
+				const RealType sign = (odd && fermionSign ==
+				                       ProgramGlobals::FermionOrBosonEnum::BOSON) ? -1.0
+				                                                                  : 1.0;
 
 				for (int k=Acrs.getRowPtr(r0);k<Acrs.getRowPtr(r0+1);k++) {
 					SizeType r0prime = Acrs.getCol(k);
@@ -676,7 +687,7 @@ private:
 
 	FieldType brLftCrnrEnviron_(const SparseMatrixType& Acrs,
 	                            const SparseMatrixType& Bcrs,
-	                            int fermionSign,
+	                            ProgramGlobals::FermionOrBosonEnum fOrB,
 	                            const VectorWithOffsetType& vec1,
 	                            const VectorWithOffsetType& vec2,
 	                            SizeType threadId)
@@ -684,6 +695,7 @@ private:
 		if (verbose_)
 			std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";
 
+		const int fermionSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 		int signRight = fermionSignBasis(fermionSign,
 		                                 helper_.leftRightSuper(threadId).right());
 		FieldType sum = 0;
@@ -712,7 +724,8 @@ private:
 				             permutation(t));
 				SizeType r0,r1;
 				pack2.unpack(r0,r1,helper_.leftRightSuper(threadId).right().permutation(r));
-				RealType sign = (fermionSign > 0) ? 1 : helper_.signsOneSite(r0) * signRight;
+				const RealType sign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON)
+				        ? 1 : helper_.signsOneSite(r0) * signRight;
 
 				for (int k=Acrs.getRowPtr(r1);k<Acrs.getRowPtr(r1+1);k++) {
 					SizeType r1prime = Acrs.getCol(k);
@@ -738,12 +751,14 @@ private:
 	FieldType bracketRightCorner_(const SparseMatrixType& A1,
 	                              const SparseMatrixType& A2,
 	                              const SparseMatrixType& B,
-	                              int fermionSign,
+	                              ProgramGlobals::FermionOrBosonEnum fOrB,
 	                              const VectorWithOffsetType& vec1,
 	                              const VectorWithOffsetType& vec2,
 	                              SizeType threadId)
 	{
 		if (helper_.direction(threadId)!=EXPAND_SYSTEM) return 0;
+
+		const int fermionSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 
 		if (verbose_)
 			std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";

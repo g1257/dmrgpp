@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h"
 #include "Mpi.h"
 #include "Concurrency.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -101,7 +102,7 @@ public:
 	                           const typename PsimagLite::Vector<PairType>::Type& pairs,
 	                           const SparseMatrixType& O1,
 	                           const SparseMatrixType& O2,
-	                           int fermionicSign)
+	                           ProgramGlobals::FermionOrBosonEnum fermionicSign)
 	    : w_(w),
 	      twopoint_(twopoint),
 	      pairs_(pairs),
@@ -126,7 +127,7 @@ private:
 	const typename PsimagLite::Vector<PairType>::Type& pairs_;
 	const SparseMatrixType& O1_;
 	const SparseMatrixType& O2_;
-	int fermionicSign_;
+	ProgramGlobals::FermionOrBosonEnum fermionicSign_;
 }; // class Parallel2PointCorrelations
 } // namespace Dmrg 
 

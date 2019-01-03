@@ -195,7 +195,7 @@ public:
 			            'N',
 			            braket.site(i),
 			            braket.op(i),
-			            braket.op(i - 1).fermionSign,
+			            braket.op(i - 1).fermionOrBoson,
 			            threadId);
 			O2gt = OsoFar;
 		}
@@ -245,8 +245,8 @@ public:
 
 		int ns = i2-1;
 		if (ns<0) ns = 0;
-		skeleton_.growDirectly(O1g,O1m,i1,braket.op(index0).fermionSign,ns,true,threadId);
-		skeleton_.dmrgMultiply(O2g,O1g,O2m,braket.op(index1).fermionSign,ns,threadId);
+		skeleton_.growDirectly(O1g,O1m,i1,braket.op(index0).fermionOrBoson,ns,true,threadId);
+		skeleton_.dmrgMultiply(O2g,O1g,O2m,braket.op(index1).fermionOrBoson,ns,threadId);
 
 		helper_.setPointer(threadId,ns);
 		helper_.transform(O2gt,O2g,threadId);
@@ -279,8 +279,7 @@ public:
 		SparseMatrixType Otmp;
 		if (index0 == 0) err("secondStage\n");
 
-		int fermionS = braket.op(index0 - 1).fermionSign;
-		growDirectly4p(Otmp,O2gt,i2+1,fermionS,ns,threadId);
+		growDirectly4p(Otmp,O2gt,i2+1,braket.op(index0 - 1).fermionOrBoson,ns,threadId);
 		if (verbose_) {
 			std::cerr<<"Otmp\n";
 			std::cerr<<Otmp;
@@ -289,7 +288,7 @@ public:
 		SparseMatrixType O3g,O4g;
 		if (i4==skeleton_.numberOfSites(threadId)-1) {
 			if (i3<i4-1) { // still not tested (2018-02-27)
-				skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index0).fermionSign,ns,threadId);
+				skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index0).fermionOrBoson,ns,threadId);
 
 				SparseMatrixType O3gt;
 				helper_.transform(O3gt,O3g,threadId);
@@ -297,12 +296,12 @@ public:
 				ns = i4-2;
 				if (ns<0) ns = 0;
 				helper_.setPointer(threadId,ns);
-				growDirectly4p(Otmp,O3gt,i3+1,braket.op(index0).fermionSign,ns,threadId);
+				growDirectly4p(Otmp,O3gt,i3+1,braket.op(index0).fermionOrBoson,ns,threadId);
 				helper_.setPointer(threadId,i4-2);
 
 				return skeleton_.bracketRightCorner(Otmp,
 				                                    O4m,
-				                                    braket.op(index1).fermionSign,
+				                                    braket.op(index1).fermionOrBoson,
 				                                    threadId);
 			}
 
@@ -310,11 +309,11 @@ public:
 			return skeleton_.bracketRightCorner(Otmp,
 			                                    O3m,
 			                                    O4m,
-			                                    braket.op(index1).fermionSign,
+			                                    braket.op(index1).fermionOrBoson,
 			                                    threadId);
 		}
 
-		skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index0).fermionSign,ns,threadId);
+		skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index0).fermionOrBoson,ns,threadId);
 		if (verbose_) {
 			std::cerr<<"O3g\n";
 			std::cerr<<O3g;
@@ -332,14 +331,14 @@ public:
 		ns = i4-1;
 		if (ns<0) ns = 0;
 		helper_.setPointer(threadId,ns);
-		growDirectly4p(Otmp,O3gt,i3+1,braket.op(index0).fermionSign,ns,threadId);
+		growDirectly4p(Otmp,O3gt,i3+1,braket.op(index0).fermionOrBoson,ns,threadId);
 		if (verbose_) {
 			std::cerr<<"Otmp\n";
 			std::cerr<<Otmp;
 		}
 
-		skeleton_.dmrgMultiply(O4g,Otmp,O4m,braket.op(index1).fermionSign,ns,threadId);
-		return skeleton_.bracket(O4g,braket.op(index1).fermionSign,threadId);
+		skeleton_.dmrgMultiply(O4g,Otmp,O4m,braket.op(index1).fermionOrBoson,ns,threadId);
+		return skeleton_.bracket(O4g,braket.op(index1).fermionOrBoson,threadId);
 	}
 
 	//! requires i2<i3<i4
@@ -349,7 +348,7 @@ public:
 	                 char mod3,
 	                 SizeType i3,
 	                 const OperatorType& Op3,
-	                 int fermionS,
+	                 ProgramGlobals::FermionOrBosonEnum fermionS,
 	                 SizeType threadId) const
 	{
 		// Take care of modifiers
@@ -372,7 +371,7 @@ public:
 		}
 
 		SparseMatrixType O3g;
-		skeleton_.dmrgMultiply(O3g,Otmp,O3m,Op3.fermionSign,ns,threadId);
+		skeleton_.dmrgMultiply(O3g,Otmp,O3m,Op3.fermionOrBoson,ns,threadId);
 		if (verbose_) {
 			std::cerr<<"O3g\n";
 			std::cerr<<O3g;
@@ -407,8 +406,7 @@ private:
 		if (ns<0) ns = 0;
 		SparseMatrixType Otmp;
 		if (index == 0) err("secondStage\n");
-		int fermionS = braket.op(index - 1).fermionSign;
-		growDirectly4p(Otmp,O2gt,i2+1,fermionS,ns,threadId);
+		growDirectly4p(Otmp,O2gt,i2+1,braket.op(index - 1).fermionOrBoson,ns,threadId);
 		if (verbose_) {
 			std::cerr<<"Otmp\n";
 			std::cerr<<Otmp;
@@ -418,27 +416,27 @@ private:
 			helper_.setPointer(threadId,i3-2);
 			return skeleton_.bracketRightCorner(Otmp,
 			                                    O3m,
-			                                    braket.op(index).fermionSign,
+			                                    braket.op(index).fermionOrBoson,
 			                                    threadId);
 		}
 
 		helper_.setPointer(threadId,ns);
 		SparseMatrixType O3g;
-		skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index).fermionSign,ns,threadId);
+		skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index).fermionOrBoson,ns,threadId);
 		if (verbose_) {
 			std::cerr<<"O3g\n";
 			std::cerr<<O3g;
 		}
 
 		helper_.setPointer(threadId,ns);
-		return skeleton_.bracket(O3g,braket.op(index).fermionSign,threadId);
+		return skeleton_.bracket(O3g,braket.op(index).fermionOrBoson,threadId);
 	}
 
 	//! i can be zero here!!
 	void growDirectly4p(SparseMatrixType& Odest,
 	                    const SparseMatrixType& Osrc,
 	                    SizeType i,
-	                    int fermionicSign,
+	                    ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	                    SizeType ns,
 	                    SizeType threadId) const
 	{

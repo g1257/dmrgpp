@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Parallel2PointCorrelations.h"
 #include "Concurrency.h"
 #include "Parallelizer.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -127,7 +128,7 @@ public:
 	void operator()(PsimagLite::Matrix<FieldType>& w,
 	                const SparseMatrixType& O1,
 	                const SparseMatrixType& O2,
-	                int fermionicSign)
+	                ProgramGlobals::FermionOrBosonEnum fermionicSign)
 	{
 		SizeType rows = w.n_row();
 		SizeType cols = w.n_col();
@@ -157,7 +158,7 @@ public:
 	        SizeType j,
 	        const SparseMatrixType& O1,
 	        const SparseMatrixType& O2,
-	        int fermionicSign,
+	        ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	        SizeType threadId)
 	{
 		FieldType c = 0;
@@ -177,22 +178,33 @@ private:
 	FieldType calcDiagonalCorrelation(SizeType i,
 	                                  const SparseMatrixType& O1,
 	                                  const SparseMatrixType& O2,
-	                                  int,
+	                                  ProgramGlobals::FermionOrBosonEnum,
 	                                  SizeType threadId)
 	{
 		SizeType n = O1.rows();
 		SparseMatrixType O1new=identity(n);
 
 		SparseMatrixType O2new = O1 * O2;
-		if (i==0) return calcCorrelation_(0,1,O2new,O1new,1,threadId);
-		return calcCorrelation_(i-1,i,O1new,O2new,1,threadId);
+		if (i==0) return calcCorrelation_(0,
+		                                  1,
+		                                  O2new,
+		                                  O1new,
+		                                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                                  threadId);
+
+		return calcCorrelation_(i - 1,
+		                        i,
+		                        O1new,
+		                        O2new,
+		                        ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                        threadId);
 	}
 
 	FieldType calcCorrelation_(SizeType i,
 	                           SizeType j,
 	                           const SparseMatrixType& O1,
 	                           const SparseMatrixType& O2,
-	                           int fermionicSign,
+	                           ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	                           SizeType threadId)
 	{
 
@@ -226,7 +238,9 @@ private:
 		skeleton_.growDirectly(O1g,O1m,i,fermionicSign,ns,true,threadId);
 		skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns,threadId);
 
-		return skeleton_.bracket(O2g,1,threadId);
+		return skeleton_.bracket(O2g,
+		                         ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                         threadId);
 	}
 
 	SparseMatrixType identity(SizeType n)
