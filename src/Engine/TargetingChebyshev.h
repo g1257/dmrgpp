@@ -277,7 +277,7 @@ private:
 
 		cocoon(direction,block1); // in-situ
 
-		//		printChebyshev(); // in-situ
+		printChebyshev(); // in-situ
 
 		PsimagLite::String options = this->model().params().options;
 		bool normalizeTimeVectors =
@@ -330,7 +330,7 @@ private:
 		typename ModelType::HamiltonianConnectionType hc(p,
 		                                                 BaseType::lrs(),
 		                                                 BaseType::model().geometry(),
-		                                                 BaseType::model().linkProduct(),
+		                                                 BaseType::model().modelLinks(),
 		                                                 this->common().currentTime(),
 		                                                 0);
 		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
