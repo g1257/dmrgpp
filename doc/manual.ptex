@@ -215,6 +215,7 @@ if two opExpr are given (one semicolon), then the bare braket is refererred to a
 two-point correlation; and so on.
 Bare brakets cannot be computed directly by DMRG++, but must first be
 dressed with a bra and a ket. What bra and ket is chosen is Targeting and context dependent.
+Because of this it is recommended to use dressed braket specifications instead.
 
 For GroundStateTargeting, bra and ket are both equal to the current target, usually the ground state,
 sometimes only in \emph{WFT} form. But if restarting a run, the current target
@@ -238,6 +239,23 @@ To be able to compute Green functions, TimeStepTargeting computes \emph{in addit
 where bra is the GroundStateTargeting vector, and
 ket the first time vector. The same is true for
 CorrectionVectorTargeting, where ket is the correction vector.
+
+\section{Dressed braket specification}
+
+Operators in braket specifications may be dressed, as follows.
+\begin{verbatim}
+./dmrg -f input.inp '<bra|bare braket|ket>,<bra|bare braket|ket>,...'
+\end{verbatim}
+The opsec was described previously.\footnote{What is new here 
+is that bras and kets dress the operators, whereas before,
+an automatic dressing procedure was used, choosing what bras and kets to use.}
+The bras and kets must be in the set $\{gs, P0, P1, \cdots\}$.
+The meaning of $gs$ is context dependent, but often 
+refers to the ground state vector, whether freshly computed or WFTed.
+``P0'' is (always?) the first targeted vector other than ``gs'', ``P1'' the
+next targeted vector, and so on.
+FIXME: EXPLORE USE OF DRESSED BRAKETS IN ALL NGSTs.
+Bare and dressed braket specifications may \emph{not} be combined.
 
 \section{Operator Expressions}
 
@@ -315,26 +333,6 @@ following items, in order.
 \begin{itemize}
 \ptexPaste{Operator}
 \end{itemize}
-
-\section{Dressed braket specification}
-
-Operators in braket specifications may be dressed, as follows.
-\begin{verbatim}
-./dmrg -f input.inp '<bra|bare braket|ket>,<bra|bare braket|ket>,...'
-\end{verbatim}
-The opsec was described previously.\footnote{What is new here 
-is that bras and kets dress the operators, whereas before,
-an automatic dressing procedure was used, choosing what bras and kets to use.}
-The bras and kets must be in the set $\{gs, P0, P1, \cdots\}$.
-The meaning of $gs$ is context dependent, but often 
-refers to the ground state vector, whether freshly computed or WFTed.
-``P0'' is (always?) the first targeted vector other than ``gs'', ``P1'' the
-next targeted vector, and so on.
-FIXME: EXPLORE USE OF DRESSED BRAKETS IN ALL NGSTs.
-Bare and dressed braket specifications may be combined:
-\begin{verbatim}
-./dmrg -f input.inp 'bare braket spec,<bra|bare braket spec|ket>,...'
-\end{verbatim}
 
 \section{The operator Driver}\label{sec:operator}
 The operator driver may be used to produce an operator by file.
