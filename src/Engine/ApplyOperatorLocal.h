@@ -85,11 +85,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename LeftRightSuperType, typename VectorWithOffsetType_>
+template<typename LeftRightSuperType_, typename VectorWithOffsetType_>
 class ApplyOperatorLocal {
 
 	typedef typename VectorWithOffsetType_::VectorType TargetVectorType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename LeftRightSuperType_::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
 	typedef typename BasisWithOperatorsType::ComplexOrRealType ComplexOrRealType;
 	typedef PsimagLite::PackIndices PackIndicesType;
@@ -141,9 +141,11 @@ public:
 
 	enum {MIDDLE, LEFT_CORNER, RIGHT_CORNER};
 
+	typedef LeftRightSuperType_ LeftRightSuperType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef OperatorType_ OperatorType;
+	typedef FermionSign FermionSignType;
 
 	ApplyOperatorLocal(const LeftRightSuperType& lrs, bool withLegacyBug)
 	    : lrs_(lrs), withLegacyBug_(withLegacyBug)
@@ -231,6 +233,8 @@ public:
 			}
 		}
 	}
+
+	const LeftRightSuperType& lrs() const { return lrs_; }
 
 private:
 

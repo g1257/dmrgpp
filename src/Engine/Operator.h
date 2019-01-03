@@ -96,8 +96,6 @@ namespace Dmrg {
 template<typename StorageType_>
 struct Operator {
 
-	enum {CAN_BE_ZERO = false, MUST_BE_NONZERO = true};
-
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef StorageType_ StorageType;
 	typedef typename StorageType::value_type value_type;
@@ -106,15 +104,24 @@ struct Operator {
 	typedef Su2Related Su2RelatedType;
 	typedef PsimagLite::Matrix<value_type> DenseMatrixType;
 
-	Operator() : fermionOrBoson(ProgramGlobals::FermionOrBosonEnum::BOSON), angularFactor(1) {}
+	enum class CategoryEnum {REGULAR, H};
+
+	Operator()
+	    : fermionOrBoson(ProgramGlobals::FermionOrBosonEnum::BOSON),
+	      category(CategoryEnum::REGULAR),
+	      jm(PairType(0, 0)),
+	      angularFactor(1)
+	{}
 
 	Operator(const StorageType& data1,
 	         ProgramGlobals::FermionOrBosonEnum fermionSign1,
 	         const PairType& jm1,
 	         RealType angularFactor1,
-	         const Su2RelatedType& su2Related1)
+	         const Su2RelatedType& su2Related1,
+	         CategoryEnum category1 = CategoryEnum::REGULAR)
 	    : data(data1),
 	      fermionOrBoson(fermionSign1),
+	      category(category1),
 	      jm(jm1),
 	      angularFactor(angularFactor1),
 	      su2Related(su2Related1)
@@ -123,7 +130,6 @@ struct Operator {
 	template<typename IoInputType, typename SomeModelType>
 	Operator(IoInputType& io,
 	         SomeModelType& model,
-	         bool checkNonZero,
 	         PsimagLite::String prefix)
 	{
 		/*PSIDOC Operator
@@ -175,7 +181,6 @@ struct Operator {
 		} else if (s == "raw") {
 			DenseMatrixType m;
 			io.read(m, prefix + "RAW_MATRIX");
-			if (checkNonZero) checkNotZeroMatrix(m);
 			fullMatrixToCrsMatrix(data,m);
 			PsimagLite::String msg = "WARNING: RAW_MATRIX read, order of basis subject ";
 			msg += "to change with DMRG++ version!\n";
@@ -204,7 +209,8 @@ struct Operator {
 
 		int fs = 0;
 		io.readline(fs,prefix + "FERMIONSIGN=");
-		fermionOrBoson = (fs < 0) ? ProgramGlobals::FermionOrBosonEnum::FERMION : ProgramGlobals::FermionOrBosonEnum::BOSON;
+		fermionOrBoson = (fs < 0) ? ProgramGlobals::FermionOrBosonEnum::FERMION
+		                          : ProgramGlobals::FermionOrBosonEnum::BOSON;
 
 		jm.first = jm.second = 0;
 		angularFactor = 1;
@@ -295,7 +301,8 @@ struct Operator {
 		data.recv(root,tag,mpiComm);
 		int fs = 0;
 		PsimagLite::MPI::recv(fs,root,tag+1,mpiComm);
-		fermionOrBoson = (fs < 0) ? ProgramGlobals::FermionOrBosonEnum::FERMION : ProgramGlobals::FermionOrBosonEnum::BOSON;
+		fermionOrBoson = (fs < 0) ? ProgramGlobals::FermionOrBosonEnum::FERMION
+		                          : ProgramGlobals::FermionOrBosonEnum::BOSON;
 		PsimagLite::MPI::recv(jm,root,tag+2,mpiComm);
 		PsimagLite::MPI::recv(angularFactor,root,tag+3,mpiComm);
 		Dmrg::recv(su2Related,root,tag+4,mpiComm);
@@ -318,9 +325,11 @@ struct Operator {
 		multiply(crs, data, other.data);
 		data = crs;
 
-		int fsOther = (other.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
+		int fsOther = (other.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1
+		                                                                                    : 1;
 		int fs = fSaved * fsOther;
-		fermionOrBoson = (fs < 0) ? ProgramGlobals::FermionOrBosonEnum::FERMION : ProgramGlobals::FermionOrBosonEnum::BOSON;
+		fermionOrBoson = (fs < 0) ? ProgramGlobals::FermionOrBosonEnum::FERMION
+		                          : ProgramGlobals::FermionOrBosonEnum::BOSON;
 
 		return *this;
 	}
@@ -358,24 +367,10 @@ struct Operator {
 	// does this operator commute or anticommute with others of the
 	// same class on different sites
 	ProgramGlobals::FermionOrBosonEnum fermionOrBoson;
+	CategoryEnum category;
 	PairType  jm; // angular momentum of this operator
 	RealType angularFactor;
 	Su2RelatedType su2Related;
-
-private:
-
-	void checkNotZeroMatrix(const DenseMatrixType& m) const
-	{
-		RealType norma = norm2(m);
-		RealType eps = 1e-6;
-		if (norma>eps) return;
-
-		PsimagLite::String s(__FILE__);
-		s += " : " + ttos(__LINE__) + "\n";
-		s += "RAW_MATRIX or COOKED_OPERATOR ";
-		s += " is less than " + ttos(eps) + "\n";
-		std::cerr<<"WARNING: "<<s;
-	}
 };
 
 template<typename SparseMatrixType>

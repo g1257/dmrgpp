@@ -73,6 +73,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ProgressIndicator.h"
 #include "ApplyOperatorLocal.h"
+#include "ApplyOperatorNsl.h"
 #include "TimeVectorsKrylov.h"
 #include "TimeVectorsChebyshev.h"
 #include "TimeVectorsRungeKutta.h"
@@ -115,6 +116,9 @@ public:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
+	typedef ApplyOperatorNsl<ApplyOperatorType,
+	ModelType,
+	LanczosSolverType> ApplyOperatorNslType;
 	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
 	typedef typename TimeVectorsBaseType::PairType PairType;
 
@@ -127,7 +131,10 @@ public:
 	      E0_(0.0),
 	      currentTime_(0.0),
 	      indexNoAdvance_(indexNoAdvance),
-	      applyOpLocal_(targetHelper.lrs(), targetHelper.withLegacyBugs()),
+	      applyOpNsl_(targetHelper.lrs(),
+	                  targetHelper.withLegacyBugs(),
+	                  targetHelper.model(),
+	                  currentTime_),
 	      targetVectors_(0),
 	      timeVectorsBase_(0)
 	{}
@@ -235,9 +242,9 @@ public:
 		return currentTime_;
 	}
 
-	const ApplyOperatorType& applyOpLocal() const
+	const ApplyOperatorNslType& applyOpNsl() const
 	{
-		return applyOpLocal_;
+		return applyOpNsl_;
 	}
 
 	VectorWithOffsetType& psi() // <--- FIXME
@@ -397,7 +404,7 @@ public:
 		typename PsimagLite::Vector<bool>::Type signs;
 		targetHelper_.model().findOddElectronsOfOneSite(signs, site);
 		FermionSign fs(targetHelper_.lrs().left(), signs);
-		applyOpLocal_(phiNew,phiOld,targetHelper_.tstStruct().aOperators()[indexOfOperator],
+		applyOpNsl_(phiNew,phiOld,targetHelper_.tstStruct().aOperators()[indexOfOperator],
 		              fs,systemOrEnviron,corner);
 
 		RealType norma = norm(phiNew);
@@ -560,7 +567,7 @@ private:
 			typename PsimagLite::Vector<bool>::Type signs;
 			targetHelper_.model().findOddElectronsOfOneSite(signs,site);
 			FermionSign fs(targetHelper_.lrs().left(), signs);
-			applyOpLocal_(phiNew,phiOld,targetHelper_.tstStruct().aOperators()[i],
+			applyOpNsl_(phiNew,phiOld,targetHelper_.tstStruct().aOperators()[i],
 			              fs,systemOrEnviron,corner);
 			RealType norma = norm(phiNew);
 
@@ -617,7 +624,7 @@ private:
 	RealType E0_;
 	RealType currentTime_;
 	SizeType indexNoAdvance_;
-	ApplyOperatorType applyOpLocal_;
+	ApplyOperatorNslType applyOpNsl_;
 	VectorWithOffsetType psi_;
 	typename PsimagLite::Vector<VectorWithOffsetType>::Type targetVectors_;
 	TimeVectorsBaseType* timeVectorsBase_;

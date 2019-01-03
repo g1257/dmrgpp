@@ -321,10 +321,10 @@ public:
 		FermionSign fs(targetHelper_.lrs().left(), signs);
 		for (SizeType j=0;j<creationMatrix.size();j++) {
 			VectorWithOffsetType phiTemp;
-			applyOpExpression_.applyOpLocal()(phiTemp,psi,creationMatrix[j],
-			                                  fs,
-			                                  direction,
-			                                  ApplyOperatorType::BORDER_NO);
+			applyOpExpression_.applyOpNsl()(phiTemp,psi,creationMatrix[j],
+			                                fs,
+			                                direction,
+			                                ApplyOperatorType::BORDER_NO);
 			if (j==0) v = phiTemp;
 			else v += phiTemp;
 		}
@@ -758,7 +758,7 @@ private:
 		targetHelper_.model().findOddElectronsOfOneSite(oddElectrons,site);
 		FermionSign fs(targetHelper_.lrs().left(), oddElectrons);
 		VectorWithOffsetType dest;
-		applyOpExpression_.applyOpLocal()(dest,src1,A,fs,systemOrEnviron,border);
+		applyOpExpression_.applyOpNsl()(dest,src1,A,fs,systemOrEnviron,border);
 
 		ComplexOrRealType sum = 0.0;
 		for (SizeType ii=0;ii<dest.sectors();ii++) {
