@@ -1,3 +1,14 @@
+2019-01-03 Version 2.46
+
+* C++11 required
+
+* Geometry::AdditionalData is a vector of unsigned ints
+
+* DegreesOfFreedom= creates orbitals per term
+
+* PsiDoc: capture first proto and first function 
+with marks inside functions
+
 2018-12-19 Version 2.44
 
 * boost-spirit now needed to compile
