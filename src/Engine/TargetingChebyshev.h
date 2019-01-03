@@ -277,8 +277,6 @@ private:
 
 		cocoon(direction,block1); // in-situ
 
-		printChebyshev(); // in-situ
-
 		PsimagLite::String options = this->model().params().options;
 		bool normalizeTimeVectors =
 		        (options.find("normalizeVectors") != std::string::npos);
@@ -308,51 +306,6 @@ private:
 		progress_.printline(msg2,std::cout);
 	}
 
-	void printChebyshev() const
-	{
-		for (SizeType i=0;i<this->common().targetVectors().size();i++)
-			printChebyshev(this->common().targetVectors()[i],i);
-	}
-
-	void printChebyshev(const VectorWithOffsetType& phi,SizeType whatTarget) const
-	{
-		for (SizeType ii=0;ii<phi.sectors();ii++) {
-			SizeType i = phi.sector(ii);
-			printChebyshev(phi,whatTarget,i);
-		}
-	}
-
-	void printChebyshev(const VectorWithOffsetType& phi,
-	                    SizeType whatTarget,
-	                    SizeType i0) const
-	{
-		SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
-		typename ModelType::HamiltonianConnectionType hc(p,
-		                                                 BaseType::lrs(),
-		                                                 BaseType::model().geometry(),
-		                                                 BaseType::model().modelLinks(),
-		                                                 this->common().currentTime(),
-		                                                 0);
-		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
-		                                                     hc);
-
-		SizeType total = phi.effectiveSize(i0);
-		TargetVectorType phi2(total);
-		phi.extract(phi2,i0);
-		TargetVectorType x(total);
-		lanczosHelper.matrixVectorProduct(x,phi2);
-		PsimagLite::OstringStream msg;
-		msg<<"Hamiltonian average at Che-time="<<this->common().currentTime();
-		msg<<" for target="<<whatTarget;
-		ComplexOrRealType numerator = phi2*x;
-		ComplexOrRealType den = phi2*phi2;
-		ComplexOrRealType division = (PsimagLite::norm(den)<1e-10) ? 0 : numerator/den;
-		msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<numerator;
-		msg<<" <phi(t)|phi(t)>="<<den<<" "<<division;
-		progress_.printline(msg,std::cout);
-		tvEnergy_[whatTarget] = PsimagLite::real(division);
-	}
-
 	// in situ computation:
 	void cocoon(ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block) const
@@ -364,14 +317,6 @@ private:
 		else
 			std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
 
-		PsimagLite::String modelName = this->model().params().model;
-
-		if (modelName == "HubbardOneBand" ||
-		        modelName == "HubbardOneBandExtended" ||
-		        modelName == "HubbardOneBandExtendedSuper" ||
-		        modelName == "Immm") {
-			this->common().cocoonLegacy(direction,block);
-		}
 
 		this->common().cocoon(block,direction);
 
