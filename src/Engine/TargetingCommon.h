@@ -143,15 +143,33 @@ public:
 		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,
 		  WFT_NOADVANCE=ApplyOperatorExpressionType::WFT_NOADVANCE};
 
+	enum class OpLabelCategory { DRESSED, BARE };
+
 	TargetingCommon(const LeftRightSuperType& lrs,
 	                const ModelType& model,
 	                const WaveFunctionTransfType& wft,
 	                SizeType indexNoAdvance)
-	    : progress_("TargetingCommon"),
+	    : cocoonType_(OpLabelCategory::DRESSED),
+	      progress_("TargetingCommon"),
 	      targetHelper_(lrs,model,wft),
 	      applyOpExpression_(targetHelper_,indexNoAdvance),
 	      inSitu_(model.geometry().numberOfSites())
-	{}
+	{
+		PsimagLite::split(meas_, model.params().insitu, ",");
+		SizeType n = meas_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			const bool isDressed = isOpLabelDressed(meas_[i]);
+			OpLabelCategory cocoonExpected = (isDressed) ? OpLabelCategory::DRESSED
+			                                             : OpLabelCategory::BARE;
+			if (i == 0) {
+				cocoonType_ = cocoonExpected;
+				continue;
+			}
+
+			if (cocoonType_ != cocoonExpected)
+				err("FATAL: If one label is dressed (bare) then all must be dressed (bare)\n");
+		}
+	}
 
 	void init(TargetParamsType* tstStruct, SizeType targets)
 	{
@@ -441,66 +459,39 @@ public:
 		applyOpExpression_.wftSome(site, begin, end);
 	}
 
+	// COCOONS start
+
 	void cocoon(const BlockType& block,
 	            ProgramGlobals::DirectionEnum direction) const
 	{
-		const ModelType& model = targetHelper_.model();
-		const VectorVectorWithOffsetType& tv = applyOpExpression_.targetVectors();
+		if (noStageIs(DISABLED))
+			std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
+		else
+			std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
 
-		if (model.params().insitu=="") return;
+		if (cocoonType_ == OpLabelCategory::BARE)
+			return cocoonBareDeprecated(block, direction);
 
-		if (BasisType::useSu2Symmetry()) {
-			noCocoon("not when SU(2) symmetry is in use");
-			return;
-		}
-
-		SizeType max = 1;
-		PsimagLite::String magic = "allPvectors";
-		if (model.params().options.find(magic) != PsimagLite::String::npos)
-			max = tv.size();
-
-		try {
-			assert(block.size()>0);
-			cocoon(direction,block[0],psi(),"PSI",psi(),"PSI");
-			if (tv.size() > 0) {
-				for (SizeType i = 0; i < max; ++i)
-					cocoon(direction,block[0],tv[i],"P"+ttos(i),tv[i],"P"+ttos(i));
-				for (SizeType i = 0; i < max; ++i)
-					cocoon(direction,block[0],psi(),"PSI",tv[i],"P"+ttos(i));
-			}
-		} catch (std::exception&) {
-			noCocoon("unsupported by the model");
-		}
-	}
-
-	void cocoonLegacy(ProgramGlobals::DirectionEnum direction,const BlockType& block) const
-	{
-		const VectorWithOffsetType& psi = applyOpExpression_.psi();
-		const VectorWithOffsetType& tv0 = applyOpExpression_.targetVectors()[0];
-		const ModelType& model = targetHelper_.model();
-
+		SizeType n = meas_.size();
+		assert(block.size()>0);
 		SizeType site = block[0];
-		OperatorType nup = model.naturalOperator("nup",site,0);
+		SizeType numberOfSites = targetHelper_.model().geometry().numberOfSites();
+		BorderEnumType border = (site == 0 || site == numberOfSites - 1) ?
+		            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
 
-		test(psi,psi,direction,"<PSI|nup|PSI>",site,nup,ApplyOperatorType::BORDER_NO);
-		PsimagLite::String s = "<P0|nup|P0>";
-		test(tv0,tv0,direction,s,site,nup,ApplyOperatorType::BORDER_NO);
+		for (SizeType i = 0; i < n; ++i) {
+			PsimagLite::String opLabel = meas_[i];
 
-		OperatorType ndown = model.naturalOperator("ndown",site,0);
-		test(psi,psi,direction,"<PSI|ndown|PSI>",site,ndown,ApplyOperatorType::BORDER_NO);
-		s = "<P0|ndown|P0>";
-		test(tv0,tv0,direction,s,site,ndown,ApplyOperatorType::BORDER_NO);
+			BraketType Braket(targetHelper_.model(), opLabel);
 
-		SparseMatrixType tmpC3 = (nup.data * ndown.data);
-		OperatorType doubleOcc(tmpC3,
-		                       nup.fermionOrBoson,
-		                       nup.jm,
-		                       nup.angularFactor,
-		                       nup.su2Related);
-		test(psi,psi,direction,"<PSI|doubleOcc|PSI>",site,doubleOcc,
-		     ApplyOperatorType::BORDER_NO);
-		s = "<P0|doubleOcc|P0>";
-		test(tv0,tv0,direction,s,site,doubleOcc,ApplyOperatorType::BORDER_NO);
+			OperatorType nup = Braket.op(0);
+
+			const VectorWithOffsetType& v1 = getVector(Braket.bra());
+			const VectorWithOffsetType& v2 = getVector(Braket.ket());
+
+			test(v1, v2, direction, opLabel, site, nup, border);
+			// don't repeat for border because this is called twice if needed
+		}
 	}
 
 	// in situ computation:
@@ -539,6 +530,94 @@ public:
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
 
+	void cocoonLegacy(ProgramGlobals::DirectionEnum direction,
+	                  const BlockType& block) const
+	{
+		const VectorWithOffsetType& psi = applyOpExpression_.psi();
+		const VectorWithOffsetType& tv0 = applyOpExpression_.targetVectors()[0];
+		const ModelType& model = targetHelper_.model();
+
+		SizeType site = block[0];
+		OperatorType nup = model.naturalOperator("nup",site,0);
+
+		test(psi,psi,direction,"<PSI|nup|PSI>",site,nup,ApplyOperatorType::BORDER_NO);
+		PsimagLite::String s = "<P0|nup|P0>";
+		test(tv0,tv0,direction,s,site,nup,ApplyOperatorType::BORDER_NO);
+
+		OperatorType ndown = model.naturalOperator("ndown",site,0);
+		test(psi,psi,direction,"<PSI|ndown|PSI>",site,ndown,ApplyOperatorType::BORDER_NO);
+		s = "<P0|ndown|P0>";
+		test(tv0,tv0,direction,s,site,ndown,ApplyOperatorType::BORDER_NO);
+
+		SparseMatrixType tmpC3 = (nup.data * ndown.data);
+		OperatorType doubleOcc(tmpC3,
+		                       nup.fermionOrBoson,
+		                       nup.jm,
+		                       nup.angularFactor,
+		                       nup.su2Related);
+		test(psi,psi,direction,"<PSI|doubleOcc|PSI>",site,doubleOcc,
+		     ApplyOperatorType::BORDER_NO);
+		s = "<P0|doubleOcc|P0>";
+		test(tv0,tv0,direction,s,site,doubleOcc,ApplyOperatorType::BORDER_NO);
+	}
+
+	ComplexOrRealType rixsCocoon(ProgramGlobals::DirectionEnum direction,
+	                             SizeType site,
+	                             SizeType index1,
+	                             SizeType index2,
+	                             bool needsShift) const
+	{
+		const ModelType& model = targetHelper_.model();
+		SizeType h = model.hilbertSize(site);
+		typename OperatorType::Su2RelatedType su2Related1;
+		SparseMatrixType idSparse;
+		idSparse.makeDiagonal(h, 1.0);
+		OperatorType id(idSparse,
+		                ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                PairType(0, 0),
+		                1.0,
+		                su2Related1);
+		ComplexOrRealType value = 0.0;
+		SizeType n = meas_.size();
+		if (n== 0) return value;
+		if (n > 1)
+			err("rixsCocoon: supports only 1 insitu operator\n");
+
+		if (cocoonType_ != OpLabelCategory::BARE)
+			err("rixsCocoon: supports only bare operators\n");
+
+		SizeType numberOfSites = targetHelper_.model().geometry().numberOfSites();
+		BorderEnumType border = (site == 0 || site == numberOfSites - 1) ?
+		            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
+
+		const VectorWithOffsetType& v1 =  applyOpExpression_.targetVectors(index1);
+		const VectorWithOffsetType& v2 =  applyOpExpression_.targetVectors(index2);
+
+		assert(n == 1);
+		for (SizeType i = 0; i < n; ++i) {
+			const PsimagLite::String opLabel = meas_[i];
+
+			BraketType Braket(targetHelper_.model(),
+			                  "<gs|"+opLabel+"[" + ttos(site) + "]|gs>");
+			if (needsShift) {
+				OperatorType A = Braket.op(0);
+				value = test_(v1, v2, direction, site, A, border);
+			} else {
+				value = test_(v1, v2, direction, site, id, border);
+			}
+		}
+
+		return value;
+	}
+
+	// COCOONS end
+
+	const ComplexOrRealType& inSitu(SizeType site) const
+	{
+		assert(site < inSitu_.size());
+		return inSitu_[site];
+	}
+
 	void calcBracket(ProgramGlobals::DirectionEnum direction,
 	                 SizeType site,
 	                 const BraketType& braket) const
@@ -575,59 +654,39 @@ public:
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
 
-	ComplexOrRealType rixsCocoon(ProgramGlobals::DirectionEnum direction,
-	                             SizeType site,
-	                             SizeType index1,
-	                             SizeType index2,
-	                             bool needsShift) const
+private:
+
+	void cocoonBareDeprecated(const BlockType& block,
+	                          ProgramGlobals::DirectionEnum direction) const
 	{
 		const ModelType& model = targetHelper_.model();
-		SizeType h = model.hilbertSize(site);
-		typename OperatorType::Su2RelatedType su2Related1;
-		SparseMatrixType idSparse;
-		idSparse.makeDiagonal(h, 1.0);
-		OperatorType id(idSparse,
-		                ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                PairType(0, 0),
-		                1.0,
-		                su2Related1);
-		ComplexOrRealType value = 0.0;
-		VectorStringType vecStr = getOperatorLabels();
-		if (vecStr.size() == 0) return value;
-		if (vecStr.size() > 1) {
-			throw PsimagLite::RuntimeError("rixsCocoon: supports only 1 insitu operator\n");
+		const VectorVectorWithOffsetType& tv = applyOpExpression_.targetVectors();
+
+		if (model.params().insitu=="") return;
+
+		if (BasisType::useSu2Symmetry()) {
+			noCocoon("not when SU(2) symmetry is in use");
+			return;
 		}
 
-		SizeType numberOfSites = targetHelper_.model().geometry().numberOfSites();
-		BorderEnumType border = (site == 0 || site == numberOfSites - 1) ?
-		            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
+		SizeType max = 1;
+		PsimagLite::String magic = "allPvectors";
+		if (model.params().options.find(magic) != PsimagLite::String::npos)
+			max = tv.size();
 
-		const VectorWithOffsetType& v1 =  applyOpExpression_.targetVectors(index1);
-		const VectorWithOffsetType& v2 =  applyOpExpression_.targetVectors(index2);
-
-		assert(vecStr.size() == 1);
-		for (SizeType i=0;i<vecStr.size();i++) {
-			PsimagLite::String opLabel = vecStr[i];
-
-			BraketType Braket(targetHelper_.model(),"<gs|"+opLabel+"[" + ttos(site) + "]|gs>");
-			if (needsShift) {
-				OperatorType A = Braket.op(0);
-				value = test_(v1,v2,direction,site,A,border);
-			} else {
-				value = test_(v1,v2,direction,site,id,border);
+		try {
+			assert(block.size()>0);
+			cocoon(direction,block[0],psi(),"PSI",psi(),"PSI");
+			if (tv.size() > 0) {
+				for (SizeType i = 0; i < max; ++i)
+					cocoon(direction,block[0],tv[i],"P"+ttos(i),tv[i],"P"+ttos(i));
+				for (SizeType i = 0; i < max; ++i)
+					cocoon(direction,block[0],psi(),"PSI",tv[i],"P"+ttos(i));
 			}
+		} catch (std::exception&) {
+			noCocoon("unsupported by the model");
 		}
-		return value;
 	}
-
-
-	const ComplexOrRealType& inSitu(SizeType site) const
-	{
-		assert(site < inSitu_.size());
-		return inSitu_[site];
-	}
-
-private:
 
 	void setQuantumNumbers(const VectorWithOffsetType& v)
 	{
@@ -671,13 +730,12 @@ private:
 	             BorderEnumType border,
 	             bool wantsPrinting) const
 	{
-		VectorStringType vecStr = getOperatorLabels();
-
-		for (SizeType i=0;i<vecStr.size();i++) {
-			PsimagLite::String opLabel = braketIfNeeded(vecStr[i],
-			                                            site,
-			                                            label1,
-			                                            label2);
+		SizeType n = meas_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			PsimagLite::String opLabel = braketTheBare(meas_[i],
+			                                           site,
+			                                           label1,
+			                                           label2);
 
 			BraketType Braket(targetHelper_.model(), opLabel);
 
@@ -688,22 +746,25 @@ private:
 		}
 	}
 
-	PsimagLite::String braketIfNeeded(PsimagLite::String opLabel,
-	                                  SizeType site,
-	                                  PsimagLite::String label1,
-	                                  PsimagLite::String label2) const
+	static PsimagLite::String braketTheBare(PsimagLite::String opLabel,
+	                                 SizeType,
+	                                 PsimagLite::String label1,
+	                                 PsimagLite::String label2)
 	{
 		if (label1 == "PSI") label1 = "gs";
 		if (label2 == "PSI") label2 = "gs";
-		if (opLabel.length() == 0 || opLabel[0] == '<') return opLabel;
+		if (opLabel.length() == 0 || opLabel[0] == '<')
+			err("Expecting bare opspec, got empty or dressed: " + opLabel + "\n");
+
 		return "<"+label1 + "|" + opLabel + "|" + label2 + ">";
 	}
 
-	VectorStringType getOperatorLabels() const
+	static bool isOpLabelDressed(PsimagLite::String opLabel)
 	{
-		VectorStringType vecStr;
-		PsimagLite::split(vecStr, targetHelper_.model().params().insitu, ",");
-		return vecStr;
+		SizeType n = opLabel.length();
+		if (n < 2) return false;
+		assert(n > 1);
+		return (opLabel[0] == '<' && opLabel[n - 1] == '>');
 	}
 
 	const VectorWithOffsetType& getVector(PsimagLite::String braOrKet) const
@@ -777,6 +838,8 @@ private:
 		return sum;
 	}
 
+	OpLabelCategory cocoonType_;
+	VectorStringType meas_;
 	PsimagLite::ProgressIndicator progress_;
 	TargetHelperType targetHelper_;
 	ApplyOperatorExpressionType applyOpExpression_;

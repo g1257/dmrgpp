@@ -275,7 +275,7 @@ private:
 		                               allOperatorsApplied,
 		                               block1);
 
-		cocoon(direction,block1); // in-situ
+		this->common().cocoon(block1, direction); // in-situ
 
 		PsimagLite::String options = this->model().params().options;
 		bool normalizeTimeVectors =
@@ -304,23 +304,6 @@ private:
 		for (SizeType i = 0; i < weight_.size(); i++)
 			msg2<<this->common().normSquared(i)<<" ";
 		progress_.printline(msg2,std::cout);
-	}
-
-	// in situ computation:
-	void cocoon(ProgramGlobals::DirectionEnum direction,
-	            const BlockType& block) const
-	{
-		std::cout<<"-------------&*&*&* In-situ measurements start\n";
-
-		if (this->common().noStageIs(DISABLED))
-			std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
-		else
-			std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
-
-
-		this->common().cocoon(block,direction);
-
-		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
 
 	TargetParamsType tstStruct_;
