@@ -334,7 +334,7 @@ private:
 					const OperatorType& myOp =  basis2.getOperatorByIndex(i);
 					bool isFermion = (myOp.fermionOrBoson ==
 					                  ProgramGlobals::FermionOrBosonEnum::FERMION);
-					if (savedSign != myOp.fermionOrBoson) {
+					if (savedSign != myOp.fermionOrBoson || fermionicSigns.size() == 0) {
 						utils::fillFermionicSigns(fermionicSigns,
 						                          basis2.signs(),
 						                          (isFermion) ? -1 : 1);
@@ -360,7 +360,7 @@ private:
 					        getOperatorByIndex(i - basis2.numberOfOperators());
 					bool isFermion = (myOp.fermionOrBoson ==
 					                  ProgramGlobals::FermionOrBosonEnum::FERMION);
-					if (savedSign != myOp.fermionOrBoson) {
+					if (savedSign != myOp.fermionOrBoson || fermionicSigns.size() == 0) {
 						utils::fillFermionicSigns(fermionicSigns,
 						                          basis2.signs(),
 						                          (isFermion) ? -1 : 1);
