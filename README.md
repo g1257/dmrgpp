@@ -102,7 +102,7 @@ Keys at https://g1257.github.com/keys.html
 
 \begin{enumerate}
 
-\item GNU C++ or LLVM CLANG++
+\item GNU C++ or LLVM CLANG++ (C++11 is used)
 
 \item (required) The BLAS and LAPACK library.
 

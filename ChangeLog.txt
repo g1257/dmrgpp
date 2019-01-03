@@ -1,3 +1,25 @@
+2019-01-03 Version 5.46
+
+Compilation:
+
+* C++11 required
+
+Model Interface
+
+* LinkProduct* removal and addition of
+fillModelLinks with its documentation
+
+Engine
+
+* Operator has fermionOrBoson member
+instead of fermionSign
+
+TestSuite:
+
+* ci accepts -e regex
+
+* sanityRig started
+
 2018-12-19 Version 5.44
 
 Developer's interface:
