@@ -661,8 +661,8 @@ private:
 				bool odd = superOddElectrons(t,threadId);
 				odd ^= helper_.leftRightSuper(threadId).right().signs()[eta];
 				const RealType sign = (odd && fermionSign ==
-				                       ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1.0
-				                                                                  : -1.0;
+				                       ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1.0
+				                                                                  : 1.0;
 
 				for (int k=Acrs.getRowPtr(r0);k<Acrs.getRowPtr(r0+1);k++) {
 					SizeType r0prime = Acrs.getCol(k);
