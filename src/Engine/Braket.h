@@ -19,7 +19,7 @@ class Braket {
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef OperatorSpec<ModelType> OperatorSpecType;
+	typedef OperatorSpec<ModelType, OperatorType> OperatorSpecType;
 
 public:
 

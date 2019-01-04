@@ -339,10 +339,13 @@ public:
 		FermionSign fs(targetHelper_.lrs().left(), signs);
 		for (SizeType j=0;j<creationMatrix.size();j++) {
 			VectorWithOffsetType phiTemp;
-			applyOpExpression_.applyOpNsl()(phiTemp,psi,creationMatrix[j],
-			                                fs,
-			                                direction,
-			                                ApplyOperatorType::BORDER_NO);
+			const OperatorType& cm = creationMatrix[j];
+			applyOpExpression_.applyOpLocal()(phiTemp,
+			                                  psi,
+			                                  cm,
+			                                  fs,
+			                                  direction,
+			                                  ApplyOperatorType::BORDER_NO);
 			if (j==0) v = phiTemp;
 			else v += phiTemp;
 		}
@@ -747,9 +750,9 @@ private:
 	}
 
 	static PsimagLite::String braketTheBare(PsimagLite::String opLabel,
-	                                 SizeType,
-	                                 PsimagLite::String label1,
-	                                 PsimagLite::String label2)
+	                                        SizeType,
+	                                        PsimagLite::String label1,
+	                                        PsimagLite::String label2)
 	{
 		if (label1 == "PSI") label1 = "gs";
 		if (label2 == "PSI") label2 = "gs";
@@ -822,7 +825,7 @@ private:
 		targetHelper_.model().findOddElectronsOfOneSite(oddElectrons,site);
 		FermionSign fs(targetHelper_.lrs().left(), oddElectrons);
 		VectorWithOffsetType dest;
-		applyOpExpression_.applyOpNsl()(dest,src1,A,fs,systemOrEnviron,border);
+		applyOpExpression_.applyOpLocal()(dest,src1,A,fs,systemOrEnviron,border);
 
 		ComplexOrRealType sum = 0.0;
 		for (SizeType ii=0;ii<dest.sectors();ii++) {

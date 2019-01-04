@@ -70,11 +70,6 @@ public:
 
 		OperatorType nup;
 
-		if (opLabel == "H") {
-			nup.category = OperatorType::CategoryEnum::H;
-			return nup;
-		}
-
 		try {
 			nup = findOperator(opLabel, site);
 		} catch (std::exception& e) {
@@ -185,7 +180,7 @@ private:
 		PsimagLite::InputNg<InputCheck>::Readable io(ioWriteable);
 
 		PsimagLite::String prefix = "";
-		return OperatorType(io, model_, prefix);
+		return OperatorType(io,model_,OperatorType::MUST_BE_NONZERO, prefix);
 	}
 
 	void replaceString(PsimagLite::String& str,

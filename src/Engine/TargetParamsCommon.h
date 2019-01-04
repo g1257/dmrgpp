@@ -186,7 +186,7 @@ public:
 
 		PsimagLite::String prefix = "";
 		for (SizeType i=0;i<sites_.size();i++) {
-			OperatorType myOp(io, model_, prefix);
+			OperatorType myOp(io,model_,OperatorType::MUST_BE_NONZERO, prefix);
 			aOperators_.push_back(myOp);
 		}
 
