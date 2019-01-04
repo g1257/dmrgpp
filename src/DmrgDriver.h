@@ -65,7 +65,7 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef Dmrg::OperatorSpec<ModelBaseType> OperatorSpecType;
+	typedef Dmrg::OperatorSpec<ModelBaseType, OperatorType> OperatorSpecType;
 
 	if (obsOptions.hasOperatorExpression && obsOptions.label != "") {
 		std::cerr<<"You must provide exactly one option: -l or -e;";
@@ -89,7 +89,8 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 	if (obsOptions.hasOperatorExpression) {
 		OperatorSpecType opSpec(model);
 		int site = -1;
-		PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(opSpec);
+		PsimagLite::CanonicalExpression<OperatorSpecType>
+		        canonicalExpression(opSpec);
 		opC = canonicalExpression(obsOptions.opexpr, site);
 	} else {
 		if (obsOptions.label == "B") {

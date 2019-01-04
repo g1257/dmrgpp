@@ -484,7 +484,7 @@ public:
 
 			BraketType Braket(targetHelper_.model(), opLabel);
 
-			OperatorType nup = Braket.op(0);
+			const typename BraketType::AlgebraType& nup = Braket.op(0);
 
 			const VectorWithOffsetType& v1 = getVector(Braket.bra());
 			const VectorWithOffsetType& v2 = getVector(Braket.ket());
@@ -600,7 +600,7 @@ public:
 			BraketType Braket(targetHelper_.model(),
 			                  "<gs|"+opLabel+"[" + ttos(site) + "]|gs>");
 			if (needsShift) {
-				OperatorType A = Braket.op(0);
+				const typename BraketType::AlgebraType& A = Braket.op(0);
 				value = test_(v1, v2, direction, site, A, border);
 			} else {
 				value = test_(v1, v2, direction, site, id, border);
@@ -739,7 +739,7 @@ private:
 
 			BraketType Braket(targetHelper_.model(), opLabel);
 
-			OperatorType nup = Braket.op(0);
+			const typename BraketType::AlgebraType& nup = Braket.op(0);
 
 			if (wantsPrinting) test(v1,v2,direction,opLabel,site,nup,border);
 			else test_(v1,v2,direction,site,nup,border);
@@ -780,12 +780,13 @@ private:
 	}
 
 	// prints <src2|A|src1>
+	template<typename SomeAlgebraType>
 	void test(const VectorWithOffsetType& src1,
 	          const VectorWithOffsetType& src2,
 	          SizeType systemOrEnviron,
 	          PsimagLite::String label,
 	          SizeType site,
-	          const OperatorType& A,
+	          const SomeAlgebraType& A,
 	          BorderEnumType border) const
 	{
 		ComplexOrRealType sum = test_(src1,src2,systemOrEnviron,site,A,border);
@@ -794,11 +795,12 @@ private:
 	}
 
 	// returns <src2|A|src1>; but if !withLegacyBugs returns <src1|A|src2>
+	template<typename SomeAlgebraType>
 	ComplexOrRealType test_(const VectorWithOffsetType& src1,
 	                        const VectorWithOffsetType& src2,
 	                        SizeType systemOrEnviron,
 	                        SizeType site,
-	                        const OperatorType& A,
+	                        const SomeAlgebraType& A,
 	                        BorderEnumType border) const
 	{
 		if (targetHelper_.withLegacyBugs())
@@ -808,11 +810,12 @@ private:
 	}
 
 	// returns <src2|A|src1>
+	template<typename SomeAlgebraType>
 	ComplexOrRealType testRealWork(const VectorWithOffsetType& src1,
 	                               const VectorWithOffsetType& src2,
 	                               SizeType systemOrEnviron,
 	                               SizeType site,
-	                               const OperatorType& A,
+	                               const SomeAlgebraType& A,
 	                               BorderEnumType border) const
 	{
 		typename PsimagLite::Vector<bool>::Type oddElectrons;

@@ -12,7 +12,6 @@ template<typename ModelType>
 class Braket {
 
 	typedef typename ModelType::OperatorType OperatorType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename PsimagLite::Vector<int>::Type VectorIntType;
 	typedef typename OperatorType::PairType PairType;
 	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
@@ -24,6 +23,8 @@ class Braket {
 
 public:
 
+	typedef typename OperatorSpecType::ResultType AlgebraType;
+	typedef typename PsimagLite::Vector<AlgebraType>::Type VectorAlgebraType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	Braket(const ModelType& model,const PsimagLite::String& braket)
@@ -60,12 +61,12 @@ public:
 		PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(opSpec);
 
 		for (SizeType i = 0; i < opExprName_.size(); ++i) {
-			OperatorType tmp = canonicalExpression(opExprName_[i],sites_[i]);
+			AlgebraType tmp = canonicalExpression(opExprName_[i],sites_[i]);
 			op_.push_back(tmp);
 		}
 	}
 
-	const OperatorType& op(SizeType ind) const
+	const AlgebraType& op(SizeType ind) const
 	{
 		assert(ind < op_.size());
 		return op_[ind];
@@ -131,7 +132,7 @@ private:
 	PsimagLite::String savedString_;
 	VectorStringType opExprName_;
 	SizeType type_;
-	VectorOperatorType op_;
+	VectorAlgebraType op_;
 	VectorIntType sites_;
 }; // class Braket
 }

@@ -189,7 +189,7 @@ struct Operator {
 		} else if (s == "expression") {
 			io.readline(s,prefix + "OperatorExpression=");
 			int site = 0;
-			typedef OperatorSpec<SomeModelType> OperatorSpecType;
+			typedef OperatorSpec<SomeModelType, Operator> OperatorSpecType;
 			OperatorSpecType opSpec(model);
 			PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(opSpec);
 			Operator p = canonicalExpression(s, site);
@@ -361,6 +361,11 @@ struct Operator {
 		}
 
 		return code;
+	}
+
+	bool isEmpty() const
+	{
+		return (data.rows() == 0 && category == CategoryEnum::REGULAR);
 	}
 
 	StorageType data;

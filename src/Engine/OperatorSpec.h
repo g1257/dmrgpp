@@ -2,14 +2,17 @@
 #define OPERATORSPEC_H
 #include "InputNg.h"
 #include "InputCheck.h"
+#include "LazyAlgebra.h"
 
 namespace Dmrg {
 
-template<typename ModelType>
+template<typename ModelType,
+         typename AlgebraType = LazyAlgebra<typename ModelType::OperatorType> >
 class OperatorSpec {
 
 	typedef typename ModelType::OperatorType OperatorType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
+	typedef LazyAlgebra<typename ModelType::OperatorType> LazyAlgebraType;
 
 	struct NaturalOpStruct {
 		NaturalOpStruct(PsimagLite::String label_)
@@ -45,7 +48,7 @@ class OperatorSpec {
 
 public:
 
-	typedef OperatorType ResultType;
+	typedef AlgebraType ResultType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef int AuxiliaryType;
 
@@ -53,7 +56,7 @@ public:
 	    : model_(model)
 	{}
 
-	OperatorType operator()(PsimagLite::String opLabel, int& site2) const
+	ResultType operator()(PsimagLite::String opLabel, int& site2) const
 	{
 		if (site2 < 0) site2 = extractSiteIfAny(opLabel);
 
@@ -99,15 +102,14 @@ public:
 		return nup;
 	}
 
-	static bool metaEqual(const OperatorType& op1, const OperatorType& op2)
+	static bool metaEqual(const ResultType& op1, const ResultType& op2)
 	{
 		return (op1.metaDiff(op2) == 0);
 	}
 
-	static bool isEmpty(const OperatorType& op)
+	static bool isEmpty(const ResultType& op)
 	{
-		return (op.data.rows() == 0 &&
-		        op.category == OperatorType::CategoryEnum::REGULAR);
+		return op.isEmpty();
 	}
 
 private:
