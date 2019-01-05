@@ -1,13 +1,13 @@
-#ifndef APPLYOPERATORNSL_H
-#define APPLYOPERATORNSL_H
+#ifndef DMRG_APPLYHAMILTONIAN_H
+#define DMRG_APPLYHAMILTONIAN_H
 
 namespace Dmrg {
 
-// ApplyOperatorNsl, with Nsl = Not so local
+// ApplyHamiltonian, with Nsl = Not so local
 template<typename ApplyOperatorLocalType,
          typename ModelType,
          typename LanczosSolverType>
-class ApplyOperatorNsl {
+class ApplyHamiltonian {
 
 public:
 
@@ -20,27 +20,17 @@ public:
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
 
-	ApplyOperatorNsl(const LeftRightSuperType& lrs,
-	                 bool withLegacyBug,
+	ApplyHamiltonian(const LeftRightSuperType& lrs,
 	                 const ModelType& model,
 	                 const RealType& physicalTime)
-	    : applyOpLocal_(lrs, withLegacyBug),
-	      model_(model),
+	    : model_(model),
 	      physicalTime_(physicalTime)
 	{}
 
 	//! FIXME: we need to make a fast version for when we're just
 	//! figuring out where the (non-zero) partition is
-	void operator()(VectorWithOffsetType& dest,
-	                const VectorWithOffsetType& phi,
-	                const OperatorType& AA,
-	                const typename  ApplyOperatorLocalType::FermionSignType& fermionSign,
-	                SizeType systemOrEnviron,
-	                typename ApplyOperatorLocalType::BorderEnum corner) const
+	void operator()(VectorWithOffsetType& dest, const VectorWithOffsetType& phi) const
 	{
-		if (AA.category == OperatorType::CategoryEnum::REGULAR)
-			return applyOpLocal_(dest, phi, AA, fermionSign, systemOrEnviron, corner);
-
 		dest = phi;
 		SizeType sectors = phi.sectors();
 		for (SizeType ii = 0; ii < sectors; ++ii) {
@@ -64,7 +54,7 @@ private:
 		                             model_.modelLinks(),
 		                             physicalTime_,
 		                             0);
-		typename LanczosSolverType::MatrixType lanczosHelper(model_, hc);
+		MatrixForApplicationType lanczosHelper(model_, hc);
 
 		SizeType total = phi.effectiveSize(i0);
 		VectorType phi2(total);
@@ -73,13 +63,13 @@ private:
 		lanczosHelper.matrixVectorProduct(r, phi2);
 	}
 
-	ApplyOperatorNsl(const ApplyOperatorNsl&);
+	ApplyHamiltonian(const ApplyHamiltonian&);
 
-	ApplyOperatorNsl& operator=(const ApplyOperatorNsl&);
+	ApplyHamiltonian& operator=(const ApplyHamiltonian&);
 
 	ApplyOperatorLocalType applyOpLocal_;
 	const ModelType& model_;
 	const RealType& physicalTime_;
 };
 }
-#endif // APPLYOPERATORNSL_H
+#endif // DMRG_APPLYHAMILTONIAN_H
