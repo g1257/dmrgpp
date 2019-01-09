@@ -271,7 +271,7 @@ private:
 		assert(0 < block1.size());
 
 		SizeType startOfWft = 1;
-		if (times_[0] == 0) {
+		if (this->common().currentTime() == 0) {
 			VectorWithOffsetType& tv1 =
 			        const_cast<VectorWithOffsetType&>(this->common().targetVectors()[1]);
 			tv1  = phiNew;

@@ -254,7 +254,7 @@ private:
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
 		r.resize(total);
-		if (fabs(times_[0])<1e-10) {
+		if (currentTime_ == 0) {
 			phi.extract(phi2,i0);
 			lanczosHelper2.matrixVectorProduct(r,phi2); // applying Hprime
 		} else {
