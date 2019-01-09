@@ -282,6 +282,8 @@ private:
 			startOfWft = 2;
 		}
 
+		// WFT 1 if !time advanced
+		// WFT 2 if time advanced
 		this->common().wftSome(block1[0], startOfWft, 3);
 
 		assert(phiNew.offset(0) == this->common().targetVectors()[1].offset(0));
@@ -310,7 +312,7 @@ private:
 
 		assert(phiNew.offset(0) == this->common().targetVectors()[1].offset(0));
 
-		oracleChebyshev(block1[0], direction);
+		//oracleChebyshev(block1[0], direction);
 	}
 
 	void printNormsAndWeights() const
