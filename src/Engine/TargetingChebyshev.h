@@ -141,6 +141,12 @@ public:
 		if (tstStruct_.sites() == 0)
 			throw PsimagLite::RuntimeError("TST needs at least one TSPSite\n");
 
+		SizeType nops = tstStruct_.sites();
+		SizeType linSize = model.geometry().numberOfSites();
+		for (SizeType i = 0; i < nops; ++i)
+			if (tstStruct_.sites(i) == 0 || tstStruct_.sites(i) == linSize - 1)
+				err("TargetingChebyshev: FATAL: No application of operators at borders\n");
+
 		RealType tau =tstStruct_.tau();
 		RealType sum = 0;
 		SizeType n = times_.size();
@@ -195,17 +201,21 @@ public:
 	{
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
-		evolveInternal(Eg,direction,block1,loopNumber);
+		evolveInternal(Eg, direction, block1, loopNumber);
+		this->common().cocoon(block1, direction); // in-situ
+
 		SizeType numberOfSites = this->lrs().super().block().size();
 
-		if (site > 1 && site < numberOfSites-2)
+		if (site > 1 && site < numberOfSites - 2)
 			return;
 		if (site == 1 && direction == ProgramGlobals::EXPAND_SYSTEM)
 			return;
+		if (site == numberOfSites - 2 && direction == ProgramGlobals::EXPAND_ENVIRON)
+			return;
 
-		SizeType x = (site == 1) ? 0 : numberOfSites-1;
+		SizeType x = (site == 1) ? 0 : numberOfSites - 1;
 		BlockType block(1,x);
-		evolveInternal(Eg,direction,block,loopNumber);
+		this->common().cocoon(block, direction); // in-situ
 	}
 
 	bool end() const
@@ -260,13 +270,17 @@ private:
 
 		assert(0 < block1.size());
 
+		SizeType startOfWft = 1;
 		if (times_[0] == 0) {
 			VectorWithOffsetType& tv1 =
 			        const_cast<VectorWithOffsetType&>(this->common().targetVectors()[1]);
 			tv1  = phiNew;
-		} else {
-			this->common().wftSome(block1[0], 1, 3);
+			startOfWft = 2;
 		}
+
+		this->common().wftSome(block1[0], startOfWft, 3);
+
+		assert(phiNew.offset(0) == this->common().targetVectors()[1].offset(0));
 
 		this->common().calcTimeVectors(startEnd,
 		                               Eg,
@@ -275,7 +289,7 @@ private:
 		                               allOperatorsApplied,
 		                               block1);
 
-		this->common().cocoon(block1, direction); // in-situ
+		assert(phiNew.offset(0) == this->common().targetVectors()[1].offset(0));
 
 		PsimagLite::String options = this->model().params().options;
 		bool normalizeTimeVectors =
@@ -283,10 +297,16 @@ private:
 		if (options.find("neverNormalizeVectors") != std::string::npos)
 			normalizeTimeVectors = false;
 
+		assert(phiNew.offset(0) == this->common().targetVectors()[1].offset(0));
+
 		if (normalizeTimeVectors)
 			this->common().normalizeTimeVectors();
 
 		printNormsAndWeights();
+
+		assert(phiNew.offset(0) == this->common().targetVectors()[1].offset(0));
+
+		printChebyshev();
 	}
 
 	void printNormsAndWeights() const
@@ -304,6 +324,51 @@ private:
 		for (SizeType i = 0; i < weight_.size(); i++)
 			msg2<<this->common().normSquared(i)<<" ";
 		progress_.printline(msg2,std::cout);
+	}
+
+	void printChebyshev() const
+	{
+		for (SizeType i=0;i<this->common().targetVectors().size();i++)
+			printChebyshev(this->common().targetVectors()[i],i);
+	}
+
+	void printChebyshev(const VectorWithOffsetType& phi,SizeType whatTarget) const
+	{
+		for (SizeType ii=0;ii<phi.sectors();ii++) {
+			SizeType i = phi.sector(ii);
+			printChebyshev(phi,whatTarget,i);
+		}
+	}
+
+	void printChebyshev(const VectorWithOffsetType& phi,
+	                    SizeType whatTarget,
+	                    SizeType i0) const
+	{
+		SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
+		typename ModelType::HamiltonianConnectionType hc(p,
+		                                                 BaseType::lrs(),
+		                                                 BaseType::model().geometry(),
+		                                                 BaseType::model().modelLinks(),
+		                                                 this->common().currentTime(),
+		                                                 0);
+		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
+		                                                     hc);
+
+		SizeType total = phi.effectiveSize(i0);
+		TargetVectorType phi2(total);
+		phi.extract(phi2,i0);
+		TargetVectorType x(total);
+		lanczosHelper.matrixVectorProduct(x,phi2);
+		PsimagLite::OstringStream msg;
+		msg<<"Hamiltonian average at Che-time="<<this->common().currentTime();
+		msg<<" for target="<<whatTarget;
+		ComplexOrRealType numerator = phi2*x;
+		ComplexOrRealType den = phi2*phi2;
+		ComplexOrRealType division = (PsimagLite::norm(den)<1e-10) ? 0 : numerator/den;
+		msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<numerator;
+		msg<<" <phi(t)|phi(t)>="<<den<<" "<<division;
+		progress_.printline(msg,std::cout);
+		tvEnergy_[whatTarget] = PsimagLite::real(division);
 	}
 
 	TargetParamsType tstStruct_;

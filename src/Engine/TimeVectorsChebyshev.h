@@ -205,51 +205,16 @@ private:
 	//! Do not normalize states here, it leads to wrong results (!)
 	void calcTargetVectors(const PairType& startEnd,
 	                       const VectorWithOffsetType& phi,
-	                       const VectorMatrixFieldType& T,
-	                       const VectorMatrixFieldType& V,
-	                       RealType Eg,
-	                       const VectorVectorRealType& eigs,
-	                       typename PsimagLite::Vector<SizeType>::Type steps,
-	                       SizeType)
-	{
-		for (SizeType i=startEnd.first+1;i<startEnd.second;i++) {
-			assert(i<targetVectors_.size());
-			targetVectors_[i] = phi;
-			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
-			calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,i,steps);
-		}
-	}
-
-	//! Do not normalize states here, it leads to wrong results (!)
-	void calcTargetVectors(const PairType& startEnd,
-	                       const VectorWithOffsetType& phi,
 	                       RealType Eg,
 	                       typename PsimagLite::Vector<SizeType>::Type steps,
 	                       SizeType)
 	{
 		for (SizeType i=startEnd.first+2;i<startEnd.second;i++) {
 			assert(i<targetVectors_.size());
+			assert(i != 1);
 			targetVectors_[i] = phi;
 			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
 			calcTargetVector(targetVectors_[i],phi,Eg,i,steps);
-		}
-	}
-
-	void calcTargetVector(VectorWithOffsetType& v,
-	                      const VectorWithOffsetType& phi,
-	                      const VectorMatrixFieldType& T,
-	                      const VectorMatrixFieldType& V,
-	                      RealType Eg,
-	                      const VectorVectorRealType& eigs,
-	                      SizeType timeIndex,
-	                      typename PsimagLite::Vector<SizeType>::Type steps)
-	{
-		v = phi;
-		for (SizeType ii=0;ii<phi.sectors();ii++) {
-			SizeType i0 = phi.sector(ii);
-			TargetVectorType r;
-			calcTargetVector(r,phi,T[ii],V[ii],Eg,eigs[ii],timeIndex,steps[ii],i0);
-			v.setDataInSector(r,i0);
 		}
 	}
 
@@ -265,35 +230,6 @@ private:
 			calcTargetVector(r,phi,Eg,timeIndex,steps[ii],i0);
 			v.setDataInSector(r,i0);
 		}
-	}
-
-	void calcTargetVector(
-	        TargetVectorType& r,
-	        const VectorWithOffsetType& phi,
-	        const MatrixComplexOrRealType& T,
-	        const MatrixComplexOrRealType& V,
-	        RealType Eg,
-	        const VectorRealType& eigs,
-	        SizeType timeIndex,
-	        SizeType steps,
-	        SizeType i0)
-	{
-		SizeType n2 = steps;
-		SizeType n = V.rows();
-		if (T.cols()!=T.rows()) throw PsimagLite::RuntimeError("T is not square\n");
-		if (V.cols()!=T.cols()) throw PsimagLite::RuntimeError("V is not nxn2\n");
-		// for (SizeType j=0;j<v.size();j++) v[j] = 0; <-- harmful if v is sparse
-		ComplexOrRealType zone = 1.0;
-		ComplexOrRealType zzero = 0.0;
-
-		//check1(phi,i0);
-		//check2(T,V,phi,n2,i0);
-		TargetVectorType tmp(n2);
-		r.resize(n2);
-		calcR(r,T,V,phi,Eg,eigs,timeIndex,steps,i0);
-		psimag::BLAS::GEMV('N',n2,n2,zone,&(T(0,0)),n2,&(r[0]),1,zzero,&(tmp[0]),1);
-		r.resize(n);
-		psimag::BLAS::GEMV('N',n,n2,zone,&(V(0,0)),n,&(tmp[0]),1,zzero,&(r[0]),1);
 	}
 
 	void calcTargetVector(TargetVectorType& r,
@@ -329,58 +265,6 @@ private:
 			lanczosHelper2.matrixVectorProduct(r,x2); // applying Hprime
 			r += (-1.0)*phi2;
 		}
-	}
-
-	void calcR(TargetVectorType& r,
-	           const MatrixComplexOrRealType& T,
-	           const MatrixComplexOrRealType& V,
-	           const VectorWithOffsetType& phi,
-	           RealType,
-	           const VectorRealType& eigs,
-	           SizeType timeIndex,
-	           SizeType n2,
-	           SizeType i0)
-	{
-		RealType timeDirection = tstStruct_.timeDirection();
-
-		for (SizeType k=0;k<n2;k++) {
-			ComplexOrRealType sum = 0.0;
-			for (SizeType kprime=0;kprime<n2;kprime++) {
-				ComplexOrRealType tmpV = calcVTimesPhi(kprime,V,phi,i0);
-				sum += PsimagLite::conj(T(kprime,k))*tmpV;
-			}
-
-			RealType tmp = (eigs[k]-E0_)*times_[timeIndex]*timeDirection;
-			ComplexOrRealType c = 0.0;
-			PsimagLite::expComplexOrReal(c,-tmp);
-			r[k] = sum * c;
-		}
-	}
-
-	ComplexOrRealType calcVTimesPhi(SizeType kprime,
-	                                const MatrixComplexOrRealType& V,
-	                                const VectorWithOffsetType& phi,
-	                                SizeType i0) const
-	{
-		ComplexOrRealType ret = 0;
-		SizeType total = phi.effectiveSize(i0);
-
-		for (SizeType j=0;j<total;j++)
-			ret += PsimagLite::conj(V(j,kprime))*phi.fastAccess(i0,j);
-		return ret;
-	}
-
-	void triDiag(const VectorWithOffsetType& phi,
-	             VectorMatrixFieldType& T,
-	             VectorMatrixFieldType& V,
-	             typename PsimagLite::Vector<SizeType>::Type& steps)
-	{
-		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
-		ParallelizerType threadedTriDiag(PsimagLite::CodeSectionParams(1));
-
-		ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,currentTime_,model_,ioIn_);
-
-		threadedTriDiag.loopCreate(helperTriDiag);
 	}
 
 	// H' = c*H + d
