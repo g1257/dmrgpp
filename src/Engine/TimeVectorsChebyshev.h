@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParallelTriDiag.h"
 #include "NoPthreadsNg.h"
 #include "Parallelizer.h"
+#include "ScaledHamiltonian.h"
 
 namespace Dmrg {
 
@@ -129,6 +130,8 @@ class TimeVectorsChebyshev : public  TimeVectorsBase<
 	VectorVectorWithOffsetType;
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename LanczosSolverType::MatrixType MatrixLanczosType;
+	typedef ScaledHamiltonian<MatrixLanczosType, TargetParamsType> ScaledMatrixType;
+
 public:
 
 	TimeVectorsChebyshev(const RealType& currentTime,
@@ -188,7 +191,7 @@ public:
 			}
 		}
 
-		calcTargetVectors(startEnd,phi,Eg,steps,systemOrEnviron);
+		calcTargetVectors(startEnd, phi);
 
 		//checkNorms();
 		timeHasAdvanced_ = false;
@@ -204,39 +207,32 @@ private:
 
 	//! Do not normalize states here, it leads to wrong results (!)
 	void calcTargetVectors(const PairType& startEnd,
-	                       const VectorWithOffsetType& phi,
-	                       RealType Eg,
-	                       typename PsimagLite::Vector<SizeType>::Type steps,
-	                       SizeType)
+	                       const VectorWithOffsetType& phi)
 	{
 		for (SizeType i=startEnd.first+2;i<startEnd.second;i++) {
 			assert(i<targetVectors_.size());
 			assert(i != 1);
 			targetVectors_[i] = phi;
 			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
-			calcTargetVector(targetVectors_[i],phi,Eg,i,steps);
+			calcTargetVector(targetVectors_[i], phi, i);
 		}
 	}
 
 	void calcTargetVector(VectorWithOffsetType& v,
 	                      const VectorWithOffsetType& phi,
-	                      RealType Eg,
-	                      SizeType timeIndex,
-	                      typename PsimagLite::Vector<SizeType>::Type steps)
+	                      SizeType timeIndex)
 	{
 		for (SizeType ii=0;ii<phi.sectors();ii++) {
 			SizeType i0 = phi.sector(ii);
 			TargetVectorType r;
-			calcTargetVector(r,phi,Eg,timeIndex,steps[ii],i0);
+			calcTargetVector(r, phi, timeIndex, i0);
 			v.setDataInSector(r,i0);
 		}
 	}
 
 	void calcTargetVector(TargetVectorType& r,
 	                      const VectorWithOffsetType& phi,
-	                      RealType,
 	                      SizeType timeIndex,
-	                      SizeType,
 	                      SizeType i0)
 	{
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
@@ -249,7 +245,7 @@ private:
 		MatrixLanczosType lanczosHelper(model_,
 		                                hc);
 
-		InternalMatrix lanczosHelper2(lanczosHelper, tstStruct_, E0_); // defining Hprime matrix
+		ScaledMatrixType lanczosHelper2(lanczosHelper, tstStruct_, E0_); // defining Hprime matrix
 
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
@@ -266,45 +262,6 @@ private:
 			r += (-1.0)*phi2;
 		}
 	}
-
-	// H' = c*H + d
-	// c = oneovera = (2.0-epsilon)/Wstar
-	// d = -oneovera*b = (2.0-epsilon)*(E0_+Wstar*0.5)/Wstar
-	class InternalMatrix {
-	public:
-		InternalMatrix(const MatrixLanczosType& mat,
-		               const TargetParamsType& tstStruct,
-		               const RealType& E0)
-		    : matx_(mat),
-		      tstStruct_(tstStruct),
-		      E0_(E0),
-		      c_((2.0 - tstStruct_.chebyEpsilon())/tstStruct_.chebyWstar()),
-		      d_(-c_*(E0_ + tstStruct_.chebyWstar()*0.5))
-		{
-			PsimagLite::ProgressIndicator progress("InternalMatrix");
-			PsimagLite::OstringStream msg;
-			msg<<"H'="<<c_<<"*H "<<d_;
-			progress.printline(msg, std::cout);
-		}
-
-		SizeType rows() const { return matx_.rows(); }
-
-		void matrixVectorProduct (TargetVectorType &x,const TargetVectorType &y) const
-		{
-			TargetVectorType tmp(y.size());
-			matx_.matrixVectorProduct(tmp, y);
-			x += c_*tmp;
-			x += d_*y;
-		}
-
-	private:
-
-		const MatrixLanczosType& matx_;
-		const TargetParamsType& tstStruct_;
-		const RealType& E0_;
-		RealType c_;
-		RealType d_;
-	}; // class InternalMatrix
 
 	const RealType& currentTime_;
 	const TargetParamsType& tstStruct_;

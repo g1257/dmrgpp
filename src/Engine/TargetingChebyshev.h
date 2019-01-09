@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParametersForSolver.h"
 #include "TimeVectorsChebyshev.h"
 #include "BlockDiagonalMatrix.h"
+#include "OracleChebyshev.h"
 
 namespace Dmrg {
 
@@ -115,6 +116,8 @@ public:
 	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename BasisType::QnType QnType;
+	typedef typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
+	typedef typename ApplyOperatorExpressionType::ApplyOperatorType ApplyOperatorType;
 
 	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 
@@ -204,8 +207,9 @@ public:
 		evolveInternal(Eg, direction, block1, loopNumber);
 		this->common().cocoon(block1, direction); // in-situ
 
-		SizeType numberOfSites = this->lrs().super().block().size();
 
+		// border site below if needed ONLY
+		SizeType numberOfSites = this->lrs().super().block().size();
 		if (site > 1 && site < numberOfSites - 2)
 			return;
 		if (site == 1 && direction == ProgramGlobals::EXPAND_SYSTEM)
@@ -306,7 +310,7 @@ private:
 
 		assert(phiNew.offset(0) == this->common().targetVectors()[1].offset(0));
 
-		printChebyshev();
+		oracleChebyshev(block1[0], direction);
 	}
 
 	void printNormsAndWeights() const
@@ -324,6 +328,18 @@ private:
 		for (SizeType i = 0; i < weight_.size(); i++)
 			msg2<<this->common().normSquared(i)<<" ";
 		progress_.printline(msg2,std::cout);
+	}
+
+	void oracleChebyshev(SizeType site, SizeType systemOrEviron) const
+	{
+		OracleChebyshev<TargetingCommonType, TargetParamsType> oracle(BaseType::model(),
+		                                                              BaseType::lrs(),
+		                                                              this->common().currentTime(),
+		                                                              tstStruct_,
+		                                                              this->common().energy());
+
+		OperatorType A = BaseType::model().naturalOperator("c", 0, 0);
+		oracle(3, this->common(), systemOrEviron, site, A, ApplyOperatorType::BORDER_NO);
 	}
 
 	void printChebyshev() const

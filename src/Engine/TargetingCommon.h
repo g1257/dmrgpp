@@ -95,14 +95,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<typename TargetHelperType,
-         typename VectorWithOffsetType,
-         typename LanczosSolverType>
+         typename VectorWithOffsetType_,
+         typename LanczosSolverType_>
 class TargetingCommon  {
 
 public:
 
 	enum SetTvsEnum { NO_TVS = false, READ_AND_SET_TVS = true};
 
+	typedef VectorWithOffsetType_ VectorWithOffsetType;
+	typedef LanczosSolverType_ LanczosSolverType;
 	typedef PsimagLite::IoSelector IoType;
 	typedef typename IoType::In IoInputType;
 	typedef typename TargetHelperType::RealType RealType;
@@ -136,6 +138,7 @@ public:
 	typedef typename ApplyOperatorExpressionType::PairType PairType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef Braket<ModelType> BraketType;
+	typedef FermionSign FermionSignType;
 
 	static const SizeType SUM = TargetParamsType::SUM;
 
@@ -657,6 +660,40 @@ public:
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
 
+	bool withLegacyBugs() const { return targetHelper_.withLegacyBugs(); }
+
+	// returns <src2|A|src1>
+	template<typename SomeAlgebraType>
+	ComplexOrRealType testRealWork(const VectorWithOffsetType& src1,
+	                               const VectorWithOffsetType& src2,
+	                               SizeType systemOrEnviron,
+	                               SizeType site,
+	                               const SomeAlgebraType& A,
+	                               BorderEnumType border) const
+	{
+		typename PsimagLite::Vector<bool>::Type oddElectrons;
+		targetHelper_.model().findOddElectronsOfOneSite(oddElectrons,site);
+		FermionSign fs(targetHelper_.lrs().left(), oddElectrons);
+		VectorWithOffsetType dest;
+		applyOpExpression_.applyOpLocal()(dest,src1,A,fs,systemOrEnviron,border);
+
+		ComplexOrRealType sum = 0.0;
+		for (SizeType ii=0;ii<dest.sectors();ii++) {
+			SizeType i = dest.sector(ii);
+			for (SizeType jj=0;jj<src2.sectors();jj++) {
+				SizeType j = src2.sector(jj);
+				if (i!=j) continue;
+				for (SizeType k=0;k<dest.effectiveSize(i);k++)
+					sum+= dest.fastAccess(i,k)*
+					        PsimagLite::conj(src2.fastAccess(j,k));
+			}
+		}
+
+		assert(site < inSitu_.size());
+		inSitu_[site] = sum;
+		return sum;
+	}
+
 private:
 
 	void cocoonBareDeprecated(const BlockType& block,
@@ -810,38 +847,6 @@ private:
 			return testRealWork(src1, src2, systemOrEnviron, site, A, border);
 		else
 			return testRealWork(src2, src1, systemOrEnviron, site, A, border);
-	}
-
-	// returns <src2|A|src1>
-	template<typename SomeAlgebraType>
-	ComplexOrRealType testRealWork(const VectorWithOffsetType& src1,
-	                               const VectorWithOffsetType& src2,
-	                               SizeType systemOrEnviron,
-	                               SizeType site,
-	                               const SomeAlgebraType& A,
-	                               BorderEnumType border) const
-	{
-		typename PsimagLite::Vector<bool>::Type oddElectrons;
-		targetHelper_.model().findOddElectronsOfOneSite(oddElectrons,site);
-		FermionSign fs(targetHelper_.lrs().left(), oddElectrons);
-		VectorWithOffsetType dest;
-		applyOpExpression_.applyOpLocal()(dest,src1,A,fs,systemOrEnviron,border);
-
-		ComplexOrRealType sum = 0.0;
-		for (SizeType ii=0;ii<dest.sectors();ii++) {
-			SizeType i = dest.sector(ii);
-			for (SizeType jj=0;jj<src2.sectors();jj++) {
-				SizeType j = src2.sector(jj);
-				if (i!=j) continue;
-				for (SizeType k=0;k<dest.effectiveSize(i);k++)
-					sum+= dest.fastAccess(i,k)*
-					        PsimagLite::conj(src2.fastAccess(j,k));
-			}
-		}
-
-		assert(site < inSitu_.size());
-		inSitu_[site] = sum;
-		return sum;
 	}
 
 	OpLabelCategory cocoonType_;
