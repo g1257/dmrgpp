@@ -140,8 +140,10 @@ public:
 	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),
-	      extended_(additional == "Extended")
+	      extended_(additional == "Extended"),
+	      withGammas_(additional == "WithGammas")
 	{
+		if (withGammas_) extended_ = true;
 
 		if (extended_)
 			checkExtended(solverParams);
@@ -282,8 +284,17 @@ protected:
 		OpForLinkType sy("sy");
 
 		ModelBaseType::createTerm("sxsy").push(sx, 'N', sy, 'N');
-
 		ModelBaseType::createTerm("sysx").push(sy, 'N', sx, 'N');
+
+		if (!withGammas_) return; // <<---- EARLY EXIT HERE
+
+		OpForLinkType sz("sz");
+
+		ModelBaseType::createTerm("sysz").push(sy, 'N', sz, 'N');
+		ModelBaseType::createTerm("szsy").push(sz, 'N', sy, 'N');
+
+		ModelBaseType::createTerm("sxsz").push(sx, 'N', sz, 'N');
+		ModelBaseType::createTerm("szsx").push(sz, 'N', sx, 'N');
 	}
 
 private:
@@ -389,6 +400,7 @@ private:
 	ParametersKitaev<RealType, QnType>  modelParameters_;
 	const GeometryType& geometry_;
 	bool extended_;
+	bool withGammas_;
 }; // class Kitaev
 
 } // namespace Dmrg

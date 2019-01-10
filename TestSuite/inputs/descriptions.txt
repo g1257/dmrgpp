@@ -327,5 +327,6 @@ the "half filled" case). U=2
 6000) Kitaev Model Test
 6001) Kitaev Model Extended test
 6005) Kitaev with magnetic field and fixLegacyBugs
+6010) Kitaev with Gammas but not GammaPrimes
 6500) Hybrid space-k ladders
 #TAGEND DO NOT REMOVE THIS TAG
