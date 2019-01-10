@@ -3,6 +3,7 @@
 #include "Vector.h"
 #include "ProgramGlobals.h"
 #include "PsimagLite.h"
+#include <functional>
 
 namespace Dmrg {
 
