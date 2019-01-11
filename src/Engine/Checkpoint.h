@@ -136,7 +136,8 @@ public:
 
 		SizeType site = 0; // FIXME for Immm model, find max of hilbert(site) over site
 		SizeType hilbertOneSite = model.hilbertSize(site);
-		if (parameters_.keptStatesInfinite < hilbertOneSite) {
+		if (parameters_.keptStatesInfinite > 0 &&
+		        parameters_.keptStatesInfinite < hilbertOneSite) {
 			PsimagLite::String str("FATAL:  keptStatesInfinite= ");
 			str += ttos(parameters_.keptStatesInfinite) + " < ";
 			str += ttos(hilbertOneSite) + "\n";

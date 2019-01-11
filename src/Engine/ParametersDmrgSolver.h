@@ -92,6 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Io/IoSerializerStub.h"
 #include "Recovery.h"
 #include "ProgressIndicator.h"
+#include <sstream>
 
 namespace Dmrg {
 
@@ -111,7 +112,10 @@ This file will be created if non-existent,
  and if it
 exits it will be truncated.
 
-\item[InfiniteLoopKeptStates=integer]  \emph{m} value for the infinite algorithm.
+\item[InfiniteLoopKeptStates] If an integer then this is
+ the \emph{m} value for the infinite algorithm. Else it is the name
+ of the filename to restart from. If the filename is numeric, use double
+ quotes around it to have it interpreted as a string.
 
 \item[FiniteLoops=vector]
 A series of space-separated numbers. More than one space is allowed.
@@ -231,7 +235,6 @@ struct ParametersDmrgSolver {
 
 		if (earlyExit) return;
 
-		io.readline(keptStatesInfinite,"InfiniteLoopKeptStates=");
 		readFiniteLoops(io,finiteLoop);
 
 		if (options.find("hasQuantumNumbers")!=PsimagLite::String::npos) {
@@ -356,19 +359,70 @@ struct ParametersDmrgSolver {
 
 		if (isObserveCode) return;
 		bool hasRestart = false;
+		PsimagLite::String restartFrom;
+		bool hasRestartFrom = getValueIfPresent(restartFrom, "RestartFilename=", io);
+		PsimagLite::String infLoops = "0";
+		bool infLoopsIsAnInt = true;
+		try {
+			io.readline(infLoops, "InfiniteLoopKeptStates=");
+			std::istringstream iss(infLoops);
+			iss >> keptStatesInfinite;
+			infLoopsIsAnInt = (iss.eof());
+		} catch (std::exception&) {
+			keptStatesInfinite = 0;
+		}
+
 		if (options.find("restart")!=PsimagLite::String::npos) {
-			io.readline(checkpoint.filename,"RestartFilename=");
+			if (!infLoopsIsAnInt and hasRestartFrom) {
+				PsimagLite::String tmp = "FATAL: RestartFilename found in input ";
+				err(tmp + "while InfiniteLoopKeptStates not an int\n");
+			}
+
+			checkpoint.filename = "";
+			if (!infLoopsIsAnInt) {
+				checkpoint.filename = infLoops;
+				// remove double quotes if present
+				SizeType begin = (infLoops[0] == '"') ? 1 : 0;
+				SizeType last = infLoops.length();
+				assert(last > 0);
+				--last;
+				SizeType end = (infLoops[last] == '"') ? last : last + 1;
+				checkpoint.filename = infLoops.substr(begin, end - begin);
+			} else {
+				if (keptStatesInfinite > 0) {
+					PsimagLite::String tmp = "WARNING: The numeric value of ";
+					tmp += "InfiniteLoopKeptStates will be ignored\n";
+					std::cerr<<tmp;
+					std::cout<<tmp;
+				}
+			}
+
+			if (hasRestartFrom)
+				checkpoint.filename = restartFrom;
+
+			if (checkpoint.filename == "") {
+				PsimagLite::String tmp = "FATAL: RestartFilename NOT found in input ";
+				err(tmp + "AND InfiniteLoopKeptStates is an int\n");
+			}
+
 			checkpoint.filename = filenameFromRootname(checkpoint.filename);
-			checkRestart(filename,checkpoint.filename,options,"RestartFilename=");
+			checkRestart(filename, checkpoint.filename, options);
 			hasRestart = true;
 		} else {
-			PsimagLite::String str;
-			try {
-				io.readline(str,"RestartFilename=");
-				PsimagLite::String s = "WARNING: RestartFilename ignored in input ";
-				s += "because restart option not present in SolverOptions.\n";
-				std::cerr<<s;
-			} catch (std::exception&) {}
+			if (hasRestartFrom) {
+				PsimagLite::String tmp = "FATAL: RestartFilename found in input ";
+				err(tmp + "but no restart found in SolverOptions.\n");
+			}
+
+			if (!infLoopsIsAnInt) {
+				PsimagLite::String tmp = "FATAL: InfiniteLoopKeptStates not an integer ";
+				err(tmp + "but no restart found in SolverOptions.\n");
+			}
+
+			if (keptStatesInfinite == 0) {
+				PsimagLite::String tmp = "FATAL: InfiniteLoopKeptStates must be ";
+				err(tmp + "a positive integer for a NON restart run.\n");
+			}
 		}
 
 		Recovery<ThisType, int>::checkOptions(recoverySave, options);
@@ -391,6 +445,19 @@ struct ParametersDmrgSolver {
 			try {
 				io.readline(checkpoint.labelForEnergy,"RestartLabelForEnergy=");
 			} catch (std::exception&) {}
+		}
+	}
+
+	template<typename SomeInputType>
+	static bool getValueIfPresent(PsimagLite::String& str,
+	                              PsimagLite::String label,
+	                              SomeInputType& io)
+	{
+		try {
+			io.readline(str, label);
+			return true;
+		} catch (std::exception&) {
+			return false;
 		}
 	}
 
@@ -491,11 +558,10 @@ struct ParametersDmrgSolver {
 
 	static void checkRestart(PsimagLite::String filename1,
 	                         PsimagLite::String filename2,
-	                         PsimagLite::String options,
-	                         PsimagLite::String label)
+	                         PsimagLite::String options)
 	{
-		checkFilesNotEqual(filename1,filename2,label);
-		checkTwoSiteDmrg(filename2,options);
+		checkFilesNotEqual(filename1, filename2);
+		checkTwoSiteDmrg(filename2, options);
 	}
 
 	// print dmrg parameters
@@ -563,13 +629,11 @@ private:
 	}
 
 	static void checkFilesNotEqual(PsimagLite::String filename1,
-	                               PsimagLite::String filename2,
-	                               PsimagLite::String label)
+	                               PsimagLite::String filename2)
 	{
 		if (filename1 != filename2) return;
 		PsimagLite::String s (__FILE__);
-		s += "\nFATAL: " + filename1 + "is equal to " + filename2;
-		s += " in label " + label + " in input file\n";
+		s += "\nFATAL: " + filename1 + "is equal to " + filename2 + "\n";
 		throw PsimagLite::RuntimeError(s.c_str());
 	}
 
