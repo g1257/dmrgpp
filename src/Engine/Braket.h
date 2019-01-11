@@ -33,6 +33,14 @@ public:
 		VectorStringType vecStr;
 		PsimagLite::split(vecStr, braket, "|");
 
+		if (vecStr.size() == 2) {
+			VectorStringType tmp;
+			tmp.push_back(vecStr[0]);
+			tmp.push_back("identity");
+			tmp.push_back(vecStr[1]);
+			vecStr = tmp;
+		}
+
 		if (vecStr.size() != 3) {
 			PsimagLite::String str("ObserverInterpreter: syntax error for ");
 			str += braket + " is not a Braket\n";
