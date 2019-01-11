@@ -169,7 +169,7 @@ public:
 			model_ = new KitaevType(solverParams,io,geometry,"");
 		} else if (name_ == "KitaevExtended") {
 			model_ = new KitaevType(solverParams,io,geometry,"Extended");
-		} else if (name_ == "KitaevWithGammasq") {
+		} else if (name_ == "KitaevWithGammas") {
 			model_ = new KitaevType(solverParams,io,geometry,"WithGammas");
 		} else if (name_ == "ModelHubbardMultiBand") {
 			model_ = new ModelHubbardMultiBandType(solverParams,io,geometry);
