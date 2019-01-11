@@ -79,7 +79,7 @@ sub loadData
 
 		if (defined($h->{$name})) {
 			my $ptr = $h->{$name};
-			if (scalar(@$ptr) != 4) {
+			if (scalar(@$ptr) != 6) {
 				print STDERR "$0: Error with $name\n";
 				next;
 			}
@@ -87,6 +87,8 @@ sub loadData
 			my $value = $ptr->[1];
 			my $dt = 0;
 			my $otherness = $ptr->[3];
+			my $min = $ptr->[4];
+			my $max = $ptr->[5];
 			if ($what eq "starting") {
 				if ($value != 0) {
 					print STDERR "$0: $name starting without stopping at line $.\n";
@@ -102,6 +104,8 @@ sub loadData
 				}
 
 				$dt = $t - $value;
+				$min = $dt if ($dt < $min);
+				$max = $dt if ($dt > $max);
 				# Increase otherness by dt for all labels that are in open mode
 				$value = 0;
 
@@ -119,7 +123,7 @@ sub loadData
 				next;
 			}
 
-			my @temp = ($ptr->[0] + $dt, $value, $ptr->[2] + 1, $otherness);
+			my @temp = ($ptr->[0] + $dt, $value, $ptr->[2] + 1, $otherness, $min, $max);
 			$h->{$name} = \@temp;
 
 		} else {
@@ -128,7 +132,7 @@ sub loadData
 				next;
 			}
 
-			my @temp = (0, $t, 1, 0);
+			my @temp = (0, $t, 1, 0, 0, 0);
 			$h->{$name} = \@temp
 		}
 	}
@@ -177,7 +181,7 @@ sub printData
 
 	foreach my $k (sort {$h{$b}->[0] <=> $h{$a}->[0]} keys %h) {
 		my $ptr = $hptr->{$k};
-		if (scalar(@$ptr) != 4) {
+		if (scalar(@$ptr) != 6) {
 			print STDERR "$0: Error with $k\n";
 			next;
 		}
@@ -196,7 +200,12 @@ sub printData
 		$_ = correctDecimalPointIfNeeded($perCent, 1);
 		my $perCentPrint = toFixedLength($_." %", $ls[2], "before", 1);
 		my $numberOfTimes = toFixedLength($ptr->[2], $ls[2], "before");
-		print "$name$sep$time$sep2$perCentPrint$sep2$numberOfTimes\n";
+		#my $min = $ptr->[4];
+		my $max = sprintf("%.3f", $ptr->[5]);
+		my $average = $time/$numberOfTimes;
+		$average = sprintf("%.3f", $average);
+		print "$name$sep$time$sep2$perCentPrint$sep2$numberOfTimes";
+		print "    m $max   a $average\n";
 	}
 
 	my ($t, $perCent) = ($c->{"time"}, $c->{"percent"});
