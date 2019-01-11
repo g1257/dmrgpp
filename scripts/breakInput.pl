@@ -9,17 +9,32 @@ defined($movementsPerFile) or die "USAGE: $0 inputFile movementsPerFile\n";
 
 open(FILE, "<", "$file") or die "$0: Cannot open $file : $!\n";
 my @lines;
+my $needsRestart = 1;
 while (<FILE>) {
 	chomp;
-	push @lines, $_;
+	my $line = $_;
 
-	# make sure it's a restart run
 	if (/SolverOptions/) {
 		print STDERR "$0: WARNING: This is not a restart run\n" unless (/restart/);
 	}
+
+	if (/^ *OutputFile=/) {
+		$line = "OutputFile=\$output";
+	}
+
+	if (/^ *RestartFilename=/) {
+		$line = "RestartFilename=\$restart";
+		$needsRestart = 0;
+	}
+
+	push @lines, $line;
 }
 
 close(FILE);
+
+if ($needsRestart) {
+	push @lines, "RestartFilename=\$restart";
+}
 
 my @finiteLoops;
 # Read all finite loops
@@ -42,6 +57,14 @@ sub writeInput
 	my ($root, $ind, $rest, $h) = @_;
 	my $fout = $root."_$ind".".inp";
 	open(FOUT, ">", "$fout") or die "$0: Cannot write to $fout : $!\n";
+
+	my $output = $root."_$ind";
+	$rest =~ s/\$output/$output/;
+	if ($ind > 0) {
+		my $prev = $root."_".($ind - 1);
+		$rest =~ s/\$restart/$prev/;
+		$rest =~ s/SolverOptions=/SolverOptions=restart,"/;
+	}
 
 	print FOUT "$rest\nFiniteLoops 1\n";
 
