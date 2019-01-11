@@ -40,7 +40,7 @@ for (my $i = 0; $i < $n; ++$i) {
 sub writeInput
 {
 	my ($root, $ind, $rest, $h) = @_;
-	my $fout = $root."$ind".".inp";
+	my $fout = $root."_$ind".".inp";
 	open(FOUT, ">", "$fout") or die "$0: Cannot write to $fout : $!\n";
 
 	print FOUT "$rest\nFiniteLoops 1\n";
