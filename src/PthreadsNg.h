@@ -154,23 +154,7 @@ public:
 	    : nthreads_(codeSectionParams.npthreads),
 	      setAffinities_(codeSectionParams.setAffinities),
 	      stackSize_(codeSectionParams.stackSize)
-	{
-#ifndef __APPLE__
-		cpu_set_t cpuset;
-		static bool firstCall = true;
-		if (setAffinities_) {
-			pid_t pid = getpid(); // always successfull
-			getPidAffinity(&cpuset, pid);
-			int ret = sched_setaffinity(pid, sizeof(cpu_set_t), &cpuset);
-			checkForError(ret);
-			if (ret == 0 && firstCall) {
-				std::cout<<"pid "<<pid<<" sched_setaffinity with count ";
-				std::cout<<CPU_COUNT(&cpuset)<<"\n";
-				firstCall = false;
-			}
-		}
-#endif
-	}
+	{}
 
 	bool affinities() const { return setAffinities_; }
 
@@ -221,6 +205,23 @@ public:
 		pthread_attr_t** attr = new pthread_attr_t*[nthreads_];
 		SizeType ntasks = pfh.tasks();
 
+		cpu_set_t cpuset;
+
+#ifndef __APPLE__
+
+		if (setAffinities_) {
+			static bool firstCall = true;
+			pid_t pid = getpid(); // always successfull
+			getPidAffinity(&cpuset, pid);
+			int ret = sched_setaffinity(pid, sizeof(cpu_set_t), &cpuset);
+			checkForError(ret);
+			if (ret == 0 && firstCall) {
+				printAffinity(pid, &cpuset);
+				firstCall = false;
+			}
+		}
+#endif
+
 		for (SizeType j=0; j <nthreads_; j++) {
 			pfs[j].pfh = &pfh;
 			pfs[j].loadBalancer = &loadBalancer;
@@ -243,8 +244,8 @@ public:
 			ret = pthread_attr_init(attr[j]);
 			checkForError(ret);
 
-			//if (setAffinities_)
-			//	setAffinity(attr[j], &cpuset, j);
+			if (setAffinities_)
+				setAffinity(attr[j], &cpuset, j);
 
 			ret = pthread_create(&thread_id[j],
 			                     attr[j],
@@ -283,6 +284,54 @@ private:
 			CPU_ZERO(cpuset);
 			return;
 		}
+	}
+
+	void setAffinity(pthread_attr_t* attr, cpu_set_t* cpuset, SizeType threadNum) const
+	{
+		// pick a cpu from cpuset
+		int chosenCpu = getOneCpuFromSet(cpuset);
+		if (chosenCpu < 0) {
+			std::cerr<<"setAffinity: no cpus left in set for thread "<<threadNum<<"\n";
+			return;
+		}
+
+		cpu_set_t mynewset;
+		CPU_ZERO(&mynewset);
+		CPU_SET(chosenCpu, &mynewset); // add cpu to new set
+		int ret = pthread_attr_setaffinity_np(attr, sizeof(cpu_set_t), &mynewset);
+		checkForError(ret);
+		if (ret != 0)
+			return;
+
+		// remove cpu from set
+		CPU_CLR(chosenCpu, cpuset);
+	}
+
+	int getOneCpuFromSet(cpu_set_t* cpuset) const
+	{
+		int count = CPU_COUNT(cpuset);
+		if (count == 0) return -1;
+
+		int chosenCpu = -1;
+		for (int i = 0; i < MAX_CPUS; ++i) {
+			if (CPU_ISSET(i, cpuset) == 0) continue;
+			chosenCpu = i;
+			break;
+		}
+
+		return chosenCpu;
+	}
+
+	void printAffinity(pid_t pid, cpu_set_t* cpuset) const
+	{
+		std::cout<<"pid "<<pid<<" sched_setaffinity with count ";
+		std::cout<<CPU_COUNT(cpuset)<<": ";
+		for (int i = 0; i < MAX_CPUS; ++i) {
+			if (CPU_ISSET(i, cpuset) == 0) continue;
+			std::cout<<i<<" ";
+		}
+
+		std::cout<<"\n";
 	}
 
 	void checkForError(int ret) const
