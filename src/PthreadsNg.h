@@ -144,19 +144,17 @@ void *thread_function_wrapper(void *dummyPtr)
 template<typename PthreadFunctionHolderType, typename LoadBalancerType=LoadBalancerDefault>
 class PthreadsNg  {
 
+	static const int MAX_CPUS = 1024;
+
 public:
 
 	typedef LoadBalancerDefault::VectorSizeType VectorSizeType;
 
 	PthreadsNg(const CodeSectionParams& codeSectionParams)
 	    : nthreads_(codeSectionParams.npthreads),
-	      cores_(1),
 	      setAffinities_(codeSectionParams.setAffinities),
 	      stackSize_(codeSectionParams.stackSize)
-	{
-		int cores = sysconf(_SC_NPROCESSORS_ONLN);
-		cores_ = (cores > 0) ? cores : 1;
-	}
+	{}
 
 	bool affinities() const { return setAffinities_; }
 
@@ -207,6 +205,15 @@ public:
 		pthread_attr_t** attr = new pthread_attr_t*[nthreads_];
 		SizeType ntasks = pfh.tasks();
 
+#ifndef __APPLE__
+//		cpu_set_t cpuset;
+
+//		if (setAffinities_) {
+//			pid_t pid = getpid(); // always successfull
+//			getPidAffinity(&cpuset, pid);
+//		}
+#endif
+
 		for (SizeType j=0; j <nthreads_; j++) {
 			pfs[j].pfh = &pfh;
 			pfs[j].loadBalancer = &loadBalancer;
@@ -229,8 +236,8 @@ public:
 			ret = pthread_attr_init(attr[j]);
 			checkForError(ret);
 
-			if (setAffinities_)
-				setAffinity(attr[j],j,cores_);
+			//if (setAffinities_)
+			//	setAffinity(attr[j], &cpuset, j);
 
 			ret = pthread_create(&thread_id[j],
 			                     attr[j],
@@ -260,34 +267,79 @@ public:
 
 private:
 
-	void setAffinity(pthread_attr_t* attr,
-	                 SizeType threadNum,
-	                 SizeType cores) const
+	void setAffinity(pthread_attr_t* attr, cpu_set_t* cpuset, SizeType threadNum) const
 	{
-#ifndef __APPLE__
-		cpu_set_t* cpuset = new cpu_set_t;
-		int cpu = threadNum % cores;
-		CPU_ZERO(cpuset);
-		CPU_SET(cpu,cpuset);
-		std::size_t cpusetsize = sizeof(cpu_set_t);
-		int ret = pthread_attr_setaffinity_np(attr,cpusetsize,cpuset);
+		// pick a cpu from cpuset
+		int chosenCpu = getOneCpuFromSet(cpuset);
+		if (chosenCpu < 0) {
+			std::cerr<<"setAffinity: no cpus left in set for thread "<<threadNum<<"\n";
+			return;
+		}
+
+		cpu_set_t mynewset;
+		CPU_ZERO(&mynewset);
+		CPU_SET(chosenCpu, &mynewset); // add cpu to new set
+		int ret = pthread_attr_setaffinity_np(attr, sizeof(cpu_set_t), &mynewset);
 		checkForError(ret);
-		// clean up
-		delete cpuset;
-		cpuset = 0;
-#endif
+		if (ret != 0)
+			return;
+
+		std::cerr<<"Threadnum "<<threadNum<<" cpu=" << chosenCpu<<"\n";
+		std::cerr.flush();
+		// remove cpu from set
+		CPU_CLR(chosenCpu, cpuset);
+	}
+
+	void getPidAffinity(cpu_set_t* cpuset, pid_t pid) const
+	{
+		CPU_ZERO(cpuset);
+		int ret = sched_getaffinity(pid, sizeof(cpu_set_t), cpuset);
+		checkForError(ret);
+		if (ret != 0) {
+			CPU_ZERO(cpuset);
+			return;
+		}
+
+		int count = CPU_COUNT(cpuset);
+		std::cout<<"Pid "<<pid<<": "<<count<<" in sched_getaffinity\n";
+
+		std::vector<SizeType> cpus(MAX_CPUS);
+		int total = 0;
+		for (int i = 0; i < MAX_CPUS; ++i) {
+			if (CPU_ISSET(i, cpuset) == 0) continue;
+			cpus[total++] = i;
+			if (total == count) break;
+		}
+
+		std::cout<<"Pid "<<pid<<": ";
+		for (int i = 0; i < total; ++i)
+			std::cout<<cpus[i]<<" ";
+		std::cout<<"\n";
+		std::cout.flush();
+	}
+
+	int getOneCpuFromSet(cpu_set_t* cpuset) const
+	{
+		int count = CPU_COUNT(cpuset);
+		if (count == 0) return -1;
+
+		int chosenCpu = -1;
+		for (int i = 0; i < MAX_CPUS; ++i) {
+			if (CPU_ISSET(i, cpuset) == 0) continue;
+			chosenCpu = i;
+			break;
+		}
+
+		return chosenCpu;
 	}
 
 	void checkForError(int ret) const
 	{
 		if (ret == 0) return;
-#ifdef _GNU_SOURCE
 		std::cerr<<"PthreadsNg ERROR: "<<strerror(ret)<<"\n";
-#endif
 	}
 
 	SizeType nthreads_;
-	SizeType cores_;
 	bool setAffinities_;
 	size_t stackSize_;
 }; // PthreadsNg class
