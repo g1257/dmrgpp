@@ -316,7 +316,8 @@ the "half filled" case). U=2
 5500) gs for RIXS test
 5501) RIXS correction vector
 5502) RIXS static
-5503) RIXS dynamic
+5503) RIXS dynamic with Krylov    starting from 5502
+5504) RIXS dynamic with Chebyshev starting from 5502
 #5504-5599 reserved for RIXS
 5600) ./dmrg -f input.inp 'n$.txt' feature GS
 5601) ./dmrg -f input.inp 'n$.txt' feature

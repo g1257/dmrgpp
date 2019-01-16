@@ -174,7 +174,10 @@ public:
 			return;
 		}
 
-		targetVectors_[indices[0]] = phi;
+		const VectorWithOffsetType* ptr0 = &(targetVectors_[indices[0]]);
+		const VectorWithOffsetType* ptr1 = &phi;
+		if (ptr0 != ptr1)
+			targetVectors_[indices[0]] = phi;
 
 		if (times_.size() == 1 && fabs(times_[0])<1e-10) return;
 

@@ -282,7 +282,7 @@ public:
 		else targetVectors_.resize(x);
 	}
 
-	void initTimeVectors(const VectorRealType& times,InputValidatorType& ioIn)
+	void initTimeVectors(const VectorRealType& times, InputValidatorType& ioIn)
 	{
 		const LeftRightSuperType& lrs = targetHelper_.lrs();
 		const ModelType& model = targetHelper_.model();

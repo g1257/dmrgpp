@@ -91,6 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "BLAS.h"
 #include "TargetParamsCorrectionVector.h"
+#include "TargetParamsTimeStep.h"
 #include "VectorWithOffsets.h"
 #include "TargetingBase.h"
 #include "ParametersForSolver.h"
@@ -123,6 +124,7 @@ public:
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef TargetParamsCorrectionVector<ModelType> TargetParamsType;
+	typedef TargetParamsTimeStep<ModelType> TargetParams2Type;
 	typedef typename BasisType::BlockType BlockType;
 	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
@@ -148,6 +150,7 @@ public:
 	BaseType,
 	TargetParamsType> CorrectionVectorSkeletonType;
 	typedef typename BasisType::QnType QnType;
+	typedef typename TargetParamsType::BaseType::AlgorithmEnum AlgorithmEnumType;
 
 	enum {DISABLED,OPERATOR,CONVERGING};
 
@@ -160,19 +163,42 @@ public:
 	                     const QnType&,
 	                     InputValidatorType& ioIn)
 	    : BaseType(lrs,model,wft,1),
-	      tstStruct_(ioIn,model),
+	      tstStruct_(ioIn, model),
+	      tstStruct2_(nullptr),
 	      ioIn_(ioIn),
 	      progress_("TargetingRixsDynamic"),
 	      gsWeight_(1.0),
 	      paramsForSolver_(ioIn,"DynamicDmrg"),
 	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().energy()),
 	      applied_(false),
-	      appliedFirst_(false)
+	      appliedFirst_(false),
+	      usesCheby_(tstStruct_.algorithm() == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV)
 	{
-		//		SizeType numberOfSites = model.geometry().numberOfSites();
-		this->common().init(&tstStruct_,12);
 		if (!wft.isEnabled())
-			throw PsimagLite::RuntimeError("TargetingRixsDynamic needs wft\n");
+			err("TargetingRixsDynamic needs wft\n");
+
+		if (!usesCheby_) {
+			this->common().init(&tstStruct_, 12);
+			return; // early exit here
+		}
+
+		tstStruct2_ = new TargetParams2Type(ioIn, model);
+		this->common().init(tstStruct2_, 12);
+
+		times_.resize(tstStruct2_->timeSteps());
+
+		RealType tau = tstStruct2_->tau();
+		SizeType n = times_.size();
+		for (SizeType i = 0; i < n; ++i)
+			times_[i] = i*tau/(n - 1);
+
+		this->common().initTimeVectors(times_, ioIn);
+	}
+
+	~TargetingRixsDynamic()
+	{
+		delete tstStruct2_;
+		tstStruct2_ = nullptr;
 	}
 
 	RealType weight(SizeType i) const
@@ -192,7 +218,6 @@ public:
 		}
 		return (applied_) ? 10 : 6;
 	}
-
 
 	// tv[6] = A^\dagger_{site} |tv[1]>
 	// tv[7] = A^\dagger_{site} |tv[2]>
@@ -225,7 +250,7 @@ public:
 
 		this->common().wftSome(site, 0, 8);
 
-		const typename TargetParamsType::BaseType::AlgorithmEnum algo = tstStruct_.algorithm();
+		const AlgorithmEnumType algo = tstStruct_.algorithm();
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
 			// just to set the stage and currenttime
 			this->common().getPhi(Eg, direction, site, loopNumber);
@@ -463,7 +488,7 @@ private:
 			return;
 		}
 
-		const typename TargetParamsType::BaseType::AlgorithmEnum algo = tstStruct_.algorithm();
+		const AlgorithmEnumType algo = tstStruct_.algorithm();
 
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
 			skeleton_.calcDynVectors(this->common().targetVectors(6),
@@ -527,14 +552,17 @@ private:
 	}
 
 	TargetParamsType tstStruct_;
+	TargetParams2Type* tstStruct2_;
 	InputValidatorType& ioIn_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
+	VectorRealType times_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
 	CorrectionVectorSkeletonType skeleton_;
 	bool applied_;
 	bool appliedFirst_;
+	bool usesCheby_;
 }; // class TargetingRixsDynamic
 } // namespace
 /*@}*/

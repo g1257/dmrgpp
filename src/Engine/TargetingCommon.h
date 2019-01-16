@@ -190,8 +190,9 @@ public:
 	{
 		SizeType startOfWft = 1;
 		if (currentTime() == 0) {
+			SizeType indexOf1 = indices[startOfWft];
 			VectorWithOffsetType& tv1 =
-			        const_cast<VectorWithOffsetType&>(targetVectors()[startOfWft]);
+			        const_cast<VectorWithOffsetType&>(targetVectors()[indexOf1]);
 			tv1  = phiNew;
 			startOfWft = 2;
 		}
