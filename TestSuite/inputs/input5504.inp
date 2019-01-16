@@ -1,0 +1,74 @@
+TotalNumberOfSites=8
+NumberOfTerms=4
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 -1
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 0.8333
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 0.8333
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 0
+
+Model=TjMultiOrb
+
+potentialV 16
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+InfiniteLoopKeptStates=100
+FiniteLoops 2
+-6 100 2 6 100 2
+RepeatFiniteLoopsTimes=10
+
+TargetElectronsUp=4
+TargetElectronsDown=4
+Threads=1
+SolverOptions=TargetingRixsDynamic,twositedmrg,restart,minimizeDisk
+CorrectionA=0
+Version=version
+RestartFilename=data5502
+
+OutputFile=data5504
+
+CorrectionVectorOmega=0.1
+DynamicDmrgType=0
+TSPProductOrSum=sum
+CorrectionVectorFreqType=Real
+
+CorrectionVectorEta=0.075
+CorrectionVectorAlgorithm=Chebyshev
+Orbitals=1
+
+GsWeight=0.1
+
+TSPSites 1 3
+TSPLoops 1 1
+TSPTau=1.0
+TSPTimeSteps=3
+TSPAdvanceEach=12
+TSPAlgorithm=Chebyshev
+ChebyshevEpsilon=0.025
+ChebyshevWstar=20
+
+TSPOperator=raw
+RAW_MATRIX
+3 3
+0 1 0
+0 0 0
+0 0 0
+FERMIONSIGN=-1
+JMVALUES 2 0 0
+AngularFactor=1
+#ci dmrg arguments= -p 12 "c?1'"
+#ci CollectBrakets 0
