@@ -520,6 +520,7 @@ private:
 			if (i==lastI) {
 				currentTime_ += targetHelper_.tstStruct().tau();
 				timesWithoutAdvancement=1;
+				timeVectorsBase_->timeHasAdvanced();
 			}
 		} else {
 			if (i==lastI && stage_[i]==WFT_NOADVANCE && firstSeeLeftCorner)
@@ -580,7 +581,6 @@ private:
 			if (advanceEach > 0 && stage_[i] == WFT_ADVANCE) {
 				SizeType timeSteps = targetHelper_.tstStruct().timeSteps();
 				advance = (timeSteps > 0) ? timeSteps - 1 : 0;
-				timeVectorsBase_->timeHasAdvanced();
 			}
 
 			if (targetVectors_.size() <= advance) {
