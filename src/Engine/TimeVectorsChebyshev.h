@@ -131,6 +131,7 @@ class TimeVectorsChebyshev : public  TimeVectorsBase<
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename LanczosSolverType::MatrixType MatrixLanczosType;
 	typedef ScaledHamiltonian<MatrixLanczosType, TargetParamsType> ScaledMatrixType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 public:
 
@@ -155,35 +156,43 @@ public:
 	      timeHasAdvanced_(false)
 	{}
 
-	virtual void calcTimeVectors(const PairType& startEnd,
+	virtual void calcTimeVectors(const PairType&,
 	                             RealType,
 	                             const VectorWithOffsetType& phi,
 	                             SizeType,
 	                             bool,
-	                             const PsimagLite::Vector<SizeType>::Type&)
+	                             const VectorSizeType& indices)
 	{
+		SizeType n = indices.size();
+		assert(n > 0);
 		if (currentTime_==0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
-			for (SizeType i=0;i<times_.size();i++)
-				targetVectors_[i]=phi;
+			for (SizeType i = 0; i < n; ++i) {
+				SizeType ii = indices[i];
+				targetVectors_[ii] = phi;
+			}
+
 			return;
 		}
 
-		targetVectors_[startEnd.first] = phi;
+		targetVectors_[indices[0]] = phi;
 
 		if (times_.size() == 1 && fabs(times_[0])<1e-10) return;
 
 		if (timeHasAdvanced_) {
-			SizeType numberOfVectorsMinusOne = startEnd.second - 1;
-			for (SizeType i = startEnd.first; i < numberOfVectorsMinusOne; ++i) {
-				targetVectors_[i] = targetVectors_[i+1];
+			for (SizeType i = 0; i < n - 1; ++i) {
+				SizeType ii = indices[i];
+				targetVectors_[ii] = targetVectors_[ii + 1];
 			}
 		}
 
-		for (SizeType i = startEnd.first + 2; i < startEnd.second; ++i) {
-			assert(i < targetVectors_.size());
-			assert(i != 1);
-			targetVectors_[i] = phi;
-			calcTargetVector(targetVectors_[i], phi, i);
+		for (SizeType i = 2; i < n; ++i) {
+			SizeType ii = indices[i];
+			assert(ii < targetVectors_.size());
+			assert(ii != 1);
+			targetVectors_[ii] = phi;
+			SizeType prev = indices[i - 1];
+			SizeType prevMinus2 = indices[i - 2];
+			calcTargetVector(targetVectors_[ii], phi, prev, prevMinus2);
 		}
 
 		timeHasAdvanced_ = false;
@@ -199,19 +208,21 @@ private:
 
 	void calcTargetVector(VectorWithOffsetType& v,
 	                      const VectorWithOffsetType& phi,
-	                      SizeType timeIndex)
+	                      SizeType prev,
+	                      SizeType prevMinus2)
 	{
 		for (SizeType ii=0;ii<phi.sectors();ii++) {
 			SizeType i0 = phi.sector(ii);
 			TargetVectorType r;
-			calcTargetVector(r, phi, timeIndex, i0);
+			calcTargetVector(r, phi, prev, prevMinus2, i0);
 			v.setDataInSector(r,i0);
 		}
 	}
 
 	void calcTargetVector(TargetVectorType& r,
 	                      const VectorWithOffsetType& phi,
-	                      SizeType timeIndex,
+	                      SizeType prev,
+	                      SizeType prevMinus2,
 	                      SizeType i0)
 	{
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
@@ -234,9 +245,9 @@ private:
 			lanczosHelper2.matrixVectorProduct(r,phi2); // applying Hprime
 		} else {
 			TargetVectorType x2(total);
-			VectorWithOffsetType x = 2.0*targetVectors_[timeIndex-1];
+			VectorWithOffsetType x = 2.0*targetVectors_[prev];
 			x.extract(x2,i0);
-			targetVectors_[timeIndex-2].extract(phi2,i0);
+			targetVectors_[prevMinus2].extract(phi2,i0);
 			lanczosHelper2.matrixVectorProduct(r,x2); // applying Hprime
 			r += (-1.0)*phi2;
 		}

@@ -101,7 +101,7 @@ public:
 
 	enum ConcatEnum {PRODUCT, SUM};
 
-	enum {KRYLOV,CHEBYSHEV,RUNGE_KUTTA,SUZUKI_TROTTER};
+	enum class AlgorithmEnum {KRYLOV, CONJUGATE_GRADIENT, CHEBYSHEV, RUNGE_KUTTA, SUZUKI_TROTTER};
 
 	virtual ~TargetParamsBase() {}
 
@@ -197,9 +197,9 @@ public:
 		return unimplemented("cgEps");
 	}
 
-	virtual SizeType algorithm() const
+	virtual AlgorithmEnum algorithm() const
 	{
-		return unimplementedInt("algorithm");
+		throw PsimagLite::RuntimeError("algorithm");
 	}
 
 	virtual RealType tau() const

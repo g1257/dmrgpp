@@ -293,7 +293,7 @@ public:
 		s += " Unknown algorithm\n";
 
 		switch (tstStruct.algorithm()) {
-		case TargetParamsType::KRYLOV:
+		case TargetParamsType::AlgorithmEnum::KRYLOV:
 			timeVectorsBase_ = new TimeVectorsKrylovType(currentTime_,
 			                                             tstStruct,
 			                                             times,
@@ -304,7 +304,7 @@ public:
 			                                             E0_,
 			                                             ioIn);
 			break;
-		case TargetParamsType::CHEBYSHEV:
+		case TargetParamsType::AlgorithmEnum::CHEBYSHEV:
 			timeVectorsBase_ = new TimeVectorsChebyshevType(currentTime_,
 			                                                tstStruct,
 			                                                times,
@@ -315,7 +315,7 @@ public:
 			                                                E0_,
 			                                                ioIn);
 			break;
-		case TargetParamsType::RUNGE_KUTTA:
+		case TargetParamsType::AlgorithmEnum::RUNGE_KUTTA:
 			timeVectorsBase_ = new TimeVectorsRungeKuttaType(currentTime_,
 			                                                 tstStruct,
 			                                                 times,
@@ -325,7 +325,7 @@ public:
 			                                                 lrs,
 			                                                 E0_);
 			break;
-		case TargetParamsType::SUZUKI_TROTTER:
+		case TargetParamsType::AlgorithmEnum::SUZUKI_TROTTER:
 			timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(currentTime_,
 			                                                    tstStruct,
 			                                                    times,

@@ -98,7 +98,7 @@ public:
 	    : BaseType(io,model),
 	      timeSteps_(0),
 	      advanceEach_(0),
-	      algorithm_(BaseType::KRYLOV),
+	      algorithm_(BaseType::AlgorithmEnum::KRYLOV),
 	      tau_(0),
 	      timeDirection_(1.0),
 	      chebyEpsilon_(0.025),
@@ -123,11 +123,11 @@ public:
 
 		io.readline(s, "TSPAlgorithm=");
 		if (s=="RungeKutta" || s=="rungeKutta" || s=="rungekutta")
-			algorithm_ = BaseType::RUNGE_KUTTA;
+			algorithm_ = BaseType::AlgorithmEnum::RUNGE_KUTTA;
 		if (s=="SuzukiTrotter" || s=="suzukiTrotter" || s=="suzukitrotter")
-			algorithm_ = BaseType::SUZUKI_TROTTER;
+			algorithm_ = BaseType::AlgorithmEnum::SUZUKI_TROTTER;
 		if (s=="Chebyshev") {
-			algorithm_ = BaseType::CHEBYSHEV;
+			algorithm_ = BaseType::AlgorithmEnum::CHEBYSHEV;
 			io.readline(chebyEpsilon_, "ChebyshevEpsilon=");
 			io.readline(chebyWstar_, "ChebyshevWstar=");
 		}
@@ -147,7 +147,7 @@ public:
 		return advanceEach_;
 	}
 
-	virtual SizeType algorithm() const
+	virtual typename BaseType::AlgorithmEnum algorithm() const
 	{
 		return algorithm_;
 	}
@@ -176,7 +176,7 @@ private:
 
 	SizeType timeSteps_;
 	SizeType advanceEach_;
-	SizeType algorithm_;
+	typename BaseType::AlgorithmEnum algorithm_;
 	RealType tau_;
 	RealType timeDirection_;
 	RealType chebyEpsilon_;

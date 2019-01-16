@@ -269,14 +269,16 @@ private:
 
 		if (phiNew.size() == 0) return;
 
-		PairType startEnd(0, times_.size());
+		VectorSizeType indices(times_.size());
+		for (SizeType i = 0; i < times_.size(); ++i)
+			indices[i] = i;
 
 		bool allOperatorsApplied = (this->common().noStageIs(DISABLED) &&
 		                            this->common().noStageIs(OPERATOR));
 
 		assert(0 < block1.size());
 
-		this->common().chebyshev(startEnd,
+		this->common().chebyshev(indices,
 		                         Eg,
 				                 phiNew,
 				                 direction,

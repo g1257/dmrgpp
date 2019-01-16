@@ -193,6 +193,14 @@ public:
 		return (applied_) ? 10 : 6;
 	}
 
+
+	// tv[6] = A^\dagger_{site} |tv[1]>
+	// tv[7] = A^\dagger_{site} |tv[2]>
+
+	// tv[8] = Re of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[6]>
+	// - Im of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[7]>
+	// tv[9] = Im of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[6]>
+	// + Re of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[7]>
 	void evolve(RealType Eg,
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
@@ -206,16 +214,38 @@ public:
 			throw PsimagLite::RuntimeError(str.c_str());
 		}
 
-		SizeType site = block1[0];
-		evolve(Eg,direction,site,loopNumber);
-		SizeType numberOfSites = this->lrs().super().block().size();
-		if (site>1 && site<numberOfSites-2) return;
-		if (site == 1 && direction == ProgramGlobals::EXPAND_SYSTEM) return;
-		//corner case
-		//		SizeType x = (site==1) ? 0 : numberOfSites-1;
-		//		evolve(Eg,direction,x,loopNumber);
+		if (direction == ProgramGlobals::INFINITE) return;
 
-		// skeleton_.printNormsAndWeights();
+		SizeType max = tstStruct_.sites();
+
+		if (max > 2)
+			err("You cannot apply more than 2 operators (only SUM is allowed)\n");
+
+		SizeType site = block1[0];
+
+		this->common().wftSome(site, 0, 8);
+
+		const typename TargetParamsType::BaseType::AlgorithmEnum algo = tstStruct_.algorithm();
+		if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
+			// just to set the stage and currenttime
+			this->common().getPhi(Eg, direction, site, loopNumber);
+		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
+			this->common().wftSome(site, 8, this->common().targetVectors().size());
+		} else {
+			assert(false);
+		}
+
+		if (!applied_) {
+			if (max == 1)
+				doMax1(site, direction, loopNumber);
+
+			if (max == 2)
+				doMax2(site, direction, loopNumber);
+		}
+
+		calcDynVectors(Eg, direction, block1); // WEIGHTS ARE SET IN calcDynVectors()
+
+		cocoon(site, direction);
 	}
 
 	void write(const VectorSizeType& block,
@@ -237,181 +267,160 @@ public:
 
 		for (SizeType site = 0; site < 6; ++site)
 			this->common().targetVectors(site) = ts.vector(site);
-		}
+	}
 
 private:
 
-	// tv[6] = A^\dagger_{site} |tv[1]>
-	// tv[7] = A^\dagger_{site} |tv[2]>
-
-	// tv[8] = Re of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[6]>
-	// - Im of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[7]>
-	// tv[9] = Im of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[6]>
-	// + Re of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[7]>
-
-	void evolve(RealType,
+	void doMax1(SizeType site,
 	            ProgramGlobals::DirectionEnum direction,
-	            SizeType site,
 	            SizeType loopNumber)
 	{
-		if (direction == ProgramGlobals::INFINITE) return;
+		if (site == tstStruct_.sites(0)) {
 
-		SizeType max = tstStruct_.sites();
+			ComplexOrRealType densCre = this->common().rixsCocoon(direction,site,1,0,false);
+			std::cout<<site<<" "<<densCre<<" 0"; // 0 here is the currentTime
+			std::cout<<" <P1|P0> 1\n";   // 1 here is the "superdensity"
 
-		if (max>2)
-			throw PsimagLite::RuntimeError("You cannot apply more than 2 operators (only SUM is allowed)\n");
+			ComplexOrRealType densCim = this->common().rixsCocoon(direction,site,2,0,false);
+			std::cout<<site<<" "<<densCim<<" 0"; // 0 here is the currentTime
+			std::cout<<" <P2|P0> 1\n";   // 1 here is the "superdensity"
 
-		this->common().wftSome(site, 0, this->common().targetVectors().size());
+			ComplexOrRealType densjre = this->common().rixsCocoon(direction,site,4,3,false);
+			std::cout<<site<<" "<<densjre<<" 0"; // 0 here is the currentTime
+			std::cout<<" <P4|P3> 1\n";   // 1 here is the "superdensity"
 
-		if (!applied_) {
-			if (max==1) {
-				if (site == tstStruct_.sites(0)) {
+			ComplexOrRealType densjim = this->common().rixsCocoon(direction,site,5,3,false);
+			std::cout<<site<<" "<<densjim<<" 0"; // 0 here is the currentTime
+			std::cout<<" <P5|P3> 1\n";   // 1 here is the "superdensity"
 
-					ComplexOrRealType densCre = this->common().rixsCocoon(direction,site,1,0,false);
-					std::cout<<site<<" "<<densCre<<" 0"; // 0 here is the currentTime
-					std::cout<<" <P1|P0> 1\n";   // 1 here is the "superdensity"
+			VectorWithOffsetType tmpV1;
+			SizeType indexOfOperator = 0;
+			this->common().applyOneOperator(loopNumber,
+			                                indexOfOperator,
+			                                site,
+			                                tmpV1, // phiNew
+			                                this->common().targetVectors(1), // src1
+			                                direction);
 
-					ComplexOrRealType densCim = this->common().rixsCocoon(direction,site,2,0,false);
-					std::cout<<site<<" "<<densCim<<" 0"; // 0 here is the currentTime
-					std::cout<<" <P2|P0> 1\n";   // 1 here is the "superdensity"
+			if (tmpV1.size() > 0)
+				addFactor(tmpV1, this->common().psi(), densCre);
 
-					ComplexOrRealType densjre = this->common().rixsCocoon(direction,site,4,3,false);
-					std::cout<<site<<" "<<densjre<<" 0"; // 0 here is the currentTime
-					std::cout<<" <P4|P3> 1\n";   // 1 here is the "superdensity"
+			if (tmpV1.size() > 0)
+				this->common().targetVectors(6) = tmpV1;
 
-					ComplexOrRealType densjim = this->common().rixsCocoon(direction,site,5,3,false);
-					std::cout<<site<<" "<<densjim<<" 0"; // 0 here is the currentTime
-					std::cout<<" <P5|P3> 1\n";   // 1 here is the "superdensity"
+			VectorWithOffsetType tmpV2;
+			this->common().applyOneOperator(loopNumber,
+			                                indexOfOperator,
+			                                site,
+			                                tmpV2,                            // phiNew
+			                                this->common().targetVectors(2), // src1
+			                                direction);
 
-					VectorWithOffsetType tmpV1;
-					SizeType indexOfOperator = 0;
-					this->common().applyOneOperator(loopNumber,
-					                                indexOfOperator,
-					                                site,
-					                                tmpV1, // phiNew
-					                                this->common().targetVectors(1), // src1
-					                                direction);
+			if (tmpV2.size() > 0)
+				addFactor(tmpV2, this->common().psi(), densCim);
 
-					if (tmpV1.size() > 0)
-						addFactor(tmpV1, this->common().psi(), densCre);
-
-					if (tmpV1.size() > 0)
-						this->common().targetVectors(6) = tmpV1;
-
-					VectorWithOffsetType tmpV2;
-					this->common().applyOneOperator(loopNumber,
-					                                indexOfOperator,
-					                                site,
-					                                tmpV2,                            // phiNew
-					                                this->common().targetVectors(2), // src1
-					                                direction);
-
-					if (tmpV2.size() > 0)
-						addFactor(tmpV2, this->common().psi(), densCim);
-
-					if (tmpV2.size() > 0) {
-						this->common().targetVectors(7) = tmpV2;
-						applied_ = true;
-						PsimagLite::OstringStream msg;
-						msg<<"Applied";
-						progress_.printline(msg, std::cout);
-					}
-				}
-			}
-
-			if (max==2) {
-
-				if (site == tstStruct_.sites(0)) {
-
-					VectorWithOffsetType tmpV1;
-					SizeType indexOfOperator = 0;
-					this->common().applyOneOperator(loopNumber,
-					                                indexOfOperator,
-					                                site,
-					                                tmpV1, // phiNew
-					                                this->common().targetVectors(1), // src1
-					                                direction);
-
-					if (tmpV1.size() > 0)
-						this->common().targetVectors(6) = tmpV1;
-
-					VectorWithOffsetType tmpV2;
-					this->common().applyOneOperator(loopNumber,
-					                                indexOfOperator,
-					                                site,
-					                                tmpV2,                            // phiNew
-					                                this->common().targetVectors(2), // src1
-					                                direction);
-
-					if (tmpV2.size() > 0) {
-						this->common().targetVectors(7) = tmpV2;
-						applied_ = false;
-						appliedFirst_ = true;
-						PsimagLite::OstringStream msg;
-						msg<<"First Operator Applied";
-						progress_.printline(msg, std::cout);
-					}
-				}
-
-				if (site == tstStruct_.sites(1)) {
-
-					ComplexOrRealType densCre = this->common().rixsCocoon(direction,site,1,0,false);
-					std::cout<<site<<" "<<densCre<<" 0"; // 0 here is the currentTime
-					std::cout<<" <P1|P0> 1\n";   // 1 here is the "superdensity"
-
-					ComplexOrRealType densCim = this->common().rixsCocoon(direction,site,2,0,false);
-					std::cout<<site<<" "<<densCim<<" 0"; // 0 here is the currentTime
-					std::cout<<" <P2|P0> 1\n";   // 1 here is the "superdensity"
-
-					ComplexOrRealType densjre = this->common().rixsCocoon(direction,site,4,3,false);
-					std::cout<<site<<" "<<densjre<<" 0"; // 0 here is the currentTime
-					std::cout<<" <P4|P3> 1\n";   // 1 here is the "superdensity"
-
-					ComplexOrRealType densjim = this->common().rixsCocoon(direction,site,5,3,false);
-					std::cout<<site<<" "<<densjim<<" 0"; // 0 here is the currentTime
-					std::cout<<" <P5|P3> 1\n";   // 1 here is the "superdensity"
-
-					VectorWithOffsetType tmpV1;
-					SizeType indexOfOperator = 1;
-					this->common().applyOneOperator(loopNumber,
-					                                indexOfOperator,
-					                                site,
-					                                tmpV1, // phiNew
-					                                this->common().targetVectors(1), // src1
-					                                direction);
-
-					if (tmpV1.size() > 0)
-						addFactor(tmpV1, this->common().psi(), densCre);
-
-					if (tmpV1.size() > 0)
-						this->common().targetVectors(6) += tmpV1;
-
-					VectorWithOffsetType tmpV2;
-					this->common().applyOneOperator(loopNumber,
-					                                indexOfOperator,
-					                                site,
-					                                tmpV2,                            // phiNew
-					                                this->common().targetVectors(2), // src1
-					                                direction);
-
-					if (tmpV2.size() > 0)
-						addFactor(tmpV2, this->common().psi(), densCim);
-
-					if (tmpV2.size() > 0) {
-						this->common().targetVectors(7) += tmpV2;
-						applied_ = true;
-						PsimagLite::OstringStream msg;
-						msg<<"Applied";
-						progress_.printline(msg, std::cout);
-					}
-				}
-
+			if (tmpV2.size() > 0) {
+				this->common().targetVectors(7) = tmpV2;
+				applied_ = true;
+				PsimagLite::OstringStream msg;
+				msg<<"Applied";
+				progress_.printline(msg, std::cout);
 			}
 		}
-		calcDynVectors();
+	}
 
-		// WEIGHTS ARE SET IN calcDynVectors()
+	void doMax2(SizeType site,
+	            ProgramGlobals::DirectionEnum direction,
+	            SizeType loopNumber)
+	{
 
+		if (site == tstStruct_.sites(0)) {
+			VectorWithOffsetType tmpV1;
+			SizeType indexOfOperator = 0;
+			this->common().applyOneOperator(loopNumber,
+			                                indexOfOperator,
+			                                site,
+			                                tmpV1, // phiNew
+			                                this->common().targetVectors(1), // src1
+			                                direction);
+
+			if (tmpV1.size() > 0)
+				this->common().targetVectors(6) = tmpV1;
+
+			VectorWithOffsetType tmpV2;
+			this->common().applyOneOperator(loopNumber,
+			                                indexOfOperator,
+			                                site,
+			                                tmpV2,                            // phiNew
+			                                this->common().targetVectors(2), // src1
+			                                direction);
+
+			if (tmpV2.size() > 0) {
+				this->common().targetVectors(7) = tmpV2;
+				applied_ = false;
+				appliedFirst_ = true;
+				PsimagLite::OstringStream msg;
+				msg<<"First Operator Applied";
+				progress_.printline(msg, std::cout);
+			}
+		}
+
+		if (site == tstStruct_.sites(1)) {
+
+			ComplexOrRealType densCre = this->common().rixsCocoon(direction,site,1,0,false);
+			std::cout<<site<<" "<<densCre<<" 0"; // 0 here is the currentTime
+			std::cout<<" <P1|P0> 1\n";   // 1 here is the "superdensity"
+
+			ComplexOrRealType densCim = this->common().rixsCocoon(direction,site,2,0,false);
+			std::cout<<site<<" "<<densCim<<" 0"; // 0 here is the currentTime
+			std::cout<<" <P2|P0> 1\n";   // 1 here is the "superdensity"
+
+			ComplexOrRealType densjre = this->common().rixsCocoon(direction,site,4,3,false);
+			std::cout<<site<<" "<<densjre<<" 0"; // 0 here is the currentTime
+			std::cout<<" <P4|P3> 1\n";   // 1 here is the "superdensity"
+
+			ComplexOrRealType densjim = this->common().rixsCocoon(direction,site,5,3,false);
+			std::cout<<site<<" "<<densjim<<" 0"; // 0 here is the currentTime
+			std::cout<<" <P5|P3> 1\n";   // 1 here is the "superdensity"
+
+			VectorWithOffsetType tmpV1;
+			SizeType indexOfOperator = 1;
+			this->common().applyOneOperator(loopNumber,
+			                                indexOfOperator,
+			                                site,
+			                                tmpV1, // phiNew
+			                                this->common().targetVectors(1), // src1
+			                                direction);
+
+			if (tmpV1.size() > 0)
+				addFactor(tmpV1, this->common().psi(), densCre);
+
+			if (tmpV1.size() > 0)
+				this->common().targetVectors(6) += tmpV1;
+
+			VectorWithOffsetType tmpV2;
+			this->common().applyOneOperator(loopNumber,
+			                                indexOfOperator,
+			                                site,
+			                                tmpV2,                            // phiNew
+			                                this->common().targetVectors(2), // src1
+			                                direction);
+
+			if (tmpV2.size() > 0)
+				addFactor(tmpV2, this->common().psi(), densCim);
+
+			if (tmpV2.size() > 0) {
+				this->common().targetVectors(7) += tmpV2;
+				applied_ = true;
+				PsimagLite::OstringStream msg;
+				msg<<"Applied";
+				progress_.printline(msg, std::cout);
+			}
+		}
+	}
+
+	void cocoon(SizeType site, ProgramGlobals::DirectionEnum direction) const
+	{
 		ComplexOrRealType rr = this->common().rixsCocoon(direction,site,8,4,true);
 		ComplexOrRealType ri = this->common().rixsCocoon(direction,site,8,5,true);
 		ComplexOrRealType ir = this->common().rixsCocoon(direction,site,9,4,true);
@@ -439,7 +448,9 @@ private:
 		}
 	}
 
-	void calcDynVectors()
+	void calcDynVectors(RealType Eg,
+	                    ProgramGlobals::DirectionEnum direction,
+	                    const VectorSizeType& block1)
 	{
 
 		if (!applied_ && appliedFirst_) {
@@ -452,11 +463,40 @@ private:
 			return;
 		}
 
-		skeleton_.calcDynVectors(this->common().targetVectors(6),
-		                         this->common().targetVectors(7),
-		                         this->common().targetVectors(8),
-		                         this->common().targetVectors(9));
-		setWeights(10);
+		const typename TargetParamsType::BaseType::AlgorithmEnum algo = tstStruct_.algorithm();
+
+		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
+			skeleton_.calcDynVectors(this->common().targetVectors(6),
+			                         this->common().targetVectors(7),
+			                         this->common().targetVectors(8),
+			                         this->common().targetVectors(9));
+			setWeights(10);
+		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
+			VectorSizeType indices{6, 8, 9};
+			calcChebyVectors(indices, Eg, direction, block1);
+			VectorSizeType indices2{7, 10, 11};
+			calcChebyVectors(indices2, Eg, direction, block1);
+			setWeights(12);
+		} else {
+			assert(false);
+		}
+	}
+
+	void calcChebyVectors(const VectorSizeType& indices,
+	                      RealType Eg,
+	                      ProgramGlobals::DirectionEnum direction,
+	                      const VectorSizeType& block1)
+	{
+		assert(indices.size() >= 3);
+		bool allOperatorsApplied = (this->common().noStageIs(DISABLED) &&
+		                            this->common().noStageIs(OPERATOR));
+
+		this->common().chebyshev(indices,
+		                         Eg,
+		                         this->common().targetVectors(indices[0]),
+		                         direction,
+		                         allOperatorsApplied,
+		                         block1);
 	}
 
 	void setWeights(SizeType n)
