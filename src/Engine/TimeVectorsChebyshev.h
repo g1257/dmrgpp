@@ -156,9 +156,9 @@ public:
 	{}
 
 	virtual void calcTimeVectors(const PairType& startEnd,
-	                             RealType Eg,
+	                             RealType,
 	                             const VectorWithOffsetType& phi,
-	                             SizeType systemOrEnviron,
+	                             SizeType,
 	                             bool,
 	                             const PsimagLite::Vector<SizeType>::Type&)
 	{
@@ -172,28 +172,20 @@ public:
 
 		if (times_.size() == 1 && fabs(times_[0])<1e-10) return;
 
-		//		VectorMatrixFieldType V(phi.sectors());
-		//		VectorMatrixFieldType T(phi.sectors());
-
-		typename PsimagLite::Vector<SizeType>::Type steps(phi.sectors());
-
-		//		triDiag(phi,T,V,steps);
-		//		VectorVectorRealType eigs(phi.sectors());
-
-		//		for (SizeType ii=0;ii<phi.sectors();ii++)
-		//			PsimagLite::diag(T[ii],eigs[ii],'V');
-
-		//		calcTargetVectors(startEnd,phi,T,V,Eg,eigs,steps,systemOrEnviron);
 		if (timeHasAdvanced_) {
-			SizeType numberOfVectorsMinusOne = targetVectors_.size() - 2;
+			SizeType numberOfVectorsMinusOne = targetVectors_.size() - 1;
 			for (SizeType i = 0; i < numberOfVectorsMinusOne; ++i) {
 				targetVectors_[i] = targetVectors_[i+1];
 			}
 		}
 
-		calcTargetVectors(startEnd, phi);
+		for (SizeType i = startEnd.first + 2; i < startEnd.second; ++i) {
+			assert(i < targetVectors_.size());
+			assert(i != 1);
+			targetVectors_[i] = phi;
+			calcTargetVector(targetVectors_[i], phi, i);
+		}
 
-		//checkNorms();
 		timeHasAdvanced_ = false;
 	}
 
@@ -204,19 +196,6 @@ public:
 
 
 private:
-
-	//! Do not normalize states here, it leads to wrong results (!)
-	void calcTargetVectors(const PairType& startEnd,
-	                       const VectorWithOffsetType& phi)
-	{
-		for (SizeType i=startEnd.first+2;i<startEnd.second;i++) {
-			assert(i<targetVectors_.size());
-			assert(i != 1);
-			targetVectors_[i] = phi;
-			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
-			calcTargetVector(targetVectors_[i], phi, i);
-		}
-	}
 
 	void calcTargetVector(VectorWithOffsetType& v,
 	                      const VectorWithOffsetType& phi,

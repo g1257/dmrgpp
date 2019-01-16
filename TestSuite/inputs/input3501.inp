@@ -24,7 +24,7 @@ RepeatFiniteLoopsTimes=40
 
 GsWeight=0.1
 TSPTau=1.0
-TSPTimeSteps=4
+TSPTimeSteps=3
 TSPAlgorithm=Chebyshev
 ChebyshevEpsilon=0.025
 ChebyshevWstar=20
@@ -35,7 +35,7 @@ TSPProductOrSum=sum
 
 TSPOperator=expression
 OperatorExpression=c
-#ci dmrg arguments= -p 6 "<gs|c|P0>,<gs|c|P1>,<gs|c|P2>,<gs|c|P3>"
+#ci dmrg arguments= -p 6 "<gs|c|P0>,<gs|c|P1>,<gs|c|P2>"
 #ci CollectBrakets 0
 
 

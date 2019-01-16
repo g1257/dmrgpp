@@ -154,8 +154,8 @@ public:
 		RealType sum = 0;
 		SizeType n = times_.size();
 
-		if (n < 4)
-			throw PsimagLite::RuntimeError("At least 4 Chebyshev vectors need to be targets\n");
+		if (n < 3)
+			throw PsimagLite::RuntimeError("At least 3 Chebyshev vectors need to be targets\n");
 
 		RealType factor = (n+4.0)/(n+2.0);
 		factor *= (1.0 - gsWeight_);
@@ -164,6 +164,7 @@ public:
 			weight_[i] = factor/(n+4);
 			sum += weight_[i];
 		}
+
 		sum -= weight_[0];
 		sum -= weight_[n-1];
 		weight_[0] = weight_[n-1] = 2*factor/(n+4);
