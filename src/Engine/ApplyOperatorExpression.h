@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2014-2017, UT-Battelle, LLC
+Copyright (c) 2014-2017-2018, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 4.]
+[DMRG++, Version 5.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -147,7 +147,7 @@ public:
 		stage_.resize((tstSites == 0) ? 1 : tstSites, DISABLED);
 	}
 
-	SizeType getPhi(VectorWithOffsetType& phiNew,
+	SizeType getPhi(VectorWithOffsetType* phiNew,
 	                RealType Eg,
 	                ProgramGlobals::DirectionEnum direction,
 	                SizeType site,
@@ -168,21 +168,30 @@ public:
 
 		// Loop over each operator that needs to be applied
 		// in turn to the g.s.
-		for (SizeType i=0;i<max;i++) {
+		for (SizeType i = 0; i < max; ++i) {
 
-			SizeType count2 = evolve(i,phiNew,phiOld,Eg,direction,site,loopNumber,max-1);
+			SizeType count2 = evolve(i, Eg, direction, site, loopNumber, max - 1);
+
 			if (count2 == 0) continue;
+
+			// phi = A|psi>
+			if (phiNew)
+				computePhi(i, site, *phiNew, phiOld, direction);
+
 			count += count2;
 
+			if (!phiNew) continue;
+
 			if (targetHelper_.tstStruct().concatenation() == PRODUCT) {
-				phiOld = phiNew;
+				phiOld = *phiNew;
 			} else {
-				if (stage_[i] == OPERATOR) vectorSum += phiNew;
-				else vectorSum = phiNew;
+				if (stage_[i] == OPERATOR) vectorSum += *phiNew;
+				else vectorSum = *phiNew;
 			}
 		}
 
-		if (targetHelper_.tstStruct().concatenation() == SUM) phiNew = vectorSum;
+		if (phiNew && targetHelper_.tstStruct().concatenation() == SUM)
+			*phiNew = vectorSum;
 
 		if (allStages(DISABLED)) E0_ = Eg;
 
@@ -197,7 +206,7 @@ public:
 			}
 
 			msg<<" value= "<<E0_;
-			progress_.printline(msg,std::cout);
+			progress_.printline(msg, std::cout);
 		}
 
 		return count;
@@ -423,7 +432,7 @@ private:
 
 	void wftOneVector(VectorWithOffsetType& phiNew,
 	                  const VectorWithOffsetType& src,
-	                  SizeType site)
+	                  SizeType site) const
 	{
 		phiNew.populateFromQns(src, targetHelper_.lrs().super());
 
@@ -467,8 +476,6 @@ private:
 	}
 
 	SizeType evolve(SizeType i,
-	                VectorWithOffsetType& phiNew,
-	                VectorWithOffsetType& phiOld,
 	                RealType Eg,
 	                ProgramGlobals::DirectionEnum direction,
 	                SizeType site,
@@ -533,9 +540,6 @@ private:
 		msg<<" Eg="<<Eg;
 		progress_.printline(msg,std::cout);
 
-		// phi = A|psi>
-		computePhi(i,site,phiNew,phiOld,direction);
-
 		return 1;
 	}
 
@@ -543,7 +547,7 @@ private:
 	                SizeType site,
 	                VectorWithOffsetType& phiNew,
 	                VectorWithOffsetType& phiOld,
-	                SizeType systemOrEnviron)
+	                SizeType systemOrEnviron) const
 	{
 		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
 		SizeType advanceEach = targetHelper_.tstStruct().advanceEach();

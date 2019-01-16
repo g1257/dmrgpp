@@ -181,23 +181,49 @@ public:
 		targetVectorsResize(targets);
 	}
 
+	void chebyshev(PairType startEnd,
+	               RealType Eg,
+	               const VectorWithOffsetType& phiNew,
+	               ProgramGlobals::DirectionEnum direction,
+	               bool allOperatorsApplied,
+	               const VectorSizeType& block1)
+	{
+		SizeType startOfWft = 1 + startEnd.first;
+		if (currentTime() == 0) {
+			VectorWithOffsetType& tv1 =
+			        const_cast<VectorWithOffsetType&>(targetVectors()[startOfWft]);
+			tv1  = phiNew;
+			++startOfWft;
+		}
+
+		// WFT 1 if !time advanced
+		// WFT 2 if time advanced
+		assert(0 < block1.size());
+		wftSome(block1[0], startOfWft, 3 + startEnd.first);
+
+		calcTimeVectors(startEnd,
+		                Eg,
+		                phiNew,
+		                direction,
+		                allOperatorsApplied,
+		                block1);
+
+	}
 	SizeType getPhi(VectorWithOffsetType& phiNew,
 	                RealType Eg,
 	                ProgramGlobals::DirectionEnum direction,
 	                SizeType site,
 	                SizeType loopNumber)
 	{
-		return applyOpExpression_.getPhi(phiNew,Eg,direction,site,loopNumber);
+		return applyOpExpression_.getPhi(&phiNew, Eg, direction, site, loopNumber);
 	}
 
-	SizeType getPhi(VectorWithOffsetType& phiNew,
-	                const VectorWithOffsetType& phiSrc,
-	                RealType Eg,
+	SizeType getPhi(RealType Eg,
 	                ProgramGlobals::DirectionEnum direction,
 	                SizeType site,
 	                SizeType loopNumber)
 	{
-		return applyOpExpression_.getPhi(phiNew,phiSrc,Eg,direction,site,loopNumber);
+		return applyOpExpression_.getPhi(0, Eg, direction, site, loopNumber);
 	}
 
 	const VectorWithOffsetType& psi() const

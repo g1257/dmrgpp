@@ -168,13 +168,13 @@ public:
 			return;
 		}
 
-		targetVectors_[0] = phi;
+		targetVectors_[startEnd.first] = phi;
 
 		if (times_.size() == 1 && fabs(times_[0])<1e-10) return;
 
 		if (timeHasAdvanced_) {
-			SizeType numberOfVectorsMinusOne = targetVectors_.size() - 1;
-			for (SizeType i = 0; i < numberOfVectorsMinusOne; ++i) {
+			SizeType numberOfVectorsMinusOne = startEnd.second - 1;
+			for (SizeType i = startEnd.first; i < numberOfVectorsMinusOne; ++i) {
 				targetVectors_[i] = targetVectors_[i+1];
 			}
 		}

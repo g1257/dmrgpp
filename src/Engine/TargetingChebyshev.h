@@ -265,36 +265,23 @@ private:
 	{
 		if (direction == ProgramGlobals::INFINITE) return;
 		VectorWithOffsetType phiNew;
-		this->common().getPhi(phiNew,Eg,direction,block1[0],loopNumber);
+		this->common().getPhi(phiNew, Eg, direction, block1[0], loopNumber);
 
 		if (phiNew.size() == 0) return;
 
-		PairType startEnd(0,times_.size());
+		PairType startEnd(0, times_.size());
+
 		bool allOperatorsApplied = (this->common().noStageIs(DISABLED) &&
 		                            this->common().noStageIs(OPERATOR));
 
 		assert(0 < block1.size());
 
-		SizeType startOfWft = 1;
-		if (this->common().currentTime() == 0) {
-			VectorWithOffsetType& tv1 =
-			        const_cast<VectorWithOffsetType&>(this->common().targetVectors()[1]);
-			tv1  = phiNew;
-			startOfWft = 2;
-		}
-
-		// WFT 1 if !time advanced
-		// WFT 2 if time advanced
-		this->common().wftSome(block1[0], startOfWft, 3);
-
-		assert(phiNew.offset(0) == this->common().targetVectors()[1].offset(0));
-
-		this->common().calcTimeVectors(startEnd,
-		                               Eg,
-		                               phiNew,
-		                               direction,
-		                               allOperatorsApplied,
-		                               block1);
+		this->common().chebyshev(startEnd,
+		                         Eg,
+				                 phiNew,
+				                 direction,
+				                 allOperatorsApplied,
+				                 block1);
 
 		assert(phiNew.offset(0) == this->common().targetVectors()[1].offset(0));
 
@@ -312,8 +299,6 @@ private:
 		printNormsAndWeights();
 
 		assert(phiNew.offset(0) == this->common().targetVectors()[1].offset(0));
-
-		//oracleChebyshev(block1[0], direction);
 	}
 
 	void printNormsAndWeights() const
