@@ -153,7 +153,7 @@ public:
 	    : cocoonType_(OpLabelCategory::DRESSED),
 	      progress_("TargetingCommon"),
 	      targetHelper_(lrs,model,wft),
-	      applyOpExpression_(targetHelper_,indexNoAdvance),
+	      aoe_(targetHelper_,indexNoAdvance),
 	      inSitu_(model.geometry().numberOfSites())
 	{
 		PsimagLite::split(meas_, model.params().insitu, ",");
@@ -172,107 +172,13 @@ public:
 		}
 	}
 
-	void init(SizeType tstSites, SizeType targets)
+	void postCtor(SizeType tstSites, SizeType targets)
 	{
-		applyOpExpression_.init(tstSites);
-		targetVectorsResize(targets);
+		aoe_.postCtor(tstSites);
+		aoe_.targetVectorsResize(targets);
 	}
 
-	void chebyshev(const VectorSizeType& indices,
-	               RealType Eg,
-	               const VectorWithOffsetType& phiNew,
-	               ProgramGlobals::DirectionEnum direction,
-	               bool allOperatorsApplied,
-	               const VectorSizeType& block1,
-	               const TargetParamsType& tstStruct)
-	{
-		SizeType startOfWft = 1;
-		if (currentTime() == 0) {
-			SizeType indexOf1 = indices[startOfWft];
-			VectorWithOffsetType& tv1 =
-			        const_cast<VectorWithOffsetType&>(targetVectors()[indexOf1]);
-			tv1  = phiNew;
-			startOfWft = 2;
-		}
-
-		// WFT 1 if !time advanced
-		// WFT 2 if time advanced
-		assert(0 < block1.size());
-		SizeType n = indices.size();
-		assert(n == 3);
-		for (SizeType i = startOfWft; i < n; ++i) {
-			SizeType ii = indices[i];
-			wftSome(block1[0], ii, ii + 1);
-		}
-
-		calcTimeVectors(PairType(0, 0),
-		                Eg,
-		                phiNew,
-		                direction,
-		                allOperatorsApplied,
-		                indices,
-		                tstStruct);
-
-	}
-
-	SizeType getPhi(VectorWithOffsetType& phiNew,
-	                RealType Eg,
-	                ProgramGlobals::DirectionEnum direction,
-	                SizeType site,
-	                SizeType loopNumber,
-	                const TargetParamsType& tstStruct)
-	{
-		return applyOpExpression_.getPhi(&phiNew, Eg, direction, site, loopNumber, tstStruct);
-	}
-
-	SizeType getPhi(RealType Eg,
-	                ProgramGlobals::DirectionEnum direction,
-	                SizeType site,
-	                SizeType loopNumber,
-	                const TargetParamsType& tstStruct)
-	{
-		return applyOpExpression_.getPhi(0, Eg, direction, site, loopNumber, tstStruct);
-	}
-
-	const VectorWithOffsetType& psi() const
-	{
-		return applyOpExpression_.psi();
-	}
-
-	VectorWithOffsetType& psi()
-	{
-		return applyOpExpression_.psi();
-	}
-
-	const TargetParamsType& tstStruct() const { return targetHelper_.tstStruct(); }
-
-	RealType normSquared(SizeType i) const
-	{
-		const VectorWithOffsetType& v = applyOpExpression_.targetVectors()[i];
-		if (v.size() == 0) return 0;
-		// call to mult will conjugate one of the vector
-		return PsimagLite::real(v*v);
-	}
-
-	void normalizeTimeVectors(SizeType start = 0, SizeType end = 0)
-	{
-		SizeType total =  applyOpExpression_.targetVectors().size();
-		if (end == 0) end = total;
-		for (SizeType i = start; i < end; ++i) {
-			RealType factor = normSquared(i);
-			if (fabs(factor) == 0) continue;
-
-			factor = 1.0/sqrt(factor);
-			applyOpExpression_.multiplyTimeVector(i,factor);
-		}
-	}
-
-	void setTime(RealType t)
-	{
-		applyOpExpression_.setTime(t);
-	}
-
-	void timeHasAdvanced() { applyOpExpression_.timeHasAdvanced(); }
+	// START read/write
 
 	void write(PsimagLite::IoSelector::Out& io,
 	           const VectorSizeType& block,
@@ -286,7 +192,7 @@ public:
 		progress_.printline(msg,std::cout);
 
 		io.write(block[0], prefix + "/TargetCentralSite");
-		psi().write(io, prefix + "/PSI");
+		aoe_.psi().write(io, prefix + "/PSI");
 	}
 
 	void writeNGSTs(PsimagLite::IoSelector::Out& io,
@@ -302,11 +208,11 @@ public:
 	                const VectorSizeType& block,
 	                PsimagLite::String prefix) const
 	{
-		SizeType marker = (noStageIs(DISABLED)) ? 1 : 0;
+		SizeType marker = (aoe_.noStageIs(DISABLED)) ? 1 : 0;
 		SizeType size = block[0];
-		TimeSerializerType ts(currentTime(),
+		TimeSerializerType ts(aoe_.currentTime(),
 		                      size,
-		                      applyOpExpression_.targetVectors(),
+		                      aoe_.targetVectors(),
 		                      marker);
 		ts.write(io, prefix);
 	}
@@ -315,8 +221,8 @@ public:
 	          PsimagLite::String prefix)
 	{
 		prefix += "/";
-		applyOpExpression_.loadEnergy(io, "Energy");
-		applyOpExpression_.psi().read(io, prefix + "PSI");
+		aoe_.loadEnergy(io, "Energy");
+		aoe_.psi().read(io, prefix + "PSI");
 	}
 
 	template<typename SomeSerializerType>
@@ -337,180 +243,21 @@ public:
 		//		for (SizeType i=0;i<targetVectors().size();i++)
 		//			targetVectors(i) = ts.vector(i);
 
-		//		applyOpExpression_.setTime(ts.time());
+		//		aoe_.setTime(ts.time());
 	}
 
-	bool allStages(SizeType x) const
-	{
-		return applyOpExpression_.allStages(x);
-	}
+	// END read/write
 
-	bool noStageIs(SizeType x) const
-	{
-		return applyOpExpression_.noStageIs(x);
-	}
+	const ApplyOperatorExpressionType& aoe() const { return aoe_; }
 
-	void initialGuess(VectorWithOffsetType& v,
-	                  const VectorSizeType& block,
-	                  bool noguess) const
-	{
-		PsimagLite::Vector<SizeType>::Type nk;
-		setNk(nk,block);
-		setInitialVector(v,applyOpExpression_.psi(), nk, noguess);
-	}
+	ApplyOperatorExpressionType& aoe() { return aoe_; }
 
-	void computeCorrection(ProgramGlobals::DirectionEnum direction,
-	                       const BlockType& block1)
-	{
-		const VectorWithOffsetType& psi = applyOpExpression_.psi();
-		VectorWithOffsetType& v = applyOpExpression_.targetVectors(0);
-
-		// operators in the one-site basis:
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType q;
-		targetHelper_.model().setOperatorMatrices(creationMatrix, q, block1);
-
-		typename BasisWithOperatorsType::VectorBoolType signs(q.size());
-		for (SizeType i = 0; i < q.size(); ++i) signs[i] = q[i].oddElectrons;
-
-		FermionSign fs(targetHelper_.lrs().left(), signs);
-		for (SizeType j=0;j<creationMatrix.size();j++) {
-			VectorWithOffsetType phiTemp;
-			const OperatorType& cm = creationMatrix[j];
-			applyOpExpression_.applyOpLocal()(phiTemp,
-			                                  psi,
-			                                  cm,
-			                                  fs,
-			                                  direction,
-			                                  ApplyOperatorType::BORDER_NO);
-			if (j==0) v = phiTemp;
-			else v += phiTemp;
-		}
-	}
-
-	int findFermionSignOfTheOperators(typename TargetParamsType::ConcatEnum concat,
-	                                  const VectorOperatorType& myoperator) const
-	{
-		bool wereSumming = (concat == TargetParamsType::ConcatEnum::SUM);
-		ProgramGlobals::FermionOrBosonEnum forB = ProgramGlobals::FermionOrBosonEnum::BOSON;
-
-		for (SizeType i = 0; i < myoperator.size(); ++i) {
-
-			RealType norma = norm2(myoperator[i].data);
-
-			if (norma==0 && wereSumming) continue;
-			if (isTheIdentity(myoperator[i].data) && !wereSumming) continue;
-
-			if (i == 0) {
-				forB = myoperator[i].fermionOrBoson;
-				continue;
-			}
-
-			if (forB == myoperator[i].fermionOrBoson) continue;
-
-			PsimagLite::String str("CorrectionVectorTargeting: ");
-			str += "inconsistent sign for operators\n";
-			throw PsimagLite::RuntimeError(str);
-
-		}
-
-		return (forB == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
-	}
-
-	void setAllStagesTo(SizeType x)
-	{
-		applyOpExpression_.setAllStagesTo(x);
-	}
-
-	const RealType& energy() const
-	{
-		return applyOpExpression_.energy();
-	}
-
-	const RealType& currentTime() const
-	{
-		return applyOpExpression_.currentTime();
-	}
-
-	const VectorVectorWithOffsetType& targetVectors() const
-	{
-		return applyOpExpression_.targetVectors();
-	}
-
-	VectorWithOffsetType& targetVectors(SizeType i)
-	{
-		return applyOpExpression_.targetVectors(i);
-	}
-
-	const VectorWithOffsetType& targetVectors(SizeType i) const
-	{
-		return applyOpExpression_.targetVectors(i);
-	}
-
-	void targetVectorsResize(SizeType x)
-	{
-		applyOpExpression_.targetVectorsResize(x);
-	}
-
-	void initTimeVectors(const TargetParamsType& tstStruct,
-	                     const VectorRealType& times,
-	                     InputValidatorType& ioIn)
-	{
-		applyOpExpression_.initTimeVectors(tstStruct, times, ioIn);
-	}
-
-	void calcTimeVectors(const PairType& startEnd,
-	                     RealType Eg,
-	                     const VectorWithOffsetType& phi,
-	                     ProgramGlobals::DirectionEnum direction,
-	                     bool allOperatorsApplied,
-	                     const PsimagLite::Vector<SizeType>::Type& block,
-	                     const TargetParamsType& tstStruct)
-	{
-		return applyOpExpression_.calcTimeVectors(startEnd,
-		                                          Eg,
-		                                          phi,
-		                                          direction,
-		                                          allOperatorsApplied,
-		                                          block,
-		                                          tstStruct);
-	}
-
-	void applyOneOperator(SizeType loopNumber,
-	                      SizeType indexOfOperator,
-	                      SizeType site,
-	                      VectorWithOffsetType& phiNew,
-	                      const VectorWithOffsetType& psiSrc,
-	                      SizeType systemOrEnviron,
-	                      const TargetParamsType& tstStruct)
-	{
-		applyOpExpression_.applyOneOperator(loopNumber,
-		                                    indexOfOperator,
-		                                    site,
-		                                    phiNew,
-		                                    psiSrc,
-		                                    systemOrEnviron,
-		                                    tstStruct);
-
-		RealType norma = norm(phiNew);
-		if (norma<1e-6) {
-			PsimagLite::OstringStream msg2;
-			msg2<<"Norm of phi is zero\n";
-			progress_.printline(msg2,std::cout);
-		}
-	}
-
-	void wftSome(SizeType site, SizeType begin, SizeType end)
-	{
-		applyOpExpression_.wftSome(site, begin, end);
-	}
-
-	// COCOONS start
+	// START Cocoons
 
 	void cocoon(const BlockType& block,
 	            ProgramGlobals::DirectionEnum direction) const
 	{
-		if (noStageIs(DISABLED))
+		if (aoe_.noStageIs(DISABLED))
 			std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
 		else
 			std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
@@ -579,8 +326,8 @@ public:
 	void cocoonLegacy(ProgramGlobals::DirectionEnum direction,
 	                  const BlockType& block) const
 	{
-		const VectorWithOffsetType& psi = applyOpExpression_.psi();
-		const VectorWithOffsetType& tv0 = applyOpExpression_.targetVectors()[0];
+		const VectorWithOffsetType& psi = aoe_.psi();
+		const VectorWithOffsetType& tv0 = aoe_.targetVectors()[0];
 		const ModelType& model = targetHelper_.model();
 
 		SizeType site = block[0];
@@ -636,8 +383,8 @@ public:
 		BorderEnumType border = (site == 0 || site == numberOfSites - 1) ?
 		            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
 
-		const VectorWithOffsetType& v1 =  applyOpExpression_.targetVectors(index1);
-		const VectorWithOffsetType& v2 =  applyOpExpression_.targetVectors(index2);
+		const VectorWithOffsetType& v1 =  aoe_.targetVectors(index1);
+		const VectorWithOffsetType& v2 =  aoe_.targetVectors(index2);
 
 		assert(n == 1);
 		for (SizeType i = 0; i < n; ++i) {
@@ -656,7 +403,133 @@ public:
 		return value;
 	}
 
-	// COCOONS end
+	// END Cocoons
+
+
+	RealType normSquared(SizeType i) const
+	{
+		const VectorWithOffsetType& v = aoe_.targetVectors()[i];
+		if (v.size() == 0) return 0;
+		// call to mult will conjugate one of the vector
+		return PsimagLite::real(v*v);
+	}
+
+	void normalizeTimeVectors(SizeType start = 0, SizeType end = 0)
+	{
+		SizeType total =  aoe_.targetVectors().size();
+		if (end == 0) end = total;
+		for (SizeType i = start; i < end; ++i) {
+			RealType factor = normSquared(i);
+			if (fabs(factor) == 0) continue;
+
+			factor = 1.0/sqrt(factor);
+			aoe_.multiplyTimeVector(i,factor);
+		}
+	}
+
+	void initialGuess(VectorWithOffsetType& v,
+	                  const VectorSizeType& block,
+	                  bool noguess) const
+	{
+		PsimagLite::Vector<SizeType>::Type nk;
+		setNk(nk,block);
+		setInitialVector(v,aoe_.psi(), nk, noguess);
+	}
+
+	void computeCorrection(ProgramGlobals::DirectionEnum direction,
+	                       const BlockType& block1)
+	{
+		const VectorWithOffsetType& psi = aoe_.psi();
+		VectorWithOffsetType& v = aoe_.targetVectors(0);
+
+		// operators in the one-site basis:
+		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
+		VectorQnType q;
+		targetHelper_.model().setOperatorMatrices(creationMatrix, q, block1);
+
+		typename BasisWithOperatorsType::VectorBoolType signs(q.size());
+		for (SizeType i = 0; i < q.size(); ++i) signs[i] = q[i].oddElectrons;
+
+		FermionSign fs(targetHelper_.lrs().left(), signs);
+		for (SizeType j=0;j<creationMatrix.size();j++) {
+			VectorWithOffsetType phiTemp;
+			const OperatorType& cm = creationMatrix[j];
+			aoe_.applyOpLocal()(phiTemp,
+			                    psi,
+			                    cm,
+			                    fs,
+			                    direction,
+			                    ApplyOperatorType::BORDER_NO);
+			if (j==0) v = phiTemp;
+			else v += phiTemp;
+		}
+	}
+
+	int findFermionSignOfTheOperators(typename TargetParamsType::ConcatEnum concat,
+	                                  const VectorOperatorType& myoperator) const
+	{
+		bool wereSumming = (concat == TargetParamsType::ConcatEnum::SUM);
+		ProgramGlobals::FermionOrBosonEnum forB = ProgramGlobals::FermionOrBosonEnum::BOSON;
+
+		for (SizeType i = 0; i < myoperator.size(); ++i) {
+
+			RealType norma = norm2(myoperator[i].data);
+
+			if (norma==0 && wereSumming) continue;
+			if (isTheIdentity(myoperator[i].data) && !wereSumming) continue;
+
+			if (i == 0) {
+				forB = myoperator[i].fermionOrBoson;
+				continue;
+			}
+
+			if (forB == myoperator[i].fermionOrBoson) continue;
+
+			PsimagLite::String str("CorrectionVectorTargeting: ");
+			str += "inconsistent sign for operators\n";
+			throw PsimagLite::RuntimeError(str);
+
+		}
+
+		return (forB == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
+	}
+
+	void chebyshev(const VectorSizeType& indices,
+	               RealType Eg,
+	               const VectorWithOffsetType& phiNew,
+	               ProgramGlobals::DirectionEnum direction,
+	               bool allOperatorsApplied,
+	               const VectorSizeType& block1,
+	               const TargetParamsType& tstStruct)
+	{
+		SizeType startOfWft = 1;
+		if (aoe_.currentTime() == 0) {
+			SizeType indexOf1 = indices[startOfWft];
+			VectorWithOffsetType& tv1 =
+			        const_cast<VectorWithOffsetType&>(aoe_.targetVectors(indexOf1));
+			tv1  = phiNew;
+			startOfWft = 2;
+		}
+
+		// WFT 1 if !time advanced
+		// WFT 2 if time advanced
+		assert(0 < block1.size());
+		SizeType n = indices.size();
+		assert(n == 3);
+		for (SizeType i = startOfWft; i < n; ++i) {
+			SizeType ii = indices[i];
+			aoe_.wftSome(block1[0], ii, ii + 1);
+		}
+
+		aoe_.calcTimeVectors(PairType(0, 0),
+		                     Eg,
+		                     phiNew,
+		                     direction,
+		                     allOperatorsApplied,
+		                     indices,
+		                     tstStruct);
+
+	}
 
 	const ComplexOrRealType& inSitu(SizeType site) const
 	{
@@ -715,7 +588,7 @@ public:
 		targetHelper_.model().findOddElectronsOfOneSite(oddElectrons,site);
 		FermionSign fs(targetHelper_.lrs().left(), oddElectrons);
 		VectorWithOffsetType dest;
-		applyOpExpression_.applyOpLocal()(dest,src1,A,fs,systemOrEnviron,border);
+		aoe_.applyOpLocal()(dest,src1,A,fs,systemOrEnviron,border);
 
 		ComplexOrRealType sum = 0.0;
 		for (SizeType ii=0;ii<dest.sectors();ii++) {
@@ -740,7 +613,7 @@ private:
 	                          ProgramGlobals::DirectionEnum direction) const
 	{
 		const ModelType& model = targetHelper_.model();
-		const VectorVectorWithOffsetType& tv = applyOpExpression_.targetVectors();
+		const VectorVectorWithOffsetType& tv = aoe_.targetVectors();
 
 		if (model.params().insitu=="") return;
 
@@ -756,12 +629,12 @@ private:
 
 		try {
 			assert(block.size()>0);
-			cocoon(direction,block[0],psi(),"PSI",psi(),"PSI");
+			cocoon(direction, block[0], aoe_.psi(), "PSI", aoe_.psi(), "PSI");
 			if (tv.size() > 0) {
 				for (SizeType i = 0; i < max; ++i)
 					cocoon(direction,block[0],tv[i],"P"+ttos(i),tv[i],"P"+ttos(i));
 				for (SizeType i = 0; i < max; ++i)
-					cocoon(direction,block[0],psi(),"PSI",tv[i],"P"+ttos(i));
+					cocoon(direction, block[0], aoe_.psi(), "PSI", tv[i], "P"+ttos(i));
 			}
 		} catch (std::exception&) {
 			noCocoon("unsupported by the model");
@@ -770,7 +643,7 @@ private:
 
 	void setQuantumNumbers(const VectorWithOffsetType& v)
 	{
-		applyOpExpression_.setQuantumNumbers(v);
+		aoe_.setQuantumNumbers(v);
 	}
 
 	void noCocoon(const PsimagLite::String& msg) const
@@ -850,13 +723,13 @@ private:
 	const VectorWithOffsetType& getVector(PsimagLite::String braOrKet) const
 	{
 		if (braOrKet == "gs")
-			return applyOpExpression_.psi();
+			return aoe_.psi();
 
 		int ind = BraketType::getPtype(braOrKet);
 		if (ind <= 0)
 			err("Malformed braket " + braOrKet + "\n");
 
-		return applyOpExpression_.targetVectors(ind - 1);
+		return aoe_.targetVectors(ind - 1);
 	}
 
 	// prints <src2|A|src1>
@@ -870,7 +743,7 @@ private:
 	          BorderEnumType border) const
 	{
 		ComplexOrRealType sum = test_(src1,src2,systemOrEnviron,site,A,border);
-		std::cout<<site<<" "<<sum<<" "<<currentTime();
+		std::cout<<site<<" "<<sum<<" "<<aoe_.currentTime();
 		std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
 	}
 
@@ -893,7 +766,7 @@ private:
 	VectorStringType meas_;
 	PsimagLite::ProgressIndicator progress_;
 	TargetHelperType targetHelper_;
-	ApplyOperatorExpressionType applyOpExpression_;
+	ApplyOperatorExpressionType aoe_;
 	mutable VectorType inSitu_;
 }; // class TargetingCommon
 

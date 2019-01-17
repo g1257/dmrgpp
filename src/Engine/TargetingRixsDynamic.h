@@ -169,7 +169,7 @@ public:
 	      progress_("TargetingRixsDynamic"),
 	      gsWeight_(1.0),
 	      paramsForSolver_(ioIn,"DynamicDmrg"),
-	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().energy()),
+	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().aoe().energy()),
 	      applied_(false),
 	      appliedFirst_(false),
 	      usesCheby_(tstStruct_.algorithm() == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV)
@@ -178,13 +178,10 @@ public:
 			err("TargetingRixsDynamic needs wft\n");
 
 		if (!usesCheby_) {
-			this->common().init(tstStruct_.sites(), 12);
 			return; // early exit here
 		}
 
 		tstStruct2_ = new TargetParams2Type(ioIn, model);
-		this->common().init(tstStruct2_->sites(), 12);
-
 		times_.resize(tstStruct2_->timeSteps());
 
 		RealType tau = tstStruct2_->tau();
@@ -192,7 +189,7 @@ public:
 		for (SizeType i = 0; i < n; ++i)
 			times_[i] = i*tau/(n - 1);
 
-		this->common().initTimeVectors(tstStruct_, times_, ioIn);
+		this->common().aoe().initTimeVectors(*tstStruct2_, times_, ioIn);
 	}
 
 	~TargetingRixsDynamic()
@@ -200,6 +197,10 @@ public:
 		delete tstStruct2_;
 		tstStruct2_ = nullptr;
 	}
+
+	SizeType sites() const { return (usesCheby_) ? tstStruct2_->sites() : tstStruct_.sites(); }
+
+	SizeType targets() const { return 12; }
 
 	RealType weight(SizeType i) const
 	{
@@ -248,14 +249,14 @@ public:
 
 		SizeType site = block1[0];
 
-		this->common().wftSome(site, 0, 8);
+		this->common().aoe().wftSome(site, 0, 8);
 
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
 			// just to set the stage and currenttime
-			this->common().getPhi(Eg, direction, site, loopNumber, *tstStruct2_);
+			this->common().aoe().getPhi(0, Eg, direction, site, loopNumber, *tstStruct2_);
 		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
-			this->common().wftSome(site, 8, this->common().targetVectors().size());
+			this->common().aoe().wftSome(site, 8, this->common().aoe().targetVectors().size());
 		} else {
 			assert(false);
 		}
@@ -291,7 +292,7 @@ public:
 			err("TargetingRixsDynamic: number of TVs must be 6\n");
 
 		for (SizeType site = 0; site < 6; ++site)
-			this->common().targetVectors(site) = ts.vector(site);
+			this->common().aoe().targetVectors(site) = ts.vector(site);
 	}
 
 private:
@@ -325,14 +326,14 @@ private:
 			           indexOfOperator,
 			           site,
 			           tmpV1, // phiNew
-			           this->common().targetVectors(1), // src1
+			           this->common().aoe().targetVectors(1), // src1
 			           direction);
 
 			if (tmpV1.size() > 0)
-				addFactor(tmpV1, this->common().psi(), densCre);
+				addFactor(tmpV1, this->common().aoe().psi(), densCre);
 
 			if (tmpV1.size() > 0)
-				this->common().targetVectors(6) = tmpV1;
+				this->common().aoe().targetVectors(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 
@@ -340,14 +341,14 @@ private:
 			           indexOfOperator,
 			           site,
 			           tmpV2,                            // phiNew
-			           this->common().targetVectors(2), // src1
+			           this->common().aoe().targetVectors(2), // src1
 			           direction);
 
 			if (tmpV2.size() > 0)
-				addFactor(tmpV2, this->common().psi(), densCim);
+				addFactor(tmpV2, this->common().aoe().psi(), densCim);
 
 			if (tmpV2.size() > 0) {
-				this->common().targetVectors(7) = tmpV2;
+				this->common().aoe().targetVectors(7) = tmpV2;
 				applied_ = true;
 				PsimagLite::OstringStream msg;
 				msg<<"Applied";
@@ -368,22 +369,22 @@ private:
 			           indexOfOperator,
 			           site,
 			           tmpV1, // phiNew
-			           this->common().targetVectors(1), // src1
+			           this->common().aoe().targetVectors(1), // src1
 			           direction);
 
 			if (tmpV1.size() > 0)
-				this->common().targetVectors(6) = tmpV1;
+				this->common().aoe().targetVectors(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
 			           indexOfOperator,
 			           site,
 			           tmpV2,                            // phiNew
-			           this->common().targetVectors(2), // src1
+			           this->common().aoe().targetVectors(2), // src1
 			           direction);
 
 			if (tmpV2.size() > 0) {
-				this->common().targetVectors(7) = tmpV2;
+				this->common().aoe().targetVectors(7) = tmpV2;
 				applied_ = false;
 				appliedFirst_ = true;
 				PsimagLite::OstringStream msg;
@@ -416,28 +417,28 @@ private:
 			           indexOfOperator,
 			           site,
 			           tmpV1, // phiNew
-			           this->common().targetVectors(1), // src1
+			           this->common().aoe().targetVectors(1), // src1
 			           direction);
 
 			if (tmpV1.size() > 0)
-				addFactor(tmpV1, this->common().psi(), densCre);
+				addFactor(tmpV1, this->common().aoe().psi(), densCre);
 
 			if (tmpV1.size() > 0)
-				this->common().targetVectors(6) += tmpV1;
+				this->common().aoe().targetVectors(6) += tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
 			           indexOfOperator,
 			           site,
 			           tmpV2,                            // phiNew
-			           this->common().targetVectors(2), // src1
+			           this->common().aoe().targetVectors(2), // src1
 			           direction);
 
 			if (tmpV2.size() > 0)
-				addFactor(tmpV2, this->common().psi(), densCim);
+				addFactor(tmpV2, this->common().aoe().psi(), densCim);
 
 			if (tmpV2.size() > 0) {
-				this->common().targetVectors(7) += tmpV2;
+				this->common().aoe().targetVectors(7) += tmpV2;
 				applied_ = true;
 				PsimagLite::OstringStream msg;
 				msg<<"Applied";
@@ -453,7 +454,7 @@ private:
 		ComplexOrRealType ir = this->common().rixsCocoon(direction,site,9,4,true);
 		ComplexOrRealType ii = this->common().rixsCocoon(direction,site,9,5,true);
 
-		const RealType time = this->common().currentTime();
+		const RealType time = this->common().aoe().currentTime();
 		std::cout<<site<<" "<<(ri-ir)<<" "<<time; // time here is the currentTime
 		std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
 		std::cout<<site<<" "<<(rr+ii)<<" "<<time; // time here is the currentTime
@@ -494,10 +495,10 @@ private:
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
 
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
-			skeleton_.calcDynVectors(this->common().targetVectors(6),
-			                         this->common().targetVectors(7),
-			                         this->common().targetVectors(8),
-			                         this->common().targetVectors(9));
+			skeleton_.calcDynVectors(this->common().aoe().targetVectors(6),
+			                         this->common().aoe().targetVectors(7),
+			                         this->common().aoe().targetVectors(8),
+			                         this->common().aoe().targetVectors(9));
 			setWeights(10);
 		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
 			VectorSizeType indices{6, 8, 9};
@@ -516,10 +517,10 @@ private:
 	                      const VectorSizeType& block1)
 	{
 		assert(indices.size() >= 3);
-		bool allOperatorsApplied = (this->common().noStageIs(DISABLED) &&
-		                            this->common().noStageIs(OPERATOR));
+		bool allOperatorsApplied = (this->common().aoe().noStageIs(DISABLED) &&
+		                            this->common().aoe().noStageIs(OPERATOR));
 
-		const VectorWithOffsetType& v0 = this->common().targetVectors(indices[0]);
+		const VectorWithOffsetType& v0 = this->common().aoe().targetVectors(indices[0]);
 		this->common().chebyshev(indices,
 		                         Eg,
 		                         v0,
@@ -537,21 +538,21 @@ private:
 	                ProgramGlobals::DirectionEnum direction)
 	{
 		if (usesCheby_)
-			this->common().applyOneOperator(loopNumber,
-		                                    indexOfOperator,
-		                                    site,
-		                                    dest, // phiNew
-		                                    src, // src1
-		                                    direction,
-		                                    *tstStruct2_);
+			this->common().aoe().applyOneOperator(loopNumber,
+		                                          indexOfOperator,
+		                                          site,
+		                                          dest, // phiNew
+		                                          src, // src1
+		                                          direction,
+		                                          *tstStruct2_);
 		else
-			this->common().applyOneOperator(loopNumber,
-		                                    indexOfOperator,
-		                                    site,
-		                                    dest, // phiNew
-		                                    src, // src1
-		                                    direction,
-		                                    tstStruct_);
+			this->common().aoe().applyOneOperator(loopNumber,
+		                                          indexOfOperator,
+		                                          site,
+		                                          dest, // phiNew
+		                                          src, // src1
+		                                          direction,
+		                                          tstStruct_);
 	}
 
 	void setWeights(SizeType n)
@@ -566,7 +567,7 @@ private:
 
 	void printNormsAndWeights() const
 	{
-		if (this->common().allStages(DISABLED)) return;
+		if (this->common().aoe().allStages(DISABLED)) return;
 
 		PsimagLite::OstringStream msg;
 		msg<<"gsWeight="<<gsWeight_<<" weights= ";
@@ -575,9 +576,9 @@ private:
 		progress_.printline(msg,std::cout);
 
 		PsimagLite::OstringStream msg2;
-		msg2<<"gsNorm="<<norm(this->common().psi())<<" norms= ";
+		msg2<<"gsNorm="<<norm(this->common().aoe().psi())<<" norms= ";
 		for (SizeType i = 0; i < weight_.size(); i++)
-			msg2<<this->common().normSquared(i)<<" ";
+			msg2<<this->common().aoe().normSquared(i)<<" ";
 		progress_.printline(msg2,std::cout);
 	}
 

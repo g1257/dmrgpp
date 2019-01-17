@@ -136,6 +136,15 @@ public:
 
 	virtual ~TargetingBase() {}
 
+	virtual void postCtor()
+	{
+		commonTargeting_.postCtor(sites(), targets());
+	}
+
+	virtual SizeType sites() const = 0;
+
+	virtual SizeType targets() const = 0;
+
 	virtual RealType gsWeight() const = 0;
 
 	virtual RealType weight(SizeType i) const = 0;
@@ -159,7 +168,7 @@ public:
 		if (X[0] != 0 && X[0] != lrs_.super().block().size()-1)
 			return;
 
-		basisWithOps.setVarious(X, model_, commonTargeting_.currentTime());
+		basisWithOps.setVarious(X, model_, commonTargeting_.aoe().currentTime());
 	}
 
 	virtual bool end() const
@@ -169,8 +178,8 @@ public:
 
 	virtual SizeType size() const
 	{
-		if (commonTargeting_.allStages(DISABLED)) return 0;
-		return commonTargeting_.targetVectors().size();
+		if (commonTargeting_.aoe().allStages(DISABLED)) return 0;
+		return commonTargeting_.aoe().targetVectors().size();
 	}
 
 	virtual RealType normSquared(SizeType i) const
@@ -191,17 +200,17 @@ public:
 
 	VectorWithOffsetType& gs()
 	{
-		return commonTargeting_.psi();
+		return commonTargeting_.aoe().psi();
 	}
 
 	const VectorWithOffsetType& gs() const
 	{
-		return commonTargeting_.psi();
+		return commonTargeting_.aoe().psi();
 	}
 
 	const VectorWithOffsetType& operator()(SizeType i) const
 	{
-		return commonTargeting_.targetVectors()[i];
+		return commonTargeting_.aoe().targetVectors()[i];
 	}
 
 	void initialGuess(VectorWithOffsetType& initialVector,
@@ -211,7 +220,7 @@ public:
 		commonTargeting_.initialGuess(initialVector, block, noguess);
 	}
 
-	const RealType& time() const {return commonTargeting_.currentTime(); }
+	const RealType& time() const {return commonTargeting_.aoe().currentTime(); }
 
 	const ComplexOrRealType& inSitu(SizeType i) const
 	{

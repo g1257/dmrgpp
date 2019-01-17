@@ -125,19 +125,21 @@ public:
 	    : BaseType(lrs,model,wft,0),
 	      tstStruct_(io,model),
 	      progress_("TargetingCorrection")
-	{
-		this->common().init(tstStruct_.sites(), 1);
-	}
+	{}
+
+	SizeType sites() const { return tstStruct_.sites(); }
+
+	SizeType targets() const { return 1; }
 
 	RealType normSquared(SizeType i) const
 	{
-		return PsimagLite::real(this->common().targetVectors()[i]*
-		                        this->common().targetVectors()[i]);
+		return PsimagLite::real(this->common().aoe().targetVectors()[i]*
+		                        this->common().aoe().targetVectors()[i]);
 	}
 
 	RealType weight(SizeType) const
 	{
-		assert(this->common().noStageIs(DISABLED));
+		assert(this->common().aoe().noStageIs(DISABLED));
 		return tstStruct_.correctionA();
 	}
 
@@ -154,7 +156,7 @@ public:
 	{
 		if (direction == ProgramGlobals::INFINITE) return;
 
-		this->common().setAllStagesTo(ENABLED);
+		this->common().aoe().setAllStagesTo(ENABLED);
 		this->common().computeCorrection(direction,block1);
 		this->common().cocoon(block1,direction);
 	}

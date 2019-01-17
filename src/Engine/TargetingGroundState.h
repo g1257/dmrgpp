@@ -126,9 +126,11 @@ public:
 	    : BaseType(lrs,model,wft,0),
 	      tstStruct_(io,model),
 	      progress_("TargetingGroundState")
-	{
-		this->common().init(tstStruct_.sites(), 0);
-	}
+	{}
+
+	SizeType sites() const { return tstStruct_.sites(); }
+
+	SizeType targets() const { return 0; }
 
 	RealType weight(SizeType) const
 	{

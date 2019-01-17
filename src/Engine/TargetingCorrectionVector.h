@@ -162,12 +162,15 @@ public:
 	      gsWeight_(1.0),
 	      correctionEnabled_(false),
 	      paramsForSolver_(ioIn,"DynamicDmrg"),
-	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().energy())
+	      skeleton_(ioIn_, tstStruct_, model, lrs, this->common().aoe().energy())
 	{
-		this->common().init(tstStruct_.sites(), 4);
 		if (!wft.isEnabled())
-			throw PsimagLite::RuntimeError("TargetingCorrectionVector needs wft\n");
+			err("TargetingCorrectionVector needs wft\n");
 	}
+
+	SizeType sites() const { return tstStruct_.sites(); }
+
+	SizeType targets() const { return 4; }
 
 	RealType weight(SizeType i) const
 	{
@@ -235,12 +238,12 @@ private:
 	            SizeType loopNumber)
 	{
 		VectorWithOffsetType phiNew;
-		SizeType count = this->common().getPhi(phiNew,
-		                                       Eg,
-		                                       direction,
-		                                       site,
-		                                       loopNumber,
-		                                       tstStruct_);
+		SizeType count = this->common().aoe().getPhi(&phiNew,
+		                                             Eg,
+		                                             direction,
+		                                             site,
+		                                             loopNumber,
+		                                             tstStruct_);
 
 		if (direction != ProgramGlobals::INFINITE) {
 			correctionEnabled_=true;
@@ -250,44 +253,44 @@ private:
 
 		if (count==0) return;
 
-		this->common().targetVectors(1) = phiNew;
-		skeleton_.calcDynVectors(this->common().targetVectors(1),
-		                         this->common().targetVectors(2),
-		                         this->common().targetVectors(3));
+		this->common().aoe().targetVectors(1) = phiNew;
+		skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
+		                         this->common().aoe().targetVectors(2),
+		                         this->common().aoe().targetVectors(3));
 
 		setWeights();
 
-		for (SizeType i = 1; i < this->common().targetVectors().size(); ++i) {
+		for (SizeType i = 1; i < this->common().aoe().targetVectors().size(); ++i) {
 			PsimagLite::String label = "P" + ttos(i);
 			this->common().cocoon(direction,
 			                      site,
-			                      this->common().psi(),
+			                      this->common().aoe().psi(),
 			                      "PSI",
-			                      this->common().targetVectors(i),
+			                      this->common().aoe().targetVectors(i),
 			                      label);
 		}
 
-		if (this->common().targetVectors().size() < 4) return;
+		if (this->common().aoe().targetVectors().size() < 4) return;
 
 		this->common().cocoon(direction,
 		                      site,
-		                      this->common().targetVectors(2),
+		                      this->common().aoe().targetVectors(2),
 		                      "P2",
-		                      this->common().targetVectors(2),
+		                      this->common().aoe().targetVectors(2),
 		                      "P2");
 
 		this->common().cocoon(direction,
 		                      site,
-		                      this->common().targetVectors(3),
+		                      this->common().aoe().targetVectors(3),
 		                      "P3",
-		                      this->common().targetVectors(3),
+		                      this->common().aoe().targetVectors(3),
 		                      "P3");
 
 		this->common().cocoon(direction,
 		                      site,
-		                      this->common().targetVectors(2),
+		                      this->common().aoe().targetVectors(2),
 		                      "P2",
-		                      this->common().targetVectors(3),
+		                      this->common().aoe().targetVectors(3),
 		                      "P3");
 	}
 
@@ -296,7 +299,7 @@ private:
 		gsWeight_ = tstStruct_.gsWeight();
 
 		RealType sum  = 0;
-		weight_.resize(this->common().targetVectors().size());
+		weight_.resize(this->common().aoe().targetVectors().size());
 		for (SizeType r=1;r<weight_.size();r++) {
 			weight_[r] = 1;
 			sum += weight_[r];

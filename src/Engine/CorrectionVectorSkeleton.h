@@ -314,7 +314,7 @@ public:
 		progress_.printline(msg,std::cout);
 
 		PsimagLite::OstringStream msg2;
-		msg2<<"gsNorm="<<norm(targetingCommon.psi())<<" norms= ";
+		msg2<<"gsNorm="<<norm(targetingCommon.aoe().psi())<<" norms= ";
 		for (SizeType i = 0; i < weights.size(); i++)
 			msg2<<targetingCommon.normSquared(i)<<" ";
 		progress_.printline(msg2,std::cout);

@@ -164,14 +164,17 @@ public:
 	      progress_("TargetingRixsStatic"),
 	      gsWeight_(1.0),
 	      paramsForSolver_(ioIn,"DynamicDmrg"),
-	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().energy()),
+	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().aoe().energy()),
 	      applied_(false),
 	      appliedFirst_(false)
 	{
-		this->common().init(tstStruct_.sites(), 6);
 		if (!wft.isEnabled())
-			throw PsimagLite::RuntimeError("TargetingRixsStatic needs wft\n");
+			err("TargetingRixsStatic needs wft\n");
 	}
+
+	SizeType sites() const { return tstStruct_.sites(); }
+
+	SizeType targets() const { return 6; }
 
 	RealType weight(SizeType i) const
 	{
@@ -235,10 +238,9 @@ public:
 			err("TargetingRixsStatic: number of TVs must be 4\n");
 
 		for (SizeType site = 0; site < 3; ++site) {
-			this->common().targetVectors(site) = ts.vector(site+1);
+			this->common().aoe().targetVectors(site) = ts.vector(site + 1);
 		}
 	}
-
 
 private:
 
@@ -260,7 +262,7 @@ private:
 		// if no apply operator at site and add into targetVectors[3]
 		// also wft everything
 
-		this->common().wftSome(site, 0, this->common().targetVectors().size());
+		this->common().aoe().wftSome(site, 0, this->common().aoe().targetVectors().size());
 
 		SizeType max = tstStruct_.sites();
 
@@ -272,15 +274,15 @@ private:
 				if (site == tstStruct_.sites(0)) {
 					VectorWithOffsetType tmpV1;
 					SizeType indexOfOperator = 0;
-					this->common().applyOneOperator(loopNumber,
+					this->common().aoe().applyOneOperator(loopNumber,
 					                                indexOfOperator,
 					                                site,
 					                                tmpV1,
-					                                this->common().psi(),
+					                                this->common().aoe().psi(),
 					                                direction,
 					                                tstStruct_);
 					if (tmpV1.size() > 0) {
-						this->common().targetVectors(3) = tmpV1;
+						this->common().aoe().targetVectors(3) = tmpV1;
 						applied_ = true;
 						PsimagLite::OstringStream msg;
 						msg<<"Applied operator";
@@ -292,15 +294,15 @@ private:
 				if (site == tstStruct_.sites(0)) {
 					VectorWithOffsetType tmpV1;
 					SizeType indexOfOperator = 0;
-					this->common().applyOneOperator(loopNumber,
+					this->common().aoe().applyOneOperator(loopNumber,
 					                                indexOfOperator,
 					                                site,
 					                                tmpV1,
-					                                this->common().psi(),
+					                                this->common().aoe().psi(),
 					                                direction,
 					                                tstStruct_);
 					if (tmpV1.size() > 0) {
-						this->common().targetVectors(3) = tmpV1;
+						this->common().aoe().targetVectors(3) = tmpV1;
 						applied_ = false;
 						appliedFirst_ = true;
 						PsimagLite::OstringStream msg;
@@ -311,15 +313,15 @@ private:
 				if (site == tstStruct_.sites(1)) {
 					VectorWithOffsetType tmpV2;
 					SizeType indexOfOperator = 1;
-					this->common().applyOneOperator(loopNumber,
+					this->common().aoe().applyOneOperator(loopNumber,
 					                                indexOfOperator,
 					                                site,
 					                                tmpV2,
-					                                this->common().psi(),
+					                                this->common().aoe().psi(),
 					                                direction,
 					                                tstStruct_);
 					if (tmpV2.size() > 0) {
-						this->common().targetVectors(3) += tmpV2;
+						this->common().aoe().targetVectors(3) += tmpV2;
 						applied_ = true;
 						PsimagLite::OstringStream msg;
 						msg<<"Applied second operator";
@@ -331,29 +333,28 @@ private:
 
 		doCorrectionVector();
 
-		for (SizeType i = 0; i < this->common().targetVectors().size(); ++i) {
+		for (SizeType i = 0; i < this->common().aoe().targetVectors().size(); ++i) {
 			PsimagLite::String label = "P" + ttos(i);
 			this->common().cocoon(direction,
 			                      site,
-			                      this->common().psi(),
+			                      this->common().aoe().psi(),
 			                      "PSI",
-			                      this->common().targetVectors(i),
+			                      this->common().aoe().targetVectors(i),
 			                      label);
 		}
-		for (SizeType i = 0; i < this->common().targetVectors().size(); ++i) {
+		for (SizeType i = 0; i < this->common().aoe().targetVectors().size(); ++i) {
 			PsimagLite::String label = "P" + ttos(i);
 			this->common().cocoon(direction,
 			                      site,
-			                      this->common().targetVectors(i),
+			                      this->common().aoe().targetVectors(i),
 			                      label,
-			                      this->common().targetVectors(i),
+			                      this->common().aoe().targetVectors(i),
 			                      label);
 		}
 	}
 
 	void doCorrectionVector()
 	{
-
 		if (!applied_ && appliedFirst_) {
 			setWeights(4);
 			return;
@@ -364,18 +365,18 @@ private:
 			return;
 		}
 
-		skeleton_.calcDynVectors(this->common().targetVectors(3),
-		                         this->common().targetVectors(4),
-		                         this->common().targetVectors(5));
-		//		this->common().targetVectors(4) = this->common().targetVectors(1);
-		//		this->common().targetVectors(5) = this->common().targetVectors(2);
+		skeleton_.calcDynVectors(this->common().aoe().targetVectors(3),
+		                         this->common().aoe().targetVectors(4),
+		                         this->common().aoe().targetVectors(5));
+		//		this->common().aoe().targetVectors(4) = this->common().aoe().targetVectors(1);
+		//		this->common().aoe().targetVectors(5) = this->common().aoe().targetVectors(2);
 
-		RealType n4 = PsimagLite::real(this->common().targetVectors(4)*
-		                               this->common().targetVectors(4));
-		RealType n5 = PsimagLite::real(this->common().targetVectors(5)*
-		                               this->common().targetVectors(5));
+		RealType n4 = PsimagLite::real(this->common().aoe().targetVectors(4)*
+		                               this->common().aoe().targetVectors(4));
+		RealType n5 = PsimagLite::real(this->common().aoe().targetVectors(5)*
+		                               this->common().aoe().targetVectors(5));
 		std::cout<<"HERE============> n4="<<n4<<" n5="<<n5;
-		std::cout<<" "<<this->common().energy()<<"\n";
+		std::cout<<" "<<this->common().aoe().energy()<<"\n";
 		setWeights(6);
 	}
 

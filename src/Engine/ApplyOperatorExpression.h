@@ -136,7 +136,7 @@ public:
 			delete timeVectorsBase_;
 	}
 
-	void init(SizeType tstSites)
+	void postCtor(SizeType tstSites)
 	{
 		if (stage_.size() != 0)
 			throw PsimagLite::RuntimeError("ApplyOperatorExpression: Internal Error\n");

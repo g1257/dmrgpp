@@ -148,20 +148,23 @@ public:
 	      paramsForSolver_(io,"DynamicDmrg"),
 	      weightForContinuedFraction_(0)
 	{
-		this->common().init(tstStruct_.sites(), 0);
 		if (!wft.isEnabled())
-			throw PsimagLite::RuntimeError(" TargetingDynamic needs an enabled wft\n");
+			err(" TargetingDynamic needs an enabled wft\n");
 	}
+
+	SizeType sites() const { return tstStruct_.sites(); }
+
+	SizeType targets() const { return 0; }
 
 	RealType weight(SizeType i) const
 	{
-		assert(!this->common().allStages(DISABLED));
+		assert(!this->common().aoe().allStages(DISABLED));
 		return weight_[i];
 	}
 
 	RealType gsWeight() const
 	{
-		if (this->common().allStages(DISABLED)) return 1.0;
+		if (this->common().aoe().allStages(DISABLED)) return 1.0;
 		return gsWeight_;
 	}
 
@@ -203,7 +206,7 @@ public:
 		if (ab_.size() < 2) return;
 
 		typename PostProcType::ParametersType params = paramsForSolver_;
-		params.Eg = this->common().energy();
+		params.Eg = this->common().aoe().energy();
 		params.weight = s2*weightForContinuedFraction_*s3;
 		params.isign = s;
 		if (tstStruct_.aOperators()[0].fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::BOSON)
@@ -228,12 +231,12 @@ private:
 	{
 
 		VectorWithOffsetType phiNew;
-		SizeType count = this->common().getPhi(phiNew,
-		                                       Eg,
-		                                       direction,
-		                                       site,
-		                                       loopNumber,
-		                                       tstStruct_);
+		SizeType count = this->common().aoe().getPhi(&phiNew,
+		                                             Eg,
+		                                             direction,
+		                                             site,
+		                                             loopNumber,
+		                                             tstStruct_);
 
 		if (count==0) return;
 
@@ -257,9 +260,9 @@ private:
 			getLanczosVectors(V,sv,p);
 			if (i==0) {
 				assert(V.cols() > 0);
-				this->common().targetVectorsResize(V.cols());
-				for (SizeType j=0;j<this->common().targetVectors().size();j++)
-					this->common().targetVectors(j) = phi;
+				this->common().aoe().targetVectorsResize(V.cols());
+				for (SizeType j=0;j<this->common().aoe().targetVectors().size();j++)
+					this->common().aoe().targetVectors(j) = phi;
 			}
 			setVectors(V,i0);
 		}
@@ -292,17 +295,17 @@ private:
 	void setVectors(const DenseMatrixType& V,
 	                SizeType i0)
 	{
-		for (SizeType i=0;i<this->common().targetVectors().size();i++) {
+		for (SizeType i=0;i<this->common().aoe().targetVectors().size();i++) {
 			VectorType tmp(V.rows());
 			for (SizeType j=0;j<tmp.size();j++) tmp[j] = V(j,i);
-			this->common().targetVectors(i).setDataInSector(tmp,i0);
+			this->common().aoe().targetVectors(i).setDataInSector(tmp,i0);
 		}
 	}
 
 	void setWeights()
 	{
 		RealType sum  = 0;
-		weight_.resize(this->common().targetVectors().size());
+		weight_.resize(this->common().aoe().targetVectors().size());
 		for (SizeType r=0;r<weight_.size();r++) {
 			weight_[r] = 1.0;
 			sum += weight_[r];

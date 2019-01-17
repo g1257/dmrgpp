@@ -91,7 +91,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingGroundState.h"
 #include "TargetingTimeStep.h"
 #include "TargetingDynamic.h"
-#include "TargetingAdaptiveDynamic.h"
 #include "TargetingCorrection.h"
 #include "TargetingCorrectionVector.h"
 #include "TargetingChebyshev.h"
@@ -146,8 +145,6 @@ public:
 	typedef TargetingTimeStep<LanczosSolverType,VectorWithOffsetType> TargetingTimeStepType;
 	typedef TargetingChebyshev<LanczosSolverType,VectorWithOffsetType> TargetingChebyshevType;
 	typedef TargetingDynamic<LanczosSolverType,VectorWithOffsetType> TargetingDynamicType;
-	typedef TargetingAdaptiveDynamic<LanczosSolverType,VectorWithOffsetType>
-	TargetingAdaptiveDynamicType;
 	typedef TargetingCorrectionVector<LanczosSolverType,VectorWithOffsetType>
 	TargetingCorrectionVectorType;
 	typedef TargetingCorrection<LanczosSolverType,VectorWithOffsetType> TargetingCorrectionType;
@@ -248,8 +245,6 @@ public:
 			psi = new TargetingTimeStepType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting=="DynamicTargeting") {
 			psi = new TargetingDynamicType(lrs_,model_,wft_,quantumSector_,ioIn_);
-		} else if (targeting=="AdaptiveDynamicTargeting") {
-			psi = new TargetingAdaptiveDynamicType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting=="CorrectionVectorTargeting") {
 			psi = new TargetingCorrectionVectorType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting=="TargetingChebyshev") {
@@ -265,8 +260,10 @@ public:
 		} else if (targeting == "TargetingRixsDynamic") {
 			psi = new TargetingRixsDynamicType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else {
-			throw PsimagLite::RuntimeError("Unknown targeting " + targeting + "\n");
+			err("Unknown targeting " + targeting + "\n");
 		}
+
+		psi->postCtor();
 
 		ioIn_.printUnused(std::cerr);
 

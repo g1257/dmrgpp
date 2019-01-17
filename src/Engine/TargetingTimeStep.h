@@ -138,11 +138,10 @@ public:
 	      tvEnergy_(times_.size(),0.0),
 	      gsWeight_(tstStruct_.gsWeight())
 	{
-		this->common().init(tstStruct_.sites(), tstStruct_.timeSteps());
 		if (!wft.isEnabled())
-			throw PsimagLite::RuntimeError("TST needs an enabled wft\n");
+			err("TST needs an enabled wft\n");
 		if (tstStruct_.sites() == 0)
-			throw PsimagLite::RuntimeError("TST needs at least one TSPSite\n");
+			err("TST needs at least one TSPSite\n");
 
 		RealType tau =tstStruct_.tau();
 		RealType sum = 0;
@@ -165,24 +164,28 @@ public:
 		sum += gsWeight_;
 		assert(fabs(sum-1.0)<1e-5);
 
-		this->common().initTimeVectors(tstStruct_, times_, ioIn);
+		this->common().aoe().initTimeVectors(tstStruct_, times_, ioIn);
 	}
+
+	SizeType sites() const { return tstStruct_.sites(); }
+
+	SizeType targets() const { return tstStruct_.timeSteps(); }
 
 	RealType weight(SizeType i) const
 	{
-		assert(!this->common().allStages(DISABLED));
+		assert(!this->common().aoe().allStages(DISABLED));
 		return weight_[i];
 	}
 
 	RealType gsWeight() const
 	{
-		if (this->common().allStages(DISABLED)) return 1.0;
+		if (this->common().aoe().allStages(DISABLED)) return 1.0;
 		return gsWeight_;
 	}
 
 	bool includeGroundStage() const
 	{
-		if (!this->common().noStageIs(DISABLED)) return true;
+		if (!this->common().aoe().noStageIs(DISABLED)) return true;
 		bool b = (fabs(gsWeight_)>1e-6);
 		return b;
 	}
@@ -215,7 +218,7 @@ public:
 	bool end() const
 	{
 		return (tstStruct_.maxTime() != 0 &&
-		        this->common().currentTime() >= tstStruct_.maxTime());
+		        this->common().aoe().currentTime() >= tstStruct_.maxTime());
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
@@ -231,22 +234,20 @@ public:
 		msg<<"Saving state...";
 		progress_.printline(msg,std::cout);
 
-		SizeType marker = (this->common().noStageIs(DISABLED)) ? 1 : 0;
+		SizeType marker = (this->common().aoe().noStageIs(DISABLED)) ? 1 : 0;
 
 		assert(block.size() > 0);
 		SizeType site = block[0];
-		TimeSerializerType ts(this->common().currentTime(),
+		TimeSerializerType ts(this->common().aoe().currentTime(),
 		                      site,
-		                      this->common().targetVectors(),
+		                      this->common().aoe().targetVectors(),
 		                      marker);
 
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, block, prefix);
 	}
 
-
 private:
-
 
 	void evolveInternal(RealType Eg,
 	                    ProgramGlobals::DirectionEnum direction,
@@ -257,7 +258,7 @@ private:
 		VectorWithOffsetType phiNew;
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
-		this->common().getPhi(phiNew,
+		this->common().aoe().getPhi(&phiNew,
 		                      Eg,
 		                      direction,
 		                      site,
@@ -265,10 +266,10 @@ private:
 		                      tstStruct_);
 
 		PairType startEnd(0,times_.size());
-		bool allOperatorsApplied = (this->common().noStageIs(DISABLED) &&
-		                            this->common().noStageIs(OPERATOR));
+		bool allOperatorsApplied = (this->common().aoe().noStageIs(DISABLED) &&
+		                            this->common().aoe().noStageIs(OPERATOR));
 
-		this->common().calcTimeVectors(startEnd,
+		this->common().aoe().calcTimeVectors(startEnd,
 		                               Eg,
 		                               phiNew,
 		                               direction,
@@ -296,7 +297,7 @@ private:
 
 	void printNormsAndWeights() const
 	{
-		if (this->common().allStages(DISABLED)) return;
+		if (this->common().aoe().allStages(DISABLED)) return;
 
 		PsimagLite::OstringStream msg;
 		msg<<"gsWeight="<<gsWeight_<<" weights= ";
@@ -305,7 +306,7 @@ private:
 		progress_.printline(msg,std::cout);
 
 		PsimagLite::OstringStream msg2;
-		msg2<<"gsNorm="<<norm(this->common().psi())<<" norms= ";
+		msg2<<"gsNorm="<<norm(this->common().aoe().psi())<<" norms= ";
 		for (SizeType i = 0; i < weight_.size(); i++)
 			msg2<<this->common().normSquared(i)<<" ";
 		progress_.printline(msg2,std::cout);
@@ -313,8 +314,8 @@ private:
 
 	void printEnergies() const
 	{
-		for (SizeType i=0;i<this->common().targetVectors().size();i++)
-			printEnergies(this->common().targetVectors()[i],i);
+		for (SizeType i=0;i<this->common().aoe().targetVectors().size();i++)
+			printEnergies(this->common().aoe().targetVectors()[i],i);
 	}
 
 	void printEnergies(const VectorWithOffsetType& phi,SizeType whatTarget) const
@@ -334,7 +335,7 @@ private:
 		                                                 BaseType::lrs(),
 		                                                 BaseType::model().geometry(),
 		                                                 ModelType::modelLinks(),
-		                                                 this->common().currentTime(),
+		                                                 this->common().aoe().currentTime(),
 		                                                 0);
 		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
 		                                                     hc);
@@ -345,7 +346,7 @@ private:
 		TargetVectorType x(total);
 		lanczosHelper.matrixVectorProduct(x,phi2);
 		PsimagLite::OstringStream msg;
-		msg<<"Hamiltonian average at time="<<this->common().currentTime();
+		msg<<"Hamiltonian average at time="<<this->common().aoe().currentTime();
 		msg<<" for target="<<whatTarget;
 		ComplexOrRealType numerator = phi2*x;
 		ComplexOrRealType den = phi2*phi2;
@@ -362,7 +363,7 @@ private:
 	{
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 
-		if (this->common().noStageIs(DISABLED))
+		if (this->common().aoe().noStageIs(DISABLED))
 			std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
 		else
 			std::cout<<"NOT ALL OPERATORS APPLIED YET\n";

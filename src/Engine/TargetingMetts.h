@@ -179,9 +179,7 @@ public:
 	      systemPrev_(),
 	      environPrev_()
 	{
-		this->common().init(mettsStruct_.sites(), mettsStruct_.timeSteps() + 1);
-		if (!wft.isEnabled()) throw PsimagLite::RuntimeError(" TargetingMetts "
-		                                                     "needs an enabled wft\n");
+		if (!wft.isEnabled()) err(" TargetingMetts needs an enabled wft\n");
 
 		RealType tau = mettsStruct_.tau()/(mettsStruct_.timeSteps()-1);
 		SizeType n1 = mettsStruct_.timeSteps();
@@ -199,7 +197,7 @@ public:
 		sum += gsWeight_;
 		assert(fabs(sum-1.0)<1e-5);
 
-		this->common().initTimeVectors(mettsStruct_, betas_, ioIn);
+		this->common().aoe().initTimeVectors(mettsStruct_, betas_, ioIn);
 	}
 
 	~TargetingMetts()
@@ -210,6 +208,10 @@ public:
 			garbage_[i] = 0;
 		}
 	}
+
+	SizeType sites() const { return mettsStruct_.sites(); }
+
+	SizeType targets() const { return mettsStruct_.timeSteps() + 1; }
 
 	RealType weight(SizeType i) const
 	{
@@ -225,9 +227,9 @@ public:
 
 	SizeType size() const
 	{
-		if (this->common().allStages(DISABLED)) return 1;
-		SizeType n = this->common().targetVectors().size();
-		if (this->common().targetVectors()[n-1].size()==0) n--;
+		if (this->common().aoe().allStages(DISABLED)) return 1;
+		SizeType n = this->common().aoe().targetVectors().size();
+		if (this->common().aoe().targetVectors()[n-1].size()==0) n--;
 		return n;
 	}
 
@@ -252,10 +254,10 @@ public:
 
 		SizeType max = n1;
 
-		if (this->common().noStageIs(DISABLED)) {
+		if (this->common().aoe().noStageIs(DISABLED)) {
 			max = 1;
-			if (this->common().allStages(WFT_ADVANCE))
-				this->common().setAllStagesTo(WFT_NOADVANCE);
+			if (this->common().aoe().allStages(WFT_ADVANCE))
+				this->common().aoe().setAllStagesTo(WFT_NOADVANCE);
 		}
 
 		// Advance or wft each target vector for beta/2
@@ -267,12 +269,12 @@ public:
 		calcTimeVectors(PairType(0,n1),Eg,direction,block1);
 
 		// Advance or wft  collapsed vector
-		if (this->common().targetVectors()[n1].size()>0)
+		if (this->common().aoe().targetVectors()[n1].size()>0)
 			evolve(n1,n1,n1-1,Eg,direction,sites,loopNumber);
 
-		for (SizeType i=0;i<this->common().targetVectors().size();i++)
-			assert(this->common().targetVectors()[i].size()==0 ||
-			       this->common().targetVectors()[i].size()==
+		for (SizeType i=0;i<this->common().aoe().targetVectors().size();i++)
+			assert(this->common().aoe().targetVectors()[i].size()==0 ||
+			       this->common().aoe().targetVectors()[i].size()==
 			       lrs_.super().permutationVector().size());
 
 		cocoon(direction,block1); // in-situ
@@ -289,11 +291,11 @@ public:
 
 		printNormsAndWeights();
 
-		if (this->common().noStageIs(COLLAPSE)) return;
+		if (this->common().aoe().noStageIs(COLLAPSE)) return;
 
 		// collapse
-		bool hasCollapsed = mettsCollapse_(this->common().targetVectors(n1),
-		                                   this->common().targetVectors()[n1-1],
+		bool hasCollapsed = mettsCollapse_(this->common().aoe().targetVectors(n1),
+		                                   this->common().aoe().targetVectors()[n1-1],
 		        sites,
 		        direction);
 		if (hasCollapsed) {
@@ -315,9 +317,9 @@ public:
 		this->common().write(io, block, prefix);
 
 		VectorVectorWithOffsetType& tv = const_cast<VectorVectorWithOffsetType&>
-		        (this->common().targetVectors());
-		if (mettsStruct_.beta > this->common().currentTime()) {
-			for (SizeType i = 0; i < this->common().targetVectors().size(); ++i)
+		        (this->common().aoe().targetVectors());
+		if (mettsStruct_.beta > this->common().aoe().currentTime()) {
+			for (SizeType i = 0; i < this->common().aoe().targetVectors().size(); ++i)
 				tv[i].clear();
 		}
 
@@ -356,15 +358,15 @@ private:
 	                     ProgramGlobals::DirectionEnum systemOrEnviron,
 	                     const VectorSizeType& block)
 	{
-		const VectorWithOffsetType& phi = this->common().targetVectors()[startEnd.first];
+		const VectorWithOffsetType& phi = this->common().aoe().targetVectors()[startEnd.first];
 		PsimagLite::OstringStream msg;
 		msg<<" vector number "<<startEnd.first<<" has norm ";
 		msg<<norm(phi);
 		progress_.printline(msg,std::cout);
 		if (norm(phi)<1e-6)
-			setFromInfinite(this->common().targetVectors(startEnd.first),lrs_);
-		bool allOperatorsApplied = (this->common().noStageIs(DISABLED));
-		this->common().calcTimeVectors(startEnd,
+			setFromInfinite(this->common().aoe().targetVectors(startEnd.first),lrs_);
+		bool allOperatorsApplied = (this->common().aoe().noStageIs(DISABLED));
+		this->common().aoe().calcTimeVectors(startEnd,
 		                               Eg,
 		                               phi,
 		                               systemOrEnviron,
@@ -378,10 +380,10 @@ private:
 	{
 		static SizeType timesWithoutAdvancement = 0;
 
-		if (this->common().noStageIs(COLLAPSE))
-			this->common().setAllStagesTo(WFT_NOADVANCE);
+		if (this->common().aoe().noStageIs(COLLAPSE))
+			this->common().aoe().setAllStagesTo(WFT_NOADVANCE);
 
-		if (this->common().allStages(COLLAPSE)) {
+		if (this->common().aoe().allStages(COLLAPSE)) {
 			if (!allSitesCollapsed()) {
 				if (sitesCollapsed_.size()>2*model_.geometry().numberOfSites())
 					throw PsimagLite::RuntimeError("advanceCounterAndComputeStage\n");
@@ -390,17 +392,17 @@ private:
 			}
 
 			sitesCollapsed_.clear();
-			this->common().setAllStagesTo(WFT_NOADVANCE);
+			this->common().aoe().setAllStagesTo(WFT_NOADVANCE);
 			timesWithoutAdvancement = 0;
-			this->common().setTime(0);
+			this->common().aoe().setTime(0);
 			PsimagLite::OstringStream msg;
 			SizeType n1 = mettsStruct_.timeSteps();
-			RealType x = norm(this->common().targetVectors()[n1]);
+			RealType x = norm(this->common().aoe().targetVectors()[n1]);
 			msg<<"Changing direction, setting collapsed with norm="<<x;
 			progress_.printline(msg,std::cout);
 			for (SizeType i=0;i<n1;i++)
-				this->common().targetVectors(i) = this->common().targetVectors()[n1];
-			this->common().timeHasAdvanced();
+				this->common().aoe().targetVectors(i) = this->common().aoe().targetVectors()[n1];
+			this->common().aoe().timeHasAdvanced();
 			printAdvancement(timesWithoutAdvancement);
 			return;
 		}
@@ -411,29 +413,29 @@ private:
 			return;
 		}
 
-		if (this->common().noStageIs(COLLAPSE) &&
-		        this->common().currentTime() < mettsStruct_.beta) {
-			this->common().setAllStagesTo(WFT_ADVANCE);
-			RealType tmp = this->common().currentTime() + mettsStruct_.tau();
-			this->common().setTime(tmp);
+		if (this->common().aoe().noStageIs(COLLAPSE) &&
+		        this->common().aoe().currentTime() < mettsStruct_.beta) {
+			this->common().aoe().setAllStagesTo(WFT_ADVANCE);
+			RealType tmp = this->common().aoe().currentTime() + mettsStruct_.tau();
+			this->common().aoe().setTime(tmp);
 			timesWithoutAdvancement = 0;
 			printAdvancement(timesWithoutAdvancement);
 			return;
 		}
 
-		if (this->common().noStageIs(COLLAPSE) &&
-		        this->common().currentTime() >= mettsStruct_.beta &&
+		if (this->common().aoe().noStageIs(COLLAPSE) &&
+		        this->common().aoe().currentTime() >= mettsStruct_.beta &&
 		        block[0]!=block.size()) {
 			printAdvancement(timesWithoutAdvancement);
 			return;
 		}
 
-		if (this->common().noStageIs(COLLAPSE) &&
-		        this->common().currentTime() >= mettsStruct_.beta) {
-			this->common().setAllStagesTo(COLLAPSE);
+		if (this->common().aoe().noStageIs(COLLAPSE) &&
+		        this->common().aoe().currentTime() >= mettsStruct_.beta) {
+			this->common().aoe().setAllStagesTo(COLLAPSE);
 			sitesCollapsed_.clear();
 			SizeType n1 = mettsStruct_.timeSteps();
-			this->common().targetVectors(n1).clear();
+			this->common().aoe().targetVectors(n1).clear();
 			timesWithoutAdvancement = 0;
 			printAdvancement(timesWithoutAdvancement);
 			return;
@@ -453,18 +455,18 @@ private:
 	                  SizeType,
 	                  const VectorSizeType& block)
 	{
-		if (this->common().targetVectors()[index].size()==0) return;
-		assert(norm(this->common().targetVectors()[index])>1e-6);
+		if (this->common().aoe().targetVectors()[index].size()==0) return;
+		assert(norm(this->common().aoe().targetVectors()[index])>1e-6);
 		VectorSizeType nk;
 		mettsCollapse_.setNk(nk,block);
 
-		if (this->common().allStages(WFT_NOADVANCE) ||
-		        this->common().allStages(WFT_ADVANCE) ||
-		        this->common().allStages(COLLAPSE)) {
+		if (this->common().aoe().allStages(WFT_NOADVANCE) ||
+		        this->common().aoe().allStages(WFT_ADVANCE) ||
+		        this->common().aoe().allStages(COLLAPSE)) {
 			SizeType advance = index;
-			if (this->common().allStages(WFT_ADVANCE)) {
+			if (this->common().aoe().allStages(WFT_ADVANCE)) {
 				advance = indexAdvance;
-				this->common().timeHasAdvanced();
+				this->common().aoe().timeHasAdvanced();
 			}
 			// don't advance the collapsed vector because we'll recompute
 			if (index==weight_.size()-1) advance=index;
@@ -474,14 +476,14 @@ private:
 
 			VectorWithOffsetType phiNew; // same sectors as g.s.
 			//phiNew.populateSectors(lrs_.super());
-			assert(norm(this->common().targetVectors()[advance])>1e-6);
+			assert(norm(this->common().aoe().targetVectors()[advance])>1e-6);
 
 			phiNew.populateSectors(lrs_.super());
 			// OK, now that we got the partition number right, let's wft:
-			wft_.setInitialVector(phiNew,this->common().targetVectors()[advance],lrs_,nk);
+			wft_.setInitialVector(phiNew,this->common().aoe().targetVectors()[advance],lrs_,nk);
 			phiNew.collapseSectors();
 			assert(norm(phiNew)>1e-6);
-			this->common().targetVectors(index) = phiNew;
+			this->common().aoe().targetVectors(index) = phiNew;
 		} else {
 			assert(false);
 		}
@@ -556,8 +558,8 @@ private:
 		           transformEnviron,
 		           block2);
 		pureVectors_.second = newVector2;
-		setFromInfinite(this->common().targetVectors(0),lrs_);
-		assert(norm(this->common().targetVectors()[0])>1e-6);
+		setFromInfinite(this->common().aoe().targetVectors(0),lrs_);
+		assert(norm(this->common().aoe().targetVectors()[0])>1e-6);
 
 		systemPrev_.fixed = alphaFixedVolume;
 		systemPrev_.permutationInverse = lrs_.left().permutationInverse();
@@ -721,7 +723,7 @@ private:
 	{
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 
-		if (this->common().noStageIs(DISABLED))
+		if (this->common().aoe().noStageIs(DISABLED))
 			std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
 		else
 			std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
@@ -741,10 +743,10 @@ private:
 
 	PsimagLite::String getStage() const
 	{
-		if (this->common().allStages(DISABLED)) return "Disabled";
-		if (this->common().allStages(COLLAPSE)) return "Collapsing";
-		if (this->common().allStages(WFT_ADVANCE)) return "WFT with time stepping";
-		if (this->common().allStages(WFT_NOADVANCE)) return "WFT without time change";
+		if (this->common().aoe().allStages(DISABLED)) return "Disabled";
+		if (this->common().aoe().allStages(COLLAPSE)) return "Collapsing";
+		if (this->common().aoe().allStages(WFT_ADVANCE)) return "WFT with time stepping";
+		if (this->common().aoe().allStages(WFT_NOADVANCE)) return "WFT without time change";
 
 		return "undefined";
 	}
@@ -791,7 +793,7 @@ private:
 
 	void printNormsAndWeights() const
 	{
-		if (this->common().allStages(DISABLED)) return;
+		if (this->common().aoe().allStages(DISABLED)) return;
 
 		PsimagLite::OstringStream msg;
 		msg<<"gsWeight="<<gsWeight_<<" weights= ";
@@ -800,7 +802,7 @@ private:
 		progress_.printline(msg,std::cout);
 
 		PsimagLite::OstringStream msg2;
-		msg2<<"gsNorm="<<norm(this->common().psi())<<" norms= ";
+		msg2<<"gsNorm="<<norm(this->common().aoe().psi())<<" norms= ";
 		for (SizeType i = 0; i < weight_.size(); i++)
 			msg2<<this->common().normSquared(i)<<" ";
 		progress_.printline(msg2,std::cout);
@@ -808,8 +810,8 @@ private:
 
 	void printEnergies() const
 	{
-		for (SizeType i=0;i<this->common().targetVectors().size();i++)
-			printEnergies(this->common().targetVectors()[i],i);
+		for (SizeType i=0;i<this->common().aoe().targetVectors().size();i++)
+			printEnergies(this->common().aoe().targetVectors()[i],i);
 	}
 
 	void printEnergies(const VectorWithOffsetType& phi,SizeType whatTarget) const
@@ -829,7 +831,7 @@ private:
 		                                                 BaseType::lrs(),
 		                                                 BaseType::model().geometry(),
 		                                                 BaseType::ModelType::modelLinks(),
-		                                                 this->common().currentTime(),
+		                                                 this->common().aoe().currentTime(),
 		                                                 0);
 		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
 		                                                     hc);
@@ -840,7 +842,7 @@ private:
 		TargetVectorType x(total);
 		lanczosHelper.matrixVectorProduct(x,phi2);
 		PsimagLite::OstringStream msg;
-		msg<<"Hamiltonian average at time="<<this->common().currentTime();
+		msg<<"Hamiltonian average at time="<<this->common().aoe().currentTime();
 		msg<<" for target="<<whatTarget;
 		ComplexOrRealType numerator = phi2*x;
 		ComplexOrRealType den = phi2*phi2;
