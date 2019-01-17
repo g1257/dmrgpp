@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TIME_VECTORS_BASE
 #define TIME_VECTORS_BASE
 #include <iostream>
-
+#include "Vector.h"
 
 namespace Dmrg {
 
@@ -97,12 +97,13 @@ public:
 
 	typedef std::pair<SizeType,SizeType> PairType;
 
-	virtual void calcTimeVectors(const PairType& startEnd,
-	                             RealType Eg,
-	                             const VectorWithOffsetType& phi,
-	                             SizeType systemOrEnviron,
-	                             bool allOperatorsApplied,
-	                             const PsimagLite::Vector<SizeType>::Type& block)=0;
+	virtual void calcTimeVectors(const PairType&,
+	                             RealType,
+	                             const VectorWithOffsetType&,
+	                             SizeType,
+	                             bool,
+	                             const PsimagLite::Vector<SizeType>::Type&,
+	                             const TargetParamsType&)=0;
 
 	virtual ~TimeVectorsBase() {}
 

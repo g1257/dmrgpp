@@ -130,7 +130,6 @@ class TimeVectorsKrylov : public  TimeVectorsBase<
 public:
 
 	TimeVectorsKrylov(const RealType& currentTime,
-	                  const TargetParamsType& tstStruct,
 	                  const VectorRealType& times,
 	                  VectorVectorWithOffsetType& targetVectors,
 	                  const ModelType& model,
@@ -139,7 +138,6 @@ public:
 	                  const RealType& E0,
 	                  InputValidatorType& ioIn)
 	    : currentTime_(currentTime),
-	      tstStruct_(tstStruct),
 	      times_(times),
 	      targetVectors_(targetVectors),
 	      model_(model),
@@ -155,9 +153,10 @@ public:
 	                             const VectorWithOffsetType& phi,
 	                             SizeType systemOrEnviron,
 	                             bool,
-	                             const PsimagLite::Vector<SizeType>::Type&)
+	                             const PsimagLite::Vector<SizeType>::Type&,
+	                             const TargetParamsType& tstStruct)
 	{
-		if (currentTime_==0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
+		if (currentTime_==0 && tstStruct.noOperator() && tstStruct.skipTimeZero()) {
 			for (SizeType i=0;i<times_.size();i++)
 				targetVectors_[i]=phi;
 			return;
@@ -180,7 +179,7 @@ public:
 		for (SizeType ii=0;ii<phi.sectors();ii++)
 			PsimagLite::diag(T[ii],eigs[ii],'V');
 
-		calcTargetVectors(startEnd,phi,T,V,Eg,eigs,steps,systemOrEnviron);
+		calcTargetVectors(startEnd, phi, T, V, Eg, eigs, steps, tstStruct);
 
 		//checkNorms();
 		timeHasAdvanced_ = false;
@@ -201,13 +200,13 @@ private:
 	                       RealType Eg,
 	                       const VectorVectorRealType& eigs,
 	                       typename PsimagLite::Vector<SizeType>::Type steps,
-	                       SizeType)
+	                       const TargetParamsType& tstStruct)
 	{
 		for (SizeType i=startEnd.first+1;i<startEnd.second;i++) {
 			assert(i<targetVectors_.size());
 			targetVectors_[i] = phi;
 			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
-			calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,i,steps);
+			calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,i,steps,tstStruct);
 		}
 	}
 
@@ -218,27 +217,28 @@ private:
 	                      RealType Eg,
 	                      const VectorVectorRealType& eigs,
 	                      SizeType timeIndex,
-	                      typename PsimagLite::Vector<SizeType>::Type steps)
+	                      typename PsimagLite::Vector<SizeType>::Type steps,
+	                      const TargetParamsType& tstStruct)
 	{
 		v = phi;
 		for (SizeType ii=0;ii<phi.sectors();ii++) {
 			SizeType i0 = phi.sector(ii);
 			TargetVectorType r;
-			calcTargetVector(r,phi,T[ii],V[ii],Eg,eigs[ii],timeIndex,steps[ii],i0);
+			calcTargetVector(r,phi,T[ii],V[ii],Eg,eigs[ii],timeIndex,steps[ii],i0,tstStruct);
 			v.setDataInSector(r,i0);
 		}
 	}
 
-	void calcTargetVector(
-	        TargetVectorType& r,
-	        const VectorWithOffsetType& phi,
-	        const MatrixComplexOrRealType& T,
-	        const MatrixComplexOrRealType& V,
-	        RealType Eg,
-	        const VectorRealType& eigs,
-	        SizeType timeIndex,
-	        SizeType steps,
-	        SizeType i0)
+	void calcTargetVector(TargetVectorType& r,
+	                      const VectorWithOffsetType& phi,
+	                      const MatrixComplexOrRealType& T,
+	                      const MatrixComplexOrRealType& V,
+	                      RealType Eg,
+	                      const VectorRealType& eigs,
+	                      SizeType timeIndex,
+	                      SizeType steps,
+	                      SizeType i0,
+	                      const TargetParamsType& tstStruct)
 	{
 		SizeType n2 = steps;
 		SizeType n = V.rows();
@@ -252,7 +252,7 @@ private:
 		//check2(T,V,phi,n2,i0);
 		TargetVectorType tmp(n2);
 		r.resize(n2);
-		calcR(r,T,V,phi,Eg,eigs,timeIndex,steps,i0);
+		calcR(r, T, V,phi, Eg, eigs, timeIndex, steps, i0, tstStruct);
 		psimag::BLAS::GEMV('N',n2,n2,zone,&(T(0,0)),n2,&(r[0]),1,zzero,&(tmp[0]),1);
 		r.resize(n);
 		psimag::BLAS::GEMV('N',n,n2,zone,&(V(0,0)),n,&(tmp[0]),1,zzero,&(r[0]),1);
@@ -266,9 +266,10 @@ private:
 	           const VectorRealType& eigs,
 	           SizeType timeIndex,
 	           SizeType n2,
-	           SizeType i0)
+	           SizeType i0,
+	           const TargetParamsType& tstStruct)
 	{
-		RealType timeDirection = tstStruct_.timeDirection();
+		RealType timeDirection = tstStruct.timeDirection();
 
 		for (SizeType k=0;k<n2;k++) {
 			ComplexOrRealType sum = 0.0;
@@ -311,7 +312,6 @@ private:
 	}
 
 	const RealType& currentTime_;
-	const TargetParamsType& tstStruct_;
 	const VectorRealType& times_;
 	VectorVectorWithOffsetType& targetVectors_;
 	const ModelType& model_;

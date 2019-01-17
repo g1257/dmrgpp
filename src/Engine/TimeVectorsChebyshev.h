@@ -94,8 +94,7 @@ template<typename TargetParamsType,
          typename WaveFunctionTransfType,
          typename LanczosSolverType,
          typename VectorWithOffsetType>
-class TimeVectorsChebyshev : public  TimeVectorsBase<
-        TargetParamsType,
+class TimeVectorsChebyshev : public  TimeVectorsBase<TargetParamsType,
         ModelType,
         WaveFunctionTransfType,
         LanczosSolverType,
@@ -109,7 +108,6 @@ class TimeVectorsChebyshev : public  TimeVectorsBase<
 	typedef typename BaseType::PairType PairType;
 	typedef typename TargetParamsType::RealType RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	//	typedef typename PsimagLite::Matrix<RealType>::Type MatrixRealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType
@@ -136,7 +134,6 @@ class TimeVectorsChebyshev : public  TimeVectorsBase<
 public:
 
 	TimeVectorsChebyshev(const RealType& currentTime,
-	                     const TargetParamsType& tstStruct,
 	                     const VectorRealType& times,
 	                     VectorVectorWithOffsetType& targetVectors,
 	                     const ModelType& model,
@@ -145,7 +142,6 @@ public:
 	                     const RealType& E0,
 	                     InputValidatorType& ioIn)
 	    : currentTime_(currentTime),
-	      tstStruct_(tstStruct),
 	      times_(times),
 	      targetVectors_(targetVectors),
 	      model_(model),
@@ -161,11 +157,12 @@ public:
 	                             const VectorWithOffsetType& phi,
 	                             SizeType,
 	                             bool,
-	                             const VectorSizeType& indices)
+	                             const VectorSizeType& indices,
+	                             const TargetParamsType& tstStruct)
 	{
 		SizeType n = indices.size();
 		assert(n > 0);
-		if (currentTime_==0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
+		if (currentTime_==0 && tstStruct.noOperator() && tstStruct.skipTimeZero()) {
 			for (SizeType i = 0; i < n; ++i) {
 				SizeType ii = indices[i];
 				targetVectors_[ii] = phi;
@@ -195,7 +192,7 @@ public:
 			targetVectors_[ii] = phi;
 			SizeType prev = indices[i - 1];
 			SizeType prevMinus2 = indices[i - 2];
-			calcTargetVector(targetVectors_[ii], phi, prev, prevMinus2);
+			calcTargetVector(targetVectors_[ii], phi, prev, prevMinus2, tstStruct);
 		}
 
 		timeHasAdvanced_ = false;
@@ -212,12 +209,14 @@ private:
 	void calcTargetVector(VectorWithOffsetType& v,
 	                      const VectorWithOffsetType& phi,
 	                      SizeType prev,
-	                      SizeType prevMinus2)
+	                      SizeType prevMinus2,
+	                      const TargetParamsType& tstStruct)
+
 	{
 		for (SizeType ii=0;ii<phi.sectors();ii++) {
 			SizeType i0 = phi.sector(ii);
 			TargetVectorType r;
-			calcTargetVector(r, phi, prev, prevMinus2, i0);
+			calcTargetVector(r, phi, prev, prevMinus2, i0, tstStruct);
 			v.setDataInSector(r,i0);
 		}
 	}
@@ -226,7 +225,8 @@ private:
 	                      const VectorWithOffsetType& phi,
 	                      SizeType prev,
 	                      SizeType prevMinus2,
-	                      SizeType i0)
+	                      SizeType i0,
+	                      const TargetParamsType& tstStruct)
 	{
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelType::HamiltonianConnectionType hc(p,
@@ -238,7 +238,7 @@ private:
 		MatrixLanczosType lanczosHelper(model_,
 		                                hc);
 
-		ScaledMatrixType lanczosHelper2(lanczosHelper, tstStruct_, E0_); // defining Hprime matrix
+		ScaledMatrixType lanczosHelper2(lanczosHelper, tstStruct, E0_); // defining Hprime matrix
 
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
@@ -257,7 +257,6 @@ private:
 	}
 
 	const RealType& currentTime_;
-	const TargetParamsType& tstStruct_;
 	const VectorRealType& times_;
 	VectorVectorWithOffsetType& targetVectors_;
 	const ModelType& model_;

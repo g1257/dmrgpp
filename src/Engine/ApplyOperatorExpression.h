@@ -294,7 +294,6 @@ public:
 		switch (tstStruct.algorithm()) {
 		case TargetParamsType::AlgorithmEnum::KRYLOV:
 			timeVectorsBase_ = new TimeVectorsKrylovType(currentTime_,
-			                                             tstStruct,
 			                                             times,
 			                                             targetVectors_,
 			                                             model,
@@ -305,7 +304,6 @@ public:
 			break;
 		case TargetParamsType::AlgorithmEnum::CHEBYSHEV:
 			timeVectorsBase_ = new TimeVectorsChebyshevType(currentTime_,
-			                                                tstStruct,
 			                                                times,
 			                                                targetVectors_,
 			                                                model,
@@ -316,7 +314,6 @@ public:
 			break;
 		case TargetParamsType::AlgorithmEnum::RUNGE_KUTTA:
 			timeVectorsBase_ = new TimeVectorsRungeKuttaType(currentTime_,
-			                                                 tstStruct,
 			                                                 times,
 			                                                 targetVectors_,
 			                                                 model,
@@ -326,7 +323,6 @@ public:
 			break;
 		case TargetParamsType::AlgorithmEnum::SUZUKI_TROTTER:
 			timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(currentTime_,
-			                                                    tstStruct,
 			                                                    times,
 			                                                    targetVectors_,
 			                                                    model,
@@ -369,14 +365,16 @@ public:
 	                     const VectorWithOffsetType& phi,
 	                     ProgramGlobals::DirectionEnum direction,
 	                     bool allOperatorsApplied,
-	                     const PsimagLite::Vector<SizeType>::Type& block)
+	                     const PsimagLite::Vector<SizeType>::Type& block,
+	                     const TargetParamsType& tstStruct)
 	{
 		timeVectorsBase_->calcTimeVectors(startEnd,
 		                                  Eg,
 		                                  phi,
 		                                  direction,
 		                                  allOperatorsApplied,
-		                                  block);
+		                                  block,
+		                                  tstStruct);
 	}
 
 	void applyOneOperator(SizeType loopNumber,

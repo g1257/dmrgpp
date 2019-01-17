@@ -283,7 +283,8 @@ private:
 				                 phiNew,
 				                 direction,
 				                 allOperatorsApplied,
-				                 block1);
+				                 block1,
+		                         tstStruct_);
 
 		assert(phiNew.offset(0) == this->common().targetVectors()[1].offset(0));
 

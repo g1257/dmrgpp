@@ -183,7 +183,8 @@ public:
 	               const VectorWithOffsetType& phiNew,
 	               ProgramGlobals::DirectionEnum direction,
 	               bool allOperatorsApplied,
-	               const VectorSizeType& block1)
+	               const VectorSizeType& block1,
+	               const TargetParamsType& tstStruct)
 	{
 		SizeType startOfWft = 1;
 		if (currentTime() == 0) {
@@ -209,7 +210,8 @@ public:
 		                phiNew,
 		                direction,
 		                allOperatorsApplied,
-		                indices);
+		                indices,
+		                tstStruct);
 
 	}
 
@@ -462,14 +464,16 @@ public:
 	                     const VectorWithOffsetType& phi,
 	                     ProgramGlobals::DirectionEnum direction,
 	                     bool allOperatorsApplied,
-	                     const PsimagLite::Vector<SizeType>::Type& block)
+	                     const PsimagLite::Vector<SizeType>::Type& block,
+	                     const TargetParamsType& tstStruct)
 	{
 		return applyOpExpression_.calcTimeVectors(startEnd,
 		                                          Eg,
 		                                          phi,
 		                                          direction,
 		                                          allOperatorsApplied,
-		                                          block);
+		                                          block,
+		                                          tstStruct);
 	}
 
 	void applyOneOperator(SizeType loopNumber,

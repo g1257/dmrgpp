@@ -127,7 +127,6 @@ class TimeVectorsSuzukiTrotter : public  TimeVectorsBase<
 public:
 
 	TimeVectorsSuzukiTrotter(RealType currentTime,
-	                         const TargetParamsType& tstStruct,
 	                         const VectorRealType& times,
 	                         VectorVectorWithOffsetType& targetVectors,
 	                         const ModelType& model,
@@ -136,7 +135,6 @@ public:
 	                         const RealType& E0)
 	    : progress_("TimeVectorsSuzukiTrotter"),
 	      currentTime_(currentTime),
-	      tstStruct_(tstStruct),
 	      times_(times),
 	      targetVectors_(targetVectors),
 	      model_(model),
@@ -151,7 +149,8 @@ public:
 	                             const VectorWithOffsetType& phi,
 	                             SizeType systemOrEnviron,
 	                             bool allOperatorsApplied,
-	                             const VectorSizeType& block)
+	                             const VectorSizeType& block,
+	                             const TargetParamsType&)
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"EXPERIMENTAL: using SuzukiTrotter";
@@ -574,7 +573,6 @@ private:
 
 	PsimagLite::ProgressIndicator progress_;
 	RealType currentTime_;
-	const TargetParamsType& tstStruct_;
 	const VectorRealType& times_;
 	VectorVectorWithOffsetType& targetVectors_;
 	const ModelType& model_;

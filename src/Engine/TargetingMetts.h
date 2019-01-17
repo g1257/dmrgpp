@@ -369,7 +369,8 @@ private:
 		                               phi,
 		                               systemOrEnviron,
 		                               allOperatorsApplied,
-		                               block);
+		                               block,
+		                               mettsStruct_);
 		this->common().normalizeTimeVectors(startEnd.first+1,startEnd.second);
 	}
 

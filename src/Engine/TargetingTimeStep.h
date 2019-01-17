@@ -273,7 +273,8 @@ private:
 		                               phiNew,
 		                               direction,
 		                               allOperatorsApplied,
-		                               block1);
+		                               block1,
+		                               tstStruct_);
 
 		cocoon(direction,block1); // in-situ
 

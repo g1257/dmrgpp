@@ -519,12 +519,14 @@ private:
 		bool allOperatorsApplied = (this->common().noStageIs(DISABLED) &&
 		                            this->common().noStageIs(OPERATOR));
 
+		const VectorWithOffsetType& v0 = this->common().targetVectors(indices[0]);
 		this->common().chebyshev(indices,
 		                         Eg,
-		                         this->common().targetVectors(indices[0]),
-		        direction,
-		        allOperatorsApplied,
-		        block1);
+		                         v0,
+		                         direction,
+		                         allOperatorsApplied,
+		                         block1,
+		                         *tstStruct2_);
 	}
 
 	void applyOneOp(SizeType loopNumber,
