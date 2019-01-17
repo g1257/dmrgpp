@@ -17,7 +17,6 @@
 #include "TargetingGroundState.h"
 #include "TargetingTimeStep.h"
 #include "TargetingDynamic.h"
-#include "TargetingAdaptiveDynamic.h"
 #include "TargetingCorrection.h"
 #include "TargetingCorrectionVector.h"
 #include "TargetingMetts.h"
