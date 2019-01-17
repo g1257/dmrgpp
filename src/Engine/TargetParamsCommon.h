@@ -107,7 +107,7 @@ public:
 	TargetParamsCommon(InputValidatorType& io,const ModelType& model)
 	    : sites_(0),
 	      startingLoops_(0),
-	      concatenation_(BaseType::PRODUCT),
+	      concatenation_(BaseType::ConcatEnum::PRODUCT),
 	      noOperator_(false),
 	      skipTimeZero_(false),
 	      isEnergyForExp_(false),
@@ -163,9 +163,9 @@ public:
 		//! Concatenation specifies what to do with
 		//! operators at different sites, add them or multiply them
 		if (productOrSum == "product") {
-			this->concatenation_ = BaseType::PRODUCT;
+			this->concatenation_ = BaseType::ConcatEnum::PRODUCT;
 		} else if (productOrSum == "sum") {
-			this->concatenation_ = BaseType::SUM;
+			this->concatenation_ = BaseType::ConcatEnum::SUM;
 		} else {
 			PsimagLite::String s(__FILE__);
 			s += " : Unknown concatentation " + productOrSum + "\n";
@@ -242,7 +242,7 @@ public:
 		return startingLoops_;
 	}
 
-	virtual SizeType concatenation() const
+	virtual typename BaseType::ConcatEnum concatenation() const
 	{
 		return concatenation_;
 	}

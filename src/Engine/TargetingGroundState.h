@@ -127,7 +127,7 @@ public:
 	      tstStruct_(io,model),
 	      progress_("TargetingGroundState")
 	{
-		this->common().init(&tstStruct_,0);
+		this->common().init(tstStruct_.sites(), 0);
 	}
 
 	RealType weight(SizeType) const

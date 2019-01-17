@@ -148,7 +148,7 @@ public:
 	      paramsForSolver_(io,"DynamicDmrg"),
 	      weightForContinuedFraction_(0)
 	{
-		this->common().init(&tstStruct_,0);
+		this->common().init(tstStruct_.sites(), 0);
 		if (!wft.isEnabled())
 			throw PsimagLite::RuntimeError(" TargetingDynamic needs an enabled wft\n");
 	}
@@ -194,7 +194,8 @@ public:
 		this->common().write(io, block, prefix);
 
 		SizeType type = tstStruct_.type();
-		int fermionSign = this->common().findFermionSignOfTheOperators();
+		int fermionSign = this->common().findFermionSignOfTheOperators(tstStruct_.concatenation(),
+		                                                               tstStruct_.aOperators());
 		int s = (type&1) ? -1 : 1;
 		int s2 = (type>1) ? -1 : 1;
 		int s3 = (type&1) ? -fermionSign : 1;
@@ -227,7 +228,12 @@ private:
 	{
 
 		VectorWithOffsetType phiNew;
-		SizeType count = this->common().getPhi(phiNew,Eg,direction,site,loopNumber);
+		SizeType count = this->common().getPhi(phiNew,
+		                                       Eg,
+		                                       direction,
+		                                       site,
+		                                       loopNumber,
+		                                       tstStruct_);
 
 		if (count==0) return;
 

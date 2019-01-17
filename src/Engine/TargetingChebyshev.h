@@ -138,7 +138,7 @@ public:
 	      tvEnergy_(times_.size(),0.0),
 	      gsWeight_(tstStruct_.gsWeight())
 	{
-		this->common().init(&tstStruct_,tstStruct_.timeSteps());
+		this->common().init(tstStruct_.sites(), tstStruct_.timeSteps());
 		if (!wft.isEnabled())
 			throw PsimagLite::RuntimeError("TST needs an enabled wft\n");
 		if (tstStruct_.sites() == 0)
@@ -175,7 +175,7 @@ public:
 		sum += gsWeight_;
 		assert(fabs(sum-1.0)<1e-5);
 
-		this->common().initTimeVectors(times_,ioIn);
+		this->common().initTimeVectors(tstStruct_, times_, ioIn);
 	}
 
 	RealType weight(SizeType i) const
@@ -265,7 +265,7 @@ private:
 	{
 		if (direction == ProgramGlobals::INFINITE) return;
 		VectorWithOffsetType phiNew;
-		this->common().getPhi(phiNew, Eg, direction, block1[0], loopNumber);
+		this->common().getPhi(phiNew, Eg, direction, block1[0], loopNumber, tstStruct_);
 
 		if (phiNew.size() == 0) return;
 

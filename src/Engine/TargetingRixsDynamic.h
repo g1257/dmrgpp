@@ -178,12 +178,12 @@ public:
 			err("TargetingRixsDynamic needs wft\n");
 
 		if (!usesCheby_) {
-			this->common().init(&tstStruct_, 12);
+			this->common().init(tstStruct_.sites(), 12);
 			return; // early exit here
 		}
 
 		tstStruct2_ = new TargetParams2Type(ioIn, model);
-		this->common().init(tstStruct2_, 12);
+		this->common().init(tstStruct2_->sites(), 12);
 
 		times_.resize(tstStruct2_->timeSteps());
 
@@ -192,7 +192,7 @@ public:
 		for (SizeType i = 0; i < n; ++i)
 			times_[i] = i*tau/(n - 1);
 
-		this->common().initTimeVectors(times_, ioIn);
+		this->common().initTimeVectors(tstStruct_, times_, ioIn);
 	}
 
 	~TargetingRixsDynamic()
@@ -253,7 +253,7 @@ public:
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
 			// just to set the stage and currenttime
-			this->common().getPhi(Eg, direction, site, loopNumber);
+			this->common().getPhi(Eg, direction, site, loopNumber, *tstStruct2_);
 		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
 			this->common().wftSome(site, 8, this->common().targetVectors().size());
 		} else {
@@ -320,12 +320,13 @@ private:
 
 			VectorWithOffsetType tmpV1;
 			SizeType indexOfOperator = 0;
-			this->common().applyOneOperator(loopNumber,
-			                                indexOfOperator,
-			                                site,
-			                                tmpV1, // phiNew
-			                                this->common().targetVectors(1), // src1
-			                                direction);
+
+			applyOneOp(loopNumber,
+			           indexOfOperator,
+			           site,
+			           tmpV1, // phiNew
+			           this->common().targetVectors(1), // src1
+			           direction);
 
 			if (tmpV1.size() > 0)
 				addFactor(tmpV1, this->common().psi(), densCre);
@@ -334,12 +335,13 @@ private:
 				this->common().targetVectors(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
-			this->common().applyOneOperator(loopNumber,
-			                                indexOfOperator,
-			                                site,
-			                                tmpV2,                            // phiNew
-			                                this->common().targetVectors(2), // src1
-			                                direction);
+
+			applyOneOp(loopNumber,
+			           indexOfOperator,
+			           site,
+			           tmpV2,                            // phiNew
+			           this->common().targetVectors(2), // src1
+			           direction);
 
 			if (tmpV2.size() > 0)
 				addFactor(tmpV2, this->common().psi(), densCim);
@@ -362,23 +364,23 @@ private:
 		if (site == tstStruct_.sites(0)) {
 			VectorWithOffsetType tmpV1;
 			SizeType indexOfOperator = 0;
-			this->common().applyOneOperator(loopNumber,
-			                                indexOfOperator,
-			                                site,
-			                                tmpV1, // phiNew
-			                                this->common().targetVectors(1), // src1
-			                                direction);
+			applyOneOp(loopNumber,
+			           indexOfOperator,
+			           site,
+			           tmpV1, // phiNew
+			           this->common().targetVectors(1), // src1
+			           direction);
 
 			if (tmpV1.size() > 0)
 				this->common().targetVectors(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
-			this->common().applyOneOperator(loopNumber,
-			                                indexOfOperator,
-			                                site,
-			                                tmpV2,                            // phiNew
-			                                this->common().targetVectors(2), // src1
-			                                direction);
+			applyOneOp(loopNumber,
+			           indexOfOperator,
+			           site,
+			           tmpV2,                            // phiNew
+			           this->common().targetVectors(2), // src1
+			           direction);
 
 			if (tmpV2.size() > 0) {
 				this->common().targetVectors(7) = tmpV2;
@@ -410,12 +412,12 @@ private:
 
 			VectorWithOffsetType tmpV1;
 			SizeType indexOfOperator = 1;
-			this->common().applyOneOperator(loopNumber,
-			                                indexOfOperator,
-			                                site,
-			                                tmpV1, // phiNew
-			                                this->common().targetVectors(1), // src1
-			                                direction);
+			applyOneOp(loopNumber,
+			           indexOfOperator,
+			           site,
+			           tmpV1, // phiNew
+			           this->common().targetVectors(1), // src1
+			           direction);
 
 			if (tmpV1.size() > 0)
 				addFactor(tmpV1, this->common().psi(), densCre);
@@ -424,12 +426,12 @@ private:
 				this->common().targetVectors(6) += tmpV1;
 
 			VectorWithOffsetType tmpV2;
-			this->common().applyOneOperator(loopNumber,
-			                                indexOfOperator,
-			                                site,
-			                                tmpV2,                            // phiNew
-			                                this->common().targetVectors(2), // src1
-			                                direction);
+			applyOneOp(loopNumber,
+			           indexOfOperator,
+			           site,
+			           tmpV2,                            // phiNew
+			           this->common().targetVectors(2), // src1
+			           direction);
 
 			if (tmpV2.size() > 0)
 				addFactor(tmpV2, this->common().psi(), densCim);
@@ -520,9 +522,34 @@ private:
 		this->common().chebyshev(indices,
 		                         Eg,
 		                         this->common().targetVectors(indices[0]),
-		                         direction,
-		                         allOperatorsApplied,
-		                         block1);
+		        direction,
+		        allOperatorsApplied,
+		        block1);
+	}
+
+	void applyOneOp(SizeType loopNumber,
+	                SizeType indexOfOperator,
+	                SizeType site,
+	                VectorWithOffsetType& dest,
+	                const VectorWithOffsetType& src,
+	                ProgramGlobals::DirectionEnum direction)
+	{
+		if (usesCheby_)
+			this->common().applyOneOperator(loopNumber,
+		                                    indexOfOperator,
+		                                    site,
+		                                    dest, // phiNew
+		                                    src, // src1
+		                                    direction,
+		                                    *tstStruct2_);
+		else
+			this->common().applyOneOperator(loopNumber,
+		                                    indexOfOperator,
+		                                    site,
+		                                    dest, // phiNew
+		                                    src, // src1
+		                                    direction,
+		                                    tstStruct_);
 	}
 
 	void setWeights(SizeType n)

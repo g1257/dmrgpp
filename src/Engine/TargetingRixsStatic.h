@@ -168,7 +168,7 @@ public:
 	      applied_(false),
 	      appliedFirst_(false)
 	{
-		this->common().init(&tstStruct_,6);
+		this->common().init(tstStruct_.sites(), 6);
 		if (!wft.isEnabled())
 			throw PsimagLite::RuntimeError("TargetingRixsStatic needs wft\n");
 	}
@@ -277,7 +277,8 @@ private:
 					                                site,
 					                                tmpV1,
 					                                this->common().psi(),
-					                                direction);
+					                                direction,
+					                                tstStruct_);
 					if (tmpV1.size() > 0) {
 						this->common().targetVectors(3) = tmpV1;
 						applied_ = true;
@@ -296,7 +297,8 @@ private:
 					                                site,
 					                                tmpV1,
 					                                this->common().psi(),
-					                                direction);
+					                                direction,
+					                                tstStruct_);
 					if (tmpV1.size() > 0) {
 						this->common().targetVectors(3) = tmpV1;
 						applied_ = false;
@@ -314,7 +316,8 @@ private:
 					                                site,
 					                                tmpV2,
 					                                this->common().psi(),
-					                                direction);
+					                                direction,
+					                                tstStruct_);
 					if (tmpV2.size() > 0) {
 						this->common().targetVectors(3) += tmpV2;
 						applied_ = true;

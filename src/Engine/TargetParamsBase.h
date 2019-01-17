@@ -99,7 +99,7 @@ public:
 	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 
-	enum ConcatEnum {PRODUCT, SUM};
+	enum class ConcatEnum {PRODUCT, SUM};
 
 	enum class AlgorithmEnum {KRYLOV, CONJUGATE_GRADIENT, CHEBYSHEV, RUNGE_KUTTA, SUZUKI_TROTTER};
 
@@ -140,9 +140,9 @@ public:
 		throw PsimagLite::RuntimeError(s);
 	}
 
-	virtual SizeType concatenation() const
+	virtual ConcatEnum concatenation() const
 	{
-		return unimplementedInt("concatenation");
+		throw PsimagLite::RuntimeError("concatenation");
 	}
 
 	virtual const VectorOperatorType& aOperators() const

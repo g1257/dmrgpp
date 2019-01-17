@@ -131,7 +131,7 @@ public:
 	typedef typename ApplyOperatorExpressionType::ApplyOperatorType ApplyOperatorType;
 	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
 	typedef typename TargetHelperType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename TargetHelperType::TargetParamsType TargetParamsType;
+	typedef typename ApplyOperatorExpressionType::TargetParamsType TargetParamsType;
 	typedef typename ApplyOperatorExpressionType::VectorVectorWithOffsetType
 	VectorVectorWithOffsetType;
 	typedef typename ApplyOperatorExpressionType::VectorRealType VectorRealType;
@@ -139,8 +139,6 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef Braket<ModelType> BraketType;
 	typedef FermionSign FermionSignType;
-
-	static const SizeType SUM = TargetParamsType::SUM;
 
 	enum {DISABLED=ApplyOperatorExpressionType::DISABLED,
 		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,
@@ -174,10 +172,9 @@ public:
 		}
 	}
 
-	void init(TargetParamsType* tstStruct, SizeType targets)
+	void init(SizeType tstSites, SizeType targets)
 	{
-		targetHelper_.setTargetStruct(tstStruct);
-		applyOpExpression_.init();
+		applyOpExpression_.init(tstSites);
 		targetVectorsResize(targets);
 	}
 
@@ -220,17 +217,19 @@ public:
 	                RealType Eg,
 	                ProgramGlobals::DirectionEnum direction,
 	                SizeType site,
-	                SizeType loopNumber)
+	                SizeType loopNumber,
+	                const TargetParamsType& tstStruct)
 	{
-		return applyOpExpression_.getPhi(&phiNew, Eg, direction, site, loopNumber);
+		return applyOpExpression_.getPhi(&phiNew, Eg, direction, site, loopNumber, tstStruct);
 	}
 
 	SizeType getPhi(RealType Eg,
 	                ProgramGlobals::DirectionEnum direction,
 	                SizeType site,
-	                SizeType loopNumber)
+	                SizeType loopNumber,
+	                const TargetParamsType& tstStruct)
 	{
-		return applyOpExpression_.getPhi(0, Eg, direction, site, loopNumber);
+		return applyOpExpression_.getPhi(0, Eg, direction, site, loopNumber, tstStruct);
 	}
 
 	const VectorWithOffsetType& psi() const
@@ -387,10 +386,10 @@ public:
 		}
 	}
 
-	int findFermionSignOfTheOperators() const
+	int findFermionSignOfTheOperators(typename TargetParamsType::ConcatEnum concat,
+	                                  const VectorOperatorType& myoperator) const
 	{
-		const VectorOperatorType& myoperator = targetHelper_.tstStruct().aOperators();
-		bool wereSumming = (targetHelper_.tstStruct().concatenation() == SUM);
+		bool wereSumming = (concat == TargetParamsType::ConcatEnum::SUM);
 		ProgramGlobals::FermionOrBosonEnum forB = ProgramGlobals::FermionOrBosonEnum::BOSON;
 
 		for (SizeType i = 0; i < myoperator.size(); ++i) {
@@ -451,9 +450,11 @@ public:
 		applyOpExpression_.targetVectorsResize(x);
 	}
 
-	void initTimeVectors(const VectorRealType& times,InputValidatorType& ioIn)
+	void initTimeVectors(const TargetParamsType& tstStruct,
+	                     const VectorRealType& times,
+	                     InputValidatorType& ioIn)
 	{
-		applyOpExpression_.initTimeVectors(times,ioIn);
+		applyOpExpression_.initTimeVectors(tstStruct, times, ioIn);
 	}
 
 	void calcTimeVectors(const PairType& startEnd,
@@ -476,14 +477,16 @@ public:
 	                      SizeType site,
 	                      VectorWithOffsetType& phiNew,
 	                      const VectorWithOffsetType& psiSrc,
-	                      SizeType systemOrEnviron)
+	                      SizeType systemOrEnviron,
+	                      const TargetParamsType& tstStruct)
 	{
 		applyOpExpression_.applyOneOperator(loopNumber,
 		                                    indexOfOperator,
 		                                    site,
 		                                    phiNew,
 		                                    psiSrc,
-		                                    systemOrEnviron);
+		                                    systemOrEnviron,
+		                                    tstStruct);
 
 		RealType norma = norm(phiNew);
 		if (norma<1e-6) {

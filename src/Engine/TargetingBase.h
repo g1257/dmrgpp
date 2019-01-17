@@ -113,9 +113,7 @@ public:
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
 	typedef TargetParamsBase<ModelType> TargetParamsType;
-	typedef TargetHelper<ModelType,
-	TargetParamsType,
-	WaveFunctionTransfType> TargetHelperType;
+	typedef TargetHelper<ModelType, WaveFunctionTransfType> TargetHelperType;
 	typedef TargetingCommon<TargetHelperType,
 	VectorWithOffsetType,
 	LanczosSolverType> TargetingCommonType;

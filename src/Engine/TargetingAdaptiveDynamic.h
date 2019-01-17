@@ -146,7 +146,7 @@ public:
 	      paramsForSolver_(io,"DynamicDmrg")
 	{
 		err("TargetingAdaptiveDynamic no longer supported\n");
-		this->common().init(&tstStruct_,2);
+		this->common().init(tstStruct_.sites(), 2);
 		if (!wft.isEnabled()) throw PsimagLite::RuntimeError(" DynamicTargeting "
 		                                                     "needs an enabled wft\n");
 	}
@@ -232,7 +232,12 @@ private:
 		Eg_ = Eg;
 		VectorWithOffsetType phiNew;
 		if (ab_.size()==0)
-			this->common().getPhi(phiNew,Eg,direction,site,loopNumber);
+			this->common().getPhi(phiNew,
+		                          Eg,
+		                          direction,
+		                          site,
+		                          loopNumber,
+		                          tstStruct_);
 
 		if (!this->common().allStages(WFT_NOADVANCE)) {
 			this->common().targetVectors(0) = phiNew;

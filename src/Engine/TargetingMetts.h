@@ -179,11 +179,11 @@ public:
 	      systemPrev_(),
 	      environPrev_()
 	{
-		this->common().init(&mettsStruct_,mettsStruct_.timeSteps()+1);
+		this->common().init(mettsStruct_.sites(), mettsStruct_.timeSteps() + 1);
 		if (!wft.isEnabled()) throw PsimagLite::RuntimeError(" TargetingMetts "
 		                                                     "needs an enabled wft\n");
 
-		RealType tau =mettsStruct_.tau()/(mettsStruct_.timeSteps()-1);
+		RealType tau = mettsStruct_.tau()/(mettsStruct_.timeSteps()-1);
 		SizeType n1 = mettsStruct_.timeSteps();
 		SizeType n = mettsStruct_.timeSteps() + 1;
 
@@ -199,7 +199,7 @@ public:
 		sum += gsWeight_;
 		assert(fabs(sum-1.0)<1e-5);
 
-		this->common().initTimeVectors(betas_,ioIn);
+		this->common().initTimeVectors(mettsStruct_, betas_, ioIn);
 	}
 
 	~TargetingMetts()

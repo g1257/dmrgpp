@@ -81,15 +81,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ModelType_,
-         typename TargetParamsType_,
-         typename WaveFunctionTransfType_>
+template<typename ModelType_, typename WaveFunctionTransfType_>
 class TargetHelper {
 
 public:
 
 	typedef ModelType_ ModelType;
-	typedef TargetParamsType_ TargetParamsType;
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -101,23 +98,12 @@ public:
 	             const WaveFunctionTransfType& wft)
 	    : lrs_(lrs),
 	      model_(model),
-	      wft_(wft),
-	      tstStruct_(0)
+	      wft_(wft)
 	{}
-
-	void setTargetStruct(TargetParamsType* tstStruct)
-	{
-		if (tstStruct_ != 0)
-			throw PsimagLite::RuntimeError("TargetHelper: Internal Error\n");
-
-		tstStruct_ = tstStruct;
-	}
 
 	const LeftRightSuperType& lrs() const  { return lrs_; }
 
 	const ModelType& model() const { return model_; }
-
-	const TargetParamsType& tstStruct() const { return *tstStruct_; }
 
 	const WaveFunctionTransfType& wft() const  { return wft_; }
 
@@ -131,7 +117,6 @@ private:
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;
 	const WaveFunctionTransfType& wft_;
-	TargetParamsType* tstStruct_;
 }; // TargetHelper
 
 } // namespace Dmrg

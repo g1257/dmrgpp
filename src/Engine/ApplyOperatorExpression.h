@@ -78,6 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsRungeKutta.h"
 #include "TimeVectorsSuzukiTrotter.h"
 #include "Io/IoSelector.h"
+#include "TargetParamsBase.h"
 
 namespace Dmrg {
 
@@ -88,7 +89,10 @@ class ApplyOperatorExpression {
 
 	typedef typename TargetHelperType::RealType RealType;
 	typedef typename TargetHelperType::ModelType ModelType;
-	typedef typename TargetHelperType::TargetParamsType TargetParamsType;
+
+public:
+
+	typedef TargetParamsBase<ModelType> TargetParamsType;
 	typedef typename TargetHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
@@ -105,12 +109,6 @@ class ApplyOperatorExpression {
 	typedef TimeVectorsSuzukiTrotter<TargetParamsType,ModelType,WaveFunctionTransfType,
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsSuzukiTrotterType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-
-	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
-	static SizeType const SUM = TargetParamsType::SUM;
-
-public:
-
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
@@ -138,12 +136,11 @@ public:
 			delete timeVectorsBase_;
 	}
 
-	void init()
+	void init(SizeType tstSites)
 	{
 		if (stage_.size() != 0)
 			throw PsimagLite::RuntimeError("ApplyOperatorExpression: Internal Error\n");
 
-		SizeType tstSites = targetHelper_.tstStruct().sites();
 		stage_.resize((tstSites == 0) ? 1 : tstSites, DISABLED);
 	}
 
@@ -151,13 +148,14 @@ public:
 	                RealType Eg,
 	                ProgramGlobals::DirectionEnum direction,
 	                SizeType site,
-	                SizeType loopNumber)
+	                SizeType loopNumber,
+	                const TargetParamsType& tstStruct)
 	{
 		SizeType count =0;
 		VectorWithOffsetType phiOld = psi_;
 		VectorWithOffsetType vectorSum;
 
-		SizeType max = targetHelper_.tstStruct().sites();
+		SizeType max = tstStruct.sites();
 		if (noStageIs(DISABLED)) {
 			max = 1;
 			for (SizeType i=0;i<stage_.size();i++) {
@@ -170,19 +168,19 @@ public:
 		// in turn to the g.s.
 		for (SizeType i = 0; i < max; ++i) {
 
-			SizeType count2 = evolve(i, Eg, direction, site, loopNumber, max - 1);
+			SizeType count2 = evolve(i, Eg, direction, site, loopNumber, max - 1, tstStruct);
 
 			if (count2 == 0) continue;
 
 			// phi = A|psi>
 			if (phiNew)
-				computePhi(i, site, *phiNew, phiOld, direction);
+				computePhi(i, site, *phiNew, phiOld, direction, tstStruct);
 
 			count += count2;
 
 			if (!phiNew) continue;
 
-			if (targetHelper_.tstStruct().concatenation() == PRODUCT) {
+			if (tstStruct.concatenation() == TargetParamsType::ConcatEnum::PRODUCT) {
 				phiOld = *phiNew;
 			} else {
 				if (stage_[i] == OPERATOR) vectorSum += *phiNew;
@@ -190,7 +188,7 @@ public:
 			}
 		}
 
-		if (phiNew && targetHelper_.tstStruct().concatenation() == SUM)
+		if (phiNew && tstStruct.concatenation() == TargetParamsType::ConcatEnum::SUM)
 			*phiNew = vectorSum;
 
 		if (allStages(DISABLED)) E0_ = Eg;
@@ -198,8 +196,8 @@ public:
 		if (noStageIs(DISABLED)) {
 			PsimagLite::OstringStream msg;
 			msg<<"EnergyForExp was ";
-			if (targetHelper_.tstStruct().isEnergyForExp()) {
-				E0_ = targetHelper_.tstStruct().energyForExp();
+			if (tstStruct.isEnergyForExp()) {
+				E0_ = tstStruct.energyForExp();
 				msg<<"provided explicitly, ";
 			} else {
 				msg<<"not provided explicitly, ";
@@ -282,11 +280,12 @@ public:
 		else targetVectors_.resize(x);
 	}
 
-	void initTimeVectors(const VectorRealType& times, InputValidatorType& ioIn)
+	void initTimeVectors(const TargetParamsType& tstStruct,
+	                     const VectorRealType& times,
+	                     InputValidatorType& ioIn)
 	{
 		const LeftRightSuperType& lrs = targetHelper_.lrs();
 		const ModelType& model = targetHelper_.model();
-		const TargetParamsType& tstStruct = targetHelper_.tstStruct();
 		const WaveFunctionTransfType& wft = targetHelper_.wft();
 
 		PsimagLite::String s (__FILE__);
@@ -385,10 +384,11 @@ public:
 	                      SizeType site,
 	                      VectorWithOffsetType& phiNew,
 	                      const VectorWithOffsetType& psiSrc,
-	                      SizeType systemOrEnviron)
+	                      SizeType systemOrEnviron,
+	                      const TargetParamsType& tstStruct)
 	{
-		if (targetHelper_.tstStruct().startingLoops().size()>0 &&
-		        targetHelper_.tstStruct().startingLoops()[indexOfOperator]>loopNumber)
+		if (tstStruct.startingLoops().size()>0 &&
+		        tstStruct.startingLoops()[indexOfOperator]>loopNumber)
 			return;
 
 		const bool hasBeenApplied = (phiNew.size() > 0);
@@ -406,7 +406,7 @@ public:
 		typename PsimagLite::Vector<bool>::Type signs;
 		targetHelper_.model().findOddElectronsOfOneSite(signs, site);
 		FermionSign fs(targetHelper_.lrs().left(), signs);
-		applyOpLocal_(phiNew,phiOld,targetHelper_.tstStruct().aOperators()[indexOfOperator],
+		applyOpLocal_(phiNew,phiOld,tstStruct.aOperators()[indexOfOperator],
 		              fs,systemOrEnviron,corner);
 
 		RealType norma = norm(phiNew);
@@ -444,15 +444,15 @@ private:
 		                                     nk);
 	}
 
-	void checkOrder(SizeType i) const
+	void checkOrder(SizeType i, const TargetParamsType& tstStruct) const
 	{
 		if (i==0) return;
 		for (SizeType j=0;j<i;j++) {
 			if (stage_[j] == DISABLED) {
 				PsimagLite::String s ="TST:: Seeing dynamic site ";
-				s += ttos(targetHelper_.tstStruct().sites(i));
+				s += ttos(tstStruct.sites(i));
 				s =s + " before having seen";
-				s = s + " site "+ttos(targetHelper_.tstStruct().sites(j));
+				s = s + " site "+ttos(tstStruct.sites(j));
 				s = s +". Please order your dynamic sites in order of appearance.\n";
 				throw PsimagLite::RuntimeError(s);
 			}
@@ -480,33 +480,34 @@ private:
 	                ProgramGlobals::DirectionEnum direction,
 	                SizeType site,
 	                SizeType loopNumber,
-	                SizeType lastI)
+	                SizeType lastI,
+	                const TargetParamsType& tstStruct)
 	{
 		static SizeType timesWithoutAdvancement = 0;
 		static bool firstSeeLeftCorner = false;
-		SizeType advanceEach = targetHelper_.tstStruct().advanceEach();
+		SizeType advanceEach = tstStruct.advanceEach();
 
 		if (direction == ProgramGlobals::INFINITE) {
 			E0_ = Eg;
 			return 0;
 		}
 
-		if (targetHelper_.tstStruct().startingLoops().size()>0 &&
-		        targetHelper_.tstStruct().startingLoops()[i]>loopNumber) return 0;
+		if (tstStruct.startingLoops().size()>0 &&
+		        tstStruct.startingLoops()[i]>loopNumber) return 0;
 
-		if (site != targetHelper_.tstStruct().sites(i) && stage_[i]==DISABLED)
+		if (site != tstStruct.sites(i) && stage_[i]==DISABLED)
 			return 0;
 
-		if (site != targetHelper_.tstStruct().sites(i) && stage_[i]!=DISABLED && i>0)
+		if (site != tstStruct.sites(i) && stage_[i]!=DISABLED && i>0)
 			return 0;
 
-		if (site == targetHelper_.tstStruct().sites(i) && stage_[i]==DISABLED) {
+		if (site == tstStruct.sites(i) && stage_[i]==DISABLED) {
 			stage_[i]=OPERATOR;
 		} else {
 			stage_[i]=WFT_NOADVANCE;
 		}
 
-		if (stage_[i] == OPERATOR) checkOrder(i);
+		if (stage_[i] == OPERATOR) checkOrder(i, tstStruct);
 
 		PsimagLite::String options = targetHelper_.model().params().options;
 		bool advanceOnlyAtBorder = (options.find("advanceUnrestricted") ==
@@ -518,7 +519,7 @@ private:
 		if (advanceEach > 0 && timesWithoutAdvancement >= advanceEach && !dontAdvance) {
 			stage_[i] = WFT_ADVANCE;
 			if (i==lastI) {
-				currentTime_ += targetHelper_.tstStruct().tau();
+				currentTime_ += tstStruct.tau();
 				timesWithoutAdvancement=1;
 				timeVectorsBase_->timeHasAdvanced();
 			}
@@ -548,15 +549,16 @@ private:
 	                SizeType site,
 	                VectorWithOffsetType& phiNew,
 	                VectorWithOffsetType& phiOld,
-	                SizeType systemOrEnviron) const
+	                SizeType systemOrEnviron,
+	                const TargetParamsType& tstStruct) const
 	{
 		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
-		SizeType advanceEach = targetHelper_.tstStruct().advanceEach();
+		SizeType advanceEach = tstStruct.advanceEach();
 
 		if (stage_[i]==OPERATOR) {
 
-			BorderEnumType corner = (targetHelper_.tstStruct().sites(i)==0 ||
-			                         targetHelper_.tstStruct().sites(i)==numberOfSites -1) ?
+			BorderEnumType corner = (tstStruct.sites(i)==0 ||
+			                         tstStruct.sites(i)==numberOfSites -1) ?
 			            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
 
 			PsimagLite::OstringStream msg;
@@ -565,7 +567,7 @@ private:
 			typename PsimagLite::Vector<bool>::Type signs;
 			targetHelper_.model().findOddElectronsOfOneSite(signs,site);
 			FermionSign fs(targetHelper_.lrs().left(), signs);
-			applyOpLocal_(phiNew,phiOld,targetHelper_.tstStruct().aOperators()[i],
+			applyOpLocal_(phiNew,phiOld,tstStruct.aOperators()[i],
 			              fs,systemOrEnviron,corner);
 			RealType norma = norm(phiNew);
 
@@ -579,7 +581,7 @@ private:
 			SizeType advance = indexNoAdvance_;
 
 			if (advanceEach > 0 && stage_[i] == WFT_ADVANCE) {
-				SizeType timeSteps = targetHelper_.tstStruct().timeSteps();
+				SizeType timeSteps = tstStruct.timeSteps();
 				advance = (timeSteps > 0) ? timeSteps - 1 : 0;
 			}
 

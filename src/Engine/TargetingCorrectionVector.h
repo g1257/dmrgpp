@@ -164,7 +164,7 @@ public:
 	      paramsForSolver_(ioIn,"DynamicDmrg"),
 	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().energy())
 	{
-		this->common().init(&tstStruct_,4);
+		this->common().init(tstStruct_.sites(), 4);
 		if (!wft.isEnabled())
 			throw PsimagLite::RuntimeError("TargetingCorrectionVector needs wft\n");
 	}
@@ -235,7 +235,12 @@ private:
 	            SizeType loopNumber)
 	{
 		VectorWithOffsetType phiNew;
-		SizeType count = this->common().getPhi(phiNew,Eg,direction,site,loopNumber);
+		SizeType count = this->common().getPhi(phiNew,
+		                                       Eg,
+		                                       direction,
+		                                       site,
+		                                       loopNumber,
+		                                       tstStruct_);
 
 		if (direction != ProgramGlobals::INFINITE) {
 			correctionEnabled_=true;
