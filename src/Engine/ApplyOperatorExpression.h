@@ -342,13 +342,6 @@ public:
 
 	void timeHasAdvanced() { timeVectorsBase_->timeHasAdvanced(); }
 
-	template<typename SomeSerializerType>
-	void loadTargetVectors(SomeSerializerType& serializer)
-	{
-		for (SizeType i=0;i<targetVectors_.size();i++)
-			targetVectors_[i] = serializer.vector(i);
-	}
-
 	void loadEnergy(PsimagLite::IoSelector::In& io,
 	                PsimagLite::String label)
 	{

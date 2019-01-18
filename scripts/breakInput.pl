@@ -63,7 +63,7 @@ sub writeInput
 	if ($ind > 0) {
 		my $prev = $root."_".($ind - 1);
 		$rest =~ s/\$restart/$prev/;
-		$rest =~ s/SolverOptions=/SolverOptions=restart,"/;
+		$rest =~ s/SolverOptions=/SolverOptions=restart,/;
 	}
 
 	print FOUT "$rest\nFiniteLoops 1\n";

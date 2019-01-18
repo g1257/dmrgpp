@@ -278,7 +278,6 @@ public:
 			BraketType Braket(targetHelper_.model(), opLabel);
 
 			const typename BraketType::AlgebraType& nup = Braket.op(0);
-
 			const VectorWithOffsetType& v1 = getVector(Braket.bra());
 			const VectorWithOffsetType& v2 = getVector(Braket.ket());
 
@@ -354,6 +353,7 @@ public:
 		test(tv0,tv0,direction,s,site,doubleOcc,ApplyOperatorType::BORDER_NO);
 	}
 
+	// FIXME TODO REMOVE
 	ComplexOrRealType rixsCocoon(ProgramGlobals::DirectionEnum direction,
 	                             SizeType site,
 	                             SizeType index1,
