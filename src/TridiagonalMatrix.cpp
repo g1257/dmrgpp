@@ -13,6 +13,7 @@ void TridiagonalMatrix<double>::diag(TridiagonalMatrix<double>::VectorRealType& 
 	int lwork = 10;
 	int liwork = 10;
 	int info = 0;
+	std::vector<int> iwork(liwork);
 	TridiagonalMatrix<double>::VectorType work(lwork);
 	TridiagonalMatrix<double>::VectorType e = b_;
 	eigs = a_;
@@ -25,7 +26,7 @@ void TridiagonalMatrix<double>::diag(TridiagonalMatrix<double>::VectorRealType& 
 	        &lz,
 	        &(work[0]),
 	        &lwork,
-	        &liwork,
+	        &(iwork[0]),
 	        &liwork,
 	        &info);
 
@@ -45,6 +46,7 @@ void TridiagonalMatrix<float>::diag(TridiagonalMatrix<float>::VectorRealType& ei
 	int lwork = 10;
 	int liwork = 10;
 	int info = 0;
+	std::vector<int> iwork(liwork);
 	TridiagonalMatrix<float>::VectorType work(lwork);
 	TridiagonalMatrix<float>::VectorType e = b_;
 	eigs = a_;
@@ -57,7 +59,7 @@ void TridiagonalMatrix<float>::diag(TridiagonalMatrix<float>::VectorRealType& ei
 	        &lz,
 	        &(work[0]),
 	        &lwork,
-	        &liwork,
+	        &(iwork[0]),
 	        &liwork,
 	        &info);
 
