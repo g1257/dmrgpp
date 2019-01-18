@@ -99,17 +99,11 @@ public:
 		        &(iwork[0]),
 		        &info);
 		if (info != 0) {
-
 			if (info < 0)
 				throw RuntimeError(String(__FILE__) + ": " + ttos(__LINE__) +
 			                       " info= " + ttos(info));
-
-			if (canTryAgain()) {
-				std::cerr<<__FILE__<<": "<<__LINE__<<" info= "<<"\n";
-				std::cerr<<"Will try with fallback...\n";
-				name_ = "gesvd";
-				operator()(jobz, a, s, vt);
-			}
+			if (info > 0)
+				std::cerr<<"WARNING "<<__FILE__<<": "<<__LINE__<<" info= "<<info<<"\n";
 		}
 
 		a = u;
