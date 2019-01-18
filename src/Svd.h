@@ -99,27 +99,17 @@ public:
 		        &(iwork[0]),
 		        &info);
 		if (info != 0) {
-			pid_t pid = getpid();
-			PsimagLite::String dumpFile = "SvdFailedForThisMatrix" + ttos(pid) + ".txt";
 
-			String str(__FILE__);
-			str += " " + ttos(__LINE__);
-			str += " svd(...) failed with info=" + ttos(info);
-			str += " matrix is " + ttos(a.rows()) + " " + ttos(a.cols());
-			str += " and dumped to file " + dumpFile + "\n";
+			if (info < 0)
+				throw RuntimeError(String(__FILE__) + ": " + ttos(__LINE__) +
+			                       " info= " + ttos(info));
 
-			std::ofstream fout(dumpFile.c_str());
-			fout<<a<<"\n";
-			fout.close();
-			sleep(2);
-
-			if (info < 0 || !canTryAgain())
-				throw RuntimeError(str);
-
-			std::cerr<<str;
-			std::cerr<<"Will try with fallback...\n";
-			name_ = "gesvd";
-			operator()(jobz, a, s, vt);
+			if (canTryAgain()) {
+				std::cerr<<__FILE__<<": "<<__LINE__<<" info= "<<"\n";
+				std::cerr<<"Will try with fallback...\n";
+				name_ = "gesvd";
+				operator()(jobz, a, s, vt);
+			}
 		}
 
 		a = u;
