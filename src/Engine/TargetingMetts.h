@@ -277,7 +277,7 @@ public:
 			       this->common().aoe().targetVectors()[i].size()==
 			       lrs_.super().permutationVector().size());
 
-		cocoon(direction,block1); // in-situ
+		this->common().cocoon(block1, direction);
 
 		printEnergies(); // in-situ
 
@@ -693,6 +693,7 @@ private:
 		for (SizeType i=0;i<oldVector.size();i++) {
 			oldVector[i] = (i==volumeOfAlphaFixed) ? 1 : 0;
 		}
+
 		assert(PsimagLite::norm(oldVector)>1e-6);
 	}
 
@@ -715,30 +716,6 @@ private:
 		}
 		phi.collapseSectors();
 		assert(norm(phi)>1e-6);
-	}
-
-	// in situ computation:
-	void cocoon(ProgramGlobals::DirectionEnum direction,
-	            const BlockType& block) const
-	{
-		std::cout<<"-------------&*&*&* In-situ measurements start\n";
-
-		if (this->common().aoe().noStageIs(StageEnumType::DISABLED))
-			std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
-		else
-			std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
-
-		PsimagLite::String modelName = this->model().params().model;
-
-		if (modelName == "HubbardOneBand" ||
-		        modelName == "HubbardOneBandExtended" ||
-		        modelName == "Immm") {
-			this->common().cocoonLegacy(direction,block);
-		}
-
-		this->common().cocoon(block,direction);
-
-		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
 
 	PsimagLite::String getStage() const

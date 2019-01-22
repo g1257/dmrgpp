@@ -294,37 +294,6 @@ public:
 		}
 	}
 
-	void cocoonLegacy(ProgramGlobals::DirectionEnum direction,
-	                  const BlockType& block) const
-	{
-		const VectorWithOffsetType& psi = aoe_.psi();
-		const VectorWithOffsetType& tv0 = aoe_.targetVectors()[0];
-		const ModelType& model = targetHelper_.model();
-
-		SizeType site = block[0];
-		OperatorType nup = model.naturalOperator("nup",site,0);
-
-		test(psi,psi,direction,"<PSI|nup|PSI>",site,nup,ApplyOperatorType::BORDER_NO);
-		PsimagLite::String s = "<P0|nup|P0>";
-		test(tv0,tv0,direction,s,site,nup,ApplyOperatorType::BORDER_NO);
-
-		OperatorType ndown = model.naturalOperator("ndown",site,0);
-		test(psi,psi,direction,"<PSI|ndown|PSI>",site,ndown,ApplyOperatorType::BORDER_NO);
-		s = "<P0|ndown|P0>";
-		test(tv0,tv0,direction,s,site,ndown,ApplyOperatorType::BORDER_NO);
-
-		SparseMatrixType tmpC3 = (nup.data * ndown.data);
-		OperatorType doubleOcc(tmpC3,
-		                       nup.fermionOrBoson,
-		                       nup.jm,
-		                       nup.angularFactor,
-		                       nup.su2Related);
-		test(psi,psi,direction,"<PSI|doubleOcc|PSI>",site,doubleOcc,
-		     ApplyOperatorType::BORDER_NO);
-		s = "<P0|doubleOcc|P0>";
-		test(tv0,tv0,direction,s,site,doubleOcc,ApplyOperatorType::BORDER_NO);
-	}
-
 	// FIXME TODO REMOVE
 	ComplexOrRealType rixsCocoon(ProgramGlobals::DirectionEnum direction,
 	                             SizeType site,

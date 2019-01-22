@@ -275,7 +275,7 @@ private:
 		                               block1,
 		                               tstStruct_);
 
-		cocoon(direction,block1); // in-situ
+		this->common().cocoon(block1, direction);
 
 		printEnergies(); // in-situ
 
@@ -354,31 +354,6 @@ private:
 		msg<<" <phi(t)|phi(t)>="<<den<<" "<<division;
 		progress_.printline(msg,std::cout);
 		tvEnergy_[whatTarget] = PsimagLite::real(division);
-	}
-
-	// in situ computation:
-	void cocoon(ProgramGlobals::DirectionEnum direction,
-	            const BlockType& block) const
-	{
-		std::cout<<"-------------&*&*&* In-situ measurements start\n";
-
-		if (this->common().aoe().noStageIs(StageEnumType::DISABLED))
-			std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
-		else
-			std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
-
-		PsimagLite::String modelName = this->model().params().model;
-
-		if (modelName == "HubbardOneBand" ||
-		        modelName == "HubbardOneBandExtended" ||
-		        modelName == "HubbardOneBandExtendedSuper" ||
-		        modelName == "Immm") {
-			this->common().cocoonLegacy(direction,block);
-		}
-
-		this->common().cocoon(block,direction);
-
-		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
 
 	TargetParamsType tstStruct_;
