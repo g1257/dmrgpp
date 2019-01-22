@@ -114,8 +114,7 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename BasisType::QnType QnType;
-
-	enum {DISABLED,ENABLED};
+	typedef typename TargetingCommonType::ApplyOperatorExpressionType::StageEnum StageEnumType;
 
 	TargetingCorrection(const LeftRightSuperType& lrs,
 	                    const ModelType& model,
@@ -139,7 +138,7 @@ public:
 
 	RealType weight(SizeType) const
 	{
-		assert(this->common().aoe().noStageIs(DISABLED));
+		assert(this->common().aoe().noStageIs(StageEnumType::DISABLED));
 		return tstStruct_.correctionA();
 	}
 
@@ -156,7 +155,7 @@ public:
 	{
 		if (direction == ProgramGlobals::INFINITE) return;
 
-		this->common().aoe().setAllStagesTo(ENABLED);
+		this->common().aoe().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 		this->common().computeCorrection(direction,block1);
 		this->common().cocoon(block1,direction);
 	}

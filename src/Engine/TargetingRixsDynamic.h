@@ -151,11 +151,7 @@ public:
 	TargetParamsType> CorrectionVectorSkeletonType;
 	typedef typename BasisType::QnType QnType;
 	typedef typename TargetParamsType::BaseType::AlgorithmEnum AlgorithmEnumType;
-
-	enum {DISABLED,OPERATOR,CONVERGING};
-
-	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
-	static SizeType const SUM = TargetParamsType::SUM;
+	typedef typename TargetingCommonType::ApplyOperatorExpressionType::StageEnum StageEnumType;
 
 	TargetingRixsDynamic(const LeftRightSuperType& lrs,
 	                     const ModelType& model,
@@ -517,8 +513,8 @@ private:
 	                      const VectorSizeType& block1)
 	{
 		assert(indices.size() >= 3);
-		bool allOperatorsApplied = (this->common().aoe().noStageIs(DISABLED) &&
-		                            this->common().aoe().noStageIs(OPERATOR));
+		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) &&
+		                            this->common().aoe().noStageIs(StageEnumType::OPERATOR));
 
 		const VectorWithOffsetType& v0 = this->common().aoe().targetVectors(indices[0]);
 		this->common().chebyshev(indices,
@@ -567,7 +563,7 @@ private:
 
 	void printNormsAndWeights() const
 	{
-		if (this->common().aoe().allStages(DISABLED)) return;
+		if (this->common().aoe().allStages(StageEnumType::DISABLED)) return;
 
 		PsimagLite::OstringStream msg;
 		msg<<"gsWeight="<<gsWeight_<<" weights= ";

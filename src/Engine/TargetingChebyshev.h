@@ -118,11 +118,7 @@ public:
 	typedef typename BasisType::QnType QnType;
 	typedef typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::ApplyOperatorType ApplyOperatorType;
-
-	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
-
-	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
-	static SizeType const SUM = TargetParamsType::SUM;
+	typedef typename ApplyOperatorExpressionType::StageEnum StageEnumType;
 
 	TargetingChebyshev(const LeftRightSuperType& lrs,
 	                   const ModelType& model,
@@ -183,19 +179,19 @@ public:
 
 	RealType weight(SizeType i) const
 	{
-		assert(!this->common().aoe().allStages(DISABLED));
+		assert(!this->common().aoe().allStages(StageEnumType::DISABLED));
 		return weight_[i];
 	}
 
 	RealType gsWeight() const
 	{
-		if (this->common().aoe().allStages(DISABLED)) return 1.0;
+		if (this->common().aoe().allStages(StageEnumType::DISABLED)) return 1.0;
 		return gsWeight_;
 	}
 
 	bool includeGroundStage() const
 	{
-		if (!this->common().aoe().noStageIs(DISABLED)) return true;
+		if (!this->common().aoe().noStageIs(StageEnumType::DISABLED)) return true;
 		bool b = (fabs(gsWeight_)>1e-6);
 		return b;
 	}
@@ -245,7 +241,7 @@ public:
 		msg<<"Saving state...";
 		progress_.printline(msg,std::cout);
 
-		SizeType marker = (this->common().aoe().noStageIs(DISABLED)) ? 1 : 0;
+		SizeType marker = (this->common().aoe().noStageIs(StageEnumType::DISABLED)) ? 1 : 0;
 
 		assert(block.size() > 0);
 		SizeType site = block[0];
@@ -275,8 +271,8 @@ private:
 		for (SizeType i = 0; i < times_.size(); ++i)
 			indices[i] = i;
 
-		bool allOperatorsApplied = (this->common().aoe().noStageIs(DISABLED) &&
-		                            this->common().aoe().noStageIs(OPERATOR));
+		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) &&
+		                            this->common().aoe().noStageIs(StageEnumType::OPERATOR));
 
 		assert(0 < block1.size());
 
@@ -308,7 +304,8 @@ private:
 
 	void printNormsAndWeights() const
 	{
-		if (this->common().aoe().allStages(DISABLED)) return;
+		if (this->common().aoe().allStages(StageEnumType::DISABLED))
+			return;
 
 		PsimagLite::OstringStream msg;
 		msg<<"gsWeight="<<gsWeight_<<" weights= ";
@@ -325,11 +322,12 @@ private:
 
 	void oracleChebyshev(SizeType site, SizeType systemOrEviron) const
 	{
-		OracleChebyshev<TargetingCommonType, TargetParamsType> oracle(BaseType::model(),
-		                                                              BaseType::lrs(),
-		                                                              this->common().aoe().currentTime(),
-		                                                              tstStruct_,
-		                                                              this->common().aoe().energy());
+		typedef OracleChebyshev<TargetingCommonType, TargetParamsType> OracleChebyshevType;
+		OracleChebyshevType oracle(BaseType::model(),
+		                           BaseType::lrs(),
+		                           this->common().aoe().currentTime(),
+		                           tstStruct_,
+		                           this->common().aoe().energy());
 
 		OperatorType A = BaseType::model().naturalOperator("c", 0, 0);
 		oracle(3, this->common(), systemOrEviron, site, A, ApplyOperatorType::BORDER_NO);

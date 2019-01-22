@@ -116,7 +116,9 @@ public:
 	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
 	typedef typename TimeVectorsBaseType::PairType PairType;
 
-	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
+	enum class StageEnum {DISABLED, OPERATOR, WFT_NOADVANCE, WFT_ADVANCE, COLLAPSE};
+
+	typedef typename PsimagLite::Vector<StageEnum>::Type VectorStageEnumType;
 
 	ApplyOperatorExpression(const TargetHelperType& targetHelper,
 	                        SizeType indexNoAdvance)
@@ -141,7 +143,7 @@ public:
 		if (stage_.size() != 0)
 			throw PsimagLite::RuntimeError("ApplyOperatorExpression: Internal Error\n");
 
-		stage_.resize((tstSites == 0) ? 1 : tstSites, DISABLED);
+		stage_.resize((tstSites == 0) ? 1 : tstSites, StageEnum::DISABLED);
 	}
 
 	SizeType getPhi(VectorWithOffsetType* phiNew,
@@ -156,11 +158,13 @@ public:
 		VectorWithOffsetType vectorSum;
 
 		SizeType max = tstStruct.sites();
-		if (noStageIs(DISABLED)) {
+		if (noStageIs(StageEnum::DISABLED)) {
 			max = 1;
 			for (SizeType i=0;i<stage_.size();i++) {
-				if (stage_[i]==OPERATOR) stage_[i] = WFT_NOADVANCE;
-				if (stage_[i]==WFT_ADVANCE) stage_[i] = WFT_NOADVANCE;
+				if (stage_[i] == StageEnum::OPERATOR)
+					stage_[i] = StageEnum::WFT_NOADVANCE;
+				if (stage_[i] == StageEnum::WFT_ADVANCE)
+					stage_[i] = StageEnum::WFT_NOADVANCE;
 			}
 		}
 
@@ -183,7 +187,7 @@ public:
 			if (tstStruct.concatenation() == TargetParamsType::ConcatEnum::PRODUCT) {
 				phiOld = *phiNew;
 			} else {
-				if (stage_[i] == OPERATOR) vectorSum += *phiNew;
+				if (stage_[i] == StageEnum::OPERATOR) vectorSum += *phiNew;
 				else vectorSum = *phiNew;
 			}
 		}
@@ -191,9 +195,9 @@ public:
 		if (phiNew && tstStruct.concatenation() == TargetParamsType::ConcatEnum::SUM)
 			*phiNew = vectorSum;
 
-		if (allStages(DISABLED)) E0_ = Eg;
+		if (allStages(StageEnum::DISABLED)) E0_ = Eg;
 
-		if (noStageIs(DISABLED)) {
+		if (noStageIs(StageEnum::DISABLED)) {
 			PsimagLite::OstringStream msg;
 			msg<<"EnergyForExp was ";
 			if (tstStruct.isEnergyForExp()) {
@@ -210,23 +214,23 @@ public:
 		return count;
 	}
 
-	bool allStages(SizeType x) const
+	bool allStages(StageEnum x) const
 	{
 		for (SizeType i=0;i<stage_.size();i++)
-			if (stage_[i]!=x) return false;
+			if (stage_[i] != x) return false;
 		return true;
 	}
 
-	bool noStageIs(SizeType x) const
+	bool noStageIs(StageEnum x) const
 	{
 		for (SizeType i=0;i<stage_.size();i++)
-			if (stage_[i]==x) return false;
+			if (stage_[i] == x) return false;
 		return true;
 	}
 
-	const VectorSizeType& stage() const { return stage_; }
+	//const VectorStaType& stage() const { return stage_; }
 
-	void setAllStagesTo(SizeType x)
+	void setAllStagesTo(StageEnum x)
 	{
 		for (SizeType i=0;i<stage_.size();i++)
 			stage_[i] = x;
@@ -439,7 +443,7 @@ private:
 	{
 		if (i==0) return;
 		for (SizeType j=0;j<i;j++) {
-			if (stage_[j] == DISABLED) {
+			if (stage_[j] == StageEnum::DISABLED) {
 				PsimagLite::String s ="TST:: Seeing dynamic site ";
 				s += ttos(tstStruct.sites(i));
 				s =s + " before having seen";
@@ -453,17 +457,17 @@ private:
 	PsimagLite::String getStage(SizeType i) const
 	{
 		switch (stage_[i]) {
-		case DISABLED:
+		case StageEnum::DISABLED:
 			return "Disabled";
-		case OPERATOR:
+		case StageEnum::OPERATOR:
 			return "Applying operator for the first time";
-		case WFT_NOADVANCE:
+		case StageEnum::WFT_NOADVANCE:
 			return "WFT_NOADVANCE";
-		case WFT_ADVANCE:
+		case StageEnum::WFT_ADVANCE:
 			return "WFT_ADVANCE";
+		case StageEnum::COLLAPSE:
+			return "COLLAPSE";
 		}
-
-		return "undefined";
 	}
 
 	SizeType evolve(SizeType i,
@@ -486,19 +490,19 @@ private:
 		if (tstStruct.startingLoops().size()>0 &&
 		        tstStruct.startingLoops()[i]>loopNumber) return 0;
 
-		if (site != tstStruct.sites(i) && stage_[i]==DISABLED)
+		if (site != tstStruct.sites(i) && stage_[i] == StageEnum::DISABLED)
 			return 0;
 
-		if (site != tstStruct.sites(i) && stage_[i]!=DISABLED && i>0)
+		if (site != tstStruct.sites(i) && stage_[i] != StageEnum::DISABLED && i>0)
 			return 0;
 
-		if (site == tstStruct.sites(i) && stage_[i]==DISABLED) {
-			stage_[i]=OPERATOR;
+		if (site == tstStruct.sites(i) && stage_[i] == StageEnum::DISABLED) {
+			stage_[i] = StageEnum::OPERATOR;
 		} else {
-			stage_[i]=WFT_NOADVANCE;
+			stage_[i] = StageEnum::WFT_NOADVANCE;
 		}
 
-		if (stage_[i] == OPERATOR) checkOrder(i, tstStruct);
+		if (stage_[i] == StageEnum::OPERATOR) checkOrder(i, tstStruct);
 
 		PsimagLite::String options = targetHelper_.model().params().options;
 		bool advanceOnlyAtBorder = (options.find("advanceUnrestricted") ==
@@ -508,18 +512,23 @@ private:
 		bool dontAdvance = (advanceOnlyAtBorder & !weAreAtBorder);
 
 		if (advanceEach > 0 && timesWithoutAdvancement >= advanceEach && !dontAdvance) {
-			stage_[i] = WFT_ADVANCE;
-			if (i==lastI) {
+			stage_[i] = StageEnum::WFT_ADVANCE;
+			if (i == lastI) {
 				currentTime_ += tstStruct.tau();
 				timesWithoutAdvancement=1;
 				timeVectorsBase_->timeHasAdvanced();
 			}
 		} else {
-			if (i==lastI && stage_[i]==WFT_NOADVANCE && firstSeeLeftCorner)
+			if (i == lastI &&
+			        stage_[i] == StageEnum::WFT_NOADVANCE &&
+			        firstSeeLeftCorner)
 				timesWithoutAdvancement++;
 		}
 
-		if (!firstSeeLeftCorner && i==lastI && stage_[i]==WFT_NOADVANCE && site==1)
+		if (!firstSeeLeftCorner &&
+		        i==lastI &&
+		        stage_[i] == StageEnum::WFT_NOADVANCE &&
+		        site==1)
 			firstSeeLeftCorner=true;
 
 		PsimagLite::OstringStream msg2;
@@ -546,7 +555,7 @@ private:
 		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
 		SizeType advanceEach = tstStruct.advanceEach();
 
-		if (stage_[i]==OPERATOR) {
+		if (stage_[i] == StageEnum::OPERATOR) {
 
 			BorderEnumType corner = (tstStruct.sites(i)==0 ||
 			                         tstStruct.sites(i)==numberOfSites -1) ?
@@ -567,11 +576,12 @@ private:
 				msg2<<"Norm of phi is zero\n";
 				progress_.printline(msg2,std::cout);
 			}
-		} else if (stage_[i] >= WFT_NOADVANCE) {
+		} else if (stage_[i] == StageEnum::WFT_NOADVANCE ||
+		           stage_[i] == StageEnum::WFT_ADVANCE) {
 
 			SizeType advance = indexNoAdvance_;
 
-			if (advanceEach > 0 && stage_[i] == WFT_ADVANCE) {
+			if (advanceEach > 0 && stage_[i] == StageEnum::WFT_ADVANCE) {
 				SizeType timeSteps = tstStruct.timeSteps();
 				advance = (timeSteps > 0) ? timeSteps - 1 : 0;
 			}
@@ -610,7 +620,7 @@ private:
 
 	PsimagLite::ProgressIndicator progress_;
 	const TargetHelperType& targetHelper_;
-	VectorSizeType stage_;
+	VectorStageEnumType stage_;
 	RealType E0_;
 	RealType currentTime_;
 	SizeType indexNoAdvance_;

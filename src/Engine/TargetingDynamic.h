@@ -129,11 +129,7 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename BasisType::QnType QnType;
-
-	enum {DISABLED,OPERATOR,CONVERGING};
-
-	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
-	static SizeType const SUM = TargetParamsType::SUM;
+	typedef typename TargetingCommonType::ApplyOperatorExpressionType::StageEnum StageEnumType;
 
 	TargetingDynamic(const LeftRightSuperType& lrs,
 	                 const ModelType& model,
@@ -158,13 +154,14 @@ public:
 
 	RealType weight(SizeType i) const
 	{
-		assert(!this->common().aoe().allStages(DISABLED));
+		assert(!this->common().aoe().allStages(StageEnumType::DISABLED));
 		return weight_[i];
 	}
 
 	RealType gsWeight() const
 	{
-		if (this->common().aoe().allStages(DISABLED)) return 1.0;
+		if (this->common().aoe().allStages(StageEnumType::DISABLED))
+			return 1.0;
 		return gsWeight_;
 	}
 

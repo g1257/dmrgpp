@@ -145,11 +145,6 @@ public:
 	TargetParamsType> CorrectionVectorSkeletonType;
 	typedef typename BasisType::QnType QnType;
 
-	enum {DISABLED,OPERATOR,CONVERGING};
-
-	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
-	static SizeType const SUM = TargetParamsType::SUM;
-
 	TargetingCorrectionVector(const LeftRightSuperType& lrs,
 	                          const ModelType& model,
 	                          const WaveFunctionTransfType& wft,

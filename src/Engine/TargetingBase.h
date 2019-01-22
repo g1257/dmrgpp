@@ -117,13 +117,9 @@ public:
 	typedef TargetingCommon<TargetHelperType,
 	VectorWithOffsetType,
 	LanczosSolverType> TargetingCommonType;
-	typedef typename TargetingCommonType::ApplyOperatorExpressionType
-	ApplyOperatorExpressionType;
+	typedef typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-
-	enum {DISABLED=ApplyOperatorExpressionType::DISABLED,
-		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,
-		  WFT_NOADVANCE=ApplyOperatorExpressionType::WFT_NOADVANCE};
+	typedef typename ApplyOperatorExpressionType::StageEnum StageEnumType;
 
 	TargetingBase(const LeftRightSuperType& lrs,
 	              const ModelType& model,
@@ -178,7 +174,7 @@ public:
 
 	virtual SizeType size() const
 	{
-		if (commonTargeting_.aoe().allStages(DISABLED)) return 0;
+		if (commonTargeting_.aoe().allStages(StageEnumType::DISABLED)) return 0;
 		return commonTargeting_.aoe().targetVectors().size();
 	}
 

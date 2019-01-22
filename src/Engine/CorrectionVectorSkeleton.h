@@ -229,9 +229,6 @@ public:
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 
-	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
-	static SizeType const SUM = TargetParamsType::SUM;
-
 	CorrectionVectorSkeleton(InputValidatorType& ioIn,
 	                         const TargetParamsType& tstStruct,
 	                         const ModelType& model,

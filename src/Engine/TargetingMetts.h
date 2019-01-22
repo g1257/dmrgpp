@@ -156,8 +156,7 @@ public:
 	typedef typename BasisType::QnType QnType;
 	typedef typename PsimagLite::Vector<BlockDiagonalMatrixType*>::Type
 	VectorBlockDiagonalMatrixType;
-
-	enum {DISABLED,WFT_NOADVANCE,WFT_ADVANCE,COLLAPSE};
+	typedef typename TargetingCommonType::ApplyOperatorExpressionType::StageEnum StageEnumType;
 
 	const static SizeType SYSTEM = ProgramGlobals::SYSTEM;
 
@@ -227,7 +226,8 @@ public:
 
 	SizeType size() const
 	{
-		if (this->common().aoe().allStages(DISABLED)) return 1;
+		if (this->common().aoe().allStages(StageEnumType::DISABLED))
+			return 1;
 		SizeType n = this->common().aoe().targetVectors().size();
 		if (this->common().aoe().targetVectors()[n-1].size()==0) n--;
 		return n;
@@ -254,10 +254,10 @@ public:
 
 		SizeType max = n1;
 
-		if (this->common().aoe().noStageIs(DISABLED)) {
+		if (this->common().aoe().noStageIs(StageEnumType::DISABLED)) {
 			max = 1;
-			if (this->common().aoe().allStages(WFT_ADVANCE))
-				this->common().aoe().setAllStagesTo(WFT_NOADVANCE);
+			if (this->common().aoe().allStages(StageEnumType::WFT_ADVANCE))
+				this->common().aoe().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 		}
 
 		// Advance or wft each target vector for beta/2
@@ -291,7 +291,7 @@ public:
 
 		printNormsAndWeights();
 
-		if (this->common().aoe().noStageIs(COLLAPSE)) return;
+		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE)) return;
 
 		// collapse
 		bool hasCollapsed = mettsCollapse_(this->common().aoe().targetVectors(n1),
@@ -365,7 +365,7 @@ private:
 		progress_.printline(msg,std::cout);
 		if (norm(phi)<1e-6)
 			setFromInfinite(this->common().aoe().targetVectors(startEnd.first),lrs_);
-		bool allOperatorsApplied = (this->common().aoe().noStageIs(DISABLED));
+		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED));
 		this->common().aoe().calcTimeVectors(startEnd,
 		                               Eg,
 		                               phi,
@@ -380,10 +380,10 @@ private:
 	{
 		static SizeType timesWithoutAdvancement = 0;
 
-		if (this->common().aoe().noStageIs(COLLAPSE))
-			this->common().aoe().setAllStagesTo(WFT_NOADVANCE);
+		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE))
+			this->common().aoe().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 
-		if (this->common().aoe().allStages(COLLAPSE)) {
+		if (this->common().aoe().allStages(StageEnumType::COLLAPSE)) {
 			if (!allSitesCollapsed()) {
 				if (sitesCollapsed_.size()>2*model_.geometry().numberOfSites())
 					throw PsimagLite::RuntimeError("advanceCounterAndComputeStage\n");
@@ -392,7 +392,7 @@ private:
 			}
 
 			sitesCollapsed_.clear();
-			this->common().aoe().setAllStagesTo(WFT_NOADVANCE);
+			this->common().aoe().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 			timesWithoutAdvancement = 0;
 			this->common().aoe().setTime(0);
 			PsimagLite::OstringStream msg;
@@ -413,9 +413,9 @@ private:
 			return;
 		}
 
-		if (this->common().aoe().noStageIs(COLLAPSE) &&
+		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE) &&
 		        this->common().aoe().currentTime() < mettsStruct_.beta) {
-			this->common().aoe().setAllStagesTo(WFT_ADVANCE);
+			this->common().aoe().setAllStagesTo(StageEnumType::WFT_ADVANCE);
 			RealType tmp = this->common().aoe().currentTime() + mettsStruct_.tau();
 			this->common().aoe().setTime(tmp);
 			timesWithoutAdvancement = 0;
@@ -423,16 +423,16 @@ private:
 			return;
 		}
 
-		if (this->common().aoe().noStageIs(COLLAPSE) &&
+		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE) &&
 		        this->common().aoe().currentTime() >= mettsStruct_.beta &&
 		        block[0]!=block.size()) {
 			printAdvancement(timesWithoutAdvancement);
 			return;
 		}
 
-		if (this->common().aoe().noStageIs(COLLAPSE) &&
+		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE) &&
 		        this->common().aoe().currentTime() >= mettsStruct_.beta) {
-			this->common().aoe().setAllStagesTo(COLLAPSE);
+			this->common().aoe().setAllStagesTo(StageEnumType::COLLAPSE);
 			sitesCollapsed_.clear();
 			SizeType n1 = mettsStruct_.timeSteps();
 			this->common().aoe().targetVectors(n1).clear();
@@ -460,11 +460,11 @@ private:
 		VectorSizeType nk;
 		mettsCollapse_.setNk(nk,block);
 
-		if (this->common().aoe().allStages(WFT_NOADVANCE) ||
-		        this->common().aoe().allStages(WFT_ADVANCE) ||
-		        this->common().aoe().allStages(COLLAPSE)) {
+		if (this->common().aoe().allStages(StageEnumType::WFT_NOADVANCE) ||
+		        this->common().aoe().allStages(StageEnumType::WFT_ADVANCE) ||
+		        this->common().aoe().allStages(StageEnumType::COLLAPSE)) {
 			SizeType advance = index;
-			if (this->common().aoe().allStages(WFT_ADVANCE)) {
+			if (this->common().aoe().allStages(StageEnumType::WFT_ADVANCE)) {
 				advance = indexAdvance;
 				this->common().aoe().timeHasAdvanced();
 			}
@@ -723,7 +723,7 @@ private:
 	{
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 
-		if (this->common().aoe().noStageIs(DISABLED))
+		if (this->common().aoe().noStageIs(StageEnumType::DISABLED))
 			std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
 		else
 			std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
@@ -743,10 +743,14 @@ private:
 
 	PsimagLite::String getStage() const
 	{
-		if (this->common().aoe().allStages(DISABLED)) return "Disabled";
-		if (this->common().aoe().allStages(COLLAPSE)) return "Collapsing";
-		if (this->common().aoe().allStages(WFT_ADVANCE)) return "WFT with time stepping";
-		if (this->common().aoe().allStages(WFT_NOADVANCE)) return "WFT without time change";
+		if (this->common().aoe().allStages(StageEnumType::DISABLED))
+			return "Disabled";
+		if (this->common().aoe().allStages(StageEnumType::COLLAPSE))
+			return "Collapsing";
+		if (this->common().aoe().allStages(StageEnumType::WFT_ADVANCE))
+			return "WFT with time stepping";
+		if (this->common().aoe().allStages(StageEnumType::WFT_NOADVANCE))
+			return "WFT without time change";
 
 		return "undefined";
 	}
@@ -793,7 +797,8 @@ private:
 
 	void printNormsAndWeights() const
 	{
-		if (this->common().aoe().allStages(DISABLED)) return;
+		if (this->common().aoe().allStages(StageEnumType::DISABLED))
+			return;
 
 		PsimagLite::OstringStream msg;
 		msg<<"gsWeight="<<gsWeight_<<" weights= ";

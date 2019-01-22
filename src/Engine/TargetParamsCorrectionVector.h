@@ -101,9 +101,6 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrReal;
 	typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
 
-	static SizeType const PRODUCT = BaseType::PRODUCT;
-	static SizeType const SUM = BaseType::SUM;
-
 	template<typename IoInputter>
 	TargetParamsCorrectionVector(IoInputter& io,const ModelType& model)
 	    : BaseType(io,model),

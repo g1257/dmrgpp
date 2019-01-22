@@ -118,11 +118,7 @@ public:
 	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename BasisType::QnType QnType;
-
-	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
-
-	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
-	static SizeType const SUM = TargetParamsType::SUM;
+	typedef typename TargetingCommonType::ApplyOperatorExpressionType::StageEnum StageEnumType;
 
 	TargetingTimeStep(const LeftRightSuperType& lrs,
 	                  const ModelType& model,
@@ -173,19 +169,21 @@ public:
 
 	RealType weight(SizeType i) const
 	{
-		assert(!this->common().aoe().allStages(DISABLED));
+		assert(!this->common().aoe().allStages(StageEnumType::DISABLED));
 		return weight_[i];
 	}
 
 	RealType gsWeight() const
 	{
-		if (this->common().aoe().allStages(DISABLED)) return 1.0;
+		if (this->common().aoe().allStages(StageEnumType::DISABLED))
+			return 1.0;
 		return gsWeight_;
 	}
 
 	bool includeGroundStage() const
 	{
-		if (!this->common().aoe().noStageIs(DISABLED)) return true;
+		if (!this->common().aoe().noStageIs(StageEnumType::DISABLED))
+			return true;
 		bool b = (fabs(gsWeight_)>1e-6);
 		return b;
 	}
@@ -234,7 +232,7 @@ public:
 		msg<<"Saving state...";
 		progress_.printline(msg,std::cout);
 
-		SizeType marker = (this->common().aoe().noStageIs(DISABLED)) ? 1 : 0;
+		SizeType marker = (this->common().aoe().noStageIs(StageEnumType::DISABLED)) ? 1 : 0;
 
 		assert(block.size() > 0);
 		SizeType site = block[0];
@@ -266,8 +264,8 @@ private:
 		                      tstStruct_);
 
 		PairType startEnd(0,times_.size());
-		bool allOperatorsApplied = (this->common().aoe().noStageIs(DISABLED) &&
-		                            this->common().aoe().noStageIs(OPERATOR));
+		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) &&
+		                            this->common().aoe().noStageIs(StageEnumType::OPERATOR));
 
 		this->common().aoe().calcTimeVectors(startEnd,
 		                               Eg,
@@ -297,7 +295,8 @@ private:
 
 	void printNormsAndWeights() const
 	{
-		if (this->common().aoe().allStages(DISABLED)) return;
+		if (this->common().aoe().allStages(StageEnumType::DISABLED))
+			return;
 
 		PsimagLite::OstringStream msg;
 		msg<<"gsWeight="<<gsWeight_<<" weights= ";
@@ -363,7 +362,7 @@ private:
 	{
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 
-		if (this->common().aoe().noStageIs(DISABLED))
+		if (this->common().aoe().noStageIs(StageEnumType::DISABLED))
 			std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
 		else
 			std::cout<<"NOT ALL OPERATORS APPLIED YET\n";

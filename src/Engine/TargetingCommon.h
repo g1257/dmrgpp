@@ -139,10 +139,7 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef Braket<ModelType> BraketType;
 	typedef FermionSign FermionSignType;
-
-	enum {DISABLED=ApplyOperatorExpressionType::DISABLED,
-		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,
-		  WFT_NOADVANCE=ApplyOperatorExpressionType::WFT_NOADVANCE};
+	typedef typename ApplyOperatorExpressionType::StageEnum StageEnumType;
 
 	enum class OpLabelCategory { DRESSED, BARE };
 
@@ -208,7 +205,7 @@ public:
 	                const VectorSizeType& block,
 	                PsimagLite::String prefix) const
 	{
-		SizeType marker = (aoe_.noStageIs(DISABLED)) ? 1 : 0;
+		SizeType marker = (aoe_.noStageIs(StageEnumType::DISABLED)) ? 1 : 0;
 		SizeType size = block[0];
 		TimeSerializerType ts(aoe_.currentTime(),
 		                      size,
@@ -257,7 +254,7 @@ public:
 	void cocoon(const BlockType& block,
 	            ProgramGlobals::DirectionEnum direction) const
 	{
-		if (aoe_.noStageIs(DISABLED))
+		if (aoe_.noStageIs(StageEnumType::DISABLED))
 			std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
 		else
 			std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
