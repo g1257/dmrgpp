@@ -468,6 +468,8 @@ private:
 		case StageEnum::COLLAPSE:
 			return "COLLAPSE";
 		}
+
+		return "undefined";
 	}
 
 	SizeType evolve(SizeType i,
