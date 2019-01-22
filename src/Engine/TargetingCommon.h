@@ -268,7 +268,7 @@ public:
 			std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
 
 		if (cocoonType_ == OpLabelCategory::BARE)
-			return cocoonBareDeprecated(block, direction);
+			err("TargetingCommon.h: cocoon(): Bare specs only for RIXS\n");
 
 		SizeType n = meas_.size();
 		assert(block.size()>0);
@@ -292,42 +292,6 @@ public:
 			test(v1, v2, direction, opLabel, site, nup, border);
 			// don't repeat for border because this is called twice if needed
 		}
-	}
-
-	// in situ computation:
-	// prints <v1|A|v2>
-	void cocoon(ProgramGlobals::DirectionEnum direction,
-	            SizeType site,
-	            const VectorWithOffsetType& v1,
-	            PsimagLite::String label1,
-	            const VectorWithOffsetType& v2,
-	            PsimagLite::String label2,
-	            bool needsPrinting = true) const
-	{
-
-		std::cout<<"-------------&*&*&* In-situ measurements start\n";
-		RealType norm1 = norm(v1);
-		RealType norm2 = norm(v2);
-		if (norm1 < 1e-6 || norm2 < 1e-6) {
-			std::cout<<"cocoon: At least 1 NORM IS ZERO ";
-			std::cout<<label1<<" has norm "<<norm1;
-			std::cout<<" "<<label2<<" has norm "<<norm2<<"\n";
-			return;
-		}
-
-		BorderEnumType border = ApplyOperatorType::BORDER_NO;
-		cocoon_(direction,site,v1,label1,v2,label2,border,needsPrinting);
-
-		SizeType numberOfSites = targetHelper_.model().geometry().numberOfSites();
-
-		int site2 = ProgramGlobals::findBorderSiteFrom(site, direction, numberOfSites);
-
-		if (site2 >= 0) {
-			border = ApplyOperatorType::BORDER_YES;
-			cocoon_(direction,site2,v1,label1,v2,label2,border,needsPrinting);
-		}
-
-		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
 
 	void cocoonLegacy(ProgramGlobals::DirectionEnum direction,
@@ -616,38 +580,6 @@ public:
 	}
 
 private:
-
-	void cocoonBareDeprecated(const BlockType& block,
-	                          ProgramGlobals::DirectionEnum direction) const
-	{
-		const ModelType& model = targetHelper_.model();
-		const VectorVectorWithOffsetType& tv = aoe_.targetVectors();
-
-		if (model.params().insitu=="") return;
-
-		if (BasisType::useSu2Symmetry()) {
-			noCocoon("not when SU(2) symmetry is in use");
-			return;
-		}
-
-		SizeType max = 1;
-		PsimagLite::String magic = "allPvectors";
-		if (model.params().options.find(magic) != PsimagLite::String::npos)
-			max = tv.size();
-
-		try {
-			assert(block.size()>0);
-			cocoon(direction, block[0], aoe_.psi(), "PSI", aoe_.psi(), "PSI");
-			if (tv.size() > 0) {
-				for (SizeType i = 0; i < max; ++i)
-					cocoon(direction,block[0],tv[i],"P"+ttos(i),tv[i],"P"+ttos(i));
-				for (SizeType i = 0; i < max; ++i)
-					cocoon(direction, block[0], aoe_.psi(), "PSI", tv[i], "P"+ttos(i));
-			}
-		} catch (std::exception&) {
-			noCocoon("unsupported by the model");
-		}
-	}
 
 	void setQuantumNumbers(const VectorWithOffsetType& v)
 	{

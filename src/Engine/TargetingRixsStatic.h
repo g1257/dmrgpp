@@ -328,24 +328,8 @@ private:
 
 		doCorrectionVector();
 
-		for (SizeType i = 0; i < this->common().aoe().targetVectors().size(); ++i) {
-			PsimagLite::String label = "P" + ttos(i);
-			this->common().cocoon(direction,
-			                      site,
-			                      this->common().aoe().psi(),
-			                      "PSI",
-			                      this->common().aoe().targetVectors(i),
-			                      label);
-		}
-		for (SizeType i = 0; i < this->common().aoe().targetVectors().size(); ++i) {
-			PsimagLite::String label = "P" + ttos(i);
-			this->common().cocoon(direction,
-			                      site,
-			                      this->common().aoe().targetVectors(i),
-			                      label,
-			                      this->common().aoe().targetVectors(i),
-			                      label);
-		}
+		VectorSizeType block(1, site);
+		this->common().cocoon(block, direction);
 	}
 
 	void doCorrectionVector()
