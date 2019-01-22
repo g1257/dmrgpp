@@ -255,38 +255,8 @@ private:
 
 		setWeights();
 
-		for (SizeType i = 1; i < this->common().aoe().targetVectors().size(); ++i) {
-			PsimagLite::String label = "P" + ttos(i);
-			this->common().cocoon(direction,
-			                      site,
-			                      this->common().aoe().psi(),
-			                      "PSI",
-			                      this->common().aoe().targetVectors(i),
-			                      label);
-		}
-
-		if (this->common().aoe().targetVectors().size() < 4) return;
-
-		this->common().cocoon(direction,
-		                      site,
-		                      this->common().aoe().targetVectors(2),
-		                      "P2",
-		                      this->common().aoe().targetVectors(2),
-		                      "P2");
-
-		this->common().cocoon(direction,
-		                      site,
-		                      this->common().aoe().targetVectors(3),
-		                      "P3",
-		                      this->common().aoe().targetVectors(3),
-		                      "P3");
-
-		this->common().cocoon(direction,
-		                      site,
-		                      this->common().aoe().targetVectors(2),
-		                      "P2",
-		                      this->common().aoe().targetVectors(3),
-		                      "P3");
+		VectorSizeType block(1, site);
+		this->common().cocoon(block, direction);
 	}
 
 	void setWeights()

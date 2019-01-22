@@ -88,5 +88,5 @@ FERMIONSIGN=1
 JMVALUES 2 0 0
 AngularFactor=1
 
-#ci dmrg arguments=":../inputs/sz4601.txt"
+#ci dmrg arguments="<gs|sz|P1>,<gs|sz|P2>,<gs|sz|P3>"
 #ci CollectBrakets 0

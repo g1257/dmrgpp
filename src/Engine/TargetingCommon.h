@@ -149,14 +149,22 @@ public:
 	                SizeType indexNoAdvance)
 	    : cocoonType_(OpLabelCategory::DRESSED),
 	      progress_("TargetingCommon"),
-	      targetHelper_(lrs,model,wft),
-	      aoe_(targetHelper_,indexNoAdvance),
+	      targetHelper_(lrs, model, wft),
+	      aoe_(targetHelper_, indexNoAdvance),
 	      inSitu_(model.geometry().numberOfSites())
 	{
 		PsimagLite::split(meas_, model.params().insitu, ",");
 		SizeType n = meas_.size();
 		for (SizeType i = 0; i < n; ++i) {
 			const bool isDressed = isOpLabelDressed(meas_[i]);
+
+			// check this early that what's passed makes sense
+			if (isDressed) {
+				BraketType braket(model, meas_[i]);
+				getVectorCheck(braket.bra());
+				getVectorCheck(braket.ket());
+			}
+
 			OpLabelCategory cocoonExpected = (isDressed) ? OpLabelCategory::DRESSED
 			                                             : OpLabelCategory::BARE;
 			if (i == 0) {
@@ -266,8 +274,11 @@ public:
 		assert(block.size()>0);
 		SizeType site = block[0];
 		SizeType numberOfSites = targetHelper_.model().geometry().numberOfSites();
-		BorderEnumType border = (site == 0 || site == numberOfSites - 1) ?
-		            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
+		BorderEnumType border = ApplyOperatorType::BORDER_NO;
+		if (site == 0 && direction == ProgramGlobals::EXPAND_ENVIRON)
+			border = ApplyOperatorType::BORDER_YES;
+		if (site == numberOfSites - 1 && direction == ProgramGlobals::EXPAND_SYSTEM)
+			border = ApplyOperatorType::BORDER_YES;
 
 		for (SizeType i = 0; i < n; ++i) {
 			PsimagLite::String opLabel = meas_[i];
@@ -727,6 +738,16 @@ private:
 			err("Malformed braket " + braOrKet + "\n");
 
 		return aoe_.targetVectors(ind - 1);
+	}
+
+	void getVectorCheck(PsimagLite::String braOrKet) const
+	{
+		if (braOrKet == "gs")
+			return;
+
+		int ind = BraketType::getPtype(braOrKet);
+		if (ind <= 0)
+			err("Malformed braket " + braOrKet + "\n");
 	}
 
 	// prints <src2|A|src1>
