@@ -1,3 +1,24 @@
+2019-01-22 Version 5.48
+
+New features:
+
+* TargetingChebyshev: needs cocoon
+
+* Model KitaevWithGammas
+
+* InfiniteLoopeptStates= can be used for restarts
+
+* <bra|ket> with empty op-spec now accepted
+
+* coutAnalysis: prints max and average of each item
+
+Engine:
+
+* TargeParams* clean up
+
+* Targeting* clean up
+
+
 2019-01-03 Version 5.46
 
 Compilation:
