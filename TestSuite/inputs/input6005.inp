@@ -51,6 +51,6 @@ FiniteLoops 3 9 150 0
 
 TruncationTolerance=1e-6
 
-#ci dmrg arguments="sy?0"
+#ci dmrg arguments="<gs|sy?0|gs>"
 #ci CollectBrakets 0
 #ci observe arguments="<gs|sy?0|gs>"

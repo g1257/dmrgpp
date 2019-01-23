@@ -105,10 +105,6 @@ public:
 
 	virtual ~TargetParamsBase() {}
 
-	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
-	                           SizeType x,
-	                           PsimagLite::String msg = "") const = 0;
-
 	virtual SizeType sites() const = 0;
 
 	virtual SizeType sites(SizeType) const

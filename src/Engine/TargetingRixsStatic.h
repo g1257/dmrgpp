@@ -246,7 +246,7 @@ private:
 	// tv[4] = imaginary cv for tv[3]
 	// tv[5] = real      cv for tv[3]
 
-	void evolve(RealType Eg,
+	void evolve(RealType,
 	            ProgramGlobals::DirectionEnum direction,
 	            SizeType site,
 	            SizeType loopNumber)
@@ -262,7 +262,7 @@ private:
 		SizeType max = tstStruct_.sites();
 
 		if (max>2)
-			throw PsimagLite::RuntimeError("You cannot apply more than 2 operators (only SUM is allowed)\n");
+			err("You cannot apply more than 2 operators (only SUM is allowed)\n");
 
 		if (!applied_) {
 			if (max==1) {
@@ -329,6 +329,17 @@ private:
 		doCorrectionVector();
 
 		VectorSizeType block(1, site);
+		this->common().cocoon(block, direction);
+		SizeType sites = BaseType::model().geometry().numberOfSites();
+		if (sites < 4) return;
+
+		SizeType site2 = sites;
+		if (site == 1 && direction == ProgramGlobals::EXPAND_ENVIRON)
+			site2 = 0;
+		if (site == sites - 2 && direction == ProgramGlobals::EXPAND_SYSTEM)
+			site2 = sites - 1;
+		if (site2 == sites) return;
+		block[0] = site2;
 		this->common().cocoon(block, direction);
 	}
 
