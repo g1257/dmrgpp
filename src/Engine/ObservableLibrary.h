@@ -389,9 +389,8 @@ private:
 	                     const PsimagLite::String& ket)
 	{
 		SizeType threadId = 0;
-		VectorFieldType density;
 
-		for (SizeType i0 = 0;i0<observe_.size();i0++) {
+		for (SizeType i0 = 0; i0 < observe_.size(); ++i0) {
 
 			if (i0==0) {
 				std::cout<<"Using Matrix A:\n";
@@ -403,39 +402,42 @@ private:
 			observe_.setBrakets(bra,ket);
 			observe_.setPointer(threadId,i0);
 
-			SizeType tmp = density.size();
-			onePointHookForZero(i0,opA,"gs",threadId,density);
-			SizeType lastOne = density.size();
-			if (tmp != density.size() && lastOne > 0) {
-				lastOne--;
-				std::cout<<"0 "<<density[lastOne];
-				std::cout<<" "<<observe_.time(threadId)<<"\n";
-			}
+			cornerLeftOrRight(1, threadId, i0, bra, opA, ket);
 
 			FieldType tmp1 = observe_.template
 			        onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
 			std::cout<<observe_.site(threadId)<<" "<<tmp1;
 			std::cout<<" "<<observe_.time(threadId)<<"\n";
-			density.push_back(tmp1);
 
-			if (!observe_.isAtCorner(numberOfSites_,threadId)) continue;
-
-			// also calculate next or prev. site:
-			SizeType x = (observe_.site(threadId)==1) ? 0 : numberOfSites_-1;
-
-			// operator might be site dependent
-			OperatorType opAcorner = opA;
-
-			// do the corner case
-			observe_.setBrakets(bra,ket);
-			tmp1 = observe_.template
-			        onePoint<ApplyOperatorType>(i0,
-			                                    opAcorner,
-			                                    ApplyOperatorType::BORDER_YES);
-			std::cout<<x<<" "<<tmp1;
-			std::cout<<" "<<observe_.time(threadId)<<"\n";
-			density.push_back(tmp1);
+			cornerLeftOrRight(numberOfSites_ - 2, threadId, i0, bra, opA, ket);
 		}
+	}
+
+	void cornerLeftOrRight(SizeType site,
+	                       SizeType threadId,
+	                       SizeType i0,
+	                       const PsimagLite::String& bra,
+	                       const OperatorType& opA,
+	                       const PsimagLite::String& ket)
+	{
+		if (observe_.site(threadId) != site) return;
+
+		if (!observe_.isAtCorner(numberOfSites_, threadId)) return;
+
+		// also calculate next or prev. site:
+		SizeType x = (observe_.site(threadId)==1) ? 0 : numberOfSites_-1;
+
+		// operator might be site dependent
+		OperatorType opAcorner = opA;
+
+		// do the corner case
+		observe_.setBrakets(bra,ket);
+		FieldType tmp1 = observe_.template
+		        onePoint<ApplyOperatorType>(i0,
+		                                    opAcorner,
+		                                    ApplyOperatorType::BORDER_YES);
+		std::cout<<x<<" "<<tmp1;
+		std::cout<<" "<<observe_.time(threadId)<<"\n";
 	}
 
 	MatrixType SliceOrbital(const MatrixType& m,
@@ -1200,22 +1202,6 @@ private:
 		v.resize(static_cast<SizeType>(orbitals*(orbitals+1)/2));
 		for (SizeType i = 0; i < v.size(); ++i)
 			v[i].resize(rows,cols);
-	}
-
-	void onePointHookForZero(SizeType i0,
-	                         const OperatorType& opA,
-	                         const PsimagLite::String& gsOrTime,
-	                         SizeType threadId,
-	                         VectorFieldType& density)
-	{
-		if (hasTimeEvolution_) return;
-		if (observe_.site(threadId)!=1 || observe_.isAtCorner(numberOfSites_,threadId))
-			return;
-		assert(observe_.site(threadId)==1);
-		FieldType tmp1 = observe_.template onePointHookForZero<ApplyOperatorType>(i0,opA);
-		density.push_back(tmp1);
-		if (hasTimeEvolution_ && gsOrTime=="time") std::cout<<"\n";
-		if (!hasTimeEvolution_) std::cout<<"\n";
 	}
 
 	SizeType logBase2(SizeType x) const

@@ -202,12 +202,16 @@ public:
 
 		skeleton_.printNormsAndWeights(this->common(), weight_, gsWeight_);
 
-		SizeType numberOfSites = this->lrs().super().block().size();
-		if (site>1 && site<numberOfSites-2) return;
-		if (site == 1 && direction == ProgramGlobals::EXPAND_SYSTEM) return;
 		//corner case
-		SizeType x = (site==1) ? 0 : numberOfSites-1;
-		evolve(Eg,direction,x,loopNumber);
+		SizeType numberOfSites = this->lrs().super().block().size();
+		SizeType site2 = numberOfSites;
+
+		if (site == 1 && direction == ProgramGlobals::EXPAND_ENVIRON)
+			site2 = 0;
+		if (site == numberOfSites - 2 && direction == ProgramGlobals::EXPAND_SYSTEM)
+			site2 = numberOfSites - 1;
+		if (site2 == numberOfSites) return;
+		evolve(Eg, direction, site2, loopNumber);
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
@@ -256,7 +260,8 @@ private:
 		setWeights();
 
 		VectorSizeType block(1, site);
-		this->common().cocoon(block, direction);
+		bool doBorderIfBorder = false;
+		this->common().cocoon(block, direction, doBorderIfBorder);
 	}
 
 	void setWeights()

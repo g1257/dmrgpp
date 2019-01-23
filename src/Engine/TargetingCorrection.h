@@ -157,7 +157,8 @@ public:
 
 		this->common().aoe().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 		this->common().computeCorrection(direction,block1);
-		this->common().cocoon(block1,direction);
+		bool doBorderIfBorder = false;
+		this->common().cocoon(block1, direction, doBorderIfBorder);
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io,

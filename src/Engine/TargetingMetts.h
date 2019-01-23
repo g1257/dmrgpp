@@ -277,7 +277,8 @@ public:
 			       this->common().aoe().targetVectors()[i].size()==
 			       lrs_.super().permutationVector().size());
 
-		this->common().cocoon(block1, direction);
+		bool doBorderIfBorder = true;
+		this->common().cocoon(block1, direction, doBorderIfBorder);
 
 		printEnergies(); // in-situ
 

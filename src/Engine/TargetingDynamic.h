@@ -180,11 +180,17 @@ public:
 
 		SizeType site = block1[0];
 		evolve(Eg,direction,site,loopNumber);
+
+		//corner case
 		SizeType numberOfSites = this->lrs().super().block().size();
-		if (site>1 && site<numberOfSites-2) return;
-		// //corner case
-		SizeType x = (site==1) ? 0 : numberOfSites-1;
-		evolve(Eg,direction,x,loopNumber);
+		SizeType site2 = numberOfSites;
+
+		if (site == 1 && direction == ProgramGlobals::EXPAND_ENVIRON)
+			site2 = 0;
+		if (site == numberOfSites - 2 && direction == ProgramGlobals::EXPAND_SYSTEM)
+			site2 = numberOfSites - 1;
+		if (site2 == numberOfSites) return;
+		evolve(Eg, direction, site2, loopNumber);
 	}
 
 	void write(const VectorSizeType& block,
@@ -239,8 +245,9 @@ private:
 
 		calcLanczosVectors(gsWeight_,weight_,phiNew,direction);
 
-		VectorSizeType block(1,site);
-		this->common().cocoon(block,direction);
+		bool doBorderIfBorder = false;
+		VectorSizeType block(1, site);
+		this->common().cocoon(block, direction, doBorderIfBorder);
 	}
 
 	void calcLanczosVectors(RealType&,

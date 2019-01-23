@@ -153,7 +153,8 @@ public:
 	            const BlockType&,
 	            SizeType)
 	{
-		this->common().cocoon(block1,direction);
+		bool doBorderIfBorder = true;
+		this->common().cocoon(block1, direction, doBorderIfBorder);
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,

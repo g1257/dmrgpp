@@ -202,24 +202,9 @@ public:
 	            const BlockType&,
 	            SizeType loopNumber)
 	{
-		assert(block1.size() > 0);
-		SizeType site = block1[0];
 		evolveInternal(Eg, direction, block1, loopNumber);
-		this->common().cocoon(block1, direction); // in-situ
-
-
-		// border site below if needed ONLY
-		SizeType numberOfSites = this->lrs().super().block().size();
-		if (site > 1 && site < numberOfSites - 2)
-			return;
-		if (site == 1 && direction == ProgramGlobals::EXPAND_SYSTEM)
-			return;
-		if (site == numberOfSites - 2 && direction == ProgramGlobals::EXPAND_ENVIRON)
-			return;
-
-		SizeType x = (site == 1) ? 0 : numberOfSites - 1;
-		BlockType block(1,x);
-		this->common().cocoon(block, direction); // in-situ
+		bool doBorderIfBorder = true;
+		this->common().cocoon(block1, direction, doBorderIfBorder); // in-situ
 	}
 
 	bool end() const

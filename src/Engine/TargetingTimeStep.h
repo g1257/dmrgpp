@@ -275,7 +275,8 @@ private:
 		                               block1,
 		                               tstStruct_);
 
-		this->common().cocoon(block1, direction);
+		bool doBorderIfBorder = false;
+		this->common().cocoon(block1, direction, doBorderIfBorder);
 
 		printEnergies(); // in-situ
 

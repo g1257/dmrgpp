@@ -205,13 +205,6 @@ public:
 		SizeType site = block1[0];
 		evolve(Eg,direction,site,loopNumber);
 		skeleton_.printNormsAndWeights(this->common(), weight_, gsWeight_);
-
-		SizeType numberOfSites = this->lrs().super().block().size();
-		if (site>1 && site<numberOfSites-2) return;
-		if (site == 1 && direction == ProgramGlobals::EXPAND_SYSTEM) return;
-		//corner case
-		//		SizeType x = (site==1) ? 0 : numberOfSites-1;
-		//		evolve(Eg,direction,x,loopNumber);
 	}
 
 	void write(const VectorSizeType& block,
@@ -328,19 +321,9 @@ private:
 
 		doCorrectionVector();
 
+		bool doBorderIfBorder = true;
 		VectorSizeType block(1, site);
-		this->common().cocoon(block, direction);
-		SizeType sites = BaseType::model().geometry().numberOfSites();
-		if (sites < 4) return;
-
-		SizeType site2 = sites;
-		if (site == 1 && direction == ProgramGlobals::EXPAND_ENVIRON)
-			site2 = 0;
-		if (site == sites - 2 && direction == ProgramGlobals::EXPAND_SYSTEM)
-			site2 = sites - 1;
-		if (site2 == sites) return;
-		block[0] = site2;
-		this->common().cocoon(block, direction);
+		this->common().cocoon(block, direction, doBorderIfBorder);
 	}
 
 	void doCorrectionVector()

@@ -260,7 +260,8 @@ public:
 	// START Cocoons
 
 	void cocoon(const BlockType& block,
-	            ProgramGlobals::DirectionEnum direction) const
+	            ProgramGlobals::DirectionEnum direction,
+	            bool doBorderIfBorder) const
 	{
 		if (aoe_.noStageIs(StageEnumType::DISABLED))
 			std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
@@ -292,6 +293,19 @@ public:
 			test(v1, v2, direction, opLabel, site, nup, border);
 			// don't repeat for border because this is called twice if needed
 		}
+
+		if (!doBorderIfBorder) return;
+
+		SizeType site2 = numberOfSites;
+
+		if (site == 1 && direction == ProgramGlobals::EXPAND_ENVIRON)
+			site2 = 0;
+		if (site == numberOfSites - 2 && direction == ProgramGlobals::EXPAND_SYSTEM)
+			site2 = numberOfSites - 1;
+		if (site2 == numberOfSites) return;
+
+		VectorSizeType block1(1, site2);
+		cocoon(block1, direction, false);
 	}
 
 	// FIXME TODO REMOVE
