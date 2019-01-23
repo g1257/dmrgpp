@@ -422,7 +422,16 @@ private:
 	{
 		if (observe_.site(threadId) != site) return;
 
-		if (!observe_.isAtCorner(numberOfSites_, threadId)) return;
+		bool atCorner = observe_.isAtCorner(numberOfSites_, threadId);
+
+		if (site == 1 && !atCorner) {
+			FieldType tmp1 = observe_.template onePointHookForZero<ApplyOperatorType>(i0, opA);
+			std::cout<<"0 "<<tmp1<<" "<<observe_.time(threadId)<<"\n";
+			return;
+		}
+
+		if (!atCorner)
+			return;
 
 		// also calculate next or prev. site:
 		SizeType x = (observe_.site(threadId)==1) ? 0 : numberOfSites_-1;
