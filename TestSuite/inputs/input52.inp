@@ -43,7 +43,7 @@ OperatorExpression=c'*c?1*c?1'+c?1'*c*c'
 
 Threads=4
 
-#ci dmrg arguments="<P0|nup|P0>"
+#ci dmrg arguments="<P0|nup|P0>,<P0|nup*ndown|P0>"
 #ci getTimeObservablesInSitu 2 <P0|nup|P0>
 #ci getTimeObservablesInSitu 4 <P0|nup|P0>
 #ci getTimeObservablesInSitu 5 <P0|nup|P0>
