@@ -79,11 +79,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define OBSERVABLE_LIBRARY_H
 
 #include "Matrix.h" // in PsimagLite
-#include "PreOperatorSiteDependent.h"
-#include "PreOperatorSiteIndependent.h"
 #include "Concurrency.h"
 #include "Vector.h"
 #include "ProgramGlobals.h"
+#include "ApplyOperatorLocal.h"
 
 namespace Dmrg {
 
@@ -105,9 +104,6 @@ public:
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorFieldType;
 	typedef PsimagLite::Matrix<FieldType> MatrixType;
 	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
-	typedef PreOperatorBase<ModelType> PreOperatorBaseType;
-	typedef PreOperatorSiteDependent<ModelType> PreOperatorSiteDependentType;
-	typedef PreOperatorSiteIndependent<ModelType> PreOperatorSiteIndependentType;
 	typedef typename ObserverType::BraketType BraketType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef std::pair<SizeType,SizeType> PairSizeType;
@@ -150,13 +146,10 @@ public:
 		for (SizeType i = 0; i < vecStr.size(); ++i) {
 			BraketType braket(model_, vecStr[i]);
 
-			SizeType threadId = 0;
 			if (braket.points() == 1) {
-				PreOperatorSiteIndependentType preOperator(braket.op(0),
-				                                           braket.opName(0),
-				                                           threadId);
 				measureOnePoint(braket.bra(),
-				                preOperator,
+				                braket.op(0),
+				                braket.opName(0),
 				                braket.ket());
 				continue;
 			}
@@ -214,34 +207,43 @@ private:
 		PsimagLite::String str("WARNING: ObservableLibrary: ");
 		str += "measureTheOnePoints is deprecated\n";
 		std::cerr<<str;
+		SizeType site = 0;
 
-		SizeType threadId = 0;
 		for (SizeType dof=0;dof<numberOfDofs;dof++) {
 			for (SizeType dof2=dof;dof2<numberOfDofs;dof2++) {
 				PsimagLite::String str("c^\\dagger(dof=");
 				str += ttos(dof) + ") c(dof=" + ttos(dof2) + ")";
-				PreOperatorSiteDependentType preOperator(dof,dof2,model_,str,threadId);
-				measureOnePoint(preOperator);
+				SparseMatrixType opCup = model_.naturalOperator("c", site, dof).data;
+				SparseMatrixType opCdown = model_.naturalOperator("c", site, dof2).data;
+				SparseMatrixType opCupTranspose;
+				transposeConjugate(opCupTranspose,opCup);
+				SparseMatrixType A = opCupTranspose * opCdown; //<--- FIXME CHECK
+				Su2RelatedType su2Related1;
+				OperatorType opA(A,
+				                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+				                 std::pair<SizeType,SizeType>(0, 0),
+				                 1,
+				                 su2Related1);
+
+				measureOnePoint(opA, str);
 			}
 		}
 	}
 
 	void measureOnePoint(const PsimagLite::String& bra,
-	                     const PreOperatorBaseType& preOperator,
+	                     const OperatorType& opA,
+	                     PsimagLite::String label,
 	                     const PsimagLite::String& ket)
 	{
-		SizeType threadId = preOperator.threadId();
+		SizeType threadId = 0;
 		VectorFieldType density;
 
 		for (SizeType i0 = 0;i0<observe_.size();i0++) {
-			if (!preOperator.isValid(i0+1)) continue;
-
-			OperatorType opA = preOperator(i0+1);
-
-			preOperator.printMatrix(opA.data,preOperator.siteDependent(),i0);
 
 			if (i0==0) {
-				std::cout<<"site <"<<bra<<"|"<<preOperator.label();
+				std::cout<<"Using Matrix A:\n";
+				std::cout<<opA.data.toDense();
+				std::cout<<"site <"<<bra<<"|"<<label;
 				std::cout<<"|"<<ket<<"> time\n";
 			}
 
@@ -269,8 +271,7 @@ private:
 			SizeType x = (observe_.site(threadId)==1) ? 0 : numberOfSites_-1;
 
 			// operator might be site dependent
-			if (!preOperator.isValid(x)) continue;
-			OperatorType opAcorner = preOperator(x);
+			OperatorType opAcorner = opA;
 
 			// do the corner case
 			observe_.setBrakets(bra,ket);
@@ -457,13 +458,13 @@ private:
 					else
 						spinTotalTotal +=  factor*spinTotal;
 
-				
+
 					if (PsimagLite::Concurrency::root()) {
-							std::cout<<"SpinTotal orb"<<x<<"-"<<y<<":\n";
-							std::cout<<spinTotal;
+						std::cout<<"SpinTotal orb"<<x<<"-"<<y<<":\n";
+						std::cout<<spinTotal;
 					}
 					counter++;
-				}	
+				}
 			}
 
 			if (PsimagLite::Concurrency::root() && orbitals > 1) {
@@ -1028,16 +1029,16 @@ private:
 		// Singlet four-points
 		MatrixType m1(rows,cols);
 		MatrixType m2(rows,cols);
-//		std::cout << "PairPair Correlations S^{l}_{nn}" << std::endl;
-//		names.push_back("S^{l}_{nn}");
-//		ppFour(m1,m2,0,0,0,0,onsiteOrNot,-1);
+		//		std::cout << "PairPair Correlations S^{l}_{nn}" << std::endl;
+		//		names.push_back("S^{l}_{nn}");
+		//		ppFour(m1,m2,0,0,0,0,onsiteOrNot,-1);
 
 
-//		m1.clear();
-//		m1.resize(rows,cols);
-//		std::cout << "PairPair Correlations S^{u}_{nn}" << std::endl;
-//		names.push_back("S^{u}_{nn}");
-//		ppFour(m1,m2,1,1,1,1,onsiteOrNot,-1);
+		//		m1.clear();
+		//		m1.resize(rows,cols);
+		//		std::cout << "PairPair Correlations S^{u}_{nn}" << std::endl;
+		//		names.push_back("S^{u}_{nn}");
+		//		ppFour(m1,m2,1,1,1,1,onsiteOrNot,-1);
 
 
 		m1.clear();
@@ -1061,30 +1062,30 @@ private:
 		std::cout << m2;
 
 
-//		m1 = new MatrixType(rows,cols);
-//		std::cout << "PairPair Correlations S^{l-u}_{nn}" << std::endl;
-//		names.push_back("S^{l-u}_{nn}");
-//		ppFour(*m1,0,0,1,1,onsiteOrNot,-1);
-//		result.push_back(m1);
+		//		m1 = new MatrixType(rows,cols);
+		//		std::cout << "PairPair Correlations S^{l-u}_{nn}" << std::endl;
+		//		names.push_back("S^{l-u}_{nn}");
+		//		ppFour(*m1,0,0,1,1,onsiteOrNot,-1);
+		//		result.push_back(m1);
 
 		// Triplet four-points
-//		m1 = new MatrixType(rows,cols);
-//		std::cout << "PairPair Correlations T^{l}_{nn}" << std::endl;
-//		names.push_back("T^{l}_{nn}");
-//		ppFour(*m1,0,0,0,0,onsiteOrNot,1);
-//		result.push_back(m1);
+		//		m1 = new MatrixType(rows,cols);
+		//		std::cout << "PairPair Correlations T^{l}_{nn}" << std::endl;
+		//		names.push_back("T^{l}_{nn}");
+		//		ppFour(*m1,0,0,0,0,onsiteOrNot,1);
+		//		result.push_back(m1);
 
-//		m1 = new MatrixType(rows,cols);
-//		std::cout << "PairPair Correlations T^{u}_{nn}" << std::endl;
-//		names.push_back("T^{u}_{nn}");
-//		ppFour(*m1,1,1,1,1,onsiteOrNot,1);
-//		result.push_back(m1);
+		//		m1 = new MatrixType(rows,cols);
+		//		std::cout << "PairPair Correlations T^{u}_{nn}" << std::endl;
+		//		names.push_back("T^{u}_{nn}");
+		//		ppFour(*m1,1,1,1,1,onsiteOrNot,1);
+		//		result.push_back(m1);
 
-//		m1 = new MatrixType(rows,cols);
-//		std::cout << "PairPair Correlations T^{l-u}_{nn}" << std::endl;
-//		names.push_back("T^{l-u}_{nn}");
-//		ppFour(*m1,0,0,1,1,onsiteOrNot,1);
-//		result.push_back(m1);
+		//		m1 = new MatrixType(rows,cols);
+		//		std::cout << "PairPair Correlations T^{l-u}_{nn}" << std::endl;
+		//		names.push_back("T^{l-u}_{nn}");
+		//		ppFour(*m1,0,0,1,1,onsiteOrNot,1);
+		//		result.push_back(m1);
 	}
 
 	void ppFour(MatrixType& m, MatrixType& m2,
@@ -1299,8 +1300,7 @@ private:
 			                 std::pair<SizeType,SizeType>(0, 0),
 			                 1,
 			                 su2Related1);
-			PreOperatorSiteIndependentType preOperator(opA,"nupNdown",threadId);
-			measureOnePoint(preOperator);
+			measureOnePoint(opA, "nupNdown");
 		} else if (label=="nup+ndown") {
 			A = matrixNup_.data;
 			A += matrixNdown_.data;
@@ -1309,8 +1309,7 @@ private:
 			                 std::pair<SizeType,SizeType>(0, 0),
 			                 1,
 			                 su2Related1);
-			PreOperatorSiteIndependentType preOperator(opA,"nup+ndown",threadId);
-			measureOnePoint(preOperator);
+			measureOnePoint(opA, "nup+ndown");
 		} else if (label=="sz") {
 			A = matrixNup_.data;
 			const FieldType f1 = (-1.0);
@@ -1320,8 +1319,7 @@ private:
 			                 std::pair<SizeType,SizeType>(0, 0),
 			                 1,
 			                 su2Related1);
-			PreOperatorSiteIndependentType preOperator(opA,"sz",threadId);
-			measureOnePoint(preOperator);
+			measureOnePoint(opA, "sz");
 		} else {
 			PsimagLite::String s = "Unknown label: " + label + "\n";
 			throw PsimagLite::RuntimeError(s.c_str());
@@ -1339,24 +1337,21 @@ private:
 			v[i].resize(rows,cols);
 	}
 
-	void measureOnePoint(const PreOperatorBaseType& preOperator)
+	void measureOnePoint(const OperatorType& opA, PsimagLite::String label)
 	{
 		const PsimagLite::String& modelName = model_.params().model;
-		SizeType threadId = preOperator.threadId();
 		VectorFieldType density;
+		const SizeType threadId = 0;
+		for (SizeType i0 = 0; i0 < observe_.size(); ++i0) {
 
-		for (SizeType i0 = 0;i0<observe_.size();i0++) {
-			if (!preOperator.isValid(i0+1)) continue;
-
-			OperatorType opA = preOperator(i0+1);
 			FieldType tmp1;
 
-			preOperator.printMatrix(opA.data,preOperator.siteDependent(),i0);
-
-			if (i0==0) {
-				std::cout<<"site "<<preOperator.label()<<"(gs) ";
+			if (i0 == 0) {
+				std::cout<<"Using Matrix A:\n";
+				std::cout<<opA.data.toDense();
+				std::cout<<"site "<<label<<"(gs) ";
 				if (hasTimeEvolution_)
-					std::cout<<preOperator.label()<<"(timevector) time";
+					std::cout<<label<<"(timevector) time";
 				//std::cout<<"\n";
 			}
 			// for g.s. use this one:
@@ -1382,11 +1377,8 @@ private:
 
 			// also calculate next or prev. site:
 			if (observe_.isAtCorner(numberOfSites_,threadId)) {
-				SizeType x = (observe_.site(threadId)==1) ? 0 : numberOfSites_-1;
-
-				// operator might be site dependent
-				if (!preOperator.isValid(x)) continue;
-				OperatorType opAcorner = preOperator(x);
+				// FIXME TODO operator might be site dependent
+				OperatorType opAcorner = opA;
 
 				// do the corner case
 				// for g.s. use this one:
@@ -1405,8 +1397,6 @@ private:
 					                                    ApplyOperatorType::BORDER_YES);
 					std::cout<<" "<<tmp2<<" "<<observe_.time(threadId);
 				}
-
-				//std::cout<<"\n";
 			}
 		}
 
