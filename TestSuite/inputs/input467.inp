@@ -64,4 +64,4 @@ GeometryOptions=ConstantValues
 Connectors 1  0.0
 Connectors 1  1.60000
 
-#ci observe arguments=onepoint,ss
+#ci observe arguments="<gs|c?0'*c?0|gs>,<gs|c?0'*c?1|gs>,<gs|c?1'*c?1|gs>,ss"

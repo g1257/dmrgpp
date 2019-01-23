@@ -253,4 +253,4 @@ Version=version
 OutputFile=data5700.txt
 Orbitals=1
 
-#ci dmrg arguments=<gs|n|P1>,<gs|n|P2>,<gs|n|P3>,<gs|sz|P1>,<gs|sz|P2>,<gs|sz|P3>
+#ci dmrg arguments="<gs|n|P1>,<gs|n|P2>,<gs|n|P3>,<gs|sz|P1>,<gs|sz|P2>,<gs|sz|P3>"

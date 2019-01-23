@@ -28,8 +28,6 @@ void mainLoop(GeometryType& geometry,
 
 	const PsimagLite::String& datafile = params.filename;
 	IoInputType dataIo(datafile);
-	bool hasTimeEvolution = (targeting != "GroundStateTargeting" &&
-	        targeting != "CorrectionTargeting");
 
 	bool iscomplex = false;
 	dataIo.read(iscomplex, "IsComplex");
@@ -38,7 +36,7 @@ void mainLoop(GeometryType& geometry,
 		err("Previous run was complex and this one is not (or viceversa)\n");
 
 	while (!observeOneFullSweep<VectorWithOffsetType,ModelBaseType>
-	       (dataIo,model,list,hasTimeEvolution,orbitals));
+	       (dataIo, model, list, orbitals));
 }
 
 template<typename GeometryType,

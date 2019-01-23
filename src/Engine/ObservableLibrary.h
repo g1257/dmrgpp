@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2014, UT-Battelle, LLC
+Copyright (c) 2009-2014-2019, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 5.]
@@ -111,28 +111,15 @@ public:
 	template<typename IoInputter>
 	ObservableLibrary(IoInputter& io,
 	                  SizeType numberOfSites,
-	                  bool hasTimeEvolution,
 	                  const ModelType& model,
 	                  SizeType start,
 	                  SizeType nf,
 	                  SizeType trail,
 	                  bool verbose)
 	    : numberOfSites_(numberOfSites),
-	      hasTimeEvolution_(hasTimeEvolution),
 	      model_(model),
-	      observe_(io, start, nf, trail, hasTimeEvolution, model, verbose)
-	{
-		PsimagLite::String modelName = model.params().model;
-		bool hubbardLike = (modelName == "HubbardOneBand" ||
-		                    modelName == "HubbardOneBandExtended");
-
-		if (hasTimeEvolution && hubbardLike) {
-			SizeType site = 0;
-			// FIXME: No support for site varying operators
-			matrixNup_ = model_.naturalOperator("nup",site,0);
-			matrixNdown_ = model_.naturalOperator("ndown",site,0);
-		}
-	}
+	      observe_(io, start, nf, trail, model, verbose)
+	{}
 
 	bool endOfData() const { return observe_.endOfData(); }
 
@@ -156,152 +143,6 @@ public:
 
 			manyPoint(0,braket,rows,cols);
 		}
-	}
-
-	void measureTriage(const PsimagLite::String& label,
-	                   SizeType rows,
-	                   SizeType cols,
-	                   SizeType orbitals,
-	                   bool hasTimeEvolution)
-	{
-		bool ot = (label == "ot" || label== "time");
-
-		if (hasTimeEvolution && ot) {
-			measureTime("superDensity");
-			measureTime("nupNdown");
-			measureTime("nup+ndown");
-			measureTime("sz");
-			return;
-		}
-
-		if (hasTimeEvolution) setBrakets("time","time");
-
-		const PsimagLite::String& modelName = model_.params().model;
-
-		// Immm supports only onepoint:
-		if (modelName=="Immm" && label!="onepoint") {
-			PsimagLite::String str(__FILE__);
-			str += " "  + ttos(__LINE__) + "\n";
-			str += "Model Immm only supports onepoint\n";
-			throw PsimagLite::RuntimeError(str.c_str());
-		}
-
-		if (!hasTimeEvolution && label == "onepoint") {
-			SizeType numberOfDofs = dofsFromModelName();
-			return measureTheOnePoints(numberOfDofs);
-		}
-
-		measure(label,rows,cols,orbitals);
-	}
-
-private:
-
-	void setBrakets(const PsimagLite::String& left,
-	                const PsimagLite::String& right)
-	{
-		observe_.setBrakets(left,right);
-	}
-
-	void measureTheOnePoints(SizeType numberOfDofs)
-	{
-		PsimagLite::String str("WARNING: ObservableLibrary: ");
-		str += "measureTheOnePoints is deprecated\n";
-		std::cerr<<str;
-		SizeType site = 0;
-
-		for (SizeType dof=0;dof<numberOfDofs;dof++) {
-			for (SizeType dof2=dof;dof2<numberOfDofs;dof2++) {
-				PsimagLite::String str("c^\\dagger(dof=");
-				str += ttos(dof) + ") c(dof=" + ttos(dof2) + ")";
-				SparseMatrixType opCup = model_.naturalOperator("c", site, dof).data;
-				SparseMatrixType opCdown = model_.naturalOperator("c", site, dof2).data;
-				SparseMatrixType opCupTranspose;
-				transposeConjugate(opCupTranspose,opCup);
-				SparseMatrixType A = opCupTranspose * opCdown; //<--- FIXME CHECK
-				Su2RelatedType su2Related1;
-				OperatorType opA(A,
-				                 ProgramGlobals::FermionOrBosonEnum::BOSON,
-				                 std::pair<SizeType,SizeType>(0, 0),
-				                 1,
-				                 su2Related1);
-
-				measureOnePoint(opA, str);
-			}
-		}
-	}
-
-	void measureOnePoint(const PsimagLite::String& bra,
-	                     const OperatorType& opA,
-	                     PsimagLite::String label,
-	                     const PsimagLite::String& ket)
-	{
-		SizeType threadId = 0;
-		VectorFieldType density;
-
-		for (SizeType i0 = 0;i0<observe_.size();i0++) {
-
-			if (i0==0) {
-				std::cout<<"Using Matrix A:\n";
-				std::cout<<opA.data.toDense();
-				std::cout<<"site <"<<bra<<"|"<<label;
-				std::cout<<"|"<<ket<<"> time\n";
-			}
-
-			observe_.setBrakets(bra,ket);
-			observe_.setPointer(threadId,i0);
-
-			SizeType tmp = density.size();
-			onePointHookForZero(i0,opA,"gs",threadId,density);
-			SizeType lastOne = density.size();
-			if (tmp != density.size() && lastOne > 0) {
-				lastOne--;
-				std::cout<<"0 "<<density[lastOne];
-				std::cout<<" "<<observe_.time(threadId)<<"\n";
-			}
-
-			FieldType tmp1 = observe_.template
-			        onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
-			std::cout<<observe_.site(threadId)<<" "<<tmp1;
-			std::cout<<" "<<observe_.time(threadId)<<"\n";
-			density.push_back(tmp1);
-
-			if (!observe_.isAtCorner(numberOfSites_,threadId)) continue;
-
-			// also calculate next or prev. site:
-			SizeType x = (observe_.site(threadId)==1) ? 0 : numberOfSites_-1;
-
-			// operator might be site dependent
-			OperatorType opAcorner = opA;
-
-			// do the corner case
-			observe_.setBrakets(bra,ket);
-			tmp1 = observe_.template
-			        onePoint<ApplyOperatorType>(i0,
-			                                    opAcorner,
-			                                    ApplyOperatorType::BORDER_YES);
-			std::cout<<x<<" "<<tmp1;
-			std::cout<<" "<<observe_.time(threadId)<<"\n";
-			density.push_back(tmp1);
-		}
-	}
-
-	MatrixType SliceOrbital(const MatrixType& m,
-	                        const SizeType o1,
-	                        const SizeType o2)
-	{
-		SizeType orbitals = 2;
-		SizeType nsite = numberOfSites_/orbitals;
-		MatrixType out(nsite,nsite);
-		for (SizeType i = 0; i < nsite; ++i) {
-			for (SizeType j = i; j < nsite; ++j) {
-				SizeType k = i*orbitals + o1;
-				SizeType l = j*orbitals + o2;
-				out(i,j) = m(k,l);
-			}
-		}
-
-		std::cout << out;
-		return out;
 	}
 
 	void measure(const PsimagLite::String& label,
@@ -385,7 +226,7 @@ private:
 					else
 						tSpTotal +=  factor*tSpThis;
 
-					
+
 					if (PsimagLite::Concurrency::root()) {
 						std::cout<<"OperatorS+S- orb"<<i<<"-"<<j<<":\n";
 						std::cout<<tSpTotal;
@@ -532,6 +373,88 @@ private:
 			PsimagLite::String s = "Unknown label: " + label + "\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
+	}
+
+private:
+
+	void setBrakets(const PsimagLite::String& left,
+	                const PsimagLite::String& right)
+	{
+		observe_.setBrakets(left,right);
+	}
+
+	void measureOnePoint(const PsimagLite::String& bra,
+	                     const OperatorType& opA,
+	                     PsimagLite::String label,
+	                     const PsimagLite::String& ket)
+	{
+		SizeType threadId = 0;
+		VectorFieldType density;
+
+		for (SizeType i0 = 0;i0<observe_.size();i0++) {
+
+			if (i0==0) {
+				std::cout<<"Using Matrix A:\n";
+				std::cout<<opA.data.toDense();
+				std::cout<<"site <"<<bra<<"|"<<label;
+				std::cout<<"|"<<ket<<"> time\n";
+			}
+
+			observe_.setBrakets(bra,ket);
+			observe_.setPointer(threadId,i0);
+
+			SizeType tmp = density.size();
+			onePointHookForZero(i0,opA,"gs",threadId,density);
+			SizeType lastOne = density.size();
+			if (tmp != density.size() && lastOne > 0) {
+				lastOne--;
+				std::cout<<"0 "<<density[lastOne];
+				std::cout<<" "<<observe_.time(threadId)<<"\n";
+			}
+
+			FieldType tmp1 = observe_.template
+			        onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
+			std::cout<<observe_.site(threadId)<<" "<<tmp1;
+			std::cout<<" "<<observe_.time(threadId)<<"\n";
+			density.push_back(tmp1);
+
+			if (!observe_.isAtCorner(numberOfSites_,threadId)) continue;
+
+			// also calculate next or prev. site:
+			SizeType x = (observe_.site(threadId)==1) ? 0 : numberOfSites_-1;
+
+			// operator might be site dependent
+			OperatorType opAcorner = opA;
+
+			// do the corner case
+			observe_.setBrakets(bra,ket);
+			tmp1 = observe_.template
+			        onePoint<ApplyOperatorType>(i0,
+			                                    opAcorner,
+			                                    ApplyOperatorType::BORDER_YES);
+			std::cout<<x<<" "<<tmp1;
+			std::cout<<" "<<observe_.time(threadId)<<"\n";
+			density.push_back(tmp1);
+		}
+	}
+
+	MatrixType SliceOrbital(const MatrixType& m,
+	                        const SizeType o1,
+	                        const SizeType o2)
+	{
+		SizeType orbitals = 2;
+		SizeType nsite = numberOfSites_/orbitals;
+		MatrixType out(nsite,nsite);
+		for (SizeType i = 0; i < nsite; ++i) {
+			for (SizeType j = i; j < nsite; ++j) {
+				SizeType k = i*orbitals + o1;
+				SizeType l = j*orbitals + o2;
+				out(i,j) = m(k,l);
+			}
+		}
+
+		std::cout << out;
+		return out;
 	}
 
 	void ppTwopoint(typename PsimagLite::Vector<MatrixType*>::Type& result,
@@ -1268,64 +1191,6 @@ private:
 		observe_.anyPoint(braket);
 	}
 
-	void measureTime(const PsimagLite::String& label)
-	{
-		PsimagLite::String str("WARNING: ObservableLibrary: ");
-		str += "deprecated use of measureTime\n";
-		std::cerr<<str;
-
-		SparseMatrixType A;
-		Su2RelatedType su2Related1;
-		SizeType threadId = 0;
-
-		if (label=="superDensity") {
-			A.makeDiagonal(model_.hilbertSize(observe_.site(threadId)),1.0);
-			std::pair<SizeType,SizeType> zeroZero(0,0);
-			OperatorType opIdentity(A,
-			                        ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                        zeroZero,
-			                        1,
-			                        su2Related1);
-			observe_.setBrakets("time","time");
-			FieldType superDensity = observe_.template
-			        onePoint<ApplyOperatorType>(0,
-			                                    opIdentity,
-			                                    ApplyOperatorType::BORDER_NO);
-			std::cout<<"SuperDensity(Weight of the timeVector)="<<
-			           superDensity<<"\n";
-		} else if (label=="nupNdown") {
-			multiply(A,matrixNup_.data,matrixNdown_.data);
-			OperatorType opA(A,
-			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                 std::pair<SizeType,SizeType>(0, 0),
-			                 1,
-			                 su2Related1);
-			measureOnePoint(opA, "nupNdown");
-		} else if (label=="nup+ndown") {
-			A = matrixNup_.data;
-			A += matrixNdown_.data;
-			OperatorType opA(A,
-			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                 std::pair<SizeType,SizeType>(0, 0),
-			                 1,
-			                 su2Related1);
-			measureOnePoint(opA, "nup+ndown");
-		} else if (label=="sz") {
-			A = matrixNup_.data;
-			const FieldType f1 = (-1.0);
-			A += f1*matrixNdown_.data;
-			OperatorType opA(A,
-			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                 std::pair<SizeType,SizeType>(0, 0),
-			                 1,
-			                 su2Related1);
-			measureOnePoint(opA, "sz");
-		} else {
-			PsimagLite::String s = "Unknown label: " + label + "\n";
-			throw PsimagLite::RuntimeError(s.c_str());
-		}
-	}
-
 	void resizeStorage(VectorMatrixType& v,
 	                   SizeType rows,
 	                   SizeType cols,
@@ -1335,81 +1200,6 @@ private:
 		v.resize(static_cast<SizeType>(orbitals*(orbitals+1)/2));
 		for (SizeType i = 0; i < v.size(); ++i)
 			v[i].resize(rows,cols);
-	}
-
-	void measureOnePoint(const OperatorType& opA, PsimagLite::String label)
-	{
-		const PsimagLite::String& modelName = model_.params().model;
-		VectorFieldType density;
-		const SizeType threadId = 0;
-		for (SizeType i0 = 0; i0 < observe_.size(); ++i0) {
-
-			FieldType tmp1;
-
-			if (i0 == 0) {
-				std::cout<<"Using Matrix A:\n";
-				std::cout<<opA.data.toDense();
-				std::cout<<"site "<<label<<"(gs) ";
-				if (hasTimeEvolution_)
-					std::cout<<label<<"(timevector) time";
-				//std::cout<<"\n";
-			}
-			// for g.s. use this one:
-			observe_.setBrakets("gs","gs");
-			observe_.setPointer(threadId,i0);
-
-			onePointHookForZero(i0,opA,"gs",threadId, density);
-
-			tmp1 = observe_.template
-			        onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
-			density.push_back(tmp1);
-
-			if (hasTimeEvolution_) { // for time vector use this one:
-				observe_.setBrakets("time","time");
-
-				onePointHookForZero(i0,opA,"time",threadId,density);
-
-				FieldType tmp2 = observe_.template
-				        onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
-
-				std::cout<<" "<<tmp2<<" "<<observe_.time(threadId);
-			}
-
-			// also calculate next or prev. site:
-			if (observe_.isAtCorner(numberOfSites_,threadId)) {
-				// FIXME TODO operator might be site dependent
-				OperatorType opAcorner = opA;
-
-				// do the corner case
-				// for g.s. use this one:
-				observe_.setBrakets("gs","gs");
-				FieldType tmp1 = observe_.template
-				        onePoint<ApplyOperatorType>(i0,
-				                                    opAcorner,
-				                                    ApplyOperatorType::BORDER_YES);
-				density.push_back(tmp1);
-
-				if (hasTimeEvolution_) {// for time vector use this one:
-					observe_.setBrakets("time","time");
-					FieldType tmp2 = observe_.template
-					        onePoint<ApplyOperatorType>(i0,
-					                                    opAcorner,
-					                                    ApplyOperatorType::BORDER_YES);
-					std::cout<<" "<<tmp2<<" "<<observe_.time(threadId);
-				}
-			}
-		}
-
-		if (modelName=="HubbardOneBandExtendedSuper") {
-			SizeType nsite=observe_.size()/2+1;
-			SizeType orbitals = 2;
-			for (SizeType i0 = 0;i0<nsite;i0++)
-				std::cout << i0 << " " << density[i0*orbitals+0]
-				          << " " << density[i0*orbitals+1] << std::endl;
-		} else {
-			for (SizeType i0 = 0;i0<observe_.size();i0++)
-				std::cout << i0 << " " << density[i0] << std::endl;
-		}
 	}
 
 	void onePointHookForZero(SizeType i0,
@@ -1479,7 +1269,6 @@ private:
 	bool hasTimeEvolution_;
 	const ModelType& model_; // not the owner
 	ObserverType observe_;
-	OperatorType matrixNup_,matrixNdown_;
 	VectorMatrixType szsz_,sPlusSminus_,sMinusSplus_;
 
 }; // class ObservableLibrary

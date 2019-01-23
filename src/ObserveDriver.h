@@ -50,7 +50,6 @@ template<typename VectorWithOffsetType, typename ModelType>
 bool observeOneFullSweep(IoInputType& io,
                          const ModelType& model,
                          const PsimagLite::String& list,
-                         bool hasTimeEvolution,
                          SizeType orbitals);
 }
 

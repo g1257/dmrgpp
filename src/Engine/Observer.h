@@ -134,7 +134,6 @@ public:
 	         SizeType start,
 	         SizeType nf,
 	         SizeType trail,
-	         bool hasTimeEvolution,
 	         const ModelType& model,
 	         bool verbose = false)
 	    : helper_(io,
@@ -142,7 +141,6 @@ public:
 	              nf,
 	              trail,
 	              model.params().nthreads,
-	              hasTimeEvolution,
 	              verbose,
 	              (model.params().options.find("fixLegacyBugs") == PsimagLite::String::npos)),
 	      onepoint_(helper_),

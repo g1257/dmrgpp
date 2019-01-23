@@ -44,24 +44,20 @@ Geometry2Type> ModelBase4Type;
 template bool observeOneFullSweep<VectorWithOffset1Type,ModelBase3Type>(IoInputType& io,
 const ModelBase3Type& model,
 const PsimagLite::String& list,
-bool hasTimeEvolution,
 SizeType orbitals);
 
 template bool observeOneFullSweep<VectorWithOffset2Type,ModelBase4Type>(IoInputType& io,
 const ModelBase4Type& model,
 const PsimagLite::String& list,
-bool hasTimeEvolution,
 SizeType orbitals);
 
 template bool observeOneFullSweep<VectorWithOffset3Type,ModelBase3Type>(IoInputType& io,
 const ModelBase3Type& model,
 const PsimagLite::String& list,
-bool hasTimeEvolution,
 SizeType orbitals);
 
 template bool observeOneFullSweep<VectorWithOffset4Type,ModelBase4Type>(IoInputType& io,
 const ModelBase4Type& model,
 const PsimagLite::String& list,
-bool hasTimeEvolution,
 SizeType orbitals);
 }

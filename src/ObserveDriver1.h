@@ -9,7 +9,6 @@ template<typename VectorWithOffsetType,
 bool observeOneFullSweep(IoInputType& io,
                          const ModelType& model,
                          const PsimagLite::String& list,
-                         bool hasTimeEvolution,
                          SizeType orbitals)
 {
 	typedef typename ModelType::GeometryType GeometryType;
@@ -72,7 +71,6 @@ bool observeOneFullSweep(IoInputType& io,
 
 	ObservableLibraryType observerLib(io,
 	                                  n,
-	                                  hasTimeEvolution,
 	                                  model,
 	                                  start,
 	                                  nf,
@@ -85,9 +83,9 @@ bool observeOneFullSweep(IoInputType& io,
 		if (item.find("%") == 0) continue;
 
 		if (item.length() > 0 && item[0] != '<')
-			observerLib.measureTriage(item,rows,cols,orbitals,hasTimeEvolution);
+			observerLib.measure(item, rows, cols, orbitals);
 		else
-			observerLib.interpret(item,rows,cols);
+			observerLib.interpret(item, rows, cols);
 	}
 
 	start = end;

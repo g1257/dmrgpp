@@ -120,7 +120,6 @@ public:
 	               SizeType nf,
 	               SizeType trail,
 	               SizeType numberOfPthreads,
-	               bool hasTimeEvolution,
 	               bool verbose,
 	               bool withLegacyBugs)
 	    : io_(io),
@@ -140,11 +139,11 @@ public:
 			signsOneSite_[i] = (odds[i]) ? -1 : 1;
 
 		if (nf > 0)
-			if (!init(hasTimeEvolution, start, start + nf, SAVE_YES))
+			if (!init(start, start + nf, SAVE_YES))
 				return;
 
 		if (trail > 0)
-			if (!init(hasTimeEvolution, start, start + trail, SAVE_NO))
+			if (!init(start, start + trail, SAVE_NO))
 				return;
 	}
 
@@ -297,10 +296,7 @@ public:
 
 private:
 
-	bool init(bool hasTimeEvolution,
-	          SizeType start,
-	          SizeType end,
-	          SaveEnum saveOrNot)
+	bool init(SizeType start, SizeType end, SaveEnum saveOrNot)
 	{
 		PsimagLite::String prefix = "Serializer";
 		SizeType total = 0;
@@ -317,11 +313,11 @@ private:
 				dSerializerV_.push_back(dSerializer);
 			else
 				delete dSerializer;
-			if (hasTimeEvolution) {
-				TimeSerializerType ts(io_, ""); // FIXME
-				if (saveOrNot == SAVE_YES)
-					timeSerializerV_.push_back(ts);
-			}
+//			if (hasTimeEvolution) {
+//				TimeSerializerType ts(io_, ""); // FIXME
+//				if (saveOrNot == SAVE_YES)
+//					timeSerializerV_.push_back(ts);
+//			}
 
 			std::cerr<<__FILE__<<" read "<<i<<" out of "<<total<<"\n";
 		}
