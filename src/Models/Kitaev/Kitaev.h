@@ -143,8 +143,6 @@ public:
 	      extended_(additional == "Extended"),
 	      withGammas_(additional == "WithGammas")
 	{
-		if (withGammas_) extended_ = true;
-
 		if (extended_)
 			checkExtended(solverParams);
 
@@ -278,13 +276,14 @@ protected:
 			ModelBaseType::createTerm(labels[i] + labels[i]).push(smu, 'N', smu, 'N');
 		}
 
-		if (!extended_) return; // <<---- EARLY EXIT HERE
-
 		OpForLinkType sx("sx");
 		OpForLinkType sy("sy");
 
-		ModelBaseType::createTerm("sxsy").push(sx, 'N', sy, 'N');
-		ModelBaseType::createTerm("sysx").push(sy, 'N', sx, 'N');
+		if (extended_) {
+			ModelBaseType::createTerm("sxsy").push(sx, 'N', sy, 'N');
+			ModelBaseType::createTerm("sysx").push(sy, 'N', sx, 'N');
+			return; // <<---- EARLY EXIT HERE
+		}
 
 		if (!withGammas_) return; // <<---- EARLY EXIT HERE
 
@@ -295,6 +294,9 @@ protected:
 
 		ModelBaseType::createTerm("sxsz").push(sx, 'N', sz, 'N');
 		ModelBaseType::createTerm("szsx").push(sz, 'N', sx, 'N');
+
+		ModelBaseType::createTerm("sxsy").push(sx, 'N', sy, 'N');
+		ModelBaseType::createTerm("sysx").push(sy, 'N', sx, 'N');
 	}
 
 private:
