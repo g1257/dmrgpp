@@ -114,7 +114,6 @@ public:
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
-	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -139,7 +138,8 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef Braket<ModelType> BraketType;
 	typedef FermionSign FermionSignType;
-	typedef typename ApplyOperatorExpressionType::StageEnum StageEnumType;
+	typedef typename ApplyOperatorExpressionType::StageEnumType StageEnumType;
+	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 
 	enum class OpLabelCategory { DRESSED, BARE };
 
@@ -213,12 +213,11 @@ public:
 	                const VectorSizeType& block,
 	                PsimagLite::String prefix) const
 	{
-		SizeType marker = (aoe_.noStageIs(StageEnumType::DISABLED)) ? 1 : 0;
-		SizeType size = block[0];
+		SizeType site = block[0];
 		TimeSerializerType ts(aoe_.currentTime(),
-		                      size,
+		                      site,
 		                      aoe_.targetVectors(),
-		                      marker);
+		                      aoe_.stages());
 		ts.write(io, prefix);
 	}
 
@@ -230,24 +229,26 @@ public:
 		aoe_.psi().read(io, prefix + "PSI");
 	}
 
-	template<typename SomeSerializerType>
 	void readGSandNGSTs(IoInputType& io, PsimagLite::String prefix)
 	{
 		read(io, prefix);
 
-		SomeSerializerType* ts = 0;
+		TimeSerializerType* ts = 0;
 
 		try {
-			ts = new SomeSerializerType(io, prefix);
+			ts = new TimeSerializerType(io, prefix);
 		} catch (...) {
 			return;
 		}
 
-		aoe_.setAllStagesTo(ApplyOperatorExpressionType::StageEnum::WFT_NOADVANCE);
+		const typename TimeSerializerType::VectorStageEnumType& stages = ts->stages();
+		SizeType nstages = stages.size();
+		for (SizeType i = 0; i < nstages; ++i)
+			aoe_.setStage(i, stages[i]);
 
 		SizeType n = aoe_.targetVectors().size();
 
-		if (n != ts->size())
+		if (n != ts->numberOfVectors())
 			err(PsimagLite::String(__FILE__) +
 			    ": Trying to set TVs but different sizes\n");
 
@@ -369,6 +370,13 @@ public:
 
 	// END Cocoons
 
+
+	void setAllStagesTo(StageEnumType x)
+	{
+		SizeType n = aoe_.stages().size();
+		for (SizeType i = 0; i < n; ++i)
+			aoe_.setStage(i, x);
+	}
 
 	RealType normSquared(SizeType i) const
 	{

@@ -94,7 +94,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingBase.h"
 #include "ParametersForSolver.h"
 #include "ParallelTriDiag.h"
-#include "TimeSerializer.h"
 #include "FreqEnum.h"
 #include "CorrectionVectorSkeleton.h"
 
@@ -131,7 +130,7 @@ public:
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
-	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
+	typedef typename TargetingCommonType::TimeSerializerType TimeSerializerType;
 	typedef typename LanczosSolverType::MatrixType LanczosMatrixType;
 	typedef CorrectionVectorFunction<LanczosMatrixType,TargetParamsType>
 	CorrectionVectorFunctionType;

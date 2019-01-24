@@ -74,7 +74,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include "ProgressIndicator.h"
 #include "BLAS.h"
-#include "TimeSerializer.h"
 #include "TargetParamsTimeStep.h"
 #include "ProgramGlobals.h"
 #include "ParametersForSolver.h"
@@ -114,11 +113,11 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef TargetParamsTimeStep<ModelType> TargetParamsType;
 	typedef typename BasisType::BlockType BlockType;
-	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
+	typedef typename TargetingCommonType::TimeSerializerType TimeSerializerType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename BasisType::QnType QnType;
-	typedef typename TargetingCommonType::ApplyOperatorExpressionType::StageEnum StageEnumType;
+	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 
 	TargetingTimeStep(const LeftRightSuperType& lrs,
 	                  const ModelType& model,
@@ -221,7 +220,7 @@ public:
 
 	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
-		this->common().template readGSandNGSTs<TimeSerializerType>(io, prefix);
+		this->common().readGSandNGSTs(io, prefix);
 	}
 
 	void write(const VectorSizeType& block,
@@ -232,15 +231,14 @@ public:
 		msg<<"Saving state...";
 		progress_.printline(msg,std::cout);
 
-		SizeType marker = (this->common().aoe().noStageIs(StageEnumType::DISABLED)) ? 1 : 0;
-
 		assert(block.size() > 0);
 		SizeType site = block[0];
 		TimeSerializerType ts(this->common().aoe().currentTime(),
 		                      site,
 		                      this->common().aoe().targetVectors(),
-		                      marker);
+		                      this->common().aoe().stages());
 
+		ts.write(io, prefix);
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, block, prefix);
 	}

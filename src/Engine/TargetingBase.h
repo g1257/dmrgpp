@@ -119,7 +119,7 @@ public:
 	LanczosSolverType> TargetingCommonType;
 	typedef typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename ApplyOperatorExpressionType::StageEnum StageEnumType;
+	typedef typename ApplyOperatorExpressionType::StageEnumType StageEnumType;
 
 	TargetingBase(const LeftRightSuperType& lrs,
 	              const ModelType& model,

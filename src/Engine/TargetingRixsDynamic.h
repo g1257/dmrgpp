@@ -98,7 +98,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParallelTriDiag.h"
 #include "FreqEnum.h"
 #include "CorrectionVectorSkeleton.h"
-#include "TimeSerializer.h"
 
 namespace Dmrg {
 
@@ -130,7 +129,7 @@ public:
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
-	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
+	typedef typename TargetingCommonType::TimeSerializerType TimeSerializerType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
@@ -151,7 +150,7 @@ public:
 	TargetParamsType> CorrectionVectorSkeletonType;
 	typedef typename BasisType::QnType QnType;
 	typedef typename TargetParamsType::BaseType::AlgorithmEnum AlgorithmEnumType;
-	typedef typename TargetingCommonType::ApplyOperatorExpressionType::StageEnum StageEnumType;
+	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 
 	TargetingRixsDynamic(const LeftRightSuperType& lrs,
 	                     const ModelType& model,

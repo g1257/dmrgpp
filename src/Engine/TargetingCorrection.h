@@ -114,7 +114,7 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename BasisType::QnType QnType;
-	typedef typename TargetingCommonType::ApplyOperatorExpressionType::StageEnum StageEnumType;
+	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 
 	TargetingCorrection(const LeftRightSuperType& lrs,
 	                    const ModelType& model,
@@ -155,7 +155,7 @@ public:
 	{
 		if (direction == ProgramGlobals::INFINITE) return;
 
-		this->common().aoe().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
+		this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 		this->common().computeCorrection(direction,block1);
 		bool doBorderIfBorder = false;
 		this->common().cocoon(block1, direction, doBorderIfBorder);

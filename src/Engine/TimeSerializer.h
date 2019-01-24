@@ -81,6 +81,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Io/IoSelector.h"
 #include "TypeToString.h"
+#include "Vector.h"
+#include "StageEnum.h"
 
 namespace Dmrg {
 
@@ -92,6 +94,8 @@ class TimeSerializer {
 
 public:
 
+	typedef typename PsimagLite::Vector<StageEnum>::Type VectorStageEnumType;
+
 	// Unfortunately we need a default ctor
 	// to build an array of these
 	TimeSerializer() { }
@@ -99,11 +103,11 @@ public:
 	TimeSerializer(RealType currentTime,
 	               SizeType site,
 	               const typename PsimagLite::Vector<VectorType>::Type& targetVectors,
-	               SizeType marker)
+	               const VectorStageEnumType& stages)
 	    : currentTime_(currentTime),
 	      site_(site),
 	      targetVectors_(targetVectors),
-	      marker_(marker)
+	      stages_(stages)
 	{}
 
 	TimeSerializer(typename PsimagLite::IoSelector::In& io,
@@ -135,10 +139,8 @@ public:
 			targetVectors_[i].read(io, s);
 		}
 
-		s = prefix + "MARKER";
-		io.read(xi, s);
-		if (xi < 0) err("TimeSerializer:: marker must be positive\n");
-		marker_ = xi;
+		s = prefix + "Stages";
+		io.read(stages_, s);
 	}
 
 	void write(PsimagLite::IoSelector::Out& io, PsimagLite::String prefix) const
@@ -156,10 +158,10 @@ public:
 			targetVectors_[i].write(io, prefix + label);
 		}
 
-		io.write(marker_, prefix + "MARKER");
+		io.write(stages_, prefix + "Stages");
 	}
 
-	SizeType size() const
+	SizeType numberOfVectors() const
 	{
 		return  targetVectors_.size();
 	}
@@ -171,8 +173,6 @@ public:
 		return  site_;
 	}
 
-	SizeType numberOfVectors() const { return targetVectors_.size(); }
-
 	const VectorType& vector(SizeType i) const
 	{
 		if (i < targetVectors_.size())
@@ -180,9 +180,9 @@ public:
 		throw PsimagLite::RuntimeError("Not so many time vectors\n");
 	}
 
-	SizeType marker() const
+	const VectorStageEnumType& stages() const
 	{
-		return marker_;
+		return stages_;
 	}
 
 private:
@@ -190,7 +190,7 @@ private:
 	RealType currentTime_;
 	SizeType site_;
 	typename PsimagLite::Vector<VectorType>::Type targetVectors_;
-	SizeType marker_;
+	VectorStageEnumType stages_;
 }; // class TimeSerializer
 } // namespace Dmrg 
 

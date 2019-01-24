@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffset.h"
 #include "ParametersForSolver.h"
 #include "RandomForTests.h"
-#include "TimeSerializer.h"
 #include "TimeVectorsKrylov.h"
 #include "TimeVectorsRungeKutta.h"
 #include "TimeVectorsSuzukiTrotter.h"
@@ -142,7 +141,7 @@ public:
 	MettsStochasticsType,
 	TargetParamsType> MettsCollapseType;
 	typedef typename MettsCollapseType::PackIndicesType PackIndicesType;
-	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
+	typedef typename TargetingCommonType::TimeSerializerType TimeSerializerType;
 	typedef TimeVectorsBase<TargetParamsType,ModelType,WaveFunctionTransfType,
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsBaseType;
 	typedef TimeVectorsKrylov<TargetParamsType,ModelType,WaveFunctionTransfType,
@@ -156,7 +155,7 @@ public:
 	typedef typename BasisType::QnType QnType;
 	typedef typename PsimagLite::Vector<BlockDiagonalMatrixType*>::Type
 	VectorBlockDiagonalMatrixType;
-	typedef typename TargetingCommonType::ApplyOperatorExpressionType::StageEnum StageEnumType;
+	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 
 	const static SizeType SYSTEM = ProgramGlobals::SYSTEM;
 
@@ -257,7 +256,7 @@ public:
 		if (this->common().aoe().noStageIs(StageEnumType::DISABLED)) {
 			max = 1;
 			if (this->common().aoe().allStages(StageEnumType::WFT_ADVANCE))
-				this->common().aoe().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
+				this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 		}
 
 		// Advance or wft each target vector for beta/2
@@ -308,7 +307,7 @@ public:
 
 	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
-		this->common().template readGSandNGSTs<TimeSerializerType>(io, prefix);
+		this->common().readGSandNGSTs(io, prefix);
 	}
 
 	void write(const VectorSizeType& block,
@@ -382,7 +381,7 @@ private:
 		static SizeType timesWithoutAdvancement = 0;
 
 		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE))
-			this->common().aoe().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
+			this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 
 		if (this->common().aoe().allStages(StageEnumType::COLLAPSE)) {
 			if (!allSitesCollapsed()) {
@@ -393,7 +392,7 @@ private:
 			}
 
 			sitesCollapsed_.clear();
-			this->common().aoe().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
+			this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 			timesWithoutAdvancement = 0;
 			this->common().aoe().setTime(0);
 			PsimagLite::OstringStream msg;
@@ -416,7 +415,7 @@ private:
 
 		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE) &&
 		        this->common().aoe().currentTime() < mettsStruct_.beta) {
-			this->common().aoe().setAllStagesTo(StageEnumType::WFT_ADVANCE);
+			this->common().setAllStagesTo(StageEnumType::WFT_ADVANCE);
 			RealType tmp = this->common().aoe().currentTime() + mettsStruct_.tau();
 			this->common().aoe().setTime(tmp);
 			timesWithoutAdvancement = 0;
@@ -433,7 +432,7 @@ private:
 
 		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE) &&
 		        this->common().aoe().currentTime() >= mettsStruct_.beta) {
-			this->common().aoe().setAllStagesTo(StageEnumType::COLLAPSE);
+			this->common().setAllStagesTo(StageEnumType::COLLAPSE);
 			sitesCollapsed_.clear();
 			SizeType n1 = mettsStruct_.timeSteps();
 			this->common().aoe().targetVectors(n1).clear();

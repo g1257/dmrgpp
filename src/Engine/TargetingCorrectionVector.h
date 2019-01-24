@@ -89,7 +89,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingBase.h"
 #include "ParametersForSolver.h"
 #include "ParallelTriDiag.h"
-#include "TimeSerializer.h"
 #include "FreqEnum.h"
 #include "NoPthreadsNg.h"
 #include "CorrectionVectorSkeleton.h"
@@ -123,7 +122,7 @@ public:
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
-	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
+	typedef typename TargetingCommonType::TimeSerializerType TimeSerializerType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
@@ -223,11 +222,9 @@ public:
 		this->common().writeNGSTs(io, block, prefix);
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io,
-	          PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
-		this->common().template readGSandNGSTs<TimeSerializerType>(io,
-		                                                           prefix);
+		this->common().readGSandNGSTs(io, prefix);
 		setWeights();
 	}
 

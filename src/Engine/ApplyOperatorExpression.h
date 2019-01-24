@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsSuzukiTrotter.h"
 #include "Io/IoSelector.h"
 #include "TargetParamsBase.h"
+#include "StageEnum.h"
 
 namespace Dmrg {
 
@@ -115,9 +116,7 @@ public:
 	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
 	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
 	typedef typename TimeVectorsBaseType::PairType PairType;
-
-	enum class StageEnum {DISABLED, OPERATOR, WFT_NOADVANCE, WFT_ADVANCE, COLLAPSE};
-
+	typedef StageEnum StageEnumType;
 	typedef typename PsimagLite::Vector<StageEnum>::Type VectorStageEnumType;
 
 	ApplyOperatorExpression(const TargetHelperType& targetHelper,
@@ -228,12 +227,12 @@ public:
 		return true;
 	}
 
-	//const VectorStaType& stage() const { return stage_; }
+	const VectorStageEnumType& stages() const { return stage_; }
 
-	void setAllStagesTo(StageEnum x)
+	void setStage(SizeType ind, StageEnum x)
 	{
-		for (SizeType i=0;i<stage_.size();i++)
-			stage_[i] = x;
+		assert(ind < stage_.size());
+		stage_[ind] = x;
 	}
 
 	const RealType& energy() const
@@ -454,7 +453,7 @@ private:
 		}
 	}
 
-	PsimagLite::String getStage(SizeType i) const
+	PsimagLite::String stageToString(SizeType i) const
 	{
 		switch (stage_[i]) {
 		case StageEnum::DISABLED:
@@ -539,7 +538,7 @@ private:
 		if (timesWithoutAdvancement>0) progress_.printline(msg2,std::cout);
 
 		PsimagLite::OstringStream msg;
-		msg<<"Evolving, stage="<<getStage(i);
+		msg<<"Evolving, stage="<<stageToString(i);
 		msg<<" site="<<site<<" loopNumber="<<loopNumber;
 		msg<<" Eg="<<Eg;
 		progress_.printline(msg,std::cout);

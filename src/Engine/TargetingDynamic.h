@@ -121,7 +121,7 @@ public:
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
-	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
+	typedef typename TargetingCommonType::TimeSerializerType TimeSerializerType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
@@ -129,7 +129,7 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename BasisType::QnType QnType;
-	typedef typename TargetingCommonType::ApplyOperatorExpressionType::StageEnum StageEnumType;
+	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 
 	TargetingDynamic(const LeftRightSuperType& lrs,
 	                 const ModelType& model,
@@ -219,10 +219,9 @@ public:
 		this->common().writeNGSTs(io, block, prefix, cf);
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io,
-	          PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
-		this->common().template readGSandNGSTs<TimeSerializerType>(io, prefix);
+		this->common().readGSandNGSTs(io, prefix);
 	}
 
 private:
