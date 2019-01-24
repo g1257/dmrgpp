@@ -215,6 +215,7 @@ struct ParametersDmrgSolver {
 	                     bool isObserveCode = false)
 	    : sitesPerBlock(1),
 	      maxMatrixRankStored(0),
+	      keptStatesInfinite(0),
 	      excited(0),
 	      dumperBegin(0),
 	      dumperEnd(0),
