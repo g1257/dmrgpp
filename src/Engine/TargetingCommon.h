@@ -235,20 +235,20 @@ public:
 	{
 		read(io, prefix);
 
-		// restarting NGST --> NGST isn't supported yet FIXME TODO
+		aoe_.setAllStagesTo(ApplyOperatorExpressionType::StageEnum::WFT_NOADVANCE);
 
-		//		setAllStagesTo(WFT_NOADVANCE);
+		SomeSerializerType ts(io, prefix);
 
-		//		SomeSerializerType ts(io, lastInstance, prefix);
+		SizeType n = aoe_.targetVectors().size();
 
-		//		if (targetVectors().size() != ts.size())
-		//			err(PsimagLite::String(__FILE__) +
-		//			    ": Trying to set TVs but different sizes\n");
+		if (n != ts.size())
+			err(PsimagLite::String(__FILE__) +
+			    ": Trying to set TVs but different sizes\n");
 
-		//		for (SizeType i=0;i<targetVectors().size();i++)
-		//			targetVectors(i) = ts.vector(i);
+		for (SizeType i = 0; i < n; ++i)
+			aoe_.targetVectors(i) = ts.vector(i);
 
-		//		aoe_.setTime(ts.time());
+		aoe_.setTime(ts.time());
 	}
 
 	// END read/write

@@ -169,6 +169,7 @@ public:
 
 	RealType weight(SizeType i) const
 	{
+		assert(i < weight_.size());
 		return weight_[i];
 	}
 
@@ -227,6 +228,7 @@ public:
 	{
 		this->common().template readGSandNGSTs<TimeSerializerType>(io,
 		                                                           prefix);
+		setWeights();
 	}
 
 private:

@@ -159,9 +159,9 @@ public:
 		io.write(marker_, prefix + "MARKER");
 	}
 
-	SizeType size(SizeType i=0) const
+	SizeType size() const
 	{
-		return  targetVectors_[i].size();
+		return  targetVectors_.size();
 	}
 
 	RealType time() const { return currentTime_; }
