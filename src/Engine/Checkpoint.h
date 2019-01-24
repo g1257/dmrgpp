@@ -192,10 +192,7 @@ public:
 	void checkpointStacks(PsimagLite::String filename) const
 	{
 		// taken from dtor
-		PsimagLite::OstringStream msg;
-		msg<<"Writing sys. and env. stacks to disk...";
-		progress_.printline(msg, std::cout);
-
+		sayAboutToWrite();
 		const bool needsToRead = false;
 
 		DiskStackType systemDisk(filename, needsToRead, "system", isObserveCode_);
@@ -203,6 +200,7 @@ public:
 
 		DiskStackType environDisk(filename, needsToRead, "environ", isObserveCode_);
 		envStack_.toDisk(environDisk);
+		sayWritingDone();
 	}
 
 	// Not related to stacks
@@ -277,6 +275,20 @@ public:
 	const RealType& energy() const { return energyFromFile_; }
 
 private:
+
+	void sayAboutToWrite() const
+	{
+		PsimagLite::OstringStream msg;
+		msg<<"Writing sys. and env. stacks to disk...";
+		progress_.printline(msg, std::cout);
+	}
+
+	void sayWritingDone() const
+	{
+		PsimagLite::OstringStream msg;
+		msg<<"Written sys. and env. stacks to disk.";
+		progress_.printline(msg, std::cout);
+	}
 
 	Checkpoint(const Checkpoint&);
 
@@ -423,11 +435,10 @@ private:
 		                      needsToRead,
 		                      "environ",
 		                      isObserveCode_);
-		PsimagLite::OstringStream msg;
-		msg<<"Writing sys. and env. stacks to disk...";
-		progress_.printline(msg,std::cout);
+		sayAboutToWrite();
 		DiskOrMemoryStackType::loadStack(systemDisk, systemStack_);
 		DiskOrMemoryStackType::loadStack(envDisk, envStack_);
+		sayWritingDone();
 	}
 
 	//! Move elsewhere
