@@ -95,7 +95,7 @@ class IoSimple {
 
 	template<typename T>
 	struct PrintWithEqualSign {
-		enum { True = Loki::TypeTraits<T>::isArith ||IsEnum<T>::True };
+		enum { True = Loki::TypeTraits<T>::isArith || std::is_enum<T>::value };
 	};
 
 public:

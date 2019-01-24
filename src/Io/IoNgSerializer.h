@@ -138,7 +138,8 @@ public:
 	void write(String name2,
 	           const T& what,
 	           WriteMode allowOverwrite = NO_OVERWRITE,
-	           typename EnableIf<Loki::TypeTraits<T>::isArith || IsEnum<T>::True, int*>::Type = 0)
+	           typename EnableIf<Loki::TypeTraits<T>::isArith ||
+	           std::is_enum<T>::value, int*>::Type = 0)
 	{
 		String name = "Def/" + name2;
 		const void* ptr = static_cast<const T*>(&what);
@@ -303,15 +304,29 @@ public:
 	template<typename T>
 	void write(String name2,
 	           const std::vector<T>& what,
-	           WriteMode allowOverwrite = NO_OVERWRITE,
+	           WriteMode = NO_OVERWRITE,
 	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith
-	           && !IsPairLike<T>::True, int*>::Type = 0)
+	           && !IsPairLike<T>::True && !IsEnumClass<T>::value, int*>::Type = 0)
 	{
 		SizeType n = what.size();
 		createGroup(name2);
 		write(name2 + "/Size", n);
 		for (SizeType i = 0; i < n; ++i)
 			what[i].write(name2 + "/" + typeToString(i), *this);
+	}
+
+	template<typename T>
+	void write(String name2,
+	           const std::vector<T>& what,
+	           WriteMode allowOverwrite = NO_OVERWRITE,
+	           typename EnableIf<IsEnumClass<T>::value, int*>::Type = 0)
+	{
+		overwriteNotSupported(allowOverwrite);
+		SizeType n = what.size();
+		createGroup(name2);
+		write(name2 + "/Size", n);
+		for (SizeType i = 0; i < n; ++i)
+			write(name2 + "/" + typeToString(i), what[i]);
 	}
 
 	template<typename T>
@@ -376,7 +391,8 @@ public:
 	template<typename SomeType>
 	void read(SomeType& value,
 	          String name,
-	          typename EnableIf<Loki::TypeTraits<SomeType>::isArith, int*>::Type = 0)
+	          typename EnableIf<Loki::TypeTraits<SomeType>::isArith &&
+	          !std::is_enum<SomeType>::value, int*>::Type = 0)
 	{
 		void* ptr = static_cast<void *>(&value);
 		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet("Def/" + name));
@@ -432,7 +448,8 @@ public:
 	template<typename SomeType>
 	void read(SomeType& value,
 	          String name,
-	          typename EnableIf<IsEnum<SomeType>::True, int*>::Type = 0)
+	          typename EnableIf<std::is_enum<SomeType>::value ||
+	          IsEnumClass<SomeType>::value, int*>::Type = 0)
 	{
 		SizeType x = 0;
 		read(x, name);
@@ -473,7 +490,7 @@ public:
 	void read(std::vector<T>& what,
 	          String name,
 	          typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith
-	          && !IsPairLike<T>::True, int*>::Type = 0)
+	          && !IsPairLike<T>::True && !IsEnumClass<T>::value, int*>::Type = 0)
 	{
 		SizeType size = 0;
 		read(size, name + "/Size");
@@ -487,6 +504,18 @@ public:
 	          String name,
 	          typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith
 	          && IsPairLike<T>::True, int*>::Type = 0)
+	{
+		SizeType size = 0;
+		read(size, name + "/Size");
+		what.resize(size);
+		for (SizeType i = 0; i < size; ++i)
+			read(what[i], name + "/" + ttos(i));
+	}
+
+	template<typename T>
+	void read(std::vector<T>& what,
+	          String name,
+	          typename EnableIf<IsEnumClass<T>::value, int*>::Type = 0)
 	{
 		SizeType size = 0;
 		read(size, name + "/Size");

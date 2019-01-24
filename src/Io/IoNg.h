@@ -110,7 +110,8 @@ struct IsRootUnDelegated {
 		  IsVectorLike<T>::True ||
 		  IsStackLike<T>::True ||
 		  IsPairLike<T>::True ||
-		  IsEnum<T>::True ||
+		  std::is_enum<T>::value ||
+		  IsEnumClass<T>::value ||
 		  IsStringLike<T>::True};
 };
 // PSIDOC_CODE_END

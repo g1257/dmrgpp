@@ -43,10 +43,13 @@ typedef unsigned int SizeType;
 
 namespace PsimagLite {
 
-template<typename T>
-struct IsEnum {
-	enum {True = __is_enum(T)};
-};
+template <typename T, bool B = std::is_enum<T>::value>
+struct IsEnumClass : std::false_type {};
+
+template <typename T>
+struct IsEnumClass<T, true>
+: std::integral_constant<bool,
+    !std::is_convertible<T, typename std::underlying_type<T>::type>::value> {};
 
 inline div_t div(int a, int b) { return std::div(a, b); }
 

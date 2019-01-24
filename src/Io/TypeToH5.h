@@ -6,10 +6,10 @@
 namespace PsimagLite {
 
 template<typename T>
-typename EnableIf<!IsEnum<T>::True, H5::PredType>::Type typeToH5();
+typename EnableIf<!std::is_enum<T>::value, H5::PredType>::Type typeToH5();
 
 template<typename T>
-typename EnableIf<IsEnum<T>::True, H5::PredType>::Type typeToH5()
+typename EnableIf<std::is_enum<T>::value, H5::PredType>::Type typeToH5()
 {
 	return H5::PredType::NATIVE_UINT8;
 }
