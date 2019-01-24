@@ -235,20 +235,29 @@ public:
 	{
 		read(io, prefix);
 
-		aoe_.setAllStagesTo(ApplyOperatorExpressionType::StageEnum::WFT_NOADVANCE);
+		SomeSerializerType* ts = 0;
 
-		SomeSerializerType ts(io, prefix);
+		try {
+			ts = new SomeSerializerType(io, prefix);
+		} catch (...) {
+			return;
+		}
+
+		aoe_.setAllStagesTo(ApplyOperatorExpressionType::StageEnum::WFT_NOADVANCE);
 
 		SizeType n = aoe_.targetVectors().size();
 
-		if (n != ts.size())
+		if (n != ts->size())
 			err(PsimagLite::String(__FILE__) +
 			    ": Trying to set TVs but different sizes\n");
 
 		for (SizeType i = 0; i < n; ++i)
-			aoe_.targetVectors(i) = ts.vector(i);
+			aoe_.targetVectors(i) = ts->vector(i);
 
-		aoe_.setTime(ts.time());
+		aoe_.setTime(ts->time());
+
+		delete ts;
+		ts = 0;
 	}
 
 	// END read/write
