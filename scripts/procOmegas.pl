@@ -222,6 +222,7 @@ sub correctionVectorReadOpen
 	my $status;
 	my $maxSite = 0;
 	while (<$fh>) {
+		next if (/PsiApp\: +CmdLine/);
 		if (/P3/ and /gs/) {
 		        $status="p3";
 		} elsif (/P2/ and /gs/) {
