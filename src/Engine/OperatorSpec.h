@@ -58,7 +58,14 @@ public:
 
 	ResultType operator()(PsimagLite::String opLabel, int& site2) const
 	{
-		if (site2 < 0) site2 = extractSiteIfAny(opLabel);
+		PsimagLite::String copyOfOpLabel = opLabel;
+		int site3 = extractSiteIfAny(opLabel);
+
+		if (site2 >= 0 && site3 >= 0 && site2 != site3)
+			err(PsimagLite::String(__FILE__) +
+			    " FATAL , delete site from " + copyOfOpLabel + "\n");
+
+		if (site2 < 0) site2 = site3;
 
 		SizeType site = (site2 < 0) ? 0 : site2;
 
@@ -148,13 +155,8 @@ private:
 			throw PsimagLite::RuntimeError(str);
 		}
 
-		if (static_cast<SizeType>(lastIndex) != name.length() - 1) {
-			PsimagLite::String str("Braket operator ");
-			str += name + " has [] but does not end in ]\n";
-			throw PsimagLite::RuntimeError(str);
-		}
-
-		PsimagLite::String str = name.substr(0,firstIndex);
+		PsimagLite::String str = name.substr(0, firstIndex);
+		str += name.substr(lastIndex + 1, name.length() - lastIndex);
 		int site = atoi(name.substr(firstIndex+1,lastIndex-1).c_str());
 		name = str;
 		return site;
