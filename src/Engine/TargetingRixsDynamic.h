@@ -442,18 +442,41 @@ private:
 		}
 	}
 
-	void cocoon(SizeType site, ProgramGlobals::DirectionEnum direction) const
+	void cocoon(SizeType site, ProgramGlobals::DirectionEnum direction)
+	const
 	{
-		ComplexOrRealType rr = this->common().rixsCocoon(direction,site,8,4,true);
-		ComplexOrRealType ri = this->common().rixsCocoon(direction,site,8,5,true);
-		ComplexOrRealType ir = this->common().rixsCocoon(direction,site,9,4,true);
-		ComplexOrRealType ii = this->common().rixsCocoon(direction,site,9,5,true);
+		if (!usesCheby_) {
+			ComplexOrRealType rr =
+			        this->common().rixsCocoon(direction,site,8,4,true);
+			ComplexOrRealType ri =
+			        this->common().rixsCocoon(direction,site,8,5,true);
+			ComplexOrRealType ir =
+			        this->common().rixsCocoon(direction,site,9,4,true);
+			ComplexOrRealType ii =
+			        this->common().rixsCocoon(direction,site,9,5,true);
 
-		const RealType time = this->common().aoe().currentTime();
-		std::cout<<site<<" "<<(ri-ir)<<" "<<time; // time here is the currentTime
-		std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
-		std::cout<<site<<" "<<(rr+ii)<<" "<<time; // time here is the currentTime
-		std::cout<<" <gs|A|P3> 1\n";   // 1 here is the "superdensity"
+			const RealType time = this->common().aoe().currentTime();
+			std::cout<<site<<" "<<(ri-ir)<<" "<<time; // time here is the currentTime
+			        std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
+			std::cout<<site<<" "<<(rr+ii)<<" "<<time; // time here is the currentTime
+			        std::cout<<" <gs|A|P3> 1\n";   // 1 here is the "superdensity"
+			return;
+		} else {
+			ComplexOrRealType rr =
+			        this->common().rixsCocoon(direction,site,9,4,true);
+			ComplexOrRealType ri =
+			        this->common().rixsCocoon(direction,site,9,5,true);
+			ComplexOrRealType ir =
+			        this->common().rixsCocoon(direction,site,11,4,true);
+			ComplexOrRealType ii =
+			        this->common().rixsCocoon(direction,site,11,5,true);
+
+			const RealType time = this->common().aoe().currentTime();
+			std::cout<<site<<" "<<(ri-ir)<<" "<<time; // time here is the currentTime
+			        std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
+			std::cout<<site<<" "<<(rr+ii)<<" "<<time; // time here is the currentTime
+			        std::cout<<" <gs|A|P3> 1\n";   // 1 here is the "superdensity"
+		}
 	}
 
 	void addFactor(VectorWithOffsetType& phiNew,
