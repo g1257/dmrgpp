@@ -1,12 +1,10 @@
 #include "TridiagonalMatrix.h"
 
-#ifndef USE_STEQR
-
 namespace PsimagLite {
 
 template<>
-void TridiagonalMatrix<double>::diag(TridiagonalMatrix<double>::VectorRealType& eigs,
-                                     SizeType nn) const
+void TridiagonalMatrix<double>::diag2(TridiagonalMatrix<double>::VectorRealType& eigs,
+                                      SizeType nn) const
 {
 	char jobz = 'N';
 	int n = nn;
@@ -38,8 +36,8 @@ void TridiagonalMatrix<double>::diag(TridiagonalMatrix<double>::VectorRealType& 
 }
 
 template<>
-void TridiagonalMatrix<float>::diag(TridiagonalMatrix<float>::VectorRealType& eigs,
-                                    SizeType nn) const
+void TridiagonalMatrix<float>::diag2(TridiagonalMatrix<float>::VectorRealType& eigs,
+                                     SizeType nn) const
 {
 	char jobz = 'N';
 	int n = nn;
@@ -71,4 +69,3 @@ void TridiagonalMatrix<float>::diag(TridiagonalMatrix<float>::VectorRealType& ei
 }
 
 }
-#endif

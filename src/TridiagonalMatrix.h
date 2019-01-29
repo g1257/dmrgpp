@@ -86,6 +86,8 @@ class TridiagonalMatrix {
 
 	typedef typename Real<FieldType>::Type RealType;
 
+	static const bool diagWithLapack_ = true;
+
 public:
 
 	typedef typename Vector<FieldType>::Type VectorType;
@@ -142,24 +144,13 @@ public:
 		m(n - 1, n - 1) = a_[n-1];
 	}
 
-
-#ifndef USE_STEQR
-	void diag(VectorRealType&, SizeType) const;
-#else
-	void diag(VectorRealType& eigs, SizeType nn)
+	void diag(VectorRealType& eigs, SizeType nn) const
 	{
-		int n = nn;
-		VectorType e = b_;
-		eigs = a_;
-		int info = 0;
-		int ldz = 1;
-		VectorRealType work(2*nn);
-		VectorRealType z(ldz*nn + 2);
-		psimag::LAPACK::STEQR('N', n, &(eigs[0]), &(e[1]), &(z[0]), ldz, &(work[0]), &info);
-		if (info == 0) return;
-		throw RuntimeError("FATAL: *STEQR failed with info = " + ttos(info) + "\n");
+		if (diagWithLapack_)
+			diag2(eigs, nn);
+		else
+			ground(eigs, nn);
 	}
-#endif
 
 	void push(const FieldType& a,const FieldType& b)
 	{
@@ -171,8 +162,92 @@ public:
 
 private:
 
+	void diag2(VectorRealType&, SizeType) const;
+
+	void ground(VectorRealType& groundD, SizeType nn) const
+	{
+		const int n = nn;
+
+		groundD.resize(n);
+		groundAllocations(n);
+
+		const long int maxCounter = 10000;
+
+		assert(a_.size() >= nn && b_.size() >= nn);
+		for (SizeType i = 0; i < nn; ++i) {
+			groundD[i] = a_[i];
+			groundE_[i] = b_[i];
+		}
+
+		RealType s = 0;
+		long int intCounter=0;
+		int m = 0;
+		int l = 0;
+		for (; l < n; l++) {
+			do {
+				intCounter++;
+				if (intCounter > maxCounter) {
+					std::cerr<<"lanczos: ground: premature exit ";
+					std::cerr<<"(may indicate an internal error)\n";
+					break;
+				}
+
+				for (m = l; m < n - 1; m++) {
+					RealType dd = fabs(groundD[m]) + fabs(groundD[m + 1]);
+					if ((fabs(groundE_[m]) + dd) == dd) break;
+				}
+
+				if (m != l) {
+					RealType g = (groundD[l + 1] - groundD[l])/(2.0*groundE_[l]);
+					RealType r = sqrt(g*g + 1.0);
+					g = groundD[m] - groundD[l] + groundE_[l]/
+					        (g + (g >= 0 ? fabs(r) : -fabs(r)));
+					RealType p = 0.0;
+					RealType c = 1.0;
+					int i = m -1;
+					for (s = 1.0; i >= l; i--) {
+						RealType f = s * groundE_[i];
+						RealType h = c * groundE_[i];
+						groundE_[i + 1] = (r = sqrt(f * f + g * g));
+						if (r == 0.0) {
+							groundD[i + 1] -= p;
+							groundE_[m] = 0.0;
+							break;
+						}
+
+						s = f / r;
+						c = g / r;
+						g = groundD[i + 1] - p;
+						r = (groundD[i] - g) * s + 2.0 * c * h;
+						groundD[i + 1] = g + (p = s * r);
+						g = c * r - h;
+					}
+
+					if (r == 0.0 && i >= l) continue;
+					groundD[l] -= p;
+					groundE_[l] = g;
+					groundE_[m] = 0.0;
+				}
+			} while (m != l);
+		}
+
+		std::sort(groundD.begin(), groundD.end());
+
+		if (intCounter > maxCounter)
+			throw RuntimeError(String(__FILE__) + "::ground(): internal error\n");
+	}
+
+	void groundAllocations(SizeType n) const
+	{
+		if (groundE_.size() != n) {
+			groundE_.clear();
+			groundE_.resize(n);
+		}
+	}
+
 	VectorRealType a_;
 	VectorRealType b_;
+	mutable VectorRealType groundE_;
 }; // class TridiagonalMatrix
 } // namespace PsimagLite
 
