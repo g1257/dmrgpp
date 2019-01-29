@@ -142,7 +142,22 @@ public:
 		m(n - 1, n - 1) = a_[n-1];
 	}
 
+
+#ifndef USE_STERF
 	void diag(VectorRealType&, SizeType) const;
+#else
+	void diag(VectorRealType& eigs, SizeType nn)
+	{
+		int n = nn;
+		VectorType e = b_;
+		eigs = a_;
+		int info = 0;
+		psimag::LAPACK::STERF(&n, &(eigs[0]), &(e[1]), &info);
+
+		if (info == 0) return;
+		throw RuntimeError("FATAL: *sterf_ failed with info = " + ttos(info) + "\n");
+	}
+#endif
 
 	void push(const FieldType& a,const FieldType& b)
 	{

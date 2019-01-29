@@ -1,5 +1,7 @@
 #include "TridiagonalMatrix.h"
 
+#ifndef USE_STERF
+
 namespace PsimagLite {
 
 template<>
@@ -69,3 +71,4 @@ void TridiagonalMatrix<float>::diag(TridiagonalMatrix<float>::VectorRealType& ei
 }
 
 }
+#endif

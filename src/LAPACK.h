@@ -223,7 +223,22 @@ extern "C" void cstedc_(char*,
                         int*,
                         int*);
 
+extern "C" void dsterf_(int*, double*, double*, int*);
+
+extern "C" void ssterf_(int*, float*, float*, int*);
+
 // ============================================================================
+
+inline void STERF(int* n, double* d, double* e, int* info)
+{
+	dsterf_(n, d, e, info);
+}
+
+inline void STERF(int* n, float* d, float* e, int* info)
+{
+	ssterf_(n, d, e, info);
+}
+
 inline void GESV(int ma,
                  int mb,
                  float* a,
