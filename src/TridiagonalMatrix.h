@@ -143,7 +143,7 @@ public:
 	}
 
 
-#ifndef USE_STERF
+#ifndef USE_STEQR
 	void diag(VectorRealType&, SizeType) const;
 #else
 	void diag(VectorRealType& eigs, SizeType nn)
@@ -152,10 +152,12 @@ public:
 		VectorType e = b_;
 		eigs = a_;
 		int info = 0;
-		psimag::LAPACK::STERF(&n, &(eigs[0]), &(e[1]), &info);
-
+		int ldz = 1;
+		VectorRealType work(2*nn);
+		VectorRealType z(ldz*nn + 2);
+		psimag::LAPACK::STEQR('N', n, &(eigs[0]), &(e[1]), &(z[0]), ldz, &(work[0]), &info);
 		if (info == 0) return;
-		throw RuntimeError("FATAL: *sterf_ failed with info = " + ttos(info) + "\n");
+		throw RuntimeError("FATAL: *STEQR failed with info = " + ttos(info) + "\n");
 	}
 #endif
 

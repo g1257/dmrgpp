@@ -227,6 +227,10 @@ extern "C" void dsterf_(int*, double*, double*, int*);
 
 extern "C" void ssterf_(int*, float*, float*, int*);
 
+extern "C" void dsteqr_(char*, int*, double*, double*, double*, int*, double*, int*);
+
+extern "C" void ssteqr_(char*, int*, float*, float*, float*, int*, float*, int*);
+
 // ============================================================================
 
 inline void STERF(int* n, double* d, double* e, int* info)
@@ -237,6 +241,30 @@ inline void STERF(int* n, double* d, double* e, int* info)
 inline void STERF(int* n, float* d, float* e, int* info)
 {
 	ssterf_(n, d, e, info);
+}
+
+inline void STEQR(char jobz,
+                  int n,
+                  double* d,
+                  double* e,
+                  double *z,
+                  int ldz,
+                  double *work,
+                  int *info)
+{
+	dsteqr_(&jobz, &n, d, e, z, &ldz, work, info);
+}
+
+inline void STEQR(char jobz,
+                  int n,
+                  float* d,
+                  float* e,
+                  float *z,
+                  int ldz,
+                  float *work,
+                  int *info)
+{
+	ssteqr_(&jobz, &n, d, e, z, &ldz, work, info);
 }
 
 inline void GESV(int ma,

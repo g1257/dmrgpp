@@ -1,6 +1,6 @@
 #include "TridiagonalMatrix.h"
 
-#ifndef USE_STERF
+#ifndef USE_STEQR
 
 namespace PsimagLite {
 
