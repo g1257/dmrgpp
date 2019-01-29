@@ -10,7 +10,7 @@ struct WftOptions {
 	typedef typename VectorWithOffsetType_::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
-	enum AccelEnum {ACCEL_NONE, ACCEL_PATCHES, ACCEL_BLOCKS, ACCEL_SVD};
+	enum AccelEnum {ACCEL_NONE, ACCEL_PATCHES, ACCEL_SVD};
 
 	WftOptions(ProgramGlobals::DirectionEnum dir1,
 	           PsimagLite::String options,
@@ -22,7 +22,7 @@ struct WftOptions {
 	      firstCall(f),
 	      bounce(b),
 	      dir(dir1),
-	      accel((twoSiteDmrg) ? ACCEL_BLOCKS : ACCEL_PATCHES),
+	      accel(ACCEL_PATCHES),
 	      denseSparseThreshold(d)
 	{
 		if (options.find("wftAccelSvd") != PsimagLite::String::npos)

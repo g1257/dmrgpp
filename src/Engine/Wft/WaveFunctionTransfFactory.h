@@ -154,6 +154,10 @@ public:
 			}
 		}
 
+		PsimagLite::OstringStream msg;
+		msg<<"ctor(): accel="<<wftOptions_.accel;
+		progress_.printline(msg, std::cout);
+
 		if (BasisType::useSu2Symmetry())
 			wftImpl_=new WaveFunctionTransfSu2Type(waveStructCombined_,
 			                                       wftOptions_);
