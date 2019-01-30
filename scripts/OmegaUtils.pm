@@ -158,7 +158,7 @@ sub fourier
 		return fourierLadderAverage($f, $v, $geometry->{"leg"}, $hptr);
 	}
 
-	my $name = ($geometry->{"name"};
+	my $name = $geometry->{"name"};
 	if ($name eq "chain") {
 		return fourierChain($f, $v, $hptr);
 	}
