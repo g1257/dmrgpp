@@ -226,13 +226,7 @@ public:
 		progress_.printline(msg,std::cout);
 
 		assert(block.size() > 0);
-		SizeType site = block[0];
-		TimeSerializerType ts(this->common().aoe().currentTime(),
-		                      site,
-		                      this->common().aoe().targetVectors(),
-		                      this->common().aoe().stages());
 
-		ts.write(io, prefix);
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, block, prefix);
 	}
