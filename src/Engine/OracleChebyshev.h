@@ -25,7 +25,7 @@ public:
 
 	OracleChebyshev(const ModelType& model,
 	                const LeftRightSuperType& lrs,
-	                SizeType currentTime,
+	                const RealType& currentTime,
 	                const TargetParamsType& tstStruct,
 	                RealType E0)
 	    : model_(model), lrs_(lrs), currentTime_(currentTime), tstStruct_(tstStruct), E0_(E0)
@@ -109,7 +109,7 @@ private:
 
 	const ModelType& model_;
 	const LeftRightSuperType& lrs_;
-	const SizeType& currentTime_;
+	const RealType& currentTime_;
 	const TargetParamsType& tstStruct_;
 	const RealType& E0_;
 };
