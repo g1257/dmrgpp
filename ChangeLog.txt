@@ -1,3 +1,36 @@
+2019-01-31 Version 5.50
+
+Bug fixes:
+
+* Kitaev: bug fix when using gammas
+
+* OperatorSpec: bug fixes for bracketed sites
+
+User interface:
+
+* openblas used by default
+
+* observe: onepoint no longer supported
+
+* bare operator-specs no longer supported
+(except for RixsDynamic)
+
+New features:
+
+* CorrectionVector can restart from a previous
+CorrectionVector run
+
+* TargetingRixDynamic: cocoon for Cheby
+(contributed by Alberto)
+
+Refactoring:
+
+* TargetingCommon: legacy cocoons deleted
+
+* PreOperator classes deleted
+
+* Stages of Targeting now in StageEnum
+
 2019-01-22 Version 5.48
 
 New features:
