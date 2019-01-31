@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParallelWftOne.h"
 #include "Parallelizer.h"
 #include "MatrixVectorKron/KronMatrix.h"
+#include "WftAccelBlocks.h"
 #include "WftAccelPatches.h"
 #include "WftSparseTwoSite.h"
 #include "WftAccelSvd.h"
@@ -119,6 +120,7 @@ public:
 	typedef MatrixOrIdentity<SparseMatrixType> MatrixOrIdentityType;
 	typedef ParallelWftOne<VectorWithOffsetType, DmrgWaveStructType> ParallelWftType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
+	typedef WftAccelBlocks<BaseType> WftAccelBlocksType;
 	typedef WftAccelPatches<BaseType> WftAccelPatchesType;
 	typedef WftSparseTwoSite<BaseType, MatrixOrIdentityType> WftSparseTwoSiteType;
 	typedef WftAccelSvd<BaseType> WftAccelSvdType;
@@ -127,6 +129,7 @@ public:
 	                        const WftOptionsType& wftOptions)
 	    : dmrgWaveStruct_(dmrgWaveStruct),
 	      wftOptions_(wftOptions),
+	      wftAccelBlocks_(dmrgWaveStruct, wftOptions),
 	      wftAccelPatches_(dmrgWaveStruct, wftOptions),
 	      wftAccelSvd_(dmrgWaveStruct, wftOptions)
 	{}
@@ -233,6 +236,10 @@ private:
 	                          const LeftRightSuperType& lrs,
 	                          const VectorSizeType& nk) const
 	{
+		if (wftOptions_.accel == WftOptionsType::ACCEL_BLOCKS &&
+		        lrs.left().block().size() > 1)
+			return wftAccelBlocks_.environFromInfinite(psiDest, i0, psiSrc, iOld, lrs, nk);
+
 		typedef PsimagLite::Parallelizer<WftSparseTwoSiteType> ParallelizerType;
 
 		SparseMatrixType ws;
@@ -283,6 +290,8 @@ private:
 
 		assert(dmrgWaveStruct_.lrs().super().permutationInverse().size() == psiSrc.size());
 
+		bool inBlocks = (lrs.right().block().size() > 1 &&
+		                 wftOptions_.accel == WftOptionsType::ACCEL_BLOCKS);
 		SparseMatrixType we;
 		dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).toSparse(we);
 		SparseMatrixType ws;
@@ -299,21 +308,31 @@ private:
 				SizeType final = psiDest.effectiveSize(i0)+start;
 				VectorType dest(final-start,0.0);
 				if (srcI > 0) psiDest.extract(dest,i0);
-				ParallelizerType threadedWft(PsimagLite::Concurrency::codeSectionParams);
+				if (inBlocks) {
+					wftAccelBlocks_.systemFromInfinite(psiDest,
+					                                   i0,
+					                                   psiSrc,
+					                                   srcII,
+					                                   lrs,
+					                                   nk);
+					continue;
+				} else {
+					ParallelizerType threadedWft(PsimagLite::Concurrency::codeSectionParams);
 
-				WftSparseTwoSiteType helperWft(psiDest,
-				                               i0,
-				                               psiSrc,
-				                               srcII,
-				                               dmrgWaveStruct_,
-				                               wftOptions_,
-				                               lrs,
-				                               nk,
-				                               wsT,
-				                               we,
-				                               ProgramGlobals::SYSTEM);
+					WftSparseTwoSiteType helperWft(psiDest,
+					                               i0,
+					                               psiSrc,
+					                               srcII,
+					                               dmrgWaveStruct_,
+					                               wftOptions_,
+					                               lrs,
+					                               nk,
+					                               wsT,
+					                               we,
+					                               ProgramGlobals::SYSTEM);
 
-				threadedWft.loopCreate(helperWft);
+					threadedWft.loopCreate(helperWft);
+				}
 			}
 		}
 	}
@@ -436,6 +455,7 @@ private:
 
 	const DmrgWaveStructType& dmrgWaveStruct_;
 	const WftOptionsType& wftOptions_;
+	WftAccelBlocksType wftAccelBlocks_;
 	WftAccelPatchesType wftAccelPatches_;
 	WftAccelSvdType wftAccelSvd_;
 }; // class WaveFunctionTransfLocal

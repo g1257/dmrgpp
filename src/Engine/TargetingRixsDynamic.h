@@ -442,7 +442,8 @@ private:
 		}
 	}
 
-	void cocoon(SizeType site, ProgramGlobals::DirectionEnum direction) const
+	void cocoon(SizeType site, ProgramGlobals::DirectionEnum direction)
+	const
 	{
 		if (!usesCheby_) {
 			ComplexOrRealType rr =
@@ -498,6 +499,7 @@ private:
 	                    ProgramGlobals::DirectionEnum direction,
 	                    const VectorSizeType& block1)
 	{
+
 		if (!applied_ && appliedFirst_) {
 			setWeights(8);
 			return;
