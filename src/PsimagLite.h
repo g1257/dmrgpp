@@ -1,6 +1,7 @@
 #ifndef PSI_PSIMAGLITE_H
 #define PSI_PSIMAGLITE_H
 
+#include "MicroArchitecture.h"
 #include <iostream>
 #include <utility>
 #include "Concurrency.h"
@@ -53,10 +54,13 @@ void split(Vector<String>::Type& tokens, String str, String delimiters = " ");
 String basename(const String&);
 
 class PsiApp {
+
 public:
 
 	PsiApp(String appName, int* argc, char*** argv, int nthreads)
-	    : concurrency_(argc, argv, nthreads), appName_(basename(appName))
+	    : concurrency_(argc, argv, nthreads),
+	      appName_(basename(appName)),
+	      microArch_(MicroArchitecture().vendorId())
 	{
 		chekSizeType();
 
@@ -64,6 +68,14 @@ public:
 		char** temp = *argv;
 		for (SizeType i = 0; i < n; ++i)
 			cmdLine_ += String(temp[i]) + " ";
+	}
+
+	void checkMicroArch(std::ostream& os, PsimagLite::String compiledArch) const
+	{
+		os<<"Compiled MicroArchitecture is "<<compiledArch<<"\n";
+		os<<"Running on MicroArchitecture "<<microArch_<<"\n";
+		if (compiledArch == microArch_) return;
+		os<<"WARNING: Compiled MicroArchitecture is DIFFERENT than Running one\n";
 	}
 
 	const String& name() const { return appName_; }
@@ -103,6 +115,7 @@ private:
 	Concurrency concurrency_;
 	String appName_;
 	String cmdLine_;
+	String microArch_;
 };
 } // namespace PsimagLite
 
