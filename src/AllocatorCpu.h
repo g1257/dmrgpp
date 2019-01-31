@@ -31,6 +31,7 @@ Please see full open source license included in file LICENSE.
 #include <stdexcept>
 #include <cstdlib>
 #include <sstream>
+#include <type_traits>
 #ifdef USE_CUSTOM_ALLOCATOR
 #include "MemoryCpu.h"
 #endif
