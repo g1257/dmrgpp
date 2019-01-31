@@ -195,6 +195,7 @@ int main(int argc,char **argv)
 		Provenance provenance;
 		std::cout<<provenance;
 		std::cout<<Provenance::logo(application.name())<<"\n";
+		application.checkMicroArch(std::cout, Provenance::compiledMicroArch());
 	}
 
 	if (versionOnly) return 0;

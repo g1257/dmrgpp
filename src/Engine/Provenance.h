@@ -12,6 +12,16 @@ class Provenance {
 
 public:
 
+	static PsimagLite::String compiledMicroArch()
+	{
+#ifndef MICRO_ARCH
+#error "Please run ./configure.pl ...\n";
+		return "";
+#else
+		return MICRO_ARCH;
+#endif
+	}
+
 	static PsimagLite::String logo(PsimagLite::String appName)
 	{
 		PsimagLite::OstringStream msg;

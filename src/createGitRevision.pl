@@ -10,11 +10,15 @@ my $hashPsimagLite = getGitHash("../../PsimagLite");
 
 my $hashDmrgpp = getGitHash("..");
 
+my $microArch = getMicroArch();
+
 open(FOUT, ">", $file) or exit(2);
 print FOUT "// DO NOT EDIT. It will be overwritten\n";
 print FOUT "// Created by $0\n";
 print FOUT "#define PSIMAGLITE_GIT_REV \"$hashPsimagLite\"\n";
 print FOUT "#define DMRGPP_GIT_REV \"$hashDmrgpp\"\n";
+print FOUT "#define MICRO_ARCH \"$microArch\"\n";
+print FOUT "\n";
 close(FOUT);
 
 sub getGitHash
@@ -45,4 +49,25 @@ sub getGitHash
 
 	return $value;
 }
+
+sub getMicroArch
+{
+	my $file = "/proc/cpuinfo";
+	open(FILE, "<", $file) or return "E0";
+	my $vendorId;
+	while (<FILE>) {
+		next unless (/vendor_id/);
+		chomp;
+		$vendorId = $_;
+	}
+
+	close(FILE);
+
+	($vendorId) or return "E1";
+	return "Intel" if ($vendorId =~ /intel/i);
+	return "AMD" if ($vendorId =~ /AMD/);
+	$vendorId =~ s/vendor_id[ \t] *:[ \t]*//;
+	return $vendorId;
+}
+
 

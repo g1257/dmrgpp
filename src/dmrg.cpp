@@ -15,14 +15,15 @@ std::ofstream GlobalCoutStream;
 
 typedef PsimagLite::Concurrency ConcurrencyType;
 
-void printLicense(PsimagLite::String name, const OperatorOptions& options)
+void printLicense(const PsimagLite::PsiApp& app, const OperatorOptions& options)
 {
 	if (!ConcurrencyType::root() || options.enabled) return;
 
 	std::cout<<ProgramGlobals::license;
 	Provenance provenance;
 	std::cout<<provenance;
-	std::cout<<Provenance::logo(name)<<"\n";
+	std::cout<<Provenance::logo(app.name())<<"\n";
+	app.checkMicroArch(std::cout, Provenance::compiledMicroArch());
 }
 
 void usageOperator()
@@ -348,7 +349,7 @@ to the main dmrg driver are the following.
 
 	// print license
 	if (versionOnly) {
-		printLicense(application.name(), options);
+		printLicense(application, options);
 		return 0;
 	}
 
@@ -393,7 +394,7 @@ to the main dmrg driver are the following.
 		std::cerr<<"AutoRestart possible\n";
 	}
 
-	printLicense(application.name(), options);
+	printLicense(application, options);
 
 	application.printCmdLine(std::cout);
 	if (echoInput) application.echoBase64(std::cout, filename);
