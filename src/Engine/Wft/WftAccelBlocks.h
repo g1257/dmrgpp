@@ -4,6 +4,9 @@
 #include "BLAS.h"
 #include "ProgramGlobals.h"
 
+#include <iostream>
+#include <iomanip>
+
 namespace Dmrg {
 
 template<typename WaveFunctionTransfBaseType>
@@ -57,86 +60,433 @@ class WftAccelBlocks {
 
 		void doTaskEnviron(SizeType kp, SizeType threadNum)
 		{
+#if (0)
 			SizeType ipsize = ws_.rows();
 			SizeType i2psize = ws_.cols();
 			SizeType jp2size = we_.rows();
 			SizeType jpsize = we_.cols();
-			MatrixType tmp(i2psize, jpsize);
+#endif
 
-			result_[kp].resize(ipsize, jpsize);
+			const int nrow_W_S = ws_.rows();
+			const int ncol_W_S = ws_.cols();
+			const int nrow_W_E = we_.rows();
+			const int ncol_W_E = we_.cols();
+			//
+			// --------------------------------
+			// Compute Ynew = W_S * Yold * W_E
+			// --------------------------------
+			const int nrow_Yold = ncol_W_S;
+			const int ncol_Yold = nrow_W_E;
+
+			const int nrow_Ynew = nrow_W_S;
+			const int ncol_Ynew = ncol_W_E;
+
+			result_[kp].resize(nrow_Ynew, ncol_Ynew);
 			result_[kp].setTo(0.0);
-			tmp.setTo(0.0);
+
 
 			const MatrixType& weModif = getWeModif(we_, threadNum);
 
-			psimag::BLAS::GEMM('N',
-			                   'N',
-			                   i2psize,
-			                   jpsize,
-			                   jp2size,
-			                   1.0,
-			                   &((psi_[kp])(0,0)),
-			                   i2psize,
-			                   &(weModif(0,0)),
-			                   jp2size,
-			                   0.0,
-			                   &(tmp(0,0)),
-			                   i2psize);
+			const int idebug = 0;
 
-			psimag::BLAS::GEMM('N',
-			                   'N',
-			                   ipsize,
-			                   jpsize,
-			                   i2psize,
-			                   1.0,
-			                   &(ws_(0,0)),
-			                   ipsize,
-			                   &(tmp(0,0)),
-			                   i2psize,
-			                   0.0,
-			                   &((result_[kp])(0,0)),
-			                   ipsize);
+			int nrow_Ytemp = 0;
+			int ncol_Ytemp = 0;
+
+
+			// ---------------------------
+			// Compute   Ynew = W_S * Yold * W_E
+			// as
+			// Method 1
+			// (1) Ytemp = W_S * Yold
+			// (2) Ynew = Ytemp * W_E
+			// need   2 * nrow_W_S * ncol_W_S * ncol_Yold   flops +
+			//        2 * nrow_Ytemp * ncol_Ytemp * ncol_W_E flops
+			// or
+			// Method 2:
+			// (1) Ytemp = Yold * W_E
+			// (2) Ynew = W_S * Ytemp
+			// need 2 * nrow_Yold * ncol_Yold * ncol_W_E flops +
+			//      2 * nrow_W_S * ncol_W_S * ncol_Ytemp flops
+			// ---------------------------
+
+
+			const ComplexOrRealType *Yold = &((psi_[kp])(0,0));
+			const int ldYold = nrow_Yold;
+
+			const ComplexOrRealType *W_E = &(weModif(0,0));
+			const int ldW_E = nrow_W_E;
+
+			const ComplexOrRealType *W_S = &(ws_(0,0));
+			const int ldW_S = nrow_W_S;
+
+			ComplexOrRealType *Ynew = &((result_[kp])(0,0));
+			const int ldYnew = nrow_Ynew;
+
+			// ----------------------
+			// Method 1
+			// (1) Ytemp = W_S * Yold
+			// (2) Ynew = Ytemp * W_E
+			// ----------------------
+			nrow_Ytemp = nrow_W_S;
+			ncol_Ytemp = ncol_Yold;
+			const RealType flops_method_1 = 2.0 * nrow_W_S   * ncol_W_S   * ncol_Yold +
+			        2.0 * nrow_Ytemp * ncol_Ytemp * ncol_W_E;
+
+			// ------------------------
+			// Method 2:
+			// (1) Ytemp = Yold * W_E
+			// (2) Ynew = W_S * Ytemp
+			// ------------------------
+			nrow_Ytemp = nrow_Yold;
+			ncol_Ytemp = ncol_W_E;
+			const RealType flops_method_2 =  2.0 * nrow_Yold * ncol_Yold * ncol_W_E +
+			        2.0 * nrow_W_S  * ncol_W_S  * ncol_Ytemp ;
+
+			const bool use_method_1 = (flops_method_1 <= flops_method_2);
+			if (idebug >= 1) {
+				std::cout << "WftAccelBlocks.h:146: "
+				          << " use_method_1=" << use_method_1
+				          << std::scientific
+				          << " flops_method_1=" << flops_method_1
+				          << " flops_method_2=" << flops_method_2
+				          << std::defaultfloat
+				          << "\n";
+
+			};
+
+			const ComplexOrRealType d_one = 1.0;
+			const ComplexOrRealType d_zero = 0.0;
+
+			// ---------------------------
+			// Compute   Ynew = W_S * (Yold * W_E)
+			// ---------------------------
+			//
+			// Note Y = kron(A,B) * X = B * X * transpose(A)
+			//
+			// Ynew = kron( transpose(W_E), W_S) * Yold
+			// ------------------------------------------
+
+			// -----------------------------
+			// Method 1: Ytemp = W_S * Yold
+			// Method 2: Ytemp = Yold * W_E
+			// -----------------------------
+			nrow_Ytemp = (use_method_1) ? nrow_W_S : nrow_Yold;
+			ncol_Ytemp = (use_method_1) ? ncol_Yold : ncol_W_E;
+
+			MatrixType tmp(nrow_Ytemp, ncol_Ytemp);
+			tmp.setTo(0.0);
+			ComplexOrRealType *Ytemp = &(tmp(0,0));
+			const int ldYtemp = nrow_Ytemp;
+
+			if (use_method_1) {
+				// ------------------
+				// Method 1:
+				// Ytemp = W_S * Yold
+				// Ynew = Ytemp * W_E
+				// ------------------
+
+				// ------------------
+				// Ytemp = W_S * Yold
+				// ------------------
+				{
+					const int mm = nrow_Ytemp;
+					const int nn = ncol_Ytemp;
+					const int kk = nrow_Yold;
+
+					const ComplexOrRealType alpha = d_one;
+					const ComplexOrRealType beta = d_zero;
+
+					assert( ncol_W_S == nrow_Yold );
+					assert( nrow_Ytemp == nrow_W_S );
+					assert( ncol_Ytemp == ncol_Yold );
+
+					psimag::BLAS::GEMM( 'N', 'N',
+					                    mm, nn, kk,
+					                    alpha, W_S, ldW_S, Yold, ldYold,
+					                    beta,  Ytemp, ldYtemp );
+				}
+
+				// -------------------
+				// Ynew = Ytemp * W_E
+				// -------------------
+				{
+					const int mm = nrow_Ynew;
+					const int nn = ncol_Ynew;
+					const int kk = ncol_Ytemp;
+
+					const ComplexOrRealType alpha = d_one;
+					const ComplexOrRealType beta = d_zero;
+
+					assert( nrow_Ynew == nrow_Ytemp );
+					assert( ncol_Ynew == ncol_W_E );
+					assert( ncol_Ytemp == nrow_W_E );
+
+					psimag::BLAS::GEMM( 'N', 'N',
+					                    mm, nn, kk,
+					                    alpha, Ytemp, ldYtemp, W_E, ldW_E,
+					                    beta,  Ynew, ldYnew );
+
+
+				}
+
+
+			}
+			else {
+				// --------------------
+				// Method 2:
+				// Ytemp = Yold * W_E
+				// Ynew =  W_S * Ytemp
+				// --------------------
+
+
+				//  ------------------
+				//  Ytemp = Yold * W_E
+				//  ------------------
+				{
+					const ComplexOrRealType alpha = d_one;
+					const ComplexOrRealType beta = d_zero;
+
+					const int mm = nrow_Ytemp;
+					const int nn = ncol_Ytemp;
+					const int kk = ncol_Yold;
+
+					assert( nrow_Ytemp == nrow_Yold );
+					assert( ncol_Ytemp == ncol_W_E );
+					assert( ncol_Yold == nrow_W_E );
+
+					psimag::BLAS::GEMM('N', 'N',
+					                   mm, nn, kk,
+					                   alpha, Yold, ldYold, W_E, ldW_E,
+					                   beta, Ytemp, ldYtemp );
+				}
+
+				// ------------------
+				// Ynew = W_S * Ytemp
+				// ------------------
+				{
+					const ComplexOrRealType alpha = d_one;
+					const ComplexOrRealType beta = d_zero;
+
+					const int mm = nrow_Ynew;
+					const int nn = ncol_Ynew;
+					const int kk = ncol_W_S;
+
+					assert( nrow_Ynew == nrow_W_S);
+					assert( ncol_Ynew == ncol_Ytemp);
+					assert( ncol_W_S == nrow_Ytemp );
+
+					psimag::BLAS::GEMM('N', 'N',
+					                   mm, nn, kk,
+					                   alpha, W_S, ldW_S, Ytemp, ldYtemp,
+					                   beta, Ynew, ldYnew );
+
+				}
+			};
 		}
 
 		void doTaskSystem(SizeType kp)
 		{
+#if (0)
 			SizeType ipSize = ws_.rows();
 			SizeType isSize = ws_.cols();
 			SizeType jenSize = we_.rows();
 			SizeType jprSize = we_.cols();
-			MatrixType tmp(ipSize, jenSize);
+#endif
 
-			result_[kp].resize(isSize, jenSize);
+			const int idebug = 0;
+
+			const int nrow_W_S = ws_.rows();
+			const int ncol_W_S = ws_.cols();
+			const int nrow_W_E = we_.rows();
+			const int ncol_W_E = we_.cols();
+
+
+
+			// -------------------------------------------------
+			// Note Y = kron(A,B) * X  =   B * X * transpose(A)
+			//
+			// Ynew = kron( W_E, conj(transpose(W_S)) * Yold
+			// -------------------------------------------------
+			const int nrow_Yold = nrow_W_S;
+			const int ncol_Yold = ncol_W_E;
+			const int nrow_Ynew = ncol_W_S;
+			const int ncol_Ynew = nrow_W_E;
+
+			int nrow_Ytemp = 0;
+			int ncol_Ytemp = 0;
+
+
+			result_[kp].resize(nrow_Ynew, ncol_Ynew);
 			result_[kp].setTo(0.0);
+
+			const ComplexOrRealType *Yold = &((psi_[kp])(0,0));
+			const int ldYold = nrow_Yold;
+
+			const ComplexOrRealType *W_E = &(we_(0,0));
+			const int ldW_E = nrow_W_E;
+
+
+			ComplexOrRealType  *Ynew = &((result_[kp])(0,0));
+			const int ldYnew = nrow_Ynew;
+
+			const ComplexOrRealType *W_S = &(ws_(0,0));
+			const int ldW_S = nrow_W_S;
+
+
+			const ComplexOrRealType d_one = 1.0;
+			const ComplexOrRealType d_zero = 0.0;
+
+			// ---------------------------------------------------
+			// Ynew = conj(transpose(W_S)) * Yold * transpose(W_E)
+			// ---------------------------------------------------
+			//
+			// Method 1:
+			// (1) Ytemp = conj( transpose(W_S)) * Yold
+			// (2) Ynew = Ytemp * transpose(W_E)
+			//
+			//  need   2.0 * nrow_W_S * ncol_W_S * ncol_Yold +
+			//         2.0 * nrow_Ytemp * ncol_Ytemp *  nrow_W_E
+			// Method 2:
+			// (1) Ytemp = Yold * transpose(W_E)
+			// (2) Ynew = conj(transpose(W_S)) * Ytemp
+			//
+			// need  2.0 * nrow_Yold * ncol_Yold  * nrow_W_E +
+			//       2.0 * nrow_W_S * ncol_W_S * ncol_Ytemp
+			// ---------------------------------------------------
+
+
+			// ---------------------------------------
+			// Method 1:
+			// (1) Ytemp = conj( transpose(W_S)) * Yold
+			// (2) Ynew = Ytemp * transpose(W_E)
+			// ---------------------------------------
+			nrow_Ytemp = ncol_W_S;
+			ncol_Ytemp = ncol_Yold;
+			const RealType flops_method_1 = 2.0 * nrow_W_S * ncol_W_S * ncol_Yold +
+			        2.0 * nrow_Ytemp * ncol_Ytemp * nrow_W_E;
+
+			// -----------------------
+			// Method 2:
+			// (1) Ytemp = Yold * transpose(W_E)
+			// (2) Ynew = conj(transpose(W_S)) * Ytemp
+			// -----------------------
+			nrow_Ytemp = nrow_Yold;
+			ncol_Ytemp = nrow_W_E;
+			const RealType flops_method_2 = 2.0 * nrow_Yold * ncol_Yold * nrow_W_E +
+			        2.0 * nrow_W_S * ncol_W_S * ncol_Ytemp;
+
+			const bool use_method_1 = (flops_method_1 <= flops_method_2);
+			if (idebug >= 1) {
+				std::cout << "WftAccelBlocks.h:360: "
+				          << " use_method_1=" << use_method_1
+				          << std::scientific
+				          << " flops_method_1=" << flops_method_1
+				          << " flops_method_2=" << flops_method_2
+				          << std::defaultfloat
+				          << "\n";
+
+			};
+
+			nrow_Ytemp = (use_method_1) ? ncol_W_S : nrow_Yold;
+			ncol_Ytemp = (use_method_1) ? ncol_Yold : nrow_W_E;
+
+			MatrixType tmp(nrow_Ytemp, ncol_Ytemp);
 			tmp.setTo(0.0);
 
-			psimag::BLAS::GEMM('N',
-			                   'T',
-			                   ipSize,
-			                   jenSize,
-			                   jprSize,
-			                   1.0,
-			                   &((psi_[kp])(0,0)),
-			                   ipSize,
-			                   &(we_(0,0)),
-			                   jenSize,
-			                   0.0,
-			                   &(tmp(0,0)),
-			                   ipSize);
+			ComplexOrRealType *Ytemp = &(tmp(0,0));
+			const int ldYtemp = nrow_Ytemp;
 
-			psimag::BLAS::GEMM('C',
-			                   'N',
-			                   isSize,
-			                   jenSize,
-			                   ipSize,
-			                   1.0,
-			                   &(ws_(0,0)),
-			                   ipSize,
-			                   &(tmp(0,0)),
-			                   ipSize,
-			                   0.0,
-			                   &((result_[kp])(0,0)),
-			                   isSize);
+			if (use_method_1) {
+				// ---------------------------
+				// Method 1:
+				// (1) Ytemp = conj( transpose(W_S)) * Yold
+				// (2) Ynew = Ytemp * transpose(W_E)
+				// ---------------------------
+
+
+				// -----------------------------------------
+				// (1) Ytemp = conj( transpose(W_S)) * Yold
+				// -----------------------------------------
+				{
+					const ComplexOrRealType alpha = d_one;
+					const ComplexOrRealType beta = d_zero;
+
+					const int mm = nrow_Ytemp;
+					const int nn = ncol_Ytemp;
+					const int kk = nrow_Yold;
+
+					psimag::BLAS::GEMM('C', 'N',
+					                   mm,nn,kk,
+					                   alpha, W_S, ldW_S, Yold, ldYold,
+					                   beta,  Ytemp, ldYtemp );
+
+				}
+
+				// ----------------------------------
+				// (2) Ynew = Ytemp * transpose(W_E)
+				// ----------------------------------
+				{
+					const ComplexOrRealType alpha = d_one;
+					const ComplexOrRealType beta = d_zero;
+
+					const int mm = nrow_Ynew;
+					const int nn = ncol_Ynew;
+					const int kk = ncol_Ytemp;
+
+					psimag::BLAS::GEMM('N', 'T',
+					                   mm,nn,kk,
+					                   alpha, Ytemp, ldYtemp, W_E, ldW_E,
+					                   beta, Ynew, ldYnew );
+
+				}
+
+
+
+			}
+			else {
+				// --------------------------------------
+				// Method 2:
+				// (1) Ytemp = Yold * transpose(W_E)
+				// (2) Ynew = conj(transpose(W_S)) * Ytemp
+				// --------------------------------------
+
+				// -------------------------------
+				// Ytemp = Yold * transpose( W_E )
+				// -------------------------------
+
+				{
+					const ComplexOrRealType alpha = d_one;
+					const ComplexOrRealType beta = d_zero;
+
+					const int mm = nrow_Ytemp;
+					const int nn = ncol_Ytemp;
+					const int kk = ncol_Yold;
+
+					psimag::BLAS::GEMM('N', 'T',
+					                   mm, nn, kk,
+					                   alpha, Yold, ldYold, W_E,  ldW_E,
+					                   beta, Ytemp, ldYtemp );
+				}
+
+				// ------------------------------------
+				// Ynew = conj(transpose(W_S)) * Ytemp
+				// ------------------------------------
+
+				{
+					const ComplexOrRealType alpha = d_one;
+					const ComplexOrRealType beta = d_zero;
+
+					const int mm = nrow_Ynew;
+					const int nn = ncol_Ynew;
+					const int kk = nrow_Ytemp;
+
+					psimag::BLAS::GEMM('C', 'N',
+					                   mm, nn, kk,
+					                   alpha, W_S, ldW_S, Ytemp, ldYtemp,
+					                   beta, Ynew, ldYnew);
+
+				}
+			};
 		}
 
 		const MatrixType& getWeModif(const PsimagLite::Matrix<RealType>& m, SizeType)
