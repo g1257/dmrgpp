@@ -1,0 +1,36 @@
+%\RequirePackage{luatex85}
+\documentclass{standalone}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.13}
+\input{palette.tex}
+\usepgfplotslibrary{colormaps}
+
+\pgfplotsset{colormap={mypa}%
+	{ color(0cm)=(white); color(1cm)=(myblue); color(2cm)=(myred)}}
+
+\begin{document}
+    \begin{tikzpicture}
+        \begin{axis}[
+            view={0}{90},   % not needed for `matrix plot*' variant
+            xlabel=$q_x$,
+            ylabel=Energy,
+            colormap name = mypa,
+            colorbar,
+            colorbar style={
+                title= ,
+                yticklabel style={
+                    /pgf/number format/.cd,
+                    fixed,
+                    precision=1,
+                    fixed zerofill,
+                },
+            },
+            title= ,
+            enlargelimits=false,
+            axis on top,
+        ]
+            \addplot [matrix plot*,point meta=explicit] file [meta=index 2] {outSpectrum1.pgfplots};
+        \end{axis}
+    \end{tikzpicture}
+\end{document}
