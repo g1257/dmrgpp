@@ -5,11 +5,12 @@ use warnings;
 use utf8;
 
 my ($dir, $h, $u, $lOrUp) = @ARGV;
-defined($lOrUp) or die "USAGE: $0 dir h u L | U\n";
+defined($lOrUp) or die "USAGE: $0 dir h u L | U | sz\n";
 
 die "$0: $dir not a dir\n" unless (-d "$dir");
 
-my $root = "16x4u$u"."nih$h$lOrUp"."akwladder0ky";
+my $akw = ($lOrUp eq "sz") ? "" : "akw";
+my $root = "16x4u$u"."nih$h$lOrUp$akw"."ladder0ky";
 
 doFile(0, $root, $dir);
 doFile(1, $root, $dir);
@@ -25,6 +26,12 @@ sub doFile
 	die "$0: Failed to create $fout\n" if (-r "$fout");
 	system("$cmd");
 
+	my $dirForTex = $0;
+	$dirForTex =~ s/pgfplot\.pl$//;
+	die "$0: Not a directory $dirForTex\n" unless (-d "$dirForTex");
+
+	system("cp $dirForTex/sample.tex .");
+	system("cp $dirForTex/palette.tex .");
 	$file = "sample.tex";
 	$fout = "$root$ind.tex";
 	copyAndEdit($fout, $file, $ind);
