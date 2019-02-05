@@ -25,6 +25,9 @@ struct WftOptions {
 	      accel((twoSiteDmrg) ? ACCEL_BLOCKS : ACCEL_PATCHES),
 	      denseSparseThreshold(d)
 	{
+		if (options.find("wftAccelPatches") != PsimagLite::String::npos)
+			accel = ACCEL_PATCHES;
+
 		if (options.find("wftAccelSvd") != PsimagLite::String::npos)
 			accel = ACCEL_SVD;
 

@@ -339,6 +339,8 @@ public:
 			\item [KronNoLoadBalance] Disable load balancing for MatrixVectorKron
 			\item [setAffinities] TBW
 			\item [wftNoAccel] Disable WFT acceleration (but not the WFT itself)
+			\item [wftAccelPatches] Force WFT acceleration with patches, even
+			in twositedmrg
 			\item [BatchedGemm] Only meaningful with MatrixVectorKron. Enables
 								batched gemm and might need plugin sc
 			\item [KrylovNoAbridge] TBW
@@ -405,6 +407,7 @@ public:
 		registerOpts.push_back("KronNoLoadBalance");
 		registerOpts.push_back("setAffinities");
 		registerOpts.push_back("wftNoAccel");
+		registerOpts.push_back("wftAccelPatches");
 		registerOpts.push_back("BatchedGemm");
 		registerOpts.push_back("KrylovNoAbridge");
 		registerOpts.push_back("fixLegacyBugs");
