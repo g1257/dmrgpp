@@ -5,6 +5,9 @@
 #include "LAPACK.h"
 #include "PackIndices.h"
 
+#include <iostream>
+#include <iomanip>
+
 namespace Dmrg {
 
 template<typename GenIjPatchType, typename VectorWithOffsetType>
@@ -125,6 +128,8 @@ class BlockDiagWf {
 
 		void doTask(SizeType ipatch, SizeType threadNum)
 		{
+			const int idebug = 0;
+
 			MatrixType* mptr = data_[ipatch];
 
 			if (mptr == 0) return;
@@ -151,7 +156,6 @@ class BlockDiagWf {
 
 			const MatrixType& mRight = getRightMatrix(tRight_(partR), charRight_, threadNum);
 			const MatrixType& mLeft = tLeft_(partL);
-			MatrixType tmp(m.rows(), (charRight_ == 'N') ? mRight.cols() : mRight.rows());
 
 			if (mRight.cols() == 0 && mRight.rows() == 0) {
 				m.clear();
@@ -163,56 +167,225 @@ class BlockDiagWf {
 				return;
 			}
 
-			// tmp = data_[ii] * op(mRight, charRight);
 
-			// columns of the matrix op(A) ==  rows of the matrix op(B)
-			if (charRight_ == 'N')
-				assert(m.cols() == mRight.rows());
-			else
-				assert(m.cols() == mRight.cols());
+			//  ---------------------------------
+			//  Here W_L = mLeft,  W_R = mRight
+			//
+			//  Need to evaluate
+			//
+			//  Ynew = opL(W_L) * Yold * opR( W_R )
+			//
+			//  but note that
+			//  Ynew is over-written by Yold
+			//
+			//  where
+			//
+			//  opL(W_L) = W_L                  if charLeft_ == 'N'
+			//  opL(W_L) = transpose(W_L)       if charLeft_ == 'T'
+			//  opL(W_L) = conj(transpose(W_L)) if charLeft_ == 'C'
+			//
+			//  opL(W_R) = W_R                  if charRight_ == 'N'
+			//  opL(W_R) = transpose(W_R)       if charRight_ == 'T'
+			//  opL(W_R) = conj(transpose(W_R)) if charRight_ == 'C'
+			//  ---------------------------------
+			//
+			const int nrow_W_L = mLeft.rows();
+			const int ncol_W_L = mLeft.cols();
+			const ComplexOrRealType *W_L = &(mLeft(0,0));
+			const int ldW_L = nrow_W_L;
 
-			psimag::BLAS::GEMM('N',
-			                   charRight_,
-			                   m.rows(),
-			                   tmp.cols(),
-			                   m.cols(),
-			                   1.0,
-			                   &(m(0,0)),
-			                   m.rows(),
-			                   &(mRight(0,0)),
-			                   mRight.rows(),
-			                   0.0,
-			                   &(tmp(0,0)),
-			                   tmp.rows());
+			const int nrow_W_R = mRight.rows();
+			const int ncol_W_R = mRight.cols();
+			const ComplexOrRealType *W_R = &(mRight(0,0));
+			const int ldW_R = nrow_W_R;
 
-			// data_[ii] = op(mLeft, charLeft) * tmp;
 
-			m.clear();
+			const bool has_work = (nrow_W_L >= 1) && (ncol_W_L >= 1) &&
+			        (nrow_W_R >= 1) && (ncol_W_R >= 1);
+			if (!has_work) {
+				m.clear();
+				return;
+			};
 
-			// columns of the matrix op(A) ==  rows of the matrix op(B)
-			if (charLeft_ == 'N') {
-				m.resize(mLeft.rows(), tmp.cols());
-				assert(mLeft.cols() == tmp.rows());
-			} else {
-				m.resize(mLeft.cols(), tmp.cols());
-				assert(mLeft.rows() == tmp.rows());
+
+			const int nrow_Yold = m.rows();
+			const int ncol_Yold = m.cols();
+			ComplexOrRealType *Yold = &(m(0,0));
+			const int ldYold = nrow_Yold;
+
+			const int nrow_Ynew = (charLeft_ == 'N') ? nrow_W_L : ncol_W_L;
+			const int ncol_Ynew = (charRight_ == 'N') ? ncol_W_R : nrow_W_R;
+			const int ldYnew = nrow_Ynew;
+
+			//  ----------------------------------
+			//  Note: Ynew is over-written by Yold
+			//  so delay assign pointer value to Ynew
+			//  ----------------------------------
+
+			int nrow_Ytemp = 0;
+			int ncol_Ytemp = 0;
+			int ldYtemp = 0;
+			// ---------------------------
+			// Method 1:
+			// (1) Ytemp = opL(W_L) * Yold
+			// (2) Ynew = Ytemp * opR(W_R)
+			//
+			// Method 2:
+			// (1) Ytemp = Yold * opR( W_R )
+			// (2) Ynew = opL(W_L) * Ytemp
+			// ---------------------------
+
+			assert( (charLeft_ == 'N') || (charLeft_ == 'T') || (charLeft_ == 'C'));
+			assert( (charRight_ == 'N') || (charRight_ == 'T') || (charRight_ == 'C'));
+
+			nrow_Ytemp = (charLeft_ == 'N') ? nrow_W_L : ncol_W_L;
+			ncol_Ytemp = ncol_Yold;
+			const RealType flops_method_1 = 2.0 * nrow_W_L * ncol_W_L * ncol_Yold +
+			        2.0 * nrow_Ytemp * ncol_Ytemp * ncol_Ynew;
+
+			nrow_Ytemp = nrow_Yold;
+			ncol_Ytemp = (charRight_ == 'N') ? ncol_W_R : nrow_W_R;
+			const RealType flops_method_2 = 2.0 * nrow_Yold * ncol_Yold * ncol_Ytemp +
+			        2.0 * nrow_W_L * ncol_W_L * ncol_Ytemp;
+
+			const bool use_method_1 = (flops_method_1 <= flops_method_2);
+
+			if (idebug >= 1) {
+				const double speedup_ratio = (use_method_1) ?
+				            flops_method_2 / flops_method_1 :
+				            flops_method_1 / flops_method_2;
+
+				std::cout << "BlockDiagWf.h:225: "
+				          << " use_method_1=" << use_method_1
+				          << std::scientific
+				          << " flops_method_1=" << flops_method_1
+				          << " flops_method_2=" << flops_method_2
+				          << " speedup ratio=" << speedup_ratio
+				          << std::defaultfloat
+				          << "\n";
+			};
+
+
+
+			const ComplexOrRealType d_one = 1.0;
+			const ComplexOrRealType d_zero = 0.0;
+
+			if (use_method_1) {
+				// ---------------------------
+				// Method 1:
+				// (1) Ytemp = opL(W_L) * Yold
+				// (2) Ynew = Ytemp * opR(W_R)
+				// ---------------------------
+				nrow_Ytemp = (charLeft_ == 'N') ? nrow_W_L : ncol_W_L;
+				ncol_Ytemp = ncol_Yold;
+				MatrixType tmp(nrow_Ytemp,ncol_Ytemp);
+				ComplexOrRealType *Ytemp = &(tmp(0,0));
+				ldYtemp = nrow_Ytemp;
+
+				// ---------------------------
+				// (1) Ytemp = opL(W_L) * Yold
+				// ---------------------------
+				{
+					const char transA = charLeft_;
+					const char transB = 'N';
+					const int mm = nrow_Ytemp;
+					const int nn = ncol_Ytemp;
+					const int kk = nrow_Yold;
+					const ComplexOrRealType alpha = d_one;
+					const ComplexOrRealType beta = d_zero;
+
+					psimag::BLAS::GEMM( transA, transB,
+					                    mm, nn, kk,
+					                    alpha,  W_L, ldW_L, Yold, ldYold,
+					                    beta,   Ytemp, ldYtemp );
+				}
+
+				// ------------------------------
+				// Note Ynew is over-written Yold
+				// ------------------------------
+				m.clear();
+				m.resize( nrow_Ynew, ncol_Ynew);
+				ComplexOrRealType  *Ynew = &(m(0,0));
+
+
+				// ---------------------------
+				// (2) Ynew = Ytemp * opR(W_R)
+				// ---------------------------
+				{
+					const char transA = 'N';
+					const char transB = charRight_;
+					const int mm = nrow_Ynew;
+					const int nn = ncol_Ynew;
+					const int kk = ncol_Ytemp;
+					const ComplexOrRealType alpha = d_one;
+					const ComplexOrRealType beta = d_zero;
+
+					psimag::BLAS::GEMM( transA, transB,
+					                    mm, nn, kk,
+					                    alpha, Ytemp, ldYtemp, W_R, ldW_R,
+					                    beta, Ynew, ldYnew );
+				}
 			}
+			else {
+				// ---------------------------
+				// Method 2:
+				// (1) Ytemp = Yold * opR( W_R )
+				// (2) Ynew = opL(W_L) * Ytemp
+				// ---------------------------
 
-			psimag::BLAS::GEMM(charLeft_,
-			                   'N',
-			                   m.rows(),
-			                   m.cols(),
-			                   tmp.rows(),
-			                   1.0,
-			                   &(mLeft(0,0)),
-			                   mLeft.rows(),
-			                   &(tmp(0,0)),
-			                   tmp.rows(),
-			                   0.0,
-			                   &(m(0,0)),
-			                   m.rows());
+				nrow_Ytemp = nrow_Yold;
+				ncol_Ytemp = (charRight_ == 'N') ? ncol_W_R : nrow_W_R;
+				MatrixType tmp(nrow_Ytemp,ncol_Ytemp);
+				ComplexOrRealType *Ytemp = &(tmp(0,0));
+				ldYtemp = nrow_Ytemp;
 
-			//sum += normOfMatrix(m);
+				// ------------------------------
+				// (1) Ytemp = Yold * opR( W_R )
+				// ------------------------------
+				{
+					const char transA = 'N';
+					const char transB = charRight_;
+					const int mm = nrow_Ytemp;
+					const int nn = ncol_Ytemp;
+					const int kk = ncol_Yold;
+					const ComplexOrRealType alpha = d_one;
+					const ComplexOrRealType beta = d_zero;
+
+					psimag::BLAS::GEMM( transA, transB,
+					                    mm, nn, kk,
+					                    alpha, Yold, ldYold, W_R, ldW_R,
+					                    beta,  Ytemp, ldYtemp );
+
+				}
+
+				// ------------------------------
+				// Note Ynew over-written by Yold
+				// ------------------------------
+				m.clear();
+				m.resize( nrow_Ynew, ncol_Ynew );
+				ComplexOrRealType *Ynew = &(m(0,0));
+
+				// ---------------------------
+				// (2) Ynew = opL(W_L) * Ytemp
+				// ---------------------------
+				{
+					const char transA = charLeft_;
+					const char transB = 'N';
+					const int mm = nrow_Ynew;
+					const int nn = ncol_Ynew;
+					const int kk = nrow_Ytemp;
+					const ComplexOrRealType alpha = d_one;
+					const ComplexOrRealType beta = d_zero;
+
+					psimag::BLAS::GEMM( transA, transB,
+					                    mm, nn, kk,
+					                    alpha, W_L, ldW_L, Ytemp, ldYtemp,
+					                    beta, Ynew, ldYnew );
+				}
+
+
+			};
+
 		}
 
 	private:
@@ -270,9 +443,9 @@ class BlockDiagWf {
 		char charRight_;
 		typename PsimagLite::Vector<MatrixType>::Type storage_;
 		const VectorPairType& patches_;
-        VectorSizeType& offsetRows_;
-        VectorSizeType& offsetCols_;
-        VectorMatrixType& data_;
+		VectorSizeType& offsetRows_;
+		VectorSizeType& offsetCols_;
+		VectorMatrixType& data_;
 	};
 
 public:
