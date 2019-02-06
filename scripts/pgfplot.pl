@@ -4,13 +4,13 @@ use strict;
 use warnings;
 use utf8;
 
-my ($dir, $h, $u, $lOrUp) = @ARGV;
-defined($lOrUp) or die "USAGE: $0 dir h u L | U | sz\n";
+my ($dir, $uroot, $lOrUp) = @ARGV;
+defined($lOrUp) or die "USAGE: $0 dir root L | U | sz\n";
 
 die "$0: $dir not a dir\n" unless (-d "$dir");
 
 my $akw = ($lOrUp eq "sz") ? "" : "akw";
-my $root = "16x4u$u"."nih$h$lOrUp$akw"."ladder0ky";
+my $root = "$uroot$lOrUp$akw"."ladder0ky";
 
 doFile(0, $root, $dir);
 doFile(1, $root, $dir);
