@@ -98,7 +98,8 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 		$nonExistent = "";
 	}
 
-	my $isSu2 = Ci::isSu2("../inputs/input$n.inp",$n);
+	my $thisInput = Ci::getInputFilename($n);
+	my $isSu2 = Ci::isSu2($thisInput, $n);
 	if ($isSu2 and !$su2) {
 		print STDERR "$0: WARNING: Ignored test $n ";
 		print STDERR "because it's an SU(2) test and ";
@@ -106,7 +107,6 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 		next;
 	}
 
-	my $thisInput = "../inputs/input$n.inp";
 	next unless matchesRegex($thisInput, $regex);
 
 	my $from = getRestartFrom("$thisInput",$n);
@@ -197,7 +197,8 @@ sub runObserveOne
 
 	my $output = "observe$n.txt";
 	unlink($output) if ($ind == 0);
-	my $cmd = "./observe -f ../inputs/input$n.inp $sOptions $args >> $output";
+	my $inputfile = Ci::getInputFilename($n);
+	my $cmd = "./observe -f $inputfile $sOptions $args >> $output";
 	print "|$n|: postTest $cmd\n";
 	return $cmd;
 }
@@ -259,7 +260,7 @@ sub getDeepBatchIndex
 
 	defined($n) or die "$0: getDeepBatchIndex $from\n";
 
-	my $file = "../inputs/input$n.inp";
+	my $file = Ci::getInputFilename($n);
 	my $from2 = getRestartFrom($file, $n);
 
 	return ($from2 eq "") ? $n : getDeepBatchIndex($from2);
@@ -270,7 +271,8 @@ sub getCmd
 	my ($n, $tool, $extraCmdArgs) = @_;
 	my $valgrind = ($tool eq "") ? "" : "valgrind --tool=$tool ";
 	$valgrind .= " --callgrind-out-file=callgrind$n.out " if ($tool eq "callgrind");
-	return "$valgrind./dmrg -f ../inputs/input$n.inp $extraCmdArgs &> output$n.txt\n\n";
+	my $inputfile = Ci::getInputFilename($n);
+	return "$valgrind./dmrg -f $inputfile $extraCmdArgs &> output$n.txt\n\n";
 }
 
 sub createBatch
@@ -341,4 +343,5 @@ sub prepareDir
 	system("cp -av  ../src/observe $workdir/");
 	chdir("$workdir/");
 }
+
 

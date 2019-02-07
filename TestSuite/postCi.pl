@@ -65,7 +65,10 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 		next;
 	}
 
-	my $isSu2 = Ci::isSu2("inputs/input$n.inp",$n);
+	my $thisInput = Ci::getInputFilename($n);
+	$thisInput =~ s/\.\.\///;
+
+	my $isSu2 = Ci::isSu2($thisInput, $n);
 	if ($isSu2 and !$su2) {
 		print STDERR "$0: WARNING: Ignored test $n ";
 		print STDERR "because it's NOT an SU(2) test and ";
@@ -75,7 +78,7 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 
 	procTest($n,$workdir,$golddir);
 
-	my @ciAnnotations = Ci::getCiAnnotations("inputs/input$n.inp",$n);
+	my @ciAnnotations = Ci::getCiAnnotations($thisInput, $n);
 	my $totalAnnotations = scalar(@ciAnnotations);
 
 	my @postProcessLabels = qw(getTimeObservablesInSitu getEnergyAncilla CollectBrakets metts observe);

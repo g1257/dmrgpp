@@ -279,5 +279,13 @@ sub readAnnotationFromKey
 	return (undef);
 }
 
+sub getInputFilename
+{
+	my ($n) = @_;
+	my $file = "../inputs/input$n.ain";
+	return $file if (-r "$file");
+	return "../inputs/input$n.inp";
+}
+
 1;
 
