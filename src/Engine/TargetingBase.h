@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingCommon.h"
 #include "Wft/WaveFunctionTransfFactory.h"
 #include "Io/IoSelector.h"
+#include "Intent.h"
 
 namespace Dmrg {
 
@@ -128,7 +129,10 @@ public:
 	    : lrs_(lrs),
 	      model_(model),
 	      commonTargeting_(lrs,model,wft,indexNoAdvance)
-	{}
+	{
+		Intent<ModelType> intent(model_);
+		intent.check();
+	}
 
 	virtual ~TargetingBase() {}
 

@@ -141,7 +141,8 @@ public:
 	          const GeometryType_& geometry,
 	          InputValidatorType& io)
 	    : modelCommon_(params, geometry),
-	      targetQuantum_(io)
+	      targetQuantum_(io),
+	      ioIn_(io)
 	{
 		labeledOperators_.setModelName(params.model);
 	}
@@ -512,6 +513,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		basis = newBasis;
 	}
 
+	InputValidatorType_& ioIn() const { return ioIn_; }
+
 protected:
 
 	static OpsLabelType& createOpsLabel(PsimagLite::String name,
@@ -548,6 +551,7 @@ private:
 
 	ModelCommonType modelCommon_;
 	TargetQuantumElectronsType targetQuantum_;
+	InputValidatorType_& ioIn_;
 	static LabeledOperatorsType labeledOperators_;
 	static ModelLinksType modelLinks_;
 	static VectorQnType qns_;
