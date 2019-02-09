@@ -10,7 +10,7 @@ defined($lOrUp) or die "USAGE: $0 dir root L | U | sz\n";
 die "$0: $dir not a dir\n" unless (-d "$dir");
 
 my $akw = ($lOrUp eq "sz") ? "" : "akw";
-my $root = "$uroot$lOrUp$akw"."ladder0ky";
+my $root = "$uroot$lOrUp$akw"."ky";
 
 doFile(0, $root, $dir);
 doFile(1, $root, $dir);
