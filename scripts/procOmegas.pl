@@ -183,7 +183,7 @@ sub printSpectrum
 
 sub procCommon
 {
-	my ($ind, $omega, $centralSite, $geometry) = @_;
+	my ($array, $ind, $omega, $centralSite, $geometry) = @_;
 	my $n = $GlobalNumberOfSites;
 	my $inputRoot = "input";
 	my $prefix = "runFor$inputRoot$ind";
@@ -197,13 +197,13 @@ sub procCommon
 	correctionVectorWrite($outFile,\@values,\@values2,$maxSite,$omega);
 
 	$inFile = "$prefix.space";
-	$outFile = "$prefix.sq";
+
 
 	my @spaceValues;
 	readSpace(\@spaceValues,$inFile);
 	my @qValues;
 	OmegaUtils::fourier(\@qValues,\@spaceValues,$geometry,$hptr);
-	printFourier($outFile,\@qValues,$geometry);
+	writeFourier($array,\@qValues,$geometry);
 }
 
 sub correctionVectorRead
@@ -317,21 +317,21 @@ sub readSpace
 sub procThisOmegaKspace
 {
 	my ($ind, $omega, $centralSite, $mForQ, $geometry) = @_;
-	procCommon($ind, $omega, $centralSite, $geometry);
-	my $inputRoot = "input";
-	my $prefix = "runFor$inputRoot$ind";
-	my $inFile = "$prefix.sq";
-	extractValue($inFile,$mForQ);
+	my @array;
+	procCommon(\@array, $ind, $omega, $centralSite, $geometry);
+	my @temp = extractValue(\@array, $mForQ);
+	shift @temp;
+	print "$omega @temp\n";
 }
 
 sub procThisOmegaSpace
 {
 	my ($ind, $omega, $centralSite, $siteForSpectrum) = @_;
-	procCommon($ind, $omega, $centralSite, $geometry);
-	my $inputRoot = "input";
-	my $prefix = "runFor$inputRoot$ind";
-	my $inFile = "$prefix.space";
-	extractValue($inFile,$siteForSpectrum);
+	my @array;
+	procCommon(\@array, $ind, $omega, $centralSite, $geometry);
+	my @temp = extractValue(\@array ,$siteForSpectrum);
+	shift @temp;
+	print "$omega @temp\n";
 }
 
 sub readCheby
@@ -451,11 +451,8 @@ sub doCheby
 	my @qValues;
 	OmegaUtils::fourier(\@qValues,\@spaceValues,$geometry,$hptr);
 
-	my $outFile = "runForinput$ind.sq";
-	printFourier($outFile,\@qValues,$geometry);
-
-	my @array;
-	readAllQs(\@array,$ind);
+	my  @array;
+	writeFourier(\@array,\@qValues,$geometry);
 	die "doCheby: array is empty\n" if (scalar(@array) == 0);
 	printSpectrum(\@array);
 }
@@ -463,29 +460,10 @@ sub doCheby
 sub procAllQs
 {
 	my ($ind, $omega, $centralSite, $geometry) = @_;
-	procCommon($ind, $omega, $centralSite, $geometry);
 	my @array;
-	readAllQs(\@array,$ind);
+	procCommon(\@array, $ind, $omega, $centralSite, $geometry);
 	die "procAllQs: array is empty\n" if (scalar(@array) == 0);
 	printSpectrum(\@array);
-}
-
-sub readAllQs
-{
-	my ($array,$ind) = @_;
-	my $counter = 0;
-	my $inputRoot = "input";
-	my $prefix = "runFor$inputRoot$ind";
-	open(FILE, "<", "$prefix.sq") or die "$0: Cannot open file : $!\n";
-	while (<FILE>) {
-		chomp;
-		my @temp = split;
-		my $n = scalar(@temp);
-		($n == 3) or next;
-		$array->[$counter++] = \@temp;
-	}
-
-	close(FILE);
 }
 
 sub execThis
@@ -495,80 +473,63 @@ sub execThis
 	system($cmd);
 }
 
-sub printFourier
+sub writeFourier
 {
-	my ($outFile, $f, $geometry) = @_;
+	my ($array, $f, $geometry) = @_;
 	my $subname = $geometry->{"subname"};
 
 	if ($geometry->{"name"} eq "chain") {
-		return printFourierChain($outFile,$f);
+		return writeFourierChain($array,$f);
 	}
 
 	if ($geometry->{"name"} eq "ladder" || $subname eq "average") {
-		return printFourierLadder($outFile, $f);
+		return writeFourierLadder($array, $f);
 	}
 
-	die "$0: printFourier: undefined geometry ".$geometry->{"name"}."\n";
+	die "$0: writeFourier: undefined geometry ".$geometry->{"name"}."\n";
 }
 
-sub printFourierChain
+sub writeFourierChain
 {
-	my ($outFile,$f) = @_;
-
-	open(FOUT, ">", "$outFile") or die "$0: Cannot write to $outFile : $!\n";
+	my ($array, $f) = @_;
 
 	my $n = scalar(@$f);
 	for (my $m = 0; $m < $n; ++$m) {
 		my $q = OmegaUtils::getQ($m, $n, $isPeriodic);
 		my $ptr = $f->[$m];
 		my @temp = @$ptr;
-		print FOUT "$q $temp[0] $temp[1]\n";
+		$array->[$m] = [$q, $temp[0], $temp[1]];
 	}
-
-	close(FOUT);
 }
 
-sub printFourierLadder
+sub writeFourierLadder
 {
-	my ($outFile, $f) = @_;
-
-	open(FOUT, ">", "$outFile") or die "$0: Cannot write to $outFile : $!\n";
+	my ($array, $f) = @_;
 
 	my $n = scalar(@$f);
 	for (my $m = 0; $m < $n; ++$m) {
 		my $ptr = $f->[$m];
 		my @temp = @$ptr;
-		print FOUT "$m @temp\n";
+		my @temp2 = ($m);
+		push @temp2, @temp;
+		$array->[$m] = \@temp2;
 	}
-
-	close(FOUT);
 }
 
 sub extractValue
 {
-	my ($file,$q) = @_;
-	open(FILE, "<", $file) or die "$0: Cannot open file $file : $!\n";
+	my ($array, $q) = @_;
+	my $narray = scalar(@$array);
 
-	my $omega;
-	while(<FILE>) {
-
-		chomp;
-		if (/^#omega=(.*$)/) {
-			$omega = $1;
-			next;
-		}
-
-		my @temp = split;
+	for (my $i = 0; $i < $narray; ++$i) {
+		my $ptr = $array->[$i];
+		my @temp = @$ptr;
 		next unless (scalar(@temp) > 1);
 		next unless (abs($temp[0]-$q)<1e-3);
-		die "$0: File $file line $_\n" if (!defined($omega));
-		print "$omega $temp[1] ";
-		print "$temp[2]" if (scalar(@temp) == 3);
-		print "\n";
-		last;
+		return @temp;
 	}
 
-	close(FILE);
+	die "$0: No q=$q found in array\n";
 }
 
 sub spectrumToColor
