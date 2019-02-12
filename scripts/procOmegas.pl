@@ -187,20 +187,15 @@ sub procCommon
 	my $n = $GlobalNumberOfSites;
 	my $inputRoot = "input";
 	my $prefix = "runFor$inputRoot$ind";
-	my $outFile = "$prefix.space";
 	my $inFile = "$prefix.cout";
 	my @values;
 	my @values2;
 
 	my $maxSite = correctionVectorRead(\@values,\@values2,$inFile);
 
-	correctionVectorWrite($outFile,\@values,\@values2,$maxSite,$omega);
-
-	$inFile = "$prefix.space";
-
-
 	my @spaceValues;
-	readSpace(\@spaceValues,$inFile);
+	correctionVectorWrite(\@spaceValues,\@values,\@values2,$maxSite,$omega);
+
 	my @qValues;
 	OmegaUtils::fourier(\@qValues,\@spaceValues,$geometry,$hptr);
 	writeFourier($array,\@qValues,$geometry);
@@ -273,11 +268,8 @@ sub correctionVectorReadOpen
 
 sub correctionVectorWrite
 {
-	my ($outFile, $v1, $v2, $maxSite, $omega) = @_;
+	my ($array, $v1, $v2, $maxSite, $omega) = @_;
 
-	open(FOUT, ">", "$outFile") or die "$0: Cannot write to $outFile : $!\n";
-
-	print FOUT "#omega=$omega\n";
 	for (my $i = 0; $i < $maxSite; ++$i) {
 		my $vv1 = $v1->[$i];
 		my $vv2 = $v2->[$i];
@@ -285,33 +277,9 @@ sub correctionVectorWrite
 			print STDERR "$0: Undefined value for site = $i and omega = $omega\n";
 			$vv1 = $vv2 = 0.0;
 		}
-		print FOUT "$i $vv1 $vv2\n";
+		
+		$array->[$i] = [$vv1, $vv2];
 	}
-
-	close(FOUT);
-}
-
-sub readSpace
-{
-	my ($space,$inFile) = @_;
-	my $counter = 0;
-
-	open(FIN, "<", "$inFile") or die "$0: Cannot open $inFile : $!\n";
-	while(<FIN>) {
-		if (/^#/) {
-		        next;
-		}
-
-		my @temp=split;
-		next unless (scalar(@temp) == 3);
-		my @temp2 = ($temp[1],$temp[2]);
-		$space->[$temp[0]] = \@temp2;
-		die "$0: Line $_\n" unless ($counter == $temp[0]);
-		$counter++;
-	}
-
-	close(FIN);
-	print LOGFILEOUT "$0: Read $counter sites\n";
 }
 
 sub procThisOmegaKspace
