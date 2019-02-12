@@ -12,6 +12,7 @@ my $usage = "-f dollarizedInput [-M mForQ] [-S site] [-p] [-r] [-z]\n";
 my ($templateInput,$site,$m,$GlobalNumberOfSites);
 my ($siteForSpectrum,$mForQ,$isPeriodic,$mMax,$wantsRealPart);
 my $zeroAtCenter = 0;
+my $isCheby = 0;
 
 GetOptions('f=s' => \$templateInput,
            'S:i' => \$siteForSpectrum,
@@ -23,15 +24,16 @@ GetOptions('f=s' => \$templateInput,
 
 (defined($templateInput) and defined($isPeriodic)) or die "$0: USAGE: $usage\n";
 
-my ($omega0,$total,$omegaStep,$centralSite);
+my ($omega0, $omegaTotal, $omegaStep, $centralSite);
 my $geometryName;
 my $geometrySubName = "NONE";
 my $geometryLeg = 1;
 my $orbitals = 1;
 my $omegaOffset = 0;
+my $JacksOrLorentz = 0;
 
 my $hptr = {"#OmegaBegin" => \$omega0,
-            "#OmegaTotal" => \$total,
+            "#OmegaTotal" => \$omegaTotal,
             "#OmegaStep" => \$omegaStep,
 	    "#OmegaOffset" => \$omegaOffset,
             "GeometryKind" => \$geometryName,
@@ -39,6 +41,7 @@ my $hptr = {"#OmegaBegin" => \$omega0,
             "LadderLeg" => \$geometryLeg,
             "Orbitals" => \$orbitals,
             "TSPSites 1" => \$centralSite,
+            "#JacksOrLorentz" => \$JacksOrLorentz,
             "TotalNumberOfSites" => \$GlobalNumberOfSites};
 
 OmegaUtils::getLabels($hptr,$templateInput);
@@ -61,13 +64,15 @@ my $geometry = {"name" => $geometryName, "leg" => $geometryLeg, "subname" => $ge
 
 my $outSpectrum = "out.spectrum";
 open(FOUTSPECTRUM, ">", "$outSpectrum") or die "$0: Cannot write to $outSpectrum : $!\n";
-for (my $i = $omegaOffset; $i < $total; ++$i) {
+for (my $i = $omegaOffset; $i < $omegaTotal; ++$i) {
 
 	my $omega = $omega0 + $omegaStep * $i;
 	print FOUTSPECTRUM "$omega ";
 	print LOGFILEOUT "$0: About to proc for omega = $omega\n";
 
-	if (defined($mForQ)) {
+	if ($isCheby) {
+		doCheby($i, $omega, $centralSite, $geometry);
+	} elsif (defined($mForQ)) {
 		procThisOmegaKspace($i, $omega, $centralSite, $mForQ, $geometry);
 	} elsif (defined($siteForSpectrum)) {
 		procThisOmegaSpace($i, $omega, $centralSite, $siteForSpectrum, $geometry);
@@ -84,7 +89,7 @@ for (my $i = $omegaOffset; $i < $total; ++$i) {
 close(FOUTSPECTRUM);
 print STDERR "$0: Spectrum written to $outSpectrum\n";
 my $wantsRealOrImag = (defined($wantsRealPart)) ? "real" : "imag";
-my $omegaMax = $omega0 + $omegaStep * $total;
+my $omegaMax = $omega0 + $omegaStep * $omegaTotal;
 
 printSpectrumToColor($outSpectrum,$wantsRealOrImag,$geometry,$omegaMax);
 printGnuplot($outSpectrum, $geometry);
@@ -208,8 +213,11 @@ sub correctionVectorRead
 
 	my $maxSite = 0;
 
-	$maxSite = correctionVectorReadOpen($v1,$v2,$inFile,\*FIN);
+	my @v12 = ($v1, $v2);
+	my $labels = ["P3", "P2"]; # ORDER IMPORTANT HERE!
+	$maxSite = correctionVectorReadOpen(\@v12, $labels, $inFile,\*FIN);
 	close(FIN);
+
 	$maxSite++;
 
 	print LOGFILEOUT "$0: correctionVectorRead maxsite= $maxSite\n";
@@ -218,26 +226,36 @@ sub correctionVectorRead
 
 sub correctionVectorReadOpen
 {
-	my ($v1,$v2,$inFile,$fh) = @_;
-	my $status;
+	my ($vs, $labels, $inFile, $fh) = @_;
+	my $status = "clear";
 	my $maxSite = 0;
+
 	while (<$fh>) {
+
 		next if (/PsiApp\: +CmdLine/);
-		if (/P3/ and /gs/) {
-		        $status="p3";
-		} elsif (/P2/ and /gs/) {
-		        $status="p2";
-		} else {
-		        next;
+
+		my $skip = 1;
+		foreach my $label (@$labels) {
+			next unless (/$label/ and /gs/);
+		        $status = $label;
+			$skip = 0;
 		}
+
+		next if ($skip);
 
 		chomp;
 		my @temp = split;
 		die "$0: Line $_\n" unless (scalar(@temp)==5);
 
 		my $site = $temp[0];
-		$v1->[$site] = $temp[1] if ($status eq "p3");
-		$v2->[$site] = $temp[1] if ($status eq "p2");
+		my $time = $temp[2];
+		my $c = 0;
+		foreach my $label (@$labels) {
+			++$c;
+			next unless ($status eq $label);
+			$vs->[$c - 1]->[$site + $time*$GlobalNumberOfSites] = $temp[1];
+		}
+
 		$maxSite = $site if ($maxSite < $site);
 		$status = "clear";
 	}
@@ -308,10 +326,96 @@ sub procThisOmegaSpace
 	extractValue($inFile,$siteForSpectrum);
 }
 
+sub readCheby
+{
+	my ($v1, $input) = @_;
+	my $file = $input;
+	$file =~s/\.inp//;
+	$file = "runFor$file.cout";
+
+	open(FIN, "<", "$file") or die "$0: Cannot open $file : $!\n";
+
+	correctionVectorReadOpen([$v1], ["P1"], $file, \*FIN);
+	close(FIN);
+}
+
+sub dampCheby
+{
+	my ($times) = @_;
+
+	my @dampG = (1.0);
+
+	if ($JacksOrLorentz == 1) {
+		my $timesPlusOne = ($times + 1.0);
+		my $cot = cot(pi/$timesPlusOne);
+		for (my $n = 1; $n < $times; ++$n) {
+			my $num = ($timesPlusOne - $n) * cos(pi*$n/$timesPlusOne) + sin(pi*$n/$timesPlusOne) * $cot;
+			$dampG[$n] = $num/$timesPlusOne;
+		}
+	} else {
+		my $den = sinh(4.0);
+		for (my $n = 1; $n < $times; ++$n) {	
+			my $num = sinh(4.0*(1.0-$n/$times));
+			$dampG[$n] = $num/$den;
+		}
+	}
+
+	#print STDERR "Damping Factor\n";
+	#for (my $i =0; $i < $times; ++$i) {
+		#print STDERR "$i\t$dampG[$i]\n";
+	#}
+
+	return @dampG;
+}
+
+sub chebyRealSpace
+{
+	my ($factor, $ChebyPolyXfactor, $dampG, $vM) = @_;
+	my @vMdamped;
+	my $times = scalar(@$dampG);
+	my $omegas = scalar(@$factor);
+	for (my $om = 0; $om < $omegas; ++$om) {
+		for (my $p = 1; $p < $GlobalNumberOfSites - 1; ++$p) {
+			# adding the zeroth Cheby momentum $n==0
+			my $value = $vMdamped[$p + $GlobalNumberOfSites*$om];
+			defined($value) or $vMdamped[$p + $GlobalNumberOfSites*$om] = 0;
+			$vMdamped[$p + $GlobalNumberOfSites*$om] += $factor->[$om]*$vM->[$p];
+			# adding all the others
+			for (my $n = 1; $n < $times; ++$n) {
+			 	$vMdamped[$p + $GlobalNumberOfSites*$om] += 2.0*$dampG->[$n]*
+				                           $ChebyPolyXfactor->[$om+$omegas*$n]*
+				                           $vM->[$p + $GlobalNumberOfSites*$n];
+			}
+		}
+	}
+
+	return @vMdamped;
+}
+
+sub doCheby
+{
+	my ($array, $ind, $omega, $centralSite, $geometry) = @_;
+	my @v; # index on site and time
+	readCheby(\@v, $templateInput);
+	my $times = scalar(@v)/$GlobalNumberOfSites;
+	print STDERR "$0: Read times=$times\n";
+	my @dampG = dampCheby($times);
+	my $omegas = $omegaTotal - $omegaOffset;
+	my @factor = factorCheby($omegas);
+	my @spaceValues = chebyRealSpace(\@factor, \@dampG, \@v);
+	my @qValues;
+	
+	OmegaUtils::fourier(\@qValues,\@spaceValues,$geometry,$hptr);
+	my $outFile = "runForinput$ind.sq";
+	printFourier($outFile,\@qValues,$geometry);
+	readAllQs($array,$ind);
+	die "doCheby: array is empty\n" if (scalar(@$array) == 0);
+}
+
 sub procAllQs
 {
 	my ($array, $ind, $omega, $centralSite, $geometry) = @_;
-	procCommon($ind,$omega,$centralSite, $geometry);
+	procCommon($ind, $omega, $centralSite, $geometry);
 	readAllQs($array,$ind);
 	die "procAllQs: array is empty\n" if (scalar(@$array) == 0);
 }
