@@ -38,4 +38,8 @@ OperatorExpression=c
 #ci dmrg arguments= -p 6 "<gs|c|P0>,<gs|c|P1>,<gs|c|P2>"
 #ci CollectBrakets 0
 
+#OmegaBegin=0
+#OmegaStep=0.1
+#OmegaTotal=20
+#JacksonOrLorentz=Jackson
 

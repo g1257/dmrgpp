@@ -12,7 +12,6 @@ my $usage = "-f dollarizedInput [-M mForQ] [-S site] [-p] [-r] [-z]\n";
 my ($templateInput,$site,$m,$GlobalNumberOfSites);
 my ($siteForSpectrum,$mForQ,$isPeriodic,$mMax,$wantsRealPart);
 my $zeroAtCenter = 0;
-my $isCheby = 0;
 
 GetOptions('f=s' => \$templateInput,
            'S:i' => \$siteForSpectrum,
@@ -30,7 +29,10 @@ my $geometrySubName = "NONE";
 my $geometryLeg = 1;
 my $orbitals = 1;
 my $omegaOffset = 0;
-my $JacksOrLorentz = 0;
+my $jacksOrLorentz = "none";
+my $Wstar = 0;
+my $epsilont = 0;
+my $testoutputfile;
 
 my $hptr = {"#OmegaBegin" => \$omega0,
             "#OmegaTotal" => \$omegaTotal,
@@ -41,13 +43,17 @@ my $hptr = {"#OmegaBegin" => \$omega0,
             "LadderLeg" => \$geometryLeg,
             "Orbitals" => \$orbitals,
             "TSPSites 1" => \$centralSite,
-            "#JacksOrLorentz" => \$JacksOrLorentz,
-            "TotalNumberOfSites" => \$GlobalNumberOfSites};
+            "#JacksonOrLorentz" => \$jacksOrLorentz,
+            "TotalNumberOfSites" => \$GlobalNumberOfSites,
+            "ChebyshevWstar" => \$Wstar,
+	    "ChebyshevEpsilon" => \$epsilont,
+            "OutputFile" => \$testoutputfile};
 
 OmegaUtils::getLabels($hptr,$templateInput);
 $hptr->{"isPeriodic"} = $isPeriodic;
 $hptr->{"mMax"} = $mMax;
 $hptr->{"centralSite"} = $centralSite;
+$hptr->{"isCheby"} = findIfWeAreCheby($jacksOrLorentz, $testoutputfile, $Wstar, $epsilont);
 
 my $logFile = "Log$templateInput";
 $logFile =~ s/\..*$//;
@@ -64,23 +70,25 @@ my $geometry = {"name" => $geometryName, "leg" => $geometryLeg, "subname" => $ge
 
 my $outSpectrum = "out.spectrum";
 open(FOUTSPECTRUM, ">", "$outSpectrum") or die "$0: Cannot write to $outSpectrum : $!\n";
+
+my %cheby;
+prepareCheby(\%cheby) if ($hptr->{"isCheby"});
+
+
 for (my $i = $omegaOffset; $i < $omegaTotal; ++$i) {
 
 	my $omega = $omega0 + $omegaStep * $i;
 	print FOUTSPECTRUM "$omega ";
 	print LOGFILEOUT "$0: About to proc for omega = $omega\n";
 
-	if ($isCheby) {
-		doCheby($i, $omega, $centralSite, $geometry);
+	if ($hptr->{"isCheby"}) {
+		doCheby($i, \%cheby, $omega, $centralSite, $geometry);
 	} elsif (defined($mForQ)) {
 		procThisOmegaKspace($i, $omega, $centralSite, $mForQ, $geometry);
 	} elsif (defined($siteForSpectrum)) {
 		procThisOmegaSpace($i, $omega, $centralSite, $siteForSpectrum, $geometry);
 	} else {
-		my @array;
-		procAllQs(\@array, $i, $omega, $centralSite, $geometry);
-
-		printSpectrum(\@array);
+		procAllQs($i, $omega, $centralSite, $geometry);
 	}
 
 	print LOGFILEOUT "$0: Finished         omega = $omega\n";
@@ -345,7 +353,7 @@ sub dampCheby
 
 	my @dampG = (1.0);
 
-	if ($JacksOrLorentz == 1) {
+	if ($jacksOrLorentz eq "Jackson") {
 		my $timesPlusOne = ($times + 1.0);
 		my $cot = cot(pi/$timesPlusOne);
 		for (my $n = 1; $n < $times; ++$n) {
@@ -368,56 +376,98 @@ sub dampCheby
 	return @dampG;
 }
 
+# Does only one omegas
 sub chebyRealSpace
 {
-	my ($factor, $ChebyPolyXfactor, $dampG, $vM) = @_;
+	my ($om, $cheby) = @_;
+	my $factor = $cheby->{"factor"};
+	my $ChebyPolyXfactor = $cheby->{"polyXfactor"};
+	my $dampG = $cheby->{"dampG"};
+	my $vM = $cheby->{"data"};
 	my @vMdamped;
 	my $times = scalar(@$dampG);
-	my $omegas = scalar(@$factor);
-	for (my $om = 0; $om < $omegas; ++$om) {
-		for (my $p = 1; $p < $GlobalNumberOfSites - 1; ++$p) {
-			# adding the zeroth Cheby momentum $n==0
-			my $value = $vMdamped[$p + $GlobalNumberOfSites*$om];
-			defined($value) or $vMdamped[$p + $GlobalNumberOfSites*$om] = 0;
-			$vMdamped[$p + $GlobalNumberOfSites*$om] += $factor->[$om]*$vM->[$p];
-			# adding all the others
-			for (my $n = 1; $n < $times; ++$n) {
-			 	$vMdamped[$p + $GlobalNumberOfSites*$om] += 2.0*$dampG->[$n]*
-				                           $ChebyPolyXfactor->[$om+$omegas*$n]*
-				                           $vM->[$p + $GlobalNumberOfSites*$n];
-			}
+
+	$vMdamped[0] = [0, 0];
+	for (my $p = 1; $p < $GlobalNumberOfSites - 1; ++$p) {
+		# adding the zeroth Cheby momentum $n==0
+		my $sum = $factor->[$om]*$vM->[$p];
+
+		# adding all the others		
+		for (my $n = 1; $n < $times; ++$n) {
+		 	$sum += 2.0*$dampG->[$n]*$ChebyPolyXfactor->[$n+$times*$om]*
+				                   $vM->[$p + $GlobalNumberOfSites*$n];
 		}
+
+		$vMdamped[$p] = [0, $sum]; # 0 would be the real part
 	}
 
 	return @vMdamped;
 }
 
-sub doCheby
+sub doFactorAndPolyXfactor
 {
-	my ($array, $ind, $omega, $centralSite, $geometry) = @_;
+	my ($times) = @_;
+	my $wPrime = 1.0-0.5*$epsilont;	
+	my $scalea = $Wstar/(2.0*$wPrime);
+	my (@factor, @polyXfactor);
+
+	for (my $om = 0; $om < $omegaTotal; ++$om) {
+        	my $omega = $omega0+$om*$omegaStep;
+		# Scaling
+		my $omegaPrime = ($omega/$scalea)-$wPrime;
+		my $underSqrt = 1.0 - $omegaPrime*$omegaPrime;
+		die "$0: $omegaPrime is such that 1-w'^2 < 0 $wPrime $scalea\n" if ($underSqrt < 0); 
+		$factor[$om] = 1.0/(pi*sqrt($underSqrt));
+		for (my $n = 1; $n < $times; ++$n) {
+			$polyXfactor[$n + $times*$om] = $factor[$om]*cos($n*acos($omegaPrime));
+		}
+	}
+
+	return (\@factor, \@polyXfactor);
+}
+
+sub prepareCheby
+{
+	my ($cheby) = @_;	
 	my @v; # index on site and time
 	readCheby(\@v, $templateInput);
+	$cheby->{"data"} = \@v;
+
 	my $times = scalar(@v)/$GlobalNumberOfSites;
 	print STDERR "$0: Read times=$times\n";
 	my @dampG = dampCheby($times);
-	my $omegas = $omegaTotal - $omegaOffset;
-	my @factor = factorCheby($omegas);
-	my @spaceValues = chebyRealSpace(\@factor, \@dampG, \@v);
-	my @qValues;
+	$cheby->{"dampG"} = \@dampG;
 	
+	my ($factor, $polyXfactor) = doFactorAndPolyXfactor($times); # returns 2 references
+	$cheby->{"factor"} = $factor;
+	$cheby->{"polyXfactor"} = $polyXfactor;
+}
+
+sub doCheby
+{
+	my ($ind, $cheby, $omega, $centralSite, $geometry) = @_;
+	my @spaceValues = chebyRealSpace($ind, $cheby);
+	
+	my @qValues;
 	OmegaUtils::fourier(\@qValues,\@spaceValues,$geometry,$hptr);
+
 	my $outFile = "runForinput$ind.sq";
 	printFourier($outFile,\@qValues,$geometry);
-	readAllQs($array,$ind);
-	die "doCheby: array is empty\n" if (scalar(@$array) == 0);
+
+	my @array;
+	readAllQs(\@array,$ind);
+	die "doCheby: array is empty\n" if (scalar(@array) == 0);
+	printSpectrum(\@array);
 }
 
 sub procAllQs
 {
-	my ($array, $ind, $omega, $centralSite, $geometry) = @_;
+	my ($ind, $omega, $centralSite, $geometry) = @_;
 	procCommon($ind, $omega, $centralSite, $geometry);
-	readAllQs($array,$ind);
-	die "procAllQs: array is empty\n" if (scalar(@$array) == 0);
+	my @array;
+	readAllQs(\@array,$ind);
+	die "procAllQs: array is empty\n" if (scalar(@array) == 0);
+	printSpectrum(\@array);
 }
 
 sub readAllQs
@@ -537,8 +587,9 @@ sub spectrumToColor
 		next if ($n < 2);
 		if (!defined($size)) {
 			$size = $n;
+			print STDERR "$0: File $file at line $. has set size to $size\n";
 		} else {
-			($size == $n) or die "$0: Wrong line $_\n";
+			($size == $n) or die "$0: Wrong line $_ (expected size $size)\n";
 		}
 
 		my @temp2 = getRealOrImagData(\@temp,$realOrImag,$geometry,$qyIndex);
@@ -620,5 +671,34 @@ sub getRealOrImagData
 	}
 
 	return @temp;
+}
+
+sub findIfWeAreCheby
+{
+	my ($jacksOrLorentz, $testoutputfile, $Wstar, $epsilont) = @_;
+	my $b1 = ($jacksOrLorentz eq "none");
+	my $b2 = ($testoutputfile =~ /\$/);
+
+	return 0 if ($b1 and $b2);
+
+	if ($Wstar == 0) {
+		die "$0: Needs ChebyshevWstar in input\n";
+	}
+
+	if ($epsilont == 0) {
+		die "$0: Needs ChebyshevEpsilon in input\n";
+	}
+
+	return 1 if (!$b1 and !$b2);
+
+	if ($jacksOrLorentz ne "Jackson" and $jacksOrLorentz ne "Lorentz") {
+		die "$0: #JacksOrLorentz= Jackson or Lorentz not $jacksOrLorentz\n";
+	}
+
+	if ($b1 and !$b2) {
+		die "$0: JacksOrLorentz is none, but OutputFile= is NOT dollarized\n";
+	}
+
+	die "$0: JacksOrLorentz is NOT none, but OutputFile= is dollarized\n";
 }
 
