@@ -37,16 +37,16 @@ my $testoutputfile;
 my $hptr = {"#OmegaBegin" => \$omega0,
             "#OmegaTotal" => \$omegaTotal,
             "#OmegaStep" => \$omegaStep,
-	    "#OmegaOffset" => \$omegaOffset,
+            "#OmegaOffset" => \$omegaOffset,
             "GeometryKind" => \$geometryName,
-	    "GeometrySubKind" => \$geometrySubName,
+            "GeometrySubKind" => \$geometrySubName,
             "LadderLeg" => \$geometryLeg,
             "Orbitals" => \$orbitals,
             "TSPSites 1" => \$centralSite,
             "#JacksonOrLorentz" => \$jacksOrLorentz,
             "TotalNumberOfSites" => \$GlobalNumberOfSites,
             "ChebyshevWstar" => \$Wstar,
-	    "ChebyshevEpsilon" => \$epsilont,
+            "ChebyshevEpsilon" => \$epsilont,
             "OutputFile" => \$testoutputfile};
 
 OmegaUtils::getLabels($hptr,$templateInput);
@@ -193,6 +193,7 @@ sub procCommon
 
 	my $maxSite = correctionVectorRead(\@values,\@values2,$inFile);
 
+	print STDERR "$0: omega=$omega maxSite=$maxSite\n";
 	my @spaceValues;
 	correctionVectorWrite(\@spaceValues,\@values,\@values2,$maxSite,$omega);
 
@@ -240,7 +241,7 @@ sub correctionVectorReadOpen
 		my $skip = 1;
 		foreach my $label (@$labels) {
 			next unless (/$label/ and /gs/);
-		        $status = $label;
+			$status = $label;
 			$skip = 0;
 		}
 
@@ -277,7 +278,7 @@ sub correctionVectorWrite
 			print STDERR "$0: Undefined value for site = $i and omega = $omega\n";
 			$vv1 = $vv2 = 0.0;
 		}
-		
+
 		$array->[$i] = [$vv1, $vv2];
 	}
 }
@@ -396,7 +397,7 @@ sub doFactorAndPolyXfactor
 
 sub prepareCheby
 {
-	my ($cheby) = @_;	
+	my ($cheby) = @_;
 	my @v; # index on site and time
 	readCheby(\@v, $templateInput);
 	$cheby->{"data"} = \@v;
@@ -405,7 +406,7 @@ sub prepareCheby
 	print STDERR "$0: Read times=$times\n";
 	my @dampG = dampCheby($times);
 	$cheby->{"dampG"} = \@dampG;
-	
+
 	my ($factor, $polyXfactor) = doFactorAndPolyXfactor($times); # returns 2 references
 	$cheby->{"factor"} = $factor;
 	$cheby->{"polyXfactor"} = $polyXfactor;
@@ -415,7 +416,7 @@ sub doCheby
 {
 	my ($ind, $cheby, $omega, $centralSite, $geometry) = @_;
 	my @spaceValues = chebyRealSpace($ind, $cheby);
-	
+
 	my @qValues;
 	OmegaUtils::fourier(\@qValues,\@spaceValues,$geometry,$hptr);
 

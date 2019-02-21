@@ -410,7 +410,7 @@ sub fourierLadderAverage
 	my $total = int($leg/$legSmall);
 	my $centralSite = $hptr->{"centralSite"};
 	my $ll = ($centralSite == int($n/2)) ? 0 : 1;
-	die "$0: Wrong central site\n" if ($centralSite != int($n/2) + $ll*2);
+	die "$0: Wrong central site $centralSite\n" if ($centralSite != int($n/2) + $ll*2);
 
 	# prepare partialV
 
