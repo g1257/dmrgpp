@@ -205,9 +205,9 @@ public:
 		pthread_attr_t** attr = new pthread_attr_t*[nthreads_];
 		SizeType ntasks = pfh.tasks();
 
+#ifndef __APPLE__
 		cpu_set_t cpuset;
 
-#ifndef __APPLE__
 
 		if (setAffinities_) {
 			static bool firstCall = true;
