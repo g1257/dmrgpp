@@ -244,8 +244,10 @@ public:
 			ret = pthread_attr_init(attr[j]);
 			checkForError(ret);
 
+#ifndef __APPLE__
 			if (setAffinities_)
 				setAffinity(attr[j], &cpuset, j);
+#endif
 
 			ret = pthread_create(&thread_id[j],
 			                     attr[j],
@@ -287,7 +289,6 @@ private:
 			return;
 		}
 	}
-#endif
 
 	void setAffinity(pthread_attr_t* attr, cpu_set_t* cpuset, SizeType threadNum) const
 	{
@@ -336,6 +337,7 @@ private:
 
 		std::cout<<"\n";
 	}
+#endif
 
 	void checkForError(int ret) const
 	{
