@@ -142,7 +142,9 @@ class WftAccelBlocks {
 			const RealType flops_method_2 =  2.0 * nrow_Yold * ncol_Yold * ncol_W_E +
 			        2.0 * nrow_W_S  * ncol_W_S  * ncol_Ytemp ;
 
+
 			const bool use_method_1 = (flops_method_1 <= flops_method_2);
+#ifndef __APPLE__
 			if (idebug >= 1) {
 				std::cout << "WftAccelBlocks.h:146: "
 				          << " use_method_1=" << use_method_1
@@ -152,7 +154,8 @@ class WftAccelBlocks {
 				          << std::defaultfloat
 				          << "\n";
 
-			};
+			}
+#endif
 
 			const ComplexOrRealType d_one = 1.0;
 			const ComplexOrRealType d_zero = 0.0;
@@ -376,6 +379,8 @@ class WftAccelBlocks {
 			        2.0 * nrow_W_S * ncol_W_S * ncol_Ytemp;
 
 			const bool use_method_1 = (flops_method_1 <= flops_method_2);
+
+#ifndef __APPLE__
 			if (idebug >= 1) {
 				std::cout << "WftAccelBlocks.h:360: "
 				          << " use_method_1=" << use_method_1
@@ -385,7 +390,8 @@ class WftAccelBlocks {
 				          << std::defaultfloat
 				          << "\n";
 
-			};
+			}
+#endif
 
 			nrow_Ytemp = (use_method_1) ? ncol_W_S : nrow_Yold;
 			ncol_Ytemp = (use_method_1) ? ncol_Yold : nrow_W_E;

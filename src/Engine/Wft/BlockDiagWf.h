@@ -249,7 +249,7 @@ class BlockDiagWf {
 			        2.0 * nrow_W_L * ncol_W_L * ncol_Ytemp;
 
 			const bool use_method_1 = (flops_method_1 <= flops_method_2);
-
+#ifndef __APPLE__
 			if (idebug >= 1) {
 				const double speedup_ratio = (use_method_1) ?
 				            flops_method_2 / flops_method_1 :
@@ -263,8 +263,8 @@ class BlockDiagWf {
 				          << " speedup ratio=" << speedup_ratio
 				          << std::defaultfloat
 				          << "\n";
-			};
-
+			}
+#endif
 
 
 			const ComplexOrRealType d_one = 1.0;
