@@ -275,9 +275,9 @@ public:
 
 private:
 
+#ifndef __APPLE__
 	void getPidAffinity(cpu_set_t* cpuset, pid_t pid) const
 	{
-#ifndef __APPLE__
 
 		CPU_ZERO(cpuset);
 		int ret = sched_getaffinity(pid, sizeof(cpu_set_t), cpuset);
@@ -286,8 +286,8 @@ private:
 			CPU_ZERO(cpuset);
 			return;
 		}
-#endif
 	}
+#endif
 
 	void setAffinity(pthread_attr_t* attr, cpu_set_t* cpuset, SizeType threadNum) const
 	{
