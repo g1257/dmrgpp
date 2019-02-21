@@ -87,7 +87,9 @@ class WftAccelBlocks {
 
 			const MatrixType& weModif = getWeModif(we_, threadNum);
 
+#ifndef __APPLE__
 			const int idebug = 0;
+#endif
 
 			int nrow_Ytemp = 0;
 			int ncol_Ytemp = 0;
@@ -296,7 +298,9 @@ class WftAccelBlocks {
 			SizeType jprSize = we_.cols();
 #endif
 
+#ifndef __APPLE__
 			const int idebug = 0;
+#endif
 
 			const int nrow_W_S = ws_.rows();
 			const int ncol_W_S = ws_.cols();
