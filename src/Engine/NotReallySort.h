@@ -7,13 +7,11 @@
 #include "Sort.h"
 #include "Concurrency.h"
 #include "Parallelizer.h"
-#include <tr1/unordered_map>
+#include <unordered_map>
 #include "PairOfQns.h"
 #include "Array.h"
 
 namespace std {
-
-namespace tr1 {
 
 template<>
 class hash<Dmrg::Qn> {
@@ -101,8 +99,7 @@ private:
 	const VectorLikeQnType& inQns_;
 	bool addOdd_;
 };
-}
-}
+} // namespace std
 
 namespace Dmrg {
 
@@ -112,7 +109,7 @@ public:
 
 	typedef Qn::VectorQnType VectorQnType;
 	typedef Qn::VectorSizeType VectorSizeType;
-	typedef std::tr1::hash<Dmrg::PairOfQns>::VectorLikeQnType VectorLikeQnType;
+	typedef std::hash<Dmrg::PairOfQns>::VectorLikeQnType VectorLikeQnType;
 
 	enum AlgoEnum {ALGO_UMAP, ALGO_CUSTOM};
 
@@ -165,8 +162,8 @@ public:
 			const bool hasAtLeastOneOdd = (noNeedForOdd) ? false : getOddElectrons(inQns);
 			const bool addOddToHash = (!noNeedForOdd && hasAtLeastOneOdd);
 
-			std::tr1::hash<PairOfQnsOrJustQnType> helper(hash, inQns, addOddToHash);
-			std::tr1::unordered_map<PairOfQnsOrJustQnType, SizeType> umap(initialSizeOfHashTable,
+			std::hash<PairOfQnsOrJustQnType> helper(hash, inQns, addOddToHash);
+			std::unordered_map<PairOfQnsOrJustQnType, SizeType> umap(initialSizeOfHashTable,
 			                                                              helper);
 			firstPassUmap(outQns, count, umap, inQns);
 			secondPassUmap(outNumber, offset, count, umap, inNumbers, inQns);
@@ -207,9 +204,9 @@ private:
 		const bool addOddToHash = (!noNeedForOdd && hasAtLeastOneOdd);
 
 		SizeType threads = std::min(PsimagLite::Concurrency::codeSectionParams.npthreads, n);
-		std::tr1::hash<PairOfQnsOrJustQnType> helper(hash, inQns, addOddToHash);
+		std::hash<PairOfQnsOrJustQnType> helper(hash, inQns, addOddToHash);
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
-		PsimagLite::Parallelizer<std::tr1::hash<PairOfQnsOrJustQnType> >
+		PsimagLite::Parallelizer<std::hash<PairOfQnsOrJustQnType> >
 		        parallelizer(codeSectionParams);
 		parallelizer.loopCreate(helper);
 
@@ -302,7 +299,7 @@ private:
 	template<typename SomeVectorLikeQnType>
 	void firstPassUmap(VectorQnType& outQns,
 	                   VectorSizeType& count,
-	                   std::tr1::unordered_map<typename SomeVectorLikeQnType::value_type,
+	                   std::unordered_map<typename SomeVectorLikeQnType::value_type,
 	                   SizeType>& umap,
 	                   const SomeVectorLikeQnType& inQns)
 	{
@@ -332,7 +329,7 @@ private:
 	void secondPassUmap(VectorSizeType& outNumber,
 	                    VectorSizeType& offset,
 	                    VectorSizeType& count,
-	                    std::tr1::unordered_map<typename SomeVectorLikeQnType::value_type,
+	                    std::unordered_map<typename SomeVectorLikeQnType::value_type,
 	                    SizeType>& umap,
 	                    const VectorSizeType& inNumbers,
 	                    const SomeVectorLikeQnType& inQns)
