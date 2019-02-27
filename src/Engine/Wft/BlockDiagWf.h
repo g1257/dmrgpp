@@ -128,8 +128,9 @@ class BlockDiagWf {
 
 		void doTask(SizeType ipatch, SizeType threadNum)
 		{
+#ifndef __APPLE__
 			const int idebug = 0;
-
+#endif
 			MatrixType* mptr = data_[ipatch];
 
 			if (mptr == 0) return;
