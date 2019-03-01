@@ -14,8 +14,10 @@ sub MAIN($file)
 		++$ln;
 		my $copy = $line;
 		
+		$copy ~~ s/\s+$//;
 		$copy ~~ s/\.txt// if ($copy ~~ /OutputFile\=/);
-		$copy ~~ s/\=(<-[\d\-\.]>.*$)/\=\"$0\"/;
+		$copy ~~ s/\=(<-[\d\-\.\+]>.*$)/\=\"$0\"/;
+		$copy ~~ s/\s+1\s+(<[\d\-\.\+]>+$)/\=\[$0\]/;
 
 		my $sc = ($copy ~~ /^$/) ?? "" !! ";"; 
 		print "$copy$sc\n";
