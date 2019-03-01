@@ -1,0 +1,36 @@
+##Ainur1.0
+TotalNumberOfSites=16;
+NumberOfTerms=1;
+DegreesOfFreedom=1;
+GeometryKind="chain";
+GeometryOptions="ConstantValues";
+dir0:Connectors=[1.0];
+
+hubbardU=[0,...];
+potentialV=[0,...];
+Model="HubbardOneBand";
+SolverOptions="TimeStepTargeting";
+Version="53725d9b8f22615ccccc782082f4cd6f51a4e374";
+OutputFile="data8";
+InfiniteLoopKeptStates=200;
+FiniteLoops=[
+[  7, 200, 0],
+[-14, 200, 0],
+[ 14, 200, 0],
+[-14, 200, 0],
+[ 14, 200, 0]];
+
+TargetElectronsUp=8;
+TargetElectronsDown=8;
+GsWeight=0.1;
+TSPTau=0.1;
+TSPTimeSteps=5;
+TSPAdvanceEach=100;
+TSPAlgorithm="Krylov";
+TSPSites=[10];
+TSPLoops=[0];
+TSPProductOrSum="product";
+
+TSPOperator="expression";
+OperatorExpression="c?0*c?0'*c?1'+(-1.0)*c?1'*c?0'*c?0";
+
