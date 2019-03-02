@@ -20,5 +20,5 @@ FiniteLoops=[[7, 100, 0],
 TargetElectronsUp=8;
 TargetElectronsDown=8;
 Pvectors=1;
-string P0="(c?0[0]'*c?0[1]' +  c?1[0]'*c?1[1] - c?0[1]'*c?0[0] - c?1[1]'*c?1[0])|gs>";
+string P0="c?0[2]'*c?0[3]*|gs>";
 #ci observe arguments="<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>"

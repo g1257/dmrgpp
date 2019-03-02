@@ -26,6 +26,8 @@ public:
 			weight_ = findWeightAndStripIt(str_);
 	}
 
+	const PsimagLite::String& toString() { return str_; }
+
 	const RealType& weight() const { return weight_; }
 
 private:
