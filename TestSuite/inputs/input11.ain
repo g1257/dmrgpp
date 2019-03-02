@@ -1,0 +1,24 @@
+##Ainur1.0
+TotalNumberOfSites=12;
+NumberOfTerms=1;
+DegreesOfFreedom=1;
+GeometryKind="ladder";
+GeometryOptions="ConstantValues";
+LadderLeg=2;
+dir0:Connectors=[1.0];
+dir1:Connectors=[1.0];
+hubbardU=[0.0,...];
+potentialV=[0.0,...];
+Model="HubbardOneBand";
+SolverOptions="none";
+Version="6b9dc12805519cb864e80fa0957129a010711116";
+OutputFile="data11";
+InfiniteLoopKeptStates=150;
+FiniteLoops=[
+[  5, 200, 0],
+[-10, 200, 0],
+[ 10, 200, 1],
+[ -1, 200, 1]];
+TargetElectronsUp=6;
+TargetElectronsDown=6;
+Threads=2;
