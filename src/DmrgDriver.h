@@ -114,8 +114,7 @@ template<typename SolverType, typename VectorWithOffsetType>
 void mainLoop4(typename SolverType::MatrixType::ModelType::GeometryType&,
                const ParametersDmrgSolverType&,
                InputNgType::Readable&,
-               const OperatorOptions&,
-               PsimagLite::String);
+               const OperatorOptions&);
 
 #endif // DMRGDRIVER_H
 

@@ -134,6 +134,10 @@ public:
 		intent.check();
 	}
 
+	TargetingBase(const TargetingBase&) = delete;
+
+	TargetingBase& operator=(const TargetingBase&) = delete;
+
 	virtual ~TargetingBase() {}
 
 	virtual void postCtor()

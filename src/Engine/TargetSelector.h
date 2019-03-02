@@ -10,6 +10,7 @@
 #include "TargetingMetts.h"
 #include "TargetingRixsStatic.h"
 #include "TargetingRixsDynamic.h"
+#include "TargetingExpression.h"
 
 namespace Dmrg {
 
@@ -38,6 +39,8 @@ class TargetSelector {
 	typedef TargetingMetts<LanczosSolverType,VectorWithOffsetType> TargetingMettsType;
 	typedef TargetingRixsStatic<LanczosSolverType,VectorWithOffsetType> TargetingRixsStaticType;
 	typedef TargetingRixsDynamic<LanczosSolverType,VectorWithOffsetType> TargetingRixsDynamicType;
+	typedef TargetingExpression<LanczosSolverType,VectorWithOffsetType> TargetingExpressionType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 public:
 
@@ -60,8 +63,20 @@ public:
 		psi_ = nullptr;
 	}
 
+	TargetSelector(const TargetSelector&) = delete;
+
+	TargetSelector& operator=(const TargetSelector&) = delete;
+
+	TargetingBaseType& operator()()
+	{
+		PsimagLite::String targeting = getTargeting(model_.params().options);
+		return operator()(targeting);
+	}
+
 	TargetingBaseType& operator()(PsimagLite::String targeting)
 	{
+		check1(targeting);
+
 		if (targeting=="TimeStepTargeting" || targeting == "TargetingAncilla") {
 			psi_ = new TargetingTimeStepType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting=="DynamicTargeting") {
@@ -80,6 +95,8 @@ public:
 			psi_ = new TargetingRixsStaticType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting == "TargetingRixsDynamic") {
 			psi_ = new TargetingRixsDynamicType(lrs_,model_,wft_,quantumSector_,ioIn_);
+		} else if (targeting == "TargetingExpression") {
+			psi_ = new TargetingExpressionType(lrs_, model_, wft_, quantumSector_, ioIn_);
 		} else {
 			err("Unknown targeting " + targeting + "\n");
 		}
@@ -90,6 +107,68 @@ public:
 	}
 
 private:
+
+	PsimagLite::String getTargeting(const PsimagLite::String& options) const
+	{
+		PsimagLite::String targeting("GroundStateTargeting");
+
+		VectorStringType targets = {"GroundStateTargeting",
+		                            "TimeStepTargeting",
+		                            "AdaptiveDynamicTargeting",
+		                            "DynamicTargeting",
+		                            "CorrectionVectorTargeting",
+		                            "CorrectionTargeting",
+		                            "MettsTargeting",
+		                            "TargetingAncilla",
+		                            "TargetingCorrelations",
+		                            "TargetingInSitu",
+		                            "TargetingRixsStatic",
+		                            "TargetingRixsDynamic",
+		                            "TargetingChebyshev"};
+
+		const SizeType totalTargets = targets.size();
+		SizeType count = 0;
+		for (SizeType i = 0;i < totalTargets; ++i) {
+			if (options.find(targets[i]) != PsimagLite::String::npos) {
+				if (targeting == "AdaptiveDynamicTargeting" &&
+				        targets[i] == "DynamicTargeting") continue;
+				targeting = targets[i];
+				count++;
+			}
+		}
+
+		if (count > 1)
+			err("Only one targeting at a time supported\n");
+
+		if (count == 0)
+			std::cerr <<" No explicit targeting found, asumming " << targeting <<"\n";
+
+		return targeting;
+	}
+
+	void check1(PsimagLite::String targeting) const
+	{
+		if (model_.params().options.find("useComplex") != PsimagLite::String::npos &&
+		        targeting != "TimeStepTargeting" &&
+		        targeting != "ChebyshevTargeting" &&
+		        targeting != "GroundStateTargeting" &&
+		        targeting != "TargetingCorrelations" &&
+		        targeting != "CorrectionTargeting" &&
+		        targeting != "CorrectionVectorTargeting" &&
+		        targeting != "TargetingInSitu" &&
+		        targeting != "TargetingRixsStatic" &&
+		        targeting != "TargetingRixsDynamic") {
+			err("SolverOptions=useComplex not allowed for " + targeting + "\n");
+		} else {
+			if (targeting == "TimeStepTargeting")
+				err("SolverOptions=useComplex is needed for " + targeting + "\n");
+		}
+
+		if (targeting != "GroundStateTargeting" && BasisType::useSu2Symmetry()) {
+			PsimagLite::String str("SU(2) supports only GroundStateTargeting (sorry!)\n");
+			throw PsimagLite::RuntimeError(str);
+		}
+	}
 
 	TargetingBaseType* psi_;
 	const LeftRightSuperType& lrs_;

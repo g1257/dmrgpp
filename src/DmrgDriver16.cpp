@@ -26,8 +26,7 @@ template void mainLoop4<LanczosSolver32Type,Dmrg::VectorWithOffset<std::complex<
 (LanczosSolver32Type::MatrixType::ModelType::GeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
-const OperatorOptions&,
-PsimagLite::String);
+const OperatorOptions&);
 
 
 typedef PsimagLite::CrsMatrix<std::complex<RealType> > SparseMatrixInstance33Type;
@@ -51,6 +50,5 @@ template void mainLoop4<LanczosSolver33Type,Dmrg::VectorWithOffsets<std::complex
 (LanczosSolver33Type::MatrixType::ModelType::GeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
-const OperatorOptions&,
-PsimagLite::String);
+const OperatorOptions&);
 

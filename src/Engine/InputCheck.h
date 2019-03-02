@@ -336,7 +336,7 @@ public:
 			\item [KroneckerDumper] TBW
 			\item [extendedPrint] TBW
 			\item [truncationNoSvd] Do not use SVD for truncation;
-		                               use density matrix instead
+									   use density matrix instead
 			\item [KronNoLoadBalance] Disable load balancing for MatrixVectorKron
 			\item [setAffinities] TBW
 			\item [wftNoAccel] Disable WFT acceleration (but not the WFT itself)
@@ -347,7 +347,7 @@ public:
 			\item [KrylovNoAbridge] TBW
 			\item [fixLegacyBugs] TBW
 			\item [saveDensityMatrixEigenvalues] Save DensityMatrixEigenvalues
-			                                     to the data file.
+												 to the data file.
 			\item [KronNoUseLowerPart] Don't Use lower part of Kron matrix but
  recompute it instead.
 			\item [shrinkStacksOnDisk] Store shrink stacks on disk instead of in memory
@@ -440,43 +440,6 @@ public:
 	void usageMain(const PsimagLite::String& name) const
 	{
 		std::cerr<<"USAGE is "<<name<<"\n";
-	}
-
-	PsimagLite::String getTargeting(const PsimagLite::String& options) const
-	{
-		PsimagLite::String targeting="GroundStateTargeting";
-
-		const char *targets[]={"GroundStateTargeting",
-		                       "TimeStepTargeting",
-		                       "AdaptiveDynamicTargeting",
-		                       "DynamicTargeting",
-		                       "CorrectionVectorTargeting",
-		                       "CorrectionTargeting",
-		                       "MettsTargeting",
-		                       "TargetingAncilla",
-		                       "TargetingCorrelations",
-		                       "TargetingInSitu",
-		                       "TargetingRixsStatic",
-		                       "TargetingRixsDynamic",
-		                       "TargetingChebyshev"};
-
-		SizeType totalTargets = 13;
-
-		SizeType count = 0;
-		for (SizeType i = 0;i<totalTargets;++i) {
-			if (options.find(targets[i])!=PsimagLite::String::npos) {
-				if (targeting == "AdaptiveDynamicTargeting" &&
-				        std::string(targets[i]) == "DynamicTargeting") continue;
-				targeting = targets[i];
-				count++;
-			}
-		}
-
-		if (count > 1) {
-			throw PsimagLite::RuntimeError("Only one targeting supported\n");
-		}
-
-		return targeting;
 	}
 
 	void checkFileOptions(PsimagLite::String fileOption)

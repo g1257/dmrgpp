@@ -102,8 +102,7 @@ template void mainLoop4<$lanczosType,$vecWithOffsetType>
 (${lanczosType}::MatrixType::ModelType::GeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
-const OperatorOptions&,
-PsimagLite::String);
+const OperatorOptions&);
 
 EOF
 

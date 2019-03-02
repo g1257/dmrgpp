@@ -6,7 +6,6 @@ template<typename GeometryType,
          typename ModelHelperType,
          typename VectorWithOffsetType>
 void mainLoop(GeometryType& geometry,
-              const PsimagLite::String& targeting,
               InputNgType::Readable& io,
               const ParametersDmrgSolverType& params,
               const PsimagLite::String& list)
@@ -43,7 +42,6 @@ template<typename GeometryType,
          template<typename> class ModelHelperTemplate,
          typename MySparseMatrix>
 void mainLoop1(GeometryType& geometry,
-               const PsimagLite::String& targeting,
                InputNgType::Readable& io,
                const ParametersDmrgSolverType& params,
                const PsimagLite::String& list)
@@ -59,11 +57,11 @@ void mainLoop1(GeometryType& geometry,
 	if (params.options.find("vectorwithoffsets")!=PsimagLite::String::npos) {
 		typedef VectorWithOffsets<ComplexOrRealType, QnType> VectorWithOffsetType;
 		mainLoop<GeometryType,ModelHelperType,VectorWithOffsetType>
-		        (geometry,targeting,io,params, list);
+		        (geometry, io, params, list);
 	} else {
 		typedef VectorWithOffset<ComplexOrRealType, QnType> VectorWithOffsetType;
 		mainLoop<GeometryType,ModelHelperType,VectorWithOffsetType>
-		        (geometry,targeting,io,params, list);
+		        (geometry, io, params, list);
 	}
 }
 
@@ -86,27 +84,12 @@ void mainLoop0(InputNgType::Readable& io,
 
 	bool su2 = (tmp > 0);
 
-	PsimagLite::String targeting=inputCheck.getTargeting(dmrgSolverParams.options);
-
-	if (targeting!="GroundStateTargeting" && su2)
-		throw PsimagLite::RuntimeError("SU(2) supports only GroundStateTargeting");
-
 	if (su2) {
-		mainLoop1<GeometryType,ModelHelperSu2,MySparseMatrix>
-		        (geometry,targeting,io,dmrgSolverParams, list);
-
-		return;
-	}
-
-	if (targeting=="GroundStateTargeting") {
-		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix>
-		        (geometry,targeting,io,dmrgSolverParams, list);
-	} else if (targeting=="TimeStepTargeting") {
-		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrixComplex>
-		        (geometry,targeting,io,dmrgSolverParams, list);
+		mainLoop1<GeometryType, ModelHelperSu2, MySparseMatrix>
+		        (geometry, io, dmrgSolverParams, list);
 	} else {
-		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix>
-		        (geometry,targeting,io,dmrgSolverParams, list);
+		mainLoop1<GeometryType, ModelHelperLocal, MySparseMatrix>
+		        (geometry, io, dmrgSolverParams, list);
 	}
 }
 

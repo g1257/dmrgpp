@@ -43,8 +43,7 @@ template<typename MatrixVectorType, typename VectorWithOffsetType>
 void mainLoop3(typename MatrixVectorType::ModelType::GeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io,
-               const OperatorOptions& opOptions,
-               PsimagLite::String targeting)
+               const OperatorOptions& opOptions)
 {
 	typedef PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>
 	        ParametersForSolverType;
@@ -54,16 +53,14 @@ void mainLoop3(typename MatrixVectorType::ModelType::GeometryType& geometry,
 		mainLoop4<SolverType,VectorWithOffsetType>(geometry,
 		                                           dmrgSolverParams,
 		                                           io,
-		                                           opOptions,
-		                                           targeting);
+		                                           opOptions);
 	} else {
 		typedef PsimagLite::LanczosSolver<ParametersForSolverType,
 		        MatrixVectorType, typename MatrixVectorType::VectorType> SolverType;
 		mainLoop4<SolverType,VectorWithOffsetType>(geometry,
 		                                           dmrgSolverParams,
 		                                           io,
-		                                           opOptions,
-		                                           targeting);
+		                                           opOptions);
 	}
 }
 
@@ -71,8 +68,7 @@ template<typename MatrixVectorType>
 void mainLoop2(typename MatrixVectorType::ModelType::GeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io,
-               const OperatorOptions& opOptions,
-               PsimagLite::String targeting)
+               const OperatorOptions& opOptions)
 {
 	typedef typename MatrixVectorType::ComplexOrRealType ComplexOrRealType;
 	typedef typename MatrixVectorType::ModelType::QnType QnType;
@@ -82,15 +78,13 @@ void mainLoop2(typename MatrixVectorType::ModelType::GeometryType& geometry,
 		mainLoop3<MatrixVectorType,VectorWithOffsetType>(geometry,
 		                                                 dmrgSolverParams,
 		                                                 io,
-		                                                 opOptions,
-		                                                 targeting);
+		                                                 opOptions);
 	} else {
 		typedef VectorWithOffset<ComplexOrRealType, QnType> VectorWithOffsetType;
 		mainLoop3<MatrixVectorType,VectorWithOffsetType>(geometry,
 		                                                 dmrgSolverParams,
 		                                                 io,
-		                                                 opOptions,
-		                                                 targeting);
+		                                                 opOptions);
 	}
 }
 
@@ -100,8 +94,7 @@ template<typename GeometryType,
 void mainLoop1(GeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io,
-               const OperatorOptions& opOptions,
-               PsimagLite::String targeting)
+               const OperatorOptions& opOptions)
 {
 	typedef Basis<MySparseMatrix> BasisType;
 	typedef Operators<BasisType> OperatorsType;
@@ -117,29 +110,25 @@ void mainLoop1(GeometryType& geometry,
 		mainLoop2<MatrixVectorStored<ModelBaseType> >(geometry,
 		                                              dmrgSolverParams,
 		                                              io,
-		                                              opOptions,
-		                                              targeting);
+		                                              opOptions);
 	} else if (dmrgSolverParams.options.find("MatrixVectorOnTheFly")!=PsimagLite::String::npos
 	           || ModelHelperType::isSu2()) {
 
 		mainLoop2<MatrixVectorOnTheFly<ModelBaseType> >(geometry,
 		                                                dmrgSolverParams,
 		                                                io,
-		                                                opOptions,
-		                                                targeting);
+		                                                opOptions);
 	} else {
 		mainLoop2<MatrixVectorKron<ModelBaseType> >(geometry,
 		                                            dmrgSolverParams,
 		                                            io,
-		                                            opOptions,
-		                                            targeting);
+		                                            opOptions);
 	}
 }
 
 template<typename MySparseMatrix>
 void mainLoop0(InputNgType::Readable& io,
                const ParametersDmrgSolverType& dmrgSolverParams,
-               PsimagLite::String targeting,
                const OperatorOptions& opOptions)
 {
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;
@@ -158,18 +147,12 @@ void mainLoop0(InputNgType::Readable& io,
 
 	bool su2 = (tmp > 0);
 
-	if (targeting != "GroundStateTargeting" && su2) {
-		PsimagLite::String str("SU(2) supports only GroundStateTargeting (sorry!)\n");
-		throw PsimagLite::RuntimeError(str);
-	}
-
 	if (su2) {
 #ifdef ENABLE_SU2
 		mainLoop1<GeometryType,ModelHelperSu2,MySparseMatrix>(geometry,
 		                                                      dmrgSolverParams,
 		                                                      io,
-		                                                      opOptions,
-		                                                      targeting);
+		                                                      opOptions);
 #else
 		PsimagLite::String str1("To run with SU(2) you need -DENABLE_SU2 in Config.make\n");
 		PsimagLite::String str2("\n\tYou might also need to run ");
@@ -179,26 +162,10 @@ void mainLoop0(InputNgType::Readable& io,
 		return;
 	}
 
-	if (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos &&
-	        targeting != "TimeStepTargeting" &&
-                targeting != "ChebyshevTargeting" &&		
-	        targeting != "GroundStateTargeting" &&
-	        targeting != "TargetingCorrelations" &&
-	        targeting != "CorrectionTargeting" &&
-	        targeting != "CorrectionVectorTargeting" &&
-                targeting != "TargetingInSitu" &&
-                targeting != "TargetingRixsStatic" &&
-                targeting != "TargetingRixsDynamic") {
-		PsimagLite::String str("SolverOptions=useComplex not allowed for ");
-		str += targeting + "\n";
-		throw PsimagLite::RuntimeError(str);
-	}
-
 	mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix>(geometry,
 	                                                        dmrgSolverParams,
 	                                                        io,
-	                                                        opOptions,
-	                                                        targeting);
+	                                                        opOptions);
 }
 
 int main(int argc, char **argv)
@@ -421,13 +388,11 @@ to the main dmrg driver are the following.
 	if (dmrgSolverParams.options.find("notReallySortCustom") != PsimagLite::String::npos)
 		ProgramGlobals::notReallySortAlgo = "custom";
 
-	PsimagLite::String targeting = inputCheck.getTargeting(dmrgSolverParams.options);
 	bool isComplex = (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos);
-	if (targeting=="TimeStepTargeting") isComplex = true;
 	if (isComplex) {
-		mainLoop0<MySparseMatrixComplex>(io,dmrgSolverParams,targeting,options);
+		mainLoop0<MySparseMatrixComplex>(io, dmrgSolverParams, options);
 	} else {
-		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,targeting,options);
+		mainLoop0<MySparseMatrixReal>(io, dmrgSolverParams, options);
 	}
 }
 

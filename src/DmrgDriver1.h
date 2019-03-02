@@ -7,8 +7,7 @@ template<typename SolverType, typename VectorWithOffsetType>
 void mainLoop4(typename SolverType::MatrixType::ModelType::GeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io,
-               const OperatorOptions& opOptions,
-               PsimagLite::String targeting)
+               const OperatorOptions& opOptions)
 {
 	typedef typename SolverType::MatrixType::ModelType ModelBaseType;
 
@@ -26,7 +25,7 @@ void mainLoop4(typename SolverType::MatrixType::ModelType::GeometryType& geometr
 	DmrgSolverType dmrgSolver(model,io);
 
 	//! Calculate observables:
-	dmrgSolver.main(geometry,targeting);
+	dmrgSolver.main(geometry);
 }
 
 #endif // DMRG_DMRGDRIVER_1_H

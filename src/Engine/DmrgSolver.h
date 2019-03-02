@@ -206,7 +206,7 @@ public:
 		progress_.printline(msg2,std::cout);
 	}
 
-	void main(const GeometryType& geometry, PsimagLite::String targeting)
+	void main(const GeometryType& geometry)
 	{
 		ioOut_.write(geometry, "GEOMETRY");
 
@@ -226,7 +226,7 @@ public:
 		                                             wft_,
 		                                             quantumSector_,
 		                                             ioIn_);
-		TargetingType& psi = targetSelector(targeting);
+		TargetingType& psi = targetSelector();
 
 		ioIn_.printUnused(std::cerr);
 
