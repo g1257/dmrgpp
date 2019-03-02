@@ -88,15 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Recovery.h"
 #include "Truncation.h"
 #include "ObservablesInSitu.h"
-#include "TargetingGroundState.h"
-#include "TargetingTimeStep.h"
-#include "TargetingDynamic.h"
-#include "TargetingCorrection.h"
-#include "TargetingCorrectionVector.h"
-#include "TargetingChebyshev.h"
-#include "TargetingMetts.h"
-#include "TargetingRixsStatic.h"
-#include "TargetingRixsDynamic.h"
+#include "TargetSelector.h"
 #include "PsiBase64.h"
 #include "PrinterInDetail.h"
 #include "Io/IoSelector.h"
@@ -141,16 +133,6 @@ public:
 	typedef typename PsimagLite::Vector<BlockType>::Type VectorBlockType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename TargetingType::LanczosSolverType LanczosSolverType;
-	typedef TargetingGroundState<LanczosSolverType,VectorWithOffsetType> TargetingGroundStateType;
-	typedef TargetingTimeStep<LanczosSolverType,VectorWithOffsetType> TargetingTimeStepType;
-	typedef TargetingChebyshev<LanczosSolverType,VectorWithOffsetType> TargetingChebyshevType;
-	typedef TargetingDynamic<LanczosSolverType,VectorWithOffsetType> TargetingDynamicType;
-	typedef TargetingCorrectionVector<LanczosSolverType,VectorWithOffsetType>
-	TargetingCorrectionVectorType;
-	typedef TargetingCorrection<LanczosSolverType,VectorWithOffsetType> TargetingCorrectionType;
-	typedef TargetingMetts<LanczosSolverType,VectorWithOffsetType> TargetingMettsType;
-	typedef TargetingRixsStatic<LanczosSolverType,VectorWithOffsetType> TargetingRixsStaticType;
-	typedef TargetingRixsDynamic<LanczosSolverType,VectorWithOffsetType> TargetingRixsDynamicType;
 	typedef PrinterInDetail<LeftRightSuperType> PrinterInDetailType;
 	typedef typename DiagonalizationType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
@@ -239,31 +221,12 @@ public:
 			sitesIndices_.push_back(X[i]);
 		for (SizeType i=0;i<Y.size();i++) sitesIndices_.push_back(Y[Y.size()-i-1]);
 
-		TargetingType* psi = 0;
-
-		if (targeting=="TimeStepTargeting" || targeting == "TargetingAncilla") {
-			psi = new TargetingTimeStepType(lrs_,model_,wft_,quantumSector_,ioIn_);
-		} else if (targeting=="DynamicTargeting") {
-			psi = new TargetingDynamicType(lrs_,model_,wft_,quantumSector_,ioIn_);
-		} else if (targeting=="CorrectionVectorTargeting") {
-			psi = new TargetingCorrectionVectorType(lrs_,model_,wft_,quantumSector_,ioIn_);
-		} else if (targeting=="TargetingChebyshev") {
-			psi = new TargetingChebyshevType(lrs_,model_,wft_,quantumSector_,ioIn_);
-		} else if (targeting=="CorrectionTargeting") {
-			psi = new TargetingCorrectionType(lrs_,model_,wft_,quantumSector_,ioIn_);
-		} else if (targeting == "GroundStateTargeting") {
-			psi = new TargetingGroundStateType(lrs_,model_,wft_,quantumSector_,ioIn_);
-		} else if (targeting == "MettsTargeting") {
-			psi = new TargetingMettsType(lrs_,model_,wft_,quantumSector_,ioIn_);
-		} else if (targeting == "TargetingRixsStatic") {
-			psi = new TargetingRixsStaticType(lrs_,model_,wft_,quantumSector_,ioIn_);
-		} else if (targeting == "TargetingRixsDynamic") {
-			psi = new TargetingRixsDynamicType(lrs_,model_,wft_,quantumSector_,ioIn_);
-		} else {
-			err("Unknown targeting " + targeting + "\n");
-		}
-
-		psi->postCtor();
+		TargetSelector<TargetingType> targetSelector(lrs_,
+		                                             model_,
+		                                             wft_,
+		                                             quantumSector_,
+		                                             ioIn_);
+		TargetingType& psi = targetSelector(targeting);
 
 		ioIn_.printUnused(std::cerr);
 
@@ -271,23 +234,20 @@ public:
 		MyBasisWithOperators pE("BasisWithOperators.Environ");
 
 		if (checkpoint_.isRestart()) {
-			checkpoint_.read(pS, pE, *psi, false, "FinalPsi");
+			checkpoint_.read(pS, pE, psi, false, "FinalPsi");
 		} else { // move this block elsewhere:
 
 			RealType time = 0;
 			pE.setVarious(E, model_, time);
 			pS.setVarious(S, model_, time);
 
-			infiniteDmrgLoop(X,Y,E,pS,pE,*psi);
+			infiniteDmrgLoop(X,Y,E,pS,pE,psi);
 		}
 
 		RecoveryType recovery(sitesIndices_, ioOut_, checkpoint_, wft_, pS, pE);
-		finiteDmrgLoops(pS, pE, *psi, recovery);
+		finiteDmrgLoops(pS, pE, psi, recovery);
 
-		inSitu_.init(*psi,geometry.numberOfSites());
-
-		delete psi;
-		psi = 0;
+		inSitu_.init(psi,geometry.numberOfSites());
 	}
 
 	const ComplexOrRealType& inSitu(SizeType i) const
