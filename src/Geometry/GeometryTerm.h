@@ -237,6 +237,7 @@ public:
 			str += "string " + istr + "GeometryOptions;\n";
 			str += "integer " + istr + "LadderLeg;\n";
 			str += "integer " + istr + "LongChainDistance;\n";
+			str += "integer " + istr + "BathSitesPerSite;\n";
 			for (SizeType j = 0; j < 9; ++j) {
 				String jstr = "dir" + ttos(j) + ":";
 				str += "vector " + istr + jstr + "Connectors;\n";

@@ -219,6 +219,25 @@ public:
 		}
 	}
 
+	static String stringContext(std::string::iterator it,
+	                            std::string::iterator start,
+	                            std::string::iterator end,
+	                            SizeType before = 5,
+	                            SizeType after = 10)
+	{
+		std::string::iterator alpha = it;
+		SizeType counter = 0;
+		while (alpha != start && counter++ < before)
+			--alpha;
+
+		std::string::iterator omega = it;
+		counter = 0;
+		while (omega != end && counter++ < after)
+			++omega;
+
+		return String(alpha, omega);
+	}
+
 private:
 
 	int assignStorageByName(String key)

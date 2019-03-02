@@ -128,8 +128,8 @@ AinurState::Action<T>::operator()(A& attr,
 template <typename A, typename ContextType>
 typename EnableIf<TypesEqual<A, DoubleOrFloatType>::True, void>::Type
 AinurState::ActionCmplx::operator()(A& attr,
-                                         ContextType&,
-                                         bool&) const
+                                    ContextType&,
+                                    bool&) const
 {
 	if (name_ == "rows2")
 		t_.push_back(std::complex<DoubleOrFloatType>(0.0, attr));
@@ -142,8 +142,8 @@ AinurState::ActionCmplx::operator()(A& attr,
 template <typename A, typename ContextType>
 typename EnableIf<!TypesEqual<A, DoubleOrFloatType>::True, void>::Type
 AinurState::ActionCmplx::operator()(A& attr,
-                                         ContextType&,
-                                         bool&) const
+                                    ContextType&,
+                                    bool&) const
 {
 	if (name_ == "rows1") {
 		t_.push_back(std::complex<DoubleOrFloatType>(
@@ -178,8 +178,11 @@ void AinurState::convertInternal(Matrix<T>& t,
 	                          qi::space);
 
 	//check if we have a match
-	if (!r)
-		err("matrix parsing failed\n");
+	if (!r) {
+		err("matrix parsing failed near " +
+		    stringContext(it, value.begin(), value.end())
+		    + "\n");
+	}
 
 	if (it != value.end())
 		std::cerr << "matrix parsing: unmatched part exists\n";
