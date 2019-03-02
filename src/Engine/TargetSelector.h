@@ -124,7 +124,8 @@ private:
 		                            "TargetingInSitu",
 		                            "TargetingRixsStatic",
 		                            "TargetingRixsDynamic",
-		                            "TargetingChebyshev"};
+		                            "TargetingChebyshev",
+		                            "TargetingExpression"};
 
 		const SizeType totalTargets = targets.size();
 		SizeType count = 0;
@@ -137,11 +138,13 @@ private:
 			}
 		}
 
+		if (count == 1) return targeting;
+
 		if (count > 1)
 			err("Only one targeting at a time supported\n");
 
-		if (count == 0)
-			std::cerr <<" No explicit targeting found, asumming " << targeting <<"\n";
+		std::cerr <<" No explicit targeting found, asumming " << targeting <<"\n";
+		std::cout <<" No explicit targeting found, asumming " << targeting <<"\n";
 
 		return targeting;
 	}

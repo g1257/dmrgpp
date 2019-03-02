@@ -244,7 +244,7 @@ public:
 		str += "string FeAsMode;\n";
 		str += "integer TargetSpinTimesTwo;\n";
 		str += "integer UseSu2Symmetry;\n";
-
+		str += "integer Pvectors;\n";
 		return str;
 	}
 
