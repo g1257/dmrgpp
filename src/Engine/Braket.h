@@ -67,9 +67,10 @@ public:
 
 		OperatorSpecType opSpec(model);
 		PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(opSpec);
-
+		const AlgebraType opEmpty;
 		for (SizeType i = 0; i < opExprName_.size(); ++i) {
-			AlgebraType tmp = canonicalExpression(opExprName_[i],sites_[i]);
+			AlgebraType tmp;
+			canonicalExpression(tmp, opExprName_[i], opEmpty, sites_[i]);
 			op_.push_back(tmp);
 		}
 	}

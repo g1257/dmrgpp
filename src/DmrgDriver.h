@@ -85,13 +85,14 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 	}
 
 	OperatorType opC;
+	const OperatorType opEmpty;
 
 	if (obsOptions.hasOperatorExpression) {
 		OperatorSpecType opSpec(model);
 		int site = -1;
-		PsimagLite::CanonicalExpression<OperatorSpecType>
-		        canonicalExpression(opSpec);
-		opC = canonicalExpression(obsOptions.opexpr, site);
+		PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(opSpec);
+
+		canonicalExpression(opC, obsOptions.opexpr, opEmpty, site);
 	} else {
 		if (obsOptions.label == "B") {
 			model.printBasis(obsOptions.site);

@@ -187,7 +187,9 @@ struct Operator {
 			typedef OperatorSpec<SomeModelType, Operator> OperatorSpecType;
 			OperatorSpecType opSpec(model);
 			PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(opSpec);
-			Operator p = canonicalExpression(s, site);
+			Operator p;
+			const Operator opEmpty;
+			canonicalExpression(p, s, opEmpty, site);
 			data = p.data;
 			fermionOrBoson = p.fermionOrBoson;
 			jm = p.jm;
