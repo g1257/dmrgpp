@@ -53,8 +53,6 @@ public:
 
 	bool finalized() const { return finalized_; }
 
-private:
-
 	void finalize()
 	{
 		if (finalized_) return;
@@ -64,6 +62,8 @@ private:
 		// loop over str_ other than |something> and apply
 		err("AlgebraForTargetingExpression::finalize() not implemented\n");
 	}
+
+private:
 
 	bool finalized_;
 	PsimagLite::String str_;
