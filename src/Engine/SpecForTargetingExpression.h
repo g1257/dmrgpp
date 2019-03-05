@@ -1,9 +1,13 @@
 #ifndef SPECFORTARGETINGEXPRESSION_H
 #define SPECFORTARGETINGEXPRESSION_H
 #include "Vector.h"
-#include "OperatorSpec.h"
+#include "OneOperatorSpec.h"
 #include "CanonicalExpression.h"
 #include <numeric>
+#include "GetBraOrKet.h"
+#include "ProgramGlobals.h"
+#include "MatrixVectorKron/GenIjPatch.h"
+#include "Wft/BlockDiagWf.h"
 
 namespace Dmrg {
 
@@ -42,6 +46,8 @@ public:
 	typedef OneOperatorSpec OneOperatorSpecType;
 	typedef typename PsimagLite::Vector<OneOperatorSpecType*>::Type VectorOneOperatorSpecType;
 	typedef PsimagLite::Vector<int>::Type VectorIntType;
+	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
+	typedef BlockDiagWf<GenIjPatchType, VectorWithOffsetType> BlockDiagWfType;
 
 	const VectorWithOffsetType& toVectorWithOffset() const { return data_; }
 
@@ -107,6 +113,9 @@ public:
 		if (finalized_) return;
 
 		SizeType n = vStr_.size();
+		if (n == 0)
+			err("AlgebraForTargetingExpression: Cannot finalize an empty object\n");
+
 		SizeType opsSize = (n == 1) ? 1 : n - 1;
 		VectorOneOperatorSpecType ops(opsSize, 0);
 		VectorIntType sites(opsSize, -1);
@@ -119,7 +128,10 @@ public:
 				if (ket != "")
 					err("More than one ket found in " + toString() + "\n");
 				ket = tmp;
-				continue;
+				if (i + 1 != n)
+					err("Vector is not at the end in " + toString() + "\n");
+
+				continue; // == break;
 			}
 
 			// it's a matrix
@@ -130,7 +142,15 @@ public:
 			++j;
 		}
 
-		finalizeInternal(ops, sites, ket);
+		if (data_.size() != 0)
+			err("AlgebraForTargetingExpression: data already set !?\n");
+
+		data_ = getVector(ket);
+		data_ = factor_*data_;
+		factor_ = 1.0;
+
+		if (n > 1)
+			finalizeInternal(ops, sites);
 
 		for (SizeType i = 0; i < opsSize; ++i) {
 			delete ops[i];
@@ -144,29 +164,70 @@ public:
 private:
 
 	void finalizeInternal(const VectorOneOperatorSpecType& ops,
+	                      const VectorIntType& sites)
+	{
+		SizeType sectors = data_.sectors();
+		for (SizeType i = 0; i < sectors; ++i) {
+			finalizeInternal(ops, sites, i);
+		}
+	}
+
+	void finalizeInternal(const VectorOneOperatorSpecType& ops,
 	                      const VectorIntType& sites,
-	                      PsimagLite::String& ket)
+	                      SizeType iSector)
 	{
 		SizeType n = ops.size();
 		const SizeType opsPerSite = aux_.model.modelLinks().cm().size();
-		const SizeType systemBlockSize = aux_.lrs.left().block().size();
+		const LeftRightSuperType& lrs = aux_.lrs;
+		const SizeType systemBlockSize = lrs.left().block().size();
 		assert(systemBlockSize > 0);
-		const int maxSystemSite = aux_.lrs.left().block()[systemBlockSize - 1];
-		for (SizeType i = 0; i < n; ++i) {
-			SizeType index = aux_.model.modelLinks().nameDofToIndex(ops[i]->label,
-			                                                        ops[i]->dof);
+		const int maxSystemSite = lrs.left().block()[systemBlockSize - 1];
+		BlockDiagWfType v(data_, iSector, lrs);
 
-			if (sites[i] <= maxSystemSite) { // in system
-				index += opsPerSite*sites[i];
+		for (SizeType i = 0; i < n; ++i) {
+			SizeType j = n - i - 1;
+			SizeType index = aux_.model.modelLinks().nameDofToIndex(ops[j]->label,
+			                                                        ops[j]->dof);
+			assert(j < sites.size());
+			auto side = ProgramGlobals::SYSTEM;
+			char modifierSys = (ops[j]->transpose) ? 'T' : 'N';
+			char modifierEnv = modifierSys;
+			typename OperatorType::StorageType mSystem;
+			typename OperatorType::StorageType mEnviron;
+			if (sites[j] <= maxSystemSite) { // in system
+				index += opsPerSite*sites[j];
+				modifierEnv = 'N';
+				mSystem = lrs.left().getOperatorByIndex(index).data;
+				mEnviron.makeDiagonal(mSystem.rows(), 1.0);
 			} else { // in environ
-				SizeType siteReverse = aux_.model.geometry().numberOfSites() - sites[i] - 1;
+				SizeType siteReverse = aux_.model.geometry().numberOfSites() - sites[j] - 1;
 				index += opsPerSite*siteReverse;
+				side = ProgramGlobals::ENVIRON;
+				modifierSys = 'N';
+				mEnviron = lrs.right().getOperatorByIndex(index);
+				mSystem.makeDiagonal(mEnviron.rows(), 1.0);
 			}
 
-			std::cerr<<index<<"\n";
+			v.transform(modifierSys, modifierEnv, mSystem, mEnviron);
 		}
 
+		SizeType h = aux_.model.hilbertSize(0); // FIXME SDHS Immm TODO
+		PsimagLite::Vector<SizeType>::Type nk(1, h);
+		v.toVectorWithOffsets(data_, iNew, lrs, nk, aux_.dir);
+
 		err("AlgebraForTargetingExpression::finalizeInternal() not implemented\n");
+	}
+
+	const VectorWithOffsetType& getVector(PsimagLite::String braOrKet) const
+	{
+		GetBraOrKet getBraOrKet(braOrKet);
+
+		SizeType ind = getBraOrKet();
+
+		if (ind > 0 && ind - 1 >= aux_.pvectors.size())
+			err("getVector: out of range for " + braOrKet + "\n");
+
+		return (ind == 0) ? aux_.gs : aux_.pvectors[ind - 1];
 	}
 
 	bool finalized_;

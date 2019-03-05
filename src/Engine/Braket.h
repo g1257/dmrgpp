@@ -5,6 +5,7 @@
 #include "Matrix.h"
 #include "OperatorSpec.h"
 #include "CanonicalExpression.h"
+#include "GetBraOrKet.h"
 
 namespace Dmrg {
 
@@ -109,27 +110,12 @@ public:
 
 	PsimagLite::String toString() const { return savedString_; }
 
-	static int getPtype(PsimagLite::String str)
-	{
-		// str == P\d+
-		if (str.length() < 2) return -1;
-		if (str[0] != 'P') return -1;
-		PsimagLite::String number("");
-		for (SizeType i = 1; i < str.length(); ++i) {
-			number += str[i];
-			unsigned char x = str[i];
-			if (x < 48 || x > 57) return -1;
-		}
-
-		return atoi(number.c_str()) + 1;
-	}
-
 private:
 
 	bool isBraket(SizeType ind) const
 	{
 		if (ind >= braket_.size()) return false;
-		int pType = getPtype(braket_[ind]);
+		int pType = GetBraOrKet::getPtype(braket_[ind]);
 
 		return (braket_[ind] == "gs" ||
 		        braket_[ind] == "time" ||

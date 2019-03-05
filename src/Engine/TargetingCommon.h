@@ -91,6 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ApplyOperatorExpression.h"
 #include "Io/IoSelector.h"
 #include "PsimagLite.h"
+#include "GetBraOrKet.h"
 
 namespace Dmrg {
 
@@ -369,7 +370,6 @@ public:
 	}
 
 	// END Cocoons
-
 
 	void setAllStagesTo(StageEnumType x)
 	{
@@ -662,24 +662,17 @@ private:
 
 	const VectorWithOffsetType& getVector(PsimagLite::String braOrKet) const
 	{
-		if (braOrKet == "gs")
-			return aoe_.psi();
+		GetBraOrKet getBraOrKet(braOrKet);
 
-		int ind = BraketType::getPtype(braOrKet);
-		if (ind <= 0)
-			err("Malformed braket " + braOrKet + "\n");
+		SizeType ind = getBraOrKet();
 
-		return aoe_.targetVectors(ind - 1);
+		return (ind == 0) ? aoe_.psi() : aoe_.targetVectors(ind - 1);
 	}
 
 	void getVectorCheck(PsimagLite::String braOrKet) const
 	{
-		if (braOrKet == "gs")
-			return;
-
-		int ind = BraketType::getPtype(braOrKet);
-		if (ind <= 0)
-			err("Malformed braket " + braOrKet + "\n");
+		GetBraOrKet getBraOrKet(braOrKet);
+		getBraOrKet();
 	}
 
 	// prints <src2|A|src1>
