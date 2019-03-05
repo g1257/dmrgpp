@@ -11,14 +11,17 @@ template<typename VectorWithOffsetType, typename ModelType>
 struct AuxForTargetingExpression {
 
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
+	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
 
 	AuxForTargetingExpression(const ModelType& model_,
+	                          const LeftRightSuperType& lrs_,
 	                          const VectorWithOffsetType& gs_,
 	                          const VectorVectorWithOffsetType& pvectors_)
-	    : model(model_), gs(gs_), pvectors(pvectors_)
+	    : model(model_), lrs(lrs_), gs(gs_), pvectors(pvectors_)
 	{}
 
 	const ModelType& model;
+	const LeftRightSuperType lrs;
 	const VectorWithOffsetType& gs;
 	const VectorVectorWithOffsetType& pvectors;
 };
@@ -144,6 +147,25 @@ private:
 	                      const VectorIntType& sites,
 	                      PsimagLite::String& ket)
 	{
+		SizeType n = ops.size();
+		const SizeType opsPerSite = aux_.model.modelLinks().cm().size();
+		const SizeType systemBlockSize = aux_.lrs.left().block().size();
+		assert(systemBlockSize > 0);
+		const int maxSystemSite = aux_.lrs.left().block()[systemBlockSize - 1];
+		for (SizeType i = 0; i < n; ++i) {
+			SizeType index = aux_.model.modelLinks().nameDofToIndex(ops[i]->label,
+			                                                        ops[i]->dof);
+
+			if (sites[i] <= maxSystemSite) { // in system
+				index += opsPerSite*sites[i];
+			} else { // in environ
+				SizeType siteReverse = aux_.model.geometry().numberOfSites() - sites[i] - 1;
+				index += opsPerSite*siteReverse;
+			}
+
+			std::cerr<<index<<"\n";
+		}
+
 		err("AlgebraForTargetingExpression::finalizeInternal() not implemented\n");
 	}
 

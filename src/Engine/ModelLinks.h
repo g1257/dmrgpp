@@ -107,7 +107,8 @@ public:
 
 
 			assert(index1 < cm_.size() && index2 < cm_.size());
-			ProgramGlobals::FermionOrBosonEnum fermionOrBoson = ProgramGlobals::FermionOrBosonEnum::BOSON;
+			ProgramGlobals::FermionOrBosonEnum fermionOrBoson =
+			        ProgramGlobals::FermionOrBosonEnum::BOSON;
 			if (cm_[index1].fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION &&
 			cm_[index2].fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
 				fermionOrBoson = ProgramGlobals::FermionOrBosonEnum::FERMION;
@@ -224,8 +225,11 @@ public:
 
 			dofs = ll.dofs();
 
-			for (SizeType j = 0; j < dofs; ++j)
+			for (SizeType j = 0; j < dofs; ++j) {
 				cm_.push_back(ll(j));
+				cmNameDof_.push_back(typename LabelType::PairStringSizeType(nameAndSite.first,
+				                                                            j));
+			}
 		}
 
 		SizeType m = cm_.size();
@@ -295,6 +299,20 @@ public:
 		return *(terms_[term]);
 	}
 
+	// FIXME TODO SDHS Immm: add type of site to arguments here
+	SizeType nameDofToIndex(PsimagLite::String name,
+	                        SizeType dof) const
+	{
+		PairStringSizeType p(name, dof);
+		auto result = std::find(cmNameDof_.begin(), cmNameDof_.end(), p);
+		if (result == cmNameDof_.end())
+			err("siteNameDofToIndex: not found for name=" + name + " dof= " +
+			    ttos(dof) + "\n");
+		return (result - cmNameDof_.begin());
+	}
+
+	const VectorOperatorType& cm() const { return cm_; }
+
 private:
 
 	static HermitianEnum getHermitianProperty(const SparseMatrixType& m)
@@ -309,6 +327,7 @@ private:
 	static VectorOperatorType cm_;
 	static VectorSizeType offsets_;
 	static VectorPairStringSizeType trackables_;
+	static VectorPairStringSizeType cmNameDof_;
 };
 
 template<typename T1, typename T2>
@@ -322,5 +341,8 @@ typename ModelLinks<T1, T2>::VectorOperatorType ModelLinks<T1, T2>::cm_;
 
 template<typename T1, typename T2>
 typename ModelLinks<T1, T2>::VectorPairStringSizeType ModelLinks<T1, T2>::trackables_;
+
+template<typename T1, typename T2>
+typename ModelLinks<T1, T2>::VectorPairStringSizeType ModelLinks<T1, T2>::cmNameDof_;
 }
 #endif // MODEL_LINKS_H
