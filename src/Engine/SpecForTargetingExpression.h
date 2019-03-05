@@ -6,8 +6,7 @@
 #include <numeric>
 #include "GetBraOrKet.h"
 #include "ProgramGlobals.h"
-#include "MatrixVectorKron/GenIjPatch.h"
-#include "Wft/BlockDiagWf.h"
+#include "PackIndices.h"
 
 namespace Dmrg {
 
@@ -46,8 +45,9 @@ public:
 	typedef OneOperatorSpec OneOperatorSpecType;
 	typedef typename PsimagLite::Vector<OneOperatorSpecType*>::Type VectorOneOperatorSpecType;
 	typedef PsimagLite::Vector<int>::Type VectorIntType;
-	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
-	typedef BlockDiagWf<GenIjPatchType, VectorWithOffsetType> BlockDiagWfType;
+	typedef typename VectorWithOffsetType::VectorType VectorType;
+	typedef PsimagLite::PackIndices PackIndicesType;
+	typedef typename OperatorType::StorageType SparseMatrixType;
 
 	const VectorWithOffsetType& toVectorWithOffset() const { return data_; }
 
@@ -168,7 +168,7 @@ private:
 	{
 		SizeType sectors = data_.sectors();
 		for (SizeType i = 0; i < sectors; ++i) {
-			finalizeInternal(ops, sites, i);
+			finalizeInternal(ops, sites, data_.sector(i));
 		}
 	}
 
@@ -182,40 +182,63 @@ private:
 		const SizeType systemBlockSize = lrs.left().block().size();
 		assert(systemBlockSize > 0);
 		const int maxSystemSite = lrs.left().block()[systemBlockSize - 1];
-		BlockDiagWfType v(data_, iSector, lrs);
+		VectorType v(lrs.super().size(), 0.0);
 
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType j = n - i - 1;
 			SizeType index = aux_.model.modelLinks().nameDofToIndex(ops[j]->label,
 			                                                        ops[j]->dof);
 			assert(j < sites.size());
-			auto side = ProgramGlobals::SYSTEM;
-			char modifierSys = (ops[j]->transpose) ? 'T' : 'N';
-			char modifierEnv = modifierSys;
-			typename OperatorType::StorageType mSystem;
-			typename OperatorType::StorageType mEnviron;
+
 			if (sites[j] <= maxSystemSite) { // in system
 				index += opsPerSite*sites[j];
-				modifierEnv = 'N';
-				mSystem = lrs.left().getOperatorByIndex(index).data;
-				mEnviron.makeDiagonal(mSystem.rows(), 1.0);
+
+				const SparseMatrixType& m = lrs.left().getOperatorByIndex(index).data;
+				multiplySys(v, iSector, m, ops[j]->transpose);
 			} else { // in environ
 				SizeType siteReverse = aux_.model.geometry().numberOfSites() - sites[j] - 1;
 				index += opsPerSite*siteReverse;
-				side = ProgramGlobals::ENVIRON;
-				modifierSys = 'N';
-				mEnviron = lrs.right().getOperatorByIndex(index);
-				mSystem.makeDiagonal(mEnviron.rows(), 1.0);
+				const SparseMatrixType& m = lrs.right().getOperatorByIndex(index).data;
+				multiplyEnv(v, iSector, m, ops[j]->transpose);
 			}
 
-			v.transform(modifierSys, modifierEnv, mSystem, mEnviron);
+			data_.fromFull(v, aux_.lrs.super()); // doesn't work in general FIXME
+			// convert data_ from the beginning into BlockOffDiag.h FIXME TODO
+			err("AlgebraForTargetingExpression::finalizeInternal() not implemented\n");
+
+			std::fill(v.begin(), v.end(), 0.0);
 		}
+	}
 
-		SizeType h = aux_.model.hilbertSize(0); // FIXME SDHS Immm TODO
-		PsimagLite::Vector<SizeType>::Type nk(1, h);
-		v.toVectorWithOffsets(data_, iNew, lrs, nk, aux_.dir);
+	void multiplySys(VectorType& v,
+	                 SizeType iSector,
+	                 const SparseMatrixType& m,
+	                 bool transpose)
+	{
+		PackIndicesType pack(aux_.lrs.left().size());
+		SizeType offset = data_.offset(iSector);
+		SizeType total = data_.effectiveSize(iSector);
+		for (SizeType i = 0; i < total; ++i) {
+			SizeType s = 0;
+			SizeType e = 0;
+			pack.unpack(s, e, aux_.lrs.super().permutation(i + offset));
+			const SizeType start = m.getRowPtr(s);
+			const SizeType end = m.getRowPtr(s + 1);
+			for (SizeType k = start; k < end; ++k) {
+				const SizeType sprime = m.getCol(k);
+				const SizeType j = pack.pack(sprime, e, aux_.lrs.super().permutationInverse());
+				assert(j < v.size());
+				v[j] += m.getValue(k)*data_.fastAccess(iSector, i);
+			}
+		}
+	}
 
-		err("AlgebraForTargetingExpression::finalizeInternal() not implemented\n");
+	void multiplyEnv(VectorType& v,
+	                 SizeType iSector,
+	                 const SparseMatrixType& m,
+	                 bool transpose)
+	{
+		err("AlgebraForTargetingExpression::multiplyEnv() not implemented\n");
 	}
 
 	const VectorWithOffsetType& getVector(PsimagLite::String braOrKet) const
