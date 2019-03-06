@@ -545,7 +545,7 @@ private:
 	{
 		if (str == "gs") return 0;
 		if (str == "time") return 1; // == "P0", "time" is legacy notation
-		int x = BraketType::getPtype(str);
+		int x = BraketType::GetBraOrKetType::getPtype(str);
 		if (x >= 0) return x;
 
 		PsimagLite::String msg("Observer::braketStringToNumber:");

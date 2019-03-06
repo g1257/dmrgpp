@@ -27,6 +27,7 @@ public:
 	typedef typename OperatorSpecType::ResultType AlgebraType;
 	typedef typename PsimagLite::Vector<AlgebraType>::Type VectorAlgebraType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef GetBraOrKet GetBraOrKetType;
 
 	Braket(const ModelType& model,const PsimagLite::String& braket)
 	    : model_(model), braket_(2,""),savedString_(braket)
