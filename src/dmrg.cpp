@@ -389,6 +389,9 @@ to the main dmrg driver are the following.
 		ProgramGlobals::notReallySortAlgo = "custom";
 
 	bool isComplex = (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos);
+	if (dmrgSolverParams.options.find("TimeStepTargeting") != PsimagLite::String::npos)
+		isComplex = true;
+
 	if (isComplex) {
 		mainLoop0<MySparseMatrixComplex>(io, dmrgSolverParams, options);
 	} else {

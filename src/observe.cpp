@@ -202,7 +202,11 @@ int main(int argc,char **argv)
 	PsimagLite::CodeSectionParams codeSectionParams(dmrgSolverParams.nthreads, setAffinities);
 	ConcurrencyType::setOptions(codeSectionParams);
 
-	if (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos) {
+	bool isComplex = (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos);
+	if (dmrgSolverParams.options.find("TimeStepTargeting") != PsimagLite::String::npos)
+		isComplex = true;
+
+	if (isComplex) {
 		mainLoop0<MySparseMatrixComplex>(io,dmrgSolverParams,inputCheck, list);
 	} else {
 		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck, list);

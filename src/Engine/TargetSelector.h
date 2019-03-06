@@ -162,9 +162,6 @@ private:
 		        targeting != "TargetingRixsStatic" &&
 		        targeting != "TargetingRixsDynamic") {
 			err("SolverOptions=useComplex not allowed for " + targeting + "\n");
-		} else {
-			if (targeting == "TimeStepTargeting")
-				err("SolverOptions=useComplex is needed for " + targeting + "\n");
 		}
 
 		if (targeting != "GroundStateTargeting" && BasisType::useSu2Symmetry()) {
