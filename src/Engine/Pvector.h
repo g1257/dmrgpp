@@ -36,8 +36,7 @@ private:
 	{
 		const SizeType l = str.length();
 		if (l < 4) err("Pvector " + str + " string too short\n");
-		SizeType last = l - 1;
-		assert(str[last] == '>');
+		assert(str[l - 1] == '>');
 		PsimagLite::String buffer("");
 		for (SizeType i = 0; i < l; ++i) {
 			const SizeType j = l - i - 1;
