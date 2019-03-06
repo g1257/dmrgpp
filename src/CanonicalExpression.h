@@ -19,18 +19,20 @@ public:
 	    : itemSpec_(itemSpec)
 	{}
 
-	ResultType operator()(String expr, AuxiliaryType& aux) const
+	void operator()(ResultType& result,
+	                String expr,
+	                const ResultType& resultEmpty,
+	                AuxiliaryType& aux) const
 	{
 		// canonical expressions only for now
 		// expr --> exprCanonical
 		String exprCanonical = expr; // canonicalize here
 		VectorStringType vecStr;
-		ResultType result;
 
 		split(vecStr, exprCanonical, "+");
 
 		for (SizeType i = 0; i < vecStr.size(); ++i) {
-			ResultType term;
+			ResultType term = resultEmpty;
 			procCanonicalTerm(term, vecStr[i], aux);
 			if (!ItemSpecType::metaEqual(term, result))
 				err("CanonicalExpression: metas not equal\n");
@@ -43,8 +45,6 @@ public:
 
 		if (ItemSpecType::isEmpty(result))
 			err("CanonicalExpression: expression result is empty\n");
-
-		return result;
 	}
 
 private:
