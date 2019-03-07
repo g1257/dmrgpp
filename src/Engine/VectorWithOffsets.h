@@ -383,6 +383,7 @@ public:
 	          PsimagLite::String label)
 	{
 		io.read(size_, label + "/size_");
+		if (size_ == 0) return;
 		io.read(index2Sector_, label + "/index2Sector_");
 		SizeType x = 0;
 		io.read(x, label + "/data_/Size");

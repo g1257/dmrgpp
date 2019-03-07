@@ -96,10 +96,6 @@ public:
 
 	typedef typename PsimagLite::Vector<StageEnum>::Type VectorStageEnumType;
 
-	// Unfortunately we need a default ctor
-	// to build an array of these
-	TimeSerializer() { }
-
 	TimeSerializer(RealType currentTime,
 	               SizeType site,
 	               const typename PsimagLite::Vector<VectorType>::Type& targetVectors,

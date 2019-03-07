@@ -235,19 +235,30 @@ public:
 	{
 		if (timeSsize_ == 0) return 0.0;
 		assert(checkPos(threadId));
-		return timeSerializerV_[currentPos_[threadId]].time();
+		SizeType ind = currentPos_[threadId];
+		assert(ind < timeSerializerV_.size());
+		assert(timeSerializerV_[ind]);
+		return timeSerializerV_[ind]->time();
 	}
 
 	SizeType site(SizeType threadId) const
 	{
 		assert(checkPos(threadId));
-		return  (timeSsize_==0) ?
-		            dSerializerV_[currentPos_[threadId]]->site()
-		        : timeSerializerV_[currentPos_[threadId]].site();
+		SizeType ind = currentPos_[threadId];
+
+		if (timeSsize_ == 0) {
+			assert(ind < dSerializerV_.size());
+			assert(dSerializerV_[ind]);
+			return dSerializerV_[ind]->site();
 		}
 
-		SizeType size() const
-		{
+		assert(ind < timeSerializerV_.size());
+		assert(timeSerializerV_[ind]);
+		return timeSerializerV_[ind]->site();
+	}
+
+	SizeType size() const
+	{
 		return dSsize_; //-1;
 	}
 
@@ -269,7 +280,10 @@ public:
 	                                       SizeType threadId) const
 	{
 		assert(checkPos(threadId));
-		return timeSerializerV_[currentPos_[threadId]].vector(braketId);
+		SizeType ind = currentPos_[threadId];
+		assert(ind < timeSerializerV_.size());
+		assert(timeSerializerV_[ind]);
+		return timeSerializerV_[ind]->vector(braketId);
 	}
 
 	bool withLegacyBugs() const
@@ -313,11 +327,15 @@ private:
 				dSerializerV_.push_back(dSerializer);
 			else
 				delete dSerializer;
-//			if (hasTimeEvolution) {
-//				TimeSerializerType ts(io_, ""); // FIXME
-//				if (saveOrNot == SAVE_YES)
-//					timeSerializerV_.push_back(ts);
-//			}
+
+			try {
+				PsimagLite::String prefix("/TargetingCommon/" + ttos(i));
+				TimeSerializerType* ts = new TimeSerializerType(io_, prefix);
+				if (saveOrNot == SAVE_YES)
+					timeSerializerV_.push_back(ts);
+				else
+					delete ts;
+			} catch(...) {}
 
 			std::cerr<<__FILE__<<" read "<<i<<" out of "<<total<<"\n";
 		}
@@ -381,7 +399,7 @@ private:
 
 	IoInputType& io_;
 	typename PsimagLite::Vector<DmrgSerializerType*>::Type dSerializerV_;
-	typename PsimagLite::Vector<TimeSerializerType>::Type timeSerializerV_;
+	typename PsimagLite::Vector<TimeSerializerType*>::Type timeSerializerV_;
 	VectorSizeType currentPos_; // it's a vector: one per pthread
 	bool verbose_;
 	bool withLegacyBugs_;
