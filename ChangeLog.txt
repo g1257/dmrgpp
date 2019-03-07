@@ -1,3 +1,38 @@
+2019-03-07 Version 5.52
+
+Compilation:
+
+* DMRG++ compiles on MacOS
+
+Refactoring:
+
+* Target selection now in TargetSelector
+
+* procOmegas: no longer writes .space and .sq files
+
+Performance:
+
+* WftAccelBlocks improved by Ed
+
+* BlockDiagWf improved by Ed
+
+New Features:
+
+* pgfplot.pl and TeX templates added
+
+* procOmegas: cheby support
+
+* Multi-site Expressions In-Situ: work started
+
+* Intent input line: work started
+
+TestSuite:
+
+* ci: prefer Ainur inputs
+
+* inp2ain to help convert to Ainur inputs
+
+
 2019-01-31 Version 5.50
 
 Bug fixes:
