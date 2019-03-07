@@ -1,3 +1,12 @@
+2019-03-07 Version 2.52
+
+* PthreadsNg compiles on MacOS
+
+* Ainur: better error reporting
+
+* CanonicalExpression no longer needs
+default ctor for ResultType
+
 2019-01-31 Version 2.50
 
 * IsEnumClass predicate
