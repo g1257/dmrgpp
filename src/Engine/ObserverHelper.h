@@ -149,13 +149,15 @@ public:
 
 	~ObserverHelper()
 	{
-		for (SizeType i=0;i<dSsize_;i++) {
-			DmrgSerializerType* p = dSerializerV_[i];
-			delete p;
-		}
+		for (SizeType i = 0; i < dSsize_; ++i)
+			delete dSerializerV_[i];
+
+		for (SizeType i = 0; i < timeSerializerV_.size(); ++i)
+			delete timeSerializerV_[i];
 
 		dSerializerV_.clear();
-		dSsize_ = 0;
+		timeSerializerV_.clear();
+		dSsize_ = timeSsize_ = 0;
 	}
 
 	bool endOfData() const { return noMoreData_; }
