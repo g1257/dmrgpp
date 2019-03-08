@@ -86,7 +86,7 @@ public:
 		if (other.finalized_ || finalized_)
 			err("AlgebraForTargetingExpression: Two finalized terms cannot be multiplied\n");
 
-		vStr_.insert(vStr_.begin(), other.vStr_.begin(), other.vStr_.end());
+		vStr_.insert(vStr_.end(), other.vStr_.begin(), other.vStr_.end());
 
 		return *this;
 	}
@@ -166,6 +166,7 @@ private:
 	void finalizeInternal(const VectorOneOperatorSpecType& ops,
 	                      const VectorIntType& sites)
 	{
+		checkSites(sites);
 		SizeType sectors = data_.sectors();
 		for (SizeType i = 0; i < sectors; ++i) {
 			finalizeInternal(ops, sites, data_.sector(i));
@@ -251,6 +252,16 @@ private:
 			err("getVector: out of range for " + braOrKet + "\n");
 
 		return (ind == 0) ? aux_.gs : aux_.pvectors[ind - 1];
+	}
+
+	void checkSites(const VectorIntType& sites) const
+	{
+		SizeType n = sites.size();
+		for (SizeType i = 1; i < n; ++i) {
+			if (sites[i] >= sites[i - 1]) continue;
+			err(PsimagLite::String("SpecForTargetingExpression: Sites must be ") +
+			    " ordered increasingly in expression " + toString());
+		}
 	}
 
 	bool finalized_;

@@ -130,14 +130,12 @@ public:
 
 	public:
 
-		MyLoop(bool useSu2Symmetry,
-		       ReducedOperatorsType& reducedOpImpl,
+		MyLoop(ReducedOperatorsType& reducedOpImpl,
 		       typename PsimagLite::Vector<OperatorType>::Type& operators,
 		       const BlockDiagonalMatrixType& ftransform1,
 		       const BasisType* thisBasis1,
 		       const PairSizeSizeType& startEnd)
-		    : useSu2Symmetry_(useSu2Symmetry),
-		      reducedOpImpl_(reducedOpImpl),
+		    : reducedOpImpl_(reducedOpImpl),
 		      operators_(operators),
 		      ftransform(ftransform1),
 		      thisBasis(thisBasis1),
@@ -155,7 +153,7 @@ public:
 				return;
 			}
 
-			if (!useSu2Symmetry_)
+			if (!BasisType::useSu2Symmetry())
 				reducedOpImpl_.changeBasis(operators_[k].data);
 			else
 				reducedOpImpl_.changeBasis(k);
@@ -163,7 +161,7 @@ public:
 
 		SizeType tasks() const
 		{
-			if (useSu2Symmetry_) return reducedOpImpl_.size();
+			if (BasisType::useSu2Symmetry()) return reducedOpImpl_.size();
 			return operators_.size();
 		}
 
@@ -171,7 +169,7 @@ public:
 		{
 			if (ConcurrencyType::isMpiDisabled("Operators")) return;
 
-			if (!useSu2Symmetry_) {
+			if (!BasisType::useSu2Symmetry()) {
 				gatherOperators();
 				bcastOperators();
 			} else {
@@ -204,7 +202,6 @@ public:
 				Dmrg::bcast(operators_[i]);
 		}
 
-		bool useSu2Symmetry_;
 		ReducedOperatorsType& reducedOpImpl_;
 		typename PsimagLite::Vector<OperatorType>::Type& operators_;
 		const BlockDiagonalMatrixType& ftransform;
@@ -214,8 +211,7 @@ public:
 	};
 
 	Operators(const BasisType* thisBasis)
-	    : useSu2Symmetry_(BasisType::useSu2Symmetry()),
-	      reducedOpImpl_(thisBasis),
+	    : reducedOpImpl_(thisBasis),
 	      progress_("Operators")
 	{
 		announceChangeAll();
@@ -227,8 +223,7 @@ public:
 	          SizeType level,
 	          const BasisType* thisBasis,
 	          bool isObserveCode)
-	    : useSu2Symmetry_(BasisType::useSu2Symmetry()),
-	      reducedOpImpl_(io,level,thisBasis),
+	    : reducedOpImpl_(io,level,thisBasis),
 	      progress_("Operators")
 	{
 		if (isObserveCode) return;
@@ -247,7 +242,7 @@ public:
 	{
 		prefix += "/";
 
-		if (!useSu2Symmetry_) {
+		if (!BasisType::useSu2Symmetry()) {
 			io.read(operators_, prefix + "Operators");
 		} else {
 			if (roi) reducedOpImpl_.read(io);
@@ -259,32 +254,32 @@ public:
 
 	void setOperators(const typename PsimagLite::Vector<OperatorType>::Type& ops)
 	{
-		if (!useSu2Symmetry_) operators_=ops;
+		if (!BasisType::useSu2Symmetry()) operators_=ops;
 		else reducedOpImpl_.setOperators(ops);
 	}
 
 	const OperatorType& getReducedOperatorByIndex(char modifier,const PairType& p) const
 	{
-		assert(useSu2Symmetry_);
+		assert(BasisType::useSu2Symmetry());
 		return reducedOpImpl_.getReducedOperatorByIndex(modifier,p);
 	}
 
 	const OperatorType& getOperatorByIndex(int i) const
 	{
-		assert(!useSu2Symmetry_);
+		assert(!BasisType::useSu2Symmetry());
 		assert(i>=0 && SizeType(i)<operators_.size());
 		return operators_[i];
 	}
 
 	const OperatorType& getReducedOperatorByIndex(int i) const
 	{
-		assert(useSu2Symmetry_);
+		assert(BasisType::useSu2Symmetry());
 		return reducedOpImpl_.getReducedOperatorByIndex(i);
 	}
 
 	SizeType numberOfOperators() const
 	{
-		if (useSu2Symmetry_) return reducedOpImpl_.size();
+		if (BasisType::useSu2Symmetry()) return reducedOpImpl_.size();
 		return operators_.size();
 	}
 
@@ -295,7 +290,7 @@ public:
 		typedef PsimagLite::Parallelizer<MyLoop> ParallelizerType;
 		ParallelizerType threadObject(PsimagLite::Concurrency::codeSectionParams);
 
-		MyLoop helper(useSu2Symmetry_,reducedOpImpl_,operators_,ftransform,thisBasis,startEnd);
+		MyLoop helper(reducedOpImpl_,operators_,ftransform,thisBasis,startEnd);
 
 		threadObject.loopCreate(helper); // FIXME: needs weights
 
@@ -307,7 +302,8 @@ public:
 	void reorder(const VectorSizeType& permutation)
 	{
 		for (SizeType k=0;k<numberOfOperators();k++) {
-			if (!useSu2Symmetry_) reorder(operators_[k].data,permutation);
+			if (!BasisType::useSu2Symmetry())
+				reorder(operators_[k].data,permutation);
 			reducedOpImpl_.reorder(k,permutation);
 		}
 		reorder(hamiltonian_,permutation);
@@ -324,7 +320,8 @@ public:
 	                  SizeType x,
 	                  const BasisType* thisBasis)
 	{
-		if (!useSu2Symmetry_) operators_.resize(x);
+		if (!BasisType::useSu2Symmetry())
+			operators_.resize(x);
 		reducedOpImpl_.setToProduct(basis2,basis3,x,thisBasis);
 	}
 
@@ -360,7 +357,7 @@ public:
 	                     bool option,
 	                     ApplyFactorsType& apply)
 	{
-		assert(!useSu2Symmetry_);
+		assert(!BasisType::useSu2Symmetry());
 		PsimagLite::externalProduct(operators_[i].data,m.data,x,fermionicSigns,option);
 		// don't forget to set fermion sign and j:
 		operators_[i].fermionOrBoson=m.fermionOrBoson;
@@ -420,7 +417,7 @@ public:
 
 	void print(int ind= -1) const
 	{
-		if (!useSu2Symmetry_) {
+		if (!BasisType::useSu2Symmetry()) {
 			if (ind<0)
 				for (SizeType i=0;i<operators_.size();i++) std::cerr<<operators_[i];
 			else std::cerr<<operators_[ind];
@@ -435,8 +432,11 @@ public:
 	               typename PsimagLite::EnableIf<
 	               PsimagLite::IsOutputLike<SomeIoOutType>::True, int*>::Type = 0) const
 	{
-		if (!useSu2Symmetry_) io.overwrite(operators_, s + "/Operators");
-		else reducedOpImpl_.overwrite(io,s);
+		if (!BasisType::useSu2Symmetry())
+			io.overwrite(operators_, s + "/Operators");
+		else
+			reducedOpImpl_.overwrite(io,s);
+
 		io.overwrite(hamiltonian_, s + "/Hamiltonian");
 	}
 
@@ -444,7 +444,7 @@ public:
 	           const PsimagLite::String& s,
 	           PsimagLite::IoNgSerializer::WriteMode mode) const
 	{
-		if (!useSu2Symmetry_) {
+		if (!BasisType::useSu2Symmetry()) {
 			if (mode == PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
 				io.overwrite(operators_, s + "/Operators");
 			else
@@ -496,7 +496,6 @@ private:
 #endif
 	}
 
-	bool useSu2Symmetry_;
 	ReducedOperatorsType reducedOpImpl_;
 	typename PsimagLite::Vector<OperatorType>::Type operators_;
 	SparseMatrixType hamiltonian_;
