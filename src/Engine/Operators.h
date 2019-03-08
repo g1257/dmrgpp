@@ -126,6 +126,9 @@ public:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef std::pair<SizeType,SizeType> PairSizeSizeType;
 
+	// law of the excluded middle went out the window here:
+	enum class ChangeAllEnum { UNSET, TRUE_SET, FALSE_SET};
+
 	class MyLoop {
 
 	public:
@@ -182,9 +185,9 @@ public:
 
 		bool isExcluded(SizeType k) const
 		{
-#ifdef OPERATORS_CHANGE_ALL
-			return false; // <-- this is the safest answer
-#endif
+			if (changeAll_ == ChangeAllEnum::TRUE_SET)
+				return false; // <-- this is the safest answer
+
 			if (k < startEnd_.first || k >= startEnd_.second) return true;
 			return false;
 		}
@@ -214,7 +217,8 @@ public:
 	    : reducedOpImpl_(thisBasis),
 	      progress_("Operators")
 	{
-		announceChangeAll();
+		if (changeAll_ == ChangeAllEnum::UNSET)
+			changeAll_ = ChangeAllEnum::FALSE_SET;
 	}
 
 	template<typename IoInputter>
@@ -226,9 +230,10 @@ public:
 	    : reducedOpImpl_(io,level,thisBasis),
 	      progress_("Operators")
 	{
-		if (isObserveCode) return;
+		if (changeAll_ == ChangeAllEnum::UNSET)
+			changeAll_ = ChangeAllEnum::FALSE_SET;
 
-		announceChangeAll();
+		if (isObserveCode) return;
 
 		read(io, prefix, false);
 	}
@@ -250,6 +255,25 @@ public:
 
 		io.read(hamiltonian_, prefix + "Hamiltonian");
 		reducedOpImpl_.setHamiltonian(hamiltonian_);
+	}
+
+	static void setChangeAll(bool flag)
+	{
+		if (!flag) {
+			changeAll_ = ChangeAllEnum::FALSE_SET;
+			printChangeAll();
+			return;
+		}
+
+		assert(flag);
+
+		if (changeAll_ == ChangeAllEnum::UNSET) {
+			changeAll_ = ChangeAllEnum::TRUE_SET;
+			printChangeAll();
+			return;
+		}
+
+		err("Operators::setChangeAll(true) called to late\n");
 	}
 
 	void setOperators(const typename PsimagLite::Vector<OperatorType>::Type& ops)
@@ -483,24 +507,43 @@ private:
 		permuteInverse(v,matrixTmp,permutation);
 	}
 
-	void announceChangeAll() const
+	static void printChangeAll()
 	{
-#ifdef OPERATORS_CHANGE_ALL
-		static bool flag = false;
-		if (flag) return;
-		PsimagLite::String msg("OPERATORS_CHANGE_ALL in use: ");
-		msg += "GeometryMaxConnections value might not be used\n";
+		PsimagLite::String msg("INFO: Operators::changeAll_=");
+		msg += toString(changeAll_) + "\n";
+		if (changeAll_ == ChangeAllEnum::TRUE_SET)
+			msg += "GeometryMaxConnections value might not be used\n";
 		std::cerr<<msg;
 		std::cout<<msg;
-		flag = true;
-#endif
 	}
 
+	static PsimagLite::String toString(ChangeAllEnum value)
+	{
+		switch (value) {
+		case ChangeAllEnum::UNSET:
+			return "UNSET";
+			break;
+		case ChangeAllEnum::FALSE_SET:
+			return "FALSE";
+			break;
+		case ChangeAllEnum::TRUE_SET:
+		default:
+			return "TRUE";
+			break;
+		}
+	}
+
+	static ChangeAllEnum changeAll_;
 	ReducedOperatorsType reducedOpImpl_;
 	typename PsimagLite::Vector<OperatorType>::Type operators_;
 	SparseMatrixType hamiltonian_;
 	PsimagLite::ProgressIndicator progress_;
 }; //class Operators
+
+template<typename T>
+typename Operators<T>::ChangeAllEnum Operators<T>::changeAll_ =
+        Operators<T>::ChangeAllEnum::UNSET;
+
 } // namespace Dmrg
 
 /*@}*/

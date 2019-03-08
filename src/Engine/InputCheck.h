@@ -351,6 +351,9 @@ public:
 			\item [KronNoUseLowerPart] Don't Use lower part of Kron matrix but
  recompute it instead.
 			\item [shrinkStacksOnDisk] Store shrink stacks on disk instead of in memory
+			\item [OperatorsChangeAll] Do not hollow out operators but keep track of
+			them for all sites. This is will use more RAM, but might be needed
+			to target expressions.
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,
@@ -415,6 +418,7 @@ public:
 		registerOpts.push_back("saveDensityMatrixEigenvalues");
 		registerOpts.push_back("KronNoUseLowerPart");
 		registerOpts.push_back("shrinkStacksOnDisk");
+		registerOpts.push_back("OperatorsChangeAll");
 
 		PsimagLite::Options::Writeable optWriteable(registerOpts,
 		                                            PsimagLite::Options::Writeable::PERMISSIVE);

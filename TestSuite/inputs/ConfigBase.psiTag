@@ -54,9 +54,6 @@ compilerCPPOptions USE_CUSTOM_ALLOCATOR = (
 CPPFLAGS += -DUSE_CUSTOM_ALLOCATOR
 )
 
-#Change basis even for un-needed operators
-.= CPPFLAGS += -DOPERATORS_CHANGE_ALL
-
 # Disable KronUtil
 compilerCPPOptions NotKronUtil = (
 CPPFLAGS += -DDO_NOT_USE_KRON_UTIL

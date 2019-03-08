@@ -131,6 +131,8 @@ public:
 	{
 		Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 		MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
+		if (params.options.find("OperatorsChangeAll") != PsimagLite::String::npos)
+			OperatorsType::setChangeAll(true);
 	}
 
 	const ParametersType& params() const { return params_; }
