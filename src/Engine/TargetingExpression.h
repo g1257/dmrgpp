@@ -112,6 +112,7 @@ class TargetingExpression : public TargetingBase<LanczosSolverType_,VectorWithOf
 	CanonicalExpressionType;
 	typedef AuxForTargetingExpression<VectorWithOffsetType_, ModelType>
 	AuxForTargetingExpressionType;
+	typedef typename TargetingCommonType::VectorRealType VectorRealType;
 
 public:
 
@@ -121,8 +122,10 @@ public:
 	                    const QnType&,
 	                    InputValidatorType& io)
 	    : BaseType(lrs,model,wft,0),
-	      progress_("TargetingExpression")
+	      progress_("TargetingExpression"),
+	      gsWeight_(0.3)
 	{
+		io.readline(gsWeight_, "GsWeight=");
 		pvectorsFromInput(io);
 	}
 
@@ -153,7 +156,7 @@ public:
 
 	RealType gsWeight() const
 	{
-		return 1;
+		return (this->common().aoe().noStageIs(StageEnumType::DISABLED)) ? gsWeight_ : 1.0;
 	}
 
 	void evolve(RealType,
@@ -166,6 +169,14 @@ public:
 
 		this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 		computePvectors();
+
+		SizeType n = pVectors_.size();
+		VectorRealType weight(n);
+		for (SizeType i = 0; i < n; ++i)
+			weight[i] = pVectors_[i]->weight();
+
+		this->common().printNormsAndWeights(gsWeight_, weight);
+
 		bool doBorderIfBorder = true;
 		this->common().cocoon(block1, direction, doBorderIfBorder); // in-situ
 	}
@@ -191,10 +202,18 @@ private:
 		io.readline(total, "Pvectors=");
 		pVectors_.resize(total);
 		PsimagLite::String tmp;
+		RealType sum = 0.0;
 		for (SizeType i = 0; i < total; ++i) {
 			io.readline(tmp, "P" + ttos(i) + "=");
 			pVectors_[i] = new PvectorType(tmp);
+			sum += pVectors_[i]->weight();
 		}
+
+		if (sum == 0.0) return;
+
+		RealType factor = (1.0 - gsWeight_)/sum;
+		for (SizeType i = 0; i < total; ++i)
+			pVectors_[i]->multiplyWeight(factor);
 	}
 
 	void computePvectors()
@@ -215,6 +234,7 @@ private:
 	}
 
 	PsimagLite::ProgressIndicator progress_;
+	RealType gsWeight_;
 	VectorPvectorType pVectors_;
 	SpecForTargetingExpressionType opSpec_;
 };     //class TargetingExpression

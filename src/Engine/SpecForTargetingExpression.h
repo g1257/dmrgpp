@@ -60,7 +60,7 @@ public:
 		GetOperator(SizeType index,
 		            const BasisWithOperatorsType& basis,
 		            bool transpose)
-		    : index_(index), basis_(basis), m_(0), owner_(false), fs_(1)
+		    : index_(index), m_(0), owner_(false), fs_(1)
 		{
 			const OperatorType& op = basis.getOperatorByIndex(index);
 			fs_ = (op.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
@@ -91,7 +91,6 @@ public:
 	private:
 
 		SizeType index_;
-		const BasisWithOperatorsType& basis_;
 		SparseMatrixType const*  m_;
 		bool owner_;
 		int fs_;
@@ -226,6 +225,7 @@ private:
 	{
 		checkSites(sites);
 		SizeType sectors = srcVwo.sectors();
+		assert(sectors == 1);
 		for (SizeType i = 0; i < sectors; ++i) {
 			finalizeInternal(srcVwo, ops, sites, srcVwo.sector(i));
 		}
@@ -249,7 +249,7 @@ private:
 		SparseMatrixType mEnv;
 		int fse = 1;
 		for (SizeType i = 0; i < n; ++i) {
-			SizeType j = n - i - 1;
+			const SizeType j = n - i - 1;
 			SizeType index = aux_.model.modelLinks().nameDofToIndex(ops[j]->label,
 			                                                        ops[j]->dof);
 			assert(j < sites.size());
@@ -257,15 +257,15 @@ private:
 			if (sites[j] <= maxSystemSite) { // in system
 				index += opsPerSite*sites[j];
 
-				GetOperator m(index, lrs.left(), ops[j]->transpose);
+				const GetOperator m(index, lrs.left(), ops[j]->transpose);
 				if (mSys.rows() == 0)
 					mSys = m();
 				else
 					mSys = mSys*m();
 			} else { // in environ
-				SizeType siteReverse = aux_.model.geometry().numberOfSites() - sites[j] - 1;
+				const SizeType siteReverse = aux_.model.geometry().numberOfSites() - sites[j] - 1;
 				index += opsPerSite*siteReverse;
-				GetOperator m(index, lrs.right(), ops[j]->transpose);
+				const GetOperator m(index, lrs.right(), ops[j]->transpose);
 				fse *= m.fermionicSign();
 				if (mEnv.rows() == 0)
 					mEnv = m();
@@ -281,6 +281,9 @@ private:
 			mEnv.makeDiagonal(aux_.lrs.right().size(), 1.0);
 
 		multiplySysEnv(fullVector_, srcVwo, iSector, mSys, mEnv, fse);
+
+		RealType sum = PsimagLite::norm(fullVector_);
+		std::cerr<<"fixed site="<<sites[0]<<" CoO="<<maxSystemSite<<" norm="<<sum<<"\n";
 	}
 
 	void multiplySysEnv(VectorType& v,

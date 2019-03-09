@@ -26,6 +26,8 @@ public:
 			weight_ = findWeightAndStripIt(str_);
 	}
 
+	void multiplyWeight(const RealType& factor) { weight_*= factor; }
+
 	const PsimagLite::String& toString() { return str_; }
 
 	const RealType& weight() const { return weight_; }
@@ -36,12 +38,11 @@ private:
 	{
 		const SizeType l = str.length();
 		if (l < 4) err("Pvector " + str + " string too short\n");
-		assert(str[l - 1] == '>');
 		PsimagLite::String buffer("");
 		for (SizeType i = 0; i < l; ++i) {
 			const SizeType j = l - i - 1;
-			if (j == '*') break;
 			const unsigned char letter = str[j];
+			if (letter == '*') break;
 			if (!isAdigit(letter) && letter != '.' && letter != '+' && letter != '-')
 				err("Wrong weight for vector " + str + "\n");
 
