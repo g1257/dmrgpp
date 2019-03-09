@@ -203,7 +203,7 @@ public:
 
 		SizeType site = block1[0];
 		evolve(Eg,direction,site,loopNumber);
-		skeleton_.printNormsAndWeights(this->common(), weight_, gsWeight_);
+		this->common().printNormsAndWeights(gsWeight_, weight_);
 	}
 
 	void write(const VectorSizeType& block,

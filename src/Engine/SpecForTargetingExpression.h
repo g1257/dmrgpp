@@ -47,9 +47,11 @@ public:
 	typedef OneOperatorSpec OneOperatorSpecType;
 	typedef typename PsimagLite::Vector<OneOperatorSpecType*>::Type VectorOneOperatorSpecType;
 	typedef PsimagLite::Vector<int>::Type VectorIntType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
 	class GetOperator {
 
@@ -58,16 +60,17 @@ public:
 		GetOperator(SizeType index,
 		            const BasisWithOperatorsType& basis,
 		            bool transpose)
-		    : index_(index), basis_(basis), m_(0), owner_(false)
+		    : index_(index), basis_(basis), m_(0), owner_(false), fs_(1)
 		{
-			const SparseMatrixType& m = basis.getOperatorByIndex(index).data;
+			const OperatorType& op = basis.getOperatorByIndex(index);
+			fs_ = (op.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
 			if (!transpose) {
 				m_ = new SparseMatrixType();
 				SparseMatrixType& mm = const_cast<SparseMatrixType&>(*m_);
-				transposeConjugate(mm, m);
+				transposeConjugate(mm, op.data);
 				owner_ = true;
 			} else {
-				m_ = &m;
+				m_ = &op.data;
 			}
 		}
 
@@ -83,12 +86,15 @@ public:
 			return *m_;
 		}
 
+		const int& fermionicSign() const { return fs_; }
+
 	private:
 
 		SizeType index_;
 		const BasisWithOperatorsType& basis_;
 		SparseMatrixType const*  m_;
 		bool owner_;
+		int fs_;
 	};
 
 	AlgebraForTargetingExpression(const AuxiliaryType& aux)
@@ -239,6 +245,9 @@ private:
 		if (fullVector_.size() == 0)
 			fullVector_.resize(lrs.super().size(), 0.0);
 
+		SparseMatrixType mSys;
+		SparseMatrixType mEnv;
+		int fse = 1;
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType j = n - i - 1;
 			SizeType index = aux_.model.modelLinks().nameDofToIndex(ops[j]->label,
@@ -249,62 +258,62 @@ private:
 				index += opsPerSite*sites[j];
 
 				GetOperator m(index, lrs.left(), ops[j]->transpose);
-				multiplySys(fullVector_, srcVwo, iSector, m());
+				if (mSys.rows() == 0)
+					mSys = m();
+				else
+					mSys = mSys*m();
 			} else { // in environ
 				SizeType siteReverse = aux_.model.geometry().numberOfSites() - sites[j] - 1;
 				index += opsPerSite*siteReverse;
 				GetOperator m(index, lrs.right(), ops[j]->transpose);
-				multiplyEnv(fullVector_, srcVwo, iSector, m());
+				fse *= m.fermionicSign();
+				if (mEnv.rows() == 0)
+					mEnv = m();
+				else
+					mEnv = mEnv*m();
 			}
 		}
+
+		if (mSys.rows() == 0)
+			mSys.makeDiagonal(aux_.lrs.left().size(), 1.0);
+
+		if (mEnv.rows() == 0)
+			mEnv.makeDiagonal(aux_.lrs.right().size(), 1.0);
+
+		multiplySysEnv(fullVector_, srcVwo, iSector, mSys, mEnv, fse);
 	}
 
-	void multiplySys(VectorType& v,
-	                 const VectorWithOffsetType& srcVwo,
-	                 SizeType iSector,
-	                 const SparseMatrixType& m) // <---- m must be the transpose conj. here!!
+	void multiplySysEnv(VectorType& v,
+	                    const VectorWithOffsetType& srcVwo,
+	                    SizeType iSector,
+	                    const SparseMatrixType& mSys, // <--- must be the trans. conj. ATTENTION
+	                    const SparseMatrixType& mEnv, // <--- must be the trans. conj. ATTENTION
+	                    int fse)
 	{
 		PackIndicesType pack(aux_.lrs.left().size());
 		SizeType offset = srcVwo.offset(iSector);
 		SizeType total = srcVwo.effectiveSize(iSector);
+		const VectorSizeType& permInv = aux_.lrs.super().permutationInverse();
 		for (SizeType i = 0; i < total; ++i) {
 			SizeType s = 0;
 			SizeType e = 0;
 			pack.unpack(s, e, aux_.lrs.super().permutation(i + offset));
 			assert(s < aux_.lrs.left().size());
 			assert(e < aux_.lrs.right().size());
-			const SizeType start = m.getRowPtr(s);
-			const SizeType end = m.getRowPtr(s + 1);
+			const RealType fs = aux_.lrs.left().fermionicSign(s, fse);
+			const SizeType start = mSys.getRowPtr(s);
+			const SizeType end = mSys.getRowPtr(s + 1);
+			const SizeType start2 = mEnv.getRowPtr(e);
+			const SizeType end2 = mEnv.getRowPtr(e + 1);
 			for (SizeType k = start; k < end; ++k) {
-				const SizeType sprime = m.getCol(k);
-				const SizeType j = pack.pack(sprime, e, aux_.lrs.super().permutationInverse());
-				assert(j < v.size());
-				v[j] += PsimagLite::conj(m.getValue(k))*srcVwo.fastAccess(iSector, i);
-			}
-		}
-	}
-
-	void multiplyEnv(VectorType& v,
-	                 const VectorWithOffsetType& srcVwo,
-	                 SizeType iSector,
-	                 const SparseMatrixType& m)  // <---- m must be the transpose conj. here!!
-	{
-		PackIndicesType pack(aux_.lrs.left().size());
-		SizeType offset = srcVwo.offset(iSector);
-		SizeType total = srcVwo.effectiveSize(iSector);
-		for (SizeType i = 0; i < total; ++i) {
-			SizeType s = 0;
-			SizeType e = 0;
-			pack.unpack(s, e, aux_.lrs.super().permutation(i + offset));
-			assert(s < aux_.lrs.left().size());
-			assert(e < aux_.lrs.right().size());
-			const SizeType start = m.getRowPtr(e);
-			const SizeType end = m.getRowPtr(e + 1);
-			for (SizeType k = start; k < end; ++k) {
-				const SizeType eprime = m.getCol(k);
-				const SizeType j = pack.pack(s, eprime, aux_.lrs.super().permutationInverse());
-				assert(j < v.size());
-				v[j] += PsimagLite::conj(m.getValue(k))*srcVwo.fastAccess(iSector, i);
+				const SizeType sprime = mSys.getCol(k);
+				for (SizeType ke = start2; ke < end2; ++ke) {
+					const SizeType eprime = mEnv.getCol(ke);
+					const SizeType j = pack.pack(sprime, eprime, permInv);
+					assert(j < v.size());
+					v[j] += PsimagLite::conj(mSys.getValue(k)*mEnv.getValue(ke))*
+					        srcVwo.fastAccess(iSector, i)*fs;
+				}
 			}
 		}
 	}

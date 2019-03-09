@@ -579,6 +579,25 @@ public:
 		return sum;
 	}
 
+	void printNormsAndWeights(const RealType& gsWeight,
+	                          const VectorRealType& weights) const
+	{
+		if (aoe_.allStages(StageEnumType::DISABLED))
+			return;
+
+		PsimagLite::OstringStream msg;
+		msg<<"gsWeight="<<gsWeight<<" weights= ";
+		for (SizeType i = 0; i < weights.size(); ++i)
+			msg<<weights[i]<<" ";
+		progress_.printline(msg, std::cout);
+
+		PsimagLite::OstringStream msg2;
+		msg2<<"gsNorm="<<norm(aoe_.psi())<<" norms= ";
+		for (SizeType i = 0; i < weights.size(); i++)
+			msg2<<normSquared(i)<<" ";
+		progress_.printline(msg2, std::cout);
+	}
+
 private:
 
 	void setQuantumNumbers(const VectorWithOffsetType& v)

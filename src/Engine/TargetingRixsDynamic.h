@@ -583,23 +583,6 @@ private:
 		for (SizeType r=0;r<weight_.size();r++) weight_[r] = (1.0 - gsWeight_)/sum;
 	}
 
-	void printNormsAndWeights() const
-	{
-		if (this->common().aoe().allStages(StageEnumType::DISABLED)) return;
-
-		PsimagLite::OstringStream msg;
-		msg<<"gsWeight="<<gsWeight_<<" weights= ";
-		for (SizeType i = 0; i < weight_.size(); i++)
-			msg<<weight_[i]<<" ";
-		progress_.printline(msg,std::cout);
-
-		PsimagLite::OstringStream msg2;
-		msg2<<"gsNorm="<<norm(this->common().aoe().psi())<<" norms= ";
-		for (SizeType i = 0; i < weight_.size(); i++)
-			msg2<<this->common().aoe().normSquared(i)<<" ";
-		progress_.printline(msg2,std::cout);
-	}
-
 	TargetParamsType tstStruct_;
 	TargetParams2Type* tstStruct2_;
 	InputValidatorType& ioIn_;

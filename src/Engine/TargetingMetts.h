@@ -289,7 +289,7 @@ public:
 		if (normalizeTimeVectors)
 			this->common().normalizeTimeVectors();
 
-		printNormsAndWeights();
+		this->common().printNormsAndWeights(gsWeight_, weight_);
 
 		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE)) return;
 
@@ -770,24 +770,6 @@ private:
 			if (!seen) return false;
 		}
 		return true;
-	}
-
-	void printNormsAndWeights() const
-	{
-		if (this->common().aoe().allStages(StageEnumType::DISABLED))
-			return;
-
-		PsimagLite::OstringStream msg;
-		msg<<"gsWeight="<<gsWeight_<<" weights= ";
-		for (SizeType i = 0; i < weight_.size(); i++)
-			msg<<weight_[i]<<" ";
-		progress_.printline(msg,std::cout);
-
-		PsimagLite::OstringStream msg2;
-		msg2<<"gsNorm="<<norm(this->common().aoe().psi())<<" norms= ";
-		for (SizeType i = 0; i < weight_.size(); i++)
-			msg2<<this->common().normSquared(i)<<" ";
-		progress_.printline(msg2,std::cout);
 	}
 
 	void printEnergies() const

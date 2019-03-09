@@ -299,24 +299,6 @@ public:
 		tv3 += tv4;
 	}
 
-	template<typename SomeTargetingCommonType>
-	void printNormsAndWeights(const SomeTargetingCommonType& targetingCommon,
-	                          const VectorRealType& weights,
-	                          const RealType& gsWeight) const
-	{
-		PsimagLite::OstringStream msg;
-		msg<<"gsWeight="<<gsWeight<<" weights= ";
-		for (SizeType i = 0; i < weights.size(); i++)
-			msg<<weights[i]<<" ";
-		progress_.printline(msg,std::cout);
-
-		PsimagLite::OstringStream msg2;
-		msg2<<"gsNorm="<<norm(targetingCommon.aoe().psi())<<" norms= ";
-		for (SizeType i = 0; i < weights.size(); i++)
-			msg2<<targetingCommon.normSquared(i)<<" ";
-		progress_.printline(msg2,std::cout);
-	}
-
 	void computeXiAndXrIndirect(VectorType& xi,
 	                            VectorType& xr,
 	                            const VectorType& sv,

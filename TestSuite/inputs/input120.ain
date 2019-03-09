@@ -14,11 +14,11 @@ SolverOptions="twositedmrg,TargetingExpression,OperatorsChangeAll";
 Version="53725d9b8f22615ccccc782082f4cd6f51a4e374";
 OutputFile="data2";
 InfiniteLoopKeptStates=100;
-FiniteLoops=[[7, 100, 0],
-[-14, 100, 0],
-[ 14, 100, 1]];
+FiniteLoops=[[7, 200, 0],
+[-14, 200, 0],
+[ 14, 200, 1]];
 TargetElectronsUp=8;
 TargetElectronsDown=8;
 Pvectors=1;
-string P0="c?0[3]*|gs>";
+string P0="c?0[10]*|gs>";
 #ci observe arguments="<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>"
