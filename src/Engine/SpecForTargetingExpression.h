@@ -8,6 +8,8 @@
 #include "ProgramGlobals.h"
 #include "PackIndices.h"
 
+// All this isn't efficient!!
+
 namespace Dmrg {
 
 template<typename VectorWithOffsetType, typename ModelType>
@@ -49,7 +51,45 @@ public:
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
 
-	const VectorWithOffsetType& toVectorWithOffset() const { return data_; }
+	class GetOperator {
+
+	public:
+
+		GetOperator(SizeType index,
+		            const BasisWithOperatorsType& basis,
+		            bool transpose)
+		    : index_(index), basis_(basis), m_(0), owner_(false)
+		{
+			const SparseMatrixType& m = basis.getOperatorByIndex(index).data;
+			if (!transpose) {
+				m_ = new SparseMatrixType();
+				SparseMatrixType& mm = const_cast<SparseMatrixType&>(*m_);
+				transposeConjugate(mm, m);
+				owner_ = true;
+			} else {
+				m_ = &m;
+			}
+		}
+
+		~GetOperator()
+		{
+			if (!owner_) return;
+			delete m_;
+			m_ = 0;
+		}
+
+		const SparseMatrixType& operator()() const
+		{
+			return *m_;
+		}
+
+	private:
+
+		SizeType index_;
+		const BasisWithOperatorsType& basis_;
+		SparseMatrixType const*  m_;
+		bool owner_;
+	};
 
 	AlgebraForTargetingExpression(const AuxiliaryType& aux)
 	    : finalized_(false), factor_(1.0), aux_(aux) {}
@@ -67,7 +107,7 @@ public:
 	{
 		finalized_ = other.finalized_;
 		vStr_ = other.vStr_;
-		data_ = other.data_;
+		fullVector_ = other.fullVector_;
 		factor_ = other.factor_;
 		return *this;
 	}
@@ -75,9 +115,9 @@ public:
 	AlgebraForTargetingExpression& operator+=(const AlgebraForTargetingExpression& other)
 	{
 		AlgebraForTargetingExpression otherCopy = other;
-		otherCopy.finalize();
-		finalize();
-		data_ += other.toVectorWithOffset();
+		otherCopy.finalize(0);
+		finalize(0);
+		fullVector_ += fullVector_;
 		return *this;
 	}
 
@@ -108,9 +148,16 @@ public:
 
 	bool finalized() const { return finalized_; }
 
-	void finalize()
+	void finalize(VectorWithOffsetType* vwo)
 	{
-		if (finalized_) return;
+		if (finalized_) {
+			if (vwo) {
+				vwo->fromFull(fullVector_, aux_.lrs.super());
+				std::fill(fullVector_.begin(), fullVector_.end(), 0.0);
+			}
+
+			return;
+		}
 
 		SizeType n = vStr_.size();
 		if (n == 0)
@@ -142,19 +189,23 @@ public:
 			++j;
 		}
 
-		if (data_.size() != 0)
-			err("AlgebraForTargetingExpression: data already set !?\n");
-
-		data_ = getVector(ket);
-		data_ = factor_*data_;
-		factor_ = 1.0;
+		const VectorWithOffsetType& srcVwo = getVector(ket);
 
 		if (n > 1)
-			finalizeInternal(ops, sites);
+			finalizeInternal(srcVwo, ops, sites);
 
 		for (SizeType i = 0; i < opsSize; ++i) {
 			delete ops[i];
 			ops[i] = 0;
+		}
+
+		if (factor_ != 1.0)
+			fullVector_ *= factor_;
+		factor_ = 1.0;
+
+		if (vwo) {
+			vwo->fromFull(fullVector_, aux_.lrs.super());
+			fullVector_.clear();
 		}
 
 		finalized_ = true;
@@ -163,17 +214,19 @@ public:
 
 private:
 
-	void finalizeInternal(const VectorOneOperatorSpecType& ops,
+	void finalizeInternal(const VectorWithOffsetType& srcVwo,
+	                      const VectorOneOperatorSpecType& ops,
 	                      const VectorIntType& sites)
 	{
 		checkSites(sites);
-		SizeType sectors = data_.sectors();
+		SizeType sectors = srcVwo.sectors();
 		for (SizeType i = 0; i < sectors; ++i) {
-			finalizeInternal(ops, sites, data_.sector(i));
+			finalizeInternal(srcVwo, ops, sites, srcVwo.sector(i));
 		}
 	}
 
-	void finalizeInternal(const VectorOneOperatorSpecType& ops,
+	void finalizeInternal(const VectorWithOffsetType& srcVwo,
+	                      const VectorOneOperatorSpecType& ops,
 	                      const VectorIntType& sites,
 	                      SizeType iSector)
 	{
@@ -183,7 +236,8 @@ private:
 		const SizeType systemBlockSize = lrs.left().block().size();
 		assert(systemBlockSize > 0);
 		const int maxSystemSite = lrs.left().block()[systemBlockSize - 1];
-		VectorType v(lrs.super().size(), 0.0);
+		if (fullVector_.size() == 0)
+			fullVector_.resize(lrs.super().size(), 0.0);
 
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType j = n - i - 1;
@@ -194,52 +248,65 @@ private:
 			if (sites[j] <= maxSystemSite) { // in system
 				index += opsPerSite*sites[j];
 
-				const SparseMatrixType& m = lrs.left().getOperatorByIndex(index).data;
-				multiplySys(v, iSector, m, ops[j]->transpose);
+				GetOperator m(index, lrs.left(), ops[j]->transpose);
+				multiplySys(fullVector_, srcVwo, iSector, m());
 			} else { // in environ
 				SizeType siteReverse = aux_.model.geometry().numberOfSites() - sites[j] - 1;
 				index += opsPerSite*siteReverse;
-				const SparseMatrixType& m = lrs.right().getOperatorByIndex(index).data;
-				multiplyEnv(v, iSector, m, ops[j]->transpose);
+				GetOperator m(index, lrs.right(), ops[j]->transpose);
+				multiplyEnv(fullVector_, srcVwo, iSector, m());
 			}
-
-			data_.fromFull(v, aux_.lrs.super()); // doesn't work in general FIXME
-			// convert data_ from the beginning into BlockOffDiag.h FIXME TODO
-			err("AlgebraForTargetingExpression::finalizeInternal() not implemented\n");
-
-			std::fill(v.begin(), v.end(), 0.0);
 		}
 	}
 
 	void multiplySys(VectorType& v,
+	                 const VectorWithOffsetType& srcVwo,
 	                 SizeType iSector,
-	                 const SparseMatrixType& m,
-	                 bool transpose)
+	                 const SparseMatrixType& m) // <---- m must be the transpose conj. here!!
 	{
 		PackIndicesType pack(aux_.lrs.left().size());
-		SizeType offset = data_.offset(iSector);
-		SizeType total = data_.effectiveSize(iSector);
+		SizeType offset = srcVwo.offset(iSector);
+		SizeType total = srcVwo.effectiveSize(iSector);
 		for (SizeType i = 0; i < total; ++i) {
 			SizeType s = 0;
 			SizeType e = 0;
 			pack.unpack(s, e, aux_.lrs.super().permutation(i + offset));
+			assert(s < aux_.lrs.left().size());
+			assert(e < aux_.lrs.right().size());
 			const SizeType start = m.getRowPtr(s);
 			const SizeType end = m.getRowPtr(s + 1);
 			for (SizeType k = start; k < end; ++k) {
 				const SizeType sprime = m.getCol(k);
 				const SizeType j = pack.pack(sprime, e, aux_.lrs.super().permutationInverse());
 				assert(j < v.size());
-				v[j] += m.getValue(k)*data_.fastAccess(iSector, i);
+				v[j] += PsimagLite::conj(m.getValue(k))*srcVwo.fastAccess(iSector, i);
 			}
 		}
 	}
 
 	void multiplyEnv(VectorType& v,
+	                 const VectorWithOffsetType& srcVwo,
 	                 SizeType iSector,
-	                 const SparseMatrixType& m,
-	                 bool transpose)
+	                 const SparseMatrixType& m)  // <---- m must be the transpose conj. here!!
 	{
-		err("AlgebraForTargetingExpression::multiplyEnv() not implemented\n");
+		PackIndicesType pack(aux_.lrs.left().size());
+		SizeType offset = srcVwo.offset(iSector);
+		SizeType total = srcVwo.effectiveSize(iSector);
+		for (SizeType i = 0; i < total; ++i) {
+			SizeType s = 0;
+			SizeType e = 0;
+			pack.unpack(s, e, aux_.lrs.super().permutation(i + offset));
+			assert(s < aux_.lrs.left().size());
+			assert(e < aux_.lrs.right().size());
+			const SizeType start = m.getRowPtr(e);
+			const SizeType end = m.getRowPtr(e + 1);
+			for (SizeType k = start; k < end; ++k) {
+				const SizeType eprime = m.getCol(k);
+				const SizeType j = pack.pack(s, eprime, aux_.lrs.super().permutationInverse());
+				assert(j < v.size());
+				v[j] += PsimagLite::conj(m.getValue(k))*srcVwo.fastAccess(iSector, i);
+			}
+		}
 	}
 
 	const VectorWithOffsetType& getVector(PsimagLite::String braOrKet) const
@@ -266,7 +333,7 @@ private:
 
 	bool finalized_;
 	VectorStringType vStr_;
-	VectorWithOffsetType data_;
+	VectorType fullVector_;
 	ComplexOrRealType factor_;
 	const AuxiliaryType& aux_;
 };

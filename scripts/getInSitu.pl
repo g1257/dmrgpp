@@ -27,7 +27,9 @@ close(FILE);
 for (my $y = 0; $y < $ly; ++$y) {
 	for (my $x = 0; $x < $lx; ++$x) {
 		my $ind = $y + $x*$ly;
-		print "$value[$ind] ";
+		my $tmp = $value[$ind];
+		defined($tmp) or $tmp = "X";
+		print "$tmp ";
 	}
 
 	print "\n";

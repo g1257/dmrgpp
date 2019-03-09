@@ -158,7 +158,7 @@ public:
 
 	void evolve(RealType,
 	            ProgramGlobals::DirectionEnum direction,
-	            const BlockType&,
+	            const BlockType& block1,
 	            const BlockType&,
 	            SizeType)
 	{
@@ -166,6 +166,8 @@ public:
 
 		this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 		computePvectors();
+		bool doBorderIfBorder = true;
+		this->common().cocoon(block1, direction, doBorderIfBorder); // in-situ
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io,
@@ -207,8 +209,8 @@ private:
 		for (SizeType i = 0; i < total; ++i) {
 			AlgebraType tmp(aux);
 			canonicalExpression(tmp, pVectors_[i]->toString(), opEmpty, aux);
-			tmp.finalize();
-			this->common().aoe().targetVectors(i) = tmp.toVectorWithOffset();
+			VectorWithOffsetType_& dst = this->common().aoe().targetVectors(i);
+			tmp.finalize(&dst);
 		}
 	}
 
