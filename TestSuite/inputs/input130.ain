@@ -15,17 +15,21 @@ gt1:dir0:Connectors=[1.0];
 #Model params
 Model="Heisenberg";
 int HeisenbergTwiceS=1;
-SolverOptions="twositedmrg,TargetingExpression,OperatorsChangeAll";
+SolverOptions="truncationNoSvd,twositedmrg,TargetingExpression,OperatorsChangeAll";
 Version="53725d9b8f22615ccccc782082f4cd6f51a4e374";
 OutputFile="data130";
 InfiniteLoopKeptStates=100;
-FiniteLoops=[[7, 100, 0],
-[-14, 100, 0],
-[ 14, 100, 0],
-[-14, 100, 2],
-[ 14, 100, 2]];
+FiniteLoops=[[7, 110, 0],
+[-14, 120, 0],
+[ 14, 130, 0],
+[-14, 140, 0],
+[ 14, 150, 0],
+[-14, 160, 0],
+[ 14, 170, 0],
+[-14, 180, 0],
+[ 14, 190, 0]];
 int TargetSzPlusConst=8;
 Pvectors=1;
-GsWeight=0.99;
-string P0="splus[10]*|gs>";
+GsWeight=0.3;
+string P0="splus[8]*|gs>";
 #ci observe arguments="<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>"

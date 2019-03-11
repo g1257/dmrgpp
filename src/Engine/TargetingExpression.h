@@ -168,7 +168,7 @@ public:
 		if (direction == ProgramGlobals::INFINITE) return;
 
 		this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
-		computePvectors();
+		computePvectors(direction);
 
 		SizeType n = pVectors_.size();
 		VectorRealType weight(n);
@@ -216,14 +216,15 @@ private:
 			pVectors_[i]->multiplyWeight(factor);
 	}
 
-	void computePvectors()
+	void computePvectors(ProgramGlobals::DirectionEnum dir)
 	{
 		CanonicalExpressionType canonicalExpression(opSpec_);
 		SizeType total = pVectors_.size();
 		AuxForTargetingExpressionType aux(this->model(),
 		                                  this->lrs(),
 		                                  this->common().aoe().psi(),
-		                                  this->common().aoe().targetVectors());
+		                                  this->common().aoe().targetVectors(),
+		                                  dir);
 		const AlgebraType opEmpty(aux);
 		for (SizeType i = 0; i < total; ++i) {
 			AlgebraType tmp(aux);
