@@ -32,6 +32,34 @@ sub getLabels
 
 sub printGnuplot
 {
+	my ($inFile, $geometry, $isPeriodic, $zeroAtCenter) = @_;
+	my $hasPrinted = 0;
+	open(FIN, "<", "$inFile") or die "$0: Cannot open $inFile : $!\n";
+
+	my %h;
+	while (<FIN>) {
+		my @temp = split;
+		my $n = scalar(@temp);
+		if ($n < 1) {
+			print STDERR "$0: line $. in $inFile is empty, skipping\n";
+			next;
+		}
+
+		print STDERR "$0: Columns $n in $inFile\n" if (!$hasPrinted);
+		$hasPrinted = 1;
+
+		my $omega = $temp[0];
+		$h{$omega} = \@temp;
+
+	}
+
+	close(FIN);
+
+	printGnuplotFromHash(\%h, $geometry, $isPeriodic, $zeroAtCenter);
+}
+
+sub printGnuplotFromHash
+{
 	my ($ptr, $geometry, $isPeriodic, $zeroAtCenter) = @_;
 
 	my ($factor, $fileIndices, $leg) = getGeometryDetails($geometry);

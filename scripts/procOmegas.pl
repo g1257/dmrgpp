@@ -100,38 +100,10 @@ my $wantsRealOrImag = (defined($wantsRealPart)) ? "real" : "imag";
 my $omegaMax = $omega0 + $omegaStep * $omegaTotal;
 
 printSpectrumToColor($outSpectrum,$wantsRealOrImag,$geometry,$omegaMax);
-printGnuplot($outSpectrum, $geometry);
+OmegaUtils::printGnuplot($outSpectrum, $geometry, $isPeriodic, $zeroAtCenter);
 
 close(LOGFILEOUT);
 print STDERR "$0: Log written to $logFile\n";
-
-sub printGnuplot
-{
-	my ($inFile, $geometry) = @_;
-	my $hasPrinted = 0;
-	open(FIN, "<", "$inFile") or die "$0: Cannot open $inFile : $!\n";
-
-	my %h;
-	while (<FIN>) {
-		my @temp = split;
-		my $n = scalar(@temp);
-		if ($n < 1) {
-			print STDERR "$0: line $. in $inFile is empty, skipping\n";
-			next;
-		}
-
-		print STDERR "$0: Columns $n in $inFile\n" if (!$hasPrinted);
-		$hasPrinted = 1;
-
-		my $omega = $temp[0];
-		$h{$omega} = \@temp;
-
-	}
-
-	close(FIN);
-
-	OmegaUtils::printGnuplot(\%h, $geometry, $isPeriodic, $zeroAtCenter);
-}
 
 sub printSpectrumToColor
 {
