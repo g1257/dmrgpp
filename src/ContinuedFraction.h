@@ -106,13 +106,13 @@ public:
 		ab_.write(io);
 
 		String f = (freqEnum_ == FREQ_MATSUBARA) ? "Matsubara" : "Real";
-		io.write(f, "#FreqEnum=");
+		io.write(" ", "#FreqEnum=" + f);
 
-		io.write(weight_, "#CFWeight=");
+		io.write(weight_, "#CFWeight");
 
-		io.write(Eg_, "#CFEnergy=");
+		io.write(Eg_, "#CFEnergy");
 
-		io.write(isign_, "#CFIsign=");
+		io.write(isign_, "#CFIsign");
 
 		io.write(eigs_,"#CFEigs");
 		io.write(intensity_,"#CFIntensities");
