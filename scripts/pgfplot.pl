@@ -20,6 +20,7 @@ sub doFile
 	my ($ind, $root, $dir) = @_;
 
 	my $file = "$dir/outSpectrum$ind.pgfplots";
+	return unless (-r "$file");
 	my $fout = "$root$ind.pgfplots";
 	unlink("$fout");
 	my $cmd = "cp $file $fout";

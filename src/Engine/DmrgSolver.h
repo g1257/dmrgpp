@@ -92,6 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PsiBase64.h"
 #include "PrinterInDetail.h"
 #include "Io/IoSelector.h"
+#include "TargetingBase.h"
 
 namespace Dmrg {
 
