@@ -4,22 +4,29 @@ use strict;
 use warnings;
 use utf8;
 
-my ($dir, $uroot, $lOrUp) = @ARGV;
-defined($lOrUp) or die "USAGE: $0 dir root L | U | sz\n";
+my ($uroot, $lOrUp) = @ARGV;
 
-die "$0: $dir not a dir\n" unless (-d "$dir");
+defined($uroot) or die "USAGE: $0 root [L | U | sz]\n";
+
+if (!defined($lOrUp)) {
+	my $file = "sample.tex";
+	my $fout = "$uroot.tex";
+	my $name = "$uroot.pgfplots";
+	fromTexToTex($fout, $file, $name);;
+	exit(0);
+}
 
 my $akw = ($lOrUp eq "sz") ? "" : "akw";
 my $root = "$uroot$lOrUp$akw"."ky";
 
-doFile(0, $root, $dir);
-doFile(1, $root, $dir);
+doFile(0, $root);
+doFile(1, $root);
 
 sub doFile
 {
-	my ($ind, $root, $dir) = @_;
+	my ($ind, $root) = @_;
 
-	my $file = "$dir/outSpectrum$ind.pgfplots";
+	my $file = "outSpectrum$ind.pgfplots";
 	return unless (-r "$file");
 	my $fout = "$root$ind.pgfplots";
 	unlink("$fout");
@@ -27,23 +34,34 @@ sub doFile
 	die "$0: Failed to create $fout\n" if (-r "$fout");
 	system("$cmd");
 
+	$file = "sample.tex";
+	$fout = "$root$ind.tex";
+
+	my $name = $fout;
+	$name =~ s/tex$/pgfplots/;
+	fromTexToTex($fout, $file, $name);
+}
+
+sub fromTexToTex
+{
+	my ($fout, $file, $name) = @_;
+
 	my $dirForTex = $0;
 	$dirForTex =~ s/pgfplot\.pl$//;
 	die "$0: Not a directory $dirForTex\n" unless (-d "$dirForTex");
 
 	system("cp $dirForTex/sample.tex .");
 	system("cp $dirForTex/palette.tex .");
-	$file = "sample.tex";
-	$fout = "$root$ind.tex";
-	copyAndEdit($fout, $file, $ind);
+	
+	copyAndEdit($fout, $file, $name);
 
-	$cmd = "pdflatex $fout";
+	my $cmd = "pdflatex $fout";
 	system("$cmd");
 }
 
 sub copyAndEdit
 {
-	my ($fout, $file, $ind) = @_;
+	my ($fout, $file, $name) = @_;
 	open(FILE, "<", "$file") or die "$0: Cannot open $file : $!\n";
 	my $ret = open(FOUT, ">", "$fout");
 	if (!$ret) {
@@ -51,8 +69,6 @@ sub copyAndEdit
 		die "$0: Cannot open write to $fout : $!\n";
 	}
 
-	my $name = $fout;
-	$name =~ s/tex$/pgfplots/;
 	while (<FILE>) {
 		next if (/^ *\%/);
 		s/outSpectrum\d\.pgfplots/$name/;
