@@ -90,19 +90,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ParametersType,typename TargetingType_>
+template<typename ModelType, typename WaveFunctionTransfType_>
 class Checkpoint {
 
 public:
 
-	typedef TargetingType_ TargetingType;
-	typedef typename TargetingType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename TargetingType::RealType  RealType;
-	typedef typename TargetingType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
+	typedef typename ModelType::RealType  RealType;
+	typedef typename ModelType::ParametersType ParametersType;
+	typedef typename ModelType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::ComplexOrRealType ComplexOrRealType;
 	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
 	typedef typename PsimagLite::IoSelector IoType;
-	typedef typename TargetingType::ModelType ModelType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
@@ -126,8 +125,8 @@ public:
 	                 isObserveCode),
 	    envStack_(systemStack_.onDisk(),
 	              parameters_.filename,
-                  "environ",
-                  isObserveCode),
+	              "environ",
+	              isObserveCode),
 	    progress_("Checkpoint"),
 	    energyFromFile_(0.0),
 	    dummyBwo_("dummy")
@@ -224,19 +223,15 @@ public:
 	// Not related to stacks
 	void read(BasisWithOperatorsType &pS,
 	          BasisWithOperatorsType &pE,
-	          TargetingType& psi,
-	          bool isObserveCode,
-	          PsimagLite::String prefix)
+	          bool isObserveCode)
 	{
-		typename IoType::In ioTmp(parameters_.checkpoint.filename);
+		typename PsimagLite::IoSelector::In ioTmp(parameters_.checkpoint.filename);
 
 		BasisWithOperatorsType pS1(ioTmp, "CHKPOINTSYSTEM", isObserveCode);
-
 		pS = pS1;
+
 		BasisWithOperatorsType pE1(ioTmp, "CHKPOINTENVIRON", isObserveCode);
 		pE = pE1;
-		PsimagLite::IoSelector::In io(parameters_.checkpoint.filename);
-		psi.read(io, prefix);
 	}
 
 	void push(const BasisWithOperatorsType &pS,const BasisWithOperatorsType &pE)
@@ -251,10 +246,10 @@ public:
 		else systemStack_.push(pSorE);
 	}
 
-	const BasisWithOperatorsType& shrink(SizeType what,const TargetingType& target)
+	const BasisWithOperatorsType& shrink(SizeType what)
 	{
-		if (what==ProgramGlobals::ENVIRON) return shrink(envStack_,target);
-		else return shrink(systemStack_,target);
+		if (what==ProgramGlobals::ENVIRON) return shrinkInternal(envStack_);
+		else return shrinkInternal(systemStack_);
 	}
 
 	bool isRestart() const { return isRestart_; }
@@ -394,15 +389,12 @@ private:
 	}
 
 	//! shrink  (we don't really shrink, we just undo the growth)
-	const BasisWithOperatorsType& shrink(DiskOrMemoryStackType& thisStack,
-	                                     const TargetingType& target)
+	const BasisWithOperatorsType& shrinkInternal(DiskOrMemoryStackType& thisStack)
 	{
 		assert(thisStack.size() > 0);
 		thisStack.pop();
 		assert(thisStack.size() > 0);
 		dummyBwo_ =  thisStack.top();
-		// only updates the extreme sites:
-		target.updateOnSiteForCorners(dummyBwo_);
 		return dummyBwo_;
 	}
 

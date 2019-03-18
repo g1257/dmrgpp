@@ -127,8 +127,8 @@ public:
 	typedef Truncation<ParametersType,TargetingType> TruncationType;
 	typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> DmrgSerializerType;
 	typedef typename ModelType::GeometryType GeometryType;
-	typedef Checkpoint<ParametersType, TargetingType> CheckpointType;
-	typedef Recovery<ParametersType, CheckpointType> RecoveryType;
+	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
+	typedef Recovery<CheckpointType, TargetingType> RecoveryType;
 	typedef typename DmrgSerializerType::FermionSignType FermionSignType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename PsimagLite::Vector<BlockType>::Type VectorBlockType;
@@ -235,7 +235,10 @@ public:
 		MyBasisWithOperators pE("BasisWithOperators.Environ");
 
 		if (checkpoint_.isRestart()) {
-			checkpoint_.read(pS, pE, psi, false, "FinalPsi");
+			PsimagLite::IoSelector::In io(parameters_.checkpoint.filename);
+
+			checkpoint_.read(pS, pE, false);
+			psi.read(io, "FinalPsi");
 		} else { // move this block elsewhere:
 
 			RealType time = 0;
@@ -498,6 +501,7 @@ obtain ordered
 		if (stepLength<0)
 			stepLengthCorrected = int((stepLength+sitesPerBlock-1)/sitesPerBlock);
 		int stepFinal = stepCurrent_ + stepLengthCorrected;
+		BasisWithOperatorsType dummyBwo("dummy");
 
 		while (true) {
 
@@ -508,11 +512,14 @@ obtain ordered
 			printerInDetail.print(std::cout, "finite");
 			if (direction == ProgramGlobals::EXPAND_SYSTEM) {
 				lrs_.growLeftBlock(model_, pS, sitesIndices_[stepCurrent_], time);
-				lrs_.right(checkpoint_.shrink(ProgramGlobals::ENVIRON,target));
+				lrs_.right(dummyBwo = checkpoint_.shrink(ProgramGlobals::ENVIRON));
 			} else {
 				lrs_.growRightBlock(model_, pE, sitesIndices_[stepCurrent_], time);
-				lrs_.left(checkpoint_.shrink(ProgramGlobals::SYSTEM,target));
+				lrs_.left(dummyBwo = checkpoint_.shrink(ProgramGlobals::SYSTEM));
 			}
+
+			// only updates the extreme sites:
+			target.updateOnSiteForCorners(dummyBwo);
 
 			lrs_.printSizes("finite",std::cout);
 
