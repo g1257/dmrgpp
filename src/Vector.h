@@ -496,6 +496,20 @@ public:
 	enum {True = true};
 };
 
+inline String basenameOf(String s)
+{
+	int j = 0;
+	SizeType l = s.length();
+	for (SizeType i = 0; i < l; ++i) {
+		j = l - i - 1;
+		const char letter = s[j];
+		if (letter == '.')
+			break;
+	}
+
+	return s.substr(0, l - j);
+}
+
 }// namespace PsimagLite
 
 /*@}*/
