@@ -486,7 +486,6 @@ obtain ordered
 		PrinterInDetailType printerInDetail(lrs_, extendedPrint);
 		int stepLength = parameters_.finiteLoop[loopIndex].stepLength;
 		SizeType keptStates = parameters_.finiteLoop[loopIndex].keptStates;
-		int saveOption = parameters_.finiteLoop[loopIndex].saveOption;
 
 		const SizeType ten = 10;
 		const SizeType initialSizeOfHashTable = std::max(ten, keptStates);
@@ -527,12 +526,10 @@ obtain ordered
 
 			lrs_.setToProduct(quantumSector_, initialSizeOfHashTable);
 
-			bool needsPrinting = (saveOption & 1);
 			energy_ = diagonalization_(target,
 			                           direction,
 			                           sitesIndices_[stepCurrent_],
-			                           loopIndex,
-			                           needsPrinting);
+			                           loopIndex);
 			printEnergy(energy_);
 
 			changeTruncateAndSerialize(pS,pE,target,keptStates,direction,loopIndex);

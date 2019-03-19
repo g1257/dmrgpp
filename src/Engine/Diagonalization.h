@@ -168,8 +168,7 @@ public:
 	RealType operator()(TargetingType& target,
 	                    ProgramGlobals::DirectionEnum direction,
 	                    const BlockType& block,
-	                    SizeType loopIndex,
-	                    bool)
+	                    SizeType loopIndex)
 	{
 		PsimagLite::Profiling profiling("Diagonalization", std::cout);
 		assert(direction != ProgramGlobals::INFINITE);
