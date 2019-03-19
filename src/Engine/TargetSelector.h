@@ -75,6 +75,8 @@ public:
 
 	TargetingBaseType& operator()(PsimagLite::String targeting)
 	{
+		if (psi_) return *psi_;
+
 		check1(targeting);
 
 		if (targeting=="TimeStepTargeting" || targeting == "TargetingAncilla") {
