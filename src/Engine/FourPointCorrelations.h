@@ -96,7 +96,6 @@ class FourPointCorrelations {
 	typedef typename ObserverHelperType::BasisWithOperatorsType BasisWithOperatorsType ;
 
 	typedef SizeType IndexType;
-	static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
 	typedef typename VectorType::value_type FieldType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
 
@@ -448,10 +447,14 @@ private:
 
 		for (SizeType s=nt;s<ns;s++) {
 			helper_.setPointer(threadId,s);
-			int growOption = GROW_RIGHT;
 
 			SparseMatrixType Onew(helper_.cols(threadId), helper_.cols(threadId));
-			skeleton_.fluffUp(Onew,Odest,fermionicSign,growOption,true,threadId);
+			skeleton_.fluffUp(Onew,
+			                  Odest,
+			                  fermionicSign,
+			                  CorrelationsSkeletonType::GrowDirection::RIGHT,
+			                  true,
+			                  threadId);
 			Odest = Onew;
 
 		}

@@ -109,9 +109,7 @@ public:
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef PsimagLite::CrsMatrix<FieldType> SparseMatrixType;
 
-	enum {GROW_RIGHT,GROW_LEFT};
-
-	enum {DIAGONAL,NON_DIAGONAL};
+	enum class GrowDirection {RIGHT, LEFT};
 
 	enum {LEFT_BRAKET=ObserverHelperType::LEFT_BRAKET,
 		  RIGHT_BRAKET=ObserverHelperType::RIGHT_BRAKET};
@@ -143,7 +141,7 @@ public:
 
 		for (SizeType s=nt;s<ns;s++) {
 			helper_.setPointer(threadId,s);
-			SizeType growOption = growthDirection(s,nt,i,threadId);
+			const GrowDirection growOption = growthDirection(s,nt,i,threadId);
 			SparseMatrixType Onew(helper_.cols(threadId),helper_.cols(threadId));
 
 			fluffUp(Onew,Odest,fermionicSign,growOption,false,threadId);
@@ -156,17 +154,23 @@ public:
 		}
 	}
 
-	SizeType growthDirection(SizeType s,int nt,SizeType i,SizeType threadId) const
+	GrowDirection growthDirection(SizeType s,
+	                              int nt,
+	                              SizeType i,
+	                              SizeType threadId) const
 	{
 		const ProgramGlobals::DirectionEnum dir = helper_.direction(threadId);
-		SizeType growOption = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? GROW_RIGHT
-		                                                                            : GROW_LEFT;
+		GrowDirection growOption = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		        ? GrowDirection::RIGHT
+		        : GrowDirection::LEFT;
 
 		if (s==SizeType(nt)) {
-			growOption = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? GROW_LEFT
-			                                                                   : GROW_RIGHT;
-			if (i==0) growOption = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ?
-			            GROW_RIGHT : GROW_LEFT;
+			growOption = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+			        ? GrowDirection::LEFT
+			        : GrowDirection::RIGHT;
+			if (i==0) growOption = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+			        ? GrowDirection::RIGHT
+			        : GrowDirection::LEFT;
 		}
 
 		return growOption;
@@ -176,7 +180,7 @@ public:
 	void fluffUp(SparseMatrixType& ret2,
 	             const SparseMatrixType& O,
 	             ProgramGlobals::FermionOrBosonEnum fOrB,
-	             int growOption,
+	             const GrowDirection growOption,
 	             bool transform,
 	             SizeType threadId)
 	{
@@ -192,7 +196,7 @@ public:
 		SizeType ktotal = n/orows;
 		SparseMatrixType ret(n, n, ktotal*O.nonZeros());
 
-		if (growOption==GROW_RIGHT) {
+		if (growOption == GrowDirection::RIGHT) {
 			RealType sign = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
 			        ? fermionSignBasis(fermionicSign, helper_.leftRightSuper(threadId).left()) :
 			          1;
