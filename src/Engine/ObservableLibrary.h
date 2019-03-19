@@ -114,11 +114,10 @@ public:
 	                  const ModelType& model,
 	                  SizeType start,
 	                  SizeType nf,
-	                  SizeType trail,
-	                  bool verbose)
+	                  SizeType trail)
 	    : numberOfSites_(numberOfSites),
 	      model_(model),
-	      observe_(io, start, nf, trail, model, verbose)
+	      observe_(io, start, nf, trail, model.params())
 	{}
 
 	bool endOfData() const { return observe_.endOfData(); }

@@ -115,12 +115,7 @@ public:
 	typedef Parallel2PointCorrelations<ThisType> Parallel2PointCorrelationsType;
 	typedef typename Parallel2PointCorrelationsType::PairType PairType;
 
-	TwoPointCorrelations(ObserverHelperType& helper,
-	                     CorrelationsSkeletonType& skeleton,
-	                     bool verbose=false)
-	    : helper_(helper),
-	      skeleton_(skeleton),
-	      verbose_(verbose)
+	TwoPointCorrelations(CorrelationsSkeletonType& skeleton) : skeleton_(skeleton)
 	{}
 
 	void operator()(PsimagLite::Matrix<FieldType>& w,
@@ -209,15 +204,16 @@ private:
 		if (i >= j)
 			err("Observer::calcCorrelation_(...): i must be smaller than j\n");
 
+		const ObserverHelperType& helper = skeleton_.helper();
 		SparseMatrixType O1m,O2m;
 		skeleton_.createWithModification(O1m,O1,'n');
 		skeleton_.createWithModification(O2m,O2,'n');
 
 		if (j==skeleton_.numberOfSites(threadId)-1) {
 			if (i==j-1) {
-				helper_.setPointer(threadId,j-2);
-				SizeType ni = helper_.leftRightSuper(threadId).left().size()/
-				        helper_.leftRightSuper(threadId).right().size();
+				skeleton_.setPointer(threadId,j-2);
+				SizeType ni = helper.leftRightSuper(threadId).left().size()/
+				        helper.leftRightSuper(threadId).right().size();
 
 				SparseMatrixType O1g;
 				O1g.makeDiagonal(ni,1.0);
@@ -226,7 +222,7 @@ private:
 			}
 			SparseMatrixType O1g;
 			skeleton_.growDirectly(O1g,O1m,i,fermionicSign,j-2,true,threadId);
-			helper_.setPointer(threadId,j-2);
+			skeleton_.setPointer(threadId,j-2);
 			return skeleton_.bracketRightCorner(O1g,O2m,fermionicSign,threadId);
 		}
 
@@ -248,9 +244,7 @@ private:
 		return ret;
 	}
 
-	ObserverHelperType& helper_;
 	CorrelationsSkeletonType& skeleton_;
-	bool verbose_;
 };  //class TwoPointCorrelations
 } // namespace Dmrg
 

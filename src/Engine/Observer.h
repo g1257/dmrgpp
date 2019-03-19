@@ -104,6 +104,7 @@ class Observer {
 	typedef typename ModelType_::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelType_::ModelHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef typename ModelType_::ParametersType ParametersType;
 	typedef ObserverHelper<IoInputType,
 	MatrixType,
 	VectorType,
@@ -126,19 +127,17 @@ public:
 	         SizeType start,
 	         SizeType nf,
 	         SizeType trail,
-	         const ModelType& model,
-	         bool verbose = false)
+	         const ParametersType& params)
 	    : helper_(io,
 	              start,
 	              nf,
 	              trail,
-	              model.params().nthreads,
-	              verbose,
-	              (model.params().options.find("fixLegacyBugs") == PsimagLite::String::npos)),
+	              params.nthreads,
+	              params.options.find("fixLegacyBugs") == PsimagLite::String::npos),
 	      onepoint_(helper_),
-	      skeleton_(helper_,model,verbose),
-	      twopoint_(helper_,skeleton_),
-	      fourpoint_(helper_,skeleton_)
+	      skeleton_(helper_),
+	      twopoint_(skeleton_),
+	      fourpoint_(skeleton_)
 	{}
 
 	SizeType size() const { return helper_.size(); }

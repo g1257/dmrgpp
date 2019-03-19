@@ -121,11 +121,9 @@ public:
 	               SizeType nf,
 	               SizeType trail,
 	               SizeType numberOfPthreads,
-	               bool verbose,
 	               bool withLegacyBugs)
 	    : io_(io),
 	      currentPos_(numberOfPthreads),
-	      verbose_(verbose),
 	      withLegacyBugs_(withLegacyBugs),
 	      bracket_(2,0),
 	      noMoreData_(false),
@@ -410,7 +408,6 @@ private:
 	typename PsimagLite::Vector<DmrgSerializerType*>::Type dSerializerV_;
 	typename PsimagLite::Vector<TimeSerializerType*>::Type timeSerializerV_;
 	VectorSizeType currentPos_; // it's a vector: one per pthread
-	bool verbose_;
 	bool withLegacyBugs_;
 	VectorSizeType bracket_;
 	bool noMoreData_;

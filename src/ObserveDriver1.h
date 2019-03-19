@@ -18,7 +18,6 @@ bool observeOneFullSweep(IoInputType& io,
 	static SizeType start = 0;
 
 	const GeometryType& geometry = model.geometry();
-	bool verbose = false;
 	SizeType n  = geometry.numberOfSites();
 	SizeType rows = n; // could be n/2 if there's enough symmetry
 	SizeType cols = n;
@@ -74,8 +73,7 @@ bool observeOneFullSweep(IoInputType& io,
 	                                  model,
 	                                  start,
 	                                  nf,
-	                                  trail,
-	                                  verbose);
+	                                  trail);
 
 	for (SizeType i = 0; i < vecOptions.size(); ++i) {
 		PsimagLite::String item = vecOptions[i];

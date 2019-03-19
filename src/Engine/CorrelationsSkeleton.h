@@ -111,10 +111,7 @@ public:
 
 	enum class GrowDirection {RIGHT, LEFT};
 
-	CorrelationsSkeleton(ObserverHelperType& helper,
-	                     const ModelType&,
-	                     bool verbose = false)
-	    : helper_(helper),verbose_(verbose)
+	CorrelationsSkeleton(ObserverHelperType& helper) : helper_(helper)
 	{}
 
 	SizeType numberOfSites(SizeType threadId) const
@@ -137,7 +134,7 @@ public:
 		if (nt<0) nt=0;
 
 		for (SizeType s=nt;s<ns;s++) {
-			helper_.setPointer(threadId,s);
+			helper_.setPointer(threadId, s);
 			const GrowDirection growOption = growthDirection(s,nt,i,threadId);
 			SparseMatrixType Onew(helper_.cols(threadId),helper_.cols(threadId));
 
@@ -345,6 +342,13 @@ public:
 		}
 	}
 
+	void setPointer(SizeType threadID, SizeType location)
+	{
+		helper_.setPointer(threadID, location);
+	}
+
+	const ObserverHelperType& helper() const { return helper_; }
+
 private:
 
 	int fermionSignBasis(int fermionicSign, const BasisType& basis) const
@@ -504,12 +508,9 @@ private:
 	                   ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	                   SizeType threadId)
 	{
-		if (verbose_)
-			std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";
-
 		if (vec1.size()!=helper_.leftRightSuper(threadId).super().size() ||
 		        vec1.size()!=vec2.size())
-			throw PsimagLite::RuntimeError("CorrelationsSkeleton::bracket_(...): Error\n");
+			err("CorrelationsSkeleton::bracket_(...): Error\n");
 
 		return (helper_.direction(threadId) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 		        ? bracketSystem_(A,vec1,vec2,threadId)
@@ -614,10 +615,7 @@ private:
 	                            const VectorWithOffsetType& vec2,
 	                            SizeType threadId)
 	{
-		if (verbose_)
-			std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";
-
-		FieldType sum=0;
+		FieldType sum = 0;
 		SizeType leftSize = helper_.leftRightSuper(threadId).left().size();
 		SizeType ni = helper_.leftRightSuper(threadId).left().size()/Bcrs.rows();
 
@@ -678,9 +676,6 @@ private:
 	                            const VectorWithOffsetType& vec2,
 	                            SizeType threadId)
 	{
-		if (verbose_)
-			std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";
-
 		const int fermionSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 		int signRight = fermionSignBasis(fermionSign,
 		                                 helper_.leftRightSuper(threadId).right());
@@ -746,9 +741,6 @@ private:
 			return 0;
 
 		const int fermionSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
-
-		if (verbose_)
-			std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";
 
 		SparseMatrixType A1crs(A1);
 		SparseMatrixType A2crs(A2);
@@ -820,7 +812,6 @@ private:
 	}
 
 	ObserverHelperType& helper_; //<-- NB: We are not the owner
-	bool verbose_;
 };  //class CorrelationsSkeleton
 } // namespace Dmrg
 

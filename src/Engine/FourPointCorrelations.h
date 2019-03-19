@@ -106,12 +106,8 @@ public:
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
 	typedef typename CorrelationsSkeletonType::BraketType BraketType;
 
-	FourPointCorrelations(ObserverHelperType& precomp,
-	                      CorrelationsSkeletonType& skeleton,
-	                      bool verbose=false)
-	    : helper_(precomp),skeleton_(skeleton),verbose_(verbose)
-	{
-	}
+	FourPointCorrelations(CorrelationsSkeletonType& skeleton) : skeleton_(skeleton)
+	{}
 
 	//! Four-point: these are expensive and uncached!!!
 	//! requires i1<i2<i3<i4
@@ -147,9 +143,9 @@ public:
 	                     SizeType threadId) const
 	{
 		if (i1>i2 || i2>i3)
-			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs ordered points\n");
+			err("calcCorrelation: FourPoint needs ordered points\n");
 		if (i1==i2 || i1==i3 || i2==i3)
-			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs distinct points\n");
+			err("calcCorrelation: FourPoint needs distinct points\n");
 
 		SparseMatrixType O2gt;
 
@@ -229,12 +225,6 @@ public:
 		SparseMatrixType O1m, O2m;
 		skeleton_.createWithModification(O1m,braket.op(index0).data,mod1);
 		skeleton_.createWithModification(O2m,braket.op(index1).data,mod2);
-		if (verbose_) {
-			std::cerr<<"O1m, mod="<<mod1<<"\n";
-			std::cerr<<O1m;
-			std::cerr<<"O2m, mod="<<mod2<<"\n";
-			std::cerr<<O2m;
-		}
 
 		// Multiply and grow ("snowball")
 		SparseMatrixType O1g,O2g;
@@ -244,12 +234,8 @@ public:
 		skeleton_.growDirectly(O1g,O1m,i1,braket.op(index0).fermionOrBoson,ns,true,threadId);
 		skeleton_.dmrgMultiply(O2g,O1g,O2m,braket.op(index1).fermionOrBoson,ns,threadId);
 
-		helper_.setPointer(threadId,ns);
-		helper_.transform(O2gt,O2g,threadId);
-		if (verbose_) {
-			std::cerr<<"O2gt\n";
-			std::cerr<<O2gt;
-		}
+		skeleton_.setPointer(threadId, ns);
+		skeleton_.helper().transform(O2gt,O2g,threadId);
 	}
 
 	//! requires i2<i3<i4
@@ -269,17 +255,14 @@ public:
 		skeleton_.createWithModification(O3m,braket.op(index0).data,mod3);
 		skeleton_.createWithModification(O4m,braket.op(index1).data,mod4);
 
-		int ns = i3-1;
+		const ObserverHelperType& helper = skeleton_.helper();
+		int ns = i3 - 1;
 		if (ns<0) ns = 0;
-		helper_.setPointer(threadId,ns);
+		skeleton_.setPointer(threadId,ns);
 		SparseMatrixType Otmp;
 		if (index0 == 0) err("secondStage\n");
 
 		growDirectly4p(Otmp,O2gt,i2+1,braket.op(index0 - 1).fermionOrBoson,ns,threadId);
-		if (verbose_) {
-			std::cerr<<"Otmp\n";
-			std::cerr<<Otmp;
-		}
 
 		SparseMatrixType O3g,O4g;
 		if (i4==skeleton_.numberOfSites(threadId)-1) {
@@ -287,13 +270,13 @@ public:
 				skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index0).fermionOrBoson,ns,threadId);
 
 				SparseMatrixType O3gt;
-				helper_.transform(O3gt,O3g,threadId);
+				helper.transform(O3gt,O3g,threadId);
 
 				ns = i4-2;
 				if (ns<0) ns = 0;
-				helper_.setPointer(threadId,ns);
+				skeleton_.setPointer(threadId,ns);
 				growDirectly4p(Otmp,O3gt,i3+1,braket.op(index0).fermionOrBoson,ns,threadId);
-				helper_.setPointer(threadId,i4-2);
+				skeleton_.setPointer(threadId,i4-2);
 
 				return skeleton_.bracketRightCorner(Otmp,
 				                                    O4m,
@@ -301,7 +284,7 @@ public:
 				                                    threadId);
 			}
 
-			helper_.setPointer(threadId,i4-2);
+			skeleton_.setPointer(threadId, i4 - 2);
 			return skeleton_.bracketRightCorner(Otmp,
 			                                    O3m,
 			                                    O4m,
@@ -310,28 +293,16 @@ public:
 		}
 
 		skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index0).fermionOrBoson,ns,threadId);
-		if (verbose_) {
-			std::cerr<<"O3g\n";
-			std::cerr<<O3g;
-		}
 
-		helper_.setPointer(threadId,ns);
+		skeleton_.setPointer(threadId, ns);
 
 		SparseMatrixType O3gt;
-		helper_.transform(O3gt,O3g,threadId);
-		if (verbose_) {
-			std::cerr<<"O3gt\n";
-			std::cerr<<O3gt;
-		}
+		helper.transform(O3gt,O3g,threadId);
 
 		ns = i4-1;
 		if (ns<0) ns = 0;
-		helper_.setPointer(threadId,ns);
+		skeleton_.setPointer(threadId, ns);
 		growDirectly4p(Otmp,O3gt,i3+1,braket.op(index0).fermionOrBoson,ns,threadId);
-		if (verbose_) {
-			std::cerr<<"Otmp\n";
-			std::cerr<<Otmp;
-		}
 
 		skeleton_.dmrgMultiply(O4g,Otmp,O4m,braket.op(index1).fermionOrBoson,ns,threadId);
 		return skeleton_.bracket(O4g,braket.op(index1).fermionOrBoson,threadId);
@@ -358,28 +329,17 @@ public:
 
 		int ns = i3-1;
 		if (ns < 0) ns = 0;
-		helper_.setPointer(threadId,ns);
+
+		skeleton_.setPointer(threadId, ns);
 		SparseMatrixType Otmp;
 		growDirectly4p(Otmp,OsoFar,i2+1,fermionS,ns,threadId);
-		if (verbose_) {
-			std::cerr<<"Otmp\n";
-			std::cerr<<Otmp;
-		}
 
 		SparseMatrixType O3g;
 		skeleton_.dmrgMultiply(O3g,Otmp,O3m,Op3.fermionOrBoson,ns,threadId);
-		if (verbose_) {
-			std::cerr<<"O3g\n";
-			std::cerr<<O3g;
-		}
 
-		helper_.setPointer(threadId,ns);
+		skeleton_.setPointer(threadId, ns);
 
-		helper_.transform(dest,O3g,threadId);
-		if (verbose_) {
-			std::cerr<<"dest\n";
-			std::cerr<<dest;
-		}
+		skeleton_.helper().transform(dest, O3g, threadId);
 	}
 
 
@@ -403,28 +363,20 @@ private:
 		SparseMatrixType Otmp;
 		if (index == 0) err("secondStage\n");
 		growDirectly4p(Otmp,O2gt,i2+1,braket.op(index - 1).fermionOrBoson,ns,threadId);
-		if (verbose_) {
-			std::cerr<<"Otmp\n";
-			std::cerr<<Otmp;
-		}
 
 		if (i3 == skeleton_.numberOfSites(threadId)-1) {
-			helper_.setPointer(threadId,i3-2);
+			skeleton_.setPointer(threadId, i3 - 2);
 			return skeleton_.bracketRightCorner(Otmp,
 			                                    O3m,
 			                                    braket.op(index).fermionOrBoson,
 			                                    threadId);
 		}
 
-		helper_.setPointer(threadId,ns);
+		skeleton_.setPointer(threadId, ns);
 		SparseMatrixType O3g;
 		skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index).fermionOrBoson,ns,threadId);
-		if (verbose_) {
-			std::cerr<<"O3g\n";
-			std::cerr<<O3g;
-		}
 
-		helper_.setPointer(threadId,ns);
+		skeleton_.setPointer(threadId,ns);
 		return skeleton_.bracket(O3g,braket.op(index).fermionOrBoson,threadId);
 	}
 
@@ -442,10 +394,12 @@ private:
 		int nt=i-1;
 		if (nt<0) nt=0;
 
-		for (SizeType s=nt;s<ns;s++) {
-			helper_.setPointer(threadId,s);
+		const ObserverHelperType& helper = skeleton_.helper();
 
-			SparseMatrixType Onew(helper_.cols(threadId), helper_.cols(threadId));
+		for (SizeType s=nt;s<ns;s++) {
+			skeleton_.setPointer(threadId,s);
+
+			SparseMatrixType Onew(helper.cols(threadId), helper.cols(threadId));
 			skeleton_.fluffUp(Onew,
 			                  Odest,
 			                  fermionicSign,
@@ -471,12 +425,10 @@ private:
 		}
 
 		if (flag) return;
-		throw PsimagLite::RuntimeError("AnyPoint: Point must be strictly ordered\n");
+		err("AnyPoint: Point must be strictly ordered\n");
 	}
 
-	ObserverHelperType& helper_; // <-- NB: not the owner
 	CorrelationsSkeletonType& skeleton_; // <-- NB: not the owner
-	bool verbose_;
 };  //class FourPointCorrelations
 } // namespace Dmrg
 
