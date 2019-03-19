@@ -99,11 +99,6 @@ class MultiPointCorrelations {
 	typedef MultiPointCorrelations<CorrelationsSkeletonType> ThisType;
 	typedef typename CorrelationsSkeletonType::SparseMatrixType SparseMatrixType;
 
-	static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
-	static SizeType const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
-	static SizeType const DIAGONAL = CorrelationsSkeletonType::DIAGONAL;
-	static SizeType const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
-
 public:
 
 	typedef typename ObserverHelperType::MatrixType MatrixType;

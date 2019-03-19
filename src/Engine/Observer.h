@@ -115,14 +115,6 @@ class Observer {
 	typedef FourPointCorrelations<CorrelationsSkeletonType> FourPointCorrelationsType;
 	typedef MultiPointCorrelations<CorrelationsSkeletonType> MultiPointCorrelationsType;
 
-	static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
-	static SizeType const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
-	static SizeType const DIAGONAL = CorrelationsSkeletonType::DIAGONAL;
-	static SizeType const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
-
-	enum {LEFT_BRAKET=ObserverHelperType::LEFT_BRAKET,
-		  RIGHT_BRAKET=ObserverHelperType::RIGHT_BRAKET};
-
 public:
 
 	typedef typename CorrelationsSkeletonType::BraketType BraketType;

@@ -89,18 +89,15 @@ namespace Dmrg {
 template<typename CorrelationsSkeletonType>
 class FourPointCorrelations {
 
-	typedef typename CorrelationsSkeletonType::ObserverHelperType
-	ObserverHelperType;
+public:
+
+	typedef typename CorrelationsSkeletonType::ObserverHelperType ObserverHelperType;
 	typedef typename ObserverHelperType::VectorType VectorType ;
 	typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename ObserverHelperType::BasisWithOperatorsType BasisWithOperatorsType ;
-
 	typedef SizeType IndexType;
 	typedef typename VectorType::value_type FieldType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
-
-public:
-
 	typedef typename CorrelationsSkeletonType::SparseMatrixType SparseMatrixType;
 	typedef typename CorrelationsSkeletonType::OperatorType OperatorType;
 	typedef typename ObserverHelperType::MatrixType MatrixType;

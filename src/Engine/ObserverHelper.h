@@ -112,8 +112,9 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef PsimagLite::Vector<short int>::Type VectorShortIntType;
 
-	enum {LEFT_BRAKET=0,RIGHT_BRAKET=1};
-	enum SaveEnum {SAVE_YES, SAVE_NO};
+	enum class BraketEnum {LEFT, RIGHT};
+
+	enum class SaveEnum {YES, NO};
 
 	ObserverHelper(IoInputType& io,
 	               SizeType start,
@@ -139,11 +140,11 @@ public:
 			signsOneSite_[i] = (odds[i]) ? -1 : 1;
 
 		if (nf > 0)
-			if (!init(start, start + nf, SAVE_YES))
+			if (!init(start, start + nf, SaveEnum::YES))
 				return;
 
 		if (trail > 0)
-			if (!init(start, start + trail, SAVE_NO))
+			if (!init(start, start + trail, SaveEnum::NO))
 				return;
 	}
 
@@ -176,8 +177,8 @@ public:
 
 	void setBrakets(SizeType left,SizeType right)
 	{
-		bracket_[LEFT_BRAKET]=left;
-		bracket_[RIGHT_BRAKET]=right;
+		bracket_[0] = left;
+		bracket_[1] = right;
 	}
 
 	void transform(SparseMatrixType& ret,const SparseMatrixType& O2,size_t threadId) const
@@ -264,14 +265,15 @@ public:
 		return dSsize_; //-1;
 	}
 
-	const VectorWithOffsetType& getVectorFromBracketId(SizeType leftOrRight,
+	const VectorWithOffsetType& getVectorFromBracketId(const BraketEnum leftOrRight,
 	                                                   SizeType threadId) const
 	{
-		SizeType braketId = bracket_[leftOrRight];
+		const SizeType ind = toInteger(leftOrRight);
+		assert(ind < bracket_.size());
+		SizeType braketId = bracket_[ind];
 		// braketId == 0 means GS
-		if (braketId == 0) {
+		if (braketId == 0)
 			return wavefunction(threadId);
-		}
 
 		// braketId > 0 then it means the "time vector" number braketId - 1
 		assert(braketId > 0);
@@ -312,6 +314,11 @@ public:
 
 private:
 
+	static SizeType toInteger(const BraketEnum leftOrRight)
+	{
+		return (leftOrRight == BraketEnum::LEFT) ? 0 : 1;
+	}
+
 	bool init(SizeType start, SizeType end, SaveEnum saveOrNot)
 	{
 		PsimagLite::String prefix = "Serializer";
@@ -325,7 +332,7 @@ private:
 			                                                         prefix + "/" + ttos(i),
 			                                                         false,
 			                                                         true);
-			if (saveOrNot == SAVE_YES)
+			if (saveOrNot == SaveEnum::YES)
 				dSerializerV_.push_back(dSerializer);
 			else
 				delete dSerializer;
@@ -333,7 +340,7 @@ private:
 			try {
 				PsimagLite::String prefix("/TargetingCommon/" + ttos(i));
 				TimeSerializerType* ts = new TimeSerializerType(io_, prefix);
-				if (saveOrNot == SAVE_YES)
+				if (saveOrNot == SaveEnum::YES)
 					timeSerializerV_.push_back(ts);
 				else
 					delete ts;

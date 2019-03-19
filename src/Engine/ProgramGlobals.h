@@ -187,7 +187,7 @@ struct ProgramGlobals {
 		return is;
 	}
 
-	static PsimagLite::String toString(DirectionEnum d)
+	static PsimagLite::String toString(const DirectionEnum d)
 	{
 		switch (d) {
 		case DirectionEnum::INFINITE:

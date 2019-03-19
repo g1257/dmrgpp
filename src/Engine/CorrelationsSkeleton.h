@@ -111,9 +111,6 @@ public:
 
 	enum class GrowDirection {RIGHT, LEFT};
 
-	enum {LEFT_BRAKET=ObserverHelperType::LEFT_BRAKET,
-		  RIGHT_BRAKET=ObserverHelperType::RIGHT_BRAKET};
-
 	CorrelationsSkeleton(ObserverHelperType& helper,
 	                     const ModelType&,
 	                     bool verbose = false)
@@ -290,9 +287,11 @@ public:
 	{
 		try {
 			const VectorWithOffsetType& src1 =
-			        helper_.getVectorFromBracketId(LEFT_BRAKET,threadId);
+			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::LEFT,
+			                                       threadId);
 			const VectorWithOffsetType& src2 =
-			        helper_.getVectorFromBracketId(RIGHT_BRAKET,threadId);
+			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::RIGHT,
+			                                       threadId);
 
 			return bracket_(A,src1,src2,fermionicSign,threadId);
 		} catch (std::exception& e) {
@@ -310,9 +309,11 @@ public:
 	{
 		try {
 			const VectorWithOffsetType& src1 =
-			        helper_.getVectorFromBracketId(LEFT_BRAKET,threadId);
+			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::LEFT,
+			                                       threadId);
 			const VectorWithOffsetType& src2 =
-			        helper_.getVectorFromBracketId(RIGHT_BRAKET,threadId);
+			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::RIGHT,
+			                                       threadId);
 			return bracketRightCorner_(A,B,fermionSign,src1,src2,threadId);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
@@ -330,9 +331,11 @@ public:
 	{
 		try {
 			const VectorWithOffsetType& src1 =
-			        helper_.getVectorFromBracketId(LEFT_BRAKET,threadId);
+			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::LEFT,
+			                                       threadId);
 			const VectorWithOffsetType& src2 =
-			        helper_.getVectorFromBracketId(RIGHT_BRAKET,threadId);
+			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::RIGHT,
+			                                       threadId);
 			return bracketRightCorner_(A,B,C,fermionSign,src1,src2,threadId);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();

@@ -90,18 +90,16 @@ namespace Dmrg {
 
 template<typename ObserverHelperType>
 class OnePointCorrelations {
+
 	typedef typename ObserverHelperType::MatrixType MatrixType;
 	typedef typename ObserverHelperType::VectorType VectorType ;
-	typedef typename ObserverHelperType::VectorWithOffsetType
-	VectorWithOffsetType;
-	typedef typename ObserverHelperType::BasisWithOperatorsType
-	BasisWithOperatorsType;
+	typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;
+	typedef typename ObserverHelperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename VectorType::value_type FieldType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
 
-	enum {LEFT_BRAKET=ObserverHelperType::LEFT_BRAKET,
-		  RIGHT_BRAKET=ObserverHelperType::RIGHT_BRAKET};
 public:
+
 	OnePointCorrelations(ObserverHelperType& helper,
 	                     bool verbose=false)
 	    : helper_(helper),
@@ -117,10 +115,12 @@ public:
 		SizeType pnter=site;
 		helper_.setPointer(threadId,pnter);
 		try {
-			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRAKET,
-			                                                                  threadId);
-			const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRAKET,
-			                                                                   threadId);
+			const VectorWithOffsetType& src1 =
+			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::LEFT,
+			                                       threadId);
+			const VectorWithOffsetType& src2 =
+			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::RIGHT,
+			                                       threadId);
 
 			return onePointInternal<ApplyOperatorType>(site,A,src1,src2,corner,threadId);
 		} catch (std::exception& e) {
@@ -139,10 +139,12 @@ public:
 		SizeType threadId = 0;
 		helper_.setPointer(threadId,pnter);
 		try {
-			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRAKET,
-			                                                                  threadId);
-			const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRAKET,
-			                                                                   threadId);
+			const VectorWithOffsetType& src1 =
+			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::LEFT,
+			                                       threadId);
+			const VectorWithOffsetType& src2 =
+			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::RIGHT,
+			                                       threadId);
 
 			return onePointInternalHookForZero<ApplyOperatorType>(site,
 			                                                      A,
