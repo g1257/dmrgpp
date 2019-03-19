@@ -69,13 +69,17 @@ public:
 
 	TargetingBaseType& operator()()
 	{
+		if (psi_) return *psi_;
+
 		PsimagLite::String targeting = getTargeting(model_.params().options);
 		return operator()(targeting);
 	}
 
 	TargetingBaseType& operator()(PsimagLite::String targeting)
 	{
-		if (psi_) return *psi_;
+		if (psi_)
+			err("TargetingBaseType::operator(): can only be called multiple times" +
+			    PsimagLite::String(" without argument\n"));
 
 		check1(targeting);
 
