@@ -173,10 +173,10 @@ public:
 	                                                           SizeType jnd) const
 	{
 		SizeType middle = smax + 1;
-		if (ind<middle && jnd>=middle) return ProgramGlobalsType::SYSTEM_ENVIRON;
-		if (jnd<middle && ind>=middle) return ProgramGlobalsType::ENVIRON_SYSTEM;
-		if (ind<middle) return ProgramGlobalsType::SYSTEM_SYSTEM;
-		return ProgramGlobalsType::ENVIRON_ENVIRON;
+		if (ind<middle && jnd>=middle) return ProgramGlobalsType::ConnectionEnum::SYSTEM_ENVIRON;
+		if (jnd<middle && ind>=middle) return ProgramGlobalsType::ConnectionEnum::ENVIRON_SYSTEM;
+		return (ind < middle) ? ProgramGlobalsType::ConnectionEnum::SYSTEM_SYSTEM
+		                      : ProgramGlobalsType::ConnectionEnum::ENVIRON_ENVIRON;
 	}
 
 	ComplexOrRealType operator()
