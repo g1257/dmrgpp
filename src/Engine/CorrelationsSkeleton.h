@@ -89,26 +89,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-// Don't add functions to this class
-template<typename FieldType>
-struct CorrelationData {
-	SizeType ni;
-	SizeType nj;
-	typename PsimagLite::Vector<PsimagLite::Matrix<FieldType> >::Type correlationVector;
-	PsimagLite::SparseVector<FieldType> wavefunction;
-};
-
-// Companion function:
-template<typename FieldType>
-std::ostream& operator<<(std::ostream& os,CorrelationData<FieldType>& c)
-{
-	os<<"ni="<<c.ni<<"\n";
-	os<<"nj="<<c.nj<<"\n";
-	os<<c.correlationVector;
-	os<<c.wavefunction;
-	return os;
-}
-
 template<typename ObserverHelperType_,typename ModelType>
 class CorrelationsSkeleton {
 	typedef SizeType IndexType;
