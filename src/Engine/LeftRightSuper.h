@@ -103,9 +103,6 @@ public:
 	typedef typename KroneckerDumperType::ParamsForKroneckerDumper ParamsForKroneckerDumperType;
 	typedef typename BasisType::QnType QnType;
 
-	enum {SAVE_ALL = BasisType::SAVE_ALL,
-		  SAVE_PARTIAL = BasisType::SAVE_PARTIAL};
-
 	template<typename IoInputter>
 	LeftRightSuper(IoInputter& io,
 	               PsimagLite::String prefix,
@@ -247,7 +244,7 @@ public:
 
 	void write(PsimagLite::IoNg::Out& io,
 	           PsimagLite::String prefix,
-	           SizeType option,
+	           typename BasisWithOperatorsType::SaveEnum option,
 	           bool minimizeWrite) const
 	{
 		prefix += "/LRS";

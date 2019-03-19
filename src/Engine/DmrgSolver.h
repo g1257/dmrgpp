@@ -140,8 +140,6 @@ public:
 	typedef typename BasisWithOperatorsType::QnType QnType;
 	typedef typename QnType::PairSizeType PairSizeType;
 
-	enum {SAVE_ALL=MyBasis::SAVE_ALL, SAVE_PARTIAL=MyBasis::SAVE_PARTIAL};
-
 	DmrgSolver(ModelType const &model,
 	           InputValidatorType& ioIn)
 	    : model_(model),
@@ -590,7 +588,9 @@ obtain ordered
 		const BlockDiagonalMatrixType& transform = truncate_.transform(direction);
 		DmrgSerializerType ds(fsS,fsE,lrs_,target.gs(),transform, direction);
 
-		SizeType saveOption2 = (saveOption & 4) ? SAVE_ALL : SAVE_PARTIAL;
+		typename BasisWithOperatorsType::SaveEnum saveOption2 = (saveOption & 4) ?
+		            BasisWithOperatorsType::SaveEnum::ALL :
+		            BasisWithOperatorsType::SaveEnum::PARTIAL;
 		SizeType numberOfSites = model_.geometry().numberOfSites();
 
 		static SizeType counter = 0;

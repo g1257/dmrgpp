@@ -142,7 +142,7 @@ public:
 	template<typename SomeIoOutType>
 	void write(SomeIoOutType& io,
 	           PsimagLite::String prefix,
-	           SizeType option,
+	           typename BasisWithOperatorsType::SaveEnum option,
 	           SizeType numberOfSites,
 	           SizeType counter,
 	           typename PsimagLite::EnableIf<

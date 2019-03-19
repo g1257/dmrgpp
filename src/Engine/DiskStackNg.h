@@ -138,12 +138,12 @@ public:
 			d.write(*ioOut_,
 			        label_ + "/" + ttos(total_),
 			        IoOutType::Serializer::NO_OVERWRITE,
-			        DataType::SAVE_ALL);
+			        DataType::SaveEnum::ALL);
 		} catch (...) {
 			d.write(*ioOut_,
 			        label_ + "/" + ttos(total_),
 			        IoOutType::Serializer::ALLOW_OVERWRITE,
-			        DataType::SAVE_ALL);
+			        DataType::SaveEnum::ALL);
 		}
 
 		++total_;

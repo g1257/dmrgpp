@@ -158,7 +158,7 @@ private:
 	void writePartial(PsimagLite::IoSelector::Out& io, PsimagLite::String prefix) const
 	{
 		io.createGroup(prefix);
-		lrs_.write(io, prefix, LeftRightSuperType::SAVE_ALL, false);
+		lrs_.write(io, prefix, BasisWithOperatorsType::SaveEnum::ALL, false);
 	}
 
 	LeftRightSuperType lrs_;

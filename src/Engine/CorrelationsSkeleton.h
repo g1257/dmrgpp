@@ -91,11 +91,10 @@ namespace Dmrg {
 
 template<typename ObserverHelperType_,typename ModelType>
 class CorrelationsSkeleton {
-	typedef SizeType IndexType;
-	typedef PsimagLite::PackIndices PackIndicesType;
 
 public:
 
+	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef Braket<ModelType> BraketType;
 	typedef ObserverHelperType_ ObserverHelperType;
 	typedef typename ObserverHelperType::MatrixType MatrixType;

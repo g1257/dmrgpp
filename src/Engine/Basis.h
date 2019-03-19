@@ -113,8 +113,6 @@ public:
 	typedef NotReallySort::VectorLikeQnType VectorLikeQnType;
 	typedef typename VectorLikeQnType::value_type PairOfQnsType;
 
-	enum {SAVE_ALL, SAVE_PARTIAL};
-
 	//! Constructor, s=name of this basis
 	Basis(const PsimagLite::String& s)
 	    : dmrgTransformed_(false), name_(s)

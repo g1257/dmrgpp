@@ -115,10 +115,9 @@ namespace Dmrg {
 template<typename OperatorsType_>
 class BasisWithOperators : public OperatorsType_::BasisType {
 
-	typedef PsimagLite::Vector<SizeType>::Type VectorIntegerType;
-
 public:
 
+	typedef PsimagLite::Vector<SizeType>::Type VectorIntegerType;
 	typedef typename OperatorsType_::BasisType BaseType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename BaseType::RealType RealType;
@@ -133,6 +132,8 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
+
+	enum class SaveEnum {ALL, PARTIAL};
 
 	BasisWithOperators(const PsimagLite::String& s)
 	    : BasisType(s), operators_(this)
@@ -286,7 +287,7 @@ public:
 	void write(SomeOutputType& io,
 	           typename SomeOutputType::Serializer::WriteMode mode,
 	           PsimagLite::String prefix,
-	           SizeType option,
+	           SaveEnum option,
 	           typename PsimagLite::EnableIf<
 	           PsimagLite::IsOutputLike<SomeOutputType>::True, int*>::Type = 0) const
 	{
@@ -297,12 +298,12 @@ public:
 	void write(SomeOutputType& io,
 	           const PsimagLite::String& s,
 	           typename SomeOutputType::Serializer::WriteMode mode,
-	           SizeType option,
+	           SaveEnum option,
 	           typename PsimagLite::EnableIf<
 	           PsimagLite::IsOutputLike<SomeOutputType>::True, int*>::Type = 0) const
 	{
 		BasisType::write(io, s, mode, false); // parent saves
-		if (option == BasisType::SAVE_ALL)
+		if (option == SaveEnum::ALL)
 			operators_.write(io, s, mode);
 
 		assert(operatorsPerSite_.size() > 0);

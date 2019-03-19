@@ -213,11 +213,11 @@ public:
 		pS.write(io,
 		         "CHKPOINTSYSTEM",
 		         IoType::Out::Serializer::NO_OVERWRITE,
-		         BasisWithOperatorsType::SAVE_ALL);
+		         BasisWithOperatorsType::SaveEnum::ALL);
 		pE.write(io,
 		         "CHKPOINTENVIRON",
 		         IoType::Out::Serializer::NO_OVERWRITE,
-		         BasisWithOperatorsType::SAVE_ALL);
+		         BasisWithOperatorsType::SaveEnum::ALL);
 	}
 
 	// Not related to stacks
