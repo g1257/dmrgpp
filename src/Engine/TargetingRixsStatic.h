@@ -243,7 +243,7 @@ private:
 	            SizeType site,
 	            SizeType loopNumber)
 	{
-		if (direction == ProgramGlobals::INFINITE) return;
+		if (direction == ProgramGlobals::DirectionEnum::INFINITE) return;
 
 		// see if operator at sitep has been applied and result put into targetVectors[3]
 		// if no apply operator at site and add into targetVectors[3]

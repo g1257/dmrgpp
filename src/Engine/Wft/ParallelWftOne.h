@@ -117,23 +117,23 @@ public:
 	      pack1_(0),
 	      pack2_(0)
 	{
-		dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).toSparse(we_);
-        dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).toSparse(ws_);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).toSparse(we_);
+        dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).toSparse(ws_);
 		transposeConjugate(wsT_,ws_);
 		transposeConjugate(weT_,we_);
 		SizeType vOfNk = ProgramGlobals::volumeOf(nk);
-		if (dir_ == ProgramGlobals::EXPAND_SYSTEM) {
+		if (dir_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 			assert(dmrgWaveStruct_.lrs().right().permutationInverse().size() ==
-			       dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).rows());
+			       dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).rows());
 			assert(lrs_.left().permutationInverse().size()/vOfNk==
-			       dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).cols());
+			       dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols());
 			pack1_ = new PackIndicesType(lrs.left().permutationInverse().size());
 			pack2_ = new PackIndicesType(lrs.left().permutationInverse().size()/vOfNk);
 		} else {
 			assert(dmrgWaveStruct_.lrs().left().permutationInverse().size() ==
-			       dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).rows());
+			       dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).rows());
 			assert(lrs_.right().permutationInverse().size()/vOfNk==
-			       dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).cols());
+			       dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).cols());
 			pack1_ = new PackIndicesType(lrs.super().permutationInverse().size()/
 			                             lrs.right().permutationInverse().size());
 			pack2_ = new PackIndicesType(vOfNk);
@@ -152,7 +152,7 @@ public:
 	{
 		SizeType start = psiDest_.offset(i0_);
 
-		if (dir_ == ProgramGlobals::EXPAND_SYSTEM) {
+		if (dir_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 			SizeType ip = 0;
 			SizeType alpha = 0;
 			SizeType kp = 0;
@@ -219,7 +219,7 @@ private:
 	                              const typename PsimagLite::Vector<SizeType>::Type& nk) const
 	{
 		SizeType volumeOfNk = ProgramGlobals::volumeOf(nk);
-		SizeType ni= dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).cols();
+		SizeType ni= dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols();
 		SizeType nip = dmrgWaveStruct_.lrs().left().permutationInverse().size()/volumeOfNk;
 		SizeType alpha = dmrgWaveStruct_.lrs().left().permutationInverse(ip+kp*nip);
 

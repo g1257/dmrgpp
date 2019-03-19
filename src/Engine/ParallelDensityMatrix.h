@@ -141,7 +141,7 @@ private:
 	                                             SizeType alpha2,
 	                                             const TargetVectorType& v)
 	{
-		if (direction == ProgramGlobals::EXPAND_SYSTEM)
+		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			return densityMatrixExpandSystem(alpha1,
 			                                 alpha2,
 			                                 v);

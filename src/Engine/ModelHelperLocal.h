@@ -129,18 +129,18 @@ public:
 	const SparseMatrixType& reducedOperator(char modifier,
 	                                        SizeType i,
 	                                        SizeType sigma,
-	                                        SizeType type) const
+	                                        const ProgramGlobals::SysOrEnvEnum type) const
 	{
 
 		assert(!BasisType::useSu2Symmetry());
 
 		const SparseMatrixType* m = 0;
 		PairType ii;
-		if (type == ProgramGlobals::SYSTEM) {
+		if (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) {
 			ii = lrs_.left().getOperatorIndices(i,sigma);
 			m = &(lrs_.left().getOperatorByIndex(ii.first).data);
 		} else {
-			assert(type == ProgramGlobals::ENVIRON);
+			assert(type == ProgramGlobals::SysOrEnvEnum::ENVIRON);
 			ii = lrs_.right().getOperatorIndices(i,sigma);
 			m =&(lrs_.right().getOperatorByIndex(ii.first).data);
 		}
@@ -149,7 +149,7 @@ public:
 		if (modifier == 'N') return *m;
 
 		assert(modifier == 'C');
-		SizeType typeIndex = (type == ProgramGlobals::SYSTEM) ? 0 : 1;
+		SizeType typeIndex = (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? 0 : 1;
 		SizeType packed = typeIndex + ii.first*2;
 		int indexOfSeen = PsimagLite::indexOrMinusOne(seen_, packed);
 		if (indexOfSeen >= 0) {
@@ -187,13 +187,14 @@ public:
 	                     SparseMatrixType &matrixBlock,
 	                     const LinkType& link) const
 	{
-		RealType fermionSign =(link.fermionOrBoson==ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
+		RealType fermionSign = (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
+		        ? -1 : 1;
 
 		//! work only on partition m
-		if (link.type==ProgramGlobals::ENVIRON_SYSTEM)  {
+		if (link.type==ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM)  {
 			LinkType link2 = link;
 			link2.value *= fermionSign;
-			link2.type = ProgramGlobals::SYSTEM_ENVIRON;
+			link2.type = ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON;
 			fastOpProdInter(B,A,matrixBlock,link2);
 			return;
 		}
@@ -246,12 +247,13 @@ public:
 	                     const SparseMatrixType& B,
 	                     const LinkType& link) const
 	{
-		RealType fermionSign =  (link.fermionOrBoson==ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
+		RealType fermionSign =  (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
+		        ? -1 : 1;
 
-		if (link.type==ProgramGlobals::ENVIRON_SYSTEM)  {
+		if (link.type==ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM)  {
 			LinkType link2 = link;
 			link2.value *= fermionSign;
-			link2.type = ProgramGlobals::SYSTEM_ENVIRON;
+			link2.type = ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON;
 			fastOpProdInter(x,y,B,A,link2);
 			return;
 		}

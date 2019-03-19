@@ -118,7 +118,7 @@ public:
 	      rng_(targetParams.rngSeed),
 	      targetParams_(targetParams),
 	      progress_("MettsCollapse"),
-	      prevDirection_(ProgramGlobals::INFINITE),
+	      prevDirection_(ProgramGlobals::DirectionEnum::INFINITE),
 	      collapseBasis_(0,0)
 	{}
 
@@ -127,7 +127,7 @@ public:
 	                typename PsimagLite::Vector<SizeType>::Type& block,
 	                ProgramGlobals::DirectionEnum direction)
 	{
-		assert(direction!=ProgramGlobals::INFINITE);
+		assert(direction!=ProgramGlobals::DirectionEnum::INFINITE);
 
 		if (targetParams_.collapse.find("every")!=PsimagLite::String::npos ||
 		    collapseBasis_.rows() == 0) setCollapseBasis(block);
@@ -256,7 +256,7 @@ private:
 	                    SizeType nk,// <-- size of the Hilbert sp. of one site
 	                    bool border) const
 	{
-		if (direction == ProgramGlobals::EXPAND_SYSTEM)
+		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			collapseVectorLeft(w,v,m,indexFixed,nk,border);
 		else
 			collapseVectorRight(w,v,m,indexFixed,nk,border);
@@ -557,8 +557,10 @@ private:
 		typename PsimagLite::Vector<SizeType>::Type nk;
 		setNk(nk,block);
 		SizeType volumeOfNk = volumeOf(nk);
-		bool b1 = (direction == ProgramGlobals::EXPAND_SYSTEM && lrs_.right().size()==volumeOfNk);
-		bool b2 = (direction == ProgramGlobals::EXPAND_ENVIRON && lrs_.left().size()==volumeOfNk);
+		bool b1 = (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM &&
+		           lrs_.right().size()==volumeOfNk);
+		bool b2 = (direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON &&
+		           lrs_.left().size()==volumeOfNk);
 		return (b1 || b2);
 	}
 

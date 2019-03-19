@@ -120,8 +120,6 @@ class Recovery  {
 
 public:
 
-	enum {SYSTEM = ProgramGlobals::SYSTEM, ENVIRON = ProgramGlobals::ENVIRON};
-
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename CheckpointType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename CheckpointType::WaveFunctionTransfType WaveFunctionTransfType;
@@ -321,7 +319,7 @@ private:
 		for (SizeType j = 0; j < sitesPerBlock; ++j)
 			siteToAdd[j] = pE_.block()[j];
 
-		if (direction == ProgramGlobals::EXPAND_ENVIRON) {
+		if (direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) {
 			// right-most site of pS
 			for (SizeType j = 0; j < sitesPerBlock; ++j)
 				siteToAdd[j] = pS_.block()[pS_.block().size() - 1 - j];

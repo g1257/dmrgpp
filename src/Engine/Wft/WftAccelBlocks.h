@@ -35,7 +35,7 @@ class WftAccelBlocks {
 		                    const MatrixType& ws,
 		                    const MatrixType& we,
 		                    SizeType volumeOfNk,
-		                    SizeType sysOrEnv,
+		                    const ProgramGlobals::SysOrEnvEnum sysOrEnv,
 		                    SizeType threads)
 		    : result_(result),
 		      psi_(psi),
@@ -50,7 +50,7 @@ class WftAccelBlocks {
 
 		void doTask(SizeType kp, SizeType threadNum)
 		{
-			if (sysOrEnv_ == ProgramGlobals::SYSTEM)
+			if (sysOrEnv_ == ProgramGlobals::SysOrEnvEnum::SYSTEM)
 				return doTaskSystem(kp);
 
 			doTaskEnviron(kp, threadNum);
@@ -523,7 +523,7 @@ class WftAccelBlocks {
 		const MatrixType& ws_;
 		const MatrixType& we_;
 		SizeType volumeOfNk_;
-		SizeType sysOrEnv_;
+		const ProgramGlobals::SysOrEnvEnum sysOrEnv_;
 		VectorMatrixType storage_;
 	};
 
@@ -546,10 +546,10 @@ public:
 
 		SizeType volumeOfNk = ProgramGlobals::volumeOf(nk);
 		MatrixType ws;
-		dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).toDense(ws);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).toDense(ws);
 
 		MatrixType we;
-		dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).toDense(we);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).toDense(we);
 
 		SizeType i2psize = ws.cols();
 		SizeType jp2size = we.rows();
@@ -564,7 +564,8 @@ public:
 
 		VectorMatrixType result(volumeOfNk);
 
-		SizeType threads = std::min(volumeOfNk, PsimagLite::Concurrency::codeSectionParams.npthreads);
+		SizeType threads = std::min(volumeOfNk,
+		                            PsimagLite::Concurrency::codeSectionParams.npthreads);
 		typedef PsimagLite::Parallelizer<ParallelWftInBlocks> ParallelizerType;
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
 		ParallelizerType threadedWft(codeSectionParams);
@@ -574,7 +575,7 @@ public:
 		                              ws,
 		                              we,
 		                              volumeOfNk,
-		                              ProgramGlobals::ENVIRON,
+		                              ProgramGlobals::SysOrEnvEnum::ENVIRON,
 		                              threads);
 
 		threadedWft.loopCreate(helperWft);
@@ -594,10 +595,10 @@ public:
 
 		SizeType volumeOfNk = ProgramGlobals::volumeOf(nk);
 		MatrixType ws;
-		dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).toDense(ws);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).toDense(ws);
 
 		MatrixType we;
-		dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).toDense(we);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).toDense(we);
 
 		SizeType ipSize = ws.rows();
 		SizeType jprSize = we.cols();
@@ -622,7 +623,7 @@ public:
 		                              ws,
 		                              we,
 		                              volumeOfNk,
-		                              ProgramGlobals::SYSTEM,
+		                              ProgramGlobals::SysOrEnvEnum::SYSTEM,
 		                              threads);
 
 		threadedWft.loopCreate(helperWft);

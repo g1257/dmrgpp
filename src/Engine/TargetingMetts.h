@@ -157,8 +157,6 @@ public:
 	VectorBlockDiagonalMatrixType;
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 
-	const static SizeType SYSTEM = ProgramGlobals::SYSTEM;
-
 	TargetingMetts(const LeftRightSuperType& lrs,
 	               const ModelType& model,
 	               const WaveFunctionTransfType& wft,
@@ -173,7 +171,7 @@ public:
 	      progress_("TargetingMetts"),
 	      mettsStochastics_(model,mettsStruct_.rngSeed,mettsStruct_.pure),
 	      mettsCollapse_(mettsStochastics_,lrs,mettsStruct_),
-	      prevDirection_(ProgramGlobals::INFINITE),
+	      prevDirection_(ProgramGlobals::DirectionEnum::INFINITE),
 	      systemPrev_(),
 	      environPrev_()
 	{
@@ -239,13 +237,13 @@ public:
 	            SizeType loopNumber)
 	{
 		VectorSizeType sites;
-		if (direction == ProgramGlobals::INFINITE)
+		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
 			utils::blockUnion(sites,block1,block2);
 		else sites = block1;
 
 		SizeType n1 = mettsStruct_.timeSteps();
 
-		if (direction == ProgramGlobals::INFINITE) {
+		if (direction == ProgramGlobals::DirectionEnum::INFINITE) {
 			updateStochastics(block1,block2);
 			getNewPures(block1,block2);
 			return;
@@ -339,7 +337,7 @@ private:
 	            SizeType start,
 	            SizeType indexAdvance,
 	            RealType Eg,
-	            SizeType direction,
+	            const ProgramGlobals::DirectionEnum direction,
 	            const VectorSizeType& block,
 	            SizeType loopNumber)
 	{
@@ -452,7 +450,7 @@ private:
 
 	void advanceOrWft(SizeType index,
 	                  SizeType indexAdvance,
-	                  SizeType,
+	                  const ProgramGlobals::DirectionEnum,
 	                  const VectorSizeType& block)
 	{
 		if (this->common().aoe().targetVectors()[index].size()==0) return;
@@ -527,7 +525,8 @@ private:
 			msg<<" site="<<block2[i]<<" is "<<betaFixed[i];
 		progress_.printline(msg,std::cerr);
 
-		const BlockDiagonalMatrixType& transformSystem = getTransform(ProgramGlobals::SYSTEM);
+		const BlockDiagonalMatrixType& transformSystem =
+		        getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM);
 
 		TargetVectorType newVector1(transformSystem.rows(),0);
 
@@ -537,14 +536,15 @@ private:
 
 		getNewPure(newVector1,
 		           pureVectors_.first,
-		           ProgramGlobals::SYSTEM,
+		           ProgramGlobals::SysOrEnvEnum::SYSTEM,
 		           alphaFixedVolume,
 		           lrs_.left(),
 		           transformSystem,
 		           block1);
 		pureVectors_.first = newVector1;
 
-		const BlockDiagonalMatrixType& transformEnviron = getTransform(ProgramGlobals::ENVIRON);
+		const BlockDiagonalMatrixType& transformEnviron =
+		        getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON);
 		TargetVectorType newVector2(transformEnviron.rows(),0);
 
 		VectorSizeType nk2;
@@ -552,7 +552,7 @@ private:
 		SizeType betaFixedVolume = mettsCollapse_.volumeOf(betaFixed,nk2);
 		getNewPure(newVector2,
 		           pureVectors_.second,
-		           ProgramGlobals::ENVIRON,
+		           ProgramGlobals::SysOrEnvEnum::ENVIRON,
 		           betaFixedVolume,
 		           lrs_.right(),
 		           transformEnviron,
@@ -587,7 +587,7 @@ private:
 
 	void getNewPure(TargetVectorType& newVector,
 	                TargetVectorType& oldVector,
-	                SizeType direction,
+	                const ProgramGlobals::SysOrEnvEnum direction,
 	                SizeType alphaFixed,
 	                const BasisWithOperatorsType& basis,
 	                const BlockDiagonalMatrixType& transform,
@@ -616,7 +616,7 @@ private:
 			newVector[alpha] = 0;
 
 		for (SizeType alpha=0;alpha<ns;alpha++) {
-			SizeType gamma = (direction==ProgramGlobals::SYSTEM) ?
+			SizeType gamma = (direction == ProgramGlobals::SysOrEnvEnum::SYSTEM) ?
 			            basis.permutationInverse(alpha + alphaFixed*ns) :
 			            basis.permutationInverse(alphaFixed + alpha*volumeOfNk);
 			newVector[gamma] = tmpVector[alpha];
@@ -633,7 +633,7 @@ private:
 
 	void delayedTransform(TargetVectorType& newVector,
 	                      TargetVectorType& oldVector,
-	                      SizeType direction,
+	                      const ProgramGlobals::SysOrEnvEnum direction,
 	                      const MatrixType& transform,
 	                      const VectorSizeType& block)
 	{
@@ -643,8 +643,9 @@ private:
 		mettsCollapse_.setNk(nk,block);
 		SizeType ne = mettsCollapse_.volumeOf(nk);
 
-		const VectorSizeType& permutationInverse = (direction==SYSTEM)
-		        ? systemPrev_.permutationInverse : environPrev_.permutationInverse;
+		const VectorSizeType& permutationInverse =
+		        (direction == ProgramGlobals::SysOrEnvEnum::SYSTEM) ?
+		            systemPrev_.permutationInverse : environPrev_.permutationInverse;
 		SizeType nsPrev = permutationInverse.size()/ne;
 
 		newVector.resize(transform.cols());
@@ -652,9 +653,8 @@ private:
 		for (SizeType gamma=0;gamma<newVector.size();gamma++) {
 			newVector[gamma] = 0;
 			for (SizeType alpha=0;alpha<nsPrev;alpha++) {
-				SizeType noPermIndex =  (direction==SYSTEM)
-				        ? alpha + systemPrev_.fixed*nsPrev
-				        : environPrev_.fixed + alpha*ne;
+				SizeType noPermIndex =  (direction == ProgramGlobals::SysOrEnvEnum::SYSTEM) ?
+				            alpha + systemPrev_.fixed*nsPrev : environPrev_.fixed + alpha*ne;
 
 				SizeType gammaPrime = permutationInverse[noPermIndex];
 
@@ -839,7 +839,7 @@ private:
 	RealType gsWeight_;
 	MettsStochasticsType mettsStochastics_;
 	MettsCollapseType mettsCollapse_;
-	SizeType prevDirection_;
+	ProgramGlobals::DirectionEnum prevDirection_;
 	MettsPrev systemPrev_;
 	MettsPrev environPrev_;
 	std::pair<TargetVectorType,TargetVectorType> pureVectors_;

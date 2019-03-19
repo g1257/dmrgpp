@@ -154,7 +154,7 @@ public:
 		if (isSu2 && mode != 2)
 			err("Qn::scale() expects mode==1 for SU(2)\n");
 
-		if (direction == ProgramGlobals::INFINITE) {
+		if (direction == ProgramGlobals::DirectionEnum::INFINITE) {
 			double ts = totalSites;
 			for (SizeType x = 0; x < mode; ++x) {
 				double flp = original.other[x]*sites;

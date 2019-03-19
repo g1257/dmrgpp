@@ -53,9 +53,9 @@ public:
 	               bool twoSiteDmrg,
 	               bool bounce)
 	{
-		WftStackType& stack = (dir == ProgramGlobals::EXPAND_ENVIRON) ? wsStack_ :
-		                                                                weStack_;
-		const PsimagLite::String label = (dir == ProgramGlobals::EXPAND_ENVIRON) ?
+		WftStackType& stack = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? wsStack_
+		                                                                             : weStack_;
+		const PsimagLite::String label = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ?
 		            "system" : "environ";
 
 		needsPop_ = false;
@@ -79,9 +79,9 @@ public:
 
 	void afterWft(ProgramGlobals::DirectionEnum dir)
 	{
-		WftStackType& stack = (dir == ProgramGlobals::EXPAND_ENVIRON) ? wsStack_ :
-		                                                                weStack_;
-		const PsimagLite::String label = (dir == ProgramGlobals::EXPAND_ENVIRON) ?
+		WftStackType& stack = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? wsStack_
+		                                                                             : weStack_;
+		const PsimagLite::String label = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ?
 		            "system" : "environ";
 
 		if (!needsPop_)
@@ -105,21 +105,21 @@ public:
 		WaveStructSvdType wave(transform, vts, s, qns);
 
 		switch (dir) {
-		case ProgramGlobals::INFINITE:
-			if (direction == ProgramGlobals::EXPAND_SYSTEM) {
+		case ProgramGlobals::DirectionEnum::INFINITE:
+			if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 				wsStack_.push(wave);
 			} else {
 				weStack_.push(wave);
 			}
 
 			break;
-		case ProgramGlobals::EXPAND_ENVIRON:
-			if (direction != ProgramGlobals::EXPAND_ENVIRON)
+		case ProgramGlobals::DirectionEnum::EXPAND_ENVIRON:
+			if (direction != ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
 				err("EXPAND_ENVIRON but option==0\n");
 			weStack_.push(wave);
 			break;
-		case ProgramGlobals::EXPAND_SYSTEM:
-			if (direction != ProgramGlobals::EXPAND_SYSTEM)
+		case ProgramGlobals::DirectionEnum::EXPAND_SYSTEM:
+			if (direction != ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 				err("EXPAND_SYSTEM but option==1\n");
 			wsStack_.push(wave);
 			break;
@@ -133,9 +133,10 @@ public:
 
 	const WaveStructSvdType& getWave(ProgramGlobals::SysOrEnvEnum sysOrEnv) const
 	{
-		assert(sysOrEnv == ProgramGlobals::SYSTEM || weStack_.size() > 0);
-		assert(sysOrEnv != ProgramGlobals::SYSTEM || wsStack_.size() > 0);
-		return (sysOrEnv == ProgramGlobals::SYSTEM) ? wsStack_.top() : weStack_.top();
+		assert(sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM || weStack_.size() > 0);
+		assert(sysOrEnv != ProgramGlobals::SysOrEnvEnum::SYSTEM || wsStack_.size() > 0);
+		return (sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? wsStack_.top()
+		                                                          : weStack_.top();
 	}
 
 	const LeftRightSuperType& lrs() const
@@ -150,7 +151,8 @@ public:
 
 	SizeType size(ProgramGlobals::SysOrEnvEnum sysOrEnv) const
 	{
-		return (sysOrEnv == ProgramGlobals::SYSTEM) ? wsStack_.size() : weStack_.size();
+		return (sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? wsStack_.size()
+		                                                          : weStack_.size();
 	}
 
 private:

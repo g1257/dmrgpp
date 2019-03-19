@@ -240,7 +240,7 @@ private:
 		std::pair<char, char> mods('n', 'n');
 		LinkType link(0,
 		              0,
-		              ProgramGlobals::SYSTEM_SYSTEM,
+		              ProgramGlobals::ConnectionEnum::SYSTEM_SYSTEM,
 		              value,
 		              ProgramGlobals::FermionOrBosonEnum::BOSON,
 		              ops,
@@ -261,9 +261,9 @@ private:
 			SparseMatrixType const* B = 0;
 
 			LinkType link2 = hc_.getKron(&A, &B, ix);
-			if (link2.type==ProgramGlobals::ENVIRON_SYSTEM)  {
+			if (link2.type==ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM)  {
 				LinkType link3 = link2;
-				link3.type = ProgramGlobals::SYSTEM_ENVIRON;
+				link3.type = ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON;
 				if (link3.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
 					link3.value *= -1.0;
 

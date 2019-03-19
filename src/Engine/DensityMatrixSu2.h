@@ -109,7 +109,8 @@ public:
 	DensityMatrixSu2(const TargetingType& target,
 	                 const LeftRightSuperType& lrs,
 	                 const ParamsType& p)
-	    : pBasis_((p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.left() : lrs.right()),
+	    : pBasis_((p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.left() :
+	                                                                              lrs.right()),
 	      data_(pBasis_),
 	      mMaximal_(data_.blocks()),
 	      direction_(p.direction),
@@ -119,8 +120,8 @@ public:
 		BuildingBlockType matrixBlock;
 
 		const BasisWithOperatorsType& pBasisSummed =
-		        (p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.right() :
-		                                                         lrs.left();
+		        (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.right() :
+		                                                                        lrs.left();
 
 		for (SizeType m = 0; m < pBasis_.partition() - 1; ++m) {
 			// Definition: Given partition p with (j m)
@@ -286,7 +287,7 @@ private:
 		int ne = pBasisSummed.size();
 		int ns = pSE.size()/ne;
 		SizeType total=pBasisSummed.size();
-		if (direction != ProgramGlobals::EXPAND_SYSTEM) {
+		if (direction != ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 			ns=pBasisSummed.size();
 			ne=pSE.size()/ns;
 		}
@@ -303,7 +304,7 @@ private:
 			int i1 = alpha1+beta*ns;
 			int i2 = alpha2+beta*ns;
 			// sum over system:
-			if (direction != ProgramGlobals::EXPAND_SYSTEM) {
+			if (direction != ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 				i1 = beta + alpha1*ns;
 				i2 = beta + alpha2*ns;
 			}

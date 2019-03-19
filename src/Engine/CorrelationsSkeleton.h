@@ -116,9 +116,6 @@ public:
 	enum {LEFT_BRAKET=ObserverHelperType::LEFT_BRAKET,
 		  RIGHT_BRAKET=ObserverHelperType::RIGHT_BRAKET};
 
-	static const SizeType EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
-	static const SizeType EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
-
 	CorrelationsSkeleton(ObserverHelperType& helper,
 	                     const ModelType&,
 	                     bool verbose = false)
@@ -161,13 +158,17 @@ public:
 
 	SizeType growthDirection(SizeType s,int nt,SizeType i,SizeType threadId) const
 	{
-		SizeType dir = helper_.direction(threadId);
-		SizeType growOption = (dir==EXPAND_SYSTEM) ? GROW_RIGHT : GROW_LEFT;
+		const ProgramGlobals::DirectionEnum dir = helper_.direction(threadId);
+		SizeType growOption = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? GROW_RIGHT
+		                                                                            : GROW_LEFT;
 
 		if (s==SizeType(nt)) {
-			growOption = (dir==EXPAND_SYSTEM) ? GROW_LEFT : GROW_RIGHT;
-			if (i==0) growOption = (dir==EXPAND_SYSTEM) ? GROW_RIGHT : GROW_LEFT;
+			growOption = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? GROW_LEFT
+			                                                                   : GROW_RIGHT;
+			if (i==0) growOption = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ?
+			            GROW_RIGHT : GROW_LEFT;
 		}
+
 		return growOption;
 	}
 
@@ -182,8 +183,9 @@ public:
 		const int fermionicSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 		const ProgramGlobals::DirectionEnum dir = helper_.direction(threadId);
 
-		const BasisType& basis = (dir == EXPAND_SYSTEM) ? helper_.leftRightSuper(threadId).left() :
-		                                                  helper_.leftRightSuper(threadId).right();
+		const BasisType& basis = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		        ? helper_.leftRightSuper(threadId).left()
+		        : helper_.leftRightSuper(threadId).right();
 
 		SizeType n = basis.size();
 		SizeType orows = O.rows();
@@ -191,7 +193,7 @@ public:
 		SparseMatrixType ret(n, n, ktotal*O.nonZeros());
 
 		if (growOption==GROW_RIGHT) {
-			RealType sign = (dir == ProgramGlobals::EXPAND_ENVIRON)
+			RealType sign = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
 			        ? fermionSignBasis(fermionicSign, helper_.leftRightSuper(threadId).left()) :
 			          1;
 
@@ -221,7 +223,7 @@ public:
 				for (SizeType k = 0; k < ktotal; ++k) {
 					ret.setRow(k + i*ktotal, counter);
 					RealType sign = 1;
-					if (dir == ProgramGlobals::EXPAND_ENVIRON) {
+					if (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) {
 						sign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON)
 						        ? 1 : fermionSignBasis(fermionicSign,
 						                               helper_.leftRightSuper(threadId).left())*
@@ -263,7 +265,7 @@ public:
 	                  SizeType ns,
 	                  SizeType threadId)
 	{
-		return (helper_.direction(threadId) == EXPAND_SYSTEM) ?
+		return (helper_.direction(threadId) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ?
 		            dmrgMultiplySystem(result,O1,O2,fermionicSign,ns,threadId) :
 		            dmrgMultiplyEnviron(result,O1,O2,fermionicSign,ns,threadId);
 	}
@@ -502,11 +504,9 @@ private:
 		        vec1.size()!=vec2.size())
 			throw PsimagLite::RuntimeError("CorrelationsSkeleton::bracket_(...): Error\n");
 
-		if (helper_.direction(threadId)==EXPAND_SYSTEM) {
-			return bracketSystem_(A,vec1,vec2,threadId);
-		}
-
-		return bracketEnviron_(A,vec1,vec2,fermionicSign,threadId);
+		return (helper_.direction(threadId) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		        ? bracketSystem_(A,vec1,vec2,threadId)
+		        : bracketEnviron_(A,vec1,vec2,fermionicSign,threadId);
 	}
 
 	FieldType bracketSystem_(const SparseMatrixType& A,
@@ -586,9 +586,9 @@ private:
 	                              const VectorWithOffsetType& vec2,
 	                              SizeType threadId)
 	{
-		return (helper_.direction(threadId) == EXPAND_SYSTEM) ?
-		            brRghtCrnrSystem_(A,B,fermionSign,vec1,vec2,threadId) :
-		            brLftCrnrEnviron_(A,B,fermionSign,vec1,vec2,threadId);
+		return (helper_.direction(threadId) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		        ? brRghtCrnrSystem_(A,B,fermionSign,vec1,vec2,threadId)
+		        : brLftCrnrEnviron_(A,B,fermionSign,vec1,vec2,threadId);
 	}
 
 	bool superOddElectrons(SizeType t, SizeType threadId) const
@@ -735,7 +735,8 @@ private:
 	                              const VectorWithOffsetType& vec2,
 	                              SizeType threadId)
 	{
-		if (helper_.direction(threadId)!=EXPAND_SYSTEM) return 0;
+		if (helper_.direction(threadId) != ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+			return 0;
 
 		const int fermionSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 

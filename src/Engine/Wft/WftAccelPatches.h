@@ -41,16 +41,16 @@ public:
 	                const VectorSizeType& nk,
 	                typename ProgramGlobals::DirectionEnum dir) const
 	{
-		char charLeft = (dir == ProgramGlobals::EXPAND_SYSTEM) ? 'C' : 'N';
-		char charRight = (dir == ProgramGlobals::EXPAND_SYSTEM) ? 'T' : 'N';
+		char charLeft = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 'C' : 'N';
+		char charRight = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 'T' : 'N';
 		BlockDiagWfType psi(psiSrc,
 		                    iOld,
 		                    dmrgWaveStruct_.lrs());
 
 		psi.transform(charLeft,
 		              charRight,
-		              dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM),
-		              dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON));
+		              dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM),
+		              dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON));
 		psi.toVectorWithOffsets(psiDest, iNew, lrs, nk, dir);
 	}
 

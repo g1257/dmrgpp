@@ -219,13 +219,15 @@ public:
 		assert(xx < lps_.size());
 		const LinkType& link2 = lps_[xx];
 
-		assert(link2.type == ProgramGlobals::SYSTEM_ENVIRON ||
-		       link2.type == ProgramGlobals::ENVIRON_SYSTEM);
+		assert(link2.type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON ||
+		       link2.type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM);
 
-		SizeType sysOrEnv = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ?
-		            ProgramGlobals::SYSTEM : ProgramGlobals::ENVIRON;
-		SizeType envOrSys = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ?
-		            ProgramGlobals::ENVIRON : ProgramGlobals::SYSTEM;
+		const ProgramGlobals::SysOrEnvEnum sysOrEnv =
+		        (link2.type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
+		            ProgramGlobals::SysOrEnvEnum::SYSTEM : ProgramGlobals::SysOrEnvEnum::ENVIRON;
+		const ProgramGlobals::SysOrEnvEnum envOrSys =
+		        (link2.type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
+		            ProgramGlobals::SysOrEnvEnum::ENVIRON : ProgramGlobals::SysOrEnvEnum::SYSTEM;
 
 		SizeType i = PsimagLite::indexOrMinusOne(modelHelper_.leftRightSuper().super().block(),
 		                                         link2.site1);
@@ -234,8 +236,10 @@ public:
 
 		int offset = modelHelper_.leftRightSuper().left().block().size();
 
-		SizeType site1Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? i : i - offset;
-		SizeType site2Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? j - offset : j;
+		SizeType site1Corrected = (link2.type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
+		            i : i - offset;
+		SizeType site2Corrected = (link2.type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
+		            j - offset : j;
 
 		*A = &modelHelper_.reducedOperator(link2.mods.first,
 		                                   site1Corrected,
@@ -273,8 +277,8 @@ private:
 
 		ProgramGlobals::ConnectionEnum type = superGeometry_.connectionKind(smax_, hItems);
 
-		assert(type != ProgramGlobals::SYSTEM_SYSTEM &&
-		        type != ProgramGlobals::ENVIRON_ENVIRON);
+		assert(type != ProgramGlobals::ConnectionEnum::SYSTEM_SYSTEM &&
+		        type != ProgramGlobals::ConnectionEnum::ENVIRON_ENVIRON);
 
 		assert(hItems.size() == 2);
 
@@ -290,7 +294,7 @@ private:
 
 				edofs[0] = oneLink.orbs.first;
 				edofs[1] = oneLink.orbs.second;
- 				ComplexOrRealType tmp = superGeometry_(smax_,
+				ComplexOrRealType tmp = superGeometry_(smax_,
 				                                       emin_,
 				                                       hItems,
 				                                       edofs,
@@ -303,15 +307,15 @@ private:
 				oneLink.modifier(tmp);
 
 				LinkType link2(hItems[0],
-				               hItems[1],
-				               type,
-				               tmp,
-				               oneLink.fermionOrBoson,
-				               oneLink.indices,
-				               oneLink.mods,
-				               oneLink.angularMomentum,
-				               oneLink.angularFactor,
-				               oneLink.category);
+				        hItems[1],
+				        type,
+				        tmp,
+				        oneLink.fermionOrBoson,
+				        oneLink.indices,
+				        oneLink.mods,
+				        oneLink.angularMomentum,
+				        oneLink.angularFactor,
+				        oneLink.category);
 
 				++totalOne;
 				lps_.push_back(link2);
@@ -321,7 +325,8 @@ private:
 
 				link2.value = PsimagLite::conj(tmp);
 
-				if (oneLink.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) link2.value *= (-1.0);
+				if (oneLink.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
+					link2.value *= (-1.0);
 
 				char saved = oneLink.mods.first;
 				link2.mods.first = oneLink.mods.second;
@@ -344,8 +349,8 @@ private:
 
 	bool connectionIsHermitian(const LinkType& link) const
 	{
-		return (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? linkIsHermitianFermion(link) :
-		                                                          linkIsHermitianBoson(link);
+		return (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ?
+		            linkIsHermitianFermion(link) : linkIsHermitianBoson(link);
 	}
 
 	bool linkIsHermitianFermion(const LinkType& link) const

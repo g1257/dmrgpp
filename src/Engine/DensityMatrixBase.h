@@ -92,7 +92,6 @@ class DensityMatrixBase {
 	typedef typename TargetingType::TargetVectorType::value_type DensityMatrixElementType;
 	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 	typedef typename BasisType::FactorsType FactorsType;
-	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
 public:
 

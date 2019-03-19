@@ -238,7 +238,7 @@ private:
 	                    const BlockType& block1,
 	                    SizeType loopNumber)
 	{
-		if (direction == ProgramGlobals::INFINITE) return;
+		if (direction == ProgramGlobals::DirectionEnum::INFINITE) return;
 		VectorWithOffsetType phiNew;
 		this->common().aoe().getPhi(&phiNew, Eg, direction, block1[0], loopNumber, tstStruct_);
 

@@ -240,29 +240,31 @@ public:
 		envStack_.push(pE);
 	}
 
-	void push(const BasisWithOperatorsType &pSorE,SizeType what)
+	void push(const BasisWithOperatorsType &pSorE,
+	          typename ProgramGlobals::SysOrEnvEnum what)
 	{
-		if (what==ProgramGlobals::ENVIRON) envStack_.push(pSorE);
+		if (what == ProgramGlobals::SysOrEnvEnum::ENVIRON) envStack_.push(pSorE);
 		else systemStack_.push(pSorE);
 	}
 
-	const BasisWithOperatorsType& shrink(SizeType what)
+	const BasisWithOperatorsType& shrink(typename ProgramGlobals::SysOrEnvEnum what)
 	{
-		if (what==ProgramGlobals::ENVIRON) return shrinkInternal(envStack_);
-		else return shrinkInternal(systemStack_);
+		return (what == ProgramGlobals::SysOrEnvEnum::ENVIRON) ? shrinkInternal(envStack_) :
+		                                                         shrinkInternal(systemStack_);
 	}
 
 	bool isRestart() const { return isRestart_; }
 
-	SizeType stackSize(SizeType what) const
+	SizeType stackSize(typename ProgramGlobals::SysOrEnvEnum what) const
 	{
-		if (what==ProgramGlobals::ENVIRON) return envStack_.size();
-		return systemStack_.size();
+		return (what == ProgramGlobals::SysOrEnvEnum::ENVIRON) ? envStack_.size() :
+		                                                         systemStack_.size();
 	}
 
-	const DiskOrMemoryStackType& memoryStack(SizeType option) const
+	const DiskOrMemoryStackType& memoryStack(typename ProgramGlobals::SysOrEnvEnum option) const
 	{
-		return (option == ProgramGlobals::SYSTEM) ? systemStack_ : envStack_;
+		return (option == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? systemStack_ :
+		                                                          envStack_;
 	}
 
 	const ParametersType& parameters() const { return parameters_; }

@@ -147,7 +147,7 @@ public:
 	virtual void calcTimeVectors(const PairType& startEnd,
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
-	                             SizeType systemOrEnviron,
+	                             const ProgramGlobals::DirectionEnum systemOrEnviron,
 	                             bool,
 	                             const PsimagLite::Vector<SizeType>::Type&,
 	                             const TargetParamsType& tstStruct)
@@ -213,7 +213,7 @@ private:
 	void calcTimeVectors(const PairType& startEnd,
 	                     RealType,
 	                     const VectorWithOffsetType& phi,
-	                     SizeType,
+	                     const ProgramGlobals::DirectionEnum,
 	                     SizeType i0,
 	                     const TargetParamsType& tstStruct)
 	{

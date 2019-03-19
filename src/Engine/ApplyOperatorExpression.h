@@ -378,7 +378,7 @@ public:
 	                      SizeType site,
 	                      VectorWithOffsetType& phiNew,
 	                      const VectorWithOffsetType& psiSrc,
-	                      SizeType systemOrEnviron,
+	                      const ProgramGlobals::DirectionEnum systemOrEnviron,
 	                      const TargetParamsType& tstStruct)
 	{
 		if (tstStruct.startingLoops().size()>0 &&
@@ -400,8 +400,12 @@ public:
 		typename PsimagLite::Vector<bool>::Type signs;
 		targetHelper_.model().findOddElectronsOfOneSite(signs, site);
 		FermionSign fs(targetHelper_.lrs().left(), signs);
-		applyOpLocal_(phiNew,phiOld,tstStruct.aOperators()[indexOfOperator],
-		              fs,systemOrEnviron,corner);
+		applyOpLocal_(phiNew,
+		              phiOld,
+		              tstStruct.aOperators()[indexOfOperator],
+		              fs,
+		              systemOrEnviron,
+		              corner);
 
 		RealType norma = norm(phiNew);
 		if (norma<1e-6) {
@@ -483,7 +487,7 @@ private:
 		static bool firstSeeLeftCorner = false;
 		SizeType advanceEach = tstStruct.advanceEach();
 
-		if (direction == ProgramGlobals::INFINITE) {
+		if (direction == ProgramGlobals::DirectionEnum::INFINITE) {
 			E0_ = Eg;
 			return 0;
 		}
@@ -550,7 +554,7 @@ private:
 	                SizeType site,
 	                VectorWithOffsetType& phiNew,
 	                VectorWithOffsetType& phiOld,
-	                SizeType systemOrEnviron,
+	                const ProgramGlobals::DirectionEnum systemOrEnviron,
 	                const TargetParamsType& tstStruct) const
 	{
 		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
@@ -568,8 +572,11 @@ private:
 			typename PsimagLite::Vector<bool>::Type signs;
 			targetHelper_.model().findOddElectronsOfOneSite(signs,site);
 			FermionSign fs(targetHelper_.lrs().left(), signs);
-			applyOpLocal_(phiNew,phiOld,tstStruct.aOperators()[i],
-			              fs,systemOrEnviron,corner);
+			applyOpLocal_(phiNew,
+			              phiOld,
+			              tstStruct.aOperators()[i],
+			              fs,
+			              systemOrEnviron,corner);
 			RealType norma = norm(phiNew);
 
 			if (norma<1e-6) {

@@ -163,16 +163,14 @@ public:
 	// we're at site 1 or n-2
 	bool isAtCorner(SizeType numberOfSites,SizeType threadId) const
 	{
-		bool es = (helper_.direction(threadId) == ProgramGlobals::EXPAND_SYSTEM);
+		const bool es = (helper_.direction(threadId) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 		if (es && helper_.site(threadId) ==  numberOfSites-2) return true;
-		if (!es && helper_.site(threadId) == 1) return true;
-		return false;
+		return (!es && helper_.site(threadId) == 1);
 	}
 
 	void setBrakets(const PsimagLite::String& left,const PsimagLite::String& right)
 	{
-		helper_.setBrakets(braketStringToNumber(left),
-		                   braketStringToNumber(right));
+		helper_.setBrakets(braketStringToNumber(left), braketStringToNumber(right));
 	}
 
 	void twoPoint(MatrixType& storage,

@@ -156,7 +156,7 @@ public:
 		PsimagLite::Profiling profiling("TruncationChangeBasis", std::cout);
 		DensityMatrixBaseType* dmS = 0;
 
-		if (direction == ProgramGlobals::EXPAND_SYSTEM) {
+		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 			changeBasis(pS,target,keptStates,direction, &dmS);
 			assert(dmS);
 			truncateBasis(pS,lrs_.right(), *dmS, direction, keptStates);
@@ -172,8 +172,8 @@ public:
 
 	const TransformType& transform(ProgramGlobals::DirectionEnum direction) const
 	{
-		return (direction == ProgramGlobals::EXPAND_SYSTEM) ?
-		            leftCache_.transform : rightCache_.transform;
+		return (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? leftCache_.transform
+		                                                                   : rightCache_.transform;
 	}
 
 	const RealType& error() const { return error_; }
@@ -186,16 +186,31 @@ public:
 		PsimagLite::Profiling profiling("TruncationChangeBasis", std::cout);
 
 		DensityMatrixBaseType* dmS = 0;
-		changeBasis(sBasis,target, keptStates, ProgramGlobals::EXPAND_SYSTEM, &dmS);
+		changeBasis(sBasis,
+		            target,
+		            keptStates, ProgramGlobals::DirectionEnum::EXPAND_SYSTEM,
+		            &dmS);
 		assert(dmS);
-		truncateBasis(sBasis, lrs_.right(), *dmS, ProgramGlobals::EXPAND_SYSTEM, keptStates);
+		truncateBasis(sBasis,
+		              lrs_.right(),
+		              *dmS,
+		              ProgramGlobals::DirectionEnum::EXPAND_SYSTEM,
+		              keptStates);
 		delete dmS;
 		dmS = 0;
 
 		DensityMatrixBaseType* dmE = 0;
-		changeBasis(eBasis,target, keptStates, ProgramGlobals::EXPAND_ENVIRON, &dmE);
+		changeBasis(eBasis,
+		            target,
+		            keptStates,
+		            ProgramGlobals::DirectionEnum::EXPAND_ENVIRON,
+		            &dmE);
 		assert(dmE);
-		truncateBasis(eBasis, lrs_.left(), *dmE, ProgramGlobals::EXPAND_ENVIRON, keptStates);
+		truncateBasis(eBasis,
+		              lrs_.left(),
+		              *dmE,
+		              ProgramGlobals::DirectionEnum::EXPAND_ENVIRON,
+		              keptStates);
 		delete dmE;
 		dmE = 0;
 	}
@@ -225,7 +240,8 @@ private:
 			in $\mathcal{V}(E')$.
 			*/
 
-		const BasisWithOperatorsType& pBasis = (direction == ProgramGlobals::EXPAND_SYSTEM) ?
+		const ProgramGlobals::DirectionEnum expandSys = ProgramGlobals::DirectionEnum::EXPAND_SYSTEM;
+		const BasisWithOperatorsType& pBasis = (direction == expandSys) ?
 		            lrs_.left() : lrs_.right();
 
 		bool debug = false;
@@ -233,8 +249,8 @@ private:
 		bool enablePersistentSvd = (parameters_.options.find("EnablePersistentSvd") !=
 		        PsimagLite::String::npos);
 		ParamsDensityMatrixType p(useSvd, direction, debug, enablePersistentSvd);
-		TruncationCache& cache = (direction == ProgramGlobals::EXPAND_SYSTEM) ? leftCache_ :
-		                                                                        rightCache_;
+		TruncationCache& cache = (direction == expandSys) ? leftCache_ :
+		                                                    rightCache_;
 
 		if (BasisType::useSu2Symmetry()) {
 			if (p.useSvd) {
@@ -275,7 +291,7 @@ private:
 	                   ProgramGlobals::DirectionEnum direction,
 	                   SizeType keptStates)
 	{
-		bool expandSys = (direction == ProgramGlobals::EXPAND_SYSTEM);
+		bool expandSys = (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 		const BasisWithOperatorsType& basis = (expandSys) ? lrs_.left() : lrs_.right();
 		SizeType site = 0; // FIXME for model Immm
 		size_t mostRecent = lrs_.left().operatorsPerSite(site)*geometry_.maxConnections();

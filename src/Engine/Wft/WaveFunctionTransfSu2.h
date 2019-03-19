@@ -134,7 +134,7 @@ public:
 
 	{
 		bool done = false;
-		if (wftOptions_.dir == ProgramGlobals::EXPAND_ENVIRON) {
+		if (wftOptions_.dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) {
 			done = true;
 			if (wftOptions_.firstCall) {
 				transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
@@ -145,7 +145,7 @@ public:
 			}
 		}
 
-		if (wftOptions_.dir == ProgramGlobals::EXPAND_SYSTEM) {
+		if (wftOptions_.dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 			done = true;
 			if (wftOptions_.firstCall)
 				transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
@@ -169,7 +169,7 @@ private:
 		if (wftOptions_.twoSiteDmrg)
 			return transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
 
-		typename ProgramGlobals::DirectionEnum dir1 = ProgramGlobals::EXPAND_ENVIRON;
+		const ProgramGlobals::DirectionEnum dir1 = ProgramGlobals::DirectionEnum::EXPAND_ENVIRON;
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
 			transformVectorParallel(psiDest,psiSrc,lrs,i0,nk,dir1);
@@ -185,7 +185,7 @@ private:
 		if (wftOptions_.twoSiteDmrg)
 			return transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
 
-		typename ProgramGlobals::DirectionEnum dir2 = ProgramGlobals::EXPAND_SYSTEM;
+		const ProgramGlobals::DirectionEnum dir2 = ProgramGlobals::DirectionEnum::EXPAND_SYSTEM;
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
 			transformVectorParallel(psiDest,psiSrc,lrs,i0,nk,dir2);
@@ -221,9 +221,9 @@ private:
 	                                  const VectorSizeType& nk) const
 	{
 		SparseMatrixType ws;
-		dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).toSparse(ws);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).toSparse(ws);
 		SparseMatrixType we;
-		dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).toSparse(we);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).toSparse(we);
 		SparseMatrixType weT;
 		transposeConjugate(weT,we);
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
@@ -247,9 +247,9 @@ private:
 
 		assert(lrs.left().permutationInverse().size() == volumeOfNk ||
 		       lrs.left().permutationInverse().size() == dmrgWaveStruct_.
-		       getTransform(ProgramGlobals::SYSTEM).rows());
+		       getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).rows());
 		assert(lrs.right().permutationInverse().size()/volumeOfNk == dmrgWaveStruct_.
-		       getTransform(ProgramGlobals::ENVIRON).cols());
+		       getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).cols());
 
 		SizeType start = psiDest.offset(i0);
 		SizeType total = psiDest.effectiveSize(i0);
@@ -297,7 +297,7 @@ private:
 	                                          const VectorSizeType& nk) const
 	{
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
-		SizeType ni=dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).cols();
+		SizeType ni=dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols();
 		SizeType nip = dmrgWaveStruct_.lrs().left().permutationInverse().size()/volumeOfNk;
 		MatrixOrIdentityType wsRef2(wftOptions_.twoSiteDmrg && nip>volumeOfNk,ws);
 
@@ -346,9 +346,9 @@ private:
 		assert(lrsOld.super().permutationInverse().size() == psiSrc.size());
 
 		SparseMatrixType we;
-		dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).toSparse(we);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).toSparse(we);
 		SparseMatrixType ws;
-		dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).toSparse(ws);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).toSparse(ws);
 		SparseMatrixType wsT;
 		transposeConjugate(wsT,ws);
 
@@ -386,7 +386,7 @@ private:
 		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
 		SizeType nalpha = lrs.left().permutationInverse().size();
 
-		assert(nip==dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).cols());
+		assert(nip==dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols());
 
 		const FactorsType* fptrS = lrs.left().getFactors();
 		assert(fptrS);
@@ -480,7 +480,7 @@ private:
 	                            const VectorSizeType& nk) const
 	{
 		SparseMatrixType ws;
-		dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).toSparse(ws);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).toSparse(ws);
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
 			transformVector1bounce(psiDest,psiSrc,lrs,i0,nk,ws);
@@ -546,9 +546,10 @@ private:
 	                                            const SparseMatrixType& ws,
 	                                            const VectorSizeType& nk) const
 	{
-		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
-		SizeType ni=dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).cols();
-		SizeType nip = dmrgWaveStruct_.lrs().left().permutationInverse().size()/volumeOfNk;
+		const SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
+		const SizeType ni = dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).
+		        cols();
+		const SizeType nip = dmrgWaveStruct_.lrs().left().permutationInverse().size()/volumeOfNk;
 		MatrixOrIdentityType wsRef2(wftOptions_.twoSiteDmrg && nip>volumeOfNk,ws);
 		const FactorsType* fptrS = dmrgWaveStruct_.lrs().left().getFactors();
 		assert(fptrS);
@@ -586,7 +587,7 @@ private:
 	                            const VectorSizeType& nk) const
 	{
 		SparseMatrixType we;
-		dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).toSparse(we);
+		dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).toSparse(we);
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
 			transformVector2bounce(psiDest,psiSrc,lrs,i0,nk,we);

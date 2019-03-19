@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "LAPACK.h"
 #include "Sort.h"
+#include "ProgramGlobals.h"
 //#include "ReflectionTransform.h"
 
 namespace Dmrg {
@@ -102,11 +103,11 @@ public:
 	ReflectionOperatorEmpty(LeftRightSuperType& lrs,
 			   SizeType,
 			   bool isEnabled,
-			   SizeType)
+			   const ProgramGlobals::DirectionEnum)
 		: lrs_(lrs)
 	{
 		assert(!isEnabled);
-		if (isEnabled) throw PsimagLite::RuntimeError("ReflectionOperatorEmpty\n");
+		if (isEnabled) err("ReflectionOperatorEmpty\n");
 	}
 
 	void update(const typename PsimagLite::Vector<SizeType>::Type&)

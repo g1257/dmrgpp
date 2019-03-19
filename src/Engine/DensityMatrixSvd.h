@@ -109,8 +109,6 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 	typedef typename BasisWithOperatorsType::VectorQnType VectorQnType;
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 
-	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
-
 	class GroupsStruct {
 
 		struct PropsOfGroup {
@@ -248,7 +246,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 
 		bool expandSys() const
 		{
-			return (direction_ == ProgramGlobals::EXPAND_SYSTEM);
+			return (direction_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 		}
 
 	private:
@@ -429,10 +427,10 @@ public:
 		SizeType oneOrZero = (target.includeGroundStage()) ? 1 : 0;
 		SizeType targets = oneOrZero + target.size(); // Number of targets;
 		typename GenIjPatchType::LeftOrRightEnumType dir1 =
-		        (p.direction == ProgramGlobals::EXPAND_SYSTEM) ?
+		        (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ?
 		            GenIjPatchType::LEFT : GenIjPatchType::RIGHT;
 		typename GenIjPatchType::LeftOrRightEnumType dir2 =
-		        (p.direction == ProgramGlobals::EXPAND_SYSTEM) ?
+		        (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ?
 		            GenIjPatchType::RIGHT : GenIjPatchType::LEFT;
 
 		for (SizeType x = 0; x  < targets; ++x) {

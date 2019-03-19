@@ -107,8 +107,6 @@ class TwoPointCorrelations {
 	static SizeType const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
 	static SizeType const DIAGONAL = CorrelationsSkeletonType::DIAGONAL;
 	static SizeType const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
-	static const SizeType EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
-	static const SizeType EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
 
 public:
 

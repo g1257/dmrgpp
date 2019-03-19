@@ -176,7 +176,7 @@ public:
 	                  const ThisType& basis3,
 	                  ProgramGlobals::DirectionEnum dir)
 	{
-		if (dir == ProgramGlobals::EXPAND_SYSTEM)
+		if (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			setToProduct(basis2, basis3);
 		else
 			setToProduct(basis3, basis2);

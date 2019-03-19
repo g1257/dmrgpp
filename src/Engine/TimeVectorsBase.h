@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TIME_VECTORS_BASE
 #include <iostream>
 #include "Vector.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -100,7 +101,7 @@ public:
 	virtual void calcTimeVectors(const PairType&,
 	                             RealType,
 	                             const VectorWithOffsetType&,
-	                             SizeType,
+	                             const ProgramGlobals::DirectionEnum,
 	                             bool,
 	                             const PsimagLite::Vector<SizeType>::Type&,
 	                             const TargetParamsType&)=0;

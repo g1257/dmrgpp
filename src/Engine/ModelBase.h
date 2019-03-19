@@ -500,7 +500,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		              qn,
 		              false,
 		              10,
-		              ProgramGlobals::VERBOSE_NO);
+		              ProgramGlobals::VerboseEnum::NO);
 
 		SizeType n = partition.size();
 		assert(n > 0);

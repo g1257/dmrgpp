@@ -144,9 +144,8 @@ public:
 
 		SizeType n = inNumbers.size();
 		assert(n == inQns.size());
-		PsimagLite::Profiling* profiling = (verbose) ? new PsimagLite::Profiling("notReallySort",
-		                                                                         "n= " + ttos(n),
-		                                                                         std::cout) : 0;
+		PsimagLite::Profiling* profiling = (verbose == ProgramGlobals::VerboseEnum::YES) ?
+		            new PsimagLite::Profiling("notReallySort","n= " + ttos(n), std::cout) : 0;
 
 		VectorSizeType count;
 
@@ -164,7 +163,7 @@ public:
 
 			std::hash<PairOfQnsOrJustQnType> helper(hash, inQns, addOddToHash);
 			std::unordered_map<PairOfQnsOrJustQnType, SizeType> umap(initialSizeOfHashTable,
-			                                                              helper);
+			                                                         helper);
 			firstPassUmap(outQns, count, umap, inQns);
 			secondPassUmap(outNumber, offset, count, umap, inNumbers, inQns);
 		}

@@ -147,7 +147,7 @@ public:
 	virtual void calcTimeVectors(const PairType& startEnd,
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
-	                             SizeType systemOrEnviron,
+	                             ProgramGlobals::DirectionEnum systemOrEnviron,
 	                             bool allOperatorsApplied,
 	                             const VectorSizeType& block,
 	                             const TargetParamsType&)
@@ -182,8 +182,8 @@ public:
 		SizeType site = static_cast<SizeType>(lrs_.left().block()[lastIndexLeft]/
 		                                      sitesPerBlock);
 		bool oddLink = (site & 1);
-		bool b1 = (oddLink && systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM);
-		bool b2 = (!oddLink && systemOrEnviron==ProgramGlobals::EXPAND_ENVIRON);
+		bool b1 = (oddLink && systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
+		bool b2 = (!oddLink && systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
 		if (b2 && lrs_.left().block().size() == sitesPerBlock) b2=false;
 
 		wftAll(block);
@@ -208,23 +208,23 @@ public:
 		}
 
 		SparseMatrixType transformS;
-		wft_.getTransform(ProgramGlobals::SYSTEM).toSparse(transformS);
+		wft_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).toSparse(transformS);
 		SparseMatrixType transformST;
 		transposeConjugate(transformST,transformS);
 
 		SparseMatrixType transformE;
-		wft_.getTransform(ProgramGlobals::ENVIRON).toSparse(transformE);
+		wft_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).toSparse(transformE);
 		SparseMatrixType transformET;
 		transposeConjugate(transformET,transformE);
 
 		SizeType hilbertSize = model_.hilbertSize(block[0]);
-		if (systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM &&
+		if (systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM &&
 		    lrs_.right().size()==hilbertSize) {
 			transformE.makeDiagonal(hilbertSize,1);
 			transformET.makeDiagonal(hilbertSize,1);
 		}
 
-		if (systemOrEnviron==ProgramGlobals::EXPAND_ENVIRON &&
+		if (systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON &&
 		    lrs_.left().size()==hilbertSize) {
 			transformS.makeDiagonal(hilbertSize,1);
 			transformST.makeDiagonal(hilbertSize,1);
@@ -292,7 +292,7 @@ private:
 	void calcTargetVector(VectorWithOffsetType& target,
 	                      RealType Eg,
 	                      const VectorWithOffsetType& phi,
-	                      SizeType systemOrEnviron,
+	                      const ProgramGlobals::DirectionEnum systemOrEnviron,
 	                      const RealType& time,
 	                      const SparseMatrixType& S,
 	                      const SparseMatrixType& ST,
@@ -321,7 +321,7 @@ private:
 	void calcTimeVectorsSuzukiTrotter(TargetVectorType& result,
 	                                  RealType,
 	                                  const VectorWithOffsetType& phi,
-	                                  SizeType systemOrEnviron,
+	                                  const ProgramGlobals::DirectionEnum systemOrEnviron,
 	                                  SizeType i0,
 	                                  const RealType& time,
 	                                  const SparseMatrixType& transformS,
@@ -348,7 +348,7 @@ private:
 		for (SizeType i=0;i<phi0.size();i++) {
 			SizeType xp=0,yp=0;
 			packSuper.unpack(xp,yp,lrs_.super().permutation(i+offset));
-			if (systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM) {
+			if (systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 				timeVectorSystem(result,
 				                 phi0,
 				                 xp,
@@ -515,14 +515,14 @@ private:
 	}
 
 	void getMatrix(MatrixComplexOrRealType& m,
-	               SizeType systemOrEnviron,
+	               const ProgramGlobals::DirectionEnum systemOrEnviron,
 	               const BlockType& block,
 	               const RealType& time) const
 	{
 		SparseMatrixType hmatrix;
 		RealType factorForDiagonals =
-		        (systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM) ? 1.0 : 0.0;
-		if (systemOrEnviron==ProgramGlobals::EXPAND_ENVIRON && block[0]==0)
+		        (systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 1.0 : 0.0;
+		if (systemOrEnviron==ProgramGlobals::DirectionEnum::EXPAND_ENVIRON && block[0] == 0)
 			factorForDiagonals = 1.0;
 
 		if (fabs(factorForDiagonals)>1e-6) {

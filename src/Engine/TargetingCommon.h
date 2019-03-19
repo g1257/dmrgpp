@@ -287,9 +287,11 @@ public:
 		SizeType site = block[0];
 		SizeType numberOfSites = targetHelper_.model().geometry().numberOfSites();
 		BorderEnumType border = ApplyOperatorType::BORDER_NO;
-		if (site == 0 && direction == ProgramGlobals::EXPAND_ENVIRON)
+		if (site == 0 &&
+		        direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
 			border = ApplyOperatorType::BORDER_YES;
-		if (site == numberOfSites - 1 && direction == ProgramGlobals::EXPAND_SYSTEM)
+		if (site == numberOfSites - 1 &&
+		        direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			border = ApplyOperatorType::BORDER_YES;
 
 		for (SizeType i = 0; i < n; ++i) {
@@ -309,9 +311,9 @@ public:
 
 		SizeType site2 = numberOfSites;
 
-		if (site == 1 && direction == ProgramGlobals::EXPAND_ENVIRON)
+		if (site == 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
 			site2 = 0;
-		if (site == numberOfSites - 2 && direction == ProgramGlobals::EXPAND_SYSTEM)
+		if (site == numberOfSites - 2 && direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			site2 = numberOfSites - 1;
 		if (site2 == numberOfSites) return;
 
@@ -551,7 +553,7 @@ public:
 	template<typename SomeAlgebraType>
 	ComplexOrRealType testRealWork(const VectorWithOffsetType& src1,
 	                               const VectorWithOffsetType& src2,
-	                               SizeType systemOrEnviron,
+	                               const ProgramGlobals::DirectionEnum systemOrEnviron,
 	                               SizeType site,
 	                               const SomeAlgebraType& A,
 	                               BorderEnumType border) const
@@ -698,7 +700,7 @@ private:
 	template<typename SomeAlgebraType>
 	void test(const VectorWithOffsetType& src1,
 	          const VectorWithOffsetType& src2,
-	          SizeType systemOrEnviron,
+	          const ProgramGlobals::DirectionEnum systemOrEnviron,
 	          PsimagLite::String label,
 	          SizeType site,
 	          const SomeAlgebraType& A,
@@ -713,7 +715,7 @@ private:
 	template<typename SomeAlgebraType>
 	ComplexOrRealType test_(const VectorWithOffsetType& src1,
 	                        const VectorWithOffsetType& src2,
-	                        SizeType systemOrEnviron,
+	                        const ProgramGlobals::DirectionEnum systemOrEnviron,
 	                        SizeType site,
 	                        const SomeAlgebraType& A,
 	                        BorderEnumType border) const

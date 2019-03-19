@@ -521,7 +521,7 @@ public:
 	                         typename ProgramGlobals::DirectionEnum dir) const
 	{
 		SizeType destIndex = dest.sector(iNew);
-		if (dir == ProgramGlobals::EXPAND_SYSTEM)
+		if (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			return toVectorExpandSys(dest, destIndex, lrs, nk);
 
 		toVectorExpandEnviron(dest, destIndex, lrs, nk);

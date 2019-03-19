@@ -97,15 +97,15 @@ struct ProgramGlobals {
 
 	static PsimagLite::String notReallySortAlgo;
 
-	enum DirectionEnum {INFINITE=0,EXPAND_ENVIRON=1,EXPAND_SYSTEM=2};
+	enum class DirectionEnum {INFINITE, EXPAND_ENVIRON, EXPAND_SYSTEM};
 
-	enum ConnectionEnum {SYSTEM_SYSTEM,SYSTEM_ENVIRON,ENVIRON_SYSTEM,ENVIRON_ENVIRON};
+	enum class ConnectionEnum {SYSTEM_SYSTEM, SYSTEM_ENVIRON, ENVIRON_SYSTEM, ENVIRON_ENVIRON};
 
-	enum SysOrEnvEnum {SYSTEM, ENVIRON};
+	enum class SysOrEnvEnum {SYSTEM, ENVIRON};
 
-	enum class FermionOrBosonEnum {FERMION,BOSON};
+	enum class FermionOrBosonEnum {FERMION, BOSON};
 
-	enum VerboseEnum {VERBOSE_NO, VERBOSE_YES};
+	enum class VerboseEnum {NO, YES};
 
 	static void init(SizeType maxElectronsOneSpin_)
 	{
@@ -120,10 +120,10 @@ struct ProgramGlobals {
 	                              DirectionEnum direction,
 	                              SizeType n)
 	{
-		if (site == 1 && direction == EXPAND_ENVIRON)
+		if (site == 1 && direction == DirectionEnum::EXPAND_ENVIRON)
 			return 0;
 
-		if (site == n - 2 && direction == EXPAND_SYSTEM)
+		if (site == n - 2 && direction == DirectionEnum::EXPAND_SYSTEM)
 			return n - 1;
 
 		return -1;
@@ -175,16 +175,33 @@ struct ProgramGlobals {
 		int x = -1;
 		is >> x;
 		if (x == 0) {
-			direction = INFINITE;
+			direction = DirectionEnum::INFINITE;
 		} else if (x == 1) {
-			direction = EXPAND_ENVIRON;
+			direction = DirectionEnum::EXPAND_ENVIRON;
 		} else if (x == 2) {
-			direction = EXPAND_SYSTEM;
+			direction = DirectionEnum::EXPAND_SYSTEM;
 		} else {
 			err("istream& operator>> DirectionEnum\n");
 		}
 
 		return is;
+	}
+
+	static PsimagLite::String toString(DirectionEnum d)
+	{
+		switch (d) {
+		case DirectionEnum::INFINITE:
+			return "INFINITE";
+			break;
+		case DirectionEnum::EXPAND_ENVIRON:
+			return "EXPAND_ENVIRON";
+			break;
+		case DirectionEnum::EXPAND_SYSTEM:
+			return "EXPAND_SYSTEM";
+			break;
+		}
+
+		return "UNKNOWN_DIRECTION_ENUM";
 	}
 
 	static PsimagLite::String SYSTEM_STACK_STRING;

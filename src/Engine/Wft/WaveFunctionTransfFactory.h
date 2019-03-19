@@ -124,7 +124,7 @@ public:
 	template<typename SomeParametersType>
 	WaveFunctionTransfFactory(SomeParametersType& params)
 	    : isEnabled_(!(params.options.find("nowft")!=PsimagLite::String::npos)),
-	      wftOptions_(ProgramGlobals::INFINITE,
+	      wftOptions_(ProgramGlobals::DirectionEnum::INFINITE,
 	                  params.options,
 	                  true,
 	                  true,
@@ -181,11 +181,11 @@ public:
 	{
 		bool allow = false;
 		switch (wftOptions_.dir) {
-		case ProgramGlobals::INFINITE:
+		case ProgramGlobals::DirectionEnum::INFINITE:
 			allow = false;
 			break;
-		case ProgramGlobals::EXPAND_SYSTEM:
-		case ProgramGlobals::EXPAND_ENVIRON:
+		case ProgramGlobals::DirectionEnum::EXPAND_SYSTEM:
+		case ProgramGlobals::DirectionEnum::EXPAND_ENVIRON:
 			allow = true;
 		}
 
@@ -212,13 +212,13 @@ public:
 	{
 		bool allow=false;
 		switch (wftOptions_.dir) {
-		case ProgramGlobals::INFINITE:
+		case ProgramGlobals::DirectionEnum::INFINITE:
 			allow=false;
 			break;
-		case ProgramGlobals::EXPAND_SYSTEM:
+		case ProgramGlobals::DirectionEnum::EXPAND_SYSTEM:
 			allow=true;
 
-		case ProgramGlobals::EXPAND_ENVIRON:
+		case ProgramGlobals::DirectionEnum::EXPAND_ENVIRON:
 			allow=true;
 		}
 
@@ -245,13 +245,13 @@ public:
 	{
 		bool allow=false;
 		switch (wftOptions_.dir) {
-		case ProgramGlobals::INFINITE:
+		case ProgramGlobals::DirectionEnum::INFINITE:
 			allow=false;
 			break;
-		case ProgramGlobals::EXPAND_SYSTEM:
+		case ProgramGlobals::DirectionEnum::EXPAND_SYSTEM:
 			allow=true;
 
-		case ProgramGlobals::EXPAND_ENVIRON:
+		case ProgramGlobals::DirectionEnum::EXPAND_ENVIRON:
 			allow=true;
 		}
 
@@ -309,7 +309,8 @@ public:
 		waveStructCombined_.push(transform, direction, vts, s, qns, wftOptions_.dir);
 		waveStructCombined_.setLrs(lrs);
 		PsimagLite::OstringStream msg;
-		msg<<"OK, pushing option="<<direction<<" and stage="<<wftOptions_.dir;
+		msg<<"OK, pushing option="<<ProgramGlobals::toString(direction);
+		msg<<" and stage="<<ProgramGlobals::toString(wftOptions_.dir);
 		progress_.printline(msg,std::cout);
 
 		if (noLoad_) {
@@ -424,7 +425,7 @@ private:
 	SizeType computeCenter(const LeftRightSuperType& lrs,
 	                       ProgramGlobals::DirectionEnum direction) const
 	{
-		if (direction == ProgramGlobals::EXPAND_SYSTEM) {
+		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 			SizeType total = lrs.left().block().size();
 			assert(total>0);
 			total--;

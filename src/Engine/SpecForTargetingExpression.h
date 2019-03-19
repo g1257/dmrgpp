@@ -248,7 +248,8 @@ private:
 			fullVector_.resize(lrs.super().size(), 0.0);
 
 		ProgramGlobals::DirectionEnum dir = aux_.direction;
-		SizeType cOo = (dir == ProgramGlobals::EXPAND_SYSTEM) ? maxSystemSite : maxSystemSite + 1;
+		SizeType cOo = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? maxSystemSite
+		                                                                     : maxSystemSite + 1;
 
 		SparseMatrixType mSys;
 		SparseMatrixType mCoO;
@@ -310,7 +311,7 @@ private:
 	                   const SparseMatrixType& mEnv, // <--- must be the trans. conj. ATTENTION
 	                   int fse)
 	{
-		if (aux_.direction == ProgramGlobals::EXPAND_SYSTEM)
+		if (aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			multiplyWhenExpandSys(v, srcVwo, iSector, mSys, mCoO, mEnv, fse);
 		else
 			multiplyWhenExpandEnv(v, srcVwo, iSector, mSys, mCoO, mEnv, fse);

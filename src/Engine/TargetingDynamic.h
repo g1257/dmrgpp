@@ -185,9 +185,10 @@ public:
 		SizeType numberOfSites = this->lrs().super().block().size();
 		SizeType site2 = numberOfSites;
 
-		if (site == 1 && direction == ProgramGlobals::EXPAND_ENVIRON)
+		if (site == 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
 			site2 = 0;
-		if (site == numberOfSites - 2 && direction == ProgramGlobals::EXPAND_SYSTEM)
+		if (site == numberOfSites - 2
+		        && direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			site2 = numberOfSites - 1;
 		if (site2 == numberOfSites) return;
 		evolve(Eg, direction, site2, loopNumber);
@@ -252,7 +253,7 @@ private:
 	void calcLanczosVectors(RealType&,
 	                        typename PsimagLite::Vector<RealType>::Type&,
 	                        const VectorWithOffsetType& phi,
-	                        SizeType)
+	                        const ProgramGlobals::DirectionEnum)
 	{
 		for (SizeType i=0;i<phi.sectors();i++) {
 			VectorType sv;

@@ -32,8 +32,8 @@ public:
 
 				ProgramGlobals::ConnectionEnum type = superGeometry.connectionKind(smax, v);
 
-				if (type == ProgramGlobals::SYSTEM_SYSTEM ||
-				        type == ProgramGlobals::ENVIRON_ENVIRON) continue;
+				if (type == ProgramGlobals::ConnectionEnum::SYSTEM_SYSTEM ||
+				        type == ProgramGlobals::ConnectionEnum::ENVIRON_ENVIRON) continue;
 
 				data_[counter++] = v;
 			}

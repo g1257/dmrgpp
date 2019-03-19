@@ -34,7 +34,7 @@ public:
 	                 const VectorSizeType& nk,
 	                 const SparseMatrixType& wsT,
 	                 const SparseMatrixType& we,
-	                 SizeType sysOrEnv)
+	                 const ProgramGlobals::SysOrEnvEnum sysOrEnv)
 	    : dest_(dest),
 	      i0_(i0),
 	      src_(src),
@@ -45,25 +45,27 @@ public:
 	      wsT_(wsT),
 	      we_(we),
 	      volumeOfNk_(ProgramGlobals::volumeOf(nk)),
-	      pack1_((sysOrEnv == ProgramGlobals::SYSTEM) ? lrs.left().permutationInverse().size() :
-	                                                    lrs.super().permutationInverse().size()/
-	                                                    lrs.right().permutationInverse().size()),
-	      pack2_((sysOrEnv == ProgramGlobals::SYSTEM) ?  lrs.left().permutationInverse().size()/
-	                                                     volumeOfNk_ : volumeOfNk_),
+	      pack1_((sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM)
+	             ? lrs.left().permutationInverse().size() :
+	               lrs.super().permutationInverse().size()/
+	               lrs.right().permutationInverse().size()),
+	      pack2_((sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM)
+	             ?  lrs.left().permutationInverse().size()/volumeOfNk_ : volumeOfNk_),
 	      sysOrEnv_(sysOrEnv)
 	{
-		assert(sysOrEnv == ProgramGlobals::SYSTEM || sysOrEnv == ProgramGlobals::ENVIRON);
+		assert(sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM ||
+	           sysOrEnv == ProgramGlobals::SysOrEnvEnum::ENVIRON);
 
-		if (sysOrEnv == ProgramGlobals::SYSTEM) {
+		if (sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM) {
 			assert(lrs.left().permutationInverse().size()/volumeOfNk_ ==
-			       dmrgWaveStruct_.getTransform(ProgramGlobals::SYSTEM).cols());
+			       dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols());
 
 		} else {
 			assert(lrs.left().permutationInverse().size() == volumeOfNk_ ||
 			       lrs.left().permutationInverse().size() == dmrgWaveStruct_.
-			       getTransform(ProgramGlobals::SYSTEM).rows());
+			       getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).rows());
 			assert(lrs.right().permutationInverse().size()/volumeOfNk_ ==
-			       dmrgWaveStruct_.getTransform(ProgramGlobals::ENVIRON).cols());
+			       dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).cols());
 		}
 	}
 
@@ -72,7 +74,7 @@ public:
 	void doTask(SizeType x, SizeType)
 	{
 		SizeType destOffset = dest_.offset(i0_);
-		if (sysOrEnv_ == ProgramGlobals::SYSTEM) {
+		if (sysOrEnv_ == ProgramGlobals::SysOrEnvEnum::SYSTEM) {
 			SizeType isn = 0;
 			SizeType jen = 0;
 			pack1_.unpack(isn, jen, lrs_.super().permutation(x + destOffset));
@@ -169,7 +171,7 @@ private:
 	SizeType volumeOfNk_;
 	PackIndicesType pack1_;
 	PackIndicesType pack2_;
-	SizeType sysOrEnv_;
+	const ProgramGlobals::SysOrEnvEnum sysOrEnv_;
 
 };
 }

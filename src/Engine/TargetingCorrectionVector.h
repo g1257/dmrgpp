@@ -206,9 +206,10 @@ public:
 		SizeType numberOfSites = this->lrs().super().block().size();
 		SizeType site2 = numberOfSites;
 
-		if (site == 1 && direction == ProgramGlobals::EXPAND_ENVIRON)
+		if (site == 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
 			site2 = 0;
-		if (site == numberOfSites - 2 && direction == ProgramGlobals::EXPAND_SYSTEM)
+		if (site == numberOfSites - 2 &&
+		        direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			site2 = numberOfSites - 1;
 		if (site2 == numberOfSites) return;
 		evolve(Eg, direction, site2, loopNumber);
@@ -243,7 +244,7 @@ private:
 		                                             loopNumber,
 		                                             tstStruct_);
 
-		if (direction != ProgramGlobals::INFINITE) {
+		if (direction != ProgramGlobals::DirectionEnum::INFINITE) {
 			correctionEnabled_=true;
 			typename PsimagLite::Vector<SizeType>::Type block1(1,site);
 			addCorrection(direction,block1);

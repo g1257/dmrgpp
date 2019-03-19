@@ -153,7 +153,7 @@ public:
 	                    const BlockType& blockRight)
 	{
 		PsimagLite::Profiling profiling("Diagonalization", std::cout);
-		assert(direction == ProgramGlobals::INFINITE);
+		assert(direction == ProgramGlobals::DirectionEnum::INFINITE);
 		SizeType loopIndex = 0;
 		VectorSizeType sectors;
 		targetedSymmetrySectors(sectors,target.lrs());
@@ -171,7 +171,7 @@ public:
 	                    SizeType loopIndex)
 	{
 		PsimagLite::Profiling profiling("Diagonalization", std::cout);
-		assert(direction != ProgramGlobals::INFINITE);
+		assert(direction != ProgramGlobals::DirectionEnum::INFINITE);
 
 		RealType gsEnergy = internalMain_(target,direction,loopIndex,false,block);
 		//  targeting:
@@ -209,7 +209,7 @@ private:
 		checkSaveOption(saveOption);
 
 		bool onlyWft = false;
-		if (direction != ProgramGlobals::INFINITE)
+		if (direction != ProgramGlobals::DirectionEnum::INFINITE)
 			onlyWft = ((saveOption & 2)>0);
 
 		bool noguess = ((saveOption & 8) > 0); // bit 3 set means guess is random vector

@@ -194,7 +194,7 @@ public:
 		     model,
 		     pS,
 		     X,
-		     ProgramGlobals::EXPAND_SYSTEM,
+		     ProgramGlobals::DirectionEnum::EXPAND_SYSTEM,
 		     time);
 	}
 
@@ -209,7 +209,7 @@ public:
 		     model,
 		     pE,
 		     X,
-		     ProgramGlobals::EXPAND_ENVIRON,
+		     ProgramGlobals::DirectionEnum::EXPAND_ENVIRON,
 		     time);
 	}
 
@@ -368,7 +368,7 @@ private:
 
 		LeftRightSuper2Type* lrs;
 		BasisType* leftOrRightL =  &leftOrRight;
-		if (dir == ProgramGlobals::EXPAND_SYSTEM) {
+		if (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 			lrs = new LeftRightSuper2Type(pS,Xbasis,*leftOrRightL);
 		} else {
 			lrs = new  LeftRightSuper2Type(Xbasis,pS,*leftOrRightL);

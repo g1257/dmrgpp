@@ -99,8 +99,6 @@ class DensityMatrixLocal : public DensityMatrixBase<TargetingType> {
 	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 	typedef typename DensityMatrixBase<TargetingType>::Params ParamsType;
 
-	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
-
 public:
 
 	typedef typename BaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
@@ -115,7 +113,8 @@ public:
 	                   const ParamsType& p)
 	    :
 	      progress_("DensityMatrixLocal"),
-	      data_((p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.left() : lrs.right()),
+	      data_((p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.left() :
+	                                                                            lrs.right()),
 	      direction_(p.direction),
 	      debug_(p.debug)
 	{
@@ -126,12 +125,12 @@ public:
 		}
 
 		const BasisWithOperatorsType& pBasis =
-		        (p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.left() :
-		                                                         lrs.right();
+		        (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.left() :
+		                                                                        lrs.right();
 
 		const BasisWithOperatorsType& pBasisSummed =
-		        (p.direction == ProgramGlobals::EXPAND_SYSTEM) ? lrs.right() :
-		                                                         lrs.left();
+		        (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.right() :
+		                                                                        lrs.left();
 
 		//loop over all partitions:
 		for (SizeType m=0;m<pBasis.partition()-1;m++) {

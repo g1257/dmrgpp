@@ -120,18 +120,18 @@ public:
 	const SparseMatrixType& reducedOperator(char modifier,
 	                                        SizeType i,
 	                                        SizeType sigma,
-	                                        SizeType type) const
+	                                        const ProgramGlobals::SysOrEnvEnum type) const
 	{
 		assert(BasisType::useSu2Symmetry());
 
-		if (type == ProgramGlobals::SYSTEM) {
+		if (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) {
 			PairType ii = lrs_.left().getOperatorIndices(i,
 			                                             sigma);
 			return lrs_.left().getReducedOperatorByIndex(modifier,
 			                                             ii).data;
 		}
 
-		assert(type == ProgramGlobals::ENVIRON);
+		assert(type == ProgramGlobals::SysOrEnvEnum::ENVIRON);
 		PairType ii = lrs_.right().getOperatorIndices(i,
 		                                              sigma);
 		return lrs_.right().getReducedOperatorByIndex(modifier,
@@ -160,12 +160,13 @@ public:
 	                     bool flip=false) const
 	{
 		//int const SystemEnviron=1,EnvironSystem=2;
-		RealType fermionSign = (link.fermionOrBoson==ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
+		RealType fermionSign = (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
+		        ? -1 : 1;
 
-		if (link.type==ProgramGlobals::ENVIRON_SYSTEM)  {
+		if (link.type==ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM)  {
 			LinkType link2 = link;
 			link2.value *= fermionSign;
-			link2.type = ProgramGlobals::SYSTEM_ENVIRON;
+			link2.type = ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON;
 			fastOpProdInter(B,A,matrixBlock,link2,true);
 			return;
 		}
@@ -241,12 +242,13 @@ public:
 	                     bool flipped=false) const
 	{
 		//int const SystemEnviron=1,EnvironSystem=2;
-		RealType fermionSign =  (link.fermionOrBoson==ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
+		RealType fermionSign =  (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
+		        ? -1 : 1;
 
-		if (link.type == ProgramGlobals::ENVIRON_SYSTEM)  {
+		if (link.type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM)  {
 			LinkType link2 = link;
 			link2.value *= fermionSign;
-			link2.type = ProgramGlobals::SYSTEM_ENVIRON;
+			link2.type = ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON;
 			fastOpProdInter(x,y,B,A,link2,true);
 			return;
 		}

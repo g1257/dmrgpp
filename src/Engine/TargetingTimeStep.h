@@ -204,7 +204,7 @@ public:
 			return;
 		if (site > 1 && site < numberOfSites-2)
 			return;
-		if (site == 1 && direction == ProgramGlobals::EXPAND_SYSTEM)
+		if (site == 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			return;
 
 		SizeType x = (site == 1) ? 0 : numberOfSites-1;
@@ -242,7 +242,7 @@ private:
 	                    const BlockType& block1,
 	                    SizeType loopNumber)
 	{
-		if (direction == ProgramGlobals::INFINITE) return;
+		if (direction == ProgramGlobals::DirectionEnum::INFINITE) return;
 		VectorWithOffsetType phiNew;
 		assert(block1.size() > 0);
 		SizeType site = block1[0];

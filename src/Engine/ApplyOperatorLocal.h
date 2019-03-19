@@ -157,14 +157,14 @@ public:
 	                const VectorWithOffsetType& src,
 	                const OperatorType& AA,
 	                const FermionSign& fermionSign,
-	                SizeType systemOrEnviron,
+	                ProgramGlobals::DirectionEnum systemOrEnviron,
 	                BorderEnum corner) const
 	{
 		LegacyBug legacyBug(withLegacyBug_, AA);
 		const OperatorType& A = legacyBug();
 
 		if (corner == BORDER_NO) {
-			if (systemOrEnviron == ProgramGlobals::EXPAND_SYSTEM)
+			if (systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 				applyLocalOpSystem(dest,src,A,fermionSign);
 			else
 				applyLocalOpEnviron(dest,src,A);
@@ -180,9 +180,9 @@ public:
 	                 const VectorWithOffsetType& src,
 	                 const OperatorType& A,
 	                 const FermionSign& fermionSign,
-	                 SizeType systemOrEnviron) const
+	                 ProgramGlobals::DirectionEnum systemOrEnviron) const
 	{
-		assert(systemOrEnviron == ProgramGlobals::EXPAND_SYSTEM);
+		assert(systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 
 		TargetVectorType dest2(lrs_.super().size(),0.0);
 

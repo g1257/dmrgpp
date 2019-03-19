@@ -155,7 +155,7 @@ public:
 	virtual void calcTimeVectors(const PairType&,
 	                             RealType,
 	                             const VectorWithOffsetType& phi,
-	                             SizeType,
+	                             const ProgramGlobals::DirectionEnum,
 	                             bool,
 	                             const VectorSizeType& indices,
 	                             const TargetParamsType& tstStruct)

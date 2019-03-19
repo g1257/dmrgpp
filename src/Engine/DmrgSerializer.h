@@ -201,8 +201,8 @@ public:
 
 	SizeType site() const
 	{
-		if (direction_==ProgramGlobals::EXPAND_SYSTEM) return lrs_.right().block()[0]-1;
-		else return lrs_.right().block()[0];
+		return (direction_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ?
+		            lrs_.right().block()[0] - 1 : lrs_.right().block()[0];
 	}
 
 	void transform(SparseMatrixType& ret, const SparseMatrixType& O) const

@@ -165,7 +165,7 @@ public:
 	            const BlockType&,
 	            SizeType)
 	{
-		if (direction == ProgramGlobals::INFINITE) return;
+		if (direction == ProgramGlobals::DirectionEnum::INFINITE) return;
 
 		this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 		computePvectors(direction);

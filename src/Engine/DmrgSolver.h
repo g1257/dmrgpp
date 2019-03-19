@@ -157,7 +157,7 @@ public:
 	      reflectionOperator_(lrs_,
 	                          model_.hilbertSize(0),
 	                          parameters_.useReflectionSymmetry,
-	                          ProgramGlobals::EXPAND_SYSTEM),
+	                          ProgramGlobals::DirectionEnum::EXPAND_SYSTEM),
 	      diagonalization_(parameters_,
 	                       model,
 	                       verbose_,
@@ -348,12 +348,17 @@ obtain ordered
 			progress_.print("Growth done.\n",std::cout);
 			lrs_.printSizes("Infinite",std::cout);
 
-			updateQuantumSector(lrs_.sites(),ProgramGlobals::INFINITE,step);
+			updateQuantumSector(lrs_.sites(),
+			                    ProgramGlobals::DirectionEnum::INFINITE,
+			                    step);
 
 			lrs_.setToProduct(quantumSector_, initialSizeOfHashTable);
 
 			const BlockType& ystep = findRightBlock(Y,step,E);
-			energy_ = diagonalization_(psi,ProgramGlobals::INFINITE,X[step],ystep);
+			energy_ = diagonalization_(psi,
+			                           ProgramGlobals::DirectionEnum::INFINITE,
+			                           X[step],
+			                           ystep);
 			printEnergy(energy_);
 
 			truncate_.changeBasisInfinite(pS, pE, psi, parameters_.keptStatesInfinite);
@@ -363,7 +368,7 @@ obtain ordered
 				else checkpoint_.push(lrs_.left(),lrs_.right());
 			} else {
 				checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS,
-				                 ProgramGlobals::SYSTEM);
+				                 ProgramGlobals::SysOrEnvEnum::SYSTEM);
 			}
 
 			progress_.printMemoryUsage();
@@ -402,7 +407,8 @@ obtain ordered
 		assert(indexOfFirstFiniteLoop < parameters_.finiteLoop.size());
 		ProgramGlobals::DirectionEnum direction =
 		        (parameters_.finiteLoop[indexOfFirstFiniteLoop].stepLength < 0) ?
-		            ProgramGlobals::EXPAND_ENVIRON :  ProgramGlobals::EXPAND_SYSTEM;
+		            ProgramGlobals::DirectionEnum::EXPAND_ENVIRON :
+		            ProgramGlobals::DirectionEnum::EXPAND_SYSTEM;
 
 		int lastSign = 1;
 
@@ -426,8 +432,8 @@ obtain ordered
 					if (parameters_.finiteLoop[i].stepLength > 0) stepCurrent_++;
 					if (parameters_.finiteLoop[i].stepLength < 0) stepCurrent_--;
 				} else { // has bounced
-					checkForWft((signThis > 0) ? ProgramGlobals::SYSTEM :
-					                             ProgramGlobals::ENVIRON,
+					checkForWft((signThis > 0) ? ProgramGlobals::SysOrEnvEnum::SYSTEM :
+					                             ProgramGlobals::SysOrEnvEnum::ENVIRON,
 					            pS);
 				}
 			}
@@ -459,10 +465,12 @@ obtain ordered
 		SizeType lastSiteOfSystem = pS.block()[--last];
 		PsimagLite::String lOrR = "";
 
-		if (what == ProgramGlobals::SYSTEM && lastSiteOfSystem != 0)
+		if (what == ProgramGlobals::SysOrEnvEnum::SYSTEM &&
+		        lastSiteOfSystem != 0)
 			lOrR = "right";
 
-		if (what == ProgramGlobals::ENVIRON && lastSiteOfSystem != numberOfSites - 2)
+		if (what == ProgramGlobals::SysOrEnvEnum::ENVIRON &&
+		        lastSiteOfSystem != numberOfSites - 2)
 			lOrR = "left";
 
 		if (lOrR == "") return;
@@ -489,7 +497,8 @@ obtain ordered
 		const SizeType initialSizeOfHashTable = std::max(ten, keptStates);
 
 		ProgramGlobals::DirectionEnum direction = (stepLength < 0) ?
-		            ProgramGlobals::EXPAND_ENVIRON : ProgramGlobals::EXPAND_SYSTEM;
+		            ProgramGlobals::DirectionEnum::EXPAND_ENVIRON :
+		            ProgramGlobals::DirectionEnum::EXPAND_SYSTEM;
 
 		wft_.setStage(direction);
 
@@ -507,12 +516,12 @@ obtain ordered
 
 			RealType time = target.time();
 			printerInDetail.print(std::cout, "finite");
-			if (direction == ProgramGlobals::EXPAND_SYSTEM) {
+			if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 				lrs_.growLeftBlock(model_, pS, sitesIndices_[stepCurrent_], time);
-				lrs_.right(dummyBwo = checkpoint_.shrink(ProgramGlobals::ENVIRON));
+				lrs_.right(dummyBwo = checkpoint_.shrink(ProgramGlobals::SysOrEnvEnum::ENVIRON));
 			} else {
 				lrs_.growRightBlock(model_, pE, sitesIndices_[stepCurrent_], time);
-				lrs_.left(dummyBwo = checkpoint_.shrink(ProgramGlobals::SYSTEM));
+				lrs_.left(dummyBwo = checkpoint_.shrink(ProgramGlobals::SysOrEnvEnum::SYSTEM));
 			}
 
 			// only updates the extreme sites:
@@ -546,7 +555,7 @@ obtain ordered
 			}
 		}
 
-		if (direction == ProgramGlobals::EXPAND_SYSTEM)
+		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			pE = lrs_.right();
 		else
 			pS = lrs_.left();
@@ -566,10 +575,12 @@ obtain ordered
 
 		truncate_.changeBasisFinite(pS, pE, target, keptStates, direction);
 
-		if (direction == ProgramGlobals::EXPAND_SYSTEM)
-			checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS, ProgramGlobals::SYSTEM);
+		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+			checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS,
+			                 ProgramGlobals::SysOrEnvEnum::SYSTEM);
 		else
-			checkpoint_.push((twoSiteDmrg) ? lrs_.right() : pE, ProgramGlobals::ENVIRON);
+			checkpoint_.push((twoSiteDmrg) ? lrs_.right() : pE,
+			                 ProgramGlobals::SysOrEnvEnum::ENVIRON);
 
 		write(fsS,fsE,target,direction,loopIndex);
 	}
@@ -620,20 +631,13 @@ obtain ordered
 		return false;
 	}
 
-	PsimagLite::String getDirection(ProgramGlobals::DirectionEnum dir) const
-	{
-		if (dir == ProgramGlobals::INFINITE) return  "INFINITE";
-		return (dir == ProgramGlobals::EXPAND_ENVIRON) ?
-		            "EXPAND_ENVIRON" : "EXPAND_SYSTEM";
-	}
-
 	void updateQuantumSector(SizeType sites,
 	                         ProgramGlobals::DirectionEnum direction,
 	                         SizeType step)
 	{
 		SizeType maxSites = model_.geometry().numberOfSites();
 
-		if (direction == ProgramGlobals::INFINITE &&
+		if (direction == ProgramGlobals::DirectionEnum::INFINITE &&
 		        sites < maxSites &&
 		        parameters_.adjustQuantumNumbers.size() > step) {
 			quantumSector_ = parameters_.adjustQuantumNumbers[step];

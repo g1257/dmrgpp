@@ -235,7 +235,7 @@ public:
 			throw PsimagLite::RuntimeError(str.c_str());
 		}
 
-		if (direction == ProgramGlobals::INFINITE) return;
+		if (direction == ProgramGlobals::DirectionEnum::INFINITE) return;
 
 		SizeType max = tstStruct_.sites();
 

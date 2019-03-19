@@ -173,8 +173,8 @@ public:
 		                                std::cout);
 
 		bool notSuper = (basis1.block().size() == 1 || basis2.block().size() == 1);
-		ProgramGlobals::VerboseEnum verbose = (notSuper) ? ProgramGlobals::VERBOSE_NO :
-		                                                   ProgramGlobals::VERBOSE_YES;
+		ProgramGlobals::VerboseEnum verbose = (notSuper) ? ProgramGlobals::VerboseEnum::NO :
+		                                                   ProgramGlobals::VerboseEnum::YES;
 
 		block_.clear();
 		utils::blockUnion(block_,basis1.block_,basis2.block_);
@@ -345,7 +345,7 @@ public:
 		                                  false,
 		                                  false,
 		                                  initialSizeOfHashTable,
-		                                  ProgramGlobals::VERBOSE_NO);
+		                                  ProgramGlobals::VerboseEnum::NO);
 
 		return calcError(eigs,removedIndices);
 	}
@@ -557,7 +557,7 @@ protected:
 		                                  true,
 		                                  true,
 		                                  10,
-		                                  ProgramGlobals::VERBOSE_NO);
+		                                  ProgramGlobals::VerboseEnum::NO);
 		reorder();
 		signsOld_ = signs_;
 	}
