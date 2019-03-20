@@ -1,0 +1,30 @@
+##Ainur1.0
+TotalNumberOfSites=16;
+NumberOfTerms=2;
+
+#Hopping
+gt0:DegreesOfFreedom=1;
+gt0:GeometryKind="chain";
+gt0:GeometryOptions="ConstantValues";
+gt0:dir0:Connectors=[1.0];
+
+#RashbaSOC
+gt1:DegreesOfFreedom=1;
+gt1:GeometryKind="chain";
+gt1:GeometryOptions="ConstantValues";
+gt1:dir0:Connectors=[2.0];
+
+#Model params
+hubbardU=[0.0, ...];
+potentialV=[0.0,...];
+Model="HubbardOneBandRashbaSOC";
+SolverOptions="none";
+Version="53725d9b8f22615ccccc782082f4cd6f51a4e374";
+OutputFile="data4800";
+InfiniteLoopKeptStates=100;
+FiniteLoops=[[7, 100, 0],
+[-14, 100, 0],
+[ 14, 100, 1]];
+TargetElectronsUp=8;
+TargetElectronsDown=8;
+#ci observe arguments="<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>"
