@@ -218,7 +218,7 @@ private:
 
 		if (j == skeleton_.numberOfSites() - 1) {
 			if (i == j - 1) {
-				typename ObserverHelperType::PointerForSerializerType ptr(j - 2);
+				const SizeType ptr = j - 2;
 				SizeType ni = helper.leftRightSuper(ptr).left().size()/
 				        helper.leftRightSuper(ptr).right().size();
 
@@ -236,16 +236,15 @@ private:
 
 			SparseMatrixType O1g;
 			skeleton_.growDirectly(O1g,O1m,i,fermionicSign,j-2,true);
-			typename ObserverHelperType::PointerForSerializerType ptr(j - 2);
-			return skeleton_.bracketRightCorner(O1g, O2m, fermionicSign, ptr, bra, ket);
+			// j - 2 below is the pointer
+			return skeleton_.bracketRightCorner(O1g, O2m, fermionicSign, j - 2, bra, ket);
 		}
 
 		SparseMatrixType O1g,O2g;
 		SizeType ns = j-1;
 
 		skeleton_.growDirectly(O1g,O1m,i,fermionicSign,ns,true);
-		typename ObserverHelperType::PointerForSerializerType ptr =
-		        skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns);
+		const SizeType ptr = skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns);
 
 		return skeleton_.bracket(O2g,
 		                         ProgramGlobals::FermionOrBosonEnum::BOSON,

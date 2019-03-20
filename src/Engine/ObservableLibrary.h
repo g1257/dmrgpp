@@ -107,7 +107,6 @@ public:
 	typedef typename ObserverType::BraketType BraketType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef std::pair<SizeType,SizeType> PairSizeType;
-	typedef typename ObserverType::PointerForSerializerType PointerForSerializerType;
 
 	template<typename IoInputter>
 	ObservableLibrary(IoInputter& io,
@@ -392,21 +391,19 @@ private:
 				std::cout<<"|"<<ket<<"> time\n";
 			}
 
-			// observe_.setBrakets(bra,ket);
-			PointerForSerializerType ptr(i0);
-			cornerLeftOrRight(1, ptr, bra, opA, ket);
+			cornerLeftOrRight(1, i0, bra, opA, ket);
 
 			FieldType tmp1 = observe_.template
 			        onePoint<ApplyOperatorType>(i0, opA, ApplyOperatorType::BORDER_NO, bra, ket);
-			std::cout<<observe_.helper().site(ptr)<<" "<<tmp1;
-			std::cout<<" "<<observe_.helper().time(ptr)<<"\n";
+			std::cout<<observe_.helper().site(i0)<<" "<<tmp1;
+			std::cout<<" "<<observe_.helper().time(i0)<<"\n";
 
-			cornerLeftOrRight(numberOfSites_ - 2, ptr, bra, opA, ket);
+			cornerLeftOrRight(numberOfSites_ - 2, i0, bra, opA, ket);
 		}
 	}
 
 	void cornerLeftOrRight(SizeType site,
-	                       const PointerForSerializerType& ptr,
+	                       SizeType ptr,
 	                       const PsimagLite::String& bra,
 	                       const OperatorType& opA,
 	                       const PsimagLite::String& ket)
@@ -416,7 +413,7 @@ private:
 		bool atCorner = observe_.isAtCorner(numberOfSites_, ptr);
 
 		if (site == 1 && !atCorner) {
-			FieldType tmp1 = observe_.template onePointHookForZero<ApplyOperatorType>(ptr.get(),
+			FieldType tmp1 = observe_.template onePointHookForZero<ApplyOperatorType>(ptr,
 			                                                                          opA,
 			                                                                          bra,
 			                                                                          ket);
@@ -434,9 +431,8 @@ private:
 		OperatorType opAcorner = opA;
 
 		// do the corner case
-		// observe_.setBrakets(bra,ket);
 		FieldType tmp1 = observe_.template
-		        onePoint<ApplyOperatorType>(ptr.get(),
+		        onePoint<ApplyOperatorType>(ptr,
 		                                    opAcorner,
 		                                    ApplyOperatorType::BORDER_YES,
 		                                    bra,
@@ -1120,9 +1116,8 @@ private:
 	               SizeType cols)
 	{
 		if (hasTimeEvolution_) {
-			PointerForSerializerType ptr(0);
 			printSites();
-			std::cout<<"Time="<<observe_.helper().time(ptr)<<"\n";
+			std::cout<<"Time="<<observe_.helper().time(0)<<"\n";
 		}
 
 		std::cout<<braket.toString()<<"\n";
@@ -1195,13 +1190,12 @@ private:
 	void printSites() const
 	{
 		std::cout<<"Sites=";
-		PointerForSerializerType ptr(0);
+		const SizeType ptr = 0;
 		if (observe_.helper().site(ptr) == 1) std::cout<<"0 ";
 		if (observe_.helper().site(ptr) == numberOfSites_ - 2)
 			std::cout<<(numberOfSites_ - 1)<<" ";
 		for (SizeType i = 0; i < observe_.helper().size(); ++i) {
-			ptr.setPointer(i);
-			SizeType x = observe_.helper().site(ptr);
+			SizeType x = observe_.helper().site(i);
 			std::cout<<x<<" ";
 		}
 

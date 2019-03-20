@@ -114,7 +114,6 @@ public:
 	typedef TwoPointCorrelations<CorrelationsSkeletonType> TwoPointCorrelationsType;
 	typedef FourPointCorrelations<CorrelationsSkeletonType> FourPointCorrelationsType;
 	typedef MultiPointCorrelations<CorrelationsSkeletonType> MultiPointCorrelationsType;
-	typedef typename ObserverHelperType::PointerForSerializerType PointerForSerializerType;
 	typedef typename CorrelationsSkeletonType::BraketType BraketType;
 	typedef ModelType_ ModelType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
@@ -140,10 +139,10 @@ public:
 
 	// return true if
 	// we're at site 1 or n-2
-	bool isAtCorner(SizeType numberOfSites, const PointerForSerializerType& ptr) const
+	bool isAtCorner(SizeType numberOfSites, SizeType ptr) const
 	{
 		const bool es = (helper_.direction(ptr) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
-		if (es && helper_.site(ptr) ==  numberOfSites-2) return true;
+		if (es && helper_.site(ptr) ==  numberOfSites - 2) return true;
 		return (!es && helper_.site(ptr) == 1);
 	}
 

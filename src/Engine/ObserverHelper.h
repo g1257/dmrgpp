@@ -88,27 +88,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-// temporary class only <<--------- FIXME DELETE
-class PointerForSerializer {
-
-public:
-
-	PointerForSerializer(SizeType n)
-	    : pos_(n)
-	{}
-
-	void setPointer(SizeType pos)
-	{
-		pos_ = pos;
-	}
-
-	SizeType get() const { return  pos_; }
-
-private:
-
-	SizeType pos_;
-};
-
 template<typename IoInputType_,
          typename MatrixType_,
          typename VectorType_,
@@ -134,7 +113,6 @@ public:
 	typedef typename DmrgSerializerType::FermionSignType FermionSignType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef PsimagLite::Vector<short int>::Type VectorShortIntType;
-	typedef PointerForSerializer PointerForSerializerType;
 	typedef GetBraOrKet GetBraOrKetType;
 
 	enum class SaveEnum {YES, NO};
@@ -147,8 +125,6 @@ public:
 	    : io_(io),
 	      withLegacyBugs_(withLegacyBugs),
 	      noMoreData_(false),
-	      dSsize_(0),
-	      timeSsize_(0),
 	      numberOfSites_(0)
 	{
 		typename BasisWithOperatorsType::VectorBoolType odds;
@@ -169,15 +145,15 @@ public:
 
 	~ObserverHelper()
 	{
-		for (SizeType i = 0; i < dSsize_; ++i)
+		for (SizeType i = 0; i < dSerializerV_.size(); ++i) {
 			delete dSerializerV_[i];
+			dSerializerV_[i] = 0;
+		}
 
-		for (SizeType i = 0; i < timeSerializerV_.size(); ++i)
+		for (SizeType i = 0; i < timeSerializerV_.size(); ++i) {
 			delete timeSerializerV_[i];
-
-		dSerializerV_.clear();
-		timeSerializerV_.clear();
-		dSsize_ = timeSsize_ = 0;
+			timeSerializerV_[i] = 0;
+		}
 	}
 
 	const SizeType& numberOfSites() const { return numberOfSites_; }
@@ -186,22 +162,22 @@ public:
 
 	void transform(SparseMatrixType& ret,
 	               const SparseMatrixType& O2,
-	               const PointerForSerializerType& ind) const
+	               SizeType ind) const
 	{
-		assert(ind.get() < dSerializerV_.size());
-		return dSerializerV_[ind.get()]->transform(ret,O2);
+		checkIndex(ind);
+		return dSerializerV_[ind]->transform(ret, O2);
 	}
 
-	SizeType cols(const PointerForSerializerType& ind) const
+	SizeType cols(SizeType ind) const
 	{
-		assert(ind.get() < dSerializerV_.size());
-		return dSerializerV_[ind.get()]->cols();
+		checkIndex(ind);
+		return dSerializerV_[ind]->cols();
 	}
 
-	SizeType rows(const PointerForSerializerType& ind) const
+	SizeType rows(SizeType ind) const
 	{
-		assert(ind.get() < dSerializerV_.size());
-		return dSerializerV_[ind.get()]->rows();
+		checkIndex(ind);
+		return dSerializerV_[ind]->rows();
 	}
 
 	short int signsOneSite(SizeType site) const
@@ -210,53 +186,49 @@ public:
 		return signsOneSite_[site];
 	}
 
-	const FermionSignType& fermionicSignLeft(const PointerForSerializerType& ind) const
+	const FermionSignType& fermionicSignLeft(SizeType ind) const
 	{
-		assert(ind.get() < dSerializerV_.size());
-		return dSerializerV_[ind.get()]->fermionicSignLeft();
+		checkIndex(ind);
+		return dSerializerV_[ind]->fermionicSignLeft();
 	}
 
-	const FermionSignType& fermionicSignRight(const PointerForSerializerType& ind) const
+	const FermionSignType& fermionicSignRight(SizeType ind) const
 	{
-		assert(ind.get() < dSerializerV_.size());
-		return dSerializerV_[ind.get()]->fermionicSignRight();
+		checkIndex(ind);
+		return dSerializerV_[ind]->fermionicSignRight();
 	}
 
-	const LeftRightSuperType& leftRightSuper(const PointerForSerializerType& ind) const
+	const LeftRightSuperType& leftRightSuper(SizeType ind) const
 	{
-		return dSerializerV_[ind.get()]->leftRightSuper();
+		checkIndex(ind);
+		return dSerializerV_[ind]->leftRightSuper();
 	}
 
-	ProgramGlobals::DirectionEnum direction(const PointerForSerializerType& ind) const
+	ProgramGlobals::DirectionEnum direction(SizeType ind) const
 	{
-		assert(ind.get() < dSerializerV_.size());
-		return dSerializerV_[ind.get()]->direction();
+		checkIndex(ind);
+		return dSerializerV_[ind]->direction();
 	}
 
-	const VectorWithOffsetType& wavefunction(const PointerForSerializerType& ind) const
+	const VectorWithOffsetType& wavefunction(SizeType ind) const
 	{
-		assert(ind.get() < dSerializerV_.size());
-		return dSerializerV_[ind.get()]->wavefunction();
+		checkIndex(ind);
+
+		return dSerializerV_[ind]->wavefunction();
 	}
 
-	RealType time(const PointerForSerializerType& index) const
+	RealType time(SizeType ind) const
 	{
-		if (timeSsize_ == 0) return 0.0;
-		assert(index.get() < dSerializerV_.size());
-		SizeType ind = index.get();
+		if (timeSerializerV_.size() == 0) return 0.0;
 		assert(ind < timeSerializerV_.size());
 		assert(timeSerializerV_[ind]);
 		return timeSerializerV_[ind]->time();
 	}
 
-	SizeType site(const PointerForSerializerType& index) const
+	SizeType site(SizeType ind) const
 	{
-		assert(index.get() < dSerializerV_.size());
-		SizeType ind = index.get();
-
-		if (timeSsize_ == 0) {
-			assert(ind < dSerializerV_.size());
-			assert(dSerializerV_[ind]);
+		if (timeSerializerV_.size() == 0) {
+			checkIndex(ind);
 			return dSerializerV_[ind]->site();
 		}
 
@@ -265,13 +237,10 @@ public:
 		return timeSerializerV_[ind]->site();
 	}
 
-	SizeType size() const
-	{
-		return dSsize_; //-1;
-	}
+	SizeType size() const { return dSerializerV_.size(); }
 
 	const VectorWithOffsetType& getVectorFromBracketId(PsimagLite::String braOrKet,
-	                                                   const PointerForSerializerType& index) const
+	                                                   SizeType index) const
 	{
 		SizeType braketId = braketStringToNumber(braOrKet);
 		// braketId == 0 means GS
@@ -284,10 +253,8 @@ public:
 	}
 
 	const VectorWithOffsetType& timeVector(SizeType braketId,
-	                                       const PointerForSerializerType& index) const
+	                                       SizeType ind) const
 	{
-		assert(index.get() < dSerializerV_.size());
-		SizeType ind = index.get();
 		assert(ind < timeSerializerV_.size());
 		assert(timeSerializerV_[ind]);
 		return timeSerializerV_[ind]->vector(braketId);
@@ -352,10 +319,8 @@ private:
 			std::cerr<<__FILE__<<" read "<<i<<" out of "<<total<<"\n";
 		}
 
-		dSsize_ = dSerializerV_.size();
-		timeSsize_ = timeSerializerV_.size();
 		noMoreData_ = (end == total);
-		return (dSsize_ > 0);
+		return (dSerializerV_.size() > 0);
 	}
 
 	static SizeType braketStringToNumber(const PsimagLite::String& str)
@@ -369,13 +334,21 @@ private:
 		throw PsimagLite::RuntimeError(msg + " must be gs or time or P\\d+\n");
 	}
 
+	void checkIndex(SizeType ind) const
+	{
+		if (ind >= dSerializerV_.size())
+			err("Index " + ttos(ind) + " bigger than " + ttos(dSerializerV_.size()));
+
+		if (dSerializerV_[ind]) return;
+
+		err("dSerializerV_ at index " + ttos(ind) + " point to 0x0\n");
+	}
+
 	IoInputType& io_;
 	typename PsimagLite::Vector<DmrgSerializerType*>::Type dSerializerV_;
 	typename PsimagLite::Vector<TimeSerializerType*>::Type timeSerializerV_;
 	const bool withLegacyBugs_;
 	bool noMoreData_;
-	SizeType dSsize_;
-	SizeType timeSsize_;
 	VectorShortIntType signsOneSite_;
 	SizeType numberOfSites_;
 };  // ObserverHelper

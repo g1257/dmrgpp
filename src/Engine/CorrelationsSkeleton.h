@@ -132,25 +132,24 @@ public:
 		int nt=i-1;
 		if (nt<0) nt=0;
 
-		for (SizeType s=nt;s<ns;s++) {
-			PointerForSerializer ptr(s);
-			const GrowDirection growOption = growthDirection(s, nt, i, ptr);
-			SparseMatrixType Onew(helper_.cols(ptr),helper_.cols(ptr));
+		for (SizeType s = nt; s < ns; ++s) {
+			const GrowDirection growOption = growthDirection(s, nt, i, s);
+			SparseMatrixType Onew(helper_.cols(s),helper_.cols(s));
 
-			fluffUp(Onew, Odest, fermionicSign, growOption, false, ptr);
-			if (!transform && s == ns-1) {
+			fluffUp(Onew, Odest, fermionicSign, growOption, false, s);
+			if (!transform && s == ns - 1) {
 				Odest = Onew;
 				continue;
 			}
 
-			helper_.transform(Odest, Onew, ptr);
+			helper_.transform(Odest, Onew, s);
 		}
 	}
 
 	GrowDirection growthDirection(SizeType s,
 	                              int nt,
 	                              SizeType i,
-	                              const PointerForSerializer& ptr) const
+	                              SizeType ptr) const
 	{
 		const ProgramGlobals::DirectionEnum dir = helper_.direction(ptr);
 		GrowDirection growOption = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
@@ -175,7 +174,7 @@ public:
 	             ProgramGlobals::FermionOrBosonEnum fOrB,
 	             const GrowDirection growOption,
 	             bool transform,
-	             const PointerForSerializer& ptr) const
+	             SizeType ptr) const
 	{
 		const int fermionicSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 		const ProgramGlobals::DirectionEnum dir = helper_.direction(ptr);
@@ -255,17 +254,17 @@ public:
 		ret2 = ret;
 	}
 
-	PointerForSerializer dmrgMultiply(SparseMatrixType& result,
-	                                  const SparseMatrixType& O1,
-	                                  const SparseMatrixType& O2,
-	                                  ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	                                  SizeType ns) const
+	SizeType dmrgMultiply(SparseMatrixType& result,
+	                      const SparseMatrixType& O1,
+	                      const SparseMatrixType& O2,
+	                      ProgramGlobals::FermionOrBosonEnum fermionicSign,
+	                      SizeType ns) const
 	{
-		PointerForSerializer ptr((ns == 0) ? ns : ns - 1);
+		SizeType ptr = (ns == 0) ? ns : ns - 1;
 		if (helper_.direction(ptr) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
-			dmrgMultiplySystem(result, O1, O2, fermionicSign, ns, ptr);
+			dmrgMultiplySystem(result, ptr, O1, O2, fermionicSign, ns);
 		else
-			dmrgMultiplyEnviron(result, O1, O2, fermionicSign, ns, ptr);
+			dmrgMultiplyEnviron(result, ptr, O1, O2, fermionicSign, ns);
 
 		return ptr;
 
@@ -283,9 +282,9 @@ public:
 
 	FieldType bracket(const SparseMatrixType& A,
 	                  ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	                  const PointerForSerializer& ptr,
+	                  SizeType ptr,
 	                  PsimagLite::String bra,
-                      PsimagLite::String ket) const
+	                  PsimagLite::String ket) const
 	{
 		try {
 			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
@@ -303,7 +302,7 @@ public:
 	FieldType bracketRightCorner(const SparseMatrixType& A,
 	                             const SparseMatrixType& B,
 	                             ProgramGlobals::FermionOrBosonEnum fermionSign,
-	                             const PointerForSerializer& ptr,
+	                             SizeType ptr,
 	                             PsimagLite::String bra,
 	                             PsimagLite::String ket) const
 	{
@@ -323,7 +322,7 @@ public:
 	                             const SparseMatrixType& B,
 	                             const SparseMatrixType& C,
 	                             ProgramGlobals::FermionOrBosonEnum fermionSign,
-	                             const PointerForSerializer& ptr,
+	                             SizeType ptr,
 	                             PsimagLite::String bra,
 	                             PsimagLite::String ket) const
 	{
@@ -355,27 +354,27 @@ private:
 	}
 
 	void dmrgMultiplySystem(SparseMatrixType& result,
+	                        SizeType& ptr,
 	                        const SparseMatrixType& O1,
 	                        const SparseMatrixType& O2,
 	                        ProgramGlobals::FermionOrBosonEnum fOrB, // for O2
-	                        SizeType ns,
-	                        PointerForSerializer& ptr) const
+	                        SizeType ns) const
 	{
 		const int fermionicSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 		SizeType ni=O1.rows();
 
-		ptr.setPointer(ns);
+		ptr = ns;
 		SizeType sprime = helper_.leftRightSuper(ptr).left().size(); //ni*nj;
 		result.resize(sprime,sprime);
 
 		if (helper_.leftRightSuper(ptr).left().size()!=sprime) {
 			std::cerr<<"WARNING: "<<helper_.leftRightSuper(ptr).left().size();
 			std::cerr<<"!="<<sprime<<"\n";
-			throw PsimagLite::RuntimeError("problem in dmrgMultiply\n");
+			err("problem in dmrgMultiply\n");
 		}
 
 		PsimagLite::Vector<SizeType>::Type col(sprime,0);
-		typename PsimagLite::Vector<FieldType>::Type value(sprime,0);
+		typename PsimagLite::Vector<FieldType>::Type value(sprime, 0);
 
 		PackIndicesType pack(ni);
 
@@ -395,6 +394,7 @@ private:
 					col[r2] = 1;
 				}
 			}
+
 			for (SizeType i=0;i<col.size();i++) {
 				if (col[i]==0) continue;
 				result.pushCol(i);
@@ -404,23 +404,24 @@ private:
 				col[i] = 0;
 			}
 		}
+
 		result.setRow(result.rows(),counter);
 		result.checkValidity();
 	}
 
 	void dmrgMultiplyEnviron(SparseMatrixType& result,
+	                         SizeType& ptr,
 	                         const SparseMatrixType& O1,
 	                         const SparseMatrixType& O2,
 	                         ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	                         SizeType ns,
-	                         PointerForSerializer& ptr) const
+	                         SizeType ns) const
 	{
 		int fs = (fermionicSign == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 		RealType f = fermionSignBasis(fs,
 		                              helper_.leftRightSuper(ptr).left());
 		SizeType nj=O2.rows();
 
-		ptr.setPointer(ns);
+		ptr = ns;
 		SizeType eprime = helper_.leftRightSuper(ptr).right().size(); //ni*nj;
 		result.resize(eprime,eprime);
 
@@ -498,7 +499,7 @@ private:
 	                   const VectorWithOffsetType& vec1,
 	                   const VectorWithOffsetType& vec2,
 	                   ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	                   const PointerForSerializer& ptr) const
+	                   SizeType ptr) const
 	{
 		if (vec1.size()!=helper_.leftRightSuper(ptr).super().size() ||
 		        vec1.size()!=vec2.size())
@@ -512,7 +513,7 @@ private:
 	FieldType bracketSystem_(const SparseMatrixType& A,
 	                         const VectorWithOffsetType& vec1,
 	                         const VectorWithOffsetType& vec2,
-	                         const PointerForSerializer& ptr) const
+	                         SizeType ptr) const
 	{
 		FieldType sum=0;
 		PackIndicesType pack(helper_.leftRightSuper(ptr).left().size());
@@ -543,7 +544,7 @@ private:
 	                          const VectorWithOffsetType& vec1,
 	                          const VectorWithOffsetType& vec2,
 	                          ProgramGlobals::FermionOrBosonEnum fOrB,
-	                          const PointerForSerializer& ptr) const
+	                          SizeType ptr) const
 	{
 		const int fermionicSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 
@@ -584,14 +585,14 @@ private:
 	                              ProgramGlobals::FermionOrBosonEnum fermionSign,
 	                              const VectorWithOffsetType& vec1,
 	                              const VectorWithOffsetType& vec2,
-	                              const PointerForSerializer& ptr) const
+	                              SizeType ptr) const
 	{
 		return (helper_.direction(ptr) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 		        ? brRghtCrnrSystem_(A,B,fermionSign,vec1,vec2,ptr)
 		        : brLftCrnrEnviron_(A,B,fermionSign,vec1,vec2,ptr);
 	}
 
-	bool superOddElectrons(SizeType t, const PointerForSerializer& ptr) const
+	bool superOddElectrons(SizeType t, SizeType ptr) const
 	{
 		// return helper_.leftRightSuper(ptr).super().electrons(t);
 		SizeType tmp = helper_.leftRightSuper(ptr).super().permutation(t);
@@ -605,7 +606,7 @@ private:
 	                            ProgramGlobals::FermionOrBosonEnum fermionSign,
 	                            const VectorWithOffsetType& vec1,
 	                            const VectorWithOffsetType& vec2,
-	                            const PointerForSerializer& ptr) const
+	                            SizeType ptr) const
 	{
 		FieldType sum = 0;
 		SizeType leftSize = helper_.leftRightSuper(ptr).left().size();
@@ -666,7 +667,7 @@ private:
 	                            ProgramGlobals::FermionOrBosonEnum fOrB,
 	                            const VectorWithOffsetType& vec1,
 	                            const VectorWithOffsetType& vec2,
-	                            const PointerForSerializer& ptr) const
+	                            SizeType ptr) const
 	{
 		const int fermionSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 		int signRight = fermionSignBasis(fermionSign,
@@ -727,7 +728,7 @@ private:
 	                              ProgramGlobals::FermionOrBosonEnum fOrB,
 	                              const VectorWithOffsetType& vec1,
 	                              const VectorWithOffsetType& vec2,
-	                              const PointerForSerializer& ptr) const
+	                              SizeType ptr) const
 	{
 		if (helper_.direction(ptr) != ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			return 0;

@@ -150,22 +150,19 @@ private:
 		SparseMatrixType O2g;
 		if (i==0) {
 			skeleton_.growDirectly(O2gt,O,i,fermionicSign,ns,true);
-			typename ObserverHelperType::PointerForSerializerType ptr =
-			        skeleton_.dmrgMultiply(O2g,O2gt,identity,fermionicSign,ns);
+			const SizeType ptr = skeleton_.dmrgMultiply(O2g,O2gt,identity,fermionicSign,ns);
 			FieldType ret = skeleton_.bracket(O2g, fermionicSign, ptr, bra, ket);
 			return ret;
 		}
 
 		//			if (i==5) {
-		typename ObserverHelperType::PointerForSerializerType ptr =
-		        skeleton_.dmrgMultiply(O2g, O2gt, O, fermionicSign, ns - 1);
+		const SizeType ptr = skeleton_.dmrgMultiply(O2g, O2gt, O, fermionicSign, ns - 1);
 		//			} else {
 		//				skeleton_.dmrgMultiply(O2g,O2gt,identity,fermionicSign,ns-1);
 		//			}
 		O2gt.clear();
 		FieldType ret = skeleton_.bracket(O2g,fermionicSign, ptr, bra, ket);
-		ptr.setPointer(ns - 1);
-		skeleton_.helper().transform(O2gt, O2g, ptr);
+		skeleton_.helper().transform(O2gt, O2g, ns - 1);
 		return ret;
 	}
 

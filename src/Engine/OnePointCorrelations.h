@@ -110,12 +110,12 @@ public:
 	                     PsimagLite::String bra,
 	                     PsimagLite::String ket) const
 	{
-		typename ObserverHelperType::PointerForSerializerType ptr(site);
+		const SizeType ptr = site;
 		try {
 			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
 			const VectorWithOffsetType& src2 = helper_.getVectorFromBracketId(ket, ptr);
 
-			return onePointInternal<ApplyOperatorType>(site, A, src1, src2, corner, ptr);
+			return onePointInternal<ApplyOperatorType>(A, src1, src2, corner, ptr);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
 			std::cerr<<"WARNING: Observer::onePoint(...): Nothing here yet\n";
@@ -129,14 +129,12 @@ public:
 	                      PsimagLite::String bra,
 	                      PsimagLite::String ket) const
 	{
-		SizeType pnter=site;
-		typename ObserverHelperType::PointerForSerializerType ptr(pnter);
+		const SizeType ptr = site;
 		try {
 			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
 			const VectorWithOffsetType& src2 = helper_.getVectorFromBracketId(ket, ptr);
 
-			return onePointInternalHookForZero<ApplyOperatorType>(site,
-			                                                      A,
+			return onePointInternalHookForZero<ApplyOperatorType>(A,
 			                                                      src1,
 			                                                      src2,
 			                                                      ptr);
@@ -150,12 +148,11 @@ public:
 private:
 
 	template<typename ApplyOperatorType>
-	FieldType onePointInternal(SizeType,
-	                           const typename ApplyOperatorType::OperatorType& A,
+	FieldType onePointInternal(const typename ApplyOperatorType::OperatorType& A,
 	                           const VectorWithOffsetType& src1,
 	                           const VectorWithOffsetType& src2,
 	                           typename ApplyOperatorType::BorderEnum corner,
-	                           typename ObserverHelperType::PointerForSerializerType ptr) const
+	                           SizeType ptr) const
 	{
 		if (src1.sectors() == 0 || src2.sectors() == 0) return 0.0;
 		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(ptr),
@@ -180,16 +177,15 @@ private:
 					sum+= v1.slowAccess(k+offset)*PsimagLite::conj(v2.slowAccess(k+offset));
 			}
 		}
+
 		return sum;
 	}
 
 	template<typename ApplyOperatorType>
-	FieldType onePointInternalHookForZero(SizeType,
-	                                      const typename ApplyOperatorType::OperatorType& A,
+	FieldType onePointInternalHookForZero(const typename ApplyOperatorType::OperatorType& A,
 	                                      const VectorWithOffsetType& src1,
 	                                      const VectorWithOffsetType& src2,
-	                                      typename ObserverHelperType::PointerForSerializerType ptr)
-	const
+	                                      SizeType ptr) const
 	{
 
 		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(ptr),
