@@ -262,13 +262,13 @@ public:
 	                                  SizeType ns) const
 	{
 		PointerForSerializer ptr((ns == 0) ? ns : ns - 1);
-		if (helper_.direction(ptr) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
-			dmrgMultiplySystem(result,O1,O2,fermionicSign,ns);
-			return ptr;
-		} else {
-			dmrgMultiplyEnviron(result,O1,O2,fermionicSign,ns,ptr);
-			return ptr;
-		}
+		if (helper_.direction(ptr) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+			dmrgMultiplySystem(result, O1, O2, fermionicSign, ns, ptr);
+		else
+			dmrgMultiplyEnviron(result, O1, O2, fermionicSign, ns, ptr);
+
+		return ptr;
+
 	}
 
 	static void createWithModification(SparseMatrixType& Om,const SparseMatrixType& O,char mod)
@@ -364,12 +364,13 @@ private:
 	                        const SparseMatrixType& O1,
 	                        const SparseMatrixType& O2,
 	                        ProgramGlobals::FermionOrBosonEnum fOrB, // for O2
-	                        SizeType ns) const
+	                        SizeType ns,
+	                        PointerForSerializer& ptr) const
 	{
 		const int fermionicSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 		SizeType ni=O1.rows();
 
-		PointerForSerializer ptr(ns);
+		ptr.setPointer(ns);
 		SizeType sprime = helper_.leftRightSuper(ptr).left().size(); //ni*nj;
 		result.resize(sprime,sprime);
 
