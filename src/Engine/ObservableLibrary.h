@@ -1117,58 +1117,6 @@ private:
 
 	}
 
-	FieldType ppFour2(SizeType i1,
-	                  SizeType i2,
-	                  SizeType j1,
-	                  SizeType j2,
-	                  SizeType orb1,
-	                  SizeType orb2,
-	                  SizeType orb3,
-	                  SizeType orb4,
-	                  int sign) const
-	{
-
-		SizeType thini1 = i1*2 + orb1;
-		SizeType thini2 = i2*2 + orb2;
-		SizeType thinj1 = j1*2 + orb3;
-		SizeType thinj2 = j2*2 + orb4;
-		SizeType threadId = 0;
-		FieldType sum = 0.0;
-		SizeType site = 0;
-		//		SizeType orbitals = 1;
-
-		for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
-			// c(i1,orb1,spin0)
-			SparseMatrixType O1 = model_.naturalOperator("c",site,spin0).data;
-			// c(i2,orb2,1-spin0)
-			SparseMatrixType O2 = model_.naturalOperator("c",site,1-spin0).data;
-			for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
-				// c(i2,orb2,spin1)
-				SparseMatrixType O3 = model_.naturalOperator("c",site,spin1).data;
-				// c(i3,orb1,1-spin1)
-				SparseMatrixType O4 = model_.naturalOperator("c",site,1-spin1).data;
-				SizeType val = spin0 + spin1 + 1;
-				int signTerm = (val & 1) ? sign : 1;
-				sum +=  signTerm*observe_.fourpoint()('N',
-				                                      thini1,
-				                                      O1,
-				                                      'N',
-				                                      thini2,
-				                                      O2,
-				                                      'C',
-				                                      thinj1,
-				                                      O3,
-				                                      'C',
-				                                      thinj2,
-				                                      O4,
-				                                      ProgramGlobals::FermionOrBosonEnum::FERMION,
-				                                      threadId);
-			}
-		}
-
-		return sum;
-	}
-
 	void manyPoint(MatrixType* storage,
 	               const BraketType& braket,
 	               SizeType rows,

@@ -358,58 +358,6 @@ private:
 		return (dSsize_ > 0);
 	}
 
-	bool checkPos(const PointerForSerializerType& ind) const
-	{
-//		if (threadId>=currentPos_.size())
-//			return checkFailedThread(threadId);
-
-//		SizeType pos = ind.get();
-
-//		if (pos>=dSsize_)
-//			return checkFailed1(threadId,pos);
-
-//		bool hasTimeE = (timeSsize_>0);
-
-//		if (!hasTimeE) return true;
-//		if (pos>=timeSsize_)
-//			return checkFailed2(threadId,pos);
-		return true;
-	}
-
-	bool checkFailedThread(const PointerForSerializerType& ind) const
-	{
-//		PsimagLite::String str(__FILE__);
-//		str += " " + ttos(__LINE__) + "\n";
-//		str += " thread=" + ttos(threadId);
-//		str += " >= currentPos.size=" + ttos(currentPos_.size());
-//		str += "\n";
-//		std::cerr<<str;
-//		return false;
-		return true;
-	}
-
-	bool checkFailed1(SizeType threadId,SizeType pos) const
-	{
-		PsimagLite::String str(__FILE__);
-		str += " " + ttos(__LINE__) + "\n";
-		str += " thread=" + ttos(threadId) + " currentPos=" + ttos(pos);
-		str += " >= serializer.size=" + ttos(dSsize_);
-		str += "\n";
-		std::cerr<<str;
-		return false;
-	}
-
-	bool checkFailed2(SizeType threadId,SizeType pos) const
-	{
-		PsimagLite::String str(__FILE__);
-		str += " " + ttos(__LINE__) + "\n";
-		str += " thread=" + ttos(threadId) + " currentPos=" + ttos(pos);
-		str += " >= time serializer.size=" + ttos(timeSsize_);
-		str += "\n";
-		std::cerr<<str;
-		return false;
-	}
-
 	static SizeType braketStringToNumber(const PsimagLite::String& str)
 	{
 		if (str == "gs") return 0;

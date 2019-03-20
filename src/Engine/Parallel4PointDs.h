@@ -112,19 +112,19 @@ public:
 	      mode_(mode)
 	{}
 
-	void doTask(SizeType taskNumber, SizeType threadNum)
+	void doTask(SizeType taskNumber, SizeType)
 	{
 		SizeType i = pairs_[taskNumber].first;
 		SizeType j = pairs_[taskNumber].second;
 
-		fpd_(i,j) = (mode_ == MODE_NORMAL) ? fourPointDelta(2*i,2*j,gammas_,model_,threadNum)
-		                                   : fourPointThin(i,j,gammas_,model_,threadNum);
+		fpd_(i,j) = (mode_ == MODE_NORMAL) ? fourPointDelta(2*i, 2*j, gammas_)
+		                                   : fourPointThin(i, j);
 		if (mode_ == MODE_NORMAL) {
-			fpd_(i,j) = fourPointDelta(2*i,2*j,gammas_,model_,threadNum);
+			fpd_(i,j) = fourPointDelta(2*i,2*j,gammas_);
 		} else if (mode_ == MODE_THIN) {
-			fpd_(i,j) = fourPointThin(i,j,gammas_,model_,threadNum);
+			fpd_(i,j) = fourPointThin(i, j);
 		} else if (mode_ == MODE_THINupdn) {
-			fpd_(i,j) = fourPointThinupdn(i,j,gammas_,model_,threadNum);
+			fpd_(i,j) = fourPointThinupdn(i, j);
 		} else {
 			throw PsimagLite::RuntimeError("Parallel4PointDs: No matching mode_ found \n");
 		}
@@ -134,14 +134,11 @@ public:
 
 private:
 
-	template<typename SomeModelType>
 	FieldType fourPointDelta(SizeType i,
 	                         SizeType j,
-	                         const typename PsimagLite::Vector<SizeType>::Type& gammas,
-	                         const SomeModelType& model,
-	                         SizeType threadId) const
+	                         const typename PsimagLite::Vector<SizeType>::Type& gammas) const
 	{
-		SizeType hs = model.hilbertSize(0);
+		SizeType hs = model_.hilbertSize(0);
 		SizeType nx = 0;
 		while (hs) {
 			hs>>=1;
@@ -166,16 +163,11 @@ private:
 		str += "<gs|c[" + ttos(site) + "]?" + ttos(gammas[3] + 0*nx) + "|gs>";
 		//const SparseMatrixType& opC3 = model.naturalOperator("c",site,gammas[3] + 0*nx).data;
 
-		BraketType braket(model, str);
+		BraketType braket(model_, str);
 		return fourpoint_(i,i+1,j,j+1,braket);
 	}
 
-	template<typename SomeModelType>
-	FieldType fourPointThin(SizeType i,
-	                        SizeType j,
-	                        const typename PsimagLite::Vector<SizeType>::Type& gammas,
-	                        const SomeModelType& model,
-	                        SizeType threadId) const
+	FieldType fourPointThin(SizeType i, SizeType j) const
 	{
 		SizeType number1 = fpd_.n_row()/2;
 		SizeType spin0 = i/number1;
@@ -211,7 +203,7 @@ private:
 
 //		SizeType val = spin0 + spin1 + 1;
 //		int signTerm = (val & 1) ? sign : 1;
-//		FieldType fourval = fourpoint_(thini1,thini2,thinj1,thinj2,braket,threadId);
+//		FieldType fourval = fourpoint_(thini1,thini2,thinj1,thinj2,braket);
 //		return signTerm*fourval;
 
 		BraketType braket(model_, str);
@@ -219,13 +211,7 @@ private:
 		return fourval;
 	}
 
-
-	template<typename SomeModelType>
-	FieldType fourPointThinupdn(SizeType i,
-	                            SizeType j,
-	                            const typename PsimagLite::Vector<SizeType>::Type& gammas,
-	                            const SomeModelType& model,
-	                            SizeType threadId) const
+	FieldType fourPointThinupdn(SizeType i, SizeType j) const
 	{
 		SizeType number1 = fpd_.n_row()/2;
 		SizeType spin0 = i/number1;
@@ -264,7 +250,7 @@ private:
 	const ModelType& model_;
 	const typename PsimagLite::Vector<SizeType>::Type& gammas_;
 	const typename PsimagLite::Vector<PairType>::Type& pairs_;
-	FourPointModeEnum mode_;
+	const FourPointModeEnum mode_;
 }; // class Parallel4PointDs
 } // namespace Dmrg
 

@@ -169,7 +169,7 @@ private:
 		typename ObserverHelperType::PointerForSerializerType ptr =
 		        skeleton_.dmrgMultiply(O2g, O2gt, O, fermionicSign, ns - 1);
 		//			} else {
-		//				skeleton_.dmrgMultiply(O2g,O2gt,identity,fermionicSign,ns-1,threadId);
+		//				skeleton_.dmrgMultiply(O2g,O2gt,identity,fermionicSign,ns-1);
 		//			}
 		O2gt.clear();
 		FieldType ret = skeleton_.bracket(O2g,fermionicSign, ptr, bra, ket);
