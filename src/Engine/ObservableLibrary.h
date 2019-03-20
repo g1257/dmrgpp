@@ -174,7 +174,9 @@ public:
 					observe_.twoPoint(out,
 					                  n1,
 					                  n2,
-					                  ProgramGlobals::FermionOrBosonEnum::BOSON);
+					                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+					                  "gs",
+					                  "gs");
 					std::cout << str << std::endl;
 					std::cout << out;
 				}
@@ -326,8 +328,8 @@ public:
 
 			typename PsimagLite::Vector<MatrixType*>::Type results;
 			typename PsimagLite::Vector<PsimagLite::String>::Type names;
-			ppTwopoint(results,names,rows,cols);
-			ppFourpoint(results,names,rows,cols);
+			ppTwopoint(results, names, rows, cols, "gs", "gs");
+			ppFourpoint(results, names, rows, cols);
 
 		} else if (label=="dd4") {
 			if (model_.geometry().label(0)!="ladderx") {
@@ -357,7 +359,7 @@ public:
 			myMatrix(1,1) = myMatrix(2,2) = -1.0;
 			SparseMatrixType myMatrixSparse(myMatrix);
 			typename PsimagLite::Vector<FieldType>::Type result;
-			observe_.multiCorrelations(result,myMatrixSparse,rows,cols);
+			observe_.multiCorrelations(result, myMatrixSparse, rows, cols, "gs", "gs");
 			for (SizeType i=0;i<result.size();i++)
 				std::cout<<i<<" "<<result[i]<<"\n";
 
@@ -367,21 +369,14 @@ public:
 			}
 			typename PsimagLite::Vector<MatrixType*>::Type results;
 			typename PsimagLite::Vector<PsimagLite::String>::Type names;
-			ddOrbitalsTwopoint(results,names,rows,cols);
+			ddOrbitalsTwopoint(results, names, rows, cols, "gs", "gs");
 			ddOrbitalsFourpoint(results,names,rows,cols);
 		} else {
-			PsimagLite::String s = "Unknown label: " + label + "\n";
-			throw PsimagLite::RuntimeError(s.c_str());
+			err("Unknown label: " + label + "\n");
 		}
 	}
 
 private:
-
-	void setBrakets(const PsimagLite::String& left,
-	                const PsimagLite::String& right)
-	{
-		observe_.setBrakets(left,right);
-	}
 
 	void measureOnePoint(const PsimagLite::String& bra,
 	                     const OperatorType& opA,
@@ -397,12 +392,12 @@ private:
 				std::cout<<"|"<<ket<<"> time\n";
 			}
 
-			observe_.setBrakets(bra,ket);
+			// observe_.setBrakets(bra,ket);
 			PointerForSerializerType ptr(i0);
 			cornerLeftOrRight(1, ptr, bra, opA, ket);
 
 			FieldType tmp1 = observe_.template
-			        onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
+			        onePoint<ApplyOperatorType>(i0, opA, ApplyOperatorType::BORDER_NO, bra, ket);
 			std::cout<<observe_.helper().site(ptr)<<" "<<tmp1;
 			std::cout<<" "<<observe_.helper().time(ptr)<<"\n";
 
@@ -421,8 +416,13 @@ private:
 		bool atCorner = observe_.isAtCorner(numberOfSites_, ptr);
 
 		if (site == 1 && !atCorner) {
+			const typename ApplyOperatorType::BorderEnum borderNo =
+			        ApplyOperatorType::BorderEnum::BORDER_NO;
 			FieldType tmp1 = observe_.template onePointHookForZero<ApplyOperatorType>(ptr.get(),
-			                                                                          opA);
+			                                                                          opA,
+			                                                                          borderNo,
+			                                                                          bra,
+			                                                                          ket);
 			std::cout<<"0 "<<tmp1<<" "<<observe_.helper().time(ptr)<<"\n";
 			return;
 		}
@@ -437,11 +437,13 @@ private:
 		OperatorType opAcorner = opA;
 
 		// do the corner case
-		observe_.setBrakets(bra,ket);
+		// observe_.setBrakets(bra,ket);
 		FieldType tmp1 = observe_.template
 		        onePoint<ApplyOperatorType>(ptr.get(),
 		                                    opAcorner,
-		                                    ApplyOperatorType::BORDER_YES);
+		                                    ApplyOperatorType::BORDER_YES,
+		                                    bra,
+		                                    ket);
 		std::cout<<x<<" "<<tmp1;
 		std::cout<<" "<<observe_.helper().time(ptr)<<"\n";
 	}
@@ -468,12 +470,14 @@ private:
 	void ppTwopoint(typename PsimagLite::Vector<MatrixType*>::Type& result,
 	                typename PsimagLite::Vector<PsimagLite::String>::Type& names,
 	                SizeType rows,
-	                SizeType cols)
+	                SizeType cols,
+	                PsimagLite::String bra,
+	                PsimagLite::String ket)
 	{
 		// Two-point Pair
 		MatrixType m1(rows,cols);
 		MatrixType m2(rows,cols);
-		ppTwo(m1,m2,0);
+		ppTwo(m1, m2, 0, bra, ket);
 
 		if (model_.params().model=="HubbardOneBandExtendedSuper") {
 			rows = rows/2;   // Actually: divided by # of orbitals
@@ -482,7 +486,7 @@ private:
 
 		m1.clear(); m1.resize(rows,cols);
 		m2.clear(); m2.resize(rows,cols);
-		ppTwo(m1,m2,1);
+		ppTwo(m1, m2, 1, bra, ket);
 		std::cout << "PairPair Correlations S^{lu}_{on}" << std::endl;
 		std::cout << m1;
 		std::cout << "PairPair Correlations T^{lu}_{on}" << std::endl;
@@ -491,10 +495,14 @@ private:
 		m1.clear(); m1.resize(rows,cols);
 		m2.clear(); m2.resize(rows,cols);
 		names.push_back("T_{on}");
-		ppTwo(m1,m2,3);
+		ppTwo(m1, m2, 3, bra, ket);
 	}
 
-	void ppTwo(MatrixType& m,MatrixType& m2, SizeType flag)
+	void ppTwo(MatrixType& m,
+	           MatrixType& m2,
+	           SizeType flag,
+	           PsimagLite::String bra,
+	           PsimagLite::String ket)
 	{
 		SizeType site = 1;
 		SizeType orbitals = logBase2(model_.hilbertSize(site));
@@ -513,7 +521,7 @@ private:
 			SparseMatrixType A,B;
 			multiply(B,O1,O2); // c_dn,0 . c_up,0.
 			transposeConjugate(A,B);
-			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON);
+			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
 			//std::cout << m;
 			std::cout << "PairPair Correlations S^{l}_{on}" << std::endl;
 			SliceOrbital(m,0,0);
@@ -555,8 +563,7 @@ private:
 			std::cout << "PairPair Correlations T^{ab-dndn}_{on}" << std::endl;
 			std::cout << m2;
 		} else {
-			PsimagLite::String s = "Unknown flag: " + ttos(flag);
-			throw PsimagLite::RuntimeError(s.c_str());
+			err("Unknown flag: " + ttos(flag));
 		}
 	}
 
@@ -644,49 +651,51 @@ private:
 	void ddOrbitalsTwopoint(typename PsimagLite::Vector<MatrixType*>::Type& result,
 	                        typename PsimagLite::Vector<PsimagLite::String>::Type& names,
 	                        SizeType rows,
-	                        SizeType cols)
+	                        SizeType cols,
+	                        PsimagLite::String bra,
+			                PsimagLite::String ket)
 	{
 		// Two-point Pair
 		MatrixType* m1 = new MatrixType(rows,cols);
 		names.push_back("S^{l}_{on}");
 		std::cout << "PairPair Correlations S^{l}_{on}" << std::endl;
-		ddOrbitalsTwo(*m1,0);
+		ddOrbitalsTwo(*m1, 0, bra, ket);
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
 		names.push_back("S^{u}_{on}");
 		std::cout << "PairPair Correlations S^{u}_{on}" << std::endl;
-		ddOrbitalsTwo(*m1,1);
+		ddOrbitalsTwo(*m1, 1, bra, ket);
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
 		names.push_back("S^{lu}_{on}");
 		std::cout << "PairPair Correlations S^{lu}_{on}" << std::endl;
-		ddOrbitalsTwo(*m1,2);
+		ddOrbitalsTwo(*m1, 2, bra, ket);
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
 		names.push_back("T^{lu}_{on}");
 		std::cout << "PairPair Correlations T^{lu}_{on}" << std::endl;
-		ddOrbitalsTwo(*m1,3);
+		ddOrbitalsTwo(*m1, 3, bra, ket);
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
 		names.push_back("T^{lu}_{on}");
 		std::cout << "PairPair Correlations T^{up-up}_{on}" << std::endl;
-		ddOrbitalsTwo(*m1,4);
+		ddOrbitalsTwo(*m1, 4, bra, ket);
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
 		names.push_back("T^{lu}_{on}");
 		std::cout << "PairPair Correlations T^{dn-dn}_{on}" << std::endl;
-		ddOrbitalsTwo(*m1,5);
+		ddOrbitalsTwo(*m1, 5, bra, ket);
 		result.push_back(m1);
 
 		m1 = new MatrixType(rows,cols);
 		names.push_back("T^{lu}_{on}");
 		std::cout << "PairPair Correlations T^{up*up+dn*dn}_{on}" << std::endl;
-		ddOrbitalsTwo(*m1,6);
+		ddOrbitalsTwo(*m1, 6, bra, ket);
 		result.push_back(m1);
 	}
 
@@ -746,7 +755,10 @@ private:
 		result.push_back(m1);
 	}
 
-	void ddOrbitalsTwo(MatrixType& m, SizeType flag)
+	void ddOrbitalsTwo(MatrixType& m,
+	                   const SizeType flag,
+	                   PsimagLite::String bra,
+	                   PsimagLite::String ket)
 	{
 		SizeType site = 1;
 		SizeType orbitals = logBase2(model_.hilbertSize(site));
@@ -765,7 +777,7 @@ private:
 			SparseMatrixType A,B;
 			multiply(B,O1,O2); // c_dn,0 . c_up,0.
 			transposeConjugate(A,B);
-			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON);
+			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
 
 			std::cout << m;
 		} else if (flag==1) {
@@ -779,7 +791,7 @@ private:
 			SparseMatrixType A,B;
 			multiply(B,O1,O2); // c_dn,0 . c_up,0.
 			transposeConjugate(A,B);
-			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON);
+			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
 			std::cout << m;
 		} else if (flag==2) {
 			SizeType spin0 = 0; // up
@@ -797,7 +809,7 @@ private:
 			mult1 = 1.0; mult2 = -1.0;
 			operatorPlus(B,tmp1,mult1,tmp2,mult2); // B = 1.0*tmp1 + (-1.0)*tmp2 = Singlet
 			transposeConjugate(A,B); // A = transpose(B)
-			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON);
+			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
 			std::cout << m;
 		} else if (flag==3) {
 			SizeType spin0 = 0; // up
@@ -815,7 +827,7 @@ private:
 			mult1 = 1.0; mult2 = 1.0;
 			operatorPlus(B,tmp1,mult1,tmp2,mult2); // B = 1.0*tmp1 + (1.0)*tmp2 = Triplet
 			transposeConjugate(A,B); // A = transpose(B)
-			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON);
+			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
 			std::cout << m;
 		} else if (flag==4) {
 			SizeType orb0 = 0;  // lower orbital
@@ -828,7 +840,7 @@ private:
 			SparseMatrixType A,B;
 			multiply(B,O1,O2);      // c_up,0 . c_up,1
 			transposeConjugate(A,B);
-			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON);
+			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
 			std::cout << m;
 		} else if (flag==5) {
 			SizeType orb0 = 0;  // lower orbital
@@ -841,7 +853,7 @@ private:
 			SparseMatrixType A,B;
 			multiply(B,O1,O2);      // c_dn,0 . c_dn,1
 			transposeConjugate(A,B);
-			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON);
+			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
 			std::cout << m;
 		} else if (flag==6) {
 			SizeType spin0 = 0; // up
@@ -860,11 +872,10 @@ private:
 			// B = 1.0*tmp1 + (1.0)*tmp2 = Triplet = up*up + dn*dn
 			operatorPlus(B,tmp1,mult1,tmp2,mult2);
 			transposeConjugate(A,B); // A = transpose(B)
-			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON);
+			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
 			std::cout << m;
 		} else {
-			PsimagLite::String s = "Unknown flag: " + ttos(flag);
-			throw PsimagLite::RuntimeError(s.c_str());
+			err("Unknown flag: " + ttos(flag));
 		}
 	}
 
@@ -1170,7 +1181,6 @@ private:
 		}
 
 		std::cout<<braket.toString()<<"\n";
-		observe_.setBrakets(braket.bra(), braket.ket());
 
 		if (braket.points() == 2) {
 			bool needsPrinting = false;

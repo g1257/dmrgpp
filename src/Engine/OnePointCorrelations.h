@@ -109,19 +109,16 @@ public:
 	template<typename ApplyOperatorType>
 	FieldType operator()(SizeType site,
 	                     const typename ApplyOperatorType::OperatorType& A,
-	                     typename ApplyOperatorType::BorderEnum corner)
+	                     typename ApplyOperatorType::BorderEnum corner,
+	                     PsimagLite::String bra,
+	                     PsimagLite::String ket)
 	{
-		SizeType pnter=site;
-		typename ObserverHelperType::PointerForSerializerType ptr(pnter);
+		typename ObserverHelperType::PointerForSerializerType ptr(site);
 		try {
-			const VectorWithOffsetType& src1 =
-			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::LEFT,
-			                                       ptr);
-			const VectorWithOffsetType& src2 =
-			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::RIGHT,
-			                                       ptr);
+			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
+			const VectorWithOffsetType& src2 = helper_.getVectorFromBracketId(ket, ptr);
 
-			return onePointInternal<ApplyOperatorType>(site,A,src1,src2,corner,ptr);
+			return onePointInternal<ApplyOperatorType>(site, A, src1, src2, corner, ptr);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
 			std::cerr<<"WARNING: Observer::onePoint(...): Nothing here yet\n";
@@ -132,17 +129,15 @@ public:
 	template<typename ApplyOperatorType>
 	FieldType hookForZero(SizeType site,
 	                      const typename ApplyOperatorType::OperatorType& A,
-	                      bool corner = false)
+	                      typename ApplyOperatorType::BorderEnum corner,
+	                      PsimagLite::String bra,
+	                      PsimagLite::String ket)
 	{
 		SizeType pnter=site;
 		typename ObserverHelperType::PointerForSerializerType ptr(pnter);
 		try {
-			const VectorWithOffsetType& src1 =
-			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::LEFT,
-			                                       ptr);
-			const VectorWithOffsetType& src2 =
-			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::RIGHT,
-			                                       ptr);
+			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
+			const VectorWithOffsetType& src2 = helper_.getVectorFromBracketId(ket, ptr);
 
 			return onePointInternalHookForZero<ApplyOperatorType>(site,
 			                                                      A,

@@ -283,15 +283,13 @@ public:
 
 	FieldType bracket(const SparseMatrixType& A,
 	                  ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	                  const PointerForSerializer& ptr) const
+	                  const PointerForSerializer& ptr,
+	                  PsimagLite::String bra,
+                      PsimagLite::String ket) const
 	{
 		try {
-			const VectorWithOffsetType& src1 =
-			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::LEFT,
-			                                       ptr);
-			const VectorWithOffsetType& src2 =
-			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::RIGHT,
-			                                       ptr);
+			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
+			const VectorWithOffsetType& src2 = helper_.getVectorFromBracketId(ket, ptr);
 
 			return bracket_(A,src1,src2,fermionicSign,ptr);
 		} catch (std::exception& e) {
@@ -305,15 +303,13 @@ public:
 	FieldType bracketRightCorner(const SparseMatrixType& A,
 	                             const SparseMatrixType& B,
 	                             ProgramGlobals::FermionOrBosonEnum fermionSign,
-	                             const PointerForSerializer& ptr) const
+	                             const PointerForSerializer& ptr,
+	                             PsimagLite::String bra,
+	                             PsimagLite::String ket) const
 	{
 		try {
-			const VectorWithOffsetType& src1 =
-			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::LEFT,
-			                                       ptr);
-			const VectorWithOffsetType& src2 =
-			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::RIGHT,
-			                                       ptr);
+			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
+			const VectorWithOffsetType& src2 = helper_.getVectorFromBracketId(ket, ptr);
 			return bracketRightCorner_(A,B,fermionSign,src1,src2,ptr);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
@@ -327,15 +323,13 @@ public:
 	                             const SparseMatrixType& B,
 	                             const SparseMatrixType& C,
 	                             ProgramGlobals::FermionOrBosonEnum fermionSign,
-	                             const PointerForSerializer& ptr) const
+	                             const PointerForSerializer& ptr,
+	                             PsimagLite::String bra,
+	                             PsimagLite::String ket) const
 	{
 		try {
-			const VectorWithOffsetType& src1 =
-			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::LEFT,
-			                                       ptr);
-			const VectorWithOffsetType& src2 =
-			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::RIGHT,
-			                                       ptr);
+			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
+			const VectorWithOffsetType& src2 = helper_.getVectorFromBracketId(ket, ptr);
 			return bracketRightCorner_(A,B,C,fermionSign,src1,src2,ptr);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();

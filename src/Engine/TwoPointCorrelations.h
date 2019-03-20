@@ -92,24 +92,18 @@ namespace Dmrg {
 
 template<typename CorrelationsSkeletonType>
 class TwoPointCorrelations {
-	typedef typename CorrelationsSkeletonType::ObserverHelperType
-	ObserverHelperType;
-	typedef typename ObserverHelperType::VectorType VectorType ;
-	typedef typename ObserverHelperType::VectorWithOffsetType
-	VectorWithOffsetType;
-	typedef typename ObserverHelperType::BasisWithOperatorsType
-	BasisWithOperatorsType ;
+
+	typedef typename CorrelationsSkeletonType::ObserverHelperType ObserverHelperType;
+	typedef typename ObserverHelperType::VectorType VectorType;
+	typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;
+	typedef typename ObserverHelperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename VectorType::value_type FieldType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
 	typedef TwoPointCorrelations<CorrelationsSkeletonType> ThisType;
 
-	static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
-	static SizeType const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
-	static SizeType const DIAGONAL = CorrelationsSkeletonType::DIAGONAL;
-	static SizeType const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
-
 public:
 
+	typedef typename CorrelationsSkeletonType::BraketType BraketType;
 	typedef typename CorrelationsSkeletonType::SparseMatrixType SparseMatrixType;
 	typedef typename ObserverHelperType::MatrixType MatrixType;
 	typedef Parallel2PointCorrelations<ThisType> Parallel2PointCorrelationsType;
@@ -121,7 +115,9 @@ public:
 	void operator()(PsimagLite::Matrix<FieldType>& w,
 	                const SparseMatrixType& O1,
 	                const SparseMatrixType& O2,
-	                ProgramGlobals::FermionOrBosonEnum fermionicSign)
+	                ProgramGlobals::FermionOrBosonEnum fermionicSign,
+	                PsimagLite::String bra,
+	                PsimagLite::String ket)
 	{
 		SizeType rows = w.n_row();
 		SizeType cols = w.n_col();
@@ -137,7 +133,14 @@ public:
 		typedef PsimagLite::Parallelizer<Parallel2PointCorrelationsType> ParallelizerType;
 		ParallelizerType threaded2Points(PsimagLite::Concurrency::codeSectionParams);
 
-		Parallel2PointCorrelationsType helper2Points(w,*this,pairs,O1,O2,fermionicSign);
+		Parallel2PointCorrelationsType helper2Points(w,
+		                                             *this,
+		                                             pairs,
+		                                             O1,
+		                                             O2,
+		                                             fermionicSign,
+		                                             bra,
+		                                             ket);
 
 		threaded2Points.loopCreate(helper2Points);
 	}
@@ -146,20 +149,21 @@ public:
 	// where |psi> is the g.s.
 	// Note1: O1 is applied to site i and O2 is applied to site j
 	// Note2: O1 and O2 operators must commute or anti-commute (set fermionicSign accordingly)
-	FieldType calcCorrelation(
-	        SizeType i,
-	        SizeType j,
-	        const SparseMatrixType& O1,
-	        const SparseMatrixType& O2,
-	        ProgramGlobals::FermionOrBosonEnum fermionicSign)
+	FieldType calcCorrelation(SizeType i,
+	                          SizeType j,
+	                          const SparseMatrixType& O1,
+	                          const SparseMatrixType& O2,
+	                          ProgramGlobals::FermionOrBosonEnum fermionicSign,
+	                          PsimagLite::String bra,
+                              PsimagLite::String ket)
 	{
 		FieldType c = 0;
 		if (i==j) {
-			c = calcDiagonalCorrelation(i,O1,O2,fermionicSign);
+			c = calcDiagonalCorrelation(i, O1, O2, fermionicSign, bra, ket);
 		} else if (i>j) {
-			c = -calcCorrelation_(j,i,O2,O1,fermionicSign);
+			c = -calcCorrelation_(j, i, O2, O1, fermionicSign, bra, ket);
 		} else {
-			c = calcCorrelation_(i,j,O1,O2,fermionicSign);
+			c = calcCorrelation_(i, j, O1, O2, fermionicSign, bra, ket);
 		}
 
 		return c;
@@ -167,11 +171,12 @@ public:
 
 private:
 
-
 	FieldType calcDiagonalCorrelation(SizeType i,
 	                                  const SparseMatrixType& O1,
 	                                  const SparseMatrixType& O2,
-	                                  ProgramGlobals::FermionOrBosonEnum)
+	                                  ProgramGlobals::FermionOrBosonEnum,
+	                                  PsimagLite::String bra,
+		                              PsimagLite::String ket)
 	{
 		SizeType n = O1.rows();
 		SparseMatrixType O1new=identity(n);
@@ -181,20 +186,26 @@ private:
 		                                  1,
 		                                  O2new,
 		                                  O1new,
-		                                  ProgramGlobals::FermionOrBosonEnum::BOSON);
+		                                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                                  bra,
+		                                  ket);
 
 		return calcCorrelation_(i - 1,
 		                        i,
 		                        O1new,
 		                        O2new,
-		                        ProgramGlobals::FermionOrBosonEnum::BOSON);
+		                        ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                        bra,
+		                        ket);
 	}
 
 	FieldType calcCorrelation_(SizeType i,
 	                           SizeType j,
 	                           const SparseMatrixType& O1,
 	                           const SparseMatrixType& O2,
-	                           ProgramGlobals::FermionOrBosonEnum fermionicSign)
+	                           ProgramGlobals::FermionOrBosonEnum fermionicSign,
+	                           PsimagLite::String bra,
+	                           PsimagLite::String ket)
 	{
 
 		if (i >= j)
@@ -214,12 +225,19 @@ private:
 				SparseMatrixType O1g;
 				O1g.makeDiagonal(ni,1.0);
 
-				return skeleton_.bracketRightCorner(O1g,O1m,O2m,fermionicSign,ptr);
+				return skeleton_.bracketRightCorner(O1g,
+				                                    O1m,
+				                                    O2m,
+				                                    fermionicSign,
+				                                    ptr,
+				                                    bra,
+				                                    ket);
 			}
+
 			SparseMatrixType O1g;
 			skeleton_.growDirectly(O1g,O1m,i,fermionicSign,j-2,true);
-			 typename ObserverHelperType::PointerForSerializerType ptr(j - 2);
-			return skeleton_.bracketRightCorner(O1g,O2m,fermionicSign,ptr);
+			typename ObserverHelperType::PointerForSerializerType ptr(j - 2);
+			return skeleton_.bracketRightCorner(O1g, O2m, fermionicSign, ptr, bra, ket);
 		}
 
 		SparseMatrixType O1g,O2g;
@@ -231,7 +249,9 @@ private:
 
 		return skeleton_.bracket(O2g,
 		                         ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                         ptr);
+		                         ptr,
+		                         bra,
+		                         ket);
 	}
 
 	SparseMatrixType identity(SizeType n)

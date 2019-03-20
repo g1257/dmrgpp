@@ -150,11 +150,6 @@ public:
 		return (!es && helper_.site(ptr) == 1);
 	}
 
-	void setBrakets(const PsimagLite::String& left, const PsimagLite::String& right)
-	{
-		helper_.setBrakets(braketStringToNumber(left), braketStringToNumber(right));
-	}
-
 	void twoPoint(MatrixType& storage,
 	              const BraketType& braket)
 	{
@@ -181,15 +176,19 @@ public:
 		PsimagLite::String str("twopoint: Give no site, first site, or all sites\n");
 
 		switch (flag) {
+
 		case 0: // no sites given
-			return twopoint_(storage, m0, m1, fermionSign);
+			return twopoint_(storage, m0, m1, fermionSign, braket.bra(), braket.ket());
+
 		case 1: //first site given
 			for (site1 = 0; site1 < sites; ++site1)
 				storage(braket.site(0),site1) = twopoint_.calcCorrelation(braket.site(0),
 				                                                          site1,
 				                                                          braket.op(0).data,
 				                                                          braket.op(1).data,
-				                                                          fermionSign);
+				                                                          fermionSign,
+				                                                          braket.bra(),
+				                                                          braket.ket());
 			return;
 
 		case 3:
@@ -197,19 +196,24 @@ public:
 			                                                                   braket.site(1),
 			                                                                   braket.op(0).data,
 			                                                                   braket.op(1).data,
-			                                                                   fermionSign);
+			                                                                   fermionSign,
+			                                                                   braket.bra(),
+			                                                                   braket.ket());
 			return;
+
 		default:
-			throw PsimagLite::RuntimeError(str);
+			err(str);
 		}
 	}
 
 	void twoPoint(MatrixType& m,
 	              const SparseMatrixType& O1,
 	              const SparseMatrixType& O2,
-	              ProgramGlobals::FermionOrBosonEnum fermionicSign)
+	              ProgramGlobals::FermionOrBosonEnum fermionicSign,
+	              PsimagLite::String bra,
+	              PsimagLite::String ket)
 	{
-		twopoint_(m, O1, O2, fermionicSign);
+		twopoint_(m, O1, O2, fermionicSign, bra, ket);
 	}
 
 	void threePoint(const BraketType& braket,
@@ -477,17 +481,21 @@ public:
 	template<typename ApplyOperatorType>
 	FieldType onePoint(SizeType site,
 	                   const typename ApplyOperatorType::OperatorType& A,
-	                   typename ApplyOperatorType::BorderEnum corner)
+	                   typename ApplyOperatorType::BorderEnum corner,
+	                   PsimagLite::String bra,
+	                   PsimagLite::String ket)
 	{
-		return onepoint_.template operator()<ApplyOperatorType>(site,A,corner);
+		return onepoint_.template operator()<ApplyOperatorType>(site, A, corner, bra, ket);
 	}
 
 	template<typename ApplyOperatorType>
 	FieldType onePointHookForZero(SizeType site,
 	                              const typename ApplyOperatorType::OperatorType& A,
-	                              bool corner = false)
+	                              typename ApplyOperatorType::BorderEnum corner,
+	                              PsimagLite::String bra,
+	                              PsimagLite::String ket)
 	{
-		return onepoint_.template hookForZero<ApplyOperatorType>(site,A,corner);
+		return onepoint_.template hookForZero<ApplyOperatorType>(site, A, corner, bra, ket);
 	}
 
 	template<typename VectorLikeType>
@@ -496,25 +504,16 @@ public:
 	multiCorrelations(VectorLikeType& result,
 	                  const SparseMatrixType& O,
 	                  SizeType rows,
-	                  SizeType cols)
+	                  SizeType cols,
+	                  PsimagLite::String bra,
+                      PsimagLite::String ket)
 	{
 		SizeType nthreads = 1;
-		MultiPointCorrelationsType multi(nthreads,helper_,skeleton_);
-		multi(result,O,rows,cols);
+		MultiPointCorrelationsType multi(nthreads, helper_, skeleton_);
+		multi(result, O, rows, cols, bra, ket);
 	}
 
 private:
-
-	SizeType braketStringToNumber(const PsimagLite::String& str) const
-	{
-		if (str == "gs") return 0;
-		if (str == "time") return 1; // == "P0", "time" is legacy notation
-		int x = BraketType::GetBraOrKetType::getPtype(str);
-		if (x >= 0) return x;
-
-		PsimagLite::String msg("Observer::braketStringToNumber:");
-		throw PsimagLite::RuntimeError(msg + " must be gs or time or P\\d+\n");
-	}
 
 	ObserverHelperType helper_;
 	OnePointCorrelationsType onepoint_;

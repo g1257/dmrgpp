@@ -87,13 +87,12 @@ namespace Dmrg {
 template<typename TwoPointCorrelationsType>
 class Parallel2PointCorrelations {
 
+public:
+
 	typedef typename TwoPointCorrelationsType::MatrixType MatrixType;
 	typedef typename TwoPointCorrelationsType::SparseMatrixType SparseMatrixType;
 	typedef typename MatrixType::value_type FieldType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
-
-public:
-
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename PsimagLite::Real<FieldType>::Type RealType;
 
@@ -102,20 +101,30 @@ public:
 	                           const typename PsimagLite::Vector<PairType>::Type& pairs,
 	                           const SparseMatrixType& O1,
 	                           const SparseMatrixType& O2,
-	                           ProgramGlobals::FermionOrBosonEnum fermionicSign)
+	                           ProgramGlobals::FermionOrBosonEnum fermionicSign,
+	                           PsimagLite::String bra,
+	                           PsimagLite::String ket)
 	    : w_(w),
 	      twopoint_(twopoint),
 	      pairs_(pairs),
 	      O1_(O1),
 	      O2_(O2),
-	      fermionicSign_(fermionicSign)
+	      fermionicSign_(fermionicSign),
+	      bra_(bra),
+	      ket_(ket)
 	{}
 
 	void doTask(SizeType taskNumber, SizeType)
 	{
 		SizeType i = pairs_[taskNumber].first;
 		SizeType j = pairs_[taskNumber].second;
-		w_(i,j) = twopoint_.calcCorrelation(i,j,O1_,O2_,fermionicSign_);
+		w_(i,j) = twopoint_.calcCorrelation(i,
+		                                    j,
+		                                    O1_,
+		                                    O2_,
+		                                    fermionicSign_,
+		                                    bra_,
+		                                    ket_);
 	}
 
 	SizeType tasks() const { return pairs_.size(); }
@@ -127,7 +136,9 @@ private:
 	const typename PsimagLite::Vector<PairType>::Type& pairs_;
 	const SparseMatrixType& O1_;
 	const SparseMatrixType& O2_;
-	ProgramGlobals::FermionOrBosonEnum fermionicSign_;
+	const ProgramGlobals::FermionOrBosonEnum fermionicSign_;
+	const PsimagLite::String bra_;
+	const PsimagLite::String ket_;
 }; // class Parallel2PointCorrelations
 } // namespace Dmrg 
 

@@ -130,7 +130,7 @@ public:
 
 		firstStage(O2gt,'N',i1,'N',i2,braket,0,1);
 
-		return secondStage(O2gt,i2,'C',i3,'C',i4,braket,2,3);
+		return secondStage(O2gt, i2, 'C', i3, 'C', i4, braket, 2, 3);
 	}
 
 	//! 3-point: these are expensive and uncached!!!
@@ -274,7 +274,9 @@ public:
 				return skeleton_.bracketRightCorner(Otmp,
 				                                    O4m,
 				                                    braket.op(index1).fermionOrBoson,
-				                                    ptr);
+				                                    ptr,
+				                                    braket.bra(),
+				                                    braket.ket());
 			}
 
 			typename ObserverHelperType::PointerForSerializerType ptr(i4 - 2);
@@ -282,7 +284,9 @@ public:
 			                                    O3m,
 			                                    O4m,
 			                                    braket.op(index1).fermionOrBoson,
-			                                    ptr);
+			                                    ptr,
+			                                    braket.bra(),
+			                                    braket.ket());
 		}
 
 		skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index0).fermionOrBoson,ns);
@@ -297,7 +301,11 @@ public:
 		growDirectly4p(Otmp,O3gt,i3+1,braket.op(index0).fermionOrBoson,ns);
 
 		ptr = skeleton_.dmrgMultiply(O4g,Otmp,O4m,braket.op(index1).fermionOrBoson,ns);
-		return skeleton_.bracket(O4g,braket.op(index1).fermionOrBoson,ptr);
+		return skeleton_.bracket(O4g,
+		                         braket.op(index1).fermionOrBoson,
+		                         ptr,
+		                         braket.bra(),
+		                         braket.ket());
 	}
 
 	//! requires i2<i3<i4
@@ -358,7 +366,9 @@ private:
 			return skeleton_.bracketRightCorner(Otmp,
 			                                    O3m,
 			                                    braket.op(index).fermionOrBoson,
-			                                    ptr);
+			                                    ptr,
+			                                    braket.bra(),
+			                                    braket.ket());
 		}
 
 		SparseMatrixType O3g;
@@ -366,7 +376,11 @@ private:
 		        skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index).fermionOrBoson,ns);
 
 		ptr.setPointer(ns);
-		return skeleton_.bracket(O3g,braket.op(index).fermionOrBoson,ptr);
+		return skeleton_.bracket(O3g,
+		                         braket.op(index).fermionOrBoson,
+		                         ptr,
+		                         braket.bra(),
+		                         braket.ket());
 	}
 
 	//! i can be zero here!!

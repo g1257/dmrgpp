@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DmrgSerializer.h"
 #include "VectorWithOffsets.h" // to include norm
 #include "VectorWithOffset.h" // to include norm
+#include "GetBraOrKet.h"
 
 namespace Dmrg {
 
@@ -134,8 +135,7 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef PsimagLite::Vector<short int>::Type VectorShortIntType;
 	typedef PointerForSerializer PointerForSerializerType;
-
-	enum class BraketEnum {LEFT, RIGHT};
+	typedef GetBraOrKet GetBraOrKetType;
 
 	enum class SaveEnum {YES, NO};
 
@@ -146,7 +146,6 @@ public:
 	               bool withLegacyBugs)
 	    : io_(io),
 	      withLegacyBugs_(withLegacyBugs),
-	      bracket_(2,0),
 	      noMoreData_(false),
 	      dSsize_(0),
 	      timeSsize_(0),
@@ -184,12 +183,6 @@ public:
 	const SizeType& numberOfSites() const { return numberOfSites_; }
 
 	bool endOfData() const { return noMoreData_; }
-
-	void setBrakets(SizeType left,SizeType right)
-	{
-		bracket_[0] = left;
-		bracket_[1] = right;
-	}
 
 	void transform(SparseMatrixType& ret,
 	               const SparseMatrixType& O2,
@@ -277,12 +270,10 @@ public:
 		return dSsize_; //-1;
 	}
 
-	const VectorWithOffsetType& getVectorFromBracketId(const BraketEnum leftOrRight,
+	const VectorWithOffsetType& getVectorFromBracketId(PsimagLite::String braOrKet,
 	                                                   const PointerForSerializerType& index) const
 	{
-		const SizeType ind = toInteger(leftOrRight);
-		assert(ind < bracket_.size());
-		SizeType braketId = bracket_[ind];
+		SizeType braketId = braketStringToNumber(braOrKet);
 		// braketId == 0 means GS
 		if (braketId == 0)
 			return wavefunction(index);
@@ -325,11 +316,6 @@ public:
 	}
 
 private:
-
-	static SizeType toInteger(const BraketEnum leftOrRight)
-	{
-		return (leftOrRight == BraketEnum::LEFT) ? 0 : 1;
-	}
 
 	bool init(SizeType start, SizeType end, SaveEnum saveOrNot)
 	{
@@ -424,17 +410,27 @@ private:
 		return false;
 	}
 
+	static SizeType braketStringToNumber(const PsimagLite::String& str)
+	{
+		if (str == "gs") return 0;
+		if (str == "time") return 1; // == "P0", "time" is legacy notation
+		int x = GetBraOrKetType::getPtype(str);
+		if (x >= 0) return x;
+
+		PsimagLite::String msg("ObserverHelper::braketStringToNumber:");
+		throw PsimagLite::RuntimeError(msg + " must be gs or time or P\\d+\n");
+	}
+
 	IoInputType& io_;
 	typename PsimagLite::Vector<DmrgSerializerType*>::Type dSerializerV_;
 	typename PsimagLite::Vector<TimeSerializerType*>::Type timeSerializerV_;
 	bool withLegacyBugs_;
-	VectorSizeType bracket_;
 	bool noMoreData_;
 	SizeType dSsize_;
 	SizeType timeSsize_;
 	VectorShortIntType signsOneSite_;
 	SizeType numberOfSites_;
-};  //ObserverHelper
+};  // ObserverHelper
 } // namespace Dmrg
 
 /*@}*/

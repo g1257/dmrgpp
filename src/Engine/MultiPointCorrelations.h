@@ -119,20 +119,23 @@ public:
 	operator()(VectorLikeType& result,
 	           const SparseMatrixType& O,
 	           SizeType rows,
-	           SizeType cols)
+	           SizeType cols,
+	           PsimagLite::String bra,
+               PsimagLite::String ket)
 	{
 		assert(rows == cols);
 		result.resize(rows);
-		SparseMatrixType Og;
-		SparseMatrixType identity(O.rows(),O.cols());
 
+		SparseMatrixType Og;
+
+		SparseMatrixType identity(O.rows(),O.cols());
 		identity.makeDiagonal(O.rows(),1.0);
 
-		size_t rowsOver2 = static_cast<size_t>(rows/2);
+		const size_t rowsOver2 = static_cast<size_t>(rows/2);
 
-		for (SizeType i=0;i<rowsOver2;i++) {
-			result[i] = calcCorrelation_(Og,i,O,identity);
-		}
+		for (SizeType i = 0; i < rowsOver2; ++i)
+			result[i] = calcCorrelation_(Og, i, O, identity, bra, ket);
+
 		for (SizeType i=rowsOver2; i<rows; i++) result[i]=0;
 	}
 
@@ -142,7 +145,9 @@ private:
 	FieldType calcCorrelation_(SparseMatrixType& O2gt,
 	                           SizeType i,
 	                           const SparseMatrixType& O,
-	                           const SparseMatrixType& identity)
+	                           const SparseMatrixType& identity,
+	                           PsimagLite::String bra,
+                               PsimagLite::String ket)
 	{
 
 		if (i>=skeleton_.numberOfSites()-1)
@@ -156,7 +161,7 @@ private:
 			skeleton_.growDirectly(O2gt,O,i,fermionicSign,ns,true);
 			typename ObserverHelperType::PointerForSerializerType ptr =
 			        skeleton_.dmrgMultiply(O2g,O2gt,identity,fermionicSign,ns);
-			FieldType ret = skeleton_.bracket(O2g, fermionicSign, ptr);
+			FieldType ret = skeleton_.bracket(O2g, fermionicSign, ptr, bra, ket);
 			return ret;
 		}
 
@@ -167,7 +172,7 @@ private:
 		//				skeleton_.dmrgMultiply(O2g,O2gt,identity,fermionicSign,ns-1,threadId);
 		//			}
 		O2gt.clear();
-		FieldType ret = skeleton_.bracket(O2g,fermionicSign, ptr);
+		FieldType ret = skeleton_.bracket(O2g,fermionicSign, ptr, bra, ket);
 		ptr.setPointer(ns - 1);
 		helper_.transform(O2gt, O2g, ptr);
 		return ret;
