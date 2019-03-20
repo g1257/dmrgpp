@@ -115,8 +115,7 @@ public:
 	                     SizeType i2,
 	                     SizeType i3,
 	                     SizeType i4,
-	                     const BraketType& braket,
-	                     SizeType threadId) const
+	                     const BraketType& braket) const
 	{
 		if (i1>i2 || i3>i4 || i2>i3)
 			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs ordered points\n");
@@ -129,9 +128,9 @@ public:
 
 		SparseMatrixType O2gt;
 
-		firstStage(O2gt,'N',i1,'N',i2,braket,0,1,threadId);
+		firstStage(O2gt,'N',i1,'N',i2,braket,0,1);
 
-		return secondStage(O2gt,i2,'C',i3,'C',i4,braket,2,3,threadId);
+		return secondStage(O2gt,i2,'C',i3,'C',i4,braket,2,3);
 	}
 
 	//! 3-point: these are expensive and uncached!!!
@@ -139,8 +138,7 @@ public:
 	FieldType threePoint(SizeType i1,
 	                     SizeType i2,
 	                     SizeType i3,
-	                     const BraketType& braket,
-	                     SizeType threadId) const
+	                     const BraketType& braket) const
 	{
 		if (i1>i2 || i2>i3)
 			err("calcCorrelation: FourPoint needs ordered points\n");
@@ -149,14 +147,14 @@ public:
 
 		SparseMatrixType O2gt;
 
-		firstStage(O2gt,'N',i1,'N',i2,braket,0,1,threadId);
+		firstStage(O2gt,'N',i1,'N',i2,braket,0,1);
 
-		return secondStage(O2gt,i2,'N',i3,braket,2,threadId);
+		return secondStage(O2gt,i2,'N',i3,braket,2);
 	}
 
 	//! 4-points or more: these are expensive and uncached!!!
 	//! requires i0<i1<i2<i3<...<i_{n-1}
-	FieldType anyPoint(const BraketType& braket, SizeType threadId) const
+	FieldType anyPoint(const BraketType& braket) const
 	{
 		SizeType n = braket.points();
 		if (n < 4)
@@ -172,8 +170,7 @@ public:
 		           braket.site(1),
 		           braket,
 		           0,
-		           1,
-		           threadId);
+		           1);
 
 		assert(n > 3);
 		SizeType end = n - 2;
@@ -187,8 +184,7 @@ public:
 			            'N',
 			            braket.site(i),
 			            braket.op(i),
-			            braket.op(i - 1).fermionOrBoson,
-			            threadId);
+			            braket.op(i - 1).fermionOrBoson);
 			O2gt = OsoFar;
 		}
 
@@ -205,8 +201,7 @@ public:
 		                   i4,
 		                   braket,
 		                   n - 2,
-		                   n - 1,
-		                   threadId);
+		                   n - 1);
 	}
 
 	//! requires i1<i2
@@ -217,8 +212,7 @@ public:
 	                SizeType i2,
 	                const BraketType& braket,
 	                SizeType index0,
-	                SizeType index1,
-	                SizeType threadId) const
+	                SizeType index1) const
 	{
 
 		// Take care of modifiers
@@ -231,11 +225,11 @@ public:
 
 		int ns = i2-1;
 		if (ns<0) ns = 0;
-		skeleton_.growDirectly(O1g,O1m,i1,braket.op(index0).fermionOrBoson,ns,true,threadId);
-		skeleton_.dmrgMultiply(O2g,O1g,O2m,braket.op(index1).fermionOrBoson,ns,threadId);
+		skeleton_.growDirectly(O1g,O1m,i1,braket.op(index0).fermionOrBoson,ns,true);
+		typename ObserverHelperType::PointerForSerializerType ptr =
+		        skeleton_.dmrgMultiply(O2g,O1g,O2m,braket.op(index1).fermionOrBoson,ns);
 
-		skeleton_.setPointer(threadId, ns);
-		skeleton_.helper().transform(O2gt,O2g,threadId);
+		skeleton_.helper().transform(O2gt, O2g, ptr);
 	}
 
 	//! requires i2<i3<i4
@@ -247,8 +241,7 @@ public:
 	                      SizeType i4,
 	                      const BraketType& braket,
 	                      SizeType index0,
-	                      SizeType index1,
-	                      SizeType threadId) const
+	                      SizeType index1) const
 	{
 		// Take care of modifiers
 		SparseMatrixType O3m,O4m;
@@ -258,54 +251,53 @@ public:
 		const ObserverHelperType& helper = skeleton_.helper();
 		int ns = i3 - 1;
 		if (ns<0) ns = 0;
-		skeleton_.setPointer(threadId,ns);
 		SparseMatrixType Otmp;
 		if (index0 == 0) err("secondStage\n");
 
-		growDirectly4p(Otmp,O2gt,i2+1,braket.op(index0 - 1).fermionOrBoson,ns,threadId);
+		growDirectly4p(Otmp,O2gt,i2+1,braket.op(index0 - 1).fermionOrBoson,ns);
 
 		SparseMatrixType O3g,O4g;
-		if (i4==skeleton_.numberOfSites(threadId)-1) {
+		if (i4 == skeleton_.numberOfSites() - 1) {
 			if (i3<i4-1) { // still not tested (2018-02-27)
-				skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index0).fermionOrBoson,ns,threadId);
+				typename ObserverHelperType::PointerForSerializerType ptr =
+				        skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index0).fermionOrBoson,ns);
 
 				SparseMatrixType O3gt;
-				helper.transform(O3gt,O3g,threadId);
+				helper.transform(O3gt,O3g,ptr);
 
 				ns = i4-2;
 				if (ns<0) ns = 0;
-				skeleton_.setPointer(threadId,ns);
-				growDirectly4p(Otmp,O3gt,i3+1,braket.op(index0).fermionOrBoson,ns,threadId);
-				skeleton_.setPointer(threadId,i4-2);
+				ptr.setPointer(ns);
+				growDirectly4p(Otmp,O3gt,i3+1,braket.op(index0).fermionOrBoson,ns);
+				ptr.setPointer(i4 - 2);
 
 				return skeleton_.bracketRightCorner(Otmp,
 				                                    O4m,
 				                                    braket.op(index1).fermionOrBoson,
-				                                    threadId);
+				                                    ptr);
 			}
 
-			skeleton_.setPointer(threadId, i4 - 2);
+			typename ObserverHelperType::PointerForSerializerType ptr(i4 - 2);
 			return skeleton_.bracketRightCorner(Otmp,
 			                                    O3m,
 			                                    O4m,
 			                                    braket.op(index1).fermionOrBoson,
-			                                    threadId);
+			                                    ptr);
 		}
 
-		skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index0).fermionOrBoson,ns,threadId);
+		skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index0).fermionOrBoson,ns);
 
-		skeleton_.setPointer(threadId, ns);
+		typename ObserverHelperType::PointerForSerializerType ptr(ns);
 
 		SparseMatrixType O3gt;
-		helper.transform(O3gt,O3g,threadId);
+		helper.transform(O3gt,O3g,ptr);
 
 		ns = i4-1;
 		if (ns<0) ns = 0;
-		skeleton_.setPointer(threadId, ns);
-		growDirectly4p(Otmp,O3gt,i3+1,braket.op(index0).fermionOrBoson,ns,threadId);
+		growDirectly4p(Otmp,O3gt,i3+1,braket.op(index0).fermionOrBoson,ns);
 
-		skeleton_.dmrgMultiply(O4g,Otmp,O4m,braket.op(index1).fermionOrBoson,ns,threadId);
-		return skeleton_.bracket(O4g,braket.op(index1).fermionOrBoson,threadId);
+		ptr = skeleton_.dmrgMultiply(O4g,Otmp,O4m,braket.op(index1).fermionOrBoson,ns);
+		return skeleton_.bracket(O4g,braket.op(index1).fermionOrBoson,ptr);
 	}
 
 	//! requires i2<i3<i4
@@ -315,8 +307,7 @@ public:
 	                 char mod3,
 	                 SizeType i3,
 	                 const OperatorType& Op3,
-	                 ProgramGlobals::FermionOrBosonEnum fermionS,
-	                 SizeType threadId) const
+	                 ProgramGlobals::FermionOrBosonEnum fermionS) const
 	{
 		// Take care of modifiers
 		if (i2 > i3)
@@ -330,16 +321,15 @@ public:
 		int ns = i3-1;
 		if (ns < 0) ns = 0;
 
-		skeleton_.setPointer(threadId, ns);
 		SparseMatrixType Otmp;
-		growDirectly4p(Otmp,OsoFar,i2+1,fermionS,ns,threadId);
+		growDirectly4p(Otmp,OsoFar,i2+1,fermionS,ns);
 
 		SparseMatrixType O3g;
-		skeleton_.dmrgMultiply(O3g,Otmp,O3m,Op3.fermionOrBoson,ns,threadId);
+		skeleton_.dmrgMultiply(O3g,Otmp,O3m,Op3.fermionOrBoson,ns);
 
-		skeleton_.setPointer(threadId, ns);
+		typename ObserverHelperType::PointerForSerializerType ptr(ns);
 
-		skeleton_.helper().transform(dest, O3g, threadId);
+		skeleton_.helper().transform(dest, O3g, ptr);
 	}
 
 
@@ -351,8 +341,7 @@ private:
 	                      char mod3,
 	                      SizeType i3,
 	                      const BraketType& braket,
-	                      SizeType index,
-	                      SizeType threadId) const
+	                      SizeType index) const
 	{
 		// Take care of modifiers
 		SparseMatrixType O3m;
@@ -362,22 +351,22 @@ private:
 		if (ns<0) ns = 0;
 		SparseMatrixType Otmp;
 		if (index == 0) err("secondStage\n");
-		growDirectly4p(Otmp,O2gt,i2+1,braket.op(index - 1).fermionOrBoson,ns,threadId);
+		growDirectly4p(Otmp,O2gt,i2+1,braket.op(index - 1).fermionOrBoson,ns);
 
-		if (i3 == skeleton_.numberOfSites(threadId)-1) {
-			skeleton_.setPointer(threadId, i3 - 2);
+		if (i3 == skeleton_.numberOfSites()-1) {
+			typename ObserverHelperType::PointerForSerializerType ptr(i3 - 2);
 			return skeleton_.bracketRightCorner(Otmp,
 			                                    O3m,
 			                                    braket.op(index).fermionOrBoson,
-			                                    threadId);
+			                                    ptr);
 		}
 
-		skeleton_.setPointer(threadId, ns);
 		SparseMatrixType O3g;
-		skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index).fermionOrBoson,ns,threadId);
+		typename ObserverHelperType::PointerForSerializerType ptr =
+		        skeleton_.dmrgMultiply(O3g,Otmp,O3m,braket.op(index).fermionOrBoson,ns);
 
-		skeleton_.setPointer(threadId,ns);
-		return skeleton_.bracket(O3g,braket.op(index).fermionOrBoson,threadId);
+		ptr.setPointer(ns);
+		return skeleton_.bracket(O3g,braket.op(index).fermionOrBoson,ptr);
 	}
 
 	//! i can be zero here!!
@@ -385,8 +374,7 @@ private:
 	                    const SparseMatrixType& Osrc,
 	                    SizeType i,
 	                    ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	                    SizeType ns,
-	                    SizeType threadId) const
+	                    SizeType ns) const
 	{
 		Odest =Osrc;
 
@@ -397,15 +385,15 @@ private:
 		const ObserverHelperType& helper = skeleton_.helper();
 
 		for (SizeType s=nt;s<ns;s++) {
-			skeleton_.setPointer(threadId,s);
+			typename ObserverHelperType::PointerForSerializerType ptr(s);
 
-			SparseMatrixType Onew(helper.cols(threadId), helper.cols(threadId));
+			SparseMatrixType Onew(helper.cols(ptr), helper.cols(ptr));
 			skeleton_.fluffUp(Onew,
 			                  Odest,
 			                  fermionicSign,
 			                  CorrelationsSkeletonType::GrowDirection::RIGHT,
 			                  true,
-			                  threadId);
+			                  ptr);
 			Odest = Onew;
 
 		}

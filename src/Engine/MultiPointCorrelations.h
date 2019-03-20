@@ -122,7 +122,6 @@ public:
 	           SizeType cols)
 	{
 		assert(rows == cols);
-		size_t threadId = 0;
 		result.resize(rows);
 		SparseMatrixType Og;
 		SparseMatrixType identity(O.rows(),O.cols());
@@ -132,7 +131,7 @@ public:
 		size_t rowsOver2 = static_cast<size_t>(rows/2);
 
 		for (SizeType i=0;i<rowsOver2;i++) {
-			result[i] = calcCorrelation_(Og,i,O,identity,threadId);
+			result[i] = calcCorrelation_(Og,i,O,identity);
 		}
 		for (SizeType i=rowsOver2; i<rows; i++) result[i]=0;
 	}
@@ -143,11 +142,10 @@ private:
 	FieldType calcCorrelation_(SparseMatrixType& O2gt,
 	                           SizeType i,
 	                           const SparseMatrixType& O,
-	                           const SparseMatrixType& identity,
-	                           SizeType threadId)
+	                           const SparseMatrixType& identity)
 	{
 
-		if (i>=skeleton_.numberOfSites(threadId)-1)
+		if (i>=skeleton_.numberOfSites()-1)
 			throw PsimagLite::RuntimeError("calcCorrelation: i must be < sites-1\n");
 		ProgramGlobals::FermionOrBosonEnum fermionicSign =
 		        ProgramGlobals::FermionOrBosonEnum::BOSON;
@@ -155,21 +153,23 @@ private:
 		SizeType ns = i;
 		SparseMatrixType O2g;
 		if (i==0) {
-			skeleton_.growDirectly(O2gt,O,i,fermionicSign,ns,true,threadId);
-			skeleton_.dmrgMultiply(O2g,O2gt,identity,fermionicSign,ns,threadId);
-			FieldType ret = skeleton_.bracket(O2g,fermionicSign,threadId);
+			skeleton_.growDirectly(O2gt,O,i,fermionicSign,ns,true);
+			typename ObserverHelperType::PointerForSerializerType ptr =
+			        skeleton_.dmrgMultiply(O2g,O2gt,identity,fermionicSign,ns);
+			FieldType ret = skeleton_.bracket(O2g, fermionicSign, ptr);
 			return ret;
 		}
 
 		//			if (i==5) {
-		skeleton_.dmrgMultiply(O2g,O2gt,O,fermionicSign,ns-1,threadId);
+		typename ObserverHelperType::PointerForSerializerType ptr =
+		        skeleton_.dmrgMultiply(O2g, O2gt, O, fermionicSign, ns - 1);
 		//			} else {
 		//				skeleton_.dmrgMultiply(O2g,O2gt,identity,fermionicSign,ns-1,threadId);
 		//			}
 		O2gt.clear();
-		FieldType ret = skeleton_.bracket(O2g,fermionicSign,threadId);
-		helper_.setPointer(threadId,ns-1);
-		helper_.transform(O2gt,O2g,threadId);
+		FieldType ret = skeleton_.bracket(O2g,fermionicSign, ptr);
+		ptr.setPointer(ns - 1);
+		helper_.transform(O2gt, O2g, ptr);
 		return ret;
 	}
 

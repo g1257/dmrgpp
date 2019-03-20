@@ -107,6 +107,7 @@ public:
 	typedef typename ObserverType::BraketType BraketType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef std::pair<SizeType,SizeType> PairSizeType;
+	typedef typename ObserverType::PointerForSerializerType PointerForSerializerType;
 
 	template<typename IoInputter>
 	ObservableLibrary(IoInputter& io,
@@ -120,7 +121,7 @@ public:
 	      observe_(io, start, nf, trail, model.params())
 	{}
 
-	bool endOfData() const { return observe_.endOfData(); }
+	bool endOfData() const { return observe_.helper().endOfData(); }
 
 	const ModelType& model() const { return model_; }
 
@@ -387,9 +388,7 @@ private:
 	                     PsimagLite::String label,
 	                     const PsimagLite::String& ket)
 	{
-		SizeType threadId = 0;
-
-		for (SizeType i0 = 0; i0 < observe_.size(); ++i0) {
+		for (SizeType i0 = 0; i0 < observe_.helper().size(); ++i0) {
 
 			if (i0==0) {
 				std::cout<<"Using Matrix A:\n";
@@ -399,33 +398,32 @@ private:
 			}
 
 			observe_.setBrakets(bra,ket);
-			observe_.setPointer(threadId,i0);
-
-			cornerLeftOrRight(1, threadId, i0, bra, opA, ket);
+			PointerForSerializerType ptr(i0);
+			cornerLeftOrRight(1, ptr, bra, opA, ket);
 
 			FieldType tmp1 = observe_.template
 			        onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
-			std::cout<<observe_.site(threadId)<<" "<<tmp1;
-			std::cout<<" "<<observe_.time(threadId)<<"\n";
+			std::cout<<observe_.helper().site(ptr)<<" "<<tmp1;
+			std::cout<<" "<<observe_.helper().time(ptr)<<"\n";
 
-			cornerLeftOrRight(numberOfSites_ - 2, threadId, i0, bra, opA, ket);
+			cornerLeftOrRight(numberOfSites_ - 2, ptr, bra, opA, ket);
 		}
 	}
 
 	void cornerLeftOrRight(SizeType site,
-	                       SizeType threadId,
-	                       SizeType i0,
+	                       const PointerForSerializerType& ptr,
 	                       const PsimagLite::String& bra,
 	                       const OperatorType& opA,
 	                       const PsimagLite::String& ket)
 	{
-		if (observe_.site(threadId) != site) return;
+		if (observe_.helper().site(ptr) != site) return;
 
-		bool atCorner = observe_.isAtCorner(numberOfSites_, threadId);
+		bool atCorner = observe_.isAtCorner(numberOfSites_, ptr);
 
 		if (site == 1 && !atCorner) {
-			FieldType tmp1 = observe_.template onePointHookForZero<ApplyOperatorType>(i0, opA);
-			std::cout<<"0 "<<tmp1<<" "<<observe_.time(threadId)<<"\n";
+			FieldType tmp1 = observe_.template onePointHookForZero<ApplyOperatorType>(ptr.get(),
+			                                                                          opA);
+			std::cout<<"0 "<<tmp1<<" "<<observe_.helper().time(ptr)<<"\n";
 			return;
 		}
 
@@ -433,7 +431,7 @@ private:
 			return;
 
 		// also calculate next or prev. site:
-		SizeType x = (observe_.site(threadId)==1) ? 0 : numberOfSites_-1;
+		SizeType x = (observe_.helper().site(ptr) == 1) ? 0 : numberOfSites_ - 1;
 
 		// operator might be site dependent
 		OperatorType opAcorner = opA;
@@ -441,11 +439,11 @@ private:
 		// do the corner case
 		observe_.setBrakets(bra,ket);
 		FieldType tmp1 = observe_.template
-		        onePoint<ApplyOperatorType>(i0,
+		        onePoint<ApplyOperatorType>(ptr.get(),
 		                                    opAcorner,
 		                                    ApplyOperatorType::BORDER_YES);
 		std::cout<<x<<" "<<tmp1;
-		std::cout<<" "<<observe_.time(threadId)<<"\n";
+		std::cout<<" "<<observe_.helper().time(ptr)<<"\n";
 	}
 
 	MatrixType SliceOrbital(const MatrixType& m,
@@ -593,8 +591,10 @@ private:
 				SizeType thinj2 = (string=="four") ? (j+1)*orbitals + orb4 : j*orbitals + orb4;
 				for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 					SizeType spin1=spin0;
-					pairs.push_back(PairSizeType(thini1+thini2*rows*orbitals+rows*orbitals*rows*orbitals*spin0,
-					                             thinj1+thinj2*rows*orbitals+rows*orbitals*rows*orbitals*spin1));
+					pairs.push_back(PairSizeType(thini1 + thini2*rows*orbitals +
+					                             rows*orbitals*rows*orbitals*spin0,
+					                             thinj1 + thinj2*rows*orbitals +
+					                             rows*orbitals*rows*orbitals*spin1));
 				}
 			}
 		}
@@ -899,7 +899,6 @@ private:
 		SizeType j1 = j;
 		SizeType j2 = j + 1;
 
-		SizeType threadId = 0;
 		FieldType sum = 0.0;
 		SizeType site = 0;
 		SizeType orbitals = logBase2(model_.hilbertSize(site));
@@ -925,7 +924,7 @@ private:
 				BraketType braket(model_, str + str2);
 				SizeType val = spin0 + spin1 + 1;
 				int signTerm = (val & 1) ? sign : 1;
-				sum +=  signTerm*observe_.fourpoint()(i1,i2,j1,j2,braket,threadId);
+				sum +=  signTerm*observe_.fourpoint()(i1,i2,j1,j2,braket);
 			}
 		}
 
@@ -1165,9 +1164,9 @@ private:
 	               SizeType cols)
 	{
 		if (hasTimeEvolution_) {
-			SizeType threadId = 0;
-			printSites(threadId);
-			std::cout<<"Time="<<observe_.time(threadId)<<"\n";
+			PointerForSerializerType ptr(0);
+			printSites();
+			std::cout<<"Time="<<observe_.helper().time(ptr)<<"\n";
 		}
 
 		std::cout<<braket.toString()<<"\n";
@@ -1238,23 +1237,22 @@ private:
 		return 0;
 	}
 
-	void printSites(SizeType threadId)
+	void printSites() const
 	{
 		std::cout<<"Sites=";
-		observe_.setPointer(threadId,0);
-		if (observe_.site(threadId)==1) std::cout<<"0 ";
-		if (observe_.site(threadId)==numberOfSites_-2)
-			std::cout<<(numberOfSites_-1)<<" ";
-		for (SizeType i=0;i<observe_.size();i++) {
-			observe_.setPointer(threadId,i);
-			SizeType x = observe_.site(threadId);
+		PointerForSerializerType ptr(0);
+		if (observe_.helper().site(ptr) == 1) std::cout<<"0 ";
+		if (observe_.helper().site(ptr) == numberOfSites_ - 2)
+			std::cout<<(numberOfSites_ - 1)<<" ";
+		for (SizeType i = 0; i < observe_.helper().size(); ++i) {
+			ptr.setPointer(i);
+			SizeType x = observe_.helper().site(ptr);
 			std::cout<<x<<" ";
 		}
 
-		if (observe_.site(threadId)==1) std::cout<<"0";
-		if (observe_.site(threadId) ==numberOfSites_-2) {
-			std::cout<<(numberOfSites_-1);
-		}
+		if (observe_.helper().site(ptr) == 1) std::cout<<"0";
+		if (observe_.helper().site(ptr) == numberOfSites_ - 2)
+			std::cout<<(numberOfSites_ - 1);
 
 		std::cout<<"\n";
 	}

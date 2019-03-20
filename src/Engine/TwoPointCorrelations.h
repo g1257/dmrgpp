@@ -151,17 +151,17 @@ public:
 	        SizeType j,
 	        const SparseMatrixType& O1,
 	        const SparseMatrixType& O2,
-	        ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	        SizeType threadId)
+	        ProgramGlobals::FermionOrBosonEnum fermionicSign)
 	{
 		FieldType c = 0;
 		if (i==j) {
-			c=calcDiagonalCorrelation(i,O1,O2,fermionicSign,threadId);
+			c = calcDiagonalCorrelation(i,O1,O2,fermionicSign);
 		} else if (i>j) {
-			c= -calcCorrelation_(j,i,O2,O1,fermionicSign,threadId);
+			c = -calcCorrelation_(j,i,O2,O1,fermionicSign);
 		} else {
-			c=calcCorrelation_(i,j,O1,O2,fermionicSign,threadId);
+			c = calcCorrelation_(i,j,O1,O2,fermionicSign);
 		}
+
 		return c;
 	}
 
@@ -171,8 +171,7 @@ private:
 	FieldType calcDiagonalCorrelation(SizeType i,
 	                                  const SparseMatrixType& O1,
 	                                  const SparseMatrixType& O2,
-	                                  ProgramGlobals::FermionOrBosonEnum,
-	                                  SizeType threadId)
+	                                  ProgramGlobals::FermionOrBosonEnum)
 	{
 		SizeType n = O1.rows();
 		SparseMatrixType O1new=identity(n);
@@ -182,23 +181,20 @@ private:
 		                                  1,
 		                                  O2new,
 		                                  O1new,
-		                                  ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                                  threadId);
+		                                  ProgramGlobals::FermionOrBosonEnum::BOSON);
 
 		return calcCorrelation_(i - 1,
 		                        i,
 		                        O1new,
 		                        O2new,
-		                        ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                        threadId);
+		                        ProgramGlobals::FermionOrBosonEnum::BOSON);
 	}
 
 	FieldType calcCorrelation_(SizeType i,
 	                           SizeType j,
 	                           const SparseMatrixType& O1,
 	                           const SparseMatrixType& O2,
-	                           ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	                           SizeType threadId)
+	                           ProgramGlobals::FermionOrBosonEnum fermionicSign)
 	{
 
 		if (i >= j)
@@ -209,32 +205,33 @@ private:
 		skeleton_.createWithModification(O1m,O1,'n');
 		skeleton_.createWithModification(O2m,O2,'n');
 
-		if (j==skeleton_.numberOfSites(threadId)-1) {
-			if (i==j-1) {
-				skeleton_.setPointer(threadId,j-2);
-				SizeType ni = helper.leftRightSuper(threadId).left().size()/
-				        helper.leftRightSuper(threadId).right().size();
+		if (j == skeleton_.numberOfSites() - 1) {
+			if (i == j - 1) {
+				typename ObserverHelperType::PointerForSerializerType ptr(j - 2);
+				SizeType ni = helper.leftRightSuper(ptr).left().size()/
+				        helper.leftRightSuper(ptr).right().size();
 
 				SparseMatrixType O1g;
 				O1g.makeDiagonal(ni,1.0);
 
-				return skeleton_.bracketRightCorner(O1g,O1m,O2m,fermionicSign,threadId);
+				return skeleton_.bracketRightCorner(O1g,O1m,O2m,fermionicSign,ptr);
 			}
 			SparseMatrixType O1g;
-			skeleton_.growDirectly(O1g,O1m,i,fermionicSign,j-2,true,threadId);
-			skeleton_.setPointer(threadId,j-2);
-			return skeleton_.bracketRightCorner(O1g,O2m,fermionicSign,threadId);
+			skeleton_.growDirectly(O1g,O1m,i,fermionicSign,j-2,true);
+			 typename ObserverHelperType::PointerForSerializerType ptr(j - 2);
+			return skeleton_.bracketRightCorner(O1g,O2m,fermionicSign,ptr);
 		}
 
 		SparseMatrixType O1g,O2g;
 		SizeType ns = j-1;
 
-		skeleton_.growDirectly(O1g,O1m,i,fermionicSign,ns,true,threadId);
-		skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns,threadId);
+		skeleton_.growDirectly(O1g,O1m,i,fermionicSign,ns,true);
+		typename ObserverHelperType::PointerForSerializerType ptr =
+		        skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns);
 
 		return skeleton_.bracket(O2g,
 		                         ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                         threadId);
+		                         ptr);
 	}
 
 	SparseMatrixType identity(SizeType n)

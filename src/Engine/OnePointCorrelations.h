@@ -111,18 +111,17 @@ public:
 	                     const typename ApplyOperatorType::OperatorType& A,
 	                     typename ApplyOperatorType::BorderEnum corner)
 	{
-		SizeType threadId =0;
 		SizeType pnter=site;
-		helper_.setPointer(threadId,pnter);
+		typename ObserverHelperType::PointerForSerializerType ptr(pnter);
 		try {
 			const VectorWithOffsetType& src1 =
 			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::LEFT,
-			                                       threadId);
+			                                       ptr);
 			const VectorWithOffsetType& src2 =
 			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::RIGHT,
-			                                       threadId);
+			                                       ptr);
 
-			return onePointInternal<ApplyOperatorType>(site,A,src1,src2,corner,threadId);
+			return onePointInternal<ApplyOperatorType>(site,A,src1,src2,corner,ptr);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
 			std::cerr<<"WARNING: Observer::onePoint(...): Nothing here yet\n";
@@ -136,22 +135,21 @@ public:
 	                      bool corner = false)
 	{
 		SizeType pnter=site;
-		SizeType threadId = 0;
-		helper_.setPointer(threadId,pnter);
+		typename ObserverHelperType::PointerForSerializerType ptr(pnter);
 		try {
 			const VectorWithOffsetType& src1 =
 			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::LEFT,
-			                                       threadId);
+			                                       ptr);
 			const VectorWithOffsetType& src2 =
 			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::RIGHT,
-			                                       threadId);
+			                                       ptr);
 
 			return onePointInternalHookForZero<ApplyOperatorType>(site,
 			                                                      A,
 			                                                      src1,
 			                                                      src2,
 			                                                      corner,
-			                                                      threadId);
+			                                                      ptr);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
 			std::cerr<<"WARNING: Observer::onePoint(...): Nothing here yet\n";
@@ -167,17 +165,17 @@ private:
 	                           const VectorWithOffsetType& src1,
 	                           const VectorWithOffsetType& src2,
 	                           typename ApplyOperatorType::BorderEnum corner,
-	                           SizeType threadId)
+	                           typename ObserverHelperType::PointerForSerializerType ptr)
 	{
 		if (src1.sectors() == 0 || src2.sectors() == 0) return 0.0;
-		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(threadId),
+		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(ptr),
 		                                helper_.withLegacyBugs());
 		VectorWithOffsetType dest;
 		applyOpLocal1(dest,
 		              src1,
 		              A,
-		              helper_.fermionicSignLeft(threadId),
-		              helper_.direction(threadId),corner);
+		              helper_.fermionicSignLeft(ptr),
+		              helper_.direction(ptr),corner);
 
 		FieldType sum = static_cast<FieldType>(0.0);
 		const VectorWithOffsetType& v1 = dest;
@@ -201,17 +199,17 @@ private:
 	                                      const VectorWithOffsetType& src1,
 	                                      const VectorWithOffsetType& src2,
 	                                      bool, //= false
-	                                      SizeType threadId)
+	                                      typename ObserverHelperType::PointerForSerializerType ptr)
 	{
 
-		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(threadId),
+		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(ptr),
 		                                helper_.withLegacyBugs());
 		VectorWithOffsetType dest;
 		applyOpLocal1.hookForZero(dest,
 		                          src1,
 		                          A,
-		                          helper_.fermionicSignLeft(threadId),
-		                          helper_.direction(threadId));
+		                          helper_.fermionicSignLeft(ptr),
+		                          helper_.direction(ptr));
 
 		FieldType sum = static_cast<FieldType>(0.0);
 		const VectorWithOffsetType& v1 = dest;

@@ -167,7 +167,7 @@ private:
 		//const SparseMatrixType& opC3 = model.naturalOperator("c",site,gammas[3] + 0*nx).data;
 
 		BraketType braket(model, str);
-		return fourpoint_(i,i+1,j,j+1,braket,threadId);
+		return fourpoint_(i,i+1,j,j+1,braket);
 	}
 
 	template<typename SomeModelType>
@@ -215,7 +215,7 @@ private:
 //		return signTerm*fourval;
 
 		BraketType braket(model_, str);
-		FieldType fourval = fourpoint_(thini1,thini2,thinj1,thinj2,braket,threadId);
+		FieldType fourval = fourpoint_(thini1,thini2,thinj1,thinj2,braket);
 		return fourval;
 	}
 
@@ -255,7 +255,7 @@ private:
 		str += "c?"+ ttos(spin1) + "[" + ttos(site) + "]|gs>";
 
 		BraketType braket(model_, str);
-		FieldType fourval = fourpoint_(thini1,thini2,thinj1,thinj2,braket,threadId);
+		FieldType fourval = fourpoint_(thini1,thini2,thinj1,thinj2,braket);
 		return fourval;
 	}
 

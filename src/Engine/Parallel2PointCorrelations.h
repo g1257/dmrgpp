@@ -111,11 +111,11 @@ public:
 	      fermionicSign_(fermionicSign)
 	{}
 
-	void doTask(SizeType taskNumber ,SizeType threadNum)
+	void doTask(SizeType taskNumber, SizeType)
 	{
 		SizeType i = pairs_[taskNumber].first;
 		SizeType j = pairs_[taskNumber].second;
-		w_(i,j) = twopoint_.calcCorrelation(i,j,O1_,O2_,fermionicSign_,threadNum);
+		w_(i,j) = twopoint_.calcCorrelation(i,j,O1_,O2_,fermionicSign_);
 	}
 
 	SizeType tasks() const { return pairs_.size(); }

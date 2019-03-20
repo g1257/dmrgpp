@@ -114,9 +114,9 @@ public:
 	CorrelationsSkeleton(ObserverHelperType& helper) : helper_(helper)
 	{}
 
-	SizeType numberOfSites(SizeType threadId) const
+	SizeType numberOfSites() const
 	{
-		return helper_.leftRightSuper(threadId).sites();
+		return helper_.numberOfSites();
 	}
 
 	//! i can be zero here!!
@@ -125,8 +125,7 @@ public:
 	                  SizeType i,
 	                  ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	                  SizeType ns,
-	                  bool transform,
-	                  SizeType threadId)
+	                  bool transform) const
 	{
 		Odest =Osrc;
 		// from 0 --> i
@@ -134,26 +133,26 @@ public:
 		if (nt<0) nt=0;
 
 		for (SizeType s=nt;s<ns;s++) {
-			helper_.setPointer(threadId, s);
-			const GrowDirection growOption = growthDirection(s,nt,i,threadId);
-			SparseMatrixType Onew(helper_.cols(threadId),helper_.cols(threadId));
+			PointerForSerializer ptr(s);
+			const GrowDirection growOption = growthDirection(s, nt, i, ptr);
+			SparseMatrixType Onew(helper_.cols(ptr),helper_.cols(ptr));
 
-			fluffUp(Onew,Odest,fermionicSign,growOption,false,threadId);
+			fluffUp(Onew, Odest, fermionicSign, growOption, false, ptr);
 			if (!transform && s == ns-1) {
 				Odest = Onew;
 				continue;
 			}
 
-			helper_.transform(Odest,Onew,threadId);
+			helper_.transform(Odest, Onew, ptr);
 		}
 	}
 
 	GrowDirection growthDirection(SizeType s,
 	                              int nt,
 	                              SizeType i,
-	                              SizeType threadId) const
+	                              const PointerForSerializer& ptr) const
 	{
-		const ProgramGlobals::DirectionEnum dir = helper_.direction(threadId);
+		const ProgramGlobals::DirectionEnum dir = helper_.direction(ptr);
 		GrowDirection growOption = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 		        ? GrowDirection::RIGHT
 		        : GrowDirection::LEFT;
@@ -176,14 +175,14 @@ public:
 	             ProgramGlobals::FermionOrBosonEnum fOrB,
 	             const GrowDirection growOption,
 	             bool transform,
-	             SizeType threadId)
+	             const PointerForSerializer& ptr) const
 	{
 		const int fermionicSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
-		const ProgramGlobals::DirectionEnum dir = helper_.direction(threadId);
+		const ProgramGlobals::DirectionEnum dir = helper_.direction(ptr);
 
 		const BasisType& basis = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
-		        ? helper_.leftRightSuper(threadId).left()
-		        : helper_.leftRightSuper(threadId).right();
+		        ? helper_.leftRightSuper(ptr).left()
+		        : helper_.leftRightSuper(ptr).right();
 
 		SizeType n = basis.size();
 		SizeType orows = O.rows();
@@ -192,7 +191,7 @@ public:
 
 		if (growOption == GrowDirection::RIGHT) {
 			RealType sign = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
-			        ? fermionSignBasis(fermionicSign, helper_.leftRightSuper(threadId).left()) :
+			        ? fermionSignBasis(fermionicSign, helper_.leftRightSuper(ptr).left()) :
 			          1;
 
 			SizeType counter = 0;
@@ -224,10 +223,10 @@ public:
 					if (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) {
 						sign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON)
 						        ? 1 : fermionSignBasis(fermionicSign,
-						                               helper_.leftRightSuper(threadId).left())*
+						                               helper_.leftRightSuper(ptr).left())*
 						          helper_.signsOneSite(k);
 					} else {
-						sign = helper_.fermionicSignLeft(threadId)(k, fermionicSign);
+						sign = helper_.fermionicSignLeft(ptr)(k, fermionicSign);
 					}
 
 					for (int kj = O.getRowPtr(i); kj < O.getRowPtr(i + 1); ++kj) {
@@ -249,26 +248,30 @@ public:
 
 		reorderRowsCrs(ret, basis);
 		if (transform) {
-			helper_.transform(ret2, ret, threadId);
+			helper_.transform(ret2, ret, ptr);
 			return;
 		}
 
 		ret2 = ret;
 	}
 
-	void dmrgMultiply(SparseMatrixType& result,
-	                  const SparseMatrixType& O1,
-	                  const SparseMatrixType& O2,
-	                  ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	                  SizeType ns,
-	                  SizeType threadId)
+	PointerForSerializer dmrgMultiply(SparseMatrixType& result,
+	                                  const SparseMatrixType& O1,
+	                                  const SparseMatrixType& O2,
+	                                  ProgramGlobals::FermionOrBosonEnum fermionicSign,
+	                                  SizeType ns) const
 	{
-		return (helper_.direction(threadId) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ?
-		            dmrgMultiplySystem(result,O1,O2,fermionicSign,ns,threadId) :
-		            dmrgMultiplyEnviron(result,O1,O2,fermionicSign,ns,threadId);
+		PointerForSerializer ptr((ns == 0) ? ns : ns - 1);
+		if (helper_.direction(ptr) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
+			dmrgMultiplySystem(result,O1,O2,fermionicSign,ns);
+			return ptr;
+		} else {
+			dmrgMultiplyEnviron(result,O1,O2,fermionicSign,ns,ptr);
+			return ptr;
+		}
 	}
 
-	void createWithModification(SparseMatrixType& Om,const SparseMatrixType& O,char mod)
+	static void createWithModification(SparseMatrixType& Om,const SparseMatrixType& O,char mod)
 	{
 		if (mod == 'n' || mod == 'N') {
 			Om = O;
@@ -280,17 +283,17 @@ public:
 
 	FieldType bracket(const SparseMatrixType& A,
 	                  ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	                  SizeType threadId)
+	                  const PointerForSerializer& ptr) const
 	{
 		try {
 			const VectorWithOffsetType& src1 =
 			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::LEFT,
-			                                       threadId);
+			                                       ptr);
 			const VectorWithOffsetType& src2 =
 			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::RIGHT,
-			                                       threadId);
+			                                       ptr);
 
-			return bracket_(A,src1,src2,fermionicSign,threadId);
+			return bracket_(A,src1,src2,fermionicSign,ptr);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
 			std::cerr<<"WARNING: CorrelationsSkeleton::bracket(...):";
@@ -302,16 +305,16 @@ public:
 	FieldType bracketRightCorner(const SparseMatrixType& A,
 	                             const SparseMatrixType& B,
 	                             ProgramGlobals::FermionOrBosonEnum fermionSign,
-	                             SizeType threadId)
+	                             const PointerForSerializer& ptr) const
 	{
 		try {
 			const VectorWithOffsetType& src1 =
 			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::LEFT,
-			                                       threadId);
+			                                       ptr);
 			const VectorWithOffsetType& src2 =
 			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::RIGHT,
-			                                       threadId);
-			return bracketRightCorner_(A,B,fermionSign,src1,src2,threadId);
+			                                       ptr);
+			return bracketRightCorner_(A,B,fermionSign,src1,src2,ptr);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
 			std::cerr<<"WARNING: CorrelationsSkeleton::bracketRightCorner(...):";
@@ -324,27 +327,22 @@ public:
 	                             const SparseMatrixType& B,
 	                             const SparseMatrixType& C,
 	                             ProgramGlobals::FermionOrBosonEnum fermionSign,
-	                             SizeType threadId)
+	                             const PointerForSerializer& ptr) const
 	{
 		try {
 			const VectorWithOffsetType& src1 =
 			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::LEFT,
-			                                       threadId);
+			                                       ptr);
 			const VectorWithOffsetType& src2 =
 			        helper_.getVectorFromBracketId(ObserverHelperType::BraketEnum::RIGHT,
-			                                       threadId);
-			return bracketRightCorner_(A,B,C,fermionSign,src1,src2,threadId);
+			                                       ptr);
+			return bracketRightCorner_(A,B,C,fermionSign,src1,src2,ptr);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
 			std::cerr<<"WARNING: CorrelationsSkeleton::bracketRightCornerABC(...):";
 			std::cerr<<" No data seen yet\n";
 			return 0;
 		}
-	}
-
-	void setPointer(SizeType threadID, SizeType location)
-	{
-		helper_.setPointer(threadID, location);
 	}
 
 	const ObserverHelperType& helper() const { return helper_; }
@@ -366,18 +364,17 @@ private:
 	                        const SparseMatrixType& O1,
 	                        const SparseMatrixType& O2,
 	                        ProgramGlobals::FermionOrBosonEnum fOrB, // for O2
-	                        SizeType ns,
-	                        SizeType threadId)
+	                        SizeType ns) const
 	{
 		const int fermionicSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 		SizeType ni=O1.rows();
 
-		helper_.setPointer(threadId,ns);
-		SizeType sprime = helper_.leftRightSuper(threadId).left().size(); //ni*nj;
+		PointerForSerializer ptr(ns);
+		SizeType sprime = helper_.leftRightSuper(ptr).left().size(); //ni*nj;
 		result.resize(sprime,sprime);
 
-		if (helper_.leftRightSuper(threadId).left().size()!=sprime) {
-			std::cerr<<"WARNING: "<<helper_.leftRightSuper(threadId).left().size();
+		if (helper_.leftRightSuper(ptr).left().size()!=sprime) {
+			std::cerr<<"WARNING: "<<helper_.leftRightSuper(ptr).left().size();
 			std::cerr<<"!="<<sprime<<"\n";
 			throw PsimagLite::RuntimeError("problem in dmrgMultiply\n");
 		}
@@ -390,14 +387,14 @@ private:
 		SizeType counter = 0;
 		for (SizeType r=0;r<sprime;r++) {
 			SizeType e,u;
-			pack.unpack(e,u,helper_.leftRightSuper(threadId).left().permutation(r));
-			RealType f = helper_.fermionicSignLeft(threadId)(e,fermionicSign);
+			pack.unpack(e,u,helper_.leftRightSuper(ptr).left().permutation(r));
+			RealType f = helper_.fermionicSignLeft(ptr)(e,fermionicSign);
 			result.setRow(r,counter);
 			for (int k=O1.getRowPtr(e);k<O1.getRowPtr(e+1);k++) {
 				SizeType e2 = O1.getCol(k);
 				for (int k2=O2.getRowPtr(u);k2<O2.getRowPtr(u+1);k2++) {
 					SizeType u2 = O2.getCol(k2);
-					SizeType r2 = helper_.leftRightSuper(threadId).left().
+					SizeType r2 = helper_.leftRightSuper(ptr).left().
 					        permutationInverse(e2 + u2*ni);
 					value[r2] += O1.getValue(k)*O2.getValue(k2)*f;
 					col[r2] = 1;
@@ -421,19 +418,19 @@ private:
 	                         const SparseMatrixType& O2,
 	                         ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	                         SizeType ns,
-	                         SizeType threadId)
+	                         PointerForSerializer& ptr) const
 	{
 		int fs = (fermionicSign == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 		RealType f = fermionSignBasis(fs,
-		                              helper_.leftRightSuper(threadId).left());
+		                              helper_.leftRightSuper(ptr).left());
 		SizeType nj=O2.rows();
 
-		helper_.setPointer(threadId,ns);
-		SizeType eprime = helper_.leftRightSuper(threadId).right().size(); //ni*nj;
+		ptr.setPointer(ns);
+		SizeType eprime = helper_.leftRightSuper(ptr).right().size(); //ni*nj;
 		result.resize(eprime,eprime);
 
-		if (helper_.leftRightSuper(threadId).right().size()!=eprime) {
-			std::cerr<<"WARNING: "<<helper_.leftRightSuper(threadId).right().size();
+		if (helper_.leftRightSuper(ptr).right().size()!=eprime) {
+			std::cerr<<"WARNING: "<<helper_.leftRightSuper(ptr).right().size();
 			std::cerr<<"!="<<eprime<<"\n";
 			throw PsimagLite::RuntimeError("problem in dmrgMultiply\n");
 		}
@@ -448,7 +445,7 @@ private:
 			result.setRow(r,counter);
 			SizeType e = 0;
 			SizeType u = 0;
-			pack.unpack(e,u,helper_.leftRightSuper(threadId).right().permutation(r));
+			pack.unpack(e,u,helper_.leftRightSuper(ptr).right().permutation(r));
 			const RealType sign = (fermionicSign == ProgramGlobals::FermionOrBosonEnum::BOSON)
 			        ? 1 : f*helper_.signsOneSite(e);
 
@@ -457,7 +454,7 @@ private:
 
 				for (int k2=O1.getRowPtr(u);k2<O1.getRowPtr(u+1);k2++) {
 					SizeType u2 = O1.getCol(k2);
-					SizeType r2 = helper_.leftRightSuper(threadId).right().
+					SizeType r2 = helper_.leftRightSuper(ptr).right().
 					        permutationInverse(e2 + u2*nj);
 					assert(r2<eprime);
 					col[r2] = 1;
@@ -506,24 +503,24 @@ private:
 	                   const VectorWithOffsetType& vec1,
 	                   const VectorWithOffsetType& vec2,
 	                   ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	                   SizeType threadId)
+	                   const PointerForSerializer& ptr) const
 	{
-		if (vec1.size()!=helper_.leftRightSuper(threadId).super().size() ||
+		if (vec1.size()!=helper_.leftRightSuper(ptr).super().size() ||
 		        vec1.size()!=vec2.size())
 			err("CorrelationsSkeleton::bracket_(...): Error\n");
 
-		return (helper_.direction(threadId) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
-		        ? bracketSystem_(A,vec1,vec2,threadId)
-		        : bracketEnviron_(A,vec1,vec2,fermionicSign,threadId);
+		return (helper_.direction(ptr) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		        ? bracketSystem_(A,vec1,vec2,ptr)
+		        : bracketEnviron_(A,vec1,vec2,fermionicSign,ptr);
 	}
 
 	FieldType bracketSystem_(const SparseMatrixType& A,
 	                         const VectorWithOffsetType& vec1,
 	                         const VectorWithOffsetType& vec2,
-	                         SizeType threadId)
+	                         const PointerForSerializer& ptr) const
 	{
 		FieldType sum=0;
-		PackIndicesType pack(helper_.leftRightSuper(threadId).left().size());
+		PackIndicesType pack(helper_.leftRightSuper(ptr).left().size());
 		for (SizeType x=0;x<vec1.sectors();x++) {
 			SizeType sector = vec1.sector(x);
 			SizeType offset = vec1.offset(sector);
@@ -531,11 +528,11 @@ private:
 			for (SizeType t=offset;t<total;t++) {
 				SizeType eta,r;
 
-				pack.unpack(r,eta,helper_.leftRightSuper(threadId).super().
+				pack.unpack(r,eta,helper_.leftRightSuper(ptr).super().
 				            permutation(t));
 				for (int k=A.getRowPtr(r);k<A.getRowPtr(r+1);k++) {
 					SizeType r2 = A.getCol(k);
-					SizeType t2 = helper_.leftRightSuper(threadId).super().
+					SizeType t2 = helper_.leftRightSuper(ptr).super().
 					        permutationInverse(r2+eta*A.cols());
 					if (t2<offset || t2>=total) continue;
 					sum += A.getValue(k)*PsimagLite::conj(vec1.slowAccess(t))*
@@ -551,16 +548,16 @@ private:
 	                          const VectorWithOffsetType& vec1,
 	                          const VectorWithOffsetType& vec2,
 	                          ProgramGlobals::FermionOrBosonEnum fOrB,
-	                          SizeType threadId)
+	                          const PointerForSerializer& ptr) const
 	{
 		const int fermionicSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 
 		RealType sign = fermionSignBasis(fermionicSign,
-		                                 helper_.leftRightSuper(threadId).left());
+		                                 helper_.leftRightSuper(ptr).left());
 
 		FieldType sum=0;
-		PackIndicesType pack(helper_.leftRightSuper(threadId).left().size());
-		SizeType leftSize = helper_.leftRightSuper(threadId).left().size();
+		PackIndicesType pack(helper_.leftRightSuper(ptr).left().size());
+		SizeType leftSize = helper_.leftRightSuper(ptr).left().size();
 
 		for (SizeType x=0;x<vec1.sectors();x++) {
 			SizeType sector = vec1.sector(x);
@@ -569,13 +566,13 @@ private:
 			for (SizeType t=offset;t<total;t++) {
 				SizeType eta,r;
 
-				pack.unpack(r,eta,helper_.leftRightSuper(threadId).super().
+				pack.unpack(r,eta,helper_.leftRightSuper(ptr).super().
 				            permutation(t));
 				if (eta>=A.rows()) throw PsimagLite::RuntimeError("Error\n");
 
 				for (int k=A.getRowPtr(eta);k<A.getRowPtr(eta+1);k++) {
 					SizeType eta2 = A.getCol(k);
-					SizeType t2 = helper_.leftRightSuper(threadId).super().
+					SizeType t2 = helper_.leftRightSuper(ptr).super().
 					        permutationInverse(r+eta2*leftSize);
 					if (t2<offset || t2>=total) continue;
 					sum += A.getValue(k)*PsimagLite::conj(vec1.slowAccess(t))*
@@ -592,20 +589,20 @@ private:
 	                              ProgramGlobals::FermionOrBosonEnum fermionSign,
 	                              const VectorWithOffsetType& vec1,
 	                              const VectorWithOffsetType& vec2,
-	                              SizeType threadId)
+	                              const PointerForSerializer& ptr) const
 	{
-		return (helper_.direction(threadId) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
-		        ? brRghtCrnrSystem_(A,B,fermionSign,vec1,vec2,threadId)
-		        : brLftCrnrEnviron_(A,B,fermionSign,vec1,vec2,threadId);
+		return (helper_.direction(ptr) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		        ? brRghtCrnrSystem_(A,B,fermionSign,vec1,vec2,ptr)
+		        : brLftCrnrEnviron_(A,B,fermionSign,vec1,vec2,ptr);
 	}
 
-	bool superOddElectrons(SizeType t, SizeType threadId) const
+	bool superOddElectrons(SizeType t, const PointerForSerializer& ptr) const
 	{
-		// return helper_.leftRightSuper(threadId).super().electrons(t);
-		SizeType tmp = helper_.leftRightSuper(threadId).super().permutation(t);
-		div_t mydiv = PsimagLite::div(tmp,helper_.leftRightSuper(threadId).left().size());
-		return helper_.leftRightSuper(threadId).right().signs()[mydiv.quot] ^
-		        helper_.leftRightSuper(threadId).left().signs()[mydiv.rem];
+		// return helper_.leftRightSuper(ptr).super().electrons(t);
+		SizeType tmp = helper_.leftRightSuper(ptr).super().permutation(t);
+		div_t mydiv = PsimagLite::div(tmp,helper_.leftRightSuper(ptr).left().size());
+		return helper_.leftRightSuper(ptr).right().signs()[mydiv.quot] ^
+		        helper_.leftRightSuper(ptr).left().signs()[mydiv.rem];
 	}
 
 	FieldType brRghtCrnrSystem_(const SparseMatrixType& Acrs,
@@ -613,22 +610,22 @@ private:
 	                            ProgramGlobals::FermionOrBosonEnum fermionSign,
 	                            const VectorWithOffsetType& vec1,
 	                            const VectorWithOffsetType& vec2,
-	                            SizeType threadId)
+	                            const PointerForSerializer& ptr) const
 	{
 		FieldType sum = 0;
-		SizeType leftSize = helper_.leftRightSuper(threadId).left().size();
-		SizeType ni = helper_.leftRightSuper(threadId).left().size()/Bcrs.rows();
+		SizeType leftSize = helper_.leftRightSuper(ptr).left().size();
+		SizeType ni = helper_.leftRightSuper(ptr).left().size()/Bcrs.rows();
 
 		// some sanity checks:
 		if (vec1.size() != vec2.size() ||
-		        vec1.size() != helper_.leftRightSuper(threadId).super().size())
+		        vec1.size() != helper_.leftRightSuper(ptr).super().size())
 			err("Observe::brRghtCrnrSystem_(...)\n");
 
 		if (ni != Acrs.rows())
 			err("Observe::brRghtCrnrSystem_(...)\n");
 
 		// ok, we're ready for the main course:
-		PackIndicesType pack1(helper_.leftRightSuper(threadId).left().size());
+		PackIndicesType pack1(helper_.leftRightSuper(ptr).left().size());
 		PackIndicesType pack2(ni);
 		for (SizeType x=0;x<vec1.sectors();x++) {
 			SizeType sector = vec1.sector(x);
@@ -637,25 +634,25 @@ private:
 			for (SizeType t=offset;t<total;t++) {
 				SizeType eta,r;
 
-				pack1.unpack(r,eta,helper_.leftRightSuper(threadId).super().
+				pack1.unpack(r,eta,helper_.leftRightSuper(ptr).super().
 				             permutation(t));
 				SizeType r0,r1;
-				pack2.unpack(r0,r1,helper_.leftRightSuper(threadId).left().
+				pack2.unpack(r0,r1,helper_.leftRightSuper(ptr).left().
 				             permutation(r));
-				bool odd = superOddElectrons(t,threadId);
-				odd ^= helper_.leftRightSuper(threadId).right().signs()[eta];
+				bool odd = superOddElectrons(t,ptr);
+				odd ^= helper_.leftRightSuper(ptr).right().signs()[eta];
 				const RealType sign = (odd && fermionSign ==
 				                       ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1.0
-				                                                                  : 1.0;
+				                                                                    : 1.0;
 
 				for (int k=Acrs.getRowPtr(r0);k<Acrs.getRowPtr(r0+1);k++) {
 					SizeType r0prime = Acrs.getCol(k);
 					for (int k2 = Bcrs.getRowPtr(eta);
 					     k2<Bcrs.getRowPtr(eta+1);k2++) {
 						SizeType eta2 = Bcrs.getCol(k2);
-						SizeType rprime = helper_.leftRightSuper(threadId).left().
+						SizeType rprime = helper_.leftRightSuper(ptr).left().
 						        permutationInverse(r0prime+r1*ni);
-						SizeType t2 = helper_.leftRightSuper(threadId).super().
+						SizeType t2 = helper_.leftRightSuper(ptr).super().
 						        permutationInverse(rprime+eta2*leftSize);
 						if (t2<offset || t2>=total) continue;
 						sum += Acrs.getValue(k)*Bcrs.getValue(k2)*
@@ -674,24 +671,24 @@ private:
 	                            ProgramGlobals::FermionOrBosonEnum fOrB,
 	                            const VectorWithOffsetType& vec1,
 	                            const VectorWithOffsetType& vec2,
-	                            SizeType threadId)
+	                            const PointerForSerializer& ptr) const
 	{
 		const int fermionSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 		int signRight = fermionSignBasis(fermionSign,
-		                                 helper_.leftRightSuper(threadId).right());
+		                                 helper_.leftRightSuper(ptr).right());
 		FieldType sum = 0;
 		SizeType ni = Bcrs.rows();
-		SizeType leftSize = helper_.leftRightSuper(threadId).left().size();
+		SizeType leftSize = helper_.leftRightSuper(ptr).left().size();
 
 		// some sanity checks:
 		if (vec1.size() != vec2.size() ||
-		        vec1.size()!=helper_.leftRightSuper(threadId).super().size())
+		        vec1.size()!=helper_.leftRightSuper(ptr).super().size())
 			err("Observe::brLftCrnrEnviron_(...)\n");
-		if (helper_.leftRightSuper(threadId).right().size()/Bcrs.rows() != Acrs.rows())
+		if (helper_.leftRightSuper(ptr).right().size()/Bcrs.rows() != Acrs.rows())
 			err("Observe::brLftCrnrEnviron_(...)\n");
 
 		// ok, we're ready for the main course:
-		PackIndicesType pack1(helper_.leftRightSuper(threadId).left().size());
+		PackIndicesType pack1(helper_.leftRightSuper(ptr).left().size());
 		PackIndicesType pack2(ni);
 
 		for (SizeType x=0;x<vec1.sectors();x++) {
@@ -701,10 +698,10 @@ private:
 			for (SizeType t=offset;t<total;t++) {
 				SizeType eta,r;
 
-				pack1.unpack(eta,r,helper_.leftRightSuper(threadId).super().
+				pack1.unpack(eta,r,helper_.leftRightSuper(ptr).super().
 				             permutation(t));
 				SizeType r0,r1;
-				pack2.unpack(r0,r1,helper_.leftRightSuper(threadId).right().permutation(r));
+				pack2.unpack(r0,r1,helper_.leftRightSuper(ptr).right().permutation(r));
 				const RealType sign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON)
 				        ? 1 : helper_.signsOneSite(r0) * signRight;
 
@@ -713,9 +710,9 @@ private:
 					for (int k2 = Bcrs.getRowPtr(eta);
 					     k2<Bcrs.getRowPtr(eta+1);k2++) {
 						SizeType eta2 = Bcrs.getCol(k2);
-						SizeType rprime = helper_.leftRightSuper(threadId).right().
+						SizeType rprime = helper_.leftRightSuper(ptr).right().
 						        permutationInverse(r0+r1prime*ni);
-						SizeType t2 = helper_.leftRightSuper(threadId).super().
+						SizeType t2 = helper_.leftRightSuper(ptr).super().
 						        permutationInverse(eta2+rprime*leftSize);
 						if (t2<offset || t2>=total) continue;
 						sum += PsimagLite::conj(Acrs.getValue(k))*Bcrs.getValue(k2)*
@@ -735,9 +732,9 @@ private:
 	                              ProgramGlobals::FermionOrBosonEnum fOrB,
 	                              const VectorWithOffsetType& vec1,
 	                              const VectorWithOffsetType& vec2,
-	                              SizeType threadId)
+	                              const PointerForSerializer& ptr) const
 	{
-		if (helper_.direction(threadId) != ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		if (helper_.direction(ptr) != ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			return 0;
 
 		const int fermionSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
@@ -746,20 +743,20 @@ private:
 		SparseMatrixType A2crs(A2);
 		SparseMatrixType Bcrs(B);
 		FieldType sum=0;
-		SizeType ni = helper_.leftRightSuper(threadId).left().size()/Bcrs.rows();
-		SizeType leftSize = helper_.leftRightSuper(threadId).left().size();
+		SizeType ni = helper_.leftRightSuper(ptr).left().size()/Bcrs.rows();
+		SizeType leftSize = helper_.leftRightSuper(ptr).left().size();
 
 		// some sanity checks:
 		assert(vec1.size()==vec2.size());
 
 		if (vec1.size()==0) return 0;
 
-		assert(vec1.size()==helper_.leftRightSuper(threadId).super().size());
+		assert(vec1.size()==helper_.leftRightSuper(ptr).super().size());
 		assert(ni==A1crs.rows());
 		assert(Bcrs.rows()==A2crs.rows());
 
 		// ok, we're ready for the main course:
-		PackIndicesType pack1(helper_.leftRightSuper(threadId).left().size());
+		PackIndicesType pack1(helper_.leftRightSuper(ptr).left().size());
 		PackIndicesType pack2(ni);
 
 		for (SizeType x=0;x<vec1.sectors();x++) {
@@ -771,12 +768,12 @@ private:
 
 				pack1.unpack(r,
 				             eta,
-				             helper_.leftRightSuper(threadId).super().permutation(t));
+				             helper_.leftRightSuper(ptr).super().permutation(t));
 				SizeType r0,r1;
 				pack2.unpack(r0,
 				             r1,
-				             helper_.leftRightSuper(threadId).left().permutation(r));
-				RealType sign = helper_.leftRightSuper(threadId).right().
+				             helper_.leftRightSuper(ptr).left().permutation(r));
+				RealType sign = helper_.leftRightSuper(ptr).right().
 				        fermionicSign(r1,fermionSign);
 
 				for (int k1=A1crs.getRowPtr(r0);k1<A1crs.getRowPtr(r0+1);k1++) {
@@ -785,9 +782,9 @@ private:
 						SizeType r1prime = A2crs.getCol(k2);
 						for (int k3 = Bcrs.getRowPtr(eta);k3<Bcrs.getRowPtr(eta+1);k3++) {
 							SizeType eta2 = Bcrs.getCol(k3);
-							SizeType rprime = helper_.leftRightSuper(threadId).left().
+							SizeType rprime = helper_.leftRightSuper(ptr).left().
 							        permutationInverse(r0prime+r1prime*ni);
-							SizeType t2 = helper_.leftRightSuper(threadId).super().
+							SizeType t2 = helper_.leftRightSuper(ptr).super().
 							        permutationInverse(rprime+eta2*leftSize);
 							if (t2<offset || t2>=total) continue;
 							sum +=  A1crs.getValue(k1)*A2crs.getValue(k2)*

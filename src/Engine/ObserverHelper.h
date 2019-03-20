@@ -86,6 +86,28 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffset.h" // to include norm
 
 namespace Dmrg {
+
+// temporary class only <<--------- FIXME DELETE
+class PointerForSerializer {
+
+public:
+
+	PointerForSerializer(SizeType n)
+	    : pos_(n)
+	{}
+
+	void setPointer(SizeType pos)
+	{
+		pos_ = pos;
+	}
+
+	SizeType get() const { return  pos_; }
+
+private:
+
+	SizeType pos_;
+};
+
 template<typename IoInputType_,
          typename MatrixType_,
          typename VectorType_,
@@ -111,6 +133,7 @@ public:
 	typedef typename DmrgSerializerType::FermionSignType FermionSignType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef PsimagLite::Vector<short int>::Type VectorShortIntType;
+	typedef PointerForSerializer PointerForSerializerType;
 
 	enum class BraketEnum {LEFT, RIGHT};
 
@@ -120,15 +143,14 @@ public:
 	               SizeType start,
 	               SizeType nf,
 	               SizeType trail,
-	               SizeType numberOfPthreads,
 	               bool withLegacyBugs)
 	    : io_(io),
-	      currentPos_(numberOfPthreads),
 	      withLegacyBugs_(withLegacyBugs),
 	      bracket_(2,0),
 	      noMoreData_(false),
 	      dSsize_(0),
-	      timeSsize_(0)
+	      timeSsize_(0),
+	      numberOfSites_(0)
 	{
 		typename BasisWithOperatorsType::VectorBoolType odds;
 		io_.read(odds, "OddElectronsOneSite");
@@ -159,19 +181,9 @@ public:
 		dSsize_ = timeSsize_ = 0;
 	}
 
+	const SizeType& numberOfSites() const { return numberOfSites_; }
+
 	bool endOfData() const { return noMoreData_; }
-
-	void setPointer(SizeType threadId, SizeType pos)
-	{
-		assert(threadId<currentPos_.size());
-		currentPos_[threadId]=pos;
-	}
-
-	SizeType getPointer(SizeType threadId) const
-	{
-		assert(threadId<currentPos_.size());
-		return currentPos_[threadId];
-	}
 
 	void setBrakets(SizeType left,SizeType right)
 	{
@@ -179,22 +191,24 @@ public:
 		bracket_[1] = right;
 	}
 
-	void transform(SparseMatrixType& ret,const SparseMatrixType& O2,size_t threadId) const
+	void transform(SparseMatrixType& ret,
+	               const SparseMatrixType& O2,
+	               const PointerForSerializerType& ind) const
 	{
-		assert(checkPos(threadId));
-		return dSerializerV_[currentPos_[threadId]]->transform(ret,O2);
+		assert(ind.get() < dSerializerV_.size());
+		return dSerializerV_[ind.get()]->transform(ret,O2);
 	}
 
-	SizeType cols(SizeType threadId) const
+	SizeType cols(const PointerForSerializerType& ind) const
 	{
-		assert(checkPos(threadId));
-		return dSerializerV_[currentPos_[threadId]]->cols();
+		assert(ind.get() < dSerializerV_.size());
+		return dSerializerV_[ind.get()]->cols();
 	}
 
-	SizeType rows(SizeType threadId) const
+	SizeType rows(const PointerForSerializerType& ind) const
 	{
-		assert(checkPos(threadId));
-		return dSerializerV_[currentPos_[threadId]]->rows();
+		assert(ind.get() < dSerializerV_.size());
+		return dSerializerV_[ind.get()]->rows();
 	}
 
 	short int signsOneSite(SizeType site) const
@@ -203,49 +217,49 @@ public:
 		return signsOneSite_[site];
 	}
 
-	const FermionSignType& fermionicSignLeft(SizeType threadId) const
+	const FermionSignType& fermionicSignLeft(const PointerForSerializerType& ind) const
 	{
-		assert(checkPos(threadId));
-		return dSerializerV_[currentPos_[threadId]]->fermionicSignLeft();
+		assert(ind.get() < dSerializerV_.size());
+		return dSerializerV_[ind.get()]->fermionicSignLeft();
 	}
 
-	const FermionSignType& fermionicSignRight(SizeType threadId) const
+	const FermionSignType& fermionicSignRight(const PointerForSerializerType& ind) const
 	{
-		assert(checkPos(threadId));
-		return dSerializerV_[currentPos_[threadId]]->fermionicSignRight();
+		assert(ind.get() < dSerializerV_.size());
+		return dSerializerV_[ind.get()]->fermionicSignRight();
 	}
 
-	const LeftRightSuperType& leftRightSuper(SizeType threadId) const
+	const LeftRightSuperType& leftRightSuper(const PointerForSerializerType& ind) const
 	{
-		return dSerializerV_[currentPos_[threadId]]->leftRightSuper();
+		return dSerializerV_[ind.get()]->leftRightSuper();
 	}
 
-	ProgramGlobals::DirectionEnum direction(SizeType threadId) const
+	ProgramGlobals::DirectionEnum direction(const PointerForSerializerType& ind) const
 	{
-		assert(checkPos(threadId));
-		return dSerializerV_[currentPos_[threadId]]->direction();
+		assert(ind.get() < dSerializerV_.size());
+		return dSerializerV_[ind.get()]->direction();
 	}
 
-	const VectorWithOffsetType& wavefunction(SizeType threadId) const
+	const VectorWithOffsetType& wavefunction(const PointerForSerializerType& ind) const
 	{
-		assert(checkPos(threadId));
-		return dSerializerV_[currentPos_[threadId]]->wavefunction();
+		assert(ind.get() < dSerializerV_.size());
+		return dSerializerV_[ind.get()]->wavefunction();
 	}
 
-	RealType time(SizeType threadId) const
+	RealType time(const PointerForSerializerType& index) const
 	{
 		if (timeSsize_ == 0) return 0.0;
-		assert(checkPos(threadId));
-		SizeType ind = currentPos_[threadId];
+		assert(index.get() < dSerializerV_.size());
+		SizeType ind = index.get();
 		assert(ind < timeSerializerV_.size());
 		assert(timeSerializerV_[ind]);
 		return timeSerializerV_[ind]->time();
 	}
 
-	SizeType site(SizeType threadId) const
+	SizeType site(const PointerForSerializerType& index) const
 	{
-		assert(checkPos(threadId));
-		SizeType ind = currentPos_[threadId];
+		assert(index.get() < dSerializerV_.size());
+		SizeType ind = index.get();
 
 		if (timeSsize_ == 0) {
 			assert(ind < dSerializerV_.size());
@@ -264,25 +278,25 @@ public:
 	}
 
 	const VectorWithOffsetType& getVectorFromBracketId(const BraketEnum leftOrRight,
-	                                                   SizeType threadId) const
+	                                                   const PointerForSerializerType& index) const
 	{
 		const SizeType ind = toInteger(leftOrRight);
 		assert(ind < bracket_.size());
 		SizeType braketId = bracket_[ind];
 		// braketId == 0 means GS
 		if (braketId == 0)
-			return wavefunction(threadId);
+			return wavefunction(index);
 
 		// braketId > 0 then it means the "time vector" number braketId - 1
 		assert(braketId > 0);
-		return timeVector(braketId - 1, threadId);
+		return timeVector(braketId - 1, index);
 	}
 
 	const VectorWithOffsetType& timeVector(SizeType braketId,
-	                                       SizeType threadId) const
+	                                       const PointerForSerializerType& index) const
 	{
-		assert(checkPos(threadId));
-		SizeType ind = currentPos_[threadId];
+		assert(index.get() < dSerializerV_.size());
+		SizeType ind = index.get();
 		assert(ind < timeSerializerV_.size());
 		assert(timeSerializerV_[ind]);
 		return timeSerializerV_[ind]->vector(braketId);
@@ -330,6 +344,11 @@ private:
 			                                                         prefix + "/" + ttos(i),
 			                                                         false,
 			                                                         true);
+
+
+			SizeType tmp = dSerializer->leftRightSuper().sites();
+			if (tmp > 0 && numberOfSites_ == 0) numberOfSites_ = tmp;
+
 			if (saveOrNot == SaveEnum::YES)
 				dSerializerV_.push_back(dSerializer);
 			else
@@ -353,33 +372,34 @@ private:
 		return (dSsize_ > 0);
 	}
 
-	bool checkPos(SizeType threadId) const
+	bool checkPos(const PointerForSerializerType& ind) const
 	{
-		if (threadId>=currentPos_.size())
-			return checkFailedThread(threadId);
+//		if (threadId>=currentPos_.size())
+//			return checkFailedThread(threadId);
 
-		SizeType pos = currentPos_[threadId];
+//		SizeType pos = ind.get();
 
-		if (pos>=dSsize_)
-			return checkFailed1(threadId,pos);
+//		if (pos>=dSsize_)
+//			return checkFailed1(threadId,pos);
 
-		bool hasTimeE = (timeSsize_>0);
+//		bool hasTimeE = (timeSsize_>0);
 
-		if (!hasTimeE) return true;
-		if (pos>=timeSsize_)
-			return checkFailed2(threadId,pos);
+//		if (!hasTimeE) return true;
+//		if (pos>=timeSsize_)
+//			return checkFailed2(threadId,pos);
 		return true;
 	}
 
-	bool checkFailedThread(SizeType threadId) const
+	bool checkFailedThread(const PointerForSerializerType& ind) const
 	{
-		PsimagLite::String str(__FILE__);
-		str += " " + ttos(__LINE__) + "\n";
-		str += " thread=" + ttos(threadId);
-		str += " >= currentPos.size=" + ttos(currentPos_.size());
-		str += "\n";
-		std::cerr<<str;
-		return false;
+//		PsimagLite::String str(__FILE__);
+//		str += " " + ttos(__LINE__) + "\n";
+//		str += " thread=" + ttos(threadId);
+//		str += " >= currentPos.size=" + ttos(currentPos_.size());
+//		str += "\n";
+//		std::cerr<<str;
+//		return false;
+		return true;
 	}
 
 	bool checkFailed1(SizeType threadId,SizeType pos) const
@@ -407,13 +427,13 @@ private:
 	IoInputType& io_;
 	typename PsimagLite::Vector<DmrgSerializerType*>::Type dSerializerV_;
 	typename PsimagLite::Vector<TimeSerializerType*>::Type timeSerializerV_;
-	VectorSizeType currentPos_; // it's a vector: one per pthread
 	bool withLegacyBugs_;
 	VectorSizeType bracket_;
 	bool noMoreData_;
 	SizeType dSsize_;
 	SizeType timeSsize_;
 	VectorShortIntType signsOneSite_;
+	SizeType numberOfSites_;
 };  //ObserverHelper
 } // namespace Dmrg
 
