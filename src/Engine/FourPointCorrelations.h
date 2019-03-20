@@ -106,7 +106,7 @@ public:
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
 	typedef typename CorrelationsSkeletonType::BraketType BraketType;
 
-	FourPointCorrelations(CorrelationsSkeletonType& skeleton) : skeleton_(skeleton)
+	FourPointCorrelations(const CorrelationsSkeletonType& skeleton) : skeleton_(skeleton)
 	{}
 
 	//! Four-point: these are expensive and uncached!!!
@@ -430,7 +430,7 @@ private:
 		err("AnyPoint: Point must be strictly ordered\n");
 	}
 
-	CorrelationsSkeletonType& skeleton_; // <-- NB: not the owner
+	const CorrelationsSkeletonType& skeleton_;
 };  //class FourPointCorrelations
 } // namespace Dmrg
 

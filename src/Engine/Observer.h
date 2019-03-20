@@ -107,10 +107,7 @@ public:
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelType_::ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelType_::ParametersType ParametersType;
-	typedef ObserverHelper<IoInputType,
-	MatrixType,
-	VectorType,
-	VectorWithOffsetType_,
+	typedef ObserverHelper<IoInputType, MatrixType, VectorType, VectorWithOffsetType_,
 	LeftRightSuperType> ObserverHelperType;
 	typedef CorrelationsSkeleton<ObserverHelperType,ModelType_> CorrelationsSkeletonType;
 	typedef OnePointCorrelations<ObserverHelperType> OnePointCorrelationsType;
@@ -150,8 +147,7 @@ public:
 		return (!es && helper_.site(ptr) == 1);
 	}
 
-	void twoPoint(MatrixType& storage,
-	              const BraketType& braket)
+	void twoPoint(MatrixType& storage, const BraketType& braket) const
 	{
 		assert(braket.points() == 2);
 
@@ -211,7 +207,7 @@ public:
 	              const SparseMatrixType& O2,
 	              ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	              PsimagLite::String bra,
-	              PsimagLite::String ket)
+	              PsimagLite::String ket) const
 	{
 		twopoint_(m, O1, O2, fermionicSign, bra, ket);
 	}
@@ -483,7 +479,7 @@ public:
 	                   const typename ApplyOperatorType::OperatorType& A,
 	                   typename ApplyOperatorType::BorderEnum corner,
 	                   PsimagLite::String bra,
-	                   PsimagLite::String ket)
+	                   PsimagLite::String ket) const
 	{
 		return onepoint_.template operator()<ApplyOperatorType>(site, A, corner, bra, ket);
 	}
@@ -491,11 +487,10 @@ public:
 	template<typename ApplyOperatorType>
 	FieldType onePointHookForZero(SizeType site,
 	                              const typename ApplyOperatorType::OperatorType& A,
-	                              typename ApplyOperatorType::BorderEnum corner,
 	                              PsimagLite::String bra,
-	                              PsimagLite::String ket)
+	                              PsimagLite::String ket) const
 	{
-		return onepoint_.template hookForZero<ApplyOperatorType>(site, A, corner, bra, ket);
+		return onepoint_.template hookForZero<ApplyOperatorType>(site, A, bra, ket);
 	}
 
 	template<typename VectorLikeType>
@@ -508,18 +503,17 @@ public:
 	                  PsimagLite::String bra,
                       PsimagLite::String ket)
 	{
-		SizeType nthreads = 1;
-		MultiPointCorrelationsType multi(nthreads, helper_, skeleton_);
+		MultiPointCorrelationsType multi(skeleton_);
 		multi(result, O, rows, cols, bra, ket);
 	}
 
 private:
 
-	ObserverHelperType helper_;
-	OnePointCorrelationsType onepoint_;
-	CorrelationsSkeletonType skeleton_;
-	TwoPointCorrelationsType twopoint_;
-	FourPointCorrelationsType fourpoint_;
+	const ObserverHelperType helper_;
+	const OnePointCorrelationsType onepoint_;
+	const CorrelationsSkeletonType skeleton_;
+	const TwoPointCorrelationsType twopoint_;
+	const FourPointCorrelationsType fourpoint_;
 };  //class Observer
 } // namespace Dmrg
 

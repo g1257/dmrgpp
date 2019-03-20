@@ -100,10 +100,7 @@ class OnePointCorrelations {
 
 public:
 
-	OnePointCorrelations(ObserverHelperType& helper,
-	                     bool verbose=false)
-	    : helper_(helper),
-	      verbose_(verbose)
+	OnePointCorrelations(const ObserverHelperType& helper) : helper_(helper)
 	{}
 
 	template<typename ApplyOperatorType>
@@ -111,7 +108,7 @@ public:
 	                     const typename ApplyOperatorType::OperatorType& A,
 	                     typename ApplyOperatorType::BorderEnum corner,
 	                     PsimagLite::String bra,
-	                     PsimagLite::String ket)
+	                     PsimagLite::String ket) const
 	{
 		typename ObserverHelperType::PointerForSerializerType ptr(site);
 		try {
@@ -129,9 +126,8 @@ public:
 	template<typename ApplyOperatorType>
 	FieldType hookForZero(SizeType site,
 	                      const typename ApplyOperatorType::OperatorType& A,
-	                      typename ApplyOperatorType::BorderEnum corner,
 	                      PsimagLite::String bra,
-	                      PsimagLite::String ket)
+	                      PsimagLite::String ket) const
 	{
 		SizeType pnter=site;
 		typename ObserverHelperType::PointerForSerializerType ptr(pnter);
@@ -143,7 +139,6 @@ public:
 			                                                      A,
 			                                                      src1,
 			                                                      src2,
-			                                                      corner,
 			                                                      ptr);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
@@ -160,7 +155,7 @@ private:
 	                           const VectorWithOffsetType& src1,
 	                           const VectorWithOffsetType& src2,
 	                           typename ApplyOperatorType::BorderEnum corner,
-	                           typename ObserverHelperType::PointerForSerializerType ptr)
+	                           typename ObserverHelperType::PointerForSerializerType ptr) const
 	{
 		if (src1.sectors() == 0 || src2.sectors() == 0) return 0.0;
 		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(ptr),
@@ -193,8 +188,8 @@ private:
 	                                      const typename ApplyOperatorType::OperatorType& A,
 	                                      const VectorWithOffsetType& src1,
 	                                      const VectorWithOffsetType& src2,
-	                                      bool, //= false
 	                                      typename ObserverHelperType::PointerForSerializerType ptr)
+	const
 	{
 
 		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(ptr),
@@ -216,15 +211,14 @@ private:
 				if (i!=j) continue;
 				SizeType offset = v1.offset(i);
 				for (SizeType k=0;k<v1.effectiveSize(i);k++)
-					sum+= v1.slowAccess(k+offset)*PsimagLite::conj(v2.slowAccess(k+offset));
+					sum += v1.slowAccess(k+offset)*PsimagLite::conj(v2.slowAccess(k+offset));
 			}
 		}
+
 		return sum;
 	}
 
-	ObserverHelperType& helper_;
-	bool verbose_;
-
+	const ObserverHelperType& helper_;
 };  //class OnePointCorrelations
 } // namespace Dmrg
 

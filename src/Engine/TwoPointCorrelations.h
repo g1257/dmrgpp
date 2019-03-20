@@ -109,7 +109,7 @@ public:
 	typedef Parallel2PointCorrelations<ThisType> Parallel2PointCorrelationsType;
 	typedef typename Parallel2PointCorrelationsType::PairType PairType;
 
-	TwoPointCorrelations(CorrelationsSkeletonType& skeleton) : skeleton_(skeleton)
+	TwoPointCorrelations(const CorrelationsSkeletonType& skeleton) : skeleton_(skeleton)
 	{}
 
 	void operator()(PsimagLite::Matrix<FieldType>& w,
@@ -117,7 +117,7 @@ public:
 	                const SparseMatrixType& O2,
 	                ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	                PsimagLite::String bra,
-	                PsimagLite::String ket)
+	                PsimagLite::String ket) const
 	{
 		SizeType rows = w.n_row();
 		SizeType cols = w.n_col();
@@ -155,7 +155,7 @@ public:
 	                          const SparseMatrixType& O2,
 	                          ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	                          PsimagLite::String bra,
-                              PsimagLite::String ket)
+                              PsimagLite::String ket) const
 	{
 		FieldType c = 0;
 		if (i==j) {
@@ -176,7 +176,7 @@ private:
 	                                  const SparseMatrixType& O2,
 	                                  ProgramGlobals::FermionOrBosonEnum,
 	                                  PsimagLite::String bra,
-		                              PsimagLite::String ket)
+		                              PsimagLite::String ket) const
 	{
 		SizeType n = O1.rows();
 		SparseMatrixType O1new=identity(n);
@@ -205,7 +205,7 @@ private:
 	                           const SparseMatrixType& O2,
 	                           ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	                           PsimagLite::String bra,
-	                           PsimagLite::String ket)
+	                           PsimagLite::String ket) const
 	{
 
 		if (i >= j)
@@ -254,14 +254,14 @@ private:
 		                         ket);
 	}
 
-	SparseMatrixType identity(SizeType n)
+	static SparseMatrixType identity(SizeType n)
 	{
-		SparseMatrixType ret(n,n);
+		SparseMatrixType ret(n, n);
 		ret.makeDiagonal(n,1.0);
 		return ret;
 	}
 
-	CorrelationsSkeletonType& skeleton_;
+	const CorrelationsSkeletonType& skeleton_;
 };  //class TwoPointCorrelations
 } // namespace Dmrg
 

@@ -416,11 +416,8 @@ private:
 		bool atCorner = observe_.isAtCorner(numberOfSites_, ptr);
 
 		if (site == 1 && !atCorner) {
-			const typename ApplyOperatorType::BorderEnum borderNo =
-			        ApplyOperatorType::BorderEnum::BORDER_NO;
 			FieldType tmp1 = observe_.template onePointHookForZero<ApplyOperatorType>(ptr.get(),
 			                                                                          opA,
-			                                                                          borderNo,
 			                                                                          bra,
 			                                                                          ket);
 			std::cout<<"0 "<<tmp1<<" "<<observe_.helper().time(ptr)<<"\n";

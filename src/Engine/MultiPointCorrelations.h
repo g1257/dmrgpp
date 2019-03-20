@@ -87,13 +87,11 @@ namespace Dmrg {
 
 template<typename CorrelationsSkeletonType>
 class MultiPointCorrelations {
-	typedef typename CorrelationsSkeletonType::ObserverHelperType
-	ObserverHelperType;
-	typedef typename ObserverHelperType::VectorType VectorType ;
-	typedef typename ObserverHelperType::VectorWithOffsetType
-	VectorWithOffsetType;
-	typedef typename ObserverHelperType::BasisWithOperatorsType
-	BasisWithOperatorsType ;
+
+	typedef typename CorrelationsSkeletonType::ObserverHelperType ObserverHelperType;
+	typedef typename ObserverHelperType::VectorType VectorType;
+	typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;
+	typedef typename ObserverHelperType::BasisWithOperatorsType BasisWithOperatorsType ;
 	typedef typename VectorType::value_type FieldType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
 	typedef MultiPointCorrelations<CorrelationsSkeletonType> ThisType;
@@ -103,14 +101,7 @@ public:
 
 	typedef typename ObserverHelperType::MatrixType MatrixType;
 
-	MultiPointCorrelations(SizeType nthreads,
-	                       ObserverHelperType& helper,
-	                       CorrelationsSkeletonType& skeleton,
-	                       bool verbose=false)
-	    : nthreads_(nthreads),
-	      helper_(helper),
-	      skeleton_(skeleton),
-	      verbose_(verbose)
+	MultiPointCorrelations(const CorrelationsSkeletonType& skeleton) : skeleton_(skeleton)
 	{}
 
 	template<typename VectorLikeType>
@@ -174,14 +165,11 @@ private:
 		O2gt.clear();
 		FieldType ret = skeleton_.bracket(O2g,fermionicSign, ptr, bra, ket);
 		ptr.setPointer(ns - 1);
-		helper_.transform(O2gt, O2g, ptr);
+		skeleton_.helper().transform(O2gt, O2g, ptr);
 		return ret;
 	}
 
-	SizeType nthreads_;
-	ObserverHelperType& helper_;
-	CorrelationsSkeletonType& skeleton_;
-	bool verbose_;
+	const CorrelationsSkeletonType& skeleton_;
 };  //class MultiPointCorrelations
 } // namespace Dmrg
 

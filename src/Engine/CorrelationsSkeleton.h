@@ -111,7 +111,7 @@ public:
 
 	enum class GrowDirection {RIGHT, LEFT};
 
-	CorrelationsSkeleton(ObserverHelperType& helper) : helper_(helper)
+	CorrelationsSkeleton(const ObserverHelperType& helper) : helper_(helper)
 	{}
 
 	SizeType numberOfSites() const
@@ -803,7 +803,7 @@ private:
 		return sum/norma2;
 	}
 
-	ObserverHelperType& helper_; //<-- NB: We are not the owner
+	const ObserverHelperType& helper_;
 };  //class CorrelationsSkeleton
 } // namespace Dmrg
 

@@ -372,7 +372,7 @@ private:
 	IoInputType& io_;
 	typename PsimagLite::Vector<DmrgSerializerType*>::Type dSerializerV_;
 	typename PsimagLite::Vector<TimeSerializerType*>::Type timeSerializerV_;
-	bool withLegacyBugs_;
+	const bool withLegacyBugs_;
 	bool noMoreData_;
 	SizeType dSsize_;
 	SizeType timeSsize_;

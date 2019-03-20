@@ -97,7 +97,7 @@ public:
 	typedef typename PsimagLite::Real<FieldType>::Type RealType;
 
 	Parallel2PointCorrelations(MatrixType& w,
-	                           TwoPointCorrelationsType& twopoint,
+	                           const TwoPointCorrelationsType& twopoint,
 	                           const typename PsimagLite::Vector<PairType>::Type& pairs,
 	                           const SparseMatrixType& O1,
 	                           const SparseMatrixType& O2,
@@ -132,7 +132,7 @@ public:
 private:
 
 	MatrixType& w_;
-	TwoPointCorrelationsType& twopoint_;
+	const TwoPointCorrelationsType& twopoint_;
 	const typename PsimagLite::Vector<PairType>::Type& pairs_;
 	const SparseMatrixType& O1_;
 	const SparseMatrixType& O2_;
