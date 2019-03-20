@@ -124,7 +124,7 @@ public:
 	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),
-	      modelHubbard_(solverParams, io, geometry)
+	      modelHubbard_(solverParams, io, geometry, "")
 	{}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const

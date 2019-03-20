@@ -136,13 +136,15 @@ public:
 
 	ModelHubbard(const SolverParamsType& solverParams,
 	             InputValidatorType& io,
-	             GeometryType const &geometry)
+	             GeometryType const &geometry,
+	             PsimagLite::String extension)
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),
-	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
+	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
+	      extension_(extension)
 	{
 		SizeType usize = modelParameters_.hubbardU.size();
 		SizeType vsize = modelParameters_.potentialV.size();
@@ -335,6 +337,20 @@ protected:
 
 		OpForLinkType cdown("c", 1); // (D)
 		hop.push(cdown, 'N', cdown, 'C', 1, -1, 1); // (E)
+
+		if (extension_ != "RashbaSOC") return;
+
+		assert(extension_ == "RashbaSOC");
+
+		ModelTermType& rashbaSOC = ModelBaseType::createTerm("RashbaSOC");
+
+		for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
+			OpForLinkType c1("c", spin1);
+			for (SizeType spin2 = 0; spin2 < 2; ++spin2) {
+					OpForLinkType c2("c", spin2); // (C)
+					rashbaSOC.push(c1, 'N', c2, 'C');
+			}
+		}
 	}
 
 	/* PSIDOC Hubbard::write
@@ -550,6 +566,7 @@ private:
 	const GeometryType &geometry_;
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
+	PsimagLite::String extension_;
 };	//class ModelHubbard
 
 } // namespace Dmrg

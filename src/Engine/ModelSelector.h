@@ -134,7 +134,7 @@ public:
 		}
 #if ALL_MODELS
 		else if (name_ == "HubbardOneBand") {
-			model_ = new ModelHubbardType(solverParams, io, geometry);
+			model_ = new ModelHubbardType(solverParams, io, geometry, "");
 		} else if (name_ == "HeisenbergAncillaC") {
 			model_ = new HeisenbergAncillaCType(solverParams,io,geometry);
 		} else if (name_ == "HubbardOneBandExtended") {
@@ -158,7 +158,7 @@ public:
 		} else if (name_ == "SuperHubbardExtended") {
 			model_ = new SuperHubbardExtendedType(solverParams,io,geometry);
 		} else if (name_ == "KaneMeleHubbard") {
-			model_ = new ModelHubbardType(solverParams,io,geometry);
+			model_ = new ModelHubbardType(solverParams,io,geometry,"");
 		} else if (name_ == "HubbardAncilla") {
 			model_ = new HubbardAncillaType(solverParams,io,geometry);
 		} else if (name_ == "HubbardAncillaExtended") {
@@ -179,6 +179,8 @@ public:
 			model_ = new HubbardHolsteinType(solverParams, io, geometry, "SSH");
 		} else if (name_ == "Kondo") {
 			model_ = new KondoType(solverParams, io, geometry);
+		} else if (name_ == "HubbardOneBandRashbaSOC") {
+			model_ = new ModelHubbardType(solverParams, io, geometry, "RashbaSOC");
 		}
 #endif
 		else {
