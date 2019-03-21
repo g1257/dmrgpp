@@ -111,7 +111,8 @@ public:
 
 	enum class GrowDirection {RIGHT, LEFT};
 
-	CorrelationsSkeleton(const ObserverHelperType& helper) : helper_(helper)
+	CorrelationsSkeleton(const ObserverHelperType& helper, bool normalizeResult)
+	    : helper_(helper), normalizeResult_(normalizeResult)
 	{}
 
 	SizeType numberOfSites() const
@@ -798,6 +799,8 @@ private:
 
 	FieldType resultDivided(FieldType sum, const VectorWithOffsetType& vec) const
 	{
+		if (!normalizeResult_) return sum;
+
 		FieldType tmp = vec*vec;
 		RealType norma2 = PsimagLite::real(tmp);
 		assert(fabs(norma2)>1e-10 && fabs(PsimagLite::imag(tmp))<1e-6);
@@ -805,6 +808,7 @@ private:
 	}
 
 	const ObserverHelperType& helper_;
+	bool normalizeResult_;
 };  //class CorrelationsSkeleton
 } // namespace Dmrg
 

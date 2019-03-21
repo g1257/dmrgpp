@@ -130,7 +130,7 @@ public:
 	              trail,
 	              params.options.find("fixLegacyBugs") == PsimagLite::String::npos),
 	      onepoint_(helper_),
-	      skeleton_(helper_),
+	      skeleton_(helper_, true),
 	      twopoint_(skeleton_),
 	      fourpoint_(skeleton_)
 	{}
