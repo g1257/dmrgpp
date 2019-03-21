@@ -81,7 +81,7 @@ public:
 		AlgebraForTargetingExpression otherCopy = other;
 		otherCopy.finalize(0);
 		finalize(0);
-		fullVector_ += fullVector_;
+		fullVector_ += other.fullVector_;
 		return *this;
 	}
 
