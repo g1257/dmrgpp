@@ -55,49 +55,6 @@ public:
 	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
-	class GetOperator {
-
-	public:
-
-		GetOperator(SizeType index,
-		            const BasisWithOperatorsType& basis,
-		            bool transpose)
-		    : index_(index), m_(0), owner_(false), fs_(1)
-		{
-			const OperatorType& op = basis.getOperatorByIndex(index);
-			fs_ = (op.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
-			if (!transpose) {
-				m_ = new SparseMatrixType();
-				SparseMatrixType& mm = const_cast<SparseMatrixType&>(*m_);
-				transposeConjugate(mm, op.data);
-				owner_ = true;
-			} else {
-				m_ = &op.data;
-			}
-		}
-
-		~GetOperator()
-		{
-			if (!owner_) return;
-			delete m_;
-			m_ = 0;
-		}
-
-		const SparseMatrixType& operator()() const
-		{
-			return *m_;
-		}
-
-		const int& fermionicSign() const { return fs_; }
-
-	private:
-
-		SizeType index_;
-		SparseMatrixType const*  m_;
-		bool owner_;
-		int fs_;
-	};
-
 	AlgebraForTargetingExpression(const AuxiliaryType& aux)
 	    : finalized_(false), factor_(1.0), aux_(aux) {}
 
@@ -224,25 +181,126 @@ private:
 	                      const VectorOneOperatorSpecType& ops,
 	                      const VectorIntType& sites)
 	{
-//		SizeType n = ops.size();
-//		assert(n == sites.size());
-//		switch (n) {
-//		case 1:
+		SizeType n = ops.size();
+		assert(n == sites.size());
+		OperatorType* op0 = 0;
+		OperatorType* op1  =0;
+		switch (n) {
+		case 1:
+			op0 = new OperatorType(aux_.model.naturalOperator(ops[0]->label,
+			        0, // FIXME TODO SDHS Immm
+			        ops[0]->dof));
+			oneOperator(ket, *op0, sites[0]);
+			delete op0;
+			op0 = 0;
+			break;
 
-//			break;
-//		default:
-//			break;
-//		}
+		case 2:
+			op0 =  new OperatorType(aux_.model.naturalOperator(ops[0]->label,
+			        0, // FIXME TODO SDHS Immm
+			        ops[0]->dof));
+			op1 = new OperatorType(aux_.model.naturalOperator(ops[1]->label,
+			        0, // FIXME TODO SDHS Immm
+			        ops[1]->dof));
+			twoOperators(ket, *op0, sites[0], *op1, sites[1]);
+			delete op0;
+			delete op1;
+			op0 = op1 = 0;
+			break;
+
+		default:
+			err("finalizeInternal: Only 1 or 2 operators supported for now\n");
+			break;
+		}
 	}
 
-	void checkSites(const VectorIntType& sites) const
+	void oneOperator(PsimagLite::String ket, const OperatorType& op, SizeType site)
 	{
-		SizeType n = sites.size();
-		for (SizeType i = 1; i < n; ++i) {
-			if (sites[i] >= sites[i - 1]) continue;
-			err(PsimagLite::String("SpecForTargetingExpression: Sites must be ") +
-			    " ordered increasingly in expression " + toString());
+		SizeType currentCoO = getCurrentCoO();
+
+		if (site == currentCoO) {
+			const VectorWithOffsetType& srcVwo = getCurrentVector(ket);
+			applyInSitu(srcVwo, site, op);
+			return;
 		}
+
+		err("oneOperator unimplemented\n");
+		// Fetch ket at coo site --> into vec
+		// Apply op to vec ---> vec2
+		// Bring vec2 back to current coo
+	}
+
+	void twoOperators(PsimagLite::String ket,
+	                  const OperatorType& op1,
+	                  SizeType site1,
+	                  const OperatorType& op2,
+	                  SizeType site2)
+	{
+		if (site1 == site2) {
+			oneOperator(ket, op1*op2, site1);
+			return;
+		}
+
+		SizeType currentCoO = getCurrentCoO();
+		const VectorWithOffsetType& srcVwo = getCurrentVector(ket);
+		if (site1 == currentCoO) {
+			applyInSitu(srcVwo, site1, op1);
+			oneOperator(ket, op2, site2);
+			return;
+		}
+
+		if (site2 == currentCoO) {
+			applyInSitu(srcVwo, site2, op2);
+			oneOperator(ket, op1, site1);
+			return;
+		}
+
+		err("twoOperators unimplemented\n");
+		// neither is current CoO
+		// Fetch ket at coo site1 --> into vec
+		// Apply op1 to vec ---> vec2
+		// Move to coo site2 --> vec3
+		// Apply op2 to vec3 --> vec4
+		// Bring vec4 back to current coo
+	}
+
+	// returns A|src1>
+	void applyInSitu(const VectorWithOffsetType& src1,
+	                 SizeType site,
+	                 const OperatorType& A) const
+	{
+		err("applyInSitu unimplemented\n");
+
+//		typename PsimagLite::Vector<bool>::Type oddElectrons;
+//		targetHelper_.model().findOddElectronsOfOneSite(oddElectrons,site);
+//		FermionSign fs(targetHelper_.lrs().left(), oddElectrons);
+//		VectorWithOffsetType dest;
+//		aoe_.applyOpLocal()(dest,src1,A,fs,systemOrEnviron,border);
+		// OUTPUTS to fullVector_
+
+	}
+
+	const VectorWithOffsetType& getCurrentVector(PsimagLite::String braOrKet) const
+	{
+		GetBraOrKet getBraOrKet(braOrKet);
+
+		SizeType ind = getBraOrKet();
+
+		if (ind > 0 && ind - 1 >= aux_.pvectors.size())
+			err("getVector: out of range for " + braOrKet + "\n");
+
+		return (ind == 0) ? aux_.gs : aux_.pvectors[ind - 1];
+	}
+
+	SizeType getCurrentCoO() const
+	{
+		const LeftRightSuperType& lrs = aux_.lrs;
+		const SizeType systemBlockSize = lrs.left().block().size();
+		assert(systemBlockSize > 0);
+		const int maxSystemSite = lrs.left().block()[systemBlockSize - 1];
+		return (aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? maxSystemSite
+		                                                                        : maxSystemSite + 1;
+
 	}
 
 	bool finalized_;

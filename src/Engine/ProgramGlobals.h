@@ -107,6 +107,15 @@ struct ProgramGlobals {
 
 	enum class VerboseEnum {NO, YES};
 
+	static FermionOrBosonEnum multipy(const FermionOrBosonEnum& a,
+	                                  const FermionOrBosonEnum& b)
+	{
+		if (a == FermionOrBosonEnum::BOSON) return b;
+
+		return (b == FermionOrBosonEnum::BOSON) ? FermionOrBosonEnum::FERMION
+		                                        : FermionOrBosonEnum::BOSON;
+	}
+
 	static void init(SizeType maxElectronsOneSpin_)
 	{
 		if (maxElectronsOneSpin == maxElectronsOneSpin_) return;

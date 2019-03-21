@@ -305,6 +305,13 @@ struct Operator {
 		Dmrg::recv(su2Related,root,tag+4,mpiComm);
 	}
 
+	Operator operator*(const Operator& other) const
+	{
+		const ProgramGlobals::FermionOrBosonEnum f = ProgramGlobals::multipy(fermionOrBoson,
+		                                                                     other.fermionOrBoson);
+		return Operator(data*other.data, f, PairType(0, 0), 1.0, su2Related);
+	}
+
 	Operator& operator*=(value_type x)
 	{
 		data *= x;
