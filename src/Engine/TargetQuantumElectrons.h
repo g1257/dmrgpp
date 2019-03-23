@@ -92,7 +92,6 @@ struct TargetQuantumElectrons {
 	TargetQuantumElectrons(IoInputType& io)
 	    : totalNumberOfSites(0),
 	      isSu2(false),
-	      isCanonical(true),
 	      qn(QnType::zero())
 	{
 		VectorSizeType qnOther;
@@ -129,25 +128,15 @@ struct TargetQuantumElectrons {
 			ready++;
 		} catch (std::exception&) {}
 
-		bool hasSzPlusConst = false;
 		try {
 			SizeType szPlusConst = 0;
 			io.readline(szPlusConst,"TargetSzPlusConst=");
 			qnOther.push_back(szPlusConst);
-			hasSzPlusConst = true;
 		} catch (std::exception&) {}
 
 		if (ready == 3) {
 			msg += "Provide either up/down or total/sz but not both.\n";
 			throw PsimagLite::RuntimeError(msg);
-		}
-
-		if (qnOther.size() > 0) hasSzPlusConst = true;
-
-		if (!hasSzPlusConst) {
-			std::cerr<<"TargetQuantumElectrons: Grand Canonical\n";
-			assert(qnOther.size() == 0);
-			isCanonical = false;
 		}
 
 		bool flag = false;
@@ -162,8 +151,6 @@ struct TargetQuantumElectrons {
 		try {
 			VectorSizeType extra;
 			io.read(extra,"TargetExtra");
-			if (!hasSzPlusConst)
-				std::cout<<"WARNING: TargetExtra= with grand canonical ???\n";
 			for (SizeType i = 0; i < extra.size(); ++i)
 				qnOther.push_back(extra[i]);
 		} catch (std::exception&) {}
@@ -181,10 +168,6 @@ struct TargetQuantumElectrons {
 			msg += "Please provide TargetSpinTimesTwo when running with SU(2).\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
-
-		if (isSu2 && !hasSzPlusConst)
-			throw PsimagLite::RuntimeError
-		        ("WARNING: SU(2) with grand canonical ???\n");
 
 		if (isSu2)
 			qn.oddElectrons = (totalNumberOfSites & 1);
@@ -205,7 +188,6 @@ struct TargetQuantumElectrons {
 		io.createGroup(label);
 		io.write(label + "/TotalNumberOfSites", totalNumberOfSites);
 		io.write(label + "/isSu2", isSu2);
-		io.write(label + "/isCanonical", isCanonical);
 		qn.write(label + "/qn", io);
 	}
 
@@ -222,7 +204,6 @@ struct TargetQuantumElectrons {
 
 	SizeType totalNumberOfSites;
 	bool isSu2;
-	bool isCanonical;
 	QnType qn;
 
 private:

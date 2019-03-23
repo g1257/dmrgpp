@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009, 2017, UT-Battelle, LLC
+Copyright (c) 2009, 2017-2019, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 4.]
+[DMRG++, Version 5.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -140,9 +140,6 @@ public:
 	      additional_(additional),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 	{
-		if (additional == "Anisotropic")
-			checkAnisotropic(solverParams);
-
 		SizeType n = geometry_.numberOfSites();
 		SizeType m = modelParameters_.magneticField.size();
 		SizeType md = modelParameters_.anisotropyD.size();
@@ -151,7 +148,7 @@ public:
 		if (m > 0 && m != n) {
 			PsimagLite::String msg("ModelHeisenberg: If provided, ");
 			msg += " MagneticField must be a vector of " + ttos(n) + " entries.\n";
-			throw PsimagLite::RuntimeError(msg);
+			err(msg);
 		}
 
 		if (md > 0 && md != n) {
@@ -336,29 +333,6 @@ protected:
 
 private:
 
-	void checkAnisotropic(const SolverParamsType& solverParams) const
-	{
-		bool isCanonical = (ModelBaseType::targetQuantum().isCanonical);
-		bool useTheForce = (solverParams.options.find("useTheForce") !=
-		        PsimagLite::String::npos);
-		if (!isCanonical) return;
-
-		PsimagLite::String warning("HeisenbergAnisotropic: ");
-		warning += "canonical mode in use. ";
-		warning += "Results will likely be WRONG.\n";
-		warning += "Please delete the TargetSzPlusConst= ";
-		warning += "line in the input file.\n";
-
-		if (useTheForce) {
-			std::cerr<<"WARNING: "<<warning;
-			std::cout<<"WARNING: "<<warning;
-			return;
-		}
-
-		std::cerr<<"FATAL: "<<warning;
-		err("You may useTheForce in SolverOptions to run it anyway\n");
-	}
-
 	//! Find S^+_site in the natural basis natBasis
 	SparseMatrixType findSplusMatrices(SizeType site,
 	                                   const HilbertBasisType& natBasis) const
@@ -454,7 +428,12 @@ private:
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
 
-		bool isCanonical = (ModelBaseType::targetQuantum().isCanonical);
+		bool isCanonical = (ModelBaseType::targetQuantum().qn.other.size() == 1);
+		if (isCanonical && additional_ == "Anisotropic")
+			err(PsimagLite::String(__FILE__) +
+			    ": Anisotropic sub-model must be canonical. Please " +
+			    "delete the TargetSzPlusConst= from the input file\n");
+
 		VectorSizeType other;
 		if (isCanonical) other.resize(1, 0);
 		QnType::ifPresentOther0IsElectrons = false;

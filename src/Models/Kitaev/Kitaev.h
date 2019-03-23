@@ -143,9 +143,6 @@ public:
 	      extended_(additional == "Extended"),
 	      withGammas_(additional == "WithGammas")
 	{
-		if (extended_)
-			checkExtended(solverParams);
-
 		SizeType n = geometry_.numberOfSites();
 		SizeType mx = modelParameters_.magneticFieldX.size();
 		SizeType my = modelParameters_.magneticFieldY.size();
@@ -300,33 +297,6 @@ protected:
 	}
 
 private:
-
-	void checkExtended(const SolverParamsType& solverParams) const
-	{
-		bool isCanonical = (ModelBaseType::targetQuantum().isCanonical);
-		PsimagLite::String warning1("KitaevExtended: ");
-		warning1 += "Testing needed!\n";
-		std::cerr<<"WARNING: "<<warning1;
-		bool useTheForce = (solverParams.options.find("useTheForce") !=
-		        PsimagLite::String::npos);
-
-		if (!isCanonical) return;
-
-		PsimagLite::String warning("KitaevExtended: ");
-		warning += "canonical mode in use. ";
-		warning += "Results will likely be WRONG.\n";
-		warning += "Please delete the TargetSzPlusConst= ";
-		warning += "line in the input file.\n";
-
-		if (useTheForce) {
-			std::cerr<<"WARNING: "<<warning;
-			std::cout<<"WARNING: "<<warning;
-			return;
-		}
-		std::cerr<<"FATAL: "<<warning;
-		err("You may useTheForce in SolverOptions to run it anyway\n");
-	}
-
 
 	//! find all states in the natural basis for a block of n sites
 	void setBasis(HilbertBasisType& basis,
