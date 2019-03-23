@@ -107,12 +107,26 @@ public:
 	              int tmp) const
 	{
 		SizeType maxMatrixRankStored = (tmp < 0) ? 0 : tmp;
-		if (matrixStored.rows() == 0 || matrixStored.rows() > maxMatrixRankStored) {
-			PsimagLite::String str("MatrixVectorBase: fullDiag too big or zero\n");
+
+		if (matrixStored.rows() == 0) {
+			PsimagLite::String str("MatrixVectorBase:fullDiag: no stored matrix\n");
+			str += "\trow= " + ttos(eigs.size()) + " max row= ";
+			str += ttos(maxMatrixRankStored) + "\n";
+			str += "Please add or increase MaxMatrixRankStored=" +
+			       ttos(2 + matrixStored.rows());
+			str += " in your input file\n";
+			err(str);
+		}
+
+		if (matrixStored.rows() > maxMatrixRankStored) {
+			PsimagLite::String str("MatrixVectorBase:fullDiag: internal error!\n");
 			str += "\trow= " + ttos(matrixStored.rows()) + " max row= ";
 			str += ttos(maxMatrixRankStored) + "\n";
-			throw PsimagLite::RuntimeError(str);
+			str += "Please add or increase MaxMatrixRankStored= to at least " +
+			        ttos(2 + eigs.size()) + " in your input file\n";
+			err(str);
 		}
+
 
 		fm = matrixStored.toDense();
 		diag(fm,eigs,'V');
