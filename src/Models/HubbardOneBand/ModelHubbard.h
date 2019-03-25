@@ -344,13 +344,11 @@ protected:
 
 		ModelTermType& rashbaSOC = ModelBaseType::createTerm("RashbaSOC");
 
-		for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
-			OpForLinkType c1("c", spin1);
-			for (SizeType spin2 = 0; spin2 < 2; ++spin2) {
-					OpForLinkType c2("c", spin2); // (C)
-					rashbaSOC.push(c1, 'N', c2, 'C');
-			}
-		}
+		// up-down
+		rashbaSOC.push(cup, 'N', cdown, 'C');
+
+		// down-up
+		rashbaSOC.push(cdown, 'N', cup, 'C');
 	}
 
 	/* PSIDOC Hubbard::write
