@@ -125,8 +125,8 @@ public:
 	{
 		if (finalized_) {
 			if (vwo) {
-				vwo->fromFull(fullVector_, aux_.lrs.super());
-				std::fill(fullVector_.begin(), fullVector_.end(), 0.0);
+				*vwo = fullVector_;
+				fullVector_.clear();
 			}
 
 			return;
@@ -171,11 +171,11 @@ public:
 		}
 
 		if (factor_ != 1.0)
-			fullVector_ *= factor_;
+			fullVector_ = factor_*fullVector_;
 		factor_ = 1.0;
 
 		if (vwo) {
-			vwo->fromFull(fullVector_, aux_.lrs.super());
+			*vwo = fullVector_;
 			fullVector_.clear();
 		}
 
@@ -276,22 +276,20 @@ private:
 	// returns A|src1>
 	void applyInSitu(const VectorWithOffsetType& src1,
 	                 SizeType site,
-	                 const OperatorType& A) const
+	                 const OperatorType& A)
 	{
 		err("applyInSitu unimplemented\n");
 
 		typename PsimagLite::Vector<bool>::Type oddElectrons;
 		aux_.model.findOddElectronsOfOneSite(oddElectrons,site);
 		FermionSign fs(aux_.lrs.left(), oddElectrons);
-		VectorWithOffsetType dest;
 		bool b1 = (site == 1 && aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
 		SizeType n = aux_.model.geometry().numberOfSites();
 		assert(n > 2);
 		bool b2 = (site == n - 2 && aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 		BorderEnumType border = (b1 || b2) ? BorderEnumType::BORDER_YES
 		                                   : BorderEnumType::BORDER_NO;
-		aux_.aoe.applyOpLocal()(dest, src1, A, fs, aux_.direction, border);
-		// OUTPUTS to fullVector_
+		aux_.aoe.applyOpLocal()(fullVector_, src1, A, fs, aux_.direction, border);
 	}
 
 	const VectorWithOffsetType& getCurrentVector(PsimagLite::String braOrKet) const
@@ -319,7 +317,7 @@ private:
 
 	bool finalized_;
 	VectorStringType vStr_;
-	VectorType fullVector_;
+	VectorWithOffsetType fullVector_;
 	ComplexOrRealType factor_;
 	const AuxiliaryType& aux_;
 };
