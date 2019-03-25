@@ -12,20 +12,25 @@
 
 namespace Dmrg {
 
-template<typename VectorWithOffsetType, typename ModelType>
+template<typename TargetingBaseType>
 struct AuxForTargetingExpression {
 
+	typedef typename TargetingBaseType::VectorWithOffsetType VectorWithOffsetType;
+	typedef typename TargetingBaseType::ModelType ModelType;
+	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
 	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
 
-	AuxForTargetingExpression(const ModelType& model_,
+	AuxForTargetingExpression(const ApplyOperatorExpressionType& aoe_,
+	                          const ModelType& model_,
 	                          const LeftRightSuperType& lrs_,
 	                          const VectorWithOffsetType& gs_,
 	                          const VectorVectorWithOffsetType& pvectors_,
 	                          ProgramGlobals::DirectionEnum dir)
-	    : model(model_), lrs(lrs_), gs(gs_), pvectors(pvectors_), direction(dir)
+	    : aoe(aoe_), model(model_), lrs(lrs_), gs(gs_), pvectors(pvectors_), direction(dir)
 	{}
 
+	const ApplyOperatorExpressionType& aoe;
 	const ModelType& model;
 	const LeftRightSuperType lrs;
 	const VectorWithOffsetType& gs;
@@ -33,13 +38,15 @@ struct AuxForTargetingExpression {
 	ProgramGlobals::DirectionEnum direction;
 };
 
-template<typename VectorWithOffsetType, typename ModelType>
+template<typename TargetingBaseType>
 class AlgebraForTargetingExpression {
 
 public:
 
+	typedef typename TargetingBaseType::VectorWithOffsetType VectorWithOffsetType;
+	typedef typename TargetingBaseType::ModelType ModelType;
 	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
-	typedef AuxForTargetingExpression<VectorWithOffsetType, ModelType> AuxiliaryType;
+	typedef AuxForTargetingExpression<TargetingBaseType> AuxiliaryType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
@@ -54,6 +61,8 @@ public:
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
+	typedef typename ApplyOperatorExpressionType::BorderEnumType BorderEnumType;
 
 	AlgebraForTargetingExpression(const AuxiliaryType& aux)
 	    : finalized_(false), factor_(1.0), aux_(aux) {}
@@ -188,8 +197,8 @@ private:
 		switch (n) {
 		case 1:
 			op0 = new OperatorType(aux_.model.naturalOperator(ops[0]->label,
-			        0, // FIXME TODO SDHS Immm
-			        ops[0]->dof));
+			                       0, // FIXME TODO SDHS Immm
+			                       ops[0]->dof));
 			oneOperator(ket, *op0, sites[0]);
 			delete op0;
 			op0 = 0;
@@ -197,11 +206,11 @@ private:
 
 		case 2:
 			op0 =  new OperatorType(aux_.model.naturalOperator(ops[0]->label,
-			        0, // FIXME TODO SDHS Immm
-			        ops[0]->dof));
+			                        0, // FIXME TODO SDHS Immm
+			                        ops[0]->dof));
 			op1 = new OperatorType(aux_.model.naturalOperator(ops[1]->label,
-			        0, // FIXME TODO SDHS Immm
-			        ops[1]->dof));
+			                       0, // FIXME TODO SDHS Immm
+			                       ops[1]->dof));
 			twoOperators(ket, *op0, sites[0], *op1, sites[1]);
 			delete op0;
 			delete op1;
@@ -271,13 +280,18 @@ private:
 	{
 		err("applyInSitu unimplemented\n");
 
-//		typename PsimagLite::Vector<bool>::Type oddElectrons;
-//		targetHelper_.model().findOddElectronsOfOneSite(oddElectrons,site);
-//		FermionSign fs(targetHelper_.lrs().left(), oddElectrons);
-//		VectorWithOffsetType dest;
-//		aoe_.applyOpLocal()(dest,src1,A,fs,systemOrEnviron,border);
+		typename PsimagLite::Vector<bool>::Type oddElectrons;
+		aux_.model.findOddElectronsOfOneSite(oddElectrons,site);
+		FermionSign fs(aux_.lrs.left(), oddElectrons);
+		VectorWithOffsetType dest;
+		bool b1 = (site == 1 && aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
+		SizeType n = aux_.model.geometry().numberOfSites();
+		assert(n > 2);
+		bool b2 = (site == n - 2 && aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
+		BorderEnumType border = (b1 || b2) ? BorderEnumType::BORDER_YES
+		                                   : BorderEnumType::BORDER_NO;
+		aux_.aoe.applyOpLocal()(dest, src1, A, fs, aux_.direction, border);
 		// OUTPUTS to fullVector_
-
 	}
 
 	const VectorWithOffsetType& getCurrentVector(PsimagLite::String braOrKet) const
@@ -310,12 +324,13 @@ private:
 	const AuxiliaryType& aux_;
 };
 
-template<typename VectorWithOffsetType, typename ModelType>
+template<typename TargetingBaseType>
 class SpecForTargetingExpression {
 
 public:
 
-	typedef AlgebraForTargetingExpression<VectorWithOffsetType, ModelType> AlgebraType;
+	typedef typename TargetingBaseType::VectorWithOffsetType VectorWithOffsetType;
+	typedef AlgebraForTargetingExpression<TargetingBaseType> AlgebraType;
 	typedef AlgebraType ResultType;
 	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
 	typedef typename AlgebraType::AuxiliaryType AuxiliaryType;

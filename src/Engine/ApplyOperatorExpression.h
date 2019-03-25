@@ -88,11 +88,10 @@ template<typename TargetHelperType,
          typename LanczosSolverType>
 class ApplyOperatorExpression {
 
-	typedef typename TargetHelperType::RealType RealType;
-	typedef typename TargetHelperType::ModelType ModelType;
-
 public:
 
+	typedef typename TargetHelperType::RealType RealType;
+	typedef typename TargetHelperType::ModelType ModelType;
 	typedef TargetParamsBase<ModelType> TargetParamsType;
 	typedef typename TargetHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;

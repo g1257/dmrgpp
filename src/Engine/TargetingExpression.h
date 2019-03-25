@@ -105,13 +105,11 @@ class TargetingExpression : public TargetingBase<LanczosSolverType_,VectorWithOf
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 	typedef Pvector<VectorWithOffsetType_> PvectorType;
 	typedef typename PsimagLite::Vector<PvectorType*>::Type VectorPvectorType;
-	typedef SpecForTargetingExpression<VectorWithOffsetType_, ModelType>
-	SpecForTargetingExpressionType;
+	typedef SpecForTargetingExpression<BaseType> SpecForTargetingExpressionType;
 	typedef typename SpecForTargetingExpressionType::AlgebraType AlgebraType;
 	typedef PsimagLite::CanonicalExpression<SpecForTargetingExpressionType>
 	CanonicalExpressionType;
-	typedef AuxForTargetingExpression<VectorWithOffsetType_, ModelType>
-	AuxForTargetingExpressionType;
+	typedef AuxForTargetingExpression<BaseType> AuxForTargetingExpressionType;
 	typedef typename TargetingCommonType::VectorRealType VectorRealType;
 
 public:
@@ -220,7 +218,8 @@ private:
 	{
 		CanonicalExpressionType canonicalExpression(opSpec_);
 		SizeType total = pVectors_.size();
-		AuxForTargetingExpressionType aux(this->model(),
+		AuxForTargetingExpressionType aux(this->common().aoe(),
+		                                  this->model(),
 		                                  this->lrs(),
 		                                  this->common().aoe().psi(),
 		                                  this->common().aoe().targetVectors(),
