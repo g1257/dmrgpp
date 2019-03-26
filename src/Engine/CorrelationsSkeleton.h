@@ -97,13 +97,12 @@ public:
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef Braket<ModelType> BraketType;
 	typedef ObserverHelperType_ ObserverHelperType;
-	typedef typename ObserverHelperType::MatrixType MatrixType;
-	typedef typename ObserverHelperType::VectorType VectorType ;
 	typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename ObserverHelperType::BasisWithOperatorsType BasisWithOperatorsType ;
+	typedef typename VectorWithOffsetType::VectorType VectorType ;
+	typedef typename ObserverHelperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename ObserverHelperType::FermionSignType FermionSignType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename ObserverHelperType::FermionSignType FermionSignType;
 	typedef typename BasisType::VectorSizeType VectorSizeType;
 	typedef typename VectorType::value_type FieldType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;

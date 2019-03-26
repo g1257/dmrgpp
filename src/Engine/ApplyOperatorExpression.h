@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetParamsBase.h"
 #include "StageEnum.h"
 #include "MultiSiteExpressionHelper.h"
+#include "CorrelationsSkeleton.h"
 
 namespace Dmrg {
 
@@ -121,6 +122,7 @@ public:
 	typedef MultiSiteExpressionHelper<LeftRightSuperType, VectorWithOffsetType>
 	MultiSiteExpressionHelperType;
 	typedef typename MultiSiteExpressionHelperType::DmrgSerializerType DmrgSerializerType;
+	typedef CorrelationsSkeleton<MultiSiteExpressionHelperType, ModelType> CorrelationsSkeletonType;
 
 	ApplyOperatorExpression(const TargetHelperType& targetHelper,
 	                        SizeType indexNoAdvance)
@@ -132,7 +134,8 @@ public:
 	      applyOpLocal_(targetHelper.lrs(), targetHelper.withLegacyBugs()),
 	      targetVectors_(0),
 	      timeVectorsBase_(0),
-	      multiSiteExprHelper_(targetHelper_.model().geometry().numberOfSites() - 2)
+	      multiSiteExprHelper_(targetHelper_.model().geometry().numberOfSites() - 2),
+	      correlationsSkel_(multiSiteExprHelper_, false)
 	{}
 
 	~ApplyOperatorExpression()
@@ -646,6 +649,7 @@ private:
 	typename PsimagLite::Vector<VectorWithOffsetType>::Type targetVectors_;
 	TimeVectorsBaseType* timeVectorsBase_;
 	mutable MultiSiteExpressionHelperType multiSiteExprHelper_;
+	CorrelationsSkeletonType correlationsSkel_;
 };
 
 } // namespace Dmrg

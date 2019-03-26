@@ -5,14 +5,17 @@
 
 namespace Dmrg {
 
-template<typename LeftRightSuperType, typename VectorWithOffsetType>
+template<typename LeftRightSuperType, typename VectorWithOffsetType_>
 class MultiSiteExpressionHelper {
 
 public:
 
+	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef DmrgSerializer<LeftRightSuperType, VectorWithOffsetType> DmrgSerializerType;
 	typedef typename PsimagLite::Vector<DmrgSerializerType const*>::Type VectorDmrgSerializerType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename DmrgSerializerType::FermionSignType FermionSignType;
 
 	MultiSiteExpressionHelper(SizeType n) : vds_(n, nullptr) {}
 
