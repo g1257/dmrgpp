@@ -121,6 +121,7 @@ public:
 	typedef typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ApplyOperatorExpressionType::StageEnumType StageEnumType;
+	typedef typename ApplyOperatorExpressionType::DmrgSerializerType DmrgSerializerType;
 
 	TargetingBase(const LeftRightSuperType& lrs,
 	              const ModelType& model,
@@ -249,6 +250,11 @@ public:
 
 		io.createGroup(prefix);
 		return prefix;
+	}
+
+	void multiSitePush(DmrgSerializerType const* ds) const
+	{
+		commonTargeting_.aoe().multiSitePush(ds);
 	}
 
 protected:

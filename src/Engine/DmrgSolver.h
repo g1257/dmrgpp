@@ -591,25 +591,38 @@ obtain ordered
 	           ProgramGlobals::DirectionEnum direction,
 	           SizeType loopIndex)
 	{
-		int saveOption = parameters_.finiteLoop[loopIndex].saveOption;
+		static SizeType counter = 0;
 
-		if (!(saveOption & 1)) return;
 		if (!saveData_) return;
 
+		int saveOption = parameters_.finiteLoop[loopIndex].saveOption;
+
+		if (!(saveOption & 1) || !(saveOption & 16)) return;
+
+
 		const BlockDiagonalMatrixType& transform = truncate_.transform(direction);
-		DmrgSerializerType ds(fsS,fsE,lrs_,target.gs(),transform, direction);
+		DmrgSerializerType* ds = new DmrgSerializerType(fsS,
+		                                                fsE,
+		                                                lrs_,
+		                                                target.gs(),
+		                                                transform,
+		                                                direction);
+		if (saveOption & 16) {
+			target.multiSitePush(ds);
+			return;
+		}
 
-		typename BasisWithOperatorsType::SaveEnum saveOption2 = (saveOption & 4) ?
-		            BasisWithOperatorsType::SaveEnum::ALL :
-		            BasisWithOperatorsType::SaveEnum::PARTIAL;
+		typename BasisWithOperatorsType::SaveEnum saveOption2 = (saveOption & 4)
+		        ? BasisWithOperatorsType::SaveEnum::ALL
+		        : BasisWithOperatorsType::SaveEnum::PARTIAL;
 		SizeType numberOfSites = model_.geometry().numberOfSites();
-
-		static SizeType counter = 0;
 		PsimagLite::String prefix("Serializer");
-		ds.write(ioOut_, prefix, saveOption2, numberOfSites, counter);
+		ds->write(ioOut_, prefix, saveOption2, numberOfSites, counter);
 		PsimagLite::String prefixForTarget = TargetingType::buildPrefix(ioOut_, counter);
 		target.write(sitesIndices_[stepCurrent_], ioOut_, prefixForTarget);
 		++counter;
+		delete ds;
+		ds = 0;
 	}
 
 	bool finalStep(int stepLength,int stepFinal)

@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Io/IoSelector.h"
 #include "TargetParamsBase.h"
 #include "StageEnum.h"
+#include "MultiSiteExpressionHelper.h"
 
 namespace Dmrg {
 
@@ -117,6 +118,9 @@ public:
 	typedef typename TimeVectorsBaseType::PairType PairType;
 	typedef StageEnum StageEnumType;
 	typedef typename PsimagLite::Vector<StageEnum>::Type VectorStageEnumType;
+	typedef MultiSiteExpressionHelper<LeftRightSuperType, VectorWithOffsetType>
+	MultiSiteExpressionHelperType;
+	typedef typename MultiSiteExpressionHelperType::DmrgSerializerType DmrgSerializerType;
 
 	ApplyOperatorExpression(const TargetHelperType& targetHelper,
 	                        SizeType indexNoAdvance)
@@ -127,7 +131,8 @@ public:
 	      indexNoAdvance_(indexNoAdvance),
 	      applyOpLocal_(targetHelper.lrs(), targetHelper.withLegacyBugs()),
 	      targetVectors_(0),
-	      timeVectorsBase_(0)
+	      timeVectorsBase_(0),
+	      multiSiteExprHelper_(targetHelper_.model().geometry().numberOfSites() - 2)
 	{}
 
 	~ApplyOperatorExpression()
@@ -425,6 +430,11 @@ public:
 		}
 	}
 
+	void multiSitePush(DmrgSerializerType const* ds) const
+	{
+		multiSiteExprHelper_.push(ds, psi_);
+	}
+
 private:
 
 	void wftOneVector(VectorWithOffsetType& phiNew,
@@ -635,6 +645,7 @@ private:
 	VectorWithOffsetType psi_;
 	typename PsimagLite::Vector<VectorWithOffsetType>::Type targetVectors_;
 	TimeVectorsBaseType* timeVectorsBase_;
+	mutable MultiSiteExpressionHelperType multiSiteExprHelper_;
 };
 
 } // namespace Dmrg

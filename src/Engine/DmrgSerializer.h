@@ -212,6 +212,14 @@ public:
 		m.toSparse(ret);
 	}
 
+	SizeType centerOfOrthogonality() const
+	{
+		SizeType max = lrs_.left().block().size();
+		assert(max > 0);
+		const SizeType site = lrs_.left().block()[max - 1];
+		return (direction_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? site : site + 1;
+	}
+
 private:
 
 	void fillOffsets(VectorSizeType& v, const BasisType& basis) const
