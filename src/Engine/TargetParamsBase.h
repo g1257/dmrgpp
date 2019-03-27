@@ -98,6 +98,7 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	enum class ConcatEnum {PRODUCT, SUM};
 
@@ -124,15 +125,9 @@ public:
 		throw PsimagLite::RuntimeError(s);
 	}
 
-	virtual RealType chebyEpsilon() const
+	virtual VectorRealType chebyTransform() const
 	{
-		PsimagLite::String s = "TargetParamsBase: unimplemented chebyEpsilon\n";
-		throw PsimagLite::RuntimeError(s);
-	}
-
-	virtual RealType chebyWstar() const
-	{
-		PsimagLite::String s = "TargetParamsBase: unimplemented chebyWstar\n";
+		PsimagLite::String s = "TargetParamsBase: unimplemented chebyTransform\n";
 		throw PsimagLite::RuntimeError(s);
 	}
 

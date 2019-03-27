@@ -87,11 +87,11 @@ namespace Dmrg {
 template<typename ModelType>
 class TargetParamsTimeVectors : public TargetParamsCommon<ModelType> {
 
-	typedef TargetParamsCommon<ModelType> BaseType;
-
 public:
 
+	typedef TargetParamsCommon<ModelType> BaseType;
 	typedef typename ModelType::RealType RealType;
+	typedef typename BaseType::VectorRealType VectorRealType;
 
 	template<typename IoInputter>
 	TargetParamsTimeVectors(IoInputter& io,const ModelType& model)
@@ -100,9 +100,7 @@ public:
 	      advanceEach_(0),
 	      algorithm_(BaseType::AlgorithmEnum::KRYLOV),
 	      tau_(0),
-	      timeDirection_(1.0),
-	      chebyEpsilon_(0.025),
-	      chebyWstar_(10.0)
+	      timeDirection_(1.0)
 	{
 		/*PSIDOC TargetParamsTimeVectors
 		\item[TSPTau] [RealType], $\tau$ for the Krylov,
@@ -128,8 +126,9 @@ public:
 			algorithm_ = BaseType::AlgorithmEnum::SUZUKI_TROTTER;
 		if (s=="Chebyshev") {
 			algorithm_ = BaseType::AlgorithmEnum::CHEBYSHEV;
-			io.readline(chebyEpsilon_, "ChebyshevEpsilon=");
-			io.readline(chebyWstar_, "ChebyshevWstar=");
+			io.read(chebyTransform_, "ChebyshevTransform");
+			if (chebyTransform_.size() != 2)
+				err("ChebyshevTransform must be a vector of two real entries\n");
 		}
 
 		try {
@@ -162,14 +161,9 @@ public:
 		return timeDirection_;
 	}
 
-	virtual RealType chebyEpsilon() const
+	virtual VectorRealType chebyTransform() const
 	{
-		return chebyEpsilon_;
-	}
-
-	virtual RealType chebyWstar() const
-	{
-		return chebyWstar_;
+		return chebyTransform_;
 	}
 
 private:
@@ -179,8 +173,7 @@ private:
 	typename BaseType::AlgorithmEnum algorithm_;
 	RealType tau_;
 	RealType timeDirection_;
-	RealType chebyEpsilon_;
-	RealType chebyWstar_;
+	VectorRealType chebyTransform_;
 }; // class TargetParamsTimeVectors
 
 template<typename ModelType>

@@ -23,10 +23,13 @@ public:
 	                  const RealType& E0)
 	    : matx_(mat),
 	      tstStruct_(tstStruct),
-	      E0_(E0),
-	      c_((2.0 - tstStruct_.chebyEpsilon())/tstStruct_.chebyWstar()),
-	      d_(-c_*(E0_ + tstStruct_.chebyWstar()*0.5))
+	      E0_(E0)
 	{
+		if (tstStruct_.chebyTransform().size() != 2)
+			err("ChebyshevTransform must be a vector of two real entries\n");
+		c_ = tstStruct_.chebyTransform()[0];
+		d_ = tstStruct_.chebyTransform()[1];
+
 		PsimagLite::ProgressIndicator progress("InternalMatrix");
 		PsimagLite::OstringStream msg;
 		msg<<"H'="<<c_<<"*H "<<d_;
