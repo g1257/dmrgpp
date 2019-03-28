@@ -121,10 +121,10 @@ public:
 
 	SizeType tasks() const { return phi_.sectors(); }
 
-	void doTask(SizeType ii, SizeType threadNum)
+	void doTask(SizeType ii, SizeType)
 	{
 		SizeType i = phi_.sector(ii);
-		steps_[ii] = triDiag(phi_,T_[ii],V_[ii],i,threadNum);
+		steps_[ii] = triDiag(phi_,T_[ii],V_[ii],i);
 	}
 
 private:
@@ -132,8 +132,7 @@ private:
 	SizeType triDiag(const VectorWithOffsetType& phi,
 	                 MatrixComplexOrRealType& T,
 	                 MatrixComplexOrRealType& V,
-	                 SizeType i0,
-	                 SizeType threadNum)
+	                 SizeType i0)
 	{
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelType::HamiltonianConnectionType hc(p,
@@ -146,7 +145,6 @@ private:
 
 		typename LanczosSolverType::ParametersSolverType params(io_,"Tridiag");
 		params.lotaMemory = true;
-		params.threadId = threadNum;
 
 		LanczosSolverType lanczosSolver(lanczosHelper, params);
 

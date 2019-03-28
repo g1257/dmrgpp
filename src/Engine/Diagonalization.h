@@ -408,21 +408,20 @@ private:
 		PsimagLite::OstringStream msg;
 		msg<<"I will now diagonalize a matrix of size="<<hc.modelHelper().size();
 		progress_.printline(msg,std::cout);
-		diagonaliseOneBlock(partitionIndex,
-		                    tmpVec,
+		diagonaliseOneBlock(tmpVec,
 		                    energyTmp,
 		                    hc,
 		                    initialVector,
 		                    saveOption);
 	}
 
-	void diagonaliseOneBlock(SizeType partitionIndex,
-	                         TargetVectorType& tmpVec,
+	void diagonaliseOneBlock(TargetVectorType& tmpVec,
 	                         RealType &energyTmp,
 	                         HamiltonianConnectionType& hc,
 	                         const TargetVectorType& initialVector,
 	                         SizeType saveOption)
 	{
+		static SizeType counter = 0;
 		ReflectionSymmetryType *rs = 0;
 		if (reflectionOperator_.isEnabled()) rs = &reflectionOperator_;
 
@@ -438,7 +437,7 @@ private:
 			return;
 		}
 
-		ParametersForSolverType params(io_,"Lanczos");
+		ParametersForSolverType params(io_, "Lanczos", counter++);
 		LanczosOrDavidsonBaseType* lanczosOrDavidson = 0;
 
 		bool useDavidson = (parameters_.options.find("useDavidson") !=
