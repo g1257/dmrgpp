@@ -128,7 +128,7 @@ public:
 
 	ChebyshevSolver(MatrixType const &mat,
 	                SolverParametersType& params)
-	    : progress_("ChebyshevSolver",params.threadId),
+	    : progress_("ChebyshevSolver"),
 	      mat_(mat),
 	      params_(params),
 	      mode_(WITH_INFO),

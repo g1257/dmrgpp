@@ -99,65 +99,94 @@ struct ParametersForSolver {
 	static const SizeType LanczosSteps = 200; // max number of external Lanczos steps
 
 	ParametersForSolver()
-	    : steps(LanczosSteps),minSteps(4),tolerance(1e-12),stepsForEnergyConvergence(MaxLanczosSteps),
-	      options(""),oneOverA(0),b(0),Eg(0),weight(0),isign(0),lotaMemory(false),
-	      threadId(0)
+	    : steps(LanczosSteps),
+	      minSteps(4),
+	      tolerance(1e-12),
+	      stepsForEnergyConvergence(MaxLanczosSteps),
+	      options(""),
+	      oneOverA(0),
+	      b(0),
+	      Eg(0),
+	      weight(0),
+	      isign(0),
+	      lotaMemory(false)
 	{}
 
 	template<typename IoInputType>
-	ParametersForSolver(IoInputType& io,String prefix)
-	    : steps(LanczosSteps),minSteps(4),tolerance(1e-12),stepsForEnergyConvergence(MaxLanczosSteps),
-	      options(""),oneOverA(0),b(0),Eg(0),weight(0),isign(0),lotaMemory(true),
-	      threadId(0)
+	ParametersForSolver(IoInputType& io, String prefix, int ind = -1)
+	    : steps(LanczosSteps),
+	      minSteps(4),
+	      tolerance(1e-12),
+	      stepsForEnergyConvergence(MaxLanczosSteps),
+	      options("none"),
+	      oneOverA(0),
+	      b(0),
+	      Eg(0),
+	      weight(0),
+	      isign(0),
+	      lotaMemory(true)
 	{
+
+		rabbitHole(steps, prefix, ind, "Steps", io);
+
+		rabbitHole(minSteps, prefix, ind, "MinSteps", io);
+
+		rabbitHole(tolerance, prefix, ind, "Eps", io);
+
+		rabbitHole(stepsForEnergyConvergence, prefix, ind, "StepsForEnergyConvergence", io);
+
+		rabbitHole(options, prefix, ind, "Options", io);
+
+		rabbitHole(oneOverA, prefix, ind, "OneOverA", io);
+
+		rabbitHole(b, prefix, ind, "B", io);
+
+		rabbitHole(Eg, prefix, ind, "Energy", io);
+
+		int x = 0;
+		rabbitHole(x, prefix, ind, "NoSaveLanczosVectors", io);
+		lotaMemory = (x > 0) ? 0 : 1;
+	}
+
+	template<typename T, typename IoInputType>
+	static void rabbitHole(T& t, String prefix, int ind, String postfix, IoInputType& io)
+	{
+		if (ind >= 0) {
+			bunnie(t, prefix, ind, postfix, io);
+		} else {
+			hare(t, prefix, postfix, io);
+		}
+	}
+
+	template<typename T, typename IoInputType>
+	static void hare(T& t, String prefix, String postfix, IoInputType& io)
+	{
+		// if prefix + postfix exists use it
 		try {
-			io.readline(steps,prefix + "Steps=");
+			io.readline(t, prefix + postfix + "=");
+			return;
+		} catch (std::exception&) {}
+	}
+
+	template<typename T, typename IoInputType>
+	static void bunnie(T& t, String prefix, SizeType ind, String postfix, IoInputType& io)
+	{
+		// if prefix + ind + postfix exists --> use it and return
+		try {
+			io.readline(t, prefix + ttos(ind) + postfix + "=");
+			return;
 		} catch (std::exception&) {}
 
-		try {
-			io.readline(minSteps,prefix + "MinSteps=");
-		} catch (std::exception&) {}
-
-		try {
-			io.readline(tolerance,prefix + "Eps=");
-		} catch (std::exception&) {}
-
-		try {
-			io.readline(stepsForEnergyConvergence,prefix + "StepsForEnergyConvergence=");
-		} catch (std::exception&) {}
-
-		try {
-			io.readline(options,prefix + "Options=");
-		} catch (std::exception&) {
-			options = "none";
-			io.rewind();
+		// if prefix + jnd + postfix exists with jnd < ind --> use the largest jnd and return
+		for (SizeType i = 0; i < ind; ++i) {
+			const SizeType jnd = ind - i - 1;
+			try {
+				io.readline(t, prefix + ttos(jnd) + postfix + "=");
+				return;
+			} catch (std::exception&) {}
 		}
 
-		try {
-			io.readline(oneOverA,prefix + "OneOverA=");
-		} catch (std::exception&) {}
-
-		try {
-			io.readline(b,prefix + "B=");
-		} catch (std::exception&) {}
-
-		try {
-			io.readline(Eg,prefix + "Energy=");
-		} catch (std::exception&) {}
-
-		try {
-			int x = 0;
-			io.readline(x,prefix + "SaveLanczosVectors=");
-			PsimagLite::String msg("prefix + SaveLanczosVectors=");
-			msg +="	should not be present in input file anymore\n";
-			throw RuntimeError(msg);
-		} catch (std::exception&) {}
-
-		try {
-			int x = 0;
-			io.readline(x,prefix + "NoSaveLanczosVectors=");
-			lotaMemory = (x > 0) ? 0 : 1;
-		} catch (std::exception&) {}
+		hare(t, prefix, postfix, io);
 	}
 
 	SizeType steps;
@@ -170,7 +199,6 @@ struct ParametersForSolver {
 	RealType weight;
 	int isign;
 	bool lotaMemory;
-	SizeType threadId;
 }; // class ParametersForSolver
 } // namespace PsimagLite
 

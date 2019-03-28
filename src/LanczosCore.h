@@ -119,7 +119,7 @@ public:
 	LanczosCore(const MatrixType& mat,
 	            const SolverParametersType& params,
 	            bool isReorthoEnabled)
-	    : progress_("LanczosCore", params.threadId),
+	    : progress_("LanczosCore"),
 	      mat_(mat),
 	      params_(params),
 	      steps_(params.steps),
