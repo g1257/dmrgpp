@@ -161,7 +161,7 @@ public:
 		return timeDirection_;
 	}
 
-	virtual VectorRealType chebyTransform() const
+	virtual const VectorRealType& chebyTransform() const
 	{
 		return chebyTransform_;
 	}

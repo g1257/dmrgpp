@@ -125,7 +125,7 @@ public:
 		throw PsimagLite::RuntimeError(s);
 	}
 
-	virtual VectorRealType chebyTransform() const
+	virtual const VectorRealType& chebyTransform() const
 	{
 		PsimagLite::String s = "TargetParamsBase: unimplemented chebyTransform\n";
 		throw PsimagLite::RuntimeError(s);

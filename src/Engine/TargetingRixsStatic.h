@@ -157,7 +157,6 @@ public:
 	      ioIn_(ioIn),
 	      progress_("TargetingRixsStatic"),
 	      gsWeight_(1.0),
-	      paramsForSolver_(ioIn,"DynamicDmrg"),
 	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().aoe().energy()),
 	      applied_(false),
 	      appliedFirst_(false)
@@ -367,7 +366,6 @@ private:
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
-	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
 	CorrectionVectorSkeletonType skeleton_;
 	bool applied_;
 	bool appliedFirst_;

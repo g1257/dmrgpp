@@ -155,7 +155,6 @@ public:
 	      progress_("TargetingCorrectionVector"),
 	      gsWeight_(1.0),
 	      correctionEnabled_(false),
-	      paramsForSolver_(ioIn,"DynamicDmrg"),
 	      skeleton_(ioIn_, tstStruct_, model, lrs, this->common().aoe().energy())
 	{
 		if (!wft.isEnabled())
@@ -303,7 +302,6 @@ private:
 	RealType gsWeight_;
 	bool correctionEnabled_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
-	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
 	CorrectionVectorSkeletonType skeleton_;
 }; // class TargetingCorrectionVector
 } // namespace
