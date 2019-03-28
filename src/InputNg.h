@@ -154,6 +154,8 @@ public:
 
 	public:
 
+		typedef Vector<String>::Type VectorStringType;
+
 		Writeable(const String& file,const InputCheckType& inputCheck)
 		    : data_(""),
 		      line_(0),
@@ -222,7 +224,7 @@ public:
 
 			PsiBase64::Decode base64decode(buffer);
 			data_ = base64decode();
-			check();
+			changeAndParse();
 
 			if (verbose_) {
 				std::cout<<"START\n";
@@ -269,14 +271,12 @@ public:
 			}
 
 			fin.close();
-			if (data_.size() > 2 && data_[0] == '#' && data_[1] == '#') {
+			if (data_.size() > 2 && data_[0] == '#' && data_[1] == '#')
 				ainurMode_ = true;
-				return;
-			}
 
-			check();
+			changeAndParse();
 
-			if (verbose_) {
+			if (verbose_ && !ainurMode_) {
 				std::cout<<"START\n";
 				printMap(mapStrStr_,"StrStr");
 				std::cout<<"END\nSTART\n";
@@ -285,7 +285,97 @@ public:
 			}
 		}
 
-		void check()
+		void changeAndParse()
+		{
+			changeDataIfNeeded();
+
+			if (ainurMode_) return;
+
+			parseInternal();
+		}
+
+		void changeDataIfNeeded()
+		{
+			VectorStringType vlines;
+			splitIntoLines(vlines);
+			data_ = "";
+			const SizeType n = vlines.size();
+			for (SizeType i = 0; i < n; ++i) {
+				const String& thisline = vlines[i];
+				data_ += replaceLine(thisline);
+			}
+		}
+
+		void splitIntoLines(VectorStringType& vlines) const
+		{
+			String buffer("");
+			const SizeType n = data_.length();
+			for (SizeType i = 0; i < n; ++i) {
+				if (data_[i] == '\n') {
+					vlines.push_back(buffer);
+					buffer = "";
+				} else {
+					buffer += data_[i];
+				}
+			}
+
+			vlines.push_back(buffer);
+		}
+
+		// !A$iB a b c d ...
+		// gets replaced by
+		// A0B=a;
+		// A1B=b;
+		// A2B=c;
+		// ...
+		// The semicolon is used only in ainurMode
+		String replaceLine(String line) const
+		{
+			if (line[0] != '!') return line + "\n";
+
+			const SizeType n = line.length();
+			SizeType ind = 1;
+			String a;
+			for (; ind < n; ++ind) {
+				if (line[ind] == '$') break;
+				a += line[ind];
+			}
+
+			++ind;
+			if (ind >= n)
+				throw RuntimeError("replaceLine: syntax error near " + line + "\n");
+
+			if (line[ind] != 'i')
+				throw RuntimeError("replaceLine: syntax error near " + line + "\n");
+
+			++ind;
+			String b;
+			for (; ind < n; ++ind) {
+				if (line[ind] == ' ' || line[ind] == '\t') break;
+				b += line[ind];
+			}
+
+			++ind;
+			String rest;
+			for (; ind < n; ++ind) rest += line[ind];
+			if (rest == "")
+				throw RuntimeError("replaceLine: syntax error near " + line + "\n");
+
+			VectorStringType tokens;
+			split(tokens, rest, " ");
+			const SizeType m = tokens.size();
+
+			String newline;
+			for (SizeType i = 0; i < m; ++i) {
+				newline += a + ttos(i) + b + "=" + tokens[i];
+				if (ainurMode_) newline += ";";
+				newline += "\n";
+			}
+
+			return newline;
+		}
+
+		void parseInternal()
 		{
 			String buffer="";
 			for (SizeType i=0;i<data_.length();i++) {
