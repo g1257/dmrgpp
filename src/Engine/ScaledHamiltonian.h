@@ -32,7 +32,7 @@ public:
 
 		PsimagLite::ProgressIndicator progress("InternalMatrix");
 		PsimagLite::OstringStream msg;
-		msg<<"H'="<<c_<<"*H "<<d_;
+		msg<<"H'="<<c_<<"*H "<<d_<<"      (rank="<<matx_.rows()<<")";
 		progress.printline(msg, std::cout);
 	}
 

@@ -597,7 +597,7 @@ obtain ordered
 
 		int saveOption = parameters_.finiteLoop[loopIndex].saveOption;
 
-		if (!(saveOption & 1) || !(saveOption & 16)) return;
+		if (!(saveOption & 1) && !(saveOption & 16)) return;
 
 
 		const BlockDiagonalMatrixType& transform = truncate_.transform(direction);
