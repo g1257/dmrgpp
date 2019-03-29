@@ -101,10 +101,12 @@ public:
 
 	void reflectionSector(SizeType) {  }
 
-	void fullDiag(VectorRealType& eigs,
-	              FullMatrixType& fm,
-	              const SparseMatrixType& matrixStored,
-	              int tmp) const
+	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const;
+
+	static void fullDiag(VectorRealType& eigs,
+	                     FullMatrixType& fm,
+	                     const SparseMatrixType& matrixStored,
+	                     int tmp)
 	{
 		SizeType maxMatrixRankStored = (tmp < 0) ? 0 : tmp;
 
@@ -113,7 +115,7 @@ public:
 			str += "\trow= " + ttos(eigs.size()) + " max row= ";
 			str += ttos(maxMatrixRankStored) + "\n";
 			str += "Please add or increase MaxMatrixRankStored=" +
-			       ttos(2 + matrixStored.rows());
+			        ttos(2 + matrixStored.rows());
 			str += " in your input file\n";
 			err(str);
 		}

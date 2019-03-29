@@ -457,9 +457,9 @@ private:
 
 			const RealType time = this->common().aoe().currentTime();
 			std::cout<<site<<" "<<(ri-ir)<<" "<<time; // time here is the currentTime
-			        std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
+			std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
 			std::cout<<site<<" "<<(rr+ii)<<" "<<time; // time here is the currentTime
-			        std::cout<<" <gs|A|P3> 1\n";   // 1 here is the "superdensity"
+			std::cout<<" <gs|A|P3> 1\n";   // 1 here is the "superdensity"
 			return;
 		} else {
 			ComplexOrRealType rr =
@@ -473,9 +473,12 @@ private:
 
 			const RealType time = this->common().aoe().currentTime();
 			std::cout<<site<<" "<<(ri-ir)<<" "<<time; // time here is the currentTime
-			        std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
+			std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
 			std::cout<<site<<" "<<(rr+ii)<<" "<<time; // time here is the currentTime
-			        std::cout<<" <gs|A|P3> 1\n";   // 1 here is the "superdensity"
+			std::cout<<" <gs|A|P3> 1\n";   // 1 here is the "superdensity"
+
+			for (SizeType i = 6; i < 12; ++i)
+				std::cout<<"norm2("<<i<<")= "<<this->common().normSquared(i)<<"\n";
 		}
 	}
 

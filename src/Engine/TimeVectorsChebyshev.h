@@ -238,7 +238,12 @@ private:
 		MatrixLanczosType lanczosHelper(model_,
 		                                hc);
 
-		ScaledMatrixType lanczosHelper2(lanczosHelper, tstStruct, E0_); // defining Hprime matrix
+		ProgramGlobals::VerboseEnum verbose = (model_.params().options.find("VerboseCheby")
+		                                       != PsimagLite::String::npos)
+		        ? ProgramGlobals::VerboseEnum::YES : ProgramGlobals::VerboseEnum::NO;
+
+		// defining Hprime matrix:
+		ScaledMatrixType lanczosHelper2(lanczosHelper, tstStruct, E0_, verbose);
 
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);

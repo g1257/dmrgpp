@@ -2,6 +2,7 @@
 #define SCALEDHAMILTONIAN_H
 #include "Vector.h"
 #include "ProgressIndicator.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -17,10 +18,13 @@ public:
 	typedef typename TargetParamsType::RealType RealType;
 	typedef typename MatrixLanczosType::ComplexOrRealType ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	ScaledHamiltonian(const MatrixLanczosType& mat,
 	                  const TargetParamsType& tstStruct,
-	                  const RealType& E0)
+	                  const RealType& E0,
+	                  ProgramGlobals::VerboseEnum verbose)
 	    : matx_(mat),
 	      tstStruct_(tstStruct),
 	      E0_(E0)
@@ -30,10 +34,20 @@ public:
 		c_ = tstStruct_.chebyTransform()[0];
 		d_ = tstStruct_.chebyTransform()[1];
 
+		SizeType n = matx_.rows();
 		PsimagLite::ProgressIndicator progress("InternalMatrix");
 		PsimagLite::OstringStream msg;
-		msg<<"H'="<<c_<<"*H "<<d_<<"      (rank="<<matx_.rows()<<")";
+		msg<<"H'="<<c_<<"*H "<<d_<<"      (rank="<<n<<")";
 		progress.printline(msg, std::cout);
+
+		if (verbose == ProgramGlobals::VerboseEnum::NO) return;
+
+		MatrixType dense;
+		VectorRealType eigs(n);
+		matx_.fullDiag(eigs, dense);
+		PsimagLite::OstringStream msg2;
+		msg2<<"eigs[0]="<<eigs[0]<<" eigs["<<(n-1)<<"]="<<eigs[n - 1];
+		progress.printline(msg2, std::cout);
 	}
 
 	SizeType rows() const { return matx_.rows(); }
