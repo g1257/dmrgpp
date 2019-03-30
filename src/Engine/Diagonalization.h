@@ -158,7 +158,7 @@ public:
 		VectorSizeType sectors;
 		targetedSymmetrySectors(sectors,target.lrs());
 		reflectionOperator_.update(sectors);
-		RealType gsEnergy = internalMain_(target,direction,loopIndex,false,blockLeft);
+		RealType gsEnergy = internalMain_(target,direction,loopIndex,blockLeft);
 		//  targeting:
 		target.evolve(gsEnergy,direction,blockLeft,blockRight,loopIndex);
 		wft_.triggerOff(target.lrs());
@@ -173,7 +173,7 @@ public:
 		PsimagLite::Profiling profiling("Diagonalization", std::cout);
 		assert(direction != ProgramGlobals::DirectionEnum::INFINITE);
 
-		RealType gsEnergy = internalMain_(target,direction,loopIndex,false,block);
+		RealType gsEnergy = internalMain_(target,direction,loopIndex,block);
 		//  targeting:
 		target.evolve(gsEnergy,direction,block,block,loopIndex);
 		wft_.triggerOff(target.lrs());
@@ -195,7 +195,6 @@ private:
 	RealType internalMain_(TargetingType& target,
 	                       ProgramGlobals::DirectionEnum direction,
 	                       SizeType loopIndex,
-	                       bool,
 	                       const VectorSizeType& block)
 
 	{
@@ -205,7 +204,7 @@ private:
 		wft_.triggerOn();
 
 		RealType gsEnergy = 0;
-		SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
+		const SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
 		checkSaveOption(saveOption);
 
 		bool onlyWft = false;
@@ -289,7 +288,7 @@ private:
 				                    lrs,
 				                    target.time(),
 				                    initialVectorBySector,
-				                    saveOption);
+				                    loopIndex);
 			}
 
 			energySaved[j] = gsEnergy;
@@ -353,7 +352,7 @@ private:
 	                         const LeftRightSuperType& lrs,
 	                         RealType targetTime,
 	                         const TargetVectorType& initialVector,
-	                         SizeType saveOption)
+	                         SizeType loopIndex)
 	{
 		PsimagLite::String options = parameters_.options;
 		bool dumperEnabled = (options.find("KroneckerDumper") != PsimagLite::String::npos);
@@ -372,6 +371,7 @@ private:
 		                             targetTime,
 		                             paramsKrDumperPtr);
 
+		const SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
 		if (options.find("debugmatrix")!=PsimagLite::String::npos && !(saveOption & 4) ) {
 			SparseMatrixType fullm;
 
@@ -412,22 +412,23 @@ private:
 		                    energyTmp,
 		                    hc,
 		                    initialVector,
-		                    saveOption);
+		                    loopIndex);
 	}
 
 	void diagonaliseOneBlock(TargetVectorType& tmpVec,
 	                         RealType &energyTmp,
 	                         HamiltonianConnectionType& hc,
 	                         const TargetVectorType& initialVector,
-	                         SizeType saveOption)
+	                         SizeType loopIndex)
 	{
-		static SizeType counter = 0;
 		ReflectionSymmetryType *rs = 0;
 		if (reflectionOperator_.isEnabled()) rs = &reflectionOperator_;
 
 		typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(model_,
 		                                                             hc,
 		                                                             rs);
+
+		const SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
 
 		if ((saveOption & 4)>0) {
 			energyTmp = slowWft(lanczosHelper, tmpVec, initialVector);
@@ -437,7 +438,7 @@ private:
 			return;
 		}
 
-		ParametersForSolverType params(io_, "Lanczos", counter++);
+		ParametersForSolverType params(io_, "Lanczos", loopIndex);
 		LanczosOrDavidsonBaseType* lanczosOrDavidson = 0;
 
 		bool useDavidson = (parameters_.options.find("useDavidson") !=
