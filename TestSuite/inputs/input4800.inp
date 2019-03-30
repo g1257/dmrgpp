@@ -39,7 +39,7 @@ Connectors 1 (0,1)
 hubbardU 24  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 potentialV 48 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 Model=HubbardOneBandRashbaSOC
-SolverOptions=useComplex,MatrixVectorStored,debugmatrix
+SolverOptions=useComplex
 Version=53725d9b8f22615ccccc782082f4cd6f51a4e374
 OutputFile=data4800
 InfiniteLoopKeptStates=20
