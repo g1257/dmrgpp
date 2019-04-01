@@ -353,6 +353,7 @@ public:
 			\item [OperatorsChangeAll] Do not hollow out operators but keep track of
 			them for all sites. This is will use more RAM, but might be needed
 			to target expressions.
+			\item [calcAndPrintEntropies] Calculate entropies and print to cout file
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,
@@ -418,6 +419,7 @@ public:
 		registerOpts.push_back("KronNoUseLowerPart");
 		registerOpts.push_back("shrinkStacksOnDisk");
 		registerOpts.push_back("OperatorsChangeAll");
+		registerOpts.push_back("calcAndPrintEntropies");
 
 		PsimagLite::Options::Writeable optWriteable(registerOpts,
 		                                            PsimagLite::Options::Writeable::PERMISSIVE);
