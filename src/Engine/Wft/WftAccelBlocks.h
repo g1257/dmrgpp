@@ -87,7 +87,7 @@ class WftAccelBlocks {
 
 			const MatrixType& weModif = getWeModif(we_, threadNum);
 
-#ifndef __APPLE__
+#if 0
 			const int idebug = 0;
 #endif
 
@@ -146,7 +146,7 @@ class WftAccelBlocks {
 
 
 			const bool use_method_1 = (flops_method_1 <= flops_method_2);
-#ifndef __APPLE__
+#if 0
 			if (idebug >= 1) {
 				std::cout << "WftAccelBlocks.h:146: "
 				          << " use_method_1=" << use_method_1
@@ -298,7 +298,7 @@ class WftAccelBlocks {
 			SizeType jprSize = we_.cols();
 #endif
 
-#ifndef __APPLE__
+#if 0
 			const int idebug = 0;
 #endif
 
@@ -384,7 +384,7 @@ class WftAccelBlocks {
 
 			const bool use_method_1 = (flops_method_1 <= flops_method_2);
 
-#ifndef __APPLE__
+#if 0
 			if (idebug >= 1) {
 				std::cout << "WftAccelBlocks.h:360: "
 				          << " use_method_1=" << use_method_1

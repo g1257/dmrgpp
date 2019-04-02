@@ -128,7 +128,7 @@ class BlockDiagWf {
 
 		void doTask(SizeType ipatch, SizeType threadNum)
 		{
-#ifndef __APPLE__
+#if 0
 			const int idebug = 0;
 #endif
 			MatrixType* mptr = data_[ipatch];
@@ -250,7 +250,7 @@ class BlockDiagWf {
 			        2.0 * nrow_W_L * ncol_W_L * ncol_Ytemp;
 
 			const bool use_method_1 = (flops_method_1 <= flops_method_2);
-#ifndef __APPLE__
+#if 0
 			if (idebug >= 1) {
 				const double speedup_ratio = (use_method_1) ?
 				            flops_method_2 / flops_method_1 :
