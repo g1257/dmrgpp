@@ -170,7 +170,8 @@ public:
 			ops[i] = 0;
 		}
 
-		if (factor_ != 1.0)
+		const RealType oneReal = 1.0;
+		if (factor_ != oneReal)
 			fullVector_ = factor_*fullVector_;
 		factor_ = 1.0;
 
