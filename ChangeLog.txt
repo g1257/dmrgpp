@@ -1,3 +1,56 @@
+2019-04-02 Version 5.54
+
+Scripts:
+
+* fromOutSpectrum.pl: redoes *pgfplots from out.spectrum
+
+* spectrumSum.pl to sum out.spectrum files
+
+User Interface:
+
+* Params for Lanczos for each loop
+
+* MaxMatrixRankStored is now suggested when Lanczos fails
+
+* ChebyshevTransform as a vector of c and d
+
+* OperatorsChangeAll option now at runtime
+
+New Features:
+
+* HubbardOneBandRashbaSOC implemented
+
+* observe for NGSTs: observe p-vectors if saveoption bit set
+
+* multi-site expressions (work in progress)
+
+TestSuite
+
+* test 4800 for HubbardOneBandRashbaSOC
+
+* test 150 for testing input formats
+
+* test 130 for multi-site expressions
+
+Refactoring
+
+* isCanonical is now a model property
+
+* Targeting printNormsAndWeights now in TargetingCommon
+
+* Checkpoint no longer depends on Targeting
+
+* TargetingSelector
+
+* enum class in ProgramGlobals replaces enum
+
+* ObserverHelper: pointer to CoO no longer a member,
+but passed to member functions instead
+
+* ObserverHelper: bra and ket no longer members,
+but passed to member functions instead
+
+
 2019-03-07 Version 5.52
 
 Compilation:
