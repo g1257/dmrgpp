@@ -1,3 +1,19 @@
+2019-04-02 Version 2.54
+
+Bug fixes:
+
+* ContinuedFractionCollection driver: write fixed
+
+New features:
+
+* InputNg: supports replacements
+
+* ParametersForLanczosSolver: rabbit hole algorithm used now
+
+Refactoring
+
+* basenameOf now available
+
 2019-03-07 Version 2.52
 
 * PthreadsNg compiles on MacOS
