@@ -6,39 +6,41 @@ my $self = $*PROGRAM-NAME;
 
 sub MAIN($file1, $file2)
 {
-# For every plot
-#### Read pgfplots
-
 	my @m1;
 	readPlot(@m1, $file1);
 	my @m2;
 	readPlot(@m2, $file2);
 
-	my @msum = sumPlot(@m1, @m2);
-	writePlot(@msum);
+	my $mode = ($file1 ~~ /".pgfplots"$/);
+	my @msum = sumPlot(@m1, @m2, $mode);
+	writePlot(@msum, $mode);
 }
 
-sub sumPlot(@m1, @m2)
+sub sumPlot(@m1, @m2, $mode)
 {
 	my Int $total = @m1.elems;
 	die "$self: Plots not of equal size $total and "~@m2.elems~"\n" if ($total != @m2.elems);
 
 	my @msum;
 	for 0..^$total -> Int $ind {
-		@msum[$ind] = sumThisRow(@m1[$ind], @m2[$ind]);
+		@msum[$ind] = sumThisRow(@m1[$ind], @m2[$ind], $mode);
 	}
 
 	return @msum;
 }
 
-sub sumThisRow(@row1, @row2)
+sub sumThisRow(@row1, @row2, $mode)
 {
 	my Int $total = @row1.elems;
 	die "$self: Row not of equal size $total and "~@row2.elems~"\n" if ($total != @row2.elems);
 
 	my @a;
-	@a[0] = @row1[0];
-	for 1..^$total -> Int $ind {
+	my $n = ($mode) ?? 2 !! 1;
+	for 0..^$n -> Int $ind {
+		@a[$ind] = @row1[$ind];
+	}
+
+	for $n..^$total -> Int $ind {
 		@a[$ind] = @row1[$ind] + @row2[$ind];
 	}
 
@@ -57,13 +59,17 @@ sub vectorEqual(@v1, @v2)
 
 	return 1;
 }
-sub writePlot(@m)
+sub writePlot(@m, $mode)
 {
 	my Int $total = @m.elems;
 
+	my $prevOmega = 0;
 	for 0..^$total -> Int $ind {
 		my @thisrow = @m[$ind];
+		my $thisOmega = ($mode) ?? @thisrow[0][1] !! 0;
+		say "" if ($mode && $ind > 0 && $prevOmega != $thisOmega);
 		@thisrow.join(' ').say;
+		$prevOmega = $thisOmega;
 	}
 }
 
