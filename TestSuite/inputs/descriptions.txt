@@ -309,6 +309,8 @@ Page* where more or less this feature is used: Will be given when published
 4710) Hubbard Holstein SSH
 # 4711 to 4799 reserved for Hubbard Holstein with and without SSH
 4800) HubbardOneBandRashbaSOC
+4804) RashbaSOC chain with complex
+4808) RashbaSOC full geometry with complex
 #5000 TOO BIG Hubbard model 1 orbital on a 32x2 ladder with m up to 800.
 It has 14 electrons up and 14 electrons down (or 2+2 "holes", 16+16 being
 the "half filled" case). U=2

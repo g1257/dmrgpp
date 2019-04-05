@@ -348,7 +348,10 @@ protected:
 		rashbaSOC.push(cup, 'N', cdown, 'C');
 
 		// down-up
-		rashbaSOC.push(cdown, 'N', cup, 'C');
+		auto valueModifer = [](SparseElementType& value)
+		{ value = PsimagLite::conj(value);};
+
+		rashbaSOC.push(cdown, 'N', cup, 'C', 1, 0, 0, valueModifer);
 	}
 
 	/* PSIDOC Hubbard::write
