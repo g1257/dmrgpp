@@ -14,7 +14,7 @@ class OperatorSpec {
 	typedef typename ModelType::OperatorType OperatorType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef LazyAlgebra<typename ModelType::OperatorType> LazyAlgebraType;
-	typedef OneOperatorSpec OneOperatorSpecType;
+	typedef PsimagLite::OneOperatorSpec OneOperatorSpecType;
 
 public:
 

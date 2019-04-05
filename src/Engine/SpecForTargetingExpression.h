@@ -53,7 +53,7 @@ public:
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef OneOperatorSpec OneOperatorSpecType;
+	typedef PsimagLite::OneOperatorSpec OneOperatorSpecType;
 	typedef typename PsimagLite::Vector<OneOperatorSpecType*>::Type VectorOneOperatorSpecType;
 	typedef PsimagLite::Vector<int>::Type VectorIntType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
