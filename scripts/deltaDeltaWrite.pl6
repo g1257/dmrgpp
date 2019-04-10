@@ -13,7 +13,8 @@ sub MAIN($sites)
 		$x ~= compute($center, 0, $j + 1, 0)~",";
 	}
 
-	say $x;
+	$x ~~ s/","$//;
+	say '"' ~ $x ~ '"';
 }
 
 sub compute($ind, $s0, $bjnd, $sb1)

@@ -11,25 +11,29 @@ sub MAIN(Int $sites, $file)
 	my @a = %h{"a"}.list;
 	my @b = %h{"b"}.list;
 	note "a has " ~ @a.elems ~ " and b has " ~ @b.elems;
-	
+
 	my Int $center = $sites div 2;
 
 	my @value;
+	my @count;
 	for 0..^$sites -> Int $s {
 		next if (!defined(@a[$s]));
 		next if (!defined(@b[$s]));
 		my $val = @a[$s] - @b[$s];
 		my Int $distance = abs($s - $center) div 2;
-		if (defined(@value[$distance])) {
-			@value[$distance] = $val;
+		if (!defined(@value[$distance])) {
+			@value[$distance] = abs($val);
+			@count[$distance] = 1;
 		} else {
-			@value[$distance] += $val;
+			@value[$distance] += abs($val);
+			++@count[$distance];
 		}
 	}
 
 	my $max = @value.elems;
 	for 1..^$max -> Int $distance {
-		say "$distance " ~ abs(@value[$distance]);
+		my $val = @value[$distance]/@count[$distance];
+		say "$distance " ~ abs($val);
 	}
 }
 
@@ -42,7 +46,7 @@ sub readDeltaDelta(Int $sites, $file)
 	my @b;
 	for $file.IO.lines -> $line {
 		next if ($line ~~ / "CmdLine" /);
-	
+
 		if ($readNext) {
 			my @temp = split(/\s+/, $line);
 			die "$self: Wrong line $line\n" if (@temp.elems != 5);
