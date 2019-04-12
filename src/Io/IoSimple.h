@@ -210,6 +210,13 @@ public:
 			fout_->precision(x);
 		}
 
+		SizeType precision(SizeType x)
+		{
+			if (!fout_) return x;
+			fout_->precision(x);
+			return x;
+		}
+
 		template<typename X>
 		friend Out& operator<<(Out& io, const X& t)
 		{

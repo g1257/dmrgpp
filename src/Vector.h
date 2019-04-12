@@ -382,7 +382,7 @@ T scalarProduct(const vector<T,A>& v1, const vector<T,A>& v2)
 {
 	T result = 0.0;
 	for (SizeType i=0; i < v2.size(); i++)
-		result += conj(v1[i]) * v2[i];
+		result += PsimagLite::conj(v1[i]) * v2[i];
 	return result;
 }
 

@@ -266,7 +266,17 @@ public:
 		throw RuntimeError(str);
 	}
 
-	int simplex(VectorType&,RealType=1e-3,RealType=1e-3)
+	int simplex(VectorType&,RealType = 1e-3,RealType = 1e-3)
+	{
+		String str("Minimizer needs the gsl\n");
+		throw RuntimeError(str);
+	}
+
+	int conjugateGradient(VectorType&,
+	                      RealType = 1e-3,
+	                      RealType = 1e-3,
+	                      RealType = 1e-3,
+	                      SizeType = 0)
 	{
 		String str("Minimizer needs the gsl\n");
 		throw RuntimeError(str);
