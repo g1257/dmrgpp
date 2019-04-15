@@ -349,7 +349,7 @@ protected:
 
 		// down-up
 		auto valueModifer = [](SparseElementType& value)
-		{ value = PsimagLite::conj(value);};
+		{ value = -PsimagLite::conj(value);};
 
 		rashbaSOC.push(cdown, 'N', cup, 'C', 1, 0, 0, valueModifer);
 	}
