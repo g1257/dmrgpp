@@ -231,7 +231,13 @@ struct ParametersDmrgSolver {
 		io.readline(options,"SolverOptions=");
 		options += sOptions;
 		io.readline(version,"Version=");
-		io.readline(filename,"OutputFile=");
+
+		try {
+			io.readline(filename,"OutputFile=");
+		} catch (std::exception&) {
+			filename = io.filename();
+		}
+
 		filename = filenameFromRootname(filename);
 
 		if (earlyExit) return;
@@ -671,6 +677,14 @@ private:
 		size_t findIndex = f.find(".txt");
 		if (findIndex != PsimagLite::String::npos)
 			f.replace(findIndex, PsimagLite::String(".txt").length(), ".hd5");
+
+		findIndex = f.find(".inp");
+		if (findIndex != PsimagLite::String::npos)
+			f.replace(findIndex, PsimagLite::String(".inp").length(), ".hd5");
+
+		findIndex = f.find(".ain");
+		if (findIndex != PsimagLite::String::npos)
+			f.replace(findIndex, PsimagLite::String(".ain").length(), ".hd5");
 
 		findIndex = f.find(".hd5");
 		if (findIndex == PsimagLite::String::npos)
