@@ -6,13 +6,15 @@ my $self = $*PROGRAM-NAME;
 
 sub MAIN(Str $name, *@args)
 {
-	my Str $dmrgppPath = getPsiPath("DMRGPP");
-	my $command = findCommand($name, $dmrgppPath);
+	$name ~~ / ^<[\w .]>+ $ / or die "$self: NAME $name not alphanumeric\n";
+	my Str $psiPath = getPsiPath();
+	my $scriptsPath = $psiPath ~ "/dmrgpp/scripts";
+	my $command = findCommand($name, $scriptsPath);
 
-	say $command ~ @args;
+	run $command, @args;
 }
 
-sub findCommand(Str $name2, Str $dmrgppPath)
+sub findCommand(Str $name2, Str $scriptsPath)
 {
 	my Str $name = $name2;
 	my $extension = $name.IO.extension;
@@ -35,19 +37,37 @@ sub findCommand(Str $name2, Str $dmrgppPath)
 
 	die "$self: File $name with wrong extension\n" unless ($extension);
 
-	$name.IO ~ :rx or die "$self: $name is not rx\n";
-	
+	return commandFromNameAndExtension($name, $extension, $scriptsPath);
+}
+
+sub commandFromNameAndExtension(Str $name, Str $extension, Str $scriptsPath)
+{
+	die "$self: scriptsPath/$name not in git index\n" unless isInGitIndex($name, $scriptsPath);
+
+	$name.IO ~~ :r & :x or die "$self: scriptsPath/$name is not read AND exec\n";
+
 	my $interpreter;
 	$interpreter = "/usr/bin/perl6" if ($extension eq "pl6");
 	$interpreter = "/usr/bin/perl" if ($extension eq "pl");
 	die "$self: Cannot find interpreter\n" unless ($interpreter);
 
-	my $argsForInterpreter = "-I $dmrgppPath/scripts ";
-	
-	return "$interpreter $argsForInterpreter $dmrgppPath/scripts/$name ";
+	my $argsForInterpreter = "-I $scriptsPath ";
+
+	return "$interpreter $argsForInterpreter $scriptsPath/$name ";
 }
 
-sub getPsiPath(Str $what)
+sub isInGitIndex(Str $name, Str $scriptsPath)
+{
+	my $oldir = $*CWD.basename;
+	chdir $scriptsPath;
+	my $full = $scriptsPath ~ "/" ~ $name;
+	$name ~~ / ^<[\w .]>+ $ / or die "$self: NAME $name not alphanumeric\n";
+	my $capture = q:x/git ls-files $full/;
+	#q:x
+	return $capture.trim-trailing ~~ / "$name" /;
+}
+
+sub getPsiPath()
 {
 	my Str $homeDir = %*ENV{"HOME"};
 	my Str $file = $homeDir ~ "/.config/PsimagLite/config";
