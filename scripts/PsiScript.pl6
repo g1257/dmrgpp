@@ -11,7 +11,7 @@ sub MAIN(Str $name, *@args)
 	my $scriptsPath = $psiPath ~ "/dmrgpp/scripts";
 	my $command = findCommand($name, $scriptsPath);
 
-	run $command, @args;
+	shell $command ~ " " ~ @args.join(' ');
 }
 
 sub findCommand(Str $name2, Str $scriptsPath)
@@ -51,7 +51,7 @@ sub commandFromNameAndExtension(Str $name, Str $extension, Str $scriptsPath)
 	$interpreter = "/usr/bin/perl" if ($extension eq "pl");
 	die "$self: Cannot find interpreter\n" unless ($interpreter);
 
-	my $argsForInterpreter = "-I $scriptsPath ";
+	my $argsForInterpreter = ($extension eq "pl") ?? " -I $scriptsPath " !! "";
 
 	return "$interpreter $argsForInterpreter $scriptsPath/$name ";
 }
