@@ -22,10 +22,10 @@ sub MAIN(Int $sites, $file)
 		my $val = @a[$s] - @b[$s];
 		my Int $distance = abs($s - $center) div 2;
 		if (!defined(@value[$distance])) {
-			@value[$distance] = abs($val);
+			@value[$distance] = $val;
 			@count[$distance] = 1;
 		} else {
-			@value[$distance] += abs($val);
+			@value[$distance] += $val;
 			++@count[$distance];
 		}
 	}
@@ -33,7 +33,7 @@ sub MAIN(Int $sites, $file)
 	my $max = @value.elems;
 	for 1..^$max -> Int $distance {
 		my $val = @value[$distance]/@count[$distance];
-		say "$distance " ~ abs($val);
+		say "$distance " ~ $val;
 	}
 }
 
@@ -83,23 +83,33 @@ sub findTypeAndSite($label, Int $center)
 	@temp.elems == 3 or die "$self: Wrong label $label\n";
 	my @temp2 = split(/";"/, @temp[1]);
 	@temp2.elems == 4 or die "$self: Wrong operators "~@temp[1]~"\n";
-	my $type;
 	my @sites;
-	my $typeCenter;
+	my @spins;
+	my ($removedCenter, $removedCenterP1) = (0, 0);
 	for 0..^4 -> Int $ind {
 		my $op = @temp2[$ind];
 		my ($spin, $site) = getSpinAndSite($op);
-		$typeCenter = ($site +& 1) if ($spin == 0);
-		next if ($site == $center or $site == $center + 1);
+
+		if ($site == $center and !$removedCenter) {
+			$removedCenter = 1;
+			next;
+		}
+
+		if ($site == $center + 1 and !$removedCenterP1) {
+			$removedCenterP1 = 1;
+			next;
+		}
+
 		push @sites, $site;
-		next if ($spin != 0);
-		$type = ($site +& 1);
+		push @spins, $spin;
 	}
 
-	@sites = ($center, $center + 1) if (@sites.elems == 0);
 	@sites.elems == 2 or die "$self: Wrong operators (sites): "~@temp[1]~"\n";
 	my $s = (@sites[0] < @sites[1]) ?? @sites[0] !! @sites[1];
-	defined($type) or $type = $typeCenter;
+	my $indexForSpin0 = (@spins[0] == 0) ?? 0 !! 1;
+	my $type = (@sites[$indexForSpin0] > @sites[1 - $indexForSpin0]);
+	my $diff = ($type) ?? @sites[$indexForSpin0] - @sites[1-$indexForSpin0] !! @sites[1 - $indexForSpin0] - @sites[$indexForSpin0];
+	#note $diff;
 	return ($type, $s);
 }
 
