@@ -104,6 +104,7 @@ sub readMatrix($file, $label)
 	while !$fh.eof {
 		++$ln;
 		my $line = $fh.get;
+		next if ($line ~~ /CmdLine/);
 		last if ($line ~~ / "$label" /);
 	}
 
