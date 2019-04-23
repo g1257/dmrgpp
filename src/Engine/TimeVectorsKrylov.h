@@ -138,7 +138,7 @@ public:
 		Action(const VectorRealType& eigs,
 		       const RealType& E0,
 		       const RealType& time,
-		       const RealType& timeDirection)
+		       RealType timeDirection)
 		    : eigs_(eigs),
 		      E0_(E0),
 		      time_(time),
@@ -162,7 +162,7 @@ public:
 		const VectorRealType& eigs_;
 		const RealType& E0_;
 		const RealType& time_;
-		const RealType& timeDirection_;
+		const RealType timeDirection_;
 	};
 
 	typedef KrylovHelper<Action> KrylovHelperType;
