@@ -20,8 +20,9 @@ public:
 	KrylovHelper(const SolverParamsType& params)
 	    : params_(params), progress_("KrylovHelper") {}
 
+	template<typename SomeActionType>
 	void calcR(VectorType& r,
-	           const ActionType& whatRorI,
+	           const SomeActionType& whatRorI,
 	           const MatrixComplexOrRealType& T,
 	           const MatrixComplexOrRealType& V,
 	           const VectorWithOffsetType& phi,

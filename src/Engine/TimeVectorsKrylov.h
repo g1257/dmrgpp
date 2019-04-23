@@ -131,38 +131,12 @@ public:
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 
-	class Action {
-
-	public:
-
-		Action(const VectorRealType& eigs,
-		       const RealType& E0,
-		       const RealType& time,
-		       RealType timeDirection)
-		    : eigs_(eigs),
-		      E0_(E0),
-		      time_(time),
-		      timeDirection_(timeDirection)		{}
+	struct Action {
 
 		typedef typename ThisType::MatrixComplexOrRealType MatrixComplexOrRealType;
 		typedef typename ThisType::VectorWithOffsetType VectorWithOffsetType;
 		typedef typename ThisType::VectorRealType VectorRealType;
 		typedef typename ModelType::SolverParamsType SolverParamsType;
-
-		ComplexOrRealType operator()(SizeType k) const
-		{
-			RealType tmp = (eigs_[k]-E0_)*time_*timeDirection_;
-			ComplexOrRealType c = 0.0;
-			PsimagLite::expComplexOrReal(c, -tmp);
-			return c;
-		}
-
-	private:
-
-		const VectorRealType& eigs_;
-		const RealType& E0_;
-		const RealType& time_;
-		const RealType timeDirection_;
 	};
 
 	typedef KrylovHelper<Action> KrylovHelperType;
@@ -262,7 +236,17 @@ private:
 	{
 		v = phi;
 		for (SizeType ii = 0;ii < phi.sectors(); ++ii) {
-			Action action(eigs[ii], Eg, times_[timeIndex], tstStruct.timeDirection());
+			const RealType time = times_[timeIndex];
+			const RealType timeDirection = tstStruct.timeDirection();
+			const VectorRealType& eigsii = eigs[ii];
+			auto action = [eigsii, Eg, time, timeDirection](SizeType k)
+			{
+				RealType tmp = (eigsii[k]-Eg)*time*timeDirection;
+				ComplexOrRealType c = 0.0;
+				PsimagLite::expComplexOrReal(c, -tmp);
+				return c;
+			};
+
 			SizeType i0 = phi.sector(ii);
 			VectorType r;
 			calcTargetVector(r, phi, T[ii], V[ii], action, steps[ii], i0);
@@ -270,11 +254,12 @@ private:
 		}
 	}
 
+	template<typename SomeLambdaType>
 	void calcTargetVector(VectorType& r,
 	                      const VectorWithOffsetType& phi,
 	                      const MatrixComplexOrRealType& T,
 	                      const MatrixComplexOrRealType& V,
-	                      const Action& action,
+	                      const SomeLambdaType& action,
 	                      SizeType steps,
 	                      SizeType i0)
 	{
