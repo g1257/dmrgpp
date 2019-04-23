@@ -247,23 +247,23 @@ private:
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
 		this->common().aoe().getPhi(&phiNew,
-		                      Eg,
-		                      direction,
-		                      site,
-		                      loopNumber,
-		                      tstStruct_);
+		                            Eg,
+		                            direction,
+		                            site,
+		                            loopNumber,
+		                            tstStruct_);
 
 		PairType startEnd(0,times_.size());
 		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) &&
 		                            this->common().aoe().noStageIs(StageEnumType::OPERATOR));
 
 		this->common().aoe().calcTimeVectors(startEnd,
-		                               Eg,
-		                               phiNew,
-		                               direction,
-		                               allOperatorsApplied,
-		                               block1,
-		                               tstStruct_);
+		                                     Eg,
+		                                     phiNew,
+		                                     direction,
+		                                     allOperatorsApplied,
+		                                     block1,
+		                                     tstStruct_);
 
 		bool doBorderIfBorder = false;
 		this->common().cocoon(block1, direction, doBorderIfBorder);

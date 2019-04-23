@@ -299,6 +299,8 @@ public:
 		tv3 += tv4;
 	}
 
+private:
+
 	void computeXiAndXrIndirect(VectorType& xi,
 	                            VectorType& xr,
 	                            const VectorType& sv,
@@ -372,7 +374,7 @@ public:
 	           SizeType i0)
 	{
 		bool krylovAbridge = (model_.params().options.find("KrylovNoAbridge") ==
-		        PsimagLite::String::npos);
+		                      PsimagLite::String::npos);
 		SizeType n3 = (krylovAbridge) ? 1 : n2;
 		// ---------------------------------------------------
 		// precompute values of calcVTimesPhi(kprime,v,phi,i0)
@@ -400,10 +402,10 @@ public:
 		progress_.printline(msg, std::cout);
 	}
 
-	ComplexOrRealType calcVTimesPhi(SizeType kprime,
-	                                const MatrixComplexOrRealType& V,
-	                                const VectorWithOffsetType& phi,
-	                                SizeType i0) const
+	static ComplexOrRealType calcVTimesPhi(SizeType kprime,
+	                                       const MatrixComplexOrRealType& V,
+	                                       const VectorWithOffsetType& phi,
+	                                       SizeType i0)
 	{
 		ComplexOrRealType ret = 0;
 		SizeType total = phi.effectiveSize(i0);
@@ -433,16 +435,6 @@ public:
 
 		threadedTriDiag.loopCreate(helperTriDiag);
 	}
-
-private:
-
-	void triDiagRixs(const VectorWithOffsetType& phi,
-	                 VectorMatrixFieldType& T,
-	                 VectorMatrixFieldType& V,
-	                 VectorSizeType& steps,
-	                 ProgramGlobals::DirectionEnum direction,
-	                 SizeType site)
-	{}
 
 	RealType dynWeightOf(VectorType& v,const VectorType& w) const
 	{
