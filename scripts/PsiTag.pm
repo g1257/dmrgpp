@@ -42,6 +42,44 @@ Content is subject to interpretation as follows.
 
 Tagging is canonicalized as follows: See canonicalTagName below.
 
+Proposal for improvement: if statement after mode
+
+Example:
+
+mytag ? [if xyz] = 42
+
+sets mytag to 42 only if xyz is an existing tag
+
+Syntax: tagging ? [ modifier ] mode content
+
+where tagging, mode, and content are treated and defined as before,
+modifier MUST NOT be multiline; and \[ is replaced into [ and \] into ]
+
+modifer = submodifer1 &&& submodifer2 &&& submodifer3
+
+\&&& is replaced into &&& for each submodifer.
+
+The only submodifer type allowed for now is type if. And it is allowed only once.
+
+submodifierOfTypeIf = if predicate
+
+where
+
+predicate = subpredicate1 SEPARATOR subpredicate2 SEPARATOR ...
+
+If only one subpredicate is present SEPARATOR MUST be ommited.
+Separator is one of || for logical OR, and && for logical AND.
+For each subpredicate, \|| is replaced into || and \&& into &&.
+
+subpredicate = tag
+subpredicate = ! tag
+subpredicate = tag == content
+subpredicate = tag != content
+subpredicate = tag1 == < tag2
+subpredicate = tag1 != < tag2
+Spaces are optional. Spaces before and after content will be part of content.
+content MUST NOT be multiline; the whole predicate is within the line.
+
 =cut
 
 package PsiTag;
