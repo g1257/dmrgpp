@@ -9,18 +9,23 @@ Syntax: tagging  mode content
 content can appear multiline if scope is block
 block is between ( ) multiline
 tagging and mode must appear in the same line
-automatic tagging is possible with .= content
+
 Mode is either
              add definition and overwrite if it exits =
              add definition and append to it if it exits +=
              add definition or ignore if it exits =?
              add definition or fail if it exits =!
-             delete definition or ignore if it doesn't exist -=
-             delete definition or fail if it exits -=!
+             delete from definition or ignore if it doesn't exist -=
+             delete from definition or fail if it exits -=!
 
 tagging must not contain any of = + ? ! - < & *
 
 Content is subject to interpretation as follows.
+
+   (0) sometag = ()
+	Deletes sometag if it exits. Spaces around =  are optional. Note that
+       sometag =
+       sets the content of sometag to nothing, and is different from deletion.
 
    (1) First non-whitespace character after mode in the same line, if it is a (
 
@@ -81,8 +86,16 @@ sub readTags
 		}
 
 		if (!$blockScope) {
+
 			next if ($line =~ /^\#/ or isEmptyLine($line));
-			if ($line =~ /^([^\=\+\?\!\-\<\&\*]+)([\=\+\?\!\-\<\&\*][^ \t]*)(.*)$/) {
+
+			if ($line =~ /^([^\=\+\?\!\-\<\&\*]+)\=[ \t]*\(\)[ \t]*$/) {
+				my $tag = $1;
+				removeTag($tags, canonicalTagName($tag));
+				next;
+			}
+
+			if ($line =~ /^([^\=\+\?\!\-\<\&\*]+)([\=\+\?\!\-\<\&\*]+)[ \t]*(.*)$/) {
 				my $tag = $1;
 				my $mode = $2;
 				my $rest = $3;
@@ -108,7 +121,7 @@ sub readTags
 					syntaxError($line, $i + 1);
 				}
 
-				($tag) or die "$0: tag does not exist in line scope $line\n";
+				($tag) or die "$0: FATAL: tag does not exist in line scope $line\n";
 				if ($thisLineParens > 0) {
 					$blockScope = 1;
 					$multilineContent = "";
@@ -146,14 +159,59 @@ sub readTags
 sub addTag
 {
 	my ($tags, $tag, $mode, $content) = @_;
-	#print STDERR "$0: Adding $tag, ignoring $mode\n";
-	$tags->{"$tag"} = {"content" => $content};
+	# mode is 
+	# = (add or overwrite) 
+	# += (append) 
+	# -= (delete) 
+	# =? (selective add)
+	# =! (strict add)
+	# -=! (strict delete)
+	# Does the tag exist?
+	my $mytag = $tags->{"$tag"};
+	my $b = defined($mytag);
+	my $oldContent = ($b) ? $tags->{"$tag"}{"content"} : "";
+	my $append = (($mode eq "=?" && !$b) or ($mode eq "+=") or ($mode eq "=!" && !$b) or ($mode eq "="));
+	
+	die "$0: FATAL: Adding tag $tag with $mode, but $tag already exists\n" if ($mode eq "=!" && $b);
+
+	return if ($mode eq "=?" && $b);
+
+	if ($append) {
+		$oldContent = "" if ($mode eq "=");
+		$tags->{"$tag"} = {"content" => "$oldContent$content"};
+		return;
+	}
+
+	if ($mode eq "-=" or $mode eq "-=!") {
+
+		print STDERR "$0: WARNING: Deletion of content in non-existing tag $tag\n" if (!$b);
+
+		my $hasIt = ($oldContent =~ /\Q$content/);
+
+		die "$0: FATAL: Strict delete of non-existing content in tag $tag\n" if ($mode eq "-=!" && !$hasIt);
+
+		return if (!$hasIt);
+
+		$oldContent =~ s/\Q$content//g if ($hasIt);
+		$tags->{"$tag"} = {"content" => "$oldContent"};
+		return;
+	}
+
+	die "$0: FATAL: Unknown mode $mode applied to tag $tag\n";	
+}
+
+sub removeTag
+{
+	my ($tags, $tag) = @_;
+
+	defined($tags->{"$tag"}) or return;	
+	delete $tags->{"$tag"};
 }
 
 sub syntaxError
 {
 	my ($line, $ind) = @_;
-	print STDERR "$0: Syntax error line $ind\n";
+	print STDERR "$0: FATAL: Syntax error line $ind\n";
 	die "$0: ----> $line <------\n";
 }
 
@@ -186,13 +244,13 @@ sub unWrap
 		my $content = $line;
 		if ($line =~ /^[ \t]*\<(.*$)/) { # (3) in block scope
 			my $existingTag = $1;
-			($existingTag) or die "$0: Tag does not exist in unWrap: $line\n";
+			($existingTag) or die "$0: FATAL: Tag does not exist in unWrap: $line\n";
 			$existingTag = canonicalTagName($existingTag);
 			my $ptr = $tags->{"$existingTag"};
-			defined($ptr) or die "$0: Tag $existingTag doesn't exist\n";
-			(ref($ptr) eq "HASH") or die "$0: Tag $existingTag not hash ref but ".ref($ptr)."\n";
+			defined($ptr) or die "$0: FATAL: Tag $existingTag doesn't exist\n";
+			(ref($ptr) eq "HASH") or die "$0: FATAL: Tag $existingTag not hash ref but ".ref($ptr)."\n";
 			$content = $ptr->{"content"};
-			defined($content) or die "$0: No content for $existingTag\n";
+			defined($content) or die "$0: FATAL: No content for $existingTag\n";
 			$content = unWrap($tags, $content);
 		}
 
