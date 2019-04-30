@@ -215,7 +215,8 @@ public:
 	                PsimagLite::String prefix) const
 	{
 		SizeType site = block[0];
-		TimeSerializerType ts(aoe_.currentTime(),
+		TimeSerializerType ts(aoe_.currentTimeStep(),
+		                      aoe_.time(),
 		                      site,
 		                      aoe_.targetVectors(),
 		                      aoe_.stages());
@@ -256,7 +257,7 @@ public:
 		for (SizeType i = 0; i < n; ++i)
 			aoe_.targetVectors(i) = ts->vector(i);
 
-		aoe_.setTime(ts->time());
+		aoe_.setCurrentTimeStep(ts->currentTimeStep());
 
 		delete ts;
 		ts = 0;
@@ -477,7 +478,7 @@ public:
 	               const TargetParamsType& tstStruct)
 	{
 		SizeType startOfWft = 1;
-		if (aoe_.currentTime() == 0) {
+		if (aoe_.currentTimeStep() == 0) {
 			SizeType indexOf1 = indices[startOfWft];
 			VectorWithOffsetType& tv1 =
 			        const_cast<VectorWithOffsetType&>(aoe_.targetVectors(indexOf1));
@@ -707,7 +708,7 @@ private:
 	          BorderEnumType border) const
 	{
 		ComplexOrRealType sum = test_(src1,src2,systemOrEnviron,site,A,border);
-		std::cout<<site<<" "<<sum<<" "<<aoe_.currentTime();
+		std::cout<<site<<" "<<sum<<" "<<aoe_.time();
 		std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
 	}
 

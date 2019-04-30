@@ -126,15 +126,16 @@ class TimeVectorsSuzukiTrotter : public  TimeVectorsBase<
 
 public:
 
-	TimeVectorsSuzukiTrotter(RealType currentTime,
+	TimeVectorsSuzukiTrotter(const SizeType& currentTimeStep,
 	                         const VectorRealType& times,
 	                         VectorVectorWithOffsetType& targetVectors,
 	                         const ModelType& model,
 	                         const WaveFunctionTransfType& wft,
 	                         const LeftRightSuperType& lrs,
 	                         const RealType& E0)
-	    : progress_("TimeVectorsSuzukiTrotter"),
-	      currentTime_(currentTime),
+	    : BaseType(times),
+	      progress_("TimeVectorsSuzukiTrotter"),
+	      currentTimeStep_(currentTimeStep),
 	      times_(times),
 	      targetVectors_(targetVectors),
 	      model_(model),
@@ -245,6 +246,8 @@ public:
 			assert(targetVectors_[i].size()==targetVectors_[0].size());
 		}
 	}
+
+	RealType time() const { return currentTimeStep_*BaseType::tau(); }
 
 	virtual void timeHasAdvanced()
 	{
@@ -572,7 +575,7 @@ private:
 	}
 
 	PsimagLite::ProgressIndicator progress_;
-	RealType currentTime_;
+	const SizeType& currentTimeStep_;
 	const VectorRealType& times_;
 	VectorVectorWithOffsetType& targetVectors_;
 	const ModelType& model_;

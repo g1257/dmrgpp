@@ -316,7 +316,7 @@ public:
 
 		VectorVectorWithOffsetType& tv = const_cast<VectorVectorWithOffsetType&>
 		        (this->common().aoe().targetVectors());
-		if (mettsStruct_.beta > this->common().aoe().currentTime()) {
+		if (mettsStruct_.beta > this->common().aoe().time()) {
 			for (SizeType i = 0; i < this->common().aoe().targetVectors().size(); ++i)
 				tv[i].clear();
 		}
@@ -392,7 +392,7 @@ private:
 			sitesCollapsed_.clear();
 			this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 			timesWithoutAdvancement = 0;
-			this->common().aoe().setTime(0);
+			this->common().aoe().setCurrentTimeStep(0);
 			PsimagLite::OstringStream msg;
 			SizeType n1 = mettsStruct_.timeSteps();
 			RealType x = norm(this->common().aoe().targetVectors()[n1]);
@@ -412,24 +412,24 @@ private:
 		}
 
 		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE) &&
-		        this->common().aoe().currentTime() < mettsStruct_.beta) {
+		        this->common().aoe().time() < mettsStruct_.beta) {
 			this->common().setAllStagesTo(StageEnumType::WFT_ADVANCE);
-			RealType tmp = this->common().aoe().currentTime() + mettsStruct_.tau();
-			this->common().aoe().setTime(tmp);
+			const SizeType tmp = this->common().aoe().currentTimeStep() + 1;
+			this->common().aoe().setCurrentTimeStep(tmp);
 			timesWithoutAdvancement = 0;
 			printAdvancement(timesWithoutAdvancement);
 			return;
 		}
 
 		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE) &&
-		        this->common().aoe().currentTime() >= mettsStruct_.beta &&
+		        this->common().aoe().time() >= mettsStruct_.beta &&
 		        block[0]!=block.size()) {
 			printAdvancement(timesWithoutAdvancement);
 			return;
 		}
 
 		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE) &&
-		        this->common().aoe().currentTime() >= mettsStruct_.beta) {
+		        this->common().aoe().time() >= mettsStruct_.beta) {
 			this->common().setAllStagesTo(StageEnumType::COLLAPSE);
 			sitesCollapsed_.clear();
 			SizeType n1 = mettsStruct_.timeSteps();
@@ -795,7 +795,7 @@ private:
 		                                                 BaseType::lrs(),
 		                                                 BaseType::model().geometry(),
 		                                                 BaseType::ModelType::modelLinks(),
-		                                                 this->common().aoe().currentTime(),
+		                                                 this->common().aoe().time(),
 		                                                 0);
 		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
 		                                                     hc);
@@ -806,7 +806,7 @@ private:
 		TargetVectorType x(total);
 		lanczosHelper.matrixVectorProduct(x,phi2);
 		PsimagLite::OstringStream msg;
-		msg<<"Hamiltonian average at time="<<this->common().aoe().currentTime();
+		msg<<"Hamiltonian average at time="<<this->common().aoe().time();
 		msg<<" for target="<<whatTarget;
 		ComplexOrRealType numerator = phi2*x;
 		ComplexOrRealType den = phi2*phi2;

@@ -141,7 +141,7 @@ public:
 
 	typedef KrylovHelper<Action> KrylovHelperType;
 
-	TimeVectorsKrylov(const RealType& currentTime,
+	TimeVectorsKrylov(const SizeType& currentTimeStep,
 	                  const VectorRealType& times,
 	                  VectorVectorWithOffsetType& targetVectors,
 	                  const ModelType& model,
@@ -149,7 +149,8 @@ public:
 	                  const LeftRightSuperType& lrs,
 	                  const RealType& E0,
 	                  InputValidatorType& ioIn)
-	    : currentTime_(currentTime),
+	    : BaseType(times),
+	      currentTimeStep_(currentTimeStep),
 	      times_(times),
 	      targetVectors_(targetVectors),
 	      model_(model),
@@ -169,7 +170,7 @@ public:
 	                             const PsimagLite::Vector<SizeType>::Type&,
 	                             const TargetParamsType& tstStruct)
 	{
-		if (currentTime_==0 && tstStruct.noOperator() && tstStruct.skipTimeZero()) {
+		if (currentTimeStep_ == 0 && tstStruct.noOperator() && tstStruct.skipTimeZero()) {
 			for (SizeType i=0;i<times_.size();i++)
 				targetVectors_[i]=phi;
 			return;
@@ -202,6 +203,8 @@ public:
 	{
 		timeHasAdvanced_ = true;
 	}
+
+	RealType time() const { return currentTimeStep_*BaseType::tau(); }
 
 private:
 
@@ -289,12 +292,12 @@ private:
 		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
 		ParallelizerType threadedTriDiag(PsimagLite::CodeSectionParams(1));
 
-		ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,currentTime_,model_,ioIn_);
+		ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,time(),model_,ioIn_);
 
 		threadedTriDiag.loopCreate(helperTriDiag);
 	}
 
-	const RealType& currentTime_;
+	const SizeType& currentTimeStep_;
 	const VectorRealType& times_;
 	VectorVectorWithOffsetType& targetVectors_;
 	const ModelType& model_;

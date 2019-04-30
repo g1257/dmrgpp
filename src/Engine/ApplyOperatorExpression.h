@@ -129,7 +129,7 @@ public:
 	    : progress_("ApplyOperatorExpression"),
 	      targetHelper_(targetHelper),
 	      E0_(0.0),
-	      currentTime_(0.0),
+	      currentTimeStep_(0),
 	      indexNoAdvance_(indexNoAdvance),
 	      applyOpLocal_(targetHelper.lrs(), targetHelper.withLegacyBugs()),
 	      targetVectors_(0),
@@ -247,11 +247,6 @@ public:
 		return E0_;
 	}
 
-	const RealType& currentTime() const
-	{
-		return currentTime_;
-	}
-
 	const ApplyOperatorType& applyOpLocal() const
 	{
 		return applyOpLocal_;
@@ -303,7 +298,7 @@ public:
 
 		switch (tstStruct.algorithm()) {
 		case TargetParamsType::AlgorithmEnum::KRYLOV:
-			timeVectorsBase_ = new TimeVectorsKrylovType(currentTime_,
+			timeVectorsBase_ = new TimeVectorsKrylovType(currentTimeStep_,
 			                                             times,
 			                                             targetVectors_,
 			                                             model,
@@ -313,7 +308,7 @@ public:
 			                                             ioIn);
 			break;
 		case TargetParamsType::AlgorithmEnum::CHEBYSHEV:
-			timeVectorsBase_ = new TimeVectorsChebyshevType(currentTime_,
+			timeVectorsBase_ = new TimeVectorsChebyshevType(currentTimeStep_,
 			                                                times,
 			                                                targetVectors_,
 			                                                model,
@@ -323,7 +318,7 @@ public:
 			                                                ioIn);
 			break;
 		case TargetParamsType::AlgorithmEnum::RUNGE_KUTTA:
-			timeVectorsBase_ = new TimeVectorsRungeKuttaType(currentTime_,
+			timeVectorsBase_ = new TimeVectorsRungeKuttaType(currentTimeStep_,
 			                                                 times,
 			                                                 targetVectors_,
 			                                                 model,
@@ -332,7 +327,7 @@ public:
 			                                                 E0_);
 			break;
 		case TargetParamsType::AlgorithmEnum::SUZUKI_TROTTER:
-			timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(currentTime_,
+			timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(currentTimeStep_,
 			                                                    times,
 			                                                    targetVectors_,
 			                                                    model,
@@ -345,9 +340,16 @@ public:
 		}
 	}
 
-	void setTime(RealType t)
+	RealType time() const
 	{
-		currentTime_ = t;
+		return (timeVectorsBase_) ? timeVectorsBase_->time() : 0;
+	}
+
+	SizeType currentTimeStep() const { return currentTimeStep_; }
+
+	void setCurrentTimeStep(SizeType t)
+	{
+		currentTimeStep_ = t;
 	}
 
 	void timeHasAdvanced() { timeVectorsBase_->timeHasAdvanced(); }
@@ -531,7 +533,7 @@ private:
 		if (advanceEach > 0 && timesWithoutAdvancement >= advanceEach && !dontAdvance) {
 			stage_[i] = StageEnum::WFT_ADVANCE;
 			if (i == lastI) {
-				currentTime_ += tstStruct.tau();
+				++currentTimeStep_;
 				timesWithoutAdvancement=1;
 				timeVectorsBase_->timeHasAdvanced();
 			}
@@ -550,7 +552,7 @@ private:
 
 		PsimagLite::OstringStream msg2;
 		msg2<<"Steps without advance: "<<timesWithoutAdvancement;
-		msg2<<" site="<<site<<" currenTime="<<currentTime_;
+		msg2<<" site="<<site<<" currenTime="<<time();
 		if (timesWithoutAdvancement>0) progress_.printline(msg2,std::cout);
 
 		PsimagLite::OstringStream msg;
@@ -642,7 +644,7 @@ private:
 	const TargetHelperType& targetHelper_;
 	VectorStageEnumType stage_;
 	RealType E0_;
-	RealType currentTime_;
+	SizeType currentTimeStep_;
 	SizeType indexNoAdvance_;
 	ApplyOperatorType applyOpLocal_;
 	VectorWithOffsetType psi_;

@@ -455,7 +455,7 @@ private:
 			ComplexOrRealType ii =
 			        this->common().rixsCocoon(direction,site,9,5,true);
 
-			const RealType time = this->common().aoe().currentTime();
+			const RealType time = this->common().aoe().time();
 			std::cout<<site<<" "<<(ri-ir)<<" "<<time; // time here is the currentTime
 			std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
 			std::cout<<site<<" "<<(rr+ii)<<" "<<time; // time here is the currentTime
@@ -471,7 +471,7 @@ private:
 			ComplexOrRealType ii =
 			        this->common().rixsCocoon(direction,site,11,5,true);
 
-			const RealType time = this->common().aoe().currentTime();
+			const RealType time = this->common().aoe().time();
 			std::cout<<site<<" "<<(ri-ir)<<" "<<time; // time here is the currentTime
 			std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
 			std::cout<<site<<" "<<(rr+ii)<<" "<<time; // time here is the currentTime

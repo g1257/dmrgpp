@@ -107,7 +107,7 @@ class TimeVectorsChebyshev : public  TimeVectorsBase<TargetParamsType,
 	VectorWithOffsetType> BaseType;
 	typedef typename BaseType::PairType PairType;
 	typedef typename TargetParamsType::RealType RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename BaseType::VectorRealType VectorRealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType
@@ -133,7 +133,7 @@ class TimeVectorsChebyshev : public  TimeVectorsBase<TargetParamsType,
 
 public:
 
-	TimeVectorsChebyshev(const RealType& currentTime,
+	TimeVectorsChebyshev(const SizeType& currentTimeStep,
 	                     const VectorRealType& times,
 	                     VectorVectorWithOffsetType& targetVectors,
 	                     const ModelType& model,
@@ -141,7 +141,8 @@ public:
 	                     const LeftRightSuperType& lrs,
 	                     const RealType& E0,
 	                     InputValidatorType& ioIn)
-	    : currentTime_(currentTime),
+	    : BaseType(times),
+	      currentTimeStep_(currentTimeStep),
 	      times_(times),
 	      targetVectors_(targetVectors),
 	      model_(model),
@@ -162,7 +163,7 @@ public:
 	{
 		SizeType n = indices.size();
 		assert(n > 0);
-		if (currentTime_==0 && tstStruct.noOperator() && tstStruct.skipTimeZero()) {
+		if (currentTimeStep_ == 0 && tstStruct.noOperator() && tstStruct.skipTimeZero()) {
 			for (SizeType i = 0; i < n; ++i) {
 				SizeType ii = indices[i];
 				targetVectors_[ii] = phi;
@@ -203,6 +204,7 @@ public:
 		timeHasAdvanced_ = true;
 	}
 
+	RealType time() const { return currentTimeStep_*BaseType::tau(); }
 
 private:
 
@@ -233,7 +235,7 @@ private:
 		                                                 lrs_,
 		                                                 model_.geometry(),
 		                                                 ModelType::modelLinks(),
-		                                                 currentTime_,
+		                                                 time(),
 		                                                 0);
 		MatrixLanczosType lanczosHelper(model_,
 		                                hc);
@@ -248,7 +250,7 @@ private:
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
 		r.resize(total);
-		if (currentTime_ == 0) {
+		if (currentTimeStep_ == 0) {
 			phi.extract(phi2,i0);
 			lanczosHelper2.matrixVectorProduct(r,phi2); // applying Hprime
 		} else {
@@ -261,7 +263,7 @@ private:
 		}
 	}
 
-	const RealType& currentTime_;
+	const SizeType& currentTimeStep_;
 	const VectorRealType& times_;
 	VectorVectorWithOffsetType& targetVectors_;
 	const ModelType& model_;

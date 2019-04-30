@@ -96,11 +96,13 @@ public:
 
 	typedef typename PsimagLite::Vector<StageEnum>::Type VectorStageEnumType;
 
-	TimeSerializer(RealType currentTime,
+	TimeSerializer(SizeType currentTimeStep,
+	               RealType currentTime,
 	               SizeType site,
 	               const typename PsimagLite::Vector<VectorType>::Type& targetVectors,
 	               const VectorStageEnumType& stages)
-	    : currentTime_(currentTime),
+	    : currentTimeStep_(currentTimeStep),
+	      currentTime_(currentTime),
 	      site_(site),
 	      targetVectors_(targetVectors),
 	      stages_(stages)
@@ -111,12 +113,11 @@ public:
 	{
 		prefix += "/TimeSerializer/";
 
-		RealType x = 0;
-		PsimagLite::String s = prefix + "Time";
-		io.read(x, s);
-		if (x < 0)
-			err("TimeSerializer:: time cannot be negative\n");
-		currentTime_ = x;
+		PsimagLite::String s = prefix + "CurrentTimeStep";
+		io.read(currentTimeStep_, s);
+
+		s = prefix + "Time";
+		io.read(currentTime_, s);
 
 		s = prefix + "TargetCentralSite";
 		int xi = 0;
@@ -146,6 +147,7 @@ public:
 		prefix += "/";
 
 		io.write(currentTime_, prefix + "Time");
+		io.write(currentTimeStep_, prefix + "CurrentTimeStep");
 		io.write(site_, prefix + "TargetCentralSite");
 		io.write(targetVectors_.size(), prefix + "TNUMBEROFVECTORS");
 
@@ -161,6 +163,8 @@ public:
 	{
 		return  targetVectors_.size();
 	}
+
+	SizeType currentTimeStep() const { return currentTimeStep_; }
 
 	RealType time() const { return currentTime_; }
 
@@ -183,6 +187,7 @@ public:
 
 private:
 
+	SizeType currentTimeStep_;
 	RealType currentTime_;
 	SizeType site_;
 	typename PsimagLite::Vector<VectorType>::Type targetVectors_;
