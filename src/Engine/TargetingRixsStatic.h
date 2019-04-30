@@ -153,7 +153,7 @@ public:
 	                    const QnType&,
 	                    InputValidatorType& ioIn)
 	    : BaseType(lrs,model,wft,1),
-	      tstStruct_(ioIn,model),
+	      tstStruct_(ioIn, "TargetingRixsStatic", model),
 	      ioIn_(ioIn),
 	      progress_("TargetingRixsStatic"),
 	      gsWeight_(1.0),

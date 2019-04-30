@@ -149,8 +149,8 @@ public:
 	                          const WaveFunctionTransfType& wft,
 	                          const QnType&,
 	                          InputValidatorType& ioIn)
-	    : BaseType(lrs,model,wft,1),
-	      tstStruct_(ioIn, model),
+	    : BaseType(lrs, model, wft, 1),
+	      tstStruct_(ioIn, "TargetingCorrectionVector", model),
 	      ioIn_(ioIn),
 	      progress_("TargetingCorrectionVector"),
 	      gsWeight_(1.0),

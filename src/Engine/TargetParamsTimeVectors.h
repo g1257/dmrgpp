@@ -94,8 +94,10 @@ public:
 	typedef typename BaseType::VectorRealType VectorRealType;
 
 	template<typename IoInputter>
-	TargetParamsTimeVectors(IoInputter& io,const ModelType& model)
-	    : BaseType(io,model),
+	TargetParamsTimeVectors(IoInputter& io,
+	                        PsimagLite::String targeting,
+	                        const ModelType& model)
+	    : BaseType(io, targeting, model),
 	      timeSteps_(0),
 	      advanceEach_(0),
 	      algorithm_(BaseType::AlgorithmEnum::KRYLOV),

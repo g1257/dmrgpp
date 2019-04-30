@@ -158,7 +158,7 @@ public:
 	                     const QnType&,
 	                     InputValidatorType& ioIn)
 	    : BaseType(lrs,model,wft,1),
-	      tstStruct_(ioIn, model),
+	      tstStruct_(ioIn, "TargetingRixsDynamic", model),
 	      tstStruct2_(nullptr),
 	      ioIn_(ioIn),
 	      progress_("TargetingRixsDynamic"),
@@ -176,7 +176,7 @@ public:
 			return; // early exit here
 		}
 
-		tstStruct2_ = new TargetParams2Type(ioIn, model);
+		tstStruct2_ = new TargetParams2Type(ioIn, "TargetingRixsDynamic", model);
 		times_.resize(tstStruct2_->timeSteps());
 
 		RealType tau = tstStruct2_->tau();

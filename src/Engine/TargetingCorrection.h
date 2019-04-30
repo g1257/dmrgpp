@@ -122,7 +122,7 @@ public:
 	                    const QnType&,
 	                    InputValidatorType& io)
 	    : BaseType(lrs,model,wft,0),
-	      tstStruct_(io,model),
+	      tstStruct_(io, "TargetingCorrection"),
 	      progress_("TargetingCorrection")
 	{}
 

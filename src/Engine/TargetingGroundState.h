@@ -122,9 +122,9 @@ public:
 	                     const ModelType& model,
 	                     const WaveFunctionTransfType& wft,
 	                     const QnType&,
-	                     InputValidatorType& io)
-	    : BaseType(lrs,model,wft,0),
-	      tstStruct_(io,model),
+	                     InputValidatorType&)
+	    : BaseType(lrs, model, wft, 0),
+	      tstStruct_("TargetingGroundState"),
 	      progress_("TargetingGroundState")
 	{}
 

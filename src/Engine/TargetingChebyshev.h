@@ -124,8 +124,8 @@ public:
 	                   const WaveFunctionTransfType& wft,
 	                   const QnType&,
 	                   InputValidatorType& ioIn)
-	    : BaseType(lrs,model,wft,0),
-	      tstStruct_(ioIn,model),
+	    : BaseType(lrs, model, wft, 0),
+	      tstStruct_(ioIn, "TargetingChebyshev", model),
 	      wft_(wft),
 	      progress_("TargetingChebyshev"),
 	      times_(tstStruct_.timeSteps()),

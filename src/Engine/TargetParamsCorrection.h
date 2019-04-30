@@ -94,7 +94,8 @@ public:
 	typedef typename BaseType::RealType RealType;
 
 	template<typename IoInputter>
-	TargetParamsCorrection(IoInputter& io,const ModelType&)
+	TargetParamsCorrection(IoInputter& io, PsimagLite::String targeting)
+	    : BaseType(targeting)
 	{
 		io.readline(correctionA_,"CorrectionA=");
 	}

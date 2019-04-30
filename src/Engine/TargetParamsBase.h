@@ -104,6 +104,8 @@ public:
 
 	enum class AlgorithmEnum {KRYLOV, CONJUGATE_GRADIENT, CHEBYSHEV, RUNGE_KUTTA, SUZUKI_TROTTER};
 
+	TargetParamsBase(PsimagLite::String targeting) : targeting_(targeting) {}
+
 	virtual ~TargetParamsBase() {}
 
 	virtual SizeType sites() const = 0;
@@ -243,6 +245,8 @@ public:
 		return unimplemented("timeDirection");
 	}
 
+	virtual PsimagLite::String targeting() const { return targeting_; }
+
 private:
 
 	RealType unimplemented(PsimagLite::String s) const
@@ -256,6 +260,8 @@ private:
 		s = "TargetParamsBase: unimplemented " + s + "\n";
 		throw PsimagLite::RuntimeError(s);
 	}
+
+	PsimagLite::String targeting_;
 }; // class TargetParamsBase
 
 } // namespace Dmrg

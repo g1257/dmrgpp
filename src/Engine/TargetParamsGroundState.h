@@ -90,8 +90,7 @@ public:
 
 	typedef typename ModelType::RealType RealType;
 
-	template<typename IoInputter>
-	TargetParamsGroundState(IoInputter&,const ModelType&)
+	TargetParamsGroundState(PsimagLite::String targeting) : BaseType(targeting)
 	{}
 
 	virtual SizeType memResolv(PsimagLite::MemResolv&,

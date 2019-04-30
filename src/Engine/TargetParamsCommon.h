@@ -104,8 +104,11 @@ public:
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 
-	TargetParamsCommon(InputValidatorType& io,const ModelType& model)
-	    : sites_(0),
+	TargetParamsCommon(InputValidatorType& io,
+	                   PsimagLite::String targeting,
+	                   const ModelType& model)
+	    : BaseType(targeting),
+	      sites_(0),
 	      startingLoops_(0),
 	      concatenation_(BaseType::ConcatEnum::PRODUCT),
 	      noOperator_(false),

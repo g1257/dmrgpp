@@ -137,7 +137,7 @@ public:
 	                 const QnType&,
 	                 InputValidatorType& io)
 	    : BaseType(lrs,model,wft,0),
-	      tstStruct_(io,model),
+	      tstStruct_(io, "TargetingDynamic", model),
 	      wft_(wft),
 	      progress_("TargetingDynamic"),
 	      gsWeight_(tstStruct_.gsWeight()),

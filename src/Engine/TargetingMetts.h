@@ -162,10 +162,10 @@ public:
 	               const WaveFunctionTransfType& wft,
 	               const QnType& quantumSector,
 	               InputValidatorType& ioIn)
-	    : BaseType(lrs,model,wft,0),
+	    : BaseType(lrs, model, wft, 0),
 	      model_(model),
 	      lrs_(lrs),
-	      mettsStruct_(ioIn,model),
+	      mettsStruct_(ioIn, "TargetingMetts", model),
 	      wft_(wft),
 	      quantumSector_(quantumSector),
 	      progress_("TargetingMetts"),

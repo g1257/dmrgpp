@@ -123,15 +123,17 @@ public:
 	                  const ModelType& model,
 	                  const WaveFunctionTransfType& wft,
 	                  const QnType&,
-	                  InputValidatorType& ioIn)
-	    : BaseType(lrs,model,wft,0),
-	      tstStruct_(ioIn,model),
+	                  InputValidatorType& ioIn,
+	                  PsimagLite::String targeting)
+	    : BaseType(lrs, model, wft, 0),
+	      tstStruct_(ioIn, targeting, model),
 	      wft_(wft),
-	      progress_("TargetingTimeStep"),
+	      progress_(targeting),
 	      times_(tstStruct_.timeSteps()),
 	      weight_(tstStruct_.timeSteps()),
 	      tvEnergy_(times_.size(),0.0),
-	      gsWeight_(tstStruct_.gsWeight())
+	      gsWeight_(tstStruct_.gsWeight()),
+	      targeting_(targeting)
 	{
 		if (!wft.isEnabled())
 			err("TST needs an enabled wft\n");
@@ -336,6 +338,7 @@ private:
 	VectorRealType weight_;
 	mutable VectorRealType tvEnergy_;
 	RealType gsWeight_;
+	PsimagLite::String targeting_;
 };     //class TargetingTimeStep
 } // namespace Dmrg
 

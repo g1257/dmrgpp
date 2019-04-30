@@ -102,8 +102,10 @@ public:
 	typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
 
 	template<typename IoInputter>
-	TargetParamsCorrectionVector(IoInputter& io,const ModelType& model)
-	    : BaseType(io,model),
+	TargetParamsCorrectionVector(IoInputter& io,
+	                             PsimagLite::String targeting,
+	                             const ModelType& model)
+	    : BaseType(io, targeting, model),
 	      cgSteps_(1000),
 	      cgEps_(1e-6)
 	{

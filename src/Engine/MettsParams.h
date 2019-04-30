@@ -99,8 +99,10 @@ public:
 	typedef typename OperatorType::StorageType SparseMatrixType;
 
 	template<typename IoInputter>
-	MettsParams(IoInputter& io,const ModelType& model)
-	    : TimeVectorParamsType(io,model)
+	MettsParams(IoInputter& io,
+	            PsimagLite::String targeting,
+	            const ModelType& model)
+	    : TimeVectorParamsType(io, targeting, model)
 	{
 		io.readline(beta,"BetaDividedByTwo=");
 		io.readline(rngSeed,"TSPRngSeed=");

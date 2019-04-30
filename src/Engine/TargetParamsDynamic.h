@@ -98,8 +98,8 @@ public:
 	typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
 
 	template<typename IoInputter>
-	TargetParamsDynamic(IoInputter& io,const ModelType& model)
-	    : TargetParamsCommonType(io,model)
+	TargetParamsDynamic(IoInputter& io, PsimagLite::String targeting, const ModelType& model)
+	    : TargetParamsCommonType(io, targeting, model)
 	{
 		io.readline(type_,"DynamicDmrgType=");
 	}

@@ -84,7 +84,7 @@ public:
 		check1(targeting);
 
 		if (targeting=="TimeStepTargeting" || targeting == "TargetingAncilla") {
-			psi_ = new TargetingTimeStepType(lrs_,model_,wft_,quantumSector_,ioIn_);
+			psi_ = new TargetingTimeStepType(lrs_,model_,wft_,quantumSector_,ioIn_, targeting);
 		} else if (targeting=="DynamicTargeting") {
 			psi_ = new TargetingDynamicType(lrs_,model_,wft_,quantumSector_,ioIn_);
 		} else if (targeting=="CorrectionVectorTargeting") {

@@ -95,8 +95,10 @@ public:
 	typedef typename ModelType::RealType RealType;
 
 	template<typename IoInputter>
-	TargetParamsTimeStep(IoInputter& io,const ModelType& model)
-	    : TimeVectorParamsType(io,model),
+	TargetParamsTimeStep(IoInputter& io,
+	                     PsimagLite::String targeting,
+	                     const ModelType& model)
+	    : TimeVectorParamsType(io, targeting, model),
 	      maxTime_(0)
 	{
 		try {
