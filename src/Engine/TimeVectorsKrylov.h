@@ -142,21 +142,20 @@ public:
 	typedef KrylovHelper<Action> KrylovHelperType;
 
 	TimeVectorsKrylov(const SizeType& currentTimeStep,
+	                  const TargetParamsType& tstStruct,
 	                  const VectorRealType& times,
 	                  VectorVectorWithOffsetType& targetVectors,
 	                  const ModelType& model,
 	                  const WaveFunctionTransfType& wft,
 	                  const LeftRightSuperType& lrs,
-	                  const RealType& E0,
 	                  InputValidatorType& ioIn)
-	    : BaseType(times),
-	      currentTimeStep_(currentTimeStep),
+	    : currentTimeStep_(currentTimeStep),
+	      tstStruct_(tstStruct),
 	      times_(times),
 	      targetVectors_(targetVectors),
 	      model_(model),
 	      wft_(wft),
 	      lrs_(lrs),
-	      E0_(E0),
 	      ioIn_(ioIn),
 	      timeHasAdvanced_(true),
 	      krylovHelper_(model.params())
@@ -167,10 +166,9 @@ public:
 	                             const VectorWithOffsetType& phi,
 	                             const ProgramGlobals::DirectionEnum,
 	                             bool,
-	                             const PsimagLite::Vector<SizeType>::Type&,
-	                             const TargetParamsType& tstStruct)
+	                             const PsimagLite::Vector<SizeType>::Type&)
 	{
-		if (currentTimeStep_ == 0 && tstStruct.noOperator() && tstStruct.skipTimeZero()) {
+		if (currentTimeStep_ == 0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
 			for (SizeType i=0;i<times_.size();i++)
 				targetVectors_[i]=phi;
 			return;
@@ -193,7 +191,7 @@ public:
 		for (SizeType ii=0;ii<phi.sectors();ii++)
 			PsimagLite::diag(T[ii],eigs[ii],'V');
 
-		calcTargetVectors(startEnd, phi, T, V, Eg, eigs, steps, tstStruct);
+		calcTargetVectors(startEnd, phi, T, V, Eg, eigs, steps);
 
 		//checkNorms();
 		timeHasAdvanced_ = false;
@@ -204,7 +202,7 @@ public:
 		timeHasAdvanced_ = true;
 	}
 
-	RealType time() const { return currentTimeStep_*BaseType::tau(); }
+	RealType time() const { return currentTimeStep_*tstStruct_.tau(); }
 
 private:
 
@@ -215,15 +213,14 @@ private:
 	                       const VectorMatrixFieldType& V,
 	                       RealType Eg,
 	                       const VectorVectorRealType& eigs,
-	                       typename PsimagLite::Vector<SizeType>::Type steps,
-	                       const TargetParamsType& tstStruct)
+	                       typename PsimagLite::Vector<SizeType>::Type steps)
 	{
 		for (SizeType i=startEnd.first+1;i<startEnd.second;i++) {
 			assert(i<targetVectors_.size());
 			targetVectors_[i] = phi;
 
 			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
-			calcTargetVector(targetVectors_[i], phi, T, V, Eg, eigs, steps, tstStruct, i);
+			calcTargetVector(targetVectors_[i], phi, T, V, Eg, eigs, steps, i);
 		}
 	}
 
@@ -234,13 +231,12 @@ private:
 	                      RealType Eg,
 	                      const VectorVectorRealType& eigs,
 	                      typename PsimagLite::Vector<SizeType>::Type steps,
-	                      const TargetParamsType& tstStruct,
 	                      SizeType timeIndex)
 	{
 		v = phi;
 		for (SizeType ii = 0;ii < phi.sectors(); ++ii) {
 			const RealType time = times_[timeIndex];
-			const RealType timeDirection = tstStruct.timeDirection();
+			const RealType timeDirection = tstStruct_.timeDirection();
 			const VectorRealType& eigsii = eigs[ii];
 			auto action = [eigsii, Eg, time, timeDirection](SizeType k)
 			{
@@ -298,12 +294,12 @@ private:
 	}
 
 	const SizeType& currentTimeStep_;
+	const TargetParamsType& tstStruct_;
 	const VectorRealType& times_;
 	VectorVectorWithOffsetType& targetVectors_;
 	const ModelType& model_;
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;
-	const RealType& E0_;
 	InputValidatorType& ioIn_;
 	bool timeHasAdvanced_;
 	KrylovHelperType krylovHelper_;

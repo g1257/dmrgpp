@@ -299,41 +299,40 @@ public:
 		switch (tstStruct.algorithm()) {
 		case TargetParamsType::AlgorithmEnum::KRYLOV:
 			timeVectorsBase_ = new TimeVectorsKrylovType(currentTimeStep_,
+			                                             tstStruct,
 			                                             times,
 			                                             targetVectors_,
 			                                             model,
 			                                             wft,
 			                                             lrs,
-			                                             E0_,
 			                                             ioIn);
 			break;
 		case TargetParamsType::AlgorithmEnum::CHEBYSHEV:
 			timeVectorsBase_ = new TimeVectorsChebyshevType(currentTimeStep_,
+			                                                tstStruct,
 			                                                times,
 			                                                targetVectors_,
 			                                                model,
 			                                                wft,
-			                                                lrs,
-			                                                E0_,
-			                                                ioIn);
+			                                                lrs);
 			break;
 		case TargetParamsType::AlgorithmEnum::RUNGE_KUTTA:
 			timeVectorsBase_ = new TimeVectorsRungeKuttaType(currentTimeStep_,
+			                                                 tstStruct,
 			                                                 times,
 			                                                 targetVectors_,
 			                                                 model,
 			                                                 wft,
-			                                                 lrs,
-			                                                 E0_);
+			                                                 lrs);
 			break;
 		case TargetParamsType::AlgorithmEnum::SUZUKI_TROTTER:
 			timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(currentTimeStep_,
+			                                                    tstStruct,
 			                                                    times,
 			                                                    targetVectors_,
 			                                                    model,
 			                                                    wft,
-			                                                    lrs,
-			                                                    E0_);
+			                                                    lrs);
 			break;
 		default:
 			throw PsimagLite::RuntimeError(s.c_str());
@@ -370,16 +369,14 @@ public:
 	                     const VectorWithOffsetType& phi,
 	                     ProgramGlobals::DirectionEnum direction,
 	                     bool allOperatorsApplied,
-	                     const PsimagLite::Vector<SizeType>::Type& block,
-	                     const TargetParamsType& tstStruct)
+	                     const PsimagLite::Vector<SizeType>::Type& block)
 	{
 		timeVectorsBase_->calcTimeVectors(startEnd,
 		                                  Eg,
 		                                  phi,
 		                                  direction,
 		                                  allOperatorsApplied,
-		                                  block,
-		                                  tstStruct);
+		                                  block);
 	}
 
 	void applyOneOperator(SizeType loopNumber,

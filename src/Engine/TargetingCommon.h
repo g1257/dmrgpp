@@ -501,8 +501,7 @@ public:
 		                     phiNew,
 		                     direction,
 		                     allOperatorsApplied,
-		                     indices,
-		                     tstStruct);
+		                     indices);
 
 	}
 

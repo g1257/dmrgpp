@@ -127,21 +127,20 @@ class TimeVectorsSuzukiTrotter : public  TimeVectorsBase<
 public:
 
 	TimeVectorsSuzukiTrotter(const SizeType& currentTimeStep,
+	                         const TargetParamsType& tstStruct,
 	                         const VectorRealType& times,
 	                         VectorVectorWithOffsetType& targetVectors,
 	                         const ModelType& model,
 	                         const WaveFunctionTransfType& wft,
-	                         const LeftRightSuperType& lrs,
-	                         const RealType& E0)
-	    : BaseType(times),
-	      progress_("TimeVectorsSuzukiTrotter"),
+	                         const LeftRightSuperType& lrs)
+	    : progress_("TimeVectorsSuzukiTrotter"),
 	      currentTimeStep_(currentTimeStep),
+	      tstStruct_(tstStruct),
 	      times_(times),
 	      targetVectors_(targetVectors),
 	      model_(model),
 	      wft_(wft),
 	      lrs_(lrs),
-	      E0_(E0),
 	      twoSiteDmrg_(wft_.options().twoSiteDmrg)
 	{}
 
@@ -150,8 +149,7 @@ public:
 	                             const VectorWithOffsetType& phi,
 	                             ProgramGlobals::DirectionEnum systemOrEnviron,
 	                             bool allOperatorsApplied,
-	                             const VectorSizeType& block,
-	                             const TargetParamsType&)
+	                             const VectorSizeType& block)
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"EXPERIMENTAL: using SuzukiTrotter";
@@ -247,7 +245,7 @@ public:
 		}
 	}
 
-	RealType time() const { return currentTimeStep_*BaseType::tau(); }
+	RealType time() const { return currentTimeStep_*tstStruct_.tau(); }
 
 	virtual void timeHasAdvanced()
 	{
@@ -576,12 +574,12 @@ private:
 
 	PsimagLite::ProgressIndicator progress_;
 	const SizeType& currentTimeStep_;
+	const TargetParamsType& tstStruct_;
 	const VectorRealType& times_;
 	VectorVectorWithOffsetType& targetVectors_;
 	const ModelType& model_;
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;
-	RealType E0_;
 	bool twoSiteDmrg_;
 	VectorSizeType linksSeen_;
 }; //class TimeVectorsSuzukiTrotter

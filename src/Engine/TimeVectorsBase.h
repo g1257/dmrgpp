@@ -92,21 +92,10 @@ template<typename TargetParamsType,
 		 typename VectorWithOffsetType>
 class TimeVectorsBase  {
 
-	typedef typename TargetParamsType::RealType RealType;
-
 public:
 
+	typedef typename TargetParamsType::RealType RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-
-	TimeVectorsBase(const VectorRealType& times) : tau_(0)
-	{
-		const SizeType n = times.size() - 1;
-		if (n >= times.size())
-			err("TimeVectorsBase: times vector has size 0\n");
-
-		tau_ = times[n];
-	}
-
 	typedef std::pair<SizeType,SizeType> PairType;
 
 	virtual void calcTimeVectors(const PairType&,
@@ -114,23 +103,13 @@ public:
 	                             const VectorWithOffsetType&,
 	                             const ProgramGlobals::DirectionEnum,
 	                             bool,
-	                             const PsimagLite::Vector<SizeType>::Type&,
-	                             const TargetParamsType&)=0;
+	                             const PsimagLite::Vector<SizeType>::Type&)=0;
 
 	virtual RealType time() const = 0;
 
 	virtual ~TimeVectorsBase() {}
 
 	virtual void timeHasAdvanced() {}
-
-protected:
-
-	virtual RealType tau() const  { return tau_; }
-
-private:
-
-	RealType tau_;
-
 }; //class TimeVectorsBase
 } // namespace Dmrg
 /*@}*/

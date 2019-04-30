@@ -134,36 +134,32 @@ class TimeVectorsChebyshev : public  TimeVectorsBase<TargetParamsType,
 public:
 
 	TimeVectorsChebyshev(const SizeType& currentTimeStep,
+	                     const TargetParamsType& tstStruct,
 	                     const VectorRealType& times,
 	                     VectorVectorWithOffsetType& targetVectors,
 	                     const ModelType& model,
 	                     const WaveFunctionTransfType& wft,
-	                     const LeftRightSuperType& lrs,
-	                     const RealType& E0,
-	                     InputValidatorType& ioIn)
-	    : BaseType(times),
-	      currentTimeStep_(currentTimeStep),
+	                     const LeftRightSuperType& lrs)
+	    : currentTimeStep_(currentTimeStep),
+	      tstStruct_(tstStruct),
 	      times_(times),
 	      targetVectors_(targetVectors),
 	      model_(model),
 	      wft_(wft),
 	      lrs_(lrs),
-	      E0_(E0),
-	      ioIn_(ioIn),
 	      timeHasAdvanced_(false)
 	{}
 
 	virtual void calcTimeVectors(const PairType&,
-	                             RealType,
+	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
 	                             const ProgramGlobals::DirectionEnum,
 	                             bool,
-	                             const VectorSizeType& indices,
-	                             const TargetParamsType& tstStruct)
+	                             const VectorSizeType& indices)
 	{
 		SizeType n = indices.size();
 		assert(n > 0);
-		if (currentTimeStep_ == 0 && tstStruct.noOperator() && tstStruct.skipTimeZero()) {
+		if (currentTimeStep_ == 0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
 			for (SizeType i = 0; i < n; ++i) {
 				SizeType ii = indices[i];
 				targetVectors_[ii] = phi;
@@ -193,7 +189,7 @@ public:
 			targetVectors_[ii] = phi;
 			SizeType prev = indices[i - 1];
 			SizeType prevMinus2 = indices[i - 2];
-			calcTargetVector(targetVectors_[ii], phi, prev, prevMinus2, tstStruct);
+			calcTargetVector(targetVectors_[ii], phi, prev, prevMinus2, Eg);
 		}
 
 		timeHasAdvanced_ = false;
@@ -204,7 +200,7 @@ public:
 		timeHasAdvanced_ = true;
 	}
 
-	RealType time() const { return currentTimeStep_*BaseType::tau(); }
+	RealType time() const { return currentTimeStep_*tstStruct_.tau(); }
 
 private:
 
@@ -212,13 +208,13 @@ private:
 	                      const VectorWithOffsetType& phi,
 	                      SizeType prev,
 	                      SizeType prevMinus2,
-	                      const TargetParamsType& tstStruct)
+	                      RealType Eg)
 
 	{
 		for (SizeType ii=0;ii<phi.sectors();ii++) {
 			SizeType i0 = phi.sector(ii);
 			TargetVectorType r;
-			calcTargetVector(r, phi, prev, prevMinus2, i0, tstStruct);
+			calcTargetVector(r, phi, prev, prevMinus2, i0, Eg);
 			v.setDataInSector(r,i0);
 		}
 	}
@@ -228,7 +224,7 @@ private:
 	                      SizeType prev,
 	                      SizeType prevMinus2,
 	                      SizeType i0,
-	                      const TargetParamsType& tstStruct)
+	                      RealType Eg)
 	{
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelType::HamiltonianConnectionType hc(p,
@@ -245,7 +241,7 @@ private:
 		        ? ProgramGlobals::VerboseEnum::YES : ProgramGlobals::VerboseEnum::NO;
 
 		// defining Hprime matrix:
-		ScaledMatrixType lanczosHelper2(lanczosHelper, tstStruct, E0_, verbose);
+		ScaledMatrixType lanczosHelper2(lanczosHelper, tstStruct_, Eg, verbose);
 
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
@@ -264,13 +260,12 @@ private:
 	}
 
 	const SizeType& currentTimeStep_;
+	const TargetParamsType& tstStruct_;
 	const VectorRealType& times_;
 	VectorVectorWithOffsetType& targetVectors_;
 	const ModelType& model_;
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;
-	const RealType& E0_;
-	InputValidatorType& ioIn_;
 	bool timeHasAdvanced_;
 }; //class TimeVectorsChebyshev
 } // namespace Dmrg

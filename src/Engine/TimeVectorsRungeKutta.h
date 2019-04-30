@@ -128,21 +128,20 @@ class TimeVectorsRungeKutta : public  TimeVectorsBase<
 public:
 
 	TimeVectorsRungeKutta(const SizeType& currentTimeStep,
+	                      const TargetParamsType& tstStruct,
 						  const VectorRealType& times,
 						  typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors,
 						  const ModelType& model,
 						  const WaveFunctionTransfType& wft,
-						  const LeftRightSuperType& lrs,
-						  const RealType& E0)
-		: BaseType(times),
-	      progress_("TimeVectorsRungeKutta"),
-		  currentTimeStep_(currentTimeStep),
+						  const LeftRightSuperType& lrs)
+		: progress_("TimeVectorsRungeKutta"),
+	      currentTimeStep_(currentTimeStep),
+	      tstStruct_(tstStruct),
 		  times_(times),
 		  targetVectors_(targetVectors),
 		  model_(model),
 		  wft_(wft),
-		  lrs_(lrs),
-		  E0_(E0)
+		  lrs_(lrs)
 	{}
 
 	virtual void calcTimeVectors(const PairType& startEnd,
@@ -150,8 +149,7 @@ public:
 	                             const VectorWithOffsetType& phi,
 	                             const ProgramGlobals::DirectionEnum systemOrEnviron,
 	                             bool,
-	                             const PsimagLite::Vector<SizeType>::Type&,
-	                             const TargetParamsType& tstStruct)
+	                             const PsimagLite::Vector<SizeType>::Type&)
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"using RungeKutta";
@@ -166,11 +164,11 @@ public:
 
 		for (SizeType ii=0;ii<phi.sectors();ii++) {
 			SizeType i = phi.sector(ii);
-			calcTimeVectors(startEnd, Eg, phi, systemOrEnviron, i, tstStruct);
+			calcTimeVectors(startEnd, Eg, phi, systemOrEnviron, i);
 		}
 	}
 
-	RealType time() const { return currentTimeStep_*BaseType::tau(); }
+	RealType time() const { return currentTimeStep_*tstStruct_.tau(); }
 
 private:
 
@@ -214,18 +212,17 @@ private:
 	}; // FunctionForRungeKutta
 
 	void calcTimeVectors(const PairType& startEnd,
-	                     RealType,
+	                     RealType Eg,
 	                     const VectorWithOffsetType& phi,
 	                     const ProgramGlobals::DirectionEnum,
-	                     SizeType i0,
-	                     const TargetParamsType& tstStruct)
+	                     SizeType i0)
 	{
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi0(total);
 		phi.extract(phi0,i0);
-		FunctionForRungeKutta f(E0_,tstStruct.timeDirection(),lrs_,time(),model_,phi,i0);
+		FunctionForRungeKutta f(Eg,tstStruct_.timeDirection(),lrs_,time(),model_,phi,i0);
 
-		RealType epsForRK = tstStruct.tau()/(times_.size()-1.0);
+		RealType epsForRK = tstStruct_.tau()/(times_.size()-1.0);
 		PsimagLite::RungeKutta<RealType,FunctionForRungeKutta,TargetVectorType>
 		        rungeKutta(f,epsForRK);
 
@@ -240,12 +237,12 @@ private:
 
 	PsimagLite::ProgressIndicator progress_;
 	const SizeType& currentTimeStep_;
+	const TargetParamsType& tstStruct_;
 	const VectorRealType& times_;
 	typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors_;
 	const ModelType& model_;
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;
-	RealType E0_;
 }; //class TimeVectorsRungeKutta
 } // namespace Dmrg
 /*@}*/

@@ -365,12 +365,11 @@ private:
 			setFromInfinite(this->common().aoe().targetVectors(startEnd.first),lrs_);
 		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED));
 		this->common().aoe().calcTimeVectors(startEnd,
-		                               Eg,
-		                               phi,
-		                               systemOrEnviron,
-		                               allOperatorsApplied,
-		                               block,
-		                               mettsStruct_);
+		                                     Eg,
+		                                     phi,
+		                                     systemOrEnviron,
+		                                     allOperatorsApplied,
+		                                     block);
 		this->common().normalizeTimeVectors(startEnd.first+1,startEnd.second);
 	}
 

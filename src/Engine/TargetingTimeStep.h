@@ -264,8 +264,7 @@ private:
 		                                     phiNew,
 		                                     direction,
 		                                     allOperatorsApplied,
-		                                     block1,
-		                                     tstStruct_);
+		                                     block1);
 
 		bool doBorderIfBorder = false;
 		this->common().cocoon(block1, direction, doBorderIfBorder);
