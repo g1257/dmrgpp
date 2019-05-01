@@ -102,7 +102,8 @@ public:
 	      advanceEach_(0),
 	      algorithm_(BaseType::AlgorithmEnum::KRYLOV),
 	      tau_(0),
-	      timeDirection_(1.0)
+	      timeDirection_(1.0),
+	      exponentialTime_(false)
 	{
 		/*PSIDOC TargetParamsTimeVectors
 		\item[TSPTau] [RealType], $\tau$ for the Krylov,
@@ -136,6 +137,12 @@ public:
 		try {
 			io.readline(timeDirection_,"TSPTimeFactor=");
 		} catch (std::exception&) {}
+
+		try {
+			int x = 0;
+			io.readline(x, "TSPExponentialTime=");
+			exponentialTime_ = (x > 0);
+		} catch (std::exception&) {}
 	}
 
 	virtual SizeType timeSteps() const
@@ -168,6 +175,11 @@ public:
 		return chebyTransform_;
 	}
 
+	virtual bool exponentialTime() const
+	{
+		return exponentialTime_;
+	}
+
 private:
 
 	SizeType timeSteps_;
@@ -176,6 +188,7 @@ private:
 	RealType tau_;
 	RealType timeDirection_;
 	VectorRealType chebyTransform_;
+	bool exponentialTime_;
 }; // class TargetParamsTimeVectors
 
 template<typename ModelType>

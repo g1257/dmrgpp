@@ -132,8 +132,7 @@ public:
 	      times_(tstStruct_.timeSteps()),
 	      weight_(tstStruct_.timeSteps()),
 	      tvEnergy_(times_.size(),0.0),
-	      gsWeight_(tstStruct_.gsWeight()),
-	      targeting_(targeting)
+	      gsWeight_(tstStruct_.gsWeight())
 	{
 		if (!wft.isEnabled())
 			err("TST needs an enabled wft\n");
@@ -337,7 +336,6 @@ private:
 	VectorRealType weight_;
 	mutable VectorRealType tvEnergy_;
 	RealType gsWeight_;
-	PsimagLite::String targeting_;
 };     //class TargetingTimeStep
 } // namespace Dmrg
 

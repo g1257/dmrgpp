@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2017-2018, UT-Battelle, LLC
+Copyright (c) 2014-2017-2018-2019, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 5.]
@@ -216,6 +216,9 @@ public:
 			msg<<" value= "<<E0_;
 			progress_.printline(msg, std::cout);
 		}
+
+		if (phiNew && timeVectorsBase_)
+			timeVectorsBase_->exponentialAdvance(*phiNew);
 
 		return count;
 	}

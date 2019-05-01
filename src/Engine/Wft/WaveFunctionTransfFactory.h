@@ -405,7 +405,7 @@ private:
 
 		RealType norm1 = norm(psiSrc);
 		if (norm1 < 1e-5)
-			err("WFT Factory: norm1 = " + ttos(norm1) + " < 1e-5\n");
+			std::cerr<<"WFT Factory: norm1 = " << norm1 << " < 1e-5\n";
 
 		wftImpl_->transformVector(psiDest, psiSrc, lrs, nk);
 
@@ -417,7 +417,7 @@ private:
 		}
 
 		if (norm2 < 1e-5)
-			err("WFT Factory: norm2 = " + ttos(norm2) + " < 1e-5\n");
+			std::cerr << "WFT Factory: norm2 = " << norm2 << " < 1e-5\n";
 
 		progress_.printline(msg,std::cout);
 	}
