@@ -86,14 +86,20 @@ sub createInput
 	my $nup = int($n/2);
 	my $ndown = $nup;
 
+	my %valuesHash = (
+	"steps" => $steps, 
+	"data" => $data,
+	"nup" => $nup,
+	"ndown" => $ndown,
+	"omega" => $omega);
+
 	open(FILE, "<", "$templateInput") or die "$0: Cannot open $templateInput: $!\n";
 
 	while(<FILE>) {
 		next if (/^#/);
 		if (/\$([a-zA-Z0-9\[\]]+)/) {
 				my $name = $1;
-				my $str = "\$".$name;
-				my $val = eval "$str";
+				my $val = $valuesHash{"$name"};
 				defined($val) or die "$0: Undefined substitution for $name\n";
 				s/\$\Q$name/$val/g;
 		}
@@ -135,6 +141,12 @@ sub createBatch
 {
         my ($ind,$omega,$input) = @_;
         my $file = "Batch$ind.pbs";
+
+	my %valuesHash = (
+	"input" => $input, 
+	"ind" => $ind,
+	"omega" => $omega);
+
         open(FOUT, ">", "$file") or die "$0: Cannot write to $file: $!\n";
 
         open(FILE, "<", "$templateBatch") or die "$0: Cannot open $templateBatch: $!\n";
@@ -143,8 +155,7 @@ sub createBatch
                 while (/\$\$([a-zA-Z0-9\[\]]+)/) {
                         my $line = $_;
                         my $name = $1;
-                        my $str = "\$".$name;
-                        my $val = eval "$str";
+                        my $val = $valuesHash{"$name"};
                         defined($val) or die "$0: Undefined substitution for $name\n";
                         $line =~ s/\$\$$name/$val/;
                         $_ = $line;
