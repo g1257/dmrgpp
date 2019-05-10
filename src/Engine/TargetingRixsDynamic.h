@@ -269,6 +269,8 @@ public:
 		calcDynVectors(Eg, direction, block1); // WEIGHTS ARE SET IN calcDynVectors()
 
 		cocoon(site, direction);
+
+		this->common().printNormsAndWeights(gsWeight_, weight_);
 	}
 
 	void write(const VectorSizeType& block,
