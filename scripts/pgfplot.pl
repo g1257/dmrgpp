@@ -59,8 +59,8 @@ sub fromTexToTex
 	sleep(1);
 	my $foutpdf = $fout;
 	$foutpdf =~ s/\.tex$/.pdf/;
-	$cmd = "pdftocairo -singlefile -png $foutpdf";
-	system("$cmd");
+	$cmd = "/usr/bin/pdftocairo -singlefile -png $foutpdf";
+	system("$cmd") if (-x "/usr/bin/pdftocairo");
 }
 
 sub copyAndEdit
