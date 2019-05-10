@@ -209,10 +209,12 @@ public:
 
 	SizeType size() const
 	{
-		if (!applied_ && appliedFirst_) {
-			return 8;
-		}
-		return (applied_) ? 10 : 6;
+		if (!applied_ && appliedFirst_) return 8;
+
+		const AlgorithmEnumType algo = tstStruct_.algorithm();
+		SizeType tenOrTwelve = (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) ? 12
+		                                                                                      : 10;
+		return (applied_) ? tenOrTwelve : 6;
 	}
 
 	// tv[6] = A^\dagger_{site} |tv[1]>
@@ -298,20 +300,20 @@ private:
 	{
 		if (site == tstStruct_.sites(0)) {
 
-			ComplexOrRealType densCre = this->common().rixsCocoon(direction,site,1,0,false);
-			std::cout<<site<<" "<<densCre<<" 0"; // 0 here is the currentTime
+			ComplexOrRealType densCim = this->common().rixsCocoon(direction,site,1,0,false);
+			std::cout<<site<<" "<<densCim<<" 0"; // 0 here is the currentTime
 			std::cout<<" <P1|P0> 1\n";   // 1 here is the "superdensity"
 
-			ComplexOrRealType densCim = this->common().rixsCocoon(direction,site,2,0,false);
-			std::cout<<site<<" "<<densCim<<" 0"; // 0 here is the currentTime
+			ComplexOrRealType densCre = this->common().rixsCocoon(direction,site,2,0,false);
+			std::cout<<site<<" "<<densCre<<" 0"; // 0 here is the currentTime
 			std::cout<<" <P2|P0> 1\n";   // 1 here is the "superdensity"
 
-			ComplexOrRealType densjre = this->common().rixsCocoon(direction,site,4,3,false);
-			std::cout<<site<<" "<<densjre<<" 0"; // 0 here is the currentTime
+			ComplexOrRealType densjim = this->common().rixsCocoon(direction,site,4,3,false);
+			std::cout<<site<<" "<<densjim<<" 0"; // 0 here is the currentTime
 			std::cout<<" <P4|P3> 1\n";   // 1 here is the "superdensity"
 
-			ComplexOrRealType densjim = this->common().rixsCocoon(direction,site,5,3,false);
-			std::cout<<site<<" "<<densjim<<" 0"; // 0 here is the currentTime
+			ComplexOrRealType densjre = this->common().rixsCocoon(direction,site,5,3,false);
+			std::cout<<site<<" "<<densjre<<" 0"; // 0 here is the currentTime
 			std::cout<<" <P5|P3> 1\n";   // 1 here is the "superdensity"
 
 			VectorWithOffsetType tmpV1;
@@ -321,11 +323,11 @@ private:
 			           indexOfOperator,
 			           site,
 			           tmpV1, // phiNew
-			           this->common().aoe().targetVectors(1), // src1
+			           this->common().aoe().targetVectors(1), // src1 apply op on Im|alpha(C)>
 			           direction);
 
 			if (tmpV1.size() > 0)
-				addFactor(tmpV1, this->common().aoe().psi(), densCre);
+				addFactor(tmpV1, this->common().aoe().psi(), densCim);
 
 			if (tmpV1.size() > 0)
 				this->common().aoe().targetVectors(6) = tmpV1;
@@ -336,11 +338,11 @@ private:
 			           indexOfOperator,
 			           site,
 			           tmpV2,                            // phiNew
-			           this->common().aoe().targetVectors(2), // src1
+			           this->common().aoe().targetVectors(2), // src1 apply op on Re|alpha(C)>
 			           direction);
 
 			if (tmpV2.size() > 0)
-				addFactor(tmpV2, this->common().aoe().psi(), densCim);
+				addFactor(tmpV2, this->common().aoe().psi(), densCre);
 
 			if (tmpV2.size() > 0) {
 				this->common().aoe().targetVectors(7) = tmpV2;
@@ -364,7 +366,7 @@ private:
 			           indexOfOperator,
 			           site,
 			           tmpV1, // phiNew
-			           this->common().aoe().targetVectors(1), // src1
+			           this->common().aoe().targetVectors(1), // src1 apply op on Im|alpha(C)>
 			           direction);
 
 			if (tmpV1.size() > 0)
@@ -375,7 +377,7 @@ private:
 			           indexOfOperator,
 			           site,
 			           tmpV2,                            // phiNew
-			           this->common().aoe().targetVectors(2), // src1
+			           this->common().aoe().targetVectors(2), // src1 apply op on Re|alpha(C)>
 			           direction);
 
 			if (tmpV2.size() > 0) {
@@ -390,20 +392,20 @@ private:
 
 		if (site == tstStruct_.sites(1)) {
 
-			ComplexOrRealType densCre = this->common().rixsCocoon(direction,site,1,0,false);
-			std::cout<<site<<" "<<densCre<<" 0"; // 0 here is the currentTime
+			ComplexOrRealType densCim = this->common().rixsCocoon(direction,site,1,0,false);
+			std::cout<<site<<" "<<densCim<<" 0"; // 0 here is the currentTime
 			std::cout<<" <P1|P0> 1\n";   // 1 here is the "superdensity"
 
-			ComplexOrRealType densCim = this->common().rixsCocoon(direction,site,2,0,false);
-			std::cout<<site<<" "<<densCim<<" 0"; // 0 here is the currentTime
+			ComplexOrRealType densCre = this->common().rixsCocoon(direction,site,2,0,false);
+			std::cout<<site<<" "<<densCre<<" 0"; // 0 here is the currentTime
 			std::cout<<" <P2|P0> 1\n";   // 1 here is the "superdensity"
 
-			ComplexOrRealType densjre = this->common().rixsCocoon(direction,site,4,3,false);
-			std::cout<<site<<" "<<densjre<<" 0"; // 0 here is the currentTime
+			ComplexOrRealType densjim = this->common().rixsCocoon(direction,site,4,3,false);
+			std::cout<<site<<" "<<densjim<<" 0"; // 0 here is the currentTime
 			std::cout<<" <P4|P3> 1\n";   // 1 here is the "superdensity"
 
-			ComplexOrRealType densjim = this->common().rixsCocoon(direction,site,5,3,false);
-			std::cout<<site<<" "<<densjim<<" 0"; // 0 here is the currentTime
+			ComplexOrRealType densjre = this->common().rixsCocoon(direction,site,5,3,false);
+			std::cout<<site<<" "<<densjre<<" 0"; // 0 here is the currentTime
 			std::cout<<" <P5|P3> 1\n";   // 1 here is the "superdensity"
 
 			VectorWithOffsetType tmpV1;
@@ -412,11 +414,11 @@ private:
 			           indexOfOperator,
 			           site,
 			           tmpV1, // phiNew
-			           this->common().aoe().targetVectors(1), // src1
+			           this->common().aoe().targetVectors(1), // src1 apply op on Im|alpha(C)>
 			           direction);
 
 			if (tmpV1.size() > 0)
-				addFactor(tmpV1, this->common().aoe().psi(), densCre);
+				addFactor(tmpV1, this->common().aoe().psi(), densCim);
 
 			if (tmpV1.size() > 0)
 				this->common().aoe().targetVectors(6) += tmpV1;
@@ -426,11 +428,11 @@ private:
 			           indexOfOperator,
 			           site,
 			           tmpV2,                            // phiNew
-			           this->common().aoe().targetVectors(2), // src1
+			           this->common().aoe().targetVectors(2), // src1 apply op on Re|alpha(C)>
 			           direction);
 
 			if (tmpV2.size() > 0)
-				addFactor(tmpV2, this->common().aoe().psi(), densCim);
+				addFactor(tmpV2, this->common().aoe().psi(), densCre);
 
 			if (tmpV2.size() > 0) {
 				this->common().aoe().targetVectors(7) += tmpV2;
@@ -447,13 +449,13 @@ private:
 	{
 		if (!usesCheby_) {
 			ComplexOrRealType rr =
-			        this->common().rixsCocoon(direction,site,8,4,true);
-			ComplexOrRealType ri =
-			        this->common().rixsCocoon(direction,site,8,5,true);
-			ComplexOrRealType ir =
-			        this->common().rixsCocoon(direction,site,9,4,true);
-			ComplexOrRealType ii =
 			        this->common().rixsCocoon(direction,site,9,5,true);
+			ComplexOrRealType ri =
+			        this->common().rixsCocoon(direction,site,9,4,true);
+			ComplexOrRealType ir =
+			        this->common().rixsCocoon(direction,site,8,5,true);
+			ComplexOrRealType ii =
+			        this->common().rixsCocoon(direction,site,8,4,true);
 
 			const RealType time = this->common().aoe().time();
 			std::cout<<site<<" "<<(ri-ir)<<" "<<time; // time here is the currentTime
@@ -463,13 +465,13 @@ private:
 			return;
 		} else {
 			ComplexOrRealType rr =
-			        this->common().rixsCocoon(direction,site,9,4,true);
+			        this->common().rixsCocoon(direction,site,10,5,true);
 			ComplexOrRealType ri =
-			        this->common().rixsCocoon(direction,site,9,5,true);
+			        this->common().rixsCocoon(direction,site,10,4,true);
 			ComplexOrRealType ir =
-			        this->common().rixsCocoon(direction,site,11,4,true);
+			        this->common().rixsCocoon(direction,site,8,5,true);
 			ComplexOrRealType ii =
-			        this->common().rixsCocoon(direction,site,11,5,true);
+			        this->common().rixsCocoon(direction,site,8,4,true);
 
 			const RealType time = this->common().aoe().time();
 			std::cout<<site<<" "<<(ri-ir)<<" "<<time; // time here is the currentTime
