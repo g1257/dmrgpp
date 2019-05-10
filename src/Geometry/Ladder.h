@@ -118,13 +118,10 @@ public:
 			if (leg_>2) throw RuntimeError("LadderLeg>2 must have IsPeriodicY= line\n");
 		}
 
-		if (leg_ & 1)
-			throw RuntimeError("Ladder: leg must be even\n");
-
 		if (leg_ == 2)
 			isPeriodicY_ = false;
 
-		if (linSize % leg_ !=0)
+		if (linSize % leg_ != 0)
 			throw RuntimeError("Ladder: leg must divide number of sites\n");
 	}
 
@@ -161,7 +158,7 @@ public:
 		return sizeof(*this);
 	}
 
-	virtual SizeType maxConnections() const { return leg_ + 1; }
+	virtual SizeType maxConnections() const { return (isPeriodicX_) ? linSize_ : leg_ + 1; }
 
 	virtual SizeType dirs() const { return 2; }
 
@@ -175,7 +172,7 @@ public:
 		throw RuntimeError("Unknown direction\n");
 	}
 
-	bool connected(SizeType i1,SizeType i2) const
+	bool connected(SizeType i1, SizeType i2) const
 	{
 		if (i1==i2) return false;
 		SizeType c1 = i1/leg_;
@@ -192,8 +189,7 @@ public:
 	SizeType calcDir(SizeType i1,SizeType i2) const
 	{
 		assert(connected(i1,i2));
-		if (sameColumn(i1,i2)) return DIRECTION_Y;
-		return DIRECTION_X;
+		return (sameColumn(i1,i2)) ? DIRECTION_Y : DIRECTION_X;
 	}
 
 	bool fringe(SizeType i,SizeType smax,SizeType emin) const
@@ -223,18 +219,20 @@ public:
 
 	SizeType handle(SizeType i1,SizeType i2) const
 	{
-		SizeType dir = calcDir(i1,i2);
-		SizeType imin = (i1<i2) ? i1 : i2;
-		SizeType y = imin/leg_;
+		const SizeType dir = calcDir(i1,i2);
+		const SizeType imin = (i1 < i2) ? i1 : i2;
+		const SizeType imax = (i1 < i2) ? i2 : i1;
+		const SizeType y = imin/leg_;
 		switch(dir) {
 		case DIRECTION_X:
-			return imin;
+			if (!isPeriodicX_) return imin;
+			return (imin < leg_ && imax == imin + linSize_ - leg_) ? imax : imin;
 		case DIRECTION_Y:
-			if (!isPeriodicY_) return imin-imin/leg_;
-			if (imin ==0 || imin % leg_ == 0) imin = (i1>i2) ? i1 : i2;
-			return imin-imin/leg_ + y;
+			if (!isPeriodicY_) return imin - y;
+			return (imin % leg_ == 0 && imax == imin + leg_ -1) ? imax : imin;
 		}
-		throw RuntimeError("hanlde: Unknown direction\n");
+
+		throw RuntimeError("handle: Unknown direction\n");
 	}
 
 	bool sameColumn(SizeType i1,SizeType i2) const
@@ -261,7 +259,7 @@ public:
 	SizeType length(SizeType i) const
 	{
 		assert(i<2);
-		return (i==1) ? leg_ : SizeType(linSize_/leg_);
+		return (i == 1) ? leg_ : SizeType(linSize_/leg_);
 	}
 
 	SizeType leg() const
@@ -293,6 +291,8 @@ public:
 	}
 
 	bool isPeriodicY() const { return isPeriodicY_; }
+
+	bool isPeriodicX() const { return isPeriodicX_; }
 
 private:
 

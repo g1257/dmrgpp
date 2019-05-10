@@ -20,7 +20,7 @@ use warnings;
 use strict;
 
 use Getopt::Long qw(:config no_ignore_case);
-use lib "../../PsimagLite/scripts";
+use lib "../scripts";
 use NewMake;
 use PsiTag;
 

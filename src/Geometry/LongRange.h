@@ -98,7 +98,10 @@ public:
 		orbitals_ = static_cast<SizeType>(matrix_.rows()/linSize);
 		try {
 			io.readline(maxConnections_,"GeometryMaxConnections=");
-		} catch (std::exception&) {}
+		} catch (std::exception& e) {
+			std::cerr<<"Please add GeometryMaxConnections=0 or some other number\n";
+			throw e.what();
+		}
 	}
 
 	virtual void set(MatrixType& m, SizeType orbitals) const
