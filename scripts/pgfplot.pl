@@ -16,8 +16,7 @@ if (!defined($lOrUp)) {
 	exit(0);
 }
 
-my $akw = ($lOrUp eq "sz") ? "" : "akw";
-my $root = "$uroot$lOrUp$akw"."ky";
+my $root = "$uroot$lOrUp"."_ky";
 
 doFile(0, $root);
 doFile(1, $root);
@@ -52,10 +51,15 @@ sub fromTexToTex
 
 	system("cp $dirForTex/sample.tex .");
 	system("cp $dirForTex/palette.tex .");
-	
+
 	copyAndEdit($fout, $file, $name);
 
 	my $cmd = "pdflatex $fout";
+	system("$cmd");
+	sleep(1);
+	my $foutpdf = $fout;
+	$foutpdf =~ s/\.tex$/.pdf/;
+	$cmd = "pdftocairo -singlefile -png $foutpdf";
 	system("$cmd");
 }
 
