@@ -574,6 +574,13 @@ private:
 			calcVectors(indices2, Eg, direction, block1);
 			setWeights(12);
 		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME){
+			// wft 6 and 7 here ?
+			// wft 11 and 16 here?
+			if (timeHasAdvanced_) {
+				targetVectors_[6] = targetVectors_[11];
+				targetVectors_[7] = targetVectors_[15];
+			}
+
 			VectorSizeType indices{6, 8, 9, 10, 11};
 			calcVectors(indices, Eg, direction, block1);
 			VectorSizeType indices2{7, 12, 13, 14, 15};
