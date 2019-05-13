@@ -158,8 +158,7 @@ public:
 	      lrs_(lrs),
 	      ioIn_(ioIn),
 	      timeHasAdvanced_(false),
-	      krylovHelper_(model.params()),
-	      expTime_(tstStruct.targeting() == "TargetingAncilla" && tstStruct.exponentialTime())
+	      krylovHelper_(model.params())
 	{}
 
 	virtual void calcTimeVectors(const PsimagLite::Vector<SizeType>::Type& indices,
@@ -207,21 +206,7 @@ public:
 
 	RealType time() const
 	{
-		if (!expTime_ || currentTimeStep_ < 2)
-			return currentTimeStep_*tstStruct_.tau();
-
-		const SizeType n = (1 << (currentTimeStep_ - 1));
-		return n*tstStruct_.tau();
-	}
-
-	void exponentialAdvance(VectorWithOffsetType& phiNew) const
-	{
-		if (!expTime_ || !timeHasAdvanced_) return;
-
-		const SizeType n = (1 << currentTimeStep_) - 1;
-		assert(n > 0);
-		const ComplexOrRealType factor = pow(norm(phiNew), n);
-		phiNew = factor*phiNew;
+		return currentTimeStep_*tstStruct_.tau();
 	}
 
 private:
@@ -323,7 +308,6 @@ private:
 	InputValidatorType& ioIn_;
 	bool timeHasAdvanced_;
 	KrylovHelperType krylovHelper_;
-	const bool expTime_;
 }; //class TimeVectorsKrylov
 } // namespace Dmrg
 /*@}*/

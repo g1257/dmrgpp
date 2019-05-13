@@ -245,11 +245,6 @@ public:
 		return unimplemented("timeDirection");
 	}
 
-	virtual bool exponentialTime() const
-	{
-		return unimplemented("exponentialTime");
-	}
-
 	virtual PsimagLite::String targeting() const { return targeting_; }
 
 private:

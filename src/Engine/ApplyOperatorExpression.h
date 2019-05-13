@@ -217,9 +217,6 @@ public:
 			progress_.printline(msg, std::cout);
 		}
 
-		if (phiNew && timeVectorsBase_)
-			timeVectorsBase_->exponentialAdvance(*phiNew);
-
 		return count;
 	}
 

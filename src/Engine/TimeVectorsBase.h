@@ -118,8 +118,6 @@ public:
 
 	virtual RealType time() const = 0;
 
-	virtual void exponentialAdvance(VectorWithOffsetType&) const {}
-
 	virtual ~TimeVectorsBase() {}
 
 	virtual void timeHasAdvanced() {}
