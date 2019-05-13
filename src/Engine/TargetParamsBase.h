@@ -102,7 +102,7 @@ public:
 
 	enum class ConcatEnum {PRODUCT, SUM};
 
-	enum class AlgorithmEnum {KRYLOV, CONJUGATE_GRADIENT, CHEBYSHEV, RUNGE_KUTTA, SUZUKI_TROTTER};
+	enum class AlgorithmEnum {KRYLOV, CONJUGATE_GRADIENT, CHEBYSHEV, KRYLOVTIME, RUNGE_KUTTA, SUZUKI_TROTTER};
 
 	TargetParamsBase(PsimagLite::String targeting) : targeting_(targeting) {}
 

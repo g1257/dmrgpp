@@ -166,21 +166,28 @@ public:
 	      paramsForSolver_(ioIn,"DynamicDmrg"),
 	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().aoe().energy()),
 	      applied_(false),
-	      appliedFirst_(false),
-	      usesCheby_(tstStruct_.algorithm() == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV)
+	      appliedFirst_(false)
 	{
 		if (!wft.isEnabled())
 			err("TargetingRixsDynamic needs wft\n");
 
-		if (!usesCheby_) {
+		if (tstStruct_.algorithm() == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
 			return; // early exit here
 		}
 
+
+
 		tstStruct2_ = new TargetParams2Type(ioIn, "TargetingRixsDynamic", model);
+
 		times_.resize(tstStruct2_->timeSteps());
 
 		RealType tau = tstStruct2_->tau();
 		SizeType n = times_.size();
+		if (tstStruct_.algorithm() == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME) {
+			if (n != 4)
+				err("TargetingRixsDynamic with KrylovTime: number of TimeSteps must be 4\n");
+		}
+
 		for (SizeType i = 0; i < n; ++i)
 			times_[i] = i*tau/(n - 1);
 
@@ -193,9 +200,11 @@ public:
 		tstStruct2_ = nullptr;
 	}
 
-	SizeType sites() const { return (usesCheby_) ? tstStruct2_->sites() : tstStruct_.sites(); }
+	SizeType sites() const { return (tstStruct_.algorithm() ==
+		                             TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) ?
+		            tstStruct_.sites() : tstStruct2_->sites(); }
 
-	SizeType targets() const { return 12; }
+	SizeType targets() const { return 16; }
 
 	RealType weight(SizeType i) const
 	{
@@ -211,10 +220,16 @@ public:
 	{
 		if (!applied_ && appliedFirst_) return 8;
 
+		SizeType tenOrTwelveOrSixteen;
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
-		SizeType tenOrTwelve = (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) ? 12
-		                                                                                      : 10;
-		return (applied_) ? tenOrTwelve : 6;
+		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
+			tenOrTwelveOrSixteen = 10;
+		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
+			tenOrTwelveOrSixteen = 12;
+		} else {
+			tenOrTwelveOrSixteen = 16;
+		}
+		return (applied_) ? tenOrTwelveOrSixteen : 6;
 	}
 
 	// tv[6] = A^\dagger_{site} |tv[1]>
@@ -249,11 +264,14 @@ public:
 		this->common().aoe().wftSome(site, 0, 8);
 
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
-		if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
-			// just to set the stage and currenttime
-			this->common().aoe().getPhi(0, Eg, direction, site, loopNumber, *tstStruct2_);
-		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
+		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
 			this->common().aoe().wftSome(site, 8, this->common().aoe().targetVectors().size());
+		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
+			// just to set the stage and currenttime: CHEBY
+			this->common().aoe().getPhi(0, Eg, direction, site, loopNumber, *tstStruct2_);
+		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME){
+			// just to set the stage and currenttime: KRYLOVTIME
+			this->common().aoe().getPhi(0, Eg, direction, site, loopNumber, *tstStruct2_);
 		} else {
 			assert(false);
 		}
@@ -449,7 +467,9 @@ private:
 	void cocoon(SizeType site, ProgramGlobals::DirectionEnum direction)
 	const
 	{
-		if (!usesCheby_) {
+		const AlgorithmEnumType algo = tstStruct_.algorithm();
+
+		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
 			ComplexOrRealType rr =
 			        this->common().rixsCocoon(direction,site,9,5,true);
 			ComplexOrRealType ri =
@@ -465,7 +485,7 @@ private:
 			std::cout<<site<<" "<<(rr+ii)<<" "<<time; // time here is the currentTime
 			std::cout<<" <gs|A|P3> 1\n";   // 1 here is the "superdensity"
 			return;
-		} else {
+		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
 			ComplexOrRealType rr =
 			        this->common().rixsCocoon(direction,site,10,5,true);
 			ComplexOrRealType ri =
@@ -483,6 +503,28 @@ private:
 
 			for (SizeType i = 6; i < 12; ++i)
 				std::cout<<"norm2("<<i<<")= "<<this->common().normSquared(i)<<"\n";
+			return;
+		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME){
+			ComplexOrRealType rr =
+			        this->common().rixsCocoon(direction,site,15,5,true);
+			ComplexOrRealType ri =
+			        this->common().rixsCocoon(direction,site,15,4,true);
+			ComplexOrRealType ir =
+			        this->common().rixsCocoon(direction,site,11,5,true);
+			ComplexOrRealType ii =
+			        this->common().rixsCocoon(direction,site,11,4,true);
+
+			const RealType time = this->common().aoe().time();
+			std::cout<<site<<" "<<(ri-ir)<<" "<<time; // time here is the currentTime
+			std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
+			std::cout<<site<<" "<<(rr+ii)<<" "<<time; // time here is the currentTime
+			std::cout<<" <gs|A|P3> 1\n";   // 1 here is the "superdensity"
+
+			for (SizeType i = 6; i < 16; ++i)
+				std::cout<<"norm2("<<i<<")= "<<this->common().normSquared(i)<<"\n";
+			return;
+		} else {
+			assert(false);
 		}
 	}
 
@@ -527,25 +569,33 @@ private:
 			setWeights(10);
 		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
 			VectorSizeType indices{6, 8, 9};
-			calcChebyVectors(indices, Eg, direction, block1);
+			calcVectors(indices, Eg, direction, block1);
 			VectorSizeType indices2{7, 10, 11};
-			calcChebyVectors(indices2, Eg, direction, block1);
+			calcVectors(indices2, Eg, direction, block1);
 			setWeights(12);
+		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME){
+			VectorSizeType indices{6, 8, 9, 10, 11};
+			calcVectors(indices, Eg, direction, block1);
+			VectorSizeType indices2{7, 12, 13, 14, 15};
+			calcVectors(indices2, Eg, direction, block1);
+			setWeights(16);
 		} else {
 			assert(false);
 		}
 	}
 
-	void calcChebyVectors(const VectorSizeType& indices,
+	void calcVectors(const VectorSizeType& indices,
 	                      RealType Eg,
 	                      ProgramGlobals::DirectionEnum direction,
 	                      const VectorSizeType& block1)
 	{
-		assert(indices.size() >= 3);
+
 		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) &&
 		                            this->common().aoe().noStageIs(StageEnumType::OPERATOR));
 
 		const VectorWithOffsetType& v0 = this->common().aoe().targetVectors(indices[0]);
+		const AlgorithmEnumType algo = tstStruct_.algorithm();
+		if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
 		this->common().chebyshev(indices,
 		                         Eg,
 		                         v0,
@@ -553,6 +603,17 @@ private:
 		                         allOperatorsApplied,
 		                         block1,
 		                         *tstStruct2_);
+		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME){
+			this->common().krylovtime(indices,
+			                         Eg,
+			                         v0,
+			                         direction,
+			                         allOperatorsApplied,
+			                         block1,
+			                         *tstStruct2_);
+		} else {
+			assert(false);
+		}
 	}
 
 	void applyOneOp(SizeType loopNumber,
@@ -562,7 +623,9 @@ private:
 	                const VectorWithOffsetType& src,
 	                ProgramGlobals::DirectionEnum direction)
 	{
-		if (usesCheby_)
+		const AlgorithmEnumType algo = tstStruct_.algorithm();
+
+		if (algo != TargetParamsType::BaseType::AlgorithmEnum::KRYLOV)
 			this->common().aoe().applyOneOperator(loopNumber,
 		                                          indexOfOperator,
 		                                          site,
@@ -601,7 +664,6 @@ private:
 	CorrectionVectorSkeletonType skeleton_;
 	bool applied_;
 	bool appliedFirst_;
-	bool usesCheby_;
 }; // class TargetingRixsDynamic
 } // namespace
 /*@}*/

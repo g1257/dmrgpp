@@ -134,6 +134,8 @@ public:
 			algorithm_ = BaseType::AlgorithmEnum::CONJUGATE_GRADIENT;
 		} else if (tmp == "Chebyshev") {
 			algorithm_ = BaseType::AlgorithmEnum::CHEBYSHEV;
+		} else if (tmp == "KrylovTime") {
+			algorithm_ = BaseType::AlgorithmEnum::KRYLOVTIME;
 		} else {
 			PsimagLite::String str("TargetParamsCorrectionVector ");
 			str += "Unknown algorithm " + tmp + "\n";
