@@ -37,6 +37,7 @@ sub printGnuplot
 	open(FIN, "<", "$inFile") or die "$0: Cannot open $inFile : $!\n";
 
 	my %h;
+	my $npoints;
 	while (<FIN>) {
 		my @temp = split;
 		my $n = scalar(@temp);
@@ -49,8 +50,14 @@ sub printGnuplot
 		$hasPrinted = 1;
 
 		my $omega = $temp[0];
-		$h{$omega} = \@temp;
+		my $tmpPoints = scalar(@temp);
+		defined($npoints) or $npoints = $tmpPoints;
+		if ($npoints != $tmpPoints) {
+			print "$0: Discared values for omega=$omega; found $tmpPoints, expected $npoints\n";
+			next;
+		}
 
+		$h{$omega} = \@temp;
 	}
 
 	close(FIN);
