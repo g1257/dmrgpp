@@ -150,12 +150,10 @@ public:
 	      timeHasAdvanced_(false)
 	{}
 
-	virtual void calcTimeVectors(const PairType&,
+	virtual void calcTimeVectors(const VectorSizeType& indices,
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
-	                             const ProgramGlobals::DirectionEnum,
-	                             bool,
-	                             const VectorSizeType& indices)
+	                             typename BaseType::ExtraData* = 0)
 	{
 		SizeType n = indices.size();
 		assert(n > 0);

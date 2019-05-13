@@ -98,12 +98,23 @@ public:
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef std::pair<SizeType,SizeType> PairType;
 
-	virtual void calcTimeVectors(const PairType&,
+	struct ExtraData {
+
+		ExtraData(ProgramGlobals::DirectionEnum dir_,
+		          bool allOperatorsApplied_,
+		          PsimagLite::Vector<SizeType>::Type block_)
+		    : dir(dir_), allOperatorsApplied(allOperatorsApplied_), block(block_)
+		{}
+
+		ProgramGlobals::DirectionEnum dir;
+		bool allOperatorsApplied;
+		PsimagLite::Vector<SizeType>::Type block;
+	};
+
+	virtual void calcTimeVectors(const PsimagLite::Vector<SizeType>::Type&,
 	                             RealType,
 	                             const VectorWithOffsetType&,
-	                             const ProgramGlobals::DirectionEnum,
-	                             bool,
-	                             const PsimagLite::Vector<SizeType>::Type&)=0;
+	                             ExtraData* = 0) = 0;
 
 	virtual RealType time() const = 0;
 

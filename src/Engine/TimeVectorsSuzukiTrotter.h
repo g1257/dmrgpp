@@ -144,12 +144,10 @@ public:
 	      twoSiteDmrg_(wft_.options().twoSiteDmrg)
 	{}
 
-	virtual void calcTimeVectors(const PairType& startEnd,
+	virtual void calcTimeVectors(const VectorSizeType& indices,
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
-	                             ProgramGlobals::DirectionEnum systemOrEnviron,
-	                             bool allOperatorsApplied,
-	                             const VectorSizeType& block)
+	                             typename BaseType::ExtraData* extraData)
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"EXPERIMENTAL: using SuzukiTrotter";
@@ -163,9 +161,14 @@ public:
 		targetVectors_[0] = phi;
 
 		bool returnFlag = false;
-		for (SizeType i=1;i<times_.size();i++) {
-			if (targetVectors_[i].size()==0 || !allOperatorsApplied) {
-				targetVectors_[i] = phi;
+		if (times_.size() != indices.size())
+			err("TimeVectorsSuzukiTrotter: times.size() != indices.size()\n");
+
+		for (SizeType i = 1; i < times_.size(); ++i) {
+			const SizeType ii = indices[i];
+			assert(ii < targetVectors_.size());
+			if (targetVectors_[ii].size()==0 || !extraData->allOperatorsApplied) {
+				targetVectors_[ii] = phi;
 				returnFlag = true;
 			}
 		}
@@ -181,11 +184,13 @@ public:
 		SizeType site = static_cast<SizeType>(lrs_.left().block()[lastIndexLeft]/
 		                                      sitesPerBlock);
 		bool oddLink = (site & 1);
-		bool b1 = (oddLink && systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
-		bool b2 = (!oddLink && systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
+		bool b1 = (oddLink &&
+		           extraData->dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
+		bool b2 = (!oddLink &&
+		           extraData->dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
 		if (b2 && lrs_.left().block().size() == sitesPerBlock) b2=false;
 
-		wftAll(block);
+		wftAll(extraData->block);
 
 		if (b1 || b2) return;
 
@@ -197,7 +202,7 @@ public:
 		progress_.printline(msg2,std::cout);
 
 		if (!areAllLinksSeen) {
-			for (SizeType i = 0; i < block.size(); ++i)
+			for (SizeType i = 0; i < extraData->block.size(); ++i)
 				linksSeen_.push_back(lastIndexLeft+i);
 		} else {
 			PsimagLite::OstringStream msg3;
@@ -216,32 +221,35 @@ public:
 		SparseMatrixType transformET;
 		transposeConjugate(transformET,transformE);
 
-		SizeType hilbertSize = model_.hilbertSize(block[0]);
-		if (systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM &&
+		SizeType hilbertSize = model_.hilbertSize(extraData->block[0]);
+		if (extraData->dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM &&
 		    lrs_.right().size()==hilbertSize) {
 			transformE.makeDiagonal(hilbertSize,1);
 			transformET.makeDiagonal(hilbertSize,1);
 		}
 
-		if (systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON &&
+		if (extraData->dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON &&
 		    lrs_.left().size()==hilbertSize) {
 			transformS.makeDiagonal(hilbertSize,1);
 			transformST.makeDiagonal(hilbertSize,1);
 		}
 
-		for (SizeType i=startEnd.first+1;i<startEnd.second;i++) {
-			VectorWithOffsetType src = targetVectors_[i];
+		const SizeType n = indices.size();
+		for (SizeType i = 1; i < n; ++i) {
+			const SizeType ii = indices[i];
+			assert(ii < targetVectors_.size());
+			VectorWithOffsetType src = targetVectors_[ii];
 			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
-			calcTargetVector(targetVectors_[i],
+			calcTargetVector(targetVectors_[ii],
 			                 Eg,
 			                 src,
-			                 systemOrEnviron,
+			                 extraData->dir,
 			                 times_[i],
 			                 transformS,
 			                 transformST,
 			                 transformE,
 			                 transformET);
-			assert(targetVectors_[i].size()==targetVectors_[0].size());
+			assert(targetVectors_[ii].size()==targetVectors_[indices[0]].size());
 		}
 	}
 

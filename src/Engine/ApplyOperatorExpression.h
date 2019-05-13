@@ -367,19 +367,20 @@ public:
 		targetVectors_[i] = factor*targetVectors_[i];
 	}
 
-	void calcTimeVectors(const PairType& startEnd,
+	void calcTimeVectors(const PsimagLite::Vector<SizeType>::Type& indices,
 	                     RealType Eg,
 	                     const VectorWithOffsetType& phi,
 	                     ProgramGlobals::DirectionEnum direction,
 	                     bool allOperatorsApplied,
 	                     const PsimagLite::Vector<SizeType>::Type& block)
 	{
-		timeVectorsBase_->calcTimeVectors(startEnd,
+		typename TimeVectorsBaseType::ExtraData extra(direction,
+		                                              allOperatorsApplied,
+		                                              block);
+		timeVectorsBase_->calcTimeVectors(indices,
 		                                  Eg,
 		                                  phi,
-		                                  direction,
-		                                  allOperatorsApplied,
-		                                  block);
+		                                  &extra);
 	}
 
 	void applyOneOperator(SizeType loopNumber,

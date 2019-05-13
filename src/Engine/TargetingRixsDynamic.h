@@ -585,9 +585,9 @@ private:
 	}
 
 	void calcVectors(const VectorSizeType& indices,
-	                      RealType Eg,
-	                      ProgramGlobals::DirectionEnum direction,
-	                      const VectorSizeType& block1)
+	                 RealType Eg,
+	                 ProgramGlobals::DirectionEnum direction,
+	                 const VectorSizeType& block1)
 	{
 
 		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) &&
@@ -596,21 +596,20 @@ private:
 		const VectorWithOffsetType& v0 = this->common().aoe().targetVectors(indices[0]);
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
-		this->common().chebyshev(indices,
-		                         Eg,
-		                         v0,
-		                         direction,
-		                         allOperatorsApplied,
-		                         block1,
-		                         *tstStruct2_);
-		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME){
-			this->common().krylovtime(indices,
+			this->common().chebyshev(indices,
 			                         Eg,
 			                         v0,
 			                         direction,
 			                         allOperatorsApplied,
-			                         block1,
-			                         *tstStruct2_);
+			                         block1);
+
+		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME){
+			this->common().aoe().calcTimeVectors(indices,
+			                                     Eg,
+			                                     v0,
+			                                     direction,
+			                                     allOperatorsApplied,
+			                                     block1);
 		} else {
 			assert(false);
 		}

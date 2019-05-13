@@ -474,8 +474,7 @@ public:
 	               const VectorWithOffsetType& phiNew,
 	               ProgramGlobals::DirectionEnum direction,
 	               bool allOperatorsApplied,
-	               const VectorSizeType& block1,
-	               const TargetParamsType& tstStruct)
+	               const VectorSizeType& block1)
 	{
 		SizeType startOfWft = 1;
 		if (aoe_.currentTimeStep() == 0) {
@@ -496,53 +495,14 @@ public:
 			aoe_.wftSome(block1[0], ii, ii + 1);
 		}
 
-		aoe_.calcTimeVectors(PairType(0, 0),
+		aoe_.calcTimeVectors(indices,
 		                     Eg,
 		                     phiNew,
 		                     direction,
 		                     allOperatorsApplied,
-		                     indices);
+		                     block1);
 
 	}
-
-	void krylovtime(const VectorSizeType& indices,
-	               RealType Eg,
-	               const VectorWithOffsetType& phiNew,
-	               ProgramGlobals::DirectionEnum direction,
-	               bool allOperatorsApplied,
-	               const VectorSizeType& block1,
-	               const TargetParamsType& tstStruct)
-	{
-		assert(0 < block1.size());
-
-		SizeType startOfWft = 1;
-		if (aoe_.currentTimeStep() == 0) {
-			SizeType indexOf1 = indices[startOfWft];
-			VectorWithOffsetType& tv1 =
-			        const_cast<VectorWithOffsetType&>(aoe_.targetVectors(indexOf1));
-			tv1  = phiNew;
-			startOfWft = 2;
-		}
-
-		// WFT 1 if !time advanced
-		// WFT 2 if time advanced
-		assert(0 < block1.size());
-		SizeType n = indices.size();
-
-		for (SizeType i = startOfWft; i < n; ++i) {
-			SizeType ii = indices[i];
-			aoe_.wftSome(block1[0], ii, ii + 1);
-		}
-
-		aoe_.calcTimeVectors(PairType(0, 0),
-		                     Eg,
-		                     phiNew,
-		                     direction,
-		                     allOperatorsApplied,
-		                     indices);
-
-	}
-
 
 	const ComplexOrRealType& inSitu(SizeType site) const
 	{

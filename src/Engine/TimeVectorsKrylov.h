@@ -162,38 +162,24 @@ public:
 	      expTime_(tstStruct.targeting() == "TargetingAncilla" && tstStruct.exponentialTime())
 	{}
 
-	virtual void calcTimeVectors(const PairType& startEnd,
+	virtual void calcTimeVectors(const PsimagLite::Vector<SizeType>::Type& indices,
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
-	                             const ProgramGlobals::DirectionEnum,
-	                             bool,
-	                             const PsimagLite::Vector<SizeType>::Type& indices)
+	                             typename BaseType::ExtraData* = 0)
 	{
-		SizeType n = indices.size();
-		if (n>0) {
-			if (currentTimeStep_ == 0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
-				for (SizeType i = 0; i < n; ++i) {
-					SizeType ii = indices[i];
-					targetVectors_[ii] = phi;
-				}
-
-				return;
+		const SizeType n = indices.size();
+		if (currentTimeStep_ == 0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
+			for (SizeType i = 0; i < n; ++i) {
+				const SizeType ii = indices[i];
+				targetVectors_[ii] = phi;
 			}
-
-			const VectorWithOffsetType* ptr0 = &(targetVectors_[indices[0]]);
-			const VectorWithOffsetType* ptr1 = &phi;
-			if (ptr0 != ptr1)
-				targetVectors_[indices[0]] = phi;
-		} else {
-			if (currentTimeStep_ == 0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
-				for (SizeType i=0;i<times_.size();i++)
-					targetVectors_[i]=phi;
-				return;
-			}
-
-			assert(0 < targetVectors_.size());
-			targetVectors_[0] = phi;
 		}
+
+		const VectorWithOffsetType* ptr0 = &(targetVectors_[indices[0]]);
+		const VectorWithOffsetType* ptr1 = &phi;
+		if (ptr0 != ptr1)
+			targetVectors_[indices[0]] = phi;
+
 		if (times_.size() == 1 && fabs(times_[0])<1e-10) return;
 
 		VectorMatrixFieldType V(phi.sectors());
@@ -208,20 +194,8 @@ public:
 		for (SizeType ii=0;ii<phi.sectors();ii++)
 			PsimagLite::diag(T[ii],eigs[ii],'V');
 
-		if (n>0) {
+		calcTargetVectors(indices, phi, T, V, Eg, eigs, steps);
 
-			if (timeHasAdvanced_) {
-				for (SizeType i = 0; i < n - 1; ++i) {
-					SizeType ii = indices[i];
-					targetVectors_[ii] = targetVectors_[ii + 1];
-				}
-			}
-
-			calcTargetVectors(indices, phi, T, V, Eg, eigs, steps);
-
-		} else {
-			calcTargetVectors(startEnd, phi, T, V, Eg, eigs, steps);
-		}
 		//checkNorms();
 		timeHasAdvanced_ = false;
 	}
@@ -253,24 +227,6 @@ public:
 private:
 
 	//! Do not normalize states here, it leads to wrong results (!)
-	void calcTargetVectors(const PairType& startEnd,
-	                       const VectorWithOffsetType& phi,
-	                       const VectorMatrixFieldType& T,
-	                       const VectorMatrixFieldType& V,
-	                       RealType Eg,
-	                       const VectorVectorRealType& eigs,
-	                       typename PsimagLite::Vector<SizeType>::Type steps)
-	{
-		for (SizeType i=startEnd.first+1;i<startEnd.second;i++) {
-			assert(i<targetVectors_.size());
-			targetVectors_[i] = phi;
-
-			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
-			calcTargetVector(targetVectors_[i], phi, T, V, Eg, eigs, steps, i);
-		}
-	}
-
-	//! Do not normalize states here, it leads to wrong results (!)
 	void calcTargetVectors(typename PsimagLite::Vector<SizeType>::Type indices,
 	                       const VectorWithOffsetType& phi,
 	                       const VectorMatrixFieldType& T,
@@ -279,8 +235,9 @@ private:
 	                       const VectorVectorRealType& eigs,
 	                       typename PsimagLite::Vector<SizeType>::Type steps)
 	{
-		for (SizeType i=1;i<indices.size();i++) {
-			SizeType ii = indices[i];
+		for (SizeType i = 1; i < indices.size(); ++i) {
+			const SizeType ii = indices[i];
+			assert(ii < targetVectors_.size());
 			targetVectors_[ii] = phi;
 			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
 			calcTargetVector(targetVectors_[ii], phi, T, V, Eg, eigs, steps, i);

@@ -364,7 +364,10 @@ private:
 		if (norm(phi)<1e-6)
 			setFromInfinite(this->common().aoe().targetVectors(startEnd.first),lrs_);
 		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED));
-		this->common().aoe().calcTimeVectors(startEnd,
+		VectorSizeType indices(startEnd.second - startEnd.first);
+		for (SizeType i = 0; i < indices.size(); ++i) indices[i] = i + startEnd.first;
+
+		this->common().aoe().calcTimeVectors(indices,
 		                                     Eg,
 		                                     phi,
 		                                     systemOrEnviron,

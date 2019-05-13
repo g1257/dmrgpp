@@ -124,6 +124,7 @@ class TimeVectorsRungeKutta : public  TimeVectorsBase<
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorComplexOrRealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef VectorComplexOrRealType TargetVectorType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 public:
 
@@ -144,12 +145,10 @@ public:
 		  lrs_(lrs)
 	{}
 
-	virtual void calcTimeVectors(const PairType& startEnd,
+	virtual void calcTimeVectors(const VectorSizeType& indices,
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
-	                             const ProgramGlobals::DirectionEnum systemOrEnviron,
-	                             bool,
-	                             const PsimagLite::Vector<SizeType>::Type&)
+	                             typename BaseType::ExtraData* = 0)
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"using RungeKutta";
@@ -164,7 +163,7 @@ public:
 
 		for (SizeType ii=0;ii<phi.sectors();ii++) {
 			SizeType i = phi.sector(ii);
-			calcTimeVectors(startEnd, Eg, phi, systemOrEnviron, i);
+			calcTimeVectors(indices, Eg, phi, i);
 		}
 	}
 
@@ -211,10 +210,9 @@ private:
 		typename LanczosSolverType::MatrixType lanczosHelper_;
 	}; // FunctionForRungeKutta
 
-	void calcTimeVectors(const PairType& startEnd,
+	void calcTimeVectors(const VectorSizeType& indices,
 	                     RealType Eg,
 	                     const VectorWithOffsetType& phi,
-	                     const ProgramGlobals::DirectionEnum,
 	                     SizeType i0)
 	{
 		SizeType total = phi.effectiveSize(i0);
@@ -230,8 +228,11 @@ private:
 		rungeKutta.solve(result,0.0,times_.size(),phi0);
 		assert(result.size()==times_.size());
 
-		for (SizeType i=0;i<startEnd.second;i++) {
-			targetVectors_[i].setDataInSector(result[i],i0);
+		const SizeType n = indices.size();
+		for (SizeType i = 0; i < n; ++i) {
+			const SizeType ii = indices[ii];
+			assert(ii < targetVectors_.size());
+			targetVectors_[ii].setDataInSector(result[i], i0);
 		}
 	}
 
