@@ -231,7 +231,7 @@ private:
 
 		const SizeType n = indices.size();
 		for (SizeType i = 0; i < n; ++i) {
-			const SizeType ii = indices[ii];
+			const SizeType ii = indices[i];
 			assert(ii < targetVectors_.size());
 			targetVectors_[ii].setDataInSector(result[i], i0);
 		}
