@@ -274,8 +274,12 @@ correction vector algorithm (type=2).
 #3501) ChebyshevTargeting from 3500
 #correction vector algorithm (type=3).
 3510) Heisenberg chain Szz(q,omega) gs
-3511) Chebyshev from 3510 c=0.1 d=1.83004  ./dmrg -f input3511.inp "<gs|sz|P1>,<gs|sz|P2>"
-3512) Chebyshev from 3510 c=0.2 d=4.64758  ./dmrg -f input3511.inp "<gs|sz|P1>,<gs|sz|P2>"
+3511) Chebyshev from 3510 Szz(k, omega) c=0.1 d=1.83004  ./dmrg -f input3511.inp "<gs|sz|P1>,<gs|sz|P2>"
+3512) Chebyshev from 3510 Szz(k, omega) c=0.2 d=4.64758  ./dmrg -f input3511.inp "<gs|sz|P1>,<gs|sz|P2>"
+3530) t-J chain gs undoped
+#3531) Chebyshev from 3530 Szz(k, omega) c=0.07 d=-0.2508063720171  ./dmrg -f input3511.inp "<gs|sz|P1>,<gs|sz|P2>"
+3532) Chebyshev from 3530 A-(k, omega) c=0.07 d=-0.2508063720171 ./dmrg -f input3511.inp "<gs|c?0'|P1>,<gs|c?0'|P2>"
+
 #4000) KMH model simple test -->     BROKEN, ISSUE?
 #4001) KMH model simple test 8 sites BROKEN, ISSUE?
 #4002 to 4099 are hereby reserved for the KMH model.

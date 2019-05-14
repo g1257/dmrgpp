@@ -1,0 +1,45 @@
+TotalNumberOfSites=32
+NumberOfTerms=4
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 -1.0
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 0.3
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 0.3
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 -0.075
+
+
+potentialV 64
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+
+Model=TjMultiOrb
+SolverOptions=twositedmrg
+Version=version
+OutputFile=data3530
+InfiniteLoopKeptStates=100
+FiniteLoops 5
+15 1000 0 -30 1000 0
+30 1000 0 -30 1000 0
+30 1000 0
+
+Threads=4
+TruncationTolerance=1e-8
+TargetElectronsUp=16
+TargetElectronsDown=16
+Orbitals=1
+
