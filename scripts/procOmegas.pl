@@ -10,8 +10,9 @@ use Getopt::Long qw(:config no_ignore_case);
 my $usage = "-f dollarizedInput [-M mForQ] [-S site] [-p] [-r] [-z]\n";
 
 my ($templateInput,$site,$m,$GlobalNumberOfSites);
-my ($siteForSpectrum,$mForQ,$isPeriodic,$mMax,$wantsRealPart);
+my ($siteForSpectrum,$mForQ,$mMax,$wantsRealPart);
 my $zeroAtCenter = 0;
+my $isPeriodic = 0;
 
 GetOptions('f=s' => \$templateInput,
            'S:i' => \$siteForSpectrum,
