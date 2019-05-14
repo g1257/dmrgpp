@@ -175,8 +175,6 @@ public:
 			return; // early exit here
 		}
 
-
-
 		tstStruct2_ = new TargetParams2Type(ioIn, "TargetingRixsDynamic", model);
 
 		times_.resize(tstStruct2_->timeSteps());
@@ -204,7 +202,17 @@ public:
 		                             TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) ?
 		            tstStruct_.sites() : tstStruct2_->sites(); }
 
-	SizeType targets() const { return 16; }
+	SizeType targets() const
+	{
+		const AlgorithmEnumType algo = tstStruct_.algorithm();
+		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
+			return 10;
+		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
+			return 12;
+		} else {
+			return 16;
+		}
+	}
 
 	RealType weight(SizeType i) const
 	{
@@ -229,6 +237,7 @@ public:
 		} else {
 			tenOrTwelveOrSixteen = 16;
 		}
+
 		return (applied_) ? tenOrTwelveOrSixteen : 6;
 	}
 
