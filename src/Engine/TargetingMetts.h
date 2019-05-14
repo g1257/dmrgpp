@@ -372,6 +372,7 @@ private:
 		                                     phi,
 		                                     systemOrEnviron,
 		                                     allOperatorsApplied,
+		                                     false, // don't wft or advance indices[0]
 		                                     block);
 		this->common().normalizeTimeVectors(startEnd.first+1,startEnd.second);
 	}

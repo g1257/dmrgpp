@@ -265,6 +265,7 @@ private:
 		                                     phiNew,
 		                                     direction,
 		                                     allOperatorsApplied,
+		                                     false, // don't wft or advance indices[0]
 		                                     block1);
 
 		bool doBorderIfBorder = false;

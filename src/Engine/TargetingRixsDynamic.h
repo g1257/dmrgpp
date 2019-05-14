@@ -601,6 +601,7 @@ private:
 			                                     v0,
 			                                     direction,
 			                                     allOperatorsApplied,
+			                                     false, // don't wft or advance indices[0]
 			                                     block1);
 
 		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME){
@@ -609,6 +610,7 @@ private:
 			                                     v0,
 			                                     direction,
 			                                     allOperatorsApplied,
+			                                     true, // wft and advance (if needed) indices[0]
 			                                     block1);
 		} else {
 			assert(false);

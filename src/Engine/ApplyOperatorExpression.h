@@ -137,7 +137,6 @@ public:
 	      timeVectorsBase_(0),
 	      wftHelper_(targetHelper.model(), targetHelper.lrs(), targetHelper.wft()),
 	      multiSiteExprHelper_(targetHelper_.model().geometry().numberOfSites() - 2),
-	      wftAndAdvanceIfNeeded_(true),
 	      correlationsSkel_(multiSiteExprHelper_, false)
 	{}
 
@@ -372,18 +371,17 @@ public:
 	                     const VectorWithOffsetType& phi,
 	                     ProgramGlobals::DirectionEnum direction,
 	                     bool allOperatorsApplied,
+	                     bool wftAndAdvanceIfNeeded,
 	                     const PsimagLite::Vector<SizeType>::Type& block)
 	{
 		typename TimeVectorsBaseType::ExtraData extra(direction,
 		                                              allOperatorsApplied,
-		                                              wftAndAdvanceIfNeeded_,
+		                                              wftAndAdvanceIfNeeded,
 		                                              block);
 		timeVectorsBase_->calcTimeVectors(indices,
 		                                  Eg,
 		                                  phi,
 		                                  extra);
-
-		wftAndAdvanceIfNeeded_ = true;
 	}
 
 	void applyOneOperator(SizeType loopNumber,
@@ -558,8 +556,6 @@ private:
 	{
 		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
 
-		wftAndAdvanceIfNeeded_ = false;
-
 		if (stage_[i] == StageEnum::OPERATOR) {
 
 			BorderEnumType corner = (tstStruct.sites(i)==0 ||
@@ -637,7 +633,6 @@ private:
 	TimeVectorsBaseType* timeVectorsBase_;
 	WftHelperType wftHelper_;
 	mutable MultiSiteExpressionHelperType multiSiteExprHelper_;
-	mutable bool wftAndAdvanceIfNeeded_;
 	CorrelationsSkeletonType correlationsSkel_;
 };
 

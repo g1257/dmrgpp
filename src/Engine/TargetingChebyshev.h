@@ -258,6 +258,7 @@ private:
 		                                     phiNew,
 		                                     direction,
 		                                     allOperatorsApplied,
+		                                     false, // don't wft or advance indices[0]
 		                                     block1);
 
 		assert(phiNew.offset(0) == this->common().aoe().targetVectors()[1].offset(0));
