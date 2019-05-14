@@ -1,0 +1,49 @@
+TotalNumberOfSites=64
+NumberOfTerms=2
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 1.0
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 1.0
+
+Model=Heisenberg
+HeisenbergTwiceS=1
+
+TargetSzPlusConst=32
+
+SolverOptions=twositedmrg,TargetingChebyshev,restart
+Version=version
+OutputFile=data3512
+RestartFilename=data3510
+InfiniteLoopKeptStates=100
+FiniteLoops 2
+-62 200 2 62 200 2
+RepeatFiniteLoopsTimes=50
+TruncationTolerance=1e-9
+
+GsWeight=0.1
+TSPTau=1.0
+TSPTimeSteps=3
+TSPAlgorithm=Chebyshev
+ChebyshevTransform 2 0.2 4.64758
+TSPAdvanceEach=62
+TSPSites 1 31
+TSPLoops 1 0
+TSPProductOrSum=sum
+
+TSPOperator=expression
+OperatorExpression=sz
+
+#ChebyshevC=0.2
+#ChebyshevE0=-28.1754
+#ChebyshevSign=1
+#OmegaBegin=0.0
+#OmegaTotal=200
+#OmegaStep=0.02
+#JacksonOrLorentz=0
+#ci dmrg arguments=-p 12 "<gs|sz|P1>,<gs|sz|P2>"
