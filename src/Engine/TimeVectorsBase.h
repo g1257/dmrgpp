@@ -114,12 +114,17 @@ public:
 
 		ExtraData(ProgramGlobals::DirectionEnum dir_,
 		          bool allOperatorsApplied_,
+		          bool wftAndAdvanceIfNeeded_,
 		          VectorSizeType block_)
-		    : dir(dir_), allOperatorsApplied(allOperatorsApplied_), block(block_)
+		    : dir(dir_),
+		      allOperatorsApplied(allOperatorsApplied_),
+		      wftAndAdvanceIfNeeded(wftAndAdvanceIfNeeded_),
+		      block(block_)
 		{}
 
 		ProgramGlobals::DirectionEnum dir;
 		bool allOperatorsApplied;
+		bool wftAndAdvanceIfNeeded;
 		PsimagLite::Vector<SizeType>::Type block;
 	};
 

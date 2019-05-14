@@ -170,8 +170,8 @@ public:
 		if (indices.size() < 2)
 			err("TimeVectorsKrylov: indices.size() must be greater than 1\n");
 
-		// wft and (if needed) advance
-		{
+		// Only for RIXS Dynamics wft and (if needed) advance
+		if (extra.wftAndAdvanceIfNeeded) {
 			SizeType advance = (timeHasAdvanced_) ? indices[indices.size() - 1] : indices[0];
 			VectorWithOffsetType phiNew;
 			if (targetVectors_[advance].size() > 0) {

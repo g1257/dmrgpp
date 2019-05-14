@@ -137,6 +137,7 @@ public:
 	      timeVectorsBase_(0),
 	      wftHelper_(targetHelper.model(), targetHelper.lrs(), targetHelper.wft()),
 	      multiSiteExprHelper_(targetHelper_.model().geometry().numberOfSites() - 2),
+	      wftAndAdvanceIfNeeded_(true),
 	      correlationsSkel_(multiSiteExprHelper_, false)
 	{}
 
@@ -375,11 +376,14 @@ public:
 	{
 		typename TimeVectorsBaseType::ExtraData extra(direction,
 		                                              allOperatorsApplied,
+		                                              wftAndAdvanceIfNeeded_,
 		                                              block);
 		timeVectorsBase_->calcTimeVectors(indices,
 		                                  Eg,
 		                                  phi,
 		                                  extra);
+
+		wftAndAdvanceIfNeeded_ = true;
 	}
 
 	void applyOneOperator(SizeType loopNumber,
@@ -554,6 +558,8 @@ private:
 	{
 		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
 
+		wftAndAdvanceIfNeeded_ = false;
+
 		if (stage_[i] == StageEnum::OPERATOR) {
 
 			BorderEnumType corner = (tstStruct.sites(i)==0 ||
@@ -580,9 +586,40 @@ private:
 			}
 		} else if (stage_[i] == StageEnum::WFT_NOADVANCE ||
 		           stage_[i] == StageEnum::WFT_ADVANCE) {
+			const SizeType advanceEach = tstStruct.advanceEach();
+			SizeType advance = indexNoAdvance_;
+
+			if (advanceEach > 0 && stage_[i] == StageEnum::WFT_ADVANCE) {
+				SizeType timeSteps = tstStruct.timeSteps();
+				advance = (timeSteps > 0) ? timeSteps - 1 : 0;
+			}
+
+			if (targetVectors_.size() <= advance) {
+				PsimagLite::String s(__FILE__);
+				s += ": TargetVectors.size()" + ttos(targetVectors_.size());
+				s += " but advance=" + ttos(advance) + "\n";
+				throw PsimagLite::RuntimeError(s);
+			}
+
+			const VectorWithOffsetType& src = targetVectors_[advance];
+
+			if (src.size() == 0) {
+				PsimagLite::String s(__FILE__);
+				s += ": TargetVectors[" + ttos(advance) + "].size()==0\n";
+				throw PsimagLite::RuntimeError(s);
+			}
+
+			if (site==0 || site==numberOfSites -1)  {
+				// don't wft since we did it before
+				assert(advance < targetVectors_.size());
+				phiNew = src;
+				return;
+			}
+
 			PsimagLite::OstringStream msg;
-			msg<<"Doing nothing in stage=" <<stageToString(i);
-			progress_.printline(msg,std::cout);
+			msg<<"I'm calling the WFT now";
+
+			wftHelper_.wftOneVector(phiNew, src, site);
 		} else {
 			throw PsimagLite::RuntimeError("computePhi\n");
 		}
@@ -600,6 +637,7 @@ private:
 	TimeVectorsBaseType* timeVectorsBase_;
 	WftHelperType wftHelper_;
 	mutable MultiSiteExpressionHelperType multiSiteExprHelper_;
+	mutable bool wftAndAdvanceIfNeeded_;
 	CorrelationsSkeletonType correlationsSkel_;
 };
 
