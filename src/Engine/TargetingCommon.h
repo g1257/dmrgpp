@@ -469,41 +469,6 @@ public:
 		return (forB == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
 	}
 
-	void chebyshev(const VectorSizeType& indices,
-	               RealType Eg,
-	               const VectorWithOffsetType& phiNew,
-	               ProgramGlobals::DirectionEnum direction,
-	               bool allOperatorsApplied,
-	               const VectorSizeType& block1)
-	{
-		SizeType startOfWft = 1;
-		if (aoe_.currentTimeStep() == 0) {
-			SizeType indexOf1 = indices[startOfWft];
-			VectorWithOffsetType& tv1 =
-			        const_cast<VectorWithOffsetType&>(aoe_.targetVectors(indexOf1));
-			tv1  = phiNew;
-			startOfWft = 2;
-		}
-
-		// WFT 1 if !time advanced
-		// WFT 2 if time advanced
-		assert(0 < block1.size());
-		SizeType n = indices.size();
-
-		for (SizeType i = startOfWft; i < n; ++i) {
-			SizeType ii = indices[i];
-			aoe_.wftSome(block1[0], ii, ii + 1);
-		}
-
-		aoe_.calcTimeVectors(indices,
-		                     Eg,
-		                     phiNew,
-		                     direction,
-		                     allOperatorsApplied,
-		                     block1);
-
-	}
-
 	const ComplexOrRealType& inSitu(SizeType site) const
 	{
 		assert(site < inSitu_.size());

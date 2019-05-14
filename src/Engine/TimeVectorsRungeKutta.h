@@ -135,7 +135,8 @@ public:
 						  const ModelType& model,
 						  const WaveFunctionTransfType& wft,
 						  const LeftRightSuperType& lrs)
-		: progress_("TimeVectorsRungeKutta"),
+		: BaseType(model, lrs, wft),
+	      progress_("TimeVectorsRungeKutta"),
 	      currentTimeStep_(currentTimeStep),
 	      tstStruct_(tstStruct),
 		  times_(times),
@@ -148,7 +149,7 @@ public:
 	virtual void calcTimeVectors(const VectorSizeType& indices,
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
-	                             typename BaseType::ExtraData* = 0)
+	                             const typename BaseType::ExtraData&)
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"using RungeKutta";

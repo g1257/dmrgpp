@@ -253,12 +253,12 @@ private:
 
 		assert(0 < block1.size());
 
-		this->common().chebyshev(indices,
-		                         Eg,
-		                         phiNew,
-		                         direction,
-		                         allOperatorsApplied,
-		                         block1);
+		this->common().aoe().calcTimeVectors(indices,
+		                                     Eg,
+		                                     phiNew,
+		                                     direction,
+		                                     allOperatorsApplied,
+		                                     block1);
 
 		assert(phiNew.offset(0) == this->common().aoe().targetVectors()[1].offset(0));
 

@@ -123,6 +123,7 @@ public:
 	MultiSiteExpressionHelperType;
 	typedef typename MultiSiteExpressionHelperType::DmrgSerializerType DmrgSerializerType;
 	typedef CorrelationsSkeleton<MultiSiteExpressionHelperType, ModelType> CorrelationsSkeletonType;
+	typedef typename TimeVectorsBaseType::WftHelperType WftHelperType;
 
 	ApplyOperatorExpression(const TargetHelperType& targetHelper,
 	                        SizeType indexNoAdvance)
@@ -134,6 +135,7 @@ public:
 	      applyOpLocal_(targetHelper.lrs(), targetHelper.withLegacyBugs()),
 	      targetVectors_(0),
 	      timeVectorsBase_(0),
+	      wftHelper_(targetHelper.model(), targetHelper.lrs(), targetHelper.wft()),
 	      multiSiteExprHelper_(targetHelper_.model().geometry().numberOfSites() - 2),
 	      correlationsSkel_(multiSiteExprHelper_, false)
 	{}
@@ -377,7 +379,7 @@ public:
 		timeVectorsBase_->calcTimeVectors(indices,
 		                                  Eg,
 		                                  phi,
-		                                  &extra);
+		                                  extra);
 	}
 
 	void applyOneOperator(SizeType loopNumber,
@@ -422,37 +424,18 @@ public:
 		}
 	}
 
-	void wftSome(SizeType site, SizeType begin, SizeType end)
-	{
-		for (SizeType index = begin; index < end; ++index) {
-			const VectorWithOffsetType& src = targetVectors_[index];
-			if (src.size() == 0) continue;
-			VectorWithOffsetType phiNew;
-			wftOneVector(phiNew,src,site);
-			targetVectors_[index] = phiNew;
-		}
-	}
-
 	void multiSitePush(DmrgSerializerType const* ds) const
 	{
 		multiSiteExprHelper_.push(ds, psi_);
 	}
 
-private:
-
-	void wftOneVector(VectorWithOffsetType& phiNew,
-	                  const VectorWithOffsetType& src,
-	                  SizeType site) const
+	void wftSome(SizeType site, SizeType begin, SizeType end)
 	{
-		phiNew.populateFromQns(src, targetHelper_.lrs().super());
-
-		// OK, now that we got the partition number right, let's wft:
-		VectorSizeType nk(1,targetHelper_.model().hilbertSize(site));
-		targetHelper_.wft().setInitialVector(phiNew,
-		                                     src,
-		                                     targetHelper_.lrs(),
-		                                     nk);
+		VectorVectorWithOffsetType& tvs = const_cast<VectorVectorWithOffsetType&>(targetVectors_);
+		wftHelper_.wftSome(tvs, site, begin, end);
 	}
+
+private:
 
 	void checkOrder(SizeType i, const TargetParamsType& tstStruct) const
 	{
@@ -570,7 +553,6 @@ private:
 	                const TargetParamsType& tstStruct) const
 	{
 		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
-		SizeType advanceEach = tstStruct.advanceEach();
 
 		if (stage_[i] == StageEnum::OPERATOR) {
 
@@ -598,41 +580,9 @@ private:
 			}
 		} else if (stage_[i] == StageEnum::WFT_NOADVANCE ||
 		           stage_[i] == StageEnum::WFT_ADVANCE) {
-
-			SizeType advance = indexNoAdvance_;
-
-			if (advanceEach > 0 && stage_[i] == StageEnum::WFT_ADVANCE) {
-				SizeType timeSteps = tstStruct.timeSteps();
-				advance = (timeSteps > 0) ? timeSteps - 1 : 0;
-			}
-
-			if (targetVectors_.size() <= advance) {
-				PsimagLite::String s(__FILE__);
-				s += ": TargetVectors.size()" + ttos(targetVectors_.size());
-				s += " but advance=" + ttos(advance) + "\n";
-				throw PsimagLite::RuntimeError(s);
-			}
-
-			const VectorWithOffsetType& src = targetVectors_[advance];
-
-			if (src.size() == 0) {
-				PsimagLite::String s(__FILE__);
-				s += ": TargetVectors[" + ttos(advance) + "].size()==0\n";
-				throw PsimagLite::RuntimeError(s);
-			}
-
-			if (site==0 || site==numberOfSites -1)  {
-				// don't wft since we did it before
-				assert(advance < targetVectors_.size());
-				phiNew = src;
-				return;
-			}
-
 			PsimagLite::OstringStream msg;
-			msg<<"I'm calling the WFT now";
+			msg<<"Doing nothing in stage=" <<stageToString(i);
 			progress_.printline(msg,std::cout);
-
-			wftOneVector(phiNew, src, site);
 		} else {
 			throw PsimagLite::RuntimeError("computePhi\n");
 		}
@@ -648,6 +598,7 @@ private:
 	VectorWithOffsetType psi_;
 	typename PsimagLite::Vector<VectorWithOffsetType>::Type targetVectors_;
 	TimeVectorsBaseType* timeVectorsBase_;
+	WftHelperType wftHelper_;
 	mutable MultiSiteExpressionHelperType multiSiteExprHelper_;
 	CorrelationsSkeletonType correlationsSkel_;
 };

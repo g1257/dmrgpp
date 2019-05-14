@@ -149,7 +149,8 @@ public:
 	                  const WaveFunctionTransfType& wft,
 	                  const LeftRightSuperType& lrs,
 	                  InputValidatorType& ioIn)
-	    : currentTimeStep_(currentTimeStep),
+	    : BaseType(model, lrs, wft),
+	      currentTimeStep_(currentTimeStep),
 	      tstStruct_(tstStruct),
 	      times_(times),
 	      targetVectors_(targetVectors),
@@ -164,8 +165,24 @@ public:
 	virtual void calcTimeVectors(const PsimagLite::Vector<SizeType>::Type& indices,
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
-	                             typename BaseType::ExtraData* = 0)
+	                             const typename BaseType::ExtraData& extra)
 	{
+		if (indices.size() < 2)
+			err("TimeVectorsKrylov: indices.size() must be greater than 1\n");
+
+		// wft and (if needed) advance
+		{
+			SizeType advance = (timeHasAdvanced_) ? indices[indices.size() - 1] : indices[0];
+			VectorWithOffsetType phiNew;
+			if (targetVectors_[advance].size() > 0) {
+				BaseType::wftHelper().wftOneVector(phiNew,
+				                                   targetVectors_[advance],
+				                                   extra.block[0]);
+
+				targetVectors_[indices[0]] = phiNew;
+			}
+		}
+
 		const SizeType n = indices.size();
 		if (currentTimeStep_ == 0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
 			for (SizeType i = 0; i < n; ++i) {

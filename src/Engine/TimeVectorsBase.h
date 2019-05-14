@@ -82,27 +82,39 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include "Vector.h"
 #include "ProgramGlobals.h"
+#include "Wft/WftHelper.h"
 
 namespace Dmrg {
 
 template<typename TargetParamsType,
-		 typename ModelType,
-		 typename WaveFunctionTransfType,
-		 typename LanczosSolverType,
-		 typename VectorWithOffsetType>
+         typename ModelType,
+         typename WaveFunctionTransfType,
+         typename LanczosSolverType,
+         typename VectorWithOffsetType>
 class TimeVectorsBase  {
 
 public:
 
+	typedef typename ModelType::ModelHelperType ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename TargetParamsType::RealType RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef std::pair<SizeType,SizeType> PairType;
+	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef WftHelper<ModelType, VectorWithOffsetType, WaveFunctionTransfType> WftHelperType;
+
+	TimeVectorsBase(const ModelType& model,
+	                const LeftRightSuperType& lrs,
+	                const WaveFunctionTransfType& wft)
+	    : wftHelper_(model, lrs, wft)
+	{}
 
 	struct ExtraData {
 
 		ExtraData(ProgramGlobals::DirectionEnum dir_,
 		          bool allOperatorsApplied_,
-		          PsimagLite::Vector<SizeType>::Type block_)
+		          VectorSizeType block_)
 		    : dir(dir_), allOperatorsApplied(allOperatorsApplied_), block(block_)
 		{}
 
@@ -111,16 +123,24 @@ public:
 		PsimagLite::Vector<SizeType>::Type block;
 	};
 
-	virtual void calcTimeVectors(const PsimagLite::Vector<SizeType>::Type&,
+	virtual void calcTimeVectors(const VectorSizeType&,
 	                             RealType,
 	                             const VectorWithOffsetType&,
-	                             ExtraData* = 0) = 0;
+	                             const ExtraData&) = 0;
 
 	virtual RealType time() const = 0;
 
 	virtual ~TimeVectorsBase() {}
 
 	virtual void timeHasAdvanced() {}
+
+protected:
+
+	const WftHelperType& wftHelper() const { return wftHelper_; }
+
+private:
+
+	WftHelperType wftHelper_;
 }; //class TimeVectorsBase
 } // namespace Dmrg
 /*@}*/

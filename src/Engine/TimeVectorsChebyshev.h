@@ -140,7 +140,8 @@ public:
 	                     const ModelType& model,
 	                     const WaveFunctionTransfType& wft,
 	                     const LeftRightSuperType& lrs)
-	    : currentTimeStep_(currentTimeStep),
+	    : BaseType(model, lrs, wft),
+	      currentTimeStep_(currentTimeStep),
 	      tstStruct_(tstStruct),
 	      times_(times),
 	      targetVectors_(targetVectors),
@@ -153,9 +154,28 @@ public:
 	virtual void calcTimeVectors(const VectorSizeType& indices,
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
-	                             typename BaseType::ExtraData* = 0)
-	{
+	                             const typename BaseType::ExtraData& extra)
+	{	
+		SizeType startOfWft = 1;
+		if (currentTimeStep_ == 0) {
+			SizeType indexOf1 = indices[startOfWft];
+			assert(indexOf1 < targetVectors_.size());
+			VectorWithOffsetType& tv1 =
+			        const_cast<VectorWithOffsetType&>(targetVectors_[indexOf1]);
+			tv1  = phi;
+			startOfWft = 2;
+		}
+
+		// WFT 1 if !time advanced
+		// WFT 2 if time advanced
+		assert(0 < extra.block.size());
 		SizeType n = indices.size();
+
+		for (SizeType i = startOfWft; i < n; ++i) {
+			SizeType ii = indices[i];
+			BaseType::wftHelper().wftSome(targetVectors_, extra.block[0], ii, ii + 1);
+		}
+
 		assert(n > 0);
 		if (currentTimeStep_ == 0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
 			for (SizeType i = 0; i < n; ++i) {
