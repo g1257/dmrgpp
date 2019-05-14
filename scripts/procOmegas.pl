@@ -30,8 +30,8 @@ my $geometryLeg = 1;
 my $orbitals = 1;
 my $omegaOffset = 0;
 my $jacksOrLorentz = "none";
-my $Wstar = 0;
-my $epsilont = 0;
+my $ChebyC = 0;
+my $ChebySign = 1;
 my $testoutputfile;
 
 my $hptr = {"#OmegaBegin" => \$omega0,
@@ -42,18 +42,18 @@ my $hptr = {"#OmegaBegin" => \$omega0,
             "GeometrySubKind" => \$geometrySubName,
             "LadderLeg" => \$geometryLeg,
             "Orbitals" => \$orbitals,
+            "#ChebyshevC" => \$ChebyC,
+            "#ChebyshevSign" => \$ChebySign,
             "TSPSites 1" => \$centralSite,
             "#JacksonOrLorentz" => \$jacksOrLorentz,
             "TotalNumberOfSites" => \$GlobalNumberOfSites,
-            "ChebyshevWstar" => \$Wstar,
-            "ChebyshevEpsilon" => \$epsilont,
             "OutputFile" => \$testoutputfile};
 
 OmegaUtils::getLabels($hptr,$templateInput);
 $hptr->{"isPeriodic"} = $isPeriodic;
 $hptr->{"mMax"} = $mMax;
 $hptr->{"centralSite"} = $centralSite;
-$hptr->{"isCheby"} = findIfWeAreCheby($jacksOrLorentz, $testoutputfile, $Wstar, $epsilont);
+$hptr->{"isCheby"} = findIfWeAreCheby($jacksOrLorentz, $testoutputfile, $ChebyC);
 
 my $logFile = "Log$templateInput";
 $logFile =~ s/\..*$//;
@@ -219,8 +219,8 @@ sub correctionVectorReadOpen
 
 		next if ($skip);
 
-		chomp;
-		my @temp = split;
+	chomp;
+	my @temp = split;
 		die "$0: Line $_\n" unless (scalar(@temp)==5);
 
 		my $site = $temp[0];
@@ -253,7 +253,7 @@ sub correctionVectorWrite
 
 		$array->[$i] = [$vv1, $vv2];
 	}
-}
+}	
 
 sub procThisOmegaKspace
 {
@@ -280,12 +280,33 @@ sub readCheby
 	my ($v1, $input) = @_;
 	my $file = $input;
 	$file =~s/\.inp//;
-	$file = "runFor$file.cout";
+	my ($dir, $base) = getDirAndBase($file);
+	$file = "runFor$base.cout";
 
 	open(FIN, "<", "$file") or die "$0: Cannot open $file : $!\n";
 
 	correctionVectorReadOpen([$v1], ["P1"], $file, \*FIN);
 	close(FIN);
+}
+
+sub getDirAndBase
+{
+	my ($file) = @_;
+	my $b1 = ($file =~ /^\//);
+	my $b2 = ($file =~ /^\.\.\//);
+	return $file if (!$b1 && !$b2);
+
+	my @temp = split/\//, $file;
+	my $n = scalar(@temp);
+	die "$0: getDirAndBase: expected n >= 2, got $n\n" if ($n < 2);
+
+	my $dir = $temp[0]."/";
+	my $base = $temp[$n - 1];
+	for (my $i = 1; $i < $n - 1; ++$i) {
+		$dir = $temp[$i]."/";
+	}
+
+	return ($dir, $base);
 }
 
 sub dampCheby
@@ -305,14 +326,14 @@ sub dampCheby
 		my $den = sinh(4.0);
 		for (my $n = 1; $n < $times; ++$n) {	
 			my $num = sinh(4.0*(1.0-$n/$times));
-			$dampG[$n] = $num/$den;
+                	$dampG[$n] = $num/$den;
 		}
 	}
 
-	#print STDERR "Damping Factor\n";
+#print STDERR "Damping Factor\n";
 	#for (my $i =0; $i < $times; ++$i) {
-		#print STDERR "$i\t$dampG[$i]\n";
-	#}
+	#print STDERR "$i\t$dampG[$i]\n";
+#}
 
 	return @dampG;
 }
@@ -348,19 +369,19 @@ sub chebyRealSpace
 sub doFactorAndPolyXfactor
 {
 	my ($times) = @_;
-	my $wPrime = 1.0-0.5*$epsilont;	
-	my $scalea = $Wstar/(2.0*$wPrime);
+	my $epsilont = 0.025;
+	my $Wprime = 1.0-0.5*$epsilont; 
 	my (@factor, @polyXfactor);
 
 	for (my $om = 0; $om < $omegaTotal; ++$om) {
-        	my $omega = $omega0+$om*$omegaStep;
+		my $omega = $omega0+$om*$omegaStep;
 		# Scaling
-		my $omegaPrime = ($omega/$scalea)-$wPrime;
-		my $underSqrt = 1.0 - $omegaPrime*$omegaPrime;
-		die "$0: $omegaPrime is such that 1-w'^2 < 0 $wPrime $scalea\n" if ($underSqrt < 0); 
+		my $omegaPrime = ($ChebySign*$omega-$omega0)*$ChebyC-$Wprime;
+		my $underSqrt = 1.0-$omegaPrime*$omegaPrime;
+		die "$0: $omegaPrime is such that 1-w'^2 < 0\n" if ($underSqrt < 0); 
 		$factor[$om] = 1.0/(pi*sqrt($underSqrt));
 		for (my $n = 1; $n < $times; ++$n) {
-			$polyXfactor[$n + $times*$om] = $factor[$om]*cos($n*acos($omegaPrime));
+			$polyXfactor[$n + $times*$om] = $ChebyC*$factor[$om]*cos($n*acos($omegaPrime));
 		}
 	}
 
@@ -405,14 +426,14 @@ sub procAllQs
 	procCommon(\@array, $ind, $omega, $centralSite, $geometry);
 	die "procAllQs: array is empty\n" if (scalar(@array) == 0);
 	printSpectrum(\@array);
-}
+		}
 
 sub execThis
 {
 	my ($cmd) = @_;
 	print LOGFILEOUT "$0: About to execute $cmd\n";
 	system($cmd);
-}
+					}
 
 sub writeFourier
 {
@@ -421,7 +442,7 @@ sub writeFourier
 
 	if ($geometry->{"name"} eq "chain") {
 		return writeFourierChain($array,$f);
-	}
+		}
 
 	if ($geometry->{"name"} eq "ladder" || $subname eq "average") {
 		return writeFourierLadder($array, $f);
@@ -454,9 +475,9 @@ sub writeFourierLadder
 		my @temp2 = ($m);
 		push @temp2, @temp;
 		$array->[$m] = \@temp2;
-	}
-}
-
+			}
+		}
+		
 sub extractValue
 {
 	my ($array, $q) = @_;
@@ -492,12 +513,12 @@ sub spectrumToColor
 			print STDERR "$0: File $file at line $. has set size to $size\n";
 		} else {
 			($size == $n) or die "$0: Wrong line $_ (expected size $size)\n";
-		}
+                        }
 
 		my @temp2 = getRealOrImagData(\@temp,$realOrImag,$geometry,$qyIndex);
 		$finalSize = scalar(@temp2) if (!defined($finalSize));
 		$data->[$counter++] = \@temp2;
-	}
+                        }
 
 	close(FIN);
 
@@ -509,8 +530,8 @@ sub spectrumToColor
 
 	scaleData($data,$min,$max);
 	return ($counter,$finalSize);
-}
-
+                }
+                
 sub minMaxData
 {
 	my ($a) = @_;
@@ -525,8 +546,8 @@ sub minMaxData
 			#next if ($thisValue<0);
 			$min = $thisValue if ($min > $thisValue);
 			$max = $thisValue if ($max < $thisValue);
-		}
-	}
+        }
+}
 
 	return ($min,$max);
 }
@@ -577,18 +598,14 @@ sub getRealOrImagData
 
 sub findIfWeAreCheby
 {
-	my ($jacksOrLorentz, $testoutputfile, $Wstar, $epsilont) = @_;
+	my ($jacksOrLorentz, $testoutputfile, $chebyC) = @_;
 	my $b1 = ($jacksOrLorentz eq "none");
 	my $b2 = ($testoutputfile =~ /\$/);
 
 	return 0 if ($b1 and $b2);
 
-	if ($Wstar == 0) {
-		die "$0: Needs ChebyshevWstar in input\n";
-	}
-
-	if ($epsilont == 0) {
-		die "$0: Needs ChebyshevEpsilon in input\n";
+	if ($chebyC == 0) {
+		die "$0: Needs ChebyshevC in input\n";
 	}
 
 	return 1 if (!$b1 and !$b2);
