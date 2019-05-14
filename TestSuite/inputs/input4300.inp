@@ -24,6 +24,7 @@ NumberOfTerms=1
 DegreesOfFreedom=2
 GeometryKind=LongRange
 GeometryOptions=none
+GeometryMaxConnections=0
 Connectors 16 16
 0 0 0.024 0 0.334 0.177 -0.085 -0.216 0 0 0 0 0 0 0 0
 0 0 0 -0.216 -0.177 -0.212 0.216 -0.109 0 0 0 0 0 0 0 0

@@ -24,6 +24,7 @@ Connectors  1 0
 DegreesOfFreedom=1
 GeometryKind=LongRange
 GeometryOptions=none
+GeometryMaxConnections=0
 Connectors 6 6
  0 -1 -1 -1 -1 -1
 -1  0 -1 -1 -1 -1

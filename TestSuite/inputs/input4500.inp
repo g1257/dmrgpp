@@ -1,6 +1,7 @@
 TotalNumberOfSites=8
 NumberOfTerms=3
 
+GeometryMaxConnections=0
 DegreesOfFreedom=1
 GeometryKind=LongRange
 GeometryOptions=none

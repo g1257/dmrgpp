@@ -4,6 +4,7 @@ NumberOfTerms=2
 DegreesOfFreedom=1
 GeometryKind=LongRange
 GeometryOptions=none
+GeometryMaxConnections=0
 Connectors
 24 24
 (0,0) (-1,0) (0,0) (0,0) (0,0) (0,0) (0,0) (0,0) (0,0) (0,0) (0,0) (0,0) (0,0) (0,0) (0,0) (0,0) (0,0) (0,0) (0,0) (0,0) (0,0) (0,0) (0,0) (0,0) 
