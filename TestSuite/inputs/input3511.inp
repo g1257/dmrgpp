@@ -25,6 +25,7 @@ FiniteLoops 2
 -62 200 2 62 200 2
 RepeatFiniteLoopsTimes=50
 TruncationTolerance=1e-9
+Threads=4
 
 GsWeight=0.1
 TSPTau=1.0
