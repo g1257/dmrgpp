@@ -14,10 +14,11 @@ my ($action, $n, @what) = @ARGV;
 defined($what[0]) or die "$0: USAGE: action n what\n";
 
 my %actions = (getTimeObservablesInSitu => \&runTimeInSituObs,
-	               getEnergyAncilla => \&runEnergyAncillaInSituObs,
-	               CollectBrakets => \&runCollectBrakets,
-	               metts => \&runMetts,
-	               nDollar => \&runNdollar);
+               getEnergyAncilla => \&runEnergyAncillaInSituObs,
+               CollectBrakets => \&runCollectBrakets,
+               metts => \&runMetts,
+               nDollar => \&runNdollar,
+               procOmegas => \&runProcOmegas);
 
 defined($actions{$action}) or die "$0: Action $action not registered\n";
 
@@ -147,4 +148,13 @@ sub runNdollar
 	Ndollar::main($what->[0]);
 }
 
+sub runProcOmegas
+{
+	my ($n, $what) = @_;
+	my $dir = "../../scripts";
+	my $cmd = "perl -I $dir $dir/procOmegas.pl -f ../inputs/input$n.inp @$what";
+	system($cmd);
+	$cmd = "cp out.spectrum out$n.spectrum";
+	system($cmd);
+}
 

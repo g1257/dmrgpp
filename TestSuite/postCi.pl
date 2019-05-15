@@ -86,7 +86,8 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	               getEnergyAncilla => \&checkEnergyAncillaInSitu,
 	               CollectBrakets => \&checkCollectBrakets,
 	               metts => \&checkMetts,
-	               observe => \&checkObserve);
+	               observe => \&checkObserve,
+	               procOmegas => \&checkProcOmegas);
 	for (my $i = 0; $i < $totalAnnotations; ++$i) {
 		my ($ppLabel, $w) = Ci::readAnnotationFromIndex(\@ciAnnotations, $i);
 		my $x = defined($w) ? scalar(@$w) : 0;
@@ -481,6 +482,100 @@ sub checkMetts
 		compareHashes(\%vals1, \%vals2);
 	}
 }
+
+sub checkProcOmegas
+{
+	my ($n, $what, $workdir, $golddir) = @_;
+	my $file1 = "$workdir/out$n.spectrum";
+	my $file2 = "$golddir/out$n.spectrum";
+	print "$0: kompare $file1 $file2\n";
+	compareSpectrum($file1, $file2);
+}
+
+sub compareSpectrum
+{
+	my ($file1, $file2) = @_;
+
+	my %h1;
+	loadSpectrum(\%h1, $file1);
+
+	my %h2;
+	loadSpectrum(\%h2, $file2);
+
+	compareSpectrumHashes(\%h1, \%h2);
+}
+
+sub loadSpectrum
+{
+	my ($h, $file) = @_;
+	if (!open(FILE, "<", $file)) {
+		print "\t\tWARNING: $file could not be opened\n";
+		return;
+	}
+
+	while (<FILE>) {
+		next if (/^[ \t]*#/);
+		chomp;
+		my @temp = split;
+		my $n = scalar(@temp);
+		next if ($n < 2);
+		my $key = shift @temp;
+		
+		$h->{"$key"} = \@temp;
+	}
+
+	close(FILE); 
+}
+
+sub compareSpectrumHashes
+{
+	my ($h1, $h2) = @_;
+	my $n1 = keys %$h1;
+	my $n2 = keys %$h2;
+	print "\t\tWARNING:Spectrum: Different number of omegas $n1 and $n2\n"
+	 if ($n1 != $n2);
+
+	my $maxDiff = 0;
+	my @omegasUndef;
+	foreach my $key (sort keys %$h1) {
+		my $vec1 = $h1->{$key};
+		my $vec2 = $h2->{$key};
+		if (defined($vec2)) {
+			my $diff = vectorAbsDiff($vec1, $vec2);
+			$maxDiff = $diff if ($diff > $maxDiff);
+		} else {
+			push @omegasUndef, $key;
+		}
+	}
+
+	my $n = scalar(@omegasUndef);
+	print "\t\t WARNING:Spectrum: $n omegas not found\n" if ($n > 0);
+	my $warnOrNot = ($maxDiff < 1e-5) ? "" : "WARNING"; 
+	print "\t\t$warnOrNot"."Spectrum: maxDiff=$maxDiff\n";
+}
+
+sub vectorAbsDiff
+{
+	my ($v1, $v2) = @_;
+	my $n1 = scalar(@$v1);
+	my $n2 = scalar(@$v2);
+	print "\t\tWARNING:Spectrum: Different number of space points $n1 and $n2\n"
+	 if ($n1 != $n2);
+
+	my $max = ($n1 < $n2) ? $n2 : $n1;
+	my $maxDiff = 0;
+	for (my $i = 0; $i < $max; ++$i) {
+		my $val1 = $v1->[$i];
+		my $val2 = $v2->[$i];
+		defined($val1) or $val1 = 0;
+		defined($val2) or $val2 = 0;
+		my $diff = abs($v1->[$i] - $v2->[$i]);
+		$maxDiff = $diff if ($diff > $maxDiff);
+	}
+
+	return $maxDiff;
+}
+
 
 sub checkObserve
 {

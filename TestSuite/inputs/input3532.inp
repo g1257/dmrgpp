@@ -67,3 +67,4 @@ OperatorExpression=c?0'
 #JacksonOrLorentz=0
 
 #ci dmrg arguments= -p 12 "<gs|c?0'|P1>,<gs|c?0'|P2>"
+#ci procOmegas -p
