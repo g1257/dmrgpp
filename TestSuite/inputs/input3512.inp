@@ -47,3 +47,4 @@ OperatorExpression=sz
 #OmegaStep=0.02
 #JacksonOrLorentz=0
 #ci dmrg arguments=-p 12 "<gs|sz|P1>,<gs|sz|P2>"
+#ci procOmegas -p
