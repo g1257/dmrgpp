@@ -468,68 +468,33 @@ private:
 		}
 	}
 
-	void cocoon(SizeType site, ProgramGlobals::DirectionEnum direction)
-	const
+	void cocoon(SizeType site, ProgramGlobals::DirectionEnum direction) const
 	{
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
+		const bool isChevy = (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV);
+
+		SizeType nineOrTenOrFifteen = (isChevy) ? 10 : 15;
+		SizeType eightOrEleven = (isChevy) ? 8 : 11;
 
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
-			ComplexOrRealType rr =
-			        this->common().rixsCocoon(direction,site,9,5,true);
-			ComplexOrRealType ri =
-			        this->common().rixsCocoon(direction,site,9,4,true);
-			ComplexOrRealType ir =
-			        this->common().rixsCocoon(direction,site,8,5,true);
-			ComplexOrRealType ii =
-			        this->common().rixsCocoon(direction,site,8,4,true);
-
-			const RealType time = this->common().aoe().time();
-			std::cout<<site<<" "<<(ri-ir)<<" "<<time; // time here is the currentTime
-			std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
-			std::cout<<site<<" "<<(rr+ii)<<" "<<time; // time here is the currentTime
-			std::cout<<" <gs|A|P3> 1\n";   // 1 here is the "superdensity"
-			return;
-		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
-			ComplexOrRealType rr =
-			        this->common().rixsCocoon(direction,site,10,5,true);
-			ComplexOrRealType ri =
-			        this->common().rixsCocoon(direction,site,10,4,true);
-			ComplexOrRealType ir =
-			        this->common().rixsCocoon(direction,site,8,5,true);
-			ComplexOrRealType ii =
-			        this->common().rixsCocoon(direction,site,8,4,true);
-
-			const RealType time = this->common().aoe().time();
-			std::cout<<site<<" "<<(ri-ir)<<" "<<time; // time here is the currentTime
-			std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
-			std::cout<<site<<" "<<(rr+ii)<<" "<<time; // time here is the currentTime
-			std::cout<<" <gs|A|P3> 1\n";   // 1 here is the "superdensity"
-
-			for (SizeType i = 6; i < 12; ++i)
-				std::cout<<"norm2("<<i<<")= "<<this->common().normSquared(i)<<"\n";
-			return;
-		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME){
-			ComplexOrRealType rr =
-			        this->common().rixsCocoon(direction,site,15,5,true);
-			ComplexOrRealType ri =
-			        this->common().rixsCocoon(direction,site,15,4,true);
-			ComplexOrRealType ir =
-			        this->common().rixsCocoon(direction,site,11,5,true);
-			ComplexOrRealType ii =
-			        this->common().rixsCocoon(direction,site,11,4,true);
-
-			const RealType time = this->common().aoe().time();
-			std::cout<<site<<" "<<(ri-ir)<<" "<<time; // time here is the currentTime
-			std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
-			std::cout<<site<<" "<<(rr+ii)<<" "<<time; // time here is the currentTime
-			std::cout<<" <gs|A|P3> 1\n";   // 1 here is the "superdensity"
-
-			for (SizeType i = 6; i < 16; ++i)
-				std::cout<<"norm2("<<i<<")= "<<this->common().normSquared(i)<<"\n";
-			return;
-		} else {
-			assert(false);
+			nineOrTenOrFifteen = 9;
+			eightOrEleven = 8;
 		}
+
+		const ComplexOrRealType rr =
+		        this->common().rixsCocoon(direction,site,nineOrTenOrFifteen,5,true);
+		const ComplexOrRealType ri =
+		        this->common().rixsCocoon(direction,site,nineOrTenOrFifteen,4,true);
+		const ComplexOrRealType ir =
+		        this->common().rixsCocoon(direction,site,eightOrEleven,5,true);
+		const ComplexOrRealType ii =
+		        this->common().rixsCocoon(direction,site,eightOrEleven,4,true);
+
+		const RealType time = this->common().aoe().time();
+		std::cout<<site<<" "<<(ri-ir)<<" "<<time; // time here is the currentTime
+		std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
+		std::cout<<site<<" "<<(rr+ii)<<" "<<time; // time here is the currentTime
+		std::cout<<" <gs|A|P3> 1\n";   // 1 here is the "superdensity"
 	}
 
 	void addFactor(VectorWithOffsetType& phiNew,
@@ -572,22 +537,28 @@ private:
 			                         this->common().aoe().targetVectors(8),
 			                         this->common().aoe().targetVectors(9));
 			setWeights(10);
-		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
-			VectorSizeType indices{6, 8, 9};
-			calcVectors(indices, Eg, direction, block1, !firstCall);
-			VectorSizeType indices2{7, 10, 11};
-			calcVectors(indices2, Eg, direction, block1, !firstCall);
-			setWeights(12);
-		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME){
-			VectorSizeType indices{6, 8, 9, 10, 11};
-			calcVectors(indices, Eg, direction, block1, !firstCall);
-			VectorSizeType indices2{7, 12, 13, 14, 15};
-			calcVectors(indices2, Eg, direction, block1, !firstCall);
-			setWeights(16);
-		} else {
-			assert(false);
+			firstCall = false; // unused here but just in case
+			return;
 		}
 
+		VectorSizeType indices;
+		VectorSizeType indices2;
+		SizeType numberOfWeights = 0;
+
+		if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
+			indices = {6, 8, 9};
+			indices2 = {7, 10, 11};
+			numberOfWeights = 12;
+		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME){
+			indices = {6, 8, 9, 10, 11};
+			indices2 = {7, 12, 13, 14, 15};
+			numberOfWeights = 16;
+		}
+
+		assert(numberOfWeights > 0);
+		assert(indices.size() > 0 && indices2.size() > 0);
+		calcVectors(indices, Eg, direction, block1, !firstCall);
+		calcVectors(indices2, Eg, direction, block1, !firstCall);
 		firstCall = false;
 	}
 
