@@ -208,7 +208,8 @@ public:
 		if (timeHasAdvanced_) {
 			for (SizeType i = 0; i < n - 1; ++i) {
 				SizeType ii = indices[i];
-				targetVectors_[ii] = targetVectors_[ii + 1];
+				SizeType jj = indices[i + 1];
+				targetVectors_[ii] = targetVectors_[jj];
 			}
 		}
 
