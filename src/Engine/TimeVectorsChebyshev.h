@@ -156,6 +156,18 @@ public:
 	                             const VectorWithOffsetType& phi,
 	                             const typename BaseType::ExtraData& extra)
 	{	
+		if (extra.wftAndAdvanceIfNeeded) {
+			const SizeType noAdvance = indices[0];
+			VectorWithOffsetType phiNew;
+			if (targetVectors_[noAdvance].size() > 0) {
+				BaseType::wftHelper().wftOneVector(phiNew,
+				                                   targetVectors_[noAdvance],
+				                                   extra.block[0]);
+
+				targetVectors_[noAdvance] = phiNew;
+			}
+		}
+
 		SizeType startOfWft = 1;
 		if (currentTimeStep_ == 0) {
 			SizeType indexOf1 = indices[startOfWft];

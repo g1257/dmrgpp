@@ -270,19 +270,14 @@ public:
 
 		SizeType site = block1[0];
 
-		this->common().aoe().wftSome(site, 0, 8);
+		this->common().aoe().wftSome(site, 0, 6);
 
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
-			this->common().aoe().wftSome(site, 8, this->common().aoe().targetVectors().size());
-		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
-			// just to set the stage and currenttime: CHEBY
-			this->common().aoe().getPhi(0, Eg, direction, site, loopNumber, *tstStruct2_);
-		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME){
-			// just to set the stage and currenttime: KRYLOVTIME
-			this->common().aoe().getPhi(0, Eg, direction, site, loopNumber, *tstStruct2_);
+			this->common().aoe().wftSome(site, 6, this->common().aoe().targetVectors().size());
 		} else {
-			assert(false);
+			// just to set the stage and currenttime: CHEBY and KRYLOVTIME
+			this->common().aoe().getPhi(0, Eg, direction, site, loopNumber, *tstStruct2_);
 		}
 
 		if (!applied_) {
@@ -557,6 +552,7 @@ private:
 	                    ProgramGlobals::DirectionEnum direction,
 	                    const VectorSizeType& block1)
 	{
+		static bool firstCall = true;
 
 		if (!applied_ && appliedFirst_) {
 			setWeights(8);
@@ -578,52 +574,41 @@ private:
 			setWeights(10);
 		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
 			VectorSizeType indices{6, 8, 9};
-			calcVectors(indices, Eg, direction, block1);
+			calcVectors(indices, Eg, direction, block1, !firstCall);
 			VectorSizeType indices2{7, 10, 11};
-			calcVectors(indices2, Eg, direction, block1);
+			calcVectors(indices2, Eg, direction, block1, !firstCall);
 			setWeights(12);
 		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME){
 			VectorSizeType indices{6, 8, 9, 10, 11};
-			calcVectors(indices, Eg, direction, block1);
+			calcVectors(indices, Eg, direction, block1, !firstCall);
 			VectorSizeType indices2{7, 12, 13, 14, 15};
-			calcVectors(indices2, Eg, direction, block1);
+			calcVectors(indices2, Eg, direction, block1, !firstCall);
 			setWeights(16);
 		} else {
 			assert(false);
 		}
+
+		firstCall = false;
 	}
 
 	void calcVectors(const VectorSizeType& indices,
 	                 RealType Eg,
 	                 ProgramGlobals::DirectionEnum direction,
-	                 const VectorSizeType& block1)
+	                 const VectorSizeType& block1,
+	                 bool wftOrAdvance)
 	{
-
 		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) &&
 		                            this->common().aoe().noStageIs(StageEnumType::OPERATOR));
 
 		const VectorWithOffsetType& v0 = this->common().aoe().targetVectors(indices[0]);
-		const AlgorithmEnumType algo = tstStruct_.algorithm();
-		if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
-			this->common().aoe().calcTimeVectors(indices,
-			                                     Eg,
-			                                     v0,
-			                                     direction,
-			                                     allOperatorsApplied,
-			                                     false, // don't wft or advance indices[0]
-			                                     block1);
 
-		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME){
-			this->common().aoe().calcTimeVectors(indices,
-			                                     Eg,
-			                                     v0,
-			                                     direction,
-			                                     allOperatorsApplied,
-			                                     true, // wft and advance (if needed) indices[0]
-			                                     block1);
-		} else {
-			assert(false);
-		}
+		this->common().aoe().calcTimeVectors(indices,
+		                                     Eg,
+		                                     v0,
+		                                     direction,
+		                                     allOperatorsApplied,
+		                                     wftOrAdvance, // wft and advance indices[0]
+		                                     block1);
 	}
 
 	void applyOneOp(SizeType loopNumber,
