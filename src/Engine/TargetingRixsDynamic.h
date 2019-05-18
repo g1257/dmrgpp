@@ -216,6 +216,7 @@ public:
 
 	RealType weight(SizeType i) const
 	{
+		assert(i < weight_.size());
 		return weight_[i];
 	}
 
@@ -560,6 +561,7 @@ private:
 		calcVectors(indices, Eg, direction, block1, !firstCall);
 		calcVectors(indices2, Eg, direction, block1, !firstCall);
 		firstCall = false;
+		setWeights(numberOfWeights);
 	}
 
 	void calcVectors(const VectorSizeType& indices,
