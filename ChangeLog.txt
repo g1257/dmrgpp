@@ -1,3 +1,22 @@
+2019-05-20 Version 2.56
+
+* OneOperatorSpec moved to PsimagLite so that Lanczos++ can use it
+
+* Changes needed by YaSpinWave
+
+* PsiScript.pl6 added to execute scripts
+
+* PsiTag now supports append, delete, and strict modes
+
+* PsiTag proposal for modifiers
+
+* Ladder geometry now supports odd legs
+
+* Ladder geometry now honors IsPeriodicX=1
+
+* LongRange geometry now requires GeometryMaxConnections=
+(set to 0 if in doubt)
+
 2019-04-02 Version 2.54
 
 Bug fixes:
