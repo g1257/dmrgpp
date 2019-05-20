@@ -1,3 +1,45 @@
+2019-05-20 Version 5.56
+
+Scripts:
+
+* correlations.pl6 added
+
+* delta delta read and write scripts
+
+* pgfplot.pl: various improvements
+
+* procOmegas: supports Chebyshev
+
+User Interface:
+
+* OuputFile= can now be omitted from input
+
+Bug fixes:
+
+* RashbaSOC: bug fixes
+
+New Features
+
+* Chebyshev non-RIXS now works
+
+* RixsDynamics: supports Chebyshev (more testing needed)
+
+Refactor:
+
+* OneOperatorSpec moved to PsimagLite so Lanczos++ can use it
+
+* KrylovHelper added
+
+* Wft Helper added
+
+TestSuite:
+
+* ci: 4804 and 4808 for RashbaSOC
+
+* ci: 3510-3511 and 3530-3532 for Chebyshev non-RIXS
+
+* ci and postCi now can verify out.spectrum files
+
 2019-04-02 Version 5.54
 
 Scripts:
