@@ -170,10 +170,28 @@ sub procCommon
 	my @spaceValues;
 	correctionVectorWrite(\@spaceValues,\@values,\@values2,$maxSite,$omega);
 
+	writeSpaceValues("out.space", \@spaceValues);
+
 	my @qValues;
 	OmegaUtils::fourier(\@qValues,\@spaceValues,$geometry,$hptr);
 	writeFourier($array,\@qValues,$geometry);
 }
+
+sub writeSpaceValues
+{
+	my ($fout, $array) = @_;
+	open(FFOUT, ">", "$fout") or die "$0: Cannot write to $fout : $!\n";
+	print FFOUT "$n\n";
+	for (my $i = 0; $i < $n; ++$i) {
+		my $ptr = $array->[$i];
+		my $vv1 = $ptr->[0];
+		my $vv2 = $ptr->[1];
+		print FFOUT "$i $vv1 $vv2\n";
+    }
+
+	close(FFOUT);
+}
+
 
 sub correctionVectorRead
 {
@@ -254,7 +272,7 @@ sub correctionVectorWrite
 
 		$array->[$i] = [$vv1, $vv2];
 	}
-}	
+}
 
 sub procThisOmegaKspace
 {
@@ -427,7 +445,7 @@ sub procAllQs
 	procCommon(\@array, $ind, $omega, $centralSite, $geometry);
 	die "procAllQs: array is empty\n" if (scalar(@array) == 0);
 	printSpectrum(\@array);
-		}
+}
 
 sub execThis
 {
