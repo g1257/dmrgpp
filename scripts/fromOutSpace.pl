@@ -5,10 +5,9 @@ use warnings;
 use Math::Trig;
 use lib ".";
 use OmegaUtils;
-my ($outSpace, $templateInput, $isPeriodic, $zeroAtCenter) = @ARGV;
-defined($templateInput) or die "USAGE: $0 out.space inputFile [isPeriodic] [zeroAtCenter]\n";
-defined($isPeriodic) or $isPeriodic = 0;
-defined($zeroAtCenter) or $zeroAtCenter = 0;
+my ($outSpace, $templateInput, $isPeriodic, $multicenter) = @ARGV;
+defined($isPeriodic) or die "USAGE: $0 out.space inputFile isPeriodic [multicenter]\n";
+defined($multicenter) or $multicenter = 0;
 
 my $geometryName;
 my $geometrySubName = "";
@@ -25,6 +24,7 @@ my $geometry = {"name" => $geometryName, "leg" => $geometryLeg, "subname" => $ge
 
 $hptr->{"centralSite"} = $centralSite;
 $hptr->{"isPeriodic"} = $isPeriodic;
+$hptr->{"multicenter"} = $multicenter;
 $geometry->{"isPeriodic"} = $isPeriodic;
 
 my %h;

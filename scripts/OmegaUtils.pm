@@ -241,8 +241,11 @@ sub fourierChain
 			die "$0: Chain of $n sites, but central site is $centralSite, makes not sense!?\n";
 		}
 
-		#my $otherCenter = ($b) ? $centralSite - 1 : $centralSite + 1;
-		#push @centralSites, $otherCenter;
+		# FIXME: DOES NOT WORK, CHECK FORMULA BELOW
+		if ($hptr->{"multicenter"}) {
+			my $otherCenter = ($b) ? $centralSite - 1 : $centralSite + 1;
+			push @centralSites, $otherCenter;
+		}
 	}
 
 	my $numberOfQs = (defined($mMax)) ? $mMax : $n;
