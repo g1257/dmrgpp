@@ -24,6 +24,8 @@ OmegaUtils::getLabels($hptr,$templateInput);
 my $geometry = {"name" => $geometryName, "leg" => $geometryLeg, "subname" => $geometrySubName};
 
 $hptr->{"centralSite"} = $centralSite;
+$hptr->{"isPeriodic"} = $isPeriodic;
+$geometry->{"isPeriodic"} = $isPeriodic;
 
 my %h;
 readSpaceValues(\%h, $outSpace);

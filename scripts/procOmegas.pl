@@ -189,7 +189,7 @@ sub writeSpaceValues
 		my $vv1 = $ptr->[0];
 		my $vv2 = $ptr->[1];
 		print SPACEOUT "$i $vv1 $vv2\n";
-    }
+	}
 }
 
 sub correctionVectorRead
@@ -342,9 +342,9 @@ sub dampCheby
 		}
 	} else {
 		my $den = sinh(4.0);
-		for (my $n = 1; $n < $times; ++$n) {	
+		for (my $n = 1; $n < $times; ++$n) {
 			my $num = sinh(4.0*(1.0-$n/$times));
-                	$dampG[$n] = $num/$den;
+			$dampG[$n] = $num/$den;
 		}
 	}
 
@@ -452,7 +452,7 @@ sub execThis
 	print LOGFILEOUT "$0: About to execute $cmd\n";
 	system($cmd);
 }
-		
+
 sub extractValue
 {
 	my ($array, $q) = @_;
@@ -488,12 +488,12 @@ sub spectrumToColor
 			print STDERR "$0: File $file at line $. has set size to $size\n";
 		} else {
 			($size == $n) or die "$0: Wrong line $_ (expected size $size)\n";
-                        }
+		}
 
 		my @temp2 = getRealOrImagData(\@temp,$realOrImag,$geometry,$qyIndex);
 		$finalSize = scalar(@temp2) if (!defined($finalSize));
 		$data->[$counter++] = \@temp2;
-                        }
+	}
 
 	close(FIN);
 
@@ -505,8 +505,8 @@ sub spectrumToColor
 
 	scaleData($data,$min,$max);
 	return ($counter,$finalSize);
-                }
-                
+}
+
 sub minMaxData
 {
 	my ($a) = @_;
@@ -521,7 +521,7 @@ sub minMaxData
 			#next if ($thisValue<0);
 			$min = $thisValue if ($min > $thisValue);
 			$max = $thisValue if ($max < $thisValue);
-        }
+		}
 }
 
 	return ($min,$max);
