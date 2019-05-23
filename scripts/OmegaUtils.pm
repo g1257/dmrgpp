@@ -245,8 +245,6 @@ sub fourierChain
 		push @centralSites, $otherCenter;
 	}
 
-	print STDERR "@centralSites\n";
-
 	my $numberOfQs = (defined($mMax)) ? $mMax : $n;
 	for (my $m = 0; $m < $numberOfQs; ++$m) {
 		my @sum = (0,0);
@@ -471,6 +469,50 @@ sub fourierLadderAverageInput
 	}
 
 	return @partialV;
+}
+
+sub writeFourier
+{
+	my ($array, $f, $geometry) = @_;
+	my $subname = $geometry->{"subname"};
+	my $isPeriodic = $geometry->{"isPeriodic"};
+
+	if ($geometry->{"name"} eq "chain") {
+		return writeFourierChain($array,$f, $isPeriodic);
+	}
+
+	if ($geometry->{"name"} eq "ladder" || $subname eq "average") {
+		return writeFourierLadder($array, $f);
+	}
+
+	die "$0: writeFourier: undefined geometry ".$geometry->{"name"}."\n";
+}
+
+sub writeFourierChain
+{
+	my ($array, $f, $isPeriodic) = @_;
+
+	my $n = scalar(@$f);
+	for (my $m = 0; $m < $n; ++$m) {
+		my $q = getQ($m, $n, $isPeriodic);
+		my $ptr = $f->[$m];
+		my @temp = @$ptr;
+		$array->[$m] = [$q, $temp[0], $temp[1]];
+	}
+}
+
+sub writeFourierLadder
+{
+	my ($array, $f) = @_;
+
+	my $n = scalar(@$f);
+	for (my $m = 0; $m < $n; ++$m) {
+		my $ptr = $f->[$m];
+		my @temp = @$ptr;
+		my @temp2 = ($m);
+		push @temp2, @temp;
+		$array->[$m] = \@temp2;
+	}
 }
 
 sub getQ

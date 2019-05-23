@@ -71,7 +71,7 @@ my $geometry = {"name" => $geometryName, "leg" => $geometryLeg, "subname" => $ge
 
 my $outSpectrum = "out.spectrum";
 open(FOUTSPECTRUM, ">", "$outSpectrum") or die "$0: Cannot write to $outSpectrum : $!\n";
-
+open(SPACEOUT, ">", "out.space") or die "$0: Cannot write to out.space : $!\n";
 my %cheby;
 prepareCheby(\%cheby) if ($hptr->{"isCheby"});
 
@@ -96,7 +96,9 @@ for (my $i = $omegaOffset; $i < $omegaTotal; ++$i) {
 }
 
 close(FOUTSPECTRUM);
-print STDERR "$0: Spectrum written to $outSpectrum\n";
+print STDERR "$0: Momentum Spectrum written to $outSpectrum\n";
+close(SPACEOUT);
+print STDERR "$0: Spatial Spectrum written to out.space\n";
 my $wantsRealOrImag = (defined($wantsRealPart)) ? "real" : "imag";
 my $omegaMax = $omega0 + $omegaStep * $omegaTotal;
 
@@ -170,28 +172,25 @@ sub procCommon
 	my @spaceValues;
 	correctionVectorWrite(\@spaceValues,\@values,\@values2,$maxSite,$omega);
 
-	writeSpaceValues("out.space", \@spaceValues);
+	writeSpaceValues($omega, \@spaceValues);
 
 	my @qValues;
 	OmegaUtils::fourier(\@qValues,\@spaceValues,$geometry,$hptr);
-	writeFourier($array,\@qValues,$geometry);
+	OmegaUtils::writeFourier($array,\@qValues,$geometry);
 }
 
 sub writeSpaceValues
 {
-	my ($fout, $array) = @_;
-	open(FFOUT, ">", "$fout") or die "$0: Cannot write to $fout : $!\n";
-	print FFOUT "$n\n";
+	my ($array, $omega) = @_;
+	my $n = scalar(@$array);
+	print SPACEOUT "$omega $n\n";
 	for (my $i = 0; $i < $n; ++$i) {
 		my $ptr = $array->[$i];
 		my $vv1 = $ptr->[0];
 		my $vv2 = $ptr->[1];
-		print FFOUT "$i $vv1 $vv2\n";
+		print SPACEOUT "$i $vv1 $vv2\n";
     }
-
-	close(FFOUT);
 }
-
 
 sub correctionVectorRead
 {
@@ -433,7 +432,7 @@ sub doCheby
 	OmegaUtils::fourier(\@qValues,\@spaceValues,$geometry,$hptr);
 
 	my  @array;
-	writeFourier(\@array,\@qValues,$geometry);
+	OmegaUtils::writeFourier(\@array,\@qValues,$geometry);
 	die "doCheby: array is empty\n" if (scalar(@array) == 0);
 	printSpectrum(\@array);
 }
@@ -452,50 +451,7 @@ sub execThis
 	my ($cmd) = @_;
 	print LOGFILEOUT "$0: About to execute $cmd\n";
 	system($cmd);
-					}
-
-sub writeFourier
-{
-	my ($array, $f, $geometry) = @_;
-	my $subname = $geometry->{"subname"};
-
-	if ($geometry->{"name"} eq "chain") {
-		return writeFourierChain($array,$f);
-		}
-
-	if ($geometry->{"name"} eq "ladder" || $subname eq "average") {
-		return writeFourierLadder($array, $f);
-	}
-
-	die "$0: writeFourier: undefined geometry ".$geometry->{"name"}."\n";
 }
-
-sub writeFourierChain
-{
-	my ($array, $f) = @_;
-
-	my $n = scalar(@$f);
-	for (my $m = 0; $m < $n; ++$m) {
-		my $q = OmegaUtils::getQ($m, $n, $isPeriodic);
-		my $ptr = $f->[$m];
-		my @temp = @$ptr;
-		$array->[$m] = [$q, $temp[0], $temp[1]];
-	}
-}
-
-sub writeFourierLadder
-{
-	my ($array, $f) = @_;
-
-	my $n = scalar(@$f);
-	for (my $m = 0; $m < $n; ++$m) {
-		my $ptr = $f->[$m];
-		my @temp = @$ptr;
-		my @temp2 = ($m);
-		push @temp2, @temp;
-		$array->[$m] = \@temp2;
-			}
-		}
 		
 sub extractValue
 {
