@@ -292,6 +292,9 @@ private:
 			}
 
 			energySaved[j] = gsEnergy;
+
+			const QnType& q = lrs.super().qnEx(i);
+			target.set(q, vecSaved[j], energySaved[j]);
 		}
 
 		// calc gs energy

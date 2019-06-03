@@ -109,6 +109,7 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename BasisType::BlockType BlockType;
+	typedef typename BasisType::QnType QnType;
 	typedef WaveFunctionTransfFactory<LeftRightSuperType,
 	VectorWithOffsetType> WaveFunctionTransfType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
@@ -160,7 +161,19 @@ public:
 	                    const BlockType& block2,
 	                    SizeType loopNumber) = 0;
 
-	virtual bool includeGroundStage() const {return true; }
+	virtual void read(typename TargetingCommonType::IoInputType&,
+	                  PsimagLite::String) = 0;
+
+	virtual void write(const typename PsimagLite::Vector<SizeType>::Type&,
+	                   PsimagLite::IoSelector::Out&,
+	                   PsimagLite::String) const = 0;
+
+	// virtuals with default implementation
+
+	virtual bool includeGroundStage() const { return true; }
+
+	virtual void set(const QnType&, const VectorType&, const RealType&) const
+	{}
 
 	virtual void updateOnSiteForCorners(BasisWithOperatorsType& basisWithOps) const
 	{
@@ -191,13 +204,6 @@ public:
 	{
 		return commonTargeting_.normSquared(i);
 	}
-
-	virtual void read(typename TargetingCommonType::IoInputType&,
-	                  PsimagLite::String) = 0;
-
-	virtual void write(const typename PsimagLite::Vector<SizeType>::Type&,
-	                   PsimagLite::IoSelector::Out&,
-	                   PsimagLite::String) const = 0;
 
 	// non-virtual below
 
