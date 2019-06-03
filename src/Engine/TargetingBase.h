@@ -123,6 +123,7 @@ public:
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ApplyOperatorExpressionType::StageEnumType StageEnumType;
 	typedef typename ApplyOperatorExpressionType::DmrgSerializerType DmrgSerializerType;
+	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	TargetingBase(const LeftRightSuperType& lrs,
 	              const ModelType& model,
@@ -164,7 +165,7 @@ public:
 	virtual void read(typename TargetingCommonType::IoInputType&,
 	                  PsimagLite::String) = 0;
 
-	virtual void write(const typename PsimagLite::Vector<SizeType>::Type&,
+	virtual void write(const VectorSizeType&,
 	                   PsimagLite::IoSelector::Out&,
 	                   PsimagLite::String) const = 0;
 
@@ -172,8 +173,12 @@ public:
 
 	virtual bool includeGroundStage() const { return true; }
 
-	virtual void set(const QnType&, const VectorType&, const RealType&) const
-	{}
+	virtual void set(typename PsimagLite::Vector<VectorType>::Type& v,
+	                 const VectorSizeType& sectors,
+	                 const BasisType& someBasis)
+	{
+		commonTargeting_.aoe().psi().set(v, sectors, someBasis);
+	}
 
 	virtual void updateOnSiteForCorners(BasisWithOperatorsType& basisWithOps) const
 	{
@@ -225,7 +230,7 @@ public:
 	}
 
 	void initialGuess(VectorWithOffsetType& initialVector,
-	                  const typename PsimagLite::Vector<SizeType>::Type& block,
+	                  const VectorSizeType& block,
 	                  bool noguess) const
 	{
 		commonTargeting_.initialGuess(initialVector, block, noguess);

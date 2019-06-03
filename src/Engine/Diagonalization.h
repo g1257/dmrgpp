@@ -292,9 +292,6 @@ private:
 			}
 
 			energySaved[j] = gsEnergy;
-
-			const QnType& q = lrs.super().qnEx(i);
-			target.set(q, vecSaved[j], energySaved[j]);
 		}
 
 		// calc gs energy
@@ -338,7 +335,7 @@ private:
 		msg4<<"Number of Sectors found "<<counter;
 		progress_.printline(msg4, std::cout);
 
-		target.gs().set(vecSaved, sectors, lrs.super());
+		target.set(vecSaved, sectors, lrs.super());
 
 		if (PsimagLite::Concurrency::root())
 			oldEnergy_ = gsEnergy;

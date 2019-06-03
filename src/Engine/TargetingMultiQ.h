@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PsimagLite.h"
 #include "TargetingBase.h"
 #include "ParametersForSolver.h"
+#include "TargetQuantumElectrons.h"
 
 namespace Dmrg {
 
@@ -118,48 +119,66 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename BasisType::QnType QnType;
+	typedef TargetQuantumElectrons<RealType, QnType> TargetQuantumElectronsType;
 
 	TargetingMultiQ(const LeftRightSuperType& lrs,
 	                const ModelType& model,
 	                const WaveFunctionTransfType& wft,
 	                const QnType&,
-	                InputValidatorType& ioIn,
+	                InputValidatorType&,
 	                PsimagLite::String targeting)
 	    : BaseType(lrs, model, wft, 0),
-	      tstStruct_(ioIn, targeting, model),
+	      tstStruct_(targeting),
 	      progress_(targeting),
 	      gsWeight_(tstStruct_.gsWeight())
+	{}
+
+	virtual bool includeGroundStage() const { return false; }
+
+	virtual void set(typename PsimagLite::Vector<VectorType>::Type& v,
+	                 const VectorSizeType& sectors,
+	                 const BasisType& basis)
 	{
-		if (tstStruct_.targets() < 2)
-			err("TargetingMultiQ: FATAL ERROR: must have at least 2 targets\n");
+		const SizeType n = sectors.size();
+		if (this->common().aoe().targetVectors().size() == 0)
+			this->common().aoe().targetVectorsResize(n);
+		else
+			if (this->common().aoe().targetVectors().size() != n)
+				err("TargetingMultiQ: Wrong number of targets (FATAL ERROR)\n");
 
-		const SizeType n = tstStruct_.targets() - 1;
+		VectorSizeType weights(basis.partition() - 1);
+		for (SizeType i = 0; i < n; ++i) {
+			SizeType j = sectors[i];
+			weights[j] = basis.partition(j + 1) - basis.partition(j);
+		}
+
 		const RealType factor = 1 - gsWeight_;
-		for (SizeType i = 0; i < n; ++i)
+		for (SizeType i = 0; i < n; ++i) {
+			VectorWithOffsetType vwo(weights, basis);
+			vwo.setDataInSector(v[i], i);
+			VectorWithOffsetType& handle =
+			        const_cast<VectorWithOffsetType&>(this->common().aoe().targetVectors()[i]);
+			handle = vwo;
 			weight_[i] = factor/n;
-
-		this->common().aoe().targetVectorsResize(n - 1);
+		}
 	}
 
 	SizeType sites() const { return 0; }
 
-	SizeType targets() const { return tstStruct_.targets() - 1; }
+	SizeType targets() const { return weight_.size(); }
 
 	RealType weight(SizeType i) const
 	{
-		assert(i < weight_.size() + 1);
-		return (i == 0) ? gsWeight_ : weight_[i - 1];
+		assert(i < weight_.size());
+		return  weight_[i];
 	}
 
 	RealType gsWeight() const
 	{
-		return gsWeight_;
+		throw PsimagLite::RuntimeError("gsWeight should not be called by this target\n");
 	}
 
-	SizeType size() const
-	{
-		return tstStruct_.targets() - 1;
-	}
+	SizeType size() const { return weight_.size(); }
 
 	void evolve(RealType,
 	            ProgramGlobals::DirectionEnum,
@@ -187,7 +206,6 @@ private:
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
 	VectorRealType weight_;
-
 };     //class TargetingMultiQ
 } // namespace Dmrg
 /*@}*/
