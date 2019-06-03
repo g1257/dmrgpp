@@ -304,7 +304,7 @@ And (4) after the option \verb!-e! in the operator driver.
 
 There are two kinds of operator specifications: by label and by file.
 
-By label, it is given by \verb!name[site]?dof'!
+By label, it is given by \verb!name?dof'[site]!
 Name is mandatory; it is a non-empty string \verb![a-zA-Z_]+!, and if the
 label ends in underscore \_ then the operator is considered
 unnatural.\footnote{Unnatural operators aren't yet implemented.}
