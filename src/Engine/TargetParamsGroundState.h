@@ -93,13 +93,6 @@ public:
 	TargetParamsGroundState(PsimagLite::String targeting) : BaseType(targeting)
 	{}
 
-	virtual SizeType memResolv(PsimagLite::MemResolv&,
-	                           SizeType,
-	                           PsimagLite::String = "") const
-	{
-		return 0;
-	}
-
 	virtual SizeType sites() const { return 0; }
 
 	void write(PsimagLite::String,

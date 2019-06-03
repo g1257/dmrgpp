@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2019, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 5.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -72,14 +72,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file TargetingGroundState.h
+/*! \file TargetingMultiQ.h
  *
  *  targets the ground state
  *
  */
 
-#ifndef TARGETING_GS_H
-#define TARGETING_GS_H
+#ifndef TARGETING_MULTI_Q
+#define TARGETING_MULTI_Q
 #include <iostream>
 #include "TargetParamsGroundState.h"
 #include "ApplyOperatorLocal.h"
@@ -91,7 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingGroundState : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
+class TargetingMultiQ : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
 public:
 
@@ -109,6 +109,7 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
@@ -118,44 +119,54 @@ public:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename BasisType::QnType QnType;
 
-	TargetingGroundState(const LeftRightSuperType& lrs,
-	                     const ModelType& model,
-	                     const WaveFunctionTransfType& wft,
-	                     const QnType&,
-	                     InputValidatorType&)
+	TargetingMultiQ(const LeftRightSuperType& lrs,
+	                const ModelType& model,
+	                const WaveFunctionTransfType& wft,
+	                const QnType&,
+	                InputValidatorType& ioIn,
+	                PsimagLite::String targeting)
 	    : BaseType(lrs, model, wft, 0),
-	      tstStruct_("TargetingGroundState"),
-	      progress_("TargetingGroundState")
-	{}
-
-	SizeType sites() const { return tstStruct_.sites(); }
-
-	SizeType targets() const { return 0; }
-
-	RealType weight(SizeType) const
+	      tstStruct_(ioIn, targeting, model),
+	      progress_(targeting),
+	      gsWeight_(tstStruct_.gsWeight())
 	{
-		throw PsimagLite::RuntimeError("GST: What are you doing here?\n");
+		if (tstStruct_.targets() < 2)
+			err("TargetingMultiQ: FATAL ERROR: must have at least 2 targets\n");
+
+		const SizeType n = tstStruct_.targets() - 1;
+		const RealType factor = 1 - gsWeight_;
+		for (SizeType i = 0; i < n; ++i)
+			weight_[i] = factor/n;
+
+		this->common().aoe().targetVectorsResize(n - 1);
+	}
+
+	SizeType sites() const { return 0; }
+
+	SizeType targets() const { return tstStruct_.targets() - 1; }
+
+	RealType weight(SizeType i) const
+	{
+		assert(i < weight_.size() + 1);
+		return (i == 0) ? gsWeight_ : weight_[i - 1];
 	}
 
 	RealType gsWeight() const
 	{
-		return 1;
+		return gsWeight_;
 	}
 
 	SizeType size() const
 	{
-		return 0;
+		return tstStruct_.targets() - 1;
 	}
 
 	void evolve(RealType,
-	            ProgramGlobals::DirectionEnum direction,
-	            const BlockType& block1,
+	            ProgramGlobals::DirectionEnum,
+	            const BlockType&,
 	            const BlockType&,
 	            SizeType)
-	{
-		bool doBorderIfBorder = true;
-		this->common().cocoon(block1, direction, doBorderIfBorder);
-	}
+	{}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
 	           PsimagLite::IoSelector::Out& io,
@@ -174,8 +185,10 @@ private:
 
 	TargetParamsType tstStruct_;
 	PsimagLite::ProgressIndicator progress_;
+	RealType gsWeight_;
+	VectorRealType weight_;
 
-};     //class TargetingGroundState
+};     //class TargetingMultiQ
 } // namespace Dmrg
 /*@}*/
 #endif
