@@ -96,70 +96,7 @@ public:
 	    : totalNumberOfSites_(0),
 	      isSu2_(false)
 	{
-		QnType qn(QnType::zero());
-		VectorSizeType qnOther;
-		const bool allowUpDown = true;
 		io.readline(totalNumberOfSites_, "TotalNumberOfSites=");
-
-		PsimagLite::String msg("TargetQuantumElectrons: ");
-		bool hasTwiceJ = false;
-		try {
-			io.readline(qn.jmPair.first, "TargetSpinTimesTwo=");
-			hasTwiceJ = true;
-		} catch (std::exception&) {}
-
-		SizeType ready = 0;
-		if (allowUpDown) {
-			SizeType electronsUp = 0;
-			SizeType electronsDown = 0;
-			try {
-				io.readline(electronsUp,"TargetElectronsUp=");
-				io.readline(electronsDown,"TargetElectronsDown=");
-				SizeType tmp = electronsUp + electronsDown;
-				qn.oddElectrons = (tmp & 1);
-				qnOther.push_back(tmp);
-				qnOther.push_back(electronsUp);
-				ready = 2;
-			} catch (std::exception&) {}
-		}
-
-		try {
-			SizeType tmp = 0;
-			io.readline(tmp, "TargetElectronsTotal=");
-			qn.oddElectrons = (tmp & 1);
-			qnOther.push_back(tmp);
-			ready++;
-		} catch (std::exception&) {}
-
-		try {
-			SizeType szPlusConst = 0;
-			io.readline(szPlusConst,"TargetSzPlusConst=");
-			qnOther.push_back(szPlusConst);
-		} catch (std::exception&) {}
-
-		if (ready == 3) {
-			msg += "Provide either up/down or total/sz but not both.\n";
-			throw PsimagLite::RuntimeError(msg);
-		}
-
-		bool flag = false;
-		try {
-			int dummy = 0;
-			io.readline(dummy, "TargetExtra=");
-			flag = true;
-		} catch (std::exception&) {}
-
-		if (flag) err("Instead of TargetExtra= please use a vector\n");
-
-		try {
-			VectorSizeType extra;
-			io.read(extra,"TargetExtra");
-			for (SizeType i = 0; i < extra.size(); ++i)
-				qnOther.push_back(extra[i]);
-		} catch (std::exception&) {}
-
-		qn.other.fromStdVector(qnOther);
-
 		int tmp = 0;
 		try {
 			io.readline(tmp,"UseSu2Symmetry=");
@@ -167,15 +104,20 @@ public:
 
 		isSu2_ = (tmp > 0);
 
-		if (isSu2_ && !hasTwiceJ) {
-			msg += "Please provide TargetSpinTimesTwo when running with SU(2).\n";
-			throw PsimagLite::RuntimeError(msg);
+		bool hasNqns = false;
+		SizeType nqns = 0;
+		try {
+			io.readline(nqns, "NumberOfTargetQns=");
+			hasNqns = true;
+		} catch (std::exception&) {}
+
+		if (!hasNqns) {
+			readOneTarget(io, "");
+			return;
 		}
 
-		if (isSu2_)
-			qn.oddElectrons = (totalNumberOfSites_ & 1);
-
-		vqn_.push_back(qn);
+		for (SizeType i = 0; i < nqns; ++i)
+			readOneTarget(io, ttos(i));
 	}
 
 	SizeType sizeOfOther() const
@@ -252,13 +194,91 @@ public:
 
 private:
 
-	SizeType totalNumberOfSites_;
-	bool isSu2_;
-	VectorQnType vqn_;
-
 	TargetQuantumElectrons(const TargetQuantumElectrons&);
 
 	TargetQuantumElectrons& operator=(const TargetQuantumElectrons&);
+
+	template<typename IoInputType>
+	void readOneTarget(IoInputType& io,
+	                   const PsimagLite::String label)
+	{
+		QnType qn(QnType::zero());
+		VectorSizeType qnOther;
+		const bool allowUpDown = true;
+
+		PsimagLite::String msg("TargetQuantumElectrons: ");
+		bool hasTwiceJ = false;
+		try {
+			io.readline(qn.jmPair.first, "TargetSpinTimesTwo" + label + "=");
+			hasTwiceJ = true;
+		} catch (std::exception&) {}
+
+		SizeType ready = 0;
+		if (allowUpDown) {
+			SizeType electronsUp = 0;
+			SizeType electronsDown = 0;
+			try {
+				io.readline(electronsUp,"TargetElectronsUp" + label + "=");
+				io.readline(electronsDown,"TargetElectronsDown" + label + "=");
+				SizeType tmp = electronsUp + electronsDown;
+				qn.oddElectrons = (tmp & 1);
+				qnOther.push_back(tmp);
+				qnOther.push_back(electronsUp);
+				ready = 2;
+			} catch (std::exception&) {}
+		}
+
+		try {
+			SizeType tmp = 0;
+			io.readline(tmp, "TargetElectronsTotal" + label + "=");
+			qn.oddElectrons = (tmp & 1);
+			qnOther.push_back(tmp);
+			ready++;
+		} catch (std::exception&) {}
+
+		try {
+			SizeType szPlusConst = 0;
+			io.readline(szPlusConst,"TargetSzPlusConst" + label + "=");
+			qnOther.push_back(szPlusConst);
+		} catch (std::exception&) {}
+
+		if (ready == 3) {
+			msg += "Provide either up/down or total/sz but not both.\n";
+			throw PsimagLite::RuntimeError(msg);
+		}
+
+		bool flag = false;
+		try {
+			int dummy = 0;
+			io.readline(dummy, "TargetExtra" + label + "=");
+			flag = true;
+		} catch (std::exception&) {}
+
+		if (flag) err("Instead of TargetExtra" + label + "= please use a vector\n");
+
+		try {
+			VectorSizeType extra;
+			io.read(extra,"TargetExtra" + label);
+			for (SizeType i = 0; i < extra.size(); ++i)
+				qnOther.push_back(extra[i]);
+		} catch (std::exception&) {}
+
+		qn.other.fromStdVector(qnOther);
+
+		if (isSu2_ && !hasTwiceJ) {
+			msg += "Please provide TargetSpinTimesTwo when running with SU(2).\n";
+			throw PsimagLite::RuntimeError(msg);
+		}
+
+		if (isSu2_)
+			qn.oddElectrons = (totalNumberOfSites_ & 1);
+
+		vqn_.push_back(qn);
+	}
+
+	SizeType totalNumberOfSites_;
+	bool isSu2_;
+	VectorQnType vqn_;
 };
 } // namespace Dmrg
 
