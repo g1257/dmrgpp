@@ -150,7 +150,6 @@ public:
 	      lrs_("pSprime", "pEprime", "pSE"),
 	      ioOut_(parameters_.filename, PsimagLite::IoSelector::ACC_TRUNC),
 	      progress_("DmrgSolver"),
-	      quantumSector_(QnType::zero()),
 	      stepCurrent_(0),
 	      checkpoint_(parameters_, ioIn, model, false),
 	      wft_(parameters_),
@@ -348,11 +347,14 @@ obtain ordered
 			progress_.print("Growth done.\n",std::cout);
 			lrs_.printSizes("Infinite",std::cout);
 
-			updateQuantumSector(lrs_.sites(),
-			                    ProgramGlobals::DirectionEnum::INFINITE,
-			                    step);
+			model_.targetQuantum().updateQuantumSector(quantumSector_,
+			                                           lrs_.sites(),
+			                                           ProgramGlobals::DirectionEnum::INFINITE,
+			                                           step,
+			                                           parameters_.adjustQuantumNumbers);
 
-			lrs_.setToProduct(quantumSector_, initialSizeOfHashTable);
+			assert(0 < quantumSector_.size()); // used only for SU(2)
+			lrs_.setToProduct(quantumSector_[0], initialSizeOfHashTable);
 
 			const BlockType& ystep = findRightBlock(Y,step,E);
 			energy_ = diagonalization_(psi,
@@ -529,9 +531,14 @@ obtain ordered
 
 			lrs_.printSizes("finite",std::cout);
 
-			updateQuantumSector(lrs_.sites(),direction,stepCurrent_);
+			model_.targetQuantum().updateQuantumSector(quantumSector_,
+			                                           lrs_.sites(),
+			                                           direction,
+			                                           stepCurrent_,
+			                                           parameters_.adjustQuantumNumbers);
 
-			lrs_.setToProduct(quantumSector_, initialSizeOfHashTable);
+			assert(0 < quantumSector_.size()); // used only for SU(2)
+			lrs_.setToProduct(quantumSector_[0], initialSizeOfHashTable);
 
 			energy_ = diagonalization_(target,
 			                           direction,
@@ -644,28 +651,6 @@ obtain ordered
 		return false;
 	}
 
-	void updateQuantumSector(SizeType sites,
-	                         ProgramGlobals::DirectionEnum direction,
-	                         SizeType step)
-	{
-		SizeType maxSites = model_.geometry().numberOfSites();
-
-		if (direction == ProgramGlobals::DirectionEnum::INFINITE &&
-		        sites < maxSites &&
-		        parameters_.adjustQuantumNumbers.size() > step) {
-			quantumSector_ = parameters_.adjustQuantumNumbers[step];
-			return;
-		} else {
-			quantumSector_ = model_.targetQuantum().qn;
-		}
-
-
-		quantumSector_.scale(sites,
-		                     model_.geometry().numberOfSites(),
-		                     direction,
-		                     MyBasis::useSu2Symmetry());
-	}
-
 	void printEnergy(RealType energy)
 	{
 		if (!saveData_) return;
@@ -700,7 +685,7 @@ obtain ordered
 	LeftRightSuperType lrs_;
 	PsimagLite::IoSelector::Out ioOut_;
 	PsimagLite::ProgressIndicator progress_;
-	QnType quantumSector_;
+	typename QnType::VectorQnType quantumSector_;
 	int stepCurrent_;
 	CheckpointType checkpoint_;
 	WaveFunctionTransfType wft_;

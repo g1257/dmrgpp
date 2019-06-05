@@ -132,7 +132,7 @@ public:
 	                const bool& verbose,
 	                ReflectionSymmetryType& reflectionOperator,
 	                InputValidatorType& io,
-	                const QnType& quantumSector,
+	                const typename QnType::VectorQnType& quantumSector,
 	                WaveFunctionTransfType& waveFunctionTransformation,
 	                RealType oldEnergy)
 	    : parameters_(parameters),
@@ -186,9 +186,15 @@ private:
 	                             const LeftRightSuperType& lrs) const
 	{
 		SizeType total = lrs.super().partition()-1;
-		for (SizeType i=0;i<total;i++) {
-			if (lrs.super().pseudoQn(i) != quantumSector_) continue;
-			mVector.push_back(i);
+		for (SizeType i = 0; i < total; ++i) {
+			bool flag = false;
+			for (SizeType j = 0; j < quantumSector_.size(); ++j)
+				if (lrs.super().pseudoQn(i) == quantumSector_[j]) {
+					flag = true;
+					break;
+				}
+
+			if (flag) mVector.push_back(i);
 		}
 	}
 
@@ -233,7 +239,15 @@ private:
 				std::cerr<<lrs.super().qnEx(i);
 
 			// Do only one sector unless doing su(2) with j>0, then do all m's
-			if (lrs.super().pseudoQn(i) != quantumSector_ && !findSymmetrySector)
+			bool flag = false;
+			for (SizeType ii = 0; ii < quantumSector_.size(); ++ii) {
+				if (lrs.super().pseudoQn(i) == quantumSector_[ii]) {
+					flag = true;
+					break;
+				}
+			}
+
+			if (!flag && !findSymmetrySector)
 				bs = 0;
 			else
 				sectors.push_back(i);
@@ -260,8 +274,10 @@ private:
 			SizeType i = sectors[j];
 			PsimagLite::OstringStream msg;
 			msg<<"About to diag. sector with";
-			msg<<" quantumSector="<<quantumSector_;
-			progress_.printline(msg,std::cout);
+			msg<<" quantumSector=";
+			for (SizeType ii = 0; ii < quantumSector_.size(); ++ii)
+				msg<<quantumSector_[ii]<<" -- ";
+			progress_.printline(msg, std::cout);
 			TargetVectorType initialVectorBySector(weights[i]);
 			initialVector.extract(initialVectorBySector,i);
 			RealType norma = PsimagLite::norm(initialVectorBySector);
@@ -554,7 +570,7 @@ private:
 	InputValidatorType& io_;
 	PsimagLite::ProgressIndicator progress_;
 	// quantumSector_ needs to be a reference since DmrgSolver will change it
-	const QnType& quantumSector_;
+	const typename QnType::VectorQnType& quantumSector_;
 	WaveFunctionTransfType& wft_;
 	RealType oldEnergy_;
 }; // class Diagonalization

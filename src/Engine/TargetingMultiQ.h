@@ -119,15 +119,17 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename BasisType::QnType QnType;
+	typedef typename QnType::VectorQnType VectorQnType;
 	typedef TargetQuantumElectrons<RealType, QnType> TargetQuantumElectronsType;
 
 	TargetingMultiQ(const LeftRightSuperType& lrs,
 	                const ModelType& model,
 	                const WaveFunctionTransfType& wft,
-	                const QnType&,
+	                const VectorQnType& vqn,
 	                InputValidatorType&,
 	                PsimagLite::String targeting)
 	    : BaseType(lrs, model, wft, 0),
+	      vqn_(vqn),
 	      tstStruct_(targeting),
 	      progress_(targeting),
 	      gsWeight_(tstStruct_.gsWeight())
@@ -202,6 +204,7 @@ public:
 
 private:
 
+	const VectorQnType& vqn_;
 	TargetParamsType tstStruct_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;

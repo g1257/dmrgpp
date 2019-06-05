@@ -49,7 +49,7 @@ public:
 	TargetSelector(const LeftRightSuperType& lrs,
 	               const ModelType& model,
 	               const WaveFunctionTransfType& wft,
-	               const QnType& quantumSector,
+	               const typename QnType::VectorQnType& quantumSector,
 	               InputValidatorType& ioIn)
 	    : psi_(nullptr),
 	      lrs_(lrs),
@@ -85,26 +85,28 @@ public:
 
 		check1(targeting);
 
+		assert(0 < quantumSector_.size());
+		const QnType& qn = quantumSector_[0];
 		if (targeting=="TimeStepTargeting" || targeting == "TargetingAncilla") {
-			psi_ = new TargetingTimeStepType(lrs_,model_,wft_,quantumSector_,ioIn_, targeting);
+			psi_ = new TargetingTimeStepType(lrs_,model_,wft_,qn,ioIn_, targeting);
 		} else if (targeting=="DynamicTargeting") {
-			psi_ = new TargetingDynamicType(lrs_,model_,wft_,quantumSector_,ioIn_);
+			psi_ = new TargetingDynamicType(lrs_,model_,wft_,qn,ioIn_);
 		} else if (targeting=="CorrectionVectorTargeting") {
-			psi_ = new TargetingCorrectionVectorType(lrs_,model_,wft_,quantumSector_,ioIn_);
+			psi_ = new TargetingCorrectionVectorType(lrs_,model_,wft_,qn,ioIn_);
 		} else if (targeting=="TargetingChebyshev") {
-			psi_ = new TargetingChebyshevType(lrs_,model_,wft_,quantumSector_,ioIn_);
+			psi_ = new TargetingChebyshevType(lrs_,model_,wft_,qn,ioIn_);
 		} else if (targeting=="CorrectionTargeting") {
-			psi_ = new TargetingCorrectionType(lrs_,model_,wft_,quantumSector_,ioIn_);
+			psi_ = new TargetingCorrectionType(lrs_,model_,wft_,qn,ioIn_);
 		} else if (targeting == "GroundStateTargeting") {
-			psi_ = new TargetingGroundStateType(lrs_,model_,wft_,quantumSector_,ioIn_);
+			psi_ = new TargetingGroundStateType(lrs_,model_,wft_,qn,ioIn_);
 		} else if (targeting == "MettsTargeting") {
-			psi_ = new TargetingMettsType(lrs_,model_,wft_,quantumSector_,ioIn_);
+			psi_ = new TargetingMettsType(lrs_,model_,wft_,qn,ioIn_);
 		} else if (targeting == "TargetingRixsStatic") {
-			psi_ = new TargetingRixsStaticType(lrs_,model_,wft_,quantumSector_,ioIn_);
+			psi_ = new TargetingRixsStaticType(lrs_,model_,wft_,qn,ioIn_);
 		} else if (targeting == "TargetingRixsDynamic") {
-			psi_ = new TargetingRixsDynamicType(lrs_,model_,wft_,quantumSector_,ioIn_);
+			psi_ = new TargetingRixsDynamicType(lrs_,model_,wft_,qn,ioIn_);
 		} else if (targeting == "TargetingExpression") {
-			psi_ = new TargetingExpressionType(lrs_, model_, wft_, quantumSector_, ioIn_);
+			psi_ = new TargetingExpressionType(lrs_, model_, wft_, qn, ioIn_);
 		} else if (targeting == "TargetingMultiQ") {
 			psi_ = new TargetingMultiQType(lrs_, model_, wft_, quantumSector_, ioIn_, targeting);
 		} else {
@@ -184,7 +186,7 @@ private:
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;
 	const WaveFunctionTransfType& wft_;
-	const QnType& quantumSector_;
+	const typename QnType::VectorQnType& quantumSector_;
 	InputValidatorType& ioIn_;
 };
 }

@@ -428,7 +428,7 @@ private:
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
 
-		bool isCanonical = (ModelBaseType::targetQuantum().qn.other.size() == 1);
+		bool isCanonical = (ModelBaseType::targetQuantum().sizeOfOther() == 1);
 		if (isCanonical && additional_ == "Anisotropic")
 			err(PsimagLite::String(__FILE__) +
 			    ": Anisotropic sub-model must be canonical. Please " +

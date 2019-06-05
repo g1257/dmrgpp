@@ -522,7 +522,7 @@ private:
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
 
-		const bool isCanonical = (ModelBaseType::targetQuantum().qn.other.size() == 2);
+		const bool isCanonical = (ModelBaseType::targetQuantum().sizeOfOther() == 2);
 		if (isCanonical && extension_ == "RashbaSOC")
 			err(PsimagLite::String(__FILE__) +
 			    ": RashbaSOC sub-model must be canonical. Please " +

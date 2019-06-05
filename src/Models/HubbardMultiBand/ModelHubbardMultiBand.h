@@ -435,7 +435,7 @@ private:
 		typedef std::pair<SizeType,SizeType> PairType;
 
 		qns.resize(basis.size(), QnType::zero());
-		SizeType mode = ModelBaseType::targetQuantum().qn.other.size();
+		SizeType mode = ModelBaseType::targetQuantum().sizeOfOther();
 		assert(mode == 2 || mode == 3); // either Sz or Sz and k-symmetry
 		VectorSizeType other(mode, 0);
 		QnType::modalStruct.resize(mode);

@@ -493,7 +493,7 @@ private:
 	void updateStochastics(const VectorSizeType& block1,
 	                       const VectorSizeType& block2)
 	{
-		const QnType& qn = model_.targetQuantum().qn;
+		const QnType& qn = model_.targetQuantum().qn(0);
 		mettsStochastics_.update(qn,block1,block2,mettsStruct_.rngSeed);
 	}
 

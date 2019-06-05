@@ -83,20 +83,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 //! Hubbard Model Parameters
 template<typename RealType, typename QnType>
-struct TargetQuantumElectrons {
+class TargetQuantumElectrons {
+
+public:
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename QnType::PairSizeType PairSizeType;
+	typedef typename QnType::VectorQnType VectorQnType;
 
 	template<typename IoInputType>
 	TargetQuantumElectrons(IoInputType& io)
-	    : totalNumberOfSites(0),
-	      isSu2(false),
-	      qn(QnType::zero())
+	    : totalNumberOfSites_(0),
+	      isSu2_(false)
 	{
+		QnType qn(QnType::zero());
 		VectorSizeType qnOther;
 		const bool allowUpDown = true;
-		io.readline(totalNumberOfSites, "TotalNumberOfSites=");
+		io.readline(totalNumberOfSites_, "TotalNumberOfSites=");
 
 		PsimagLite::String msg("TargetQuantumElectrons: ");
 		bool hasTwiceJ = false;
@@ -162,23 +165,64 @@ struct TargetQuantumElectrons {
 			io.readline(tmp,"UseSu2Symmetry=");
 		} catch (std::exception&) {}
 
-		isSu2 = (tmp > 0);
+		isSu2_ = (tmp > 0);
 
-		if (isSu2 && !hasTwiceJ) {
+		if (isSu2_ && !hasTwiceJ) {
 			msg += "Please provide TargetSpinTimesTwo when running with SU(2).\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
 
-		if (isSu2)
-			qn.oddElectrons = (totalNumberOfSites & 1);
+		if (isSu2_)
+			qn.oddElectrons = (totalNumberOfSites_ & 1);
+
+		vqn_.push_back(qn);
 	}
 
-	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
+	SizeType sizeOfOther() const
 	{
-		return 0;
+		const SizeType n = vqn_.size();
+		if (n == 0) return 0;
+		const SizeType answer = vqn_[0].other.size();
+		for (SizeType i = 1; i < n; ++i) {
+			if (vqn_[i].other.size() == answer) continue;
+			err("sizeOfOther must be the same for all target qns\n");
+		}
+
+		return answer;
+	}
+
+	const QnType& qn(SizeType ind) const
+	{
+		assert(ind < vqn_.size());
+		return vqn_[ind];
+	}
+
+	void updateQuantumSector(VectorQnType& quantumSector,
+	                         SizeType sites,
+	                         ProgramGlobals::DirectionEnum direction,
+	                         SizeType step,
+	                         const VectorQnType& adjustQuantumNumbers) const
+	{
+		const SizeType maxSites = totalNumberOfSites_;
+
+		if (direction == ProgramGlobals::DirectionEnum::INFINITE &&
+		        sites < maxSites &&
+		        adjustQuantumNumbers.size() > step) {
+			if (quantumSector.size() != 1)
+				err("adjustQuantumNumbers only with single target\n");
+			quantumSector[0] = adjustQuantumNumbers[step];
+			return;
+		} else {
+			quantumSector = vqn_;
+		}
+
+		const SizeType n = quantumSector.size();
+
+		for (SizeType i = 0; i < n; ++i)
+			quantumSector[i].scale(sites,
+			                       totalNumberOfSites_,
+			                       direction,
+			                       isSu2_);
 	}
 
 	void write(PsimagLite::String label1,
@@ -186,27 +230,31 @@ struct TargetQuantumElectrons {
 	{
 		PsimagLite::String label = label1 + "/TargetQuantumElectrons";
 		io.createGroup(label);
-		io.write(label + "/TotalNumberOfSites", totalNumberOfSites);
-		io.write(label + "/isSu2", isSu2);
-		qn.write(label + "/qn", io);
+		io.write(label + "/TotalNumberOfSites", totalNumberOfSites_);
+		io.write(label + "/isSu2", isSu2_);
+		vqn_.write(label + "/qn", io);
 	}
 
 	//! Function that prints model parameters to stream os
 	friend std::ostream& operator<<(std::ostream &os,
 	                                const TargetQuantumElectrons& p)
 	{
+		if (p.vqn_.size() == 0) return os;
+		const QnType& qn = p.vqn_[0];
 		os<<"TargetElectronsTotal="<<p.totalElectrons<<"\n";
 		os<<"TargetOther="<<p.other<<"\n";
 		if (p.isSu2)
 			os<<"TargetSpinTimesTwo="<<p.twiceJ<<"\n";
+		if (p.vqn_.size() > 1)
+			os<<"FIXME TODO: More than one qn found\n";
 		return os;
 	}
 
-	SizeType totalNumberOfSites;
-	bool isSu2;
-	QnType qn;
-
 private:
+
+	SizeType totalNumberOfSites_;
+	bool isSu2_;
+	VectorQnType vqn_;
 
 	TargetQuantumElectrons(const TargetQuantumElectrons&);
 
