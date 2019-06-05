@@ -210,6 +210,20 @@ public:
 		return commonTargeting_.normSquared(i);
 	}
 
+	virtual void initialGuess(typename PsimagLite::Vector<VectorType>::Type& initialVector,
+	                          const VectorSizeType& block,
+	                          bool noguess,
+	                          VectorSizeType& weights,
+	                          const BasisType& basis) const
+	{
+		VectorWithOffsetType vwo(weights, basis);
+		commonTargeting_.initialGuess(vwo, block, noguess);
+		const SizeType n = vwo.sectors();
+		initialVector.resize(n);
+		for (SizeType i = 0; i < n; ++i)
+			vwo.extract(initialVector[i], vwo.sector(i));
+	}
+
 	// non-virtual below
 
 	const ModelType& model() const { return model_; }
@@ -227,13 +241,6 @@ public:
 	const VectorWithOffsetType& operator()(SizeType i) const
 	{
 		return commonTargeting_.aoe().targetVectors()[i];
-	}
-
-	void initialGuess(VectorWithOffsetType& initialVector,
-	                  const VectorSizeType& block,
-	                  bool noguess) const
-	{
-		commonTargeting_.initialGuess(initialVector, block, noguess);
 	}
 
 	RealType time() const {return commonTargeting_.aoe().time(); }

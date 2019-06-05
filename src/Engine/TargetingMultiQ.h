@@ -132,7 +132,7 @@ public:
 	      vqn_(vqn),
 	      tstStruct_(targeting),
 	      progress_(targeting),
-	      gsWeight_(tstStruct_.gsWeight())
+	      weight_(vqn_.size())
 	{}
 
 	virtual bool includeGroundStage() const { return false; }
@@ -142,26 +142,39 @@ public:
 	                 const BasisType& basis)
 	{
 		const SizeType n = sectors.size();
-		if (this->common().aoe().targetVectors().size() == 0)
+		if (this->common().aoe().targetVectors().size() != n)
 			this->common().aoe().targetVectorsResize(n);
-		else
-			if (this->common().aoe().targetVectors().size() != n)
-				err("TargetingMultiQ: Wrong number of targets (FATAL ERROR)\n");
 
-		VectorSizeType weights(basis.partition() - 1);
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType j = sectors[i];
-			weights[j] = basis.partition(j + 1) - basis.partition(j);
-		}
+			VectorSizeType weights(basis.partition() - 1);
 
-		const RealType factor = 1 - gsWeight_;
-		for (SizeType i = 0; i < n; ++i) {
+			weights[j] = basis.partition(j + 1) - basis.partition(j);
 			VectorWithOffsetType vwo(weights, basis);
-			vwo.setDataInSector(v[i], i);
+			vwo.setDataInSector(v[i], j);
 			VectorWithOffsetType& handle =
 			        const_cast<VectorWithOffsetType&>(this->common().aoe().targetVectors()[i]);
 			handle = vwo;
-			weight_[i] = factor/n;
+			weight_[i] = 1.0/n;
+		}
+	}
+
+	void initialGuess(typename PsimagLite::Vector<VectorType>::Type& initialVector,
+	                  const VectorSizeType& block,
+	                  bool noguess,
+	                  VectorSizeType& weights,
+	                  const BasisType& basis) const
+	{
+		VectorSizeType sectors;
+		findSectors(sectors, weights);
+		const SizeType n = sectors.size();
+		initialVector.resize(n);
+		for (SizeType i = 0; i < n; ++i) {
+			VectorSizeType weights2(weights.size());
+			weights2[sectors[i]] = weights[sectors[i]];
+			VectorWithOffsetType vwo(weights2, basis);
+			this->common().initialGuess(vwo, block, noguess);
+			vwo.extract(initialVector[i], sectors[i]);
 		}
 	}
 
@@ -183,11 +196,17 @@ public:
 	SizeType size() const { return weight_.size(); }
 
 	void evolve(RealType,
-	            ProgramGlobals::DirectionEnum,
-	            const BlockType&,
+	            ProgramGlobals::DirectionEnum direction,
+	            const BlockType& block1,
 	            const BlockType&,
 	            SizeType)
-	{}
+	{
+		if (this->common().aoe().targetVectors().size() != weight_.size())
+			return;
+
+		const bool doBorderIfBorder = true;
+		this->common().cocoon(block1, direction, doBorderIfBorder);
+	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
 	           PsimagLite::IoSelector::Out& io,
@@ -204,10 +223,16 @@ public:
 
 private:
 
+	void findSectors(VectorSizeType& sectors, const VectorSizeType& weights) const
+	{
+		const SizeType m = weights.size();
+		for (SizeType i = 0; i < m; ++i)
+			if (weights[i] > 0) sectors.push_back(i);
+	}
+
 	const VectorQnType& vqn_;
 	TargetParamsType tstStruct_;
 	PsimagLite::ProgressIndicator progress_;
-	RealType gsWeight_;
 	VectorRealType weight_;
 };     //class TargetingMultiQ
 } // namespace Dmrg

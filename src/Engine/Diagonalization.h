@@ -263,9 +263,9 @@ private:
 		}
 
 		SizeType totalSectors = sectors.size();
-		VectorWithOffsetType initialVector(weights, lrs.super());
+		typename PsimagLite::Vector<TargetVectorType>::Type initialVector;
 
-		target.initialGuess(initialVector, block, noguess);
+		target.initialGuess(initialVector, block, noguess, weights, lrs.super());
 
 		typename PsimagLite::Vector<RealType>::Type energySaved(totalSectors);
 		typename PsimagLite::Vector<TargetVectorType>::Type vecSaved(totalSectors);
@@ -274,12 +274,9 @@ private:
 			SizeType i = sectors[j];
 			PsimagLite::OstringStream msg;
 			msg<<"About to diag. sector with";
-			msg<<" quantumSector=";
-			for (SizeType ii = 0; ii < quantumSector_.size(); ++ii)
-				msg<<quantumSector_[ii]<<" -- ";
+			msg<<" quantumSector="<<lrs.super().qnEx(i);
 			progress_.printline(msg, std::cout);
-			TargetVectorType initialVectorBySector(weights[i]);
-			initialVector.extract(initialVectorBySector,i);
+			TargetVectorType& initialVectorBySector = initialVector[j];
 			RealType norma = PsimagLite::norm(initialVectorBySector);
 
 			if (fabs(norma) < 1e-12) {

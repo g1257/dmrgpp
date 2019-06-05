@@ -137,7 +137,8 @@ private:
 		                            "TargetingRixsStatic",
 		                            "TargetingRixsDynamic",
 		                            "TargetingChebyshev",
-		                            "TargetingExpression"};
+		                            "TargetingExpression",
+		                            "TargetingMultiQ"};
 
 		const SizeType totalTargets = targets.size();
 		SizeType count = 0;

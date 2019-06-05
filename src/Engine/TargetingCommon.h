@@ -408,7 +408,7 @@ public:
 	{
 		PsimagLite::Vector<SizeType>::Type nk;
 		setNk(nk,block);
-		setInitialVector(v,aoe_.psi(), nk, noguess);
+		setInitialVector(v, aoe_.psi(), nk, noguess);
 	}
 
 	void computeCorrection(ProgramGlobals::DirectionEnum direction,
@@ -595,7 +595,7 @@ private:
 		if (noguess)
 			wft.createRandomVector(v1);
 		else
-			wft.setInitialVector(v1,v2,targetHelper_.lrs(),nk);
+			wft.setInitialVector(v1, v2, targetHelper_.lrs(), nk);
 	}
 
 	// prints <v1|A|v2>
