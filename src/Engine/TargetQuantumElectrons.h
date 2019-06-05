@@ -133,6 +133,8 @@ public:
 		return answer;
 	}
 
+	SizeType size() const { return vqn_.size(); }
+
 	const QnType& qn(SizeType ind) const
 	{
 		assert(ind < vqn_.size());

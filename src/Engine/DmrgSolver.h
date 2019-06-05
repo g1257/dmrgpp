@@ -186,6 +186,11 @@ public:
 		ioOut_.write(PsimagLite::IsComplexNumber<ComplexOrRealType>::True, "IsComplex");
 		if (parameters_.options.find("verbose")!=PsimagLite::String::npos)
 			verbose_=true;
+
+		const SizeType n = model_.targetQuantum().size();
+		for (SizeType i = 0; i < n; ++i)
+			quantumSector_.push_back(model_.targetQuantum().qn(i));
+
 	}
 
 	~DmrgSolver()
