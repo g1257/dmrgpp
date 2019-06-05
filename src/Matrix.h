@@ -59,7 +59,7 @@ public:
 	Matrix(SizeType nrow,SizeType ncol)
 	    : nrow_(nrow),
 	      ncol_(ncol),
-	      data_(nrow*ncol, 0) // the 0 should not be here, FIXME TODO
+	      data_(nrow*ncol)
 	{}
 
 	Matrix(SizeType nrow, SizeType ncol, const T& value)
