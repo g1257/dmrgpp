@@ -1,0 +1,29 @@
+TotalNumberOfSites=16
+NumberOfTerms=1
+
+Term0=Hopping
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+	1
+	1.0
+
+hubbardU	16 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+potentialV	 32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+	0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+Model=HubbardOneBand
+SolverOptions=TargetingMultiQ
+Version=version
+OutputFile=data250
+InfiniteLoopKeptStates=100
+FiniteLoops 3
+  7 100 8
+-14 100 8
+ 14 100 8
+NumberOfTargetQns=2
+TargetElectronsUp0=8
+TargetElectronsDown0=8
+TargetElectronsUp1=7
+TargetElectronsDown1=8
+#ci dmrg arguments= -p 12 "<P0|c|P1>"
