@@ -178,7 +178,9 @@ public:
 		} else if (name_ == "HubbardHolsteinSSH") {
 			model_ = new HubbardHolsteinType(solverParams, io, geometry, "SSH");
 		} else if (name_ == "Kondo") {
-			model_ = new KondoType(solverParams, io, geometry);
+			model_ = new KondoType(solverParams, io, geometry, "");
+		} else if (name_ == "KondoEx") {
+			model_ = new KondoType(solverParams, io, geometry, "Ex");
 		} else if (name_ == "HubbardOneBandRashbaSOC") {
 			model_ = new ModelHubbardType(solverParams, io, geometry, "RashbaSOC");
 		}

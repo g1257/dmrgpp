@@ -33,11 +33,12 @@ public:
 
 	Kondo(const SolverParamsType& solverParams,
 	      InputValidatorType& io,
-	      GeometryType const &geometry)
+	      GeometryType const &geometry,
+	      PsimagLite::String option)
 	    : ModelBaseType(solverParams, geometry, io),
 	      solverParams_(solverParams),
 	      geometry_(geometry),
-	      modelParams_(io)
+	      modelParams_(io, option == "Ex")
 	{
 		SizeType sitesTimesDof = 2 + modelParams_.twiceTheSpin;
 		SizeType total = (1<<sitesTimesDof);
@@ -116,6 +117,27 @@ public:
 			// Kondo term
 			assert(ind < modelParams_.kondoJ.size());
 			hmatrix += modelParams_.kondoJ[ind] * kondoOnSite(ind, niup, nidown);
+
+			if (!modelParams_.extended) continue; // EARLY CONTINUE HERE
+
+			const OperatorType& Splus = ModelBaseType::naturalOperator("Splus", 0, 0);
+			hmatrix += modelParams_.kondoHx*Splus.data;
+			transposeConjugate(tmpMatrix, Splus.data);
+			hmatrix += modelParams_.kondoHx*tmpMatrix;
+
+			transposeConjugate(tmpMatrix, cup.data);
+			multiply(niup, tmpMatrix, cdown.data);
+			hmatrix += modelParams_.electronHx*niup;
+
+			transposeConjugate(tmpMatrix, cdown.data);
+			multiply(nidown, tmpMatrix, cup.data);
+			hmatrix += modelParams_.electronHx*nidown;
+
+			multiply(niup, cup.data, cdown.data);
+			hmatrix += modelParams_.pairingField*niup;
+
+			transposeConjugate(nidown, niup);
+			hmatrix += modelParams_.pairingField*nidown;
 		}
 	}
 
@@ -189,8 +211,7 @@ protected:
 		else
 			spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModifierTermOther);
 
-		ninj.push(n, 'N', n, 'N');
-
+		ninj.push(n, 'N', n, 'N');		
 	}
 
 private:
@@ -199,7 +220,8 @@ private:
 	                                const VectorSizeType& basis) const
 	{
 		qns.resize(basis.size(), QnType::zero());
-		VectorSizeType other(2, 0);
+		SizeType nsym = (modelParams_.extended) ? 0 : 2;
+		VectorSizeType other(nsym);
 
 		// bit 0 <--- up electron
 		// bit 1 <--- down electron
@@ -217,8 +239,10 @@ private:
 			SizeType bosonicSz = basis[i];
 			bosonicSz >>= 2; // delete electronic part
 
-			other[0] = electrons;
-			other[1] = electronsUp + bosonicSz;
+			if (other.size() >= 2) {
+				other[0] = electrons;
+				other[1] = electronsUp + bosonicSz;
+			}
 
 			bool sign = electrons & 1;
 			qns[i] = QnType(sign, other, jmpair, 0);

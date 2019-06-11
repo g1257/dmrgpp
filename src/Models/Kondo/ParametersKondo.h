@@ -11,7 +11,8 @@ struct ParametersKondo : public ParametersModelBase<RealType, QnType> {
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	template<typename IoInputType>
-	ParametersKondo(IoInputType& io) : BaseType(io, false)
+	ParametersKondo(IoInputType& io, bool extended_)
+	    : BaseType(io, false), extended(extended_)
 	{
 		SizeType nsites = 0;
 		io.readline(nsites, "TotalNumberOfSites=");
@@ -24,6 +25,12 @@ struct ParametersKondo : public ParametersModelBase<RealType, QnType> {
 		checkVector(hubbardU, "hubbardU", nsites);
 		io.read(kondoJ, "kondoJ");
 		checkVector(kondoJ, "kondoJ", nsites);
+
+		if (!extended) return;
+
+		io.readline(kondoHx, "KondoHx=");
+		io.readline(electronHx, "ElectronHx=");
+		io.readline(pairingField, "PairingField=");
 	}
 
 	void write(PsimagLite::String label1,
@@ -36,12 +43,23 @@ struct ParametersKondo : public ParametersModelBase<RealType, QnType> {
 		io.write(label + "/potentialV", potentialV);
 		io.write(label + "/hubbardU", hubbardU);
 		io.write(label + "/kondoJ", kondoJ);
+		io.write(label + "/extended", extended);
+
+		if (!extended) return;
+
+		io.write(label + "/kondoHx", kondoHx);
+		io.write(label + "/electronHx", electronHx);
+		io.write(label + "/pairingField", pairingField);
 	}
 
 	SizeType twiceTheSpin;
 	VectorRealType potentialV;
 	VectorRealType hubbardU;
 	VectorRealType kondoJ;
+	const bool extended;
+	RealType kondoHx;
+	RealType electronHx;
+	RealType pairingField;
 
 private:
 
