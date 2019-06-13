@@ -647,7 +647,7 @@ private:
 
 	const VectorWithOffsetType& getVector(PsimagLite::String braOrKet) const
 	{
-		GetBraOrKet getBraOrKet(braOrKet);
+		PsimagLite::GetBraOrKet getBraOrKet(braOrKet);
 
 		SizeType ind = getBraOrKet();
 
@@ -656,7 +656,7 @@ private:
 
 	void getVectorCheck(PsimagLite::String braOrKet) const
 	{
-		GetBraOrKet getBraOrKet(braOrKet);
+		PsimagLite::GetBraOrKet getBraOrKet(braOrKet);
 		getBraOrKet();
 	}
 

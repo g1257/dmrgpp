@@ -113,7 +113,7 @@ public:
 	typedef typename DmrgSerializerType::FermionSignType FermionSignType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef PsimagLite::Vector<short int>::Type VectorShortIntType;
-	typedef GetBraOrKet GetBraOrKetType;
+	typedef PsimagLite::GetBraOrKet GetBraOrKetType;
 
 	enum class SaveEnum {YES, NO};
 

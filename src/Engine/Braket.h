@@ -27,7 +27,7 @@ public:
 	typedef typename OperatorSpecType::ResultType AlgebraType;
 	typedef typename PsimagLite::Vector<AlgebraType>::Type VectorAlgebraType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-	typedef GetBraOrKet GetBraOrKetType;
+	typedef PsimagLite::GetBraOrKet GetBraOrKetType;
 
 	Braket(const ModelType& model,const PsimagLite::String& braket)
 	    : model_(model), braket_(2,""),savedString_(braket)
@@ -116,7 +116,7 @@ private:
 	bool isBraket(SizeType ind) const
 	{
 		if (ind >= braket_.size()) return false;
-		int pType = GetBraOrKet::getPtype(braket_[ind]);
+		int pType = PsimagLite::GetBraOrKet::getPtype(braket_[ind]);
 
 		return (braket_[ind] == "gs" ||
 		        braket_[ind] == "time" ||
