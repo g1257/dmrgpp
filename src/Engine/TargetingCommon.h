@@ -233,8 +233,6 @@ public:
 
 	void readGSandNGSTs(IoInputType& io, PsimagLite::String prefix)
 	{
-		const RestartStructType& checkpoint = targetHelper_.model().params().checkpoint;
-
 		read(io, prefix);
 
 		TimeSerializerType* ts = 0;
@@ -249,11 +247,13 @@ public:
 		SizeType rstages = stages.size();        // read stages
 		SizeType dstages = aoe_.stages().size(); // destination stages
 
+		const RestartStructType& checkpoint = targetHelper_.model().params().checkpoint;
+
 		for (SizeType i = 0; i < dstages; ++i) {
 			SizeType j = checkpoint.mappingStages(i);
 			if (j >= rstages) {
 				err("TargetingCommon::readGSandNGSTs: stages mapping failed " +
-				    ttos(j) + " >= " + ttos(rstages));
+				    ttos(j) + " >= " + ttos(rstages) + "\n");
 			}
 
 			aoe_.setStage(i, stages[j]);
@@ -262,13 +262,21 @@ public:
 		SizeType rtvs = ts->numberOfVectors();        // read tvs
 		SizeType dtvs = aoe_.targetVectors().size();  // destination tvs
 
+		int tvForPsi = checkpoint.sourceTvForPsi();
+		if (tvForPsi >= 0) {
+			SizeType tvForPsiUnsigned = tvForPsi;
+			if (tvForPsiUnsigned >= rtvs)
+				err("TargetingCommon::readGSandNGSTs: sourceTvForPsi >= " + ttos(rtvs) + "\n");
+			aoe_.psi() = ts->vector(tvForPsiUnsigned);
+		}
+
 		for (SizeType i = 0; i < dtvs; ++i) {
 			const int j = checkpoint.mappingTvs(i);
 			if (j < 0) continue;
 			const SizeType jj = j;
 			if (jj >= rtvs) {
 				err("TargetingCommon::readGSandNGSTs: tvs mapping failed " +
-								    ttos(j) + " >= " + ttos(rtvs));
+								    ttos(j) + " >= " + ttos(rtvs) + "\n");
 			}
 
 			aoe_.targetVectors(i) = ts->vector(j);

@@ -45,6 +45,8 @@ struct RestartStruct {
 		//return mappingTvs_[ind];
 	}
 
+	int sourceTvForPsi() const { return -1; }
+
 	void write(PsimagLite::String label,
 	           PsimagLite::IoSerializer& ioSerializer) const
 	{
