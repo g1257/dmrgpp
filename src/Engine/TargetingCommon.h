@@ -265,13 +265,12 @@ public:
 
 		SizeType rtvs = ts->numberOfVectors();        // read tvs
 		SizeType dtvs = aoe_.targetVectors().size();  // destination tvs
-		if (dtvs != rtvs)
-			err(PsimagLite::String(__FILE__) +
-			    ": Trying to set TVs but different sizes\n");
 
 		for (SizeType i = 0; i < dtvs; ++i) {
-			SizeType j = checkpoint.mappingTvs(i);
-			if (j >= rtvs) {
+			const int j = checkpoint.mappingTvs(i);
+			if (j < 0) continue;
+			const SizeType jj = j;
+			if (jj >= rtvs) {
 				err("TargetingCommon::readGSandNGSTs: tvs mapping failed " +
 								    ttos(j) + " >= " + ttos(rtvs));
 			}
