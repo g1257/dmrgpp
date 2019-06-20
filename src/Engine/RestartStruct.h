@@ -11,15 +11,38 @@ namespace Dmrg {
 // no longer a struct
 struct RestartStruct {
 
+	typedef PsimagLite::Vector<int>::Type VectorIntType;
+
 	RestartStruct()
-	    : filename_(""),labelForEnergy_("Energy")
+	    : filename_(""), labelForEnergy_("Energy"), sourceTvForPsi_(-1)
 	{}
 
+	/* PSIDOC MiscRestartOptions
+
+	 RestartSourceTvForPsi=integer
+	 Optional. If present and non-negative, set the g.s. of this targeting to the
+	 previous run target vector indicated by this number.
+	 RestartMappingTvs (vector of integers)
+	 Optional. If present the number of numbers to follow must be provided first,
+	 as for all vectors in InputNg legacy, and with the appropriate syntax for Ainur.
+	 Sets the i-th target vector for this targeting to the previous run target
+	 vector number MappingTvs[i], if MappingTvs[i] is non-negative; skips it if negative.
+	 */
 	template<typename SomeInputType>
 	void read(SomeInputType& io)
 	{
 		try {
 			io.readline(labelForEnergy_, "RestartLabelForEnergy=");
+		} catch (std::exception&) {}
+
+		try {
+			io.readline(sourceTvForPsi_, "RestartSourceTvForPsi=");
+		} catch (std::exception&) {
+			sourceTvForPsi_ = -1;
+		}
+
+		try {
+			io.read(mappingTvs_, "RestartMappingTvs");
 		} catch (std::exception&) {}
 	}
 
@@ -36,16 +59,16 @@ struct RestartStruct {
 
 	int mappingTvs(SizeType ind) const
 	{
-		//if (mappingTvs_.size() == 0)
+		if (mappingTvs_.size() == 0)
 			return ind;
 
-		//if (ind >= mappingTvs_.size())
-		//	err("RestartStruct::mappingTvs not provided for ind= " + ttos(ind) + "\n");
+		if (ind >= mappingTvs_.size())
+			err("RestartStruct::mappingTvs not provided for ind= " + ttos(ind) + "\n");
 
-		//return mappingTvs_[ind];
+		return mappingTvs_[ind];
 	}
 
-	int sourceTvForPsi() const { return -1; }
+	int sourceTvForPsi() const { return sourceTvForPsi_; }
 
 	void write(PsimagLite::String label,
 	           PsimagLite::IoSerializer& ioSerializer) const
@@ -54,6 +77,9 @@ struct RestartStruct {
 		ioSerializer.createGroup(root);
 		ioSerializer.write(root + "/filename", filename_);
 		ioSerializer.write(root + "/labelForEnergy", labelForEnergy_);
+		ioSerializer.write(root + "/sourceTvForPsi", sourceTvForPsi_);
+		if (mappingTvs_.size() > 0)
+			ioSerializer.write(root + "/mappingTvs", mappingTvs_);
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const RestartStruct& c)
@@ -62,20 +88,18 @@ struct RestartStruct {
 
 	    os<<"RestartStruct.filename="<<c.filename_<<"\n";
 	    os<<"RestartStruct.labelForEnergy="<<c.labelForEnergy_<<"\n";
+		os<<"RestartStruct.sourceTvForPsi="<<c.sourceTvForPsi_<<"\n";
+		if (c.mappingTvs_.size() > 0)
+			os<<"RestartStruct.mappingTvs="<<c.mappingTvs_<<"\n";
 	    return os;
-	}
-
-	friend std::istream& operator>>(std::istream& is,RestartStruct& c)
-	{
-	    is>>c.filename_;
-	    is>>c.labelForEnergy_;
-	    return is;
 	}
 
 private:
 
 	PsimagLite::String filename_;
 	PsimagLite::String labelForEnergy_;
+	int sourceTvForPsi_;
+	VectorIntType mappingTvs_;
 };
 
 } // namespace Dmrg
