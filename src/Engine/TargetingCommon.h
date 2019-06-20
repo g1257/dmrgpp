@@ -227,12 +227,8 @@ public:
 
 	void read(IoInputType& io, PsimagLite::String prefix)
 	{
-		const RestartStructType& checkpoint = targetHelper_.model().params().checkpoint;
-		prefix += "/";
-		if (checkpoint.labelForEnergy() != "NO")
-			aoe_.loadEnergy(io, checkpoint.labelForEnergy());
-		if (checkpoint.labelForPsi() != "NO")
-		aoe_.psi().read(io, prefix + checkpoint.labelForPsi());
+		aoe_.loadEnergy(io, "Energy");
+		aoe_.psi().read(io, prefix + "PSI");
 	}
 
 	void readGSandNGSTs(IoInputType& io, PsimagLite::String prefix)
