@@ -385,16 +385,16 @@ struct ParametersDmrgSolver {
 				err(tmp + "while InfiniteLoopKeptStates not an int\n");
 			}
 
-			checkpoint.filename = "";
+			checkpoint.setFilename("");
 			if (!infLoopsIsAnInt) {
-				checkpoint.filename = infLoops;
+				checkpoint.setFilename(infLoops);
 				// remove double quotes if present
 				SizeType begin = (infLoops[0] == '"') ? 1 : 0;
 				SizeType last = infLoops.length();
 				assert(last > 0);
 				--last;
 				SizeType end = (infLoops[last] == '"') ? last : last + 1;
-				checkpoint.filename = infLoops.substr(begin, end - begin);
+				checkpoint.setFilename(infLoops.substr(begin, end - begin));
 			} else {
 				if (keptStatesInfinite > 0) {
 					PsimagLite::String tmp = "WARNING: The numeric value of ";
@@ -405,15 +405,15 @@ struct ParametersDmrgSolver {
 			}
 
 			if (hasRestartFrom)
-				checkpoint.filename = restartFrom;
+				checkpoint.setFilename(restartFrom);
 
-			if (checkpoint.filename == "") {
+			if (checkpoint.filename() == "") {
 				PsimagLite::String tmp = "FATAL: RestartFilename NOT found in input ";
 				err(tmp + "AND InfiniteLoopKeptStates is an int\n");
 			}
 
-			checkpoint.filename = filenameFromRootname(checkpoint.filename);
-			checkRestart(filename, checkpoint.filename, options);
+			checkpoint.setFilename(filenameFromRootname(checkpoint.filename()));
+			checkRestart(filename, checkpoint.filename(), options);
 			hasRestart = true;
 		} else {
 			if (hasRestartFrom) {
@@ -436,22 +436,7 @@ struct ParametersDmrgSolver {
 		Recovery<ThisType, int>::autoRestart(*this);
 
 		if (hasRestart) {
-			try {
-				io.readline(checkpoint.into,"RestartInto=");
-			} catch (std::exception&) {}
-
-			if (checkpoint.into != "All" && checkpoint.into != "GroundState") {
-				PsimagLite::String str = "FATAL: RestartInto=All | GroundState\n";
-				throw PsimagLite::RuntimeError(str);
-			}
-
-			try {
-				io.readline(checkpoint.labelForPsi,"RestartLabelForPsi=");
-			} catch (std::exception&) {}
-
-			try {
-				io.readline(checkpoint.labelForEnergy,"RestartLabelForEnergy=");
-			} catch (std::exception&) {}
+			checkpoint.read(io);
 		}
 	}
 

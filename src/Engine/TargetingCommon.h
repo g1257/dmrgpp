@@ -92,6 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Io/IoSelector.h"
 #include "PsimagLite.h"
 #include "GetBraOrKet.h"
+#include "RestartStruct.h"
 
 namespace Dmrg {
 
@@ -141,6 +142,7 @@ public:
 	typedef FermionSign FermionSignType;
 	typedef typename ApplyOperatorExpressionType::StageEnumType StageEnumType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
+	typedef RestartStruct RestartStructType;
 
 	enum class OpLabelCategory { DRESSED, BARE };
 
@@ -223,16 +225,20 @@ public:
 		ts.write(io, prefix);
 	}
 
-	void read(IoInputType& io,
-	          PsimagLite::String prefix)
+	void read(IoInputType& io, PsimagLite::String prefix)
 	{
+		const RestartStructType& checkpoint = targetHelper_.model().params().checkpoint;
 		prefix += "/";
-		aoe_.loadEnergy(io, "Energy");
-		aoe_.psi().read(io, prefix + "PSI");
+		if (checkpoint.labelForEnergy() != "NO")
+			aoe_.loadEnergy(io, checkpoint.labelForEnergy());
+		if (checkpoint.labelForPsi() != "NO")
+		aoe_.psi().read(io, prefix + checkpoint.labelForPsi());
 	}
 
 	void readGSandNGSTs(IoInputType& io, PsimagLite::String prefix)
 	{
+		const RestartStructType& checkpoint = targetHelper_.model().params().checkpoint;
+
 		read(io, prefix);
 
 		TimeSerializerType* ts = 0;
@@ -244,18 +250,34 @@ public:
 		}
 
 		const typename TimeSerializerType::VectorStageEnumType& stages = ts->stages();
-		SizeType nstages = stages.size();
-		for (SizeType i = 0; i < nstages; ++i)
-			aoe_.setStage(i, stages[i]);
+		SizeType rstages = stages.size();        // read stages
+		SizeType dstages = aoe_.stages().size(); // destination stages
 
-		SizeType n = aoe_.targetVectors().size();
+		for (SizeType i = 0; i < dstages; ++i) {
+			SizeType j = checkpoint.mappingStages(i);
+			if (j >= rstages) {
+				err("TargetingCommon::readGSandNGSTs: stages mapping failed " +
+				    ttos(j) + " >= " + ttos(rstages));
+			}
 
-		if (n != ts->numberOfVectors())
+			aoe_.setStage(i, stages[j]);
+		}
+
+		SizeType rtvs = ts->numberOfVectors();        // read tvs
+		SizeType dtvs = aoe_.targetVectors().size();  // destination tvs
+		if (dtvs != rtvs)
 			err(PsimagLite::String(__FILE__) +
 			    ": Trying to set TVs but different sizes\n");
 
-		for (SizeType i = 0; i < n; ++i)
-			aoe_.targetVectors(i) = ts->vector(i);
+		for (SizeType i = 0; i < dtvs; ++i) {
+			SizeType j = checkpoint.mappingTvs(i);
+			if (j >= rtvs) {
+				err("TargetingCommon::readGSandNGSTs: tvs mapping failed " +
+								    ttos(j) + " >= " + ttos(rtvs));
+			}
+
+			aoe_.targetVectors(i) = ts->vector(j);
+		}
 
 		aoe_.setCurrentTimeStep(ts->currentTimeStep());
 

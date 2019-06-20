@@ -154,7 +154,7 @@ public:
 
 		VectorStringType parts;
 		RecoveryStaticType::makeThreeParts(parts,
-		                                   checkpoint_.parameters().checkpoint.filename);
+		                                   checkpoint_.parameters().checkpoint.filename());
 		if (parts.size() == 3) counter_ = 1 + atoi(parts[1].c_str());
 	}
 
@@ -299,7 +299,7 @@ private:
 
 	void readRecovery()
 	{
-		typename IoType::In ioIn2(checkpoint_.parameters().checkpoint.filename);
+		typename IoType::In ioIn2(checkpoint_.parameters().checkpoint.filename());
 
 		ioIn2.read(opaqueRestart_.loopIndex, "Recovery/loopIndex");
 		ioIn2.read(opaqueRestart_.stepCurrent, "Recovery/stepCurrent");
@@ -338,7 +338,7 @@ private:
 	void writeEnergies(typename IoType::Out& ioOut,
 	                   PsimagLite::String file) const
 	{
-		PsimagLite::String energyLabel = checkpoint_.parameters().checkpoint.labelForEnergy;
+		PsimagLite::String energyLabel = checkpoint_.parameters().checkpoint.labelForEnergy();
 		ioOut.flush();
 		typename IoType::In ioIn(file);
 		SizeType total = 0;
@@ -403,7 +403,7 @@ public:
 
 		// *  add the line RestartFilename= pointing to the data file of the
 		// run to be restarted.
-		params.checkpoint.filename = recoveryFile;
+		params.checkpoint.setFilename(recoveryFile);
 		//params.checkRestart(params.filename, recoveryFile, params.options, "INTERNAL=");
 
 		params.autoRestart = true;

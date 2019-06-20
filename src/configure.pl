@@ -51,7 +51,6 @@ system("cd KronUtil; perl configure.pl \"@configFiles\" $flavor $gccdash");
 
 my %provenanceDriver = (name => 'Provenance', aux => 1);
 my %progGlobalsDriver = (name => 'ProgramGlobals', aux => 1);
-my %restartDriver = (name => 'RestartStruct', aux => 1);
 my %finiteLoopDriver = (name => 'FiniteLoop', aux => 1);
 my %utilsDriver = (name => 'Utils', aux => 1);
 my %qnDriver = (name => 'Qn', aux => 1);
@@ -67,11 +66,11 @@ my %observeDriver1 = (name => 'ObserveDriver1', aux => 1);
 my %observeDriver2 = (name => 'ObserveDriver2', aux => 1);
 
 my @drivers = (\%provenanceDriver,\%su2RelatedDriver,
-\%progGlobalsDriver,\%restartDriver,\%finiteLoopDriver,\%utilsDriver,
+\%progGlobalsDriver,\%finiteLoopDriver,\%utilsDriver,
 \%qnDriver, \%observeDriver,\%toolboxDriver,
 \%observeDriver0,\%observeDriver1,\%observeDriver2);
 
-$dotos = "dmrg.o Provenance.o RestartStruct.o FiniteLoop.o Utils.o Qn.o ";
+$dotos = "dmrg.o Provenance.o FiniteLoop.o Utils.o Qn.o ";
 $dotos .= " ProgramGlobals.o Su2Related.o";
 
 my @su2files = DmrgDriver::createTemplates($generateSources);

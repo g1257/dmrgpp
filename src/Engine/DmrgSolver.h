@@ -237,7 +237,7 @@ public:
 		MyBasisWithOperators pE("BasisWithOperators.Environ");
 
 		if (checkpoint_.isRestart()) {
-			PsimagLite::IoSelector::In io(parameters_.checkpoint.filename);
+			PsimagLite::IoSelector::In io(parameters_.checkpoint.filename());
 
 			checkpoint_.read(pS, pE, false);
 			psi.read(io, "FinalPsi");

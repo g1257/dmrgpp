@@ -150,9 +150,9 @@ public:
 		VectorSizeType v;
 
 		{
-			IoType::In ioIn2(parameters_.checkpoint.filename);
+			IoType::In ioIn2(parameters_.checkpoint.filename());
 			ioIn2.readLastVectorEntry(energyFromFile_,
-			                          parameters_.checkpoint.labelForEnergy);
+			                          parameters_.checkpoint.labelForEnergy());
 
 			ioIn2.read(v, "CHKPOINTSYSTEM/OperatorPerSite");
 			if (v.size() == 0) return;
@@ -225,7 +225,7 @@ public:
 	          BasisWithOperatorsType &pE,
 	          bool isObserveCode)
 	{
-		typename PsimagLite::IoSelector::In ioTmp(parameters_.checkpoint.filename);
+		typename PsimagLite::IoSelector::In ioTmp(parameters_.checkpoint.filename());
 
 		BasisWithOperatorsType pS1(ioTmp, "CHKPOINTSYSTEM", isObserveCode);
 		pS = pS1;
@@ -307,7 +307,7 @@ private:
 		bool checkPoint = false;
 
 		if (isRestart_) {
-			PsimagLite::IoSelector::In io1(parameters_.checkpoint.filename);
+			PsimagLite::IoSelector::In io1(parameters_.checkpoint.filename());
 			io1.read(lastSite, "FinalPsi/TargetCentralSite");
 			io1.read(prevDeltaSign, "LastLoopSign");
 			checkPoint = true;
@@ -402,11 +402,11 @@ private:
 
 	void loadStacksDiskToMemory()
 	{
-		DiskStackType systemDisk(parameters_.checkpoint.filename,
+		DiskStackType systemDisk(parameters_.checkpoint.filename(),
 		                         isRestart_,
 		                         "system",
 		                         isObserveCode_);
-		DiskStackType envDisk(parameters_.checkpoint.filename,
+		DiskStackType envDisk(parameters_.checkpoint.filename(),
 		                      isRestart_,
 		                      "environ",
 		                      isObserveCode_);

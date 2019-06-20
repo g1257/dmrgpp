@@ -130,7 +130,7 @@ public:
 	                  true,
 	                  params.denseSparseThreshold),
 	      progress_("WaveFunctionTransf"),
-	      filenameIn_(params.checkpoint.filename),
+	      filenameIn_(params.checkpoint.filename()),
 	      filenameOut_(params.filename),
 	      wftImpl_(0),
 	      rng_(3433117),
