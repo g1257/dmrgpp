@@ -31,6 +31,15 @@ ruleRows<SizeType>()
 	return "[" >> -(boost::spirit::int_ % ",") >> "]";
 }
 
+template<>
+boost::spirit::qi::rule<std::string::iterator,
+std::vector<int>(),
+boost::spirit::qi::space_type>
+ruleRows<int>()
+{
+	return "[" >> -(boost::spirit::int_ % ",") >> "]";
+}
+
 //---------
 template<typename T>
 boost::spirit::qi::rule<std::string::iterator,
@@ -55,6 +64,17 @@ ruleElipsis<SizeType>()
 {
 	return "[" >> boost::spirit::int_ >> "," >> "..." >> "]";
 }
+
+template<>
+boost::spirit::qi::rule<std::string::iterator,
+int(),
+boost::spirit::qi::space_type>
+ruleElipsis<int>()
+{
+	return "[" >> boost::spirit::int_ >> "," >> "..." >> "]";
+}
+
+//---------
 
 void AinurState::assign(String k, String v)
 {
@@ -264,6 +284,8 @@ template void AinurState::convertInternal(Matrix<DoubleOrFloatType>&,String, int
 template void AinurState::convertInternal(std::vector<DoubleOrFloatType>&, String, int) const;
 
 template void AinurState::convertInternal(std::vector<SizeType>&, String, int) const;
+
+template void AinurState::convertInternal(std::vector<int>&, String, int) const;
 
 template void AinurState::convertInternal(std::vector<std::complex<DoubleOrFloatType> >&,
 String, int) const;
