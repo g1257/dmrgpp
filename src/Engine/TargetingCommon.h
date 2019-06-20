@@ -245,20 +245,18 @@ public:
 		}
 
 		const typename TimeSerializerType::VectorStageEnumType& stages = ts->stages();
-		SizeType rstages = stages.size();        // read stages
-		SizeType dstages = aoe_.stages().size(); // destination stages
+		const SizeType rstages = stages.size();        // read stages
+		const SizeType dstages = aoe_.stages().size(); // destination stages
 
 		const RestartStructType& checkpoint = targetHelper_.model().params().checkpoint;
 
-		for (SizeType i = 0; i < dstages; ++i) {
-			SizeType j = checkpoint.mappingStages(i);
-			if (j >= rstages) {
-				err("TargetingCommon::readGSandNGSTs: stages mapping failed " +
-				    ttos(j) + " >= " + ttos(rstages) + "\n");
-			}
+		const SizeType dstagesOrZero = (checkpoint.mapStages()) ? dstages : 0;
 
-			aoe_.setStage(i, stages[j]);
-		}
+		if (dstagesOrZero > 0 && dstagesOrZero != rstages)
+			err("TargetingCommon::readGSandNGSTs: stages cannot be set from previous\n");
+
+		for (SizeType i = 0; i < dstagesOrZero; ++i)
+			aoe_.setStage(i, stages[i]);
 
 		SizeType rtvs = ts->numberOfVectors();        // read tvs
 		SizeType dtvs = aoe_.targetVectors().size();  // destination tvs
@@ -277,7 +275,7 @@ public:
 			const SizeType jj = j;
 			if (jj >= rtvs) {
 				err("TargetingCommon::readGSandNGSTs: tvs mapping failed " +
-								    ttos(j) + " >= " + ttos(rtvs) + "\n");
+				    ttos(j) + " >= " + ttos(rtvs) + "\n");
 			}
 
 			aoe_.targetVectors(i) = ts->vector(j);

@@ -159,6 +159,7 @@ public:
 		knownLabels_.push_back("RepeatFiniteLoopsFrom");
 		knownLabels_.push_back("RestartFilename");
 		knownLabels_.push_back("RestartLabelForEnergy");
+		knownLabels_.push_back("RestartMapStages");
 		knownLabels_.push_back("RestartSourceTvForPsi");
 		knownLabels_.push_back("RestartMappingTvs");
 		knownLabels_.push_back("COOKED_OPERATOR");
