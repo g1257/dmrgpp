@@ -112,7 +112,7 @@ private:
 			int jpr = weRef.getColOrExit(k2);
 			// jpr < 0 could be due to an m smaller than h, the Hilbert size of one site
 			// this is checked against elsewhere
-			assert(jpr >= 0);
+			if (jpr < 0) continue;
 			SizeType jp = dmrgWaveStruct_.lrs().right().permutationInverse(jpl + jpr*volumeOfNk_);
 			ComplexOrRealType sum2 = 0;
 			for (SizeType k = start;k < end;k++) {
