@@ -181,7 +181,7 @@ sub procCommon
 
 sub writeSpaceValues
 {
-	my ($array, $omega) = @_;
+	my ($omega, $array) = @_;
 	my $n = scalar(@$array);
 	print SPACEOUT "$omega $n\n";
 	for (my $i = 0; $i < $n; ++$i) {
