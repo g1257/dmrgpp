@@ -185,21 +185,6 @@ public:
 		        (loopIndex % optionSpec_.value) == 0);
 	}
 
-	bool byTime() const
-	{
-		if (optionSpec_.optionEnum != BY_DELTATIME) return false;
-
-		static bool firstCall = true;
-		PsimagLite::MemoryUsage::TimeHandle time = PsimagLite::ProgressIndicator::time();
-		PsimagLite::MemoryUsage::TimeHandle deltaTime = time - savedTime_;
-		savedTime_ = time;
-		if (!firstCall)
-			return (deltaTime.seconds() > optionSpec_.value);
-
-		firstCall = false;
-		return false;
-	}
-
 	void write(const TargetingType& psi,
 	           SizeType loopIndex,
 	           SizeType stepCurrent,
@@ -257,16 +242,6 @@ private:
 			optionSpec_.optionEnum = BY_LOOP;
 			optionSpec_.value = atoi(each.c_str());
 			std::cerr<<"Recovery by loop every "<<optionSpec_.value<<" loops\n";
-			return;
-		}
-
-		if (str.length() < 4) dieWithError(str);
-
-		if (str[0] == 'd' && str[1] == 't' && str[2] == '>') {
-			PsimagLite::String each = str.substr(3, str.length() - 3);
-			optionSpec_.optionEnum = BY_DELTATIME;
-			optionSpec_.value = atoi(each.c_str());
-			std::cerr<<"Recovery by delta time greater than "<<optionSpec_.value<<" seconds\n";
 			return;
 		}
 
@@ -367,7 +342,6 @@ private:
 	const WaveFunctionTransfType& wft_;
 	const BasisWithOperatorsType& pS_;
 	const BasisWithOperatorsType& pE_;
-	mutable PsimagLite::MemoryUsage::TimeHandle savedTime_;
 	mutable SizeType counter_;
 }; //class Recovery
 

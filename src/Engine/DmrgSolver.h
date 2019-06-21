@@ -445,7 +445,7 @@ obtain ordered
 				}
 			}
 
-			finiteStep(pS, pE, i, psi, recovery);
+			finiteStep(pS, pE, i, psi);
 
 			if (psi.end()) break;
 
@@ -491,8 +491,7 @@ obtain ordered
 	void finiteStep(MyBasisWithOperators &pS,
 	                MyBasisWithOperators &pE,
 	                SizeType loopIndex,
-	                TargetingType& target,
-	                RecoveryType& recovery)
+	                TargetingType& target)
 	{
 		bool extendedPrint = (parameters_.options.find("extendedPrint") !=
 		        PsimagLite::String::npos);
@@ -561,10 +560,6 @@ obtain ordered
 			progress_.printMemoryUsage();
 
 			if (target.end()) break;
-			if (recovery.byTime()) {
-				int lastSign = (parameters_.finiteLoop[loopIndex].stepLength < 0) ? -1 : 1;
-				recovery.write(target, loopIndex, stepCurrent_, lastSign, ioOut_);
-			}
 		}
 
 		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
