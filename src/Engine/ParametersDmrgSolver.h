@@ -634,7 +634,13 @@ private:
 	{
 		PsimagLite::IoSelector::In io(filename2);
 		PsimagLite::String optionsOld;
-		io.read(optionsOld,"PARAMETERS/options");
+		try {
+			io.read(optionsOld,"PARAMETERS/options");
+		} catch (...) {
+			std::cerr<<"WARNING: could not read PARAMETERS/options from ";
+			std::cerr<<io.filename()<<"\n";
+			return;
+		}
 
 		bool bOld = (optionsOld.find("twositedmrg")!=PsimagLite::String::npos);
 		bool b = (options.find("twositedmrg")!=PsimagLite::String::npos);
