@@ -315,7 +315,7 @@ sub appendToBatch
 	print FOUT "$cmd\n";
 	close(FOUT);
 
-	print STDERR "$0: $fout appended to\n";
+	print STDERR "$0: $fout has been written in append mode.\n";
 }
 
 sub submitBatch

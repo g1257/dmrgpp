@@ -26,9 +26,9 @@ HeisenbergTwiceS=1
 TargetElectronsTotal=6
 TargetSzPlusConst=12
 
-InfiniteLoopKeptStates=data2101.hd5
+InfiniteLoopKeptStates=data2101
 FiniteLoops 2
-10 400 2  -10 400 2 
+10 400 2  -10 400 2
 
 
 SolverOptions=CorrectionVectorTargeting,restart,twositedmrg
