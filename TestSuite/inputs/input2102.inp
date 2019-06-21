@@ -1,4 +1,4 @@
-TotalNumberOfSites=48
+TotalNumberOfSites=12
 NumberOfTerms=3
 
 DegreesOfFreedom=2
@@ -23,13 +23,13 @@ Connectors 1 0
 Model=HeisenbergAncillaC
 HeisenbergTwiceS=1
 
-TargetElectronsTotal=24
-TargetSzPlusConst=48
-Threads=8
+TargetElectronsTotal=6
+TargetSzPlusConst=12
 
-InfiniteLoopKeptStates=data2101
+InfiniteLoopKeptStates=data2101.hd5
 FiniteLoops 2
-46 400 2  -46 400 2 
+10 400 2  -10 400 2 
+
 
 SolverOptions=CorrectionVectorTargeting,restart,twositedmrg
 CorrectionA=0
@@ -42,7 +42,7 @@ RestartMapStages=0
 OutputFile=data2102
 
 DynamicDmrgType=0
-TSPSites 1 23
+TSPSites 1 5
 TSPLoops 1 0
 TSPProductOrSum=sum
 TSPEnergyForExp=0
@@ -54,6 +54,7 @@ CorrectionVectorAlgorithm=Krylov
 GsWeight=0.1
 CorrectionVectorOmega=2.000
 
+Threads=8
 
 TSPOperator=raw
 RAW_MATRIX

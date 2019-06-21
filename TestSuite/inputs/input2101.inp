@@ -1,4 +1,4 @@
-TotalNumberOfSites=48
+TotalNumberOfSites=12
 NumberOfTerms=3
 
 DegreesOfFreedom=2
@@ -23,18 +23,19 @@ Connectors 1 0
 Model=HeisenbergAncillaC
 HeisenbergTwiceS=1
 
-TargetElectronsTotal=24
-TargetSzPlusConst=48
-Threads=16
+TargetElectronsTotal=6
+TargetSzPlusConst=12
+Threads=8
 
 SolverOptions=twositedmrg,restart,TargetingAncilla,normalizeTimeVectors
 Version=version
 OutputFile=data2101
 InfiniteLoopKeptStates=data2100
 FiniteLoops 2 
-46 400 2  -46 400 2 
+10 400 2  -10 400 2 
 
 RepeatFiniteLoopsTimes=10
+RecoverySave=l%2,keep,M=100
 
 TruncationTolerance=1e-7
 TridiagEps=1e-7
@@ -43,10 +44,10 @@ TridiagSteps=500
 GsWeight=0.0
 TSPTau=0.1
 TSPTimeSteps=5
-TSPAdvanceEach=46
+TSPAdvanceEach=10
 TSPAlgorithm=Krylov
-TSPSites 1 23
-TSPLoops 1 2
+TSPSites 1 5
+TSPLoops 1 0 
 TSPProductOrSum=product
 
 TSPOperator=expression
