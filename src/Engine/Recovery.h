@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <sys/types.h>
 #include <dirent.h>
 #include "Io/IoNg.h"
+#include "PsimagLite.h"
 
 namespace Dmrg {
 
@@ -97,16 +98,18 @@ class Recovery  {
 	typedef Recovery<ParametersType,int> RecoveryStaticType;
 	typedef typename CheckpointType::ComplexOrRealType ComplexOrRealType;
 
-	static const SizeType MAX_RECOVERY_FILES = 10;
-
-	enum OptionEnum {DISABLED, BY_DELTATIME, BY_LOOP};
+	enum class OptionEnum {DISABLED, BY_LOOP};
 
 	struct OptionSpec {
 
-		OptionSpec() : optionEnum(BY_LOOP), value(1) {}
+		OptionSpec()
+		    : optionEnum(OptionEnum::BY_LOOP), value(1), keepFiles(false), maxFiles(10)
+		{}
 
 		OptionEnum optionEnum;
 		SizeType value;
+		bool keepFiles;
+		SizeType maxFiles;
 	};
 
 	struct OpaqueRestart {
@@ -160,10 +163,11 @@ public:
 
 	~Recovery()
 	{
-		for (SizeType i = 0; i < MAX_RECOVERY_FILES; ++i) {
+		for (SizeType i = 0; i < optionSpec_.maxFiles; ++i) {
 			PsimagLite::String prefix(RecoveryStaticType::recoveryFilePrefix());
 			prefix += ttos(i);
 			PsimagLite::String savedName(prefix + checkpoint_.parameters().filename);
+			if (optionSpec_.keepFiles) continue;
 			unlink(savedName.c_str());
 		}
 	}
@@ -181,7 +185,7 @@ public:
 
 	bool byLoop(SizeType loopIndex) const
 	{
-		return (optionSpec_.optionEnum == BY_LOOP &&
+		return (optionSpec_.optionEnum == OptionEnum::BY_LOOP &&
 		        (loopIndex % optionSpec_.value) == 0);
 	}
 
@@ -219,7 +223,7 @@ public:
 		checkpoint_.checkpointStacks(savedName);
 
 		if (counter_ >= checkpoint_.parameters().recoveryMaxFiles ||
-		        counter_ >= MAX_RECOVERY_FILES) counter_ = 0;
+		        counter_ >= optionSpec_.maxFiles) counter_ = 0;
 	}
 
 private:
@@ -230,8 +234,41 @@ private:
 
 		if (str == "") return;
 
+		VectorStringType tokens;
+		PsimagLite::split(tokens, str, ",");
+		for (SizeType i = 0; i < tokens.size(); ++i)
+			procOneOption(tokens[i]);
+	}
+
+	/* PSIDOC RecoverySave
+	  This is a comma-separated list options; whitespace isn't allowed.
+	  Supported options are as follows.
+
+	  l%n, where n is a positive integer, and indicates that save occurs when
+	  the loop index is divisible by n. So, l%1 saves every loop.
+	  CAUTION: Loops that don't end at the end shouldn't be saved, because
+	  the minimum saving unit is a full sweep.
+
+	  no, which disables RecoverySave, and is assumed if RecoverySave= is
+	  absent from the input file. In other words, RecoverySave is disabled by default.
+
+	  keep, which keeps recovery files even if the run finishes normally.
+	  By default, all recovery files are deleted if the run finishes normally.
+
+	  M=n, where n is the maximum number of recovery files that will be saved, before
+	  the oldest file is overwritten. Defaults to 10.
+	 */
+	void procOneOption(PsimagLite::String str)
+	{
+		if (str == "") return;
+
 		if (str == "no") {
-			optionSpec_.optionEnum = DISABLED;
+			optionSpec_.optionEnum = OptionEnum::DISABLED;
+			return;
+		}
+
+		if (str == "keep") {
+			optionSpec_.keepFiles = true;
 			return;
 		}
 
@@ -239,9 +276,16 @@ private:
 
 		if (str[0] == 'l' && str[1] == '%') {
 			PsimagLite::String each = str.substr(2, str.length() - 2);
-			optionSpec_.optionEnum = BY_LOOP;
+			optionSpec_.optionEnum = OptionEnum::BY_LOOP;
 			optionSpec_.value = atoi(each.c_str());
 			std::cerr<<"Recovery by loop every "<<optionSpec_.value<<" loops\n";
+			return;
+		}
+
+		if (str[0] == 'M' && str[1] == '=') {
+			PsimagLite::String each = str.substr(2, str.length() - 2);
+			optionSpec_.maxFiles = atoi(each.c_str());
+			std::cerr<<"Recovery Max files= "<<optionSpec_.maxFiles<<"\n";
 			return;
 		}
 
