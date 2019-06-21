@@ -1,0 +1,69 @@
+TotalNumberOfSites=48
+NumberOfTerms=3
+
+DegreesOfFreedom=2
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 2 2
+1 0
+0 -1
+
+DegreesOfFreedom=2
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 2 2
+1 0
+0 -1
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 0
+
+Model=HeisenbergAncillaC
+HeisenbergTwiceS=1
+
+TargetElectronsTotal=24
+TargetSzPlusConst=48
+Threads=8
+
+InfiniteLoopKeptStates=data2101
+FiniteLoops 2
+46 400 2  -46 400 2 
+
+SolverOptions=CorrectionVectorTargeting,restart,twositedmrg
+CorrectionA=0
+Version=version
+
+RestartSourceTvForPsi=0
+RestartMappingTvs 4  -1 -1 -1 -1
+RestartMapStages=0
+
+OutputFile=data2102
+
+DynamicDmrgType=0
+TSPSites 1 23
+TSPLoops 1 0
+TSPProductOrSum=sum
+TSPEnergyForExp=0
+CorrectionVectorFreqType=Real
+
+CorrectionVectorEta=0.03
+CorrectionVectorAlgorithm=Krylov
+
+GsWeight=0.1
+CorrectionVectorOmega=2.000
+
+
+TSPOperator=raw
+RAW_MATRIX
+4 4
+-0.5 0 0 0
+0 -0.5 0 0
+0 0 0.5 0
+0 0 0 0.5
+FERMIONSIGN=1
+JMVALUES 2 0 0
+AngularFactor=1
+#ci dmrg arguments=-p 12 "<gs|sz|P0>,<gs|sz|P1>,<gs|sz|P2>,<gs|sz|P3>"
+#ci CollectBrakets 0
