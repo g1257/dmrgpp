@@ -224,7 +224,7 @@ sub getRestartFrom
 {
 	my ($file,$n) = @_;
 	open(FILE, "<", "$file") or die "$0: Cannot open $file : $!\n";
-	my ($so, $from);
+	my ($so, $from, $from2);
 	my $restart = 0;
 	while (<FILE>) {
 		chomp;
@@ -232,17 +232,20 @@ sub getRestartFrom
 			$so = $1;
 			last unless ($so =~ /restart/);
 			$restart = 1;
-			last if defined($from);
 		}
 
 		if (/RestartFilename=(.*$)/) {
 			$from = $1;
-			last if defined($so);
+		}
+
+		if (/InfiniteLoopKeptStates=(.*$)/) {
+			$from2 = $1;
 		}
 	}
 
 	close(FILE);
 	return "" if ($restart == 0);
+	$from = $from2 unless defined($from);
 	defined($from) or die "$0: restart test $n without RestartFilename\n";
 	return $from;
 }
