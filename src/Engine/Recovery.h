@@ -222,8 +222,7 @@ public:
 		// checkpoint stacks
 		checkpoint_.checkpointStacks(savedName);
 
-		if (counter_ >= checkpoint_.parameters().recoveryMaxFiles ||
-		        counter_ >= optionSpec_.maxFiles) counter_ = 0;
+		if (counter_ >= optionSpec_.maxFiles) counter_ = 0;
 	}
 
 private:

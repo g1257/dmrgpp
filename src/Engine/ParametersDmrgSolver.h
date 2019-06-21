@@ -151,7 +151,6 @@ struct ParametersDmrgSolver {
 	SizeType dumperBegin;
 	SizeType dumperEnd;
 	SizeType precision;
-	SizeType recoveryMaxFiles;
 	int useReflectionSymmetry;
 	bool autoRestart;
 	PairRealSizeType truncationControl;
@@ -192,7 +191,6 @@ struct ParametersDmrgSolver {
 		ioSerializer.write(root + "/insitu", insitu);
 		ioSerializer.write(root + "/fileForDensityMatrixEigs", fileForDensityMatrixEigs);
 		ioSerializer.write(root + "/recoverySave", recoverySave);
-		ioSerializer.write(root + "/recoveryMaxFiles", recoveryMaxFiles);
 		checkpoint.write(label + "/checkpoint", ioSerializer);
 		ioSerializer.write(root + "/adjustQuantumNumbers", adjustQuantumNumbers);
 		ioSerializer.write(root + "/finiteLoop", finiteLoop);
@@ -220,7 +218,6 @@ struct ParametersDmrgSolver {
 	      dumperBegin(0),
 	      dumperEnd(0),
 	      precision(6),
-	      recoveryMaxFiles(3),
 	      autoRestart(false),
 	      recoverySave("no"),
 	      adjustQuantumNumbers(0, QnType(false, VectorSizeType(), PairSizeType(0, 0), 0)),
@@ -330,10 +327,6 @@ struct ParametersDmrgSolver {
 
 		try {
 			io.readline(recoverySave,"RecoverySave=");
-		} catch (std::exception&) {}
-
-		try {
-			io.readline(recoveryMaxFiles,"RecoveryMaxFiles=");
 		} catch (std::exception&) {}
 
 		try {
@@ -578,7 +571,6 @@ struct ParametersDmrgSolver {
 		os<<p.finiteLoop;
 
 		os<<"RecoverySave="<<p.recoverySave<<"\n";
-		os<<"RecoveryMaxFiles="<<p.recoveryMaxFiles<<"\n";
 
 		if (p.truncationControl.first > 0) {
 			os<<"parameters.tolerance="<<p.truncationControl.first<<",";
