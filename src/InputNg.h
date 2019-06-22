@@ -156,6 +156,20 @@ public:
 
 		typedef Vector<String>::Type VectorStringType;
 
+		Writeable(const InputCheckType& inputCheck, String data)
+		    : data_(data),
+		      line_(0),
+		      state_(IN_LABEL),
+		      numericVector_(0),
+		      lastLabel_(""),
+		      file_(""),
+		      inputCheck_(inputCheck),
+		      verbose_(false),
+		      ainurMode_(false)
+		{
+			internal();
+		}
+
 		Writeable(const String& file,const InputCheckType& inputCheck)
 		    : data_(""),
 		      line_(0),
@@ -168,71 +182,6 @@ public:
 		      ainurMode_(false)
 		{
 			internal(file);
-		}
-
-		Writeable(const String& file,
-		          const InputCheckType& inputCheck,
-		          PsimagLite::String start,
-		          PsimagLite::String end)
-		    : data_(""),
-		      line_(0),
-		      state_(IN_LABEL),
-		      numericVector_(0),
-		      lastLabel_(""),
-		      file_(file),
-		      inputCheck_(inputCheck),
-		      verbose_(false),
-		      ainurMode_(false)
-		{
-			std::ifstream fin(file.c_str());
-			if (!fin || !fin.good() || fin.bad()) {
-				String s(__FILE__);
-				s += " Cannot open file " + file + "\n";
-				throw RuntimeError(s.c_str());
-			}
-
-			PsimagLite::String buffer = "";
-			int mode = 0;
-			while (!fin.eof()) {
-				PsimagLite::String str;
-				fin>>str;
-				if (str == start) {
-					mode = 1;
-					continue;
-				}
-
-				if (str == end) {
-					mode = 2;
-					break;
-				}
-
-				if (mode == 1) buffer += str;
-			}
-
-			if (mode == 0) {
-				internal(file);
-				return;
-			}
-
-			if (mode == 1) {
-				String s(__FILE__);
-				s += " File " + file + " contains " + start + " but no " + end +"\n";
-				throw RuntimeError(s.c_str());
-			}
-
-			assert(mode == 2);
-
-			PsiBase64::Decode base64decode(buffer);
-			data_ = base64decode();
-			changeAndParse();
-
-			if (verbose_) {
-				std::cout<<"START\n";
-				printMap(mapStrStr_,"StrStr");
-				std::cout<<"END\nSTART\n";
-				printMap(mapStrVec_,"StrVec");
-				std::cout<<"END\n";
-			}
 		}
 
 		void set(MapStrStrType& mapStrStr,
@@ -271,6 +220,11 @@ public:
 			}
 
 			fin.close();
+			internal();
+		}
+
+		void internal()
+		{
 			if (data_.size() > 2 && data_[0] == '#' && data_[1] == '#')
 				ainurMode_ = true;
 
