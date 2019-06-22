@@ -112,10 +112,7 @@ private:
 
 		replaceString(label, ttos(site));
 		InputCheck inputCheck;
-		PsimagLite::InputNg<InputCheck>::Writeable ioWriteable(label,
-		                                                       inputCheck,
-		                                                       "InputStartsHere",
-		                                                       "InputEndsHere");
+		PsimagLite::InputNg<InputCheck>::Writeable ioWriteable(label, inputCheck);
 		PsimagLite::InputNg<InputCheck>::Readable io(ioWriteable);
 
 		PsimagLite::String prefix = "";

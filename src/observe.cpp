@@ -187,11 +187,8 @@ int main(int argc,char **argv)
 
 	//Setup the Geometry
 	InputCheck inputCheck;
-	InputNgType::Writeable ioWriteable(filename,
-	                                   inputCheck,
-	                                   "InputStartsHere",
-	                                   "InputEndsHere");
-	InputNgType::Readable io(ioWriteable);
+	InputFromDataOrNot<InputCheck> inputFromDataOrNot(filename, inputCheck);
+	InputNgType::Readable io(inputFromDataOrNot.ioWriteable());
 
 	ParametersDmrgSolverType dmrgSolverParams(io,sOptions,false,true);
 
@@ -211,5 +208,6 @@ int main(int argc,char **argv)
 	} else {
 		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck, list);
 	}
+
 } // main
 

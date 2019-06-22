@@ -27,6 +27,7 @@
 #include "InputCheck.h"
 #include "ModelSelector.h"
 #include "ModelBase.h"
+#include "InputFromDataOrNot.h"
 
 namespace Dmrg {
 
