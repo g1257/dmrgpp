@@ -90,17 +90,43 @@ public:
 
 	LongRange() : linSize_(0), orbitals_(0), maxConnections_(0) {}
 
-	LongRange(SizeType linSize,InputType& io)
+	LongRange(SizeType linSize, InputType& io)
 	    : linSize_(linSize), maxConnections_(0)
 	{
-		io.read(matrix_, "Connectors");
-		assert(matrix_.rows()%linSize == 0);
-		orbitals_ = static_cast<SizeType>(matrix_.rows()/linSize);
+		bool hasEntangler = false;
+		typename Real<ComplexOrRealType>::Type entangler = 0;
+
+		try {	
+			io.readline(entangler, "GeometryEntangler=");
+			hasEntangler = true;
+		} catch (std::exception&) {}
+
+		if (hasEntangler) {
+			SizeType orbitals = 0;
+			io.readline(orbitals, "Orbitals=");
+			const SizeType n = orbitals*linSize;
+			matrix_.resize(n, n);
+			setEntangler(entangler);
+		} else {
+			io.read(matrix_, "Connectors");
+		}
+
+		if (matrix_.rows() != matrix_.cols())
+			std::cerr<<"WARNING: (LongRange) Connectors matrix isn't square\n";
+
+		if (matrix_.rows()%linSize != 0)
+			throw RuntimeError("FATAL: (LongRange) Connectors matrix " +
+			                   String("isn't divisible by number of sites\n"));
+
+		orbitals_ = matrix_.rows()/linSize;
+
 		try {
 			io.readline(maxConnections_,"GeometryMaxConnections=");
 		} catch (std::exception& e) {
-			std::cerr<<"Please add GeometryMaxConnections=0 or some other number\n";
-			throw e.what();
+			if (!hasEntangler) {
+				std::cerr<<"Please add GeometryMaxConnections=0 or some other number\n";
+				throw e.what();
+			}
 		}
 	}
 
@@ -185,14 +211,15 @@ public:
 		throw RuntimeError("LongRange::write(): unimplemented\n");
 	}
 
-	SizeType memResolv(MemResolv&,
-	                   SizeType,
-	                   String) const
-	{
-		throw RuntimeError("LongRange::memResolv(): unimplemented\n");
-	}
-
 private:
+
+	void setEntangler(ComplexOrRealType value)
+	{
+		const SizeType n = matrix_.rows();
+		for (SizeType i = 0; i < n; ++i)
+			for (SizeType j = 0; j < n; ++j)
+				matrix_(i, j) = (i == j) ? 0 : value;
+	}
 
 	SizeType linSize_;
 	SizeType orbitals_;

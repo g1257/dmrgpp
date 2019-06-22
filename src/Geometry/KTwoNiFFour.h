@@ -107,26 +107,6 @@ public:
 		std::cout<<"KTwoNiFFour: SIGN CHANGE="<<signChange_<<"\n";
 	}
 
-	SizeType memResolv(MemResolv& mres,
-	                   SizeType,
-	                   String msg) const
-	{
-		String str = msg;
-		str += "KTwoNiFFour";
-		const char* start = (const char *)this;
-		const char* end = (const char*)&linSize_;
-		SizeType total = end - start;
-		mres.push(MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
-
-		start = end;
-		end = (const char*)&signChange_;
-		total += mres.memResolv(&linSize_,end-start,str + " linSize");
-
-		mres.memResolv(&signChange_,sizeof(*this) - total,str + " signChange");
-
-		return sizeof(*this);
-	}
-
 	SizeType getVectorSize(SizeType) const
 	{
 		assert(false);

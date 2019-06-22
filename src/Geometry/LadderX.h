@@ -206,13 +206,6 @@ public:
 		throw RuntimeError("findReflection: unimplemented (sorry)\n");
 	}
 
-	SizeType memResolv(MemResolv&,
-	                   SizeType,
-	                   String) const
-	{
-		return 0;
-	}
-
 private:
 
 	LadderType ladder_; // owner

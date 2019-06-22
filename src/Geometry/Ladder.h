@@ -134,30 +134,6 @@ public:
 		ar & isPeriodicY_;
 	}
 
-	SizeType memResolv(MemResolv& mres,
-	                   SizeType,
-	                   String msg) const
-	{
-		String str = msg;
-		str += "Ladder";
-		const char* start = (const char *)this;
-		const char* end = (const char*)&linSize_;
-		SizeType total = end - start;
-		mres.push(MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
-
-		start = end;
-		end = (const char*)&leg_;
-		total += mres.memResolv(&linSize_,end-start,str + " linSize");
-
-		start = end;
-		end = (const char*)&isPeriodicY_;
-		total += mres.memResolv(&leg_,end-start,str + " leg");
-
-		mres.memResolv(&isPeriodicY_,sizeof(*this)-total, str + " isPeriodicY");
-
-		return sizeof(*this);
-	}
-
 	virtual SizeType maxConnections() const { return (isPeriodicX_) ? linSize_ : leg_ + 1; }
 
 	virtual SizeType dirs() const { return 2; }

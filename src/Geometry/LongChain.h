@@ -193,13 +193,6 @@ public:
 		throw RuntimeError("LongChain::write(): unimplemented\n");
 	}
 
-	SizeType memResolv(MemResolv&,
-	                   SizeType,
-	                   String) const
-	{
-		throw RuntimeError("LongChain::memResolv(): unimplemented\n");
-	}
-
 private:
 
 	SizeType linSize_;

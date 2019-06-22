@@ -121,39 +121,6 @@ public:
 		ar & ladder_;
 	}
 
-	SizeType memResolv(MemResolv& mres,
-	                   SizeType,
-	                   String msg) const
-	{
-		String str = msg;
-		str += "LadderBath";
-		const char* start = (const char *)this;
-		const char* end = (const char*)&linSize_;
-		SizeType total = end - start;
-		mres.push(MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
-
-		start = end;
-		end = (const char*)&bathSitesPerSite_;
-		total += mres.memResolv(&linSize_,end-start,str + " linSize");
-
-		start = end;
-		end = (const char*)&clusterSize_;
-		total += mres.memResolv(&bathSitesPerSite_,end-start,str + " bathSitesPerSite");
-
-		start = end;
-		end = (const char*)&ladder_;
-		total += mres.memResolv(&clusterSize_,end-start,str + " clusterSize");
-
-		mres.push(MemResolv::MEMORY_HEAPPTR,
-		          sizeof(*this) - total,
-		          &ladder_,
-		          str + " Ladder ptr");
-
-		mres.memResolv(ladder_);
-
-		return sizeof(*this);
-	}
-
 	virtual SizeType dirs() const { return 3; }
 
 	virtual SizeType length(SizeType) const

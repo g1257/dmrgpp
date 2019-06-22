@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define GEOMETRY_BASE_H
 
 #include "InputNg.h"
-#include "MemResolv.h"
 
 namespace PsimagLite {
 
@@ -102,10 +101,6 @@ public:
 	template<class Archive>
 	void write(Archive&, const unsigned int)
 	{}
-
-	virtual SizeType memResolv(MemResolv& mres,
-	                           SizeType x,
-	                           String msg) const = 0;
 
 	virtual SizeType dirs() const = 0;
 

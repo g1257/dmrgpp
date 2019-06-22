@@ -158,14 +158,6 @@ public:
 		ioSerializer.write(label + "/terms_", terms_);
 	}
 
-	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   String) const
-	{
-		return 0;
-	}
-
 	String label(SizeType i) const { return terms_[i]->label(); }
 
 	typename ProgramGlobalsType::ConnectionEnum connectionKind(SizeType smax,

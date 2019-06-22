@@ -178,13 +178,6 @@ public:
 	template<class Archive>
 	void write(Archive &, const unsigned int) {}
 
-	SizeType memResolv(MemResolv&,
-	                   SizeType,
-	                   String) const
-	{
-		return 0;
-	}
-
 private:
 
 	std::pair<bool, Dir> connectedInternal(SizeType ii1, SizeType ii2) const

@@ -101,22 +101,6 @@ public:
 		ar & linSize_;
 	}
 
-	SizeType memResolv(MemResolv& mres,
-	                   SizeType,
-	                   String msg) const
-	{
-		String str = msg;
-		str += "Star";
-		const char* start = (const char *)this;
-		const char* end = (const char*)&linSize_;
-		SizeType total = end - start;
-		mres.push(MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
-
-		mres.memResolv(&linSize_,sizeof(*this) - total,str + " linSize");
-
-		return sizeof(*this);
-	}
-
 	virtual SizeType maxConnections() const
 	{
 		return linSize_ - 1;
