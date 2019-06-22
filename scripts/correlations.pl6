@@ -22,7 +22,7 @@ sub MAIN($file, $label, $geometry, $sites, $label2?)
 	my @h = getDistancesAndPairs($geometry, $sites);
 	my $half = @h.elems;
 	for 0..^$half -> Int $distance {
-		
+
 		my @pairs = @h[$distance].list;
 		my $p = @pairs.elems;
 		my $sum = 0;
@@ -37,7 +37,7 @@ sub MAIN($file, $label, $geometry, $sites, $label2?)
 				die "$self: Undefined m3 of $i\n" if (!defined(@m3[$i]));
 				die "$self: Undefined m3 of $j\n" if (!defined(@m3[$j]));
 				$sum -= @m3[$i]*@m3[$j];
-			} 
+			}
 		}
 
 		$sum = abs($sum) if ($mode2);

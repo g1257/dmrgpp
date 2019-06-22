@@ -22,7 +22,7 @@ sub MAIN($file)
 sub writePlot(Int $rows, @m)
 {
 	my Int $cols = @m.elems;
-	
+
 	for 0..^$cols -> Int $col {
 		for 0..^$rows -> Int $row {
 			my $temp = @m[$col].list[$row];
@@ -48,7 +48,7 @@ sub readPlot(@m, $file)
 		if ($line eq "") {
 			my $rowsFound = @thisrow.elems;
 			if (defined($rows)) {
-				die "$myself: column with wrong n. of rows " ~ 
+				die "$myself: column with wrong n. of rows " ~
 				   " expected $rows, found $rowsFound\n"
 				  if ($rows != $rowsFound);
 			} else {

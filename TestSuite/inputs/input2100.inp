@@ -18,20 +18,8 @@ Connectors 2 2
 DegreesOfFreedom=1
 GeometryKind=LongRange
 GeometryOptions=none
-GeometryMaxConnections=0
-Connectors 12 12
-0 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
--1 0 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
--1 -1 0 -1 -1 -1 -1 -1 -1 -1 -1 -1
--1 -1 -1 0 -1 -1 -1 -1 -1 -1 -1 -1
--1 -1 -1 -1 0 -1 -1 -1 -1 -1 -1 -1
--1 -1 -1 -1 -1 0 -1 -1 -1 -1 -1 -1
--1 -1 -1 -1 -1 -1 0 -1 -1 -1 -1 -1
--1 -1 -1 -1 -1 -1 -1 0 -1 -1 -1 -1
--1 -1 -1 -1 -1 -1 -1 -1 0 -1 -1 -1
--1 -1 -1 -1 -1 -1 -1 -1 -1 0 -1 -1
--1 -1 -1 -1 -1 -1 -1 -1 -1 -1 0 -1
--1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 0
+GeometryEntangler=-1
+Orbitals=1
 
 Model=HeisenbergAncillaC
 HeisenbergTwiceS=1
