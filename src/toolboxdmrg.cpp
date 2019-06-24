@@ -6,6 +6,7 @@
 #include "ToolBox.h"
 #include "PsimagLite.h"
 #include "Qn.h"
+#include "InputFromDataOrNot.h"
 
 #ifndef USE_FLOAT
 typedef double RealType;
@@ -145,11 +146,8 @@ int main(int argc,char **argv)
 		inputCheck.checkFileOptions(toolOptions.extraOptions);
 	}
 
-	InputNgType::Writeable ioWriteable(toolOptions.filename,
-	                                   inputCheck,
-	                                   "InputStartsHere",
-	                                   "InputEndsHere");
-	InputNgType::Readable io(ioWriteable);
+	InputFromDataOrNot<InputCheck> inputFromDataOrNot(toolOptions.filename, inputCheck);
+	InputNgType::Readable io(inputFromDataOrNot.ioWriteable());
 
 	//! Read the parameters for this run
 	bool earlyExit = true;
