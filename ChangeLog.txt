@@ -1,3 +1,11 @@
+2019-06-25 Version 2.58
+
+* GetBraOrKet now in PsimagLite
+
+* Geometry LongRange supports Entangler
+
+* InputNg::Writeable can take data in string, and in file
+
 2019-05-20 Version 2.56
 
 * OneOperatorSpec moved to PsimagLite so that Lanczos++ can use it
