@@ -1,3 +1,26 @@
+2019-06-25 Version 5.58
+
+Scripts:
+
+* procOmegas writes out.space
+
+* OmegaUtils supports open boundary condition
+
+* fromOutSpace performs Fourier transform from out.space
+
+New features:
+
+* TargetingMultQ added
+
+* KondoEx added
+
+* RestartStruct takes new input lines
+
+* RecoverySave and Load supported only by loop
+
+* ./observe -f data.hd5
+can now be used instead of ./observe -f input.inp
+
 2019-05-20 Version 5.56
 
 Scripts:
