@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2015, UT-Battelle, LLC
+Copyright (c) 2009-2015-2019, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 5.]
@@ -139,7 +139,10 @@ public:
 	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
 	      geometry_(geometry)
-	{}
+	{
+		if (modelParameters_.potentialV.size() != ORBITALS*2*geometry.numberOfSites())
+			err("HubbardAncilla: potentialV.size must be equal to ORBITALS*2*numberOfSites\n");
+	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
