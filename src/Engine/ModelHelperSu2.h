@@ -117,6 +117,8 @@ public:
 	      su2reduced_(m,lrs)
 	{}
 
+	void clearThreadSelves() const {}
+
 	const SparseMatrixType& reducedOperator(char modifier,
 	                                        SizeType i,
 	                                        SizeType sigma,

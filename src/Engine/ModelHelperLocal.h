@@ -110,15 +110,16 @@ public:
 	typedef typename BasisType::QnType QnType;
 	typedef typename PsimagLite::Vector<typename PsimagLite::Vector<SparseMatrixType*>::Type>::Type
 	VectorVectorSparseMatrixType;
+	typedef PsimagLite::Concurrency ConcurrencyType;
 
 	ModelHelperLocal(SizeType m, const LeftRightSuperType& lrs)
 	    : m_(m),
 	      lrs_(lrs),
 	      buffer_(lrs_.left().size()),
-	      garbage_(PsimagLite::Concurrency::codeSectionParams.npthreads),
-	      seen_(PsimagLite::Concurrency::codeSectionParams.npthreads)
+	      garbage_(ConcurrencyType::codeSectionParams.npthreads),
+	      seen_(ConcurrencyType::codeSectionParams.npthreads)
 	{
-		PsimagLite::Concurrency::mutexInit(&mutex_);
+		ConcurrencyType::mutexInit(&mutex_);
 
 		createBuffer();
 		createAlphaAndBeta();
@@ -135,7 +136,12 @@ public:
 			}
 		}
 
-		PsimagLite::Concurrency::mutexDestroy(&mutex_);
+		ConcurrencyType::mutexDestroy(&mutex_);
+	}
+
+	void clearThreadSelves() const
+	{
+		threadSelves_.clear();
 	}
 
 	const SparseMatrixType& reducedOperator(char modifier,
@@ -163,11 +169,15 @@ public:
 		assert(modifier == 'C');
 		SizeType typeIndex = (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? 0 : 1;
 		SizeType packed = typeIndex + ii.first*2;
-		const SizeType threadSelf = PsimagLite::Concurrency::threadSelf();
+		const ConcurrencyType::PthreadtType threadSelf = ConcurrencyType::threadSelf();
 		const SizeType threadNum = threadNumberFromSelf(threadSelf);
 
+		if (garbage_.size() != seen_.size())
+			err("reducedOperator: FATAL: internal error\n");
+
 		if (garbage_.size() <= threadNum || seen_.size() <= threadNum)
-			err("reducedOperator: internal error\n");
+			err("reducedOperator: FATAL: " + ttos(threadNum) + " >= " +
+			    ttos(garbage_.size()) + "\n");
 
 		int indexOfSeen = PsimagLite::indexOrMinusOne(seen_[threadNum], packed);
 		if (indexOfSeen >= 0) {
@@ -180,6 +190,7 @@ public:
 		garbage_[threadNum].push_back(mc);
 		seen_[threadNum].push_back(packed);
 		mc->checkValidity();
+
 		return *mc;
 	}
 
@@ -484,20 +495,20 @@ private:
 		}
 	}
 
-	SizeType threadNumberFromSelf(SizeType threadSelf) const
+	SizeType threadNumberFromSelf(ConcurrencyType::PthreadtType threadSelf) const
 	{
-		PsimagLite::Concurrency::mutexLock(&mutex_);
+		ConcurrencyType::mutexLock(&mutex_);
+
 		int threadPreNum = PsimagLite::indexOrMinusOne(threadSelves_, threadSelf);
 		if (threadPreNum < 0) {
 			threadPreNum = threadSelves_.size();
 			threadSelves_.push_back(threadSelf);
 		}
 
-		PsimagLite::Concurrency::mutexUnlock(&mutex_);
+		ConcurrencyType::mutexUnlock(&mutex_);
 
 		return threadPreNum;
 	}
-
 
 	int m_;
 	const LeftRightSuperType& lrs_;
@@ -506,8 +517,8 @@ private:
 	typename PsimagLite::Vector<bool>::Type fermionSigns_;
 	mutable VectorVectorSparseMatrixType garbage_;
 	mutable typename PsimagLite::Vector<BlockType>::Type seen_;
-	mutable PsimagLite::Concurrency::MutexType mutex_;
-	mutable VectorSizeType threadSelves_;
+	mutable ConcurrencyType::MutexType mutex_;
+	mutable PsimagLite::Vector<ConcurrencyType::PthreadtType>::Type threadSelves_;
 }; // class ModelHelperLocal
 } // namespace Dmrg
 /*@}*/

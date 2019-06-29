@@ -26,7 +26,9 @@ public:
 	      y_(y),
 	      hc_(hc),
 	      xtemp_(ConcurrencyType::storageSize(ConcurrencyType::codeSectionParams.npthreads))
-	{}
+	{
+		hc_.modelHelper().clearThreadSelves();
+	}
 
 	void doTask(SizeType taskNumber ,SizeType threadNum)
 	{
