@@ -79,7 +79,6 @@ public:
 			x_[i] += x[i];
 	}
 
-
 	template<typename SomeConcurrencyType,typename SomeOtherConcurrencyType>
 	void sync(SomeConcurrencyType& conc,SomeOtherConcurrencyType& conc2)
 	{

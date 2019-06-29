@@ -104,26 +104,38 @@ public:
 	typedef typename BasisType::RealType RealType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef Link<SparseElementType> LinkType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorSparseElementType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
 	typedef typename BasisType::QnType QnType;
+	typedef typename PsimagLite::Vector<typename PsimagLite::Vector<SparseMatrixType*>::Type>::Type
+	VectorVectorSparseMatrixType;
 
 	ModelHelperLocal(SizeType m, const LeftRightSuperType& lrs)
 	    : m_(m),
 	      lrs_(lrs),
-	      buffer_(lrs_.left().size())
+	      buffer_(lrs_.left().size()),
+	      garbage_(PsimagLite::Concurrency::codeSectionParams.npthreads),
+	      seen_(PsimagLite::Concurrency::codeSectionParams.npthreads)
 	{
+		PsimagLite::Concurrency::mutexInit(&mutex_);
+
 		createBuffer();
 		createAlphaAndBeta();
 	}
 
 	~ModelHelperLocal()
 	{
-		SizeType n = garbage_.size();
+		const SizeType n = garbage_.size();
 		for (SizeType i = 0; i < n; ++i) {
-			delete garbage_[i];
-			garbage_[i] = 0;
+			const SizeType m = garbage_[i].size();
+			for (SizeType j = 0; j < m; ++j) {
+				delete garbage_[i][j];
+				garbage_[i][j] = 0;
+			}
 		}
+
+		PsimagLite::Concurrency::mutexDestroy(&mutex_);
 	}
 
 	const SparseMatrixType& reducedOperator(char modifier,
@@ -151,16 +163,22 @@ public:
 		assert(modifier == 'C');
 		SizeType typeIndex = (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? 0 : 1;
 		SizeType packed = typeIndex + ii.first*2;
-		int indexOfSeen = PsimagLite::indexOrMinusOne(seen_, packed);
+		const SizeType threadSelf = PsimagLite::Concurrency::threadSelf();
+		const SizeType threadNum = threadNumberFromSelf(threadSelf);
+
+		if (garbage_.size() <= threadNum || seen_.size() <= threadNum)
+			err("reducedOperator: internal error\n");
+
+		int indexOfSeen = PsimagLite::indexOrMinusOne(seen_[threadNum], packed);
 		if (indexOfSeen >= 0) {
-			assert(static_cast<SizeType>(indexOfSeen) < garbage_.size());
-			return *(garbage_[indexOfSeen]);
+			assert(static_cast<SizeType>(indexOfSeen) < garbage_[threadNum].size());
+			return *(garbage_[threadNum][indexOfSeen]);
 		}
 
 		SparseMatrixType* mc = new SparseMatrixType;
 		transposeConjugate(*mc, *m);
-		garbage_.push_back(mc);
-		seen_.push_back(packed);
+		garbage_[threadNum].push_back(mc);
+		seen_[threadNum].push_back(packed);
 		mc->checkValidity();
 		return *mc;
 	}
@@ -466,13 +484,30 @@ private:
 		}
 	}
 
+	SizeType threadNumberFromSelf(SizeType threadSelf) const
+	{
+		PsimagLite::Concurrency::mutexLock(&mutex_);
+		int threadPreNum = PsimagLite::indexOrMinusOne(threadSelves_, threadSelf);
+		if (threadPreNum < 0) {
+			threadPreNum = threadSelves_.size();
+			threadSelves_.push_back(threadSelf);
+		}
+
+		PsimagLite::Concurrency::mutexUnlock(&mutex_);
+
+		return threadPreNum;
+	}
+
+
 	int m_;
 	const LeftRightSuperType& lrs_;
 	typename PsimagLite::Vector<PsimagLite::Vector<int>::Type>::Type buffer_;
 	typename PsimagLite::Vector<SizeType>::Type alpha_,beta_;
 	typename PsimagLite::Vector<bool>::Type fermionSigns_;
-	mutable typename PsimagLite::Vector<SparseMatrixType*>::Type garbage_;
-	mutable BlockType seen_;
+	mutable VectorVectorSparseMatrixType garbage_;
+	mutable typename PsimagLite::Vector<BlockType>::Type seen_;
+	mutable PsimagLite::Concurrency::MutexType mutex_;
+	mutable VectorSizeType threadSelves_;
 }; // class ModelHelperLocal
 } // namespace Dmrg
 /*@}*/
