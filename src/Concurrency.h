@@ -98,7 +98,9 @@ public:
 	static CodeSectionParams codeSectionParams;
 
 #ifndef USE_PTHREADS
+
 	typedef int MutexType;
+	typedef SizeType PthreadtType;
 
 	static void mutexLock(MutexType*)
 	{}
@@ -112,12 +114,14 @@ public:
 	static void mutexDestroy(MutexType*)
 	{}
 
-	static SizeType threadSelf() { return 0; }
+	static PthreadtType threadSelf() { return 0; }
 
 #else
 
 	#include <pthread.h>
+
 	typedef pthread_mutex_t MutexType;
+	typedef pthread_t PthreadtType;
 
 	static void mutexInit(MutexType* mutex)
 	{
@@ -147,7 +151,7 @@ public:
 	// This ISN'T 0, 1, 2, ...
 	// it's a rather large number
 	// Only assured thing is its uniqueness per PROCESS
-	static SizeType threadSelf()
+	static PthreadtType threadSelf()
 	{
 		return pthread_self();
 	}
