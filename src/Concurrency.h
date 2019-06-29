@@ -112,6 +112,8 @@ public:
 	static void mutexDestroy(MutexType*)
 	{}
 
+	static SizeType threadSelf() { return 0; }
+
 #else
 
 	#include <pthread.h>
@@ -119,22 +121,35 @@ public:
 
 	static void mutexInit(MutexType* mutex)
 	{
-		pthread_mutex_init(mutex, 0);
+		if (pthread_mutex_init(mutex, 0) != 0)
+			std::cerr<<"WARNING: mutexInit returned non zero\n";
 	}
 
 	static void mutexDestroy(MutexType* mutex)
 	{
-		pthread_mutex_destroy(mutex);
+		if (pthread_mutex_destroy(mutex) != 0)
+			std::cerr<<"WARNING: mutexDestroy returned non zero\n";
 	}
 
 	static void mutexLock(MutexType* mutex)
 	{
-		pthread_mutex_lock(mutex);
+		if (pthread_mutex_lock(mutex) != 0)
+			std::cerr<<"WARNING: mutexLock returned non zero\n";
 	}
 
 	static void mutexUnlock(MutexType* mutex)
 	{
-		pthread_mutex_unlock(mutex);
+		if (pthread_mutex_unlock(mutex) != 0)
+			std::cerr<<"WARNING: mutexUnlock returned non zero\n";
+	}
+
+	// DON'T EVEN think of using this as a thread id
+	// This ISN'T 0, 1, 2, ...
+	// it's a rather large number
+	// Only assured thing is its uniqueness per PROCESS
+	static SizeType threadSelf()
+	{
+		return pthread_self();
 	}
 
 #endif

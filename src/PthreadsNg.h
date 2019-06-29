@@ -89,6 +89,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TypeToString.h"
 #include "CodeSectionParams.h"
 
+#ifdef __linux__
+#include <sys/types.h>
+#include <sys/syscall.h>
+#endif
+
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
