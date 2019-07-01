@@ -13,6 +13,7 @@ my ($templateInput,$site,$m,$GlobalNumberOfSites);
 my ($siteForSpectrum,$mForQ,$mMax,$wantsRealPart);
 my $zeroAtCenter = 0;
 my $isPeriodic = 0;
+my $nonNegativeOnly = 0;
 
 GetOptions('f=s' => \$templateInput,
            'S:i' => \$siteForSpectrum,
@@ -20,6 +21,7 @@ GetOptions('f=s' => \$templateInput,
            'p' => \$isPeriodic,
            'M:i' => \$mMax,
            'r' => \$wantsRealPart,
+		   'N' => \$nonNegativeOnly,
            'z' => \$zeroAtCenter) or die "$usage\n";
 
 (defined($templateInput) and defined($isPeriodic)) or die "$0: USAGE: $usage\n";
@@ -103,7 +105,7 @@ my $wantsRealOrImag = (defined($wantsRealPart)) ? "real" : "imag";
 my $omegaMax = $omega0 + $omegaStep * $omegaTotal;
 
 printSpectrumToColor($outSpectrum,$wantsRealOrImag,$geometry,$omegaMax);
-OmegaUtils::printGnuplot($outSpectrum, $geometry, $isPeriodic, $zeroAtCenter);
+OmegaUtils::printGnuplot($outSpectrum, $geometry, $isPeriodic, $zeroAtCenter, $nonNegativeOnly);
 
 close(LOGFILEOUT);
 print STDERR "$0: Log written to $logFile\n";

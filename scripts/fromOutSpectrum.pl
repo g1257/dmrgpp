@@ -5,8 +5,8 @@ use warnings;
 use Math::Trig;
 use lib ".";
 use OmegaUtils;
-my ($outSpectrum, $templateInput, $isPeriodic, $zeroAtCenter) = @ARGV;
-defined($templateInput) or die "USAGE: $0 out.spectrum inputFile [isPeriodic] [zeroAtCenter]\n";
+my ($outSpectrum, $templateInput, $isPeriodic, $zeroAtCenter, $nonNegativeOnly) = @ARGV;
+defined($templateInput) or die "USAGE: $0 out.spectrum inputFile [isPeriodic] [zeroAtCenter] [nonNegativeOnly]\n";
 defined($isPeriodic) or $isPeriodic = 0;
 defined($zeroAtCenter) or $zeroAtCenter = 0;
 
@@ -21,4 +21,4 @@ OmegaUtils::getLabels($hptr,$templateInput);
 
 my $geometry = {"name" => $geometryName, "leg" => $geometryLeg, "subname" => $geometrySubName};
 
-OmegaUtils::printGnuplot($outSpectrum, $geometry, $isPeriodic, $zeroAtCenter);
+OmegaUtils::printGnuplot($outSpectrum, $geometry, $isPeriodic, $zeroAtCenter, $nonNegativeOnly);

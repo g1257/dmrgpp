@@ -28,11 +28,13 @@ my $usage = "USAGE: $0 -f dollarizedInput [-m mu] [-p] [-z] minusSpectrum plusSp
 my $templateInput;
 my $isPeriodic;
 my $zeroAtCenter = 0;
+my $nonNegativeOnly = 0;
 my $mu;
 
 GetOptions('f=s' => \$templateInput,
            'm=f' => \$mu,
            'p' => \$isPeriodic,
+		   'N' => \$nonNegativeOnly,
            'z' => \$zeroAtCenter) or die "$usage\n";
 
 (defined($templateInput) and defined($isPeriodic)) or die "$usage\n";
@@ -72,7 +74,7 @@ my %specFull;
 addSpectrum(\%specFull, \%specMinus);
 addSpectrum(\%specFull, \%specPlus) if (defined($fpString));
 my $geometry = {"name" => $geometryName, "leg" => $geometryLeg};
-OmegaUtils::printGnuplot(\%specFull, $geometry,  $isPeriodic, $zeroAtCenter);
+OmegaUtils::printGnuplot(\%specFull, $geometry,  $isPeriodic, $zeroAtCenter, $nonNegativeOnly);
 OmegaUtils::printOffsetPlots("offset", \%specFull, $geometry,  $isPeriodic, $zeroAtCenter);
 
 exit(0) if (!defined($fpString));

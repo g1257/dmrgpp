@@ -32,7 +32,7 @@ sub getLabels
 
 sub printGnuplot
 {
-	my ($inFile, $geometry, $isPeriodic, $zeroAtCenter) = @_;
+	my ($inFile, $geometry, $isPeriodic, $zeroAtCenter, $nonNegativeOnly) = @_;
 	my $hasPrinted = 0;
 	open(FIN, "<", "$inFile") or die "$0: Cannot open $inFile : $!\n";
 
@@ -62,12 +62,12 @@ sub printGnuplot
 
 	close(FIN);
 
-	printGnuplotFromHash(\%h, $geometry, $isPeriodic, $zeroAtCenter);
+	printGnuplotFromHash(\%h, $geometry, $isPeriodic, $zeroAtCenter, $nonNegativeOnly);
 }
 
 sub printGnuplotFromHash
 {
-	my ($ptr, $geometry, $isPeriodic, $zeroAtCenter) = @_;
+	my ($ptr, $geometry, $isPeriodic, $zeroAtCenter, $nonNegativeOnly) = @_;
 
 	my ($factor, $fileIndices, $leg) = getGeometryDetails($geometry);
 
@@ -90,6 +90,7 @@ sub printGnuplotFromHash
 				my $q = getQ($m2 - $centerShift, $numberOfQs, $isPeriodic);
 				my $realPart = $aptr->[2*$m+1+2*$fileIndex*$numberOfQs];
 				my $imagPart = $aptr->[2*$m+2+2*$fileIndex*$numberOfQs];
+				$imagPart = 0 if ($nonNegativeOnly and $imagPart < 0);
 				print FOUT "$q $omega $realPart $imagPart\n";
 				print FOUT2 "$q $omega $imagPart\n";
 			}
