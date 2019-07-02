@@ -1,0 +1,68 @@
+
+# Feel free to add or edit yourself.
+# Follow format explained at the end of this file.
+
+* LICENSE
+All contributors have transfered copyright to UT-Battelle, LLC.
+See file LICENSE for details.
+
+* Current Contributors
+
+- G.~A.
+url here
+Core, Integration.
+
+- Ed D'Azevedo
+url here
+DMRG++: Kron Engine, GPU support via DmrgppPluginSc
+PsimagLite: linear algebra
+
+-  Wael R. Elwasif
+url here
+DMRG++: Performance
+
+- Jacek Herbrych
+url here
+DMRG++: Models
+
+- Nitin Kaushal
+url here
+DMRG++: Spin-orbit coupling models
+
+- Pontus Laurell
+url here
+DMRG++: Kitaev models
+
+- Alberto Nocera
+url here
+DMRG++: Core, Targets, Models, RIXS
+Lanczos++
+
+- Nirav Patel
+url here
+DMRG++: Various
+PsimagLite: LanczosSolver
+
+
+* Past Contributors
+
+- Khaled A. Al Hassanieh
+
+- Luis G. Dias Da Silva
+
+- Peter Doak
+
+- Anibal Lugo
+
+- Eduardo Ponce
+
+- Julian Rincon
+
+- Jesus Torres
+
+# File format should be
+# * Section Header
+# - Name
+# url line
+# description line
+
