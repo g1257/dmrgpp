@@ -171,6 +171,16 @@ public:
 		}
 	}
 
+	virtual PsimagLite::String oracle() const
+	{
+		const RealType ne = ModelBaseType::targetQuantum().qn(0).other[0];
+		const RealType nup = ModelBaseType::targetQuantum().qn(0).other[1];
+		const RealType ndown = ne - nup;
+		const RealType n = ModelBaseType::geometry().numberOfSites();
+		RealType energy = -nup*(n - nup) - ndown*(n - ndown);
+		return ModelBaseType::oracle(energy, " -Nup*(L-Nup) -Ndown*(L-Ndown)");
+	}
+
 protected:
 
 	void fillLabeledOperators(VectorQnType& qns)

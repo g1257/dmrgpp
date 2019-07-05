@@ -147,6 +147,14 @@ public:
 		io.write(label + "/hot_", hot_);
 	}
 
+	virtual PsimagLite::String oracle() const
+	{
+		const RealType ne = ModelBaseType::targetQuantum().qn(0).other[0];
+		const RealType n = ModelBaseType::geometry().numberOfSites();
+		RealType energy = -ne*(n - ne);
+		return ModelBaseType::oracle(energy, "-Ne*(L-Ne)");
+	}
+
 protected:
 
 	void fillLabeledOperators(VectorQnType& qns)

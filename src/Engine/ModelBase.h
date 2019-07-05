@@ -299,6 +299,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 	virtual SizeType differentTypesOfAtoms() const { return 1; }
 
+	virtual PsimagLite::String oracle() const { return ""; }
+
 	/**
 		The function \cppFunction{addHamiltonianConnection} implements
 		the Hamiltonian connection (e.g. tight-binding links in the case of the Hubbard Model
@@ -516,6 +518,16 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	InputValidatorType_& ioIn() const { return ioIn_; }
 
 protected:
+
+	PsimagLite::String oracle(const RealType& energy,
+	                          const PsimagLite::String formula) const
+	{
+		if (modelCommon_.params().options.find("TargetingAncilla") != PsimagLite::String::npos)
+			return "";
+
+		const PsimagLite::String s = " Oracle: " + ttos(energy) + " : " + formula;
+		return s;
+	}
 
 	static OpsLabelType& createOpsLabel(PsimagLite::String name,
 	                                    SizeType site = 0)

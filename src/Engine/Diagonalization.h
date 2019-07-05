@@ -315,8 +315,8 @@ private:
 			if (energySaved[i] < gsEnergy) gsEnergy = energySaved[i];
 
 		PsimagLite::OstringStream msg3;
-		msg3<<"Ground state energy= "<<gsEnergy;
-		progress_.printline(msg3,std::cout);
+		msg3<<"Ground state energy= "<<gsEnergy<<model_.oracle();
+		progress_.printline(msg3, std::cout);
 
 		if (verbose_ && PsimagLite::Concurrency::root())
 			std::cerr<<"About to calc gs vector\n";

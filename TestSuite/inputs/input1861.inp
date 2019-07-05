@@ -35,7 +35,7 @@ Version=version
 OutputFile=data1861.txt
 InfiniteLoopKeptStates=60
 FiniteLoops 4
-2 200 0 -2 200 0 -2 200 0  2 200 0
+2 200 2   -2 200 2   -2 200 2  2 200 2
 
 RepeatFiniteLoopsFrom=0
 RepeatFiniteLoopsTimes=10
