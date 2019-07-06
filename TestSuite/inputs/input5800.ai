@@ -4,7 +4,7 @@ NumberOfTerms=1;
 DegreesOfFreedom=3;
 GeometryKind="chain";
 GeometryOptions="ConstantValues";
-Connectors=[
+dir0:Connectors=[
 [-0.15, 0.0, 0.0],
 [0.0, -0.5, 0.0],
 [0.0, 0.0, -0.5]];
@@ -19,24 +19,24 @@ potentialV=[
 [0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8],
 [-0.05, -0.05, -0.05, -0.05, -0.05, -0.05, -0.05, -0.05],
 [-0.05, -0.05, -0.05, -0.05, -0.05, -0.05, -0.05, -0.05]];
-SpinOrbit=[
+matrix SpinOrbit=[
 [(0,0), (0,0), (0,0), (0,0), (0,0), (0,-0.1), (0,0), (0,0.1), (0,0)],
 [(0,0), (0,-0.1), (0.1,0), (0,0.1), (0,0), (0,0), (-0.1,0), (0,0), (0,0)],
 [(0,0), (0,-0.1), (-0.1,0), (0,0.1), (0,0), (0,0), (0.1,0), (0,0), (0,0)],
 [(0,0), (0,0), (0,0), (0,0), (0,0), (0,0.1), (0,0), (0,-0.1) (0,0)]];
-TargetElectronsTotal=30;
-TargetSzPlusConst=45;
-JzSymmetry=1;
-CorrectionA=0.005;
+int TargetElectronsTotal=30;
+int TargetSzPlusConst=45;
+int JzSymmetry=1;
+double CorrectionA=0.005;
 SolverOptions="CorrectionTargeting,useComplex,vectorwithoffsets";
 Version="version";
 OutputFile="data5800";
-AdjustQuantumNumbers=[22, 15, 34, 22];
+vector AdjustQuantumNumbers=[22, 15, 34, 22];
 InfiniteLoopKeptStates=70;
 FiniteLoops=[
 [ 3, 70, 0],
 [-6, 70, 0],
 [ 6, 70, 0]];
-LanczosEps=1e-6;
-LanczosSteps=200;
+real LanczosEps=1e-6;
+int LanczosSteps=200;
 Threads=4;
