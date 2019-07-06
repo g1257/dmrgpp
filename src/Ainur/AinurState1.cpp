@@ -24,6 +24,15 @@ ruleRows<DoubleOrFloatType>()
 
 template<>
 boost::spirit::qi::rule<std::string::iterator,
+std::vector<std::complex<DoubleOrFloatType> >(),
+boost::spirit::qi::space_type>
+ruleRows<std::complex<DoubleOrFloatType> >()
+{
+	return "[" >> -(boost::spirit::DoubleOrFloatUnderscore % ",") >> "]";
+}
+
+template<>
+boost::spirit::qi::rule<std::string::iterator,
 std::vector<SizeType>(),
 boost::spirit::qi::space_type>
 ruleRows<SizeType>()
@@ -52,6 +61,15 @@ boost::spirit::qi::rule<std::string::iterator,
 DoubleOrFloatType(),
 boost::spirit::qi::space_type>
 ruleElipsis<DoubleOrFloatType>()
+{
+	return  "[" >> boost::spirit::DoubleOrFloatUnderscore  >> "," >> "..." >> "]";
+}
+
+template<>
+boost::spirit::qi::rule<std::string::iterator,
+std::complex<DoubleOrFloatType>(),
+boost::spirit::qi::space_type>
+ruleElipsis<std::complex<DoubleOrFloatType> >()
 {
 	return  "[" >> boost::spirit::DoubleOrFloatUnderscore  >> "," >> "..." >> "]";
 }
@@ -211,7 +229,8 @@ void AinurState::convertInternal(Matrix<T>& t,
 template<typename T>
 void AinurState::convertInternal(std::vector<T>& t,
                                  String value,
-                                 typename EnableIf<Loki::TypeTraits<T>::isArith,
+                                 typename EnableIf<Loki::TypeTraits<T>::isArith ||
+                                 IsComplexNumber<T>::True,
                                  int>::Type) const
 {
 	namespace qi = boost::spirit::qi;
@@ -228,47 +247,6 @@ void AinurState::convertInternal(std::vector<T>& t,
 	bool r = qi::phrase_parse(it,
 	                          value.end(),
 	                          ruRows [actionRows] | ruElipsis[actionElipsis],
-	                          qi::space);
-
-	//check if we have a match
-	if (!r)
-		err("vector parsing failed\n");
-
-	if (it != value.end())
-		std::cerr << "vector parsing: unmatched part exists\n";
-}
-
-template<typename T>
-void AinurState::convertInternal(std::vector<std::complex<T> >& t,
-                                 String value,
-                                 typename EnableIf<Loki::TypeTraits<T>::isArith,
-                                 int>::Type) const
-{ 
-	namespace qi = boost::spirit::qi;
-	ActionCmplx actionRows1("rows1", t);
-	ActionCmplx actionRows2("rows2", t);
-	ActionCmplx actionRows3("rows3", t);
-
-#define MY_COMPLEX (qi::DoubleOrFloatUnderscore >> qi::DoubleOrFloatUnderscore >>  "i") [actionRows1] | (qi::DoubleOrFloatUnderscore >> "i") [actionRows2] | qi::DoubleOrFloatUnderscore [actionRows3]
-
-	typedef BOOST_TYPEOF(MY_COMPLEX) OneType;
-	typedef std::string::iterator IteratorType;
-
-	IteratorType it = value.begin();
-
-	OneType cmplxN =  MY_COMPLEX;
-#define MY_V_OF_COMPLEX "[" >> -(cmplxN  % ",") >> "]"
-	typedef BOOST_TYPEOF(MY_V_OF_COMPLEX) ManyTypes;
-	ManyTypes ruRows = MY_V_OF_COMPLEX;
-	//	qi::rule<IteratorType, std::complex<T>(), qi::space_type> ruElipsis =
-	//	        ruleElipsis<std::complex<T> >();
-
-
-	//Action<std::complex<T> > actionElipsis("elipsis", t);
-
-	bool r = qi::phrase_parse(it,
-	                          value.end(),
-	                          ruRows,// | ruElipsis[actionElipsis],
 	                          qi::space);
 
 	//check if we have a match
