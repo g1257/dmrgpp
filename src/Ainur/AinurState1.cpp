@@ -22,13 +22,98 @@ ruleRows<DoubleOrFloatType>()
 	return "[" >> -(boost::spirit::DoubleOrFloatUnderscore % ",") >> "]";
 }
 
+template<typename SomeRealType>
+class MyClass {
+
+public:
+
+	typedef std::complex<SomeRealType> value_type;
+
+	MyClass() : t1_(0), t2_(0), counter_(0) {}
+
+	explicit MyClass(const SomeRealType& r) : t1_(r), t2_(0), counter_(0) {}
+
+	value_type toComplex() const
+	{
+		return (counter_ < 2) ? t1_ : value_type(t1_, t2_);
+	}
+
+	int end() const { return 0; }
+
+	void insert(int, const SomeRealType& val)
+	{
+		if (counter_ == 0)
+			t1_ = val;
+		else if (counter_ == 1)
+			t2_ = val;
+		if (counter_ > 1)
+			err("Wrong complex\n");
+		++counter_;
+	}
+
+	void insert(int, const value_type& val)
+	{
+		err("Wrong complex ...\n");
+	}
+
+private:
+
+	SomeRealType t1_;
+	SomeRealType t2_;
+	SizeType counter_;
+};
+
+template<typename ComplexOrRealType, bool>
+struct MyProxyFor {
+	typedef ComplexOrRealType Type;
+
+	static void copy(ComplexOrRealType& dest, const ComplexOrRealType& src)
+	{
+		dest = src;
+	}
+
+	static void copy(std::vector<ComplexOrRealType>& dest,
+	                 const std::vector<ComplexOrRealType>& src)
+	{
+		dest = src;
+	}
+};
+
+template<typename ComplexOrRealType>
+struct MyProxyFor<ComplexOrRealType, true> {
+
+	typedef MyClass<typename Real<ComplexOrRealType>::Type> Type;
+
+	static void copy(std::vector<ComplexOrRealType>& dest,
+	                 const std::vector<Type>& src)
+	{
+		dest.clear();
+		const SizeType n = src.size();
+		if (n == 0) return;
+		dest.resize(n);
+		for (SizeType i = 0; i < n; ++i)
+			dest[i] = src[i].toComplex();
+	}
+
+	static void copy(std::vector<ComplexOrRealType>& dest,
+	                 const Type& src)
+	{
+		dest.push_back(src.toComplex());
+	}
+};
+
 template<>
 boost::spirit::qi::rule<std::string::iterator,
-std::vector<std::complex<DoubleOrFloatType> >(),
+std::vector<MyClass<DoubleOrFloatType> >(),
 boost::spirit::qi::space_type>
-ruleRows<std::complex<DoubleOrFloatType> >()
+ruleRows<MyClass<DoubleOrFloatType> >()
 {
-	return "[" >> -(boost::spirit::DoubleOrFloatUnderscore % ",") >> "]";
+	auto fl = boost::spirit::DoubleOrFloatUnderscore;
+	boost::spirit::qi::rule<std::string::iterator,
+	std::vector<MyClass<DoubleOrFloatType> >(),
+	boost::spirit::qi::space_type> myrule =  "[" >> -( ( fl  | "(" >> fl >> "," >> fl >> ")" )
+	            % ",") >> "]";
+	return myrule;
 }
 
 template<>
@@ -67,11 +152,18 @@ ruleElipsis<DoubleOrFloatType>()
 
 template<>
 boost::spirit::qi::rule<std::string::iterator,
-std::complex<DoubleOrFloatType>(),
+MyClass<DoubleOrFloatType>(),
 boost::spirit::qi::space_type>
-ruleElipsis<std::complex<DoubleOrFloatType> >()
+ruleElipsis<MyClass<DoubleOrFloatType> >()
 {
-	return  "[" >> boost::spirit::DoubleOrFloatUnderscore  >> "," >> "..." >> "]";
+	auto fl = boost::spirit::DoubleOrFloatUnderscore;
+	boost::spirit::qi::rule<std::string::iterator,
+	MyClass<DoubleOrFloatType>(),
+	boost::spirit::qi::space_type> myrule =  "[" >> (fl |
+	                (fl >> "i" >> fl) |
+	                ("i" >> fl))
+	            >> "," >> "..." >> "]";
+	return myrule;
 }
 
 template<>
@@ -160,7 +252,7 @@ AinurState::Action<T>::operator()(A& attr,
                                   ContextType&,
                                   bool&) const
 {
-	t_ = attr;
+	MyProxyFor<T, IsComplexNumber<T>::True>::copy(t_, attr);
 }
 
 template <typename A, typename ContextType>
@@ -235,11 +327,13 @@ void AinurState::convertInternal(std::vector<T>& t,
 {
 	namespace qi = boost::spirit::qi;
 	typedef std::string::iterator IteratorType;
-	typedef std::vector<T> LocalVectorType;
+	typedef typename MyProxyFor<T, IsComplexNumber<T>::True>::Type MyProxyForType;
+	typedef std::vector<MyProxyForType> LocalVectorType;
 
 	IteratorType it = value.begin();
-	qi::rule<IteratorType, LocalVectorType(), qi::space_type> ruRows = ruleRows<T>();
-	qi::rule<IteratorType, T(), qi::space_type> ruElipsis = ruleElipsis<T>();
+	qi::rule<IteratorType, LocalVectorType(), qi::space_type> ruRows = ruleRows<MyProxyForType>();
+	qi::rule<IteratorType, MyProxyForType(), qi::space_type> ruElipsis =
+	        ruleElipsis<MyProxyForType>();
 
 	Action<T> actionRows("rows", t);
 	Action<T> actionElipsis("elipsis", t);

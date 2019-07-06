@@ -78,10 +78,10 @@ print FH<<EOF;
 AinurSpirit.o: ../src/Ainur/AinurSpirit.cpp ../src/Ainur/AinurSpirit.h Makefile ../src/Ainur/AinurSpirit1.cpp
 \t\$(CXX) \$(CPPFLAGS) -c ../src/Ainur/AinurSpirit.cpp
 
-AinurState.o: ../src/Ainur/AinurState.cpp ../src/Ainur/AinurState.h Makefile 
+AinurState.o: ../src/Ainur/AinurState.cpp ../src/Ainur/AinurState1.cpp ../src/Ainur/AinurState.h Makefile 
 \t\$(CXX) \$(CPPFLAGS) -c ../src/Ainur/AinurState.cpp
 
-Makefile.dep: $combinedUnits2 ../src/Ainur/AinurSpirit.cpp ../src/Ainur/AinurState.cpp
+Makefile.dep: $combinedUnits2 ../src/Ainur/AinurSpirit.cpp ../src/Ainur/AinurState.cpp ../src/Ainur/AinurState1.cpp
 \t\$(CXX) \$(CPPFLAGS) -MM  $combinedUnits2  > Makefile.dep
 
 clean: Makefile.dep
