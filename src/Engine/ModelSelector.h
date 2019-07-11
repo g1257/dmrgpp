@@ -61,6 +61,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/FeAsBasedScExtended/FeAsBasedScExtended.h"
 #include "../Models/Immm/Immm.h"
 #include "../Models/TjMultiOrb/TjMultiOrb.h"
+#include "../Models/TjAnisotropic/TjAnisotropic.h"
 #include "../Models/TjAncillaC2/TjAncillaC2.h"
 #include "../Models/TjAncillaC/TjAncillaC.h"
 #include "../Models/TjAncillaG/TjAncillaG.h"
@@ -96,6 +97,7 @@ class ModelSelector {
 	typedef FeAsBasedScExtended<ModelBaseType> FeBasedScExtType;
 	typedef Immm<ModelBaseType> ImmmType;
 	typedef TjMultiOrb<ModelBaseType> TjMultiOrbType;
+	typedef TjAnisotropic<ModelBaseType> TjAnisotropicType;
 	typedef TjAncillaC2<ModelBaseType> TjAncillaC2Type;
 	typedef TjAncillaC<ModelBaseType> TjAncillaCType;
 	typedef TjAncillaG<ModelBaseType> TjAncillaGType;
@@ -149,6 +151,8 @@ public:
 			model_ = new ImmmType(solverParams,io,geometry);
 		} else if (name_ == "TjMultiOrb") {
 			model_ = new TjMultiOrbType(solverParams,io,geometry);
+		} else if (name_ == "TjAnisotropic") {
+			model_ = new TjAnisotropicType(solverParams,io,geometry);
 		} else if (name_ == "TjAncillaC2") {
 			model_ = new TjAncillaC2Type(solverParams,io,geometry);
 		} else if (name_ == "TjAncillaC") {

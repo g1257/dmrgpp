@@ -197,7 +197,7 @@ public:
 	}
 
 	template<typename SomeIoInType>
-	static void readVector(VectorQnType& vqns,
+    static void readVector(VectorQnType& vqns,
 	                       PsimagLite::String prefix,
 	                       SomeIoInType& io)
 	{
