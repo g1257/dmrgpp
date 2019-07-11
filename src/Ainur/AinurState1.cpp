@@ -4,6 +4,7 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include "AinurDoubleOrFloat.h"
+#include "AinurComplexHelper.h"
 
 namespace PsimagLite {
 
@@ -22,95 +23,15 @@ ruleRows<DoubleOrFloatType>()
 	return "[" >> -(boost::spirit::DoubleOrFloatUnderscore % ",") >> "]";
 }
 
-template<typename SomeRealType>
-class MyClass {
-
-public:
-
-	typedef std::complex<SomeRealType> value_type;
-
-	MyClass() : t1_(0), t2_(0), counter_(0) {}
-
-	explicit MyClass(const SomeRealType& r) : t1_(r), t2_(0), counter_(0) {}
-
-	value_type toComplex() const
-	{
-		return (counter_ < 2) ? t1_ : value_type(t1_, t2_);
-	}
-
-	int end() const { return 0; }
-
-	void insert(int, const SomeRealType& val)
-	{
-		if (counter_ == 0)
-			t1_ = val;
-		else if (counter_ == 1)
-			t2_ = val;
-		if (counter_ > 1)
-			err("Wrong complex\n");
-		++counter_;
-	}
-
-	void insert(int, const value_type& val)
-	{
-		err("Wrong complex ...\n");
-	}
-
-private:
-
-	SomeRealType t1_;
-	SomeRealType t2_;
-	SizeType counter_;
-};
-
-template<typename ComplexOrRealType, bool>
-struct MyProxyFor {
-	typedef ComplexOrRealType Type;
-
-	static void copy(ComplexOrRealType& dest, const ComplexOrRealType& src)
-	{
-		dest = src;
-	}
-
-	static void copy(std::vector<ComplexOrRealType>& dest,
-	                 const std::vector<ComplexOrRealType>& src)
-	{
-		dest = src;
-	}
-};
-
-template<typename ComplexOrRealType>
-struct MyProxyFor<ComplexOrRealType, true> {
-
-	typedef MyClass<typename Real<ComplexOrRealType>::Type> Type;
-
-	static void copy(std::vector<ComplexOrRealType>& dest,
-	                 const std::vector<Type>& src)
-	{
-		dest.clear();
-		const SizeType n = src.size();
-		if (n == 0) return;
-		dest.resize(n);
-		for (SizeType i = 0; i < n; ++i)
-			dest[i] = src[i].toComplex();
-	}
-
-	static void copy(std::vector<ComplexOrRealType>& dest,
-	                 const Type& src)
-	{
-		dest.push_back(src.toComplex());
-	}
-};
-
 template<>
 boost::spirit::qi::rule<std::string::iterator,
-std::vector<MyClass<DoubleOrFloatType> >(),
+std::vector<AinurComplexHelper<DoubleOrFloatType> >(),
 boost::spirit::qi::space_type>
-ruleRows<MyClass<DoubleOrFloatType> >()
+ruleRows<AinurComplexHelper<DoubleOrFloatType> >()
 {
 	auto fl = boost::spirit::DoubleOrFloatUnderscore;
 	boost::spirit::qi::rule<std::string::iterator,
-	std::vector<MyClass<DoubleOrFloatType> >(),
+	std::vector<AinurComplexHelper<DoubleOrFloatType> >(),
 	boost::spirit::qi::space_type> myrule =  "[" >> -( ( fl  | "(" >> fl >> "," >> fl >> ")" )
 	            % ",") >> "]";
 	return myrule;
@@ -152,13 +73,13 @@ ruleElipsis<DoubleOrFloatType>()
 
 template<>
 boost::spirit::qi::rule<std::string::iterator,
-MyClass<DoubleOrFloatType>(),
+AinurComplexHelper<DoubleOrFloatType>(),
 boost::spirit::qi::space_type>
-ruleElipsis<MyClass<DoubleOrFloatType> >()
+ruleElipsis<AinurComplexHelper<DoubleOrFloatType> >()
 {
 	auto fl = boost::spirit::DoubleOrFloatUnderscore;
 	boost::spirit::qi::rule<std::string::iterator,
-	MyClass<DoubleOrFloatType>(),
+	AinurComplexHelper<DoubleOrFloatType>(),
 	boost::spirit::qi::space_type> myrule =  "[" >> (fl |
 	                (fl >> "i" >> fl) |
 	                ("i" >> fl))
@@ -253,35 +174,6 @@ AinurState::Action<T>::operator()(A& attr,
                                   bool&) const
 {
 	MyProxyFor<T, IsComplexNumber<T>::True>::copy(t_, attr);
-}
-
-template <typename A, typename ContextType>
-typename EnableIf<TypesEqual<A, DoubleOrFloatType>::True, void>::Type
-AinurState::ActionCmplx::operator()(A& attr,
-                                    ContextType&,
-                                    bool&) const
-{
-	if (name_ == "rows2")
-		t_.push_back(std::complex<DoubleOrFloatType>(0.0, attr));
-	else if (name_ == "rows3")
-		t_.push_back(attr);
-	else
-		err("Error parsing complex number\n");
-}
-
-template <typename A, typename ContextType>
-typename EnableIf<!TypesEqual<A, DoubleOrFloatType>::True, void>::Type
-AinurState::ActionCmplx::operator()(A& attr,
-                                    ContextType&,
-                                    bool&) const
-{
-	if (name_ == "rows1") {
-		t_.push_back(std::complex<DoubleOrFloatType>(
-		                 boost::fusion::at_c<0>(attr),
-		                 boost::fusion::at_c<1>(attr)));
-	} else {
-		err("Error parsing complex number\n");
-	}
 }
 
 template<typename T>

@@ -24,29 +24,6 @@ class AinurState {
 		}
 	};
 
-	struct ActionCmplx {
-
-		ActionCmplx(String name, std::vector<ComplexType>& t)
-		    : name_(name), t_(t)
-		{}
-
-		template <typename A, typename ContextType>
-		typename EnableIf<TypesEqual<A, DoubleOrFloatType>::True, void>::Type
-		operator()(A& attr,
-		           ContextType&,
-		           bool&) const;
-
-		template <typename A, typename ContextType>
-		typename EnableIf<!TypesEqual<A, DoubleOrFloatType>::True, void>::Type
-		operator()(A& attr,
-		           ContextType&,
-		           bool&) const;
-
-
-		String name_;
-		std::vector<ComplexType>& t_;
-	};
-
 	template<typename T>
 	struct Action {
 
