@@ -367,13 +367,15 @@ private:
 		VectorSizeType indices(startEnd.second - startEnd.first);
 		for (SizeType i = 0; i < indices.size(); ++i) indices[i] = i + startEnd.first;
 
+		const bool isLastCall = true;
 		this->common().aoe().calcTimeVectors(indices,
 		                                     Eg,
 		                                     phi,
 		                                     systemOrEnviron,
 		                                     allOperatorsApplied,
 		                                     false, // don't wft or advance indices[0]
-		                                     block);
+		                                     block,
+		                                     isLastCall);
 		this->common().normalizeTimeVectors(startEnd.first+1,startEnd.second);
 	}
 

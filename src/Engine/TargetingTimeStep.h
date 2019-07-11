@@ -260,13 +260,16 @@ private:
 
 		VectorSizeType indices(startEnd.second - startEnd.first);
 		for (SizeType i = 0; i < indices.size(); ++i) indices[i] = i + startEnd.first;
+
+		const bool isLastCall = true;
 		this->common().aoe().calcTimeVectors(indices,
 		                                     Eg,
 		                                     phiNew,
 		                                     direction,
 		                                     allOperatorsApplied,
 		                                     false, // don't wft or advance indices[0]
-		                                     block1);
+		                                     block1,
+		                                     isLastCall);
 
 		bool doBorderIfBorder = false;
 		this->common().cocoon(block1, direction, doBorderIfBorder);

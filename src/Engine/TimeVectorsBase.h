@@ -115,17 +115,20 @@ public:
 		ExtraData(ProgramGlobals::DirectionEnum dir_,
 		          bool allOperatorsApplied_,
 		          bool wftAndAdvanceIfNeeded_,
-		          VectorSizeType block_)
+		          VectorSizeType block_,
+		          bool isLastCall_)
 		    : dir(dir_),
 		      allOperatorsApplied(allOperatorsApplied_),
 		      wftAndAdvanceIfNeeded(wftAndAdvanceIfNeeded_),
-		      block(block_)
+		      block(block_),
+		      isLastCall(isLastCall_)
 		{}
 
 		ProgramGlobals::DirectionEnum dir;
 		bool allOperatorsApplied;
 		bool wftAndAdvanceIfNeeded;
 		PsimagLite::Vector<SizeType>::Type block;
+		bool isLastCall;
 	};
 
 	virtual void calcTimeVectors(const VectorSizeType&,

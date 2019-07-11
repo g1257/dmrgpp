@@ -558,8 +558,8 @@ private:
 
 		assert(numberOfWeights > 0);
 		assert(indices.size() > 0 && indices2.size() > 0);
-		calcVectors(indices, Eg, direction, block1, !firstCall);
-		calcVectors(indices2, Eg, direction, block1, !firstCall);
+		calcVectors(indices, Eg, direction, block1, !firstCall, false);
+		calcVectors(indices2, Eg, direction, block1, !firstCall, true);
 		firstCall = false;
 		setWeights(numberOfWeights);
 	}
@@ -568,7 +568,8 @@ private:
 	                 RealType Eg,
 	                 ProgramGlobals::DirectionEnum direction,
 	                 const VectorSizeType& block1,
-	                 bool wftOrAdvance)
+	                 bool wftOrAdvance,
+	                 bool isLastCall)
 	{
 		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) &&
 		                            this->common().aoe().noStageIs(StageEnumType::OPERATOR));
@@ -581,7 +582,8 @@ private:
 		                                     direction,
 		                                     allOperatorsApplied,
 		                                     wftOrAdvance, // wft and advance indices[0]
-		                                     block1);
+		                                     block1,
+		                                     isLastCall);
 	}
 
 	void applyOneOp(SizeType loopNumber,

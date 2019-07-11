@@ -372,12 +372,14 @@ public:
 	                     ProgramGlobals::DirectionEnum direction,
 	                     bool allOperatorsApplied,
 	                     bool wftAndAdvanceIfNeeded,
-	                     const PsimagLite::Vector<SizeType>::Type& block)
+	                     const PsimagLite::Vector<SizeType>::Type& block,
+	                     bool isLastCall)
 	{
 		typename TimeVectorsBaseType::ExtraData extra(direction,
 		                                              allOperatorsApplied,
 		                                              wftAndAdvanceIfNeeded,
-		                                              block);
+		                                              block,
+		                                              isLastCall);
 		timeVectorsBase_->calcTimeVectors(indices,
 		                                  Eg,
 		                                  phi,

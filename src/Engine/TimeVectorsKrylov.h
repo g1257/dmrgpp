@@ -213,7 +213,7 @@ public:
 		calcTargetVectors(indices, phi, T, V, Eg, eigs, steps);
 
 		//checkNorms();
-		timeHasAdvanced_ = false;
+		if (extra.isLastCall) timeHasAdvanced_ = false;
 	}
 
 	void timeHasAdvanced()

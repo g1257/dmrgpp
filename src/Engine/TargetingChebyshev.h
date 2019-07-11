@@ -253,13 +253,15 @@ private:
 
 		assert(0 < block1.size());
 
+		bool isLastCall = true;
 		this->common().aoe().calcTimeVectors(indices,
 		                                     Eg,
 		                                     phiNew,
 		                                     direction,
 		                                     allOperatorsApplied,
 		                                     false, // don't wft or advance indices[0]
-		                                     block1);
+		                                     block1,
+		                                     isLastCall);
 
 		assert(phiNew.offset(0) == this->common().aoe().targetVectors()[1].offset(0));
 

@@ -157,7 +157,7 @@ public:
 		else return getReducedOperatorByIndex(i0+offset);
 	}
 
-	const SparseMatrixType& hamiltonian() const { return reducedHamiltonian_; }
+	const SparseMatrixType& hamiltonian()const { return reducedHamiltonian_; }
 
 	void setOperators(const typename PsimagLite::Vector<OperatorType>::Type& ops)
 	{
