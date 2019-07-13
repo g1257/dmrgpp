@@ -4,7 +4,7 @@
 #include "Vector.h"
 #include "PredicateAnd.h"
 
-namespace Dmrg {
+namespace PsimagLite {
 
 /* PSIDOC PredicateAwesome
  Comma-separated list of items, don't leave spaces:
@@ -49,7 +49,7 @@ namespace Dmrg {
 
  The predicate call is
  bool SpecType::isPredicateTrue(const VectorStringType& variables,
-                                const VectorSizeType& values)
+								const VectorSizeType& values)
  Only variables of type SizeType are supported for now.
 
  In the future we could use
@@ -67,10 +67,21 @@ class PredicateAwesome {
 
 public:
 
-	typedef PsimagLite::Vector<PredicateAnd>::Type VectorPredicateAndType;
+	typedef Vector<PredicateAnd>::Type VectorPredicateAndType;
+	typedef PredicateAnd::VectorStringType VectorStringType;
+
+	PredicateAwesome(String pred)
+	    : pred_(pred)
+	{
+		VectorStringType tokens;
+		split(tokens, pred, ",");
+		const SizeType n = tokens.size();
+		for (SizeType i = 0; i < n; ++i)
+			predicateAnd_.push_back(PredicateAnd(tokens[i]));
+	}
 
 	template<typename T>
-    bool isTrue(PsimagLite::String name, T val)
+	bool isTrue(String name, T val)
 	{
 		SizeType n = predicateAnd_.size();
 		for (SizeType i = 0; i < n; ++i)
@@ -80,8 +91,8 @@ public:
 
 private:
 
+	String pred_;
 	VectorPredicateAndType predicateAnd_;
-
 };
 }
 #endif // PREDICATE_AWESOME_H
