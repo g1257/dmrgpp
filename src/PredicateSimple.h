@@ -29,17 +29,19 @@ public:
 		if (n < 3) err("PredicateSimple: pred must have at least 3 characters\n");
 
 		for (SizeType i = 0; i < n - 1; ++i) {
-			String maybeOp = pred.substr(i, 1);
-			if (operatorLength(maybeOp) == 1) {
-				location = i;
-				length = 1;
-				break;
-			}
 
-			maybeOp = pred.substr(i, 2);
+			// order matters: test with LONGER FIRST
+			String maybeOp = pred.substr(i, 2);
 			if (operatorLength(maybeOp) == 2) {
 				location = i;
 				length = 2;
+				break;
+			}
+
+			maybeOp = pred.substr(i, 1);
+			if (operatorLength(maybeOp) == 1) {
+				location = i;
+				length = 1;
 				break;
 			}
 		}

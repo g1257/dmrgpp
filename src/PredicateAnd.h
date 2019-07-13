@@ -4,7 +4,7 @@
 #include "PredicateSimple.h"
 #include "PsimagLite.h"
 
-namespace Dmrg {
+namespace PsimagLite {
 
 /* PSIDOC PredicateAnd
  PredicateAnd is a semicolon-separated list of simple predicates,
@@ -17,18 +17,21 @@ class PredicateAnd {
 
 public:
 
-	typedef PsimagLite::Vector<PredicateSimple>::Type VectorPredicateSimpleType;
+	typedef Vector<PredicateSimple>::Type VectorPredicateSimpleType;
+	typedef PredicateSimple::VectorStringType VectorStringType;
 
-	PredicateAnd(PsimagLite::String pred)
+	PredicateAnd(String pred)
 	    : pred_(pred)
 	{
-		PsimagLite::split(tokens, str, ";");
+		VectorStringType tokens;
+		split(tokens, pred, ";");
+		const SizeType n = tokens.size();
 		for (SizeType i = 0; i < n; ++i)
-			vPredicateSimple_.push_back(PredicateSimple(str[i]));
+			vPredicateSimple_.push_back(PredicateSimple(tokens[i]));
 	}
 
 	template<typename T>
-    bool isTrue(PsimagLite::String name, T val)
+	bool isTrue(String name, T val)
 	{
 		SizeType n = vPredicateSimple_.size();
 		for (SizeType i = 0; i < n; ++i)
@@ -38,7 +41,7 @@ public:
 
 private:
 
-	PsimagLite::String pred_;
+	String pred_;
 	VectorPredicateSimpleType vPredicateSimple_;
 };
 }
