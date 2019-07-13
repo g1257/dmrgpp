@@ -56,22 +56,22 @@ struct IsNumber {
 };
 
 template<typename T>
-typename EnableIf<Loki::TypeTraits<T>::isFloat,T>::Type
+typename EnableIf<Loki::TypeTraits<T>::isArith,T>::Type
 real(T t) { return t; }
 
 template<typename T>
-typename EnableIf<Loki::TypeTraits<T>::isFloat,T>::Type
+typename EnableIf<Loki::TypeTraits<T>::isArith,T>::Type
 real(const std::complex<T>& t)
 {
 	return std::real(t);
 }
 
 template<typename T>
-typename EnableIf<Loki::TypeTraits<T>::isFloat,T>::Type
+typename EnableIf<Loki::TypeTraits<T>::isArith,T>::Type
 imag(T) { return 0.0; }
 
 template<typename T>
-typename EnableIf<Loki::TypeTraits<T>::isFloat,T>::Type
+typename EnableIf<Loki::TypeTraits<T>::isArith,T>::Type
 imag(const std::complex<T>& t)
 {
 	return std::imag(t);

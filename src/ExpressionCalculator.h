@@ -202,7 +202,7 @@ private:
 	}
 
 	template<typename T>
-	static typename EnableIf<Loki::TypeTraits<T>::isStdFloat,
+	static typename EnableIf<Loki::TypeTraits<T>::isArith,
 	T>::Type myExponential(T v)
 	{
 		return ::exp(v);
@@ -217,7 +217,7 @@ private:
 	}
 
 	template<typename T>
-	static typename EnableIf<Loki::TypeTraits<T>::isStdFloat,
+	static typename EnableIf<Loki::TypeTraits<T>::isArith,
 	T>::Type eToTheI(T x)
 	{
 		throw RuntimeError("eToTheI(" + ttos(x) + "): not unless T is complex\n");

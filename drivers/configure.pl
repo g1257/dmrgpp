@@ -44,7 +44,8 @@ sub createMakefile
 	continuedFractionCollection range kernelPolynomial fit
 	linearPrediction options randomTest svd testLapack threads loadImbalance testIsClass
 	testMemResolv1 sumDecomposition calculator closuresTest base64test checkRunId
-	testLanczos testExcitedLanczos testLanczosMatrixInFile nested testIoNg testIoNgBoolean affinityTest);
+	testLanczos testExcitedLanczos testLanczosMatrixInFile nested testIoNg testIoNgBoolean
+	affinityTest testPredicate);
 
 	my %args;
 	$args{"code"} = "PsimagLite/drivers";
