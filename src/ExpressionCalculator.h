@@ -193,6 +193,8 @@ private:
 		if (op[0] == '+') return values[0] + values[1];
 		if (op[0] == '-') return values[0] - values[1];
 		if (op[0] == '*') return values[0] * values[1];
+		if (op[0] == '%') return (static_cast<SizeType>(values[0]) %
+		        static_cast<SizeType>(values[1]));
 		if (op[0] == 'c') return cos(values[0]);
 		if (op[0] == 's') return sin(values[0]);
 		if (op[0] == '?') return (PsimagLite::real(values[0]) > 0) ? values[1] : values[2];
@@ -233,7 +235,7 @@ private:
 
 	static SizeType findAry(PsimagLite::String op)
 	{
-		if (op == "+" || op == "-" || op == "*") return 2;
+		if (op == "+" || op == "-" || op == "*" || op == "%") return 2;
 		if (op == "c" || op == "s" || op == "e" || op == "l" || op == "ei")
 			return 1;
 		if (op == "?") return 3;
