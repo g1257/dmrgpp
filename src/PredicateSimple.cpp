@@ -2,6 +2,6 @@
 
 namespace PsimagLite {
 PredicateSimple::VectorStringType PredicateSimple::ops_ =
-{"==", "<=", ">=", ">", "<", "%"};
+{"==", "!=", "<=", ">=", ">", "<", "%"};
 
 }

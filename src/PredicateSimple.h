@@ -46,6 +46,9 @@ public:
 			}
 		}
 
+		if (length == 0)
+			err("Could not find operator in predicate " + pred + "\n");
+
 		lhs_ = pred.substr(0, location);
 		op_ = pred.substr(location, length);
 		rhs_ = pred.substr(location + length, n - location - length);
@@ -66,8 +69,11 @@ private:
 	static bool compareOnOp(T lv, String op, T rv)
 	{
 		// {==, <, >, <=, >=, %}
+		// If you add something here, add it also to PredicateSimple.cpp
 		if (op == "==")
 			return (lv == rv);
+		if (op == "!=")
+			return (lv != rv);
 		if (op == "<")
 			return (lv < rv);
 		if (op == ">")
