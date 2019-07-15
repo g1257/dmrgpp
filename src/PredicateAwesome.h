@@ -3,6 +3,7 @@
 
 #include "Vector.h"
 #include "PredicateAnd.h"
+#include "PredicateDefaultSpec.h"
 
 namespace PsimagLite {
 
@@ -33,14 +34,10 @@ namespace PsimagLite {
  So l%2 means that the simple predicate is true if l is divisible by 2.
 
  From this rules, the list of items
- M=2,l%2;l!=0,l=7..11
-
+ M=2,l%2;l!=0,l>=7,l<11
  will set M=2 and define a predicate that is true if l
  is in the set {2, 4, 6, 7, 8, 9, 10, 12, 14, 16, 18 ...}
  and false otherwise.
- Had we used
- M=2,l%2;l!=0,l=7...11
- the range would have included 11.
 
  API via SpecType
 
@@ -48,21 +45,17 @@ namespace PsimagLite {
  S2 calls SpecType::set(String word1, String word2)
 
  The predicate call is
- bool SpecType::isPredicateTrue(const VectorStringType& variables,
-								const VectorSizeType& values)
- Only variables of type SizeType are supported for now.
 
- In the future we could use
  template<typename T>
- bool SpecType::isPredicateTrue(String name, T val)
+ bool isPredicateTrue(String name, T val)
 
  template<typename T1, typename T2>
- bool SpecType::isPredicateTrue(String name1, T1 val2, String name2, T2 val2)
+ bool isPredicateTrue(String name1, T1 val2, String name2, T2 val2)
 
- etc.
+ etc. Can we do this with varargs templates?? FIXME TODO
  */
 
-template<typename SpecType>
+template<typename SpecType = PredicateDefaultSpec>
 class PredicateAwesome {
 
 public:
