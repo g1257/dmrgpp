@@ -52,6 +52,8 @@ public:
 		lhs_ = pred.substr(0, location);
 		op_ = pred.substr(location, length);
 		rhs_ = pred.substr(location + length, n - location - length);
+		if (lhs_ == "" || rhs_ == "")
+			err("Left or right expression is empty\n");
 	}
 
 	template<typename T>
@@ -82,7 +84,7 @@ private:
 			return (lv <= rv);
 		if (op == ">=")
 			return (lv >= rv);
-		if (op == "%")
+		if (op == "%%")
 			return ((lv % rv) == 0);
 		throw RuntimeError("Unknown operator " + op + "\n");
 	}
