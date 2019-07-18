@@ -30,8 +30,8 @@ CPPFLAGS += -Wall -Wendif-labels
 compilerCPPOptions Werror = CPPFLAGS += -Werror
 
 # This enables additional debugging
-compilerCPPOptions AdditonalDebugging = (
-CPPFLAGS += -D_GLIBCXX_DEBUG -D_GLIBCXX_PROFILE
+compilerCPPOptions AdditionalDebugging = (
+CPPFLAGS += -D_GLIBCXX_DEBUG # -D_GLIBCXX_PROFILE
 )
 
 # This makes the code use long instead of short integers

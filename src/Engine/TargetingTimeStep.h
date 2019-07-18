@@ -274,9 +274,11 @@ private:
 		bool doBorderIfBorder = false;
 		this->common().cocoon(block1, direction, doBorderIfBorder);
 
-		printEnergies(); // in-situ
-
 		PsimagLite::String options = this->model().params().options;
+
+		if (options.find("noPrintHamiltonianAverage") == std::string::npos)
+			printEnergies(); // in-situ
+
 		bool normalizeTimeVectors =
 		        (options.find("normalizeTimeVectors") != std::string::npos);
 		if (options.find("TargetingAncilla") != std::string::npos)
