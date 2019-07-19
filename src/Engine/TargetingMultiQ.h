@@ -173,7 +173,10 @@ public:
 			VectorSizeType weights2(weights.size());
 			weights2[sectors[i]] = weights[sectors[i]];
 			VectorWithOffsetType vwo(weights2, basis);
-			this->common().initialGuess(vwo, block, noguess);
+			this->common().initialGuess(vwo,
+			                            this->common().aoe().targetVectors()[i],
+			                            block,
+			                            noguess);
 			vwo.extract(initialVector[i], sectors[i]);
 		}
 	}

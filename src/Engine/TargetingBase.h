@@ -217,7 +217,7 @@ public:
 	                          const BasisType& basis) const
 	{
 		VectorWithOffsetType vwo(weights, basis);
-		commonTargeting_.initialGuess(vwo, block, noguess);
+		commonTargeting_.initialGuess(vwo, commonTargeting_.aoe().psi(), block, noguess);
 		const SizeType n = vwo.sectors();
 		initialVector.resize(n);
 		for (SizeType i = 0; i < n; ++i)

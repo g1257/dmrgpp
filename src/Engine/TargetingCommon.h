@@ -427,12 +427,13 @@ public:
 	}
 
 	void initialGuess(VectorWithOffsetType& v,
+	                  const VectorWithOffsetType& psi,
 	                  const VectorSizeType& block,
 	                  bool noguess) const
 	{
 		PsimagLite::Vector<SizeType>::Type nk;
 		setNk(nk,block);
-		setInitialVector(v, aoe_.psi(), nk, noguess);
+		setInitialVector(v, psi, nk, noguess);
 	}
 
 	void computeCorrection(ProgramGlobals::DirectionEnum direction,
