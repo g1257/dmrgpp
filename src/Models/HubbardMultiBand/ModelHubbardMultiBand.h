@@ -646,29 +646,32 @@ private:
 		VectorOperatorType cm;
 		setOperatorMatricesInternal(cm, block);
 
-		SparseMatrixType m0m1;
-		SparseMatrixType m2m3;
-		SparseMatrixType m2m3t;
-		SparseMatrixType term;
+		MatrixType m0m1;
+		MatrixType m2m3;
+		MatrixType m2m3t;
+		MatrixType term;
+		MatrixType qxDense;
 		const RealType zeroPointFive = 0.5;
 		SizeType orbitals = modelParameters_.orbitals;
 		for (SizeType k0 = 0; k0 < orbitals; ++k0) {
-			const SparseMatrixType& m0 = cm[k0 + SPIN_DOWN*orbitals].data;
+			const MatrixType& m0 = cm[k0 + SPIN_DOWN*orbitals].data.toDense();
 			for (SizeType k1 = 0; k1 < orbitals; ++k1) {
-				const SparseMatrixType& m1 = cm[k1 + SPIN_UP*orbitals].data;
-				multiply(m0m1, m0, m1);
+				const MatrixType& m1 = cm[k1 + SPIN_UP*orbitals].data.toDense();
+				m0m1 = m0*m1;
 				for (SizeType k2 = 0; k2 < orbitals; ++k2) {
-					const SparseMatrixType& m2 = cm[k2 + SPIN_UP*orbitals].data;
+					const MatrixType& m2 = cm[k2 + SPIN_UP*orbitals].data.toDense();
 					SizeType k3 = (k0 + k1 + k2) % orbitals;
 
-					const SparseMatrixType& m3 = cm[k3 + SPIN_DOWN*orbitals].data;
-					multiply(m2m3, m3, m2);
+					const MatrixType& m3 = cm[k3 + SPIN_DOWN*orbitals].data.toDense();
+					m2m3 = m3*m2;
 					transposeConjugate(m2m3t, m2m3);
-					multiply(term, m2m3t, m0m1);
-					qx_ += zeroPointFive*term;
+					term = m2m3t * m0m1;
+					qxDense += zeroPointFive*term;
 				}
 			}
 		}
+
+		fullMatrixToCrsMatrix(qx_, qxDense);
 	}
 
 	ParamsModelType  modelParameters_;

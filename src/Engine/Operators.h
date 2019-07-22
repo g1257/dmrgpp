@@ -118,13 +118,14 @@ public:
 	typedef ReducedOperators<BasisType> ReducedOperatorsType;
 	typedef typename ReducedOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename ReducedOperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename OperatorType::StorageType StorageType;
+	typedef typename StorageType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef std::pair<SizeType,SizeType> PairSizeSizeType;
+	typedef PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
 
 	// law of the excluded middle went out the window here:
 	enum class ChangeAllEnum { UNSET, TRUE_SET, FALSE_SET};
@@ -202,7 +203,7 @@ public:
 		{
 			if (!hasMpi_) return;
 			for (SizeType i = 0; i < operators_.size(); i++)
-				Dmrg::bcast(operators_[i]);
+				bcast(operators_[i]);
 		}
 
 		ReducedOperatorsType& reducedOpImpl_;
@@ -327,7 +328,7 @@ public:
 	{
 		for (SizeType k=0;k<numberOfOperators();k++) {
 			if (!BasisType::useSu2Symmetry())
-				reorder(operators_[k].data,permutation);
+				reorder(operators_[k].data, permutation);
 			reducedOpImpl_.reorder(k,permutation);
 		}
 		reorder(hamiltonian_,permutation);

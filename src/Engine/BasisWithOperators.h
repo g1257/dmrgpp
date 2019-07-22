@@ -126,10 +126,11 @@ public:
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorsType::BasisType BasisType;
 	typedef typename BasisType::BlockType VectorSizeType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
+	typedef typename OperatorType::StorageType StorageType;
 	typedef BasisWithOperators<OperatorsType> ThisType;
 	typedef typename BasisType::FactorsType FactorsType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename StorageType::value_type ComplexOrRealType;
+	typedef typename PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
 

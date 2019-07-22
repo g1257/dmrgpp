@@ -20,7 +20,7 @@ class ModelLinks {
 	typedef typename LabeledOperatorsType::ComplexOrRealType ComplexOrRealType;
 	typedef typename LabeledOperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::RealType RealType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
+	typedef typename OperatorType::StorageType OperatorStorageType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename PsimagLite::Vector<typename LabelType::PairStringSizeType>::Type
 	VectorPairStringSizeType;
@@ -315,7 +315,7 @@ public:
 
 private:
 
-	static HermitianEnum getHermitianProperty(const SparseMatrixType& m)
+	static HermitianEnum getHermitianProperty(const OperatorStorageType& m)
 	{
 		if (isHermitian(m)) return HERMIT_PLUS;
 		return (isAntiHermitian(m)) ? HERMIT_MINUS : HERMIT_NEITHER;

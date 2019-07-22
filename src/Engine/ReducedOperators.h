@@ -91,8 +91,8 @@ class ReducedOperators {
 
 	typedef typename BasisType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
-	// typedef BlockOffDiagMatrix<MatrixDenseOrSparse<SparseMatrixType> > BlockOffDiagMatrixType;
-	typedef Operator<SparseMatrixType> OperatorType_;
+	typedef Operator<SparseElementType> OperatorType_;
+	typedef typename OperatorType_::StorageType OperatorStorageType;
 	typedef typename BasisType::RealType RealType;
 	typedef typename OperatorType_::PairType PairType;
 	typedef ClebschGordanCached<RealType> ClebschGordanType;

@@ -15,8 +15,8 @@ class FeAsJzSymmetry {
 public:
 
 	typedef typename VectorOperatorType::value_type OperatorType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename OperatorType::StorageType OperatorStorageType;
+	typedef typename OperatorStorageType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
@@ -46,8 +46,8 @@ class FeAsJzSymmetry<HilbertBasisType,VectorOperatorType, true> {
 public:
 
 	typedef typename VectorOperatorType::value_type OperatorType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename OperatorType::StorageType OperatorStorageType;
+	typedef typename OperatorStorageType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
@@ -425,26 +425,10 @@ private:
 
 	void Rotate_all(const MatrixType& R, VectorOperatorType& creationMatrix)
 	{
-
-		SizeType nrow;
-		SparseMatrixType R_crs;
-		SparseMatrixType R_dagg_crs;
-		SparseMatrixType tmp_crs;
-
-		for(SizeType i=0;i<creationMatrix.size();i++){
-			nrow = creationMatrix[i].data.rows();
-			R_crs.resize(nrow,nrow);
-			R_dagg_crs.resize(nrow,nrow);
-			tmp_crs.resize(nrow,nrow);
-
-			fullMatrixToCrsMatrix(R_crs, R);
-			transposeConjugate(R_dagg_crs,R_crs);
-
-			multiply(tmp_crs,creationMatrix[i].data,R_crs);
-			multiply(creationMatrix[i].data,R_dagg_crs,tmp_crs);
-
-
-
+		for(SizeType i = 0; i < creationMatrix.size(); ++i){
+			MatrixType tmp = creationMatrix[i].data.toDense()*R;
+			MatrixType tmp2 = multiplyTransposeConjugate(R, tmp);
+			fullMatrixToCrsMatrix(creationMatrix[i].data, tmp2);
 		}
 	}
 

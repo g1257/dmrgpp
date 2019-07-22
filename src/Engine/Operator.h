@@ -89,24 +89,45 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CanonicalExpression.h"
 #include "Io/IoSerializerStub.h"
 #include "ProgramGlobals.h"
+#ifdef USE_OPERATOR_STORAGE
+#include "OperatorStorage.h"
+#endif
 
 namespace Dmrg {
 
 // This is a structure, don't add member functions here!
-template<typename StorageType_>
+template<typename ComplexOrRealType>
 struct Operator {
 
 	enum {CAN_BE_ZERO = false, MUST_BE_NONZERO = true};
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef StorageType_ StorageType;
-	typedef typename StorageType::value_type value_type;
+	typedef ComplexOrRealType value_type;
+	typedef PsimagLite::CrsMatrix<value_type> SparseMatrixType;
 	typedef typename PsimagLite::Real<value_type>::Type RealType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef Su2Related Su2RelatedType;
 	typedef PsimagLite::Matrix<value_type> DenseMatrixType;
 
 	Operator() : fermionOrBoson(ProgramGlobals::FermionOrBosonEnum::BOSON), angularFactor(1) {}
+
+#ifdef USE_OPERATOR_STORAGE
+	typedef OperatorStorage<ComplexOrRealType> StorageType;
+
+	Operator(const SparseMatrixType& data1,
+	         ProgramGlobals::FermionOrBosonEnum fermionSign1,
+	         const PairType& jm1,
+	         RealType angularFactor1,
+	         const Su2RelatedType& su2Related1)
+	    : data(data1),
+	      fermionOrBoson(fermionSign1),
+	      jm(jm1),
+	      angularFactor(angularFactor1),
+	      su2Related(su2Related1)
+	{}
+#else
+	typedef SparseMatrixType StorageType;
+#endif
 
 	Operator(const StorageType& data1,
 	         ProgramGlobals::FermionOrBosonEnum fermionSign1,
