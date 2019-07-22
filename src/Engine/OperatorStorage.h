@@ -35,7 +35,7 @@ public:
 		throw PsimagLite::RuntimeError("OperatorStorage::ctor(SparseMatrixType)\n");
 	}
 
-	void makeDiagonal(SizeType rows) // replace this by a ctor
+	void makeDiagonal(SizeType rows, ComplexOrRealType value = 1) // replace this by a ctor
 	{
 		throw PsimagLite::RuntimeError("OperatorStorage::makeDiagonal\n");
 	}
@@ -50,9 +50,24 @@ public:
 		throw PsimagLite::RuntimeError("OperatorStorage::operator*=\n");
 	}
 
+	void fromCRS(const SparseMatrixType&)
+	{
+		throw PsimagLite::RuntimeError("OperatorStorage::fromCRS\n");
+	}
+
 	MatrixType toDense() const
 	{
 		throw PsimagLite::RuntimeError("OperatorStorage::toDense\n");
+	}
+
+	SparseMatrixType toCRS() const
+	{
+		throw PsimagLite::RuntimeError("OperatorStorage::toCRS\n");
+	}
+
+	SizeType nonZeros() const
+	{
+		throw PsimagLite::RuntimeError("OperatorStorage::nonZeros\n");
 	}
 
 	SizeType rows() const
@@ -65,6 +80,14 @@ template<typename ComplexOrRealType>
 OperatorStorage<ComplexOrRealType>
 operator*(const typename OperatorStorage<ComplexOrRealType>::RealType& value,
           const OperatorStorage<ComplexOrRealType>& storage)
+{
+	throw PsimagLite::RuntimeError("OperatorStorage: operator*\n");
+}
+
+template<typename ComplexOrRealType>
+OperatorStorage<ComplexOrRealType>
+operator*(const OperatorStorage<ComplexOrRealType>&,
+          const OperatorStorage<ComplexOrRealType>&)
 {
 	throw PsimagLite::RuntimeError("OperatorStorage: operator*\n");
 }
@@ -121,6 +144,22 @@ bool isAntiHermitian(const OperatorStorage<ComplexOrRealType>&)
 	throw PsimagLite::RuntimeError("OperatorStorage: isHermitian\n");
 }
 
+template<typename ComplexOrRealType>
+bool isTheIdentity(const OperatorStorage<ComplexOrRealType>&)
+{
+	throw PsimagLite::RuntimeError("OperatorStorage: isTheIdentity\n");
+}
+
+// See CrsMatrix.h line 734
+template<typename T>
+void externalProduct2(OperatorStorage<T>& B,
+                      const OperatorStorage<T>& A,
+                      SizeType nout,
+                      const typename PsimagLite::Vector<typename PsimagLite::Real<T>::Type>::Type& signs,
+                      bool order)
+{
+	throw PsimagLite::RuntimeError("OperatorStorage: externalProduct\n");
+}
 } // namespace PsimagLite
 
 #endif // OPERATORSTORAGE_H

@@ -12,14 +12,14 @@ template<typename ModelType,
 class OperatorSpec {
 
 	typedef typename ModelType::OperatorType OperatorType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
+	typedef typename OperatorType::StorageType OperatorStorageType;
 	typedef LazyAlgebra<typename ModelType::OperatorType> LazyAlgebraType;
 	typedef PsimagLite::OneOperatorSpec OneOperatorSpecType;
 
 public:
 
 	typedef AlgebraType ResultType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename OperatorStorageType::value_type ComplexOrRealType;
 	typedef int AuxiliaryType;
 
 	OperatorSpec(const ModelType& model)
@@ -89,7 +89,7 @@ private:
 	OperatorType specialOperator(SizeType site, ComplexOrRealType value) const
 	{
 		SizeType rows = model_.hilbertSize(site);
-		SparseMatrixType tmp(rows,rows);
+		OperatorStorageType tmp;
 		tmp.makeDiagonal(rows, value);
 		typename OperatorType::Su2RelatedType su2Related;
 		return OperatorType(tmp,

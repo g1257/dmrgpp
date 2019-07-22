@@ -192,7 +192,7 @@ public:
 				}
 			}
 
-			createReducedOperator(reducedOperators_[i].data,opSrc);
+			createReducedOperator(reducedOperators_[i].data, opSrc);
 			reducedOperators_[i].fermionOrBoson=opSrc[0]->fermionOrBoson;
 			reducedOperators_[i].jm=opSrc[0]->jm;
 			reducedOperators_[i].angularFactor=opSrc[0]->angularFactor;
@@ -218,15 +218,17 @@ public:
 		if (!useSu2Symmetry_) return;
 		findBasisInverse();
 		SizeType angularMomentum =0;
-		VectorPointerOperatorType opSrc(angularMomentum+1);
+		VectorPointerOperatorType opSrc(angularMomentum + 1);
 
-		OperatorType myOp;
-		myOp.data = hamiltonian;
-		myOp.fermionOrBoson = ProgramGlobals::FermionOrBosonEnum::BOSON;
-		myOp.jm=typename OperatorType::PairType(0,0);
-		myOp.angularFactor = 1.0;
-		opSrc[0]=&myOp;
-		createReducedOperator(reducedHamiltonian_,opSrc);
+		Su2Related su2Related;
+		OperatorType myOp(hamiltonian,
+		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                  typename OperatorType::PairType(0, 0),
+		                  1.0,
+		                  su2Related);
+
+		opSrc[0] = &myOp;
+		createReducedOperator(reducedHamiltonian_, opSrc);
 	}
 
 	void setToProduct(const BasisType& basis2,
@@ -538,11 +540,13 @@ private:
 	}
 
 	void createReducedConj(SizeType k1,
-	                       SparseMatrixType& opDest,
-	                       const SparseMatrixType& opSrc)
+	                       OperatorStorageType& opDest1,
+	                       const OperatorStorageType& opSrc1)
 	{
-		//			SizeType n=opSrc.rank();
-		transposeConjugate(opDest,opSrc);
+		SparseMatrixType opSrc;
+		toCRS(opSrc, opSrc1);
+		SparseMatrixType opDest;
+		transposeConjugate(opDest, opSrc);
 		for (SizeType i=0;i<opSrc.rows();i++) {
 			PairType jm = thisBasis_->jmValue(thisBasis_->reducedIndex(i));
 			for (int k=opDest.getRowPtr(i);k<opDest.getRowPtr(i+1);k++) {
@@ -558,26 +562,29 @@ private:
 				opDest.setValues(k,val);
 			}
 		}
+
+		fromCRS(opDest1, opDest);
 	}
 
-	void createReducedOperator(SparseMatrixType& opDest,
+	void createReducedOperator(OperatorStorageType& opDest,
 	                           const VectorPointerOperatorType& opSrc)
 	{
 		SizeType n = thisBasis_->reducedSize();
 		DenseMatrixType opDest1(n,n);
 		for (SizeType i=0;i<opSrc.size();i++)
 			createReducedOperator(opDest1,*opSrc[i]);
-		fullMatrixToCrsMatrix(opDest,opDest1);
+		fullMatrixToCrsMatrix(opDest, opDest1);
 	}
 
 	void createReducedOperator(DenseMatrixType& opDest1,const OperatorType& opSrc)
 	{
-		DenseMatrixType opSrcDense;
-		crsMatrixToFullMatrix(opSrcDense, opSrc.data);
+		const DenseMatrixType opSrcDense = opSrc.data.toDense();
+		SparseMatrixType opSrcCRS;
+		fullMatrixToCrsMatrix(opSrcCRS, opSrcDense);
 		for (SizeType i=0;i<opSrc.data.rows();i++) {
 			PairType jm = thisBasis_->jmValue(i);
-			for (int l=opSrc.data.getRowPtr(i);l<opSrc.data.getRowPtr(i+1);l++) {
-				SizeType iprime = opSrc.data.getCol(l);
+			for (int l=opSrcCRS.getRowPtr(i);l<opSrcCRS.getRowPtr(i+1);l++) {
+				SizeType iprime = opSrcCRS.getCol(l);
 				PairType jmPrime = thisBasis_->jmValue(iprime);
 				RealType divisor = opSrc.angularFactor*(jmPrime.first+1);
 				opDest1(basisrinverse_[i],basisrinverse_[iprime]) +=
@@ -925,7 +932,7 @@ private:
 	PsimagLite::Vector<SizeType>::Type momentumOfOperators_;
 	PsimagLite::Vector<SizeType>::Type basisrinverse_;
 	typename PsimagLite::Vector<OperatorType>::Type reducedOperators_;
-	SparseMatrixType reducedHamiltonian_;
+	OperatorStorageType reducedHamiltonian_;
 	SizeType j1Max_;
 	SizeType j2Max_;
 	VectorVectorType lfactorLeft_;

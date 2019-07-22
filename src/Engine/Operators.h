@@ -328,10 +328,11 @@ public:
 	{
 		for (SizeType k=0;k<numberOfOperators();k++) {
 			if (!BasisType::useSu2Symmetry())
-				reorder(operators_[k].data, permutation);
+				reorder2(operators_[k].data, permutation);
 			reducedOpImpl_.reorder(k,permutation);
 		}
-		reorder(hamiltonian_,permutation);
+
+		reorder2(hamiltonian_,permutation);
 		reducedOpImpl_.reorderHamiltonian(permutation);
 	}
 
@@ -383,7 +384,12 @@ public:
 	                     ApplyFactorsType& apply)
 	{
 		assert(!BasisType::useSu2Symmetry());
-		PsimagLite::externalProduct(operators_[i].data,m.data,x,fermionicSigns,option);
+#ifndef USE_OPERATOR_STORAGE
+		PsimagLite::externalProduct
+#else
+		externalProduct2
+#endif
+		        (operators_[i].data,m.data,x,fermionicSigns,option);
 		// don't forget to set fermion sign and j:
 		operators_[i].fermionOrBoson=m.fermionOrBoson;
 		operators_[i].jm=m.jm;
@@ -495,7 +501,7 @@ public:
 
 private:
 
-	void reorder(SparseMatrixType &v,const   VectorSizeType& permutation)
+	void reorder2(SparseMatrixType &v,const   VectorSizeType& permutation)
 	{
 		if (v.rows() == 0 || v.cols() == 0) {
 			assert(v.rows() == 0 && v.cols() == 0);

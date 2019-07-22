@@ -91,6 +91,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #ifdef USE_OPERATOR_STORAGE
 #include "OperatorStorage.h"
+#else
+template<typename T>
+void fromCRS(PsimagLite::CrsMatrix<T>& dest, const PsimagLite::CrsMatrix<T>& src)
+{
+	dest = src;
+}
+
+template<typename T>
+void toCRS(PsimagLite::CrsMatrix<T>& dest, const PsimagLite::CrsMatrix<T>& src)
+{
+	dest = src;
+}
 #endif
 
 namespace Dmrg {
@@ -346,8 +358,7 @@ struct Operator {
 		if (metaDiff(other) > 0)
 			err("operator+= failed for Operator: metas not equal\n");
 
-		StorageType crs;
-		multiply(crs, data, other.data);
+		StorageType crs = data*other.data;
 		data = crs;
 
 		int fsOther = (other.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1
