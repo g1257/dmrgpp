@@ -425,8 +425,8 @@ public:
 
 	void outerProductHamiltonianReduced(const BasisType& basis2,
 	                                    const BasisType& basis3,
-	                                    const SparseMatrixType& h2,
-	                                    const SparseMatrixType& h3)
+	                                    const StorageType& h2,
+	                                    const StorageType& h3)
 	{
 		reducedOpImpl_.outerProductHamiltonian(basis2,basis3,h2,h3);
 	}
@@ -439,7 +439,7 @@ public:
 
 	const SparseMatrixType& hamiltonian() const { return hamiltonian_; }
 
-	const SparseMatrixType& reducedHamiltonian() const
+	const StorageType& reducedHamiltonian() const
 	{
 		return reducedOpImpl_.hamiltonian();
 	}
@@ -513,6 +513,18 @@ private:
 		permute(matrixTmp,v,permutation);
 		permuteInverse(v,matrixTmp,permutation);
 	}
+
+#ifdef USE_OPERATOR_STORAGE
+	void reorder2(StorageType& v, const VectorSizeType& permutation)
+	{
+		if (v.rows() == 0 || v.cols() == 0) {
+			assert(v.rows() == 0 && v.cols() == 0);
+			return;
+		}
+
+		err("Operators.h: reorder2\n");
+	}
+#endif
 
 	static void printChangeAll()
 	{

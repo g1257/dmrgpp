@@ -102,6 +102,7 @@ public:
 	typedef HamiltonianAbstract<SuperGeometryType> HamiltonianAbstractType;
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename ModelHelperType::OperatorStorageType OperatorStorageType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef VerySparseMatrix<ComplexOrRealType> VerySparseMatrixType;
 	typedef typename ModelHelperType::LinkType LinkType;
@@ -186,6 +187,12 @@ public:
 		progress_.printline(msg2,std::cout);
 	}
 
+#ifdef USE_OPERATOR_STORAGE
+	void matrixBond(VerySparseMatrixType& matrix) const
+	{
+		err("matrixBond needs rewrite for USE_OPERATOR_STORAGE\n");
+	}
+#else
 	void matrixBond(VerySparseMatrixType& matrix) const
 	{
 		SizeType matrixRank = matrix.rows();
@@ -211,9 +218,10 @@ public:
 
 		matrix += matrix2;
 	}
+#endif
 
-	const LinkType& getKron(const SparseMatrixType** A,
-	                        const SparseMatrixType** B,
+	const LinkType& getKron(const OperatorStorageType** A,
+	                        const OperatorStorageType** B,
 	                        SizeType xx) const
 	{
 		assert(xx < lps_.size());

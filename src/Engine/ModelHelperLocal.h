@@ -99,6 +99,7 @@ public:
 	typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename OperatorsType::OperatorType OperatorType;
+	typedef typename OperatorType::StorageType OperatorStorageType;
 	typedef typename OperatorsType::BasisType BasisType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef typename BasisType::RealType RealType;
@@ -144,15 +145,15 @@ public:
 		threadSelves_.clear();
 	}
 
-	const SparseMatrixType& reducedOperator(char modifier,
-	                                        SizeType i,
-	                                        SizeType sigma,
-	                                        const ProgramGlobals::SysOrEnvEnum type) const
+	const OperatorStorageType& reducedOperator(char modifier,
+	                                           SizeType i,
+	                                           SizeType sigma,
+	                                           const ProgramGlobals::SysOrEnvEnum type) const
 	{
 
 		assert(!BasisType::useSu2Symmetry());
 
-		const SparseMatrixType* m = 0;
+		const OperatorStorageType* m = 0;
 		PairType ii;
 		if (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) {
 			ii = lrs_.left().getOperatorIndices(i,sigma);
@@ -208,6 +209,16 @@ public:
 	{
 		return lrs_.super().qnEx(m_);
 	}
+
+#ifdef USE_OPERATOR_STORAGE
+	void fastOpProdInter(OperatorStorageType const &A,
+	                     OperatorStorageType const &B,
+	                     OperatorStorageType &matrixBlock,
+	                     const LinkType& link) const
+	{
+		err("fastOpProdInter should not be called for OperatorStorageType\n");
+	}
+#endif
 
 	//! Does matrixBlock= (AB), A belongs to pSprime and B
 	// belongs to pEprime or viceversa (inter)

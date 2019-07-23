@@ -6,13 +6,15 @@
 
 namespace Dmrg {
 
-template<typename SparseMatrixType, typename MatrixType>
+template<typename OperatorStorageType, typename MatrixType>
 class ChangeOfBasis {
 
 public:
 
 	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
 	typedef BlockOffDiagMatrix<MatrixType> BlockOffDiagMatrixType;
+	typedef typename OperatorStorageType::value_type ComplexOrRealType;
+	typedef PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
 
 	ChangeOfBasis()
 	{
@@ -32,6 +34,7 @@ public:
 		transposeConjugate(oldTtranspose_, oldT_);
 	}
 
+#ifndef USE_OPERATOR_STORAGE
 	void operator()(SparseMatrixType &v) const
 	{
 		if (!ProgramGlobals::oldChangeOfBasis) {
@@ -46,6 +49,12 @@ public:
 		multiply(tmp, v, oldT_);
 		multiply(v, oldTtranspose_, tmp);
 	}
+#else
+	void operator()(OperatorStorageType &v) const
+	{
+		err("Needs to be written for OperatorStorageType\n");
+	}
+#endif
 
 	static void changeBasis(SparseMatrixType &v,
 	                        const BlockDiagonalMatrixType& ftransform1)

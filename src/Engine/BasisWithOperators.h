@@ -126,10 +126,10 @@ public:
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorsType::BasisType BasisType;
 	typedef typename BasisType::BlockType VectorSizeType;
-	typedef typename OperatorType::StorageType StorageType;
+	typedef typename OperatorType::StorageType OperatorStorageType;
 	typedef BasisWithOperators<OperatorsType> ThisType;
 	typedef typename BasisType::FactorsType FactorsType;
-	typedef typename StorageType::value_type ComplexOrRealType;
+	typedef typename OperatorStorageType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
@@ -210,7 +210,7 @@ public:
 		return operators_.hamiltonian();
 	}
 
-	const SparseMatrixType& reducedHamiltonian() const
+	const OperatorStorageType& reducedHamiltonian() const
 	{
 		return operators_.reducedHamiltonian();
 	}

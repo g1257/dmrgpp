@@ -104,7 +104,7 @@ class ReducedOperators {
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
 	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef ChangeOfBasis<SparseMatrixType, DenseMatrixType> ChangeOfBasisType;
+	typedef ChangeOfBasis<OperatorStorageType, DenseMatrixType> ChangeOfBasisType;
 
 public:
 
@@ -157,7 +157,7 @@ public:
 		else return getReducedOperatorByIndex(i0+offset);
 	}
 
-	const SparseMatrixType& hamiltonian()const { return reducedHamiltonian_; }
+	const OperatorStorageType& hamiltonian()const { return reducedHamiltonian_; }
 
 	void setOperators(const typename PsimagLite::Vector<OperatorType>::Type& ops)
 	{
@@ -330,8 +330,7 @@ public:
 		const BasisType* basisB = &basis3;
 		SizeType angularMomentum = myOp.jm.first;
 		ProgramGlobals::FermionOrBosonEnum fermionOrBoson = myOp.fermionOrBoson;
-		const SparseMatrixType& A = myOp.data;
-		PsimagLite::Vector<SizeType>::Type jvals;
+		const OperatorStorageType& A = myOp.data;
 
 		if (!order) {
 			basisA = &basis3;
@@ -354,8 +353,8 @@ public:
 
 	void outerProductHamiltonian(const BasisType& basis2,
 	                             const BasisType& basis3,
-	                             const SparseMatrixType& h2,
-	                             const SparseMatrixType& h3)
+	                             const OperatorStorageType& h2,
+	                             const OperatorStorageType& h3)
 	{
 		if (!useSu2Symmetry_) return;
 
@@ -415,6 +414,7 @@ public:
 		io.write(reducedOperators_, "Operators", mode);
 	}
 
+#ifndef USE_OPERATOR_STORAGE
 	void changeBasis(SparseMatrixType &v)
 	{
 		if (!useSu2Symmetry_)
@@ -424,6 +424,15 @@ public:
 		multiply(tmp,v,su2Transform_);
 		multiply(v,su2TransformT_,tmp);
 	}
+#else
+	void changeBasis(OperatorStorageType& v)
+	{
+		if (!useSu2Symmetry_)
+			return changeOfBasis_(v);
+
+		v.rotate(su2TransformT_, su2Transform_);
+	}
+#endif
 
 	void clear()
 	{
@@ -772,11 +781,14 @@ private:
 	void externalProd_(PsimagLite::Matrix<SparseElementType>& B,
 	                   const BasisType* basisA,
 	                   const BasisType* basisB,
-	                   const SparseMatrixType& A,
+	                   const OperatorStorageType& A1,
 	                   int ki,
 	                   bool order,
 	                   int fermionSign)
 	{
+		SparseMatrixType A;
+		toCRS(A, A1);
+
 		SizeType n = B.rows();
 		//SizeType angularMomentum = 0;
 		//if (ki>=0) angularMomentum = momentumOfOperators_[ki];

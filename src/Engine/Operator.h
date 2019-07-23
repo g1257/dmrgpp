@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CanonicalExpression.h"
 #include "Io/IoSerializerStub.h"
 #include "ProgramGlobals.h"
+
 #ifdef USE_OPERATOR_STORAGE
 #include "OperatorStorage.h"
 #else
