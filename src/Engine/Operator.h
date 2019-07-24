@@ -89,22 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CanonicalExpression.h"
 #include "Io/IoSerializerStub.h"
 #include "ProgramGlobals.h"
-
-#ifdef USE_OPERATOR_STORAGE
 #include "OperatorStorage.h"
-#else
-template<typename T>
-void fromCRS(PsimagLite::CrsMatrix<T>& dest, const PsimagLite::CrsMatrix<T>& src)
-{
-	dest = src;
-}
-
-template<typename T>
-void toCRS(PsimagLite::CrsMatrix<T>& dest, const PsimagLite::CrsMatrix<T>& src)
-{
-	dest = src;
-}
-#endif
 
 namespace Dmrg {
 
@@ -124,7 +109,6 @@ struct Operator {
 
 	Operator() : fermionOrBoson(ProgramGlobals::FermionOrBosonEnum::BOSON), angularFactor(1) {}
 
-#ifdef USE_OPERATOR_STORAGE
 	typedef OperatorStorage<ComplexOrRealType> StorageType;
 
 	Operator(const SparseMatrixType& data1,
@@ -138,9 +122,6 @@ struct Operator {
 	      angularFactor(angularFactor1),
 	      su2Related(su2Related1)
 	{}
-#else
-	typedef SparseMatrixType StorageType;
-#endif
 
 	Operator(const StorageType& data1,
 	         ProgramGlobals::FermionOrBosonEnum fermionSign1,
@@ -257,14 +238,6 @@ struct Operator {
 		io.readline(angularFactor,prefix + "AngularFactor=");
 
 		// FIXME: su2related needs to be set properly for when SU(2) is running
-	}
-
-	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
-	{
-		return 0;
 	}
 
 	void dagger()
@@ -404,6 +377,10 @@ struct Operator {
 	{
 		return (data.rows() == 0);
 	}
+
+	const SparseMatrixType& getCRS() const { return data.getCRS(); }
+
+	// FIXME TODO: MAKE THE BELOW PRIVATE
 
 	StorageType data;
 	// does this operator commute or anticommute with others of the

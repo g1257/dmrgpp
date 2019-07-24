@@ -93,12 +93,12 @@ public:
 
 			// onsite U hubbard
 			//n_i up
-			transposeConjugate(tmpMatrix, cup.data);
-			multiply(niup, tmpMatrix, cup.data);
+			transposeConjugate(tmpMatrix, cup.getCRS());
+			multiply(niup, tmpMatrix, cup.getCRS());
 
 			//n_i down
-			transposeConjugate(tmpMatrix, cdown.data);
-			multiply(nidown, tmpMatrix, cdown.data);
+			transposeConjugate(tmpMatrix, cdown.getCRS());
+			multiply(nidown, tmpMatrix, cdown.getCRS());
 
 			multiply(tmpMatrix,niup,nidown);
 			assert(ind < modelParams_.hubbardU.size());
@@ -121,19 +121,19 @@ public:
 			if (!modelParams_.extended) continue; // EARLY CONTINUE HERE
 
 			const OperatorType& Splus = ModelBaseType::naturalOperator("Splus", 0, 0);
-			hmatrix += modelParams_.kondoHx*Splus.data;
-			transposeConjugate(tmpMatrix, Splus.data);
+			hmatrix += modelParams_.kondoHx*Splus.getCRS();
+			transposeConjugate(tmpMatrix, Splus.getCRS());
 			hmatrix += modelParams_.kondoHx*tmpMatrix;
 
-			transposeConjugate(tmpMatrix, cup.data);
-			multiply(niup, tmpMatrix, cdown.data);
+			transposeConjugate(tmpMatrix, cup.getCRS());
+			multiply(niup, tmpMatrix, cdown.getCRS());
 			hmatrix += modelParams_.electronHx*niup;
 
-			transposeConjugate(tmpMatrix, cdown.data);
-			multiply(nidown, tmpMatrix, cup.data);
+			transposeConjugate(tmpMatrix, cdown.getCRS());
+			multiply(nidown, tmpMatrix, cup.getCRS());
 			hmatrix += modelParams_.electronHx*nidown;
 
-			multiply(niup, cup.data, cdown.data);
+			multiply(niup, cup.getCRS(), cdown.getCRS());
 			hmatrix += modelParams_.pairingField*niup;
 
 			transposeConjugate(nidown, niup);
@@ -161,10 +161,10 @@ protected:
 		this->makeTrackable("n");
 
 		{
-			SparseMatrixType mup = ops_[0].data;
+			SparseMatrixType mup = ops_[0].getCRS();
 			SparseMatrixType mupT;
 			transposeConjugate(mupT, mup);
-			SparseMatrixType mdown = ops_[1].data;
+			SparseMatrixType mdown = ops_[1].getCRS();
 			SparseMatrixType mdownT;
 			transposeConjugate(mdownT, mdown);
 			SparseMatrixType szMatrix = mdownT*mdown;
@@ -432,10 +432,10 @@ private:
 	                             const SparseMatrixType& nidown) const
 	{
 		// cdu[d] is actually cu[d] not cu[d] dagger.
-		const SparseMatrixType& cdu = ops_[0].data;
-		const SparseMatrixType& cdd = ops_[1].data;
-		const SparseMatrixType& Sp = ops_[2].data;
-		const SparseMatrixType& Sz = ops_[3].data;
+		const SparseMatrixType& cdu = ops_[0].getCRS();
+		const SparseMatrixType& cdd = ops_[1].getCRS();
+		const SparseMatrixType& Sp = ops_[2].getCRS();
+		const SparseMatrixType& Sz = ops_[3].getCRS();
 
 		SparseMatrixType Sm;
 		transposeConjugate(Sm, Sp);

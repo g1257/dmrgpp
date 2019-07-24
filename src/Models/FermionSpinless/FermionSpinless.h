@@ -168,7 +168,7 @@ public:
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType site = block[i];
 			const OperatorType& niupop = ModelBaseType::naturalOperator("n", site, 0);
-			const SparseMatrixType& niup = niupop.data;
+			const SparseMatrixType& niup = niupop.getCRS();
 
 			// V_iup term
 			RealType tmp = modelParameters_.potentialV[block[i]];

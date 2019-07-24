@@ -414,17 +414,6 @@ public:
 		io.write(reducedOperators_, "Operators", mode);
 	}
 
-#ifndef USE_OPERATOR_STORAGE
-	void changeBasis(SparseMatrixType &v)
-	{
-		if (!useSu2Symmetry_)
-			return changeOfBasis_(v);
-
-		SparseMatrixType tmp;
-		multiply(tmp,v,su2Transform_);
-		multiply(v,su2TransformT_,tmp);
-	}
-#else
 	void changeBasis(OperatorStorageType& v)
 	{
 		if (!useSu2Symmetry_)
@@ -432,7 +421,6 @@ public:
 
 		v.rotate(su2TransformT_, su2Transform_);
 	}
-#endif
 
 	void clear()
 	{

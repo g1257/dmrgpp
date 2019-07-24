@@ -28,6 +28,7 @@ public:
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	OperatorStorage() : justCrs_(true)
 	{}
@@ -222,6 +223,22 @@ public:
 		err("OperatorStorage: fullMatrixToCrsMatrix\n");
 	}
 
+	friend void reorder2(OperatorStorage& v, const VectorSizeType& permutation)
+	{
+		if (v.rows() == 0 || v.cols() == 0) {
+			assert(v.rows() == 0 && v.cols() == 0);
+			return;
+		}
+
+		if (!v.justCRS())
+			err("OperatorStorage: reorder2\n");
+
+		SparseMatrixType matrixTmp;
+
+		permute(matrixTmp, v.getCRS(), permutation);
+		permuteInverse(v.crs_, matrixTmp, permutation);
+	}
+
 private:
 
 	bool justCrs_;
@@ -298,12 +315,9 @@ bool isTheIdentity(const OperatorStorage<ComplexOrRealType>& src)
 }
 
 template<typename ComplexOrRealType>
-bool isNonZeroMatrix(const OperatorStorage<ComplexOrRealType>& src)
+bool isNonZeroMatrix(const OperatorStorage<ComplexOrRealType>& m)
 {
-	if (src.justCRS())
-		return isNonZeroMatrix(src.getCRS());
-
-	throw PsimagLite::RuntimeError("OperatorStorage: isNonZeroMatrix\n");
+	return (m.rows() > 0 && m.cols() > 0);
 }
 
 } // namespace PsimagLite

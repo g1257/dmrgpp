@@ -327,7 +327,7 @@ private:
 
 		if (this->useSu2Symmetry()) setMomentumOfOperators(basis2);
 		operators_.setToProduct(basis2,basis3,x,this);
-		ApplyFactors<FactorsType> apply(this->getFactors(),this->useSu2Symmetry());
+		ApplyFactors<FactorsType> apply(this->getFactors(), this->useSu2Symmetry());
 		ProgramGlobals::FermionOrBosonEnum savedSign = ProgramGlobals::FermionOrBosonEnum::BOSON;
 
 		for (SizeType i=0;i<this->numberOfOperators();i++) {

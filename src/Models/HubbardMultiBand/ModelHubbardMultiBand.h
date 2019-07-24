@@ -210,7 +210,7 @@ protected:
 	{
 		qns = qq_;
 		assert(creationMatrix_.size()>0);
-		SizeType nrow = creationMatrix_[0].data.rows();
+		SizeType nrow = creationMatrix_[0].getCRS().rows();
 
 		OpsLabelType& splus = this->createOpsLabel("splus");
 		OpsLabelType& sminus = this->createOpsLabel("sminus");
@@ -220,8 +220,8 @@ protected:
 		for (SizeType orbital = 0; orbital < modelParameters_.orbitals; ++orbital) {
 			{
 				MatrixType tmp(nrow,nrow);
-				tmp += multiplyTc(creationMatrix_[orbital].data,
-				                  creationMatrix_[orbital + modelParameters_.orbitals].data);
+				tmp += multiplyTc(creationMatrix_[orbital].getCRS(),
+				                  creationMatrix_[orbital + modelParameters_.orbitals].getCRS());
 				SparseMatrixType tmp2(tmp);
 				typename OperatorType::Su2RelatedType su2Related;
 				splus.push(OperatorType(tmp2,
@@ -242,10 +242,10 @@ protected:
 				MatrixType tmp(nrow,nrow);
 				MatrixType tmp2(nrow,nrow);
 
-				tmp += multiplyTc(creationMatrix_[orbital].data,
-				                  creationMatrix_[orbital].data);
-				tmp2 += multiplyTc(creationMatrix_[orbital + modelParameters_.orbitals].data,
-				        creationMatrix_[orbital + modelParameters_.orbitals].data);
+				tmp += multiplyTc(creationMatrix_[orbital].getCRS(),
+				                  creationMatrix_[orbital].getCRS());
+				tmp2 += multiplyTc(creationMatrix_[orbital + modelParameters_.orbitals].getCRS(),
+				        creationMatrix_[orbital + modelParameters_.orbitals].getCRS());
 
 				tmp = 0.5*(tmp-tmp2);
 				SparseMatrixType tmp3(tmp);
@@ -260,8 +260,8 @@ protected:
 			{ // delta = c^\dagger * c^dagger
 				SparseMatrixType atmp;
 				multiply(atmp,
-				         creationMatrix_[orbital + modelParameters_.orbitals].data,
-				        creationMatrix_[orbital].data);
+				         creationMatrix_[orbital + modelParameters_.orbitals].getCRS(),
+				        creationMatrix_[orbital].getCRS());
 				typename OperatorType::Su2RelatedType su2Related;
 				d.push(OperatorType(atmp,
 				                    ProgramGlobals::FermionOrBosonEnum::BOSON,
@@ -278,7 +278,7 @@ protected:
 		for (SizeType dof = 0; dof < dofs; ++dof) {
 			{
 				MatrixType tmp =
-				        multiplyTc(creationMatrix_[dof].data,creationMatrix_[dof].data);
+				        multiplyTc(creationMatrix_[dof].getCRS(),creationMatrix_[dof].getCRS());
 				SparseMatrixType tmp2(tmp);
 				typename OperatorType::Su2RelatedType su2Related;
 				nop.push(OperatorType(tmp2,
@@ -506,20 +506,20 @@ private:
 		SparseMatrixType tmp;
 		const VectorOperatorType& cm = creationMatrix_;
 		for (SizeType orb1 = 0; orb1 < orbitals; ++orb1) {
-			const SparseMatrixType& m1up = cm[orb1 + SPIN_UP*orbitals + i*dof].data;
-			const SparseMatrixType& m1down = cm[orb1 + SPIN_DOWN*orbitals + i*dof].data;
+			const SparseMatrixType& m1up = cm[orb1 + SPIN_UP*orbitals + i*dof].getCRS();
+			const SparseMatrixType& m1down = cm[orb1 + SPIN_DOWN*orbitals + i*dof].getCRS();
 
 			for (SizeType orb2 = 0; orb2 < orbitals; ++orb2) {
 				ComplexOrRealType val = getOnSiteHopping(actualSite, orb1, orb2);
 				if (val == zero) continue;
 
-				const SparseMatrixType& m2up = cm[orb2 + SPIN_UP*orbitals + i*dof].data;
+				const SparseMatrixType& m2up = cm[orb2 + SPIN_UP*orbitals + i*dof].getCRS();
 				SparseMatrixType m2t;
 				transposeConjugate(m2t, m2up);
 				multiply(tmpMatrix, m1up, m2t);
 				tmp += val*tmpMatrix;
 
-				const SparseMatrixType& m2down = cm[orb2 + SPIN_DOWN*orbitals + i*dof].data;
+				const SparseMatrixType& m2down = cm[orb2 + SPIN_DOWN*orbitals + i*dof].getCRS();
 				transposeConjugate(m2t, m2down);
 				multiply(tmpMatrix, m1down, m2t);
 
@@ -582,8 +582,8 @@ private:
 	{
 		int dof = 2*modelParameters_.orbitals;
 		const VectorOperatorType& cm = creationMatrix_;
-		SparseMatrixType nup = n(cm[orbital+SPIN_UP*modelParameters_.orbitals+i*dof].data);
-		SparseMatrixType ndown = n(cm[orbital+SPIN_DOWN*modelParameters_.orbitals+i*dof].data);
+		SparseMatrixType nup = n(cm[orbital+SPIN_UP*modelParameters_.orbitals+i*dof].getCRS());
+		SparseMatrixType ndown = n(cm[orbital+SPIN_DOWN*modelParameters_.orbitals+i*dof].getCRS());
 
 		SizeType linSize = geometry_.numberOfSites();
 
@@ -604,10 +604,10 @@ private:
 		const VectorOperatorType& cm = creationMatrix_;
 		SizeType orbitalsSquared = modelParameters_.orbitals*modelParameters_.orbitals;
 
-		SparseMatrixType nup = nEx(cm[orb+SPIN_UP*modelParameters_.orbitals+i*dof].data,
-		        cm[orb2+SPIN_UP*modelParameters_.orbitals+i*dof].data);
-		SparseMatrixType ndown = nEx(cm[orb+SPIN_DOWN*modelParameters_.orbitals+i*dof].data,
-		        cm[orb2+SPIN_DOWN*modelParameters_.orbitals+i*dof].data);
+		SparseMatrixType nup = nEx(cm[orb+SPIN_UP*modelParameters_.orbitals+i*dof].getCRS(),
+		        cm[orb2+SPIN_UP*modelParameters_.orbitals+i*dof].getCRS());
+		SparseMatrixType ndown = nEx(cm[orb+SPIN_DOWN*modelParameters_.orbitals+i*dof].getCRS(),
+		        cm[orb2+SPIN_DOWN*modelParameters_.orbitals+i*dof].getCRS());
 
 		SizeType linSize = geometry_.numberOfSites();
 
@@ -654,15 +654,15 @@ private:
 		const RealType zeroPointFive = 0.5;
 		SizeType orbitals = modelParameters_.orbitals;
 		for (SizeType k0 = 0; k0 < orbitals; ++k0) {
-			const MatrixType& m0 = cm[k0 + SPIN_DOWN*orbitals].data.toDense();
+			const MatrixType& m0 = cm[k0 + SPIN_DOWN*orbitals].getCRS().toDense();
 			for (SizeType k1 = 0; k1 < orbitals; ++k1) {
-				const MatrixType& m1 = cm[k1 + SPIN_UP*orbitals].data.toDense();
+				const MatrixType& m1 = cm[k1 + SPIN_UP*orbitals].getCRS().toDense();
 				m0m1 = m0*m1;
 				for (SizeType k2 = 0; k2 < orbitals; ++k2) {
-					const MatrixType& m2 = cm[k2 + SPIN_UP*orbitals].data.toDense();
+					const MatrixType& m2 = cm[k2 + SPIN_UP*orbitals].getCRS().toDense();
 					SizeType k3 = (k0 + k1 + k2) % orbitals;
 
-					const MatrixType& m3 = cm[k3 + SPIN_DOWN*orbitals].data.toDense();
+					const MatrixType& m3 = cm[k3 + SPIN_DOWN*orbitals].getCRS().toDense();
 					m2m3 = m3*m2;
 					transposeConjugate(m2m3t, m2m3);
 					term = m2m3t * m0m1;

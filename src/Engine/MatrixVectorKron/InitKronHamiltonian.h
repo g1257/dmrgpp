@@ -155,7 +155,7 @@ public:
 		VectorType& yin = yin_;
 
 		const VectorSizeType& permInverse = BaseType::lrs(BaseType::NEW).super().permutationInverse();
-		const SparseMatrixType& leftH = BaseType::lrs(BaseType::NEW).left().hamiltonian();
+		const SparseMatrixType& leftH = BaseType::lrs(BaseType::NEW).left().hamiltonian().getCRS();
 		SizeType nl = leftH.rows();
 
 		SizeType offset = BaseType::offset(BaseType::NEW);

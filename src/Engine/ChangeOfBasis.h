@@ -34,27 +34,18 @@ public:
 		transposeConjugate(oldTtranspose_, oldT_);
 	}
 
-#ifndef USE_OPERATOR_STORAGE
-	void operator()(SparseMatrixType &v) const
+	void operator()(OperatorStorageType& v) const
 	{
 		if (!ProgramGlobals::oldChangeOfBasis) {
-			BlockOffDiagMatrixType vBlocked(v, transform_.offsetsRows());
+			BlockOffDiagMatrixType vBlocked(v.getCRS(), transform_.offsetsRows());
 			vBlocked.transform(transform_);
-			vBlocked.toSparse(v);
+			vBlocked.toSparse(v.getCRSNonConst());
 			return;
 		}
 
 		assert(ProgramGlobals::oldChangeOfBasis);
-		SparseMatrixType tmp;
-		multiply(tmp, v, oldT_);
-		multiply(v, oldTtranspose_, tmp);
+		v.rotate(oldTtranspose_, oldT_);
 	}
-#else
-	void operator()(OperatorStorageType &v) const
-	{
-		err("Needs to be written for OperatorStorageType\n");
-	}
-#endif
 
 	static void changeBasis(OperatorStorageType &v,
 	                        const BlockDiagonalMatrixType& ftransform1)

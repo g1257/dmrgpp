@@ -188,12 +188,6 @@ public:
 		progress_.printline(msg2,std::cout);
 	}
 
-#ifdef USE_OPERATOR_STORAGE
-	void matrixBond(VerySparseMatrixType& matrix) const
-	{
-		err("matrixBond needs rewrite for USE_OPERATOR_STORAGE\n");
-	}
-#else
 	void matrixBond(VerySparseMatrixType& matrix) const
 	{
 		SizeType matrixRank = matrix.rows();
@@ -205,10 +199,10 @@ public:
 			SparseMatrixType matrixBlock(matrixRank, matrixRank);
 			for (SizeType i = 0; i < totalOnes_[xx]; ++i) {
 				SparseMatrixType mBlock;
-				SparseMatrixType const* A = 0;
-				SparseMatrixType const* B = 0;
+				OperatorStorageType const* A = 0;
+				OperatorStorageType const* B = 0;
 				const LinkType& link2 = getKron(&A, &B, x++);
-				modelHelper_.fastOpProdInter(*A, *B, mBlock, link2);
+				modelHelper_.fastOpProdInter(A->getCRS(), B->getCRS(), mBlock, link2);
 
 				matrixBlock += mBlock;
 			}
@@ -219,7 +213,6 @@ public:
 
 		matrix += matrix2;
 	}
-#endif
 
 	const LinkType& getKron(const OperatorStorageType** A,
 	                        const OperatorStorageType** B,
@@ -348,12 +341,6 @@ private:
 		}
 
 		return totalOne;
-	}
-
-	bool isNonZeroMatrix(const SparseMatrixType& m) const
-	{
-		if (m.rows() > 0 && m.cols() > 0) return true;
-		return false;
 	}
 
 	bool connectionIsHermitian(const LinkType& link) const

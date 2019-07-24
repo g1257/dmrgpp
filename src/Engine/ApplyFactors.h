@@ -91,41 +91,23 @@ public:
 	{}
 
 	template<typename T>
-	void operator()(T& m) const
+	void operator()(OperatorStorage<T>& m) const
 	{
 		if (!enabled_ || factors_ == 0) return;
+
 		if (factors_->rows()!=m.rows())
-			throw PsimagLite::RuntimeError("Problem applying factors\n");
-		applyFactors(m);
+			err("Problem applying factors\n");
+
+		err("SU(2) factors no longer works\n");
+//		FactorsType tmp2;
+//		transposeConjugate(tmp2, *factors_);
+//		m.rotate(tmp2, *factors_);
 	}
 
 private:
 
-	template<typename T>
-	void applyFactors(OperatorStorage<T>& m2) const
-	{
-		FactorsType m = m2.getCRS();
-		FactorsType tmp;
-		multiply(tmp,m,*factors_);
-		FactorsType tmp2;
-		transposeConjugate(tmp2,*factors_);
-		multiply(m, tmp2, tmp);
-		fromCRS(m2, m);
-	}
-
-	template<typename T>
-	void applyFactors(PsimagLite::CrsMatrix<T>& m) const
-	{
-		FactorsType tmp;
-		multiply(tmp,m,*factors_);
-		FactorsType tmp2;
-		transposeConjugate(tmp2,*factors_);
-		multiply(m, tmp2, tmp);
-	}
-
 	const FactorsType* factors_;
 	bool enabled_;
-
 }; // class ApplyFactors
 } // namespace Dmrg
 

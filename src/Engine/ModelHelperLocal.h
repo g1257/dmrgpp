@@ -109,8 +109,9 @@ public:
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorSparseElementType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
 	typedef typename BasisType::QnType QnType;
-	typedef typename PsimagLite::Vector<typename PsimagLite::Vector<SparseMatrixType*>::Type>::Type
-	VectorVectorSparseMatrixType;
+	typedef typename PsimagLite::Vector<OperatorStorageType*>::Type VectorOperatorStorageType;
+	typedef typename PsimagLite::Vector<VectorOperatorStorageType>::Type
+	VectorVectorOperatorStorageType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
 
 	ModelHelperLocal(SizeType m, const LeftRightSuperType& lrs)
@@ -186,7 +187,7 @@ public:
 			return *(garbage_[threadNum][indexOfSeen]);
 		}
 
-		SparseMatrixType* mc = new SparseMatrixType;
+		OperatorStorageType* mc = new OperatorStorageType;
 		transposeConjugate(*mc, *m);
 		garbage_[threadNum].push_back(mc);
 		seen_[threadNum].push_back(packed);
@@ -209,16 +210,6 @@ public:
 	{
 		return lrs_.super().qnEx(m_);
 	}
-
-#ifdef USE_OPERATOR_STORAGE
-	void fastOpProdInter(OperatorStorageType const &A,
-	                     OperatorStorageType const &B,
-	                     OperatorStorageType &matrixBlock,
-	                     const LinkType& link) const
-	{
-		err("fastOpProdInter should not be called for OperatorStorageType\n");
-	}
-#endif
 
 	//! Does matrixBlock= (AB), A belongs to pSprime and B
 	// belongs to pEprime or viceversa (inter)
@@ -526,7 +517,7 @@ private:
 	typename PsimagLite::Vector<PsimagLite::Vector<int>::Type>::Type buffer_;
 	typename PsimagLite::Vector<SizeType>::Type alpha_,beta_;
 	typename PsimagLite::Vector<bool>::Type fermionSigns_;
-	mutable VectorVectorSparseMatrixType garbage_;
+	mutable VectorVectorOperatorStorageType garbage_;
 	mutable typename PsimagLite::Vector<BlockType>::Type seen_;
 	mutable ConcurrencyType::MutexType mutex_;
 	mutable PsimagLite::Vector<ConcurrencyType::PthreadtType>::Type threadSelves_;

@@ -196,17 +196,17 @@ public:
 			// magnetic field x
 			const OperatorType& sx = ModelBaseType::naturalOperator("sx", site, 0);
 			RealType tmp = modelParameters_.magneticFieldX[block[0]];
-			hmatrix += tmp*sx.data;
+			hmatrix += tmp*sx.getCRS();
 
 			// magnetic field y
 			const OperatorType& sy = ModelBaseType::naturalOperator("sy", site, 0);
 			tmp = modelParameters_.magneticFieldY[block[0]];
-			hmatrix += tmp*sy.data;
+			hmatrix += tmp*sy.getCRS();
 
 			// magnetic field z
 			const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
 			tmp = modelParameters_.magneticFieldZ[block[0]];
-			hmatrix += tmp*sz.data;
+			hmatrix += tmp*sz.getCRS();
 		}
 	}
 

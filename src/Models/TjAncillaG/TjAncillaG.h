@@ -151,8 +151,8 @@ public:
 		SizeType linSize = geometry_.numberOfSites();
 		for (SizeType i=0;i<n;i++) {
 			// potentialV
-			SparseMatrixType nup = this->naturalOperator("nup",i,0).data;
-			SparseMatrixType ndown = this->naturalOperator("ndown",i,0).data;
+			SparseMatrixType nup = this->naturalOperator("nup",i,0).getCRS();
+			SparseMatrixType ndown = this->naturalOperator("ndown",i,0).getCRS();
 			SparseMatrixType m = nup;
 			assert(block[i]+linSize<modelParameters_.potentialV.size());
 			m *= modelParameters_.potentialV[block[i]];
@@ -270,7 +270,7 @@ protected:
 			OpsLabelType& nupop = this->createOpsLabel("nup");
 			OperatorType tmp = this->naturalOperator("c", site, 0);
 			tmp.dagger();
-			SparseMatrixType c = tmp.data;
+			SparseMatrixType c = tmp.getCRS();
 			SparseMatrixType tmp3(multiplyTc(c,c));
 			typename OperatorType::Su2RelatedType su2Related;
 			nupop.push(OperatorType(tmp3,
@@ -283,7 +283,7 @@ protected:
 		{
 			OperatorType tmp = this->naturalOperator("c", site, 1);
 			tmp.dagger();
-			SparseMatrixType c = tmp.data;
+			SparseMatrixType c = tmp.getCRS();
 			SparseMatrixType tmp3(multiplyTc(c,c));
 			typename OperatorType::Su2RelatedType su2Related;
 			this->createOpsLabel("ndown").push(OperatorType(tmp3,

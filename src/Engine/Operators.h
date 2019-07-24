@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Complex.h"
 #include "Concurrency.h"
 #include "Parallelizer.h"
+#include "ApplyFactors.h"
 
 namespace Dmrg {
 /* PSIDOC Operators
@@ -126,6 +127,7 @@ public:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef std::pair<SizeType,SizeType> PairSizeSizeType;
 	typedef PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
+	typedef typename BasisType::FactorsType FactorsType;
 
 	// law of the excluded middle went out the window here:
 	enum class ChangeAllEnum { UNSET, TRUE_SET, FALSE_SET};
@@ -375,21 +377,15 @@ public:
 		internal degree of freedom $\sigma$. See PTEXREF{setToProductOps}
 		and PTEXREF{HERE}.
 		*/
-	template<typename ApplyFactorsType>
 	void externalProduct(SizeType i,
 	                     const OperatorType& m,
 	                     int x,
-	                     const   VectorRealType& fermionicSigns,
+	                     const VectorRealType& fermionicSigns,
 	                     bool option,
-	                     ApplyFactorsType& apply)
+	                     ApplyFactors<FactorsType>& apply)
 	{
 		assert(!BasisType::useSu2Symmetry());
-#ifndef USE_OPERATOR_STORAGE
-		PsimagLite::externalProduct
-#else
-		externalProduct2
-#endif
-		        (operators_[i].data,m.data,x,fermionicSigns,option);
+		externalProduct2(operators_[i].data,m.data,x,fermionicSigns,option);
 		// don't forget to set fermion sign and j:
 		operators_[i].fermionOrBoson=m.fermionOrBoson;
 		operators_[i].jm=m.jm;
@@ -506,31 +502,6 @@ public:
 	}
 
 private:
-
-	void reorder2(SparseMatrixType &v,const   VectorSizeType& permutation)
-	{
-		if (v.rows() == 0 || v.cols() == 0) {
-			assert(v.rows() == 0 && v.cols() == 0);
-			return;
-		}
-
-		SparseMatrixType matrixTmp;
-
-		permute(matrixTmp,v,permutation);
-		permuteInverse(v,matrixTmp,permutation);
-	}
-
-#ifdef USE_OPERATOR_STORAGE
-	void reorder2(StorageType& v, const VectorSizeType& permutation)
-	{
-		if (v.rows() == 0 || v.cols() == 0) {
-			assert(v.rows() == 0 && v.cols() == 0);
-			return;
-		}
-
-		err("Operators.h: reorder2\n");
-	}
-#endif
 
 	static void printChangeAll()
 	{
