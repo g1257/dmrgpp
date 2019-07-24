@@ -135,59 +135,59 @@ private:
 
 	MatrixType Jz_opr_original_basis(VectorOperatorType& creationMatrix)
 	{
-		SizeType nrow = creationMatrix[0].getCRS().rows();
+		SizeType nrow = creationMatrix[0].getStorage().rows();
 		MatrixType tmp(nrow,nrow);
 		//Works only for 3 orbital model
 		//xy=0,zx=1,yz=2
 		//nxy_up-nxy_dn
-		tmp += 0.5*(multiplyTc(creationMatrix[0].getCRS(),creationMatrix[0].getCRS()));
-		tmp += -0.5*(multiplyTc(creationMatrix[3].getCRS(),creationMatrix[3].getCRS()));
+		tmp += 0.5*(multiplyTc(creationMatrix[0].getStorage(),creationMatrix[0].getStorage()));
+		tmp += -0.5*(multiplyTc(creationMatrix[3].getStorage(),creationMatrix[3].getStorage()));
 
 
 		//        //nzx_up-nzx_dn
-		tmp += -0.5*(multiplyTc(creationMatrix[4].getCRS(),creationMatrix[4].getCRS()));
-		tmp += 0.5*(multiplyTc(creationMatrix[1].getCRS(),creationMatrix[1].getCRS())) ;
+		tmp += -0.5*(multiplyTc(creationMatrix[4].getStorage(),creationMatrix[4].getStorage()));
+		tmp += 0.5*(multiplyTc(creationMatrix[1].getStorage(),creationMatrix[1].getStorage())) ;
 
 		//        //nyz_up-nyz_dn
-		tmp += -0.5*(multiplyTc(creationMatrix[5].getCRS(),creationMatrix[5].getCRS())) ;
-		tmp += 0.5*(multiplyTc(creationMatrix[2].getCRS(),creationMatrix[2].getCRS())) ;
+		tmp += -0.5*(multiplyTc(creationMatrix[5].getStorage(),creationMatrix[5].getStorage())) ;
+		tmp += 0.5*(multiplyTc(creationMatrix[2].getStorage(),creationMatrix[2].getStorage())) ;
 
 		//i(czx_dn_dagg*cyz_dn) + hc (first with i, sec with -i,
 		ComplexOrRealType sqrtMinus1(0,1);
 
-		tmp += +sqrtMinus1*(multiplyTc(creationMatrix[4].getCRS(),creationMatrix[5].getCRS()));
+		tmp += +sqrtMinus1*(multiplyTc(creationMatrix[4].getStorage(),creationMatrix[5].getStorage()));
 
-		tmp += -sqrtMinus1*(multiplyTc(creationMatrix[5].getCRS(),creationMatrix[4].getCRS()));
+		tmp += -sqrtMinus1*(multiplyTc(creationMatrix[5].getStorage(),creationMatrix[4].getStorage()));
 
 		//i(czx_up_dagg*cyz_up) + hc
-		tmp += +sqrtMinus1*(multiplyTc(creationMatrix[1].getCRS(),creationMatrix[2].getCRS()));
+		tmp += +sqrtMinus1*(multiplyTc(creationMatrix[1].getStorage(),creationMatrix[2].getStorage()));
 
-		tmp += -sqrtMinus1*(multiplyTc(creationMatrix[2].getCRS(),creationMatrix[1].getCRS()) ) ;
+		tmp += -sqrtMinus1*(multiplyTc(creationMatrix[2].getStorage(),creationMatrix[1].getStorage()) ) ;
 
 		return tmp;
 
 	}
 
 	MatrixType Calculate_onsite_Hamiltonian(VectorOperatorType& creationMatrix){
-		SizeType nrow = creationMatrix[0].getCRS().row();
+		SizeType nrow = creationMatrix[0].getStorage().row();
 		MatrixType tmp(nrow,nrow);
 		MatrixType tmp2(nrow,nrow),tmp3(nrow,nrow),tmp4(nrow,nrow);
 		RealType _U,_J,_Up;
 		ComplexOrRealType sqrtMinus1(0,1);
 
-		//    tmp += -0.5*sqrtMinus1*(multiplyTc(creationMatrix[1].getCRS(),creationMatrix[2].getCRS()));
-		//    tmp +=  0.5*sqrtMinus1*(multiplyTc(creationMatrix[1].getCRS(),creationMatrix[3].getCRS()));
-		//    tmp +=  0.5*sqrtMinus1*(multiplyTc(creationMatrix[2].getCRS(),creationMatrix[1].getCRS()));
-		//    tmp +=  -0.5*(multiplyTc(creationMatrix[2].getCRS(),creationMatrix[3].getCRS()));
-		//    tmp += -0.5*sqrtMinus1*(multiplyTc(creationMatrix[0].getCRS(),creationMatrix[4].getCRS()));
-		//    tmp += 0.5*(multiplyTc(creationMatrix[0].getCRS(),creationMatrix[5].getCRS()));
+		//    tmp += -0.5*sqrtMinus1*(multiplyTc(creationMatrix[1].getStorage(),creationMatrix[2].getStorage()));
+		//    tmp +=  0.5*sqrtMinus1*(multiplyTc(creationMatrix[1].getStorage(),creationMatrix[3].getStorage()));
+		//    tmp +=  0.5*sqrtMinus1*(multiplyTc(creationMatrix[2].getStorage(),creationMatrix[1].getStorage()));
+		//    tmp +=  -0.5*(multiplyTc(creationMatrix[2].getStorage(),creationMatrix[3].getStorage()));
+		//    tmp += -0.5*sqrtMinus1*(multiplyTc(creationMatrix[0].getStorage(),creationMatrix[4].getStorage()));
+		//    tmp += 0.5*(multiplyTc(creationMatrix[0].getStorage(),creationMatrix[5].getStorage()));
 
-		//    tmp += 0.5*sqrtMinus1*(multiplyTc(creationMatrix[4].getCRS(),creationMatrix[0].getCRS()));
-		//    tmp += 0.5*sqrtMinus1*(multiplyTc(creationMatrix[4].getCRS(),creationMatrix[5].getCRS()));
-		//    tmp += 0.5*(multiplyTc(creationMatrix[5].getCRS(),creationMatrix[0].getCRS()));
-		//    tmp += -0.5*sqrtMinus1*(multiplyTc(creationMatrix[5].getCRS(),creationMatrix[4].getCRS()));
-		//    tmp += -0.5*sqrtMinus1*(multiplyTc(creationMatrix[3].getCRS(),creationMatrix[1].getCRS()));
-		//    tmp += -0.5*(multiplyTc(creationMatrix[3].getCRS(),creationMatrix[2].getCRS()));
+		//    tmp += 0.5*sqrtMinus1*(multiplyTc(creationMatrix[4].getStorage(),creationMatrix[0].getStorage()));
+		//    tmp += 0.5*sqrtMinus1*(multiplyTc(creationMatrix[4].getStorage(),creationMatrix[5].getStorage()));
+		//    tmp += 0.5*(multiplyTc(creationMatrix[5].getStorage(),creationMatrix[0].getStorage()));
+		//    tmp += -0.5*sqrtMinus1*(multiplyTc(creationMatrix[5].getStorage(),creationMatrix[4].getStorage()));
+		//    tmp += -0.5*sqrtMinus1*(multiplyTc(creationMatrix[3].getStorage(),creationMatrix[1].getStorage()));
+		//    tmp += -0.5*(multiplyTc(creationMatrix[3].getStorage(),creationMatrix[2].getStorage()));
 
 
 		//U=1.0, J=0.25 ,Up=U-2J
@@ -197,41 +197,41 @@ private:
 		//U terms
 		if(true){
 			//n_up_xy*n_dn_xy
-			tmp2 =  ( (multiplyTc(creationMatrix[0].getCRS(),creationMatrix[0].getCRS())) * ( multiplyTc(creationMatrix[3].getCRS(),creationMatrix[3].getCRS())) );
+			tmp2 =  ( (multiplyTc(creationMatrix[0].getStorage(),creationMatrix[0].getStorage())) * ( multiplyTc(creationMatrix[3].getStorage(),creationMatrix[3].getStorage())) );
 			tmp += _U*tmp2;
 			//n_up_xz*n_dn_xz
-			tmp2 = ( (multiplyTc(creationMatrix[1].getCRS(),creationMatrix[1].getCRS())) * ( multiplyTc(creationMatrix[4].getCRS(),creationMatrix[4].getCRS())) );
+			tmp2 = ( (multiplyTc(creationMatrix[1].getStorage(),creationMatrix[1].getStorage())) * ( multiplyTc(creationMatrix[4].getStorage(),creationMatrix[4].getStorage())) );
 			tmp += _U*tmp2;
 			//n_up_yz*n_dn_yz
-			tmp2 = ( (multiplyTc(creationMatrix[2].getCRS(),creationMatrix[2].getCRS())) * ( multiplyTc(creationMatrix[5].getCRS(),creationMatrix[5].getCRS())) );
+			tmp2 = ( (multiplyTc(creationMatrix[2].getStorage(),creationMatrix[2].getStorage())) * ( multiplyTc(creationMatrix[5].getStorage(),creationMatrix[5].getStorage())) );
 			tmp += _U*tmp2;
 		}
 
 		//Up-J/2 terms
 		if(true){
 			//nxy*nxz
-			tmp2 = (multiplyTc(creationMatrix[0].getCRS(),creationMatrix[0].getCRS()));
-			tmp2 += (multiplyTc(creationMatrix[3].getCRS(),creationMatrix[3].getCRS()));
-			tmp3 = (multiplyTc(creationMatrix[1].getCRS(),creationMatrix[1].getCRS()));
-			tmp3 += ( multiplyTc(creationMatrix[4].getCRS(),creationMatrix[4].getCRS()));
+			tmp2 = (multiplyTc(creationMatrix[0].getStorage(),creationMatrix[0].getStorage()));
+			tmp2 += (multiplyTc(creationMatrix[3].getStorage(),creationMatrix[3].getStorage()));
+			tmp3 = (multiplyTc(creationMatrix[1].getStorage(),creationMatrix[1].getStorage()));
+			tmp3 += ( multiplyTc(creationMatrix[4].getStorage(),creationMatrix[4].getStorage()));
 			tmp4 = tmp2*tmp3;
 
 			tmp += (_Up - _J*(0.5))*tmp4;
 			//nxy*nyz
-			tmp2 = (multiplyTc(creationMatrix[0].getCRS(),creationMatrix[0].getCRS()));
-			tmp2 += (multiplyTc(creationMatrix[3].getCRS(),creationMatrix[3].getCRS()));
-			tmp3 = (multiplyTc(creationMatrix[2].getCRS(),creationMatrix[2].getCRS()));
-			tmp3 += ( multiplyTc(creationMatrix[5].getCRS(),creationMatrix[5].getCRS()));
+			tmp2 = (multiplyTc(creationMatrix[0].getStorage(),creationMatrix[0].getStorage()));
+			tmp2 += (multiplyTc(creationMatrix[3].getStorage(),creationMatrix[3].getStorage()));
+			tmp3 = (multiplyTc(creationMatrix[2].getStorage(),creationMatrix[2].getStorage()));
+			tmp3 += ( multiplyTc(creationMatrix[5].getStorage(),creationMatrix[5].getStorage()));
 			tmp4 = tmp2*tmp3;
 
 			tmp += (_Up - _J*(0.5))*tmp4;
 
 
 			//nxz*nyz
-			tmp2 = (multiplyTc(creationMatrix[1].getCRS(),creationMatrix[1].getCRS()));
-			tmp2 += (multiplyTc(creationMatrix[4].getCRS(),creationMatrix[4].getCRS()));
-			tmp3 = (multiplyTc(creationMatrix[2].getCRS(),creationMatrix[2].getCRS()));
-			tmp3 += ( multiplyTc(creationMatrix[5].getCRS(),creationMatrix[5].getCRS()));
+			tmp2 = (multiplyTc(creationMatrix[1].getStorage(),creationMatrix[1].getStorage()));
+			tmp2 += (multiplyTc(creationMatrix[4].getStorage(),creationMatrix[4].getStorage()));
+			tmp3 = (multiplyTc(creationMatrix[2].getStorage(),creationMatrix[2].getStorage()));
+			tmp3 += ( multiplyTc(creationMatrix[5].getStorage(),creationMatrix[5].getStorage()));
 			tmp4 = tmp2*tmp3;
 
 			tmp += (_Up - _J*(0.5))*tmp4;
@@ -242,30 +242,30 @@ private:
 		//SzSz Hunds term
 		if (true){
 			//Sz_xy*Sz_xz
-			tmp2 = (multiplyTc(creationMatrix[0].getCRS(),creationMatrix[0].getCRS()));
-			tmp2 += (-1.0)*(multiplyTc(creationMatrix[3].getCRS(),creationMatrix[3].getCRS()));
-			tmp3 = (multiplyTc(creationMatrix[1].getCRS(),creationMatrix[1].getCRS()));
-			tmp3 += (-1.0)*( multiplyTc(creationMatrix[4].getCRS(),creationMatrix[4].getCRS()));
+			tmp2 = (multiplyTc(creationMatrix[0].getStorage(),creationMatrix[0].getStorage()));
+			tmp2 += (-1.0)*(multiplyTc(creationMatrix[3].getStorage(),creationMatrix[3].getStorage()));
+			tmp3 = (multiplyTc(creationMatrix[1].getStorage(),creationMatrix[1].getStorage()));
+			tmp3 += (-1.0)*( multiplyTc(creationMatrix[4].getStorage(),creationMatrix[4].getStorage()));
 			tmp4 = tmp2*tmp3;
 
 			tmp += (0.25)*(-2*_J)*tmp4;
 
 
 			//Sz_xy*Sz_yz
-			tmp2 = (multiplyTc(creationMatrix[0].getCRS(),creationMatrix[0].getCRS()));
-			tmp2 += (-1.0)*(multiplyTc(creationMatrix[3].getCRS(),creationMatrix[3].getCRS()));
-			tmp3 = (multiplyTc(creationMatrix[2].getCRS(),creationMatrix[2].getCRS()));
-			tmp3 += (-1.0)*( multiplyTc(creationMatrix[5].getCRS(),creationMatrix[5].getCRS()));
+			tmp2 = (multiplyTc(creationMatrix[0].getStorage(),creationMatrix[0].getStorage()));
+			tmp2 += (-1.0)*(multiplyTc(creationMatrix[3].getStorage(),creationMatrix[3].getStorage()));
+			tmp3 = (multiplyTc(creationMatrix[2].getStorage(),creationMatrix[2].getStorage()));
+			tmp3 += (-1.0)*( multiplyTc(creationMatrix[5].getStorage(),creationMatrix[5].getStorage()));
 			tmp4 = tmp2*tmp3;
 
 			tmp += (0.25)*(-2*_J)*tmp4;
 
 
 			//Sz_xz*Sz_yz
-			tmp2 = (multiplyTc(creationMatrix[1].getCRS(),creationMatrix[1].getCRS()));
-			tmp2 += (-1.0)*(multiplyTc(creationMatrix[4].getCRS(),creationMatrix[4].getCRS()));
-			tmp3 = (multiplyTc(creationMatrix[2].getCRS(),creationMatrix[2].getCRS()));
-			tmp3 += (-1.0)*( multiplyTc(creationMatrix[5].getCRS(),creationMatrix[5].getCRS()));
+			tmp2 = (multiplyTc(creationMatrix[1].getStorage(),creationMatrix[1].getStorage()));
+			tmp2 += (-1.0)*(multiplyTc(creationMatrix[4].getStorage(),creationMatrix[4].getStorage()));
+			tmp3 = (multiplyTc(creationMatrix[2].getStorage(),creationMatrix[2].getStorage()));
+			tmp3 += (-1.0)*( multiplyTc(creationMatrix[5].getStorage(),creationMatrix[5].getStorage()));
 			tmp4 = tmp2*tmp3;
 
 			tmp += (0.25)*(-2*_J)*tmp4;
@@ -276,35 +276,35 @@ private:
 		if(true){
 
 			//Sp_xy*Sm_xz + Sp_xz*Sm_xy
-			tmp2 = multiplyTc(creationMatrix[0].getCRS(),creationMatrix[3].getCRS());
-			tmp3 = multiplyTc(creationMatrix[4].getCRS(),creationMatrix[1].getCRS());
+			tmp2 = multiplyTc(creationMatrix[0].getStorage(),creationMatrix[3].getStorage());
+			tmp3 = multiplyTc(creationMatrix[4].getStorage(),creationMatrix[1].getStorage());
 			tmp4 = tmp2*tmp3;
 			tmp += (-_J)*tmp4;
 
-			tmp2 = multiplyTc(creationMatrix[1].getCRS(),creationMatrix[4].getCRS());
-			tmp3 = multiplyTc(creationMatrix[3].getCRS(),creationMatrix[0].getCRS());
+			tmp2 = multiplyTc(creationMatrix[1].getStorage(),creationMatrix[4].getStorage());
+			tmp3 = multiplyTc(creationMatrix[3].getStorage(),creationMatrix[0].getStorage());
 			tmp4 = tmp2*tmp3;
 			tmp += (-_J)*tmp4;
 
 			//Sp_xy*Sm_yz + Sp_yz*Sm_xy
-			tmp2 = multiplyTc(creationMatrix[0].getCRS(),creationMatrix[3].getCRS());
-			tmp3 = multiplyTc(creationMatrix[5].getCRS(),creationMatrix[2].getCRS());
+			tmp2 = multiplyTc(creationMatrix[0].getStorage(),creationMatrix[3].getStorage());
+			tmp3 = multiplyTc(creationMatrix[5].getStorage(),creationMatrix[2].getStorage());
 			tmp4 = tmp2*tmp3;
 			tmp += (-_J)*tmp4;
 
-			tmp2 = multiplyTc(creationMatrix[2].getCRS(),creationMatrix[5].getCRS());
-			tmp3 = multiplyTc(creationMatrix[3].getCRS(),creationMatrix[0].getCRS());
+			tmp2 = multiplyTc(creationMatrix[2].getStorage(),creationMatrix[5].getStorage());
+			tmp3 = multiplyTc(creationMatrix[3].getStorage(),creationMatrix[0].getStorage());
 			tmp4 = tmp2*tmp3;
 			tmp += (-_J)*tmp4;
 
 			//Sp_yz*Sm_xz + Sp_xz*Sm_yz
-			tmp2 = multiplyTc(creationMatrix[2].getCRS(),creationMatrix[5].getCRS());
-			tmp3 = multiplyTc(creationMatrix[4].getCRS(),creationMatrix[1].getCRS());
+			tmp2 = multiplyTc(creationMatrix[2].getStorage(),creationMatrix[5].getStorage());
+			tmp3 = multiplyTc(creationMatrix[4].getStorage(),creationMatrix[1].getStorage());
 			tmp4 = tmp2*tmp3;
 			tmp += (-_J)*tmp4;
 
-			tmp2 = multiplyTc(creationMatrix[1].getCRS(),creationMatrix[4].getCRS());
-			tmp3 = multiplyTc(creationMatrix[5].getCRS(),creationMatrix[2].getCRS());
+			tmp2 = multiplyTc(creationMatrix[1].getStorage(),creationMatrix[4].getStorage());
+			tmp3 = multiplyTc(creationMatrix[5].getStorage(),creationMatrix[2].getStorage());
 			tmp4 = tmp2*tmp3;
 			tmp += (-_J)*tmp4;
 		}
@@ -314,8 +314,8 @@ private:
 		if (true){
 			//P_xy_dagg P_xz + P_xz_dagg P_xy , gamma=xy,gamma_p=xz
 
-			tmp2= (multiplyTc(creationMatrix[0].getCRS(),creationMatrix[4].getCRS()));
-			tmp3= (multiplyTc(creationMatrix[1].getCRS(),creationMatrix[3].getCRS()));
+			tmp2= (multiplyTc(creationMatrix[0].getStorage(),creationMatrix[4].getStorage()));
+			tmp3= (multiplyTc(creationMatrix[1].getStorage(),creationMatrix[3].getStorage()));
 
 			tmp4 = tmp2*transposeConjugate(tmp3);
 			tmp += (-1.0)*(_J)*tmp4;
@@ -324,8 +324,8 @@ private:
 			tmp += (-1.0)*(_J)*tmp4;
 
 			//gamma=xy,gamma_p=yz
-			tmp2= (multiplyTc(creationMatrix[0].getCRS(),creationMatrix[5].getCRS()));
-			tmp3= (multiplyTc(creationMatrix[2].getCRS(),creationMatrix[3].getCRS()));
+			tmp2= (multiplyTc(creationMatrix[0].getStorage(),creationMatrix[5].getStorage()));
+			tmp3= (multiplyTc(creationMatrix[2].getStorage(),creationMatrix[3].getStorage()));
 
 			tmp4 = tmp2*transposeConjugate(tmp3);
 			tmp += (-1.0)*(_J)*tmp4;
@@ -335,8 +335,8 @@ private:
 
 
 			//gamma=xz,gamma_p=yz
-			tmp2= (multiplyTc(creationMatrix[1].getCRS(),creationMatrix[5].getCRS()));
-			tmp3= (multiplyTc(creationMatrix[2].getCRS(),creationMatrix[4].getCRS()));
+			tmp2= (multiplyTc(creationMatrix[1].getStorage(),creationMatrix[5].getStorage()));
+			tmp3= (multiplyTc(creationMatrix[2].getStorage(),creationMatrix[4].getStorage()));
 
 			tmp4 = tmp2*transposeConjugate(tmp3);
 			tmp += (-1.0)*(_J)*tmp4;
@@ -426,7 +426,7 @@ private:
 	void Rotate_all(const MatrixType& R, VectorOperatorType& creationMatrix)
 	{
 		for(SizeType i = 0; i < creationMatrix.size(); ++i){
-			MatrixType tmp = creationMatrix[i].getCRS().toDense()*R;
+			MatrixType tmp = creationMatrix[i].getStorage().toDense()*R;
 			MatrixType tmp2 = multiplyTransposeConjugate(R, tmp);
 			creationMatrix[i].fromStorage(tmp2);
 		}

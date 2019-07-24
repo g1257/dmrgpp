@@ -543,7 +543,7 @@ private:
 	                       OperatorType& opDest1,
 	                       const OperatorType& opSrc1)
 	{
-		const SparseMatrixType& opSrc = opSrc1.getCRS();
+		const SparseMatrixType& opSrc = opSrc1.getStorage().getCRS();
 		SparseMatrixType opDest;
 		transposeConjugate(opDest, opSrc);
 		for (SizeType i=0;i<opSrc.rows();i++) {
@@ -579,7 +579,7 @@ private:
 		const DenseMatrixType opSrcDense = opSrc.getStorage().toDense();
 		SparseMatrixType opSrcCRS;
 		fullMatrixToCrsMatrix(opSrcCRS, opSrcDense);
-		for (SizeType i=0;i<opSrc.getCRS().rows();i++) {
+		for (SizeType i=0;i<opSrc.getStorage().rows();i++) {
 			PairType jm = thisBasis_->jmValue(i);
 			for (int l=opSrcCRS.getRowPtr(i);l<opSrcCRS.getRowPtr(i+1);l++) {
 				SizeType iprime = opSrcCRS.getCol(l);

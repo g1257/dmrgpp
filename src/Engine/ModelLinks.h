@@ -283,7 +283,7 @@ public:
 	SizeType hilbertSize(SizeType) const
 	{
 		assert(cm_.size() > 0);
-		return cm_[0].getCRS().rows();
+		return cm_[0].getStorage().rows();
 	}
 
 	void setOperatorMatrices(VectorOperatorType& cm) const

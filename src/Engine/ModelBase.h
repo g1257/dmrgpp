@@ -281,7 +281,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	                             const BlockType& block,
 	                             RealType time)  const
 	{
-		hmatrix.makeDiagonal(cm[0].getCRS().rows());
+		hmatrix.makeDiagonal(cm[0].getStorage().rows());
 
 		modelCommon_.addConnectionsInNaturalBasis(hmatrix,cm,block,time);
 

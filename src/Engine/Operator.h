@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2016-2018, UT-Battelle, LLC
+Copyright (c) 2009-2016-2018-2019, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 5.]
@@ -71,7 +71,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file Operator.h
  *
- *  A structure to represent an operator
+ *  A class to represent an operator
  *  Contains the actual data_, the (J,M) that indicates
  * how this operator transforms, the fermionSign which
  * indicates if this operator commutes or anticommutes
@@ -109,14 +109,12 @@ public:
 	typedef Su2Related Su2RelatedType;
 	typedef PsimagLite::Matrix<value_type> DenseMatrixType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef OperatorStorage<ComplexOrRealType> StorageType;
 
 	Operator()
 	    : fermionOrBoson_(ProgramGlobals::FermionOrBosonEnum::BOSON), angularFactor_(1)
 	{}
 
-	typedef OperatorStorage<ComplexOrRealType> StorageType;
-
-	// Do we still need this ctor?
 	Operator(const SparseMatrixType& data1,
 	         ProgramGlobals::FermionOrBosonEnum fermionSign1,
 	         const PairType& jm1,
@@ -300,28 +298,7 @@ public:
 		os<<"angularFactor_="<<angularFactor_<<"\n";
 	}
 
-	void send(int root,int tag,PsimagLite::MPI::CommType mpiComm)
-	{
-		data_.send(root,tag,mpiComm);
-		int fs = (fermionOrBoson_ == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
-		PsimagLite::MPI::send(fs,root,tag+1,mpiComm);
-		PsimagLite::MPI::send(jm_,root,tag+2,mpiComm);
-		PsimagLite::MPI::send(angularFactor_,root,tag+3,mpiComm);
-		Dmrg::send(su2Related_,root,tag+4,mpiComm);
-	}
-
-	void recv(int root,int tag,PsimagLite::MPI::CommType mpiComm)
-	{
-		data_.recv(root,tag,mpiComm);
-		int fs = 0;
-		PsimagLite::MPI::recv(fs,root,tag+1,mpiComm);
-		fermionOrBoson_ = (fs < 0) ? ProgramGlobals::FermionOrBosonEnum::FERMION
-		                           : ProgramGlobals::FermionOrBosonEnum::BOSON;
-		PsimagLite::MPI::recv(jm_,root,tag+2,mpiComm);
-		PsimagLite::MPI::recv(angularFactor_,root,tag+3,mpiComm);
-		Dmrg::recv(su2Related_,root,tag+4,mpiComm);
-	}
-
+	// operators START
 	Operator operator*(const Operator& other) const
 	{
 		const ProgramGlobals::FermionOrBosonEnum f = ProgramGlobals::multipy(fermionOrBoson_,
@@ -361,6 +338,8 @@ public:
 		data_ += other.data_;
 		return *this;
 	}
+
+	// operators END
 
 	void outerProduct(const Operator& A,
 	                  SizeType nout,
@@ -421,7 +400,7 @@ public:
 		angularFactor_ = af;
 	}
 
-	// Don't uset this one, use getStorage directly FIXME TODO
+	// short cut
 	const SparseMatrixType& getCRS() const { return data_.getCRS(); }
 
 	const StorageType& getStorage() const { return data_; }
@@ -504,9 +483,8 @@ template<typename SparseMatrixType,
 void fillOperator(SomeVectorTemplate<SparseMatrixType*,SomeAllocator1Type>& data_,
                   SomeVectorTemplate<Operator<SparseMatrixType>,SomeAllocator2Type>& op)
 {
-	for (SizeType i=0;i<data_.size();i++) {
+	for (SizeType i = 0; i < data_.size(); ++i)
 		data_[i] = &(op[i].data_);
-	}
 }
 
 template<typename SparseMatrixType>
