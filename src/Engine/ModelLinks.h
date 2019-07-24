@@ -109,8 +109,8 @@ public:
 			assert(index1 < cm_.size() && index2 < cm_.size());
 			ProgramGlobals::FermionOrBosonEnum fermionOrBoson =
 			        ProgramGlobals::FermionOrBosonEnum::BOSON;
-			if (cm_[index1].fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION &&
-			cm_[index2].fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
+			if (cm_[index1].fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION &&
+			cm_[index2].fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION)
 				fermionOrBoson = ProgramGlobals::FermionOrBosonEnum::FERMION;
 			// can we also infer angularMomentum, angularFactor, and category? FIXME TODO
 
@@ -236,7 +236,7 @@ public:
 		if (m == 0) return;
 		hermit_.resize(m);
 		for (SizeType i = 0; i < m; ++i)
-			hermit_[i] = getHermitianProperty(cm_[i].data);
+			hermit_[i] = getHermitianProperty(cm_[i].getStorage());
 
 		Term::init(labeledOps);
 	}
@@ -283,7 +283,7 @@ public:
 	SizeType hilbertSize(SizeType) const
 	{
 		assert(cm_.size() > 0);
-		return cm_[0].data.rows();
+		return cm_[0].getCRS().rows();
 	}
 
 	void setOperatorMatrices(VectorOperatorType& cm) const

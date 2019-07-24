@@ -95,6 +95,14 @@ public:
 		throw PsimagLite::RuntimeError("OperatorStorage::operator*=\n");
 	}
 
+	void fromDense(const PsimagLite::Matrix<ComplexOrRealType>& m)
+	{
+		if (!justCrs_)
+			throw PsimagLite::RuntimeError("OperatorStorage::fromDense()\n");
+
+		fullMatrixToCrsMatrix(crs_, m);
+	}
+
 	void clear()
 	{
 		if (justCrs_)

@@ -164,7 +164,7 @@ public:
 
 		SparseMatrixType m0 = braket.op(0).getCRS();
 		SparseMatrixType m1 = braket.op(1).getCRS();
-		ProgramGlobals::FermionOrBosonEnum fermionSign = braket.op(0).fermionOrBoson;
+		ProgramGlobals::FermionOrBosonEnum fermionSign = braket.op(0).fermionOrBoson();
 
 		SizeType site1 = 0;
 		SizeType sites= storage.n_col();

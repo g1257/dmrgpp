@@ -574,18 +574,18 @@ private:
 
 	void createReducedOperator(DenseMatrixType& opDest1,const OperatorType& opSrc)
 	{
-		const DenseMatrixType opSrcDense = opSrc.data.toDense();
+		const DenseMatrixType opSrcDense = opSrc.getStorage().toDense();
 		SparseMatrixType opSrcCRS;
 		fullMatrixToCrsMatrix(opSrcCRS, opSrcDense);
-		for (SizeType i=0;i<opSrc.data.rows();i++) {
+		for (SizeType i=0;i<opSrc.getCRS().rows();i++) {
 			PairType jm = thisBasis_->jmValue(i);
 			for (int l=opSrcCRS.getRowPtr(i);l<opSrcCRS.getRowPtr(i+1);l++) {
 				SizeType iprime = opSrcCRS.getCol(l);
 				PairType jmPrime = thisBasis_->jmValue(iprime);
-				RealType divisor = opSrc.angularFactor*(jmPrime.first+1);
+				RealType divisor = opSrc.angularFactor()*(jmPrime.first+1);
 				opDest1(basisrinverse_[i],basisrinverse_[iprime]) +=
 				        opSrcDense(i,iprime)*
-				        cgObject_->operator()(jmPrime,jm,opSrc.jm)/divisor;
+				        cgObject_->operator()(jmPrime,jm,opSrc.jm())/divisor;
 			}
 		}
 	}

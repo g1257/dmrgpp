@@ -289,7 +289,7 @@ private:
 			assert(x<lrs_.left().permutationVector().size());
 			pack2.unpack(x0,x1,lrs_.left().permutation(x));
 
-			const bool isFermion = (A.fermionOrBoson ==
+			const bool isFermion = (A.fermionOrBoson() ==
 			                        ProgramGlobals::FermionOrBosonEnum::FERMION);
 			const RealType sign = fermionSign(x0, (isFermion) ? -1 : 1);
 			const SizeType start = A.getCRS().getRowPtr(x1);
@@ -348,7 +348,7 @@ private:
 			SizeType y0 = 0;
 			SizeType y1 = 0;
 			pack2.unpack(y0,y1,lrs_.right().permutation(y));
-			const bool isFermion = (A.fermionOrBoson ==
+			const bool isFermion = (A.fermionOrBoson() ==
 			                        ProgramGlobals::FermionOrBosonEnum::FERMION);
 			const RealType sign = lrs_.left().fermionicSign(x, (isFermion) ? -1 : 1);
 			const SizeType start = A.getCRS().getRowPtr(y0);
@@ -411,7 +411,7 @@ private:
 			if (x >= lrs_.left().permutationVector().size())
 				err("applyLocalOpSystem S\n");
 
-			const bool isFermion = (A.fermionOrBoson ==
+			const bool isFermion = (A.fermionOrBoson() ==
 			                        ProgramGlobals::FermionOrBosonEnum::FERMION);
 			const RealType sign = lrs_.left().fermionicSign(x, (isFermion) ? -1 : 1);
 			const SizeType start = A.getCRS().getRowPtr(y);
