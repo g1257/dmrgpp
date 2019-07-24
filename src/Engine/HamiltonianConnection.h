@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "VerySparseMatrix.h"
 #include "ProgressIndicator.h"
+#include "OperatorStorage.h"
 
 namespace Dmrg {
 

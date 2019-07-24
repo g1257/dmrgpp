@@ -56,13 +56,16 @@ public:
 	}
 #endif
 
-	static void changeBasis(SparseMatrixType &v,
+	static void changeBasis(OperatorStorageType &v,
 	                        const BlockDiagonalMatrixType& ftransform1)
 	{
+		if (!v.justCRS())
+			err("changeBasis: operatorstorage not justCRS\n");
+
 		if (!ProgramGlobals::oldChangeOfBasis) {
-			BlockOffDiagMatrixType vBlocked(v, ftransform1.offsetsRows());
+			BlockOffDiagMatrixType vBlocked(v.getCRS(), ftransform1.offsetsRows());
 			vBlocked.transform(ftransform1);
-			vBlocked.toSparse(v);
+			vBlocked.toSparse(v.getCRSNonConst());
 			return;
 		}
 
@@ -71,9 +74,7 @@ public:
 		ftransform1.toSparse(ftransform);
 		SparseMatrixType ftransformT;
 		transposeConjugate(ftransformT,ftransform);
-		SparseMatrixType tmp;
-		multiply(tmp,v,ftransform);
-		multiply(v,ftransformT,tmp);
+		v.rotate(ftransformT, ftransform);
 	}
 
 	void clear()

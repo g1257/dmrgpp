@@ -423,9 +423,9 @@ public:
 		SizeType ns=lrs_.left().size();
 		SparseMatrixType hamiltonian;
 		if (option) {
-			hamiltonian = lrs_.left().hamiltonian();
+			hamiltonian = lrs_.left().hamiltonian().getCRS();
 		} else {
-			hamiltonian = lrs_.right().hamiltonian();
+			hamiltonian = lrs_.right().hamiltonian().getCRS();
 		}
 
 		matrixBlock.resize(bs,bs);

@@ -253,8 +253,8 @@ protected:
 	                      const OperatorStorageType& B,
 	                      const LinkType& link2)
 	{
-		SparseMatrixType Ahat;
-		calculateAhat(Ahat, A, link2.value, link2.fermionOrBoson);
+		OperatorStorageType Ahat;
+		calculateAhat(Ahat.getCRSNonConst(), A.getCRS(), link2.value, link2.fermionOrBoson);
 		ArrayOfMatStructType* x1 = new ArrayOfMatStructType(Ahat,
 		                                                    ijpatchesOld_,
 		                                                    *ijpatchesNew_,

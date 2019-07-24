@@ -93,6 +93,8 @@ class ArrayOfMatStruct {
 public:
 
 	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::OperatorStorageType OperatorStorageType;
 	typedef MatrixDenseOrSparse<SparseMatrixType> MatrixDenseOrSparseType;
 	typedef typename MatrixDenseOrSparseType::RealType RealType;
 	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
@@ -101,7 +103,7 @@ public:
 	typedef typename MatrixDenseOrSparseType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 
-	ArrayOfMatStruct(const SparseMatrixType& sparse,
+	ArrayOfMatStruct(const OperatorStorageType& sparse1,
 	                 const GenIjPatchType& patchOld,
 	                 const GenIjPatchType& patchNew,
 	                 typename GenIjPatchType::LeftOrRightEnumType leftOrRight,
@@ -109,6 +111,7 @@ public:
 	                 bool useLowerPart)
 	    : data_(patchNew(leftOrRight).size(), patchOld(leftOrRight).size())
 	{
+		const SparseMatrixType& sparse = sparse1.getCRS();
 		const BasisType& basisOld = (leftOrRight == GenIjPatchType::LEFT) ?
 		            patchOld.lrs().left() : patchOld.lrs().right();
 		const BasisType& basisNew = (leftOrRight == GenIjPatchType::LEFT) ?

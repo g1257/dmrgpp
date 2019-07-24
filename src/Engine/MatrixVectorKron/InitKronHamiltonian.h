@@ -233,8 +233,8 @@ private:
 	void addHlAndHr()
 	{
 		const RealType value = 1.0;
-		const SparseMatrixType& aL = hc_.modelHelper().leftRightSuper().left().hamiltonian();
-		const SparseMatrixType& aR = hc_.modelHelper().leftRightSuper().right().hamiltonian();
+		const OperatorStorageType& aL = hc_.modelHelper().leftRightSuper().left().hamiltonian();
+		const OperatorStorageType& aR = hc_.modelHelper().leftRightSuper().right().hamiltonian();
 		identityL_.makeDiagonal(aL.rows(), value);
 		identityR_.makeDiagonal(aR.rows(), value);
 		std::pair<SizeType, SizeType> ops(0,0);
@@ -286,8 +286,8 @@ private:
 
 	const ModelType& model_;
 	const HamiltonianConnectionType& hc_;
-	SparseMatrixType identityL_;
-	SparseMatrixType identityR_;
+	OperatorStorageType identityL_;
+	OperatorStorageType identityR_;
 	VectorSizeType vstart_;
 	VectorType yin_;
 	VectorType xout_;

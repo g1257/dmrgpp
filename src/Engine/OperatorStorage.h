@@ -102,7 +102,7 @@ public:
 		throw PsimagLite::RuntimeError("OperatorStorage::clear()\n");
 	}
 
-	bool checkValidity() const
+	void checkValidity() const
 	{
 		if (justCrs_)
 			return crs_.checkValidity();
@@ -132,6 +132,14 @@ public:
 	}
 
 	const SparseMatrixType& getCRS() const
+	{
+		if (!justCrs_)
+			throw PsimagLite::RuntimeError("OperatorStorage::toCRS\n");
+		return crs_;
+	}
+
+	// FIXME TODO DELETE THIS FUNCTION!!
+	SparseMatrixType& getCRSNonConst()
 	{
 		if (!justCrs_)
 			throw PsimagLite::RuntimeError("OperatorStorage::toCRS\n");
@@ -287,6 +295,15 @@ bool isTheIdentity(const OperatorStorage<ComplexOrRealType>& src)
 		return isTheIdentity(src.getCRS());
 
 	throw PsimagLite::RuntimeError("OperatorStorage: isTheIdentity\n");
+}
+
+template<typename ComplexOrRealType>
+bool isNonZeroMatrix(const OperatorStorage<ComplexOrRealType>& src)
+{
+	if (src.justCRS())
+		return isNonZeroMatrix(src.getCRS());
+
+	throw PsimagLite::RuntimeError("OperatorStorage: isNonZeroMatrix\n");
 }
 
 } // namespace PsimagLite
