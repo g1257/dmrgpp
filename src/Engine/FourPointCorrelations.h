@@ -217,8 +217,8 @@ public:
 
 		// Take care of modifiers
 		SparseMatrixType O1m, O2m;
-		skeleton_.createWithModification(O1m,braket.op(index0).data,mod1);
-		skeleton_.createWithModification(O2m,braket.op(index1).data,mod2);
+		skeleton_.createWithModification(O1m,braket.op(index0).getCRS(),mod1);
+		skeleton_.createWithModification(O2m,braket.op(index1).getCRS(),mod2);
 
 		// Multiply and grow ("snowball")
 		SparseMatrixType O1g,O2g;
@@ -244,8 +244,8 @@ public:
 	{
 		// Take care of modifiers
 		SparseMatrixType O3m,O4m;
-		skeleton_.createWithModification(O3m,braket.op(index0).data,mod3);
-		skeleton_.createWithModification(O4m,braket.op(index1).data,mod4);
+		skeleton_.createWithModification(O3m,braket.op(index0).getCRS(),mod3);
+		skeleton_.createWithModification(O4m,braket.op(index1).getCRS(),mod4);
 
 		const ObserverHelperType& helper = skeleton_.helper();
 		int ns = i3 - 1;
@@ -326,7 +326,7 @@ public:
 			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs distinct points\n");
 
 		SparseMatrixType O3m;
-		skeleton_.createWithModification(O3m,Op3.data,mod3);
+		skeleton_.createWithModification(O3m,Op3.getCRS(),mod3);
 
 		int ns = i3-1;
 		if (ns < 0) ns = 0;
@@ -353,7 +353,7 @@ private:
 	{
 		// Take care of modifiers
 		SparseMatrixType O3m;
-		skeleton_.createWithModification(O3m,braket.op(index).data,mod3);
+		skeleton_.createWithModification(O3m,braket.op(index).getCRS(),mod3);
 
 		int ns = i3-1;
 		if (ns<0) ns = 0;

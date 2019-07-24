@@ -100,7 +100,8 @@ public:
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
+	typedef typename OperatorType::StorageType OperatorStorageType;
+	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename OperatorsType::BasisType BasisType;
 	typedef typename BasisType::QnType QnType;
 	typedef typename BasisType::BlockType BlockType;

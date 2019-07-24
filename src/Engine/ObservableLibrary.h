@@ -99,7 +99,7 @@ public:
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
 	typedef typename ModelType::RealType RealType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
+	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename VectorWithOffsetType::value_type FieldType;
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorFieldType;
 	typedef PsimagLite::Matrix<FieldType> MatrixType;
@@ -161,9 +161,9 @@ public:
 			for (SizeType i = 0; i < orbitals*2; ++i) {
 				for (SizeType j = i; j < orbitals*2; ++j) {
 					SparseMatrixType O2,O4,n1,n2;
-					SparseMatrixType O1 = model_.naturalOperator("c",site,i).data; // c_i
+					SparseMatrixType O1 = model_.naturalOperator("c",site,i).getCRS(); // c_i
 					transposeConjugate(O2,O1); // O2 = transpose(O1)
-					SparseMatrixType O3 = model_.naturalOperator("c",site,j).data; // c_j
+					SparseMatrixType O3 = model_.naturalOperator("c",site,j).getCRS(); // c_j
 					transposeConjugate(O4,O3); // O4 = transpose(O3)
 
 					multiply(n1,O2,O1); // c_i^{\dagger}.c_i
@@ -386,7 +386,7 @@ private:
 
 			if (i0==0) {
 				std::cout<<"Using Matrix A:\n";
-				std::cout<<opA.data.toDense();
+				std::cout<<opA.getCRS().toDense();
 				std::cout<<"site <"<<bra<<"|"<<label;
 				std::cout<<"|"<<ket<<"> time\n";
 			}
@@ -507,9 +507,9 @@ private:
 			SizeType spin1 = 1; // down
 
 			// c_dn,0
-			SparseMatrixType O1 = model_.naturalOperator("c",site,spin1).data;
+			SparseMatrixType O1 = model_.naturalOperator("c",site,spin1).getCRS();
 			// c_up,0
-			SparseMatrixType O2 = model_.naturalOperator("c",site,spin0).data;
+			SparseMatrixType O2 = model_.naturalOperator("c",site,spin0).getCRS();
 
 			SparseMatrixType A,B;
 			multiply(B,O1,O2); // c_dn,0 . c_up,0.
@@ -763,9 +763,9 @@ private:
 			SizeType spin0 = 0; // up
 			SizeType spin1 = 1; // down
 			// c_dn,0
-			SparseMatrixType O1 = model_.naturalOperator("c",site,orb1+spin1*orbitals).data;
+			SparseMatrixType O1 = model_.naturalOperator("c",site,orb1+spin1*orbitals).getCRS();
 			// c_up,0
-			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin0*orbitals).data;
+			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin0*orbitals).getCRS();
 
 			SparseMatrixType A,B;
 			multiply(B,O1,O2); // c_dn,0 . c_up,0.
@@ -778,9 +778,9 @@ private:
 			SizeType spin0 = 0; // up
 			SizeType spin1 = 1; // down
 			// c_dn,0
-			SparseMatrixType O1 = model_.naturalOperator("c",site,orb1+spin1*orbitals).data;
+			SparseMatrixType O1 = model_.naturalOperator("c",site,orb1+spin1*orbitals).getCRS();
 			// c_up,0
-			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin0*orbitals).data;
+			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin0*orbitals).getCRS();
 			SparseMatrixType A,B;
 			multiply(B,O1,O2); // c_dn,0 . c_up,0.
 			transposeConjugate(A,B);
@@ -789,10 +789,10 @@ private:
 		} else if (flag==2) {
 			SizeType spin0 = 0; // up
 			SizeType spin1 = 1; // down
-			SparseMatrixType O1 = model_.naturalOperator("c",site,1+spin1*orbitals).data; // c_dn,1
-			SparseMatrixType O2 = model_.naturalOperator("c",site,0+spin0*orbitals).data; // c_up,0
-			SparseMatrixType O3 = model_.naturalOperator("c",site,1+spin0*orbitals).data; // c_up,1
-			SparseMatrixType O4 = model_.naturalOperator("c",site,0+spin1*orbitals).data; // c_dn,0
+			SparseMatrixType O1 = model_.naturalOperator("c",site,1+spin1*orbitals).getCRS(); // c_dn,1
+			SparseMatrixType O2 = model_.naturalOperator("c",site,0+spin0*orbitals).getCRS(); // c_up,0
+			SparseMatrixType O3 = model_.naturalOperator("c",site,1+spin0*orbitals).getCRS(); // c_up,1
+			SparseMatrixType O4 = model_.naturalOperator("c",site,0+spin1*orbitals).getCRS(); // c_dn,0
 
 			SparseMatrixType A,B,tmp1,tmp2;
 			multiply(tmp1,O1,O2); // c_dn,1 . c_up,0
@@ -807,10 +807,10 @@ private:
 		} else if (flag==3) {
 			SizeType spin0 = 0; // up
 			SizeType spin1 = 1; // down
-			SparseMatrixType O1 = model_.naturalOperator("c",site,1+spin1*orbitals).data; // c_dn,1
-			SparseMatrixType O2 = model_.naturalOperator("c",site,0+spin0*orbitals).data; // c_up,0
-			SparseMatrixType O3 = model_.naturalOperator("c",site,1+spin0*orbitals).data; // c_up,1
-			SparseMatrixType O4 = model_.naturalOperator("c",site,0+spin1*orbitals).data; // c_dn,0
+			SparseMatrixType O1 = model_.naturalOperator("c",site,1+spin1*orbitals).getCRS(); // c_dn,1
+			SparseMatrixType O2 = model_.naturalOperator("c",site,0+spin0*orbitals).getCRS(); // c_up,0
+			SparseMatrixType O3 = model_.naturalOperator("c",site,1+spin0*orbitals).getCRS(); // c_up,1
+			SparseMatrixType O4 = model_.naturalOperator("c",site,0+spin1*orbitals).getCRS(); // c_dn,0
 
 			SparseMatrixType A,B,tmp1,tmp2;
 			multiply(tmp1,O1,O2); // c_dn,1 . c_up,0
@@ -827,9 +827,9 @@ private:
 			SizeType orb1 = 1;  // upper orbital
 			SizeType spin0 = 0; // up
 			// c_up,0
-			SparseMatrixType O1 = model_.naturalOperator("c",site,orb0+spin0*orbitals).data;
+			SparseMatrixType O1 = model_.naturalOperator("c",site,orb0+spin0*orbitals).getCRS();
 			// c_up,1
-			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin0*orbitals).data;
+			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin0*orbitals).getCRS();
 			SparseMatrixType A,B;
 			multiply(B,O1,O2);      // c_up,0 . c_up,1
 			transposeConjugate(A,B);
@@ -840,9 +840,9 @@ private:
 			SizeType orb1 = 1;  // upper orbital
 			SizeType spin1 = 1; // dn
 			// c_dn,0
-			SparseMatrixType O1 = model_.naturalOperator("c",site,orb0+spin1*orbitals).data;
+			SparseMatrixType O1 = model_.naturalOperator("c",site,orb0+spin1*orbitals).getCRS();
 			// c_dn,1
-			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin1*orbitals).data;
+			SparseMatrixType O2 = model_.naturalOperator("c",site,orb1+spin1*orbitals).getCRS();
 			SparseMatrixType A,B;
 			multiply(B,O1,O2);      // c_dn,0 . c_dn,1
 			transposeConjugate(A,B);
@@ -851,10 +851,10 @@ private:
 		} else if (flag==6) {
 			SizeType spin0 = 0; // up
 			SizeType spin1 = 1; // down
-			SparseMatrixType O1 = model_.naturalOperator("c",site,1+spin1*orbitals).data; // c_up,0
-			SparseMatrixType O2 = model_.naturalOperator("c",site,0+spin0*orbitals).data; // c_up,1
-			SparseMatrixType O3 = model_.naturalOperator("c",site,1+spin0*orbitals).data; // c_dn,0
-			SparseMatrixType O4 = model_.naturalOperator("c",site,0+spin1*orbitals).data; // c_dn,1
+			SparseMatrixType O1 = model_.naturalOperator("c",site,1+spin1*orbitals).getCRS(); // c_up,0
+			SparseMatrixType O2 = model_.naturalOperator("c",site,0+spin0*orbitals).getCRS(); // c_up,1
+			SparseMatrixType O3 = model_.naturalOperator("c",site,1+spin0*orbitals).getCRS(); // c_dn,0
+			SparseMatrixType O4 = model_.naturalOperator("c",site,0+spin1*orbitals).getCRS(); // c_dn,1
 
 			SparseMatrixType A,B,tmp1,tmp2;
 			multiply(tmp1,O1,O2); // c_dn,1 . c_up,0
