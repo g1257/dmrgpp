@@ -134,7 +134,7 @@ public:
 
 		// transpose conjugate
 		SparseMatrixType copy = crs_;
-		transposeConjugate(crs_, copy);
+		PsimagLite::transposeConjugate(crs_, copy);
 
 		// conjugate again to end up transposing only
 		crs_.conjugate();

@@ -108,6 +108,7 @@ public:
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef Su2Related Su2RelatedType;
 	typedef PsimagLite::Matrix<value_type> DenseMatrixType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	Operator()
 	    : fermionOrBoson_(ProgramGlobals::FermionOrBosonEnum::BOSON), angularFactor_(1)
@@ -115,6 +116,7 @@ public:
 
 	typedef OperatorStorage<ComplexOrRealType> StorageType;
 
+	// Do we still need this ctor?
 	Operator(const SparseMatrixType& data1,
 	         ProgramGlobals::FermionOrBosonEnum fermionSign1,
 	         const PairType& jm1,
@@ -244,15 +246,14 @@ public:
 		// FIXME: su2Related_ needs to be set properly for when SU(2) is running
 	}
 
-	void fromDense(const PsimagLite::Matrix<ComplexOrRealType>& m)
+	void fromStorage(const PsimagLite::Matrix<ComplexOrRealType>& m)
 	{
 		data_.fromDense(m);
 	}
 
-	void dagger()
+	void fromStorage(const SparseMatrixType& m)
 	{
-		StorageType data2 = data_;
-		transposeConjugate(data_,data2);
+		fromCRS(data_, m);
 	}
 
 	void write(PsimagLite::String label,
@@ -361,6 +362,14 @@ public:
 		return *this;
 	}
 
+	void outerProduct(const Operator& A,
+	                  SizeType nout,
+	                  const VectorRealType& signs,
+	                  bool order)
+	{
+		externalProduct2(data_, A.getStorage(), nout, signs, order);
+	}
+
 	SizeType metaDiff(const Operator& op2) const
 	{
 		const Operator& op1 = *this;
@@ -387,9 +396,38 @@ public:
 		return (data_.rows() == 0);
 	}
 
+	void clear()
+	{
+		data_.clear();
+	}
+
+	void set(ProgramGlobals::FermionOrBosonEnum fOrB,
+	         PairType jm1,
+	         RealType af,
+	         const Su2RelatedType& su2)
+	{
+		fermionOrBoson_ = fOrB;
+		jm_ = jm1;
+		angularFactor_ = af;
+		su2Related_ = su2;
+	}
+
+	void set(ProgramGlobals::FermionOrBosonEnum fOrB,
+	         PairType jm1,
+	         RealType af)
+	{
+		fermionOrBoson_ = fOrB;
+		jm_ = jm1;
+		angularFactor_ = af;
+	}
+
+	// Don't uset this one, use getStorage directly FIXME TODO
 	const SparseMatrixType& getCRS() const { return data_.getCRS(); }
 
 	const StorageType& getStorage() const { return data_; }
+
+	// FIXME TODO
+	StorageType& getStorageNonConst() { return data_; }
 
 	const ProgramGlobals::FermionOrBosonEnum& fermionOrBoson() const
 	{
@@ -400,6 +438,11 @@ public:
 
 	const RealType& angularFactor() const { return angularFactor_; }
 
+	const Su2RelatedType& su2Related() const { return su2Related_; }
+
+	// FIXME TODO
+	Su2RelatedType& su2RelatedNonConst() { return su2Related_; }
+
 	void conjugate()
 	{
 		data_.conjugate();
@@ -408,6 +451,26 @@ public:
 	void transpose()
 	{
 		data_.transpose();
+	}
+
+	void dagger()
+	{
+		StorageType copy = data_;
+		transposeConjugate(data_, copy);
+	}
+
+	friend void reorder2(Operator& v, const VectorSizeType& permutation)
+	{
+		reorder2(v.data_, permutation);
+	}
+
+	friend void bcast2(Operator& op)
+	{
+		bcast(op.data_);
+		PsimagLite::MPI::bcast(op.fermionOrBoson_);
+		PsimagLite::MPI::bcast(op.jm_);
+		PsimagLite::MPI::bcast(op.angularFactor_);
+		bcast(op.su2Related_);
 	}
 
 private:
@@ -433,16 +496,6 @@ private:
 	RealType angularFactor_;
 	Su2RelatedType su2Related_;
 };
-
-template<typename T>
-void bcast(Operator<T>& op)
-{
-	bcast(op.data_);
-	PsimagLite::MPI::bcast(op.fermionOrBoson_);
-	PsimagLite::MPI::bcast(op.jm_);
-	PsimagLite::MPI::bcast(op.angularFactor_);
-	bcast(op.su2Related_);
-}
 
 template<typename SparseMatrixType,
          template<typename,typename> class SomeVectorTemplate,

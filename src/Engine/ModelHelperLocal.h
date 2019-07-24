@@ -158,11 +158,11 @@ public:
 		PairType ii;
 		if (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) {
 			ii = lrs_.left().getOperatorIndices(i,sigma);
-			m = &(lrs_.left().getOperatorByIndex(ii.first).data);
+			m = &(lrs_.left().getOperatorByIndex(ii.first).getStorage());
 		} else {
 			assert(type == ProgramGlobals::SysOrEnvEnum::ENVIRON);
 			ii = lrs_.right().getOperatorIndices(i,sigma);
-			m =&(lrs_.right().getOperatorByIndex(ii.first).data);
+			m =&(lrs_.right().getOperatorByIndex(ii.first).getStorage());
 		}
 
 		m->checkValidity();

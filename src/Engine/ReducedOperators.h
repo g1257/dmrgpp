@@ -166,45 +166,46 @@ public:
 		reducedOperators_.resize(ops.size());
 
 		for (SizeType i=0;i<ops.size();i++) {
-			SizeType angularMomentum =ops[i].jm.first;
+			SizeType angularMomentum = ops[i].jm().first;
 			VectorPointerOperatorType
 			        opSrc(angularMomentum+1);
-			if (ops[i].su2Related.source.size()==0) continue;
+			if (ops[i].su2Related().source.size()==0) continue;
 			VectorOperatorType myOp(angularMomentum+1);
 			SizeType transposeCounter=0;
 
 			for (SizeType m=0;m<=angularMomentum;m++) {
-				int tr = ops[i].su2Related.transpose[m];
+				const int tr = ops[i].su2Related().transpose[m];
+				const SizeType iM = ops[i].su2Related().source[m];
+
 				if (tr>=0) {
-					transposeConjugate(myOp[transposeCounter].data,
-					                   ops[ops[i].su2Related.source[m]].data);
-					myOp[transposeCounter].fermionOrBoson =
-					        ops[ops[i].su2Related.source[m]].fermionOrBoson;
-					myOp[transposeCounter].jm=typename OperatorType::PairType(
-					            angularMomentum,
-					            angularMomentum-ops[ops[i].su2Related.source[m]].jm.second);
-					myOp[transposeCounter].angularFactor =
-					        -ops[ops[i].su2Related.source[m]].angularFactor;
-					opSrc[m]=&myOp[transposeCounter];
-					transposeCounter++;
+					const ProgramGlobals::FermionOrBosonEnum fOrB = ops[iM].fermionOrBoson();
+					const PairType pairJm(angularMomentum,
+					                      angularMomentum-ops[iM].jm().second);
+					RealType af = -ops[iM].angularFactor();
+					myOp[transposeCounter] = ops[iM];
+					myOp[transposeCounter].dagger();
+					myOp[transposeCounter].set(fOrB, pairJm, af);
+					opSrc[m] = &myOp[transposeCounter];
+					++transposeCounter;
 				} else {
-					opSrc[m]=&ops[ops[i].su2Related.source[m]];
+					opSrc[m]=&ops[iM];
 				}
 			}
 
-			createReducedOperator(reducedOperators_[i].data, opSrc);
-			reducedOperators_[i].fermionOrBoson=opSrc[0]->fermionOrBoson;
-			reducedOperators_[i].jm=opSrc[0]->jm;
-			reducedOperators_[i].angularFactor=opSrc[0]->angularFactor;
+			DenseMatrixType tmp;
+			createReducedOperator(tmp, opSrc);
+			reducedOperators_[i].fromStorage(tmp);
+			const OperatorType& op0 = *(opSrc[0]);
+			reducedOperators_[i].set(op0.fermionOrBoson(),
+			                         op0.jm(),
+			                         op0.angularFactor());
 
-			reducedOperators_[i].su2Related.offset = ops[i].su2Related.offset;
-			SizeType i1 = i +  ops[i].su2Related.offset;
-			createReducedConj(angularMomentum,
-			                  reducedOperators_[i1].data,
-			                  reducedOperators_[i].data);
-			reducedOperators_[i1].fermionOrBoson=opSrc[0]->fermionOrBoson;
-			reducedOperators_[i1].jm=opSrc[0]->jm;
-			reducedOperators_[i1].angularFactor=opSrc[0]->angularFactor;
+			reducedOperators_[i].su2RelatedNonConst().offset = ops[i].su2Related().offset;
+			SizeType i1 = i +  ops[i].su2Related().offset;
+			createReducedConj(angularMomentum, reducedOperators_[i1], reducedOperators_[i]);
+			reducedOperators_[i1].set(op0.fermionOrBoson(),
+			                          op0.jm(),
+			                          op0.angularFactor());
 		}
 	}
 
@@ -228,7 +229,9 @@ public:
 		                  su2Related);
 
 		opSrc[0] = &myOp;
-		createReducedOperator(reducedHamiltonian_, opSrc);
+		DenseMatrixType tmp;
+		createReducedOperator(tmp, opSrc);
+		reducedHamiltonian_.fromDense(tmp);
 	}
 
 	void setToProduct(const BasisType& basis2,
@@ -305,7 +308,7 @@ public:
 	void changeBasis(SizeType k)
 	{
 		if (!useSu2Symmetry_) return;
-		changeBasis(reducedOperators_[k].data);
+		changeBasis(reducedOperators_[k].getStorageNonConst());
 	}
 
 	void changeBasisHamiltonian(OperatorStorageType& hamiltonian,
@@ -328,9 +331,9 @@ public:
 
 		const BasisType* basisA = &basis2;
 		const BasisType* basisB = &basis3;
-		SizeType angularMomentum = myOp.jm.first;
-		ProgramGlobals::FermionOrBosonEnum fermionOrBoson = myOp.fermionOrBoson;
-		const OperatorStorageType& A = myOp.data;
+		SizeType angularMomentum = myOp.jm().first;
+		ProgramGlobals::FermionOrBosonEnum fermionOrBoson = myOp.fermionOrBoson();
+		const OperatorStorageType& A = myOp.getStorage();
 
 		if (!order) {
 			basisA = &basis3;
@@ -344,11 +347,11 @@ public:
 		PsimagLite::Matrix<SparseElementType> B(n,n);
 		const int fs = (fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
 		externalProd_(B, basisA, basisB, A, ki, order, fs);
-		fullMatrixToCrsMatrix(reducedOperators_[ind].data,B);
-		reducedOperators_[ind].fermionOrBoson = fermionOrBoson;
-		reducedOperators_[ind].jm = myOp.jm;
-		reducedOperators_[ind].angularFactor = myOp.angularFactor;
-		reducedOperators_[ind].su2Related = myOp.su2Related;
+		reducedOperators_[ind].fromStorage(B);
+		reducedOperators_[ind].set(fermionOrBoson,
+		                           myOp.jm(),
+		                           myOp.angularFactor(),
+		                           myOp.su2Related());
 	}
 
 	void outerProductHamiltonian(const BasisType& basis2,
@@ -404,7 +407,7 @@ public:
 	void bcast()
 	{
 		for (SizeType i = 0; i < reducedOperators_.size(); i++)
-			Dmrg::bcast(reducedOperators_[i]);
+			bcast2(reducedOperators_[i]);
 	}
 
 	void write(PsimagLite::IoNg::Out& io,
@@ -537,8 +540,8 @@ private:
 	}
 
 	void createReducedConj(SizeType k1,
-	                       OperatorStorageType& opDest1,
-	                       const OperatorStorageType& opSrc1)
+	                       OperatorType& opDest1,
+	                       const OperatorType& opSrc1)
 	{
 		const SparseMatrixType& opSrc = opSrc1.getCRS();
 		SparseMatrixType opDest;
@@ -559,17 +562,16 @@ private:
 			}
 		}
 
-		fromCRS(opDest1, opDest);
+		opDest1.fromStorage(opDest);
 	}
 
-	void createReducedOperator(OperatorStorageType& opDest,
+	void createReducedOperator(DenseMatrixType& opDest1,
 	                           const VectorPointerOperatorType& opSrc)
 	{
 		SizeType n = thisBasis_->reducedSize();
-		DenseMatrixType opDest1(n,n);
+		opDest1.resize(n, n);
 		for (SizeType i=0;i<opSrc.size();i++)
-			createReducedOperator(opDest1,*opSrc[i]);
-		fullMatrixToCrsMatrix(opDest, opDest1);
+			createReducedOperator(opDest1, *opSrc[i]);
 	}
 
 	void createReducedOperator(DenseMatrixType& opDest1,const OperatorType& opSrc)

@@ -334,13 +334,13 @@ private:
 			if (i<basis2.numberOfOperators()) {
 				if (!this->useSu2Symmetry()) {
 					const OperatorType& myOp =  basis2.getOperatorByIndex(i);
-					bool isFermion = (myOp.fermionOrBoson ==
+					bool isFermion = (myOp.fermionOrBoson() ==
 					                  ProgramGlobals::FermionOrBosonEnum::FERMION);
-					if (savedSign != myOp.fermionOrBoson || fermionicSigns.size() == 0) {
+					if (savedSign != myOp.fermionOrBoson() || fermionicSigns.size() == 0) {
 						utils::fillFermionicSigns(fermionicSigns,
 						                          basis2.signs(),
 						                          (isFermion) ? -1 : 1);
-						savedSign = myOp.fermionOrBoson;
+						savedSign = myOp.fermionOrBoson();
 					}
 
 					operators_.externalProduct(i,
@@ -358,16 +358,20 @@ private:
 				}
 			} else {
 				if (!this->useSu2Symmetry()) {
+
 					const OperatorType& myOp = basis3.
 					        getOperatorByIndex(i - basis2.numberOfOperators());
-					bool isFermion = (myOp.fermionOrBoson ==
+
+					bool isFermion = (myOp.fermionOrBoson() ==
 					                  ProgramGlobals::FermionOrBosonEnum::FERMION);
-					if (savedSign != myOp.fermionOrBoson || fermionicSigns.size() == 0) {
+
+					if (savedSign != myOp.fermionOrBoson() || fermionicSigns.size() == 0) {
 						utils::fillFermionicSigns(fermionicSigns,
 						                          basis2.signs(),
 						                          (isFermion) ? -1 : 1);
-						savedSign = myOp.fermionOrBoson;
+						savedSign = myOp.fermionOrBoson();
 					}
+
 					operators_.externalProduct(i,
 					                           myOp,
 					                           basis2.size(),
@@ -411,10 +415,11 @@ private:
 		PsimagLite::Vector<SizeType>::Type momentum;
 		for (SizeType i=0;i<basis.numberOfOperators();i++) {
 			int x = PsimagLite::indexOrMinusOne(momentum,
-			                                    basis.getReducedOperatorByIndex(i).jm.first);
+			                                    basis.getReducedOperatorByIndex(i).jm().first);
 			if (x < 0)
-				momentum.push_back(basis.getReducedOperatorByIndex(i).jm.first);
+				momentum.push_back(basis.getReducedOperatorByIndex(i).jm().first);
 		}
+
 		operators_.setMomentumOfOperators(momentum);
 	}
 

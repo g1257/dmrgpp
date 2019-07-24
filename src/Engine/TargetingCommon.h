@@ -479,11 +479,11 @@ public:
 			if (isTheIdentity(myoperator[i].getCRS()) && !wereSumming) continue;
 
 			if (i == 0) {
-				forB = myoperator[i].fermionOrBoson;
+				forB = myoperator[i].fermionOrBoson();
 				continue;
 			}
 
-			if (forB == myoperator[i].fermionOrBoson) continue;
+			if (forB == myoperator[i].fermionOrBoson()) continue;
 
 			PsimagLite::String str("CorrectionVectorTargeting: ");
 			str += "inconsistent sign for operators\n";

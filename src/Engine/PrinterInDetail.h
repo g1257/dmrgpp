@@ -58,8 +58,8 @@ private:
 		os<<"Operators at site "<<site<<" ("<<siteC<<")\n";
 		for (SizeType sigma = 0; sigma < end; ++sigma) {
 			typename BasisWithOperatorsType::PairType p = basis.getOperatorIndices(siteC, sigma);
-			os<<sigma<<" non-zeroes="<<basis.getOperatorByIndex(p.first).data.nonZeros();
-			os<<" rows="<<basis.getOperatorByIndex(p.first).data.rows()<<"\n";
+			os<<sigma<<" non-zeroes="<<basis.getOperatorByIndex(p.first).getStorage().nonZeros();
+			os<<" rows="<<basis.getOperatorByIndex(p.first).getStorage().rows()<<"\n";
 		}
 	}
 

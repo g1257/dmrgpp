@@ -428,7 +428,7 @@ private:
 		for(SizeType i = 0; i < creationMatrix.size(); ++i){
 			MatrixType tmp = creationMatrix[i].getCRS().toDense()*R;
 			MatrixType tmp2 = multiplyTransposeConjugate(R, tmp);
-			creationMatrix[i].fromDense(tmp2);
+			creationMatrix[i].fromStorage(tmp2);
 		}
 	}
 

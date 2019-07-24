@@ -328,14 +328,14 @@ private:
 		}
 
 		for (SizeType i=0;i<aOperators_.size();i++)
-			aOperators_[i].data *= tmpVector[i];
+			aOperators_[i] *= tmpVector[i];
 	}
 
 	bool isNoOperator() const
 	{
 		if (aOperators_.size()!=1) return false;
-		return (isTheIdentity(aOperators_[0].data)
-		        && aOperators_[0].fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::BOSON);
+		return (isTheIdentity(aOperators_[0].getStorage())
+		        && aOperators_[0].fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::BOSON);
 	}
 
 	void checkSizesOfOperators() const
@@ -348,7 +348,7 @@ private:
 		}
 
 		for (SizeType i=0;i<aOperators_.size();i++) {
-			SizeType n = aOperators_[i].data.rows();
+			SizeType n = aOperators_[i].getStorage().rows();
 			SizeType hilbert = model_.hilbertSize(sites_[i]);
 			if (n != hilbert) {
 				PsimagLite::String str(__FILE__);

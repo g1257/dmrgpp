@@ -151,16 +151,16 @@ public:
 			reducedOpImpl_.prepareTransform(ftransform,thisBasis);
 		}
 
-		void doTask(SizeType taskNumber , SizeType threadNum)
+		void doTask(SizeType taskNumber, SizeType)
 		{
 			SizeType k = taskNumber;
 			if (isExcluded(k) && k < operators_.size()) {
-				operators_[k].data.clear();
+				operators_[k].clear();
 				return;
 			}
 
 			if (!BasisType::useSu2Symmetry())
-				reducedOpImpl_.changeBasis(operators_[k].data);
+				reducedOpImpl_.changeBasis(operators_[k].getStorageNonConst());
 			else
 				reducedOpImpl_.changeBasis(k);
 		}
@@ -205,7 +205,7 @@ public:
 		{
 			if (!hasMpi_) return;
 			for (SizeType i = 0; i < operators_.size(); i++)
-				bcast(operators_[i]);
+				bcast2(operators_[i]);
 		}
 
 		ReducedOperatorsType& reducedOpImpl_;
@@ -330,8 +330,8 @@ public:
 	{
 		for (SizeType k=0;k<numberOfOperators();k++) {
 			if (!BasisType::useSu2Symmetry())
-				reorder2(operators_[k].data, permutation);
-			reducedOpImpl_.reorder(k,permutation);
+				reorder2(operators_[k], permutation);
+			reducedOpImpl_.reorder(k, permutation);
 		}
 
 		reorder2(hamiltonian_,permutation);
@@ -385,12 +385,10 @@ public:
 	                     ApplyFactors<FactorsType>& apply)
 	{
 		assert(!BasisType::useSu2Symmetry());
-		externalProduct2(operators_[i].data,m.data,x,fermionicSigns,option);
+		operators_[i].outerProduct(m, x, fermionicSigns, option);
 		// don't forget to set fermion sign and j:
-		operators_[i].fermionOrBoson=m.fermionOrBoson;
-		operators_[i].jm=m.jm;
-		operators_[i].angularFactor=m.angularFactor;
-		apply(operators_[i].data);
+		operators_[i].set(m.fermionOrBoson(), m.jm(), m.angularFactor());
+		// apply(operators_[i]);
 	}
 
 	void externalProductReduced(SizeType i,
