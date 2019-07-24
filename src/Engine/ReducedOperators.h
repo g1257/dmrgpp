@@ -213,7 +213,7 @@ public:
 		momentumOfOperators_=momentum;
 	}
 
-	void setHamiltonian(const SparseMatrixType& hamiltonian)
+	void setHamiltonian(const OperatorStorageType& hamiltonian)
 	{
 		if (!useSu2Symmetry_) return;
 		findBasisInverse();
@@ -308,11 +308,11 @@ public:
 		changeBasis(reducedOperators_[k].data);
 	}
 
-	void changeBasisHamiltonian(SparseMatrixType& hamiltonian,
+	void changeBasisHamiltonian(OperatorStorageType& hamiltonian,
 	                            const BlockDiagonalMatrixType& transform)
 	{
 		hamiltonian.checkValidity();
-		ChangeOfBasisType::changeBasis(hamiltonian,transform);
+		ChangeOfBasisType::changeBasis(hamiltonian, transform);
 		if (useSu2Symmetry_)
 			changeBasis(reducedHamiltonian_);
 	}
@@ -552,8 +552,7 @@ private:
 	                       OperatorStorageType& opDest1,
 	                       const OperatorStorageType& opSrc1)
 	{
-		SparseMatrixType opSrc;
-		toCRS(opSrc, opSrc1);
+		const SparseMatrixType& opSrc = opSrc1.getCRS();
 		SparseMatrixType opDest;
 		transposeConjugate(opDest, opSrc);
 		for (SizeType i=0;i<opSrc.rows();i++) {
@@ -786,8 +785,7 @@ private:
 	                   bool order,
 	                   int fermionSign)
 	{
-		SparseMatrixType A;
-		toCRS(A, A1);
+		const SparseMatrixType& A = A1.getCRS();
 
 		SizeType n = B.rows();
 		//SizeType angularMomentum = 0;

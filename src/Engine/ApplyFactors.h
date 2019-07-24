@@ -78,6 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef APPLY_FACTORS_H
 #define APPLY_FACTORS_H
+#include "OperatorStorage.h"
 
 namespace Dmrg {
 template<typename FactorsType>
@@ -89,26 +90,37 @@ public:
 	    : factors_(factors),enabled_(enabled)
 	{}
 
-	template<typename SparseMatrixType>
-	void operator()(SparseMatrixType& m) const
+	template<typename T>
+	void operator()(T& m) const
 	{
 		if (!enabled_ || factors_ == 0) return;
 		if (factors_->rows()!=m.rows())
 			throw PsimagLite::RuntimeError("Problem applying factors\n");
 		applyFactors(m);
-
 	}
 
 private:
 
-	template<typename SparseMatrixType>
-	void applyFactors(SparseMatrixType& m) const
+	template<typename T>
+	void applyFactors(OperatorStorage<T>& m2) const
 	{
-		SparseMatrixType tmp;
+		FactorsType m = m2.getCRS();
+		FactorsType tmp;
 		multiply(tmp,m,*factors_);
-		SparseMatrixType tmp2;
+		FactorsType tmp2;
 		transposeConjugate(tmp2,*factors_);
-		multiply(m,tmp2,tmp);
+		multiply(m, tmp2, tmp);
+		fromCRS(m2, m);
+	}
+
+	template<typename T>
+	void applyFactors(PsimagLite::CrsMatrix<T>& m) const
+	{
+		FactorsType tmp;
+		multiply(tmp,m,*factors_);
+		FactorsType tmp2;
+		transposeConjugate(tmp2,*factors_);
+		multiply(m, tmp2, tmp);
 	}
 
 	const FactorsType* factors_;

@@ -111,6 +111,7 @@ public:
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef ReflectionOperatorEmpty<LeftRightSuperType> ReflectionSymmetryType;
 	typedef typename OperatorsType::OperatorType OperatorType;
+	typedef typename OperatorType::StorageType OperatorStorageType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename MyBasis::QnType QnType;
 	typedef TargetQuantumElectrons<RealType, QnType> TargetQuantumElectronsType;
@@ -310,7 +311,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		explained before in Section~\ref{subsec:dmrgBasisWithOperators}.
 		This function has a default implementation.
 		*/
-	void addHamiltonianConnection(SparseMatrixType &matrix,
+	void addHamiltonianConnection(SparseMatrixType& matrix,
 	                              const LeftRightSuperType& lrs,
 	                              RealType currentTime) const
 	{

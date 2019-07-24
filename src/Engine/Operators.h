@@ -321,7 +321,7 @@ public:
 
 		helper.gather();
 
-		reducedOpImpl_.changeBasisHamiltonian(hamiltonian_,ftransform);
+		reducedOpImpl_.changeBasisHamiltonian(hamiltonian_, ftransform);
 	}
 
 	void reorder(const VectorSizeType& permutation)
@@ -407,16 +407,16 @@ public:
 	}
 
 	template<typename ApplyFactorsType>
-	void outerProductHamiltonian(const SparseMatrixType& h2,
-	                             const SparseMatrixType& h3,
+	void outerProductHamiltonian(const StorageType& h2,
+	                             const StorageType& h3,
 	                             ApplyFactorsType& apply)
 	{
-		SparseMatrixType tmpMatrix;
+		StorageType tmpMatrix;
 		assert(h2.rows()==h2.cols());
 		VectorRealType ones(h2.rows(),1.0);
-		PsimagLite::externalProduct(hamiltonian_,h2,h3.rows(),ones,true);
+		externalProduct2(hamiltonian_,h2,h3.rows(),ones,true);
 
-		PsimagLite::externalProduct(tmpMatrix,h3,h2.rows(),ones,false);
+		externalProduct2(tmpMatrix,h3,h2.rows(),ones,false);
 
 		hamiltonian_ += tmpMatrix;
 
@@ -431,13 +431,19 @@ public:
 		reducedOpImpl_.outerProductHamiltonian(basis2,basis3,h2,h3);
 	}
 
-	void setHamiltonian(SparseMatrixType const &h)
+	void setHamiltonian(StorageType const &h)
 	{
-		hamiltonian_=h;
+		hamiltonian_ = h;
 		reducedOpImpl_.setHamiltonian(h);
 	}
 
-	const SparseMatrixType& hamiltonian() const { return hamiltonian_; }
+	void setHamiltonian(const SparseMatrixType& h)
+	{
+		fromCRS(hamiltonian_, h);
+		reducedOpImpl_.setHamiltonian(hamiltonian_);
+	}
+
+	const StorageType& hamiltonian() const { return hamiltonian_; }
 
 	const StorageType& reducedHamiltonian() const
 	{
@@ -555,7 +561,7 @@ private:
 	static ChangeAllEnum changeAll_;
 	ReducedOperatorsType reducedOpImpl_;
 	typename PsimagLite::Vector<OperatorType>::Type operators_;
-	SparseMatrixType hamiltonian_;
+	StorageType hamiltonian_;
 	PsimagLite::ProgressIndicator progress_;
 }; //class Operators
 

@@ -429,10 +429,10 @@ private:
 	}
 };
 
-template<typename SparseMatrixType>
-void bcast(Operator<SparseMatrixType>& op)
+template<typename T>
+void bcast(Operator<T>& op)
 {
-	PsimagLite::bcast(op.data);
+	bcast(op.data);
 	PsimagLite::MPI::bcast(op.fermionOrBoson);
 	PsimagLite::MPI::bcast(op.jm);
 	PsimagLite::MPI::bcast(op.angularFactor);

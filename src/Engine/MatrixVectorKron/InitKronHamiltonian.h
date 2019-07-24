@@ -95,6 +95,7 @@ public:
 	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef typename ModelHelperType::OperatorStorageType OperatorStorageType;
 	typedef typename LeftRightSuperType::BasisType BasisType;
 	typedef InitKronBase<LeftRightSuperType> BaseType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
@@ -257,8 +258,8 @@ private:
 		SizeType total = hc_.tasks();
 
 		for (SizeType ix=0;ix<total;ix++) {
-			SparseMatrixType const* A = 0;
-			SparseMatrixType const* B = 0;
+			OperatorStorageType const* A = 0;
+			OperatorStorageType const* B = 0;
 
 			LinkType link2 = hc_.getKron(&A, &B, ix);
 			if (link2.type==ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM)  {

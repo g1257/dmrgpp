@@ -96,6 +96,7 @@ public:
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
+	typedef typename OperatorType::StorageType OperatorStorageType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
 	typedef  LeftRightSuper<BasisWithOperatorsType_,SuperBlockType> ThisType;
@@ -364,7 +365,7 @@ private:
 		Xbasis.setVarious(X, model, time);
 		leftOrRight.setToProduct(pS, Xbasis, dir);
 
-		SparseMatrixType matrix=leftOrRight.hamiltonian();
+		SparseMatrixType matrix = leftOrRight.hamiltonian().getCRS();
 
 		LeftRightSuper2Type* lrs;
 		BasisType* leftOrRightL =  &leftOrRight;
@@ -374,7 +375,7 @@ private:
 			lrs = new  LeftRightSuper2Type(Xbasis,pS,*leftOrRightL);
 		}
 		//!PTEX_LABEL{295}
-		model.addHamiltonianConnection(matrix,*lrs,time);
+		model.addHamiltonianConnection(matrix, *lrs, time);
 		delete lrs;
 		leftOrRight.setHamiltonian(matrix);
 	}

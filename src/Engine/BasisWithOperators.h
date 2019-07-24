@@ -199,13 +199,12 @@ public:
 		return error;
 	}
 
-	void setHamiltonian(SparseMatrixType const &h)
+	void setHamiltonian(const SparseMatrixType& h)
 	{
 		operators_.setHamiltonian(h);
 	}
 
-	//! Returns the Hamiltonian as stored in this basis
-	const SparseMatrixType& hamiltonian() const
+	const OperatorStorageType& hamiltonian() const
 	{
 		return operators_.hamiltonian();
 	}
@@ -231,7 +230,8 @@ public:
 
 		model.calcHamiltonian(h, ops, block, time);
 
-		operators_.setHamiltonian(h);
+		OperatorStorageType hOp(h);
+		operators_.setHamiltonian(hOp);
 		operators_.setOperators(ops);
 		//! re-order operators and hamiltonian
 		operators_.reorder(BaseType::permutationVector());

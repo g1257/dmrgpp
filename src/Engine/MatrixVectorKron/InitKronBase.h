@@ -94,6 +94,8 @@ public:
 
 	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
 	typedef typename LeftRightSuperType::RealType RealType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::OperatorStorageType OperatorStorageType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef Link<ComplexOrRealType> LinkType;
 	typedef ArrayOfMatStruct<LeftRightSuperType> ArrayOfMatStructType;
@@ -247,8 +249,8 @@ public:
 
 protected:
 
-	void addOneConnection(const SparseMatrixType& A,
-	                      const SparseMatrixType& B,
+	void addOneConnection(const OperatorStorageType& A,
+	                      const OperatorStorageType& B,
 	                      const LinkType& link2)
 	{
 		SparseMatrixType Ahat;
