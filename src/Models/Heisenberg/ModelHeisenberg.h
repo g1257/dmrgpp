@@ -205,7 +205,7 @@ public:
 
 			if (modelParameters_.magneticField.size() == linSize) {
 				RealType tmp = modelParameters_.magneticField[site];
-				hmatrix += tmp*sz.data;
+				hmatrix += tmp*sz.getCRS();
 
 			}
 
@@ -215,7 +215,7 @@ public:
 			if (modelParameters_.anisotropyD.size() == linSize) {
 				SparseMatrixType Szsquare;
 				RealType tmp = modelParameters_.anisotropyD[site];
-				multiply(Szsquare, sz.data, sz.data);
+				multiply(Szsquare, sz.getCRS(), sz.getCRS());
 				hmatrix += tmp*Szsquare;
 
 			}
@@ -226,7 +226,7 @@ public:
 				SparseMatrixType splusSquared;
 
 				RealType tmp = 0.5*modelParameters_.anisotropyE[site];
-				multiply(splusSquared, splus.data, splus.data);
+				multiply(splusSquared, splus.getCRS(), splus.getCRS());
 				hmatrix += tmp*splusSquared;
 
 				SparseMatrixType sminusSquared;

@@ -212,9 +212,9 @@ protected:
 
 			{ // S^z
 				MatrixType tmp1;
-				crsMatrixToFullMatrix(tmp1,nUpOrDown(block,SPIN_UP).data);
+				crsMatrixToFullMatrix(tmp1,nUpOrDown(block,SPIN_UP).getCRS());
 				MatrixType tmp2;
-				crsMatrixToFullMatrix(tmp2,nUpOrDown(block,SPIN_DOWN).data);
+				crsMatrixToFullMatrix(tmp2,nUpOrDown(block,SPIN_DOWN).getCRS());
 				tmp1 -= tmp2;
 				SparseMatrixType tmp(tmp1);
 				typename OperatorType::Su2RelatedType su2Related;
@@ -238,8 +238,8 @@ protected:
 
 			for (SizeType dof = 0; dof < total; ++dof) {
 				SparseMatrixType tmp2;
-				transposeConjugate(tmp2,creationMatrix[dof].data);
-				SparseMatrixType tmp3 = creationMatrix[dof].data * tmp2;
+				transposeConjugate(tmp2,creationMatrix[dof].getCRS());
+				SparseMatrixType tmp3 = creationMatrix[dof].getCRS() * tmp2;
 				typename OperatorType::Su2RelatedType su2Related;
 				o.push(OperatorType(tmp3,
 				                    ProgramGlobals::FermionOrBosonEnum::BOSON,
@@ -428,7 +428,7 @@ private:
 		SizeType total = NUMBER_OF_SPINS * orbitalsAtSite(site);
 		for (SizeType dof=0;dof<total;dof++) {
 			const OperatorType& cmop = ModelBaseType::naturalOperator("c", site, dof);
-			const SparseMatrixType& cm = cmop.data;
+			const SparseMatrixType& cm = cmop.getCRS();
 			SizeType norb = orbitalsAtSite(site);
 			assert(norb==1 || norb==2);
 			SizeType orb = dof % norb;
@@ -445,7 +445,7 @@ private:
 
 		const OperatorType& cup = ModelBaseType::naturalOperator("c", site, 0);
 		const OperatorType& cdown = ModelBaseType::naturalOperator("c", site, 1);
-		hmatrix +=  modelParameters_.hubbardU[site] * nbar(cup.data) * nbar(cdown.data);
+		hmatrix +=  modelParameters_.hubbardU[site] * nbar(cup.getCRS()) * nbar(cdown.getCRS());
 	}
 
 	SparseMatrixType n(const SparseMatrixType& c) const
@@ -490,14 +490,14 @@ private:
 		VectorQnType qns;
 		setOperatorMatricesInternal(creationMatrix, qns, block);
 		assert(creationMatrix.size()>0);
-		SizeType rank = creationMatrix[0].data.rows();
+		SizeType rank = creationMatrix[0].getCRS().rows();
 		MatrixType tmp(rank,rank);
 		assert(norb*2-1<creationMatrix.size());
 		assert(spin1<2);
 		assert(spin2<2);
 		for (SizeType orb=0;orb<norb;orb++)
-			tmp += multiplyTc(creationMatrix[orb+spin1*norb].data,
-			        creationMatrix[orb+spin2*norb].data);
+			tmp += multiplyTc(creationMatrix[orb+spin1*norb].getCRS(),
+			        creationMatrix[orb+spin2*norb].getCRS());
 
 		typename OperatorType::Su2RelatedType su2Related;
 		return OperatorType(SparseMatrixType(tmp),

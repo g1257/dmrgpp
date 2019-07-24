@@ -473,10 +473,10 @@ public:
 
 		for (SizeType i = 0; i < myoperator.size(); ++i) {
 
-			RealType norma = norm2(myoperator[i].data);
+			RealType norma = norm2(myoperator[i].getCRS());
 
 			if (norma==0 && wereSumming) continue;
-			if (isTheIdentity(myoperator[i].data) && !wereSumming) continue;
+			if (isTheIdentity(myoperator[i].getCRS()) && !wereSumming) continue;
 
 			if (i == 0) {
 				forB = myoperator[i].fermionOrBoson;

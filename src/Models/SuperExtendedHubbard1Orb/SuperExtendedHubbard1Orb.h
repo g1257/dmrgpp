@@ -216,7 +216,7 @@ private:
 	{
 		typename OperatorType::Su2RelatedType su2related;
 		SparseMatrixType pair;
-		multiply(pair,cm[0].data,cm[1].data);
+		multiply(pair,cm[0].getCRS(),cm[1].getCRS());
 
 		OperatorType myOp(pair,
 		                  ProgramGlobals::FermionOrBosonEnum::BOSON,

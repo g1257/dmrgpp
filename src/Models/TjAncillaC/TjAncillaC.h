@@ -241,7 +241,7 @@ protected:
 		{
 			OperatorType tmp = this->naturalOperator("c", site, 0);
 			tmp.dagger();
-			SparseMatrixType c = tmp.data;
+			SparseMatrixType c = tmp.getCRS();
 			SparseMatrixType tmp3(multiplyTc(c,c));
 			typename OperatorType::Su2RelatedType su2Related;
 			this->createOpsLabel("nup").push(OperatorType(tmp3,
@@ -254,7 +254,7 @@ protected:
 		{
 			OperatorType tmp = this->naturalOperator("c", site, 1);
 			tmp.dagger();
-			SparseMatrixType c = tmp.data;
+			SparseMatrixType c = tmp.getCRS();
 			SparseMatrixType tmp3(multiplyTc(c,c));
 			typename OperatorType::Su2RelatedType su2Related;
 			this->createOpsLabel("ndown").push(OperatorType(tmp3,
@@ -542,8 +542,8 @@ private:
 		for (SizeType i=0;i<n;i++) {
 			SizeType orb = 0;
 			// potentialV
-			SparseMatrixType nup(this->naturalOperator("nup",i,orb).data);
-			SparseMatrixType ndown(this->naturalOperator("ndown",i,orb).data);
+			SparseMatrixType nup(this->naturalOperator("nup",i,orb).getCRS());
+			SparseMatrixType ndown(this->naturalOperator("ndown",i,orb).getCRS());
 			SparseMatrixType m = nup;
 			SizeType index = block[i]+orb*linSize;
 			assert(index<modelParameters_.potentialV.size());

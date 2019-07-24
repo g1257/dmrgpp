@@ -9,6 +9,7 @@ template<typename HamiltonianConnectionType>
 class ParallelHamiltonianConnection {
 
 	typedef typename HamiltonianConnectionType::ModelHelperType ModelHelperType;
+	typedef typename ModelHelperType::OperatorStorageType OperatorStorageType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename HamiltonianConnectionType::GeometryType GeometryType;
@@ -38,7 +39,7 @@ public:
 		if (taskNumber == 0) {
 			hc_.modelHelper().hamiltonianLeftProduct(xtemp_[threadNum], y_);
 			const SparseMatrixType& hamiltonian = hc_.modelHelper().leftRightSuper().
-			        left().hamiltonian();
+			        left().hamiltonian().getCRS();
 			hc_.kroneckerDumper().push(true, hamiltonian, y_);
 			return;
 		}
@@ -46,7 +47,7 @@ public:
 		if (taskNumber == 1) {
 			hc_.modelHelper().hamiltonianRightProduct(xtemp_[threadNum],y_);
 			const SparseMatrixType& hamiltonian = hc_.modelHelper().leftRightSuper().
-			        right().hamiltonian();
+			        right().hamiltonian().getCRS();
 			hc_.kroneckerDumper().push(false, hamiltonian, y_);
 			return;
 		}
@@ -54,11 +55,15 @@ public:
 		assert(taskNumber > 1);
 		taskNumber -= 2;
 
-		SparseMatrixType const* A = 0;
-		SparseMatrixType const* B = 0;
+		OperatorStorageType const* A = 0;
+		OperatorStorageType const* B = 0;
 		const LinkType& link2 = hc_.getKron(&A, &B, taskNumber);
-		hc_.modelHelper().fastOpProdInter(xtemp_[threadNum], y_, *A, *B, link2);
-		hc_.kroneckerDumper().push(*A, *B, link2.value, link2.fermionOrBoson, y_);
+		hc_.modelHelper().fastOpProdInter(xtemp_[threadNum], y_, A->getCRS(), B->getCRS(), link2);
+		hc_.kroneckerDumper().push(A->getCRS(),
+		                           B->getCRS(),
+		                           link2.value,
+		                           link2.fermionOrBoson,
+		                           y_);
 	}
 
 	SizeType tasks() const { return hc_.tasks() + 2; }

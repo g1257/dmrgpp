@@ -185,7 +185,7 @@ public:
 	                                      const VectorHilbertStateType&) const
     {
 		assert(sigma < creationMatrix_.size());
-		return creationMatrix_[sigma].data;
+		return creationMatrix_[sigma].getCRS();
 	}
 
 	SizeType maxElectronsOneSpin() const
@@ -581,8 +581,8 @@ private:
 		for (SizeType i=0;i<n;i++) {
 			for (SizeType orb = 0; orb < orbitals; ++orb) {
 				// potentialV
-				SparseMatrixType nup(this->naturalOperator("nup",i,orb).data);
-				SparseMatrixType ndown(this->naturalOperator("ndown",i,orb).data);
+				SparseMatrixType nup(this->naturalOperator("nup",i,orb).getCRS());
+				SparseMatrixType ndown(this->naturalOperator("ndown",i,orb).getCRS());
 				SparseMatrixType m = nup;
 				assert(block[i]+linSize*orb+linSize*orbitals<modelParameters_.potentialV.size());
 				m *= modelParameters_.potentialV[block[i]+linSize*orb];
@@ -597,17 +597,17 @@ private:
             // magnetic field x
             const OperatorType& sx = ModelBaseType::naturalOperator("sx", site, 0);
             RealType tmp = modelParameters_.magneticFieldX[block[0]];
-            hmatrix += tmp*sx.data;
+            hmatrix += tmp*sx.getCRS();
 
             // magnetic field y
             const OperatorType& sy = ModelBaseType::naturalOperator("sy", site, 0);
             tmp = modelParameters_.magneticFieldY[block[0]];
-            hmatrix += tmp*sy.data;
+            hmatrix += tmp*sy.getCRS();
 
             // magnetic field z
             const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
             tmp = modelParameters_.magneticFieldZ[block[0]];
-            hmatrix += tmp*sz.data;
+            hmatrix += tmp*sz.getCRS();
         }
 	}
 

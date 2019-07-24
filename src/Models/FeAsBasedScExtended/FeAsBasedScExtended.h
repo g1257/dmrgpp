@@ -280,9 +280,9 @@ private:
 		SparseMatrixType tmpMatrix,tmpMatrix2;
 		for (SizeType orbital=0;orbital<orbitals_;orbital++) {
 			transposeConjugate(tmpMatrix2,
-			                   creationMatrix[orbital+spin2*orbitals_].data);
+			                   creationMatrix[orbital+spin2*orbitals_].getCRS());
 			multiply(tmpMatrix,
-			         creationMatrix[orbital+spin1*orbitals_].data,
+			         creationMatrix[orbital+spin1*orbitals_].getCRS(),
 			        tmpMatrix2);
 
 			if (orbital == 0) sum = value*tmpMatrix;

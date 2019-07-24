@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PackIndices.h" // in PsimagLite
 #include "FermionSign.h"
 #include "ProgramGlobals.h"
+#include "OperatorStorage.h"
 
 namespace Dmrg {
 
@@ -106,14 +107,9 @@ class ApplyOperatorLocal {
 		{
 			if (withLegacyBug_) return;
 
-			// copy A
 			*Aptr_ = A;
 
-			// transpose conjugate Aptr_->data
-			transposeConjugate(Aptr_->data, A.data);
-
-			// conjugate again to end up transposing only
-			Aptr_->data.conjugate();
+			Aptr_->transpose();
 		}
 
 		~LegacyBug()
@@ -207,7 +203,7 @@ public:
 		SizeType offset = src.offset(i0);
 		SizeType final = offset + src.effectiveSize(i0);
 		SizeType ns = lrs_.left().permutationVector().size();
-		SizeType nx = ns/A.data.rows();
+		SizeType nx = ns/A.getCRS().rows();
 		if (src.size() != lrs_.super().permutationVector().size())
 			err("applyLocalOpSystem SE\n");
 
@@ -223,13 +219,13 @@ public:
 			assert(x<lrs_.left().permutationVector().size());
 			pack2.unpack(x0,x1,lrs_.left().permutation(x));
 
-			SizeType start = A.data.getRowPtr(x0);
-			SizeType end = A.data.getRowPtr(x0 + 1);
+			SizeType start = A.getCRS().getRowPtr(x0);
+			SizeType end = A.getCRS().getRowPtr(x0 + 1);
 			for (SizeType k = start; k < end; ++k) {
-				SizeType x0prime = A.data.getCol(k);
+				SizeType x0prime = A.getCRS().getCol(k);
 				SizeType xprime = lrs_.left().permutationInverse(x0prime+x1*nx);
 				SizeType j = lrs_.super().permutationInverse(xprime+y*ns);
-				dest2[j] += src.slowAccess(i)*A.data.getValue(k);
+				dest2[j] += src.slowAccess(i)*A.getCRS().getValue(k);
 			}
 		}
 	}
@@ -277,7 +273,7 @@ private:
 		SizeType offset = src.offset(i0);
 		SizeType final = offset + src.effectiveSize(i0);
 		SizeType ns = lrs_.left().permutationVector().size();
-		SizeType nx = ns/A.data.rows();
+		SizeType nx = ns/A.getCRS().rows();
 		if (src.size() != lrs_.super().permutationVector().size())
 			err("applyLocalOpSystem SE\n");
 
@@ -296,13 +292,13 @@ private:
 			const bool isFermion = (A.fermionOrBoson ==
 			                        ProgramGlobals::FermionOrBosonEnum::FERMION);
 			const RealType sign = fermionSign(x0, (isFermion) ? -1 : 1);
-			const SizeType start = A.data.getRowPtr(x1);
-			const SizeType end = A.data.getRowPtr(x1 + 1);
+			const SizeType start = A.getCRS().getRowPtr(x1);
+			const SizeType end = A.getCRS().getRowPtr(x1 + 1);
 			for (SizeType k = start; k < end; ++k) {
-				SizeType x1prime = A.data.getCol(k);
+				SizeType x1prime = A.getCRS().getCol(k);
 				SizeType xprime = lrs_.left().permutationInverse(x0+x1prime*nx);
 				SizeType j = lrs_.super().permutationInverse(xprime+y*ns);
-				dest2[j] += src.slowAccess(i)*A.data.getValue(k)*sign;
+				dest2[j] += src.slowAccess(i)*A.getCRS().getValue(k)*sign;
 			}
 		}
 	}
@@ -341,7 +337,7 @@ private:
 		SizeType final = offset + src.effectiveSize(i0);
 
 		SizeType ns = lrs_.left().size();
-		SizeType nx = A.data.rows();
+		SizeType nx = A.getCRS().rows();
 		PackIndicesType pack1(ns);
 		PackIndicesType pack2(nx);
 
@@ -355,13 +351,13 @@ private:
 			const bool isFermion = (A.fermionOrBoson ==
 			                        ProgramGlobals::FermionOrBosonEnum::FERMION);
 			const RealType sign = lrs_.left().fermionicSign(x, (isFermion) ? -1 : 1);
-			const SizeType start = A.data.getRowPtr(y0);
-			const SizeType end = A.data.getRowPtr(y0 + 1);
+			const SizeType start = A.getCRS().getRowPtr(y0);
+			const SizeType end = A.getCRS().getRowPtr(y0 + 1);
 			for (SizeType k = start; k < end; ++k) {
-				SizeType y0prime = A.data.getCol(k);
+				SizeType y0prime = A.getCRS().getCol(k);
 				SizeType yprime = lrs_.right().permutationInverse(y0prime+y1*nx);
 				SizeType j = lrs_.super().permutationInverse(x+yprime*ns);
-				dest2[j] += src.slowAccess(i)*A.data.getValue(k)*sign;
+				dest2[j] += src.slowAccess(i)*A.getCRS().getValue(k)*sign;
 			}
 		}
 	}
@@ -383,12 +379,12 @@ private:
 			SizeType y = 0;
 			pack.unpack(x,y,lrs_.super().permutation(i));
 
-			const SizeType start = A.data.getRowPtr(x);
-			const SizeType end = A.data.getRowPtr(x + 1);
+			const SizeType start = A.getCRS().getRowPtr(x);
+			const SizeType end = A.getCRS().getRowPtr(x + 1);
 			for (SizeType k = start; k < end; ++k) {
-				SizeType xprime = A.data.getCol(k);
+				SizeType xprime = A.getCRS().getCol(k);
 				SizeType j = lrs_.super().permutationInverse(xprime+y*ns);
-				dest2[j] += src.slowAccess(i)*A.data.getValue(k);
+				dest2[j] += src.slowAccess(i)*A.getCRS().getValue(k);
 			}
 		}
 	}
@@ -418,12 +414,12 @@ private:
 			const bool isFermion = (A.fermionOrBoson ==
 			                        ProgramGlobals::FermionOrBosonEnum::FERMION);
 			const RealType sign = lrs_.left().fermionicSign(x, (isFermion) ? -1 : 1);
-			const SizeType start = A.data.getRowPtr(y);
-			const SizeType end = A.data.getRowPtr(y + 1);
+			const SizeType start = A.getCRS().getRowPtr(y);
+			const SizeType end = A.getCRS().getRowPtr(y + 1);
 			for (SizeType k = start; k < end; ++k) {
-				SizeType yprime = A.data.getCol(k);
+				SizeType yprime = A.getCRS().getCol(k);
 				SizeType j = lrs_.super().permutationInverse(x+yprime*ns);
-				dest2[j] += src.slowAccess(i)*A.data.getValue(k)*sign;
+				dest2[j] += src.slowAccess(i)*A.getCRS().getValue(k)*sign;
 			}
 		}
 	}
@@ -434,7 +430,7 @@ private:
 	                        const OperatorType& A,
 	                        const FermionSign& fermionSign) const
 	{
-		if (lrs_.right().size() == A.data.rows()) { // right corner
+		if (lrs_.right().size() == A.getCRS().rows()) { // right corner
 			applyLocalOpSystem(dest,src,A,fermionSign,RIGHT_CORNER);
 			return;
 		}

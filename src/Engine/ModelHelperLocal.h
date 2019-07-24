@@ -345,7 +345,7 @@ public:
 		int offset = lrs_.super().partition(m);
 		int i,k,alphaPrime;
 		int bs = lrs_.super().partition(m+1)-offset;
-		const SparseMatrixType& hamiltonian = lrs_.left().hamiltonian();
+		const SparseMatrixType& hamiltonian = lrs_.left().hamiltonian().getCRS();
 		SizeType ns = lrs_.left().size();
 		SparseElementType sum = 0.0;
 		PackIndicesType pack(ns);
@@ -378,7 +378,7 @@ public:
 		int offset = lrs_.super().partition(m);
 		int i,k;
 		int bs = lrs_.super().partition(m+1)-offset;
-		const SparseMatrixType& hamiltonian = lrs_.right().hamiltonian();
+		const SparseMatrixType& hamiltonian = lrs_.right().hamiltonian().getCRS();
 		SizeType ns = lrs_.left().size();
 		SparseElementType sum = 0.0;
 		PackIndicesType pack(ns);

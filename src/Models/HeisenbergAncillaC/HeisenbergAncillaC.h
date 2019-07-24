@@ -195,7 +195,7 @@ public:
 			const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
 			// magnetic field
 			RealType tmp = modelParameters_.magneticField[site];
-			hmatrix += tmp * sz.data;
+			hmatrix += tmp * sz.getCRS();
 		}
 	}
 

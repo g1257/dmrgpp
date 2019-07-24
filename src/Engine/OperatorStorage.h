@@ -111,6 +111,27 @@ public:
 		throw PsimagLite::RuntimeError("OperatorStorage::checkValidity\n");
 	}
 
+	void conjugate()
+	{
+		if (justCrs_)
+			return crs_.conjugate();
+
+		throw PsimagLite::RuntimeError("OperatorStorage::conjugate\n");
+	}
+
+	void transpose()
+	{
+		if (!justCrs_)
+			throw PsimagLite::RuntimeError("OperatorStorage::transpose\n");
+
+		// transpose conjugate
+		SparseMatrixType copy = crs_;
+		transposeConjugate(crs_, copy);
+
+		// conjugate again to end up transposing only
+		crs_.conjugate();
+	}
+
 	void rotate(const PsimagLite::CrsMatrix<ComplexOrRealType>& left,
 	            const PsimagLite::CrsMatrix<ComplexOrRealType>& right)
 	{

@@ -211,7 +211,7 @@ protected:
 			OpsLabelType& sminus = this->createOpsLabel("sminus");
 
 			PsimagLite::Matrix<SparseElementType> tmp =
-			        multiplyTc(creationMatrix[iup].data,creationMatrix[idown].data);
+			        multiplyTc(creationMatrix[iup].getCRS(),creationMatrix[idown].getCRS());
 			SparseMatrixType tmp2(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			splus.push(OperatorType(tmp2,
@@ -231,9 +231,9 @@ protected:
 		{
 			OpsLabelType& sz = this->createOpsLabel("sz");
 			PsimagLite::Matrix<SparseElementType> tmp =
-			        multiplyTc(creationMatrix[iup].data,creationMatrix[iup].data);
+			        multiplyTc(creationMatrix[iup].getCRS(),creationMatrix[iup].getCRS());
 			PsimagLite::Matrix<SparseElementType> tmp2 =
-			        multiplyTc(creationMatrix[idown].data,creationMatrix[idown].data);
+			        multiplyTc(creationMatrix[idown].getCRS(),creationMatrix[idown].getCRS());
 			tmp = 0.5*(tmp - tmp2);
 			SparseMatrixType tmp3(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
@@ -250,7 +250,7 @@ protected:
 			OpsLabelType& nupop = this->createOpsLabel("nup");
 			OperatorType cup = creationMatrix[SPIN_UP];
 			cup.dagger();
-			SparseMatrixType tmp3(multiplyTc(cup.data,cup.data));
+			SparseMatrixType tmp3(multiplyTc(cup.getCRS(),cup.getCRS()));
 			typename OperatorType::Su2RelatedType su2Related;
 			nupop.push(OperatorType(tmp3,
 			                        ProgramGlobals::FermionOrBosonEnum::BOSON,
@@ -267,7 +267,7 @@ protected:
 
 			OperatorType cdown = creationMatrix[SPIN_DOWN];
 			cdown.dagger();
-			SparseMatrixType tmp3(multiplyTc(cdown.data,cdown.data));
+			SparseMatrixType tmp3(multiplyTc(cdown.getCRS(),cdown.getCRS()));
 			typename OperatorType::Su2RelatedType su2Related;
 			ndownop.push(OperatorType(tmp3,
 			                          ProgramGlobals::FermionOrBosonEnum::BOSON,
@@ -293,9 +293,9 @@ protected:
 		{
 			OpsLabelType& d = this->createOpsLabel("d");
 			PsimagLite::Matrix<SparseElementType> cup;
-			crsMatrixToFullMatrix(cup,creationMatrix[SPIN_UP].data);
+			crsMatrixToFullMatrix(cup,creationMatrix[SPIN_UP].getCRS());
 			PsimagLite::Matrix<SparseElementType> cdown;
-			crsMatrixToFullMatrix(cdown,creationMatrix[SPIN_DOWN].data);
+			crsMatrixToFullMatrix(cdown,creationMatrix[SPIN_DOWN].getCRS());
 			cup = (cup*cdown);
 			SparseMatrixType tmp3(cup);
 			typename OperatorType::Su2RelatedType su2Related;
@@ -398,12 +398,12 @@ protected:
 			// onsite U hubbard
 			//n_i up
 			const OperatorType& cup = ModelBaseType::naturalOperator("c", site, 0);
-			transposeConjugate(tmpMatrix, cup.data);
-			multiply(niup,tmpMatrix, cup.data);
+			transposeConjugate(tmpMatrix, cup.getCRS());
+			multiply(niup,tmpMatrix, cup.getCRS());
 			//n_i down
 			const OperatorType& cdown = ModelBaseType::naturalOperator("c", site, 1);
-			transposeConjugate(tmpMatrix, cdown.data);
-			multiply(nidown,tmpMatrix, cdown.data);
+			transposeConjugate(tmpMatrix, cdown.getCRS());
+			multiply(nidown,tmpMatrix, cdown.getCRS());
 
 			multiply(tmpMatrix, niup, nidown);
 			RealType tmp = modelParameters_.hubbardU[block[i]];

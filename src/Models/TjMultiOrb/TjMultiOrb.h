@@ -163,7 +163,7 @@ public:
 	                                      const VectorHilbertStateType&) const
 	{
 		assert(sigma < creationMatrix_.size());
-		return creationMatrix_[sigma].data;
+		return creationMatrix_[sigma].getCRS();
 	}
 
 	//! Find n_i in the natural basis natBasis
@@ -172,7 +172,7 @@ public:
 	                                const VectorHilbertStateType&) const
 	{
 		assert(4*modelParameters_.orbitals + orb < creationMatrix_.size());
-		return creationMatrix_[4*modelParameters_.orbitals + orb].data;
+		return creationMatrix_[4*modelParameters_.orbitals + orb].getCRS();
 	}
 
 	//! Find S^+_i in the natural basis natBasis
@@ -181,7 +181,7 @@ public:
 	                                   const VectorHilbertStateType&) const
 	{
 		assert(2*modelParameters_.orbitals + orb < creationMatrix_.size());
-		return creationMatrix_[2*modelParameters_.orbitals+orb].data;
+		return creationMatrix_[2*modelParameters_.orbitals+orb].getCRS();
 	}
 
 	//! Find S^z_i in the natural basis natBasis
@@ -190,7 +190,7 @@ public:
 	                                const VectorHilbertStateType&) const
 	{
 		assert(3*modelParameters_.orbitals + orb< creationMatrix_.size());
-		return creationMatrix_[3*modelParameters_.orbitals + orb].data;
+		return creationMatrix_[3*modelParameters_.orbitals + orb].getCRS();
 	}
 
 	SizeType maxElectronsOneSpin() const
@@ -328,7 +328,7 @@ protected:
 			SizeType x = dof + SPIN_UP*modelParameters_.orbitals;
 			OperatorType cup = this->naturalOperator("c", site, x);
 			cup.dagger();
-			SparseMatrixType nup(multiplyTc(cup.data,cup.data));
+			SparseMatrixType nup(multiplyTc(cup.getCRS(),cup.getCRS()));
 			if (modelParameters_.orbitals > 1)
 				nup = findNMatrices(dof + SPIN_UP*modelParameters_.orbitals);
 			typename OperatorType::Su2RelatedType su2Related;
@@ -344,7 +344,7 @@ protected:
 			SizeType x = dof + SPIN_DOWN*modelParameters_.orbitals;
 			OperatorType cdown = this->naturalOperator("c", site, x);
 			cdown.dagger();
-			SparseMatrixType ndown(multiplyTc(cdown.data,cdown.data));
+			SparseMatrixType ndown(multiplyTc(cdown.getCRS(),cdown.getCRS()));
 			if (modelParameters_.orbitals > 1)
 				ndown = findNMatrices(dof + SPIN_DOWN*modelParameters_.orbitals);
 			typename OperatorType::Su2RelatedType su2Related;
@@ -720,8 +720,8 @@ private:
 		for (SizeType i=0;i<n;i++) {
 			for (SizeType orb = 0; orb < orbitals; ++orb) {
 				// potentialV
-				SparseMatrixType nup(this->naturalOperator("nup",i,orb).data);
-				SparseMatrixType ndown(this->naturalOperator("ndown",i,orb).data);
+				SparseMatrixType nup(this->naturalOperator("nup",i,orb).getCRS());
+				SparseMatrixType ndown(this->naturalOperator("ndown",i,orb).getCRS());
 				SparseMatrixType m = nup;
 				assert(block[i]+linSize*orb+linSize*orbitals<modelParameters_.potentialV.size());
 				m *= modelParameters_.potentialV[block[i]+linSize*orb];

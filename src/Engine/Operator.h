@@ -380,6 +380,16 @@ struct Operator {
 
 	const SparseMatrixType& getCRS() const { return data.getCRS(); }
 
+	void conjugate()
+	{
+		data.conjugate();
+	}
+
+	void transpose()
+	{
+		data.transpose();
+	}
+
 	// FIXME TODO: MAKE THE BELOW PRIVATE
 
 	StorageType data;
