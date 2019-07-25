@@ -321,6 +321,10 @@ public:
 	{
 		nrow_ = c.r2.nrow_;
 		ncol_ = c.r2.ncol_;
+
+		const SizeType cSize =  c.r2.data_.size();
+		resizeIfNeeded(cSize);
+
 		this->data_ += c.r1*c.r2.data_;
 		return *this;
 	}
@@ -330,6 +334,10 @@ public:
 	{
 		nrow_ = c.r1.nrow_;
 		ncol_ = c.r1.ncol_;
+
+		const SizeType cSize =  c.r1.data_.size();
+		resizeIfNeeded(cSize);
+
 		this->data_ += c.r2*c.r1.data_;
 		return *this;
 	}
@@ -452,6 +460,14 @@ public:
 	friend class MatrixNonOwned;
 
 private:
+
+	void resizeIfNeeded(const SizeType cSize)
+	{
+		if (this->data_.size() > 0 && cSize != this->data_.size())
+			throw RuntimeError("operator+= matrices of different sizes\n");
+		if (this->data_.size() == 0)
+			this->data_.resize(cSize);
+	}
 
 	template<typename T1>
 	void matrixMatrix(const Matrix<T>& a, const Matrix<T>& b, const T1& t1)
