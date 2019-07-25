@@ -22,4 +22,4 @@ TargetElectronsDown=8;
 Pvectors=1;
 GsWeight=0.3;
 string P0="c?0[10]'*c?0[10]*|gs>";
-#ci observe arguments="<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>"
+#ci observe arguments=<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>

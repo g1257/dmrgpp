@@ -55,21 +55,32 @@ sub getTests
 	return @tests;
 }
 
-sub isSu2
+sub getInfoFromInput
 {
-	my ($file,$n) = @_; 
-	open(FILE, "$file") or return 0;
-	my $su2 = 0;
+	my ($file, $n) = @_;
+	my %keys;
+	open(FILE, "$file") or return %keys;
 	while (<FILE>) {
 		chomp;
-		if (/UseSu2Symmetry=1/) {
-			$su2 = 1;
-			last;
+		next if (/^#/);
+		s/\"//g;
+		s/\; *$//;
+		if (/(^[^\=]+)\=([^ ]+$)/) {
+			$keys{"$1"} = $2;
 		}
 	}
 
 	close(FILE);
-	return $su2;
+	return %keys;
+}
+
+sub isSu2
+{
+	my ($keys) = @_;
+	my $label = "UseSu2Symmetry";
+	my $value = $keys->{$label};
+	defined($value) or $value = 0;
+	return ($value == 1);
 }
 
 sub procRanges

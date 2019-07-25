@@ -59,24 +59,37 @@ my $rangesTotal = scalar(@inRange);
 die "$0: No tests specified under -n\n" if ($rangesTotal == 0);
 
 for (my $j = 0; $j < $rangesTotal; ++$j) {
-        my $n = $inRange[$j];
-       if (!exists($allowedTests{"$n"})) {
+	my $n = $inRange[$j];
+	if (!exists($allowedTests{"$n"})) {
 		#print STDERR "$0: Test $n does not exist, ignored\n";
+		next;
+	}
+
+	if ($n == 120) {
+		print STDERR "$0: |$n| ignored\n";
 		next;
 	}
 
 	my $thisInput = Ci::getInputFilename($n);
 	$thisInput =~ s/\.\.\///;
 
-	my $isSu2 = Ci::isSu2($thisInput, $n);
+	my %keys = Ci::getInfoFromInput($thisInput, $n);
+	my $isSu2 = Ci::isSu2(\%keys);
 	if ($isSu2 and !$su2) {
 		print STDERR "$0: WARNING: Ignored test $n ";
 		print STDERR "because it's NOT an SU(2) test and ";
 		print STDERR "you did not specify -su2\n";
 		next;
-        }
+	}
 
-	procTest($n,$workdir,$golddir);
+	my $solverOpts = $keys{"SolverOptions"};
+	my $targetName = "GroundStateTargeting";
+	defined($solverOpts) or $solverOpts = ""; 
+	if ($solverOpts =~ /Targeting/ && !($solverOpts =~ /GroundStateTargeting/)) {
+		$targetName = "NGST";
+	}
+
+	procTest($n, $workdir, $golddir, $targetName);
 
 	my @ciAnnotations = Ci::getCiAnnotations($thisInput, $n);
 	my $totalAnnotations = scalar(@ciAnnotations);
@@ -106,12 +119,12 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 
 sub procTest
 {
-	my ($n,$workdir,$golddir) = @_;
+	my ($n, $workdir, $golddir, $targetName) = @_;
 	my %newValues;
 	my %oldValues;
 	procCout(\%newValues, $n,$workdir);
 	procCout(\%oldValues, $n, $golddir);
-	compareValues(\%newValues, \%oldValues, $n);
+	compareValues(\%newValues, \%oldValues, $n, $targetName);
 	procMemcheck($n);
 }
 
@@ -146,7 +159,7 @@ sub procCout
 		if (/Current virtual memory is/) {
 			if (/maximum was (.+)$/) {
 				$values->{"MaxRAM"} = $1;
-			}		
+			}
 		}
 	}
 
@@ -156,7 +169,7 @@ sub procCout
 
 sub compareValues
 {
-	my ($newValues, $oldValues, $n) = @_;
+	my ($newValues, $oldValues, $n, $targetName) = @_;
 	foreach my $key (sort keys %$oldValues) {
 		my $v1 = $newValues->{"$key"};
 		my $v2 = $oldValues->{"$key"};
@@ -168,7 +181,8 @@ sub compareValues
 		}
 
 		my $maxEdiff = maxEnergyDiff($newValues->{$key}, $oldValues->{$key});
-		print "|$n|: MaxEnergyDiff = $maxEdiff\n";
+		next if ($targetName ne "GroundStateTargeting" and $maxEdiff eq "NO ENERGIES!");
+		print "|$n|: MaxEnergyDiff = $maxEdiff   .$targetName.\n";
 	}
 }
 
@@ -184,7 +198,7 @@ sub maxEnergyDiff
 	for (my $i = 0; $i < $n; ++$i) {
 		my $tmp = abs($eNew->[$i] - $eOld->[$i]);
 		$maxEdiff = $tmp if ($tmp > $maxEdiff);
- 	}
+	}
 
 	return "$maxEdiff [out of $n]";
 }

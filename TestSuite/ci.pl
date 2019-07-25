@@ -99,7 +99,8 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	}
 
 	my $thisInput = Ci::getInputFilename($n);
-	my $isSu2 = Ci::isSu2($thisInput, $n);
+	my %keys = Ci::getInfoFromInput($thisInput, $n);
+	my $isSu2 = Ci::isSu2(\%keys);
 	if ($isSu2 and !$su2) {
 		print STDERR "$0: WARNING: Ignored test $n ";
 		print STDERR "because it's an SU(2) test and ";
