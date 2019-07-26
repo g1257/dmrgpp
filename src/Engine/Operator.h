@@ -344,9 +344,10 @@ public:
 	void outerProduct(const Operator& A,
 	                  SizeType nout,
 	                  const VectorRealType& signs,
-	                  bool order)
+	                  bool order,
+	                  const VectorSizeType& colPermutation)
 	{
-		externalProduct2(data_, A.getStorage(), nout, signs, order);
+		externalProduct2(data_, A.getStorage(), nout, signs, order, colPermutation);
 	}
 
 	SizeType metaDiff(const Operator& op2) const
@@ -438,9 +439,9 @@ public:
 		transposeConjugate(data_, copy);
 	}
 
-	friend void reorder2(Operator& v, const VectorSizeType& permutation)
+	friend void reorder2(Operator& v, const VectorSizeType& permutation, bool full)
 	{
-		reorder2(v.data_, permutation);
+		reorder2(v.data_, permutation, full);
 	}
 
 	friend void bcast2(Operator& op)

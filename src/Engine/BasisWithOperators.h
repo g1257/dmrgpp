@@ -234,7 +234,7 @@ public:
 		operators_.setHamiltonian(hOp);
 		operators_.setOperators(ops);
 		//! re-order operators and hamiltonian
-		operators_.reorder(BaseType::permutationVector());
+		operators_.reorder(BaseType::permutationVector(), true);
 
 		operatorsPerSite_.clear();
 		for (SizeType i=0;i<block.size();i++)
@@ -348,7 +348,7 @@ private:
 					                           basis3.size(),
 					                           fermionicSigns,
 					                           true,
-					                           apply);
+					                           BaseType::permutationInverse());
 				} else {
 					operators_.externalProductReduced(i,
 					                                  basis2,
@@ -377,7 +377,7 @@ private:
 					                           basis2.size(),
 					                           fermionicSigns,
 					                           false,
-					                           apply);
+					                           BaseType::permutationInverse());
 				} else {
 					operators_.externalProductReduced(i,
 					                                  basis2,
@@ -392,13 +392,14 @@ private:
 		//! Calc. hamiltonian
 		operators_.outerProductHamiltonian(basis2.hamiltonian(),
 		                                   basis3.hamiltonian(),
-		                                   apply);
+		                                   apply,
+		                                   BaseType::permutationInverse());
 		operators_.outerProductHamiltonianReduced(basis2,
 		                                          basis3,
 		                                          basis2.reducedHamiltonian(),
 		                                          basis3.reducedHamiltonian());
 		//! re-order operators and hamiltonian
-		operators_.reorder(BaseType::permutationVector());
+		operators_.reorder(BaseType::permutationVector(), false);
 
 		SizeType offset1 = basis2.operatorsPerSite_.size();
 		operatorsPerSite_.resize(offset1+basis3.operatorsPerSite_.size());

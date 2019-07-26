@@ -326,15 +326,15 @@ public:
 		reducedOpImpl_.changeBasisHamiltonian(hamiltonian_, ftransform);
 	}
 
-	void reorder(const VectorSizeType& permutation)
+	void reorder(const VectorSizeType& permutation, bool full)
 	{
 		for (SizeType k=0;k<numberOfOperators();k++) {
 			if (!BasisType::useSu2Symmetry())
-				reorder2(operators_[k], permutation);
+				reorder2(operators_[k], permutation, full);
 			reducedOpImpl_.reorder(k, permutation);
 		}
 
-		reorder2(hamiltonian_,permutation);
+		reorder2(hamiltonian_,permutation, full);
 		reducedOpImpl_.reorderHamiltonian(permutation);
 	}
 
@@ -382,10 +382,10 @@ public:
 	                     int x,
 	                     const VectorRealType& fermionicSigns,
 	                     bool option,
-	                     ApplyFactors<FactorsType>& apply)
+	                     const VectorSizeType& colPermutation)
 	{
 		assert(!BasisType::useSu2Symmetry());
-		operators_[i].outerProduct(m, x, fermionicSigns, option);
+		operators_[i].outerProduct(m, x, fermionicSigns, option, colPermutation);
 		// don't forget to set fermion sign and j:
 		operators_[i].set(m.fermionOrBoson(), m.jm(), m.angularFactor());
 		// apply(operators_[i]);
@@ -403,14 +403,15 @@ public:
 	template<typename ApplyFactorsType>
 	void outerProductHamiltonian(const StorageType& h2,
 	                             const StorageType& h3,
-	                             ApplyFactorsType& apply)
+	                             ApplyFactorsType& apply,
+	                             const VectorSizeType& colPermutation)
 	{
 		StorageType tmpMatrix;
 		assert(h2.rows()==h2.cols());
 		VectorRealType ones(h2.rows(),1.0);
-		externalProduct2(hamiltonian_,h2,h3.rows(),ones,true);
+		externalProduct2(hamiltonian_,h2,h3.rows(),ones,true, colPermutation);
 
-		externalProduct2(tmpMatrix,h3,h2.rows(),ones,false);
+		externalProduct2(tmpMatrix,h3,h2.rows(),ones,false, colPermutation);
 
 		hamiltonian_ += tmpMatrix;
 
