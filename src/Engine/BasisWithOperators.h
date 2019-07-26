@@ -233,8 +233,8 @@ public:
 		OperatorStorageType hOp(h);
 		operators_.setHamiltonian(hOp);
 		operators_.setOperators(ops);
-		//! re-order operators and hamiltonian
-		operators_.reorder(BaseType::permutationVector());
+
+		// one site basis is assumed ordered
 
 		operatorsPerSite_.clear();
 		for (SizeType i=0;i<block.size();i++)

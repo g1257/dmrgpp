@@ -249,21 +249,6 @@ public:
 		throw PsimagLite::RuntimeError("OperatorStorage: externalProduct\n");
 	}
 
-	friend void reorder2(OperatorStorage& v, const VectorSizeType& permutation)
-	{
-		if (v.rows() == 0 || v.cols() == 0) {
-			assert(v.rows() == 0 && v.cols() == 0);
-			return;
-		}
-
-		if (!v.justCRS())
-			err("OperatorStorage: reorder2\n");
-
-		SparseMatrixType matrixTmp;
-		permute(matrixTmp, v.getCRS(), permutation);
-		permuteInverse(v.crs_, matrixTmp, permutation);
-	}
-
 	friend void fullMatrixToCrsMatrix(OperatorStorage& dest,
 	                                  const PsimagLite::Matrix<ComplexOrRealType>& src)
 	{
