@@ -736,7 +736,7 @@ externalProduct(CrsMatrix<T>& B,
                 SizeType nout,
                 const VectorLikeType& signs,
                 bool order,
-                const PsimagLite::Vector<SizeType>::Type& colPermutation)
+                const PsimagLite::Vector<SizeType>::Type& permutationFull)
 {
 	// -------------------------------------
 	//  B = kron(eye, A)   if (is_A_fastest)
@@ -784,8 +784,8 @@ externalProduct(CrsMatrix<T>& B,
 		SizeType nnz_row = A.getRowPtr(ia+1) - A.getRowPtr(ia);
 
 		for( SizeType ie=0; ie < nrow_eye;  ie++) {
-			SizeType ib = (is_A_fastest) ?   ia + ie * nrow_A :
-			                                 ie + ia * nrow_eye;
+			SizeType ib = (is_A_fastest) ?   permutationFull[ia + ie * nrow_A]:
+			                                 permutationFull[ie + ia * nrow_eye];
 			nnz_B_row[ ib ] = nnz_row;
 		};
 	};
@@ -842,13 +842,13 @@ externalProduct(CrsMatrix<T>& B,
 				T bij = (is_A_fastest) ? aij : aij * signs[ alpha ];
 
 
-				SizeType ip = B_rowptr[ ib ];
+				SizeType ip = B_rowptr[ permutationFull[ib] ];
 
-				assert(jb < colPermutation.size());
-				B.setCol( ip, colPermutation[jb] );
+				assert(jb < permutationFull.size());
+				B.setCol( ip, permutationFull[jb] );
 				B.setValues( ip, bij );
 
-				++B_rowptr[ ib ];
+				++B_rowptr[ permutationFull[ib] ];
 			};
 		};
 	};
