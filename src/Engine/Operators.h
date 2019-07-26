@@ -326,15 +326,15 @@ public:
 		reducedOpImpl_.changeBasisHamiltonian(hamiltonian_, ftransform);
 	}
 
-	void reorder(const VectorSizeType& permutation, bool full)
+	void reorder(const VectorSizeType& permutation)
 	{
 		for (SizeType k=0;k<numberOfOperators();k++) {
 			if (!BasisType::useSu2Symmetry())
-				reorder2(operators_[k], permutation, full);
+				reorder2(operators_[k], permutation);
 			reducedOpImpl_.reorder(k, permutation);
 		}
 
-		reorder2(hamiltonian_,permutation, full);
+		reorder2(hamiltonian_,permutation);
 		reducedOpImpl_.reorderHamiltonian(permutation);
 	}
 
@@ -382,10 +382,14 @@ public:
 	                     int x,
 	                     const VectorRealType& fermionicSigns,
 	                     bool option,
-	                     const VectorSizeType& colPermutation)
+	                     const VectorSizeType& permutationFull)
 	{
 		assert(!BasisType::useSu2Symmetry());
-		operators_[i].outerProduct(m, x, fermionicSigns, option, colPermutation);
+		operators_[i].outerProduct(m,
+		                           x,
+		                           fermionicSigns,
+		                           option,
+		                           permutationFull);
 		// don't forget to set fermion sign and j:
 		operators_[i].set(m.fermionOrBoson(), m.jm(), m.angularFactor());
 		// apply(operators_[i]);
@@ -404,14 +408,14 @@ public:
 	void outerProductHamiltonian(const StorageType& h2,
 	                             const StorageType& h3,
 	                             ApplyFactorsType& apply,
-	                             const VectorSizeType& colPermutation)
+	                             const VectorSizeType& permutationFull)
 	{
 		StorageType tmpMatrix;
 		assert(h2.rows()==h2.cols());
 		VectorRealType ones(h2.rows(),1.0);
-		externalProduct2(hamiltonian_,h2,h3.rows(),ones,true, colPermutation);
+		externalProduct2(hamiltonian_,h2,h3.rows(),ones,true, permutationFull);
 
-		externalProduct2(tmpMatrix,h3,h2.rows(),ones,false, colPermutation);
+		externalProduct2(tmpMatrix,h3,h2.rows(),ones,false, permutationFull);
 
 		hamiltonian_ += tmpMatrix;
 

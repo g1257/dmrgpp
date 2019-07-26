@@ -234,7 +234,7 @@ public:
 		operators_.setHamiltonian(hOp);
 		operators_.setOperators(ops);
 		//! re-order operators and hamiltonian
-		operators_.reorder(BaseType::permutationVector(), true);
+		operators_.reorder(BaseType::permutationVector());
 
 		operatorsPerSite_.clear();
 		for (SizeType i=0;i<block.size();i++)
@@ -398,8 +398,6 @@ private:
 		                                          basis3,
 		                                          basis2.reducedHamiltonian(),
 		                                          basis3.reducedHamiltonian());
-		//! re-order operators and hamiltonian
-		operators_.reorder(BaseType::permutationVector(), false);
 
 		SizeType offset1 = basis2.operatorsPerSite_.size();
 		operatorsPerSite_.resize(offset1+basis3.operatorsPerSite_.size());

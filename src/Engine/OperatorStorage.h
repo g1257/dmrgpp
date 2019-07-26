@@ -236,15 +236,20 @@ public:
 	                             SizeType nout,
 	                             const VectorRealType& signs,
 	                             bool order,
-	                             const VectorSizeType& colPermutation)
+	                             const VectorSizeType& permutationFull)
 	{
 		if (B.justCRS() && A.justCRS())
-			return externalProduct(B.crs_, A.getCRS(), nout, signs, order, colPermutation);
+			return externalProduct(B.crs_,
+			                       A.getCRS(),
+			                       nout,
+			                       signs,
+			                       order,
+			                       permutationFull);
 
 		throw PsimagLite::RuntimeError("OperatorStorage: externalProduct\n");
 	}
 
-	friend void reorder2(OperatorStorage& v, const VectorSizeType& permutation, bool full)
+	friend void reorder2(OperatorStorage& v, const VectorSizeType& permutation)
 	{
 		if (v.rows() == 0 || v.cols() == 0) {
 			assert(v.rows() == 0 && v.cols() == 0);
@@ -255,14 +260,8 @@ public:
 			err("OperatorStorage: reorder2\n");
 
 		SparseMatrixType matrixTmp;
-		SparseMatrixType matrixTmp2;
-		if (full)
-			permute(matrixTmp2, v.getCRS(), permutation);
-		const SparseMatrixType& startingPoint = (full) ? matrixTmp2 :  v.getCRS();
-		SparseMatrixType& endPoint = (full) ? v.crs_ :  matrixTmp;
-		permuteInverse(endPoint, startingPoint, permutation);
-		if (!full)
-			v.crs_ = matrixTmp;
+		permute(matrixTmp, v.getCRS(), permutation);
+		permuteInverse(v.crs_, matrixTmp, permutation);
 	}
 
 	friend void fullMatrixToCrsMatrix(OperatorStorage& dest,
