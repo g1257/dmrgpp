@@ -248,7 +248,11 @@ public:
 	          typename PsimagLite::EnableIf<
 	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
-		prefix += "/";
+		const SizeType last = prefix.length() - 1;
+		if (last >= prefix.length())
+			err("Operators.h: read\n");
+
+		if (prefix[last] != '/') prefix += "/";
 
 		if (!BasisType::useSu2Symmetry()) {
 			io.read(operators_, prefix + "Operators");
