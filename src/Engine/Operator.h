@@ -52,7 +52,7 @@ OR THE UNITED STATES DEPARTMENT OF ENERGY BE LIABLE FOR
 ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
 PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-data_, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
@@ -62,7 +62,7 @@ DAMAGE.
 NEITHER THE UNITED STATES GOVERNMENT, NOR THE UNITED
 STATES DEPARTMENT OF ENERGY, NOR THE COPYRIGHT OWNER, NOR
 ANY OF THEIR EMPLOYEES, REPRESENTS THAT THE USE OF ANY
-INFORMATION, data_, APPARATUS, PRODUCT, OR PROCESS
+INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
 DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
@@ -262,10 +262,10 @@ public:
 		if (mode != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
 			ioSerializer.createGroup(label);
 
-		data_.write(label + "/data_", ioSerializer, mode);
-		ioSerializer.write(label + "/fermionOrBoson_", fermionOrBoson_, mode);
-		ioSerializer.write(label + "/jm_", jm_, mode);
-		ioSerializer.write(label + "/angularFactor_", angularFactor_, mode);
+		data_.write(label + "/data", ioSerializer, mode);
+		ioSerializer.write(label + "/fermionOrBoson", fermionOrBoson_, mode);
+		ioSerializer.write(label + "/jm", jm_, mode);
+		ioSerializer.write(label + "/angularFactor", angularFactor_, mode);
 		// su2Related_.write(label + "/su2Related_", ioSerializer);
 	}
 
@@ -278,10 +278,10 @@ public:
 	void read(PsimagLite::String label,
 	          PsimagLite::IoSerializer& ioSerializer)
 	{
-		data_.read(label + "/data_", ioSerializer);
-		ioSerializer.read(fermionOrBoson_, label + "/fermionOrBoson_");
-		ioSerializer.read(jm_, label + "/jm_");
-		ioSerializer.read(angularFactor_, label + "/angularFactor_");
+		data_.read(label + "/data", ioSerializer);
+		ioSerializer.read(fermionOrBoson_, label + "/fermionOrBoson");
+		ioSerializer.read(jm_, label + "/jm");
+		ioSerializer.read(angularFactor_, label + "/angularFactor");
 		// su2Related_.read(label + "/su2Related_", ioSerializer);
 	}
 
