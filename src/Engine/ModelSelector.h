@@ -73,6 +73,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/HubbardMultiBand/ModelHubbardMultiBand.h"
 #include "../Models/HubbardHolstein/HubbardHolstein.h"
 #include "../Models/Kondo/Kondo.h"
+#include "../Models/UlsOsu/UlsOsu.h"
+
 #endif
 
 namespace Dmrg {
@@ -98,7 +100,8 @@ class ModelSelector {
 	typedef Immm<ModelBaseType> ImmmType;
 	typedef TjMultiOrb<ModelBaseType> TjMultiOrbType;
 	typedef TjAnisotropic<ModelBaseType> TjAnisotropicType;
-	typedef TjAncillaC2<ModelBaseType> TjAncillaC2Type;
+    typedef UlsOsu<ModelBaseType> UlsOsuType;
+    typedef TjAncillaC2<ModelBaseType> TjAncillaC2Type;
 	typedef TjAncillaC<ModelBaseType> TjAncillaCType;
 	typedef TjAncillaG<ModelBaseType> TjAncillaGType;
 	typedef SuperHubbardExtended<ModelBaseType> SuperHubbardExtendedType;
@@ -153,6 +156,8 @@ public:
 			model_ = new TjMultiOrbType(solverParams,io,geometry);
 		} else if (name_ == "TjAnisotropic") {
 			model_ = new TjAnisotropicType(solverParams,io,geometry);
+        } else if (name_ == "UlsOsu") {
+            model_ = new UlsOsuType(solverParams, io, geometry);
 		} else if (name_ == "TjAncillaC2") {
 			model_ = new TjAncillaC2Type(solverParams,io,geometry);
 		} else if (name_ == "TjAncillaC") {
