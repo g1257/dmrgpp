@@ -168,6 +168,9 @@ public:
 	                  const QnType* pseudoQn = 0,
 	                  SizeType initialSizeOfHashTable = 10)
 	{
+		if (useSu2Symmetry_)
+			err("SU(2) symmetry no longer supported\n");
+
 		PsimagLite::Profiling profiling("setToProduct",
 		                                ttos(basis1.size()) + "x" + ttos(basis2.size()),
 		                                std::cout);
@@ -179,67 +182,73 @@ public:
 		block_.clear();
 		utils::blockUnion(block_,basis1.block_,basis2.block_);
 
-		if (useSu2Symmetry_) {
-			std::cout<<"Basis: SU(2) Symmetry is in use\n";
+		SizeType ns = basis2.size();
+		SizeType ne = basis1.size();
 
-			VectorQnType qnsBig;
-			symmSu2_.setToProduct(basis1.symmSu2_,
-			                      basis2.symmSu2_,
-			                      pseudoQn,
-			                      basis1.qns_,
-			                      basis2.qns_,
-			                      qns_,
-			                      qnsBig);
+		unsigned long int check = ns*ne;
+		unsigned int shift = 8*sizeof(SizeType)-1;
+		unsigned long int max = 1;
+		max <<= shift;
+		if (check >= max) {
+			PsimagLite::String msg("Basis::setToProduct: Basis too large. ");
+			msg += "Current= "+ ttos(check) + " max " + ttos(max) + " ";
+			msg += "Please recompile with -DUSE_LONG\n";
+			throw PsimagLite::RuntimeError(msg);
+		}
 
-			// order quantum numbers of combined basis:
-			findPermutationAndPartitionAndQns(qnsBig, true, false, 10, verbose);
-		} else {
-			SizeType ns = basis2.size();
-			SizeType ne = basis1.size();
+		SizeType npe = basis2.offset_.size();
+		if (npe > 0) --npe;
+		SizeType nps = basis1.offset_.size();
+		if (nps > 0) --nps;
 
-			unsigned long int check = ns*ne;
-			unsigned int shift = 8*sizeof(SizeType)-1;
-			unsigned long int max = 1;
-			max <<= shift;
-			if (check >= max) {
-				PsimagLite::String msg("Basis::setToProduct: Basis too large. ");
-				msg += "Current= "+ ttos(check) + " max " + ttos(max) + " ";
-				msg += "Please recompile with -DUSE_LONG\n";
-				throw PsimagLite::RuntimeError(msg);
-			}
+		SizeType total = basis1.size() * basis2.size();
+		signs_.clear();
+		signs_.resize(total);
+		SizeType counter = 0;
+		// pass to deal with signs (legacy issue)
+		for (SizeType pe = 0; pe < npe; ++pe)
+			for (SizeType i = basis2.offset_[pe]; i < basis2.offset_[pe + 1]; ++i)
+				for (SizeType ps = 0; ps < nps; ++ps)
+					for (SizeType j = basis1.offset_[ps];
+					     j < basis1.offset_[ps + 1];
+					     ++j)
+						signs_[counter++] = (basis1.signs_[j] ^ basis2.signs_[i]);
 
-			SizeType npe = basis2.partition_.size();
-			if (npe > 0) --npe;
-			SizeType nps = basis1.partition_.size();
-			if (nps > 0) --nps;
-
-			SizeType total = basis1.size() * basis2.size();
-			qnsBig_.resize(total);
-			signs_.clear();
-			signs_.resize(total);
-			SizeType counter = 0;
+		// first pass for sizes in super
+		for (SizeType ps = 0; ps < nps; ++ps) {
+			const SizeType leftSize = basis1.offset_[ps + 1] - basis1.offset_[ps];
 			for (SizeType pe = 0; pe < npe; ++pe) {
-				for (SizeType i = basis2.partition_[pe]; i < basis2.partition_[pe + 1]; ++i) {
-					for (SizeType ps = 0; ps < nps; ++ps) {
-						for (SizeType j = basis1.partition_[ps];
-						     j < basis1.partition_[ps + 1];
-						     ++j) {
-							qnsBig_[counter] = PairOfQnsType(basis2.qns_[pe], basis1.qns_[ps]);
-							signs_[counter++] = (basis1.signs_[j] ^ basis2.signs_[i]);
-						}
+				const SizeType rightSize = basis2.offset_[pe + 1] - basis2.offset_[pe];
+				const QnType tensorProd(basis2.qns_[pe], basis1.qns_[ps]);
+				qnSizes[tensorProd] += leftSize*rightSize;
+			}
+		}
+
+		offsetsFromSizes(offsetsSuper, qnSizes);
+
+		// second pass for permutation in super
+		const SizeType basisLeftSize = basis1.size();
+		for (SizeType ps = 0; ps < nps; ++ps) {
+			const SizeType leftSize = basis1.offset_[ps + 1] - basis1.offset_[ps];
+			for (SizeType pe = 0; pe < npe; ++pe) {
+				const SizeType rightSize = basis2.offset_[pe + 1] - basis2.offset_[pe];
+				for (SizeType i = 0; i < leftSize; ++i) {
+					const SizeType ileftOffset = basis1.offset_[ps] + i;
+					for (SizeType j = 0; j < rightSize; ++j) {
+						const SizeType irightOffset = basis2.offset_[pe] + j;
+						const QnType tensorProd(basis2.qns_[pe], basis1.qns_[ps]);
+						const SizeType iglobalState = ileftOffset + irightOffset*basisLeftSize;
+						const SizeType ipos = offsetsSuper[tensorProd] + (i + j*leftSize);
+						permInverse_[ipos] = iglobalState;
+						permutationVector_[iglobalState] = ipos;
 					}
 				}
 			}
-
-			// order quantum numbers of combined basis:
-			findPermutationAndPartitionAndQns(qnsBig_,
-			                                  true,
-			                                  false,
-			                                  initialSizeOfHashTable,
-			                                  verbose);
 		}
 
-		reorder();
+		offsetsFromSizes(offset_, qnSizes);
+
+		reorderSigns();
 		signsOld_ = signs_;
 	}
 
@@ -253,12 +262,12 @@ public:
 	//! returns the start of basis partition i (see paper)
 	SizeType partition(SizeType i) const
 	{
-		assert(i < partition_.size());
-		return partition_[i];
+		assert(i < offset_.size());
+		return offset_[i];
 	}
 
 	//! returns number of partitions for this basis (see paper)
-	SizeType partition() const { return partition_.size(); }
+	SizeType partition() const { return offset_.size(); }
 
 	//! returns the permutation of i
 	SizeType permutation(SizeType i) const
@@ -292,15 +301,15 @@ public:
 	//! returns the size of this basis
 	SizeType size() const
 	{
-		assert(partition_.size() > 0);
-		return partition_[partition_.size()-1];
+		assert(offset_.size() > 0);
+		return offset_[offset_.size()-1];
 	}
 
 	//! finds the partition that contains basis state i
 	SizeType findPartitionNumber(SizeType i) const
 	{
-		for (SizeType j=0;j<partition_.size()-1;j++)
-			if (i>=partition_[j] && i<partition_[j+1]) return j;
+		for (SizeType j=0;j<offset_.size()-1;j++)
+			if (i>=offset_[j] && i<offset_[j+1]) return j;
 
 		throw PsimagLite::RuntimeError("Basis: No partition found for this state\n");
 	}
@@ -336,7 +345,7 @@ public:
 		if (removedIndices.size()==0) return 0;
 
 		VectorQnType qns;
-		unShrinkVector(qns, qns_, partition_);
+		unShrinkVector(qns, qns_, offset_);
 		truncate(qns, removedIndices);
 
 		// N.B.: false below means that we don't truncate the permutation vectors
@@ -456,8 +465,8 @@ public:
 	QnType pseudoQn(SizeType i) const
 	{
 		if (useSu2Symmetry_) {
-			assert(i < partition_.size());
-			SizeType ind = partition_[i];
+			assert(i < offset_.size());
+			SizeType ind = offset_[i];
 			PairType jmPair(symmSu2_.jmValue(ind).first, 0);
 			assert(ind < signs_.size());
 			QnType q(signs_[ind], VectorSizeType(), jmPair, 0);
@@ -490,7 +499,7 @@ public:
 			io.write(signsOld_, label + "SignsOld", mode);
 		}
 
-		io.write(partition_, label + "PARTITION", mode);
+		io.write(offset_, label + "PARTITION", mode);
 		io.write(permInverse_, label + "PERMUTATIONINVERSE", mode);
 		if (mode == PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
 			io.overwrite(qns_, label + "QNShrink");
@@ -524,7 +533,7 @@ public:
 		os<<"electrons\n";
 		os<<x.electrons_;
 		os<<"partition\n";
-		os<<x.partition_;
+		os<<x.offset_;
 		os<<"permutation\n";
 		os<<x.permutationVector_;
 		os<<"block\n";
@@ -558,7 +567,7 @@ protected:
 		                                  true,
 		                                  10,
 		                                  ProgramGlobals::VerboseEnum::NO);
-		reorder();
+		reorderSigns();
 		signsOld_ = signs_;
 	}
 
@@ -581,7 +590,7 @@ private:
 			io.read(signsOld_, prefix + "SignsOld");
 		}
 
-		io.read(partition_, prefix + "PARTITION");
+		io.read(offset_, prefix + "PARTITION");
 		io.read(permInverse_, prefix + "PERMUTATIONINVERSE");
 		permutationVector_.resize(permInverse_.size());
 		for (SizeType i=0;i<permInverse_.size();i++)
@@ -603,13 +612,13 @@ private:
 		if (!Qn::ifPresentOther0IsElectrons || Qn::modalStruct.size() == 0)
 			return;
 
-		SizeType n = partition_.size();
+		SizeType n = offset_.size();
 		assert(n > 0);
 		--n;
-		assert(partition_[n] == signs_.size());
+		assert(offset_[n] == signs_.size());
 		for (SizeType p = 0; p < n; ++p) {
-			SizeType start = partition_[p];
-			SizeType end = partition_[p + 1];
+			SizeType start = offset_[p];
+			SizeType end = offset_[p + 1];
 			SizeType expected = (qns_[p].other[0] & 1);
 			for (SizeType i = start; i < end; ++i) {
 				if (signs_[i] != expected)
@@ -666,7 +675,7 @@ private:
 		}
 	}
 
-	void reorder()
+	void reorderSigns()
 	{
 		utils::reorder(signs_,permutationVector_);
 		if (useSu2Symmetry_) symmSu2_.reorder(permutationVector_);
@@ -690,7 +699,7 @@ private:
 		NotReallySort notReallySort;
 		notReallySort(permutationVector,
 		              qns_,
-		              partition_,
+		              offset_,
 		              numbers,
 		              qns,
 		              doNotSort,
@@ -742,7 +751,6 @@ these numbers are
 		order of hundreds for usual symmetries, making this implementation very practical for
 		systems of correlated electrons.)
 		*/
-	VectorLikeQnType qnsBig_;
 	VectorQnType qns_;
 	VectorBoolType signs_;
 	VectorBoolType signsOld_;
@@ -761,7 +769,7 @@ these numbers are
 		Now we know that our Hamiltonian matrix will be composed first of a
 		block of 4x4, then of a block of 2x2, etc.
 		*/
-	VectorSizeType partition_;
+	VectorSizeType offset_;
 
 	/* PSIDOC BasisPermutationVector
 		We then reorder our basis such that its elements are given in
