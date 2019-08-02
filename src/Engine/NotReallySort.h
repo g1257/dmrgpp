@@ -21,21 +21,24 @@ public:
 	typedef Dmrg::Qn::VectorQnType VectorQnType;
 	typedef Dmrg::Qn::VectorSizeType VectorSizeType;
 
-	hash(VectorSizeType& hash,
-	     const VectorQnType& inQns,
+	hash(VectorSizeType* hash,
+	     const VectorQnType* inQns,
 	     bool addOdd)
 	    : hash_(hash), inQns_(inQns), addOdd_(addOdd)
 	{}
 
+	hash(bool addOdd) : addOdd_(addOdd)
+	{}
+
 	void doTask(SizeType taskNumber, SizeType)
 	{
-		assert(inQns_.size() > taskNumber);
-		hash_[taskNumber] = operator()(inQns_[taskNumber]);
+		assert(inQns_->size() > taskNumber);
+		(*hash_)[taskNumber] = operator()((*inQns_)[taskNumber]);
 	}
 
 	SizeType tasks() const
 	{
-		return inQns_.size();
+		return inQns_->size();
 	}
 
 	SizeType operator()(const Dmrg::Qn& qn) const
@@ -57,8 +60,8 @@ public:
 
 private:
 
-	VectorSizeType& hash_;
-	const VectorQnType& inQns_;
+	VectorSizeType* hash_;
+	const VectorQnType* inQns_;
 	bool addOdd_;
 };
 
@@ -161,7 +164,7 @@ public:
 			const bool hasAtLeastOneOdd = (noNeedForOdd) ? false : getOddElectrons(inQns);
 			const bool addOddToHash = (!noNeedForOdd && hasAtLeastOneOdd);
 
-			std::hash<PairOfQnsOrJustQnType> helper(hash, inQns, addOddToHash);
+			std::hash<PairOfQnsOrJustQnType> helper(&hash, &inQns, addOddToHash);
 			std::unordered_map<PairOfQnsOrJustQnType, SizeType> umap(initialSizeOfHashTable,
 			                                                         helper);
 			firstPassUmap(outQns, count, umap, inQns);
@@ -203,7 +206,7 @@ private:
 		const bool addOddToHash = (!noNeedForOdd && hasAtLeastOneOdd);
 
 		SizeType threads = std::min(PsimagLite::Concurrency::codeSectionParams.npthreads, n);
-		std::hash<PairOfQnsOrJustQnType> helper(hash, inQns, addOddToHash);
+		std::hash<PairOfQnsOrJustQnType> helper(&hash, &inQns, addOddToHash);
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
 		PsimagLite::Parallelizer<std::hash<PairOfQnsOrJustQnType> >
 		        parallelizer(codeSectionParams);

@@ -175,10 +175,6 @@ public:
 		                                ttos(basis1.size()) + "x" + ttos(basis2.size()),
 		                                std::cout);
 
-		bool notSuper = (basis1.block().size() == 1 || basis2.block().size() == 1);
-		ProgramGlobals::VerboseEnum verbose = (notSuper) ? ProgramGlobals::VerboseEnum::NO :
-		                                                   ProgramGlobals::VerboseEnum::YES;
-
 		block_.clear();
 		utils::blockUnion(block_,basis1.block_,basis2.block_);
 
@@ -196,46 +192,47 @@ public:
 			throw PsimagLite::RuntimeError(msg);
 		}
 
-		SizeType npe = basis2.offset_.size();
+		SizeType npe = basis2.offsets_.size();
 		if (npe > 0) --npe;
-		SizeType nps = basis1.offset_.size();
+		SizeType nps = basis1.offsets_.size();
 		if (nps > 0) --nps;
 
 		SizeType total = basis1.size() * basis2.size();
 		signs_.clear();
 		signs_.resize(total);
 		SizeType counter = 0;
-		// pass to deal with signs (legacy issue)
+		// pass to deal with signs (legacy issue) FIXME: make signs_ per symmetry block
 		for (SizeType pe = 0; pe < npe; ++pe)
-			for (SizeType i = basis2.offset_[pe]; i < basis2.offset_[pe + 1]; ++i)
+			for (SizeType i = basis2.offsets_[pe]; i < basis2.offsets_[pe + 1]; ++i)
 				for (SizeType ps = 0; ps < nps; ++ps)
-					for (SizeType j = basis1.offset_[ps];
-					     j < basis1.offset_[ps + 1];
-					     ++j)
+					for (SizeType j = basis1.offsets_[ps]; j < basis1.offsets_[ps + 1]; ++j)
 						signs_[counter++] = (basis1.signs_[j] ^ basis2.signs_[i]);
 
 		// first pass for sizes in super
+		std::hash<QnType> myhash(true);
+		std::unordered_map<QnType, SizeType> qnSizes(initialSizeOfHashTable, myhash);
 		for (SizeType ps = 0; ps < nps; ++ps) {
-			const SizeType leftSize = basis1.offset_[ps + 1] - basis1.offset_[ps];
+			const SizeType leftSize = basis1.offsets_[ps + 1] - basis1.offsets_[ps];
 			for (SizeType pe = 0; pe < npe; ++pe) {
-				const SizeType rightSize = basis2.offset_[pe + 1] - basis2.offset_[pe];
+				const SizeType rightSize = basis2.offsets_[pe + 1] - basis2.offsets_[pe];
 				const QnType tensorProd(basis2.qns_[pe], basis1.qns_[ps]);
 				qnSizes[tensorProd] += leftSize*rightSize;
 			}
 		}
 
-		offsetsFromSizes(offsetsSuper, qnSizes);
+		std::unordered_map<QnType, SizeType> offsetsSuper(initialSizeOfHashTable, myhash);
+		thingsFromSizes(offsetsSuper, qnSizes);
 
 		// second pass for permutation in super
 		const SizeType basisLeftSize = basis1.size();
 		for (SizeType ps = 0; ps < nps; ++ps) {
-			const SizeType leftSize = basis1.offset_[ps + 1] - basis1.offset_[ps];
+			const SizeType leftSize = basis1.offsets_[ps + 1] - basis1.offsets_[ps];
 			for (SizeType pe = 0; pe < npe; ++pe) {
-				const SizeType rightSize = basis2.offset_[pe + 1] - basis2.offset_[pe];
+				const SizeType rightSize = basis2.offsets_[pe + 1] - basis2.offsets_[pe];
 				for (SizeType i = 0; i < leftSize; ++i) {
-					const SizeType ileftOffset = basis1.offset_[ps] + i;
+					const SizeType ileftOffset = basis1.offsets_[ps] + i;
 					for (SizeType j = 0; j < rightSize; ++j) {
-						const SizeType irightOffset = basis2.offset_[pe] + j;
+						const SizeType irightOffset = basis2.offsets_[pe] + j;
 						const QnType tensorProd(basis2.qns_[pe], basis1.qns_[ps]);
 						const SizeType iglobalState = ileftOffset + irightOffset*basisLeftSize;
 						const SizeType ipos = offsetsSuper[tensorProd] + (i + j*leftSize);
@@ -246,10 +243,23 @@ public:
 			}
 		}
 
-		offsetsFromSizes(offset_, qnSizes);
-
 		reorderSigns();
 		signsOld_ = signs_;
+	}
+
+	void thingsFromSizes(std::unordered_map<QnType, SizeType>& offsetsTmp,
+	                     const std::unordered_map<QnType, SizeType>& sizes)
+	{
+		offsets_.resize(sizes.size() + 1);
+		offsets_[0] = 0;
+		SizeType counter = 0;
+		typedef std::unordered_map<QnType, SizeType>::const_iterator SomeIteratorType;
+		for (SomeIteratorType it = sizes.begin(); it != sizes.end(); ++it) {
+			qns_[counter] = it->first;
+			offsets_[counter + 1] =  offsets_[counter] + it->second;
+			offsetsTmp[it->first] = offsets_[counter + 1];
+			++counter;
+		}
 	}
 
 	//! returns the effective quantum number of basis state i
@@ -262,12 +272,12 @@ public:
 	//! returns the start of basis partition i (see paper)
 	SizeType partition(SizeType i) const
 	{
-		assert(i < offset_.size());
-		return offset_[i];
+		assert(i < offsets_.size());
+		return offsets_[i];
 	}
 
 	//! returns number of partitions for this basis (see paper)
-	SizeType partition() const { return offset_.size(); }
+	SizeType partition() const { return offsets_.size(); }
 
 	//! returns the permutation of i
 	SizeType permutation(SizeType i) const
@@ -301,15 +311,15 @@ public:
 	//! returns the size of this basis
 	SizeType size() const
 	{
-		assert(offset_.size() > 0);
-		return offset_[offset_.size()-1];
+		assert(offsets_.size() > 0);
+		return offsets_[offsets_.size()-1];
 	}
 
 	//! finds the partition that contains basis state i
 	SizeType findPartitionNumber(SizeType i) const
 	{
-		for (SizeType j=0;j<offset_.size()-1;j++)
-			if (i>=offset_[j] && i<offset_[j+1]) return j;
+		for (SizeType j=0;j<offsets_.size()-1;j++)
+			if (i>=offsets_[j] && i<offsets_[j+1]) return j;
 
 		throw PsimagLite::RuntimeError("Basis: No partition found for this state\n");
 	}
@@ -345,7 +355,7 @@ public:
 		if (removedIndices.size()==0) return 0;
 
 		VectorQnType qns;
-		unShrinkVector(qns, qns_, offset_);
+		unShrinkVector(qns, qns_, offsets_);
 		truncate(qns, removedIndices);
 
 		// N.B.: false below means that we don't truncate the permutation vectors
@@ -465,8 +475,8 @@ public:
 	QnType pseudoQn(SizeType i) const
 	{
 		if (useSu2Symmetry_) {
-			assert(i < offset_.size());
-			SizeType ind = offset_[i];
+			assert(i < offsets_.size());
+			SizeType ind = offsets_[i];
 			PairType jmPair(symmSu2_.jmValue(ind).first, 0);
 			assert(ind < signs_.size());
 			QnType q(signs_[ind], VectorSizeType(), jmPair, 0);
@@ -499,7 +509,7 @@ public:
 			io.write(signsOld_, label + "SignsOld", mode);
 		}
 
-		io.write(offset_, label + "PARTITION", mode);
+		io.write(offsets_, label + "PARTITION", mode);
 		io.write(permInverse_, label + "PERMUTATIONINVERSE", mode);
 		if (mode == PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
 			io.overwrite(qns_, label + "QNShrink");
@@ -533,7 +543,7 @@ public:
 		os<<"electrons\n";
 		os<<x.electrons_;
 		os<<"partition\n";
-		os<<x.offset_;
+		os<<x.offsets_;
 		os<<"permutation\n";
 		os<<x.permutationVector_;
 		os<<"block\n";
@@ -590,7 +600,7 @@ private:
 			io.read(signsOld_, prefix + "SignsOld");
 		}
 
-		io.read(offset_, prefix + "PARTITION");
+		io.read(offsets_, prefix + "PARTITION");
 		io.read(permInverse_, prefix + "PERMUTATIONINVERSE");
 		permutationVector_.resize(permInverse_.size());
 		for (SizeType i=0;i<permInverse_.size();i++)
@@ -612,13 +622,13 @@ private:
 		if (!Qn::ifPresentOther0IsElectrons || Qn::modalStruct.size() == 0)
 			return;
 
-		SizeType n = offset_.size();
+		SizeType n = offsets_.size();
 		assert(n > 0);
 		--n;
-		assert(offset_[n] == signs_.size());
+		assert(offsets_[n] == signs_.size());
 		for (SizeType p = 0; p < n; ++p) {
-			SizeType start = offset_[p];
-			SizeType end = offset_[p + 1];
+			SizeType start = offsets_[p];
+			SizeType end = offsets_[p + 1];
 			SizeType expected = (qns_[p].other[0] & 1);
 			for (SizeType i = start; i < end; ++i) {
 				if (signs_[i] != expected)
@@ -699,7 +709,7 @@ private:
 		NotReallySort notReallySort;
 		notReallySort(permutationVector,
 		              qns_,
-		              offset_,
+		              offsets_,
 		              numbers,
 		              qns,
 		              doNotSort,
@@ -769,7 +779,7 @@ these numbers are
 		Now we know that our Hamiltonian matrix will be composed first of a
 		block of 4x4, then of a block of 2x2, etc.
 		*/
-	VectorSizeType offset_;
+	VectorSizeType offsets_;
 
 	/* PSIDOC BasisPermutationVector
 		We then reorder our basis such that its elements are given in
