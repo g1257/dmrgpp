@@ -168,7 +168,7 @@ public:
         }
 
         if (BasisType::useSu2Symmetry())
-            err("Kitaev does not have SU(2) symmetry\n");
+            err("UlsOsu does not have SU(2) implimentation \n");
 
         // fill caches
         ProgramGlobals::init(geometry_.numberOfSites() + 1);
@@ -297,10 +297,17 @@ protected:
         OpForLinkType sx("sx");
         OpForLinkType sy("sy");
         OpForLinkType sz("sz");
+        OpForLinkType lx("lx");
+        OpForLinkType ly("ly");
+        OpForLinkType lz("lz");
 
         ModelBaseType::createTerm("sxsx").push(sx, 'N', sx, 'N');
         ModelBaseType::createTerm("sysy").push(sy, 'N', sy, 'N');
         ModelBaseType::createTerm("szsz").push(sz, 'N', sz, 'N');
+
+        ModelBaseType::createTerm("lxlx").push(lx, 'N', lx, 'N');
+        ModelBaseType::createTerm("lyly").push(ly, 'N', ly, 'N');
+        ModelBaseType::createTerm("lzlz").push(lz, 'N', lz, 'N');
     }
 
 private:
@@ -323,6 +330,8 @@ private:
         double val = sqrt(2.0);
         MatrixType Ax(3,3), Ay(3,3), Az(3,3), Iden(3,3);
         Ax.setTo(0.0); Ay.setTo(0.0); Az.setTo(0.0); Iden.setTo(0.0);
+
+        // -- Spin-1 matricies --
         Ax(0,1) = 1.0/val; Ax(1,0)= 1.0/val;
         Ax(1,2) = 1.0/val; Ax(2,1) = 1.0/val;
 
@@ -338,6 +347,8 @@ private:
         Iden(1,1) = 1.0;
         Iden(2,2) = 1.0;
 
+
+        // -- Spin-1 matricies --
         MatrixType cm(total,total);
         cm.setTo(0.0);
         assert(total == 9);
@@ -367,6 +378,14 @@ private:
                                     RealType) const
     {
         SizeType n=block.size();
+        SizeType linSize = geometry_.numberOfSites();
+        if (modelParameters_.magneticFieldX.size() != linSize)
+            return; // <<---- PLEASE NOTE EARLY EXIT HERE
+        if (modelParameters_.magneticFieldY.size() != linSize)
+            return; // <<---- PLEASE NOTE EARLY EXIT HERE
+        if (modelParameters_.magneticFieldZ.size() != linSize)
+            return; // <<---- PLEASE NOTE EARLY EXIT HERE
+
         for (SizeType i = 0; i < n; ++i) {
             SizeType site = block[i];
 
@@ -396,7 +415,7 @@ private:
         HilbertStateType total = 9;
 
         basis.resize(total);
-        for (SizeType a = 0; a< total; ++a) basis[a] = a;
+        //for (SizeType a = 0; a< total; ++a) basis[a] = a;
         if (modelParameters_.orbitals == 1 && basis.size() == 9) {
             basis[0] = 0; // e - e
             basis[1] = 1; // e - u
