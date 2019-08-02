@@ -202,43 +202,64 @@ public:
 		signs_.resize(total);
 		SizeType counter = 0;
 		// pass to deal with signs (legacy issue) FIXME: make signs_ per symmetry block
-		for (SizeType pe = 0; pe < npe; ++pe)
-			for (SizeType i = basis2.offsets_[pe]; i < basis2.offsets_[pe + 1]; ++i)
-				for (SizeType ps = 0; ps < nps; ++ps)
-					for (SizeType j = basis1.offsets_[ps]; j < basis1.offsets_[ps + 1]; ++j)
+		for (SizeType ps = 0; ps < nps; ++ps)
+			for (SizeType j = basis1.offsets_[ps]; j < basis1.offsets_[ps + 1]; ++j)
+				for (SizeType pe = 0; pe < npe; ++pe)
+					for (SizeType i = basis2.offsets_[pe]; i < basis2.offsets_[pe + 1]; ++i)
 						signs_[counter++] = (basis1.signs_[j] ^ basis2.signs_[i]);
 
 		// first pass for sizes in super
 		std::hash<QnType> myhash(true);
 		std::unordered_map<QnType, SizeType> qnSizes(initialSizeOfHashTable, myhash);
+		std::unordered_map<QnType, SizeType> seenThisQns(initialSizeOfHashTable, myhash);
+
+		counter = 0;
+		const QnType dummyQn(basis2.qns_[0], basis1.qns_[0]);
+		qns_.clear();
+		qns_.resize(nps*npe, dummyQn);
 		for (SizeType ps = 0; ps < nps; ++ps) {
 			const SizeType leftSize = basis1.offsets_[ps + 1] - basis1.offsets_[ps];
 			for (SizeType pe = 0; pe < npe; ++pe) {
 				const SizeType rightSize = basis2.offsets_[pe + 1] - basis2.offsets_[pe];
 				const QnType tensorProd(basis2.qns_[pe], basis1.qns_[ps]);
 				qnSizes[tensorProd] += leftSize*rightSize;
+				if (seenThisQns[tensorProd] == 1) continue;
+				seenThisQns[tensorProd] = 1;
+				qns_[counter++] = tensorProd;
 			}
 		}
 
-		std::unordered_map<QnType, SizeType> offsetsSuper(initialSizeOfHashTable, myhash);
-		thingsFromSizes(offsetsSuper, qnSizes);
+		qns_.resize(counter, dummyQn);
+		offsetsFromSizes(qnSizes);
 
 		// second pass for permutation in super
 		const SizeType basisLeftSize = basis1.size();
+		const SizeType basisRightSize = basis2.size();
+		permInverse_.resize(basisLeftSize*basisRightSize);
+		permutationVector_.resize(permInverse_.size());
+		counter = 0;
 		for (SizeType ps = 0; ps < nps; ++ps) {
 			const SizeType leftSize = basis1.offsets_[ps + 1] - basis1.offsets_[ps];
 			for (SizeType pe = 0; pe < npe; ++pe) {
 				const SizeType rightSize = basis2.offsets_[pe + 1] - basis2.offsets_[pe];
+
+				const QnType thisQn(basis2.qns_[pe], basis1.qns_[ps]);
+
 				for (SizeType i = 0; i < leftSize; ++i) {
 					const SizeType ileftOffset = basis1.offsets_[ps] + i;
 					for (SizeType j = 0; j < rightSize; ++j) {
 						const SizeType irightOffset = basis2.offsets_[pe] + j;
-						const QnType tensorProd(basis2.qns_[pe], basis1.qns_[ps]);
+
 						const SizeType iglobalState = ileftOffset + irightOffset*basisLeftSize;
-						const SizeType ipos = offsetsSuper[tensorProd] + (i + j*leftSize);
+						const SizeType ipos = offsets_[counter] + (i + j*leftSize);
 						permInverse_[ipos] = iglobalState;
 						permutationVector_[iglobalState] = ipos;
 					}
+				}
+
+				if (seenThisQns[thisQn] == 1) {
+					seenThisQns[thisQn] = 2;
+					++counter;
 				}
 			}
 		}
@@ -247,18 +268,16 @@ public:
 		signsOld_ = signs_;
 	}
 
-	void thingsFromSizes(std::unordered_map<QnType, SizeType>& offsetsTmp,
-	                     const std::unordered_map<QnType, SizeType>& sizes)
+	void offsetsFromSizes(std::unordered_map<QnType, SizeType>& sizes)
 	{
+		const SizeType total = qns_.size();
+		assert(total == sizes.size());
 		offsets_.resize(sizes.size() + 1);
+
 		offsets_[0] = 0;
-		SizeType counter = 0;
-		typedef std::unordered_map<QnType, SizeType>::const_iterator SomeIteratorType;
-		for (SomeIteratorType it = sizes.begin(); it != sizes.end(); ++it) {
-			qns_[counter] = it->first;
-			offsets_[counter + 1] =  offsets_[counter] + it->second;
-			offsetsTmp[it->first] = offsets_[counter + 1];
-			++counter;
+		for (SizeType i = 0; i < total; ++i) {
+			const QnType& qn = qns_[i];
+			offsets_[i + 1] = offsets_[i] + sizes[qn];
 		}
 	}
 

@@ -60,11 +60,16 @@ public:
 		allocate(n);
 	}
 
-	SizeType size() const { return size_; }
+	SizeType size() const
+	{
+		assert(size_ == 0 || data_);
+		return size_;
+	}
 
 	const T& operator[](SizeType ind) const
 	{
 		assert(ind < size_);
+		assert(data_);
 		return data_[ind];
 	}
 
