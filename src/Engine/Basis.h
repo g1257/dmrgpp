@@ -229,15 +229,15 @@ public:
 			}
 		}
 
+		std::unordered_map<QnType, SizeType> offsets(initialSizeOfHashTable, myhash);
 		qns_.resize(counter, dummyQn);
-		offsetsFromSizes(qnSizes);
+		offsetsFromSizes(offsets, qnSizes);
 
 		// second pass for permutation in super
 		const SizeType basisLeftSize = basis1.size();
 		const SizeType basisRightSize = basis2.size();
 		permInverse_.resize(basisLeftSize*basisRightSize);
 		permutationVector_.resize(permInverse_.size());
-		counter = 0;
 		for (SizeType ps = 0; ps < nps; ++ps) {
 			const SizeType leftSize = basis1.offsets_[ps + 1] - basis1.offsets_[ps];
 			for (SizeType pe = 0; pe < npe; ++pe) {
@@ -251,15 +251,10 @@ public:
 						const SizeType irightOffset = basis2.offsets_[pe] + j;
 
 						const SizeType iglobalState = ileftOffset + irightOffset*basisLeftSize;
-						const SizeType ipos = offsets_[counter] + (i + j*leftSize);
+						const SizeType ipos = offsets[thisQn] + (i + j*leftSize);
 						permInverse_[ipos] = iglobalState;
 						permutationVector_[iglobalState] = ipos;
 					}
-				}
-
-				if (seenThisQns[thisQn] == 1) {
-					seenThisQns[thisQn] = 2;
-					++counter;
 				}
 			}
 		}
@@ -268,7 +263,8 @@ public:
 		signsOld_ = signs_;
 	}
 
-	void offsetsFromSizes(std::unordered_map<QnType, SizeType>& sizes)
+	void offsetsFromSizes(std::unordered_map<QnType, SizeType>& offsets,
+	                      std::unordered_map<QnType, SizeType>& sizes)
 	{
 		const SizeType total = qns_.size();
 		assert(total == sizes.size());
@@ -278,6 +274,7 @@ public:
 		for (SizeType i = 0; i < total; ++i) {
 			const QnType& qn = qns_[i];
 			offsets_[i + 1] = offsets_[i] + sizes[qn];
+			offsets[qn] = offsets_[i];
 		}
 	}
 
