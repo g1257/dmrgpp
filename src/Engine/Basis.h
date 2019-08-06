@@ -230,6 +230,7 @@ public:
 		}
 
 		std::unordered_map<QnType, SizeType> offsets(initialSizeOfHashTable, myhash);
+		std::unordered_map<QnType, SizeType> extraOffsets(initialSizeOfHashTable, myhash);
 		qns_.resize(counter, dummyQn);
 		offsetsFromSizes(offsets, qnSizes);
 
@@ -251,9 +252,10 @@ public:
 						const SizeType irightOffset = basis2.offsets_[pe] + j;
 
 						const SizeType iglobalState = ileftOffset + irightOffset*basisLeftSize;
-						const SizeType ipos = offsets[thisQn] + (i + j*leftSize);
-						permInverse_[ipos] = iglobalState;
-						permutationVector_[iglobalState] = ipos;
+						const SizeType ipos = offsets[thisQn] + extraOffsets[thisQn];
+						++extraOffsets[thisQn];
+						permutationVector_[ipos] = iglobalState;
+						permInverse_[iglobalState] = ipos;
 					}
 				}
 			}
