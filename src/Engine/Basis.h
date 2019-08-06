@@ -372,18 +372,35 @@ public:
 
 		if (removedIndices.size()==0) return 0;
 
-		VectorQnType qns;
-		unShrinkVector(qns, qns_, offsets_);
-		truncate(qns, removedIndices);
-
-		// N.B.: false below means that we don't truncate the permutation vectors
+		// we don't truncate the permutation vectors
 		//	because they're needed for the WFT
-		findPermutationAndPartitionAndQns(qns,
-		                                  false,
-		                                  false,
-		                                  initialSizeOfHashTable,
-		                                  ProgramGlobals::VerboseEnum::NO);
+		PairType startCount(0, 0);
+		const SizeType n = offsets_.size() - 1;
+		assert(n < offsets_.size());
+		VectorSizeType newOffsets(n);
+		assert(qns_.size() > 0);
+		const QnType dummyQn = qns_[0];
+		VectorQnType newQns(qns_.size(), dummyQn);
+		SizeType j = 0;
+		for (SizeType i = 0; i < n; ++i) {
+			const SizeType offset = offsets_[i];
+			const SizeType thisSize = offsets_[i + 1] - offsets_[i];
+			startCount = countRemovedStatesInRange(removedIndices,
+			                                       startCount.first,
+			                                       offset,
+			                                       thisSize);
 
+			if (startCount.second == thisSize) continue;
+			assert(startCount.second <= thisSize);
+			newOffsets[j + 1] = newOffsets[j] + thisSize - startCount.second;
+			newQns[j] = qns_[i];
+			++j;
+		}
+
+		newOffsets.resize(j + 1);
+		newQns.resize(j, dummyQn);
+		qns_ = newQns;
+		offsets_ = newOffsets;
 		return calcError(eigs,removedIndices);
 	}
 
@@ -665,22 +682,25 @@ private:
 		}
 	}
 
-	void unShrinkVector(VectorQnType& dest,
-	                    const VectorQnType& src,
-	                    const VectorSizeType& partition) const
+	PairType countRemovedStatesInRange(const VectorSizeType& removedIndices,
+	                                   SizeType start,
+	                                   SizeType offset,
+	                                   SizeType thisSize) const
 	{
-		SizeType n = partition.size();
-		assert(n > 0);
-		assert(src.size() == n -1);
-
-		dest.resize(partition[n - 1], QnType::zero());
-		for (SizeType i = 0; i < n - 1; ++i) {
-			SizeType start = partition[i];
-			SizeType end = partition[i + 1];
-			assert(end < 1 + dest.size());
-			for (SizeType j = start; j < end; ++j)
-				dest[j] = src[i];
+		SizeType ind = start;
+		SizeType count = 0;
+		const SizeType end = removedIndices.size();
+		const SizeType last = offset + thisSize;
+		for (; ind < end; ++ind) {
+			if (removedIndices[ind] < offset)
+				err("Removed indices not sorted?!\n");
+			if (removedIndices[ind] >= last)
+				break;
+			++count;
 		}
+
+		return PairType(ind, count);
+
 	}
 
 	RealType calcError(const typename PsimagLite::Vector<RealType>::Type& eigs,
