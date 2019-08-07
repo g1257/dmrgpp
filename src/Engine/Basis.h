@@ -603,12 +603,35 @@ protected:
 		VectorQnType basisData2 = basisData;
 		if (!useSu2Symmetry()) flattenQns(basisData2);
 
-		findPermutationAndPartitionAndQns(basisData2,
-		                                  true,
-		                                  true,
-		                                  10,
-		                                  ProgramGlobals::VerboseEnum::NO);
-		reorderSigns();
+		// basisData2 is ALREADY SORTED
+
+		qns_.clear();
+		offsets_.clear();
+		permutationVector_.resize(n);
+		permInverse_.resize(n);
+		assert(0 < basisData2.size());
+		QnType qnPrev = basisData2[0];
+		SizeType sum = 0;
+		offsets_.push_back(0);
+		for (SizeType i = 0; i < n; ++i) {
+			const QnType& qn = basisData2[i];
+			permutationVector_[i] = permInverse_[i] = i;
+			if (qn == qnPrev) {
+				++sum;
+				continue;
+			}
+
+			const SizeType counter = qns_.size();
+			qns_.push_back(qnPrev);
+			offsets_.push_back(offsets_[counter] + sum);
+			qnPrev = qn;
+			sum = 1;
+		}
+
+		const SizeType counter = qns_.size();
+		qns_.push_back(qnPrev);
+		offsets_.push_back(offsets_[counter] + sum);
+		assert(offsets_[counter + 1] == basisData2.size());
 		signsOld_ = signs_;
 	}
 
@@ -715,6 +738,7 @@ private:
 		}
 	}
 
+	// FIXME TODO: Can be made faster  because removedIndices is already sorted
 	SizeType countRemovedStatesInRange(const VectorSizeType& removedIndices,
 	                                   SizeType offset,
 	                                   SizeType thisSize) const
@@ -724,9 +748,6 @@ private:
 		const SizeType last = offset + thisSize;
 		for (SizeType i = 0; i < end; ++i) {
 			const SizeType ind = removedIndices[i];
-//			assert(rI < permutationVector_.size());
-//			if (permutationVector_[rI] < offset || permutationVector_[rI] >= last)
-//				continue;
 			if (ind < offset || ind >= last)
 				continue;
 			++count;
@@ -742,12 +763,6 @@ private:
 		for (SizeType i=0;i<eigs.size();i++)
 			if (PsimagLite::indexOrMinusOne(removedIndices,i) < 0) sum += eigs[i];
 		return 1.0 - sum;
-	}
-
-	void reorderSigns()
-	{
-		utils::reorder(signs_,permutationVector_);
-		if (useSu2Symmetry_) symmSu2_.reorder(permutationVector_);
 	}
 
 	template<typename SomeVectorLikeQnType>
