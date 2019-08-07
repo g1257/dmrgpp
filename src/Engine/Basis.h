@@ -261,6 +261,9 @@ public:
 			}
 		}
 
+		checkPermutation(permInverse_);
+		checkPermutation(permutationVector_);
+
 		reorderSigns();
 		signsOld_ = signs_;
 	}
@@ -374,7 +377,6 @@ public:
 
 		// we don't truncate the permutation vectors
 		//	because they're needed for the WFT
-		PairType startCount(0, 0);
 		const SizeType n = offsets_.size() - 1;
 		assert(n < offsets_.size());
 		VectorSizeType newOffsets(n);
@@ -385,14 +387,13 @@ public:
 		for (SizeType i = 0; i < n; ++i) {
 			const SizeType offset = offsets_[i];
 			const SizeType thisSize = offsets_[i + 1] - offsets_[i];
-			startCount = countRemovedStatesInRange(removedIndices,
-			                                       startCount.first,
-			                                       offset,
-			                                       thisSize);
+			const SizeType count = countRemovedStatesInRange(removedIndices,
+			                                                 offset,
+			                                                 thisSize);
 
-			if (startCount.second == thisSize) continue;
-			assert(startCount.second <= thisSize);
-			newOffsets[j + 1] = newOffsets[j] + thisSize - startCount.second;
+			if (count == thisSize) continue;
+			assert(count <= thisSize);
+			newOffsets[j + 1] = newOffsets[j] + thisSize - count;
 			newQns[j] = qns_[i];
 			++j;
 		}
@@ -673,6 +674,19 @@ private:
 #endif
 	}
 
+	void checkPermutation(const VectorSizeType& v) const
+	{
+#ifdef NDEBUG
+		return;
+#endif
+
+		const SizeType n = v.size();
+		const SizeType expected = n*(n - 1);
+		SizeType value = std::accumulate(v.begin(), v.end(), 0);
+		if (value*2 == expected) return;
+		err("Permutation failed\n");
+	}
+
 	static void flattenQns(VectorQnType& qns)
 	{
 		SizeType n = qns.size();
@@ -682,25 +696,24 @@ private:
 		}
 	}
 
-	PairType countRemovedStatesInRange(const VectorSizeType& removedIndices,
-	                                   SizeType start,
+	SizeType countRemovedStatesInRange(const VectorSizeType& removedIndices,
 	                                   SizeType offset,
 	                                   SizeType thisSize) const
 	{
-		SizeType ind = start;
 		SizeType count = 0;
 		const SizeType end = removedIndices.size();
 		const SizeType last = offset + thisSize;
-		for (; ind < end; ++ind) {
-			if (removedIndices[ind] < offset)
-				err("Removed indices not sorted?!\n");
-			if (removedIndices[ind] >= last)
-				break;
+		for (SizeType i = 0; i < end; ++i) {
+//			const SizeType rI = removedIndices[i];
+//			assert(rI < permutationVector_.size());
+//			if (permutationVector_[rI] < offset || permutationVector_[rI] >= last)
+//				continue;
+			if (i < offset || i >= last)
+				continue;
 			++count;
 		}
 
-		return PairType(ind, count);
-
+		return count;
 	}
 
 	RealType calcError(const typename PsimagLite::Vector<RealType>::Type& eigs,
