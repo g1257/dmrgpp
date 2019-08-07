@@ -245,18 +245,21 @@ public:
 
 				const QnType thisQn(basis2.qns_[pe], basis1.qns_[ps]);
 
+				SizeType sum = extraOffsets[thisQn];
+				const SizeType offset = offsets[thisQn];
 				for (SizeType i = 0; i < leftSize; ++i) {
 					const SizeType ileftOffset = basis1.offsets_[ps] + i;
 					for (SizeType j = 0; j < rightSize; ++j) {
 						const SizeType irightOffset = basis2.offsets_[pe] + j;
 						const SizeType iglobalState = ileftOffset + irightOffset*basisLeftSize;
-						const SizeType ipos = offsets[thisQn] + extraOffsets[thisQn];
-
-						++extraOffsets[thisQn];
+						const SizeType ipos = offset + sum;
+						++sum;
 						permutationVector_[ipos] = iglobalState;
 						permInverse_[iglobalState] = ipos;
 					}
 				}
+
+				extraOffsets[thisQn] = sum;
 			}
 		}
 
@@ -362,7 +365,7 @@ public:
 		//	because they're needed for the WFT
 		const SizeType n = offsets_.size() - 1;
 		assert(n < offsets_.size());
-		VectorSizeType newOffsets(n);
+		VectorSizeType newOffsets(n + 1);
 		assert(qns_.size() > 0);
 		const QnType dummyQn = qns_[0];
 		VectorQnType newQns(qns_.size(), dummyQn);
@@ -680,10 +683,13 @@ private:
 		offsets_[0] = 0;
 		for (SizeType i = 0; i < total; ++i) {
 			const QnType& qn = qns_[i];
-			offsets_[i + 1] = offsets_[i] + sizes[qn];
+			const SizeType thisSize = sizes[qn];
+			offsets_[i + 1] = offsets_[i] + thisSize;
 			offsets[qn] = offsets_[i];
-			for (SizeType k = 0; k < sizes[qn]; ++k)
-				signs_[offsets_[i] + k] = signsPerOffset[i];
+			const SizeType offset = offsets_[i];
+			const bool value = signsPerOffset[i];
+			for (SizeType k = 0; k < thisSize; ++k)
+				signs_[offset + k] = value;
 		}
 	}
 
@@ -717,11 +723,11 @@ private:
 		const SizeType end = removedIndices.size();
 		const SizeType last = offset + thisSize;
 		for (SizeType i = 0; i < end; ++i) {
-//			const SizeType rI = removedIndices[i];
+			const SizeType ind = removedIndices[i];
 //			assert(rI < permutationVector_.size());
 //			if (permutationVector_[rI] < offset || permutationVector_[rI] >= last)
 //				continue;
-			if (i < offset || i >= last)
+			if (ind < offset || ind >= last)
 				continue;
 			++count;
 		}
