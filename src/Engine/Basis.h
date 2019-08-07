@@ -93,13 +93,12 @@ namespace Dmrg {
 template<typename SparseMatrixType_>
 class Basis {
 
+public:
+
 	typedef typename SparseMatrixType_::value_type SparseElementType;
 	typedef typename PsimagLite::Real<SparseElementType>::Type RealType_;
 	typedef Basis<SparseMatrixType_> ThisType;
 	typedef HamiltonianSymmetryLocal<SparseMatrixType_>  HamiltonianSymmetryLocalType;
-
-public:
-
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef VectorSizeType BlockType;
 	typedef SparseMatrixType_ SparseMatrixType;
@@ -197,23 +196,13 @@ public:
 		SizeType nps = basis1.offsets_.size();
 		if (nps > 0) --nps;
 
-		SizeType total = basis1.size() * basis2.size();
-		signs_.clear();
-		signs_.resize(total);
-		SizeType counter = 0;
-		// pass to deal with signs (legacy issue) FIXME: make signs_ per symmetry block
-		for (SizeType ps = 0; ps < nps; ++ps)
-			for (SizeType j = basis1.offsets_[ps]; j < basis1.offsets_[ps + 1]; ++j)
-				for (SizeType pe = 0; pe < npe; ++pe)
-					for (SizeType i = basis2.offsets_[pe]; i < basis2.offsets_[pe + 1]; ++i)
-						signs_[counter++] = (basis1.signs_[j] ^ basis2.signs_[i]);
-
 		// first pass for sizes in super
 		std::hash<QnType> myhash(true);
 		std::unordered_map<QnType, SizeType> qnSizes(initialSizeOfHashTable, myhash);
 		std::unordered_map<QnType, SizeType> seenThisQns(initialSizeOfHashTable, myhash);
+		VectorBoolType signsPerOffset(nps*npe);
 
-		counter = 0;
+		SizeType counter = 0;
 		const QnType dummyQn(basis2.qns_[0], basis1.qns_[0]);
 		qns_.clear();
 		qns_.resize(nps*npe, dummyQn);
@@ -225,20 +214,30 @@ public:
 				qnSizes[tensorProd] += leftSize*rightSize;
 				if (seenThisQns[tensorProd] == 1) continue;
 				seenThisQns[tensorProd] = 1;
-				qns_[counter++] = tensorProd;
+				qns_[counter] = tensorProd;
+				signsPerOffset[counter] = (basis1.signs_[basis1.offsets_[ps]] ^
+				        basis2.signs_[basis2.offsets_[pe]]);
+				++counter;
 			}
 		}
 
 		std::unordered_map<QnType, SizeType> offsets(initialSizeOfHashTable, myhash);
 		std::unordered_map<QnType, SizeType> extraOffsets(initialSizeOfHashTable, myhash);
 		qns_.resize(counter, dummyQn);
-		offsetsFromSizes(offsets, qnSizes);
+		signsPerOffset.resize(counter);
+
+		const SizeType total = basis1.size() * basis2.size();
+		signs_.clear();
+		signs_.resize(total);
+
+		offsetsFromSizes(offsets, qnSizes, signsPerOffset);
 
 		// second pass for permutation in super
 		const SizeType basisLeftSize = basis1.size();
 		const SizeType basisRightSize = basis2.size();
 		permInverse_.resize(basisLeftSize*basisRightSize);
 		permutationVector_.resize(permInverse_.size());
+		counter = 0;
 		for (SizeType ps = 0; ps < nps; ++ps) {
 			const SizeType leftSize = basis1.offsets_[ps + 1] - basis1.offsets_[ps];
 			for (SizeType pe = 0; pe < npe; ++pe) {
@@ -250,9 +249,9 @@ public:
 					const SizeType ileftOffset = basis1.offsets_[ps] + i;
 					for (SizeType j = 0; j < rightSize; ++j) {
 						const SizeType irightOffset = basis2.offsets_[pe] + j;
-
 						const SizeType iglobalState = ileftOffset + irightOffset*basisLeftSize;
 						const SizeType ipos = offsets[thisQn] + extraOffsets[thisQn];
+
 						++extraOffsets[thisQn];
 						permutationVector_[ipos] = iglobalState;
 						permInverse_[iglobalState] = ipos;
@@ -264,23 +263,7 @@ public:
 		checkPermutation(permInverse_);
 		checkPermutation(permutationVector_);
 
-		reorderSigns();
 		signsOld_ = signs_;
-	}
-
-	void offsetsFromSizes(std::unordered_map<QnType, SizeType>& offsets,
-	                      std::unordered_map<QnType, SizeType>& sizes)
-	{
-		const SizeType total = qns_.size();
-		assert(total == sizes.size());
-		offsets_.resize(sizes.size() + 1);
-
-		offsets_[0] = 0;
-		for (SizeType i = 0; i < total; ++i) {
-			const QnType& qn = qns_[i];
-			offsets_[i + 1] = offsets_[i] + sizes[qn];
-			offsets[qn] = offsets_[i];
-		}
 	}
 
 	//! returns the effective quantum number of basis state i
@@ -384,6 +367,7 @@ public:
 		const QnType dummyQn = qns_[0];
 		VectorQnType newQns(qns_.size(), dummyQn);
 		SizeType j = 0;
+		VectorBoolType newSigns(offsets_[n]);
 		for (SizeType i = 0; i < n; ++i) {
 			const SizeType offset = offsets_[i];
 			const SizeType thisSize = offsets_[i + 1] - offsets_[i];
@@ -393,16 +377,24 @@ public:
 
 			if (count == thisSize) continue;
 			assert(count <= thisSize);
-			newOffsets[j + 1] = newOffsets[j] + thisSize - count;
+			const SizeType newSize = thisSize - count;
+			newOffsets[j + 1] = newOffsets[j] + newSize;
 			newQns[j] = qns_[i];
+			const bool oldSign = signs_[offsets_[i]];
+			assert(newOffsets[j] + newSize < newSigns.size() - 1);
+			for (SizeType k = 0; k < newSize; ++k)
+				newSigns[newOffsets[j] + k] = oldSign;
+
 			++j;
 		}
 
 		newOffsets.resize(j + 1);
 		newQns.resize(j, dummyQn);
+		newSigns.resize(newOffsets[j]);
+		signs_ = newSigns;
 		qns_ = newQns;
 		offsets_ = newOffsets;
-		return calcError(eigs,removedIndices);
+		return calcError(eigs, removedIndices);
 	}
 
 	//! Returns the factors that mix this basis
@@ -674,6 +666,27 @@ private:
 #endif
 	}
 
+	void offsetsFromSizes(std::unordered_map<QnType, SizeType>& offsets,
+	                      std::unordered_map<QnType, SizeType>& sizes,
+	                      const VectorBoolType& signsPerOffset)
+	{
+		const SizeType total = qns_.size();
+		assert(total == sizes.size());
+		offsets_.resize(sizes.size() + 1);
+		assert(signsPerOffset.size() == total);
+
+		// signs_ has already the right size here
+
+		offsets_[0] = 0;
+		for (SizeType i = 0; i < total; ++i) {
+			const QnType& qn = qns_[i];
+			offsets_[i + 1] = offsets_[i] + sizes[qn];
+			offsets[qn] = offsets_[i];
+			for (SizeType k = 0; k < sizes[qn]; ++k)
+				signs_[offsets_[i] + k] = signsPerOffset[i];
+		}
+	}
+
 	void checkPermutation(const VectorSizeType& v) const
 	{
 #ifdef NDEBUG
@@ -723,17 +736,6 @@ private:
 		for (SizeType i=0;i<eigs.size();i++)
 			if (PsimagLite::indexOrMinusOne(removedIndices,i) < 0) sum += eigs[i];
 		return 1.0 - sum;
-	}
-
-	void truncate(VectorQnType& qns, const VectorSizeType& removedIndices)
-	{
-		utils::truncateVector(qns, removedIndices);
-		utils::truncateVector(signs_,removedIndices);
-		if (useSu2Symmetry_) {
-			VectorSizeType electrons;
-			QnType::su2ElectronsBridge(electrons, qns);
-			symmSu2_.truncate(removedIndices, electrons);
-		}
 	}
 
 	void reorderSigns()
