@@ -359,6 +359,10 @@ public:
 
 		if (removedIndices.size()==0) return 0;
 
+		PsimagLite::Profiling profiling("truncateBasis",
+		                                ttos(eigs.size()) + "-" + ttos(removedIndices.size()),
+		                                std::cout);
+
 		// we don't truncate the permutation vectors
 		//	because they're needed for the WFT
 		const SizeType n = offsets_.size() - 1;
