@@ -109,8 +109,6 @@ public:
 	typedef typename HamiltonianSymmetrySu2Type::FactorsType FactorsType;
 	typedef typename HamiltonianSymmetrySu2Type::PairType PairType;
 	typedef typename QnType::VectorQnType VectorQnType;
-	typedef NotReallySort::VectorLikeQnType VectorLikeQnType;
-	typedef typename VectorLikeQnType::value_type PairOfQnsType;
 
 	//! Constructor, s=name of this basis
 	Basis(const PsimagLite::String& s)
@@ -763,39 +761,6 @@ private:
 		for (SizeType i=0;i<eigs.size();i++)
 			if (PsimagLite::indexOrMinusOne(removedIndices,i) < 0) sum += eigs[i];
 		return 1.0 - sum;
-	}
-
-	template<typename SomeVectorLikeQnType>
-	void findPermutationAndPartitionAndQns(const SomeVectorLikeQnType& qns,
-	                                       bool changePermutation,
-	                                       bool doNotSort,
-	                                       SizeType initialSizeOfHashTable,
-	                                       ProgramGlobals::VerboseEnum verbose)
-	{
-		PsimagLite::Profiling profiling("findPermutationEtc",
-		                                ttos(qns.size()),
-		                                std::cout);
-		SizeType n = qns.size();
-
-		VectorSizeType numbers(n);
-		for (SizeType i = 0; i < n; ++i) numbers[i] = i;
-		VectorSizeType permutationVector;
-		NotReallySort notReallySort;
-		notReallySort(permutationVector,
-		              qns_,
-		              offsets_,
-		              numbers,
-		              qns,
-		              doNotSort,
-		              initialSizeOfHashTable,
-		              verbose);
-
-		if (changePermutation) {
-			permutationVector_ = (useSu2Symmetry_) ? numbers : permutationVector;
-			permInverse_.resize(permutationVector_.size());
-			for (SizeType i=0;i<permInverse_.size();i++)
-				permInverse_[permutationVector_[i]]=i;
-		}
 	}
 
 	void correctNameIfNeeded()

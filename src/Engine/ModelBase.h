@@ -490,30 +490,42 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		return targetQuantum_;
 	}
 
-	static void orderByQuantum(VectorSizeType& basis, VectorQnType& qn)
+	static void orderByQuantum(VectorSizeType& basis, VectorQnType& qns)
 	{
-		VectorSizeType newBasis;
-		VectorSizeType partition;
-		VectorQnType qns;
-		NotReallySort notReallySort;
-		notReallySort(newBasis,
-		              qns,
-		              partition,
-		              basis,
-		              qn,
-		              false,
-		              10,
-		              ProgramGlobals::VerboseEnum::NO);
+		const SizeType initialSizeOfHashTable = 10;
+		const SizeType n = qns.size();
+		std::hash<QnType> myhash(true);
+		std::unordered_map<QnType, SizeType> qnSizes(initialSizeOfHashTable, myhash);
+		std::unordered_map<QnType, SizeType> seenThisQns(initialSizeOfHashTable, myhash);
+		VectorQnType uniqueQns;
 
-		SizeType n = partition.size();
-		assert(n > 0);
-		--n;
-		assert(n == qns.size());
-		for (SizeType i = 0; i < n; ++i)
-			for (SizeType j = partition[i]; j < partition[i + 1]; ++j)
-				qn[j] = qns[i];
+		for (SizeType i = 0; i < n; ++i) {
+			const QnType& qn = qns[i];
+			++qnSizes[qn];
+			if (seenThisQns[qn] == 1) continue;
+			seenThisQns[qn] = 1;
+			uniqueQns.push_back(qn);
+		}
 
-		basis = newBasis;
+		std::unordered_map<QnType, SizeType> offsets(initialSizeOfHashTable, myhash);
+		offsetsFromSizes(offsets, qnSizes, uniqueQns);
+
+		std::unordered_map<QnType, SizeType> extraOffsets(initialSizeOfHashTable, myhash);
+		VectorSizeType basisNew(basis.size());
+		assert(0 < qns.size());
+		VectorQnType qnNew(qns.size(), qns[0]);
+		for (SizeType i = 0; i < n; ++i) {
+			const QnType& thisQn = qns[i];
+			SizeType sum = extraOffsets[thisQn];
+			const SizeType offset = offsets[thisQn];
+			const SizeType ipos = offset + sum;
+			++extraOffsets[thisQn];
+			basisNew[ipos] = i;
+			qnNew[ipos] = thisQn;
+		}
+
+		basis = basisNew;
+		qns = qnNew;
 	}
 
 	InputValidatorType_& ioIn() const { return ioIn_; }
@@ -561,6 +573,21 @@ protected:
 	}
 
 private:
+
+	static void offsetsFromSizes(std::unordered_map<QnType, SizeType>& offsets,
+	                             std::unordered_map<QnType, SizeType>& sizes,
+	                             const VectorQnType& qns)
+	{
+		const SizeType total = sizes.size();
+
+		SizeType offset = 0;
+		for (SizeType i = 0; i < total; ++i) {
+			const QnType& qn = qns[i];
+			const SizeType thisSize = sizes[qn];
+			offsets[qn] = offset;
+			offset  += thisSize;
+		}
+	}
 
 	ModelCommonType modelCommon_;
 	TargetQuantumElectronsType targetQuantum_;
