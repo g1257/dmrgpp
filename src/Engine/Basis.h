@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "HamiltonianSymmetrySu2.h"
 #include "Profiling.h"
 #include "Qn.h"
-#include "NotReallySort.h"
+#include "QnHash.h"
 
 namespace Dmrg {
 // A class to represent in a light way a Dmrg basis (used only to implement symmetries).

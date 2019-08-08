@@ -1,5 +1,5 @@
-#ifndef NOT_REALLY_SORT_H
-#define NOT_REALLY_SORT_H
+#ifndef DMRG_QN_HASH_H
+#define DMRG_QN_HASH_H
 #define USE_PTHREADS_OR_NOT_NG
 #include "Qn.h"
 #include "Vector.h"
@@ -104,5 +104,5 @@ private:
 };
 } // namespace std
 
-#endif // NOT_REALLY_SORT_H
+#endif // DMRG_QN_HASH_H
 
