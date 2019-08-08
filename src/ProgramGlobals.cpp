@@ -100,7 +100,6 @@ const PsimagLite::String ProgramGlobals::license=
 
 PsimagLite::String ProgramGlobals::SYSTEM_STACK_STRING = "SystemStack";
 PsimagLite::String ProgramGlobals::ENVIRON_STACK_STRING = "EnvironStack";
-PsimagLite::String ProgramGlobals::notReallySortAlgo = "unordered_map";
 
 } // namespace Dmrg
 

@@ -243,21 +243,20 @@ public:
 
 				const QnType thisQn(basis2.qns_[pe], basis1.qns_[ps]);
 
-				SizeType sum = extraOffsets[thisQn];
+				const SizeType extraOffset = extraOffsets[thisQn];
 				const SizeType offset = offsets[thisQn];
 				for (SizeType i = 0; i < leftSize; ++i) {
 					const SizeType ileftOffset = basis1.offsets_[ps] + i;
 					for (SizeType j = 0; j < rightSize; ++j) {
 						const SizeType irightOffset = basis2.offsets_[pe] + j;
 						const SizeType iglobalState = ileftOffset + irightOffset*basisLeftSize;
-						const SizeType ipos = offset + sum;
-						++sum;
+						const SizeType ipos = offset + extraOffset + j + i*rightSize;
 						permutationVector_[ipos] = iglobalState;
 						permInverse_[iglobalState] = ipos;
 					}
 				}
 
-				extraOffsets[thisQn] = sum;
+				extraOffsets[thisQn] += leftSize*rightSize;
 			}
 		}
 
