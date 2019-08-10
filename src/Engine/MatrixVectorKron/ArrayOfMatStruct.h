@@ -440,8 +440,10 @@ public:
 
 	~ArrayOfMatStruct()
 	{
-		for (SizeType i = 0; i < data_.n_row(); ++i)
-			for (SizeType j = 0; j < data_.n_col(); ++j)
+		const SizeType cols = data_.cols();
+		const SizeType rows = data_.rows();
+		for (SizeType j = 0; j < cols; ++j)
+			for (SizeType i = 0; i < rows; ++i)
 				delete data_(i, j);
 	}
 

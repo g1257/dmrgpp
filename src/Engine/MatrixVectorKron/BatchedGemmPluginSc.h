@@ -44,9 +44,10 @@ public:
 		pRight_.resize(npatches, 0);
 
 		SizeType zeroes = 0;
-		for (SizeType outPatch = 0; outPatch < npatches; ++outPatch) {
+		for (SizeType ic = 0; ic < nC; ++ic) {
 			for (SizeType inPatch = 0; inPatch < npatches; ++inPatch) {
-				for (SizeType ic=0;ic<nC;++ic) {
+				for (SizeType outPatch = 0; outPatch < npatches; ++outPatch) {
+
 					const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
 					const ArrayOfMatStructType& yiStruct = initKron_.yc(ic);
 
