@@ -130,19 +130,19 @@ public:
 				const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
 				const ArrayOfMatStructType& yiStruct = initKron_.yc(ic);
 
-
-
 				const bool performTranspose = (initKron_.useLowerPart() &&
 				                               (outPatch < inPatch));
 
-				const MatrixDenseOrSparseType& Amat =  performTranspose ?
+				const MatrixDenseOrSparseType* Amat =  performTranspose ?
 				            xiStruct(inPatch,outPatch): xiStruct(outPatch,inPatch);
 
-				const MatrixDenseOrSparseType& Bmat =  performTranspose ?
+				const MatrixDenseOrSparseType* Bmat =  performTranspose ?
 				            yiStruct(inPatch,outPatch) : yiStruct(outPatch,inPatch);
 
+				if (!Amat || !Bmat) continue;
+
 				if (!performTranspose)
-					initKron_.checks(Amat, Bmat, outPatch, inPatch);
+					initKron_.checks(*Amat, *Bmat, outPatch, inPatch);
 
 				const char opt = performTranspose ? (isComplex ? 'c': 't') : 'n';
 				kronMult(x_,
@@ -151,8 +151,8 @@ public:
 				         offsetY,
 				         opt,
 				         opt,
-				         Amat,
-				         Bmat,
+				         *Amat,
+				         *Bmat,
 				         initKron_.denseFlopDiscount());
 			}
 		}

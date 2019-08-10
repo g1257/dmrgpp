@@ -70,8 +70,11 @@ public:
 			const ArrayOfMatStructType& xiStruct = initKron_.xc(ioperator);
 			for (SizeType jpatch = 0; jpatch < npatches; ++jpatch) {
 				for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
+					const MatrixDenseOrSparseType* AsrcPtr = xiStruct(ipatch, jpatch);
 
-					const MatrixType& Asrc =  xiStruct(ipatch,jpatch).dense();
+					if (!AsrcPtr) continue;
+
+					const MatrixType& Asrc =  AsrcPtr->dense();
 					SizeType igroup = initKron_.patch(InitKronType::NEW,
 					                                  GenIjPatchType::LEFT)[ipatch];
 					SizeType jgroup = initKron_.patch(InitKronType::NEW,
@@ -88,8 +91,11 @@ public:
 			const ArrayOfMatStructType& yiStruct = initKron_.yc(ioperator);
 			for (SizeType jpatch = 0; jpatch < npatches; ++jpatch) {
 				for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
+					const MatrixDenseOrSparseType* BsrcPtr = yiStruct(ipatch,jpatch);
 
-					const MatrixType& Bsrc =  yiStruct(ipatch,jpatch).dense();
+					if (!BsrcPtr) continue;
+
+					const MatrixType& Bsrc =  BsrcPtr->dense();
 					SizeType igroup = initKron_.patch(InitKronType::NEW,
 					                                  GenIjPatchType::RIGHT)[ipatch];
 					SizeType jgroup = initKron_.patch(InitKronType::NEW,

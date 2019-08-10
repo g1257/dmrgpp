@@ -137,12 +137,8 @@ public:
 		// precompute the size of each patch
 		// ---------------------------------
 
-
 		std::vector<SizeType> ipatch_Size( ipatchSize );
 		std::vector<SizeType> jpatch_Size( jpatchSize );
-
-
-
 
 		// ----------------------------------
 		// setup mapping from index to ipatch
@@ -174,8 +170,6 @@ public:
 			assert( ipatch_Size[ ipatch ] >= 1 );
 
 		};
-
-
 
 		for(SizeType jpatch=0; jpatch < jpatchSize; ++jpatch) {
 			const SizeType jgroup = patchOld(leftOrRight)[jpatch];
@@ -217,7 +211,6 @@ public:
 
 		};
 
-
 		// -----------------------------------------
 		// allocate data structure outside main loop
 		// to avoid repeated allocation and deallocation
@@ -228,8 +221,6 @@ public:
 			            ipatch_Size[ ipatch ] :
 			            max_ipatchSize;
 		};
-
-
 
 		std::vector<   std::vector<SizeType> > rowPtr1D(jpatchSize);
 		for(SizeType jpatch=0; jpatch < jpatchSize; jpatch++) {
@@ -259,7 +250,6 @@ public:
 				rowPtr1D[ jpatch ].clear();
 				rowPtr1D[ jpatch ].resize( local_nrows,0 );
 			};
-
 
 			// --------------------------------------
 			// first pass to count number of nonzeros
@@ -317,18 +307,18 @@ public:
 				const SizeType indx = jpatch;
 				const SizeType nnz = total_nz[ indx ];
 
-
-
 				const bool isDense = (nnz   >= threshold * lnrows * lncols);
 				assert( nnz <= lnrows * lncols );
 
 				is_dense1D[ indx ] = isDense;
 
+				if (nnz == 0) continue; // <--- ATTENTION: EARLY EXIT
 
-				MatrixDenseOrSparseType *pmat = new MatrixDenseOrSparseType(lnrows,lncols,isDense);
-				assert( pmat  != 0 );
+				data_(ipatch, jpatch) = new MatrixDenseOrSparseType(lnrows,
+				                                                    lncols,
+				                                                    isDense);
 
-				data_(ipatch,jpatch) = pmat;
+				MatrixDenseOrSparseType* pmat = data_(ipatch, jpatch);
 
 				if (isDense) {
 					// ---------------------------
@@ -391,8 +381,9 @@ public:
 					const bool is_valid_jpatch = (0 <= jpatch) && (jpatch < jpatchSize);
 					if (!is_valid_jpatch) continue;
 
-
 					if (useLowerPart && (ipatch < jpatch))  continue;
+
+					if (!data_(ipatch,jpatch)) continue; // <--- ATTENTION: EARLY EXIT
 
 					const SizeType indx = jpatch;
 
@@ -434,36 +425,31 @@ public:
 
 					if (is_dense1D[ indx ]) continue;
 
-					if (data_(ipatch,jpatch) != 0) {
+					if (data_(ipatch,jpatch))
 						(data_(ipatch,jpatch)->getSparse()).checkValidity();
-					};
 				};
 			};
-
 		}; // for ipatch
-
 	}
 
-	const MatrixDenseOrSparseType& operator()(SizeType i,SizeType j)  const
+	const MatrixDenseOrSparseType* operator()(SizeType i, SizeType j) const
 	{
 		assert(i<data_.n_row() && j<data_.n_col());
-		assert(data_(i,j));
-		return *data_(i,j);
+		return data_(i, j);
 	}
 
 	~ArrayOfMatStruct()
 	{
 		for (SizeType i = 0; i < data_.n_row(); ++i)
 			for (SizeType j = 0; j < data_.n_col(); ++j)
-				if (data_(i,j)) delete data_(i,j);
+				delete data_(i, j);
 	}
 
 private:
 
+	ArrayOfMatStruct(const ArrayOfMatStruct&) = delete;
 
-	ArrayOfMatStruct(const ArrayOfMatStruct&);
-
-	ArrayOfMatStruct& operator=(const ArrayOfMatStruct&);
+	ArrayOfMatStruct& operator=(const ArrayOfMatStruct&) = delete;
 
 	PsimagLite::Matrix<MatrixDenseOrSparseType*> data_;
 }; //class ArrayOfMatStruct
