@@ -35,14 +35,15 @@ public:
 		if (!enabled()) return;
 		SizeType npatches = initKron_.numberOfPatches(DUMMY);
 		SizeType nC = initKron_.connections();
-		ComplexOrRealType** aptr = new ComplexOrRealType*[npatches*npatches*nC];
-		ComplexOrRealType** bptr = new ComplexOrRealType*[npatches*npatches*nC];
+		const SizeType total = npatches*npatches*nC;
+		ComplexOrRealType** aptr = new ComplexOrRealType*[total];
+		ComplexOrRealType** bptr = new ComplexOrRealType*[total];
 		VectorIntType ldAptr(npatches*npatches*nC);
 		VectorIntType ldBptr(npatches*npatches*nC);
 
 		const ComplexOrRealType* zero = 0;
-		memcpy(aptr, &zero, npatches*npatches*nC);
-		memcpy(bptr, &zero, npatches*npatches*nC);
+		memcpy(aptr, &zero, total*sizeof(ComplexOrRealType*));
+		memcpy(bptr, &zero, total*sizeof(ComplexOrRealType*));
 
 		pLeft_.resize(npatches, 0);
 		pRight_.resize(npatches, 0);
