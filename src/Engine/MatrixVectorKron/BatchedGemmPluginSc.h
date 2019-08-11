@@ -41,9 +41,8 @@ public:
 		VectorIntType ldAptr(npatches*npatches*nC);
 		VectorIntType ldBptr(npatches*npatches*nC);
 
-		const ComplexOrRealType* zero = 0;
-		memcpy(aptr, &zero, total*sizeof(ComplexOrRealType*));
-		memcpy(bptr, &zero, total*sizeof(ComplexOrRealType*));
+		memset(aptr, 0, total*sizeof(ComplexOrRealType*));
+		memset(bptr, 0, total*sizeof(ComplexOrRealType*));
 
 		pLeft_.resize(npatches, 0);
 		pRight_.resize(npatches, 0);
