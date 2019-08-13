@@ -1,3 +1,40 @@
+2019-08-13 Version 5.60
+
+bug fix:
+
+* reducedOperator is now thread safe
+
+* Operators.h: There was a trailing / in hdf5 file
+
+* Ainur: complex matrices need more work
+
+* AUTHORS file added
+
+performance:
+
+* NotReallySort.h now gone, and algorithm should perform way better
+
+* ArrayOfMatStruct allocates only if number of non-zeroes is 
+greater than zero
+
+* externalProduct now permutes rows and cols on-the-fly
+
+* OperatorStorage.h : shim for CrsMatrix.h for now, but
+will make operator storage more performant in the future
+
+scripts:
+
+* OmegaUtils: support -N or non-negative intensities only
+
+new features
+
+* Entanglers: exact energy written to cout now
+
+* t-J anisotropic model added (Nirav)
+
+* added SolverOptions
+noPrintHamiltonianAverage for ancilla evolution runs
+
 2019-06-25 Version 5.58
 
 Scripts:
