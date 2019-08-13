@@ -1,3 +1,19 @@
+2019-08-13 Version 2.60
+
+bug fixes
+
+* Matrix::operator+= : resize if needed
+
+* Ainur: still not working for Complex matrices
+
+performance
+
+* externalProduct now permutes rows and cols on-the-fly
+
+new features
+
+* PredicateAwesome
+
 2019-06-25 Version 2.58
 
 * GetBraOrKet now in PsimagLite
