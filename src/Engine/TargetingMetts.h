@@ -279,7 +279,7 @@ public:
 
 		PsimagLite::String options = this->model().params().options;
 
-		if (options.find("noPrintHamiltonianAverage") == std::string::npos)
+		if (options.find("printHamiltonianAverage") != std::string::npos)
 			printEnergies(); // in-situ
 
 		bool normalizeTimeVectors = true;

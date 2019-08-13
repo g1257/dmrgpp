@@ -357,7 +357,7 @@ public:
 			them for all sites. This is will use more RAM, but might be needed
 			to target expressions.
 			\item [calcAndPrintEntropies] Calculate entropies and print to cout file
-			\item [noPrintHamiltonianAverage] Don't print <...|H|...> in NGSTs.
+			\item [printHamiltonianAverage] Print <...|H|...> in NGSTs.
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,
@@ -424,7 +424,7 @@ public:
 		registerOpts.push_back("shrinkStacksOnDisk");
 		registerOpts.push_back("OperatorsChangeAll");
 		registerOpts.push_back("calcAndPrintEntropies");
-		registerOpts.push_back("noPrintHamiltonianAverage");
+		registerOpts.push_back("printHamiltonianAverage");
 
 		PsimagLite::Options::Writeable optWriteable(registerOpts,
 		                                            PsimagLite::Options::Writeable::PERMISSIVE);
