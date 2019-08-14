@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Profiling.h"
 #include "Qn.h"
 #include "QnHash.h"
+#include "Parallelizer.h"
 
 namespace Dmrg {
 // A class to represent in a light way a Dmrg basis (used only to implement symmetries).
@@ -236,6 +237,7 @@ public:
 		permInverse_.resize(basisLeftSize*basisRightSize);
 		permutationVector_.resize(permInverse_.size());
 		counter = 0;
+
 		for (SizeType ps = 0; ps < nps; ++ps) {
 			const SizeType leftSize = basis1.offsets_[ps + 1] - basis1.offsets_[ps];
 			for (SizeType pe = 0; pe < npe; ++pe) {
@@ -245,18 +247,21 @@ public:
 
 				const SizeType extraOffset = extraOffsets[thisQn];
 				const SizeType offset = offsets[thisQn];
-				for (SizeType i = 0; i < leftSize; ++i) {
-					const SizeType ileftOffset = basis1.offsets_[ps] + i;
-					for (SizeType j = 0; j < rightSize; ++j) {
-						const SizeType irightOffset = basis2.offsets_[pe] + j;
-						const SizeType iglobalState = ileftOffset + irightOffset*basisLeftSize;
-						const SizeType ipos = offset + extraOffset + j + i*rightSize;
-						permutationVector_[ipos] = iglobalState;
-						permInverse_[iglobalState] = ipos;
-					}
-				}
+				MyLoop myloop(basis1.offsets_[ps],
+				              basis2.offsets_[pe],
+				              basisLeftSize,
+				              rightSize,
+				              offset + extraOffset,
+				              leftSize*rightSize,
+				              permutationVector_,
+				              permInverse_);
 
-				extraOffsets[thisQn] += leftSize*rightSize;
+				SizeType threads = std::min(myloop.tasks(),
+				                            PsimagLite::Concurrency::codeSectionParams.npthreads);
+				PsimagLite::CodeSectionParams codeSectionParams(threads);
+				PsimagLite::Parallelizer<MyLoop> parallelizer(codeSectionParams);
+				parallelizer.loopCreate(myloop);
+				extraOffsets[thisQn] += myloop.tasks();
 			}
 		}
 
@@ -776,6 +781,54 @@ private:
 		else
 			name_ = "environ";
 	}
+
+	class MyLoop {
+
+	public:
+
+		MyLoop(SizeType basis1OffsetsPs,
+		       SizeType basis2OffsetsPe,
+		       SizeType basisLeftSize,
+		       SizeType rightSize,
+		       SizeType offsetPlusExtraOffset,
+		       SizeType tasks,
+		       VectorSizeType& permutationVector,
+		       VectorSizeType& permInverse)
+		    : basis1OffsetsPs_(basis1OffsetsPs),
+		      basis2OffsetsPe_(basis2OffsetsPe),
+		      basisLeftSize_(basisLeftSize),
+		      rightSize_(rightSize),
+		      offsetPlusExtraOffset_(offsetPlusExtraOffset),
+		      tasks_(tasks),
+		      permutationVector_(permutationVector),
+		      permInverse_(permInverse)
+		{}
+
+		void doTask(SizeType ji, SizeType)
+		{
+			div_t q = div(ji, rightSize_);
+			const SizeType ileftOffset = basis1OffsetsPs_ + q.quot;
+			const SizeType irightOffset = basis2OffsetsPe_ + q.rem;
+			const SizeType iglobalState = ileftOffset + irightOffset*basisLeftSize_;
+			const SizeType ipos = offsetPlusExtraOffset_ + ji;
+			permutationVector_[ipos] = iglobalState;
+			permInverse_[iglobalState] = ipos;
+		}
+
+		SizeType tasks() const { return tasks_; }
+
+	private:
+
+		const SizeType basis1OffsetsPs_;
+		const SizeType basis2OffsetsPe_;
+		const SizeType basisLeftSize_;
+		const SizeType rightSize_;
+		const SizeType offsetPlusExtraOffset_;
+		const SizeType tasks_;
+		VectorSizeType& permutationVector_;
+		VectorSizeType& permInverse_;
+
+	}; // MyLoop
 
 	/* PSIDOC BasisQuantumNumbers
 		Symmetries will allow the solver to block the Hamiltonian matrix in blocks,
