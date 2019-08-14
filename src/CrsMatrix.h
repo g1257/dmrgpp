@@ -408,16 +408,17 @@ public:
 	{
 		nrow_=row;
 		ncol_=row;
-		rowptr_.resize(row+1);
-		values_.resize(row);
-		colind_.resize(row);
+		rowptr_.reserve(row + 1);
+		values_.reserve(row);
+		colind_.reserve(row);
 
-		for (SizeType i=0;i<row;i++) {
-			values_[i]=value;
-			colind_[i]=i;
-			rowptr_[i]=i;
+		for (SizeType i = 0; i < row; ++i) {
+			values_.push_back(value);
+			colind_.push_back(i);
+			rowptr_.push_back(i);
 		}
-		rowptr_[row]=row;
+
+		rowptr_.push_back(row);
 	}
 
 	const int& getRowPtr(SizeType i) const { assert(i<rowptr_.size()); return rowptr_[i]; }
@@ -937,12 +938,14 @@ void multiply(typename Vector<S>::Type& v2,
               const typename Vector<S>::Type& v1)
 {
 	SizeType n = m.rows();
-	v2.resize(n);
+	v2.reserve(n);
 	for (SizeType i=0;i<n;i++) {
-		v2[i]=0;
-		for (int j=m.getRowPtr(i);j<m.getRowPtr(i+1);j++) {
-			v2[i] += m.getValue(j)*v1[m.getCol(j)];
-		}
+		S sum = 0;
+		const SizeType start = m.getRowPtr(i);
+		const SizeType end = m.getRowPtr(i + 1);
+		for (SizeType j = start; j < end; ++j)
+			sum += m.getValue(j)*v1[m.getCol(j)];
+		v2.push_back(sum);
 	}
 }
 
