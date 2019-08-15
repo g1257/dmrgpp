@@ -145,6 +145,11 @@ public:
 		return (model_.params().options.find("KronLoadBalance") != PsimagLite::String::npos);
 	}
 
+	bool blasIsThreadSafe() const
+	{
+		return (model_.params().options.find("blasIsThreadSafe") != PsimagLite::String::npos);
+	}
+
 	// -------------------
 	// copy vin(:) to yin(:)
 	// -------------------

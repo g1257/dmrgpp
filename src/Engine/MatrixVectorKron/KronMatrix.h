@@ -141,7 +141,10 @@ public:
 		KronConnectionsType kc(initKron_);
 
 		typedef PsimagLite::Parallelizer<KronConnectionsType> ParallelizerType;
-		ParallelizerType parallelConnections(PsimagLite::Concurrency::codeSectionParams);
+		SizeType threads = (initKron_.blasIsThreadSafe()) ? PsimagLite::Concurrency::
+		                                                    codeSectionParams.npthreads : 1 ;
+		PsimagLite::CodeSectionParams codeSectionParams(threads);
+		ParallelizerType parallelConnections(codeSectionParams);
 
 		if (initKron_.loadBalance())
 			parallelConnections.loopCreate(kc, initKron_.weightsOfPatchesNew());
