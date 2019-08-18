@@ -181,7 +181,7 @@ int main(int argc, char **argv)
 	PsimagLite::String sOptions("");
 	int precision = 6;
 	bool unbuffered = false;
-	bool forceSerial = false;
+	SizeType threadsInCmd = 0;
 	bool versionOnly = false;
 	/* PSIDOC DmrgDriver
 There is a single input file that is passed as the
@@ -205,8 +205,8 @@ to the main dmrg driver are the following.
 	  In other cases, string is the name of the file to redirect std::cout to.
 	 \item[-k] [Optional] Keep untar files
 	 \item[-U] [Optional] Make cout output unbuffered
-	 \item[-S] [Optional] Ignore the Threads= line if present in the input, and run with
-	 Threads=1
+	 \item[-S] [Optional, number] Ignore the Threads= line if present in the input,
+	  and run with Threads=number
 	 \item[-V] [Optional] Print version and exit
 	  \end{itemize}
 	 */
@@ -247,7 +247,7 @@ to the main dmrg driver are the following.
 	\begin{verbatim}./operator -l c -t -f input.inp\end{verbatim}
 	\end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:s:l:d:p:e:o:tkBUSV")) != -1) {
+	while ((opt = getopt(argc, argv,"f:s:l:d:p:e:o:S:tkBUV")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -276,14 +276,14 @@ to the main dmrg driver are the following.
 		case 'o':
 			sOptions += optarg;
 			break;
+		case 'S':
+			threadsInCmd = atoi(optarg);
+			break;
 		case 'B':
 			options.label = "B";
 			break;
 		case 'U':
 			unbuffered = true;
-			break;
-		case 'S':
-			forceSerial = true;
 			break;
 		case 'V':
 			versionOnly = true;
@@ -325,7 +325,7 @@ to the main dmrg driver are the following.
 
 	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, false);
 
-	if (forceSerial) dmrgSolverParams.nthreads = 1;
+	if (threadsInCmd > 0) dmrgSolverParams.nthreads = threadsInCmd;
 
 	bool echoInput = false;
 	if (!options.enabled && options.label != "-") {

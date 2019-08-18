@@ -116,8 +116,8 @@ Braket specifications can be bare or dressed, and are explained elsewhere.
 \item[-p] [Optional, Integer] Digits of precision for printing.
 \item[-o] {[}Optional, String{]} Extra options for SolverOptions
 \item[-F] [Optional, string] TBW
-\item[-S] [Optional] Ignore the Threads= line if present in the input, and run with
-Threads=1
+\item[-S] [Optional, number] Ignore the Threads= line if present in the input, and run with
+Threads=number
 \item[-V] [Optional] Print version and exit
 \end{itemize}
   */
@@ -129,11 +129,11 @@ int main(int argc,char **argv)
 	PsimagLite::String filesOption;
 	int opt = 0;
 	int precision = 6;
-	bool forceSerial = false;
+	SizeType threadsInCmd = 0;
 	bool versionOnly = false;
 	PsimagLite::String sOptions("");
 
-	while ((opt = getopt(argc, argv,"f:p:o:F:SV")) != -1) {
+	while ((opt = getopt(argc, argv,"f:p:o:F:S:V")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -150,7 +150,7 @@ int main(int argc,char **argv)
 			filesOption = optarg;
 			break;
 		case 'S':
-			forceSerial = true;
+			threadsInCmd = atoi(optarg);
 			break;
 		case 'V':
 			versionOnly = true;
@@ -192,7 +192,7 @@ int main(int argc,char **argv)
 
 	ParametersDmrgSolverType dmrgSolverParams(io,sOptions,false,true);
 
-	if (forceSerial) dmrgSolverParams.nthreads = 1;
+	if (threadsInCmd > 0) dmrgSolverParams.nthreads = threadsInCmd;
 
 	bool setAffinities = (dmrgSolverParams.options.find("setAffinities")
 	                      != PsimagLite::String::npos);
