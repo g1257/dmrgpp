@@ -3,7 +3,6 @@
 #include "Matrix.h"
 #include "BLAS.h"
 #include "ProgramGlobals.h"
-
 #include <iostream>
 #include <iomanip>
 
@@ -566,6 +565,7 @@ public:
 
 		SizeType threads = std::min(volumeOfNk,
 		                            PsimagLite::Concurrency::codeSectionParams.npthreads);
+		if (!wftOptions_.blasIsThreadSafe) threads = 1;
 		typedef PsimagLite::Parallelizer<ParallelWftInBlocks> ParallelizerType;
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
 		ParallelizerType threadedWft(codeSectionParams);

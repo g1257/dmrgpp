@@ -1,7 +1,6 @@
 #ifndef WFTSPARSETWOSITE_H
 #define WFTSPARSETWOSITE_H
 #include "Matrix.h"
-#include "BLAS.h"
 #include "ProgramGlobals.h"
 
 namespace Dmrg {
