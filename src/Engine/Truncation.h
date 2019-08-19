@@ -159,11 +159,11 @@ public:
 		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 			changeBasis(pS,target,keptStates,direction, &dmS);
 			assert(dmS);
-			truncateBasis(pS,lrs_.right(), *dmS, direction, keptStates);
+			truncateBasis(pS,lrs_.right(), *dmS, direction);
 		} else {
 			changeBasis(pE,target,keptStates,direction, &dmS);
 			assert(dmS);
-			truncateBasis(pE,lrs_.left(), *dmS, direction, keptStates);
+			truncateBasis(pE,lrs_.left(), *dmS, direction);
 		}
 
 		delete dmS;
@@ -194,8 +194,7 @@ public:
 		truncateBasis(sBasis,
 		              lrs_.right(),
 		              *dmS,
-		              ProgramGlobals::DirectionEnum::EXPAND_SYSTEM,
-		              keptStates);
+		              ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 		delete dmS;
 		dmS = 0;
 
@@ -209,8 +208,7 @@ public:
 		truncateBasis(eBasis,
 		              lrs_.left(),
 		              *dmE,
-		              ProgramGlobals::DirectionEnum::EXPAND_ENVIRON,
-		              keptStates);
+		              ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
 		delete dmE;
 		dmE = 0;
 	}
@@ -288,8 +286,7 @@ private:
 	void truncateBasis(BasisWithOperatorsType& rPrime,
 	                   const BasisWithOperatorsType& oppoBasis,
 	                   const DensityMatrixBaseType& dms,
-	                   ProgramGlobals::DirectionEnum direction,
-	                   SizeType keptStates)
+	                   ProgramGlobals::DirectionEnum direction)
 	{
 		bool expandSys = (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 		const BasisWithOperatorsType& basis = (expandSys) ? lrs_.left() : lrs_.right();
@@ -307,14 +304,13 @@ private:
 
 		cache.transform.truncate(cache.removedIndices);
 
-		const SizeType ten = 10;
-		const SizeType initialSizeOfHashTable = std::max(ten, keptStates);
-
+		const bool blasIsThreadSafe = (parameters_.options.find("blasIsThreadSafe") !=
+		        PsimagLite::String::npos);
 		rPrime.truncateBasis(cache.transform,
 		                     cache.eigs,
 		                     cache.removedIndices,
 		                     startEnd,
-		                     initialSizeOfHashTable);
+		                     blasIsThreadSafe);
 		LeftRightSuperType* lrs = 0;
 		if (expandSys)
 			lrs = new LeftRightSuperType(rPrime,

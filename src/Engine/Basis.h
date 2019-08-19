@@ -356,8 +356,7 @@ public:
 	}
 
 	RealType truncateBasis(const typename PsimagLite::Vector<RealType>::Type& eigs,
-	                       const VectorSizeType& removedIndices,
-	                       SizeType initialSizeOfHashTable)
+	                       const VectorSizeType& removedIndices)
 	{
 		dmrgTransformed_=true;
 

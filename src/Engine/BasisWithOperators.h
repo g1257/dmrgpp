@@ -189,12 +189,11 @@ public:
 	                       const typename PsimagLite::Vector<RealType>::Type& eigs,
 	                       const VectorSizeType& removedIndices,
 	                       const PairSizeSizeType& startEnd,
-	                       SizeType initialSizeOfHashTable)
+	                       bool blasIsThreadSafe)
 	{
-		BasisType &parent = *this;
-		RealType error = parent.truncateBasis(eigs,removedIndices, initialSizeOfHashTable);
+		RealType error = BasisType::truncateBasis(eigs, removedIndices);
 
-		operators_.changeBasis(ftransform,this,startEnd);
+		operators_.changeBasis(ftransform, this, startEnd, blasIsThreadSafe);
 
 		return error;
 	}

@@ -316,10 +316,14 @@ public:
 
 	void changeBasis(const BlockDiagonalMatrixType& ftransform,
 	                 const BasisType* thisBasis,
-	                 const PairSizeSizeType& startEnd)
+	                 const PairSizeSizeType& startEnd,
+	                 bool blasIsThreadSafe)
 	{
 		typedef PsimagLite::Parallelizer<MyLoop> ParallelizerType;
-		ParallelizerType threadObject(PsimagLite::Concurrency::codeSectionParams);
+		SizeType threads = (blasIsThreadSafe) ? PsimagLite::Concurrency::
+		                                        codeSectionParams.npthreads : 1;
+		PsimagLite::CodeSectionParams codeSectionParams(threads);
+		ParallelizerType threadObject(codeSectionParams);
 
 		MyLoop helper(reducedOpImpl_,operators_,ftransform,thisBasis,startEnd);
 
