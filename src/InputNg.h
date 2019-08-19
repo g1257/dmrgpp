@@ -765,7 +765,7 @@ public:
 		read(Matrix<std::complex<FloatingType> >& m, const String& label)
 		{
 			if (ainur_)
-				err("reading a matrix complex not supported. Label= " + label + "\n");
+				return ainur_->readValue(m, label);
 
 			String label2 = label2label(label);
 

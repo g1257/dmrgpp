@@ -257,7 +257,8 @@ private:
 	template<typename T>
 	void convertInternal(Matrix<T>& t,
 	                     String value,
-	                     typename EnableIf<Loki::TypeTraits<T>::isArith,
+	                     typename EnableIf<Loki::TypeTraits<T>::isArith ||
+	                     IsComplexNumber<T>::True,
 	                     int>::Type = 0) const;
 
 	template<typename T>

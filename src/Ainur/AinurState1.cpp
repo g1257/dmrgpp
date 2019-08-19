@@ -179,16 +179,18 @@ AinurState::Action<T>::operator()(A& attr,
 template<typename T>
 void AinurState::convertInternal(Matrix<T>& t,
                                  String value,
-                                 typename EnableIf<Loki::TypeTraits<T>::isArith,
+                                 typename EnableIf<Loki::TypeTraits<T>::isArith ||
+                                 IsComplexNumber<T>::True,
                                  int>::Type) const
 {
 	namespace qi = boost::spirit::qi;
 	typedef std::string::iterator IteratorType;
-	typedef std::vector<T> LocalVectorType;
+	typedef typename MyProxyFor<T, IsComplexNumber<T>::True>::Type MyProxyForType;
+	typedef std::vector<MyProxyForType> LocalVectorType;
 	typedef std::vector<LocalVectorType> LocalVectorVectorType;
 
 	IteratorType it = value.begin();
-	qi::rule<IteratorType, LocalVectorType(), qi::space_type> ruRows = ruleRows<T>();
+	qi::rule<IteratorType, LocalVectorType(), qi::space_type> ruRows = ruleRows<MyProxyForType>();
 
 	qi::rule<IteratorType, LocalVectorVectorType(), qi::space_type> full =
 	        "[" >> -(ruRows  % ",") >> "]";
@@ -245,12 +247,17 @@ void AinurState::convertInternal(std::vector<T>& t,
 
 template void AinurState::convertInternal(Matrix<DoubleOrFloatType>&,String, int) const;
 
+template void AinurState::convertInternal(Matrix<std::complex<DoubleOrFloatType> >&,
+String,
+int) const;
+
 template void AinurState::convertInternal(std::vector<DoubleOrFloatType>&, String, int) const;
+
+template void AinurState::convertInternal(std::vector<std::complex<DoubleOrFloatType> >&,
+String,
+int) const;
 
 template void AinurState::convertInternal(std::vector<SizeType>&, String, int) const;
 
 template void AinurState::convertInternal(std::vector<int>&, String, int) const;
-
-template void AinurState::convertInternal(std::vector<std::complex<DoubleOrFloatType> >&,
-String, int) const;
 } // namespace PsimagLite
