@@ -118,7 +118,7 @@ LDFLAGS += -llapack
 )
 
 dependency BLAS = (
-LDFLAGS += -lopenblas
+LDFLAGS += -lblas
 )
 
 dependency pthreads = (
