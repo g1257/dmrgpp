@@ -358,6 +358,7 @@ public:
 			to target expressions.
 			\item [calcAndPrintEntropies] Calculate entropies and print to cout file
 			\item [printHamiltonianAverage] Print <...|H|...> in NGSTs.
+			\item [blasNotThreadSafe] TBW
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,
@@ -425,6 +426,7 @@ public:
 		registerOpts.push_back("OperatorsChangeAll");
 		registerOpts.push_back("calcAndPrintEntropies");
 		registerOpts.push_back("printHamiltonianAverage");
+		registerOpts.push_back("blasNotThreadSafe");
 
 		PsimagLite::Options::Writeable optWriteable(registerOpts,
 		                                            PsimagLite::Options::Writeable::PERMISSIVE);

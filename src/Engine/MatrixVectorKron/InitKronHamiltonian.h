@@ -147,7 +147,7 @@ public:
 
 	bool blasIsThreadSafe() const
 	{
-		return (model_.params().options.find("blasIsThreadSafe") != PsimagLite::String::npos);
+		return (model_.params().options.find("blasNotThreadSafe") == PsimagLite::String::npos);
 	}
 
 	// -------------------

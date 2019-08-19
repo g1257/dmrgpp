@@ -129,7 +129,7 @@ public:
 	                  true,
 	                  true,
 	                  params.denseSparseThreshold,
-	                  params.options.find("blasIsThreadSafe") != PsimagLite::String::npos),
+	                  params.options.find("blasNotThreadSafe") == PsimagLite::String::npos),
 	      progress_("WaveFunctionTransf"),
 	      filenameIn_(params.checkpoint.filename()),
 	      filenameOut_(params.filename),

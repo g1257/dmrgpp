@@ -304,7 +304,7 @@ private:
 
 		cache.transform.truncate(cache.removedIndices);
 
-		const bool blasIsThreadSafe = (parameters_.options.find("blasIsThreadSafe") !=
+		const bool blasIsThreadSafe = (parameters_.options.find("blasNotThreadSafe") ==
 		        PsimagLite::String::npos);
 		rPrime.truncateBasis(cache.transform,
 		                     cache.eigs,
