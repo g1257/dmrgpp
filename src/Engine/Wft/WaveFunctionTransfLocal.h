@@ -180,8 +180,8 @@ private:
 
 		const ProgramGlobals::DirectionEnum dir1 = ProgramGlobals::DirectionEnum::EXPAND_ENVIRON;
 
-		for (SizeType ii=0;ii<psiDest.sectors();ii++)
-			transformVectorParallel(psiDest,psiSrc,lrs,ii,nk,dir1);
+		for (SizeType ii = 0; ii < psiDest.sectors(); ++ii)
+			transformVectorParallel(psiDest, psiSrc, lrs, ii, nk, dir1);
 	}
 
 	void transformVectorParallel(VectorWithOffsetType& psiDest,

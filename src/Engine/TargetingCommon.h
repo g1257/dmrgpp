@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Braket.h"
 #include "ProgressIndicator.h"
-#include "BLAS.h"
 #include "TimeSerializer.h"
 #include "TargetParamsDynamic.h"
 #include "VectorWithOffsets.h"

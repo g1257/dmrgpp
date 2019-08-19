@@ -489,10 +489,12 @@ public:
 	void transform(char charLeft,
 	               char charRight,
 	               const BlockDiagonalMatrixType& tLeft,
-	               const BlockDiagonalMatrixType& tRight)
+	               const BlockDiagonalMatrixType& tRight,
+	               bool blasIsThreadSafe)
 	{
 		SizeType npatches = data_.size();
 		SizeType threads = std::min(npatches, PsimagLite::Concurrency::codeSectionParams.npthreads);
+		if (!blasIsThreadSafe) threads = 1;
 		typedef PsimagLite::Parallelizer<ParallelBlockTransform> ParallelizerType;
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
 		ParallelizerType threadedTransform(codeSectionParams);

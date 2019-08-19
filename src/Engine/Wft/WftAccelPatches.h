@@ -47,10 +47,12 @@ public:
 		                    iOld,
 		                    dmrgWaveStruct_.lrs());
 
+
 		psi.transform(charLeft,
 		              charRight,
 		              dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM),
-		              dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON));
+		              dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON),
+		              wftOptions_.blasIsThreadSafe);
 		psi.toVectorWithOffsets(psiDest, iNew, lrs, nk, dir);
 	}
 

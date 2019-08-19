@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TARGETING_DYNAMIC_H
 
 #include "ProgressIndicator.h"
-#include "BLAS.h"
 #include "ParametersForSolver.h"
 #include "TargetParamsDynamic.h"
 #include "VectorWithOffsets.h"

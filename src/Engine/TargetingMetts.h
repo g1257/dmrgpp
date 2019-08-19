@@ -72,7 +72,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_TARGETING_METTS_H
 #include <iostream>
 #include "ProgressIndicator.h"
-#include "BLAS.h"
 #include "ApplyOperatorLocal.h"
 #include "MettsSerializer.h"
 #include "MettsParams.h"

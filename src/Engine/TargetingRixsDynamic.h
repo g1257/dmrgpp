@@ -89,7 +89,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TARGETING_RIXS_DYNAMIC_H
 
 #include "ProgressIndicator.h"
-#include "BLAS.h"
 #include "TargetParamsCorrectionVector.h"
 #include "TargetParamsTimeStep.h"
 #include "VectorWithOffsets.h"

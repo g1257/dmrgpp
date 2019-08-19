@@ -16,11 +16,13 @@ struct WftOptions {
 	           PsimagLite::String options,
 	           bool f,
 	           bool b,
-	           RealType d)
+	           RealType d,
+	           bool blasIsThreadSafe_)
 	    : twoSiteDmrg(options.find("twositedmrg") != PsimagLite::String::npos),
 	      kronLoadBalance(options.find("KronLoadBalance") != PsimagLite::String::npos),
 	      firstCall(f),
 	      bounce(b),
+	      blasIsThreadSafe(blasIsThreadSafe_),
 	      dir(dir1),
 	      accel((twoSiteDmrg) ? ACCEL_BLOCKS : ACCEL_PATCHES),
 	      denseSparseThreshold(d)
@@ -65,6 +67,7 @@ struct WftOptions {
 	bool kronLoadBalance;
 	bool firstCall;
 	bool bounce;
+	bool blasIsThreadSafe;
 	ProgramGlobals::DirectionEnum dir;
 	AccelEnum accel;
 	RealType denseSparseThreshold;

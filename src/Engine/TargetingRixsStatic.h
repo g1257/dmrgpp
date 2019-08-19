@@ -88,7 +88,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TARGETING_RIXS_STATIC_H
 
 #include "ProgressIndicator.h"
-#include "BLAS.h"
 #include "TargetParamsCorrectionVector.h"
 #include "VectorWithOffsets.h"
 #include "TargetingBase.h"

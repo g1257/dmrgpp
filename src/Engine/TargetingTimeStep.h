@@ -73,7 +73,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <iostream>
 #include "ProgressIndicator.h"
-#include "BLAS.h"
 #include "TargetParamsTimeStep.h"
 #include "ProgramGlobals.h"
 #include "ParametersForSolver.h"

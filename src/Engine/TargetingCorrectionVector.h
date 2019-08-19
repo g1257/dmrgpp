@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TARGETING_CORRECTION_VECTOR_H
 
 #include "ProgressIndicator.h"
-#include "BLAS.h"
 #include "TargetParamsCorrectionVector.h"
 #include "VectorWithOffsets.h"
 #include "CorrectionVectorFunction.h"

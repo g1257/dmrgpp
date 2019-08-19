@@ -78,7 +78,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_SERIAL_H
 #define DMRG_SERIAL_H
 
-#include "BLAS.h"
 #include "Io/IoSelector.h"
 #include "FermionSign.h"
 #include "ProgramGlobals.h"
