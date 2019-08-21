@@ -159,6 +159,7 @@ struct ParametersDmrgSolver {
 	PsimagLite::String model;
 	PsimagLite::String insitu;
 	PsimagLite::String recoverySave;
+	PsimagLite::String printHamiltonianAverage;
 	RestartStruct checkpoint;
 	typename QnType::VectorQnType adjustQuantumNumbers;
 	VectorFiniteLoopType finiteLoop;
@@ -187,6 +188,7 @@ struct ParametersDmrgSolver {
 		ioSerializer.write(root + "/model", model);
 		ioSerializer.write(root + "/insitu", insitu);
 		ioSerializer.write(root + "/recoverySave", recoverySave);
+		ioSerializer.write(root + "/printHamiltonianAverage", printHamiltonianAverage);
 		checkpoint.write(label + "/checkpoint", ioSerializer);
 		ioSerializer.write(root + "/adjustQuantumNumbers", adjustQuantumNumbers);
 		ioSerializer.write(root + "/finiteLoop", finiteLoop);
@@ -358,6 +360,10 @@ struct ParametersDmrgSolver {
 		} catch (std::exception&) {
 			keptStatesInfinite = 0;
 		}
+
+		try {
+			io.readline(printHamiltonianAverage, "PrintHamiltonianAverage=");
+		} catch (std::exception&) {}
 
 		if (options.find("restart")!=PsimagLite::String::npos) {
 			if (!infLoopsIsAnInt and hasRestartFrom) {

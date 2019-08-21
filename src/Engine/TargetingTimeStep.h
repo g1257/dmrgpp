@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsSuzukiTrotter.h"
 #include "TargetingBase.h"
 #include "BlockDiagonalMatrix.h"
+#include "PredicateAwesome.h"
 
 namespace Dmrg {
 
@@ -273,11 +274,15 @@ private:
 		bool doBorderIfBorder = false;
 		this->common().cocoon(block1, direction, doBorderIfBorder);
 
-		PsimagLite::String options = this->model().params().options;
-
-		if (options.find("printHamiltonianAverage") != std::string::npos)
+		PsimagLite::String predicate = this->model().params().printHamiltonianAverage;
+		const SizeType linSize = this->model().geometry().numberOfSites();
+		PsimagLite::PredicateAwesome<>::replaceAll(predicate, "c", ttos(linSize));
+		PsimagLite::PredicateAwesome<> pAwesome(predicate);
+		assert(block1.size() > 0);
+		if (pAwesome.isTrue("s", block1[0]))
 			printEnergies(); // in-situ
 
+		PsimagLite::String options = this->model().params().options;
 		bool normalizeTimeVectors =
 		        (options.find("normalizeTimeVectors") != std::string::npos);
 		if (options.find("TargetingAncilla") != std::string::npos)

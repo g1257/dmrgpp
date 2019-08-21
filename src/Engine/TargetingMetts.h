@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 #include "TargetingBase.h"
 #include "Io/IoSelector.h"
+#include "PredicateAwesome.h"
 
 namespace Dmrg {
 
@@ -276,11 +277,15 @@ public:
 		bool doBorderIfBorder = true;
 		this->common().cocoon(block1, direction, doBorderIfBorder);
 
-		PsimagLite::String options = this->model().params().options;
-
-		if (options.find("printHamiltonianAverage") != std::string::npos)
+		PsimagLite::String predicate = model_.params().printHamiltonianAverage;
+		const SizeType linSize = model_.geometry().numberOfSites();
+		PsimagLite::PredicateAwesome<>::replaceAll(predicate, "c", ttos(linSize));
+		PsimagLite::PredicateAwesome<> pAwesome(predicate);
+		assert(block1.size() > 0);
+		if (pAwesome.isTrue("s", block1[0]))
 			printEnergies(); // in-situ
 
+		PsimagLite::String options = this->model().params().options;
 		bool normalizeTimeVectors = true;
 		if (options.find("neverNormalizeVectors") != std::string::npos)
 			normalizeTimeVectors = false;

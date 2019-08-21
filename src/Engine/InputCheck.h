@@ -206,6 +206,7 @@ public:
 		knownLabels_.push_back("ThreadsStackSize");
 		knownLabels_.push_back("RecoverySave");
 		knownLabels_.push_back("Intent");
+		knownLabels_.push_back("PrintHamiltonianAverage");
 		for (SizeType i = 0; i < 10; ++i)
 			knownLabels_.push_back("Term" + ttos(i));
 	}
@@ -357,7 +358,6 @@ public:
 			them for all sites. This is will use more RAM, but might be needed
 			to target expressions.
 			\item [calcAndPrintEntropies] Calculate entropies and print to cout file
-			\item [printHamiltonianAverage] Print <...|H|...> in NGSTs.
 			\item [blasNotThreadSafe] TBW
 		\end{itemize}
 		*/
@@ -425,7 +425,6 @@ public:
 		registerOpts.push_back("shrinkStacksOnDisk");
 		registerOpts.push_back("OperatorsChangeAll");
 		registerOpts.push_back("calcAndPrintEntropies");
-		registerOpts.push_back("printHamiltonianAverage");
 		registerOpts.push_back("blasNotThreadSafe");
 
 		PsimagLite::Options::Writeable optWriteable(registerOpts,
