@@ -210,7 +210,12 @@ sub procMemcheck
 	my $mode = "OK";
 	my $extra = "UNDEFINED";
 	my %lost;
-	open(FILE, "<", $file1) or die "$0: Cannot open $file1 : $!\n";
+	my $ret = open(FILE, "<", $file1);
+	if (!$ret) {
+		print STDERR "$0: Cannot open $file1 : $!\n";
+		return;
+	}
+
 	while (<FILE>) {
 		if (/FATAL: You are requesting/ || /mandatory label/) {
 			$mode = "FATAL";

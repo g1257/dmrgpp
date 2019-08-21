@@ -131,7 +131,10 @@ public:
 	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
 	      geometry_(geometry)
-	{}
+	{
+		if (PsimagLite::Concurrency::codeSectionParams.npthreads != 1)
+			err("TjAncillaC:: cannot be run with Threads > 1 sorry\n");
+	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
