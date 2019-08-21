@@ -16,9 +16,9 @@ public:
 	}
 
 	template<typename SomeLambdaType>
-	void parallelFor(const SomeLambdaType& lambda, SizeType n)
+	void parallelFor(SizeType start, SizeType end, const SomeLambdaType& lambda)
 	{
-		for (SizeType i = 0; i < n; ++i)
+		for (SizeType i = start; i < end; ++i)
 			lambda(i, 0);
 	}
 };

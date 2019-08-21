@@ -12,11 +12,10 @@ int main(int argc, char** argv)
 
 	PsimagLite::Parallizer2<> parallelizer(threads);
 
-	parallelizer.parallelFor([&v](SizeType i, SizeType)
+	parallelizer.parallelFor(0, n, [&v](SizeType i, SizeType)
 	{
-		v[i] = i + 42;        // <<<--- body of the loop
-	},
-	n);                       // <<<---- total of the loop
+		v[i] = i + 42; 
+	});
 
 	/*
 	for (SizeType i = 0; i < n; ++i) {

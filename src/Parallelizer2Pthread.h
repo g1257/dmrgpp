@@ -28,14 +28,15 @@ template<typename SomeLambdaType,
          >
 struct PthreadFunctionStruct {
 	PthreadFunctionStruct()
-	    : pfh(0),loadBalancer(0),threadNum(0),nthreads(0),total(0),cpu(0)
+	    : pfh(0),loadBalancer(0),threadNum(0),nthreads(0),start(0),end(0),cpu(0)
 	{}
 
 	const SomeLambdaType* pfh;
 	const LoadBalancerType* loadBalancer;
 	int threadNum;
 	SizeType nthreads;
-	SizeType total;
+	SizeType start;
+	SizeType end;
 	SizeType cpu;
 };
 
@@ -57,8 +58,8 @@ void *thread_function_wrapper(void *dummyPtr)
 
 	for (SizeType p = 0; p < blockSize; ++p) {
 		SizeType taskNumber = pfs->loadBalancer->taskNumber(pfs->threadNum, p);
-		if (taskNumber > pfs->total) break;
-		(*pfh)(taskNumber, pfs->threadNum);
+		if (taskNumber + pfs->start >= pfs->end) break;
+		(*pfh)(taskNumber + pfs->start, pfs->threadNum);
 	}
 
 	return 0;
@@ -78,29 +79,30 @@ public:
 
 	// no weights, no balancer ==> create weights, set all weigths to 1, delegate
 	template<typename SomeLambdaType>
-	void parallelFor(const SomeLambdaType& lambda,
-	                 SizeType ntasks)
+	void parallelFor(SizeType start, SizeType end, const SomeLambdaType& lambda)
 	{
-		VectorSizeType weights(ntasks,1);
-		parallelFor(lambda, weights, ntasks);
+		VectorSizeType weights(end - start, 1);
+		parallelFor(start, end, lambda, weights);
 	}
 
 	// weights, no balancer ==> create balancer with weights ==> delegate
 	template<typename SomeLambdaType>
-	void parallelFor(const SomeLambdaType& lambda,
-	                 const VectorSizeType& weights,
-	                 SizeType ntasks)
+	void parallelFor(SizeType start,
+	                 SizeType end,
+	                 const SomeLambdaType& lambda,
+	                 const VectorSizeType& weights)
 	{
 		LoadBalancerType* loadBalancer = new LoadBalancerType(weights, nthreads_);
-		parallelFor(lambda, *loadBalancer, ntasks);
+		parallelFor(start, end, lambda, *loadBalancer);
 		delete loadBalancer;
 		loadBalancer = 0;
 	}
 
 	template<typename SomeLambdaType>
-	void parallelFor(const SomeLambdaType& lambda,
-	                 const LoadBalancerType& loadBalancer,
-	                 SizeType ntasks)
+	void parallelFor(SizeType start,
+	                 SizeType end,
+	                 const SomeLambdaType& lambda,
+	                 const LoadBalancerType& loadBalancer)
 	{
 		PthreadFunctionStruct<SomeLambdaType>* pfs =
 		new PthreadFunctionStruct<SomeLambdaType>[nthreads_];
@@ -111,7 +113,8 @@ public:
 			pfs[j].pfh = &lambda;
 			pfs[j].loadBalancer = &loadBalancer;
 			pfs[j].threadNum = j;
-			pfs[j].total = ntasks;
+			pfs[j].start = start;
+			pfs[j].end = end;
 			pfs[j].nthreads = nthreads_;
 
 			attr[j] = new pthread_attr_t;
