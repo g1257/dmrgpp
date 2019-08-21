@@ -84,6 +84,24 @@ public:
 		return false;
 	}
 
+	template<typename T1, typename T2>
+	bool isTrue(String name1, T1 val1, String name2, T2 val2)
+	{
+		return (isTrue(name1, val1) && isTrue(name2, val2));
+	}
+
+	static void replaceAll(String& str, const String& from, const String& to)
+	{
+		if (from.empty()) return;
+
+		size_t start_pos = 0;
+
+		while ((start_pos = str.find(from, start_pos)) != String::npos) {
+			str.replace(start_pos, from.length(), to);
+			start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+		}
+	}
+
 private:
 
 	String pred_;
