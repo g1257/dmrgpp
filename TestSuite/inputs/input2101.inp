@@ -36,6 +36,7 @@ FiniteLoops 2
 
 RepeatFiniteLoopsTimes=10
 RecoverySave=l%2,keep,M=100
+PrintHamiltonianAverage=s==c
 
 TruncationTolerance=1e-7
 TridiagEps=1e-7

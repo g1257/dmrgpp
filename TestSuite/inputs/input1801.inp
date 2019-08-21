@@ -18,6 +18,7 @@ LadderLeg=2
 Model=Heisenberg
 HeisenbergTwiceS=1
 
+PrintHamiltonianAverage=s==c
 SolverOptions=twositedmrg,restart,TargetingAncilla
 Version=version
 OutputFile=data1801.txt

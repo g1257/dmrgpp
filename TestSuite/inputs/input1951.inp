@@ -28,6 +28,7 @@ FiniteLoops 4
 RepeatFiniteLoopsFrom=0
 RepeatFiniteLoopsTimes=10
 
+PrintHamiltonianAverage=s==c
 TargetElectronsTotal=8
 TargetSzPlusConst=4
 TargetExtra 2 2 2

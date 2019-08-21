@@ -30,7 +30,7 @@ InfiniteLoopKeptStates=data2101
 FiniteLoops 2
 10 400 2  -10 400 2
 
-
+PrintHamiltonianAverage=s==c
 SolverOptions=CorrectionVectorTargeting,restart,twositedmrg
 CorrectionA=0
 Version=version

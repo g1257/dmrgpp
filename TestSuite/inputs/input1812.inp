@@ -19,6 +19,7 @@ Connectors 1 0.0
 Model=HeisenbergAncillaC
 HeisenbergTwiceS=1
 
+PrintHamiltonianAverage=s==c
 SolverOptions=twositedmrg,restart,TargetingAncilla,neverNormalizeVectors
 Version=version
 OutputFile=data1812

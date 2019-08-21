@@ -30,6 +30,7 @@ Model=TjAncillaC2
 potentialV	 12 0 0 0 0 0 0 
                     0 0 0 0 0 0 
 
+PrintHamiltonianAverage=s==c
 SolverOptions=restart,TargetingAncilla,twositedmrg
 Version=version
 OutputFile=data1861.txt

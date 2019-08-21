@@ -278,8 +278,8 @@ public:
 		this->common().cocoon(block1, direction, doBorderIfBorder);
 
 		PsimagLite::String predicate = model_.params().printHamiltonianAverage;
-		const SizeType linSize = model_.geometry().numberOfSites();
-		PsimagLite::PredicateAwesome<>::replaceAll(predicate, "c", ttos(linSize));
+		const SizeType center = model_.geometry().numberOfSites()/2;
+		PsimagLite::PredicateAwesome<>::replaceAll(predicate, "c", ttos(center));
 		PsimagLite::PredicateAwesome<> pAwesome(predicate);
 		assert(block1.size() > 0);
 		if (pAwesome.isTrue("s", block1[0]))
