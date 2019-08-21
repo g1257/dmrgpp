@@ -85,8 +85,10 @@ public:
 	template<typename SomeLambdaType>
 	void parallelFor(SizeType start, SizeType end, const SomeLambdaType& lambda)
 	{
-		VectorSizeType weights(end - start, 1);
-		parallelFor(start, end, lambda, weights);
+		LoadBalancerType* loadBalancer = new LoadBalancerType(end - start, nthreads_);
+		parallelFor(start, end, lambda, *loadBalancer);
+		delete loadBalancer;
+		loadBalancer = 0;
 	}
 
 	// weights, no balancer ==> create balancer with weights ==> delegate
@@ -96,7 +98,8 @@ public:
 	                 const SomeLambdaType& lambda,
 	                 const VectorSizeType& weights)
 	{
-		LoadBalancerType* loadBalancer = new LoadBalancerType(weights, nthreads_);
+		LoadBalancerType* loadBalancer = new LoadBalancerType(weights.size(), nthreads_);
+		loadBalancer->setWeights(weights);
 		parallelFor(start, end, lambda, *loadBalancer);
 		delete loadBalancer;
 		loadBalancer = 0;

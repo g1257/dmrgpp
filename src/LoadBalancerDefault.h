@@ -11,59 +11,25 @@ public:
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-	LoadBalancerDefault(const VectorSizeType& weights, SizeType nthreads)
-	    : taskNumber_(nthreads)
+	LoadBalancerDefault(SizeType ntasks, SizeType nthreads)
+	    : blockSize_(ntasks/nthreads)
 	{
-		VectorSizeType workLoad(nthreads, 0);
-		SizeType ntasks = weights.size();
-		VectorSizeType weights2 = weights;
-		VectorSizeType iperm(ntasks, 0);
-		Sort<VectorSizeType> sort;
-		sort.sort(weights2,iperm);
-
-		for (SizeType iii = 0; iii < ntasks; ++iii) {
-			SizeType ii = ntasks - 1 - iii; // because sort is ascending
-			SizeType thread = findThreadWithLightestWork(workLoad);
-			// assign work to thread
-			assert(thread < taskNumber_.size());
-			taskNumber_[thread].push_back(iperm[ii]);
-			// update work loads
-			assert(thread < workLoad.size()); 
-			workLoad[thread] += weights[iperm[ii]];
-		}
-
-#ifdef DEBUG_PTHREADS_NG
-		for (SizeType i = 0; i < nthreads; ++i) {
-			SizeType n = taskNumber_[i].size();
-			std::cout<<n<<" Indices allocated to thread "<<i<<": ";
-			for (SizeType j = 0; j < n; ++j)
-				std::cout<<taskNumber_[i][j]<<" ";
-			std::cout<<"\n";
-		}
-#endif
+		if ((ntasks % nthreads) != 0) ++blockSize_;
 	}
 
-	SizeType blockSize(SizeType threadNum) const
+	SizeType blockSize(SizeType) const
 	{
-		assert(threadNum < taskNumber_.size());
-		return taskNumber_[threadNum].size();
+		return blockSize_;
 	}
 
-	int taskNumber(SizeType threadNum, SizeType p) const
+	SizeType taskNumber(SizeType threadNum, SizeType p) const
 	{
-		assert(threadNum < taskNumber_.size());
-		assert(p < taskNumber_[threadNum].size());
-		return taskNumber_[threadNum][p];
+		return p + threadNum*blockSize_;
 	}
 
 private:
 
-	SizeType findThreadWithLightestWork(const VectorSizeType& workLoad) const
-	{
-		return std::min_element(workLoad.begin(), workLoad.end()) - workLoad.begin();
-	}
-
-	PsimagLite::Vector<VectorSizeType>::Type taskNumber_;
+	SizeType blockSize_;
 }; // class LoadBalancerDefault
 } // namespace PsimagLite
 #endif // LOADBALANCERDEFAULT_H
