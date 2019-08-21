@@ -11,6 +11,10 @@ public:
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
+	LoadBalancerWeights(SizeType ntasks, SizeType nthreads)
+	    : LoadBalancerWeights(VectorSizeType(ntasks, 1), nthreads) // ctor delegation
+	{}
+
 	LoadBalancerWeights(const VectorSizeType& weights, SizeType nthreads)
 	    : taskNumber_(nthreads)
 	{

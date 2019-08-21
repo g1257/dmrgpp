@@ -1,5 +1,6 @@
 #include "Parallelizer2.h"
 #include "Vector.h"
+#include "LoadBalancerWeights.h"
 
 int main(int argc, char** argv)
 {

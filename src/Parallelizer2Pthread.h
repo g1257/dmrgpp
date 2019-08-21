@@ -40,11 +40,11 @@ struct PthreadFunctionStruct {
 	SizeType cpu;
 };
 
-template<typename SomeLambdaType>
+template<typename SomeLambdaType, typename SomeLoadBalancer>
 void *thread_function_wrapper(void *dummyPtr)
 {
-	PthreadFunctionStruct<SomeLambdaType> *pfs =
-	        static_cast<PthreadFunctionStruct<SomeLambdaType> *>(dummyPtr);
+	PthreadFunctionStruct<SomeLambdaType, SomeLoadBalancer> *pfs =
+	        static_cast<PthreadFunctionStruct<SomeLambdaType, SomeLoadBalancer> *>(dummyPtr);
 
 	const SomeLambdaType* pfh = pfs->pfh;
 
@@ -111,8 +111,8 @@ public:
 	                 const SomeLambdaType& lambda,
 	                 const LoadBalancerType& loadBalancer)
 	{
-		PthreadFunctionStruct<SomeLambdaType>* pfs =
-		new PthreadFunctionStruct<SomeLambdaType>[nthreads_];
+		PthreadFunctionStruct<SomeLambdaType, LoadBalancerType>* pfs =
+		new PthreadFunctionStruct<SomeLambdaType, LoadBalancerType>[nthreads_];
 		pthread_t* thread_id = new pthread_t[nthreads_];
 		pthread_attr_t** attr = new pthread_attr_t*[nthreads_];
 
@@ -131,7 +131,7 @@ public:
 
 			ret = pthread_create(&thread_id[j],
 			                     attr[j],
-			                     thread_function_wrapper<SomeLambdaType>,
+			                     thread_function_wrapper<SomeLambdaType, LoadBalancerType>,
 			                     &pfs[j]);
 			checkForError(ret);
 		}
