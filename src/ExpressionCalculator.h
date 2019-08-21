@@ -16,7 +16,13 @@ template<typename ComplexOrRealType>
 struct PrepassData {
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 
-	PsimagLite::String names;
+	PrepassData() {}
+
+	PrepassData(String names_, const VectorType& values_)
+	    : names(names_), values(values_)
+	{}
+
+	String names;
 	VectorType values;
 };
 

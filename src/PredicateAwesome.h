@@ -66,6 +66,7 @@ public:
 	PredicateAwesome(String pred)
 	    : pred_(pred)
 	{
+		if (pred_ == "") return;
 		VectorStringType tokens;
 		split(tokens, pred, ",");
 		const SizeType n = tokens.size();
@@ -76,6 +77,7 @@ public:
 	template<typename T>
 	bool isTrue(String name, T val)
 	{
+		if (pred_ == "") return false;
 		SizeType n = predicateAnd_.size();
 		for (SizeType i = 0; i < n; ++i)
 			if (predicateAnd_[i].isTrue(name, val)) return true;

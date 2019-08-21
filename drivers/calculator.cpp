@@ -10,10 +10,9 @@ int main(int argc, char **argv)
 	ExpressionCalculatorType::VectorStringType ve;
 	PsimagLite::split(ve, argv[1], ",");
 
-	PrepassDataType pd;
+
 	PrepassDataType::VectorType vr(1,0.25);
-	pd.names = "t";
-	pd.values = vr;
+	PrepassDataType pd("t", vr);
 
 	PsimagLite::ExpressionPrepass<PrepassDataType>::prepass(ve,pd);
 
