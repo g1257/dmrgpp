@@ -21,6 +21,10 @@ public:
 		for (SizeType i = start; i < end; ++i)
 			lambda(i, 0);
 	}
+
+	SizeType numberOfThreads() const { return 1; }
+
+	String name() const { return "serial"; }
 };
 }
 #endif // PARALLELIZER2SERIAL_H

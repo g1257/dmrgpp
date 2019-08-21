@@ -12,6 +12,8 @@ int main(int argc, char** argv)
 
 	PsimagLite::Parallizer2<> parallelizer(threads);
 
+	std::cout<<"Testing Parallelizer2 with "<<parallelizer.name();
+	std::cout<<" and "<<parallelizer.numberOfThreads()<<" threads.\n";
 	parallelizer.parallelFor(0, n, [&v](SizeType i, SizeType)
 	{
 		v[i] = i + 42; 

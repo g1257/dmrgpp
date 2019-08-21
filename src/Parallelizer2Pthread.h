@@ -77,6 +77,10 @@ public:
 	Parallizer2(SizeType nthreads)
 	    : nthreads_(nthreads) {}
 
+	SizeType numberOfThreads() const { return nthreads_; }
+
+	String name() const { return "pthread"; }
+
 	// no weights, no balancer ==> create weights, set all weigths to 1, delegate
 	template<typename SomeLambdaType>
 	void parallelFor(SizeType start, SizeType end, const SomeLambdaType& lambda)
