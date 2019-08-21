@@ -96,7 +96,6 @@ public:
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename SparseMatrixType::value_type value_type;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
@@ -104,8 +103,7 @@ public:
 	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
 
 	MatrixVectorStored(const ModelType& model,
-	                   const HamiltonianConnectionType& hc,
-	                   const ReflectionSymmetryType* rs=0)
+	                   const HamiltonianConnectionType& hc)
 	    : model_(model),
 	      matrixStored_(2),
 	      pointer_(0),
@@ -113,25 +111,15 @@ public:
 	{
 		PsimagLite::String options = model.params().options;
 		bool debugMatrix = (options.find("debugmatrix") != PsimagLite::String::npos);
-		if (!rs) {
-			matrixStored_[0].clear();
-			model.fullHamiltonian(matrixStored_[0], hc);
-			assert(isHermitian(matrixStored_[0],true));
-			PsimagLite::OstringStream msg;
-			msg<<"fullHamiltonian has rank="<<matrixStored_[0].rows();
-			msg<<" nonzeros="<<matrixStored_[0].nonZeros();
-			progress_.printline(msg,std::cout);
-			if (debugMatrix)
-				printFullMatrix(matrixStored_[0],"matrix",1);
-			return;
-		}
-
-		SparseMatrixType matrix2;
-		model.fullHamiltonian(matrix2, hc);
-		rs->transform(matrixStored_[0],matrixStored_[1],matrix2);
+		matrixStored_[0].clear();
+		model.fullHamiltonian(matrixStored_[0], hc);
+		assert(isHermitian(matrixStored_[0],true));
 		PsimagLite::OstringStream msg;
-		msg<<" sector="<<matrixStored_[0].rows()<<" and sector="<<matrixStored_[1].rows();
+		msg<<"fullHamiltonian has rank="<<matrixStored_[0].rows();
+		msg<<" nonzeros="<<matrixStored_[0].nonZeros();
 		progress_.printline(msg,std::cout);
+		if (debugMatrix)
+			printFullMatrix(matrixStored_[0],"matrix",1);
 	}
 
 	SizeType rows() const { return matrixStored_[pointer_].rows(); }

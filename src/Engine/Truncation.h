@@ -109,7 +109,6 @@ class Truncation  {
 	typedef typename DensityMatrixBaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename TargetingType::ModelType ModelType;
 	typedef typename ModelType::GeometryType GeometryType;
-	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 public:
@@ -126,13 +125,12 @@ public:
 
 	}; // TruncationCache
 
-	Truncation(ReflectionSymmetryType& reflectionOperator,
+	Truncation(const LeftRightSuperType& lrs,
 	           WaveFunctionTransfType& waveFunctionTransformation,
 	           const ParametersType& parameters,
 	           const GeometryType& geometry,
 	           IoOutType& ioOut)
-	    : reflectionOperator_(reflectionOperator),
-	      lrs_(reflectionOperator_.leftRightSuper()),
+	    : lrs_(lrs),
 	      waveFunctionTransformation_(waveFunctionTransformation),
 	      parameters_(parameters),
 	      geometry_(geometry),
@@ -512,7 +510,6 @@ private:
 		++counterVector_[index];
 	}
 
-	ReflectionSymmetryType& reflectionOperator_;
 	const LeftRightSuperType& lrs_;
 	WaveFunctionTransfType& waveFunctionTransformation_;
 	const ParametersType& parameters_;

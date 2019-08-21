@@ -151,7 +151,6 @@ struct ParametersDmrgSolver {
 	SizeType dumperBegin;
 	SizeType dumperEnd;
 	SizeType precision;
-	int useReflectionSymmetry;
 	bool autoRestart;
 	PairRealSizeType truncationControl;
 	PsimagLite::String filename;
@@ -159,7 +158,6 @@ struct ParametersDmrgSolver {
 	PsimagLite::String options;
 	PsimagLite::String model;
 	PsimagLite::String insitu;
-	PsimagLite::String fileForDensityMatrixEigs;
 	PsimagLite::String recoverySave;
 	RestartStruct checkpoint;
 	typename QnType::VectorQnType adjustQuantumNumbers;
@@ -182,14 +180,12 @@ struct ParametersDmrgSolver {
 		ioSerializer.write(root + "/dumperBegin", dumperBegin);
 		ioSerializer.write(root + "/dumperEnd", dumperEnd);
 		ioSerializer.write(root + "/precision", precision);
-		ioSerializer.write(root + "/useReflectionSymmetry", useReflectionSymmetry);
 		ioSerializer.write(root + "/truncationControl", truncationControl);
 		ioSerializer.write(root + "/filename", filename);
 		ioSerializer.write(root + "/version", version);
 		ioSerializer.write(root + "/options", options);
 		ioSerializer.write(root + "/model", model);
 		ioSerializer.write(root + "/insitu", insitu);
-		ioSerializer.write(root + "/fileForDensityMatrixEigs", fileForDensityMatrixEigs);
 		ioSerializer.write(root + "/recoverySave", recoverySave);
 		checkpoint.write(label + "/checkpoint", ioSerializer);
 		ioSerializer.write(root + "/adjustQuantumNumbers", adjustQuantumNumbers);
@@ -294,15 +290,6 @@ struct ParametersDmrgSolver {
 			s += "\nFATAL: nthreads cannot be zero\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
-
-		useReflectionSymmetry=0;
-		try {
-			io.readline(useReflectionSymmetry,"UseReflectionSymmetry=");
-		} catch (std::exception&) {}
-		fileForDensityMatrixEigs="";
-		try {
-			io.readline(fileForDensityMatrixEigs,"FileForDensityMatrixEigs=");
-		} catch (std::exception&) {}
 
 		insitu = "";
 		try {

@@ -130,7 +130,6 @@ public:
 	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
 	typedef Recovery<CheckpointType, TargetingType> RecoveryType;
 	typedef typename DmrgSerializerType::FermionSignType FermionSignType;
-	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename PsimagLite::Vector<BlockType>::Type VectorBlockType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename TargetingType::LanczosSolverType LanczosSolverType;
@@ -153,19 +152,14 @@ public:
 	      stepCurrent_(0),
 	      checkpoint_(parameters_, ioIn, model, false),
 	      wft_(parameters_),
-	      reflectionOperator_(lrs_,
-	                          model_.hilbertSize(0),
-	                          parameters_.useReflectionSymmetry,
-	                          ProgramGlobals::DirectionEnum::EXPAND_SYSTEM),
 	      diagonalization_(parameters_,
 	                       model,
 	                       verbose_,
-	                       reflectionOperator_,
 	                       ioIn,
 	                       quantumSector_,
 	                       wft_,
 	                       checkpoint_.energy()),
-	      truncate_(reflectionOperator_,
+	      truncate_(lrs_,
 	                wft_,
 	                parameters_,
 	                model.geometry(),
@@ -690,7 +684,6 @@ obtain ordered
 	CheckpointType checkpoint_;
 	WaveFunctionTransfType wft_;
 	VectorBlockType sitesIndices_;
-	ReflectionSymmetryType reflectionOperator_;
 	DiagonalizationType diagonalization_;
 	TruncationType truncate_;
 	ObservablesInSituType inSitu_;

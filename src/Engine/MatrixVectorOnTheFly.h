@@ -94,7 +94,6 @@ public:
 	typedef ModelType_ ModelType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type value_type;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -103,8 +102,7 @@ public:
 	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
 
 	MatrixVectorOnTheFly(const ModelType& model,
-	                     const HamiltonianConnectionType& hc,
-	                     ReflectionSymmetryType* = 0)
+	                     const HamiltonianConnectionType& hc)
 	    : model_(model), hc_(hc)
 	{
 		int maxMatrixRankStored = model.params().maxMatrixRankStored;

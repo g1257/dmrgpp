@@ -79,7 +79,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MODEL_BASE_H
 #define MODEL_BASE_H
 
-#include "ReflectionOperatorEmpty.h"
 #include "Vector.h"
 #include "Sort.h"
 #include "MemResolv.h"
@@ -109,7 +108,6 @@ public:
 	typedef typename ModelHelperType::BasisType MyBasis;
 	typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef ReflectionOperatorEmpty<LeftRightSuperType> ReflectionSymmetryType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::StorageType OperatorStorageType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;

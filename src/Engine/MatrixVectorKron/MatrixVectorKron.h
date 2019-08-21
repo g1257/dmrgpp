@@ -99,7 +99,6 @@ public:
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelType::ParametersType ParametersType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef InitKronHamiltonian<ModelType> InitKronType;
 	typedef KronMatrix<InitKronType> KronMatrixType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
@@ -111,8 +110,7 @@ public:
 	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
 
 	MatrixVectorKron(const ModelType& model,
-	                 const HamiltonianConnectionType& hc,
-	                 ReflectionSymmetryType* = 0)
+	                 const HamiltonianConnectionType& hc)
 	    : params_(model.params()),
 	      initKron_(model, hc),
 	      kronMatrix_(initKron_, "Hamiltonian"),

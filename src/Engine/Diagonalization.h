@@ -111,7 +111,6 @@ public:
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::ParamsForKroneckerDumperType ParamsForKroneckerDumperType;
-	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename TargetingType::MatrixVectorType MatrixVectorType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
@@ -130,7 +129,6 @@ public:
 	Diagonalization(const ParametersType& parameters,
 	                const ModelType& model,
 	                const bool& verbose,
-	                ReflectionSymmetryType& reflectionOperator,
 	                InputValidatorType& io,
 	                const typename QnType::VectorQnType& quantumSector,
 	                WaveFunctionTransfType& waveFunctionTransformation,
@@ -138,7 +136,6 @@ public:
 	    : parameters_(parameters),
 	      model_(model),
 	      verbose_(verbose),
-	      reflectionOperator_(reflectionOperator),
 	      io_(io),
 	      progress_("Diag."),
 	      quantumSector_(quantumSector),
@@ -157,7 +154,6 @@ public:
 		SizeType loopIndex = 0;
 		VectorSizeType sectors;
 		targetedSymmetrySectors(sectors,target.lrs());
-		reflectionOperator_.update(sectors);
 		RealType gsEnergy = internalMain_(target,direction,loopIndex,blockLeft);
 		//  targeting:
 		target.evolve(gsEnergy,direction,blockLeft,blockRight,loopIndex);
@@ -434,12 +430,8 @@ private:
 	                         const TargetVectorType& initialVector,
 	                         SizeType loopIndex)
 	{
-		ReflectionSymmetryType *rs = 0;
-		if (reflectionOperator_.isEnabled()) rs = &reflectionOperator_;
-
 		typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(model_,
-		                                                             hc,
-		                                                             rs);
+		                                                             hc);
 
 		const SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
 
@@ -471,10 +463,6 @@ private:
 			if (lanczosOrDavidson) delete lanczosOrDavidson;
 			return;
 		}
-
-		if (reflectionOperator_.isEnabled())
-			err("ReflectionOperator enabled is not longer supported\n");
-
 
 		try {
 			energyTmp = computeLevel(*lanczosOrDavidson,tmpVec,initialVector);
@@ -563,7 +551,6 @@ private:
 	const ParametersType& parameters_;
 	const ModelType& model_;
 	const bool& verbose_;
-	ReflectionSymmetryType& reflectionOperator_;
 	InputValidatorType& io_;
 	PsimagLite::ProgressIndicator progress_;
 	// quantumSector_ needs to be a reference since DmrgSolver will change it
