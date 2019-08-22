@@ -107,7 +107,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template<typename PthreadFunctionHolderType, typename LoadBalancerType=LoadBalancerDefault>
+template<typename PthreadFunctionHolderType, typename LoadBalancerType>
 struct PthreadFunctionStruct {
 	PthreadFunctionStruct()
 	    : pfh(0),loadBalancer(0),threadNum(0),nthreads(0),total(0),cpu(0)
@@ -121,11 +121,12 @@ struct PthreadFunctionStruct {
 	SizeType cpu;
 };
 
-template<typename PthreadFunctionHolderType>
+template<typename PthreadFunctionHolderType, typename LoadBalancerType>
 void *thread_function_wrapper(void *dummyPtr)
 {
-	PthreadFunctionStruct<PthreadFunctionHolderType> *pfs =
-	        static_cast<PthreadFunctionStruct<PthreadFunctionHolderType> *>(dummyPtr);
+	PthreadFunctionStruct<PthreadFunctionHolderType, LoadBalancerType> *pfs =
+	        static_cast<PthreadFunctionStruct<PthreadFunctionHolderType, LoadBalancerType> *>
+	        (dummyPtr);
 
 	PthreadFunctionHolderType *pfh = pfs->pfh;
 
@@ -139,7 +140,7 @@ void *thread_function_wrapper(void *dummyPtr)
 
 	for (SizeType p=0; p < blockSize; ++p) {
 		SizeType taskNumber = pfs->loadBalancer->taskNumber(pfs->threadNum, p);
-		if (taskNumber > pfs->total) break;
+		if (taskNumber >= pfs->total) break;
 		pfh->doTask(taskNumber, pfs->threadNum);
 	}
 
@@ -186,16 +187,17 @@ public:
 	// no weights, no balancer ==> create weights, set all weigths to 1, delegate
 	void loopCreate(PthreadFunctionHolderType& pfh)
 	{
-		SizeType ntasks = pfh.tasks();
-		VectorSizeType weights(ntasks,1);
-		loopCreate(pfh,weights);
+		LoadBalancerType* loadBalancer = new LoadBalancerType(pfh.tasks(), nthreads_);
+		loopCreate(pfh, *loadBalancer);
+		delete loadBalancer;
+		loadBalancer = 0;
 	}
 
 	// weights, no balancer ==> create balancer with weights ==> delegate
 	void loopCreate(PthreadFunctionHolderType& pfh, const VectorSizeType& weights)
 	{
 		LoadBalancerType* loadBalancer = new LoadBalancerType(weights, nthreads_);
-		loopCreate(pfh,*loadBalancer);
+		loopCreate(pfh, *loadBalancer);
 		delete loadBalancer;
 		loadBalancer = 0;
 	}
@@ -204,8 +206,8 @@ public:
 	void loopCreate(PthreadFunctionHolderType& pfh,
 	                const LoadBalancerType& loadBalancer)
 	{
-		PthreadFunctionStruct<PthreadFunctionHolderType>* pfs;
-		pfs = new PthreadFunctionStruct<PthreadFunctionHolderType>[nthreads_];
+		PthreadFunctionStruct<PthreadFunctionHolderType, LoadBalancerType>* pfs;
+		pfs = new PthreadFunctionStruct<PthreadFunctionHolderType, LoadBalancerType>[nthreads_];
 		pthread_t* thread_id = new pthread_t[nthreads_];
 		pthread_attr_t** attr = new pthread_attr_t*[nthreads_];
 		SizeType ntasks = pfh.tasks();
@@ -256,7 +258,8 @@ public:
 
 			ret = pthread_create(&thread_id[j],
 			                     attr[j],
-			                     thread_function_wrapper<PthreadFunctionHolderType>,
+			                     thread_function_wrapper<PthreadFunctionHolderType,
+			                     LoadBalancerType>,
 			                     &pfs[j]);
 			checkForError(ret);
 		}

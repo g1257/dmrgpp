@@ -113,7 +113,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #endif // USE_PTHREADS
 
 namespace PsimagLite {
-template<typename InstanceType>
+template<typename InstanceType, typename LoadBalancerType=LoadBalancerDefault>
 class Parallelizer
 
 #ifdef USE_PTHREADS
@@ -122,8 +122,8 @@ class Parallelizer
 	: public PthreadsAndMpi<InstanceType> {
 	typedef PthreadsAndMpi<InstanceType> BaseType;
 #else
-        : public ActualPthreadsName<InstanceType> {
-	typedef ActualPthreadsName<InstanceType> BaseType;
+        : public ActualPthreadsName<InstanceType, LoadBalancerType> {
+	typedef ActualPthreadsName<InstanceType, LoadBalancerType> BaseType;
 #endif
 
 #else
@@ -131,8 +131,8 @@ class Parallelizer
         : public Mpi<InstanceType> {
 	typedef Mpi<InstanceType> BaseType;
 #else
-        : public ActualNoPthreadsName<InstanceType>  {
-	typedef ActualNoPthreadsName<InstanceType> BaseType;
+        : public ActualNoPthreadsName<InstanceType, LoadBalancerType>  {
+	typedef ActualNoPthreadsName<InstanceType, LoadBalancerType> BaseType;
 #endif
 #endif
 

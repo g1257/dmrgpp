@@ -105,9 +105,10 @@ public:
 	// no weights, no balancer ==> create weights, set all weigths to 1, delegate
 	void loopCreate(PthreadFunctionHolderType& pfh)
 	{
-		SizeType ntasks = pfh.tasks();
-		VectorSizeType weights(ntasks,1);
-		loopCreate(pfh,weights);
+		LoadBalancerType* loadBalancer = new LoadBalancerType(pfh.tasks(), 1);
+		loopCreate(pfh, *loadBalancer);
+		delete loadBalancer;
+		loadBalancer = 0;
 	}
 
 	// weights, no balancer ==> create balancer with weights ==> delegate
