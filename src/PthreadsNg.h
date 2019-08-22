@@ -206,11 +206,12 @@ public:
 	void loopCreate(PthreadFunctionHolderType& pfh,
 	                const LoadBalancerType& loadBalancer)
 	{
-		PthreadFunctionStruct<PthreadFunctionHolderType, LoadBalancerType>* pfs;
-		pfs = new PthreadFunctionStruct<PthreadFunctionHolderType, LoadBalancerType>[nthreads_];
-		pthread_t* thread_id = new pthread_t[nthreads_];
-		pthread_attr_t** attr = new pthread_attr_t*[nthreads_];
 		SizeType ntasks = pfh.tasks();
+		SizeType actualThreads = std::min(nthreads_, ntasks);
+		PthreadFunctionStruct<PthreadFunctionHolderType, LoadBalancerType>* pfs;
+		pfs = new PthreadFunctionStruct<PthreadFunctionHolderType, LoadBalancerType>[actualThreads];
+		pthread_t* thread_id = new pthread_t[actualThreads];
+		pthread_attr_t** attr = new pthread_attr_t*[actualThreads];
 
 #ifndef __APPLE__
 		cpu_set_t cpuset;
@@ -229,12 +230,12 @@ public:
 		}
 #endif
 
-		for (SizeType j=0; j <nthreads_; j++) {
+		for (SizeType j=0; j <actualThreads; j++) {
 			pfs[j].pfh = &pfh;
 			pfs[j].loadBalancer = &loadBalancer;
 			pfs[j].threadNum = j;
 			pfs[j].total = ntasks;
-			pfs[j].nthreads = nthreads_;
+			pfs[j].nthreads = actualThreads;
 
 			attr[j] = new pthread_attr_t;
 			int ret = (stackSize_ > 0) ? pthread_attr_setstacksize(attr[j], stackSize_) : 0;
@@ -264,8 +265,8 @@ public:
 			checkForError(ret);
 		}
 
-		for (SizeType j=0; j <nthreads_; ++j) pthread_join(thread_id[j], 0);
-		for (SizeType j=0; j <nthreads_; ++j) {
+		for (SizeType j=0; j <actualThreads; ++j) pthread_join(thread_id[j], 0);
+		for (SizeType j=0; j <actualThreads; ++j) {
 			int ret = pthread_attr_destroy(attr[j]);
 			checkForError(ret);
 			delete attr[j];
