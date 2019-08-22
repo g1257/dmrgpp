@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Parallelizer.h"
 #include "PsimagLite.h"
 #include "ProgressIndicator.h"
+#include "LoadBalancerWeights.h"
 #ifdef PLUGIN_SC
 #include "BatchedGemmPluginSc.h"
 #else
@@ -139,17 +140,18 @@ public:
 		}
 
 		KronConnectionsType kc(initKron_);
-
-		typedef PsimagLite::Parallelizer<KronConnectionsType> ParallelizerType;
 		SizeType threads = (initKron_.blasIsThreadSafe()) ? PsimagLite::Concurrency::
 		                                                    codeSectionParams.npthreads : 1 ;
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
-		ParallelizerType parallelConnections(codeSectionParams);
 
-		if (initKron_.loadBalance())
+		if (initKron_.loadBalance()) {
+			PsimagLite::Parallelizer<KronConnectionsType,
+			        PsimagLite::LoadBalancerWeights> parallelConnections(codeSectionParams);
 			parallelConnections.loopCreate(kc, initKron_.weightsOfPatchesNew());
-		else
+		} else {
+			PsimagLite::Parallelizer<KronConnectionsType> parallelConnections(codeSectionParams);
 			parallelConnections.loopCreate(kc);
+		}
 
 		kc.sync();
 
