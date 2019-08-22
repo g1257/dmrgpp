@@ -18,8 +18,9 @@ public:
 	LoadBalancerWeights(const VectorSizeType& weights, SizeType nthreads)
 	    : taskNumber_(nthreads)
 	{
-		VectorSizeType workLoad(nthreads, 0);
 		SizeType ntasks = weights.size();
+		if (ntasks < nthreads) nthreads = ntasks;
+		VectorSizeType workLoad(nthreads, 0);
 		VectorSizeType weights2 = weights;
 		VectorSizeType iperm(ntasks, 0);
 		Sort<VectorSizeType> sort;

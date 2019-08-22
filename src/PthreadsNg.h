@@ -280,7 +280,7 @@ public:
 
 	String name() const { return "PthreadsNg"; }
 
-	SizeType threads() const { return nthreads_; }
+	//SizeType threads() const { return nthreads_; }
 
 	SizeType mpiProcs() const { return 1; }
 

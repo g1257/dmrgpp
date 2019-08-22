@@ -20,6 +20,7 @@ Please see full open source license included in file LICENSE.
 #include <cstdlib>
 #define USE_PTHREADS_OR_NOT_NG
 #include "Parallelizer.h"
+#include "LoadBalancerWeights.h"
 
 class MyHelper {
 
@@ -74,7 +75,6 @@ int main(int argc,char *argv[])
 {
 	typedef PsimagLite::Concurrency ConcurrencyType;
 
-
 	if (argc!=3) {
 		std::cout<<"USAGE: "<<argv[0]<<" nthreads ntasks\n";
 		return 1;
@@ -86,7 +86,7 @@ int main(int argc,char *argv[])
 	ConcurrencyType concurrency(&argc,&argv,nthreads);
 
 	typedef MyHelper HelperType;
-	typedef PsimagLite::Parallelizer<HelperType> ParallelizerType;
+	typedef PsimagLite::Parallelizer<HelperType, PsimagLite::LoadBalancerWeights> ParallelizerType;
 	ParallelizerType threadObject(ConcurrencyType::codeSectionParams);
 
 	HelperType helper(ntasks, nthreads);
