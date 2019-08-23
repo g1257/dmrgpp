@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquared.h"
 #include "ProgramGlobals.h"
 #include "Utils.h"
-#include "complex.h"
+#include "Complex.h"
 
 namespace Dmrg {
 //! t-J model for DMRG solver, uses ModelHubbard and ModelHeisenberg by containment

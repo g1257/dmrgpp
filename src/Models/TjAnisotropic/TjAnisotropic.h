@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/TjAnisotropic/ParametersModelTjAnisotropic.h"
 #include "../Models/FeAsModel/HilbertSpaceFeAs.h"
 #include "ProgramGlobals.h"
-#include "complex.h"
+#include "Complex.h"
 
 namespace Dmrg {
 //! t-J model for DMRG solver, uses ModelHubbard and ModelHeisenberg by containment
