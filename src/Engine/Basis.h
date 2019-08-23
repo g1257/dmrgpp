@@ -200,19 +200,37 @@ public:
 		std::unordered_map<QnType, SizeType> qnSizes(initialSizeOfHashTable, myhash);
 		std::unordered_map<QnType, SizeType> seenThisQns(initialSizeOfHashTable, myhash);
 		VectorBoolType signsPerOffset(nps*npe);
+		//
+		// -------------------------------
+		// precompute left and right sizes
+		// -------------------------------
+		std::vector<SizeType> leftSize_array(nps);
+		std::vector<SizeType> rightSize_array(npe);
+
+		for(SizeType ps = 0; ps < nps; ++ps) {
+			const SizeType leftSize = basis1.offsets_[ps + 1] - basis1.offsets_[ps];
+			leftSize_array[ps] = leftSize;
+		};
+		for(SizeType pe = 0; pe < npe; ++pe) {
+			const SizeType rightSize = basis2.offsets_[pe + 1] - basis2.offsets_[pe];
+			rightSize_array[pe] = rightSize;
+		};
 
 		SizeType counter = 0;
 		const QnType dummyQn(basis2.qns_[0], basis1.qns_[0]);
 		qns_.clear();
 		qns_.resize(nps*npe, dummyQn);
 		for (SizeType ps = 0; ps < nps; ++ps) {
-			const SizeType leftSize = basis1.offsets_[ps + 1] - basis1.offsets_[ps];
 			for (SizeType pe = 0; pe < npe; ++pe) {
-				const SizeType rightSize = basis2.offsets_[pe + 1] - basis2.offsets_[pe];
+
+				const SizeType leftSize = leftSize_array[ps];
+				const SizeType rightSize = rightSize_array[pe];
 				const QnType tensorProd(basis2.qns_[pe], basis1.qns_[ps]);
 				qnSizes[tensorProd] += leftSize*rightSize;
-				if (seenThisQns[tensorProd] == 1) continue;
-				seenThisQns[tensorProd] = 1;
+
+				if (seenThisQns[tensorProd]) continue;
+
+				seenThisQns[tensorProd] = counter+1;
 				qns_[counter] = tensorProd;
 				signsPerOffset[counter] = (basis1.signs_[basis1.offsets_[ps]] ^
 				        basis2.signs_[basis2.offsets_[pe]]);
@@ -238,32 +256,65 @@ public:
 		permutationVector_.resize(permInverse_.size());
 		counter = 0;
 
-		for (SizeType ps = 0; ps < nps; ++ps) {
-			const SizeType leftSize = basis1.offsets_[ps + 1] - basis1.offsets_[ps];
-			for (SizeType pe = 0; pe < npe; ++pe) {
-				const SizeType rightSize = basis2.offsets_[pe + 1] - basis2.offsets_[pe];
+		// -----------------------------------
+		// extra pass to setup offset pointers
+		// -----------------------------------
+		std::vector<SizeType> offset_into_perm_array(nps*npe);
 
+		for(SizeType pe = 0; pe < npe; ++pe) {
+			for(SizeType ps = 0; ps < nps; ++ps) {
+				const SizeType leftSize = leftSize_array[ps];
+				const SizeType rightSize = rightSize_array[pe];
 				const QnType thisQn(basis2.qns_[pe], basis1.qns_[ps]);
 
-				const SizeType extraOffset = extraOffsets[thisQn];
-				const SizeType offset = offsets[thisQn];
-				MyLoop myloop(basis1.offsets_[ps],
-				              basis2.offsets_[pe],
-				              basisLeftSize,
-				              rightSize,
-				              offset + extraOffset,
-				              leftSize*rightSize,
-				              permutationVector_,
-				              permInverse_);
 
-				SizeType threads = std::min(myloop.tasks(),
-				                            PsimagLite::Concurrency::codeSectionParams.npthreads);
-				PsimagLite::CodeSectionParams codeSectionParams(threads);
-				PsimagLite::Parallelizer<MyLoop> parallelizer(codeSectionParams);
-				parallelizer.loopCreate(myloop);
-				extraOffsets[thisQn] += myloop.tasks();
-			}
-		}
+				SizeType extraOffset = 0;
+
+				{
+					extraOffset = extraOffsets[thisQn];
+					extraOffsets[thisQn] += leftSize * rightSize;
+				}
+
+				const SizeType offset = offsets[thisQn];
+
+				const SizeType pspe = ps + pe * nps;
+
+				const SizeType offset_into_perm = offset + extraOffset;
+				offset_into_perm_array[ pspe ] = offset_into_perm;
+
+			};
+		};
+
+		// -----------------------------------------
+		// collapsed loop to fill permutation vector
+		// -----------------------------------------
+//#pragma omp parallel for  schedule(dynamic)
+		for( SizeType pspe = 0; pspe < nps*npe; ++pspe) {
+
+			// ----------------------------
+			// recall  pspe = ps + pe * nps;
+			// ----------------------------
+			const SizeType pe = pspe/nps;
+			const SizeType ps = pspe - pe*nps;
+			const SizeType offset_into_perm  = offset_into_perm_array[ pspe ];
+
+			const SizeType leftSize = leftSize_array[ps];
+			const SizeType rightSize = rightSize_array[pe];
+
+			for (SizeType iright = 0; iright < rightSize; ++iright) {
+				for (SizeType ileft = 0; ileft < leftSize; ++ileft) {
+
+					const SizeType ileftOffset = basis1.offsets_[ps] + ileft;
+					const SizeType irightOffset = basis2.offsets_[pe] + iright;
+
+					const SizeType iglobalState = ileftOffset + irightOffset*basisLeftSize;
+					const SizeType ipos = ileft + iright * leftSize + offset_into_perm;
+
+					permutationVector_[ipos] = iglobalState;
+					permInverse_[iglobalState] = ipos;
+				};
+			};
+		};
 
 		checkPermutation(permInverse_);
 		checkPermutation(permutationVector_);
@@ -909,4 +960,3 @@ struct IsBasisType<Basis<SparseMatrixType_> > {
 
 /*@}*/
 #endif
-
