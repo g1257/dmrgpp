@@ -6,11 +6,11 @@
 namespace PsimagLite {
 
 template<typename = int>
-class Parallizer2 {
+class Parallelizer2 {
 
 public:
 
-	Parallizer2(SizeType threads) : threads_(threads)
+	Parallelizer2(SizeType threads) : threads_(threads)
 	{
 		omp_set_num_threads(threads);
 	}

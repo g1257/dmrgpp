@@ -26,8 +26,8 @@
 template<typename SomeLambdaType,
          typename LoadBalancerType=PsimagLite::LoadBalancerDefault
          >
-struct PthreadFunctionStruct {
-	PthreadFunctionStruct()
+struct PthreadFunctionStruct2 {
+	PthreadFunctionStruct2()
 	    : pfh(0),loadBalancer(0),threadNum(0),nthreads(0),start(0),end(0),cpu(0)
 	{}
 
@@ -41,10 +41,10 @@ struct PthreadFunctionStruct {
 };
 
 template<typename SomeLambdaType, typename SomeLoadBalancer>
-void *thread_function_wrapper(void *dummyPtr)
+void *thread_function_wrapper2(void *dummyPtr)
 {
-	PthreadFunctionStruct<SomeLambdaType, SomeLoadBalancer> *pfs =
-	        static_cast<PthreadFunctionStruct<SomeLambdaType, SomeLoadBalancer> *>(dummyPtr);
+	PthreadFunctionStruct2<SomeLambdaType, SomeLoadBalancer> *pfs =
+	        static_cast<PthreadFunctionStruct2<SomeLambdaType, SomeLoadBalancer> *>(dummyPtr);
 
 	const SomeLambdaType* pfh = pfs->pfh;
 
@@ -68,13 +68,13 @@ void *thread_function_wrapper(void *dummyPtr)
 namespace PsimagLite {
 
 template<typename LoadBalancerType=LoadBalancerDefault>
-class Parallizer2 {
+class Parallelizer2 {
 
 public:
 
 	typedef LoadBalancerDefault::VectorSizeType VectorSizeType;
 
-	Parallizer2(SizeType nthreads)
+	Parallelizer2(SizeType nthreads)
 	    : nthreads_(nthreads) {}
 
 	SizeType numberOfThreads() const { return nthreads_; }
@@ -111,8 +111,8 @@ public:
 	                 const SomeLambdaType& lambda,
 	                 const LoadBalancerType& loadBalancer)
 	{
-		PthreadFunctionStruct<SomeLambdaType, LoadBalancerType>* pfs =
-		new PthreadFunctionStruct<SomeLambdaType, LoadBalancerType>[nthreads_];
+		PthreadFunctionStruct2<SomeLambdaType, LoadBalancerType>* pfs =
+		new PthreadFunctionStruct2<SomeLambdaType, LoadBalancerType>[nthreads_];
 		pthread_t* thread_id = new pthread_t[nthreads_];
 		pthread_attr_t** attr = new pthread_attr_t*[nthreads_];
 
@@ -131,7 +131,7 @@ public:
 
 			ret = pthread_create(&thread_id[j],
 			                     attr[j],
-			                     thread_function_wrapper<SomeLambdaType, LoadBalancerType>,
+			                     thread_function_wrapper2<SomeLambdaType, LoadBalancerType>,
 			                     &pfs[j]);
 			checkForError(ret);
 		}

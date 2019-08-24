@@ -1,6 +1,7 @@
 #ifndef PARALLELIZER2_H
 #define PARALLELIZER2_H
 #include "Vector.h"
+#include "Concurrency.h"
 
 #ifdef USE_PTHREADS
 #include "Parallelizer2Pthread.h"

@@ -11,7 +11,7 @@ int main(int argc, char** argv)
 
 	PsimagLite::Vector<double>::Type v(n);
 
-	PsimagLite::Parallizer2<> parallelizer(threads);
+	PsimagLite::Parallelizer2<> parallelizer(threads);
 
 	std::cout<<"Testing Parallelizer2 with "<<parallelizer.name();
 	std::cout<<" and "<<parallelizer.numberOfThreads()<<" threads.\n";

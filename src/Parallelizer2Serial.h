@@ -5,11 +5,11 @@
 namespace PsimagLite {
 
 template<typename = int>
-class Parallizer2 {
+class Parallelizer2 {
 
 public:
 
-	Parallizer2(SizeType threads)
+	Parallelizer2(SizeType threads)
 	{
 		if (threads != 1)
 			throw RuntimeError("Please compile with -DUSE_PTHREADS\n");
