@@ -14,11 +14,12 @@ public:
 	LoadBalancerDefault(SizeType ntasks, SizeType nthreads)
 	    : blockSize_(ntasks/nthreads)
 	{
-		if (ntasks < nthreads) {
+		if (ntasks < nthreads && ntasks > 0) {
 			nthreads = ntasks;
 			blockSize_ = 1;
 		}
 
+		assert(nthreads > 0);
 		if ((ntasks % nthreads) != 0) ++blockSize_;
 	}
 

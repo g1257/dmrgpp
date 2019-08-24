@@ -19,7 +19,7 @@ public:
 	    : taskNumber_(nthreads)
 	{
 		SizeType ntasks = weights.size();
-		if (ntasks < nthreads) nthreads = ntasks;
+		if (ntasks < nthreads && ntasks > 0) nthreads = ntasks;
 		VectorSizeType workLoad(nthreads, 0);
 		VectorSizeType weights2 = weights;
 		VectorSizeType iperm(ntasks, 0);
