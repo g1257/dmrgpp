@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Profiling.h"
 #include "Qn.h"
 #include "QnHash.h"
-#include "Parallelizer.h"
+#include "Parallelizer2.h"
 
 namespace Dmrg {
 // A class to represent in a light way a Dmrg basis (used only to implement symmetries).
@@ -288,8 +288,21 @@ public:
 		// -----------------------------------------
 		// collapsed loop to fill permutation vector
 		// -----------------------------------------
-//#pragma omp parallel for  schedule(dynamic)
-		for( SizeType pspe = 0; pspe < nps*npe; ++pspe) {
+
+		const SizeType threads = std::min(nps*npe,
+		                                  PsimagLite::Concurrency::codeSectionParams.npthreads);
+		PsimagLite::Parallelizer2<> parallelizer2(threads);
+		parallelizer2.parallelFor(0,
+		                          nps*npe,
+		                          [nps,
+		                          basisLeftSize,
+		                          &offset_into_perm_array,
+		                          &leftSize_array,
+		                          &rightSize_array,
+		                          &basis1,
+		                          &basis2,
+		                          this]
+		                          (SizeType pspe, SizeType) {
 
 			// ----------------------------
 			// recall  pspe = ps + pe * nps;
@@ -310,11 +323,11 @@ public:
 					const SizeType iglobalState = ileftOffset + irightOffset*basisLeftSize;
 					const SizeType ipos = ileft + iright * leftSize + offset_into_perm;
 
-					permutationVector_[ipos] = iglobalState;
-					permInverse_[iglobalState] = ipos;
-				};
-			};
-		};
+					this->permutationVector_[ipos] = iglobalState;
+					this->permInverse_[iglobalState] = ipos;
+				}
+			}
+		});
 
 		checkPermutation(permInverse_);
 		checkPermutation(permutationVector_);
