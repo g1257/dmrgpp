@@ -176,7 +176,7 @@ public:
 			return twopoint_(storage, m0, m1, fermionSign, braket.bra(), braket.ket());
 
 		case 1: //first site given
-			for (site1 = 0; site1 < sites; ++site1)
+			for (site1 = braket.site(0); site1 < sites; ++site1)
 				storage(braket.site(0),site1) = twopoint_.calcCorrelation(braket.site(0),
 				                                                          site1,
 				                                                          braket.op(0).getCRS(),
