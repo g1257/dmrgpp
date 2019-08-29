@@ -289,9 +289,10 @@ public:
 		// collapsed loop to fill permutation vector
 		// -----------------------------------------
 
-		const SizeType threads = std::min(nps*npe,
-		                                  PsimagLite::Concurrency::codeSectionParams.npthreads);
-		PsimagLite::Parallelizer2<> parallelizer2(threads);
+		PsimagLite::CodeSectionParams codeParams = PsimagLite::Concurrency::codeSectionParams;
+		codeParams.npthreads = std::min(nps*npe,
+		                                PsimagLite::Concurrency::codeSectionParams.npthreads);
+		PsimagLite::Parallelizer2<> parallelizer2(codeParams);
 		parallelizer2.parallelFor(0,
 		                          nps*npe,
 		                          [nps,
