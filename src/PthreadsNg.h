@@ -171,19 +171,6 @@ public:
 		setAffinities_ = flag;
 	}
 
-	void setStackSize(size_t stackSize)
-	{
-		if (stackSize > 0 && stackSize < PTHREAD_STACK_MIN) {
-			String str(__FILE__);
-			str += ": You are asking PthreadsNg to set stacksize to ";
-			str += ttos(stackSize) + " which is smaller than ";
-			str += "PTHREAD_STACK_MIN= " + ttos(PTHREAD_STACK_MIN);
-			throw RuntimeError(str + "\n");
-		}
-
-		stackSize_ = stackSize;
-	}
-
 	// no weights, no balancer ==> create weights, set all weigths to 1, delegate
 	void loopCreate(PthreadFunctionHolderType& pfh)
 	{

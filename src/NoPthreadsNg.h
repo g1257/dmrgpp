@@ -100,8 +100,6 @@ public:
 
 	size_t stackSize() const { return 0; }
 
-	void setStackSize(size_t) {}
-
 	// no weights, no balancer ==> create weights, set all weigths to 1, delegate
 	void loopCreate(PthreadFunctionHolderType& pfh)
 	{

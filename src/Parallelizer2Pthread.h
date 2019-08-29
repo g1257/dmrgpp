@@ -74,8 +74,8 @@ public:
 
 	typedef LoadBalancerDefault::VectorSizeType VectorSizeType;
 
-	Parallelizer2(SizeType nthreads)
-	    : nthreads_(nthreads) {}
+	Parallelizer2(const CodeSectionParams& codeParams)
+	    : nthreads_(codeParams.npthreads), stackSize_(codeParams.stackSize) {}
 
 	SizeType numberOfThreads() const { return nthreads_; }
 
@@ -125,8 +125,18 @@ public:
 			pfs[j].nthreads = nthreads_;
 
 			attr[j] = new pthread_attr_t;
+			int ret = (stackSize_ > 0) ? pthread_attr_setstacksize(attr[j], stackSize_) : 0;
+			if (ret != 0) {
+				std::cerr<<__FILE__;
+				std::cerr<<"\tpthread_attr_setstacksize() has returned non-zero "<<ret<<"\n";
+				std::cerr<<"\tIt is possible (but no certain) that the following error";
+				std::cerr<<"\thappened.\n";
+				std::cerr<<"\tEINVAL The stack size is less than ";
+				std::cerr<<"PTHREAD_STACK_MIN (16384) bytes.\n";
+				std::cerr<<"\tI will ignore this error and let you continue\n";
+			}
 
-			int ret = pthread_attr_init(attr[j]);
+			ret = pthread_attr_init(attr[j]);
 			checkForError(ret);
 
 			ret = pthread_create(&thread_id[j],
@@ -158,6 +168,7 @@ private:
 	}
 
 	SizeType nthreads_;
+	size_t stackSize_;
 };
 }
 #endif // PARALLELIZER2PTHREAD_H

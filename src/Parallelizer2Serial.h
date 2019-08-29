@@ -1,6 +1,7 @@
 #ifndef PARALLELIZER2SERIAL_H
 #define PARALLELIZER2SERIAL_H
 #include "Vector.h"
+#include "CodeSectionParams.h"
 
 namespace PsimagLite {
 
@@ -9,9 +10,9 @@ class Parallelizer2 {
 
 public:
 
-	Parallelizer2(SizeType threads)
+	Parallelizer2(const CodeSectionParams& codeParams)
 	{
-		if (threads != 1)
+		if (codeParams.npthreads != 1)
 			throw RuntimeError("Please compile with -DUSE_PTHREADS\n");
 	}
 

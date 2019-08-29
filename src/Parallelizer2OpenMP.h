@@ -2,6 +2,7 @@
 #define PARALLELIZER2OPENMP_H
 #include "Vector.h"
 #include <omp.h>
+#include "CodeSectionParams.h"
 
 namespace PsimagLite {
 
@@ -10,9 +11,10 @@ class Parallelizer2 {
 
 public:
 
-	Parallelizer2(SizeType threads) : threads_(threads)
+	Parallelizer2(const CodeSectionParams& codeParams)
+	    : threads_(codeParams.npthreads)
 	{
-		omp_set_num_threads(threads);
+		omp_set_num_threads(codeParams.npthreads);
 	}
 
 	template<typename SomeLambdaType>
