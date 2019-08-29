@@ -196,7 +196,16 @@ int main(int argc,char **argv)
 
 	bool setAffinities = (dmrgSolverParams.options.find("setAffinities")
 	                      != PsimagLite::String::npos);
-	PsimagLite::CodeSectionParams codeSectionParams(dmrgSolverParams.nthreads, setAffinities);
+
+	SizeType threadsStackSize = 0;
+	try {
+		io.readline(threadsStackSize, "ThreadsStackSize=");
+	} catch (std::exception&) {}
+
+
+	PsimagLite::CodeSectionParams codeSectionParams(dmrgSolverParams.nthreads,
+	                                                setAffinities,
+	                                                threadsStackSize);
 	ConcurrencyType::setOptions(codeSectionParams);
 
 	bool isComplex = (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos);
