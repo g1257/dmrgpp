@@ -17,7 +17,23 @@ sub getLabels
 		chomp;
 		foreach my $key (keys %$hptr) {
 			if (/$key[= ]([^ ]+)/) {
-				${$hptr->{$key}} = $1;
+				my $newVal = $1;
+				my $prev = ${$hptr->{$key}};
+				if ($prev) {
+					print STDERR "Already a previous value for $key of $prev\n";
+					print "New value is $newVal\n";
+					print "To take new value press ENTER. Or enter value ";
+					$_ = <STDIN>;
+					chomp;
+					if ($_) {
+						${$hptr->{$key}} = $_;
+						print STDERR "$0: Value for $key is ".${$hptr->{$key}}."\n";
+						next;
+					}
+				}
+
+				${$hptr->{$key}} = $newVal;
+				print STDERR "$0: Value for $key is ".${$hptr->{$key}}."\n";
 			}
 		}
 	}
