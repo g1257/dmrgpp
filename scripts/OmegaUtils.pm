@@ -19,7 +19,7 @@ sub getLabels
 			if (/$key[= ]([^ ]+)/) {
 				my $newVal = $1;
 				my $prev = ${$hptr->{$key}};
-				if ($prev) {
+				if ($prev && $prev != $newVal) {
 					print STDERR "Already a previous value for $key of $prev\n";
 					print "New value is $newVal\n";
 					print "To take new value press ENTER. Or enter value ";
