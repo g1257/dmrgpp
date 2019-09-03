@@ -87,7 +87,7 @@ sub printGnuplotFromHash
 	my ($ptr, $geometry, $isPeriodic, $zeroAtCenter, $nonNegativeOnly) = @_;
 
 	my ($factor, $fileIndices, $leg) = getGeometryDetails($geometry);
-
+	
 	foreach my $fileIndex (@$fileIndices) {
 		my $outFile = "outSpectrum$fileIndex.gnuplot";
 		my $outFile2 = "outSpectrum$fileIndex.pgfplots";
@@ -98,13 +98,18 @@ sub printGnuplotFromHash
 			my $aptr = $ptr->{$omega};
 			my $nks = scalar(@$aptr) - 1;
 			my $numberOfQs = int($factor*$nks);
-			my $centerShift = ($numberOfQs & 1) ? ($numberOfQs - 1)/2 : $numberOfQs/2;
-			$centerShift = 0 unless ($zeroAtCenter);
-			for (my $m2 = 0; $m2 < $numberOfQs; ++$m2) {
-				my $m = $m2 - $centerShift;
-				$m += $numberOfQs if ($m < 0);
+			my @array;
+			if ($geometry->{"subname"} =~ /^Honeycomb/) {
+				my $type = $geometry->{"subname"};
+				@array = Honeycomb::fillQvalues($ptr, $type);
+			} else {
+				@array = fillQvalues($numberOfQs, $isPeriodic, $zeroAtCenter);
+			}
 
-				my $q = getQ($m2 - $centerShift, $numberOfQs, $isPeriodic);
+			foreach my $ind (@array) {
+				my $ptr = $array[$ind];
+				my ($m, $q) = ($ptr->{"m"}, $ptr->{"q"});
+				
 				my $realPart = $aptr->[2*$m+1+2*$fileIndex*$numberOfQs];
 				my $imagPart = $aptr->[2*$m+2+2*$fileIndex*$numberOfQs];
 				$imagPart = 0 if ($nonNegativeOnly and $imagPart < 0);
@@ -122,9 +127,31 @@ sub printGnuplotFromHash
 	}
 }
 
+sub fillQvalues
+{
+	my ($numberOfQs, $isPeriodic, $zeroAtCenter) = @_;
+	my $centerShift = ($numberOfQs & 1) ? ($numberOfQs - 1)/2 : $numberOfQs/2;
+	$centerShift = 0 unless ($zeroAtCenter);
+	my @array;	
+	for (my $m2 = 0; $m2 < $numberOfQs; ++$m2) {
+		my $m = $m2 - $centerShift;
+		$m += $numberOfQs if ($m < 0);
+		my $q = getQ($m2 - $centerShift, $numberOfQs, $isPeriodic);
+		my $temp = { "m" => $m, "q" => $q};
+		push @array, $temp;
+	}
+
+	return @array;
+}
+
 sub printOffsetPlots
 {
 	my ($ext, $ptr, $geometry, $isPeriodic, $zeroAtCenter) = @_;
+
+	if ($geometry->{"subname"} =~ /^Honeycomb/) {
+		print STDERR "$0: WARNING: Honeycomb: printOffsetPlots not supported yet\n";
+		return;
+	}
 
 	my ($factor, $fileIndices, $leg) = getGeometryDetails($geometry);
 
@@ -174,6 +201,8 @@ sub getGeometryDetails
 		$leg = $geometry->{"leg"};
 		$factor = 0.25;
 		@fileIndices=(0, 1) if ($leg == 2 || $subname eq "average");
+	} elsif ($geometry->{"subname"} =~ /^Honeycomb/) {
+		return (1, \@fileIndices, $leg);
 	} else {
 		die "$0: Unknown geometry $name\n";
 	}

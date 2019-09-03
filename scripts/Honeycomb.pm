@@ -46,6 +46,28 @@ sub honeySpace
 	setSiteCoordinates($tindx, $tindy, \@ptsx, \@ptsy, $ncmatrix, $lx, $ly, \%isHash);
 }
 
+sub fillQvalues
+{
+	my ($hptr, $type) = @_;
+
+	my $lx = $hptr->{"#Lx"};
+	my $ly = $hptr->{"#Ly"};
+	my ($M1, $M2) = (2*$lx, $ly);
+	my @array;	
+	for (my $m1 = 0; $m1 < $M1; ++$m1) {
+		for (my $m2 = 0; $m2 < $M2; ++$m2) {
+			my ($qx, $qy) = honeyGetQ($m1, $m2, $lx, $ly, $type);
+			# choose your path
+			next if ($qy != 0);
+			my $m = $m1 + $m2*$M1;
+			my $temp = { "m" => $m, "q" => $qx};
+			push @array, $temp;
+		}
+	}
+
+	return @array;
+}
+
 sub honeycombZigzagSetSiteCoordinates
 {
 	my ($tindx, $tindy, $ptsx, $ptsy, $ncmatrix, $lx, $ly, $isHash) = @_;
