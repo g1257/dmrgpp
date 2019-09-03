@@ -37,6 +37,7 @@ my $ChebyC = 0;
 my $ChebySign = 1;
 my $testoutputfile;
 my ($lx, $ly) = (0, 0);
+my $options = "";
 
 my $hptr = {"#OmegaBegin" => \$omega0,
             "#OmegaTotal" => \$omegaTotal,
@@ -44,6 +45,7 @@ my $hptr = {"#OmegaBegin" => \$omega0,
             "#OmegaOffset" => \$omegaOffset,
             "#Lx" => \$lx,
             "#Ly" => \$ly,
+	    "#options" => \$options,
             "GeometryKind" => \$geometryName,
             "GeometrySubKind" => \$geometrySubName,
             "LadderLeg" => \$geometryLeg,

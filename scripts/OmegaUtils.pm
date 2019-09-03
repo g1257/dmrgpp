@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use Math::Trig;
+use Honeycomb;
 
 package OmegaUtils;
 
@@ -504,16 +505,18 @@ sub fourierHoneycomb
 	my $ly = $hptr->{"#Ly"};
 	my ($M1, $M2) = (2*$lx, $ly);
 	my $n = scalar(@$v);
+	my (@tindx, @tindy);
+	Honeycomb::honeySpace(\@tindx, \@tindy, $n, $hptr, $type);
 	for (my $m1 = 0; $m1 < $M1; ++$m1) { # loop over momenta
 		for (my $m2 = 0; $m2 < $M2; ++$m2) { # loop over momenta
 			
 			# valid ($qx, $qy)
-			my ($qx, $qy) = honeyGetQ($m1, $m2, $lx, $ly, $type);
+			my ($qx, $qy) = Honeycomb::honeyGetQ($m1, $m2, $lx, $ly, $type);
 			my @sum = (0, 0);
 			for (my $i = 0; $i < $n; ++$i) { # loop over space
 				my $ptr = $v->[$i];
 				my @temp = @$ptr;
-				my @fourierFactor = honeyFourierFactor($i, $qx, $qy, $n, $hptr, $type);
+				my @fourierFactor = honeyFourierFactor($i, $qx, $qy, \@tindx, \@tindy, $hptr);
 				$sum[0] += $fourierFactor[0]*$temp[1] + $fourierFactor[1]*$temp[0]; # imaginary part
 				$sum[1] += $fourierFactor[0]*$temp[0] - $fourierFactor[1]*$temp[1]; # real part
 			}
@@ -525,11 +528,11 @@ sub fourierHoneycomb
 
 sub honeyFourierFactor
 {
-	my ($i, $qx, $qy, $n, $hptr, $type) = @_;
+	my ($i, $qx, $qy, $tindx, $tindy, $hptr) = @_;
 	# get (rx, ry) and (cx, cy)
 	my $indexForCenter = $hptr->{"centralSite"};
-	my ($rx, $ry) = honeySpaceFromIndex($i, $n, $hptr, $type);
-	my ($cx, $cy) = honeySpaceFromIndex($indexForCenter, $n, $hptr, $type);
+	my ($rx, $ry) = ($tindx->[$i], $tindy->[$i]);
+	my ($cx, $cy) = ($tindx->[$indexForCenter], $tindy->[$indexForCenter]);
 	my $arg = $qx*($rx - $cx) + $qy*($ry - $cy); 
 	return (cos($arg), sin($arg));
 }
@@ -583,26 +586,6 @@ sub getQ
 {
 	my ($m, $n, $isPeriodic) = @_;
 	return ($isPeriodic) ? 2.0*$pi*$m/$n : ($m + 1)*$pi/($n+1.0);
-}
-
-
-sub honeyGetQ
-{
-	my ($m1, $m2, $lx, $ly, $type) = @_;
-	my ($b1x, $b1y) = (2*$pi/(3*$lx), 0);
-	my ($b2x, $b2y) = (0, 2*$pi/(sqrt(3)*$ly));
-	if ($type eq "zigzag") {
-		($b1x, $b1y) = (2*$pi*sqrt(3)/(3*$lx), -1);
-		($b2x, $b2y) = (0, 4*$pi/(3*$ly));
-	}
-
-	return ($m1 * $b1x + $m2 * $b2x, $m1 * $b1y + $m2 * $b2y);
-}
-
-sub honeySpaceFromIndex
-{
-	my ($ind, $n, $hptr, $type) = @_;
-	
 }
 
 1;

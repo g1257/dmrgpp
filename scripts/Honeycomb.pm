@@ -3,8 +3,11 @@
 use strict;
 use warnings;
 use utf8;
+use Math::Trig;
 
 package Honeycomb;
+
+my $pi = Math::Trig::pi;
 
 sub setSiteCoordinates
 {
@@ -18,12 +21,34 @@ sub setSiteCoordinates
 	}
 }
 
+sub honeyGetQ
+{
+	my ($m1, $m2, $lx, $ly, $type) = @_;
+	my ($b1x, $b1y) = (2*$pi/(3*$lx), 0);
+	my ($b2x, $b2y) = (0, 2*$pi/(sqrt(3)*$ly));
+	if ($type eq "zigzag") {
+		($b1x, $b1y) = (2*$pi*sqrt(3)/(3*$lx), -1);
+		($b2x, $b2y) = (0, 4*$pi/(3*$ly));
+	}
+
+	return ($m1 * $b1x + $m2 * $b2x, $m1 * $b1y + $m2 * $b2y);
+}
+
+sub honeySpace
+{
+	my ($tindx, $tindy, $n, $hptr, $type) = @_;
+	my %isHash = %$hptr;
+	$isHash{"isArmchairX"} = ($type =~ /armchair/i);
+	$isHash{"isLeft"} = ($hptr->{"#options"} =~ /left/i);
+	my (@ptsx, @ptsy, $ncmatrix);
+	my $lx = $hptr->{"#Lx"};
+	my $ly = $hptr->{"#Ly"};
+	setSiteCoordinates($tindx, $tindy, \@ptsx, \@ptsy, $ncmatrix, $lx, $ly, \%isHash);
+}
+
 sub honeycombZigzagSetSiteCoordinates
 {
 	my ($tindx, $tindy, $ptsx, $ptsy, $ncmatrix, $lx, $ly, $isHash) = @_;
-
-	my $isPeriodicX = $isHash->{"isPeriodicX"};
-	my $isPeriodicY = $isHash->{"isPeriodicY"};
 	my $isLeft = $isHash->{"isLeft"};
 	my ($scalex, $scaley) = (2.0, 4.0/sqrt(3.0));
 
@@ -86,8 +111,6 @@ sub honeycombArmchairSetSiteCoordinates
 {
 	my ($tindx, $tindy, $ptsx, $ptsy, $ncmatrix, $lx, $ly, $isHash) = @_;
 
-	my $isPeriodicX = $isHash->{"isPeriodicX"};
-	my $isPeriodicY = $isHash->{"isPeriodicY"};
 	my $isLeft = $isHash->{"isLeft"};
 	my ($scalex, $scaley) = (1.0, 2.0/sqrt(3.0));
 
