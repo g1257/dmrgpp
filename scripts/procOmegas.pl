@@ -36,11 +36,14 @@ my $jacksOrLorentz = "none";
 my $ChebyC = 0;
 my $ChebySign = 1;
 my $testoutputfile;
+my ($lx, $ly) = (0, 0);
 
 my $hptr = {"#OmegaBegin" => \$omega0,
             "#OmegaTotal" => \$omegaTotal,
             "#OmegaStep" => \$omegaStep,
             "#OmegaOffset" => \$omegaOffset,
+            "#Lx" => \$lx,
+            "#Ly" => \$ly,
             "GeometryKind" => \$geometryName,
             "GeometrySubKind" => \$geometrySubName,
             "LadderLeg" => \$geometryLeg,
@@ -52,12 +55,13 @@ my $hptr = {"#OmegaBegin" => \$omega0,
             "TotalNumberOfSites" => \$GlobalNumberOfSites,
             "OutputFile" => \$testoutputfile};
 
-OmegaUtils::getLabels($hptr,$templateInput);
+OmegaUtils::getLabels($hptr, $templateInput);
+
 $hptr->{"isPeriodic"} = $isPeriodic;
 $hptr->{"mMax"} = $mMax;
 $hptr->{"centralSite"} = $centralSite;
 $hptr->{"isCheby"} = findIfWeAreCheby($jacksOrLorentz, $testoutputfile, $ChebyC);
-
+ 
 my $logFile = "Log$templateInput";
 $logFile =~ s/\..*$//;
 $logFile .= ".log";
