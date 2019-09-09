@@ -35,7 +35,7 @@ my $omegaOffset = 0;
 my $jacksOrLorentz = "none";
 my $ChebyC = 0;
 my $ChebySign = 1;
-my $testoutputfile;
+my $testoutputfile = "runForinput\$";
 my ($lx, $ly) = (0, 0);
 my $options = "";
 
