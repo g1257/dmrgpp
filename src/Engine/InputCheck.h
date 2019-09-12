@@ -207,6 +207,8 @@ public:
 		knownLabels_.push_back("RecoverySave");
 		knownLabels_.push_back("Intent");
 		knownLabels_.push_back("PrintHamiltonianAverage");
+		knownLabels_.push_back("SaveDensityMatrixEigenvalues");
+
 		for (SizeType i = 0; i < 10; ++i)
 			knownLabels_.push_back("Term" + ttos(i));
 	}
@@ -349,8 +351,6 @@ public:
 								batched gemm and might need plugin sc
 			\item [KrylovNoAbridge] TBW
 			\item [fixLegacyBugs] TBW
-			\item [saveDensityMatrixEigenvalues] Save DensityMatrixEigenvalues
-												 to the data file.
 			\item [KronNoUseLowerPart] Don't Use lower part of Kron matrix but
  recompute it instead.
 			\item [shrinkStacksOnDisk] Store shrink stacks on disk instead of in memory
@@ -420,7 +420,6 @@ public:
 		registerOpts.push_back("BatchedGemm");
 		registerOpts.push_back("KrylovNoAbridge");
 		registerOpts.push_back("fixLegacyBugs");
-		registerOpts.push_back("saveDensityMatrixEigenvalues");
 		registerOpts.push_back("KronNoUseLowerPart");
 		registerOpts.push_back("shrinkStacksOnDisk");
 		registerOpts.push_back("OperatorsChangeAll");

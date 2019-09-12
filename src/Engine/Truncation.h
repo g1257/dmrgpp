@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "Io/IoNg.h"
 #include "Profiling.h"
+#include "PredicateAwesome.h"
 
 namespace Dmrg {
 
@@ -186,7 +187,8 @@ public:
 		DensityMatrixBaseType* dmS = 0;
 		changeBasis(sBasis,
 		            target,
-		            keptStates, ProgramGlobals::DirectionEnum::EXPAND_SYSTEM,
+		            keptStates,
+		            ProgramGlobals::DirectionEnum::EXPAND_SYSTEM,
 		            &dmS);
 		assert(dmS);
 		truncateBasis(sBasis,
@@ -476,7 +478,16 @@ private:
 
 	void dumpEigs(const VectorRealType& eigs)
 	{
-		if (parameters_.options.find("saveDensityMatrixEigenvalues") == PsimagLite::String::npos)
+		SizeType last = lrs_.left().block().size();
+		assert(lrs_.left().block().size() > 0);
+		SizeType index = lrs_.left().block()[last - 1];
+
+		PsimagLite::String predicate = parameters_.saveDensityMatrixEigenvalues;
+		const SizeType center = geometry_.numberOfSites()/2;
+		PsimagLite::PredicateAwesome<>::replaceAll(predicate, "c", ttos(center));
+		PsimagLite::PredicateAwesome<> pAwesome(predicate);
+
+		if (!pAwesome.isTrue("s", index))
 			return;
 
 		PsimagLite::String label("DensityMatrixEigenvalues");
@@ -491,10 +502,6 @@ private:
 				ioOut_.createGroup(label + "/" + ttos(i));
 			firstCall = false;
 		}
-
-		SizeType last = lrs_.left().block().size();
-		assert(lrs_.left().block().size() > 0);
-		SizeType index = lrs_.left().block()[last - 1];
 
 		assert(index < counterVector_.size());
 		SizeType counter = counterVector_[index];
