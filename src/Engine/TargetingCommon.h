@@ -586,6 +586,12 @@ public:
 		for (SizeType i = 0; i < weights.size(); i++)
 			msg2<<normSquared(i)<<" ";
 		progress_.printline(msg2, std::cout);
+
+		if (aoe_.currentTimeStep() == 0) return;
+
+		PsimagLite::OstringStream msg3;
+		msg3<<"CurrentTime="<<aoe_.time()<<" CurrentTimeStep="<<aoe_.currentTimeStep();
+		progress_.printline(msg3, std::cout);
 	}
 
 private:
