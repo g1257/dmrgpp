@@ -7,9 +7,9 @@
 /* PSIDOC PredicateSimple
  PredicateSimple is of the form
  word operator word
- where operator is in {==, <, >, <=, >=, %}
- with the usual meaning, and % means divisible by.
- So l%2 means that the simple predicate is true if l is divisible by 2.
+ where operator is in {==, <, >, <=, >=, %%}
+ with the usual meaning, and %% means divisible by.
+ So l%%2 means that the simple predicate is true if l is divisible by 2.
  */
 namespace PsimagLite {
 
@@ -70,7 +70,7 @@ private:
 	template<typename T>
 	static bool compareOnOp(T lv, String op, T rv)
 	{
-		// {==, <, >, <=, >=, %}
+		// {==, <, >, <=, >=, %%}
 		// If you add something here, add it also to PredicateSimple.cpp
 		if (op == "==")
 			return (lv == rv);

@@ -29,12 +29,12 @@ namespace PsimagLite {
 
  where SimplePredicate is of the form
  word operator word
- where operator is in {==, <, >, <=, >=, %}
- with the expected meaning, and % means divisible by.
- So l%2 means that the simple predicate is true if l is divisible by 2.
+ where operator is in {==, <, >, <=, >=, %%}
+ with the expected meaning, and %% means divisible by.
+ So l%%2 means that the simple predicate is true if l is divisible by 2.
 
  From this rules, the list of items
- M=2,l%2;l!=0,l>=7,l<11
+ M=2,l%%2;l!=0,l>=7,l<11
  will set M=2 and define a predicate that is true if l
  is in the set {2, 4, 6, 7, 8, 9, 10, 12, 14, 16, 18 ...}
  and false otherwise.
