@@ -110,7 +110,7 @@ public:
 			RuntimeError("LongChain::ctor()\n");
 	}
 
-	virtual SizeType maxConnections() const { return 1; }
+	virtual SizeType maxConnections() const { return (isPeriodic_) ? linSize_ : 1; }
 
 	virtual SizeType dirs() const { return 1; }
 
