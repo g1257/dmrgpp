@@ -92,7 +92,7 @@ int main(int argc,char *argv[])
 	HelperType helper(ntasks, nthreads);
 
 	std::cout<<"Using "<<threadObject.name();
-	std::cout<<" with "<<threadObject.threads()<<" threads.\n";
+	std::cout<<" with "<<nthreads<<" threads.\n";
 	threadObject.loopCreate(helper, helper.weights());
 	helper.sync();
 	std::cout<<"Sum of all tasks= "<<helper.result()<<"\n";

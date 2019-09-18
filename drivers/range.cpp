@@ -110,7 +110,7 @@ int main(int argc,char *argv[])
 
 	if (ConcurrencyType::root()) {
 		std::cout<<"Using "<<threadObject.name()<<" mode= "<<ConcurrencyType::mode;
-		std::cout<<" with "<<threadObject.threads();
+		std::cout<<" with "<<nthreads;
 		std::cout<<" threads or mpi procs.\n";
 		std::cout<<"sum="<<sum<<"\n";
 		std::cout<<helper.v();
