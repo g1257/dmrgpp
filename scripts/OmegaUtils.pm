@@ -87,7 +87,7 @@ sub printGnuplotFromHash
 	my ($ptr, $geometry, $isPeriodic, $zeroAtCenter, $nonNegativeOnly) = @_;
 
 	my ($factor, $fileIndices, $leg) = getGeometryDetails($geometry);
-	
+
 	foreach my $fileIndex (@$fileIndices) {
 		my $outFile = "outSpectrum$fileIndex.gnuplot";
 		my $outFile2 = "outSpectrum$fileIndex.pgfplots";
@@ -106,10 +106,9 @@ sub printGnuplotFromHash
 				@array = fillQvalues($numberOfQs, $isPeriodic, $zeroAtCenter);
 			}
 
-			foreach my $ind (@array) {
-				my $ptr = $array[$ind];
-				my ($m, $q) = ($ptr->{"m"}, $ptr->{"q"});
-				
+			foreach my $ptr2 (@array) {
+				my ($m, $q) = ($ptr2->{"m"}, $ptr2->{"q"});
+
 				my $realPart = $aptr->[2*$m+1+2*$fileIndex*$numberOfQs];
 				my $imagPart = $aptr->[2*$m+2+2*$fileIndex*$numberOfQs];
 				$imagPart = 0 if ($nonNegativeOnly and $imagPart < 0);
@@ -132,7 +131,7 @@ sub fillQvalues
 	my ($numberOfQs, $isPeriodic, $zeroAtCenter) = @_;
 	my $centerShift = ($numberOfQs & 1) ? ($numberOfQs - 1)/2 : $numberOfQs/2;
 	$centerShift = 0 unless ($zeroAtCenter);
-	my @array;	
+	my @array;
 	for (my $m2 = 0; $m2 < $numberOfQs; ++$m2) {
 		my $m = $m2 - $centerShift;
 		$m += $numberOfQs if ($m < 0);
@@ -538,7 +537,7 @@ sub fourierHoneycomb
 	Honeycomb::honeySpace(\@tindx, \@tindy, $n, $hptr, $type);
 	for (my $m1 = 0; $m1 < $M1; ++$m1) { # loop over momenta
 		for (my $m2 = 0; $m2 < $M2; ++$m2) { # loop over momenta
-			
+
 			# valid ($qx, $qy)
 			my ($qx, $qy) = Honeycomb::honeyGetQ($m1, $m2, $lx, $ly, $type);
 			my @sum = (0, 0);
@@ -562,7 +561,7 @@ sub honeyFourierFactor
 	my $indexForCenter = $hptr->{"centralSite"};
 	my ($rx, $ry) = ($tindx->[$i], $tindy->[$i]);
 	my ($cx, $cy) = ($tindx->[$indexForCenter], $tindy->[$indexForCenter]);
-	my $arg = $qx*($rx - $cx) + $qy*($ry - $cy); 
+	my $arg = $qx*($rx - $cx) + $qy*($ry - $cy);
 	return (cos($arg), sin($arg));
 }
 

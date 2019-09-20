@@ -87,7 +87,7 @@ sub createInput
 	my $ndown = $nup;
 
 	my %valuesHash = (
-	"steps" => $steps, 
+	"steps" => $steps,
 	"data" => $data,
 	"nup" => $nup,
 	"ndown" => $ndown,
@@ -143,7 +143,7 @@ sub createBatch
         my $file = "Batch$ind.pbs";
 
 	my %valuesHash = (
-	"input" => $input, 
+	"input" => $input,
 	"ind" => $ind,
 	"omega" => $omega);
 
@@ -182,4 +182,3 @@ sub submitBatch
 	chomp($ret);
 	return $ret;
 }
-

@@ -63,7 +63,7 @@ $hptr->{"isPeriodic"} = $isPeriodic;
 $hptr->{"mMax"} = $mMax;
 $hptr->{"centralSite"} = $centralSite;
 $hptr->{"isCheby"} = findIfWeAreCheby($jacksOrLorentz, $testoutputfile, $ChebyC);
- 
+
 my $logFile = "Log$templateInput";
 $logFile =~ s/\..*$//;
 $logFile .= ".log";
@@ -380,9 +380,9 @@ sub chebyRealSpace
 		# adding the zeroth Cheby momentum $n==0
 		my $sum = $factor->[$om]*$vM->[$p];
 
-		# adding all the others		
+		# adding all the others
 		for (my $n = 1; $n < $times; ++$n) {
-		 	$sum += 2.0*$dampG->[$n]*$ChebyPolyXfactor->[$n+$times*$om]*
+			$sum += 2.0*$dampG->[$n]*$ChebyPolyXfactor->[$n+$times*$om]*
 				                   $vM->[$p + $GlobalNumberOfSites*$n];
 		}
 
@@ -396,7 +396,7 @@ sub doFactorAndPolyXfactor
 {
 	my ($times) = @_;
 	my $epsilont = 0.025;
-	my $Wprime = 1.0-0.5*$epsilont; 
+	my $Wprime = 1.0-0.5*$epsilont;
 	my (@factor, @polyXfactor);
 
 	for (my $om = 0; $om < $omegaTotal; ++$om) {
@@ -404,7 +404,7 @@ sub doFactorAndPolyXfactor
 		# Scaling
 		my $omegaPrime = ($ChebySign*$omega-$omega0)*$ChebyC-$Wprime;
 		my $underSqrt = 1.0-$omegaPrime*$omegaPrime;
-		die "$0: $omegaPrime is such that 1-w'^2 < 0\n" if ($underSqrt < 0); 
+		die "$0: $omegaPrime is such that 1-w'^2 < 0\n" if ($underSqrt < 0);
 		$factor[$om] = 1.0/(pi*sqrt($underSqrt));
 		for (my $n = 1; $n < $times; ++$n) {
 			$polyXfactor[$n + $times*$om] = $ChebyC*$factor[$om]*cos($n*acos($omegaPrime));
@@ -603,4 +603,3 @@ sub findIfWeAreCheby
 
 	die "$0: JacksOrLorentz is NOT none, but OutputFile= is dollarized\n";
 }
-
