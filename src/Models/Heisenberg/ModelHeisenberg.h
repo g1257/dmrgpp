@@ -141,7 +141,7 @@ public:
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 	{
 		SizeType n = geometry_.numberOfSites();
-		SizeType m = modelParameters_.magneticField.size();
+		SizeType m = modelParameters_.magneticFieldV.size();
 		SizeType md = modelParameters_.anisotropyD.size();
 		SizeType me = modelParameters_.anisotropyE.size();
 
@@ -199,14 +199,21 @@ public:
 
 			// PSIDOCMARK_BEGIN MagneticField
 			SizeType site = block[i];
-			const OperatorType& sz = ModelBaseType::naturalOperator("sz",
-			                                                        site,
-			                                                        0);
 
-			if (modelParameters_.magneticField.size() == linSize) {
-				RealType tmp = modelParameters_.magneticField[site];
-				hmatrix += tmp*sz.getCRS();
+			const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
+			const OperatorType& splus = ModelBaseType::naturalOperator("splus", site, 0);
 
+			if (modelParameters_.magneticFieldV.size() == linSize) {
+
+				RealType tmp = modelParameters_.magneticFieldV[site];
+				const OperatorType& sminus = ModelBaseType::naturalOperator("sminus", site, 0);
+
+				if (modelParameters_.magneticFieldDirection == "z") {
+					hmatrix += tmp*sz.getCRS();
+				} else if (modelParameters_.magneticFieldDirection == "x") {
+					hmatrix += 0.5*tmp*splus.getCRS();
+					hmatrix += 0.5*tmp*sminus.getCRS();
+				}
 			}
 
 			// PSIDOCMARK_END
@@ -222,7 +229,7 @@ public:
 
 			// anisotropyE
 			if (modelParameters_.anisotropyE.size() == linSize) {
-				const OperatorType& splus = ModelBaseType::naturalOperator("splus", site, 0);
+
 				SparseMatrixType splusSquared;
 
 				RealType tmp = 0.5*modelParameters_.anisotropyE[site];
@@ -431,7 +438,12 @@ private:
 		bool isCanonical = (ModelBaseType::targetQuantum().sizeOfOther() == 1);
 		if (isCanonical && additional_ == "Anisotropic")
 			err(PsimagLite::String(__FILE__) +
-			    ": Anisotropic sub-model must be canonical. Please " +
+			    ": Anisotropic sub-model CANNOT be canonical. Please " +
+			    "delete the TargetSzPlusConst= from the input file\n");
+
+		if (isCanonical && modelParameters_.magneticFieldDirection != "z")
+			err(PsimagLite::String(__FILE__) +
+			    ": magneticFieldDirection == x CANNOT be canonical. Please " +
 			    "delete the TargetSzPlusConst= from the input file\n");
 
 		VectorSizeType other;

@@ -99,8 +99,24 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 		io.readline(twiceTheSpin,"HeisenbergTwiceS=");
 
 		try {
-			io.read(magneticField,"MagneticField");
+			io.read(magneticFieldV,"MagneticField");
 		} catch (std::exception&) {}
+
+		if (magneticFieldV.size() > 0) {
+
+			magneticFieldDirection = "z";
+			try {
+				io.readline(magneticFieldDirection,"MagneticFieldDirection=");
+			} catch (std::exception&) {
+				std::cerr<<"WARNING: MagneticFieldDirection= not given, assuming z\n";
+			}
+
+
+			if (magneticFieldDirection != "x" && magneticFieldDirection != "z")
+			{
+				err("magneticFieldDirection must be in {x, y}\n");
+			}
+		}
 
 		try {
 			io.read(anisotropyD,"AnisotropyD");
@@ -126,7 +142,8 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 		io.createGroup(label);
 		BaseType::write(label, io);
 		io.write(label + "/twiceTheSpin", twiceTheSpin);
-		io.write(label + "/magneticField", magneticField);
+		io.write(label + "/magneticFieldV", magneticFieldV);
+		io.write(label + "/magneticFieldDirection", magneticFieldDirection);
 		io.write(label + "/anisotropyD", anisotropyD);
 		io.write(label + "/anisotropyE", anisotropyE);
 	}
@@ -135,7 +152,8 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 	friend std::ostream& operator<<(std::ostream &os,
 	                                const ParametersModelHeisenberg& parameters)
 	{
-		os<<"MagneticField="<<parameters.magneticField<<"\n";
+		os<<"MagneticField="<<parameters.magneticFieldV<<"\n";
+		os<<"magneticFieldDirection="<<parameters.magneticFieldDirection<<"\n";
 		os<<"AnisotropyD="<<parameters.anisotropy<<"\n";
 		os<<"HeisenbergTwiceS="<<parameters.twiceTheSpin<<"\n";
 		os<<parameters.targetQuantum;
@@ -143,7 +161,8 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 	}
 
 	SizeType twiceTheSpin;
-	VectorRealType magneticField;
+	PsimagLite::String magneticFieldDirection;
+	VectorRealType magneticFieldV;
 	VectorRealType anisotropyD;
 	VectorRealType anisotropyE;
 };
