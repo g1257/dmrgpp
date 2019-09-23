@@ -211,8 +211,9 @@ public:
 				if (modelParameters_.magneticFieldDirection == "z") {
 					hmatrix += tmp*sz.getCRS();
 				} else if (modelParameters_.magneticFieldDirection == "x") {
-					hmatrix += 0.5*tmp*splus.getCRS();
-					hmatrix += 0.5*tmp*sminus.getCRS();
+					static const RealType zeroPointFive = 0.5;
+					hmatrix += zeroPointFive*tmp*splus.getCRS();
+					hmatrix += zeroPointFive*tmp*sminus.getCRS();
 				}
 			}
 
