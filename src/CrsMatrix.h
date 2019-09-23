@@ -340,7 +340,7 @@ public:
 	void operator+=(const CrsMatrix& m)
 	{
 		CrsMatrix c;
-		const T f1 = 1.0;
+		static const typename Real<T>::Type f1 = 1.0;
 		add(c,m,f1);
 		*this = c;
 	}
@@ -593,7 +593,9 @@ public:
 private:
 
 	template<typename T1>
-	void add(CrsMatrix<T>& c, const CrsMatrix<T>& m, const T1& t1) const
+	typename std::enable_if<std::is_same<T1, typename Real<T>::Type>::value ||
+	std::is_same<T1, T>::value, void>::type
+	add(CrsMatrix<T>& c, const CrsMatrix<T>& m, const T1& t1) const
 	{
 		assert(m.rows() == m.cols());
 		const T1 one = 1.0;
