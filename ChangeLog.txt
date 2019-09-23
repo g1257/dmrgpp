@@ -1,3 +1,27 @@
+2019-09-23 Version 5.62
+
+User facing:
+
+* -S command line option overrides Threads=
+
+* PrintHamiltonianAverage= predicate awesome
+
+* SaveDensityMatrixEigenvalues= predicate awesome
+
+Scripts:
+
+* OmegaUtils: asks if repeated keys found
+
+* honeycomb lattice scripts
+
+performance:
+
+* Basis::setToProduct parallelized
+
+features:
+
+* Model=Heisenberg supports magnetic field in x direction
+
 2019-08-13 Version 5.60
 
 bug fix:
