@@ -442,7 +442,7 @@ private:
 			    ": Anisotropic sub-model CANNOT be canonical. Please " +
 			    "delete the TargetSzPlusConst= from the input file\n");
 
-		if (isCanonical && modelParameters_.magneticFieldDirection != "z")
+		if (isCanonical && modelParameters_.magneticFieldDirection == "x")
 			err(PsimagLite::String(__FILE__) +
 			    ": magneticFieldDirection == x CANNOT be canonical. Please " +
 			    "delete the TargetSzPlusConst= from the input file\n");
