@@ -1,3 +1,17 @@
+2019-09-23 version 2.62
+
+new drivers
+
+* isBlasThreaded and openBlasConfig
+
+new features and interfaces
+
+* PredicateAwesome supports constants
+
+* Parallelizer2 replaces Parallelizer
+
+* sfinae examples started
+
 2019-08-13 Version 2.60
 
 bug fixes
