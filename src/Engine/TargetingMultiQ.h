@@ -198,7 +198,7 @@ public:
 
 	SizeType size() const { return weight_.size(); }
 
-	void evolve(RealType,
+	void evolve(const VectorRealType&,
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType&,

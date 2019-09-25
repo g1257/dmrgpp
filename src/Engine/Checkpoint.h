@@ -129,7 +129,7 @@ public:
 	              "environ",
 	              isObserveCode),
 	    progress_("Checkpoint"),
-	    energiesFromFile_(parameters_.excited, 0),
+	    energiesFromFile_(parameters_.excited.size(), 0),
 	    dummyBwo_("dummy")
 	{
 		if (parameters_.autoRestart) isRestart_ = true;

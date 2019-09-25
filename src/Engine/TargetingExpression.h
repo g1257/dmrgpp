@@ -157,7 +157,7 @@ public:
 		return (this->common().aoe().noStageIs(StageEnumType::DISABLED)) ? gsWeight_ : 1.0;
 	}
 
-	void evolve(RealType,
+	void evolve(const VectorRealType&,
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType&,

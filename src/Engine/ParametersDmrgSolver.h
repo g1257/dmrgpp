@@ -147,10 +147,10 @@ struct ParametersDmrgSolver {
 	SizeType sitesPerBlock;
 	SizeType maxMatrixRankStored;
 	SizeType keptStatesInfinite;
-	SizeType excited;
 	SizeType dumperBegin;
 	SizeType dumperEnd;
 	SizeType precision;
+	VectorSizeType excited;
 	bool autoRestart;
 	PairRealSizeType truncationControl;
 	PsimagLite::String filename;
@@ -214,10 +214,10 @@ struct ParametersDmrgSolver {
 	    : sitesPerBlock(1),
 	      maxMatrixRankStored(0),
 	      keptStatesInfinite(0),
-	      excited(0),
 	      dumperBegin(0),
 	      dumperEnd(0),
 	      precision(6),
+	      excited(1, 0),
 	      autoRestart(false),
 	      recoverySave("no"),
 	      adjustQuantumNumbers(0, QnType(false, VectorSizeType(), PairSizeType(0, 0), 0)),
@@ -309,7 +309,7 @@ struct ParametersDmrgSolver {
 		} catch (std::exception&) {}
 
 		try {
-			io.readline(excited,"Excited=");
+			io.read(excited,"Excited");
 		} catch (std::exception&) {}
 
 		try {

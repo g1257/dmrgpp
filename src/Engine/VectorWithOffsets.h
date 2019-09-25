@@ -105,6 +105,7 @@ public:
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef std::pair<SizeType, QnType> PairQnType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
+	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
 
 	VectorWithOffsets()
 	    : progress_("VectorWithOffsets"),size_(0),index2Sector_(0)
@@ -143,7 +144,7 @@ public:
 	}
 
 	template<typename SomeBasisType>
-	void set(typename PsimagLite::Vector<VectorType>::Type& v,
+	void set(VectorVectorType& v,
 	         const VectorSizeType& sectors,
 	         const SomeBasisType& someBasis)
 	{
@@ -652,7 +653,7 @@ private:
 	PsimagLite::ProgressIndicator progress_;
 	SizeType size_;
 	typename PsimagLite::Vector<int>::Type index2Sector_;
-	typename PsimagLite::Vector<VectorType>::Type data_;
+	VectorVectorType data_;
 	typename PsimagLite::Vector<SizeType>::Type offsets_;
 	typename PsimagLite::Vector<PairQnType>::Type nzMsAndQns_;
 }; // class VectorWithOffset

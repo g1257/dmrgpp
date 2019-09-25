@@ -363,7 +363,7 @@ private:
 				progress_.printline(msg, std::cout);
 
 				PsimagLite::OstringStream msg2;
-				msg2<<"Norm of vector is "<<PsimagLite::norm(vecSaved[j]);
+				msg2<<"Norm of vector is "<<PsimagLite::norm(vecSaved[excitedIndex][j]);
 				msg2<<" and quantum numbers are ";
 				msg2<<q;
 				progress_.printline(msg2, std::cout);
@@ -375,11 +375,12 @@ private:
 			msg4<<" for Level["<<excitedIndex<<"]="<<parameters_.excited[excitedIndex];
 			progress_.printline(msg4, std::cout);
 
-			target.set(vecSaved, sectors, lrs.super());
-
 			if (PsimagLite::Concurrency::root())
 				oldEnergy_[excitedIndex] = myEnergy;
 		}
+
+		target.set(vecSaved, sectors, lrs.super());
+		energies = oldEnergy_;
 	}
 
 	/** Diagonalise the i-th block of the matrix, return its eigenvectors
@@ -469,7 +470,7 @@ private:
 		const SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
 
 		if ((saveOption & 4)>0) {
-			energyTmp = slowWft(lanczosHelper, tmpVec, initialVector);
+			energyTmp = slowWft(lanczosHelper, tmpVec, initialVector, excited);
 			PsimagLite::OstringStream msg;
 			msg<<"Early exit due to user requesting (slow) WFT, energy= "<<energyTmp;
 			progress_.printline(msg,std::cout);
@@ -546,9 +547,9 @@ private:
 
 	RealType slowWft(const typename LanczosOrDavidsonBaseType::MatrixType& object,
 	                 TargetVectorType& gsVector,
-	                 const TargetVectorType& initialVector) const
+	                 const TargetVectorType& initialVector,
+	                 SizeType excited) const
 	{
-		SizeType excited = parameters_.excited;
 		if (excited > 0) {
 			PsimagLite::OstringStream msg;
 			msg<<"FATAL: slowWft: Not possible when excited > 0\n";

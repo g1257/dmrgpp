@@ -200,6 +200,7 @@ public:
 	            const BlockType&,
 	            SizeType loopNumber)
 	{
+		assert(energies.size() > 0);
 		RealType Eg = energies[0];
 		evolveInternal(Eg, direction, block1, loopNumber);
 		bool doBorderIfBorder = true;

@@ -129,6 +129,7 @@ public:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename BasisType::QnType QnType;
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
+	typedef typename BaseType::VectorRealType VectorRealType;
 
 	TargetingDynamic(const LeftRightSuperType& lrs,
 	                 const ModelType& model,
@@ -164,7 +165,7 @@ public:
 		return gsWeight_;
 	}
 
-	void evolve(RealType Eg,
+	void evolve(const VectorRealType& energies,
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType& block2,
@@ -177,6 +178,8 @@ public:
 			throw PsimagLite::RuntimeError(str.c_str());
 		}
 
+		assert(energies.size() > 0);
+		RealType Eg = energies[0];
 		SizeType site = block1[0];
 		evolve(Eg,direction,site,loopNumber);
 

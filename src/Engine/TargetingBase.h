@@ -125,6 +125,8 @@ public:
 	typedef typename ApplyOperatorExpressionType::DmrgSerializerType DmrgSerializerType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename PsimagLite::Vector<TargetVectorType>::Type VectorVectorType;
+	typedef typename PsimagLite::Vector<VectorVectorType>::Type VectorVectorVectorType;
 
 	TargetingBase(const LeftRightSuperType& lrs,
 	              const ModelType& model,
@@ -174,11 +176,14 @@ public:
 
 	virtual bool includeGroundStage() const { return true; }
 
-	virtual void set(typename PsimagLite::Vector<VectorType>::Type& v,
+	virtual void set(VectorVectorVectorType& v,
 	                 const VectorSizeType& sectors,
 	                 const BasisType& someBasis)
 	{
-		commonTargeting_.aoe().psi().set(v, sectors, someBasis);
+		if (v.size() != 1)
+			err("TargetingBase::set: exactly one vector expected, got " +
+			    ttos(v.size()) + " instead.\n");
+		commonTargeting_.aoe().psi().set(v[0], sectors, someBasis);
 	}
 
 	virtual void updateOnSiteForCorners(BasisWithOperatorsType& basisWithOps) const
@@ -211,7 +216,7 @@ public:
 		return commonTargeting_.normSquared(i);
 	}
 
-	virtual void initialGuess(typename PsimagLite::Vector<VectorType>::Type& initialVector,
+	virtual void initialGuess(VectorVectorType& initialVector,
 	                          const VectorSizeType& block,
 	                          bool noguess,
 	                          VectorSizeType& weights,

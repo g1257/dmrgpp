@@ -182,7 +182,7 @@ public:
 		return BaseType::size();
 	}
 
-	void evolve(RealType Eg,
+	void evolve(const VectorRealType& energies,
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType& block2,
@@ -195,6 +195,8 @@ public:
 			throw PsimagLite::RuntimeError(str.c_str());
 		}
 
+		assert(energies.size() > 0);
+		RealType Eg = energies[0];
 		SizeType site = block1[0];
 		evolve(Eg,direction,site,loopNumber);
 

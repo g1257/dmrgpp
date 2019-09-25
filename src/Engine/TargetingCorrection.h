@@ -115,6 +115,7 @@ public:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename BasisType::QnType QnType;
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
+	typedef typename BaseType::VectorRealType VectorRealType;
 
 	TargetingCorrection(const LeftRightSuperType& lrs,
 	                    const ModelType& model,
@@ -147,7 +148,7 @@ public:
 		return 1;
 	}
 
-	void evolve(RealType,
+	void evolve(const VectorRealType&,
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType&,

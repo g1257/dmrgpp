@@ -230,12 +230,14 @@ public:
 		return n;
 	}
 
-	void evolve(RealType Eg,
+	void evolve(const VectorRealType&,
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType& block2,
 	            SizeType loopNumber)
 	{
+		RealType Eg = 0;
+
 		VectorSizeType sites;
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
 			utils::blockUnion(sites,block1,block2);

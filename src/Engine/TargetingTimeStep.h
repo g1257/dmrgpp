@@ -188,7 +188,7 @@ public:
 		return b;
 	}
 
-	void evolve(RealType Eg,
+	void evolve(const VectorRealType& energies,
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType&,
@@ -196,6 +196,8 @@ public:
 	{
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
+		assert(energies.size() > 0);
+		RealType Eg = energies[0];
 		evolveInternal(Eg,direction,block1,loopNumber);
 		SizeType numberOfSites = this->lrs().super().block().size();
 

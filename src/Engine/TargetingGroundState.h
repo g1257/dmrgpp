@@ -117,6 +117,7 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename BasisType::QnType QnType;
+	typedef typename BaseType::VectorRealType VectorRealType;
 
 	TargetingGroundState(const LeftRightSuperType& lrs,
 	                     const ModelType& model,
@@ -147,7 +148,7 @@ public:
 		return 0;
 	}
 
-	void evolve(RealType,
+	void evolve(const VectorRealType&,
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType&,
