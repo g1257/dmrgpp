@@ -138,6 +138,7 @@ public:
 	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename BasisWithOperatorsType::QnType QnType;
 	typedef typename QnType::PairSizeType PairSizeType;
+	typedef typename DiagonalizationType::VectorRealType VectorRealType;
 
 	DmrgSolver(ModelType const &model,
 	           InputValidatorType& ioIn)
@@ -158,13 +159,12 @@ public:
 	                       ioIn,
 	                       quantumSector_,
 	                       wft_,
-	                       checkpoint_.energy()),
+	                       checkpoint_.energies()),
 	      truncate_(lrs_,
 	                wft_,
 	                parameters_,
 	                model.geometry(),
 	                ioOut_),
-	      energy_(0.0),
 	      saveData_(parameters_.options.find("noSaveData") == PsimagLite::String::npos)
 	{
 		std::cout<<appInfo_;
@@ -255,8 +255,6 @@ public:
 		return inSitu_(i);
 	}
 
-	RealType energy() const { return energy_; }
-
 private:
 
 	/* PSIDOC DmrgSolverInfiniteDmrgLoop
@@ -329,6 +327,7 @@ obtain ordered
 		const SizeType initialSizeOfHashTable = std::max(ten, parameters_.keptStatesInfinite);
 
 		RealType time = 0; // no time advancement possible in the infiniteDmrgLoop
+		VectorRealType energies;
 		for (SizeType step=0;step<X.size();step++) {
 			PsimagLite::OstringStream msg;
 			msg<<"Infinite-loop: step="<<step<<" ( of "<<X.size()<<"), ";
@@ -356,11 +355,13 @@ obtain ordered
 			lrs_.setToProduct(quantumSector_[0], initialSizeOfHashTable);
 
 			const BlockType& ystep = findRightBlock(Y,step,E);
-			energy_ = diagonalization_(psi,
-			                           ProgramGlobals::DirectionEnum::INFINITE,
-			                           X[step],
-			                           ystep);
-			printEnergy(energy_);
+
+			diagonalization_(psi,
+			                 energies,
+			                 ProgramGlobals::DirectionEnum::INFINITE,
+			                 X[step],
+			                 ystep);
+			printEnergies(energies);
 
 			truncate_.changeBasisInfinite(pS, pE, psi, parameters_.keptStatesInfinite);
 
@@ -509,6 +510,7 @@ obtain ordered
 		int stepFinal = stepCurrent_ + stepLengthCorrected;
 		BasisWithOperatorsType dummyBwo("dummy");
 
+		VectorRealType energies;
 		while (true) {
 
 			if (static_cast<SizeType>(stepCurrent_) >= sitesIndices_.size())
@@ -538,11 +540,12 @@ obtain ordered
 			assert(0 < quantumSector_.size()); // used only for SU(2)
 			lrs_.setToProduct(quantumSector_[0], initialSizeOfHashTable);
 
-			energy_ = diagonalization_(target,
-			                           direction,
-			                           sitesIndices_[stepCurrent_],
-			                           loopIndex);
-			printEnergy(energy_);
+			diagonalization_(target,
+			                 energies,
+			                 direction,
+			                 sitesIndices_[stepCurrent_],
+			                 loopIndex);
+			printEnergies(energies);
 
 			changeTruncateAndSerialize(pS,pE,target,keptStates,direction,loopIndex);
 
@@ -645,7 +648,7 @@ obtain ordered
 		return false;
 	}
 
-	void printEnergy(RealType energy)
+	void printEnergies(const VectorRealType& energies)
 	{
 		if (!saveData_) return;
 		static SizeType counter = 0;
@@ -653,13 +656,13 @@ obtain ordered
 			try {
 				PsimagLite::IoSelector::In ioIn(ioOut_.filename());
 				SizeType x = 0;
-				ioIn.read(x, "Energy/Size");
+				ioIn.read(x, "Energies/Size");
 				ioIn.close();
 				counter = x;
 			} catch (...) {}
 		}
 
-		ioOut_.writeVectorEntry(energy, "Energy", counter++);
+		ioOut_.writeVectorEntry(energies, "Energies", counter++);
 	}
 
 	const BlockType& findRightBlock(const VectorBlockType& y,
@@ -687,7 +690,6 @@ obtain ordered
 	DiagonalizationType diagonalization_;
 	TruncationType truncate_;
 	ObservablesInSituType inSitu_;
-	RealType energy_;
 	bool saveData_;
 }; //class DmrgSolver
 } // namespace Dmrg

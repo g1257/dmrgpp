@@ -194,12 +194,13 @@ public:
 		return b;
 	}
 
-	void evolve(RealType Eg,
+	void evolve(const VectorRealType& energies,
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType&,
 	            SizeType loopNumber)
 	{
+		RealType Eg = energies[0];
 		evolveInternal(Eg, direction, block1, loopNumber);
 		bool doBorderIfBorder = true;
 		this->common().cocoon(block1, direction, doBorderIfBorder); // in-situ

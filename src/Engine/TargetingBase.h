@@ -124,6 +124,7 @@ public:
 	typedef typename ApplyOperatorExpressionType::StageEnumType StageEnumType;
 	typedef typename ApplyOperatorExpressionType::DmrgSerializerType DmrgSerializerType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	TargetingBase(const LeftRightSuperType& lrs,
 	              const ModelType& model,
@@ -156,7 +157,7 @@ public:
 
 	virtual RealType weight(SizeType i) const = 0;
 
-	virtual void evolve(RealType Eg,
+	virtual void evolve(const VectorRealType& energies,
 	                    ProgramGlobals::DirectionEnum direction,
 	                    const BlockType& block1,
 	                    const BlockType& block2,

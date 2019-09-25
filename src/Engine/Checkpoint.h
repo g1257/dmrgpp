@@ -111,6 +111,7 @@ public:
 	typedef DiskStack<BasisWithOperatorsType>  DiskStackType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	Checkpoint(const ParametersType& parameters,
 	           InputValidatorType& ioIn,
@@ -128,7 +129,7 @@ public:
 	              "environ",
 	              isObserveCode),
 	    progress_("Checkpoint"),
-	    energyFromFile_(0.0),
+	    energiesFromFile_(parameters_.excited, 0),
 	    dummyBwo_("dummy")
 	{
 		if (parameters_.autoRestart) isRestart_ = true;
@@ -151,7 +152,7 @@ public:
 
 		{
 			IoType::In ioIn2(parameters_.checkpoint.filename());
-			ioIn2.readLastVectorEntry(energyFromFile_,
+			ioIn2.readLastVectorEntry(energiesFromFile_,
 			                          parameters_.checkpoint.labelForEnergy());
 
 			ioIn2.read(v, "CHKPOINTSYSTEM/OperatorPerSite");
@@ -269,7 +270,7 @@ public:
 
 	const ParametersType& parameters() const { return parameters_; }
 
-	const RealType& energy() const { return energyFromFile_; }
+	const VectorRealType& energies() const { return energiesFromFile_; }
 
 private:
 
@@ -454,7 +455,7 @@ private:
 	DiskOrMemoryStackType systemStack_;
 	DiskOrMemoryStackType envStack_;
 	PsimagLite::ProgressIndicator progress_;
-	RealType energyFromFile_;
+	VectorRealType energiesFromFile_;
 	BasisWithOperatorsType dummyBwo_;
 }; // class Checkpoint
 } // namespace Dmrg
