@@ -292,6 +292,9 @@ private:
 				TargetVectorType& initialVectorBySector = initialVector[excitedIndex][j];
 				RealType norma = PsimagLite::norm(initialVectorBySector);
 
+				if (initialVectorBySector.size() <= parameters_.excited[excitedIndex])
+					continue;
+
 				if (fabs(norma) < 1e-12) {
 					if (onlyWft)
 						err("FATAL Norm of initial vector is zero\n");
@@ -334,10 +337,22 @@ private:
 		for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited; ++excitedIndex) {
 
 			assert(energySaved[excitedIndex].size() > 0);
-			RealType myEnergy = energySaved[excitedIndex][0];
-			for (SizeType i = 1; i < totalSectors; ++i)
-				if (energySaved[excitedIndex][i] < myEnergy)
-					myEnergy = energySaved[excitedIndex][i];
+			RealType myEnergy = 0;
+			bool flag = true;
+			for (SizeType i = 0; i < totalSectors; ++i) {
+				if (vecSaved[excitedIndex][i].size() == 0)
+					continue;
+
+				if (!flag && energySaved[excitedIndex][i] > myEnergy)
+					continue;
+
+				myEnergy = energySaved[excitedIndex][i];
+				flag = false;
+			}
+
+			if (flag)
+				err("Could not found sector for Level[" + ttos(excitedIndex) +
+				    "]=" + ttos(parameters_.excited[excitedIndex]) + "\n");
 
 			PsimagLite::OstringStream msg3;
 			msg3<<"Level["<<excitedIndex<<"]="<<parameters_.excited[excitedIndex];
@@ -350,7 +365,11 @@ private:
 			SizeType counter = 0;
 			RealType degeneracyMax = parameters_.degeneracyMax;
 			for (SizeType j = 0; j < totalSectors; ++j) {
-				if (findSymmetrySector && fabs(energySaved[excitedIndex][j] - myEnergy) > degeneracyMax)
+				if (findSymmetrySector
+				        && fabs(energySaved[excitedIndex][j] - myEnergy) > degeneracyMax)
+					continue;
+
+				if (vecSaved[excitedIndex][j].size() == 0)
 					continue;
 
 				SizeType i = sectors[j];
