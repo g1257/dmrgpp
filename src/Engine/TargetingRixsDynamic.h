@@ -181,8 +181,8 @@ public:
 		RealType tau = tstStruct2_->tau();
 		SizeType n = times_.size();
 		if (tstStruct_.algorithm() == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME) {
-			if (n != 4)
-				err("TargetingRixsDynamic with KrylovTime: number of TimeSteps must be 4\n");
+			if (n != 5)
+				err("TargetingRixsDynamic with KrylovTime: number of TimeSteps must be 5\n");
 		}
 
 		for (SizeType i = 0; i < n; ++i)
