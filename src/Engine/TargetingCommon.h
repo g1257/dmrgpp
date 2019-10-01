@@ -227,7 +227,7 @@ public:
 	void read(IoInputType& io, PsimagLite::String prefix)
 	{
 		prefix += "/";
-		aoe_.loadEnergy(io, "Energy");
+		aoe_.loadEnergy(io, "Energies");
 		aoe_.psi().read(io, prefix + "PSI");
 	}
 

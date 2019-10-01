@@ -14,7 +14,7 @@ struct RestartStruct {
 	typedef PsimagLite::Vector<int>::Type VectorIntType;
 
 	RestartStruct()
-	    : filename_(""), labelForEnergy_("Energy"), mapStages_(true), sourceTvForPsi_(-1)
+	    : filename_(""), labelForEnergy_("Energies"), mapStages_(true), sourceTvForPsi_(-1)
 	{}
 
 	/* PSIDOC MiscRestartOptions
