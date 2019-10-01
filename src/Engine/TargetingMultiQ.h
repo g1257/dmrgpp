@@ -121,6 +121,7 @@ public:
 	typedef typename BasisType::QnType QnType;
 	typedef typename QnType::VectorQnType VectorQnType;
 	typedef TargetQuantumElectrons<RealType, QnType> TargetQuantumElectronsType;
+	typedef typename BaseType::VectorVectorVectorType VectorVectorVectorType;
 
 	TargetingMultiQ(const LeftRightSuperType& lrs,
 	                const ModelType& model,
@@ -137,11 +138,19 @@ public:
 
 	virtual bool includeGroundStage() const { return false; }
 
-	virtual void set(typename PsimagLite::Vector<VectorType>::Type& v,
+	virtual void set(VectorVectorVectorType& inV,
 	                 const VectorSizeType& sectors,
 	                 const BasisType& basis)
 	{
 		const SizeType n = sectors.size();
+		if (inV.size() != 1)
+			err("Expected exactly one vector instead of " + ttos(inV.size()) +
+			    + ", that is,  just the ground state\n");
+
+		if (inV[0].size() != n)
+			err("Expected inV[0].size == " + ttos(sectors) + " but found "
+			    + ttos(inV[0].size()) + " instead\n");
+
 		if (this->common().aoe().targetVectors().size() != n)
 			this->common().aoe().targetVectorsResize(n);
 
@@ -151,7 +160,7 @@ public:
 
 			weights[j] = basis.partition(j + 1) - basis.partition(j);
 			VectorWithOffsetType vwo(weights, basis);
-			vwo.setDataInSector(v[i], j);
+			vwo.setDataInSector(inV[0][i], j);
 			VectorWithOffsetType& handle =
 			        const_cast<VectorWithOffsetType&>(this->common().aoe().targetVectors()[i]);
 			handle = vwo;
