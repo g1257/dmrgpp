@@ -248,7 +248,7 @@ public:
 	// - Im of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[7]>
 	// tv[9] = Im of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[6]>
 	// + Re of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[7]>
-	void evolve(RealType Eg,
+	void evolve(const VectorRealType& energies,
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType& block2,
@@ -263,6 +263,8 @@ public:
 
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE) return;
 
+		assert(energies.size() > 0);
+		const RealType Eg = energies[0];
 		SizeType max = tstStruct_.sites();
 
 		if (max > 2)
