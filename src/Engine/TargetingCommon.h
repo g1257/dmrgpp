@@ -431,8 +431,13 @@ public:
 	                  bool noguess) const
 	{
 		PsimagLite::Vector<SizeType>::Type nk;
-		setNk(nk,block);
-		setInitialVector(v, psi, nk, noguess);
+		setNk(nk, block);
+		const WaveFunctionTransfType& wft = targetHelper_.wft();
+
+		if (noguess)
+			wft.createRandomVector(v);
+		else
+			wft.setInitialVector(v, psi, targetHelper_.lrs(), nk);
 	}
 
 	void computeCorrection(ProgramGlobals::DirectionEnum direction,
@@ -613,19 +618,6 @@ private:
 	{
 		for (SizeType i=0;i<block.size();i++)
 			nk.push_back(targetHelper_.model().hilbertSize(block[i]));
-	}
-
-	void setInitialVector(VectorWithOffsetType& v1,
-	                      const VectorWithOffsetType& v2,
-	                      const VectorSizeType& nk,
-	                      bool noguess) const
-	{
-		const WaveFunctionTransfType& wft = targetHelper_.wft();
-
-		if (noguess)
-			wft.createRandomVector(v1);
-		else
-			wft.setInitialVector(v1, v2, targetHelper_.lrs(), nk);
 	}
 
 	// prints <v1|A|v2>

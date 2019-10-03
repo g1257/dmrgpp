@@ -124,6 +124,9 @@ public:
 	typedef typename MultiSiteExpressionHelperType::DmrgSerializerType DmrgSerializerType;
 	typedef CorrelationsSkeleton<MultiSiteExpressionHelperType, ModelType> CorrelationsSkeletonType;
 	typedef typename TimeVectorsBaseType::WftHelperType WftHelperType;
+	typedef typename VectorWithOffsetType::VectorType VectorType;
+	typedef typename PsimagLite::Vector<typename
+	PsimagLite::Vector<VectorWithOffsetType*>::Type>::Type VectorVectorVectorWithOffsetType;
 
 	ApplyOperatorExpression(const TargetHelperType& targetHelper,
 	                        SizeType indexNoAdvance)
@@ -142,8 +145,16 @@ public:
 
 	~ApplyOperatorExpression()
 	{
-		if (timeVectorsBase_)
-			delete timeVectorsBase_;
+		delete timeVectorsBase_;
+		timeVectorsBase_ = 0;
+		const SizeType nexcited = psi_.size();
+		for (SizeType i =0; i < nexcited; ++i) {
+			const SizeType sectors = psi_[i].size();
+			for (SizeType j = 0; j < sectors; ++j) {
+				delete psi_[i][j];
+				psi_[i][j] = 0;
+			}
+		}
 	}
 
 	void postCtor(SizeType tstSites)
@@ -162,7 +173,7 @@ public:
 	                const TargetParamsType& tstStruct)
 	{
 		SizeType count =0;
-		VectorWithOffsetType phiOld = psi_;
+		VectorWithOffsetType phiOld = ensureOnlyOnePsi("getPhi");
 		VectorWithOffsetType vectorSum;
 
 		SizeType max = tstStruct.sites();
@@ -254,14 +265,28 @@ public:
 		return applyOpLocal_;
 	}
 
-	VectorWithOffsetType& psi() // <--- FIXME
+	template<typename SomeBasisType>
+	void setPsi(SizeType excitedIndex,
+	            SizeType sectorIndex,
+	            const VectorType& v,
+	            const VectorSizeType& weights,
+	            const SomeBasisType& basis,
+	            const VectorSizeType& sectors)
 	{
-		return psi_;
-	}
+		if (psi_.size() == 0) {
+			psi_.resize(targetHelper_.model().params().excited.size());
+			for (SizeType i = 0; i < psi_.size(); ++i)
+				psi_[i].resize(sectors.size());
+		}
 
-	const VectorWithOffsetType& psi() const
-	{
-		return psi_;
+		assert(sectorIndex < sectors.size());
+		const SizeType sector = sectors[sectorIndex];
+
+		assert(excitedIndex < psi_.size());
+		assert(sectorIndex < psi_[excitedIndex].size());
+
+		psi_[excitedIndex][sectorIndex] = new VectorWithOffsetType(weights, basis);
+		psi_[excitedIndex][sectorIndex]->setDataInSector(v, sector);
 	}
 
 	const VectorVectorWithOffsetType& targetVectors() const
@@ -630,8 +655,8 @@ private:
 	SizeType currentTimeStep_;
 	SizeType indexNoAdvance_;
 	ApplyOperatorType applyOpLocal_;
-	VectorWithOffsetType psi_;
-	typename PsimagLite::Vector<VectorWithOffsetType>::Type targetVectors_;
+	VectorVectorVectorWithOffsetType psi_;
+	VectorVectorWithOffsetType targetVectors_;
 	TimeVectorsBaseType* timeVectorsBase_;
 	WftHelperType wftHelper_;
 	mutable MultiSiteExpressionHelperType multiSiteExprHelper_;

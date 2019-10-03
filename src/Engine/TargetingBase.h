@@ -176,14 +176,45 @@ public:
 
 	virtual bool includeGroundStage() const { return true; }
 
-	virtual void set(VectorVectorVectorType& v,
+	virtual void set(VectorVectorVectorType& inV,
 	                 const VectorSizeType& sectors,
 	                 const BasisType& someBasis)
 	{
-		if (v.size() != 1)
-			err("TargetingBase::set: exactly one vector expected, got " +
-			    ttos(v.size()) + " instead.\n");
-		commonTargeting_.aoe().psi().set(v[0], sectors, someBasis);
+		const SizeType nsectors = sectors.size();
+		const VectorSizeType& excited = model.params().excited;
+		const SizeType nexcited = excited.size();
+
+		assert(nsectors > 0);
+
+		assert(nexcited > 0);
+
+		if (nexcited > 1)
+			std::cerr<<"nexcited = "<<nexcited<< " > 1 is experimental\n";
+
+		if (nexcited != inV.size())
+			err("FATAL: inV.size == " + ttos(inV.size()) + " but params.excited.size= "
+			    + ttos(nexcited) + "\n");
+
+		for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
+
+			if (inV[excitedIndex].size() != nsectors)
+				err("Expected inV[" + ttos(excitedIndex) + "].size == " +
+				    ttos(sectors) + " but found " + ttos(inV[excitedIndex].size()) +
+				    " instead\n");
+
+			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+
+				VectorSizeType weights(basis.partition() - 1);
+
+				weights[j] = basis.partition(j + 1) - basis.partition(j);
+				commonTargeting_.aoe_.setPsi(excitedIndex,
+				                             sectorIndex,
+				                             inV[excitedIndex][sectorIndex],
+				                             weights,
+				                             someBasis,
+				                             sectors);
+			}
+		}
 	}
 
 	virtual void updateOnSiteForCorners(BasisWithOperatorsType& basisWithOps) const
@@ -216,18 +247,23 @@ public:
 		return commonTargeting_.normSquared(i);
 	}
 
-	virtual void initialGuess(VectorVectorType& initialVector,
+	virtual void initialGuess(VectorVectorVectorType& initialVector,
 	                          const VectorSizeType& block,
 	                          bool noguess,
 	                          VectorSizeType& weights,
 	                          const BasisType& basis) const
 	{
-		VectorWithOffsetType vwo(weights, basis);
-		commonTargeting_.initialGuess(vwo, commonTargeting_.aoe().psi(), block, noguess);
-		const SizeType n = vwo.sectors();
-		initialVector.resize(n);
-		for (SizeType i = 0; i < n; ++i)
-			vwo.extract(initialVector[i], vwo.sector(i));
+		for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
+			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+
+				VectorWithOffsetType vwo(weights, basis);
+				commonTargeting_.initialGuess(vwo, commonTargeting_.aoe().psi(), block, noguess);
+				const SizeType n = vwo.sectors();
+				initialVector.resize(n);
+				for (SizeType i = 0; i < n; ++i)
+					vwo.extract(initialVector[i], vwo.sector(i));
+			}
+		}
 	}
 
 	// non-virtual below
