@@ -494,6 +494,8 @@ public:
 		return index2Sector_[i];
 	}
 
+	static PsimagLite::String name() { return "vectorwithoffsets"; }
+
 	friend RealType norm(const VectorWithOffsets& v)
 	{
 		RealType sum=0;

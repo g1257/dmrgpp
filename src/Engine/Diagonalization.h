@@ -268,7 +268,7 @@ private:
 		typename PsimagLite::Vector<VectorRealType>::Type energySaved(numberOfExcited);
 		VectorVectorVectorType vecSaved(numberOfExcited);
 
-		target.initialGuess(initialVector, block,noguess, weights, lrs.super());
+		target.initialGuess(initialVector, block, noguess, weights, lrs.super());
 
 		for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited; ++excitedIndex) {
 

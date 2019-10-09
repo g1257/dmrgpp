@@ -142,6 +142,8 @@ public:
 	typedef typename ApplyOperatorExpressionType::StageEnumType StageEnumType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef RestartStruct RestartStructType;
+	typedef typename ApplyOperatorExpressionType::VectorVectorVectorWithOffsetType
+	VectorVectorVectorWithOffsetType;
 
 	enum class OpLabelCategory { DRESSED, BARE };
 

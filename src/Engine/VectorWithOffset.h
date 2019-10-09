@@ -326,6 +326,8 @@ public:
 		return ((i < offset_) || (i >= (offset_+data_.size()))) ? (-1) : (0);
 	}
 
+	static PsimagLite::String name() { return "vectorwithoffset"; }
+
 	friend ComplexOrRealType operator*(const VectorWithOffset& v1,
 	                                   const VectorWithOffset& v2)
 	{

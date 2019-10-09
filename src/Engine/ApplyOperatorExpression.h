@@ -265,6 +265,11 @@ public:
 		return applyOpLocal_;
 	}
 
+	const VectorVectorVectorWithOffsetType& psi() const
+	{
+		return psi_;
+	}
+
 	template<typename SomeBasisType>
 	void setPsi(SizeType excitedIndex,
 	            SizeType sectorIndex,
@@ -462,6 +467,19 @@ public:
 	{
 		VectorVectorWithOffsetType& tvs = const_cast<VectorVectorWithOffsetType&>(targetVectors_);
 		wftHelper_.wftSome(tvs, site, begin, end);
+	}
+
+	const VectorWithOffsetType& ensureOnlyOnePsi(PsimagLite::String func) const
+	{
+		if (psi_.size() != 1)
+			err("ensureOnlyOnePsi failed (more than one excited); called from" +
+			    func + "\n");
+
+		if (psi_[0].size() != 1)
+			err("ensureOnlyOnePsi failed (more than one sector); called from" +
+			    func + "\n");
+
+		return *(psi_[0][0]);
 	}
 
 private:
