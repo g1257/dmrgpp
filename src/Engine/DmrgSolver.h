@@ -139,6 +139,8 @@ public:
 	typedef typename BasisWithOperatorsType::QnType QnType;
 	typedef typename QnType::PairSizeType PairSizeType;
 	typedef typename DiagonalizationType::VectorRealType VectorRealType;
+	typedef typename TargetingType::VectorVectorVectorWithOffsetType
+	VectorVectorVectorWithOffsetType;
 
 	DmrgSolver(ModelType const &model,
 	           InputValidatorType& ioIn)
@@ -605,10 +607,26 @@ obtain ordered
 
 
 		const BlockDiagonalMatrixType& transform = truncate_.transform(direction);
+		// FIXME: Serializer will for now save only one psi target
+		const VectorVectorVectorWithOffsetType& psi = target.psi();
+		if (psi.size() == 0)
+			err("No psi targets?\n");
+		if (psi.size() > 1) {
+			std::cerr<<"WARNING: Only one psi excited saved out of "<<psi.size()<<"\n";
+			std::cout<<"WARNING: Only one psi excited saved out of "<<psi.size()<<"\n";
+		}
+
+		if (psi[0].size() == 0)
+			err("No psi[0] targets?\n");
+		if (psi[0].size() > 1) {
+			std::cerr<<"WARNING: Only one psi sector saved out of "<<psi[0].size()<<"\n";
+			std::cout<<"WARNING: Only one psi sector saved out of "<<psi[0].size()<<"\n";
+		}
+
 		DmrgSerializerType* ds = new DmrgSerializerType(fsS,
 		                                                fsE,
 		                                                lrs_,
-		                                                target.gs(),
+		                                                *(psi[0][0]),
 		                                                transform,
 		                                                direction);
 		if (saveOption & 16) {
