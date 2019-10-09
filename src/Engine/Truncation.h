@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "DensityMatrixLocal.h"
 #include "DensityMatrixSvd.h"
-#include "DensityMatrixSu2.h"
 #include "Sort.h"
 #include "Concurrency.h"
 #include "Io/IoNg.h"
@@ -105,7 +104,6 @@ class Truncation  {
 	typedef typename TargetingType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef DensityMatrixLocal<TargetingType> DensityMatrixLocalType;
 	typedef DensityMatrixSvd<TargetingType> DensityMatrixSvdType;
-	typedef DensityMatrixSu2<TargetingType> DensityMatrixSu2Type;
 	typedef DensityMatrixBase<TargetingType> DensityMatrixBaseType;
 	typedef typename DensityMatrixBaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename TargetingType::ModelType ModelType;
@@ -251,12 +249,7 @@ private:
 		                                                    rightCache_;
 
 		if (BasisType::useSu2Symmetry()) {
-			if (p.useSvd) {
-				std::cerr<<"WARNING: SVD for truncation NOT supported with SU(2)\n";
-				p.useSvd = false;
-			}
-
-			*dm = new DensityMatrixSu2Type(target,lrs_,p);
+			err("SU(2) no longer supported\n");
 		} else if (p.useSvd) {
 			*dm = new DensityMatrixSvdType(target,lrs_,p);
 		} else {
