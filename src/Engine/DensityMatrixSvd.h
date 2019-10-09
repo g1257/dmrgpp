@@ -108,6 +108,8 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 	typedef typename BasisType::QnType QnType;
 	typedef typename BasisWithOperatorsType::VectorQnType VectorQnType;
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
+	typedef typename TargetingType::VectorVectorVectorWithOffsetType
+	VectorVectorVectorWithOffsetType;
 
 	class GroupsStruct {
 
@@ -424,8 +426,7 @@ public:
 	      persistentSvd_(data_.blocks())
 	{
 		PsimagLite::Profiling profiling("DensityMatrixSvdCtor", std::cout);
-		SizeType oneOrZero = (target.includeGroundStage()) ? 1 : 0;
-		SizeType targets = oneOrZero + target.size(); // Number of targets;
+
 		typename GenIjPatchType::LeftOrRightEnumType dir1 =
 		        (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ?
 		            GenIjPatchType::LEFT : GenIjPatchType::RIGHT;
@@ -433,31 +434,43 @@ public:
 		        (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ?
 		            GenIjPatchType::RIGHT : GenIjPatchType::LEFT;
 
-		for (SizeType x = 0; x  < targets; ++x) {
-			SizeType x2 = (target.includeGroundStage() && x > 0 ) ? x - 1 : x;
+		typename PsimagLite::Vector<const VectorWithOffsetType*>::Type effectiveTargets;
+		SizeType x = 0;
+		SizeType psiTargets = 0;
+		if (target.includeGroundStage()) {
+			const VectorVectorVectorWithOffsetType& psi = target.psi();
+			const SizeType nexcited = psi.size();
 
-			const VectorWithOffsetType& v = (target.includeGroundStage() && x == 0) ?
-			            target.gs() : target(x2);
-
-			SizeType sectors = v.sectors();
-			for (SizeType sector = 0; sector < sectors; ++sector) {
-				SizeType m = v.sector(sector);
-				QnType qn = lrs_.super().qnEx(m);
-				GenIjPatchType genIjPatch(lrs, qn);
-				const VectorSizeType& groups =  genIjPatch(dir1);
-				for (SizeType i = 0; i < groups.size(); ++i) {
-					SizeType igroup = groups[i];
-					assert(genIjPatch(dir2).size() > i);
-					SizeType jgroup = genIjPatch(dir2)[i];
-					allTargets_.push(igroup, jgroup, x, sector);
+			for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
+				const SizeType nsectors = psi[excitedIndex].size();
+				for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+					effectiveTargets.push_back(psi[excitedIndex][sectorIndex]);
+					pushOneTarget(*(psi[excitedIndex][sectorIndex]), x++, dir1, dir2);
+					++psiTargets;
 				}
 			}
 		}
 
+		SizeType targets = target.size(); // Number of non-GS targets;
+
+		for (SizeType i = 0; i  < targets; ++i) {
+			const VectorWithOffsetType& v = target(i);
+			effectiveTargets.push_back(&v);
+			pushOneTarget(v, x++, dir1, dir2);
+		}
+
 		allTargets_.finalize();
 
-		for (SizeType x = 0; x < targets; ++x)
-			addThisTarget(x, target);
+		assert(effectiveTargets.size() == x);
+
+		for (SizeType x = 0; x < effectiveTargets.size(); ++x) {
+
+			const VectorWithOffsetType& v = *effectiveTargets[x];
+			const RealType weight = (x < psiTargets) ? target.gsWeight()
+			                                         : target.weight(x - psiTargets);
+
+			addThisTarget2(x, v, sqrt(weight));
+		}
 
 		PsimagLite::OstringStream msg;
 		msg<<"Found "<<allTargets_.size()<<" groups on left or right";
@@ -528,20 +541,6 @@ public:
 
 private:
 
-	void addThisTarget(SizeType x,
-	                   const TargetingType& target)
-
-	{
-		SizeType x2 = (target.includeGroundStage() && x > 0 ) ? x - 1 : x;
-
-		const VectorWithOffsetType& v = (target.includeGroundStage() && x == 0) ?
-		            target.gs() : target(x2);
-
-		RealType weight = (target.includeGroundStage() && x == 0 ) ?
-		            target.gsWeight() : target.weight(x2);
-
-		addThisTarget2(x, v, sqrt(weight));
-	}
 
 	void addThisTarget2(SizeType x,
 	                    const VectorWithOffsetType& v,
@@ -562,6 +561,26 @@ private:
 			                                  sqrtW,
 			                                  allTargets_);
 			threaded.loopCreate(parallelPsiSplit);
+		}
+	}
+
+	void pushOneTarget(const VectorWithOffsetType& v,
+	                   SizeType x,
+	                   typename GenIjPatchType::LeftOrRightEnumType dir1,
+	                   typename GenIjPatchType::LeftOrRightEnumType dir2)
+	{
+		SizeType sectors = v.sectors();
+		for (SizeType sector = 0; sector < sectors; ++sector) {
+			SizeType m = v.sector(sector);
+			QnType qn = lrs_.super().qnEx(m);
+			GenIjPatchType genIjPatch(lrs_, qn);
+			const VectorSizeType& groups =  genIjPatch(dir1);
+			for (SizeType i = 0; i < groups.size(); ++i) {
+				SizeType igroup = groups[i];
+				assert(genIjPatch(dir2).size() > i);
+				SizeType jgroup = genIjPatch(dir2)[i];
+				allTargets_.push(igroup, jgroup, x, sector);
+			}
 		}
 	}
 

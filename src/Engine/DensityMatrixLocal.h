@@ -107,6 +107,8 @@ public:
 	BasisWithOperatorsType,
 	TargetVectorType> ParallelDensityMatrixType;
 	typedef PsimagLite::Parallelizer<ParallelDensityMatrixType> ParallelizerType;
+	typedef typename TargetingType::VectorVectorVectorWithOffsetType
+	VectorVectorVectorWithOffsetType;
 
 	DensityMatrixLocal(const TargetingType& target,
 	                   const LeftRightSuperType& lrs,
@@ -144,14 +146,24 @@ public:
 			RealType w = target.gsWeight();
 
 			// if we are to target the ground state do it now:
-			if (target.includeGroundStage()) initPartition(matrixBlock,
-			                                               pBasis,
-			                                               m,
-			                                               target.gs(),
-			                                               pBasisSummed,
-			                                               lrs.super(),
-			                                               p.direction,
-			                                               w);
+			if (target.includeGroundStage()) {
+				const VectorVectorVectorWithOffsetType& psi = target.psi();
+				const SizeType nexcited = psi.size();
+
+				for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
+					const SizeType nsectors = psi[excitedIndex].size();
+					for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+						initPartition(matrixBlock,
+						              pBasis,
+						              m,
+						              *(psi[excitedIndex][sectorIndex]),
+						              pBasisSummed,
+						              lrs.super(),
+						              p.direction,
+						              w);
+					}
+				}
+			}
 
 			// target all other states if any:
 			for (SizeType ix = 0; ix < target.size(); ++ix) {

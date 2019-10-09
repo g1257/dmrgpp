@@ -265,15 +265,10 @@ public:
 
 	const ModelType& model() const { return model_; }
 
-//	VectorWithOffsetType& gs()
-//	{
-//		return commonTargeting_.aoe().psi();
-//	}
-
-//	const VectorWithOffsetType& gs() const
-//	{
-//		return commonTargeting_.aoe().psi();
-//	}
+	const VectorVectorVectorWithOffsetType& psi() const
+	{
+		return commonTargeting_.aoe().psi();
+	}
 
 	const VectorWithOffsetType& operator()(SizeType i) const
 	{
