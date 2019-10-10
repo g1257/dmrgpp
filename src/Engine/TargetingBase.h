@@ -205,14 +205,9 @@ public:
 				    " instead\n");
 
 			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
-
-				VectorSizeType weights(someBasis.partition() - 1);
-				SizeType sector = sectors[sectorIndex];
-				weights[sector] = someBasis.partition(sector + 1) - someBasis.partition(sector);
 				commonTargeting_.aoe().setPsi(excitedIndex,
 				                              sectorIndex,
 				                              inV[excitedIndex][sectorIndex],
-				                              weights,
 				                              someBasis,
 				                              sectors);
 			}
@@ -330,8 +325,11 @@ private:
 		const VectorVectorVectorWithOffsetType& psi = commonTargeting_.aoe().psi();
 		const SizeType nexcited = psi.size();
 
+		if (initialVector.size() != nexcited)
+			err("initialGuessVwo\n");
 		for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
 			const SizeType nsectors = psi[excitedIndex].size();
+			initialVector[excitedIndex].resize(nsectors);
 			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
 				VectorWithOffsetType vwo(weights, basis);
 				commonTargeting_.initialGuess(vwo,

@@ -621,6 +621,10 @@ public:
 
 private:
 
+	TargetingCommon(const TargetingCommon&) = delete;
+
+	TargetingCommon& operator=(const TargetingCommon&) = delete;
+
 	void setQuantumNumbers(const VectorWithOffsetType& v)
 	{
 		aoe_.setQuantumNumbers(v);

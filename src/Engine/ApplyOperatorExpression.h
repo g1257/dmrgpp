@@ -136,25 +136,21 @@ public:
 	      currentTimeStep_(0),
 	      indexNoAdvance_(indexNoAdvance),
 	      applyOpLocal_(targetHelper.lrs(), targetHelper.withLegacyBugs()),
+	      psi_(1),
 	      targetVectors_(0),
 	      timeVectorsBase_(0),
 	      wftHelper_(targetHelper.model(), targetHelper.lrs(), targetHelper.wft()),
 	      multiSiteExprHelper_(targetHelper_.model().geometry().numberOfSites() - 2),
 	      correlationsSkel_(multiSiteExprHelper_, false)
-	{}
+	{
+		psi_[0].resize(1);
+	}
 
 	~ApplyOperatorExpression()
 	{
 		delete timeVectorsBase_;
 		timeVectorsBase_ = 0;
-		const SizeType nexcited = psi_.size();
-		for (SizeType i =0; i < nexcited; ++i) {
-			const SizeType sectors = psi_[i].size();
-			for (SizeType j = 0; j < sectors; ++j) {
-				delete psi_[i][j];
-				psi_[i][j] = 0;
-			}
-		}
+		clearPsi();
 	}
 
 	void postCtor(SizeType tstSites)
@@ -274,14 +270,8 @@ public:
 	{
 		std::cerr<<"Setting only one psi\n";
 		std::cout<<"Setting only one psi\n";
-		const SizeType nexcited = psi_.size();
-		for (SizeType i =0; i < nexcited; ++i) {
-			const SizeType sectors = psi_[i].size();
-			for (SizeType j = 0; j < sectors; ++j) {
-				delete psi_[i][j];
-				psi_[i][j] = 0;
-			}
-		}
+
+		clearPsi();
 
 		psi_.resize(1);
 		psi_[0].resize(1);
@@ -291,8 +281,7 @@ public:
 	template<typename SomeBasisType>
 	void setPsi(SizeType excitedIndex,
 	            SizeType sectorIndex,
-	            const VectorType& v,
-	            const VectorSizeType& weights,
+	            VectorType& v,
 	            const SomeBasisType& basis,
 	            const VectorSizeType& sectors)
 	{
@@ -308,20 +297,23 @@ public:
 		assert(excitedIndex < psi_.size());
 		assert(sectorIndex < psi_[excitedIndex].size());
 
-		psi_[excitedIndex][sectorIndex] = new VectorWithOffsetType(weights, basis);
-		psi_[excitedIndex][sectorIndex]->setDataInSector(v, sector);
+		if (!psi_[excitedIndex][sectorIndex])
+			psi_[excitedIndex][sectorIndex] = new VectorWithOffsetType;
+		psi_[excitedIndex][sectorIndex]->set(v, sector, basis);
 	}
 
 	void writePsi(PsimagLite::IoSelector::Out& io, PsimagLite::String prefix) const
 	{
 		const SizeType nexcited = psi_.size();
+		io.createGroup(prefix + "/PSI");
 		io.write(nexcited, prefix + "/PSI/Size");
 		for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
 			const SizeType nsectors = psi_[excitedIndex].size();
-			PsimagLite::String label = prefix + "/PSI/" + ttos(excitedIndex) + "/";
-			io.write(nsectors, label + "Size");
+			PsimagLite::String label = prefix + "/PSI/" + ttos(excitedIndex);
+			io.createGroup(label);
+			io.write(nsectors, label + "/Size");
 			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex)
-				psi_[excitedIndex][sectorIndex]->write(io, label + ttos(sectorIndex));
+				psi_[excitedIndex][sectorIndex]->write(io, label + "/" + ttos(sectorIndex));
 		}
 	}
 
@@ -329,6 +321,7 @@ public:
 	{
 		SizeType nexcited = 0;
 		io.read(nexcited, prefix + "/PSI/Size");
+		clearPsi();
 		psi_.resize(nexcited);
 		for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
 
@@ -336,8 +329,10 @@ public:
 			SizeType nsectors = 0;
 			io.read(nsectors, label + "Size");
 			psi_[excitedIndex].resize(nsectors);
-			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex)
+			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+				psi_[excitedIndex][sectorIndex] = new VectorWithOffsetType;
 				psi_[excitedIndex][sectorIndex]->read(io, label + ttos(sectorIndex));
+			}
 		}
 	}
 
@@ -713,6 +708,22 @@ private:
 			throw PsimagLite::RuntimeError("computePhi\n");
 		}
 	}
+
+	void clearPsi()
+	{
+		const SizeType nexcited = psi_.size();
+		for (SizeType i =0; i < nexcited; ++i) {
+			const SizeType sectors = psi_[i].size();
+			for (SizeType j = 0; j < sectors; ++j) {
+				delete psi_[i][j];
+				psi_[i][j] = 0;
+			}
+		}
+	}
+
+	ApplyOperatorExpression(const ApplyOperatorExpression&) = delete;
+
+	ApplyOperatorExpression& operator=(const ApplyOperatorExpression&) = delete;
 
 	PsimagLite::ProgressIndicator progress_;
 	const TargetHelperType& targetHelper_;

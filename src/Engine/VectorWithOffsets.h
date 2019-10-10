@@ -144,8 +144,8 @@ public:
 	}
 
 	template<typename SomeBasisType>
-	void set(VectorVectorType& v,
-	         const VectorSizeType& sectors,
+	void set(VectorType& v,
+	         SizeType sector,
 	         const SomeBasisType& someBasis)
 	{
 		size_ = someBasis.size();
@@ -158,17 +158,9 @@ public:
 		for (SizeType i = 0; i < n; ++i)
 			offsets_[i] = someBasis.partition(i);
 
-		SizeType m = sectors.size();
-		if (m != v.size())
-			err("FATAL: VectorWithOffsets::");
-
-		for (SizeType j = 0; j < m; ++j) {
-			SizeType i = sectors[j];
-			data_[i].swap(v[j]);
-			QnType qn = someBasis.pseudoQn(i);
-			nzMsAndQns_.push_back(PairQnType(i, qn));
-
-		}
+		data_[sector].swap(v);
+		QnType qn = someBasis.pseudoQn(sector);
+		nzMsAndQns_.push_back(PairQnType(sector, qn));
 
 		offsets_[n] = size_;
 		setIndex2Sector();
