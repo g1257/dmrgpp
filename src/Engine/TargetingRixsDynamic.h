@@ -352,8 +352,10 @@ private:
 			           this->common().aoe().targetVectors(1), // src1 apply op on Im|alpha(C)>
 			           direction);
 
+			const VectorWithOffsetType& psi00 = this->common().aoe().
+			        ensureOnlyOnePsi(__FILE__ + PsimagLite::String("::doMax1"));
 			if (tmpV1.size() > 0)
-				addFactor(tmpV1, this->common().aoe().psi(), densCim);
+				addFactor(tmpV1, psi00, densCim);
 
 			if (tmpV1.size() > 0)
 				this->common().aoe().targetVectors(6) = tmpV1;
@@ -368,7 +370,7 @@ private:
 			           direction);
 
 			if (tmpV2.size() > 0)
-				addFactor(tmpV2, this->common().aoe().psi(), densCre);
+				addFactor(tmpV2, psi00, densCre);
 
 			if (tmpV2.size() > 0) {
 				this->common().aoe().targetVectors(7) = tmpV2;
@@ -443,8 +445,11 @@ private:
 			           this->common().aoe().targetVectors(1), // src1 apply op on Im|alpha(C)>
 			           direction);
 
+			const VectorWithOffsetType& psi00 = this->common().aoe().
+			        ensureOnlyOnePsi(__FILE__ + PsimagLite::String("::doMax2"));
+
 			if (tmpV1.size() > 0)
-				addFactor(tmpV1, this->common().aoe().psi(), densCim);
+				addFactor(tmpV1, psi00, densCim);
 
 			if (tmpV1.size() > 0)
 				this->common().aoe().targetVectors(6) += tmpV1;
@@ -458,7 +463,7 @@ private:
 			           direction);
 
 			if (tmpV2.size() > 0)
-				addFactor(tmpV2, this->common().aoe().psi(), densCre);
+				addFactor(tmpV2, psi00, densCre);
 
 			if (tmpV2.size() > 0) {
 				this->common().aoe().targetVectors(7) += tmpV2;

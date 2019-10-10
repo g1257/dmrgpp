@@ -257,6 +257,8 @@ private:
 			err("You cannot apply more than 2 operators (only SUM is allowed)\n");
 
 		if (!applied_) {
+			const VectorWithOffsetType& psi00 = this->common().aoe().
+						        ensureOnlyOnePsi(__FILE__ + PsimagLite::String("::evolve"));
 			if (max==1) {
 				if (site == tstStruct_.sites(0)) {
 					VectorWithOffsetType tmpV1;
@@ -265,7 +267,7 @@ private:
 					                                indexOfOperator,
 					                                site,
 					                                tmpV1,
-					                                this->common().aoe().psi(),
+					                                psi00,
 					                                direction,
 					                                tstStruct_);
 					if (tmpV1.size() > 0) {
@@ -285,7 +287,7 @@ private:
 					                                indexOfOperator,
 					                                site,
 					                                tmpV1,
-					                                this->common().aoe().psi(),
+					                                psi00,
 					                                direction,
 					                                tstStruct_);
 					if (tmpV1.size() > 0) {
@@ -304,7 +306,7 @@ private:
 					                                indexOfOperator,
 					                                site,
 					                                tmpV2,
-					                                this->common().aoe().psi(),
+					                                psi00,
 					                                direction,
 					                                tstStruct_);
 					if (tmpV2.size() > 0) {

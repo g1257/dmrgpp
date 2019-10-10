@@ -267,7 +267,11 @@ public:
 			SizeType tvForPsiUnsigned = tvForPsi;
 			if (tvForPsiUnsigned >= rtvs)
 				err("TargetingCommon::readGSandNGSTs: sourceTvForPsi >= " + ttos(rtvs) + "\n");
-			aoe_.psi() = ts->vector(tvForPsiUnsigned);
+
+			std::cout<<"FIXME TODO WARNING: Need better spec for TvForPsi\n";
+			std::cerr<<"FIXME TODO WARNING: Need better spec for TvForPsi\n";
+
+			aoe_.setOnlyOnePsi(ts->vector(tvForPsiUnsigned));
 		}
 
 		for (SizeType i = 0; i < dtvs; ++i) {
@@ -445,7 +449,7 @@ public:
 	void computeCorrection(ProgramGlobals::DirectionEnum direction,
 	                       const BlockType& block1)
 	{
-		const VectorWithOffsetType& psi = aoe_.psi();
+		const VectorWithOffsetType& psi = aoe_.ensureOnlyOnePsi("computeCorrection");
 		VectorWithOffsetType& v = aoe_.targetVectors(0);
 
 		// operators in the one-site basis:
@@ -589,7 +593,21 @@ public:
 		progress_.printline(msg, std::cout);
 
 		PsimagLite::OstringStream msg2;
-		msg2<<"gsNorm="<<norm(aoe_.psi())<<" norms= ";
+		msg2<<"gsNorms=";
+
+		const SizeType nexcited = aoe_.psi().size();
+		for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
+			const SizeType nsectors = aoe_.psi()[excitedIndex].size();
+			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+				if (nexcited > 1)
+					msg2<<"e"<<excitedIndex<<";";
+				if (nsectors > 1)
+					msg2<<"s"<<sectorIndex<<";";
+				msg2<<norm(*(aoe_.psi()[excitedIndex][sectorIndex]))<<" ";
+			}
+		}
+
+		msg2<<" norms= ";
 		for (SizeType i = 0; i < weights.size(); i++)
 			msg2<<normSquared(i)<<" ";
 		progress_.printline(msg2, std::cout);
@@ -675,7 +693,7 @@ private:
 
 		SizeType ind = getBraOrKet();
 
-		return (ind == 0) ? aoe_.psi() : aoe_.targetVectors(ind - 1);
+		return (ind == 0) ? *(aoe_.psi()[0][0]) : aoe_.targetVectors(ind - 1);
 	}
 
 	void getVectorCheck(PsimagLite::String braOrKet) const

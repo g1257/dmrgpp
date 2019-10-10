@@ -270,6 +270,24 @@ public:
 		return psi_;
 	}
 
+	void setOnlyOnePsi(const VectorWithOffsetType& v)
+	{
+		std::cerr<<"Setting only one psi\n";
+		std::cout<<"Setting only one psi\n";
+		const SizeType nexcited = psi_.size();
+		for (SizeType i =0; i < nexcited; ++i) {
+			const SizeType sectors = psi_[i].size();
+			for (SizeType j = 0; j < sectors; ++j) {
+				delete psi_[i][j];
+				psi_[i][j] = 0;
+			}
+		}
+
+		psi_.resize(1);
+		psi_[0].resize(1);
+		psi_[0][0] = new VectorWithOffsetType(v);
+	}
+
 	template<typename SomeBasisType>
 	void setPsi(SizeType excitedIndex,
 	            SizeType sectorIndex,
@@ -309,13 +327,13 @@ public:
 
 	void readPsi(PsimagLite::IoSelector::In& io, PsimagLite::String prefix)
 	{
-		const SizeType nexcited = 0;
+		SizeType nexcited = 0;
 		io.read(nexcited, prefix + "/PSI/Size");
 		psi_.resize(nexcited);
 		for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
 
 			PsimagLite::String label = prefix + "/PSI/" + ttos(excitedIndex) + "/";
-			const SizeType nsectors = 0;
+			SizeType nsectors = 0;
 			io.read(nsectors, label + "Size");
 			psi_[excitedIndex].resize(nsectors);
 			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex)
