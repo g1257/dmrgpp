@@ -294,6 +294,35 @@ public:
 		psi_[excitedIndex][sectorIndex]->setDataInSector(v, sector);
 	}
 
+	void writePsi(PsimagLite::IoSelector::Out& io, PsimagLite::String prefix) const
+	{
+		const SizeType nexcited = psi_.size();
+		io.write(nexcited, prefix + "/PSI/Size");
+		for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
+			const SizeType nsectors = psi_[excitedIndex].size();
+			PsimagLite::String label = prefix + "/PSI/" + ttos(excitedIndex) + "/";
+			io.write(nsectors, label + "Size");
+			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex)
+				psi_[excitedIndex][sectorIndex]->write(io, label + ttos(sectorIndex));
+		}
+	}
+
+	void readPsi(PsimagLite::IoSelector::In& io, PsimagLite::String prefix)
+	{
+		const SizeType nexcited = 0;
+		io.read(nexcited, prefix + "/PSI/Size");
+		psi_.resize(nexcited);
+		for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
+
+			PsimagLite::String label = prefix + "/PSI/" + ttos(excitedIndex) + "/";
+			const SizeType nsectors = 0;
+			io.read(nsectors, label + "Size");
+			psi_[excitedIndex].resize(nsectors);
+			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex)
+				psi_[excitedIndex][sectorIndex]->read(io, label + ttos(sectorIndex));
+		}
+	}
+
 	const VectorVectorWithOffsetType& targetVectors() const
 	{
 		return targetVectors_;
@@ -460,7 +489,8 @@ public:
 
 	void multiSitePush(DmrgSerializerType const* ds) const
 	{
-		multiSiteExprHelper_.push(ds, psi_);
+		const VectorWithOffsetType& psi00 = ensureOnlyOnePsi("multiSitePush");
+		multiSiteExprHelper_.push(ds, psi00);
 	}
 
 	void wftSome(SizeType site, SizeType begin, SizeType end)

@@ -201,7 +201,7 @@ public:
 		progress_.printline(msg,std::cout);
 
 		io.write(block[0], prefix + "/TargetCentralSite");
-		aoe_.psi().write(io, prefix + "/PSI");
+		aoe_.writePsi(io, prefix);
 	}
 
 	void writeNGSTs(PsimagLite::IoSelector::Out& io,
@@ -230,7 +230,7 @@ public:
 	{
 		prefix += "/";
 		aoe_.loadEnergy(io, "Energies");
-		aoe_.psi().read(io, prefix + "PSI");
+		aoe_.readPsi(io, prefix);
 	}
 
 	void readGSandNGSTs(IoInputType& io, PsimagLite::String prefix)
