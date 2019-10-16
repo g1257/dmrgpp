@@ -9,7 +9,12 @@ class GetBraOrKet {
 
 public:
 
-	GetBraOrKet(String braOrKet) : braOrKet_(braOrKet)
+	enum class Kind {E, P};
+
+	typedef std::pair<SizeType, SizeType> PairSizeType;
+
+	GetBraOrKet(String braOrKet)
+	    : isKet_(true), braOrKet_(braOrKet), kind_(Kind::E), pair_(0, 0)
 	{
 		const SizeType l = braOrKet.length();
 		if (l < 2)
@@ -17,39 +22,71 @@ public:
 		const SizeType last = l - 1;
 		if (braOrKet_[0] == '|' && braOrKet_[last] == '>' && l > 2)
 			braOrKet_ = braOrKet.substr(1, l - 2);
-		if (braOrKet_[0] == '<' && braOrKet_[last] == '|' && l > 2)
+		if (braOrKet_[0] == '<' && braOrKet_[last] == '|' && l > 2) {
 			braOrKet_ = braOrKet.substr(1, l - 2);
+			isKet_ = false;
+		}
+
+		getKind(braOrKet_);
 	}
 
-	SizeType operator()() const
-	{
-		if (braOrKet_ == "gs")
-			return 0;
+	bool isKet() const { return isKet_; }
 
-		int ind = getPtype(braOrKet_);
-		if (ind <= 0)
-			err("Malformed braket " + braOrKet_ + "\n");
-		return ind;
+	const String& toString() const { return braOrKet_; }
+
+	bool isPvector() const { return (kind_ == Kind::P); }
+
+	SizeType levelIndex() const { return pair_.first; }
+
+	SizeType sectorIndex() const { return pair_.second; }
+
+private:
+
+	void getKind(String str)
+	{
+		if (str.length() < 2)
+			err("GetBraOrKet:: " + str + "too short\n");
+
+		if (str[0] == 'P') {
+			kind_ = Kind::P;
+			pair_.first = getNumberFrom(str, 1); // modifies str
+		} else if (str == "gs") {
+			kind_ = Kind::E;
+			return;
+		} else if (str == "time") { // legacy name
+			kind_ = Kind::P;
+			return;
+		} else if (str[0] == 'X') {
+			kind_ = Kind::E;
+			pair_.first = getNumberFrom(str, 1); // modifies str
+		}
+
+		if (str.size() < 2)
+			return;
+
+		if (str[0] == 'Q') {
+			pair_.second = getNumberFrom(str, 1); // modifies str
+		} else {
+			err("A vector spec can only start with P, gs, X or Q " + str + "\n");
+		}
 	}
 
-	static int getPtype(String str)
+	static SizeType getNumberFrom(String str, SizeType start)
 	{
-		// str == P\d+
-		if (str.length() < 2) return -1;
-		if (str[0] != 'P') return -1;
 		String number("");
-		for (SizeType i = 1; i < str.length(); ++i) {
+		for (SizeType i = start; i < str.length(); ++i) {
 			number += str[i];
 			unsigned char x = str[i];
 			if (x < 48 || x > 57) return -1;
 		}
 
-		return atoi(number.c_str()) + 1;
+		return atoi(number.c_str());
 	}
 
-private:
-
+	bool isKet_;
 	String braOrKet_;
+	Kind kind_;
+	PairSizeType pair_;
 };
 }
 #endif // GETBRAORKET_H
