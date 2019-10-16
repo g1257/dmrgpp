@@ -325,13 +325,11 @@ private:
 
 	static SizeType braketStringToNumber(const PsimagLite::String& str)
 	{
-		if (str == "gs") return 0;
-		if (str == "time") return 1; // == "P0", "time" is legacy notation
-		int x = GetBraOrKetType::getPtype(str);
-		if (x >= 0) return x;
+		GetBraOrKetType ketOrBra(str);
+		if (!ketOrBra.isPvector())
+			return 0;
 
-		PsimagLite::String msg("ObserverHelper::braketStringToNumber:");
-		throw PsimagLite::RuntimeError(msg + " must be gs or time or P\\d+\n");
+		return ketOrBra.levelIndex();
 	}
 
 	void checkIndex(SizeType ind) const

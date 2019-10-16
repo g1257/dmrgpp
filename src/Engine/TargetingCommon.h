@@ -695,15 +695,15 @@ private:
 	{
 		PsimagLite::GetBraOrKet getBraOrKet(braOrKet);
 
-		SizeType ind = getBraOrKet();
+		if (getBraOrKet.isPvector())
+			return aoe_.targetVectors(getBraOrKet.levelIndex());
 
-		return (ind == 0) ? *(aoe_.psi()[0][0]) : aoe_.targetVectors(ind - 1);
+		return *(aoe_.psi()[getBraOrKet.levelIndex()][getBraOrKet.sectorIndex()]);
 	}
 
 	void getVectorCheck(PsimagLite::String braOrKet) const
 	{
 		PsimagLite::GetBraOrKet getBraOrKet(braOrKet);
-		getBraOrKet();
 	}
 
 	// prints <src2|A|src1>

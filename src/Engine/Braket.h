@@ -28,9 +28,10 @@ public:
 	typedef typename PsimagLite::Vector<AlgebraType>::Type VectorAlgebraType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef PsimagLite::GetBraOrKet GetBraOrKetType;
+	typedef PsimagLite::Vector<GetBraOrKetType>::Type VectorGetBraOrKetType;
 
 	Braket(const ModelType& model,const PsimagLite::String& braket)
-	    : model_(model), braket_(2,""),savedString_(braket)
+	    : model_(model), savedString_(braket)
 	{
 		VectorStringType vecStr;
 		PsimagLite::split(vecStr, braket, "|");
@@ -49,19 +50,9 @@ public:
 			throw PsimagLite::RuntimeError(str);
 		}
 
-		braket_[0] = vecStr[0].substr(1,vecStr[0].length()-1);
-		if (!isBraket(0)) {
-			PsimagLite::String str("ObserverInterpreter: syntax error: ");
-			str += braket_[0] + " must be <gs or <time or <P\\d+\n";
-			throw PsimagLite::RuntimeError(str);
-		}
+		braket_.push_back(vecStr[0].substr(1,vecStr[0].length()-1));
 
-		braket_[1] = vecStr[2].substr(0,vecStr[2].length()-1);
-		if (!isBraket(1)) {
-			PsimagLite::String str("ObserverInterpreter: syntax error: ");
-			str += braket_[1] + " must be gs> or time>  or <P\\d+\n";
-			throw PsimagLite::RuntimeError(str);
-		}
+		braket_.push_back(vecStr[2].substr(0,vecStr[2].length()-1));
 
 		PsimagLite::split(opExprName_, vecStr[1], ";");
 
@@ -89,15 +80,15 @@ public:
 		return opExprName_[ind];
 	}
 
-	PsimagLite::String bra() const
+	const GetBraOrKetType& bra() const
 	{
-		assert(isBraket(0));
+		assert(braket_.size() > 0);
 		return braket_[0];
 	}
 
-	PsimagLite::String ket() const
+	const GetBraOrKetType& ket() const
 	{
-		assert(isBraket(1));
+		assert(braket_.size() > 1);
 		return braket_[1];
 	}
 
@@ -113,18 +104,8 @@ public:
 
 private:
 
-	bool isBraket(SizeType ind) const
-	{
-		if (ind >= braket_.size()) return false;
-		int pType = PsimagLite::GetBraOrKet::getPtype(braket_[ind]);
-
-		return (braket_[ind] == "gs" ||
-		        braket_[ind] == "time" ||
-		        pType >= 0);
-	}
-
 	const ModelType& model_;
-	VectorStringType braket_;
+	VectorGetBraOrKetType braket_;
 	PsimagLite::String savedString_;
 	VectorStringType opExprName_;
 	SizeType type_;
