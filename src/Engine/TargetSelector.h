@@ -11,7 +11,6 @@
 #include "TargetingRixsStatic.h"
 #include "TargetingRixsDynamic.h"
 #include "TargetingExpression.h"
-#include "TargetingMultiQ.h"
 
 namespace Dmrg {
 
@@ -41,7 +40,6 @@ class TargetSelector {
 	typedef TargetingRixsStatic<LanczosSolverType,VectorWithOffsetType> TargetingRixsStaticType;
 	typedef TargetingRixsDynamic<LanczosSolverType,VectorWithOffsetType> TargetingRixsDynamicType;
 	typedef TargetingExpression<LanczosSolverType,VectorWithOffsetType> TargetingExpressionType;
-	typedef TargetingMultiQ<LanczosSolverType,VectorWithOffsetType> TargetingMultiQType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 public:
@@ -107,8 +105,6 @@ public:
 			psi_ = new TargetingRixsDynamicType(lrs_,model_,wft_,qn,ioIn_);
 		} else if (targeting == "TargetingExpression") {
 			psi_ = new TargetingExpressionType(lrs_, model_, wft_, qn, ioIn_);
-		} else if (targeting == "TargetingMultiQ") {
-			psi_ = new TargetingMultiQType(lrs_, model_, wft_, quantumSector_, ioIn_, targeting);
 		} else {
 			err("Unknown targeting " + targeting + "\n");
 		}
