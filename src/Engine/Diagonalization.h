@@ -232,8 +232,8 @@ private:
 
 		SizeType total = lrs.super().partition()-1;
 		SizeType weightsTotal = 0;
-		VectorSizeType weights(total);
 		VectorSizeType sectors;
+		VectorSizeType compactedWeights;
 		for (SizeType i = 0; i < total; ++i) {
 			SizeType bs = lrs.super().partition(i+1)-lrs.super().partition(i);
 			if (verbose_)
@@ -248,13 +248,14 @@ private:
 				}
 			}
 
-			if (!flag && !findSymmetrySector)
+			if (!flag && !findSymmetrySector) {
 				bs = 0;
-			else
+			} else {
 				sectors.push_back(i);
+				compactedWeights.push_back(bs);
+			}
 
 			weightsTotal += bs;
-			weights[i] = bs;
 		}
 
 		if (weightsTotal == 0) {
@@ -268,7 +269,13 @@ private:
 		typename PsimagLite::Vector<VectorRealType>::Type energySaved(numberOfExcited);
 		VectorVectorVectorType vecSaved(numberOfExcited);
 
-		target.initialGuess(initialVector, block, noguess, weights, lrs.super());
+		target.initPsi(numberOfExcited, totalSectors);
+		target.initialGuess(initialVector,
+		                    block,
+		                    noguess,
+		                    compactedWeights,
+		                    sectors,
+		                    lrs.super());
 
 		for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited; ++excitedIndex) {
 
@@ -339,10 +346,16 @@ private:
 				if (vecSaved[excitedIndex][i].size() == 0)
 					continue;
 
-				if (!flag && energySaved[excitedIndex][i] > myEnergy)
+				const RealType sectorEnergy = energySaved[excitedIndex][i];
+				PsimagLite::OstringStream msg4;
+				msg4<<"Level["<<excitedIndex<<"]="<<parameters_.excited[excitedIndex];
+				msg4<<" Sector["<<i<<"]="<<sectors[i];
+				msg4<<" sector energy = "<<sectorEnergy;
+				progress_.printline(msg4, std::cout);
+				if (!flag && sectorEnergy > myEnergy)
 					continue;
 
-				myEnergy = energySaved[excitedIndex][i];
+				myEnergy = sectorEnergy;
 				flag = false;
 			}
 

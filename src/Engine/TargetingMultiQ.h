@@ -156,10 +156,10 @@ public:
 
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType j = sectors[i];
-			VectorSizeType weights(basis.partition() - 1);
 
-			weights[j] = basis.partition(j + 1) - basis.partition(j);
-			VectorWithOffsetType vwo(weights, basis);
+			VectorWithOffsetType vwo(basis.partition(j + 1) - basis.partition(j),
+			                         j,
+			                         basis);
 			vwo.setDataInSector(inV[0][i], j);
 			VectorWithOffsetType& handle =
 			        const_cast<VectorWithOffsetType&>(this->common().aoe().targetVectors()[i]);

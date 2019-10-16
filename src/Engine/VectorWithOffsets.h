@@ -134,6 +134,41 @@ public:
 		setIndex2Sector();
 	}
 
+	template<typename SomeBasisType>
+	VectorWithOffsets(SizeType, SizeType, const SomeBasisType&)
+	    : progress_("VectorWithOffset")
+	{
+		err("VectorWithOffsets::ctor() FATAL: wrong execution path!\n");
+	}
+
+	template<typename SomeBasisType>
+	VectorWithOffsets(const VectorSizeType& compactedWeights,
+	                  const VectorSizeType& sectors,
+	                  const SomeBasisType& someBasis)
+	    : progress_("VectorWithOffsets"),
+	      size_(someBasis.size()),
+	      index2Sector_(size_),
+	      data_(someBasis.partition() - 1),
+	      offsets_(someBasis.partition())
+	{
+		for (SizeType i = 0; i < offsets_.size(); ++i)
+			offsets_[i] = someBasis.partition(i);
+
+		assert(data_.size() < offsets_.size());
+		if (offsets_[data_.size()] != size_)
+			err("VectorWithOffsets::ctor(): FATAL: internal error\n");
+
+		for (SizeType sectorIndex = 0; sectorIndex < compactedWeights.size(); ++sectorIndex) {
+			const SizeType sector = sectors[sectorIndex];
+			data_[sector].resize(compactedWeights[sectorIndex]);
+			QnType qn = someBasis.pseudoQn(sector);
+			nzMsAndQns_.push_back(PairQnType(sector, qn));
+
+		}
+
+		setIndex2Sector();
+	}
+
 	void clear()
 	{
 		size_ = 0;

@@ -109,31 +109,42 @@ public:
 	{}
 
 	template<typename SomeBasisType>
-	VectorWithOffset(const VectorSizeType& weights,
+	VectorWithOffset(const VectorSizeType& compactedWeights,
+	                 const VectorSizeType& sectors,
 	                 const SomeBasisType& someBasis)
 	    : progress_("VectorWithOffset"),
 	      size_(someBasis.size()),
-	      offset_(0),
 	      mAndq_(PairQnType(0, QnType::zero()))
 	{
-		bool found = false;
-		for (SizeType i=0;i<weights.size();i++) {
-			if (weights[i]>0) {
-				if (found) {
-					PsimagLite::String msg("FATAL: VectorWithOffset::");
-					msg += " more than one non-zero sector found. ";
-					msg += " Maybe you should be using VectorWithOffsets instead?\n";
-					throw PsimagLite::RuntimeError(msg);
-				}
+		if (compactedWeights.size() != sectors.size())
+			err("VectorWithOffset::ctor(): INTERNAL ERROR\n");
 
-				data_.resize(weights[i]);
-				offset_ = someBasis.partition(i);
-				const QnType& qn = someBasis.pseudoQn(i);
-				mAndq_ = PairQnType(i, qn);
-				found = true;
-			}
+		if (compactedWeights.size() == 0)
+			err("VectorWithOffset::ctor(): no sectors!\n");
+
+		if (compactedWeights.size() > 1) {
+			PsimagLite::String msg("FATAL: VectorWithOffset::");
+			msg += " more than one non-zero sector found. ";
+			msg += " Maybe you should be using VectorWithOffsets instead?\n";
+			throw PsimagLite::RuntimeError(msg);
 		}
+
+		data_.resize(compactedWeights[0]);
+		const SizeType sector = sectors[0];
+		offset_ = someBasis.partition(sector);
+		mAndq_ = PairQnType(sector, someBasis.pseudoQn(sector));
 	}
+
+	template<typename SomeBasisType>
+	VectorWithOffset(SizeType weight,
+	                 SizeType sector,
+	                 const SomeBasisType& someBasis)
+	    : progress_("VectorWithOffset"),
+	      size_(someBasis.size()),
+	      data_(weight),
+	      offset_(someBasis.partition(sector)),
+	      mAndq_(PairQnType(sector, someBasis.pseudoQn(sector)))
+	{}
 
 	void clear()
 	{

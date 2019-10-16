@@ -136,15 +136,12 @@ public:
 	      currentTimeStep_(0),
 	      indexNoAdvance_(indexNoAdvance),
 	      applyOpLocal_(targetHelper.lrs(), targetHelper.withLegacyBugs()),
-	      psi_(1),
 	      targetVectors_(0),
 	      timeVectorsBase_(0),
 	      wftHelper_(targetHelper.model(), targetHelper.lrs(), targetHelper.wft()),
 	      multiSiteExprHelper_(targetHelper_.model().geometry().numberOfSites() - 2),
 	      correlationsSkel_(multiSiteExprHelper_, false)
-	{
-		psi_[0].resize(1);
-	}
+	{}
 
 	~ApplyOperatorExpression()
 	{
@@ -152,6 +149,35 @@ public:
 		timeVectorsBase_ = 0;
 		clearPsi();
 	}
+
+	virtual void initPsi(SizeType nexcited, SizeType nsectors)
+	{
+		if (psi_.size() > 0) {
+			if (psi_.size() != nexcited)
+				err("AOE::initPsi(): nexcited cannot change during run\n");
+			bool flag = true;
+			for (SizeType i = 0; i < nexcited; ++i)
+				if (psi_[i].size() != nsectors)
+					flag = false;
+
+			if (flag) return;
+
+			std::cerr<<"AOE::initPsi(): WARNING sectors changed during run\n";
+			std::cout<<"AOE::initPsi(): WARNING sectors changed during run\n";
+			for (SizeType i = 0; i < nexcited; ++i) {
+				for (SizeType j = 0; j < psi_[i].size(); ++j) {
+					delete psi_[i][j];
+					psi_[i][j] = nullptr;
+				}
+			}
+		}
+
+		psi_.resize(nexcited);
+
+		for (SizeType i = 0; i < nexcited; ++i)
+			psi_[i].resize(nsectors, nullptr);
+	}
+
 
 	void postCtor(SizeType tstSites)
 	{
