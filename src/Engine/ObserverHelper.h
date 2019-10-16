@@ -210,11 +210,13 @@ public:
 		return dSerializerV_[ind]->direction();
 	}
 
-	const VectorWithOffsetType& wavefunction(SizeType ind) const
+	const VectorWithOffsetType& wavefunction(SizeType ind,
+	                                         SizeType levelIndex,
+	                                         SizeType sectorIndex) const
 	{
 		checkIndex(ind);
 
-		return dSerializerV_[ind]->wavefunction();
+		return dSerializerV_[ind]->wavefunction(levelIndex, sectorIndex);
 	}
 
 	RealType time(SizeType ind) const
@@ -239,17 +241,15 @@ public:
 
 	SizeType size() const { return dSerializerV_.size(); }
 
-	const VectorWithOffsetType& getVectorFromBracketId(PsimagLite::String braOrKet,
+	const VectorWithOffsetType& getVectorFromBracketId(const PsimagLite::GetBraOrKet& braOrKet,
 	                                                   SizeType index) const
 	{
-		SizeType braketId = braketStringToNumber(braOrKet);
-		// braketId == 0 means GS
-		if (braketId == 0)
-			return wavefunction(index);
+		const SizeType levelIndex = braOrKet.levelIndex();
 
-		// braketId > 0 then it means the "time vector" number braketId - 1
-		assert(braketId > 0);
-		return timeVector(braketId - 1, index);
+		if (braOrKet.isPvector())
+			return timeVector(index, levelIndex);
+
+		return wavefunction(index, levelIndex, braOrKet.sectorIndex());
 	}
 
 	const VectorWithOffsetType& timeVector(SizeType braketId,

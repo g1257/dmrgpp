@@ -283,8 +283,8 @@ public:
 	FieldType bracket(const SparseMatrixType& A,
 	                  ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	                  SizeType ptr,
-	                  PsimagLite::String bra,
-	                  PsimagLite::String ket) const
+	                  const PsimagLite::GetBraOrKet& bra,
+	                  const PsimagLite::GetBraOrKet& ket) const
 	{
 		try {
 			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
@@ -303,8 +303,8 @@ public:
 	                             const SparseMatrixType& B,
 	                             ProgramGlobals::FermionOrBosonEnum fermionSign,
 	                             SizeType ptr,
-	                             PsimagLite::String bra,
-	                             PsimagLite::String ket) const
+	                             const PsimagLite::GetBraOrKet& bra,
+	                             const PsimagLite::GetBraOrKet& ket) const
 	{
 		try {
 			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
@@ -323,8 +323,8 @@ public:
 	                             const SparseMatrixType& C,
 	                             ProgramGlobals::FermionOrBosonEnum fermionSign,
 	                             SizeType ptr,
-	                             PsimagLite::String bra,
-	                             PsimagLite::String ket) const
+	                             const PsimagLite::GetBraOrKet& bra,
+	                             const PsimagLite::GetBraOrKet& ket) const
 	{
 		try {
 			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);

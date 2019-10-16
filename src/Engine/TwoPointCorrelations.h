@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "Parallelizer.h"
 #include "ProgramGlobals.h"
+#include "GetBraOrKet.h"
 
 namespace Dmrg {
 
@@ -116,8 +117,8 @@ public:
 	                const SparseMatrixType& O1,
 	                const SparseMatrixType& O2,
 	                ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	                PsimagLite::String bra,
-	                PsimagLite::String ket) const
+	                const PsimagLite::GetBraOrKet& bra,
+	                const PsimagLite::GetBraOrKet& ket) const
 	{
 		SizeType rows = w.n_row();
 		SizeType cols = w.n_col();
@@ -154,8 +155,8 @@ public:
 	                          const SparseMatrixType& O1,
 	                          const SparseMatrixType& O2,
 	                          ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	                          PsimagLite::String bra,
-                              PsimagLite::String ket) const
+	                          const PsimagLite::GetBraOrKet& bra,
+                              const PsimagLite::GetBraOrKet& ket) const
 	{
 		FieldType c = 0;
 		if (i==j) {
@@ -175,8 +176,8 @@ private:
 	                                  const SparseMatrixType& O1,
 	                                  const SparseMatrixType& O2,
 	                                  ProgramGlobals::FermionOrBosonEnum,
-	                                  PsimagLite::String bra,
-		                              PsimagLite::String ket) const
+	                                  const PsimagLite::GetBraOrKet& bra,
+		                              const PsimagLite::GetBraOrKet& ket) const
 	{
 		SizeType n = O1.rows();
 		SparseMatrixType O1new=identity(n);
@@ -204,8 +205,8 @@ private:
 	                           const SparseMatrixType& O1,
 	                           const SparseMatrixType& O2,
 	                           ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	                           PsimagLite::String bra,
-	                           PsimagLite::String ket) const
+	                           const PsimagLite::GetBraOrKet& bra,
+	                           const PsimagLite::GetBraOrKet& ket) const
 	{
 
 		if (i >= j)

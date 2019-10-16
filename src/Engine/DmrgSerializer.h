@@ -86,10 +86,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 // Move also checkpointing from DmrgSolver to here (FIXME)
-template<typename LeftRightSuperType,typename VectorType>
+template<typename LeftRightSuperType,typename VectorWithOffsetType>
 class DmrgSerializer {
 
-	typedef DmrgSerializer<LeftRightSuperType,VectorType> ThisType;
+	typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> ThisType;
 	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
@@ -104,11 +104,13 @@ public:
 	typedef typename BasisType::RealType RealType;
 	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
 	typedef BlockOffDiagMatrix<MatrixType> BlockOffDiagMatrixType;
+	typedef typename PsimagLite::Vector<typename
+	PsimagLite::Vector<VectorWithOffsetType*>::Type>::Type VectorVectorVectorWithOffsetType;
 
 	DmrgSerializer(const FermionSignType& fS,
 	               const FermionSignType& fE,
 	               const LeftRightSuperType& lrs,
-	               const VectorType& wf,
+	               const VectorWithOffsetType& wf,
 	               const BlockDiagonalMatrixType& transform,
 	               ProgramGlobals::DirectionEnum direction)
 	    : fS_(fS),
@@ -134,7 +136,19 @@ public:
 	{
 		if (bogus) return;
 
-		wavefunction_.read(io, prefix + "/WaveFunction");
+		SizeType levels = 0;
+		io.read(levels, prefix + "/WaveFunction/Size");
+		wavefunction_.resize(levels);
+		for (SizeType i = 0; i < levels; ++i) {
+			SizeType nsectors = 0;
+			io.read(nsectors, prefix + "/WaveFunction/" + ttos(i) + "/Size");
+			wavefunction_[i].resize(nsectors);
+			for (SizeType j = 0; j < nsectors; ++j) {
+				wavefunction_[i][j] = new VectorWithOffsetType;
+				wavefunction_[i][j]->read(io, prefix + "/WaveFunction/" + ttos(i) + "/" + ttos(j));
+			}
+		}
+
 		io.read(direction_, prefix + "/direction");
 	}
 
@@ -164,6 +178,16 @@ public:
 		lrs_.write(io, prefix, option, minimizeWrite);
 
 		wavefunction_.write(io, prefix + "/WaveFunction");
+		io.createGroup(prefix + "/WaveFunction");
+		const SizeType levels = wavefunction_.size();
+		io.write(levels, prefix + "/WaveFunction/Size");
+		for (SizeType i = 0; i < levels; ++i) {
+			const SizeType nsectors = wavefunction_[i].size();
+			io.createGroup(prefix + "/WaveFunction/" + ttos(i));
+			io.write(nsectors, prefix + "/WaveFunction/" + ttos(i) + "/Size");
+			for (SizeType j = 0; j < nsectors; ++j)
+				wavefunction_[i][j]->write(io, prefix + "/WaveFunction/" + ttos(i) + "/" + ttos(j));
+		}
 
 		transform_.write(prefix + "/transform", io);
 		io.write(direction_, prefix + "/direction");
@@ -184,7 +208,18 @@ public:
 		return lrs_;
 	}
 
-	const VectorType& wavefunction() const { return wavefunction_; }
+	const VectorWithOffsetType& wavefunction(SizeType levelIndex, SizeType sectorIndex) const
+	{
+		if (levelIndex >= wavefunction_.size())
+			err(PsimagLite::String(__FILE__) + "::wavefunction(): levelIndex = " +
+			    ttos(levelIndex) + ">=" + ttos(wavefunction_.size()) + "\n");
+
+		if (sectorIndex >= wavefunction_[levelIndex].size())
+			err(PsimagLite::String(__FILE__) + "::wavefunction(): sectorIndex = " +
+			    ttos(sectorIndex) + ">=" + ttos(wavefunction_[levelIndex].size()) + "\n");
+
+		return *(wavefunction_[levelIndex][sectorIndex]);
+	}
 
 	SizeType cols() const
 	{
@@ -238,7 +273,7 @@ private:
 	FermionSignType fS_;
 	FermionSignType fE_;
 	LeftRightSuperType lrs_;
-	VectorType wavefunction_;
+	VectorVectorVectorWithOffsetType wavefunction_;
 	BlockDiagonalMatrixType transform_;
 	ProgramGlobals::DirectionEnum direction_;
 }; // class DmrgSerializer

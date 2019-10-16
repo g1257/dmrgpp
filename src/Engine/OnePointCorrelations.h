@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 #include "VectorWithOffsets.h" // for operator*
 #include "VectorWithOffset.h" // for operator*
+#include "GetBraOrKet.h"
 
 namespace Dmrg {
 
@@ -107,8 +108,8 @@ public:
 	FieldType operator()(SizeType site,
 	                     const typename ApplyOperatorType::OperatorType& A,
 	                     typename ApplyOperatorType::BorderEnum corner,
-	                     PsimagLite::String bra,
-	                     PsimagLite::String ket) const
+	                     const PsimagLite::GetBraOrKet& bra,
+	                     const PsimagLite::GetBraOrKet& ket) const
 	{
 		const SizeType ptr = site;
 		try {
@@ -126,8 +127,8 @@ public:
 	template<typename ApplyOperatorType>
 	FieldType hookForZero(SizeType site,
 	                      const typename ApplyOperatorType::OperatorType& A,
-	                      PsimagLite::String bra,
-	                      PsimagLite::String ket) const
+	                      const PsimagLite::GetBraOrKet& bra,
+	                      const PsimagLite::GetBraOrKet& ket) const
 	{
 		const SizeType ptr = site;
 		try {

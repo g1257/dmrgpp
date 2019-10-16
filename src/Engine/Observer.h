@@ -477,8 +477,8 @@ public:
 	FieldType onePoint(SizeType site,
 	                   const typename ApplyOperatorType::OperatorType& A,
 	                   typename ApplyOperatorType::BorderEnum corner,
-	                   PsimagLite::String bra,
-	                   PsimagLite::String ket) const
+	                   const PsimagLite::GetBraOrKet& bra,
+	                   const PsimagLite::GetBraOrKet& ket) const
 	{
 		return onepoint_.template operator()<ApplyOperatorType>(site, A, corner, bra, ket);
 	}
@@ -486,8 +486,8 @@ public:
 	template<typename ApplyOperatorType>
 	FieldType onePointHookForZero(SizeType site,
 	                              const typename ApplyOperatorType::OperatorType& A,
-	                              PsimagLite::String bra,
-	                              PsimagLite::String ket) const
+	                              const PsimagLite::GetBraOrKet& bra,
+	                              const PsimagLite::GetBraOrKet& ket) const
 	{
 		return onepoint_.template hookForZero<ApplyOperatorType>(site, A, bra, ket);
 	}

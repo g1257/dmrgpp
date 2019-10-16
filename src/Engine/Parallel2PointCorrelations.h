@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Mpi.h"
 #include "Concurrency.h"
 #include "ProgramGlobals.h"
+#include "GetBraOrKet.h"
 
 namespace Dmrg {
 
@@ -102,8 +103,8 @@ public:
 	                           const SparseMatrixType& O1,
 	                           const SparseMatrixType& O2,
 	                           ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	                           PsimagLite::String bra,
-	                           PsimagLite::String ket)
+	                           const PsimagLite::GetBraOrKet& bra,
+	                           const PsimagLite::GetBraOrKet& ket)
 	    : w_(w),
 	      twopoint_(twopoint),
 	      pairs_(pairs),
@@ -137,8 +138,8 @@ private:
 	const SparseMatrixType& O1_;
 	const SparseMatrixType& O2_;
 	const ProgramGlobals::FermionOrBosonEnum fermionicSign_;
-	const PsimagLite::String bra_;
-	const PsimagLite::String ket_;
+	const PsimagLite::GetBraOrKet& bra_;
+	const PsimagLite::GetBraOrKet& ket_;
 }; // class Parallel2PointCorrelations
 } // namespace Dmrg 
 
