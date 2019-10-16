@@ -611,22 +611,14 @@ obtain ordered
 		const VectorVectorVectorWithOffsetType& psi = target.psi();
 		if (psi.size() == 0)
 			err("No psi targets?\n");
-		if (psi.size() > 1) {
-			std::cerr<<"WARNING: Only one psi excited saved out of "<<psi.size()<<"\n";
-			std::cout<<"WARNING: Only one psi excited saved out of "<<psi.size()<<"\n";
-		}
 
 		if (psi[0].size() == 0)
 			err("No psi[0] targets?\n");
-		if (psi[0].size() > 1) {
-			std::cerr<<"WARNING: Only one psi sector saved out of "<<psi[0].size()<<"\n";
-			std::cout<<"WARNING: Only one psi sector saved out of "<<psi[0].size()<<"\n";
-		}
 
 		DmrgSerializerType* ds = new DmrgSerializerType(fsS,
 		                                                fsE,
 		                                                lrs_,
-		                                                *(psi[0][0]),
+		                                                psi,
 		                                                transform,
 		                                                direction);
 		if (saveOption & 16) {

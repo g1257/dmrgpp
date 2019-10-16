@@ -110,7 +110,7 @@ public:
 	DmrgSerializer(const FermionSignType& fS,
 	               const FermionSignType& fE,
 	               const LeftRightSuperType& lrs,
-	               const VectorWithOffsetType& wf,
+	               const VectorVectorVectorWithOffsetType& wf,
 	               const BlockDiagonalMatrixType& transform,
 	               ProgramGlobals::DirectionEnum direction)
 	    : fS_(fS),
@@ -177,7 +177,6 @@ public:
 		bool minimizeWrite = (lrs_.super().block().size() == numberOfSites);
 		lrs_.write(io, prefix, option, minimizeWrite);
 
-		wavefunction_.write(io, prefix + "/WaveFunction");
 		io.createGroup(prefix + "/WaveFunction");
 		const SizeType levels = wavefunction_.size();
 		io.write(levels, prefix + "/WaveFunction/Size");
