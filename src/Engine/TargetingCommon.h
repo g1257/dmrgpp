@@ -163,11 +163,8 @@ public:
 			const bool isDressed = isOpLabelDressed(meas_[i]);
 
 			// check this early that what's passed makes sense
-			if (isDressed) {
-				BraketType braket(model, meas_[i]);
-				getVectorCheck(braket.bra());
-				getVectorCheck(braket.ket());
-			}
+			if (isDressed)
+				BraketType(model, meas_[i]);
 
 			OpLabelCategory cocoonExpected = (isDressed) ? OpLabelCategory::DRESSED
 			                                             : OpLabelCategory::BARE;
@@ -330,10 +327,13 @@ public:
 			BraketType Braket(targetHelper_.model(), opLabel);
 
 			const typename BraketType::AlgebraType& nup = Braket.op(0);
-			const VectorWithOffsetType& v1 = getVector(Braket.bra());
-			const VectorWithOffsetType& v2 = getVector(Braket.ket());
 
-			test(v1, v2, direction, opLabel, site, nup, border);
+			const VectorWithOffsetType* v1 = getVector(Braket.bra());
+			const VectorWithOffsetType* v2 = getVector(Braket.ket());
+
+			if (!v1 || !v2) continue;
+
+			test(*v1, *v2, direction, opLabel, site, nup, border);
 			// don't repeat for border because this is called twice if needed
 		}
 
@@ -517,8 +517,11 @@ public:
 		if (braket.points() != 1)
 			err("Brakets in situ must be one-points\n");
 
-		const VectorWithOffsetType& v1 = getVector(braket.bra());
-		const VectorWithOffsetType& v2 = getVector(braket.ket());
+		const VectorWithOffsetType* v1 = getVector(braket.bra());
+		const VectorWithOffsetType* v2 = getVector(braket.ket());
+
+		if (!v1 || !v2) return;
+
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 		RealType norm1 = norm(v1);
 		RealType norm2 = norm(v2);
@@ -540,7 +543,7 @@ public:
 		if (site2 >= 0) {
 			border = ApplyOperatorType::BORDER_YES;
 			// v1 == bra; v2 = ket
-			test(v1,v2,direction,braket.toString(),site2,braket.op(0),border);
+			test(*v1, *v2, direction, braket.toString(), site2, braket.op(0), border);
 		}
 
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
@@ -621,10 +624,6 @@ public:
 
 private:
 
-	TargetingCommon(const TargetingCommon&) = delete;
-
-	TargetingCommon& operator=(const TargetingCommon&) = delete;
-
 	void setQuantumNumbers(const VectorWithOffsetType& v)
 	{
 		aoe_.setQuantumNumbers(v);
@@ -691,19 +690,21 @@ private:
 		return (opLabel[0] == '<' && opLabel[n - 1] == '>');
 	}
 
-	const VectorWithOffsetType& getVector(PsimagLite::String braOrKet) const
+	const VectorWithOffsetType* getVector(const PsimagLite::GetBraOrKet& getBraOrKet) const
 	{
-		PsimagLite::GetBraOrKet getBraOrKet(braOrKet);
-
+		const SizeType levelIndex = getBraOrKet.levelIndex();
 		if (getBraOrKet.isPvector())
-			return aoe_.targetVectors(getBraOrKet.levelIndex());
+			return &(aoe_.targetVectors(levelIndex));
 
-		return *(aoe_.psi()[getBraOrKet.levelIndex()][getBraOrKet.sectorIndex()]);
-	}
+		if (aoe_.psi().size() <= levelIndex)
+			err("getVector: levelIndex = " + ttos(levelIndex) + ">=" +
+			    ttos(aoe_.psi().size()) + "\n");
 
-	void getVectorCheck(PsimagLite::String braOrKet) const
-	{
-		PsimagLite::GetBraOrKet getBraOrKet(braOrKet);
+		const SizeType sectorIndex = getBraOrKet.sectorIndex();
+		if (aoe_.psi()[levelIndex].size() <= sectorIndex)
+			return nullptr;
+
+		return aoe_.psi()[levelIndex][sectorIndex];
 	}
 
 	// prints <src2|A|src1>
@@ -735,6 +736,10 @@ private:
 		else
 			return testRealWork(src2, src1, systemOrEnviron, site, A, border);
 	}
+
+	TargetingCommon(const TargetingCommon&) = delete;
+
+	TargetingCommon& operator=(const TargetingCommon&) = delete;
 
 	OpLabelCategory cocoonType_;
 	VectorStringType meas_;

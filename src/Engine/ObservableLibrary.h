@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "ProgramGlobals.h"
 #include "ApplyOperatorLocal.h"
+#include "GetBraOrKet.h"
 
 namespace Dmrg {
 
@@ -377,18 +378,18 @@ public:
 
 private:
 
-	void measureOnePoint(const PsimagLite::String& bra,
+	void measureOnePoint(const PsimagLite::GetBraOrKet& bra,
 	                     const OperatorType& opA,
 	                     PsimagLite::String label,
-	                     const PsimagLite::String& ket)
+	                     const PsimagLite::GetBraOrKet& ket)
 	{
 		for (SizeType i0 = 0; i0 < observe_.helper().size(); ++i0) {
 
 			if (i0==0) {
 				std::cout<<"Using Matrix A:\n";
 				std::cout<<opA.getCRS().toDense();
-				std::cout<<"site <"<<bra<<"|"<<label;
-				std::cout<<"|"<<ket<<"> time\n";
+				std::cout<<"site <"<<bra.toString()<<"|"<<label;
+				std::cout<<"|"<<ket.toString()<<"> time\n";
 			}
 
 			cornerLeftOrRight(1, i0, bra, opA, ket);
@@ -404,9 +405,9 @@ private:
 
 	void cornerLeftOrRight(SizeType site,
 	                       SizeType ptr,
-	                       const PsimagLite::String& bra,
+	                       const PsimagLite::GetBraOrKet& bra,
 	                       const OperatorType& opA,
-	                       const PsimagLite::String& ket)
+	                       const PsimagLite::GetBraOrKet& ket)
 	{
 		if (observe_.helper().site(ptr) != site) return;
 

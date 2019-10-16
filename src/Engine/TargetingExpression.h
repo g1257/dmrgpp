@@ -218,12 +218,11 @@ private:
 	{
 		CanonicalExpressionType canonicalExpression(opSpec_);
 		SizeType total = pVectors_.size();
-		const VectorWithOffsetType_& psi00 = this->common().aoe().
-		        ensureOnlyOnePsi("computePvectors");
+
 		AuxForTargetingExpressionType aux(this->common().aoe(),
 		                                  this->model(),
 		                                  this->lrs(),
-		                                  psi00,
+		                                  this->common().aoe().psi(),
 		                                  this->common().aoe().targetVectors(),
 		                                  dir);
 		const AlgebraType opEmpty(aux);

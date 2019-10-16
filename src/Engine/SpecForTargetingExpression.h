@@ -19,21 +19,23 @@ struct AuxForTargetingExpression {
 	typedef typename TargetingBaseType::ModelType ModelType;
 	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
+	typedef typename PsimagLite::Vector<typename
+	PsimagLite::Vector<VectorWithOffsetType*>::Type>::Type VectorVectorVectorWithOffsetType;
 	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
 
 	AuxForTargetingExpression(const ApplyOperatorExpressionType& aoe_,
 	                          const ModelType& model_,
 	                          const LeftRightSuperType& lrs_,
-	                          const VectorWithOffsetType& gs_,
+	                          const VectorVectorVectorWithOffsetType& psi_,
 	                          const VectorVectorWithOffsetType& pvectors_,
 	                          ProgramGlobals::DirectionEnum dir)
-	    : aoe(aoe_), model(model_), lrs(lrs_), gs(gs_), pvectors(pvectors_), direction(dir)
+	    : aoe(aoe_), model(model_), lrs(lrs_), psi(psi_), pvectors(pvectors_), direction(dir)
 	{}
 
 	const ApplyOperatorExpressionType& aoe;
 	const ModelType& model;
 	const LeftRightSuperType lrs;
-	const VectorWithOffsetType& gs;
+	const VectorVectorVectorWithOffsetType& psi;
 	const VectorVectorWithOffsetType& pvectors;
 	ProgramGlobals::DirectionEnum direction;
 };
@@ -297,12 +299,15 @@ private:
 	{
 		PsimagLite::GetBraOrKet getBraOrKet(braOrKet);
 
-		SizeType ind = getBraOrKet();
+		SizeType level = getBraOrKet.levelIndex();
 
-		if (ind > 0 && ind - 1 >= aux_.pvectors.size())
-			err("getVector: out of range for " + braOrKet + "\n");
+		if (getBraOrKet.isPvector()) {
+			if (level >= aux_.pvectors.size())
+				err("getVector: out of range for " + braOrKet + "\n");
+			return aux_.pvectors[level];
+		}
 
-		return (ind == 0) ? aux_.gs : aux_.pvectors[ind - 1];
+		return *(aux_.psi[level][getBraOrKet.sectorIndex()]);
 	}
 
 	SizeType getCurrentCoO() const
