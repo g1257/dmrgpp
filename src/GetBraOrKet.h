@@ -71,14 +71,21 @@ private:
 		}
 	}
 
-	static SizeType getNumberFrom(String str, SizeType start)
+	static SizeType getNumberFrom(String& str, SizeType start)
 	{
 		String number("");
-		for (SizeType i = start; i < str.length(); ++i) {
-			number += str[i];
+		SizeType i = start;
+		for (; i < str.length(); ++i) {
 			unsigned char x = str[i];
-			if (x < 48 || x > 57) return -1;
+			if (x < 48 || x > 57) break;
+			number += str[i];
 		}
+
+		if (number == "")
+			RuntimeError("getNumberFrom: no number after character location " + ttos(start) +
+			             " for string " + str + "\n");
+
+		str = str.substr(i, str.length() - i);
 
 		return atoi(number.c_str());
 	}
