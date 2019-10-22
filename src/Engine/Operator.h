@@ -172,11 +172,11 @@ public:
 		 commutes or anticommutes at \emph{different} sites. Do not specify if
 		 \verb!TSPOperator!
 		 was set to \verb!expression!.
-		 \item[jm_VALUES] [Integer*2] If not using $SU(2)$ symmetry this is \verb!0 0!.
+		 \item[jm\_VALUES] [Integer*2] If not using $SU(2)$ symmetry this is \verb!0 0!.
 		 Else it is the $2j$ and $j+m$ for this operator. Do not specify if
 		 \verb!TSPOperator!
 		 was set to \verb!expression!.
-		 \item[angularFactor_] [RealType] If not using $SU(2)$ symmetry this is \verb!1!.
+		 \item[angularFactor\_] [RealType] If not using $SU(2)$ symmetry this is \verb!1!.
 		 Else FIXME. Do not specify if
 		 \verb!TSPOperator!
 		 was set to \verb!expression!.

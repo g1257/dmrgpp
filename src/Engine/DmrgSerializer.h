@@ -117,6 +117,7 @@ public:
 	      fE_(fE),
 	      lrs_(lrs),
 	      wavefunction_(wf),
+		  ownWf_(false),
 	      transform_(transform),
 	      direction_(direction)
 	{}
@@ -132,6 +133,7 @@ public:
 	    : fS_(io, prefix + "/fS", bogus),
 	      fE_(io, prefix + "/fE", bogus),
 	      lrs_(io, prefix, isObserveCode),
+		  ownWf_(true),
 	      transform_(io, prefix + "/transform")
 	{
 		if (bogus) return;
@@ -150,6 +152,19 @@ public:
 		}
 
 		io.read(direction_, prefix + "/direction");
+	}
+
+	~DmrgSerializer()
+	{
+		if (!ownWf_) return;
+		const SizeType levels = wavefunction_.size();
+		for (SizeType i = 0; i < levels; ++i) {
+			const SizeType nsectors = wavefunction_[i].size();
+			for (SizeType j = 0; j < nsectors; ++j) {
+				delete wavefunction_[i][j];
+				wavefunction_[i][j] = nullptr;
+			}
+		}
 	}
 
 	template<typename SomeIoOutType>
@@ -273,6 +288,7 @@ private:
 	FermionSignType fE_;
 	LeftRightSuperType lrs_;
 	VectorVectorVectorWithOffsetType wavefunction_;
+	bool ownWf_;
 	BlockDiagonalMatrixType transform_;
 	ProgramGlobals::DirectionEnum direction_;
 }; // class DmrgSerializer
