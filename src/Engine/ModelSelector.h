@@ -74,6 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/HubbardHolstein/HubbardHolstein.h"
 #include "../Models/Kondo/Kondo.h"
 #include "../Models/UlsOsu/UlsOsu.h"
+#include "../Models/Graphene/Graphene.h"
 
 #endif
 
@@ -112,6 +113,8 @@ class ModelSelector {
 	typedef ModelHubbardMultiBand<ModelBaseType> ModelHubbardMultiBandType;
 	typedef HubbardHolstein<ModelBaseType> HubbardHolsteinType;
 	typedef Kondo<ModelBaseType> KondoType;
+	typedef Graphene<ModelBaseType> GrapheneType;
+
 #endif
 	// end models
 
@@ -192,6 +195,8 @@ public:
 			model_ = new KondoType(solverParams, io, geometry, "Ex");
 		} else if (name_ == "HubbardOneBandRashbaSOC") {
 			model_ = new ModelHubbardType(solverParams, io, geometry, "RashbaSOC");
+		} else if (name_ == "Graphene") {
+			model_ = new GrapheneType(solverParams, io, geometry);
 		}
 #endif
 		else {
