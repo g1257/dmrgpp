@@ -248,7 +248,7 @@ public:
 		else systemStack_.push(pSorE);
 	}
 
-	const BasisWithOperatorsType& shrink(typename ProgramGlobals::SysOrEnvEnum what)
+	BasisWithOperatorsType& shrink(typename ProgramGlobals::SysOrEnvEnum what)
 	{
 		return (what == ProgramGlobals::SysOrEnvEnum::ENVIRON) ? shrinkInternal(envStack_) :
 		                                                         shrinkInternal(systemStack_);
@@ -392,7 +392,7 @@ private:
 	}
 
 	//! shrink  (we don't really shrink, we just undo the growth)
-	const BasisWithOperatorsType& shrinkInternal(DiskOrMemoryStackType& thisStack)
+	BasisWithOperatorsType& shrinkInternal(DiskOrMemoryStackType& thisStack)
 	{
 		assert(thisStack.size() > 0);
 		thisStack.pop();

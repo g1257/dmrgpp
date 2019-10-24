@@ -510,7 +510,6 @@ obtain ordered
 		if (stepLength<0)
 			stepLengthCorrected = int((stepLength+sitesPerBlock-1)/sitesPerBlock);
 		int stepFinal = stepCurrent_ + stepLengthCorrected;
-		BasisWithOperatorsType dummyBwo("dummy");
 
 		VectorRealType energies;
 		while (true) {
@@ -522,14 +521,18 @@ obtain ordered
 			printerInDetail.print(std::cout, "finite");
 			if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 				lrs_.growLeftBlock(model_, pS, sitesIndices_[stepCurrent_], time);
-				lrs_.right(dummyBwo = checkpoint_.shrink(ProgramGlobals::SysOrEnvEnum::ENVIRON));
+				BasisWithOperatorsType* dummyBwo =
+				        &checkpoint_.shrink(ProgramGlobals::SysOrEnvEnum::ENVIRON);
+				target.updateOnSiteForCorners(*dummyBwo); // <-- only updates extreme sites
+				lrs_.right(*dummyBwo);
 			} else {
 				lrs_.growRightBlock(model_, pE, sitesIndices_[stepCurrent_], time);
-				lrs_.left(dummyBwo = checkpoint_.shrink(ProgramGlobals::SysOrEnvEnum::SYSTEM));
+				BasisWithOperatorsType* dummyBwo =
+				        &checkpoint_.shrink(ProgramGlobals::SysOrEnvEnum::SYSTEM);
+				target.updateOnSiteForCorners(*dummyBwo); // <-- only updates extreme sites
+				lrs_.left(*dummyBwo);
 			}
 
-			// only updates the extreme sites:
-			target.updateOnSiteForCorners(dummyBwo);
 
 			lrs_.printSizes("finite",std::cout);
 
