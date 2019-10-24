@@ -254,6 +254,7 @@ hence non-trivial. (Krylov)
 2101) Hot Ancilla Phase
 2102) CV Phase
 #2103-2199 --> Reserved for hot spectra
+2300) Graphene
 3000) Dynamics: Local Green's function at site 8 for a non-interacting one-band Hubbard model using
 correction vector algorithm (type=0).
 3001) Dynamics: Local Green's function at site 8 for a non-interacting one-band Hubbard model using

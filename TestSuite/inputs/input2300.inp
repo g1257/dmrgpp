@@ -1,0 +1,57 @@
+TotalNumberOfSites=16
+NumberOfTerms=5
+
+Term0=Hopping
+DegreesOfFreedom=2
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 2 2
+1.0 0.0
+0.0 2.0
+
+Term1=ninj
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+    1
+    1.0
+
+Term2=nana
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+    1
+    1.0
+
+Term3=spasma
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+    1
+    1.0
+
+Term4=yoyo
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+    1
+    1.0
+
+hubbardU	16 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+Model=Graphene
+Orbitals=2
+SolverOptions=twositedmrg
+Version=5.63
+OutputFile=data2300
+InfiniteLoopKeptStates=100
+FiniteLoops 3
+  7 100 0
+-14 100 0
+ 14 100 1
+TargetElectronsUp=8
+TargetElectronsDown=8
+#ci observe arguments="<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>"
