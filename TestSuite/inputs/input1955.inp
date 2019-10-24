@@ -1,0 +1,64 @@
+TotalNumberOfSites=6
+
+NumberOfTerms=2
+DegreesOfFreedom=2
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+2 2
+-1.0 0
+0    0
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 0
+
+FeAsMode=INT_ORBITAL0
+Orbitals=1
+
+hubbardU  6
+10.00 10.00 10.00 10.00 10.00 10.00
+
+potentialV  24
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+
+Model=HubbardAncilla
+Version=paper65
+TruncationTolerance=1e-8
+TargetElectronsTotal=8
+TargetSzPlusConst=4
+TargetExtra 2   2 2
+Threads=1
+SolverOptions=twositedmrg,restart,TargetingAncilla,normalizeTimeVectors
+InfiniteLoopKeptStates=100
+RestartFilename=data1954
+OutputFile=data1955
+FiniteLoops 2
+ -4 200 2    4 200 2
+LanczosEps=1e-9
+LanczosSteps=400
+
+PrintHamiltonianAverage=l%1==0
+RepeatFiniteLoopsTimes=10
+RecoverySave=l%2,keep,M=100
+RecoveryMaxFiles=200
+
+TridiagEps=1e-8
+TridiagSteps=500
+
+GsWeight=0.1
+TSPTau=0.1
+TSPTimeSteps=5
+TSPAdvanceEach=4
+TSPAlgorithm=Krylov
+TSPSites 1 4
+TSPLoops 1 1
+TSPProductOrSum=product
+
+TSPOperator=expression
+OperatorExpression=identity
+

@@ -1,0 +1,39 @@
+TotalNumberOfSites=6
+
+NumberOfTerms=2
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 0
+
+DegreesOfFreedom=1
+GeometryKind=LongRange
+GeometryOptions=none
+Orbitals=1
+GeometryEntangler=-1
+
+FeAsMode=INT_ORBITAL0
+Orbitals=1
+
+hubbardU  6
+0 0 0 0 0 0
+
+potentialV 24
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+
+Model=HubbardAncilla
+Version=paper65
+TruncationTolerance=1e-12
+TargetElectronsTotal=8
+TargetSzPlusConst=4
+TargetExtra 2   2 2
+Threads=1
+SolverOptions=twositedmrg,MatrixVectorOnTheFly
+InfiniteLoopKeptStates=100
+FiniteLoops 3
+ 2  200  0
+ -4 200  0      4 200 0
+OutputFile=data1954
