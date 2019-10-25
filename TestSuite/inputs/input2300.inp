@@ -41,7 +41,8 @@ Connectors
     1
     1.0
 
-hubbardU	16 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+HubbardU=2.0
+PairHopping=2.0
 Model=Graphene
 Orbitals=2
 SolverOptions=twositedmrg
