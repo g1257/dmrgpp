@@ -167,11 +167,11 @@ public:
 	                                const BlockType& block,
 	                                RealType time) const
 	{
-		SizeType n=block.size();
-
+		SizeType n = block.size();
+		assert(n == 1);
 		for (SizeType i = 0; i < n; ++i) {
-			//addNiSquared(hmatrix, i, block);
-			//addPairHopping(hmatrix, i, block);
+			addNiSquared(hmatrix);
+			addPairHopping(hmatrix);
 		}
 	}
 
@@ -488,8 +488,67 @@ private:
 		}
 	}
 
+	//! Term is U*\sum_{\alpha}n_i^2
+	void addNiSquared(SparseMatrixType& hmatrix) const
+	{
+		SizeType dofs = 2*modelParameters_.orbitals;
+		SparseMatrixType nmatrix;
+		const VectorOperatorType& cm = creationMatrix_;
+		for (SizeType alpha = 0; alpha < dofs; ++alpha)
+			nmatrix += n(cm[alpha].getCRS());
+
+		SparseMatrixType nmatrixSquared = nmatrix*nmatrix;
+		hmatrix += modelParameters_.hubbardU*nmatrixSquared;
+	}
+
+	// Term is P*\sum_i(0.25*ni_a ni_b +
+	// 0.5*si_a^\dagger si_b + 0.5*si_b^\dagger si_a +
+	// si_a^z si_b^z
+	void addPairHopping(SparseMatrixType& hmatrix) const
+	{
+		SizeType orbitals = modelParameters_.orbitals;
+		SparseMatrixType nmatrixA;
+		SparseMatrixType nmatrixB;
+		const VectorOperatorType& cm = creationMatrix_;
+		for (SizeType spin = 0; spin < 2; ++spin) {
+			nmatrixA += n(cm[0 + spin*orbitals].getCRS()); // orbital a
+			nmatrixB += n(cm[1 + spin*orbitals].getCRS()); // orbital b
+		}
+
+		SparseMatrixType nmatrixAB = nmatrixA*nmatrixB;
+		hmatrix += 0.25*modelParameters_.pairHopping*nmatrixAB;
+
+		const SparseMatrixType& splusA =
+		        ModelBaseType::naturalOperator("splus", 0, 0).getCRS(); // splus_a
+		const SparseMatrixType& splusB =
+		        ModelBaseType::naturalOperator("splus", 0, 1).getCRS(); // splus_b
+		const SparseMatrixType& sminusA =
+		        ModelBaseType::naturalOperator("sminus", 0, 0).getCRS(); // sminus_a
+		const SparseMatrixType& sminusB =
+		        ModelBaseType::naturalOperator("sminus", 0, 1).getCRS(); // sminus_b
+		SparseMatrixType tmp = splusA*sminusB;
+		tmp += splusB*sminusA;
+		hmatrix += 0.5*modelParameters_.pairHopping*tmp;
+
+		const SparseMatrixType& szA =
+		        ModelBaseType::naturalOperator("sz", 0, 0).getCRS(); // sz_a
+		const SparseMatrixType& szB =
+		        ModelBaseType::naturalOperator("sz", 0, 1).getCRS(); // sz_b
+		tmp = szA*szB;
+		hmatrix += modelParameters_.pairHopping*tmp;
+	}
+
+	static SparseMatrixType n(const SparseMatrixType& c)
+	{
+		SparseMatrixType tmpMatrix;
+		SparseMatrixType cdagger;
+		transposeConjugate(cdagger, c);
+		multiply(tmpMatrix, c, cdagger);
+
+		return tmpMatrix;
+	}
+
 	ParametersGrapheneType  modelParameters_;
-	//serializr ref geometry_ start
 	const GeometryType& geometry_;
 	SizeType statesPerSite_;
 	HilbertBasisType basis_;

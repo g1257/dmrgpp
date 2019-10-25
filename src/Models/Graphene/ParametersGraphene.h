@@ -100,7 +100,8 @@ struct ParametersGraphene : public ParametersModelBase<ComplexOrRealType, QnType
 	    : BaseType(io, false)
 	{
 		io.readline(orbitals,"Orbitals=");
-		io.read(hubbardU,"hubbardU");
+		io.readline(hubbardU,"HubbardU=");
+		io.readline(pairHopping, "PairHopping=");
 	}
 
 	template<typename SomeMemResolvType>
@@ -119,10 +120,12 @@ struct ParametersGraphene : public ParametersModelBase<ComplexOrRealType, QnType
 		BaseType::write(label, io);
 		io.write(label + "/orbitals", orbitals);
 		io.write(label + "/hubbardU", hubbardU);
+		io.write(label + "/pairHopping", pairHopping);
 	}
 
 	SizeType orbitals;
-	typename PsimagLite::Vector<RealType>::Type hubbardU;
+	RealType hubbardU;
+	RealType pairHopping;
 };
 } // namespace Dmrg
 
