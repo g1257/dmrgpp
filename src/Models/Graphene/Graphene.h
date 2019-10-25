@@ -127,8 +127,8 @@ public:
 	static const int SPIN_DOWN=HilbertSpaceFeAsType::SPIN_DOWN;
 
 	Graphene(const SolverParamsType& solverParams,
-	              InputValidatorType& io,
-	              GeometryType const &geometry)
+	         InputValidatorType& io,
+	         GeometryType const &geometry)
 	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
 	      geometry_(geometry)
@@ -228,9 +228,9 @@ public:
 			if (dof == 0 || dof == 2) // naup nadown
 				nn.push(OperatorType(tmp2,
 				                     ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                         typename OperatorType::PairType(0,0),
-			                         1.0,
-			                         su2Related));
+				                     typename OperatorType::PairType(0,0),
+				                     1.0,
+				                     su2Related));
 		}
 
 		this->makeTrackable("nn");
@@ -269,9 +269,9 @@ public:
 			// s+ a
 			if (dof == 0) splus2.push(OperatorType(tmp2,
 			                                       ProgramGlobals::FermionOrBosonEnum::BOSON,
-						                           typename OperatorType::PairType(0,0),
-						                           1.0,
-						                           su2Related));
+			                                       typename OperatorType::PairType(0,0),
+			                                       1.0,
+			                                       su2Related));
 		}
 
 		this->makeTrackable("splus2");
@@ -303,16 +303,20 @@ public:
 	void fillModelLinks()
 	{
 		const SizeType orbitals = modelParameters_.orbitals;
-		ModelTermType& hop = ModelBaseType::createTerm("hopping");//(A)
-		for (SizeType spin = 0; spin < 2; ++spin) {
-			for (SizeType orb1 = 0; orb1 < orbitals; ++orb1) {
-				OpForLinkType c1("C", orb1 + spin*orbitals, orb1); // (B)
-				for (SizeType orb2 = 0; orb2 < orbitals; ++orb2) {
-					OpForLinkType c2("C", orb2 + spin*orbitals, orb2); // (C)
+		ModelTermType& hopA = ModelBaseType::createTerm("hoppingA");
 
-					hop.push(c1, 'N', c2, 'C', 1, (spin == 1) ? -1 : 1, spin);
-				}
-			}
+		for (SizeType spin = 0; spin < 2; ++spin) {
+			OpForLinkType c1("C", 0 + spin*orbitals);
+			OpForLinkType c2("C", 0 + spin*orbitals);
+			hopA.push(c1, 'N', c2, 'C', 1, (spin == 1) ? -1 : 1, spin);
+		}
+
+		ModelTermType& hopB = ModelBaseType::createTerm("hoppingB");
+
+		for (SizeType spin = 0; spin < 2; ++spin) {
+			OpForLinkType c1("C", 1 + spin*orbitals);
+			OpForLinkType c2("C", 1 + spin*orbitals);
+			hopB.push(c1, 'N', c2, 'C', 1, (spin == 1) ? -1 : 1, spin);
 		}
 
 		ModelTermType& ninj = ModelBaseType::createTerm("ninj");

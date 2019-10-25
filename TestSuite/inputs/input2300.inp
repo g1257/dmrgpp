@@ -1,15 +1,19 @@
 TotalNumberOfSites=16
-NumberOfTerms=5
+NumberOfTerms=6
 
 Term0=Hopping
-DegreesOfFreedom=2
+DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
-Connectors 2 2
-1.0 0.0
-0.0 2.0
+Connectors 1 -3.0
 
-Term1=ninj
+Term1=HoppingB
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1  -1.0
+
+Term2=ninj
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
@@ -17,7 +21,7 @@ Connectors
     1
     1.0
 
-Term2=nana
+Term3=nana
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
@@ -25,7 +29,7 @@ Connectors
     1
     1.0
 
-Term3=spasma
+Term4=spasma
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
@@ -33,7 +37,7 @@ Connectors
     1
     1.0
 
-Term4=yoyo
+Term5=yoyo
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
