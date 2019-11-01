@@ -205,7 +205,7 @@ private:
 
 	{
 		const OptionsType& options = parameters_.options;
-		bool findSymmetrySector = (options.find("findSymmetrySector") != PsimagLite::String::npos);
+		const bool findSymmetrySector = options.isSet("findSymmetrySector");
 		const LeftRightSuperType& lrs= target.lrs();
 		wft_.triggerOn();
 
@@ -221,10 +221,10 @@ private:
 
 		bool noguess = ((saveOption & 8) > 0); // bit 3 set means guess is random vector
 
-		if (parameters_.options.find("MettsTargeting")!=PsimagLite::String::npos)
+		if (parameters_.options.isSet("MettsTargeting"))
 			return;
 
-		if (parameters_.options.find("TargetingAncilla")!=PsimagLite::String::npos)
+		if (parameters_.options.isSet("TargetingAncilla"))
 			onlyWft = true;
 
 		PsimagLite::OstringStream msg0;

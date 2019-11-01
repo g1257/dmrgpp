@@ -148,8 +148,8 @@ public:
 	{
 		procOptions();
 
-		if (checkpoint_.parameters().options.find("recoveryEnableRead") ==
-		        PsimagLite::String::npos) return;
+		if (!checkpoint_.parameters().options.isSet("recoveryEnableRead"))
+			return;
 
 		if (!checkpoint_.parameters().autoRestart) return;
 

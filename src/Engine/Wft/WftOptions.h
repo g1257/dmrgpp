@@ -18,8 +18,8 @@ struct WftOptions {
 	           bool b,
 	           RealType d,
 	           bool blasIsThreadSafe_)
-	    : twoSiteDmrg(options.find("twositedmrg") != PsimagLite::String::npos),
-	      kronLoadBalance(options.find("KronLoadBalance") != PsimagLite::String::npos),
+	    : twoSiteDmrg(options.isSet("twositedmrg")),
+	      kronLoadBalance(options.isSet("KronLoadBalance")),
 	      firstCall(f),
 	      bounce(b),
 	      blasIsThreadSafe(blasIsThreadSafe_),
@@ -27,13 +27,13 @@ struct WftOptions {
 	      accel((twoSiteDmrg) ? ACCEL_BLOCKS : ACCEL_PATCHES),
 	      denseSparseThreshold(d)
 	{
-		if (options.find("wftAccelPatches") != PsimagLite::String::npos)
+		if (options.isSet("wftAccelPatches"))
 			accel = ACCEL_PATCHES;
 
-		if (options.find("wftAccelSvd") != PsimagLite::String::npos)
+		if (options.isSet("wftAccelSvd"))
 			accel = ACCEL_SVD;
 
-		if (options.find("wftNoAccel") != PsimagLite::String::npos)
+		if (options.isSet("wftNoAccel"))
 			accel = ACCEL_NONE;
 
 		if (accel == ACCEL_SVD && twoSiteDmrg)

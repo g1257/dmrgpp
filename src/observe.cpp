@@ -207,9 +207,8 @@ int main(int argc,char **argv)
 	                                                threadsStackSize);
 	ConcurrencyType::setOptions(codeSectionParams);
 
-	bool isComplex = (dmrgSolverParams.options.isSet("useComplex"));
-	if (dmrgSolverParams.options.isSet("TimeStepTargeting"))
-		isComplex = true;
+	bool isComplex = (dmrgSolverParams.options.isSet("useComplex") ||
+	                  dmrgSolverParams.options.isSet("TimeStepTargeting"));
 
 	if (isComplex) {
 		mainLoop0<MySparseMatrixComplex>(io,dmrgSolverParams,inputCheck, list);

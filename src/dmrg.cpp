@@ -384,8 +384,8 @@ to the main dmrg driver are the following.
 
 	registerSignals();
 
-	bool isComplex = dmrgSolverParams.options.isSet("useComplex") ||
-	        dmrgSolverParams.options.isSet("TimeStepTargeting");
+	bool isComplex = (dmrgSolverParams.options.isSet("useComplex") ||
+	                  dmrgSolverParams.options.isSet("TimeStepTargeting"));
 
 	if (isComplex) {
 		mainLoop0<MySparseMatrixComplex>(io, dmrgSolverParams, options);

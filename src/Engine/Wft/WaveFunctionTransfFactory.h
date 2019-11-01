@@ -125,13 +125,13 @@ public:
 
 	template<typename SomeParametersType>
 	WaveFunctionTransfFactory(SomeParametersType& params)
-	    : isEnabled_(!(params.options.find("nowft")!=PsimagLite::String::npos)),
+	    : isEnabled_(!(params.options.isSet("nowft"))),
 	      wftOptions_(ProgramGlobals::DirectionEnum::INFINITE,
 	                  params.options,
 	                  true,
 	                  true,
 	                  params.denseSparseThreshold,
-	                  params.options.find("blasNotThreadSafe") == PsimagLite::String::npos),
+	                  !params.options.isSet("blasNotThreadSafe")),
 	      progress_("WaveFunctionTransf"),
 	      filenameIn_(params.checkpoint.filename()),
 	      filenameOut_(params.filename),
@@ -142,16 +142,15 @@ public:
 	{
 		if (!isEnabled_) return;
 
-		bool b = (params.options.find("restart")!=PsimagLite::String::npos ||
-		        params.autoRestart);
+		bool b = (params.options.isSet("restart") || params.autoRestart);
 
 		if (b) {
-			if (params.options.find("noloadwft")!=PsimagLite::String::npos)
+			if (params.options.isSet("noloadwft"))
 				noLoad_=true;
 			else
 				read();
 		} else {
-			if (params.options.find("noloadwft")!=PsimagLite::String::npos) {
+			if (params.options.isSet("noloadwft")) {
 				PsimagLite::String str("Error: noloadwft needs restart or checkpoint\n");
 				throw PsimagLite::RuntimeError(str.c_str());
 			}

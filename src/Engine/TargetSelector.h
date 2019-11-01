@@ -141,7 +141,7 @@ private:
 		const SizeType totalTargets = targets.size();
 		SizeType count = 0;
 		for (SizeType i = 0;i < totalTargets; ++i) {
-			if (options.find(targets[i]) != PsimagLite::String::npos) {
+			if (options.isSet(targets[i])) {
 				if (targeting == "AdaptiveDynamicTargeting" &&
 				        targets[i] == "DynamicTargeting") continue;
 				targeting = targets[i];
@@ -162,7 +162,7 @@ private:
 
 	void check1(PsimagLite::String targeting) const
 	{
-		if (model_.params().options.find("useComplex") != PsimagLite::String::npos &&
+		if (model_.params().options.isSet("useComplex") &&
 		        targeting != "TimeStepTargeting" &&
 		        targeting != "ChebyshevTargeting" &&
 		        targeting != "GroundStateTargeting" &&

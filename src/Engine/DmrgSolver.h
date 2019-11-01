@@ -312,10 +312,8 @@ obtain ordered
 	                      MyBasisWithOperators &pE,
 	                      TargetingType& psi)
 	{
-		bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=
-		        PsimagLite::String::npos);
-		bool extendedPrint = (parameters_.options.find("extendedPrint") !=
-		        PsimagLite::String::npos);
+		bool twoSiteDmrg = parameters_.options.isSet("twositedmrg");
+		bool extendedPrint = parameters_.options.isSet("extendedPrint");
 		PrinterInDetailType printerInDetail(lrs_, extendedPrint);
 
 		lrs_.left(pS);
@@ -393,7 +391,7 @@ obtain ordered
 	                     TargetingType& psi,
 	                     RecoveryType& recovery)
 	{
-		if (parameters_.options.find("nofiniteloops") != PsimagLite::String::npos)
+		if (parameters_.options.isSet("nofiniteloops"))
 			return;
 
 		SizeType loopsTotal = parameters_.finiteLoop.size();
@@ -487,8 +485,7 @@ obtain ordered
 	                SizeType loopIndex,
 	                TargetingType& target)
 	{
-		bool extendedPrint = (parameters_.options.find("extendedPrint") !=
-		        PsimagLite::String::npos);
+		const bool extendedPrint = parameters_.options.find("extendedPrint");
 		PrinterInDetailType printerInDetail(lrs_, extendedPrint);
 		int stepLength = parameters_.finiteLoop[loopIndex].stepLength;
 		SizeType keptStates = parameters_.finiteLoop[loopIndex].keptStates;

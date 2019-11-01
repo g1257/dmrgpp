@@ -241,9 +241,8 @@ private:
 		            lrs_.left() : lrs_.right();
 
 		bool debug = false;
-		bool useSvd = (parameters_.options.find("truncationNoSvd") == PsimagLite::String::npos);
-		bool enablePersistentSvd = (parameters_.options.find("EnablePersistentSvd") !=
-		        PsimagLite::String::npos);
+		bool useSvd = !parameters_.options.isSet("truncationNoSvd");
+		bool enablePersistentSvd = parameters_.options.find("EnablePersistentSvd");
 		ParamsDensityMatrixType p(useSvd, direction, debug, enablePersistentSvd);
 		TruncationCache& cache = (direction == expandSys) ? leftCache_ :
 		                                                    rightCache_;
@@ -265,7 +264,7 @@ private:
 		updateKeptStates(keptStates, cache.eigs);
 
 		cache.transform = dmS->operator()();
-		if (parameters_.options.find("nodmrgtransform") != PsimagLite::String::npos) {
+		if (parameters_.options.isSet("nodmrgtransform")) {
 			PsimagLite::OstringStream msg;
 			msg<<"SolverOptions=nodmrgtransform, setting transform to identity";
 			progress_.printline(msg,std::cout);
@@ -297,8 +296,8 @@ private:
 
 		cache.transform.truncate(cache.removedIndices);
 
-		const bool blasIsThreadSafe = (parameters_.options.find("blasNotThreadSafe") ==
-		        PsimagLite::String::npos);
+		const bool blasIsThreadSafe = !parameters_.options.find("blasNotThreadSafe");
+
 		rPrime.truncateBasis(cache.transform,
 		                     cache.eigs,
 		                     cache.removedIndices,

@@ -183,7 +183,7 @@ public:
 
 	~Checkpoint()
 	{
-		if (parameters_.options.find("noSaveStacks") != PsimagLite::String::npos)
+		if (parameters_.options.isSet("noSaveStacks"))
 			return;
 
 		loadStacksMemoryToDisk();
@@ -296,11 +296,10 @@ private:
 	                      SizeType hilbertOneSite,
 	                      InputValidatorType& ioIn) const
 	{
-		if (parameters_.options.find("nofiniteloops")!=PsimagLite::String::npos)
+		if (parameters_.options.isSet("nofiniteloops"))
 			return;
 
-		bool allInSystem = (parameters_.options.find("geometryallinsystem")!=
-		        PsimagLite::String::npos);
+		bool allInSystem = (parameters_.options.isSet("geometryallinsystem"));
 
 		PsimagLite::Vector<FiniteLoop>::Type vfl;
 		int lastSite = (allInSystem) ? totalSites-2 : totalSites/2-1; // must be signed
