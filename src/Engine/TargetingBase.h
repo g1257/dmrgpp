@@ -142,6 +142,15 @@ public:
 	{
 		Intent<ModelType> intent(model_);
 		intent.check();
+
+		const VectorSizeType& excited = model_.params().excited;
+		const SizeType nexcited = excited.size();
+
+		if (nexcited == 1) return; // EARLY EXIT
+
+		PsimagLite::String msg = "nexcited = " + ttos(nexcited) + " > 1 is experimental\n";
+		std::cerr<<msg;
+		std::cout<<msg;
 	}
 
 	TargetingBase(const TargetingBase&) = delete;
@@ -191,9 +200,6 @@ public:
 		assert(nsectors > 0);
 
 		assert(nexcited > 0);
-
-		if (nexcited > 1)
-			std::cerr<<"nexcited = "<<nexcited<< " > 1 is experimental\n";
 
 		if (nexcited != inV.size())
 			err("FATAL: inV.size == " + ttos(inV.size()) + " but params.excited.size= "
