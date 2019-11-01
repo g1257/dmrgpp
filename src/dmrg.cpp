@@ -47,7 +47,7 @@ void mainLoop3(typename MatrixVectorType::ModelType::GeometryType& geometry,
 {
 	typedef PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>
 	        ParametersForSolverType;
-	if (dmrgSolverParams.options.find("ChebyshevSolver")!=PsimagLite::String::npos) {
+	if (dmrgSolverParams.options.isSet("ChebyshevSolver")) {
 		typedef PsimagLite::ChebyshevSolver<ParametersForSolverType,
 		        MatrixVectorType, typename MatrixVectorType::VectorType> SolverType;
 		mainLoop4<SolverType,VectorWithOffsetType>(geometry,
@@ -73,7 +73,7 @@ void mainLoop2(typename MatrixVectorType::ModelType::GeometryType& geometry,
 	typedef typename MatrixVectorType::ComplexOrRealType ComplexOrRealType;
 	typedef typename MatrixVectorType::ModelType::QnType QnType;
 
-	if (dmrgSolverParams.options.find("vectorwithoffsets")!=PsimagLite::String::npos) {
+	if (dmrgSolverParams.options.isSet("vectorwithoffsets")) {
 		typedef VectorWithOffsets<ComplexOrRealType, QnType> VectorWithOffsetType;
 		mainLoop3<MatrixVectorType,VectorWithOffsetType>(geometry,
 		                                                 dmrgSolverParams,
@@ -106,13 +106,13 @@ void mainLoop1(GeometryType& geometry,
 	        InputNgType::Readable,
 	        GeometryType> ModelBaseType;
 
-	if (dmrgSolverParams.options.find("MatrixVectorStored")!=PsimagLite::String::npos) {
+	if (dmrgSolverParams.options.isSet("MatrixVectorStored")) {
 		mainLoop2<MatrixVectorStored<ModelBaseType> >(geometry,
 		                                              dmrgSolverParams,
 		                                              io,
 		                                              opOptions);
-	} else if (dmrgSolverParams.options.find("MatrixVectorOnTheFly")!=PsimagLite::String::npos
-	           || ModelHelperType::isSu2()) {
+	} else if (dmrgSolverParams.options.isSet("MatrixVectorOnTheFly") ||
+	           ModelHelperType::isSu2()) {
 
 		mainLoop2<MatrixVectorOnTheFly<ModelBaseType> >(geometry,
 		                                                dmrgSolverParams,
@@ -137,7 +137,7 @@ void mainLoop0(InputNgType::Readable& io,
 	        ProgramGlobals> GeometryType;
 
 	GeometryType geometry(io);
-	if (dmrgSolverParams.options.find("printgeometry") != PsimagLite::String::npos)
+	if (dmrgSolverParams.options.isSet("printgeometry"))
 		std::cout<<geometry;
 
 	int tmp = 0;
@@ -367,11 +367,10 @@ to the main dmrg driver are the following.
 	if (echoInput) application.echoBase64(std::cout, filename);
 
 	if (insitu!="") dmrgSolverParams.insitu = insitu;
-	if (dmrgSolverParams.options.find("minimizeDisk") != PsimagLite::String::npos)
+	if (dmrgSolverParams.options.isSet("minimizeDisk"))
 		dmrgSolverParams.options += ",noSaveWft,noSaveStacks,noSaveData";
 
-	bool setAffinities = (dmrgSolverParams.options.find("setAffinities")
-	                      != PsimagLite::String::npos);
+	bool setAffinities = (dmrgSolverParams.options.isSet("setAffinities"));
 
 	SizeType threadsStackSize = 0;
 	try {
@@ -385,9 +384,8 @@ to the main dmrg driver are the following.
 
 	registerSignals();
 
-	bool isComplex = (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos);
-	if (dmrgSolverParams.options.find("TimeStepTargeting") != PsimagLite::String::npos)
-		isComplex = true;
+	bool isComplex = dmrgSolverParams.options.isSet("useComplex") ||
+	        dmrgSolverParams.options.isSet("TimeStepTargeting");
 
 	if (isComplex) {
 		mainLoop0<MySparseMatrixComplex>(io, dmrgSolverParams, options);

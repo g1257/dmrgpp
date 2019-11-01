@@ -119,8 +119,8 @@ public:
 	           bool isObserveCode) :
 	    parameters_(parameters),
 	    isObserveCode_(isObserveCode),
-	    isRestart_(parameters_.options.find("restart") != PsimagLite::String::npos),
-	    systemStack_(parameters_.options.find("shrinkStacksOnDisk") != PsimagLite::String::npos,
+	    isRestart_(parameters_.options.isSet("restart")),
+	    systemStack_(parameters_.options.isSet("shrinkStacksOnDisk"),
 	                 parameters_.filename,
 	                 "system",
 	                 isObserveCode),

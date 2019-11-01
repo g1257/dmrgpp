@@ -148,7 +148,7 @@ public:
 	      parameters_(model_.params()),
 	      ioIn_(ioIn),
 	      appInfo_("DmrgSolver:"),
-	      verbose_(false),
+	      verbose_(parameters_.options.isSet("verbose")),
 	      lrs_("pSprime", "pEprime", "pSE"),
 	      ioOut_(parameters_.filename, PsimagLite::IoSelector::ACC_TRUNC),
 	      progress_("DmrgSolver"),
@@ -167,7 +167,7 @@ public:
 	                parameters_,
 	                model.geometry(),
 	                ioOut_),
-	      saveData_(parameters_.options.find("noSaveData") == PsimagLite::String::npos)
+	      saveData_(!parameters_.options.isSet("noSaveData"))
 	{
 		std::cout<<appInfo_;
 		PsimagLite::OstringStream msg;
@@ -180,8 +180,6 @@ public:
 		ioOut_.write(parameters_, "PARAMETERS");
 		ioOut_.write(model_, "MODEL");
 		ioOut_.write(PsimagLite::IsComplexNumber<ComplexOrRealType>::True, "IsComplex");
-		if (parameters_.options.find("verbose")!=PsimagLite::String::npos)
-			verbose_=true;
 
 		const SizeType n = model_.targetQuantum().size();
 		for (SizeType i = 0; i < n; ++i)
@@ -212,8 +210,7 @@ public:
 		BlockType S,E;
 		VectorBlockType X,Y;
 
-		bool allInSystem = (parameters_.options.find("geometryallinsystem")!=
-		        PsimagLite::String::npos);
+		const bool allInSystem = (parameters_.options.isSet("geometryallinsystem"));
 
 		geometry.split(parameters_.sitesPerBlock,S,X,Y,E,allInSystem);
 		for (SizeType i=0;i<X.size();i++)

@@ -29,12 +29,6 @@ public:
 		return (data_.find(what) != PsimagLite::String::npos);
 	}
 
-	// deprecated: use isSet
-//	size_t find(PsimagLite::String what) const
-//	{
-//		return data_.find(what);
-//	}
-
 private:
 
 	PsimagLite::String data_;
