@@ -289,9 +289,7 @@ public:
 			printEnergies(); // in-situ
 
 		const OptionsType& options = this->model().params().options;
-		bool normalizeTimeVectors = true;
-		if (options.find("neverNormalizeVectors") != std::string::npos)
-			normalizeTimeVectors = false;
+		const bool normalizeTimeVectors = !options.isSet("neverNormalizeVectors");
 
 		if (normalizeTimeVectors)
 			this->common().normalizeTimeVectors();

@@ -142,12 +142,12 @@ public:
 
 	bool loadBalance() const
 	{
-		return (model_.params().options.find("KronLoadBalance") != PsimagLite::String::npos);
+		return model_.params().options.isSet("KronLoadBalance");
 	}
 
 	bool blasIsThreadSafe() const
 	{
-		return (model_.params().options.find("blasNotThreadSafe") == PsimagLite::String::npos);
+		return !model_.params().options.isSet("blasNotThreadSafe");
 	}
 
 	// -------------------
@@ -230,7 +230,7 @@ public:
 
 	bool batchedGemm() const
 	{
-		return (model_.params().options.find("BatchedGemm") != PsimagLite::String::npos);
+		return model_.params().options.isSet("BatchedGemm");
 	}
 
 private:

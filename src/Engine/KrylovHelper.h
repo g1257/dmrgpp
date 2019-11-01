@@ -29,8 +29,7 @@ public:
 	           SizeType n2,
 	           SizeType i0)
 	{
-		bool krylovAbridge = (params_.options.find("KrylovNoAbridge") ==
-		                      PsimagLite::String::npos);
+		const bool krylovAbridge = !params_.options.isSet("KrylovNoAbridge");
 		SizeType n3 = (krylovAbridge) ? 1 : n2;
 		// ---------------------------------------------------
 		// precompute values of calcVTimesPhi(kprime,v,phi,i0)

@@ -204,7 +204,7 @@ public:
 
 		// corner case only for TargetingAncilla
 		const OptionsType& options = this->model().params().options;
-		if (options.find("TargetingAncilla") == std::string::npos)
+		if (!options.isSet("TargetingAncilla"))
 			return;
 		if (site > 1 && site < numberOfSites-2)
 			return;
@@ -286,11 +286,10 @@ private:
 			printEnergies(); // in-situ
 
 		const OptionsType& options = this->model().params().options;
-		bool normalizeTimeVectors =
-		        (options.find("normalizeTimeVectors") != std::string::npos);
-		if (options.find("TargetingAncilla") != std::string::npos)
-			normalizeTimeVectors = true;
-		if (options.find("neverNormalizeVectors") != std::string::npos)
+		bool normalizeTimeVectors = (options.isSet("normalizeTimeVectors") ||
+		                             options.isSet("TargetingAncilla"));
+
+		if (options.isSet("neverNormalizeVectors"))
 			normalizeTimeVectors = false;
 
 		if (normalizeTimeVectors)

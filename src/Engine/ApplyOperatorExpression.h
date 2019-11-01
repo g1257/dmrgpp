@@ -623,8 +623,8 @@ private:
 		if (stage_[i] == StageEnum::OPERATOR) checkOrder(i, tstStruct);
 
 		const OptionsType& options = targetHelper_.model().params().options;
-		bool advanceOnlyAtBorder = (options.find("advanceUnrestricted") ==
-		                            PsimagLite::String::npos);
+		const bool advanceOnlyAtBorder = !options.isSet("advanceUnrestricted");
+
 		SizeType sites = targetHelper_.model().geometry().numberOfSites();
 		bool weAreAtBorder = (site < 2 || site >= sites-2);
 		bool dontAdvance = (advanceOnlyAtBorder & !weAreAtBorder);

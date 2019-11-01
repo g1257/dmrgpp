@@ -268,10 +268,8 @@ private:
 		assert(phiNew.offset(0) == this->common().aoe().targetVectors()[1].offset(0));
 
 		const OptionsType& options = this->model().params().options;
-		bool normalizeTimeVectors =
-		        (options.find("normalizeVectors") != std::string::npos);
-		if (options.find("neverNormalizeVectors") != std::string::npos)
-			normalizeTimeVectors = false;
+		const bool normalizeTimeVectors = (options.isSet("normalizeVectors") &&
+		                                   !options.isSet("neverNormalizeVectors"));
 
 		assert(phiNew.offset(0) == this->common().aoe().targetVectors()[1].offset(0));
 

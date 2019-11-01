@@ -267,9 +267,9 @@ private:
 		MatrixLanczosType lanczosHelper(model_,
 		                                hc);
 
-		ProgramGlobals::VerboseEnum verbose = (model_.params().options.find("VerboseCheby")
-		                                       != PsimagLite::String::npos)
-		        ? ProgramGlobals::VerboseEnum::YES : ProgramGlobals::VerboseEnum::NO;
+		ProgramGlobals::VerboseEnum verbose = (model_.params().options.isSet("VerboseCheby"))
+		            ? ProgramGlobals::VerboseEnum::YES
+		            : ProgramGlobals::VerboseEnum::NO;
 
 		// defining Hprime matrix:
 		ScaledMatrixType lanczosHelper2(lanczosHelper, tstStruct_, Eg, verbose);
