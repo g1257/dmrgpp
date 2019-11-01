@@ -550,49 +550,6 @@ struct ParametersDmrgSolver {
 		checkTwoSiteDmrg(filename2, options);
 	}
 
-	// print dmrg parameters
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const ParametersDmrgSolver& p)
-	{
-		os<<"This is DMRG++\n";
-		Provenance provenance;
-		os<<provenance;
-		os<<"parameters.version="<<p.version<<"\n";
-		os<<"parameters.model="<<p.model<<"\n";
-		os<<"parameters.filename="<<p.filename<<"\n";
-		os<<"parameters.options="<<p.options<<"\n";
-		if (p.options.find("KroneckerDumper") != PsimagLite::String::npos) {
-			os<<"parameters.dumperBegin="<<p.dumperBegin<<"\n";
-			os<<"parameters.dumperEnd="<<p.dumperEnd<<"\n";
-		}
-
-		os<<"parameters.precision="<<p.precision<<"\n";
-		os<<"parameters.keptStatesInfinite="<<p.keptStatesInfinite<<"\n";
-		os<<"FiniteLoops ";
-		os<<p.finiteLoop;
-
-		os<<"RecoverySave="<<p.recoverySave<<"\n";
-
-		if (p.truncationControl.first > 0) {
-			os<<"parameters.tolerance="<<p.truncationControl.first<<",";
-			os<<p.truncationControl.second<<"\n";
-		}
-
-		os<<"parameters.degeneracyMax="<<p.degeneracyMax<<"\n";
-		os<<"parameters.denseSparseThreshold="<<p.denseSparseThreshold<<"\n";
-		os<<"parameters.nthreads="<<p.nthreads<<"\n";
-		os<<"parameters.useReflectionSymmetry="<<p.useReflectionSymmetry<<"\n";
-		os<<p.checkpoint;
-
-		if (p.fileForDensityMatrixEigs!="")
-			os<<"parameters.fileForDensityMatrixEigs="<<p.fileForDensityMatrixEigs<<"\n";
-
-		if (p.options.find("MatrixVectorStored")==PsimagLite::String::npos)
-			os<<"MaxMatrixRankStored="<<p.maxMatrixRankStored<<"\n";
-
-		return os;
-	}
-
 private:
 
 	static SizeType modeFromModel(PsimagLite::String model)
@@ -636,8 +593,8 @@ private:
 		}
 
 		bool bOld = (optionsOld.find("twositedmrg")!=PsimagLite::String::npos);
-		bool b = (options.isSet("twositedmrg"));
-		bool doNotCheck = (options.isSet("doNotCheckTwoSiteDmrg"));
+		bool b = options.isSet("twositedmrg");
+		bool doNotCheck = options.isSet("doNotCheckTwoSiteDmrg");
 
 		if (bOld == b) return;
 

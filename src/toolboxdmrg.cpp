@@ -153,7 +153,7 @@ int main(int argc,char **argv)
 	bool earlyExit = true;
 	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, earlyExit);
 
-	if (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos)
+	if (dmrgSolverParams.options.isSet("useComplex"))
 		main1<std::complex<RealType> >(io, application, dmrgSolverParams, toolOptions);
 	else
 		main1<RealType>(io, application, dmrgSolverParams, toolOptions);
