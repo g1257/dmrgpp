@@ -85,7 +85,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename DmrgWaveStructType_,typename VectorWithOffsetType_>
+template<typename DmrgWaveStructType_,
+         typename VectorWithOffsetType_,
+         typename OptionsType_>
 class WaveFunctionTransfBase {
 
 public:
@@ -97,7 +99,7 @@ public:
 	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef WftOptions<VectorWithOffsetType_>WftOptionsType;
+	typedef WftOptions<VectorWithOffsetType_, OptionsType_>WftOptionsType;
 
 	virtual void transformVector(VectorWithOffsetType& psiDest,
 	                             const VectorWithOffsetType& psiSrc,

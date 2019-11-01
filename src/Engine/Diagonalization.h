@@ -95,6 +95,7 @@ class Diagonalization {
 public:
 
 	typedef std::pair<SizeType,SizeType> PairSizeType;
+	typedef typename ParametersType::OptionsType OptionsType;
 	typedef typename TargetingType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef typename TargetingType::ModelType ModelType;
 	typedef typename TargetingType::BasisType BasisType;
@@ -203,7 +204,7 @@ private:
 	                   const VectorSizeType& block)
 
 	{
-		PsimagLite::String options = parameters_.options;
+		const OptionsType& options = parameters_.options;
 		bool findSymmetrySector = (options.find("findSymmetrySector") != PsimagLite::String::npos);
 		const LeftRightSuperType& lrs= target.lrs();
 		wft_.triggerOn();
@@ -423,7 +424,7 @@ private:
 	                         SizeType loopIndex,
 	                         SizeType excited)
 	{
-		PsimagLite::String options = parameters_.options;
+		const OptionsType& options = parameters_.options;
 		bool dumperEnabled = (options.find("KroneckerDumper") != PsimagLite::String::npos);
 		ParamsForKroneckerDumperType paramsKrDumper(dumperEnabled,
 		                                            parameters_.dumperBegin,
@@ -591,7 +592,7 @@ private:
 		object.matrixVectorProduct(gsVector, initialVector);
 		RealType gsEnergy = PsimagLite::real(initialVector*gsVector);
 		gsVector = initialVector;
-		PsimagLite::String options = parameters_.options;
+		const OptionsType& options = parameters_.options;
 		bool debugmatrix = (options.find("debugmatrix") != PsimagLite::String::npos);
 
 		if (debugmatrix)

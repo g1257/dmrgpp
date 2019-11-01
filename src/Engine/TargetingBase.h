@@ -100,6 +100,8 @@ public:
 	typedef typename LanczosSolverType::MatrixType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
+	typedef typename ModelType::ParametersType ParametersType;
+	typedef typename ParametersType::OptionsType OptionsType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
@@ -110,8 +112,8 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef typename BasisType::QnType QnType;
-	typedef WaveFunctionTransfFactory<LeftRightSuperType,
-	VectorWithOffsetType> WaveFunctionTransfType;
+	typedef WaveFunctionTransfFactory<LeftRightSuperType, VectorWithOffsetType, OptionsType>
+	WaveFunctionTransfType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
 	typedef TargetParamsBase<ModelType> TargetParamsType;

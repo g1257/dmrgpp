@@ -90,7 +90,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Random48.h"
 
 namespace Dmrg {
-template<typename LeftRightSuperType,typename VectorWithOffsetType_>
+template<typename LeftRightSuperType,
+         typename VectorWithOffsetType_,
+         typename OptionsType_>
 class WaveFunctionTransfFactory {
 
 	typedef PsimagLite::IoSelector IoType;
@@ -112,11 +114,11 @@ public:
 	typedef typename WaveStructCombinedType::VectorMatrixType VectorMatrixType;
 	typedef typename WaveStructCombinedType::VectorQnType VectorQnType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
-	typedef WaveFunctionTransfBase<WaveStructCombinedType,VectorWithOffsetType>
+	typedef WaveFunctionTransfBase<WaveStructCombinedType, VectorWithOffsetType, OptionsType_>
 	WaveFunctionTransfBaseType;
-	typedef WaveFunctionTransfLocal<WaveStructCombinedType,VectorWithOffsetType>
+	typedef WaveFunctionTransfLocal<WaveStructCombinedType, VectorWithOffsetType, OptionsType_>
 	WaveFunctionTransfLocalType;
-	typedef WaveFunctionTransfSu2<WaveStructCombinedType,VectorWithOffsetType>
+	typedef WaveFunctionTransfSu2<WaveStructCombinedType, VectorWithOffsetType, OptionsType_>
 	WaveFunctionTransfSu2Type;
 	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
 	typedef typename WaveStructCombinedType::WaveStructSvdType WaveStructSvdType;
@@ -136,7 +138,7 @@ public:
 	      wftImpl_(0),
 	      rng_(3433117),
 	      noLoad_(false),
-	      save_(params.options.find("noSaveWft") == PsimagLite::String::npos)
+	      save_(!params.options.isSet("noSaveWft"))
 	{
 		if (!isEnabled_) return;
 

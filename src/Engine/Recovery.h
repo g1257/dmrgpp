@@ -396,7 +396,7 @@ public:
 	static PsimagLite::String recoveryFilePrefix() { return "Recovery"; }
 
 	static void checkOptions(PsimagLite::String recoverySave,
-	                         PsimagLite::String options)
+	                         const typename ParametersType::OptionsType& options)
 	{
 		if (recoverySave == "" || recoverySave == "no")
 			return;

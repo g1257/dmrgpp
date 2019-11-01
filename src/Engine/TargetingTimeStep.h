@@ -96,6 +96,7 @@ public:
 	typedef TargetingBase<LanczosSolverType,VectorWithOffsetType_> BaseType;
 	typedef typename BaseType::TargetingCommonType TargetingCommonType;
 	typedef std::pair<SizeType,SizeType> PairType;
+	typedef typename BaseType::OptionsType OptionsType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
@@ -202,7 +203,7 @@ public:
 		SizeType numberOfSites = this->lrs().super().block().size();
 
 		// corner case only for TargetingAncilla
-		PsimagLite::String options = this->model().params().options;
+		const OptionsType& options = this->model().params().options;
 		if (options.find("TargetingAncilla") == std::string::npos)
 			return;
 		if (site > 1 && site < numberOfSites-2)
@@ -284,7 +285,7 @@ private:
 		if (pAwesome.isTrue("s", block1[0]))
 			printEnergies(); // in-situ
 
-		PsimagLite::String options = this->model().params().options;
+		const OptionsType& options = this->model().params().options;
 		bool normalizeTimeVectors =
 		        (options.find("normalizeTimeVectors") != std::string::npos);
 		if (options.find("TargetingAncilla") != std::string::npos)

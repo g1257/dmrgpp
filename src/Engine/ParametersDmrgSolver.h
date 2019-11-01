@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2014, UT-Battelle, LLC
+Copyright (c) 2009-2014-2019, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 5.]
@@ -93,6 +93,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Recovery.h"
 #include "ProgressIndicator.h"
 #include <sstream>
+#include "Options.h"
 
 namespace Dmrg {
 
@@ -142,6 +143,7 @@ struct ParametersDmrgSolver {
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef std::pair<FieldType, SizeType> PairRealSizeType;
 	typedef typename PsimagLite::Vector<FiniteLoop>::Type VectorFiniteLoopType;
+	typedef Options<InputValidatorType> OptionsType;
 
 	SizeType nthreads;
 	SizeType sitesPerBlock;
@@ -155,7 +157,7 @@ struct ParametersDmrgSolver {
 	PairRealSizeType truncationControl;
 	PsimagLite::String filename;
 	PsimagLite::String version;
-	PsimagLite::String options;
+	OptionsType options;
 	PsimagLite::String model;
 	PsimagLite::String insitu;
 	PsimagLite::String recoverySave;
@@ -185,7 +187,7 @@ struct ParametersDmrgSolver {
 		ioSerializer.write(root + "/truncationControl", truncationControl);
 		ioSerializer.write(root + "/filename", filename);
 		ioSerializer.write(root + "/version", version);
-		ioSerializer.write(root + "/options", options);
+		options.write(root + "/options", ioSerializer);
 		ioSerializer.write(root + "/model", model);
 		ioSerializer.write(root + "/insitu", insitu);
 		ioSerializer.write(root + "/recoverySave", recoverySave);
@@ -219,13 +221,13 @@ struct ParametersDmrgSolver {
 	      precision(6),
 	      excited(1, 0),
 	      autoRestart(false),
+	      options("SolverOptions=", io),
 	      recoverySave("no"),
 	      adjustQuantumNumbers(0, QnType(false, VectorSizeType(), PairSizeType(0, 0), 0)),
 	      degeneracyMax(1e-12),
 	      denseSparseThreshold(0.2)
 	{
 		io.readline(model,"Model=");
-		io.readline(options,"SolverOptions=");
 		options += sOptions;
 		io.readline(version,"Version=");
 
@@ -542,7 +544,7 @@ struct ParametersDmrgSolver {
 
 	static void checkRestart(PsimagLite::String filename1,
 	                         PsimagLite::String filename2,
-	                         PsimagLite::String options)
+	                         const OptionsType& options)
 	{
 		checkFilesNotEqual(filename1, filename2);
 		checkTwoSiteDmrg(filename2, options);
@@ -621,7 +623,7 @@ private:
 	}
 
 	static void checkTwoSiteDmrg(PsimagLite::String filename2,
-	                             PsimagLite::String options)
+	                             const OptionsType& options)
 	{
 		PsimagLite::IoSelector::In io(filename2);
 		PsimagLite::String optionsOld;

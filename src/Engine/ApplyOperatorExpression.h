@@ -94,6 +94,8 @@ public:
 
 	typedef typename TargetHelperType::RealType RealType;
 	typedef typename TargetHelperType::ModelType ModelType;
+	typedef typename ModelType::ParametersType ParametersType;
+	typedef typename ParametersType::OptionsType OptionsType;
 	typedef TargetParamsBase<ModelType> TargetParamsType;
 	typedef typename TargetHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
@@ -620,7 +622,7 @@ private:
 
 		if (stage_[i] == StageEnum::OPERATOR) checkOrder(i, tstStruct);
 
-		PsimagLite::String options = targetHelper_.model().params().options;
+		const OptionsType& options = targetHelper_.model().params().options;
 		bool advanceOnlyAtBorder = (options.find("advanceUnrestricted") ==
 		                            PsimagLite::String::npos);
 		SizeType sites = targetHelper_.model().geometry().numberOfSites();

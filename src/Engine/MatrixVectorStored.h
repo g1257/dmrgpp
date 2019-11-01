@@ -93,14 +93,16 @@ class MatrixVectorStored : public MatrixVectorBase<ModelType_> {
 public:
 
 	typedef ModelType_ ModelType;
+	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
+	typedef typename ModelType::ParametersType ParametersType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type value_type;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename ParametersType::OptionsType OptionsType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
-	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
 
 	MatrixVectorStored(const ModelType& model,
 	                   const HamiltonianConnectionType& hc)
@@ -109,7 +111,7 @@ public:
 	      pointer_(0),
 	      progress_("MatrixVectorStored")
 	{
-		PsimagLite::String options = model.params().options;
+		const OptionsType& options = model.params().options;
 		bool debugMatrix = (options.find("debugmatrix") != PsimagLite::String::npos);
 		matrixStored_[0].clear();
 		model.fullHamiltonian(matrixStored_[0], hc);

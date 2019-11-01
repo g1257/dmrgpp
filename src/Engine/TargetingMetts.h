@@ -110,6 +110,7 @@ public:
 
 	typedef LanczosSolverType_ LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType,VectorWithOffsetType_> BaseType;
+	typedef typename BaseType::OptionsType OptionsType;
 	typedef typename BaseType::TargetingCommonType TargetingCommonType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
@@ -287,7 +288,7 @@ public:
 		if (pAwesome.isTrue("s", block1[0]))
 			printEnergies(); // in-situ
 
-		PsimagLite::String options = this->model().params().options;
+		const OptionsType& options = this->model().params().options;
 		bool normalizeTimeVectors = true;
 		if (options.find("neverNormalizeVectors") != std::string::npos)
 			normalizeTimeVectors = false;

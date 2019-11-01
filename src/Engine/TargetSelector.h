@@ -19,6 +19,7 @@ class TargetSelector {
 
 	typedef typename TargetingBaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
+	typedef typename ModelType::ParametersType ParametersType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
@@ -26,6 +27,7 @@ class TargetSelector {
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisType::QnType QnType;
+	typedef typename ParametersType::OptionsType OptionsType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename TargetingBaseType::LanczosSolverType LanczosSolverType;
 	typedef typename TargetingBaseType::VectorWithOffsetType VectorWithOffsetType;
@@ -116,7 +118,7 @@ public:
 
 private:
 
-	PsimagLite::String getTargeting(const PsimagLite::String& options) const
+	PsimagLite::String getTargeting(const OptionsType& options) const
 	{
 		PsimagLite::String targeting("GroundStateTargeting");
 

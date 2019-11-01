@@ -4,7 +4,7 @@
 
 namespace Dmrg {
 
-template<typename VectorWithOffsetType_>
+template<typename VectorWithOffsetType_, typename OptionsType>
 struct WftOptions {
 
 	typedef typename VectorWithOffsetType_::value_type ComplexOrRealType;
@@ -13,7 +13,7 @@ struct WftOptions {
 	enum AccelEnum {ACCEL_NONE, ACCEL_PATCHES, ACCEL_BLOCKS, ACCEL_SVD};
 
 	WftOptions(ProgramGlobals::DirectionEnum dir1,
-	           PsimagLite::String options,
+	           const OptionsType& options,
 	           bool f,
 	           bool b,
 	           RealType d,

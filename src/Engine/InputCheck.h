@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define INPUT_CHECK_H
 #include <vector>
 #include <stdexcept>
-#include "Options.h"
+#include "../../PsimagLite/src/Options.h"
 #include "Geometry/Geometry.h"
 #include "ProgramGlobals.h"
 

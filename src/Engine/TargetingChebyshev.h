@@ -92,6 +92,7 @@ public:
 	typedef LanczosSolverType_ LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType,VectorWithOffsetType_> BaseType;
 	typedef typename BaseType::TargetingCommonType TargetingCommonType;
+	typedef typename BaseType::OptionsType OptionsType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
@@ -266,7 +267,7 @@ private:
 
 		assert(phiNew.offset(0) == this->common().aoe().targetVectors()[1].offset(0));
 
-		PsimagLite::String options = this->model().params().options;
+		const OptionsType& options = this->model().params().options;
 		bool normalizeTimeVectors =
 		        (options.find("normalizeVectors") != std::string::npos);
 		if (options.find("neverNormalizeVectors") != std::string::npos)

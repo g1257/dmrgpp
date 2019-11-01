@@ -96,12 +96,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename DmrgWaveStructType,typename VectorWithOffsetType>
+template<typename DmrgWaveStructType,
+         typename VectorWithOffsetType,
+         typename OptionsType_>
 class WaveFunctionTransfLocal : public
-        WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType> {
+        WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType, OptionsType_> {
 
 
-	typedef WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType> BaseType;
+	typedef WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType, OptionsType_>
+	BaseType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename BaseType::PackIndicesType PackIndicesType;
 
