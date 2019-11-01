@@ -533,7 +533,7 @@ protected:
 	PsimagLite::String oracle(const RealType& energy,
 	                          const PsimagLite::String formula) const
 	{
-		if (modelCommon_.params().options.find("TargetingAncilla") != PsimagLite::String::npos)
+		if (modelCommon_.params().options.isSet("TargetingAncilla"))
 			return "";
 
 		const PsimagLite::String s = " Oracle: " + ttos(energy) + " : " + formula;

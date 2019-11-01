@@ -401,7 +401,7 @@ public:
 		if (recoverySave == "" || recoverySave == "no")
 			return;
 
-		if (options.find("minimizeDisk") == PsimagLite::String::npos)
+		if (!options.isSet("minimizeDisk"))
 			return;
 
 		err("minimizeDisk cannot be used with RecoverySave\n");
@@ -410,7 +410,7 @@ public:
 	// this function is called before the ctor
 	static void autoRestart(ParametersType& params)
 	{
-		if (params.options.find("recoveryEnableRead") == PsimagLite::String::npos)
+		if (!params.options.isSet("recoveryEnableRead"))
 			return;
 
 		// params.filename must have been corrected already if necessary

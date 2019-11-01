@@ -243,7 +243,7 @@ struct ParametersDmrgSolver {
 
 		readFiniteLoops(io,finiteLoop);
 
-		if (options.find("hasQuantumNumbers")!=PsimagLite::String::npos) {
+		if (options.isSet("hasQuantumNumbers")) {
 			PsimagLite::String s = "*** FATAL: hasQuantumNumbers ";
 			s += "option is no longer allowed in input file\n";
 			throw PsimagLite::RuntimeError(s.c_str());
@@ -280,7 +280,7 @@ struct ParametersDmrgSolver {
 			if (tokens.size() > 1)
 				truncationControl.second = atoi(tokens[1].c_str());
 			warnIfFiniteMlessThanMin(finiteLoop, truncationControl.second);
-			if (options.find("twositedmrg") == PsimagLite::String::npos) {
+			if (!options.isSet("twositedmrg")) {
 				std::cerr<<"WARNING: TruncationTolerance used without twositedmrg\n";
 				std::cout<<"WARNING: TruncationTolerance used without twositedmrg\n";
 			}
@@ -330,8 +330,8 @@ struct ParametersDmrgSolver {
 			io.readline(dumperEnd,"KroneckerDumperEnd=");
 		} catch (std::exception&) {}
 
-		if (options.find("KroneckerDumper") != PsimagLite::String::npos) {
-			if (options.find("MatrixVectorStored") != PsimagLite::String::npos) {
+		if (options.isSet("KroneckerDumper")) {
+			if (options.isSet("MatrixVectorStored")) {
 				PsimagLite::String msg("FATAL: KroneckerDumper cannot run with ");
 				throw PsimagLite::RuntimeError(msg + "MatrixVectorStored\n");
 			}
@@ -373,7 +373,7 @@ struct ParametersDmrgSolver {
 			io.readline(saveDensityMatrixEigenvalues, "SaveDensityMatrixEigenvalues=");
 		} catch (std::exception&) {}
 
-		if (options.find("restart")!=PsimagLite::String::npos) {
+		if (options.isSet("restart")) {
 			if (!infLoopsIsAnInt and hasRestartFrom) {
 				PsimagLite::String tmp = "FATAL: RestartFilename found in input ";
 				err(tmp + "while InfiniteLoopKeptStates not an int\n");
@@ -636,8 +636,8 @@ private:
 		}
 
 		bool bOld = (optionsOld.find("twositedmrg")!=PsimagLite::String::npos);
-		bool b = (options.find("twositedmrg")!=PsimagLite::String::npos);
-		bool doNotCheck = (options.find("doNotCheckTwoSiteDmrg") != PsimagLite::String::npos);
+		bool b = (options.isSet("twositedmrg"));
+		bool doNotCheck = (options.isSet("doNotCheckTwoSiteDmrg"));
 
 		if (bOld == b) return;
 

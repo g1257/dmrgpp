@@ -54,7 +54,7 @@ void mainLoop1(GeometryType& geometry,
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;
 	typedef Qn QnType;
 
-	if (params.options.find("vectorwithoffsets")!=PsimagLite::String::npos) {
+	if (params.options.isSet("vectorwithoffsets")) {
 		typedef VectorWithOffsets<ComplexOrRealType, QnType> VectorWithOffsetType;
 		mainLoop<GeometryType,ModelHelperType,VectorWithOffsetType>
 		        (geometry, io, params, list);
@@ -194,8 +194,7 @@ int main(int argc,char **argv)
 
 	if (threadsInCmd > 0) dmrgSolverParams.nthreads = threadsInCmd;
 
-	bool setAffinities = (dmrgSolverParams.options.find("setAffinities")
-	                      != PsimagLite::String::npos);
+	bool setAffinities = (dmrgSolverParams.options.isSet("setAffinities"));
 
 	SizeType threadsStackSize = 0;
 	try {
@@ -208,8 +207,8 @@ int main(int argc,char **argv)
 	                                                threadsStackSize);
 	ConcurrencyType::setOptions(codeSectionParams);
 
-	bool isComplex = (dmrgSolverParams.options.find("useComplex") != PsimagLite::String::npos);
-	if (dmrgSolverParams.options.find("TimeStepTargeting") != PsimagLite::String::npos)
+	bool isComplex = (dmrgSolverParams.options.isSet("useComplex"));
+	if (dmrgSolverParams.options.isSet("TimeStepTargeting"))
 		isComplex = true;
 
 	if (isComplex) {

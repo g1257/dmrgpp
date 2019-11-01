@@ -30,10 +30,10 @@ public:
 	}
 
 	// deprecated: use isSet
-	size_t find(PsimagLite::String what) const
-	{
-		return data_.find(what);
-	}
+//	size_t find(PsimagLite::String what) const
+//	{
+//		return data_.find(what);
+//	}
 
 private:
 

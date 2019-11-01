@@ -128,7 +128,7 @@ public:
 	              start,
 	              nf,
 	              trail,
-	              params.options.find("fixLegacyBugs") == PsimagLite::String::npos),
+	              !params.options.isSet("fixLegacyBugs")),
 	      onepoint_(helper_),
 	      skeleton_(helper_, true),
 	      twopoint_(skeleton_),
