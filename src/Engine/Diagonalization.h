@@ -425,7 +425,7 @@ private:
 	                         SizeType excited)
 	{
 		const OptionsType& options = parameters_.options;
-		bool dumperEnabled = (options.find("KroneckerDumper") != PsimagLite::String::npos);
+		const bool dumperEnabled = options.isSet("KroneckerDumper");
 		ParamsForKroneckerDumperType paramsKrDumper(dumperEnabled,
 		                                            parameters_.dumperBegin,
 		                                            parameters_.dumperEnd,
@@ -442,7 +442,7 @@ private:
 		                             paramsKrDumperPtr);
 
 		const SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
-		if (options.find("debugmatrix")!=PsimagLite::String::npos && !(saveOption & 4) ) {
+		if (options.isSet("debugmatrix") && !(saveOption & 4) ) {
 			SparseMatrixType fullm;
 
 			model_.fullHamiltonian(fullm, hc);
@@ -450,7 +450,7 @@ private:
 			PsimagLite::Matrix<typename SparseMatrixType::value_type> fullm2;
 			crsMatrixToFullMatrix(fullm2,fullm);
 			if (PsimagLite::isZero(fullm2)) std::cerr<<"Matrix is zero\n";
-			if (options.find("printmatrix")!=PsimagLite::String::npos)
+			if (options.isSet("printmatrix"))
 				printFullMatrix(fullm,"matrix",1);
 
 			if (!isHermitian(fullm,true))
@@ -459,11 +459,10 @@ private:
 			typename PsimagLite::Vector<RealType>::Type eigs(fullm2.rows());
 			PsimagLite::diag(fullm2,eigs,'V');
 			std::cerr<<"eigs[0]="<<eigs[0]<<"\n";
-			if (options.find("test")!=PsimagLite::String::npos)
+			if (options.isSet("test"))
 				throw std::logic_error("Exiting due to option test in the input\n");
 
-			if (options.find("exactdiag")!=PsimagLite::String::npos &&
-			        (saveOption & 4) == 0) {
+			if (options.isSet("exactdiag") && (saveOption & 4) == 0) {
 				energyTmp = eigs[0];
 				for (SizeType i = 0; i < tmpVec.size(); ++i)
 					tmpVec[i] = fullm2(i,0);
@@ -509,8 +508,8 @@ private:
 		ParametersForSolverType params(io_, "Lanczos", loopIndex);
 		LanczosOrDavidsonBaseType* lanczosOrDavidson = 0;
 
-		bool useDavidson = (parameters_.options.find("useDavidson") !=
-		        PsimagLite::String::npos);
+		const bool useDavidson = parameters_.options.isSet("useDavidson");
+
 		if (useDavidson) {
 			lanczosOrDavidson = new DavidsonSolverType(lanczosHelper, params);
 		} else {
@@ -592,10 +591,8 @@ private:
 		object.matrixVectorProduct(gsVector, initialVector);
 		RealType gsEnergy = PsimagLite::real(initialVector*gsVector);
 		gsVector = initialVector;
-		const OptionsType& options = parameters_.options;
-		bool debugmatrix = (options.find("debugmatrix") != PsimagLite::String::npos);
 
-		if (debugmatrix)
+		if (parameters_.options.isSet("debugmatrix"))
 			std::cout<<"VECTOR: Printing of BlockOffDiagMatrix not supported\n";
 
 		return gsEnergy;

@@ -485,7 +485,7 @@ obtain ordered
 	                SizeType loopIndex,
 	                TargetingType& target)
 	{
-		const bool extendedPrint = parameters_.options.find("extendedPrint");
+		const bool extendedPrint = parameters_.options.isSet("extendedPrint");
 		PrinterInDetailType printerInDetail(lrs_, extendedPrint);
 		int stepLength = parameters_.finiteLoop[loopIndex].stepLength;
 		SizeType keptStates = parameters_.finiteLoop[loopIndex].keptStates;
@@ -571,7 +571,7 @@ obtain ordered
 	                                ProgramGlobals::DirectionEnum direction,
 	                                SizeType loopIndex)
 	{
-		bool twoSiteDmrg = (parameters_.options.find("twositedmrg") != PsimagLite::String::npos);
+		const bool twoSiteDmrg = parameters_.options.isSet("twositedmrg");
 		FermionSignType fsS(pS.signs());
 
 		FermionSignType fsE(pE.signs());

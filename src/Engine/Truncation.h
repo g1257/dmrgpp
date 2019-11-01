@@ -242,7 +242,7 @@ private:
 
 		bool debug = false;
 		bool useSvd = !parameters_.options.isSet("truncationNoSvd");
-		bool enablePersistentSvd = parameters_.options.find("EnablePersistentSvd");
+		bool enablePersistentSvd = parameters_.options.isSet("EnablePersistentSvd");
 		ParamsDensityMatrixType p(useSvd, direction, debug, enablePersistentSvd);
 		TruncationCache& cache = (direction == expandSys) ? leftCache_ :
 		                                                    rightCache_;
@@ -296,7 +296,7 @@ private:
 
 		cache.transform.truncate(cache.removedIndices);
 
-		const bool blasIsThreadSafe = !parameters_.options.find("blasNotThreadSafe");
+		const bool blasIsThreadSafe = !parameters_.options.isSet("blasNotThreadSafe");
 
 		rPrime.truncateBasis(cache.transform,
 		                     cache.eigs,
@@ -367,7 +367,7 @@ private:
 		msg2<<"Discarded weight (Truncation error): "<< discWeight;
 		progress_.printline(msg2,std::cout);
 
-		if (parameters_.options.find("calcAndPrintEntropies") != PsimagLite::String::npos)
+		if (parameters_.options.isSet("calcAndPrintEntropies"))
 			calcAndPrintEntropies(eigs);
 	}
 

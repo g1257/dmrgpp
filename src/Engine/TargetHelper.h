@@ -109,7 +109,7 @@ public:
 
 	bool withLegacyBugs() const
 	{
-		return (model_.params().options.find("fixLegacyBugs") == PsimagLite::String::npos);
+		return !model_.params().options.isSet("fixLegacyBugs");
 	}
 
 private:

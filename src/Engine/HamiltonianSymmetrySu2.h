@@ -215,7 +215,7 @@ public:
 
 		removedIndices.clear();
 
-		if (solverParams.options.find("inflate")!=PsimagLite::String::npos)
+		if (solverParams.options.isSet("inflate"))
 			inclusiveRemoval(removedIndices,perm,eigs,target);
 		else exclusiveRemoval(removedIndices,perm,eigs,target);
 	}

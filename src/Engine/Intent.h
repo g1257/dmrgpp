@@ -129,7 +129,7 @@ private:
 
 	bool hasInSolverOptions(PsimagLite::String what) const
 	{
-		return (model_.params().options.find(what) != PsimagLite::String::npos);
+		return model_.params().options.isSet(what);
 	}
 
 	void saySomethingAbout(PsimagLite::String what) const

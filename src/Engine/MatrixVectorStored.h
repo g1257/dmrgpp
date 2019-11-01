@@ -112,7 +112,8 @@ public:
 	      progress_("MatrixVectorStored")
 	{
 		const OptionsType& options = model.params().options;
-		bool debugMatrix = (options.find("debugmatrix") != PsimagLite::String::npos);
+		const bool debugMatrix = options.isSet("debugmatrix");
+
 		matrixStored_[0].clear();
 		model.fullHamiltonian(matrixStored_[0], hc);
 		assert(isHermitian(matrixStored_[0],true));
