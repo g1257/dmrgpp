@@ -114,7 +114,7 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 
 			if (magneticFieldDirection != "x" && magneticFieldDirection != "z")
 			{
-				err("magneticFieldDirection must be in {x, y}\n");
+				err("magneticFieldDirection must be in {x, z}\n");
 			}
 		}
 
