@@ -1,3 +1,17 @@
+2019-11-08 Version 5.64
+
+* MultiExcited implemented
+but changes are needed
+
+* Multiple sectors implemented,
+TargetingMultiQ no longer needed
+
+* Bug fix for Ancilla (bug introduced in March 2019)
+
+* Graphene model implemented
+
+* SolverOptions now a class
+
 2019-09-23 Version 5.62
 
 User facing:
