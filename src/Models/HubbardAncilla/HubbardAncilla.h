@@ -131,14 +131,15 @@ public:
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
 	static const int SPIN_DOWN=HilbertSpaceFeAsType::SPIN_DOWN;
-	static SizeType const ORBITALS  = 2;
+	static SizeType const ORBITALS = 2;
 
 	HubbardAncilla(const SolverParamsType& solverParams,
 	               InputValidatorType& io,
 	               GeometryType const &geometry)
 	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
-	      geometry_(geometry)
+	      geometry_(geometry),
+	      hot_(geometry_.orbitals(0,0) > 1)
 	{
 		if (modelParameters_.potentialV.size() != ORBITALS*2*geometry.numberOfSites())
 			err("HubbardAncilla: potentialV.size must be equal to ORBITALS*2*numberOfSites\n");
@@ -200,7 +201,10 @@ protected:
 
 		SizeType dofs = 2*ORBITALS;
 		for (SizeType i=0;i<block.size();i++) {
-			for (SizeType sigma=0;sigma<dofs;sigma+=2) {
+			for (SizeType sigma2 = 0; sigma2 < dofs; ++sigma2) {
+				SizeType sigma = (hot_) ? 2*sigma2 : sigma2;
+				if (sigma >= dofs) sigma -= (dofs - 1);
+				if (!hot_ && (sigma & 1)) continue;
 				MatrixType tmp;
 				findOperatorMatrices(tmp,i,sigma,natBasis);
 				SparseMatrixType tmpMatrix(tmp);
@@ -237,10 +241,14 @@ protected:
 		ModelTermType& hop = ModelBaseType::createTerm("hopping");
 		ModelTermType& ll = ModelBaseType::createTerm("LambdaLambda");
 
-		for (SizeType spin = 0; spin < 2; ++spin) {
-			OpForLinkType c("c", spin);
+		const SizeType orbitals = (hot_) ? 2 : 1;
 
-			hop.push(c, 'N', c, 'C', 1, (spin == 1) ? -1 : 1, spin);
+		for (SizeType spin = 0; spin < 2; ++spin) {
+			for (SizeType orb = 0; orb < orbitals; ++orb) {
+				OpForLinkType c("c", orb + spin*orbitals, orb);
+
+				hop.push(c, 'N', c, 'C', 1, (spin == 1) ? -1 : 1, spin);
+			}
 
 			OpForLinkType l("l", spin);
 
@@ -441,18 +449,22 @@ private:
 	                   const VectorSparseMatrixType& cm,
 	                   SizeType actualIndexOfSite) const
 	{
-		SizeType orbital = 0;
-		SparseMatrixType nup = n(cm[orbital+SPIN_UP*ORBITALS]);
-		SparseMatrixType ndown = n(cm[orbital+SPIN_DOWN*ORBITALS]);
+		SizeType factor = (hot_) ? 2 : 1;
+		SizeType nsites = geometry_.numberOfSites();
+		if (modelParameters_.potentialV.size() != factor*2*nsites)
+			err("Number of Vs is incorrect\n");
 
-		SizeType linSize = geometry_.numberOfSites();
+		for (SizeType orbital = 0; orbital < factor; ++orbital) {
+			SparseMatrixType nup = n(cm[orbital + SPIN_UP*ORBITALS]);
+			SparseMatrixType ndown = n(cm[orbital + SPIN_DOWN*ORBITALS]);
 
-		SizeType iUp = actualIndexOfSite + (orbital + 0*ORBITALS)*linSize;
-		assert(iUp < modelParameters_.potentialV.size());
-		hmatrix += modelParameters_.potentialV[iUp] * nup;
-		SizeType iDown = actualIndexOfSite + (orbital + 1*ORBITALS)*linSize;
-		assert(iDown < modelParameters_.potentialV.size());
-		hmatrix += modelParameters_.potentialV[iDown] * ndown;
+			SizeType iUp = actualIndexOfSite + (orbital + 0*ORBITALS)*nsites;
+			assert(iUp < modelParameters_.potentialV.size());
+			hmatrix += modelParameters_.potentialV[iUp] * nup;
+			SizeType iDown = actualIndexOfSite + (orbital + 1*ORBITALS)*nsites;
+			assert(iDown < modelParameters_.potentialV.size());
+			hmatrix += modelParameters_.potentialV[iDown] * ndown;
+		}
 	}
 
 	SparseMatrixType n(const SparseMatrixType& c) const
@@ -471,20 +483,26 @@ private:
 	                    SizeType actualSite) const
 	{
 		SparseMatrixType tmpMatrix;
+		SizeType nsites = geometry_.numberOfSites();
+		SizeType factor = (hot_) ? 2 : 1;
+		if (modelParameters_.hubbardU.size() != factor*nsites)
+			err("Number of Us is incorrect\n");
 
-		SizeType alpha = 0; // real sites, no ancilla
-		SparseMatrixType m1=cm[alpha+SPIN_UP*2];
-		SparseMatrixType m2=cm[alpha+SPIN_DOWN*2];
+		for (SizeType alpha = 0; alpha < factor; ++alpha) {// real sites and ancillas
+			SparseMatrixType m1 = cm[alpha + SPIN_UP*ORBITALS];
+			SparseMatrixType m2 = cm[alpha + SPIN_DOWN*ORBITALS];
 
-		multiply(tmpMatrix,n(m1),n(m2));
-		assert(actualSite < modelParameters_.hubbardU.size());
-		hmatrix += modelParameters_.hubbardU[actualSite]*tmpMatrix;
+			multiply(tmpMatrix, n(m1), n(m2));
+			assert(actualSite + nsites*alpha < modelParameters_.hubbardU.size());
+			hmatrix += modelParameters_.hubbardU[actualSite + nsites*alpha]*tmpMatrix;
+		}
 	}
 
 	//serializr normal modelParameters_
 	ParametersHubbardAncillaType  modelParameters_;
 	//serializr ref geometry_ start
 	const GeometryType& geometry_;
+	bool hot_;
 }; //class HubbardAncilla
 } // namespace Dmrg
 /*@}*/

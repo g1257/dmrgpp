@@ -616,18 +616,22 @@ private:
 	                   const VectorSparseMatrixType& cm,
 	                   SizeType actualIndexOfSite) const
 	{
-		SizeType orbital = 0;
-		SparseMatrixType nup = n(cm[orbital+SPIN_UP*ORBITALS]);
-		SparseMatrixType ndown = n(cm[orbital+SPIN_DOWN*ORBITALS]);
+		SizeType factor = (hot_) ? 2 : 1;
+		SizeType nsites = geometry_.numberOfSites();
+		if (modelParameters_.potentialV.size() != factor*2*nsites)
+			err("Number of Vs is incorrect\n");
 
-		SizeType linSize = geometry_.numberOfSites();
+		for (SizeType orbital = 0; orbital < factor; ++orbital) {
+			SparseMatrixType nup = n(cm[orbital + SPIN_UP*ORBITALS]);
+			SparseMatrixType ndown = n(cm[orbital + SPIN_DOWN*ORBITALS]);
 
-		SizeType iUp = actualIndexOfSite + (orbital + 0*ORBITALS)*linSize;
-		assert(iUp < modelParameters_.potentialV.size());
-		hmatrix += modelParameters_.potentialV[iUp] * nup;
-		SizeType iDown = actualIndexOfSite + (orbital + 1*ORBITALS)*linSize;
-		assert(iDown < modelParameters_.potentialV.size());
-		hmatrix += modelParameters_.potentialV[iDown] * ndown;
+			SizeType iUp = actualIndexOfSite + (orbital + 0*ORBITALS)*nsites;
+			assert(iUp < modelParameters_.potentialV.size());
+			hmatrix += modelParameters_.potentialV[iUp] * nup;
+			SizeType iDown = actualIndexOfSite + (orbital + 1*ORBITALS)*nsites;
+			assert(iDown < modelParameters_.potentialV.size());
+			hmatrix += modelParameters_.potentialV[iDown] * ndown;
+		}
 	}
 
 	SparseMatrixType n(const SparseMatrixType& c) const
