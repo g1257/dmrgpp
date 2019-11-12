@@ -209,7 +209,7 @@ private:
 		const LeftRightSuperType& lrs= target.lrs();
 		wft_.triggerOn();
 
-		SizeType numberOfExcited = parameters_.excited.size();
+		SizeType numberOfExcited = parameters_.numberOfExcited;
 		energies.resize(numberOfExcited);
 		std::fill(energies.begin(), energies.end(), 0);
 		const SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
@@ -270,7 +270,7 @@ private:
 		typename PsimagLite::Vector<VectorRealType>::Type energySaved(numberOfExcited);
 		VectorVectorVectorType vecSaved(numberOfExcited);
 
-		target.initPsi(numberOfExcited, totalSectors);
+		target.initPsi(totalSectors, numberOfExcited);
 		target.initialGuess(initialVector,
 		                    block,
 		                    noguess,
@@ -291,12 +291,12 @@ private:
 				PsimagLite::OstringStream msg;
 				msg<<"About to diag. sector with";
 				msg<<" quantumSector="<<lrs.super().qnEx(i);
-				msg<<" and Excited["<<excitedIndex<<"]="<<parameters_.excited[excitedIndex];
+				msg<<" and numberOfExcited="<<parameters_.numberOfExcited;
 				progress_.printline(msg, std::cout);
 				TargetVectorType& initialVectorBySector = initialVector[excitedIndex][j];
 				RealType norma = PsimagLite::norm(initialVectorBySector);
 
-				if (initialVectorBySector.size() <= parameters_.excited[excitedIndex])
+				if (initialVectorBySector.size() <= parameters_.numberOfExcited)
 					continue;
 
 				if (fabs(norma) < 1e-12) {
@@ -324,7 +324,7 @@ private:
 					                    target.time(),
 					                    initialVectorBySector,
 					                    loopIndex,
-					                    parameters_.excited[excitedIndex]);
+					                    parameters_.numberOfExcited);
 
 				}
 
@@ -349,7 +349,7 @@ private:
 
 				const RealType sectorEnergy = energySaved[excitedIndex][i];
 				PsimagLite::OstringStream msg4;
-				msg4<<"Level["<<excitedIndex<<"]="<<parameters_.excited[excitedIndex];
+				msg4<<"numberOfExcited="<<parameters_.numberOfExcited;
 				msg4<<" Sector["<<i<<"]="<<sectors[i];
 				msg4<<" sector energy = "<<sectorEnergy;
 				progress_.printline(msg4, std::cout);
@@ -362,10 +362,10 @@ private:
 
 			if (flag)
 				err("Could not found sector for Level[" + ttos(excitedIndex) +
-				    "]=" + ttos(parameters_.excited[excitedIndex]) + "\n");
+				    "]=" + ttos(parameters_.numberOfExcited) + "\n");
 
 			PsimagLite::OstringStream msg3;
-			msg3<<"Level["<<excitedIndex<<"]="<<parameters_.excited[excitedIndex];
+			msg3<<"numberOfExcited="<<parameters_.numberOfExcited;
 			msg3<<" with Energy= "<<myEnergy<<model_.oracle();
 			progress_.printline(msg3, std::cout);
 
@@ -401,7 +401,7 @@ private:
 
 			PsimagLite::OstringStream msg4;
 			msg4<<"Number of Sectors found "<<counter;
-			msg4<<" for Level["<<excitedIndex<<"]="<<parameters_.excited[excitedIndex];
+			msg4<<" for numberOfExcited="<<parameters_.numberOfExcited;
 			progress_.printline(msg4, std::cout);
 
 			if (PsimagLite::Concurrency::root())

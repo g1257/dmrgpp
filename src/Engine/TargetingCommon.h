@@ -598,15 +598,16 @@ public:
 		PsimagLite::OstringStream msg2;
 		msg2<<"gsNorms=";
 
-		const SizeType nexcited = aoe_.psi().size();
-		for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
-			const SizeType nsectors = aoe_.psi()[excitedIndex].size();
-			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+		const SizeType nsectors = aoe_.psiConst().size();
+
+		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+			const SizeType nexcited = aoe_.psiConst()[sectorIndex].size();
+			for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
 				if (nexcited > 1)
 					msg2<<"e"<<excitedIndex<<";";
 				if (nsectors > 1)
 					msg2<<"s"<<sectorIndex<<";";
-				msg2<<norm(*(aoe_.psi()[excitedIndex][sectorIndex]))<<" ";
+				msg2<<norm(*(aoe_.psiConst()[sectorIndex][excitedIndex]))<<" ";
 			}
 		}
 
@@ -692,19 +693,19 @@ private:
 
 	const VectorWithOffsetType* getVector(const PsimagLite::GetBraOrKet& getBraOrKet) const
 	{
-		const SizeType levelIndex = getBraOrKet.levelIndex();
-		if (getBraOrKet.isPvector())
-			return &(aoe_.targetVectors(levelIndex));
-
-		if (aoe_.psi().size() <= levelIndex)
-			err("getVector: levelIndex = " + ttos(levelIndex) + ">=" +
-			    ttos(aoe_.psi().size()) + "\n");
-
 		const SizeType sectorIndex = getBraOrKet.sectorIndex();
-		if (aoe_.psi()[levelIndex].size() <= sectorIndex)
+		if (getBraOrKet.isPvector())
+			return &(aoe_.targetVectors(sectorIndex));
+
+		if (aoe_.psiConst().size() <= sectorIndex)
+			err("getVector: sectorIndex = " + ttos(sectorIndex) + ">=" +
+			    ttos(aoe_.psiConst().size()) + "\n");
+
+		const SizeType levelIndex = getBraOrKet.levelIndex();
+		if (aoe_.psiConst()[sectorIndex].size() <= levelIndex)
 			return nullptr;
 
-		return aoe_.psi()[levelIndex][sectorIndex];
+		return aoe_.psiConst()[sectorIndex][levelIndex];
 	}
 
 	// prints <src2|A|src1>

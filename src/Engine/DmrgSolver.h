@@ -605,7 +605,7 @@ obtain ordered
 
 		const BlockDiagonalMatrixType& transform = truncate_.transform(direction);
 		// FIXME: Serializer will for now save only one psi target
-		const VectorVectorVectorWithOffsetType& psi = target.psi();
+		const VectorVectorVectorWithOffsetType& psi = target.psiConst();
 		if (psi.size() == 0)
 			err("No psi targets?\n");
 

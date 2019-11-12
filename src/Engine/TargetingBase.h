@@ -143,8 +143,7 @@ public:
 		Intent<ModelType> intent(model_);
 		intent.check();
 
-		const VectorSizeType& excited = model_.params().excited;
-		const SizeType nexcited = excited.size();
+		const SizeType nexcited = model_.params().numberOfExcited;
 
 		if (nexcited == 1) return; // EARLY EXIT
 
@@ -194,28 +193,27 @@ public:
 	                 const BasisType& someBasis)
 	{
 		const SizeType nsectors = sectors.size();
-		const VectorSizeType& excited = model_.params().excited;
-		const SizeType nexcited = excited.size();
+		const SizeType nexcited = model_.params().numberOfExcited;
 
 		assert(nsectors > 0);
 
 		assert(nexcited > 0);
 
-		if (nexcited != inV.size())
+		if (nsectors != inV.size())
 			err("FATAL: inV.size == " + ttos(inV.size()) + " but params.excited.size= "
-			    + ttos(nexcited) + "\n");
+			    + ttos(nsectors) + "\n");
 
-		for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
-
-			if (inV[excitedIndex].size() != nsectors)
-				err("Expected inV[" + ttos(excitedIndex) + "].size == " +
-				    ttos(sectors) + " but found " + ttos(inV[excitedIndex].size()) +
+		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+			if (inV[sectorIndex].size() != nexcited)
+				err("Expected inV[" + ttos(sectorIndex) + "].size == " +
+				    ttos(nexcited) + " but found " + ttos(inV[sectorIndex].size()) +
 				    " instead\n");
 
-			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
-				commonTargeting_.aoe().setPsi(excitedIndex,
-				                              sectorIndex,
-				                              inV[excitedIndex][sectorIndex],
+			for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
+
+				commonTargeting_.aoe().setPsi(sectorIndex,
+				                              excitedIndex,
+				                              inV[sectorIndex][excitedIndex],
 				                              someBasis,
 				                              sectors);
 			}
@@ -252,9 +250,9 @@ public:
 		return commonTargeting_.normSquared(i);
 	}
 
-	virtual void initPsi(SizeType nexcited, SizeType nsectors)
+	virtual void initPsi(SizeType nsectors, SizeType nexcited)
 	{
-		commonTargeting_.aoe().initPsi(nexcited, nsectors);
+		commonTargeting_.aoe().initPsi(nsectors, nexcited);
 	}
 
 	virtual void initialGuess(VectorVectorVectorType& initialVector,
@@ -274,9 +272,9 @@ public:
 
 	const ModelType& model() const { return model_; }
 
-	const VectorVectorVectorWithOffsetType& psi() const
+	const VectorVectorVectorWithOffsetType& psiConst() const
 	{
-		return commonTargeting_.aoe().psi();
+		return commonTargeting_.aoe().psiConst();
 	}
 
 	const VectorWithOffsetType& operator()(SizeType i) const
@@ -337,26 +335,26 @@ private:
 	                             const VectorSizeType& sectors,
 	                             const BasisType& basis) const
 	{
-		const VectorVectorVectorWithOffsetType& psi = commonTargeting_.aoe().psi();
-		const SizeType nexcited = psi.size();
+		const VectorVectorVectorWithOffsetType& psi = commonTargeting_.aoe().psiConst();
+		const SizeType nsectors = psi.size();
 
-
-		if (initialVector.size() != nexcited)
+		if (initialVector.size() != nsectors)
 			err("initialGuessVwo\n");
-		for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
-			const SizeType nsectors = psi[excitedIndex].size();
-			initialVector[excitedIndex].resize(nsectors);
-			if (nsectors != compactedWeights.size())
+		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+			const SizeType nexcited = psi[sectorIndex].size();
+			initialVector[sectorIndex].resize(nexcited);
+			if (nexcited != compactedWeights.size())
 				err("initialGuessVwo compactedWeights\n");
-			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+			for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
+
 				VectorWithOffsetType vwo(compactedWeights[sectorIndex],
 				                         sectors[sectorIndex],
 				                         basis);
 				commonTargeting_.initialGuess(vwo,
-				                              *(psi[excitedIndex][sectorIndex]),
+				                              *(psi[sectorIndex][excitedIndex]),
 				                              block,
 				                              noguess);
-				vwo.extract(initialVector[excitedIndex][sectorIndex], vwo.sector(0));
+				vwo.extract(initialVector[sectorIndex][excitedIndex], vwo.sector(0));
 			}
 		}
 	}

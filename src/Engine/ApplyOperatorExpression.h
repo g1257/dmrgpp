@@ -152,34 +152,31 @@ public:
 		clearPsi();
 	}
 
-	virtual void initPsi(SizeType nexcited, SizeType nsectors)
+	virtual void initPsi(SizeType nsectors, SizeType nexcited)
 	{
 		if (psi_.size() > 0) {
-			if (psi_.size() != nexcited)
-				err("AOE::initPsi(): nexcited cannot change during run\n");
 			bool flag = true;
-			for (SizeType i = 0; i < nexcited; ++i)
-				if (psi_[i].size() != nsectors)
-					flag = false;
+
+			if (psi_.size() != nsectors) {
+				flag = false;
+			} else {
+				for (SizeType i = 0; i < nsectors; ++i)
+					if (psi_[i].size() != nexcited)
+						flag = false;
+			}
 
 			if (flag) return;
 
-			std::cerr<<"AOE::initPsi(): WARNING sectors changed during run\n";
-			std::cout<<"AOE::initPsi(): WARNING sectors changed during run\n";
-			for (SizeType i = 0; i < nexcited; ++i) {
-				for (SizeType j = 0; j < psi_[i].size(); ++j) {
-					delete psi_[i][j];
-					psi_[i][j] = nullptr;
-				}
-			}
+			std::cerr<<"AOE::initPsi(): WARNING sectors/nexcited changed during run\n";
+			std::cout<<"AOE::initPsi(): WARNING sectors/nexcited changed during run\n";
+			clearPsi();
 		}
 
-		psi_.resize(nexcited);
+		psi_.resize(nsectors);
 
-		for (SizeType i = 0; i < nexcited; ++i)
-			psi_[i].resize(nsectors, nullptr);
+		for (SizeType i = 0; i < nsectors; ++i)
+			psi_[i].resize(nexcited, nullptr);
 	}
-
 
 	void postCtor(SizeType tstSites)
 	{
@@ -289,7 +286,7 @@ public:
 		return applyOpLocal_;
 	}
 
-	const VectorVectorVectorWithOffsetType& psi() const
+	const VectorVectorVectorWithOffsetType& psiConst() const
 	{
 		return psi_;
 	}
@@ -307,59 +304,60 @@ public:
 	}
 
 	template<typename SomeBasisType>
-	void setPsi(SizeType excitedIndex,
-	            SizeType sectorIndex,
+	void setPsi(SizeType sectorIndex,
+	            SizeType excitedIndex,
 	            VectorType& v,
 	            const SomeBasisType& basis,
 	            const VectorSizeType& sectors)
 	{
 		if (psi_.size() == 0) {
-			psi_.resize(targetHelper_.model().params().excited.size());
+			psi_.resize(sectors.size());
+			const SizeType nexcited = targetHelper_.model().params().numberOfExcited;
 			for (SizeType i = 0; i < psi_.size(); ++i)
-				psi_[i].resize(sectors.size());
+				psi_[i].resize(nexcited);
 		}
 
 		assert(sectorIndex < sectors.size());
 		const SizeType sector = sectors[sectorIndex];
 
-		assert(excitedIndex < psi_.size());
-		assert(sectorIndex < psi_[excitedIndex].size());
+		assert(sectorIndex < psi_.size());
+		assert(excitedIndex < psi_[sectorIndex].size());
 
-		if (!psi_[excitedIndex][sectorIndex])
-			psi_[excitedIndex][sectorIndex] = new VectorWithOffsetType;
-		psi_[excitedIndex][sectorIndex]->set(v, sector, basis);
+		if (!psi_[sectorIndex][excitedIndex])
+			psi_[sectorIndex][excitedIndex] = new VectorWithOffsetType;
+		psi_[sectorIndex][excitedIndex]->set(v, sector, basis);
 	}
 
 	void writePsi(PsimagLite::IoSelector::Out& io, PsimagLite::String prefix) const
 	{
-		const SizeType nexcited = psi_.size();
+		const SizeType nsectors = psi_.size();
 		io.createGroup(prefix + "/PSI");
-		io.write(nexcited, prefix + "/PSI/Size");
-		for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
-			const SizeType nsectors = psi_[excitedIndex].size();
-			PsimagLite::String label = prefix + "/PSI/" + ttos(excitedIndex);
+		io.write(nsectors, prefix + "/PSI/Size");
+		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+			const SizeType nexcited = psi_[sectorIndex].size();
+			PsimagLite::String label = prefix + "/PSI/" + ttos(sectorIndex);
 			io.createGroup(label);
-			io.write(nsectors, label + "/Size");
-			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex)
-				psi_[excitedIndex][sectorIndex]->write(io, label + "/" + ttos(sectorIndex));
+			io.write(nexcited, label + "/Size");
+			for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex)
+				psi_[sectorIndex][excitedIndex]->write(io, label + "/" + ttos(excitedIndex));
 		}
 	}
 
 	void readPsi(PsimagLite::IoSelector::In& io, PsimagLite::String prefix)
 	{
-		SizeType nexcited = 0;
-		io.read(nexcited, prefix + "/PSI/Size");
+		SizeType nsectors = 0;
+		io.read(nsectors, prefix + "/PSI/Size");
 		clearPsi();
-		psi_.resize(nexcited);
-		for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
+		psi_.resize(nsectors);
 
-			PsimagLite::String label = prefix + "/PSI/" + ttos(excitedIndex) + "/";
-			SizeType nsectors = 0;
-			io.read(nsectors, label + "Size");
-			psi_[excitedIndex].resize(nsectors);
-			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
-				psi_[excitedIndex][sectorIndex] = new VectorWithOffsetType;
-				psi_[excitedIndex][sectorIndex]->read(io, label + ttos(sectorIndex));
+		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+			PsimagLite::String label = prefix + "/PSI/" + ttos(sectorIndex) + "/";
+			SizeType nexcited = 0;
+			io.read(nexcited, label + "Size");
+			psi_[sectorIndex].resize(nexcited);
+			for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
+				psi_[sectorIndex][excitedIndex] = new VectorWithOffsetType;
+				psi_[sectorIndex][excitedIndex]->read(io, label + ttos(excitedIndex));
 			}
 		}
 	}
@@ -739,10 +737,10 @@ private:
 
 	void clearPsi()
 	{
-		const SizeType nexcited = psi_.size();
-		for (SizeType i =0; i < nexcited; ++i) {
-			const SizeType sectors = psi_[i].size();
-			for (SizeType j = 0; j < sectors; ++j) {
+		const SizeType sectors = psi_.size();
+		for (SizeType i = 0; i < sectors; ++i) {
+			const SizeType nexcited = psi_[i].size();
+			for (SizeType j = 0; j < nexcited; ++j) {
 				delete psi_[i][j];
 				psi_[i][j] = 0;
 			}

@@ -147,16 +147,18 @@ public:
 
 			// if we are to target the ground state do it now:
 			if (target.includeGroundStage()) {
-				const VectorVectorVectorWithOffsetType& psi = target.psi();
-				const SizeType nexcited = psi.size();
+				const VectorVectorVectorWithOffsetType& psi = target.psiConst();
+				const SizeType nsectors = psi.size();
 
-				for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
-					const SizeType nsectors = psi[excitedIndex].size();
-					for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+				for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+					const SizeType nexcited = psi[sectorIndex].size();
+
+					for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
+
 						initPartition(matrixBlock,
 						              pBasis,
 						              m,
-						              *(psi[excitedIndex][sectorIndex]),
+						              *(psi[sectorIndex][excitedIndex]),
 						              pBasisSummed,
 						              lrs.super(),
 						              p.direction,
@@ -170,13 +172,20 @@ public:
 				RealType wnorm = target.normSquared(ix);
 				if (fabs(wnorm) < 1e-6) continue;
 				RealType w = target.weight(ix)/wnorm;
-				initPartition(matrixBlock,pBasis,m,target(ix),
-				              pBasisSummed,lrs.super(),p.direction,w);
+				initPartition(matrixBlock,
+				              pBasis,
+				              m,
+				              target(ix),
+				              pBasisSummed,
+				              lrs.super(),
+				              p.direction,
+				              w);
 			}
 
 			// set this matrix block into data_
 			data_.setBlock(m,pBasis.partition(m),matrixBlock);
 		}
+
 		{
 			PsimagLite::OstringStream msg;
 			msg<<"Done with init partition";

@@ -222,7 +222,7 @@ private:
 		AuxForTargetingExpressionType aux(this->common().aoe(),
 		                                  this->model(),
 		                                  this->lrs(),
-		                                  this->common().aoe().psi(),
+		                                  this->common().aoe().psiConst(),
 		                                  this->common().aoe().targetVectors(),
 		                                  dir);
 		const AlgebraType opEmpty(aux);

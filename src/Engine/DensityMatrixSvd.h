@@ -438,14 +438,15 @@ public:
 		SizeType x = 0;
 		SizeType psiTargets = 0;
 		if (target.includeGroundStage()) {
-			const VectorVectorVectorWithOffsetType& psi = target.psi();
-			const SizeType nexcited = psi.size();
+			const VectorVectorVectorWithOffsetType& psi = target.psiConst();
+			const SizeType nsectors = psi.size();
 
-			for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
-				const SizeType nsectors = psi[excitedIndex].size();
-				for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
-					effectiveTargets.push_back(psi[excitedIndex][sectorIndex]);
-					pushOneTarget(*(psi[excitedIndex][sectorIndex]), x++, dir1, dir2);
+			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+				const SizeType nexcited = psi[sectorIndex].size();
+
+				for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
+					effectiveTargets.push_back(psi[sectorIndex][excitedIndex]);
+					pushOneTarget(*(psi[sectorIndex][excitedIndex]), x++, dir1, dir2);
 					++psiTargets;
 				}
 			}

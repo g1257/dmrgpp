@@ -152,7 +152,7 @@ struct ParametersDmrgSolver {
 	SizeType dumperBegin;
 	SizeType dumperEnd;
 	SizeType precision;
-	VectorSizeType excited;
+	SizeType numberOfExcited;
 	bool autoRestart;
 	PairRealSizeType truncationControl;
 	PsimagLite::String filename;
@@ -180,7 +180,7 @@ struct ParametersDmrgSolver {
 		ioSerializer.write(root + "/sitesPerBlock", sitesPerBlock);
 		ioSerializer.write(root + "/maxMatrixRankStored", maxMatrixRankStored);
 		ioSerializer.write(root + "/keptStatesInfinite", keptStatesInfinite);
-		ioSerializer.write(root + "/excited", excited);
+		ioSerializer.write(root + "/numberOfExcited", numberOfExcited);
 		ioSerializer.write(root + "/dumperBegin", dumperBegin);
 		ioSerializer.write(root + "/dumperEnd", dumperEnd);
 		ioSerializer.write(root + "/precision", precision);
@@ -219,7 +219,7 @@ struct ParametersDmrgSolver {
 	      dumperBegin(0),
 	      dumperEnd(0),
 	      precision(6),
-	      excited(1, 0),
+	      numberOfExcited(1),
 	      autoRestart(false),
 	      options("SolverOptions=", io),
 	      recoverySave("no"),
@@ -311,7 +311,7 @@ struct ParametersDmrgSolver {
 		} catch (std::exception&) {}
 
 		try {
-			io.read(excited,"Excited");
+			io.readline(numberOfExcited, "NumberOfExcited=");
 		} catch (std::exception&) {}
 
 		try {

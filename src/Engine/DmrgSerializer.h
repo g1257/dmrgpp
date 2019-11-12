@@ -138,14 +138,14 @@ public:
 	{
 		if (bogus) return;
 
-		SizeType levels = 0;
-		io.read(levels, prefix + "/WaveFunction/Size");
-		wavefunction_.resize(levels);
-		for (SizeType i = 0; i < levels; ++i) {
-			SizeType nsectors = 0;
-			io.read(nsectors, prefix + "/WaveFunction/" + ttos(i) + "/Size");
-			wavefunction_[i].resize(nsectors);
-			for (SizeType j = 0; j < nsectors; ++j) {
+		SizeType nsectors = 0;
+		io.read(nsectors, prefix + "/WaveFunction/Size");
+		wavefunction_.resize(nsectors);
+		for (SizeType i = 0; i < nsectors; ++i) {
+			SizeType nexcited = 0;
+			io.read(nexcited, prefix + "/WaveFunction/" + ttos(i) + "/Size");
+			wavefunction_[i].resize(nexcited);
+			for (SizeType j = 0; j < nexcited; ++j) {
 				wavefunction_[i][j] = new VectorWithOffsetType;
 				wavefunction_[i][j]->read(io, prefix + "/WaveFunction/" + ttos(i) + "/" + ttos(j));
 			}
@@ -157,10 +157,10 @@ public:
 	~DmrgSerializer()
 	{
 		if (!ownWf_) return;
-		const SizeType levels = wavefunction_.size();
-		for (SizeType i = 0; i < levels; ++i) {
-			const SizeType nsectors = wavefunction_[i].size();
-			for (SizeType j = 0; j < nsectors; ++j) {
+		const SizeType nsectors = wavefunction_.size();
+		for (SizeType i = 0; i < nsectors; ++i) {
+			const SizeType nexcited = wavefunction_[i].size();
+			for (SizeType j = 0; j < nexcited; ++j) {
 				delete wavefunction_[i][j];
 				wavefunction_[i][j] = nullptr;
 			}
@@ -193,13 +193,13 @@ public:
 		lrs_.write(io, prefix, option, minimizeWrite);
 
 		io.createGroup(prefix + "/WaveFunction");
-		const SizeType levels = wavefunction_.size();
-		io.write(levels, prefix + "/WaveFunction/Size");
-		for (SizeType i = 0; i < levels; ++i) {
-			const SizeType nsectors = wavefunction_[i].size();
+		const SizeType nsectors = wavefunction_.size();
+		io.write(nsectors, prefix + "/WaveFunction/Size");
+		for (SizeType i = 0; i < nsectors; ++i) {
+			const SizeType nexcited = wavefunction_[i].size();
 			io.createGroup(prefix + "/WaveFunction/" + ttos(i));
 			io.write(nsectors, prefix + "/WaveFunction/" + ttos(i) + "/Size");
-			for (SizeType j = 0; j < nsectors; ++j)
+			for (SizeType j = 0; j < nexcited; ++j)
 				wavefunction_[i][j]->write(io, prefix + "/WaveFunction/" + ttos(i) + "/" + ttos(j));
 		}
 
@@ -222,18 +222,18 @@ public:
 		return lrs_;
 	}
 
-	const VectorWithOffsetType& wavefunction(SizeType levelIndex, SizeType sectorIndex) const
-	{
-		if (levelIndex >= wavefunction_.size())
-			err(PsimagLite::String(__FILE__) + "::wavefunction(): levelIndex = " +
-			    ttos(levelIndex) + ">=" + ttos(wavefunction_.size()) + "\n");
+//	const VectorWithOffsetType& wavefunction(SizeType sectorIndex, SizeType levelIndex) const
+//	{
+//		if (sectorIndex >= wavefunction_.size())
+//			err(PsimagLite::String(__FILE__) + "::wavefunction(): sectorIndex = " +
+//			    ttos(sectorIndex) + ">=" + ttos(wavefunction_.size()) + "\n");
 
-		if (sectorIndex >= wavefunction_[levelIndex].size())
-			err(PsimagLite::String(__FILE__) + "::wavefunction(): sectorIndex = " +
-			    ttos(sectorIndex) + ">=" + ttos(wavefunction_[levelIndex].size()) + "\n");
+//		if (levelIndex >= wavefunction_[sectorIndex].size())
+//			err(PsimagLite::String(__FILE__) + "::wavefunction(): levelIndex = " +
+//			    ttos(levelIndex) + ">=" + ttos(wavefunction_[sectorIndex].size()) + "\n");
 
-		return *(wavefunction_[levelIndex][sectorIndex]);
-	}
+//		return *(wavefunction_[sectorIndex][levelIndex]);
+//	}
 
 	SizeType cols() const
 	{
