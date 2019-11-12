@@ -454,7 +454,7 @@ public:
 			newOffsets[j + 1] = newOffsets[j] + newSize;
 			newQns[j] = qns_[i];
 			const bool oldSign = signs_[offsets_[i]];
-			assert(newOffsets[j] + newSize < newSigns.size() - 1);
+			assert(newOffsets[j] + newSize  < newSigns.size() + 1);
 			for (SizeType k = 0; k < newSize; ++k)
 				newSigns[newOffsets[j] + k] = oldSign;
 

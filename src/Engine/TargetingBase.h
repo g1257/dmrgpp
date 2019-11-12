@@ -340,10 +340,11 @@ private:
 
 		if (initialVector.size() != nsectors)
 			err("initialGuessVwo\n");
+		if (nsectors != compactedWeights.size())
+			err("initialGuessVwo compactedWeights\n");
+
 		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
-			const SizeType nexcited = psi[sectorIndex].size();
-			if (nexcited != compactedWeights.size())
-				err("initialGuessVwo compactedWeights\n");
+
 			SizeType excitedIndex = 0;
 
 			VectorWithOffsetType vwo(compactedWeights[sectorIndex],

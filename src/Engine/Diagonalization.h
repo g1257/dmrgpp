@@ -265,7 +265,7 @@ private:
 		}
 
 		SizeType totalSectors = sectors.size();
-		VectorVectorType initialVector;
+		VectorVectorType initialVector(totalSectors);
 		VectorVectorRealType energySaved(totalSectors);
 		VectorVectorVectorType vecSaved(totalSectors);
 
@@ -520,11 +520,11 @@ private:
 				msg2<<"Found eigenvalue["<<excited<<"]= "<<energyTmp[excited];
 				progress_.printline(msg2,std::cout);
 			}
-
-			PsimagLite::OstringStream msg1;
-			msg1<<"Found lowest eigenvalue= "<<energyTmp[0];
-			progress_.printline(msg1,std::cout);
 		}
+
+		PsimagLite::OstringStream msg1;
+		msg1<<"Found lowest eigenvalue= "<<energyTmp[0];
+		progress_.printline(msg1,std::cout);
 
 		if (lanczosOrDavidson) delete lanczosOrDavidson;
 	}
