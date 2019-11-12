@@ -36,11 +36,32 @@ public:
 
 	bool isPvector() const { return (kind_ == Kind::P); }
 
-	SizeType levelIndex() const { return pair_.first; }
+	SizeType levelIndex() const
+	{
+		checkIfPvector(false);
+		return pair_.second;
+	}
 
-	SizeType sectorIndex() const { return pair_.second; }
+	SizeType sectorIndex() const
+	{
+		checkIfPvector(false);
+		return pair_.first;
+	}
+
+	SizeType pIndex() const
+	{
+		checkIfPvector(true);
+		return pair_.first;
+	}
 
 private:
+
+	void checkIfPvector(bool b) const
+	{
+		bool isP = (kind_ == Kind::P);
+		if (isP == b) return;
+		throw PsimagLite::RuntimeError("Internal ERROR: checkIfPpvector\n");
+	}
 
 	void getKind(String str)
 	{
@@ -56,7 +77,7 @@ private:
 		} else if (str == "time") { // legacy name
 			kind_ = Kind::P;
 			return;
-		} else if (str[0] == 'X') {
+		} else if (str[0] == 'Q') {
 			kind_ = Kind::E;
 			pair_.first = getNumberFrom(str, 1); // modifies str
 		}
@@ -64,7 +85,7 @@ private:
 		if (str.size() < 2)
 			return;
 
-		if (str[0] == 'Q') {
+		if (str[0] == 'X') {
 			pair_.second = getNumberFrom(str, 1); // modifies str
 		} else {
 			err("A vector spec can only start with P, gs, X or Q " + str + "\n");
