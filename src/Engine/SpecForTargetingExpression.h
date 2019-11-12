@@ -299,14 +299,14 @@ private:
 	{
 		PsimagLite::GetBraOrKet getBraOrKet(braOrKet);
 
-		SizeType sectorIndex = getBraOrKet.sectorIndex();
-
 		if (getBraOrKet.isPvector()) {
-			if (sectorIndex >= aux_.pvectors.size())
+			const SizeType pIndex = getBraOrKet.pIndex();
+			if (pIndex >= aux_.pvectors.size())
 				err("getVector: out of range for " + braOrKet + "\n");
-			return aux_.pvectors[sectorIndex];
+			return aux_.pvectors[pIndex];
 		}
 
+		const SizeType sectorIndex = getBraOrKet.sectorIndex();
 		return *(aux_.psi[sectorIndex][getBraOrKet.levelIndex()]);
 	}
 

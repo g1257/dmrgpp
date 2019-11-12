@@ -244,11 +244,12 @@ public:
 	const VectorWithOffsetType& getVectorFromBracketId(const PsimagLite::GetBraOrKet& braOrKet,
 	                                                   SizeType index) const
 	{
+		if (braOrKet.isPvector()) {
+			const SizeType pIndex = braOrKet.pIndex();
+			return timeVector(index, pIndex);
+		}
+
 		const SizeType levelIndex = braOrKet.levelIndex();
-
-		if (braOrKet.isPvector())
-			return timeVector(index, levelIndex);
-
 		return wavefunction(index, levelIndex, braOrKet.sectorIndex());
 	}
 

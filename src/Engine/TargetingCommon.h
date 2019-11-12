@@ -693,10 +693,12 @@ private:
 
 	const VectorWithOffsetType* getVector(const PsimagLite::GetBraOrKet& getBraOrKet) const
 	{
-		const SizeType sectorIndex = getBraOrKet.sectorIndex();
-		if (getBraOrKet.isPvector())
-			return &(aoe_.targetVectors(sectorIndex));
+		if (getBraOrKet.isPvector()) {
+			const SizeType pIndex = getBraOrKet.pIndex();
+			return &(aoe_.targetVectors(pIndex));
+		}
 
+		const SizeType sectorIndex = getBraOrKet.sectorIndex();
 		if (aoe_.psiConst().size() <= sectorIndex)
 			err("getVector: sectorIndex = " + ttos(sectorIndex) + ">=" +
 			    ttos(aoe_.psiConst().size()) + "\n");
