@@ -456,7 +456,17 @@ public:
 	void loadEnergy(PsimagLite::IoSelector::In& io,
 	                PsimagLite::String label)
 	{
-		io.readLastVectorEntry(E0_, label);
+		SizeType nsectors = 0;
+		io.read(nsectors, label + "/Size");
+		if (nsectors == 0)
+			err("FATAL: " + label + "/Size=0");
+
+		SizeType nexcited = 0;
+		io.read(nexcited, label + "/0/Size");
+		if (nexcited == 0)
+			err("FATAL: " + label + "/0/Size=0");
+
+		io.read(E0_, label + "/0/0");
 	}
 
 	void multiplyTimeVector(SizeType i,RealType factor)

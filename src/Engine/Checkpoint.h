@@ -157,8 +157,21 @@ public:
 
 		{
 			IoType::In ioIn2(parameters_.checkpoint.filename());
-			ioIn2.readLastVectorEntry(energiesFromFile_,
-			                          parameters_.checkpoint.labelForEnergy());
+
+			// Energies/Size <-- sectors
+			// Energies/0/Size <--- excited
+			const PsimagLite::String lfEnergy = parameters_.checkpoint.labelForEnergy();
+			SizeType nsectors = 0;
+			ioIn2.read(nsectors, lfEnergy + "/Size");
+			energiesFromFile_.resize(nsectors);
+			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+				SizeType nexcited = 0;
+				ioIn2.read(nexcited, lfEnergy + "/" + ttos(sectorIndex) + "/Size");
+				energiesFromFile_[sectorIndex].resize(nexcited);
+				for (SizeType e = 0; e < nexcited; ++e)
+					ioIn2.read(energiesFromFile_[sectorIndex][e],
+					             lfEnergy + "/" + ttos(sectorIndex) + "/" + ttos(e));
+			}
 
 			ioIn2.read(v, "CHKPOINTSYSTEM/OperatorPerSite");
 			if (v.size() == 0) return;

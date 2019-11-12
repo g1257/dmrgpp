@@ -185,7 +185,6 @@ public:
 		const SizeType n = model_.targetQuantum().size();
 		for (SizeType i = 0; i < n; ++i)
 			quantumSector_.push_back(model_.targetQuantum().qn(i));
-
 	}
 
 	~DmrgSolver()
@@ -359,7 +358,6 @@ obtain ordered
 			                 ProgramGlobals::DirectionEnum::INFINITE,
 			                 X[step],
 			                 ystep);
-			printEnergies(energies);
 
 			truncate_.changeBasisInfinite(pS, pE, psi, parameters_.keptStatesInfinite);
 
@@ -659,18 +657,34 @@ obtain ordered
 	void printEnergies(const VectorVectorRealType& energies)
 	{
 		if (!saveData_) return;
-		static SizeType counter = 0;
-		if (counter == 0) {
-			try {
-				PsimagLite::IoSelector::In ioIn(ioOut_.filename());
-				SizeType x = 0;
-				ioIn.read(x, "Energies/Size");
-				ioIn.close();
-				counter = x;
-			} catch (...) {}
+
+		static bool firstCall = true;
+		PsimagLite::IoNgSerializer::WriteMode mode =
+		        (firstCall) ? PsimagLite::IoNgSerializer::NO_OVERWRITE
+		                    : PsimagLite::IoNgSerializer::ALLOW_OVERWRITE;
+
+		// Energies/Size <-- sectors
+		// Energies/0/Size <--- excited
+		const SizeType nsectors = energies.size();
+
+		if (firstCall)
+			ioOut_.createGroup("Energies");
+
+		ioOut_.write(nsectors, "Energies/Size", mode);
+		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+			const SizeType nexcited = energies[sectorIndex].size();
+			if (firstCall)
+				ioOut_.createGroup("Energies/" + ttos(sectorIndex));
+			ioOut_.write(nexcited,
+			             "Energies/" + ttos(sectorIndex) + "/Size",
+			             mode);
+			for (SizeType e = 0; e < nexcited; ++e)
+				ioOut_.write(energies[sectorIndex][e],
+				             "Energies/" + ttos(sectorIndex) + "/" + ttos(e),
+				             mode);
 		}
 
-		ioOut_.writeVectorEntry(energies, "Energies", counter++);
+		firstCall = false;
 	}
 
 	const BlockType& findRightBlock(const VectorBlockType& y,
