@@ -117,7 +117,7 @@ public:
 	      fE_(fE),
 	      lrs_(lrs),
 	      wavefunction_(wf),
-		  ownWf_(false),
+	      ownWf_(false),
 	      transform_(transform),
 	      direction_(direction)
 	{}
@@ -133,7 +133,7 @@ public:
 	    : fS_(io, prefix + "/fS", bogus),
 	      fE_(io, prefix + "/fE", bogus),
 	      lrs_(io, prefix, isObserveCode),
-		  ownWf_(true),
+	      ownWf_(true),
 	      transform_(io, prefix + "/transform")
 	{
 		if (bogus) return;
@@ -222,18 +222,19 @@ public:
 		return lrs_;
 	}
 
-//	const VectorWithOffsetType& wavefunction(SizeType sectorIndex, SizeType levelIndex) const
-//	{
-//		if (sectorIndex >= wavefunction_.size())
-//			err(PsimagLite::String(__FILE__) + "::wavefunction(): sectorIndex = " +
-//			    ttos(sectorIndex) + ">=" + ttos(wavefunction_.size()) + "\n");
+	const VectorWithOffsetType& psiConst(SizeType sectorIndex,
+	                                     SizeType levelIndex) const
+	{
+		if (sectorIndex >= wavefunction_.size())
+			err(PsimagLite::String(__FILE__) + "::wavefunction(): sectorIndex = " +
+			    ttos(sectorIndex) + ">=" + ttos(wavefunction_.size()) + "\n");
 
-//		if (levelIndex >= wavefunction_[sectorIndex].size())
-//			err(PsimagLite::String(__FILE__) + "::wavefunction(): levelIndex = " +
-//			    ttos(levelIndex) + ">=" + ttos(wavefunction_[sectorIndex].size()) + "\n");
+		if (levelIndex >= wavefunction_[sectorIndex].size())
+			err(PsimagLite::String(__FILE__) + "::wavefunction(): levelIndex = " +
+			    ttos(levelIndex) + ">=" + ttos(wavefunction_[sectorIndex].size()) + "\n");
 
-//		return *(wavefunction_[sectorIndex][levelIndex]);
-//	}
+		return *(wavefunction_[sectorIndex][levelIndex]);
+	}
 
 	SizeType cols() const
 	{
@@ -251,10 +252,10 @@ public:
 	{
 		return (direction_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ?
 		            lrs_.right().block()[0] - 1 : lrs_.right().block()[0];
-	}
+		}
 
-	void transform(SparseMatrixType& ret, const SparseMatrixType& O) const
-	{
+		void transform(SparseMatrixType& ret, const SparseMatrixType& O) const
+		{
 		BlockOffDiagMatrixType m(O, transform_.offsetsRows());
 		m.transform(transform_);
 		m.toSparse(ret);

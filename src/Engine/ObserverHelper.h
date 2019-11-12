@@ -210,13 +210,13 @@ public:
 		return dSerializerV_[ind]->direction();
 	}
 
-	const VectorWithOffsetType& wavefunction(SizeType ind,
-	                                         SizeType levelIndex,
-	                                         SizeType sectorIndex) const
+	const VectorWithOffsetType& psiConst(SizeType ind,
+	                                     SizeType sectorIndex,
+	                                     SizeType levelIndex) const
 	{
 		checkIndex(ind);
 
-		return dSerializerV_[ind]->wavefunction(levelIndex, sectorIndex);
+		return dSerializerV_[ind]->psiConst(sectorIndex, levelIndex);
 	}
 
 	RealType time(SizeType ind) const
@@ -249,8 +249,7 @@ public:
 			return timeVector(index, pIndex);
 		}
 
-		const SizeType levelIndex = braOrKet.levelIndex();
-		return wavefunction(index, levelIndex, braOrKet.sectorIndex());
+		return psiConst(index, braOrKet.sectorIndex(), braOrKet.levelIndex());
 	}
 
 	const VectorWithOffsetType& timeVector(SizeType braketId,
